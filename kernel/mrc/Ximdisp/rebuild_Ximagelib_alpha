@@ -1,0 +1,12 @@
+#!/bin/csh
+#
+cp Ximagelib.a Ximagelib.a.save
+/bin/rm -f *.o
+/bin/rm -f *.f
+/bin/rm -f Ximagelib.a
+cp Ximagelibf.for Ximagelibf.f
+f77 -w -extend_source -c Ximagelibf.f
+cc -c Ximagelibc.c
+ar cr Ximagelib.a `lorder *.o | tsort`
+/bin/rm -f *.o
+/bin/rm -f *.f

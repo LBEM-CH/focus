@@ -1,0 +1,14 @@
+#!/bin/csh
+#
+cp Ximdisp.for Ximdisp.f
+f77 -extend_source -w -o Ximdisp.exe Ximdisp.f \
+                            Ximagelib.a \
+                            subs.a \
+                            harwell.a \
+                            -lXaw -lXt -lXmu -lX11 -lXext -ldnet_stub \
+                            ${IMAGELIB}/ifftlib.a \
+                            ${IMAGELIB}/imlib2k.a \
+                            ${IMAGELIB}/genlib.a
+mv Ximdisp.exe ../bin/Ximdisp.exe
+/bin/rm -f *.o
+/bin/rm -f *.f

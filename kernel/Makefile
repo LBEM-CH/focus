@@ -1,0 +1,78 @@
+# Makefile for 2dx
+#
+export prefix=/usr/local/2dx
+export eprefix=${prefix}
+export bindir=${eprefix}/bin
+export sbindir=${eprefix}/sbin
+export libexecdir=${eprefix}/libexec
+export datadir=${prefix}/share
+export sysconfdir=${prefix}/etc
+export sharedstatedir=${prefix}/com
+export localstatedir=${prefix}/var
+export libdir=${eprefix}/lib
+export includedir=${prefix}/include
+export oldincludedir=/usr/include
+export infodir=${prefix}/info
+export mandir=${prefix}/man
+
+#
+# SUBDIRS = @qsubdirs@  ./mrc
+SUBDIRS =  ./mrc
+INSTALL = /opt/local/bin/ginstall -c 
+COPY = cp -r
+FILE_EXISTS = test -e
+DIR_EXISTS = test -d
+LINK = ln -sf
+MKDIR = mkdir -p
+
+all: ./mrc/all.target
+
+clean: $(SUBDIRS:=/clean.target)
+
+install:
+	#create all dirs needed
+  
+	@$(MKDIR) $(root)$(prefix)/2dx_image/scripts-standard 
+	@$(MKDIR) $(root)$(prefix)/2dx_image/scripts-custom
+	@$(MKDIR) $(root)$(prefix)/2dx_merge/scripts-standard 
+	@$(MKDIR) $(root)$(prefix)/2dx_merge/scripts-custom
+	@$(MKDIR) $(root)$(prefix)/config
+	@$(MKDIR) $(root)$(prefix)/config/2dx_image
+	@$(MKDIR) $(root)$(prefix)/config/2dx_merge
+	@$(MKDIR) $(root)$(prefix)/config/resource
+	@$(MKDIR) $(root)$(prefix)/proc
+  
+
+	@$(COPY) 2dx_image/scripts-standard/*.script $(root)$(prefix)/2dx_image/scripts-standard/
+	@$(COPY) 2dx_image/scripts-custom/*.script $(root)$(prefix)/2dx_image/scripts-custom/
+
+	@$(COPY) 2dx_merge/scripts-standard/*.script $(root)$(prefix)/2dx_merge/scripts-standard/
+	@$(COPY) 2dx_merge/scripts-custom/*.script $(root)$(prefix)/2dx_merge/scripts-custom/
+
+	@$(COPY) proc/* $(root)$(prefix)/proc/
+
+	@$(INSTALL) \
+		./config/VARIABLE.txt \
+		./config/2dx_image-user.cfg \
+		./config/status-window \
+		./config/2dx.cshrc \
+		./config/2dx.cfg \
+		./config/2dx_image-algo-1.jpg \
+		./config/2dx_image-algo-2.jpg \
+		./config/2dx_master.cfg \
+		$(root)$(prefix)/config
+	
+	@$(INSTALL) ./config/2dx_image/about.htm \
+		./config/2dx_image/navigator_help.htm \
+		./config/2dx_image/2dx_status.html \
+		$(root)$(prefix)/config/2dx_image
+
+	@$(COPY) config/2dx_merge/*.inf $(root)$(prefix)/config/2dx_merge
+	@$(COPY) config/resource/*.png $(root)$(prefix)/config/resource
+
+	@$(MAKE) $(MFLAGS) -C mrc install prefix=$(root)$(prefix)/mrc
+
+
+%.target:
+	@echo $(MAKE) $(MFLAGS) -C $(*D) $(*F)
+	@[ -d $(*D) ] && $(MAKE) $(MFLAGS) -C $(*D) $(*F)

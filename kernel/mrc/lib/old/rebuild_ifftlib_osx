@@ -1,0 +1,12 @@
+#!/bin/csh
+#
+/bin/rm -f *.f
+/bin/rm -f *.o 
+/bin/rm -f libfft.a
+/bin/rm -f libconv.a
+
+g++ -I /sw/include/ -O -c fftlib.cpp; ar crs libfft.a fftlib.o; ranlib libfft.a
+g++ -I /sw/include/ -c 2dx_conv.cpp; ar cru libconv.a ./2dx_conv.o; ranlib libconv.a
+
+/bin/rm -f *.f
+/bin/rm -f *.o 

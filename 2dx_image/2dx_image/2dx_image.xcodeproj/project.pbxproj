@@ -1,0 +1,1040 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+		D7BA7D76DAB5DD13389D6332 = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			generatedFileNames = (
+				);
+			isa = PBXShellScriptBuildPhase;
+			name = "Qt Qmake";
+			neededFileNames = (
+				);
+			shellPath = "/bin/sh";
+			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/2dx_image\ -f\ 2dx_image.xcodeproj/qt_makeqmake.mak";
+		};
+		B286394C66CD420F61AE0133 = {
+			isa = PBXFileReference;
+			name = "centralWindow.cpp";
+			path = "centralWindow.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		7A086CBF87BDB6067FC6F3FC = {
+			fileRef = "B286394C66CD420F61AE0133";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		118FCBAABA162BA17933C789 = {
+			isa = PBXFileReference;
+			name = "main.cpp";
+			path = "main.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		2B093CA6F071B023A473CED0 = {
+			fileRef = "118FCBAABA162BA17933C789";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		86B26EDE2FE672340F83FFDB = {
+			isa = PBXFileReference;
+			name = "mainWindow.cpp";
+			path = "mainWindow.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		A6FD49F6C258A505C9742C98 = {
+			fileRef = "86B26EDE2FE672340F83FFDB";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		CCA2F5EA50A755F05D203081 = {
+			isa = PBXFileReference;
+			name = "navigator.cpp";
+			path = "navigator.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		89840851CA7CEFBB5FC41B95 = {
+			fileRef = "CCA2F5EA50A755F05D203081";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E11424CF11EF4B6C7DBFCA45 = {
+			isa = PBXFileReference;
+			name = "controlActionsGroup.cpp";
+			path = "controlActionsGroup.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		2598F20714CAD9D4F6DC3CC5 = {
+			fileRef = "E11424CF11EF4B6C7DBFCA45";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		73FB348DFA29A74358B1D0E9 = {
+			isa = PBXFileReference;
+			name = "progressStamps.cpp";
+			path = "progressStamps.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		41A02DBD27DEA584C505CC65 = {
+			fileRef = "73FB348DFA29A74358B1D0E9";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		436E083A6E1174D948D44CC8 = {
+			isa = PBXFileReference;
+			name = "resultsFile.cpp";
+			path = "resultsFile.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		D4F9FAF46C872B25F632C397 = {
+			fileRef = "436E083A6E1174D948D44CC8";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C152E5A0F24CBE281BCA89DC = {
+			isa = PBXFileReference;
+			name = "resultsParser.cpp";
+			path = "resultsParser.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4CDC1E2CF835A8FD2BF861BD = {
+			fileRef = "C152E5A0F24CBE281BCA89DC";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		13CB02952A725E367B89C5D0 = {
+			isa = PBXFileReference;
+			name = "statusView.cpp";
+			path = "statusView.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		3471524AE950DDC771A883C3 = {
+			fileRef = "13CB02952A725E367B89C5D0";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6606C11BD08369C559B3F50D = {
+			isa = PBXFileReference;
+			name = "statusViewer.cpp";
+			path = "statusViewer.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		7790F8252BB5067B642B9BD1 = {
+			fileRef = "6606C11BD08369C559B3F50D";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F03B82FD4937E2AB72AD0AA2 = {
+			isa = PBXFileReference;
+			name = "warningBox.cpp";
+			path = "warningBox.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		37BCE37E278BCBB248B670DF = {
+			fileRef = "F03B82FD4937E2AB72AD0AA2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		8F7BD962A7AB2145E5D98419 = {
+			isa = PBXFileReference;
+			name = "icon_OSX.icns";
+			path = "resource/icon_OSX.icns";
+			refType = 4;
+		};
+		3A86A1FBEB052C0B4F1F9FD2 = {
+			fileRef = "8F7BD962A7AB2145E5D98419";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F56D208A6F30EE4929EC5CDE = {
+			isa = PBXFileReference;
+			name = "moc_centralWindow.cpp";
+			path = "moc_centralWindow.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		5AF73D145BEB62C13C4484FD = {
+			fileRef = "F56D208A6F30EE4929EC5CDE";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		219ABDD29F250EBA2C28ED9D = {
+			isa = PBXFileReference;
+			name = "moc_mainWindow.cpp";
+			path = "moc_mainWindow.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		B15CFED8AB1B507EA9CFE3EB = {
+			fileRef = "219ABDD29F250EBA2C28ED9D";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		2573B31DAC964074EE177067 = {
+			isa = PBXFileReference;
+			name = "moc_navigator.cpp";
+			path = "moc_navigator.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		376E242C1BC924320794E135 = {
+			fileRef = "2573B31DAC964074EE177067";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		423CD91167E92413DD2B4CA3 = {
+			isa = PBXFileReference;
+			name = "moc_controlActionsGroup.cpp";
+			path = "moc_controlActionsGroup.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		6D5F23FA66AD732DF2042BC0 = {
+			fileRef = "423CD91167E92413DD2B4CA3";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C9EB33A7C44E0D6BF60ECDDD = {
+			isa = PBXFileReference;
+			name = "moc_progressStamps.cpp";
+			path = "moc_progressStamps.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		0E4C3F23CD520DE7BA491123 = {
+			fileRef = "C9EB33A7C44E0D6BF60ECDDD";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		2959925344A6F8C77A277816 = {
+			isa = PBXFileReference;
+			name = "moc_resultsFile.cpp";
+			path = "moc_resultsFile.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		B03DE1714B3461977AA8618E = {
+			fileRef = "2959925344A6F8C77A277816";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		35B2604F8009E786EEC9C638 = {
+			isa = PBXFileReference;
+			name = "moc_resultsParser.cpp";
+			path = "moc_resultsParser.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		8BD3BE071B29566AE7DF56C7 = {
+			fileRef = "35B2604F8009E786EEC9C638";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		7C172D5CF84E1A85D2A6FBE2 = {
+			isa = PBXFileReference;
+			name = "moc_statusViewer.cpp";
+			path = "moc_statusViewer.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9F25E38D13A75DF53B5FFEF6 = {
+			fileRef = "7C172D5CF84E1A85D2A6FBE2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		347474188C4224399B6BB1B7 = {
+			isa = PBXFileReference;
+			name = "moc_warningBox.cpp";
+			path = "moc_warningBox.cpp";
+			refType = 4;
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		91632466C1CD7469D1996951 = {
+			fileRef = "347474188C4224399B6BB1B7";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C9DEC0CB8003E22407CB9BDF = {
+			isa = PBXFileReference;
+			name = "centralWindow.h";
+			path = "centralWindow.h";
+			refType = 4;
+		};
+		434016518D5B58E424C1B966 = {
+			isa = PBXFileReference;
+			name = "mainWindow.h";
+			path = "mainWindow.h";
+			refType = 4;
+		};
+		BD9A7B505759197E42778D56 = {
+			isa = PBXFileReference;
+			name = "navigator.h";
+			path = "navigator.h";
+			refType = 4;
+		};
+		778C83060B46792A21CE2534 = {
+			isa = PBXFileReference;
+			name = "controlActionsGroup.h";
+			path = "controlActionsGroup.h";
+			refType = 4;
+		};
+		4E00694CB77CC5228FA92996 = {
+			isa = PBXFileReference;
+			name = "progressStamps.h";
+			path = "progressStamps.h";
+			refType = 4;
+		};
+		5F4597D9681EE660992C2950 = {
+			isa = PBXFileReference;
+			name = "resultsFile.h";
+			path = "resultsFile.h";
+			refType = 4;
+		};
+		B5918AD6C7F93418ADCB340F = {
+			isa = PBXFileReference;
+			name = "resultsParser.h";
+			path = "resultsParser.h";
+			refType = 4;
+		};
+		6B911954101987F78FB44CDC = {
+			isa = PBXFileReference;
+			name = "statusView.h";
+			path = "statusView.h";
+			refType = 4;
+		};
+		10A6321E9554CAE4FBBD8DE9 = {
+			isa = PBXFileReference;
+			name = "statusViewer.h";
+			path = "statusViewer.h";
+			refType = 4;
+		};
+		053787980531B4DC40DAC553 = {
+			isa = PBXFileReference;
+			name = "warningBox.h";
+			path = "warningBox.h";
+			refType = 4;
+		};
+		E5EFC0242E5262E8D151D7DE = {
+			isa = PBXFileReference;
+			name = "qmake.pro";
+			path = "qmake.pro";
+			refType = 4;
+		};
+		883D7615C4D2DE3FA1218F12 = {
+			isa = PBXGroup;
+			children = (
+				"C9DEC0CB8003E22407CB9BDF",
+				"434016518D5B58E424C1B966",
+				"BD9A7B505759197E42778D56",
+				"778C83060B46792A21CE2534",
+				"4E00694CB77CC5228FA92996",
+				"5F4597D9681EE660992C2950",
+				"B5918AD6C7F93418ADCB340F",
+				"6B911954101987F78FB44CDC",
+				"10A6321E9554CAE4FBBD8DE9",
+				"053787980531B4DC40DAC553");
+			name = "Headers";
+			refType = 4;
+		};
+		DE5386A4B70818E0FDE3B8A0 = {
+			isa = PBXGroup;
+			children = (
+				"8F7BD962A7AB2145E5D98419");
+			name = "resource";
+			refType = 4;
+		};
+		FB61758D0F0FDA4BA867C3D5 = {
+			isa = PBXGroup;
+			children = (
+				"B286394C66CD420F61AE0133",
+				"118FCBAABA162BA17933C789",
+				"86B26EDE2FE672340F83FFDB",
+				"CCA2F5EA50A755F05D203081",
+				"E11424CF11EF4B6C7DBFCA45",
+				"73FB348DFA29A74358B1D0E9",
+				"436E083A6E1174D948D44CC8",
+				"C152E5A0F24CBE281BCA89DC",
+				"13CB02952A725E367B89C5D0",
+				"6606C11BD08369C559B3F50D",
+				"F03B82FD4937E2AB72AD0AA2",
+				"DE5386A4B70818E0FDE3B8A0");
+			name = "Sources";
+			refType = 4;
+		};
+		7CABE3C80E79AD2B307756D2 = {
+			isa = PBXGroup;
+			children = (
+				"E5EFC0242E5262E8D151D7DE");
+			name = "Sources [qmake]";
+			refType = 4;
+		};
+		46E892BBB6BB6952967E0561 = {
+			isa = PBXGroup;
+			children = (
+				"F56D208A6F30EE4929EC5CDE",
+				"219ABDD29F250EBA2C28ED9D",
+				"2573B31DAC964074EE177067",
+				"423CD91167E92413DD2B4CA3",
+				"C9EB33A7C44E0D6BF60ECDDD",
+				"2959925344A6F8C77A277816",
+				"35B2604F8009E786EEC9C638",
+				"7C172D5CF84E1A85D2A6FBE2",
+				"347474188C4224399B6BB1B7");
+			name = "Temporary Sources";
+			refType = 4;
+		};
+		A0A52A2ADF7A1E2A99738674 = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			generatedFileNames = (
+				"7A086CBF87BDB6067FC6F3FC",
+				"2B093CA6F071B023A473CED0",
+				"A6FD49F6C258A505C9742C98",
+				"89840851CA7CEFBB5FC41B95",
+				"2598F20714CAD9D4F6DC3CC5",
+				"41A02DBD27DEA584C505CC65",
+				"D4F9FAF46C872B25F632C397",
+				"4CDC1E2CF835A8FD2BF861BD",
+				"3471524AE950DDC771A883C3",
+				"7790F8252BB5067B642B9BD1",
+				"37BCE37E278BCBB248B670DF",
+				"5AF73D145BEB62C13C4484FD",
+				"B15CFED8AB1B507EA9CFE3EB",
+				"376E242C1BC924320794E135",
+				"6D5F23FA66AD732DF2042BC0",
+				"0E4C3F23CD520DE7BA491123",
+				"B03DE1714B3461977AA8618E",
+				"8BD3BE071B29566AE7DF56C7",
+				"9F25E38D13A75DF53B5FFEF6",
+				"91632466C1CD7469D1996951");
+			isa = PBXShellScriptBuildPhase;
+			name = "Qt Preprocessors";
+			neededFileNames = (
+				"7A086CBF87BDB6067FC6F3FC",
+				"2B093CA6F071B023A473CED0",
+				"A6FD49F6C258A505C9742C98",
+				"89840851CA7CEFBB5FC41B95",
+				"2598F20714CAD9D4F6DC3CC5",
+				"41A02DBD27DEA584C505CC65",
+				"D4F9FAF46C872B25F632C397",
+				"4CDC1E2CF835A8FD2BF861BD",
+				"3471524AE950DDC771A883C3",
+				"7790F8252BB5067B642B9BD1",
+				"37BCE37E278BCBB248B670DF",
+				"5AF73D145BEB62C13C4484FD",
+				"B15CFED8AB1B507EA9CFE3EB",
+				"376E242C1BC924320794E135",
+				"6D5F23FA66AD732DF2042BC0",
+				"0E4C3F23CD520DE7BA491123",
+				"B03DE1714B3461977AA8618E",
+				"8BD3BE071B29566AE7DF56C7",
+				"9F25E38D13A75DF53B5FFEF6",
+				"91632466C1CD7469D1996951");
+			shellPath = "/bin/sh";
+			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/2dx_image\ -f\ 2dx_image.xcodeproj/qt_preprocess.mak";
+		};
+		C29B8785722055ED95EF7B57 = {
+			buildActionMask = 2147483647;
+			files = (
+				"7A086CBF87BDB6067FC6F3FC",
+				"2B093CA6F071B023A473CED0",
+				"A6FD49F6C258A505C9742C98",
+				"89840851CA7CEFBB5FC41B95",
+				"2598F20714CAD9D4F6DC3CC5",
+				"41A02DBD27DEA584C505CC65",
+				"D4F9FAF46C872B25F632C397",
+				"4CDC1E2CF835A8FD2BF861BD",
+				"3471524AE950DDC771A883C3",
+				"7790F8252BB5067B642B9BD1",
+				"37BCE37E278BCBB248B670DF",
+				"5AF73D145BEB62C13C4484FD",
+				"B15CFED8AB1B507EA9CFE3EB",
+				"376E242C1BC924320794E135",
+				"6D5F23FA66AD732DF2042BC0",
+				"0E4C3F23CD520DE7BA491123",
+				"B03DE1714B3461977AA8618E",
+				"8BD3BE071B29566AE7DF56C7",
+				"9F25E38D13A75DF53B5FFEF6",
+				"91632466C1CD7469D1996951");
+			isa = PBXSourcesBuildPhase;
+			name = "Build Sources";
+		};
+		6787D88D34CCE388C1136A41 = {
+			isa = PBXFileReference;
+			name = "conf";
+			path = "../lib/common/libconf.a";
+			refType = 4;
+		};
+		C0A837553CCBE32667C885AB = {
+			fileRef = "6787D88D34CCE388C1136A41";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E4EB38A7BBA6D70CD566E786 = {
+			isa = PBXFileReference;
+			name = "extentions";
+			path = "../lib/common/libextentions.a";
+			refType = 4;
+		};
+		0799AB15A291AE74B8620262 = {
+			fileRef = "E4EB38A7BBA6D70CD566E786";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		5B203E0B93A1564650BC0A18 = {
+			isa = PBXFileReference;
+			name = "mrcImage";
+			path = "../lib/common/libmrcImage.a";
+			refType = 4;
+		};
+		E446E750CCBB1393CDC78924 = {
+			fileRef = "5B203E0B93A1564650BC0A18";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E7E2FF2E5A8F1012DF001E35 = {
+			isa = PBXFrameworkReference;
+			name = "QtWebKit.framework";
+			path = "/Library/Frameworks/QtWebKit.framework";
+			refType = 0;
+		};
+		B198A42F9C7E6191234418CA = {
+			fileRef = "E7E2FF2E5A8F1012DF001E35";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		D257B800BEA04269848631CD = {
+			isa = PBXFrameworkReference;
+			name = "phonon.framework";
+			path = "/Library/Frameworks/phonon.framework";
+			refType = 0;
+		};
+		2A97A25B9E48F522A50953E0 = {
+			fileRef = "D257B800BEA04269848631CD";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		72D65F7126626E5504FE87DB = {
+			isa = PBXFrameworkReference;
+			name = "QtDBus.framework";
+			path = "/Library/Frameworks/QtDBus.framework";
+			refType = 0;
+		};
+		75F2207ECECD02B5142C1392 = {
+			fileRef = "72D65F7126626E5504FE87DB";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		8EE92F8FA333C9E415C5B34E = {
+			isa = PBXFrameworkReference;
+			name = "QtXml.framework";
+			path = "/Library/Frameworks/QtXml.framework";
+			refType = 0;
+		};
+		C2643FEB592DBFD1429BE4E1 = {
+			fileRef = "8EE92F8FA333C9E415C5B34E";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		211E167C6D84B224E0231D07 = {
+			isa = PBXFrameworkReference;
+			name = "QtScript.framework";
+			path = "/Library/Frameworks/QtScript.framework";
+			refType = 0;
+		};
+		FA4EB477BC2C58FB0934CE07 = {
+			fileRef = "211E167C6D84B224E0231D07";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C374004D45E01156F931B37D = {
+			isa = PBXFrameworkReference;
+			name = "QtOpenGL.framework";
+			path = "/Library/Frameworks/QtOpenGL.framework";
+			refType = 0;
+		};
+		450A0D11527AF164AEFE7377 = {
+			fileRef = "C374004D45E01156F931B37D";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		9B36DA7E32F0304E780E7972 = {
+			isa = PBXFrameworkReference;
+			name = "QtGui.framework";
+			path = "/Library/Frameworks/QtGui.framework";
+			refType = 0;
+		};
+		501667F26B3C1FF6767A7C12 = {
+			fileRef = "9B36DA7E32F0304E780E7972";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		DA138F75C9F545CDAE7FB264 = {
+			isa = PBXFrameworkReference;
+			name = "Carbon.framework";
+			path = "/System/Library/Frameworks/Carbon.framework";
+			refType = 0;
+		};
+		C8FD4A1AAA37CF2CA2824CCF = {
+			fileRef = "DA138F75C9F545CDAE7FB264";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		821416211D63F190AAAD016A = {
+			isa = PBXFrameworkReference;
+			name = "AppKit.framework";
+			path = "/System/Library/Frameworks/AppKit.framework";
+			refType = 0;
+		};
+		51D4DBF7CB8537BE86EBD055 = {
+			fileRef = "821416211D63F190AAAD016A";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		B6B9970B86A6C219B0869FE9 = {
+			isa = PBXFrameworkReference;
+			name = "QtNetwork.framework";
+			path = "/Library/Frameworks/QtNetwork.framework";
+			refType = 0;
+		};
+		3826A0833FCB54E86728C6EF = {
+			fileRef = "B6B9970B86A6C219B0869FE9";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		60EF245C130E8583D7F93F3C = {
+			isa = PBXFrameworkReference;
+			name = "SystemConfiguration.framework";
+			path = "/System/Library/Frameworks/SystemConfiguration.framework";
+			refType = 0;
+		};
+		B0A05EFA293371CDA6918C63 = {
+			fileRef = "60EF245C130E8583D7F93F3C";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7BC2E65A5E699A5E5D834CA2 = {
+			isa = PBXFrameworkReference;
+			name = "QtCore.framework";
+			path = "/Library/Frameworks/QtCore.framework";
+			refType = 0;
+		};
+		069D05B0128AE5DC7EE31738 = {
+			fileRef = "7BC2E65A5E699A5E5D834CA2";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AE7A480FD6C52FCA80FECD = {
+			isa = PBXFrameworkReference;
+			name = "ApplicationServices.framework";
+			path = "/System/Library/Frameworks/ApplicationServices.framework";
+			refType = 0;
+		};
+		F9E76E570E10AF14870553A7 = {
+			fileRef = "27AE7A480FD6C52FCA80FECD";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		DA18A6831232F53228631AD1 = {
+			isa = PBXFrameworkReference;
+			name = "OpenGL.framework";
+			path = "/System/Library/Frameworks/OpenGL.framework";
+			refType = 0;
+		};
+		BCEF71E1EDFB18DA77DC750B = {
+			fileRef = "DA18A6831232F53228631AD1";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C6766F86E49E9C8701C8E637 = {
+			isa = PBXFrameworkReference;
+			name = "AGL.framework";
+			path = "/System/Library/Frameworks/AGL.framework";
+			refType = 0;
+		};
+		0C6D4628EE0B0D1479A20551 = {
+			fileRef = "C6766F86E49E9C8701C8E637";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		ED1E82605DD74B483AF3C982 = {
+			children = (
+				"6787D88D34CCE388C1136A41",
+				"E4EB38A7BBA6D70CD566E786",
+				"5B203E0B93A1564650BC0A18",
+				"E7E2FF2E5A8F1012DF001E35",
+				"D257B800BEA04269848631CD",
+				"72D65F7126626E5504FE87DB",
+				"8EE92F8FA333C9E415C5B34E",
+				"211E167C6D84B224E0231D07",
+				"C374004D45E01156F931B37D",
+				"9B36DA7E32F0304E780E7972",
+				"DA138F75C9F545CDAE7FB264",
+				"821416211D63F190AAAD016A",
+				"B6B9970B86A6C219B0869FE9",
+				"60EF245C130E8583D7F93F3C",
+				"7BC2E65A5E699A5E5D834CA2",
+				"27AE7A480FD6C52FCA80FECD",
+				"DA18A6831232F53228631AD1",
+				"C6766F86E49E9C8701C8E637");
+			isa = PBXGroup;
+			name = "External Frameworks and Libraries";
+			path = "";
+			refType = 4;
+		};
+		2A1043669E6E5A7426EA502A = {
+			buildActionMask = 2147483647;
+			files = (
+				"C0A837553CCBE32667C885AB",
+				"0799AB15A291AE74B8620262",
+				"E446E750CCBB1393CDC78924",
+				"B198A42F9C7E6191234418CA",
+				"2A97A25B9E48F522A50953E0",
+				"75F2207ECECD02B5142C1392",
+				"C2643FEB592DBFD1429BE4E1",
+				"FA4EB477BC2C58FB0934CE07",
+				"450A0D11527AF164AEFE7377",
+				"501667F26B3C1FF6767A7C12",
+				"C8FD4A1AAA37CF2CA2824CCF",
+				"51D4DBF7CB8537BE86EBD055",
+				"3826A0833FCB54E86728C6EF",
+				"B0A05EFA293371CDA6918C63",
+				"069D05B0128AE5DC7EE31738",
+				"F9E76E570E10AF14870553A7",
+				"BCEF71E1EDFB18DA77DC750B",
+				"0C6D4628EE0B0D1479A20551");
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		3787F99312C85FF0073FD7BA = {
+			buildActionMask = 2147483647;
+			files = (
+				B073A2C2145F92DCED60C31E,
+			);
+			isa = PBXResourcesBuildPhase;
+			name = "Bundle Resources";
+		};
+		F6069D5A5DA8AA28EDB8B3C6 = {
+			name = "Project Copy";
+			buildActionMask = 2147483647;
+			dstPath = "/Users/gipsonb/Projects/2dx-stable/2dx_image";
+			dstSubfolderSpec = 0;
+			files = (
+"07E0DFA73EB56DCB9E28CDD9");
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		07E0DFA73EB56DCB9E28CDD9 = {
+			fileRef = "DB83CC1FF67CC56FF75731BC";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		05596AB53D8D521C69802C27 = {
+			children = (
+				"FB61758D0F0FDA4BA867C3D5",
+				"46E892BBB6BB6952967E0561",
+				"883D7615C4D2DE3FA1218F12",
+				"7CABE3C80E79AD2B307756D2",
+				"ED1E82605DD74B483AF3C982");
+			isa = PBXGroup;
+			name = "2dx_image";
+			path = "";
+			refType = 4;
+		};
+		DB83CC1FF67CC56FF75731BC = {
+			isa = PBXFileReference;
+			explicitFileType = "wrapper.application";
+			path = "2dx_image.app";
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		068F80C7519D0528FB08E821 = {
+			children = (
+				"DB83CC1FF67CC56FF75731BC");
+			isa = PBXGroup;
+			name = "Products";
+			refType = 4;
+		};
+		B9BADD83E15CD859698BF395 = {
+			buildPhases = (
+				"D7BA7D76DAB5DD13389D6332",
+				"A0A52A2ADF7A1E2A99738674",
+				"F6069D5A5DA8AA28EDB8B3C6",
+				"C29B8785722055ED95EF7B57",
+				"2A1043669E6E5A7426EA502A",
+				"3787F99312C85FF0073FD7BA");
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"/Library/Frameworks/QtCore.framework/Versions/4/Headers",
+					"/usr/include/QtCore",
+					"/Library/Frameworks/QtNetwork.framework/Versions/4/Headers",
+					"/usr/include/QtNetwork",
+					"/Library/Frameworks/QtGui.framework/Versions/4/Headers",
+					"/usr/include/QtGui",
+					"/Library/Frameworks/QtOpenGL.framework/Versions/4/Headers",
+					"/usr/include/QtOpenGL",
+					"/Library/Frameworks/QtScript.framework/Versions/4/Headers",
+					"/usr/include/QtScript",
+					"/Library/Frameworks/QtWebKit.framework/Versions/4/Headers",
+					"/usr/include/QtWebKit",
+					"/usr/include",
+					".",
+					"../include",
+					"../include",
+					"/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers",
+					"/System/Library/Frameworks/AGL.framework/Headers",
+					".",
+					"/usr/local/include",
+					"/System/Library/Frameworks/CarbonCore.framework/Headers",
+					"/usr/local/Qt4.5/mkspecs/macx-xcode");
+				LIBRARY_SEARCH_PATHS = (
+					"/Library/Frameworks",
+					"/usr/local/ccp4/lib",
+					"/Users/gipsonb/Projects/2dx-stable/lib/common",
+					"/System/Library/Frameworks/");
+				OPTIMIZATION_CFLAGS = (
+					);
+				OTHER_CFLAGS = (
+					"-O3",
+					"-ffast-math",
+					"-Os",
+					"-Wall",
+					"-W",
+					"-DQT_NO_DEBUG",
+					"-DQT_WEBKIT_LIB",
+					"-DQT_SCRIPT_LIB",
+					"-DQT_OPENGL_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_NETWORK_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED");
+				OTHER_CPLUSPLUSFLAGS = (
+					"-O3",
+					"-ffast-math",
+					"-Os",
+					"-Wall",
+					"-W",
+					"-DQT_NO_DEBUG",
+					"-DQT_WEBKIT_LIB",
+					"-DQT_SCRIPT_LIB",
+					"-DQT_OPENGL_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_NETWORK_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED");
+				LEXFLAGS = "";
+				YACCFLAGS = "-d";
+				OTHER_REZFLAGS = "";
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "";
+				PREBINDING = NO;
+				INFOPLIST_FILE = "Info.plist";
+				BUILD_ROOT = "/Users/gipsonb/Projects/2dx-stable/2dx_image";
+				OTHER_LDFLAGS = (
+						"-headerpad_max_install_names",
+						"-L/Library/Frameworks",
+						"-F/Library/Frameworks",
+						"-L/usr/local/ccp4/lib",
+						"-L/Users/gipsonb/Projects/2dx-stable/lib/common",
+						"-lwidgets",
+						"-lfftw3f",
+						"-lz",
+						"-lm");
+				DYLIB_CURRENT_VERSION = "1.0.0";
+				DYLIB_COMPATIBILITY_VERSION = "1.0";
+				MACOSX_DEPLOYMENT_TARGET = "10.3";
+				ARCHS = "i386";
+				PRODUCT_NAME = "2dx_image";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+				);
+			productReference = "DB83CC1FF67CC56FF75731BC";
+			shouldUseHeadermap = 1;
+			isa = PBXNativeTarget;
+			productType = "com.apple.product-type.application";
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist SYSTEM \"file://localhost/System/Library/DTDs/PropertyList.dtd\">
+<plist version=\"0.9\">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>icon_OSX.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+    <key>CFBundleGetInfoString</key>
+	<string>Created by Qt/QMake</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleExecutable</key>
+	<string>2dx_image</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.2dx_image</string>
+	<key>NOTE</key>
+	<string>This file was generated by Qt/QMake.</string>
+</dict>
+</plist>
+";
+			name = "2dx_image";
+			productName = "2dx_image";
+			startupPath = "<<ProjectDirectory>>";
+		};
+		8DB1DD96F65B1BF1FFC506E0 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = "NO";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "YES";
+				GCC_OPTIMIZATION_LEVEL = "0";
+			};
+			name = "Debug";
+		};
+		2C641C3335766025DD51B7BD = {
+			buildRules = (
+				);
+			buildSettings = {
+				COPY_PHASE_STRIP = "NO";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "YES";
+				GCC_OPTIMIZATION_LEVEL = "0";
+			};
+			isa = "PBXBuildStyle";
+			name = "Debug";
+		};
+		95E1EB2E5DDD587BE5B3E548 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+			};
+			name = "Release";
+		};
+		26DE8D2AEA4B3714B41E931F = {
+			buildRules = (
+				);
+			buildSettings = {
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+			};
+			isa = "PBXBuildStyle";
+			name = "Release";
+		};
+		2A951308CDB28F104D0A4BD2 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"8DB1DD96F65B1BF1FFC506E0",
+				"95E1EB2E5DDD587BE5B3E548");
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationIsName = "Release";
+		};
+		91B15E841AA80083484172DE = {
+			buildStyles = (
+				"2C641C3335766025DD51B7BD",
+				"26DE8D2AEA4B3714B41E931F");
+			hasScannedForEncodings = 1;
+			isa = PBXProject;
+			mainGroup = "05596AB53D8D521C69802C27";
+			buildConfigurationList = "2A951308CDB28F104D0A4BD2";
+			projectDirPath = "";
+			targets = (
+				"B9BADD83E15CD859698BF395");
+		};
+	};
+	rootObject = "91B15E841AA80083484172DE";
+}

@@ -1,0 +1,333 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+		D7BA7D76DAB5DD13389D6332 = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			generatedFileNames = (
+				);
+			isa = PBXShellScriptBuildPhase;
+			name = "Qt Qmake";
+			neededFileNames = (
+				);
+			shellPath = "/bin/sh";
+			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable\ -f\ qmake.xcodeproj/qt_makeqmake.mak";
+		};
+		E5EFC0242E5262E8D151D7DE = {
+			isa = PBXFileReference;
+			name = "qmake.pro";
+			path = "qmake.pro";
+			refType = 4;
+		};
+		7CABE3C80E79AD2B307756D2 = {
+			isa = PBXGroup;
+			children = (
+				"E5EFC0242E5262E8D151D7DE");
+			name = "Sources [qmake]";
+			refType = 4;
+		};
+		A0A52A2ADF7A1E2A99738674 = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			generatedFileNames = (
+				);
+			isa = PBXShellScriptBuildPhase;
+			name = "Qt Preprocessors";
+			neededFileNames = (
+				);
+			shellPath = "/bin/sh";
+			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable\ -f\ qmake.xcodeproj/qt_preprocess.mak";
+		};
+		9B36DA7E32F0304E780E7972 = {
+			isa = PBXFrameworkReference;
+			name = "QtGui.framework";
+			path = "/Library/Frameworks/QtGui.framework";
+			refType = 0;
+		};
+		501667F26B3C1FF6767A7C12 = {
+			fileRef = "9B36DA7E32F0304E780E7972";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		DA138F75C9F545CDAE7FB264 = {
+			isa = PBXFrameworkReference;
+			name = "Carbon.framework";
+			path = "/System/Library/Frameworks/Carbon.framework";
+			refType = 0;
+		};
+		C8FD4A1AAA37CF2CA2824CCF = {
+			fileRef = "DA138F75C9F545CDAE7FB264";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		821416211D63F190AAAD016A = {
+			isa = PBXFrameworkReference;
+			name = "AppKit.framework";
+			path = "/System/Library/Frameworks/AppKit.framework";
+			refType = 0;
+		};
+		51D4DBF7CB8537BE86EBD055 = {
+			fileRef = "821416211D63F190AAAD016A";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7BC2E65A5E699A5E5D834CA2 = {
+			isa = PBXFrameworkReference;
+			name = "QtCore.framework";
+			path = "/Library/Frameworks/QtCore.framework";
+			refType = 0;
+		};
+		069D05B0128AE5DC7EE31738 = {
+			fileRef = "7BC2E65A5E699A5E5D834CA2";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AE7A480FD6C52FCA80FECD = {
+			isa = PBXFrameworkReference;
+			name = "ApplicationServices.framework";
+			path = "/System/Library/Frameworks/ApplicationServices.framework";
+			refType = 0;
+		};
+		F9E76E570E10AF14870553A7 = {
+			fileRef = "27AE7A480FD6C52FCA80FECD";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		ED1E82605DD74B483AF3C982 = {
+			children = (
+				"9B36DA7E32F0304E780E7972",
+				"DA138F75C9F545CDAE7FB264",
+				"821416211D63F190AAAD016A",
+				"7BC2E65A5E699A5E5D834CA2",
+				"27AE7A480FD6C52FCA80FECD");
+			isa = PBXGroup;
+			name = "External Frameworks and Libraries";
+			path = "";
+			refType = 4;
+		};
+		2A1043669E6E5A7426EA502A = {
+			buildActionMask = 2147483647;
+			files = (
+				"501667F26B3C1FF6767A7C12",
+				"C8FD4A1AAA37CF2CA2824CCF",
+				"51D4DBF7CB8537BE86EBD055",
+				"069D05B0128AE5DC7EE31738",
+				"F9E76E570E10AF14870553A7");
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		3787F99312C85FF0073FD7BA = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXResourcesBuildPhase;
+			name = "Bundle Resources";
+		};
+		F6069D5A5DA8AA28EDB8B3C6 = {
+			name = "Project Copy";
+			buildActionMask = 2147483647;
+			dstPath = "/Users/gipsonb/Projects/2dx-stable/lib/common";
+			dstSubfolderSpec = 0;
+			files = (
+"07E0DFA73EB56DCB9E28CDD9");
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		07E0DFA73EB56DCB9E28CDD9 = {
+			fileRef = "FE2BA5DB79B9B688B37BEB2D";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		05596AB53D8D521C69802C27 = {
+			children = (
+				"7CABE3C80E79AD2B307756D2",
+				"ED1E82605DD74B483AF3C982");
+			isa = PBXGroup;
+			name = "qmake";
+			path = "";
+			refType = 4;
+		};
+		FE2BA5DB79B9B688B37BEB2D = {
+			isa = PBXFileReference;
+			explicitFileType = "wrapper.application";
+			path = "qmake.app";
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		068F80C7519D0528FB08E821 = {
+			children = (
+				"FE2BA5DB79B9B688B37BEB2D");
+			isa = PBXGroup;
+			name = "Products";
+			refType = 4;
+		};
+		B12E13DCC238DAFBDC047101 = {
+			buildPhases = (
+				"D7BA7D76DAB5DD13389D6332",
+				"A0A52A2ADF7A1E2A99738674",
+				"F6069D5A5DA8AA28EDB8B3C6",
+				"2A1043669E6E5A7426EA502A",
+				"3787F99312C85FF0073FD7BA");
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"/Library/Frameworks/QtCore.framework/Versions/4/Headers",
+					"/usr/include/QtCore",
+					"/Library/Frameworks/QtGui.framework/Versions/4/Headers",
+					"/usr/include/QtGui",
+					"/usr/include",
+					"include",
+					".",
+					".",
+					"/usr/local/include",
+					"/System/Library/Frameworks/CarbonCore.framework/Headers",
+					"/usr/local/Qt4.5/mkspecs/macx-xcode");
+				LIBRARY_SEARCH_PATHS = (
+					"/Library/Frameworks",
+					"/usr/local/ccp4/lib",
+					"/System/Library/Frameworks/");
+				OPTIMIZATION_CFLAGS = (
+					);
+				OTHER_CFLAGS = (
+					"-pipe",
+					"-g",
+					"-Wall",
+					"-W",
+					"-DQT_GUI_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED");
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pipe",
+					"-g",
+					"-Wall",
+					"-W",
+					"-DQT_GUI_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED");
+				LEXFLAGS = "";
+				YACCFLAGS = "-d";
+				OTHER_REZFLAGS = "";
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "";
+				PREBINDING = NO;
+				INFOPLIST_FILE = "Info.plist";
+				BUILD_ROOT = "/Users/gipsonb/Projects/2dx-stable";
+				OTHER_LDFLAGS = (
+						"-headerpad_max_install_names",
+						"-L/Library/Frameworks",
+						"-F/Library/Frameworks",
+						"-L/usr/local/ccp4/lib",
+						"-lz",
+						"-lm");
+				INSTALL_DIR = "/Users/gipsonb/Projects/2dx-stable/lib/common/";
+				DYLIB_CURRENT_VERSION = "1.0.0";
+				DYLIB_COMPATIBILITY_VERSION = "1.0";
+				MACOSX_DEPLOYMENT_TARGET = "10.3";
+				PRODUCT_NAME = "qmake";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+				);
+			productReference = "FE2BA5DB79B9B688B37BEB2D";
+			shouldUseHeadermap = 1;
+			isa = PBXNativeTarget;
+			productType = "com.apple.product-type.application";
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist SYSTEM \"file://localhost/System/Library/DTDs/PropertyList.dtd\">
+<plist version=\"0.9\">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+    <key>CFBundleGetInfoString</key>
+	<string>Created by Qt/QMake</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleExecutable</key>
+	<string>qmake</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.qmake</string>
+	<key>NOTE</key>
+	<string>This file was generated by Qt/QMake.</string>
+</dict>
+</plist>
+";
+			name = "qmake";
+			productName = "qmake";
+			startupPath = "<<ProjectDirectory>>";
+			productInstallPath = "lib/common/";
+		};
+		8DB1DD96F65B1BF1FFC506E0 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = "NO";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "YES";
+				GCC_OPTIMIZATION_LEVEL = "0";
+			};
+			name = "Debug";
+		};
+		2C641C3335766025DD51B7BD = {
+			buildRules = (
+				);
+			buildSettings = {
+				COPY_PHASE_STRIP = "NO";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "YES";
+				GCC_OPTIMIZATION_LEVEL = "0";
+			};
+			isa = "PBXBuildStyle";
+			name = "Debug";
+		};
+		95E1EB2E5DDD587BE5B3E548 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+			};
+			name = "Release";
+		};
+		26DE8D2AEA4B3714B41E931F = {
+			buildRules = (
+				);
+			buildSettings = {
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+			};
+			isa = "PBXBuildStyle";
+			name = "Release";
+		};
+		2A951308CDB28F104D0A4BD2 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"8DB1DD96F65B1BF1FFC506E0",
+				"95E1EB2E5DDD587BE5B3E548");
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationIsName = "Debug";
+		};
+		91B15E841AA80083484172DE = {
+			buildStyles = (
+				"2C641C3335766025DD51B7BD",
+				"26DE8D2AEA4B3714B41E931F");
+			hasScannedForEncodings = 1;
+			isa = PBXProject;
+			mainGroup = "05596AB53D8D521C69802C27";
+			buildConfigurationList = "2A951308CDB28F104D0A4BD2";
+			projectDirPath = "";
+			targets = (
+				"B12E13DCC238DAFBDC047101");
+		};
+	};
+	rootObject = "91B15E841AA80083484172DE";
+}

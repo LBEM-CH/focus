@@ -1,0 +1,12 @@
+#!/bin/csh
+#
+/bin/rm -f *.o 
+/bin/rm -f *.f 
+/bin/rm -f misclib.a
+./fsplit mtzlib.for
+./fsplit lcflib.for
+./fsplit miscsubs.for
+/usr/local/gfortran/bin/gfortran -w -fno-second-underscore -c  *.f
+ar crs libmisc.a *.o
+/bin/rm -f *.o 
+/bin/rm -f *.f 

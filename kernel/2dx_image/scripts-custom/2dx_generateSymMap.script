@@ -1,0 +1,290 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Generate SymMap                                                    #
+#                                                                           #
+# 2dx.org, GNU Plublic License.                                             #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 09/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 50
+#
+# MANUAL: This script makes use of MRC and CCP4 commands to generate the final projection map.
+#
+# MANUAL: It prints a table of phase residuals during the symmetrization, as calculated by AVGAMPHS.<br>
+#
+# MANUAL: <b>Attention</b> this table is only valid and calculated for values along the Z=0 plane in Fourier space, i.e. the non-tilted values within the z-window of 1/2*ALAT.<br> A tilted image may therefore not show many entries in the table, simply because these values are outside of the zMinMax range used here.
+#
+# MANUAL: A big <I><U>thank you</U></I> goes to Vinzenz Unger for debugging this script and providing most of the algorithm and usage here, and to Per Bullough, who gave us essential information and help in handling symmetries and systematic absences between MRC and CCP4 worlds.
+#
+# GLOBAL: SYN_Unbending
+# GLOBAL: ML_doit
+# GLOBAL: RESMIN
+# GLOBAL: RESMAX
+# GLOBAL: SYM
+# GLOBAL: ALAT
+# GLOBAL: tempfac
+# GLOBAL: phaori
+# GLOBAL: phaoriFouFilter
+# GLOBAL: ctfrev
+# GLOBAL: avrgamphsNUMBER
+# GLOBAL: avrgamphsRESOL
+# GLOBAL: zstarrange
+# GLOBAL: Calc_from_zstarrange
+# GLOBAL: zstarrange_real
+# GLOBAL: realang
+# GLOBAL: realcell
+# GLOBAL: rot90
+# GLOBAL: rot180
+# GLOBAL: revhk
+# GLOBAL: revhnd
+# GLOBAL: sgnxch
+# GLOBAL: revxsgn
+# GLOBAL: MergePhaseResidual
+# GLOBAL: comment
+# GLOBAL: produceSpiderMap
+# GLOBAL: mapscale
+# GLOBAL: unitcellnumber
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set produceSpiderMap = ""
+set mapscale = ""
+set unitcellnumber = ""
+set SYN_Unbending = ""
+set imagename = ""
+set defocus = ""
+set imagenumber = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set phacon = ""
+set CS = ""
+set KV = ""
+set ALAT = ""
+set lattice = ""
+set realang = ""
+set realcell = ""
+set phaori = ""
+set phaoriFouFilter = ""
+set rot180 = ""
+set revhk = ""
+set rot90 = ""
+set revhnd = ""
+set sgnxch = ""
+set revxsgn = ""
+set ctfrev = ""
+set beamtilt = ""
+set zstarrange = ""
+set Calc_from_zstarrange = ""
+set zstarrange_real = ""
+set tempfac = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
+set SYM = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set ML_doit = ""
+#
+#$end_vars
+#
+echo "<<@progress: 1>>"
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set scriptname = 2dx_generateSymMap
+#
+${proc_2dx}/2dx_makedirs 
+#
+\rm -f LOGS/${scriptname}.results
+#
+set date = `date`
+echo date = ${date}
+#
+if ( ${Calc_from_zstarrange} == "y" ) then
+  set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
+else
+  set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
+endif
+#
+set ABANG = `echo $realang | awk '{s=180-$1} END {print s}'`
+echo ABANG = ${ABANG}
+set IAQP2 = 0
+set IVERBOSE = 1
+set LOGOUTPUT = F
+set LPROTFOUFIL = T
+set phastepnum = 1
+set phastep = 0.1
+#
+#############################################################################
+echo ":: "
+echo ":: first in space group p1"
+echo ":: "
+#
+set SYM_sub = 'p1'
+set spcgrp = "1"
+set spcgroup_num = "1"
+set CCP4_SYM = "1"
+set ML_sym_val = "1"
+#
+set symmetry = 'p1'
+set spcgrp_local = 1
+set CCP4_SYM = 1
+set rotate_to_Z = "no"
+set produceSpiderMapLocal = "n"
+#
+# origtilt does something strange when working with spcgrp>1. (TODO).
+# Symmetrization is therefore here only done by the CCP4 programs.
+#
+set spcgrp_first = 1
+echo spcgrp_first = ${spcgrp_first}
+#
+echo spcgrp = ${spcgrp}
+echo SYM_sub = ${SYM_sub}
+echo CCP4_SYM = ${CCP4_SYM}
+echo rotate_to_Z = ${rotate_to_Z}
+#
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing generateMap script for p1 symmetry"
+#############################################################################
+#############################################################################
+#############################################################################
+#
+set phaori_local = ${phaori}
+#
+if ( ${SYN_Unbending} == "0" ) then
+    # FouFilter Unbending result is used:
+    set aphfile = APH/${imagename}.fou.cor.aph
+    #
+    # A check in case somebody just upgraded from an earlier version of 2dx:
+    if ( ! -e ${aphfile} ) then
+      if ( -e APH/${imagename}.cor.aph ) then
+        \cp APH/${imagename}.cor.aph ${aphfile}
+      endif
+    endif
+    #
+else
+    # Synthetic Unbending result is used:
+    set aphfile = APH/${imagename}.syn.cor.aph
+endif
+#
+echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
+set prefix = ""
+set prename = ""
+#
+source ${proc_2dx}/2dx_generateMap_sub.com
+#
+if ( ${ML_doit} == 'y' ) then
+  echo ":: "
+  ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
+  echo ":: "
+  set phaori_local = "0.0,0.0"
+  set aphfile = APH/ML_result.aph
+  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  set prefix = "ML_"
+  set prename = "ML "
+  #
+  source ${proc_2dx}/2dx_generateMap_sub.com
+  #
+endif
+#
+#
+echo ":: "
+echo ":: and now in space group ${SYM}"
+echo ":: "
+#
+#############################################################################
+${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"
+#############################################################################
+#
+set SYM_sub = ${SYM}
+#
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+#
+# origtilt does something strange when working with spcgrp>1. (TODO).
+# Symmetrization is therefore here only done by the CCP4 programs.
+#
+set spcgrp_first = 1
+echo spcgrp_first = ${spcgrp_first}
+#
+echo spcgrp = ${spcgrp}
+set produceSpiderMapLocal = ${produceSpiderMap}
+echo SYM = ${SYM}
+echo CCP4_SYM = ${CCP4_SYM}
+echo rotate_to_Z = ${rotate_to_Z}
+#
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing generateMap script for ${SYM} symmetry"
+#############################################################################
+#############################################################################
+#############################################################################
+#
+if ( ${SYN_Unbending} == "0" ) then
+    # FouFilter Unbending result is used:
+    set phaori_local = ${phaoriFouFilter}
+    set aphfile = APH/${imagename}.fou.cor.aph
+else
+    # Synthetic Unbending result is used:
+    set phaori_local = ${phaori}
+    set aphfile = APH/${imagename}.syn.cor.aph
+endif
+#
+echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
+set prefix = ""
+set prename = ""
+#
+source ${proc_2dx}/2dx_generateMap_sub.com
+#
+if ( ${ML_doit} == 'y' ) then
+  echo ":: "
+  ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
+  echo ":: "
+  set phaori_local = "0.0,0.0"
+  set aphfile = APH/ML_result.aph
+  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  set prefix = "ML_"
+  set prename = "ML "
+  #
+  source ${proc_2dx}/2dx_generateMap_sub.com
+  #
+endif
+#
+#############################################################################
+#############################################################################
+#############################################################################
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#
+# Just to make sure the 2dx GUI displays this as well:
+source ${proc_2dx}/2dx_checklattice_sub.com 
+#

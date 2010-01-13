@@ -1,0 +1,14 @@
+#!/bin/csh
+#
+echo " rebuilding fsplit ..."
+gcc -o fsplit fsplit.c
+echo " rebuilding imlib2k ..."
+./rebuild_imlib2k_osx
+echo " rebuilding genlib ..."
+./rebuild_genlib_osx
+echo " rebuilding plot2klib ..."
+./rebuild_plot2klib_osx
+echo " rebuilding ifftlib ..."
+./rebuild_ifftlib_osx
+echo " rebuilding misclib ..."
+./rebuild_misclib_osx

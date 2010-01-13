@@ -1,0 +1,35 @@
+#!/bin/csh -ef
+#
+set bin_ccp4 = "/usr/local/ccp4/bin"
+set ccp4 = "/usr/local/ccp4"
+source ${bin_ccp4}/ccp4.setup-csh
+#
+set infile = $1
+set tmp = `echo ${infile} | sed 's/\./_/g' | sed 's/ /_/g' `
+#
+set i = 1
+while ( $i == 1 )
+  set tmpold = $tmp
+  set tmp = `echo ${tmp} | cut -d\/ -f2-`
+  echo tmp = $tmp
+  if ( $tmp == '' ) then
+    set i = 0
+  endif
+  if ( $tmp == $tmpold ) then
+    set i = 0
+  endif
+end
+set outfile = TMP-${tmpold}.html
+#
+# mtzdump:
+# NREF <nref>
+# followed by number of reflections to be listed. If negative, then no summary table is printed. 
+# If -1, then ALL reflections will be dumped. (Default 10.)
+#
+${bin_ccp4}/mtzdump hklin ${infile} << eot > ${outfile}
+NREF -1
+END
+eot
+#
+$webBrowser_2dx_app ${outfile}
+

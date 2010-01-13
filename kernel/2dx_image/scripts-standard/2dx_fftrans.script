@@ -1,0 +1,474 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Calculate FFT                                                      #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 03/01/2006                                             #
+# Last Modification: 03/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 10
+#
+# MANUAL: This script calculates the Fast Fourier Transformations (FFT) of the image, as well as a 2x2 downscaled version of the image, and the image histogram.
+#
+# MANUAL: It also verifies some parameters and corrects them if needed. <BR><BR>
+#
+# MANUAL: This script can also generate an average power spectrum for a given image by averaging the power spectrum of a discrete sampling of sub-windows. 
+#
+# MANUAL: The process generates a final image known as a <B>periodogram</B>.
+#
+# MANUAL: The number of sub-windows to be averaged can be from <i>0</I> to <i>(Image Side Length - Window Size)</I>, with values beyond this range changed to this maximum. 
+#
+# MANUAL: The size of the sub-window ranges from <i>0</I> to <i>Image Side Length</I>.
+#
+# MANUAL: The smaller the window, the faster the program execution; more steps tends toward a more well defined CTF.
+#
+# GLOBAL: SYN_Unbending
+# GLOBAL: generatePeriodogram
+# GLOBAL: periodogramWindowsize
+# GLOBAL: periodogramNumsubsteps
+# GLOBAL: imagenumber
+# GLOBAL: imagename
+# GLOBAL: nonmaskimagename
+# GLOBAL: imageorigin
+# GLOBAL: imagesidelength
+# GLOBAL: taperBeforeFFT
+# GLOBAL: comment
+# GLOBAL: magnification
+# GLOBAL: stepdigitizer
+# GLOBAL: Calc_from_sample_pixel
+# GLOBAL: sample_pixel
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SYN_Unbending = ""
+set PHASEORI_done = ""
+#
+set imageorigin = ""
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set realang = ""
+set phacon = ""
+set RESMIN = ""
+set RESMAX = ""
+set RADLIM = ""
+set generatePeriodogram = ""
+set periodogramWindowsize = ""
+set periodogramNumsubsteps = ""
+set taperBeforeFFT = ""
+#
+#$end_vars
+#
+source ${proc_2dx}/initialize
+#
+if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") && ( -e  FFTIR/${imagename}.fft.mrc ) ) then
+  ${proc_2dx}/linblock "Skipping. Synthetical Reference is used and FFT exists."
+  exit
+endif
+#
+${proc_2dx}/2dx_makedirs
+#
+set scriptname = 2dx_fftrans
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+if ( ! -e ${imagename}.mrc ) then
+  ${proc_2dx}/linblock "Image ${imagename}.mrc does not exist."
+#
+  if ( ! -e ${imagename}.tif ) then
+    ${proc_2dx}/protest "Image ${imagename}.tif does not exist."
+  else
+    ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+#
+${bin_2dx}/tif2mrc.exe << eot
+${imagename}.tif
+${imagename}.mrc
+y
+eot
+#
+    echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
+  endif
+else
+  echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${imagename} != ${nonmaskimagename} ) then
+  echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
+endif
+#
+${bin_2dx}/2dx_endianTest.exe ${imagename}.mrc
+#
+set correctend = `${bin_2dx}/2dx_endianTest.exe ${imagename}.mrc | tail -n 1`
+#
+if ( ${correctend} == 'n' ) then
+  ${proc_2dx}/linblock "WARNING: wrong endedness. This will (hopefully) work, but is awfully slow." 
+  ${proc_2dx}/linblock "Use byteswap.exe to correct the endedness to this machine's form."
+  echo "# WARNING: Warning: wrong endedness. This will (hopefully) work, but is awfully slow." >> LOGS/${scriptname}.results
+  echo "# WARNING: Use byteswap.exe to correct the endedness to this machine's form." >> LOGS/${scriptname}.results
+endif
+#
+setenv IN ${imagename}.mrc
+set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
+set sizeX = `echo ${dimens} | cut -d\  -f1` 
+set sizeY = `echo ${dimens} | cut -d\  -f2` 
+if ( ${sizeX} != ${sizeY} ) then
+  ${proc_2dx}/linblock "ERROR: only square images are supported."
+  ${proc_2dx}/linblock "ERROR: only square images are supported."
+  ${proc_2dx}/linblock "ERROR: only square images are supported."
+  echo "#WARNING: ERROR: only square images are supported." >> LOGS/${scriptname}.results
+  ${proc_2dx}/protest "This image is of ${sizeX} x ${sizeY} dimensions. Aborting."
+endif
+#
+if ( ${sizeX} != ${imagesidelength} ) then
+  set oldval = ${imagesidelength}
+  set imagesidelength = ${sizeX}
+  ${proc_2dx}/linblock "ERROR: correcting imagesidelength from ${oldval} to ${imagesidelength}"
+  echo "set imagesidelength = ${imagesidelength}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${Calc_from_sample_pixel} == "y" ) then
+  set magnification = `echo ${stepdigitizer} ${sample_pixel} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
+  echo "set magnification = ${magnification}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating magnification as ${magnification}."
+else
+  set sample_pixel = `echo ${stepdigitizer} ${magnification} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
+  echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating pixel size on sample level as ${sample_pixel} Angstroems."
+endif
+#
+if ( `echo ${phacon} | awk '{ if (( $1 < 0 ) || ( $1 > 1 )) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${phacon}
+  set phacon = 0.9975
+  ${proc_2dx}/linblock "ERROR: correcting phacon from ${oldval} to ${phacon}"
+  echo "set phacon = ${phacon}" >> LOGS/${scriptname}.results
+endif
+#
+set testname = `echo ${imagename} | cut -c2-`
+if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
+  set oldval = ${nonmaskimagename}
+  set nonmaskimagename = ${imagename}
+  ${proc_2dx}/linblock "ERROR: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
+  echo "set nonmaskimagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
+endif
+# 
+echo "<<@progress: 3>>"
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+set testval1 = `echo ${RADLIM} | cut -d\, -f1`
+set testval2 = `echo ${RADLIM} | cut -d\, -f2`
+set testval3 = `echo ${RADLIM} | cut -d\, -f3`
+set correctit = 0
+#
+if ( `echo ${testval1} | awk '{ if (( $1 < 0 ) || ( $1 > 50 )) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${testval1}
+  set testval1 = 35
+  set correctit = 1 
+  ${proc_2dx}/linblock "ERROR: correcting RADLIM first value from ${oldval} to ${testval1}"
+endif
+#
+if ( `echo ${testval2} | awk '{ if (( $1 < 0 ) || ( $1 > 50 )) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${testval2}
+  set testval2 = 35
+  set correctit = 1 
+  ${proc_2dx}/linblock "ERROR: correcting RADLIM second value from ${oldval} to ${testval2}"
+endif
+#
+if ( ${correctit} == 1 ) then
+  set RADLIM = `echo ${testval1},${testval2},${testval3}`
+  echo "set RADLIM = ${RADLIM}" >> LOGS/${scriptname}.results
+endif
+#
+set newimagenumber = `echo ${imagenumber} | ${bin_2dx}/2dx_getnumber.exe`
+if ( ${newimagenumber} != ${imagenumber} ) then
+  ${proc_2dx}/linblock "WARNING: correcting imagenumber from ${imagenumber} to ${newimagenumber}"
+  set imagenumber = ${newimagenumber}
+  echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+endif
+#
+set testval = `echo ${imagenumber} | wc -c`
+if ( `echo ${testval} | awk '{ if ( $1 < 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${imagenumber}
+  set imagenumber = `echo 0000000000 | cut -c${testval}-`${imagenumber}
+  ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
+  echo "set imagenumber = ${imagenumber}" >> LOGS/${scriptname}.results
+endif  
+#
+if ( `echo ${testval} | awk '{ if ( $1 > 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${imagenumber}
+  set startnum = `echo ${testval} | awk '{ s = $1 - 10 } END { print s }'`
+  set endnum   = `echo ${testval} | awk '{ s = $1 - 1 } END { print s }'`
+  set imagenumber = `echo ${imagenumber} | cut -c${startnum}-${endnum}`
+  ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
+  echo "set imagenumber = ${imagenumber}" >> LOGS/${scriptname}.results
+endif  
+#
+echo "<<@progress: 5>>"
+echo "<<@evaluate>>"
+#
+if ( ${imageorigin} >= '4' ) then
+  ${proc_2dx}/linblock "2dx_fftrans: Diffraction pattern. No FFT calculated."
+  exit 
+endif
+#   
+/bin/rm -f FFTIR/${imagename}.fft.mrc
+/bin/rm -f FFTIR/${imagename}.int.mrc
+/bin/rm -f FFTIR/${imagename}.red.mrc
+/bin/rm -f FFTIR/${imagename}.pg.mrc
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "HISTO - to produce a histogram of the grey-values in the image"
+#                                                                           #
+#############################################################################
+#
+setenv IN ${imagename}.mrc
+#
+${bin_2dx}/histok.exe << eot
+0,${imagesidelength},0,${imagesidelength}
+0
+eot
+#
+\mv -f HISTO.PS PS/${imagename}-histo.ps
+#
+echo "# IMAGE: "PS/${imagename}-histo.ps "<Histogram>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 20>"
+#
+if ( ${taperBeforeFFT} == "y" ) then
+  #############################################################################
+  ${proc_2dx}/linblock "TAPEREDGE: To taper the edges to prevent stripes in the FFT"
+  #############################################################################
+  #
+  \rm -f     SCRATCH/${imagename}.taper.mrc
+  setenv IN  ${imagename}.mrc
+  setenv OUT SCRATCH/${imagename}.taper.mrc
+  ${bin_2dx}/2dx_taperedgek.exe << eot
+10,10,100,10       ! IAVER,ISMOOTH,ITAPER
+eot
+  #
+  echo "# IMAGE: "SCRATCH/${imagename}.taper.mrc "<Edge-Tapered Image>" >> LOGS/${scriptname}.results
+  #
+endif
+echo "<<@progress: 25>>"
+echo "<<@evaluate>>"
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "FFTRANS - to calculate Fourier transform of image"
+#                                                                           #
+#############################################################################
+#
+\rm -f FFTIR/${imagename}.fft.mrc
+if ( ${taperBeforeFFT} == "y" ) then
+  setenv IN SCRATCH/${imagename}.taper.mrc
+else
+  setenv IN ${imagename}.mrc
+endif 
+setenv OUT FFTIR/${imagename}.fft.mrc
+${bin_2dx}/2dx_fftrans.exe
+#
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 30>>"
+#
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "LABEL - to down-interpolate image 2 times."
+#                                                                           #
+#############################################################################
+#
+if ( ${taperBeforeFFT} == "y" ) then
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.taper.mrc
+4               ! average adjacent pixels
+FFTIR/${imagename}.red.mrc
+2,2
+eot
+else
+  ${bin_2dx}/labelh.exe << eot
+${imagename}.mrc
+4               ! average adjacent pixels
+FFTIR/${imagename}.red.mrc
+2,2
+eot
+endif
+#
+echo "# IMAGE: "FFTIR/${imagename}.red.mrc "<Downsampled Image>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 30>>"
+echo "<<@evaluate>>"
+#
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "FFTRANS - to calculate reduced Fourier transform"
+#                                                                           #
+#############################################################################
+#
+\rm -f FFTIR/${imagename}.red.fft.mrc
+setenv IN  FFTIR/${imagename}.red.mrc
+setenv OUT FFTIR/${imagename}.red.fft.mrc
+${bin_2dx}/2dx_fftrans.exe
+#
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 50>>"
+#
+set bigimage = `echo ${imagesidelength} | awk '{ if ( $1 > 5001 ) { s = 1 } else { s = 0 }} END { print s }'`
+#
+if ( ${bigimage} == '1' ) then
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "LABEL - to cut out an image 2048x2048 in center of original image"
+  #                                                                           #
+  #############################################################################
+  #
+  set smallsize = 2048  
+  #
+  set rtemp1 = ${imagesidelength}
+  @ rtemp1 /= 4
+  set rtemps = ${smallsize}
+  @ rtemps /= 2
+  @ rtemp1 -= ${rtemps}
+  set rtemp2 = ${rtemp1}
+  @ rtemp2 += ${smallsize}
+  @ rtemp1 += 1
+  set patlabel = ${rtemp1},${rtemp2},${rtemp1},${rtemp2}
+  echo "Center       : Xmin,Xmax,Ymin,Ymax = ${patlabel}"
+  #
+  \rm -f SCRATCH/${imagename}.tmp.mrc 
+  #
+  ${bin_2dx}/labelh.exe << eot
+${nonmaskimagename}.mrc
+1
+SCRATCH/${imagename}.tmp.mrc
+${patlabel}
+eot
+  #
+  echo "<<@progress: 60>>"
+  echo "<<@evaluate>>"
+  #
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "TAPEREDGE - is needed for spotscan images to eliminate transform stripes"
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f     SCRATCH/${imagename}.center.mrc
+  setenv IN  SCRATCH/${imagename}.tmp.mrc
+  setenv OUT SCRATCH/${imagename}.center.mrc
+  echo "Starting taperedge"
+  ${bin_2dx}/2dx_taperedgek.exe << eot
+10,10,100,10       ! IAVER,ISMOOTH,ITAPER,IDIST
+eot
+  echo "Finished taperedge"
+  #
+  \rm -f SCRATCH/${imagename}.tmp.mrc
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "LABEL - to down-interpolate image 2 times."
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f CUT/${imagename}.center.red.mrc
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.center.mrc
+4               ! average adjacent pixels
+CUT/${imagename}.center.red.mrc
+2,2
+eot
+  #
+  echo "# IMAGE: "CUT/${imagename}.center.red.mrc "<Center of Downsampled Image>"  >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 70>>"
+  echo "<<@evaluate>>"
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "FFTRANS - to calculate reduced central Fourier transform"
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f     CUT/${imagename}.center.red.fft.mrc
+  #
+  setenv IN  CUT/${imagename}.center.red.mrc
+  setenv OUT CUT/${imagename}.center.red.fft.mrc
+  ${bin_2dx}/2dx_fftrans.exe
+  #
+  echo "# IMAGE: "CUT/${imagename}.center.red.fft.mrc "<FFT of Center of Downsampled Image>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 80>>"
+  #
+else
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "small image, not producing center image."
+  #                                                                           #
+  #############################################################################
+endif
+#
+#
+if ( ${generatePeriodogram} == "y" ) then
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "2dx_periodogram - to calculate the periodogram of the image"
+  #                                                                           #
+  #############################################################################
+  #
+  if ( -e SCRATCH/${imagename}.taper.mrc ) then
+    ${bin_2dx}/2dx_periodogram.exe SCRATCH/${imagename}.taper.mrc ${periodogramWindowsize} ${periodogramNumsubsteps}
+  else
+    ${bin_2dx}/2dx_periodogram.exe ${imagename}.mrc ${periodogramWindowsize} ${periodogramNumsubsteps}
+  endif
+  #
+  \mv -f periodogram.mrc FFTIR/${imagename}.pg.mrc
+  echo "IMAGE: FFTIR/${imagename}.pg.mrc" "<Periodogram>" >> LOGS/${scriptname}.results
+  echo "<<@progress: 15>>"
+  #
+endif
+#
+echo "set FFT_done = y" >> LOGS/${scriptname}.results
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+##
+#
+echo "<<@progress: 100>>"
+#

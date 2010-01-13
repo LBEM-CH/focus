@@ -1,0 +1,8 @@
+
+#!/bin/csh
+#
+/bin/rm -f *.o 
+/bin/rm -f subs.a
+cc -c -w subsc.c
+ar cr subs.a `lorder *.o | tsort`
+/bin/rm -f *.o 

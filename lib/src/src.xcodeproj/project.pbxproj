@@ -1,0 +1,145 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+		B213718A6CFE6E7E149336A6 = {
+			isa = PBXFileReference;
+			lastKnownFileType = "wrapper.pb-project";
+			name = "mrcImage.xcodeproj";
+			path = "/Users/gipsonb/Projects/2dx-stable/lib/src/mrcImage/mrcImage.xcodeproj";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		BBB97C837A57B6526334019E = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = "mrcImage.dylib";
+			refType = 3;
+			remoteRef = "0E9FECF20E25525678E8FEC7";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0E9FECF20E25525678E8FEC7 = {
+			containerPortal = "B213718A6CFE6E7E149336A6";
+			isa = PBXContainerItemProxy;
+			proxyType = "2";
+			remoteGlobalIDString = "66D65E1C9FD6EFBB5045F5BE";
+			remoteInfo = "mrcImage";
+		};
+		7F04B052060E7A541EE81774 = {
+			children = (
+				);
+			isa = PBXGroup;
+			name = "Products";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		8BD3A7272DCDBF64A7127EE9 = {
+			isa = PBXFileReference;
+			lastKnownFileType = "wrapper.pb-project";
+			name = "extentions.xcodeproj";
+			path = "/Users/gipsonb/Projects/2dx-stable/lib/src/extentions/extentions.xcodeproj";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		AF5401BE34F9EB6A367D01E7 = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = "extentions.dylib";
+			refType = 3;
+			remoteRef = "3ECF96098C4CF978320DCBA5";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3ECF96098C4CF978320DCBA5 = {
+			containerPortal = "8BD3A7272DCDBF64A7127EE9";
+			isa = PBXContainerItemProxy;
+			proxyType = "2";
+			remoteGlobalIDString = "39E38F58DF15941AD1687B67";
+			remoteInfo = "extentions";
+		};
+		5D9EF91293362894A43E71AC = {
+			children = (
+				);
+			isa = PBXGroup;
+			name = "Products";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		B2A2D94BC0E5A82DA3503E81 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = "NO";
+			};
+			name = "Debug";
+		};
+		026D935CF87BC5A57D066772 = {
+			buildRules = (
+				);
+			buildSettings = {
+				COPY_PHASE_STRIP = "NO";
+			};
+			isa = PBXBuildStyle;
+			name = "Debug";
+		};
+		C6EE5F4E4F422FDDBF285003 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+			};
+			name = "Release";
+		};
+		17D1799BD08EB4FFE0CBC60F = {
+			buildRules = (
+				);
+			buildSettings = {
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+			};
+			isa = PBXBuildStyle;
+			name = "Release";
+		};
+		30E61B081CF688BCA30A6135 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"B2A2D94BC0E5A82DA3503E81",
+				"C6EE5F4E4F422FDDBF285003");
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationIsName = "Release";
+		};
+		0E71022E8970293824BA089C = {
+			children = (
+				"B213718A6CFE6E7E149336A6",
+				"8BD3A7272DCDBF64A7127EE9");
+			isa = PBXGroup;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		83F5E4B52EF1918F746DF6D4 = {
+			buildSettings = {
+			};
+			buildStyles = (
+				"026D935CF87BC5A57D066772",
+				"17D1799BD08EB4FFE0CBC60F");
+			isa = PBXProject;
+			mainGroup = "0E71022E8970293824BA089C";
+			projectDirPath = "";
+			buildConfigurationList = "30E61B081CF688BCA30A6135";
+			projectReferences = (
+				{
+					ProductGroup = "7F04B052060E7A541EE81774";
+					ProjectRef = "B213718A6CFE6E7E149336A6";
+				},
+				{
+					ProductGroup = "5D9EF91293362894A43E71AC";
+					ProjectRef = "8BD3A7272DCDBF64A7127EE9";
+				},
+			);
+			targets = (
+				);
+		};
+	};
+	rootObject = "83F5E4B52EF1918F746DF6D4";
+}

@@ -1,0 +1,12 @@
+#!/bin/csh -ef
+#
+#
+if ( $#argv != 2 ) then
+  echo lindoubl2 : display a line with 2 texts
+  echo \\t usage: lindoubl2 \<text1\> \<text2\> 
+  echo \\t example: lindoubl2 \"ctfapply start\" \"def=500\.,500\.,45\.\"
+else
+  echo `echo "::==== $1 ===================================================" | cut -c1-32`\
+       `echo "$2 ==============================================================" | cut -c1-47`
+endif
+#

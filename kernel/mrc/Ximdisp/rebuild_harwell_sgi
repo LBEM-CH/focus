@@ -1,0 +1,10 @@
+#!/bin/csh
+#
+/bin/rm -f *.o 
+/bin/rm -f *.f 
+/bin/rm -f harwell.a
+../lib/fsplit harwell.for
+f77 -w -c *.f
+ar r harwell.a *.o
+/bin/rm -f *.o 
+/bin/rm -f *.f 

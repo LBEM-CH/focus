@@ -1,0 +1,310 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Refine Once                                                        #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/03/2007                                             #
+# Last Modification: 01/03/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 38
+#
+# MANUAL: This script allows refining the phase origins of the selected images.
+# 
+# MANUAL: This does one single alignment step of the selected images against the available reference.
+#
+# GLOBAL: Merge_Refine_Rounds
+# GLOBAL: MergeResolution
+# GLOBAL: merge_modus
+# GLOBAL: zstarwin
+# GLOBAL: RESMIN
+# GLOBAL: RESMAX
+# GLOBAL: tempkeep
+# GLOBAL: realcell
+# GLOBAL: realang
+# GLOBAL: ALAT
+# GLOBAL: MergeStepSize
+# GLOBAL: IBOXPHS
+# GLOBAL: SYM
+# GLOBAL: avrgamphsNUMBER
+# GLOBAL: avrgamphsRESOL
+# GLOBAL: MergeHKMAX
+# GLOBAL: MergeIQMAX
+# GLOBAL: refbeamtilt
+# GLOBAL: reftiltgeo
+# GLOBAL: merge_reference
+# GLOBAL: merge_ref_num
+# GLOBAL: merge_comment_1
+# GLOBAL: merge_comment_2
+# GLOBAL: merge_comment_3
+# GLOBAL: merge_comment_4
+# GLOBAL: merge_comment_5
+# GLOBAL: merge_comment_6
+# GLOBAL: merge_comment_7
+# GLOBAL: merge_comment_8
+# GLOBAL: merge_comment_9
+# GLOBAL: max_amp_correction
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set create_merged_dataset = ""
+set Merge_Refine_Rounds = ""
+set MergeResolution = ""
+set merge_modus = ""
+set zstarwin = ""
+set RESMIN = ""
+set RESMAX = ""
+set tempkeep = ""
+set realcell = ""
+set realang = ""
+set ALAT = ""
+set MergeStepSize = ""
+set IBOXPHS = ""
+set SYM = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set MergeHKMAX = ""
+set MergeIQMAX = ""
+set refbeamtilt = ""
+set reftiltgeo = ""
+set merge_reference = ""
+set merge_ref_num = ""
+set max_amp_correction = ""
+#
+#$end_vars
+#
+setenv OMP_NUM_THREADS 8
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set dirfile = "2dx_merge_dirfile.dat"
+#
+set number = 1
+set IVERBOSE = 9
+set RFACAMP = 1.0
+#
+set date = `date`
+echo date = ${date}
+#
+set scriptname = 2dx_refine
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>>"
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+if ( ${MergeHKMAX}x == 'x' ) then
+  set MergeHKMAX = '20'
+  ${proc_2dx}/linblock "ERROR: correcting MergeHKMAX to ${MergeHKMAX}"
+  echo "set MergeHKMAX = ${MergeHKMAX}" >> LOGS/${scriptname}.results
+endif
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 5>>"
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing sym2spsgrp_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+#
+echo SYM = ${SYM}
+echo spcgrp = ${spcgrp}
+echo CCP4_SYM = ${CCP4_SYM}
+#
+############################################################################# 
+${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
+#############################################################################
+#
+${proc_2dx}/2dx_merge_makedirs
+#
+echo "<<@progress: 10>"
+#
+set NPRG = 1
+if ( ${merge_modus} == '2D' ) then
+  if ( ! -e APH/merge.aph ) then
+    ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+    ${proc_2dx}/protest "Run Merging script first."
+  endif
+endif
+if ( ${merge_modus} == '3D' ) then
+  if ( ${merge_reference} == '0' ) then
+    # Use merge.aph files
+    if ( ! -e APH/merge.aph ) then
+      ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+      ${proc_2dx}/protest "Run Merging script first."
+    endif
+  else
+    # User interpolated lattice lines latlinesref.mtz
+    if ( ! -e merge3D.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge.mtz not found. No reference for refinement available."
+      ${proc_2dx}/protest "Run Merging script first."
+    endif
+    set NPRG = 3
+  endif
+endif
+#
+if ( ${merge_ref_num} != "0" ) then
+  if ( -d REGISTERS/Reg_${merge_ref_num} ) then
+     #############################################################################
+     ${proc_2dx}/linblock "Using merged dataset from register ${merge_ref_num}."
+     #############################################################################  
+     echo "::" `cat REGISTERS/Reg_${merge_ref_num}/COMMENT.txt | head -1`
+     echo "::" `cat REGISTERS/Reg_${merge_ref_num}/COMMENT.txt | head -2 | tail -1`
+     echo " "
+    if ( ${NPRG} == "3" ) then
+      # Use MTZ file
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3D.mtz not existing in register ${merge_ref_num}."
+      else
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ."
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D.mtz .
+      endif
+      #
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3Dref.mtz not existing in register ${merge_ref_num}."
+      else
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ."
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz .
+      endif
+    else
+      # Use APH file
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge2D.mtz not existing in register ${merge_ref_num}."
+      else
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ." 
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge2D.mtz .
+      endif
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge.aph ) then
+        ${proc_2dx}/protest "ERROR: merge.aph not existing in register ${merge_ref_num}."
+      else
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge.aph APH/merge.aph"
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge.aph APH/merge.aph
+      endif
+    endif
+  else
+    ${proc_2dx}/protest "ERROR: Register ${merge_ref_num} does not contain data."
+  endif
+  #
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "Compile refinement script"
+#############################################################################
+#
+set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
+\rm -f ${scriptBfile}
+set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
+\rm -f ${postprocessingfile}
+#
+set genref = "1"
+#
+\rm -f LOGS/${scriptname}-tmp.results
+#
+if ( ${refbeamtilt} == 'y' ) then
+  set NBM = T
+  ${proc_2dx}/linblock "NBM=T, doing beam tilt refinement."
+else
+  set NBM = F
+  ${proc_2dx}/linblock "NBM=F, no beam tilt refinement."
+endif
+#
+if ( ${reftiltgeo} == 'y' ) then
+  set NTL = T
+  ${proc_2dx}/linblock "NTL=T, doing crystal tiltangle and tiltaxis refinement."
+else
+  set NTL = F
+  ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."
+endif
+#
+${bin_2dx}/2dx_merge_compileB.exe << eot
+LOGS/${scriptname}-tmp.results
+${proc_2dx}
+${bin_2dx}
+${dirfile}
+${scriptBfile}
+${postprocessingfile}
+${genref}
+${spcgrp}
+${realcell}
+${realang}
+${zstarwin}
+${ALAT}
+${IVERBOSE}
+${MergeStepSize}
+${RFACAMP}
+${IBOXPHS}
+${NPRG}
+${NBM}
+${NTL}
+${MergeIQMAX}
+${MergeHKMAX}
+${RESMIN}
+${RESMAX}
+0
+eot
+#
+echo "<<@progress: +5>>"
+#
+#############################################################################
+${proc_2dx}/linblock "Launch refinement script"
+#############################################################################
+#
+echo "# IMAGE: ${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
+chmod +x ${scriptBfile}
+${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
+# cat SCRATCH/2dx_merge_scriptB.out
+#
+#
+#############################################################################
+${proc_2dx}/linblock "Launch refinement postprocessing script"
+#############################################################################
+#
+echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
+chmod +x ${postprocessingfile}
+${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
+#
+echo "################################################"
+echo "################################################"
+echo "output in file LOGS/2dx_merge_scriptB.log"
+echo "################################################"
+echo "################################################"
+#
+cat 2dx_origtiltk-console.log
+#\rm -f 2dx_origtiltk-console.log
+#
+cat LOGS/${scriptname}-tmp.results >> LOGS/${scriptname}.results
+# \rm -f LOGS/${scriptname}-tmp.results
+#
+echo "<<@progress: 90>"
+#
+# Issue evaluate here to reload the Ph-Ori-Change column
+#echo "<<@evaluate>>"
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_refine normal end."
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

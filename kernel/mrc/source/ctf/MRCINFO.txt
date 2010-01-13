@@ -1,0 +1,177 @@
+Notes on MRC IMAGE PROCESSING software 2000 installation.	13.02.2001
+--------------------------------------------------------
+
+
+	The MRC Image Processing package is currently freely available to 
+academic workers, and although it is helpful if bugs are reported, no support 
+or instruction is available. A list of users is kept, so please do not just 
+copy the system without informing us. These notes are not completely 
+comprehensive, but should assist you in the installation of the package.
+
+	Use of the programs is described in published papers which are 
+referred to in our publication Crowther, Henderson and Smith, J. Struct. Biol.
+(1996) 116, 9-16. If you do require instruction from someone, the file :
+image2000/doc/outside_users.doc contains a list of users, so you should find 
+someone close to you and ask to visit them so that you can learn from them.
+
+
+					Jude Smith. 
+						jms@mrc-lmb.cam.ac.uk
+
+
+*****************************************************************************
+
+
+	This release has a plot library which produces postscript format files 
+rather than the .plt files as in the old system which required reformatting 
+before printing. 
+
+	It is also LINUX compliant and machine architecture independent and 
+provided that they were created on a matching-endian machine, the programs are 
+still able to read old-style MRC Image format files. i.e. little-endian 
+old-style maps can be read correctly on a little-endian (e.g. DEC/Alpha), but 
+not on a big-endian computer (e.g. SGI). Old-style maps of a different 
+architecture may be converted by the byte_swap_map program. Some programs need 
+to write information into the header e.g. autocorrlk, backautok, and in this 
+case will require new-style, architecture compatible maps. If the map is 
+new-style, but architecture incompatible, or if it is old style but 
+architecture compatible, then the program image_convert will correctly 
+reformat them. In the case where the map is old-style and 
+architecture-incompatible, then byte_swap_map followed by image_convert 
+would need to be run first. Newly created files will always be written in 
+the new-style format which carries a machine stamp in the header along with 
+a rms deviation, a three-dimensional origin in a shifted position and 
+symmetry data. 
+
+To summarise :
+
+Old style, different endian maps ........... no read, no write
+			: use byte_swap_map followed by image_convert
+
+Old style, compatible endian maps .......... read, no write
+			: use image_convert
+
+New style, different endian maps ........... read, no write
+			: use image_convert
+
+New style, compatible endian maps .......... read, write
+
+The new format is 
+described in more detail in :    image2000/doc/image.doc.
+
+Although the original MRC image processing package is still available, 
+upgrades will be confined to the new 2000 version. 
+
+
+*****************************************************************************
+
+
+1) Prerequisites
+  --------------
+
+F77  and C compilers and X11/R6 (or X11/R5).
+
+Edit the first executable line in the file image2000/com/image.login 
+to suit your system. For example, if you have loaded the uncompressed 
+tar file into /disk7/public then change the line to :
+
+  setenv IMAGE_PUBLIC /disk7/public/image2000
+
+Edit each users .login and .cshrc to source the files image.login and 
+image.cshrc needed to make the required links. In the example above, users
+.login and .cshrc files should include :
+
+  source /disk7/public/image2000/com/image.login
+
+and 
+
+  source /disk7/public/image2000/com/image.cshrc
+
+respectively.
+
+
+2) Installation of software :
+   ------------------------
+
+If you are running on a DEC/Alpha computer, run  :
+                  ../image2000/rebuild_image_alpha
+                  ../image/laserlinks
+
+If you are running on a Silicon Graphics computer, run :
+                  ../image2000/rebuild_image_sgi 
+
+  NB : if you are installing on IRIX6.5 you will first need to edit the
+         file image2000/lib/rebuild_genlib_sgi. Replace "-Olimit 1500"
+         with "-OPT:Olimit=1500"
+
+If you are running on a PC under LINUX, run
+                   ../image2000/rebuild_image_linux
+
+  NB : This version has been tested on RedHat LINUX 6.2. Higher versions
+       have problems, in particular the version of XFree86 which comes with
+       RedHat LINUX 7.0 has a bug which affects Ximdisp. 06.04.2001
+
+It is wise to redirect the output to a log file and check the installation
+has run to completion.
+
+Note : If the error 'file not found' occurs, it may be necessary to type 
+the following, or put it in your .login :
+
+setenv PATH .:$PATH
+
+
+
+3) Test the installation :
+   ---------------------
+
+First :
+source ../image2000/com/image.login 
+source ../image2000/com/image.cshrc
+
+Run the command scripts in ../image2000/test  :
+
+  a) allspace.com reads allspace.data to test allspace.exe, log file
+     for comparison in allspace.log
+
+  b) fftir.com sets up files for job2000.com which tests many programs. 
+     Log files in fftir.log and job2000.log for comparison.
+
+  c) ctfg000.com tests ctfapply which tests the plot2k routines.
+
+  d) Helical programs can be tested by using the instructions described in 
+     ../image2000/test/hlxtest_scheme
+
+  e) Frealign is distributed with this package and can be tested by running
+    ../image2000/frealign/test301.com.alpha, or if you are usingan SGI :
+    ../image2000/frealign/test301.com.sgi
+
+
+Notes :
+
+If you are running on an SGI, you may need to use the command unlimit
+
+
+4) Documentation :
+   -------------
+
+Documentation on the programs is found as a plain text file in :
+	../image2000/doc/improc.doc
+
+
+5) Man pages for laserwriter programs :
+   ----------------------------------
+
+Either read the plain text in :
+	../laser/postscript/lasertext.doc
+	../laser/postscript/lasertone.doc
+
+or copy :
+	../laser/postscript/lasertext.1
+	../laser/postscript/lasertone.1
+
+to e.g. /usr/local/man/man1
+
+Note : to  make laser links correctly
+cd local
+ln -sf ${IMAGE_LASER}/lasertext.exe lasertext
+ln -sf ${IMAGE_LASER}/lasertone.exe lasertone

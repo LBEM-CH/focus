@@ -1,0 +1,76 @@
+F77 = 
+GCC = gcc
+GXX = g++
+GFLAGS = -c -DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math
+FFLAGS = -c -O1 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -dead_strip -static-libgcc
+LIBRARIES = libgen.a libmisc.a libim2k.a libplot2k.a libfft.a libconv.a lib2dx.a
+INCLUDES = -I../include
+GENFOR = unix.for diskio.for ccplib.for subs.for parser.for symlib.for
+GENC = library.c
+MISCFOR = mtzlib.for lcflib.for miscsubs.for
+IMLIBFOR = imsubs2000.for imsubs2.for
+PLOT2KC = plot2k.c
+FFTCPP = fftlib.cpp
+CONVCPP = 2dx_conv.cpp
+FSPLIT = fsplit
+LIB2DX = 2dx_func.for mrcImage.cpp
+
+
+all: $(FSPLIT) $(LIBRARIES)
+
+$(FSPLIT): fsplit.c
+	$(GCC) -o $@ $<
+
+libgen.a: $(GENFOR) $(GENC) $(FSPLIT)
+	\rm -f *.o *.f libgen.a
+	@for s in $(GENFOR); do ./fsplit $${s}; done
+	$(F77) $(FFLAGS) *.f
+	$(GCC) $(GFLAGS) $(GENC) 
+	ar crs libgen.a *.o
+	ranlib libgen.a
+	\rm -f *.o *.f
+
+libmisc.a: $(MISCFOR) libgen.a $(FSPLIT)
+	\rm -f *.o *.f libmisc.a
+	@for s in $(MISCFOR); do ./fsplit $${s}; done
+	$(F77) $(FFLAGS) *.f 
+	ar crs libmisc.a *.o
+	\rm -f *.o *.f
+	ranlib libmisc.a
+
+libim2k.a: $(IMLIBFOR) libmisc.a libgen.a $(FSPLIT)
+	\rm -f *.o *.f libim2k.a
+	@for s in $(IMLIBFOR); do ./fsplit $${s}; done
+	$(F77) $(FFLAGS) *.f 
+	ar crs libim2k.a *.o
+	\rm -f *.o *.f
+	ranlib libim2k.a
+
+libplot2k.a: $(PLOT2KC) libim2k.a libmisc.a libgen.a $(FSPLIT)
+	\rm -f libplot2k.a
+	$(GCC) $(GFLAGS) $(PLOT2KC)
+	ar crs $@ $(patsubst %.c,%.o,$(PLOT2KC))
+	ranlib $@
+
+lib2dx.a: $(LIB2DX) libplot2k.a libim2k.a libmisc.a libgen.a $(FSPLIT)
+	\rm -f lib2dx.a
+	$(F77) $(FFLAGS) 2dx_func.for
+	$(GXX) $(GFLAGS) $(INCLUDES) mrcImage.cpp
+	ar crs lib2dx.a 2dx_func.o mrcImage.o
+	\rm -f 2dx_func.o
+	ranlib $@
+
+libfft.a: $(FFTCPP) lib2dx.a libplot2k.a libim2k.a libmisc.a libgen.a $(FSPLIT)
+	\rm -f libfft.a
+	$(GXX) $(GFLAGS) $(INCLUDES) $(FFTCPP)
+	ar crs $@ $(patsubst %.cpp,%.o,$(FFTCPP))
+	ranlib $@
+
+libconv.a: $(CONVCPP) libfft.a lib2dx.a libplot2k.a libim2k.a libmisc.a libgen.a $(FSPLIT)
+	\rm -f libconv.a
+	$(GXX) $(GFLAGS) $(CONVCPP)
+	ar crs $@ $(patsubst %.cpp,%.o,$(CONVCPP))
+	ranlib $@
+
+clean:
+	\rm -f *.o *.f *.a

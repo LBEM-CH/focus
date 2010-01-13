@@ -1,0 +1,31 @@
+GXX = g++
+CFLAGS = -ffast-math -dead_strip -static-libgcc
+LIBDIR = -L../../lib
+MAIN_SOURCES = 2dx_ML.c main_ML.c get_stack.c 2dx_lowpass.c ctf.c whitening.c mask.c trans.c quadintp.c rotate.c cross_corr.c get_resolution.c apply_envelop.c maximum_likelihood.c 
+MAIN_SOURCES_MERGE1 = 2dx_ML_stack.c write_stack_merge.c fgetline.c cgetline.c 2dx_lowpass.c ctf.c whitening.c mask.c trans.c quadintp.c rotate.c cross_corr.c get_resolution.c apply_envelop.c maximum_likelihood.c 
+MAIN_SOURCES_MERGE2 = 2dx_ML_merge.c  fgetline.c cgetline.c 2dx_lowpass.c ctf.c whitening.c mask.c trans.c quadintp.c rotate.c cross_corr.c get_resolution.c apply_envelop.c maximum_likelihood.c 
+ 
+BINDIR = ../../bin/
+BINARIES = $(BINDIR)/2dx_ML.exe  
+#$(BINDIR)/2dx_ML_stack.exe $(BINDIR)/2dx_ML_merge.exe
+LIBS = -lfftw3f -l2dx
+INCLUDES = -I../../include/ -I./
+
+all: $(BINARIES)
+
+$(BINDIR)/2dx_ML.exe: $(MAIN_SOURCES_)
+	$(GXX) $(INCLUDES) -o $(BINDIR)/2dx_ML.exe $(CFLAGS) 2dx_ML.c $(LIBDIR) $(LIBS) 
+
+#$(BINDIR)/2dx_ML_stack.exe: $(MAIN_SOURCES_MERGE1)
+#	$(GXX) $(INCLUDES) -o $(BINDIR)/2dx_ML_stack.exe $(CFLAGS) 2dx_ML_stack.c $(LIBDIR) $(LIBS) 
+
+#$(BINDIR)/2dx_ML_merge.exe: $(MAIN_SOURCES_MERGE2)
+#	$(GXX) $(INCLUDES) -o $(BINDIR)/2dx_ML_merge.exe $(CFLAGS) 2dx_ML_merge.c $(LIBDIR) $(LIBS) 
+
+ 
+
+clean:
+	\rm -f $(BINARIES)
+
+
+

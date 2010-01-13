@@ -1,0 +1,283 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Refine Spotlist                                                    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 05/20/2006                                             #
+# Last Modification: 05/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 73
+#
+# MANUAL: This script allows the creation of a new spotlist, using either the final Amplitude-and-Phase file or the final unbent image as input. In both cases, an IQ threshold is defined, and the identified spots stronger than this threshold are identified.
+#
+#=============================================================================
+# SECTION: Algorithm Selection
+#=============================================================================
+#
+# LABEL: Source of additional spots
+# LEGEND: Choose the file where the additional spots are extracted from.
+# EXAMPLE: addspots = "1"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Spots
+# TYPE: Drop_Down_Menu "0=FFT of Unbent Image;1=APH File"
+set addspots = "1"
+#
+# LABEL: Keep old spots in addition to new ones (for APH file option)?
+# LEGEND: Lets you decide, if a completely new spotlist should be established, or if the found spots should merely added to the existing one. This applies only to the APH file option. When using the Unbent Image as source, then always a new spotfile is generated.
+# EXAMPLE: keepOld = "n"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Spots
+# TYPE: Bool "y;n"
+set keepOld = "n"
+#
+#=============================================================================
+#
+# GLOBAL: RESMIN
+# GLOBAL: RESMAX
+# GLOBAL: lattice
+# GLOBAL: secondlattice
+# GLOBAL: spotrefine_IHKmax
+# GLOBAL: spot_filter
+# GLOBAL: spot_exclusion_radius
+# GLOBAL: ProtSpotList
+# GLOBAL: realcell
+# GLOBAL: realang
+# GLOBAL: ALAT
+# GLOBAL: IQMAX
+# GLOBAL: spotrefine_IHKmax
+# GLOBAL: comment
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set realcell = ""
+set lattice = ""
+set secondlattice = ""
+set spotrefine_IHKmax = ""
+set spot_filter = ""
+set ProtSpotList = ""
+set spot_exclusion_radius = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set revhk = ""
+set realang = ""
+set RESMIN = ""
+set RESMAX = ""
+set ALAT = "" 
+set lattice = ""
+set IQMAX = ""
+set refori = ""
+set spotrefine_IHKmax = ""
+set RMAG = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_refinespots
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+#
+source ${proc_2dx}/initialize
+#
+#############################################################################
+${proc_2dx}/linblock "${scriptname}" 
+#############################################################################  
+#
+set date = `date`
+echo date = ${date}
+#
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+echo refposix = ${refposix}
+echo refposiy = ${refposiy}
+#
+${proc_2dx}/2dx_makedirs
+#
+if ( ${ProtSpotList} == "y" ) then
+  ${proc_2dx}/protest "::ERROR: SpotList protected. Aborting" 
+else
+  if ( ${ProtSpotList} != "n" ) then  
+  set ProtSpotList = "n"
+  echo "set ProtSpotList = n" >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 1>>"
+#
+set oldspotlist  = ${imagename}.spt
+echo oldspotlist = ${oldspotlist}
+#
+if ( ${keepOld} == "n" ) then
+  \rm -f ${oldspotlist}
+endif
+#
+if ( ${addspots} == "1" ) then
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_spotrefine - To add spots according to the APH file."
+  #############################################################################
+  #
+  ${proc_2dx}/linblock "using IQMAX of ${IQMAX}."
+  #
+  set aphfile      = APH/${imagename}.cor.aph
+  echo aphfile     = ${aphfile}
+  #
+  if ( ! -e ${aphfile} || ! -s ${aphfile} ) then
+    set oldaphfile = ${aphfile}
+    set aphfile      = APH/${nonmaskimagename}.cor.aph
+    echo aphfile     = ${aphfile}
+    ${proc_2dx}/linblock "WARNING: ${oldaphfile} not ok. Trying ${aphfile}."
+    if ( ! -e ${aphfile} || ! -s ${aphfile} ) then  
+      ${proc_2dx}/protest "ERROR: ${aphfile} not ok."
+    endif
+  endif
+  #
+  ${proc_2dx}/linblock "Using file ${aphfile}"
+  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input APH file for Spotlist Determination>" >> LOGS/${scriptname}.results
+  #
+  set newspotlist  = TMP.spt
+  echo newspotlist = ${newspotlist}
+  #
+  \rm -f ${newspotlist} 
+  #
+  ${bin_2dx}/2dx_spotrefine.exe << eot
+${oldspotlist}
+${aphfile}
+${IQMAX}
+${spotrefine_IHKmax}
+${newspotlist}
+eot
+  #
+  if ( ! -e ${newspotlist} ) then
+    ${proc_2dx}/protest "2dx_spotrefine: ERROR occured."
+  endif
+  #
+  \mv -f ${oldspotlist} SCRATCH/${imagename}.old.spt
+  \mv -f ${newspotlist} ${oldspotlist}
+  #
+else
+  #
+  set inputname = FFTIR/cor${imagename}.fft.mrc
+  if ( ! -e ${inputname} ) then
+    ${proc_2dx}/linblock "${inputname} does not exist."
+    set inputname = FFTIR/cor${imagename}.unbend1.fft.mrc
+    if ( ! -e ${inputname} ) then
+      ${proc_2dx}/linblock "${inputname} does not exist neither."
+      ${proc_2dx}/protest "First run Unbend I and/or Unbend II."
+    endif
+  endif  
+  #
+  ${proc_2dx}/linblock "Using file ${inputname}"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_mmboxa - To get the spot list from the corrected FFT."
+  #############################################################################  
+  #
+  # set IQMAX=4
+  ${proc_2dx}/linblock "using IQMAX of ${IQMAX}."
+  #
+  \rm -f ${imagename}.spt
+  #
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+${inputname}
+  ${imagenumber}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2 3 0 50 50 12 12               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+${imagename}.spt
+${IQMAX}                              ! IQMAX
+${refposix} ${refposiy}         ! XORIG,YORIG
+${RESMIN} ${RESMAX} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
+  #
+  echo "# IMAGE-IMPORTANT: ${inputname} <FFT: Input FFT for Spotlist Determination>" >> LOGS/${scriptname}.results
+  #
+endif
+#
+set spotname = ${imagename}.spt
+#
+if ( ${spot_filter} == 'y' ) then
+  #
+  set spotnum = `cat ${spotname} | wc -l`
+  ${proc_2dx}/linblock "So far, found ${spotnum} spots."
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_spotfilter: To weed out the spots on second lattice."
+  #############################################################################
+  #
+  \rm -f SCRATCH/GOODSPOT.spt
+  \rm -f SCRATCH/BADSPOT.spt
+  \rm -f SCRATCH/COUNTSPOT.tmp
+  \rm -f SCRATCH/CORRECTEDSPOT.spt
+  #
+  set imodspot = 1
+  #
+  ${bin_2dx}/2dx_spotfilter.exe << eot
+${lattice}
+${secondlattice}
+${spotrefine_IHKmax}
+${spot_exclusion_radius}
+${imodspot}
+${spotname}
+SCRATCH/GOODSPOT.spt
+SCRATCH/BADSPOT.spt
+SCRATCH/COUNTSPOT.tmp
+SCRATCH/CORRECTEDSPOT.spt
+eot
+  #
+  if ( ! -e SCRATCH/COUNTSPOT.tmp ) then
+    ${proc_2dx}/protest "ERROR in 2dx_spotfilter"
+  endif
+  set igood = `head -1 SCRATCH/COUNTSPOT.tmp`
+  set ibad  = `head -2 SCRATCH/COUNTSPOT.tmp | tail -1`
+  set ispt  = `head -3 SCRATCH/COUNTSPOT.tmp | tail -1`
+  set irest = `head -4 SCRATCH/COUNTSPOT.tmp | tail -1`
+  echo "::`echo 2dx_spotfilter: Generated ${igood} good and ${ibad} bad spots.`"
+  echo :From ${ispt} spots in ${spotname} survived ${irest} spots.
+  echo :Survived spots are copied onto ${spotname}
+  \rm -f ${spotname}
+  \mv SCRATCH/CORRECTEDSPOT.spt ${spotname}
+  echo :Good spots are in SCRATCH/GOODSPOT.spt
+  \rm -f SCRATCH/COUNTSPOT.tmp
+  #
+  set spotnum = `cat ${spotname} | wc -l`
+  ${proc_2dx}/linblock "Now you have ${spotnum} spots."
+  #
+else
+  #
+  set spotnum = `cat ${spotname} | wc -l`
+  ${proc_2dx}/linblock "You have ${spotnum} spots."
+  #
+endif
+#
+set spotnum = `cat ${imagename}.spt | wc -l`
+echo " " >> History.dat
+echo ":Refine Spotlist: You now have ${spotnum} spots." >> History.dat
+#
+echo "# IMAGE-IMPORTANT: ${imagename}.spt <TXT: Spotlist>" >> LOGS/${scriptname}.results
+#
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#
+echo "set SPOTS_done = y" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+#

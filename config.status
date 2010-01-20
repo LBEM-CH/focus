@@ -335,7 +335,7 @@ Copyright (C) 2006 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/Users/gipsonb/Projects/2dx-stable'
+ac_pwd='/Users/marheit/code/2dx/trunk'
 srcdir='.'
 INSTALL='/opt/local/bin/ginstall -c'
 # If no file are specified by the user, then we need to provide default
@@ -527,9 +527,9 @@ s,@OBJEXT@,|#_!!_#|o,g
 s,@CXX@,|#_!!_#|g++,g
 s,@CXXFLAGS@,|#_!!_#|-g -O2,g
 s,@ac_ct_CXX@,|#_!!_#|g++,g
-s,@FC@,|#_!!_#|g95,g
+s,@FC@,|#_!!_#|gfortran,g
 s,@FCFLAGS@,|#_!!_#|-g -O2,g
-s,@ac_ct_FC@,|#_!!_#|g95,g
+s,@ac_ct_FC@,|#_!!_#|gfortran,g
 s,@INSTALL_PROGRAM@,|#_!!_#|${INSTALL},g
 s,@INSTALL_SCRIPT@,|#_!!_#|${INSTALL},g
 s,@INSTALL_DATA@,|#_!!_#|${INSTALL} -m 644,g

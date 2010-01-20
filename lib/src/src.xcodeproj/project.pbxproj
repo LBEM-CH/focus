@@ -5,30 +5,30 @@
 	};
 	objectVersion = 42;
 	objects = {
-		B213718A6CFE6E7E149336A6 = {
+		4A000FA246599DBD00013101 = {
 			isa = PBXFileReference;
 			lastKnownFileType = "wrapper.pb-project";
 			name = "mrcImage.xcodeproj";
-			path = "/Users/gipsonb/Projects/2dx-stable/lib/src/mrcImage/mrcImage.xcodeproj";
+			path = "/Users/marheit/code/2dx/trunk/lib/src/mrcImage/mrcImage.xcodeproj";
 			refType = 0;
 			sourceTree = "<absolute>";
 		};
-		BBB97C837A57B6526334019E = {
+		18D0DC471FF214FD7CA17A51 = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
 			path = "mrcImage.dylib";
 			refType = 3;
-			remoteRef = "0E9FECF20E25525678E8FEC7";
+			remoteRef = "207658133A89C37B1BA11FB6";
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		0E9FECF20E25525678E8FEC7 = {
-			containerPortal = "B213718A6CFE6E7E149336A6";
+		207658133A89C37B1BA11FB6 = {
+			containerPortal = "4A000FA246599DBD00013101";
 			isa = PBXContainerItemProxy;
 			proxyType = "2";
-			remoteGlobalIDString = "66D65E1C9FD6EFBB5045F5BE";
+			remoteGlobalIDString = "491244B7688163B0689C0563";
 			remoteInfo = "mrcImage";
 		};
-		7F04B052060E7A541EE81774 = {
+		1854C97681B25B970DC82E7A = {
 			children = (
 				);
 			isa = PBXGroup;
@@ -36,30 +36,30 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		8BD3A7272DCDBF64A7127EE9 = {
+		C62D0CDB914388A93EE5A7CE = {
 			isa = PBXFileReference;
 			lastKnownFileType = "wrapper.pb-project";
 			name = "extentions.xcodeproj";
-			path = "/Users/gipsonb/Projects/2dx-stable/lib/src/extentions/extentions.xcodeproj";
+			path = "/Users/marheit/code/2dx/trunk/lib/src/extentions/extentions.xcodeproj";
 			refType = 0;
 			sourceTree = "<absolute>";
 		};
-		AF5401BE34F9EB6A367D01E7 = {
+		5C604B0352BEE45FD07C1D3A = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
 			path = "extentions.dylib";
 			refType = 3;
-			remoteRef = "3ECF96098C4CF978320DCBA5";
+			remoteRef = "D50D61FFF1F258FB46D6C651";
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		3ECF96098C4CF978320DCBA5 = {
-			containerPortal = "8BD3A7272DCDBF64A7127EE9";
+		D50D61FFF1F258FB46D6C651 = {
+			containerPortal = "C62D0CDB914388A93EE5A7CE";
 			isa = PBXContainerItemProxy;
 			proxyType = "2";
-			remoteGlobalIDString = "39E38F58DF15941AD1687B67";
+			remoteGlobalIDString = "F0F29D6076542C9365E41367";
 			remoteInfo = "extentions";
 		};
-		5D9EF91293362894A43E71AC = {
+		39C301A00E6770D75A5145E3 = {
 			children = (
 				);
 			isa = PBXGroup;
@@ -111,8 +111,8 @@
 		};
 		0E71022E8970293824BA089C = {
 			children = (
-				"B213718A6CFE6E7E149336A6",
-				"8BD3A7272DCDBF64A7127EE9");
+				"4A000FA246599DBD00013101",
+				"C62D0CDB914388A93EE5A7CE");
 			isa = PBXGroup;
 			refType = 4;
 			sourceTree = "<group>";
@@ -129,12 +129,12 @@
 			buildConfigurationList = "30E61B081CF688BCA30A6135";
 			projectReferences = (
 				{
-					ProductGroup = "7F04B052060E7A541EE81774";
-					ProjectRef = "B213718A6CFE6E7E149336A6";
+					ProductGroup = "1854C97681B25B970DC82E7A";
+					ProjectRef = "4A000FA246599DBD00013101";
 				},
 				{
-					ProductGroup = "5D9EF91293362894A43E71AC";
-					ProjectRef = "8BD3A7272DCDBF64A7127EE9";
+					ProductGroup = "39C301A00E6770D75A5145E3";
+					ProjectRef = "C62D0CDB914388A93EE5A7CE";
 				},
 			);
 			targets = (

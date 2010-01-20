@@ -16,7 +16,7 @@
 			neededFileNames = (
 				);
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/2dx_merge\ -f\ 2dx_merge.xcodeproj/qt_makeqmake.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/2dx_merge\ -f\ 2dx_merge.xcodeproj/qt_makeqmake.mak";
 		};
 		118FCBAABA162BA17933C789 = {
 			isa = PBXFileReference;
@@ -782,7 +782,7 @@
 				"4A1A7003003F95F8810B3B80",
 				"2B48C14917AAEDB92EFF2331");
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/2dx_merge\ -f\ 2dx_merge.xcodeproj/qt_preprocess.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/2dx_merge\ -f\ 2dx_merge.xcodeproj/qt_preprocess.mak";
 		};
 		C29B8785722055ED95EF7B57 = {
 			buildActionMask = 2147483647;
@@ -1054,7 +1054,7 @@
 		F6069D5A5DA8AA28EDB8B3C6 = {
 			name = "Project Copy";
 			buildActionMask = 2147483647;
-			dstPath = "/Users/gipsonb/Projects/2dx-stable/2dx_merge";
+			dstPath = "/Users/marheit/code/2dx/trunk/2dx_merge";
 			dstSubfolderSpec = 0;
 			files = (
 "07E0DFA73EB56DCB9E28CDD9");
@@ -1062,7 +1062,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		07E0DFA73EB56DCB9E28CDD9 = {
-			fileRef = "0137CD370AB027E69B244A75";
+			fileRef = "274EC2B0BBFBA5EE7CC791AE";
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -1080,7 +1080,7 @@
 			path = "";
 			refType = 4;
 		};
-		0137CD370AB027E69B244A75 = {
+		274EC2B0BBFBA5EE7CC791AE = {
 			isa = PBXFileReference;
 			explicitFileType = "wrapper.application";
 			path = "2dx_merge.app";
@@ -1089,12 +1089,12 @@
 		};
 		068F80C7519D0528FB08E821 = {
 			children = (
-				"0137CD370AB027E69B244A75");
+				"274EC2B0BBFBA5EE7CC791AE");
 			isa = PBXGroup;
 			name = "Products";
 			refType = 4;
 		};
-		B22628D214B3F6AE6BC89354 = {
+		361DEEAE87D971C5FB513138 = {
 			buildPhases = (
 				"D7BA7D76DAB5DD13389D6332",
 				"A0A52A2ADF7A1E2A99738674",
@@ -1126,7 +1126,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"/Library/Frameworks",
 					"/usr/local/ccp4/lib",
-					"/Users/gipsonb/Projects/2dx-stable/lib/common",
+					"/Users/marheit/code/2dx/trunk/lib/common",
 					"/System/Library/Frameworks/");
 				OPTIMIZATION_CFLAGS = (
 					);
@@ -1161,26 +1161,27 @@
 				WARNING_CFLAGS = "";
 				PREBINDING = NO;
 				INFOPLIST_FILE = "Info.plist";
-				BUILD_ROOT = "/Users/gipsonb/Projects/2dx-stable/2dx_merge";
+				BUILD_ROOT = "/Users/marheit/code/2dx/trunk/2dx_merge";
 				OTHER_LDFLAGS = (
 						"-headerpad_max_install_names",
 						"-L/Library/Frameworks",
 						"-F/Library/Frameworks",
 						"-L/usr/local/ccp4/lib",
-						"-L/Users/gipsonb/Projects/2dx-stable/lib/common",
+						"-L/Users/marheit/code/2dx/trunk/lib/common",
 						"-lfftw3f",
 						"-lz",
 						"-lm");
 				DYLIB_CURRENT_VERSION = "1.0.0";
 				DYLIB_COMPATIBILITY_VERSION = "1.0";
 				MACOSX_DEPLOYMENT_TARGET = "10.3";
+				ARCHS = "i386";
 				PRODUCT_NAME = "2dx_merge";
 			};
 			conditionalBuildSettings = {
 			};
 			dependencies = (
 				);
-			productReference = "0137CD370AB027E69B244A75";
+			productReference = "274EC2B0BBFBA5EE7CC791AE";
 			shouldUseHeadermap = 1;
 			isa = PBXNativeTarget;
 			productType = "com.apple.product-type.application";
@@ -1265,7 +1266,7 @@
 			buildConfigurationList = "2A951308CDB28F104D0A4BD2";
 			projectDirPath = "";
 			targets = (
-				"B22628D214B3F6AE6BC89354");
+				"361DEEAE87D971C5FB513138");
 		};
 	};
 	rootObject = "91B15E841AA80083484172DE";

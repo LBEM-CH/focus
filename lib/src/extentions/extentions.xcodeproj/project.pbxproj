@@ -16,7 +16,7 @@
 			neededFileNames = (
 				);
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/lib/src/extentions\ -f\ extentions.xcodeproj/qt_makeqmake.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/lib/src/extentions\ -f\ extentions.xcodeproj/qt_makeqmake.mak";
 		};
 		70F0A0C8F7DA40F164C8DF71 = {
 			isa = PBXFileReference;
@@ -197,7 +197,7 @@
 				"F68564125467AAA044C26987",
 				"16D17B09027A366B36DC26DB");
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/lib/src/extentions\ -f\ extentions.xcodeproj/qt_preprocess.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/lib/src/extentions\ -f\ extentions.xcodeproj/qt_preprocess.mak";
 		};
 		C29B8785722055ED95EF7B57 = {
 			buildActionMask = 2147483647;
@@ -220,7 +220,7 @@
 		F6069D5A5DA8AA28EDB8B3C6 = {
 			name = "Project Copy";
 			buildActionMask = 2147483647;
-			dstPath = "/Users/gipsonb/Projects/2dx-stable/lib/common";
+			dstPath = "/Users/marheit/code/2dx/trunk/lib/common";
 			dstSubfolderSpec = 0;
 			files = (
 "07E0DFA73EB56DCB9E28CDD9");
@@ -228,7 +228,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		07E0DFA73EB56DCB9E28CDD9 = {
-			fileRef = "CCDE702757AFC245D1514E79";
+			fileRef = "5CD32B2CF3F950FB9C62ECB6";
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -244,7 +244,7 @@
 			path = "";
 			refType = 4;
 		};
-		CCDE702757AFC245D1514E79 = {
+		5CD32B2CF3F950FB9C62ECB6 = {
 			isa = PBXFileReference;
 			explicitFileType = "compiled.mach-o.dylib";
 			path = "libextentions.a";
@@ -253,12 +253,12 @@
 		};
 		068F80C7519D0528FB08E821 = {
 			children = (
-				"CCDE702757AFC245D1514E79");
+				"5CD32B2CF3F950FB9C62ECB6");
 			isa = PBXGroup;
 			name = "Products";
 			refType = 4;
 		};
-		FC33D571F3ED846E4B6EF12C = {
+		E6CA11C67A8EA44ECB2AAD1E = {
 			buildPhases = (
 				"D7BA7D76DAB5DD13389D6332",
 				"A0A52A2ADF7A1E2A99738674",
@@ -273,7 +273,6 @@
 					"/usr/include/QtGui",
 					"/usr/include",
 					"../../../include",
-					".",
 					".",
 					"/usr/local/include",
 					"/System/Library/Frameworks/CarbonCore.framework/Headers",
@@ -308,12 +307,13 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "";
 				PREBINDING = NO;
-				BUILD_ROOT = "/Users/gipsonb/Projects/2dx-stable/lib/src/extentions";
-				INSTALL_DIR = "/Users/gipsonb/Projects/2dx-stable/lib/src/extentions/../../common/";
+				BUILD_ROOT = "/Users/marheit/code/2dx/trunk/lib/src/extentions";
+				INSTALL_DIR = "/Users/marheit/code/2dx/trunk/lib/src/extentions/../../common/";
 				INSTALL_PATH = "";
 				DYLIB_CURRENT_VERSION = "1.0.0";
 				DYLIB_COMPATIBILITY_VERSION = "1.0";
 				MACOSX_DEPLOYMENT_TARGET = "10.3";
+				ARCHS = "i386";
 				LIBRARY_STYLE = "STATIC";
 				PRODUCT_NAME = "extentions";
 			};
@@ -321,7 +321,7 @@
 			};
 			dependencies = (
 				);
-			productReference = "CCDE702757AFC245D1514E79";
+			productReference = "5CD32B2CF3F950FB9C62ECB6";
 			shouldUseHeadermap = 1;
 			isa = PBXNativeTarget;
 			name = "extentions";
@@ -386,7 +386,7 @@
 			buildConfigurationList = "2A951308CDB28F104D0A4BD2";
 			projectDirPath = "";
 			targets = (
-				"FC33D571F3ED846E4B6EF12C");
+				"E6CA11C67A8EA44ECB2AAD1E");
 		};
 	};
 	rootObject = "91B15E841AA80083484172DE";

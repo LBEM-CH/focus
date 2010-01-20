@@ -1,4 +1,4 @@
-F77 = 
+F77 = gfortran
 GCC = gcc
 FFLAGS = -O1 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -dead_strip -static-libgcc -ipo -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -w 
 # CFLAGS = -O3 -ftree-vectorize -w -ffast-math -ffast-math -dead_strip -static-libgcc

@@ -1,4 +1,4 @@
-F77 = 
+F77 = gfortran
 GCC = gcc
 GXX = g++
 GFLAGS = -c -DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math

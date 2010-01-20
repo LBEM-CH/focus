@@ -16,7 +16,7 @@
 			neededFileNames = (
 				);
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/2dx_image\ -f\ 2dx_image.xcodeproj/qt_makeqmake.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/2dx_image\ -f\ 2dx_image.xcodeproj/qt_makeqmake.mak";
 		};
 		B286394C66CD420F61AE0133 = {
 			isa = PBXFileReference;
@@ -510,7 +510,7 @@
 				"9F25E38D13A75DF53B5FFEF6",
 				"91632466C1CD7469D1996951");
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/2dx_image\ -f\ 2dx_image.xcodeproj/qt_preprocess.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/2dx_image\ -f\ 2dx_image.xcodeproj/qt_preprocess.mak";
 		};
 		C29B8785722055ED95EF7B57 = {
 			buildActionMask = 2147483647;
@@ -582,6 +582,18 @@
 		};
 		E446E750CCBB1393CDC78924 = {
 			fileRef = "5B203E0B93A1564650BC0A18";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		19ED117BC5361523481F1C49 = {
+			isa = PBXFileReference;
+			name = "fftw3f";
+			path = "/opt/local/lib/libfftw3f.3.dylib";
+			refType = 0;
+		};
+		5ECCFC3912D88EB3A1235F74 = {
+			fileRef = "19ED117BC5361523481F1C49";
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -730,6 +742,18 @@
 			settings = {
 			};
 		};
+		B17AB5A1BBB7CABB649D4526 = {
+			isa = PBXFileReference;
+			name = "z";
+			path = "/opt/local/lib/libz.1.2.3.dylib";
+			refType = 0;
+		};
+		0BBCA87DD96827A5DBBC4E5A = {
+			fileRef = "B17AB5A1BBB7CABB649D4526";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		27AE7A480FD6C52FCA80FECD = {
 			isa = PBXFrameworkReference;
 			name = "ApplicationServices.framework";
@@ -772,6 +796,7 @@
 				"4EA68D53D2CE14FDD9B0D74F",
 				"E4EB38A7BBA6D70CD566E786",
 				"5B203E0B93A1564650BC0A18",
+				"19ED117BC5361523481F1C49",
 				"E7E2FF2E5A8F1012DF001E35",
 				"D257B800BEA04269848631CD",
 				"72D65F7126626E5504FE87DB",
@@ -784,6 +809,7 @@
 				"B6B9970B86A6C219B0869FE9",
 				"60EF245C130E8583D7F93F3C",
 				"7BC2E65A5E699A5E5D834CA2",
+				"B17AB5A1BBB7CABB649D4526",
 				"27AE7A480FD6C52FCA80FECD",
 				"DA18A6831232F53228631AD1",
 				"C6766F86E49E9C8701C8E637");
@@ -799,6 +825,7 @@
 				"D51DDB2F055020E39B011B89",
 				"0799AB15A291AE74B8620262",
 				"E446E750CCBB1393CDC78924",
+				"5ECCFC3912D88EB3A1235F74",
 				"B198A42F9C7E6191234418CA",
 				"2A97A25B9E48F522A50953E0",
 				"75F2207ECECD02B5142C1392",
@@ -811,6 +838,7 @@
 				"3826A0833FCB54E86728C6EF",
 				"B0A05EFA293371CDA6918C63",
 				"069D05B0128AE5DC7EE31738",
+				"0BBCA87DD96827A5DBBC4E5A",
 				"F9E76E570E10AF14870553A7",
 				"BCEF71E1EDFB18DA77DC750B",
 				"0C6D4628EE0B0D1479A20551");
@@ -828,7 +856,7 @@
 		F6069D5A5DA8AA28EDB8B3C6 = {
 			name = "Project Copy";
 			buildActionMask = 2147483647;
-			dstPath = "/Users/gipsonb/Projects/2dx-stable/2dx_image";
+			dstPath = "/Users/marheit/code/2dx/trunk/2dx_image";
 			dstSubfolderSpec = 0;
 			files = (
 "07E0DFA73EB56DCB9E28CDD9");
@@ -836,7 +864,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		07E0DFA73EB56DCB9E28CDD9 = {
-			fileRef = "DB83CC1FF67CC56FF75731BC";
+			fileRef = "BF023D1901BAF66EBB9DF5D0";
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -853,7 +881,7 @@
 			path = "";
 			refType = 4;
 		};
-		DB83CC1FF67CC56FF75731BC = {
+		BF023D1901BAF66EBB9DF5D0 = {
 			isa = PBXFileReference;
 			explicitFileType = "wrapper.application";
 			path = "2dx_image.app";
@@ -862,12 +890,12 @@
 		};
 		068F80C7519D0528FB08E821 = {
 			children = (
-				"DB83CC1FF67CC56FF75731BC");
+				"BF023D1901BAF66EBB9DF5D0");
 			isa = PBXGroup;
 			name = "Products";
 			refType = 4;
 		};
-		B9BADD83E15CD859698BF395 = {
+		36A65D9B8FCAA566EE2E07E1 = {
 			buildPhases = (
 				"D7BA7D76DAB5DD13389D6332",
 				"A0A52A2ADF7A1E2A99738674",
@@ -892,10 +920,10 @@
 					"/usr/include",
 					".",
 					"../include",
+					"/opt/local/include",
 					"../include",
 					"/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers",
 					"/System/Library/Frameworks/AGL.framework/Headers",
-					".",
 					".",
 					"/usr/local/include",
 					"/System/Library/Frameworks/CarbonCore.framework/Headers",
@@ -903,7 +931,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					"/Library/Frameworks",
 					"/usr/local/ccp4/lib",
-					"/Users/gipsonb/Projects/2dx-stable/lib/common",
+					"/opt/local/lib",
+					"/Users/marheit/code/2dx/trunk/lib/common",
 					"/System/Library/Frameworks/");
 				OPTIMIZATION_CFLAGS = (
 					);
@@ -942,26 +971,26 @@
 				WARNING_CFLAGS = "";
 				PREBINDING = NO;
 				INFOPLIST_FILE = "Info.plist";
-				BUILD_ROOT = "/Users/gipsonb/Projects/2dx-stable/2dx_image";
+				BUILD_ROOT = "/Users/marheit/code/2dx/trunk/2dx_image";
 				OTHER_LDFLAGS = (
 						"-headerpad_max_install_names",
 						"-L/Library/Frameworks",
 						"-F/Library/Frameworks",
 						"-L/usr/local/ccp4/lib",
-						"-L/Users/gipsonb/Projects/2dx-stable/lib/common",
-						"-lfftw3f",
-						"-lz",
+						"-L/opt/local/lib",
+						"-L/Users/marheit/code/2dx/trunk/lib/common",
 						"-lm");
 				DYLIB_CURRENT_VERSION = "1.0.0";
 				DYLIB_COMPATIBILITY_VERSION = "1.0";
 				MACOSX_DEPLOYMENT_TARGET = "10.3";
+				ARCHS = "i386";
 				PRODUCT_NAME = "2dx_image";
 			};
 			conditionalBuildSettings = {
 			};
 			dependencies = (
 				);
-			productReference = "DB83CC1FF67CC56FF75731BC";
+			productReference = "BF023D1901BAF66EBB9DF5D0";
 			shouldUseHeadermap = 1;
 			isa = PBXNativeTarget;
 			productType = "com.apple.product-type.application";
@@ -1046,7 +1075,7 @@
 			buildConfigurationList = "2A951308CDB28F104D0A4BD2";
 			projectDirPath = "";
 			targets = (
-				"B9BADD83E15CD859698BF395");
+				"36A65D9B8FCAA566EE2E07E1");
 		};
 	};
 	rootObject = "91B15E841AA80083484172DE";

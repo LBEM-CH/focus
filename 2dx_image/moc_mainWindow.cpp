@@ -1,8 +1,8 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainWindow.h'
 **
-** Created: Wed Oct 29 21:09:44 2008
-**      by: The Qt Meta Object Compiler version 59 (Qt 4.4.0)
+** Created: Wed Jan 20 11:57:39 2010
+**      by: The Qt Meta Object Compiler version 61 (Qt 4.5.3)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -10,8 +10,8 @@
 #include "mainWindow.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'mainWindow.h' doesn't include <QObject>."
-#elif Q_MOC_OUTPUT_REVISION != 59
-#error "This file was generated using the moc from 4.4.0. It"
+#elif Q_MOC_OUTPUT_REVISION != 61
+#error "This file was generated using the moc from 4.5.3. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -20,12 +20,13 @@ QT_BEGIN_MOC_NAMESPACE
 static const uint qt_meta_data_mainWindow[] = {
 
  // content:
-       1,       // revision
+       2,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   10, // methods
+      11,   12, // methods
        0,    0, // properties
        0,    0, // enums/sets
+       0,    0, // constructors
 
  // slots: signature, parameters, type, tag, flags
       12,   11,   11,   11, 0x0a,
@@ -65,7 +66,7 @@ void *mainWindow::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
     if (!strcmp(_clname, qt_meta_stringdata_mainWindow))
-	return static_cast<void*>(const_cast< mainWindow*>(this));
+        return static_cast<void*>(const_cast< mainWindow*>(this));
     return QMainWindow::qt_metacast(_clname);
 }
 
@@ -87,6 +88,7 @@ int mainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 8: revert(); break;
         case 9: showUpdates(); break;
         case 10: editHelperConf(); break;
+        default: ;
         }
         _id -= 11;
     }

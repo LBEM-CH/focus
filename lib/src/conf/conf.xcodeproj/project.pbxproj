@@ -16,7 +16,7 @@
 			neededFileNames = (
 				);
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/lib/src/conf\ -f\ conf.xcodeproj/qt_makeqmake.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/lib/src/conf\ -f\ conf.xcodeproj/qt_makeqmake.mak";
 		};
 		811DAB21F3182AF2B2D95942 = {
 			isa = PBXFileReference;
@@ -258,7 +258,7 @@
 				"5262FADF0D98732CD4656290",
 				"EC42A3A3D05C27F8A69DD38C");
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/lib/src/conf\ -f\ conf.xcodeproj/qt_preprocess.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/lib/src/conf\ -f\ conf.xcodeproj/qt_preprocess.mak";
 		};
 		C29B8785722055ED95EF7B57 = {
 			buildActionMask = 2147483647;
@@ -284,7 +284,7 @@
 		F6069D5A5DA8AA28EDB8B3C6 = {
 			name = "Project Copy";
 			buildActionMask = 2147483647;
-			dstPath = "/Users/gipsonb/Projects/2dx-stable/lib/common";
+			dstPath = "/Users/marheit/code/2dx/trunk/lib/common";
 			dstSubfolderSpec = 0;
 			files = (
 "07E0DFA73EB56DCB9E28CDD9");
@@ -292,7 +292,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		07E0DFA73EB56DCB9E28CDD9 = {
-			fileRef = "0C58743FE1635706C3043D5A";
+			fileRef = "A456E169C253C2B7C3618E6F";
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -308,7 +308,7 @@
 			path = "";
 			refType = 4;
 		};
-		0C58743FE1635706C3043D5A = {
+		A456E169C253C2B7C3618E6F = {
 			isa = PBXFileReference;
 			explicitFileType = "compiled.mach-o.dylib";
 			path = "libconf.a";
@@ -317,12 +317,12 @@
 		};
 		068F80C7519D0528FB08E821 = {
 			children = (
-				"0C58743FE1635706C3043D5A");
+				"A456E169C253C2B7C3618E6F");
 			isa = PBXGroup;
 			name = "Products";
 			refType = 4;
 		};
-		3696108769D67027CB57ED7D = {
+		069F6D37BE113249CD8614EA = {
 			buildPhases = (
 				"D7BA7D76DAB5DD13389D6332",
 				"A0A52A2ADF7A1E2A99738674",
@@ -337,7 +337,6 @@
 					"/usr/include/QtGui",
 					"/usr/include",
 					"../../../include",
-					".",
 					".",
 					"/usr/local/include",
 					"/System/Library/Frameworks/CarbonCore.framework/Headers",
@@ -372,12 +371,13 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "";
 				PREBINDING = NO;
-				BUILD_ROOT = "/Users/gipsonb/Projects/2dx-stable/lib/src/conf";
-				INSTALL_DIR = "/Users/gipsonb/Projects/2dx-stable/lib/src/conf/../../common/";
+				BUILD_ROOT = "/Users/marheit/code/2dx/trunk/lib/src/conf";
+				INSTALL_DIR = "/Users/marheit/code/2dx/trunk/lib/src/conf/../../common/";
 				INSTALL_PATH = "";
 				DYLIB_CURRENT_VERSION = "1.0.0";
 				DYLIB_COMPATIBILITY_VERSION = "1.0";
 				MACOSX_DEPLOYMENT_TARGET = "10.3";
+				ARCHS = "i386";
 				LIBRARY_STYLE = "STATIC";
 				PRODUCT_NAME = "conf";
 			};
@@ -385,7 +385,7 @@
 			};
 			dependencies = (
 				);
-			productReference = "0C58743FE1635706C3043D5A";
+			productReference = "A456E169C253C2B7C3618E6F";
 			shouldUseHeadermap = 1;
 			isa = PBXNativeTarget;
 			name = "conf";
@@ -450,7 +450,7 @@
 			buildConfigurationList = "2A951308CDB28F104D0A4BD2";
 			projectDirPath = "";
 			targets = (
-				"3696108769D67027CB57ED7D");
+				"069F6D37BE113249CD8614EA");
 		};
 	};
 	rootObject = "91B15E841AA80083484172DE";

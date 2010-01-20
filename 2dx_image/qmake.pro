@@ -1,19 +1,26 @@
 TEMPLATE = app
 TARGET = 2dx_image
 DESTDIR = $$TOP_SRCDIR/2dx_image/
+ message("The top source dir:")
+ message($$TOP_SRCDIR)
 
 QMAKE_CXXFLAGS=-O3 -ffast-math
 QMAKE_CFLAGS=-O3 -ffast-math
-INCLUDEPATH+=. ../include
+INCLUDEPATH+=. ../include 
 
 macx {
   ICON = "./resource/icon_OSX.icns"
+  INCLUDEPATH+=/opt/local/include 
 }
 prefix = $$prefix
 
 include($$TOP_SRCDIR/qmake.pro)
 
+macx {
+  LIBS+=-L/opt/local/lib
+}
 LIBS += -L$$TOP_SRCDIR/lib/common -lconf -lwidgets -lextentions -lmrcImage -lfftw3f 
+
 QT += network opengl 
 QT += script webkit
 

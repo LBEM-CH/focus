@@ -16,7 +16,7 @@
 			neededFileNames = (
 				);
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/2dx_logbrowser\ -f\ 2dx_logbrowser.xcodeproj/qt_makeqmake.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/2dx_logbrowser\ -f\ 2dx_logbrowser.xcodeproj/qt_makeqmake.mak";
 		};
 		BC670F85A861480592AD7326 = {
 			isa = PBXFileReference;
@@ -284,7 +284,7 @@
 				"3F760F957037AE3539DD8796",
 				"B25996ADE6CF5F19F9D9B25D");
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/2dx_logbrowser\ -f\ 2dx_logbrowser.xcodeproj/qt_preprocess.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/2dx_logbrowser\ -f\ 2dx_logbrowser.xcodeproj/qt_preprocess.mak";
 		};
 		C29B8785722055ED95EF7B57 = {
 			buildActionMask = 2147483647;
@@ -395,7 +395,7 @@
 		F6069D5A5DA8AA28EDB8B3C6 = {
 			name = "Project Copy";
 			buildActionMask = 2147483647;
-			dstPath = "/Users/gipsonb/Projects/2dx-stable/2dx_logbrowser";
+			dstPath = "/Users/marheit/code/2dx/trunk/2dx_logbrowser";
 			dstSubfolderSpec = 0;
 			files = (
 "07E0DFA73EB56DCB9E28CDD9");
@@ -403,7 +403,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		07E0DFA73EB56DCB9E28CDD9 = {
-			fileRef = "E44C44576EF9AA24EE4D915C";
+			fileRef = "373498D625AD6747C28DAF39";
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -420,7 +420,7 @@
 			path = "";
 			refType = 4;
 		};
-		E44C44576EF9AA24EE4D915C = {
+		373498D625AD6747C28DAF39 = {
 			isa = PBXFileReference;
 			explicitFileType = "wrapper.application";
 			path = "2dx_logbrowser.app";
@@ -429,12 +429,12 @@
 		};
 		068F80C7519D0528FB08E821 = {
 			children = (
-				"E44C44576EF9AA24EE4D915C");
+				"373498D625AD6747C28DAF39");
 			isa = PBXGroup;
 			name = "Products";
 			refType = 4;
 		};
-		1E07E7A96225BD8D30B5179F = {
+		B24AF6BC65F68CD2ECF1560D = {
 			buildPhases = (
 				"D7BA7D76DAB5DD13389D6332",
 				"A0A52A2ADF7A1E2A99738674",
@@ -450,7 +450,6 @@
 					"/usr/include/QtGui",
 					"/usr/include",
 					"../include",
-					".",
 					".",
 					"/usr/local/include",
 					"/System/Library/Frameworks/CarbonCore.framework/Headers",
@@ -486,7 +485,7 @@
 				WARNING_CFLAGS = "";
 				PREBINDING = NO;
 				INFOPLIST_FILE = "Info.plist";
-				BUILD_ROOT = "/Users/gipsonb/Projects/2dx-stable/2dx_logbrowser";
+				BUILD_ROOT = "/Users/marheit/code/2dx/trunk/2dx_logbrowser";
 				OTHER_LDFLAGS = (
 						"-headerpad_max_install_names",
 						"-L/Library/Frameworks",
@@ -497,13 +496,14 @@
 				DYLIB_CURRENT_VERSION = "1.0.0";
 				DYLIB_COMPATIBILITY_VERSION = "1.0";
 				MACOSX_DEPLOYMENT_TARGET = "10.3";
+				ARCHS = "i386";
 				PRODUCT_NAME = "2dx_logbrowser";
 			};
 			conditionalBuildSettings = {
 			};
 			dependencies = (
 				);
-			productReference = "E44C44576EF9AA24EE4D915C";
+			productReference = "373498D625AD6747C28DAF39";
 			shouldUseHeadermap = 1;
 			isa = PBXNativeTarget;
 			productType = "com.apple.product-type.application";
@@ -588,7 +588,7 @@
 			buildConfigurationList = "2A951308CDB28F104D0A4BD2";
 			projectDirPath = "";
 			targets = (
-				"1E07E7A96225BD8D30B5179F");
+				"B24AF6BC65F68CD2ECF1560D");
 		};
 	};
 	rootObject = "91B15E841AA80083484172DE";

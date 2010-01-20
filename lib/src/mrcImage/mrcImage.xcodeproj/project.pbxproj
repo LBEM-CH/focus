@@ -16,7 +16,7 @@
 			neededFileNames = (
 				);
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/lib/src/mrcImage\ -f\ mrcImage.xcodeproj/qt_makeqmake.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/lib/src/mrcImage\ -f\ mrcImage.xcodeproj/qt_makeqmake.mak";
 		};
 		B3076E30D920B2A3CF1BFC66 = {
 			isa = PBXFileReference;
@@ -222,7 +222,7 @@
 				"3DBAEAA1070FB10DC830D913",
 				"6CC29BCC7B78B9D0F62CEA7A");
 			shellPath = "/bin/sh";
-			shellScript = "make\ -C\ /Users/gipsonb/Projects/2dx-stable/lib/src/mrcImage\ -f\ mrcImage.xcodeproj/qt_preprocess.mak";
+			shellScript = "make\ -C\ /Users/marheit/code/2dx/trunk/lib/src/mrcImage\ -f\ mrcImage.xcodeproj/qt_preprocess.mak";
 		};
 		C29B8785722055ED95EF7B57 = {
 			buildActionMask = 2147483647;
@@ -246,7 +246,7 @@
 		F6069D5A5DA8AA28EDB8B3C6 = {
 			name = "Project Copy";
 			buildActionMask = 2147483647;
-			dstPath = "/Users/gipsonb/Projects/2dx-stable/lib/common";
+			dstPath = "/Users/marheit/code/2dx/trunk/lib/common";
 			dstSubfolderSpec = 0;
 			files = (
 "07E0DFA73EB56DCB9E28CDD9");
@@ -254,7 +254,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		07E0DFA73EB56DCB9E28CDD9 = {
-			fileRef = "53512D36C8E859FB32474262";
+			fileRef = "95D262F929237907E59669CD";
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -270,7 +270,7 @@
 			path = "";
 			refType = 4;
 		};
-		53512D36C8E859FB32474262 = {
+		95D262F929237907E59669CD = {
 			isa = PBXFileReference;
 			explicitFileType = "compiled.mach-o.dylib";
 			path = "libmrcImage.a";
@@ -279,12 +279,12 @@
 		};
 		068F80C7519D0528FB08E821 = {
 			children = (
-				"53512D36C8E859FB32474262");
+				"95D262F929237907E59669CD");
 			isa = PBXGroup;
 			name = "Products";
 			refType = 4;
 		};
-		4136584DB64C123A0A63143E = {
+		518FDDC3D1FE1A214A80A4B6 = {
 			buildPhases = (
 				"D7BA7D76DAB5DD13389D6332",
 				"A0A52A2ADF7A1E2A99738674",
@@ -299,7 +299,6 @@
 					"/usr/include/QtGui",
 					"/usr/include",
 					"../../../include",
-					".",
 					".",
 					"/usr/local/include",
 					"/System/Library/Frameworks/CarbonCore.framework/Headers",
@@ -332,12 +331,13 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "";
 				PREBINDING = NO;
-				BUILD_ROOT = "/Users/gipsonb/Projects/2dx-stable/lib/src/mrcImage";
-				INSTALL_DIR = "/Users/gipsonb/Projects/2dx-stable/lib/src/mrcImage/../../common/";
+				BUILD_ROOT = "/Users/marheit/code/2dx/trunk/lib/src/mrcImage";
+				INSTALL_DIR = "/Users/marheit/code/2dx/trunk/lib/src/mrcImage/../../common/";
 				INSTALL_PATH = "";
 				DYLIB_CURRENT_VERSION = "1.0.0";
 				DYLIB_COMPATIBILITY_VERSION = "1.0";
 				MACOSX_DEPLOYMENT_TARGET = "10.3";
+				ARCHS = "i386";
 				LIBRARY_STYLE = "STATIC";
 				PRODUCT_NAME = "mrcImage";
 			};
@@ -345,7 +345,7 @@
 			};
 			dependencies = (
 				);
-			productReference = "53512D36C8E859FB32474262";
+			productReference = "95D262F929237907E59669CD";
 			shouldUseHeadermap = 1;
 			isa = PBXNativeTarget;
 			name = "mrcImage";
@@ -410,7 +410,7 @@
 			buildConfigurationList = "2A951308CDB28F104D0A4BD2";
 			projectDirPath = "";
 			targets = (
-				"4136584DB64C123A0A63143E");
+				"518FDDC3D1FE1A214A80A4B6");
 		};
 	};
 	rootObject = "91B15E841AA80083484172DE";

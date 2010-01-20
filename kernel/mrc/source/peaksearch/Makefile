@@ -1,4 +1,4 @@
-F77 = 
+F77 = gfortran
 GCC = gcc
 GXX = g++
 FFLAGS = -ffast-math -dead_strip -static-libgcc

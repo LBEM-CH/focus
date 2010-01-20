@@ -8,6 +8,9 @@ TARGET = widgets
 QT += network opengl 
 QT += script
 
+macx {
+  INCLUDEPATH+=/opt/local/include 
+}
 include($$TOP_SRCDIR/qmake.pro)
 
 # Input

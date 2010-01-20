@@ -57,7 +57,6 @@ void confModel::initializeModel(confData *data)
         elementItem = new QStandardItem(valueElement);
         elementItem->setData("value",Qt::UserRole);
         elementItem->setData(qVariantFromValue(element),Qt::UserRole + 1);
-				qDebug()<<element<<QVariant(element);
         elementItem->setCheckable(false);
 				elementItem->setEditable(true);
         propertyItems<<elementItem;

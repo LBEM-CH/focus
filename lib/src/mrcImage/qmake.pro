@@ -4,6 +4,9 @@ CONFIG += staticlib debug
 TEMPLATE = lib
 TARGET = mrcImage
 
+macx {
+  INCLUDEPATH+=/opt/local/include 
+}
 include($$TOP_SRCDIR/qmake.pro)
 
 # Input

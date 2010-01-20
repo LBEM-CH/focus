@@ -1,8 +1,6 @@
 TEMPLATE = app
 TARGET = 2dx_image
 DESTDIR = $$TOP_SRCDIR/2dx_image/
- message("The top source dir:")
- message($$TOP_SRCDIR)
 
 QMAKE_CXXFLAGS=-O3 -ffast-math
 QMAKE_CFLAGS=-O3 -ffast-math

@@ -4,8 +4,15 @@ DESTDIR = $$TOP_SRCDIR/2dx_merge/
 FORMS = importBox.ui importTool.ui
 ICON = "./resource/icon.icns"
 
+macx {
+  INCLUDEPATH+=/opt/local/include 
+}
+
 include($$TOP_SRCDIR/qmake.pro)
 
+macx {
+  LIBS+=-L/opt/local/lib
+}
 LIBS += -L$$TOP_SRCDIR/lib/common -lconf -lwidgets -lmrcImage -lextentions -lfftw3f
 
 # Input

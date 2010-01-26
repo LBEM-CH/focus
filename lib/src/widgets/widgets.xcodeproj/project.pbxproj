@@ -1143,11 +1143,23 @@
 					);
 			};
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		1375C2241121BE157CBA840F = {
 			isa = PBXFileReference;
 			name = "scriptProgress.h";
 			path = "../../../include/scriptProgress.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		34C2D65F314D1B2CCD286AF2 = {
 			isa = PBXFileReference;
@@ -1155,11 +1167,23 @@
 			path = "../../../include/aboutWindow.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		6FC5131D3CE85747EA022815 = {
 			isa = PBXFileReference;
 			name = "graphicalButton.h";
 			path = "../../../include/graphicalButton.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		4656EF6DEE5D29DB6A6D6BCA = {
 			isa = PBXFileReference;
@@ -1167,11 +1191,23 @@
 			path = "../../../include/viewContainer.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		B21D7E9537E02AD253183420 = {
 			isa = PBXFileReference;
 			name = "LogViewer.h";
 			path = "../../../include/LogViewer.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		5D59A3634BB100164F39D5A9 = {
 			isa = PBXFileReference;
@@ -1179,11 +1215,23 @@
 			path = "../../../include/controlBar.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		A31903BA5009E2FD7DAB8BD9 = {
 			isa = PBXFileReference;
 			name = "confInterface.h";
 			path = "../../../include/confInterface.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		8CDC1E91CE37A0D81535E816 = {
 			isa = PBXFileReference;
@@ -1191,11 +1239,23 @@
 			path = "../../../include/confInput.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		4271DE323B451F444F2B05DF = {
 			isa = PBXFileReference;
 			name = "confValidator.h";
 			path = "../../../include/confValidator.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		F76211885F4A33FB4DCE28FD = {
 			isa = PBXFileReference;
@@ -1203,11 +1263,23 @@
 			path = "../../../include/levelGroup.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		E445EF54DF3C444363FC91DE = {
 			isa = PBXFileReference;
 			name = "mrcHeaderDisplay.h";
 			path = "../../../include/mrcHeaderDisplay.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		FE2BC2F600215D40612A689D = {
 			isa = PBXFileReference;
@@ -1215,11 +1287,23 @@
 			path = "../../../include/imagePreview.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		30A80432C19CA1A3600D09C0 = {
 			isa = PBXFileReference;
 			name = "scriptModule.h";
 			path = "../../../include/scriptModule.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		4617A6151B0222211B46629A = {
 			isa = PBXFileReference;
@@ -1227,11 +1311,23 @@
 			path = "../../../include/SpinBoxDelegate.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		B63790D4083E0AE638677D0A = {
 			isa = PBXFileReference;
 			name = "phaseView.h";
 			path = "../../../include/phaseView.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		84CF2627BB49546023EB02BB = {
 			isa = PBXFileReference;
@@ -1239,11 +1335,23 @@
 			path = "../../../include/confSectionHeader.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		DF7EFDC166C0B48A3B29D4A7 = {
 			isa = PBXFileReference;
 			name = "imageViewer.h";
 			path = "../../../include/imageViewer.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		5C62C4B69D6C8AD397B146A7 = {
 			isa = PBXFileReference;
@@ -1251,11 +1359,23 @@
 			path = "../../../include/confManual.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		A37EF20DA83A31B95A5105F5 = {
 			isa = PBXFileReference;
 			name = "confModel.h";
 			path = "../../../include/confModel.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		D3F2C6263E10727E4B9FDE16 = {
 			isa = PBXFileReference;
@@ -1263,11 +1383,23 @@
 			path = "../../../include/textBrowser.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		AC8D9E5C515553A370CFC812 = {
 			isa = PBXFileReference;
 			name = "updateWindow.h";
 			path = "../../../include/updateWindow.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		3D6BEAAD15C17A5BFEA74A68 = {
 			isa = PBXFileReference;
@@ -1275,11 +1407,23 @@
 			path = "../../../include/mrcGraphicsItem.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		E3E76DB4280A6ED338FFEA7F = {
 			isa = PBXFileReference;
 			name = "resizeableStackedWidget.h";
 			path = "../../../include/resizeableStackedWidget.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		5C1C1CF98A2E67068133E63F = {
 			isa = PBXFileReference;
@@ -1287,11 +1431,23 @@
 			path = "../../../include/abstractTool.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		4F20A5073AC870A79406C3DF = {
 			isa = PBXFileReference;
 			name = "latticeTool.h";
 			path = "../../../include/latticeTool.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		05915F836AAC6571698E19D8 = {
 			isa = PBXFileReference;
@@ -1299,11 +1455,23 @@
 			path = "../../../include/imageNavigator.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		FF6B7AC623C23D85D820F794 = {
 			isa = PBXFileReference;
 			name = "ctfTool.h";
 			path = "../../../include/ctfTool.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		2E6F05635C2B7DD25F463483 = {
 			isa = PBXFileReference;
@@ -1311,11 +1479,23 @@
 			path = "../../../include/fullScreenImage.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		DDAF4D5D4B82123BFFCDC30D = {
 			isa = PBXFileReference;
 			name = "selectionFFT.h";
 			path = "../../../include/selectionFFT.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		26213A72679E4EAB73C52DBC = {
 			isa = PBXFileReference;
@@ -1323,11 +1503,23 @@
 			path = "../../../include/zoomWindow.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		D9FB516282981589DF338133 = {
 			isa = PBXFileReference;
 			name = "latticeRefineTool.h";
 			path = "../../../include/latticeRefineTool.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		94290FC1E08A2EF6B956EBE2 = {
 			isa = PBXFileReference;
@@ -1335,11 +1527,23 @@
 			path = "../../../include/spotSelectTool.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		3A5B0094390D18996A989C37 = {
 			isa = PBXFileReference;
 			name = "navigatorHelpTool.h";
 			path = "../../../include/navigatorHelpTool.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		A34F053243EF26282EBF90B9 = {
 			isa = PBXFileReference;
@@ -1347,11 +1551,23 @@
 			path = "../../../include/mouseAssignTool.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		217F2D1A6D151AF4E238B3C8 = {
 			isa = PBXFileReference;
 			name = "displayParametersTool.h";
 			path = "../../../include/displayParametersTool.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		ABCF1F8E0A1F4FACDB3C9EBB = {
 			isa = PBXFileReference;
@@ -1359,11 +1575,23 @@
 			path = "../../../include/glWidget.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		246046F8B7E60FD994791252 = {
 			isa = PBXFileReference;
 			name = "autoImportTool.h";
 			path = "../../../include/autoImportTool.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		A6C391EA61AADFB251277060 = {
 			isa = PBXFileReference;
@@ -1371,11 +1599,23 @@
 			path = "../../../include/importManager.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		A454F1B516DE4275331EFC63 = {
 			isa = PBXFileReference;
 			name = "confEditor.h";
 			path = "../../../include/confEditor.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		A52C6A70FAFA253428F0BEBA = {
 			isa = PBXFileReference;
@@ -1392,6 +1632,7 @@
 		883D7615C4D2DE3FA1218F12 = {
 			isa = PBXGroup;
 			children = (
+				"BB589BDB1A73F546662B4B6E",
 				"4458B98565818D7E2682FA2D");
 			name = "Headers";
 			refType = 4;
@@ -1867,6 +2108,7 @@
 					"/Library/Frameworks/QtScript.framework/Versions/4/Headers",
 					"/usr/include/QtScript",
 					"/usr/include",
+					"/opt/local/include",
 					"../../../include",
 					"/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers",
 					"/System/Library/Frameworks/AGL.framework/Headers",

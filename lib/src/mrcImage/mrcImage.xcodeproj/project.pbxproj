@@ -108,11 +108,23 @@
 					);
 			};
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		58D862832FE2362C0F9BF1C2 = {
 			isa = PBXFileReference;
 			name = "threadedLoad.h";
 			path = "../../../include/threadedLoad.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		943FCF3AD0890BE6D706FA30 = {
 			isa = PBXFileReference;
@@ -120,11 +132,23 @@
 			path = "../../../include/mrcImage.h";
 			refType = 4;
 		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
+		};
 		FA8288AE2904379AE7ED0E22 = {
 			isa = PBXFileReference;
 			name = "mrcHeader.h";
 			path = "../../../include/mrcHeader.h";
 			refType = 4;
+		};
+		BB589BDB1A73F546662B4B6E = {
+			isa = PBXFileReference;
+			name = "/opt/local/include";
+			path = "/opt/local/include";
+			refType = 0;
 		};
 		DF0555BF1F5D692E81CF3923 = {
 			isa = PBXFileReference;
@@ -141,6 +165,7 @@
 		883D7615C4D2DE3FA1218F12 = {
 			isa = PBXGroup;
 			children = (
+				"BB589BDB1A73F546662B4B6E",
 				"4458B98565818D7E2682FA2D");
 			name = "Headers";
 			refType = 4;
@@ -298,6 +323,7 @@
 					"/Library/Frameworks/QtGui.framework/Versions/4/Headers",
 					"/usr/include/QtGui",
 					"/usr/include",
+					"/opt/local/include",
 					"../../../include",
 					".",
 					"/usr/local/include",

@@ -47,6 +47,20 @@ fullScreenImage::fullScreenImage(mrcImage *source_image, confData *conf, QWidget
   screenHeight = screenRect.height();
 
   scale=1.0;
+  float w = 1.0, h = 1.0;
+	if(image->width()*scale*(1.0+2.0*fabs(shearScale))<screenWidth)
+		w = (screenWidth);
+	else
+		 w = ((int)(image->width()*scale*(1.0+2.0*fabs(shearScale))));
+
+	if(image->height()*pixelSize*scale<screenHeight)
+		h = (screenHeight);
+	else
+		h = ((int)(image->height()*scale*pixelSize));
+
+  QGridLayout *layout = new QGridLayout; 
+  layout->addItem(new QSpacerItem(w,h),0,0);
+  setLayout(layout);
   rescaleWidget();
 
   overlayVisible = true;

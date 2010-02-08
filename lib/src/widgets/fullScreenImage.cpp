@@ -48,15 +48,15 @@ fullScreenImage::fullScreenImage(mrcImage *source_image, confData *conf, QWidget
 
   scale=1.0;
   float w = 1.0, h = 1.0;
-	if(image->width()*scale*(1.0+2.0*fabs(shearScale))<screenWidth)
+	if(image->width()*scale<screenWidth)
 		w = (screenWidth);
 	else
-		 w = ((int)(image->width()*scale*(1.0+2.0*fabs(shearScale))));
+		 w = ((int)(image->width()*scale));
 
-	if(image->height()*pixelSize*scale<screenHeight)
+	if(image->height()*scale<screenHeight)
 		h = (screenHeight);
 	else
-		h = ((int)(image->height()*scale*pixelSize));
+		h = ((int)(image->height()*scale));
 
   QGridLayout *layout = new QGridLayout; 
   layout->addItem(new QSpacerItem(w,h),0,0);

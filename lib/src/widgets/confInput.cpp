@@ -190,13 +190,17 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
 		}
 
 		k = value.toInt(&ok);
-    if(!ok || k<0)
+		if(!ok || k<0)
+		{
 			if(menuOptions.contains(QString::number(k))) k = menuOptions.indexOf(value);
-      else k=0;
-    if(k>=0)
+		}
+		else k=0;
+
+		if(k>=0)
 			menu->setCurrentIndex(k);
-    else
+		else
 			menu->setCurrentIndex(0);
+
 		layout->addWidget(menu,0,3,1,1);
 
 		connect(menu,SIGNAL(currentIndexChanged(int)),this,SLOT(save()));
@@ -424,13 +428,17 @@ bool confInput::event(QEvent *event)
 		if(whatsThisResult.contains("element://sync"))
 		{
 			QString value = element->get("sync_with_upper_level").trimmed().toLower();
+
 			if(!value.isEmpty())
+			{
 				if(value == "yes") value = "no";
 				else if(value == "no") value = "yes";
-				element->set("sync_with_upper_level",value);
-				updateWhatsThis();
-				dataModified();
-				QWhatsThis::hideText();
+			}
+
+			element->set("sync_with_upper_level",value);
+			updateWhatsThis();
+			dataModified();
+			QWhatsThis::hideText();
 		}
 		else
 			QProcess::startDetached(data->getApp("webBrowser") + " " + whatsThisResult);

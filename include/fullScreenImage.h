@@ -24,6 +24,7 @@
 #include <QPoint>
 #include <QMessageBox>
 #include <QDebug>
+#include <QGridLayout>
 #include <math.h>
 #include <confData.h>
 #include <pointHash.h>

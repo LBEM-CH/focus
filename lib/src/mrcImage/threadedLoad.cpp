@@ -5,7 +5,7 @@ float loadThread::fastMagnitude(float a, float b)
   return sqrt(a*a+b*b);
 }
 
-loadThread::loadThread(char *data, uchar *iData, uint32_t width, uint32_t height, float min, float max, int m, uint32_t l, uint32_t r, QImage::Format f, loadThread::loadType t, bool p, QObject *parent)
+loadThread::loadThread(char *data, uchar *iData, quint32 width, quint32 height, float min, float max, int m, quint32 l, quint32 r, QImage::Format f, loadThread::loadType t, bool p, QObject *parent)
            :QThread(parent)
 {
 	rawData = data;
@@ -26,14 +26,14 @@ void loadThread::run()
 {
 	if(type == loadThread::fft)
 	{
-		uint32_t i,j,index;
+		quint32 i,j,index;
 		QColor color, oppositeColor;
 		int colors[6];
 		float theta, theta2, rotatePhase = 1.0;
 		int value = 0;
 		qint64 dataSize = nx*ny;
 
-		for(uint32_t k=leftI;k<rightI;k++)
+		for(quint32 k=leftI;k<rightI;k++)
 		{
 			i = k % (nx-1); j = k/(nx-1);
 			index = (j*(nx) + i)*2;
@@ -96,7 +96,7 @@ void loadThread::run()
 		else if(format == QImage::Format_RGB32) width = 4;
 		else return;
 
-		for(uint32_t i=leftI;i<rightI;i++)
+		for(quint32 i=leftI;i<rightI;i++)
 		{
 			if (mode == 0)
 			{

@@ -81,46 +81,46 @@ qint64 mrcHeader::dataOffset()
   return headerOffset+1024;
 }
 
-uint32_t mrcHeader::mode()
+quint32 mrcHeader::mode()
 {
-  uint32_t value = *(uint32_t*)(get("mode"));
+  quint32 value = *(quint32*)(get("mode"));
   return value;
 }
 
-uint32_t mrcHeader::nx()
+quint32 mrcHeader::nx()
 {
-  uint32_t value = *(uint32_t*)(get("nx"));
+  quint32 value = *(quint32*)(get("nx"));
   return value;
 }
 
-uint32_t mrcHeader::ny()
+quint32 mrcHeader::ny()
 {
-  uint32_t value = *(uint32_t*)(get("ny"));
+  quint32 value = *(quint32*)(get("ny"));
   return value;
 }
 
-uint32_t mrcHeader::nz()
+quint32 mrcHeader::nz()
 {
-  uint32_t value = *(uint32_t*)(get("nz"));
+  quint32 value = *(quint32*)(get("nz"));
   if(value == 0) return 1;
   return value;
 }
 
-uint32_t mrcHeader::mx()
+quint32 mrcHeader::mx()
 {
-  uint32_t value = *(uint32_t*)(get("mx"));
+  quint32 value = *(quint32*)(get("mx"));
   return value;
 }
 
-uint32_t mrcHeader::my()
+quint32 mrcHeader::my()
 {
-  uint32_t value = *(uint32_t*)(get("my"));
+  quint32 value = *(quint32*)(get("my"));
   return value;
 }
 
-uint32_t mrcHeader::mz()
+quint32 mrcHeader::mz()
 {
-  uint32_t value = *(uint32_t*)(get("mz"));
+  quint32 value = *(quint32*)(get("mz"));
   return value;
 }
 
@@ -142,22 +142,22 @@ float mrcHeader::cellC()
   return value;
 }
 
-void mrcHeader::setNX(uint32_t var)
+void mrcHeader::setNX(quint32 var)
 {
   header[variables.indexOf("nx")] = var;
 }
 
-void mrcHeader::setNY(uint32_t var)
+void mrcHeader::setNY(quint32 var)
 {
   header[variables.indexOf("ny")] = var;
 }
 
-void mrcHeader::setNZ(uint32_t var)
+void mrcHeader::setNZ(quint32 var)
 {
   header[variables.indexOf("nz")] = var;
 }
 
-void mrcHeader::setMode(uint32_t var)
+void mrcHeader::setMode(quint32 var)
 {
   header[variables.indexOf("mode")] = var;
 }

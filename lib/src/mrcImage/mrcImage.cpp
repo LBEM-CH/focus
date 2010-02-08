@@ -115,7 +115,7 @@ void mrcImage::clear()
 
 void mrcImage::determineCellSize(mrcHeader *header)
 {
-  uint32_t mode = header->mode();
+  quint32 mode = header->mode();
   if(mode == 0) cellSize = 1;
   else if(mode == 1) cellSize = 2;
   else if(mode == 2) cellSize = 4;
@@ -127,7 +127,7 @@ bool mrcImage::loadData(mrcHeader *header)
 {
   if(!imageFile.open(QIODevice::ReadOnly)) return false;
   imageFile.seek(header->dataOffset());
-  uint32_t mode = headers[0]->mode();
+  quint32 mode = headers[0]->mode();
   qint64 dataSize;
   if(mode == 3 || mode == 4)
   {
@@ -143,12 +143,12 @@ bool mrcImage::loadData(mrcHeader *header)
   if(mode != 0 && header->swapEndian())
     if(mode == 3 || mode == 4)
       #pragma omp parallel for shared(rawData);
-      for(uint32_t i=0;i<header->nx()*header->ny()*cellSize/2-cellSize/2;i++)
+      for(quint32 i=0;i<header->nx()*header->ny()*cellSize/2-cellSize/2;i++)
         byteSwap(&rawData[i*cellSize/2],cellSize/2);
     else
 	  {
       #pragma omp parallel for shared(rawData);
-      for(uint32_t i=0;i<header->nx()*header->ny()-1;i++)
+      for(quint32 i=0;i<header->nx()*header->ny()-1;i++)
         byteSwap(&rawData[i*cellSize],cellSize);
 	  }
 
@@ -173,11 +173,11 @@ float mrcImage::stdDev(mrcHeader *header)
   {
     if(header->mode()==3)
       #pragma omp parallel for (rawData)
-      for(uint32_t k=0;k<(nx-1)*ny;k++)
+      for(quint32 k=0;k<(nx-1)*ny;k++)
          x2+=((unsigned short*)rawData)[2*k]*((unsigned short*)rawData)[2*k]+((unsigned short*)rawData)[2*k+1]*((unsigned short*)rawData)[2*k+1];
     else
       #pragma omp parallel for (rawData)
-      for(uint32_t k=0;k<(nx-1)*ny;k++)
+      for(quint32 k=0;k<(nx-1)*ny;k++)
       {
         r = ((float*)rawData)[2*k];
         x2+=r*r;
@@ -191,11 +191,11 @@ float mrcImage::stdDev(mrcHeader *header)
 
 void mrcImage::scaleData(mrcHeader *header, QImage::Format format)
 {
-  uint32_t mode = header->mode();
+  quint32 mode = header->mode();
   qint64 dataSize = header->nx()*header->ny();
 
-  uint32_t nx = header->nx();
-  uint32_t ny = header->ny();
+  quint32 nx = header->nx();
+  quint32 ny = header->ny();
   int value = 0;
 
   if(imageData!=NULL) delete imageData;
@@ -203,7 +203,7 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format)
   if(mode == 3 || mode ==4)
   {
     imageData = new uchar[dataSize*2*4];
-    uint32_t i,j,index;
+    quint32 i,j,index;
     QColor color, oppositeColor;
     int colors[6];
     float theta, theta2, rotatePhase = 1.0;
@@ -211,7 +211,7 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format)
 		QTime timer;  
     timer.start();
     /*
-      for(uint32_t k=0;k<(nx-1)*ny;k++)
+      for(quint32 k=0;k<(nx-1)*ny;k++)
       {
         i = k % (nx-1); j = k/(nx-1);
         index = (j*(nx) + i)*2;
@@ -306,7 +306,7 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format)
         l[t]->wait();
 /*  
     #pragma omp parallel for shared(imageData, rawData)
-    for(uint32_t i=0;i<dataSize*width;i++)
+    for(quint32 i=0;i<dataSize*width;i++)
     {
       if (mode == 0)
       {
@@ -347,7 +347,7 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format)
 
 void mrcImage::formatImage(mrcHeader *header, QImage::Format format)
 {
-  uint32_t mode = header->mode();
+  quint32 mode = header->mode();
 
 	if(image!=NULL) delete image;
 
@@ -424,7 +424,7 @@ void mrcImage::rescale(float min, float max)
 bool mrcImage::thumbnailPresent()
 {
   QFileInfo inf(imageFile);
-//  uint32_t mode = headers[0]->mode();
+//  quint32 mode = headers[0]->mode();
   qint64 dataSize = headers[0]->nx()*headers[0]->ny()*headers[0]->nz()*cellSize;
   if(inf.size()-(dataSize+1024) != 200*200 + 1024) return false;
   return true;
@@ -497,8 +497,8 @@ float mrcImage::min()
 
 float mrcImage::value(const QPoint &pos)
 {
-  uint32_t mode = headers[0]->mode();
-  uint32_t index;
+  quint32 mode = headers[0]->mode();
+  quint32 index;
   index = pos.x()+pos.y()*headers[0]->nx();
 
   if(validPosition(pos.x(),pos.y()))
@@ -522,7 +522,7 @@ bool mrcImage::validPosition(int x, int y)
 
 QPoint mrcImage::maxValue(const QPoint &pos, int distance, mrcImage::maxValueMethod method, float sigma)
 {
-  //uint32_t mode = headers[0]->mode();
+  //quint32 mode = headers[0]->mode();
   QPoint location;
   //QPoint origin = pos;
   if(validPosition(pos.x(),pos.y()))
@@ -679,13 +679,13 @@ QPoint mrcImage::maxValue(const QPoint &pos, int distance, mrcImage::maxValueMet
 
 float mrcImage::phase(const QPoint &pos)
 {
-  uint32_t mode = headers[0]->mode();
-  uint32_t index;
+  quint32 mode = headers[0]->mode();
+  quint32 index;
   index = pos.x()+pos.y()*headers[0]->nx();
   float rotatePhase = 1.0;
   rotatePhase = powf(-1, pos.x() + pos.y());
 
-  if(pos.x()>=0 && uint32_t(pos.x())<headers[0]->nx() && pos.y()>0 && uint32_t(pos.y())<headers[0]->ny())
+  if(pos.x()>=0 && quint32(pos.x())<headers[0]->nx() && pos.y()>0 && quint32(pos.y())<headers[0]->ny())
   {
     if(mode == 0 || mode == 1 || mode == 2) return 0.0;
     if(mode == 3) return fmod(atan2(((unsigned short*)rawData)[2*index+1]*rotatePhase,((unsigned short*)rawData)[2*index]*rotatePhase) + 2.0*PI, 2.0*PI);

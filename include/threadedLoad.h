@@ -17,10 +17,10 @@ class loadThread : public QThread
 
   char *rawData;
   uchar *imageData;
-  uint32_t nx, ny;
+  quint32 nx, ny;
   float imageMin, imageMax;
   int mode;
-  uint32_t leftI, rightI;
+  quint32 leftI, rightI;
   bool showPhase;
   QImage::Format format;
 
@@ -28,7 +28,7 @@ class loadThread : public QThread
 
   public:
   enum loadType {fft, real};
-  loadThread(char *rawData, uchar *imageData, uint32_t nx, uint32_t ny, float min, float max, int mode, uint32_t leftI, uint32_t rightI, QImage::Format format, loadThread::loadType type, bool showPhase = false, QObject *parent = NULL);
+  loadThread(char *rawData, uchar *imageData, quint32 nx, quint32 ny, float min, float max, int mode, quint32 leftI, quint32 rightI, QImage::Format format, loadThread::loadType type, bool showPhase = false, QObject *parent = NULL);
 
   protected:
   void run();

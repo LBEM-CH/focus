@@ -80,7 +80,7 @@ class imageNavigator: public QScrollArea
   QPoint navOrigin;
   QPoint selectionOrigin;
   QPoint currentMousePos;
-  uint32_t scrollSpeed;
+  quint32 scrollSpeed;
   int scrollBorder;
   int horScroll;
   int verScroll;

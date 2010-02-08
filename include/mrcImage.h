@@ -60,7 +60,7 @@ class mrcImage : public QThread
   QImage *image;
   QPixmap pixmap;
 
-  uint32_t minLength;
+  quint32 minLength;
 
   bool loadImage(mrcHeader *header, QImage::Format format = QImage::Format_RGB32);
   bool loadData(mrcHeader *header);

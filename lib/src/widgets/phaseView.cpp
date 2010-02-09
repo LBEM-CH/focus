@@ -20,7 +20,9 @@
 
 #include <phaseView.h>
 
-#define PI 3.1415926
+#ifndef M_PI
+#define M_PI 3.1415926
+#endif
 
 phaseView::phaseView(QWidget *parent)
           :QWidget(parent,Qt::Tool)
@@ -45,7 +47,7 @@ phaseView::phaseView(QWidget *parent)
   for(int i=0;i<=256;i++)
   {
     la = (float)i/256.0;
-    a = la*2.0*PI;
+    a = la*2.0*M_PI;
     if(i%64 == 0 && i!=256)
     {
       item = new QGraphicsTextItem;

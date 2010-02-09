@@ -616,7 +616,7 @@ void imageNavigator::mouseReleaseEvent(QMouseEvent *event)
     selectionArea->hide();
     showFFTSelection(selectionArea->frameGeometry());
   }
-  else if((event->button()==Qt::RightButton ||  event->button()==Qt::LeftButton && event->modifiers()==Qt::ShiftModifier) && fftSelectionMode)
+  else if((event->button()==Qt::RightButton || (event->button()==Qt::LeftButton && event->modifiers()==Qt::ShiftModifier)) && fftSelectionMode)
   {
     showFFTSelection(selectionArea->frameGeometry(),false);
     selectionFFTTool->move(0,0);

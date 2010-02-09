@@ -403,8 +403,10 @@ bool projectModel::save(QStandardItem *currentItem, int itemCount, QFile &saveFi
   {
 //    qDebug()<<pathFromIndex(i);
     if(i.isValid())
-    if(i.child(0,0).isValid()) save(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), saveFile);
-    else saveFile.write((pathFromIndex(i) + '\n').toAscii());
+    {
+	    if(i.child(0,0).isValid()) save(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), saveFile);
+	    else saveFile.write((pathFromIndex(i) + '\n').toAscii());
+    }
   }
   return true;
 }
@@ -568,33 +570,34 @@ void projectModel::changeSelection(QStandardItem *currentItem, int itemCount, co
   QList<QModelIndex> list = match(currentItem->index(), Qt::CheckStateRole, ".*" /*QString::number(Qt::Checked) + "|" + QString::number(Qt::PartiallyChecked) + "|" + QString::number(Qt::Unchecked)*/, itemCount, Qt::MatchRegExp);
   foreach(i, list)
   {
-    if(i.isValid())
-    if(i.child(0,0).isValid()) changeSelection(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(),action);
-    else if(i.column() == 0)
-    {
-      if(checkAction == "invert")
-      {
-        if(i.data(Qt::CheckStateRole) == Qt::Checked) setData(i,Qt::Unchecked,Qt::CheckStateRole);
-        else if(i.data(Qt::CheckStateRole) == Qt::Unchecked) setData(i,Qt::Checked,Qt::CheckStateRole);
-      }
-      else if(checkAction == "selectall")
-      {
-        if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);
-      }
-      else if(checkAction == "clear")
-        setData(i,Qt::Unchecked,Qt::CheckStateRole);
-      else if(checkAction == "removeitems")
-      {
-        if(i.data(Qt::CheckStateRole) == Qt::Checked) 
-        {
-          QString path = pathFromIndex(i);
-					qDebug()<<"Removing: "<<path;
-          QProcess p;
-          p.setStandardOutputFile(data->getDir("working") + "/config/out.out");          
-          p.setStandardErrorFile(data->getDir("working") + "/config/out.err");
-          p.start("rm -rf " + path);
-          p.waitForFinished(30000);
-          
+	  if(i.isValid())
+	  {
+		  if(i.child(0,0).isValid()) changeSelection(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(),action);
+		  else if(i.column() == 0)
+		  {
+			  if(checkAction == "invert")
+			  {
+				  if(i.data(Qt::CheckStateRole) == Qt::Checked) setData(i,Qt::Unchecked,Qt::CheckStateRole);
+				  else if(i.data(Qt::CheckStateRole) == Qt::Unchecked) setData(i,Qt::Checked,Qt::CheckStateRole);
+			  }
+			  else if(checkAction == "selectall")
+			  {
+				  if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);
+			  }
+			  else if(checkAction == "clear")
+				  setData(i,Qt::Unchecked,Qt::CheckStateRole);
+			  else if(checkAction == "removeitems")
+			  {
+				  if(i.data(Qt::CheckStateRole) == Qt::Checked) 
+				  {
+					  QString path = pathFromIndex(i);
+					  qDebug()<<"Removing: "<<path;
+					  QProcess p;
+					  p.setStandardOutputFile(data->getDir("working") + "/config/out.out");          
+					  p.setStandardErrorFile(data->getDir("working") + "/config/out.err");
+					  p.start("rm -rf " + path);
+					  p.waitForFinished(30000);
+					  
 
 ///					QModelIndex parent = i.parent();
 
@@ -610,10 +613,11 @@ void projectModel::changeSelection(QStandardItem *currentItem, int itemCount, co
             p.waitForFinished(30000);            
 					}
 */
-				}
-			}
-		}
-	}
+				  }
+			  }
+		  }
+	  }
+  }
 }
 
 void projectModel::currentRowChanged(const QModelIndex&i,const QModelIndex&)

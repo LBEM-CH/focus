@@ -21,6 +21,9 @@
 #include "albumViewer.h"
 #include <QDebug>
 
+#ifdef PI
+#undef PI
+#endif
 #define PI 3.141592653589793
 
 albumViewer::albumViewer(QWidget *parent)

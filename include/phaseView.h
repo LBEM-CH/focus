@@ -1,6 +1,7 @@
 
 #ifndef PHASEVIEW_H
 #define PHASEVIEW_H
+#define _USE_MATH_DEFINES
 
 #include <QGraphicsView>
 #include <QGraphicsScene>

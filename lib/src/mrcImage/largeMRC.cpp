@@ -10,7 +10,7 @@ void largeMRC::initialize()
   else if(mode == 3) cellSize = 4;
   else if(mode == 4) cellSize = 8;
 
-  isComplex = (mode == 3 | mode == 4);
+  isComplex = ((mode == 3) | (mode == 4));
 
   nx = header->nx();
   ny = header->ny();

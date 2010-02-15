@@ -106,10 +106,29 @@ if ( ! -e ${imagename}.mrc ) then
 #
 ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tif
-${imagename}.mrc
+SCRATCH/${imagename}.tmp.mrc
 y
 eot
 #
+  if ( ${imageorigin} == '4' ) then
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
+    #                                                                           #
+    #############################################################################  
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+2               ! switch to REAL (floating point)
+${imagename}.mrc
+0.25,0
+1
+eot
+  #
+  else
+    \mv SCRATCH/${imagename}.tmp.mrc ${imagename}.mrc
+  endif
+
     echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
   endif
 else
@@ -237,7 +256,7 @@ endif
 echo "<<@progress: 5>>"
 echo "<<@evaluate>>"
 #
-if ( ${imageorigin} >= '4' ) then
+if ( ${imageorigin} >= '5' ) then
   ${proc_2dx}/linblock "2dx_fftrans: Diffraction pattern. No FFT calculated."
   exit 
 endif

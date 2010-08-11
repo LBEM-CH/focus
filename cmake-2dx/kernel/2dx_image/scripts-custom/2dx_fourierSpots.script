@@ -1,0 +1,127 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Spot Intensity							    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 02/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 99
+#
+# MANUAL: This is a temporary script that you probably don't want to use...
+#
+# GLOBAL: SYM
+# GLOBAL: lattice
+# GLOBAL: secondlattice
+# GLOBAL: realang
+# GLOBAL: realcell
+# GLOBAL: TLTANG
+# GLOBAL: TLTAXIS
+# GLOBAL: TLTAXA
+# GLOBAL: TAXA
+# GLOBAL: TANGL
+# GLOBAL: imagesidelength
+# GLOBAL: stepdigitizer
+# GLOBAL: magnification
+# GLOBAL: tempkeep
+# GLOBAL: refori
+# GLOBAL: comment
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set imagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set RESMAX = ""
+set RESMIN = ""
+set ALAT = ""
+set refori = ""
+set realang = ""
+set realcell = ""
+set lattice = ""
+set secondlattice = ""
+set TLTANG = ""
+set TLTAXIS = ""
+set SYM = ""
+set tempkeep = ""
+#
+#$end_vars
+#
+echo "<<@progress: 1>>"
+#
+source ${proc_2dx}/initialize
+#
+echo lattice = ${lattice}
+echo secondlattice = ${secondlattice}
+#
+set scriptname = 2dx_fourierSpots
+#
+
+\rm -f LOGS/${scriptname}.results
+#
+${proc_2dx}/2dx_makedirs 
+#
+${proc_2dx}/linblock "Lattice is currently: ${lattice}"
+
+set spotname = "SCRATCH/statistics.txt"
+
+\rm -f ${spotname}
+\rm -f SCRATCH/${imagename}.stat.txt
+\rm -f SCRATCH/${imagename}.stat.csv
+
+#
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+echo refposix = ${refposix}
+echo refposiy = ${refposiy}
+#
+
+if(-e FFTIR/${imagename}.fft.mrc) then
+
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+FFTIR/${imagename}.fft.mrc
+${imagenumber}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2 1 250 15 15 12 12               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+${spotname} 
+${refposix} ${refposiy}         ! XORIG,YORIG
+${RESMIN} ${RESMAX} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
+
+echo "Lattice Statistices For:,${imagename}" > SCRATCH/${imagename}.stat.txt
+echo "Reciprocal Lattice:,$lattice" >> SCRATCH/${imagename}.stat.txt
+echo "Real Cell:,${realcell}" >> SCRATCH/${imagename}.stat.txt
+echo "Real Cell Angle:,${realang}" >> SCRATCH/${imagename}.stat.txt
+echo "" >> SCRATCH/${imagename}.stat.txt
+echo "" >> SCRATCH/${imagename}.stat.txt
+
+echo "h,k,Amplitude,Phase,RMS Background" >> SCRATCH/${imagename}.stat.txt
+cat ${spotname} | awk ' { if(NR>1) {print $1","$2","$3","$4","$6} } ' >> SCRATCH/${imagename}.stat.txt
+cp SCRATCH/${imagename}.stat.txt SCRATCH/${imagename}.stat.csv
+\rm ${spotname}
+echo "IMAGE-IMPORTANT: SCRATCH/${imagename}.stat.txt" "<Spot Statistics>" >> LOGS/${scriptname}.results
+echo "IMAGE-IMPORTANT: SCRATCH/${imagename}.stat.csv" "<Spot Statistics (Excel)>" >> LOGS/${scriptname}.results
+else
+${proc_2dx}/linblock "Can't find FFTIR/${imagename}.fft.mrc"
+endif 
+echo "<<@progress: 100>>"
+  
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+

@@ -1,0 +1,11 @@
+#!/bin/csh
+#
+/bin/rm -f *.o
+/bin/rm -f *.f
+/bin/rm -f Ximagelib.a
+cp Ximagelibf.for Ximagelibf.f
+g77 -O -w -c Ximagelibf.f
+gcc -c Ximagelibc.c
+ar cr Ximagelib.a *.o
+/bin/rm -f *.o
+/bin/rm -f *.f

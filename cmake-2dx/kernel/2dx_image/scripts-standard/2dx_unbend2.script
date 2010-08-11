@@ -1,0 +1,762 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Unbend II                                                          #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 02/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# MANUAL: This script will do the second and following unbending rounds. 
+#
+# MANUAL: The unbending always starts with the raw image ${imagename}.mrc, but uses the latest verion of the reference as the unbending template. The number of maskb?? values that are not "0" determine how many rounds of unbending will be done.
+#
+# SORTORDER: 50
+#
+# GLOBAL: SYN_Unbending
+# GLOBAL: holeb
+# GLOBAL: maskb01
+# GLOBAL: maskb02
+# GLOBAL: maskb03
+# GLOBAL: maskb04
+# GLOBAL: maskb05
+# GLOBAL: boxb1
+# GLOBAL: boxb2
+# GLOBAL: quadradb
+# GLOBAL: facthreshb
+# GLOBAL: quadpredb
+# GLOBAL: RESMAX
+# GLOBAL: RESMIN
+# GLOBAL: ALAT
+# GLOBAL: radlim
+# GLOBAL: domask
+# GLOBAL: ctf_ttf
+# GLOBAL: ttfcorfirst
+# GLOBAL: treatspotscan
+# GLOBAL: ctfplotresmax
+# GLOBAL: tempkeep
+# GLOBAL: refori
+# GLOBAL: createmaskinfo
+# GLOBAL: ISTEP
+# GLOBAL: ISTEP_h
+# GLOBAL: IMAXCOR
+# GLOBAL: comment
+# GLOBAL: RMAG
+# GLOBAL: ccunbend_program
+#
+#$end_local_vars
+#
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SYN_Unbending = ""
+set PHASEORI_done = ""
+set boxb1 = ""
+set boxb2 = ""
+set quadradb = ""
+set imagename = ""
+set defocus = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set realcell = ""
+set lattice = ""
+set holeb = ""
+set maskb01 = ""
+set maskb02 = ""
+set maskb03 = ""
+set maskb04 = ""
+set maskb05 = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set ALAT = ""
+set quadpredb = ""
+set radlim = ""
+set realang = ""
+set treatspotscan = ""
+set facthresha = ""
+set phacon = ""
+set ctfplotresmax = ""
+set stepdigitizer = ""
+set CS = ""
+set KV = ""
+set domask = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set TANGL = ""
+set ttfcorfirst = ""
+set det_tilt = ""
+set ctf_ttf = ""
+set refori = ""
+set createmaskinfo = ""
+set ISTEP = ""
+set ISTEP_h = ""
+set IMAXCOR = ""
+set RMAG = ""
+set ccunbend_program = ""
+set RB_1 = ""
+set RB_2 = ""
+set RB_3 = ""
+set RB_4 = ""
+set RB_5 = ""
+set RB_6 = ""
+set RP_1 = ""
+set RP_2 = ""
+set RP_3 = ""
+set RP_4 = ""
+set RP_5 = ""
+set RP_6 = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_unbend2
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+#
+source ${proc_2dx}/initialize
+#
+set date = `date`
+echo date = ${date}
+#
+if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
+  ${proc_2dx}/linblock "Skipping. Synthetical Reference is used instead."
+  #
+  echo "# IMAGE-IMPORTANT: FFTIR/cor${imagename}.fft.unbend2.mrc <FFT of Unbent Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/ref${imagename}.fft.msk.unbend2.mrc <FFT of Unbent Reference>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${imagename}.reference2.mrc <Reference Patch>" >> LOGS/${scriptname}.results  
+  echo "# IMAGE: SCRATCH/auto${imagename}.cor.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/box${imagename}.flt2.mrc <Center of Reference Patch>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/auto${imagename}.cor.unbend2.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/auto${imagename}.map.mrc <Central Peak of Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/refb1${imagename}.flt.mrc <Reference 1>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/refb2${imagename}.flt.mrc <Reference 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/ref${imagename}.flt.unbend2.mrc <Filtered Image for Reference generation>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/refb1${imagename}.flt.unbend2.mrc <Reference 1>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/refb2${imagename}.flt.unbend2.mrc <Reference 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/${imagename}.fft.msk.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/${imagename}.ttf.mrc <Image after TTF correction>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/corel2${imagename}.fft.mrc <XCF between Reference 2 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/${imagename}.fft.msk.unbend2.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/ref1${imagename}.fft.unbend2.mrc <FFT of Reference 1>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/ref2${imagename}.fft.unbend2.mrc <FFT of Reference 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/corel1${imagename}.fft.mrc <XCF between Reference 1 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor2${imagename}.cor.mrc <XCF between Reference 2 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2a.ps <PS: Vector Plot of Distortion, Pass 1>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: ManualMasking-UnbendPlot.mrc <Distortion Plot for Manual Masking>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: CUT/${imagename}-masking.mrc <Masking Area from Automatic Masking>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2b.ps <PS: Vector Plot of Distortion, Pass 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: ManualMasking-CCmap.mrc <XCF Map for Manual Masking>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ManualMasking-UnbendPlot.mrc <Distortion Plot for Manual Masking>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2c.ps <PS: Vector Plot for Distortions, Pass 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor2${imagename}.cor.unbend2.mrc <XCF Map between Reference 2 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor1${imagename}.cor.unbend2.mrc <XCF Map between Reference 1 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: ${imagename}.mrc" >> LOGS/${scriptname}.results
+  echo "# IMAGE: m${imagename}.mrc" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${imagename}-ccunbend2.ps <PS: Vector Plot for Unbending>"  >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor${imagename}.notap.unbend2.mrc <Raw Unbent Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor${imagename}.mrc <Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: FFTIR/cor${imagename}.fft.mrc <FFT of Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: APH/${imagename}.nolimit.aph <APH File (No Resolution Limitation)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: APH/${imagename}.ttf.nolimit.aph <APH File after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${imagename}.ttplot.nolimit.unbend2.ps <PS: IQ Plot after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: APH/${imagename}.cor.aph <Link to Final APH File>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: APH/${imagename}.limit.aph <APH File (Resolution Limitation)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${imagename}.ttplot.limit.unbend2.ps <PS: IQ Plot after TTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: APH/${imagename}.ttf.limit.aph <APH File after TTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results
+  exit
+endif
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+set tmp1 = `echo ${boxb1} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${boxb1} ) then
+  echo boxb1 = ${boxb1}
+else
+  set boxb1 = ${tmp1}
+  echo boxb1 = ${boxb1}
+  echo "set boxb1 = ${boxb1}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: boxb1 needs to be an integer number. Now corrected."
+  echo "#WARNING: Warning: boxb1 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${boxb2} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${boxb2} ) then
+  echo boxb2 = ${boxb2}
+else
+  set boxb2 = ${tmp1}
+  echo boxb2 = ${boxb2}
+  echo "set boxb2 = ${boxb2}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: boxb2 needs to be an integer number. Now corrected."
+  echo "#WARNING: Warning: boxb2 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${boxb1} ${boxb2} | awk '{if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${tmp1} == 1 ) then
+  set tmp1 = ${boxb2}
+  set boxb2 = ${boxb1}
+  set boxb1 = ${tmp1}
+  echo boxb1 = ${boxb1}
+  echo boxb2 = ${boxb2}
+  echo "set boxb1 = ${boxb1}" >> LOGS/${scriptname}.results
+  echo "set boxb2 = ${boxb2}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: boxb2 should be larger than boxb1. Now exchanged."
+  echo "#WARNING: Warning: boxb2 should be larger than boxb1. Now exchanged." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${maskb02} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${maskb02} ) then
+  echo maskb02 = ${maskb02}
+else
+  set maskb02 = ${tmp1}
+  echo maskb02 = ${maskb02}
+  echo "set maskb02 = ${maskb02}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: maskb02 needs to be an integer number. Now corrected."
+  echo "#WARNING: Warning: maskb02 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${maskb03} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${maskb03} ) then
+  echo maskb03 = ${maskb03}
+else
+  set maskb03 = ${tmp1}
+  echo maskb03 = ${maskb03}
+  echo "set maskb03 = ${maskb03}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: maskb03 needs to be an integer number. Now corrected."
+  echo "#WARNING: Warning: maskb03 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${maskb04} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${maskb04} ) then
+  echo maskb04 = ${maskb04}
+else
+  set maskb04 = ${tmp1}
+  echo maskb04 = ${maskb04}
+  echo "set maskb04 = ${maskb04}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: maskb04 needs to be an integer number. Now corrected."
+  echo "#WARNING: Warning: maskb04 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${maskb05} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${maskb05} ) then
+  echo maskb05 = ${maskb05}
+else
+  set maskb05 = ${tmp1}
+  echo maskb05 = ${maskb05}
+  echo "set maskb05 = ${maskb05}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: maskb05 needs to be an integer number. Now corrected."
+  echo "#WARNING: Warning: maskb05 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+\rm -f HOLEref.TMP HOLE.TMP
+echo "<<@progress: 1>>"
+#
+set round = 1
+if ( ${maskb02} > '0' ) then
+  @ round += 1
+endif
+if ( ${maskb03} > '0' ) then
+  @ round += 1
+endif
+if ( ${maskb04} > '0' ) then
+  @ round += 1
+endif
+if ( ${maskb05} > '0' ) then
+  @ round += 1
+endif
+#
+set startname = `echo ${imagename} | cut -c1`
+if ( $domask == 'y' ) then
+  if ( ${startname} == 'm' ) then
+    set domask = 'n'
+    echo domask corrected to ${domask}
+  endif
+endif
+#
+if ( ${createmaskinfo} == 'y' ) then
+  if ( ${startname} == 'm' ) then
+    # set createmaskinfo = 'n'
+    ${proc_2dx}/linblock "WARNING: creating another MASKINFO, but file already masked."
+  endif
+endif
+#
+if ( ${domask} == 'y' ) then
+  set round = 1
+  ${proc_2dx}/lin "Doing only one round because of masking"
+else
+  ${proc_2dx}/lin "Doing ${round} rounds"
+endif
+#
+set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
+set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
+set tmp = `echo ${quadradbx} ${quadradby} | awk '{if ( $2 == 0 ) { s = $1 } else { s = $2 }} END { print s }'`
+if ( ${tmp} != ${quadradby} ) then
+  set quadradby = ${tmp}
+  set quadradb = `echo ${quadradbx} ${quadradby} | sed 's/ /,/g'`
+  echo "set quadradb = ${quadradb}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: correcting quadradb to ${quadradb}."
+  echo "#WARNING: Warning: correcting quadradb to ${quadradb}." >> LOGS/${scriptname}.results
+endif
+#
+if ( ${ccunbend_program} != "0" && ${ccunbend_program} != "1" ) then
+  set ccunbend_program = "0"
+  echo "set ccunbend_program = ${ccunbend_program}" >> LOGS/${scriptname}.results
+endif
+#
+#################################################################################
+#
+if ( ${boxb1} > ${imagesidelength} ) then
+  ${proc_2dx}/linblock "WARNING: boxb1 too large."
+endif
+#  
+if ( ${boxb2} > ${imagesidelength} ) then
+  ${proc_2dx}/linblock "WARNING: boxb2 too large."
+endif
+#  
+if ( ${treatspotscan} == 'y' ) then
+  set valspotscan = '1'
+else
+  set valspotscan = '0'
+endif
+#
+set rmax = 11000
+echo rmax = ${rmax}
+#
+# Limit RADLIM parameters to at least 20
+set radlimx = `echo ${radlim} | cut -d\, -f1`
+set radlimy = `echo ${radlim} | cut -d\, -f2`
+set radlima = `echo ${radlim} | cut -d\, -f3`
+set radlimtmpx = `echo ${radlimx} | awk '{if ( $1 < 20 ) { s = 20 } else { s = $1 }} END { print s }'`
+set radlimtmpy = `echo ${radlimy} | awk '{if ( $1 < 20 ) { s = 20 } else { s = $1 }} END { print s }'`
+set radlimnewx = `echo ${radlimtmpx} | awk '{if ( $1 > 49 ) { s = 49 } else { s = $1 }} END { print s }'`
+set radlimnewy = `echo ${radlimtmpy} | awk '{if ( $1 > 49 ) { s = 49 } else { s = $1 }} END { print s }'`
+set radlimnew = `echo ${radlimnewx},${radlimnewy},${radlima}`
+if ( ${radlim} != ${radlimnew} ) then
+  set radlim = ${radlimnew}
+  echo "set radlim = ${radlim}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: correcting RADLIM to ${radlim}."
+endif
+#
+set reciangle = `echo ${realang} | awk '{ s = 180.0 - $1 } END { print s } '`
+echo reciangle = ${reciangle}
+#
+set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+if ( ${tmp1} != ${refposix} ) then
+  set refori = ${refposix},${refposiy}
+  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected."
+  echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
+endif
+echo refposix = ${refposix}
+echo refposiy = ${refposiy}
+#
+set rtempx1 = ${refposix}
+set rtempy1 = ${refposiy}
+set rtempx2 = ${refposix}
+set rtempy2 = ${refposiy}
+@ rtempx1 -= 13
+@ rtempx2 += 12
+@ rtempy1 -= 13
+@ rtempy2 += 12
+# this gives a box at the reference location with a diameter of 26 pixels.
+set patlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
+echo patlabel = ${patlabel}
+#
+set rtempx1 = ${refposix}
+set rtempy1 = ${refposiy}
+set rtempx2 = ${refposix}
+set rtempy2 = ${refposiy}
+@ rtempx1 -= 400
+@ rtempx2 += 399
+@ rtempy1 -= 400
+@ rtempy2 += 399
+# this gives a box at the reference locations with a diameter of 800 pixels.
+set boxlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
+echo boxlabel = ${boxlabel}
+#
+# set RESPLOTMAX = 0.3
+set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 } else { s = 0.3 } } END { print s }'`
+# 0.3 corresponds to 3.33 Angstroem for the border of the plot.
+#
+if ( ! -d SCRATCH ) then
+  ${proc_2dx}/protest "ERROR: SCRATCH does not exist."
+endif
+#
+set u1 = `echo ${lattice} | cut -d\, -f1`
+set u2 = `echo ${lattice} | cut -d\, -f2`
+set v1 = `echo ${lattice} | cut -d\, -f3`
+set v2 = `echo ${lattice} | cut -d\, -f4`
+set ulen = `echo ${u1} ${u2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+set vlen = `echo ${v1} ${v2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+#
+set latlenok = `echo ${ulen} ${vlen} | awk '{ if ( $1 + $2 < 0.1 ) { s = 0 } else { s = 1 }} END { print s }'`
+if ( ${latlenok} == '0' ) then
+  ${proc_2dx}/linblock "ERROR: Lattice is ${lattice}"
+  ${proc_2dx}/protest "Determine lattice first. Aborting."
+endif
+#
+#############################################################################
+#                                                                           #
+#  UNBEND II expects the existence of FFTIR/cor${imagename}.unbend1.fft.mrc #
+#                                                                           #
+#############################################################################
+#
+if ( ! -e FFTIR/cor${imagename}.unbend1.fft.mrc ) then
+  ${proc_2dx}/protest "ERROR: cor${imagename}.mrc not existing."
+endif
+#
+\cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+#
+echo "<<@progress: 5>>"
+#
+if (${ctf_ttf} == 'CTF') then
+  if ( ${ttfcorfirst} == 'y' ) then
+    ${proc_2dx}/linblock "Treating as Non-Tilted: Correcting TTFcorFirst to NO"
+    set ttfcorfirst = 'n'
+    echo "set ttfcorfirst = n" >> LOGS/${scriptname}.results
+  endif
+else
+  ${proc_2dx}/linblock "Warning: You are using TTF correction. This requires a reliable tilt geometry."
+  echo "# WARNING: Warning: You are using TTF correction. This requires a reliable tilt geometry." >> LOGS/${scriptname}.results
+endif
+#
+set u1 = `echo ${lattice} | cut -d\, -f1`
+set u2 = `echo ${lattice} | cut -d\, -f2`
+set v1 = `echo ${lattice} | cut -d\, -f3`
+set v2 = `echo ${lattice} | cut -d\, -f4`
+set ulen = `echo ${u1} ${u2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+set vlen = `echo ${v1} ${v2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+set smaller_vector = `echo ${ulen} ${vlen} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 }} END { print s }'`
+#
+set newmaskb01 = `echo ${smaller_vector} ${maskb01} | awk '{ if ( $1 / 2.1 < $2 ) { s = int( $1 / 2.1 ) } else { s = $2 }} END { print s }'`
+set newmaskb01 = `echo ${newmaskb01} | awk '{ if ( $1 < 2 ) { s = 2 } else { s = $1 }} END { print s }'`
+if ( ${maskb01} != ${newmaskb01} ) then
+  ${proc_2dx}/linblock "correcting maskb01 from ${maskb01} to ${newmaskb01}"
+  set maskb01 = ${newmaskb01}
+  echo "set maskb01 = ${newmaskb01}" >> LOGS/${scriptname}.results
+endif
+${proc_2dx}/linblock "Using maskb01=${maskb01} for lattice of length u=${ulen} and v=${vlen}"
+#
+set newmaskb02 = `echo ${smaller_vector} ${maskb02} | awk '{ if ( $1 / 2.1 < $2 ) { s = int( $1 / 2.1 ) } else { s = $2 }} END { print s }'`
+if ( ${maskb02} != ${newmaskb02} ) then
+  ${proc_2dx}/linblock "correcting maskb02 from ${maskb02} to ${newmaskb02}"
+  set maskb02 = ${newmaskb02}
+  echo "set maskb02 = ${newmaskb02}" >> LOGS/${scriptname}.results
+endif
+if ( ${maskb02} != 0 ) then
+  ${proc_2dx}/linblock "Using maskb02=${maskb02} for lattice of length u=${ulen} and v=${vlen}"
+endif
+#
+set newmaskb03 = `echo ${smaller_vector} ${maskb03} | awk '{ if ( $1 / 2.1 < $2 ) { s = int( $1 / 2.1 ) } else { s = $2 }} END { print s }'`
+if ( ${maskb03} != ${newmaskb03} ) then
+  ${proc_2dx}/linblock "correcting maskb03 from ${maskb03} to ${newmaskb03}"
+  set maskb03 = ${newmaskb03}
+  echo "set maskb03 = ${newmaskb03}" >> LOGS/${scriptname}.results
+endif
+if ( ${maskb03} != 0 ) then
+  ${proc_2dx}/linblock "Using maskb03=${maskb03} for lattice of length u=${ulen} and v=${vlen}"
+endif
+#
+set newmaskb04 = `echo ${smaller_vector} ${maskb04} | awk '{ if ( $1 / 2.1 < $2 ) { s = int( $1 / 2.1 ) } else { s = $2 }} END { print s }'`
+if ( ${maskb04} != ${newmaskb04} ) then
+  ${proc_2dx}/linblock "correcting maskb04 from ${maskb04} to ${newmaskb04}"
+  set maskb04 = ${newmaskb04}
+  echo "set maskb04 = ${newmaskb04}" >> LOGS/${scriptname}.results
+endif
+if ( ${maskb04} != 0 ) then
+  ${proc_2dx}/linblock "Using maskb04=${maskb04} for lattice of length u=${ulen} and v=${vlen}"
+endif
+#
+set newmaskb05 = `echo ${smaller_vector} ${maskb05} | awk '{ if ( $1 / 2.1 < $2 ) { s = int( $1 / 2.1 ) } else { s = $2 }} END { print s }'`
+if ( ${maskb05} != ${newmaskb05} ) then
+  ${proc_2dx}/linblock "correcting maskb05 from ${maskb05} to ${newmaskb05}"
+  set maskb05 = ${newmaskb05}
+  echo "set maskb05 = ${newmaskb05}" >> LOGS/${scriptname}.results
+endif
+if ( ${maskb05} != 0 ) then
+  ${proc_2dx}/linblock "Using maskb05=${maskb05} for lattice of length u=${ulen} and v=${vlen}"
+endif
+#
+#############################################################################
+#############################################################################
+##### BEGINNING OF THE BIG WHILE LOOP OVER THE DIFFERENT MASKB VALUES #######
+#############################################################################
+#############################################################################
+#
+set locround = 1
+set final_round = "n"
+#
+while ( ${locround} <= ${round} ) 
+  #
+  if ( ${locround} == ${round} ) then
+    set final_round = "y" 
+  endif
+  #
+  source ${proc_2dx}/2dx_unbend2_sub.com
+  #
+  echo "<<@evaluate>>"
+  #
+  @ locround += 1
+  #
+end
+#
+#############################################################################
+#############################################################################
+##### END OF THE BIG WHILE LOOP OVER THE DIFFERENT MASKB VALUES #############
+#############################################################################
+#############################################################################
+#
+#############################################################################
+${proc_2dx}/${lincommand} "MASKTRAN - to mask the FFT of the unbent image"
+#############################################################################
+#
+\rm -f SCRATCH/cor${imagename}.msk.fft.mrc
+#
+setenv IN  FFTIR/cor${imagename}.fft.mrc
+setenv OUT SCRATCH/cor${imagename}.msk.fft.mrc
+# ITYPE=0 uses all spots (below). The following line is thereby probably not needed:
+setenv SPOTS ${imagename}.spt
+#
+${bin_2dx}/masktrana.exe << eot
+1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+1  ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${lattice} -30 30 -30 30 ${rmax} 0 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_fftrans - to create a Fourier-filtered direct reconstruction"
+#############################################################################
+\rm -f SCRATCH/${imagename}.unbent-filtered.mrc
+setenv IN SCRATCH/cor${imagename}.msk.fft.mrc
+setenv OUT SCRATCH/${imagename}.unbent-filtered.mrc
+${bin_2dx}/2dx_fftrans.exe 
+#
+if ( ${tempkeep} == 'y' ) then
+  echo "# IMAGE: SCRATCH/cor${imagename}.msk.fft.mrc <FFT after Unbending and tight Fourier-filtering>" >> LOGS/${scriptname}.results
+else
+  \rm -f SCRATCH/cor${imagename}.msk.fft.mrc
+endif
+#
+echo "# IMAGE-IMPORTANT: SCRATCH/${imagename}.unbent-filtered.mrc <Unbent and Fourier-filtered Image>" >> LOGS/${scriptname}.results
+#
+if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
+  #############################################################################
+  ${proc_2dx}/linblock "Measuring signal in resolution bins"
+  #############################################################################
+  #
+  \rm -f SCRATCH/TMP9882.dat
+  \rm -f SCRATCH/dummy.aph
+  set rlocmin = ${RESMIN}
+  set rlocmax = ${RB_1}
+  #
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+FFTIR/cor${imagename}.fft.mrc
+${imagenumber} ${imagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/dummy.aph
+SCRATCH/TMP9882.dat
+U2
+${refposix},${refposiy}         ! XORIG,YORIG
+${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                              ! Lattice vectors
+eot
+  #
+  cat SCRATCH/TMP9882.dat | grep PSMAX > SCRATCH/TMP9881.dat
+  source SCRATCH/TMP9881.dat
+  set RP_1 = ${PSMAX}
+  #
+  \rm -f SCRATCH/TMP9882.dat
+  \rm -f SCRATCH/dummy.aph
+  set rlocmin = ${rlocmax}
+  set rlocmax = ${RB_2}
+  #
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+FFTIR/cor${imagename}.fft.mrc
+${imagenumber} ${imagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/dummy.aph
+SCRATCH/TMP9882.dat
+U2
+${refposix},${refposiy}         ! XORIG,YORIG
+${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                              ! Lattice vectors
+eot
+  #
+  cat SCRATCH/TMP9882.dat | grep PSMAX > SCRATCH/TMP9881.dat
+  source SCRATCH/TMP9881.dat
+  set RP_2 = ${PSMAX}
+  #
+  \rm -f SCRATCH/TMP9882.dat
+  \rm -f SCRATCH/dummy.aph
+  set rlocmin = ${rlocmax}
+  set rlocmax = ${RB_3}
+  #
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+FFTIR/cor${imagename}.fft.mrc
+${imagenumber} ${imagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/dummy.aph
+SCRATCH/TMP9882.dat
+U2
+${refposix},${refposiy}         ! XORIG,YORIG
+${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                              ! Lattice vectors
+eot
+  #
+  cat SCRATCH/TMP9882.dat | grep PSMAX > SCRATCH/TMP9881.dat
+  source SCRATCH/TMP9881.dat
+  set RP_3 = ${PSMAX}
+  #
+  \rm -f SCRATCH/TMP9882.dat
+  \rm -f SCRATCH/dummy.aph
+  set rlocmin = ${rlocmax}
+  set rlocmax = ${RB_4}
+  #
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+FFTIR/cor${imagename}.fft.mrc
+${imagenumber} ${imagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/dummy.aph
+SCRATCH/TMP9882.dat
+U2
+${refposix},${refposiy}         ! XORIG,YORIG
+${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                              ! Lattice vectors
+eot
+  #
+  cat SCRATCH/TMP9882.dat | grep PSMAX > SCRATCH/TMP9881.dat
+  source SCRATCH/TMP9881.dat
+  set RP_4 = ${PSMAX}
+  #
+  \rm -f SCRATCH/TMP9882.dat
+  \rm -f SCRATCH/dummy.aph
+  set rlocmin = ${rlocmax}
+  set rlocmax = ${RB_5}
+  #
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+FFTIR/cor${imagename}.fft.mrc
+${imagenumber} ${imagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/dummy.aph
+SCRATCH/TMP9882.dat
+U2
+${refposix},${refposiy}         ! XORIG,YORIG
+${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                              ! Lattice vectors
+eot
+  #
+  cat SCRATCH/TMP9882.dat | grep PSMAX > SCRATCH/TMP9881.dat
+  source SCRATCH/TMP9881.dat
+  set RP_5 = ${PSMAX}
+  #
+  \rm -f SCRATCH/TMP9882.dat
+  \rm -f SCRATCH/dummy.aph
+  set rlocmin = ${rlocmax}
+  set rlocmax = ${RB_6}
+  #
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+FFTIR/cor${imagename}.fft.mrc
+${imagenumber} ${imagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/dummy.aph
+SCRATCH/TMP9882.dat
+U2
+${refposix},${refposiy}         ! XORIG,YORIG
+${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                              ! Lattice vectors
+eot
+  #
+  cat SCRATCH/TMP9882.dat | grep PSMAX > SCRATCH/TMP9881.dat
+  source SCRATCH/TMP9881.dat
+  set RP_6 = ${PSMAX}
+  #
+  echo "::  ResBin     Power "
+  echo ":: ${RB_1}      ${RP_1}"
+  echo ":: ${RB_2}      ${RP_2}"
+  echo ":: ${RB_3}      ${RP_3}"
+  echo ":: ${RB_4}      ${RP_4}"
+  echo ":: ${RB_5}      ${RP_5}"
+  echo ":: ${RB_6}      ${RP_6}"
+  #
+  echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
+  echo "set RP_2 = ${RP_2}" >> LOGS/${scriptname}.results
+  echo "set RP_3 = ${RP_3}" >> LOGS/${scriptname}.results
+  echo "set RP_4 = ${RP_4}" >> LOGS/${scriptname}.results
+  echo "set RP_5 = ${RP_5}" >> LOGS/${scriptname}.results
+  echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
+  #
+endif
+#
+if ( ${ttfcorfirst} == 'y' ) then
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "CTFAPPLY - to plot IQ plot without defocus and CTF application"
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f CTFPLOT.PS
+  \rm -f PS/${imagename}.ttf.nolimit.ps
+  #
+  setenv IN  APH/${imagename}.ttf.nolimit.aph
+  setenv OUT dummy.tmp
+  ${bin_2dx}/2dx_ctfapplyk.exe << eot
+${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
+0.0,0.0,0.0,${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
+${imagenumber} ${imagename}.ttf.nolimit, ${date}, No Limit, Nyquist=${ctfplotresmax}
+${phacon}
+${RESMIN},0.0
+eot
+  #
+  if ( ! -e CTFPLOT.PS ) then
+    ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
+  else
+    \mv -f CTFPLOT.PS PS/${imagename}.ttf.nolimit.ps
+    echo "# IMAGE-IMPORTANT: PS/${imagename}.ttf.nolimit.ps <PS: IQ Plot after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results
+  endif
+  #
+endif
+#
+echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
+echo "set ML_done = n" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+#
+#
+

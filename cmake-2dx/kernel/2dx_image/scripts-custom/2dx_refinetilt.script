@@ -1,0 +1,308 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Refine Tilt from SpotSplitting                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 08/15/2006                                             #
+# Last Modification: 08/15/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 75
+#
+# MANUAL: This script calls the MRC program <A HREF="http://2dx.org/documentation/mrc-software/mrc-programs/ttrefine">ttrefine</A>, to refine the defocus and/or tilt geometry based on the evaluation of spotsplitting in the Fourier transformation. 
+#
+# MANUAL: Be aware that this program may make things worse, if the data are noisy. For the refinement of all five parameters usually a well-refined and stable 3D dataset in form of a MTZ file is needed as well. Use with care, and first try to run it with the "Overwrite data" button set to "no". If the output appears to make sense, you can re-run it with "Overwrite data" set to "yes". Good luck.
+#
+#=============================================================================
+# SECTION: Algorithm Selection
+#=============================================================================
+#
+# LABEL: Mode of operation
+# LEGEND: Choose the things that should be refined"
+# EXAMPLE: mode = "tiltangle"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
+# TYPE: Drop_Down_Menu "0=nothing;1=refine defocus;2=refine defocus and astigma;3=refine tiltaxis;4=refine tiltangle;5=refine all 5 parameters"
+set mode = "0=nothing"
+#
+# LABEL: Number of cycles 
+# LEGEND: The number of refinement cycles in ttrefine
+# EXAMPLE: ncyc = "10"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
+# TYPE: Integer "MIN=1;MAX=1000;DEFAULT=10"
+set ncyc = "10"
+#
+# LABEL: MTZ reference for refinement
+# LEGEND: Define, if a MTZ file is available as refinement reference.
+# EXAMPLE: reference = "(none)"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
+# The reference should be something like: '../merge/merge3D.mtz'
+# TYPE: Drop_Down_Menu "(none);../merge/merge3D.mtz"
+set reference = "(none)"
+#
+# LABEL: Overwrite data
+# LEGEND: Define if the results should overwrite the database or not.
+# EXAMPLE: overwrite = "n"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
+# TYPE: Bool "y;n"
+set overwrite = "n"
+#
+#=============================================================================
+#
+# GLOBAL: RESMIN
+# GLOBAL: RESMAX
+# GLOBAL: lattice
+# GLOBAL: realang
+# GLOBAL: ALAT
+# GLOBAL: TLTAXIS
+# GLOBAL: TLTANG
+# GLOBAL: TLTAXA
+# GLOBAL: TAXA
+# GLOBAL: TANGL
+# GLOBAL: defocus
+# GLOBAL: SYM
+# GLOBAL: phaori
+# GLOBAL: revhk
+# GLOBAL: rot180
+# GLOBAL: comment
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set imagename = ""
+set imagesidelength = ""
+set imagenumber = ""
+set realcell = ""
+set lattice = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set revhk = ""
+set rot180 = ""
+set realang = ""
+set RESMIN = ""
+set RESMAX = ""
+set ALAT = "" 
+set lattice = ""
+set IQMAX = ""
+set defocus = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
+set SYM = ""
+set phaori = ""
+set CS = ""
+set KV = ""
+set RMAG = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_refinetilt
+#
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+#############################################################################
+${proc_2dx}/linblock "${scriptname}" 
+#############################################################################  
+#
+echo SYM = ${SYM}
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+echo spcgrp = ${spcgrp}
+echo " "
+#
+set ABANG = `echo $realang | awk '{s=180-$1} END {print s}'`
+echo ABANG = $ABANG
+#
+# These are exactly the contrary, to get the orientation right...
+if ( ${rot180} == 'y' ) then
+  set rot180val = '0'
+else
+  set rot180val = '1'
+endif
+#
+# if ( ${rot90} == 'y' ) then
+#   set rot90val = '1'
+# else
+#   set rot90val = '0'
+# endif
+#
+if ( ${revhk} == 'y' ) then
+  set revhkval = '1'
+else
+  set revhkval = '0'
+endif
+#
+set SGNXCH = 1
+echo SGNXCH = ${SGNXCH}
+if ( ${SGNXCH} == "1" ) then
+  set phaorix = `echo ${phaori} | cut -d\, -f1 `
+  set phaoriy = `echo ${phaori} | cut -d\, -f2 | awk '{ s = -$1 } END { print s }'`
+  set phaori = `echo ${phaorix},${phaoriy}`
+endif
+#
+set REVXSGN = 1
+echo REVXSGN = ${REVXSGN}
+if ( ${REVXSGN} == "1" ) then
+  set phaorix = `echo ${phaori} | cut -d\, -f1 | awk '{ s = -$1 } END { print s }'`
+  set phaoriy = `echo ${phaori} | cut -d\, -f2 `
+  set phaori = `echo ${phaorix},${phaoriy}`
+endif
+#
+${proc_2dx}/2dx_makedirs
+#
+echo "<<@progress: 1>>"
+#
+set imode = `echo ${mode} | cut -c1-1`
+#
+if ( ${imode} != "0" ) then
+  if ( ! -e FFTIR/cor${imagename}.fft.mrc ) then
+    if ( -e SCRATCH/cor${imagename}.mrc ) then
+      ${proc_2dx}/linblock "="
+      ${proc_2dx}/linblock "ttrefine: SCRATCH/cor${imagename}.fft.mrc does not exist."
+      ${proc_2dx}/linblock "          recreating from SCRATCH/cor${imagename}.mrc ."
+      ${proc_2dx}/linblock "="
+      \rm -f FFTIR/cor${imagename}.fft.mrc
+      setenv IN SCRATCH/cor${imagename}.mrc
+      setenv OUT FFTIR/cor${imagename}.fft.mrc
+      ${bin_2dx}/2dx_fftrans.exe
+    else
+      ${proc_2dx}/linblock "="
+      ${proc_2dx}/linblock "ttrefine: ERROR: SCRATCH/cor${imagename}.fft.mrc nor"
+      ${proc_2dx}/linblock "                 SCRATCH/cor${imagename}.mrc exist."
+      ${proc_2dx}/protest "First run UNBEND scripts. Exiting."
+      exit -1
+    endif
+  endif
+endif
+#
+\rm -f TMP123333.tmp
+\rm -f TMP124444.tmp
+#
+if ( $reference == "(none)" ) then
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_ttrefine.exe - To refine values."
+  #############################################################################
+  #
+  echo "calling ${bin_2dx}/2dx_ttrefine.exe with:"
+  echo "${imode} ${ncyc} 0.20 F F T F F 1         ! IMODE,NCYC,FSHIFT,LIST,MTZ,MAXIM,LISTS,ISHIFT,IREF"
+  echo "FFTIR/cor${imagename}.fft.mrc"
+  echo "${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV}  ! ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT"
+  echo "0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT"
+  echo "${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX"
+  echo "${lattice},${ABANG}                             ! AX, AY, BX, BY  , ABANG"
+  echo "${spcgrp} ${phaori} ${revhkval} ${rot180val} ${SGNXCH} ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH"
+  echo "${defocus} ${TLTAXIS} ${TLTANG}              ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL"
+  ${proc_2dx}/lin "Starting now:"
+  echo " "
+  #
+  ${bin_2dx}/2dx_ttrefine.exe << eot
+${imode} ${ncyc} 0.20 F F T F F 1         ! IMODE,NCYC,FSHIFT,LIST,MTZ,MAXIM,LISTS,ISHIFT,IREF
+FFTIR/cor${imagename}.fft.mrc
+${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV}  ! ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT
+0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT
+${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX
+${lattice},${ABANG}                             ! AX, AY, BX, BY  , ABANG
+${spcgrp} ${phaori} ${revhkval} ${rot180val} ${SGNXCH} ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
+${defocus} ${TLTAXIS} ${TLTANG}              ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
+eot
+  #
+else
+  #  
+  set INFILE = ${reference}
+  #  
+  if ( ! -e ${INFILE} ) then
+    ${proc_2dx}/protest "ERROR: ${INFILE} does not exist."
+  endif
+  # setenv INREF ${INFILE}  
+  setenv INREF
+  setenv HKLIN ${INFILE}
+  #
+  time ${MRC_LOCAL}/bin/2dx_ttrefine.exe << eot
+${imode} ${ncyc} 0.20 F T F F F 1         ! IMODE,NCYC,FSHIFT,LIST,MTZ,MAXIM,LISTS,ISHIFT,IREF
+FFTIR/cor${imagename}.fft.mrc
+${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT
+0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT
+${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX
+${lattice},${ABANG}                             ! AX, AY, BX, BY, ABANG
+${spcgrp} ${phaori} ${revhkval} ${rot180val} ${SGNXCH} ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
+${defocus} ${TLTAXIS} ${TLTANG}              ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
+LABIN AMP=F SIG=SIGF PHASE=PHI FOM=FOM
+eot
+  #
+endif
+#
+if (( ${imode} != '0') && ( ! -e TMP123333.tmp || ! -e TMP124444.tmp )) then
+  ${proc_2dx}/protest "ttrefine: ERROR occured."
+endif
+#
+if ( $imode != '0' ) then
+  cat TMP124444.tmp
+  \rm TMP124444.tmp
+  set olddefocus = ${defocus}
+  set newdefocus = `head -n 1 TMP123333.tmp | cut -d\= -f2`
+  set defocus = `echo ${newdefocus} | sed 's/ /,/g'`
+  ${proc_2dx}/linblock "old defocus = ${olddefocus}"
+  ${proc_2dx}/linblock "new defocus = ${defocus}"
+endif
+#
+set oTLTAXIS = ${TLTAXIS}
+set oTLTANG  = ${TLTANG}
+set oTLTAXA = ${TLTAXA}
+set oTAXA = ${TAXA}
+set oTANGL = ${TANGL}
+#
+set TTREFINE_TLTAXIS = `head -n 2 TMP123333.tmp | tail -n 1 | cut -d\= -f2`
+set TTREFINE_TLTANG = `head -n 3 TMP123333.tmp | tail -n 1 | cut -d\= -f2`
+set TTREFINE_TLTAXA = `head -n 4 TMP123333.tmp | tail -n 1 | cut -d\= -f2`
+set TTREFINE_TAXA = `head -n 5 TMP123333.tmp | tail -n 1 | cut -d\= -f2`
+set TTREFINE_TANGL = `head -n 6 TMP123333.tmp | tail -n 1 | cut -d\= -f2`
+#
+${proc_2dx}/linblock "TLTAXIS: old ${oTLTAXIS}, now ${TTREFINE_TLTAXIS}"
+${proc_2dx}/linblock "TLTANG : old ${oTLTANG}, now ${TTREFINE_TLTANG}"
+${proc_2dx}/linblock "TLTAXA : old ${oTLTAXA}, now ${TTREFINE_TLTAXA}"
+${proc_2dx}/linblock "TAXA   : old ${oTAXA}, now ${TTREFINE_TAXA}"
+${proc_2dx}/linblock "TANGL  : old ${oTANGL}, now ${TTREFINE_TANGL}"
+#
+echo "set TTREFINE_TLTAXIS = ${TTREFINE_TLTAXIS}" >> LOGS/${scriptname}.results
+echo "set TTREFINE_TLTANG  = ${TTREFINE_TLTANG}"  >> LOGS/${scriptname}.results
+echo "set TTREFINE_TLTAXA  = ${TTREFINE_TLTAXA}"  >> LOGS/${scriptname}.results
+echo "set TTREFINE_TAXA    = ${TTREFINE_TAXA}"    >> LOGS/${scriptname}.results
+echo "set TTREFINE_TANGL   = ${TTREFINE_TANGL}"   >> LOGS/${scriptname}.results
+#
+if ( ${overwrite} == "y" ) then
+  set TLTAXIS = ${TTREFINE_TLTAXIS}
+  set TLTANG  = ${TTREFINE_TLTANG}
+  set TLTAXA  = ${TTREFINE_TLTAXA}
+  set TAXA    = ${TTREFINE_TAXA}
+  set TANGL   = ${TTREFINE_TANGL}
+  echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+  echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  echo "set TLTANG  = ${TLTANG}"  >> LOGS/${scriptname}.results
+  echo "set TLTAXA  = ${TLTAXA}"  >> LOGS/${scriptname}.results
+  echo "set TAXA    = ${TAXA}"    >> LOGS/${scriptname}.results
+  echo "set TANGL   = ${TANGL}"   >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_ACTIVE = 3"   >> LOGS/${scriptname}.results
+endif
+#
+echo "# IMAGE: FFTIR/cor${imagename}.fft.mrc <FFT of Unbent Image>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+#

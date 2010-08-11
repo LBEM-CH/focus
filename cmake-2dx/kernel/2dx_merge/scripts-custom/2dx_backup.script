@@ -1,0 +1,243 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Backup Project                                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 30/08/2007                                             #
+# Last Modification: 30/08/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 90
+#
+# MANUAL: This script allows to copy the significant files from the currently selected images in this project into a different location. 
+#
+# MANUAL: This can be used to backup a project, for file safety. It can also be used to clone a project onto a different computer, if that computer's harddrive is NFS mounted.
+#
+# GLOBAL: backup_dir
+# GLOBAL: backup_merge
+# GLOBAL: backup_sure
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_image = ""
+#
+set backup_dir = ""
+set backup_merge = ""
+set backup_sure = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_backup
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+echo backup_dir = ${backup_dir}
+echo backup_merge = ${backup_merge}
+echo backup_sure = ${backup_sure}
+#
+echo "<<@progress: 1>>"
+#
+echo "set backup_sure = no" >> LOGS/${scriptname}.results
+if ( ! -d ${backup_dir} ) then
+  #
+  ${proc_2dx}/linblock "Provide an existing directory path"
+  ${proc_2dx}/protest "${backup_dir} not found"
+  #
+endif
+#
+if ( ${backup_sure} == "no" ) then
+  ${proc_2dx}/protest "Not running (Are you sure is 'no')."
+endif
+#
+# This switch decides if the *.mrc files should also be copied:
+set alsobig = "y"
+#
+set oldir = ${PWD}
+#
+cd ..
+set local_root_dir = ${PWD}
+set local_root_noslash = `echo ${local_root_dir} | sed "s/\//#/g"`
+echo local_root_dir = ${local_root_dir}
+set backup_dir_noslash = `echo ${backup_dir} | sed "s/\//#/g"`
+echo backup_dir = ${backup_dir}
+cd ${oldir}
+#
+if ( ${backup_merge} == "yes" ) then
+  ############################################################################# 
+  ${proc_2dx}/linblock "Backing up merge directory"
+  #############################################################################
+  #
+  echo ": "
+  echo "::---- Backup merge"
+  set from_dir = ${PWD}
+  set to_dir = `echo ${from_dir} | sed "s/\//#/g" | sed "s/${local_root_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
+  if ( ! -d ${to_dir} ) then
+    \mkdir -p ${to_dir}
+    if ( ! -d ${to_dir} ) then
+      ${proc_2dx}/protest "ERROR: ${to_dir} could not be created."
+    endif
+  endif
+  #
+  echo "dummy" > ${from_dir}/SELECT-dummy.dat
+  cp -f ${from_dir}/SELECT* ${to_dir}
+  \rm ${from_dir}/SELECT-dummy.dat
+  \rm ${to_dir}/SELECT-dummy.dat
+  #
+  echo ":New: ${to_dir}/2dx_merge.cfg"
+  cp -f -p ${from_dir}/2dx_merge.cfg ${to_dir}
+  #
+  cp -f -p ${from_dir}/2dx_merge_dirfile.dat ${to_dir}
+  #
+  if ( -d ${from_dir}/REGISTERS ) then
+    echo ":New: ${to_dir}/REGISTERS"
+    cp -f -r ${from_dir}/REGISTERS ${to_dir}
+  endif
+  #
+  if ( -e ${from_dir}/merge2D.mtz ) then
+    echo ":New: ${to_dir}/merge2D.mtz"
+    cp -f -p ${from_dir}/merge2D.mtz ${to_dir}
+  endif
+  #
+  if ( -e ${from_dir}/merge3D.mtz ) then
+    echo ":New: ${to_dir}/merge3D.mtz"
+    cp -f -p ${from_dir}/merge3D.mtz ${to_dir}
+  endif
+  #
+  if ( -e ${from_dir}/merge.aph ) then
+    echo ":New: ${to_dir}/merge.aph"
+    cp -f -p ${from_dir}/merge.aph ${to_dir}
+  endif
+  #
+  if ( -d ${from_dir}/APH ) then
+    if ( ! -d ${to_dir}/APH ) then
+      \mkdir ${to_dir}/APH
+    endif
+    echo dummy > ${from_dir}/APH/dummy.tmp
+    echo ":New: ${to_dir}/APH/*"
+    cp -f -p ${from_dir}/APH/* ${to_dir}/APH
+    \rm ${from_dir}/APH/dummy.tmp
+    \rm ${to_dir}/APH/dummy.tmp
+  endif
+  #
+  if ( -e ${from_dir}/History.dat ) then
+    echo ":New: ${to_dir}/History.dat"
+    cp -f -p ${from_dir}/History.dat ${to_dir}
+  endif
+  #
+endif
+#
+############################################################################# 
+${proc_2dx}/linblock "Backing up all directories"
+#############################################################################
+#
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
+set increment = `echo ${dirnum} | awk '{ s = 100.0 / $1 } END { print s }'`
+set curval = 0.0
+#
+foreach dirfile ( ${dirlist} ) 
+  set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
+  set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
+  echo "<<@progress:${curprogress}>>"
+  cd ${dirfile}
+  if ( -e 2dx_image.cfg ) then
+    set loc_imagename = `fgrep "set imagename = " 2dx_image.cfg | cut -d\" -f2`
+    set loc_nonmaskimagename = `fgrep "set nonmaskimagename = " 2dx_image.cfg | cut -d\" -f2`
+    echo ": "
+    echo "::---- Backup ${dirfile}"
+    set from_dir = ${PWD}
+    set to_dir = `echo ${from_dir} | sed "s/\//#/g" | sed "s/${local_root_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
+    #
+    if ( ! -d ${to_dir} ) then
+      \mkdir -p ${to_dir}
+      if ( ! -d ${to_dir} ) then
+        ${proc_2dx}/protest "ERROR: ${to_dir} could not be created."
+      endif
+    endif
+    #
+    echo ":New: ${to_dir}/2dx_image.cfg"
+    cp -f -p ${from_dir}/2dx_image.cfg ${to_dir}
+    #
+    if ( ${alsobig} == "y" ) then
+      if ( ! -e ${to_dir}/${loc_imagename}.mrc ) then
+        echo ":New: ${to_dir}/${loc_imagename}.mrc"
+        cp -f -p ${from_dir}/${loc_imagename}.mrc ${to_dir}
+      else
+        echo ":Old: ${to_dir}/${loc_imagename}.mrc"
+      endif
+    endif
+    #
+    if ( -e ${from_dir}/${loc_imagename}.spt ) then
+      echo ":New: ${to_dir}/${loc_imagename}.spt"
+      cp -f -p ${from_dir}/${loc_imagename}.spt ${to_dir}
+    endif
+    #
+    if ( -e ${from_dir}/${loc_imagename}.mtz ) then
+      echo ":New: ${to_dir}/${loc_imagename}.mtz"
+      cp -f -p ${from_dir}/${loc_imagename}.mtz ${to_dir}
+    endif
+    #
+    if ( ${loc_imagename} != ${loc_nonmaskimagename} ) then
+      if ( ${alsobig} == "y" ) then
+        if ( ! -e ${to_dir}/${loc_nonmaskimagename}.mrc ) then
+          echo ":New: ${to_dir}/${loc_nonmaskimagename}.mrc"
+          cp -f -p ${from_dir}/${loc_nonmaskimagename}.mrc ${to_dir}
+        else
+          echo ":Old: ${to_dir}/${loc_nonmaskimagename}.mrc"
+        endif
+      endif
+      #
+      if ( -e ${from_dir}/${loc_nonmaskimagename}.spt ) then
+        echo ":New: ${to_dir}/${loc_nonmaskimagename}.spt"
+        cp -f -p ${from_dir}/${loc_nonmaskimagename}.spt ${to_dir}
+      endif
+      #
+      if ( -e ${from_dir}/${loc_nonmaskimagename}.mtz ) then
+        echo ":New: ${to_dir}/${loc_nonmaskimagename}.mtz"
+        cp -f -p ${from_dir}/${loc_nonmaskimagename}.mtz ${to_dir}
+      endif
+    endif
+    #
+    if ( -e ${from_dir}/History.dat ) then
+      echo ":New: ${to_dir}/History.dat"
+      cp -f -p ${from_dir}/History.dat ${to_dir}
+    endif
+    #
+    if ( -d ${from_dir}/APH ) then
+      if ( ! -d ${to_dir}/APH ) then
+        \mkdir ${to_dir}/APH
+      endif
+      echo dummy > ${from_dir}/APH/dummy.tmp
+      echo ":New: ${to_dir}/APH/*"
+      cp -f -p ${from_dir}/APH/* ${to_dir}/APH
+      \rm ${from_dir}/APH/dummy.tmp
+      \rm ${to_dir}/APH/dummy.tmp
+    endif
+    #
+  else
+    echo "::Backup from ${dirfile} not possible, since no 2dx_image.cfg exists."
+  endif
+  # 
+  cd ${oldir}
+end
+#
+echo "<<@progress:100>>"
+#
+############################################################################# 
+${proc_2dx}/linblock "Done."
+#############################################################################
+#
+#
+#

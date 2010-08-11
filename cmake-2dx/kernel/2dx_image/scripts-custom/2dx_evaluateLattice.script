@@ -1,0 +1,775 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Evaluate Lattice                                                   #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 09/05/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# MANUAL: This script assists in the manipulation and/or evaluation of the determined reciprocal lattice. It offers three pull-down selectors to re-scale, rotate or invert the current reciprocal lattice. After that, it will compare the resulting lattice with a lattice that is calculated from the real-space lattice, taking the dimensions of the image size, magnification and digitizer stepsize into account. 
+#
+# MANUAL: As output, this script will report <BR><B>(1)</B> the calculated real-space lattice dimensions, to which the current reciprocal lattice would correspond to, and <BR><B>(2)</B> the theoretical magnification, that would bring the reciprocal lattice in best agreement with the real-space lattice, and <BR><B>(3)</B> the tilt geometry as calculated from the distortions of the current reciprocal lattice with respect to the real-space lattice.
+#
+# MANUAL: This script will then also calculate the fitness of the current reciprocal lattice using the coordinates of peaks in the averaged powerspectrum that was calculated in the script <i>Get Lattice & Tilt</I>.
+# 
+# MANUAL: This is done by calculating for the peaks in the peaklist their distance from the nodes of the current lattice. To exclude noise peaks or peaks from other lattices, only the peaks that are close enough to the current lattice are considered.
+#
+# MANUAL: <i>Lattice Error</i> describes the percentage of the maximum error a lattice can generate according to 2dx_laterror.exe when fit to the points. 0% would indicate a perfectly fit lattice, where 100% would indicate a perfectly misaligned lattice.
+#
+# MANUAL: For a more detailed description see <A HREF="http://2dx.org/documentation/2dx-software/parameters/Lattice">here</A>.
+#
+#
+# SORTORDER: 20
+#
+#=============================================================================
+# SECTION: Modify Current Lattice
+#=============================================================================
+#
+# LABEL: Swap first and second lattice
+# LEGEND: This allows to exchange the lattices that are stored as primary and secondary lattice.
+# EXAMPLE: doswap = "nothing"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Drop_Down_Menu "0=nothing;1=Swap Lattices;2=Copy First onto Second;3=Copy Second onto First"
+set doswap = "0"
+#
+# LABEL: Scaling - Do the following
+# LEGEND: This allows to modify the lattice vector values
+# EXAMPLE: do1 = "nothing"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Drop_Down_Menu "0=nothing;1=double u;2=double v;3=double u&v;4=grow by 45deg (h->h+k,k->h-k);5=half u;6=half v;7=half u&v;8=shrink by 45deg (h->h/2+k/2,k->h/2-k/2)"
+set do1 = "0"
+#
+# LABEL: Skewing - Then do the following
+# LEGEND: This allows to replace one vector with the sum of the two
+# EXAMPLE: do2 = "nothing"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Drop_Down_Menu "0=nothing;1=close (h->h,k->h+k);2=open (h->h,k->h-k)"
+set do2 = "0"
+#
+# LABEL: Rotating - Then do the following
+# LEGEND: This allows to rotate a hexagonal lattice
+# EXAMPLE: do3 = "nothing"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Drop_Down_Menu "0=nothing;1=rot sq. ccw (h->k,k->-h);2=rot sq. cw (h->-k,k->h);3=rot hex ccw (h->k,k->-h+k);4=rot hex cw (h->-k+h,k->h)"
+set do3 = "0"
+#
+# LABEL: Handedness - Then do the following
+# LEGEND: This allows to change the hand of the lattice, by exchanging u and v
+# EXAMPLE: do4 = "nothing"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Drop_Down_Menu "0=nothing;1=change hand (h->k,k->h)"
+set do4 = "0"
+#
+#=============================================================================
+# SECTION: Overwrite existing values ? (careful !!!)
+#=============================================================================
+#
+# LABEL: Overwrite project-wide real-space lattice?
+# LEGEND: When this is 'y', then the determined real-space lattice will be inserted into the database. Be careful, this should only be done ONCE for the entire protein crystal project, and <B>only for a non-tilted sample</B>. A determined value should be updated in the higher-level master database 2dx_image.cfg. Future starts of 2dx_image will then update the local databases of all lower-level image processing directories with this new value.
+# EXAMPLE: overwriteRealLattice = "n"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Bool "y;n"
+# LOCKED: YES
+set overwriteRealLattice = "n"
+#
+# LABEL: Overwrite local tilt geometry?
+# LEGEND: When this is 'y', then the determined tilt geometry from lattice distortions will be inserted into the database. This, however, will only happen if the determined tilt angle is higher than 15 degrees, and if the flag to determine the tilt geometry is set to yes (det_tilt).  
+# EXAMPLE: overwriteTiltgeometry = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Bool "y;n"
+set overwriteTiltgeometry = "n"
+#
+#=============================================================================
+# SECTION: Peak Coordinates
+#=============================================================================
+#
+# LABEL: (Re-)create peak coordinate file ?
+# LEGEND: When this is 'y', then the peaks_xy_final.dat file is (re-)created. This is then used for the calculation of the lattice error.
+# EXAMPLE: regenPL = "n"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Bool "y;n"
+set regenPL = "n"
+#
+# LABEL: Number of Peaks
+# LEGEND: Number of Peaks in peaksearch, more peaks yields a more accurate lattice. These peaks are used to calculate the lattice error.
+# EXAMPLE: peakNum = "140"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: INTEGER
+set peakNum = "140"
+#
+#
+# GLOBAL: SYM
+# GLOBAL: lattice
+# GLOBAL: secondlattice
+# GLOBAL: realcell
+# GLOBAL: realang
+# GLOBAL: realcell_local
+# GLOBAL: realang_local
+# GLOBAL: TLTANG
+# GLOBAL: TLTAXIS
+# GLOBAL: TLTAXA
+# GLOBAL: TAXA
+# GLOBAL: TANGL
+# GLOBAL: det_tilt
+# GLOBAL: ctf_ttf
+# GLOBAL: imagesidelength
+# GLOBAL: stepdigitizer
+# GLOBAL: magnification
+# GLOBAL: tempkeep
+# GLOBAL: comment
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set imagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set RESMAX = ""
+set realcell = ""
+set realang = ""
+set realcell_local = ""
+set realang_local = ""
+set lattice = ""
+set secondlattice = ""
+set TLTANG = ""
+set TLTAXIS = ""
+set SYM = ""
+set det_tilt = ""
+set ctf_ttf = ""
+set tempkeep = ""
+#
+#$end_vars
+#
+echo "<<@progress: 1>>"
+#
+source ${proc_2dx}/initialize
+#
+echo lattice = ${lattice}
+echo secondlattice = ${secondlattice}
+#
+set scriptname = 2dx_evaluateLattice
+#
+\rm -f LOGS/${scriptname}.results
+#
+${proc_2dx}/2dx_makedirs 
+#
+if ( ${do1} != 0 || ${do2} != 0 || ${do3} != 0 ) then
+  ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
+else
+  echo ":Lattice is: ${lattice}"
+endif
+#
+if ( ${doswap} != 0 ) then
+  ${proc_2dx}/linblock "Second Lattice is currently: ${secondlattice}"
+endif
+#
+#############################################################################
+if ( ${doswap} != 0 ) then
+  ${proc_2dx}/linblock "doswap - swapping lattices"
+endif
+#############################################################################
+#
+if ( ${doswap} == "1" ) then
+  set tmplattice = `echo ${lattice} | sed 's/, /,/g'`
+  set lattice = `echo ${secondlattice} | sed 's/, /,/g'`
+  set secondlattice = "${tmplattice}"
+  echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
+  echo "set secondlattice = "${secondlattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+  ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
+endif
+#
+if ( ${doswap} == "2" ) then
+  set secondlattice = `echo ${lattice} | sed 's/, /,/g'`
+  echo "set secondlattice = "${secondlattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+  ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
+endif
+#
+if ( ${doswap} == "3" ) then
+  set lattice = `echo ${secondlattice} | sed 's/, /,/g'`
+  echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+  ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
+endif
+#
+#############################################################################
+if ( ${do1} != 0 ) then
+  ${proc_2dx}/linblock "do1 - to scale the lattice"
+endif
+#############################################################################
+#
+# TYPE: Drop_Down_Menu "0=nothing;1=double u;2=double v;3=double u&v;4=grow by 45deg (h->h+k,k->h-k);5=half u;6=half v;7=half u&v;8=shrink by 45deg (h->h/2+k/2,k->h/2-k/2)"
+#
+set latu1 = `echo ${lattice} | cut -d, -f1`
+set latu2 = `echo ${lattice} | cut -d, -f2`
+set latv1 = `echo ${lattice} | cut -d, -f3`
+set latv2 = `echo ${lattice} | cut -d, -f4`
+#
+if ( ${do1} == "1" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = 2 * $1 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = 2 * $1 } END { print s}'`
+endif
+#
+if ( ${do1} == "2" ) then
+  set latv1 = `echo ${latv1} | awk '{ s = 2 * $1 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = 2 * $1 } END { print s}'`
+endif
+#
+if ( ${do1} == "3" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = 2 * $1 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = 2 * $1 } END { print s}'`
+  set latv1 = `echo ${latv1} | awk '{ s = 2 * $1 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = 2 * $1 } END { print s}'`
+endif
+#
+if ( ${do1} == "4" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 + $3 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 + $4 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 - $3 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 - $4 } END { print s}'`
+  set latu1 = ${nlatu1}
+  set latu2 = ${nlatu2}
+  set latv1 = ${nlatv1}
+  set latv2 = ${nlatv2}
+endif
+#
+if ( ${do1} == "5" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = $1 / 2 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = $1 / 2 } END { print s}'`
+endif
+#
+if ( ${do1} == "6" ) then
+  set latv1 = `echo ${latv1} | awk '{ s = $1 / 2 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = $1 / 2 } END { print s}'`
+endif
+#
+if ( ${do1} == "7" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = $1 / 2 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = $1 / 2 } END { print s}'`
+  set latv1 = `echo ${latv1} | awk '{ s = $1 / 2 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = $1 / 2 } END { print s}'`
+endif
+#
+if ( ${do1} == "8" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 / 2 + $3 / 2 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 / 2 + $4 / 2 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 / 2 - $3 / 2 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 / 2 - $4 / 2 } END { print s}'`
+  set latu1 = ${nlatu1}
+  set latu2 = ${nlatu2}
+  set latv1 = ${nlatv1}
+  set latv2 = ${nlatv2}
+endif
+#
+set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
+if ( ${do1} != 0 ) then
+  echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+endif
+#
+#############################################################################
+if ( ${do2} != 0 ) then
+  ${proc_2dx}/linblock "do2 - to skew the lattice"
+endif
+#############################################################################
+#
+# TYPE: Drop_Down_Menu "0=nothing;1=(h->h,k=h+k);2=(h->h,k=h-k)"
+#
+set nlatu1 = ${latu1}
+set nlatu2 = ${latu2}
+set nlatv1 = ${latv1}
+set nlatv2 = ${latv2}
+#
+if ( ${do2} == "1" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1      } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2      } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 + $3 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 + $4 } END { print s}'`
+endif
+#
+if ( ${do2} == "2" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1      } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2      } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 - $3 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 - $4 } END { print s}'`
+endif
+#
+set latu1 = ${nlatu1}
+set latu2 = ${nlatu2}
+set latv1 = ${nlatv1}
+set latv2 = ${nlatv2}
+#
+set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
+if ( ${do2} != 0 ) then
+  echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+endif
+#
+#############################################################################
+if ( ${do3} != 0 ) then
+  ${proc_2dx}/linblock "do3 - to rotate the lattice"
+endif
+#############################################################################
+#
+# TYPE: Drop_Down_Menu "0=nothing;1=rot sq. ccw (h->k,k->-h);2=rot sq. cw (h->-k,k->h);3=rot hex ccw (hk->k,-h+k);4=rot hex cw (hk->-k+h,h)"
+#
+set nlatu1 = ${latu1}
+set nlatu2 = ${latu2}
+set nlatv1 = ${latv1}
+set nlatv2 = ${latv2}
+#
+if ( ${do3} == "1" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $3 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $4 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = - $1 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = - $2 } END { print s}'`
+endif
+#
+if ( ${do3} == "2" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = - $3 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = - $4 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $1 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $2 } END { print s}'`
+endif
+#
+if ( ${do3} == "3" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $3      } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $4      } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $3 - $1 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $4 - $2 } END { print s}'`
+endif
+#
+if ( ${do3} == "4" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 - $3 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 - $4 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1      } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2      } END { print s}'`
+endif
+#
+set latu1 = ${nlatu1}
+set latu2 = ${nlatu2}
+set latv1 = ${nlatv1}
+set latv2 = ${nlatv2}
+#
+set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
+if ( ${do3} != 0 ) then
+  echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+endif
+#
+#############################################################################
+if ( ${do4} != 0 ) then
+  ${proc_2dx}/linblock "do3 - to change the hand of the lattice"
+endif
+#############################################################################
+#
+if ( ${do4} == "1" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $3 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $4 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 } END { print s}'`
+endif
+#
+set latu1 = ${nlatu1}
+set latu2 = ${nlatu2}
+set latv1 = ${nlatv1}
+set latv2 = ${nlatv2}
+#
+set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
+if ( ${do4} != 0 ) then
+  echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+endif
+#
+#############################################################################
+#
+if ( ${do1} != 0 || ${do2} != 0 || ${do3} != 0 || ${do4} != 0 ) then
+  echo "::Don't forget to redo the spotlist."
+endif
+#
+echo "<<@progress: 30>>"
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_reciproc: to calculate corresponding real-space lattice."
+#############################################################################
+#
+set TMPdat = "SCRATCH/TMP.dat"
+\rm -f ${TMPdat}
+#
+${bin_2dx}/2dx_reciproc.exe << eot
+${lattice}
+${imagesidelength}
+${TMPdat}
+eot
+#
+if ( ! -e ${TMPdat} ) then
+  ${proc_2dx}/protest "ERROR in 2dx_reciproc."
+endif
+#
+set real_lat = `cat ${TMPdat}`
+\rm ${TMPdat}
+#
+echo ":: "
+echo ":: Recip. lattice in recip. px is ${lattice}"
+echo ":: RealSpace lattice in pixels is ${real_lat}"
+echo ":: "
+#
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_lencalc: To calculate some values for the tilt geometry determination."
+#############################################################################
+#
+set docfile = "2dx_lencalc-doc.tmp"
+#
+\rm -f ${docfile}
+#
+${bin_2dx}/2dx_lencalc.exe << eot
+${lattice}
+${realcell}
+${realang}
+${imagesidelength}
+${magnification}
+${stepdigitizer}
+${docfile}
+eot
+#
+cat ${docfile}
+#
+set hand     = `head -n 2 ${docfile} | tail -n 1`
+set untilted = `head -n 4 ${docfile} | tail -n 1`
+set alpha    = `head -n 6 ${docfile} | tail -n 1`
+echo "::Alpha = ${alpha}       (Angle between X-Axis and A-star lattice vector"
+set tilted   = `head -n 8 ${docfile} | tail -n 1`
+set realtlt  = `head -n 10 ${docfile} | tail -n 1`
+#
+# set reallatu = `echo ${realtlt} | cut -d\  -f1`
+# set reallatv = `echo ${realtlt} | cut -d\  -f2`
+# set tiltrealcell = `echo ${reallatu},${reallatv}`
+# set tiltrealang = `echo ${realtlt} | cut -d\  -f3`
+#
+set oldrealcell = `echo ${realcell} | sed 's/,/ /g'`
+#
+echo ":: ${realtlt}    would be the (potentially tilted) real-space lattice [A,A,deg]."
+#
+echo "<<@progress: 40>>"
+#
+#############################################################################
+#                                                                           #
+#  EMTILT                                                                   #
+#                                                                           #
+#                 ->  1   , 1   , 90.0       (or also : lenA,lenB,90.0)     #
+#                 ->  lenH, lenK, ang(H,K)                                  #
+#                                                                           #
+#                 <-  ang(Tiltaxis to A*) = Omega                           #
+#                 <-  Tiltangle (without sign)                              #
+#                                                                           #
+#  A* was in the EM in the sample-plane.                                    #
+#  Omega is NOT the angle from the Tiltaxis to H, but this one without      #
+#     perspective. Omega is in the negative plane.                          #
+#     Omega is slightly smaller than the latter (TLTAXA).                   #
+#                                                                           #
+#############################################################################
+#                                                                           #
+#  Angle from TLT-axis to H is TLTAXA, TLT-axis to K is TLTAXB. (???)       #
+#  Angle from Y-axis to H is TLTAXA, Y-axis to K is TLTAXB.                 #
+#  Henderson: "TLTANG, TLTAXA, TLTAXB are on negative, nobody wants them."  #
+#  This is not fully correct: TTMASK or TTBOX need them.                    #
+#                                                                           #
+#  TLTAXIS: Angle from X-axis to Tiltaxis                                   #
+#  TLTANG is positive for strong underfocus at top of image.                #
+#  TLTANG is positive for left overfocus, right underfocus when TLTAXIS= Y  #
+#  TLTANG is positive for strong underfocus on left side, when TLTAXIS= Y   #
+#       (Left screw positive counting)                                      #
+#          TLTAXIS, TLTANG are for TTREFINE.                                #
+#                                                                           #
+#  TTREFINE has perfect output for ORIGTILTC :                              #
+#          TAXA  , TAXB  , TANGL  are on sample, for ORIGTILTC.             #
+#                                                                           #
+#############################################################################
+#
+# Henderson in an email 6/2000:
+#   y=0 means the x-axis which is horizontal.  It is indeed the bottom line of
+# the image.  The first point on that line is (0,0), the second point (1,0)
+# and so on [e.g. (x,0)].  Therefore all points on the line have y=0.  If the
+# tiltaxis is horizontal, parallel to x and the defocus gets stronger as you
+# go to higher values of y (i.e. further up the image), then TLTANGL is positive.
+# This is a robust definition and TLTAXIS can take any number between -89.999
+# and +89.999.  If it happens to be exactly 90.000 (note that this has never
+# occurred in practice), then you have to know how the program reacts and that is
+# where the extra x=0 description arises.  In practice, if your film orientation
+# is such that the tiltaxis is mostly vertical but varies a bit with some of
+# them on different sides of the vertical, then those with TLTAXIS of 85 degrees,
+# for example, would have TLTANG positive, whereas those with TLTAXIS of 95 (i.e.
+# -85) degrees would have TLTANGL negative.  So, the TLTANGL sign would change
+# at 90.   This does not happen with the tiltaxis roughly horizontal, when there
+# is no change in the definition as the TLTAXIS passes from -10 to +10.  I hope
+#?| this is now clearer.
+#
+#############################################################################
+#
+#############################################################################
+${proc_2dx}/linblock "emtilt: To calculate the tilt geometry from lattice distortions."
+#############################################################################
+#
+\rm -f TMP.2dx_emtilt.1.out
+#
+set oldTLTAXIS = ${TLTAXIS}
+set oldTLTANG  = ${TLTANG}
+set docfile = "2dx_emtilt-doc.tmp"
+\rm -f ${docfile}
+#
+echo untilted = ${untilted}
+echo tilted = ${tilted}
+echo oldTLTAXIS = ${oldTLTAXIS}
+echo oldTLTANG = ${oldTLTANG}
+echo hand = ${hand}
+echo alpha = ${alpha}
+#
+${bin_2dx}/2dx_emtilt.exe << eot
+${untilted}
+${tilted}
+${oldTLTAXIS}
+${oldTLTANG}
+${hand}
+${alpha}
+${docfile}
+eot
+#
+echo "2dx_emtilt.exe finished."
+#
+# read the determined values for the tilt geometry back into this script shell:
+set LATTICE_TLTAXIS = `head -n 2  ${docfile} | tail -n 1`
+set LATTICE_TLTANG  = `head -n 4  ${docfile} | tail -n 1`
+set LATTICE_TLTAXA  = `head -n 6  ${docfile} | tail -n 1`
+set LATTICE_TAXA    = `head -n 8  ${docfile} | tail -n 1`
+set LATTICE_TANGL   = `head -n 10 ${docfile} | tail -n 1`
+#
+echo "<<@progress: 55>>"
+#
+set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>15 || $1<-15) {s=1} else {s=0}} END {print s}'`
+#
+# if ( ${highangle} == '1' && ${det_tilt} == 'y' && ${overwriteTiltgeometry} == 'y' ) then
+if ( ${overwriteTiltgeometry} == 'y' ) then
+  #############################################################################
+  ${proc_2dx}/linblock "Saving tilt geometry from lattice, because of high tilt."
+  #############################################################################
+  set TLTAXIS = ${LATTICE_TLTAXIS}
+  set TLTANG  = ${LATTICE_TLTANG}
+  set TLTAXA  = ${LATTICE_TLTAXA}
+  set TAXA    = ${LATTICE_TAXA}
+  set TANGL   = ${LATTICE_TANGL}
+  #
+  # Make sure these values are going back into 2dx:
+  echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  echo "set TLTANG  = ${TLTANG}"  >> LOGS/${scriptname}.results
+  echo "set TLTAXA  = ${TLTAXA}"  >> LOGS/${scriptname}.results
+  echo "set TAXA    = ${TAXA}"    >> LOGS/${scriptname}.results
+  echo "set TANGL   = ${TANGL}"   >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_ACTIVE = 2"   >> LOGS/${scriptname}.results
+  #
+else
+  #############################################################################
+  if ( ${highangle} != '1' ) then
+    ${proc_2dx}/linblock "NOT saving tilt geometry from lattice, because of low tilt."
+  else
+    ${proc_2dx}/linblock "NOT saving tilt geometry from lattice, because you said so."
+  endif
+  #############################################################################
+  echo "TLTAXIS = ${LATTICE_TLTAXIS}"
+  echo "TLTANG  = ${LATTICE_TLTANG}" 
+  echo "TLTAXA  = ${LATTICE_TLTAXA}" 
+  echo "TAXA    = ${LATTICE_TAXA}"   
+  echo "TANGL   = ${LATTICE_TANGL}"  
+  echo "(These values were calculated, but will not be used.)"
+endif
+#
+echo "set LATTICE_TLTAXIS = "\"${LATTICE_TLTAXIS}\" >> LOGS/${scriptname}.results
+echo "set LATTICE_TLTANG  = "\"${LATTICE_TLTANG}\"  >> LOGS/${scriptname}.results
+echo "set LATTICE_TLTAXA  = "\"${LATTICE_TLTAXA}\"  >> LOGS/${scriptname}.results
+echo "set LATTICE_TAXA    = "\"${LATTICE_TAXA}\"    >> LOGS/${scriptname}.results
+echo "set LATTICE_TANGL   = "\"${LATTICE_TANGL}\"   >> LOGS/${scriptname}.results
+#
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#
+#
+echo " "                              >> History.dat
+echo "::From EvaluateLattice:"        >> History.dat
+echo "::RealCell= ${realcell}"        >> History.dat
+echo "::Real Ang= ${realang}"         >> History.dat
+echo "::Lattice = ${lattice}"         >> History.dat
+echo " "                              >> History.dat
+echo "::TLTAXIS = ${LATTICE_TLTAXIS}" >> History.dat
+echo "::TLTANG  = ${LATTICE_TLTANG}"  >> History.dat
+echo "::TLTAXA  = ${LATTICE_TLTAXA}"  >> History.dat
+echo "::TAXA    = ${LATTICE_TAXA}"    >> History.dat
+echo "::TANGL   = ${LATTICE_TANGL}"   >> History.dat
+#
+echo ": "                           
+echo "::TLTAXIS = ${LATTICE_TLTAXIS}"
+echo "::TLTANG  = ${LATTICE_TLTANG}"  
+echo "::TLTAXA  = ${LATTICE_TLTAXA}" 
+echo "::TAXA    = ${LATTICE_TAXA}"  
+echo "::TANGL   = ${LATTICE_TANGL}"   
+#
+echo "<<@progress: 70>>"
+#
+set outputfile = ${scriptname}.tmp
+\rm -f ${outputfile}
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_calcmag - to calculate the theoretical magnification"
+#############################################################################
+#
+${bin_2dx}/2dx_calcmag.exe << eot
+${realcell}
+${realang}
+${TLTAXIS}
+${TLTANG}
+${lattice}
+${imagesidelength}
+${magnification}
+${stepdigitizer}
+${outputfile}
+eot
+#
+if ( ! -e ${outputfile} ) then
+  ${proc_2dx}/protest "ERROR in 2dx_calcmag.exe"
+endif
+#
+set theormag = `cat ${outputfile} | head -n 1`
+set RANGrec  = `cat ${outputfile} | head -n 2 | tail -n 1`
+set tmp = `echo ${RANGrec} | awk '{ if ( $1 < 100.0 ) { s = 1 } else { s = 0 }} END { print s }'`  
+if ( $tmp == '1' ) then
+  set RANGrec = " "${RANGrec}
+endif
+set RANGrealimage = `cat ${outputfile} | head -n 3 | tail -n 1`
+set RANGrealsample = `cat ${outputfile} | head -n 4 | tail -n 1`
+set realcell_local = `cat ${outputfile} | head -n 5 | tail -n 1`
+set realang_local = `cat ${outputfile} | head -n 6 | tail -n 1`
+#
+echo "set realcell_local = "${realcell_local} >> LOGS/${scriptname}.results
+echo "set realang_local = "${realang_local} >> LOGS/${scriptname}.results
+#
+if ( ${overwriteRealLattice} == "y" ) then
+  echo "set realcell = "${realcell_local} >> LOGS/${scriptname}.results
+  echo "set realang = "${realang_local} >> LOGS/${scriptname}.results
+  echo "set overwriteRealLattice = n" >> LOGS/${scriptname}.results
+  echo "::"
+  echo ":: ##############################################################################"
+  echo ":: ${realcell},${realang}    is the corresponding non-tilted real-space lattice [A,A,deg]."
+  echo ":: This is in Angstroems and Degrees."
+  echo ":: ##############################################################################"
+  echo ":: This is now written into the database of this image as project-wide value."
+  echo ":: If you like this value, don't forget to save this database as project default."
+  echo ":: ##############################################################################"
+else
+  echo ":: ${realcell_local} ${realang_local}   would be the non-tilted real-space lattice [A,A,deg]."
+endif
+echo ":: ${oldrealcell} ${realang}    is the current real-space lattice [A,A,deg]."
+echo ":: "
+#
+\rm -f ${outputfile}
+#
+${proc_2dx}/linblock "Theoretical magnification is ${theormag}, given magnification is ${magnification}"
+echo "::"
+echo ":: ${RANGrec}    is the included angle in given reciprocal lattice."
+echo ":: ${RANGrealimage}    is the included angle in the real-space image lattice."
+echo ":: ${RANGrealsample}    is the included angle in the real-space sample lattice."
+echo "::"
+#
+echo "set CALCULATEDMAG = ${theormag}" >> LOGS/${scriptname}.results
+#
+set docfile = "./peaks_xy_final.dat"
+if ( ${regenPL} == "y" ) then
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_taperedge: To taper the edges to prevent stripes in the FFT"
+  #############################################################################
+  #
+  \rm -f     SCRATCH/${imagename}.taper.mrc
+  setenv IN  ${imagename}.mrc
+  setenv OUT SCRATCH/${imagename}.taper.mrc
+  ${bin_2dx}/2dx_taperedgek.exe << eot
+10,10,100,10       ! IAVER,ISMOOTH,ITAPER
+eot
+  #
+  echo "<<@progress: 80>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_peaksearch: To generate a completed peak list ..."
+  #############################################################################
+  #
+  \rm -f ${docfile}
+  #
+  ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}.taper.mrc 40 ${peakNum}
+  #
+  if ( ${tempkeep} == 'y' ) then
+    #
+    \mv -f 2dx_peaksearch-non-masked_image.mrc SCRATCH/pks-non-masked_image.mrc
+    #\mv -f 2dx_peaksearch-amp_LHpass.mrc SCRATCH/pks-amp_LHpass.mrc
+    \mv -f 2dx_peaksearch-masked_image.mrc SCRATCH/pks-masked_image.mrc
+    \rm -f 2dx_peaksearch-phase.mrc
+    #
+    echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
+    #
+  else
+    \rm -f 2dx_peaksearch-non-masked_image.mrc
+    \rm -f 2dx_peaksearch-masked_image.mrc
+    \rm -f 2dx_peaksearch-amp_LHpass.mrc
+    \rm -f 2dx_peaksearch-phase.mrc
+    \rm -f SCRATCH/${imagename}.taper.mrc
+  endif
+  #
+  \mv -f 2dx_peaksearch-average.mrc SCRATCH/pks-average.mrc
+  echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>" >> LOGS/${scriptname}.results
+  #
+endif
+#
+if ( ${doswap} != "0" ) then
+  #
+  echo "set doswap = 0" >> LOGS/${scriptname}.results
+  #
+endif
+#
+if( -e ${docfile} )then
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_laterror to find fitness of current lattice."
+  #############################################################################
+  #
+  echo ": Calling: " ${bin_2dx}/2dx_laterror.exe "${lattice}" ${docfile}
+  ${bin_2dx}/2dx_laterror.exe "${lattice}" ${docfile}
+  #
+else
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Not calculating 2dx_laterror, since no peaks_xy_final.dat exists."
+  #############################################################################
+  #
+  #
+endif
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+#
+#
+

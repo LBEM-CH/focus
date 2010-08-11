@@ -1,0 +1,22 @@
+CXX = g++
+CXXFLAGS = -O3 -ftree-vectorize -static-libgcc
+SOURCES = 2dx_spotIntensity.cpp
+OBJECTS = 2dx_spotIntensity.o
+BINDIR = ../../bin/
+BINARIES = $(BINDIR)/2dx_spotIntensity.exe
+LDIR = -L../../lib
+LFLAGS = -l2dx
+INCLUDES = -I../../include -I./ -I../../../include/
+
+all: $(BINARIES) $(SOURCES)
+
+%.o: %.cpp
+	$(CXX) -c $(INCLUDES) $(CXXFLAGS) $<
+
+$(BINDIR)/%.exe: %.o
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDIR) $(LFLAGS)
+
+clean:
+	\rm -f ../../bin/2dx_spotIntensity.exe
+	\rm -f *.o
+

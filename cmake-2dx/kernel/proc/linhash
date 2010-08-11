@@ -1,0 +1,11 @@
+#!/bin/csh -ef
+#
+#
+if ( $#argv != 1 ) then
+  echo lin : display a line with a text 
+  echo \\t usage: lin \<text\>
+  echo \\t example: lin \"fftir start\"
+else
+  echo "::#### $1 #####################################################################################" | cut -c1-80
+endif
+#

@@ -1,0 +1,6 @@
+#!/bin/csh -ef
+#
+set infile = $1
+#
+${viewer3D_2dx_app} ${infile}
+#

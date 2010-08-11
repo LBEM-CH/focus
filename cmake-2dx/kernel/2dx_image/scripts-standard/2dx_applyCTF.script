@@ -1,0 +1,325 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Correct CTF                                                        #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 02/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 70
+#
+# MANUAL: This script applies the CTF correction to the evaluated list of Amplitudes and Phases. 
+#
+# MANUAL: It uses 2dx_ctfapplyk.for, which applies CTF correction to the phases, but not the amplitudes. The correction value is added as last column to the output file, where the sign of that value shows if the phases have been inverted. The absolute value of that last column's entry shows the amplitude correction that should be applied to the amplitude - but it has not yet been applied.
+#
+# MANUAL: This makes only sense if the Amplitudes and Phases are not already CTF-corrected by some TTF correction. The script therefore automatically determines whether the data are from a TTF correction run (ttbox), or form a normal evaluation (mmbox).
+#
+# GLOBAL: SYN_Unbending
+# GLOBAL: imagesidelength
+# GLOBAL: magnification
+# GLOBAL: stepdigitizer
+# GLOBAL: TLTAXIS
+# GLOBAL: TLTANG 
+# GLOBAL: TLTAXA 
+# GLOBAL: TAXA 
+# GLOBAL: TANGL
+# GLOBAL: defocus
+# GLOBAL: beamtilt
+# GLOBAL: RESMAX
+# GLOBAL: ctfplotresmax
+# GLOBAL: CS
+# GLOBAL: KV
+# GLOBAL: phacon
+# GLOBAL: ctf_ttf
+# GLOBAL: tempkeep
+# GLOBAL: comment
+# GLOBAL: plotres_rings
+# GLOBAL: realcell
+# GLOBAL: realang
+# GLOBAL: lattice
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SYN_Unbending = ""
+set imagename = ""
+set defocus = ""
+set imagenumber = ""
+set lattice = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set TAXA = ""
+set TANGL = ""
+set phacon = ""
+set ctfplotresmax = ""
+set CS = ""
+set KV = ""
+set TLTANG = ""
+set det_tilt = ""
+set ctf_ttf = ""
+set tempkeep = ""
+set plotres_rings = ""
+set realcell = ""
+set realang = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_applyCTF
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@evaluate>>"
+#
+set date = `date`
+echo date = ${date}
+#
+set istilt = `echo $TLTANG | awk '{if ( -25.0 < $1 && $1 < 25.0 ) {s = 0} else {s = 1}} END {print s}'`
+#
+if ( ${istilt} == '0' ) then
+  if ( ${ctf_ttf} != "CTF" ) then
+    set ctf_ttf = "CTF"
+    echo ":: WARNING: Correcting ctf_ttf to CTF."
+    echo "set ctf_ttf = ${ctf_ttf}" >> LOGS/${scriptname}.results
+  endif
+endif
+#
+set ctfplotresmax_auto = `echo ${ctfplotresmax} | awk '{ if ( $1 < 0.0001 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${ctfplotresmax_auto} == '1' ) then
+  set ctfplotresmax = `echo ${RESMAX} | awk '{ if ( $1 > 5.0 ) { s = int($1 * 0.90) } else { s = $1 * 0.90 } }  END { print s }'`
+  echo ":Setting max resolution for CTF plot to ${ctfplotresmax}."
+endif
+# set RESPLOTMAX = 0.3
+set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 } else { s = 0.3 } } END { print s }'`
+# 0.3 corresponds to 3.33 Angstroem for the border of the plot (Nyquist).
+#
+echo "<<@progress: 1>>"
+${proc_2dx}/2dx_makedirs 
+#
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#
+if ( ${ctf_ttf} == 'TTF' ) then
+  ${proc_2dx}/linblock "No CTFAPPLY needed, since TTF correction is already done."
+  #
+  if ( ${SYN_Unbending} == "0" ) then
+    # FouFilter Unbending result is used:
+    set outfile_nolimit = ${imagename}.fou.ttf.nolimit.aph
+    set outfile_limit = ${imagename}.fou.ttf.limit.aph
+    set final_outfile = ${imagename}.fou.cor.aph
+  else
+    # Synthetical Unbending result is used:
+    set outfile_nolimit = ${imagename}.syn.ttf.nolimit.aph
+    set outfile_limit = ${imagename}.syn.ttf.limit.aph
+    set final_outfile = ${imagename}.syn.cor.aph
+  endif
+  #
+  if ( ! -e APH/${outfile_nolimit} ) then
+    ${proc_2dx}/protest "ERROR: APH/${outfile_nolimit} does not exist."
+  endif
+  #
+  cd APH
+  \rm -f ${final_outfile}
+  \ln -s ${outfile_nolimit} ${final_outfile}
+  \rm -f ${imagename}.cor.aph
+  \ln -s ${final_outfile} ${imagename}.cor.aph
+  cd ..
+  echo "# IMAGE-IMPORTANT: APH/${outfile_nolimit} <APH File after TTF correction (No Res.Limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: APH/${outfile_limit} <APH File after TTF correction (Res.Limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: APH/${final_outfile}  <Link to Final APH File (No Res.Limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
+  #
+else
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "CTFAPPLY - to correct the microscope's CTF"
+  #                                                                           #
+  #                     ${imagename}.limit.aph  =>  ${imagename}-limit-ctf.ps #
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f CTFPLOT.PS
+  \rm -f PS/ctf${imagename}.nolimit.ps
+  #
+  if ( ${SYN_Unbending} == "0" ) then
+    # FouFilter Unbending result is used:
+    set infile_nolimit = ${imagename}.fou.nolimit.aph
+    #
+    # A check in case somebody just upgraded from an earlier version of 2dx:
+    cd APH
+    if ( ! -e ${infile_nolimit} ) then
+      if ( -e ${imagename}.nolimit.aph ) then
+        \cp ${imagename}.nolimit.aph ${infile_nolimit}
+      endif
+    endif
+    set infile_limit = ${imagename}.fou.limit.aph
+    if ( ! -e ${infile_limit} ) then
+      if ( -e ${imagename}.limit.aph ) then
+        \cp ${imagename}.limit.aph ${infile_limit}
+      endif
+    endif
+    cd ..
+    #
+    set outfile_nolimit = ${imagename}.fou.ctf.nolimit.aph
+    set outfile_limit = ${imagename}.fou.ctf.limit.aph
+    set final_outfile = ${imagename}.fou.cor.aph
+  else
+    # Synthetical Unbending result is used:
+    set infile_nolimit = ${imagename}.syn.nolimit.aph
+    set infile_limit = ${imagename}.syn.limit.aph
+    set outfile_nolimit = ${imagename}.syn.ctf.nolimit.aph
+    set outfile_limit = ${imagename}.syn.ctf.limit.aph
+    set final_outfile = ${imagename}.syn.cor.aph
+  endif
+  #
+  if ( ! -e APH/${infile_nolimit} ) then
+    ${proc_2dx}/protest "ERROR: APH/${infile_nolimit} does not exist."
+  endif
+  setenv IN  APH/${infile_nolimit}
+  setenv OUT APH/${outfile_nolimit}
+  echo "# IMAGE-IMPORTANT: APH/${infile_nolimit}  <APH: before CTF correction (No Res.Limit) [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
+  ${bin_2dx}/2dx_ctfapplyk.exe << eot
+${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
+${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
+${imagenumber} ${imagename}, ${date}
+${phacon}
+${RESMIN},1.0
+eot
+  #
+  echo "# IMAGE-IMPORTANT: APH/${outfile_nolimit} <APH File after CTF correction (No Res.Limit) [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 30>>"
+  \mv -f CTFPLOT.PS PS/${imagename}.ctf.nolimit.ps
+  echo "# IMAGE-IMPORTANT: PS/${imagename}.ctf.nolimit.ps <PS: IQ Plot after CTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results
+  #
+  \rm -f CTFPLOT.PS
+  \rm -f PS/ctf${imagename}.limit.ps
+  #
+  if ( ! -e APH/${infile_limit} ) then
+    ${proc_2dx}/protest "ERROR: APH/${infile_limit} does not exist."
+  endif
+  echo "# IMAGE-IMPORTANT: APH/${infile_limit} <APH File before CTF correction (Res.Limit) [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
+  setenv IN  APH/${infile_limit}
+  setenv OUT APH/${outfile_limit}
+  ${bin_2dx}/2dx_ctfapplyk.exe << eot
+${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
+${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
+${imagenumber} ${imagename}, ${date}
+${phacon}
+${RESMIN},${RESMAX}
+eot
+  #
+  echo "# IMAGE-IMPORTANT: APH/${outfile_limit} <APH File after CTF correction (Res.Limit) [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 60>>"
+  \mv -f CTFPLOT.PS PS/${imagename}.ctf.limit.ps
+  echo "# IMAGE-IMPORTANT: PS/${imagename}.ctf.limit.ps <PS: IQ Plot after CTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results
+  #
+  cd APH
+  \rm -f ${imagename}.cor.aph
+  \ln -s ${outfile_nolimit} ${imagename}.cor.aph
+  \rm -f ${final_outfile}
+  \ln -s ${outfile_nolimit} ${final_outfile}
+  \rm -f ${imagename}.cor.aph
+  \ln -s ${final_outfile} ${imagename}.cor.aph
+  cd ..
+  echo "# IMAGE-IMPORTANT: APH/${imagename}.cor.aph <Link to Final APH File (No Res.Limit) [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+  #
+endif
+#
+set aphfile = APH/${imagename}.cor.aph
+#
+if ( ! -e ${aphfile} ) then
+  ${proc_2dx}/protest "ERROR: ${aphfile} not found."
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_plotreska - to plot the powerspectrum with resolution circles"
+${proc_2dx}/linblock "Using plotreska, contributed by Anchi Cheng."
+#############################################################################  
+#
+\rm -f PLOTRES.PS
+#
+# plot ellipses in canonical HK space
+set plotres_ellipse = "1"
+#
+echo "# IMAGE-IMPORTANT: ${aphfile} <APH: plotres input file>" >> LOGS/${scriptname}.results
+#
+# Plot as (tilted) section in 3D Fourier space
+# 
+${bin_2dx}/2dx_plotreska.exe << eot
+${TAXA}, ${TANGL}
+1 	! Show as tilted projections, based on real-space lattice
+${realcell},${realang},${lattice}
+${aphfile}
+1	! Include IQ Value label
+${plotres_ellipse}
+${RESMAX}
+${plotres_rings}
+eot
+#
+if ( ! -e PLOTRES.PS ) then
+  ${proc_2dx}/protest "ERROR: Problem in 2dx_plotreska."
+endif
+\mv -f PLOTRES.PS PS/2dx_plotreska_canonical.ps
+echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
+#
+# Plot as non-tilted projection 
+# 
+${bin_2dx}/2dx_plotreska.exe << eot
+${TAXA}, ${TANGL}
+2 	! Show as non-tilted projections, based on reciprocal lattice
+${lattice},${imagesidelength},${stepdigitizer},${magnification}
+${aphfile}
+1	! Include IQ Value label
+${plotres_ellipse}
+${RESMAX}
+${plotres_rings}
+eot
+#
+if ( ! -e PLOTRES.PS ) then
+  ${proc_2dx}/protest "ERROR: Problem in 2dx_plotreska."
+endif
+\mv -f PLOTRES.PS PS/2dx_plotreska_measured.ps
+echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_measured.ps <PS: Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "2dx_powerhisto - to prepare a histogram of the PS spot intensity"
+#                                                                           #
+#############################################################################
+#
+\rm -f SCRATCH/POWERHISTO.txt
+#
+${bin_2dx}/2dx_powerhisto.exe << eot
+APH/${final_outfile}
+SCRATCH/POWERHISTO.txt
+${lattice}
+0.05
+eot
+#
+echo "# IMAGE: SCRATCH/POWERHISTO.txt <Histogram of Power in PS>" >> LOGS/${scriptname}.results
+#
+echo "set CTF_done = y" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+#
+#
+

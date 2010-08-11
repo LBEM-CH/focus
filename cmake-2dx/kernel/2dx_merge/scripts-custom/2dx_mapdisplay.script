@@ -1,0 +1,58 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Display Maps                                                       #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 03/01/2006                                             #
+# Last Modification: 03/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 20
+#
+# MANUAL: This script will produce a list of the final maps of the selected image directories.
+#
+# MANUAL: ToDo: 2dx_merge has a bug when the file names become too long. They are then not displayed any more.
+#
+# GLOBAL: imagename
+# GLOBAL: SYM
+#
+#$end_local_vars
+#
+set proc_2dx = ""
+set bin_2dx = ""
+#
+set imagename = ""
+set SYM = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_mapdisplay
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+echo "<<@progress: 1>>"
+#
+echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}-scaled.mrc <MAP: ${SYM}-symmetrized MultiUnitCell Map>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
+#
+set OUTPUTFILE = SCRATCH/2dx_mapdisplay.tmp
+#
+\rm -f ${OUTPUTFILE}
+#
+${bin_2dx}/2dx_merge_inventory.exe << eot
+${OUTPUTFILE}
+2dx_merge_dirfile.dat
+eot
+#
+cat ${OUTPUTFILE} >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+#
+${proc_2dx}/linblock "${scriptname} finished correctly."
+#

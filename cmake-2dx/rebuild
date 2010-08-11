@@ -1,0 +1,46 @@
+#!/bin/csh
+####
+#
+set olddir = $PWD
+#
+cd mrc
+\rm -f Makefile
+#
+cd ${olddir}/2dx_image
+\rm -rf 2dx_image.app
+\rm -f 2dx_image.exe
+\rm -f 2dx_image
+#
+cd ${olddir}/2dx_merge
+\rm -rf 2dx_merge.app
+\rm -f 2dx_merge.exe
+\rm -f 2dx_merge
+#
+cd ${olddir}/2dx_logbrowser
+\rm -rf 2dx_logbrowser.app
+\rm -f 2dx_logbrowser.exe
+\rm -f 2dx_logbrowser
+#
+cd ${olddir}/lib/common
+\rm -f *.a
+#
+cd ${olddir}
+#
+./configure
+#
+if ( $#argv != 0 ) then
+  make clean
+endif
+#
+make
+#
+if ( $#argv != 0 ) then
+  echo "#########################################################"
+  echo "                 Complete Rebuild done."
+  echo "#########################################################"
+else
+  echo "#########################################################"
+  echo "                   Quick Rebuild done."
+  echo "#########################################################"
+endif
+#

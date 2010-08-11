@@ -1,0 +1,78 @@
+#!/bin/csh
+#
+fflags=-c -w -extend_source -check_bounds
+gflags=-c -w -extend_source
+cflags=-c -w
+LIB=/usr/lib/lib
+
+Ximdisp.exe: Ximdisp.o\
+               Ximagelibc.o\
+               Ximagelibf.o\
+               harwell.o\
+               ifftsub.o\
+               imsubs2000.o\
+               diskio.o\
+               unix.o\
+               ccplib.o\
+               library.o\
+               subs.o\
+               subsc.o
+	f77 -n -non_shared -o Ximdisp.exe Ximdisp.o \
+                  Ximagelibc.o \
+                  Ximagelibf.o \
+                  harwell.o \
+                  ifftsub.o \
+                  imsubs2000.o \
+                  diskio.o \
+                  unix.o \
+                  ccplib.o \
+                  library.o \
+                  subs.o \
+                  subsc.o \
+                 ${LIB}Xaw.a ${LIB}Xt.a ${LIB}Xmu.a ${LIB}X11.a ${LIB}Xext.a\
+                 ${LIB}dnet_stub.a ${LIB}SM.a ${LIB}ICE.a
+
+Ximdisp.o: Ximdisp.for Ximdisp_common.for
+	cp Ximdisp.for Ximdisp.f;\
+          f77 $(fflags) Ximdisp.f
+
+harwell.o: harwell.for
+	cp harwell.for harwell.f;\
+          f77 $(fflags) harwell.f
+
+ifftsub.o: ifftsub.for
+	cp ifftsub.for ifftsub.f;\
+          f77 $(gflags) ifftsub.f
+
+subsc.o: subsc.c
+	cc $(cflags) subsc.c
+
+Ximagelibf.o: Ximagelibf.for
+	cp Ximagelibf.for Ximagelibf.f;\
+          f77 $(fflags) Ximagelibf.f
+
+Ximagelibc.o: Ximagelibc.c
+	cc $(cflags) Ximagelibc.c
+
+imsubs2000.o: imsubs2000.for imsubs_common.for
+	cp imsubs2000.for imsubs2000.f;\
+          f77 $(fflags) imsubs2000.f
+
+diskio.o: diskio.for
+	cp diskio.for diskio.f;\
+          f77 $(fflags) diskio.f
+
+unix.o: unix.m4
+	m4 -D_dec_fortran=1 unix.m4 > unix.f;\
+          f77 $(fflags) unix.f
+
+ccplib.o: ccplib.for
+	cp ccplib.for ccplib.f;\
+          f77 $(fflags) ccplib.f
+
+subs.o: subs.for
+	cp subs.for subs.f;\
+          f77 $(fflags) subs.f
+
+library.o: library.c library.h
+	cc $(cflags) library.c

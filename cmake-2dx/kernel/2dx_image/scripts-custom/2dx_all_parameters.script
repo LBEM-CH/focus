@@ -1,0 +1,63 @@
+#!/bin/csh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: All Parameters                                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 09/01/2006                                             #
+# Last Modification: 09/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 96
+#
+# MANUAL: <B>All Parameters</B>
+#
+# MANUAL: You can use this to see and edit all parameters.
+#
+# GLOBAL: *
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+# Variables to be available from the config file are:
+#
+#$end_vars
+#
+set scriptname = 2dx_all_parameters
+#
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+echo "<<@progress: 1>>"
+#
+source ${proc_2dx}/initialize
+#
+${proc_2dx}/2dx_makedirs
+#
+#############################################################################
+echo ":: "
+echo "::                           ************************"
+echo "::                             This is not a script."
+echo "::               It is only used to see and edit all parameters."
+echo "::                           ************************"
+echo ":: "
+#############################################################################
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+@
+echo "<<@progress: 100>>"
+#

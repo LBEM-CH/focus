@@ -1,0 +1,18 @@
+
+These are the source code files for the programs that are used in the image 
+processing of the 2D crystal images. 
+
+These files are based on a subset of the MRC programs, which were written by 
+Richard Henderson and others. We have modified or extended some MRC programs 
+in order to interface them with the 2dx software environment, and have added 
+some additional functions and programs.
+
+The original MRC programs continue to evolve, and the users are encouraged to 
+contact Jude Short (JMS@mrc-lmb.cam.ac.uk) or Richard Henderson 
+(rh15@mrc-lmb.cam.ac.uk) for the complete set and a more recent version of 
+their programs.
+
+Henning Stahlberg, Davis, June 2006.
+
+
+

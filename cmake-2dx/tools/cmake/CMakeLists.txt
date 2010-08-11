@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 2.6)
+
+set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/)
+set(RUNTIME_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin/)
+#set(2DX_ROOT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+message(STATUS "Install prefix is set to ${CMAKE_INSTALL_PREFIX}")
+#message(STATUS "2DX_ROOT_DIRECTORY=${2DX_ROOT_DIRECTORY}")
+ 
+project(CMakeTools)
+
+install(FILES FindFFTW.cmake       DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake)
+
+#install(FILES build_all              DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

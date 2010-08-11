@@ -1,0 +1,12 @@
+#!/bin/csh
+#
+/bin/rm -f *.o
+/bin/rm -f *.f
+/bin/rm -f Ximagelib.a
+cp Ximagelibf.for Ximagelibf.f
+gfortran -O -w -ffixed-line-length-none -c Ximagelibf.f
+gcc -c Ximagelibc.c
+ar crs Ximagelibc.a Ximagelibc.o
+ar crs Ximagelibf.a Ximagelibf.o
+/bin/rm -f *.o
+/bin/rm -f *.f

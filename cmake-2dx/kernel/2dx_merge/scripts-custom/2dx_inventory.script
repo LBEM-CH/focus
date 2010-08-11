@@ -1,0 +1,132 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Image Inventory                                                    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 03/01/2006                                             #
+# Last Modification: 03/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 50
+#
+# MANUAL: This script will produce a list of *.mrc or other types of files, and show them in the <i>Images</I> pane. Select the kind of files you want to see.
+#
+#=============================================================================
+# SECTION: Program
+#=============================================================================
+#
+# LABEL: Select the kind of files to list
+# LEGEND: This allows to chose the kind of files that this script should produce an inventory of.
+# EXAMPLE: do = "mrc"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Inventory
+# TYPE: Drop_Down_Menu "0=MRC format files;1=PostScript files;2=Amplitude-and-Phase lists;3=Spot Lists;4=MTZ;5=all"
+set do = "0"
+#
+#$end_local_vars
+#
+set proc_2dx = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_inventory
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+echo "<<@progress: 1>>"
+#
+if ( ${do} == "0" || ${do} == "5" ) then
+
+  ${proc_2dx}/linblock "inventory of \*.mrc"
+  echo dummy > 111Adummy.mrc
+  ls -1 *.mrc | grep -v "111Adummy.mrc" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+  \rm -f 111Adummy.mrc
+
+  echo "<<@progress: 25>>"
+
+  if ( -d FFTIR ) then
+    ${proc_2dx}/linblock "inventory of FFTIR/\*.mrc"
+    echo dummy > FFTIR/111Adummy.mrc
+    ls -1 FFTIR/*.mrc | grep -v "111Adummy.mrc" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+    \rm -f FFTIR/111Adummy.mrc
+  else
+    ${proc_2dx}/linblock "             FFTIR not existing"
+  endif
+
+  echo "<<@progress: 50>>"
+
+  if ( -d SCRATCH ) then
+    ${proc_2dx}/linblock "inventory of SCRATCH/\*.mrc"
+    echo dummy > SCRATCH/111Adummy.mrc
+    ls -1 SCRATCH/*.mrc | grep -v "111Adummy.mrc" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+    \rm -f SCRATCH/111Adummy.mrc
+  else
+    ${proc_2dx}/linblock "             SCRATCH not existing"
+  endif
+
+  echo "<<@progress: 75>>"
+
+  if ( -d CUT ) then
+    ${proc_2dx}/linblock "inventory of CUT/\*.mrc"
+    echo dummy > CUT/111Adummy-masking.mrc
+    ls -1 CUT/*-masking.mrc | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+    \rm -f CUT/111Adummy.mrc
+  else
+    ${proc_2dx}/linblock "             CUT not existing"
+  endif
+
+endif
+
+echo "<<@progress: 85>>"
+
+if ( ${do} == "1" || ${do} == "5" ) then
+  if ( -d PS ) then
+    ${proc_2dx}/linblock "inventory of PS/\*.ps"
+    echo dummy > PS/111Adummy.ps
+    ls -1 PS/*.ps | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+    \rm -f PS/111Adummy.ps
+  else
+    ${proc_2dx}/linblock "             PS not existing"
+  endif
+endif
+
+
+if ( ${do} == "2" || ${do} == "5" ) then
+  if ( -d APH ) then
+    ${proc_2dx}/linblock "inventory of APH/\*.aph"
+    echo dummy > APH/111Adummy.aph
+    ls -1 APH/*.aph | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+    \rm -f APH/111Adummy.aph
+  else
+    ${proc_2dx}/linblock "             APH not existing"
+  endif
+endif
+
+if ( ${do} == "3" || ${do} == "5" ) then
+  ${proc_2dx}/linblock "inventory of \*.spt"
+  echo dummy > 111Adummy.spt
+  ls -1 *.spt | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+  \rm -f 111Adummy.spt
+endif
+
+if ( ${do} == "4" || ${do} == "5" ) then
+  ${proc_2dx}/linblock "inventory of \*.mtz"
+  echo dummy > 111Adummy.mtz
+  ls -1 *.mtz | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+  \rm -f 111Adummy.mtz
+  if ( -d APH ) then
+    echo dummy > APH/111Adummy.mtz
+    ls -1 APH/*.mtz | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+    \rm -f APH/111Adummy.mtz
+  endif
+endif
+
+echo "<<@progress: 100>>"
+
+
+${proc_2dx}/linblock "${scriptname} finished correctly."

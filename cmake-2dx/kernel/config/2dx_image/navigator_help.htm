@@ -1,0 +1,74 @@
+<html>
+<body BGCOLOR="#FEFFFD">
+<H1>2dx_image Navigator </H1>
+<HR>
+Welcome to the interactive 2dx_image fullscreen navigator.
+<p></p>
+<H2>All Images</H2> <br>
+<b>Mouse Assignment</b><br>
+The mouse assignment tool shown in the Navigator menu (<font COLOR="#FF0306">M</font>) will show the current meaning of the mouse buttons as well as the available single-click + key command available for single button mice.
+Regardless of the assignment, at any time <font COLOR="#FF0306">Apple</font> + Click on Mac or Ctrl + Click on other systems will display the Navigator menu.
+<br><br>
+<b>View Tiltaxis (TLTAXIS)</b><br>
+This function displays the currently defined tilt axis, using the values for <i>TLTAXIS</i> and <i>TLTANG</i>. This is valid for the large image of the carbon film with the 2D crystal somewhere in the image. This would be the large CCD or digitized film image, of for example 4096x4096 pixel size. TLTAXIS is defined as from the horizontal X-axis counter-clockwise to the tilt axis. A TLTAXIS value of 45 degrees would point to 1:30 pm.
+<br><br>
+<b>View Crystal Tiltaxis (TAXA)</b><br>
+This function displays the tilt axis in the final map, using the values for <i>TAXA</i> and <i>TANGL</i>. This is valid for the reconstructed crystal, displayed as final map, which usually has 400x400 pixel size, and shows 2x2 unit cells. From the point of view of the 2D crystal, TAXA and TANGL describe the orientation of this projection map with respect to the 3D reconstruction of the protein. This protein reconstruction does not know anything about the carbon film it was laying on, so that TLTAXIS and TLTANG have no relevance any more. TAXA is defined as from the crystal tilt axis counter-clock wise to the horizontal A* axis. A TAXA value of 45 degrees would point to 4:30 pm.
+<br><br>
+<b>Zoom</b><br>
+This funciton will allow to zoom up or down. A maximal zoom factor is set, based on the image size, to prevent program crashed due to memory overflow. Keyboard shortcuts will be the fastest way to zoom up or down.
+<br>
+
+
+<H2>Real Space Images</H2>
+
+<b>Selection Based FFT:</b> <br>
+This tool allows real-time calculation of FFTs based on user selection of screen data. 
+The left mouse button allows a draggable selection area, while the right mouse button shows the FFT of area around the point which was clicked at the current dimensions.
+The number keys (<font COLOR="#FF0306">1</font>-<font COLOR="#FF0306">9</font>) change the brightness of the resulting FFT while the <font COLOR="#FF0306">-</font>/<font COLOR="#FF0306">+</font> keys change the zoom level, with the <font COLOR="#FF0306">0</font> key rescaling to a zoom of 1.0.
+<br><br>
+It is important to note that the FFT is based on the <i>viewable data</i> and is necessarily 8-bit. This allows the tool to be generally applied to any data source and loses no real information
+as the display is maximally 8-bit anyhow.
+<p></p>
+<b>Polygonal Selection:</b> <br>
+This allows the selection of regions of real-space images for use with the default <font COLOR="#0306A3"><i>Mask Crystal from Polygon</i></font> script included in the <font COLOR="#03A306">Specific Scripts</font> section of this release.
+Regions can be cleared or saved via the menu presented by a Right-Click at any time during selection.
+<p></p>
+
+<H2>Fourier Space Images</H2>
+
+<b>Display Coordinate Info</b><br>
+This funciton brings up a window that displays values for the current mouse pointer location, like closest Miller index coordinate, resolution, amplitude, phase, etc..
+<br><br>
+<b>Display Contrast / Brightness</b><br>
+This funciton lets you choose the Min and Max values for the LUT of the display. It also allows activating the color-coded display of the pixel phase values.
+<br><br>
+<b>Show Mouse Button Assignment</b><br>
+This funciton brings up a window that displays the current definition of the mouse buttons.
+<br><br>
+<b>Display Parameters</b><br>
+This function allows defining several dimensions of circles and crosses. This funciton also allows activating the display of the double-click smart-mouse parameters, used for manual lattice definition.
+<br><br>
+<b>View CTF</b><br>
+Displays the current zero-crossings of the ctf calculated by relevent parameters, most importantly the Defocus in the x and y directions as well as the angle at which this astigmatism occurs.
+<br>
+Reload resets the defocus and astigmatic angle to the current saved values, where accept saves the current values.
+<br><br>
+<b>Set Phase Origin</b><br>
+This function is used to define the phase origin of the final projection map. You should use this function in the following way: Create a final projection map, by running the custom script "Get PhaseOrigin Manually". This creates the final map, in case it did not exist. Now open that final map, by double-clicking its name in the Images pane. In the final map display, move the cursor over the position that you wish to be centered, and press "Shift+P". Now close the navigator with the ESC button, and run that custom script "Get PhaseOrigin Manually" again. It will now apply the determined phase origin shift to the current phase origin, and calculate the final map again, with the now corrected phase origin values.
+<br><br>
+<b>View / Load Peaklist</b><br>
+This function allows loading and displaying any peak list. By default, the peaklist peaks_xy.dat that is used as basis for the automatic lattice determination is loaded and displayed. However, any other x/y peaklist can be displayed as well.
+<br><br>
+<b>Spot Selection</b><br>
+This function allows displaying the current spotlist, and manually editing it. Spots can be clicked on or off, and the final spotlist can then be saved.
+<br><br>
+<b>Lattice Refinement</b><br>
+This funciton allows the manual determination of a reciprocal lattice. Individual spots can be identified by mouse click, and their Miller coordinates can be defined manually. Single clicking in the FFT will select the current click location. <b><u><font COLOR="#0000A0">Double clicking</font></u></b> in the FFT will select the a location in the FFT that is within a choosen radius of the current click location the highest peak, or the center of a Gauss fit to the nearest peak. The parameters for this can be defined in the <i>Display Parameter</i> menu.
+<br><br>
+<b>View Lattice/View Second Lattice</b> <br>
+These options allow the user to view the current primary and secondary lattices atop the displayed Fourier space image.
+<br><br>
+<br>
+</body>
+</html>

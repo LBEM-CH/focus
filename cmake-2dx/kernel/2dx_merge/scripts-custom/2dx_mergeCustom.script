@@ -1,0 +1,503 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Merge with Custom Input File                                       #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/03/2007                                             #
+# Last Modification: 01/03/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 53
+#
+# MANUAL: This script allows merging based on a custom input file.
+#
+# GLOBAL: MergeResolution
+# GLOBAL: merge_modus
+# GLOBAL: zstarrange
+# GLOBAL: Calc_from_zstarrange
+# GLOBAL: zstarrange_real
+# GLOBAL: RESMIN
+# GLOBAL: RESMAX
+# GLOBAL: tempkeep
+# GLOBAL: realcell
+# GLOBAL: realang
+# GLOBAL: ALAT
+# GLOBAL: SYM
+# GLOBAL: avrgamphsNUMBER
+# GLOBAL: avrgamphsRESOL
+# GLOBAL: MergeIPAT
+# GLOBAL: MergeDELPLT
+# GLOBAL: MergeDELPRO
+# GLOBAL: MergeIQMAX
+# GLOBAL: MergeHKMAX
+# GLOBAL: MergeRminRmax
+# GLOBAL: MergeRCUT
+# GLOBAL: MergePFACT
+# GLOBAL: MergeBINSIZ
+# GLOBAL: MergeNCYCLS
+# GLOBAL: MergeMPRINT
+# GLOBAL: MergeAK
+# GLOBAL: MergeIWF
+# GLOBAL: MergeIWP
+# GLOBAL: max_amp_correction
+# GLOBAL: merge_file
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set MergeResolution = ""
+set merge_modus = ""
+set zstarwin  = ""
+set zstarrange  = ""
+set zstarrange_real  = ""
+set Calc_from_zstarrange = ""
+set RESMIN = ""
+set RESMAX = ""
+set tempkeep = ""
+set realcell = ""
+set realang = ""
+set ALAT = ""
+set SYM = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set MergeIPAT = ""
+set MergeDELPLT = ""
+set MergeDELPRO = ""
+set MergeRminRmax = ""
+set MergeRCUT = ""
+set MergePFACT = ""
+set MergeIQMAX = ""
+set MergeHKMAX = ""
+set MergeBINSIZ = ""
+set MergeNCYCLS = ""
+set MergeMPRINT = ""
+set MergeAK = ""
+set MergeIWF = ""
+set MergeIWP = ""
+set max_amp_correction = ""
+set merge_file = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_mergeCustom
+#
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+if ( ${Calc_from_zstarrange} == "y" ) then
+  set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
+else
+  set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
+endif
+#
+set zmin = `echo ${zstarrange} | awk '{s = -$1} END {print s}'`
+set zminmax = `echo ${zmin},${zstarrange}`
+echo zminmax = ${zminmax}
+#
+echo "<<@progress: 1>>"
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+if ( ! -e ${merge_file} ) then
+  ${proc_2dx}/protest "ERROR: File not found: ${merge_file}"
+endif
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${MergeAK}x == 'x' ) then
+  set MergeAK = "10"
+  echo "set MergeAK = ${MergeAK}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeAK corrected to ${MergeAK}"
+endif
+#
+if ( ${MergeIWF}x == 'x' ) then
+  set MergeIWF = "0"
+  echo "set MergeIWF = ${MergeIWF}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeIWF corrected to ${MergeIWF}"
+endif
+#
+if ( ${MergeIWP}x == 'x' ) then
+  set MergeIWP = "1"
+  echo "set MergeIWP = ${MergeIWP}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeIWP corrected to ${MergeIWP}"
+endif
+#
+if(${MergeIWF} == "0")then
+  set MergeIWF_VAL = -1
+endif
+if(${MergeIWF} == "1")then
+  set MergeIWF_VAL = 0
+endif
+if(${MergeIWF} == "2")then
+  set MergeIWF_VAL = 1
+endif
+if(${MergeIWP} == "0")then
+  set MergeIWP_VAL = -2
+endif
+if(${MergeIWP} == "1")then
+  set MergeIWP_VAL = -1
+endif
+if(${MergeIWP} == "2")then
+  set MergeIWP_VAL = 0
+endif
+if(${MergeIWP} == "3")then
+  set MergeIWP_VAL = 1
+endif
+echo MergeAK = ${MergeAK}
+echo MergeIWF_VAL = ${MergeIWF_VAL}
+echo MergeIWP_VAL = ${MergeIWP_VAL}
+#
+echo "<<@progress: 5>>"
+#
+#############################################################################
+${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+#
+echo SYM = ${SYM}
+echo spcgrp = ${spcgrp}
+echo CCP4_SYM = ${CCP4_SYM}
+#
+############################################################################# 
+${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
+#############################################################################
+#
+${proc_2dx}/2dx_merge_makedirs
+#
+echo "<<@progress: 10>"
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing 2dx_merge_merge.sub"
+#############################################################################
+#
+# source ${proc_2dx}/2dx_merge_merge_sub.com
+#
+if ( ${merge_modus} == "3D" ) then
+  #
+  echo "<<@progress: 70>>"
+  #
+# This is to skip the following part:
+if ( 1 == 2 ) then
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "LATLINPRESCAL - to apply CTF correction and weight calculation"
+  #                                                                           #
+  #                                          merge_3ds.aph  =>  latlines.dat  #
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f fort.1
+  \rm -f fort.3
+  #
+  \ln -s APH/merge.aph fort.1
+  #
+  ${bin_2dx}/2dx_latlinprescal.exe << eot > LOGS/latlinprescal.log
+1001,${zminmax} ! NSER,ZMIN,ZMAX
+${MergeIQMAX}               ! IQMAX
+${max_amp_correction}
+eot
+  #
+  \rm -f fort.1
+  echo "################################################"
+  echo "################################################"
+  echo "output in file LOGS/latlinprescal.log"
+  echo "################################################"
+  echo "################################################"
+  #
+  if ( -e fort.3 ) then
+    \mv -f fort.3 SCRATCH/latlines.dat
+    echo "# IMAGE: SCRATCH/latlines.dat <Lattice line data after pre-scaling [H,K,Z,A,P,FOM,SIGAMP,SIGANG,IQ]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: LOGS/latlinprescal.log <LOG: latlinprescal output>" >> LOGS/${scriptname}.results
+  else
+    ${proc_2dx}/protest "ERROR: latlines.dat does not exist."
+  endif
+  #
+  echo " "
+  ${proc_2dx}/lin "-"
+  echo " "
+  #
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "LATLINEK - to fit lattice lines to merged data (D.Agard's program)"
+  #                                                                           #
+  #                latlines.dat  =>  latfitteds.dat + LATLINE.PLT + guess.dat #
+  #                                                                           #
+  #############################################################################
+  #
+  echo "<<@progress: +5>>"
+  #
+  \rm -f PLOT.PS
+  \rm -f PS/latline.ps
+  \rm -f SCRATCH/latfitteds.dat
+  \rm -f SCRATCH/guess.dat
+  \rm -f latline.statistics
+  #
+  set iplterr = 0
+  set idoh = 0
+  set idok = 0
+  set IAQP2 = 0
+  set iplterr = 1         
+  set imaxIQplot = 4
+  set MergeIGUESS = 1
+  #
+  if ( ${tempkeep} == 'y' ) then
+    set iverbose = 1
+  else
+    set iverbose = 1
+  endif
+  #
+  setenv  OBS   SCRATCH/latlines.dat
+  setenv  OUT   SCRATCH/latfitteds.dat
+  setenv  GUESS SCRATCH/guess.dat
+  #
+  echo " "
+  echo " Parameters for latline are:"
+  echo " "
+  echo "2dx_merge_latline_sub.com, ${date}"
+  echo "${spcgrp}                            # IPG (Plane group number 1-17)"
+  echo "0                             # IPAT, 0=F & Phase, 1=Intensity data"
+  echo "${MergeAK},${MergeIWF_VAL},${MergeIWP_VAL}                      # AK,IWF,IWP - relative weights, + individual sigmas"
+  echo "${ALAT},${zminmax},${MergeDELPLT}        # ALAT,ZMIN,ZMAX,DELPLT "
+  echo "${MergeDELPRO},${MergeRminRmax},${MergeRCUT},${MergePFACT}        # DELPRO,RMIN,RMAX,RCUT,PFACT"
+  echo "${MergeIGUESS},${MergeBINSIZ}                       # IGUESS,BINSIZ"
+  echo "${MergeNCYCLS},${MergeMPRINT}                          # NCYCLS,MPRINT"
+  echo "${idoh},${idok},${iverbose}                         # H,K indices to plot. 0 0 = all."
+  echo "${IAQP2},${iplterr},${imaxIQplot}                         # IAQP2: 1=y,0=n, iplterr=1:errbar in PHS, maxIQ for PSplot"
+  echo " "
+  #
+  ${bin_2dx}/2dx_latlinek.exe << eot > LOGS/2dx_latlinek.log
+2dx_merge_latline_sub.com, ${date}
+${spcgrp}                                                    ! IPG (Plane group number 1-17)
+0                                                            ! IPAT, 0=F & Phase, 1=Intensity data
+${MergeAK},${MergeIWF_VAL},${MergeIWP_VAL}                   ! AK,IWF,IWP - relative weights, + individual sigmas
+${ALAT},${zminmax},${MergeDELPLT}                            ! ALAT,ZMIN,ZMAX,DELPLT
+${MergeDELPRO},${MergeRminRmax},${MergeRCUT},${MergePFACT}   ! DELPRO,RMIN,RMAX,RCUT,PFACT
+${MergeIGUESS},${MergeBINSIZ}                                ! IGUESS,BINSIZ
+${MergeNCYCLS},${MergeMPRINT}                                ! NCYCLS,MPRINT
+${idoh},${idok},${iverbose}                                  ! H,K indices to plot. 0 0 = all.
+${IAQP2},${iplterr},${imaxIQplot}                            ! IAQP2: 1=y,0=n, iplterr=1:errbar in PHS, maxIQ for PSplot
+eot
+  #
+  echo "################################################"
+  echo "################################################"
+  echo "output in file LOGS/2dx_latlinek.log"
+  echo "################################################"
+  echo "################################################"
+  #
+  echo "# IMAGE: LOGS/2dx_latlinek.log <LOG: 2dx_latlinek output>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/latline_stat.dat <Lattice line statistics>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/latfitteds.dat <Lattice line fit data [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/guess.dat <Lattice line guess data>" >> LOGS/${scriptname}.results
+  if ( ! -e latline.statistics ) then
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linhash "3D modus, but do you have 3D (i.e. tilted) data?"
+    ${proc_2dx}/protest "ERROR in latlinek. Check logfile."
+  endif
+  \mv -f latline.statistics SCRATCH/latline_stat.dat
+  #
+  if ( ! -e PLOT.PS ) then
+    ${proc_2dx}/protest "2dx_latlinek: ERROR occured."
+  endif
+  #
+  \mv -f PLOT.PS PS/latline.ps 
+  echo "# IMAGE-IMPORTANT: PS/latline.ps <PS: Lattice lines>" >> LOGS/${scriptname}.results
+  #
+  echo " "
+  ${proc_2dx}/lin "-"
+  echo " "
+  #
+  echo "<<@progress: +5>>"
+  #
+endif
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "PREPMKMTZ - Program to convert fitted data to CCP4 format"
+#                                                                           #
+#############################################################################
+#
+\rm -f APH/latfitted_nosym.hkl
+\rm -f APH/latfittedref.hkl
+#
+# setenv IN SCRATCH/latfitteds.dat
+setenv IN ${merge_file}
+echo "# IMAGE-IMPORTANT: ${merge_file} <My Input File>" >> LOGS/${scriptname}.results
+#
+setenv OUT APH/latfitted_nosym.hkl
+setenv REFHKL APH/latfittedref_nosym.hkl
+#
+${bin_2dx}/prepmklcf.exe << eot > LOGS/prepmklcf.log
+${RESMAX},1.1                          ! RESOLUTION,REDUCAC
+${realcell},${realang},${ALAT}         ! a,b,gamma,c
+1.0                                    ! SCALE
+eot
+#
+echo "################################################"
+echo "################################################"
+echo "output in file LOGS/prepmklcf.log"
+echo "################################################"
+echo "################################################"
+#
+echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfitted_nosym.hkl <Lattice lines for volume fitted after prepmklcf [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfittedref_nosym.hkl <Lattice lines for reference fitted after prepmklcf [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: +5>>"
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to latfitted APH file, for volume"
+#############################################################################  
+#
+${bin_2dx}/2dx_hklsym.exe << eot
+APH/latfitted_nosym.hkl
+APH/latfitted_sym_nosort.hkl
+APH/latfitted_sym_noheader.hkl
+${spcgrp}
+0     ! no header line
+0     ! no sigma column
+eot
+#
+\rm -f APH/latfitted_sym_noheader.hkl
+echo "# IMAGE: APH/latfitted_sym_nosort.hkl <Lattice lines for volume after 2dx_hklsym [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+#
+sort < APH/latfitted_sym_nosort.hkl > APH/latfitted_sym_sort.hkl
+echo "# IMAGE: APH/latfitted_sym_sort.hkl <Lattice lines for volume after 2dx_hklsym, sorted [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to latfitted APH file, for reference"
+#############################################################################  
+#
+${bin_2dx}/2dx_hklsym.exe << eot
+APH/latfittedref_nosym.hkl
+APH/latfittedref_sym_nosort.hkl
+APH/latfittedref_sym_noheader.hkl
+${spcgrp}
+0     ! no header line
+1     ! with sigma column
+eot
+#
+\rm -f APH/latfittedref_sym_noheader.hkl
+echo "# IMAGE: APH/latfittedref_sym_nosort.hkl <Lattice lines for reference after 2dx_hklsym [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+#
+sort < APH/latfittedref_sym_nosort.hkl > APH/latfittedref_sym_sort.hkl
+echo "# IMAGE: APH/latfittedref_sym_sort.hkl <Lattice lines for reference after 2dx_hklsym, sorted [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_hklclean - to eliminated duplicates from APH file, for volume"
+#############################################################################  
+#
+${bin_2dx}/2dx_hklclean.exe << eot
+APH/latfitted_sym_sort.hkl
+APH/latfitted.hkl
+0     ! no header line
+0     ! no sigma column
+eot
+#
+echo "<<@progress: +5>>"
+#
+if ( ! -e APH/latfitted.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+#
+echo "# IMAGE: APH/latfitted.hkl <Lattice lines for volume after 2dx_hklclean [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_hklclean - to eliminated duplicates from APH file, for reference"
+#############################################################################  
+#
+${bin_2dx}/2dx_hklclean.exe << eot
+APH/latfittedref_sym_sort.hkl
+APH/latfittedref.hkl
+0     ! no header line
+1     ! with sigma column
+eot
+#
+echo "<<@progress: +5>>"
+#
+if ( ! -e APH/latfitted.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+#
+echo "# IMAGE: APH/latfittedref.hkl <Lattice lines for reference after 2dx_hklclean [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for volume"
+#############################################################################
+#
+set infile = APH/latfitted.hkl
+\rm -f merge3D.mtz
+#
+${bin_ccp4}/f2mtz hklin ${infile} hklout merge3D.mtz << eof
+TITLE  P1 map, ${date}
+CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT H K L F PHI FOM
+CTYPOUT H H H F P W
+FILE ${infile}
+SKIP 1
+END
+eof
+#
+echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Full fitted lattice line data for volume>" >> LOGS/${scriptname}.results
+echo "<<@progress: +5>>"
+#
+#
+#############################################################################
+${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for reference"
+#############################################################################
+#
+set infile = APH/latfittedref.hkl
+\rm -f merge3Dref.mtz
+#
+${bin_ccp4}/f2mtz hklin ${infile} hklout merge3Dref.mtz << eof
+TITLE  P1 map, ${date}
+CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT H K L F PHI FOM SIGA
+CTYPOUT H H H F P W W
+FILE ${infile}
+SKIP 1
+END
+eof
+#
+echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full fitted lattice line data for reference>" >> LOGS/${scriptname}.results
+echo "<<@progress: +5>>"
+#
+#
+  #
+endif
+echo "<<@progress: 100>>"
+#
+#############################################################################
+${proc_2dx}/linblock "normal end."
+#############################################################################
+#
+#

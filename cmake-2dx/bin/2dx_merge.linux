@@ -1,7 +1,0 @@
-#!/bin/bash
-currentDir=$PWD
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$currentDir/../lib/
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$currentDir/../lib/
-cd `dirname $0`
-../2dx_merge/2dx_merge $*
-cd $currentDir

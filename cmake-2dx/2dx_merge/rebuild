@@ -1,8 +1,0 @@
-#!/bin/bash
-export CXXFLAGS="-O3 -ftree-vectorize -ffast-math"
-
-#echo "QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.4u.sdk" >> 2dx_image.pro
-#echo "CONFIG += x86 ppc" >> 2dx_image.pro
-qmake -spec macx-xcode
-open 2dx_merge.xcodeproj
-

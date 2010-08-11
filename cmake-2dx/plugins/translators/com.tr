@@ -1,6 +1,0 @@
-#!/bin/csh -ef
-#
-set infile = $1
-#
-$scriptEditor_2dx_app ${infile}
-

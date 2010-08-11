@@ -1,7 +1,0 @@
-#!/bin/csh
-#
-/bin/rm -f *.o 
-/bin/rm -f subs.a
-gcc -c -w subsc.c
-ar crs subs.a *.o
-/bin/rm -f *.o 

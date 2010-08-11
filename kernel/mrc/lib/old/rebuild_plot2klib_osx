@@ -1,7 +1,0 @@
-#!/bin/csh
-#
-/bin/rm -f *.o 
-/bin/rm -f plot2klib.a
-gcc -w -c plot2k.c
-ar crs libplot2k.a *.o
-/bin/rm -f *.o 

@@ -1,8 +1,0 @@
-
-#!/bin/csh
-#
-/bin/rm -f *.o 
-/bin/rm -f subs.a
-cc -c -w sgisubsc.c
-ar r subs.a *.o
-/bin/rm -f *.o 

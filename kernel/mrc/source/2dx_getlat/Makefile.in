@@ -1,0 +1,20 @@
+CXX = @CXX@
+CXXFLAGS = 
+LIBS = 
+SOURCES = 2dx_laterror.cpp 2dx_getlat.cpp
+OBJECTS = 2dx_laterror.o 2dx_getlat.o
+BINDIR = ../../bin/
+BINARIES = $(BINDIR)/2dx_laterror.exe $(BINDIR)/2dx_getlat.exe
+
+all: $(BINARIES) $(SOURCES)
+
+%.o: %.cpp
+	$(CXX) -c $(CXXFLAGS) $<
+
+$(BINDIR)/%.exe: %.o
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBS)
+
+clean:
+	\rm -f ../../bin/2dx_getlat.exe
+	\rm -f ../../bin/2dx_laterror.exe
+

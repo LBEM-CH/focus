@@ -1,0 +1,203 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Maximum Likelihood                                                 #
+#                                                                           #
+# 2dx.org, GNU Plublic License.                                             #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 07/18/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 80
+#
+# MANUAL: <B>This script applies a Maximum Likelihood algorithm to a stack of unit cells.</B>
+#
+# MANUAL: <B>NOTE: The ML processing takes its parameters directly from the <i>2dx_image.cfg</I> file. You therefore have to <I>Save</I> the current parameters before starting this script.</B>
+#
+# MANUAL: For more information, see <A HREF="http://dx.doi.org/10.1016/j.jsb.2007.09.013">Zeng et al., JSB 2007</A>, or on <A HREF="http://2dx.org/documentation/2dx-software/parameters/Ml">2dx.org</A>.
+#
+# MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_ML.jpg">
+#
+# GLOBAL: ML_doit
+# GLOBAL: ML_doMLorCC
+# GLOBAL: RESMIN
+# GLOBAL: RESMAX
+# GLOBAL: SYM
+# GLOBAL: defocus
+# GLOBAL: stepdigitizer
+# GLOBAL: magnification
+# GLOBAL: ALAT
+# GLOBAL: tempfac
+# GLOBAL: tempkeep
+# GLOBAL: ctfrev
+# GLOBAL: realang
+# GLOBAL: realcell
+# GLOBAL: phaori
+# GLOBAL: lattice
+# GLOBAL: ML_realcellxy_outer
+# GLOBAL: ML_mask_radius
+# GLOBAL: ML_iteration
+# GLOBAL: ML_threshold_method
+# GLOBAL: ML_absolute_threshold
+# GLOBAL: ML_relative_threshold
+# GLOBAL: ML_ref_ind
+# GLOBAL: ML_do_whiten
+# GLOBAL: ML_correct_CTF
+# GLOBAL: ML_rotational_symmetry
+# GLOBAL: ML_MinMaxStep_angle
+# GLOBAL: ML_terminate_ML
+# GLOBAL: ML_lp_method
+# GLOBAL: ML_lp_radius
+# GLOBAL: ML_B_factor
+# GLOBAL: ML_A_factor
+# GLOBAL: comment
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set imagename = ""
+set imagenumber = ""
+set defocus = ""
+set imagenumber = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set phacon = ""
+set CS = ""
+set KV = ""
+set ALAT = ""
+set lattice = ""
+set realang = ""
+set realcell = ""
+set ctfrev = ""
+set phaori = ""
+set lattice = ""
+set ML_doit = ""
+set ML_doMLorCC = ""
+set ML_realcellxy_outer = ""
+set ML_mask_radius = ""
+set ML_iteration = ""
+set ML_threshold_method = ""
+set ML_absolute_threshold = ""
+set ML_relative_threshold = ""
+set ML_ref_ind = ""
+set ML_do_whiten = ""
+set ML_correct_CTF = ""
+set ML_rotational_symmetry = ""
+set ML_MinMaxStep_angle = ""
+set ML_terminate_ML = ""
+set ML_lp_method = ""
+set ML_lp_radius = ""
+set ML_B_factor = ""
+set ML_A_factor = ""
+set rot180 = ""
+set revhk = ""
+set rot90 = ""
+set beamtilt = ""
+set zstarwin = ""
+set tempfac = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
+set SYM = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+#
+#$end_vars
+#
+echo "<<@progress: 1>>"
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+#echo ML_whitefirst = ${ML_whitefirst}
+setenv OMP_NUM_THREADS 2
+#source ~/.cshrc 
+echo ML_doMLorCC = ${ML_doMLorCC}
+#
+set defocus_nokomma = `echo ${defocus} | sed 's/,/ /g'`
+#set ML_oversizexy_nokomma = `echo ${ML_oversizexy} | sed 's/,/ /g'`
+#set ML_realcellxy_inner_nokomma = `echo ${ML_realcellxy_inner} | sed 's/,/ /g'`
+set ML_realcellxy_outer_nokomma = `echo ${ML_realcellxy_outer} | sed 's/,/ /g'`
+set ML_MinMaxStep_angle_nokomma = `echo ${ML_MinMaxStep_angle} | sed 's/,/ /g'`
+set lattice_nokomma = `echo ${lattice} | sed 's/,/ /g'`
+set phaori_nokomma = `echo ${phaori} | sed 's/,/ /g'`
+#
+set scriptname = 2dx_max_likelihood
+#
+${proc_2dx}/2dx_makedirs 
+#
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+#
+if ( ${ML_doit} == 'n' ) then
+  ${proc_2dx}/linblock "No Maximum Likelihood processing."
+  ${proc_2dx}/linblock "2dx_MaxLikelihood - normal end."
+  echo "<<@progress: 100>>"
+  exit
+endif
+#
+if ( "now" == "future" ) then
+  echo ":: "
+  ${proc_2dx}/linblock "Sourcing 2dx_ML_stack_sub.com script"
+  echo ":: "
+  # source ${proc_2dx}/2dx_ML_stack_sub.com
+  #
+  #############################################################################
+  echo ":: "
+  ${proc_2dx}/linblock "Sourcing 2dx_ML_run_sub.com script"
+  echo ":: "
+  # source ${proc_2dx}/2dx_ML_run_sub.com
+  #
+else
+  #
+  #############################################################################
+  echo ":: "
+  ${proc_2dx}/linblock "Sourcing 2dx_ML_sub.com script"
+  echo ":: "
+  source ${proc_2dx}/2dx_ML_sub.com
+  #
+endif
+#############################################################################
+#############################################################################
+#############################################################################
+#
+set aphfile = "APH/ML_result.aph"
+if ( ! -e ${aphfile} ) then
+  ${proc_2dx}/protest "ERROR: ${aphfile} does not exist. Problem in ML."
+endif
+#
+if ( ${tempkeep} == "n" ) then
+  echo dummy > SCRATCH/ML_reference_1.mrc 
+  \rm -f SCRATCH/ML_reference_*.mrc
+endif
+#
+echo "set ML_done = y" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+echo "::ML run finished."
+#
+#
+#############################################################################
+${proc_2dx}/linblock "removing uncompressed profile"
+############################################################################# 
+#
+\rm -f ${imagename}.profile
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#

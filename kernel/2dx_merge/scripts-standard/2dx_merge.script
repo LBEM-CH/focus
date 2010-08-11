@@ -1,0 +1,218 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Merge Once                                                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/03/2007                                             #
+# Last Modification: 01/03/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 20
+#
+# MANUAL: This script allows merging the selected image data into one merge dataset.
+#
+# MANUAL: Select only the one best image and run this script with that one image.
+#
+# GLOBAL: MergeResolution
+# GLOBAL: merge_modus
+# GLOBAL: zstarrange
+# GLOBAL: Calc_from_zstarrange
+# GLOBAL: zstarrange_real
+# GLOBAL: RESMIN
+# GLOBAL: RESMAX
+# GLOBAL: tempkeep
+# GLOBAL: realcell
+# GLOBAL: realang
+# GLOBAL: ALAT
+# GLOBAL: MergeIQMAX
+# GLOBAL: SYM
+# GLOBAL: avrgamphsNUMBER
+# GLOBAL: avrgamphsRESOL
+# GLOBAL: MergeIPAT
+# GLOBAL: MergeDELPLT
+# GLOBAL: MergeDELPRO
+# GLOBAL: MergeRminRmax
+# GLOBAL: MergeRCUT
+# GLOBAL: MergePFACT
+# GLOBAL: MergeBINSIZ
+# GLOBAL: MergeNCYCLS
+# GLOBAL: MergeMPRINT
+# GLOBAL: MergeHKMAX
+# GLOBAL: MergeAK
+# GLOBAL: MergeIWF
+# GLOBAL: MergeIWP
+# GLOBAL: max_amp_correction
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set MergeResolution = ""
+set merge_modus = ""
+set zstarwin  = ""
+set zstarrange  = ""
+set Calc_from_zstarrange = ""
+set zstarrange_real = ""
+set RESMIN = ""
+set RESMAX = ""
+set tempkeep = ""
+set realcell = ""
+set realang = ""
+set ALAT = ""
+set SYM = ""
+set merge_ref_num = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set MergeIPAT = ""
+set MergeDELPLT = ""
+set MergeDELPRO = ""
+set MergeRminRmax = ""
+set MergeIQMAX = ""
+set MergeRCUT = ""
+set MergePFACT = ""
+set MergeBINSIZ = ""
+set MergeNCYCLS = ""
+set MergeMPRINT = ""
+set MergeHKMAX = ""
+set MergeAK = ""
+set MergeIWF = ""
+set MergeIWP = ""
+set max_amp_correction = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_merge
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+if ( ${Calc_from_zstarrange} == "y" ) then
+  set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
+else
+  set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
+endif
+#
+set zmin = `echo ${zstarrange} | awk '{s = -$1} END {print s}'`
+set zminmax = `echo ${zmin},${zstarrange}`
+echo zminmax = ${zminmax}
+#
+echo "<<@progress: 1>>"
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+if ( ${MergeHKMAX}x == 'x' ) then
+  set MergeHKMAX = '20'
+  ${proc_2dx}/linblock "ERROR: correcting MergeHKMAX to ${MergeHKMAX}"
+  echo "set MergeHKMAX = ${MergeHKMAX}" >> LOGS/${scriptname}.results
+endif
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 5>>"
+#
+if ( ${MergeAK}x == 'x' ) then
+  set MergeAK = "10"
+  echo "set MergeAK = ${MergeAK}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeAK corrected to ${MergeAK}"
+endif
+#
+if ( ${MergeIWF}x == 'x' ) then
+  set MergeIWF = "0"
+  echo "set MergeIWF = ${MergeIWF}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeIWF corrected to ${MergeIWF}"
+endif
+#
+if ( ${MergeIWP}x == 'x' ) then
+  set MergeIWP = "1"
+  echo "set MergeIWP = ${MergeIWP}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeIWP corrected to ${MergeIWP}"
+endif
+#
+if(${MergeIWF} == "0")then
+  set MergeIWF_VAL = -1
+endif
+if(${MergeIWF} == "1")then
+  set MergeIWF_VAL = 0
+endif
+if(${MergeIWF} == "2")then
+  set MergeIWF_VAL = 1
+endif
+if(${MergeIWP} == "0")then
+  set MergeIWP_VAL = -2
+endif
+if(${MergeIWP} == "1")then
+  set MergeIWP_VAL = -1
+endif
+if(${MergeIWP} == "2")then
+  set MergeIWP_VAL = 0
+endif
+if(${MergeIWP} == "3")then
+  set MergeIWP_VAL = 1
+endif
+echo MergeAK = ${MergeAK}
+echo MergeIWF_VAL = ${MergeIWF_VAL}
+echo MergeIWP_VAL = ${MergeIWP_VAL}
+#
+#############################################################################
+${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+#
+echo SYM = ${SYM}
+echo spcgrp = ${spcgrp}
+echo CCP4_SYM = ${CCP4_SYM}
+#
+############################################################################# 
+${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
+#############################################################################
+#
+${proc_2dx}/2dx_merge_makedirs
+#
+echo "<<@progress: 10>"
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing 2dx_merge.sub"
+#############################################################################
+#
+source ${proc_2dx}/2dx_merge_merge_sub.com
+#
+if ( ${merge_modus} == "3D" ) then
+  #
+  echo "<<@progress: 70>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
+  #############################################################################
+  #
+  source ${proc_2dx}/2dx_merge_latline_sub.com
+  #
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_merge normal end."
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

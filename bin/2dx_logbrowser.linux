@@ -1,0 +1,6 @@
+#!/bin/bash
+currentDir=$PWD
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$currentDir/../lib/
+cd `dirname $0`
+../2dx_logbrowser/2dx_logbrowser $*
+cd $currentDir

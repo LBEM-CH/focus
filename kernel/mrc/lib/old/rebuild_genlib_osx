@@ -1,0 +1,18 @@
+#!/bin/csh
+#
+/bin/rm -f *.o 
+/bin/rm -f *.f 
+/bin/rm -f genlib.a
+m4 -D_g77=1 unix.m4 > unix.for
+./fsplit unix.for
+./fsplit diskio.for
+./fsplit ccplib.for
+./fsplit subs.for
+./fsplit parser.for
+./fsplit symlib.for
+/usr/local/gfortran/bin/gfortran -c  -O -fno-second-underscore -w *.f
+#pretend we are an alliant (Intel cpu) *and* a powerpc (G4/G5 cpu) at once!
+gcc -c -O -DPROTOTYPE -Dalliant -Dpowerpc -w library.c
+ar crs libgen.a *.o
+/bin/rm -f *.o 
+/bin/rm -f *.f 

@@ -1,0 +1,98 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Initialization                                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 09/01/2006                                             #
+# Last Modification: 09/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 1
+#
+# MANUAL: <B>Welcome to 2dx_merger</B>
+#
+# MANUAL: This program assists you in the managing of a 2D crystal image processing project, and will do the merging of the processed data. Help is available <A HREF="http://2dx.org/documentation/2dx-software">here</A>. Try the right mouse click on the various fields or variable names, to get more information.
+#
+# GLOBAL: ALAT
+# GLOBAL: IBOXPHS
+# GLOBAL: MergeIQMAX
+# GLOBAL: MergeResolution
+# GLOBAL: MergeStepSize
+# GLOBAL: merge_modus
+# GLOBAL: Merge_Refine_Rounds
+# GLOBAL: RESMAX
+# GLOBAL: RESMIN
+# GLOBAL: SYM
+# GLOBAL: avrgamphsNUMBER
+# GLOBAL: avrgamphsRESOL
+# GLOBAL: realang
+# GLOBAL: realcell
+# GLOBAL: revhk
+# GLOBAL: rot180
+# GLOBAL: rot90
+# GLOBAL: tempfac
+# GLOBAL: tempkeep
+# GLOBAL: zstarwin
+# GLOBAL: zstarrange
+# GLOBAL: merge_modus
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+# Variables to be available from the config file are:
+set tempkeep = ""
+set initialization_executable = ""
+#
+#$end_vars
+#
+set ccp4_setup = 'y'
+set scriptname = 2dx_initialize
+#
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+${proc_2dx}/2dx_makedirs
+#
+echo "<<@progress: 1>>"
+#
+if ( ${initialization_executable} == "n" ) then
+  #
+  ${proc_2dx}/lin "Initialization ran already."
+  echo ":(If this is wrong, uncheck initialization_executable.)"
+  #
+else
+  #
+  #################################################################################
+  ${proc_2dx}/lin "Running some tests..."
+  #################################################################################
+  #
+  set initialization_executable = "n"
+  echo "set initialization_executable = ${initialization_executable}"  >> LOGS/${scriptname}.results
+  # 
+endif
+#
+#############################################################################
+echo ":: "
+echo "::                            *************************"
+echo "::                              Welcome to 2dx_merge"
+echo "::                            *************************"
+echo "::                 (activate the MANUAL button top right for help)"
+echo ":: "
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

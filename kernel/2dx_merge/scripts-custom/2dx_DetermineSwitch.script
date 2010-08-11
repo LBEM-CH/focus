@@ -1,0 +1,465 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Refine Switch                                                      #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/03/2007                                             #
+# Last Modification: 01/03/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 12
+#
+# MANUAL: This script allows refining the setting of certain switches
+#
+# MANUAL: This script will set the switches like <i>revhk</i> (this inverts data between H and K) to first the current setting (normal), and then to the other setting (inverted), and tries the merging process with both settings. For this, the merging program ORIGTILT needs to be able to access the full 360.0 degree search range, so you should set the Merge Step Size to e.g. 1.0 and the number of sets to 361, so that the product between the two reaches 360.0 (plus the zero position). Other good settings are steps of 3.0 deg and 121 steps.
+#
+# MANUAL: It is possible to do an exhaustive search over several switches on the same time. You could for example simultaneously search for the optimal settings of <i>revhk</i>, <i>rot180</i>, and <i>invert_tiltangle</i>, which will then run ORIGTILT 8 times in all combinations of the three switches, and determine the best setting with the lowest phase residual. 
+#
+# MANUAL: <i>invert_tiltangle</i> will do exactly that. It will test if potentially the negative tilt angle would fit better. That could be the case, if your tilt geometry determination from the defocus failed, and from the lattice distortion by bad luck you got the wrong sign of the tilt angle.  
+# 
+# GLOBAL: MergeResolution
+# GLOBAL: merge_modus
+# GLOBAL: zstarwin
+# GLOBAL: RESMIN
+# GLOBAL: RESMAX
+# GLOBAL: tempkeep
+# GLOBAL: realcell
+# GLOBAL: realang
+# GLOBAL: ALAT
+# GLOBAL: MergeStepSize
+# GLOBAL: IBOXPHS
+# GLOBAL: SYM
+# GLOBAL: avrgamphsNUMBER
+# GLOBAL: avrgamphsRESOL
+# GLOBAL: MergeHKMAX
+# GLOBAL: MergeIQMAX
+# GLOBAL: refrevhk
+# GLOBAL: refrot90
+# GLOBAL: refrot180
+# GLOBAL: refsgnxch
+# GLOBAL: refrevhnd
+# GLOBAL: refrevxsgn
+# GLOBAL: refinvert_tiltangle
+# GLOBAL: merge_reference
+# GLOBAL: merge_ref_num
+# GLOBAL: merge_comment_1
+# GLOBAL: merge_comment_2
+# GLOBAL: merge_comment_3
+# GLOBAL: merge_comment_4
+# GLOBAL: merge_comment_5
+# GLOBAL: merge_comment_6
+# GLOBAL: merge_comment_7
+# GLOBAL: merge_comment_8
+# GLOBAL: merge_comment_9
+# GLOBAL: max_amp_correction
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set create_merged_dataset = ""
+set MergeResolution = ""
+set merge_modus = ""
+set zstarwin = ""
+set RESMIN = ""
+set RESMAX = ""
+set tempkeep = ""
+set realcell = ""
+set realang = ""
+set ALAT = ""
+set MergeStepSize = ""
+set IBOXPHS = ""
+set SYM = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set MergeHKMAX = ""
+set MergeIQMAX = ""
+set refbeamtilt = ""
+set reftiltgeo = ""
+set merge_reference = ""
+set merge_ref_num = ""
+set max_amp_correction = ""
+set refrevhk = ""
+set refrot90 = ""
+set refrot180 = ""
+set refsgnxch = ""
+set refrevhnd = ""
+set refrevxsgn = ""
+set refinvert_tiltangle = ""
+#
+#$end_vars
+#
+setenv OMP_NUM_THREADS 8
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set dirfile = "2dx_merge_dirfile.dat"
+#
+set number = 1
+set IVERBOSE = 9
+set RFACAMP = 1.0
+#
+set date = `date`
+echo date = ${date}
+#
+set scriptname = 2dx_DetermineSwitch
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>>"
+#
+if ( ${refrevhk} == "y" ) then
+  set refrevhk_val = "normal invert"
+  ${proc_2dx}/linblock "Testing alternative setting of revhk"
+else
+  set refrevhk_val = "normal"
+endif
+#
+if ( ${refrot90} == "y" ) then
+  set refrot90_val = "normal invert"
+  ${proc_2dx}/linblock "Testing alternative setting of rot90"
+else
+  set refrot90_val = "normal"
+endif
+#
+if ( ${refrot180} == "y" ) then
+  set refrot180_val = "normal invert"
+  ${proc_2dx}/linblock "Testing alternative setting of rot180"
+else
+  set refrot180_val = "normal"
+endif
+#
+if ( ${refsgnxch} == "y" ) then
+  set refsgnxch_val = "normal invert"
+  ${proc_2dx}/linblock "Testing alternative setting of sgnxch"
+else
+  set refsgnxch_val = "normal"
+endif
+#
+if ( ${refrevhnd} == "y" ) then
+  set refrevhnd_val = "normal invert"
+  ${proc_2dx}/linblock "Testing alternative setting of revhnd. ATTENTION, this changes the handedness."
+  echo "#WARNING: Changing the revhnd setting alters the handedness of the final reconstruction. Danger." >> LOGS/${scriptname}.results
+else
+  set refrevhnd_val = "normal"
+endif
+#
+if ( ${refrevxsgn} == "y" ) then
+  set refrevxsgn_val = "normal invert"
+  ${proc_2dx}/linblock "Testing alternative setting of revxsgn. ATTENTION, this changes the handedness."
+  echo "#WARNING: Changing the revxsgn setting alters the handedness of the final reconstruction. Danger." >> LOGS/${scriptname}.results
+else
+  set refrevxsgn_val = "normal"
+endif
+#
+if ( ${refinvert_tiltangle} == "y" ) then
+  set refinvert_tiltangle_val = "normal invert"
+  ${proc_2dx}/linblock "Testing alternative setting of invert_tiltangle. ATTENTION, this changes the handedness."
+  echo "#WARNING: Changing the invert_tiltangle setting alters the handedness of the final reconstruction. Danger." >> LOGS/${scriptname}.results
+else
+  set refinvert_tiltangle_val = "normal"
+endif
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+set phaori_range = `echo ${MergeStepSize} ${IBOXPHS} | awk '{ s = sqrt ( $1 * $1 * $2 * $2 ) } END { print s }'`
+set phaori_range_ok = `echo ${phaori_range} | awk '{ if ( $1 < 350.0 || $1 > 370.0 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${phaori_range_ok} == "1" ) then
+  echo ":: "
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "ERROR: You are not covering the full 360.0 degree search range."
+  ${proc_2dx}/linblock "You are only covering a range of ${phaori_range}"
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "ERROR: Stepsize of phase orign search is ${MergeStepSize}"
+  ${proc_2dx}/linblock "ERROR: Number of steps is                ${IBOXPHS}"
+  ${proc_2dx}/protest "Correct these settings, e.g. to 3.0 and 121"
+else
+  ${proc_2dx}/linblock "Searching over ${phaori_range} degrees."
+endif
+#
+if ( ${MergeHKMAX}x == 'x' ) then
+  set MergeHKMAX = '20'
+  ${proc_2dx}/linblock "ERROR: correcting MergeHKMAX to ${MergeHKMAX}"
+  echo "set MergeHKMAX = ${MergeHKMAX}" >> LOGS/${scriptname}.results
+endif
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing sym2spsgrp_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+#
+echo SYM = ${SYM}
+echo spcgrp = ${spcgrp}
+echo CCP4_SYM = ${CCP4_SYM}
+#
+############################################################################# 
+${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
+#############################################################################
+#
+${proc_2dx}/2dx_merge_makedirs
+#
+echo "<<@progress: 5>"
+#
+set NPRG = 1
+if ( ${merge_modus} == '2D' ) then
+  if ( ! -e APH/merge.aph ) then
+    ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+    ${proc_2dx}/protest "Run Merging script first."
+  endif
+endif
+if ( ${merge_modus} == '3D' ) then
+  if ( ${merge_reference} == '0' ) then
+    # Use merge.aph files
+    if ( ! -e APH/merge.aph ) then
+      ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+      ${proc_2dx}/protest "Run Merging script first."
+    endif
+  else
+    # User interpolated lattice lines latlinesref.mtz
+    if ( ! -e merge3D.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge.mtz not found. No reference for refinement available."
+      ${proc_2dx}/protest "Run Merging script first."
+    endif
+    set NPRG = 3
+  endif
+endif
+#
+if ( ${merge_ref_num} != "0" ) then
+  if ( -d REGISTERS/Reg_${merge_ref_num} ) then
+     #############################################################################
+     ${proc_2dx}/linblock "Using merged dataset from register ${merge_ref_num}."
+     #############################################################################  
+     echo "::" `cat REGISTERS/Reg_${merge_ref_num}/COMMENT.txt | head -1`
+     echo "::" `cat REGISTERS/Reg_${merge_ref_num}/COMMENT.txt | head -2 | tail -1`
+     echo " "
+    if ( ${NPRG} == "3" ) then
+      # Use MTZ file
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3D.mtz not existing in register ${merge_ref_num}."
+      else
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ."
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D.mtz .
+      endif
+      #
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3Dref.mtz not existing in register ${merge_ref_num}."
+      else
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ."
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz .
+      endif
+    else
+      # Use APH file
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge2D.mtz not existing in register ${merge_ref_num}."
+      else
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ." 
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge2D.mtz .
+      endif
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge.aph ) then
+        ${proc_2dx}/protest "ERROR: merge.aph not existing in register ${merge_ref_num}."
+      else
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge.aph APH/merge.aph"
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge.aph APH/merge.aph
+      endif
+    endif
+  else
+    ${proc_2dx}/protest "ERROR: Register ${merge_ref_num} does not contain data."
+  endif
+  #
+endif
+#
+set linenum = `cat 2dx_merge_dirfile.dat | wc -l`
+set currentline = 1
+set line_progress = `echo ${linenum}  | awk '{ s = 90.0 / $1 } END { prints s }'`
+while ( ${currentline} <= ${linenum} ) 
+  echo "linenum = ${linenum};  currentline = ${currentline}"
+  ${proc_2dx}/2dx_split.com 2dx_merge_dirfile.dat SCRATCH/2dx_refine_longfile.dat SCRATCH/2dx_refine_onefile.dat ${currentline}
+  set oneline = `cat SCRATCH/2dx_refine_onefile.dat`
+  #
+  echo "::"
+  echo "::Image: ${oneline}"
+  #
+  set best_phares = 9999.0
+  set found_better = "n"
+  set number = 1
+  foreach revhk_modus ( ${refrevhk_val} )
+    foreach rot90_modus ( ${refrot90_val} )
+      foreach rot180_modus ( ${refrot180_val} )
+        foreach sgnxch_modus ( ${refsgnxch_val} )
+          foreach revhnd_modus ( ${refrevhnd_val} )
+            foreach revxsgn_modus ( ${refrevxsgn_val} )
+              foreach invert_tiltangle_modus ( ${refinvert_tiltangle_val} )
+                set dirfile = "SCRATCH/2dx_refine_onefile.dat"
+                source ${proc_2dx}/2dx_refine_refine_sub.com
+                if ( ${MergePhaseResidual} != "nan" ) then
+                  if ( ${number} == "1" ) then
+                    set better_now = 0
+                    set best_phares = ${MergePhaseResidual}
+                  else
+                    set better_now = `echo ${MergePhaseResidual} ${best_phares} | awk '{ if ( $1 < $2 ) { print 1 } else { print 0 }} END { print s }'`
+                  endif
+                else
+                  set better_now = "nan"
+                endif
+                if ( ${better_now} == '1' ) then
+                  set best_revhk = ${revhk_modus}
+                  set best_rot90 = ${rot90_modus}
+                  set best_rot180 = ${rot180_modus}
+                  set best_sgnxch = ${sgnxch_modus}
+                  set best_revhnd = ${revhnd_modus}
+                  set best_revxsgn = ${revxsgn_modus}
+                  set best_invert_tiltangle = ${invert_tiltangle_modus}
+                  set best_phares = ${MergePhaseResidual}
+                  set best_phaori = ${phaori}
+                  # set best_phaoriFouFilter = ${phaoriFouFilter}
+                  set best_phaori_last_change = ${phaori_last_change}
+                  set found_better = "y"
+                endif
+                set number = `echo ${number} | awk '{ s = $1 + 1 } END { print s}'`
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  #
+  echo "<<@progress: +${line_progress}>>"
+  #
+  set olddir = $PWD
+  if ( ${found_better} == "y" ) then
+    echo "::Found better setting, with PhaseResidual = ${best_phares}"
+    echo "<IMAGEDIR="\"${oneline}\"">" >> LOGS/${scriptname}.results
+    cd ${oneline}
+    #
+    if ( ${best_revhk} == "invert" ) then
+      set revhk = `cat 2dx_image.cfg | grep "set revhk" | cut -d\" -f2`
+      if ( ${revhk} == 'y' ) then
+        set newrevhk = 'n'
+      else
+        set newrevhk = 'y'
+      endif
+      ${proc_2dx}/linblock "#"
+      ${proc_2dx}/linblock "Inverting revhk from ${revhk} to ${newrevhk}"
+      ${proc_2dx}/linblock "#"
+      echo "set revhk = ${newrevhk}" >> ${olddir}/LOGS/${scriptname}.results
+    endif
+    #
+    if ( ${best_rot90} == "invert" ) then
+      set rot90 = `cat 2dx_image.cfg | grep "set rot90" | cut -d\" -f2`
+      if ( ${rot90} == 'y' ) then
+        set newrot90 = 'n'
+      else
+        set newrot90 = 'y'
+      endif
+      ${proc_2dx}/linblock "#"
+      ${proc_2dx}/linblock "Inverting rot90 from ${rot90} to ${newrot90}"
+      ${proc_2dx}/linblock "#"
+      echo "set rot90 = ${newrot90}" >> ${olddir}/LOGS/${scriptname}.results
+    endif
+    #
+    if ( ${best_rot180} == "invert" ) then
+      set rot180 = `cat 2dx_image.cfg | grep "set rot180" | cut -d\" -f2`
+      if ( ${rot180} == 'y' ) then
+        set newrot180 = 'n'
+      else
+        set newrot180 = 'y'
+      endif
+      ${proc_2dx}/linblock "#"
+      ${proc_2dx}/linblock "Inverting rot180 from ${rot180} to ${newrot180}"
+      ${proc_2dx}/linblock "#"
+      echo "set rot180 = ${newrot180}" >> ${olddir}/LOGS/${scriptname}.results
+    endif
+    #
+    if ( ${best_sgnxch} == "invert" ) then
+      set sgnxch = `cat 2dx_image.cfg | grep "set sgnxch" | cut -d\" -f2`
+      if ( ${sgnxch} == 'y' ) then
+        set newsgnxch = 'n'
+      else
+        set newsgnxch = 'y'
+      endif
+      ${proc_2dx}/linblock "#"
+      ${proc_2dx}/linblock "Inverting sgnxch from ${sgnxch} to ${newsgnxch}"
+      ${proc_2dx}/linblock "#"
+      echo "set sgnxch = ${newsgnxch}" >> ${olddir}/LOGS/${scriptname}.results
+    endif
+    #
+    if ( ${best_revhnd} == "invert" ) then
+      set revhnd = `cat 2dx_image.cfg | grep "set revhnd" | cut -d\" -f2`
+      if ( ${revhnd} == 'y' ) then
+        set newrevhnd = 'n'
+      else
+        set newrevhnd = 'y'
+      endif
+      ${proc_2dx}/linblock "#"
+      ${proc_2dx}/linblock "Inverting revhnd from ${revhnd} to ${newrevhnd}"
+      ${proc_2dx}/linblock "#"
+      echo "set revhnd = ${newrevhnd}" >> ${olddir}/LOGS/${scriptname}.results
+    endif
+    #
+    if ( ${best_revxsgn} == "invert" ) then
+      set revxsgn = `cat 2dx_image.cfg | grep "set revxsgn" | cut -d\" -f2`
+      if ( ${revxsgn} == 'y' ) then
+        set newrevxsgn = 'n'
+      else
+        set newrevxsgn = 'y'
+      endif
+      ${proc_2dx}/linblock "#"
+      ${proc_2dx}/linblock "Inverting revxsgn from ${revxsgn} to ${newrevxsgn}"
+      ${proc_2dx}/linblock "#"
+      echo "set revxsgn = ${newrevxsgn}" >> ${olddir}/LOGS/${scriptname}.results
+    endif
+    #
+    if ( ${best_invert_tiltangle} == "invert" ) then
+      set TLTANG = `cat 2dx_image.cfg | grep "set TLTANG" | cut -d\" -f2`
+      set TANGL  = `cat 2dx_image.cfg | grep "set TANGL" | cut -d\" -f2`
+      set newTANGL  = `echo ${TANGL}  | awk '{ s = - $1 } END { print s }'`
+      set newTLTANG = `echo ${TLTANG} | awk '{ s = - $1 } END { print s }'`
+      ${proc_2dx}/linblock "#"
+      ${proc_2dx}/linblock "Inverting TLTANG from ${TLTANG} to ${newTLTANG}"
+      ${proc_2dx}/linblock "Inverting TANGL  from ${TANGL} to ${newTANGL}"
+      ${proc_2dx}/linblock "#"
+      echo "set TLTANG = ${newTLTANG}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set TANGL = ${newTANGL}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set MERGE_TLTANG = ${newTLTANG}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set MERGE_TANGL = ${newTANGL}" >> ${olddir}/LOGS/${scriptname}.results
+    endif
+    #
+    cd ${olddir}
+    echo "set phaori = ${best_phaori}" >> LOGS/${scriptname}.results
+    # echo "set phaoriFouFilter = ${best_phaoriFouFilter}" >> LOGS/${scriptname}.results
+    echo "set phaori_last_change = ${best_phaori_last_change}" >> LOGS/${scriptname}.results
+    echo "set MergePhaseResidual = ${best_phares}" >> LOGS/${scriptname}.results
+    echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+  else
+    if ( ${MergePhaseResidual} != "nan" ) then
+      echo "::Keeping settings. Phase Residual = ${best_phares}"
+    else
+      ${proc_2dx}/linblock "ERROR occured."
+    endif
+  endif
+  #
+  @ currentline += 1
+end
+#
+echo "<<@progress: 100>>"
+#

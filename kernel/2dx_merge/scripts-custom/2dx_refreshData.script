@@ -1,0 +1,78 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Refresh Databases                                                  #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 03/01/2006                                             #
+# Last Modification: 03/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 25
+#
+# MANUAL: This script will refresh the 2dx_image.cfg files in the image directories. 
+#
+# MANUAL: In order to do so, it will read the config files in all selected image directories and save them again. This can be useful if a variable has been added to the master config file 2dx_master.cfg, which then should be updated into all local image directory 2dx_image.cfg files.
+#
+# You can also adapt this script and add your own function, which will then be applied to all selected images.
+#
+#$end_local_vars
+#
+set proc_2dx = ""
+set bin_2dx = ""
+set app_2dx_image = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_refreshData
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+${proc_2dx}/2dx_makedirs 
+#
+echo "<<@progress: 1>>"
+#
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+set olddir = $PWD
+#
+foreach dirfile ( ${dirlist} ) 
+  echo "::Working on ${dirfile}"
+  #
+  echo "<IMAGEDIR="\"${dirfile}\"">" >> LOGS/${scriptname}.results
+  echo "set dummy = 1" >> LOGS/${scriptname}.results
+
+  # Use the following to invert the CTF in all directories, so that cryo setting is valid:
+  # echo "set ctfrev = y" >> LOGS/${scriptname}.results
+
+  echo "#unlock ctfplotresmax" >> LOGS/${scriptname}.results
+  echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
+
+  # Use the following to activate the synthetic unbending in all directories:
+  # echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
+  #
+  # echo "set TLTAXIS = 0.0" >> LOGS/${scriptname}.results
+  # echo "set TLTAXA = 0.0" >> LOGS/${scriptname}.results
+  # echo "set TLTANG = 0.0" >> LOGS/${scriptname}.results
+  # echo "set TAXA = 0.0" >> LOGS/${scriptname}.results
+  # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
+  #
+  # echo "#lock phaori" >> LOGS/${scriptname}.results
+  # echo "#lock phaoriFouFilter" >> LOGS/${scriptname}.results
+  # echo "#unlock phaori" >> LOGS/${scriptname}.results
+  # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
+  # 
+  # ${app_2dx_image} ${dirfile} "+2dx_evaluateLattice"
+  #
+  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+end
+#
+echo "<<@progress: 100>>"
+${proc_2dx}/linblock "${scriptname} finished correctly."
+#

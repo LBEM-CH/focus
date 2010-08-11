@@ -1,0 +1,529 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Mask Crystal from Polygon                                          #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 08/20/2006                                             #
+# Last Modification: 08/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 10
+#
+# MANUAL: This scripts assists in manually masking the crystal. 
+#
+# MANUAL: Use the full-screen browser to manually define a polygon, which will then be saved as <I>selectionList.dat</I>. Input for the manual polygon selection can come from either the raw image itself, the ManualMasking-CCmap.mrc file, or the ManualMasking-UnbendPlot.mrc file.
+#
+# MANUAL: After having defined a polygon, run this script to mask the image. The area defined in the polygon will be masked with blurred edges. The parameter <I>Masking Fourier Radius</I> defines how blurred the edges are: A larger value means a sharper edge (0...0.5).
+#
+#=============================================================================
+# SECTION: Parameter for masking
+#=============================================================================
+#
+# LABEL: Masking Fourier Radius (To blur the border of the mask)
+# LEGEND: Choose the radius in Fourier space that will be used for blurring the mask (e.g. 0.1).
+# EXAMPLE: fourmask = "0.1"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Masking
+# TYPE: FLOAT "MIN=0.0;MAX=0.5;DEFAULT=0.1"
+set fourmask = "0.1"
+#
+# LABEL: Crop into smaller, square image ?
+# LEGEND: Choose if the original size should be kept (n), or if the output image should have smaller dimensions (y).
+# EXAMPLE: crop = '"n"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Masking
+# TYPE: BOOL "y;n"
+set crop = "n"
+#
+# GLOBAL: imagename
+# GLOBAL: nonmaskimagename
+# GLOBAL: imagenumber
+# GLOBAL: imagesidelength
+# GLOBAL: magnification
+# GLOBAL: stepdigitizer
+# GLOBAL: lattice
+# GLOBAL: secondlattice
+# GLOBAL: maska
+# GLOBAL: maskb01
+# GLOBAL: maskb02
+# GLOBAL: maskb03
+# GLOBAL: maskb04
+# GLOBAL: maskb05
+# GLOBAL: tempkeep
+# GLOBAL: refori
+# GLOBAL: comment
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set lattice = ""
+set secondlattice = ""
+set maska = ""
+set maskb01 = ""
+set maskb02 = ""
+set maskb03 = ""
+set maskb04 = ""
+set maskb05 = ""
+set tempkeep = ""
+set refori = ""
+#
+#$end_vars
+#
+echo "<<@progress: 1>>"
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set scriptname = 2dx_maskCrystal
+\rm -f LOGS/${scriptname}.results
+#
+set date = `date`
+echo date = ${date}
+#
+${proc_2dx}/2dx_makedirs 
+#
+set originalpolygon = selectionList.dat
+#
+set masktobig = `echo ${fourmask} | awk '{ if ( $1 > 0.5 ) { s = 1 } else { s = 0 }} END { print s }'`
+if ( ${masktobig} == '1' ) then
+  set fourmask = 0.2
+  echo "set fourmask = ${fourmask}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Fourier Mask corrected to ${fourmask}."
+endif
+#
+echo "# IMAGE: ${nonmaskimagename}.mrc" >> LOGS/${scriptname}.results
+echo "# IMAGE: ManualMasking-CCmap.mrc" >> LOGS/${scriptname}.results
+echo "# IMAGE: ManualMasking-UnbendPlot.mrc" >> LOGS/${scriptname}.results
+#
+if ( ! -e ${originalpolygon} ) then
+  if ( -e ManualMasking-CCmap.mrc ) then
+    #############################################################################
+    ${proc_2dx}/linblock "${originalpolygon} does not exist."
+    ${proc_2dx}/linblock "#"
+    echo ":: "
+    echo ":: "
+    echo "::                         First define a polygon manually,"
+    echo ":: "
+    echo "::                  using one of the three files in the Images pane"
+    echo ":: "
+    echo ":: "
+    ${proc_2dx}/linblock "#"
+    #############################################################################
+  else
+    ${proc_2dx}/linblock "${originalpolygon} does not exist."
+    if ( -e ManualMasking-UnbendPlot.mrc ) then
+      ${proc_2dx}/linblock "ManualMasking-CCmap.mrc does not exist."
+    else
+      ${proc_2dx}/linblock "ManualMasking-CCmap.mrc and ManualMasking-UnbendPlot.mrc do not exist."
+    endif
+    ${proc_2dx}/linblock "#"
+    echo ":: "
+    echo "::                         First define a polygon manually."
+    echo ":: "
+    echo "::          You can do that using the original image (see Images pane), "
+    echo "::                or by (re-)running Unbend-II with the option to "
+    echo "::        'Create information for manual masking' set to 'yes', and then"
+    echo "::   using the ManualMasking-CCmap.mrc or ManualMasking-UnbendPlot.mrc files."
+    echo ":: "
+    ${proc_2dx}/linblock "#"
+    #
+  endif
+  echo "<<@progress: 100>>"
+  #############################################################################
+  ${proc_2dx}/linblock "${scriptname} aborting (normal end)"
+  #############################################################################
+  #
+else
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "LABEL - to create flat value=1 file"
+  #############################################################################
+  #
+  ${bin_2dx}/labelh.exe << eot
+${imagename}.mrc
+2               ! Logrithmic  OD stretch ( y = aLOGx + b )
+SCRATCH/TMPvalue1.mrc
+0.0 1.0
+0
+eot
+  #
+  echo "<<@progress: 10>>"
+  #
+  ##############################################################################
+  ${proc_2dx}/linblock "modifypolygon - to prepare the input data for boximage"
+  ##############################################################################
+  #
+  set polygonfile = SCRATCH/TMPpolygon.dat
+  set coordinatefile = SCRATCH/TMPcoordinate.dat
+  set newimagesidelengthfile = SCRATCH/TMPnewimagesidelength.dat
+  set iborder = `echo ${fourmask} | awk '{ s = int( 3.0 / $1 ) } END { print s }'`
+  set rfactor = 1.0
+  #
+  echo "Using as original polygon file:"
+  cat ${originalpolygon}
+  echo " "
+  #
+  \rm -f ${polygonfile}
+  \rm -f ${coordinatefile}
+  \rm -f ${newimagesidelengthfile}
+  ${bin_2dx}/2dx_modifypolygon.exe << eot > SCRATCH/TMPmodifypolygon.dat
+${originalpolygon}
+${polygonfile}
+${coordinatefile}
+${newimagesidelengthfile}
+${imagesidelength}
+${rfactor}
+${iborder}
+eot
+  #
+  if ( ${crop} == 'y' ) then
+    cat SCRATCH/TMPmodifypolygon.dat
+  else
+    cat SCRATCH/TMPmodifypolygon.dat | sed 's/::/only if cropping= /g' | sed 's/:/only if cropping= /g'
+  endif
+  #
+  \rm -f SCRATCH/TMPmodifypolygon.dat
+  #
+  echo "<<@progress: 15>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "BOXIMAGE - to mask the value=1 file with the polygon"
+  #############################################################################
+  #
+  \rm -f SCRATCH/TMPmask1.mrc
+  # Center of gravity of polygon goes into this file:
+  \rm -f boximage.tmp
+  setenv IN  SCRATCH/TMPvalue1.mrc
+  setenv OUT SCRATCH/TMPmask1.mrc
+  #
+  echo "Using as polygon file:"
+  cat ${polygonfile}
+  echo " "
+  #
+  ${bin_2dx}/2dx_boximage.exe  << eot
+`cat ${polygonfile}`
+eot
+  #
+  \rm -f ${polygonfile}
+  #
+  if ( ! -e boximage.tmp ) then
+    ${proc_2dx}/protest "ERROR: 2dx_boximage.exe did not produce boximage.tmp"
+  endif
+  \rm SCRATCH/TMPvalue1.mrc
+  #
+  echo "<<@progress: 20>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "FFTIR - to calculate Fourier transform"
+  #############################################################################
+  #
+  \rm -f SCRATCH/TMPmask1.fft.mrc
+  setenv IN  SCRATCH/TMPmask1.mrc
+  setenv OUT SCRATCH/TMPmask1.fft.mrc
+  #
+  ${bin_2dx}/2dx_fftrans.exe
+  #
+  \rm SCRATCH/TMPmask1.mrc
+  #
+  echo "<<@progress: 30>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "MASKTRAN - to get rid of high resolution"
+  ${proc_2dx}/linblock "         - using a Fourier radius of ${fourmask}"
+  #############################################################################
+  #
+  \rm -f SCRATCH/TMPmask1.fft.mask.mrc
+  setenv IN  SCRATCH/TMPmask1.fft.mrc
+  setenv OUT SCRATCH/TMPmask1.fft.mask.mrc
+  setenv SPOTS SCRATCH/TMPspot.spt
+  #
+  echo "0,0"   >  SCRATCH/TMPspot.spt
+  #
+  set locmask = `echo ${fourmask} ${imagesidelength} | awk '{ s = $1 * $2 / 2 } END { print s }'`
+  ${bin_2dx}/masktrana.exe << eot
+2 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${locmask}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+10000,0,0,10000 -9 9 -9 9 200.0 1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+  #
+  \rm SCRATCH/TMPmask1.fft.mrc
+  \rm SCRATCH/TMPspot.spt
+  #
+  echo "<<@progress: 40>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "FFTIR - to calculate Fourier transform"
+  #############################################################################
+  #
+  \rm -f SCRATCH/TMPmask2.mrc
+  setenv IN  SCRATCH/TMPmask1.fft.mask.mrc
+  setenv OUT SCRATCH/TMPmask2.mrc
+  #
+  ${bin_2dx}/2dx_fftrans.exe
+  #
+  \rm SCRATCH/TMPmask1.fft.mask.mrc
+  #
+  echo "<<@progress: 50>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "LABEL - to level the mask between 0.0 and 1.0"
+  #############################################################################
+  #
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMPmask2.mrc
+99
+3               ! Logrithmic  OD stretch ( y = aLOGx + b )
+SCRATCH/TMPmask3.mrc
+0.0 1.0
+0
+eot
+  #
+  \rm SCRATCH/TMPmask2.mrc
+  #
+  echo "<<@progress: 60>>"
+  #
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "TWOFILE - to multiply image with masking-image"
+  #############################################################################
+  #
+  \rm -f m${nonmaskimagename}.mrc
+  setenv IN1 ${nonmaskimagename}.mrc
+  setenv IN2 SCRATCH/TMPmask3.mrc
+  setenv OUT m${nonmaskimagename}.mrc
+  ${bin_2dx}/2dx_twofile.exe << eot
+5               ! ICOMB (5 is a new option that amplitude-levels file A with B
+0 0 0 0 0 ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+eot
+  #
+  if ( ${tempkeep} == 'y' ) then
+    \mv -f SCRATCH/TMPmask3.mrc SCRATCH/maskCrystal-mask.mrc
+    echo "# IMAGE:" SCRATCH/maskCrystal-mask.mrc  >> LOGS/${scriptname}.results
+  else
+    \rm SCRATCH/TMPmask3.mrc
+  endif
+  echo "<<@progress: 90>>"
+  #
+  set centerx = `cat boximage.tmp | awk '{ s = int ( $1 ) } END { print s }'`
+  set centery = `cat boximage.tmp | awk '{ s = int ( $2 ) } END { print s }'`
+  \rm -f boximage.tmp
+  #
+  set refori = ${centerx},${centery}
+  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "reference center changed to ${refori}."
+  #
+  echo "# IMAGE: "m${nonmaskimagename}.mrc  >> LOGS/${scriptname}.results
+  set oldname = `echo ${imagename}`
+  set imagename = `echo m${nonmaskimagename}`
+  if ( ${oldname} != ${imagename} ) then
+    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
+    ${proc_2dx}/linblock "Imagename changed from ${oldname} to ${imagename}."
+    echo "#WARNING: Imagename changed from ${oldname} to ${imagename}." >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( ! -e ${imagename}.spt ) then
+    if ( -e ${nonmaskimagename}.spt ) then
+      \cp -f ${nonmaskimagename}.spt ${imagename}.spt
+      ${proc_2dx}/linblock "Spotlist ${nonmaskimagename}.spt copied to ${imagename}.spt."
+    endif
+  else
+    ${proc_2dx}/linblock "Spotlist ${imagename}.spt was already existing. Is it still good ?"
+    echo "#WARNING: Warning: Spotlist ${imagename}.spt was already existing. Is it still good ?" >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( ${crop} == "y" ) then
+    #############################################################################
+    ${proc_2dx}/linblock "Safeguarding original image to ${nonmaskimagename}-original-big.mrc"
+    #############################################################################
+    #
+    if ( -e ${nonmaskimagename}-original-big.mrc ) then
+      \mv -f ${nonmaskimagename}-original-big.mrc ${nonmaskimagename}-original-big-old.mrc
+      echo "# IMAGE: ${nonmaskimagename}-original-big-old.mrc" >> LOGS/${scriptname}.results
+    endif
+    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}-original-big.mrc
+    echo "# IMAGE: ${nonmaskimagename}-original-big.mrc" >> LOGS/${scriptname}.results
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Crop image into new smaller dimensions"
+    #############################################################################
+    #
+    set IDIM = `cat ${coordinatefile}`
+    echo IDIM = ${IDIM}
+    ${proc_2dx}/linblock "Cropping coordinates are ${IDIM}"
+    #
+    \rm -f SCRATCH/TMPmask5.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+m${nonmaskimagename}.mrc
+1
+SCRATCH/TMPmask5.mrc
+${IDIM}
+eot
+    #
+    # echo "# IMAGE: SCRATCH/TMPmask5.mrc" >> LOGS/${scriptname}.results
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Pad into image with same dimensions to get the header right"
+    #############################################################################
+    #
+    \rm -f m${nonmaskimagename}.mrc
+    set newimagesidelength = `cat ${newimagesidelengthfile}`
+    echo newimagesidelength = ${newimagesidelength}
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMPmask5.mrc
+30
+m${nonmaskimagename}.mrc
+${newimagesidelength}
+eot
+    #
+    ${proc_2dx}/lin "Padding done."
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Now cropping with the original image, without masking."
+    #############################################################################
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Crop image into new smaller dimensions"
+    #############################################################################
+    #
+    echo IDIM = ${IDIM}
+    #
+    \rm -f SCRATCH/TMPmask5.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+${nonmaskimagename}.mrc
+1
+SCRATCH/TMPmask5.mrc
+${IDIM}
+eot
+    #
+    # echo "# IMAGE: SCRATCH/TMPmask5.mrc" >> LOGS/${scriptname}.results
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Pad into image with same dimensions to get the header right"
+    #############################################################################
+    #
+    \rm -f SCRATCH/TMPmask6.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMPmask5.mrc
+30
+${nonmaskimagename}.mrc
+${newimagesidelength}
+eot
+    #
+    \rm -f SCRATCH/TMPmask5.mrc
+    #
+    ${proc_2dx}/lin "Padding done."
+    #
+    set factor = `echo ${newimagesidelength} ${imagesidelength} | awk '{ s = $1 / $2 } END { print s }'`
+    echo factor = ${factor}
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "re-dimensioning all image-size dependent parameters by factor ${factor}"
+    #############################################################################
+    #
+    set tmp1 = `echo ${lattice} | cut -d\, -f1`
+    set latx1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
+    set tmp1 = `echo ${lattice} | cut -d\, -f2`
+    set laty1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
+    set tmp1 = `echo ${lattice} | cut -d\, -f3`
+    set latx2 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
+    set tmp1 = `echo ${lattice} | cut -d\, -f4`
+    set laty2 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
+    set lattice = `echo ${latx1},${laty1},${latx2},${laty2}`
+    echo ":Now: lattice = "${lattice}
+    echo "set lattice = ${lattice}" >> LOGS/${scriptname}.results
+    #
+    set tmp1 = `echo ${secondlattice} | cut -d\, -f1`
+    set latx1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
+    set tmp1 = `echo ${secondlattice} | cut -d\, -f2`
+    set laty1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
+    set tmp1 = `echo ${secondlattice} | cut -d\, -f3`
+    set latx2 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
+    set tmp1 = `echo ${secondlattice} | cut -d\, -f4`
+    set laty2 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
+    set secondlattice = `echo ${latx1},${laty1},${latx2},${laty2}`
+    echo ":Now: secondlattice = "${secondlattice}
+    echo "set secondlattice = ${secondlattice}" >> LOGS/${scriptname}.results
+    #
+    set maska   = `echo ${maska} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
+    set maskb01 = `echo ${maskb01} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
+    set maskb02 = `echo ${maskb02} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
+    set maskb03 = `echo ${maskb03} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
+    set maskb04 = `echo ${maskb04} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
+    set maskb05 = `echo ${maskb05} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
+    echo ":Now: maska = ${maska}"
+    echo ":Now: maskb01 = ${maskb01}"
+    echo ":Now: maskb02 = ${maskb02}"
+    echo ":Now: maskb03 = ${maskb03}"
+    echo ":Now: maskb04 = ${maskb04}"
+    echo ":Now: maskb05 = ${maskb05}"
+    echo "set maska = ${maska}" >> LOGS/${scriptname}.results
+    echo "set maskb01 = ${maskb01}" >> LOGS/${scriptname}.results
+    echo "set maskb02 = ${maskb02}" >> LOGS/${scriptname}.results
+    echo "set maskb03 = ${maskb03}" >> LOGS/${scriptname}.results
+    echo "set maskb04 = ${maskb04}" >> LOGS/${scriptname}.results
+    echo "set maskb05 = ${maskb05}" >> LOGS/${scriptname}.results
+    #
+    set reforix = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+    set refori = ${reforix},${reforix}
+    echo ":Now: refori = ${refori}"
+    echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
+    #
+    echo "::"
+    echo "::           All image-size dependent parameters were recalculated."
+    echo "::"
+    echo "::           SAVING of the Processing Data is HIGHLY RECOMMENDED."
+    echo "::"
+    echo "#WARNING: All image-size dependent parameters were recalculated." >> LOGS/${scriptname}.results
+    echo "#WARNING: SAVING of the Processing Data is HIGHLY RECOMMENDED." >> LOGS/${scriptname}.results
+    #
+    echo "set PHASEORI_done = n" >> LOGS/${scriptname}.results
+    echo "set PHASEORI_done = n" >> LOGS/${scriptname}.results
+    #
+  endif
+  #
+  echo "set MASKING_done = y" >> LOGS/${scriptname}.results
+  #
+  echo "set domask = n" >> LOGS/${scriptname}.results
+  #
+  echo "set FFT_done = n" >> LOGS/${scriptname}.results
+  echo "set UNBENDING_done = n" >> LOGS/${scriptname}.results
+  echo "set ML_done = n" >> LOGS/${scriptname}.results
+  echo "set CTF_done = n" >> LOGS/${scriptname}.results
+  echo "set SPOTS_done = n" >> LOGS/${scriptname}.results
+  #
+  ${proc_2dx}/linblock "#"
+  echo ":: "
+  echo ":: Now save the parameters and run again: "
+  echo "::                Calculate FFT "
+  echo "::                Unbend I "
+  echo "::                Unbend II "
+  echo "::                Correct CTF "
+  echo "::                Generate Map "
+  echo ":: "
+  ${proc_2dx}/linblock "#"
+  #
+  echo "<<@progress: 100>>"
+  ##########################################################################
+  ${proc_2dx}/linblock "${scriptname} - normal end."
+  ##########################################################################
+  #
+endif
+#
+  

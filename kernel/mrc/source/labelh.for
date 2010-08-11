@@ -1,0 +1,1865 @@
+C*LABEL.FOR********************************************************************
+C									      *
+C	Program to perform simple manipulations on image files		      *
+C									      *
+C	Version 1.12	31-MAR-82    DAA	for VAX			      *
+C	Version 1.13	13-OCT-82    DAA	for VAX			      *
+C	Version 1.14	7- JAN-85    MK 	some more routines	      *
+C						for nicer displays	      *
+C	Version 1.15	20-APR-85    RH		line size 8192		      *
+C	Version 1.16	12-JUN-87    RH		extra option		      *
+C	Version 1.17	06-FEB-92    RH		max/min/mean on option 4      *
+C	Version 1.18	26-MAR-92    RH		transfer "extra" data         *
+C	Version 1.20	07-OCT-95    RH		increased dimensions          *
+C	Version 1.21	17-DEC-96    RH		new single particle option 50 *
+C	Version 1.22	01-JAN-97    RH		clean up new option           *
+C	Version 1.23	01-SEP-98    RH		remove title option 50 I/P    *
+C	Version 1.H1	01-FEB-03    HST	more transforming options     *
+C******************************************************************************
+C
+C Input is a single file in mapformat, output is a single file in mapformat
+C
+C      Card input, or online control
+C
+C        card  1 :  input filename
+C        card  2 :  IMODE, describes which of the various simple manipulations
+C                are required - can be -2,-1,0,1,2,3,4 or 99 for images
+C                                      as well as 5,6,7,8 for transforms.
+C                If IMODE is 50, single particle boxing and restacking option
+C                If IMODE is 99, a second IMODE of 1,2,3,4 gives more options
+C                                      and 5,6,7,8 more options for transforms.
+C        card  3 :  output filename
+C        cards 4 onwards are dependent on manipulation - see below
+C -------------------------------------------------------------------------
+C IMODE= -3: Change to BYTE output format with automatic scaling
+C
+C IMODE= -2: Change INTEGER*2/INTEGER*1 output format
+C        card  4 : SCALE, scale factor for INTEGER*2/BYTE conversion
+C
+C IMODE= -1: Change REAL/INTEGER*2 output format
+C        card  4 : SCALE, scale factor for REAL/INTEGER conversion
+C
+C IMODE=  0: Change Labels
+C        card  4 : NLA, number of labels to ADD ?  (can be negative)
+C        cards 5 : TITLE,  enter titles to add for label number #
+C     or card  5 : NLR, remove labels # (0 to exit) ? 
+C
+C IMODE=  1: Select region
+C        card  4 : enter Limits (Xmin,max,Ymin,max) if NZ=1
+C     or card  4 : enter Limits (Xmin,max,Ymin,max,Zmin,max) if NZ>1
+C
+C IMODE=  2: Linear OD stretch  ( y = mx + b )
+C        card  4 : A,B enter coefficients A & B ( Y = AX + B )
+C        card  5 : IQ=0 or 1 - set values <0 to 0  (0= no, 1=yes) ?
+C
+C IMODE=  3: Logrithmic  OD stretch ( y = aLOGx + b )
+C        card  4 : A,B enter coefficients A & B ( Y = A*ALOG(X) + B )
+C
+C IMODE=  4: Average adjacent pixels
+C        card  4 : NREDX,NREDY enter integer reduction factor for X,Y:
+C
+C IMODE=  5: Output amplitudes or Intensities
+C        card  4 : IQ, write out amplitudes (0) or Intensities*.01 (1) ?
+C
+C IMODE=  6: Output Phases (degrees)
+C        no further input needed
+C
+C IMODE=  7: Output REAL part of Complex value
+C        no further input needed
+C
+C IMODE=  8: Output IMAGINARY part of Complex value
+C        no further input needed
+C
+C IMODE= 10: Transform 16 bit linear transmission into 16 bit OD
+C
+C IMODE= 11: Transform 16 bit linear transmission into 8 bit OD
+C
+C IMODE= 12: Fix STEM images for IMOD
+C
+C IMODE= 13: Cyclically permutate CELL information in header.
+C
+C IMODE= 20: Produce thumbnail image
+C        card 4 : Enter X/Y dimensions of output image
+C
+C IMODE= 29: Interpolate into two times larger image
+C
+C IMODE= 30: Pad into new larger dimensions
+C        card 4 : ISIZE: square dimension of new output image
+C
+C IMODE= 31: Select region with change of header,
+C        card  4 : enter Limits (Xmin,max,Ymin,max) if NZ=1
+C     or card  4 : enter Limits (Xmin,max,Ymin,max,Zmin,max) if NZ>1
+C
+C -----------------------------------------------------------
+C IMODE= 50: goes to the single particle selection option, with input
+C            from a file of X,Y coordinates, and desired box size.
+C        card  4 : NBOXX,NBOXY
+C        card  5 : input filename for the list of X,Y coordinates of
+C                  the centres of the areas to be selected.
+C -----------------------------------------------------------
+C IMODE= 99: More options, mainly for display purposes
+C      then asks for a second IMODE
+C
+C IMODE=  1: VARIOUS 90 DEG TURNS AND MIRRORS
+C        card  4 : ITURN, TURN NO? (1:Z90,2:Z-90,3:Z180,4:Xmir,5:Ymir)
+C
+C IMODE=  2: GEOMETRIC STRETCH ( y = m**X )
+C        card  4 : A, enter A (Y = X**A)
+C
+C IMODE=  3: CUT OFF OVER - AND UNDERFLOWS
+C        card  4 : A,B enter LOWEST AND HIGHEST VALUE TO PRUNE IMAGE WITH
+C
+C IMODE=  4: GET RID OF OUTLIERS BY INTERPOLATION
+C        card  4 : critdiff, enter critical difference
+C
+C****************************************************************************
+CHEN>
+C     PARAMETER (LMAX=16384,LCMX=8192)
+      PARAMETER (LMAX=21000)
+      PARAMETER (LCMX=10500)
+CHEN<
+      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+      DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
+      DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX),OU2(LMAX)
+      DIMENSION LABELS(20,10),CELL(6),EXTRA(29)
+      DIMENSION DNCELL(6),MXYZN(3)
+      COMPLEX CLINE(LCMX),COUT(LCMX)
+      CHARACTER*60 INFILE,OUTFILE
+      character*80 TITLE
+      REAL*8 DOUBLMEAN,DOUBLOMEAN
+      INTEGER*4 iover,iunder,ilow
+      EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
+      EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
+      DATA NXYZST/3*0/, CNV/57.29578/
+C
+      WRITE(6,1000)
+1000  FORMAT(/,/,' LABEL: Image Manipulation Program',
+     .    '  VH1.23(1-Sep-98)',/)
+      WRITE(6,1100)
+1100	FORMAT('$Input filename:  ')
+	READ(5,1200) INFILE
+1200	FORMAT(A)
+
+	CALL IMOPEN(1,INFILE,'RO')
+C
+	CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+	NXT = NX
+	IF (MODE .GE. 3) NXT = NXT*2
+C
+1	WRITE(6,1300)
+1300	FORMAT(/,' Available modes of operation are: ',/,
+     . ' -3: Change to BYTE with autom. scaling',/,
+     . ' -2: Change INTEGER*2/INTEGER*1 output format',/,
+     . ' -1: Change REAL/INTEGER*2 output format',/,
+     . '  0: Change Labels',/,
+     . '  1: Select region',/,
+     . '  2: Linear OD stretch  ( y = mx + b )',/,
+     . '  3: Logrithmic  OD stretch ( y = aLOGx + b )',/,
+     . '  4: Average adjacent pixels',/,
+     . ' 10: Transform WORD (2Byte) into OD (INT*2)',/,
+     . ' 11: Transform WORD (2Byte) into OD (INT*1)',/,
+     . ' 12: Fix STEM image problem',/,
+     . ' 13: Cyclically permutate CELL information in header',/,
+     . ' 20: Produce thumbnail image',/,
+     . ' 29: Interpolate into two times larger image',/,
+     . ' 30: Pad into square image',/,
+     . ' 31: Select region (and change header)',/,
+     . ' 50: create stack of small boxes centred on coords read',
+     . ' in from list',/,
+     .   ' 99: More options, mainly for display purposes')
+
+	IF (MODE .GE. 3) WRITE(6,1400)
+1400	FORMAT(
+     . '  5: Output amplitudes or Intensities',/,
+     . '  6: Output Phases (degrees)',/,
+     . '  7: Output REAL part of Complex value',/,
+     . '  8: Output IMAGINARY part of Complex value',/)
+C
+	WRITE(6,1500)
+1500	FORMAT(/,'$Enter desired mode: ')
+	READ(5,*) IMODE
+      		if (imode.eq.50) then
+			call IMCLOSE(1)
+			call LABELC(INFILE)
+			stop
+		endif
+		if (IMODE.eq.99) then
+			call IMCLOSE(1)
+			call LABELB(INFILE)
+			stop
+		endif
+	IF ((IMODE .GT. 4 .and. IMODE .ne. 10 .and. IMODE.ne.11 
+     1      .and. IMODE.ne.12 .and. IMODE.ne.13 .and. IMODE.ne.20 
+     1      .and. IMODE.ne.29 .and. IMODE.ne.30
+     1      .and. IMODE.ne.31) 
+     1      .AND. MODE .LT. 3) GOTO 1
+	WRITE(6,1550)
+1550	FORMAT(10X)
+C
+	IF (IMODE .NE. 0) THEN
+	  WRITE(6,1600)
+1600	  FORMAT('$Output filename:  ')
+	  READ(5,1200) OUTFILE
+	  CALL IMOPEN(2,OUTFILE,'NEW')
+	  CALL ITRHDR(2,1)
+	END IF
+        if ( IMODE.eq.10 ) goto 91
+        if ( IMODE.eq.11 ) goto 92
+        if ( IMODE.eq.12 ) goto 93
+        if ( IMODE.eq.13 ) goto 97
+        if ( IMODE.eq.20 ) goto 94
+        if ( IMODE.eq.29 ) goto 98
+        if ( IMODE.eq.30 ) goto 95
+        if ( IMODE.eq.31 ) goto 96
+C-------------------------------97 already taken for "13"
+	GOTO (113,3,5,10,20,30,40,45,50,60,70,80) IMODE+4
+C
+C=====================================================================
+C
+C  MODE 10 :  Transforming WORD*2 into OD (INT*2)
+C
+91      continue
+	write(TITLE,'(''LABELH Mode 10: Transform p.Trans. into OD '')')
+        write(6,'('' Transforming into OD'')')
+	DOMIN =  1.E10
+	DOMAX = -1.E10
+	DOMEAN = 0.0
+        DOUBLOMEAN = 0.0
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DMEAN = 0.0
+	DOUBLMEAN = 0.0
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        ilow = 0
+	DO IZ= 1,NZ
+	  DO IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+	    DO IX = 1,NXT
+C
+C-------------Image is MODE=1, i.e. unsigned short, not INTEGER*2,
+C-------------because it was generated by TIF2MRC.exe.
+C-------------This is interpreted in INTEGER*2 as (-32000...32000)
+C-------------Flip negative values to positive end by adding 65536.
+C-------------It is also Negative Transmission. 
+C             neg.transm.: 0     = black=absorb.=   prot=>OD=high
+C                          65535 = white=transp.=no prot=>OD=0
+C            
+C-------------Divide by 65536 to get values between 0 and 1, i.e.
+C-------------between full transmission (transparent = 0 neg. Transm.) 
+C-------------and no transmission (black = 1 neg. Transmission).
+C
+              VAL = ALINE(IX)
+              if(VAL.lt.0)VAL=VAL+65536
+              if(VAL.lt.1)VAL=1
+              if (VAL .LT. DOMIN) DOMIN = VAL
+              if (VAL .GT. DOMAX) DOMAX = VAL
+              DOUBLOMEAN = DOUBLOMEAN + VAL
+C
+	      VAL = VAL/65536.0
+	      VAL = -log(VAL) * 1000.0
+C-------------Now, a value of 1000 is OD=1.
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      ALINE(IX) = VAL
+   	    enddo
+	    CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+	DOMEAN = DOUBLOMEAN/(NXT*NY*NZ)
+	DMEAN = DOUBLMEAN/(NXT*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        write(6,'('' old file MIN,MAX,MEAN: '',3G12.4)')
+     1       DOMIN,DOMAX,DOMEAN
+        write(6,'('' new file MIN,MAX,MEAN: '',3G12.4)')
+     1       DMIN,DMAX,DMEAN
+        write(6,'('' OD range is          : '',3G12.4)')
+     1       DMIN/1000.0,DMAX/1000.0,DMEAN/1000.0
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 11 :  Transforming WORD*2 into OD (INT*1)
+C
+92      continue
+        write(TITLE,'(''LABELH Mode 11: Transform p.Trans. into OD '')')
+        write(6,'('' Transforming into OD'')')
+        DOMIN =  1.E10
+        DOMAX = -1.E10
+        DOMEAN = 0.0
+        DOUBLOMEAN = 0.0
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+        MODE = 0
+        CALL IALMOD(2,MODE)
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        WRITE(6,'('' Scale factor : '')')
+        READ(5,*) SCALE
+C
+        iunder=0
+        iover=0
+        DO IZ= 1,NZ
+          DO IY = 1,NY
+            CALL IRDLIN(1,ALINE,*999)
+            DO IX = 1,NXT
+              VAL = ALINE(IX)
+C-------------if(VAL.lt.0)VAL=VAL+65536
+              if(VAL.lt.0)VAL=(-VAL)+32768
+              if(VAL.lt.1)VAL=1
+              if (VAL .LT. DOMIN) DOMIN = VAL
+              if (VAL .GT. DOMAX) DOMAX = VAL
+              DOUBLOMEAN = DOUBLOMEAN + VAL
+C
+              VAL = -log(VAL) * 1000.0 * SCALE
+C-------------Now, a value of 1000*SCALE is OD=1.
+              if(VAL.lt.1.0)then
+                VAL=1.0
+                iunder=iunder+1
+              endif
+              if(VAL.gt.255.0)then
+                VAL=255.0
+                iover=iover+1
+              endif
+              IF (VAL .LT. DMIN) DMIN = VAL
+              IF (VAL .GT. DMAX) DMAX = VAL
+              DOUBLMEAN = DOUBLMEAN + VAL
+              ALINE(IX) = VAL
+            enddo
+            CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+        DOMEAN = DOUBLOMEAN/(NXT*NY*NZ)
+        DMEAN = DOUBLMEAN/(NXT*NY*NZ)
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        write(6,'('' old file MIN,MAX,MEAN: '',3G12.4)')
+     1       DOMIN,DOMAX,DOMEAN
+        write(6,'('' new file MIN,MAX,MEAN: '',3G12.4)')
+     1       DMIN,DMAX,DMEAN
+        write(6,'('' OD range is          : '',3G12.4)')
+     1       DMIN/1000.0,DMAX/1000.0,DMEAN/1000.0
+        if(ilow.gt.0)then
+          write(6,'('' WARNING: there were '',I10,
+     1    '' low values.'')')ilow
+        endif
+        if(iunder.gt.0)then
+          write(6,'('' WARNING: there were '',I10,
+     1    '' values under 1'')')iunder
+        endif
+        if(iover.gt.0)then
+          write(6,'('' WARNING: there were '',I10,
+     1    '' values over 255'')')iover
+        endif
+	GOTO 990
+C
+C=====================================================================
+
+C
+C  MODE 12 :  Transforming STEM problem images
+C
+93      continue
+	write(TITLE,'(''LABELH Mode 12: Transform STEM images '')')
+        write(6,'('' Transforming STEM images'')')
+	DOMIN =  1.E10
+	DOMAX = -1.E10
+	DOMEAN = 0.0
+        DOUBLOMEAN = 0.0
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DMEAN = 0.0
+	DOUBLMEAN = 0.0
+        MODE = 2
+        CALL IALMOD(2,MODE)
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        iunder=0
+        iover=0
+	DO IZ= 1,NZ
+	  DO IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+	    DO IX = 1,NXT
+              VAL = ALINE(IX)
+              if (VAL .LT. DOMIN) DOMIN = VAL
+              if (VAL .GT. DOMAX) DOMAX = VAL
+              DOUBLOMEAN = DOUBLOMEAN + VAL
+C
+              if(VAL.lt.20000)VAL=VAL+32768
+              if(VAL.lt.1)VAL=1
+C
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+C
+	      ALINE(IX) = VAL
+   	    enddo
+	    CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+	DOMEAN = DOUBLOMEAN/(NXT*NY*NZ)
+	DMEAN = DOUBLMEAN/(NXT*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        write(6,'('' old file MIN,MAX,MEAN: '',3G12.4)')
+     1       DOMIN,DOMAX,DOMEAN
+        write(6,'('' new file MIN,MAX,MEAN: '',3G12.4)')
+     1       DMIN,DMAX,DMEAN
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 13 :  Cyclically permutate CELL header information
+C
+97      continue
+        write(TITLE,'(''LABELH Mode 13: Cyclically permutate header'',
+     1     '' CELL information '')')
+        write(6,'('' Cyclically permutating CELL header info'')')
+C
+        CALL IRTCEL(1,CELL)
+        DNCELL(1) = CELL(3)
+        DNCELL(2) = CELL(1)
+        DNCELL(3) = CELL(2)
+        DNCELL(4) = CELL(4)
+        DNCELL(5) = CELL(5)
+        DNCELL(6) = CELL(6)
+        MXYZN(1) = MXYZ(3)
+        MXYZN(2) = MXYZ(1)
+        MXYZN(3) = MXYZ(2)
+C
+        CALL ICRHDR(2,NXYZ,MXYZN,MODE,LABELS,NL)
+C
+        DO IZ = 1,NZ
+          DO IY = 1,NY
+            CALL IRDLIN(1,ALINE,*999)
+            CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+C
+        CALL IALCEL(2,DNCELL)
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+        write(6,'('' old CELL labels CellA,CellB,CellC: '',3G12.4)')
+     1       (CELL(I),I=1,3)
+        write(6,'('' new CELL labels CellA,CellB,CellC: '',3G12.4)')
+     1       (DNCELL(I),I=1,3)
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE 20 :  Producing Thumbnail Image
+C    
+94      continue
+C
+        WRITE(6,'(''MODE 20: Producing Thumbnail image'')')
+C       WRITE(6,'(''Enter output image dimensions in X,Y:'')')
+C       READ(5,*) NOUTX,NOUTY
+        NOUTX = 200
+        NOUTY = 200
+        if ( MODE.GE.3) NOUTX = NOUTX/2
+C
+        DMIN = 1.E10
+        DMAX = -1.E10
+        DOUBLMEAN = 0.0
+        print *,'Label Mode 20: Producing thumbnail of dimension ',
+     .      NOUTX,NOUTY
+        NREDX = NX/NOUTX
+        NREDY = NY/NOUTY
+        NX = NOUTX
+        NY = NOUTY
+C  Put title labels, new cell and extra information only into header
+        CALL IRTLAB(1,LABELS,NL)
+        CALL IRTEXT(1,EXTRA,1,29)
+        CALL IRTCEL(1,CELL)
+        CELL(1) = CELL(1)*NX*NREDX/MXYZ(1)
+        CELL(2) = CELL(2)*NY*NREDY/MXYZ(2)
+        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+        CALL IALEXT(2,EXTRA,1,29)
+        CALL IALCEL(2,CELL)
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        NX4 = NX*4
+        SCL = 1./(NREDX*NREDY)
+        IF (MODE .GE. 3) NX4 = NX4*2
+        DO IZ = 1,NZ
+          CALL IMPOSN(1,IZ-1,0)
+          DO IY = 1,NY
+            CALL ZERO(OUT,NX4)
+            IF (MODE .LE. 2) THEN
+              DO JY = 1,NREDY
+                CALL IRDLIN(1,ALINE,*999)
+                INDEX = 0
+                DO IX = 1,NX
+                  DO JX = 1,NREDX       
+                    INDEX = INDEX + 1
+                    OUT(IX) = OUT(IX) + ALINE(INDEX)*SCL
+                  enddo
+                enddo
+              enddo
+              DO IX=1,NX
+                VAL=OUT(IX)
+                IF (VAL .LT. DMIN) DMIN = VAL
+                IF (VAL .GT. DMAX) DMAX = VAL
+                DOUBLMEAN = DOUBLMEAN + VAL
+              enddo
+            ELSE
+              DO JY = 1,NREDY
+                CALL IRDLIN(1,CLINE,*999)
+                INDEX = 0
+                DO IX = 1,NX
+                  DO JX = 1,NREDX       
+                    INDEX = INDEX + 1
+                    COUT(IX) = COUT(IX) + CLINE(INDEX)*SCL
+                  enddo
+                enddo
+              enddo
+              DO IX=1,NX
+                VAL=OUT(IX)
+                IF (VAL .LT. DMIN) DMIN = VAL
+                IF (VAL .GT. DMAX) DMAX = VAL
+                DOUBLMEAN = DOUBLMEAN + VAL
+              enddo
+            END IF
+            CALL IWRLIN(2,OUT)
+          enddo
+        enddo
+        DMEAN = DOUBLMEAN/(NX*NY*NZ)
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE 29 :  Pad into square image
+C    
+98     continue
+C
+       WRITE(6,'(''MODE 29: Interpolate into two times larger image'')')
+       IF (MODE .GT. 2) THEN
+         STOP '::Only works on real images'
+       ENDIF
+       NOUTX = 2*NX
+       NOUTY = 2*NY
+       print *,'Label Mode 29: Interpolating into image of dimension ',
+     .   NOUTX,NOUTY
+C
+       NX = NOUTX
+       NY = NOUTY
+C
+C  Put title labels, new cell and extra information only into header
+       CALL IRTLAB(1,LABELS,NL)
+       CALL IRTEXT(1,EXTRA,1,29)
+       CALL IRTCEL(1,CELL)
+       CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+       CELL(1) = REAL(NOUTX)
+       CELL(2) = REAL(NOUTY)
+       CALL IALEXT(2,EXTRA,1,29)
+       CALL IALCEL(2,CELL)
+       CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+       DO IZ = 1,NZ
+         CALL IMPOSN(1,IZ-1,0)
+         DO IY = 1,NY,2
+C
+           CALL IRDLIN(1,ALINE,*999)
+C
+           if(IY.gt.1)then
+             DO IX = 1,NX,2
+               OUT(IX)=(ALINE(INT(IX/2)+1)+OU2(IX))/2.0
+               OUT(IX+1)=(((ALINE(INT(IX/2)+1)+ALINE(INT(IX/2)+2))/2.0)+OU2(IX+1))/2.0
+             ENDDO
+             OUT(NX)=(ALINE(INT(NX/2))+OU2(NX))/2.0
+           else
+             DO IX = 1,NX,2
+               OUT(IX)=ALINE(INT(IX/2)+1)
+               OUT(IX+1)=(ALINE(INT(IX/2)+1)+ALINE(INT(IX/2)+2))/2.0
+             enddo
+             OUT(NX)=ALINE(INT(NX/2))
+           endif
+           CALL IWRLIN(2,OUT)
+C
+           DO IX = 1,NX,2
+             OUT(IX)=ALINE(INT(IX/2)+1)
+             OUT(IX+1)=(ALINE(INT(IX/2)+1)+ALINE(INT(IX/2)+2))/2.0
+             OU2(IX)=OUT(IX)
+             OU2(IX+1)=OUT(IX+1)
+           ENDDO
+           OUT(NX)=ALINE(INT(NX/2))
+           OU2(NX)=OUT(NX)
+           CALL IWRLIN(2,OUT)
+C
+         enddo
+       enddo
+       GOTO 990
+C
+C=====================================================================
+C
+C  MODE 30 :  Pad into square image
+C    
+95     continue
+C
+       WRITE(6,'(''MODE 30: Pad into square image'')')
+       IF (MODE .GT. 2) THEN
+         STOP 'Only works on real images'
+       ENDIF
+       WRITE(6,'(''Enter dimension of output image:'')')
+       READ(5,*) IOUTDIM
+       NOUTX = IOUTDIM
+       NOUTY = IOUTDIM
+       print *,'Label Mode 30: Padding into image of dimension ',
+     .   NOUTX,NOUTY
+C
+       IXSTART = (IOUTDIM - NX) / 2
+       IXSKIP=0
+       if(IXSTART.lt.1)then
+C--------Crop to center in X-direction
+         IXSKIP=(NX-IOUTDIM)/2
+         write(*,'(''IXSKIP = '',I9)')IXSKIP
+         IXSTART=1
+       endif
+C
+       IYSTART = (IOUTDIM - NY) / 2
+       write(*,'(/,''IYSTART = '',I9)')IYSTART
+       IYSKIP=0
+       if(IYSTART.lt.1)then 
+C--------crop to top edge in Y-direction
+         IYSKIP=NY-IOUTDIM
+         IYSTART=1
+         write(*,'(''IYSTART corrected to '',I9)')IYSTART
+         write(*,'(''IYSKIP = '',I9)')IYSKIP
+       endif
+C
+       IXEND   = IXSTART + NX - 1
+       if(IXEND.gt.IXSTART+IOUTDIM-1)IXEND=IXSTART+IOUTDIM-1
+       IYEND   = IYSTART + NY - 1
+       write(*,'(''IYEND   = '',I9)')IYEND
+       if(IYEND.gt.IYSTART+IOUTDIM-1)then
+         IYEND=IYSTART+IOUTDIM-1
+         write(*,'(''IYEND corrected to '',I9)')IYEND
+       endif
+C
+       NX = NOUTX
+       NY = NOUTY
+C
+C  Put title labels, new cell and extra information only into header
+       CALL IRTLAB(1,LABELS,NL)
+       CALL IRTEXT(1,EXTRA,1,29)
+       CALL IRTCEL(1,CELL)
+       CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+       CELL(1) = REAL(IOUTDIM)
+       CELL(2) = REAL(IOUTDIM)
+       CALL IALEXT(2,EXTRA,1,29)
+       CALL IALCEL(2,CELL)
+       CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+       DO IZ = 1,NZ
+         CALL IMPOSN(1,IZ-1,0)
+         if(IYSKIP.gt.0)then
+           do IY=1,IYSKIP
+             CALL IRDLIN(1,ALINE,*999)
+           enddo
+         endif
+         DO IY = 1,NY
+           if ( IY .ge. IYSTART .and. IY .le. IYEND ) then
+             CALL IRDLIN(1,ALINE,*999)
+             DO IX = 1,NX
+               if ( IX .ge. IXSTART .and. IX .le. IXEND ) then
+                 OUT(IX) = ALINE(IXSKIP+IX-IXSTART+1)
+               else
+                 OUT(IX) = DMEAN
+               endif
+             enddo
+             CALL IWRLIN(2,OUT)
+           else
+             DO IX = 1,NX
+               OUT(IX) = DMEAN
+             enddo
+             CALL IWRLIN(2,OUT)
+           END IF
+         enddo
+       enddo
+       GOTO 990
+C
+C=====================================================================
+C
+C  MODE 31 : SELECTING A REGION with change of header
+C
+ 96     continue
+C
+        CALL ICLLIM(1,IXYZMIN,IXYZMAX,NXYZ)
+        write(TITLE,'(''LABEL Mode 31: Min/Max XYZ = '',6I6)')
+     1  IXMIN,IXMAX,IYMIN,IYMAX,IZMIN,IZMAX
+        write(*,'(''LABEL Mode 31: Min/Max XYZ = '',6I6)')
+     1  IXMIN,IXMAX,IYMIN,IYMAX,IZMIN,IZMAX
+C
+        IQ = 1
+C       WRITE(6,1775)
+C1775   FORMAT('$Use "true" starting limits (0) or start at 0 (1) ? ')
+C       READ(5,*) IQ
+        DO J = 1,3
+          NXYZST(J) = 0
+          IF (IQ .EQ. 0) NXYZST(J) = IXYZMIN(J)
+        enddo
+C
+       CALL IRTLAB(1,LABELS,NL)
+       CALL IRTEXT(1,EXTRA,1,29)
+       CALL IRTCEL(1,CELL)
+C
+       CELL(1)=IXMAX-IXMIN+1
+       CELL(2)=IYMAX-IYMIN+1
+       write(*,'(''New CELL = '',2F12.1)')CELL(1),CELL(2)
+C
+       CALL IALSIZ(2,NXYZ,NXYZST)
+       CALL IALCEL(2,CELL)
+       CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DOUBLMEAN = 0.0
+        DO IZ = IZMIN,IZMAX
+          CALL IMPOSN(1,IZ,IYMIN)
+          DO IY = 1,NY
+            CALL IRDPAL(1,ALINE,IXMIN,IXMAX,*999)
+            CALL IWRLIN(2,ALINE)
+            DO IX = 1,NX
+              IF (MODE .LT. 3) THEN
+                VAL = ALINE(IX)
+              ELSE
+                VAL = CABS(CLINE(IX))
+              END IF
+              DOUBLMEAN = DOUBLMEAN + VAL
+              IF (VAL .LT. DMIN) DMIN = VAL
+              IF (VAL .GT. DMAX) DMAX = VAL
+            enddo
+          enddo
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY*NZ)
+        CELL(1)=IXMAX
+        CELL(2)=IYMAX
+        CELL(3)=IZMAX
+        CALL IALCEL(2,CELL)
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        GOTO 990
+C
+C
+C=====================================================================
+C
+C  MODE -3 :  CHANGING OUTPUT DATA FORMAT REAL/BYTE with autom. scaling
+C
+113	IF (MODE.LT.0.OR.MODE.GT.4) GO TO 997
+	MODE = 0
+C
+	CALL IALMOD(2,MODE)
+C
+        ROFFSET = DMIN
+	RSCALE  = 255.0/(DMAX-DMIN)
+        write(6,'('' Automatic Scaling: '')')
+        write(6,'('' OFFSET = '',F12.3)')ROFFSET
+        write(6,'('' SCALE  = '',F12.3)')RSCALE
+C
+C	DMIN = (DMIN-ROFFSET)*RSCALE
+C	DMAX = (DMAX-ROFFSET)*RSCALE
+C    	IF (DMAX.GT.255.0) DMAX=255.
+C      	IF (DMIN.LT.0.0) DMIN=0.
+C
+        DMIN=0.0
+        DMAX=255.0
+C
+	DMEAN = (DMEAN-ROFFSET)*RSCALE
+C
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)	
+C
+      	NTRUNC = 0
+	DO IZ = 1,NZ
+	  DO IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+      	    IF (MODE.EQ.1.OR.MODE.EQ.3) THEN
+	      DO IX = 1,NX
+	        ATEMP = (ALINE(IX)-ROFFSET)*RSCALE
+      	        IF (ATEMP.GT.255.) THEN
+      		  ATEMP=255.
+      		  NTRUNC=NTRUNC+1
+      	        ENDIF
+      	        IF (ATEMP.LT.0.) THEN
+      		  ATEMP=0.
+      		  NTRUNC=NTRUNC+1
+      	        ENDIF
+	        ALINE(IX) = ATEMP
+   	      enddo
+      	    ELSE
+      	      DO IX = 1,NX
+      	        ALINE(IX) = (ALINE(IX)-ROFFSET)*RSCALE
+   	      enddo
+      	    ENDIF
+	    CALL IWRLIN(2,ALINE)
+   	  enddo
+   	enddo
+      	IF (NTRUNC.NE.0) WRITE(6,127)NTRUNC
+127	FORMAT(//////' *********************************************',
+     . ' WARNING ********************************************'//
+     . ' in real to byte conversion',I10,' numbers were truncated',
+     . ' to be 0...255'//////)
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE -2 :  CHANGING OUTPUT DATA FORMAT INTEGER*1/INTEGER*2
+C
+3       IF (MODE.LT.0.OR.MODE.GT.1) GO TO 997
+        IF (MODE .EQ. 1) LMODE = 0
+        IF (MODE .EQ. 0) LMODE = 1
+        MODE = LMODE
+        SCALE = 1.0
+        IF (MODE .EQ. 0) THEN
+          WRITE(6,1625)
+1625      FORMAT(/,'$Scale factor for INTEGER*2/BYTE conversion [1]: ')
+          READ(5,*) SCALE
+        END IF
+C
+        IF(SCALE .gt. 1.0) SCALE = 1.0
+        CALL IALMOD(2,MODE)
+        DMIN = DMIN*SCALE
+        DMAX = DMAX*SCALE
+        DMEAN = DMEAN*SCALE
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+        DO IZ = 1,NZ
+          DO IY = 1,NY
+            CALL IRDLIN(1,ALINE,*999)
+            DO 90 IX = 1,NX
+               ALINE(IX) = SCALE*ALINE(IX)
+90          CONTINUE
+            CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE -1 :  CHANGING OUTPUT DATA FORMAT
+C
+5	IF (MODE.LT.1.OR.MODE.GT.4) GO TO 997
+	IF (MODE .EQ. 1) LMODE = 2
+	IF (MODE .EQ. 2) LMODE = 1
+	IF (MODE .EQ. 3) LMODE = 4
+	IF (MODE .EQ. 4) LMODE = 3
+	MODE = LMODE
+	SCALE = 1.0
+	IF (MODE .EQ. 1 .OR. MODE .EQ. 3) THEN
+	  WRITE(6,1650)
+1650	  FORMAT(/,'$Scale factor for REAL/INTEGER conversion [1]: ')
+	  READ(5,*) SCALE
+	END IF
+C
+	CALL IALMOD(2,MODE)
+	DMIN = DMIN*SCALE
+	DMAX = DMAX*SCALE
+      	IF (MODE.EQ.1.OR.MODE.EQ.3) THEN
+      		IF (DMAX.GT.32000.0) DMAX=32000.
+      		IF (DMIN.LT.-32000.0) DMIN=-32000.
+      	ENDIF
+	DMEAN = DMEAN*SCALE
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)	
+C
+      	NTRUNC = 0
+	DO IZ = 1,NZ
+	  DO IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+      	    IF (MODE.EQ.1.OR.MODE.EQ.3) THEN
+	      DO 100 IX = 1,NX
+	        ATEMP = SCALE*ALINE(IX)
+      	        IF (ATEMP.GT.32000.) THEN	! check for overflows
+      			ATEMP=32000.
+      			NTRUNC=NTRUNC+1
+      	        ENDIF
+      	        IF (ATEMP.LT.-32000.) THEN	! and underflows
+      			ATEMP=-32000.
+      			NTRUNC=NTRUNC+1
+      	        ENDIF
+	        ALINE(IX) = ATEMP
+100	      CONTINUE
+      	    ELSE
+      	      DO 101 IX = 1,NX
+      	        ALINE(IX) = SCALE*ALINE(IX)
+101	      CONTINUE
+      	    ENDIF
+	    CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+      	IF (NTRUNC.NE.0) WRITE(6,126)NTRUNC
+126	FORMAT(//////' *********************************************',
+     . ' WARNING ********************************************'//
+     . ' in real to integer conversion',I10,' numbers were truncated',
+     . ' to be +/-32000'//////)
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 0 : CHANGE LABELS
+C
+10	CALL IRTLAB(1,LABELS,NL)
+	DO 150 J = 1,NL
+	  WRITE(6,1675) J,(LABELS(K,J),K=1,18)
+150	CONTINUE
+1675	FORMAT(I3,2X,18A4)
+	WRITE(6,1680)
+1680	FORMAT(/,'$Number of labels to ADD ? ')
+	READ(5,*) NLA
+	IF (NLA .GT. 0) THEN
+	  NL = MIN(10,NL+NLA)
+	  LST = NL - NLA + 1
+	  DO 160 J=LST,NL
+	    WRITE(6,1690) J
+	    READ(5,1700) TITLE
+C	Following statement changed for Alliant
+	    CALL CCPMVI(LABELS(1,J),TITLE,20)
+160	  CONTINUE
+1690	  FORMAT(' Enter label # ',I3)
+1700	  FORMAT(20A4)
+	ELSE
+12	  WRITE(6,1710)
+1710	  FORMAT(/,'$Remove label # (0 to exit) ? ')
+	  READ(5,*) NLR
+	  IF (NLR .LE. 0) GOTO 15
+	  IF (NLR .GT. NL) GOTO 12
+	  NL = NL - 1
+	  DO 170 J = NLR,NL
+C	Following statement changed for Alliant
+	    CALL CCPMVI(LABELS(1,J),LABELS(1,J+1),20)
+170	  CONTINUE
+	  DO 180 J = 1,NL
+	    WRITE(6,1675) J,(LABELS(K,J),K=1,18)
+180	  CONTINUE
+	  GOTO 12
+	END IF
+15	CALL IALLAB(1,LABELS,NL)	  
+	CALL IWRHDR(1,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 995
+C
+C=====================================================================
+C
+C  MODE 1 : SELECTING A REGION
+C
+20	CALL ICLLIM(1,IXYZMIN,IXYZMAX,NXYZ)
+C
+	write(TITLE,'(''LABEL Mode 1: Min/Max XYZ = '',6I6)') 
+     1  IXMIN,IXMAX,IYMIN,IYMAX,IZMIN,IZMAX
+C
+	IQ = 1
+C	WRITE(6,1775)
+C1775	FORMAT('$Use "true" starting limits (0) or start at 0 (1) ? ')
+C	READ(5,*) IQ
+	DO 200 J = 1,3
+	  NXYZST(J) = 0
+	  IF (IQ .EQ. 0) NXYZST(J) = IXYZMIN(J)
+200	CONTINUE
+C
+	CALL IALSIZ(2,NXYZ,NXYZST)
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO IZ = IZMIN,IZMAX
+	  CALL IMPOSN(1,IZ,IYMIN)
+	  DO IY = 1,NY
+	    CALL IRDPAL(1,ALINE,IXMIN,IXMAX,*999)
+	    CALL IWRLIN(2,ALINE)
+	    DO IX = 1,NX
+	      IF (MODE .LT. 3) THEN
+	        VAL = ALINE(IX)
+	      ELSE
+		VAL = CABS(CLINE(IX))
+	      END IF
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+            enddo
+          enddo
+        enddo
+C
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 2 : LINEAR OD STRETCH
+C
+30	WRITE(6,1800)
+1800	FORMAT(/,'$Enter coeffecients A & B ( Y = AX + B )  ')
+	READ(5,*) A,B
+        WRITE(6,'(''A = '',G12.4,'' B = '',G12.4)') A,B
+	WRITE(6,1850)
+1850	FORMAT('$Set values <0 to 0  (0= no, 1=yes) ? ')
+	READ(5,*) IQ
+        WRITE(6,'(''IQ = '',I6)') IQ
+	IF (IQ .EQ. 0) then
+	  write(TITLE,'(''LABEL Mode 2: Linear Stretch A,B = '',2G12.4)')
+     1    A,B
+	endif
+	IF (IQ .EQ. 1) then
+	  write(TITLE,'(''LABEL Mode 2: Linear Stretch,Zero truncation  '',
+     1    ''A,B = '',2G12.4)')
+     2    A,B
+        endif
+	DMIN =  1.E10
+	DMAX = -1.E10
+        domin = 1.E10
+        domax = 1.E10
+	DOUBLMEAN = 0.0
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DO IZ= 1,NZ
+	  DO IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+	    DO 300 IX = 1,NXT
+              if(ALINE(IX) .lt. domin) domin = ALINE(IX)
+              if(ALINE(IX) .gt. domax) domax = ALINE(IX)
+	      VAL = ALINE(IX)*A + B
+	      IF (IQ .EQ. 1 .AND. VAL .LT. 0.0) VAL = 0.0
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      ALINE(IX) = VAL
+300	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+	DMEAN = DOUBLMEAN/(NXT*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        write(6,'('' old file extrema: '',2G12.4)')domin,domax
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 3 : LOG OD STRETCH
+C
+40	WRITE(6,2000)
+2000	FORMAT(' Enter coeffecients A & B ( Y = A*ALOG(X) + B )')
+	READ(5,*) A,B
+	write(TITLE,2100)A,B
+2100	FORMAT('LABEL Mode 3: Logarithmic Stretch A,B = ',2G12.4)
+CHEN
+        WRITE(6,'(A70)') TITLE
+CHEN
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+	DMIN = 1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+C
+      	NOVER=0
+      	NUNDER=0
+	DO IZ= 1,NZ
+	  DO IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+	    DO 400 IX = 1,NXT
+	      VAL = ALINE(IX)
+	      ABSVAL = ABS(VAL)
+	      IF (ABSVAL .LT. 1.E-5) ABSVAL=1.
+CHEN
+C-------------VAL = A*SIGN(ALOG10(ABSVAL),VAL) + B
+	      VAL = A*ALOG10(ABSVAL) + B
+CHEN
+      	      IF(MODE.EQ.0) THEN
+      		IF(VAL.GT.255.0) THEN
+      			VAL=255.0
+      			NOVER=NOVER+1
+      	      	ENDIF
+      		IF(VAL.LT.0.0) THEN
+      			VAL=0.0
+      			NUNDER=NUNDER+1
+      	      	ENDIF
+      	      ENDIF
+	      ALINE(IX) = VAL
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+400	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+	DMEAN = DOUBLMEAN/(NXT*NY*NZ)
+      	WRITE(6,451) NOVER,NUNDER,DMIN,DMAX,DMEAN
+451	FORMAT(' There were ',I10,' densities reduced to 255',
+     .        '        and ',I10,' densities increased to 0',
+     .        ' DMIN,DMAX,DMEAN ',3F10.1)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 4 : PIXEL AVERAGING
+C
+45	WRITE(6,2200)
+      	DMIN = 1.E10
+      	DMAX = -1.E10
+      	DOUBLMEAN = 0.0
+2200	FORMAT('$Enter integer reduction factor for X,Y: ')
+	READ(5,*) NREDX,NREDY
+	print *,'Label Mode 4: Pixel averaging factor for X,Y = ', NREDX, NREDY
+c	write(TITLE,2300)NREDX,NREDY
+c2300	FORMAT('LABEL Mode 4: Pixel averaging factor for X,Y = ',2I4)
+	NX = NX/NREDX
+	NY = NY/NREDY
+C  Put title labels, new cell and extra information only into header
+	CALL IRTLAB(1,LABELS,NL)
+	CALL IRTEXT(1,EXTRA,1,29)
+	CALL IRTCEL(1,CELL)
+	CELL(1) = CELL(1)*NX*NREDX/MXYZ(1)
+	CELL(2) = CELL(2)*NY*NREDY/MXYZ(2)
+	CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+	CALL IALEXT(2,EXTRA,1,29)
+	CALL IALCEL(2,CELL)
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	NX4 = NX*4
+	SCL = 1./(NREDX*NREDY)
+	IF (MODE .GE. 3) NX4 = NX4*2
+	DO 475 IZ = 1,NZ
+	  CALL IMPOSN(1,IZ-1,0)
+	  DO 475 IY = 1,NY
+	    CALL ZERO(OUT,NX4)
+	    IF (MODE .LE. 2) THEN
+	      DO JY = 1,NREDY
+	        CALL IRDLIN(1,ALINE,*999)
+		INDEX = 0
+		DO IX = 1,NX
+		  DO JX = 1,NREDX	    
+		    INDEX = INDEX + 1
+		    OUT(IX) = OUT(IX) + ALINE(INDEX)*SCL
+                  enddo
+                enddo
+              enddo
+      	      DO IX=1,NX
+      		VAL=OUT(IX)
+      		IF (VAL .LT. DMIN) DMIN = VAL
+      		IF (VAL .GT. DMAX) DMAX = VAL
+      		DOUBLMEAN = DOUBLMEAN + VAL
+              enddo
+	    ELSE
+	      DO JY = 1,NREDY
+	        CALL IRDLIN(1,CLINE,*999)
+		INDEX = 0
+		DO IX = 1,NX
+		  DO JX = 1,NREDX	    
+		    INDEX = INDEX + 1
+		    COUT(IX) = COUT(IX) + CLINE(INDEX)*SCL
+                  enddo
+                enddo
+              enddo
+              DO IX=1,NX
+                VAL=OUT(IX)
+                IF (VAL .LT. DMIN) DMIN = VAL
+                IF (VAL .GT. DMAX) DMAX = VAL
+                DOUBLMEAN = DOUBLMEAN + VAL
+              enddo
+	    END IF
+	    CALL IWRLIN(2,OUT)
+475	CONTINUE
+      	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+      	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 5 : GETTING AMPLITUES OR INTENSITIES
+C
+50	CALL IALMOD(2,2)
+	WRITE(6,2350)
+2350	FORMAT('$Write out amplitudes (0) or Intensities*.01 (1) ? ')
+	READ(5,*) IQ
+	IF (IQ .EQ. 0) THEN
+	  write(TITLE,2400)
+	ELSE
+	  write(TITLE,2450)
+	ENDIF
+2400	FORMAT('LABEL Mode 5: Amplitudes selected')
+2450	FORMAT('LABEL Mode 5: Intensities*.01 selected')
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO 550 IZ = 1,NZ
+	  DO 550 IY = 1,NY
+	    CALL IRDLIN(1,CLINE,*999)
+	    IF (IQ .EQ. 0) THEN
+	      DO 500 IX = 1,NX
+	        VAL = CABS(CLINE(IX))
+	        ALINE(IX) = VAL
+	        DOUBLMEAN = DOUBLMEAN + VAL
+	        IF (VAL .LT. DMIN) DMIN = VAL
+	        IF (VAL .GT. DMAX) DMAX = VAL
+500	      CONTINUE
+	    ELSE
+	      IND = 1
+	      DO 525 IX = 1,NX
+	        VAL = .01*(ALINE(IND)**2 + ALINE(IND+1)**2)
+		IND = IND + 2
+	        ALINE(IX) = VAL
+	        DOUBLMEAN = DOUBLMEAN + VAL
+	        IF (VAL .LT. DMIN) DMIN = VAL
+	        IF (VAL .GT. DMAX) DMAX = VAL
+525	      CONTINUE
+	    ENDIF
+	    CALL IWRLIN(2,ALINE)
+550	CONTINUE
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 6 : GETTING PHASES  
+C
+60	CALL IALMOD(2,2)
+	write(TITLE,2500)
+2500	FORMAT('LABEL Mode 6: Select phases from Fourier Transform')
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO 650 IZ = 1,NZ
+	  DO 650 IY = 1,NY
+	    CALL IRDLIN(1,CLINE,*999)
+	    DO 600 IX = 1,NX
+	      A = REAL(CLINE(IX))
+	      B = AIMAG(CLINE(IX))
+	      PHASE = ATAN2(B,A)*CNV
+	      ALINE(IX) = PHASE
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      IF (VAL .LT. DMIN) DMIN = PHASE
+	      IF (VAL .GT. DMAX) DMAX = PHASE
+600	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+650	CONTINUE
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 7 : GETTING REAL PART
+C
+70	CALL IALMOD(2,2)
+	write(TITLE,2600)
+2600	FORMAT('LABEL Mode 7: Select real part from Fourier Transform')
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO 750 IZ = 1,NZ
+	  DO 750 IY = 1,NY
+	    CALL IRDLIN(1,CLINE,*999)
+	    DO 700 IX = 1,NX
+	      VAL = REAL(CLINE(IX))
+	      ALINE(IX) = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+700	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+750	CONTINUE
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C=====================================================================
+C
+C  MODE 8 : GETTING IMAGINARY PART
+C
+80	CALL IALMOD(2,2)
+	write(TITLE,2700)
+2700	FORMAT('LABEL Mode 8: Select imaginary part from',
+     . ' Fourier Transform')
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO 850 IZ = 1,NZ
+	  DO 850 IY = 1,NY
+	    CALL IRDLIN(1,CLINE,*999)
+	    DO 800 IX = 1,NX
+	      VAL = AIMAG(CLINE(IX))
+	      ALINE(IX) = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+800	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+850	CONTINUE
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C   HERE FOR FINISH
+C
+990	CALL IMCLOSE(2)
+995	CALL IMCLOSE(1)
+	CALL EXIT
+997	WRITE(6,998)
+998	FORMAT(' THIS OPTION NOT COMPATIBLE WITH INPUT FILE MODE')
+      	STOP
+999	STOP 'END-OF-FILE ERROR ON READ'
+	END
+
+C*LABELB.FOR*************************************************************
+C									*
+C	Program to perform simple manipulations on image files		*
+C									*
+C	LABEL Version 1.12	31-MAR-82    DAA	for VAX	        *
+C	LABEL Version 1.13	13-OCT-82    DAA	for VAX		*
+C	LABELB Version 1.1      7- JAN-85    MK   some more routines    *
+C	LABELB Version 1.2	20-APR-85    RH   bigger line length	*
+C************************************************************************
+C
+      SUBROUTINE LABELB(INFILE)
+CHEN>
+C     PARAMETER (LMAX=16384,LCMX=8192)
+      PARAMETER (LMAX=21000)
+      PARAMETER (LCMX=10500)
+      PARAMETER (IBMX=256)
+CHEN<
+	COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+	DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
+	DIMENSION BILD(IBMX,IBMX),CILD(IBMX,IBMX)
+	DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX)
+c	DIMENSION LABELS(20,10),CELL(6)
+	DIMENSION LABELS(20,10)
+	COMPLEX CLINE(LCMX),COUT(LCMX)
+      	REAL*8 DOUBLMEAN
+	CHARACTER*60 INFILE,OUTFILE
+	character*80 TITLE
+	EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
+	EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
+	DATA NXYZST/3*0/, CNV/57.29578/
+C
+1000	FORMAT(//' LABELB: Image Manipulation Program  V1.2'/)
+1011	format(' these are some more options to manipulate image files
+     1  '/' especially for nice diplays. You can turn them around in 
+     1  '/' 90 degree steps, cut off outliers, repair scratches, or
+     1  '/' do geometrical stretch (square root, e.g.).') 
+C	WRITE(6,1100)
+c1100	FORMAT('$Input filename:  ')
+c	READ(5,1200) INFILE
+1200	FORMAT(A)
+
+	CALL IMOPEN(1,INFILE,'RO')
+C
+	CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+C
+	NXT = NX
+	IF (MODE .GE. 3) NXT = NXT*2
+	write(6,1000)
+	write(6,1011)
+C
+1	WRITE(6,1300)
+1300	FORMAT(/,' Available modes of operation are: ',/,
+     . '  1: VARIOUS 90 DEG TURNS AND MIRRORS',/,
+     . '  2: GEOMETRIC STRETCH ( y = m**X )',/,
+     . '  3: CUT OFF OVER - AND UNDERFLOWS',/,
+     . '  4: GET RID OF OUTLIERS BY INTERPOLATION')
+	IF (MODE .GE. 3) WRITE(6,1400)
+1400	FORMAT(
+     . '  5: Output amplitudes or Intensities',/,
+     . '  6: Output Phases (degrees)',/,
+     . '  7: Output REAL part of Complex value',/,
+     . '  8: Output IMAGINARY part of Complex value',/)
+C
+	WRITE(6,1500)
+1500	FORMAT(/,'$Enter desired mode: ')
+	READ(5,*) IMODE
+	IF (IMODE .GT. 4 .AND. MODE .LT. 3) GOTO 1
+	WRITE(6,1550)
+1550	FORMAT(10X)
+C
+	IF (IMODE .NE. 0) THEN
+	  WRITE(6,1600)
+1600	  FORMAT('$Output filename:  ')
+	  READ(5,1200) OUTFILE
+
+	IF (IMODE.NE.1) THEN
+	  CALL IMOPEN(2,OUTFILE,'NEW')
+	  CALL ITRHDR(2,1)
+	END IF
+	END IF
+
+	GOTO (5,10,20,30,40,45,50,60,70,80) IMODE+2
+
+5	Continue
+	GOTO 990
+10	Continue
+	GOTO 995
+C
+C  MODE 1 : VARIOUS 90 DEG TURNS
+C
+20	CONTINUE
+      	IF(NXYZ(1).GT.IBMX.OR.NXYZ(2).GT.IBMX) THEN
+      		WRITE(6,201) IBMX, NXYZ(1), NXYZ(2)
+201		FORMAT(' CANNOT DO TURNS OR MIRRORS IF IMAGE SIZE',
+     .			' . GT.',I5,', NX AND NY ARE',2I5)
+      		GO TO 1
+      	ENDIF
+C
+	WRITE(6,287)
+	READ(5,*)ITURN
+287	FORMAT('$TURN NO? (1:Z90,2:Z-90,3:Z180,4:Xmir,5:Ymir)')
+	write(TITLE,1750) ITURN
+1750	FORMAT(' MLABEL  Mode 1: TURN NO ',I1,
+     . '   (1:Z90,2:Z-90,3:Z180,4:X180,5:Y180)')
+200	CONTINUE
+C
+	IF (ITURN.EQ.1.OR.ITURN.EQ.2) THEN
+	NXYZST(1) = NXYZ(2)
+	NXYZST(2) = NXYZ(1)
+	NXYZST(3) = NXYZ(3)
+	ELSE
+	NXYZST(1) = NXYZ(1)
+	NXYZST(2) = NXYZ(2)
+	NXYZST(3) = NXYZ(3)
+	ENDIF
+
+	CALL IMOPEN(2,OUTFILE,'NEW')
+	CALL ICRHDR(2,NXYZST,NXYZST,2,LABELS,10)
+	CALL ITRLAB(2,1)
+C       the cell parameters are not transformed or transfered, because this
+C	operation was intended just for beautifying pictures
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+C	READ THE WHOLE PICTURE INTO BILD. IT HAS TO BE ONE LAYER ONLY
+C	AND SMALLER THAN THE DIMENSIONS OF BILD.
+	DO IZ = 1,NXYZ(3) !FOR EACH SECTION SEPERATELY
+
+	DO IY = 1,NXYZ(2)	
+	    CALL IRDLIN(1,BILD(1,IY),*999)
+	ENDDO
+C	NOW TRANSFORM THIS IN SUITABLE MANNER
+
+	IF (ITURN.EQ.5) THEN
+	DO IY = 1,NXYZ(2)
+		DO IX = 1,NXYZ(1)
+			CILD(NXYZ(1)-IX+1,IY)=BILD(IX,IY)
+		ENDDO
+	ENDDO
+	ENDIF
+
+	IF (ITURN.EQ.4) THEN
+	DO IX = 1,NXYZ(1)
+		DO IY = 1,NXYZ(2)
+			CILD(IX,NXYZ(2)-IY+1)=BILD(IX,IY)
+		ENDDO
+	ENDDO
+	ENDIF
+
+
+	IF (ITURN.EQ.1) THEN
+	DO IX = 1,NXYZ(1)
+		DO IY = 1,NXYZ(2)
+			CILD(IY,NXYZ(1)-IX+1)=BILD(IX,IY)
+		ENDDO
+	ENDDO
+	ENDIF
+
+
+	IF (ITURN.EQ.2) THEN
+	DO IX = 1,NXYZ(1)
+		DO IY = 1,NXYZ(2)
+			CILD(NXYZ(2)-IY+1,IX)=BILD(IX,IY)
+		ENDDO
+	ENDDO
+	ENDIF
+
+
+	IF (ITURN.EQ.3) THEN
+	DO IX = 1,NXYZ(1)
+		DO IY = 1,NXYZ(2)
+			CILD(NXYZ(1)-IX+1,NXYZ(2)-IY+1)=BILD(IX,IY)
+		ENDDO
+	ENDDO
+	ENDIF
+
+
+	DO IY = 1,NXYZST(2)
+		CALL IWRLIN(2,CILD(1,IY))
+	ENDDO
+
+	ENDDO !IZ
+C
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C  MODE 2 : GEOMETRIC STRETCH
+C
+30	WRITE(6,1800)
+1800	FORMAT(/,'$Enter A (Y = X**A) ')
+	READ(5,*) A
+	WRITE(TITLE,1900) A
+1900	FORMAT(' MLABEL Mode 2: GEOMETRIC Stretch A,= ',F12.4)
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DO IZ= 1,NZ
+	  DO IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+		IF (A.EQ.0.5) THEN  !SQRT
+	    DO 300 IX = 1,NXT
+	      VAL = SQRT(ALINE(IX))
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      ALINE(IX) = VAL
+300	    CONTINUE
+		ELSE
+	    DO 392 IX = 1,NXT
+	      VAL = (ALINE(IX))**A
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      ALINE(IX) = VAL
+392	    CONTINUE
+	        ENDIF
+	    CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+	DMEAN = DOUBLMEAN/(NXT*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C  MODE 3 : CUT OFF OVER AND UNDERFLOW
+C
+40	WRITE(6,2000)
+2000	FORMAT(' Enter LOWEST AND HIGHEST VALUE TO PRUNE IMAGE WITH')
+	READ(5,*) A,B
+	WRITE(TITLE,2100) A,B
+2100	FORMAT(' MLABEL Mode 3: LIMIT DYNAMIC RANGE TO ',2F12.4)
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+	DMIN = 1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+C
+	DO IZ= 1,NZ
+	  DO IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+	    DO 400 IX = 1,NXT
+	      IF (ALINE(IX).LT.A) ALINE(IX)=A
+	      IF (ALINE(IX).GT.B) ALINE(IX)=B	
+	      IF (ALINE(IX) .LT. DMIN) DMIN = ALINE(IX)
+	      IF (ALINE(IX) .GT. DMAX) DMAX = ALINE(IX)
+	      DOUBLMEAN = DOUBLMEAN + ALINE(IX)
+400	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+	DMEAN = DOUBLMEAN/(NXT*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C  MODE 4 : GET RID OF OUTLIERS BY INTERPOLATION
+C     if in one line  pixel n - pixel(n-1) is opposite in sign to 
+c     pixel n+1 - pixel n and greater than preset value, pixel n
+c     is replaced by the average of n+1 and n-1. This should get
+c     rid of vertical lines introduced through memory errrors in 
+c     2-d pictures. 
+45	WRITE(6,2200)
+2200	FORMAT('$Enter critical difference ')
+	READ(5,*) critdiff
+	WRITE(TITLE,2300) critdiff
+2300	FORMAT(' MLABEL Mode 4: get rid of outlier rows, critdiff= ',G10.4)
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+
+	DMIN = 1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+C
+	DO 454 IZ= 1,NZ
+	  DO 454 IY = 1,NY
+	    CALL IRDLIN(1,ALINE,*999)
+	    DO 404 IX = 2,NXT-1
+		DLEFT = ALINE(IX)-ALINE(IX-1)
+		DRIGH = ALINE(IX+1)-ALINE(IX)
+		IF (DRIGH.EQ.0.) DRIGH=1.E-10
+	      IF (ABS(DLEFT).GT.CRITDIFF.AND.DLEFT/DRIGH.LE.0.) 
+     1        ALINE(IX)=(ALINE(IX+1)+ALINE(IX-1))/2.
+	      IF (ALINE(IX) .LT. DMIN) DMIN = ALINE(IX)
+	      IF (ALINE(IX) .GT. DMAX) DMAX = ALINE(IX)
+	      DOUBLMEAN = DOUBLMEAN + ALINE(IX)
+404	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+454	CONTINUE
+	DMEAN = DOUBLMEAN/(NXT*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C  MODE 5 : GETTING AMPLITUES OR INTENSITIES
+C
+50	CALL IALMOD(2,2)
+	WRITE(6,2350)
+2350	FORMAT('$Write out amplitudes (0) or Intensities*.01 (1) ? ')
+	READ(5,*) IQ
+	IF (IQ .EQ. 0) THEN
+	  WRITE(TITLE,2400)
+	ELSE
+	  WRITE(TITLE,2450)
+	ENDIF
+2400	FORMAT(' LABEL Mode 5: Select amplitudes from Fourier')
+2450	FORMAT(' LABEL Mode 5: Select Intensities *0.01 from Fourier ',
+     . 'Transform')
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO 550 IZ = 1,NZ
+	  DO 550 IY = 1,NY
+	    CALL IRDLIN(1,CLINE,*999)
+	    IF (IQ .EQ. 0) THEN
+	      DO 500 IX = 1,NX
+	        VAL = CABS(CLINE(IX))
+	        ALINE(IX) = VAL
+	        DOUBLMEAN = DOUBLMEAN + VAL
+	        IF (VAL .LT. DMIN) DMIN = VAL
+	        IF (VAL .GT. DMAX) DMAX = VAL
+500	      CONTINUE
+	    ELSE
+	      IND = 1
+	      DO 525 IX = 1,NX
+	        VAL = .01*(ALINE(IND)**2 + ALINE(IND+1)**2)
+		IND = IND + 2
+	        ALINE(IX) = VAL
+	        DOUBLMEAN = DOUBLMEAN + VAL
+	        IF (VAL .LT. DMIN) DMIN = VAL
+	        IF (VAL .GT. DMAX) DMAX = VAL
+525	      CONTINUE
+	    ENDIF
+	    CALL IWRLIN(2,ALINE)
+550	CONTINUE
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C  MODE 6 : GETTING PHASES  
+C
+60	CALL IALMOD(2,2)
+	WRITE(TITLE,2500)
+2500	FORMAT(' LABEL Mode 6: Select phases from Fourier Transform')
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO 650 IZ = 1,NZ
+	  DO 650 IY = 1,NY
+	    CALL IRDLIN(1,CLINE,*999)
+	    DO 600 IX = 1,NX
+	      A = REAL(CLINE(IX))
+	      B = AIMAG(CLINE(IX))
+	      PHASE = ATAN2(B,A)*CNV
+	      ALINE(IX) = PHASE
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      IF (VAL .LT. DMIN) DMIN = PHASE
+	      IF (VAL .GT. DMAX) DMAX = PHASE
+600	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+650	CONTINUE
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C  MODE 7 : GETTING REAL PART
+C
+70	CALL IALMOD(2,2)
+	WRITE(TITLE,2600)
+2600	FORMAT(' LABEL Mode 7: Select real part from Fourier Transform')
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO 750 IZ = 1,NZ
+	  DO 750 IY = 1,NY
+	    CALL IRDLIN(1,CLINE,*999)
+	    DO 700 IX = 1,NX
+	      VAL = REAL(CLINE(IX))
+	      ALINE(IX) = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+700	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+750	CONTINUE
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C  MODE 8 : GETTING IMAGINARY PART
+C
+80	CALL IALMOD(2,2)
+C	WRITE(TITLE,2400)
+	WRITE(TITLE,2400)
+2700	FORMAT(' LABEL Mode 8: Select imaginary part from',
+     . ' Fourier Transform')
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	DO 850 IZ = 1,NZ
+	  DO 850 IY = 1,NY
+	    CALL IRDLIN(1,CLINE,*999)
+	    DO 800 IX = 1,NX
+	      VAL = AIMAG(CLINE(IX))
+	      ALINE(IX) = VAL
+	      DOUBLMEAN = DOUBLMEAN + VAL
+	      IF (VAL .LT. DMIN) DMIN = VAL
+	      IF (VAL .GT. DMAX) DMAX = VAL
+800	    CONTINUE
+	    CALL IWRLIN(2,ALINE)
+850	CONTINUE
+	DMEAN = DOUBLMEAN/(NX*NY*NZ)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+	GOTO 990
+C
+C   HERE FOR FINISH
+C
+990	CALL IMCLOSE(2)
+995	CALL IMCLOSE(1)
+	CALL EXIT
+999	STOP 'END-OF-FILE ERROR ON READ'
+	END
+
+C*LABELC.FOR**************************************************************
+C									 *
+C	Program to perform simple manipulations on image files		 *
+C	this subroutine selects many small areas and writes out a stack	 *
+C	of mini areas surrounding aech selected area (particle)		 *
+C									 *
+C   this subroutine edited from						 *
+C	LABEL Version 1.12	31-MAR-82    DAA	for VAX	         *
+C	LABEL Version 1.13	13-OCT-82    DAA	for VAX		 *
+C	LABELB Version 1.1      7- JAN-85    MK   some more routines     *
+C	LABELB Version 1.2	20-APR-85    RH   bigger line length	 *
+C       LABELC Version 1.21	17-Dec-1996  RH   creation of subroutine *
+C*************************************************************************
+C
+      SUBROUTINE LABELC(INFILE)
+      PARAMETER (NDIM=150000)
+      PARAMETER (NAREA=15000)
+	COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+	DIMENSION ARRAY(NDIM),NXYZ(3),MXYZ(3),NXYZST(3)
+      	DIMENSION NXYZBOX(3),NXYZTMP(3)
+	DIMENSION IXYZMIN(3),IXYZMAX(3)
+	DIMENSION LABELS(20,10)
+      	DIMENSION IAX(NAREA),IAY(NAREA)
+      	REAL*8 DOUBLMEAN
+        CHARACTER DAT*24
+	character*80 TITLE
+	CHARACTER*60 INFILE,OUTFILE,DATAFILE,TITLELINE
+	EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
+	DATA NXYZST/3*0/, CNV/57.29578/
+C
+1000	FORMAT(//' LABELC: Image Manipulation Program  V1.21'/)
+1011	format(' selects many small areas and puts them into',
+     . ' a file stack')
+C
+C	WRITE(6,1100)
+c1100	FORMAT('$Input filename:  ')
+c	READ(5,1200) INFILE
+1200	FORMAT(A)
+
+	CALL IMOPEN(1,INFILE,'RO')
+C
+	CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+      	IF(MODE.LT.0.OR.MODE.GT.2) 
+     . STOP ' only MODE 0,1 or 2 allowed for this option'
+	write(6,1000)
+	write(6,1011)
+C
+	  WRITE(6,1500)
+1500	  FORMAT('$Output filename:  ')
+	  READ(5,1200) OUTFILE
+C
+	WRITE(6,1600)
+1600	FORMAT(/,'$Enter size of mini boxes to be selected, NBOXX,NBOXY ')
+	READ(5,*) NBOXX, NBOXY
+      	IF(NBOXX*NBOXY.GT.NDIM) STOP ' NBOXX*NBOXY too small for NDIM'
+      	NBOXX  = (NBOXX/2)*2
+      	NHBOXX =  NBOXX/2
+      	NBOXY  = (NBOXY/2)*2
+      	NHBOXY =  NBOXY/2
+	WRITE(6,1610) NBOXX, NBOXY
+1610	FORMAT(' Selected areas are',I5,' x ',I5)
+C  better to be an even number
+	  WRITE(6,1700)
+1700	  FORMAT('$filename for list of X,Y centres of areas required : ')
+	  READ(5,1200) DATAFILE
+      	  OPEN(UNIT=10,FILE=DATAFILE,STATUS='OLD')
+      	  READ(10,1200) TITLELINE 
+1701	  FORMAT(' First (title) line discarded',A)
+      	  WRITE(6,1701) TITLELINE
+      	DO 1800 IA=1,NAREA
+      		READ(10,*,END=1801) IAX(IA),IAY(IA)
+1800	CONTINUE
+      	STOP ' Too many selected areas for program dimension'
+1801	IF(IA.GT.1) THEN
+      		NAREAS = IA-1
+		NXYZBOX(1) = NBOXX
+		NXYZBOX(2) = NBOXY
+      		NXYZBOX(3) = NAREAS
+      		NXYZTMP(1) = NBOXX*NBOXY
+      		NXYZTMP(2) = NAREAS
+      		NXYZTMP(3) = 1
+      		WRITE(6,1805)NAREAS
+1805		FORMAT(' Number of particles slected',I6)
+      	ENDIF
+C
+	CALL IMOPEN(2,OUTFILE,'NEW')
+	CALL ITRHDR(2,1)
+      	CALL IALSIZ(2,NXYZTMP,NXYZST)
+        CALL FDATE(DAT)
+C        WRITE(TITLE) NAREAS,NBOXX,NBOXY,DAT(5:24,1900)
+        WRITE(TITLE,1900) NAREAS,NBOXX,NBOXY,DAT(5:24)
+1900    FORMAT(' LABELC: select',I6,
+     . '  particles each with area',2I4,5X,A20)
+	DMIN =  1.E10
+	DMAX = -1.E10
+	DOUBLMEAN = 0.0
+	CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+	DO 1950 IA = 1,NAREAS
+      		NX1 = IAX(IA) - NHBOXX + 1
+      		NX2 = IAX(IA) + NHBOXX
+      		NY1 = IAY(IA) - NHBOXY + 1
+      		NY2 = IAY(IA) + NHBOXY
+      		IF (NX1.LT.0.OR.NX2.GT.NXYZ(1)-1.OR.
+     . NY1.LT.0.OR.NY2.GT.NXYZ(2)-1) THEN
+      	WRITE(6,1901) IAX(IA),IAY(IA)
+1901	FORMAT('  particle too near edge ignored, coords',2I7)
+C      		  STOP ' particle too near edge'
+      		ENDIF
+      	WRITE(6,*) NX1,NX2,NY1,NY2
+      		CALL IMPOSN(1,0,0)
+      		CALL IRDPAS(1,ARRAY,NBOXX,NBOXY,NX1,NX2,NY1,NY2,*999)
+      		CALL IWRLIN(2,ARRAY)
+      		DO 1960 J=1,NBOXX*NBOXY
+      			VAL = ARRAY(J)
+      			IF (VAL .LT. DMIN) DMIN = VAL
+      			IF (VAL .GT. DMAX) DMAX = VAL
+      			DOUBLMEAN = DOUBLMEAN + VAL
+1960		CONTINUE
+1950	CONTINUE
+	DMEAN = DOUBLMEAN/(NAREAS*NBOXX*NBOXY)
+      	CALL IALSIZ(2,NXYZBOX,NXYZST)
+	CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+990	CALL IMCLOSE(2)
+995	CALL IMCLOSE(1)
+	CALL EXIT
+999	STOP 'END-OF-FILE ERROR ON READING input image'
+	END
+

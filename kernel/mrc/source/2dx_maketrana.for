@@ -1,24 +1,24 @@
 C   MAKETRAN:  remember also to change version number in first write statement.
 C
 C   This program reads in an MTZ file of diffraction amplitudes and phases from
-C	the experimentally determined and merged 3-D data from a 2-dimensional 
-C	crystal, and writes out the transform of the projection of the 
-C	structure in the direction, at the magnification, and modified 
-C	by the requested CTF, for later use as a reference in cross-correlation
-C	with the digitised experimental image.  The code is derived from a
-C	synthesis of bits of ORIGTILT, MASKTRAN, CTFAPPLY & EDMTZ.
+C       the experimentally determined and merged 3-D data from a 2-dimensional 
+C       crystal, and writes out the transform of the projection of the 
+C       structure in the direction, at the magnification, and modified 
+C       by the requested CTF, for later use as a reference in cross-correlation
+C       with the digitised experimental image.  The code is derived from a
+C       synthesis of bits of ORIGTILT, MASKTRAN, CTFAPPLY & EDMTZ.
 C
-C	Version 1.00	1.9.94		RH	Original version
-C	Version 1.01	9.9.94		RH	Temperature factor added
-C	Version 1.02	4.12.94		RH	no STANG in p2
-C	Version 1.03	6.5.95		RH	slight extrapolation of lattice line
-C	Version 1.04	25.7.95		RH	set ASTAR, BSTAR in subroutines
-C	Version 1.05	22.4.96		RH	add RH ASTAR, BSTAR changes
-C	Version 1.06	4.7.99		RH	IBEGIN(-MAXINDEX:MAXINDEX,etc), etc
-C	Version	1.07	29.03.00	JMS	zorigin inserted in ialorg for 
-C						  compatibility with imsubs2000
-C       Version	1.08	29.10.01	RH	change NAME to CHARACTER*80
-C       Version	1.09	4.8.02		RH	check array bounds IBEGIN,IFINISH
+C       Version 1.00    1.9.94          RH      Original version
+C       Version 1.01    9.9.94          RH      Temperature factor added
+C       Version 1.02    4.12.94         RH      no STANG in p2
+C       Version 1.03    6.5.95          RH      slight extrapolation of lattice line
+C       Version 1.04    25.7.95         RH      set ASTAR, BSTAR in subroutines
+C       Version 1.05    22.4.96         RH      add RH ASTAR, BSTAR changes
+C       Version 1.06    4.7.99          RH      IBEGIN(-MAXINDEX:MAXINDEX,etc), etc
+C       Version 1.07    29.03.00        JMS     zorigin inserted in ialorg for 
+C                                                 compatibility with imsubs2000
+C       Version 1.08    29.10.01        RH      change NAME to CHARACTER*80
+C       Version 1.09    4.8.02          RH      check array bounds IBEGIN,IFINISH
 C
 C   Input cards: 
 C
@@ -92,38 +92,38 @@ C
 C*******************************************************************************
 C
 CHEN>
-C      	PARAMETER (IARRMXSIZ=37000000)
-C	PARAMETER (NMAX=500)
+C       PARAMETER (IARRMXSIZ=37000000)
+C       PARAMETER (NMAX=500)
 C
-      	PARAMETER (IARRMXSIZ=410000000)
-	PARAMETER (NMAX=20100)
+        PARAMETER (IARRMXSIZ=410000000)
+        PARAMETER (NMAX=20100)
 CHEN<
-      	COMMON//NX,NY,NZ
+        COMMON//NX,NY,NZ
         DIMENSION ARRAY(IARRMXSIZ)
-	DIMENSION TITLE(20),TITLEIN(12),NXYZ(3),NXYZT(3),CELL(6)
-      	DIMENSION BEAMSHFT(4)
-      	DIMENSION IHS(NMAX),IKS(NMAX),ZS(NMAX),XC(NMAX),YC(NMAX),
-     .		AMP(NMAX),PHASE(NMAX),APART(NMAX),BPART(NMAX),BSH(NMAX)
-      	REAL KV
-      	REAL*8 DOUBLMEAN
-	CHARACTER*80 NAME
-	CHARACTER DAT*24
-      	LOGICAL IAMPLIM
-	EQUIVALENCE (NX,NXYZ)
-      	EQUIVALENCE (BEAMSHFT(2),ASTAR),(BEAMSHFT(3),BSTAR),
-     .		  (BEAMSHFT(4),ABANG)
+        DIMENSION TITLE(20),TITLEIN(12),NXYZ(3),NXYZT(3),CELL(6)
+        DIMENSION BEAMSHFT(4)
+        DIMENSION IHS(NMAX),IKS(NMAX),ZS(NMAX),XC(NMAX),YC(NMAX),
+     .          AMP(NMAX),PHASE(NMAX),APART(NMAX),BPART(NMAX),BSH(NMAX)
+        REAL KV
+        REAL*8 DOUBLMEAN
+        CHARACTER*80 NAME
+        CHARACTER DAT*24
+        LOGICAL IAMPLIM
+        EQUIVALENCE (NX,NXYZ)
+        EQUIVALENCE (BEAMSHFT(2),ASTAR),(BEAMSHFT(3),BSTAR),
+     .            (BEAMSHFT(4),ABANG)
 CTSH++
-	CHARACTER TMPTITLE*80
-	EQUIVALENCE (TMPTITLE,TITLE)
+        CHARACTER TMPTITLE*80
+        EQUIVALENCE (TMPTITLE,TITLE)
 CTSH--
-	DATA CELL/100.,100.,100.,90.,90.,90./
+        DATA CELL/100.,100.,100.,90.,90.,90./
 CHEN>
         DATA ARRAY/IARRMXSIZ*0.0/
 CHEN<
-      	DATA DOUBLMEAN/0.0/
-      	TWOPI = 2.0 * 3.14159265
-	MAXSIZ = IARRMXSIZ
-      	DRAD = TWOPI/360.0
+        DATA DOUBLMEAN/0.0/
+        TWOPI = 2.0 * 3.14159265
+        MAXSIZ = IARRMXSIZ
+        DRAD = TWOPI/360.0
 C
       WRITE(6,1000)
 1000  FORMAT(/,/,' MAKETRAN VX 1.09 (4.8.02): ',
@@ -147,7 +147,7 @@ CHEN<
       READ(5,*) RESMIN,RESMAX
       IF(RESMIN.EQ.0.0) RESMIN=1000.0    ! Angstroms
       IF(RESMAX.EQ.0.0) RESMAX=2.0       ! Angstroms
-      IF(RESMAX.GT.RESMIN) THEN	! flip
+      IF(RESMAX.GT.RESMIN) THEN ! flip
         TEMP=RESMIN
         RESMIN=RESMAX
         RESMAX=TEMP
@@ -175,7 +175,7 @@ CHEN<
 103   FORMAT(' WAVELENGTH(ANGSTROMS)',F10.4)
       STEPR=DSTEP*(10.0**4.0)/XMAG
       THETATR=WL/(STEPR*NX)
-C		  THETATR IS DIFFRACTION ANGLE OF (1,0) IN TRANSFORM (RADIANS)
+C                 THETATR IS DIFFRACTION ANGLE OF (1,0) IN TRANSFORM (RADIANS)
       BEAMSHFT(1)=0.360*CS*10.0**7*WL**2
 C
       CALL FDATE(DAT)
@@ -204,7 +204,7 @@ C
 6     ARRAY(J)=0.0
       READ(5,1500) TITLEIN    ! title for output file
 1500  FORMAT(12A4)
-CTSH      	WRITE(TITLE) TITLEIN,DAT(5:24,1501)
+CTSH            WRITE(TITLE) TITLEIN,DAT(5:24,1501)
 CTSH++
       WRITE(TMPTITLE,1501) TITLEIN,DAT(5:24)
 CTSH--
@@ -229,7 +229,7 @@ C
       IIN = SQRT(RSQMIN)
       IOUT= SQRT(RSQMAX)
       IF(IOUT.GT.NX2) THEN
-        IOUT = NX2	! maximum at edge of transform
+        IOUT = NX2      ! maximum at edge of transform
         RSQMAX = IOUT**2
         RESLIM = NX*DSTEP*10000/XMAG/IOUT
         WRITE(6,1804) IOUT, RESLIM
@@ -247,7 +247,7 @@ C          write(*,'('':: I,J = '',2I6)')I,J
           XPOS=IH*AX+IK*BX
           YPOS=IH*AY+IK*BY
 C
-          IF(XPOS.LT.0.) GO TO 119		  ! Use only positive X,
+          IF(XPOS.LT.0.) GO TO 119                ! Use only positive X,
           IF(XPOS.EQ.0.0.AND.YPOS.LE.0.) GO TO 119  ! positive Y when X=0.
           RSQ=XPOS**2 + YPOS**2
           IF(RSQ.GT.RSQMAX) GO TO 119
@@ -256,7 +256,7 @@ C
           DPERP=IH*STAXA+IK*STAXB
           Z=DPERP*TTANGL
 CHEN>
-C      	  CALL FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180)
+C         CALL FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180)
 C
           CALL FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180,ROT90,REVHND)
 CHEN<
@@ -276,17 +276,17 @@ CHEN<
           ZS(NHOLE) =Z
           XC(NHOLE)=XPOS
           YC(NHOLE)=YPOS
-          BSH(NHOLE)=BEAMSHFT(1)*RADSQ		! HERE BSH IS STORED
+          BSH(NHOLE)=BEAMSHFT(1)*RADSQ          ! HERE BSH IS STORED
           WRITE(6,1800) IH,IK,XC(NHOLE),YC(NHOLE)
 1800      FORMAT(5X,2I5,3F12.3)
-119     CONTINUE		! used for debugging
+119     CONTINUE                ! used for debugging
 120   CONTINUE
       WRITE(6,121) NHOLE
 121   FORMAT(/,' Number of holes within resolution ranges',I5,/)
 C
 C
 C       Main guts of the program :- 
-C		get the structure factors, put them in transform and apply CTF
+C               get the structure factors, put them in transform and apply CTF
 C
       CALL GETSFS(NHOLE,AMP,PHASE,IHS,IKS,ZS,A,B,ABANG)
       DO 130 J=1,NHOLE            ! apply beamtilt phaseshift
@@ -369,24 +369,24 @@ C
       DIMENSION STANG(17)
       DATA STANG/2*0.0,10*90.0,5*120.0/
 C
-	PARAMETER (BTEMP=80.0)
-	PARAMETER (DRAD=0.0174532)
-	PARAMETER (RDEG=57.295779)
-	PARAMETER (PI=3.14159265)
+        PARAMETER (BTEMP=80.0)
+        PARAMETER (DRAD=0.0174532)
+        PARAMETER (RDEG=57.295779)
+        PARAMETER (PI=3.14159265)
 CHEN>
-C	PARAMETER (MAXPTS=6000)
-C	PARAMETER (MAXINDEX=40)
+C       PARAMETER (MAXPTS=6000)
+C       PARAMETER (MAXINDEX=40)
 C
-	PARAMETER (MAXPTS=80000)
-	PARAMETER (MAXINDEX=60)
+        PARAMETER (MAXPTS=80000)
+        PARAMETER (MAXINDEX=60)
 CHEN<
-	PARAMETER (IRNGESQ=(2*MAXINDEX+1)**2)
+        PARAMETER (IRNGESQ=(2*MAXINDEX+1)**2)
 C
 C
 C     .. parameters for mtz aspects
-	PARAMETER (NLOC=40)
-	PARAMETER (MCOLS=200)
-	PARAMETER (NPAR=200)
+        PARAMETER (NLOC=40)
+        PARAMETER (MCOLS=200)
+        PARAMETER (NPAR=200)
 C
       DIMENSION CELL(6),RSYMX(4,4,96)
       LOGICAL EOF
@@ -397,7 +397,7 @@ c      REAL ADATAIN(MCOLS),ADATAOUT(MCOLS),DUM(2,MCOLS)
 c      INTEGER IH(3),JPOINT(NLOC),LOOKUP(NLOC)
       INTEGER JPOINT(NLOC),LOOKUP(NLOC)
 c      CHARACTER OUTTYP(NLOC)*1,LSPRGI(NLOC)*30,LSPRGO(NLOC)*30,
-c     +	TITNEW*70,HISNEW(20)*80,CTPRGI(NLOC)*1,DUMMY*10
+c     + TITNEW*70,HISNEW(20)*80,CTPRGI(NLOC)*1,DUMMY*10
       CHARACTER LSPRGI(NLOC)*30,CTPRGI(NLOC)*1,DUMMY*10
 C
 C     .. Scalars for Parser ..
@@ -416,10 +416,10 @@ C
 C
 CHEN>
 C      INTEGER*2 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
-C     .	IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),IP1,IP2
+C     . IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),IP1,IP2
 C
       INTEGER*4 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
-     .	IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),IP1,IP2
+     .  IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),IP1,IP2
 CHEN<
 C
 C---- NLPRGI  =  number of input labels
@@ -434,8 +434,8 @@ C
       DATA IBEGIN /IRNGESQ*-999/, IFINISH /IRNGESQ*-999/
       DATA NBEGIN /-999/,NFINISH/-999/
       LOGICAL LFPZERO
-	ASTAR=1.0/(A*SIN(DRAD*ABANG))
-	BSTAR=1.0/(B*SIN(DRAD*ABANG))
+        ASTAR=1.0/(A*SIN(DRAD*ABANG))
+        BSTAR=1.0/(B*SIN(DRAD*ABANG))
 C
 C     READ SPACE GROUP NUMBER, AND FLAG FOR OUTPUT OF ALL FP'S
 C
@@ -456,10 +456,10 @@ C
       CALL LRCELL(1,CELL)
       CALL LRSYMM(1,NSYMX,RSYMX)
       IF(IERR.NE.0) THEN
-      	WRITE (6,8)IERR
-8	FORMAT(':: ERROR ON INPUT OF MTZ FILE, IERR=',I5)
+        WRITE (6,8)IERR
+8       FORMAT(':: ERROR ON INPUT OF MTZ FILE, IERR=',I5)
         GOTO 980
-      	STOP
+        STOP
       ENDIF
 C---- Find out how many columns and reflections in input file
       CALL LRINFO(1,DUMMY,NCOL,NREF,DUM)
@@ -479,16 +479,16 @@ CHEN>
 C-----IF(ISPGRP.GE.3.AND.STANG(ISPGRP).NE.CELL(6)) THEN
       IF(ISPGRP.GE.3.AND.ABS(STANG(ISPGRP)-CELL(6)).gt.0.2) THEN
 CHEN<
-      	WRITE(6,1109) STANG(ISPGRP),CELL(6)
-1109	FORMAT(':: Conflict between cell angles from space group',
+        WRITE(6,1109) STANG(ISPGRP),CELL(6)
+1109    FORMAT(':: Conflict between cell angles from space group',
      $  ' and mtz input file, STANG, CELL=',2F8.3)
         GOTO 980
-      	STOP
+        STOP
       ENDIF
 C
 CHEN>
 C      IF(ABANG.NE.180.0 - CELL(6)) 
-C     .		STOP' Conflict between GAMMA and MTZ cell angle'
+C     .         STOP' Conflict between GAMMA and MTZ cell angle'
 C
       IF(ABANG.NE.180.0 - CELL(6)) THEN
         write(*,'('':: CELL(6) ='',F9.2,'' ABANG='',F9.2)')CELL(6),ABANG
@@ -516,12 +516,12 @@ C
       IHI(N)=ADATAIN(1)
       IKI(N)=ADATAIN(2)
       IF(IABS(IHI(N)).GT.MAXINDEX.OR.IABS(IKI(N)).GT.MAXINDEX) THEN
-      	WRITE(6,1101) MAXINDEX
-1101	FORMAT(':: Array dimensions for IBEGIN, ',
+        WRITE(6,1101) MAXINDEX
+1101    FORMAT(':: Array dimensions for IBEGIN, ',
      $ 'IFINISH too small for spot',
      $ 'indices       MAXINDEX= ',I6)
         GOTO 980
-      	STOP
+        STOP
       ENDIF
       ILI(N)=ADATAIN(3)
       FPIN(N)=ADATAIN(4)
@@ -533,15 +533,17 @@ C        write(*,'(3I5,3F15.3)') IHI(N),IKI(N),ILI(N),FPIN(N),
 C     .    PHIN(N),FOMIN(N)
 CHEN<
 C
+      IHOLD=0
+      IKOLD=0
       IF(N.EQ.1) THEN
-      	IHOLD=IHI(N)
-      	IKOLD=IKI(N)
-      	IBEGIN(IHOLD,IKOLD)=1
+        IHOLD=IHI(N)
+        IKOLD=IKI(N)
+        IBEGIN(IHOLD,IKOLD)=1
       ENDIF
       IF(.NOT.((IHI(N).EQ.IHOLD).AND.(IKI(N).EQ.IKOLD))) THEN
-      	IFINISH(IHOLD,IKOLD)=N-1
-      	IHOLD=IHI(N)
-      	IKOLD=IKI(N)
+        IFINISH(IHOLD,IKOLD)=N-1
+        IHOLD=IHI(N)
+        IKOLD=IKI(N)
 C
 CHEN>
         IF((IHOLD.GT.MAXINDEX).OR.(IKOLD.GT.MAXINDEX))THEN
@@ -553,7 +555,7 @@ CHEN>
         ENDIF
 CHEN<
 C
-      	IBEGIN(IHOLD,IKOLD)=N
+        IBEGIN(IHOLD,IKOLD)=N
       ENDIF
       GO TO 1
 C
@@ -569,8 +571,8 @@ C
       NOTFOUND = 0
       NOUTPUT  = 0
 C
-      	WRITE(6,1201)
-1201  	FORMAT(/,' IHIN IKIN  ZIN   NH  NK   ZSTAR    FREF ',
+        WRITE(6,1201)
+1201    FORMAT(/,' IHIN IKIN  ZIN   NH  NK   ZSTAR    FREF ',
      .  '   PHS  PHIN-  PHIN+   FOM IHI IKI ILI')
       DO 1200 J=1,NHOLE
         NH=IHS(J)
@@ -596,73 +598,73 @@ CHEN>
 C       WRITE(6,7707) NBEGIN,NFINISH
 7707   FORMAT(2I9)
 CHEN<
-C	
+C       
       IF((NBEGIN.EQ.-999).OR.(NFINISH.EQ.-999)) THEN
           NOTFOUND=NOTFOUND+1
-      	IF(LFPZERO) THEN
-      	  WRITE(6,1107) IHS(J),IKS(J),NH,NK
-1107	  FORMAT(2I4,' has no structure factor in MTZ file.',
+        IF(LFPZERO) THEN
+          WRITE(6,1107) IHS(J),IKS(J),NH,NK
+1107      FORMAT(2I4,' has no structure factor in MTZ file.',
      .       '           Reflection ',2I4)
-      	ENDIF
-      	AMP(J)=0.0
-      	PHASE(J)=0.0
+        ENDIF
+        AMP(J)=0.0
+        PHASE(J)=0.0
 C
-      ELSE		!CALCPHS
+      ELSE              !CALCPHS
 C
-      	ZBEGIN=ILI(NBEGIN)/CELL(3)
-      	ZFINISH=ILI(NFINISH)/CELL(3)
-      	ZALLOW = 1/(2.0*CELL(3))  ! allow limited extrapolation beyond data.
-      	IF(.NOT.((ZSTAR.GE.ZBEGIN-ZALLOW).AND.
-     .			(ZSTAR.LE.ZFINISH+ZALLOW))) THEN
+        ZBEGIN=ILI(NBEGIN)/CELL(3)
+        ZFINISH=ILI(NFINISH)/CELL(3)
+        ZALLOW = 1/(2.0*CELL(3))  ! allow limited extrapolation beyond data.
+        IF(.NOT.((ZSTAR.GE.ZBEGIN-ZALLOW).AND.
+     .                  (ZSTAR.LE.ZFINISH+ZALLOW))) THEN
           NOTFOUND=NOTFOUND+1
           WRITE(6,1108) NH,NK,IHS(J),IKS(J),ZSTAR,
      $                  ILI(NBEGIN),ILI(NFINISH)
-1108	  FORMAT(' ZSTAR outside range on line',2I5,'   spot',2I5,
+1108      FORMAT(' ZSTAR outside range on line',2I5,'   spot',2I5,
      .  '        ZSTAR=',F8.5,' range=',2I5)
-      	  GOTO 1200
-      	ENDIF
-      	CPART=0.0
-      	SPART=0.0
-      	SUMFP=0.0
-      	FOMWT=0.0
+          GOTO 1200
+        ENDIF
+        CPART=0.0
+        SPART=0.0
+        SUMFP=0.0
+        FOMWT=0.0
 CHEN>
         FOMAVE=0.0
 CHEN<
-      	DO 85 I=NBEGIN,NFINISH
-      	  ZI=ILI(I)/CELL(3)
-      	  ZDIFF=ZSTAR-ZI
-      	  IF(ZDIFF.NE.0) THEN
-     	    ARGEXP=-0.25*BTEMP*ZDIFF**2
-      	    ARGSINC=0.5*PI*ZDIFF*CELL(3)
-      	    SINCF=SIN(ARGSINC)/ARGSINC
-      	    SINCDAMP=SINCF*EXP(ARGEXP)
-      	  ELSE
-      	    SINCDAMP=1.0
-      	  ENDIF
+        DO 85 I=NBEGIN,NFINISH
+          ZI=ILI(I)/CELL(3)
+          ZDIFF=ZSTAR-ZI
+          IF(ZDIFF.NE.0) THEN
+            ARGEXP=-0.25*BTEMP*ZDIFF**2
+            ARGSINC=0.5*PI*ZDIFF*CELL(3)
+            SINCF=SIN(ARGSINC)/ARGSINC
+            SINCDAMP=SINCF*EXP(ARGEXP)
+          ELSE
+            SINCDAMP=1.0
+          ENDIF
           PHAS=PHIN(I)*DRAD
           CPART=CPART+SINCDAMP*COS(PHAS)*FPIN(I)
           SPART=SPART+SINCDAMP*SIN(PHAS)*FPIN(I)
-      	  SUMFP=SUMFP+SINCDAMP*FPIN(I)
-      	  FOMWT=FOMWT+SINCDAMP*FPIN(I)*FOMIN(I)
+          SUMFP=SUMFP+SINCDAMP*FPIN(I)
+          FOMWT=FOMWT+SINCDAMP*FPIN(I)*FOMIN(I)
 CHEN>
           FOMAVE=FOMAVE+FOMIN(I)
 CHEN<
-85    	CONTINUE
+85      CONTINUE
 C
-      	FREF=0.5*SQRT(SPART**2+CPART**2)		! Here for divide by two
-      	PPHS=RDEG*ATAN2(SPART,CPART)
+        FREF=0.5*SQRT(SPART**2+CPART**2)                ! Here for divide by two
+        PPHS=RDEG*ATAN2(SPART,CPART)
 CHEN>
-C      	PHS=PPHS*IP1-IP2
-      	PHS=AMOD(PPHS*IP1-IP2,360.0)
+C       PHS=PPHS*IP1-IP2
+        PHS=AMOD(PPHS*IP1-IP2,360.0)
         if(SUMFP.eq.0.0)then
           FOM=FOMAVE/(1+NFINISH-NBEGIN)
         else
           FOM=FOMWT/SUMFP
         endif
 CHEN<
-      	RADSQ=NH**2*ASTAR**2 + NK**2*BSTAR**2 +
-     .		2.0*NH*NK*COS(DRAD*ABANG)*ASTAR*BSTAR+ZI**2
-      	BSCALE=EXP(-0.25*RADSQ*BFACTOR)
+        RADSQ=NH**2*ASTAR**2 + NK**2*BSTAR**2 +
+     .          2.0*NH*NK*COS(DRAD*ABANG)*ASTAR*BSTAR+ZI**2
+        BSCALE=EXP(-0.25*RADSQ*BFACTOR)
       PHASE(J)=PHS
       AMP(J)=FREF*FOM*SFACTOR*BSCALE
 C
@@ -676,15 +678,15 @@ C                    AFTER DIVIDING THE RESULT BY TWO,THE OUTPUT COLUMN
 C                    AMPREF IS THEREFORE DIRECTLY COMPARABLE WITH THE INPUT
 C                    AMPLITUDES.
 C
-      	IZLESS=ZSTAR*CELL(3)
-      	IZLESS=NBEGIN+(IZLESS-ILI(NBEGIN))
-      	IZMORE=IZLESS+1
-      	WRITE(6,1111) IHS(J),IKS(J),ZS(J),NH,NK,ZSTAR,
-     $		FREF,PHS,PHIN(IZLESS),PHIN(IZMORE),FOM,
-     $		IHI(IZLESS),IKI(IZLESS),ILI(IZLESS)
-1111	FORMAT(2I4,F7.3,2I4,F7.3,G9.1,F7.1,2F7.1,F7.2,3I4)
+        IZLESS=ZSTAR*CELL(3)
+        IZLESS=NBEGIN+(IZLESS-ILI(NBEGIN))
+        IZMORE=IZLESS+1
+        WRITE(6,1111) IHS(J),IKS(J),ZS(J),NH,NK,ZSTAR,
+     $          FREF,PHS,PHIN(IZLESS),PHIN(IZMORE),FOM,
+     $          IHI(IZLESS),IKI(IZLESS),ILI(IZLESS)
+1111    FORMAT(2I4,F7.3,2I4,F7.3,G9.1,F7.1,2F7.1,F7.2,3I4)
 C
-      	NOUTPUT=NOUTPUT+1
+        NOUTPUT=NOUTPUT+1
       ENDIF
 1200  CONTINUE
 C
@@ -846,13 +848,13 @@ C
       CALL ASYM(IH,IK,Z,IP1,IP2,LSPEC,IPTEST,WSTAR,
      1  MAT(1,IMAT(1,ISPGRP)),MAT(1,IMAT(2,ISPGRP)),
      2  MAT(1,IMAT(3,ISPGRP)),MAT(1,IMAT(4,ISPGRP)),
-     3	MAT(1,IMAT(5,ISPGRP)),
+     3  MAT(1,IMAT(5,ISPGRP)),
      4  IGO(1,ISPGRP),ISPEC(1,ISPGRP),LREV(ISPGRP))
       RETURN
       END
 C*************************************************************************
       SUBROUTINE ASYM(IH,IK,Z,IP1,IP2,SPEC,IPTEST,WSTAR,
-     1	A1,A2,A3,A4,A5,IGO,ISPEC,LREV)
+     1  A1,A2,A3,A4,A5,IGO,ISPEC,LREV)
       INTEGER*2 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
       INTEGER*4 IP1,IP2
       LOGICAL SPEC,LREV
@@ -996,13 +998,13 @@ C
 C
       DO 200 NH=1,NHOLE
 C
-C     	Set hole centre
+C       Set hole centre
         X=XC(NH)
         Y=NY2+YC(NH)            ! shifts to transform coordinates
         IXC=X+0.5               ! nearest pixel to centre of spot
         IYC=Y+0.5               !   "      "
 C
-C     	Set hole limits
+C       Set hole limits
         RA=RAD
         RADSQ=RA*RA
         IRAD=RA+0.5             ! rounded to nearest integer
@@ -1022,7 +1024,7 @@ C       Scan over hole -- holes can overlap
         DO 300 IY=IY1,IY2
           YSQ=(IY-Y)**2
           IYTRUE=IY-NY2
-C     	  IX can be negative
+C         IX can be negative
           DO 310 IX=IX1,IX2
             GWT = 1.0
             RCONJUG = 1.0
@@ -1030,7 +1032,7 @@ C     	  IX can be negative
             IF(ISHAPE.LE.2) THEN
               RSQ=(IX-X)**2+YSQ
               IF(RSQ.GT.RADSQ) GO TO 310      ! from exact centre
-C		   Gaussian weight from exact centre for soft holes
+C                  Gaussian weight from exact centre for soft holes
               IF(ISHAPE.EQ.2) GWT=EXP(-2.0*RSQ/RADSQ)
             ENDIF
 C           Check if point in neg X half transform - use Friedel mate
@@ -1055,7 +1057,7 @@ C
      .                       RCONJUG*PHSORG*BPART(NH)*GWT
 C
 C           On IX=0 need another segment
-C     		But not for centre hole
+C               But not for centre hole
             IF(IX.EQ.0.AND.((X.NE.0.).OR.(Y.NE.0.))) THEN
 CHEN>
 C-------------Friedel mate is complex conjugated
@@ -1110,28 +1112,28 @@ C*******************************************************************************
       NY21 = NY/2 + 1
 C
       DO 300 IY = 1,NY
-      	TY = IY-1-NY2
-      	INDY = (IY-1)*NXP2
+        TY = IY-1-NY2
+        INDY = (IY-1)*NXP2
       DO 300 IX = 1,NX21
-      	   TX = IX-1
-      	   INDEX = 1 + INDY + (IX-1)*2
-      	   RAD = TX**2+TY**2
-      	   IF(RAD.NE.0) THEN
-      		RAD = SQRT(RAD)
-      		ANGLE=RAD*THETATR
-      		ANGSPT=ATAN2(TY,TX)
-      		C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
-      		C2=-C1*CS*ANGLE*ANGLE/2.0
-      		ANGDIF=ANGSPT-ANGAST
-      		CCOS=COS(2.0*ANGDIF)
-      		DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-      		CHI=C1*DF+C2
-      		CNTRST=-SIN(CHI)
-      	   ELSE
-      		CNTRST=0.0
-      	   ENDIF
-      	ARRAY(INDEX)   = ARRAY(INDEX) * CNTRST
-	ARRAY(INDEX+1) = ARRAY(INDEX+1) * CNTRST
+           TX = IX-1
+           INDEX = 1 + INDY + (IX-1)*2
+           RAD = TX**2+TY**2
+           IF(RAD.NE.0) THEN
+                RAD = SQRT(RAD)
+                ANGLE=RAD*THETATR
+                ANGSPT=ATAN2(TY,TX)
+                C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
+                C2=-C1*CS*ANGLE*ANGLE/2.0
+                ANGDIF=ANGSPT-ANGAST
+                CCOS=COS(2.0*ANGDIF)
+                DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
+                CHI=C1*DF+C2
+                CNTRST=-SIN(CHI)
+           ELSE
+                CNTRST=0.0
+           ENDIF
+        ARRAY(INDEX)   = ARRAY(INDEX) * CNTRST
+        ARRAY(INDEX+1) = ARRAY(INDEX+1) * CNTRST
 300   CONTINUE
       RETURN
       END
@@ -1178,7 +1180,7 @@ C******************************************************************************
 C              TO APPLY ORIGIN AND BEAMTILT PHASE-SHIFT.
       FUNCTION PHSHFT(IH,IK,OX,OY,TX,TY,BEAMSHFT,B)
       DIMENSION BEAMSHFT(4)
-C	! attempt to not make it p3 specific.
+C       ! attempt to not make it p3 specific.
       ASTAR=BEAMSHFT(2)
       BSTAR=BEAMSHFT(3)
       PHSHFT=IH*OX + IK*OY + B*(IH*TX*ASTAR+IK*TY*BSTAR)

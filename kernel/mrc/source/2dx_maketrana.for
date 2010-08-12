@@ -533,8 +533,13 @@ C        write(*,'(3I5,3F15.3)') IHI(N),IKI(N),ILI(N),FPIN(N),
 C     .    PHIN(N),FOMIN(N)
 CHEN<
 C
+C
+C
       IHOLD=0
       IKOLD=0
+C
+      write(*,'(2I8)') IHOLD,IKOLD
+C
       IF(N.EQ.1) THEN
         IHOLD=IHI(N)
         IKOLD=IKI(N)
@@ -629,6 +634,7 @@ C
         FOMWT=0.0
 CHEN>
         FOMAVE=0.0
+        ZI=0
 CHEN<
         DO 85 I=NBEGIN,NFINISH
           ZI=ILI(I)/CELL(3)

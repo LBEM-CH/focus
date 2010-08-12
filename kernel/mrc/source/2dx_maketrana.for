@@ -481,7 +481,7 @@ C-----IF(ISPGRP.GE.3.AND.STANG(ISPGRP).NE.CELL(6)) THEN
 CHEN<
       	WRITE(6,1109) STANG(ISPGRP),CELL(6)
 1109	FORMAT(':: Conflict between cell angles from space group',
-     $	' and mtz input file, STANG, CELL=',2F8.3)
+     $  ' and mtz input file, STANG, CELL=',2F8.3)
         GOTO 980
       	STOP
       ENDIF
@@ -563,7 +563,7 @@ C
 C
       WRITE(6,1100)N,NREC
 1100  FORMAT(I10,' Phases input on stream 1',/,
-     $	I10,' total records on stream 1.')
+     $  I10,' total records on stream 1.')
       CALL LRCLOS(1)
 C
       NOTFOUND = 0
@@ -571,7 +571,7 @@ C
 C
       	WRITE(6,1201)
 1201  	FORMAT(/,' IHIN IKIN  ZIN   NH  NK   ZSTAR    FREF ',
-     .	'   PHS  PHIN-  PHIN+   FOM IHI IKI ILI')
+     .  '   PHS  PHIN-  PHIN+   FOM IHI IKI ILI')
       DO 1200 J=1,NHOLE
         NH=IHS(J)
         NK=IKS(J)
@@ -618,7 +618,7 @@ C
           WRITE(6,1108) NH,NK,IHS(J),IKS(J),ZSTAR,
      $                  ILI(NBEGIN),ILI(NFINISH)
 1108	  FORMAT(' ZSTAR outside range on line',2I5,'   spot',2I5,
-     .	'        ZSTAR=',F8.5,' range=',2I5)
+     .  '        ZSTAR=',F8.5,' range=',2I5)
       	  GOTO 1200
       	ENDIF
       	CPART=0.0

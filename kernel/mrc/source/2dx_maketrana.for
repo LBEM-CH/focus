@@ -735,7 +735,7 @@ C  Arms length routine to call ASYM. All matrices for manipulating
 C   H,K's are in this subroutine instead of .MAIN (or other)
 C
       LOGICAL LSPEC
-      INTEGER*2 IP1,IP2
+      INTEGER*4 IP1,IP2
 C
       INTEGER*2 ISPEC(5,17)
       DATA ISPEC/7*0,1,3*0,1,4*0,1,4*0,1,3*0,3*1,2*0,3*1,0,-1,3*1,0,1,
@@ -854,7 +854,7 @@ C*************************************************************************
       SUBROUTINE ASYM(IH,IK,Z,IP1,IP2,SPEC,IPTEST,WSTAR,
      1	A1,A2,A3,A4,A5,IGO,ISPEC,LREV)
       INTEGER*2 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
-      INTEGER*2 IP1,IP2
+      INTEGER*4 IP1,IP2
       LOGICAL SPEC,LREV
 C
 C      WRITE(6,904)A1,A2,A3,A4,A5,IH,IK,Z,IP1,IP2,SPEC,IPTEST,WSTAR
@@ -965,7 +965,8 @@ C                             0      0     0      0  IA(8)
 C           FOR ALL CASES.
 C
 C
-      INTEGER*2 IA(8),IP1,IP2
+      INTEGER*2 IA(8)
+      INTEGER*4 IP1,IP2
 C      WRITE(6,900)IA,IH,IK,Z,IP1,IP2
       IH1=IA(1)*IH+IA(2)*IK
       IK=IA(3)*IH+IA(4)*IK

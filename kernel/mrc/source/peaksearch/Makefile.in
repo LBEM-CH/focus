@@ -4,13 +4,13 @@ GXX = @CXX@
 FFLAGS = @CPPFLAGS@
 GFLAGS = @CPPFLAGS@
 BIN = ../../bin
-LDIR = -L../../lib
+LDIR = -L/opt/local/lib -L../../lib
 LFLAGS = -lfftw3f -l2dx @LIBS@
 HEADERS = 2dx_lowhighpass.cpp 2dx_peaksearch_fft2d.cpp 2dx_mask.cpp 2dx_peaksearcha.cpp 2dx_peaksearchb.cpp 2dx_shift.cpp
 SOURCES = 2dx_peaksearch.c 
 OBJECTS = 2dx_peaksearch.o 
 CEXE = $(BIN)/2dx_peaksearch.exe 
-INCLUDES = -I../../include/ -I./
+INCLUDES = -I/opt/local/include/ -I../../include/ -I./
 
 all: $(CEXE) $(SOURCES) $(HEADERS) 
 

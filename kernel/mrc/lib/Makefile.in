@@ -1,10 +1,10 @@
 F77 = @FC@
 GCC = @CC@
 GXX = @CXX@
-GFLAGS = -c -DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math
+GFLAGS = -c -DPROTOTYPE -Dalliant -w -ffast-math
 FFLAGS = -c @FCFLAGS@
 LIBRARIES = libgen.a libmisc.a libim2k.a libplot2k.a libfft.a libconv.a lib2dx.a
-INCLUDES = -I../include
+INCLUDES = -I../include -I/opt/local/include
 GENFOR = unix.for diskio.for ccplib.for subs.for parser.for symlib.for
 GENC = library.c
 MISCFOR = mtzlib.for lcflib.for miscsubs.for
@@ -68,7 +68,7 @@ libfft.a: $(FFTCPP) lib2dx.a libplot2k.a libim2k.a libmisc.a libgen.a $(FSPLIT)
 
 libconv.a: $(CONVCPP) libfft.a lib2dx.a libplot2k.a libim2k.a libmisc.a libgen.a $(FSPLIT)
 	\rm -f libconv.a
-	$(GXX) $(GFLAGS) $(CONVCPP)
+	$(GXX) $(GFLAGS) $(INCLUDES) $(CONVCPP)
 	ar crs $@ $(patsubst %.cpp,%.o,$(CONVCPP))
 	ranlib $@
 

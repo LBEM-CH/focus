@@ -1,11 +1,11 @@
 CXX=@CXX@
 CFLAGS= -w -ffast-math -DUSE_THREADS_2DX @CPPFLAGS@
 SOURCES=main.cpp
-LDIR = -L../../lib/ -L../../lib64
+LDIR = -L../../lib/ -L../../lib64 -L/opt/local/lib/
 LIB=-lfftw3f -l2dx -lpthread
 BIN=../../bin/
 EXE = 2dx_periodogram.exe
-INCLUDES = -I../../include/
+INCLUDES = -I../../include/ -I/opt/local/include/ 
 
 all: $(BIN)/$(EXE)
 

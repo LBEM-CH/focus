@@ -188,10 +188,10 @@ INSTALL(CODE "
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
-INSTALL(CODE "
-    include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
-    " COMPONENT Runtime)
+#INSTALL(CODE "
+#    include(BundleUtilities)
+#    fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
+#    " COMPONENT Runtime)
 
 
 # To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X

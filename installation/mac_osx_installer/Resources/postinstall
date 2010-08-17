@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+export INSTALL_DIR=$2
+#
+cd ${INSTALL_DIR}/bin
+\rm -f 2dx_image.app
+ln -sf ../2dx_image/2dx_image.app ./
+\rm -f 2dx_merge.app
+ln -sf ../2dx_merge/2dx_merge.app ./
+\rm -f 2dx_logbrowser.app
+ln -sf ../2dx_logbrowser/2dx_logbrowser.app ./
+##
+open ${INSTALL_DIR}/bin
+#
+exit 0

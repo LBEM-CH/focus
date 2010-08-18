@@ -177,3 +177,34 @@ echo ''
 cd ${BUILD}
 
 
+################################################################################
+# Replacing local "kernel" in installation site with link to svn-repository copy
+################################################################################
+
+S2='henning'
+S3='sthennin'
+if [ "$USER" == "$S2" ] || [ "$USER" == "$S3" ];
+then
+  echo User = $USER
+  cd ~/2dx
+  ls -l kernel
+  if [ -h kernel ];
+  then
+    echo "Link already existing."
+  else
+    echo "Removing kernel directory in local ~/2dx"
+    \rm -rf kernel
+  fi
+  if [ ! -h kernel ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ~/Projects/repos/2dx/trunk/kernel .
+  fi
+  ls -l kernel
+  echo "done."
+fi
+
+
+cd ${BUILD}
+
+

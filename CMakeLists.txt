@@ -23,23 +23,14 @@ add_subdirectory(bin)
 add_subdirectory(plugins)
 # copy the kernel and create the appropriate symbolic links
 install(DIRECTORY kernel DESTINATION ${CMAKE_INSTALL_PREFIX} USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink kernel/config
-	                                                           ${CMAKE_INSTALL_PREFIX}/config)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink kernel/proc
-	                                                           ${CMAKE_INSTALL_PREFIX}/proc)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/2dx_image/scripts-standard
-${CMAKE_INSTALL_PREFIX}/2dx_image/scripts-standard)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/2dx_image/scripts-custom
-${CMAKE_INSTALL_PREFIX}/2dx_image/scripts-custom)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/2dx_merge/scripts-standard
-${CMAKE_INSTALL_PREFIX}/2dx_merge/scripts-standard)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/2dx_merge/scripts-custom
-${CMAKE_INSTALL_PREFIX}/2dx_merge/scripts-custom)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/mrc/bin
-	                                                           ${CMAKE_INSTALL_PREFIX}/2dx_image/bin)
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/mrc/bin
-	                                                           ${CMAKE_INSTALL_PREFIX}/2dx_merge/bin)
-
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink kernel/config ${CMAKE_INSTALL_PREFIX}/config)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink kernel/proc ${CMAKE_INSTALL_PREFIX}/proc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/2dx_image/scripts-standard ${CMAKE_INSTALL_PREFIX}/2dx_image/scripts-standard)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/2dx_image/scripts-custom ${CMAKE_INSTALL_PREFIX}/2dx_image/scripts-custom)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/2dx_merge/scripts-standard ${CMAKE_INSTALL_PREFIX}/2dx_merge/scripts-standard)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/2dx_merge/scripts-custom ${CMAKE_INSTALL_PREFIX}/2dx_merge/scripts-custom)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/mrc/bin ${CMAKE_INSTALL_PREFIX}/2dx_image/bin)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../kernel/mrc/bin ${CMAKE_INSTALL_PREFIX}/2dx_merge/bin)
 							   
 install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_INSTALL_PREFIX})
 #packaging

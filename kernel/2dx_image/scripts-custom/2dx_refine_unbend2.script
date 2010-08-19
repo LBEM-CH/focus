@@ -74,27 +74,6 @@ set refine_maskb01_doit_3 = "n"
 set refine_boxb1_doit_3 = "n"
 #
 #=============================================================================
-# SECTION: Refinement Parameters
-#=============================================================================
-#
-# LABEL: maskb01 refinement values (start, end, step, factor)
-# LEGEND:  Fourier filter radius for the first unbending, in RLU.
-# EXAMPLE: refine_maskb01_val = "5,40,2,1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Integer "MIN=0;MAX=1000000;DEFAULT=50"
-# TYPE: Four_Float "MIN=0;MAX=200;DEFAULT=5;MIN=1;MAX=400;DEFAULT=30;MIN=1;MAX=300;DEFAULT=2;MIN=1.0;MAX=10.0;DEFAULT=1.0"
-# RELATION: %OF realcell 2
-set refine_maskb01_val = "5,40,2,1"
-#
-# LABEL: boxb1 refinement values (start, end, step)
-# LEGEND: Diameter of the reference for the first unbending, in pixel.
-# EXAMPLE: refine_boxb1_val = "50,700,50,1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Four_Float "MIN=5;MAX=500;DEFAULT=50;MIN=5;MAX=4000;DEFAULT=700;MIN=1;MAX=3000;DEFAULT=50;MIN=1.0;MAX=10.0;DEFAULT=1.0"
-# RELATION: %OF realcell 2
-set refine_boxb1_val = "50,400,50,1"
-#
-#=============================================================================
 # Other parameter follow
 #=============================================================================
 #
@@ -115,6 +94,8 @@ set refine_boxb1_val = "50,400,50,1"
 # GLOBAL: comment
 # GLOBAL: RMAG
 # GLOBAL: ccunbend_program
+# GLOBAL: refine_maskb01_val
+# GLOBAL: refine_boxb1_val
 #
 #$end_local_vars
 #
@@ -164,6 +145,8 @@ set IMAXCOR = ""
 set ISTEP = ""
 set RMAG = ""
 set ccunbend_program = ""
+set refine_maskb01_val = ""
+set refine_boxb1_val = ""
 #
 #$end_vars
 #

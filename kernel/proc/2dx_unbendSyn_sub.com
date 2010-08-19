@@ -238,12 +238,12 @@ LABIN AMP=F PHASE=PHI FOM=FOM
 eot
 #
 if ( ! -e SCRATCH/make${imagename}.1.fft.mrc ) then
-  ${bin_2dx}/linblock "#"
-  ${bin_2dx}/linblock "ERROR: SCRATCH/make${imagename}.1.fft.mrc not created."
-  ${bin_2dx}/linblock "Problem in 2dx_maketrana.exe"
-  ${bin_2dx}/linblock "#"
-  ${bin_2dx}/linblock "Are the parameter, e.g. real-space lattice, the same in the merged dataset as here?"
-  ${bin_2dx}/protest "Aborting."
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "ERROR: SCRATCH/make${imagename}.1.fft.mrc not created."
+  ${proc_2dx}/linblock "Problem in 2dx_maketrana.exe"
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "Are the parameter, e.g. real-space lattice, the same in the merged dataset as here?"
+  ${proc_2dx}/protest "Aborting."
 endif
 #
 echo "# IMAGE: SCRATCH/make${imagename}.1.fft.mrc <FFT: First synthetic reference>" >> LOGS/${scriptname}.results
@@ -265,12 +265,12 @@ LABIN AMP=F PHASE=PHI FOM=FOM
 eot
   #
   if ( ! -e SCRATCH/make${imagename}.2.fft.mrc ) then
-    ${bin_2dx}/linblock "#"
-    ${bin_2dx}/linblock "ERROR: SCRATCH/make${imagename}.2.fft.mrc not created."
-    ${bin_2dx}/linblock "Problem in 2dx_maketrana.exe"
-    ${bin_2dx}/linblock "#"
-    ${bin_2dx}/linblock "Are the parameter, e.g. real-space lattice, the same in the merged dataset as here?"
-    ${bin_2dx}/protest "Aborting."
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "ERROR: SCRATCH/make${imagename}.2.fft.mrc not created."
+    ${proc_2dx}/linblock "Problem in 2dx_maketrana.exe"
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "Are the parameter, e.g. real-space lattice, the same in the merged dataset as here?"
+    ${proc_2dx}/protest "Aborting."
   endif
   #
   echo "# IMAGE: SCRATCH/make${imagename}.2.fft.mrc <FFT: Second synthetic reference>" >> LOGS/${scriptname}.results
@@ -530,7 +530,7 @@ eot-ttmask
   endif
   #
   if ( ! -e TMP234439.dat ) then
-    protest "allref:unbend:ttmask: ERROR occured."
+    ${proc_2dx}/protest "allref:unbend:ttmask: ERROR occured."
   endif
   #
 endif

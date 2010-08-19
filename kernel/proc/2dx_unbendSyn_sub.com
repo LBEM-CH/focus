@@ -64,18 +64,17 @@ set SYN_RefRESMAX = ${RESMAX}
 echo SYN_RefRESMIN = ${SYN_RefRESMIN}
 echo SYN_RefRESMAX = ${SYN_RefRESMAX}
 #
-#
 # Test if reference is existing:
-set mergedat = "../merge/merge3D.mtz"
+set mergedat = "../merge/merge3Dref_nophaerr.mtz"
 if ( ! -e ${mergedat} ) then
-  set mergedat = "../../merge/merge3D.mtz"
+  set mergedat = "../../merge/merge3Dref_nophaerr.mtz"
   if ( ! -e ${mergedat} ) then
     set mergedat = "../merge/merge2D.mtz"
     if ( ! -e ${mergedat} ) then
       set mergedat = "../../merge/merge2D.mtz"
       if ( ! -e ${mergedat} ) then
         ${proc_2dx}/linblock "ERROR. No merged reference dataset found."
-        ${proc_2dx}/linblock "ERROR. Neither ../merge/merge3D.mtz nor ../../merge/merge3D.mtz exist."
+        ${proc_2dx}/linblock "ERROR. Neither ../merge/merge3Dref_nophaerr.mtz nor ../../merge/merge3Dref_nophaerr.mtz exist."
         ${proc_2dx}/protest "ERROR. Neither ../merge/merge2D.mtz nor ../../merge/merge2D.mtz exist."
       endif
     endif
@@ -468,6 +467,9 @@ ${proc_2dx}/linblock "MASKTRAN - a for the filtered TEM image."
 #
 if ( ${istilt} == "n" ) then
   #
+  if ( ! -e FFTIR/${imagename}.fft.mrc ) then
+    ${proc_2dx}/protest "First calculate FFTs"
+  endif
   setenv IN  FFTIR/${imagename}.fft.mrc
   if ( -e GOODSPOT.spt ) then
     setenv SPOTS GOODSPOT.spt
@@ -482,7 +484,7 @@ if ( ${istilt} == "n" ) then
   ${bin_2dx}/masktrana.exe << eot
 1 T T F	                    ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${SYN_maska}                ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice} -30 30 -30 30 ${rmax} 1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+${lattice},-30,30,-30,30,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
   #
 else
@@ -1271,6 +1273,7 @@ eot
   #
   \rm -f APH/${imagename}.syn.ttf.nolimit.aph
   \mv -f APH/${imagename}.syn.ttf.nolimit.tmp.aph APH/${imagename}.syn.ttf.nolimit.aph
+  echo "# IMAGE: APH/${imagename}.syn.ttf.nolimit.aph <APH: Final Syn TTF APH file>" >> LOGS/${scriptname}.results 
   #
   \mv -f TTPLOT.PS PS/${imagename}.ttplot.nolimit.unbendS.ps
   echo "# IMAGE: PS/${imagename}.ttplot.nolimit.unbendS.ps <PS: IQ Plot after TTF correction, no res. limit>" >> LOGS/${scriptname}.results 

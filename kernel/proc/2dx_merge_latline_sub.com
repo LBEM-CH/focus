@@ -309,6 +309,36 @@ END
 eof
 #
 echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full fitted lattice line data for reference>" >> LOGS/${scriptname}.results
+#
+####################################################################################
+#                                                                                  #
+${proc_2dx}/linblock "sftools to expand mtz and to eliminate lattice lines with illegal phases"
+#                                                                                  #
+####################################################################################
+#
+\rm -f SCRATCH/merge3Dref_nophaerr_tmp.mtz
+#
+${bin_ccp4}/sftools << eof
+read merge3Dref.mtz
+sort h k l 
+set spacegroup
+${CCP4_SYM}
+select phaerr
+select invert
+purge
+y
+set spacegroup
+1
+expand
+write SCRATCH/merge3Dref_nophaerr_tmp.mtz
+y
+quit
+eof
+#
+# this should garantee that the file is never missing:
+\mv -f SCRATCH/merge3Dref_nophaerr_tmp.mtz merge3Dref_nophaerr.mtz
+#
+echo "# IMAGE-IMPORTANT: merge3Dref_nophaerr.mtz <MTZ: Lattice lines without phase-error for synref>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #

@@ -189,8 +189,10 @@ void printError(double *l, latticePairs &millerVectorPairs)
     k++;
   }
   //absError = sqrt(absError);
-  cout<<":Absolute Error: "<<absError<<endl;
-  cout<<"::RMSDn Error: "<<absError/(k*maxError)*100.0<<"%"<<endl;
+  cout<<"Absolute Error: "<<endl;
+  cout<<absError<<endl;
+  cout<<"RMSDn Error [%]: "<<endl;
+  cout<<absError/(k*maxError)*100.0<<endl;
   //if (DEBUG) cout<<":%Max Possible Error: "<<absError/(sqrt(2.0)*k)*100.0<<"% "<<endl;
   //cout<<"::Lattice Error: "<<absError/(sqrt(0.0225 * 2.0) * k)*100.0<<"%"<<endl;
 }
@@ -442,8 +444,10 @@ int main(int argc, char **argv)
   if(DEBUG) printMillerVectorPairs(millerVectorPairs);
   if(DEBUG) cout<<peakList.size()<<" "<<millerVectorPairs.size()<<endl;
   printError(lattice,millerVectorPairs);
-  cout<<"::Peaks Used: "<<millerVectorPairs.size()<<" of "<<peakList.size()-1<<endl;
-  cout<<"::Nodes/Peak Density: "<<nodesPerPeak(lattice,millerVectorPairs)<<endl;
+  cout<<"Peaks Used: "<<endl;
+  cout<<millerVectorPairs.size()<<" of "<<peakList.size()-1<<endl;
+  cout<<"Nodes/Peak Density: "<<endl;
+  cout<<nodesPerPeak(lattice,millerVectorPairs)<<endl;
 
   double m[4*4];
   generateCorrelationMatrix(m,lattice,millerVectorPairs);

@@ -65,6 +65,10 @@
 # GLOBAL: comment
 # GLOBAL: det_lattice
 # GLOBAL: do_lattice_algorithm
+# GLOBAL: laterror_abserror
+# GLOBAL: laterror_rmsderror
+# GLOBAL: laterror_peaksused
+# GLOBAL: laterror_nodepeakdensity
 #
 #$end_local_vars
 #
@@ -100,6 +104,10 @@ set regenPL = ""
 set InnerExclusionRadius = ""
 set det_lattice = ""
 set do_lattice_algorithm = ""
+set laterror_abserror = ""
+set laterror_rmsderror = ""
+set laterror_peaksused = ""
+set laterror_nodepeakdensity = ""
 #
 #$end_vars
 #
@@ -628,7 +636,23 @@ echo "set CALCULATEDMAG = ${theormag}" >> LOGS/${scriptname}.results
 ${proc_2dx}/linblock "2dx_laterror to find fitness of current lattice."
 #############################################################################
 #
-${bin_2dx}/2dx_laterror.exe "${lattice}" ${docfile}
+${bin_2dx}/2dx_laterror.exe "${lattice}" ${docfile} > SCRATCH/2dx_laterror.tmp
+cat SCRATCH/2dx_laterror.tmp
+set laterror_abserror=`cat SCRATCH/2dx_laterror.tmp | tail -n 7 | head -n 1`
+set laterror_rmsderror=`cat SCRATCH/2dx_laterror.tmp | tail -n 5 | head -n 1`
+set laterror_peaksused=`cat SCRATCH/2dx_laterror.tmp | tail -n 3 | head -n 1`
+set laterror_nodepeakdensity=`cat SCRATCH/2dx_laterror.tmp | tail -n 1`
+#
+echo ": "
+echo "::Absolute Error: ${laterror_abserror}"
+echo "::RMSDn ERROR: ${laterror_rmsderror}"
+echo "::Peaks Used: ${laterror_peaksused}"
+echo "::Nodes/Peak Density: ${laterror_nodepeakdensity}"
+#
+echo "set laterror_abserror = ${laterror_abserror}" >> LOGS/${scriptname}.results
+echo "set laterror_rmsderror = ${laterror_rmsderror}" >> LOGS/${scriptname}.results
+echo "set laterror_peaksused = ${laterror_peaksused}" >> LOGS/${scriptname}.results
+echo "set laterror_nodepeakdensity = ${laterror_nodepeakdensity}" >> LOGS/${scriptname}.results
 #
 echo "set LATTICE_done = y" >> LOGS/${scriptname}.results
 echo "set SPOTS_done = n" >> LOGS/${scriptname}.results

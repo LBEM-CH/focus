@@ -24,6 +24,7 @@ displayParametersTool::displayParametersTool(QWidget *parent)
   setDefaults();
 
   connect(&latticeSize,SIGNAL(valueChanged(int)),this,SLOT(changeLatticeSize(int)));
+  connect(&latticeCircleLine,SIGNAL(valueChanged(int)),this,SLOT(changedLatticeCircleLine(int)));
   connect(&latticeOrders,SIGNAL(valueChanged(int)),this,SLOT(changeLatticeOrders(int)));
   connect(&spotSize,SIGNAL(valueChanged(int)),this,SLOT(changeSpotSize(int)));
   connect(&latticeRefineSize,SIGNAL(valueChanged(int)),this,SLOT(changeRefinementSize(int)));
@@ -40,6 +41,8 @@ displayParametersTool::displayParametersTool(QWidget *parent)
   signalMapper->setMapping(&spotSize,&spotSize);
   connect(&latticeRefineSize,SIGNAL(editingFinished()),signalMapper,SLOT(map()));
   signalMapper->setMapping(&latticeRefineSize,&latticeRefineSize);
+  connect(&latticeCircleLine,SIGNAL(editingFinished()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(&latticeCircleLine,&latticeCircleLine);
   connect(&searchRange,SIGNAL(editingFinished()),signalMapper,SLOT(map()));
   signalMapper->setMapping(&searchRange,&searchRange);
   connect(&sigma,SIGNAL(editingFinished()),signalMapper,SLOT(map()));
@@ -47,31 +50,38 @@ displayParametersTool::displayParametersTool(QWidget *parent)
 
   connect(signalMapper,SIGNAL(mapped(QWidget*)),SLOT(complete(QWidget*)));
 
-  layout->addWidget(new QLabel("<b>Display Parameters</b>"),0,0,1,1);
+  layout->addWidget(new QLabel("<b>Display XXXXXX Parameters</b>"),0,0,1,1);
   layout->addWidget(new QLabel("Lattice Orders:"),1,0,1,1);
   layout->addWidget(&latticeOrders,1,1,1,1);
   layout->addWidget(new QLabel("Lattice Circle Radius [px]:"),2,0,1,1);
   layout->addWidget(&latticeSize,2,1,1,1);
-  layout->addWidget(new QLabel("Spot Circle Radius [px]:"),3,0,1,1);
-  layout->addWidget(&spotSize,3,1,1,1);
-  layout->addWidget(new QLabel("Lattice Refinement Circle Radius [px]:"),4,0,1,1);
-  layout->addWidget(&latticeRefineSize,4,1,1,1);
-  layout->addItem(new QSpacerItem(10,20),5,0,1,1);
-  layout->addWidget(new QLabel("<b>Smart Mouse Parameters</b>"),6,0,1,1);
-  layout->addWidget(new QLabel("Maximum Value Method:"),7,0,1,1);
-  layout->addWidget(&maxValueMethodChooser,7,1,1,1);
-  layout->addWidget(new QLabel("Max Value Search Range [px]:"),8,0,1,1);
-  layout->addWidget(&searchRange,8,1,1,1);
-  layout->addWidget(new QLabel("Max Value Sigma [px]:"),9,0,1,1);
-  layout->addWidget(&sigma,9,1,1,1);
-  layout->addWidget(new QLabel("View Fit:"),10,0,1,1);
-  layout->addWidget(&viewFit,10,1,1,1);
+  layout->addWidget(new QLabel("Lattice Circle Line Thickness [px]:"),3,0,1,1);
+  layout->addWidget(&latticeCircleLine,3,1,1,1);
+  layout->addWidget(new QLabel("Spot Circle Radius [px]:"),4,0,1,1);
+  layout->addWidget(&spotSize,4,1,1,1);
+  layout->addWidget(new QLabel("Lattice Refinement Circle Radius [px]:"),5,0,1,1);
+  layout->addWidget(&latticeRefineSize,5,1,1,1);
+  layout->addItem(new QSpacerItem(10,20),6,0,1,1);
+  layout->addWidget(new QLabel("<b>Smart Mouse Parameters</b>"),7,0,1,1);
+  layout->addWidget(new QLabel("Maximum Value Method:"),8,0,1,1);
+  layout->addWidget(&maxValueMethodChooser,8,1,1,1);
+  layout->addWidget(new QLabel("Max Value Search Range [px]:"),9,0,1,1);
+  layout->addWidget(&searchRange,9,1,1,1);
+  layout->addWidget(new QLabel("Max Value Sigma [px]:"),10,0,1,1);
+  layout->addWidget(&sigma,10,1,1,1);
+  layout->addWidget(new QLabel("View Fit:"),11,0,1,1);
+  layout->addWidget(&viewFit,11,1,1,1);
   setLayout(layout);
 }
 
 void displayParametersTool::changeLatticeSize(int value)
 {
   emit latticeSizeChanged(value*2);
+}
+
+void displayParametersTool::changeLatticeCircleLine(int thickness)
+{
+  emit latticeCircleLineChanged(thickness);
 }
 
 void displayParametersTool::changeLatticeOrders(int value)
@@ -106,6 +116,7 @@ void displayParametersTool::changeSearchMethod(int method)
 void displayParametersTool::flush()
 {
   emit latticeSizeChanged(latticeSize.value()*2);
+  emit latticeCircleLineChanged(latticeCircleLine.value());
   emit latticeOrdersChanged(latticeOrders.value()*2);
   emit spotSizeChanged(spotSize.value()*2);
   emit refinementSizeChanged(latticeRefineSize.value()*2);
@@ -143,6 +154,8 @@ void displayParametersTool::setDefaults()
 {
   latticeSize.setValue(10);
   latticeSize.setSingleStep(1);
+  latticeCircleLine.setValue(1);
+  latticeCircleLine.setSingleStep(1);
   latticeOrders.setValue(20);
   latticeOrders.setSingleStep(1);
   latticeOrders.setMinimum(1);

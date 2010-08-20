@@ -9,6 +9,17 @@
 rm -rf bin/CMakeFiles
 rm -rf plugins/CMakeFiles
 rm -rf /Users/marheit/code/2dx/trunk/lib/src/conf/CMakeFiles
+rm -rf ./2dx_image/CMakeFiles
+rm -rf ./2dx_logbrowser/CMakeFiles
+rm -rf ./2dx_merge/CMakeFiles
+rm -rf ./bin/CMakeFiles
+rm -rf ./CMakeFiles
+rm -rf ./CMakeFiles/CMakeTmp/CMakeFiles
+rm -rf ./include/CMakeFiles
+rm -rf ./plugins/CMakeFiles
+rm -rf ./tools/cmake/CMakeFiles
+rm -rf ./tools/cmake/CMakeFiles/CMakeTmp/CMakeFiles
+
 ################################################################################
 # Remove Bundles 
 ################################################################################

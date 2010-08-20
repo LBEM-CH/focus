@@ -31,6 +31,7 @@ class displayParametersTool : public QWidget
 
 /* Slots */
   void changeLatticeSize(int value);
+  void changeLatticeCircleLine(int thickness);
   void changeLatticeOrders(int value);
   void changeSpotSize(int value);
   void changeRefinementSize(int value);
@@ -44,6 +45,7 @@ class displayParametersTool : public QWidget
 
   signals:
   void latticeSizeChanged(int size);
+  void latticeCircleLineChanged(int thickness);
   void latticeOrdersChanged(int orders);
   void spotSizeChanged(int size);
   void refinementSizeChanged(int size);
@@ -55,7 +57,7 @@ class displayParametersTool : public QWidget
   void viewFitChanged(bool view);
 
   private:
-  QSpinBox latticeSize, latticeOrders, spotSize, latticeRefineSize;
+  QSpinBox latticeSize, latticeOrders, spotSize, latticeRefineSize, latticeCircleLine;
   QSpinBox searchRange;
   QDoubleSpinBox sigma;
 

@@ -24,7 +24,7 @@ displayParametersTool::displayParametersTool(QWidget *parent)
   setDefaults();
 
   connect(&latticeSize,SIGNAL(valueChanged(int)),this,SLOT(changeLatticeSize(int)));
-  connect(&latticeCircleLine,SIGNAL(valueChanged(int)),this,SLOT(changedLatticeCircleLine(int)));
+  connect(&latticeCircleLine,SIGNAL(valueChanged(int)),this,SLOT(changeLatticeCircleLine(int)));
   connect(&latticeOrders,SIGNAL(valueChanged(int)),this,SLOT(changeLatticeOrders(int)));
   connect(&spotSize,SIGNAL(valueChanged(int)),this,SLOT(changeSpotSize(int)));
   connect(&latticeRefineSize,SIGNAL(valueChanged(int)),this,SLOT(changeRefinementSize(int)));
@@ -50,7 +50,7 @@ displayParametersTool::displayParametersTool(QWidget *parent)
 
   connect(signalMapper,SIGNAL(mapped(QWidget*)),SLOT(complete(QWidget*)));
 
-  layout->addWidget(new QLabel("<b>Display XXXXXX Parameters</b>"),0,0,1,1);
+  layout->addWidget(new QLabel("<b>Display Parameters</b>"),0,0,1,1);
   layout->addWidget(new QLabel("Lattice Orders:"),1,0,1,1);
   layout->addWidget(&latticeOrders,1,1,1,1);
   layout->addWidget(new QLabel("Lattice Circle Radius [px]:"),2,0,1,1);

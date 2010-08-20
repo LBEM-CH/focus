@@ -259,12 +259,12 @@ void fullScreenImage::drawLattice(float lattice[2][2], bool primary)
       if(i==0 && j == 0) {u = -latticeEllipseSize/2.0; v = latticeEllipseSize/2.0;}
       if(primary)
       {
-        QPen temp2 = temp;
-        temp2.setWidth(latticeEllipseLineThickness);
-        image_base->setPen(temp2);
-        if(i==1 && j==0) image_base->setPen(QPen(QColor(230,26,13),0));
-        if(i==0 && j==1) image_base->setPen(QPen(QColor(1,3,230),0));
-        if(i==0 && j==0) image_base->setPen(QPen(Qt::black,0));
+        QPen pen = temp;
+	pen.setWidth(latticeEllipseLineThickness);
+        if(i==1 && j==0) pen.setColor(QColor(230,26,13));
+        if(i==0 && j==1) pen.setColor(QColor(1,3,230));
+        if(i==0 && j==0) pen.setColor(Qt::black);
+        image_base->setPen(pen);
         image_base->drawEllipse(QRectF(u,-v,latticeEllipseSize,latticeEllipseSize));
       }
       else
@@ -797,6 +797,7 @@ void fullScreenImage::setLatticeEllipseSize(int size)
 
 void fullScreenImage::setLatticeEllipseLineThickness(int thickness)
 {
+	std::cout << "Lattice Ellipse Line Thickness set";
 	latticeEllipseLineThickness = thickness;
 	update();
 }

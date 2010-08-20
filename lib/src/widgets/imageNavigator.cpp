@@ -376,7 +376,7 @@ void imageNavigator::Initialize_Tools()
     parameterEditor->move(0,screenHeight-parameterEditor->height()-35);
     parameterEditor->hide();
     connect(parameterEditor,SIGNAL(latticeSizeChanged(int)),image,SLOT(setLatticeEllipseSize(int)));
-    connect(parameterEditor,SIGNAL(refinementCircleLineChanged(int)),image,SLOT(setLatticeEllipseLineThickness(int)));
+    connect(parameterEditor,SIGNAL(latticeCircleLineChanged(int)),image,SLOT(setLatticeEllipseLineThickness(int)));
     connect(parameterEditor,SIGNAL(latticeOrdersChanged(int)),image,SLOT(setLatticeOrders(int)));
     connect(parameterEditor,SIGNAL(spotSizeChanged(int)),image,SLOT(setPeakEllipseSize(int)));
     connect(parameterEditor,SIGNAL(refinementSizeChanged(int)),image,SLOT(setRefinementEllipseSize(int)));

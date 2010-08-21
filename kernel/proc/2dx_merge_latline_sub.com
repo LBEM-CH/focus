@@ -175,7 +175,7 @@ setenv OUT APH/latfitted_nosym.hkl
 setenv REFHKL APH/latfittedref_nosym.hkl
 #
 ${bin_2dx}/prepmklcf.exe << eot > LOGS/prepmklcf.log
-${RESMAX},1.1                          ! RESOLUTION,REDUCAC
+${RESMAX},1.5                          ! RESOLUTION,REDUCAC (1.5 = 60deg phase error)
 ${realcell},${realang},${ALAT}         ! a,b,gamma,c
 1.0                                    ! SCALE
 eot
@@ -282,7 +282,7 @@ SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
 FILE ${infile}
-SKIP 1
+SKIP 0
 END
 eof
 #
@@ -304,7 +304,7 @@ SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM SIGA
 CTYPOUT H H H F P W W
 FILE ${infile}
-SKIP 1
+SKIP 0
 END
 eof
 #

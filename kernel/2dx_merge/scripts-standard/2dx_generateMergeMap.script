@@ -34,6 +34,8 @@
 # GLOBAL: produceSpiderMap
 # GLOBAL: mapscale
 # GLOBAL: unitcellnumber
+# GLOBAL: npo_line1
+# GLOBAL: npo_line2
 #
 #$end_local_vars
 #
@@ -84,6 +86,8 @@ set merge_register_date_9 = ""
 set produceSpiderMap = ""
 set mapscale = ""
 set unitcellnumber = ""
+set npo_line1 = ""
+set npo_line2 = ""
 #
 #$end_vars
 #
@@ -115,6 +119,8 @@ echo avrgamphsRESOL = ${avrgamphsRESOL}
 echo diffmap_doit = ${diffmap_doit}
 echo diffmap_source = ${diffmap_source}
 echo diffmap_weight = ${diffmap_weight}
+echo npo_line1 = ${npo_line1}
+echo npo_line2 = ${npo_line2}
 #
 set scriptname = 2dx_generateMergeMap
 #
@@ -389,8 +395,8 @@ ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM}.plt"
 ${bin_ccp4}/npo  MAPIN  SCRATCH/${imagename}-${SYM}.map  PLOT  ${imagename}-${SYM}.plt  << eof
 TITLE Merged Result
 MAP SCALE 0.4
-CONTRS -500 TO 500 BY 12
-MODE BELOW -40 DASHED 1 0.15 0
+${npo_line1}
+${npo_line2}
 SECTS 0 0
 PLOT
 END

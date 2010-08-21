@@ -353,7 +353,7 @@ CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}
-SKIP 1
+SKIP 0
 END
 eof
   #

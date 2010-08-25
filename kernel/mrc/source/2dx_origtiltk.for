@@ -1816,7 +1816,7 @@ C-----In a FILIN like "../ML-00/ML0012345601/APH/corML0012345601.aph" the string
 C-----                "../ML-00/ML0012345601" needs to be found:
 
       write(CTMP,'(''/'')')
-      ihen1=80
+      ihen1=len(FILIN)-1
       ihen2=0
 411   continue
         ihen1=ihen1-1

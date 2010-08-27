@@ -79,6 +79,7 @@ class confData : public QObject
   confData *parentConf;
   confData *userData;
   QString dataFilename;
+  QString linkName;
   QStringList valueSearch;
   QStringList manualData;
   QString initializationScriptBaseName;
@@ -97,8 +98,10 @@ class confData : public QObject
 
   public:
   confData(QString filename, confData *parentData = NULL, QObject *parent = NULL);
+  confData(QString filename, confData *parentData, const QString link, QObject *parent = NULL);
   confData(const confData &data);
   confData(const QString &source, const QString &reference);
+  confData(const QString &source, const QString &reference, const QString &link);
   confData(QObject *parent = NULL);
   ~confData();
 
@@ -111,6 +114,7 @@ class confData : public QObject
   void setWorkingDir(QString dir);
   void setParentConf(confData *parent);
   void setUserConf(confData *userConf);
+  void setSymLink(const QString linkName);
 
   void clear();
 

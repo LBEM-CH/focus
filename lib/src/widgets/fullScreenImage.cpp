@@ -259,22 +259,24 @@ void fullScreenImage::drawLattice(float lattice[2][2], bool primary)
       if(i==0 && j == 0) {u = -latticeEllipseSize/2.0; v = latticeEllipseSize/2.0;}
       if(primary)
       {
-        QPen pen = temp;
-	pen.setWidth(latticeEllipseLineThickness);
-        if(i==1 && j==0) pen.setColor(QColor(230,26,13));
-        if(i==0 && j==1) pen.setColor(QColor(1,3,230));
-        if(i==0 && j==0) pen.setColor(Qt::black);
-        image_base->setPen(pen);
+        QPen pen1 = temp;
+	pen1.setWidth(latticeEllipseLineThickness);
+        if(i==1 && j==0) pen1.setColor(QColor(230,26,13));
+        if(i==0 && j==1) pen1.setColor(QColor(1,3,230));
+        if(i==0 && j==0) pen1.setColor(Qt::black);
+        image_base->setPen(pen1);
         image_base->drawEllipse(QRectF(u,-v,latticeEllipseSize,latticeEllipseSize));
       }
       else
       {
-        image_base->setPen(QPen(QColor(113,126,230),3.0));
-        if(i==1 && j==0) image_base->setPen(QPen(QColor(230,26,13),3.0));
-        if(i==0 && j==1) image_base->setPen(QPen(QColor(1,3,230),3.0));
-        if(i==0 && j==0) image_base->setPen(QPen(Qt::black,3.0));
-
-        image_base->drawRect(QRectF(u,-v,latticeEllipseSize,latticeEllipseSize));
+        QPen pen2 = QPen(QColor(113,126,230));
+	pen2.setWidth(latticeEllipseLineThickness);
+        if(i==1 && j==0) pen2.setColor(QColor(230,26,13));
+        if(i==0 && j==1) pen2.setColor(QColor(1,3,230));
+        if(i==0 && j==0) pen2.setColor(Qt::black);
+        image_base->setPen(pen2);
+        
+	image_base->drawRect(QRectF(u,-v,latticeEllipseSize,latticeEllipseSize));
       }
    
     	if(millerIndicesVisible)

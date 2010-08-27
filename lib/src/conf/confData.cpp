@@ -35,6 +35,13 @@ confData::confData(QString filename, confData *parentData, QObject *parent)
 //  sync(QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg");
 }
 
+confData::confData(QString filename, confData *parentData, QString link, QObject *parent)
+                  :QObject(parent)
+{
+  linkName = link;
+  init(filename, parentData);
+}
+		  
 confData::confData(const confData &data)
                   :QObject(data.parent())
 {
@@ -64,6 +71,11 @@ confData::confData(const QString &source, const QString &reference)
   //sync(QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg");
 }
 
+confData::confData(const QString &source, const QString &reference, const QString &link)
+{
+  linkName = link;	
+  confData(source, reference);
+}
 confData::confData(QObject *parent)
          :QObject(parent)
 {
@@ -88,6 +100,14 @@ void confData::setUserConf(confData *userConf)
 {
   userData = userConf;
 }
+
+void confData::setSymLink(const QString linkName)
+{
+  QFile data(dataFilename);
+  if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+  data.link(linkName);
+}
+
 
 bool confData::isEmpty()
 {
@@ -164,6 +184,12 @@ bool confData::parseDataFile()
   QFile data(dataFilename);
   if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
   //data.setTextModeEnabled(true);
+  //create symbolic link if lineName is set
+  if(!linkName.isEmpty())
+  {
+    qDebug()<< "creating the sym link to " << data.fileName() << " with the name " << linkName;
+    data.link(data.fileName(), linkName);
+  }
   QString lineData;
   confSection *section=NULL;
   confElement *element=NULL;

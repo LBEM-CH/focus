@@ -101,11 +101,11 @@ void confData::setUserConf(confData *userConf)
   userData = userConf;
 }
 
-void confData::setSymLink(const QString linkName)
+void confData::setSymLink(const QString fileName, const QString linkName)
 {
   QFile data(dataFilename);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
-  data.link(linkName);
+  data.link(fileName, linkName);
 }
 
 

@@ -114,7 +114,7 @@ class confData : public QObject
   void setWorkingDir(QString dir);
   void setParentConf(confData *parent);
   void setUserConf(confData *userConf);
-  void setSymLink(const QString linkName);
+  void setSymLink(const QString fileName, const QString linkName);
 
   void clear();
 

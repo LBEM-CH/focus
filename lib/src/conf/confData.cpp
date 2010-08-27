@@ -105,6 +105,9 @@ void confData::setSymLink(const QString fileName, const QString linkName)
 {
   QFile data(dataFilename);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+  //dele the file that lies where link should be
+  if(QFileInfo(linkName).exists())
+    QFile(linkName).remove();
   data.link(fileName, linkName);
 }
 
@@ -182,7 +185,7 @@ QString &confData::parseVariables(QString &line)
 bool confData::parseDataFile()
 {
   QFile data(dataFilename);
-  if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+  if(!data.open(QIODevice::ReadWrite | QIODevice::Text)) return false;
   //data.setTextModeEnabled(true);
   //create symbolic link if lineName is set
   if(!linkName.isEmpty())

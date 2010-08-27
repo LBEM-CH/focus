@@ -851,8 +851,11 @@ void mainWindow::importFile(const QString &file, const QHash<QString,QString> &i
     qDebug()<<pC+tiltAngle<<" does not exist...creating.";
     tiltDir.setPath(mainData->getDir("project"));
     tiltDir.mkdir(tiltDirectory);
+    QString tiltConfigLocation = mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg";
+    //confData tiltData(tiltConfigLocation);
     confData tiltData(mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg", mainData->getDir("project") + "/2dx_master.cfg");
     tiltData.save();
+    tiltData.setSymLink("../2dx_master.cfg", mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg");
   }
 
   tiltDir.setPath(mainData->getDir("project") + "/" + tiltDirectory);

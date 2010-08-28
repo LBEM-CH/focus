@@ -25,7 +25,6 @@
 # GLOBAL: MergeResolution
 # GLOBAL: MergeStepSize
 # GLOBAL: merge_modus
-# GLOBAL: Merge_Refine_Rounds
 # GLOBAL: RESMAX
 # GLOBAL: RESMIN
 # GLOBAL: SYM

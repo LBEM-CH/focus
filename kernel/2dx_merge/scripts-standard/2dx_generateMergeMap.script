@@ -169,7 +169,7 @@ echo SYM = ${SYM}
 echo spcgrp = ${spcgrp}
 echo CCP4_SYM = ${CCP4_SYM}
 #
-echo "<<@progress: 20>>"
+echo "<<@progress: +10>>"
 #
 # contrast for grey plot
 set scale = 1
@@ -233,7 +233,7 @@ eot
     #
   endif
   #
-  echo "<<@progress: 50>>"
+  echo "<<@progress: +10>>"
   #
   # echo "# IMAGE: SCRATCH/scratch1.map <MAP: temporary volume 1>" >> LOGS/${scriptname}.results
   #
@@ -267,7 +267,7 @@ OMAT
   0.000 0.000 0.000
 eot
   #
-  echo "<<@progress: 80>>"
+  echo "<<@progress: +10>>"
   #
   # echo "# IMAGE: SCRATCH/scratch2.map <MAP: temporary volume 2>" >> LOGS/${scriptname}.results
   #
@@ -285,7 +285,7 @@ eof
   #
   echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
   #
-  echo "<<@progress: 100>>"
+  echo "<<@progress: +10>>"
   #
 endif
 #
@@ -346,7 +346,7 @@ endif
 # The remainder is also for 2D projection maps only:
 #############################################################################
 #
-echo "<<@progress: 50>>"
+echo "<<@progress: +10>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "extend - to extend SCRATCH/scratch1.map into ${imagename}-${SYM}.rec.mrc"
@@ -384,7 +384,7 @@ endif
 #
 # echo "# IMAGE: SCRATCH/${imagename}-${SYM}.map <temporary map>" >> LOGS/${scriptname}.results
 #
-echo "<<@progress: 55>>"
+echo "<<@progress: +10>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM}.plt"
@@ -402,7 +402,7 @@ PLOT
 END
 eof
 #
-echo "<<@progress: 85>>"
+echo "<<@progress: +10>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "laserplot - to create PS/${imagename}MAP-${SYM}.ps"
@@ -415,7 +415,7 @@ ${bin_2dx}/laserplot.exe -outputfile=PS/${imagename}MAP-${SYM}.ps ${imagename}-$
 #
 echo "# IMAGE: PS/${imagename}MAP-${SYM}.ps <PS: ${SYM}-symmetrized final 2D map plot>" >> LOGS/${scriptname}.results
 #
-echo "<<@progress: 90>>"
+echo "<<@progress: +10>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "LABEL - to create a clean MRC file format instead of CCP4"

@@ -19,7 +19,6 @@
 # 
 # MANUAL: This does one single alignment step of the selected images against the available reference.
 #
-# GLOBAL: Merge_Refine_Rounds
 # GLOBAL: MergeResolution
 # GLOBAL: merge_modus
 # GLOBAL: zstarwin
@@ -57,7 +56,6 @@ set bin_2dx = ""
 set proc_2dx = ""
 #
 set create_merged_dataset = ""
-set Merge_Refine_Rounds = ""
 set MergeResolution = ""
 set merge_modus = ""
 set zstarwin = ""
@@ -153,6 +151,12 @@ if ( ${merge_modus} == '3D' ) then
     if ( ! -e APH/merge.aph ) then
       ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
       ${proc_2dx}/protest "Run Merging script first."
+    endif
+    if ( ${reftiltgeo} == "y" ) then
+      # tilt geometry refinement only possible with refined lattice lines in MTZ data, not with APH data.
+      ${proc_2dx}/linblock "ERROR: tilt geometry refinement only possible with refined lattice lines in MTZ file."
+      ${proc_2dx}/linblock "ERROR: Conflict between parameter USE MERGED DATA... and REFINE TILTGEOMETRY..."
+      ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
     endif
   else
     # User interpolated lattice lines latlinesref.mtz

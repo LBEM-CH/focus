@@ -175,7 +175,7 @@ echo "################################################"
 \mv -f TLTPLOT.PS PS/2dx_tltplotk.ps
 echo "# IMAGE-IMPORTANT: PS/2dx_tltplotk.ps <PS: TLTPLOT file>" >> LOGS/${scriptname}.results
 #
-echo "<<@progress: 25>"
+echo "<<@progress: 22>"
 #
 endif
 #
@@ -200,7 +200,7 @@ echo "# IMAGE-IMPORTANT: APH/merge.aph <APH: merge.aph, combined amps & phases [
 \rm -f TMP444789.tmp
 \rm -f LOGS/avramphs.table.txt
 #
-echo "<<@progress: 20>>"
+echo "<<@progress: 24>>"
 #
 ${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D.log
 T
@@ -236,7 +236,7 @@ if ( ${merge_modus} == "2D" ) then
 endif
 \rm -f LOGS/avramphs.table.txt
 #
-echo "<<@progress: 30>>"
+echo "<<@progress: 26>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_centric2 - to correct phases to 0 or 180 for 2D run"
@@ -254,7 +254,7 @@ ${RESMIN},${RESMAX}
 ${SYM}
 eot
 #
-echo "<<@progress: 35>>"
+echo "<<@progress: 30>>"
 #
 if ( ! -e APH/centric2D.hkl ) then
   ${proc_2dx}/protest "ERROR occured."
@@ -265,7 +265,7 @@ endif
 #
 echo "# IMAGE: APH/centric2D.hkl <APH file after CENTRIC for 2D run [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
-echo "<<@progress: 41>>"
+echo "<<@progress: 35>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to APH file for 2D run"
@@ -301,7 +301,7 @@ APH/sym2D.hkl
 ${withsigf}
 eot
 #
-echo "<<@progress: 44>>"
+echo "<<@progress: 40>>"
 #
 if ( ! -e APH/sym2D.hkl ) then
   ${proc_2dx}/protest "ERROR occured."

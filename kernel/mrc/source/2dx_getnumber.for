@@ -43,7 +43,7 @@ C
 C
  300  continue
 C-----There is no number in that name. Set it to 1000
-      write(*,'(''1000'')')
+      write(*,'(''1000 - no number found '')')
       goto 900
 C
  800  continue

@@ -312,7 +312,11 @@ y
 quit
 eof
 #
-# this should garantee that the file is never missing:
+if ( ! -e SCRATCH/merge3Dref_nophaerr_tmp.mtz ) then
+  ${proc_2dx}/protest "ERROR: SCRATCH/merge3Dref_nophaerr_tmp.mtz was not created."
+endif
+#
+# this should guarantee that the file is never missing:
 \mv -f SCRATCH/merge3Dref_nophaerr_tmp.mtz merge3Dref_nophaerr.mtz
 #
 echo "# IMAGE-IMPORTANT: merge3Dref_nophaerr.mtz <MTZ: Lattice lines without phase-error for synref>" >> LOGS/${scriptname}.results

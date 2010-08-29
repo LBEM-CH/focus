@@ -533,13 +533,6 @@ C        write(*,'(3I5,3F15.3)') IHI(N),IKI(N),ILI(N),FPIN(N),
 C     .    PHIN(N),FOMIN(N)
 CHEN<
 C
-C
-C
-      IHOLD=0
-      IKOLD=0
-C
-      write(*,'(2I8)') IHOLD,IKOLD
-C
       IF(N.EQ.1) THEN
         IHOLD=IHI(N)
         IKOLD=IKI(N)
@@ -554,7 +547,7 @@ CHEN>
         IF((IHOLD.GT.MAXINDEX).OR.(IKOLD.GT.MAXINDEX))THEN
           WRITE(6,1209) MAXINDEX
 1209      FORMAT(':: Maximum index too high for program dimension.
-     $              MAXINDEX= ',I6)
+     .              MAXINDEX= ',I6)
           GOTO 980
           STOP
         ENDIF
@@ -570,7 +563,7 @@ C
 C
       WRITE(6,1100)N,NREC
 1100  FORMAT(I10,' Phases input on stream 1',/,
-     $  I10,' total records on stream 1.')
+     .  I10,' total records on stream 1.')
       CALL LRCLOS(1)
 C
       NOTFOUND = 0

@@ -65,16 +65,16 @@ echo SYN_RefRESMIN = ${SYN_RefRESMIN}
 echo SYN_RefRESMAX = ${SYN_RefRESMAX}
 #
 # Test if reference is existing:
-set mergedat = "../merge/merge3Dref_nophaerr.mtz"
+set mergedat = "../merge/merge3Dref.mtz"
 if ( ! -e ${mergedat} ) then
-  set mergedat = "../../merge/merge3Dref_nophaerr.mtz"
+  set mergedat = "../../merge/merge3Dref.mtz"
   if ( ! -e ${mergedat} ) then
     set mergedat = "../merge/merge2D.mtz"
     if ( ! -e ${mergedat} ) then
       set mergedat = "../../merge/merge2D.mtz"
       if ( ! -e ${mergedat} ) then
         ${proc_2dx}/linblock "ERROR. No merged reference dataset found."
-        ${proc_2dx}/linblock "ERROR. Neither ../merge/merge3Dref_nophaerr.mtz nor ../../merge/merge3Dref_nophaerr.mtz exist."
+        ${proc_2dx}/linblock "ERROR. Neither ../merge/merge3Dref.mtz nor ../../merge/merge3Dref.mtz exist."
         ${proc_2dx}/protest "ERROR. Neither ../merge/merge2D.mtz nor ../../merge/merge2D.mtz exist."
       endif
     endif
@@ -192,7 +192,7 @@ if ( ${istilt} == "y" ) then
   #
 endif
 #
-set locfactor = `echo ${locfactor} | awk '{ s = 0.001 * $1 } END { print s }'`
+# set locfactor = `echo ${locfactor} | awk '{ s = 0.001 * $1 } END { print s }'`
 #
 echo " "
 echo locdef = ${locdef}

@@ -12,6 +12,7 @@ C       updated 4/19/2008
       REAL RFFOM(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
       REAL RFSIGA(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
       REAL RFBACK(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,4)
 C
       PI=3.1415926537
 C
@@ -298,65 +299,90 @@ C              write(*,'('':: write '',5I8)')H,K,L,ispc,ianz
               if(PHASE.gt.180.0)PHASE=PHASE-360.0
 C-------------Should FOM be plainly averaged (division by ianz here), or rather made better, by some kind of SQRT(N)? ToDo
               FOM=FOM/ianz
+C
+C====================
+C====================
+C====================
+C-------------Do not write out negative L values:
+              ineg=0
+C====================
+C====================
+C====================
+C
+C-----------ROUTP contains AMP.PHS,FOM,SIGA
+C      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,4)
+C
               if(ispc.lt.10 .or. K.ge.0)then
                 if(isig.eq.1)then
                   WRITE (11,310) H,K,L,AMP,PHASE,FOM,SIGA
-                  WRITE (11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
                   WRITE (12,310) H,K,L,AMP,PHASE,FOM,SIGA
-                  WRITE (12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                  if(ineg.gt.0)then
+                    WRITE (11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                    WRITE (12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                  endif
                 elseif(isig.eq.2)then
                   WRITE (11,310) H,K,L,AMP,PHASE,BACK,FOM
-                  WRITE (11,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
                   WRITE (12,310) H,K,L,AMP,PHASE,BACK,FOM
-                  WRITE (12,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                  if(ineg.gt.0)then
+                    WRITE (11,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                    WRITE (12,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                  endif
                 else
                   WRITE (11,300) H,K,L,AMP,PHASE,FOM
-                  WRITE (11,300) -H,-K,-L,AMP,-PHASE,FOM
                   WRITE (12,300) H,K,L,AMP,PHASE,FOM
-                  WRITE (12,300) -H,-K,-L,AMP,-PHASE,FOM
+                  if(ineg.gt.0)then
+                    WRITE (11,300) -H,-K,-L,AMP,-PHASE,FOM
+                    WRITE (12,300) -H,-K,-L,AMP,-PHASE,FOM
+                  endif
                 endif
               endif
               if(ispc.ge.10 .and. ispc.le.12)then
                 if(K.ge.0)then
                   if(isig.eq.1)then
                     WRITE (11,310) -H,-K,L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) H,K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310) -H,-K,L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) H,K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (11,310) -K,H,L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) K,-H,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (11,310) K,-H,L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) -K,H,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310) -K,H,L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) K,-H,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310) K,-H,L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) -K,H,-L,AMP,-PHASE,FOM,SIGA
+                    if(ineg.gt.0)then
+                      WRITE (11,310) H,K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) H,K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310) K,-H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310) -K,H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) K,-H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) -K,H,-L,AMP,-PHASE,FOM,SIGA
+                    endif
                   elseif(isig.eq.2)then
                     WRITE (11,310) -H,-K,L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) H,K,-L,AMP,-PHASE,BACK,FOM 
                     WRITE (12,310) -H,-K,L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) H,K,-L,AMP,-PHASE,BACK,FOM
                     WRITE (11,310) -K,H,L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) K,-H,-L,AMP,-PHASE,BACK,FOM
                     WRITE (11,310) K,-H,L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) -K,H,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310) -K,H,L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) K,-H,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310) K,-H,L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) -K,H,-L,AMP,-PHASE,BACK,FOM
+                    if(ineg.gt.0)then
+                      WRITE (11,310) H,K,-L,AMP,-PHASE,BACK,FOM 
+                      WRITE (12,310) H,K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310) K,-H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310) -K,H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) K,-H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) -K,H,-L,AMP,-PHASE,BACK,FOM
+                    endif
                   else
                     WRITE (11,300) -H,-K,L,AMP,PHASE,FOM
-                    WRITE (11,300) H,K,-L,AMP,-PHASE,FOM
                     WRITE (12,300) -H,-K,L,AMP,PHASE,FOM
-                    WRITE (12,300) H,K,-L,AMP,-PHASE,FOM
                     WRITE (11,300) -K,H,L,AMP,PHASE,FOM
-                    WRITE (11,300) K,-H,-L,AMP,-PHASE,FOM
                     WRITE (11,300) K,-H,L,AMP,PHASE,FOM
-                    WRITE (11,300) -K,H,-L,AMP,-PHASE,FOM
                     WRITE (12,300) -K,H,L,AMP,PHASE,FOM
-                    WRITE (12,300) K,-H,-L,AMP,-PHASE,FOM
                     WRITE (12,300) K,-H,L,AMP,PHASE,FOM
-                    WRITE (12,300) -K,H,-L,AMP,-PHASE,FOM
+                    if(ineg.gt.0)then
+                      WRITE (11,300) H,K,-L,AMP,-PHASE,FOM
+                      WRITE (12,300) H,K,-L,AMP,-PHASE,FOM
+                      WRITE (11,300) K,-H,-L,AMP,-PHASE,FOM
+                      WRITE (11,300) -K,H,-L,AMP,-PHASE,FOM
+                      WRITE (12,300) K,-H,-L,AMP,-PHASE,FOM
+                      WRITE (12,300) -K,H,-L,AMP,-PHASE,FOM
+                    endif
                   endif
                 endif
               endif
@@ -364,31 +390,37 @@ C-------------Should FOM be plainly averaged (division by ianz here), or rather 
                 if(K.ge.0)then
                   if(isig.eq.1)then
                     WRITE (11,310) -H-K, H, L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) +H+K,-H,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (11,310)  K,-H-K, L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) -K,+H+K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310) -H-K, H, L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) +H+K,-H,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310)  K,-H-K, L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) -K,+H+K,-L,AMP,-PHASE,FOM,SIGA
+                    if(ineg.gt.0)then
+                      WRITE (11,310) +H+K,-H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310) -K,+H+K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) +H+K,-H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) -K,+H+K,-L,AMP,-PHASE,FOM,SIGA
+                    endif
                   elseif(isig.eq.2)then
                     WRITE (11,310) -H-K, H, L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) +H+K,-H,-L,AMP,-PHASE,BACK,FOM
                     WRITE (11,310)  K,-H-K, L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) -K,+H+K,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310) -H-K, H, L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) +H+K,-H,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310)  K,-H-K, L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) -K,+H+K,-L,AMP,-PHASE,BACK,FOM
+                    if(ineg.gt.0)then
+                      WRITE (11,310) +H+K,-H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310) -K,+H+K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) +H+K,-H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) -K,+H+K,-L,AMP,-PHASE,BACK,FOM
+                    endif
                   else
                     WRITE (11,300) -H-K, H, L,AMP,PHASE,FOM
-                    WRITE (11,300) +H+K,-H,-L,AMP,-PHASE,FOM
                     WRITE (11,300)  K,-H-K, L,AMP,PHASE,FOM
-                    WRITE (11,300) -K,+H+K,-L,AMP,-PHASE,FOM
                     WRITE (12,300) -H-K, H, L,AMP,PHASE,FOM
-                    WRITE (12,300) +H+K,-H,-L,AMP,-PHASE,FOM
                     WRITE (12,300)  K,-H-K, L,AMP,PHASE,FOM
-                    WRITE (12,300) -K,+H+K,-L,AMP,-PHASE,FOM
+                    if(ineg.gt.0)then
+                      WRITE (11,300) +H+K,-H,-L,AMP,-PHASE,FOM
+                      WRITE (11,300) -K,+H+K,-L,AMP,-PHASE,FOM
+                      WRITE (12,300) +H+K,-H,-L,AMP,-PHASE,FOM
+                      WRITE (12,300) -K,+H+K,-L,AMP,-PHASE,FOM
+                    endif
                   endif
                 endif
               endif
@@ -396,67 +428,73 @@ C-------------Should FOM be plainly averaged (division by ianz here), or rather 
                 if(K.ge.0.and.L.ge.0)then
                   if(isig.eq.1)then
                     WRITE (11,310) -K, H+K, L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) +K,-H-K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (11,310) -H-K, H, L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310)  H+K,-H,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (11,310) -H,  -K, L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310)  H,   K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (11,310)  K,-H-K, L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) -K, H+K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (11,310)  H+K,-H, L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) -H-K, H,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310) -K, H+K, L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) +K,-H-K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310) -H-K, H, L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310)  H+K,-H,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310) -H,  -K, L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310)  H,   K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310)  K,-H-K, L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) -K, H+K,-L,AMP,-PHASE,FOM,SIGA
                     WRITE (12,310)  H+K,-H, L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) -H-K, H,-L,AMP,-PHASE,FOM,SIGA
+                    if(ineg.gt.0)then
+                      WRITE (11,310) -H-K, H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310) +K,-H-K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310)  H+K,-H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310)  H,   K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310) -K, H+K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) +K,-H-K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310)  H+K,-H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310)  H,   K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) -K, H+K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) -H-K, H,-L,AMP,-PHASE,FOM,SIGA
+                    endif
                   elseif(isig.eq.2)then
                     WRITE (11,310) -K, H+K, L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) +K,-H-K,-L,AMP,-PHASE,BACK,FOM
                     WRITE (11,310) -H-K, H, L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310)  H+K,-H,-L,AMP,-PHASE,BACK,FOM
                     WRITE (11,310) -H,  -K, L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310)  H,   K,-L,AMP,-PHASE,BACK,FOM
                     WRITE (11,310)  K,-H-K, L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) -K, H+K,-L,AMP,-PHASE,BACK,FOM
                     WRITE (11,310)  H+K,-H, L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) -H-K, H,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310) -K, H+K, L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) +K,-H-K,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310) -H-K, H, L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310)  H+K,-H,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310) -H,  -K, L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310)  H,   K,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310)  K,-H-K, L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) -K, H+K,-L,AMP,-PHASE,BACK,FOM
                     WRITE (12,310)  H+K,-H, L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) -H-K, H,-L,AMP,-PHASE,BACK,FOM
+                    if(ineg.gt.0)then
+                      WRITE (11,310) +K,-H-K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310)  H+K,-H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310)  H,   K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310) -K, H+K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310) -H-K, H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) +K,-H-K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310)  H+K,-H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310)  H,   K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) -K, H+K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) -H-K, H,-L,AMP,-PHASE,BACK,FOM
+                    endif
                   else
                     WRITE (11,300) -K, H+K, L,AMP,PHASE,FOM
-                    WRITE (11,300) +K,-H-K,-L,AMP,-PHASE,FOM
                     WRITE (11,300) -H-K, H, L,AMP,PHASE,FOM
-                    WRITE (11,300)  H+K,-H,-L,AMP,-PHASE,FOM
                     WRITE (11,300) -H,  -K, L,AMP,PHASE,FOM
-                    WRITE (11,300)  H,   K,-L,AMP,-PHASE,FOM
                     WRITE (11,300)  K,-H-K, L,AMP,PHASE,FOM
-                    WRITE (11,300) -K, H+K,-L,AMP,-PHASE,FOM
                     WRITE (11,300)  H+K,-H, L,AMP,PHASE,FOM
-                    WRITE (11,300) -H-K, H,-L,AMP,-PHASE,FOM
                     WRITE (12,300) -K, H+K, L,AMP,PHASE,FOM
-                    WRITE (12,300) +K,-H-K,-L,AMP,-PHASE,FOM
                     WRITE (12,300) -H-K, H, L,AMP,PHASE,FOM
-                    WRITE (12,300)  H+K,-H,-L,AMP,-PHASE,FOM
                     WRITE (12,300) -H,  -K, L,AMP,PHASE,FOM
-                    WRITE (12,300)  H,   K,-L,AMP,-PHASE,FOM
                     WRITE (12,300)  K,-H-K, L,AMP,PHASE,FOM
-                    WRITE (12,300) -K, H+K,-L,AMP,-PHASE,FOM
                     WRITE (12,300)  H+K,-H, L,AMP,PHASE,FOM
-                    WRITE (12,300) -H-K, H,-L,AMP,-PHASE,FOM
+                    if(ineg.gt.0)then
+                      WRITE (11,300) +K,-H-K,-L,AMP,-PHASE,FOM
+                      WRITE (11,300)  H+K,-H,-L,AMP,-PHASE,FOM
+                      WRITE (11,300)  H,   K,-L,AMP,-PHASE,FOM
+                      WRITE (11,300) -K, H+K,-L,AMP,-PHASE,FOM
+                      WRITE (11,300) -H-K, H,-L,AMP,-PHASE,FOM
+                      WRITE (12,300) +K,-H-K,-L,AMP,-PHASE,FOM
+                      WRITE (12,300)  H+K,-H,-L,AMP,-PHASE,FOM
+                      WRITE (12,300)  H,   K,-L,AMP,-PHASE,FOM
+                      WRITE (12,300) -K, H+K,-L,AMP,-PHASE,FOM
+                      WRITE (12,300) -H-K, H,-L,AMP,-PHASE,FOM
+                    endif
                   endif
                 endif
               endif

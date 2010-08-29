@@ -36,10 +36,24 @@ if ( ${mode} == 0 ) then
   #
   \ln -s APH/merge.aph fort.1
   #
-  ${bin_2dx}/2dx_latlinprescal.exe << eot > LOGS/latlinprescal.log
+  echo "Calling: " > LOGS/latlinprescal.log
+  echo "======== " >> LOGS/latlinprescal.log
+  echo " " >> LOGS/latlinprescal.log
+  #
+  echo "  ${bin_2dx}/2dx_latlinprescal.exe << eot >> LOGS/latlinprescal.log " >> LOGS/latlinprescal.log
+  echo "1001,${zminmax} ! NSER,ZMIN,ZMAX " >> LOGS/latlinprescal.log
+  echo "${MergeIQMAX}               ! IQMAX " >> LOGS/latlinprescal.log
+  echo "${max_amp_correction}       ! Max_Amp_Correction" >> LOGS/latlinprescal.log
+  echo "eot " >> LOGS/latlinprescal.log
+  echo " " >> LOGS/latlinprescal.log
+  echo "Running: " >> LOGS/latlinprescal.log
+  echo "======== " >> LOGS/latlinprescal.log
+  #
+  #
+  ${bin_2dx}/2dx_latlinprescal.exe << eot >> LOGS/latlinprescal.log
 1001,${zminmax} ! NSER,ZMIN,ZMAX
 ${MergeIQMAX}               ! IQMAX
-${max_amp_correction}
+${max_amp_correction}       ! Max_Amp_Correction
 eot
   #
   \rm -f fort.1
@@ -51,8 +65,8 @@ eot
   #
   if ( -e fort.3 ) then
     \mv -f fort.3 SCRATCH/latlines.dat
-    echo "# IMAGE: SCRATCH/latlines.dat <Lattice line data after pre-scaling [H,K,Z,A,P,FOM,SIGAMP,SIGANG,IQ]>" >> LOGS/${scriptname}.results
     echo "# IMAGE: LOGS/latlinprescal.log <LOG: latlinprescal output>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/latlines.dat <Latline after prescal [H,K,Z,A,P,FOM,SIGAMP,SIGANG,IQ]>" >> LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: latlines.dat does not exist."
   endif
@@ -168,7 +182,6 @@ ${proc_2dx}/linblock "PREPMKMTZ - Program to convert fitted data to CCP4 format"
 #############################################################################
 #
 \rm -f APH/latfitted_nosym.hkl
-\rm -f APH/latfittedref.hkl
 #
 setenv IN SCRATCH/latfitteds.dat
 setenv OUT APH/latfitted_nosym.hkl
@@ -187,8 +200,8 @@ echo "################################################"
 echo "################################################"
 #
 echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/latfitted_nosym.hkl <Lattice lines for volume fitted after prepmklcf [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/latfittedref_nosym.hkl <Lattice lines for reference fitted after prepmklcf [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Lattice lines for volume after prepmklcf [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Lattice lines for reference after prepmklcf [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #
@@ -196,77 +209,41 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to latfitted APH file, for volume"
 #############################################################################  
 #
-${bin_2dx}/2dx_hklsym.exe << eot
+${bin_2dx}/2dx_hklsym2.exe << eot
 APH/latfitted_nosym.hkl
-APH/latfitted_sym_nosort.hkl
-APH/latfitted_sym_noheader.hkl
+APH/latfitted.hkl
 ${spcgrp}
 0     ! no header line
 0     ! no sigma column
 eot
 #
-\rm -f APH/latfitted_sym_noheader.hkl
-echo "# IMAGE: APH/latfitted_sym_nosort.hkl <Lattice lines for volume after 2dx_hklsym [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "<<@progress: +5>>"
 #
-sort < APH/latfitted_sym_nosort.hkl > APH/latfitted_sym_sort.hkl
-echo "# IMAGE: APH/latfitted_sym_sort.hkl <Lattice lines for volume after 2dx_hklsym, sorted [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+if ( ! -e APH/latfitted.hkl ) then
+  ${proc_2dx}/protest "ERROR: APH/latfitted.hkl not produced."
+endif
+#
+echo "# IMAGE: APH/latfitted.hkl <APH: Lattice lines for volume [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to latfitted APH file, for reference"
 #############################################################################  
 #
-${bin_2dx}/2dx_hklsym.exe << eot
+${bin_2dx}/2dx_hklsym2.exe << eot
 APH/latfittedref_nosym.hkl
-APH/latfittedref_sym_nosort.hkl
-APH/latfittedref_sym_noheader.hkl
+APH/latfittedref.hkl
 ${spcgrp}
 0     ! no header line
 1     ! with sigma column
 eot
 #
-\rm -f APH/latfittedref_sym_noheader.hkl
-echo "# IMAGE: APH/latfittedref_sym_nosort.hkl <Lattice lines for reference after 2dx_hklsym [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
-#
-sort < APH/latfittedref_sym_nosort.hkl > APH/latfittedref_sym_sort.hkl
-echo "# IMAGE: APH/latfittedref_sym_sort.hkl <Lattice lines for reference after 2dx_hklsym, sorted [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
-#
-#############################################################################
-${proc_2dx}/linblock "2dx_hklclean - to eliminated duplicates from APH file, for volume"
-#############################################################################  
-#
-${bin_2dx}/2dx_hklclean.exe << eot
-APH/latfitted_sym_sort.hkl
-APH/latfitted.hkl
-0     ! no header line
-0     ! no sigma column
-eot
-#
 echo "<<@progress: +5>>"
 #
-if ( ! -e APH/latfitted.hkl ) then
-  ${proc_2dx}/protest "ERROR occured."
+if ( ! -e APH/latfittedref.hkl ) then
+  ${proc_2dx}/protest "ERROR: APH/latfittedref.hkl not produced."
 endif
 #
-echo "# IMAGE: APH/latfitted.hkl <Lattice lines for volume after 2dx_hklclean [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
-#
-#############################################################################
-${proc_2dx}/linblock "2dx_hklclean - to eliminated duplicates from APH file, for reference"
-#############################################################################  
-#
-${bin_2dx}/2dx_hklclean.exe << eot
-APH/latfittedref_sym_sort.hkl
-APH/latfittedref.hkl
-0     ! no header line
-1     ! with sigma column
-eot
-#
-echo "<<@progress: +5>>"
-#
-if ( ! -e APH/latfitted.hkl ) then
-  ${proc_2dx}/protest "ERROR occured."
-endif
-#
-echo "# IMAGE: APH/latfittedref.hkl <Lattice lines for reference after 2dx_hklclean [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfittedref.hkl <APH: Lattice lines for reference [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for volume"

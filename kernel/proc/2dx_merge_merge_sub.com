@@ -192,7 +192,7 @@ ${proc_2dx}/linblock "Using therefore zminmax=${zminmaxlocal}."
 #
 \rm -f fort.1
 \cp -f APH/merge.aph fort.1
-echo "# IMAGE-IMPORTANT: APH/merge.aph <APH: merge.aph, combined amps & phases [H,K,Z,A(CTF corrected),P(CTF Phase flipped, PhaOri),Num,IQ,WGHT,Back,CTF]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: APH/merge.aph <APH: merge.aph [H,K,Z,A,P,Num,IQ,WGHT,Back,CTF]>" >> LOGS/${scriptname}.results
 \rm -f fort.2
 \rm -f fort.3
 \rm -f fort.4

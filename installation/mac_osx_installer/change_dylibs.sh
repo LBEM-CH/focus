@@ -1,7 +1,9 @@
 #!/bin/sh
 # change_dylibs
-build_dir=`pwd`
-apps="2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
+build_dir=$1
+echo "the build dir is $1"
+cd $build_dir
+apps=" 2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
 for loop in $apps
 do
 	cd $loop
@@ -18,6 +20,6 @@ do
 		#fi
 		otool -L $loop
 	done
-	# chnage back to build dir
+	# change back to build dir
 	cd $build_dir
 done

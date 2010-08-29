@@ -24,7 +24,6 @@ void initializeProject(const QString &workingDir)
   dir.mkdir("merge");
   dir.mkpath("merge/proc");
   dir.mkpath("merge/LOGS");
-  qDebug() << "[DEBUG] creating 2dx_merge.cfg from " << appDir + sep + "config/2dx_master.cfg";
   confData data(workingDir + "/merge/" + "2dx_merge.cfg", appDir + sep + "config/2dx_master.cfg");
   //confData data(workingDir +"/2dx_master.cfg", appDir + sep + "config/2dx_master.cfg");
   data.setSymLink("merge/2dx_merge.cfg", workingDir +"/2dx_master.cfg");

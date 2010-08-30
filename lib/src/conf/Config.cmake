@@ -42,8 +42,10 @@ else(@LIBTITLE@_FOUND)
     message(STATUS "We are building the library at the moment")
     # We are building the library at the moment
     set(LIB_@LIBTITLE@ "")
+    set(@LIBTITLE@_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
   else("${LIBTITLE}" STREQUAL "@LIBTITLE@")
-    find_library(LIB_@LIBTITLE@ @LIBTITLE@)
+    message(STATUS "@LIBTITLE@: @LIBTITLE@_BINARY_DIR is ${@LIBTITLE@_BINARY_DIR}")
+    find_library(LIB_@LIBTITLE@ @LIBTITLE@ PATHS ${@LIBTITLE@_BINARY_DIR})
     message(STATUS "@LIBTITLE@: Link with ${LIB_@LIBTITLE@}")
     SET(2DX_LIBRARIES  optimized ${LIB_@LIBTITLE@} ${2DX_LIBRARIES}) 
     # Include Files of this library

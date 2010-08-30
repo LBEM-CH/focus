@@ -15,28 +15,20 @@ set(LIBTITLE mrcImage)
 SET(LIBVERSION 1)
 project(${LIBTITLE})
 
-# OS specific project properties ----------------------------------------------
-IF( APPLE )
-	# for 64bit us the follwing line
-	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386;ppc64;x86_64) 
-	#to be able to use the QT Carbon 32 bit
-	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386) 
-ENDIF( APPLE )
-
 #------------------------------------------------------------------------------
 # Configure Config file and include it.
 # The dependencies are defined in the Config.cmake file
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}Config.cmake
+  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake
   @ONLY)
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}ConfigVersion.cmake
+  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}VersionConfig.cmake
   @ONLY)
 
-include(${CMAKE_CURRENT_BINARY_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}Config.cmake)
+include(${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake)
 
 install(
   FILES       
@@ -69,10 +61,6 @@ if(QT4_FOUND)
 	QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS}) 
 endif(QT4_FOUND)
 
-
-
-#set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/)
-#set(RUNTIME_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin/)
 set(CMAKE_DEBUG_POSTFIX -dbg)
 
 if(SRC)

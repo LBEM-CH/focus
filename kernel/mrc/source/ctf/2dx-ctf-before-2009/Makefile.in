@@ -10,8 +10,8 @@ BIN = ../../bin
 
 all: $(BIN)/2dx_ctffind3.exe $(BIN)/2dx_ctftilt.exe
 
-$(BIN)/2dx_ctffind3.exe: 2dx_ctffind3.o iof.o ioc.o
-	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
+$(BIN)/2dx_ctffind3.exe: 2dx_ctffind3.o mrc_ccp4.o library.o
+	$(F77) $(FFLAGS) mrc_ccp4.o library.o -o $@ $< 
 
 $(BIN)/2dx_ctftilt.exe: 2dx_ctftilt.o mrc_ccp4.o library.o
 	$(F77) $(FFLAGS) mrc_ccp4.o library.o -o $@ $< 
@@ -27,12 +27,6 @@ mrc_ccp4.o: mrc_ccp4.f
 
 library.o: library.c
 	$(GCC) $(CFLAGS) -c $< 
-
-iof.o: iof.f
-	$(GCC) $(CFLAGS) -c $<
-
-ioc.o: ioc.c
-	$(GCC) $(CFLAGS) -c $<
 
 
 

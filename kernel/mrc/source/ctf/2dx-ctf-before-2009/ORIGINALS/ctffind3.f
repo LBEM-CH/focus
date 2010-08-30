@@ -1,102 +1,88 @@
 C*****************************************************************************
 C
-C       CTFFIND3 - determines defocus and astigmatism for images of
-C       arbitrary size (MRC format). Astigmatic angle is measured form
-C       x axis (same convetiones as in the MRC 2D image processing 
-C       programs).
+C	CTFFIND3 - determines defocus and astigmatism for images of
+C	arbitrary size (MRC format). Astigmatic angle is measured form
+C	x axis (same convetiones as in the MRC 2D image processing 
+C	programs).
 C
-C       CARD 1: Input file name for image
-C       CARD 2: Output file name to check result
-C       CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
-C       CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep
+C	CARD 1: Input file name for image
+C	CARD 2: Output file name to check result
+C	CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
+C	CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep
 C
-C               The output image file to check the result of the fitting
-C               shows the filtered average power spectrum of the input
-C               image in one half, and the fitted CTF (squared) in the
-C               other half. The two halfs should agree very well for a
-C               sucessfull fit.
+C		The output image file to check the result of the fitting
+C		shows the filtered average power spectrum of the input
+C		image in one half, and the fitted CTF (squared) in the
+C		other half. The two halfs should agree very well for a
+C		sucessfull fit.
 C
-C               CS: Spherical aberration coefficient of the objective in mm
-C               HT: Electron beam voltage in kV
-C               AmpCnst: Amount of amplitude contrast (fraction). For ice
-C                        images 0.07, for negative stain about 0.15.
-C               XMAG: Magnification of original image
-C               DStep: Pixel size on scanner in microns
-C               Box: Tile size. The program devides the image into square
-C                    tiles and calculates the average power spectrum. Tiles
-C                    with a significatly higher or lower variance are 
-C                    excluded; these are parts of the image which are unlikely
-C                    to contain useful information (beam edge, film number 
-C                    etc). IMPORTANT: Box must have even pixel dimensions.
-C               ResMin: Low resolution end of data to be fitted.
-C               ResMaX: High resolution end of data to be fitted.
-C               dFMin: Starting defocus value for grid search in Angstrom. 
-C                      Positive values represent an underfocus. The program
-C                      performs a systematic grid search of defocus values 
-C                      and astigmatism before fitting a CTF to machine 
-C                      precision.
-C               dFMax: End defocus value for grid search in Angstrom.
-C               FStep: Step width for grid search in Angstrom.
+C		CS: Spherical aberration coefficient of the objective in mm
+C		HT: Electron beam voltage in kV
+C		AmpCnst: Amount of amplitude contrast (fraction). For ice
+C		         images 0.07, for negative stain about 0.15.
+C		XMAG: Magnification of original image
+C		DStep: Pixel size on scanner in microns
+C		Box: Tile size. The program devides the image into square
+C		     tiles and calculates the average power spectrum. Tiles
+C		     with a significatly higher or lower variance are 
+C		     excluded; these are parts of the image which are unlikely
+C		     to contain useful information (beam edge, film number 
+C		     etc). IMPORTANT: Box must have even pixel dimensions.
+C		ResMin: Low resolution end of data to be fitted.
+C		ResMaX: High resolution end of data to be fitted.
+C		dFMin: Starting defocus value for grid search in Angstrom. 
+C		       Positive values represent an underfocus. The program
+C		       performs a systematic grid search of defocus values 
+C		       and astigmatism before fitting a CTF to machine 
+C		       precision.
+C		dFMax: End defocus value for grid search in Angstrom.
+C		FStep: Step width for grid search in Angstrom.
 C
 C*****************************************************************************
-C       example command file (UNIX):
+C	example command file (UNIX):
 C
-C       #!/bin/csh -x
-C       #
-C       #   ctffind3
-C       #
-C       time /public/image/bin/ctffind3.exe << eof
-C       image.mrc
-C       power.mrc
-C       2.6,200.0,0.07,60000.0,28.0
-C       128,100.0,15.0,30000.0,90000.0,5000.0
-C       eof
-C       #
+C	#!/bin/csh -x
+C	#
+C	#   ctffind3
+C	#
+C	time /public/image/bin/ctffind3.exe << eof
+C	image.mrc
+C	power.mrc
+C	2.6,200.0,0.07,60000.0,28.0
+C	128,100.0,15.0,30000.0,90000.0,5000.0
+C	eof
+C	#
 C*****************************************************************************
 C
       PROGRAM CTFFIND3
 C
-C       NIKO, 21 SEPTEMBER 2002
+C	NIKO, 21 SEPTEMBER 2002
 C
       IMPLICIT NONE
 C
-      INTEGER NXYZ(3),MODE,JXYZ(3),I,J,NX,NY,IX,IS,KXYZ(3)
-      INTEGER K,CNT,ID,L,M,LL,MM,ITEST,IP,NBIN,IMP,IERR
-      PARAMETER (NBIN=100)
-      REAL DMAX,DMEAN,DRMS,RMS,WGH1,WGH2,RMSMIN
-      REAL SCAL,MEAN,WL,PI,MIN,MAX,ANGAST
-      REAL CS,KV,WGH,XMAG,DSTEP,RESMIN,RESMAX,DFMID1,DFMID2
-      REAL THETATR,STEPR,RMIN2,RMAX2,HW,RMSMAX
-      REAL RES2,CTF,CTFV,TMP,FLT,DFMIN,DFMAX,FSTEP,DRMS1,CMAX
-      REAL,ALLOCATABLE :: AIN(:),ABOX(:),POWER(:),OUT(:),BUF1(:)
-      REAL,ALLOCATABLE :: RMSA(:),BINS(:)
-      PARAMETER (FLT=-0.1,PI=3.1415926535898)
-      COMPLEX,ALLOCATABLE :: CBOXS(:)
-      CHARACTER FILEIN*200,FILEOUT*200,TITLE*1600,CFORM,NCPUS*10
-      LOGICAL EX
+      INTEGER NXYZ(3),MXYZ(3),MODE,JXYZ(3),I,J,NX,NY,IX,IS,KXYZ(3)
+      INTEGER IXMX,IYMX,IXBMX,K,CNT,ID,L,M,LL,MM,ITEST
+      PARAMETER (IXMX=20000,IYMX=512,IXBMX=IYMX)
+      REAL DMIN,DMAX,DMEAN,AIN(IXMX*IYMX),DRMS,RMSLIM,RMS,WGH1,WGH2
+      REAL ABOX(IXBMX*IXBMX),POWER(IXBMX/2*IXBMX),SCAL,MEAN,WL
+      REAL CS,KV,WGH,XMAG,DSTEP,RESMIN,RESMAX,DFMID1,DFMID2,ANGAST
+      REAL THETATR,STEPR,RMIN2,RMAX2,HW,OUT(IXBMX*IXBMX)
+      REAL RES2,CTF,CTFV,TMP,FLT,DFMIN,DFMAX,FSTEP,DRMS1
+      REAL BUF1(IXBMX*IXBMX),PI
+      PARAMETER (PI=3.1415926535898)
+      PARAMETER (RMSLIM=1.2,FLT=-0.1)
+      COMPLEX CIN(IXMX/2*IYMX),CINS(IYMX)
+      COMPLEX CBOX(IXBMX/2*IXBMX),CBOXS(IXBMX)
+      COMPLEX CPOW(IXBMX/4*IXBMX),CPOWS(IXBMX)
+      CHARACTER FILEIN*70,FILEOUT*70
+      EQUIVALENCE (AIN,CIN)
+      EQUIVALENCE (ABOX,CBOX)
+      EQUIVALENCE (POWER,CPOW)
+      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,POWER,JXYZ,HW
 C
       WRITE(6,1000)
-1000  FORMAT(/' CTF DETERMINATION, V3.4 (19-August-2010)',
-     +       /' Distributed under the GNU',
-     +        ' General Public License (GPL)')
-C
-      IMP=0
-      CALL GETENV('OMP_NUM_THREADS',NCPUS)
-      READ(NCPUS,*,ERR=111,END=111)IMP
-111   CONTINUE
-      IF (IMP.LE.0) THEN
-        CALL GETENV('NCPUS',NCPUS)
-        READ(NCPUS,*,ERR=112,END=112)IMP
-112     CONTINUE
-      ENDIF
-      IF (IMP.LE.0) IMP=1
-      IF (IMP.GT.1) THEN
-        WRITE(*,7000) IMP
-7000    FORMAT(/' Parallel processing: NCPUS =   ',I8)
-      ENDIF
-C
-      WRITE(6,1002)
-1002  FORMAT(/' Input image file name')
+1000  FORMAT(/' CTF DETERMINATION, V3.2 (22-Sep-2006)'//,
+     +	      ' Input image file name')
       READ(5,1010)FILEIN
 1010  FORMAT(A)
       WRITE(6,1010)FILEIN
@@ -106,186 +92,147 @@ C
       WRITE(6,1010)FILEOUT
       WRITE(6,1020)
 1020  FORMAT(/' CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]')
+CTSH      READ(5,1030)CS,KV,WGH,XMAG,DSTEP
+CTSH1030  FORMAT(5F)
+CTSH++
       READ(5,*)CS,KV,WGH,XMAG,DSTEP
+CTSH--
       WRITE(6,1031)CS,KV,WGH,XMAG,DSTEP
 1031  FORMAT(F5.1,F9.1,F8.2,F10.1,F9.1)
       WRITE(6,1040)
 1040  FORMAT(/' Positive defocus values for underfocus',
-     +       /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep')
+     +	     /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep')
+CTSH      READ(5,1050)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
+CTSH1050  FORMAT(1I,5F)
+CTSH++
       READ(5,*)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
+CTSH--
       WRITE(6,1051)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
 1051  FORMAT(I4,2F11.1,2F10.1,F7.1/)
+      IF (JXYZ(1).GT.IXBMX) THEN
+      	WRITE(6,1070)IXBMX
+1070	FORMAT(/' Box size too big, IXBMX=',I10)
+      	STOP
+      ENDIF
       ITEST=JXYZ(1)/2
       IF (2*ITEST.NE.JXYZ(1)) THEN
-        WRITE(6,1090)
-1090    FORMAT(/' Box size must be even number')
-        STOP
+      	WRITE(6,1090)
+1090	FORMAT(/' Box size must be even number')
+      	STOP
       ENDIF
       JXYZ(2)=JXYZ(1)
       JXYZ(3)=1
       IF (RESMIN.LT.RESMAX) THEN
-        TMP=RESMAX
-        RESMAX=RESMIN
-        RESMIN=TMP
+      	TMP=RESMAX
+      	RESMAX=RESMIN
+      	RESMIN=TMP
       ENDIF
       IF (DFMAX.LT.DFMIN) THEN
-        TMP=DFMAX
-        DFMAX=DFMIN
-        DFMIN=TMP
+      	TMP=DFMAX
+      	DFMAX=DFMIN
+      	DFMIN=TMP
       ENDIF
 C
-      CALL GUESSF(FILEIN,CFORM,EX)
-      IF  (.NOT.EX) THEN
-        WRITE(*,1001) FILEIN
-1001    FORMAT(' File not found ',A80)
-        STOP
+      CALL IMOPEN(1,FILEIN,'RO')
+      CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+      IF (NXYZ(1).GT.IXMX) THEN
+      	WRITE(6,1080)IXMX
+1080	FORMAT(/' Image X dimensions too big, IXMX=',I10)
+      	STOP
       ENDIF
-      CALL IOPEN(FILEIN,10,CFORM,MODE,NXYZ(1),NXYZ(2),
-     +           NXYZ(3),'OLD',STEPR,TITLE)
 C
       WRITE(*,1110)NXYZ(1),NXYZ(2)
 1110  FORMAT(/,' READING IMAGE...'/' NX, NY= ',2I10)
 C
       NX=NXYZ(1)/JXYZ(1)
       NY=NXYZ(2)/JXYZ(2)
-C
-      ALLOCATE(AIN(NXYZ(1)*JXYZ(2)),ABOX(JXYZ(1)*JXYZ(2)),
-     +  OUT(JXYZ(1)*JXYZ(2)),
-     +  BUF1(JXYZ(1)*JXYZ(2)),RMSA(NX*NY),BINS(NBIN),
-     +  CBOXS(JXYZ(2)),STAT=IERR)
-      IF (IERR.NE.0) THEN
-        WRITE(*,*) ' ERROR: Memory allocation failed in MAIN'
-        STOP ' Try reducing the tile size'
-      ENDIF
-C
       DRMS=0.0D0
       CNT=0
       DO 10 I=1,NY
-        IP=(I-1)*JXYZ(2)
         DO 21 J=1,JXYZ(2)
           ID=1+NXYZ(1)*(J-1)
-          CALL IREAD(10,AIN(ID),J+IP)
+          CALL IRDLIN(1,AIN(ID),*999)
 21      CONTINUE
         DO 10 J=1,NX
           IX=(J-1)*JXYZ(1)+1
           CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
           DRMS=DRMS+RMS**2
-          CNT=CNT+1
-          IF (CNT.LE.50000) RMSA(CNT)=RMS
+      	  CNT=CNT+1
 10    CONTINUE
       DRMS=SQRT(DRMS/CNT)
-      CALL HISTO(CNT,NBIN,RMSA,BINS,MIN,MAX)
-      CMAX=0
-      DO 70 I=1,NBIN
-        IF (BINS(I).GT.CMAX) THEN
-          CMAX=BINS(I)
-          J=I
-        ENDIF
-70    CONTINUE
-      IF (J.GT.1) THEN
-        DO 71 I=J-1,1,-1
-          IF (BINS(I).LT.CMAX/10.0) THEN
-            RMSMIN=(I-1)*(MAX-MIN)/(NBIN-1)+MIN
-            GOTO 72
-          ENDIF
-71      CONTINUE
-      ENDIF
-72    CONTINUE
-      IF (J.LT.NBIN) THEN
-        DO 73 I=J+1,NBIN
-          IF (BINS(I).LT.CMAX/10.0) THEN
-            RMSMAX=(I-1)*(MAX-MIN)/(NBIN-1)+MIN
-            GOTO 74
-          ENDIF
-73      CONTINUE
-      ENDIF
-74    CONTINUE
 C
       KXYZ(1)=JXYZ(1)/2
       KXYZ(2)=JXYZ(2)
       KXYZ(3)=JXYZ(3)
       IF (2*(KXYZ(1)/2).NE.KXYZ(1)) KXYZ(1)=KXYZ(1)+1
-      ALLOCATE(POWER(KXYZ(1)*KXYZ(2)),STAT=IERR)
-      IF (IERR.NE.0) THEN
-        WRITE(*,*) ' ERROR: Memory allocation failed for POWER'
-        STOP ' Try reducing the tile size'
-      ENDIF
       DO 30 K=1,KXYZ(1)*KXYZ(2)
-        POWER(K)=0.0
+      	POWER(K)=0.0
 30    CONTINUE
       SCAL=1.0/SQRT(REAL(JXYZ(1)*JXYZ(2)))
       CNT=0
+      CALL IMPOSN(1,0,0)
       WRITE(*,1100)
 1100  FORMAT(/,' TILING IMAGE...'/)
 C
       DO 100 I=1,NY
-        IP=(I-1)*JXYZ(2)
         DO 20 J=1,JXYZ(2)
-          ID=1+NXYZ(1)*(J-1)
-          CALL IREAD(10,AIN(ID),J+IP)
-20      CONTINUE
-        DO 100 J=1,NX
-          IX=(J-1)*JXYZ(1)+1
-          CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
-          IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
-            CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+      	  ID=1+NXYZ(1)*(J-1)
+          CALL IRDLIN(1,AIN(ID),*999)
+20	CONTINUE
+      	DO 100 J=1,NX
+      	  IX=(J-1)*JXYZ(1)+1
+      	  CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
+      	  IF ((RMS.LE.DRMS*RMSLIM).AND.(RMS.GE.DRMS/RMSLIM/10.0)) THEN
+      	    CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
             DO 40 L=1,JXYZ(2)
-              DO 41 K=1,JXYZ(1)/2
-                ID=(K+JXYZ(1)/2*(L-1))*2
+      	      DO 41 K=1,JXYZ(1)/2
+                ID=K+JXYZ(1)/2*(L-1)
                 IS=K+KXYZ(1)*(L-1)
-                POWER(IS)=POWER(IS)
-     +            +(ABOX(ID-1)**2+ABOX(ID)**2)*SCAL**2
-41            CONTINUE
+                POWER(IS)=POWER(IS)+CABS(CBOX(ID)*SCAL)**2
+41	      CONTINUE
               IF (KXYZ(1).GT.JXYZ(1)/2)
      +          POWER(IS+1)=POWER(IS+1)+CABS(CBOXS(L)*SCAL)**2
-40          CONTINUE
-            CNT=CNT+1
-          ENDIF
+40	    CONTINUE
+      	    CNT=CNT+1
+      	  ENDIF
 100   CONTINUE
       WRITE(*,*)' Total tiles and number used',NX*NY,CNT
 C
       SCAL=1.0/CNT
       DO 60 K=1,KXYZ(1)*KXYZ(2)
-        POWER(K)=SQRT(POWER(K)*SCAL)
+      	POWER(K)=SQRT(POWER(K)*SCAL)
 60    CONTINUE
 C
 C       Filter power spectrum to remove slowly varying background
 C       DMAX is maximum of filtered power spectrum (for later scaling)
 C
-      STEPR=DSTEP*(10.0**4.0)/XMAG
-      CALL FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS1,DMAX,STEPR)
+      CALL FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS1,DMAX)
 C
-      CS=CS*(10.0**7.0)                          ! Angstroms
-      KV=KV*1000.0                               ! Volts
-      WL=12.26/SQRT(KV+0.9785*KV**2/(10.0**6.0)) ! Angstroms
+      CS=CS*(10.0**7.0)                         ! Angstroms
+      KV=KV*1000.0                              ! Volts
+      WL=12.3/SQRT(KV+KV**2/(10.0**6.0))        ! Angstroms
       WGH1=SQRT(1.0-WGH**2)
       WGH2=WGH
 C
+      STEPR=DSTEP*(10.0**4.0)/XMAG
       THETATR=WL/(STEPR*JXYZ(1))
       RESMIN=STEPR/RESMIN
       RESMAX=STEPR/RESMAX
-      IF (RESMIN.LT.STEPR/50.0) THEN
-        RESMIN=STEPR/50.0
-        WRITE(*,*)' Lower resolution limit reset to',
-     +            STEPR/RESMIN,' A'
-      ENDIF
-      IF (RESMIN.GE.RESMAX)
-     +  STOP ' RESMIN >= RESMAX; increase RESMAX'
+      IF (RESMIN.LT.0.05) RESMIN=0.05
 C
       DFMID1=DFMIN
       DFMID2=DFMAX
       CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
-     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
+     +		      POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
       RMIN2=RESMIN**2
       RMAX2=RESMAX**2
       HW=-1.0/RMAX2
       hw=0.0
 
-      CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,
-     +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW)
+      CALL REFINE_CTF(DFMID1,DFMID2,ANGAST)
 C
       DO 50 I=1,JXYZ(1)*JXYZ(2)
-        OUT(I)=0.0
+      	OUT(I)=0.0
 50    CONTINUE
       DO 200 L=1,JXYZ(1)/2
         LL=L-1
@@ -293,78 +240,42 @@ C
           MM=M-1
           IF (MM.GT.JXYZ(2)/2) MM=MM-JXYZ(2)
           ID=L+JXYZ(1)/2*(M-1)
-          I=L+JXYZ(1)/2
-          J=M+JXYZ(2)/2
-          IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
-          IS=I+JXYZ(1)*(J-1)
-          OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
-          IF (OUT(IS).GT.1.0) OUT(IS)=1.0
-          IF (OUT(IS).lT.-1.0) OUT(IS)=-1.0
+      	  I=L+JXYZ(1)/2
+      	  J=M+JXYZ(2)/2
+      	  IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
+      	  IS=I+JXYZ(1)*(J-1)
+      	  OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
+      	  IF (OUT(IS).GT.1.0) OUT(IS)=1.0
+      	  IF (OUT(IS).lT.-1.0) OUT(IS)=-1.0
           RES2=(REAL(LL)/JXYZ(1))**2+(REAL(MM)/JXYZ(2))**2
           IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
             CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
      +               ANGAST,THETATR,LL,MM)
-            I=JXYZ(1)/2-L+1
-            J=JXYZ(2)-J+2
-            IF (J.LE.JXYZ(2)) THEN
-              IS=I+JXYZ(1)*(J-1)
+     	    I=JXYZ(1)/2-L+1
+      	    J=JXYZ(2)-J+2
+      	    IF (J.LE.JXYZ(2)) THEN
+      	      IS=I+JXYZ(1)*(J-1)
               OUT(IS)=CTFV**2
-            ENDIF
+      	    ENDIF
           ENDIF
 200   CONTINUE
-C
-      CALL ICLOSE(10)
+201   continue
+c      do 202 i=1,jxyz(2)
+c      jstart=1+(i-1)*jxyz(1)
+c      jfinsh=i*jxyz(1)
+c202   write(*,201)(OUT(j),j=jstart,jfinsh)
+c201   format(/20(30f4.1/))
       MODE=2
-      IF (STEPR.NE.0.0) STEPR=1.0/STEPR
-      CALL IOPEN(FILEOUT,10,CFORM,MODE,JXYZ(1),JXYZ(2),
-     +           JXYZ(3),'NEW',STEPR,TITLE)
-      DO 210 J=1,JXYZ(2)
-        ID=1+JXYZ(1)*(J-1)
-        CALL IWRITE(10,OUT(ID),J)
-210   CONTINUE
-      CALL ICLOSE(10)
+      CALL WRTIMG(FILEOUT,JXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN,OUT)
 C
-CHENN>
-      open(11,FILE='SCRATCH/2dx_ctffind3.result.tmp',STATUS='NEW',ERR=998)
-        write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
-      close(11)
       GOTO 9999
-998   stop 'ERROR on file open of SCRATCH/2dx_ctffind3.result.tmp'
-9999  continue
-CHENN<
-C
+999   STOP 'END-OF-FILE ERROR ON READ'
+9999  CONTINUE
+      CALL IMCLOSE(1)
       END
 C
 C**************************************************************************
-      SUBROUTINE HISTO(N,NBIN,DATA,BINS,MIN,MAX)
-C**************************************************************************
-      IMPLICIT NONE
-C
-      INTEGER I,J,N,NBIN  
-      REAL DATA(*),MIN,MAX,BINS(*)
-C
-      MIN=1.0E30
-      MAX=-1.0E30
-      DO 10 I=1,N
-        IF (DATA(I).GT.MAX) MAX=DATA(I)
-        IF (DATA(I).LT.MIN) MIN=DATA(I)
-10    CONTINUE
-C
-      DO 20 I=1,NBIN
-        BINS(I)=0.0
-20    CONTINUE
-C
-      DO 30 I=1,N
-        J=INT((DATA(I)-MIN)/(MAX-MIN)*(NBIN-1)+0.5)+1
-        BINS(J)=BINS(J)+1.0
-30    CONTINUE
-C
-      RETURN
-      END
-C
-C**************************************************************************
-      SUBROUTINE FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS,DMAX,
-     +                  DSTEP)
+      SUBROUTINE FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS,DMAX)
 C**************************************************************************
 C       Filters power spectrum by removing smooth background. This
 C       is necessary to obtain a good CTF fit. Also calculates
@@ -376,12 +287,11 @@ C**************************************************************************
 C
       INTEGER I,J,JXYZ(*),KXYZ(*),IS,ID,NW
       REAL SCAL,POWER(*),DRMS,DMEAN,DSQR,BUF1(*),DMAX
-      REAL DSTEP
 C
       WRITE(*,1101)
 1101  FORMAT(/,' FILTERING POWER SPECTRUM...'/)
 C
-      NW=INT(KXYZ(1)*DSTEP/20.0)
+      NW=KXYZ(1)/20
 C
 C       subtract smooth background
 C
@@ -474,9 +384,6 @@ C
 C**************************************************************************
       SUBROUTINE BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
 C**************************************************************************
-C       Cuts out an area of size JXYZ from array AIN. IX, IY are
-C       upper left corner of boxed area.
-C**************************************************************************
 C
       IMPLICIT NONE
 C
@@ -490,16 +397,16 @@ C
       M4=0.0
       DO 10 J=1,JXYZ(2)
         DO 10 I=1,JXYZ(1)
-          II=I+IX-1
-          JJ=J+IY-1
+      	  II=I+IX-1
+      	  JJ=J+IY-1
           ID=II+NXYZ(1)*(JJ-1)
           IDB=I+JXYZ(1)*(J-1)
           ABOX(IDB)=AIN(ID)
-          MEAN=MEAN+ABOX(IDB)
-          IF (I.EQ.1) M1=M1+ABOX(IDB)
-          IF (I.EQ.JXYZ(1)) M2=M2+ABOX(IDB)
-          IF (J.EQ.1) M3=M3+ABOX(IDB)
-          IF (J.EQ.JXYZ(2)) M4=M4+ABOX(IDB)
+      	  MEAN=MEAN+ABOX(IDB)
+      	  IF (I.EQ.1) M1=M1+ABOX(IDB)
+      	  IF (I.EQ.JXYZ(1)) M2=M2+ABOX(IDB)
+      	  IF (J.EQ.1) M3=M3+ABOX(IDB)
+      	  IF (J.EQ.JXYZ(2)) M4=M4+ABOX(IDB)
 10    CONTINUE
       MEAN=MEAN/JXYZ(1)/JXYZ(2)
       M1=M1/JXYZ(2)
@@ -508,7 +415,7 @@ C
       M4=M4/JXYZ(1)
       RMS=0.0
       DO 20 I=1,JXYZ(1)*JXYZ(2)
-        RMS=RMS+(ABOX(I)-MEAN)**2
+      	RMS=RMS+(ABOX(I)-MEAN)**2
 20    CONTINUE
       RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
       DO 30 J=1,JXYZ(2)
@@ -549,16 +456,15 @@ C
 C
 C**************************************************************************
       SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
-     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
+     +			    AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
 C**************************************************************************
 C
       IMPLICIT NONE
 C
-      INTEGER I,J,K,NXYZ(3),I1,I2,ID,IERR
-      REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
-      REAL RMIN2,RMAX2,RMIN,RMAX,AIN(*),SUMMAX,FSTEP
+      INTEGER I,J,K,NXYZ(3),I1,I2
+      REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,RMIN,RMAX
+      REAL RMIN2,RMAX2,SUM,AIN(*),SUMMAX,FSTEP
       REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
-      REAL,ALLOCATABLE :: SUMS(:),DF1(:),DF2(:),ANG(:)
       PARAMETER (PI=3.1415926535898)
 C
       WRITE(*,1000)
@@ -572,33 +478,24 @@ C
       SUMMAX=-1.0E20
       I1=INT(DFMID1/FSTEP)
       I2=INT(DFMID2/FSTEP)
-      ID=(I2-I1+1)*(I2-I1+1)
-      ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
-      IF (IERR.NE.0) THEN
-        WRITE(*,*) ' ERROR: Memory allocation failed in SEARCH_CTF'
-        STOP ' Try reducing size of defocus search grid'
-      ENDIF
       DO 10 K=0,3
-        DO 11 I=I1,I2
-!$OMP PARALLEL DO
-          DO 12 J=I1,I2
-            CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
-     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
-12        CONTINUE
-11      CONTINUE
-        DO 13 I=1,ID
-          IF (SUMS(I).GT.SUMMAX) THEN
-            WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
-1100        FORMAT(3F12.2,F12.5)
-            SUMMAX=SUMS(I)
-            DFMID1S=DF1(I)
-            DFMID2S=DF2(I)
-            ANGASTS=ANG(I)
-          ENDIF
-13      CONTINUE
+        DO 10 I=I1,I2
+      	  DO 10 J=I1,I2
+      	    DFMID1=FSTEP*I
+      	    DFMID2=FSTEP*J
+      	    ANGAST=22.5*K
+      	    ANGAST=ANGAST/180.0*PI
+      	    SUM=EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
+     +			THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+      	    IF (SUM.GT.SUMMAX) THEN
+      	      WRITE(*,1100)DFMID1,DFMID2,ANGAST/PI*180.0,SUM
+1100	      FORMAT(3F12.2,F12.5)
+      	      SUMMAX=SUM
+      	      DFMID1S=DFMID1
+      	      DFMID2S=DFMID2
+      	      ANGASTS=ANGAST
+      	    ENDIF
 10    CONTINUE
-      DEALLOCATE(SUMS,DF1,DF2,ANG)
 C
       DFMID1=DFMID1S
       DFMID2=DFMID2S
@@ -608,33 +505,8 @@ C
       END      
 C
 C**************************************************************************
-      SUBROUTINE SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
-     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
-C**************************************************************************
-C
-      IMPLICIT NONE
-C
-      INTEGER I,J,K,NXYZ(3),I1,I2,ID
-      REAL CS,WL,WGH1,WGH2,THETATR,DF1(*),DF2(*),ANG(*)
-      REAL RMIN2,RMAX2,SUMS(*),AIN(*),SUMMAX,FSTEP
-      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
-      PARAMETER (PI=3.1415926535898)
-C
-      ID=I-I1+1+(I2-I1+1)*(J-I1)
-      DF1(ID)=FSTEP*I
-      DF2(ID)=FSTEP*J
-      ANG(ID)=22.5*K
-      ANG(ID)=ANG(ID)/180.0*PI
-      SUMS(ID)=EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),
-     +  ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
-C
-      RETURN
-      END      
-C
-C**************************************************************************
       REAL FUNCTION EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
-     +                      THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+     +			    THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -643,41 +515,39 @@ C
       REAL CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,THETATR,SUM1
       REAL SUM,AIN(*),RES2,RMIN2,RMAX2,CTF,CTFV,HW,SUM2
 C
-            SUM=0.0
-            SUM1=0.0
-            SUM2=0.0
-            DO 20 L=1,NXYZ(1)/2
-              LL=L-1
-              DO 20 M=1,NXYZ(2)
-                MM=M-1
-                IF (MM.GT.NXYZ(2)/2) MM=MM-NXYZ(2)
-                RES2=(REAL(LL)/NXYZ(1))**2+(REAL(MM)/NXYZ(2))**2
-                IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
-                  CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
-     +                     ANGAST,THETATR,LL,MM)
-                  ID=L+NXYZ(1)/2*(M-1)
-                  SUM=SUM+AIN(ID)*CTFV**2*EXP(HW*RES2)
-                  SUM1=SUM1+CTFV**4
-                  SUM2=SUM2+AIN(ID)**2*EXP(2.0*HW*RES2)
-                ENDIF
-20          CONTINUE
-            SUM=SUM/SQRT(SUM1*SUM2)
+      	    SUM=0.0
+      	    SUM1=0.0
+      	    SUM2=0.0
+      	    DO 20 L=1,NXYZ(1)/2
+      	      LL=L-1
+      	      DO 20 M=1,NXYZ(2)
+      		MM=M-1
+      		IF (MM.GT.NXYZ(2)/2) MM=MM-NXYZ(2)
+      		RES2=(REAL(LL)/NXYZ(1))**2+(REAL(MM)/NXYZ(2))**2
+      		IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
+      		  CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
+     +			   ANGAST,THETATR,LL,MM)
+      		  ID=L+NXYZ(1)/2*(M-1)
+      		  SUM=SUM+AIN(ID)*CTFV**2*EXP(HW*RES2)
+      		  SUM1=SUM1+CTFV**4
+      		  SUM2=SUM2+AIN(ID)**2*EXP(2.0*HW*RES2)
+      		ENDIF
+20	    CONTINUE
+      	    SUM=SUM/SQRT(SUM1*SUM2)
 C
       EVALCTF=SUM
       RETURN
       END
 C
 C**************************************************************************
-      SUBROUTINE REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,
-     +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
+      SUBROUTINE REFINE_CTF(DFMID1,DFMID2,ANGAST)
 C**************************************************************************
 C
       IMPLICIT NONE
 C
-      INTEGER NCYCLS,NXYZ(3)
+      INTEGER NCYCLS
       PARAMETER (NCYCLS=50)
       REAL DFMID1,DFMID2,ANGAST,XPAR(3),EPAR(3),RF,ESCALE,PI
-      REAL POWER(*),CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,HW
       PARAMETER (PI=3.1415926535898)
       DATA EPAR/100.0,100.0,0.05/
       DATA ESCALE/100.0/
@@ -690,8 +560,7 @@ C
       XPAR(2)=DFMID2
       XPAR(3)=ANGAST
       IF (XPAR(1).EQ.XPAR(2)) XPAR(1)=XPAR(1)+1.0
-      CALL VA04A(XPAR,EPAR,3,RF,ESCALE,0,1,NCYCLS,POWER,
-     +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
+      CALL VA04A(XPAR,EPAR,3,RF,ESCALE,0,1,NCYCLS)
       DFMID1=XPAR(1)
       DFMID2=XPAR(2)
       ANGAST=XPAR(3)
@@ -703,8 +572,7 @@ C
 C
 C******************************************************************************
 C
-      SUBROUTINE CALCFX(NX,XPAR,RF,AIN,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
+      SUBROUTINE CALCFX(NX,XPAR,RF)
 C
 C     CALCULATES NEW VALUE FOR F TO INPUT TO SUBROUTINE VA04A
 C
@@ -715,12 +583,14 @@ C
       INTEGER NXYZ(3),NX,IXBMX
       PARAMETER (IXBMX=512)
       REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
-      REAL RMIN2,RMAX2,AIN(*),EVALCTF
+      REAL RMIN2,RMAX2,AIN(IXBMX/2*IXBMX),EVALCTF
       REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,XPAR(3),RF
       PARAMETER (PI=3.1415926535898)
+      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,AIN,NXYZ,HW
 C
       RF=-EVALCTF(CS,WL,WGH1,WGH2,XPAR(1),XPAR(2),XPAR(3),
-     +            THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+     +		  THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+c      	print *,XPAR(1),XPAR(2),XPAR(3)/pi*180.0,sum
 C
       RETURN
       END
@@ -744,15 +614,61 @@ C
       END
 C
 C**************************************************************************
+      SUBROUTINE WRTIMG(FNAM,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN,AOUT)
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER I,J,NXYZ(3),MXYZ(3),MODE,ID,NXYZST(3)
+      REAL DMIN,DMAX,DMEAN,AOUT(*)
+      DOUBLE PRECISION DDMEAN
+      CHARACTER FNAM*70,TITLE*80
+      DATA TITLE/' OUTPUT IMAGE FROM TUBE_UNBEND'/
+C
+      WRITE(*,1000)NXYZ(1),NXYZ(2)
+1000  FORMAT(/,' WRITING IMAGE...'/' NX, NY= ',2I10)
+C
+      CALL IMOPEN(2,FNAM,'NEW')
+      CALL ITRHDR(2,1)
+      CALL IALMOD(2,MODE)
+      NXYZST(1)=0
+      NXYZST(2)=0
+      NXYZST(3)=0
+      CALL IALSIZ(2,NXYZ,NXYZST)
+      CALL IWRHDR(2,TITLE,1,0.0,0.0,0.0)
+      DMIN=1.E10
+      DMAX=-1.E10
+      DDMEAN=0.0D0
+      DO 10 J=1,NXYZ(2)
+      	ID=1+NXYZ(1)*(J-1)
+      	CALL IWRLIN(2,AOUT(ID))
+      	DO 10 I=1,NXYZ(1)
+      	  ID=I+NXYZ(1)*(J-1)
+      	  DDMEAN=DDMEAN+DBLE(AOUT(ID))
+      	  IF (AOUT(ID).LT.DMIN) DMIN=AOUT(ID)
+      	  IF (AOUT(ID).GT.DMAX) DMAX=AOUT(ID)
+10    CONTINUE
+      DMEAN=SNGL(DDMEAN)/NXYZ(1)/NXYZ(2)
+      CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+      CALL IMCLOSE(2)
+      WRITE(*,1030)DMIN,DMAX,DMEAN
+1030  FORMAT(/,' NEW VALUES:',
+     +       /,' DMIN, DMAX, DMEAN      ',3F14.3)
+C
+      RETURN
+      END
+C
+C**************************************************************************
 C
       SUBROUTINE rlft3(data,speq,nn1,nn2,nn3,isign)
 C
+C     IMPORTANT: the array "work" needs to be dimensioned with the largest
+C     of the input dimensions, nn1, nn2, or nn3
+C
       INTEGER isign,nn1,nn2,nn3,istat,iw
-      PARAMETER (iw=4096)
+      PARAMETER (iw=2048)
       COMPLEX data(nn1/2,nn2,nn3),speq(nn2,nn3)
-C
       REAL work(6*iw+15)
-C
       INTEGER i1,i2,i3,j1,j2,j3,nn(3),nnh,nnq
       DOUBLE PRECISION theta,wi,wpi,wpr,wr,wtemp
       COMPLEX c1,c2,h1,h2,w
@@ -814,7 +730,7 @@ C
       endif
 C
       if(isign.eq.-1)then
-        call pda_nfftb(3,nn,data,work,istat)
+        call pda_nfftb(3,nn,data,work,istat) 
       endif
       return
       END
@@ -871,15 +787,28 @@ C
 C
       return
       end
+C
 C**************************************************************************
-      SUBROUTINE PDA_CFFTB1 (N,C,CH,WA,AFAC)
-      DIMENSION       CH(*)      ,C(*)       ,WA(*)      ,AFAC(*)
-      NF = AFAC(2)
+C
+      SUBROUTINE PDA_CFFTB (N,C,WSAVE)
+      DIMENSION       C(1)       ,WSAVE(1)
+      IF (N .EQ. 1) RETURN
+      IW1 = N+N+1
+      IW2 = IW1+N+N
+      CALL PDA_CFFTB1 (N,C,WSAVE,WSAVE(IW1),WSAVE(IW2))
+      RETURN
+      END
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_CFFTB1 (N,C,CH,WA,IFAC)
+      DIMENSION       CH(1)      ,C(1)       ,WA(1)      ,IFAC(1)
+      NF = IFAC(2)
       NA = 0
       L1 = 1
       IW = 1
       DO 116 K1=1,NF
-         IP = AFAC(K1+2)
+         IP = IFAC(K1+2)
          L2 = IP*L1
          IDO = N/L2
          IDOT = IDO+IDO
@@ -933,22 +862,28 @@ C**************************************************************************
   117 CONTINUE
       RETURN
       END
-      SUBROUTINE PDA_CFFTB (N,C,WSAVE)
-      DIMENSION       C(*)       ,WSAVE(*)
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_CFFTF (N,C,WSAVE)
+      DIMENSION       C(1)       ,WSAVE(1)
       IF (N .EQ. 1) RETURN
       IW1 = N+N+1
       IW2 = IW1+N+N
-      CALL PDA_CFFTB1 (N,C,WSAVE,WSAVE(IW1),WSAVE(IW2))
+      CALL PDA_CFFTF1 (N,C,WSAVE,WSAVE(IW1),WSAVE(IW2))
       RETURN
       END
-      SUBROUTINE PDA_CFFTF1 (N,C,CH,WA,AFAC)
-      DIMENSION       CH(*)      ,C(*)       ,WA(*)      ,AFAC(*)
-      NF = AFAC(2)
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_CFFTF1 (N,C,CH,WA,IFAC)
+      DIMENSION       CH(1)      ,C(1)       ,WA(1)      ,IFAC(1)
+      NF = IFAC(2)
       NA = 0
       L1 = 1
       IW = 1
       DO 116 K1=1,NF
-         IP = AFAC(K1+2)
+         IP = IFAC(K1+2)
          L2 = IP*L1
          IDO = N/L2
          IDOT = IDO+IDO
@@ -1002,16 +937,22 @@ C**************************************************************************
   117 CONTINUE
       RETURN
       END
-      SUBROUTINE PDA_CFFTF (N,C,WSAVE)
-      DIMENSION       C(*)       ,WSAVE(*)
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_CFFTI (N,WSAVE)
+      DIMENSION       WSAVE(1)
       IF (N .EQ. 1) RETURN
       IW1 = N+N+1
       IW2 = IW1+N+N
-      CALL PDA_CFFTF1 (N,C,WSAVE,WSAVE(IW1),WSAVE(IW2))
+      CALL PDA_CFFTI1 (N,WSAVE(IW1),WSAVE(IW2))
       RETURN
       END
-      SUBROUTINE PDA_CFFTI1 (N,WA,AFAC)
-      DIMENSION       WA(*)      ,AFAC(*)    ,NTRYH(4)
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_CFFTI1 (N,WA,IFAC)
+      DIMENSION       WA(1)      ,IFAC(1)    ,NTRYH(4)
       DATA NTRYH(1),NTRYH(2),NTRYH(3),NTRYH(4)/3,4,2,5/
       NL = N
       NF = 0
@@ -1025,24 +966,24 @@ C**************************************************************************
       NR = NL-NTRY*NQ
       IF (NR) 101,105,101
   105 NF = NF+1
-      AFAC(NF+2) = NTRY
+      IFAC(NF+2) = NTRY
       NL = NQ
       IF (NTRY .NE. 2) GO TO 107
       IF (NF .EQ. 1) GO TO 107
       DO 106 I=2,NF
          IB = NF-I+2
-         AFAC(IB+2) = AFAC(IB+1)
+         IFAC(IB+2) = IFAC(IB+1)
   106 CONTINUE
-      AFAC(3) = 2
+      IFAC(3) = 2
   107 IF (NL .NE. 1) GO TO 104
-      AFAC(1) = N
-      AFAC(2) = NF
+      IFAC(1) = N
+      IFAC(2) = NF
       TPI = 6.28318530717959
       ARGH = TPI/FLOAT(N)
       I = 2
       L1 = 1
       DO 110 K1=1,NF
-         IP = AFAC(K1+2)
+         IP = IFAC(K1+2)
          LD = 0
          L2 = L1*IP
          IDO = N/L2
@@ -1070,14 +1011,9 @@ C**************************************************************************
   110 CONTINUE
       RETURN
       END
-      SUBROUTINE PDA_CFFTI (N,WSAVE)
-      DIMENSION       WSAVE(*)
-      IF (N .EQ. 1) RETURN
-      IW1 = N+N+1
-      IW2 = IW1+N+N
-      CALL PDA_CFFTI1 (N,WSAVE(IW1),WSAVE(IW2))
-      RETURN
-      END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_NFFTB( NDIM, DIM, DATA, WORK, ISTAT )
 *+
 *  Name:
@@ -1299,8 +1235,7 @@ C         FAC = 1.0/SQRT( REAL ( N ) )
 *  dimension. If the next dimension is the dimension currently being
 *  transformed, skip over it so that it stays at 1 (but increment the
 *  vector address to account for the skip).
-               DO WHILE( (K .LE. NDIM) .AND. 
-     +            (CART( K ) .GT. DIM( K )) ) 
+               DO WHILE( CART( K ) .GT. DIM( K ) ) 
                   CART( K ) = 1
                   K = K + 1
 
@@ -1324,6 +1259,9 @@ C         FAC = 1.0/SQRT( REAL ( N ) )
       END IF
          
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_NFFTF( NDIM, DIM, DATA, WORK, ISTAT )
 *+
 *  Name:
@@ -1561,8 +1499,7 @@ C         FAC = 1.0/SQRT( REAL ( N ) )
 *  dimension. If the next dimension is the dimension currently being
 *  transformed, skip over it so that it stays at 1 (but increment the
 *  vector address to account for the skip).
-               DO WHILE( (K .LE. NDIM) .AND. 
-     +            (CART( K ) .GT. DIM( K )) )
+               DO WHILE( CART( K ) .GT. DIM( K ) ) 
                   CART( K ) = 1
                   K = K + 1
 
@@ -1586,200 +1523,12 @@ C         FAC = 1.0/SQRT( REAL ( N ) )
       END IF
          
       END
-      SUBROUTINE PDA_PASSB2 (IDO,L1,CC,CH,WA1)
-      DIMENSION       CC(IDO,2,L1)           ,CH(IDO,L1,2)           ,
-     1                WA1(*)
-      IF (IDO .GT. 2) GO TO 102
-      DO 101 K=1,L1
-         CH(1,K,1) = CC(1,1,K)+CC(1,2,K)
-         CH(1,K,2) = CC(1,1,K)-CC(1,2,K)
-         CH(2,K,1) = CC(2,1,K)+CC(2,2,K)
-         CH(2,K,2) = CC(2,1,K)-CC(2,2,K)
-  101 CONTINUE
-      RETURN
-  102 DO 104 K=1,L1
-         DO 103 I=2,IDO,2
-            CH(I-1,K,1) = CC(I-1,1,K)+CC(I-1,2,K)
-            TR2 = CC(I-1,1,K)-CC(I-1,2,K)
-            CH(I,K,1) = CC(I,1,K)+CC(I,2,K)
-            TI2 = CC(I,1,K)-CC(I,2,K)
-            CH(I,K,2) = WA1(I-1)*TI2+WA1(I)*TR2
-            CH(I-1,K,2) = WA1(I-1)*TR2-WA1(I)*TI2
-  103    CONTINUE
-  104 CONTINUE
-      RETURN
-      END
-      SUBROUTINE PDA_PASSB3 (IDO,L1,CC,CH,WA1,WA2)
-      DIMENSION       CC(IDO,3,L1)           ,CH(IDO,L1,3)           ,
-     1                WA1(*)     ,WA2(*)
-      DATA TAUR,TAUI /-.5,.866025403784439/
-      IF (IDO .NE. 2) GO TO 102
-      DO 101 K=1,L1
-         TR2 = CC(1,2,K)+CC(1,3,K)
-         CR2 = CC(1,1,K)+TAUR*TR2
-         CH(1,K,1) = CC(1,1,K)+TR2
-         TI2 = CC(2,2,K)+CC(2,3,K)
-         CI2 = CC(2,1,K)+TAUR*TI2
-         CH(2,K,1) = CC(2,1,K)+TI2
-         CR3 = TAUI*(CC(1,2,K)-CC(1,3,K))
-         CI3 = TAUI*(CC(2,2,K)-CC(2,3,K))
-         CH(1,K,2) = CR2-CI3
-         CH(1,K,3) = CR2+CI3
-         CH(2,K,2) = CI2+CR3
-         CH(2,K,3) = CI2-CR3
-  101 CONTINUE
-      RETURN
-  102 DO 104 K=1,L1
-         DO 103 I=2,IDO,2
-            TR2 = CC(I-1,2,K)+CC(I-1,3,K)
-            CR2 = CC(I-1,1,K)+TAUR*TR2
-            CH(I-1,K,1) = CC(I-1,1,K)+TR2
-            TI2 = CC(I,2,K)+CC(I,3,K)
-            CI2 = CC(I,1,K)+TAUR*TI2
-            CH(I,K,1) = CC(I,1,K)+TI2
-            CR3 = TAUI*(CC(I-1,2,K)-CC(I-1,3,K))
-            CI3 = TAUI*(CC(I,2,K)-CC(I,3,K))
-            DR2 = CR2-CI3
-            DR3 = CR2+CI3
-            DI2 = CI2+CR3
-            DI3 = CI2-CR3
-            CH(I,K,2) = WA1(I-1)*DI2+WA1(I)*DR2
-            CH(I-1,K,2) = WA1(I-1)*DR2-WA1(I)*DI2
-            CH(I,K,3) = WA2(I-1)*DI3+WA2(I)*DR3
-            CH(I-1,K,3) = WA2(I-1)*DR3-WA2(I)*DI3
-  103    CONTINUE
-  104 CONTINUE
-      RETURN
-      END
-      SUBROUTINE PDA_PASSB4 (IDO,L1,CC,CH,WA1,WA2,WA3)
-      DIMENSION       CC(IDO,4,L1)           ,CH(IDO,L1,4)           ,
-     1                WA1(*)     ,WA2(*)     ,WA3(*)
-      IF (IDO .NE. 2) GO TO 102
-      DO 101 K=1,L1
-         TI1 = CC(2,1,K)-CC(2,3,K)
-         TI2 = CC(2,1,K)+CC(2,3,K)
-         TR4 = CC(2,4,K)-CC(2,2,K)
-         TI3 = CC(2,2,K)+CC(2,4,K)
-         TR1 = CC(1,1,K)-CC(1,3,K)
-         TR2 = CC(1,1,K)+CC(1,3,K)
-         TI4 = CC(1,2,K)-CC(1,4,K)
-         TR3 = CC(1,2,K)+CC(1,4,K)
-         CH(1,K,1) = TR2+TR3
-         CH(1,K,3) = TR2-TR3
-         CH(2,K,1) = TI2+TI3
-         CH(2,K,3) = TI2-TI3
-         CH(1,K,2) = TR1+TR4
-         CH(1,K,4) = TR1-TR4
-         CH(2,K,2) = TI1+TI4
-         CH(2,K,4) = TI1-TI4
-  101 CONTINUE
-      RETURN
-  102 DO 104 K=1,L1
-         DO 103 I=2,IDO,2
-            TI1 = CC(I,1,K)-CC(I,3,K)
-            TI2 = CC(I,1,K)+CC(I,3,K)
-            TI3 = CC(I,2,K)+CC(I,4,K)
-            TR4 = CC(I,4,K)-CC(I,2,K)
-            TR1 = CC(I-1,1,K)-CC(I-1,3,K)
-            TR2 = CC(I-1,1,K)+CC(I-1,3,K)
-            TI4 = CC(I-1,2,K)-CC(I-1,4,K)
-            TR3 = CC(I-1,2,K)+CC(I-1,4,K)
-            CH(I-1,K,1) = TR2+TR3
-            CR3 = TR2-TR3
-            CH(I,K,1) = TI2+TI3
-            CI3 = TI2-TI3
-            CR2 = TR1+TR4
-            CR4 = TR1-TR4
-            CI2 = TI1+TI4
-            CI4 = TI1-TI4
-            CH(I-1,K,2) = WA1(I-1)*CR2-WA1(I)*CI2
-            CH(I,K,2) = WA1(I-1)*CI2+WA1(I)*CR2
-            CH(I-1,K,3) = WA2(I-1)*CR3-WA2(I)*CI3
-            CH(I,K,3) = WA2(I-1)*CI3+WA2(I)*CR3
-            CH(I-1,K,4) = WA3(I-1)*CR4-WA3(I)*CI4
-            CH(I,K,4) = WA3(I-1)*CI4+WA3(I)*CR4
-  103    CONTINUE
-  104 CONTINUE
-      RETURN
-      END
-      SUBROUTINE PDA_PASSB5 (IDO,L1,CC,CH,WA1,WA2,WA3,WA4)
-      DIMENSION       CC(IDO,5,L1)           ,CH(IDO,L1,5)           ,
-     1                WA1(*)     ,WA2(*)     ,WA3(*)     ,WA4(*)
-      DATA TR11,TI11,TR12,TI12 /.309016994374947,.951056516295154,
-     1-.809016994374947,.587785252292473/
-      IF (IDO .NE. 2) GO TO 102
-      DO 101 K=1,L1
-         TI5 = CC(2,2,K)-CC(2,5,K)
-         TI2 = CC(2,2,K)+CC(2,5,K)
-         TI4 = CC(2,3,K)-CC(2,4,K)
-         TI3 = CC(2,3,K)+CC(2,4,K)
-         TR5 = CC(1,2,K)-CC(1,5,K)
-         TR2 = CC(1,2,K)+CC(1,5,K)
-         TR4 = CC(1,3,K)-CC(1,4,K)
-         TR3 = CC(1,3,K)+CC(1,4,K)
-         CH(1,K,1) = CC(1,1,K)+TR2+TR3
-         CH(2,K,1) = CC(2,1,K)+TI2+TI3
-         CR2 = CC(1,1,K)+TR11*TR2+TR12*TR3
-         CI2 = CC(2,1,K)+TR11*TI2+TR12*TI3
-         CR3 = CC(1,1,K)+TR12*TR2+TR11*TR3
-         CI3 = CC(2,1,K)+TR12*TI2+TR11*TI3
-         CR5 = TI11*TR5+TI12*TR4
-         CI5 = TI11*TI5+TI12*TI4
-         CR4 = TI12*TR5-TI11*TR4
-         CI4 = TI12*TI5-TI11*TI4
-         CH(1,K,2) = CR2-CI5
-         CH(1,K,5) = CR2+CI5
-         CH(2,K,2) = CI2+CR5
-         CH(2,K,3) = CI3+CR4
-         CH(1,K,3) = CR3-CI4
-         CH(1,K,4) = CR3+CI4
-         CH(2,K,4) = CI3-CR4
-         CH(2,K,5) = CI2-CR5
-  101 CONTINUE
-      RETURN
-  102 DO 104 K=1,L1
-         DO 103 I=2,IDO,2
-            TI5 = CC(I,2,K)-CC(I,5,K)
-            TI2 = CC(I,2,K)+CC(I,5,K)
-            TI4 = CC(I,3,K)-CC(I,4,K)
-            TI3 = CC(I,3,K)+CC(I,4,K)
-            TR5 = CC(I-1,2,K)-CC(I-1,5,K)
-            TR2 = CC(I-1,2,K)+CC(I-1,5,K)
-            TR4 = CC(I-1,3,K)-CC(I-1,4,K)
-            TR3 = CC(I-1,3,K)+CC(I-1,4,K)
-            CH(I-1,K,1) = CC(I-1,1,K)+TR2+TR3
-            CH(I,K,1) = CC(I,1,K)+TI2+TI3
-            CR2 = CC(I-1,1,K)+TR11*TR2+TR12*TR3
-            CI2 = CC(I,1,K)+TR11*TI2+TR12*TI3
-            CR3 = CC(I-1,1,K)+TR12*TR2+TR11*TR3
-            CI3 = CC(I,1,K)+TR12*TI2+TR11*TI3
-            CR5 = TI11*TR5+TI12*TR4
-            CI5 = TI11*TI5+TI12*TI4
-            CR4 = TI12*TR5-TI11*TR4
-            CI4 = TI12*TI5-TI11*TI4
-            DR3 = CR3-CI4
-            DR4 = CR3+CI4
-            DI3 = CI3+CR4
-            DI4 = CI3-CR4
-            DR5 = CR2+CI5
-            DR2 = CR2-CI5
-            DI5 = CI2-CR5
-            DI2 = CI2+CR5
-            CH(I-1,K,2) = WA1(I-1)*DR2-WA1(I)*DI2
-            CH(I,K,2) = WA1(I-1)*DI2+WA1(I)*DR2
-            CH(I-1,K,3) = WA2(I-1)*DR3-WA2(I)*DI3
-            CH(I,K,3) = WA2(I-1)*DI3+WA2(I)*DR3
-            CH(I-1,K,4) = WA3(I-1)*DR4-WA3(I)*DI4
-            CH(I,K,4) = WA3(I-1)*DI4+WA3(I)*DR4
-            CH(I-1,K,5) = WA4(I-1)*DR5-WA4(I)*DI5
-            CH(I,K,5) = WA4(I-1)*DI5+WA4(I)*DR5
-  103    CONTINUE
-  104 CONTINUE
-      RETURN
-      END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_PASSB (NAC,IDO,IP,L1,IDL1,CC,C1,C2,CH,CH2,WA)
       DIMENSION       CH(IDO,L1,IP)          ,CC(IDO,IP,L1)          ,
-     1                C1(IDO,L1,IP)          ,WA(*)      ,C2(IDL1,IP),
+     1                C1(IDO,L1,IP)          ,WA(1)      ,C2(IDL1,IP),
      2                CH2(IDL1,IP)
       IDOT = IDO/2
       NT = IP*IDL1
@@ -1893,9 +1642,12 @@ C
   130 CONTINUE
       RETURN
       END
-      SUBROUTINE PDA_PASSF2 (IDO,L1,CC,CH,WA1)
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_PASSB2 (IDO,L1,CC,CH,WA1)
       DIMENSION       CC(IDO,2,L1)           ,CH(IDO,L1,2)           ,
-     1                WA1(*)
+     1                WA1(1)
       IF (IDO .GT. 2) GO TO 102
       DO 101 K=1,L1
          CH(1,K,1) = CC(1,1,K)+CC(1,2,K)
@@ -1910,16 +1662,19 @@ C
             TR2 = CC(I-1,1,K)-CC(I-1,2,K)
             CH(I,K,1) = CC(I,1,K)+CC(I,2,K)
             TI2 = CC(I,1,K)-CC(I,2,K)
-            CH(I,K,2) = WA1(I-1)*TI2-WA1(I)*TR2
-            CH(I-1,K,2) = WA1(I-1)*TR2+WA1(I)*TI2
+            CH(I,K,2) = WA1(I-1)*TI2+WA1(I)*TR2
+            CH(I-1,K,2) = WA1(I-1)*TR2-WA1(I)*TI2
   103    CONTINUE
   104 CONTINUE
       RETURN
       END
-      SUBROUTINE PDA_PASSF3 (IDO,L1,CC,CH,WA1,WA2)
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_PASSB3 (IDO,L1,CC,CH,WA1,WA2)
       DIMENSION       CC(IDO,3,L1)           ,CH(IDO,L1,3)           ,
-     1                WA1(*)     ,WA2(*)
-      DATA TAUR,TAUI /-.5,-.866025403784439/
+     1                WA1(1)     ,WA2(1)
+      DATA TAUR,TAUI /-.5,.866025403784439/
       IF (IDO .NE. 2) GO TO 102
       DO 101 K=1,L1
          TR2 = CC(1,2,K)+CC(1,3,K)
@@ -1950,26 +1705,29 @@ C
             DR3 = CR2+CI3
             DI2 = CI2+CR3
             DI3 = CI2-CR3
-            CH(I,K,2) = WA1(I-1)*DI2-WA1(I)*DR2
-            CH(I-1,K,2) = WA1(I-1)*DR2+WA1(I)*DI2
-            CH(I,K,3) = WA2(I-1)*DI3-WA2(I)*DR3
-            CH(I-1,K,3) = WA2(I-1)*DR3+WA2(I)*DI3
+            CH(I,K,2) = WA1(I-1)*DI2+WA1(I)*DR2
+            CH(I-1,K,2) = WA1(I-1)*DR2-WA1(I)*DI2
+            CH(I,K,3) = WA2(I-1)*DI3+WA2(I)*DR3
+            CH(I-1,K,3) = WA2(I-1)*DR3-WA2(I)*DI3
   103    CONTINUE
   104 CONTINUE
       RETURN
       END
-      SUBROUTINE PDA_PASSF4 (IDO,L1,CC,CH,WA1,WA2,WA3)
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_PASSB4 (IDO,L1,CC,CH,WA1,WA2,WA3)
       DIMENSION       CC(IDO,4,L1)           ,CH(IDO,L1,4)           ,
-     1                WA1(*)     ,WA2(*)     ,WA3(*)
+     1                WA1(1)     ,WA2(1)     ,WA3(1)
       IF (IDO .NE. 2) GO TO 102
       DO 101 K=1,L1
          TI1 = CC(2,1,K)-CC(2,3,K)
          TI2 = CC(2,1,K)+CC(2,3,K)
-         TR4 = CC(2,2,K)-CC(2,4,K)
+         TR4 = CC(2,4,K)-CC(2,2,K)
          TI3 = CC(2,2,K)+CC(2,4,K)
          TR1 = CC(1,1,K)-CC(1,3,K)
          TR2 = CC(1,1,K)+CC(1,3,K)
-         TI4 = CC(1,4,K)-CC(1,2,K)
+         TI4 = CC(1,2,K)-CC(1,4,K)
          TR3 = CC(1,2,K)+CC(1,4,K)
          CH(1,K,1) = TR2+TR3
          CH(1,K,3) = TR2-TR3
@@ -1986,10 +1744,10 @@ C
             TI1 = CC(I,1,K)-CC(I,3,K)
             TI2 = CC(I,1,K)+CC(I,3,K)
             TI3 = CC(I,2,K)+CC(I,4,K)
-            TR4 = CC(I,2,K)-CC(I,4,K)
+            TR4 = CC(I,4,K)-CC(I,2,K)
             TR1 = CC(I-1,1,K)-CC(I-1,3,K)
             TR2 = CC(I-1,1,K)+CC(I-1,3,K)
-            TI4 = CC(I-1,4,K)-CC(I-1,2,K)
+            TI4 = CC(I-1,2,K)-CC(I-1,4,K)
             TR3 = CC(I-1,2,K)+CC(I-1,4,K)
             CH(I-1,K,1) = TR2+TR3
             CR3 = TR2-TR3
@@ -1999,21 +1757,24 @@ C
             CR4 = TR1-TR4
             CI2 = TI1+TI4
             CI4 = TI1-TI4
-            CH(I-1,K,2) = WA1(I-1)*CR2+WA1(I)*CI2
-            CH(I,K,2) = WA1(I-1)*CI2-WA1(I)*CR2
-            CH(I-1,K,3) = WA2(I-1)*CR3+WA2(I)*CI3
-            CH(I,K,3) = WA2(I-1)*CI3-WA2(I)*CR3
-            CH(I-1,K,4) = WA3(I-1)*CR4+WA3(I)*CI4
-            CH(I,K,4) = WA3(I-1)*CI4-WA3(I)*CR4
+            CH(I-1,K,2) = WA1(I-1)*CR2-WA1(I)*CI2
+            CH(I,K,2) = WA1(I-1)*CI2+WA1(I)*CR2
+            CH(I-1,K,3) = WA2(I-1)*CR3-WA2(I)*CI3
+            CH(I,K,3) = WA2(I-1)*CI3+WA2(I)*CR3
+            CH(I-1,K,4) = WA3(I-1)*CR4-WA3(I)*CI4
+            CH(I,K,4) = WA3(I-1)*CI4+WA3(I)*CR4
   103    CONTINUE
   104 CONTINUE
       RETURN
       END
-      SUBROUTINE PDA_PASSF5 (IDO,L1,CC,CH,WA1,WA2,WA3,WA4)
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_PASSB5 (IDO,L1,CC,CH,WA1,WA2,WA3,WA4)
       DIMENSION       CC(IDO,5,L1)           ,CH(IDO,L1,5)           ,
-     1                WA1(*)     ,WA2(*)     ,WA3(*)     ,WA4(*)
-      DATA TR11,TI11,TR12,TI12 /.309016994374947,-.951056516295154,
-     1-.809016994374947,-.587785252292473/
+     1                WA1(1)     ,WA2(1)     ,WA3(1)     ,WA4(1)
+      DATA TR11,TI11,TR12,TI12 /.309016994374947,.951056516295154,
+     1-.809016994374947,.587785252292473/
       IF (IDO .NE. 2) GO TO 102
       DO 101 K=1,L1
          TI5 = CC(2,2,K)-CC(2,5,K)
@@ -2072,21 +1833,24 @@ C
             DR2 = CR2-CI5
             DI5 = CI2-CR5
             DI2 = CI2+CR5
-            CH(I-1,K,2) = WA1(I-1)*DR2+WA1(I)*DI2
-            CH(I,K,2) = WA1(I-1)*DI2-WA1(I)*DR2
-            CH(I-1,K,3) = WA2(I-1)*DR3+WA2(I)*DI3
-            CH(I,K,3) = WA2(I-1)*DI3-WA2(I)*DR3
-            CH(I-1,K,4) = WA3(I-1)*DR4+WA3(I)*DI4
-            CH(I,K,4) = WA3(I-1)*DI4-WA3(I)*DR4
-            CH(I-1,K,5) = WA4(I-1)*DR5+WA4(I)*DI5
-            CH(I,K,5) = WA4(I-1)*DI5-WA4(I)*DR5
+            CH(I-1,K,2) = WA1(I-1)*DR2-WA1(I)*DI2
+            CH(I,K,2) = WA1(I-1)*DI2+WA1(I)*DR2
+            CH(I-1,K,3) = WA2(I-1)*DR3-WA2(I)*DI3
+            CH(I,K,3) = WA2(I-1)*DI3+WA2(I)*DR3
+            CH(I-1,K,4) = WA3(I-1)*DR4-WA3(I)*DI4
+            CH(I,K,4) = WA3(I-1)*DI4+WA3(I)*DR4
+            CH(I-1,K,5) = WA4(I-1)*DR5-WA4(I)*DI5
+            CH(I,K,5) = WA4(I-1)*DI5+WA4(I)*DR5
   103    CONTINUE
   104 CONTINUE
       RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_PASSF (NAC,IDO,IP,L1,IDL1,CC,C1,C2,CH,CH2,WA)
       DIMENSION       CH(IDO,L1,IP)          ,CC(IDO,IP,L1)          ,
-     1                C1(IDO,L1,IP)          ,WA(*)      ,C2(IDL1,IP),
+     1                C1(IDO,L1,IP)          ,WA(1)      ,C2(IDL1,IP),
      2                CH2(IDL1,IP)
       IDOT = IDO/2
       NT = IP*IDL1
@@ -2200,9 +1964,215 @@ C
   130 CONTINUE
       RETURN
       END
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_PASSF2 (IDO,L1,CC,CH,WA1)
+      DIMENSION       CC(IDO,2,L1)           ,CH(IDO,L1,2)           ,
+     1                WA1(1)
+      IF (IDO .GT. 2) GO TO 102
+      DO 101 K=1,L1
+         CH(1,K,1) = CC(1,1,K)+CC(1,2,K)
+         CH(1,K,2) = CC(1,1,K)-CC(1,2,K)
+         CH(2,K,1) = CC(2,1,K)+CC(2,2,K)
+         CH(2,K,2) = CC(2,1,K)-CC(2,2,K)
+  101 CONTINUE
+      RETURN
+  102 DO 104 K=1,L1
+         DO 103 I=2,IDO,2
+            CH(I-1,K,1) = CC(I-1,1,K)+CC(I-1,2,K)
+            TR2 = CC(I-1,1,K)-CC(I-1,2,K)
+            CH(I,K,1) = CC(I,1,K)+CC(I,2,K)
+            TI2 = CC(I,1,K)-CC(I,2,K)
+            CH(I,K,2) = WA1(I-1)*TI2-WA1(I)*TR2
+            CH(I-1,K,2) = WA1(I-1)*TR2+WA1(I)*TI2
+  103    CONTINUE
+  104 CONTINUE
+      RETURN
+      END
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_PASSF3 (IDO,L1,CC,CH,WA1,WA2)
+      DIMENSION       CC(IDO,3,L1)           ,CH(IDO,L1,3)           ,
+     1                WA1(1)     ,WA2(1)
+      DATA TAUR,TAUI /-.5,-.866025403784439/
+      IF (IDO .NE. 2) GO TO 102
+      DO 101 K=1,L1
+         TR2 = CC(1,2,K)+CC(1,3,K)
+         CR2 = CC(1,1,K)+TAUR*TR2
+         CH(1,K,1) = CC(1,1,K)+TR2
+         TI2 = CC(2,2,K)+CC(2,3,K)
+         CI2 = CC(2,1,K)+TAUR*TI2
+         CH(2,K,1) = CC(2,1,K)+TI2
+         CR3 = TAUI*(CC(1,2,K)-CC(1,3,K))
+         CI3 = TAUI*(CC(2,2,K)-CC(2,3,K))
+         CH(1,K,2) = CR2-CI3
+         CH(1,K,3) = CR2+CI3
+         CH(2,K,2) = CI2+CR3
+         CH(2,K,3) = CI2-CR3
+  101 CONTINUE
+      RETURN
+  102 DO 104 K=1,L1
+         DO 103 I=2,IDO,2
+            TR2 = CC(I-1,2,K)+CC(I-1,3,K)
+            CR2 = CC(I-1,1,K)+TAUR*TR2
+            CH(I-1,K,1) = CC(I-1,1,K)+TR2
+            TI2 = CC(I,2,K)+CC(I,3,K)
+            CI2 = CC(I,1,K)+TAUR*TI2
+            CH(I,K,1) = CC(I,1,K)+TI2
+            CR3 = TAUI*(CC(I-1,2,K)-CC(I-1,3,K))
+            CI3 = TAUI*(CC(I,2,K)-CC(I,3,K))
+            DR2 = CR2-CI3
+            DR3 = CR2+CI3
+            DI2 = CI2+CR3
+            DI3 = CI2-CR3
+            CH(I,K,2) = WA1(I-1)*DI2-WA1(I)*DR2
+            CH(I-1,K,2) = WA1(I-1)*DR2+WA1(I)*DI2
+            CH(I,K,3) = WA2(I-1)*DI3-WA2(I)*DR3
+            CH(I-1,K,3) = WA2(I-1)*DR3+WA2(I)*DI3
+  103    CONTINUE
+  104 CONTINUE
+      RETURN
+      END
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_PASSF4 (IDO,L1,CC,CH,WA1,WA2,WA3)
+      DIMENSION       CC(IDO,4,L1)           ,CH(IDO,L1,4)           ,
+     1                WA1(1)     ,WA2(1)     ,WA3(1)
+      IF (IDO .NE. 2) GO TO 102
+      DO 101 K=1,L1
+         TI1 = CC(2,1,K)-CC(2,3,K)
+         TI2 = CC(2,1,K)+CC(2,3,K)
+         TR4 = CC(2,2,K)-CC(2,4,K)
+         TI3 = CC(2,2,K)+CC(2,4,K)
+         TR1 = CC(1,1,K)-CC(1,3,K)
+         TR2 = CC(1,1,K)+CC(1,3,K)
+         TI4 = CC(1,4,K)-CC(1,2,K)
+         TR3 = CC(1,2,K)+CC(1,4,K)
+         CH(1,K,1) = TR2+TR3
+         CH(1,K,3) = TR2-TR3
+         CH(2,K,1) = TI2+TI3
+         CH(2,K,3) = TI2-TI3
+         CH(1,K,2) = TR1+TR4
+         CH(1,K,4) = TR1-TR4
+         CH(2,K,2) = TI1+TI4
+         CH(2,K,4) = TI1-TI4
+  101 CONTINUE
+      RETURN
+  102 DO 104 K=1,L1
+         DO 103 I=2,IDO,2
+            TI1 = CC(I,1,K)-CC(I,3,K)
+            TI2 = CC(I,1,K)+CC(I,3,K)
+            TI3 = CC(I,2,K)+CC(I,4,K)
+            TR4 = CC(I,2,K)-CC(I,4,K)
+            TR1 = CC(I-1,1,K)-CC(I-1,3,K)
+            TR2 = CC(I-1,1,K)+CC(I-1,3,K)
+            TI4 = CC(I-1,4,K)-CC(I-1,2,K)
+            TR3 = CC(I-1,2,K)+CC(I-1,4,K)
+            CH(I-1,K,1) = TR2+TR3
+            CR3 = TR2-TR3
+            CH(I,K,1) = TI2+TI3
+            CI3 = TI2-TI3
+            CR2 = TR1+TR4
+            CR4 = TR1-TR4
+            CI2 = TI1+TI4
+            CI4 = TI1-TI4
+            CH(I-1,K,2) = WA1(I-1)*CR2+WA1(I)*CI2
+            CH(I,K,2) = WA1(I-1)*CI2-WA1(I)*CR2
+            CH(I-1,K,3) = WA2(I-1)*CR3+WA2(I)*CI3
+            CH(I,K,3) = WA2(I-1)*CI3-WA2(I)*CR3
+            CH(I-1,K,4) = WA3(I-1)*CR4+WA3(I)*CI4
+            CH(I,K,4) = WA3(I-1)*CI4-WA3(I)*CR4
+  103    CONTINUE
+  104 CONTINUE
+      RETURN
+      END
+C
+C**************************************************************************
+C
+      SUBROUTINE PDA_PASSF5 (IDO,L1,CC,CH,WA1,WA2,WA3,WA4)
+      DIMENSION       CC(IDO,5,L1)           ,CH(IDO,L1,5)           ,
+     1                WA1(1)     ,WA2(1)     ,WA3(1)     ,WA4(1)
+      DATA TR11,TI11,TR12,TI12 /.309016994374947,-.951056516295154,
+     1-.809016994374947,-.587785252292473/
+      IF (IDO .NE. 2) GO TO 102
+      DO 101 K=1,L1
+         TI5 = CC(2,2,K)-CC(2,5,K)
+         TI2 = CC(2,2,K)+CC(2,5,K)
+         TI4 = CC(2,3,K)-CC(2,4,K)
+         TI3 = CC(2,3,K)+CC(2,4,K)
+         TR5 = CC(1,2,K)-CC(1,5,K)
+         TR2 = CC(1,2,K)+CC(1,5,K)
+         TR4 = CC(1,3,K)-CC(1,4,K)
+         TR3 = CC(1,3,K)+CC(1,4,K)
+         CH(1,K,1) = CC(1,1,K)+TR2+TR3
+         CH(2,K,1) = CC(2,1,K)+TI2+TI3
+         CR2 = CC(1,1,K)+TR11*TR2+TR12*TR3
+         CI2 = CC(2,1,K)+TR11*TI2+TR12*TI3
+         CR3 = CC(1,1,K)+TR12*TR2+TR11*TR3
+         CI3 = CC(2,1,K)+TR12*TI2+TR11*TI3
+         CR5 = TI11*TR5+TI12*TR4
+         CI5 = TI11*TI5+TI12*TI4
+         CR4 = TI12*TR5-TI11*TR4
+         CI4 = TI12*TI5-TI11*TI4
+         CH(1,K,2) = CR2-CI5
+         CH(1,K,5) = CR2+CI5
+         CH(2,K,2) = CI2+CR5
+         CH(2,K,3) = CI3+CR4
+         CH(1,K,3) = CR3-CI4
+         CH(1,K,4) = CR3+CI4
+         CH(2,K,4) = CI3-CR4
+         CH(2,K,5) = CI2-CR5
+  101 CONTINUE
+      RETURN
+  102 DO 104 K=1,L1
+         DO 103 I=2,IDO,2
+            TI5 = CC(I,2,K)-CC(I,5,K)
+            TI2 = CC(I,2,K)+CC(I,5,K)
+            TI4 = CC(I,3,K)-CC(I,4,K)
+            TI3 = CC(I,3,K)+CC(I,4,K)
+            TR5 = CC(I-1,2,K)-CC(I-1,5,K)
+            TR2 = CC(I-1,2,K)+CC(I-1,5,K)
+            TR4 = CC(I-1,3,K)-CC(I-1,4,K)
+            TR3 = CC(I-1,3,K)+CC(I-1,4,K)
+            CH(I-1,K,1) = CC(I-1,1,K)+TR2+TR3
+            CH(I,K,1) = CC(I,1,K)+TI2+TI3
+            CR2 = CC(I-1,1,K)+TR11*TR2+TR12*TR3
+            CI2 = CC(I,1,K)+TR11*TI2+TR12*TI3
+            CR3 = CC(I-1,1,K)+TR12*TR2+TR11*TR3
+            CI3 = CC(I,1,K)+TR12*TI2+TR11*TI3
+            CR5 = TI11*TR5+TI12*TR4
+            CI5 = TI11*TI5+TI12*TI4
+            CR4 = TI12*TR5-TI11*TR4
+            CI4 = TI12*TI5-TI11*TI4
+            DR3 = CR3-CI4
+            DR4 = CR3+CI4
+            DI3 = CI3+CR4
+            DI4 = CI3-CR4
+            DR5 = CR2+CI5
+            DR2 = CR2-CI5
+            DI5 = CI2-CR5
+            DI2 = CI2+CR5
+            CH(I-1,K,2) = WA1(I-1)*DR2+WA1(I)*DI2
+            CH(I,K,2) = WA1(I-1)*DI2-WA1(I)*DR2
+            CH(I-1,K,3) = WA2(I-1)*DR3+WA2(I)*DI3
+            CH(I,K,3) = WA2(I-1)*DI3-WA2(I)*DR3
+            CH(I-1,K,4) = WA3(I-1)*DR4+WA3(I)*DI4
+            CH(I,K,4) = WA3(I-1)*DI4-WA3(I)*DR4
+            CH(I-1,K,5) = WA4(I-1)*DR5+WA4(I)*DI5
+            CH(I,K,5) = WA4(I-1)*DI5-WA4(I)*DR5
+  103    CONTINUE
+  104 CONTINUE
+      RETURN
+      END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADB2 (IDO,L1,CC,CH,WA1)
       DIMENSION       CC(IDO,2,L1)           ,CH(IDO,L1,2)           ,
-     1                WA1(*)
+     1                WA1(1)
       DO 101 K=1,L1
          CH(1,K,1) = CC(1,1,K)+CC(IDO,2,K)
          CH(1,K,2) = CC(1,1,K)-CC(IDO,2,K)
@@ -2227,9 +2197,12 @@ C
   106 CONTINUE
   107 RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADB3 (IDO,L1,CC,CH,WA1,WA2)
       DIMENSION       CC(IDO,3,L1)           ,CH(IDO,L1,3)           ,
-     1                WA1(*)     ,WA2(*)
+     1                WA1(1)     ,WA2(1)
       DATA TAUR,TAUI /-.5,.866025403784439/
       DO 101 K=1,L1
          TR2 = CC(IDO,2,K)+CC(IDO,2,K)
@@ -2264,9 +2237,12 @@ C
   103 CONTINUE
       RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADB4 (IDO,L1,CC,CH,WA1,WA2,WA3)
       DIMENSION       CC(IDO,4,L1)           ,CH(IDO,L1,4)           ,
-     1                WA1(*)     ,WA2(*)     ,WA3(*)
+     1                WA1(1)     ,WA2(1)     ,WA3(1)
       DATA SQRT2 /1.414213562373095/
       DO 101 K=1,L1
          TR1 = CC(1,1,K)-CC(IDO,4,K)
@@ -2321,9 +2297,12 @@ C
   106 CONTINUE
   107 RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADB5 (IDO,L1,CC,CH,WA1,WA2,WA3,WA4)
       DIMENSION       CC(IDO,5,L1)           ,CH(IDO,L1,5)           ,
-     1                WA1(*)     ,WA2(*)     ,WA3(*)     ,WA4(*)
+     1                WA1(1)     ,WA2(1)     ,WA3(1)     ,WA4(1)
       DATA TR11,TI11,TR12,TI12 /.309016994374947,.951056516295154,
      1-.809016994374947,.587785252292473/
       DO 101 K=1,L1
@@ -2384,10 +2363,13 @@ C
   103 CONTINUE
       RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADBG (IDO,IP,L1,IDL1,CC,C1,C2,CH,CH2,WA)
       DIMENSION       CH(IDO,L1,IP)          ,CC(IDO,IP,L1)          ,
      1                C1(IDO,L1,IP)          ,C2(IDL1,IP),
-     2                CH2(IDL1,IP)           ,WA(*)
+     2                CH2(IDL1,IP)           ,WA(1)
       DATA TPI/6.28318530717959/
       ARG = TPI/FLOAT(IP)
       DCP = COS(ARG)
@@ -2544,9 +2526,12 @@ C
   142 CONTINUE
   143 RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADF2 (IDO,L1,CC,CH,WA1)
       DIMENSION       CH(IDO,2,L1)           ,CC(IDO,L1,2)           ,
-     1                WA1(*)
+     1                WA1(1)
       DO 101 K=1,L1
          CH(1,1,K) = CC(1,K,1)+CC(1,K,2)
          CH(IDO,2,K) = CC(1,K,1)-CC(1,K,2)
@@ -2571,9 +2556,12 @@ C
   106 CONTINUE
   107 RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADF3 (IDO,L1,CC,CH,WA1,WA2)
       DIMENSION       CH(IDO,3,L1)           ,CC(IDO,L1,3)           ,
-     1                WA1(*)     ,WA2(*)
+     1                WA1(1)     ,WA2(1)
       DATA TAUR,TAUI /-.5,.866025403784439/
       DO 101 K=1,L1
          CR2 = CC(1,K,2)+CC(1,K,3)
@@ -2606,9 +2594,12 @@ C
   103 CONTINUE
       RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADF4 (IDO,L1,CC,CH,WA1,WA2,WA3)
       DIMENSION       CC(IDO,L1,4)           ,CH(IDO,4,L1)           ,
-     1                WA1(*)     ,WA2(*)     ,WA3(*)
+     1                WA1(1)     ,WA2(1)     ,WA3(1)
       DATA HSQT2 /.7071067811865475/
       DO 101 K=1,L1
          TR1 = CC(1,K,2)+CC(1,K,4)
@@ -2659,9 +2650,12 @@ C
   106 CONTINUE
   107 RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADF5 (IDO,L1,CC,CH,WA1,WA2,WA3,WA4)
       DIMENSION       CC(IDO,L1,5)           ,CH(IDO,5,L1)           ,
-     1                WA1(*)     ,WA2(*)     ,WA3(*)     ,WA4(*)
+     1                WA1(1)     ,WA2(1)     ,WA3(1)     ,WA4(1)
       DATA TR11,TI11,TR12,TI12 /.309016994374947,.951056516295154,
      1-.809016994374947,.587785252292473/
       DO 101 K=1,L1
@@ -2718,10 +2712,13 @@ C
   103 CONTINUE
       RETURN
       END
+C
+C**************************************************************************
+C
       SUBROUTINE PDA_RADFG (IDO,IP,L1,IDL1,CC,C1,C2,CH,CH2,WA)
       DIMENSION       CH(IDO,L1,IP)          ,CC(IDO,IP,L1)          ,
      1                C1(IDO,L1,IP)          ,C2(IDL1,IP),
-     2                CH2(IDL1,IP)           ,WA(*)
+     2                CH2(IDL1,IP)           ,WA(1)
       DATA TPI/6.28318530717959/
       ARG = TPI/FLOAT(IP)
       DCP = COS(ARG)
@@ -2884,13 +2881,14 @@ C
   144 CONTINUE
       RETURN
       END
+C
 C**************************************************************************
-      SUBROUTINE VA04A(X,E,N,F,ESCALE,IPRINT,ICON,MAXIT,AIN,
-     +          CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
+      SUBROUTINE VA04A(X,E,N,F,ESCALE,IPRINT,ICON,MAXIT)
 C**************************************************************************
 C  STANDARD FORTRAN 66 (A VERIFIED PFORT SUBROUTINE)
-      DIMENSION W(40),X(1),E(1),AIN(*),NXYZ(3)
-C       W[N*(N+3)]
+C      COMMON W
+      DIMENSION W(40),X(1),E(1)
+C	W[N*(N+3)]
       DDMAG=0.1*ESCALE
       SCER=0.05/ESCALE
       JJ=N*N+N
@@ -2910,8 +2908,7 @@ C       W[N*(N+3)]
     1 CONTINUE
       ITERC=1
       ISGRAD=2
-      CALL CALCFX(N,X,F,AIN,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
+      CALL CALCFX(N,X,F)
       FKEEP=ABS(F)+ABS(F)
     5 ITONE=1
       FP=F
@@ -2942,8 +2939,7 @@ C       W[N*(N+3)]
       X(I)=X(I)+DD*W(K)
       K=K+1
     9 CONTINUE
-      CALL CALCFX(N,X,F,AIN,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
+      CALL CALCFX(N,X,F)
 C
       NFCC=NFCC+1
       GO TO (10,11,12,13,14,96),IS
@@ -3116,8 +3112,7 @@ C
       X(I)=X(I)+10.*E(I)
   102 CONTINUE
       FKEEP=F
-      CALL CALCFX (N,X,F,AIN,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
+      CALL CALCFX (N,X,F)
       NFCC=NFCC+1
       DDMAG=0.
       GO TO 108
@@ -3168,3 +3163,4 @@ C   81 WRITE(6,82) MAXIT
   107 INN=1
       GO TO 35
       END
+

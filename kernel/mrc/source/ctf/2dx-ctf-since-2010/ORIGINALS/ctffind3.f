@@ -1,62 +1,62 @@
 C*****************************************************************************
 C
-C       CTFFIND3 - determines defocus and astigmatism for images of
-C       arbitrary size (MRC format). Astigmatic angle is measured form
-C       x axis (same convetiones as in the MRC 2D image processing 
-C       programs).
+C	CTFFIND3 - determines defocus and astigmatism for images of
+C	arbitrary size (MRC format). Astigmatic angle is measured form
+C	x axis (same convetiones as in the MRC 2D image processing 
+C	programs).
 C
-C       CARD 1: Input file name for image
-C       CARD 2: Output file name to check result
-C       CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
-C       CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep
+C	CARD 1: Input file name for image
+C	CARD 2: Output file name to check result
+C	CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
+C	CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep
 C
-C               The output image file to check the result of the fitting
-C               shows the filtered average power spectrum of the input
-C               image in one half, and the fitted CTF (squared) in the
-C               other half. The two halfs should agree very well for a
-C               sucessfull fit.
+C		The output image file to check the result of the fitting
+C		shows the filtered average power spectrum of the input
+C		image in one half, and the fitted CTF (squared) in the
+C		other half. The two halfs should agree very well for a
+C		sucessfull fit.
 C
-C               CS: Spherical aberration coefficient of the objective in mm
-C               HT: Electron beam voltage in kV
-C               AmpCnst: Amount of amplitude contrast (fraction). For ice
-C                        images 0.07, for negative stain about 0.15.
-C               XMAG: Magnification of original image
-C               DStep: Pixel size on scanner in microns
-C               Box: Tile size. The program devides the image into square
-C                    tiles and calculates the average power spectrum. Tiles
-C                    with a significatly higher or lower variance are 
-C                    excluded; these are parts of the image which are unlikely
-C                    to contain useful information (beam edge, film number 
-C                    etc). IMPORTANT: Box must have even pixel dimensions.
-C               ResMin: Low resolution end of data to be fitted.
-C               ResMaX: High resolution end of data to be fitted.
-C               dFMin: Starting defocus value for grid search in Angstrom. 
-C                      Positive values represent an underfocus. The program
-C                      performs a systematic grid search of defocus values 
-C                      and astigmatism before fitting a CTF to machine 
-C                      precision.
-C               dFMax: End defocus value for grid search in Angstrom.
-C               FStep: Step width for grid search in Angstrom.
+C		CS: Spherical aberration coefficient of the objective in mm
+C		HT: Electron beam voltage in kV
+C		AmpCnst: Amount of amplitude contrast (fraction). For ice
+C		         images 0.07, for negative stain about 0.15.
+C		XMAG: Magnification of original image
+C		DStep: Pixel size on scanner in microns
+C		Box: Tile size. The program devides the image into square
+C		     tiles and calculates the average power spectrum. Tiles
+C		     with a significatly higher or lower variance are 
+C		     excluded; these are parts of the image which are unlikely
+C		     to contain useful information (beam edge, film number 
+C		     etc). IMPORTANT: Box must have even pixel dimensions.
+C		ResMin: Low resolution end of data to be fitted.
+C		ResMaX: High resolution end of data to be fitted.
+C		dFMin: Starting defocus value for grid search in Angstrom. 
+C		       Positive values represent an underfocus. The program
+C		       performs a systematic grid search of defocus values 
+C		       and astigmatism before fitting a CTF to machine 
+C		       precision.
+C		dFMax: End defocus value for grid search in Angstrom.
+C		FStep: Step width for grid search in Angstrom.
 C
 C*****************************************************************************
-C       example command file (UNIX):
+C	example command file (UNIX):
 C
-C       #!/bin/csh -x
-C       #
-C       #   ctffind3
-C       #
-C       time /public/image/bin/ctffind3.exe << eof
-C       image.mrc
-C       power.mrc
-C       2.6,200.0,0.07,60000.0,28.0
-C       128,100.0,15.0,30000.0,90000.0,5000.0
-C       eof
-C       #
+C	#!/bin/csh -x
+C	#
+C	#   ctffind3
+C	#
+C	time /public/image/bin/ctffind3.exe << eof
+C	image.mrc
+C	power.mrc
+C	2.6,200.0,0.07,60000.0,28.0
+C	128,100.0,15.0,30000.0,90000.0,5000.0
+C	eof
+C	#
 C*****************************************************************************
 C
       PROGRAM CTFFIND3
 C
-C       NIKO, 21 SEPTEMBER 2002
+C	NIKO, 21 SEPTEMBER 2002
 C
       IMPLICIT NONE
 C
@@ -111,27 +111,27 @@ C
 1031  FORMAT(F5.1,F9.1,F8.2,F10.1,F9.1)
       WRITE(6,1040)
 1040  FORMAT(/' Positive defocus values for underfocus',
-     +       /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep')
+     +	     /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep')
       READ(5,*)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
       WRITE(6,1051)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
 1051  FORMAT(I4,2F11.1,2F10.1,F7.1/)
       ITEST=JXYZ(1)/2
       IF (2*ITEST.NE.JXYZ(1)) THEN
-        WRITE(6,1090)
-1090    FORMAT(/' Box size must be even number')
-        STOP
+      	WRITE(6,1090)
+1090	FORMAT(/' Box size must be even number')
+      	STOP
       ENDIF
       JXYZ(2)=JXYZ(1)
       JXYZ(3)=1
       IF (RESMIN.LT.RESMAX) THEN
-        TMP=RESMAX
-        RESMAX=RESMIN
-        RESMIN=TMP
+      	TMP=RESMAX
+      	RESMAX=RESMIN
+      	RESMIN=TMP
       ENDIF
       IF (DFMAX.LT.DFMIN) THEN
-        TMP=DFMAX
-        DFMAX=DFMIN
-        DFMIN=TMP
+      	TMP=DFMAX
+      	DFMAX=DFMIN
+      	DFMIN=TMP
       ENDIF
 C
       CALL GUESSF(FILEIN,CFORM,EX)
@@ -170,7 +170,7 @@ C
           IX=(J-1)*JXYZ(1)+1
           CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
           DRMS=DRMS+RMS**2
-          CNT=CNT+1
+      	  CNT=CNT+1
           IF (CNT.LE.50000) RMSA(CNT)=RMS
 10    CONTINUE
       DRMS=SQRT(DRMS/CNT)
@@ -211,7 +211,7 @@ C
         STOP ' Try reducing the tile size'
       ENDIF
       DO 30 K=1,KXYZ(1)*KXYZ(2)
-        POWER(K)=0.0
+      	POWER(K)=0.0
 30    CONTINUE
       SCAL=1.0/SQRT(REAL(JXYZ(1)*JXYZ(2)))
       CNT=0
@@ -221,32 +221,32 @@ C
       DO 100 I=1,NY
         IP=(I-1)*JXYZ(2)
         DO 20 J=1,JXYZ(2)
-          ID=1+NXYZ(1)*(J-1)
+      	  ID=1+NXYZ(1)*(J-1)
           CALL IREAD(10,AIN(ID),J+IP)
-20      CONTINUE
-        DO 100 J=1,NX
-          IX=(J-1)*JXYZ(1)+1
-          CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
-          IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
-            CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+20	CONTINUE
+      	DO 100 J=1,NX
+      	  IX=(J-1)*JXYZ(1)+1
+      	  CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
+      	  IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
+      	    CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
             DO 40 L=1,JXYZ(2)
-              DO 41 K=1,JXYZ(1)/2
+      	      DO 41 K=1,JXYZ(1)/2
                 ID=(K+JXYZ(1)/2*(L-1))*2
                 IS=K+KXYZ(1)*(L-1)
                 POWER(IS)=POWER(IS)
      +            +(ABOX(ID-1)**2+ABOX(ID)**2)*SCAL**2
-41            CONTINUE
+41	      CONTINUE
               IF (KXYZ(1).GT.JXYZ(1)/2)
      +          POWER(IS+1)=POWER(IS+1)+CABS(CBOXS(L)*SCAL)**2
-40          CONTINUE
-            CNT=CNT+1
-          ENDIF
+40	    CONTINUE
+      	    CNT=CNT+1
+      	  ENDIF
 100   CONTINUE
       WRITE(*,*)' Total tiles and number used',NX*NY,CNT
 C
       SCAL=1.0/CNT
       DO 60 K=1,KXYZ(1)*KXYZ(2)
-        POWER(K)=SQRT(POWER(K)*SCAL)
+      	POWER(K)=SQRT(POWER(K)*SCAL)
 60    CONTINUE
 C
 C       Filter power spectrum to remove slowly varying background
@@ -275,7 +275,7 @@ C
       DFMID1=DFMIN
       DFMID2=DFMAX
       CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
-     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
+     +		      POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
       RMIN2=RESMIN**2
       RMAX2=RESMAX**2
       HW=-1.0/RMAX2
@@ -285,7 +285,7 @@ C
      +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW)
 C
       DO 50 I=1,JXYZ(1)*JXYZ(2)
-        OUT(I)=0.0
+      	OUT(I)=0.0
 50    CONTINUE
       DO 200 L=1,JXYZ(1)/2
         LL=L-1
@@ -293,23 +293,23 @@ C
           MM=M-1
           IF (MM.GT.JXYZ(2)/2) MM=MM-JXYZ(2)
           ID=L+JXYZ(1)/2*(M-1)
-          I=L+JXYZ(1)/2
-          J=M+JXYZ(2)/2
-          IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
-          IS=I+JXYZ(1)*(J-1)
-          OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
-          IF (OUT(IS).GT.1.0) OUT(IS)=1.0
-          IF (OUT(IS).lT.-1.0) OUT(IS)=-1.0
+      	  I=L+JXYZ(1)/2
+      	  J=M+JXYZ(2)/2
+      	  IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
+      	  IS=I+JXYZ(1)*(J-1)
+      	  OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
+      	  IF (OUT(IS).GT.1.0) OUT(IS)=1.0
+      	  IF (OUT(IS).lT.-1.0) OUT(IS)=-1.0
           RES2=(REAL(LL)/JXYZ(1))**2+(REAL(MM)/JXYZ(2))**2
           IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
             CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
      +               ANGAST,THETATR,LL,MM)
-            I=JXYZ(1)/2-L+1
-            J=JXYZ(2)-J+2
-            IF (J.LE.JXYZ(2)) THEN
-              IS=I+JXYZ(1)*(J-1)
+     	    I=JXYZ(1)/2-L+1
+      	    J=JXYZ(2)-J+2
+      	    IF (J.LE.JXYZ(2)) THEN
+      	      IS=I+JXYZ(1)*(J-1)
               OUT(IS)=CTFV**2
-            ENDIF
+      	    ENDIF
           ENDIF
 200   CONTINUE
 C
@@ -323,15 +323,6 @@ C
         CALL IWRITE(10,OUT(ID),J)
 210   CONTINUE
       CALL ICLOSE(10)
-C
-CHENN>
-      open(11,FILE='SCRATCH/2dx_ctffind3.result.tmp',STATUS='NEW',ERR=998)
-        write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
-      close(11)
-      GOTO 9999
-998   stop 'ERROR on file open of SCRATCH/2dx_ctffind3.result.tmp'
-9999  continue
-CHENN<
 C
       END
 C
@@ -474,8 +465,8 @@ C
 C**************************************************************************
       SUBROUTINE BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
 C**************************************************************************
-C       Cuts out an area of size JXYZ from array AIN. IX, IY are
-C       upper left corner of boxed area.
+C	Cuts out an area of size JXYZ from array AIN. IX, IY are
+C	upper left corner of boxed area.
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -490,16 +481,16 @@ C
       M4=0.0
       DO 10 J=1,JXYZ(2)
         DO 10 I=1,JXYZ(1)
-          II=I+IX-1
-          JJ=J+IY-1
+      	  II=I+IX-1
+      	  JJ=J+IY-1
           ID=II+NXYZ(1)*(JJ-1)
           IDB=I+JXYZ(1)*(J-1)
           ABOX(IDB)=AIN(ID)
-          MEAN=MEAN+ABOX(IDB)
-          IF (I.EQ.1) M1=M1+ABOX(IDB)
-          IF (I.EQ.JXYZ(1)) M2=M2+ABOX(IDB)
-          IF (J.EQ.1) M3=M3+ABOX(IDB)
-          IF (J.EQ.JXYZ(2)) M4=M4+ABOX(IDB)
+      	  MEAN=MEAN+ABOX(IDB)
+      	  IF (I.EQ.1) M1=M1+ABOX(IDB)
+      	  IF (I.EQ.JXYZ(1)) M2=M2+ABOX(IDB)
+      	  IF (J.EQ.1) M3=M3+ABOX(IDB)
+      	  IF (J.EQ.JXYZ(2)) M4=M4+ABOX(IDB)
 10    CONTINUE
       MEAN=MEAN/JXYZ(1)/JXYZ(2)
       M1=M1/JXYZ(2)
@@ -508,7 +499,7 @@ C
       M4=M4/JXYZ(1)
       RMS=0.0
       DO 20 I=1,JXYZ(1)*JXYZ(2)
-        RMS=RMS+(ABOX(I)-MEAN)**2
+      	RMS=RMS+(ABOX(I)-MEAN)**2
 20    CONTINUE
       RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
       DO 30 J=1,JXYZ(2)
@@ -549,7 +540,7 @@ C
 C
 C**************************************************************************
       SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
-     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
+     +			AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -581,21 +572,21 @@ C
       DO 10 K=0,3
         DO 11 I=I1,I2
 !$OMP PARALLEL DO
-          DO 12 J=I1,I2
+      	  DO 12 J=I1,I2
             CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
      +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
      +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
 12        CONTINUE
 11      CONTINUE
         DO 13 I=1,ID
-          IF (SUMS(I).GT.SUMMAX) THEN
-            WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
-1100        FORMAT(3F12.2,F12.5)
-            SUMMAX=SUMS(I)
-            DFMID1S=DF1(I)
-            DFMID2S=DF2(I)
-            ANGASTS=ANG(I)
-          ENDIF
+      	  IF (SUMS(I).GT.SUMMAX) THEN
+      	    WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
+1100	    FORMAT(3F12.2,F12.5)
+      	    SUMMAX=SUMS(I)
+      	    DFMID1S=DF1(I)
+      	    DFMID2S=DF2(I)
+      	    ANGASTS=ANG(I)
+      	  ENDIF
 13      CONTINUE
 10    CONTINUE
       DEALLOCATE(SUMS,DF1,DF2,ANG)
@@ -609,7 +600,7 @@ C
 C
 C**************************************************************************
       SUBROUTINE SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +		  RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
      +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
 C**************************************************************************
 C
@@ -627,14 +618,14 @@ C
       ANG(ID)=22.5*K
       ANG(ID)=ANG(ID)/180.0*PI
       SUMS(ID)=EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),
-     +  ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+     +	ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
 C
       RETURN
       END      
 C
 C**************************************************************************
       REAL FUNCTION EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
-     +                      THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+     +			    THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -643,25 +634,25 @@ C
       REAL CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,THETATR,SUM1
       REAL SUM,AIN(*),RES2,RMIN2,RMAX2,CTF,CTFV,HW,SUM2
 C
-            SUM=0.0
-            SUM1=0.0
-            SUM2=0.0
-            DO 20 L=1,NXYZ(1)/2
-              LL=L-1
-              DO 20 M=1,NXYZ(2)
-                MM=M-1
-                IF (MM.GT.NXYZ(2)/2) MM=MM-NXYZ(2)
-                RES2=(REAL(LL)/NXYZ(1))**2+(REAL(MM)/NXYZ(2))**2
-                IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
-                  CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
-     +                     ANGAST,THETATR,LL,MM)
-                  ID=L+NXYZ(1)/2*(M-1)
-                  SUM=SUM+AIN(ID)*CTFV**2*EXP(HW*RES2)
-                  SUM1=SUM1+CTFV**4
-                  SUM2=SUM2+AIN(ID)**2*EXP(2.0*HW*RES2)
-                ENDIF
-20          CONTINUE
-            SUM=SUM/SQRT(SUM1*SUM2)
+      	    SUM=0.0
+      	    SUM1=0.0
+      	    SUM2=0.0
+      	    DO 20 L=1,NXYZ(1)/2
+      	      LL=L-1
+      	      DO 20 M=1,NXYZ(2)
+      		MM=M-1
+      		IF (MM.GT.NXYZ(2)/2) MM=MM-NXYZ(2)
+      		RES2=(REAL(LL)/NXYZ(1))**2+(REAL(MM)/NXYZ(2))**2
+      		IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
+      		  CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
+     +			   ANGAST,THETATR,LL,MM)
+      		  ID=L+NXYZ(1)/2*(M-1)
+      		  SUM=SUM+AIN(ID)*CTFV**2*EXP(HW*RES2)
+      		  SUM1=SUM1+CTFV**4
+      		  SUM2=SUM2+AIN(ID)**2*EXP(2.0*HW*RES2)
+      		ENDIF
+20	    CONTINUE
+      	    SUM=SUM/SQRT(SUM1*SUM2)
 C
       EVALCTF=SUM
       RETURN
@@ -720,7 +711,7 @@ C
       PARAMETER (PI=3.1415926535898)
 C
       RF=-EVALCTF(CS,WL,WGH1,WGH2,XPAR(1),XPAR(2),XPAR(3),
-     +            THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+     +		  THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
 C
       RETURN
       END
@@ -2890,7 +2881,7 @@ C**************************************************************************
 C**************************************************************************
 C  STANDARD FORTRAN 66 (A VERIFIED PFORT SUBROUTINE)
       DIMENSION W(40),X(1),E(1),AIN(*),NXYZ(3)
-C       W[N*(N+3)]
+C	W[N*(N+3)]
       DDMAG=0.1*ESCALE
       SCER=0.05/ESCALE
       JJ=N*N+N

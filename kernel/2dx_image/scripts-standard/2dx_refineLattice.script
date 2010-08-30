@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 32
+# SORTORDER: 31
 #
 # MANUAL: This script refines the lattice, using the MRC program mmlatref.
 #

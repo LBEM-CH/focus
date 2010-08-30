@@ -62,6 +62,10 @@ C
 C
       INTEGER NXYZ(3),MODE,JXYZ(3),I,J,NX,NY,IX,IS,KXYZ(3)
       INTEGER K,CNT,ID,L,M,LL,MM,ITEST,IP,NBIN,IMP,IERR
+CHEN>
+      INTEGER INOAST
+      REAL DEFREF
+CHEN<
       PARAMETER (NBIN=100)
       REAL DMAX,DMEAN,DRMS,RMS,WGH1,WGH2,RMSMIN
       REAL SCAL,MEAN,WL,PI,MIN,MAX,ANGAST
@@ -121,6 +125,10 @@ C
 1090    FORMAT(/' Box size must be even number')
         STOP
       ENDIF
+CHEN>
+      READ(5,*)INOAST,DEFREF
+      WRITE(6,'(''INOAST = '',I4,'', DEFREF = '',F12.1)')INOAST,DEFREF
+CHEN<
       JXYZ(2)=JXYZ(1)
       JXYZ(3)=1
       IF (RESMIN.LT.RESMAX) THEN
@@ -274,13 +282,22 @@ C
 C
       DFMID1=DFMIN
       DFMID2=DFMAX
+CHEN>
+C      CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
+C     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
+      write(*,'('':Entering SEARCH_CTF subroutine'')')
       CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
-     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
+     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,INOAST)
+CHEN<
       RMIN2=RESMIN**2
       RMAX2=RESMAX**2
       HW=-1.0/RMAX2
       hw=0.0
 
+CHEN>
+      write(*,'('':Entering REFINE_CTF subroutine'')')
+CHEN<
+C
       CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,
      +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW)
 C
@@ -548,13 +565,20 @@ C
       END
 C
 C**************************************************************************
+CHEN>
+C      SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
+C     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
       SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
-     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
+     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,INOAST)
+CHEN<
 C**************************************************************************
 C
       IMPLICIT NONE
 C
       INTEGER I,J,K,NXYZ(3),I1,I2,ID,IERR
+CHEN>
+      INTEGER INOAST
+CHEN<
       REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
       REAL RMIN2,RMAX2,RMIN,RMAX,AIN(*),SUMMAX,FSTEP
       REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
@@ -570,39 +594,75 @@ C
       HW=-1.0/RMAX2
       hw=0.0
       SUMMAX=-1.0E20
-      I1=INT(DFMID1/FSTEP)
-      I2=INT(DFMID2/FSTEP)
-      ID=(I2-I1+1)*(I2-I1+1)
-      ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
-      IF (IERR.NE.0) THEN
-        WRITE(*,*) ' ERROR: Memory allocation failed in SEARCH_CTF'
-        STOP ' Try reducing size of defocus search grid'
-      ENDIF
-      DO 10 K=0,3
-        DO 11 I=I1,I2
+CHEN>
+      if(INOAST.eq.0)then
+CHEN<
+        I1=INT(DFMID1/FSTEP)
+        I2=INT(DFMID2/FSTEP)
+        ID=(I2-I1+1)*(I2-I1+1)
+        ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
+        IF (IERR.NE.0) THEN
+          WRITE(*,*) ' ERROR: Memory allocation failed in SEARCH_CTF'
+          STOP ' Try reducing size of defocus search grid'
+        ENDIF
+        DO 10 K=0,3
+          DO 11 I=I1,I2
 !$OMP PARALLEL DO
-          DO 12 J=I1,I2
-            CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
-     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
-12        CONTINUE
-11      CONTINUE
-        DO 13 I=1,ID
+            DO 12 J=I1,I2
+              CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+     +              RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +              SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
+12          CONTINUE
+11        CONTINUE
+          DO 13 I=1,ID
+            IF (SUMS(I).GT.SUMMAX) THEN
+              WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
+1100          FORMAT(3F12.2,F12.5)
+              SUMMAX=SUMS(I)
+              DFMID1S=DF1(I)
+              DFMID2S=DF2(I)
+              ANGASTS=ANG(I)
+            ENDIF
+13        CONTINUE
+10      CONTINUE
+        DEALLOCATE(SUMS,DF1,DF2,ANG)
+        DFMID1=DFMID1S
+        DFMID2=DFMID2S
+        ANGAST=ANGASTS
+C
+CHEN>
+      else
+        I1=INT(DFMID1/FSTEP)
+        I2=INT(DFMID2/FSTEP)
+        ID=I2-I1+1
+        ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
+        IF (IERR.NE.0) THEN
+          WRITE(*,*) ' ERROR: Memory allocation failed in SEARCH_CTF'
+          STOP ' Try reducing size of defocus search grid'
+        ENDIF
+        K=0
+        ANGASTS=ANGAST
+        DO 21 I=I1,I2
+          J=I
+          CALL SEARCH_CTF_S_NOAST(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+     +          RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +          SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
+21      CONTINUE
+        DO 23 I=1,ID
           IF (SUMS(I).GT.SUMMAX) THEN
-            WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
-1100        FORMAT(3F12.2,F12.5)
+            WRITE(*,1200)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
+1200        FORMAT(3F12.2,F12.5)
             SUMMAX=SUMS(I)
             DFMID1S=DF1(I)
             DFMID2S=DF2(I)
-            ANGASTS=ANG(I)
           ENDIF
-13      CONTINUE
-10    CONTINUE
-      DEALLOCATE(SUMS,DF1,DF2,ANG)
+23      CONTINUE
+        DEALLOCATE(SUMS,DF1,DF2,ANG)
+        DFMID1=DFMID1S
+        DFMID2=DFMID2S
 C
-      DFMID1=DFMID1S
-      DFMID2=DFMID2S
-      ANGAST=ANGASTS
+      endif
+CHEN<
 C
       RETURN
       END      
@@ -631,6 +691,31 @@ C
 C
       RETURN
       END      
+C
+C**************************************************************************
+      SUBROUTINE SEARCH_CTF_S_NOAST(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER I,J,K,NXYZ(3),I1,I2,ID
+      REAL CS,WL,WGH1,WGH2,THETATR,DF1(*),DF2(*),ANG(*)
+      REAL RMIN2,RMAX2,SUMS(*),AIN(*),SUMMAX,FSTEP
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
+      PARAMETER (PI=3.1415926535898)
+C
+      ID=I-I1+1+(I2-I1+1)*(J-I1)
+      DF1(ID)=FSTEP*I
+      DF2(ID)=FSTEP*J
+      ANG(ID)=ANGASTS
+      ANG(ID)=ANG(ID)/180.0*PI
+      SUMS(ID)=EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),
+     +  ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+C
+      RETURN
+      END
 C
 C**************************************************************************
       REAL FUNCTION EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,

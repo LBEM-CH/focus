@@ -6,6 +6,7 @@
 ################################################################################
 # Remove Cache Files 
 ################################################################################
+rm CmakeCache.txt
 rm -rf bin/CMakeFiles
 rm -rf plugins/CMakeFiles
 rm -rf /Users/marheit/code/2dx/trunk/lib/src/conf/CMakeFiles

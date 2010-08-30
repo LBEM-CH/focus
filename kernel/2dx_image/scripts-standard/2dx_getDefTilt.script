@@ -1,0 +1,479 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Get Defocus Gradient                                               #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 08/28/2010                                             #
+# Last Modification: 08/28/2010                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 25
+#
+# MANUAL: This script calculates the defocus and asgimatism of the image, using Niko Grigorieff's program CTFFIND3. 
+# MANUAL: If you set <I>Determine Tilt Geometry</i> to <I>Yes</I>, it will use CTFTILT instead, which not only determined defocus and astigmatism, but also the tilt geoetry for the carbon film grid support, i.e. TLTAXIS and TLTANG. An additional program 2dx_tiltgeom2.exe will then calculate TLTAXA, TAXA and TANGL, if a lattice is known.
+#
+# MANUAL: The parameter <I>Defocus Search Start</I> and <I>Defocus Start End</I> define the search range for the defocus, and <I>Defocus Search Step</I> defines the step size of the search. This may take some time, if the <I>Defocus Search Step</I> is set to small values.
+#
+# MANUAL: If you know that your defocus is around 4000.0 Angstroems, you could set the search range to 2000.0 to 6000.0 Angstroems, to save time.
+#
+# GLOBAL: imagename
+# GLOBAL: nonmaskimagename
+# GLOBAL: imagesidelength
+# GLOBAL: magnification
+# GLOBAL: stepdigitizer
+# GLOBAL: TLTAXIS
+# GLOBAL: TLTANG
+# GLOBAL: TLTAXA
+# GLOBAL: TAXA
+# GLOBAL: TANGL
+# GLOBAL: defocus
+# GLOBAL: defocusbackup
+# GLOBAL: df_start
+# GLOBAL: df_end
+# GLOBAL: df_step 
+# GLOBAL: det_defocus
+# GLOBAL: det_tilt
+# GLOBAL: phacon
+# GLOBAL: RESMAX
+# GLOBAL: lattice
+# GLOBAL: comment
+# GLOBAL: deftilt_show_tiles
+# GLOBAL: expected_tltang
+# GLOBAL: expected_tltang_uncertainty
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SYN_Unbending = ""
+set PHASEORI_done = ""
+#
+set imagename = ""
+set nonmaskimagename = ""
+set imagesidelength = ""
+set lattice = ""
+set magnification = ""
+set stepdigitizer = ""
+set CS = ""
+set KV = ""
+set defocus = ""
+set df_start = ""
+set df_end = ""
+set df_step = ""
+set RESMIN = ""
+set RESMAX = ""
+set phacon = ""
+set det_defocus = ""
+set det_tilt = ""
+set ctf_ttf = ""
+set TLTAXIS = ""
+set TLTAXA = ""
+set TLTANG = ""
+set deftilt_show_tiles = ""
+set expected_tltang = ""
+set expected_tltang_uncertainty = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_getDefTilt
+#
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@evaluate>>"
+#
+if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
+  ${proc_2dx}/linblock "Skipping. Synthetical Reference is used"
+  ${proc_2dx}/linblock "Defocus should be determined already."
+  #
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  #
+  exit
+  ##########################################################################
+  ${proc_2dx}/linblock "${scriptname} - normal end."
+  ##########################################################################
+endif
+#
+if ( ${det_defocus}x == 'x' ) then
+  set det_defocus = 'y'
+  echo "set det_defocus = ${det_defocus}" >> LOGS/${scriptname}.results
+  echo ":: det_defocus corrected to ${det_defocus}"
+endif
+#
+if ( ${det_defocus} == 'n' ) then
+  ${proc_2dx}/linblock "Skipping. Not determining any defocus."
+  #
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  #
+  exit
+  ##########################################################################
+  ${proc_2dx}/linblock "${scriptname} - normal end."
+  ##########################################################################
+endif
+#
+echo nonmaskimagename = ${nonmaskimagename}
+echo imagesidelength = ${imagesidelength}
+echo magnification = ${magnification}
+echo stepdigitizer = ${stepdigitizer}
+echo CS = ${CS}
+echo KV = ${KV}
+echo defocus = ${defocus}
+echo RESMIN = ${RESMIN}
+echo RESMAX = ${RESMAX}
+echo phacon = ${phacon}
+echo det_tilt = ${det_tilt}
+echo ctf_ttf = ${ctf_ttf}
+#
+set resoma = `echo ${RESMIN} | awk '{ s = 1.5 * $1 } END { print s }'`
+echo resoma = ${resoma}
+#
+set resotmp = `echo ${RESMAX} | awk '{if ($1 < 16.0) { s = 8.0 } else { s = $1 / 2.0 }} END { print s }'`
+set resolim = `echo ${resotmp} | awk '{if ($1 > 30.0) { s = 30.0 } else { s = $1 }} END { print s }'`
+echo resolim = $resolim
+#
+set ampcon = `echo ${phacon} | awk '{s=sqrt(1.0 - ( $1 * $1 ))} END {print s}'`
+echo ampcon = ${ampcon}
+#
+echo "<<@progress: 1>>"
+#
+set date = `date`
+echo date = ${date}
+#
+#set smallimagesidelength=2048
+set smallimagesidelength=`echo ${imagesidelength} | awk '{if($1<2049) {s=512} else if ($1<4099) {s=1024} else {s=2048}} END {print s}'`
+echo smallimagesidelength=${smallimagesidelength}
+#
+if ( ! -e ${nonmaskimagename}.mrc ) then
+  ${proc_2dx}/protest "ERROR: The non-masked image name ${nonmaskimagename}.mrc does not exist."
+endif
+#
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#
+if ( ${magnification} == '' ) then
+  ${proc_2dx}/protest "ERROR: Magnification is not defined."
+endif
+#
+if ( ${stepdigitizer} == '' ) then
+  ${proc_2dx}/protest "ERROR: Digitizer stepsize is not defined."
+endif
+#
+echo ":df_start,df_end,df_step = ${df_start}, ${df_end}, ${df_step}"
+#
+set oldlat = `echo ${lattice}`
+set lattice = `echo ${lattice} | sed 's/ /,/g' | sed 's/,,,/,/g' | sed 's/,,/,/g'`
+if ( "${oldlat}" != ${lattice} ) then
+  echo "set lattice = ${lattice}" >> LOGS/${scriptname}.results
+  echo "lattice corrected from ${oldlat} to ${lattice}"
+endif
+#
+set inimage = ${nonmaskimagename}.mrc
+#
+if ( ! -d SCRATCH ) then
+  \mkdir SCRATCH
+endif
+#
+echo "<<@progress: 20>>"
+#
+if ( ${det_tilt} == 'y' ) then
+  #
+  set outimage = 'SCRATCH/2dx_ctftilt.out.mrc'
+  \rm -f ${outimage}  
+  #
+  set searchrange1 = 10000.0
+  set searchrange2 = 1000.0
+  #
+  set mode = 0
+  if ( ${deftilt_show_tiles} == "y" ) then
+    set mode = 1
+  endif
+  # 
+  set smallsize=2048
+  echo smallsize=${smallsize}
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "Preparing defocus table."
+  #                                                                           #
+  ############################################################################# 
+  #
+  set defocus_pos_file = 2dx_defocus_positions.txt
+  echo " Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_file}
+  #
+  foreach newY ( 1 2 3 4 5 6 7 )
+    echo "        " >> ${defocus_pos_file}
+    echo "        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
+    echo "        " >> ${defocus_pos_file}
+  end
+  #
+  echo "# IMAGE-IMPORTANT: ${defocus_pos_file} <TXT: Defocus Table>" >> LOGS/${scriptname}.results  
+  #
+  echo "<<@progress: 25>>"
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "Prepare windowed images and their ffts."
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f TMP-positions.txt TMP-runfile.txt
+  #
+${bin_2dx}/2dx_calcpositions.exe << eot
+${imagesidelength}
+${smallsize}
+7,7
+${mode}
+${imagename}
+TMP-positions.txt
+TMP-runfile.txt
+eot
+  #
+  echo "<<@progress: 30>>"
+  #
+  chmod +x TMP-runfile.txt 
+  #
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: TMP-positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: TMP-runfile.txt <TXT: runfile>" >> LOGS/${scriptname}.results
+  #
+  if ( ! -d CUT ) then
+    \mkdir CUT
+  endif 
+  #
+  source TMP-runfile.txt
+  #
+  echo "<<@progress: 50>>"
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "2dx_deftilt_sub.com: On center of image"
+  #                                                                           #
+  #############################################################################
+  #
+  set dfdist = ${searchrange1} ; set inoast = 0
+  set newX = 4 ; set newY = 4 ; set refX = 0 ; set refY = 0 ; 
+  source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  echo "<<@progress: 60>>"
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "2dx_deftilt_sub.com: On other places in image"
+  ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 3x3 of 7x7 system"
+  #                                                                           #
+  #############################################################################
+  #
+  set dfdist = ${searchrange2} ; set inoast = 1
+  set newX = 4 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 3 ; set newY = 4 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 5 ; set newY = 4 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 4 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 3 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 5 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 5 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 3 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  echo "<<@progress: 65>>"
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 5x5 of 7x7 system"
+  #                                                                           #
+  #############################################################################
+  #
+  set newX = 2 ; set newY = 2 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 3 ; set newY = 2 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 2 ; set newY = 3 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 4 ; set newY = 2 ; set refX = 4 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 5 ; set newY = 2 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 6 ; set newY = 2 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 6 ; set newY = 3 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 6 ; set newY = 4 ; set refX = 5 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 6 ; set newY = 5 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 6 ; set newY = 6 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 5 ; set newY = 6 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 4 ; set newY = 6 ; set refX = 4 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 3 ; set newY = 6 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 2 ; set newY = 6 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 2 ; set newY = 5 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 2 ; set newY = 4 ; set refX = 3 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  echo "<<@progress: 70>>"
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 7x7 of 7x7 system"
+  #                                                                           #
+  #############################################################################
+  #
+  set newX = 1 ; set newY = 1 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 1 ; set newY = 2 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 2 ; set newY = 1 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 3 ; set newY = 1 ; set refX = 3 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 4 ; set newY = 1 ; set refX = 4 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 5 ; set newY = 1 ; set refX = 5 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 6 ; set newY = 1 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 7 ; set newY = 1 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 7 ; set newY = 2 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 7 ; set newY = 3 ; set refX = 6 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 7 ; set newY = 4 ; set refX = 6 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 7 ; set newY = 5 ; set refX = 6 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 7 ; set newY = 6 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 7 ; set newY = 7 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 6 ; set newY = 7 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 5 ; set newY = 7 ; set refX = 5 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 4 ; set newY = 7 ; set refX = 4 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 3 ; set newY = 7 ; set refX = 3 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 2 ; set newY = 7 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 1 ; set newY = 7 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 1 ; set newY = 6 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  set newX = 1 ; set newY = 5 ; set refX = 2 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 1 ; set newY = 4 ; set refX = 2 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  set newX = 1 ; set newY = 3 ; set refX = 2 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+  #
+  echo "<<@progress: 80>>"
+  #
+  #
+  #############################################################################
+  #
+  cat ${defocus_pos_file}
+  #
+  exit
+  #
+  #############################################################################
+  #############################################################################
+  #############################################################################
+  #############################################################################
+  #############################################################################
+  #############################################################################
+  #
+  if ( ! -e ${outimage} ) then
+    ${proc_2dx}/protest "2dx_ctftilt: ERROR: ${outimage} does not exist."
+  endif
+  #
+  echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+  #
+  set newdef = `cat SCRATCH/2dx_ctftilt.result.tmp | head -1`
+  set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
+  set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
+  set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
+  set defocus = `echo ${def1},${def2},${ang}`
+  #
+  set newtilt = `cat SCRATCH/2dx_ctftilt.result.tmp | tail -1`
+  set TLTAXIS = `echo $newtilt | awk '{s=$1} END {printf "%.3f", s}'`
+  set TLTANG = `echo $newtilt | awk '{s=$2} END {printf "%.3f", s}'`
+  set RF  = `echo $newtilt | awk '{s=$3} END {print s}'`
+  #
+  # \rm -f SCRATCH/2dx_ctftilt.result.tmp
+  #
+  echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+  echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+  #
+  echo " " >> History.dat
+  echo "::Defocus = ${defocus}" >> History.dat
+  echo "::TLTAXIS = ${TLTAXIS}" >> History.dat
+  echo "::TLTANG  = ${TLTANG}" >> History.dat
+  echo ":RF      = ${RF}" >> History.dat
+  #
+  echo "::Defocus = ${defocus}"
+  echo "::TLTAXIS = ${TLTAXIS}"
+  echo "::TLTANG  = ${TLTANG}" 
+  echo ":RF      = ${RF}"
+  #
+  #
+  echo "<<@progress: 60>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_tiltgeom2: Determine other tilt angles."
+  #############################################################################
+  #
+  if ( ${lattice} != '0.0,0.0,0.0,0.0' ) then
+    ${bin_2dx}/2dx_tiltgeom2.exe << eot
+${lattice}
+${TLTAXIS}
+${TLTANG}
+eot
+    # 
+    ${proc_2dx}/lin "="
+    cat 2dx_tiltgeom2.out
+    source 2dx_tiltgeom2.out
+    ${proc_2dx}/lin "="
+    #
+  else
+    set TLTAXA = '0.0'
+    set TAXA   = '0.0'
+    set TANGL  = '0.0'
+  endif
+  #
+  set TLTAXIS = `echo ${TLTAXIS} | awk '{s=$1} END {printf "%.3f", s}'`
+  set TLTANG  = `echo ${TLTANG}  | awk '{s=$1} END {printf "%.3f", s}'`
+  set TLTAXA  = `echo ${TLTAXA}  | awk '{s=$1} END {printf "%.3f", s}'`
+  set TAXA    = `echo ${TAXA}    | awk '{s=$1} END {printf "%.3f", s}'`
+  set TANGL   = `echo ${TANGL}   | awk '{s=$1} END {printf "%.3f", s}'`
+  #
+  echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+  echo "set TLTAXA = ${TLTAXA}" >> LOGS/${scriptname}.results
+  echo "set TAXA = ${TAXA}" >> LOGS/${scriptname}.results
+  echo "set TANGL = ${TANGL}" >> LOGS/${scriptname}.results 
+  echo "set DEFOCUS_ACTIVE = 1" >> LOGS/${scriptname}.results
+  #
+  echo "set DEFOCUS_TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_TLTAXA = ${TLTAXA}" >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_TAXA = ${TAXA}" >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_TANGL = ${TANGL}" >> LOGS/${scriptname}.results
+  #
+  echo " " >> History.dat
+  echo "::From Defocus:" >> History.dat
+  echo "::TLTAXIS = ${TLTAXIS}" >> History.dat
+  echo "::TLTANG  = ${TLTANG}" >> History.dat
+  echo "::TLTAXA  = ${TLTAXA}" >> History.dat
+  echo "::TAXA    = ${TAXA}" >> History.dat
+  echo "::TANGL   = ${TANGL}" >> History.dat
+  #
+  #
+  #
+endif
+#
+echo "<<@progress: 80>>"
+#
+echo "set DEFOCUS_done = y" >> LOGS/${scriptname}.results
+#
+echo "set CTF_done = n" >> LOGS/${scriptname}.results
+echo "set MERGING_done = n" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+##
+#
+#
+#

@@ -176,7 +176,6 @@ INSTALL(CODE "
     file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"[Paths]\nPlugins = PlugIns\")
     " COMPONENT Runtime)
 
-
 #--------------------------------------------------------------------------------
 # Use BundleUtilities to get all other dependencies for the application to work.
 # It takes a bundle or executable along with possible plugins and inspects it

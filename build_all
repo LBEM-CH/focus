@@ -144,7 +144,7 @@ do
  
 done
 
-################################################################################
+#################################################################################
 # 2DX 
 ################################################################################
 
@@ -176,6 +176,35 @@ echo ''
  
 cd ${BUILD}
 
+###############################################################################
+# Postflight 
+################################################################################
+
+echo '*============================================================================*'
+echo '| Postflight'
+echo '+----------------------------------------------------------------------------+'
+echo '| prepare                                                                    |'
+cd ${PREFIX}
+echo 'workinkg directory: '
+pwd
+echo '+----------------------------------------------------------------------------+'
+echo '| creating symbolic links                                                    |'
+ln -sFhv kernel/config config
+ln -sFhv kernel/proc proc
+ln -sFhv ../kernel/2dx_image/scripts-standard 2dx_image/scripts-standard
+ln -sFhv ../kernel/2dx_image/scripts-custom 2dx_image/scripts-custom
+ln -sFhv ../kernel/2dx_merge/scripts-standard 2dx_merge/scripts-standard
+ln -sFhv ../kernel/2dx_merge/scripts-custom 2dx_merge/scripts-custom
+ln -sFhv ../kernel/mrc/bin 2dx_image/bin
+ln -sFhv ../kernel/mrc/bin 2dx_merge/bin
+echo '+----------------------------------------------------------------------------+'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+cd ${BUILD}
 
 ################################################################################
 # Replacing local "kernel" in installation site with link to svn-repository copy

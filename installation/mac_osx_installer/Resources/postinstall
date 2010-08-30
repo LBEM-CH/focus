@@ -11,6 +11,7 @@ ln -sf ../2dx_merge/2dx_merge.app ./
 ln -sf ../2dx_logbrowser/2dx_logbrowser.app ./
 #
 chown -RP root:wheel ${INSTALL_DIR}   
+chown -RP $USER:wheel ${INSTALL_DIR}/kernel   
 #
 open ${INSTALL_DIR}/bin
 #

@@ -9,6 +9,7 @@ C       CARD 1: Input file name for image
 C       CARD 2: Output file name to check result
 C       CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
 C       CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep
+C       CARD 5: INOAST, RefDef1, RefDef2, RefDefAng
 C
 C               The output image file to check the result of the fitting
 C               shows the filtered average power spectrum of the input
@@ -37,6 +38,11 @@ C                      and astigmatism before fitting a CTF to machine
 C                      precision.
 C               dFMax: End defocus value for grid search in Angstrom.
 C               FStep: Step width for grid search in Angstrom.
+C               INOAST: If 0, then normal mode.
+C                       If 1, then only one-dimensional search without astig.
+C               RefDef1: Reference defocus value for one-dimensional search
+C               RefDef2 
+C               RefDefAng 
 C
 C*****************************************************************************
 C       example command file (UNIX):
@@ -50,6 +56,7 @@ C       image.mrc
 C       power.mrc
 C       2.6,200.0,0.07,60000.0,28.0
 C       128,100.0,15.0,30000.0,90000.0,5000.0
+C       0,1.0,1.0,0.0
 C       eof
 C       #
 C*****************************************************************************
@@ -64,7 +71,7 @@ C
       INTEGER K,CNT,ID,L,M,LL,MM,ITEST,IP,NBIN,IMP,IERR
 CHEN>
       INTEGER INOAST
-      REAL DEFREF
+      REAL DEFREF(3)
 CHEN<
       PARAMETER (NBIN=100)
       REAL DMAX,DMEAN,DRMS,RMS,WGH1,WGH2,RMSMIN
@@ -126,8 +133,9 @@ C
         STOP
       ENDIF
 CHEN>
-      READ(5,*)INOAST,DEFREF
-      WRITE(6,'(''INOAST = '',I4,'', DEFREF = '',F12.1)')INOAST,DEFREF
+      READ(5,*)INOAST,DEFREF(1),DEFREF(2),DEFREF(3)
+      WRITE(6,'(''INOAST = '',I4)')INOAST
+      WRITE(6,'(''DEFREF = '',3F12.1)')(DEFREF(i),i=1,3)
 CHEN<
       JXYZ(2)=JXYZ(1)
       JXYZ(3)=1
@@ -285,9 +293,11 @@ C
 CHEN>
 C      CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
 C     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
-      write(*,'('':Entering SEARCH_CTF subroutine'')')
+      write(*,'(''Entering SEARCH_CTF subroutine'')')
+C-----input parameters; DFMID1, DFMID2, for lower and higher boundaries of search.
       CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
-     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,INOAST)
+     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,INOAST,DEFREF)
+c-----output parameters: DFMID1,DFMID2,ANGAST for A,B,angle of defocus.
 CHEN<
       RMIN2=RESMIN**2
       RMAX2=RESMAX**2
@@ -295,12 +305,20 @@ CHEN<
       hw=0.0
 
 CHEN>
-      write(*,'('':Entering REFINE_CTF subroutine'')')
-CHEN<
+      if(INOAST.eq.0)then
+C-------Considering astigmatism variation:
+        write(*,'(''Entering REFINE_CTF subroutine'')')
 C
-      CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,
+        CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,
      +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW)
 C
+      else
+C-------Not considering astigmatism variation:
+        write(*,'(''Skipping REFINE_CTF subroutine'')')
+C
+      endif
+C
+CHEN<
       DO 50 I=1,JXYZ(1)*JXYZ(2)
         OUT(I)=0.0
 50    CONTINUE
@@ -569,7 +587,7 @@ CHEN>
 C      SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
 C     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
       SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
-     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,INOAST)
+     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,INOAST,DEFREF)
 CHEN<
 C**************************************************************************
 C
@@ -578,6 +596,7 @@ C
       INTEGER I,J,K,NXYZ(3),I1,I2,ID,IERR
 CHEN>
       INTEGER INOAST
+      REAL DEFREF(3)
 CHEN<
       REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
       REAL RMIN2,RMAX2,RMIN,RMAX,AIN(*),SUMMAX,FSTEP
@@ -596,6 +615,7 @@ C
       SUMMAX=-1.0E20
 CHEN>
       if(INOAST.eq.0)then
+C-------Normal mode: Search X,Y,Angls for defocus and astigmatism
 CHEN<
         I1=INT(DFMID1/FSTEP)
         I2=INT(DFMID2/FSTEP)
@@ -609,14 +629,15 @@ CHEN<
           DO 11 I=I1,I2
 !$OMP PARALLEL DO
             DO 12 J=I1,I2
+C             write(*,'(''calling SEARCH_CTF_S with '',3I6)')I,I1,I2
               CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
      +              RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
      +              SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
 12          CONTINUE
 11        CONTINUE
           DO 13 I=1,ID
+            WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
             IF (SUMS(I).GT.SUMMAX) THEN
-              WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
 1100          FORMAT(3F12.2,F12.5)
               SUMMAX=SUMS(I)
               DFMID1S=DF1(I)
@@ -630,10 +651,18 @@ CHEN<
         DFMID2=DFMID2S
         ANGAST=ANGASTS
 C
+        WRITE(*,'(''Best Values: '',3F12.2,F12.5)')
+     .     DFMID1,DFMID2,ANGAST,SUMMAX
+C
 CHEN>
       else
-        I1=INT(DFMID1/FSTEP)
-        I2=INT(DFMID2/FSTEP)
+C
+C-------One-dimensinal defocus search, while keeping astigmatism constant
+C
+        write(*,'('':Reference defocus was '',3F12.3)')DEFREF(1),DEFREF(2),DEFREF(3)
+C
+        I2=ABS(INT((DFMID2-DFMID1)/FSTEP))
+        I1=-I2
         ID=I2-I1+1
         ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
         IF (IERR.NE.0) THEN
@@ -641,16 +670,18 @@ CHEN>
           STOP ' Try reducing size of defocus search grid'
         ENDIF
         K=0
+        J=0
         ANGASTS=ANGAST
-        DO 21 I=I1,I2
-          J=I
-          CALL SEARCH_CTF_S_NOAST(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+        DO 21 I=1,ID
+          J=I1+I-1
+C           write(*,'(''calling SEARCH_CTF_S_INOAST with '',3I6)')I,I1,I2
+          CALL SEARCH_CTF_S_INOAST(CS,WL,WGH1,WGH2,THETATR,RMIN2,
      +          RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
-     +          SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
+     +          SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2,DEFREF)
 21      CONTINUE
         DO 23 I=1,ID
+C         WRITE(*,1200)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
           IF (SUMS(I).GT.SUMMAX) THEN
-            WRITE(*,1200)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
 1200        FORMAT(3F12.2,F12.5)
             SUMMAX=SUMS(I)
             DFMID1S=DF1(I)
@@ -660,6 +691,8 @@ CHEN>
         DEALLOCATE(SUMS,DF1,DF2,ANG)
         DFMID1=DFMID1S
         DFMID2=DFMID2S
+        ANGAST=DEFREF(3)
+        write(*,'('':Best Defocus found at '',4F12.3)')DFMID1,DFMID2,ANGAST,SUMMAX
 C
       endif
 CHEN<
@@ -693,24 +726,28 @@ C
       END      
 C
 C**************************************************************************
-      SUBROUTINE SEARCH_CTF_S_NOAST(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+      SUBROUTINE SEARCH_CTF_S_INOAST(CS,WL,WGH1,WGH2,THETATR,RMIN2,
      +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
-     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
+     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2,DEFREF)
 C**************************************************************************
 C
       IMPLICIT NONE
 C
+CHEN>
+      REAL DEFREF(3)
+CHEN<
       INTEGER I,J,K,NXYZ(3),I1,I2,ID
       REAL CS,WL,WGH1,WGH2,THETATR,DF1(*),DF2(*),ANG(*)
       REAL RMIN2,RMAX2,SUMS(*),AIN(*),SUMMAX,FSTEP
       REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
       PARAMETER (PI=3.1415926535898)
 C
-      ID=I-I1+1+(I2-I1+1)*(J-I1)
-      DF1(ID)=FSTEP*I
-      DF2(ID)=FSTEP*J
-      ANG(ID)=ANGASTS
+      ID=I
+      DF1(ID)=DEFREF(1)+FSTEP*J
+      DF2(ID)=DEFREF(2)+FSTEP*J
+      ANG(ID)=DEFREF(3)
       ANG(ID)=ANG(ID)/180.0*PI
+C      write(*,'(''testing DF1,DF2,ANG of '',3F12.3)')DF1(ID),DF2(ID),ANG(ID)
       SUMS(ID)=EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),
      +  ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
 C

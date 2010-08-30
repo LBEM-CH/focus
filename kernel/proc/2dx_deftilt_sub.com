@@ -1,5 +1,11 @@
 #
-#   2dx_deftilt.2.com
+###########################################################
+#
+#   2dx_deftilt_sub.com
+#
+# This is not an independent script. It is only called form other scripts.
+#
+###########################################################
 #
 echo New coordinates = ${newX},${newY} 
 echo Reference coord = ${refX},${refY}
@@ -21,54 +27,58 @@ endif
 ###############################################
 #
 if ( ${refX} == '0' || ${refY} == '0' ) then
+  #
   set dfmid = `echo ${defocus} | sed 's/,/ /g' | awk '{s = ($1 + $2 ) / 2 } END {print s}'`
+  set dfref = `echo ${defocus}`
+  set dfstart = ${df_start}
+  set dfend = ${df_end}
+  set dfstep = ${df_step}
+  #
 else
-  set ypos = `echo ${refY} | awk '{ s = 159 + $1 } END { print s } '`
-  set xanf = `echo ${refX} | awk '{ s = 6 + ( $1 - 1 ) * 11 } END { print s } '`
-  set xend = `echo ${xanf} | awk '{ s = $1 + 9 } END { print s } '`
-  ###############################################
-  ###############################################
-  ###############################################
-  ###############################################
-  # set dfmid = `getlinepos DATAFILE.dat ${ypos} ${xanf} ${xend}`
-  set dfmid = `echo ${defocus} | sed 's/,/ /g' | awk '{s = ($1 + $2 ) / 2 } END {print s}'`
-  ###############################################
-  ###############################################
-  ###############################################
-  ###############################################
-endif
-echo dfmid = ${dfmid}
-#
-set dfmin = 1000.0
-echo dfmin = ${dfmin}
-#
-set dftmp   = `echo ${dfmid} ${dfdist} | awk '{s = $1 - $2 } END {print s}'`
-set dfstart = `echo ${dftmp} ${dfmin} | awk '{ if ($1 < $2) { s = $2 } else { s = $1 }} END {print s}'`
-set dfend   = `echo ${dfmid} ${dfdist} | awk '{s = $1 + $2 } END {print s}'`
-echo dfstart,dfend = ${dfstart} , ${dfend}
-#
-if ( ${inoast} == 0 ) then
-  set dfstep = 100.0
-else
+  #
+  ###########################################################
+  # Get reference defocus value from table:
+  ###########################################################
+  #
+  \rm -f TMP.txt
+  #
+  ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
+${defocus_pos_file}
+${refX},${refY}
+TMP.txt
+1
+eot
+  #
+  set dfmid = `cat TMP.txt`
+  \rm -f TMP.txt
+  #
+  set dfmin = 500.0
+  echo dfmin = ${dfmin}
+  echo defocus = ${defocus}
+  #
+  set astigval = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = ( $2 - $1 ) / 2.0 } END { print s }'`
+  set astigang = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
+  set dfref1 = `echo ${dfmid} ${astigval} | awk '{ s = $1 - $2 } END { print s }'`
+  set dfref2 = `echo ${dfmid} ${astigval} | awk '{ s = $1 + $2 } END { print s }'`
+  set dfref = `echo ${dfref1},${dfref2},${astigang}`
+  echo "Reference defocus is ${dfref}"
+  #
+  ###########################################################
+  ${proc_2dx}/lin "Reference ${refX},${refY} has defocus of ${dfref} with mid ${dfmid}"
+  ###########################################################
+  #
+  set dftmp   = `echo ${dfmid} ${dfdist} | awk '{s = $1 - $2 } END {print s}'`
+  set dfstart = `echo ${dftmp} ${dfmin} | awk '{ if ($1 < $2) { s = $2 } else { s = $1 }} END {print s}'`
+  set dfend   = `echo ${dfmid} ${dfdist} | awk '{s = $1 + $2 } END {print s}'`
   set dfstep = 10.0
+  #
 endif
-echo dfstep = ${dfstep}
 #
-set resohi = ${RESMIN}
-echo resohi = ${resohi}
-#
-set resolo = ${RESMAX}
-echo resolo = $resolo
-set resolim = `echo ${resolo} | awk '{if ($1 > 5.0) { s = 5.0 } else { s = $1 }} END { print s }'`
-echo resolim = $resolim
-#
-echo phacon = ${phacon}
-set ampcon = `echo ${phacon} | awk '{s=1.0-$1} END {print s}'`
-echo ampcon = ${ampcon}
+echo ":Search range is ${dfstart}, ${dfend}, ${dfstep}"
 #
 #############################################################################
 #                                                                           #
-${proc_2dx}/lin "CTFFIND2 - search the defocus"
+${proc_2dx}/lin "2dx_ctffind3 - search the defocus"
 #                                                                           #
 #############################################################################
 #
@@ -76,12 +86,22 @@ ${proc_2dx}/lin "CTFFIND2 - search the defocus"
 #
 \rm -f ${outimage}
 #
+echo " "
+echo "Calling:"  
+echo "${bin_2dx}/2dx_ctffind3.exe"
+echo "${inimage}"
+echo "${outimage}"
+echo "${CS},${KV},${ampcon},${magnification},${stepdigitizer}"
+echo "128,${resoma},${resolim},${dfstart},${dfend},${dfstep}"
+echo "${inoast},${dfref}"
+echo " "
+#
 ${bin_2dx}/2dx_ctffind3.exe << eof
 ${inimage}
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${stepdigitizer}
-128,${resohi},${resolim},${dfstart},${dfend},${dfstep}
-${inoast},${defocus}
+128,${resoma},${resolim},${dfstart},${dfend},${dfstep}
+${inoast},${dfref}
 eof
 #
 echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
@@ -93,6 +113,7 @@ echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
 # card3:  CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
 # card4:  JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
 # card5:  inoast,dfx,dfy,dfast
+#
 #######################################################
 #
   if ( ! -e SCRATCH/2dx_ctffind3.result.tmp ) then
@@ -103,28 +124,37 @@ echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
   set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
   set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
   \rm SCRATCH/2dx_ctffind3.result.tmp
+  #
   if ( ${newX} == '4' && ${newY} == '4' ) then
-    set newdef = `echo ${def1},${def2},${ang}`
-    ${proc_2dx}/linblock "new central defocus ${newdef} (not yet used)"
-    echo "Central Defocus = "${newdef} > TMP.txt
+    set defocus = `echo ${def1},${def2},${ang}`
+    ${proc_2dx}/linblock "new central defocus ${defocus} (not yet used)"
+    echo " Central Defocus = "${defocus} > TMP.txt
     tail -n 7 ${defocus_pos_file} >> TMP.txt
+    \mv -f TMP.txt ${defocus_pos_file}
     #
-  else
-    set defave = `echo ${def1} ${def2} | awk '{ s = ( $1 + $2 ) / 2.0 } END { print s }'`
-    set defave = `echo ${defave} ${dfstart} | awk '{ if ( $1 <= $2 ) { s = 0 } else { s = $1 }} END { print s }'` 
-    set defave = `echo ${defave} ${dfend}   | awk '{ if ( $1 >= $2 ) { s = 0 } else { s = $1 }} END { print s }'` 
-    #
-    \rm -f TMP.txt
-    #
-    ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
+  endif
+  #
+  #############################################################################
+  # Write defocus value into defocus table:
+  #############################################################################
+  #
+  set defave = `echo ${def1} ${def2} | awk '{ s = ( $1 + $2 ) / 2.0 } END { print s }'`
+  # set defave = `echo ${defave} ${dfstart} | awk '{ if ( $1 <= $2 ) { s = 0 } else { s = $1 }} END { print s }'` 
+  # set defave = `echo ${defave} ${dfend}   | awk '{ if ( $1 >= $2 ) { s = 0 } else { s = $1 }} END { print s }'` 
+  #
+  \rm -f TMP.txt
+  #
+  ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
 ${defocus_pos_file}
-TMP.txt
 ${newX},${newY}
+TMP.txt
+0
 ${defave}
 eot
-    #
-    ${proc_2dx}/linblock "average defocus = ${defave} inserted in position ${newX},${newY}"
-  endif
+  #
+  #############################################################################
+  ${proc_2dx}/lin "average defocus = ${defave} inserted in position ${newX},${newY}"
+  #############################################################################
   #
   \mv -f TMP.txt ${defocus_pos_file}
   #

@@ -3,39 +3,52 @@ C
       REAL rfield(7,7)
       character*200 cfile1,cfile2,cline1
 C
-      read(*,*)cfile1
-      read(*,*)cfile2
-      read(*,*)ixpos,iypos
-      read(*,*)rdef
-C
-      write(*,'(''Opening for read '',A50)')cfile1
-      open(11,FILE=cfile1,STATUS='OLD',ERR=900)
-      write(*,'(''Opening for write '',A50)')cfile2
-      open(12,FILE=cfile2,STATUS='NEW',ERR=910)
-C
-      read(11,'(A80)')cline1
-      write(12,'(A80)')cline1(1:80)
-C
       do i=1,7
         do j=1,7
           rfield(i,j)=0.0
         enddo
       enddo
 C
+      read(*,*)cfile1
+      write(*,'(''Opening for read '',A50)')cfile1
+      open(11,FILE=cfile1,STATUS='OLD',ERR=900)
+C
+      read(11,'(A80)')cline1
       do j=1,7
         read(11,'(A1)') cline1(1:1)
         read(11,'(7F11.1)',ERR=920,END=800) (rfield(i,j), i=1,7)
       enddo
 C
+      close(11)
+C
  800  continue
 C
-      rfield(ixpos,iypos)=rdef
+      read(*,*)ixpos,iypos
 C
-      do j=1,7
+      read(*,*)cfile2
+C
+      write(*,'(''Opening for write '',A50)')cfile2
+      open(12,FILE=cfile2,STATUS='NEW',ERR=910)
+C
+      read(*,*)imodus
+C
+      if(imodus.eq.0)then
+C-------Write number into defocus table
+        write(12,'(A80)')cline1(1:80)
+C
+        read(*,*)rdef
+        rfield(ixpos,iypos)=rdef
+C
+        do j=1,7
+          write(12,'('' '')') 
+          write(12,'(7F11.1)') (rfield(i,j), i=1,7)
+        enddo
         write(12,'('' '')') 
-        write(12,'(7F11.1)') (rfield(i,j), i=1,7)
-      enddo
-      write(12,'('' '')') 
+C
+      else
+C-------Read number from defocus table
+        write(12,'(F11.1)') rfield(ixpos,iypos)
+      endif
 C
       goto 9999
 C

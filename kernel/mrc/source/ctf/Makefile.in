@@ -8,13 +8,19 @@ CFLAGS = -DPROTOTYPE -Dalliant -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFIL
 
 BIN = ../../bin
 
-all: $(BIN)/2dx_ctffind3.exe $(BIN)/2dx_ctftilt.exe
+all: $(BIN)/2dx_ctffind3.exe $(BIN)/2dx_ctftilt.exe $(BIN)/ctffind3.exe
+
+$(BIN)/ctffind3.exe: ctffind3.o iof.o ioc.o
+	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
 
 $(BIN)/2dx_ctffind3.exe: 2dx_ctffind3.o iof.o ioc.o
 	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
 
 $(BIN)/2dx_ctftilt.exe: 2dx_ctftilt.o iof.o ioc.o
 	$(F77) $(FFLAGS) iof.o ioc.o -o $@ $< 
+
+ctffind3.o: ctffind3.f
+	$(F77) $(FFLAGS) -c $< 
 
 2dx_ctffind3.o: 2dx_ctffind3.f
 	$(F77) $(FFLAGS) -c $< 

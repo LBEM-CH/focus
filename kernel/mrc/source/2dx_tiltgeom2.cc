@@ -131,7 +131,7 @@ main()
           {hand = 1;
            cout << ":Handedness determined: right handed (" << hand << ")" << endl;};
 	
-//TLTAXA: Calculation of Angle between tiltaxis anf lh on negative:
+//TLTAXA: Calculation of Angle between tiltaxis and lh on negative:
 	TLTAXA = rad2absgrad(tilt.vAngle(lh));
         tmp=tilt.vCross(lh);
 	if (tmp.z < 0) {TLTAXA *= -1;};
@@ -146,7 +146,7 @@ main()
         if(TLTAXA < 0) {TAXA *= -1;};
         cout << " TAXA nach AS      : " << TAXA << endl;
 
-// Aus ttrefine.for:
+// From ttrefine.for:
         DENOM = sin(TLTAXA*M_PI/180.0)*sin(TLTANG*M_PI/180.0);
         DENOM = DENOM * DENOM;
         DENOM = sqrt(1.0 - DENOM);

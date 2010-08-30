@@ -42,6 +42,8 @@
 # GLOBAL: RESMAX
 # GLOBAL: lattice
 # GLOBAL: comment
+# GLOBAL: expected_tltang
+# GLOBAL: expected_tltang_uncertainty
 #
 #$end_local_vars
 #
@@ -73,6 +75,8 @@ set ctf_ttf = ""
 set TLTAXIS = ""
 set TLTAXA = ""
 set TLTANG = ""
+set expected_tltang = ""
+set expected_tltang_uncertainty = ""
 #
 #$end_vars
 #
@@ -180,13 +184,13 @@ if ( ${det_tilt} == 'n' ) then
   if ( ${det_defocus} == 'y' ) then
     #
     #############################################################################
-    ${proc_2dx}/linblock "2dx_ctffind3.exe - to determine defocus and astigmatism"
+    ${proc_2dx}/linblock "2dx_ctffind3.exe - to get defocus and astigmatism"
     #############################################################################
     #
     echo imagesidelength = ${imagesidelength}
-    set tilenumber = `echo ${imagesidelength} | awk '{if ( $1 < 3000 ) { s = 128 } else { s = 256 }} END { print s }'`
-    echo tilenumber = ${tilenumber}
-    echo ":Using resolution range ${resoma}A ... ${resolim}A, and ${tilenumber} tiles."
+    set tilesize = `echo ${imagesidelength} | awk '{if ( $1 < 3000 ) { s = 128 } else { s = 256 }} END { print s }'`
+    echo tilesize = ${tilesize}
+    echo ":Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
     #
     \rm -f SCRATCH/2dx_ctffind3.result.tmp
     set outimage = 'SCRATCH/2dx_ctffind3.out.mrc'
@@ -196,7 +200,7 @@ if ( ${det_tilt} == 'n' ) then
 ${inimage}
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${stepdigitizer}
-${tilenumber},${resoma},${resolim},${df_start},${df_end},${df_step}
+${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step}
 eof
     #
     if ( ! -e ${outimage} ) then
@@ -229,14 +233,15 @@ else
   if ( ${det_defocus} == 'y' ) then
     #
     #############################################################################
-    ${proc_2dx}/linblock "2dx_ctftilt.exe - to determine defocus and tilt"
+    ${proc_2dx}/linblock "2dx_ctftilt - to get defocus and tilt. ORIGINAL VERSION from NIKO."
     #############################################################################
     #
     \rm -f SCRATCH/2dx_ctftilt.result.tmp
     echo imagesidelength = ${imagesidelength}
-    set tilenumber = `echo ${imagesidelength} | awk '{if ( $1 < 3000 ) { s = 64 } else { s = 128 }} END { print s }'`
-    echo tilenumber = ${tilenumber}
-    echo ":Using resolution range ${resoma}A ... ${resolim}A, and ${tilenumber} tiles."
+    set tilesize = `echo ${imagesidelength} | awk '{if ( $1 < 3000 ) { s = 128 } else { s = 256 }} END { print s }'`
+    echo tilesize = ${tilesize}
+    echo "::Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
+    echo ":Expected tilt angle is ${expected_tltang}, its uncertainty is ${expected_tltang_uncertainty}"
     #
     set outimage = 'SCRATCH/2dx_ctftilt.out.mrc'
     \rm -f ${outimage}  
@@ -245,7 +250,7 @@ else
 ${inimage}
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${stepdigitizer},${df_PAve}
-${tilenumber},${resoma},${resolim},${df_start},${df_end},${df_step}
+${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${expected_tltang},${expected_tltang_uncertainty}
 eof
     #
     if ( ! -e ${outimage} ) then

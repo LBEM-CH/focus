@@ -36,7 +36,7 @@
 # LEGEND: This allows to exchange the lattices that are stored as primary and secondary lattice.
 # EXAMPLE: doswap = "nothing"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=nothing;1=Swap Lattices;2=Copy First onto Second;3=Copy Second onto First"
+# TYPE: Drop_Down_Menu "0=nothing;1=Swap First with Second Lattice;2=Copy First onto Second;3=Copy Second onto First;4=Copy First onto Backup;5=Copy Backup onto First"
 set doswap = "0"
 #
 # LABEL: Scaling - Do the following
@@ -108,6 +108,7 @@ set peakNum = "140"
 # GLOBAL: SYM
 # GLOBAL: lattice
 # GLOBAL: secondlattice
+# GLOBAL: backuplattice
 # GLOBAL: realcell
 # GLOBAL: realang
 # GLOBAL: realcell_local
@@ -142,6 +143,7 @@ set realcell_local = ""
 set realang_local = ""
 set lattice = ""
 set secondlattice = ""
+set backuplattice = ""
 set TLTANG = ""
 set TLTAXIS = ""
 set SYM = ""
@@ -188,6 +190,7 @@ if ( ${doswap} == "1" ) then
   echo "set secondlattice = "${secondlattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
   ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
+  ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
 endif
 #
 if ( ${doswap} == "2" ) then
@@ -195,6 +198,7 @@ if ( ${doswap} == "2" ) then
   echo "set secondlattice = "${secondlattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
   ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
+  ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
 endif
 #
 if ( ${doswap} == "3" ) then
@@ -202,6 +206,23 @@ if ( ${doswap} == "3" ) then
   echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
   ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
+  ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
+endif
+#
+if ( ${doswap} == "4" ) then
+  set backuplattice = `echo ${lattice} | sed 's/, /,/g'`
+  echo "set backuplattice = "${backuplattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+  ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
+  ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
+endif
+#
+if ( ${doswap} == "5" ) then
+  set lattice = `echo ${backuplattice} | sed 's/, /,/g'`
+  echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+  ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
+  ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
 endif
 #
 #############################################################################

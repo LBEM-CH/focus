@@ -49,6 +49,7 @@
 # GLOBAL: TANGL
 # GLOBAL: lattice
 # GLOBAL: secondlattice
+# GLOBAL: backuplattice
 # GLOBAL: defocus
 # GLOBAL: beamtilt
 # GLOBAL: defocusfield

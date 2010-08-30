@@ -21,6 +21,7 @@
 # GLOBAL: imagesidelength
 # GLOBAL: lattice
 # GLOBAL: secondlattice
+# GLOBAL: backuplattice
 # GLOBAL: comment
 # GLOBAL: Refine_Lattice
 # GLOBAL: TLTAXIS

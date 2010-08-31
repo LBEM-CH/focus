@@ -40,6 +40,7 @@
 # GLOBAL: RESMAX
 # GLOBAL: lattice
 # GLOBAL: comment
+# GLOBAL: tempkeep
 #
 #$end_local_vars
 #
@@ -71,6 +72,7 @@ set ctf_ttf = ""
 set TLTAXIS = ""
 set TLTAXA = ""
 set TLTANG = ""
+set tempkeep = ""
 set expected_tltang = ""
 set expected_tltang_uncertainty = ""
 #

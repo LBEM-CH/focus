@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 20
+# SORTORDER: 97
 #
 # MANUAL: This script calculates the defocus and asgimatism of the image, using Niko Grigorieff's program CTFFIND3. 
 # MANUAL: If you set <I>Determine Tilt Geometry</i> to <I>Yes</I>, it will use CTFTILT instead, which not only determined defocus and astigmatism, but also the tilt geoetry for the carbon film grid support, i.e. TLTAXIS and TLTANG. An additional program 2dx_tiltgeom2.exe will then calculate TLTAXA, TAXA and TANGL, if a lattice is known.

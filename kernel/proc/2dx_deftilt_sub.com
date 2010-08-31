@@ -86,12 +86,15 @@ ${proc_2dx}/lin "2dx_ctffind3 - search the defocus"
 #
 \rm -f ${outimage}
 #
+# The image tiles are 2-times downsampled:
+set locstepdigitizer = `echo ${stepdigitizer} | awk '{ s = 2 * $1 } END { print s }'`
+#
 echo " "
 echo "Calling:"  
 echo "${bin_2dx}/2dx_ctffind3.exe"
 echo "${inimage}"
 echo "${outimage}"
-echo "${CS},${KV},${ampcon},${magnification},${stepdigitizer}"
+echo "${CS},${KV},${ampcon},${magnification},${locstepdigitizer}"
 echo "128,${resoma},${resolim},${dfstart},${dfend},${dfstep}"
 echo "${inoast},${dfref}"
 echo " "
@@ -99,12 +102,14 @@ echo " "
 ${bin_2dx}/2dx_ctffind3.exe << eof
 ${inimage}
 ${outimage}
-${CS},${KV},${ampcon},${magnification},${stepdigitizer}
+${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
 128,${resoma},${resolim},${dfstart},${dfend},${dfstep}
 ${inoast},${dfref}
 eof
 #
-echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
+if ( ${tempkeep} == "y" ) then
+  echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
+endif
 #
 #######################################################
 #PARAMETER: for ctffind3.exe

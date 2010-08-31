@@ -57,16 +57,27 @@ C
           write(12,'(''#######################################'',
      1               ''#######################################'')')
           write(12,'(''#'')')
+          write(12,'(''\rm -f SCRATCH/TMP.mrc'')')
+          write(12,'(''#'')')
           write(12,
      1    '(''\rm -f CUT/${image}.'',I1,''.'',I1,''.mrc'')')i,j
           write(12,'(''#'')')
           write(12,'(''${bin_2dx}/labelh.exe << eot'')')
           write(12,'(''${image}.mrc'')')
           write(12,'(''1'')')
+          write(12,'(''SCRATCH/TMP.mrc'')')
+          write(12,'(4I6)')ianfx,iendx,ianfy,iendy
+          write(12,'(''eot'')')
+          write(12,'(''#'')')
           write(cname1,'(''CUT/${image}.'',I1,''.'',I1,''.mrc'')')i,j
           call shorten(cname1,k)
+          write(12,'(''\rm -f '',A)')cname1(1:k)
+          write(12,'(''#'')')
+          write(12,'(''${bin_2dx}/labelh.exe << eot'')')
+          write(12,'(''SCRATCH/TMP.mrc'')')
+          write(12,'(''4'')')
           write(12,'(A)')cname1(1:k)
-          write(12,'(4I6)')ianfx,iendx,ianfy,iendy
+          write(12,'(''2,2'')')
           write(12,'(''eot'')')
           write(12,'(''#'')')
           if(imode.eq.1 .or. (i.eq.4 .and. j.eq.4))then
@@ -77,6 +88,8 @@ C
         enddo
       enddo
 c
+      write(12,'(''#'')')
+      write(12,'(''\rm -f SCRATCH/TMP.mrc'')')
       write(12,'(''#'')')
       write(12,'(''#######################################'',
      1           ''#######################################'')')

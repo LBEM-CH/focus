@@ -1,7 +1,7 @@
       PROGRAM DEFTABL
 C
       REAL rfield(7,7)
-      character*200 cfile1,cfile2,cline1
+      character*200 cfile1,cfile2,cline1,cline2
 C
       do i=1,7
         do j=1,7
@@ -15,8 +15,8 @@ C
 C
       read(11,'(A80)')cline1
       do j=1,7
-        read(11,'(A1)') cline1(1:1)
-        read(11,'(7F11.1)',ERR=920,END=800) (rfield(i,j), i=1,7)
+        read(11,'(A10)') cline2(1:10)
+        read(11,'(2X,7F11.1)',ERR=920,END=800) (rfield(i,j), i=1,7)
       enddo
 C
       close(11)
@@ -40,14 +40,16 @@ C
         rfield(ixpos,iypos)=rdef
 C
         do j=1,7
-          write(12,'('' '')') 
-          write(12,'(7F11.1)') (rfield(i,j), i=1,7)
+          write(12,'('':: '')') 
+          write(12,'(''::'',7F11.1)') (rfield(i,j), i=1,7)
         enddo
-        write(12,'('' '')') 
+        write(12,'('':: '')') 
 C
       else
-C-------Read number from defocus table
+C-------Write out one number from defocus table
         write(12,'(F11.1)') rfield(ixpos,iypos)
+        write(*,'('' Position '',2I4,'' is '',F11.1)')
+     .   ixpos,iypos,rfield(ixpos,iypos)
       endif
 C
       goto 9999

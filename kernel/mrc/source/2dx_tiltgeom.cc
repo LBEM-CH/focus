@@ -73,13 +73,13 @@ main()
 
 
 	cout << endl << "input 49 defocus values" << endl;;
-	cin.getline(temp,999);
-	char *tp,*tp2=temp;
 	int k=0;
        
-        for(int i=0;i<7;i++)
+        for(int j=0;j<7;j++)
 	{
-		for(int j=0;j<7;j++)
+	        cin.getline(temp,300);
+                char *tp,*tp2=temp;
+		for(int i=0;i<7;i++)
 		{
 			tp=strtok(tp2,",");
 			if(tp!=NULL)
@@ -101,10 +101,12 @@ main()
 		exit(1);
 	}
 	cout << endl << "Number of defocus values read: " << data.size() << endl << endl;
+        cout << "Xpos,Ypos ==> Defocus" << endl;
         for(int i=0;i<data.size();i++)
 	{
 		cout << (*data[i])[0] << "," << (*data[i])[1] << " ==> " << (*data[i])[2] << endl;
 	}
+        cout << endl;
 
 	double m[4][3];
 

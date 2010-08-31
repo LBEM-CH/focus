@@ -41,9 +41,7 @@
 # GLOBAL: RESMAX
 # GLOBAL: lattice
 # GLOBAL: comment
-# GLOBAL: deftilt_show_tiles
-# GLOBAL: expected_tltang
-# GLOBAL: expected_tltang_uncertainty
+# GLOBAL: tempkeep
 #
 #$end_local_vars
 #
@@ -74,9 +72,7 @@ set ctf_ttf = ""
 set TLTAXIS = ""
 set TLTAXA = ""
 set TLTANG = ""
-set deftilt_show_tiles = ""
-set expected_tltang = ""
-set expected_tltang_uncertainty = ""
+set tempkeep = ""
 #
 #$end_vars
 #
@@ -155,6 +151,7 @@ if ( ! -e ${nonmaskimagename}.mrc ) then
   ${proc_2dx}/protest "ERROR: The non-masked image name ${nonmaskimagename}.mrc does not exist."
 endif
 #
+echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
@@ -192,7 +189,7 @@ if ( ${det_tilt} == 'y' ) then
   set searchrange2 = 1000.0
   #
   set mode = 0
-  if ( ${deftilt_show_tiles} == "y" ) then
+  if ( ${tempkeep} == "y" ) then
     set mode = 1
   endif
   # 
@@ -206,12 +203,12 @@ if ( ${det_tilt} == 'y' ) then
   ############################################################################# 
   #
   set defocus_pos_file = 2dx_defocus_positions.txt
-  echo " Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_file}
+  echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_file}
   #
   foreach newY ( 1 2 3 4 5 6 7 )
-    echo "        " >> ${defocus_pos_file}
-    echo "        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
-    echo "        " >> ${defocus_pos_file}
+    echo "::        " >> ${defocus_pos_file}
+    echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
+    echo "::        " >> ${defocus_pos_file}
   end
   #
   echo "# IMAGE-IMPORTANT: ${defocus_pos_file} <TXT: Defocus Table>" >> LOGS/${scriptname}.results  
@@ -220,7 +217,7 @@ if ( ${det_tilt} == 'y' ) then
   #
   #############################################################################
   #                                                                           #
-  ${proc_2dx}/linblock "Prepare windowed images and their ffts."
+  ${proc_2dx}/linblock "Prepare windowed images"
   #                                                                           #
   #############################################################################
   #
@@ -357,38 +354,85 @@ eot
   #
   echo "<<@progress: 80>>"
   #
-  #
   #############################################################################
+  ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
+  #############################################################################
+  #
+  \rm -f CUT/${imagename}.merge.ps.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+CUT/${imagename}.1.1.ps.mrc
+14
+CUT/${imagename}.merge.ps.mrc
+CUT/${imagename}
+eot
+  #
+  echo "# IMAGE-IMPORTANT: "CUT/${imagename}.merge.ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
+  #
+  if ( ${tempkeep} == "n" ) then
+    echo dummy > CUT/${imagename}.1.1.ps.mrc 
+    \rm -f CUT/${imagename}.?.?.ps.mrc
+  endif
+  #
+  if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
+    ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
+  endif
   #
   cat ${defocus_pos_file}
   #
-  exit
-  #
   #############################################################################
-  #############################################################################
-  #############################################################################
-  #############################################################################
-  #############################################################################
+  ${proc_2dx}/linblock "Now calculating tilt geometry from defocus values"
   #############################################################################
   #
-  if ( ! -e ${outimage} ) then
-    ${proc_2dx}/protest "2dx_ctftilt: ERROR: ${outimage} does not exist."
-  endif
+  echo "#" > TMP.2dx_deftilt.run.txt
+  echo "${bin_2dx}/2dx_tiltgeom.exe << eot" >> TMP.2dx_deftilt.run.txt
+  echo ${stepdigitizer} >> TMP.2dx_deftilt.run.txt
+  echo ${magnification} >> TMP.2dx_deftilt.run.txt
+  echo TMP-positions.txt >> TMP.2dx_deftilt.run.txt 
+  # The input order of columns and rows needs to be inverted here.
+  \rm -f TMP.txt
+  foreach refX ( 1 2 3 4 5 6 7 ) 
+    set line = " "
+    foreach refY ( 1 2 3 4 5 6 7 ) 
+      #
+      ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
+${defocus_pos_file}
+${refX},${refY}
+TMP.txt
+1
+eot
+      #
+      set dfmid = `cat TMP.txt`
+      \rm -f TMP.txt
+      set newline = "`echo ${line} ${dfmid}`"
+      set line = "${newline}"
+    end
+    echo ${line} | sed 's/ /,/g' >> TMP.2dx_deftilt.run.txt
+  end
   #
-  echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+  echo 0,0,0 >> TMP.2dx_deftilt.run.txt
+  echo eot >> TMP.2dx_deftilt.run.txt 
+  echo # >> TMP.2dx_deftilt.run.txt 
+  echo # The input order of columns and rows is inverted here. >> TMP.2dx_deftilt.run.txt 
   #
-  set newdef = `cat SCRATCH/2dx_ctftilt.result.tmp | head -1`
-  set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
-  set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
-  set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
-  set defocus = `echo ${def1},${def2},${ang}`
+  chmod +x TMP.2dx_deftilt.run.txt
   #
-  set newtilt = `cat SCRATCH/2dx_ctftilt.result.tmp | tail -1`
-  set TLTAXIS = `echo $newtilt | awk '{s=$1} END {printf "%.3f", s}'`
-  set TLTANG = `echo $newtilt | awk '{s=$2} END {printf "%.3f", s}'`
-  set RF  = `echo $newtilt | awk '{s=$3} END {print s}'`
+  echo "# IMAGE: TMP.2dx_deftilt.run.txt <TXT: runfile for tiltgeom>" >> LOGS/${scriptname}.results
   #
-  # \rm -f SCRATCH/2dx_ctftilt.result.tmp
+  source TMP.2dx_deftilt.run.txt > TMP.2dx_deftilt.run.out.txt
+  #
+  cat TMP.2dx_deftilt.run.out.txt
+  echo "# IMAGE: TMP.2dx_deftilt.run.out.txt <TXT: result of runfile for tiltgeom>" >> LOGS/${scriptname}.results
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Done."
+  #############################################################################
+  #
+  tail -2 TMP.2dx_deftilt.run.out.txt
+  set line = `tail -1 TMP.2dx_deftilt.run.out.txt`
+  set TLTAXIS = `echo ${line} | cut -d\  -f6`
+  set TLTANG  = `echo ${line} | cut -d\  -f3`
   #
   echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
   echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
@@ -398,12 +442,10 @@ eot
   echo "::Defocus = ${defocus}" >> History.dat
   echo "::TLTAXIS = ${TLTAXIS}" >> History.dat
   echo "::TLTANG  = ${TLTANG}" >> History.dat
-  echo ":RF      = ${RF}" >> History.dat
   #
   echo "::Defocus = ${defocus}"
   echo "::TLTAXIS = ${TLTAXIS}"
   echo "::TLTANG  = ${TLTANG}" 
-  echo ":RF      = ${RF}"
   #
   #
   echo "<<@progress: 60>>"

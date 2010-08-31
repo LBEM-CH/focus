@@ -20,6 +20,7 @@ using namespace std;
 main()
 {
 	char  temp[1000],buffer[1000];
+        char name[200];
 	double stepsize;
 	Cvector<double> tmp(3),w(3);
 	vector<vector<double> > results;
@@ -28,6 +29,9 @@ main()
 	int magnification;
 // data aquisition
         cout << endl << "2dx_tiltgeom.exe: calculates tilt geometry from various defoci" << endl << endl;
+        cout << "Name for outputfile: ";
+        cin.getline(name,99);
+        cout << name << endl;
 	cout << "stepsize..........: ";
 	cin.getline(temp,99);
 	stepsize=atof(temp);
@@ -178,6 +182,8 @@ main()
 	double oldrlimit,rlimit;
 	rlimit = 3000.0;
 	double rTLTANG,rTLTAXIS;
+ 
+        int good[1000];
 
 	for(int j=0,jtotal=0;j<50 && jtotal<1000;j++,jtotal++)
 	{
@@ -206,12 +212,18 @@ main()
 				m[2][2]+=(*data[i])[0]*(*data[i])[1];
 				m[3][2]+=(*data[i])[1]*(*data[i])[1];
 				icount += 1;
+                                good[i]=1;
 			}
+                        else
+                        {
+                                // dataset i is bad
+                                good[i]=0;
+                        }
 		}
 
 		Cplane<double> pl2(ori,e);
 
-		if(icount < 12) {
+		if(icount < 16) {
 			rlimit *= 1.2;
 			rlimit += 100;
 		} else {
@@ -234,7 +246,7 @@ main()
 			j--;
 		}
 
-		if(icount > 16) {
+		if(icount > 24) {
 			rlimit *= 0.9;
 			rlimit -= 50;
 			if(rlimit < 200.0) rlimit = 200.0;
@@ -290,6 +302,43 @@ main()
 	resu << "set TLTANG = " << rTLTANG << endl;
 	resu << "set TLTAXIS = "<< rTLTAXIS << endl;
 
+
+        ofstream rout(name, ios::out); //creates new outfile
+        if (!name){
+                cerr << "ERROR: Not able to create output file ";
+                cerr << name << ". File already exists \n";
+                exit(-1);};
+
+	// write out good and bad ones
+        int ig1 = 0;
+	for(int i=1;i<8;i++)
+	{
+		for(int j=1;j<8;j++)
+		{
+                        rout << "#" << endl;
+                        if(good[ig1]>0)
+                        { 
+                                rout << "# good: " << ig1 << " " << i << "," << j << " " << (*data[ig1])[0] <<  " " << (*data[ig1])[1] << endl;
+                                rout << "\\rm -f CUT/${imagename}.marked." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "\\cp -f CUT/${imagename}." << i << "." << j << ".ps.mrc ";
+                                rout << "CUT/${imagename}.marked." << i << "." << j << ".ps.mrc" << endl;
+                        }
+                        else
+                        {
+                                rout << "# bad:  " << ig1 << " " << i << "," << j << " " << (*data[ig1])[0] << " " << (*data[ig1])[1] << endl;
+                                rout << "\\rm -f CUT/${imagename}.marked." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "${bin_2dx}/labelh.exe << eot" << endl;
+                                rout << "CUT/${imagename}." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "15" << endl;
+                                rout << "CUT/${imagename}.marked." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "eot" << endl;
+                        }
+                        rout << "#" << endl;
+                        rout << "echo \"# IMAGE: CUT/${imagename}.marked." << i << "." << j << ".ps.mrc <CUT-PS-Marked_" << i << "," << j << ">\" >> LOGS/${scriptname}.results" << endl;
+                        rout << "#" << endl;
+                        ig1++;
+                }
+        }
 
 	// memory deallocation
 	for(int i=0;i<data.size();i++)

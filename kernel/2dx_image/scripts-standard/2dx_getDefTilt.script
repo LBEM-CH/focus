@@ -369,11 +369,6 @@ eot
   #
   echo "# IMAGE-IMPORTANT: "CUT/${imagename}.merge.ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
   #
-  if ( ${tempkeep} == "n" ) then
-    echo dummy > CUT/${imagename}.1.1.ps.mrc 
-    \rm -f CUT/${imagename}.?.?.ps.mrc
-  endif
-  #
   if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
     ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
   endif
@@ -385,7 +380,9 @@ eot
   #############################################################################
   #
   echo "#" > TMP.2dx_deftilt.run.txt
+  echo "\rm -f TMP.2dx_deftilt.good.txt"   >> TMP.2dx_deftilt.run.txt
   echo "${bin_2dx}/2dx_tiltgeom.exe << eot" >> TMP.2dx_deftilt.run.txt
+  echo "TMP.2dx_deftilt.good.txt"  >> TMP.2dx_deftilt.run.txt
   echo ${stepdigitizer} >> TMP.2dx_deftilt.run.txt
   echo ${magnification} >> TMP.2dx_deftilt.run.txt
   echo TMP-positions.txt >> TMP.2dx_deftilt.run.txt 
@@ -424,6 +421,40 @@ eot
   cat TMP.2dx_deftilt.run.out.txt
   echo "# IMAGE: TMP.2dx_deftilt.run.out.txt <TXT: result of runfile for tiltgeom>" >> LOGS/${scriptname}.results
   #
+  #############################################################################
+  ${proc_2dx}/linblock "Mark Thon-ring fit panels"
+  #############################################################################
+  #
+  chmod +x TMP.2dx_deftilt.good.txt
+  echo "# IMAGE: TMP.2dx_deftilt.good.txt <TXT: runfile for marking>" >> LOGS/${scriptname}.results
+  #
+  source TMP.2dx_deftilt.good.txt
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Merge Marked Thon-ring fit panels into one overview image"
+  #############################################################################
+  #
+  \rm -f CUT/${imagename}.marked.merge.ps.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+CUT/${imagename}.marked.1.1.ps.mrc
+14
+CUT/${imagename}.marked.merge.ps.mrc
+CUT/${imagename}.marked
+eot
+  #
+  echo "# IMAGE-IMPORTANT: "CUT/${imagename}.marked.merge.ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
+  #
+  if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
+    ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
+  endif
+  #
+  if ( ${tempkeep} == "n" ) then
+    echo dummy > CUT/${imagename}.1.1.ps.mrc 
+    \rm -f CUT/${imagename}.?.?.ps.mrc
+    echo dummy > CUT/${imagename}.marked.1.1.ps.mrc 
+    \rm -f CUT/${imagename}.marked.?.?.ps.mrc
+  endif
   #
   #############################################################################
   ${proc_2dx}/linblock "Done."

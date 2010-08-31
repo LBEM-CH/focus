@@ -29,7 +29,7 @@ ctffind3.o: ctffind3.f
 	$(F77) $(FFLAGS) -c $< 
 
 iof.o: iof.f
-	$(GCC) $(CFLAGS) -c $<
+	$(F77) $(CFLAGS) -c $<
 
 ioc.o: ioc.c
 	$(GCC) $(CFLAGS) -c $<

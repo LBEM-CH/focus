@@ -592,7 +592,7 @@ C-------Copy entire file into output picture
 C
 C-------Cross out image
 C
-        do ix = 20,NX-20
+        do ix = 30,NX-30
           APIC(ix  ,ix  )=DMAX
           APIC(ix+1,ix  )=DMAX
           APIC(ix+1,ix-1)=DMAX

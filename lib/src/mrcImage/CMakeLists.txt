@@ -24,8 +24,8 @@ configure_file(
   @ONLY)
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake
-  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}VersionConfig.cmake
+  ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake
+  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}ConfigVersion.cmake
   @ONLY)
 
 include(${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake)

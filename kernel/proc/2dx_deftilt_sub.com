@@ -136,6 +136,9 @@ endif
     echo " Central Defocus = "${defocus} > TMP.txt
     tail -n 7 ${defocus_pos_file} >> TMP.txt
     \mv -f TMP.txt ${defocus_pos_file}
+    echo " Central Defocus = "${defocus} > TMP.txt
+    tail -n 7 ${defocus_pos_select_file} >> TMP.txt
+    \mv -f TMP.txt ${defocus_pos_select_file}
     #
   endif
   #

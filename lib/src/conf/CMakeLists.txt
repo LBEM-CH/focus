@@ -31,8 +31,8 @@ include(${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake)
 
 install(
   FILES       
-    ${CMAKE_CURRENT_BINARY_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}ConfigVersion.cmake
+    ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake
+    ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}ConfigVersion.cmake
   DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${LIBTITLE}-${LIBVERSION}/)
 
 # Header files -----------------------------------------------------------------

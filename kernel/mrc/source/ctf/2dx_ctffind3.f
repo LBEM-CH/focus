@@ -71,7 +71,7 @@ C
       INTEGER K,CNT,ID,L,M,LL,MM,ITEST,IP,NBIN,IMP,IERR
 CHEN>
       INTEGER INOAST
-      REAL DEFREF(3)
+      REAL DEFREF(3),DRMSH
 CHEN<
       PARAMETER (NBIN=100)
       REAL DMAX,DMEAN,DRMS,RMS,WGH1,WGH2,RMSMIN
@@ -133,7 +133,7 @@ C
         STOP
       ENDIF
 CHEN>
-      READ(5,*)INOAST,DEFREF(1),DEFREF(2),DEFREF(3)
+      READ(5,*)INOAST,DEFREF(1),DEFREF(2),DEFREF(3),DRMSH
       WRITE(6,'(''INOAST = '',I4)')INOAST
       WRITE(6,'(''DEFREF = '',3F12.1)')(DEFREF(i),i=1,3)
 CHEN<
@@ -318,6 +318,10 @@ C-------Not considering astigmatism variation:
 C
       endif
 C
+      if(DRMSH.ne.0.0)then
+        DRMS1 = DRMSH
+      endif
+C
 CHEN<
       DO 50 I=1,JXYZ(1)*JXYZ(2)
         OUT(I)=0.0
@@ -362,6 +366,7 @@ C
 CHENN>
       open(11,FILE='SCRATCH/2dx_ctffind3.result.tmp',STATUS='NEW',ERR=998)
         write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
+        write(11,'(G16.3)')DRMS1
       close(11)
       GOTO 9999
 998   stop 'ERROR on file open of SCRATCH/2dx_ctffind3.result.tmp'

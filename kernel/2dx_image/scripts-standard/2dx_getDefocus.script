@@ -243,14 +243,15 @@ SCRATCH/2dx_ctffind-cut-down.mrc
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${downstepdigitizer}
 ${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step}
-${inoast},${dfref}
+${inoast},${dfref},0.0
 eof
     #
     if ( ! -e ${outimage} ) then
       ${proc_2dx}/protest "2dx_ctffind3: ERROR: ${outimage} does not exist."
     endif
     #
-    set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp`
+    set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
+    set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
     set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
     set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
     set ang  = `echo $newdef | awk '{s=$3} END {print s}'`

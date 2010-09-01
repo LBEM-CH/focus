@@ -262,7 +262,7 @@ eot
   #                                                                           #
   #############################################################################
   #
-  set dfdist = ${searchrange1} ; set inoast = 0
+  set dfdist = ${searchrange1} ; set inoast = 0 ; set drms1 = 0.0
   set newX = 4 ; set newY = 4 ; set refX = 0 ; set refY = 0 ; 
   source ${proc_2dx}/2dx_deftilt_sub.com  
   #

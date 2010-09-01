@@ -96,7 +96,7 @@ echo "${inimage}"
 echo "${outimage}"
 echo "${CS},${KV},${ampcon},${magnification},${locstepdigitizer}"
 echo "128,${resoma},${resolim},${dfstart},${dfend},${dfstep}"
-echo "${inoast},${dfref}"
+echo "${inoast},${dfref},${drms1}"
 echo " "
 #
 ${bin_2dx}/2dx_ctffind3.exe << eof
@@ -104,7 +104,7 @@ ${inimage}
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
 128,${resoma},${resolim},${dfstart},${dfend},${dfstep}
-${inoast},${dfref}
+${inoast},${dfref},${drms1}
 eof
 #
 if ( ${debugmode} == "y" ) then
@@ -124,7 +124,8 @@ endif
   if ( ! -e SCRATCH/2dx_ctffind3.result.tmp ) then
     ${proc_2dx}/protest "2dx_deftilt_sub.com: ERROR: SCRATCH/2dx_ctffind3.result.tmp does not exist."
   endif
-  set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp`
+  set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
+  set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
   set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
   set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
   set ang  = `echo $newdef | awk '{s=$3} END {print s}'`

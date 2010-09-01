@@ -84,6 +84,22 @@ C
       read(*,*)RFACAMP
       write(*,'(F12.3)')RFACAMP
 C
+      write(*,'(/,''input Switch deciding about which RESMAX to use'')')
+      read(*,*)ISRESMAX
+      if(ISRESMAX.eq.0)then
+        write(*,'(I1,'' = Using global RESMAX'')')ISRESMAX
+      else
+        write(*,'(I1,'' = Using individual RESMAX values'')')ISRESMAX
+      endif
+C
+      write(*,'(/,''input global RESMIN'')')
+      read(*,*)RGRESMIN
+      write(*,'(F12.3)')RGRESMIN
+C
+      write(*,'(/,''input global RESMAX'')')
+      read(*,*)RGRESMAX
+      write(*,'(F12.3)')RGRESMAX
+C
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
 C
       open(11,FILE=cname2,STATUS='NEW',ERR=900)
@@ -247,8 +263,13 @@ C
 C
         write(11,'(4F12.3,''                  ! cs,kv,tx,ty'')')
      .    RCS,RKV,RTX,RTY
-        write(11,'(2F12.3,42X,''! resolution limits'')')
-     .    RESMIN,RESMAX
+        if(ISRESMAX.eq.0)then
+          write(11,'(2F12.3,42X,''! resolution limits'')')
+     .      RGRESMIN,RGRESMAX
+        else
+          write(11,'(2F12.3,42X,''! resolution limits'')')
+     .      RESMIN,RESMAX
+        endif
 C
         goto 100
 C

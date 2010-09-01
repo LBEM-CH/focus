@@ -26,6 +26,7 @@
 # GLOBAL: zstarrange_real
 # GLOBAL: RESMIN
 # GLOBAL: RESMAX
+# GLOBAL: merge_res_limit
 # GLOBAL: tempkeep
 # GLOBAL: realcell
 # GLOBAL: realang
@@ -62,6 +63,7 @@ set Calc_from_zstarrange = ""
 set zstarrange_real = ""
 set RESMIN = ""
 set RESMAX = ""
+set merge_res_limit = ""
 set tempkeep = ""
 set realcell = ""
 set realang = ""

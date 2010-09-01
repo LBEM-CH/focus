@@ -26,6 +26,7 @@
 # GLOBAL: zstarrange_real
 # GLOBAL: RESMIN
 # GLOBAL: RESMAX
+# GLOBAL: merge_res_limit
 # GLOBAL: tempkeep
 # GLOBAL: realcell
 # GLOBAL: realang
@@ -62,6 +63,7 @@ set Calc_from_zstarrange = ""
 set zstarrange_real = ""
 set RESMIN = ""
 set RESMAX = ""
+set merge_res_limit = ""
 set tempkeep = ""
 set realcell = ""
 set realang = ""
@@ -135,6 +137,12 @@ if ( ${MergeAK}x == 'x' ) then
   set MergeAK = "10"
   echo "set MergeAK = ${MergeAK}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: MergeAK corrected to ${MergeAK}"
+endif
+#
+if ( ${merge_res_limit}x == 'x' ) then
+  set merge_res_limit = "0"
+  echo "set merge_res_limit = ${merge_res_limit}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: merge_res_limit corrected to ${merge_res_limit}"
 endif
 #
 if ( ${MergeIWF}x == 'x' ) then

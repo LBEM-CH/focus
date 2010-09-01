@@ -119,13 +119,21 @@ C
       read(*,*)IHKMX
       write(*,'(I8)')IHKMX
 C
+      write(*,'(/,''input Switch deciding about which RESMAX to use'')')
+      read(*,*)ISRESMAX
+      if(ISRESMAX.eq.0)then
+        write(*,'(I1,'' = Using global RESMAX'')')ISRESMAX
+      else
+        write(*,'(I1,'' = Using individual RESMAX values'')')ISRESMAX
+      endif
+C
       write(*,'(/,''input RESMIN'')')
-      read(*,*)RLRESMIN
-      write(*,'(F12.2)')RLRESMIN
+      read(*,*)RGRESMIN
+      write(*,'(F12.2)')RGRESMIN
 C
       write(*,'(/,''input RESMAX'')')
-      read(*,*)RLRESMAX
-      write(*,'(F12.2)')RLRESMAX
+      read(*,*)RGRESMAX
+      write(*,'(F12.2)')RGRESMAX
 C
       write(*,'(/,''Want to refine switches (y=1,0=no)'')')
       read(*,*)irefswitch
@@ -318,9 +326,9 @@ C
         call shorten(CIMAGENAME,k)
         write(CTITLE(1:40),'('' Imagename = '',A)')CIMAGENAME(1:k)
         call rgetline(RESMAX,"RESMAX")
-        if(RESMAX.lt.RLRESMAX)RESMAX=RLRESMAX
+        if(RESMAX.lt.RGRESMAX)RESMAX=RGRESMAX
         call rgetline(RESMIN,"RESMIN")
-        if(RESMIN.gt.RLRESMIN)RESMIN=RLRESMIN
+        if(RESMIN.gt.RGRESMIN)RESMIN=RGRESMIN
         call rgetline(RCS,"CS")
         call rgetline(RKV,"KV")
         call cgetline(CBMTLT,"beamtilt")
@@ -399,8 +407,13 @@ C
 C
         write(11,'(4F12.3,''                 ! cs,kv,tx,ty'')')
      .    RCS,RKV,RTX,RTY
-        write(11,'(2F12.3,41X,''! resolution limits'')')
-     .    RESMIN,RESMAX
+        if(ISRESMAX.eq.0)then
+          write(11,'(2F12.3,42X,''! resolution limits'')')
+     .      RGRESMIN,RGRESMAX
+        else
+          write(11,'(2F12.3,42X,''! resolution limits'')')
+     .      RESMIN,RESMAX
+        endif
 C
         write(14,'(''#'')')
         write(14,'(''if(-e APH/REFAPH'',A10,''.hkl)then'')')

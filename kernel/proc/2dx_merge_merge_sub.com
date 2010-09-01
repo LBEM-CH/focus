@@ -65,6 +65,9 @@ ${MergeIQMAX}
 ${MergeHKMAX}
 ${IVERBOSE}
 ${RFACAMP}
+${merge_res_limit}
+${RESMIN}
+${RESMAX}
 eot
 #
 echo "# IMAGE: ${scriptAfile} <CSH: merging script>" >> LOGS/${scriptname}.results

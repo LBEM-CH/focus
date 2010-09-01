@@ -133,10 +133,10 @@ endif
   if ( ${newX} == '4' && ${newY} == '4' ) then
     set defocus = `echo ${def1},${def2},${ang}`
     ${proc_2dx}/linblock "new central defocus ${defocus}"
-    echo " Central Defocus = "${defocus} > TMP.txt
+    echo ": Central Defocus = "${defocus} > TMP.txt
     tail -n 7 ${defocus_pos_file} >> TMP.txt
     \mv -f TMP.txt ${defocus_pos_file}
-    echo " Central Defocus = "${defocus} > TMP.txt
+    echo ": Central Defocus = "${defocus} > TMP.txt
     tail -n 7 ${defocus_pos_select_file} >> TMP.txt
     \mv -f TMP.txt ${defocus_pos_select_file}
     #

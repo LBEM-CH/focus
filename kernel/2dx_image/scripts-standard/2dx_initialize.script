@@ -52,6 +52,7 @@
 # GLOBAL: tempkeep
 # GLOBAL: initialization_executable
 # GLOBAL: initialization_corr_endian
+# GLOBAL: det_defocus
 # GLOBAL: det_tilt
 # GLOBAL: ctf_ttf
 # GLOBAL: crop

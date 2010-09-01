@@ -35,7 +35,6 @@
 # GLOBAL: df_start
 # GLOBAL: df_end
 # GLOBAL: df_step 
-# GLOBAL: det_defocus
 # GLOBAL: det_tilt
 # GLOBAL: phacon
 # GLOBAL: RESMAX
@@ -66,7 +65,6 @@ set df_step = ""
 set RESMIN = ""
 set RESMAX = ""
 set phacon = ""
-set det_defocus = ""
 set det_tilt = ""
 set ctf_ttf = ""
 set TLTAXIS = ""
@@ -77,6 +75,8 @@ set tempkeep = ""
 #$end_vars
 #
 set scriptname = 2dx_getDefTilt
+#
+set debugmode = "n"
 #
 \rm -f LOGS/${scriptname}.results
 #
@@ -91,28 +91,28 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
   #
-  exit
   ##########################################################################
   ${proc_2dx}/linblock "${scriptname} - normal end."
   ##########################################################################
+  exit
 endif
 #
-if ( ${det_defocus}x == 'x' ) then
-  set det_defocus = 'y'
-  echo "set det_defocus = ${det_defocus}" >> LOGS/${scriptname}.results
-  echo ":: det_defocus corrected to ${det_defocus}"
+if ( ${det_tilt}x == 'x' ) then
+  set det_tilt = 'y'
+  echo "set det_tilt = ${det_tilt}" >> LOGS/${scriptname}.results
+  echo ":: det_tilt corrected to ${det_tilt}"
 endif
 #
-if ( ${det_defocus} == 'n' ) then
+if ( ${det_tilt} == 'n' ) then
   ${proc_2dx}/linblock "Skipping. Not determining any defocus."
   #
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
   #
-  exit
   ##########################################################################
   ${proc_2dx}/linblock "${scriptname} - normal end."
   ##########################################################################
+  exit
 endif
 #
 echo nonmaskimagename = ${nonmaskimagename}
@@ -152,6 +152,7 @@ if ( ! -e ${nonmaskimagename}.mrc ) then
 endif
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
@@ -189,7 +190,7 @@ if ( ${det_tilt} == 'y' ) then
   set searchrange2 = 1000.0
   #
   set mode = 0
-  if ( ${tempkeep} == "y" ) then
+  if ( ${debugmode} == "y" ) then
     set mode = 1
   endif
   # 
@@ -203,12 +204,17 @@ if ( ${det_tilt} == 'y' ) then
   ############################################################################# 
   #
   set defocus_pos_file = 2dx_defocus_positions.txt
+  set defocus_pos_select_file = 2dx_defocus_select_positions.txt
   echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_file}
+  echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_select_file}
   #
   foreach newY ( 1 2 3 4 5 6 7 )
     echo "::        " >> ${defocus_pos_file}
     echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
     echo "::        " >> ${defocus_pos_file}
+    echo "::        " >> ${defocus_pos_select_file}
+    echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_select_file}
+    echo "::        " >> ${defocus_pos_select_file}
   end
   #
   echo "# IMAGE-IMPORTANT: ${defocus_pos_file} <TXT: Defocus Table>" >> LOGS/${scriptname}.results  
@@ -221,7 +227,7 @@ if ( ${det_tilt} == 'y' ) then
   #                                                                           #
   #############################################################################
   #
-  \rm -f TMP-positions.txt TMP-runfile.txt
+  \rm -f TMP-positions.txt TMP-runfile-windows.txt
   #
 ${bin_2dx}/2dx_calcpositions.exe << eot
 ${imagesidelength}
@@ -230,23 +236,23 @@ ${smallsize}
 ${mode}
 ${imagename}
 TMP-positions.txt
-TMP-runfile.txt
+TMP-runfile-windows.txt
 eot
   #
   echo "<<@progress: 30>>"
   #
-  chmod +x TMP-runfile.txt 
+  chmod +x TMP-runfile-windows.txt 
   #
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE: TMP-positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: TMP-runfile.txt <TXT: runfile>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: TMP-runfile-windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
   #
   if ( ! -d CUT ) then
     \mkdir CUT
   endif 
   #
-  source TMP-runfile.txt
+  source TMP-runfile-windows.txt
   #
   echo "<<@progress: 50>>"
   #
@@ -426,13 +432,17 @@ eot
   #############################################################################
   #
   chmod +x TMP.2dx_deftilt.good.txt
-  echo "# IMAGE: TMP.2dx_deftilt.good.txt <TXT: runfile for marking>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: TMP.2dx_deftilt.good.txt <TXT: runfile for Thonring marking>" >> LOGS/${scriptname}.results
   #
-  source TMP.2dx_deftilt.good.txt
+  source TMP.2dx_deftilt.good.txt > TMP.2dx_deftilt.good.out.txt
+  echo "# IMAGE: TMP.2dx_deftilt.good.out.txt <TXT: result of runfile for Thonring marking>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${defocus_pos_select_file} <TXT: Defocus Table (Selected values)>" >> LOGS/${scriptname}.results  
   #
   #############################################################################
   ${proc_2dx}/linblock "Merge Marked Thon-ring fit panels into one overview image"
   #############################################################################
+  #
+  cat ${defocus_pos_select_file}
   #
   \rm -f CUT/${imagename}.marked.merge.ps.mrc
   #
@@ -448,17 +458,6 @@ eot
   if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
     ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
   endif
-  #
-  if ( ${tempkeep} == "n" ) then
-    echo dummy > CUT/${imagename}.1.1.ps.mrc 
-    \rm -f CUT/${imagename}.?.?.ps.mrc
-    echo dummy > CUT/${imagename}.marked.1.1.ps.mrc 
-    \rm -f CUT/${imagename}.marked.?.?.ps.mrc
-  endif
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Done."
-  #############################################################################
   #
   tail -2 TMP.2dx_deftilt.run.out.txt
   set line = `tail -1 TMP.2dx_deftilt.run.out.txt`
@@ -479,10 +478,10 @@ eot
   echo "::TLTANG  = ${TLTANG}" 
   #
   #
-  echo "<<@progress: 60>>"
+  echo "<<@progress: 90>>"
   #
   #############################################################################
-  ${proc_2dx}/linblock "2dx_tiltgeom2: Determine other tilt angles."
+  ${proc_2dx}/linblock "2dx_tiltgeom2: Determine other tilt angles with respect to lattice."
   #############################################################################
   #
   if ( ${lattice} != '0.0,0.0,0.0,0.0' ) then
@@ -531,15 +530,30 @@ eot
   echo "::TANGL   = ${TANGL}" >> History.dat
   #
   #
+  if ( ${debugmode} == "n" ) then
+    echo dummy > CUT/${imagename}.1.1.ps.mrc 
+    \rm -f CUT/${imagename}.?.?.ps.mrc
+    echo dummy > CUT/${imagename}.marked.1.1.ps.mrc 
+    \rm -f CUT/${imagename}.marked.?.?.ps.mrc
+  endif
+  #
+  if ( ${tempkeep} == "n" ) then
+    \rm -f TMP-positions.txt
+    \rm -f TMP-runfile-windows.txt
+    \rm -f CUT/${imagename}.4.4.mrc
+    \rm -f TMP.2dx_deftilt.run.txt
+    \rm -f TMP.2dx_deftilt.run.out.txt
+    \rm -f TMP.2dx_deftilt.good.txt
+  endif
+  #
+  echo "set DEFOCUS_done = y" >> LOGS/${scriptname}.results
+  #
+  echo "set DEFOCUSGRADIENT_done = y" >> LOGS/${scriptname}.results
+  #
+  echo "set CTF_done = n" >> LOGS/${scriptname}.results
+  echo "set MERGING_done = n" >> LOGS/${scriptname}.results
   #
 endif
-#
-echo "<<@progress: 80>>"
-#
-echo "set DEFOCUS_done = y" >> LOGS/${scriptname}.results
-#
-echo "set CTF_done = n" >> LOGS/${scriptname}.results
-echo "set MERGING_done = n" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 #

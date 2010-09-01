@@ -107,7 +107,7 @@ ${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
 ${inoast},${dfref}
 eof
 #
-if ( ${tempkeep} == "y" ) then
+if ( ${debugmode} == "y" ) then
   echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
 endif
 #

@@ -309,33 +309,65 @@ main()
                 cerr << name << ". File already exists \n";
                 exit(-1);};
 
+        rout << "#" << endl;
+        rout << "\\rm -f TMP.txt" << endl;
+        rout << "#" << endl;
+
 	// write out good and bad ones
         int ig1 = 0;
 	for(int i=1;i<8;i++)
 	{
 		for(int j=1;j<8;j++)
 		{
-                        rout << "#" << endl;
+                        rout << "echo \"#\"#" << endl;
+                        rout << "echo \"###################################################################################################\"" << endl;
+                        rout << "echo \"Working on position \"" << i << "," << j << endl;
+                        rout << "echo \"###################################################################################################\"" << endl;
+                        rout << "echo \"#\"#" << endl;
                         if(good[ig1]>0)
                         { 
-                                rout << "# good: " << ig1 << " " << i << "," << j << " " << (*data[ig1])[0] <<  " " << (*data[ig1])[1] << endl;
+                                rout << "# good: " << ig1 << " " << i << "," << j << " " << (*data[ig1])[0] <<  " " << (*data[ig1])[1] << " = " << (*data[ig1])[2] << endl;
                                 rout << "\\rm -f CUT/${imagename}.marked." << i << "." << j << ".ps.mrc" << endl;
                                 rout << "\\cp -f CUT/${imagename}." << i << "." << j << ".ps.mrc ";
                                 rout << "CUT/${imagename}.marked." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "#" << endl;
+                                rout << "${bin_2dx}/2dx_maintain_defocus_table.exe << eot" << endl;
+                                rout << "${defocus_pos_select_file}" << endl;
+                                rout << i << "," << j << endl;
+                                rout << "TMP.txt" << endl;
+                                rout << "0" << endl;
+                                rout << (*data[ig1])[2] << endl;
+                                rout << "eot" << endl;
+                                rout << "#" << endl;
+                                rout << "echo \"# IMAGE: CUT/${imagename}.marked." << i << "." << j << ".ps.mrc <CUT-PS-Marked_" << i << "," << j << ">\" >> LOGS/${scriptname}.results" << endl;
+                                rout << "#" << endl;
+                                rout << "\\mv -f TMP.txt ${defocus_pos_select_file}" << endl;
+                                rout << "#" << endl;
                         }
                         else
                         {
-                                rout << "# bad:  " << ig1 << " " << i << "," << j << " " << (*data[ig1])[0] << " " << (*data[ig1])[1] << endl;
+                                rout << "# bad:  " << ig1 << " " << i << "," << j << " " << (*data[ig1])[0] << " " << (*data[ig1])[1] << " = " << (*data[ig1])[2] << endl;
                                 rout << "\\rm -f CUT/${imagename}.marked." << i << "." << j << ".ps.mrc" << endl;
                                 rout << "${bin_2dx}/labelh.exe << eot" << endl;
                                 rout << "CUT/${imagename}." << i << "." << j << ".ps.mrc" << endl;
                                 rout << "15" << endl;
                                 rout << "CUT/${imagename}.marked." << i << "." << j << ".ps.mrc" << endl;
                                 rout << "eot" << endl;
+                                rout << "#" << endl;
+                                rout << "${bin_2dx}/2dx_maintain_defocus_table.exe << eot" << endl;
+                                rout << "${defocus_pos_select_file}" << endl;
+                                rout << i << "," << j << endl;
+                                rout << "TMP.txt" << endl;
+                                rout << "0" << endl;
+                                rout << "0.0" << endl;
+                                rout << "eot" << endl;
+                                rout << "#" << endl;
+                                rout << "echo \"# IMAGE: CUT/${imagename}.marked." << i << "." << j << ".ps.mrc <CUT-PS-Marked_" << i << "," << j << ">\" >> LOGS/${scriptname}.results" << endl;
+                                rout << "#" << endl;
+                                rout << "\\mv -f TMP.txt ${defocus_pos_select_file}" << endl;
+                                rout << "#" << endl;
+
                         }
-                        rout << "#" << endl;
-                        rout << "echo \"# IMAGE: CUT/${imagename}.marked." << i << "." << j << ".ps.mrc <CUT-PS-Marked_" << i << "," << j << ">\" >> LOGS/${scriptname}.results" << endl;
-                        rout << "#" << endl;
                         ig1++;
                 }
         }

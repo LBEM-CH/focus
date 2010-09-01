@@ -201,10 +201,10 @@ main()
 
         cout << ":----------------------------------------------------------------" << endl;
         cout << endl;
-        cout << "::Final results:" << endl;
+        cout << ":Final results:" << endl;
         cout << endl;
-        cout << "::TLTAXIS = " << TLTAXIS << endl;
-        cout << "::TLTANG  = " << TLTANG  << endl;
+        cout << ":TLTAXIS = " << TLTAXIS << endl;
+        cout << ":TLTANG  = " << TLTANG  << endl;
         cout << "::TLTAXA  = " << TLTAXA  << endl;
         cout << "::TAXA    = " << TAXA    << endl;
         cout << "::TANGL   = " << setprecision(4) << TANGL   << endl;

@@ -17,7 +17,9 @@
 #
 # MANUAL: This script allows merging the selected image data into one merge dataset.
 #
-# MANUAL: Select only the one best image and run this script with that one image.
+# MANUAL: Select only the one best non-tilted image and run this script with that one image.
+#
+# MANUAL: Then align the other images to it (using Refine Once), starting with non-tilted images, and slowly add more and more tilted images. After each call of "Refine Once" you should run "Merge Once" again, to merge those aligned images into a new reference. 
 #
 # GLOBAL: MergeResolution
 # GLOBAL: merge_modus

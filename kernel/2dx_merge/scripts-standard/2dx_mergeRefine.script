@@ -124,7 +124,7 @@ source ${proc_2dx}/initialize
 set dirfile = "2dx_merge_dirfile.dat"
 #
 set number = 1
-set IVERBOSE = 9
+set IVERBOSE = 1
 set RFACAMP = 1.0
 #
 set scriptname = 2dx_mergeRefine

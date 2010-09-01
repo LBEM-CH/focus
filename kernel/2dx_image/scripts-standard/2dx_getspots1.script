@@ -171,9 +171,12 @@ echo "<<@progress: 20>>"
 #   16 * 45000
 #
 #
+set local_RESMAX = `echo ${RESMAX} | awk '{ if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 } } END { print s }'`
+set local_RESMAX = `echo ${local_RESMAX} | awk '{ s = 1.5 * $1 } END { print s }'`
+${proc_2dx}/linblock "Using resolution limit of ${local_RESMAX} Angstroems"
 #
 set RINNER = 1
-set ROUTER = `echo ${imagesidelength} ${stepdigitizer} ${magnification} ${RESMAX} | awk '{ s = ( $1 * $2 *10000 ) / ( $3 * $4 ) } END { print s }'`
+set ROUTER = `echo ${imagesidelength} ${stepdigitizer} ${magnification} ${local_RESMAX} | awk '{ s = ( $1 * $2 *10000 ) / ( $3 * $4 ) } END { print s }'`
 ${proc_2dx}/linblock "Outer radius = ${ROUTER}"
 #
 set spot_source_begin = `echo ${spot_source} | cut -c1-3`

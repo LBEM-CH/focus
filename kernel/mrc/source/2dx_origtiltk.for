@@ -49,9 +49,9 @@ C
 C     NOW DOES REFINEMENT OF BEAM AND CRYSTAL TILTANGLES AND TILTAXES.
 C                            derived from ORIGMERG  13.4.84, (RH)
 C     NOTE: TILT REFINEMENT (CRYSTAL AND BEAM) HAS BEEN TESTED ONLY IN
-C					P3		30.12.84
-C					P22121		  8.8.88
-C					P4212		  4.4.94
+C                                       P3              30.12.84
+C                                       P22121            8.8.88
+C                                       P4212             4.4.94
 C
 C   THREE-DIMENSIONAL IMAGE COMBINING PROGRAM FOR ALL SEVENTEEN
 C                   TWO-SIDED PLANE GROUPS
@@ -95,7 +95,7 @@ C       THE FIRST SET OF REFLECTIONS MUST BE FOR AN UNTILTED
 C       IMAGE AND ONLY THE UNIQUE REFLECTIONS SHOULD BE PROVIDED
 C       THIS OPTION IS MEANT FOR MERGING RAW DATA -- AS IN ORIGINAL
 C       ORIGMERG - This set of data can have zero observations 
-C	provided that SCALE = 1.0 (or any non-zero value) on card 9
+C       provided that SCALE = 1.0 (or any non-zero value) on card 9
 C  IF  NPROG.EQ.1
 C       THE FIRST SET OF DATA READ IN WILL BE FROM O/P OF A PREVIOUS
 C       RUN OF ORIGMERG (UNIT 3 O/P). SUBSEQUENT FILMS WILL BE COMPARED
@@ -145,28 +145,28 @@ C
 C  10  DRESMAX, DRESMIN (BLANK CARD GIVES 100.0,3.5)                 (*)
 C
 C     Then the file of data contains data of the following kind
-C    	ISER                                                         (*)
-C    	IH,IK,A,P,IQ                                                 (*)
-C    	IH=900  (or EOF) --- THIS ENDS THE SET OF REFLECTIONS.
+C       ISER                                                         (*)
+C       IH,IK,A,P,IQ                                                 (*)
+C       IH=900  (or EOF) --- THIS ENDS THE SET OF REFLECTIONS.
 C
 C            ANY NUMBER OF FURTHER IMAGES SPECIFIED BY THE ABOVE CARDS CAN
 C            BE INCLUDED AT THIS STAGE.
 C
 C  11  IFILM<0  --- THIS ENDS DATA INPUT
 C
-C  12 TITLE --- TITLE FOR PLOT OUTPUT IF REQUESTED.		  (20A4)
-C   	
+C  12 TITLE --- TITLE FOR PLOT OUTPUT IF REQUESTED.               (20A4)
+C       
 C##############################################################################
 C
 C
 C                ISPGRP - NUMBER OF SPACE GROUP AS BELOW
-C		 NPROG  - DETERMINES TYPE OF RUN
-C		          IF =0, NORMAL SEQUENTIAL MERGING (OLD ORIGMERG).
-C		          IF =1, READS IN PREVIOUSLY MERGED DATA O/P ON UNIT 3.
+C                NPROG  - DETERMINES TYPE OF RUN
+C                         IF =0, NORMAL SEQUENTIAL MERGING (OLD ORIGMERG).
+C                         IF =1, READS IN PREVIOUSLY MERGED DATA O/P ON UNIT 3.
 C                         IF =2, READS IN REFERENCE DATA FROM LCF FILE.
 C                         IF =3, READS IN REFERENCE DATA FROM MTZ FILE.
-C		 NTILT  -  IF (F) NO CRYSTAL TILTANGLE OR TILTAXIS REFINEMENT.
-C		           IF (T) CRYSTAL TILTANGLE AND TILTAXIS ARE REFINED.
+C                NTILT  -  IF (F) NO CRYSTAL TILTANGLE OR TILTAXIS REFINEMENT.
+C                          IF (T) CRYSTAL TILTANGLE AND TILTAXIS ARE REFINED.
 C                NBEAM  -  IF (F) NO BEAMTILT REFINEMENT.
 C                          IF (T) BEAMTILT IS REFINED -- IN MILLIRADIANS.
 C                ILIST  - IF =1 PROGRAM LISTS EACH REFLECTION OTHERWISE
@@ -201,7 +201,7 @@ C                          IF (T) FILE IS CREATED WITH REFERENCE PROJECTION
 C                                 DATA AT SAME ANGLE AS INPUT DATA.
 C                NSHFTIN-  IF (F) NO OUTPUT OF ORIGIN SHIFTED INPUT DATA
 C                          IF (T) FILE IS CREATED FROM SHIFTED INPUT DATA
-C		 RFACAMP- Factor for Amplitude weight during merging
+C                RFACAMP- Factor for Amplitude weight during merging
 C                         RFACAMP=0.0: no weighting, RFACAMP=1.0: full weight
 C                IFILM  - INTEGER FILM IDENTIFIER
 C                TITLE  - DESCRIPTION OF FILM
@@ -258,11 +258,11 @@ C                         damned handedness.
 C                         NOTE THAT ALL OTHER
 C                         PARAMETERS, SUCH AS TAXA,TANGL MUST REMAIN CORRECT
 C                         W.R.T. THE ORIGINAL DIRECTIONS FOR H AND K.
-C		 CTFREV - IF NOT = 0, 
-C			  REVERSES SIGN OF STRUCTURE FACTOR BY ADDING 180 DEGS
-C			  TO THE PHASE. USEFUL FOR LOW DOSE IMAGES WHERE THERE
-C			  IS UNCERTAINTY ABOUT WHETHER IMAGE IS OVER-FOCUSSED
-C			  OR UNDER-FOCUSSED.
+C                CTFREV - IF NOT = 0, 
+C                         REVERSES SIGN OF STRUCTURE FACTOR BY ADDING 180 DEGS
+C                         TO THE PHASE. USEFUL FOR LOW DOSE IMAGES WHERE THERE
+C                         IS UNCERTAINTY ABOUT WHETHER IMAGE IS OVER-FOCUSSED
+C                         OR UNDER-FOCUSSED.
 C                CS     - SPHERICAL ABERRATION COEFFICIENT - USED TO GET
 C                         BEAMTILT ON RIGHT ABSOLUTE SCALE OF MILIRADIANS.
 C                KV     - MICROSCOPE VOLTAGE - USED TO CALCULATE WAVELENGTH.
@@ -291,11 +291,11 @@ C  18.8.84 ############  IMPORTANT CHANGE #####################################
 C            THE MATRICES IMAT, MAT, IGO HAVE BEEN CHANGED, TOGETHER WITH THE 
 C            LREV TEST IN ASYM SO THAT THE CONVENTION IN P4, P3, AND P6 IS
 C            FOR THE AXIAL INDICES TO BE H,0 RATHER THAN 0,K.
-C	     ( THEY ARE THE SAME AS IN EDLCF ).
+C            ( THEY ARE THE SAME AS IN EDLCF ).
 C
 C  PROGRAM MUST NOW BE LINKED USING COMMAND
 C   :-   on VAX, PIMLINK ORIGTILT
-C	         (INCLUDES LCFLIB,IMLIB,MODLIB,PLOT82, (LIBRARIES) ETC)
+C                (INCLUDES LCFLIB,IMLIB,MODLIB,PLOT82, (LIBRARIES) ETC)
 C   :-   for UNIX fortran -o origtilt.exe origtilt.for ma21.for -lplot82 -lccp4
 C
 C##############################################################################
@@ -306,7 +306,7 @@ C SPACE GROUP MATRICES --- convention for p3, p4 and p6 is H,0 (not 0,K).
 C     DATA ISPEC/7*0,1,3*0,1,4*0,1,4*0,1,3*0,3*1,2*0,3*1,0,-1,3*1,0,1,
 C    A 3*1,4*0,1,0,0,4*1,0,5*1,8*0,1,0,1,1,5*0,1,4*0,1,1,0/
       DATA ISPEC/
-     A	0,0,0,0,0,
+     A  0,0,0,0,0,
      B  0,0,1,0,0,
      C  0,1,0,0,0,
      D  0,1,0,0,0,
@@ -365,7 +365,7 @@ C    E 2,4,2,4,1,5,1,5,  3,4,3,5,1,4,1,5,  2,3,2,4,1,3,1,5/
       LOGICAL LREV(17)
       DATA LREV/9*.FALSE.,.TRUE.,2*.FALSE.,.TRUE.,2*.FALSE.,.TRUE.,
      1          .FALSE./
-      REAL STANG(17)		! STANDARD SPACE GROUP ANGLES.
+      REAL STANG(17)            ! STANDARD SPACE GROUP ANGLES.
       DATA STANG/2*0.0,10*90.0,5*120.0/
 C
 C        ANGLE BETWEEN A AND B FOR ALL SPACEGROUPS EXCEPT P1, P2 IS FIXED.
@@ -440,9 +440,9 @@ C
       PARAMETER (IBXPHSMAX=3601)
 C
 C  DIMENSION STATEMENTS FOR NPROG.EQ.2 REFINEMENT - i.e. using LCF files.
-C      DIMENSION CELL(6)			! also used in MTZ section
+C      DIMENSION CELL(6)                        ! also used in MTZ section
       INTEGER*4 IDATAIN(40)
-C     .		,LOOKUP(40)			! also used in MTZ section
+C     .         ,LOOKUP(40)                     ! also used in MTZ section
       INTEGER*2 IHC(NMAXC),IKC(NMAXC),ILC(NMAXC),
      . ISC(NMAXC),IFCC(NMAXC),IPHC(NMAXC),IFOM(NMAXC)
       INTEGER*4 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
@@ -508,18 +508,18 @@ C
 C  DIMENSION STATEMENTS FOR INPUT AND ORIGIN/TILTAXIS REFINEMENT.
       DIMENSION RESPOT(MAXRFL)
       INTEGER IHIN(MAXRFL),IKIN(MAXRFL)
-C      INTEGER IIH(MAXRFL),IIK(MAXRFL),IQIN(MAXRFL)	! see common block
+C      INTEGER IIH(MAXRFL),IIK(MAXRFL),IQIN(MAXRFL)     ! see common block
       INTEGER IPTEST(MAXRFL)
       INTEGER*2 IP1(MAXRFL),IP2(MAXRFL)
-      LOGICAL LSPEC(MAXRFL)	! TRUE IF PHASE IS RESTRICTED BY SYMMETRY.
-C      REAL PHSI(MAXRFL),PHSC(MAXRFL),WGT(MAXRFL)	! see common block
+      LOGICAL LSPEC(MAXRFL)     ! TRUE IF PHASE IS RESTRICTED BY SYMMETRY.
+C      REAL PHSI(MAXRFL),PHSC(MAXRFL),WGT(MAXRFL)       ! see common block
       REAL PTEMP(MAXRFL)
       REAL PHASIN(MAXRFL),AIN(MAXRFL),WGTIN(MAXRFL)
       REAL BIN(MAXRFL),CTFIN(MAXRFL)
-C      REAL BSH(MAXRFL)	! see common block
+C      REAL BSH(MAXRFL) ! see common block
 C
-C	DIMENSION STATEMENTS FOR ORIGIN PHASE RESIDUAL HISTOGRAM
-	DIMENSION NRESO(NSLOTS),SERRES(NSLOTS),ERRES(NSLOTS)
+C       DIMENSION STATEMENTS FOR ORIGIN PHASE RESIDUAL HISTOGRAM
+        DIMENSION NRESO(NSLOTS),SERRES(NSLOTS),ERRES(NSLOTS)
       DATA IRESTEP/50/
 C
 C  DIMENSION STATEMENTS FOR BEAMTILT REFINEMENT -- includes COMMON block
@@ -544,21 +544,21 @@ C  DIMENSION STATEMENTS FOR OUTPUT SORTING.
       REAL PZ(MAXPLT),PAMP(MAXPLT),PPHS(MAXPLT)
       INTEGER IPSGN(MAXPLT)
 C        
-      LOGICAL LIST		! TRUE IF DETAILED PRINTOUT REQUIRED.
+      LOGICAL LIST              ! TRUE IF DETAILED PRINTOUT REQUIRED.
       LOGICAL IOK
       REAL TITLE(10)
-      DATA LIST/.FALSE./	! IF TRUE DATA IS LISTED AT INPUT AND REFINE.
-      DATA JREFL/0/		! JREFL IS COUNT ON TOTAL NO. OF REFLECTIONS.
+      DATA LIST/.FALSE./        ! IF TRUE DATA IS LISTED AT INPUT AND REFINE.
+      DATA JREFL/0/             ! JREFL IS COUNT ON TOTAL NO. OF REFLECTIONS.
       DATA DRAD,RDEG/0.0174532,57.295779/
       DATA IZERO/0/
 C
 C  DIMENSION STATEMENTS FOR OUTPUT SORTING WITH QUICKSORT
 C
-      	INTEGER M,NSTACK
-      	PARAMETER (M=7,NSTACK=70)
-      	INTEGER*4 i,ir,j,jstack,k,l,istack(NSTACK)
-      	REAL a,temp
-		LOGICAL icompare 
+        INTEGER M,NSTACK
+        PARAMETER (M=7,NSTACK=70)
+        INTEGER*4 i,ir,j,jstack,k,l,istack(NSTACK)
+        REAL a,temp
+                LOGICAL icompare 
 C
 C
 C
@@ -605,7 +605,7 @@ C
      1      /,'  NBEAM =   ',L1,
      1      /,'  ILIST =',I5/'  IPLOT =',I5/'  MINRFL=',I5,
      2      /,'  LHMIN =',I5/'  LHMAX =',I5/'  IQMAX =',I5,
-     3	    /,' IBOXPHS=',I5/' NREFOUT=   ',L1,/' NSHFTIN=   ',L1,
+     3      /,' IBOXPHS=',I5/' NREFOUT=   ',L1,/' NSHFTIN=   ',L1,
      4      /,'  IAQP2 =',I5/'IVERBOSE=',I5,/,'LOGOUTPUT=',L1,
      .      /,' RFACAMP=',F10.6)
 155   FORMAT('  A-STAR WAS',F8.3,' DEGS FROM TILTAXIS;  B-STAR WAS',
@@ -643,7 +643,7 @@ C
 181   FORMAT(' NPROG.NE.0, NO MERGING, TO MERGE RERUN WITH NPROG=0')
 182   FORMAT(' SORTING FAILED!!!!!!!!!!!!!!!!!!!! NCHNG= ',I5)
 185   FORMAT(' REFLECTION ZSTAR   AMPLITUDE PHASE  FILM',
-     1	' IQ  FLMWGT  BACKGRND  CTF',/,'   IH  IK'/)
+     1  ' IQ  FLMWGT  BACKGRND  CTF',/,'   IH  IK'/)
 187   FORMAT(////)
 188   FORMAT('0TOO FEW POINTS TO BE WORTH PLOTTING FOR N=',I5,' L=',I5)
 CAnd ifilm 10 stellig
@@ -694,7 +694,7 @@ C       AND FOR ISPEC WHICH INDICATES SPECIAL REFLECTIONS.
 C
       ABANG=STANG(ISPGRP)
       IF(ISPGRP.LE.2) ABANG=ANG
-      WRITE(6,110)		! ORIGTILT header output, with version number.
+      WRITE(6,110)              ! ORIGTILT header output, with version number.
       WRITE(6,115)ISPGRP
       IF(ISPGRP.GT.9) BLNG=ALNG
       WRITE(6,116)IRUN
@@ -727,7 +727,7 @@ CHEN<
 C
       IF(NPROG.GE.2) GO TO 207
 C
-      READ(5,120) IFILM,TITLE	! for NPROG.eq.0 or NPROG.eq.1
+      READ(5,120) IFILM,TITLE   ! for NPROG.eq.0 or NPROG.eq.1
       WRITE(6,135)IFILM,TITLE
       READ(5,1005) FILIN
  1005 FORMAT(A)
@@ -768,8 +768,8 @@ C
       IF(NPROG.EQ.0) GO TO 201
       IF(NPROG.EQ.1) GO TO 202
 C
-201   WRITE(6,130)		! THIS IF NPROG.EQ.0
-      WRITE(6,132)		! THIS IS ONE ASYMMETRIC UNIT OF REFERENCE DATA.
+201   WRITE(6,130)              ! THIS IF NPROG.EQ.0
+      WRITE(6,132)              ! THIS IS ONE ASYMMETRIC UNIT OF REFERENCE DATA.
       IF(LIST) WRITE(6,137)
       DO 200 I=1,MAX1
       READ(NIN,*,END=210)IH,IK,A,P
@@ -810,7 +810,7 @@ C
       STOP
 C
 202   IF(LIST) WRITE(6,139)
-      DO 205 I=1,TOTRFL		! THIS FOR NPROG.EQ.1
+      DO 205 I=1,TOTRFL         ! THIS FOR NPROG.EQ.1
       LREFL=JREFL+1
       READ(NIN,*,END=210)JH(LREFL),JK(LREFL),ZSTAR(LREFL),AMP(LREFL),
      . PHS(LREFL),JFILM(LREFL),JSIGN(LREFL),
@@ -832,20 +832,20 @@ C
 C
 C   Close first file.
 C
-	CLOSE (UNIT=NIN)
-      	GO TO 220
+        CLOSE (UNIT=NIN)
+        GO TO 220
 C
-207	CONTINUE	! NPROG.EQ.2 or NPROG.eq.3
+207     CONTINUE        ! NPROG.EQ.2 or NPROG.eq.3
       IF(NPROG.EQ.2) THEN
 C------------------------------------------------------------------------------------------
 C                         REFERENCE CURVE INPUT TO STORAGE. (for LCF file)
 C------------------------------------------------------------------------------------------
-C	INPUT OF AMPL & PHASES FROM LCF FILE FOR TILTAXIS, TILTANGLE REFINEMENT.
-C  	USE POINTERS TO INDICATE THE BEGINNING OR END OF EACH LATTICE LINE.
+C       INPUT OF AMPL & PHASES FROM LCF FILE FOR TILTAXIS, TILTANGLE REFINEMENT.
+C       USE POINTERS TO INDICATE THE BEGINNING OR END OF EACH LATTICE LINE.
 C
-C  	NOTES:- THE FORMULA FOR CALCULATION OF PHASE AT AN ARBITRARY ZSTAR
-C            	POSITION DOES NOT TREAT THE SYMMETRY OF SPACE GROUPS WITH
-C            	LATTICE LINES FOR WHICH ZSTAR IS ONLY POSITIVE PROPERLY.
+C       NOTES:- THE FORMULA FOR CALCULATION OF PHASE AT AN ARBITRARY ZSTAR
+C               POSITION DOES NOT TREAT THE SYMMETRY OF SPACE GROUPS WITH
+C               LATTICE LINES FOR WHICH ZSTAR IS ONLY POSITIVE PROPERLY.
 C
 C       IMAT SHOWS WHICH MATRICES WILL BE USED FROM MAT FOR EACH SPACE GROUP
 C       THE FIRST ELEMENT OF EACH IS PASSED TO ASYM FOR LATER USE.
@@ -854,185 +854,185 @@ C       AND FOR ISPEC WHICH INDICATES SPECIAL REFLECTIONS.
 C
 C       ALL PHASES ARE STORED AS VALUES BETWEEN -180.0 AND 180.0 DEGREES
 C
-C  	INPUT OF PHASES OF NATIVE DATA 
+C       INPUT OF PHASES OF NATIVE DATA 
 C          (TITLE WITH THE PHASES IS CARRIED INVISIBLY IN /LCF/ COMMON BLOCK)
 C
-	CALL SRLCF1(1,'HKLIN',26,'H K L S FC SIGFC PHCAL FOM',LOOKUP,
+        CALL SRLCF1(1,'HKLIN',26,'H K L S FC SIGFC PHCAL FOM',LOOKUP,
      .. TRUE.,NCOL,CELL)
-      	IF(STANG(ISPGRP).EQ.CELL(6))  GO TO 1105
-     	  WRITE(6,1109) STANG(ISPGRP),CELL(6)
-1109	  FORMAT(' CONFLICT BETWEEN CELL ANGLES FROM SPACE GROUP'/
+        IF(STANG(ISPGRP).EQ.CELL(6))  GO TO 1105
+          WRITE(6,1109) STANG(ISPGRP),CELL(6)
+1109      FORMAT(' CONFLICT BETWEEN CELL ANGLES FROM SPACE GROUP'/
      .   ' AND LCF INPUT FILE')
-      	  STOP
-1105  	ABANG = 180.0 - CELL(6)
-      	WRITE(6,1113)ALNG,CELL(1),BLNG,CELL(2),WIDTH,CELL(3)
-1113	FORMAT(' COMPARISON OF CELL DIMENSIONS READ IN WITH CELL',
+          STOP
+1105    ABANG = 180.0 - CELL(6)
+        WRITE(6,1113)ALNG,CELL(1),BLNG,CELL(2),WIDTH,CELL(3)
+1113    FORMAT(' COMPARISON OF CELL DIMENSIONS READ IN WITH CELL',
      . ' DIMENSIONS'/'  FROM LCF FILE OF AMPS AND PHASES'/
      . ' THEY SHOULD BE THE SAME ***********************************'/
      . '            READ IN       LCF FILE'/
      . '  A=',2F15.2/'  B=',2F15.2/'  C=',2F15.2)
-C     	ASTAR=1.0/(CELL(1)*SIN(DRAD*ABANG))
-C      	BSTAR=1.0/(CELL(2)*SIN(DRAD*ABANG))
-C      	CSTAR=1.0/ CELL(3)
-C      	WSTAR=CSTAR/3.0
-	MH=LOOKUP(1)
-	MK=LOOKUP(2)
-	ML=LOOKUP(3)
-	MS=LOOKUP(4)
-	MFC=LOOKUP(5)
-      	MSIGFC=LOOKUP(6)
-	MPHCAL=LOOKUP(7)
-      	MFOM=LOOKUP(8)
-      	IFOMLIMIT=1	! corresponds to classical FOM of 0.01
-	NLCFOK=0
-      	NLCFPH=0
-      	NLCFAM=0
-	NREC=0
-      	WRITE(6,197)
-1101	  CALL RLCF1(IDATAIN,*1110,*1110)
-	  NLCFOK=NLCFOK+1
-	  NREC=NREC+1
-	  IF(NLCFOK.GT.NMAXC) GO TO 1150
-      	  ITH=IDATAIN(MH)
-      	  ITK=IDATAIN(MK)
-      	  IF(ABS(ITH).GT.MAXINDEX.OR.ABS(ITK).GT.MAXINDEX) THEN
-      	    WRITE(6,196) MAXINDEX
-      	    STOP
-      	  ENDIF
-	  IHC(NLCFOK)=ITH
-	  IKC(NLCFOK)=ITK
-	  ILC(NLCFOK)=IDATAIN(ML)
-	  ISC(NLCFOK)=IDATAIN(MS)
-	  IF(ISC(NLCFOK).LT.SMIN) SMIN=ISC(NLCFOK)  ! SMIN,SMAX NOT USED YET.
-	  IF(ISC(NLCFOK).GT.SMAX) SMAX=ISC(NLCFOK)
+C       ASTAR=1.0/(CELL(1)*SIN(DRAD*ABANG))
+C       BSTAR=1.0/(CELL(2)*SIN(DRAD*ABANG))
+C       CSTAR=1.0/ CELL(3)
+C       WSTAR=CSTAR/3.0
+        MH=LOOKUP(1)
+        MK=LOOKUP(2)
+        ML=LOOKUP(3)
+        MS=LOOKUP(4)
+        MFC=LOOKUP(5)
+        MSIGFC=LOOKUP(6)
+        MPHCAL=LOOKUP(7)
+        MFOM=LOOKUP(8)
+        IFOMLIMIT=1     ! corresponds to classical FOM of 0.01
+        NLCFOK=0
+        NLCFPH=0
+        NLCFAM=0
+        NREC=0
+        WRITE(6,197)
+1101      CALL RLCF1(IDATAIN,*1110,*1110)
+          NLCFOK=NLCFOK+1
+          NREC=NREC+1
+          IF(NLCFOK.GT.NMAXC) GO TO 1150
+          ITH=IDATAIN(MH)
+          ITK=IDATAIN(MK)
+          IF(ABS(ITH).GT.MAXINDEX.OR.ABS(ITK).GT.MAXINDEX) THEN
+            WRITE(6,196) MAXINDEX
+            STOP
+          ENDIF
+          IHC(NLCFOK)=ITH
+          IKC(NLCFOK)=ITK
+          ILC(NLCFOK)=IDATAIN(ML)
+          ISC(NLCFOK)=IDATAIN(MS)
+          IF(ISC(NLCFOK).LT.SMIN) SMIN=ISC(NLCFOK)  ! SMIN,SMAX NOT USED YET.
+          IF(ISC(NLCFOK).GT.SMAX) SMAX=ISC(NLCFOK)
 C---------HERE TEST FOM TO BE  > IFOMLIMIT  BEFORE ACCEPTING CURVE DATA.
 C---------AND TEST FOR PRESENCE OF THE STRUCTURE FACTOR (USING SIGFC)
-	  IF(IDATAIN(MFOM).GE.IFOMLIMIT) NLCFPH=NLCFPH+1	! CRITERIA FOM.
-      	  IF(IDATAIN(MSIGFC).GT.0.0)     NLCFAM=NLCFAM+1	! CRITERIA SIGF.
-	  IF(IDATAIN(MFOM).GE.IFOMLIMIT.AND.
+          IF(IDATAIN(MFOM).GE.IFOMLIMIT) NLCFPH=NLCFPH+1        ! CRITERIA FOM.
+          IF(IDATAIN(MSIGFC).GT.0.0)     NLCFAM=NLCFAM+1        ! CRITERIA SIGF.
+          IF(IDATAIN(MFOM).GE.IFOMLIMIT.AND.
      .     IDATAIN(MSIGFC).GT.0.0) GO TO 1102
-	  NLCFOK=NLCFOK-1		! this was not a valid point after all.
-	GO TO 1101
-1102   	IFCC(NLCFOK)=IDATAIN(MFC)
-	IPHC(NLCFOK)=IDATAIN(MPHCAL)
-      	IF(NLCFOK.NE.1) GO TO 1103
-      	  IHOLD=IHC(NLCFOK)
-      	  IKOLD=IKC(NLCFOK)
-      	  IBEGIN(IHOLD,IKOLD)=1
-1103  	IF((IHC(NLCFOK).EQ.IHOLD).AND.(IKC(NLCFOK).EQ.IKOLD)) GO TO 1101
-      	IFINISH(IHOLD,IKOLD)=NLCFOK-1
-      	IF(LIST)WRITE(6,*) IHOLD,IKOLD,ILC(IBEGIN(IHOLD,IKOLD)),
+          NLCFOK=NLCFOK-1               ! this was not a valid point after all.
+        GO TO 1101
+1102    IFCC(NLCFOK)=IDATAIN(MFC)
+        IPHC(NLCFOK)=IDATAIN(MPHCAL)
+        IF(NLCFOK.NE.1) GO TO 1103
+          IHOLD=IHC(NLCFOK)
+          IKOLD=IKC(NLCFOK)
+          IBEGIN(IHOLD,IKOLD)=1
+1103    IF((IHC(NLCFOK).EQ.IHOLD).AND.(IKC(NLCFOK).EQ.IKOLD)) GO TO 1101
+        IFINISH(IHOLD,IKOLD)=NLCFOK-1
+        IF(LIST)WRITE(6,*) IHOLD,IKOLD,ILC(IBEGIN(IHOLD,IKOLD)),
      .   ILC(IFINISH(IHOLD,IKOLD)),
      .   IBEGIN(IHOLD,IKOLD),IFINISH(IHOLD,IKOLD)
-      	IHOLD=IHC(NLCFOK)
-      	IKOLD=IKC(NLCFOK)
-      	IBEGIN(IHOLD,IKOLD)=NLCFOK
-	GO TO 1101
-1110  	IFINISH(IHOLD,IKOLD)=NLCFOK
-      	FOMLIMIT=IFOMLIMIT/100.0
-	WRITE(6,1100)NLCFOK,NREC,NLCFAM,NLCFPH,FOMLIMIT
-1100	FORMAT(I10,' GOOD S.F.s (i.e.Amp+Phs) read in from LCF FILE'/
+        IHOLD=IHC(NLCFOK)
+        IKOLD=IKC(NLCFOK)
+        IBEGIN(IHOLD,IKOLD)=NLCFOK
+        GO TO 1101
+1110    IFINISH(IHOLD,IKOLD)=NLCFOK
+        FOMLIMIT=IFOMLIMIT/100.0
+        WRITE(6,1100)NLCFOK,NREC,NLCFAM,NLCFPH,FOMLIMIT
+1100    FORMAT(I10,' GOOD S.F.s (i.e.Amp+Phs) read in from LCF FILE'/
      . I10,' TOTAL RECORDS ON THE FILE'/
      . I10,' RECORDS HAD AMPLITUDES WITH NON-ZERO SIGFC'/
      . I10,' RECORDS HAD PHASES WITH FOM >',F5.2)
-	CALL CRLCF1
-      	GO TO 220
+        CALL CRLCF1
+        GO TO 220
       ELSE
 C------------------------------------------------------------------------------------------
 C------------------------------------------------------------------------------------------
 C-------here only if NPROG.eq.3 -- i.e. for mtz file input
 C------------------------------------------------------------------------------------------
 C------------------------------------------------------------------------------------------
-      	CALL CCPFYP
-      	CALL MTZINI
-      	CALL LROPEN(1,'HKLIN',3,IERR)
-      	CALL LRCELL(1,CELL)
-      	CALL LRSYMM(1,NSYMX,RSYMX)
-      	IF(IERR.NE.0) THEN
-      	  WRITE (6,11006)IERR
+        CALL CCPFYP
+        CALL MTZINI
+        CALL LROPEN(1,'HKLIN',3,IERR)
+        CALL LRCELL(1,CELL)
+        CALL LRSYMM(1,NSYMX,RSYMX)
+        IF(IERR.NE.0) THEN
+          WRITE (6,11006)IERR
 11006     FORMAT(' ERROR ON INPUT OF MTZ FILE, IERR=',I5)
-      	  STOP
-      	ENDIF
+          STOP
+        ENDIF
 C-------Find out how many columns and reflections in input file
-      	CALL LRINFO(1,DUMMY,NCOL,NREF,DUM)
-      	CALL LKYASN(1,NLPRGI,LSPRGI,CTPRGI,LOOKUP)
+        CALL LRINFO(1,DUMMY,NCOL,NREF,DUM)
+        CALL LKYASN(1,NLPRGI,LSPRGI,CTPRGI,LOOKUP)
 C
-      	IF(ISPGRP.GE.3.AND.STANG(ISPGRP).NE.CELL(6)) THEN
-      	  WRITE(6,11008) STANG(ISPGRP),CELL(6)
-11008	  FORMAT(' Conflict between cell angles from space group',
-     $	  ' and mtz input file, STANG, CELL=',2F8.3)
-      	  STOP
-      	ENDIF
+        IF(ISPGRP.GE.3.AND.STANG(ISPGRP).NE.CELL(6)) THEN
+          WRITE(6,11008) STANG(ISPGRP),CELL(6)
+11008     FORMAT(' Conflict between cell angles from space group',
+     $    ' and mtz input file, STANG, CELL=',2F8.3)
+          STOP
+        ENDIF
 C
-      	IF(ABANG.NE.180.0 - CELL(6)) 
+        IF(ABANG.NE.180.0 - CELL(6)) 
      .   STOP' Conflict between GAMMA and MTZ cell angle'
-      	N=0
-      	NAMPS=0
-      	NPHASES=0
-      	NREC=0
+        N=0
+        NAMPS=0
+        NPHASES=0
+        NREC=0
 C
-11007	CALL LRREFF(1,RESOL,ADATAIN,EOF)
-      	  IF(EOF) GO TO 11003
-      	  NREC=NREC+1
-	  IF(ADATAIN(5).EQ.0) GO TO 11007	! CRITERIA ON SIGF
-      	  N=N+1
-      	  NAMPS=N
-	  IF(N.GT.NMAXC) GO TO 1150
+11007   CALL LRREFF(1,RESOL,ADATAIN,EOF)
+          IF(EOF) GO TO 11003
+          NREC=NREC+1
+          IF(ADATAIN(5).EQ.0) GO TO 11007       ! CRITERIA ON SIGF
+          N=N+1
+          NAMPS=N
+          IF(N.GT.NMAXC) GO TO 1150
 C
-      	  IHC(N)=ADATAIN(1)
-      	  IKC(N)=ADATAIN(2)
-      	  IF(ABS(IHC(N)).GT.MAXINDEX.OR.ABS(IKC(N)).GT.MAXINDEX) THEN
-      	    WRITE(6,196) MAXINDEX
-      	    STOP
-      	  ENDIF
-      	  ILC(N)=ADATAIN(3)
-      	  ISC(N)= 10000.0 * ((IHC(N)*ASTAR)**2 + 
+          IHC(N)=ADATAIN(1)
+          IKC(N)=ADATAIN(2)
+          IF(ABS(IHC(N)).GT.MAXINDEX.OR.ABS(IKC(N)).GT.MAXINDEX) THEN
+            WRITE(6,196) MAXINDEX
+            STOP
+          ENDIF
+          ILC(N)=ADATAIN(3)
+          ISC(N)= 10000.0 * ((IHC(N)*ASTAR)**2 + 
      .     2*IHC(N)*IKC(N)*ASTAR*BSTAR*COS(DRAD*ABANG) + 
      .     (IKC(N)*BSTAR)**2+(ILC(N)*WSTAR)**2)
-      	  IFCC(N)=ADATAIN(4)
-      	  IPHC(N)=ADATAIN(6)
-      	  IFOM(N)=ADATAIN(7)*100.0 	! compatibility LCF vs MTZ
-	  IF(IFOM(N).GE.IFOMLIMIT) NPHASES=NPHASES+1
+          IFCC(N)=ADATAIN(4)
+          IPHC(N)=ADATAIN(6)
+          IFOM(N)=ADATAIN(7)*100.0      ! compatibility LCF vs MTZ
+          IF(IFOM(N).GE.IFOMLIMIT) NPHASES=NPHASES+1
 C
-      	  IF(N.EQ.1) THEN
-      	    IHOLD=IHC(N)
-      	    IKOLD=IKC(N)
-      	    IBEGIN(IHOLD,IKOLD)=1
-      	  ENDIF
-      	  IF(.NOT.((IHC(N).EQ.IHOLD).AND.(IKC(N).EQ.IKOLD))) THEN
-      	    IFINISH(IHOLD,IKOLD)=N-1
-      	    IHOLD=IHC(N)
+          IF(N.EQ.1) THEN
+            IHOLD=IHC(N)
             IKOLD=IKC(N)
-      	    IBEGIN(IHOLD,IKOLD)=N
-      	  ENDIF
+            IBEGIN(IHOLD,IKOLD)=1
+          ENDIF
+          IF(.NOT.((IHC(N).EQ.IHOLD).AND.(IKC(N).EQ.IKOLD))) THEN
+            IFINISH(IHOLD,IKOLD)=N-1
+            IHOLD=IHC(N)
+            IKOLD=IKC(N)
+            IBEGIN(IHOLD,IKOLD)=N
+          ENDIF
 C
-C	  write(*,'('' Reference: H,K,L,A,P,FOM = '',6I6)')
+C         write(*,'('' Reference: H,K,L,A,P,FOM = '',6I6)')
 C     1      IHC(N),IKC(N),ILC(N),IFCC(N),IPHC(N),IFOM(N)
 C
-      	GO TO 11007
+        GO TO 11007
 C
 11003   WRITE(6,11004)
 11004   FORMAT(' end of mtz input')
-      	IFINISH(IHOLD,IKOLD)=N
+        IFINISH(IHOLD,IKOLD)=N
 C
-	write(6,'(//,'' Lattice line ranges:'',/)')
+        write(6,'(//,'' Lattice line ranges:'',/)')
 C
-	do I=-10,10
-	  do J=-10,10
-	    i1=IBEGIN(I,J)
-	    i2=IFINISH(I,J)
+        do I=-10,10
+          do J=-10,10
+            i1=IBEGIN(I,J)
+            i2=IFINISH(I,J)
             if(i1.ne.-999 .and. i2.ne.-999)then
-	      write(6,'('' Lattice line '',2I4,'' has pointers '',2I6,
+              write(6,'('' Lattice line '',2I4,'' has pointers '',2I6,
      1          '' to limits '',2F12.3)')
      1          I,J,i1,i2,ILC(i1)/CELL(3),ILC(i2)/CELL(3)
-	    endif
+            endif
           enddo
         enddo
 C
-      	WRITE(6,11005) NPHASES,NREC
-11005  	FORMAT(I10,' Phases input on stream 1'/
-     $	       I10,' total records on stream 1.')
-      	CALL LRCLOS(1)
+        WRITE(6,11005) NPHASES,NREC
+11005   FORMAT(I10,' Phases input on stream 1'/
+     $         I10,' total records on stream 1.')
+        CALL LRCLOS(1)
       ENDIF      
 C
 C------------------------------------------------------------------------------------------
@@ -1127,19 +1127,19 @@ C.......GOTO 602
       WRITE(6,136)TITLE
 C
       DO 250 IN=1,MAX1
-9250  	IF (NWGT) THEN
-      	   READ(NIN,*,END=260)IH,IK,A,P,IQ,BCK,CTF,W
-      	ELSE
-      	   READ(NIN,*,END=260)IH,IK,A,P,IQ,BCK,CTF
-C      	   write(*,'(''::Here1: '',2I6,2F10.3,I4,2F10.3)')
+9250    IF (NWGT) THEN
+           READ(NIN,*,END=260)IH,IK,A,P,IQ,BCK,CTF,W
+        ELSE
+           READ(NIN,*,END=260)IH,IK,A,P,IQ,BCK,CTF
+C          write(*,'(''::Here1: '',2I6,2F10.3,I4,2F10.3)')
 C     .       IH,IK,A,P,IQ,BCK,CTF
-      	   W=1.000
-      	ENDIF
+           W=1.000
+        ENDIF
 C
         if(A.gt.rmaxamp)rmaxamp=A
 C
         IF(IQ.LT.1)IQ=1
-        IF(IQ.GT.9)IQ=9		! DANGEROUS STATEMENT FOR FUTURE -- BEWARE!
+        IF(IQ.GT.9)IQ=9         ! DANGEROUS STATEMENT FOR FUTURE -- BEWARE!
         IF(IH.GE.900) GO TO 260
 C-------RESOLUTION CHECK  (ON H,K ONLY)
         DSTARSQ=(IH*ASTAR)**2+2*IH*IK*ASTAR*BSTAR*COS(DRAD*ABANG)
@@ -1148,23 +1148,23 @@ C-------RESOLUTION CHECK  (ON H,K ONLY)
         IF(DRES.LT.DRESMIN.OR.DRES.GT.DRESMAX)GO TO 9250
 C
         IF(abs(CTFREV).lt.0.01) GO TO 224
-          P=P+180.0				! CTFREV HERE - FOR LOW DOSE IMAGES.
+          P=P+180.0                             ! CTFREV HERE - FOR LOW DOSE IMAGES.
 224     CONTINUE
 C
 C-------Store read values in fields AIN,BIN,CTFIN,PHASIN,WGTIN,IHIN,IKIN,IQIN,JIN
 C
-        AIN(IN)=A				! HERE A IS STORED
-        BIN(IN)=BCK			! HERE background IS STORED
-        CTFIN(IN)=CTF			! HERE ctf IS STORED
-        PHASIN(IN)=P			! HERE P IS STORED
-        WGTIN(IN)=W			! HERE FILM WEIGHT IS STORED
-        IHIN(IN)=IH			! HERE IH IS STORED AS INPUT
-        IKIN(IN)=IK			! HERE IK IS STORED AS INPUT
+        AIN(IN)=A                               ! HERE A IS STORED
+        BIN(IN)=BCK                     ! HERE background IS STORED
+        CTFIN(IN)=CTF                   ! HERE ctf IS STORED
+        PHASIN(IN)=P                    ! HERE P IS STORED
+        WGTIN(IN)=W                     ! HERE FILM WEIGHT IS STORED
+        IHIN(IN)=IH                     ! HERE IH IS STORED AS INPUT
+        IKIN(IN)=IK                     ! HERE IK IS STORED AS INPUT
         IQIN(IN)=IQ
         JIN=JREFL+IN
 C
         IF (JIN.GT.TOTRFL) GO TO 601
-        IF (IH.GE.0) JSIGN(JIN)=IQ	! HERE IQ IS STORED
+        IF (IH.GE.0) JSIGN(JIN)=IQ      ! HERE IQ IS STORED
         IF (IH.LT.0) JSIGN(JIN)=-1*IQ
 C
 C-------JSIGN>0: H>=0 FOR THIS REFLECTION IN SPOTDATA (I.E.BEFORE APPLYING SYMMETRY)
@@ -1201,7 +1201,7 @@ C-------Determine highest amplitude
         enddo
 C
         do I=1,IN1
-	  WGTIN(I)=1.0-RFACAMP+(RFACAMP*AIN(I)/RMAXAMP)
+          WGTIN(I)=1.0-RFACAMP+(RFACAMP*AIN(I)/RMAXAMP)
         enddo
       endif
 C
@@ -1228,15 +1228,15 @@ C-----Prepare HKL/REFAPH********.hkl file for comparisson or reference image
 C--------------------------------------------------------------------------------
 C
       IF(NREFOUT .and. IREFOUT.eq.0) THEN
-	write(FNAME,30)IFILM
-30	FORMAT('APH/REFAPH',I10,'.hkl')
+        write(FNAME,30)IFILM
+30      FORMAT('APH/REFAPH',I10,'.hkl')
         do i=11,19
           if(FNAME(i:i).eq.' ')FNAME(i:i)='0'
         enddo
-      	OPEN(UNIT=4,FILE=FNAME,FORM='FORMATTED',STATUS='NEW')
+        OPEN(UNIT=4,FILE=FNAME,FORM='FORMATTED',STATUS='NEW')
         IREFOUT = IREFOUT + 1
-      	WRITE(4,31)IFILM,TITLE
-31	FORMAT(I10,10A4,'  Reference amps + phases')
+        WRITE(4,31)IFILM,TITLE
+31      FORMAT(I10,10A4,'  Reference amps + phases')
       ENDIF
 C
 C-----Work on the read reflections from fields IHIN,IKIN,...
@@ -1249,12 +1249,12 @@ C
       rmaxz = -99999.0
 C
       DO 291 IN=1,IN1
-      	IH = IHIN(IN)
-      	IK = IKIN(IN)
-      	IQ = IQIN(IN)
-      	A  = AIN(IN)
-      	P  = PHASIN(IN)
-      	W  = WGTIN(IN)
+        IH = IHIN(IN)
+        IK = IKIN(IN)
+        IQ = IQIN(IN)
+        A  = AIN(IN)
+        P  = PHASIN(IN)
+        W  = WGTIN(IN)
         IP1(IN)=1
         IP2(IN)=0
         WGT(IN)=0.0
@@ -1264,12 +1264,12 @@ C
 C
 C-------Apply all kinds of flags to this reflection, like ROT90:
 C
-C	write(*,'('' Tilted image original: H,K,Z,A,P = '',2I6,3F12.3)')
+C       write(*,'('' Tilted image original: H,K,Z,A,P = '',2I6,3F12.3)')
 C     1     IH,IK,Z,A,P
 C
         CALL FIDDLE2(IH,IK,Z,REVHK,SGNXCH,ROT180,ROT90,REVHND,REVXSGN)
 C
-C	write(*,'('' Tilted image FIDDLE2 : H,K,Z,A,P = '',2I6,3F12.3)')
+C       write(*,'('' Tilted image FIDDLE2 : H,K,Z,A,P = '',2I6,3F12.3)')
 C     1     IH,IK,Z,A,P
 C
 C-------Add PHSHFT:
@@ -1277,20 +1277,20 @@ C-------NOTE: This is done AFTER application of ROT90.
 C
         RADSQ=IH**2*ASTAR**2 + IK**2*BSTAR**2 +
      .      2.0*IH*IK*COS(0.0174532*ABANG)*ASTAR*BSTAR+Z**2
-        BSH(IN)=BEAMSHFT(1)*RADSQ		! HERE BSH IS STORED
+        BSH(IN)=BEAMSHFT(1)*RADSQ               ! HERE BSH IS STORED
 C
         P=P+PHSHFT(IH,IK,ORIGH,ORIGK,TLTH,TLTK,BEAMSHFT,BSH(IN))
 C
         PHSI(IN)=AMOD(P,360.)           ! HERE P IS STORED
-        IIH(IN)=IH			! HERE IH IS STORED
-        IIK(IN)=IK			! HERE IK IS STORED
+        IIH(IN)=IH                      ! HERE IH IS STORED
+        IIK(IN)=IK                      ! HERE IK IS STORED
         JIN=JREFL+IN
 C
 C-------ASYM places reflections into asymetric unit and applies special
 C-------selection rules.
 C
 C-------  SUBROUTINE ASYM(IH,IK,Z,IP1,IP2,SPEC,IPTEST,WSTAR,
-C------- 1	A1,A2,A3,A4,A5,IGO,ISPEC,LREV,IAQP2,IVERBOSE)
+C------- 1      A1,A2,A3,A4,A5,IGO,ISPEC,LREV,IAQP2,IVERBOSE)
 C
         CALL ASYM(IH,IK,Z,IP1(IN),IP2(IN),LSPEC(IN),IPTEST(IN),
      1    WSTAR,MAT(1,IMAT(1,ISPGRP)),MAT(1,IMAT(2,ISPGRP)),
@@ -1306,9 +1306,9 @@ C-------for determination of borders of asymetric unit:
         if(Z .lt.rminz)rminz=Z
         if(Z .gt.rmaxz)rmaxz=Z
 C
-C	write(*,'('' Tilted image ASYM    : H,K,Z,A,P = '',2I6,3F12.3)')
+C       write(*,'('' Tilted image ASYM    : H,K,Z,A,P = '',2I6,3F12.3)')
 C     1     IH,IK,Z,A,P
-C	write(*,'('' '')')
+C       write(*,'('' '')')
 C
 C.........IP1 AND IP2 GENERATE THE RELATIONSHIP BETWEEN PHASES OF REFLECTIONS
 C.........IN THE UNIQUE ASYMMETRIC UNIT AND THE INPUT REFLECTIONS. THE
@@ -1340,10 +1340,10 @@ C-------Check if this reflection is within valid boundaries:
 C
         IF(DRES.LT.DRESMIN.OR.DRES.GT.DRESMAX)GO TO 245
         IF(IQ.GT.IQMAX)then
-C	  write(6,'('' IQ > IQMAX for IQ,IQMAX,H,K,Z,W = '',4I6,2F12.3)')
+C         write(6,'('' IQ > IQMAX for IQ,IQMAX,H,K,Z,W = '',4I6,2F12.3)')
 C     1      IQ,IQMAX,IH,IK,Z,W
-	  GO TO 245
- 	endif
+          GO TO 245
+        endif
 C
 C-------Skip reflections without significant amplitude ?
 C       IF(A.LT.0.001) GO TO 245
@@ -1356,7 +1356,7 @@ C========================================
 C
 C---------here for pure merging or refinement against previous merge
 C
-C	  THIS SECTION FOR COMPARISON WITH PREVIOUS FILMS.
+C         THIS SECTION FOR COMPARISON WITH PREVIOUS FILMS.
           CSUM=0.0
           SSUM=0.0
           DO 240 IREF=1,JREFL
@@ -1380,12 +1380,12 @@ C
             IF(STEP.EQ.0.0) GO TO 240
 C
             IARG=IABS(JSIGN(IREF))
-      	    WEIGHT=1.0/MAX0(2,IARG)
-      	    IF(IARG.EQ.8) WEIGHT = 0.005
-      	    IF(IARG.GT.8) WEIGHT = 0.0
-      	    IF(AMP(IREF).LT.0.001) WEIGHT = 0.0
-            CSUM=CSUM+CPHS(IREF)*WEIGHT	! weighted vector average, with
-            SSUM=SSUM+SPHS(IREF)*WEIGHT	! an IQ of 1 or 2 getting equal weight.
+            WEIGHT=1.0/MAX0(2,IARG)
+            IF(IARG.EQ.8) WEIGHT = 0.005
+            IF(IARG.GT.8) WEIGHT = 0.0
+            IF(AMP(IREF).LT.0.001) WEIGHT = 0.0
+            CSUM=CSUM+CPHS(IREF)*WEIGHT ! weighted vector average, with
+            SSUM=SSUM+SPHS(IREF)*WEIGHT ! an IQ of 1 or 2 getting equal weight.
 240       CONTINUE
 C
           IF(NSUM.EQ.0) GO TO 290
@@ -1418,18 +1418,18 @@ C
      .     IOK,CELL(3),FREF,PREF,DPDZCU,IVERBOSE)
 C
 C---------Is there a valid lattice line data ?:
-      	  IF(.NOT.IOK) GO TO 245
+          IF(.NOT.IOK) GO TO 245
 C
-      	  NCOMP=NCOMP+1
-      	  NCOMPI=NCOMPI+1
-      	  ASUM=ASUM + FREF
-      	  ASUMI=ASUMI + A
-      	  NSUM=1
+          NCOMP=NCOMP+1
+          NCOMPI=NCOMPI+1
+          ASUM=ASUM + FREF
+          ASUMI=ASUMI + A
+          NSUM=1
 C
-      	  IF(STEP.EQ.0.0) GO TO 290
+          IF(STEP.EQ.0.0) GO TO 290
 C
 C---------SAME PHASE TRANSFORMATION AS ABOVE.
-      	  PHSC(IN)=PREF*IP1(IN)-IP2(IN)
+          PHSC(IN)=PREF*IP1(IN)-IP2(IN)
 C
         ENDIF
 C
@@ -1443,12 +1443,12 @@ C
 C
 292     IF(NREFOUT .and. IREFOUT.eq.1) THEN
 C---------Output of the reference data for checking:
-       	  IF(IIK(IN).GE.0) THEN
+          IF(IIK(IN).GE.0) THEN
             WRITE(4,293) IIH(IN),IIK(IN),IZERO,FREF,PHSC(IN),1.0
-      	  ELSE	       ! make K positive in p1, and change phase.
-      	    WRITE(4,293) -IIH(IN),-IIK(IN),IZERO,FREF,-PHSC(IN),1.0
-      	  ENDIF
-293	  FORMAT(3I5,3F10.2)
+          ELSE         ! make K positive in p1, and change phase.
+            WRITE(4,293) -IIH(IN),-IIK(IN),IZERO,FREF,-PHSC(IN),1.0
+          ENDIF
+293       FORMAT(3I5,3F10.2)
         ENDIF
 C
 C       WRITE(6,900)IN,JIN,NCOMP,WGT(IN),NCOMPI,NSUM,IP1(IN),IP2(IN)
@@ -1467,7 +1467,7 @@ C      write(6,'('' K: '',I6,'' ... '',I6)')imink,imaxk
 C      write(6,'('' Z: '',F6.3,'' ... '',F6.3)')rminz,rmaxz
 C      write(6,'('' '')')
 C
-295   IF(STEP.EQ.0.0) GO TO 400	     ! NO REFINEMENT OF TILT OR PHASE ORIGIN.
+295   IF(STEP.EQ.0.0) GO TO 400      ! NO REFINEMENT OF TILT OR PHASE ORIGIN.
 C
 C---------------------------------------------------------------------------
 C-----Do determination of error for the various shifts
@@ -1537,7 +1537,7 @@ C
 C---------Prevent from SERR = 0.0
 C
           if(SERR .eq.0.0)SERR =999.0
-	  if(SERR9.eq.0.0)SERR9=999.0
+          if(SERR9.eq.0.0)SERR9=999.0
 C
 C---------NCOMPT IS NUMBER OF SPECIAL SPOTS + NUMBER OF COMPARISONS WITH
 C---------ALL PREVIOUS COMPARABLE SPOTS
@@ -1590,8 +1590,8 @@ C
 C.....CLEAR ARRAYS FOR HISTOGRAM
 C
       DO 18010 J=1,NSLOTS
-        NRESO(J)=0	! ZERO HIST0GRAM
-	ERRES(J)=0.0
+        NRESO(J)=0      ! ZERO HIST0GRAM
+        ERRES(J)=0.0
 18010 SERRES(J)=0.0
 C
       ISH=ISHMIN
@@ -1601,23 +1601,23 @@ C
       DO 1340 IREFC=1,IN1
         IF(RESPOT(IREFC).LT.DRESMIN.OR.RESPOT(IREFC).GT.DRESMAX) GOTO 1340
         JIN=IREFC+JREFL
-C	CALCULATE RESOLUTION OF SPOT 
+C       CALCULATE RESOLUTION OF SPOT 
         DSTARSQ=(1.0/RESPOT(IREFC))**2
-C	DSTARSQ = (IIH(IREFC)*ASTAR)**2 + (IIK(IREFC)*BSTAR)**2 + 
-C     .	2.0*IIH(IREFC)*IIK(IREFC)*ASTAR*BSTAR*COS(DRAD*ABANG)
+C       DSTARSQ = (IIH(IREFC)*ASTAR)**2 + (IIK(IREFC)*BSTAR)**2 + 
+C     . 2.0*IIH(IREFC)*IIK(IREFC)*ASTAR*BSTAR*COS(DRAD*ABANG)
 C     .+ZSTAR(JIN)**2
-	IRES=DSTARSQ*10000.
+        IRES=DSTARSQ*10000.
 C****
-	ISLOT= 1 + (IRES-1)/IRESTEP
-    	IF(ISLOT.LT.1.OR.ISLOT.GE.NSLOTS) THEN
-	  write(6,'('' RESPOT,IREFC = '',F12.1,I12)')RESPOT(IREFC),IREFC
-	  write(6,'('' IIH,IIK = '',2I12)')IIH(IREFC),IIK(IREFC)
-	  write(6,'('' IRES,IRESTEP,IREFC,IN1 = '',4I12)')IRES,IRESTEP,IREFC,
+        ISLOT= 1 + (IRES-1)/IRESTEP
+        IF(ISLOT.LT.1.OR.ISLOT.GE.NSLOTS) THEN
+          write(6,'('' RESPOT,IREFC = '',F12.1,I12)')RESPOT(IREFC),IREFC
+          write(6,'('' IIH,IIK = '',2I12)')IIH(IREFC),IIK(IREFC)
+          write(6,'('' IRES,IRESTEP,IREFC,IN1 = '',4I12)')IRES,IRESTEP,IREFC,
      .       IN1
-	  WRITE(6,20000)ISLOT
-20000	  FORMAT(' ERROR, ISLOT=',I10)
-	  STOP
-	END IF
+          WRITE(6,20000)ISLOT
+20000     FORMAT(' ERROR, ISLOT=',I10)
+          STOP
+        END IF
         P=PHSI(IREFC)+PHSHFT(IIH(IREFC),IIK(IREFC),SH,SK,
      .   TILTH,TILTK,BEAMSHFT,BSH(IREFC))
         P=AMOD(P,360.)
@@ -1630,12 +1630,12 @@ C****
 1320      IF(DELTA.LT.0.0) DELTA=-DELTA
           SERR=WGT(IREFC)*DELTA+SERR
 C
-	  SERRES(ISLOT)=SERRES(ISLOT)+WGT(IREFC)*DELTA
- 	  NRESO(ISLOT)=NRESO(ISLOT)+WGT(IREFC)
+          SERRES(ISLOT)=SERRES(ISLOT)+WGT(IREFC)*DELTA
+          NRESO(ISLOT)=NRESO(ISLOT)+WGT(IREFC)
 C
-C	  WRITE(6,20001)IIH(IREFC),IIK(IREFC),JH(JIN),JK(JIN),
-C     .	   IRES,IQIN(IREFC),PHSC(IREFC),ZSTAR(JIN)
-C20001	  FORMAT(5I8,I8,F10.2,F10.5)	
+C         WRITE(6,20001)IIH(IREFC),IIK(IREFC),JH(JIN),JK(JIN),
+C     .    IRES,IQIN(IREFC),PHSC(IREFC),ZSTAR(JIN)
+C20001    FORMAT(5I8,I8,F10.2,F10.5)    
 C
 1325    CONTINUE
 1340  CONTINUE
@@ -1658,9 +1658,9 @@ C
         NRESALL=NRESALL+NRESO(I)
         SERRESALL=SERRES(I)+SERRESALL
         ERRES(I)=SERRES(I)/NRESO(I)
-	DMIN=SQRT(10000.0/((I-1)*IRESTEP + 1))
-	DMAX=SQRT(10000.0/(I*IRESTEP))
-	WRITE(6,10172)I,DMIN,DMAX,ERRES(I),NRESO(I)
+        DMIN=SQRT(10000.0/((I-1)*IRESTEP + 1))
+        DMAX=SQRT(10000.0/(I*IRESTEP))
+        WRITE(6,10172)I,DMIN,DMAX,ERRES(I),NRESO(I)
 10175 CONTINUE
 10172 FORMAT(5X,I6,3F10.3,I7)
       ERRESALL = 0.0
@@ -1686,15 +1686,15 @@ C  INSERT HERE FOR BEAMTILT REFINEMENT.
 C---------------------------------------------------------------------------
 C
       IF (NBEAM) THEN
-      	CALL BEAMTILTA
-      	WRITE(6,355)ORIGH+SHMIN,ORIGK+SKMIN,TLTH+TILTH,TLTK+TILTK
-355	FORMAT(' AGGREGATE TOTAL OF PARAMETERS --- INPUT PLUS REFINED'/
-     . '		ORIGH ...........',F9.2/
-     . '		ORIGK ...........',F9.2/
-     . '		TILTH ...........',F9.2/
-     . '		TILTK ...........',F9.2/)
+        CALL BEAMTILTA
+        WRITE(6,355)ORIGH+SHMIN,ORIGK+SKMIN,TLTH+TILTH,TLTK+TILTK
+355     FORMAT(' AGGREGATE TOTAL OF PARAMETERS --- INPUT PLUS REFINED'/
+     . '                ORIGH ...........',F9.2/
+     . '                ORIGK ...........',F9.2/
+     . '                TILTH ...........',F9.2/
+     . '                TILTK ...........',F9.2/)
         WRITE(6,9355)IFILM,ORIGH+SHMIN,ORIGK+SKMIN,TLTH+TILTH,TLTK+TILTK
-9355	FORMAT(' LATEST PARAMS',I10,2X,4F9.2)
+9355    FORMAT(' LATEST PARAMS',I10,2X,4F9.2)
 C
 CHEN-  Prepare for output later.
 C
@@ -1716,19 +1716,19 @@ C
         DO 360 IN=1,IN1
           P=PHSI(IN)+PHSHFT(IIH(IN),IIK(IN),SHMIN,SKMIN,
      .       TILTH,TILTK,BEAMSHFT,BSH(IN))
-360  	PTEMP(IN) = AMOD(P,360.)
+360     PTEMP(IN) = AMOD(P,360.)
 C
         if(NTILT)then
 C
-  	  ROTAXA=TAXA
-	  ROTANGL=TANGL
-	  RTAXAOPT=TAXA
+          ROTAXA=TAXA
+          ROTANGL=TANGL
+          RTAXAOPT=TAXA
           RTANGLOPT=TANGL
 C
           PHSMIN = 999999.99
 C
           do ITAXA=-itaxastep,itaxastep
-	    do ITANGL=-itanglstep,itanglstep
+            do ITANGL=-itanglstep,itanglstep
 C
               TAXA=ROTAXA+ITAXA*rtaxasize
               TANGL=ROTANGL+ITANGL*rtanglsize
@@ -1800,10 +1800,10 @@ C
       IF (.NOT.NTILT) GO TO 400
 C
 C------------------------------------------------------------------------
-      GO TO 270		! BACK TO START TO REDO SCALING, ORIGIN AND TILT.
+      GO TO 270         ! BACK TO START TO REDO SCALING, ORIGIN AND TILT.
 C------------------------------------------------------------------------
 C
-400   IF(SCALE.LT.0.0001)SCALE=ASUM/ASUMI	! JUMP HERE IF STEP = 0.
+400   IF(SCALE.LT.0.0001)SCALE=ASUM/ASUMI       ! JUMP HERE IF STEP = 0.
       WRITE(6,170) SCALE,NCOMPI,NCOMP
 C
 CHEN>
@@ -1941,29 +1941,6 @@ C
 174   FORMAT('Scale factor ',F10.5,' between ',I5,' new (',I10
      .    ,') and ',I5,' old spots.')
 C
-C      if(LOGOUTPUT)then
-C        WRITE(17,'(''# '',2F15.2,30X,''HHORIORI,HKORIORI'')') 
-C     .     HHORIORI,HKORIORI
-C        WRITE(17,'(''# '',2F15.2,30X,''HSHMIN,HSKMIN'')') 
-C     .     HSHMIN,HSKMIN
-C        WRITE(17,'(''# '',2F15.2,30X,''HOHRIGSH,HOKRIGSH'')') 
-C     .     HOHRIGSH,HOKRIGSH
-C        WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
-C     .     HORITAXA,HORITANGL
-C        WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
-C     .     HSHTAXA,HSHTANGL
-C        WRITE(17,'(''# '',2F15.3,30X,''TAXA,TANGL'')')
-C     .     TAXA,TANGL
-C        WRITE(17,'(''# '',2F15.2,30X,''HORITLTH,HORITLTK'')')
-C     .     HORITLTH,HORITLTK
-C        WRITE(17,'(''# '',2F15.2,30X,''HSHTHLT,HSHTKLT'')')
-C     .     HSHTHLT,HSHTKLT
-C        WRITE(17,'(''# '',2F15.2,30X,''HTHLT,HTKLT'')')
-C     .     HTHLT,HTKLT
-C        WRITE(17,'(''# '',F15.3,I15,30X,''ERRMIN,NRESALL'')') 
-C     .     ERRMIN,NRESALL
-C      endif
-C  
       if ( ifirst .eq. 0 ) then
         write(*,'(''::    Number    Scale  Phase Origin        '',
      .    ''Change Phase Ori.     PhaRes'')')
@@ -2086,6 +2063,27 @@ C
       TLTANG  = (AISABOVE * SIGNTLTAXA * HAND) * TANGL
 C
       if(LOGOUTPUT)then
+C        WRITE(17,'(''# '',2F15.2,30X,''HHORIORI,HKORIORI'')') 
+C     .     HHORIORI,HKORIORI
+C        WRITE(17,'(''# '',2F15.2,30X,''HSHMIN,HSKMIN'')') 
+C     .     HSHMIN,HSKMIN
+C        WRITE(17,'(''# '',2F15.2,30X,''HOHRIGSH,HOKRIGSH'')') 
+C     .     HOHRIGSH,HOKRIGSH
+C        WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
+C     .     HORITAXA,HORITANGL
+C        WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
+C     .     HSHTAXA,HSHTANGL
+C        WRITE(17,'(''# '',2F15.3,30X,''TAXA,TANGL'')')
+C     .     TAXA,TANGL
+C        WRITE(17,'(''# '',2F15.2,30X,''HORITLTH,HORITLTK'')')
+C     .     HORITLTH,HORITLTK
+C        WRITE(17,'(''# '',2F15.2,30X,''HSHTHLT,HSHTKLT'')')
+C     .     HSHTHLT,HSHTKLT
+C        WRITE(17,'(''# '',2F15.2,30X,''HTHLT,HTKLT'')')
+C     .     HTHLT,HTKLT
+C        WRITE(17,'(''# '',F15.3,I15,30X,''ERRMIN,NRESALL'')') 
+C     .     ERRMIN,NRESALL
+C  
         write(cline1,'(F9.3)')TLTAXIS
         call shorten(cline1,k)
         write(17,'(''# not yet set MERGE_TLTAXIS = "'',A,''"'')')
@@ -2104,6 +2102,21 @@ C
      .    cline1(1:k)
         write(6,'(''new MERGE_TLTAXA  = "'',A,''"'')')cline1(1:k)
 C
+C        WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
+C     .     HORITAXA,HORITANGL
+C        WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
+C     .     HSHTAXA,HSHTANGL
+C
+        write(cline1,'(F9.3)')HSHTAXA
+        call shorten(cline1,k)
+        write(17,'(''set TAXA_change    = "'',A,''"'')')cline1(1:k)
+        write(6,'(''new TAXA_change    = "'',A,''"'')')cline1(1:k)
+C
+        write(cline1,'(F9.3)')HSHTANGL
+        call shorten(cline1,k)
+        write(17,'(''set TANGL_change    = "'',A,''"'')')cline1(1:k)
+        write(6,'(''new TANGL_change    = "'',A,''"'')')cline1(1:k)
+C
         write(cline1,'(F9.3)')TAXA
         call shorten(cline1,k)
         write(17,'(''set MERGE_TAXA    = "'',A,''"'')')cline1(1:k)
@@ -2113,6 +2126,16 @@ C
         call shorten(cline1,k)
         write(17,'(''set MERGE_TANGL   = "'',A,''"'')')cline1(1:k)
         write(6,'(''new MERGE_TANGL   = "'',A,''"'')')cline1(1:k)
+C
+        write(cline1,'(F9.3)')TAXA
+        call shorten(cline1,k)
+        write(17,'(''set TAXA    = "'',A,''"'')')cline1(1:k)
+        write(6,'(''new TAXA    = "'',A,''"'')')cline1(1:k)
+C
+        write(cline1,'(F9.3)')TANGL
+        call shorten(cline1,k)
+        write(17,'(''set TANGL   = "'',A,''"'')')cline1(1:k)
+        write(6,'(''new TANGL   = "'',A,''"'')')cline1(1:k)
 C
         write(17,'(''set PHASEORI_done = "y"'')')
 C
@@ -2146,7 +2169,7 @@ C
 C
 C  APPLY SCALE FACTOR AND ORIGIN PHASE SHIFT.
       DO 410  IN=1,IN1
-        JREFL=JREFL+1		! HERE IS WHERE JREFL IS INCREMENTED.
+        JREFL=JREFL+1           ! HERE IS WHERE JREFL IS INCREMENTED.
 C                       JH,JK,ZSTAR done previously.
         JOUT(JREFL)=JREFL
         PHS(JREFL)=0.0
@@ -2158,14 +2181,14 @@ C                       JH,JK,ZSTAR done previously.
 C       IF(AIN(IN).LT.0.001) GO TO 405
         P=PHSI(IN)+PHSHFT(IIH(IN),IIK(IN),SHMIN,SKMIN,
      .   TILTH,TILTK,BEAMSHFT,BSH(IN))
-294     IF(NSHFTIN) THEN		! output of origin shifted data
+294     IF(NSHFTIN) THEN                ! output of origin shifted data
           IF(AIN(IN).GT.0.0) THEN
             POUT=AMOD(P,360.)
             IF(POUT.LT.-180.0)POUT=POUT+360.0
             IF(POUT.GT.180.0) POUT=POUT-360.0
             IF(IIK(IN).GE.0) THEN
               WRITE(2,293) IIH(IN),IIK(IN),IZERO,AIN(IN),POUT
-            ELSE	       ! make K positive in p1, and change phase.
+            ELSE               ! make K positive in p1, and change phase.
               WRITE(2,293) -IIH(IN),-IIK(IN),IZERO,AIN(IN),-POUT
             ENDIF
           ENDIF
@@ -2192,7 +2215,7 @@ C
 C     Before returning for another read, close file.
 C
       CLOSE (UNIT=NIN)
-      IF(NSHFTIN) CLOSE(2)	! close unit 2 for 
+      IF(NSHFTIN) CLOSE(2)      ! close unit 2 for 
 C
 C------------------------------------------------------------------------
 C  Output of summary file for use in updating .inf file, if used.
@@ -2217,8 +2240,8 @@ C
           HOHRIGSH=ORIGH+SHMIN
           HOKRIGSH=ORIGK+SKMIN
 C
-      	ENDIF
-      	WRITE(9,506)
+        ENDIF
+        WRITE(9,506)
       ENDIF
 502   FORMAT(' ORIGTILT: film ',I10,10A4/'  taken from input file ',A)
 503   FORMAT(' TAXATANGL: ',2F8.3,' DATE ',A20)
@@ -2226,10 +2249,10 @@ C
 505   FORMAT(' TILTHTILTK:',2F9.2,' DATE ',A20)
 506   FORMAT(/)
 C
-      GO TO 220		! BACK TO DO INPUT FOR ANOTHER FILM.
+      GO TO 220         ! BACK TO DO INPUT FOR ANOTHER FILM.
 500   WRITE(6,125)
       CLOSE(UNIT=9)
-      IF(NPROG.EQ.0) GO TO 501	   ! STOP HERE FOR NPROG 1, 2 OR 3.(REFINE ONLY)
+      IF(NPROG.EQ.0) GO TO 501     ! STOP HERE FOR NPROG 1, 2 OR 3.(REFINE ONLY)
       WRITE(6,181)
       GO TO 1107
 501   WRITE(6,180)
@@ -2280,94 +2303,94 @@ C
 C
       WRITE(6,156) JREFL
       IF(NPROG.EQ.0) WRITE(3,146)IRUN  ! To ensure disk is there before sorting.
-      	jstack=0
-      	l=1
-      	ir=JREFL
+        jstack=0
+        l=1
+        ir=JREFL
 C-----------Insertion sort when subarray small enough.---------------------------------
-771		if(ir-l.lt.M)then 
-      		do 7712 j=l+1,ir
-      			a=JOUT(j)
-      			do 7711 i=j-1,l,-1
-      				if(icompare(JH(a),JK(a),ZSTAR(a),JH(JOUT(i)),
+771             if(ir-l.lt.M)then 
+                do 7712 j=l+1,ir
+                        a=JOUT(j)
+                        do 7711 i=j-1,l,-1
+                                if(icompare(JH(a),JK(a),ZSTAR(a),JH(JOUT(i)),
      .                             JK(JOUT(i)),ZSTAR(JOUT(i)))) goto 772
-      				JOUT(i+1)=JOUT(i)
-7711   			enddo 
-      			i=l-1
-772			JOUT(i+1)=a
-7712   		enddo 
-      		if(jstack.eq.0) goto 7777
-C      		Pop stack and begin a new round of partitioning.
-      		ir=istack(jstack) 
-      		l=istack(jstack-1)
-      		jstack=jstack-2
+                                JOUT(i+1)=JOUT(i)
+7711                    enddo 
+                        i=l-1
+772                     JOUT(i+1)=a
+7712            enddo 
+                if(jstack.eq.0) goto 7777
+C               Pop stack and begin a new round of partitioning.
+                ir=istack(jstack) 
+                l=istack(jstack-1)
+                jstack=jstack-2
 C-----------quicksort subarray to big.---------------------------------
-      	else
-      		k=(l+ir)/2
-C      		Choose median of left, center, and right elements as 
-C      		partitioning
-C      		element a. Also rearrange so that a(l) <= a(l+1) <= a(ir).
-      		temp=JOUT(k)
-      		JOUT(k)=JOUT(l+1)
-      		JOUT(l+1)=temp
-      		if(icompare(JH(JOUT(l)),JK(JOUT(l)),ZSTAR(JOUT(l)),JH(JOUT(ir))
+        else
+                k=(l+ir)/2
+C               Choose median of left, center, and right elements as 
+C               partitioning
+C               element a. Also rearrange so that a(l) <= a(l+1) <= a(ir).
+                temp=JOUT(k)
+                JOUT(k)=JOUT(l+1)
+                JOUT(l+1)=temp
+                if(icompare(JH(JOUT(l)),JK(JOUT(l)),ZSTAR(JOUT(l)),JH(JOUT(ir))
      .                    ,JK(JOUT(ir)),ZSTAR(JOUT(ir)))) then
-      			temp=JOUT(l)
-      			JOUT(l)=JOUT(ir)
-      			JOUT(ir)=temp
-      		endif
-      		if(icompare(JH(JOUT(l+1)),JK(JOUT(l+1)),ZSTAR(JOUT(l+1))
+                        temp=JOUT(l)
+                        JOUT(l)=JOUT(ir)
+                        JOUT(ir)=temp
+                endif
+                if(icompare(JH(JOUT(l+1)),JK(JOUT(l+1)),ZSTAR(JOUT(l+1))
      .               ,JH(JOUT(ir)),JK(JOUT(ir)),ZSTAR(JOUT(ir)))) then
-      			temp=JOUT(l+1)
-      			JOUT(l+1)=JOUT(ir)
-      			JOUT(ir)=temp
-      		endif
-      		if(icompare(JH(JOUT(l)),JK(JOUT(l)),ZSTAR(JOUT(l)),
+                        temp=JOUT(l+1)
+                        JOUT(l+1)=JOUT(ir)
+                        JOUT(ir)=temp
+                endif
+                if(icompare(JH(JOUT(l)),JK(JOUT(l)),ZSTAR(JOUT(l)),
      .               JH(JOUT(l+1)),JK(JOUT(l+1)),ZSTAR(JOUT(l+1)))) then
-      			temp=JOUT(l)
-      			JOUT(l)=JOUT(l+1)
-      			JOUT(l+1)=temp
-      		endif
-C      		Initialize pointers for partitioning.
-      		i=l+1 
-      		j=ir
-C       		Partitioning element.
-      		a=JOUT(l+1)
-C      		Beginning of innermost loop.
-773			continue 
-      			i=i+1 
-      		if(icompare(JH(a),JK(a),ZSTAR(a),JH(JOUT(i)),JK(JOUT(i)),
+                        temp=JOUT(l)
+                        JOUT(l)=JOUT(l+1)
+                        JOUT(l+1)=temp
+                endif
+C               Initialize pointers for partitioning.
+                i=l+1 
+                j=ir
+C                       Partitioning element.
+                a=JOUT(l+1)
+C               Beginning of innermost loop.
+773                     continue 
+                        i=i+1 
+                if(icompare(JH(a),JK(a),ZSTAR(a),JH(JOUT(i)),JK(JOUT(i)),
      .              ZSTAR(JOUT(i)))) goto 773
-774			continue
-      			j=j-1
-      		if(icompare(JH(JOUT(j)),JK(JOUT(j)),ZSTAR(JOUT(j)),JH(a),
+774                     continue
+                        j=j-1
+                if(icompare(JH(JOUT(j)),JK(JOUT(j)),ZSTAR(JOUT(j)),JH(a),
      .               JK(a),ZSTAR(a))) goto 774
-C      		Pointers crossed. Exit with partitioning complete.
-      		if(j.lt.i)goto 775 
-C     		Exchange elements.
-      		temp=JOUT(i) 
-      		JOUT(i)=JOUT(j)
-      		JOUT(j)=temp
-C			End of innermost loop.
-      		goto 773 
-C			Insert partitioning element.
-775			JOUT(l+1)=JOUT(j) 
-      		JOUT(j)=a
-      		jstack=jstack+2
-C      		Push pointers to larger subarray on stack, process smaller subarray =
-C      		immediately.
-      		if(jstack.gt.NSTACK)pause 'NSTACK too small in sort'
-      		if(ir-i+1.ge.j-l)then
-      			istack(jstack)=ir
-      			istack(jstack-1)=i
-      			ir=j-1
-      		else
-      			istack(jstack)=j-1
-      			istack(jstack-1)=l
-      			l=i
-      		endif
-      	endif
-      	goto 771
-7777		continue
+C               Pointers crossed. Exit with partitioning complete.
+                if(j.lt.i)goto 775 
+C               Exchange elements.
+                temp=JOUT(i) 
+                JOUT(i)=JOUT(j)
+                JOUT(j)=temp
+C                       End of innermost loop.
+                goto 773 
+C                       Insert partitioning element.
+775                     JOUT(l+1)=JOUT(j) 
+                JOUT(j)=a
+                jstack=jstack+2
+C               Push pointers to larger subarray on stack, process smaller subarray =
+C               immediately.
+                if(jstack.gt.NSTACK)pause 'NSTACK too small in sort'
+                if(ir-i+1.ge.j-l)then
+                        istack(jstack)=ir
+                        istack(jstack-1)=i
+                        ir=j-1
+                else
+                        istack(jstack)=j-1
+                        istack(jstack-1)=l
+                        l=i
+                endif
+        endif
+        goto 771
+7777            continue
 C
 C
 C------------------------------------------------------------------------
@@ -2381,7 +2404,7 @@ C
       DO 600 KK=1,JREFL
         KJ=JOUT(KK)
         IF(IPLOT.EQ.0) GO TO 562
-        IF(AMP(KJ).LT.0.001) GO TO 560	! NO OUTPUT OF REFNS WITH ZERO AMPL.
+        IF(AMP(KJ).LT.0.001) GO TO 560  ! NO OUTPUT OF REFNS WITH ZERO AMPL.
           PZ(IREFL)=ZSTAR(KJ)
           PAMP(IREFL)=AMP(KJ)
           PPHS(IREFL)=PHS(KJ)
@@ -2471,23 +2494,23 @@ C------------------------------------------------------------------------
 C------------------------------------------------------------------------
 C------------------------------------------------------------------------
       FUNCTION icompare(H1,K1,Z1,H2,K2,Z2)
-		LOGICAL icompare
-		INTEGER*4 H1,K1,H2,K2
-		REAL Z1,Z2
-      	IF(H1-H2) 77510,77520,77525
+                LOGICAL icompare
+                INTEGER*4 H1,K1,H2,K2
+                REAL Z1,Z2
+        IF(H1-H2) 77510,77520,77525
 77520       IF(K1-K2) 77510,77515,77525
 77515       IF(Z1-Z2) 77510,77510,77525
-77510		icompare=.FALSE.
-		goto 77530
-77525		icompare=.TRUE.
-77530	      continue
-C		write(6,77777)H1,K1,Z1,H2,K2,Z2,icompare
-C77777		format('icompare h1:',I6,' K1:',I6,' Z1:',F6.4,' H2:',I6,' K2:',I6,' Z2:',F6.4,' L:',L1)
-		return 
+77510           icompare=.FALSE.
+                goto 77530
+77525           icompare=.TRUE.
+77530         continue
+C               write(6,77777)H1,K1,Z1,H2,K2,Z2,icompare
+C77777          format('icompare h1:',I6,' K1:',I6,' Z1:',F6.4,' H2:',I6,' K2:',I6,' Z2:',F6.4,' L:',L1)
+                return 
       end
 C*******************************************************************************
       SUBROUTINE ASYM(IH,IK,Z,IP1,IP2,SPEC,IPTEST,WSTAR,
-     1	A1,A2,A3,A4,A5,IGO,ISPEC,LREV,IAQP2,IVERBOSE)
+     1  A1,A2,A3,A4,A5,IGO,ISPEC,LREV,IAQP2,IVERBOSE)
 C
       INTEGER*2 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
       INTEGER*2 IP1,IP2
@@ -2500,7 +2523,7 @@ C                                                  (H,K,0)
 C                                                  (H,0,Z)
 C
 C Asymetric unit for p2221 is 
-C	H,K,Z >= 0
+C       H,K,Z >= 0
 C       if H=0: K>= 0
 C
 C IGO = 2,4,2,5,2,4,2,5,
@@ -2511,20 +2534,20 @@ C
 C     CALL ASYM(IH,IK,Z,IP1(IN),IP2(IN),LSPEC(IN),IPTEST(IN),
 C    1  WSTAR,MAT(1,IMAT(1,ISPGRP)),MAT(1,IMAT(2,ISPGRP)),
 C    2  MAT(1,IMAT(3,ISPGRP)),MAT(1,IMAT(4,ISPGRP)),
-C    3	MAT(1,IMAT(5,ISPGRP)),
+C    3  MAT(1,IMAT(5,ISPGRP)),
 C    4  IGO(1,ISPGRP),ISPEC(1,ISPGRP),LREV(ISPGRP),IAQP2,IVERBOSE)
 C
 C     CALL ASYM(IH,IK,Z,IP1(IN),IP2(IN),LSPEC(IN),IPTEST(IN),
 C    1  WSTAR,MAT(1,1),MAT(1,2),
 C    2  MAT(1,1),MAT(1,4),
-C    3	MAT(1,1),
+C    3  MAT(1,1),
 C    4  IGO(1,ISPGRP),ISPEC(1,ISPGRP),LREV(ISPGRP),IAQP2,IVERBOSE)
 C
-C	A1 =  -1,0,0,-1,-1,  0,  0,-1
-C	A2 =   1,0,0, 1,-1,  0,  0,-1
-C	A3 =  -1,0,0,-1,-1,  0,  0,-1
-C	A4 =   1,0,0,-1, 1,  0,180,-1
-C	A5 =  -1,0,0,-1,-1,  0,  0,-1
+C       A1 =  -1,0,0,-1,-1,  0,  0,-1
+C       A2 =   1,0,0, 1,-1,  0,  0,-1
+C       A3 =  -1,0,0,-1,-1,  0,  0,-1
+C       A4 =   1,0,0,-1, 1,  0,180,-1
+C       A5 =  -1,0,0,-1,-1,  0,  0,-1
 C
 C.........IP1 AND IP2 GENERATE THE RELATIONSHIP BETWEEN PHASES OF REFLECTIONS
 C.........IN THE UNIQUE ASYMMETRIC UNIT AND THE INPUT REFLECTIONS. THE
@@ -2565,7 +2588,7 @@ C     Z=-Z
 C     IP1=IP1  
 C     IP2=-IP2  
 C
-      PASS=0	! second pass (22.1.90) to check all changes made correctly.
+      PASS=0    ! second pass (22.1.90) to check all changes made correctly.
 50    INDEX=1
       IF(IK.GE.0) INDEX=INDEX+1
       IF(Z.GE.0.0) INDEX=INDEX+2
@@ -2583,15 +2606,15 @@ C     INDEX CLASSIFIES THE REFLECTION BY ITS INDICES
 C     IGO INDICATES WHICH MATRIX WILL BRING THE REFLECTION
 C        INTO THE UNIQUE ASYMMETRIC UNIT FOR A GIVEN INDEX
 C
-C    INDEX    K>=0     Z>=0   /K/>=/H/		IGO	GOTO	
-C      1       NO       NO      NO		= 2	-> 150	=> MULT(A4)	H=H,K=-K,Z=Z, IP1=IP1+180, IP2=-IP2
-C      2       YES      NO      NO		= 4	-> 250	=> MULT(A2)	H=H,K=K,Z=-Z, IP1=IP1,     IP2=-IP2
-C      3       NO       YES     NO		= 2	-> 150	=> MULT(A4)	H=H,K=-K,Z=Z, IP1=IP1+180, IP2=-IP2
-C      4       YES      YES     NO		= 5	-> 500
-C      5       NO       NO      YES		= 2	-> 150	=> MULT(A4)	H=H,K=-K,Z=Z, IP1=IP1+180, IP2=-IP2
-C      6       YES      NO      YES		= 4	-> 250	=> MULT(A2) 	H=H,K=K,Z=-Z, IP1=IP1,     IP2=-IP2
-C      7       NO       YES     YES		= 2	-> 150	=> MULT(A4)	H=H,K=-K,Z=Z, IP1=IP1+180, IP2=-IP2
-C      8       YES      YES     YES		= 5	-> 500
+C    INDEX    K>=0     Z>=0   /K/>=/H/          IGO     GOTO    
+C      1       NO       NO      NO              = 2     -> 150  => MULT(A4)     H=H,K=-K,Z=Z, IP1=IP1+180, IP2=-IP2
+C      2       YES      NO      NO              = 4     -> 250  => MULT(A2)     H=H,K=K,Z=-Z, IP1=IP1,     IP2=-IP2
+C      3       NO       YES     NO              = 2     -> 150  => MULT(A4)     H=H,K=-K,Z=Z, IP1=IP1+180, IP2=-IP2
+C      4       YES      YES     NO              = 5     -> 500
+C      5       NO       NO      YES             = 2     -> 150  => MULT(A4)     H=H,K=-K,Z=Z, IP1=IP1+180, IP2=-IP2
+C      6       YES      NO      YES             = 4     -> 250  => MULT(A2)     H=H,K=K,Z=-Z, IP1=IP1,     IP2=-IP2
+C      7       NO       YES     YES             = 2     -> 150  => MULT(A4)     H=H,K=-K,Z=Z, IP1=IP1+180, IP2=-IP2
+C      8       YES      YES     YES             = 5     -> 500
 C
 C      P622 IS THE HIGHEST SYMMETRY AND ITS ASYMMETRIC UNIT IS ONLY
 C         INDEX = 8
@@ -2622,10 +2645,10 @@ C
 C------LREV=T and H=0 : Do H=H, K=-K, Z=Z, IP1=IP1+180, IP2=-IP2
        IF(LREV .AND. IH.EQ.0) CALL MULT(A4,IH,IK,Z,IP1,IP2)
 
-      PASS=PASS+1			!
-      IF(PASS.EQ.1) GO TO 50		! Check through again once only.
-C					! Done 22.1.90 to fix the -ve zstar
-C					! obtained for h=0,k=-ve refls in p2.
+      PASS=PASS+1                       !
+      IF(PASS.EQ.1) GO TO 50            ! Check through again once only.
+C                                       ! Done 22.1.90 to fix the -ve zstar
+C                                       ! obtained for h=0,k=-ve refls in p2.
 C
 C------Now, reflections should be in the asymetric unit.
 C
@@ -2716,7 +2739,7 @@ C900   FORMAT(' IA,IH,IK,Z,IP1,IP2 ',8G5.1,10X,5G10.5)
 C******************************************************************************
       SUBROUTINE GRAPH(ZMIN,ZMAX,FMAX,IHIN,IKIN,NOBS,ZSTAR,
      . FOBS,PHIOBS,IPSGN)
-	DATA INIT/0/
+        DATA INIT/0/
         DIMENSION ZSTAR(1),FOBS(1),PHIOBS(1),IPSGN(1),TITLE(20)
         CHARACTER*80 LINE
 C
@@ -2735,11 +2758,11 @@ C          INIT   - 0 TO OPEN PLOT QUEUE, THEN 1
 C          IPSGN  - VALUE OF +/- IQ FROM MAIN PROGRAM,
 C                   DETERMINES TYPE OF CHARACTER IN PHASE PLOT
 C
-	ZMAG=1000.
-	FMAG=70.
-	PMAG=90.		! NOW PLOT OVER 540 DEGREES
-	GAP=8.
-	DELZ = .02
+        ZMAG=1000.
+        FMAG=70.
+        PMAG=90.                ! NOW PLOT OVER 540 DEGREES
+        GAP=8.
+        DELZ = .02
         IF(INIT.EQ.1) THEN
                 CALL P2K_PAGE
                 GO TO 5
@@ -2749,9 +2772,9 @@ C PLOT TITLE
         PLTSIZ=142.5
         FONTSIZE=4.75
         WRITE(6,'(''Input title for PLOT.PLT'')')
-	READ(5,1)TITLE
-1	FORMAT(20A4)
-	WRITE(6,1)TITLE
+        READ(5,1)TITLE
+1       FORMAT(20A4)
+        WRITE(6,1)TITLE
 C
         CALL P2K_OUTFILE('PLOT.PS',10)
 5       CALL P2K_HOME
@@ -2761,38 +2784,38 @@ C
         CALL P2K_COLOUR(0)
         CALL P2K_LWIDTH(0.3)
 C
-	INIT=1
+        INIT=1
 C
 C5      ZRANG=ZMAX-ZMIN
         ZRANG=ZMAX-ZMIN
 C
-6	ZMM=ZRANG*ZMAG
-	IF (ZMM .GT. 100.0) GOTO 7
-	ZMAG = ZMAG*2.0
-	GOTO 6
-7	ZERO=-ZMIN*ZMAG
+6       ZMM=ZRANG*ZMAG
+        IF (ZMM .GT. 100.0) GOTO 7
+        ZMAG = ZMAG*2.0
+        GOTO 6
+7       ZERO=-ZMIN*ZMAG
 C
 C  DRAW AXES FOR AMPLITUDE BOX
 C
-	IF(NOBS.LE.8) GO TO 100
-C	CALL ORIGIN(20.0,30.0,0)
-C	CALL LOCCHR(10.0,-15.0,0)
-C	CALL FONT(1)
-C	CALL STRING(TITLE,40)
-C	CALL FONT(0)
-C	CALL MOVETO(0.0,0.0)
-C	CALL DRAWTO(0.0,FMAG)
-C	CALL DRAWTO(ZMM,FMAG)
-C	CALL DRAWTO(ZMM,0.0)
-C	CALL DRAWTO(0.0,0.0)
-C	CALL MOVETO(ZERO,0.0)
-C	CALL DRAWTO(ZERO,FMAG)
-CC	POSN=ZRANG*ZMAG-22.
-C	CALL LOCCHR(POSN,FMAG-10.0,0)
+        IF(NOBS.LE.8) GO TO 100
+C       CALL ORIGIN(20.0,30.0,0)
+C       CALL LOCCHR(10.0,-15.0,0)
+C       CALL FONT(1)
+C       CALL STRING(TITLE,40)
+C       CALL FONT(0)
+C       CALL MOVETO(0.0,0.0)
+C       CALL DRAWTO(0.0,FMAG)
+C       CALL DRAWTO(ZMM,FMAG)
+C       CALL DRAWTO(ZMM,0.0)
+C       CALL DRAWTO(0.0,0.0)
+C       CALL MOVETO(ZERO,0.0)
+C       CALL DRAWTO(ZERO,FMAG)
+CC      POSN=ZRANG*ZMAG-22.
+C       CALL LOCCHR(POSN,FMAG-10.0,0)
 C        WRITE(LINE,'(''('',I2,'','',I2,'')'')')IHIN,IKIN
-C	WRITE(LINE,103) IHIN,IKIN
-C103	FORMAT('(',I2,',',I2,')')
-C	CALL STRING(LINE,20)
+C       WRITE(LINE,103) IHIN,IKIN
+C103    FORMAT('(',I2,',',I2,')')
+C       CALL STRING(LINE,20)
 C
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(5.0,30.0,0.)
@@ -2815,20 +2838,20 @@ C       POSN=ZRANG*ZMAG-22.
 103     FORMAT('(',I2,',',I2,')')
         CALL P2K_STRING(LINE,7,0.)
 C
-	IZ=ZRANG/DELZ
+        IZ=ZRANG/DELZ
 C
-	DO 25 J=1,200
-	  ZPOS=-0.5+J*DELZ
-	  IF((ZPOS.LT.ZMIN).OR.(ZPOS.GE.ZMAX))GO TO 25
-	  XPOS=ZERO+ZPOS*ZMAG
+        DO 25 J=1,200
+          ZPOS=-0.5+J*DELZ
+          IF((ZPOS.LT.ZMIN).OR.(ZPOS.GE.ZMAX))GO TO 25
+          XPOS=ZERO+ZPOS*ZMAG
           CALL P2K_MOVE(XPOS,0.,0.)
           CALL P2K_DRAW(XPOS,-2.0,0.)
           XPOS=XPOS-7.0
           CALL P2K_MOVE(XPOS,-5.5,0.)
           WRITE(LINE,26) ZPOS
           CALL P2K_STRING(LINE,6,0.)
-25	CONTINUE
-26	FORMAT(F6.3)
+25      CONTINUE
+26      FORMAT(F6.3)
 C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
         POSN=ZRANG*ZMAG-35.
@@ -2844,17 +2867,17 @@ C
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(ZERO,0.0,0.)
 C
-	SCALE=FMAG/(1.05*FMAX)
-	IA=ALOG10(1.05*FMAX)
-	B=10.0**IA
-	IC=FMAX*1.05/B
-	DO 200 J=1,IC
-	  F=J*B
-	  YPOS=F*SCALE
-	  ZA=ZMIN*ZMAG
-	  ZB=ZMAX*ZMAG
-	  CALL P2K_MOVE(ZA,YPOS,0.)
-	  ZD=ZA+2.0
+        SCALE=FMAG/(1.05*FMAX)
+        IA=ALOG10(1.05*FMAX)
+        B=10.0**IA
+        IC=FMAX*1.05/B
+        DO 200 J=1,IC
+          F=J*B
+          YPOS=F*SCALE
+          ZA=ZMIN*ZMAG
+          ZB=ZMAX*ZMAG
+          CALL P2K_MOVE(ZA,YPOS,0.)
+          ZD=ZA+2.0
           CALL P2K_STRING(LINE,6,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
           ZD=ZB-2.0
@@ -2864,16 +2887,16 @@ C
           CALL P2K_MOVE(XPOS,YPOS,0.)
           WRITE(LINE,201) F
           CALL P2K_STRING(LINE,7,0.)
-200	CONTINUE
+200     CONTINUE
         CALL P2K_MOVE(XPOS,0.,0.)
         CALL P2K_STRING('    0.0',7,0.)
-201	FORMAT(F7.1)
+201     FORMAT(F7.1)
 C
 C  PLOT OBSERVED AMPLITUDES FIRST
 C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.48)
-	DO 50 J=1,NOBS
-	  IF(FOBS(J).EQ.-999.) GO TO 50
+        DO 50 J=1,NOBS
+          IF(FOBS(J).EQ.-999.) GO TO 50
           XP=ZSTAR(J)*ZMAG - 0.05
           YP=FOBS(J)*SCALE - 0.28*FONTSIZE*0.48
           CALL P2K_MOVE(XP,YP,0.)
@@ -2885,13 +2908,13 @@ C
 C  
 C  DRAW AXES FOR PHASE BOX.
 C
-	PMAG2 = PMAG/540.		! NOW PLOT OVER 540 DEGREES
-	YPOS=FMAG+GAP+PMAG/3.0		! NOW PLOT OVER 540 DEGREES
+        PMAG2 = PMAG/540.               ! NOW PLOT OVER 540 DEGREES
+        YPOS=FMAG+GAP+PMAG/3.0          ! NOW PLOT OVER 540 DEGREES
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(0.0,YPOS,0.)
-	ZA=ZMIN*ZMAG
-	ZB=ZMAX*ZMAG
-	YAXIS=180.0*PMAG2
+        ZA=ZMIN*ZMAG
+        ZB=ZMAX*ZMAG
+        YAXIS=180.0*PMAG2
         CALL P2K_MOVE(ZA,-YAXIS,0.)
         CALL P2K_DRAW(ZA,+YAXIS*2.0,0.) ! NOW PLOT OVER 540 DEGREES
         CALL P2K_DRAW(ZB,+YAXIS*2.0,0.) ! NOW PLOT OVER 540 DEGREES
@@ -2900,7 +2923,7 @@ C
         CALL P2K_MOVE(0.0,-YAXIS,0.)
         CALL P2K_DRAW(0.0,+YAXIS*2.0,0.)        ! NOW PLOT OVER 540 DEGREES
 C
-	DO 620 J=1,11
+        DO 620 J=1,11
           YPOS=(PMAG/12)*J -YAXIS       ! NOW PLOT OVER 540 DEGREES
           CALL P2K_MOVE(ZA,YPOS,0.)
           ZD=ZA+2.0
@@ -2916,13 +2939,13 @@ C
           CALL P2K_MOVE(XPOS,YPOS,0.)
           WRITE(LINE,631) IANG
           CALL P2K_STRING(LINE,4,0.)
-630	CONTINUE
-631	FORMAT(I4)
+630     CONTINUE
+631     FORMAT(I4)
 C
 C  PLOT OBS PHASE POINTS
 C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.48)
-	DO 500 J=1,NOBS
+        DO 500 J=1,NOBS
           IF(PHIOBS(J).EQ.-999.) GO TO 500
           XP=ZSTAR(J)*ZMAG - 0.05
           YP=PHIOBS(J)*PMAG2 - 0.28*FONTSIZE*0.48
@@ -2962,8 +2985,8 @@ CTSH--
 104     FORMAT('TOO FEW SPOTS ON LINE (',I2,',',I2,')')
         CALL P2K_STRING(LINE,29,0.)
 C
-	RETURN
-	END
+        RETURN
+        END
 C******************************************************************************
       SUBROUTINE TILTP2(IN,IHIN,IKIN,IQIN,AIN,PTEMP,AMP,JREFL,JH,JK,
      1 ZSTAR,JHC,JKC,JLC,JSC,IFCC,IPHC,IBEGIN,IFINISH,TAXA,ABANG,TANGL,
@@ -3023,76 +3046,76 @@ C
         NOTNEAR=0
         NOTFOUND=0
         DO J=1,NSLOTS
-          NPHSRES(J)=0	! ZERO HIST0GRAM
+          NPHSRES(J)=0  ! ZERO HIST0GRAM
           ASIZ(J)=0.0
           AVIQ(J)=0.0
           FREFSIZ(J)=0.0
           PHSRES(J)=0.0
         enddo
-       	IF(IVERBOSE.gt.5)WRITE(6,1112)
+        IF(IVERBOSE.gt.5)WRITE(6,1112)
         DO 8100 I=1,IN
 C---------FIRST CALCULATE H,K,Z AND DZTHE,DZPHI IN CORRECT ASYMMETRIC UNIT.
           IF(IQIN(I).GT.IQMAX) THEN
-      	    NOTUSED=NOTUSED+1
-      	    GO TO 8100
+            NOTUSED=NOTUSED+1
+            GO TO 8100
           ENDIF
           IH=IHIN(I)
           IK=IKIN(I)
           Z=ZH*IH+ZK*IK
-          IF(Z.EQ.0.0) Z=0.0000001	  ! ALLOWS Z-CHANGE TEST AS FLAG BELOW.
+          IF(Z.EQ.0.0) Z=0.0000001        ! ALLOWS Z-CHANGE TEST AS FLAG BELOW.
           ZCOMP=Z
           DZTHE=DZTHEH*IH+DZTHEK*IK
           DZPHI=DZPHIH*IH+DZPHIK*IK
 C---------NOW REINDEX AND CHECK Z
           CALL FIDDLE2(IH,IK,Z,REVHK,SGNXCH,ROT180,ROT90,REVHND,REVXSGN)
-      	  IF(Z.NE.ZCOMP) THEN
-      	    DZTHE=-DZTHE
-      	    DZPHI=-DZPHI
-      	  ENDIF
+          IF(Z.NE.ZCOMP) THEN
+            DZTHE=-DZTHE
+            DZPHI=-DZPHI
+          ENDIF
           ZASYM=Z
           IF(IVERBOSE.gt.5)WRITE(6,8700)IH,IK,Z,IP1,IP2,A1,A2,A3,A4,
      .        A5,IGO,ISPEC
 8700      FORMAT(2I5,F10.5,2I5/7(8I5/))
           IP1=1
           IP2=0
-C 	  IF(IVERBOSE.gt.5)WRITE(6,18100)IHIN(I),IKIN(I),IH,IK,ZASYM
+C         IF(IVERBOSE.gt.5)WRITE(6,18100)IHIN(I),IKIN(I),IH,IK,ZASYM
           CALL ASYM(IH,IK,ZASYM,IP1,IP2,SPEC,IPTEST,WSTAR,
      1              A1,A2,A3,A4,A5,IGO,ISPEC,LREV,IAQP2,IVERBOSE)
- 	  IF(IVERBOSE.gt.5)WRITE(6,18100)IHIN(I),IKIN(I),IH,IK,ZASYM
+          IF(IVERBOSE.gt.5)WRITE(6,18100)IHIN(I),IKIN(I),IH,IK,ZASYM
 C
 C---------HERE FOR GETCRVAL SUBROUTINE_CALL !----------------------
           CALL GETCRVAL(I,IHIN,IKIN,IH,IK,ZASYM,
      .  JLC,IFCC,IPHC,IBEGIN,IFINISH,ISPEC,
      .  IOK,C,FREF,PREF,DPDZCU,IVERBOSE)
-      	  IF(.NOT.IOK) THEN
-      	    NOTFOUND=NOTFOUND+1
-C 	    WRITE(6,18100)IHIN(I),IKIN(I),IH,IK,ZASYM
-18100	    FORMAT(4I5,F10.5)
-      	    GO TO 8100
-      	  ENDIF
-      	  PREF=PREF*IP1-IP2	! P=P*IP1-IP2 TRANSFORMS FROM CURVE TO INPUT.
+          IF(.NOT.IOK) THEN
+            NOTFOUND=NOTFOUND+1
+C           WRITE(6,18100)IHIN(I),IKIN(I),IH,IK,ZASYM
+18100       FORMAT(4I5,F10.5)
+            GO TO 8100
+          ENDIF
+          PREF=PREF*IP1-IP2     ! P=P*IP1-IP2 TRANSFORMS FROM CURVE TO INPUT.
           DPDZ = DPDZCU*IP1
-      	  IF(Z.NE.ZASYM) DPDZ=-DPDZ
+          IF(Z.NE.ZASYM) DPDZ=-DPDZ
 C---------ABOVE TWO LINES CORRECT THE PHASE GRADIENT IF Z OR PHASE IS CHANGED IN ASYM.
 C---------TRANSFORMATION LATER FROM INPUT TO CURVE ASYMMETRIC UNIT IS P=P*IP1+IP2.
-      	  NBEGIN=IBEGIN(IH,IK)
+          NBEGIN=IBEGIN(IH,IK)
 CHEN
           if(NBEGIN.eq.0)NBEGIN=1
 CHEN
-      	  IZLESS=INT(ZASYM*C+100)-100
-      	  IZLESS=NBEGIN+(IZLESS-JLC(NBEGIN))
+          IZLESS=INT(ZASYM*C+100)-100
+          IZLESS=NBEGIN+(IZLESS-JLC(NBEGIN))
           IF(IZLESS.EQ.0) THEN
             write(*,*)'Warning !!!!! IZLESS=0 for IH,IK',IH,IK
             IZLESS=1
           ENDIF
-      	  IZMORE=IZLESS+1
+          IZMORE=IZLESS+1
           ZLESS = JLC(IZLESS)/C
-       	  IF(IVERBOSE.gt.5)WRITE(6,1111)IHIN(I),IKIN(I),Z,AIN(I),
+          IF(IVERBOSE.gt.5)WRITE(6,1111)IHIN(I),IKIN(I),Z,AIN(I),
      .      PTEMP(I),IH,IK,ZASYM,
      .      FREF,PREF,IPHC(IZLESS),IPHC(IZMORE),
      .      JHC(IZLESS),JKC(IZLESS),JLC(IZLESS),ZLESS
-1111	  FORMAT(2I5,F8.4,2F8.1,2I5,F8.4,F8.1,F8.1,5I6,F8.4)
-1112	  FORMAT(' NKIN NKIN ZSTARIN     AIN   PTEMP   IH',
+1111      FORMAT(2I5,F8.4,2F8.1,2I5,F8.4,F8.1,F8.1,5I6,F8.4)
+1112      FORMAT(' NKIN NKIN ZSTARIN     AIN   PTEMP   IH',
      . '   IK   ZASYM    AREF    PREF    IPH-  IPH+   IH-   IK-   IL-',
      . '   ZLESS')
 C
@@ -3102,25 +3125,25 @@ C---------COULD BE CHANGED TO 1/SIGMA**2 OR AMPLITUDE WEIGHTS LATER.
           AA0=PREF-PTEMP(I)
 C
 C---------CHECK THAT PHASE IS IN RANGE -180 TO 180 SO THAT MINIMISATION IS USEFUL.
-8261	  IF(AA0.LT.180.0) GO TO 8260
-      	  AA0=AA0-360.0
-      	  GO TO 8261
-8260	  IF(AA0.GT.-180.0) GO TO 8262
-      	  AA0=AA0+360.0
-      	  GO TO 8260
-8262	  CONTINUE
+8261      IF(AA0.LT.180.0) GO TO 8260
+          AA0=AA0-360.0
+          GO TO 8261
+8260      IF(AA0.GT.-180.0) GO TO 8262
+          AA0=AA0+360.0
+          GO TO 8260
+8262      CONTINUE
 C---------FOR RESOLUTION-DEPENDENT HISTOGRAM OF PHASE RESIDUALS.
-      	  ISLOT=1+(JSC(IZLESS)-1)/ISLOTSIZ
+          ISLOT=1+(JSC(IZLESS)-1)/ISLOTSIZ
           IF(ISLOT.LT.1.OR.ISLOT.GE.NSLOTS) STOP 'ISLOT problem'
-      	  ASIZ(ISLOT)=ASIZ(ISLOT)+AIN(I)
-      	  AVIQ(ISLOT)=AVIQ(ISLOT)+IQIN(I)
-      	  FREFSIZ(ISLOT)=FREFSIZ(ISLOT)+FREF
-      	  PHSRES(ISLOT)=PHSRES(ISLOT)+ABS(AA0)
-      	  NPHSRES(ISLOT)=NPHSRES(ISLOT)+1
-      	  IF(ABS(AA0).GT.90.0) THEN	! USE ONLY IF NEAR ENOUGH (90 DEG).
-      	    NOTNEAR=NOTNEAR+1
-      	    GO TO 8100
-      	  ENDIF
+          ASIZ(ISLOT)=ASIZ(ISLOT)+AIN(I)
+          AVIQ(ISLOT)=AVIQ(ISLOT)+IQIN(I)
+          FREFSIZ(ISLOT)=FREFSIZ(ISLOT)+FREF
+          PHSRES(ISLOT)=PHSRES(ISLOT)+ABS(AA0)
+          NPHSRES(ISLOT)=NPHSRES(ISLOT)+1
+          IF(ABS(AA0).GT.90.0) THEN     ! USE ONLY IF NEAR ENOUGH (90 DEG).
+            NOTNEAR=NOTNEAR+1
+            GO TO 8100
+          ENDIF
 C
           AA1=DPDZ*DZTHE
           AA2=DPDZ*DZPHI
@@ -3166,45 +3189,45 @@ C
      1         ' SHFTS=',2F8.3,
      2         ' FOR',I4,'(EXCL',3I4,')SPOTS, RESID=',F7.3,
      3         ' RMSRESID =',F7.3)
-	IF(IVERBOSE.gt.3)WRITE(6,18152)NOTFOUND,NOTUSED,NOTNEAR
-18152	FORMAT(' SPOTS EXCLUDED FOR; NOTFOUND=',I4,'; NOTUSED(IQ)=',I4/
+        IF(IVERBOSE.gt.3)WRITE(6,18152)NOTFOUND,NOTUSED,NOTNEAR
+18152   FORMAT(' SPOTS EXCLUDED FOR; NOTFOUND=',I4,'; NOTUSED(IQ)=',I4/
      .          '  NOTNEAR(>90.0)=',I4/)
         IF((ABS(THETA).LT.0.1).AND.(ABS(PHI).LT.0.1)) IEND=1
         IF((ICYCL.EQ.1).AND.(IEND.EQ.1)) THEN
-      	  IFINSH=1
+          IFINSH=1
 C---------PRINT OUT RESOLUTION-DEPENDENT RESIDUALS AT END OF REFINEMENT.
-      	  WRITE(6,8292)IQMAX
-8292	  FORMAT(//2X,10('*'),' PHASE RESID AS FUNCT OF RESOL',
+          WRITE(6,8292)IQMAX
+8292      FORMAT(//2X,10('*'),' PHASE RESID AS FUNCT OF RESOL',
      .   ' ********** FOR ALL SPOTS WITH IQ .LE.'I2/5X,
      .   '  RANGE    DMIN      DMAX   MEANFCURV    MEANA',
      .   '   RESIDUAL  NSPOTS  AVIQ'/)
-      	  NALL=0
-      	  FALL=0.0
-      	  AALL=0.0
-      	  PHSALL=0.
-      	  DO 8290 J=1,NSLOTS
-      	    IF(NPHSRES(J).EQ.0) GO TO 8290
-      	    FALL=FALL+FREFSIZ(J)
-      	    AALL=AALL+ASIZ(J)
-      	    AVIQALL=AVIQALL+AVIQ(J)
-      	    PHSALL=PHSALL+PHSRES(J)
-      	    NALL=NALL+NPHSRES(J)
-      	    PHSRES(J)=PHSRES(J)/NPHSRES(J)
-      	    ASIZ(J)=ASIZ(J)/NPHSRES(J)
-      	    AVIQ(J)=AVIQ(J)/NPHSRES(J)
-      	    FREFSIZ(J)=FREFSIZ(J)/NPHSRES(J)
-      	    DMIN=SQRT(10000.0/((J-1)*ISLOTSIZ + 1))
-      	    DMAX=SQRT(10000.0/(J*ISLOTSIZ))
+          NALL=0
+          FALL=0.0
+          AALL=0.0
+          PHSALL=0.
+          DO 8290 J=1,NSLOTS
+            IF(NPHSRES(J).EQ.0) GO TO 8290
+            FALL=FALL+FREFSIZ(J)
+            AALL=AALL+ASIZ(J)
+            AVIQALL=AVIQALL+AVIQ(J)
+            PHSALL=PHSALL+PHSRES(J)
+            NALL=NALL+NPHSRES(J)
+            PHSRES(J)=PHSRES(J)/NPHSRES(J)
+            ASIZ(J)=ASIZ(J)/NPHSRES(J)
+            AVIQ(J)=AVIQ(J)/NPHSRES(J)
+            FREFSIZ(J)=FREFSIZ(J)/NPHSRES(J)
+            DMIN=SQRT(10000.0/((J-1)*ISLOTSIZ + 1))
+            DMAX=SQRT(10000.0/(J*ISLOTSIZ))
             WRITE(6,8291)J,DMIN,DMAX,FREFSIZ(J),ASIZ(J),PHSRES(J),
      .                   NPHSRES(J),AVIQ(J)
-8291	    FORMAT(5X,I6,4F10.3,F10.2,I7,F8.2)
-8290	  CONTINUE
-8293	  FORMAT(/4X,'OVERALL',20X,2F10.3,F10.2,I7,F8.2)
-      	  PHSALL=PHSALL/NALL
-      	  FALL=FALL/NALL
-      	  AALL=AALL/NALL
-      	  AVIQALL=AVIQALL/NALL
-      	  WRITE(6,8293)FALL,AALL,PHSALL,NALL,AVIQALL
+8291        FORMAT(5X,I6,4F10.3,F10.2,I7,F8.2)
+8290      CONTINUE
+8293      FORMAT(/4X,'OVERALL',20X,2F10.3,F10.2,I7,F8.2)
+          PHSALL=PHSALL/NALL
+          FALL=FALL/NALL
+          AALL=AALL/NALL
+          AVIQALL=AVIQALL/NALL
+          WRITE(6,8293)FALL,AALL,PHSALL,NALL,AVIQALL
         ENDIF
 8300  CONTINUE
 C
@@ -3218,7 +3241,7 @@ C******************************************************************************
       SUBROUTINE GETCRVAL(ISPOT,IHIN,IKIN,IH,IK,ZASYM,
      . JLC,IFCC,IPHC,IBEGIN,IFINISH,ISPEC,IOK,C,FREF,PREF,
      .   DPDZCU,IVERBOSE)
-      	LOGICAL IOK
+        LOGICAL IOK
 C
 C-----calculates the AMP and PHS value of the interpolated lattice lines 
 C-----for the correct height Zstar of the tilted reflection
@@ -3266,8 +3289,8 @@ C     3  JLC,IFCC,IPHC,IBEGIN(IH,IK),IFINISH(IH,IK)
 C
       ZBEGIN=JLC(NBEGIN)/C
       ZFINISH=JLC(NFINISH)/C
-      ZALLOW = 1.0/(C*2.0)	! Allow calculation of point from curve provided
-C				! that point and available curve data are close.
+      ZALLOW = 1.0/(C*2.0)      ! Allow calculation of point from curve provided
+C                               ! that point and available curve data are close.
 C
 C-----Check, if there is sufficient distance to lattice line boundaries:
       IF((ZASYM.LT.ZBEGIN-ZALLOW).OR.(ZASYM.GT.ZFINISH+ZALLOW))THEN
@@ -3293,77 +3316,77 @@ C.....AMPLITUDES.  (see below).
 C
       CPART=0.0
       SPART=0.0
-      DZ=0.0004	!  SET DZ FOR GRADIENT CALC HERE.
+      DZ=0.0004 !  SET DZ FOR GRADIENT CALC HERE.
       CPARTDZ=0.0
       SPARTDZ=0.0
 C
-      DO 85 I=NBEGIN,NFINISH	   ! Summation over given lattice line data.
-      	ZI=JLC(I)/C
-      	ZDIFF=ZASYM-ZI
-      	ZDIFFDZ=ZASYM+DZ-ZI
+      DO 85 I=NBEGIN,NFINISH       ! Summation over given lattice line data.
+        ZI=JLC(I)/C
+        ZDIFF=ZASYM-ZI
+        ZDIFFDZ=ZASYM+DZ-ZI
 C  Next section is summation over lattice line for all space groups.
-      	IF(ZDIFF.NE.0) GO TO 81
+        IF(ZDIFF.NE.0) GO TO 81
           SINCDAMP=1.0
-      	GO TO 82
-81     	  ARGEXP=-0.25*BTEMP*ZDIFF**2
-      	  ARGSINC=0.5*PI*ZDIFF*C
-      	  SINCF=SIN(ARGSINC)/ARGSINC
-      	  SINCDAMP=SINCF*EXP(ARGEXP)
-82	CONTINUE
-      	IF(ZDIFFDZ.NE.0) GO TO 83
-      	  SINCDMPDZ=1.0
-      	GO TO 84
-83     	  ARGEXP=-0.25*BTEMP*ZDIFFDZ**2
-      	  ARGSINC=0.5*PI*ZDIFFDZ*C
-      	  SINCF=SIN(ARGSINC)/ARGSINC
-      	  SINCDMPDZ=SINCF*EXP(ARGEXP)
-84	CONTINUE
-      	PHS=IPHC(I)*DRAD
+        GO TO 82
+81        ARGEXP=-0.25*BTEMP*ZDIFF**2
+          ARGSINC=0.5*PI*ZDIFF*C
+          SINCF=SIN(ARGSINC)/ARGSINC
+          SINCDAMP=SINCF*EXP(ARGEXP)
+82      CONTINUE
+        IF(ZDIFFDZ.NE.0) GO TO 83
+          SINCDMPDZ=1.0
+        GO TO 84
+83        ARGEXP=-0.25*BTEMP*ZDIFFDZ**2
+          ARGSINC=0.5*PI*ZDIFFDZ*C
+          SINCF=SIN(ARGSINC)/ARGSINC
+          SINCDMPDZ=SINCF*EXP(ARGEXP)
+84      CONTINUE
+        PHS=IPHC(I)*DRAD
 CAND
-C      	WRITE(6,55534)IH,IK,JLC(I),IFCC(I),IPHC(I)
-55534 	FORMAT('IH,IK,JLC,IFCC,IPHC:',3I5,2I8)
+C       WRITE(6,55534)IH,IK,JLC(I),IFCC(I),IPHC(I)
+55534   FORMAT('IH,IK,JLC,IFCC,IPHC:',3I5,2I8)
 C
-      	CPART=CPART+SINCDAMP*COS(PHS)*IFCC(I)
-      	SPART=SPART+SINCDAMP*SIN(PHS)*IFCC(I)
-      	CPARTDZ=CPARTDZ+SINCDMPDZ*COS(PHS)*IFCC(I)
-      	SPARTDZ=SPARTDZ+SINCDMPDZ*SIN(PHS)*IFCC(I)
+        CPART=CPART+SINCDAMP*COS(PHS)*IFCC(I)
+        SPART=SPART+SINCDAMP*SIN(PHS)*IFCC(I)
+        CPARTDZ=CPARTDZ+SINCDMPDZ*COS(PHS)*IFCC(I)
+        SPARTDZ=SPARTDZ+SINCDMPDZ*SIN(PHS)*IFCC(I)
 C
 C-------The following section is included for lattice lines in space groups
 C-------where only the positive half of the lattice line is stored.
 C
         IF(ISPEC(3).EQ.1.AND.JLC(I).NE.0) THEN
-      	  ZDIFFMINUS=ZASYM+ZI
-      	  ZDIFFMINUSDZ=ZASYM+ZI+DZ
-     	  ARGEXP=-0.25*BTEMP*ZDIFFMINUS**2
-      	  ARGSINC=0.5*PI*ZDIFFMINUS*C
+          ZDIFFMINUS=ZASYM+ZI
+          ZDIFFMINUSDZ=ZASYM+ZI+DZ
+          ARGEXP=-0.25*BTEMP*ZDIFFMINUS**2
+          ARGSINC=0.5*PI*ZDIFFMINUS*C
           if(ARGSINC.ne.0.0)then
-      	    SINCF=SIN(ARGSINC)/ARGSINC
+            SINCF=SIN(ARGSINC)/ARGSINC
           else
-      	    SINCF=1.0
+            SINCF=1.0
           endif
-      	  SINCDAMP=SINCF*EXP(ARGEXP)
-     	  ARGEXP=-0.25*BTEMP*ZDIFFMINUSDZ**2
-      	  ARGSINC=0.5*PI*ZDIFFMINUSDZ*C
+          SINCDAMP=SINCF*EXP(ARGEXP)
+          ARGEXP=-0.25*BTEMP*ZDIFFMINUSDZ**2
+          ARGSINC=0.5*PI*ZDIFFMINUSDZ*C
           if(ARGSINC.ne.0.0)then
-      	    SINCF=SIN(ARGSINC)/ARGSINC
+            SINCF=SIN(ARGSINC)/ARGSINC
           else
-      	    SINCF=1.0
+            SINCF=1.0
           endif
-      	  SINCDMPDZ=SINCF*EXP(ARGEXP)
-      	  PHS= -IPHC(I)*DRAD	! Phase(hkl) = -Phase(hk-l)
-      	  CPART=CPART+SINCDAMP*COS(PHS)*IFCC(I)
-      	  SPART=SPART+SINCDAMP*SIN(PHS)*IFCC(I)
-      	  CPARTDZ=CPARTDZ+SINCDMPDZ*COS(PHS)*IFCC(I)
-      	  SPARTDZ=SPARTDZ+SINCDMPDZ*SIN(PHS)*IFCC(I)
-      	ENDIF
+          SINCDMPDZ=SINCF*EXP(ARGEXP)
+          PHS= -IPHC(I)*DRAD    ! Phase(hkl) = -Phase(hk-l)
+          CPART=CPART+SINCDAMP*COS(PHS)*IFCC(I)
+          SPART=SPART+SINCDAMP*SIN(PHS)*IFCC(I)
+          CPARTDZ=CPARTDZ+SINCDMPDZ*COS(PHS)*IFCC(I)
+          SPARTDZ=SPARTDZ+SINCDMPDZ*SIN(PHS)*IFCC(I)
+        ENDIF
 85    CONTINUE
 C
-      FREF=0.5*SQRT(SPART**2+CPART**2)		! Here for divide by two
-C						! referred to above.
+      FREF=0.5*SQRT(SPART**2+CPART**2)          ! Here for divide by two
+C                                               ! referred to above.
       PREF=RDEG*ATAN2(SPART,CPART)
       FREFDZ=0.5*SQRT(SPARTDZ**2+CPARTDZ**2)
       PREFDZ=RDEG*ATAN2(SPARTDZ,CPARTDZ)
-      PDIFF=PREFDZ-PREF	! MAX 8 DEG IN 0.0004 DZ == 180 DEG IN 0.01 DZ.
+      PDIFF=PREFDZ-PREF ! MAX 8 DEG IN 0.0004 DZ == 180 DEG IN 0.01 DZ.
       IF(ABS(PDIFF).GT.180.0) PDIFF=PDIFF-SIGN(360.0,PDIFF)
       IF(ABS(PDIFF).GT.8.0) PDIFF=SIGN(8.0,PDIFF)
       DPDZCU = PDIFF/DZ
@@ -3427,8 +3450,8 @@ C******************************************************************************
 C              TO APPLY ORIGIN AND BEAMTILT PHASE-SHIFT.
       FUNCTION PHSHFT(IH,IK,OX,OY,TX,TY,BEAMSHFT,B)
       DIMENSION BEAMSHFT(4)
-      ASTAR=BEAMSHFT(2)	! attempt to not make it p3 specific.
-      BSTAR=BEAMSHFT(3)	!    "      "
+      ASTAR=BEAMSHFT(2) ! attempt to not make it p3 specific.
+      BSTAR=BEAMSHFT(3) !    "      "
       PHSHFT=IH*OX + IK*OY + B*(IH*TX*ASTAR+IK*TY*BSTAR)
       RETURN
       END
@@ -3436,8 +3459,8 @@ C******************************************************************************
 C   PHASE ORIGIN AND BEAM TILT REFINEMENT TOGETHER BY R-FACTOR MINIMISATION.
 C   THE RECIPROCAL SPACE DISTANCE ACTUALLY MINIMISED IS
 C       L = SUM OF 2 * SIN(ABS(PHASEDIFF/2))
-C	New version BEAMTILTA -- 3.3.89 used Harwell subroutine_VA04A by
-C				by M.J.D.Powell to minimise above value of L
+C       New version BEAMTILTA -- 3.3.89 used Harwell subroutine_VA04A by
+C                               by M.J.D.Powell to minimise above value of L
 C
       SUBROUTINE BEAMTILTA
       PARAMETER  (MAXRFL=20000)
@@ -3449,33 +3472,33 @@ C
       DATA DRAD/0.0174533/
       DATA E/0.02,0.02,0.001,0.001/,ESCALE/200.0/
       DATA IPRINT/0/,ICONV/1/,MAXIT/100/
-      		PARAMS(1)=OXNEW
-      		PARAMS(2)=OYNEW
-      		PARAMS(3)=TX
-      		PARAMS(4)=TY
-      		ASTAR=BEAMSHFT(2)
+                PARAMS(1)=OXNEW
+                PARAMS(2)=OYNEW
+                PARAMS(3)=TX
+                PARAMS(4)=TY
+                ASTAR=BEAMSHFT(2)
       ITER=0
-      	WRITE(6,1010)
-1010	FORMAT(//' ******* BEAM TILTA REFINEMENT BEGINNING *********'/
+        WRITE(6,1010)
+1010    FORMAT(//' ******* BEAM TILTA REFINEMENT BEGINNING *********'/
      . ' NITER      OX        OY        TX        TY   ',
      . '      FUNCMIN   RESTOT  NTOT ')
-      	WRITE(6,1011)ITER,(PARAMS(J),J=1,4)
+        WRITE(6,1011)ITER,(PARAMS(J),J=1,4)
 C
       NPARAMS=4
       CALL VA04A(WORK,PARAMS,E,NPARAMS,F,
      . ESCALE,IPRINT,ICONV,MAXIT,ITER)
 C
-      	   WRITE(6,1011)ITER,(PARAMS(I),I=1,4),FUNCMIN,RESTOT,NTOT
-1011	FORMAT(I6,2F10.2,2F10.3,F12.2,F11.2,I6)
+           WRITE(6,1011)ITER,(PARAMS(I),I=1,4),FUNCMIN,RESTOT,NTOT
+1011    FORMAT(I6,2F10.2,2F10.3,F12.2,F11.2,I6)
 332     BEDGE=225.0*ASTAR**2*BEAMSHFT(1) !  SPECIFIC FOR P3, BUT USED ONLY FOR
-C		!  COSMETIC OUTPUT --  I.E.NOT USED IN REAL CALCULATIONS.
-      	PS1=ABS(PHSHFT(15,0,0.,0.,PARAMS(3),PARAMS(4),BEAMSHFT,BEDGE))
-      	PS2=ABS(PHSHFT(0,15,0.,0.,PARAMS(3),PARAMS(4),BEAMSHFT,BEDGE))
-      	PS3=ABS(PHSHFT(-15,15,0.,0.,PARAMS(3),PARAMS(4),
+C               !  COSMETIC OUTPUT --  I.E.NOT USED IN REAL CALCULATIONS.
+        PS1=ABS(PHSHFT(15,0,0.,0.,PARAMS(3),PARAMS(4),BEAMSHFT,BEDGE))
+        PS2=ABS(PHSHFT(0,15,0.,0.,PARAMS(3),PARAMS(4),BEAMSHFT,BEDGE))
+        PS3=ABS(PHSHFT(-15,15,0.,0.,PARAMS(3),PARAMS(4),
      . BEAMSHFT,BEDGE))
-      	PMAX15=AMAX1(PS1,PS2,PS3)
-      	WRITE(6,1012)PMAX15
-1012	FORMAT(' THIS AMOUNT OF BEAMTILT CAUSES THE MAX CORRECTION OF',
+        PMAX15=AMAX1(PS1,PS2,PS3)
+        WRITE(6,1012)PMAX15
+1012    FORMAT(' THIS AMOUNT OF BEAMTILT CAUSES THE MAX CORRECTION OF',
      . ' PHASE TO A REFLECTION'/
      .   ' AT RADIUS OF (15,0) OF',F10.3,' DEGREES'/
      . ' (THIS CALCULATION IS NOT PRECISE EXCEPT IN SPACE GROUP P3)'//) 
@@ -3495,34 +3518,34 @@ C******************************************************************************
      . BEAMSHFT(4),BSH(MAXRFL),IQMAX,NC,
      .   FUNCMIN,RESTOT,NTOT
       DATA DRAD,RDEG/0.0174532,57.295779/
-       	NTOT=0
-      	RESTOT=0.
-C      	NCOMP=0
-C      	NFAR=0
-C      	RESID=0.0
-      	FUNCMIN=0.0
-      	WTOTAL=0.0
-      	DO 340 M=1,NREF
-      	IF (WGT(M).EQ.0.0) GO TO 340
-      	IF (IQ(M).GT.IQMAX) GO TO 340
-      	PM=PHSI(M)+PHSHFT(IH(M),IK(M),PARAMS(1),PARAMS(2),
+        NTOT=0
+        RESTOT=0.
+C       NCOMP=0
+C       NFAR=0
+C       RESID=0.0
+        FUNCMIN=0.0
+        WTOTAL=0.0
+        DO 340 M=1,NREF
+        IF (WGT(M).EQ.0.0) GO TO 340
+        IF (IQ(M).GT.IQMAX) GO TO 340
+        PM=PHSI(M)+PHSHFT(IH(M),IK(M),PARAMS(1),PARAMS(2),
      . PARAMS(3),PARAMS(4),BEAMSHFT,BSH(M))
-      	PN=PHSC(M)
-      	PDIFF=AMOD((PM-PN),360.0)
-      	IF(ABS(PDIFF).GT.180.0) PDIFF=PDIFF-SIGN(360.0,PDIFF)
-      	SINPD2=ABS(PDIFF*DRAD/2.0)
-      	SINPD2=SIN(SINPD2)
-	NTOT=NTOT+1
-       	RESTOT=RESTOT+ABS(PDIFF)
-      	WTOTAL=WTOTAL+WGT(M)
-      	FUNCMIN=FUNCMIN+2.0*SINPD2*WGT(M)
-340	CONTINUE
-      	RESTOT=RESTOT/NTOT
-      	FUNCMIN=FUNCMIN*57.295779/WTOTAL
+        PN=PHSC(M)
+        PDIFF=AMOD((PM-PN),360.0)
+        IF(ABS(PDIFF).GT.180.0) PDIFF=PDIFF-SIGN(360.0,PDIFF)
+        SINPD2=ABS(PDIFF*DRAD/2.0)
+        SINPD2=SIN(SINPD2)
+        NTOT=NTOT+1
+        RESTOT=RESTOT+ABS(PDIFF)
+        WTOTAL=WTOTAL+WGT(M)
+        FUNCMIN=FUNCMIN+2.0*SINPD2*WGT(M)
+340     CONTINUE
+        RESTOT=RESTOT/NTOT
+        FUNCMIN=FUNCMIN*57.295779/WTOTAL
         F=FUNCMIN
-C      	   WRITE(6,1011)NC,(PARAMS(I),I=1,4),(B(I),I=1,4),RESID,
-C     .			FUNCMIN,NCOMP,NFAR
-1011	FORMAT(I5,2F10.2,2F10.3,F10.2,F7.2,2F7.3,2F10.2,I10,I6)
+C          WRITE(6,1011)NC,(PARAMS(I),I=1,4),(B(I),I=1,4),RESID,
+C     .                 FUNCMIN,NCOMP,NFAR
+1011    FORMAT(I5,2F10.2,2F10.3,F10.2,F7.2,2F7.3,2F10.2,I10,I6)
       RETURN
       END
 ***************************************************************************

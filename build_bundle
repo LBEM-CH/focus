@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+# Build the bundle for Mac OS X 
+#
+# Marcel Arheit 02.09.2010
+
+
+
+################################################################################
+# Configuration
+################################################################################
+
+# Set the default install prefix
+PREFIX=$1
+
+echo '*############################################################################*'
+echo '| Building the bundle for Mac OS X                                           |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+if [ $# -lt 1 ]
+then
+	echo 'No prefix is specified, the default prefix PREFIX='$HOME'/2dx is met'
+       	PREFIX=~/2dx
+else
+	echo 'The installation prefix is set to '$PREFIX	
+fi
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+echo '*############################################################################*'
+echo '| Build                                                                      |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+./build_all $PREFIX
+
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+
+
+echo '*############################################################################*'
+echo '| changing the plugins to link to the dylibs of the bundle                   |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+./installation/mac_osx_installer/change_dylibs.sh $PREFIX
+
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+echo '*############################################################################*'
+echo '| Making the Mac OS X installer package                                      |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+SYSTEM=`uname`
+if [ $SYSTEM = "Darwin" ]
+then
+	SW_VERSION=`sw_vers -productVersion`
+	DATE=`date "+%d_%b_%Y"`
+	OUTFILE="2dx_MAC_OS_X_"$SW_VERSION"_"$DATE".pkg"
+	PACKAGE_PATH="installation/packages/"
+	echo "Writing the package "$OUTFILE" to: " $PACKAGE_PATH
+	/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_template.pmdoc -o $PACKAGE_PATH$OUTFILE 
+
+fi
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+

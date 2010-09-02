@@ -195,7 +195,7 @@ ${proc_2dx}/linblock "Using therefore zminmax=${zminmaxlocal}."
 #
 \rm -f fort.1
 \cp -f APH/merge.aph fort.1
-echo "# IMAGE-IMPORTANT: APH/merge.aph <APH: merge.aph [H,K,Z,A,P,Num,IQ,WGHT,Back,CTF]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
 \rm -f fort.2
 \rm -f fort.3
 \rm -f fort.4
@@ -229,7 +229,7 @@ echo "################################################"
 #\mv -f fort.4 APH/avrg2D.nolimit.aph
 \rm -f fort.4
 echo "# IMAGE: LOGS/2dx_avrgamphs2D.log <LOG: 2dx_avrgamphs output for 2D run>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/avrg2D.hkl <APH: averaged amps & phases for 2D run [H,K,A,P(CTF Phase flipped, PhaOri),IQ,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/avrg2D.hkl <APH: averaged amp&phs for 2D [H,K,A,P,IQ,FOM]>" >> LOGS/${scriptname}.results
 \mv -f TMP444789.tmp LOGS/avramphs.table.txt
 \rm -f TMP444888.tmp
 if ( ${merge_modus} == "2D" ) then
@@ -266,7 +266,7 @@ endif
 # This is not used:
 \rm -f APH/centric2d.hk
 #
-echo "# IMAGE: APH/centric2D.hkl <APH file after CENTRIC for 2D run [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/centric2D.hkl <APH after CENTRIC for 2D [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 35>>"
 #
@@ -291,7 +291,7 @@ eot
 # This is not used:
 \rm -f APH/sym_nosort2D.hkl
 #
-echo "# IMAGE: APH/sym_noheader2D.hkl <APH file after 2dx_hklsym for 2D run [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/sym_noheader2D.hkl <APH after hklsym for 2D [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
 set withsigf = 0
 #
@@ -310,7 +310,7 @@ if ( ! -e APH/sym2D.hkl ) then
   ${proc_2dx}/protest "ERROR occured."
 endif
 #
-echo "# IMAGE: APH/sym2D.hkl <APH file after 2dx_clean for 2D run [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/sym2D.hkl <APH after 2dx_clean for 2D [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
 set savedir = $PWD
 set date = `date`

@@ -66,7 +66,7 @@ eot
   if ( -e fort.3 ) then
     \mv -f fort.3 SCRATCH/latlines.dat
     echo "# IMAGE: LOGS/latlinprescal.log <LOG: latlinprescal output>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/latlines.dat <Latline after prescal [H,K,Z,A,P,FOM,SIGAMP,SIGANG,IQ]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/latlines.dat <Latline after prescal [H,K,Z,A,P,FOM,SAMP,SANG,IQ]>" >> LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: latlines.dat does not exist."
   endif
@@ -200,8 +200,8 @@ echo "################################################"
 echo "################################################"
 #
 echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Lattice lines for volume after prepmklcf [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Lattice lines for reference after prepmklcf [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Latline for vol after prepmklcf [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #
@@ -223,7 +223,7 @@ if ( ! -e APH/latfitted.hkl ) then
   ${proc_2dx}/protest "ERROR: APH/latfitted.hkl not produced."
 endif
 #
-echo "# IMAGE: APH/latfitted.hkl <APH: Lattice lines for volume [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfitted.hkl <APH: Latline for vol after sym [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to latfitted APH file, for reference"
@@ -243,7 +243,7 @@ if ( ! -e APH/latfittedref.hkl ) then
   ${proc_2dx}/protest "ERROR: APH/latfittedref.hkl not produced."
 endif
 #
-echo "# IMAGE: APH/latfittedref.hkl <APH: Lattice lines for reference [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/latfittedref.hkl <APH: Latline for ref after sym [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for volume"
@@ -263,7 +263,7 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Full fitted lattice line data for volume>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Full latline for volume>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #
@@ -285,7 +285,7 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full fitted lattice line data for reference>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full latline for reference>" >> LOGS/${scriptname}.results
 #
 ####################################################################################
 #                                                                                  #
@@ -319,7 +319,7 @@ endif
 # this should guarantee that the file is never missing:
 \mv -f SCRATCH/merge3Dref_nophaerr_tmp.mtz merge3Dref_nophaerr.mtz
 #
-echo "# IMAGE-IMPORTANT: merge3Dref_nophaerr.mtz <MTZ: Lattice lines without phase-error for synref>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3Dref_nophaerr.mtz <MTZ: Latlines without phase-error for synref>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #

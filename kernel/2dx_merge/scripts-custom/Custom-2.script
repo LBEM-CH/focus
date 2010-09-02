@@ -82,8 +82,12 @@ foreach dirfile ( ${dirlist} )
   #   mkdir LOGS
   # endif
 
-  # Use the following to set all TANGL values to zero:
+  # Use the following to set all tilt angle and phase origin values to zero:
+  # echo "set TAXA = 0.0" >> LOGS/${scriptname}.results
   # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
+  # echo "set phaori = 0.0,0.0" >> LOGS/${scriptname}.results
+  # echo "set phaoriFouFilter = 0.0,0.0" >> LOGS/${scriptname}.results
+
 
   # Use the following to apply the CTF to all selected images:
   # ${app_2dx_image} ${dirfile} "2dx_applyCTF"

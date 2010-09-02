@@ -1,12 +1,12 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Get Tilt from Def (experimental)                                   #
+# Title: Get Defocus Gradient (ctftilt)                                     #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 02/20/2006                                             #
-# Last Modification: 02/20/2006                                             #
+# Last Modification: 09/02/2010                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -39,6 +39,7 @@
 # GLOBAL: det_defocus
 # GLOBAL: det_tilt
 # GLOBAL: phacon
+# GLOBAL: RESMIN
 # GLOBAL: RESMAX
 # GLOBAL: lattice
 # GLOBAL: comment
@@ -161,10 +162,11 @@ echo ampcon = ${ampcon}
 #
 echo ":df_start,df_end,df_step = ${df_start}, ${df_end}, ${df_step}"
 #
-set resotmp = `echo ${RESMAX} | awk '{if ($1 < 16.0) { s = 8.0 } else { s = $1 / 2.0 }} END { print s }'`
-set resolim = `echo ${resotmp} | awk '{if ($1 > 30.0) { s = 30.0 } else { s = $1 }} END { print s }'`
+set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
+set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
 echo resolim = $resolim
-set resoma = `echo ${RESMIN} | awk '{ s = 1.5 * $1 } END { print s }'`
+set resoma = `echo ${RESMIN} | awk '{ if ( $1 > 100.0) { s = 100.0 } else { s = $1 }} END { print s }'`
+set resoma = `echo ${resoma} | awk '{ s = $1 / 2.0 } END { print s }'`
 echo resoma = ${resoma}
 #
 set oldlat = `echo ${lattice}`
@@ -180,16 +182,18 @@ echo "<<@progress: 20>>"
 #
 if ( ${det_tilt} == 'y' ) then
     #
-    #############################################################################
-    ${proc_2dx}/linblock "2dx_ctftilt - to get defocus and tilt. ORIGINAL VERSION from NIKO."
-    #############################################################################
-    #
     \rm -f SCRATCH/2dx_ctftilt.result.tmp
     echo imagesidelength = ${imagesidelength}
-    set tilesize = `echo ${imagesidelength} | awk '{if ( $1 < 3000 ) { s = 128 } else { s = 256 }} END { print s }'`
+    set tilesize = 128
     echo tilesize = ${tilesize}
     echo "::Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
     echo ":Expected tilt angle is ${expected_tltang}, its uncertainty is ${expected_tltang_uncertainty}"
+    #
+    echo "<<@progress: 40>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_ctftilt - to get defocus and tilt. ORIGINAL VERSION from NIKO."
+    #############################################################################
     #
     set outimage = 'SCRATCH/2dx_ctftilt.out.mrc'
     \rm -f ${outimage}  
@@ -215,6 +219,7 @@ eof
     #
     set newtilt = `cat SCRATCH/2dx_ctftilt.result.tmp | tail -1`
     set TLTAXIS = `echo $newtilt | awk '{s=$1} END {printf "%.3f", s}'`
+    set TLTAXIS = `echo ${TLTAXIS} | awk '{ if ( $1 > 90.0 ) { s = $1 - 180.0 } else { s = $1 } } END { print s }'`
     set TLTANG = `echo $newtilt | awk '{s=$2} END {printf "%.3f", s}'`
     set RF  = `echo $newtilt | awk '{s=$3} END {print s}'`
     #

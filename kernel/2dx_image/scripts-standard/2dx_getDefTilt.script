@@ -13,7 +13,7 @@
 #
 # SORTORDER: 25
 #
-# MANUAL: This script calculates the defocus and asgimatism of the image, using Niko Grigorieff's program CTFFIND3. 
+# MANUAL: This script calculates the defocus and astigmatism of the image, using Niko Grigorieff's program CTFFIND3 or CTFTILT. 
 # MANUAL: If you set <I>Determine Tilt Geometry</i> to <I>Yes</I>, it will use CTFTILT instead, which not only determined defocus and astigmatism, but also the tilt geoetry for the carbon film grid support, i.e. TLTAXIS and TLTANG. An additional program 2dx_tiltgeom2.exe will then calculate TLTAXA, TAXA and TANGL, if a lattice is known.
 #
 # MANUAL: The parameter <I>Defocus Search Start</I> and <I>Defocus Start End</I> define the search range for the defocus, and <I>Defocus Search Step</I> defines the step size of the search. This may take some time, if the <I>Defocus Search Step</I> is set to small values.
@@ -36,11 +36,15 @@
 # GLOBAL: df_end
 # GLOBAL: df_step 
 # GLOBAL: det_tilt
+# GLOBAL: det_tlt_alg
 # GLOBAL: phacon
 # GLOBAL: RESMAX
 # GLOBAL: lattice
 # GLOBAL: comment
 # GLOBAL: tempkeep
+# GLOBAL: expected_tltang
+# GLOBAL: expected_tltang_uncertainty
+# GLOBAL: df_PAve 
 #
 #$end_local_vars
 #
@@ -62,15 +66,19 @@ set defocus = ""
 set df_start = ""
 set df_end = ""
 set df_step = ""
+set df_PAve = ""
 set RESMIN = ""
 set RESMAX = ""
 set phacon = ""
 set det_tilt = ""
+set det_tlt_alg = ""
 set ctf_ttf = ""
 set TLTAXIS = ""
 set TLTAXA = ""
 set TLTANG = ""
 set tempkeep = ""
+set expected_tltang = ""
+set expected_tltang_uncertainty = ""
 #
 #$end_vars
 #
@@ -128,12 +136,12 @@ echo phacon = ${phacon}
 echo det_tilt = ${det_tilt}
 echo ctf_ttf = ${ctf_ttf}
 #
-set resoma = `echo ${RESMIN} | awk '{ s = 1.5 * $1 } END { print s }'`
-echo resoma = ${resoma}
-#
-set resotmp = `echo ${RESMAX} | awk '{if ($1 < 16.0) { s = 8.0 } else { s = $1 / 2.0 }} END { print s }'`
-set resolim = `echo ${resotmp} | awk '{if ($1 > 30.0) { s = 30.0 } else { s = $1 }} END { print s }'`
+set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
+set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
 echo resolim = $resolim
+set resoma = `echo ${RESMIN} | awk '{ if ( $1 > 100.0) { s = 100.0 } else { s = $1 }} END { print s }'`
+set resoma = `echo ${resoma} | awk '{ s = $1 / 2.0 } END { print s }'`
+echo resoma = ${resoma}
 #
 set ampcon = `echo ${phacon} | awk '{s=sqrt(1.0 - ( $1 * $1 ))} END {print s}'`
 echo ampcon = ${ampcon}
@@ -183,53 +191,61 @@ echo "<<@progress: 20>>"
 #
 if ( ${det_tilt} == 'y' ) then
   #
-  set outimage = 'SCRATCH/2dx_ctftilt.out.mrc'
-  \rm -f ${outimage}  
-  #
-  set searchrange1 = 10000.0
-  set searchrange2 = 1000.0
-  #
-  set mode = 0
-  if ( ${debugmode} == "y" ) then
-    set mode = 1
-  endif
-  # 
-  set smallsize=2048
-  echo smallsize=${smallsize}
-  #
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/linblock "Preparing defocus table."
-  #                                                                           #
-  ############################################################################# 
-  #
-  set defocus_pos_file = 2dx_defocus_positions.txt
-  set defocus_pos_select_file = 2dx_defocus_select_positions.txt
-  echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_file}
-  echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_select_file}
-  #
-  foreach newY ( 1 2 3 4 5 6 7 )
-    echo "::        " >> ${defocus_pos_file}
-    echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
-    echo "::        " >> ${defocus_pos_file}
-    echo "::        " >> ${defocus_pos_select_file}
-    echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_select_file}
-    echo "::        " >> ${defocus_pos_select_file}
-  end
-  #
-  echo "# IMAGE-IMPORTANT: ${defocus_pos_file} <TXT: Defocus Table>" >> LOGS/${scriptname}.results  
-  #
-  echo "<<@progress: 25>>"
-  #
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/linblock "Prepare windowed images"
-  #                                                                           #
-  #############################################################################
-  #
-  \rm -f TMP-positions.txt TMP-runfile-windows.txt
-  #
-${bin_2dx}/2dx_calcpositions.exe << eot
+  if ( ${det_tlt_alg} == "0" ) then
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "Using CTFFIND on 7x7 locations."
+    #                                                                           #
+    ############################################################################# 
+    #
+    set outimage = 'SCRATCH/2dx_ctftilt.out.mrc'
+    \rm -f ${outimage}  
+    #
+    set searchrange1 = 10000.0
+    set searchrange2 = 1000.0
+    #
+    set mode = 0
+    if ( ${debugmode} == "y" ) then
+      set mode = 1
+    endif
+    # 
+    set smallsize=2048
+    echo smallsize=${smallsize}
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "Preparing defocus table."
+    #                                                                           #
+    ############################################################################# 
+    #
+    set defocus_pos_file = 2dx_defocus_positions.txt
+    set defocus_pos_select_file = 2dx_defocus_select_positions.txt
+    echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_file}
+    echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_select_file}
+    #
+    foreach newY ( 1 2 3 4 5 6 7 )
+      echo "::        " >> ${defocus_pos_file}
+      echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
+      echo "::        " >> ${defocus_pos_file}
+      echo "::        " >> ${defocus_pos_select_file}
+      echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_select_file}
+      echo "::        " >> ${defocus_pos_select_file}
+    end
+    #
+    echo "# IMAGE-IMPORTANT: ${defocus_pos_file} <TXT: Defocus Table>" >> LOGS/${scriptname}.results  
+    #
+    echo "<<@progress: 25>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "Prepare windowed images"
+    #                                                                           #
+      #############################################################################
+    #
+    \rm -f TMP-positions.txt TMP-runfile-windows.txt
+    #
+  ${bin_2dx}/2dx_calcpositions.exe << eot
 ${imagesidelength}
 ${smallsize}
 7,7
@@ -238,232 +254,290 @@ ${imagename}
 TMP-positions.txt
 TMP-runfile-windows.txt
 eot
-  #
-  echo "<<@progress: 30>>"
-  #
-  chmod +x TMP-runfile-windows.txt 
-  #
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: TMP-positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: TMP-runfile-windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
-  #
-  if ( ! -d CUT ) then
-    \mkdir CUT
-  endif 
-  #
-  source TMP-runfile-windows.txt
-  #
-  echo "<<@progress: 50>>"
-  #
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/linblock "2dx_deftilt_sub.com: On center of image"
-  #                                                                           #
-  #############################################################################
-  #
-  set dfdist = ${searchrange1} ; set inoast = 0 ; set drms1 = 0.0
-  set newX = 4 ; set newY = 4 ; set refX = 0 ; set refY = 0 ; 
-  source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  echo "<<@progress: 60>>"
-  #
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/linblock "2dx_deftilt_sub.com: On other places in image"
-  ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 3x3 of 7x7 system"
-  #                                                                           #
-  #############################################################################
-  #
-  set dfdist = ${searchrange2} ; set inoast = 1
-  set newX = 4 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 3 ; set newY = 4 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 5 ; set newY = 4 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 4 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 3 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 5 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 5 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 3 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  echo "<<@progress: 65>>"
-  #
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 5x5 of 7x7 system"
-  #                                                                           #
-  #############################################################################
-  #
-  set newX = 2 ; set newY = 2 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 3 ; set newY = 2 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 2 ; set newY = 3 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 4 ; set newY = 2 ; set refX = 4 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 5 ; set newY = 2 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 6 ; set newY = 2 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 6 ; set newY = 3 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 6 ; set newY = 4 ; set refX = 5 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 6 ; set newY = 5 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 6 ; set newY = 6 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 5 ; set newY = 6 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 4 ; set newY = 6 ; set refX = 4 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 3 ; set newY = 6 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 2 ; set newY = 6 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 2 ; set newY = 5 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 2 ; set newY = 4 ; set refX = 3 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  echo "<<@progress: 70>>"
-  #
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 7x7 of 7x7 system"
-  #                                                                           #
-  #############################################################################
-  #
-  set newX = 1 ; set newY = 1 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 1 ; set newY = 2 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 2 ; set newY = 1 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 3 ; set newY = 1 ; set refX = 3 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 4 ; set newY = 1 ; set refX = 4 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 5 ; set newY = 1 ; set refX = 5 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 6 ; set newY = 1 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 7 ; set newY = 1 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 7 ; set newY = 2 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 7 ; set newY = 3 ; set refX = 6 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 7 ; set newY = 4 ; set refX = 6 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 7 ; set newY = 5 ; set refX = 6 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 7 ; set newY = 6 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 7 ; set newY = 7 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 6 ; set newY = 7 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 5 ; set newY = 7 ; set refX = 5 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 4 ; set newY = 7 ; set refX = 4 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 3 ; set newY = 7 ; set refX = 3 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 2 ; set newY = 7 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 1 ; set newY = 7 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 1 ; set newY = 6 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  set newX = 1 ; set newY = 5 ; set refX = 2 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 1 ; set newY = 4 ; set refX = 2 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  set newX = 1 ; set newY = 3 ; set refX = 2 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-  #
-  echo "<<@progress: 80>>"
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
-  #############################################################################
-  #
-  \rm -f CUT/${imagename}.merge.ps.mrc
-  #
-  ${bin_2dx}/labelh.exe << eot
+    #
+    echo "<<@progress: 30>>"
+    #
+    chmod +x TMP-runfile-windows.txt 
+    #
+    echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: TMP-positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: TMP-runfile-windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
+    #
+    if ( ! -d CUT ) then
+      \mkdir CUT
+    endif 
+    #
+    source TMP-runfile-windows.txt
+    #
+    echo "<<@progress: 50>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "2dx_deftilt_sub.com: On center of image"
+    #                                                                           #
+    #############################################################################
+    #
+    set dfdist = ${searchrange1} ; set inoast = 0 ; set drms1 = 0.0
+    set newX = 4 ; set newY = 4 ; set refX = 0 ; set refY = 0 ; 
+    source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    echo "<<@progress: 60>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "2dx_deftilt_sub.com: On other places in image"
+    ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 3x3 of 7x7 system"
+    #                                                                           #
+    #############################################################################
+    #
+    set dfdist = ${searchrange2} ; set inoast = 1
+    set newX = 4 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 3 ; set newY = 4 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 5 ; set newY = 4 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 4 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 3 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 5 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 5 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 3 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    echo "<<@progress: 65>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 5x5 of 7x7 system"
+    #                                                                           #
+    #############################################################################
+    #
+    set newX = 2 ; set newY = 2 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 3 ; set newY = 2 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 2 ; set newY = 3 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 4 ; set newY = 2 ; set refX = 4 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 5 ; set newY = 2 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 6 ; set newY = 2 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 6 ; set newY = 3 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 6 ; set newY = 4 ; set refX = 5 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 6 ; set newY = 5 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 6 ; set newY = 6 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 5 ; set newY = 6 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 4 ; set newY = 6 ; set refX = 4 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 3 ; set newY = 6 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 2 ; set newY = 6 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 2 ; set newY = 5 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 2 ; set newY = 4 ; set refX = 3 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    echo "<<@progress: 70>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 7x7 of 7x7 system"
+    #                                                                           #
+    #############################################################################
+    #
+    set newX = 1 ; set newY = 1 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 2 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 2 ; set newY = 1 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 3 ; set newY = 1 ; set refX = 3 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 4 ; set newY = 1 ; set refX = 4 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 5 ; set newY = 1 ; set refX = 5 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 6 ; set newY = 1 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 1 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 2 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 7 ; set newY = 3 ; set refX = 6 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 4 ; set refX = 6 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 5 ; set refX = 6 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 7 ; set newY = 6 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 7 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 6 ; set newY = 7 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 5 ; set newY = 7 ; set refX = 5 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 4 ; set newY = 7 ; set refX = 4 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 3 ; set newY = 7 ; set refX = 3 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 2 ; set newY = 7 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 7 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 6 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 1 ; set newY = 5 ; set refX = 2 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 4 ; set refX = 2 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 3 ; set refX = 2 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    echo "<<@progress: 80>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
+    #############################################################################
+    #
+    \rm -f CUT/${imagename}.merge.ps.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
 CUT/${imagename}.1.1.ps.mrc
 14
 CUT/${imagename}.merge.ps.mrc
 CUT/${imagename}
 eot
-  #
-  echo "# IMAGE-IMPORTANT: "CUT/${imagename}.merge.ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
-  #
-  if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
-    ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
-  endif
-  #
-  cat ${defocus_pos_file}
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Now calculating tilt geometry from defocus values"
-  #############################################################################
-  #
-  echo "#" > TMP.2dx_deftilt.run.txt
-  echo "\rm -f TMP.2dx_deftilt.good.txt"   >> TMP.2dx_deftilt.run.txt
-  echo "${bin_2dx}/2dx_tiltgeom.exe << eot" >> TMP.2dx_deftilt.run.txt
-  echo "TMP.2dx_deftilt.good.txt"  >> TMP.2dx_deftilt.run.txt
-  echo ${stepdigitizer} >> TMP.2dx_deftilt.run.txt
-  echo ${magnification} >> TMP.2dx_deftilt.run.txt
-  echo TMP-positions.txt >> TMP.2dx_deftilt.run.txt 
-  # The input order of columns and rows needs to be inverted here.
-  \rm -f TMP.txt
-  foreach refX ( 1 2 3 4 5 6 7 ) 
-    set line = " "
-    foreach refY ( 1 2 3 4 5 6 7 ) 
-      #
-      ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
+    #
+    echo "# IMAGE-IMPORTANT: "CUT/${imagename}.merge.ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
+    #
+    if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
+      ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
+    endif
+    #
+    cat ${defocus_pos_file}
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Now calculating tilt geometry from defocus values"
+    #############################################################################
+    #
+    echo "#" > TMP.2dx_deftilt.run.txt
+    echo "\rm -f TMP.2dx_deftilt.good.txt"   >> TMP.2dx_deftilt.run.txt
+    echo "${bin_2dx}/2dx_tiltgeom.exe << eot" >> TMP.2dx_deftilt.run.txt
+    echo "TMP.2dx_deftilt.good.txt"  >> TMP.2dx_deftilt.run.txt
+    echo ${stepdigitizer} >> TMP.2dx_deftilt.run.txt
+    echo ${magnification} >> TMP.2dx_deftilt.run.txt
+    echo TMP-positions.txt >> TMP.2dx_deftilt.run.txt 
+    # The input order of columns and rows needs to be inverted here.
+    \rm -f TMP.txt
+    foreach refX ( 1 2 3 4 5 6 7 ) 
+      set line = " "
+      foreach refY ( 1 2 3 4 5 6 7 ) 
+        #
+        ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
 ${defocus_pos_file}
 ${refX},${refY}
 TMP.txt
 1
 eot
-      #
-      set dfmid = `cat TMP.txt`
-      \rm -f TMP.txt
-      set newline = "`echo ${line} ${dfmid}`"
-      set line = "${newline}"
+        #
+        set dfmid = `cat TMP.txt`
+        \rm -f TMP.txt
+        set newline = "`echo ${line} ${dfmid}`"
+        set line = "${newline}"
+      end
+      echo ${line} | sed 's/ /,/g' >> TMP.2dx_deftilt.run.txt
     end
-    echo ${line} | sed 's/ /,/g' >> TMP.2dx_deftilt.run.txt
-  end
-  #
-  echo 0,0,0 >> TMP.2dx_deftilt.run.txt
-  echo eot >> TMP.2dx_deftilt.run.txt 
-  echo # >> TMP.2dx_deftilt.run.txt 
-  echo # The input order of columns and rows is inverted here. >> TMP.2dx_deftilt.run.txt 
-  #
-  chmod +x TMP.2dx_deftilt.run.txt
-  #
-  echo "# IMAGE: TMP.2dx_deftilt.run.txt <TXT: runfile for tiltgeom>" >> LOGS/${scriptname}.results
-  #
-  source TMP.2dx_deftilt.run.txt > TMP.2dx_deftilt.run.out.txt
-  #
-  cat TMP.2dx_deftilt.run.out.txt
-  echo "# IMAGE: TMP.2dx_deftilt.run.out.txt <TXT: result of runfile for tiltgeom>" >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Mark Thon-ring fit panels"
-  #############################################################################
-  #
-  chmod +x TMP.2dx_deftilt.good.txt
-  echo "# IMAGE: TMP.2dx_deftilt.good.txt <TXT: runfile for Thonring marking>" >> LOGS/${scriptname}.results
-  #
-  source TMP.2dx_deftilt.good.txt > TMP.2dx_deftilt.good.out.txt
-  echo "# IMAGE: TMP.2dx_deftilt.good.out.txt <TXT: result of runfile for Thonring marking>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${defocus_pos_select_file} <TXT: Defocus Table (Selected values)>" >> LOGS/${scriptname}.results  
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Merge Marked Thon-ring fit panels into one overview image"
-  #############################################################################
-  #
-  cat ${defocus_pos_select_file}
-  #
-  \rm -f CUT/${imagename}.marked.merge.ps.mrc
-  #
-  ${bin_2dx}/labelh.exe << eot
+    #
+    echo 0,0,0 >> TMP.2dx_deftilt.run.txt
+    echo eot >> TMP.2dx_deftilt.run.txt 
+    echo # >> TMP.2dx_deftilt.run.txt 
+    echo # The input order of columns and rows is inverted here. >> TMP.2dx_deftilt.run.txt 
+    #
+    chmod +x TMP.2dx_deftilt.run.txt
+    #
+    echo "# IMAGE: TMP.2dx_deftilt.run.txt <TXT: runfile for tiltgeom>" >> LOGS/${scriptname}.results
+    #
+    source TMP.2dx_deftilt.run.txt > TMP.2dx_deftilt.run.out.txt
+    #
+    cat TMP.2dx_deftilt.run.out.txt
+    echo "# IMAGE: TMP.2dx_deftilt.run.out.txt <TXT: result of runfile for tiltgeom>" >> LOGS/${scriptname}.results
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Mark Thon-ring fit panels"
+    #############################################################################
+    #
+    chmod +x TMP.2dx_deftilt.good.txt
+    echo "# IMAGE: TMP.2dx_deftilt.good.txt <TXT: runfile for Thonring marking>" >> LOGS/${scriptname}.results
+    #
+    source TMP.2dx_deftilt.good.txt > TMP.2dx_deftilt.good.out.txt
+    echo "# IMAGE: TMP.2dx_deftilt.good.out.txt <TXT: result of runfile for Thonring marking>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${defocus_pos_select_file} <TXT: Defocus Table (Selected values)>" >> LOGS/${scriptname}.results  
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Merge Marked Thon-ring fit panels into one overview image"
+    #############################################################################
+    #
+    cat ${defocus_pos_select_file}
+    #
+    \rm -f CUT/${imagename}.marked.merge.ps.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
 CUT/${imagename}.marked.1.1.ps.mrc
 14
 CUT/${imagename}.marked.merge.ps.mrc
 CUT/${imagename}.marked
 eot
-  #
-  echo "# IMAGE-IMPORTANT: "CUT/${imagename}.marked.merge.ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
-  #
-  if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
-    ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
+    #
+    echo "# IMAGE-IMPORTANT: "CUT/${imagename}.marked.merge.ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
+    #
+    if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
+      ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
+    endif
+    #
+    tail -2 TMP.2dx_deftilt.run.out.txt
+    set line = `tail -1 TMP.2dx_deftilt.run.out.txt`
+    set TLTAXIS = `echo ${line} | cut -d\  -f6`
+    set TLTANG  = `echo ${line} | cut -d\  -f3`
+    #
+    #############################################################################
+    #############################################################################
+    #############################################################################
+  else
+    #############################################################################
+    #############################################################################
+    #############################################################################
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "Using CTFTILT."
+    #                                                                           #
+    ############################################################################# 
+    #
+    \rm -f SCRATCH/2dx_ctftilt.result.tmp
+    echo imagesidelength = ${imagesidelength}
+    set tilesize = 128
+    echo tilesize = ${tilesize}
+    echo "::Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
+    echo ":Expected tilt angle is ${expected_tltang}, its uncertainty is ${expected_tltang_uncertainty}"
+    #
+    echo "<<@progress: 40>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_ctftilt - to get defocus and tilt."
+    #############################################################################
+    #
+    set outimage = 'SCRATCH/2dx_ctftilt.out.mrc'
+    \rm -f ${outimage}  
+    #
+    ${bin_2dx}/2dx_ctftilt.exe << eof
+${inimage}
+${outimage}
+${CS},${KV},${ampcon},${magnification},${stepdigitizer},${df_PAve}
+${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${expected_tltang},${expected_tltang_uncertainty}
+eof
+    #
+    if ( ! -e ${outimage} ) then
+      ${proc_2dx}/protest "2dx_ctftilt: ERROR: ${outimage} does not exist."
+    endif
+    #
+    echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+    #
+    set newdef = `cat SCRATCH/2dx_ctftilt.result.tmp | head -1`
+    set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
+    set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
+    set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
+    set defocus = `echo ${def1},${def2},${ang}`
+    #
+    set newtilt = `cat SCRATCH/2dx_ctftilt.result.tmp | tail -1`
+    set TLTAXIS = `echo $newtilt | awk '{s=$1} END {printf "%.3f", s}'`
+    set TLTAXIS = `echo ${TLTAXIS} | awk '{ if ( $1 > 90.0 ) { s = $1 - 180.0 } else { s = $1 } } END { print s }'`
+    set TLTANG = `echo $newtilt | awk '{s=$2} END {printf "%.3f", s}'`
+    set RF  = `echo $newtilt | awk '{s=$3} END {print s}'`
+    #
+    # \rm -f SCRATCH/2dx_ctftilt.result.tmp
+    #
   endif
-  #
-  tail -2 TMP.2dx_deftilt.run.out.txt
-  set line = `tail -1 TMP.2dx_deftilt.run.out.txt`
-  set TLTAXIS = `echo ${line} | cut -d\  -f6`
-  set TLTANG  = `echo ${line} | cut -d\  -f3`
-  #
   echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
   echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
   echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results

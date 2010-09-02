@@ -410,10 +410,10 @@ void mrcImage::rescale(mrcHeader *header, float min, float max, QImage::Format f
   QTime timer;
   timer.start();
   scaleData(header,format);
-  qDebug()<<"Scale data: "<<timer.elapsed();
+  // qDebug()<<"Scale data: "<<timer.elapsed();
   timer.restart();
   formatImage(header,format);
-  qDebug()<<"format Image: "<<timer.elapsed();
+  // qDebug()<<"format Image: "<<timer.elapsed();
 }
 
 void mrcImage::rescale(float min, float max)

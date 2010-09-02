@@ -26,7 +26,7 @@ resultsFile::resultsFile(QString file, QObject *parent)
             :QObject(parent)
 {
   fileName = file;
-  if(!load()) cerr<<"Couldn't open "<<file.toStdString()<<endl;
+  // if(!load()) cerr<<"Couldn't open "<<file.toStdString()<<endl;
 }
 
 bool resultsFile::load()

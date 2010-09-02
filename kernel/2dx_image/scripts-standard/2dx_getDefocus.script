@@ -202,77 +202,83 @@ eot
     \cp -f ${inimage}.mrc SCRATCH/2dx_ctffind-cut.mrc
   endif
   #
-    ##############################################################################
-    ${proc_2dx}/lin "Downsampling by a factor of 2x2"
-    ##############################################################################
-    #
-    \rm -f SCRATCH/2dx_ctffind-cut-down.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
+  echo "<<@progress: 30>>"
+  #
+  ##############################################################################
+  ${proc_2dx}/lin "Downsampling by a factor of 2x2"
+  ##############################################################################
+  #
+  \rm -f SCRATCH/2dx_ctffind-cut-down.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
 SCRATCH/2dx_ctffind-cut.mrc
 4               ! average adjacent pixels
 SCRATCH/2dx_ctffind-cut-down.mrc
 2,2
 eot
-    #
-    echo "# IMAGE: SCRATCH/2dx_ctffind-cut-down.mrc <Downsampled central tile>" >> LOGS/${scriptname}.results
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "2dx_ctffind3.exe - to get defocus and astigmatism"
-    #############################################################################
-    #
-    echo imagesidelength = ${imagesidelength}
-    set tilesize = `echo ${imagesidelength} | awk '{if ( $1 < 3000 ) { s = 128 } else { s = 256 }} END { print s }'`
-    echo tilesize = ${tilesize}
-    echo ":Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
-    #
-    #
-    \rm -f SCRATCH/2dx_ctffind3.result.tmp
-    set outimage = 'SCRATCH/2dx_ctffind3.out.mrc'
-    \rm -f ${outimage} 
-    #
-    # Dummy setting of parameters that are not used here, as long as inoast = 0
-    set inoast = 0
-    set dfref = "1.0,1.0,0.0"
-    set downstepdigitizer = `echo ${stepdigitizer} | awk '{ s = 2 * $1 } END { print s }'`
-    #
-    echo "# IMAGE-IMPORTANT: LOGS/2dx_ctffind3.txt <TXT: Logfile of 2dx_ctffind3.exe>" >>  LOGS/${scriptname}.results
-    #
-    ${bin_2dx}/2dx_ctffind3.exe > LOGS/2dx_ctffind3.txt << eof
+  #
+  echo "# IMAGE: SCRATCH/2dx_ctffind-cut-down.mrc <Downsampled central tile>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 40>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_ctffind3.exe - to get defocus and astigmatism"
+  #############################################################################
+  #
+  echo imagesidelength = ${imagesidelength}
+  set tilesize = `echo ${imagesidelength} | awk '{if ( $1 < 3000 ) { s = 128 } else { s = 256 }} END { print s }'`
+  echo tilesize = ${tilesize}
+  echo ":Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
+  #
+  #
+  \rm -f SCRATCH/2dx_ctffind3.result.tmp
+  set outimage = 'SCRATCH/2dx_ctffind3.out.mrc'
+  \rm -f ${outimage} 
+  #
+  # Dummy setting of parameters that are not used here, as long as inoast = 0
+  set inoast = 0
+  set dfref = "1.0,1.0,0.0"
+  set downstepdigitizer = `echo ${stepdigitizer} | awk '{ s = 2 * $1 } END { print s }'`
+  #
+  echo "# IMAGE-IMPORTANT: LOGS/2dx_ctffind3.txt <TXT: Logfile of 2dx_ctffind3.exe>" >>  LOGS/${scriptname}.results
+  #
+  ${bin_2dx}/2dx_ctffind3.exe > LOGS/2dx_ctffind3.txt << eof
 SCRATCH/2dx_ctffind-cut-down.mrc
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${downstepdigitizer}
 ${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step}
 ${inoast},${dfref},0.0
 eof
-    #
-    if ( ! -e ${outimage} ) then
-      ${proc_2dx}/protest "2dx_ctffind3: ERROR: ${outimage} does not exist."
-    endif
-    #
-    set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
-    set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
-    set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
-    set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
-    set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
-    #
-    \rm -f SCRATCH/2dx_ctffind3.result.tmp
-    #
-    echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
-    #
-    set newdef = `echo ${def1},${def2},${ang}`
-    echo "set defocus = ${newdef}" >> LOGS/${scriptname}.results
-    ${proc_2dx}/linblock "new defocus is ${newdef}"
-    set defocus = ${newdef}
-    #
-    if ( ${tempkeep} == "n" ) then
-      \rm -f SCRATCH/2dx_ctffind-cut.mrc
-      \rm -f SCRATCH/2dx_ctffind-cut-down.mrc
-    endif
-    #
-    echo " " >> History.dat
-    echo "::Defocus = ${defocus}" >> History.dat
-    #
+  #
+  if ( ! -e ${outimage} ) then
+    ${proc_2dx}/protest "2dx_ctffind3: ERROR: ${outimage} does not exist."
+  endif
+  #
+  echo "<<@progress: 70>>"
+  #
+  set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
+  set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
+  set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
+  set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
+  set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
+  #
+  \rm -f SCRATCH/2dx_ctffind3.result.tmp
+  #
+  echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+  #
+  set newdef = `echo ${def1},${def2},${ang}`
+  echo "set defocus = ${newdef}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "new defocus is ${newdef}"
+  set defocus = ${newdef}
+  #
+  if ( ${tempkeep} == "n" ) then
+    \rm -f SCRATCH/2dx_ctffind-cut.mrc
+    \rm -f SCRATCH/2dx_ctffind-cut-down.mrc
+  endif
+  #
+  echo " " >> History.dat
+  echo "::Defocus = ${defocus}" >> History.dat
+  #
 endif
 #
 echo "<<@progress: 80>>"

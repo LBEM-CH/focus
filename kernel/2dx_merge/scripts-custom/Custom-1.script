@@ -55,7 +55,11 @@ foreach dirfile ( ${dirlist} )
   # This tells the 2dx_merge GUI that the following variable output concerns the image "dirfile":
   echo "<IMAGEDIR="\"${dirfile}\"">" >> LOGS/${scriptname}.results
   echo "set dummy = 1" >> LOGS/${scriptname}.results
-
+  #
+  ################################################################################
+  ######### Modify only the section below ########################################
+  ################################################################################
+  #
   # Use the following to invert the CTF in all directories, so that cryo setting is valid:
   # echo "set ctfrev = y" >> LOGS/${scriptname}.results
 
@@ -66,21 +70,15 @@ foreach dirfile ( ${dirlist} )
   # echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
 
   # Use the following to set all TANGL values to zero:
+  # echo "set TAXA = 0.0" >> LOGS/${scriptname}.results
   # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
 
   # Use the following to run all standard 2dx_image scripts on the selected images:
   # ${app_2dx_image} ${dirfile} '"*"'
 
   # Use the following to apply the CTF to all selected images:
-  #${app_2dx_image} ${dirfile} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
-  if ( -e ${dirfile}/selectionList.dat ) then
-    cp ${dirfile}/selectionList.dat SCRATCH/selectionList.dat
-  else
-    cp SCRATCH/selectionList.dat ${dirfile}/selectionList.dat
-  endif 
+  # ${app_2dx_image} ${dirfile} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
   
-  ${app_2dx_image} ${dirfile} "+2dx_maskCrystal"
-
   # Use the following to recalculate the TAXA and TANGL values for all selected images:
   # ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
  
@@ -97,7 +95,11 @@ foreach dirfile ( ${dirlist} )
   # Use the following to unlock these variables avain:
   # echo "#unlock phaori" >> LOGS/${scriptname}.results
   # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
-
+  #
+  ################################################################################
+  ######### Modify only the section above ########################################
+  ################################################################################
+  #
   # This tells 2dx_merge that the output for the image is done:
   echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
 end

@@ -303,16 +303,28 @@ set genref = "1"
 \rm -f LOGS/${scriptname}-tmp.results
 #
 if ( ${refbeamtilt} == 'y' ) then
-  set NBM = T
-  ${proc_2dx}/linblock "NBM=T, doing beam tilt refinement."
+  if ( ${merge_modus} == '3D' ) then
+    set NBM = T
+    ${proc_2dx}/linblock "NBM=T, doing beam tilt refinement."
+  else
+    ${proc_2dx}/linblock "ERROR: Beamtilt Refinement only in 3D modus possible."
+    set NBM = F
+    ${proc_2dx}/linblock "NBM=F, no beam tilt refinement."
+  endif
 else
   set NBM = F
   ${proc_2dx}/linblock "NBM=F, no beam tilt refinement."
 endif
 #
 if ( ${reftiltgeo} == 'y' ) then
-  set NTL = T
-  ${proc_2dx}/linblock "NTL=T, doing crystal tiltangle and tiltaxis refinement."
+  if ( ${merge_modus} == '3D' ) then
+    set NTL = T
+    ${proc_2dx}/linblock "NTL=T, doing crystal tiltangle and tiltaxis refinement."
+  else
+    ${proc_2dx}/linblock "ERROR: Tilt Geometry Refinement only in 3D modus possible."
+    set NTL = F
+    ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."
+  endif
 else
   set NTL = F
   ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."

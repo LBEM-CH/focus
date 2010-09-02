@@ -55,7 +55,11 @@ foreach dirfile ( ${dirlist} )
   # This tells the 2dx_merge GUI that the following variable output concerns the image "dirfile":
   echo "<IMAGEDIR="\"${dirfile}\"">" >> LOGS/${scriptname}.results
   echo "set dummy = 1" >> LOGS/${scriptname}.results
-
+  #
+  ################################################################################
+  ######### Modify only the section below ########################################
+  ################################################################################
+  #
   # Use the following to invert the CTF in all directories, so that cryo setting is valid:
   # echo "set ctfrev = y" >> LOGS/${scriptname}.results
 
@@ -72,15 +76,15 @@ foreach dirfile ( ${dirlist} )
   # echo "set det_lattice = n" >> LOGS/${scriptname}.results
   # echo "set det_defocus = n" >> LOGS/${scriptname}.results
 
-  # Use the following to run all the standard scripts again:
-  ${app_2dx_image} ${dirfile} "2dx_fftrans"
-  ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
-  ${app_2dx_image} ${dirfile} "2dx_refineLattice"
-  ${app_2dx_image} ${dirfile} "2dx_getspots"
-  ${app_2dx_image} ${dirfile} "2dx_unbend1"
-  ${app_2dx_image} ${dirfile} "2dx_unbend2"
-  ${app_2dx_image} ${dirfile} "2dx_applyCTF"
-  ${app_2dx_image} ${dirfile} "2dx_generateMAP"
+  # Use the following to run somme of the standard scripts again:
+  # ${app_2dx_image} ${dirfile} "2dx_fftrans"
+  # ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
+  # ${app_2dx_image} ${dirfile} "2dx_refineLattice"
+  # ${app_2dx_image} ${dirfile} "2dx_getspots"
+  # ${app_2dx_image} ${dirfile} "2dx_unbend1"
+  # ${app_2dx_image} ${dirfile} "2dx_unbend2"
+  # ${app_2dx_image} ${dirfile} "2dx_applyCTF"
+  # ${app_2dx_image} ${dirfile} "2dx_generateMAP"
 
   # Use the following to apply the CTF to all selected images:
   # ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
@@ -98,7 +102,11 @@ foreach dirfile ( ${dirlist} )
   # Use the following to unlock these variables avain:
   # echo "#unlock phaori" >> LOGS/${scriptname}.results
   # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
-
+  #
+  ################################################################################
+  ######### Modify only the section above ########################################
+  ################################################################################
+  #
   # This tells 2dx_merge that the output for the image is done:
   echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
 end

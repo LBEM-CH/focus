@@ -55,11 +55,15 @@ foreach dirfile ( ${dirlist} )
   # This tells the 2dx_merge GUI that the following variable output concerns the image "dirfile":
   echo "<IMAGEDIR="\"${dirfile}\"">" >> LOGS/${scriptname}.results
   echo "set dummy = 1" >> LOGS/${scriptname}.results
-
+  #
+  ################################################################################
+  ######### Modify only the section below ########################################
+  ################################################################################
+  #
   # Use the following to invert the CTF in all directories, so that cryo setting is valid:
-  echo "set ctfrev = y" >> LOGS/${scriptname}.results
-  echo "set revhnd = n" >> LOGS/${scriptname}.results
-  echo "set revhk  = n" >> LOGS/${scriptname}.results
+  # echo "set ctfrev = y" >> LOGS/${scriptname}.results
+  # echo "set revhnd = n" >> LOGS/${scriptname}.results
+  # echo "set revhk  = n" >> LOGS/${scriptname}.results
 
   # Use the following to activate the synthetic unbending in all directories:
   # echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
@@ -97,7 +101,11 @@ foreach dirfile ( ${dirlist} )
   # Use the following to unlock these variables avain:
   # echo "#unlock phaori" >> LOGS/${scriptname}.results
   # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
-
+  #
+  ################################################################################
+  ######### Modify only the section above ########################################
+  ################################################################################
+  #
   # This tells 2dx_merge that the output for the image is done:
   echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
 end

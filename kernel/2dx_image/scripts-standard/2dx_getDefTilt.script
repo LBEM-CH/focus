@@ -187,6 +187,9 @@ if ( ! -d SCRATCH ) then
   \mkdir SCRATCH
 endif
 #
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#
 echo "<<@progress: 20>>"
 #
 if ( ${det_tilt} == 'y' ) then
@@ -259,8 +262,6 @@ eot
     #
     chmod +x TMP-runfile-windows.txt 
     #
-    echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-    echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: TMP-positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
     echo "# IMAGE: TMP-runfile-windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
     #

@@ -39,21 +39,8 @@ set genref = "1"
 #
 \rm -f LOGS/${scriptname}-tmp.results
 #
-if ( ${refbeamtilt} == 'y' ) then
-  set NBM = T
-  ${proc_2dx}/lin "NBM=T, doing beam tilt refinement."
-else
-  set NBM = F
-  ${proc_2dx}/lin "NBM=F, no beam tilt refinement."
-endif
-#
-if ( ${reftiltgeo} == 'y' ) then
-  set NTL = T
-  ${proc_2dx}/lin "NTL=T, doing crystal tiltangle and tiltaxis refinement."
-else
-  set NTL = F
-  ${proc_2dx}/lin "NTL=F, no crystal tiltangle or tiltaxis refinement."
-endif
+set NBM = F
+set NTL = F
 #
 ${bin_2dx}/2dx_merge_compileB.exe << eot
 LOGS/${scriptname}-tmp.results
@@ -77,6 +64,7 @@ ${NBM}
 ${NTL}
 ${MergeIQMAX}
 ${MergeHKMAX}
+${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 1

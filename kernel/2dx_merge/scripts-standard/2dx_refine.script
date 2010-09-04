@@ -290,6 +290,7 @@ ${proc_2dx}/linblock "Launch refinement script. CHECK OUTPUT in LOG: origtilt B 
 #############################################################################
 #
 echo "# IMAGE: ${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
 chmod +x ${scriptBfile}
 ${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
@@ -300,7 +301,6 @@ ${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
 ${proc_2dx}/linblock "Launch refinement postprocessing script"
 #############################################################################
 #
-echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
 chmod +x ${postprocessingfile}
 ${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
 #

@@ -32,6 +32,7 @@ set create_PS = "n"
 # GLOBAL: realang
 # GLOBAL: realcell
 # GLOBAL: make_reference
+# GLOBAL: merge_modus
 #
 #$end_local_vars
 #
@@ -48,6 +49,7 @@ set MergeIQMAX = ""
 set tempfac = ""
 set SYM = ""
 set make_reference = ""
+set merge_modus = ""
 #
 #$end_vars
 #
@@ -103,6 +105,16 @@ echo "SCL = ${SCL}"
 set scale = 1
 echo "scale = ${scale}"
 #
+if ( ${merge_modus} == "2D" ) then
+  if ( ${make_reference} == "y" ) then
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "ERROR: Reference images can only be produced in 3D modus with an MTZ file."
+    ${proc_2dx}/linblock "No references calculated."
+    ${proc_2dx}/linblock "#"
+    set make_reference = "n"
+  endif
+endif
+#
 #############################################################################
 ${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"
 #############################################################################
@@ -155,5 +167,4 @@ exit
 #
 # Only to display this script in 2dx_merge:
 source ${proc_2dx}/2dx_merge_redoMap_sub.com
-source ${proc_2dx}/2dx_reproject_sub.com
 #

@@ -115,8 +115,8 @@ C
       write(11,'(''#'')')
 C
       if(igenref.eq.1)then
-        write(11,'(''echo dummy > APH/REFAPH1.hkl'')')
-        write(11,'(''rm -f APH/REFAPH*.hkl'')')
+        write(11,'(''echo dummy > APH/REF1.hkl'')')
+        write(11,'(''rm -f APH/REF*.hkl'')')
         write(11,'(''#'')')
       endif
 C

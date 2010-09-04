@@ -164,6 +164,118 @@ eot
 \rm -f TMP444888.tmp
 #
 #############################################################################
+#############################################################################
+#############################################################################
+############### Now work on reference dataset ###############################
+#############################################################################
+#############################################################################
+#############################################################################
+#
+set refnamecore = "REF${imagenumber}"
+set refhklfile = "APH/${refnamecore}.hkl"
+set refmtzfile = "APH/${refnamecore}.mtz"
+set refmap = "${imagename}_ref.mrc"
+#
+\rm -f ${refmtzfile}
+\rm -f ${refmap}
+#
+if (( ${make_reference} == "y" ) && ( -e ${refhklfile} )) then
+  #
+  ${proc_2dx}/linblock "Creating reference projection map"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "f2mtz - to translate ${refhklfile} into ${refmtzfile}"
+  ############################################################################# 
+  #
+  echo "Calling now:"
+  echo "${bin_ccp4}/f2mtz hklin ${refhklfile} hklout ${refmtzfile}"
+  echo "TITLE  Reference map for ${imagename}, ${date}"
+  echo "CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}"
+  echo "SYMMETRY ${CCP4_SYM}"
+  echo "LABOUT H K L F PHI FOM"
+  echo "CTYPOUT H H H F P W"
+  echo "SKIP 1"
+  echo "FILE ${refhklfile}"
+  echo "END"
+  #
+  ${bin_ccp4}/f2mtz hklin ${refhklfile} hklout ${refmtzfile} << eof
+TITLE  Reference map for ${imagename}, ${date}
+CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT H K L F PHI FOM
+CTYPOUT H H H F P W
+SKIP 1
+FILE ${refhklfile}
+END
+eof
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "fft - to transform ${refmtzfile} into SCRATCH/scratch1.map"
+  #############################################################################
+  #
+  set AXIS = "X,Y,Z"
+  #
+  # contrast for grey plot
+  set scale = 1
+  echo "scale = ${scale}"
+  #
+  \rm -f SCRATCH/scratch1.map.mrc
+  ${bin_ccp4}/fft hklin ${refmtzfile} mapout SCRATCH/scratch1.map  << eot
+LABIN F1=F PHI=PHI ##
+PROJECTION
+AXIS ${AXIS}
+SCALE F1 ${scale} ${tempfac}
+RESOLUTION ${RESMIN} ${RESMAX}
+TITLE Reference map for ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
+GRID 200 200 20
+XYZLIM 0 199 0 199 0 0
+RHOLIM 250.0
+HKLMAX 50 50 50
+END
+eot
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "extend - to extend SCRATCH/scratch1.map into SCRATCH/scratch2.map"
+  #############################################################################
+  #
+  \rm -f SCRATCH/scratch2.map
+  ${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/scratch2.map << eof
+XYZLIM 0 399 0 399 0 0
+KEEP
+END
+eof
+  #
+  \rm -f SCRATCH/scratch1.map
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "LABEL - to create a clean MRC file format ${refmap}"
+  #############################################################################
+  #
+  \rm -f ${refmap}
+  #
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/scratch2.map
+2
+${refmap}
+1,0
+0
+eot
+  #
+  \rm -f SCRATCH/scratch2.map
+  #
+else
+  ${proc_2dx}/linblock "WARNING: Reference APH file ${refhklfile} not found. No reference map created."
+endif
+#
+#############################################################################
+#############################################################################
+#############################################################################
+############### Now work on experimental dataset ############################
+#############################################################################
+#############################################################################
+#############################################################################
+#
+#############################################################################
 ${proc_2dx}/linblock "f2mtz - to translate avrg.hkl into ${imagename}.mtz"
 #############################################################################
 #
@@ -172,11 +284,10 @@ echo "Calling now:"
 echo "${bin_ccp4}/f2mtz hklin ${infile} hklout ${imagename}.mtz"
 echo "TITLE  P1 map ${imagename}, ${date}"
 echo "CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}"
-echo "SYMMETRY 1"
+echo "SYMMETRY ${CCP4_SYM}"
 echo "LABOUT H K L F PHI FOM"
 echo "CTYPOUT H H H F P W"
 echo "FILE ${infile}"
-echo "SKIP 1"
 echo "END"
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${imagename}.mtz << eof
@@ -186,7 +297,6 @@ SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
 FILE ${infile}
-SKIP 1
 END
 eof
 #
@@ -237,8 +347,8 @@ if ( ${create_PS} == "y" ) then
   ${bin_ccp4}/npo  MAPIN  SCRATCH/${imagename}-${symmetry}.map PLOT  ${imagename}-${symmetry}.plt  << eof
 TITLE P1 NOSYMMETRY ${imagename}
 MAP SCALE 0.4
-CONTRS -500 TO 500 BY 15
-MODE BELOW -40 DASHED 1 0.15 0
+${npo_line1}
+${npo_line2}
 SECTS 0 0
 PLOT
 END
@@ -290,6 +400,8 @@ endif
 cd ${mergedir}/RESULTS-MRC
 \rm -f ${imagename}-${imagenumber}.mrc
 \ln -s ${rootdir}/final_map.mrc ${imagename}-${imagenumber}.mrc
+\rm -f ${imagename}-${imagenumber}_ref.mrc
+\ln -s ${rootdir}/${imagename}_ref.mrc ${imagename}-${imagenumber}_ref.mrc
 cd ..
 #
 #

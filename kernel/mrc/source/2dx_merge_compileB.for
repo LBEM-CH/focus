@@ -201,8 +201,8 @@ C
       write(11,'(''#'')')
 C
       if(igenref.eq.1)then
-        write(11,'(''echo dummy > APH/REFAPH1.hkl'')')
-        write(11,'(''rm -f APH/REFAPH*.hkl'')')
+        write(11,'(''echo dummy > APH/REF1.hkl'')')
+        write(11,'(''rm -f APH/REF*.hkl'')')
         write(11,'(''#'')')
       endif
 C
@@ -416,16 +416,16 @@ C
         endif
 C
         write(14,'(''#'')')
-        write(14,'(''if(-e APH/REFAPH'',A10,''.hkl)then'')')
+        write(14,'(''if(-e APH/REF'',A10,''.hkl)then'')')
      .    CIMAGENUMBER(1:10)
         call shorten(cdir,k1)
         write(14,'(''  if(! -d '',A,''/APH)then'')')cdir(1:k1)
         write(14,'(''    \mkdir '',A,''/APH'')')cdir(1:k1)
         write(14,'(''  endif'')')
-        write(14,'(''  \mv -f APH/REFAPH'',A10,''.hkl '',A,''/APH &'')')
+        write(14,'(''  \mv -f APH/REF'',A10,''.hkl '',A,''/APH &'')')
      .    CIMAGENUMBER(1:10),cdir(1:k1)
         write(14,'(''else'')')
-        write(14,'(''  echo "::WARNING: APH/REFAPH'',A10,
+        write(14,'(''  echo "::WARNING: APH/REF'',A10,
      .     ''.hkl not existing."'')')CIMAGENUMBER(1:10)
         write(14,'(''endif'')')
 C

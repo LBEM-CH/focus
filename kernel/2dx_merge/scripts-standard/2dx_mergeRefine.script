@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# ITERATIONCOUNTER: MAX=100;DEFAULT=5
+# ITERATIONCOUNTER: MAX=100;DEFAULT=3
 #
 # SORTORDER: 40
 #
@@ -365,6 +365,7 @@ ${proc_2dx}/linblock "Launch refinement script"
 #############################################################################
 #
 echo "# IMAGE: ${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
 chmod +x ${scriptBfile}
 ${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
@@ -375,9 +376,10 @@ ${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
 ${proc_2dx}/linblock "Launch refinement postprocessing script"
 #############################################################################
 #
-echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
 chmod +x ${postprocessingfile}
+${proc_2dx}/linblock "Now Launching refinement postprocessing script" >>  SCRATCH/2dx_merge_scriptB.log
 ${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
+${proc_2dx}/linblock "Normal end." >>  SCRATCH/2dx_merge_scriptB.log
 #
 echo "################################################"
 echo "################################################"

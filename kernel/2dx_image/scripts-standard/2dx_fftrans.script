@@ -128,7 +128,6 @@ eot
   else
     \mv SCRATCH/${imagename}.tmp.mrc ${imagename}.mrc
   endif
-
     echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
   endif
 else

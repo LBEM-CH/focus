@@ -1224,19 +1224,28 @@ C
       IF(LIST)WRITE(6,137)
 C
 C--------------------------------------------------------------------------------
-C-----Prepare HKL/REFAPH********.hkl file for comparisson or reference image
+C-----Prepare HKL/REF********.hkl file for comparisson or reference image
 C--------------------------------------------------------------------------------
 C
       IF(NREFOUT .and. IREFOUT.eq.0) THEN
         write(FNAME,30)IFILM
-30      FORMAT('APH/REFAPH',I10,'.hkl')
-        do i=11,19
+30      FORMAT('APH/REF',I10,'.hkl')
+        do i=8,16
           if(FNAME(i:i).eq.' ')FNAME(i:i)='0'
         enddo
+C
+        call shorten(FNAME,k)
+        write(cline1,'(''\rm -f '',A)')FNAME(1:k)
+        call system(cline1)
+C
         OPEN(UNIT=4,FILE=FNAME,FORM='FORMATTED',STATUS='NEW')
         IREFOUT = IREFOUT + 1
-        WRITE(4,31)IFILM,TITLE
-31      FORMAT(I10,10A4,'  Reference amps + phases')
+        WRITE(4,31)TITLE
+31      FORMAT(10A4,'  Reference amps + phases')
+C
+        write(*,'('':: Reference file opened for output: '',A)')
+     .   FNAME(1:k)
+C
       ENDIF
 C
 C-----Work on the read reflections from fields IHIN,IKIN,...
@@ -1448,7 +1457,7 @@ C---------Output of the reference data for checking:
           ELSE         ! make K positive in p1, and change phase.
             WRITE(4,293) -IIH(IN),-IIK(IN),IZERO,FREF,-PHSC(IN),1.0
           ENDIF
-293       FORMAT(3I5,3F10.2)
+293       FORMAT(3I5,3G10.2)
         ENDIF
 C
 C       WRITE(6,900)IN,JIN,NCOMP,WGT(IN),NCOMPI,NSUM,IP1(IN),IP2(IN)

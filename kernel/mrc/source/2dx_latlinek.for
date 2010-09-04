@@ -595,8 +595,14 @@ C
           IF(SIGF(J).GT. 99999.0) SIGF(J)= 99999.0
           FMERIT = ABS(COS(AMIN1(ABS(SIGPHI(J)),90.0)/CNV))
           if(FMERIT.lt.0.00001)FMERIT=0.0
+C
+CHEN------WRITE(3,3000) IHIN,IKIN,Z,F,PHI,SIGF(J),SIGOUT,FMERIT
+          if(NOBS.gt.8)then
+            WRITE(3,3000) IHIN,IKIN,Z,F,PHI,SIGF(J),SIGOUT,FMERIT
+          else
+            WRITE(6,'(''Deleting lattice line data for '',2I6)') IHIN,IKIN
+          endif
 CHENN<
-          WRITE(3,3000) IHIN,IKIN,Z,F,PHI,SIGF(J),SIGOUT,FMERIT
 600     CONTINUE
 CHENN>
 C3000   FORMAT(2I5,F10.5,4F13.4,F7.3)

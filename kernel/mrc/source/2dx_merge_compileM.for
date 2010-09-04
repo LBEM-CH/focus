@@ -204,24 +204,19 @@ C
         call shorten(cline,k)
         write(11,'(''set TANGL = "'',A,''"'')')cline(1:k)
 C
+        call cgetline(cline,"npo_line1")
+        call shorten(cline,k)
+        write(11,'(''set npo_line1 = "'',A,''"'')')cline(1:k)
+C
+        call cgetline(cline,"npo_line2")
+        call shorten(cline,k)
+        write(11,'(''set npo_line2 = "'',A,''"'')')cline(1:k)
+C
         close(12)
 C
         write(11,'(''#'')')
 C
         write(11,'(''source ${proc_2dx}/2dx_merge_redoMap_sub.com'')')
-C
-        write(11,'(''#'')')
-        iprogress = 30 + (50*(2*imcount-1)) / (2 * itotalnumber)
-        write(cline,'(I2)')iprogress
-        call shorten(cline,k)
-        write(11,'(''echo "<<@progress: '',A,''>>"'')')cline(1:k)
-        write(11,'(''#'')')
-C
-        call shorten(cdir,k)
-        write(11,'(''cd '',A)')cdir(1:k)
-        write(11,'(''#'')')
-C
-        write(11,'(''source ${proc_2dx}/2dx_reproject_sub.com'')')
 C
         write(11,'(''#'')')
         iprogress = 30 + (50*2*imcount) / (2 * itotalnumber)

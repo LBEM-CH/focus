@@ -72,7 +72,7 @@ if ( ${location} != "all" ) then
   echo dummy > TMP-dummy
   echo dummy > TMP9871.dat
   echo dummy > 2dx_calcpositions.dummy
-  echo dummy > REFAPHdummy.hkl  
+  echo dummy > REFdummy.hkl  
   echo dummy > TMP1.spi
   echo dummy > TMP-1.tmp
   echo dummy > TMP-1.dat
@@ -80,7 +80,6 @@ if ( ${location} != "all" ) then
   echo dummy > results.1.spi
   echo dummy > LOG.1
   echo dummy > 2dx_calcpositions.tmp
-  echo dummy > REFAPHdummy.hkl
   echo dummy > dummy.TMP
   #
   if ( "${level}" != "a" ) then
@@ -178,7 +177,7 @@ if ( ${location} != "all" ) then
   \rm -f results.*
   \rm -f LOG.* 
   \rm -f 2dx_calcpositions.*
-  \rm -f REFAPH*.hkl
+  \rm -f REF*.hkl
   #
   echo "<<@progress: 100>>" 
   #

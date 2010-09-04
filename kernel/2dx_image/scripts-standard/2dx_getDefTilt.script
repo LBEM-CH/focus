@@ -1,22 +1,32 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Get Defocus Gradient                                               #
+# Title: Get Defocus & Tilt                                                 #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 08/28/2010                                             #
-# Last Modification: 08/28/2010                                             #
+# Last Modification: 09/04/2010                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
 # SORTORDER: 25
 #
-# MANUAL: This script calculates the defocus and astigmatism of the image, using Niko Grigorieff's program CTFFIND3 or CTFTILT. 
-# MANUAL: If you set <I>Determine Tilt Geometry</i> to <I>Yes</I>, it will use CTFTILT instead, which not only determined defocus and astigmatism, but also the tilt geoetry for the carbon film grid support, i.e. TLTAXIS and TLTANG. An additional program 2dx_tiltgeom2.exe will then calculate TLTAXA, TAXA and TANGL, if a lattice is known.
+# MANUAL: This script calculates the defocus and astigmatism of the image, using Niko Grigorieff's programs CTFFIND3 or CTFTILT. 
 #
-# MANUAL: The parameter <I>Defocus Search Start</I> and <I>Defocus Start End</I> define the search range for the defocus, and <I>Defocus Search Step</I> defines the step size of the search. This may take some time, if the <I>Defocus Search Step</I> is set to small values.
+# MANUAL: If you set <I>Determine Defocus</I> to <I>Yes</I>, then it will crop the central 4096x4096 part of the image (if the image was larger than that), downsample it by 2x2 times, and then use Niko's CTFFIND3 on it to fit simulated Thon rings to the experimental Thon rings, which are produced in a Periodogram.
+#
+# MANUAL: If you set <I>Determine Tilt Geometry</i> to <I>Yes</I>, it will use either of two algorithms implemented here. You can chose to use <I>CTFFIND on 7x7 locations</I>, which will then have the script to cut out 7x7 locations on the image of 2048 px size each, which are then all downsampled by 2x2 to 1024px size images. On all of these, it will then use CTFFIND3 to determine the defocus. For this, it will first run CTFFIND3 on the central tile (position 4,4 from the 7x7=49 windows), and measure the defocus and astigmatism in detail. It will then run on all other 48 tiles an abreviated version of CTFFIND3, which will only perform a one-dimensional search without refinement of the defocus changes with respect to the defocus and astigmatism setting of the central tile. This abbreviated version of CTFFIND3 will then run much faster, and it will always use the defocus values of the closest known neighbor as starting point for the search. 
+# MANUAL: This all will result in a matrix of 7x7=49 defocus values, which you can inspect as "TXT: Defocus Table", and you can inspect the fitted Thon rings on the 7x7=49 positions in the "Gallery of Thonring Fits". On these defocus values it will then try to fit a plane, and then iteratively reject outliers from that plane, and re-fit the plane, until a plane is found that agrees best with roughly half of the defocus measurements. This allows to be less sensitive to outliers in the defocus values, which might occur from artifacts in the image (e.g. the negative text field, or broken carbon film). The script will then produce another copy of the "Gallery of Marked Thonring fits", which shows the Thon rings in the 7x7 locations, but the defocus measurements that were rejected and not used are now crossed out. 
+#
+# MANUAL: If you instead set <I>CTFTILT</I>, this script will run that program from Niko Grigorieff, which searches in one go for the tilted plane that agrees best with the defocus gradient across the image (by doing a similar approach as described above). 
+#
+# MANUAL: The above programs will determine the tilt geometry of the carbon film support, which is described by the variables TLTAXIS and TLTANG. These two variables are valid for the sample support, and have nothing to do with the crystal. In fact, they could also be determined in absence of any crystal.
+#
+# MANUAL: If a lattice for a potential crystal in this image is already known, then this script will run an additional program 2dx_tiltgeom2.exe will calculate TLTAXA, which describes the orientation of the crystal with respect to the tilt axis, and it will also calculate TAXA and TANGL, which describe the tilt axis and tilt angle from the perspective of the crystal unit cell. The latter two are the values that are needed for the 3D merging.
+#
+# MANUAL: The parameter <I>Defocus Search Start</I> and <I>Defocus Start End</I> define the search range for the defocus, and <I>Defocus Search Step</I> defines the step size of the search. This script may take some time, if the <I>Defocus Search Step</I> is set to small values.
 #
 # MANUAL: If you know that your defocus is around 4000.0 Angstroems, you could set the search range to 2000.0 to 6000.0 Angstroems, to save time.
 #
@@ -35,6 +45,7 @@
 # GLOBAL: df_start
 # GLOBAL: df_end
 # GLOBAL: df_step 
+# GLOBAL: det_defocus
 # GLOBAL: det_tilt
 # GLOBAL: det_tlt_alg
 # GLOBAL: phacon
@@ -70,6 +81,7 @@ set df_PAve = ""
 set RESMIN = ""
 set RESMAX = ""
 set phacon = ""
+set det_defocus = ""
 set det_tilt = ""
 set det_tlt_alg = ""
 set ctf_ttf = ""
@@ -111,8 +123,8 @@ if ( ${det_tilt}x == 'x' ) then
   echo ":: det_tilt corrected to ${det_tilt}"
 endif
 #
-if ( ${det_tilt} == 'n' ) then
-  ${proc_2dx}/linblock "Skipping. Not determining any defocus."
+if (( ${det_defocus} == 'n' ) && ( ${det_tilt} == 'n' )) then
+  ${proc_2dx}/linblock "Skipping. Not determining any defocus or defocus gradient."
   #
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
@@ -160,6 +172,7 @@ if ( ! -e ${nonmaskimagename}.mrc ) then
 endif
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
@@ -187,12 +200,130 @@ if ( ! -d SCRATCH ) then
   \mkdir SCRATCH
 endif
 #
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-#
 echo "<<@progress: 20>>"
 #
-if ( ${det_tilt} == 'y' ) then
+if ( ${det_tilt} == 'n' ) then
+  #
+  ###############################################################################
+  ################## Here for "Determine Defocus only" ##########################
+  ###############################################################################
+  #
+  set docrop = `echo ${imagesidelength} | awk '{ if ( $1 > 4800 ) { s = 1 } else { s = 0 }} END { print s }'`
+  if ( ${docrop} == "1" ) then
+    #
+    set minx = `echo ${imagesidelength} | awk '{ s = ( $1 / 2 ) - 2048 } END { print s }'`
+    set maxx = `echo ${imagesidelength} | awk '{ s = ( $1 / 2 ) + 2047 } END { print s }'`
+    set miny = ${minx}
+    set maxy = ${maxx}
+    # 
+    ##############################################################################
+    ${proc_2dx}/lin "Cropping out the central 4096x4096 image"
+    ##############################################################################
+    #
+    \rm -f SCRATCH/2dx_ctffind-cut.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+${inimage}
+1
+SCRATCH/2dx_ctffind-cut.mrc
+  ${minx} ${maxx} ${miny} ${maxy}
+eot
+    #
+    echo "# IMAGE: SCRATCH/2dx_ctffind-cut.mrc <Cropped central tile>" >> LOGS/${scriptname}.results
+    #
+  else
+    \cp -f ${inimage}.mrc SCRATCH/2dx_ctffind-cut.mrc
+  endif
+  #
+  echo "<<@progress: 30>>"
+  #
+  ##############################################################################
+  ${proc_2dx}/lin "Downsampling by a factor of 2x2"
+  ##############################################################################
+  #
+  \rm -f SCRATCH/2dx_ctffind-cut-down.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/2dx_ctffind-cut.mrc
+4               ! average adjacent pixels
+SCRATCH/2dx_ctffind-cut-down.mrc
+2,2
+eot
+  #
+  echo "# IMAGE: SCRATCH/2dx_ctffind-cut-down.mrc <Downsampled central tile>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 40>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_ctffind3.exe - to get defocus and astigmatism"
+  #############################################################################
+  #
+  echo imagesidelength = ${imagesidelength}
+  set tilesize = 128
+  echo tilesize = ${tilesize}
+  echo ":Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
+  #
+  #
+  \rm -f SCRATCH/2dx_ctffind3.result.tmp
+  set outimage = 'SCRATCH/2dx_ctffind3.out.mrc'
+  \rm -f ${outimage} 
+  #
+  # Dummy setting of parameters that are not used here, as long as inoast = 0
+  set inoast = 0
+  set dfref = "1.0,1.0,0.0"
+  set downstepdigitizer = `echo ${stepdigitizer} | awk '{ s = 2 * $1 } END { print s }'`
+  #
+  echo "# IMAGE-IMPORTANT: LOGS/2dx_ctffind3.txt <TXT: Logfile of 2dx_ctffind3.exe>" >>  LOGS/${scriptname}.results
+  #
+  ${bin_2dx}/2dx_ctffind3.exe > LOGS/2dx_ctffind3.txt << eof
+SCRATCH/2dx_ctffind-cut-down.mrc
+${outimage}
+${CS},${KV},${ampcon},${magnification},${downstepdigitizer}
+${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step}
+${inoast},${dfref},0.0
+eof
+  #
+  if ( ! -e ${outimage} ) then
+    ${proc_2dx}/protest "2dx_ctffind3: ERROR: ${outimage} does not exist."
+  endif
+  #
+  echo "<<@progress: 70>>"
+  #
+  set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
+  set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
+  set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
+  set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
+  set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
+  #
+  \rm -f SCRATCH/2dx_ctffind3.result.tmp
+  #
+  echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+  #
+  set newdef = `echo ${def1},${def2},${ang}`
+  echo "set defocus = ${newdef}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "new defocus is ${newdef}"
+  set defocus = ${newdef}
+  #
+  if ( ${tempkeep} == "n" ) then
+    \rm -f SCRATCH/2dx_ctffind-cut.mrc
+    \rm -f SCRATCH/2dx_ctffind-cut-down.mrc
+  endif
+  #
+  echo " " >> History.dat
+  echo "::Defocus = ${defocus}" >> History.dat
+  #
+  echo "<<@progress: 80>>"
+  #
+  echo "set DEFOCUS_done = y" >> LOGS/${scriptname}.results
+  #
+  echo "set CTF_done = n" >> LOGS/${scriptname}.results
+  echo "set MERGING_done = n" >> LOGS/${scriptname}.results
+  #
+else
+  #
+  ###############################################################################
+  ################## Here for "Determine Tilt from Defocus Gradient" ############
+  ###############################################################################
   #
   if ( ${det_tlt_alg} == "0" ) then
     #

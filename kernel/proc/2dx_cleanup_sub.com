@@ -21,7 +21,7 @@ echo dummy > TMP.dummy
 echo dummy > TMP-dummy
 echo dummy > TMP9871.dat
 echo dummy > 2dx_calcpositions.dummy
-echo dummy > REFAPHdummy.hkl
+echo dummy > REFdummy.hkl
 echo dummy > dummy.results
 echo dummy > results.spi.0
 echo dummy > dummy.plt
@@ -127,7 +127,7 @@ echo dummy > dummy.TMP
 \rm -f TMP-*
 \rm -r TMP*.dat
 \rm -f 2dx_calcpositions.*
-\rm -f REFAPH*.hkl
+\rm -f REF*.hkl
 \rm -f *.TMP
 \rm *.results
 \rm -f results.spi.*

@@ -86,7 +86,6 @@ else
   #
 endif
 #
-\rm -rf LOGS
 \rm -f SUMMARY
 \rm -f 2dx_calcposition-positions.dat
 \rm -f 2dx_calcposition-runfile.com
@@ -129,9 +128,17 @@ echo dummy > dummy.TMP
 \rm -f 2dx_calcpositions.*
 \rm -f REF*.hkl
 \rm -f *.TMP
-\rm *.results
 \rm -f results.spi.*
 \rm -f LOG.spi
 \rm -f *.plt
 \rm -f APH/dummy.aph
 #
+if ( ${reset_variables} == "y" ) then
+  echo "set QVALS = 0.0" >> LOGS/${scriptname}.results
+else
+  \rm *.results
+  \rm -rf LOGS
+endif
+
+
+

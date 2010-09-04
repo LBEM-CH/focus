@@ -1457,7 +1457,7 @@ C---------Output of the reference data for checking:
           ELSE         ! make K positive in p1, and change phase.
             WRITE(4,293) -IIH(IN),-IIK(IN),IZERO,FREF,-PHSC(IN),1.0
           ENDIF
-293       FORMAT(3I5,3G10.2)
+293       FORMAT(3I5,3G16.6)
         ENDIF
 C
 C       WRITE(6,900)IN,JIN,NCOMP,WGT(IN),NCOMPI,NSUM,IP1(IN),IP2(IN)

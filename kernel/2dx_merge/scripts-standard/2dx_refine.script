@@ -50,6 +50,7 @@
 # GLOBAL: merge_comment_8
 # GLOBAL: merge_comment_9
 # GLOBAL: max_amp_correction
+# GLOBAL: make_reference
 #
 #$end_local_vars
 #
@@ -223,7 +224,8 @@ set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
 set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
 \rm -f ${postprocessingfile}
 #
-set genref = "1"
+# Reference projections are generated directly when the maps are made:
+set genref = "0"
 #
 \rm -f LOGS/${scriptname}-tmp.results
 #
@@ -296,13 +298,6 @@ chmod +x ${scriptBfile}
 ${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
 # cat SCRATCH/2dx_merge_scriptB.out
 #
-#
-#############################################################################
-${proc_2dx}/linblock "Launch refinement postprocessing script"
-#############################################################################
-#
-chmod +x ${postprocessingfile}
-${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
 #
 echo "################################################"
 echo "################################################"

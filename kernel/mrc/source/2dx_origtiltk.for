@@ -545,7 +545,7 @@ C  DIMENSION STATEMENTS FOR OUTPUT SORTING.
       INTEGER IPSGN(MAXPLT)
 C        
       LOGICAL LIST              ! TRUE IF DETAILED PRINTOUT REQUIRED.
-      LOGICAL IOK
+      LOGICAL IOK,IOK2
       REAL TITLE(10)
       DATA LIST/.FALSE./        ! IF TRUE DATA IS LISTED AT INPUT AND REFINE.
       DATA JREFL/0/             ! JREFL IS COUNT ON TOTAL NO. OF REFLECTIONS.
@@ -1271,6 +1271,9 @@ C
         DPERP=IH*STAXA+IK*STAXB
         Z=DPERP*TTANGL
 C
+        IOK  = .TRUE.
+        IOK2 = .TRUE.
+C
 C-------Apply all kinds of flags to this reflection, like ROT90:
 C
 C       write(*,'('' Tilted image original: H,K,Z,A,P = '',2I6,3F12.3)')
@@ -1347,15 +1350,23 @@ C
 C
 C-------Check if this reflection is within valid boundaries:
 C
-        IF(DRES.LT.DRESMIN.OR.DRES.GT.DRESMAX)GO TO 245
+        IF(DRES.LT.DRESMIN.OR.DRES.GT.DRESMAX)then
+          IOK2 = .FALSE.
+          GOTO 244
+        endif
+C
         IF(IQ.GT.IQMAX)then
 C         write(6,'('' IQ > IQMAX for IQ,IQMAX,H,K,Z,W = '',4I6,2F12.3)')
 C     1      IQ,IQMAX,IH,IK,Z,W
-          GO TO 245
+          IOK2 = .FALSE.
+          GO TO 244
         endif
 C
 C-------Skip reflections without significant amplitude ?
-C       IF(A.LT.0.001) GO TO 245
+C       IF(A.LT.0.001)THEN
+C          IOK2 = .FALSE.
+C          goto 244
+C        endif
 C
         IF(LSPEC(IN)) NINEC=NINEC+1
 C
@@ -1414,6 +1425,8 @@ C
 C
 C----------------------------------------------------------------
 C
+ 244    continue
+C
 C========================================
         IF(NPROG.GE.2)THEN
 C========================================
@@ -1451,13 +1464,17 @@ C
 290     continue
 C
 292     IF(NREFOUT .and. IREFOUT.eq.1) THEN
-C---------Output of the reference data for checking:
-          IF(IIK(IN).GE.0) THEN
-            WRITE(4,293) IIH(IN),IIK(IN),IZERO,FREF,PHSC(IN),1.0
-          ELSE         ! make K positive in p1, and change phase.
-            WRITE(4,293) -IIH(IN),-IIK(IN),IZERO,FREF,-PHSC(IN),1.0
-          ENDIF
-293       FORMAT(3I5,3G16.6)
+C---------IF(IOK .and. IOK2)then
+C---------IF(IOK)then
+          IF(IOK)then
+C-----------Output of the reference data for checking:
+            IF(IIK(IN).GE.0) THEN
+              WRITE(4,293) IIH(IN),IIK(IN),IZERO,FREF,PHSC(IN),1.0
+            ELSE         ! make K positive in p1, and change phase.
+              WRITE(4,293) -IIH(IN),-IIK(IN),IZERO,FREF,-PHSC(IN),1.0
+            ENDIF
+293         FORMAT(3I5,3G16.6)
+          endif
         ENDIF
 C
 C       WRITE(6,900)IN,JIN,NCOMP,WGT(IN),NCOMPI,NSUM,IP1(IN),IP2(IN)

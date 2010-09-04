@@ -179,9 +179,31 @@ set refmap = "${imagename}_ref.mrc"
 \rm -f ${refmtzfile}
 \rm -f ${refmap}
 #
-if (( ${make_reference} == "y" ) && ( -e ${refhklfile} )) then
+if ( -e ${refhklfile} ) then
+  set filehere = `wc -l ${refhklfile} | awk '{ if ( $1 > 1 ) { s = 1 } else { s = 0 }} END { print s }'`
+else
+  set filehere = 0
+endif
+if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   #
   ${proc_2dx}/linblock "Creating reference projection map"
+  #
+  set linenum = `wc -l ${refhklfile} | awk '{ s = $1 - 1 } END { print s }'`
+  head -n 1 ${refhklfile} > TMP.tmp
+  tail -n ${linenum} ${refhklfile} | sort >> TMP.tmp
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_hklclean - to eliminated duplicates from APH file, for volume"
+  #############################################################################      
+  #
+  ${bin_2dx}/2dx_hklclean.exe << eot
+TMP.tmp
+${refhklfile}
+1     ! header line
+0     ! no sigma column
+eot
+  #
+  \rm -f TMP.tmp
   #
   #############################################################################
   ${proc_2dx}/linblock "f2mtz - to translate ${refhklfile} into ${refmtzfile}"
@@ -264,7 +286,7 @@ eot
   \rm -f SCRATCH/scratch2.map
   #
 else
-  ${proc_2dx}/linblock "WARNING: Reference APH file ${refhklfile} not found. No reference map created."
+  ${proc_2dx}/linblock "WARNING: ERROR in reading reference APH file ${refhklfile}. No reference map created."
 endif
 #
 #############################################################################

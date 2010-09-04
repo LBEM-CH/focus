@@ -66,6 +66,7 @@ set overwrite = "n"
 set bin_2dx = ""
 set proc_2dx = ""
 set imagename = ""
+set nonmaskimagename = ""
 set imagesidelength = ""
 set imagenumber = ""
 set realcell = ""
@@ -169,6 +170,7 @@ endif
 \rm -f ctfsearch.dat
 \rm -f WILSONCTF
 \rm -f SUMMARY
+\rm -f TMP345875.tmp
 \rm -f TMP345876.tmp
 #
 # Test if reference is existing:
@@ -203,8 +205,6 @@ ${proc_2dx}/linblock "Using ctfsearch with iref=${iref}"
 #
 echo "<<@progress: 10>>"
 #
-echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-#
 if ( ${ctf_ttf} != 'CTF' ) then
   ${proc_2dx}/protest "ERROR: You cannot run ctfsearch with TTF-corrected data."
 endif
@@ -233,6 +233,12 @@ else
   set infile_nolimit = ${imagename}.syn.nolimit.aph
 endif
 #
+echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#
 if ( ! -e APH/${infile_nolimit} ) then
   ${proc_2dx}/protest "ERROR: APH/${infile_nolimit} does not exist."
 endif
@@ -256,18 +262,17 @@ if ( $iref == 2 ) then
   # set spcgrp = 1
   set spcgrp_local = 1
   #
-  \rm -f TMP345875.tmp
   #
-  echo "now comes ctfsearch2 with:"
-  echo ${bin_2dx}/ctfsearch2.exe
-  echo  F F ${IQMAX}                                         ! LIST LISTW QMAX
-  echo ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG
-  echo ${defocus} ${CS} ${KV} ${phacon}                           ! DFMID1 DFMID2 ANGAST CS KV PHACON
-  echo ${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT.
-  echo ${phaori} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${IAQP2}        ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 IAQP2
-  echo ${RESMIN} ${RESMAX}                             ! RESMIN RESMAX
-  echo ${spcgrp_local} ${iref} ${ctfsearch_ncyc} ${ctfsearch_iphase} ${ctfsearch_df_step} ${ctfsearch_df_range} ! ISPGRP,IREF,NCYC,IPHASE,ctfsearch_df_step,ctfsearch_df_range
-  echo LABIN AMP=F PHASE=PHI FOM=FOM SIG=SIGA          ! IF IREF=2 MTZ CONTROL
+  echo ": now comes ctfsearch2 with:"
+  echo ":${bin_2dx}/ctfsearch2.exe"
+  echo ": F F ${IQMAX}                                         ! LIST LISTW QMAX"
+  echo ":${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG"
+  echo ":${defocus} ${CS} ${KV} ${phacon}                           ! DFMID1 DFMID2 ANGAST CS KV PHACON"
+  echo ":${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT."
+  echo ":${phaori} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${IAQP2}        ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 IAQP2"
+  echo ":${RESMIN} ${RESMAX}                             ! RESMIN RESMAX"
+  echo ":${spcgrp_local} ${iref} ${ctfsearch_ncyc} ${ctfsearch_iphase} ${ctfsearch_df_step} ${ctfsearch_df_range} ! ISPGRP,IREF,NCYC,IPHASE,ctfsearch_df_step,ctfsearch_df_range"
+  echo ":LABIN AMP=F PHASE=PHI FOM=FOM SIG=SIGA          ! IF IREF=2 MTZ CONTROL"
   echo " "
   #
   ${bin_2dx}/ctfsearch2.exe << eot
@@ -332,6 +337,21 @@ if ( -e WILSONCTF ) then
 endif
 if ( -e SUMMARY ) then
   \mv -f SUMMARY LOGS/${imagename}.ctfs.summary.log
+endif
+#
+set olddef = ${defocus}
+set tmpdef = "`cat TMP345876.tmp`"
+set defocus = `echo ${tmpdef} | sed 's/ /,/g'`
+#
+\rm -f TMP345875.tmp
+\rm -f TMP345876.tmp
+#
+${proc_2dx}/linblock "Old defocus is ${olddef}"
+${proc_2dx}/linblock "New defocus is ${defocus}"
+#
+if ( ${overwrite} == "y" ) then
+  echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Using new defocus of ${defocus}"
 endif
 #
 ##########################################################################

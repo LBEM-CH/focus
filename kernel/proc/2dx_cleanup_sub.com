@@ -133,12 +133,8 @@ echo dummy > dummy.TMP
 \rm -f *.plt
 \rm -f APH/dummy.aph
 #
-if ( ${reset_variables} == "y" ) then
-  echo "set QVALS = 0.0" >> LOGS/${scriptname}.results
-else
-  \rm *.results
-  \rm -rf LOGS
-endif
+\rm *.results
+\rm -rf LOGS
 
 
 

@@ -37,10 +37,8 @@ set bin_2dx = ""
 set proc_2dx = ""
 #
 set imagename = ""
-set reset_variables = ""
 #
 #$end_vars
-set reset_variables = "y"
 #
 echo bin_2dx = ${bin_2dx}
 echo proc_2dx = ${proc_2dx}

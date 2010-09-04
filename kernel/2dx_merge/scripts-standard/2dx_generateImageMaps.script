@@ -17,12 +17,6 @@
 #
 # MANUAL: This script makes use of MRC and CCP4 commands to generate the projection maps of all selected images, using the latest phase origin settings.
 #
-# LABEL: Also create PS files?
-# LEGEND: If this is set to "y", then PS files are also generated. That will take more time, though.
-# EXAMPLE: create_PS = "n"
-# TYPE: Bool "y;n"
-set create_PS = "n"
-#
 # GLOBAL: RESMIN
 # GLOBAL: RESMAX
 # GLOBAL: SYM
@@ -34,6 +28,7 @@ set create_PS = "n"
 # GLOBAL: make_reference
 # GLOBAL: merge_modus
 # GLOBAL: merge_ref_num
+# GLOBAL: create_PS
 #
 #$end_local_vars
 #
@@ -60,6 +55,7 @@ set IVERBOSE = ""
 set RFACAMP = ""
 set MergeHKMAX = ""
 set merge_res_limit = ""
+set create_PS = ""
 #
 #$end_vars
 #
@@ -143,89 +139,91 @@ ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
 #
-set NPRG = 1
-if ( ${merge_modus} == '2D' ) then
-  if ( ! -e APH/merge.aph ) then
-    ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
-    ${proc_2dx}/linblock "Run Merging script first."
-  endif
-endif
-if ( ${merge_modus} == '3D' ) then
-  # User interpolated lattice lines latlinesref.mtz
-  if ( ! -e merge3D.mtz ) then
-    ${proc_2dx}/linblock "ERROR: merge.mtz not found. No reference for refinement available."
-    ${proc_2dx}/linblock "Run Merging script first."
-  endif
-  set NPRG = 3
-endif
-#
-if ( ${merge_ref_num} != "0" ) then
-  if ( -d REGISTERS/Reg_${merge_ref_num} ) then
-     #############################################################################
-     ${proc_2dx}/linblock "Using merged dataset from register ${merge_ref_num}."
-     #############################################################################  
-     echo "::" `cat REGISTERS/Reg_${merge_ref_num}/COMMENT.txt | head -1`
-     echo "::" `cat REGISTERS/Reg_${merge_ref_num}/COMMENT.txt | head -2 | tail -1`
-     echo " "
-    if ( ${NPRG} == "3" ) then
-      # Use MTZ file
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge3D.mtz not existing in register ${merge_ref_num}."
-      else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ."
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D.mtz .
-      endif
-      #
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge3Dref.mtz not existing in register ${merge_ref_num}."
-      else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ."
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz .
-      endif
-    else
-      # Use APH file
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge2D.mtz not existing in register ${merge_ref_num}."
-      else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ." 
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge2D.mtz .
-      endif
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge.aph ) then
-        ${proc_2dx}/protest "ERROR: merge.aph not existing in register ${merge_ref_num}."
-      else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge.aph APH/merge.aph"
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge.aph APH/merge.aph
-      endif
+if ( ${make_reference} == "y" ) then
+  #
+  set NPRG = 1
+  if ( ${merge_modus} == '2D' ) then
+    if ( ! -e APH/merge.aph ) then
+      ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+      ${proc_2dx}/linblock "Run Merging script first."
     endif
-  else
-    ${proc_2dx}/protest "ERROR: Register ${merge_ref_num} does not contain data."
+  endif
+  if ( ${merge_modus} == '3D' ) then
+    # User interpolated lattice lines latlinesref.mtz
+    if ( ! -e merge3D.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge.mtz not found. No reference for refinement available."
+      ${proc_2dx}/linblock "Run Merging script first."
+    endif
+    set NPRG = 3
   endif
   #
-endif
-#
-#############################################################################
-${proc_2dx}/linblock "Compile refinement script"
-#############################################################################
-#
-set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
-\rm -f ${scriptBfile}
-set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
-\rm -f ${postprocessingfile}
-#
-set genref = "1"
-#
-\rm -f LOGS/${scriptname}-tmp.results
-#
-set dirfile = "2dx_merge_dirfile.dat"
-set number = 1
-set IVERBOSE = 1
-set RFACAMP = 1.0
-set NBM = F
-set NTL = F
-set MergeStepSize = "0.001"
-set IBOXPHS = 61
-#
-${bin_2dx}/2dx_merge_compileB.exe << eot
+  if ( ${merge_ref_num} != "0" ) then
+    if ( -d REGISTERS/Reg_${merge_ref_num} ) then
+       #############################################################################
+       ${proc_2dx}/linblock "Using merged dataset from register ${merge_ref_num}."
+       #############################################################################  
+       echo "::" `cat REGISTERS/Reg_${merge_ref_num}/COMMENT.txt | head -1`
+       echo "::" `cat REGISTERS/Reg_${merge_ref_num}/COMMENT.txt | head -2 | tail -1`
+       echo " "
+      if ( ${NPRG} == "3" ) then
+        # Use MTZ file
+        if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ) then
+          ${proc_2dx}/protest "ERROR: merge3D.mtz not existing in register ${merge_ref_num}."
+        else
+          echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ."
+          \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D.mtz .
+        endif
+        #
+        if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ) then
+          ${proc_2dx}/protest "ERROR: merge3Dref.mtz not existing in register ${merge_ref_num}."
+        else
+          echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ."
+          \cp -f REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz .
+        endif
+      else
+        # Use APH file
+        if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ) then
+          ${proc_2dx}/protest "ERROR: merge2D.mtz not existing in register ${merge_ref_num}."
+        else
+          echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ." 
+          \cp -f REGISTERS/Reg_${merge_ref_num}/merge2D.mtz .
+        endif
+        if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge.aph ) then
+          ${proc_2dx}/protest "ERROR: merge.aph not existing in register ${merge_ref_num}."
+        else
+          echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge.aph APH/merge.aph"
+          \cp -f REGISTERS/Reg_${merge_ref_num}/merge.aph APH/merge.aph
+        endif
+      endif
+    else
+      ${proc_2dx}/protest "ERROR: Register ${merge_ref_num} does not contain data."
+    endif
+    #
+  endif
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Compile refinement script"
+  #############################################################################
+  #
+  set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
+  \rm -f ${scriptBfile}
+  set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
+  \rm -f ${postprocessingfile}
+  #
+  set genref = "1"
+  #
+  \rm -f LOGS/${scriptname}-tmp.results
+  #
+  set dirfile = "2dx_merge_dirfile.dat"
+  set number = 1
+  set IVERBOSE = 1
+  set RFACAMP = 1.0
+  set NBM = F
+  set NTL = F
+  set MergeStepSize = "0.001"
+  set IBOXPHS = 61
+  #
+  ${bin_2dx}/2dx_merge_compileB.exe << eot
 LOGS/${scriptname}-tmp.results
 ${proc_2dx}
 ${bin_2dx}
@@ -252,47 +250,48 @@ ${RESMIN}
 ${RESMAX}
 0
 eot
-#
-echo "<<@progress: 20>>"
-#
-#############################################################################
-${proc_2dx}/linblock "Launch refinement script. CHECK OUTPUT in LOG: origtilt B output"
-#############################################################################
-#
-echo "# IMAGE: ${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
-chmod +x ${scriptBfile}
-${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
-# cat SCRATCH/2dx_merge_scriptB.out
-#
-#
-#############################################################################
-${proc_2dx}/linblock "Launch refinement postprocessing script"
-#############################################################################
-#
-chmod +x ${postprocessingfile}
-${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
-#
-echo "################################################"
-echo "################################################"
-echo "output in file LOGS/2dx_merge_scriptB.log"
-echo "################################################"
-echo "################################################"
-#
-cat 2dx_origtiltk-console.log
-#\rm -f 2dx_origtiltk-console.log
-#
-# Don't evaluate refinement results here:
-# cat LOGS/${scriptname}-tmp.results >> LOGS/${scriptname}.results
-\rm -f LOGS/${scriptname}-tmp.results
+  #
+  echo "<<@progress: 20>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Launch refinement script. CHECK OUTPUT in LOG: origtilt B output"
+  #############################################################################
+  #
+  echo "# IMAGE: ${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
+  chmod +x ${scriptBfile}
+  ${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
+  # cat SCRATCH/2dx_merge_scriptB.out
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Launch refinement postprocessing script"
+  #############################################################################
+  #
+  chmod +x ${postprocessingfile}
+  ${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
+  #
+  echo "################################################"
+  echo "################################################"
+  echo "output in file LOGS/2dx_merge_scriptB.log"
+  echo "################################################"
+  echo "################################################"
+  #
+  cat 2dx_origtiltk-console.log
+  #\rm -f 2dx_origtiltk-console.log
+  #
+  # Don't evaluate refinement results here:
+  # cat LOGS/${scriptname}-tmp.results >> LOGS/${scriptname}.results
+  \rm -f LOGS/${scriptname}-tmp.results
+  #
+endif
 #
 echo "<<@progress: 40>"
 #
 #############################################################################
 ${proc_2dx}/linblock "Compile script to re-generate maps"
 #############################################################################
-echo "<<@progress: 10>>"
 #
 set dirfile = "2dx_merge_dirfile.dat"
 set scriptMfile = "SCRATCH/2dx_merge_scriptM.com"

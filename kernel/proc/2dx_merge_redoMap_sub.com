@@ -286,7 +286,9 @@ eot
   \rm -f SCRATCH/scratch2.map
   #
 else
-  ${proc_2dx}/linblock "WARNING: ERROR in reading reference APH file ${refhklfile}. No reference map created."
+  if ( ${make_reference} == "y" ) then
+    ${proc_2dx}/linblock "WARNING: ERROR in reading reference APH file ${refhklfile}. No reference map created."
+  endif
 endif
 #
 #############################################################################
@@ -387,7 +389,7 @@ eof
   #
   cd ${mergedir}/RESULTS-PS
   \rm -f ${imagename}-${imagenumber}.ps
-  \ln -s ${rootdir}/${imagename}MAP-${symmetry}.ps ${imagename}-${imagenumber}.ps
+  \ln -s ${rootdir}/PS/${imagename}MAP-${symmetry}.ps ${imagename}-${imagenumber}.ps
   cd ${rootdir}
   #
   if ( ${RESULTSPS} != "y" ) then

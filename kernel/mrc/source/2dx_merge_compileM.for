@@ -219,7 +219,7 @@ C
         write(11,'(''source ${proc_2dx}/2dx_merge_redoMap_sub.com'')')
 C
         write(11,'(''#'')')
-        iprogress = 30 + (50*2*imcount) / (2 * itotalnumber)
+        iprogress = 50 + (30*2*imcount) / (2 * itotalnumber)
         write(cline,'(I2)')iprogress
         call shorten(cline,k)
         write(11,'(''echo "<<@progress: '',A,''>>"'')')cline(1:k)

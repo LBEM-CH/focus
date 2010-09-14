@@ -15,12 +15,12 @@
 #
 # SORTORDER: 90
 #
+# REMARK: The following section defines the text in the Manual pane of the GUI:
 # MANUAL: This script makes use of CCP4 commands to generate the final projection map.
-#
 # MANUAL: The final output is an MRC-format image file that shows 2x2 unit cells. 
-#
 # MANUAL: The PostScript output file is skewed according to any potential non-square non-rectangular lattice, while the MRC-format file has the skewing information stored in the header.
 #
+# REMARK: The following section defines variables that will be displayed in the GUI:
 # GLOBAL: SYN_Unbending
 # GLOBAL: ML_doit
 # GLOBAL: RESMAX
@@ -48,8 +48,8 @@
 # GLOBAL: mapscale
 # GLOBAL: unitcellnumber
 #
+# REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
 #$end_local_vars
-#
 #
 set bin_2dx = ""
 set proc_2dx = ""

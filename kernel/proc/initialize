@@ -10,7 +10,17 @@ echo ":++++++++++++++++++++++++++++++++"
 set date = `date`
 echo date = ${date}
 #
-set ccp4 = /usr/local/ccp4
+if ( -d /usr/local/ccp4 ) then
+  set ccp4 = /usr/local/ccp4
+else 
+  set ccp = `ls -1 /Applications | grep ccp4 | tail -n 1`
+  set ccp4 = `echo /Applications/${ccp}`
+  set ccp4x = `echo ${ccp4}x`
+  if ( ${ccp4x} == 'x' ) then
+    ${proc_2dx}/linblock "WARNING: ccp4 not found"
+  endif
+endif
+echo ":CCP4 found in ${ccp4}"
 set bin_ccp4 = ${ccp4}/bin
 #
 echo bin_2dx = ${bin_2dx}
@@ -26,8 +36,9 @@ if ( $?ccp4_setup ) then
     if ( ( ! -d ${ccp4} ) || ( ! -d ${bin_ccp4} ) ) then
       echo ":: "
       ${proc_2dx}/linblock "CCP4 not found. Is it installed ???"
-      ${proc_2dx}/linblock "The location of CCP4 is defined in ${proc_2dx}/initialize"
-      ${proc_2dx}/linblock "Currently, CCP4 it is expected in ${ccp4}"
+      ${proc_2dx}/linblock "The location of CCP4 is defined in ${proc_2dx}/initialize."
+      ${proc_2dx}/linblock "You can edit it here."
+      ${proc_2dx}/linblock "CCP4 could for example be installed in /usr/local/ccp4"
       echo ":: "
       ${proc_2dx}/linblock "You will not be able to create a final map without CCP4."
       echo ":: "
@@ -52,8 +63,9 @@ if ( $?ccp4_setup ) then
         ${proc_2dx}/linblock "WARNING: ${ccp4_setup} does not exists."
         echo "#WARNING: ${ccp4_setup} does not exists." >> LOGS/${scriptname}.results
         ${proc_2dx}/linblock "CCP4 setup file not found. Is CCP4 correctly installed ???"
-        ${proc_2dx}/linblock "It is expected in ${ccp4_setup}"
-        ${proc_2dx}/linblock "The setup of CCP4 is defined in ${proc_2dx}/initialize"
+        ${proc_2dx}/linblock "The location of CCP4 is defined in ${proc_2dx}/initialize."
+        ${proc_2dx}/linblock "You can edit it here."
+        ${proc_2dx}/linblock "CCP4 could for example be installed in /usr/local/ccp4"
         echo ":: "
         ${proc_2dx}/linblock "You will not be able to create a final map without CCP4."
         echo ":: "

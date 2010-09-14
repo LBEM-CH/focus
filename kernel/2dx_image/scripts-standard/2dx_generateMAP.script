@@ -21,32 +21,32 @@
 # MANUAL: The PostScript output file is skewed according to any potential non-square non-rectangular lattice, while the MRC-format file has the skewing information stored in the header.
 #
 # REMARK: The following section defines variables that will be displayed in the GUI:
-# GLOBAL: SYN_Unbending
-# GLOBAL: ML_doit
-# GLOBAL: RESMAX
-# GLOBAL: RESMIN
-# GLOBAL: ALAT
-# GLOBAL: tempfac
-# GLOBAL: SYM
-# GLOBAL: phaori
-# GLOBAL: phaoriFouFilter
-# GLOBAL: zstarrange
-# GLOBAL: zstarrange_real
-# GLOBAL: Calc_from_zstarrange
-# GLOBAL: ctfrev
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: rot90
-# GLOBAL: rot180
-# GLOBAL: revhk
-# GLOBAL: revhnd
-# GLOBAL: sgnxch
-# GLOBAL: revxsgn
-# GLOBAL: tempkeep
-# GLOBAL: comment
-# GLOBAL: produceSpiderMap
-# GLOBAL: mapscale
-# GLOBAL: unitcellnumber
+# DISPLAY: SYN_Unbending
+# DISPLAY: ML_doit
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: ALAT
+# DISPLAY: tempfac
+# DISPLAY: SYM
+# DISPLAY: phaori
+# DISPLAY: phaoriFouFilter
+# DISPLAY: zstarrange
+# DISPLAY: zstarrange_real
+# DISPLAY: Calc_from_zstarrange
+# DISPLAY: ctfrev
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: rot90
+# DISPLAY: rot180
+# DISPLAY: revhk
+# DISPLAY: revhnd
+# DISPLAY: sgnxch
+# DISPLAY: revxsgn
+# DISPLAY: tempkeep
+# DISPLAY: comment
+# DISPLAY: produceSpiderMap
+# DISPLAY: mapscale
+# DISPLAY: unitcellnumber
 #
 # REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
 #$end_local_vars

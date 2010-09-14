@@ -243,6 +243,10 @@ bool confData::parseDataFile()
     {
       headerLine.remove("#");
       QStringList cell = headerLine.split(':');
+      if(cell.first().trimmed().toLower() == "display")
+      {
+        cell.first() = "global";
+      }
       properties.insert(cell.first().trimmed().toLower(),cell.last().trimmed());
     }
 

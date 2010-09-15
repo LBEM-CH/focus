@@ -95,7 +95,7 @@ QTreeView *scriptModule::setupModule()
     addScriptProperty(uid,"fileName",entry);
     addScriptProperty(uid,"filePath",scriptDir.canonicalPath() + "/" + entry);
     addScriptProperty(uid,"title",scriptData->property("title"));
-    addScriptProperty(uid,"globals",QVariant(scriptData->propertyList("global")));
+    addScriptProperty(uid,"globals",QVariant(scriptData->propertyList("display")));
     addScriptProperty(uid,"logFile", data->getDir("working") + "/LOGS/" +  entry.section('.',0,-2) + ".log");
     addScriptProperty(uid,"resultsFile", data->getDir("working") + "/LOGS/" +  entry.section('.',0,-2) + ".results");
 

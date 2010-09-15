@@ -19,9 +19,9 @@
 #
 # MANUAL: This can be used to backup a project, for file safety. It can also be used to clone a project onto a different computer, if that computer's harddrive is NFS mounted.
 #
-# GLOBAL: backup_dir
-# GLOBAL: backup_merge
-# GLOBAL: backup_sure
+# DISPLAY: backup_dir
+# DISPLAY: backup_merge
+# DISPLAY: backup_sure
 #
 #$end_local_vars
 #

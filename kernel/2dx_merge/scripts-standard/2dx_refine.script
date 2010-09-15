@@ -19,38 +19,38 @@
 # 
 # MANUAL: This does one single alignment step of the selected images against the available reference.
 #
-# GLOBAL: MergeResolution
-# GLOBAL: merge_modus
-# GLOBAL: zstarwin
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: merge_res_limit
-# GLOBAL: tempkeep
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: ALAT
-# GLOBAL: MergeStepSize
-# GLOBAL: IBOXPHS
-# GLOBAL: SYM
-# GLOBAL: avrgamphsNUMBER
-# GLOBAL: avrgamphsRESOL
-# GLOBAL: MergeHKMAX
-# GLOBAL: MergeIQMAX
-# GLOBAL: refbeamtilt
-# GLOBAL: reftiltgeo
-# GLOBAL: merge_reference
-# GLOBAL: merge_ref_num
-# GLOBAL: merge_comment_1
-# GLOBAL: merge_comment_2
-# GLOBAL: merge_comment_3
-# GLOBAL: merge_comment_4
-# GLOBAL: merge_comment_5
-# GLOBAL: merge_comment_6
-# GLOBAL: merge_comment_7
-# GLOBAL: merge_comment_8
-# GLOBAL: merge_comment_9
-# GLOBAL: max_amp_correction
-# GLOBAL: make_reference
+# DISPLAY: MergeResolution
+# DISPLAY: merge_modus
+# DISPLAY: zstarwin
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: merge_res_limit
+# DISPLAY: tempkeep
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: MergeStepSize
+# DISPLAY: IBOXPHS
+# DISPLAY: SYM
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: MergeHKMAX
+# DISPLAY: MergeIQMAX
+# DISPLAY: refbeamtilt
+# DISPLAY: reftiltgeo
+# DISPLAY: merge_reference
+# DISPLAY: merge_ref_num
+# DISPLAY: merge_comment_1
+# DISPLAY: merge_comment_2
+# DISPLAY: merge_comment_3
+# DISPLAY: merge_comment_4
+# DISPLAY: merge_comment_5
+# DISPLAY: merge_comment_6
+# DISPLAY: merge_comment_7
+# DISPLAY: merge_comment_8
+# DISPLAY: merge_comment_9
+# DISPLAY: max_amp_correction
+# DISPLAY: make_reference
 #
 #$end_local_vars
 #

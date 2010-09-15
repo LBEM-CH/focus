@@ -23,28 +23,28 @@
 #
 # MANUAL: In this case, the actual script is not in the usual script directory, but in a separate script ${proc_2dx}2dx_unbend1_sub.com, which is called via the "source" command from the c-shell. For this reason, double-clicking the script name in the "Standard Scripts" window will only show the less interesting part of the script. The remainder can be found by using the editor directly to open the 2dx_unbend1_sub.com file in the 2dx_image/proc directory. This is designed such that it is easy to call the same core of the unbend1 job from the refinement scripts.
 #
-# GLOBAL: SYN_Unbending
-# GLOBAL: holea
-# GLOBAL: maska
-# GLOBAL: boxa1
-# GLOBAL: boxa2	
-# GLOBAL: quadrada
-# GLOBAL: facthresha
-# GLOBAL: quadpreda
-# GLOBAL: RESMAX
-# GLOBAL: RESMIN
-# GLOBAL: ALAT
-# GLOBAL: radlim
-# GLOBAL: treatspotscan
-# GLOBAL: ctfplotresmax
-# GLOBAL: tempkeep
-# GLOBAL: refori
-# GLOBAL: ISTEP
-# GLOBAL: ISTEP_h
-# GLOBAL: IMAXCOR
-# GLOBAL: comment
-# GLOBAL: RMAG
-# GLOBAL: ccunbend_program
+# DISPLAY: SYN_Unbending
+# DISPLAY: holea
+# DISPLAY: maska
+# DISPLAY: boxa1
+# DISPLAY: boxa2	
+# DISPLAY: quadrada
+# DISPLAY: facthresha
+# DISPLAY: quadpreda
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: ALAT
+# DISPLAY: radlim
+# DISPLAY: treatspotscan
+# DISPLAY: ctfplotresmax
+# DISPLAY: tempkeep
+# DISPLAY: refori
+# DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
+# DISPLAY: IMAXCOR
+# DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: ccunbend_program
 #
 #$end_local_vars
 #

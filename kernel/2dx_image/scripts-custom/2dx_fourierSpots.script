@@ -17,22 +17,22 @@
 #
 # MANUAL: This is a temporary script that you probably don't want to use...
 #
-# GLOBAL: SYM
-# GLOBAL: lattice
-# GLOBAL: secondlattice
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: TLTANG
-# GLOBAL: TLTAXIS
-# GLOBAL: TLTAXA
-# GLOBAL: TAXA
-# GLOBAL: TANGL
-# GLOBAL: imagesidelength
-# GLOBAL: stepdigitizer
-# GLOBAL: magnification
-# GLOBAL: tempkeep
-# GLOBAL: refori
-# GLOBAL: comment
+# DISPLAY: SYM
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: TLTANG
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTAXA
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: imagesidelength
+# DISPLAY: stepdigitizer
+# DISPLAY: magnification
+# DISPLAY: tempkeep
+# DISPLAY: refori
+# DISPLAY: comment
 #
 #$end_local_vars
 #

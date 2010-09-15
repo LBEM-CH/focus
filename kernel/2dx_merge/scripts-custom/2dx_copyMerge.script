@@ -17,35 +17,35 @@
 #
 # MANUAL: Use this script to savegard the result of the lastes merging process.
 #
-# GLOBAL: merge_copy_onto
-# GLOBAL: merge_ref_num
-# GLOBAL: merge_comment_1
-# GLOBAL: merge_register_date_1
-# GLOBAL: merge_lock_1
-# GLOBAL: merge_comment_2
-# GLOBAL: merge_register_date_2
-# GLOBAL: merge_lock_2
-# GLOBAL: merge_comment_3
-# GLOBAL: merge_register_date_3
-# GLOBAL: merge_lock_3
-# GLOBAL: merge_comment_4
-# GLOBAL: merge_register_date_4
-# GLOBAL: merge_lock_4
-# GLOBAL: merge_comment_5
-# GLOBAL: merge_register_date_5
-# GLOBAL: merge_lock_5
-# GLOBAL: merge_comment_6
-# GLOBAL: merge_register_date_6
-# GLOBAL: merge_lock_6
-# GLOBAL: merge_comment_7
-# GLOBAL: merge_register_date_7
-# GLOBAL: merge_lock_7
-# GLOBAL: merge_comment_8
-# GLOBAL: merge_register_date_8
-# GLOBAL: merge_lock_8
-# GLOBAL: merge_comment_9
-# GLOBAL: merge_register_date_9
-# GLOBAL: merge_lock_9
+# DISPLAY: merge_copy_onto
+# DISPLAY: merge_ref_num
+# DISPLAY: merge_comment_1
+# DISPLAY: merge_register_date_1
+# DISPLAY: merge_lock_1
+# DISPLAY: merge_comment_2
+# DISPLAY: merge_register_date_2
+# DISPLAY: merge_lock_2
+# DISPLAY: merge_comment_3
+# DISPLAY: merge_register_date_3
+# DISPLAY: merge_lock_3
+# DISPLAY: merge_comment_4
+# DISPLAY: merge_register_date_4
+# DISPLAY: merge_lock_4
+# DISPLAY: merge_comment_5
+# DISPLAY: merge_register_date_5
+# DISPLAY: merge_lock_5
+# DISPLAY: merge_comment_6
+# DISPLAY: merge_register_date_6
+# DISPLAY: merge_lock_6
+# DISPLAY: merge_comment_7
+# DISPLAY: merge_register_date_7
+# DISPLAY: merge_lock_7
+# DISPLAY: merge_comment_8
+# DISPLAY: merge_register_date_8
+# DISPLAY: merge_lock_8
+# DISPLAY: merge_comment_9
+# DISPLAY: merge_register_date_9
+# DISPLAY: merge_lock_9
 #
 #$end_local_vars
 #

@@ -21,11 +21,11 @@
 #
 # MANUAL: If you copy the body of this script into the Initialization Script (which only runs once), then you can correct the image amplitudes for every image that you process.
 #
-# GLOBAL: imagename
-# GLOBAL: nonmaskimagename
-# GLOBAL: imageorigin
-# GLOBAL: comment
-# GLOBAL: down_factor
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imageorigin
+# DISPLAY: comment
+# DISPLAY: down_factor
 #
 #$end_local_vars
 #

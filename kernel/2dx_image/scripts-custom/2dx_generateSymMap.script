@@ -23,34 +23,34 @@
 #
 # MANUAL: A big <I><U>thank you</U></I> goes to Vinzenz Unger for debugging this script and providing most of the algorithm and usage here, and to Per Bullough, who gave us essential information and help in handling symmetries and systematic absences between MRC and CCP4 worlds.
 #
-# GLOBAL: SYN_Unbending
-# GLOBAL: ML_doit
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: SYM
-# GLOBAL: ALAT
-# GLOBAL: tempfac
-# GLOBAL: phaori
-# GLOBAL: phaoriFouFilter
-# GLOBAL: ctfrev
-# GLOBAL: avrgamphsNUMBER
-# GLOBAL: avrgamphsRESOL
-# GLOBAL: zstarrange
-# GLOBAL: Calc_from_zstarrange
-# GLOBAL: zstarrange_real
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: rot90
-# GLOBAL: rot180
-# GLOBAL: revhk
-# GLOBAL: revhnd
-# GLOBAL: sgnxch
-# GLOBAL: revxsgn
-# GLOBAL: MergePhaseResidual
-# GLOBAL: comment
-# GLOBAL: produceSpiderMap
-# GLOBAL: mapscale
-# GLOBAL: unitcellnumber
+# DISPLAY: SYN_Unbending
+# DISPLAY: ML_doit
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: SYM
+# DISPLAY: ALAT
+# DISPLAY: tempfac
+# DISPLAY: phaori
+# DISPLAY: phaoriFouFilter
+# DISPLAY: ctfrev
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: zstarrange
+# DISPLAY: Calc_from_zstarrange
+# DISPLAY: zstarrange_real
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: rot90
+# DISPLAY: rot180
+# DISPLAY: revhk
+# DISPLAY: revhnd
+# DISPLAY: sgnxch
+# DISPLAY: revxsgn
+# DISPLAY: MergePhaseResidual
+# DISPLAY: comment
+# DISPLAY: produceSpiderMap
+# DISPLAY: mapscale
+# DISPLAY: unitcellnumber
 #
 #$end_local_vars
 #

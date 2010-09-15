@@ -37,20 +37,20 @@ set keepOld = "n"
 #
 #=============================================================================
 #
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: lattice
-# GLOBAL: secondlattice
-# GLOBAL: spotrefine_IHKmax
-# GLOBAL: spot_filter
-# GLOBAL: spot_exclusion_radius
-# GLOBAL: ProtSpotList
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: ALAT
-# GLOBAL: IQMAX
-# GLOBAL: spotrefine_IHKmax
-# GLOBAL: comment
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+# DISPLAY: spotrefine_IHKmax
+# DISPLAY: spot_filter
+# DISPLAY: spot_exclusion_radius
+# DISPLAY: ProtSpotList
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: IQMAX
+# DISPLAY: spotrefine_IHKmax
+# DISPLAY: comment
 #
 #$end_local_vars
 #

@@ -26,7 +26,7 @@
 # TYPE: Drop_Down_Menu "0=MRC format files;1=CCP4 format files;2=PostScript files;3=Amplitude-and-Phase lists;4=Spot Lists;5=all"
 set do = "0"
 #
-# GLOBAL: comment
+# DISPLAY: comment
 #
 #$end_local_vars
 #

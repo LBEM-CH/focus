@@ -17,8 +17,8 @@
 #
 # MANUAL: ToDo: 2dx_merge has a bug when the file names become too long. They are then not displayed any more.
 #
-# GLOBAL: imagename
-# GLOBAL: SYM
+# DISPLAY: imagename
+# DISPLAY: SYM
 #
 #$end_local_vars
 #

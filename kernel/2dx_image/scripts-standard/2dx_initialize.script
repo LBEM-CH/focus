@@ -35,29 +35,29 @@
 #
 # MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_image-algo-2.jpg">
 #
-# GLOBAL: imagename
-# GLOBAL: nonmaskimagename
-# GLOBAL: imagenumber
-# GLOBAL: magnification
-# GLOBAL: stepdigitizer
-# GLOBAL: Calc_from_sample_pixel
-# GLOBAL: sample_pixel
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: df_min
-# GLOBAL: df_searchrange1
-# GLOBAL: RESMAX
-# GLOBAL: CS
-# GLOBAL: KV
-# GLOBAL: tempkeep
-# GLOBAL: initialization_executable
-# GLOBAL: initialization_corr_endian
-# GLOBAL: det_defocus
-# GLOBAL: det_tilt
-# GLOBAL: ctf_ttf
-# GLOBAL: crop
-# GLOBAL: comment
-# GLOBAL: imagesidelength
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagenumber
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: df_min
+# DISPLAY: df_searchrange1
+# DISPLAY: RESMAX
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: tempkeep
+# DISPLAY: initialization_executable
+# DISPLAY: initialization_corr_endian
+# DISPLAY: det_defocus
+# DISPLAY: det_tilt
+# DISPLAY: ctf_ttf
+# DISPLAY: crop
+# DISPLAY: comment
+# DISPLAY: imagesidelength
 #
 #$end_local_vars
 #

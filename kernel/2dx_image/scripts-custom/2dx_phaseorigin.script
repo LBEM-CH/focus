@@ -21,19 +21,19 @@
 #
 # MANUAL: Now run this script, and it will add the <I>Phase Origin Change</I> to the <I>Phase Origin</I>, and re-calculate the final non-symmetrized projection map, using the new <I>Phase Origin</I> value. 
 #
-# GLOBAL: SYN_Unbending
-# GLOBAL: SYM
-# GLOBAL: lattice
-# GLOBAL: secondlattice
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: TAXA
-# GLOBAL: TANGL
-# GLOBAL: refori
-# GLOBAL: comment
-# GLOBAL: phaori
-# GLOBAL: phaoriFouFilter
-# GLOBAL: phaori_change
+# DISPLAY: SYN_Unbending
+# DISPLAY: SYM
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: refori
+# DISPLAY: comment
+# DISPLAY: phaori
+# DISPLAY: phaoriFouFilter
+# DISPLAY: phaori_change
 #
 #$end_local_vars
 #

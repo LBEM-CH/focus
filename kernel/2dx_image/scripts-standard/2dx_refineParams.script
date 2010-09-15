@@ -21,38 +21,38 @@
 #
 # MANUAL:  VERY IMPORTANT NOTE : The quality of image data required for success in this type of least squares refinement is high, particularly if more than one parameter is to be refined. BE VERY CAREFUL.
 #
-# GLOBAL: refine
-# GLOBAL: refine_cyc
-# GLOBAL: refine_reference
-# GLOBAL: refine_overwrite
-# GLOBAL: spcgrp
-# GLOBAL: imagesidelength
-# GLOBAL: magnification
-# GLOBAL: stepdigitizer
-# GLOBAL: TLTAXIS
-# GLOBAL: TLTANG 
-# GLOBAL: TLTAXA 
-# GLOBAL: TAXA 
-# GLOBAL: TANGL
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: defocus
-# GLOBAL: beamtilt
-# GLOBAL: RESMAX
-# GLOBAL: CS
-# GLOBAL: KV
-# GLOBAL: tempkeep
-# GLOBAL: comment
-# GLOBAL: SYM
-# GLOBAL: phaori
-# GLOBAL: revhk
-# GLOBAL: rot90
-# GLOBAL: rot180
-# GLOBAL: sgnxch
-# GLOBAL: revhnd
-# GLOBAL: ctfrev
-# GLOBAL: revxsgn
-# GLOBAL: lattice
+# DISPLAY: refine
+# DISPLAY: refine_cyc
+# DISPLAY: refine_reference
+# DISPLAY: refine_overwrite
+# DISPLAY: spcgrp
+# DISPLAY: imagesidelength
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG 
+# DISPLAY: TLTAXA 
+# DISPLAY: TAXA 
+# DISPLAY: TANGL
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: defocus
+# DISPLAY: beamtilt
+# DISPLAY: RESMAX
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: tempkeep
+# DISPLAY: comment
+# DISPLAY: SYM
+# DISPLAY: phaori
+# DISPLAY: revhk
+# DISPLAY: rot90
+# DISPLAY: rot180
+# DISPLAY: sgnxch
+# DISPLAY: revhnd
+# DISPLAY: ctfrev
+# DISPLAY: revxsgn
+# DISPLAY: lattice
 #
 #$end_local_vars
 #

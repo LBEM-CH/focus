@@ -17,18 +17,18 @@
 #
 # MANUAL: This script makes use of MRC and CCP4 commands to generate the projection maps of all selected images, using the latest phase origin settings.
 #
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: SYM
-# GLOBAL: ALAT
-# GLOBAL: tempfac
-# GLOBAL: MergeIQMAX
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: make_reference
-# GLOBAL: merge_modus
-# GLOBAL: merge_ref_num
-# GLOBAL: create_PS
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: SYM
+# DISPLAY: ALAT
+# DISPLAY: tempfac
+# DISPLAY: MergeIQMAX
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: make_reference
+# DISPLAY: merge_modus
+# DISPLAY: merge_ref_num
+# DISPLAY: create_PS
 #
 #$end_local_vars
 #

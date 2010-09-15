@@ -54,22 +54,22 @@ set overwrite = "n"
 #
 #=============================================================================
 #
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: lattice
-# GLOBAL: realang
-# GLOBAL: ALAT
-# GLOBAL: TLTAXIS
-# GLOBAL: TLTANG
-# GLOBAL: TLTAXA
-# GLOBAL: TAXA
-# GLOBAL: TANGL
-# GLOBAL: defocus
-# GLOBAL: SYM
-# GLOBAL: phaori
-# GLOBAL: revhk
-# GLOBAL: rot180
-# GLOBAL: comment
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: lattice
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: TLTAXA
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: defocus
+# DISPLAY: SYM
+# DISPLAY: phaori
+# DISPLAY: revhk
+# DISPLAY: rot180
+# DISPLAY: comment
 #
 #$end_local_vars
 #

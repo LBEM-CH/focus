@@ -18,24 +18,24 @@
 # MANUAL: This script establishes a refined spotlist, using an <B>mmbox</B> evaluation of the FFT of the unbent image from Unbend I. You can later refine the spotlist with the specific script <I>Refine Spotlist</I>, or refine the spotlist manually in the full-screen browser, when displaying a FFT of the original or unbent image.
 #
 #
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: lattice
-# GLOBAL: secondlattice
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: ALAT
-# GLOBAL: IQMAX1
-# GLOBAL: IQMAX
-# GLOBAL: spot_source
-# GLOBAL: spot_filter
-# GLOBAL: spot_exclusion_radius
-# GLOBAL: ProtSpotList
-# GLOBAL: spotrefine_IHKmax
-# GLOBAL: refori
-# GLOBAL: comment
-# GLOBAL: TLTAXIS
-# GLOBAL: TLTANG
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: IQMAX1
+# DISPLAY: IQMAX
+# DISPLAY: spot_source
+# DISPLAY: spot_filter
+# DISPLAY: spot_exclusion_radius
+# DISPLAY: ProtSpotList
+# DISPLAY: spotrefine_IHKmax
+# DISPLAY: refori
+# DISPLAY: comment
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
 #
 #$end_local_vars
 #

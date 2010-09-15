@@ -15,23 +15,23 @@
 #
 # MANUAL: This script refines the lattice, using the MRC program mmlatref.
 #
-# GLOBAL: imagename
-# GLOBAL: nonmaskimagename
-# GLOBAL: imagenumber
-# GLOBAL: imagesidelength
-# GLOBAL: lattice
-# GLOBAL: secondlattice
-# GLOBAL: backuplattice
-# GLOBAL: comment
-# GLOBAL: Refine_Lattice
-# GLOBAL: TLTAXIS
-# GLOBAL: TLTANG
-# GLOBAL: TLTAXA
-# GLOBAL: TAXA
-# GLOBAL: TANGL
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: SYM
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagenumber
+# DISPLAY: imagesidelength
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+# DISPLAY: backuplattice
+# DISPLAY: comment
+# DISPLAY: Refine_Lattice
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: TLTAXA
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: SYM
 #
 #$end_local_vars
 #

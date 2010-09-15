@@ -28,8 +28,8 @@
 # TYPE: Drop_Down_Menu "radical;a little bit"
 set cleanup_level = "radical"
 #
-# GLOBAL: comment
-# GLOBAL: reset_variables
+# DISPLAY: comment
+# DISPLAY: reset_variables
 #
 #$end_local_vars
 #

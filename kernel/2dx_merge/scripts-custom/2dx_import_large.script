@@ -19,10 +19,10 @@
 #
 # MANUAL: The created sub-images will be in MRC file format, and have then to be "imported" with the 2dx_merge function.
 #
-# GLOBAL: airport_dir
-# GLOBAL: airport_size
-# GLOBAL: airport_OD
-# GLOBAL: airport_delete
+# DISPLAY: airport_dir
+# DISPLAY: airport_size
+# DISPLAY: airport_OD
+# DISPLAY: airport_delete
 #
 #$end_local_vars
 #

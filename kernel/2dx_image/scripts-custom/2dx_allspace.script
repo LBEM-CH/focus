@@ -39,21 +39,21 @@ set test_spacegroups_doit = "y"
 # TYPE: Drop_Down_Menu "ALL;HEXA;SQUA;RECT;OPLI;TWO;THRE;SIX;FOUR"
 set test_spacegroups_val = "ALL"
 #
-# GLOBAL: SYN_Unbending
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: SYM
-# GLOBAL: phaori
-# GLOBAL: phaoriFouFilter
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: rot180
-# GLOBAL: revhk
-# GLOBAL: comment
-# GLOBAL: allspace_step
-# GLOBAL: allspace_stepnum
-# GLOBAL: allspace_IQMAX
-# GLOBAL: allspace_RESMAX
+# DISPLAY: SYN_Unbending
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: SYM
+# DISPLAY: phaori
+# DISPLAY: phaoriFouFilter
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: rot180
+# DISPLAY: revhk
+# DISPLAY: comment
+# DISPLAY: allspace_step
+# DISPLAY: allspace_stepnum
+# DISPLAY: allspace_IQMAX
+# DISPLAY: allspace_RESMAX
 #
 #$end_local_vars
 #

@@ -77,25 +77,25 @@ set refine_boxb1_doit_3 = "n"
 # Other parameter follow
 #=============================================================================
 #
-# GLOBAL: maskb01
-# GLOBAL: maskb02
-# GLOBAL: maskb03
-# GLOBAL: maskb04
-# GLOBAL: maskb05
-# GLOBAL: boxb1
-# GLOBAL: quadradb
-# GLOBAL: quadpredb
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: radlim
-# GLOBAL: refori
-# GLOBAL: IMAXCOR
-# GLOBAL: ISTEP
-# GLOBAL: comment
-# GLOBAL: RMAG
-# GLOBAL: ccunbend_program
-# GLOBAL: refine_maskb01_val
-# GLOBAL: refine_boxb1_val
+# DISPLAY: maskb01
+# DISPLAY: maskb02
+# DISPLAY: maskb03
+# DISPLAY: maskb04
+# DISPLAY: maskb05
+# DISPLAY: boxb1
+# DISPLAY: quadradb
+# DISPLAY: quadpredb
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: radlim
+# DISPLAY: refori
+# DISPLAY: IMAXCOR
+# DISPLAY: ISTEP
+# DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: ccunbend_program
+# DISPLAY: refine_maskb01_val
+# DISPLAY: refine_boxb1_val
 #
 #$end_local_vars
 #

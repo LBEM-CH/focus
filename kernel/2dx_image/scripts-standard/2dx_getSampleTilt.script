@@ -19,21 +19,21 @@
 #
 # MANUA: You can run this script after having determined the tilt geometry of the carbon film support, to determine the orientation of the 2D crystal on that support.
 #
-# GLOBAL: imagename
-# GLOBAL: nonmaskimagename
-# GLOBAL: imagesidelength
-# GLOBAL: magnification
-# GLOBAL: stepdigitizer
-# GLOBAL: TLTAXIS
-# GLOBAL: TLTANG
-# GLOBAL: TLTAXA
-# GLOBAL: TAXA
-# GLOBAL: TANGL
-# GLOBAL: det_tilt
-# GLOBAL: lattice
-# GLOBAL: secondlattice
-# GLOBAL: backuplattice
-# GLOBAL: comment
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagesidelength
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: TLTAXA
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: det_tilt
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+# DISPLAY: backuplattice
+# DISPLAY: comment
 #
 #$end_local_vars
 #

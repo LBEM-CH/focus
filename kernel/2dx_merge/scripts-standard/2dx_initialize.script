@@ -19,27 +19,27 @@
 #
 # MANUAL: This program assists you in the managing of a 2D crystal image processing project, and will do the merging of the processed data. Help is available <A HREF="http://2dx.org/documentation/2dx-software">here</A>. Try the right mouse click on the various fields or variable names, to get more information.
 #
-# GLOBAL: ALAT
-# GLOBAL: IBOXPHS
-# GLOBAL: MergeIQMAX
-# GLOBAL: MergeResolution
-# GLOBAL: MergeStepSize
-# GLOBAL: merge_modus
-# GLOBAL: RESMAX
-# GLOBAL: RESMIN
-# GLOBAL: SYM
-# GLOBAL: avrgamphsNUMBER
-# GLOBAL: avrgamphsRESOL
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: revhk
-# GLOBAL: rot180
-# GLOBAL: rot90
-# GLOBAL: tempfac
-# GLOBAL: tempkeep
-# GLOBAL: zstarwin
-# GLOBAL: zstarrange
-# GLOBAL: merge_modus
+# DISPLAY: ALAT
+# DISPLAY: IBOXPHS
+# DISPLAY: MergeIQMAX
+# DISPLAY: MergeResolution
+# DISPLAY: MergeStepSize
+# DISPLAY: merge_modus
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: SYM
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: revhk
+# DISPLAY: rot180
+# DISPLAY: rot90
+# DISPLAY: tempfac
+# DISPLAY: tempkeep
+# DISPLAY: zstarwin
+# DISPLAY: zstarrange
+# DISPLAY: merge_modus
 #
 #$end_local_vars
 #

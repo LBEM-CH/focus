@@ -39,37 +39,37 @@
 #
 # MANUAL: This lattice-based tilt geometry is only reliable for larger tilt angles, which should be greater than 25 degrees. For smaller tilt angles, the defocus gradient is the safer method. In that case, the script "Get Sample Tilt" will use the now determined lattice orientation to translate the defocus-based tilt geometry into the sample tilt geometry.
 #
-# GLOBAL: imagesidelength
-# GLOBAL: magnification
-# GLOBAL: stepdigitizer
-# GLOBAL: TLTAXIS
-# GLOBAL: TLTANG
-# GLOBAL: TLTAXA
-# GLOBAL: TAXA
-# GLOBAL: TANGL
-# GLOBAL: lattice
-# GLOBAL: secondlattice
-# GLOBAL: backuplattice
-# GLOBAL: defocus
-# GLOBAL: beamtilt
-# GLOBAL: defocusfield
-# GLOBAL: RESMAX
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: SYM
-# GLOBAL: tempkeep
-# GLOBAL: delta
-# GLOBAL: peakNum
-# GLOBAL: testHand
-# GLOBAL: regenPL
-# GLOBAL: InnerExclusionRadius
-# GLOBAL: comment
-# GLOBAL: det_lattice
-# GLOBAL: do_lattice_algorithm
-# GLOBAL: laterror_abserror
-# GLOBAL: laterror_rmsderror
-# GLOBAL: laterror_peaksused
-# GLOBAL: laterror_nodepeakdensity
+# DISPLAY: imagesidelength
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: TLTAXA
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+# DISPLAY: backuplattice
+# DISPLAY: defocus
+# DISPLAY: beamtilt
+# DISPLAY: defocusfield
+# DISPLAY: RESMAX
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: SYM
+# DISPLAY: tempkeep
+# DISPLAY: delta
+# DISPLAY: peakNum
+# DISPLAY: testHand
+# DISPLAY: regenPL
+# DISPLAY: InnerExclusionRadius
+# DISPLAY: comment
+# DISPLAY: det_lattice
+# DISPLAY: do_lattice_algorithm
+# DISPLAY: laterror_abserror
+# DISPLAY: laterror_rmsderror
+# DISPLAY: laterror_peaksused
+# DISPLAY: laterror_nodepeakdensity
 #
 #$end_local_vars
 #

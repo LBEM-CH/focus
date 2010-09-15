@@ -17,36 +17,36 @@
 #
 # MANUAL: This script allows merging based on a custom input file.
 #
-# GLOBAL: MergeResolution
-# GLOBAL: merge_modus
-# GLOBAL: zstarrange
-# GLOBAL: Calc_from_zstarrange
-# GLOBAL: zstarrange_real
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: tempkeep
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: ALAT
-# GLOBAL: SYM
-# GLOBAL: avrgamphsNUMBER
-# GLOBAL: avrgamphsRESOL
-# GLOBAL: MergeIPAT
-# GLOBAL: MergeDELPLT
-# GLOBAL: MergeDELPRO
-# GLOBAL: MergeIQMAX
-# GLOBAL: MergeHKMAX
-# GLOBAL: MergeRminRmax
-# GLOBAL: MergeRCUT
-# GLOBAL: MergePFACT
-# GLOBAL: MergeBINSIZ
-# GLOBAL: MergeNCYCLS
-# GLOBAL: MergeMPRINT
-# GLOBAL: MergeAK
-# GLOBAL: MergeIWF
-# GLOBAL: MergeIWP
-# GLOBAL: max_amp_correction
-# GLOBAL: merge_file
+# DISPLAY: MergeResolution
+# DISPLAY: merge_modus
+# DISPLAY: zstarrange
+# DISPLAY: Calc_from_zstarrange
+# DISPLAY: zstarrange_real
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: tempkeep
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: SYM
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: MergeIPAT
+# DISPLAY: MergeDELPLT
+# DISPLAY: MergeDELPRO
+# DISPLAY: MergeIQMAX
+# DISPLAY: MergeHKMAX
+# DISPLAY: MergeRminRmax
+# DISPLAY: MergeRCUT
+# DISPLAY: MergePFACT
+# DISPLAY: MergeBINSIZ
+# DISPLAY: MergeNCYCLS
+# DISPLAY: MergeMPRINT
+# DISPLAY: MergeAK
+# DISPLAY: MergeIWF
+# DISPLAY: MergeIWP
+# DISPLAY: max_amp_correction
+# DISPLAY: merge_file
 #
 #$end_local_vars
 #

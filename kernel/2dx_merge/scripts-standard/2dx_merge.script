@@ -21,36 +21,36 @@
 #
 # MANUAL: Then align the other images to it (using Refine Once), starting with non-tilted images, and slowly add more and more tilted images. After each call of "Refine Once" you should run "Merge Once" again, to merge those aligned images into a new reference. 
 #
-# GLOBAL: MergeResolution
-# GLOBAL: merge_modus
-# GLOBAL: zstarrange
-# GLOBAL: Calc_from_zstarrange
-# GLOBAL: zstarrange_real
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: merge_res_limit
-# GLOBAL: tempkeep
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: ALAT
-# GLOBAL: MergeIQMAX
-# GLOBAL: SYM
-# GLOBAL: avrgamphsNUMBER
-# GLOBAL: avrgamphsRESOL
-# GLOBAL: MergeIPAT
-# GLOBAL: MergeDELPLT
-# GLOBAL: MergeDELPRO
-# GLOBAL: MergeRminRmax
-# GLOBAL: MergeRCUT
-# GLOBAL: MergePFACT
-# GLOBAL: MergeBINSIZ
-# GLOBAL: MergeNCYCLS
-# GLOBAL: MergeMPRINT
-# GLOBAL: MergeHKMAX
-# GLOBAL: MergeAK
-# GLOBAL: MergeIWF
-# GLOBAL: MergeIWP
-# GLOBAL: max_amp_correction
+# DISPLAY: MergeResolution
+# DISPLAY: merge_modus
+# DISPLAY: zstarrange
+# DISPLAY: Calc_from_zstarrange
+# DISPLAY: zstarrange_real
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: merge_res_limit
+# DISPLAY: tempkeep
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: MergeIQMAX
+# DISPLAY: SYM
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: MergeIPAT
+# DISPLAY: MergeDELPLT
+# DISPLAY: MergeDELPRO
+# DISPLAY: MergeRminRmax
+# DISPLAY: MergeRCUT
+# DISPLAY: MergePFACT
+# DISPLAY: MergeBINSIZ
+# DISPLAY: MergeNCYCLS
+# DISPLAY: MergeMPRINT
+# DISPLAY: MergeHKMAX
+# DISPLAY: MergeAK
+# DISPLAY: MergeIWF
+# DISPLAY: MergeIWP
+# DISPLAY: max_amp_correction
 #
 #$end_local_vars
 #

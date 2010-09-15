@@ -23,16 +23,16 @@
 #
 # MANUAL: Now you can run this standard script "Re-Unbend", to re-unbend all selected images with the merged dataset as reference.  This should give better values than the Fourier filtered unbending. Otherwise, there is something wrong with either the merged reference, or the tilt geometry, or the phase origin, or still something else.
 #
-# GLOBAL: merge_ref_num
-# GLOBAL: merge_comment_1
-# GLOBAL: merge_comment_2
-# GLOBAL: merge_comment_3
-# GLOBAL: merge_comment_4
-# GLOBAL: merge_comment_5
-# GLOBAL: merge_comment_6
-# GLOBAL: merge_comment_7
-# GLOBAL: merge_comment_8
-# GLOBAL: merge_comment_9
+# DISPLAY: merge_ref_num
+# DISPLAY: merge_comment_1
+# DISPLAY: merge_comment_2
+# DISPLAY: merge_comment_3
+# DISPLAY: merge_comment_4
+# DISPLAY: merge_comment_5
+# DISPLAY: merge_comment_6
+# DISPLAY: merge_comment_7
+# DISPLAY: merge_comment_8
+# DISPLAY: merge_comment_9
 #
 #$end_local_vars
 #

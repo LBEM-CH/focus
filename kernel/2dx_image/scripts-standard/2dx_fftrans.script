@@ -29,21 +29,21 @@
 #
 # MANUAL: The smaller the window, the faster the program execution; more steps tends toward a more well defined CTF.
 #
-# GLOBAL: SYN_Unbending
-# GLOBAL: generatePeriodogram
-# GLOBAL: periodogramWindowsize
-# GLOBAL: periodogramNumsubsteps
-# GLOBAL: imagenumber
-# GLOBAL: imagename
-# GLOBAL: nonmaskimagename
-# GLOBAL: imageorigin
-# GLOBAL: imagesidelength
-# GLOBAL: taperBeforeFFT
-# GLOBAL: comment
-# GLOBAL: magnification
-# GLOBAL: stepdigitizer
-# GLOBAL: Calc_from_sample_pixel
-# GLOBAL: sample_pixel
+# DISPLAY: SYN_Unbending
+# DISPLAY: generatePeriodogram
+# DISPLAY: periodogramWindowsize
+# DISPLAY: periodogramNumsubsteps
+# DISPLAY: imagenumber
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imageorigin
+# DISPLAY: imagesidelength
+# DISPLAY: taperBeforeFFT
+# DISPLAY: comment
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
 #
 #$end_local_vars
 #

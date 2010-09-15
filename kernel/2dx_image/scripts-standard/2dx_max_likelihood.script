@@ -23,39 +23,39 @@
 #
 # MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_ML.jpg">
 #
-# GLOBAL: ML_doit
-# GLOBAL: ML_doMLorCC
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: SYM
-# GLOBAL: defocus
-# GLOBAL: stepdigitizer
-# GLOBAL: magnification
-# GLOBAL: ALAT
-# GLOBAL: tempfac
-# GLOBAL: tempkeep
-# GLOBAL: ctfrev
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: phaori
-# GLOBAL: lattice
-# GLOBAL: ML_realcellxy_outer
-# GLOBAL: ML_mask_radius
-# GLOBAL: ML_iteration
-# GLOBAL: ML_threshold_method
-# GLOBAL: ML_absolute_threshold
-# GLOBAL: ML_relative_threshold
-# GLOBAL: ML_ref_ind
-# GLOBAL: ML_do_whiten
-# GLOBAL: ML_correct_CTF
-# GLOBAL: ML_rotational_symmetry
-# GLOBAL: ML_MinMaxStep_angle
-# GLOBAL: ML_terminate_ML
-# GLOBAL: ML_lp_method
-# GLOBAL: ML_lp_radius
-# GLOBAL: ML_B_factor
-# GLOBAL: ML_A_factor
-# GLOBAL: comment
+# DISPLAY: ML_doit
+# DISPLAY: ML_doMLorCC
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: SYM
+# DISPLAY: defocus
+# DISPLAY: stepdigitizer
+# DISPLAY: magnification
+# DISPLAY: ALAT
+# DISPLAY: tempfac
+# DISPLAY: tempkeep
+# DISPLAY: ctfrev
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: phaori
+# DISPLAY: lattice
+# DISPLAY: ML_realcellxy_outer
+# DISPLAY: ML_mask_radius
+# DISPLAY: ML_iteration
+# DISPLAY: ML_threshold_method
+# DISPLAY: ML_absolute_threshold
+# DISPLAY: ML_relative_threshold
+# DISPLAY: ML_ref_ind
+# DISPLAY: ML_do_whiten
+# DISPLAY: ML_correct_CTF
+# DISPLAY: ML_rotational_symmetry
+# DISPLAY: ML_MinMaxStep_angle
+# DISPLAY: ML_terminate_ML
+# DISPLAY: ML_lp_method
+# DISPLAY: ML_lp_radius
+# DISPLAY: ML_B_factor
+# DISPLAY: ML_A_factor
+# DISPLAY: comment
 #
 #$end_local_vars
 #

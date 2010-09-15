@@ -17,25 +17,25 @@
 #
 # MANUAL: This script makes use of MRC and CCP4 commands to generate the final projection map.
 #
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: SYM
-# GLOBAL: ALAT
-# GLOBAL: tempfac
-# GLOBAL: avrgamphsNUMBER
-# GLOBAL: avrgamphsRESOL
-# GLOBAL: realang
-# GLOBAL: realcell
-# GLOBAL: merge_modus
-# GLOBAL: merge_modus
-# GLOBAL: diffmap_doit
-# GLOBAL: diffmap_source
-# GLOBAL: diffmap_weight
-# GLOBAL: produceSpiderMap
-# GLOBAL: mapscale
-# GLOBAL: unitcellnumber
-# GLOBAL: npo_line1
-# GLOBAL: npo_line2
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: SYM
+# DISPLAY: ALAT
+# DISPLAY: tempfac
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: merge_modus
+# DISPLAY: merge_modus
+# DISPLAY: diffmap_doit
+# DISPLAY: diffmap_source
+# DISPLAY: diffmap_weight
+# DISPLAY: produceSpiderMap
+# DISPLAY: mapscale
+# DISPLAY: unitcellnumber
+# DISPLAY: npo_line1
+# DISPLAY: npo_line2
 #
 #$end_local_vars
 #

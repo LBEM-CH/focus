@@ -19,36 +19,36 @@
 #
 # SORTORDER: 50
 #
-# GLOBAL: SYN_Unbending
-# GLOBAL: holeb
-# GLOBAL: maskb01
-# GLOBAL: maskb02
-# GLOBAL: maskb03
-# GLOBAL: maskb04
-# GLOBAL: maskb05
-# GLOBAL: boxb1
-# GLOBAL: boxb2
-# GLOBAL: quadradb
-# GLOBAL: facthreshb
-# GLOBAL: quadpredb
-# GLOBAL: RESMAX
-# GLOBAL: RESMIN
-# GLOBAL: ALAT
-# GLOBAL: radlim
-# GLOBAL: domask
-# GLOBAL: ctf_ttf
-# GLOBAL: ttfcorfirst
-# GLOBAL: treatspotscan
-# GLOBAL: ctfplotresmax
-# GLOBAL: tempkeep
-# GLOBAL: refori
-# GLOBAL: createmaskinfo
-# GLOBAL: ISTEP
-# GLOBAL: ISTEP_h
-# GLOBAL: IMAXCOR
-# GLOBAL: comment
-# GLOBAL: RMAG
-# GLOBAL: ccunbend_program
+# DISPLAY: SYN_Unbending
+# DISPLAY: holeb
+# DISPLAY: maskb01
+# DISPLAY: maskb02
+# DISPLAY: maskb03
+# DISPLAY: maskb04
+# DISPLAY: maskb05
+# DISPLAY: boxb1
+# DISPLAY: boxb2
+# DISPLAY: quadradb
+# DISPLAY: facthreshb
+# DISPLAY: quadpredb
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: ALAT
+# DISPLAY: radlim
+# DISPLAY: domask
+# DISPLAY: ctf_ttf
+# DISPLAY: ttfcorfirst
+# DISPLAY: treatspotscan
+# DISPLAY: ctfplotresmax
+# DISPLAY: tempkeep
+# DISPLAY: refori
+# DISPLAY: createmaskinfo
+# DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
+# DISPLAY: IMAXCOR
+# DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: ccunbend_program
 #
 #$end_local_vars
 #

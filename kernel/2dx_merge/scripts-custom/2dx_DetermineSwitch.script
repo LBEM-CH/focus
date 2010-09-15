@@ -23,42 +23,42 @@
 #
 # MANUAL: <i>invert_tiltangle</i> will do exactly that. It will test if potentially the negative tilt angle would fit better. That could be the case, if your tilt geometry determination from the defocus failed, and from the lattice distortion by bad luck you got the wrong sign of the tilt angle.  
 # 
-# GLOBAL: MergeResolution
-# GLOBAL: merge_modus
-# GLOBAL: zstarwin
-# GLOBAL: RESMIN
-# GLOBAL: RESMAX
-# GLOBAL: set merge_res_limit
-# GLOBAL: tempkeep
-# GLOBAL: realcell
-# GLOBAL: realang
-# GLOBAL: ALAT
-# GLOBAL: MergeStepSize
-# GLOBAL: IBOXPHS
-# GLOBAL: SYM
-# GLOBAL: avrgamphsNUMBER
-# GLOBAL: avrgamphsRESOL
-# GLOBAL: MergeHKMAX
-# GLOBAL: MergeIQMAX
-# GLOBAL: refrevhk
-# GLOBAL: refrot90
-# GLOBAL: refrot180
-# GLOBAL: refsgnxch
-# GLOBAL: refrevhnd
-# GLOBAL: refrevxsgn
-# GLOBAL: refinvert_tiltangle
-# GLOBAL: merge_reference
-# GLOBAL: merge_ref_num
-# GLOBAL: merge_comment_1
-# GLOBAL: merge_comment_2
-# GLOBAL: merge_comment_3
-# GLOBAL: merge_comment_4
-# GLOBAL: merge_comment_5
-# GLOBAL: merge_comment_6
-# GLOBAL: merge_comment_7
-# GLOBAL: merge_comment_8
-# GLOBAL: merge_comment_9
-# GLOBAL: max_amp_correction
+# DISPLAY: MergeResolution
+# DISPLAY: merge_modus
+# DISPLAY: zstarwin
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: set merge_res_limit
+# DISPLAY: tempkeep
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: MergeStepSize
+# DISPLAY: IBOXPHS
+# DISPLAY: SYM
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: MergeHKMAX
+# DISPLAY: MergeIQMAX
+# DISPLAY: refrevhk
+# DISPLAY: refrot90
+# DISPLAY: refrot180
+# DISPLAY: refsgnxch
+# DISPLAY: refrevhnd
+# DISPLAY: refrevxsgn
+# DISPLAY: refinvert_tiltangle
+# DISPLAY: merge_reference
+# DISPLAY: merge_ref_num
+# DISPLAY: merge_comment_1
+# DISPLAY: merge_comment_2
+# DISPLAY: merge_comment_3
+# DISPLAY: merge_comment_4
+# DISPLAY: merge_comment_5
+# DISPLAY: merge_comment_6
+# DISPLAY: merge_comment_7
+# DISPLAY: merge_comment_8
+# DISPLAY: merge_comment_9
+# DISPLAY: max_amp_correction
 #
 #$end_local_vars
 #

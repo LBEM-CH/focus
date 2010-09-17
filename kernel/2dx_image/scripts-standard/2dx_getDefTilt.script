@@ -30,32 +30,32 @@
 #
 # MANUAL: If you know that your defocus is around 4000.0 Angstroems, you could set the search range to 2000.0 to 6000.0 Angstroems, to save time.
 #
-# GLOBAL: imagename
-# GLOBAL: nonmaskimagename
-# GLOBAL: imagesidelength
-# GLOBAL: magnification
-# GLOBAL: stepdigitizer
-# GLOBAL: TLTAXIS
-# GLOBAL: TLTANG
-# GLOBAL: TLTAXA
-# GLOBAL: TAXA
-# GLOBAL: TANGL
-# GLOBAL: defocus
-# GLOBAL: defocusbackup
-# GLOBAL: df_start
-# GLOBAL: df_end
-# GLOBAL: df_step 
-# GLOBAL: det_defocus
-# GLOBAL: det_tilt
-# GLOBAL: det_tlt_alg
-# GLOBAL: phacon
-# GLOBAL: RESMAX
-# GLOBAL: lattice
-# GLOBAL: comment
-# GLOBAL: tempkeep
-# GLOBAL: expected_tltang
-# GLOBAL: expected_tltang_uncertainty
-# GLOBAL: df_PAve 
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagesidelength
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: TLTAXA
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: defocus
+# DISPLAY: defocusbackup
+# DISPLAY: df_start
+# DISPLAY: df_end
+# DISPLAY: df_step 
+# DISPLAY: det_defocus
+# DISPLAY: det_tilt
+# DISPLAY: det_tlt_alg
+# DISPLAY: phacon
+# DISPLAY: RESMAX
+# DISPLAY: lattice
+# DISPLAY: comment
+# DISPLAY: tempkeep
+# DISPLAY: expected_tltang
+# DISPLAY: expected_tltang_uncertainty
+# DISPLAY: df_PAve 
 #
 #$end_local_vars
 #

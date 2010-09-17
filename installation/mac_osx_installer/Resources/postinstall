@@ -7,12 +7,15 @@ cd ${INSTALL_DIR}/bin
 ln -sf ../2dx_image/2dx_image.app ./
 \rm -f 2dx_merge.app
 ln -sf ../2dx_merge/2dx_merge.app ./
+ln -sf /usr/local/2dx/2dx_merge/2dx_merge.app /Applications/2dx
 \rm -f 2dx_logbrowser.app
 ln -sf ../2dx_logbrowser/2dx_logbrowser.app ./
 #
 chown -RP root:wheel ${INSTALL_DIR}   
-chown -RP $USER:wheel ${INSTALL_DIR}/kernel   
+chmod -R 777 ${INSTALL_DIR}/kernel
+#chown -RP $USER:wheel ${INSTALL_DIR}/kernel   
 #
-open ${INSTALL_DIR}/bin
+#open ${INSTALL_DIR}/bin
+open /Applications
 #
 exit 0

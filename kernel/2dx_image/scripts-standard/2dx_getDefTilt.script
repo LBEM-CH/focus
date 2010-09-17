@@ -232,7 +232,7 @@ eot
     echo "# IMAGE: SCRATCH/2dx_ctffind-cut.mrc <Cropped central tile>" >> LOGS/${scriptname}.results
     #
   else
-    \cp -f ${inimage}.mrc SCRATCH/2dx_ctffind-cut.mrc
+    \cp -f ${inimage} SCRATCH/2dx_ctffind-cut.mrc
   endif
   #
   echo "<<@progress: 30>>"

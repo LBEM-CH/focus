@@ -531,10 +531,14 @@ C
       REAL AIN(*),ABOX(*),MEAN,RMS,M1,M2,M3,M4
 C
 CHEN>
-      REAL*8 DRMS
-CHEN<
+      REAL*8 DRMS,DMEAN,DM1,DM2,DM3,DM4,DTMP
 C
       MEAN=0.0
+      DMEAN=0.0
+      DM1=0.0
+      DM2=0.0
+      DM3=0.0
+      DM4=0.0
       M1=0.0
       M2=0.0
       M3=0.0
@@ -546,18 +550,28 @@ C
           ID=II+NXYZ(1)*(JJ-1)
           IDB=I+JXYZ(1)*(J-1)
           ABOX(IDB)=AIN(ID)
-          MEAN=MEAN+ABOX(IDB)
-          IF (I.EQ.1) M1=M1+ABOX(IDB)
-          IF (I.EQ.JXYZ(1)) M2=M2+ABOX(IDB)
-          IF (J.EQ.1) M3=M3+ABOX(IDB)
-          IF (J.EQ.JXYZ(2)) M4=M4+ABOX(IDB)
+C          MEAN=MEAN+ABOX(IDB)
+          DMEAN=DMEAN+ABOX(IDB)
+C          IF (I.EQ.1) M1=M1+ABOX(IDB)
+C          IF (I.EQ.JXYZ(1)) M2=M2+ABOX(IDB)
+C          IF (J.EQ.1) M3=M3+ABOX(IDB)
+C          IF (J.EQ.JXYZ(2)) M4=M4+ABOX(IDB)
+          IF (I.EQ.1) DM1=DM1+ABOX(IDB)
+          IF (I.EQ.JXYZ(1)) DM2=DM2+ABOX(IDB)
+          IF (J.EQ.1) DM3=DM3+ABOX(IDB)
+          IF (J.EQ.JXYZ(2)) DM4=DM4+ABOX(IDB)
 10    CONTINUE
-      MEAN=MEAN/JXYZ(1)/JXYZ(2)
-      M1=M1/JXYZ(2)
-      M2=M2/JXYZ(2)
-      M3=M3/JXYZ(1)
-      M4=M4/JXYZ(1)
-CHEN>
+C      MEAN=MEAN/JXYZ(1)/JXYZ(2)
+C      M1=M1/JXYZ(2)
+C      M2=M2/JXYZ(2)
+C      M3=M3/JXYZ(1)
+C      M4=M4/JXYZ(1)
+      DMEAN=DMEAN/JXYZ(1)/JXYZ(2)
+      DM1=DM1/JXYZ(2)
+      DM2=DM2/JXYZ(2)
+      DM3=DM3/JXYZ(1)
+      DM4=DM4/JXYZ(1)
+C
 C      RMS=0.0
 C      DO 20 I=1,JXYZ(1)*JXYZ(2)
 C        RMS=RMS+(ABOX(I)-MEAN)**2
@@ -569,13 +583,21 @@ C      RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
 20    CONTINUE
       DRMS=SQRT(DRMS/JXYZ(1)/JXYZ(2))
       RMS=DRMS
-CHEN<
+C
+C      DO 30 J=1,JXYZ(2)
+C        DO 30 I=1,JXYZ(1)
+C          IDB=I+JXYZ(1)*(J-1)
+C          ABOX(IDB)=ABOX(IDB)-(M1+(M2-M1)/(JXYZ(1)-1)*(I-1))
+C     +                 -(M3+(M4-M3)/(JXYZ(2)-1)*(J-1))+MEAN
+C30    CONTINUE
       DO 30 J=1,JXYZ(2)
         DO 30 I=1,JXYZ(1)
           IDB=I+JXYZ(1)*(J-1)
-          ABOX(IDB)=ABOX(IDB)-(M1+(M2-M1)/(JXYZ(1)-1)*(I-1))
-     +                 -(M3+(M4-M3)/(JXYZ(2)-1)*(J-1))+MEAN
+          DTMP=-(DM1+(DM2-DM1)/(JXYZ(1)-1)*(I-1))
+     +         -(DM3+(DM4-DM3)/(JXYZ(2)-1)*(J-1))+DMEAN
+          ABOX(IDB)=ABOX(IDB)+DTMP
 30    CONTINUE
+CHEN<
 C
       RETURN
       END

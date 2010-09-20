@@ -533,16 +533,16 @@ C
 CHEN>
       REAL*8 DRMS,DMEAN,DM1,DM2,DM3,DM4,DTMP
 C
-      MEAN=0.0
       DMEAN=0.0
       DM1=0.0
       DM2=0.0
       DM3=0.0
       DM4=0.0
-      M1=0.0
-      M2=0.0
-      M3=0.0
-      M4=0.0
+C      MEAN=0.0
+C      M1=0.0
+C      M2=0.0
+C      M3=0.0
+C      M4=0.0
       DO 10 J=1,JXYZ(2)
         DO 10 I=1,JXYZ(1)
           II=I+IX-1
@@ -584,15 +584,11 @@ C      RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
       DRMS=SQRT(DRMS/JXYZ(1)/JXYZ(2))
       RMS=DRMS
 C
-C      DO 30 J=1,JXYZ(2)
-C        DO 30 I=1,JXYZ(1)
-C          IDB=I+JXYZ(1)*(J-1)
-C          ABOX(IDB)=ABOX(IDB)-(M1+(M2-M1)/(JXYZ(1)-1)*(I-1))
-C     +                 -(M3+(M4-M3)/(JXYZ(2)-1)*(J-1))+MEAN
-C30    CONTINUE
       DO 30 J=1,JXYZ(2)
         DO 30 I=1,JXYZ(1)
           IDB=I+JXYZ(1)*(J-1)
+C          ABOX(IDB)=ABOX(IDB)-(M1+(M2-M1)/(JXYZ(1)-1)*(I-1))
+C     +                 -(M3+(M4-M3)/(JXYZ(2)-1)*(J-1))+MEAN
           DTMP=-(DM1+(DM2-DM1)/(JXYZ(1)-1)*(I-1))
      +         -(DM3+(DM4-DM3)/(JXYZ(2)-1)*(J-1))+DMEAN
           ABOX(IDB)=ABOX(IDB)+DTMP

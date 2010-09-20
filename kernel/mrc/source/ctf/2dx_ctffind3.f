@@ -260,6 +260,13 @@ C
 100   CONTINUE
       WRITE(*,*)' Total tiles and number used',NX*NY,CNT
 C
+CHEN>
+      if(CNT.lt.1)then
+        write(*,*)' ERROR: BOXIMG did not produce correctly boxed tiles'
+        stop
+      endif
+C
+CHEN<
       SCAL=1.0/CNT
       DO 60 K=1,KXYZ(1)*KXYZ(2)
         POWER(K)=SQRT(POWER(K)*SCAL)
@@ -523,6 +530,10 @@ C
       INTEGER I,J,NXYZ(3),JXYZ(3),IX,IY,ID,IDB,II,JJ
       REAL AIN(*),ABOX(*),MEAN,RMS,M1,M2,M3,M4
 C
+CHEN>
+      REAL*8 DRMS
+CHEN<
+C
       MEAN=0.0
       M1=0.0
       M2=0.0
@@ -546,11 +557,19 @@ C
       M2=M2/JXYZ(2)
       M3=M3/JXYZ(1)
       M4=M4/JXYZ(1)
-      RMS=0.0
+CHEN>
+C      RMS=0.0
+C      DO 20 I=1,JXYZ(1)*JXYZ(2)
+C        RMS=RMS+(ABOX(I)-MEAN)**2
+C20    CONTINUE
+C      RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
+      DRMS=0.0
       DO 20 I=1,JXYZ(1)*JXYZ(2)
-        RMS=RMS+(ABOX(I)-MEAN)**2
+        DRMS=DRMS+(ABOX(I)-MEAN)**2
 20    CONTINUE
-      RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
+      DRMS=SQRT(DRMS/JXYZ(1)/JXYZ(2))
+      RMS=DRMS
+CHEN<
       DO 30 J=1,JXYZ(2)
         DO 30 I=1,JXYZ(1)
           IDB=I+JXYZ(1)*(J-1)

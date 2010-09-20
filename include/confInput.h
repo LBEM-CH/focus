@@ -60,6 +60,7 @@ class confInput : public QWidget
 
   QString type;
   int user_level;
+  int is_wrong;
 
   QLabel *label;
   QList<QLineEdit *> lEdits;
@@ -73,6 +74,7 @@ class confInput : public QWidget
   public:
   confInput(confData *conf, confElement *e, QWidget *parent = NULL);
   int userLevel();
+  int isWrong();
 
   protected:
   void mousePressEvent(QMouseEvent *event);

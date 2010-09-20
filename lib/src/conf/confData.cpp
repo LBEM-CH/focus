@@ -16,7 +16,7 @@ void confData::init(const QString &fileName, confData *parentData)
 {
   parentConf = parentData;
   dataFilename=fileName;
-  valueSearch<<"LABEL"<<"LEGEND"<<"EXAMPLE"<<"FORMER"<<"HELP"<<"TYPE"<<"RELATION"<<"LOCKED"<<"CONCERNS"<<"USERLEVEL"<<"INHERITABLE_UPON_INIT"<<"SYNC_WITH_UPPER_LEVEL";
+  valueSearch<<"LABEL"<<"LEGEND"<<"EXAMPLE"<<"FORMER"<<"HELP"<<"TYPE"<<"RELATION"<<"LOCKED"<<"CONCERNS"<<"USERLEVEL"<<"INHERITABLE_UPON_INIT"<<"SYNC_WITH_UPPER_LEVEL"<<"ISWRONG";
   empty = false;
   OS_X_APP_PATH = "Contents/MacOS/";
   if(!parseDataFile())

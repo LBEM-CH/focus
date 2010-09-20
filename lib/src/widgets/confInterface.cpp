@@ -29,9 +29,12 @@ confInterface::confInterface(confData *conf, QString concerns, QWidget *parent)
 {
   data=conf;
   alt = QColor(227,233,244);
+  alt_is_wrong = QColor(210,210,103);
+  normal_is_wrong = QColor(250,250,123);
   advancedView = false;
 
   userLevel = 0;
+  isWrong = 0;
 
   //Actions
   saveAction = new QAction(tr("Save"),this);
@@ -68,7 +71,7 @@ confInterface::confInterface(confData *conf, QString concerns, QWidget *parent)
       {
         element = (*(*data)[i])[j];
         QPalette pal(palette());
-    	  if(color)
+    	if(color)
         {
           pal.setColor(QPalette::Window,alt);
         }
@@ -158,11 +161,11 @@ void confInterface::setUserLevel(int level)
       i.next();
       if(color)
       {
-        pal.setColor(QPalette::Window,alt);
+          pal.setColor(QPalette::Window,alt);
       }
       else
       {
-        pal.setColor(QPalette::Window,Qt::white);
+          pal.setColor(QPalette::Window,Qt::white);
       }
 
       if(i.value()->userLevel() == 1)
@@ -186,11 +189,11 @@ void confInterface::setUserLevel(int level)
       i.next();
       if(color)
       {
-        pal.setColor(QPalette::Window,alt);
+          pal.setColor(QPalette::Window,alt);
       }
       else
       {
-        pal.setColor(QPalette::Window,Qt::white);
+          pal.setColor(QPalette::Window,Qt::white);
       }
 
       if(i.key()->isHidden()) i.key()->show();
@@ -255,8 +258,16 @@ void confInterface::select(const QStringList &selectionList, int)
       if(!input->isHidden())
       {
         if(section->isHidden()) section->show();
-        if(odd) pal.setColor(QPalette::Window,alt);
-        else pal.setColor(QPalette::Window,Qt::white);
+        if(input->isWrong())
+        {
+          if(odd) pal.setColor(QPalette::Window,alt_is_wrong);
+          else pal.setColor(QPalette::Window,normal_is_wrong);
+        }
+        else
+        {
+          if(odd) pal.setColor(QPalette::Window,alt);
+          else pal.setColor(QPalette::Window,Qt::white);
+        }
         odd^=true;
         input->setPalette(pal);
         showAtEnd = true;

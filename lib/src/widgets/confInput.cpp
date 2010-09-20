@@ -23,6 +23,12 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
   else
     user_level = 0;
 
+  QString isWrongString = e->get("ISWRONG").trimmed().toLower();
+  if(isWrongString == "yes")
+    is_wrong = 1;
+  else
+    is_wrong = 0;
+
   setAutoFillBackground(true);
 
   const int LINE_EDIT_WIDTH=150;
@@ -451,6 +457,11 @@ bool confInput::event(QEvent *event)
 int confInput::userLevel()
 {
 	return user_level;
+}
+
+int confInput::isWrong()
+{
+	return is_wrong;
 }
 
 void confInput::dataModified()

@@ -60,8 +60,11 @@ class confInterface : public QWidget
   QStringList selectedInputs;
 
   int userLevel;
+  int isWrong;
 
   QColor alt;
+  QColor alt_is_wrong;
+  QColor normal_is_wrong;
 
   public:
   confInterface(confData *conf, QString concerns = "", QWidget *parent = NULL);

@@ -106,6 +106,21 @@ echo "<<@progress: 1>>"
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
 #
+if ( ${merge_res_limit}x == 'x' ) then
+  echo ":: "
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "#"
+  echo ":: "
+  echo ":: "
+  ${proc_2dx}/linblock "ERROR: Parameter Database in 2dx_merge is outdated."
+  ${proc_2dx}/linblock "Use in 2dx_image the menu function 'Save As Project Default' to update."
+  echo ":: "
+  echo ":: "
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/protest "Aborting."
+endif
+#
 if ( ${MergeHKMAX}x == 'x' ) then
   set MergeHKMAX = '20'
   ${proc_2dx}/linblock "ERROR: correcting MergeHKMAX to ${MergeHKMAX}"

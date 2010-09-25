@@ -50,6 +50,7 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set merge_res_limit = ""
 #
 # Variables to be available from the config file are:
 set tempkeep = ""
@@ -92,6 +93,25 @@ echo "::                            *************************"
 echo "::                 (activate the MANUAL button top right for help)"
 echo ":: "
 #############################################################################
+#
+#
+if ( ${merge_res_limit}x == 'x' ) then
+  echo ":: "
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "#"
+  echo ":: "
+  echo ":: "
+  echo "::   ERROR: Parameter Database in 2dx_merge is outdated."
+  echo ":: "
+  echo "::   Use in 2dx_image the menu function 'Save As Project Default' to update."
+  echo ":: "
+  echo "::   Then quit 2dx_merge (without saving) and relaunch 2dx_merge."
+  echo ":: "
+  echo ":: "
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "#"
+endif
 #
 echo "<<@progress: 100>>"
 #

@@ -100,7 +100,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
 			lEdits[0]->setFixedWidth(LINE_EDIT_WIDTH);
 			lEdits[0]->setFixedHeight(LINE_EDIT_HEIGHT);
 		}
-		lEdits[0]->setAutoFillBackground(true);
+    //lEdits[0]->setAutoFillBackground(true);
 		lEdits[0]->setFont(labelFont);
 
 		if(type!="text_edit")
@@ -323,6 +323,9 @@ void confInput::load()
 	if(type=="text_edit" || type == "integer" || type == "float")
 	{
 		lEdits[0]->setText(value);
+		QPalette pal(palette());
+		pal.setColor(QPalette::Base,QColor(250,250,123));
+    lEdits[0]->setPalette(pal);
 	}
 
 	if(type == "two_float" || type == "three_float" || type == "four_float" || type == "fourtynine_float")

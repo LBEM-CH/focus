@@ -380,7 +380,7 @@ void scriptModule::readStdErr()
 	writeToLog("<error>" + text + "</error>");
 }
 
-QStringList scriptModule::globalVariables(QModelIndex index)
+QStringList scriptModule::displayedVariables(QModelIndex index)
 {
 	return getScriptProperty(index.data(Qt::UserRole).toUInt(),"displayedVars").toStringList();
 }

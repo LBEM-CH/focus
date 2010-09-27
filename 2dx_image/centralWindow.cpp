@@ -312,7 +312,7 @@ void centralWindow::scriptChanged(scriptModule *module, QModelIndex index)
 
   manuals->setCurrentIndex(manualIndex[uid] - 1);
 
-  parameters->select(module->globalVariables(index));
+  parameters->select(module->displayedVariables(index));
   currentLog = module->logFile(index);
   if(!visible["historyview"]) logViewer->loadLogFile(currentLog);
   results->setResult(module->resultsFile(index));

@@ -102,7 +102,7 @@ class scriptModule : public QWidget
   scriptModule(confData *conf, const QDir &directory, scriptModule::moduleType type = scriptModule::standard, QWidget *parent = NULL);
   void extendSelectionTo(scriptModule *module);
 
-  QStringList globalVariables(QModelIndex index);
+  QStringList displayedVariables(QModelIndex index);
   QString logFile(QModelIndex index);
   QString logFile();
   QString resultsFile(QModelIndex index);

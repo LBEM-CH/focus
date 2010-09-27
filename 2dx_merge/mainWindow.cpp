@@ -649,7 +649,7 @@ void mainWindow::scriptChanged(scriptModule *module, QModelIndex index)
 
   manuals->setCurrentIndex(manualIndex[uid] - 1);
 
-  parameters->select(module->globalVariables(index));
+  parameters->select(module->displayedVariables(index));
   if(verbosityControl->level() != 0)
 		logViewer->loadLogFile(module->logFile(index));
   else

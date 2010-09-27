@@ -198,7 +198,7 @@ SET(DIRS ${QT_LIBRARY_DIRS})
 #INSTALL(CODE "
 #    include(BundleUtilities)
 #    fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
-#    " COMPONENT Runtime)
+    #    " COMPONENT Runtime)
 
 
 # To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X

@@ -80,6 +80,8 @@ if ( "${level}" == "radical" ) then
   \rm -f ${imagename}-p*-scaled.tif
   \rm -f ${imagename}-p*-scaled-from_Spider.mrc
   #
+  \rm -rf ML
+  #
 else
   #
   ${proc_2dx}/linblock "Slight Cleanup"

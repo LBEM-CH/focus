@@ -131,7 +131,7 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 	Loop=0; 
 	mrcImage::mrcHeader *header2 = mrcImage::headerFromData(nx,ny,2,(char*)refer);                
 	char outputfile [50];
-	sprintf(outputfile,"./SCRATCH/ML_reference_%03d.mrc",Loop);           
+	sprintf(outputfile,"./ML/ML_reference_%03d.mrc",Loop);           
 	mrcImage(header2,(char*)refer,outputfile);
 	printf("File %s written.\n",outputfile);               
 	fprintf(results,"# IMAGE: %s <Reference Map %03d>\n",outputfile,Loop);
@@ -465,7 +465,7 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 
 		mrcImage::mrcHeader *header2 = mrcImage::headerFromData(nx,ny,2,(char*)temp_image);
 		char outputfile [50];
-		sprintf(outputfile,"SCRATCH/ML_reference_%03d.mrc",Loop);
+		sprintf(outputfile,"./ML/ML_reference_%03d.mrc",Loop);
 		mrcImage(header2,(char*)temp_image,outputfile);
 		printf("File %s written.\n",outputfile);
 		fprintf(results,"# IMAGE: %s <Reference Map %03d>\n",outputfile,Loop);
@@ -573,7 +573,7 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 
 			mrcImage::mrcHeader *header3 = mrcImage::headerFromData(nx,ny,2,(char*)temp_image);
 			char outputfile [50];
-			sprintf(outputfile,"SCRATCH/ML_reference_CTF_%03d.mrc",m);
+			sprintf(outputfile,"./ML/ML_reference_CTF_%03d.mrc",m);
 			mrcImage(header3,(char*)temp_image,outputfile);
 			printf("File %s written.\n",outputfile);
 			fprintf(results,"# IMAGE: %s <CTF-corr. Reference Map %03d>\n",outputfile,m);

@@ -67,12 +67,12 @@ if ( ! -e ${imagename}.mrc ) then
   ${proc_2dx}/protest "${imagename}.mrc not existing. No input image file ???"
 endif
 #
-echo dummy > SCRATCH/ML_reference_1.mrc
+echo dummy > ML/ML_reference_1.mrc
 \rm -f ML_result_noEnvelope.mrc
 \rm -f ML_result_withEnvelope.mrc
 \rm -f ML_result_ref_even.mrc
 \rm -f ML_result_ref_odd.mrc
-\rm -f SCRATCH/ML_reference_*.mrc
+\rm -f ML/ML_reference_*.mrc
 #
 echo "<<@progress: 10>>"
 #
@@ -84,11 +84,6 @@ ${bin_2dx}/2dx_ML.exe << eot_ML1
 ${ML_doMLorCC}
 LOGS/${scriptname}.results
 eot_ML1
-#
-if ( ${tempkeep} == "n" ) then
-  echo dummy > SCRATCH/ML_reference_1.mrc 
-  \rm -f SCRATCH/ML_reference_*.mrc
-endif
 #
 set aphfile = "APH/ML_result.aph"
 if ( ! -e ${aphfile} ) then

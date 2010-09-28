@@ -150,6 +150,10 @@ if ( ${ML_doit} == 'n' ) then
   exit
 endif
 #
+if ( ! -d ML ) then
+  \mkdir ML
+endif
+#
 if ( "now" == "future" ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing 2dx_ML_stack_sub.com script"
@@ -178,11 +182,6 @@ endif
 set aphfile = "APH/ML_result.aph"
 if ( ! -e ${aphfile} ) then
   ${proc_2dx}/protest "ERROR: ${aphfile} does not exist. Problem in ML."
-endif
-#
-if ( ${tempkeep} == "n" ) then
-  echo dummy > SCRATCH/ML_reference_1.mrc 
-  \rm -f SCRATCH/ML_reference_*.mrc
 endif
 #
 echo "set ML_done = y" >> LOGS/${scriptname}.results

@@ -57,7 +57,7 @@ imageAlbum::imageAlbum(const QString &path, QWidget *parent)
 
  
   QListWidget *selectionWidget = new QListWidget;
-  selectionWidget->addItem("P1-Symmetry");
+  selectionWidget->addItem("P1 Symmetry");
   
   viewContainer *selectorContainer = new viewContainer("Selection", viewContainer::image, this);
   selectorContainer->addWidget(selectionWidget);

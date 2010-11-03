@@ -35,6 +35,7 @@
 #
 # MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_image-algo-2.jpg">
 #
+# DISPLAY: imageorigin
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
 # DISPLAY: imagenumber
@@ -232,7 +233,66 @@ eot
       endif
       #
     endif
+    #
+    if ( ${imageorigin} == '4' ) then
+      #############################################################################
+      #                                                                           #
+      ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
+      #                                                                           #
+      #############################################################################  
+      #
+      \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
+      #
+      ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+2               ! switch to REAL (floating point)
+${imagename}.mrc
+0.25,0
+1
+eot
+      #
+    endif
+    #
   else
+    #
+    if ( ! -e ${imagename}.mrc ) then
+      ${proc_2dx}/linblock "Image ${imagename}.mrc does not exist."
+      #
+      if ( ! -e ${imagename}.tif ) then
+        ${proc_2dx}/protest "Image ${imagename}.tif does not exist."
+      else
+        ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+        #
+        ${bin_2dx}/tif2mrc.exe << eot
+${imagename}.tif
+SCRATCH/${imagename}.tmp.mrc
+y
+eot
+        #
+        if ( ${imageorigin} == '4' ) then
+          #############################################################################
+          #                                                                           #
+          ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
+          #                                                                           #
+          #############################################################################  
+          #
+          ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+2               ! switch to REAL (floating point)
+${imagename}.mrc
+0.25,0
+1
+eot
+          #
+        else
+          \mv SCRATCH/${imagename}.tmp.mrc ${imagename}.mrc
+        endif
+        echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
+      endif
+    else
+      echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
+    endif
+    #
     #################################################################################
     ${proc_2dx}/linblock "Initialization ran already."
     echo "::If this is wrong, set 'Initialization can be executed (again)' to 'Yes'."
@@ -425,6 +485,25 @@ eot
       endif
     endif
     #
+    if ( ${imageorigin} == '4' ) then
+      #############################################################################
+      #                                                                           #
+      ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
+      #                                                                           #
+      #############################################################################  
+      #
+      \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
+      #
+      ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+2               ! switch to REAL (floating point)
+${imagename}.mrc
+0.25,0
+1
+eot
+      #
+    endif
+    #
     set testname = `echo ${imagename} | cut -c2-`
     if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
       set oldval = ${nonmaskimagename}
@@ -608,6 +687,45 @@ eot
     endif
     #
     ##################################################################
+    #
+  else
+    if ( ! -e ${imagename}.mrc ) then
+      ${proc_2dx}/linblock "Image ${imagename}.mrc does not exist."
+    #
+      if ( ! -e ${imagename}.tif ) then
+        ${proc_2dx}/protest "Image ${imagename}.tif does not exist."
+      else
+        ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+        #
+        ${bin_2dx}/tif2mrc.exe << eot
+${imagename}.tif
+SCRATCH/${imagename}.tmp.mrc
+y
+eot
+        #
+        if ( ${imageorigin} == '4' ) then
+          #############################################################################
+          #                                                                           #
+          ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
+          #                                                                           #
+          #############################################################################  
+          #
+          ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+2               ! switch to REAL (floating point)
+${imagename}.mrc
+0.25,0
+1
+eot
+         #
+        else
+          \mv SCRATCH/${imagename}.tmp.mrc ${imagename}.mrc
+        endif
+        echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
+      endif
+    else
+      echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
+    endif
     #
   endif
   if ( ${Calc_from_sample_pixel} == "y" ) then

@@ -1,3 +1,4 @@
+#!/bin/tcsh
 #
 # This is not an executable script.
 #
@@ -9,19 +10,23 @@ echo ":++++++++++++++++++++++++++++++++"
 #
 set date = `date`
 echo date = ${date}
+set system = `uname -s`
+echo system = ${system}
 #
 if ( -d /usr/local/ccp4 ) then
   set ccp4 = /usr/local/ccp4
-else 
-  set ccp = `ls -1 /Applications | grep ccp4 | tail -n 1`
-  set ccp4 = `echo /Applications/${ccp}`
-  set ccp4x = `echo ${ccp4}x`
-  if ( ${ccp4x} == 'x' ) then
-    ${proc_2dx}/linblock "WARNING: ccp4 not found"
-  endif
+  set bin_ccp4 = ${ccp4}/bin
+else
+  if ( ${system} == "Darwin") then
+	  set ccp = `ls -1 /Applications | grep ccp4 | tail -n 1`
+	  if ( "${?ccp}" == 0) then
+		${proc_2dx}/linblock "WARNING: ccp4 not found in /Applications"
+	  else
+	    set ccp4 = `echo /Applications/${ccp}`
+            set bin_ccp4 = ${ccp4}/bin
+	  endif
+  endif 
 endif
-echo ":CCP4 found in ${ccp4}"
-set bin_ccp4 = ${ccp4}/bin
 #
 echo bin_2dx = ${bin_2dx}
 echo proc_2dx = ${proc_2dx}

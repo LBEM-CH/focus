@@ -79,6 +79,9 @@ if ( "${level}" == "radical" ) then
   \rm -f *.profile
   \rm -f ${imagename}-p*-scaled.tif
   \rm -f ${imagename}-p*-scaled-from_Spider.mrc
+  if ( -e ${imagename}.tif ) then
+    \rm -f ${imagename}.mrc
+  endif
   #
   \rm -rf ML
   #

@@ -25,8 +25,8 @@
 # LEGEND: Choose the location of the Cleanup that should be done.
 # EXAMPLE: cleanup_location = "merge"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "merge;all image directories"
-set cleanup_location = "merge"
+# TYPE: Drop_Down_Menu "all image directories;merge"
+set cleanup_location = "all"
 #
 # LABEL: Level of Cleanup
 # LEGEND: Choose the Level of the Cleanup that should be done.

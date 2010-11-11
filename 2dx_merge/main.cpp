@@ -31,6 +31,28 @@ void initializeProject(const QString &workingDir)
   data.save();
 }
 
+void reviseProject(const QString &workingDir)
+{
+  QString appDir = QApplication::applicationDirPath();
+  QString sep = "/../";
+  #ifdef Q_WS_MAC
+    appDir+="/../../../";
+  #endif
+  int tries = 0;
+  while(!QFileInfo(appDir + sep + "config/2dx_master.cfg").exists() && tries<3)
+  {
+    qDebug()<<(appDir + sep + "config/2dx_master.cfg")<<" does not exist!";
+    sep+="../";
+    tries++;
+  }
+  if(!QFileInfo(appDir + sep + "config/2dx_master.cfg").exists()) exit(0);
+  
+  QDir dir(workingDir);
+  //to enter new variables from the 2dx_master.cfg
+  confData data(workingDir + "/merge/" + "2dx_merge.cfg", appDir + sep + "config/2dx_master.cfg");
+  data.save();
+}
+
 int main(int argc, char **argv)
 {
   QApplication app(argc,argv);
@@ -47,6 +69,10 @@ int main(int argc, char **argv)
     {
       initializeProject(workingDir);
     }
+  }
+  else
+  {
+    reviseProject(workingDir);
   }
 
 

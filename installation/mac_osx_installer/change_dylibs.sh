@@ -24,10 +24,10 @@ do
 done
 cd kernel/mrc/bin
 echo "in `pwd`"
-for exe in `ls`
-do
-	echo "changing the dylibs of" $exe
-	install_name_tool -change /opt/local/lib/libfftw3f.3.dylib @executable_path/../../../lib/libfftw3f.3.dylib $exe 
-	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../../../lib/libgfortran.3.dylib $exe 
-	otool -L $exe
-done
+#for exe in `ls`
+#do
+#	echo "changing the dylibs of" $exe
+#	install_name_tool -change /opt/local/lib/libfftw3f.3.dylib @executable_path/../../../lib/libfftw3f.3.dylib $exe 
+#	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../../../lib/libgfortran.3.dylib $exe 
+#	otool -L $exe
+#done

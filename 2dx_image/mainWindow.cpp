@@ -29,7 +29,7 @@ mainWindow::mainWindow(char *dirArg)
   if(dirArg==NULL || !QFileInfo(dirArg).exists())
   {
     if(!QFileInfo(dirArg).exists()) cerr<<dirArg<<" does not exist."<<endl;
-    workingDir=QFileDialog::getExistingDirectory(this,"Select an Image Folder","./");
+    workingDir=QFileDialog::getExistingDirectory(this,"Select an Image Folder",QDir::homePath());
     if(workingDir.isEmpty()) exit(0);
   }
   else

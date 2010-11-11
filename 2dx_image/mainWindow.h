@@ -25,6 +25,7 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QFileDialog>
+#include <QDir>
 #include <QMessageBox>
 #include <QProcess>
 #include <confData.h>

@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QFileDialog>
+#include <QDir>
 #include <QMessageBox>
 #include <QDebug>
 #include "mainWindow.h"
@@ -35,7 +36,7 @@ int main(int argc, char **argv)
   QApplication app(argc,argv);
   app.setApplicationName("2dx_merge");
 
-  QString workingDir = QFileDialog::getExistingDirectory(NULL,"Select a Project Directory");
+  QString workingDir = QFileDialog::getExistingDirectory(NULL,"Select a Project Directory",QDir::homePath());
   if(workingDir.isEmpty() || !QDir(workingDir).exists()) exit(0);
 
   if(!QFileInfo(workingDir +"/merge/" + "2dx_merge.cfg").exists())

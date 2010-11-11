@@ -260,8 +260,8 @@ void confInterface::select(const QStringList &selectionList, int)
         if(section->isHidden()) section->show();
         if(input->isWrong())
         {
-          if(odd) pal.setColor(QPalette::Window,alt_is_wrong);
-          else pal.setColor(QPalette::Window,normal_is_wrong);
+          if(odd) pal.setColor(QPalette::Window,alt);
+          else pal.setColor(QPalette::Window,Qt::white);
         }
         else
         {

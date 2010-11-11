@@ -177,7 +177,8 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
 		if(type=="fourtynine_float")
 		{
 			QPalette pal(palette());
-			pal.setColor(QPalette::Base,QColor(125,125,255));
+      pal.setColor(QPalette::Base,QColor(255,0,0));
+      //pal.setColor(QPalette::Base,QColor(125,125,255));
 			lEdits[24]->setPalette(pal);
 		}
 	}
@@ -324,7 +325,7 @@ void confInput::load()
 	{
 		lEdits[0]->setText(value);
 		QPalette pal(palette());
-		pal.setColor(QPalette::Base,QColor(250,250,123));
+		pal.setColor(QPalette::Base,QColor(250,0,0));
     lEdits[0]->setPalette(pal);
 	}
 

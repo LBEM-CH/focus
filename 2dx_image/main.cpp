@@ -149,6 +149,8 @@ int main(int argc, char *argv[])
 		else
 			mainWin = new mainWindow(NULL);
 		mainWin->show();
+		mainWin->raise();
+		mainWin->activateWindow();
 		return app.exec();
 	}
 }

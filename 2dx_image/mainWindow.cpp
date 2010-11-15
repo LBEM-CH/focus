@@ -26,21 +26,10 @@ mainWindow::mainWindow(char *dirArg)
 {
   bool initialize = false;
   QString workingDir;
-  if(dirArg==NULL || !QFileInfo(dirArg).exists())
-  {
-    if(!QFileInfo(dirArg).exists()) cerr<<dirArg<<" does not exist."<<endl;
-    workingDir=QFileDialog::getExistingDirectory(this,"Select an Image Folder",QDir::homePath());
-    if(workingDir.isEmpty()) exit(0);
-  }
-  else
-    workingDir = dirArg;
 
- if(!QFileInfo(workingDir + "/" + "2dx_image.cfg").exists())
- {
-   if(QMessageBox::question(this,tr("Confirm Processing new Image?"),"No configuration data found in:\n"+workingDir+"\n\nCreate new config files in this directory?",tr("Create"),tr("Cancel"),QString(),0,1) == 1) exit(0);
-   initialize = true;
- }
-
+  
+  
+  
  QDir applicationDir, configDir;
 
  #ifdef Q_WS_MAC
@@ -54,10 +43,40 @@ mainWindow::mainWindow(char *dirArg)
 
   configDir = QDir(applicationDir.absolutePath() + "/../" + "config/");
 
+  // read user config to get the latest image dir
+  userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_image-user.cfg", configDir.absolutePath() + "/" + "2dx_image-user.cfg");
+  userData->save();
+  
+  if(dirArg==NULL || !QFileInfo(dirArg).exists())
+  {
+    if(!QFileInfo(dirArg).exists()) cerr<<dirArg<<" does not exist."<<endl;
+    QString userDirPath = userData->get("workingDir","value");
+    cout << "The last used working dir is: " << userDirPath.toStdString() << endl;
+    if(userDirPath.isEmpty()) 
+      userDirPath = QDir::homePath(); 
+    workingDir=QFileDialog::getExistingDirectory(this, "Select an Image Folder", userDirPath);
+    if(workingDir.isEmpty()) exit(0);
+  }
+  else
+  {
+    workingDir = dirArg;
+  }
+  userData->set("workingDir", workingDir);
+  userData->save();
+
+  if(!QFileInfo(workingDir + "/" + "2dx_image.cfg").exists())
+  {
+    if(QMessageBox::question(this,tr("Confirm Processing new Image?"),"No configuration data found in:\n"+workingDir+"\n\nCreate new config files in this directory?",tr("Create"),tr("Cancel"),QString(),0,1) == 1) exit(0);
+    initialize = true;
+  }
+
+  
+  
   confData masterData(userPath + "/2dx_master.cfg", configDir.canonicalPath() + "/" + "2dx_master.cfg");
   masterData.save();
 
   data = new confData(workingDir + "/" + "2dx_image.cfg", userPath + "/2dx_master.cfg");
+  data->setUserConf(userData);
   data->setDir("application",applicationDir);
   data->setDir("plugins",QDir(applicationDir.absolutePath() + "/../plugins"));
   data->setDir("tools",data->getDir("plugins") + "/tools/");
@@ -111,9 +130,9 @@ mainWindow::mainWindow(char *dirArg)
   setWindowTitle(data->getDir("working"));
 
 
-  userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_image-user.cfg", data->getDir("config") + "/" + "2dx_image-user.cfg");
-  userData->save();
-  data->setUserConf(userData);
+  //userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_image-user.cfg", data->getDir("config") + "/" + "2dx_image-user.cfg");
+  //userData->save();
+  //data->setUserConf(userData);
 
   int fontSize = data->userConf()->get("fontSize","value").toInt();
   if(fontSize!=0)

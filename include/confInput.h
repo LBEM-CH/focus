@@ -26,6 +26,7 @@
 #include <QPalette>
 #include <QProcess>
 #include <QIcon>
+#include <QColor>
 #include <float.h>
 #include "confData.h"
 #include "graphicalButton.h"
@@ -60,7 +61,7 @@ class confInput : public QWidget
 
   QString type;
   int user_level;
-  int is_wrong;
+  bool is_wrong;
 
   QLabel *label;
   QList<QLineEdit *> lEdits;
@@ -70,11 +71,12 @@ class confInput : public QWidget
   QLabel *yesLabel, *noLabel;
 
   graphicalButton *lockedBox;
-
+  const QColor isWrongBGColor;
+  
   public:
   confInput(confData *conf, confElement *e, QWidget *parent = NULL);
   int userLevel();
-  int isWrong();
+  bool isWrong();
 
   protected:
   void mousePressEvent(QMouseEvent *event);

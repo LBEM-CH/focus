@@ -22,7 +22,9 @@ bool confElement::set(QString label, QString value)
   if(properties[label.toLower()] != value) changed = true;
   properties[label.toLower()]=value;
   if(changed)
+  {
     emit dataChanged();
+  }
   return true;
 }
 
@@ -89,7 +91,7 @@ QPointF confElement::toQPointF(int group, bool *ok)
 
 bool confElement::toBool(bool *ok)
 {
-  QString value=get("value").trimmed().toLower();
+QString value=get("value").trimmed().toLower();
   if(value == "y" || value == "yes" ) return true;
   else if(value == "n" || value == "no") return false;
   else if(ok!=NULL) *ok = false;

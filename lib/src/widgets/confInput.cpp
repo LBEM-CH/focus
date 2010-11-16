@@ -15,7 +15,7 @@
 using namespace std;
 
 confInput::confInput(confData *conf, confElement *e, QWidget *parent)
-                    :QWidget(parent)
+                    :QWidget(parent), isWrongBGColor(125,125,255)
 {
   QString userLevelString = e->get("USERLEVEL").trimmed().toLower();
   if(userLevelString == "advanced")
@@ -23,11 +23,19 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
   else
     user_level = 0;
 
+  
+	QPalette pal(palette());
   QString isWrongString = e->get("ISWRONG").trimmed().toLower();
   if(isWrongString == "yes")
+  {
     is_wrong = 1;
+    pal.setColor(QPalette::Base,isWrongBGColor);
+  }
   else
+  {
     is_wrong = 0;
+    pal.setColor(QPalette::Base,Qt::white);
+  }
 
   setAutoFillBackground(true);
 
@@ -119,6 +127,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
 			//lEdits[0]->setValidator(v);
 		}
 
+	  lEdits[0]->setPalette(pal);
 		layout->addWidget(lEdits[0],0,3,1,1);
 		connect(lEdits[0],SIGNAL(textEdited(const QString &)),this,SLOT(save()));
 	}
@@ -165,6 +174,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
 
 			//if(type!="fourtynine_float") 
 			lEdits[i]->setMaximumWidth(LINE_EDIT_WIDTH/2);
+			lEdits[i]->setPalette(pal);
 			//else lEdits[i]->setMaximumWidth(LINE_EDIT_WIDTH/(2));
 
 			if(type!="fourtynine_float")
@@ -176,9 +186,6 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
 
 		if(type=="fourtynine_float")
 		{
-			QPalette pal(palette());
-      pal.setColor(QPalette::Base,QColor(255,0,0));
-      //pal.setColor(QPalette::Base,QColor(125,125,255));
 			lEdits[24]->setPalette(pal);
 		}
 	}
@@ -324,9 +331,9 @@ void confInput::load()
 	if(type=="text_edit" || type == "integer" || type == "float")
 	{
 		lEdits[0]->setText(value);
-		QPalette pal(palette());
-		pal.setColor(QPalette::Base,QColor(250,0,0));
-    lEdits[0]->setPalette(pal);
+    //QPalette pal(palette());
+		//pal.setColor(QPalette::Base,QColor(250,0,0));
+    //lEdits[0]->setPalette(pal);
 	}
 
 	if(type == "two_float" || type == "three_float" || type == "four_float" || type == "fourtynine_float")
@@ -463,13 +470,19 @@ int confInput::userLevel()
 	return user_level;
 }
 
-int confInput::isWrong()
+bool confInput::isWrong()
 {
 	return is_wrong;
 }
 
 void confInput::dataModified()
 {
+  if(is_wrong)
+  {
+    element->set("ISWRONG","NO");
+
+    qDebug() << "[Debug] Data has been modified";
+  }
 	data->setModified(true);
 }
 

@@ -24,7 +24,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
     user_level = 0;
 
   
-	QPalette pal(palette());
+	pal = QPalette(palette());
   QString isWrongString = e->get("ISWRONG").trimmed().toLower();
   if(isWrongString == "yes")
   {
@@ -480,8 +480,8 @@ void confInput::dataModified()
   if(is_wrong)
   {
     element->set("ISWRONG","NO");
-
-    qDebug() << "[Debug] Data has been modified";
+    setRegularBackground();
+    //qDebug() << "[Debug] Data has been modified";
   }
 	data->setModified(true);
 }
@@ -599,4 +599,18 @@ void confInput::show()
 	update();
 	QWidget::show();
 	emit shown();
+}
+
+void confInput::setRegularBackground()
+{
+  for(int i=0;i<lEdits.size();i++)
+	{
+    
+    pal.setColor(QPalette::Base,Qt::white);
+		lEdits[i]->setPalette(pal);
+		//repaint();
+    //update();
+		//updateGeometry();
+	}
+
 }

@@ -71,7 +71,10 @@ class confInput : public QWidget
   QLabel *yesLabel, *noLabel;
 
   graphicalButton *lockedBox;
+  QPalette pal;
   const QColor isWrongBGColor;
+
+  void setRegularBackground();
   
   public:
   confInput(confData *conf, confElement *e, QWidget *parent = NULL);

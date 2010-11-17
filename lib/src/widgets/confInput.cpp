@@ -15,7 +15,7 @@
 using namespace std;
 
 confInput::confInput(confData *conf, confElement *e, QWidget *parent)
-                    :QWidget(parent), isWrongBGColor(125,125,255)
+                    :QWidget(parent), isWrongColor(160,160,160)
 {
   QString userLevelString = e->get("USERLEVEL").trimmed().toLower();
   if(userLevelString == "advanced")
@@ -29,12 +29,12 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
   if(isWrongString == "yes")
   {
     is_wrong = 1;
-    pal.setColor(QPalette::Base,isWrongBGColor);
+    pal.setColor(QPalette::Text,isWrongColor);
   }
   else
   {
     is_wrong = 0;
-    pal.setColor(QPalette::Base,Qt::white);
+    pal.setColor(QPalette::Text,Qt::black);
   }
 
   setAutoFillBackground(true);
@@ -479,9 +479,11 @@ void confInput::dataModified()
 {
   if(is_wrong)
   {
-    element->set("ISWRONG","NO");
-    setRegularBackground();
-    //qDebug() << "[Debug] Data has been modified";
+    is_wrong = 0;
+    element->set("iswrong","NO");
+    setIsWrongValueColor();
+    //DEBUG
+    //qDebug() << "[Debug] Data has been modified to: " << element->get("iswrong");
   }
 	data->setModified(true);
 }
@@ -601,16 +603,13 @@ void confInput::show()
 	emit shown();
 }
 
-void confInput::setRegularBackground()
+void confInput::setIsWrongValueColor()
 {
   for(int i=0;i<lEdits.size();i++)
 	{
     
-    pal.setColor(QPalette::Base,Qt::white);
+    pal.setColor(QPalette::Text,Qt::black);
 		lEdits[i]->setPalette(pal);
-		//repaint();
-    //update();
-		//updateGeometry();
 	}
 
 }

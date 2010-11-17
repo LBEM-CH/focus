@@ -34,7 +34,6 @@ confInterface::confInterface(confData *conf, QString concerns, QWidget *parent)
   advancedView = false;
 
   userLevel = 0;
-  isWrong = 0;
 
   //Actions
   saveAction = new QAction(tr("Save"),this);
@@ -82,7 +81,7 @@ confInterface::confInterface(confData *conf, QString concerns, QWidget *parent)
         if((concerns.isEmpty() || element->concerns(concerns)) && !element->get("userLevel").contains("hidden",Qt::CaseInsensitive))
         {
           color=color^1;
-	  confInput *input = new confInput(data,element,this);
+	        confInput *input = new confInput(data,element,this);
           sectionHeader->addChild(input);
           lookup.insert(sectionHeader,input);
           if(input->userLevel()==0)
@@ -258,16 +257,10 @@ void confInterface::select(const QStringList &selectionList, int)
       if(!input->isHidden())
       {
         if(section->isHidden()) section->show();
-        if(input->isWrong())
-        {
-          if(odd) pal.setColor(QPalette::Window,alt);
-          else pal.setColor(QPalette::Window,Qt::white);
-        }
-        else
-        {
-          if(odd) pal.setColor(QPalette::Window,alt);
-          else pal.setColor(QPalette::Window,Qt::white);
-        }
+        if(odd) 
+          pal.setColor(QPalette::Window,alt);
+        else 
+          pal.setColor(QPalette::Window,Qt::white);
         odd^=true;
         input->setPalette(pal);
         showAtEnd = true;

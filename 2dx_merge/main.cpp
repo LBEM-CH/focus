@@ -41,9 +41,11 @@ void initializeProject(const QString &appDir, const QString &workingDir)
 
 void reviseProject(const QString &appDir, const QString &workingDir)
 {
-  QDir dir(workingDir);
-  confData data(workingDir + "/merge/" + "2dx_merge.cfg", appDir + "config/2dx_master.cfg");
-  data.save();
+//  QDir dir(workingDir);
+//  qDebug()<<"before reading:" << appDir <<  "config/2dx_master.cfg";
+//  confData data(workingDir + "/merge/" + "2dx_merge.cfg", appDir + "config/2dx_master.cfg");
+//  qDebug()<<"after reading:" << appDir <<  "config/2dx_master.cfg";
+//  data.save();
 }
 
 int main(int argc, char **argv)

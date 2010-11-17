@@ -235,7 +235,8 @@ bool confData::parseDataFile()
         verifyElement(section,element);
         lineData.remove(0,valueSearch[i].size()+1);
         element->set(valueSearch[i].simplified(),lineData);
-//	    cerr<<valueSearch[i].toStdString() + ": "<<lineData.toStdString()<<endl;
+        if(valueSearch[i] == "ISWRONG" && lineData.trimmed() == "NO")
+	        cerr<<valueSearch[i].toStdString() + ": "<<lineData.toStdString()<<endl;
         inValueSearch = true;
       }
 
@@ -335,8 +336,10 @@ void confData::loadConf(confData *conf)
       confElement *element = (*(*conf)[i])[j];
       QString valueLabel = element->get("valueLabel");
       confElement *data = get(valueLabel);
-//      for(int k=0;k<valueSearch.size();k++)
-//        data->set(valueSearch[k], element->get(valueSearch[k]));
+//TEST
+      for(int k=0;k<valueSearch.size();k++)
+        data->set(valueSearch[k], element->get(valueSearch[k]));
+//END TEST
       if(data!=NULL)
       {
         if(!element->get("locked").isEmpty()) data->set("locked",element->get("locked").simplified());

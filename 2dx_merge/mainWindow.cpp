@@ -41,7 +41,8 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   QString mergeConfigLocation = directory + "/merge/" + "2dx_merge.cfg";
   if(QFileInfo(mergeConfigLocation).exists())
   {
-    mainData = new confData(mergeConfigLocation);
+    mainData = new confData(mergeConfigLocation, configDir.canonicalPath() + "/" + "2dx_master.cfg");
+    //mainData = new confData(mergeConfigLocation);
   }
   else
   {	  

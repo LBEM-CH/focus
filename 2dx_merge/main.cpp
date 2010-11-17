@@ -39,14 +39,6 @@ void initializeProject(const QString &appDir, const QString &workingDir)
   data.save();
 }
 
-void reviseProject(const QString &appDir, const QString &workingDir)
-{
-//  QDir dir(workingDir);
-//  qDebug()<<"before reading:" << appDir <<  "config/2dx_master.cfg";
-//  confData data(workingDir + "/merge/" + "2dx_merge.cfg", appDir + "config/2dx_master.cfg");
-//  qDebug()<<"after reading:" << appDir <<  "config/2dx_master.cfg";
-//  data.save();
-}
 
 int main(int argc, char **argv)
 {
@@ -62,7 +54,7 @@ int main(int argc, char **argv)
   confData* userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg", configDir + "/" + "2dx_merge-user.cfg");
   userData->save();
   QString userDirPath = userData->get("workingDir","value");
-  qDebug() << "The last used working dir is: " << userDirPath;
+  //qDebug() << "The last used working dir is: " << userDirPath;
   if(userDirPath.isEmpty()) 
       userDirPath = QDir::homePath(); 
  
@@ -81,10 +73,6 @@ int main(int argc, char **argv)
     {
       initializeProject(appDir, workingDir);
     }
-  }
-  else
-  {
-    reviseProject(appDir, workingDir);
   }
 
 

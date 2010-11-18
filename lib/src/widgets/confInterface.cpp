@@ -29,8 +29,6 @@ confInterface::confInterface(confData *conf, QString concerns, QWidget *parent)
 {
   data=conf;
   alt = QColor(227,233,244);
-  alt_is_wrong = QColor(210,210,103);
-  normal_is_wrong = QColor(250,250,123);
   advancedView = false;
 
   userLevel = 0;

@@ -63,8 +63,6 @@ class confInterface : public QWidget
   int isWrong;
 
   QColor alt;
-  QColor alt_is_wrong;
-  QColor normal_is_wrong;
 
   public:
   confInterface(confData *conf, QString concerns = "", QWidget *parent = NULL);

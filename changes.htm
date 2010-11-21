@@ -1,6 +1,38 @@
 <html>
-<##3.1.2##>
+<##3.3.0##>
 <body>
+<font color="blue">3.3.0</font> Nov. 19, 2010 <br>
+<ul> 
+<li> <font color="red">[Bug]</font> MAKETRAN now works, since the merging script now correctly sorts spot from lattice lines into MTZ file.
+<li> <font color="red">[Bug]</font> Fixed synthetic unbending when using TTF. 
+<li> Added <b>tilt geometry refinement from defocus gradient</b>. 
+<li> Creating a new project now also sets the symbolic links that are needed for synchronization.  
+<li> Added the configuration file 2dx_merge-user.cfg, which stores user settings for 2dx_merge. It is also used by the file browser to navigate to the last used project directory.
+<li> <font color="red">[Bug]</font> 2dx_image becomes now the active window even when its called from 2dx_merge. 
+<li> CCP4 is also found in /Applications on MAC OS X. 
+<li> The local database is now updated when new parameters are added to the master configuration. 
+<li> Added a new parameter attribute ISWRONG, which when set to YES visualizes the specified values in the GUI in grey. This depicts that these values should be altered before processing. By editing them they become black and ISWRONG is set to NO.
+<li> The variable attribute GLOBAL in the CShell scripst has been replaced with DISPLAY to make its functionality more clear. Scripts containing the attribute GLOBAL will still run. 
+</ul>
+
+<BR>
+<hr>
+<BR>
+
+<font color="blue">3.2.0</font> Jun. 6, 2010 <br>
+<ul> 
+<li> Changed the build system to <a href="http://www.cmake.org">CMake</a>.
+<li> Built with  <a href="http://www.trolltech.com">Qt 4.6.2</a>.
+<li> Introduced new bug tracker  <a
+  href="http://www.2dx.unibas.ch/documentation/2dx-bug-tracker">http://www.2dx.unibas.ch/documentation/2dx-bug-tracker</a>,
+  which is also adapted by the bug report function. 
+<li> <font color="red">[Bug]</font> Initialization of the full screen
+  browser now shows directly the corresponding image. 
+</ul>
+
+<BR>
+<hr>
+<BR>
 
 <font color="blue">3.1.2</font> Nov. 11, 2008 <br>
 <ul> 
@@ -221,7 +253,7 @@
 <li> 2dx-MRC:
 <ul>
 <li> HKmax in refinespotlist now a variable parameter
-<li> Resolution limitation bug in 2dx_mmbox.for corrected
+<li> Resolution limitation n in 2dx_mmbox.for corrected
 <li> Symmetry calculation/processing fully implemented for all spacegroups reported from allspace. A big thank-you goes to <i>Per Bullough</i> from Sheffield, UK, for his help here
 <li> 2dx_centric2.for added. Thanks again to Per Bullough for advice and help.
 <li> <font color="red">[Bug]</font> Fixed some memory issues which seemed to appear in Linux environments

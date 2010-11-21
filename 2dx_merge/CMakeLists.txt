@@ -197,7 +197,7 @@ SET(DIRS ${QT_LIBRARY_DIRS})
 # over.
 INSTALL(CODE "
     include(BundleUtilities)
-    #    fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
+        fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
     " COMPONENT Runtime)
 
 

@@ -1,0 +1,142 @@
+#!/bin/bash
+#
+# scirpt to build an installer every night from the current source code in our repository.  
+#
+# Marcel Arheit 17.09.2010
+
+#These two global variables should be changed to fit the local setup
+#Attention: When altering BUIlD_DIR this has to be altered in installation/mac_osx_installer/installer_nightly_build.pmdoc as well 
+BUILD_DIR=~/2dx/build/nightly_build
+DROPBOX=~/Dropbox/2dx
+echo '*############################################################################*'
+echo '| Locating the source code                                                   |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+if [ $# -lt 1 ]
+then
+	echo "No source code and build directory specified"
+	echo "Usage: `basename $0:` <source_dir>" >&2
+	echo 'Aborting!'
+	exit 1
+fi
+SOURCE_DIR=$1
+
+echo cd ${SOURCE_DIR} || (echo "Could not change to " $SOURCE_DIR; exit 2)
+cd ${SOURCE_DIR} || (echo "Could not change to  $SOURCE_DIR"; exit 2)
+if [ $? -gt 0 ]; then
+	exit 2;
+fi
+
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+
+
+
+
+
+echo '*############################################################################*'
+echo '| Updating the source code                                                   |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+echo svn up || (echo "Could not update the repository"; exit 3)
+svn up || (echo "Could not update the repository"; exit 3)
+if [ $? -gt 0 ]; then
+	exit 3;
+fi
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+
+echo '*############################################################################*'
+echo '| Calling ./build_all                                                        |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+echo ./build_all $BUILD_DIR || (echo "Could not build the bundle"; exit 4)
+./build_all $BUILD_DIR || (echo "Could not build the bundle"; exit 4)
+if [ $? -gt 0 ]; then
+	exit 4;
+fi
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+
+
+SYSTEM=`uname`
+if [ $SYSTEM = "Darwin" ]
+then
+	echo '*############################################################################*'
+	echo '| changing the plugins to link to the dylibs of the bundle                   |'
+	echo '*============================================================================*'
+	echo '|                                                                            |'
+
+	./installation/mac_osx_installer/change_dylibs.sh $BUIlD_DIR
+
+	echo '|                                                                            |'
+	echo '*============================================================================*'
+	echo ''
+	echo ''
+	echo ''
+	echo ''
+
+	echo '*############################################################################*'
+	echo '| Making the Mac OS X installer package                                      |'
+	echo '*============================================================================*'
+	echo '|                                                                            |'
+	SW_VERSION=`sw_vers -productVersion`
+	DATE=`date "+%d_%b_%Y"`
+	OUTFILE="2dx_MAC_OS_X_"$SW_VERSION"_nightly_build.pkg"
+	PACKAGE_PATH=$BUILD_DIR"/packages/"
+	if [ ! -d $PACKAGE_PATH ]
+	then
+		echo mkdir $PACKAGE_PATH || (echo "Could not create the dir $PACKAGE_PATH"; exit 7)
+		mkdir $PACKAGE_PATH || (echo "Could not create the dir $PACKAGE_PATH"; exit 7)
+	fi
+	if [ $? -gt 0 ]; then
+		exit 7;
+	fi
+	echo "Writing the package "$OUTFILE" to: " $PACKAGE_PATH
+	/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_nightly_build.pmdoc -o $PACKAGE_PATH$OUTFILE 
+	echo '|                                                                            |'
+	echo '*============================================================================*'
+	echo ''
+	echo ''
+	echo ''
+	echo ''
+	
+	
+	echo '*############################################################################*'
+	echo '| Moving Packages to Server				                   |'
+	echo '*============================================================================*'
+	echo '|                                                                            |'
+	
+	echo mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
+	mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
+	if [ $? -gt 0 ]; then
+		exit 8;
+	fi
+	echo '|                                                                            |'
+	echo '*============================================================================*'
+	echo ''
+	echo ''
+	echo ''
+	echo ''
+
+
+fi
+exit 0

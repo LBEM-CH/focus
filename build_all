@@ -25,7 +25,7 @@ fi
 
 
 # And create build dirs here
-BUILD=$PREFIX/build
+BUILD=$PREFIX
 SRC=$(pwd)
 BUILD_LIST="
 lib/src/conf 
@@ -126,8 +126,8 @@ do
           echo ''
           echo '+----------------------------------------------------------------------------+'
           echo '| configure                                                                  |'
-          echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${*} ${SRC}/${TARGET} || (echo "Configure failed for $APP"; read)
-          cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${*} ${SRC}/${TARGET} || (echo "Configure failed for $APP"; read)
+          echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_MODULE_PATH=${PREFIX}/cmake ${*} ${SRC}/${TARGET} || (echo "Configure failed for $APP"; read)
+          cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_MODULE_PATH=${PREFIX}/cmake ${*} ${SRC}/${TARGET} || (echo "Configure failed for $APP"; read)
           echo ''
           echo '+----------------------------------------------------------------------------+'
           echo '| make                                                                       |'

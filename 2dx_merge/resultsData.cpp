@@ -19,6 +19,7 @@
 ***************************************************************************/
 
 #include <iostream>
+#include <confElement.h> 
 #include "resultsData.h"
 using namespace std;
 
@@ -92,9 +93,22 @@ bool resultsData::load(const QString &name)
       }
       else if(line.contains(QRegExp("set\\s*\\w*\\s*=", Qt::CaseInsensitive)))
       {
-        QStringList data = line.replace(QRegExp("\\s*set\\s*(\\w*)\\s*=[\\s\"]*([^\\s\"]*)[\\s\"]*.*", Qt::CaseInsensitive), "\\1|@|\\2").split("|@|");
-        if(data.size() == 2)
-          results[currentDirectory][data[0]] = data[1];
+        QStringList resultKeyValue = line.replace(QRegExp("\\s*set\\s*(\\w*)\\s*=[\\s\"]*([^\\s\"]*)[\\s\"]*.*", Qt::CaseInsensitive), "\\1|@|\\2").split("|@|");
+        if(resultKeyValue.size() == 2)
+        {
+          results[currentDirectory][resultKeyValue[0]] = resultKeyValue[1];
+          //DEBUG
+          QString key = resultKeyValue[0];
+          key = key.trimmed().remove('"');
+          key = "$" + key + "$"; 
+          qDebug() << "Result Item: " <<"##"<< key <<"##" << resultKeyValue[1];
+          confElement* e = data->get(key);
+          //qDebug() << "Element Label: " << e->get("vlauelabel");
+          qDebug() << "Element ISWRONG: " << e->get("is_wrong");
+          //if(!e->get("ISWRONG").trimmed().toLower().isEmpty())
+          //  e->set("iswrong", "NO");
+        }
+
       }
       else if(line.contains(QRegExp("^\\s*#\\s*lock",Qt::CaseInsensitive)))
       {

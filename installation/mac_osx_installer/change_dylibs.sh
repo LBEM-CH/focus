@@ -1,29 +1,36 @@
 #!/bin/sh
 # change_dylibs
+if [ $# -lt 1 ]
+then
+	echo "No build directory specified"
+	echo "Usage: `basename $0:` <build_dir>" >&2
+	echo 'Aborting!'
+	exit 1
+fi
+
 build_dir=$1
 echo "the build dir is $1"
-cd $build_dir
-apps=" 2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
+apps="2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
 for loop in $apps
 do
-	cd $loop
-	echo "in $loop" 
-	for loop in `ls`
+        path=$build_dir"/"$loop	
+	echo "in $path"
+	for loop in `ls $path`
 	do
+		file=$path"/"$loop
 		echo "changing the dylibs of" $loop
-		install_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $loop 	
-		install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $loop
-		otool -L $loop
-		if [ "$loop" = "libqsvg.dylib" ] ; then
-			echo "removing $loop"
-			rm $loop
+		echo "with absolute path" $file
+		install_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $file 	
+		install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $file 
+		otool -L $file
+		if [ "$file" = "libqsvg.dylib" ] ; then
+			echo "removing $file"
+			rm $file
 		fi
 	done
-	# change back to build dir
-	cd $build_dir
 done
-cd kernel/mrc/bin
-echo "in `pwd`"
+#cd kernel/mrc/bin
+#echo "in `pwd`"
 #for exe in `ls`
 #do
 #	echo "changing the dylibs of" $exe

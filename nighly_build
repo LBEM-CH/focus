@@ -15,7 +15,7 @@ echo '|                                                                         
 
 if [ $# -lt 1 ]
 then
-	echo "No source code and build directory specified"
+	echo "No source code directory specified"
 	echo "Usage: `basename $0:` <source_dir>" >&2
 	echo 'Aborting!'
 	exit 1

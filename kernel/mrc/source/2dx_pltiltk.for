@@ -943,6 +943,12 @@ C  USEFUL IN A NUMBER OF SPACE GROUPS
 230   IF(IROT180.EQ.0) GO TO 231
       TANGL=-TANGL
 231   CONTINUE
+      if(IROT90.ne.0)then
+        TAXA=TAXA+90
+      endif
+      if(IREVHND.ne.0)then
+        TANGL=-TANGL
+      endif
 235   IF (TAXA.GE.180.0) THEN
         TAXA=TAXA-180.0
         TANGL=-TANGL
@@ -954,12 +960,6 @@ C  USEFUL IN A NUMBER OF SPACE GROUPS
           GO TO 235
         ENDIF
       ENDIF
-      if(IROT90.ne.0)then
-        write(*,'(/,/,''::ERROR: this needs to be implemented still.'')')
-      endif
-      if(IREVHND0.ne.0)then
-        write(*,'(/,/,''::ERROR: this needs to be implemented still.'')')
-      endif
       if(IREVXSGN.ne.0)then
         write(*,'(/,/,''::ERROR: this needs to be implemented still.'')')
       endif

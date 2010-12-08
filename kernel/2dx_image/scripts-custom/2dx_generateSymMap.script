@@ -199,7 +199,7 @@ if ( ${ML_doit} == 'y' ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
-  set phaori_local = "0.0,0.0"
+  set phaori_local = "180.0,180.0"
   set aphfile = APH/ML_result.aph
   echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
   set prefix = "ML_"
@@ -261,7 +261,7 @@ if ( ${ML_doit} == 'y' ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
-  set phaori_local = "0.0,0.0"
+  set phaori_local = "180.0,180.0"
   set aphfile = APH/ML_result.aph
   echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
   set prefix = "ML_"

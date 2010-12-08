@@ -154,6 +154,43 @@ if ( ! -d ML ) then
   \mkdir ML
 endif
 #
+if ( ${SYM} == "p2" || ${SYM} == "p12_a" || ${SYM} == "p12_b" || ${SYM} == "p121_a" || ${SYM} == "p121_b" || ${SYM} == "c12_a" || ${SYM} == "c12_b" || ${SYM} == "p222" || ${SYM} == "p2221a" || ${SYM} == "p2221b" || ${SYM} == "p22121" || ${SYM} == "c222" ) then
+  if ( ${ML_rotational_symmetry} != "1" ) then
+    echo ":: "
+    echo ":: "
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "WARNING: You did not set the 2-fold symmetry. Is this an error?"
+    ${proc_2dx}/linblock "#"
+  endif
+endif 
+if ( ${SYM} == "p3" || ${SYM} == "p312" ) then
+  if ( ${ML_rotational_symmetry} != "2" ) then
+    echo ":: "
+    echo ":: "
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "WARNING: You did not set the 3-fold symmetry. Is this an error?"
+    ${proc_2dx}/linblock "#"
+  endif
+endif 
+if ( ${SYM} == "p4" || ${SYM} == "p422" || ${SYM} == "p4212" ) then
+  if ( ${ML_rotational_symmetry} != "3" ) then
+    echo ":: "
+    echo ":: "
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "WARNING: You did not set the 4-fold symmetry. Is this an error?"
+    ${proc_2dx}/linblock "#"
+  endif
+endif 
+if ( ${SYM} == "p6" || ${SYM} == "p622" ) then
+  if ( ${ML_rotational_symmetry} != "4" ) then
+    echo ":: "
+    echo ":: "
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "WARNING: You did not set the 6-fold symmetry. Is this an error?"
+    ${proc_2dx}/linblock "#"
+  endif
+endif 
+#
 if ( "now" == "future" ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing 2dx_ML_stack_sub.com script"

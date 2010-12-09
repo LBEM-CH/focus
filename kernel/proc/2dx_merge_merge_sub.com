@@ -68,6 +68,7 @@ ${RFACAMP}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
+${merge_ML_data}
 eot
 #
 echo "# IMAGE: ${scriptAfile} <CSH: merging script>" >> LOGS/${scriptname}.results

@@ -100,6 +100,14 @@ C
       read(*,*)RGRESMAX
       write(*,'(F12.3)')RGRESMAX
 C
+      write(*,'(/,''input merge_ML_data switch'')')
+      read(*,*)IMERGEML
+      if(IMERGEML.eq.0)then
+        write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
+      else
+        write(*,'(I1,'' = Using Maximum Likelihood results'')')IMERGEML
+      endif
+C
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
 C
       open(11,FILE=cname2,STATUS='NEW',ERR=900)
@@ -222,8 +230,13 @@ C
         call cgetline(CLATTICE,"lattice")
         call rgetline(RTAXA,"TAXA")
         call rgetline(RTANGL,"TANGL")
-        call cgetline(CPHORI,"phaori")
-        read(CPHORI,*)RPHAORIH,RPHAORIK
+        if(IMERGEML.eq.0)then
+          call cgetline(CPHORI,"phaori")
+          read(CPHORI,*)RPHAORIH,RPHAORIK
+        else
+          RPHAORIH=0.0
+          RPHAORIK=0.0
+        endif
         call rgetline(RZWIN,"zstarwin")
         if(imcount.eq.1)then
 C---------First film is used as is, without rescaling
@@ -243,10 +256,17 @@ C
         write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(1:40)
         call shorten(cdir,k1)
         call shortshrink(CIMAGENAME,k2)
-        write(cname4,'(A,''/APH/'',A,''.cor.aph'')')
-     .    cdir(1:k1),CIMAGENAME(1:k2)
+C
+        if(IMERGEML.eq.0)then
+          write(cname4,'(A,''/APH/'',A,''.cor.aph'')')
+     .      cdir(1:k1),CIMAGENAME(1:k2)
+        else
+          write(cname4,'(A,''/APH/ML_result.aph'')')
+     .      cdir(1:k1)
+        endif
         call shortshrink(cname4,k1)
-        write(11,'(A)')cname4(1:k1)
+         write(11,'(A)')cname4(1:k1)
+C
         write(11,'(''  F'')')
         write(11,'(2F12.3,'' 0'',40X,''! TAXA,TANGL,IORIGT'')')
      .     RTAXA,RTANGL

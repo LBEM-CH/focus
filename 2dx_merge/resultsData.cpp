@@ -99,12 +99,12 @@ bool resultsData::load(const QString &name)
           results[currentDirectory][resultKeyValue[0]] = resultKeyValue[1];
           //DEBUG
           QString key = resultKeyValue[0];
-          key = key.trimmed().remove('"');
-          key = "$" + key + "$"; 
-          qDebug() << "Result Item: " <<"##"<< key <<"##" << resultKeyValue[1];
-          confElement* e = data->get(key);
+          //key = key.trimmed().remove('"');
+          //key = "$" + key + "$"; 
+         // qDebug() << "Result Item: " <<"##"<< key <<"##" << resultKeyValue[1];
+          //confElement* e = data->get(key);
           //qDebug() << "Element Label: " << e->get("vlauelabel");
-          qDebug() << "Element ISWRONG: " << e->get("is_wrong");
+          //qDebug() << "Element ISWRONG: " << e->get("is_wrong");
           //if(!e->get("ISWRONG").trimmed().toLower().isEmpty())
           //  e->set("iswrong", "NO");
         }

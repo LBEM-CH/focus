@@ -85,10 +85,9 @@ ${ML_doMLorCC}
 LOGS/${scriptname}.results
 eot_ML1
 #
-set aphfile = "APH/ML_result.aph"
-if ( ! -e ${aphfile} ) then
-  ${proc_2dx}/protest "ERROR: ${aphfile} does not exist. Problem in ML."
-endif
+echo ${imagenumber} "           Maximum Likelihood 2D AMPS and PHS of the unit cell" > SCRATCH/ML_tmp.txt
+cat APH/ML_result.aph >> SCRATCH/ML_tmp.txt
+\mv -f SCRATCH/ML_tmp.txt APH/ML_result.aph
 #
 #############################################################################
 #

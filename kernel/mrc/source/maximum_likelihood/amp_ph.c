@@ -99,6 +99,9 @@ void amp_ph(int nx, int ny, int sx, float *real_lat, float *image1,float *image2
            amp[IDX(i,j,sx,sx)]=sqrtf(pow(out[IDX(i,j,sx,sx)][0],2)+pow(out[IDX(i,j,sx,sx)][1],2));
            phase[IDX(i,j,sx,sx)]=atan2(out[IDX(i,j,sx,sx)][1], out[IDX(i,j,sx,sx)][0]); 	   
            tmp_phase=phase[IDX(i,j,sx,sx)]*180.0/3.141592654; 
+           tmp_phase+=180.0*i;
+           tmp_phase+=180.0*j;
+           while(tmp_phase>360.0)tmp_phase-=360.0;
            if(tmp_phase<0)tmp_phase+=360.0;
            fprintf(output," %4d %4d %11.1e %11.1f %3d %11.1f %11.3f\n",i-sx/2,j-sx/2,amp[IDX(i,j,sx,sx)],tmp_phase,IQ,rback,ctf); 
          } 

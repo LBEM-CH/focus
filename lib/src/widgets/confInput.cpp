@@ -319,7 +319,7 @@ void confInput::save()
 
 void confInput::load()
 {
-	//cerr<<"Loading.."<<endl;
+  //	cerr<<"Loading.."<<endl;
 	QStringList type_default=element->get("type").split('"');
 	QString type = type_default[0].trimmed().toLower();
 	QString defaults;
@@ -327,13 +327,25 @@ void confInput::load()
 		defaults = type_default[1].trimmed();
 	QString value = element->get("value");
 	QString locked = element->get("locked").toLower().trimmed();
+  //TEST
+  QString isWrongString = element->get("ISWRONG").trimmed().toLower();
+  if(isWrongString == "yes")
+  {
+    is_wrong = 1;
+    pal.setColor(QPalette::Text,isWrongColor);
+  }
+  else
+  {
+    is_wrong = 0;
+    pal.setColor(QPalette::Text,Qt::black);
+  }
 
 	if(type=="text_edit" || type == "integer" || type == "float")
 	{
 		lEdits[0]->setText(value);
     //QPalette pal(palette());
 		//pal.setColor(QPalette::Base,QColor(250,0,0));
-    //lEdits[0]->setPalette(pal);
+    lEdits[0]->setPalette(pal);
 	}
 
 	if(type == "two_float" || type == "three_float" || type == "four_float" || type == "fourtynine_float")
@@ -347,6 +359,7 @@ void confInput::load()
 			else
 				value = fValues[i];
 			lEdits[i]->setText(value);
+      lEdits[i]->setPalette(pal);
 		}
 	}
 
@@ -483,7 +496,7 @@ void confInput::dataModified()
     element->set("iswrong","NO");
     setIsWrongValueColor();
     //DEBUG
-    //qDebug() << "[Debug] Data has been modified to: " << element->get("iswrong");
+    qDebug() << "[Debug] Data has been modified to: " << element->get("iswrong");
   }
 	data->setModified(true);
 }

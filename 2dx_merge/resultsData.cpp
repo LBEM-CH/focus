@@ -98,15 +98,21 @@ bool resultsData::load(const QString &name)
         {
           results[currentDirectory][resultKeyValue[0]] = resultKeyValue[1];
           //DEBUG
-          QString key = resultKeyValue[0];
+          //QString key = resultKeyValue[0];
           //key = key.trimmed().remove('"');
-          //key = "$" + key + "$"; 
-         // qDebug() << "Result Item: " <<"##"<< key <<"##" << resultKeyValue[1];
-          //confElement* e = data->get(key);
-          //qDebug() << "Element Label: " << e->get("vlauelabel");
-          //qDebug() << "Element ISWRONG: " << e->get("is_wrong");
-          //if(!e->get("ISWRONG").trimmed().toLower().isEmpty())
-          //  e->set("iswrong", "NO");
+          //if(data != NULL)
+          //{ 
+          //  qDebug() << "Data is not null";
+          //  confElement* e = data->get(key);
+          //  if(e != NULL)
+          //    qDebug() << "e is not null";
+          //    qDebug() << "ISWRONG: " << e->get("ISWRONG").trimmed();
+          //    if(!e->get("ISWRONG").trimmed().toLower().isEmpty())
+          //    {qDebug() << "e is not empty";
+          //      e->set("iswrong", "NO");
+          //      qDebug() << "ISWRONG: " << e->get("ISWRONG").trimmed();
+          //    }
+          //}
         }
 
       }
@@ -171,7 +177,7 @@ bool resultsData::save()
 			cerr<<(it.key() + "/" + "2dx_image.cfg").toStdString()<<" does not exist."<<endl;
 	}
 
-	//  cerr<<"Saved"<<endl;
+	cerr<<"Saved"<<endl;
 	emit saved(true);
 
 	return true;

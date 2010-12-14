@@ -54,7 +54,6 @@ set merge_res_limit = ""
 #
 # Variables to be available from the config file are:
 set tempkeep = ""
-set initialization_executable = ""
 #
 #$end_vars
 #
@@ -69,21 +68,6 @@ ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #
-if ( ${initialization_executable} == "n" ) then
-  #
-  ${proc_2dx}/lin "Initialization ran already."
-  echo ":(If this is wrong, uncheck initialization_executable.)"
-  #
-else
-  #
-  #################################################################################
-  ${proc_2dx}/lin "Running some tests..."
-  #################################################################################
-  #
-  set initialization_executable = "n"
-  echo "set initialization_executable = ${initialization_executable}"  >> LOGS/${scriptname}.results
-  # 
-endif
 #
 #############################################################################
 echo ":: "

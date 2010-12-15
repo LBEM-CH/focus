@@ -1,4 +1,4 @@
-jj#!/bin/csh -ef
+#!/bin/csh -ef
 ####
 #
 #############################################################################
@@ -28,7 +28,7 @@ jj#!/bin/csh -ef
 # DISPLAY: zstarrange_real
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
-# DISPLAY: merge_res_limi
+# DISPLAY: merge_res_limit
 # DISPLAY: merge_ML_data
 # DISPLAY: tempkeep
 # DISPLAY: realcell

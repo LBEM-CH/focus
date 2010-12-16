@@ -177,7 +177,7 @@ bool resultsData::save()
 			cerr<<(it.key() + "/" + "2dx_image.cfg").toStdString()<<" does not exist."<<endl;
 	}
 
-	cerr<<"Saved"<<endl;
+	//cerr<<"Saved"<<endl;
 	emit saved(true);
 
 	return true;

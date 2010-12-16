@@ -426,22 +426,23 @@ QString confData::get(QString element, QString value)
 
 int confData::set(QString element, QString value)
 {
-  cout << "ELEMENT " << element.toStdString() << std::endl;
   if(lookup[element.toLower()]==NULL) return 0;
 
+  //bool isModified = false;
   if(lookup[element.toLower()]->get("locked").toLower()!="yes")
   {
-    cout << "ELEMENT " << element.toStdString() << " ISWRONG: " << lookup[element.toLower()]->get("iswrong").toStdString() << std::endl;
     if(lookup[element.toLower()]->get("iswrong").toLower().trimmed() == "yes" )
     {
-      cout << "setting ISWRONG to no " << std::endl;
       lookup[element.toLower()]->set("iswrong","NO");
+      //isModified = true;
     }
     if(lookup[element.toLower()]->get("value") != value)
     {
       lookup[element.toLower()]->set("value",value);
+      //isModified = true;
       setModified(true);
     }
+    //if(isModified) setModified(true);
   }
 
   return 1;

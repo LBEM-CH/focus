@@ -495,8 +495,6 @@ void confInput::dataModified()
     is_wrong = 0;
     element->set("iswrong","NO");
     setIsWrongValueColor();
-    //DEBUG
-    qDebug() << "[Debug] Data has been modified to: " << element->get("iswrong");
   }
 	data->setModified(true);
 }

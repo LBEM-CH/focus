@@ -9,10 +9,10 @@ C Acta Crystallographica Section A, in press.
 C
 C for questions and bugs in the programs, contact acheng@scripps.edu
 C
-C version 1.0	5.24.01		AC
+C version 1.0   5.24.01         AC
 C version 2.0K 11.03.03         AC  Converted to plot2k format
 C                                   Fix Extra FIDDLET problem
-C				    Include Minimal TAXA overlap arcs and
+C                                   Include Minimal TAXA overlap arcs and
 C                                   various labels and rm subroutine
 C                                   tltplot because of linux problem
 C version 2.1  12.05.03         AC  Plot kappa50 and kappa0 only at max TANGL
@@ -22,42 +22,42 @@ C##############################################################################
 C
 C   INPUT CARD
 C
-C 1	TILTEP			(A)
+C 1     TILTEP                  (A)
 C
-C 2	TANGLST,TANGLMAX	(*,*)
+C 2     TANGLST,TANGLMAX        (*,*)
 C
-C 3	IMQLABEL		(*)
+C 3     IMQLABEL                (*)
 C
-C 4	RMAX,IQMAX		(*)
+C 4     RMAX,IQMAX              (*)
 C
-C 5	RGOOD			(*)
+C 5     RGOOD                   (*)
 C
-C 6	ISPGRP,NPROG,NTILT,NBEAM,ILIST,ALNG,BLNG,WIDTH,ANG,IPLOT,MINRFL   (*)
+C 6     ISPGRP,NPROG,NTILT,NBEAM,ILIST,ALNG,BLNG,WIDTH,ANG,IPLOT,MINRFL   (*)
 C---------1st input card for origtiltd
 C
-C 7	IFILM,TITLE                                            (I10,10A4)
+C 7     IFILM,TITLE                                            (I10,10A4)
 C---------1st real film input, i.e., non-dummy
-C 8	FILIN 					                      (A)
+C 8     FILIN                                                         (A)
 C
-C 9	NWGT  (Not used)                                              (*)
+C 9     NWGT  (Not used)                                              (*)
 C
-C 10	TAXA,TANGL,IORIGT                                             (*)
+C 10    TAXA,TANGL,IORIGT                                             (*)
 C
-C 11	ORIGH,ORIGK,STEP,WIN,ISGNXCH,SCALE,ROT180,IREVHK,CTFREV,IROT90,IIREVHND,IREVXSGN   (*)
+C 11    ORIGH,ORIGK,STEP,WIN,ISGNXCH,SCALE,ROT180,IREVHK,CTFREV,IROT90,IIREVHND,IREVXSGN   (*)
 C
-C 12	CS,KV,TILTH,TILTK   (Not used)                                (*)
+C 12    CS,KV,TILTH,TILTK   (Not used)                                (*)
 C
-C 13	DRESMAX, DRESMIN (Not used)		                      (*)
+C 13    DRESMAX, DRESMIN (Not used)                                   (*)
 C
-C 14	IFILM<0  --- THIS ENDS DATA INPUT
+C 14    IFILM<0  --- THIS ENDS DATA INPUT
 C
 C##############################################################################
 C
 C  OUTPUT
 C
 C  PLTLT.PS - ps file in polar coordinate where Radius is TANGL
-C		Angle is TAXA.
-C		Note that TANGL<0 is plotted as TAXA+180,ABS(TANGL)
+C               Angle is TAXA.
+C               Note that TANGL<0 is plotted as TAXA+180,ABS(TANGL)
 C
 C  TLTASM    - text file of the results
 C##############################################################################
@@ -66,49 +66,49 @@ C Since this program uses most of the origtilt input for convenience of editing,
 C many variables are not used.  Only the variables that matter are explained
 C here
 C
-C 	TILTEP		Plot title
-C 	TANGLST		TANGL arc step size in degree
-C	TANGLMAX	Maximal TANGL for the plot
-C 	IMQLABEL		If =0 no IMQ label in the plot
-C			   =1 include IMQ label in the plot
-C	RMAX		Maximal resolution in 3D to be used in determining IMQ
-C	IQMAX		Maximal IQ to be included in determining IMQ
-C	RGOOD		Completeness cutoff used in determining IMQ
-C			0.0 < RGOOD =< 1.0
-C	ISPGRP		NUMBER OF SPACE GROUP AS IN ORIGTILT
-C	ALNG		A AXIS IN ANGSTROMS for untilted crystal.
-C	BLNG		B AXIS IN ANGSTROMS        "        "   .
-C	WIDTH		C AXIS IN ANGSTROMS        "        "   .
-C	ANGAB		ANGLE BETWEEN A AND B - ONLY FOR P1 OR P2
-C	IFILM		INTEGER FILM IDENTIFIER
-C	TITLE		DESCRIPTION OF FILM
-C	FILIN		NAME OF FILE CONTAINING H,K,A,P,IQ DATA
-C	TAXA		ANGLE MEASURED FROM THE TILT AXIS TO THE A-AXIS,
+C       TILTEP          Plot title
+C       TANGLST         TANGL arc step size in degree
+C       TANGLMAX        Maximal TANGL for the plot
+C       IMQLABEL                If =0 no IMQ label in the plot
+C                          =1 include IMQ label in the plot
+C       RMAX            Maximal resolution in 3D to be used in determining IMQ
+C       IQMAX           Maximal IQ to be included in determining IMQ
+C       RGOOD           Completeness cutoff used in determining IMQ
+C                       0.0 < RGOOD =< 1.0
+C       ISPGRP          NUMBER OF SPACE GROUP AS IN ORIGTILT
+C       ALNG            A AXIS IN ANGSTROMS for untilted crystal.
+C       BLNG            B AXIS IN ANGSTROMS        "        "   .
+C       WIDTH           C AXIS IN ANGSTROMS        "        "   .
+C       ANGAB           ANGLE BETWEEN A AND B - ONLY FOR P1 OR P2
+C       IFILM           INTEGER FILM IDENTIFIER
+C       TITLE           DESCRIPTION OF FILM
+C       FILIN           NAME OF FILE CONTAINING H,K,A,P,IQ DATA
+C       TAXA            ANGLE MEASURED FROM THE TILT AXIS TO THE A-AXIS,
 C                       MEASURED IN DIRECTION OF A TO B BEING POSITIVE.
-C 	TANGL		TILT ANGLE IN DEGREES
-C	ISGNXCH		IF NOT EQUAL TO 0, FLIP AROUND A AXIS, USEFUL IN P121
-C	ROT180		IF NOT=0, ROTATE 180 DEG ABOUT Z-AXIS, USEFUL IN P1,P3
-C	IREVHK		IF NOT = 0, H AND K ARE INTERCHANGED ON INPUT.
-C	IROT90 		IF NOT=0, ROTATE 90  DEG ABOUT Z-AXIS, USEFUL IN P2
-C	IREVHND    	IF NOT = 0, H AND K ARE INTERCHANGED ON INPUT, and Z flipped
-C	REVXSGN   	IF NOT = 0, H is transformed into -H
+C       TANGL           TILT ANGLE IN DEGREES
+C       ISGNXCH         IF NOT EQUAL TO 0, FLIP AROUND A AXIS, USEFUL IN P121
+C       ROT180          IF NOT=0, ROTATE 180 DEG ABOUT Z-AXIS, USEFUL IN P1,P3
+C       IREVHK          IF NOT = 0, H AND K ARE INTERCHANGED ON INPUT.
+C       IROT90          IF NOT=0, ROTATE 90  DEG ABOUT Z-AXIS, USEFUL IN P2
+C       IREVHND         IF NOT = 0, H AND K ARE INTERCHANGED ON INPUT, and Z flipped
+C       REVXSGN         IF NOT = 0, H is transformed into -H
 C
-C	IMQ	Image Quality value. IMQ is determined by the highest
-C		resolution bin in which more than RGOOD of the spots have IQ
-C		better than or equal to IQMAX
-C		The resolution bins are divided equally in the reciprocal
-C		Space in JRMAX.  Therefore, currently
-C		IMQ=1 if ,in resolution range of RMAX to (4/3)*RMAX A, at least
-C			RGOOD of the spots have IQ =< IQMAX
-C		IMQ=2 if the above condition is not met in such as resolution
-C			bin but is valid in the resolution of (4/3)*RMAX to
-C			2*RMAX
-C		IMQ=3 if the highest resolution bin in which the condition is
-C			met is 2*RMAX to 4*RMAX
-C		IMQ=4 if the highest resolution bin in which the condition is
-C			met is 4*RMAX to infinity
-C		IMQ=5 if the condition is never met in all resolution bins
-C			(The image should not be used in the merging if IMQ=5)
+C       IMQ     Image Quality value. IMQ is determined by the highest
+C               resolution bin in which more than RGOOD of the spots have IQ
+C               better than or equal to IQMAX
+C               The resolution bins are divided equally in the reciprocal
+C               Space in JRMAX.  Therefore, currently
+C               IMQ=1 if ,in resolution range of RMAX to (4/3)*RMAX A, at least
+C                       RGOOD of the spots have IQ =< IQMAX
+C               IMQ=2 if the above condition is not met in such as resolution
+C                       bin but is valid in the resolution of (4/3)*RMAX to
+C                       2*RMAX
+C               IMQ=3 if the highest resolution bin in which the condition is
+C                       met is 2*RMAX to 4*RMAX
+C               IMQ=4 if the highest resolution bin in which the condition is
+C                       met is 4*RMAX to infinity
+C               IMQ=5 if the condition is never met in all resolution bins
+C                       (The image should not be used in the merging if IMQ=5)
 C
 C###############################################################################
 C
@@ -135,7 +135,7 @@ C SPACE GROUP MATRICES --- convention for p3, p4 and p6 is H,0 (not 0,K).
      C            0,-1,1,0,1,0,0,1,         0,1,1,0,1,0,0,-1,
      D            0,1,1,0,-1,0,0,1,         0,-1,1,1,-1,0,0,-1,
      E            -1,-1,1,0,1,0,0,1,         1,1,-1,0,-1,0,0,-1/
-      REAL STANG(17)		! STANDARD SPACE GROUP ANGLES.
+      REAL STANG(17)            ! STANDARD SPACE GROUP ANGLES.
       DATA STANG/2*0.0,10*90.0,5*120.0/
       REAL ASANG(17)            ! ASYMETRIC UNIT SPACE GROUP ANGLES.
       LOGICAl AZ(17)            ! ASYMETRIC UNIT SPACE GROUP Z>=0 FLAG
@@ -238,7 +238,7 @@ C      CHARACTER*60 TITLP
 C
       DRAD=3.14159/180
       MAX1=MAXRFL+1
-      FONTSIZE=4.0	! SELECT 4MM CHAR HEIGHT FOR TEXT
+      FONTSIZE=4.0      ! SELECT 4MM CHAR HEIGHT FOR TEXT
       DRAD=3.1415962/180.0
       ROFF=5.0
 
@@ -276,7 +276,7 @@ C
 1005  FORMAT(A)
 1010  FORMAT(' RESOLUTION BINS:')
 1011  FORMAT(' IMQ=',I1,' ',F6.2,' A to ',F6.2,' A')
-9201	FORMAT(' INPUT FILE NAME ',A)
+9201    FORMAT(' INPUT FILE NAME ',A)
 
       READ(5,10)TITLP
 10    FORMAT(15A4)
@@ -304,7 +304,7 @@ C              SPACE GROUP IS P1 OR P2, THE INTER AXIS ANGLE
 C
 C
       READ(5,*) ISPGRP,NPROG,NTILT,NBEAM,ILIST,ALNG,BLNG,WIDTH,ANGAB,
-     1		IPLOT,MINRFL
+     1          IPLOT,MINRFL
 C
 C     IMAT SHOWS WHICH MATRICES WILL BE USED FROM MAT FOR EACH SPACE GROUP
 C       THE FIRST ELEMENT OF EACH IS PASSED TO SET,ASYM FOR LATER USE.
@@ -314,7 +314,7 @@ C
       ASANGL=ASANG(ISPGRP)
       ASZ=AZ(ISPGRP)
       IF(ISPGRP.LE.2) ABANG=ANGAB
-      WRITE(6,110)		! PLTLT header output, with version number.
+      WRITE(6,110)              ! PLTLT header output, with version number.
       WRITE(6,115)ISPGRP
       IF(ISPGRP.GT.9) BLNG=ALNG
       WRITE(6,117)ALNG,BLNG,ABANG
@@ -379,7 +379,7 @@ C
         CALL P2K_MOVE(10.0,YPOSN,0.)
         CALL P2K_STRING(TITLP,60,0.)
         CALL P2K_MOVE(0.,0.,0.)
-C        CALL P2K_DRAW(PLTSIZ,0.,0.)		!No box drawing
+C        CALL P2K_DRAW(PLTSIZ,0.,0.)            !No box drawing
 C        CALL P2K_DRAW(PLTSIZ,PLTSIZ,0.)
 C        CALL P2K_DRAW(0.,PLTSIZ,0.)
 C        CALL P2K_DRAW(0.,0.,0.)
@@ -388,7 +388,7 @@ C        CALL P2K_DRAW(0.,0.,0.)
         CALL P2K_MOVE(-CHRSIZ,-CHRSIZ,0.)
         CALL P2K_DRAW(CHRSIZ,CHRSIZ,0.)
         CALL P2K_MOVE(CHRSIZ,-CHRSIZ,0.)
-        CALL P2K_DRAW(-CHRSIZ,CHRSIZ,0.)	! CENTRAL CROSS AT ORIGIN.
+        CALL P2K_DRAW(-CHRSIZ,CHRSIZ,0.)        ! CENTRAL CROSS AT ORIGIN.
         X= PLTSIZ/2.0
         Y= 0.0
         IF (ASZ) THEN
@@ -396,7 +396,7 @@ C        CALL P2K_DRAW(0.,0.,0.)
         ELSE
            CALL P2K_MOVE(-X,-Y,0.)
         ENDIF
-        CALL P2K_DRAW(X,Y,0.)		! PLOT 1st axis VECTOR
+        CALL P2K_DRAW(X,Y,0.)           ! PLOT 1st axis VECTOR
         X=PLTSIZ/2.0+ROFF
         CALL P2K_MOVE(X,Y,0)
         CALL P2K_STRING('0',1,0)        !0 TAXA LABEL
@@ -412,7 +412,7 @@ C        CALL P2K_DRAW(0.,0.,0.)
         ELSE
           CALL P2K_MOVE(-X,-Y,0.)
         ENDIF
-        CALL P2K_DRAW(X,Y,0.)		! PLOT 2nd axis VECTOR
+        CALL P2K_DRAW(X,Y,0.)           ! PLOT 2nd axis VECTOR
 
         NAB=INT(ASANGL)
         LZERO=0
@@ -448,7 +448,7 @@ C        CALL P2K_DRAW(0.,0.,0.)
         CALL P2K_MOVE(0,-2*ROFF,0)
         CALL P2K_CSTRING('0.0',3,0)
 
-3340  	DO 3370 N=1,IARC			! TANGL arcs
+3340    DO 3370 N=1,IARC                        ! TANGL arcs
           RAD=SCALEP*TANGLST1*N
           IF (NRN.EQ.0) THEN
             TARC=TANGLST1*N/DRAD
@@ -469,19 +469,19 @@ C        CALL P2K_DRAW(0.,0.,0.)
             CALL P2K_CSTRING(ARCSTR,4,0)
           ENDIF
           ISTEP=ASANGL
-       	   DO 3360 I=1,ISTEP
-      	     ANG=I*DRAD
-      	     X=RAD*COS(ANG)
-      	     Y=RAD*SIN(ANG)
+           DO 3360 I=1,ISTEP
+             ANG=I*DRAD
+             X=RAD*COS(ANG)
+             Y=RAD*SIN(ANG)
              IF (I.EQ.1) THEN
                XOR=X
                YOR=Y
                CALL P2K_MOVE(RAD,0.,0.)
-      	       CALL P2K_DRAW(X,Y,0.)
-      	     ELSE
-      	       CALL P2K_DRAW(X,Y,0.)
-      	     ENDIF
-3360	   CONTINUE
+               CALL P2K_DRAW(X,Y,0.)
+             ELSE
+               CALL P2K_DRAW(X,Y,0.)
+             ENDIF
+3360       CONTINUE
 
            IF (NRN.EQ.0) THEN                 !KAPPA50
             OZ=RES*SIN(TANGLST1*N)
@@ -489,30 +489,30 @@ C        CALL P2K_DRAW(0.,0.,0.)
             KAPPAF = KAPPAFDEG(N)*DRAD
             IF (KAPPAF.GT.ASANGL1) KAPPAF=ASANGL1
              IF (N.EQ.IARC) THEN
-       	      DO 3365 I=1,ISTEP
-      	       ANG=I*DRAD
+              DO 3365 I=1,ISTEP
+               ANG=I*DRAD
                IF (ANG.LE.KAPPAF) THEN
-      		 X=(RAD2)*COS(ANG)
-      		 Y=(RAD2)*SIN(ANG)
+                 X=(RAD2)*COS(ANG)
+                 Y=(RAD2)*SIN(ANG)
                  IF (I.EQ.1) THEN
                    XOR=X
                    YOR=Y
                    CALL P2K_MOVE(RAD,0.,0.)
                    CALL P2K_DRAW(RAD2,0.,0.)
-      		   CALL P2K_DRAW(X,Y,0.)
-      		 ELSE
-      		   CALL P2K_DRAW(X,Y,0.)
+                   CALL P2K_DRAW(X,Y,0.)
+                 ELSE
+                   CALL P2K_DRAW(X,Y,0.)
                    IKAPPA50 = I
-      		 ENDIF
+                 ENDIF
                ENDIF
-3365	     CONTINUE
+3365         CONTINUE
 
-      	     X=(RAD2)*COS(KAPPAF)              !last two points
+             X=(RAD2)*COS(KAPPAF)              !last two points
              Y=(RAD2)*SIN(KAPPAF)
              CALL P2K_DRAW(X,Y,0)
 
-      	     X=(RAD)*COS(KAPPAF)
-      	     Y=(RAD)*SIN(KAPPAF)
+             X=(RAD)*COS(KAPPAF)
+             Y=(RAD)*SIN(KAPPAF)
              CALL P2K_DRAW(X,Y,0)
 
             KAPPAZ = KAPPA0(N)*DRAD            !KAPPA0
@@ -522,25 +522,25 @@ C        CALL P2K_DRAW(0.,0.,0.)
             CALL P2K_MOVE(XK50,YK50,0)
 
             IF (KAPPAZ.GT.ASANGL1) KAPPAZ=ASANGL1
-       	      DO 3367 I=IKAPPA50,ISTEP
-      	       ANG=I*DRAD
+              DO 3367 I=IKAPPA50,ISTEP
+               ANG=I*DRAD
                IF (ANG.LE.KAPPAZ.AND.ANG.GE.KAPPAF) THEN
-      		 X=(RAD3)*COS(ANG)
-      		 Y=(RAD3)*SIN(ANG)
-      		 CALL P2K_DRAW(X,Y,0.)
+                 X=(RAD3)*COS(ANG)
+                 Y=(RAD3)*SIN(ANG)
+                 CALL P2K_DRAW(X,Y,0.)
                ENDIF
-3367	     CONTINUE
+3367         CONTINUE
 
-      	     X=(RAD3)*COS(KAPPAZ)              !last two points
+             X=(RAD3)*COS(KAPPAZ)              !last two points
              Y=(RAD3)*SIN(KAPPAZ)
              CALL P2K_DRAW(X,Y,0)
 
-      	     X=(RAD)*COS(KAPPAZ)
-      	     Y=(RAD)*SIN(KAPPAZ)
+             X=(RAD)*COS(KAPPAZ)
+             Y=(RAD)*SIN(KAPPAZ)
              CALL P2K_DRAW(X,Y,0)
             ENDIF
            ENDIF
-3370	 CONTINUE
+3370     CONTINUE
          NRN=NRN+1
          IF ((.NOT.ASZ).AND.(NRN.EQ.1)) THEN
            TANGLST1=-TANGLST1
@@ -570,9 +570,9 @@ C
       READ(5,*) NWGT
       READ(5,*) TAXA,TANGL,IORIGT
 
-      	TAXB=TAXA+ABANGST
-      	TAXA0=TAXA
-      	TANGL0=TANGL
+        TAXB=TAXA+ABANGST
+        TAXA0=TAXA
+        TANGL0=TANGL
       READ(5,*)ORIGH,ORIGK,STEP,WIN,ISGNXCH,SCALE,IIOT180,IREVHK,CTFREV,IROT90,IIREVHND,IREVXSGN
       READ(5,*)CS,KV,TLTH,TLTK
       WRITE(6,163)ISGNXCH,IROT180,IREVHK,IROT90,IIREVHND,IREVXSGN
@@ -586,23 +586,23 @@ C
       NIN=11
       READ(NIN,*)ISER
       IF(ISER.NE.IFILM) GO TO 602
-C      	BACKSPACE NIN
-C      	READ(NIN,138)FTITLE
-      	WRITE(6,136)FTITLE
-      	ITOTAL=0
+C       BACKSPACE NIN
+C       READ(NIN,138)FTITLE
+        WRITE(6,136)FTITLE
+        ITOTAL=0
       DO 9249 JR = 1,JRMAX
-      	ISPOT(JR)=0
-      	IGOOD(JR)=0
+        ISPOT(JR)=0
+        IGOOD(JR)=0
 9249  CONTINUE
       DO 250 IN=1,MAX1
-9250  	IF (NWGT) THEN
-      	   READ(NIN,*,END=260)IH,IK,A,P,IQ,BCK,CTF,W
-      	ELSE
-      	   READ(NIN,*,END=260)IH,IK,A,P,IQ,BCK,CTF
-      	   W=1.000
-      	ENDIF
+9250    IF (NWGT) THEN
+           READ(NIN,*,END=260)IH,IK,A,P,IQ,BCK,CTF,W
+        ELSE
+           READ(NIN,*,END=260)IH,IK,A,P,IQ,BCK,CTF
+           W=1.000
+        ENDIF
       IF(IQ.LT.1)IQ=1
-      IF(IQ.GT.9)IQ=9		! DANGEROUS STATEMENT FOR FUTURE -- BEWARE!
+      IF(IQ.GT.9)IQ=9           ! DANGEROUS STATEMENT FOR FUTURE -- BEWARE!
       IF(IH.GE.900) GO TO 260
 C
 C     In-plane resolution
@@ -679,7 +679,7 @@ C
       CALL ASYMT(RH,RK,ZT,
      1  MAT(1,IMAT(1,ISPGRP)),MAT(1,IMAT(2,ISPGRP)),
      2  MAT(1,IMAT(3,ISPGRP)),MAT(1,IMAT(4,ISPGRP)),
-     3	MAT(1,IMAT(5,ISPGRP)),
+     3  MAT(1,IMAT(5,ISPGRP)),
      4  IGO(1,ISPGRP))
       TANGL=ACOS(ZT)/DRAD
 C     TANGL=SIGNTL*TANGL
@@ -772,9 +772,9 @@ C
 C      print *,TANGL,TAXA,SCALEP
         NSPOTS=NSPOTS+1
         RADIUS=ABS(SCALEP*TANGL*DRAD)
-      	ANG=TAXA*DRAD
+        ANG=TAXA*DRAD
         X=RADIUS*COS(ANG)
-      	Y=RADIUS*SIN(ANG)
+        Y=RADIUS*SIN(ANG)
 10001 FORMAT(3F12.5)
 10002 FORMAT(2F12.5)
 C      WRITE(6,10002)SCALEP,DRAD
@@ -788,50 +788,50 @@ C      WRITE(6,10001)X,Y,RADIUS
       CALL P2K_DRAW(X,YN,0.)
       CALL P2K_DRAW(XP,Y,0.)
       CALL P2K_DRAW(X,YP,0.)
-      CALL P2K_DRAW(XN,Y,0.)		! DIAMOND ROUND EACH SPOT.
+      CALL P2K_DRAW(XN,Y,0.)            ! DIAMOND ROUND EACH SPOT.
       IF(IMQLABEL.EQ.0) GO TO 3100
-      X=X-0.2				! ADJUST CHARACTER TO BE CENTRAL IN X.
-      Y=Y-1.5				! ADJUST CHARACTER TO BE CENTRAL IN Y.
+      X=X-0.2                           ! ADJUST CHARACTER TO BE CENTRAL IN X.
+      Y=Y-1.5                           ! ADJUST CHARACTER TO BE CENTRAL IN Y.
       CALL P2K_MOVE(X,Y,0.)
 CTSH++
-      	WRITE(TMPTEXT(1:1),3160)
-      	IF(IMQ.EQ.1) THEN
+        WRITE(TMPTEXT(1:1),3160)
+        IF(IMQ.EQ.1) THEN
           CALL P2K_FONT('Helvatica'//CHAR(0),0.8*FONTSIZE)!REDUCE FONT SIZE
-          WRITE(TMPTEXT(1:1),3161)	! IMQ=1 include number
+          WRITE(TMPTEXT(1:1),3161)      ! IMQ=1 include number
         ELSE
-      	  IF(IMQ.EQ.2) THEN
+          IF(IMQ.EQ.2) THEN
             CALL P2K_FONT('Helvatica'//CHAR(0),0.6*FONTSIZE)!REDUCE FONT SIZE
-            WRITE(TMPTEXT(1:1),3162)	! IMQ=2 include number
+            WRITE(TMPTEXT(1:1),3162)    ! IMQ=2 include number
           ELSE
-      	    IF(IMQ.EQ.3) THEN
+            IF(IMQ.EQ.3) THEN
               CALL P2K_FONT('Helvatica'//CHAR(0),0.6*FONTSIZE)!REDUCE FONT SIZE
-              WRITE(TMPTEXT(1:1),3163)	! IMQ=3 include number
+              WRITE(TMPTEXT(1:1),3163)  ! IMQ=3 include number
             ELSE
-      	      IF(IMQ.EQ.4) THEN
+              IF(IMQ.EQ.4) THEN
                 CALL P2K_FONT('Helvatica'//CHAR(0),0.5*FONTSIZE)!REDUCE FONT SIZE
-                WRITE(TMPTEXT(1:1),3164)	! IMQ=4 include number
+                WRITE(TMPTEXT(1:1),3164)        ! IMQ=4 include number
               ENDIF
             ENDIF
           ENDIF
         ENDIF
 CTSH--
-3160	FORMAT(' ')
-3161	FORMAT('1')
-3162	FORMAT('2')
-3163	FORMAT('3')
-3164	FORMAT('4')
+3160    FORMAT(' ')
+3161    FORMAT('1')
+3162    FORMAT('2')
+3163    FORMAT('3')
+3164    FORMAT('4')
         IF (IMQ.LE.4) CALL P2K_CSTRING(TMPTEXT,1,0.)
 3100   CONTINUE
-      GO TO 220		! BACK TO DO INPUT FOR ANOTHER FILM.
+      GO TO 220         ! BACK TO DO INPUT FOR ANOTHER FILM.
 
 500   CONTINUE
 C
 C  Here for termination
 C
       CLOSE(UNIT=9)
-      	    WRITE(6,3110) NSPOTS
-3110	    FORMAT(' TOTAL SPOTS PLOTTED IN TTPLOT FILE =',I5,
-     .		' and plot file closed')
+            WRITE(6,3110) NSPOTS
+3110        FORMAT(' TOTAL SPOTS PLOTTED IN TTPLOT FILE =',I5,
+     .          ' and plot file closed')
             CALL P2K_PAGE
 
       GO TO 1107
@@ -970,11 +970,11 @@ C  ASYMT  Modified from subroutine ASYM of origtiltd.f to handle real values
 C         in tilt vectors
 C******************************************************************************
       SUBROUTINE ASYMT(RH,RK,ZT,
-     1	A1,A2,A3,A4,A5,IGO)
+     1  A1,A2,A3,A4,A5,IGO)
       INTEGER*2 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8)
 
       IF(RH.LT.0) CALL MULTR(A1,RH,RK,Z)
-      PASS=0	! second pass (22.1.90) to check all changes made correctly.
+      PASS=0    ! second pass (22.1.90) to check all changes made correctly.
 50    INDEX=1
       IF(RK.GE.0) INDEX=INDEX+1
       IF(ZT.GE.0.0) INDEX=INDEX+2
@@ -1009,10 +1009,10 @@ C
 
 500    CONTINUE
 
-      PASS=PASS+1			!
-      IF(PASS.EQ.1) GO TO 50		! Check through again once only.
-C					! Done 22.1.90 to fix the -ve zstar
-C					! obtained for h=0,k=-ve refls in p2.
+      PASS=PASS+1                       !
+      IF(PASS.EQ.1) GO TO 50            ! Check through again once only.
+C                                       ! Done 22.1.90 to fix the -ve zstar
+C                                       ! obtained for h=0,k=-ve refls in p2.
 
 600    CONTINUE
       RETURN

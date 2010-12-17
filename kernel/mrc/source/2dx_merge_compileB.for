@@ -135,6 +135,14 @@ C
       read(*,*)RGRESMAX
       write(*,'(F12.2)')RGRESMAX
 C
+      write(*,'(/,''input merge_ML_data switch'')')
+      read(*,*)IMERGEML
+      if(IMERGEML.eq.0)then
+        write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
+      else
+        write(*,'(I1,'' = Using Maximum Likelihood results'')')IMERGEML
+      endif
+C
       write(*,'(/,''Want to refine switches (y=1,0=no)'')')
       read(*,*)irefswitch
       write(*,'(I3)')irefswitch
@@ -339,8 +347,13 @@ C
         if(irefswitch.eq.1 .and. irefinvtangl.eq.1)then
           RTANGL=-RTANGL
         endif
-        call cgetline(CPHORI,"phaori")
-        read(CPHORI,*)RPHAORIH,RPHAORIK
+        if(IMERGEML.eq.0)then
+          call cgetline(CPHORI,"phaori")
+          read(CPHORI,*)RPHAORIH,RPHAORIK
+        else
+          RPHAORIH=0.0
+          RPHAORIK=0.0
+        endif
         call cgetline(CPHOPROT,"SYN_Unbending")
         if(CPHOPROT(1:1).eq.'0')then
 C---------FouFilter Reference
@@ -385,10 +398,16 @@ C
         close(12)
 C
         write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(1:40)
+C
         call shorten(cdir,k)
         call shortshrink(CIMAGENAME,k1)
-        write(cname4,'(A,''/APH/'',A,''.cor.aph'')')
-     .    cdir(1:k),CIMAGENAME(1:k1)
+        if(IMERGEML.eq.0)then
+          write(cname4,'(A,''/APH/'',A,''.cor.aph'')')
+     .      cdir(1:k),CIMAGENAME(1:k1)
+        else
+          write(cname4,'(A,''/APH/ML_result.aph'')')
+     .      cdir(1:k)
+        endif
         call shortshrink(cname4,k1)
         write(11,'(A)')cname4(1:k1)
         write(11,'(''  F'',62X,''! NWGT'')')

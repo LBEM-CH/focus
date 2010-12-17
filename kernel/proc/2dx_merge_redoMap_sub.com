@@ -105,7 +105,17 @@ endif
 #
 \rm -f SUMMARY
 #
-set aphfile = APH/${imagename}.cor.aph
+if ( ${merge_ML_data} == "0" ) then
+  set aphfile = APH/${imagename}.cor.aph
+else
+  set aphfile = APH/ML_result.aph
+  if ( ! -e ${aphfile} ) then
+    set aphfile = APH/${imagename}.cor.aph
+    ${proc_2dx}/linblock "WARNING: ML result not found. using ${aphfile}."
+  else
+    set phaori = "0.0,0.0"
+  endif
+endif
 #
 if ( ! -e ${aphfile} ) then
   ${proc_2dx}/linblock "ERROR: ${aphfile} not found."

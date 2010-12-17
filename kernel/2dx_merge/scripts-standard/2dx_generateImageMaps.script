@@ -29,6 +29,7 @@
 # DISPLAY: merge_modus
 # DISPLAY: merge_ref_num
 # DISPLAY: create_PS
+# DISPLAY: merge_ML_data
 #
 #$end_local_vars
 #
@@ -56,6 +57,7 @@ set RFACAMP = ""
 set MergeHKMAX = ""
 set merge_res_limit = ""
 set create_PS = ""
+set merge_ML_data = ""
 #
 #$end_vars
 #
@@ -248,6 +250,7 @@ ${MergeHKMAX}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
+${merge_ML_data}
 0
 eot
   #

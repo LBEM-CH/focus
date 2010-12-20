@@ -9,7 +9,7 @@ C
       character*200 cname1,cname2,cname3,cname4,cdir,cprocdir,cbindir
       character*200 cccp4dir,cccp4
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
-      character*80 CIMAGENUMBER,CLATTICE
+      character*80 CIMAGENUMBER,CLATTICE,CMLMERGE
       character*200 CFILE1,cline
       character*1 CNREFOUT,CNSHFTIN
       integer*8 imnum(10000)
@@ -38,6 +38,14 @@ C
       write(*,'(/,''input ALAT'')')
       read(*,*)RALAT
       write(*,'(F12.3)')RALAT
+C
+      write(*,'(/,''input merge_ML_data switch'')')
+      read(*,*)IMERGEML
+      if(IMERGEML.eq.0)then
+        write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
+      else
+        write(*,'(I1,'' = Using Maximum Likelihood results where allowed'')')IMERGEML
+      endif
 C
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
 C
@@ -98,9 +106,17 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
           enddo
         endif
 C
+        call cgetline(CMLMERGE,"ML_use_for_merging")
+C
+        write(11,'(''set ML_use_for_merging = "'',A1,''"'')')CMLMERGE(1:1)
+C
         write(11,'(''echo "::"'')')
         call shorten(cdir,k)
-        write(11,'(''${proc_2dx}/linhash "Entering Directory"'')')
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
+          write(11,'(''${proc_2dx}/linhash "Entering Directory ####### (FOURIER FILTERED RESULT)"'')')
+        else
+          write(11,'(''${proc_2dx}/linhash "Entering Directory ####### (SINGLE PARTICLE RESULT)"'')')
+        endif
         write(11,'(''echo "::'',A,''"'')')cdir(1:k)
 C
         write(11,'(''#'')')
@@ -152,9 +168,17 @@ C
         call shorten(cline,k)
         write(11,'(''set realcell = "'',A,''"'')')cline(1:k)
 C
-        call cgetline(cline,"phaori")
-        call shorten(cline,k)
-        write(11,'(''set phaori = "'',A,''"'')')cline(1:k)
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
+          call cgetline(CPHORI,"phaori")
+          read(CPHORI,*)RPHAORIH,RPHAORIK
+          write(*,'(''   using Fourier filtered results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
+          call cgetline(cline,"phaori")
+          call shorten(cline,k)
+          write(11,'(''set phaori = "'',A,''"'')')cline(1:k)
+        else
+          write(*,'(''   using Single Particle  results, PhaseOrigin = 0.0,0.0'')')
+          write(11,'(''set phaori = "0.0,0.0"'')')
+        endif
 C
         call cgetline(cline,"rot90")
         call shorten(cline,k)

@@ -24,6 +24,7 @@
 # MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_ML.jpg">
 #
 # DISPLAY: ML_doit
+# DiSPLAY: ML_use_for_merging
 # DISPLAY: ML_doMLorCC
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX

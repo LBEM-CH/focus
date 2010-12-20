@@ -13,7 +13,7 @@ C
       character*200 cdir,cprocdir,cbindir
       character CROT90,CROT180
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
-      character*80 CIMAGENUMBER,CLATTICE
+      character*80 CIMAGENUMBER,CLATTICE,CMLMERGE
       character*200 CFILE1,cline
       character*1 CNREFOUT,CNSHFTIN
       integer*8 imnum(10000)
@@ -105,7 +105,7 @@ C
       if(IMERGEML.eq.0)then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
       else
-        write(*,'(I1,'' = Using Maximum Likelihood results'')')IMERGEML
+        write(*,'(I1,'' = Using Maximum Likelihood results where allowed'')')IMERGEML
       endif
 C
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
@@ -230,12 +230,17 @@ C
         call cgetline(CLATTICE,"lattice")
         call rgetline(RTAXA,"TAXA")
         call rgetline(RTANGL,"TANGL")
-        if(IMERGEML.eq.0)then
+C
+        call cgetline(CMLMERGE,"ML_use_for_merging")
+C
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
           call cgetline(CPHORI,"phaori")
           read(CPHORI,*)RPHAORIH,RPHAORIK
+          write(*,'(''   using Fourier filtered results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
         else
           RPHAORIH=0.0
           RPHAORIK=0.0
+          write(*,'(''   using Single Particle  results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
         endif
         call rgetline(RZWIN,"zstarwin")
         if(imcount.eq.1)then
@@ -257,7 +262,7 @@ C
         call shorten(cdir,k1)
         call shortshrink(CIMAGENAME,k2)
 C
-        if(IMERGEML.eq.0)then
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
           write(cname4,'(A,''/APH/'',A,''.cor.aph'')')
      .      cdir(1:k1),CIMAGENAME(1:k2)
         else

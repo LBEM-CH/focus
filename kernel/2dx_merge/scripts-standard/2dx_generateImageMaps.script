@@ -306,6 +306,7 @@ ${scriptMfile}
 ${realcell}
 ${realang}
 ${ALAT}
+${merge_ML_data}
 eot
 #
 echo "<<@progress: 50>>"

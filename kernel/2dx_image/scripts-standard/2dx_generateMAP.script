@@ -23,6 +23,7 @@
 # REMARK: The following section defines variables that will be displayed in the GUI:
 # DISPLAY: SYN_Unbending
 # DISPLAY: ML_doit
+# DiSPLAY: ML_use_for_merging
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
 # DISPLAY: ALAT

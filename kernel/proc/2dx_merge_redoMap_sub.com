@@ -38,7 +38,7 @@ if ( ${ALAT} != ${ALATnew} ) then
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "ORIGTILT - to transform the APH file into merge.amp"
+${proc_2dx}/lin "ORIGTILT - to transform the APH file into merge.amp"
 #############################################################################
 #
 \rm -f SCRATCH/2dx_origtilt-LOG1.dat
@@ -105,7 +105,7 @@ endif
 #
 \rm -f SUMMARY
 #
-if ( ${merge_ML_data} == "0" ) then
+if ( ${merge_ML_data} == "0" || ${ML_use_for_merging} == "n" ) then
   set aphfile = APH/${imagename}.cor.aph
 else
   set aphfile = APH/ML_result.aph
@@ -146,12 +146,12 @@ eot
   \cp -f fort.3 APH/${imagename}.cor.origtiltd.aph
   #
 #############################################################################
-${proc_2dx}/linblock "AVRAMPHS - to transform merge.aph into avrg.hkl"
+${proc_2dx}/lin "AVRAMPHS - to transform merge.aph into avrg.hkl"
 #############################################################################
 #
 set zminmax = "-0.05,0.05"
 # avramphs only works for 2D projection data.
-${proc_2dx}/linblock "WARNING: Using zminmax=${zminmax}, but statistics only good for 2D."
+${proc_2dx}/lin "WARNING: Using zminmax=${zminmax}, but statistics only good for 2D."
 #
 \cp -f APH/${imagename}.cor.origtiltd.aph fort.1
 \rm -f fort.2
@@ -203,7 +203,7 @@ if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   tail -n ${linenum} ${refhklfile} | sort >> TMP.tmp
   #
   #############################################################################
-  ${proc_2dx}/linblock "2dx_hklclean - to eliminated duplicates from APH file, for volume"
+  ${proc_2dx}/lin "2dx_hklclean - to eliminated duplicates from APH file, for volume"
   #############################################################################      
   #
   ${bin_2dx}/2dx_hklclean.exe << eot
@@ -216,7 +216,7 @@ eot
   \rm -f TMP.tmp
   #
   #############################################################################
-  ${proc_2dx}/linblock "f2mtz - to translate ${refhklfile} into ${refmtzfile}"
+  ${proc_2dx}/lin "f2mtz - to translate ${refhklfile} into ${refmtzfile}"
   ############################################################################# 
   #
   echo "Calling now:"
@@ -242,7 +242,7 @@ END
 eof
   #
   #############################################################################
-  ${proc_2dx}/linblock "fft - to transform ${refmtzfile} into SCRATCH/scratch1.map"
+  ${proc_2dx}/lin "fft - to transform ${refmtzfile} into SCRATCH/scratch1.map"
   #############################################################################
   #
   set AXIS = "X,Y,Z"
@@ -267,7 +267,7 @@ END
 eot
   #
   #############################################################################
-  ${proc_2dx}/linblock "extend - to extend SCRATCH/scratch1.map into SCRATCH/scratch2.map"
+  ${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/scratch2.map"
   #############################################################################
   #
   \rm -f SCRATCH/scratch2.map
@@ -280,7 +280,7 @@ eof
   \rm -f SCRATCH/scratch1.map
   #
   #############################################################################
-  ${proc_2dx}/linblock "LABEL - to create a clean MRC file format ${refmap}"
+  ${proc_2dx}/lin "LABEL - to create a clean MRC file format ${refmap}"
   #############################################################################
   #
   \rm -f ${refmap}
@@ -297,7 +297,7 @@ eot
   #
 else
   if ( ${make_reference} == "y" ) then
-    ${proc_2dx}/linblock "WARNING: ERROR in reading reference APH file ${refhklfile}. No reference map created."
+    ${proc_2dx}/lin "WARNING: ERROR in reading reference APH file ${refhklfile}. No reference map created."
   endif
 endif
 #
@@ -310,7 +310,7 @@ endif
 #############################################################################
 #
 #############################################################################
-${proc_2dx}/linblock "f2mtz - to translate avrg.hkl into ${imagename}.mtz"
+${proc_2dx}/lin "f2mtz - to translate avrg.hkl into ${imagename}.mtz"
 #############################################################################
 #
 set infile = avrg.hkl
@@ -335,7 +335,7 @@ END
 eof
 #
 #############################################################################
-${proc_2dx}/linblock "fft - to transform ${imagename}.mtz into SCRATCH/scratch1.map"
+${proc_2dx}/lin "fft - to transform ${imagename}.mtz into SCRATCH/scratch1.map"
 #############################################################################
 #
 set AXIS = "X,Y,Z"
@@ -360,7 +360,7 @@ END
 eot
 #
 #############################################################################
-${proc_2dx}/linblock "extend - to extend SCRATCH/scratch1.map into SCRATCH/${imagename}-${symmetry}.map"
+${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/${imagename}-${symmetry}.map"
 #############################################################################
 #
 \rm -f SCRATCH/${imagename}-${symmetry}.map
@@ -373,7 +373,7 @@ eof
 if ( ${create_PS} == "y" ) then
   #
   #############################################################################
-  ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${symmetry}.plt"
+  ${proc_2dx}/lin "npo - to create a line plot ${imagename}-${symmetry}.plt"
   #############################################################################  
   #
   \rm -f ${imagename}-${symmetry}.plt
@@ -389,7 +389,7 @@ END
 eof
   #
   #############################################################################
-  ${proc_2dx}/linblock "laserplot - to create PS/${imagename}MAP-${symmetry}.ps"
+  ${proc_2dx}/lin "laserplot - to create PS/${imagename}MAP-${symmetry}.ps"
   #############################################################################
   #
   \rm -f PS/${imagename}MAP-${symmetry}.ps
@@ -410,7 +410,7 @@ eof
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "LABEL - to create a clean MRC file format instead of CCP4"
+${proc_2dx}/lin "LABEL - to create a clean MRC file format instead of CCP4"
 #############################################################################
 #
 \rm -f ${imagename}-${symmetry}.mrc

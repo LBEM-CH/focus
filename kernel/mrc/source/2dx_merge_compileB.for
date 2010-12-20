@@ -14,7 +14,7 @@ C
       character*200 cdir,cprocdir,cbindir
       character CROT90,CROT180
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
-      character*80 CIMAGENUMBER,CLATTICE,CPHOPROT
+      character*80 CIMAGENUMBER,CLATTICE,CPHOPROT,CMLMERGE
       character*1 cNBM,cNTL,CNREFOUT
       character*200 CFILE1,cerrmes,cline
       character*80 CCURRENTREF,CMODUS
@@ -140,7 +140,7 @@ C
       if(IMERGEML.eq.0)then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
       else
-        write(*,'(I1,'' = Using Maximum Likelihood results'')')IMERGEML
+        write(*,'(I1,'' = Using Maximum Likelihood results where allowed'')')IMERGEML
       endif
 C
       write(*,'(/,''Want to refine switches (y=1,0=no)'')')
@@ -347,12 +347,17 @@ C
         if(irefswitch.eq.1 .and. irefinvtangl.eq.1)then
           RTANGL=-RTANGL
         endif
-        if(IMERGEML.eq.0)then
+C
+        call cgetline(CMLMERGE,"ML_use_for_merging")
+C
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
           call cgetline(CPHORI,"phaori")
           read(CPHORI,*)RPHAORIH,RPHAORIK
+          write(*,'(''   using Fourier filtered results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
         else
           RPHAORIH=0.0
           RPHAORIK=0.0
+          write(*,'(''   using Single Particle  results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
         endif
         call cgetline(CPHOPROT,"SYN_Unbending")
         if(CPHOPROT(1:1).eq.'0')then
@@ -401,7 +406,7 @@ C
 C
         call shorten(cdir,k)
         call shortshrink(CIMAGENAME,k1)
-        if(IMERGEML.eq.0)then
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
           write(cname4,'(A,''/APH/'',A,''.cor.aph'')')
      .      cdir(1:k),CIMAGENAME(1:k1)
         else

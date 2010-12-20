@@ -21,24 +21,6 @@
 #
 # MANUAL: After having defined a polygon, run this script to mask the image. The area defined in the polygon will be masked with blurred edges. The parameter <I>Masking Fourier Radius</I> defines how blurred the edges are: A larger value means a sharper edge (0...0.5).
 #
-#=============================================================================
-# SECTION: Parameter for masking
-#=============================================================================
-#
-# LABEL: Masking Fourier Radius (To blur the border of the mask)
-# LEGEND: Choose the radius in Fourier space that will be used for blurring the mask (e.g. 0.1).
-# EXAMPLE: fourmask = "0.1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Masking
-# TYPE: FLOAT "MIN=0.0;MAX=0.5;DEFAULT=0.1"
-set fourmask = "0.1"
-#
-# LABEL: Crop into smaller, square image ?
-# LEGEND: Choose if the original size should be kept (n), or if the output image should have smaller dimensions (y).
-# EXAMPLE: crop = '"n"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Masking
-# TYPE: BOOL "y;n"
-set crop = "n"
-#
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
 # DISPLAY: imagenumber
@@ -56,6 +38,9 @@ set crop = "n"
 # DISPLAY: tempkeep
 # DISPLAY: refori
 # DISPLAY: comment
+# DISPLAY: mask_fourmask
+# DISPLAY: mask_crop
+# DISPLAY: mask_reset_reflocation
 #
 #$end_local_vars
 #
@@ -78,6 +63,9 @@ set maskb04 = ""
 set maskb05 = ""
 set tempkeep = ""
 set refori = ""
+set mask_fourmask = ""
+set mask_crop = ""
+set mask_reset_reflocation = ""
 #
 #$end_vars
 #
@@ -96,11 +84,15 @@ ${proc_2dx}/2dx_makedirs
 #
 set originalpolygon = selectionList.dat
 #
-set masktobig = `echo ${fourmask} | awk '{ if ( $1 > 0.5 ) { s = 1 } else { s = 0 }} END { print s }'`
+set masktobig = `echo ${mask_fourmask} | awk '{ if ( $1 > 0.5 ) { s = 1 } else { s = 0 }} END { print s }'`
 if ( ${masktobig} == '1' ) then
-  set fourmask = 0.2
-  echo "set fourmask = ${fourmask}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Fourier Mask corrected to ${fourmask}."
+  set mask_fourmask = 0.2
+  echo "set mask_fourmask = ${mask_fourmask}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Fourier Mask corrected to ${mask_fourmask}."
+endif
+#
+if ( ${nonmaskimagename} != ${imagename} ) then
+  ${proc_2dx}/protest "ERROR: Image already masked."
 endif
 #
 echo "# IMAGE: ${nonmaskimagename}.mrc" >> LOGS/${scriptname}.results
@@ -168,7 +160,7 @@ eot
   set polygonfile = SCRATCH/TMPpolygon.dat
   set coordinatefile = SCRATCH/TMPcoordinate.dat
   set newimagesidelengthfile = SCRATCH/TMPnewimagesidelength.dat
-  set iborder = `echo ${fourmask} | awk '{ s = int( 3.0 / $1 ) } END { print s }'`
+  set iborder = `echo ${mask_fourmask} | awk '{ s = int( 3.0 / $1 ) } END { print s }'`
   set rfactor = 1.0
   #
   echo "Using as original polygon file:"
@@ -188,7 +180,7 @@ ${rfactor}
 ${iborder}
 eot
   #
-  if ( ${crop} == 'y' ) then
+  if ( ${mask_crop} == 'y' ) then
     cat SCRATCH/TMPmodifypolygon.dat
   else
     cat SCRATCH/TMPmodifypolygon.dat | sed 's/::/only if cropping= /g' | sed 's/:/only if cropping= /g'
@@ -202,16 +194,15 @@ eot
   ${proc_2dx}/linblock "BOXIMAGE - to mask the value=1 file with the polygon"
   #############################################################################
   #
+  echo "Using as polygon file:"
+  cat ${polygonfile}
+  echo " "
+  #
   \rm -f SCRATCH/TMPmask1.mrc
   # Center of gravity of polygon goes into this file:
   \rm -f boximage.tmp
   setenv IN  SCRATCH/TMPvalue1.mrc
   setenv OUT SCRATCH/TMPmask1.mrc
-  #
-  echo "Using as polygon file:"
-  cat ${polygonfile}
-  echo " "
-  #
   ${bin_2dx}/2dx_boximage.exe  << eot
 `cat ${polygonfile}`
 eot
@@ -241,7 +232,7 @@ eot
   #
   #############################################################################
   ${proc_2dx}/linblock "MASKTRAN - to get rid of high resolution"
-  ${proc_2dx}/linblock "         - using a Fourier radius of ${fourmask}"
+  ${proc_2dx}/linblock "         - using a Fourier radius of ${mask_fourmask}"
   #############################################################################
   #
   \rm -f SCRATCH/TMPmask1.fft.mask.mrc
@@ -251,7 +242,7 @@ eot
   #
   echo "0,0"   >  SCRATCH/TMPspot.spt
   #
-  set locmask = `echo ${fourmask} ${imagesidelength} | awk '{ s = $1 * $2 / 2 } END { print s }'`
+  set locmask = `echo ${mask_fourmask} ${imagesidelength} | awk '{ s = $1 * $2 / 2 } END { print s }'`
   ${bin_2dx}/masktrana.exe << eot
 2 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${locmask}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
@@ -317,13 +308,14 @@ eot
   endif
   echo "<<@progress: 90>>"
   #
-  set centerx = `cat boximage.tmp | awk '{ s = int ( $1 ) } END { print s }'`
-  set centery = `cat boximage.tmp | awk '{ s = int ( $2 ) } END { print s }'`
-  \rm -f boximage.tmp
-  #
-  set refori = ${centerx},${centery}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "reference center changed to ${refori}."
+  if ( ${mask_reset_reflocation} == "y" && ${mask_crop} == "n" ) then
+    ${proc_2dx}/linblock "Resetting reference location to center of masked area."
+    set centerx = `cat boximage.tmp | awk '{ s = int ( $1 ) } END { print s }'`
+    set centery = `cat boximage.tmp | awk '{ s = int ( $2 ) } END { print s }'`
+    set refori = ${centerx},${centery}
+    echo "set refori = ${refori}" >> LOGS/${scriptname}.results
+    ${proc_2dx}/linblock "reference center changed to ${refori}."
+  endif
   #
   echo "# IMAGE: "m${nonmaskimagename}.mrc  >> LOGS/${scriptname}.results
   set oldname = `echo ${imagename}`
@@ -344,7 +336,7 @@ eot
     echo "#WARNING: Warning: Spotlist ${imagename}.spt was already existing. Is it still good ?" >> LOGS/${scriptname}.results
   endif
   #
-  if ( ${crop} == "y" ) then
+  if ( ${mask_crop} == "y" ) then
     #############################################################################
     ${proc_2dx}/linblock "Safeguarding original image to ${nonmaskimagename}-original-big.mrc"
     #############################################################################
@@ -480,8 +472,22 @@ eot
     echo "set maskb04 = ${maskb04}" >> LOGS/${scriptname}.results
     echo "set maskb05 = ${maskb05}" >> LOGS/${scriptname}.results
     #
-    set reforix = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-    set refori = ${reforix},${reforix}
+    if ( ${mask_reset_reflocation} == "y" ) then
+      ${proc_2dx}/linblock "Resetting reference location to center of masked area."
+      set reforix = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+      set reforiy = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+    else
+      ${proc_2dx}/linblock "Adapting current reference location to new image dimension." 
+      set reforix = `echo ${refori} | cut -d\, -f1`
+      set reforiy = `echo ${refori} | cut -d\, -f2`
+      set startx = `echo ${IDIM} | awk '{ s = $1 } END { print s }'`
+      set starty = `echo ${IDIM} | awk '{ s = $3 } END { print s }'`
+      set reforix = `echo ${reforix} ${startx} | awk '{ s = $1 - $2 } END { print s }'` 
+      set reforiy = `echo ${reforiy} ${starty} | awk '{ s = $1 - $2 } END { print s }'` 
+    endif
+    set refori = ${reforix},${reforiy}
+    echo "set refori = ${refori}" >> LOGS/${scriptname}.results
+    ${proc_2dx}/linblock "reference center changed to ${refori}."
     echo ":Now: refori = ${refori}"
     echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
     #
@@ -497,6 +503,8 @@ eot
     echo "set PHASEORI_done = n" >> LOGS/${scriptname}.results
     #
   endif
+  #
+  \rm -f boximage.tmp
   #
   echo "set MASKING_done = y" >> LOGS/${scriptname}.results
   #

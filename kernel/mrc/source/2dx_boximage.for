@@ -24,7 +24,7 @@ C     VERSION  3.41	29-Mar-00  JMS zorigin inserted in ialorg for compatibility
 C					with imsubs2000C
 C	card input
 C
-CHENN>
+CHEN>
 C       1.      NOVERT,IOUTZERO
 C                                 -number of vertices (or 0 for circcular or 
 C                                  1 for square box), flag for setting outside
@@ -32,7 +32,7 @@ C                                  of box to zero or float to average
 C                                  IOUTZERO: What should be outside of mask:
 C                                  (0=average,1=zero)
 CCCCCCCCCCCCC   NOVERT            -number of vertices, 0 for circular box (*)
-CHENN<
+CHEN<
 C	2. OX,OY		  -phase origin position                  (*)
 C	3a. CX,CY,RAD1,2,3,4  -centre coords and radii if circle      (*)
 C				   :note four radii are for a tapered toroidal
@@ -40,11 +40,11 @@ C				   :mask. A simple circle would have RAD1,2=0
 C				   :and rad3,4 equal to the required radius.
 C   or	3b. PX(I),PY(I)	  -coords of vertices if polygon          (*)
 C				   :note origin is (0,0) at lower left corner.
-CHENN>
+CHEN>
 C   or  3c      RCX,RCY,RLENBO    -centre coords and side-lenght for square
 C
 C---------No: 4 IOUTZERO          -setting outside of box to zero? 1=y,0=average.
-CHENN<
+CHEN<
 C
 C   NOTE : Specify points in image wrt origin (0,0) in bottom left corner.
 C          Therefore the middle of a 1024x1024 image is (512,512).
@@ -55,20 +55,20 @@ C			inside perimeter.
 C
 C****************************************************************************
 C
-CHENN>
+CHEN>
 C      PARAMETER (NMAX=10000)
 C      PARAMETER (NVERTMAX=21)
       PARAMETER (NMAX=20000)
       PARAMETER (NVERTMAX=31)
-CHENN<
+CHEN<
       COMMON//NX,NY,NZ
       DIMENSION PX(NVERTMAX),PY(NVERTMAX),SLOPE(NVERTMAX),ALINE(NMAX),
      1          NXYZR(3),MXYZR(3),IXYZ(3),MXYZ(3),TITLE(20)
       REAL*8 DTOT
-CHENN>
+CHEN>
 C      LOGICAL INCX(20),ADDXY(20)
       LOGICAL INCX(30),ADDXY(30)
-CHENN<
+CHEN<
       CHARACTER DAT*24
       EQUIVALENCE (NX,NXYZR)
 CTSH++
@@ -93,7 +93,7 @@ C
 C
 C     read in parameters
 C
-CHENN>
+CHEN>
 C      READ(5,*) NOVERT
 C
       READ(5,*) NOVERT,IOUTZERO
@@ -107,7 +107,7 @@ C
 C------ DMIN=0.0
       endif
 C
-CHENN<
+CHEN<
       WRITE(6,10) NX,NY,NOVERT
    10 FORMAT(/,/,/,'  Boxed image size remains',I10,' by',I10,
      1 ' points',/,/,'  No of vertices',I10,/)
@@ -331,7 +331,7 @@ C
       CALL  IWRHDR(2,TITLE,-1,DMIN,DMAX,DBMEAN)
       GO TO 4000
 C
-CHENN>
+CHEN>
 C
  2000 continue
       IF(NOVERT.GE.NVERTMAX) THEN
@@ -377,14 +377,14 @@ C
 C
       ELSE
 C
-CHENN<
+CHEN<
 C
 C     polygonal box  ##########################################################
 C
-CHENN>
+CHEN>
 C2000 IF(NOVERT.GE.NVERTMAX) THEN
       IF(NOVERT.GE.NVERTMAX) THEN
-CHENN<
+CHEN<
       	PRINT *,' too many vertices for box'
       	STOP
       ENDIF
@@ -404,9 +404,9 @@ C
       PX0=PX0/NOVERT
       PY0=PY0/NOVERT		! finds c of g. of box
 C
-CHENN>
+CHEN>
        ENDIF
-CHENN<
+CHEN<
 C
       WRITE(6,
      *'(''Writing Centre of gravity to file : boximage.tmp'')')
@@ -544,11 +544,11 @@ C
  2200 CONTINUE
       DMEAN = DTOT / NTOT
 C
-CHENN>
+CHEN>
       if(IOUTZERO.eq.1)then
         DMEAN=0.0
       endif
-CHENN<
+CHEN<
 C
 C     test each individual point to see if in box
 C
@@ -658,12 +658,12 @@ C
  3290 CONTINUE
       DBMEAN = DTOT / NPTS
 C
-CHENN>
+CHEN>
       if(IOUTZERO.eq.1)then
         DBMEAN=0.0
 C-------DMIN=0.0
       endif
-CHENN<
+CHEN<
 C
       CALL  IWRHDR(2,TITLE,-1,DMIN,DMAX,DBMEAN)
 C

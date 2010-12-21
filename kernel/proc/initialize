@@ -17,14 +17,16 @@ if ( -d /usr/local/ccp4 ) then
   set ccp4 = /usr/local/ccp4
   set bin_ccp4 = ${ccp4}/bin
 else
-  if ( ${system} == "Darwin") then
-	  set ccp = `ls -1 /Applications | grep ccp4 | tail -n 1`
-	  if ( "${?ccp}" == 0) then
+  if ( ${system} == "Darwin") then	
+	set ccp=`ls -1 /Applications | grep ccp4`
+	if ( ${%ccp} == 0) then
 		${proc_2dx}/linblock "WARNING: ccp4 not found in /Applications"
-	  else
-	    set ccp4 = `echo /Applications/${ccp}`
-            set bin_ccp4 = ${ccp4}/bin
-	  endif
+		set ccp4 = "NOT_FOUND"
+		set bin_ccp4 = "NOT_FOUND"
+	else
+	 	 set ccp4 = $ccp[1]
+        	set bin_ccp4 = ${ccp4}/bin
+	endif
   endif 
 endif
 #

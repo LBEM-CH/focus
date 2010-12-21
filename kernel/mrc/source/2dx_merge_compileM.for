@@ -106,7 +106,8 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
           enddo
         endif
 C
-        call cgetline(CMLMERGE,"ML_use_for_merging")
+        call dgetline(CMLMERGE,"ML_use_for_merging",iok)
+        if(iok.eq.0)write(CMLMERGE(1:1),'(''n'')')
 C
         write(11,'(''set ML_use_for_merging = "'',A1,''"'')')CMLMERGE(1:1)
 C
@@ -477,6 +478,48 @@ C
  900  continue
         write(*,'(''::ERROR on value read:'',A30)')cname
         stop
+C
+ 999  continue
+      RETURN
+      END
+C
+c==========================================================
+c
+      SUBROUTINE dgetline(cval,cname,iok)
+C
+C-----Same as cgetline, but no error is generated.
+C
+      CHARACTER * (*) cname,cval
+      character*200 cline
+C
+      call shorten(cname,k)
+C
+      rewind(12)
+C
+ 100  continue
+C
+        read(12,'(A)',END=900,ERR=900)cline
+        if(cline(1:3).ne."set") goto 100
+        if(cline(5:4+k).ne.cname(1:k)) goto 100
+        if(cline(5+k:5+k).ne." ") goto 100
+C
+      call shorten(cline,l)
+      ilen=l-k-9
+      do i=1,ilen
+        cval(i:i) = cline(8+i+k:8+i+k)
+      enddo
+      n=len(cval)
+      write(cval(ilen:n),'(A)')cline(l-1:l-1)
+      call shorten(cval,i)
+C      write(*,'(''value for '',A,'' is '',A)')cname(1:k),cval(1:i)
+C
+      iok=1
+C
+      goto 999
+C
+ 900  continue
+        write(*,'(''::ERROR on value read:'',A30)')cname
+        iok=0
 C
  999  continue
       RETURN

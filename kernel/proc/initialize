@@ -24,7 +24,7 @@ else
 		set ccp4 = "NOT_FOUND"
 		set bin_ccp4 = "NOT_FOUND"
 	else
-	 	 set ccp4 = $ccp[1]
+	 	set ccp4 = /Applications/$ccp[1]
         	set bin_ccp4 = ${ccp4}/bin
 	endif
   endif 

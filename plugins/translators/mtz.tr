@@ -1,7 +1,24 @@
 #!/bin/csh -ef
 #
-set bin_ccp4 = "/usr/local/ccp4/bin"
-set ccp4 = "/usr/local/ccp4"
+set system = `uname -s`
+if ( -d /usr/local/ccp4 ) then
+  set ccp4 = /usr/local/ccp4
+  set bin_ccp4 = ${ccp4}/bin
+else
+  if ( ${system} == "Darwin") then	
+	set ccp=`ls -1 /Applications | grep ccp4`
+	if ( ${%ccp} == 0) then
+		echo "ccp4 not found in /Applications"
+		exit 1
+	else
+	 	set ccp4 = /Applications/$ccp[1]
+        	set bin_ccp4 = ${ccp4}/bin
+	endif
+  else
+    exit 2
+  endif 
+endif
+#
 source ${bin_ccp4}/ccp4.setup-csh
 #
 set infile = $1

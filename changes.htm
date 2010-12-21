@@ -1,18 +1,23 @@
 <html>
 <##3.3.0##>
 <body>
-<font color="blue">3.3.0</font> Nov. 19, 2010 <br>
+<font color="blue">3.3.0</font> Dec. 24, 2010 <br>
 <ul> 
-<li> <font color="red">[Bug]</font> MAKETRAN now works, since the merging script now correctly sorts spot from lattice lines into MTZ file.
-<li> <font color="red">[Bug]</font> Fixed synthetic unbending when using TTF. 
-<li> Added <b>tilt geometry refinement from defocus gradient</b>. 
-<li> Creating a new project now also sets the symbolic links that are needed for synchronization.  
-<li> Added the configuration file 2dx_merge-user.cfg, which stores user settings for 2dx_merge. It is also used by the file browser to navigate to the last used project directory.
+<li> <font color="red">[Bug]</font> 3D reference values from lattice lines are now correctly sorted, so that the creation of synthetic unbending references via MAKETRAN now works.
+<li> <font color="red">[Bug]</font> Fixed a bug in synthetic unbending when using TTF. 
+<li> Added a script for the <I>tilt geometry refinement from defocus gradient</I>. 
+<li> 2dx_merge now creates correct symbolic links for the configuration files 2dx_master.cfg upon initialization of a new project. These links are needed for correct synchronization of global parameters (e.g. synchronization of the crystal symmetry).
+<li> Added the configuration file 2dx_merge-user.cfg into the user's home directory/.2dx, which stores user settings for 2dx_merge. It is also used by the file browser to navigate to the last used project directory.
 <li> <font color="red">[Bug]</font> 2dx_image becomes now the active window even when its called from 2dx_merge. 
-<li> CCP4 is also found in /Applications on MAC OS X. 
-<li> The local database is now updated when new parameters are added to the master configuration. 
-<li> Added a new parameter attribute ISWRONG, which when set to YES visualizes the specified values in the GUI in grey. This depicts that these values should be altered before processing. By editing them they become black and ISWRONG is set to NO.
+<li> CCP4 can now also be located in /Applications on MAC OS X. 
+<li> The local database 2dx_merge.cfg is now updated, when new parameters are added to the master configuration file /usr/local/2dx/kernel/config/2dx_master.cfg. 
+<li> Added a new parameter attribute ISWRONG, which when set to YES visualizes the specified values in the GUI in grey. This depicts that these values should be altered before processing. By editing them they become black on white, and ISWRONG is set to NO. This allows to have parameters prefilled with default values that are technically functional, but still wrong. For example, the default setting for defocus is 5000.0, but the exact value still has to determined. The defocus entry of 5000.0 is therefore initially labeled as ISWRONG.
 <li> The variable attribute GLOBAL in the CShell scripst has been replaced with DISPLAY to make its functionality more clear. Scripts containing the attribute GLOBAL will still run. 
+<li> Updated the merging scripts so that Maximum Likelihood (ML) processing results from 2dx_image can also be used for merging. For this purpose, a new parameter <i>ML_use_for_merging</i> has been introduced, which allows to decide, if a ML result should be used for merging, or if the Unbending result should instead from this image be used for merging.
+<li> <font color="red">[Bug]</font> Fixed a bug in the ML code, which resulted in the Amplitude and Phase data to be written out with 180deg phase shift with respect to the Unbending results.
+<li> Added a feature that checks if the symmetry parameter setting for ML processing is following the same space group symmetry as otherwise choosen for the project.
+<li> <font color="red">[Bug]</font> Fixed a bug in the ML code, which resulted in the Amplitude and Phase data to be written out without the initial image idenfier number. This prevented this file from being able to be included in the merging.
+<li> Added a parameter <i>mask_reset_reflocation</I> that allows to decide, if during masking and optionally cropping of the crystal area the reference location should be reset to the new center of the crystal, or if it should remain in the old position.
 </ul>
 
 <BR>

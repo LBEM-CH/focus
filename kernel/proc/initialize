@@ -1,4 +1,4 @@
-#!/bin/tcsh
+#!/bin/sh
 #
 # This is not an executable script.
 #
@@ -17,15 +17,15 @@ if ( -d /usr/local/ccp4 ) then
   set ccp4 = /usr/local/ccp4
   set bin_ccp4 = ${ccp4}/bin
 else
-  if ( ${system} == "Darwin") then	
-	set ccp=`ls -1 /Applications | grep ccp4`
-	if ( ${%ccp} == 0) then
-		${proc_2dx}/linblock "WARNING: ccp4 not found in /Applications"
-		set ccp4 = "NOT_FOUND"
-		set bin_ccp4 = "NOT_FOUND"
-	else
+  if ( ${system} == "Darwin") then
+	set nonomatch
+	if( -d /Applications/ccp4* ) then 
+        	set ccp=`ls -1 /Applications | grep ccp4`
 	 	set ccp4 = /Applications/$ccp[1]
         	set bin_ccp4 = ${ccp4}/bin
+	else
+		set ccp4 = "NOT_FOUND"
+		set bin_ccp4 = "NOT_FOUND"
 	endif
   endif 
 endif

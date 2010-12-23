@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 			foreach(QString entry, standardScriptsDir.entryList(sSearchScripts, QDir::Files | QDir::NoDotAndDotDot, QDir::Unsorted))
 			{
 				confData *local = new confData(data.getDir("standardScriptsDir") + "/" + entry);
-				local->syncWithUpper();
+        //local->syncWithUpper();
 				sortOrder = local->property("sortOrder").toInt();
 				scripts.insert(sortOrder,entry);
 				localConfList.insert(sortOrder,local);
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 			{
 				entry = entryList[i];
 				confData *local = new confData(customScriptsDir.absolutePath() + "/" + entry);
-				local->syncWithUpper();
+				//local->syncWithUpper();
 				cScripts.insert(i,entry);
 				localCConfList.insert(i,local);
 			}

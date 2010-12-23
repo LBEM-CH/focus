@@ -62,7 +62,7 @@ foreach dirfile ( ${dirlist} )
   if ( -e 2dx_image.cfg ) then
     echo ":: "
     ${proc_2dx}/linblock "::Working on ${dirfile}"
-    echo ':: ${app_2dx_image} ${dirfile} "*"'
+    echo ":: ${app_2dx_image} ${dirfile} "'"*"'
     ${app_2dx_image} ${dirfile} '"*"'
     echo ":: Done."
   else

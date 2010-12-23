@@ -1,0 +1,59 @@
+#!/bin/csh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Open Merge Directory                                               #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 12/22/2010                                             #
+# Last Modification: 12/22/2010                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 96
+#
+# MANUAL: <B>Open Merge Directory</B>
+#
+# MANUAL: You can use this to open the directory that 2dx_merge is currently working on.
+# MANUAL: This may now work on all platforms .... If you find this not to work on your system, please give us an error report back.
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+# Variables to be available from the config file are:
+#
+#$end_vars
+#
+set scriptname = 2dx_openDir
+#
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>>"
+echo "<<@evaluate>>"
+#
+${proc_2dx}/2dx_makedirs
+#
+#############################################################################
+echo ":: "
+echo "::The current working directory is:"
+echo "::"$PWD
+echo ":: "
+#############################################################################
+#
+set system = `uname -s`
+if ( ${system} == "Darwin") then
+  open $PWD
+endif
+#
+echo "<<@progress: 100>>"
+#

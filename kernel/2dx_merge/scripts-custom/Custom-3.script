@@ -75,11 +75,15 @@ foreach dirfile ( ${dirlist} )
   # echo "set phaori = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set phaoriFouFilter = 0.0,0.0" >> LOGS/${scriptname}.results
 
+  # Use the following to run all standard 2dx_image scripts on the selected images:
+  # ${app_2dx_image} ${dirfile} '"*"'
 
-  # Use the following to not run (again) the determination of lattice and defocus:
-  # echo "set det_lattice = n" >> LOGS/${scriptname}.results
-  # echo "set det_defocus = n" >> LOGS/${scriptname}.results
+  # Use the following to apply the CTF to all selected images:
+  # ${app_2dx_image} ${dirfile} "2dx_applyCTF"
 
+  # Use the following to run a few selected scripts on all selected images:
+  # ${app_2dx_image} ${dirfile} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
+  
   # Use the following to run somme of the standard scripts again:
   # ${app_2dx_image} ${dirfile} "2dx_fftrans"
   # ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
@@ -90,12 +94,12 @@ foreach dirfile ( ${dirlist} )
   # ${app_2dx_image} ${dirfile} "2dx_applyCTF"
   # ${app_2dx_image} ${dirfile} "2dx_generateMAP"
 
-  # Use the following to apply the CTF to all selected images:
+  # Use the following to recalculate the TAXA and TANGL values for all selected images:
   # ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
  
   # Use the following to calculate the local real-space lattice for each selected image:
   # ${app_2dx_image} ${dirfile} "+2dx_evaluateLattice"
-
+  
   # Use the following to lock certain variables, for example to lock the phase origin for the selected images:
   # This can be used to protect these phase origin settings, if you are happy with them and want to perform 
   # a coarse search for some other not yet correctly centered projection maps.

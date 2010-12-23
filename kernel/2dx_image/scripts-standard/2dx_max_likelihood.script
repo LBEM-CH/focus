@@ -23,6 +23,7 @@
 #
 # MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_ML.jpg">
 #
+# DISPLAY: SYN_Unbending
 # DISPLAY: ML_doit
 # DiSPLAY: ML_use_for_merging
 # DISPLAY: ML_doMLorCC
@@ -83,6 +84,7 @@ set realcell = ""
 set ctfrev = ""
 set phaori = ""
 set lattice = ""
+set SYN_Unbending = ""
 set ML_doit = ""
 set ML_doMLorCC = ""
 set ML_realcellxy_outer = ""
@@ -143,6 +145,13 @@ ${proc_2dx}/2dx_makedirs
 \rm -f LOGS/${scriptname}.results
 #
 echo "<<@evaluate>>"
+#
+if ( (${SYN_Unbending} != "0")) then
+  ${proc_2dx}/linblock "Skipping. This script only runs if you don't have the Synthetical Reference chosen."
+  echo "<<@progress: 100>>"
+  exit
+  #
+endif
 #
 if ( ${ML_doit} == 'n' ) then
   ${proc_2dx}/linblock "No Maximum Likelihood processing."

@@ -18,6 +18,7 @@
 # MANUAL: This script establishes a refined spotlist, using an <B>mmbox</B> evaluation of the FFT of the unbent image from Unbend I. You can later refine the spotlist with the specific script <I>Refine Spotlist</I>, or refine the spotlist manually in the full-screen browser, when displaying a FFT of the original or unbent image.
 #
 #
+# DISPLAY: SYN_Unbending
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: lattice
@@ -241,7 +242,7 @@ if ( ${spot_filter} == 'y' ) then
   ${proc_2dx}/linblock "2dx_spotfilter: To weed out the spots on second lattice."
   #############################################################################
   #
-  \rm -f SCRATCH/GOODSPOT.spt
+  \rm -f GOODSPOT.spt
   \rm -f SCRATCH/BADSPOT.spt
   \rm -f SCRATCH/COUNTSPOT.tmp
   \rm -f SCRATCH/CORRECTEDSPOT.spt
@@ -255,11 +256,14 @@ ${spotrefine_IHKmax}
 ${spot_exclusion_radius}
 ${imodspot}
 ${spotname}
-SCRATCH/GOODSPOT.spt
+GOODSPOT.spt
 SCRATCH/BADSPOT.spt
 SCRATCH/COUNTSPOT.tmp
 SCRATCH/CORRECTEDSPOT.spt
 eot
+  #
+  echo "# IMAGE-IMPORTANT: GOODSPOT.spt <SPT: Good Spot List>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: SCRATCH/BADSPOT.spt <SPT: Bad Spot List>" >> LOGS/${scriptname}.results
   #
   if ( ! -e SCRATCH/COUNTSPOT.tmp ) then
     ${proc_2dx}/protest "ERROR in 2dx_spotfilter"
@@ -269,11 +273,11 @@ eot
   set ispt  = `head -3 SCRATCH/COUNTSPOT.tmp | tail -1`
   set irest = `head -4 SCRATCH/COUNTSPOT.tmp | tail -1`
   echo "::`echo 2dx_spotfilter: Generated ${igood} good and ${ibad} bad spots.`"
-  echo :From ${ispt} spots in ${spotname} survived ${irest} spots.
-  echo :Survived spots are copied onto ${spotname}
+  echo ::From ${ispt} spots in ${spotname} survived ${irest} spots.
+  echo ::Survived spots are copied onto ${spotname}
   \rm -f ${spotname}
   \mv SCRATCH/CORRECTEDSPOT.spt ${spotname}
-  echo :Good spots are in SCRATCH/GOODSPOT.spt
+  echo ::Good spots are in GOODSPOT.spt
   \rm -f SCRATCH/COUNTSPOT.tmp
   #
   set spotnum = `cat ${spotname} | wc -l`

@@ -23,22 +23,15 @@
 #
 # MANUAL: Now you can run this standard script "Re-Unbend", to re-unbend all selected images with the merged dataset as reference.  This should give better values than the Fourier filtered unbending. Otherwise, there is something wrong with either the merged reference, or the tilt geometry, or the phase origin, or still something else.
 #
-# DISPLAY: merge_ref_num
-# DISPLAY: merge_comment_1
-# DISPLAY: merge_comment_2
-# DISPLAY: merge_comment_3
-# DISPLAY: merge_comment_4
-# DISPLAY: merge_comment_5
-# DISPLAY: merge_comment_6
-# DISPLAY: merge_comment_7
-# DISPLAY: merge_comment_8
-# DISPLAY: merge_comment_9
+# DISPLAY: SYN_Ref_is_set
 #
 #$end_local_vars
 #
 set bin_2dx = ""
 set proc_2dx = ""
 set app_2dx_image = ""
+#
+set SYN_Ref_is_set = ""
 #
 #$end_vars
 #
@@ -49,6 +42,11 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 echo "<<@progress: 1>>"
+#
+if ( ${SYN_Ref_is_set} == "0" ) then
+  ${proc_2dx}/linblock "ERROR: First set reference to Synthetic Reference for all images."
+  ${proc_2dx}/protest " Read the manual for this script and the parameter. Aborting."
+endif
 #
 set oldir = ${PWD}
 #
@@ -62,17 +60,19 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 foreach dirfile ( ${dirlist} ) 
   cd ${dirfile}
   if ( -e 2dx_image.cfg ) then
-    echo "::Working on ${dirfile}"
+    echo ":: "
+    ${proc_2dx}/linblock "::Working on ${dirfile}"
+    echo ':: ${app_2dx_image} ${dirfile} "*"'
+    ${app_2dx_image} ${dirfile} '"*"'
+    echo ":: Done."
   else
     echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
   endif
   # 
-  echo ':: ${app_2dx_image} ${dirfile} "*"'
-  ${app_2dx_image} ${dirfile} '"*"'
-  echo ":: Done."
-  #
   cd ${oldir}
 end
+#
+echo "<<@progress: 100>>"
 #
 ############################################################################# 
 ${proc_2dx}/linblock "Done."

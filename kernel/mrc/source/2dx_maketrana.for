@@ -155,7 +155,8 @@ CHEN<
       READ(5,*) DFMID1,DFMID2,ANGAST,CS,KV
       WRITE(6,1001) AX,AY,BX,BY,NX,NY,DSTEP,XMAG,DFMID1,DFMID2,
      .  ANGAST,CS,KV,OX,OY,TX,TY,TAXA,TANGL,RESMIN,RESMAX,
-     .  A,B,GAMMA,REVHK,SGNXCH,ROT180,ISHAPE,IAMPLIM,RAD
+     .  A,B,GAMMA,REVHK,SGNXCH,ROT180,ROT90,REVHND,
+     .  ISHAPE,IAMPLIM,RAD
 1001  FORMAT( ' AX,AY,BX,BY ............=',4F9.2,/,
      .  ' NX,NY ..................=',2I8,/,
      .  ' DSTEP ..................=',F8.1,/,
@@ -168,6 +169,7 @@ CHEN<
      .  ' RESMIN,RESMAX ..........=',F8.2,F7.2,/,
      .  ' A,B,GAMMA ..............=',3F6.1,/,
      .  ' REVHK,SGNXCH,ROT180.....=',3F6.0,/,
+     .  ' ROT90,REVHND............=',2F6.0,/,
      .  ' ISHAPE,IAMPLIM,RAD .....=',I4,3X,L1,F7.1,/)
       KV=KV*1000.0
       WL=12.3/SQRT(KV+KV**2/(10.0**6.0))
@@ -291,7 +293,12 @@ C
       CALL GETSFS(NHOLE,AMP,PHASE,IHS,IKS,ZS,A,B,ABANG)
       DO 130 J=1,NHOLE            ! apply beamtilt phaseshift
         P=PHASE(J)
+C
+CHEN>
         P=P+PHSHFT(IHS(J),IKS(J),OX,OY,TX,TY,BEAMSHFT,BSH(J))
+C       P=P+PHSHF2(IHS(J),IKS(J),OX,OY,TX,TY,BEAMSHFT,BSH(J),
+C     .            REVHK,SGNXCH,ROT180,ROT90,REVHND)
+CHEN<
         PHASE(J)=AMOD(P,360.)     ! here P is stored.
         APART(J)=AMP(J)*COS(DRAD*PHASE(J))
         BPART(J)=AMP(J)*SIN(DRAD*PHASE(J))
@@ -1143,33 +1150,32 @@ CHEN>
 C      SUBROUTINE FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180)
 C
       SUBROUTINE FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180,ROT90,REVHND)
-CHEN<
-      IF(REVHK.EQ.0.0) GO TO 225
-      I=IH
-      IH=IK
-      IK=I
-      Z=-Z
-225   CONTINUE 
-      IF(SGNXCH.EQ.0.0) GO TO 230
-      IK=-IK
-      Z=-Z
-  230 IF(ROT180.EQ.0) GO TO 231
-      IH=-IH
-      IK=-IK
-231   CONTINUE
-CHEN>
-      if(ROT90.ne.0)then
-C-------This here is a ROT90,
+      IF(abs(REVHK).gt.0.1)then
+        I=IH
+        IH=IK
+        IK=I
+        Z=-Z
+      endif
+      IF(abs(SGNXCH).gt.0.1)then
+        IK=-IK
+        Z=-Z
+      endif
+      IF(abs(ROT180).gt.0.1)then
+        IH=-IH
+        IK=-IK
+      endif
+      if(abs(ROT90).gt.0.1)then
+C-------This here would be a ROT90, counterclockwise:
 C        I=IH
 C        IH=-IK
 C        IK=I
-C-------This here is a ROT90,
+C-------This here is an inverse ROT90, clockwise,
 C-------rotating in the other direction than in all other programs.
         I=IH
         IH=IK
         IK=-I
       endif
-      if(REVHND.ne.0)then
+      if(abs(REVHND).gt.0.1)then
         Z=-Z
       endif
 CHEN<
@@ -1182,7 +1188,82 @@ C              TO APPLY ORIGIN AND BEAMTILT PHASE-SHIFT.
 C       ! attempt to not make it p3 specific.
       ASTAR=BEAMSHFT(2)
       BSTAR=BEAMSHFT(3)
-      PHSHFT=IH*OX + IK*OY + B*(IH*TX*ASTAR+IK*TY*BSTAR)
+CHEN>
+      RPHSHFT=IH*OX + IK*OY + B*(IH*TX*ASTAR+IK*TY*BSTAR)
+C
+ 100  continue
+        if(RPHSHFT.gt.180.0)then
+          RPHSHFT=RPHSHFT-360.0
+          goto 100
+        endif
+C
+ 200  continue
+        if(RPHSHFT.lt.-180.0)then
+          RPHSHFT=RPHSHFT+360.0
+          goto 200
+        endif
+C
+      PHSHFT=RPHSHFT
+CHEN<
       RETURN
       END
 C******************************************************************************
+CHEN>
+C              TO APPLY ORIGIN AND BEAMTILT PHASE-SHIFT.
+      FUNCTION PHSHF2(IH,IK,OX,OY,TX,TY,BEAMSHFT,B,REVHK,SGNXCH,ROT180,ROT90,REVHND)
+      DIMENSION BEAMSHFT(4)
+C
+C-----The reference data are merged with a Phase Origin valid for REVHK,SGNXCH,... settings.
+C-----Here, we need to invert the phase origin offset depending on those settings.
+C-----CORRECTION: This is not needed.
+C-----THE FIDDLE ROUTINE FIRST DETERMINES THE CORRECT H,K,Z VALUES, THEN ORIGINA PHASESHIFT IS APPLIED.
+C
+      ILH=IH
+      ILK=IK
+C      ZL=Z
+C
+      IF(abs(REVHK).gt.0.1)then
+        I=ILH
+        ILH=ILK
+        ILK=I
+C        ZL=-ZL
+      endif
+      IF(abs(SGNXCH).gt.0.1)then
+        ILK=-ILK
+C        ZL=-Z
+      endif
+      IF(abs(ROT180).gt.0.1)then
+        ILH=-IH
+        ILK=-IK
+      endif
+      if(abs(ROT90).gt.0.1)then
+C-------Here again counterclockwise, to undo the FIDDLE thing above.
+        I=ILH
+        ILH=-ILK
+        ILK=I
+      endif
+      if(abs(REVHND).ne.0.1)then
+C        ZL=-Z
+      endif
+C      
+      ASTAR=BEAMSHFT(2)
+      BSTAR=BEAMSHFT(3)
+      RPHSHFT=ILH*OX + ILK*OY + B*(ILH*TX*ASTAR+ILK*TY*BSTAR)
+C
+ 100  continue
+        if(RPHSHFT.gt.180.0)then
+          RPHSHFT=RPHSHFT-360.0
+          goto 100
+        endif
+C
+ 200  continue
+        if(RPHSHFT.lt.-180.0)then
+          RPHSHFT=RPHSHFT+360.0
+          goto 200
+        endif
+C
+      PHSHF2=RPHSHFT
+      RETURN
+      END
+C******************************************************************************
+CHEN<

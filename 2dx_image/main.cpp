@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 
 			if(QFileInfo(standardScriptsDir.path() + "/" + script + ".script").exists())
 			{
-				cout<<"Executing: "<<script.toStdString()<<" in "<<data.getDir("working").toStdString()<<endl;
+				cout<<"::  Executing: "<<script.toStdString()<<" in "<<data.getDir("working").toStdString()<<endl;
 				parser.parse(standardScriptsDir.path() + "/" + script + ".script", data.getDir("working") + "/proc/" + script + ".com");
 				parser.execute(script,&data);
 			}

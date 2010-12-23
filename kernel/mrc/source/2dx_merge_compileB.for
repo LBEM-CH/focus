@@ -349,7 +349,11 @@ C
         endif
 C
         call dgetline(CMLMERGE,"ML_use_for_merging",iok)
-        if(iok.eq.0)write(CMLMERGE(1:1),'(''n'')')
+        if(iok.eq.0)then
+          write(CMLMERGE(1:1),'(''n'')')
+          write(*,'(''::WARNING: ML_use_for_merging not yet defined for this image.'')')
+          write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
+        endif
 C
         if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
           call cgetline(CPHORI,"phaori")
@@ -734,7 +738,6 @@ C
       goto 999
 C
  900  continue
-        write(*,'(''::ERROR on value read:'',A30)')cname
         iok=0
 C
  999  continue

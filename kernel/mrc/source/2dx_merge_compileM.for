@@ -44,7 +44,8 @@ C
       if(IMERGEML.eq.0)then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
       else
-        write(*,'(I1,'' = Using Maximum Likelihood results where allowed'')')IMERGEML
+        write(*,'(I1,'' = Using Maximum Likelihood results'',
+     .          '' where allowed'')')IMERGEML
       endif
 C
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
@@ -107,7 +108,11 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
         endif
 C
         call dgetline(CMLMERGE,"ML_use_for_merging",iok)
-        if(iok.eq.0)write(CMLMERGE(1:1),'(''n'')')
+        if(iok.eq.0)then
+          write(CMLMERGE(1:1),'(''n'')')
+          write(*,'(''::WARNING: ML_use_for_merging not yet defined for this image.'')')
+          write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
+        endif
 C
         write(11,'(''set ML_use_for_merging = "'',A1,''"'')')CMLMERGE(1:1)
 C
@@ -518,7 +523,6 @@ C
       goto 999
 C
  900  continue
-        write(*,'(''::ERROR on value read:'',A30)')cname
         iok=0
 C
  999  continue

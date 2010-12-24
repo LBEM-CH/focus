@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: ML-3D (experimental)                                               #
+# Title: ML-3D (not yet implemented)                                        #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -156,6 +156,22 @@ endif
 #
 set date = `date`
 echo date = ${date}
+#
+${proc_2dx}/linblock "Not yet implemented. Use 2dx_image for ML processing in 2d."
+${proc_2dx}/protest "Then merge conventionally in 2dx_merge."
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 #
 #############################################################################
 echo ":: "

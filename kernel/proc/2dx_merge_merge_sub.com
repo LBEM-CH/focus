@@ -111,26 +111,26 @@ if ( ${scriptname} == "2dx_refine_cyclic" ) then
   endif
 endif
 #
-if ( 1 == 2 ) then
-#
-#############################################################################
-${proc_2dx}/linblock "Compile script to plot tilt geometry distribution"
-#############################################################################
-#
-\rm -f ${scriptPLTfile}
-#
-set number = 1
-set IVERBOSE = 1
-set RFACAMP = 1.0
-#
-set TANGLST = 1.0
-set TANGLMAX = 90.0
-set IMQLABEL = 1
-set RMAX = ${RESMAX}
-set IQMAX = 5
-set RGOOD = 0.5
-#
-${bin_2dx}/2dx_merge_compilePLT.exe << eot
+if ( ${merge_modus} == "3D" ) then
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Compile script to plot tilt geometry distribution"
+  #############################################################################    
+  #
+  \rm -f ${scriptPLTfile} 
+  #
+  set number = 1
+  set IVERBOSE = 1
+  set RFACAMP = 1.0
+  #
+  set TANGLST = 15.0
+  set TANGLMAX = 90.001
+  set IMQLABEL = 1
+  set RMAX = ${RESMAX}
+  set IQMAX = 5
+  set RGOOD = 0.5
+  #
+  ${bin_2dx}/2dx_merge_compilePLT.exe << eot
 LOGS/${scriptname}.results
 ${proc_2dx}
 ${bin_2dx}
@@ -153,34 +153,34 @@ ${RMAX}
 ${IQMAX}
 ${RGOOD}
 eot
-#
-echo "# IMAGE: ${scriptPLTfile} <CSH: merging script>" >> LOGS/${scriptname}.results
-echo "<<@progress: 20>"
-#
-#############################################################################
-${proc_2dx}/linblock "Launch script to plot tilt geometry distribution"
-#############################################################################
-#
-chmod +x ${scriptPLTfile}
-#
-echo "# IMAGE: LOGS/2dx_merge_scriptPLT.log <LOG: PLTILTK output>" >> LOGS/${scriptname}.results
-#
-\rm -f PS/2dx_tltplotk.ps
-#
-${scriptPLTfile} > LOGS/2dx_merge_scriptPLT.log
-#
-# cat LOGS/2dx_merge_scriptPLT.log
-echo "################################################"
-echo "################################################"
-echo "output in file LOGS/2dx_merge_scriptPLT.log"
-echo "################################################"
-echo "################################################"
-#
-\mv -f TLTPLOT.PS PS/2dx_tltplotk.ps
-echo "# IMAGE-IMPORTANT: PS/2dx_tltplotk.ps <PS: TLTPLOT file>" >> LOGS/${scriptname}.results
-#
-echo "<<@progress: 22>"
-#
+  #
+  echo "# IMAGE: ${scriptPLTfile} <CSH: script to generate 3D plot>" >> LOGS/${scriptname}.results
+  echo "<<@progress: 20>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Launch script to plot tilt geometry distribution"
+  #############################################################################
+  #
+  chmod +x ${scriptPLTfile}
+  #
+  echo "# IMAGE: LOGS/2dx_merge_scriptPLT.log <LOG: PLTILTK output>" >> LOGS/${scriptname}.results
+  #
+  \rm -f PS/2dx_tltplotk.ps
+  #
+  ${scriptPLTfile} > LOGS/2dx_merge_scriptPLT.log
+  #
+  # cat LOGS/2dx_merge_scriptPLT.log
+  echo "################################################"
+  echo "################################################"
+  echo "output in file LOGS/2dx_merge_scriptPLT.log"
+  echo "################################################"
+  echo "################################################"
+  #
+  \mv -f TLTPLOT.PS PS/2dx_tltplotk.ps
+  echo "# IMAGE-IMPORTANT: PS/2dx_tltplotk.ps <PS: TLTPLOT file>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 22>"
+  #
 endif
 #
 #############################################################################

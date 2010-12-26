@@ -17,6 +17,7 @@ C  PLOTRESK v1.0 11/10/03 image2000 style postscript plot and clean up.  AC
 C  PLOTRESKA v1.0 12/17/03 Add option for ploting with untilted cell  AC
 C  PLOTRESKA v1.1 4/05/05  Make data input to REAL*8 because an error on
 C                          alpha machines AC
+C  PLOTRESKA v1.2 20/12/10 Adapted to 2dx, added IOPTION=3, HSt
 C  
 C  INPUT  IOPTION  1=plot the data with A,B, GAMMA (use with caution
 C                    not properly debugged)

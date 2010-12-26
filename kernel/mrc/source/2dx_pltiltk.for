@@ -37,7 +37,7 @@ C---------1st input card for origtiltd
 C
 C 7     IFILM,TITLE                                            (I10,10A4)
 C---------1st real film input, i.e., non-dummy
-C 8     FILIN                                                         (A)
+C 8     CFILIN                                                        (A)
 C
 C 9     NWGT  (Not used)                                              (*)
 C
@@ -82,7 +82,7 @@ C       WIDTH           C AXIS IN ANGSTROMS        "        "   .
 C       ANGAB           ANGLE BETWEEN A AND B - ONLY FOR P1 OR P2
 C       IFILM           INTEGER FILM IDENTIFIER
 C       TITLE           DESCRIPTION OF FILM
-C       FILIN           NAME OF FILE CONTAINING H,K,A,P,IQ DATA
+C       CFILIN          NAME OF FILE CONTAINING H,K,A,P,IQ DATA
 C       TAXA            ANGLE MEASURED FROM THE TILT AXIS TO THE A-AXIS,
 C                       MEASURED IN DIRECTION OF A TO B BEING POSITIVE.
 C       TANGL           TILT ANGLE IN DEGREES
@@ -181,8 +181,8 @@ C
 C##############################################################################
 
       INTEGER TOTRFL
-      PARAMETER (TOTRFL=40000)
-      PARAMETER (MAXRFL=1000)
+      PARAMETER (TOTRFL=1000000)
+      PARAMETER (MAXRFL=10000)
       PARAMETER (JRMAX=4)
 
       PARAMETER (ID=150)
@@ -208,11 +208,12 @@ CTSH++
 CTSH--
 C
 C  DIMENSION STATEMENTS FOR REFLECTION LIST INPUT.
-      INTEGER IFILM,IHIN(MAXRFL),IKIN(MAXRFL),IQIN(MAXRFL)
+      INTEGER IHIN(MAXRFL),IKIN(MAXRFL),IQIN(MAXRFL)
+      INTEGER*8 IFILM,ISER
       INTEGER IMQ,IORIGT,ISPOT(JRMAX),IGOOD(JRMAX)
       INTEGER IREVHK,ISGNXCH,IROT180,IROT90,CTFREV
       INTEGER IH,IK,IQ
-      CHARACTER FTITLE*80,FILIN*40
+      CHARACTER FTITLE*80,CFILIN*200,CTITLE*200,CLINE*200
       REAL*4 CS,KV,TILTH,TILTK
       REAL*8 ORIGH,ORIGK,STEP,WIN,SCALE,TAXA,TANGL,DRESMAX,DRESMIN,TAXBN
       REAL*4 A,P,BCK,CTF,W
@@ -255,7 +256,7 @@ C
 135   FORMAT(' IMAGE ',I10,5X,10A4)
 136   FORMAT(' FOUND ',10A4)
 138   FORMAT(10A4)
-148   FORMAT(/,/,'0MORE THAN',I5,' REFLECTIONS FOR THIS IMAGE')
+148   FORMAT(/,/,'ERROR: MORE THAN',I5,' REFLECTIONS FOR THIS IMAGE')
 149   FORMAT(/,/,'0TOTAL NUMBER OF REFLECTIONS IS MORE THAN',I5)
 151   FORMAT(' REQUIRED FILM IDENTIFIER DOES NOT MATCH FILM SERIAL NUMBER
      1 AT',/,'  HEAD OF DATALIST,  IFILM=',I10,'    ISER=',I10)
@@ -325,7 +326,9 @@ C
       ABANGST=180.-ABANG  ! NOW ABANGST IS RECIPROCAL SPACE ANGLE.
 
       CALL CCPDPN(9,'TLTASM','UNKNOWN','F',0,0)
-
+C
+      write(6,'('' TLTASM opened'')')
+C
       NARC = TANGLMAX /TANGLST
       WRITE(9,170)
       DO 1500 N=1, NARC
@@ -340,6 +343,7 @@ C
         WRITE(9,171) TANGLNOW,KAPPAFDEG(N),KAPPA0(N),AREAK
 1500  CONTINUE
 C
+      write(6,'('' Initializing image data reading and plotting'')')
 C     INITIALIZE IMAGE DATA READING & PLOTING
 C
       JREFL=0
@@ -453,6 +457,7 @@ C        CALL P2K_DRAW(0.,0.,0.)
           IF (NRN.EQ.0) THEN
             TARC=TANGLST1*N/DRAD
             ITARC=INT(TARC*10)
+            write(6,'(''TARC='',F12.3)')TARC
             Do 3341 NMOD= 2,0,-1
               ITEN=ITARC/(10**NMOD)
               ITARC=ITARC-ITEN*10**NMOD
@@ -561,12 +566,24 @@ C     READ TILTED DATA----THIS PART FOLLOWS ORIGTILT FORMAT EVEN
 C     THOUGH MANY OF THE VARIABLES ARE NOT USED IN THIS PROGRAM
 C
 220   WRITE(6,125)
-      READ(5,120)IFILM,TITLE
+CHEN>
+      read(5,'(A)')CLINE
+      call shorten(CLINE,k)
+      write(6,'('' Read: '',A)')CLINE(1:k)
+      if(k.lt.11)then
+        read(CLINE(1:k),'(I10)')IFILM
+        write(CTITLE,'(10X)')
+      else
+        read(CLINE(1:k),'(I10,A200)')IFILM,CTITLE
+      endif
+C     READ(5,120)IFILM,TITLE
       IF(IFILM.LT.0) GO TO 500
-      WRITE(6,135) IFILM,TITLE
-      READ(5,1005) FILIN
-      OPEN(UNIT=11,FILE=FILIN,STATUS='OLD')
-      WRITE(6,9201)FILIN
+      call shorten(CTITLE,k)
+      WRITE(6,'('' IMAGE '',I10,5X,A)') IFILM,CTITLE(1:k)
+CHEN<
+      READ(5,1005) CFILIN
+      OPEN(UNIT=11,FILE=CFILIN,STATUS='OLD')
+      WRITE(6,9201)CFILIN
       READ(5,*) NWGT
       READ(5,*) TAXA,TANGL,IORIGT
 
@@ -765,7 +782,7 @@ C     WRITING AND PLOTING THE FINAL RESULTS
 C
 9170  CONTINUE
       WRITE(6,158)TAXA,TANGL
-      WRITE(9,175)TAXA,TANGL,IMQ,FILIN
+      WRITE(9,175)TAXA,TANGL,IMQ,CFILIN
 C
 C  Here for spot plots
 C
@@ -1109,6 +1126,9 @@ C******************************************************************************
           OPERCLOW = OPERC(INDEX50) - 50.0
           KAPPA50HIGH = OMEGADEG(INDEX50M)
           KAPPA50LOW = OMEGADEG(INDEX50)
+          if(abs(OPERCHIGH-OPERCLOW).lt.0.0000000001)then
+            write(6,'(''ERROR: OPERCHIGH-OPERCLOW is zero.'')')
+          endif
           KAPPA50 = KAPPA50HIGH - (KAPPA50HIGH-KAPPA50LOW) *
      .    (OPERCHIGH)/(OPERCHIGH-OPERCLOW)
           AREA=(XMAX-XMIN)*(YMAX-YMIN)*NTOTAL/(NXTOTAL*NYTOTAL)
@@ -1118,3 +1138,29 @@ C******************************************************************************
       print *,KAPPA50
       RETURN
       END
+c
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+C
+

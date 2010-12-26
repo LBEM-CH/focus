@@ -172,7 +172,7 @@ C
 C
       write(11,'(''${bin_2dx}/2dx_pltiltk.exe << eot'')')
 C
-      write(11,'('' PLTILTK title'')')
+      write(11,'(''Tilt Angle Distribution Plot'')')
       write(11,'(''${TANGLST},${TANGLMAX}'')')
       write(11,'(''${IMQLABEL}'')')
       write(11,'(''${RMAX},${IQMAX}'')')

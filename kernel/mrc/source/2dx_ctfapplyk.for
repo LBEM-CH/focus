@@ -2,17 +2,17 @@ C  CTFAPPLY : derived from CTFPLOT giving automatic application of C.T.F. to
 C             phases input from MMBOX and output ready for ORIGTILT.
 C  PROGRAM PLOTS SPOTS FROM MMBOX IN RECIPROCAL SPACE AND C.T.F. PLOT OF IMAGE.
 C
-C	V1.01	20.4.87		RH	changed to allow IQMAX = 9 to be passed.
-C	V1.02	24.1.89		RH	plots box sizes proportional to 8.1-IQ.
-C	V1.03	13.6.90		RH	Minor change to FORMAT statement 105.
-C	V1.04	6.10.92		RH	extended o/p format h,k,A,P,IQ,BCK,CTF
-C	V1.05	21.5.93		RH	compatible with Alliant - CCPDPN.
-C	V1.06	14.4.95		RH	minor change to I/P FORMAT statement 99
-C	V2.00	13.8.00		TSH	major change from plot82 to plot2k
+C       V1.01   20.4.87         RH      changed to allow IQMAX = 9 to be passed.
+C       V1.02   24.1.89         RH      plots box sizes proportional to 8.1-IQ.
+C       V1.03   13.6.90         RH      Minor change to FORMAT statement 105.
+C       V1.04   6.10.92         RH      extended o/p format h,k,A,P,IQ,BCK,CTF
+C       V1.05   21.5.93         RH      compatible with Alliant - CCPDPN.
+C       V1.06   14.4.95         RH      minor change to I/P FORMAT statement 99
+C       V2.00   13.8.00         TSH     major change from plot82 to plot2k
 C        ""     13.6.01         TSH     P2K_FONT needed string terminator
 C       V3.00   01.2.97         HS      PHACON,RESMAX, ps-file completed.
 C       V3.01   02.2.98         HS      RESHIG,RESLOW
-C		remember to change version number and date in title record.
+C               remember to change version number and date in title record.
 C
 C  INPUT PARAMETERS
 C      CARD 1    AX AY BX BY ISIZE DSTEP XMAG
@@ -74,7 +74,7 @@ CHENN>
       INTEGER * 8 ISER,NSER
 CHENN<
       TWOPI=6.28318
-      FONTSIZE=4.0	! SELECT 4MM CHAR HEIGHT FOR TEXT
+      FONTSIZE=4.0      ! SELECT 4MM CHAR HEIGHT FOR TEXT
       WRITE(6,1)
 1     FORMAT(/'  CTFAPPLY V2.00 : 13.8.00'//)
       READ(5,*) AX,AY,BX,BY,ISIZE,DSTEP,XMAG
@@ -121,11 +121,11 @@ C      .       ' ACCELERATING VOLTAGE (KV) ..........',F8.0)
 CHENN<
       CALL CCPDPN(1,'IN','READONLY','F',0,0)
       CALL CCPDPN(2,'OUT','UNKNOWN','F',0,0)
-C      CALL DOPEN(1,'IN','RO','F')	! old vax open
-C      CALL DOPEN(2,'OUT','NEW','F')	!  "   "   "
+C      CALL DOPEN(1,'IN','RO','F')      ! old vax open
+C      CALL DOPEN(2,'OUT','NEW','F')    !  "   "   "
       READ(1,99)  NSER,TITLEIN
       WRITE(6,97) NSER,TITLEIN
-97	FORMAT(' Serial no and tilted on input file of uncorrected data'/
+97      FORMAT(' Serial no and tilted on input file of uncorrected data'/
      . 40X,I10,15A4)
       WRITE(2,96) ISER,TITLE,'  This is: H,K,A,P,IQ,Back,CTF(phase already applied)'
 CHENN>
@@ -188,7 +188,7 @@ C
 C
 CHENN<
 C
-      SCALE=PLTSIZ/(2.0*RESMAX)		!MAXIMUM RESOLUTION, 0.3=3.33 ANGSTROMS
+      SCALE=PLTSIZ/(2.0*RESMAX)         !MAXIMUM RESOLUTION, 0.3=3.33 ANGSTROMS
       CALL P2K_MOVE(0.,0.,0.)
       CALL P2K_DRAW(PLTSIZ,0.,0.)
       CALL P2K_DRAW(PLTSIZ,PLTSIZ,0.)
@@ -211,36 +211,36 @@ C
       CALL P2K_MOVE(-CHRSIZ,-CHRSIZ,0.)
       CALL P2K_DRAW(CHRSIZ,CHRSIZ,0.)
       CALL P2K_MOVE(CHRSIZ,-CHRSIZ,0.)
-      CALL P2K_DRAW(-CHRSIZ,CHRSIZ,0.)	! CENTRAL CROSS AT ORIGIN.
-      	ALENGTH=SQRT(AX**2+AY**2)
-      	X=(AX/ALENGTH)*(PLTSIZ/2.0)
-      	Y=(AY/ALENGTH)*(PLTSIZ/2.0)
- 	CALL P2K_MOVE(0.,0.,0.)
-      	CALL P2K_DRAW(X,Y,0.)		! PLOT ASTAR VECTOR
-      	  X=X+10.
+      CALL P2K_DRAW(-CHRSIZ,CHRSIZ,0.)  ! CENTRAL CROSS AT ORIGIN.
+        ALENGTH=SQRT(AX**2+AY**2)
+        X=(AX/ALENGTH)*(PLTSIZ/2.0)
+        Y=(AY/ALENGTH)*(PLTSIZ/2.0)
+        CALL P2K_MOVE(0.,0.,0.)
+        CALL P2K_DRAW(X,Y,0.)           ! PLOT ASTAR VECTOR
+          X=X+10.
           CALL P2K_MOVE(X,Y,0.)
-CTSH         WRITE(TEXT,151)	
+CTSH         WRITE(TEXT,151)    
 CTSH++
-      	  WRITE(TMPTEXT(1:1),151)
+          WRITE(TMPTEXT(1:1),151)
 CTSH--
-151		FORMAT('H')
-152		FORMAT('K')
-      	  CALL P2K_CSTRING(TEXT,1,0.)
-      	BLENGTH=SQRT(BX**2+BY**2)
-      	X=(BX/BLENGTH)*(PLTSIZ/2.0)
-      	Y=(BY/BLENGTH)*(PLTSIZ/2.0)
- 	CALL P2K_MOVE(0.,0.,0.)
-      	CALL P2K_DRAW(X,Y,0.)		! PLOT BSTAR VECTOR
-      	  X=X+10.
+151             FORMAT('H')
+152             FORMAT('K')
+          CALL P2K_CSTRING(TEXT,1,0.)
+        BLENGTH=SQRT(BX**2+BY**2)
+        X=(BX/BLENGTH)*(PLTSIZ/2.0)
+        Y=(BY/BLENGTH)*(PLTSIZ/2.0)
+        CALL P2K_MOVE(0.,0.,0.)
+        CALL P2K_DRAW(X,Y,0.)           ! PLOT BSTAR VECTOR
+          X=X+10.
           CALL P2K_MOVE(X,Y,0.)
-      	  WRITE(TMPTEXT(1:1),152)
-      	  CALL P2K_CSTRING(TEXT,1,0.)
+          WRITE(TMPTEXT(1:1),152)
+          CALL P2K_CSTRING(TEXT,1,0.)
       NSPOTS=0
       WRITE(6,1002)
-1002	FORMAT(/' LIST OFSPOTS TO WHICH CTF IS APPLIED'/
+1002    FORMAT(/' LIST OFSPOTS TO WHICH CTF IS APPLIED'/
      . '   IH  IK     A       P  IQIN            PCORR IQOUT CNTRST')
-      	NTOTSPOTS = 0
-        CALL P2K_FONT('Courier'//CHAR(0),0.6*FONTSIZE)	!REDUCE FONT SIZE
+        NTOTSPOTS = 0
+        CALL P2K_FONT('Courier'//CHAR(0),0.6*FONTSIZE)  !REDUCE FONT SIZE
 C
         if(RESLOW.gt.0.0)then
           SpotLimit2 = (1.0 / RESLOW)**2
@@ -248,7 +248,7 @@ C
           SpotLimit2 = 1000000.0
         endif
 109     READ(1,*,END=110) IHIN,IKIN,AIN,PIN,IQIN,BIN
-        IF(IQIN.GT.8) GO TO 107		! PLOTS SPOTS WITH IQIN 8 OR LESS.
+        IF(IQIN.GT.8) GO TO 107         ! PLOTS SPOTS WITH IQIN 8 OR LESS.
         DO 100 J=-1,1,2
           IH=J*IHIN
           IK=J*IKIN
@@ -271,7 +271,7 @@ C     .        AX,AY,BX,BY,X,Y
           Y=Y*SCALE
 C         WRITE(6,104)X,Y
 104       FORMAT(2F10.1)
-          XN=X-CHRSIZ*(8.1-IQIN)/2	! work this one out if you can.
+          XN=X-CHRSIZ*(8.1-IQIN)/2      ! work this one out if you can.
           XP=X+CHRSIZ*(8.1-IQIN)/2
           YN=Y-CHRSIZ*(8.1-IQIN)/2
           YP=Y+CHRSIZ*(8.1-IQIN)/2
@@ -280,15 +280,15 @@ C         WRITE(6,104)X,Y
           CALL P2K_DRAW(XP,YN,0.)
           CALL P2K_DRAW(XP,YP,0.)
           CALL P2K_DRAW(XN,YP,0.)
-          CALL P2K_DRAW(XN,YN,0.)		! SQUARE ROUND EACH SPOT.
-cc        X=X-0.3				! ADJUST CHARACTER TO BE CENTRAL IN X.
-cc        Y=Y+0.5				! ADJUST CHARACTER TO BE CENTRAL IN Y.
-          Y=Y-1				! ADJUST CHARACTER TO BE CENTRAL IN Y.
+          CALL P2K_DRAW(XN,YN,0.)               ! SQUARE ROUND EACH SPOT.
+cc        X=X-0.3                               ! ADJUST CHARACTER TO BE CENTRAL IN X.
+cc        Y=Y+0.5                               ! ADJUST CHARACTER TO BE CENTRAL IN Y.
+          Y=Y-1                         ! ADJUST CHARACTER TO BE CENTRAL IN Y.
           WRITE(TMPTEXT(1:1),160)
-          IF(IQIN.EQ.1) WRITE(TMPTEXT(1:1),161)	! IQIN=1 include number
-          IF(IQIN.EQ.2) WRITE(TMPTEXT(1:1),162)	! IQIN=2 include number
-          IF(IQIN.EQ.3) WRITE(TMPTEXT(1:1),163)	! IQIN=3 include number
-          IF(IQIN.EQ.4) WRITE(TMPTEXT(1:1),164)	! IQIN=4 include number
+          IF(IQIN.EQ.1) WRITE(TMPTEXT(1:1),161) ! IQIN=1 include number
+          IF(IQIN.EQ.2) WRITE(TMPTEXT(1:1),162) ! IQIN=2 include number
+          IF(IQIN.EQ.3) WRITE(TMPTEXT(1:1),163) ! IQIN=3 include number
+          IF(IQIN.EQ.4) WRITE(TMPTEXT(1:1),164) ! IQIN=4 include number
 160       FORMAT(' ')
 161       FORMAT('1')
 162       FORMAT('2')
@@ -307,9 +307,9 @@ cc        Y=Y+0.5				! ADJUST CHARACTER TO BE CENTRAL IN Y.
         ANGDIF=ANGSPT-ANGAST
         CCOS=COS(2.0*ANGDIF)
 CHENN>
-C      	DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-C      	CHI=C1*DF+C2
-C      	CNTRST=-SIN(CHI)
+C       DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
+C       CHI=C1*DF+C2
+C       CNTRST=-SIN(CHI)
           if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0)then
             DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
             CHI=C1*DF+C2
@@ -325,7 +325,7 @@ C  above sets IQ to 5 for high resolution spots with ctf < 0.15.
         IF(CNTRST.LT.0.0) P=PIN+180.0
         IF(P.GE.360.0) P=P-360.0
         WRITE(2,1000) IHIN,IKIN,AIN,P,IQ,BIN,CNTRST ! O/P of SPOTS.
-C		NOTE A FEW SPOTS NEAR CTF ZEROES HAVE THEIR IQ CHANGED TO 5.
+C               NOTE A FEW SPOTS NEAR CTF ZEROES HAVE THEIR IQ CHANGED TO 5.
 1000    FORMAT(2I5,2F12.1,I4,F12.1,F12.3)
         NTOTSPOTS = NTOTSPOTS +1
         IF(IQ.LE.7) THEN
@@ -346,14 +346,14 @@ C
       NUNIQUE=NSPOTS/2
       WRITE(6,105)NSPOTS,NUNIQUE
 105   FORMAT(I10,'  SPOTS WITH IQ 8 OR LESS PLOTTED,',I10,
-     $	' OF THEM UNIQUE')
+     $  ' OF THEM UNIQUE')
       NCALC=0
       CTFAVG=0.0
       DO 200 IX=-ID,ID
       DO 200 IY=-ID,ID
       IF(IX.EQ.0.AND.IY.EQ.0) THEN
-      	CNTRST=0.0
-      	GO TO 200
+        CNTRST=0.0
+        GO TO 200
       ENDIF
       T1=IX
       T2=IY
@@ -385,7 +385,7 @@ CHENN<
 106   FORMAT(' C.T.F. NOW GENERATED',I10,' CALCULATED POINTS',
      . ' AVERAGE CTF VALUE',F5.2,' - PROCEED TO CONTOURING')
       CONT(1)=0.0
-      CONT(2)=5.0		! OFF TOP OF CTFPLOT
+      CONT(2)=5.0               ! OFF TOP OF CTFPLOT
       NCONT=2
       M=2*ID+1
       SCALE=PLTSIZ/(2.0*ID)
@@ -455,7 +455,7 @@ C LOOP CONTOUR LEVELS CL
 1     CL=CONT(ICONT)
       ICONT=ICONT+1
 C SET UP PLOTTING STYLE FOR THIS CONTOUR LEVEL
-C      CALL CONSTL(CL) 	! USED TO SET CONTOUR LINE TYPE
+C      CALL CONSTL(CL)  ! USED TO SET CONTOUR LINE TYPE
 C
 C
 C

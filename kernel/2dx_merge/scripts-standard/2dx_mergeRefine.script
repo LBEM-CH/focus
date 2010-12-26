@@ -71,6 +71,7 @@
 # DISPLAY: MergePray
 # DISPLAY: make_reference
 # DISPLAY: merge_ML_data
+# DISPLAY: plotres_rings
 #
 #$end_local_vars
 #
@@ -116,6 +117,8 @@ set MergeIWP = ""
 set merge_ref_num = ""
 set max_amp_correction = ""
 set merge_ML_data = ""
+set plotres_rings = ""
+set lattice = ""
 #
 #$end_vars
 #

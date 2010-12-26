@@ -43,12 +43,14 @@ C
 C
       open(10,FILE=cline1,STATUS='OLD',ERR=940)
       open(11,FILE=cline2,STATUS='NEW',ERR=950)
+      open(12,FILE="APH/syn_nosort2D-plot.hkl",STATUS="NEW",ERR=980)
 C
       if(iheader.gt.0)then
         READ (10,100) TITLE
         if(iheader.ne.2)then
           WRITE (11,100) TITLE
         endif
+        WRITE (12,100) TITLE
       endif
 C
       IH=-99999
@@ -81,6 +83,30 @@ C           write (11,210) H,K,L,AMP,PHASE,FOM,SIGA
 CHEN<
             write (11,200) H,K,L,AMP,PHASE,FOM
           endif
+C
+          if(L.eq.0)then
+            if(FOM.gt.95.0)then
+              IQ=1
+            elseif(FOM.gt.90.0)then
+              IQ=2
+            elseif(FOM.gt.85.0)then
+              IQ=3
+            elseif(FOM.gt.80.0)then
+              IQ=4
+            elseif(FOM.gt.75.0)then
+              IQ=5
+            elseif(FOM.gt.70.0)then
+              IQ=6
+            elseif(FOM.gt.65.0)then
+              IQ=7
+            elseif(FOM.gt.60.0)then
+              IQ=8
+            else
+              IQ=9
+            endif
+            write(12,'(1X,2I5,2F12.1,I4,2F12.3)') H,K,AMP,PHASE,IQ,BACK,FOM
+          endif
+C
           IH=H
           IK=K
           IL=L
@@ -90,6 +116,7 @@ C
  1005 continue
       close(10)
       close(11)
+      close(12)
 C
  100  FORMAT (A50)
  200  FORMAT (3I6,2G16.8,G16.8)
@@ -114,6 +141,11 @@ C
       write(*,'('':: ERROR in input data. Too extreme H, K, or L.'')')
       write(*,'('':: ERROR in input data. Too extreme H, K, or L.'')')
       write(*,'('':: ERROR in input data. Too extreme H, K, or L.'')')
+      goto 999
+C
+ 980  continue
+      write(*,'('':: ERROR while opening output file '',
+     .          ''APH/syn_nosort2D-plot.hkl.'')')
       goto 999
 C
  999  continue

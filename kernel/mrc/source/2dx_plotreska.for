@@ -1,7 +1,7 @@
 C**PLOTRES********************************************************************
 C
 C PLOTRES : is like PLOTALL, but uses IQ values from input of an expanded
-C	    single image and pltos spots in resolution bands
+C           single image and pltos spots in resolution bands
 C
 C           I dont know who wrote it originally, someone at MRC probably.   AC           
 C
@@ -25,6 +25,8 @@ C                    untilted crystals.  Note that cell parameters should be
 C                    that of the untilted crystal
 C                  2=plot the data with AX,AY,BX,BY (better tested)
 C                    plot 3D resolution as is
+C                  3=plot the merged data with A,B,GAMMA
+C                    otherwise as for option=1 above.
 C         ACELL    direct space lattice parameter A in angstrom
 C         BCELL    direct space lattice parameter B in angstrom
 C         ABANG1   direct space lattice parameter REALANG in degree
@@ -34,15 +36,15 @@ C         BX,BY    reciprocal lattice vector for B* in 1/pixel for image
 C         MDIM     image size in pixel
 C         STEP     image scanning step in micron
 C         AMAG     magnification
-C	  IQLABEL  1=include IQ label for spots withe IQ 1-4
-C		   0=no label
+C         IQLABEL  1=include IQ label for spots withe IQ 1-4
+C                  0=no label
 C         iellipse 0=plot resolution rings for tilted samples as rings
 C                  1=plot resolution rings for tilted samples as ellipses
 C         RESMAX   maximal resolution of the plot which goes to the edge of the plot
 C         TAXA1    angle from the tilt axis to the A* axis in degree
 C         TANGL1   tilt angle in degree (tilt axis not shown if TANGL=0)
-C	  NRES     number of resolution rings to display (up to 5 rings
-C	  RESTORE(5)  resolution ring value in angstrum
+C         NRES     number of resolution rings to display (up to 5 rings
+C         RESTORE(5)  resolution ring value in angstrum
 C          
 C
 
@@ -77,7 +79,7 @@ C==============================================================================
 C=====Input of parameters======================================================
 C==============================================================================
 C
-      FONTSIZE=2.0	! SELECT 4MM CHAR HEIGHT FOR TEXT
+      FONTSIZE=2.0      ! SELECT 4MM CHAR HEIGHT FOR TEXT
       pi=3.1415926537
       DRAD=pi/180.0
 
@@ -95,11 +97,13 @@ C
       write(*,'(''OPTIONS: (1) (tilted) section, '',
      .    ''input A,B,GAMMA,AX,AY,BX,BY'',/,
      .    ''         (2) untilted projection, '', 
-     .    ''input AX,AY,BX,BY,IMAGE SIZE,STEP,MAG.'')')
+     .    ''input AX,AY,BX,BY,IMAGE SIZE,STEP,MAG.'',/,
+     .    ''         (3) non-tilted merge section, '',
+     .    ''input A,B,GAMMA,AX,AY,BX,BY'')')
       READ(5,*)IOPTION
       write(6,'('' Read:'',I3)')IOPTION
 C
-      IF (IOPTION.EQ.1) THEN
+      IF (IOPTION.EQ.1 .or. IOPTION.eq.3) THEN
         PRINT *,'INPUT A,B,GAMMA,AX,AY,BX,BY'
         READ(5,*)ACELL,BCELL,ABANG1,AX,AY,BX,BY
         WRITE(6,12)ACELL,BCELL,ABANG1,AX,AY,BX,BY
@@ -160,7 +164,7 @@ C==============================================================================
 C
 C     Calculate tilt axis relative to tilted a* axis
 C
-      if(IOPTION.eq.1)then
+      if(IOPTION.eq.1.or.IOPTION.eq.3)then
 C-------Take untilted TAXA if ploting plane in 3D space
         TLTAXA = TAXA
       else
@@ -180,7 +184,7 @@ C
       RTAXA =REAL(IHAND)*TAXA
       write(6,'(''RTLTAXA='',F12.6)')RTLTAXA/DRAD
 C
-      IF (IOPTION.EQ.1) THEN
+      IF (IOPTION.EQ.1.or.IOPTION.eq.3) THEN
         GAMMA1=180.0-ABANG1
         AX=1.0/(ACELL*SIN(DRAD*GAMMA1))
         AY=0
@@ -204,9 +208,11 @@ C     write(6,'(''Lattice is now: '',4F10.3)')AX,AY,BX,BY
 C
       CALL CCPDPN(1,CNAME,'READONLY','F', 0, 0)
 C
-      READ(1,10)TITLE
-      WRITE(6,10)TITLE
-10    FORMAT(20A4)
+      if(IOPTION.ne.3)then
+        READ(1,10)TITLE
+        WRITE(6,10)TITLE
+10      FORMAT(20A4)
+      endif
 C
 C==============================================================================
 C=====Plot initialization======================================================
@@ -222,7 +228,7 @@ C
       CALL P2K_ORIGIN(-0.5*PLTSIZ,-0.7*PLTSIZ,0.)
       CALL P2K_COLOUR(0)
 C
-      YPOSN=PLTSIZ+120.
+      YPOSN=PLTSIZ+100.
 C
       CALL P2K_MOVE(0.,0.,0.)
       CALL P2K_ORIGIN(0.,0.,0.)
@@ -230,11 +236,16 @@ C
       CALL P2K_MOVE(10.,YPOSN,0.)
       CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
 C
-      write(CTITLE,'(''PLOTRES resolution circle plot of'',
-     .    '' APH file.'')')
+      if(IOPTION.eq.3)then
+        write(CTITLE,'(''PLOTRES resolution circle plot of'',
+     .      '' non-tilted merged data.'')')
+      else
+        write(CTITLE,'(''PLOTRES resolution circle plot of'',
+     .      '' APH file.'')')
+      endif
       call shorten(CTITLE,k)
       CALL P2K_STRING(RTITLE,k,0.)
-      YPOSN=YPOSN-15.0
+      YPOSN=YPOSN-10.0
 C
       call shorten(CNAME,k)
       write(CTITLE,'(''Input file: '',A)')CNAME(1:k)
@@ -243,22 +254,45 @@ C
       CALL P2K_STRING(RTITLE,k,0.)
       YPOSN=YPOSN-15.0
 C
-      CALL P2K_MOVE(10.,YPOSN,0.)
-      CALL P2K_STRING(TITLE,60,0.)
-      YPOSN=YPOSN-15.0
+      if(IOPTION.eq.3)then
+        write(CTITLE,'(''Symbols based on FOM: '')')
+        call shorten(CTITLE,k)
+        CALL P2K_MOVE(10.,YPOSN,0.)
+        CALL P2K_STRING(RTITLE,k,0.)
+        YPOSN=YPOSN+3.0
 C
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*1.3)
+        write(CTITLE,'(''Symbol:   1    2    3    4    5'',
+     .                 ''    6    7    8    9'')')
+        CALL P2K_MOVE(110.,YPOSN,0.)
+        call shorten(CTITLE,k)
+        CALL P2K_STRING(RTITLE,k,0.)
+        YPOSN=YPOSN-6.0
+        write(CTITLE,'(''FOM:     >95  >90  >85  >80  >75'',
+     .                 ''  >70  >65  >60  <60'')')
+        CALL P2K_MOVE(110.,YPOSN,0.)
+        call shorten(CTITLE,k)
+        CALL P2K_STRING(RTITLE,k,0.)
+        YPOSN=YPOSN-12.0
+      else
+        CALL P2K_MOVE(10.,YPOSN,0.)
+        CALL P2K_STRING(TITLE,60,0.)
+        YPOSN=YPOSN-15.0
+      endif
+C
+      CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
       write(CTITLE,'(''Resolution Max (Nyquist of plot) '',
      .       ''at '',F10.2,'' A'')')RORIRESMAX
       CALL P2K_MOVE(10.,YPOSN,0.)
       CALL P2K_STRING(RTITLE,60,0.)
-      YPOSN=YPOSN-10.0
+      YPOSN=YPOSN-3.0
 C
       YHEAD=YPOSN
 C
       DO N=1,NRES
         if(RESTORE(N).GE.RORIRESMAX)then
           write(CTITLE,'(''Resolution Ring at '',F10.2,'' A'')')RESTORE(N)
-          YPOSN=YPOSN-10.0
+          YPOSN=YPOSN-8.0
           if(YPOSN.gt.PLTSIZ+10.0) then
             CALL P2K_MOVE(10.,YPOSN,0.)
             CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
@@ -306,17 +340,19 @@ C
         YPOSN=YPOSN-10.0
       endif
 C
-      if(IHAND.GT.0)then
-        write(CTITLE,'(''Right-handed lattice'')')
-      else
-        write(CTITLE,'(''Left-handed lattice'')')
+      if(IOPTION.ne.3)then
+        if(IHAND.GT.0)then
+          write(CTITLE,'(''Right-handed lattice'')')
+        else
+          write(CTITLE,'(''Left-handed lattice'')')
+        endif
+        CALL P2K_MOVE(XPOSN,YPOSN,0.)
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
+        call shorten(CTITLE,k)
+        write(*,'(A)')CTITLE(1:k)
+        CALL P2K_STRING(RTITLE,k,0.)
+        YPOSN=YPOSN-10.0
       endif
-      CALL P2K_MOVE(XPOSN,YPOSN,0.)
-      CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
-      call shorten(CTITLE,k)
-      write(*,'(A)')CTITLE(1:k)
-      CALL P2K_STRING(RTITLE,k,0.)
-      YPOSN=YPOSN-10.0
 C
       YPOSN=-5.0
       CALL P2K_MOVE(10.,YPOSN,0.)
@@ -327,6 +363,16 @@ C
         call shorten(CTITLE,k)
         CALL P2K_STRING(RTITLE,k,0.)
         CALL P2K_MOVE(130.,YPOSN,0.)
+        write(CTITLE,'(F10.2,'' A,  '',F10.2,'' A,  '',F10.3,
+     .      '' deg'')')ACELL,BCELL,ABANG1
+        call shorten(CTITLE,k)
+        CALL P2K_STRING(RTITLE,k,0.)
+      elseif (IOPTION.EQ.3) THEN
+        write(CTITLE,'(''Plot of merged data for real-space lattice'',
+     .      '' (A,B,Realang): '')')
+        call shorten(CTITLE,k)
+        CALL P2K_STRING(RTITLE,k,0.)
+        CALL P2K_MOVE(160.,YPOSN,0.)
         write(CTITLE,'(F10.2,'' A,  '',F10.2,'' A,  '',F10.3,
      .      '' deg'')')ACELL,BCELL,ABANG1
         call shorten(CTITLE,k)
@@ -358,6 +404,11 @@ C
         endif
         call shorten(CTITLE,k)
         CALL P2K_STRING(RTITLE,k,0.)
+      elseif (IOPTION.EQ.3) THEN
+        write(CTITLE,'(''Plot shows the plane in canonical '',
+     .      ''Fourier space.'')')
+        call shorten(CTITLE,k)
+        CALL P2K_STRING(RTITLE,k,0.)
       else
         if(abs(TANGL).gt.0.001)then
           write(CTITLE,'(''Plot shows the projection of the (tilted) '',
@@ -386,18 +437,18 @@ C
       CALL P2K_MOVE(-CHRSIZ,-CHRSIZ,0.)
       CALL P2K_DRAW(CHRSIZ,CHRSIZ,0.)
       CALL P2K_MOVE(CHRSIZ,-CHRSIZ,0.)
-      CALL P2K_DRAW(-CHRSIZ,CHRSIZ,0.)	! CENTRAL CROSS AT ORIGIN.
+      CALL P2K_DRAW(-CHRSIZ,CHRSIZ,0.)  ! CENTRAL CROSS AT ORIGIN.
 C
 C==============================================================================
 C=====Plot vectors H and K=====================================================
 C==============================================================================
 C
       ALENGTH=SQRT(AX**2+AY**2)
-      if(IOPTION.eq.1)ALENGTH=ALENGTH*1.05
+      if(IOPTION.eq.1.or.IOPTION.eq.3)ALENGTH=ALENGTH*1.05
       X=(AX/ALENGTH)*(PLTSIZ/2.0)
       Y=(AY/ALENGTH)*(PLTSIZ/2.0)
       CALL P2K_MOVE(0.,0.,0.)
-      CALL P2K_DRAW(X,Y,0.)		! PLOT ASTAR VECTOR
+      CALL P2K_DRAW(X,Y,0.)             ! PLOT ASTAR VECTOR
       Y=Y-8.
       IF (Y.LE.-PLTSIZ/2.0) THEN
         Y=Y+10.
@@ -417,11 +468,11 @@ C
       CALL P2K_CSTRING(TEXT,1,0.)
 
       BLENGTH=SQRT(BX**2+BY**2)
-      if(IOPTION.eq.1)BLENGTH=BLENGTH*1.05
+      if(IOPTION.eq.1.or.IOPTION.eq.3)BLENGTH=BLENGTH*1.05
       X=(BX/BLENGTH)*(PLTSIZ/2.0)
       Y=(BY/BLENGTH)*(PLTSIZ/2.0)
       CALL P2K_MOVE(0.,0.,0.)
-      CALL P2K_DRAW(X,Y,0.)		! PLOT BSTAR VECTOR
+      CALL P2K_DRAW(X,Y,0.)             ! PLOT BSTAR VECTOR
       X=X+8.
       IF (X.GE.PLTSIZ/2.0) THEN
         X=X-10.
@@ -449,7 +500,7 @@ C
         XSHIFT=2*Y/RXY
         YSHIFT=-2*X/RXY
 C
-        if(IOPTION.eq.1)then
+        if(IOPTION.eq.1.or.IOPTION.eq.3)then
           if(IHAND.gt.0)then
             CALL XYROTATE(RTAXA,X,Y,XR,YR)
           else
@@ -459,7 +510,7 @@ C
           CALL XYROTATE(RTAXA,X,Y,XR,YR)
         endif
         CALL P2K_MOVE(-XR,-YR,0.)
-        CALL P2K_DRAW(XR,YR,0.)		! PLOT TILTAXIS IN Single LINE
+        CALL P2K_DRAW(XR,YR,0.)         ! PLOT TILTAXIS IN Single LINE
         XR=XR*1.05
         YR=YR*1.05
         if(XR.gt.0)then
@@ -478,7 +529,7 @@ C
           CALL XYROTATE(RTLTAXA,X,Y,XR,YR)
           CALL XYROTATE(RTLTAXA,XSHIFT,YSHIFT,XSHIFTR,YSHIFTR)
           CALL P2K_MOVE(-XR,-YR,0.)
-          CALL P2K_DRAW(XR,YR,0.)		! PLOT TILTAXIS IN TRIPLE LINES
+          CALL P2K_DRAW(XR,YR,0.)               ! PLOT TILTAXIS IN TRIPLE LINES
           CALL P2K_MOVE(XR+XSHIFTR,YR+YSHIFTR,0.)
           CALL P2K_DRAW(-XR+XSHIFTR,-YR+YSHIFTR,0.)
           CALL P2K_MOVE(XR-XSHIFTR,YR-YSHIFTR,0.)
@@ -500,16 +551,16 @@ C
 C
       ENDIF
 C
-      DO 370 N=1,NRES			! NRES resoultion ranges
+      DO 370 N=1,NRES                   ! NRES resoultion ranges
         RES=1.0/RESTORE(N)
         RAD=SCALEP*RES
 
-        DO 360 J=1,4			
-          DO 360 I=1,89		! Resolution circles
+        DO 360 J=1,4                    
+          DO 360 I=1,89         ! Resolution circles
             ANG=(90*J+I)*DRAD
             X=RAD*COS(ANG)
             Y=RAD*SIN(ANG)
-            IF (IOPTION.eq.1.AND.abs(TANGL).GT.0.001) THEN
+            IF ((IOPTION.eq.1.or.IOPTION.eq.3).AND.abs(TANGL).GT.0.001) THEN
               if(iellipse.eq.1)then
                 X0=X
                 Y0=COS(TANGL)*Y
@@ -533,7 +584,7 @@ C               CALL XYROTATE(RTLTAXA,X1,Y1,X2,Y2)
               CALL P2K_DRAW(X,Y,0.)
           ENDIF
 360     CONTINUE
-        CALL P2K_DRAW(XOR,YOR,0.)		!complete the circle
+        CALL P2K_DRAW(XOR,YOR,0.)               !complete the circle
 370   CONTINUE
 C
 C==============================================================================
@@ -581,10 +632,10 @@ C
       COMMON //RESMAX,SCALEP,NRES,NSPOTS,
      .  FONTSIZE,IQLABEL,CNAME
 C
-      IF (IQ.GT.8) GO TO 100		! PLOTS SPOTS WITH IQ =8 OR LESS.
-      CALL P2K_FONT('Courier'//CHAR(0),0.6*FONTSIZE)	!REDUCE FONT SIZE
-C      	WRITE(6,421)IH,IK
-421	FORMAT(' SPOT PLOTTED & FRIEDEL PAIR',2I5)
+      IF (IQ.GT.8) GO TO 100            ! PLOTS SPOTS WITH IQ =8 OR LESS.
+      CALL P2K_FONT('Courier'//CHAR(0),0.6*FONTSIZE)    !REDUCE FONT SIZE
+C       WRITE(6,421)IH,IK
+421     FORMAT(' SPOT PLOTTED & FRIEDEL PAIR',2I5)
       J=1
       K=1
       X=IH*AX+IK*BX
@@ -606,17 +657,17 @@ C      IF (ABS(Y).GE.RESMAX)GO TO 100
       CALL P2K_DRAW(XP,YN,0.)
       CALL P2K_DRAW(XP,YP,0.)
       CALL P2K_DRAW(XN,YP,0.)
-      CALL P2K_DRAW(XN,YN,0.)		! SQUARE ROUND EACH SPOT.
+      CALL P2K_DRAW(XN,YN,0.)           ! SQUARE ROUND EACH SPOT.
 
-      X=X-0.1				! ADJUST CHARACTER TO BE CENTRAL IN X.
-      Y=Y-0.8				! ADJUST CHARACTER TO BE CENTRAL IN Y.
+      X=X-0.1                           ! ADJUST CHARACTER TO BE CENTRAL IN X.
+      Y=Y-0.8                           ! ADJUST CHARACTER TO BE CENTRAL IN Y.
       CALL P2K_MOVE(X,Y,0.)
       WRITE(TMPTEXT(1:1),460)
       IF (IQLABEL.EQ.0) GO TO 100
-      IF (IQ.EQ.1) WRITE(TMPTEXT(1:1),461)	! INCLUDE NUMBER FOR SPOTS WITH GOOD
-      IF (IQ.EQ.2) WRITE(TMPTEXT(1:1),462)	! 'IQ' VALUES
-      IF (IQ.EQ.3) WRITE(TMPTEXT(1:1),463)	! 
-      IF (IQ.EQ.4) WRITE(TMPTEXT(1:1),464)	! 
+      IF (IQ.EQ.1) WRITE(TMPTEXT(1:1),461)      ! INCLUDE NUMBER FOR SPOTS WITH GOOD
+      IF (IQ.EQ.2) WRITE(TMPTEXT(1:1),462)      ! 'IQ' VALUES
+      IF (IQ.EQ.3) WRITE(TMPTEXT(1:1),463)      ! 
+      IF (IQ.EQ.4) WRITE(TMPTEXT(1:1),464)      ! 
 460   FORMAT(' ')
 461   FORMAT('1')
 462   FORMAT('2')

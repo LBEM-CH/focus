@@ -50,6 +50,7 @@
 # DISPLAY: MergeIWP
 # DISPLAY: max_amp_correction
 # DISPLAY: merge_ML_data
+# DISPLAY: plotres_rings
 #
 #$end_local_vars
 #
@@ -90,6 +91,8 @@ set MergeIWF = ""
 set MergeIWP = ""
 set max_amp_correction = ""
 set merge_ML_data = ""
+set plotres_rings = ""
+set lattice = ""
 #
 #$end_vars
 #

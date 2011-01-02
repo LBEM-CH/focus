@@ -23,18 +23,20 @@ do
 		install_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $file 	
 		install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $file 
 		otool -L $file
-		if [ "$file" = "libqsvg.dylib" ] ; then
+		if [ $loop = "libqsvg.dylib" ] ; then
 			echo "removing $file"
 			rm $file
 		fi
 	done
 done
-cd kernel/mrc/bin
-echo "in `pwd`"
-for exe in `ls`
+fortran_bin="kernel/mrc/bin"
+path="$build_dir/$fortran_bin"
+echo "chaning binaries in $path" 
+for exe in `ls $path`
 do
-	echo "changing the dylibs of" $exe
-	install_name_tool -change /opt/local/lib/libfftw3f.3.dylib @executable_path/../lib/libfftw3f.3.dylib $exe 
-	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../lib/libgfortran.3.dylib $exe 
-	otool -L $exe
+	file="$path/$exe"
+	echo "changing the dylibs of $file"
+	install_name_tool -change /opt/local/lib/libfftw3f.3.dylib @executable_path/../lib/libfftw3f.3.dylib $file
+#	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../lib/libgfortran.3.dylib $exe 
+	otool -L $file 
 done

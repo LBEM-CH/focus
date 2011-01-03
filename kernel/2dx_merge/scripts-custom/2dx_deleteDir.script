@@ -1,0 +1,73 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Delete Images                                                      #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2007                                             #
+# Last Modification: 10/01/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 91
+#
+# MANUAL: This script moves all choosen directories into a TRASH subdirectory. Use with extreme caution !!!
+#
+#$end_local_vars
+#
+# This defines some variables that we might need:
+set proc_2dx = ""
+set bin_2dx = ""
+set app_2dx_image = ""
+#
+#$end_vars
+#
+# This sets the scriptname variable:
+set scriptname = 2dx_deleteDir
+#
+# This removes the old logfile, so that a new fresh one can be created:
+\rm -f LOGS/${scriptname}.results
+#
+# This initializes the CCP4 environment, and other variables.
+set ccp4_setup = 'n'
+source ${proc_2dx}/initialize
+#
+# This advances the progress bar to the 1% position:
+echo "<<@progress: 1>>"
+#
+# This creates all needed subdirectories in the current merge directory, in case they are missing:
+${proc_2dx}/2dx_makedirs 
+#
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+if ( ! -d TRASH ) then
+  \mkdir TRASH
+endif
+#
+echo ":: "
+#
+# This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
+foreach dirfile ( ${dirlist} ) 
+  echo "::Moving into TRASH: ${dirfile}"
+  #
+  \mv -f ${dirfile} TRASH 
+  #
+end
+#
+echo ":: "
+echo "::Images are now in ${PWD}/TRASH "
+echo ":: "
+#
+# Move the progress bar to 100%:
+echo "<<@progress: 100>>"
+#
+# Leave a message on the logfile that the script finished:
+${proc_2dx}/linblock "${scriptname} finished correctly."
+#

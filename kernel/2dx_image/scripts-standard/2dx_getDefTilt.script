@@ -50,6 +50,7 @@
 # DISPLAY: det_tlt_alg
 # DISPLAY: phacon
 # DISPLAY: RESMAX
+# DISPLAY: RESMIN
 # DISPLAY: lattice
 # DISPLAY: comment
 # DISPLAY: tempkeep
@@ -151,7 +152,7 @@ echo ctf_ttf = ${ctf_ttf}
 set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
 set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
 echo resolim = $resolim
-set resoma = `echo ${RESMIN} | awk '{ if ( $1 > 100.0) { s = 100.0 } else { s = $1 }} END { print s }'`
+set resoma = `echo ${RESMIN} | awk '{ if ( $1 > 70.0) { s = 70.0 } else { s = $1 }} END { print s }'`
 set resoma = `echo ${resoma} | awk '{ s = $1 / 2.0 } END { print s }'`
 echo resoma = ${resoma}
 #

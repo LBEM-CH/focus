@@ -335,10 +335,10 @@ void confData::loadConf(confData *conf)
       QString valueLabel = element->get("valueLabel");
       confElement *data = get(valueLabel);
       //copying all the values in valueSearch
-      for(int k=0;k<valueSearch.size();k++)
-        data->set(valueSearch[k], element->get(valueSearch[k]));
       if(data!=NULL)
       {
+      	for(int k=0;k<valueSearch.size();k++)
+          data->set(valueSearch[k], element->get(valueSearch[k]));
         if(!element->get("locked").isEmpty()) data->set("locked",element->get("locked").simplified());
         data->set("value", element->get("value"));
       }

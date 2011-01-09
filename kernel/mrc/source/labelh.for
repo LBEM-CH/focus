@@ -82,6 +82,8 @@ C IMODE= 14: Merge 7x7 images into one large image
 C
 C IMODE= 15: Cross out image
 C
+C IMODE= 16: Transform into INTEGER*2 output format (16bit) with automatic scaling to [0 ; 16000]
+C
 C IMODE= 20: Produce thumbnail image
 C        card 4 : Enter X/Y dimensions of output image
 C
@@ -119,9 +121,9 @@ C
 C****************************************************************************
 CHEN>
 C     PARAMETER (LMAX=16384,LCMX=8192)
-      PARAMETER (LMAX=21000)
-      PARAMETER (LCMX=10500)
-      PARAMETER (LPIC=3584)
+      PARAMETER (LMAX=22000)
+      PARAMETER (LCMX=11000)
+      PARAMETER (LPIC=21000)
 CHEN<
       COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
       DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
@@ -169,6 +171,7 @@ C
      . ' 13: Cyclically permutate CELL information in header',/,
      . ' 14: Merge 7x7 images into one large image',/,
      . ' 15: Cross out image',/,
+     . ' 16: Transform [0;16000] INT*2 image',/,
      . ' 20: Produce thumbnail image',/,
      . ' 29: Interpolate into two times larger image',/,
      . ' 30: Pad into square image',/,
@@ -199,7 +202,7 @@ C
                 endif
         IF ((IMODE .GT. 4 .and. IMODE .ne. 10 .and. IMODE.ne.11 
      1      .and. IMODE.ne.12 .and. IMODE.ne.13 .and. IMODE.ne.14
-     1      .and. IMODE.ne.15 .and. IMODE.ne.20 
+     1      .and. IMODE.ne.15 .and. IMODE.ne.16 .and. IMODE.ne.20 
      1      .and. IMODE.ne.29 .and. IMODE.ne.30
      1      .and. IMODE.ne.31) 
      1      .AND. MODE .LT. 3) GOTO 1
@@ -219,6 +222,7 @@ C
         if ( IMODE.eq.13 ) goto 97
         if ( IMODE.eq.14 ) goto 99
         if ( IMODE.eq.15 ) goto 107
+        if ( IMODE.eq.16 ) goto 108
         if ( IMODE.eq.20 ) goto 94
         if ( IMODE.eq.29 ) goto 98
         if ( IMODE.eq.30 ) goto 95
@@ -618,6 +622,97 @@ C-------Write the file into the output file
         do iy = 1,NY
           do ix = 1,NX
             ALINE(ix)=APIC(ix,iy)
+          enddo
+          CALL IWRLIN(2,ALINE)
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+     .     DMIN,DMAX,DMEAN
+C
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+C=====================================================================
+C
+C  MODE 16 : Produce INTEGER*2 (16 bit) output image with range [0;16000]
+C
+108     continue
+        write(TITLE,'(''LABELH Mode 16: Produce INT*2 [0;16k] image '')')
+        write(6,'('' Producing INT*2 with Autoscaling [0;16000] '')')
+C
+        CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        CALL IRTLAB(1,LABELS,NL)
+        CALL IRTEXT(1,EXTRA,1,29)
+        CALL IRTCEL(1,CELL)
+C
+        IF (MODE .GT. 2) THEN
+          STOP 'Only works on real images'
+        ENDIF
+C
+        write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Copy entire file into output picture
+        do iy = 1,NY
+          CALL IRDLIN(1,ALINE,*999)
+          do ix = 1,NX
+            VAL=ALINE(ix)
+            APIC(ix,iy)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Opened file has range MIN,MAX,MEAN: '',3G16.5)')
+     1     DMIN,DMAX,DMEAN
+C
+        DVAL = ABS(DMAX - DMIN)
+        write(*,'('' That is a dynamic range of: '',G16.5)')
+     1     DVAL
+C
+C-------Calculate offset and scaling factors
+C
+        ROFF = DMIN
+        if ( DVAL .gt. 0.00000001 ) then
+          RSCALE = 16000.0 / DVAL
+        else
+          RSCALE = 16000.0  
+        endif
+C
+        write(*,'('' Calculated offset of '',G16.5)')ROFF
+        write(*,'('' Calculated scaling factor of '',G16.5)')RSCALE
+C
+C-------Output file is INT*2 (16 bit, Mode=1)
+C
+        MODE = 1
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Put title labels, new cell and extra information only into header
+C
+        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+        CALL IALEXT(2,EXTRA,1,29)
+        CALL IALCEL(2,CELL)
+        CALL IALMOD(2,MODE)
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+C-------Write the file into the output file
+        do iy = 1,NY
+          do ix = 1,NX
+            VAL=(APIC(ix,iy)-ROFF)*RSCALE
+            ALINE(ix)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
           enddo
           CALL IWRLIN(2,ALINE)
         enddo
@@ -1506,8 +1601,8 @@ C
       SUBROUTINE LABELB(INFILE)
 CHEN>
 C     PARAMETER (LMAX=16384,LCMX=8192)
-      PARAMETER (LMAX=21000)
-      PARAMETER (LCMX=10500)
+      PARAMETER (LMAX=22000)
+      PARAMETER (LCMX=11000)
       PARAMETER (IBMX=256)
 CHEN<
         COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX

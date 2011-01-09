@@ -92,6 +92,8 @@ if ( ${location} != "all" ) then
     \rm -rf RESULTS-PS
     \rm -rf PRJ
     \rm -rf HKL
+    \rm -rf TRASH
+    \rm -rf LOGS
     #
     if ( -d proc ) then
       cd proc
@@ -122,6 +124,17 @@ if ( ${location} != "all" ) then
       \rm -f 2dx_getLattice.com
       \rm -f 2dx_refinetilt.com
       \rm -f 2dx_maskCrystal.com
+      \rm -f 2dx_copyMerge.com
+      \rm -f 2dx_deleteDir.com
+      \rm -f 2dx_DetermineSwitch.com
+      \rm -f 2dx_MaximumLikelihood.com
+      \rm -f 2dx_mergeCustom.com
+      \rm -f 2dx_mergeRefine.com
+      \rm -f 2dx_openDir.com
+      \rm -f 2dx_reunbend.com
+      \rm -f Custom-1.com
+      \rm -f Custom-2.com
+      \rm -f Custom-3.com
       cd ..
     endif
     #
@@ -178,6 +191,7 @@ if ( ${location} != "all" ) then
   \rm -f LOG.* 
   \rm -f 2dx_calcpositions.*
   \rm -f REF*.hkl
+  \rm -f TLTASM
   #
   echo "<<@progress: 100>>" 
   #

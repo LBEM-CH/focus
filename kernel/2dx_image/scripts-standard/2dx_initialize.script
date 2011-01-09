@@ -142,6 +142,8 @@ if ( ${imagenumber} == "PutNumberHere" ) then
   echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
 endif
 #
+set new_mrc_created = 'n'
+#
 if ( ${initialization_executable} == "n" ) then
   #
   echo "Initialization not done. Date: ${date}" >> History.dat
@@ -154,6 +156,7 @@ if ( ${initialization_executable} == "n" ) then
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "WARNING: ${imagename}.mrc has the wrong endedness."
+      echo ":: ${imagename}.mrc had wrong endedness" >> History.dat
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "#"
       echo ":: "
@@ -188,6 +191,7 @@ eot
         if ( ! -e SCRATCH/TMPconverted.mrc ) then
           #############################################################################
           ${proc_2dx}/linblock "image_convert.exe FAILED."
+          ${proc_2dx}/linblock "image_convert.exe FAILED." >> History.dat
           ${proc_2dx}/linblock "Attempting to convert with byte_swap_map.exe."
           #############################################################################
           #
@@ -228,28 +232,10 @@ eot
           \mv -f ${imagename}.mrc ${imagename}-wrong-endedness.mrc
           \mv -f SCRATCH/TMPconverted.mrc ${imagename}.mrc
           ${proc_2dx}/linblock "WARNING: Endedness of the input file was corrected."
+          ${proc_2dx}/linblock "WARNING: Endedness of the input file was corrected." >> History.dat
           echo "# WARNING: Warning: Endedness of the input file was corrected."  >> LOGS/${scriptname}.results
         endif
       endif
-      #
-    endif
-    #
-    if ( ${imageorigin} == '4' ) then
-      #############################################################################
-      #                                                                           #
-      ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
-      #                                                                           #
-      #############################################################################  
-      #
-      \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
-      #
-      ${bin_2dx}/labelh.exe << eot
-SCRATCH/${imagename}.tmp.mrc
-2               ! switch to REAL (floating point)
-${imagename}.mrc
-0.25,0
-1
-eot
       #
     endif
     #
@@ -263,34 +249,19 @@ eot
       else
         if ( -e ${imagename}.tiff ) then
           ${proc_2dx}/linblock "Renaming ${imagename}.tiff into ${imagename}.tif"
+          ${proc_2dx}/linblock "Renaming ${imagename}.tiff into ${imagename}.tif" >> History.dat
           \mv -f ${imagename}.tiff ${imagename}.tif
         endif
         ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
         #
         ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tif
-SCRATCH/${imagename}.tmp.mrc
+${imagename}.mrc
 y
 eot
         #
-        if ( ${imageorigin} == '4' ) then
-          #############################################################################
-          #                                                                           #
-          ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
-          #                                                                           #
-          #############################################################################  
-          #
-          ${bin_2dx}/labelh.exe << eot
-SCRATCH/${imagename}.tmp.mrc
-2               ! switch to REAL (floating point)
-${imagename}.mrc
-0.25,0
-1
-eot
-          #
-        else
-          \mv SCRATCH/${imagename}.tmp.mrc ${imagename}.mrc
-        endif
+        set new_mrc_created = 'y'
+        #
         echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
       endif
     else
@@ -359,6 +330,8 @@ ${imagename}.mrc
 y
 eot
         #
+        set new_mrc_created = 'y'
+        #
       else
         #############################################################################
         ${proc_2dx}/linblock "Image ${imagename}.tif does not exist."
@@ -398,6 +371,8 @@ ${imagename}.mrc
 y
 eot
               #
+              set new_mrc_created = 'y'
+              #
             endif
           endif
           \rm -f zzzzz27765.tif
@@ -423,6 +398,8 @@ ${imagename}.tiff
 ${imagename}.mrc
 y
 eot
+              #
+              set new_mrc_created = 'y'
               #
             endif
           endif
@@ -455,6 +432,7 @@ eot
     if ( ${correctend} == 'n' ) then
       #############################################################################
       ${proc_2dx}/linblock "WARNING: wrong endedness. Tying 2dx_byteSwap.exe to correct endedness."
+      ${proc_2dx}/linblock "WARNING: wrong endedness. Tying 2dx_byteSwap.exe to correct endedness." >> History.dat
       #############################################################################
       \cp ${imagename}.mrc SCRATCH/TMPconverted.mrc
       ${bin_2dx}/2dx_byteSwap.exe SCRATCH/TMPconverted.mrc
@@ -469,6 +447,7 @@ eot
     if ( ${correctend} == 'n' ) then
       #############################################################################
       ${proc_2dx}/linblock "WARNING: Still wrong endedness. Tying image_convert.exe to correct endedness."
+      ${proc_2dx}/linblock "WARNING: Still wrong endedness. Tying image_convert.exe to correct endedness." >> History.dat
       #############################################################################
       #
       ${bin_2dx}/image_convert.exe << eot
@@ -481,6 +460,7 @@ eot
         #############################################################################
         ${proc_2dx}/linblock "image_convert.exe FAILED."
         ${proc_2dx}/linblock "Attempting to convert with byte_swap_map.exe."
+        ${proc_2dx}/linblock "Attempting to convert with byte_swap_map.exe." >> History.dat
         #############################################################################
         #
         ${bin_2dx}/byte_swap_map.exe << eot
@@ -520,27 +500,9 @@ eot
         \mv -f ${imagename}.mrc ${imagename}-wrong-endedness.mrc
         \mv -f SCRATCH/TMPconverted.mrc ${imagename}.mrc
         ${proc_2dx}/linblock "WARNING: Endedness of the input file was corrected."
+        ${proc_2dx}/linblock "WARNING: Endedness of the input file was corrected." >> History.dat
         echo "# WARNING: Warning: Endedness of the input file was corrected."  >> LOGS/${scriptname}.results
       endif
-    endif
-    #
-    if ( ${imageorigin} == '4' ) then
-      #############################################################################
-      #                                                                           #
-      ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
-      #                                                                           #
-      #############################################################################  
-      #
-      \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
-      #
-      ${bin_2dx}/labelh.exe << eot
-SCRATCH/${imagename}.tmp.mrc
-2               ! switch to REAL (floating point)
-${imagename}.mrc
-0.25,0
-1
-eot
-      #
     endif
     #
     set testname = `echo ${imagename} | cut -c2-`
@@ -573,17 +535,20 @@ eot
       if( ${crop} == "0" ) then
         #############################################################################
         ${proc_2dx}/linblock "Crop image into smaller square array"
+        ${proc_2dx}/linblock "Crop image into smaller square array" >> History.dat
         #############################################################################
         #
         set newsize = `echo ${sizeX} ${sizeY} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 }} END { print s }'`
       else
         #############################################################################
         ${proc_2dx}/linblock "Pad image into larger square array"
+        ${proc_2dx}/linblock "Pad image into larger square array" >> History.dat
         #############################################################################
         #
         set newsize = `echo ${sizeX} ${sizeY} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
       endif
       ${proc_2dx}/linblock "New image size will be ${newsize}"
+      ${proc_2dx}/linblock "New image size will be ${newsize}" >> History.dat
       \rm -f SCRATCH/TMPnewsize.mrc
       #
       ${bin_2dx}/labelh.exe << eot
@@ -647,6 +612,7 @@ eot
       #
       #############################################################################
       ${proc_2dx}/linblock "cutting image down into better smaller size of ${bettersize}"
+      ${proc_2dx}/linblock "cutting image down into better smaller size of ${bettersize}" >> History.dat
       #############################################################################  
       #
       \rm -f SCRATCH/TMPnewsize1.mrc
@@ -743,28 +709,12 @@ eot
         #
         ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tif
-SCRATCH/${imagename}.tmp.mrc
+${imagename}.mrc
 y
 eot
         #
-        if ( ${imageorigin} == '4' ) then
-          #############################################################################
-          #                                                                           #
-          ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
-          #                                                                           #
-          #############################################################################  
-          #
-          ${bin_2dx}/labelh.exe << eot
-SCRATCH/${imagename}.tmp.mrc
-2               ! switch to REAL (floating point)
-${imagename}.mrc
-0.25,0
-1
-eot
-         #
-        else
-          \mv SCRATCH/${imagename}.tmp.mrc ${imagename}.mrc
-        endif
+        set new_mrc_created = 'y'
+        #
         echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
       endif
     else
@@ -772,6 +722,7 @@ eot
     endif
     #
   endif
+  #
   if ( ${Calc_from_sample_pixel} == "y" ) then
     set magnification = `echo ${stepdigitizer} ${sample_pixel} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
     echo "set magnification = ${magnification}" >> LOGS/${scriptname}.results
@@ -916,6 +867,59 @@ eot
   endif
   # 
 endif
+#
+#
+#
+#############################################################################
+#############################################################################
+##### Now see, if new MRC was created, that needs to be adapted:
+#############################################################################
+#############################################################################
+#
+if ( ${new_mrc_created} == 'y' ) then
+  #
+  if ( ${imageorigin} == '4' ) then
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
+    ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4." >> History.dat
+    #                                                                           #
+    #############################################################################  
+    #
+    \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+2               ! switch to REAL (floating point)
+${imagename}.mrc
+0.25,0
+1
+eot
+    #
+  endif
+  #
+  if ( ${imageorigin} == '5' ) then
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...32k."
+    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...32k." >> History.dat
+    #                                                                           #
+    #############################################################################  
+    #
+    \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+16               ! switch to INTEGER*2 (MODE 1) with autoscaling 0É32000
+${imagename}.mrc
+eot
+    #
+  endif
+  #
+endif
+#
+#
+#
 #
 # This is to make sure that 2dx_maskCrystal displays the three file names even before it has been run
 if ( ! -e LOGS/2dx_maskCrystal.results ) then

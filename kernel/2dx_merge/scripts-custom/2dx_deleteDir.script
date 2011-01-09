@@ -62,7 +62,12 @@ foreach dirfile ( ${dirlist} )
 end
 #
 echo ":: "
+echo "::Done."
 echo "::Images are now in ${PWD}/TRASH "
+echo ":: "
+echo ":: "
+echo ":: Dont forget to rescan all directories with the button top right in this GUI"
+echo ":: "
 echo ":: "
 #
 # Move the progress bar to 100%:

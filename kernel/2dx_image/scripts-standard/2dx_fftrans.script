@@ -96,6 +96,8 @@ echo "<<@progress: 1>>"
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
 #
+set new_mrc_created = 'n'
+#
 if ( ! -e ${imagename}.mrc ) then
   ${proc_2dx}/linblock "Image ${imagename}.mrc does not exist."
 #
@@ -106,33 +108,61 @@ if ( ! -e ${imagename}.mrc ) then
     #
     ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tif
-SCRATCH/${imagename}.tmp.mrc
+${imagename}.mrc
 y
 eot
     #
-    if ( ${imageorigin} == '4' ) then
-      #############################################################################
-      #                                                                           #
-      ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
-      #                                                                           #
-      #############################################################################  
-      #
-      ${bin_2dx}/labelh.exe << eot
+    set new_mrc_created = 'y'
+    #
+    echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
+  endif
+else
+  echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
+endif
+#
+#
+if ( ${new_mrc_created} == 'y' ) then
+  #
+  if ( ${imageorigin} == '4' ) then
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
+    ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4." >> History.dat
+    #                                                                           #
+    #############################################################################  
+    #
+    \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
 SCRATCH/${imagename}.tmp.mrc
 2               ! switch to REAL (floating point)
 ${imagename}.mrc
 0.25,0
 1
 eot
-      #
-    else
-      \mv SCRATCH/${imagename}.tmp.mrc ${imagename}.mrc
-    endif
-    echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
+    #
   endif
-else
-  echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
+  #
+  if ( ${imageorigin} == '5' ) then
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...32k."
+    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...32k." >> History.dat
+    #                                                                           #
+    #############################################################################  
+    #
+    \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+16               ! switch to INTEGER*2 (MODE 1) with autoscaling 0É32000
+${imagename}.mrc
+eot
+    #
+  endif
+  #
 endif
+#
 #
 if ( ${imagename} != ${nonmaskimagename} ) then
   echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
@@ -255,11 +285,6 @@ endif
 echo "<<@progress: 5>>"
 echo "<<@evaluate>>"
 #
-if ( ${imageorigin} >= '5' ) then
-  ${proc_2dx}/linblock "2dx_fftrans: Diffraction pattern. No FFT calculated."
-  exit 
-endif
-#   
 /bin/rm -f FFTIR/${imagename}.fft.mrc
 /bin/rm -f FFTIR/${imagename}.int.mrc
 /bin/rm -f FFTIR/${imagename}.red.mrc

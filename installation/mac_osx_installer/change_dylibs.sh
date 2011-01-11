@@ -37,6 +37,6 @@ do
 	file="$path/$exe"
 	echo "changing the dylibs of $file"
 	install_name_tool -change /opt/local/lib/libfftw3f.3.dylib @executable_path/../lib/libfftw3f.3.dylib $file
-#	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../lib/libgfortran.3.dylib $exe 
+	#	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../lib/libgfortran.3.dylib $file 
 	otool -L $file 
 done

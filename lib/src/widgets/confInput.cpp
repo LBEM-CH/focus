@@ -15,7 +15,7 @@
 using namespace std;
 
 confInput::confInput(confData *conf, confElement *e, QWidget *parent)
-                    :QWidget(parent), isWrongColor(160,160,160)
+                    :QWidget(parent), isWrongColor(227,233,244)
 {
   QString userLevelString = e->get("USERLEVEL").trimmed().toLower();
   if(userLevelString == "advanced")

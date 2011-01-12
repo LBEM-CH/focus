@@ -29,12 +29,12 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
   if(isWrongString == "yes")
   {
     is_wrong = 1;
-    pal.setColor(QPalette::Text,isWrongColor);
+    pal.setColor(QPalette::Base,isWrongColor);
   }
   else
   {
     is_wrong = 0;
-    pal.setColor(QPalette::Text,Qt::black);
+    pal.setColor(QPalette::Base,Qt::white);
   }
 
   setAutoFillBackground(true);
@@ -327,17 +327,16 @@ void confInput::load()
 		defaults = type_default[1].trimmed();
 	QString value = element->get("value");
 	QString locked = element->get("locked").toLower().trimmed();
-  //TEST
   QString isWrongString = element->get("ISWRONG").trimmed().toLower();
   if(isWrongString == "yes")
   {
     is_wrong = 1;
-    pal.setColor(QPalette::Text,isWrongColor);
+    pal.setColor(QPalette::Base,isWrongColor);
   }
   else
   {
     is_wrong = 0;
-    pal.setColor(QPalette::Text,Qt::black);
+    pal.setColor(QPalette::Base,Qt::white);
   }
 
 	if(type=="text_edit" || type == "integer" || type == "float")
@@ -619,7 +618,7 @@ void confInput::setIsWrongValueColor()
   for(int i=0;i<lEdits.size();i++)
 	{
     
-    pal.setColor(QPalette::Text,Qt::black);
+    pal.setColor(QPalette::Base,Qt::white);
 		lEdits[i]->setPalette(pal);
 	}
 

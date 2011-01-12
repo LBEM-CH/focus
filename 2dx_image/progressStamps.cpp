@@ -28,7 +28,6 @@ progressStamps::progressStamps(confData *conf, QWidget *parent)
   setFocusPolicy(Qt::NoFocus);
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setAlignment(Qt::AlignCenter);
-  setLayout(layout);
   data = conf;
   stampNames << "fft" << "defocus" << "lattice" << "spots" << "unbend" << "ctf" << "mask" << "phori" << "merge" << "reprocess";
   variableNames << "FFT_done"<< "DEFOCUS_done"<< "LATTICE_done"<< "SPOTS_done"<< "UNBENDING_done"<< "CTF_done" << "MASKING_done"<< "PHASEORI_done"<< "MERGING_done"<< "REPROCESSING_done";
@@ -36,11 +35,14 @@ progressStamps::progressStamps(confData *conf, QWidget *parent)
 
   for(int i=0;i<stampNames.size();i++)
   {
+    //cout << "adding the stamp " << stampNames[i].toStdString() << endl;
     stampImages[stampNames[i]] = QPair<QPixmap,QPixmap>(QPixmap(resourceDir + stampNames[i] + "-IU.png"),QPixmap(resourceDir + stampNames[i] + "-ID.png"));
     stamps[stampNames[i]] = new QLabel(this);
     stamps[stampNames[i]]->setPixmap(stampImages[stampNames[i]].first);
+    //stamps[stampNames[i]]->setText(stampNames[i]);
     layout->addWidget(stamps[stampNames[i]]);
   }
+  setLayout(layout);
   connect(data,SIGNAL(dataModified(bool)),this,SLOT(load(bool)));
   load(true);
 }

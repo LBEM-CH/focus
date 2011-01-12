@@ -13,7 +13,7 @@ project( ${EXETITLE} )
 
 # set version
 set( VERSION_MAJOR "3" )
-set( VERSION_MINOR "2" )
+set( VERSION_MINOR "3" )
 set( VERSION_PATCH "0" )
 
 # OS specific project properties ----------------------------------------------
@@ -137,10 +137,12 @@ INSTALL(CODE "
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
-INSTALL(CODE "
-    include(BundleUtilities)
-       #  fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
-    " COMPONENT Runtime)
+if(APPLE_BUNDLE)
+	INSTALL(CODE "
+	    include(BundleUtilities)
+	      fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
+	    " COMPONENT Runtime)
+endif(APPLE_BUNDLE)
 
 
 # To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X

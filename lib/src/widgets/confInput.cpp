@@ -22,9 +22,9 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
     user_level = 1;
   else
     user_level = 0;
-  QString resourceDir = conf->getDir("resource");
-  qDebug() << "[DEBUG] Filepath: "<< QString(conf->getDir("resource")  + "is-wrong-bg.png");
-  QPixmap texturePix = QPixmap(conf->getDir("resource") + "is-wrong-bg.png");
+  QString resourceDir =  QString(conf->getDir("config") + "resource/");
+  //qDebug() << "[DEBUG] Filepath: "<< QString(resourceDir + "is-wrong-bg.png");
+  QPixmap texturePix = QPixmap(resourceDir + "is-wrong-bg.png");
   if(!texturePix.isNull())
     texture = QBrush(texturePix);
   else

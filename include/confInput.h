@@ -73,6 +73,7 @@ class confInput : public QWidget
   graphicalButton *lockedBox;
   QPalette pal;
   const QColor isWrongColor;
+  QBrush texture;
 
   void setIsWrongValueColor();
   

@@ -74,8 +74,8 @@ then
 	OUTFILE="2dx_MAC_OS_X_"$SW_VERSION"_"$DATE".pkg"
 	PACKAGE_PATH="installation/packages/"
 	echo "Writing the package "$OUTFILE" to: " $PACKAGE_PATH
-	#/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_template.pmdoc -o $PACKAGE_PATH$OUTFILE 
-	/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_template_test.pmdoc -o $PACKAGE_PATH$OUTFILE 
+	/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_template.pmdoc -o $PACKAGE_PATH$OUTFILE 
+	#/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_template_test.pmdoc -o $PACKAGE_PATH$OUTFILE 
 
 fi
 echo '|                                                                            |'

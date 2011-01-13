@@ -22,14 +22,20 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
     user_level = 1;
   else
     user_level = 0;
-
-  
+  QString resourceDir = conf->getDir("resource");
+  qDebug() << "[DEBUG] Filepath: "<< QString(conf->getDir("resource")  + "is-wrong-bg.png");
+  QPixmap texturePix = QPixmap(conf->getDir("resource") + "is-wrong-bg.png");
+  if(!texturePix.isNull())
+    texture = QBrush(texturePix);
+  else
+    texture = QBrush(Qt::blue, Qt::BDiagPattern);
 	pal = QPalette(palette());
   QString isWrongString = e->get("ISWRONG").trimmed().toLower();
   if(isWrongString == "yes")
   {
     is_wrong = 1;
-    pal.setColor(QPalette::Base,isWrongColor);
+    //pal.setColor(QPalette::Base,isWrongColor);
+    pal.setBrush(QPalette::Base,texture);
   }
   else
   {
@@ -331,7 +337,8 @@ void confInput::load()
   if(isWrongString == "yes")
   {
     is_wrong = 1;
-    pal.setColor(QPalette::Base,isWrongColor);
+    //pal.setColor(QPalette::Base,isWrongColor);
+    pal.setBrush(QPalette::Base,texture);
   }
   else
   {

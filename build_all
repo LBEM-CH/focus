@@ -22,6 +22,12 @@ then
        	PREFIX=~/2dx	
 fi
 
+if [ $# -eq 2 ];
+then
+	APPLE_BUNDLE=$2
+else
+	APPLE_BUNDLE=OFF
+fi
 
 
 # And create build dirs here
@@ -159,7 +165,7 @@ pwd
 echo '+----------------------------------------------------------------------------+'
 echo '| configure                                                                  |'
 echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} . || (echo "Configure failed for" $APP ; read)
-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} . || (echo "Configure failed for" $APP ; read)
+cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DAPPLE_BUNDLE=${APPLE_BUNDLE} . || (echo "Configure failed for" $APP ; read)
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make                                                                       |'

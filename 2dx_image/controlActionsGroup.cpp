@@ -30,7 +30,8 @@ controlActionsGroup::controlActionsGroup(confData *data, controlActionsGroup::ty
 {
   conf = data;
   if(viewType == footer)
-    setFixedHeight(41);
+    //setFixedHeight(50);
+    setMinimumHeight(41);
   else
     setFixedHeight(93);
   setAutoFillBackground(true);

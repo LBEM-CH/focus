@@ -26,13 +26,14 @@ progressStamps::progressStamps(confData *conf, QWidget *parent)
                :QWidget(parent)
 {
   setFocusPolicy(Qt::NoFocus);
+  setFixedHeight(41);
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setAlignment(Qt::AlignCenter);
   data = conf;
   stampNames << "fft" << "defocus" << "lattice" << "spots" << "unbend" << "ctf" << "mask" << "phori" << "merge" << "reprocess";
   variableNames << "FFT_done"<< "DEFOCUS_done"<< "LATTICE_done"<< "SPOTS_done"<< "UNBENDING_done"<< "CTF_done" << "MASKING_done"<< "PHASEORI_done"<< "MERGING_done"<< "REPROCESSING_done";
-  QString resourceDir = data->getDir("icons");
-
+ // QString resourceDir = data->getDir("icons");
+  QString resourceDir =  conf->getDir("config") + "resource/";
   for(int i=0;i<stampNames.size();i++)
   {
     //cout << "adding the stamp " << stampNames[i].toStdString() << endl;

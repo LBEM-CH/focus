@@ -239,8 +239,12 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
 
   layout->addWidget(globalSplitter, 1,1,3,1);
 
-  headers<<new controlActionsGroup(data, controlActionsGroup::footer);
-  layout->addWidget(headers.last(),4,0,1,3);
+  controlActionsGroup* footer =  new controlActionsGroup(data, controlActionsGroup::footer);
+  headers<< footer;
+  layout->addWidget(footer,4,0,1,3);
+  //layout->setRowStretch(4,1);
+  //headers<<new controlActionsGroup(data, controlActionsGroup::footer);
+  //layout->addWidget(headers.last(),4,0,1,3);
 
   connect(headers[3],SIGNAL(toggleInfo()),preview,SLOT(toggleInfo()));
   connect(headers[3],SIGNAL(hideWidget()),preview,SLOT(shade()));

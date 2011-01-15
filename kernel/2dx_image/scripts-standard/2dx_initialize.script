@@ -23,6 +23,8 @@
 #
 # MANUAL: Edit the parameters in this central <I>Processing Data</I> pane. By default, only the most important parameters are accessible here. If you want to change one of the <I>advanced</I> parameters too, you can switch the display mode of this <I>Processing Data</I> pane at the left end of the top bar from "Simplified" to "Full Parameter List".
 #
+# MANUAL: 2dx tries to calculate or predict values for all parameters, based on available information. In several cases, you need to manually verify these values. These are then unerlaid with a blue stripe-pattern, until you have edited or confirmed manually the values.   
+#
 # MANUAL: After having edited the parameters, choose a script from the <I>Standard Scripts</I> and execute it via the <I>Start</I> button above.
 #
 # MANUAL: Upon first launch of this program, a default database in form of the file 2dx_image.cfg is created in the chosen  directory. The default entries for this database file are taken from the ${appDir_2dx}2dx/config/2dx_image.cfg file. These default values are then updated with values from the file ../2dx_image.cfg (the database file one level up from the current directory). Finally, this script 2dx_initialize.script is executed, and the resulting databse saved into the local directory's 2dx_image.cfg file.

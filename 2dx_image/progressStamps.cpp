@@ -32,15 +32,12 @@ progressStamps::progressStamps(confData *conf, QWidget *parent)
   data = conf;
   stampNames << "fft" << "defocus" << "lattice" << "spots" << "unbend" << "ctf" << "mask" << "phori" << "merge" << "reprocess";
   variableNames << "FFT_done"<< "DEFOCUS_done"<< "LATTICE_done"<< "SPOTS_done"<< "UNBENDING_done"<< "CTF_done" << "MASKING_done"<< "PHASEORI_done"<< "MERGING_done"<< "REPROCESSING_done";
- // QString resourceDir = data->getDir("icons");
   QString resourceDir =  conf->getDir("config") + "resource/";
   for(int i=0;i<stampNames.size();i++)
   {
-    //cout << "adding the stamp " << stampNames[i].toStdString() << endl;
     stampImages[stampNames[i]] = QPair<QPixmap,QPixmap>(QPixmap(resourceDir + stampNames[i] + "-IU.png"),QPixmap(resourceDir + stampNames[i] + "-ID.png"));
     stamps[stampNames[i]] = new QLabel(this);
     stamps[stampNames[i]]->setPixmap(stampImages[stampNames[i]].first);
-    //stamps[stampNames[i]]->setText(stampNames[i]);
     layout->addWidget(stamps[stampNames[i]]);
   }
   setLayout(layout);

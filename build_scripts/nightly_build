@@ -26,8 +26,11 @@ if [ $? -gt 0 ]; then
 	exit 2;
 fi
 
-SCRIPT_DIR=${SOURCE_DIR}/build_scripts
-
+SCRIPT_DIR=$(pwd)/build_scripts
+if [ ! -d $SCRIPT_DIR ]; then
+	echo "Could not find $SCRIPT_DIR"
+       exit 9;	
+fi
 echo '|                                                                            |'
 echo '*============================================================================*'
 echo ''

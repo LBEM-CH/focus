@@ -5,7 +5,7 @@
 # Marcel Arheit 17.09.2010
 
 #These two global variables should be changed to fit the local setup
-#Attention: When altering BUIlD_DIR this has to be altered in installation/mac_osx_installer/installer_nightly_build.pmdoc as well 
+#Attention: When altering BUILD_DIR this has to be altered in installation/mac_osx_installer/installer_nightly_build.pmdoc as well 
 BUILD_DIR=~/2dx/build/nightly_build
 DROPBOX=~/Dropbox/2dx
 echo '*############################################################################*'
@@ -85,7 +85,7 @@ then
 	echo '*============================================================================*'
 	echo '|                                                                            |'
 
-	./installation/mac_osx_installer/change_dylibs.sh $BUIlD_DIR
+	./installation/mac_osx_installer/change_dylibs.sh $BUILD_DIR
 
 	echo '|                                                                            |'
 	echo '*============================================================================*'

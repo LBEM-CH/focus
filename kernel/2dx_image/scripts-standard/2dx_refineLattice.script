@@ -95,6 +95,24 @@ ${proc_2dx}/linblock "2dx_mmlatref - to refine the lattice."
 #
 \rm -f TMP456111.tmp
 #
+echo "Running:"
+cat << eot
+${bin_2dx}/2dx_mmlatref.exe
+FFTIR/${imagename}.fft.mrc
+${imagenumber} ${nonmaskimagename} 
+Y                       ! use grid units?
+Y                       ! generate grid from lattice?
+N                       ! generate points from lattice?
+2 0 0 30 30 15 15       ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+38 ${halimsid} ${halimsid} ${halimsid}     ! RINNER,ROUTER,XORIG,YORIG
+50 50.0 0               ! NCYCLES,FSHIFT,ILIST for lattice param refn
+${lattice}                 ! AX,AY,BX,BY
+eot
+#
+echo " "
+echo "Now starting:"
+echo " "
+#
 ${bin_2dx}/2dx_mmlatref.exe << eot
 FFTIR/${imagename}.fft.mrc
 ${imagenumber} ${nonmaskimagename} 

@@ -1,6 +1,7 @@
 C   MMLATREF : Refinement of lattice parameters for maximum amplitude.
 C    First created from MMBOX -- 16.12.86  RH
 C    Last modified            -- 24.12.86  RH
+C    Last modified            -- 21.04.01  RH, change to IRTORG(1,XOR,YOR,ZOR)
 C
 C    Incorporates several aspects in the refinement
 C       1. Maximises sum of sinc-fitted intensities.
@@ -75,7 +76,8 @@ C     X, Y        coordinates of individual spot.
 C
 C****************************************************************************
 C
-      PARAMETER (MAXCYC=50)
+      PROGRAM MMLATREF
+      PARAMETER (MAXCYC=200)
       DIMENSION TITLE(15),NXYZ(3),MXYZ(3)
       DIMENSION XA(2000),YA(2000),IXC(2000),IYC(2000),IH(2000),IK(2000)
       DIMENSION IAMP(21,21),IPHI(21,21),IXGU(21),IYGU(21),PHANG(4)
@@ -110,7 +112,7 @@ C
  1005 FORMAT(A)
       CALL  IMOPEN(1,FILIN,'RO')
       CALL  IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
-      CALL  IRTORG(1,XOR,YOR)
+      CALL  IRTORG(1,XOR,YOR,ZOR)
       WRITE(6,1010) XOR,YOR
  1010 FORMAT(/,' X & Y phase origin shift read from transform',
      1           2F10.2)

@@ -128,7 +128,7 @@ C
  1005 FORMAT(A)
       CALL  IMOPEN(1,FILIN,'RO')
       CALL  IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
-      CALL  IRTORG(1,XOR,YOR)
+      CALL  IRTORG(1,XOR,YOR,ZOR)
       WRITE(6,1010) XOR,YOR
  1010 FORMAT(/' X & Y phase origin shift read from transform',
      1           2F10.2)

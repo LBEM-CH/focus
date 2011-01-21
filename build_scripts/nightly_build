@@ -7,7 +7,6 @@
 #These two global variables should be changed to fit the local setup
 #Attention: When altering BUILD_DIR this has to be altered in installation/mac_osx_installer/installer_nightly_build.pmdoc as well 
 BUILD_DIR=~/2dx/build/nightly_build
-DROPBOX=~/Dropbox/2dx
 echo '*############################################################################*'
 echo '| Locating the source code                                                   |'
 echo '*============================================================================*'
@@ -21,12 +20,13 @@ then
 	exit 1
 fi
 SOURCE_DIR=$1
-
 echo cd ${SOURCE_DIR} || (echo "Could not change to " $SOURCE_DIR; exit 2)
 cd ${SOURCE_DIR} || (echo "Could not change to  $SOURCE_DIR"; exit 2)
 if [ $? -gt 0 ]; then
 	exit 2;
 fi
+
+SCRIPT_DIR=${SOURCE_DIR}/build_scripts
 
 echo '|                                                                            |'
 echo '*============================================================================*'
@@ -45,8 +45,10 @@ echo '| Updating the source code                                                
 echo '*============================================================================*'
 echo '|                                                                            |'
 
+eval `ssh-agent -s` 
 echo svn up || (echo "Could not update the repository"; exit 3)
 svn up || (echo "Could not update the repository"; exit 3)
+kill $SSH_AGENT_PID
 if [ $? -gt 0 ]; then
 	exit 3;
 fi
@@ -59,7 +61,7 @@ echo ''
 
 
 echo '*############################################################################*'
-echo '| Calling ./build_all                                                        |'
+echo '| Calling ./build_all                                                       |'
 echo '*============================================================================*'
 echo '|                                                                            |'
 
@@ -120,16 +122,15 @@ then
 	echo ''
 	
 	
+	
 	echo '*############################################################################*'
-	echo '| Moving Packages to Server				                   |'
+	echo '| Moving Package to Server				                   |'
 	echo '*============================================================================*'
 	echo '|                                                                            |'
+
 	
-	echo mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
-	mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
-	if [ $? -gt 0 ]; then
-		exit 8;
-	fi
+	echo ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 8)
+		
 	echo '|                                                                            |'
 	echo '*============================================================================*'
 	echo ''
@@ -137,6 +138,12 @@ then
 	echo ''
 	echo ''
 
+	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 8)
+	#echo mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
+	#mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
+	if [ $? -gt 0 ]; then
+		exit 8;
+	fi
 
 fi
 exit 0

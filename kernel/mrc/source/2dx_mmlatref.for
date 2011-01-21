@@ -781,14 +781,14 @@ C
 C
 CHEN
 C
-9501  FORMAT(':',I3,4F12.8,F9.0,9I4)
+9501  FORMAT(':',I3,4F12.8,F15.0,9I4)
 9502  FORMAT(': Summary of refinement',/,
-     .': CYC              SHIFTS                            SUMINT ',
-     .'IQ 1   2   3   4   5   6   7   8   9',/)
-9503  FORMAT('::',I3,4F12.8,F9.0,9I4)
+     .': CYC              SHIFTS                                SUMINT ',
+     .'  IQ 1   2   3   4   5   6   7   8   9',/)
+9503  FORMAT('::',I3,4F12.8,F15.0,9I4)
 9504  FORMAT('::',/,':: Best corrected lattice:',/,
-     .':: CYC              SHIFTS                            SUMINT ',
-     .'IQ 1   2   3   4   5   6   7   8   9',/)
+     .':: CYC              SHIFTS                                SUMINT ',
+     .'  IQ 1   2   3   4   5   6   7   8   9',/)
       STOP
 4550    WRITE(6,4551)NMAX
 4551    FORMAT(' Too many spots for current prog dimensions',I5)

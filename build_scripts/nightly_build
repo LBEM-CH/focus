@@ -116,7 +116,12 @@ then
 		exit 7;
 	fi
 	echo "Writing the package "$OUTFILE" to: " $PACKAGE_PATH
-	/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_nightly_build.pmdoc -o $PACKAGE_PATH$OUTFILE 
+	echo installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || (echo "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; exit 8)
+	installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || (echo "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; exit 8)
+	if [ $? -gt 0 ]; then
+		exit 8;
+	fi
+#	/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_nightly_build.pmdoc -o $PACKAGE_PATH$OUTFILE 
 	echo '|                                                                            |'
 	echo '*============================================================================*'
 	echo ''
@@ -132,7 +137,7 @@ then
 	echo '|                                                                            |'
 
 	
-	echo ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 8)
+	echo ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 9)
 		
 	echo '|                                                                            |'
 	echo '*============================================================================*'
@@ -141,11 +146,11 @@ then
 	echo ''
 	echo ''
 
-	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 8)
+	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 9)
 	#echo mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
 	#mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
 	if [ $? -gt 0 ]; then
-		exit 8;
+		exit 9;
 	fi
 
 fi

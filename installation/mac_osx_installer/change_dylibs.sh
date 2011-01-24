@@ -1,5 +1,11 @@
 #!/bin/sh
 # change_dylibs
+#
+# scirpt to change the dylibs of the 2dx and MRC binaries
+#
+# Marcel Arheit
+
+
 if [ $# -lt 1 ]
 then
 	echo "No build directory specified"
@@ -29,6 +35,20 @@ do
 		fi
 	done
 done
+
+if [ -f /opt/local/lib/libfftw3f.3.dylib ]; then
+	FFTW_LIB=/opt/local/lib/libfftw3f.3.dylib
+	echo "Found FFTW in $FFTW_LIB"
+else
+       if [ -f /usr/local/lib/libfftw3f.3.dylib ]; then
+		FFTW_LIB=/usr/local/lib/libfftw3f.3.dylib
+		echo "Found FFTW in $FFTW_LIB"
+	else
+		FFTW_LIB=NOT_FOUND
+		echo "FFTW not FOUND!"
+	       	exit 2
+	fi
+fi
 fortran_bin="kernel/mrc/bin"
 path="$build_dir/$fortran_bin"
 echo "chaning binaries in $path" 
@@ -36,7 +56,7 @@ for exe in `ls $path`
 do
 	file="$path/$exe"
 	echo "changing the dylibs of $file"
-	install_name_tool -change /opt/local/lib/libfftw3f.3.dylib @executable_path/../lib/libfftw3f.3.dylib $file
+	install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $file
 	#	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../lib/libgfortran.3.dylib $file 
 	otool -L $file 
 done

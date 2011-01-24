@@ -14,6 +14,13 @@ fi
 DIR=`dirname $0`
 ROOT=$1
 OUTFILE=$2
+if [ -f $OUTFILE ]
+then
+	echo "removing previous version of $OUTFILE" 
+	rm $OUTFILE
+fi
+
+
 /Developer/usr/bin/packagemaker \
 --title "2dx Nightly Build" \
 --version  DATE=`date "+%d_%b_%Y"` \

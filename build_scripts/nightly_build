@@ -68,8 +68,8 @@ echo '| Calling ./build_all                                                     
 echo '*============================================================================*'
 echo '|                                                                            |'
 
-echo ./build_all $BUILD_DIR || (echo "Could not build the bundle"; exit 4)
-./build_all $BUILD_DIR || (echo "Could not build the bundle"; exit 4)
+echo ./build_all $BUILD_DIR ON || (echo "Could not build the bundle"; exit 4)
+./build_all $BUILD_DIR ON || (echo "Could not build the bundle"; exit 4)
 if [ $? -gt 0 ]; then
 	exit 4;
 fi

@@ -360,7 +360,7 @@ else if ( ${SYM} == 'p12_a' ) then
 else if ( ${SYM} == 'p12_b' ) then
   set spcgrp = "3"
   set spcgroup_num = "3"
-  set CCP4_SYM = "4"
+  set CCP4_SYM = "3"
   set ML_sym_val = "1"
   set rotate_to_Z = "no"
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 

@@ -258,6 +258,8 @@ C       DATA NOBSMX/500/, NCALMX/50/, NPLTMX/500/, NPROMX/251/
         INTEN = .FALSE.
         NPRNT = 5
         istilt = 0
+        ZSTG = 0.0
+        ZSTO = 0.0
 C
 C   READ INPUT DATA
 C

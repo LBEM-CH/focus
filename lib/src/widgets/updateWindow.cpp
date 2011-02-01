@@ -93,6 +93,7 @@ void updateWindow::updateTextBox()
   QString currentVersion = updateString.section("##",1,1).trimmed();
   QString remindUpdate = data->userConf()->get("remindUpdate","value").toLower();
   QString intVersion = currentVersion, intInstalled = installedVersion;
+  qDebug()<<"installed version: "<<intInstalled<<",  current version: "<<intVersion;
   intVersion.remove('.'); intInstalled.remove('.');
   if(intVersion.toInt()>intInstalled.toInt())
   {

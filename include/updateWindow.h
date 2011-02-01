@@ -15,6 +15,7 @@
 #include <QPixmap>
 #include <QGridLayout>
 #include <QHttp>
+#include <QDebug>
 #include <QTextBrowser>
 #include <QProcess>
 #include <QPushButton>

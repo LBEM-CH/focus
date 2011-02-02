@@ -46,7 +46,11 @@ endif
 \rm -f ${scriptAfile}
 #
 set number = 1
-set IVERBOSE = 1
+if ( ${ILIST} == "n" ) then
+  set IVERBOSE = 1
+else
+  set IVERBOSE = 9
+endif
 set RFACAMP = 1.0
 #
 ${bin_2dx}/2dx_merge_compileA.exe << eot
@@ -69,6 +73,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_ML_data}
+${ILIST_VAL}
 eot
 #
 echo "# IMAGE: ${scriptAfile} <CSH: merging script>" >> LOGS/${scriptname}.results
@@ -103,6 +108,11 @@ if ( -e fort.3 && -e SUMMARY ) then
   \mv -f SUMMARY LOGS/mrcmerge.summary.log
 else
   ${proc_2dx}/protest "ERROR: Problem in ${scriptAfile}"
+endif
+#
+if ( ${IVERBOSE} > 5 ) then
+  \mv -f 2dx_origtiltk-reflections.log LOGS
+  echo "# IMAGE: LOGS/2dx_origtiltk-reflections.log <LOG: reflections after origtiltk>" >> LOGS/${scriptname}.results
 endif
 #
 if ( ${scriptname} == "2dx_refine_cyclic" ) then

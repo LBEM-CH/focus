@@ -38,6 +38,7 @@
 # DISPLAY: SYM
 # DISPLAY: avrgamphsNUMBER
 # DISPLAY: avrgamphsRESOL
+# DISPLAY: ILIST
 # DISPLAY: MergeHKMAX
 # DISPLAY: MergeIQMAX
 # DISPLAY: refrevhk
@@ -81,6 +82,7 @@ set IBOXPHS = ""
 set SYM = ""
 set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
+set ILIST = ""
 set MergeHKMAX = ""
 set MergeIQMAX = ""
 set refbeamtilt = ""
@@ -169,6 +171,18 @@ if ( ${refinvert_tiltangle} == "y" ) then
   echo "#WARNING: Changing the invert_tiltangle setting alters the handedness of the final reconstruction. Danger." >> LOGS/${scriptname}.results
 else
   set refinvert_tiltangle_val = "normal"
+endif
+#
+if ( ${ILIST}x == 'x' ) then
+  set ILIST = "n"
+  echo "set ILIST = ${ILIST}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: ILIST corrected to ${ILIST}"
+endif
+#
+if ( ${ILIST} == "n" ) then
+  set ILIST_VAL = 0
+else
+  set ILIST_VAL = 1
 endif
 #
 #################################################################################
@@ -312,8 +326,15 @@ while ( ${currentline} <= ${linenum} )
           foreach revhnd_modus ( ${refrevhnd_val} )
             foreach revxsgn_modus ( ${refrevxsgn_val} )
               foreach invert_tiltangle_modus ( ${refinvert_tiltangle_val} )
+                #
+                #
+                #
                 set dirfile = "SCRATCH/2dx_refine_onefile.dat"
+                #
                 source ${proc_2dx}/2dx_refine_refine_sub.com
+                #
+                #
+                #
                 if ( ${MergePhaseResidual} != "nan" ) then
                   if ( ${number} == "1" ) then
                     set better_now = 0

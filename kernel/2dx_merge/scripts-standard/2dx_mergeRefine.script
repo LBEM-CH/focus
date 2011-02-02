@@ -42,6 +42,7 @@
 # DISPLAY: avrgamphsRESOL
 # DISPLAY: MergeHKMAX
 # DISPLAY: MergeIQMAX
+# DISPLAY: ILIST
 # DISPLAY: MergeIPAT
 # DISPLAY: MergeDELPLT
 # DISPLAY: MergeDELPRO
@@ -97,6 +98,7 @@ set IBOXPHS = ""
 set SYM = ""
 set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
+set ILIST = ""
 set MergeHKMAX = ""
 set MergeIQMAX = ""
 set MergeIPAT = ""
@@ -130,7 +132,11 @@ source ${proc_2dx}/initialize
 set dirfile = "2dx_merge_dirfile.dat"
 #
 set number = 1
-set IVERBOSE = 1
+if ( ${ILIST} == "n" ) then
+  set IVERBOSE = 1
+else
+  set IVERBOSE = 6
+endif
 set RFACAMP = 1.0
 #
 set scriptname = 2dx_mergeRefine
@@ -205,6 +211,18 @@ if ( ${MergeIWP}x == 'x' ) then
   set MergeIWP = "1"
   echo "set MergeIWP = ${MergeIWP}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: MergeIWP corrected to ${MergeIWP}"
+endif
+#
+if ( ${ILIST}x == 'x' ) then
+  set ILIST = "n"
+  echo "set ILIST = ${ILIST}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: ILIST corrected to ${ILIST}"
+endif
+#
+if ( ${ILIST} == "n" ) then
+  set ILIST_VAL = 0
+else
+  set ILIST_VAL = 1
 endif
 #
 if(${MergeIWF} == "0")then
@@ -362,6 +380,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_ML_data}
+${ILIST_VAL}
 0
 eot
 #

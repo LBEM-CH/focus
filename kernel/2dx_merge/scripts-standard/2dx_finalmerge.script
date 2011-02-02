@@ -37,6 +37,7 @@
 # DISPLAY: MergeIPAT
 # DISPLAY: MergeDELPLT
 # DISPLAY: MergeDELPRO
+# DISPLAY: ILIST
 # DISPLAY: MergeIQMAX
 # DISPLAY: MergeHKMAX
 # DISPLAY: MergeRminRmax
@@ -82,6 +83,7 @@ set MergeRminRmax = ""
 set MergeRCUT = ""
 set MergePFACT = ""
 set MergeIQMAX = ""
+set ILIST = ""
 set MergeHKMAX = ""
 set MergeBINSIZ = ""
 set MergeNCYCLS = ""
@@ -148,6 +150,18 @@ if ( ${MergeIWP}x == 'x' ) then
   set MergeIWP = "1"
   echo "set MergeIWP = ${MergeIWP}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: MergeIWP corrected to ${MergeIWP}"
+endif
+#
+if ( ${ILIST}x == 'x' ) then
+  set ILIST = "n"
+  echo "set ILIST = ${ILIST}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: ILIST corrected to ${ILIST}"
+endif
+#
+if ( ${ILIST} == "n" ) then
+  set ILIST_VAL = 0
+else
+  set ILIST_VAL = 1
 endif
 #
 if(${MergeIWF} == "0")then

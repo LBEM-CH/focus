@@ -591,8 +591,8 @@ C
 137   FORMAT(4X,'H',4X,'K',5X,'ZSTAR',5X,'PHASE',7X,'AMP    IQ',
      . '   REFPHASE   NREF')
 138   FORMAT(10A4)
-139   FORMAT(4X,'H',3X,'K',3X,'ZSTAR',7X,'AMP',2X,'PHASE  JFILM',
-     . ' IQ  FLMWGT   BACKGRND   CTF')
+139   FORMAT(6X,'H',5X,'K',4X,'ZSTAR',7X,'AMP',12X,'PHASE',11X,'JFILM',
+     . '  IQ  FLMWGT      BACKGRND        CTF')
 145   FORMAT(2I5,F10.4,2F10.1,I6,F10.1,I6)
 146   FORMAT(I10)
 147   FORMAT(/,':',5X,I5,' REFLECTIONS INPUT ')
@@ -644,7 +644,13 @@ C
 182   FORMAT(' SORTING FAILED!!!!!!!!!!!!!!!!!!!! NCHNG= ',I5)
 185   FORMAT(' REFLECTION ZSTAR   AMPLITUDE PHASE  FILM',
      1  ' IQ  FLMWGT  BACKGRND  CTF',/,'   IH  IK'/)
-187   FORMAT(////)
+186   FORMAT(///,
+     .       6X,'H',5X,'K',4X,'ZSTAR',7X,'AMP',12X,'PHASE',11X,'JFILM',
+     . '  IQ  FLMWGT      BACKGRND        CTF')
+187   FORMAT(///,
+     .       6X,'H',5X,'K',4X,'ZSTAR',7X,'AMP',12X,'PHASE',11X,'JFILM',
+     . '  IQ  FLMWGT      BACKGRND        CTF,   IQ,',
+     . ' if(IQ<5)then again AMP,PHS')
 188   FORMAT('0TOO FEW POINTS TO BE WORTH PLOTTING FOR N=',I5,' L=',I5)
 CAnd ifilm 10 stellig
 C190   FORMAT(1X,2I4,F8.4,F10.1,F7.1,I7,I3,F8.5,F10.1,F7.3)
@@ -722,6 +728,10 @@ C     THE FIRST DATASET IS A FULLY-FLEDGED MTZ FILE.
 C
 CHEN>
       OPEN(UNIT=17,FILE=cfile1,STATUS='UNKNOWN')
+      if(IVERBOSE.gt.5)then
+        call system('\rm -f 2dx_origtiltk-reflections.log')
+        OPEN(UNIT=18,FILE='2dx_origtiltk-reflections.log',STATUS='NEW')
+      endif
       OPEN(UNIT=21,FILE='2dx_origtiltk-console.log',STATUS='NEW')
 CHEN<
 C
@@ -2427,6 +2437,7 @@ C
       LH=-1000
       LK=-1000
       IREFL=1
+      icount=1000
       DO 600 KK=1,JREFL
         KJ=JOUT(KK)
         IF(IPLOT.EQ.0) GO TO 562
@@ -2448,12 +2459,13 @@ C
           IF(KK.NE.JREFL) IREF1=IREFL-1
           IREF2=IREF1-1
           IF(IREF2.GE.MINRFL) GO TO 563
-            if(IVERBOSE.gt.5)WRITE(6,188) LH,LK
+            if(IVERBOSE.gt.5)WRITE(18,188) LH,LK
           GO TO 565
 563         IF (LH.LT.LHMIN) GO TO 565
 C-----------IF (LH.GT.LHMAX) GO TO 600
             IF (LH.GT.LHMAX) THEN
-              WRITE(6,*)' Sorted reflections with H > LHMAX not printed'
+              WRITE(6,*)' Sorted reflections with H > ',
+     .         'LHMAX not printed'
               GOTO 1107
             ENDIF
             CALL GRAPH(ZMIN,ZMAX,AMAX,LH,LK,IREF2,PZ,PAMP,PPHS,IPSGN)
@@ -2463,7 +2475,15 @@ C-----------IF (LH.GT.LHMAX) GO TO 600
           IPSGN(1)=IPSGN(IREF1)
           IREFL=2
 562       IF(LH.NE.JH(KJ).OR.LK.NE.JK(KJ)) then
-            if(IVERBOSE.gt.5)WRITE(6,187)
+            if(IVERBOSE.gt.5)then
+              if(icount.gt.100)then
+                WRITE(18,187)
+                icount=0
+              else
+                WRITE(18,186)
+                icount=icount+1
+              endif
+            endif
           endif
           LH=JH(KJ)
           LK=JK(KJ)
@@ -2480,7 +2500,7 @@ C
           write(CZEIL(ILEN:50),'(F10.1,F7.1)') AMP(KJ),PHS(KJ)
           ILEN = ILEN + 17
         endif
-        if(IVERBOSE.gt.5)WRITE(6,192) LH,LK,ZSTAR(KJ),AMP(KJ),PHS(KJ),
+        if(IVERBOSE.gt.5)WRITE(18,192) LH,LK,ZSTAR(KJ),AMP(KJ),PHS(KJ),
      .     JFILM(KJ),JSIGN(KJ),FLMWGT(KJ),BACK(KJ),CTFS(KJ),
      .     CZEIL(1:ILEN)
 C
@@ -2489,13 +2509,14 @@ C
         WRITE(3,190) LH,LK,ZSTAR(KJ),AMP(KJ),PHS(KJ),
      .    JFILM(KJ),JSIGN(KJ),FLMWGT(KJ),BACK(KJ),CTFS(KJ)
         GO TO 600
-  555   if(IVERBOSE.gt.5)WRITE(6,191) LH,LK,ZSTAR(KJ),AMP(KJ),
+  555   if(IVERBOSE.gt.5)WRITE(18,191) LH,LK,ZSTAR(KJ),AMP(KJ),
      .     JFILM(KJ),JSIGN(KJ),
      .   FLMWGT(KJ),BACK(KJ),CTFS(KJ)
 600   CONTINUE
       GO TO 1107
 601   WRITE(6,149) TOTRFL
       CLOSE(UNIT=17)
+      if(IVERBOSE.gt.5)CLOSE(UNIT=18)
       CLOSE(UNIT=21)
       STOP
 C

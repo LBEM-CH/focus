@@ -140,8 +140,13 @@ C
       if(IMERGEML.eq.0)then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
       else
-        write(*,'(I1,'' = Using Maximum Likelihood results where allowed'')')IMERGEML
+        write(*,'(I1,'' = Using Maximum Likelihood results'',
+     /      '' where allowed'')')IMERGEML
       endif
+C
+      write(*,'(/,''input ILIST switch'')')
+      read(*,*)ILIST
+      write(*,'(I3)')ILIST
 C
       write(*,'(/,''Want to refine switches (y=1,0=no)'')')
       read(*,*)irefswitch
@@ -249,6 +254,7 @@ C
       write(11,'(''set NPRG = "'',A,''"'')')cline(1:k)
       write(11,'(''set NTL  = "'',A1,''"'')')cNTL
       write(11,'(''set NBM  = "'',A1,''"'')')cNBM
+      write(11,'(''set ILIST = '',I3)')ILIST
       write(cline,'(I6)')IQMX
       call shortshrink(cline,k)
       write(11,'(''set IQMX = "'',A,''"'')')cline(1:k)
@@ -275,7 +281,7 @@ C
       call shorten(CFILE1,k)
       write(11,'(A)')CFILE1(1:k)
 C
-      write(11,'(''${spcgrp} ${NPRG} ${NTL} ${NBM} 0 ${realcell} ${ALAT} ${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
+      write(11,'(''${spcgrp} ${NPRG} ${NTL} ${NBM} ${ILIST} ${realcell} ${ALAT} ${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
      .  ''! ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT'')')
       write(11,'(''10,0.7,10,0.5'',52X,
      .  ''! itaxastep,rtaxasize,itanglstep,rtanglsize'')')

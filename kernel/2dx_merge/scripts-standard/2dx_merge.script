@@ -38,6 +38,7 @@
 # DISPLAY: SYM
 # DISPLAY: avrgamphsNUMBER
 # DISPLAY: avrgamphsRESOL
+# DISPLAY: ILIST
 # DISPLAY: MergeIPAT
 # DISPLAY: MergeDELPLT
 # DISPLAY: MergeDELPRO
@@ -77,6 +78,7 @@ set SYM = ""
 set merge_ref_num = ""
 set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
+set ILIST = ""
 set MergeIPAT = ""
 set MergeDELPLT = ""
 set MergeDELPRO = ""
@@ -168,6 +170,18 @@ if ( ${merge_ML_data}x == 'x' ) then
   set merge_ML_data = "0"
   echo "set merge_ML_data = ${merge_ML_data}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: merge_ML_data corrected to ${merge_ML_data}"
+endif
+#
+if ( ${ILIST}x == 'x' ) then
+  set ILIST = "n"
+  echo "set ILIST = ${ILIST}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: ILIST corrected to ${ILIST}"
+endif
+#
+if ( ${ILIST} == "n" ) then
+  set ILIST_VAL = 0
+else
+  set ILIST_VAL = 1
 endif
 #
 if(${MergeIWF} == "0")then

@@ -67,6 +67,7 @@ ${MergeHKMAX}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
+${ILIST_VAL}
 1
 ${revhk_modus}
 ${rot90_modus}

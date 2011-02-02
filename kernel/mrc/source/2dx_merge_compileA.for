@@ -105,8 +105,13 @@ C
       if(IMERGEML.eq.0)then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
       else
-        write(*,'(I1,'' = Using Maximum Likelihood results where allowed'')')IMERGEML
+        write(*,'(I1,'' = Using Maximum Likelihood results '',
+     .           ''where allowed'')')IMERGEML
       endif
+C
+      write(*,'(/,''input ILIST switch'')')
+      read(*,*)ILIST
+      write(*,'(I3)')ILIST
 C
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
 C
@@ -150,6 +155,7 @@ C
       write(11,'(''#'')')
       write(11,'(''set LOGOUTPUT = F'')')
       write(11,'(''set LPROTFOUFIL = F'')')
+      write(11,'(''set ILIST = '',I3)')ILIST
       write(11,'(''setenv OMP_NUM_THREADS 4'')')
       write(11,'(''#'')')
       write(11,'(''rm -f 2dx_origtiltk-console.log'')')
@@ -160,7 +166,7 @@ C
       call shorten(CFILE1,k)
       write(11,'(A)')CFILE1(1:k)
 C
-      write(11,'(''${spcgrp} 0 F F 0 ${realcell} ${ALAT} ${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
+      write(11,'(''${spcgrp} 0 F F ${ILIST} ${realcell} ${ALAT} ${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
      .   ''!ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT'')')
       write(11,'(''10,0.7,10,0.5'',28X,
      .   ''!itaxastep,rtaxasize,itanglstep,rtanglsize'')')

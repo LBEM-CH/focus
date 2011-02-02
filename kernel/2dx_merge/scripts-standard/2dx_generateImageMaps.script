@@ -52,7 +52,6 @@ set genref = ""
 set spcgrp = ""
 set realang = ""
 set zstarwin = ""
-set IVERBOSE = ""
 set RFACAMP = ""
 set MergeHKMAX = ""
 set merge_res_limit = ""
@@ -104,6 +103,8 @@ endif
 #
 set zwin = `echo ${ALAT} | awk '{ s = 1.0 / ( 2.0 * $1 ) } END { print s }'`
 echo zwin = $zwin
+#
+set ILIST_VAL = 0
 #
 #???? Check this ???
 set SCL = 1
@@ -251,6 +252,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_ML_data}
+${ILIST_VAL}
 0
 eot
   #

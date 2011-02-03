@@ -74,26 +74,27 @@ updateWindow::updateWindow(confData *conf, QWidget *parent)
   layout->addWidget(upgradeButton,4,3,1,1);
   connect(upgradeButton,SIGNAL(clicked()),this,SLOT(updateVersion()));
 
-  updateInf = new QHttp("www.2dx.org");
-  connect(updateInf,SIGNAL(requestFinished(int,bool)),this,SLOT(updateTextBox()));
-  updateInf->get("/download/2dx-software/2dx-installer/changes.htm");
+  QNetworkAccessManager* manager = new QNetworkAccessManager();
+  QUrl url = QUrl("http://www.2dx.unibas.ch/download/2dx-software/2dx-installer/changes.htm");
+  updateInf = manager->get(QNetworkRequest(url));
+  connect(updateInf,SIGNAL(finished()),this,SLOT(updateTextBox()));
 
 }
 
 void updateWindow::updateTextBox()
 {
-  if(updateInf->error())
+  if(updateInf->error() != QNetworkReply::NoError)
   {
     cout<<"Http error: "<<updateInf->errorString().toStdString()<<endl;
     versionInfo->setText("No version information currently available.");
-    updateText->insertPlainText(updateInf->errorString());
+    updateText->insertPlainText("Http error: "+updateInf->errorString());
     return;
   }
-  QString updateString = updateInf->readAll();
+  QByteArray updateHTML = updateInf->readAll();
+  QString updateString = QString(updateHTML);
   QString currentVersion = updateString.section("##",1,1).trimmed();
   QString remindUpdate = data->userConf()->get("remindUpdate","value").toLower();
   QString intVersion = currentVersion, intInstalled = installedVersion;
-  qDebug()<<"installed version: "<<intInstalled<<",  current version: "<<intVersion;
   intVersion.remove('.'); intInstalled.remove('.');
   if(intVersion.toInt()>intInstalled.toInt())
   {

@@ -14,7 +14,10 @@
 #include <QLabel>
 #include <QPixmap>
 #include <QGridLayout>
-#include <QHttp>
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QDebug>
 #include <QTextBrowser>
 #include <QProcess>
@@ -34,7 +37,7 @@ class updateWindow : public QWidget
   private:
 
   confData *data;
-  QHttp *updateInf;
+  QNetworkReply *updateInf;
   QTextBrowser *updateText;
   QLabel *updateTitle, *versionInfo;
   QString installedVersion;

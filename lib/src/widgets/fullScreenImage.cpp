@@ -651,7 +651,7 @@ void fullScreenImage::paintEvent(QPaintEvent *event)
 	image_base->translate(QPointF(float(width())/2.0,float(height())/2.0));
 #endif
 
-	if(cellC!=0.0 && cellC!=90.0) image_base->shear(0.0,shearScale);
+	if(cellC!=0.0 && cellC!=90.0) image_base->shear(shearScale, 0.0);
 	if(imageHeader->mode()<3)
 		if(nx!=0.0 && ny!=0.0 && cellA!=0.0 && cellB!=0.0)
 			image_base->scale(1.0,pixelSize);

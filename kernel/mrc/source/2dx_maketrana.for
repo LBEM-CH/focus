@@ -98,28 +98,34 @@ C
         PARAMETER (IARRMXSIZ=410000000)
         PARAMETER (NMAX=20100)
 CHEN<
-        COMMON//NX,NY,NZ
+        REAL KV
+        REAL*8 DOUBLMEAN
+        CHARACTER*80 NAME
+        CHARACTER DAT*24
+        CHARACTER TMPTITLE*80
+        LOGICAL IAMPLIM
+C
         DIMENSION ARRAY(IARRMXSIZ)
         DIMENSION TITLE(20),TITLEIN(12),NXYZ(3),NXYZT(3),CELL(6)
         DIMENSION BEAMSHFT(4)
         DIMENSION IHS(NMAX),IKS(NMAX),ZS(NMAX),XC(NMAX),YC(NMAX),
      .          AMP(NMAX),PHASE(NMAX),APART(NMAX),BPART(NMAX),BSH(NMAX)
-        REAL KV
-        REAL*8 DOUBLMEAN
-        CHARACTER*80 NAME
-        CHARACTER DAT*24
-        LOGICAL IAMPLIM
+C
         EQUIVALENCE (NX,NXYZ)
-        EQUIVALENCE (BEAMSHFT(2),ASTAR),(BEAMSHFT(3),BSTAR),
-     .            (BEAMSHFT(4),ABANG)
-CTSH++
-        CHARACTER TMPTITLE*80
+        EQUIVALENCE (BEAMSHFT(2),ASTAR)
+        EQUIVALENCE (BEAMSHFT(3),BSTAR)
+        EQUIVALENCE (BEAMSHFT(4),ABANG)
         EQUIVALENCE (TMPTITLE,TITLE)
-CTSH--
+C
+        COMMON//NX,NY,NZ
+C
         DATA CELL/100.,100.,100.,90.,90.,90./
-CHEN>
-        DATA ARRAY/IARRMXSIZ*0.0/
+C
+CHEN> 
+C------This crashes the gfortran compiler on OSX 10.6 from HPC:
+C        DATA ARRAY/IARRMXSIZ*0.0/
 CHEN<
+C
         DATA DOUBLMEAN/0.0/
         TWOPI = 2.0 * 3.14159265
         MAXSIZ = IARRMXSIZ
@@ -204,6 +210,7 @@ C
       MODE = 4                ! defaults to real*4
       DO 6 J=1,NY*NXP2
 6     ARRAY(J)=0.0
+C
       READ(5,1500) TITLEIN    ! title for output file
 1500  FORMAT(12A4)
 CTSH            WRITE(TITLE) TITLEIN,DAT(5:24,1501)
@@ -339,7 +346,9 @@ C
 C************************end of main program************************************
 C
       SUBROUTINE GETSFS(NHOLE,AMP,PHASE,IHS,IKS,ZS,A,B,ABANG)
-      DIMENSION AMP(1),PHASE(1),IHS(1),IKS(1),ZS(1)
+      PARAMETER (NMAX=20100)
+      DIMENSION IHS(NMAX),IKS(NMAX),ZS(NMAX),XC(NMAX),YC(NMAX)
+      DIMENSION AMP(NMAX),PHASE(NMAX)
 C
 C
 C  15.3.84 INITIAL PROGRAM WRITTEN USING ASYM SUBROUTINE BUT INCORPORATING
@@ -991,7 +1000,11 @@ C*******************************************************************************
 C
       SUBROUTINE INSERT(ARRAY,NHOLE,ISHAPE,RAD,NX,NY,
      .                  APART,BPART,XC,YC)
-      DIMENSION ARRAY(1),APART(1),BPART(1),XC(1),YC(1)
+      PARAMETER (IARRMXSIZ=410000000)
+      PARAMETER (NMAX=20100)
+      DIMENSION ARRAY(IARRMXSIZ)
+      DIMENSION APART(NMAX),BPART(NMAX)
+      DIMENSION ZS(NMAX),XC(NMAX),YC(NMAX)
 C
 c     LOGICAL IAMPLIM
 C
@@ -1098,8 +1111,12 @@ C
       RETURN
       END
 C*******************************************************************************
+C
       SUBROUTINE CTF(ARRAY,NX,NY,THETATR,WL,CS,DFMID1,DFMID2,ANGAST)
-      DIMENSION ARRAY(1)
+C
+      PARAMETER (IARRMXSIZ=410000000)
+      DIMENSION ARRAY(IARRMXSIZ)
+C
       IF(DFMID1.EQ.0.0.AND.DFMID2.EQ.0.0) THEN
         WRITE(6,10)
 10      FORMAT(/,' No CTF correction applied')
@@ -1184,7 +1201,9 @@ CHEN<
 C******************************************************************************
 C              TO APPLY ORIGIN AND BEAMTILT PHASE-SHIFT.
       FUNCTION PHSHFT(IH,IK,OX,OY,TX,TY,BEAMSHFT,B)
+C
       DIMENSION BEAMSHFT(4)
+C
 C       ! attempt to not make it p3 specific.
       ASTAR=BEAMSHFT(2)
       BSTAR=BEAMSHFT(3)
@@ -1211,6 +1230,7 @@ C******************************************************************************
 CHEN>
 C              TO APPLY ORIGIN AND BEAMTILT PHASE-SHIFT.
       FUNCTION PHSHF2(IH,IK,OX,OY,TX,TY,BEAMSHFT,B,REVHK,SGNXCH,ROT180,ROT90,REVHND)
+C
       DIMENSION BEAMSHFT(4)
 C
 C-----The reference data are merged with a Phase Origin valid for REVHK,SGNXCH,... settings.

@@ -15,7 +15,7 @@
 #
 # MANUAL: This script will produce a list of the final maps of the selected image directories.
 #
-# MANUAL: ToDo: 2dx_merge has a bug when the file names become too long. They are then not displayed any more.
+# MANUAL: ToDo: 2dx_merge has a bug when the file paths and names become too long. They are then not displayed any more.
 #
 # DISPLAY: imagename
 # DISPLAY: SYM
@@ -50,6 +50,7 @@ ${OUTPUTFILE}
 2dx_merge_dirfile.dat
 eot
 #
+cat ${OUTPUTFILE}
 cat ${OUTPUTFILE} >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"

@@ -1,22 +1,22 @@
 C  MMBOXA  derived from Judy Smith's NNBOX program but with more statistics
 C         suitable for more high resoution crystallographic analysis.
 C
-C      VX 1.00  pre-1985	RH	from Judy's program NNBOX
-C      VX 1.01	23-05-85	JMB	outer radius can be .GT. NXM1
-C      VX 1.02	24-11-86	RH	last version before sincfit
-C      VX 1.03	07-12-86	RH	sinc func fit over 4x4 box (trial)
-C      VX 1.04	21-04-87	RH	sinc func fit over 2X2 box (better)
-C      VX 1.05	10-06-87	RH	radius limits now in Angstroms.
-C      VX 1.06	09-09-87	RH	more spots, 2000 now PARAMETER.
-C      VX 1.07	18-06-92	RH	health warning if origin is given twice
-C      VX 2.00	09-01-92	RH	brought to UNIX on Alliant - no changes.
-C      VX 2.01	06-10-92	RH	extra dummy output column.
-C      VX 2.02	17-04-95	RH	extra precision for scale factor output.
-C      VX 2.03	19-07-95	RH	output opened UNKNOWN to allow overwrite
-C      VX 2.04	22-04-96	RH	debug IPERIM -> perim
-C      VX 3.00	29-11-97	RH	changed background definition -> MMBOXA
-C      VX 3.01  29-03-00       JMS  	irtorg mod to include zorigin
-C      VX 3.02  29-10-01        RH  	change filenames to CHARACTER*80
+C      VX 1.00  pre-1985        RH      from Judy's program NNBOX
+C      VX 1.01  23-05-85        JMB     outer radius can be .GT. NXM1
+C      VX 1.02  24-11-86        RH      last version before sincfit
+C      VX 1.03  07-12-86        RH      sinc func fit over 4x4 box (trial)
+C      VX 1.04  21-04-87        RH      sinc func fit over 2X2 box (better)
+C      VX 1.05  10-06-87        RH      radius limits now in Angstroms.
+C      VX 1.06  09-09-87        RH      more spots, 2000 now PARAMETER.
+C      VX 1.07  18-06-92        RH      health warning if origin is given twice
+C      VX 2.00  09-01-92        RH      brought to UNIX on Alliant - no changes.
+C      VX 2.01  06-10-92        RH      extra dummy output column.
+C      VX 2.02  17-04-95        RH      extra precision for scale factor output.
+C      VX 2.03  19-07-95        RH      output opened UNKNOWN to allow overwrite
+C      VX 2.04  22-04-96        RH      debug IPERIM -> perim
+C      VX 3.00  29-11-97        RH      changed background definition -> MMBOXA
+C      VX 3.01  29-03-00       JMS      irtorg mod to include zorigin
+C      VX 3.02  29-10-01        RH      change filenames to CHARACTER*80
 C   !!!  remember to put date and version # in title output record below.
 C
 C###############################################################################
@@ -44,17 +44,17 @@ C  MMBOX on full-size unboxed images.
 C
 C  DATA:
 C
-C     	FILIN
+C       FILIN
 C
-C     	ISER,TITLE (I10,15A4)
+C       ISER,TITLE (I10,15A4)
 C
-C     	GU     (A)
+C       GU     (A)
 C
-C     	GENGRID(A)
+C       GENGRID(A)
 C
-C     	GENPTS (A)
+C       GENPTS (A)
 C
-C     	IPIXEL, IOUT,NUMSPOT, NOH, NOK, NHOR, NVERT  (*)
+C       IPIXEL, IOUT,NUMSPOT, NOH, NOK, NHOR, NVERT  (*)
 C
 CHENN>
 CCC      FILOUT only if IOUT.NE.0
@@ -68,17 +68,17 @@ C       IQMAX only if IOUT.EQ.3 -> max value of IQ for inclusion in Spotlist
 C
 CHENN<
 C
-C     	XORIG, YORIG  (*)
+C       XORIG, YORIG  (*)
 C
-C     	RINNER, ROUTER, IRAD, ACELL, BCELL, WIDTH, ABANG  (*)
+C       RINNER, ROUTER, IRAD, ACELL, BCELL, WIDTH, ABANG  (*)
 C
 C  if GENGRID :
 C
-C     	AX, AY, BX, BY (*)
+C       AX, AY, BX, BY (*)
 C
 C  if .not. GENGRID :
 C
-C     	IH(I), IK(I), X(I), Y(I)  (*)
+C       IH(I), IK(I), X(I), Y(I)  (*)
 C
 C
 C     ISER        serial number for run to be printed & output on IOUT.
@@ -88,7 +88,7 @@ C     GENGRID     if YES generate grid from lattice points (1,0) & (0,1)
 C     GENPTS      if YES individual spots requested & generated from grid
 C     IPIXEL      pixel size only used if .not.GU 
 C     IOUT        output unit number for serial number and title, then
-C    		   IH,IK,A,P,IQ terminated with IH=100.
+C                  IH,IK,A,P,IQ terminated with IH=100.
 C     NUMSPOT     number of spots to be printed, if 0 defaults to 20.
 C     NOH, NOK    number of orders of spots in H & K direcions
 C     NHOR, NVERT box size in mm or grid units in horizontal &
@@ -185,7 +185,7 @@ C
       READ(5,1028) GU
       WRITE(6,1029) GU
  1028 FORMAT(A)
-1029	FORMAT(1X,20A1)
+1029    FORMAT(1X,20A1)
       WRITE(6,*) ' '
       WRITE(6,*) ' # type in Y for grid generation'
       WRITE(6,*) ' '
@@ -267,7 +267,7 @@ CHENN>
 CHENN<
       WRITE(6,1030) IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT,
      1              XORIG,YORIG,RINNER,ROUTER,
-     2		    IRAD,ACELL,BCELL,WIDTH,ABANG
+     2              IRAD,ACELL,BCELL,WIDTH,ABANG
 1030  FORMAT(/' Pixel size ==================================',I5/
      1        ' output unit number =========================='
      *        ,I5/
@@ -284,8 +284,8 @@ CHENN<
       TWOPI = 2. * PI
       IF((XOR.NE.0.0.AND.XORIG.NE.0.0).OR.
      . (YOR.NE.0.0.AND.YORIG.NE.0.0)) THEN
-      	WRITE(6,145)XOR,YOR,XORIG,YORIG
-145   	FORMAT(//' ***** WARNING - THIS IS OFTEN A CAUSE OF ERROR'/
+        WRITE(6,145)XOR,YOR,XORIG,YORIG
+145     FORMAT(//' ***** WARNING - THIS IS OFTEN A CAUSE OF ERROR'/
      . '       ORIGIN SHIFTS HAVE BEEN GIVEN EXPLICITLY AND ',
      . 'IMPLICITLY IN THE IMAGE HEADER'/
      . '       THIS USUALLY HAPPENS WITH AUTOMATIC BOXING ',
@@ -302,9 +302,9 @@ C
       END IF
 C
       IF(IRAD.EQ.0) THEN
-      	ROUTER = ROUTER * SCALE
-      	ROUTER = MIN(ROUTER,NXM1*SQRT(2.0))
-      	RINNER = RINNER * SCALE
+        ROUTER = ROUTER * SCALE
+        ROUTER = MIN(ROUTER,NXM1*SQRT(2.0))
+        RINNER = RINNER * SCALE
       ENDIF
 C
 C USED TO BE SCAMP = 999./DMAX
@@ -396,8 +396,8 @@ C     data read in proceed
 C
   120 IHOR2 = NHOR / 2
       IVERT2 = NVERT / 2
-      ISINCBOX2 = ISINCBOX/2	! See DATA statement above.
-      ISINCBOX = 2*ISINCBOX2	! size of box to do sinc fit.
+      ISINCBOX2 = ISINCBOX/2    ! See DATA statement above.
+      ISINCBOX = 2*ISINCBOX2    ! size of box to do sinc fit.
 
 C
 C     make sure odd number of elements in box
@@ -418,8 +418,8 @@ CHENN<
       DO 130 J=1,21
       SUM(J,K) = 0.
   130 CONTINUE
-      	SUMRMSBKOLD=0.0
-      	SUMRMSBKNEW=0.0
+        SUMRMSBKOLD=0.0
+        SUMRMSBKNEW=0.0
 C
       DO 500 I=1,NSPOT
       IHOR = NHOR
@@ -536,8 +536,8 @@ C
       AMPSQ = AMPSQ + F * F
   300 CONTINUE
       AMPTOT = AMPSQ / (2*(IHOR + IVERT - 2))
-      RMSBK = SQRT(AMPTOT)	! this was old calculation of RMSBK
-      RMSBKOLD=RMSBK		! see below GET_RMSBK subroutine for new  RMSBK
+      RMSBK = SQRT(AMPTOT)      ! this was old calculation of RMSBK
+      RMSBKOLD=RMSBK            ! see below GET_RMSBK subroutine for new  RMSBK
 C
 C     Calculate integrated amplitude
 C
@@ -583,52 +583,52 @@ C
 C
 C  Calculate phases from vector sum over 2x2 points only.
 C
-      DO 320 L2 = 1,2	! Vector phases over 2x2 points.
-      	K = K1 + L2 - 1
-      DO 320 L1 = 1,2	!
-      	J = J1 + L1 - 1
-      	AMP = IAMP(J,K)
-      	PHASE = IPHI(J,K) / 57.2958
-      	ASUM1 = ASUM1 + AMP * COS(PHASE)
-      	BSUM1 = BSUM1 + AMP * SIN(PHASE)
+      DO 320 L2 = 1,2   ! Vector phases over 2x2 points.
+        K = K1 + L2 - 1
+      DO 320 L1 = 1,2   !
+        J = J1 + L1 - 1
+        AMP = IAMP(J,K)
+        PHASE = IPHI(J,K) / 57.2958
+        ASUM1 = ASUM1 + AMP * COS(PHASE)
+        BSUM1 = BSUM1 + AMP * SIN(PHASE)
   320 CONTINUE
 C
 C  Calculated sinc function weighted phase
 C
-      DO 330 L1=1,ISINCBOX	! X
-      	J=J1+L1-ISINCBOX2
-      DO 330 L2=1,ISINCBOX	! Y
-      	K=K1+L2-ISINCBOX2
-      	AMP = IAMP(J,K)
-      	PHASE = IPHI(J,K) / 57.2958
-      	IF (L1.LE.ISINCBOX2) THEN
-      		DELTAX = DELX(1)+ISINCBOX2-L1
-      	ELSE
-      		DELTAX = DELX(2)+L1-ISINCBOX2-1
-      	ENDIF
-      	IF (L2.LE.ISINCBOX2) THEN
-      		DELTAY = DELY(1)+ISINCBOX2-L2
-      	ELSE
-      		DELTAY = DELY(2)+L2-ISINCBOX2-1
-      	ENDIF
-      	IF(DELTAX.EQ.0) GO TO 325
-      	IF(DELTAY.EQ.0) THEN
-      		SINC = (SIN(PI * DELTAX)) / (PI * DELTAX)
-      	ELSE
-      		SINC = (SIN(PI * DELTAX) * SIN(PI * DELTAY)) /
+      DO 330 L1=1,ISINCBOX      ! X
+        J=J1+L1-ISINCBOX2
+      DO 330 L2=1,ISINCBOX      ! Y
+        K=K1+L2-ISINCBOX2
+        AMP = IAMP(J,K)
+        PHASE = IPHI(J,K) / 57.2958
+        IF (L1.LE.ISINCBOX2) THEN
+                DELTAX = DELX(1)+ISINCBOX2-L1
+        ELSE
+                DELTAX = DELX(2)+L1-ISINCBOX2-1
+        ENDIF
+        IF (L2.LE.ISINCBOX2) THEN
+                DELTAY = DELY(1)+ISINCBOX2-L2
+        ELSE
+                DELTAY = DELY(2)+L2-ISINCBOX2-1
+        ENDIF
+        IF(DELTAX.EQ.0) GO TO 325
+        IF(DELTAY.EQ.0) THEN
+                SINC = (SIN(PI * DELTAX)) / (PI * DELTAX)
+        ELSE
+                SINC = (SIN(PI * DELTAX) * SIN(PI * DELTAY)) /
      . (PI**2 * DELTAX * DELTAY)
-      	END IF
-      	GO TO 328
+        END IF
+        GO TO 328
 C
-325	IF(DELTAY.EQ.0) THEN
-      		SINC = 1.
-      	ELSE
-      		SINC = (SIN(PI * DELTAY)) / (PI * DELTAY)
-      	END IF
+325     IF(DELTAY.EQ.0) THEN
+                SINC = 1.
+        ELSE
+                SINC = (SIN(PI * DELTAY)) / (PI * DELTAY)
+        END IF
 C
-328	ASUM2 = ASUM2 + AMP * COS(PHASE) * SINC
-      	BSUM2 = BSUM2 + AMP * SIN(PHASE) * SINC
-      	DENOM = DENOM + SINC**2
+328     ASUM2 = ASUM2 + AMP * COS(PHASE) * SINC
+        BSUM2 = BSUM2 + AMP * SIN(PHASE) * SINC
+        DENOM = DENOM + SINC**2
 330   CONTINUE
 C
 C changes to calculate better background using same algorithm as peak
@@ -640,31 +640,31 @@ C changes to calculate better background using same algorithm as peak
 C
 C Now some final tidy up of amp and phase calculation.
       IF(ASUM1.NE.0..OR.BSUM1.NE.0.) THEN 
-      	VECPHA1 = ATAN2(BSUM1,ASUM1) * 57.2958
-      	ELSE
-      	VECPHA1 = 0.
+        VECPHA1 = ATAN2(BSUM1,ASUM1) * 57.2958
+        ELSE
+        VECPHA1 = 0.
       END IF
       IF(VECPHA1.LT.0.) VECPHA1 = VECPHA1 + 360.
 C
       IF(ASUM2.NE.0..OR.BSUM2.NE.0.) THEN 
-      	VECPHA2 = ATAN2(BSUM2,ASUM2) * 57.2958
-      	AMPSINC = SQRT(ASUM2**2 + BSUM2**2)/DENOM
-      	IF(AMPSINC.LE.RMSBK) THEN
-      		AMPOUT = 0.00001
-      	      ELSE
-      		AMPOUT = SQRT(AMPSINC**2 - RMSBK**2)
-      	ENDIF
+        VECPHA2 = ATAN2(BSUM2,ASUM2) * 57.2958
+        AMPSINC = SQRT(ASUM2**2 + BSUM2**2)/DENOM
+        IF(AMPSINC.LE.RMSBK) THEN
+                AMPOUT = 0.00001
+              ELSE
+                AMPOUT = SQRT(AMPSINC**2 - RMSBK**2)
+        ENDIF
       ELSE
-      	VECPHA2 = 0.
-      	AMPSINC = 0.
-      	AMPOUT = 0.00001
+        VECPHA2 = 0.
+        AMPSINC = 0.
+        AMPOUT = 0.00001
       END IF
       IF(VECPHA2.LT.0.) VECPHA2 = VECPHA2 + 360.
       PHSOUT=VECPHA2
-      	PHSERR = (180.0/PI)*RMSBK/AMPOUT
-      	IQ = 1 + (PHSERR/7.0)		! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
-      	IQ = MIN(IQ,8)			!            IQ=7     AMP= 1x RMSBK
-      	IF (AMPOUT.EQ.0.00001) IQ=9	! THUS IQ=8 HAS AMPSINC .GE. RMSBK
+        PHSERR = (180.0/PI)*RMSBK/AMPOUT
+        IQ = 1 + (PHSERR/7.0)           ! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
+        IQ = MIN(IQ,8)                  !            IQ=7     AMP= 1x RMSBK
+        IF (AMPOUT.EQ.0.00001) IQ=9     ! THUS IQ=8 HAS AMPSINC .GE. RMSBK
 C
 C     sum squared amplitudes
 C
@@ -692,7 +692,7 @@ C     write output to unit IOUT
 C
       IF(IOUT.NE.0)
      . WRITE(IOUT,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK,DUMMY
-1101	FORMAT(I12,I12,F14.1,F11.1,I12,F14.1,F14.1)
+1101    FORMAT(I12,I12,F14.1,F11.1,I12,F14.1,F14.1)
 C
 CHENN>
 CHEN--write spotlist out
@@ -704,19 +704,19 @@ C
       ENDIF
 CHENN<
 C
-      	IF(IQ.LE.7) NGOOD=NGOOD+1
-      	IF(IQ.GT.7) NBAD=NBAD+1
-      	NIQ(IQ) = NIQ(IQ)+1
+        IF(IQ.LE.7) NGOOD=NGOOD+1
+        IF(IQ.GT.7) NBAD=NBAD+1
+        NIQ(IQ) = NIQ(IQ)+1
 C
 C     set up pagination
 C
       NUMOUT = NUMOUT + 1
-      	  IF(NUMOUT.EQ.NUMSPOT+1) WRITE(6,1102)
+          IF(NUMOUT.EQ.NUMSPOT+1) WRITE(6,1102)
 CHENN>
-C 1102	  FORMAT(/' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS'/
-C      .	   '   H   K  AMPOUT  PHSOUT IQ   RMSBK')
-C        	  IF(NUMOUT.GT.NUMSPOT)
-C      .	   WRITE(6,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK
+C 1102    FORMAT(/' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS'/
+C      .           '   H   K  AMPOUT  PHSOUT IQ   RMSBK')
+C                 IF(NUMOUT.GT.NUMSPOT)
+C      .           WRITE(6,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK
 C       IF(NUMOUT.GT.NUMSPOT) GO TO 500
 C
 1102      FORMAT(/' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS'/
@@ -824,7 +824,7 @@ CHENN<
       ISUM(J,K) = SQRT(SUM(J,K)/NSPOT) + 0.5
   520 CONTINUE
 C
-      WRITE(6,1250)	! Amplitude output
+      WRITE(6,1250)     ! Amplitude output
  1250 FORMAT(//132('*')//19X,'SQRT of summed,squared amplitudes',
      . /19X,33('-')/)
       L = NVERT
@@ -836,7 +836,7 @@ C
       WRITE(6,1252)
 C
       SCALEFAC = 7.0/PERIM
-      WRITE(6,1251) SCALEFAC		! Intensity output
+      WRITE(6,1251) SCALEFAC            ! Intensity output
  1251 FORMAT(//132('*')//19X,'scaled intensities (perimeter',
      . ' averaged to 7.0)',
      . '   scale factor = ',F15.9/19X,40('-'))
@@ -926,8 +926,8 @@ C
 CHENN<
 C
       STOP
-4550	WRITE(6,4551)NMAX
-4551	FORMAT(' Too many spots for current prog dimensions',I5)
+4550    WRITE(6,4551)NMAX
+4551    FORMAT(' Too many spots for current prog dimensions',I5)
       END
 C
 C****************************************************************
@@ -953,7 +953,7 @@ CHENN<
      5       TURN,FIRST,IRAD,ACELL,BCELL,WIDTH,ABANG,ihand
       COMMON//NX,NY,NZ
       EQUIVALENCE (NXYZ,NX)
-	DATA DRAD/0.0174532/
+        DATA DRAD/0.0174532/
 C
       IF(IRAD.EQ.1) WRITE(6,9165) ROUTER,RINNER
 9165  FORMAT(/' CALCULATIONS FOR THIS FILM WILL USE SPOTS IN ',
@@ -1042,7 +1042,7 @@ C
 C     spot within radius, may still be outside box, see below.
 C
           NSPOT = NSPOT + 1
-	  IF (NSPOT.GT.NMAX) GO TO 4550
+          IF (NSPOT.GT.NMAX) GO TO 4550
           IXC(NSPOT) = X + SIGN(0.5,X)
           IYC(NSPOT) = Y + SIGN(0.5,Y)
 C
@@ -1052,16 +1052,16 @@ C
           YA(NSPOT) = Y / SCALE
           IH(NSPOT) = JH
           IK(NSPOT) = JK
-C	  Reject if outside box
+C         Reject if outside box
           IF(IXC(NSPOT).GT.NX-2) GO TO 115
           IF(IXC(NSPOT).LT.-NX+2) GO TO 115
           IF(IYC(NSPOT).GT.NY/2-2) GO TO 115
           IF(IYC(NSPOT).LT.-NY/2+2) GO TO 115
           GO TO 116
-115   	    NSPOT=NSPOT-1
-C      	    WRITE(6,117)JH,JK,X,Y
-117	    FORMAT(' SPOT OUTSIDE BOX NOT USED',2I10,2F10.1)
-      	    GO TO 100
+115         NSPOT=NSPOT-1
+C           WRITE(6,117)JH,JK,X,Y
+117         FORMAT(' SPOT OUTSIDE BOX NOT USED',2I10,2F10.1)
+            GO TO 100
 116       CONTINUE
 C
           WRITE(6,20) JH,JK,X,Y
@@ -1070,9 +1070,9 @@ C
       WRITE(6,4552)NSPOT
 4552  FORMAT('  THERE WERE A TOTAL OF',I5,'  SPOTS GENEREATED')
       RETURN
-4550	WRITE(6,4551) NMAX
-4551	FORMAT(' TOO MANY SPOTS FOR CURRENT PROG DIMENSION',I5)
-	STOP
+4550    WRITE(6,4551) NMAX
+4551    FORMAT(' TOO MANY SPOTS FOR CURRENT PROG DIMENSION',I5)
+        STOP
       END
 C
 C**************************************************************************
@@ -1112,7 +1112,7 @@ CHENN<
       ELSE 
       PHASE = ATAN2(B,A) * 57.2958
       END IF
-      IF(PHASE.LT.0.) PHASE = PHASE + 360.	! Phase bet 0 and 360 degs.
+      IF(PHASE.LT.0.) PHASE = PHASE + 360.      ! Phase bet 0 and 360 degs.
   999 RETURN
       END
 C***************************************************************************
@@ -1150,8 +1150,8 @@ CHENN<
       WRITE(6,*) ' # type in JH,JK'
       WRITE(6,*) ' '
       DO 100 NREQ=1,NMAX
-	READ(5,*,END=200) JH,JK
-	IF(JH.EQ.100) GO TO 200 
+        READ(5,*,END=200) JH,JK
+        IF(JH.EQ.100) GO TO 200 
       X = JH * AX + JK * BX
       Y = JH * AY + JK * BY
       NSPOT = NSPOT + 1
@@ -1164,23 +1164,23 @@ C
       YA(NSPOT) = Y / SCALE
       IH(NSPOT) = JH
       IK(NSPOT) = JK
-C	  Reject if outside box
+C         Reject if outside box
       IF(IXC(NSPOT).GT.NX-2) GO TO 115
       IF(IXC(NSPOT).LT.-NX+2) GO TO 115
       IF(IYC(NSPOT).GT.NY/2-2) GO TO 115
       IF(IYC(NSPOT).LT.-NY/2+2) GO TO 115
       GO TO 116
-115   	NSPOT=NSPOT-1
-C      	WRITE(6,117)JH,JK,X,Y
-117	FORMAT(' SPOT OUTSIDE BOX NOT USED',2I10,2F10.1)
+115     NSPOT=NSPOT-1
+C       WRITE(6,117)JH,JK,X,Y
+117     FORMAT(' SPOT OUTSIDE BOX NOT USED',2I10,2F10.1)
 116   CONTINUE
 C
       WRITE(6,20) JH,JK,X,Y
    20 FORMAT(2I10,2F10.1)
   100 CONTINUE
       WRITE(6,21)NSPOT
-21	FORMAT(' THERE WERE A TOTAL OF',I5,'  REQUESTED SPOTS') 
-200	CONTINUE
+21      FORMAT(' THERE WERE A TOTAL OF',I5,'  REQUESTED SPOTS') 
+200     CONTINUE
       RETURN
       END
 C
@@ -1279,38 +1279,38 @@ C
 C
 C***************************************************************************
 C
-	SUBROUTINE ANGAVE(N, THETAS, WEIGHTS, THMEAN, THGOOD)
-C	Function: to average a set of angles in degrees
-C	Created: 27/7/84 by D.J.Thomas
-C	Modified:  by
-	REAL     	COMEAN		!mean value of cosines
-	INTEGER  	I		!loop counter
-	INTEGER*4	N		!number of input angles
-	REAL*4   	THETAS(1)	!array of input angles
-	REAL*4   	THGOOD		!goodness of average (0 to 1)
-	REAL*4   	THMEAN		!weighted average of input angles
-	REAL     	SIMEAN		!mean value of sines
-	REAL		WEIGHT		!total input weight
-	REAL*4		WEIGHTS(1)	!weights on input angles
+        SUBROUTINE ANGAVE(N, THETAS, WEIGHTS, THMEAN, THGOOD)
+C       Function: to average a set of angles in degrees
+C       Created: 27/7/84 by D.J.Thomas
+C       Modified:  by
+        REAL            COMEAN          !mean value of cosines
+        INTEGER         I               !loop counter
+        INTEGER*4       N               !number of input angles
+        REAL*4          THETAS(1)       !array of input angles
+        REAL*4          THGOOD          !goodness of average (0 to 1)
+        REAL*4          THMEAN          !weighted average of input angles
+        REAL            SIMEAN          !mean value of sines
+        REAL            WEIGHT          !total input weight
+        REAL*4          WEIGHTS(1)      !weights on input angles
 C
-	IF (N .LE. 0) GO TO 20
-	WEIGHT = 0.0
-	COMEAN = 0.0
-	SIMEAN = 0.0
-	DO 10 I=1,N
-	WEIGHT = WEIGHT + WEIGHTS(I)
-	COMEAN = COMEAN + (COS(THETAS(I)*0.01745329252)*WEIGHTS(I))
-	SIMEAN = SIMEAN + (SIN(THETAS(I)*0.01745329252)*WEIGHTS(I))
-10	CONTINUE
-	IF ((SIMEAN .EQ. 0.0) .AND. (COMEAN .EQ. 0.0)) GO TO 20
-	THMEAN = 57.295779513*ATAN2(SIMEAN,COMEAN)
-      	IF(THMEAN.LT.0.0) THMEAN=THMEAN+360.0
-	IF (WEIGHT .EQ. 0.0) GO TO 20
-	THGOOD = SQRT((SIMEAN*SIMEAN) + (COMEAN*COMEAN))/WEIGHT
-	RETURN
-20	THGOOD = 0.0			!average is undefined
-	RETURN
-	END
+        IF (N .LE. 0) GO TO 20
+        WEIGHT = 0.0
+        COMEAN = 0.0
+        SIMEAN = 0.0
+        DO 10 I=1,N
+        WEIGHT = WEIGHT + WEIGHTS(I)
+        COMEAN = COMEAN + (COS(THETAS(I)*0.01745329252)*WEIGHTS(I))
+        SIMEAN = SIMEAN + (SIN(THETAS(I)*0.01745329252)*WEIGHTS(I))
+10      CONTINUE
+        IF ((SIMEAN .EQ. 0.0) .AND. (COMEAN .EQ. 0.0)) GO TO 20
+        THMEAN = 57.295779513*ATAN2(SIMEAN,COMEAN)
+        IF(THMEAN.LT.0.0) THMEAN=THMEAN+360.0
+        IF (WEIGHT .EQ. 0.0) GO TO 20
+        THGOOD = SQRT((SIMEAN*SIMEAN) + (COMEAN*COMEAN))/WEIGHT
+        RETURN
+20      THGOOD = 0.0                    !average is undefined
+        RETURN
+        END
 C
 C***************************************************************************
 C
@@ -1320,12 +1320,12 @@ C this calculation to do same sinc function treatment of background as is used
 C for the peak in AMPOUT in main program
       PI = 3.141592654
       IF(ISINCBOX.NE.2) THEN
-      	WRITE(6,18)ISINCBOX
-18	FORMAT(/' WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!, ISINCBOX not 2',I5/
+        WRITE(6,18)ISINCBOX
+18      FORMAT(/' WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!, ISINCBOX not 2',I5/
      . ' background calculation algorithm based a value on 2'/)
-      	IS=2
+        IS=2
       ELSE
-      	IS=ISINCBOX
+        IS=ISINCBOX
       ENDIF
 C
       NBK=0
@@ -1333,74 +1333,74 @@ C
 C first do sums along left and right edges of box
       DO 30 NV=1,IVERT-1
       DO 30 ILEFT=1,2
-      	IH = 1 + (ILEFT-1)*(IHOR-2)
-      	IV = NV
-      	ASUM = 0.
-      	BSUM = 0.
-      	DENOM = 0.
-      	DO 20 I=1,IS
-      	DO 20 J=1,IS
-      		JBOX=IH+I-1
-      		KBOX=IV+J-1
-      		DXC=DX-I+1
-      		DYC=DY-J+1
-        	IF(DXC.EQ.0.0.AND.DYC.EQ.0.0) THEN
-      			SINC = 1.
-        	ELSEIF(DYC.EQ.0.0) THEN
-      			SINC = (SIN(PI * DXC)) / (PI * DXC)
-      		ELSEIF(DXC.EQ.0.0) THEN
-      			SINC = (SIN(PI * DYC)) / (PI * DYC)
-        	ELSE
-      			SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
+        IH = 1 + (ILEFT-1)*(IHOR-2)
+        IV = NV
+        ASUM = 0.
+        BSUM = 0.
+        DENOM = 0.
+        DO 20 I=1,IS
+        DO 20 J=1,IS
+                JBOX=IH+I-1
+                KBOX=IV+J-1
+                DXC=DX-I+1
+                DYC=DY-J+1
+                IF(DXC.EQ.0.0.AND.DYC.EQ.0.0) THEN
+                        SINC = 1.
+                ELSEIF(DYC.EQ.0.0) THEN
+                        SINC = (SIN(PI * DXC)) / (PI * DXC)
+                ELSEIF(DXC.EQ.0.0) THEN
+                        SINC = (SIN(PI * DYC)) / (PI * DYC)
+                ELSE
+                        SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
      . (PI**2 * DXC * DYC)
-      		ENDIF
-      		AMP   = IAMP(JBOX,KBOX)
-      		PHASE = IPHI(JBOX,KBOX) / 57.2958
-        	ASUM = ASUM + AMP * COS(PHASE) * SINC
-        	BSUM = BSUM + AMP * SIN(PHASE) * SINC
-        	DENOM = DENOM + SINC**2
-20	CONTINUE
+                ENDIF
+                AMP   = IAMP(JBOX,KBOX)
+                PHASE = IPHI(JBOX,KBOX) / 57.2958
+                ASUM = ASUM + AMP * COS(PHASE) * SINC
+                BSUM = BSUM + AMP * SIN(PHASE) * SINC
+                DENOM = DENOM + SINC**2
+20      CONTINUE
         AMPSINC = SQRT(ASUM**2 + BSUM**2)/DENOM
-      	NBK=NBK+1
-      	SUMBKSQ=SUMBKSQ+AMPSINC**2
+        NBK=NBK+1
+        SUMBKSQ=SUMBKSQ+AMPSINC**2
 30    CONTINUE
 C second do sums along bottom and top edges of box
       DO 50 NH=2,IHOR-2
       DO 50 IBOTT=1,2
-      	IH = NH
-      	IV = 1 + (IBOTT-1)*(IVERT-2)
-      	ASUM = 0.
-      	BSUM = 0.
-      	DENOM = 0.
-      	DO 40 I=1,IS
-      	DO 40 J=1,IS
-      		JBOX=IH+I-1
-      		KBOX=IV+J-1
-      		DXC=DX-I+1
-      		DYC=DY-J+1
-        	IF(DXC.EQ.0.0.AND.DYC.EQ.0.0) THEN
-      			SINC = 1.
-        	ELSEIF(DYC.EQ.0.0) THEN
-      			SINC = (SIN(PI * DXC)) / (PI * DXC)
-      		ELSEIF(DXC.EQ.0.0) THEN
-      			SINC = (SIN(PI * DYC)) / (PI * DYC)
-        	ELSE
-      			SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
+        IH = NH
+        IV = 1 + (IBOTT-1)*(IVERT-2)
+        ASUM = 0.
+        BSUM = 0.
+        DENOM = 0.
+        DO 40 I=1,IS
+        DO 40 J=1,IS
+                JBOX=IH+I-1
+                KBOX=IV+J-1
+                DXC=DX-I+1
+                DYC=DY-J+1
+                IF(DXC.EQ.0.0.AND.DYC.EQ.0.0) THEN
+                        SINC = 1.
+                ELSEIF(DYC.EQ.0.0) THEN
+                        SINC = (SIN(PI * DXC)) / (PI * DXC)
+                ELSEIF(DXC.EQ.0.0) THEN
+                        SINC = (SIN(PI * DYC)) / (PI * DYC)
+                ELSE
+                        SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
      . (PI**2 * DXC * DYC)
-      		ENDIF
-      		AMP   = IAMP(JBOX,KBOX)
-      		PHASE = IPHI(JBOX,KBOX) / 57.2958
-        	ASUM = ASUM + AMP * COS(PHASE) * SINC
-        	BSUM = BSUM + AMP * SIN(PHASE) * SINC
-        	DENOM = DENOM + SINC**2
-40	CONTINUE
+                ENDIF
+                AMP   = IAMP(JBOX,KBOX)
+                PHASE = IPHI(JBOX,KBOX) / 57.2958
+                ASUM = ASUM + AMP * COS(PHASE) * SINC
+                BSUM = BSUM + AMP * SIN(PHASE) * SINC
+                DENOM = DENOM + SINC**2
+40      CONTINUE
         AMPSINC = SQRT(ASUM**2 + BSUM**2)/DENOM
-      	NBK=NBK+1
-      	SUMBKSQ=SUMBKSQ+AMPSINC**2
+        NBK=NBK+1
+        SUMBKSQ=SUMBKSQ+AMPSINC**2
 50    CONTINUE
 C third calculate the overall rms background
       IF(NBK.NE.(2*(IVERT-1)+2*(IHOR-3))) STOP ' Error in GET_RMSBK'
       RMSBK=SQRT(SUMBKSQ/NBK)
-      RMSBK=RMSBK/1.10		! fudge factor to restore earlier scale of A/B
+      RMSBK=RMSBK/1.10          ! fudge factor to restore earlier scale of A/B
       RETURN
       END

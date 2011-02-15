@@ -247,13 +247,13 @@ eot
     ${proc_2dx}/linblock "2dx_ttrefine - To refine parameters."
     #############################################################################
     #
-    set INFILE = '../merge/merge3D.mtz'
+    set INFILE = '../merge/merge3Dref.mtz'
     if ( ! -e ${INFILE} ) then
-      set INFILE1 = '../../merge/merge3D.mtz'
+      set INFILE1 = '../../merge/merge3Dref.mtz'
       if ( ! -e ${INFILE1} ) then
-        set INFILE2 = '../merge/merge2D.mtz'
+        set INFILE2 = '../merge/merge2Dref.mtz'
         if ( ! -e ${INFILE2} ) then
-          set INFILE3 = '../../merge/merge2D.mtz'
+          set INFILE3 = '../../merge/merge2Dref.mtz'
           if ( ! -e ${INFILE3} ) then
             ${proc_2dx}/linblock "ERROR: Neither ${INFILE} nor ${INFILE1}"
             ${proc_2dx}/linblock "           nor ${INFILE2} nor ${INFILE3} found"
@@ -282,7 +282,7 @@ ${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX
 ${lattice},${ABANG}                             ! AX, AY, BX, BY  , ABANG
 ${spcgrp} ${phaori_local} ${revhkval} ${rot180val} ${sgnxchval}      ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
 ${defocus} ${TLTAXIS} ${TLTANG}              ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-LABIN AMP=F SIG=SIGF PHASE=PHI FOM=FOM
+LABIN AMP=F SIG=SIGA PHASE=PHI FOM=FOM
 eot
     #
   endif

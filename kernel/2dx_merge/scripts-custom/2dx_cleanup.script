@@ -32,7 +32,7 @@ set cleanup_location = "all"
 # LEGEND: Choose the Level of the Cleanup that should be done.
 # EXAMPLE: cleanup_level = "radical"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "radical;a little bit"
+# TYPE: Drop_Down_Menu "radical;a little bit;only get disk usage"
 set cleanup_level = "radical"
 #
 #$end_local_vars
@@ -61,165 +61,197 @@ echo level = ${level}
 #
 if ( ${location} != "all" ) then
   #
-  ############################################################################# 
-  ${proc_2dx}/lin "cleaning up local merge directory"
-  #############################################################################
-  #
-  echo dummy > dummy.tmp
-  echo dummy > fort.1
-  echo dummy > ${imagename}.plt
-  echo dummy > TMP.dummy
-  echo dummy > TMP-dummy
-  echo dummy > TMP9871.dat
-  echo dummy > 2dx_calcpositions.dummy
-  echo dummy > REFdummy.hkl  
-  echo dummy > TMP1.spi
-  echo dummy > TMP-1.tmp
-  echo dummy > TMP-1.dat
-  echo dummy > test1.map
-  echo dummy > results.1.spi
-  echo dummy > LOG.1
-  echo dummy > 2dx_calcpositions.tmp
-  echo dummy > dummy.TMP
-  #
-  if ( "${level}" != "a" ) then
+  if ( "${level}" == "only" ) then
+    ############################################################################# 
+    ${proc_2dx}/linblock "getting disk usage for local merge directory"
+    #############################################################################
     #
-    ${proc_2dx}/linblock "Radical Cleanup"
-    #
-    \rm -rf FFTIR
-    \rm -rf PS
-    \rm -rf RESULTS-MRC
-    \rm -rf RESULTS-PS
-    \rm -rf PRJ
-    \rm -rf HKL
-    \rm -rf TRASH
-    \rm -rf LOGS
-    #
-    if ( -d proc ) then
-      cd proc
-      \rm -f 2dx_backup.com
-      \rm -f 2dx_finalmerge.com
-      \rm -f 2dx_generateMergeMap.com
-      \rm -f 2dx_generateImageMaps.com
-      \rm -f 2dx_merge.com
-      \rm -f 2dx_refine.com
-      \rm -f 2dx_refreshData.com
-      \rm -f 2dx_initialize.com
-      \rm -f 2dx_allspace.com
-      \rm -f 2dx_applyCTF.com
-      \rm -f 2dx_determineCTF.com
-      \rm -f 2dx_fftrans.com
-      \rm -f 2dx_findlat.com
-      \rm -f 2dx_generateMAP.com
-      \rm -f 2dx_generateSymMap.com
-      \rm -f 2dx_getspots.com
-      \rm -f 2dx_inventory.com
-      \rm -f 2dx_refine_unbend1.com
-      \rm -f 2dx_refine_unbend2.com
-      \rm -f 2dx_refinespots.com
-      \rm -f 2dx_unbend1.com
-      \rm -f 2dx_unbend2.com
-      \rm -f 2dx_evaluateLattice.com
-      \rm -f 2dx_getDefocusTilt.com
-      \rm -f 2dx_getLattice.com
-      \rm -f 2dx_refinetilt.com
-      \rm -f 2dx_maskCrystal.com
-      \rm -f 2dx_copyMerge.com
-      \rm -f 2dx_deleteDir.com
-      \rm -f 2dx_DetermineSwitch.com
-      \rm -f 2dx_MaximumLikelihood.com
-      \rm -f 2dx_mergeCustom.com
-      \rm -f 2dx_mergeRefine.com
-      \rm -f 2dx_openDir.com
-      \rm -f 2dx_reunbend.com
-      \rm -f Custom-1.com
-      \rm -f Custom-2.com
-      \rm -f Custom-3.com
-      cd ..
-    endif
-    #
-    \rm -f ManualMasking-CCmap.mrc
-    \rm -f ManualMasking-UnbendPlot.mrc
-    \rm -f selectionList.dat
+    du . | sed 's/^/::/'
     #
   else
     #
-    ${proc_2dx}/linblock "Slight Cleanup"
+    ############################################################################# 
+    ${proc_2dx}/lin "cleaning up local merge directory"
+    #############################################################################
     #
-  endif  
+    echo dummy > dummy.tmp
+    echo dummy > fort.1
+    echo dummy > ${imagename}.plt
+    echo dummy > TMP.dummy
+    echo dummy > TMP-dummy
+    echo dummy > TMP9871.dat
+    echo dummy > 2dx_calcpositions.dummy
+    echo dummy > REFdummy.hkl  
+    echo dummy > TMP1.spi
+    echo dummy > TMP-1.tmp
+    echo dummy > TMP-1.dat
+    echo dummy > test1.map
+    echo dummy > results.1.spi
+    echo dummy > LOG.1
+    echo dummy > 2dx_calcpositions.tmp
+    echo dummy > dummy.TMP
+    #
+    if ( "${level}" != "a" ) then
+      #
+      ${proc_2dx}/linblock "Radical Cleanup"
+      #
+      \rm -rf FFTIR
+      \rm -rf PS
+      \rm -rf RESULTS-MRC
+      \rm -rf RESULTS-PS
+      \rm -rf PRJ
+      \rm -rf HKL
+      \rm -rf TRASH
+      \rm -rf LOGS
+      #
+      if ( -d proc ) then
+        cd proc
+        \rm -f 2dx_backup.com
+        \rm -f 2dx_finalmerge.com
+        \rm -f 2dx_generateMergeMap.com
+        \rm -f 2dx_generateImageMaps.com
+        \rm -f 2dx_merge.com
+        \rm -f 2dx_refine.com
+        \rm -f 2dx_refreshData.com
+        \rm -f 2dx_initialize.com
+        \rm -f 2dx_allspace.com
+        \rm -f 2dx_applyCTF.com
+        \rm -f 2dx_determineCTF.com
+        \rm -f 2dx_fftrans.com
+        \rm -f 2dx_findlat.com
+        \rm -f 2dx_generateMAP.com
+        \rm -f 2dx_generateSymMap.com
+        \rm -f 2dx_getspots.com
+        \rm -f 2dx_inventory.com
+        \rm -f 2dx_refine_unbend1.com
+        \rm -f 2dx_refine_unbend2.com
+        \rm -f 2dx_refinespots.com
+        \rm -f 2dx_unbend1.com
+        \rm -f 2dx_unbend2.com
+        \rm -f 2dx_evaluateLattice.com
+        \rm -f 2dx_getDefocusTilt.com
+        \rm -f 2dx_getLattice.com
+        \rm -f 2dx_refinetilt.com
+        \rm -f 2dx_maskCrystal.com
+        \rm -f 2dx_copyMerge.com
+        \rm -f 2dx_deleteDir.com
+        \rm -f 2dx_DetermineSwitch.com
+        \rm -f 2dx_MaximumLikelihood.com
+        \rm -f 2dx_mergeCustom.com
+        \rm -f 2dx_mergeRefine.com
+        \rm -f 2dx_openDir.com
+        \rm -f 2dx_reunbend.com
+        \rm -f Custom-1.com
+        \rm -f Custom-2.com
+        \rm -f Custom-3.com
+        cd ..
+      endif
+      #
+      \rm -f ManualMasking-CCmap.mrc
+      \rm -f ManualMasking-UnbendPlot.mrc
+      \rm -f selectionList.dat
+      #
+    else
+      #
+      ${proc_2dx}/linblock "Slight Cleanup"
+      #
+    endif  
+    #
+    \rm -f SUMMARY
+    \rm -f 2dx_calcposition-positions.dat
+    \rm -f 2dx_calcposition-runfile.com
+    \rm -f CTFPLOT.PS
+    \rm -f HKLOUT
+    \rm -f mask.dat
+    \rm -f masked_image.dat
+    \rm -f peaks_image_final.dat
+    \rm -f peaks_image.dat
+    \rm -f peaks_xy_final.dat
+    \rm -f peaks_xy.dat
+    \rm -f TMP-quadserch-1.mrc
+    \rm -f phase.dat
+    \rm -f average.dat
+    \rm -f amp.dat
+    \rm -f amp_LHpass.dat
+    \rm -f 2dx_findlat.out
+    \rm -f 2dx_lattilt.1.out
+    \rm -f 2dx_tiltgeom.out
+    \rm -f 2dx_tiltgeom2.out
+    \rm -f HISTO.PS
+    \rm -f CCPLOT.PS
+    \rm -f avrg.hk
+    \rm -f avrg.hkl
+    \rm -rf SCRATCH
+    echo "<<@progress: 25>>"
+    \rm -rf THUMB
+    echo "<<@progress: 50>>"
+    \rm -rf CUT
+    echo "<<@progress: 75>>"  
+    #
+    \rm -f *.tmp
+    \rm -f tag_data
+    \rm -f fort.*
+    \rm -f TMP.*
+    \rm -f TMP*.spi
+    \rm -f TMP-*
+    \rm -f TMP*.dat
+    \rm -f test*.map
+    \rm -f results.*
+    \rm -f LOG.* 
+    \rm -f 2dx_calcpositions.*
+    \rm -f REF*.hkl
+    \rm -f TLTASM
+    #
+    echo "<<@progress: 100>>" 
+    #
+    ############################################################################# 
+    ${proc_2dx}/linblock "Cleanup finished correctly..... All Gone."
+    #############################################################################
+    #
+    sleep 3
+    # \rm -rf LOGS
+    #
+  endif
   #
-  \rm -f SUMMARY
-  \rm -f 2dx_calcposition-positions.dat
-  \rm -f 2dx_calcposition-runfile.com
-  \rm -f CTFPLOT.PS
-  \rm -f HKLOUT
-  \rm -f mask.dat
-  \rm -f masked_image.dat
-  \rm -f peaks_image_final.dat
-  \rm -f peaks_image.dat
-  \rm -f peaks_xy_final.dat
-  \rm -f peaks_xy.dat
-  \rm -f TMP-quadserch-1.mrc
-  \rm -f phase.dat
-  \rm -f average.dat
-  \rm -f amp.dat
-  \rm -f amp_LHpass.dat
-  \rm -f 2dx_findlat.out
-  \rm -f 2dx_lattilt.1.out
-  \rm -f 2dx_tiltgeom.out
-  \rm -f 2dx_tiltgeom2.out
-  \rm -f HISTO.PS
-  \rm -f CCPLOT.PS
-  \rm -f avrg.hk
-  \rm -f avrg.hkl
-  \rm -rf SCRATCH
-  echo "<<@progress: 25>>"
-  \rm -rf THUMB
-  echo "<<@progress: 50>>"
-  \rm -rf CUT
-  echo "<<@progress: 75>>"  
-  #
-  \rm -f *.tmp
-  \rm -f tag_data
-  \rm -f fort.*
-  \rm -f TMP.*
-  \rm -f TMP*.spi
-  \rm -f TMP-*
-  \rm -f TMP*.dat
-  \rm -f test*.map
-  \rm -f results.*
-  \rm -f LOG.* 
-  \rm -f 2dx_calcpositions.*
-  \rm -f REF*.hkl
-  \rm -f TLTASM
-  #
-  echo "<<@progress: 100>>" 
-  #
-  ############################################################################# 
-  ${proc_2dx}/linblock "Cleanup finished correctly..... All Gone."
-  #############################################################################
-  #
-  sleep 3
-  # \rm -rf LOGS
-  echo ":: exiting".
+  echo ":: Done.".
   #
 else
   #
-  ############################################################################# 
-  ${proc_2dx}/lin "cleaning up all image directories"
-  #############################################################################
-  #
-  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-  set oldir = ${PWD}
-  #
-  foreach dirfile ( ${dirlist} ) 
-    cd ${dirfile}
-    echo "::Working on ${dirfile}"
-#    source ${proc_2dx}/2dx_cleanup_sub.com
-    ${app_2dx_image} ${dirfile} "+2dx_cleanup"
-    cd ${oldir}
-  end
+  if ( "${level}" == "only" ) then
+    ############################################################################# 
+    ${proc_2dx}/linblock "getting disk usage for local merge directory"
+    #############################################################################
+    #
+    cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+    set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+    set oldir = ${PWD}
+    #
+    foreach dirfile ( ${dirlist} ) 
+      cd ${dirfile}
+      echo "::${dirfile}"
+      \du -x -s . | sed 's/^/::                                                                      /'
+      cd ${oldir}
+    end
+    #
+  else
+    #
+    ############################################################################# 
+     ${proc_2dx}/lin "cleaning up all image directories"
+    #############################################################################
+    #
+    cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+    set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+    set oldir = ${PWD}
+    #
+    foreach dirfile ( ${dirlist} ) 
+      cd ${dirfile}
+      echo "::Working on ${dirfile}"
+      #  source ${proc_2dx}/2dx_cleanup_sub.com
+      ${app_2dx_image} ${dirfile} "+2dx_cleanup"
+      cd ${oldir}
+    end
+    #
+  endif 
   #
 endif
 #

@@ -429,6 +429,9 @@ eot
     ${proc_2dx}/linblock "re-dimensioning all image-size dependent parameters by factor ${factor}"
     #############################################################################
     #
+    echo ":Now: imagesidelength = "${newimagesidelength}
+    echo "set imagesidelength = ${newimagesidelength}" >> LOGS/${scriptname}.results
+    #
     set tmp1 = `echo ${lattice} | cut -d\, -f1`
     set latx1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
     set tmp1 = `echo ${lattice} | cut -d\, -f2`

@@ -228,8 +228,8 @@ else
     #
     foreach dirfile ( ${dirlist} ) 
       cd ${dirfile}
-      echo "::${dirfile}"
-      \du -x -s . | sed 's/^/::                                                                      /'
+      set duval = `\du -x -s . | cut -f 1`
+      echo ":: ${duval}  ${dirfile}" 
       cd ${oldir}
     end
     #

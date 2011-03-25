@@ -185,12 +185,12 @@ QString &confData::parseVariables(QString &line)
 bool confData::parseDataFile()
 {
   QFile data(dataFilename);
-  if(!data.open(QIODevice::ReadWrite | QIODevice::Text)) return false;
+  if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
   //data.setTextModeEnabled(true);
   //create symbolic link if lineName is set
   if(!linkName.isEmpty())
   {
-    qDebug()<< "creating the sym link to " << data.fileName() << " with the name " << linkName;
+    qDebug()<< "creating the symlink to " << data.fileName() << " with the name " << linkName;
     data.link(data.fileName(), linkName);
   }
   QString lineData;

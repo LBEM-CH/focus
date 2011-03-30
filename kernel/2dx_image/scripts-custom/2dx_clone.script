@@ -1,0 +1,196 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Clone this Directory                                               #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 03/29/2011                                             #
+# Last Modification: 03/29/2011                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 88
+#
+# MANUAL: This script will create a copy of the current image directory on the same level, and copy the current database file 2dx_image.cfg into that new cloned directory. However, instead of copying also the image file <filename>.tif or <filename>.mrc, it will only create a link in thennew directory that points to the image file in the old directory. This is to save space on the harddrive. However, it bears the risk that if you then delete the original directory, then the cloned directory doesn't have any image available any more.
+#
+# MANUAL: The new image directory's database will be populated with a different filename and image number, as each imagenumber can only appear once. The parameter dialogue below allows you to specify the new parameter.
+#
+# DISPLAY: comment
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagenumber
+# DISPLAY: crop
+# DISPLAY: comment
+# DISPLAY: imagesidelength
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+#
+#=============================================================================
+# SECTION: Clone current image directory
+#=============================================================================
+#
+# LABEL: New Image Number
+# LEGEND: Define here the new image number to be used for the new cloned image directory
+# EXAMPLE: new_imagenumber = "0012345602"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Clone
+# TYPE: Text_Edit
+# ISWRONG: YES
+set new_imagenumber = "PutUniqueNumberHere"
+#
+# LABEL: Swap first and second lattice in cloned image directory
+# LEGEND: This allows to exchange the lattices that are stored as primary and secondary lattice.
+# EXAMPLE: doswap = "1"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Drop_Down_Menu "0=yes;1=no"
+set doswap = "1"
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set comment = ""
+set imagenumber = ""
+set imagename = ""
+set nonmaskimagename = ""
+set crop = ""
+set comment = ""
+set imagesidelength = ""
+set lattice = ""
+set secondlattice = ""
+#
+#$end_vars
+#
+echo bin_2dx = ${bin_2dx}
+echo proc_2dx = ${proc_2dx}
+#
+echo "<<@progress: 1>>"
+#
+set scriptname = 2dx_clone
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+${proc_2dx}/2dx_makedirs
+#
+############################################################################# 
+############################################################################# 
+#
+set old_imagedirectory = `basename $PWD`
+#
+set clone_number = "1"
+set new_imagedirectory = ${old_imagedirectory}_c${clone_number}
+while ( -d ../${new_imagedirectory} )
+  set clone_number = `echo ${clone_number} | awk '{ s = $1 + 1 } END { print s }'`
+  set new_imagedirectory = ${old_imagedirectory}_c${clone_number}
+end
+#
+set new_imagename = ${imagename}_c${clone_number}
+set new_nonmaskimagename = ${nonmaskimagename}_c${clone_number}
+#
+echo ":: "
+${proc_2dx}/linblock "Preparing to clone into new directory ${new_imagedirectory}"
+echo ":: "
+#
+set err_val = 0
+#
+if ( ${new_imagenumber} == "PutUniqueNumberHere" ) then
+  ${proc_2dx}/linblock "ERROR: You didn't specify a new unique image number."
+  set err_val = 1
+endif
+#
+if ( ${new_imagedirectory} == ${old_imagedirectory} ) then
+  ${proc_2dx}/linblock "ERROR: Directory ${new_imagedirectory} already exists."
+  set err_val = 1
+endif
+#
+if ( ${new_imagename} == ${imagename} ) then
+  ${proc_2dx}/linblock "ERROR: Old and New imagename ${imagename} cannot be the same."
+  set err_val = 1
+endif
+#
+if ( ${new_imagenumber} == ${imagenumber} ) then
+  ${proc_2dx}/linblock "ERROR: Old and New imagenumber ${imagenumber} cannot be the same."
+  set err_val = 1
+endif
+#
+cd ..
+if ( -d ${new_imagedirectory} ) then
+  ${proc_2dx}/linblock "ERROR: Directory ${new_imagedirectory} already exists"
+  set err_val = 1
+endif
+#
+if ( ${err_val} == 1 ) then
+  echo ":: "
+  ${proc_2dx}/protest "ABORTING..."
+endif
+#
+if ( ${doswap} == "1" ) then
+  set new_lattice = `echo ${lattice} | sed 's/, /,/g'`
+  set new_secondlattice = `echo ${secondlattice} | sed 's/, /,/g'`
+else
+  set new_lattice = `echo ${secondlattice} | sed 's/, /,/g'`
+  set new_secondlattice = `echo ${lattice} | sed 's/, /,/g'`
+endif
+#
+\mkdir ${new_imagedirectory}
+cd ${new_imagedirectory}
+${proc_2dx}/2dx_makedirs
+cp ../${old_imagedirectory}/2dx_image.cfg .
+#
+cat << eot > sed.tmp
+s/set imagename = "${imagename}"/set imagename = "${new_imagename}"/
+s/set nonmaskimagename = "${nonmaskimagename}"/set nonmaskimagename = "${new_nonmaskimagename}"/
+s/set imagenumber = "${imagenumber}"/set imagenumber = "${new_imagenumber}"/
+s/set lattice = "${lattice}"/set lattice = "${new_lattice}"/
+s/set secondlattice = "${secondlattice}"/set secondlattice = "${new_secondlattice}"/
+eot
+cat 2dx_image.cfg | sed -f sed.tmp > tmp.cfg
+mv -f tmp.cfg 2dx_image.cfg
+\rm sed.tmp
+#
+${proc_2dx}/linblock "Cloned database 2dx_image.cfg created and adapted."
+#
+if ( -e  ../${old_imagedirectory}/${nonmaskimagename}.tif ) then
+  \ln -s ../${old_imagedirectory}/${nonmaskimagename}.tif ${new_nonmaskimagename}.tif
+endif
+if ( -e  ../${old_imagedirectory}/${imagename}.tif ) then
+  \ln -s ../${old_imagedirectory}/${imagename}.tif ${new_imagename}.tif
+endif
+if ( -e  ../${old_imagedirectory}/${nonmaskimagename}.mrc ) then
+  \ln -s ../${old_imagedirectory}/${nonmaskimagename}.mrc ${new_nonmaskimagename}.mrc
+endif
+if ( -e  ../${old_imagedirectory}/${imagename}.mrc ) then
+  \ln -s ../${old_imagedirectory}/${imagename}.mrc ${new_imagename}.mrc
+endif
+#
+${proc_2dx}/linblock "Links to old image files in cloned directory created."
+#
+if ( ${doswap} == "1" ) then
+  if ( -e  ../${old_imagedirectory}/${imagename}.spt ) then
+    cp ../${old_imagedirectory}/${imagename}.spt ${new_imagename}.spt
+  endif
+  ${proc_2dx}/linblock "Old spotlist copied to new spotlist file"
+endif
+#
+cd ../${old_imagedirectory}
+#
+############################################################################# 
+############################################################################# 
+#
+#
+echo "<<@progress: 100>>"
+#
+############################################################################# 
+echo ":: "
+${proc_2dx}/linblock "Cloning finished correctly."
+echo ":: "
+echo "::     Now go to 2dx_merge, refresh the display list, "
+echo "::     and open the cloned image from 2dx_merge"
+echo ":: "
+#############################################################################

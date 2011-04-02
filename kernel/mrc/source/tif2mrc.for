@@ -166,7 +166,7 @@ C*** test first two bytes contain intel format
         end if
        else
         write(6,'(
-     *   '' Neither Motorola nor Intel format- cannot proceed.'')')
+     *   '':: Neither Motorola nor Intel format- cannot proceed.'')')
         go to 9000
        end if
 C*** ignore next two bytes, (version number)
@@ -214,14 +214,14 @@ C*****************************************************************
 C*** NewSubfileType
         if(itag .eq. 254) then
          if(value_type4 .ne. 0) then
-          write(6,'(''Warning - multiple image file,''
+          write(6,'(''::Warning - multiple image file,''
      *    '' only first image used'')')
           go to 3000
          end if
 C*** SubfileType
         else if(itag .eq. 255) then
          if(value_type3 .ne. 1) then
-          write(6,'(''Image not full resolution'')')
+          write(6,'(''::Image not full resolution'')')
           go to 8100
          end if
 C*** ImageWidth
@@ -248,8 +248,8 @@ C***  BitsPerSample
           mode_image = 1
          else
           write(6,'(/
-     *     ''!! Tag '',i3,'' indicates RGB colour image''/ 
-     *     ''   tif2mrc cannot read colour images : '',
+     *     ''::!! Tag '',i3,'' indicates RGB colour image''/ 
+     *     ''::   tif2mrc cannot read colour images : '',
      *     ''try tiff2bw to convert to grayscale first.'')')
      *     itag
           stop
@@ -365,7 +365,7 @@ C*** to accommodate pointer reading for each strip
             end if
             if(itemp .ne. stripbytecounts) then
              write(6,'(
-     *        '' Warning - uneven stripbytecounts. '',
+     *        '':: Warning - uneven stripbytecounts. '',
      *        ''Output file may be incorrect'')')
              go to 2000
             end if
@@ -440,7 +440,7 @@ C*** ImageDepth
           nsecs = value_type4
          end if
          if(nsecs .ne. 1) then
-          write(6,'('' Multiple section file..cannot continue'')')
+          write(6,'('':: Multiple section file..cannot continue'')')
           go to 8200
          end if
          write(6,'('' ImageDepth = '',i6)') nsecs

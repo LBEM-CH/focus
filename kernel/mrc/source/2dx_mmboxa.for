@@ -846,6 +846,7 @@ C
 C  Here calculate how close the intensity average approaches theoretical.
 C
       ICENTRE=ISUMI(IHOR2+1,IVERT2+1)
+      IF(ICENTRE.lt.0)ICENTRE=0
       INEAR=ISUMI(IHOR2+1,IVERT2) + ISUMI(IHOR2+1,IVERT2+2) +
      . ISUMI(IHOR2,IVERT2+1) + ISUMI(IHOR2+2,IVERT2+1)
       IF(INEAR.LE.28) THEN

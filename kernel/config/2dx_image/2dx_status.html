@@ -12,7 +12,7 @@ function set(key)
 function setFloat(key)
 {
 	var value  = confData.get(key,"value");
-  var floatValue = parseFloat(value).toFixed(2);
+  var floatValue = parseFloat(value).toFixed(1);
 	if(value!="" && !isNaN(floatValue))
 		document.getElementById(key).innerText = floatValue;
 }
@@ -41,13 +41,13 @@ function load()
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TBODY>
 <TR>
-<TD colspan=2 align="left" height=19>Th.Mag = </TD>
+<TD colspan=2 align="left" height=19>Th.Mag=</TD>
 <TD colspan=3 align="left"  height=19 ID="CALCULATEDMAG">---</TD>
-<TD colspan=2 align="right" height=19><B>QVAL = </B></TD>
+<TD colspan=2 align="right" height=19><B>QVAL=</B></TD>
 <TD colspan=2 align="right" height=19 ID="QVAL"><B>---</B></TD></TR>
 <TBODY>
-<TR><TD colspan=4 align="left">IQs Unbend-I</TD>
-<TD colspan=3 align="right">QVal1 = </TD>
+<TR><TD colspan=4 align="left">IQs Unb.I</TD>
+<TD colspan=3 align="right">QVal1=</TD>
 <TD colspan=2 align="right" ID="QVAL1">---</TD></TR>
 <TR>
 <TD align="center" ID="U1_IQ1"><I>-</I></TD>
@@ -61,8 +61,8 @@ function load()
 <TD align="center" ID="U1_IQ9"><I>-</I></TD>
 </TR>
 <TBODY>
-<TR><TD colspan=4 align="left">IQs Unbend-II</TD>
-<TD colspan=3 align="right">QVal2 = </TD>
+<TR><TD colspan=4 align="left">IQs Unb.II</TD>
+<TD colspan=3 align="right">QVal2=</TD>
 <TD colspan=2 align="right" ID="QVAL2">---</TD></TR>
 <TR>
 <TD align="center" ID="U2_IQ1"><I>-</I></TD>
@@ -76,8 +76,8 @@ function load()
 <TD align="center" ID="U2_IQ9"><I>-</I></TD>
 </TR>
 <TBODY>
-<TR><TD colspan=4 align="left">IQs Synth.Unbend</TD>
-<TD colspan=3 align="right">QValS = </TD>
+<TR><TD colspan=4 align="left">IQs Unb.Syn</TD>
+<TD colspan=3 align="right">QValS=</TD>
 <TD colspan=2 align="right" ID="QValS">---</TD></TR>
 <TR>
 <TD align="center" ID="US_IQ1"><I>-</I></TD>

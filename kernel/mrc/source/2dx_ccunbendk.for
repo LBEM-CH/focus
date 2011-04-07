@@ -255,6 +255,10 @@ CHENN<
      .    ' DMEAN indicate possible error',/,
      .    ':: check header values of the image',/,
      .    ':: ')
+        write(6,'(''::DMIN = '',G15.3,/,
+     .            ''::DMAX = '',G15.3,/,
+     .            ''::DMEAN= '',G15.3,/,
+     .            '':: '')')DMIN,DMAX,DMEAN
 CHEN>
 C       STOP
 CHEN<

@@ -552,40 +552,46 @@ C
 C
       ENDIF
 C
+C==============================================================================
+C=====Plot Resolution Rings====================================================
+C==============================================================================
+C
       DO 370 N=1,NRES                   ! NRES resoultion ranges
-        RES=1.0/RESTORE(N)
-        RAD=SCALEP*RES
+        if(RESTORE(N).GE.RORIRESMAX)then
+          RES=1.0/RESTORE(N)
+          RAD=SCALEP*RES
 
-        DO 360 J=1,4                    
-          DO 360 I=1,89         ! Resolution circles
-            ANG=(90*J+I)*DRAD
-            X=RAD*COS(ANG)
-            Y=RAD*SIN(ANG)
-            IF ((IOPTION.eq.1.or.IOPTION.eq.3).AND.abs(TANGL).GT.0.001) THEN
-              if(iellipse.eq.1)then
-                X0=X
-                Y0=COS(TANGL)*Y
-                AXANG=atan2(AY,AX)
-                CALL XYROTATE(-AXANG,X0,Y0,X1,Y1)
-C               CALL XYROTATE(RTLTAXA,X1,Y1,X2,Y2)
-                if(IHAND.gt.0)then
-                  CALL XYROTATE(RTAXA,X1,Y1,X2,Y2)
-                else
-                  CALL XYROTATE(-RTAXA,X1,Y1,X2,Y2)
+          DO 360 J=1,4                    
+            DO 360 I=1,89         ! Resolution circles
+              ANG=(90*J+I)*DRAD
+              X=RAD*COS(ANG)
+              Y=RAD*SIN(ANG)
+              IF ((IOPTION.eq.1.or.IOPTION.eq.3).AND.abs(TANGL).GT.0.001) THEN
+                if(iellipse.eq.1)then
+                  X0=X
+                  Y0=COS(TANGL)*Y
+                  AXANG=atan2(AY,AX)
+                  CALL XYROTATE(-AXANG,X0,Y0,X1,Y1)
+C                 CALL XYROTATE(RTLTAXA,X1,Y1,X2,Y2)
+                  if(IHAND.gt.0)then
+                    CALL XYROTATE(RTAXA,X1,Y1,X2,Y2)
+                  else
+                    CALL XYROTATE(-RTAXA,X1,Y1,X2,Y2)
+                  endif
+                  X=X2
+                  Y=Y2
                 endif
-                X=X2
-                Y=Y2
-              endif
+              ENDIF
+              IF (J.EQ.1.AND.I.EQ.1) THEN
+                XOR=X
+                YOR=Y
+                CALL P2K_MOVE(X,Y,0.)
+              ELSE
+                CALL P2K_DRAW(X,Y,0.)
             ENDIF
-            IF (J.EQ.1.AND.I.EQ.1) THEN
-              XOR=X
-              YOR=Y
-              CALL P2K_MOVE(X,Y,0.)
-            ELSE
-              CALL P2K_DRAW(X,Y,0.)
-          ENDIF
-360     CONTINUE
-        CALL P2K_DRAW(XOR,YOR,0.)               !complete the circle
+360       CONTINUE
+          CALL P2K_DRAW(XOR,YOR,0.)               !complete the circle
+        endif
 370   CONTINUE
 C
 C==============================================================================

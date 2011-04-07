@@ -448,6 +448,7 @@ else
   #
   set realu = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
   set realv = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+  ${proc_2dx}/linblock "Unit cell = ${realu}, ${realv}, ${realang}"
   #
   ${bin_2dx}/labelh.exe << eot
 ${imagename}-${SYM}.mrc
@@ -523,14 +524,13 @@ X42,X43,1
   X43=X43+X70
 LB5
 ;
-X31=$realang
+X31=${realang}
 X32=180.0-X31
 X36=1.0/${mapscale}
 ; X36 is how many pixels are in one Angstroem
 X34=${unitcellnumber}*X36*${realu}/cos(${realang}-90.0)
 X34=${unitcellnumber}*X36*${realu}
 X35=${unitcellnumber}*X36*${realv}
-;
 ;
 IP
 TMP003

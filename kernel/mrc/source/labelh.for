@@ -135,7 +135,7 @@ CHEN<
       CHARACTER*60 INFILE,OUTFILE
       character*80 TITLE
       character*200 cfile,cname
-      REAL*8 DOUBLMEAN,DOUBLOMEAN
+      REAL*8 DOUBLMEAN,DOUBLOMEAN,DOUBLTMP
       INTEGER*4 iover,iunder,ilow
       EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
       EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
@@ -638,8 +638,8 @@ C
 C  MODE 16 : Produce INTEGER*2 (16 bit) output image with range [0;16000]
 C
 108     continue
-        write(TITLE,'(''LABELH Mode 16: Produce INT*2 [0;16k] image '')')
-        write(6,'('' Producing INT*2 with Autoscaling [0;16000] '')')
+        write(TITLE,'(''LABELH Mode 16: Produce INT*2 [1;16k] image '')')
+        write(6,'('' Producing INT*2 with Autoscaling [1;16000] '')')
 C
         CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
         CALL IRTLAB(1,LABELS,NL)
@@ -679,11 +679,11 @@ C
 C
 C-------Calculate offset and scaling factors
 C
-        ROFF = DMIN
+        ROFF = DMIN - 1.0
         if ( DVAL .gt. 0.00000001 ) then
-          RSCALE = 16000.0 / DVAL
+          RSCALE = 15999.0 / DVAL
         else
-          RSCALE = 16000.0  
+          RSCALE = 15999.0  
         endif
 C
         write(*,'('' Calculated offset of '',G16.5)')ROFF
@@ -708,7 +708,9 @@ C
 C-------Write the file into the output file
         do iy = 1,NY
           do ix = 1,NX
-            VAL=(APIC(ix,iy)-ROFF)*RSCALE
+            DOUBLTMP = APIC(ix,iy)
+            DOUBLTMP = (DOUBLTMP - ROFF) * RSCALE
+            VAL=DOUBLTMP
             ALINE(ix)=VAL
             IF (VAL .LT. DMIN) DMIN = VAL
             IF (VAL .GT. DMAX) DMAX = VAL

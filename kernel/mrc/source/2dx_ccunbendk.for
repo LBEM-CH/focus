@@ -854,8 +854,7 @@ C
      . ' VALUE OF NCREAL USED  =',I10/
      . ' VALUE OF EPS USED =',F15.3)
 159	FORMAT(': IMAXCOR ON INPUT =',I6,
-     . '  , REDUCED TO BE EQUAL TO ISTEP =',I6,/,
-     . ': THIS IS AN UNFORTUNATE LIMITATION OF CCUNBENDK AT THE MOMENT')
+     . '  , REDUCED TO BE EQUAL TO ISTEP =',I6)
 160	FORMAT('$ ITYPE,IOUT,IMAXCOR,ISTEP ?')
 161	FORMAT('               ITYPE----------',I5/
      . '               IOUT-----------',I5/

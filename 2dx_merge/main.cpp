@@ -59,7 +59,7 @@ int main(int argc, char **argv)
       userDirPath = QDir::homePath(); 
  
   
-  QString workingDir = QFileDialog::getExistingDirectory(NULL,"Select a Project Directory",userDirPath);
+  QString workingDir = QFileDialog::getExistingDirectory(0,"Select a Project Directory",userDirPath);
   if(workingDir.isEmpty() || !QDir(workingDir).exists()) exit(0);
   //save the selected dir as working dir in 2dx_merg-user.cfg
   userData->set("workingDir", workingDir);
@@ -78,6 +78,8 @@ int main(int argc, char **argv)
 
   mainWindow *win = new mainWindow(workingDir);
   win->show();
+  win->raise(); // raises the window on top of the parent widget stack
+  win->activateWindow(); // activates the window an thereby putting it on top-level
   win->resize(1024,740);
 
   return app.exec();

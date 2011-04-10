@@ -166,10 +166,10 @@ echo zminmax = ${zminmax}
 echo MergeAK = ${MergeAK}
 echo MergeIWF = ${MergeIWF}
 echo MergeIWP = ${MergeIWP}
-#
+# 
 set zstarwintmp = `echo ${ALAT} | awk '{ s = 1.0 / ( 2.0 * $1 ) } END { print s }'`
 set zstarwinbad = `echo ${zstarwin} ${zstarwintmp} | awk '{ if ( abs ( $1 - $2 ) > 0.001 ) { s = 1 } else { s = 0 } } END { print s }'`
-if ( ${zstarwinbad} == 1 ) then
+if ( ( ${zstarwinbad} == 1 ) && ( ${merge_modus} == '3D' ) ) then
   echo "#WARNING: Warning: zstarwin is ${zstarwin}, but reasonable would be ${zstarwintmp}" >> LOGS/${scriptname}.results
   echo "::WARNING: zstarwin is ${zstarwin}, but reasonable would be ${zstarwintmp}"
 endif

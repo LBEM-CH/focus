@@ -6,7 +6,7 @@
 #
   #
   # Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
-  if ( ${SCRATCH_DISK} == "." ) then
+  if ( ${SCRATCH_DISK} == "." || ${SCRATCH_DISK}x == "x" ) then
     if ( ! -d SCRATCH ) then
       echo "::SCRATCH disk will be local."
       \mkdir SCRATCH
@@ -24,7 +24,7 @@
   endif
   #
   # Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
-  if ( ${FFTIR_DISK} == "." ) then
+  if ( ${FFTIR_DISK} == "." || ${FFTIR_DISK}x == "x" ) then
     if ( ! -d FFTIR ) then
       echo "::FFTIR disk will be local."
       \mkdir FFTIR

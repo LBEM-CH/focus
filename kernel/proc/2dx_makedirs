@@ -1,6 +1,13 @@
 #!/bin/sh
 #
-# This is not an executable script.
+# This is not an executable script. It is only sourced from other scripts.
+# The purpose of this script is to initiate the sub-directories, where all the different file types will be stored.
+# It also allows specifying in the variable names SCRATCH_DISK and FFTIR_DISK locations for the sub-directories 
+# SCRATCH and FFTR, which can then lie on a different drive. If that different drive is a very fast drive, e.g. in form
+# of a RAM disk, then the overall processing performance for processing a larger number of images simultaneously 
+# in several instances of 2dx_image will strongly increase.
+#
+# You could also implement that fast disk by placing it on a RAID-0 or RAID-5-managed hard-drive stack, or on a Solid-State drive.
 #
 ####
 #
@@ -46,10 +53,6 @@
       \ln -s ${newfftir} FFTIR
     endif
   endif
-  #
-  # if ( ! -e SCRATCH || ! -e FFTIR ) then
-  #   2dx_linkscratch
-  # endif
   #
   if ( ! -d proc ) then
     \mkdir proc

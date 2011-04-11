@@ -42,6 +42,7 @@
 # DISPLAY: merge_modus
 # DISPLAY: imageorigin
 # DISPLAY: SCRATCH_DISK
+# DISPLAY: FFTIR_DISK
 #
 #$end_local_vars
 #

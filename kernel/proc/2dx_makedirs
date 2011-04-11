@@ -15,11 +15,14 @@
     if ( ! -d SCRATCH && ! -l SCRATCH ) then
       set olddir = $PWD
       set newscratch = ${SCRATCH_DISK}/${olddir}
-      echo "::SCRATCH disk will be ${newscratch}"
-      if ( ! -d ${newscratch} ) then
-        \mkdir -p ${newscratch}
-        \ln -s ${newscratch} SCRATCH
+      if ( -d ${newscratch} ) then
+        \rm -rf ${newscratch}
       endif
+      \rm -rf SCRATCH
+      echo "::SCRATCH disk will be:"
+      echo "::${newscratch}"
+      \mkdir -p ${newscratch}
+      \ln -s ${newscratch} SCRATCH
     endif
   endif
   #
@@ -33,11 +36,14 @@
     if ( ! -d FFTIR && ! -l FFTIR ) then
       set olddir = $PWD
       set newfftir = ${FFTIR_DISK}/${olddir}
-      echo "::FFTIR disk will be ${newfftir}"
-      if ( ! -d ${newfftir} ) then
-        \mkdir -p ${newfftir}
-        \ln -s ${newfftir} FFTIR
+      if ( -d ${newfftir} ) then
+        \rm -rf ${newfftir}
       endif
+      \rm -rf FFTIR
+      echo "::FFTIR disk will be:"
+      echo "::${newfftir}"
+      \mkdir -p ${newfftir}
+      \ln -s ${newfftir} FFTIR
     endif
   endif
   #
@@ -58,7 +64,6 @@
   endif
   #
   if ( ! -d PS ) then
-    \rm -rf PS
     \mkdir PS
   endif
   #

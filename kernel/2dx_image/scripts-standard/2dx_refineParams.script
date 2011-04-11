@@ -58,6 +58,8 @@
 #
 set proc_2dx = ""
 set bin_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 set refine = ""
 set refine_cyc = ""
@@ -173,7 +175,7 @@ else
 endif
 #
 echo "<<@progress: 1>>"
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 echo ":: "
 ${proc_2dx}/linblock "ToDo: We need here an option that calls ttboxref"

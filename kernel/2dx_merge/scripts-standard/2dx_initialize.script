@@ -41,6 +41,7 @@
 # DISPLAY: zstarrange
 # DISPLAY: merge_modus
 # DISPLAY: imageorigin
+# DISPLAY: SCRATCH_DISK
 #
 #$end_local_vars
 #
@@ -52,9 +53,12 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set merge_res_limit = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 # Variables to be available from the config file are:
 set tempkeep = ""
+set SCRATCH_DISK = ""
 #
 #$end_vars
 #
@@ -65,7 +69,7 @@ set scriptname = 2dx_initialize
 #
 source ${proc_2dx}/initialize
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #

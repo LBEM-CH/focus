@@ -1,8 +1,46 @@
-#!/bin/csh -ef
+#!/bin/sh
+#
+# This is not an executable script.
+#
 ####
 #
   #
-  # This comes later, when there is a RAM-disk SCRATCH disk or similar:
+  # Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
+  if ( ${SCRATCH_DISK} == "." ) then
+    if ( ! -d SCRATCH ) then
+      echo "::SCRATCH disk will be local."
+      \mkdir SCRATCH
+    endif
+  else
+    if ( ! -d SCRATCH && ! -l SCRATCH ) then
+      set olddir = $PWD
+      set newscratch = ${SCRATCH_DISK}/${olddir}
+      echo "::SCRATCH disk will be ${newscratch}"
+      if ( ! -d ${newscratch} ) then
+        \mkdir -p ${newscratch}
+        \ln -s ${newscratch} SCRATCH
+      endif
+    endif
+  endif
+  #
+  # Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
+  if ( ${FFTIR_DISK} == "." ) then
+    if ( ! -d FFTIR ) then
+      echo "::FFTIR disk will be local."
+      \mkdir FFTIR
+    endif
+  else
+    if ( ! -d FFTIR && ! -l FFTIR ) then
+      set olddir = $PWD
+      set newfftir = ${FFTIR_DISK}/${olddir}
+      echo "::FFTIR disk will be ${newfftir}"
+      if ( ! -d ${newfftir} ) then
+        \mkdir -p ${newfftir}
+        \ln -s ${newfftir} FFTIR
+      endif
+    endif
+  endif
+  #
   # if ( ! -e SCRATCH || ! -e FFTIR ) then
   #   2dx_linkscratch
   # endif
@@ -13,14 +51,6 @@
   #
   if ( ! -d LOGS ) then
     \mkdir LOGS
-  endif
-  #
-  if ( ! -d SCRATCH ) then
-    \mkdir SCRATCH
-  endif
-  #
-  if ( ! -d FFTIR ) then
-    \mkdir FFTIR
   endif
   #
   if ( ! -d APH ) then

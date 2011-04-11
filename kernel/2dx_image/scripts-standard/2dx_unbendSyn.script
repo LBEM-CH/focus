@@ -71,6 +71,8 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 set SYN_Unbending = ""
 set SYN_maska = ""
@@ -144,7 +146,7 @@ set scriptname = 2dx_unbendSyn
 source ${proc_2dx}/initialize
 source ${bin_ccp4}/ccp4.setup-csh
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@evaluate>>"
 #

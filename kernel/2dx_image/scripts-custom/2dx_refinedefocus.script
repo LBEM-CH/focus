@@ -65,6 +65,8 @@ set overwrite = "n"
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 set imagename = ""
 set nonmaskimagename = ""
 set imagesidelength = ""
@@ -127,7 +129,7 @@ echo spcgrp = ${spcgrp}
 echo " "
 #
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #

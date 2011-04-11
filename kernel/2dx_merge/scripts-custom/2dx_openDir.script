@@ -29,6 +29,8 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 # Variables to be available from the config file are:
 #
@@ -41,7 +43,7 @@ set scriptname = 2dx_openDir
 echo "<<@progress: 1>>"
 echo "<<@evaluate>>"
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 #############################################################################
 echo ":: "

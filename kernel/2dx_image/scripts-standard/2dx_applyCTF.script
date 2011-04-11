@@ -49,6 +49,8 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 set SYN_Unbending = ""
 set imagename = ""
@@ -107,7 +109,7 @@ set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 
 # 0.3 corresponds to 3.33 Angstroem for the border of the plot (Nyquist).
 #
 echo "<<@progress: 1>>"
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #

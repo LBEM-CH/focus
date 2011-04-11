@@ -41,6 +41,8 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 set tempkeep = ""
 set RESMIN = ""
@@ -124,7 +126,7 @@ echo npo_line2 = ${npo_line2}
 #
 set scriptname = 2dx_generateMergeMap
 #
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 \rm -f LOGS/${scriptname}.results
 #

@@ -53,6 +53,8 @@ set doswap = "1"
 set bin_2dx = ""
 set proc_2dx = ""
 #
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 set comment = ""
 set imagenumber = ""
 set imagename = ""
@@ -76,7 +78,7 @@ set scriptname = 2dx_clone
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 ############################################################################# 
 ############################################################################# 
@@ -140,7 +142,7 @@ endif
 #
 \mkdir ${new_imagedirectory}
 cd ${new_imagedirectory}
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 cp ../${old_imagedirectory}/2dx_image.cfg .
 #
 cat << eot > sed.tmp

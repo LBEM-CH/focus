@@ -47,6 +47,8 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 set imagename = ""
 set nonmaskimagename = ""
 set imagenumber = ""
@@ -80,7 +82,7 @@ set scriptname = 2dx_maskCrystal
 set date = `date`
 echo date = ${date}
 #
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 set originalpolygon = selectionList.dat
 #

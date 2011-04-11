@@ -75,6 +75,8 @@ set overwrite = "n"
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 set imagename = ""
 set imagesidelength = ""
 set imagenumber = ""
@@ -161,7 +163,7 @@ if ( ${REVXSGN} == "1" ) then
   set phaori = `echo ${phaorix},${phaoriy}`
 endif
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #

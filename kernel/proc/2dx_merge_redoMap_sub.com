@@ -15,7 +15,7 @@
 #############################################################################
 #
 #
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 set symmetry = 'p1'
 set spcgrp = 1

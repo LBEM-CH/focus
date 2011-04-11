@@ -47,6 +47,8 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 set imagename = ""
 set imagenumber = ""
@@ -111,7 +113,7 @@ set scriptname = 2dx_MaximumLikelihood
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 #echo ML_whitefirst = ${ML_whitefirst}
 echo ML_doMLorCC = ${ML_doMLorCC}

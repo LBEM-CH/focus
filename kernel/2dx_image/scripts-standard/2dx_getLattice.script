@@ -76,6 +76,8 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 set SYN_Unbending = ""
 set PHASEORI_done = ""
@@ -158,7 +160,7 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") ) then
   exit
 endif
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 \rm -f TMP456789.tmp
 #

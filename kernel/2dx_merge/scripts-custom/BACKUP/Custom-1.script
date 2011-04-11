@@ -23,6 +23,8 @@
 set proc_2dx = ""
 set bin_2dx = ""
 set app_2dx_image = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 #$end_vars
 #
@@ -36,7 +38,7 @@ set scriptname = Custom-1
 echo "<<@progress: 1>>"
 #
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 # This translates the list of directories to work on into one single long line:
 cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat

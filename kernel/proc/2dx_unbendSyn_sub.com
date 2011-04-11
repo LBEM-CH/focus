@@ -142,7 +142,7 @@ echo patlabel = ${patlabel}
 #
 echo SYN_facthresha = ${SYN_facthresha}
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 /bin/rm -f ${imagename}.int.mrc
 #

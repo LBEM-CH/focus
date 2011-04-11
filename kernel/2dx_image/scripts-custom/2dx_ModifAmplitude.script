@@ -32,6 +32,8 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 set imagename = ""
 set nonmaskimagename = ""
 set imageorigin = ""
@@ -48,7 +50,7 @@ set scriptname = 2dx_ModifAmplitude
 #
 source ${proc_2dx}/initialize
 #
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 echo "<<@progress: 1>>"
 #

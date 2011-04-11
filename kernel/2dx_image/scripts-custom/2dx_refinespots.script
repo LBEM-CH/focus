@@ -56,6 +56,8 @@ set keepOld = "n"
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 set imagename = ""
 set nonmaskimagename = ""
 set imagenumber = ""
@@ -104,7 +106,7 @@ set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }
 echo refposix = ${refposix}
 echo refposiy = ${refposiy}
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 if ( ${ProtSpotList} == "y" ) then
   ${proc_2dx}/protest "::ERROR: SpotList protected. Aborting" 

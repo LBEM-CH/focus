@@ -24,6 +24,8 @@
 set proc_2dx = ""
 set bin_2dx = ""
 set app_2dx_image = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 #$end_vars
 #
@@ -33,7 +35,7 @@ set scriptname = 2dx_refreshData
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 echo "<<@progress: 1>>"
 #

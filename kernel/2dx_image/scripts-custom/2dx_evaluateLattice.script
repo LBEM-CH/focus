@@ -131,6 +131,8 @@ set peakNum = "140"
 set bin_2dx = ""
 set proc_2dx = ""
 #
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 set imagename = ""
 set imagenumber = ""
 set imagesidelength = ""
@@ -164,7 +166,7 @@ set scriptname = 2dx_evaluateLattice
 #
 \rm -f LOGS/${scriptname}.results
 #
-${proc_2dx}/2dx_makedirs 
+source ${proc_2dx}/2dx_makedirs 
 #
 if ( ${do1} != 0 || ${do2} != 0 || ${do3} != 0 ) then
   ${proc_2dx}/linblock "Lattice is currently: ${lattice}"

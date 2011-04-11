@@ -30,6 +30,8 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
 #
 # Variables to be available from the config file are:
 #
@@ -44,7 +46,7 @@ echo "<<@progress: 1>>"
 #
 source ${proc_2dx}/initialize
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 #############################################################################
 echo ":: "

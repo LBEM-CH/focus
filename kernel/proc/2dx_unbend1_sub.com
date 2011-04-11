@@ -21,7 +21,7 @@ endif
 #
 \rm -f ${imagename}.int.mrc
 #
-${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_makedirs
 #
 #
 #############################################################################

@@ -205,7 +205,7 @@ echo CCP4_SYM = ${CCP4_SYM}
 ${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
 #############################################################################
 #
-${proc_2dx}/2dx_merge_makedirs
+source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
 #

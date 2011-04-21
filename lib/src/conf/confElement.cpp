@@ -126,4 +126,19 @@ QPair<float, float> confElement::range()
   return QPair<float,float>(min,max);
 }
 
-
+QString confElement::toString()
+{ 
+  QString props;
+  QHashIterator<QString,QString> i(properties);
+  while (i.hasNext()) {
+       i.next();
+       props.append("\n\t");
+       props.append(i.key());
+       props.append(":");
+       props.append(i.value());
+  }
+  return props;
+}
+   
+   
+   

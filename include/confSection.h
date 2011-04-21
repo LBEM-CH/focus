@@ -44,4 +44,5 @@ class confSection : public QObject
 
   confSection & operator<<(confElement *e);
   confElement* operator[](unsigned int);
+  bool operator==(const confSection& section);
 };

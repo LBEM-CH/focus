@@ -81,6 +81,7 @@ class confData : public QObject
   QString dataFilename;
   QString linkName;
   QStringList valueSearch;
+  QStringList userSetProperties;
   QStringList manualData;
   QString initializationScriptBaseName;
   QString initializationScriptName;
@@ -91,10 +92,15 @@ class confData : public QObject
   QString OS_X_APP_PATH;
 
   void verifyElement(confSection *&section, confElement *&e);
+  confSection* getSection(const QString title);
+  confElement* getElement(confElement* e);
+  confElement* protectUserSetProperies(confElement* source, confElement* target);
   void init(const QString &fileName, confData *parentData = NULL);
 
   QString readLine(QFile &data);
   QString &parseVariables(QString &line);
+  QString printLookup();
+
 
   public:
   confData(QString filename, confData *parentData = NULL, QObject *parent = NULL);
@@ -142,6 +148,7 @@ class confData : public QObject
   const QString & initializationScript(bool fullName = true);
 
   bool parseDataFile();
+  void updateConf(const QString &confFileName);
   unsigned int size();
   QList<confSection *> getSections();
   void insertSections(QList<confSection *> sectionList);

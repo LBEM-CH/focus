@@ -33,17 +33,6 @@ unsigned int confSection::size()
   return elements.size();
 }
 
-confSection & confSection::operator<<(confElement *e)
-{
-  append(e);
-  return *this;
-}
-
-confElement* confSection::operator[](unsigned int i)
-{
-  return elements[i];
-}
-
 void confSection::addConcern(QString concern)
 {
   QStringList cell = concern.toLower().split(',');
@@ -55,4 +44,20 @@ void confSection::addConcern(QString concern)
 int confSection::concerns(QString concern)
 {
   return concernList[concern.toLower()];
+}
+
+confSection & confSection::operator<<(confElement *e)
+{
+  append(e);
+  return *this;
+}
+
+confElement* confSection::operator[](unsigned int i)
+{
+  return elements[i];
+}
+
+bool confSection::operator==(const confSection& section)
+{
+  return sectionTitle==section.sectionTitle;
 }

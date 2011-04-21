@@ -45,6 +45,7 @@ class confElement : public QObject
   QPair<float,float> range();
 
   confElement &operator=(const confElement &e);
+  QString toString();
 };
 
 Q_DECLARE_METATYPE(confElement*);

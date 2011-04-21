@@ -17,6 +17,8 @@ void confData::init(const QString &fileName, confData *parentData)
   parentConf = parentData;
   dataFilename=fileName;
   valueSearch<<"LABEL"<<"LEGEND"<<"EXAMPLE"<<"FORMER"<<"HELP"<<"TYPE"<<"RELATION"<<"LOCKED"<<"CONCERNS"<<"USERLEVEL"<<"INHERITABLE_UPON_INIT"<<"SYNC_WITH_UPPER_LEVEL"<<"ISWRONG";
+  userSetProperties<<"LOCKED"<<"SYNC_WITH_UPPER_LEVEL"<<"ISWRONG";
+  
   empty = false;
   OS_X_APP_PATH = "Contents/MacOS/";
   if(!parseDataFile())
@@ -169,6 +171,40 @@ void confData::verifyElement(confSection *&section, confElement *&e)
   else return;
 }
 
+confSection* confData::getSection(const QString title)
+{
+  for (int i = 0; i < sections.size(); ++i) 
+  {
+    if (sections.at(i)->title() == title)
+      return sections.at(i);
+  }
+  confSection* section = new confSection(title);
+  //add the new section
+  sections<<section;
+  return section;
+}
+
+
+confElement* confData::getElement(confElement* element)
+{
+  if(element==NULL) 
+    return new confElement(this);
+  else
+    return element;
+}
+
+confElement* confData::protectUserSetProperies(confElement* source, confElement* target)
+{
+   for(int i=0;i<userSetProperties.size();++i)
+   { 
+     if(source->get(userSetProperties[i]) != "")
+      {
+        target->set(userSetProperties[i].simplified(),source->get(userSetProperties[i]));
+      }
+   }
+   return target;
+}
+
 QString &confData::parseVariables(QString &line)
 {
   confData *dataSource = this;
@@ -180,6 +216,20 @@ QString &confData::parseVariables(QString &line)
   line.replace("${app_2dx_image}",dataSource->getApp("2dx_image"));
   line.replace("${app_2dx_merge}",dataSource->getApp("2dx_merge"));
   return line;
+}
+
+QString confData::printLookup()
+{
+  QString elementString;
+  QHashIterator<QString, confElement *> i(lookup);
+  while (i.hasNext()) {
+       i.next();
+       QString props =  i.value()->toString();
+       elementString.append(i.key()); 
+       elementString.append(props); 
+  }
+  return elementString;
+
 }
 
 bool confData::parseDataFile()
@@ -285,6 +335,102 @@ bool confData::parseDataFile()
   return true;
 }
 
+void confData::updateConf(const QString &confFileName)
+{
+  qDebug()<<"updating configuration";
+  QFile data(confFileName);
+  if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+  
+  QString lineData;
+  QList<confSection*> newSections;
+  confSection *section=NULL;
+  confElement *element=NULL;
+
+  bool headerRead=false;
+  QString headerLine;
+  qint64 pos = -1;
+  while(!data.atEnd() && pos!=data.pos() && lineData.toLower()!="$end_local_vars" && lineData.toLower()!="$end_vars")
+  {
+    bool inValueSearch = false;
+    pos = data.pos();
+    headerLine = data.readLine().trimmed();
+    lineData = headerLine;
+    lineData.remove('#');
+    lineData = lineData.trimmed();
+
+    if(lineData.startsWith("===") && !headerRead) headerRead=true;
+
+    if(lineData.toLower().startsWith("section:"))
+    {
+      if(!headerRead) headerRead=true;
+      lineData.remove(0,8);
+      section=new confSection(lineData.simplified(),this);
+      newSections << section;
+    }
+	
+    for(int i=0;i<valueSearch.size();i++)
+    {
+      if(lineData.startsWith(valueSearch[i] + ':'))
+      {
+        element = getElement(element);
+        lineData.remove(0,valueSearch[i].size()+1);
+        element->set(valueSearch[i].simplified(),lineData);
+        inValueSearch = true;
+      }
+    }
+
+    if(!inValueSearch && !headerLine.toLower().contains(QRegExp("section\\s*:")) && headerLine.contains(QRegExp("^\\s*#\\s*\\w*\\s*:")))
+    {
+      headerLine.remove("#");
+      QStringList cell = headerLine.split(':');
+      if(cell.first().trimmed().toLower() == "global")
+      {
+        cell.first() = "display";
+      }
+      properties.insert(cell.first().trimmed().toLower(),cell.last().trimmed());
+    }
+
+    if(lineData.toLower().startsWith("set "))
+    {
+       element = getElement(element);
+       int k = lineData.indexOf('=');
+       if(k>0)
+       {
+         QStringList val = lineData.split('=');
+
+         val[0].remove(0,4);
+         val[1].remove('"');
+
+         val[0]=val[0].simplified();
+         val[1]=val[1].simplified();
+   
+         element->set("valueLabel",val[0]);
+         QHash<QString, confElement *>::iterator it = lookup.find(val[0].toLower());
+         QString value;
+         //if the element does not exist yet 
+         if(it == lookup.end())
+           value = val[1];
+         else
+         {
+           value = it.value()->get("value");
+           element = protectUserSetProperies(it.value(),element);
+         }
+
+         element->set("value",value);
+         if(section!=NULL)
+           *section << element;
+         lookup.insert(element->get("valuelabel").toLower(),element);
+         section->addConcern(element->get("concerns"));
+         element = NULL;
+       }
+    }
+ }
+
+  data.close();
+  sections = newSections;
+  qDebug() << "=== updating configuration done";
+}
+
 unsigned int confData::size()
 {
   return sections.size();
@@ -346,6 +492,7 @@ void confData::loadConf(confData *conf)
   }
   emit loading();
 }
+
 
 void confData::loadDefaultConf(confData *conf, const QStringList &defaults)
 {

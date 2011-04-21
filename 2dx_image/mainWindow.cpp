@@ -74,8 +74,16 @@ mainWindow::mainWindow(char *dirArg)
   
   confData masterData(userPath + "/2dx_master.cfg", configDir.canonicalPath() + "/" + "2dx_master.cfg");
   masterData.save();
-
-  data = new confData(workingDir + "/" + "2dx_image.cfg", userPath + "/2dx_master.cfg");
+   
+  if(initialize)
+  {
+    data = new confData(workingDir + "/" + "2dx_image.cfg", userPath + "/2dx_master.cfg");
+  }
+  else
+  {
+    data = new confData(workingDir + "/" + "2dx_image.cfg");
+    data->updateConf(userPath + "/2dx_master.cfg");
+  }
   data->setUserConf(userData);
   data->setDir("application",applicationDir);
   data->setDir("plugins",QDir(applicationDir.absolutePath() + "/../plugins"));

@@ -304,6 +304,8 @@ if ( ${refine_now} == "maskb01_boxb1" ) then
   #
   \rm -f ${imagename}-maskb01.tabl
   \rm -f ${imagename}-boxb1.tabl
+  \rm -f SCRATCH/${imagename}-maskb01_boxb1.tabl
+
   #
   set old_maskb01 = ${maskb01}
   set loc_maskb01_start = `echo ${refine_maskb01_val} | cut -d\, -f1`
@@ -327,6 +329,7 @@ if ( ${refine_now} == "maskb01_boxb1" ) then
      #
     set maskb01 = ${loc_maskb01}
     set loc_boxb1 = ${loc_boxb1_start}
+    set table_row = ""
     #
     while ( ${loc_boxb1} <= ${loc_boxb1_end} )
        #
@@ -336,12 +339,17 @@ if ( ${refine_now} == "maskb01_boxb1" ) then
        #
        echo ${loc_maskb01} ${QVAL_local} >> ${imagename}-maskb01.tabl
        echo ${loc_boxb1} ${QVAL_local} >> ${imagename}-boxb1.tabl
+       set table_row = `echo -n "${table_row} ${QVAL_local}"`
        # ${proc_2dx}/linblock "unbend2: maskb01 ${loc_maskb01} and boxb1 ${loc_boxb1} gives a QVAL of ${QVAL_local}"
        set loc_boxb1 = `echo ${loc_boxb1} ${loc_boxb1_step} ${loc_boxb1_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
     end
+    echo ${table_row} >> SCRATCH/${imagename}-maskb01_boxb1.tabl
     set loc_maskb01 = `echo ${loc_maskb01} ${loc_maskb01_step} ${loc_maskb01_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
   end
   #
+  \mv -f SCRATCH/${imagename}-maskb01_boxb1.tabl SCRATCH/${imagename}-maskb01_boxb1.txt
+  echo "# IMAGE: SCRATCH/${imagename}-maskb01_boxb1.txt  <TXT: QVal Table>" >> LOGS/${scriptname}.results
+  #  
   \rm -f TMP442211.tmp
   set best_maskb01 = `cat ${imagename}-maskb01.tabl | ${bin_2dx}/getmax.exe`
   \rm -f TMP442211.tmp

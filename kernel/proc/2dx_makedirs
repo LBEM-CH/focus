@@ -11,6 +11,9 @@
 #
 ####
 #
+#
+#################################################################################
+ echo "SCRATCH disk is set to ${SCRATCH_DISK}."
   #
   # Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
   if ( ${SCRATCH_DISK} == "." || ${SCRATCH_DISK}x == "x" ) then

@@ -5,7 +5,8 @@
 # This is not an independent csh file.
 # This file has to be sourced from another csh.
 #
-
+#
+#
 if ( ${refine_now} == "maska" ) then
   #
   \rm -f ${imagename}-maska.tabl
@@ -95,6 +96,7 @@ if ( ${refine_now} == "maska_boxa1" ) then
   #
   \rm -f ${imagename}-maska.tabl
   \rm -f ${imagename}-boxa1.tabl
+  \rm -f SCRATCH/${imagename}-maska_boxa1.tabl
   #
   set old_maska = ${maska}
   set loc_maska_start = `echo ${refine_maska_val} | cut -d\, -f1`
@@ -120,6 +122,7 @@ if ( ${refine_now} == "maska_boxa1" ) then
     #
     set maska = ${loc_maska}
     set loc_boxa1 = ${loc_boxa1_start}
+    set table_row = ""
     #
     while ( ${loc_boxa1} <= ${loc_boxa1_end} )
        #
@@ -128,11 +131,16 @@ if ( ${refine_now} == "maska_boxa1" ) then
        #
        echo ${loc_maska} ${QVAL_local} >> ${imagename}-maska.tabl
        echo ${loc_boxa1} ${QVAL_local} >> ${imagename}-boxa1.tabl
+       set table_row = `echo -n "${table_row} ${QVAL_local}"`
        # ${proc_2dx}/linblock "unbend1: maska ${loc_maska} boxa1 ${loc_boxa1} gives a QVAL of ${QVAL_local}"
        set loc_boxa1 = `echo ${loc_boxa1} ${loc_boxa1_step} ${loc_boxa1_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
     end
+    echo ${table_row} >> SCRATCH/${imagename}-maska_boxa1.tabl
     set loc_maska = `echo ${loc_maska} ${loc_maska_step} ${loc_maska_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
   end
+  #
+  \mv -f SCRATCH/${imagename}-maska_boxa1.tabl SCRATCH/${imagename}-maska_boxa1.txt
+  echo "# IMAGE: SCRATCH/${imagename}-maska_boxa1.txt  <TXT: QVal Table>" >> LOGS/${scriptname}.results
   #
   \rm -f TMP442211.tmp
   set best_maska = `cat ${imagename}-maska.tabl | ${bin_2dx}/getmax.exe`

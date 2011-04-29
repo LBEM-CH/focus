@@ -27,7 +27,9 @@ alias createLink 'eval " \\
     		    mkdir -p \!:1 \\
 		  endif \\
 		  if ( -e \!:2 ) then \\
-	            mv \!:2/* \!:1 \\
+		    if (`ls -l \!:2 | wc -l` != 0 ) then \\
+	              mv \!:2/* \!:1 \\
+		    endif \\
     		    rm -rf \!:2 \\
 		  endif \\
 		  ln -fs \!:1 \!:2 \\
@@ -73,7 +75,7 @@ else
     set target = `readlink FFTIR`
     if ("$target" != "$newfftir") then
 	echo "::FFTIR target has changed."
-    	createLink $newscratch SCRATCH
+    	createLink ${newfftir} FFTIR
     endif
   endif
 endif

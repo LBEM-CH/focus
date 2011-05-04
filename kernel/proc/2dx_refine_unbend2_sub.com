@@ -305,7 +305,7 @@ if ( ${refine_now} == "maskb01_boxb1" ) then
   \rm -f ${imagename}-maskb01.tabl
   \rm -f ${imagename}-boxb1.tabl
   \rm -f SCRATCH/${imagename}-maskb01_boxb1.tabl
-  \rm -f SCRATCH/${imagename}-maskb01_boxb1.txt
+
   #
   set old_maskb01 = ${maskb01}
   set loc_maskb01_start = `echo ${refine_maskb01_val} | cut -d\, -f1`

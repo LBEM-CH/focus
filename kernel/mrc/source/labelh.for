@@ -535,26 +535,27 @@ C
         NXYZ(1)=NX
         NXYZ(2)=NY
 C
+        DOUBLMEAN = DOUBLMEAN/(NX*NY)
+        DMEAN = DOUBLMEAN
+C
+        MODE = 2
+C
         CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
         CELL(1) = REAL(NX)
         CELL(2) = REAL(NY)
         CALL IALEXT(2,EXTRA,1,29)
         CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
-        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
-        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         write(*,'('' Output file has dimensions '',2I6)')NX,NY
 C
-C-------Write the 7 files into the output file
+C-------Write the 7x7 files into the output file
         do iy = 1,NY
           do ix = 1,NX
             ALINE(ix)=APIC(ix,iy)
           enddo
           CALL IWRLIN(2,ALINE)
         enddo
-C
-        DMEAN = DOUBLMEAN/(NX*NY)
 C
         write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
      .     DMIN,DMAX,DMEAN
@@ -594,6 +595,9 @@ C-------Copy entire file into output picture
           enddo
         enddo
 C
+        DOUBLMEAN = DOUBLMEAN/(NX*NY)
+        DMEAN = DOUBLMEAN
+C
 C-------Cross out image
 C
         do ix = 30,NX-30
@@ -611,11 +615,11 @@ C
 C
 C  Put title labels, new cell and extra information only into header
 C
+        MODE=2
+C
         CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
         CALL IALEXT(2,EXTRA,1,29)
         CALL IALCEL(2,CELL)
-        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
-        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
 C-------Write the file into the output file
@@ -626,12 +630,12 @@ C-------Write the file into the output file
           CALL IWRLIN(2,ALINE)
         enddo
 C
-        DMEAN = DOUBLMEAN/(NX*NY)
-C
         write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
      .     DMIN,DMAX,DMEAN
 C
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+        GOTO 990
 C
 C=====================================================================
 C

@@ -198,6 +198,8 @@ C
           J=I
         ENDIF
 70    CONTINUE
+      RMSMIN=MIN
+      RMSMAX=MAX
       IF (J.GT.1) THEN
         DO 71 I=J-1,1,-1
           IF (BINS(I).LT.CMAX/10.0) THEN
@@ -262,7 +264,8 @@ C
 C
 CHEN>
       if(CNT.lt.1)then
-        write(*,*)' ERROR: BOXIMG did not produce correctly boxed tiles'
+        write(*,*)' ERROR: BOXIMG did not produce correct tiles'
+        write(*,*)'RMSMIN:',RMSMIN,'  RMSMAX:',RMSMAX,'   last RMS:',RMS
         stop
       endif
 C

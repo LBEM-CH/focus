@@ -71,8 +71,9 @@ mainWindow::mainWindow(char *dirArg)
   }
 
   
-  
-  confData masterData(userPath + "/2dx_master.cfg", configDir.canonicalPath() + "/" + "2dx_master.cfg");
+  QString applicationConfigPath =  configDir.canonicalPath() + "/" + "2dx_master.cfg";
+  confData masterData(userPath + "/2dx_master.cfg", applicationConfigPath); 
+  masterData.updateConf(applicationConfigPath);
   masterData.save();
    
   if(initialize)

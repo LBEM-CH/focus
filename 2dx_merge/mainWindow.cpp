@@ -39,14 +39,15 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   configDir = QDir(applicationDir.canonicalPath() + "/../" + "config/");
 
   QString mergeConfigLocation = directory + "/merge/" + "2dx_merge.cfg";
+  QString appConfigLocation = configDir.canonicalPath() + "/" + "2dx_master.cfg";
   if(QFileInfo(mergeConfigLocation).exists())
   {
-    mainData = new confData(mergeConfigLocation, configDir.canonicalPath() + "/" + "2dx_master.cfg");
-    //mainData = new confData(mergeConfigLocation);
+    mainData = new confData(mergeConfigLocation, appConfigLocation);
+    mainData->updateConf(appConfigLocation);
   }
   else
   {	  
-    mainData = new confData(mergeConfigLocation, configDir.canonicalPath() + "/" + "2dx_master.cfg");
+    mainData = new confData(mergeConfigLocation, appConfigLocation);
   }
   mainData->setDir("project",QDir(directory));
   mainData->setDir("working",QDir(directory + "/merge"));

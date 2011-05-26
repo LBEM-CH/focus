@@ -138,7 +138,7 @@ if ( ${correct} == '1' ) then
   echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
 endif
 # 
-if ( ${imagenumber} == "PutNumberHere" ) then
+if ( ${imagenumber} == "ScriptWillPutNumberHere" ) then
   set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
   #############################################################################
   ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
@@ -521,7 +521,7 @@ eot
       echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
     endif
     # 
-    if ( ${imagenumber} == "PutNumberHere" || ${imagenumber} == "1000" ) then
+    if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) then
       set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
       #############################################################################
       ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"

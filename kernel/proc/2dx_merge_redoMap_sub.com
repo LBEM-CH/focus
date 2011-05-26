@@ -331,6 +331,7 @@ SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
 FILE ${infile}
+Skip 1
 END
 eof
 #

@@ -420,6 +420,7 @@ eof
   # \rm -f ${prefix}${imagename}-permutated.hkl
   #
 else
+#
   ${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}

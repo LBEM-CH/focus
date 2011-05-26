@@ -337,7 +337,7 @@ bool confData::parseDataFile()
 
 void confData::updateConf(const QString &confFileName)
 {
-  qDebug()<<"updating configuration";
+  //qDebug()<<"updating configuration";
   QFile data(confFileName);
   if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return;
   
@@ -428,7 +428,7 @@ void confData::updateConf(const QString &confFileName)
 
   data.close();
   sections = newSections;
-  qDebug() << "=== updating configuration done";
+  //qDebug() << "=== updating configuration done";
 }
 
 unsigned int confData::size()

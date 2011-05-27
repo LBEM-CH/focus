@@ -1,0 +1,187 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Substract Background                                               #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2006                                             #
+# Last Modification: 10/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 20
+#
+# MANUAL: This script substracts the background from the pattern.
+#
+# MANUAL: It also verifies some parameters and corrects them if needed. 
+#
+#
+# GLOBAL: imagenumber
+# GLOBAL: imagename
+# GLOBAL: nonmaskimagename
+# GLOBAL: imageorigin
+# GLOBAL: imagesidelength
+# GLOBAL: min
+# GLOBAL: max
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+set imageorigin = ""
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set magnification = ""
+set stepdigitizer = ""
+set realang = ""
+set RESMIN = ""
+set RESMAX = ""
+#
+#$end_vars
+#
+echo bin_2dx = ${bin_2dx}
+echo proc_2dx = ${proc_2dx}
+#
+echo imageorigin = ${imageorigin}
+echo imagenumber = ${imagenumber}
+echo imagesidelength = ${imagesidelength}
+echo tempkeep = ${tempkeep}
+#
+set date = `date`
+echo date = ${date}
+#
+set scriptname = 2dx_background
+\rm -f LOGS/${scriptname}.results
+\rm -f LOGS/${scriptname}.status
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+${proc_2dx}/2dx_makedirs
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "Preparing"
+#                                                                           #
+#############################################################################
+#
+set halimsid = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+echo halimsid = ${halimsid}
+#
+set origin = ${imageorigin}
+echo origin = ${origin}
+#
+set orioffx = `echo ${origin} ${halimsid} | sed 's/,/ /g' | awk '{s=$1-$3} END {print s}'`
+set orioffy = `echo ${origin} ${halimsid} | sed 's/,/ /g' | awk '{s=$2-$3} END {print s}'`
+set orioff  = `echo ${orioffx} ${orioffy}`
+#
+set strange = `echo ${orioffx} ${orioffy} | awk '{ if ( $1 > 300 || $1 < -300 || $2 > 300 || $2 < -300 ) { s = 1 } else { s = 0 }} END { print s }'`
+  if ( ${strange} == '1' ) then
+    set orioff = '0.0 0.0'
+    set origin = ${halimsid},${halimsid}
+    ${proc_2dx}/linblock "strange origin"
+    ${proc_2dx}/linblock "resetting orioff and origin"
+    echo orioff = ${orioff}
+    echo origin = ${origin}
+  endif
+endif
+echo orioff = ${orioff}
+echo origin = ${origin}
+#
+set   irmax = `echo ${imagesidelength} | awk '{s = $1 / 2 + 12} END {print s}'`
+echo  "::irmax = ${irmax}"
+set   irmin = 150
+echo  "::irmin = ${irmin}"
+set  irmaxc = `echo ${imagesidelength} | awk '{s = $1 / 2 + 163} END {print s}'`
+echo "::irmaxc = ${irmaxc}"
+set  irminc = 375
+echo "::irminc = ${irminc}"
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "BACKAUTO - to substract the background from the pattern"
+#                                                                           #
+#############################################################################
+#
+echo "<<@progress: 10>"
+#
+\cp -f ${imagename}.mrc SCRATCH/${imagename}.scl.mrc
+setenv IN        SCRATCH/${imagename}.scl.mrc
+setenv OUT      ${imagename}.crt.mrc
+setenv PLOTBACK  SCRATCH/${imagename}.ps
+\rm -f ${imagename}.crt.mrc
+\rm -f fort.2 fort.4 TMP224433.tmp
+\rm -f PLOTBACK
+#
+echo "# IMAGE: ${imagename}.mrc <Original Pattern>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/${imagename}.scl.mrc <Input for Backauto>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${imagename}.crt.mrc <Output of Backauto>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/${imagename}.ps <PS: Background profile>" >> LOGS/${scriptname}.results
+#
+set IREF = t
+#
+echo "${IREF},t"
+echo "  ${orioff}"
+echo "${imagenumber}"
+echo " ${imagename} Diffraction pattern"
+echo "   15  "
+echo "${irmax} ${irmin}"
+echo "${irmaxc} ${irminc}"
+#
+${bin_2dx}/backautok.exe << eot
+${IREF},T               ! IREF,IPLOT
+  ${orioff}     ! CX,CY (rel. to scan center!!)
+${imagenumber}         ! NPLATE
+ ${imagename} Diffraction pattern
+   15           ! NPNTS
+${irmax} ${irmin}
+${irmaxc} ${irminc}
+eot
+#
+if ( ! -e TMP224433.tmp ) then
+  ${proc_2dx}/protest "ERROR in backauto"
+endif
+#
+\mv -f fort.2 ${imagename}.bck.dat
+\mv -f fort.4 ${imagename}.ycr.dat
+#
+#############################################################################
+${proc_2dx}/linblock "labelh to create Mode=0 result file (as control)."
+#############################################################################
+#
+\rm -f SCRATCH/${imagename}.crt.mode0.mrc
+${bin_2dx}/labelh.exe << eot
+${imagename}.crt.mrc
+-2               ! linear od stretch
+SCRATCH/${imagename}.crt.mode0.mrc
+0.001
+eot
+#
+echo "# IMAGE: SCRATCH/${imagename}.crt.mode0.mrc <Output of Backauto (mode0)>" >> LOGS/${scriptname}.results
+#
+set origin = `cat TMP224433.tmp`
+echo "::New origin = ${origin}"
+echo "set origin = ${origin}" >> LOGS/${scriptname}.results
+\rm -f TMP224433.tmp
+
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "${scriptname} normal end."
+#                                                                           #
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

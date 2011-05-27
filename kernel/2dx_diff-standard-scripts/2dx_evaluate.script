@@ -1,0 +1,263 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Evaluate Pattern                                                   #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2006                                             #
+# Last Modification: 10/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 40
+#
+# MANUAL: This script indexes the pattern
+#
+#
+# GLOBAL: imagenumber
+# GLOBAL: imagename
+# GLOBAL: nonmaskimagename
+# GLOBAL: imageorigin
+# GLOBAL: imagesidelength
+# GLOBAL: min
+# GLOBAL: max
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set imageorigin = ""
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set magnification = ""
+set stepdigitizer = ""
+set realang = ""
+set KV = ""
+set RESMIN = ""
+set RESMAX = ""
+set phaorip1 = ""
+set TLTAXA = ""
+set TLTANG = ""
+set lattice = ""
+set RESMIN = ""
+set RESMAX = ""
+#
+#$end_vars
+#
+echo bin_2dx = ${bin_2dx}
+echo proc_2dx = ${proc_2dx}
+#
+echo imageorigin = ${imageorigin}
+echo imagenumber = ${imagenumber}
+echo imagesidelength = ${imagesidelength}
+echo tempkeep = ${tempkeep}
+echo realcell = ${realcell}
+echo magnification = ${magnification}
+echo stepdigitizer = ${stepdigitizer}
+echo realang = ${realang}
+echo KV = ${KV}
+echo RESMIN = ${RESMIN}
+echo RESMAX = ${RESMAX}
+echo phaorip1 = ${phaorip1}
+echo TLTAXA = ${TLTAXA}
+echo TLTANG = ${TLTANG}
+echo lattice = ${lattice}
+echo RESMIN = ${RESMIN}
+echo RESMAX = ${RESMAX}
+#
+set date = `date`
+echo date = ${date}
+#
+set scriptname = 2dx_evaluate
+\rm -f LOGS/${scriptname}.results
+\rm -f LOGS/${scriptname}.status
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+${proc_2dx}/2dx_makedirs
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "PICKAUTO - to automatically extract diffraction spot values"
+#                                                                           #
+# ${imagename}.mrc+${imagename}.crt  =>  ${imagename}.crt                   #
+#                    ${imagename}.bck + ${imagename}.ycr + ${imagename}.plt #
+#                                                                           #
+#############################################################################
+#
+# PICKAUTO automatic e.d. spot integration
+#
+setenv IN       SCRATCH/${imagename}.scl.mrc
+setenv INPARAM  ${imagename}.crt.mrc
+\rm -f fort.3
+\ln -s ${imagename}.bck.dat fort.3
+\rm -f fort.4
+\ln -s ${imagename}.ycr.dat fort.4
+# setenv fort.11  ${imagename}.autolat
+setenv PLOTOUT  SCRATCH/${imagename}.plt
+#
+echo "2dx_pickautok.exe "
+echo "${realcell},${realang},45.0,1.0,1,${KV},T"
+echo " 1,1                      "
+echo " 10240,10240              "
+echo " CCD, linear/no look-up table"
+echo "${imagenumber}                   "
+echo " CCD diffraction pattern"
+echo " 0.0 ,0.00000000240       "
+echo "  ${phaorip1}               "
+echo " ${TLTAXA} ${TLTANG}      "
+echo " ${lattice}               "
+echo " ${RESMIN},${RESMAX},${RESMIN} "
+echo " 10,10,1,10,10,1,1,10,10,1,10,10,1,1,2"
+echo " 1.0,7000.,1.30,6,1       "
+echo " 0"
+${proc_2dx}/lin "-"
+#
+${bin_2dx}/2dx_pickautok.exe << eot
+ ${realcell},${realang},45.0,1.0,1,${KV},T !A,B,G,ANGDIS,SHRINK,TILTDIR,KV,LPRINT
+ 1,1                            ! J,K: LOOK-UP TABLE FOR OPTICAL DENSITY
+ 10240,10240
+ CCD, linear/no look-up table
+${imagenumber}                         ! PLATE NUMBER
+ CCD diffraction pattern
+ 0.0 ,0.00000000240             ! PINCUSHION DISTORTION PARAMETERS
+  ${phaorip1}                     ! 512 512 ! COORDS OF CENTRE OF PATTERN
+ ${TLTAXA} ${TLTANG}            ! TLTAXA,TLTANG
+ ${lattice}                     ! LATTICE PARAMETERS
+ ${RESMIN},${RESMAX},${RESMIN}  ! RADII FOR INCLUSION OF SPOTS, now in A
+ 10,10,1,10,10,1,1,10,10,1,10,10,1,1,2    !ignored in automatic version
+ 1.0,7000.,1.30,6,1              ! REJECTION CRITERIA (1.0,700.,1.30,6,1)
+ 0
+eot
+#
+echo "# IMAGE: SCRATCH/${imagename}.scl.mrc" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${imagename}.crt.mrc" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${imagename}.bck.dat" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${imagename}.ycr.dat" >> LOGS/${scriptname}.results
+#
+exit
+# temporarily
+#############################################################################
+#############################################################################
+#############################################################################
+#############################################################################
+#############################################################################
+#############################################################################
+#
+\rm -f ${imagename}.tmp.lst
+\mv fort.2 ${imagename}.tmp.lst
+#
+\rm -f fort.3 fort.4
+#############################################################################
+#                                                                           #
+linblock "sort - to sort the ${imagename}.lst file"
+#                                                                           #
+#############################################################################
+#
+if ( 1 == 2 ) then
+  head -1 ${imagename}.tmp.lst > ${imagename}.tmp
+  tail +2 ${imagename}.tmp.lst | grep -v "    3    5" | grep -v "   -3   -5" | \
+         grep -v "    3   -5" | grep -v "   -3    5" | grep -v "  100  100   100   100" | \
+         sort -k 3 -r -n >> ${imagename}.tmp
+  echo "    3    5 59999    74" >> ${imagename}.tmp
+  echo "    5   -3 59999    74" >> ${imagename}.tmp
+  echo "   -3   -5 59999    74" >> ${imagename}.tmp
+  echo "   -5    3 59999    74" >> ${imagename}.tmp
+  echo "  100  100   100   100" >> ${imagename}.tmp
+  \rm -f ${imagename}.tmp.lst
+  \mv ${imagename}.tmp ${imagename}.tmp.lst
+  #
+endif
+#
+head -1 ${imagename}.tmp.lst > ${imagename}.sortlist
+tail +2 ${imagename}.tmp.lst | grep -v "  100  100   100   100" | sort -k 3 -r -n >> ${imagename}.sortlist
+echo "  100  100   100   100" >> ${imagename}.sortlist
+#
+head -1 ${imagename}.tmp.lst > ${imagename}.lst
+tail +2 ${imagename}.tmp.lst | grep -v "  100  100   100   100" | sort -n >> ${imagename}.lst
+echo "  100  100   100   100" >> ${imagename}.lst
+#
+wait
+#
+\rm ${imagename}.tmp.lst
+#
+#############################################################################
+#                                                                           #
+linblock "plotdiffs - to plot the diffraction pattern"
+#                                                                           #
+#############################################################################
+#
+setenv IN ${imagename}.lst
+#
+\rm -f plotdiffs.list
+#
+${MRC_LOCAL}/bin/plotdiffs.exe << eot
+${realcell},${realang}             !A,B,GAMMA
+1             ! IMOD (1=FOM,2=INT)
+1             ! ISPC (Spacegroup)
+${RESMAX}     ! MAX. RESOL. FOR PLOTFRAME (A)
+4       ! NUMBER OF RESOLUTION CIRCLES (<6)
+10      ! RESOLUTION OF FIRST CIRCLE
+8
+6
+4
+360             !NANGLE
+${rscale}       !rscale
+eot
+#
+\mv -f plotdiffs.list ${imagename}.spt
+#
+#-------------------------------------------------------------
+#
+${MRC_LOCAL}/bin/laserplot.exe -outputfile=PS/${imagename}.FOM.ps PLOTALL.PLT
+\rm PLOTALL.PLT
+#
+#-------------------------------------------------------------
+#
+setenv IN ${imagename}.lst
+\rm -f plotdiffs.list
+#
+${MRC_LOCAL}/bin/plotdiffs.exe << eot
+${realcell},${realang}             !A,B,GAMMA
+2             ! IMOD (1=FOM,2=INT)
+1             ! ISPC (Spacegroup)
+${RESMAX}     ! MAX. RESOL. FOR PLOTFRAME (A)
+4       ! NUMBER OF RESOLUTION CIRCLES (<6)
+10      ! RESOLUTION OF FIRST CIRCLE
+8
+6
+4
+360             !NANGLE
+${rscale}       !rscale
+eot
+\rm -f plotdiffs.list
+#
+#-------------------------------------------------------------
+#
+${MRC_LOCAL}/bin/laserplot.exe -outputfile=PS/${imagename}.logint.ps PLOTALL.PLT
+\rm PLOTALL.PLT
+#
+#-------------------------------------------------------------
+#
+lin "end"
+#
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "${scriptname} normal end."
+#                                                                           #
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

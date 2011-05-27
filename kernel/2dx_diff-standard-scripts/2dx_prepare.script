@@ -1,0 +1,190 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Prepare Pattern                                                    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2006                                             #
+# Last Modification: 10/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 10
+#
+# MANUAL: This script prepares the diffraction pattern for further processing
+#
+# MANUAL: It also verifies some parameters and corrects them if needed. 
+#
+#
+# GLOBAL: imagenumber
+# GLOBAL: imagename
+# GLOBAL: nonmaskimagename
+# GLOBAL: imageorigin
+# GLOBAL: imagesidelength
+# GLOBAL: min
+# GLOBAL: max
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set imageorigin = ""
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set magnification = ""
+set stepdigitizer = ""
+set realang = ""
+set RESMIN = ""
+set RESMAX = ""
+#
+#$end_vars
+#
+echo bin_2dx = ${bin_2dx}
+echo proc_2dx = ${proc_2dx}
+#
+echo imageorigin = ${imageorigin}
+echo imagenumber = ${imagenumber}
+echo imagesidelength = ${imagesidelength}
+echo tempkeep = ${tempkeep}
+#
+set date = `date`
+echo date = ${date}
+#
+set scriptname = 2dx_prepare
+\rm -f LOGS/${scriptname}.results
+\rm -f LOGS/${scriptname}.status
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+if ( ! -e ${imagename}.mrc ) then
+  ${proc_2dx}/linblock "Image ${imagename}.mrc does not exist."
+#
+  if ( ! -e ${imagename}.tif ) then
+    ${proc_2dx}/protest "Image ${imagename}.tif does not exist."
+  else
+    ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+#
+${bin_2dx}/tif2mrc.exe << eot
+${imagename}.tif
+${imagename}.mrc
+y
+eot
+#
+    echo "# IMAGE: "${imagename}.mrc >> LOGS/${scriptname}.results    
+  endif
+else
+  echo "# IMAGE: "${imagename}.mrc >> LOGS/${scriptname}.results
+endif
+#
+if ( ${imagename} != ${nonmaskimagename} ) then
+  echo "# IMAGE: "${nonmaskimagename}.mrc >> LOGS/${scriptname}.results
+endif
+#
+${bin_2dx}/2dx_endianTest.exe ${imagename}.mrc
+#
+set correctend = `${bin_2dx}/2dx_endianTest.exe ${imagename}.mrc | tail -n 1`
+#
+if ( ${correctend} == 'n' ) then
+  ${proc_2dx}/linblock "WARNING: wrong endedness. This will (hopefully) work, but is awfully slow." 
+  ${proc_2dx}/linblock "Use byteswap.exe to correct the endedness to this machine's form."
+  echo "# WARNING: Warning: wrong endedness. This will (hopefully) work, but is awfully slow." >> LOGS/${scriptname}.results
+  echo "# WARNING: Use byteswap.exe to correct the endedness to this machine's form." >> LOGS/${scriptname}.results
+endif
+#
+setenv IN ${imagename}.mrc
+set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
+set sizeX = `echo ${dimens} | cut -d\  -f1` 
+set sizeY = `echo ${dimens} | cut -d\  -f2` 
+if ( ${sizeX} != ${sizeY} ) then
+  ${proc_2dx}/linblock "ERROR: only square images are supported."
+  ${proc_2dx}/linblock "ERROR: only square images are supported."
+  ${proc_2dx}/linblock "ERROR: only square images are supported."
+  echo "#WARNING: ERROR: only square images are supported." >> LOGS/${scriptname}.results
+  ${proc_2dx}/protest "This image is of ${sizeX} x ${sizeY} dimensions. Aborting."
+endif
+#
+if ( ${sizeX} != ${imagesidelength} ) then
+  set oldval = ${imagesidelength}
+  set imagesidelength = ${sizeX}
+  ${proc_2dx}/linblock "ERROR: correcting imagesidelength from ${oldval} to ${imagesidelength}"
+  echo "set imagesidelength = ${imagesidelength}" >> LOGS/${scriptname}.results
+endif
+#
+set testname = `echo ${imagename} | cut -c2-`
+if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
+  set oldval = ${nonmaskimagename}
+  set nonmaskimagename = ${imagename}
+  ${proc_2dx}/linblock "ERROR: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
+  echo "set nonmaskimagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
+endif
+# 
+echo "<<@progress: 3>>"
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+set testval = `echo ${imagenumber} | wc -c`
+if ( `echo ${testval} | awk '{ if ( $1 < 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${imagenumber}
+  set imagenumber = `echo 0000000000 | cut -c${testval}-`${imagenumber}
+  ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
+  echo "set imagenumber = ${imagenumber}" >> LOGS/${scriptname}.results
+endif  
+#
+if ( `echo ${testval} | awk '{ if ( $1 > 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${imagenumber}
+  set startnum = `echo ${testval} | awk '{ s = $1 - 10 } END { print s }'`
+  set endnum   = `echo ${testval} | awk '{ s = $1 - 1 } END { print s }'`
+  set imagenumber = `echo ${imagenumber} | cut -c${startnum}-${endnum}`
+  ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
+  echo "set imagenumber = ${imagenumber}" >> LOGS/${scriptname}.results
+endif  
+#
+echo "<<@progress: 5>>"
+#
+############################################################################# 
+#                                                                           #
+${proc_2dx}/lin "2dx_makedirs - to create all required subdirectories"
+#                                                                           #
+#############################################################################
+#
+${proc_2dx}/2dx_makedirs
+#
+if ( ${imageorigin} < '3' ) then
+  set imageorigin = 3
+  echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Image origin corrected to e-Diff pattern"
+endif
+#   
+echo "<<@progress: 10>"
+#
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "${scriptname} normal end."
+#                                                                           #
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

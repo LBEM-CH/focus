@@ -32,7 +32,7 @@ set cleanup_location = "all"
 # LEGEND: Choose the Level of the Cleanup that should be done.
 # EXAMPLE: cleanup_level = "radical"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "radical;a little bit;only get disk usage"
+# TYPE: Drop_Down_Menu "radical;a little bit;only get disk usage;remove radical and final maps"
 set cleanup_level = "radical"
 #
 #$end_local_vars
@@ -69,6 +69,9 @@ if ( ${location} != "all" ) then
     du . | sed 's/^/::/'
     #
   else
+    if ( "${level}" == "remove" ) then
+      \rm -f final_map.mrc
+    endif
     #
     ############################################################################# 
     ${proc_2dx}/lin "cleaning up local merge directory"
@@ -248,6 +251,9 @@ else
       echo "::Working on ${dirfile}"
       #  source ${proc_2dx}/2dx_cleanup_sub.com
       ${app_2dx_image} ${dirfile} "+2dx_cleanup"
+      if ( "${level}" == "remove" ) then
+        \rm -f final_map.mrc
+      endif
       cd ${oldir}
     end
     #

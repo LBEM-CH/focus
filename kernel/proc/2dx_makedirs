@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/csh 
 #
 # This is not an executable script. It is only sourced from other scripts.
 # The purpose of this script is to initiate the sub-directories, where all the different file types will be stored.

@@ -1707,6 +1707,10 @@ C
 10174 FORMAT(//5X,'OVERALL (',I10,')',10X,F10.3,I7//)
 C**
 C
+CHEN>
+      write(6,'('' Cross-Correlation Map for this image'',/,
+     .          '' ===================================='',/)')
+CHEN<
       istep=(IBOXPHS/120)+1
 C      if(IVERBOSE.gt.3)then
         write(6,'('' The following map has a reduction factor of '',

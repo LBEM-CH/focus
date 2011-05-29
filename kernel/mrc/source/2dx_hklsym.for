@@ -51,12 +51,17 @@ C
         write(*,'('' Assuming no header line.'')')
       endif
 C
-      write(*,'('' Is there a siga column (0=no,1=y,2=Background)'')')
+      write(*,'('' Is there a siga column (0=no,1=y,2=Background,3=no and setting sigf to one)'')')
       read(*,*)isig
+      i1sig=0
       if(isig.eq.2)then
         write(*,'('' Assuming Background, FOM columns.'')')
       elseif(isig.eq.1)then
         write(*,'('' Assuming siga column.'')')
+      elseif(isig.eq.3)then
+        write(*,'('' Creating siga=1 column.'')')
+        i1sig=1
+        isig=0
       else
         write(*,'('' Assuming no siga column.'')')
       endif
@@ -99,6 +104,7 @@ C
           SIGA=0.0
           write (*,200) H,K,L,AMP,PHASE,FOM
         endif
+        if(i1sig.eq.1)SIGA=1.0
         i=i+1
         if(abs(H).gt.MAXSPOT)goto 970
         if(abs(K).gt.MAXSPOT)goto 970
@@ -121,6 +127,10 @@ C-------Treat only right half of Fourier space (H>=0)
       goto 1000
 C
  1005 continue
+      if(i1sig.eq.1)then
+C-------write out SIGF (as values of 1)
+        isig=1
+      endif
       close(10)
       icount=i
       if(icount.lt.1)then

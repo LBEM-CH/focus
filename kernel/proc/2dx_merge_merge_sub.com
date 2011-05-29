@@ -290,24 +290,38 @@ ${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to APH file for 2D run"
 \rm -f APH/sym_sort2D.hkl
 \rm -f APH/sym_noheader2D.hkl
 #
+# Set isig to 3, for NO SIGF BUT SET SIGF to 1.0
+set isig = 3
+#
 ${bin_2dx}/2dx_hklsym.exe << eot
 APH/centric2D.hkl
 APH/sym_nosort2D.hkl
 APH/sym_noheader2D.hkl
 ${spcgrp}
 1
-0
+${isig}
 eot
 #
-# This is not used:
+# This is used within 2dx_hklclean:
 \rm -f APH/sym_nosort2D.hkl
 \rm -f APH/syn_nosort2D-plot.hkl
 #
-echo "# IMAGE: APH/sym_noheader2D.hkl <APH after hklsym for 2D [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
-#
-set withsigf = 0
+echo "# IMAGE: APH/sym_noheader2D.hkl <APH after hklsym for 2D [H,K,L,A,P,FOM,1.0]>" >> LOGS/${scriptname}.results
 #
 sort < APH/sym_noheader2D.hkl > APH/sym_sort2D.hkl
+echo "# IMAGE: APH/sym_sort2D.hkl <APH after sort [H,K,L,A,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+set withsigf = 0
+#
+${bin_2dx}/2dx_hklclean.exe << eot
+APH/sym_sort2D.hkl
+APH/sym2Dref.hkl
+0
+1
+eot
+#
+# This is used within 2dx_hklclean:
+\rm -f APH/sym_nosort2D.hkl
+\rm -f APH/syn_nosort2D-plot.hkl
 #
 ${bin_2dx}/2dx_hklclean.exe << eot
 APH/sym_sort2D.hkl
@@ -323,6 +337,7 @@ if ( ! -e APH/sym2D.hkl ) then
 endif
 #
 echo "# IMAGE: APH/sym2D.hkl <APH after 2dx_clean for 2D [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/sym2Dref.hkl <APH after 2dx_clean for 2D ref [H,K,L,A,P,FOM,1.0]>" >> LOGS/${scriptname}.results
 echo "# IMAGE: APH/syn_nosort2D-plot.hkl <APH after 2dx_clean for merge plot [H,K,A,P,IQ,0,FOM]>" >> LOGS/${scriptname}.results
 #
 #############################################################################
@@ -359,7 +374,6 @@ echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Pl
 #
 set savedir = $PWD
 set date = `date`
-set infile = APH/sym2D.hkl
 #
 # ATTENTION: f2mtz omits data in the 2D projection data if SIGF is defined??????
 #
@@ -388,8 +402,12 @@ if ( ${rotate_to_Z} == "yes" ) then
   ${proc_2dx}/linblock "2dx_permutate - to transform into K,L,H"
   #############################################################################
   #
+  set infile = APH/sym2D.hkl
   ${bin_2dx}/2dx_permutate.exe < ${infile} > SCRATCH/TMP-permutated.hkl
   echo "# IMAGE: SCRATCH/TMP-permutated.hkl <TXT: APH file after permutation>" >> LOGS/${scriptname}.results
+  #
+  set infile = APH/sym2Dref.hkl
+  ${bin_2dx}/2dx_permutateref.exe < ${infile} > SCRATCH/TMP-permutatedref.hkl
   #
   #############################################################################
   ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D run"
@@ -405,6 +423,20 @@ SKIP 0
 END
 eof
   #
+  #############################################################################
+  ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D reference"
+  #############################################################################  
+  #
+  ${bin_ccp4}/f2mtz hklin SCRATCH/TMP-permutatedref.hkl hklout merge2Dref.mtz << eof
+TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
+CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT H K L F PHI FOM SIGF
+CTYPOUT H H H F P W Q
+SKIP 0
+END
+eof
+  #
   # \rm -f SCRATCH/TMP-permutated.hkl
   #
 else
@@ -413,6 +445,7 @@ else
   ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D run"
   #############################################################################  
   #
+  set infile = APH/sym2D.hkl
   ${bin_ccp4}/f2mtz hklin ${infile} hklout merge2D.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
@@ -424,8 +457,25 @@ SKIP 0
 END
 eof
   #
+  #############################################################################
+  ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D reference"
+  #############################################################################  
+  #
+  set infile = APH/sym2Dref.hkl
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout merge2Dref.mtz << eof
+TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
+CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT H K L F PHI FOM SIGF
+CTYPOUT H H H F P W Q
+FILE ${infile}
+SKIP 0
+END
+eof
+  #
 endif
 #
+echo "# IMAGE-IMPORTANT: merge2Dref.mtz <MTZ: Merged full reciproc. space 2D data for reference>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: merge2D.mtz <MTZ: Merged full reciproc. space 2D data>" >> LOGS/${scriptname}.results
 #
 #############################################################################

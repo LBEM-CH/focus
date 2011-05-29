@@ -532,7 +532,7 @@ void mainWindow::setupActions()
   connect(showSelectedAction,SIGNAL(toggled(bool)),this,SLOT(showSelected(bool)));
   viewMenu->addAction(showSelectedAction);
   
-  QAction *viewAlbum = new QAction("Show Protein Album",this);
+  QAction *viewAlbum = new QAction("Show Reconstruction Album",this);
   viewAlbum->setShortcut(tr("Ctrl+Shift+A"));
   connect(viewAlbum,SIGNAL(triggered()),this,SLOT(showAlbum()));
   viewMenu->addAction(viewAlbum);

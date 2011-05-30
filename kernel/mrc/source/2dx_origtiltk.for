@@ -227,8 +227,6 @@ C                         STEP = 0 ==> NO REFINEMENT
 C
 C                WIN    - ZSTAR RANGE WITHIN WHICH SPOTS ARE COMPARED
 C                         FOR SCALING AND ORIGIN REFINEMENT
-C                         this means: Over which Z-star range is a value 
-C                         considered to be zero, i.e. non-tilted.
 C                         A WIN value of 1/(2*ALAT) is useful, 
 C                         e.g. 0.005 for ALAT=100
 C

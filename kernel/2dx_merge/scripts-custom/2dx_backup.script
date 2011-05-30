@@ -21,6 +21,7 @@
 #
 # DISPLAY: backup_dir
 # DISPLAY: backup_merge
+# DISPLAY: backup_large_images
 # DISPLAY: backup_sure
 #
 #$end_local_vars
@@ -31,6 +32,7 @@ set app_2dx_image = ""
 #
 set backup_dir = ""
 set backup_merge = ""
+set backup_large_images = ""
 set backup_sure = ""
 #
 #$end_vars
@@ -43,6 +45,7 @@ source ${proc_2dx}/initialize
 #
 echo backup_dir = ${backup_dir}
 echo backup_merge = ${backup_merge}
+echo backup_large_images = ${backup_large_images}
 echo backup_sure = ${backup_sure}
 #
 echo "<<@progress: 1>>"
@@ -61,6 +64,9 @@ endif
 #
 # This switch decides if the *.mrc files should also be copied:
 set alsobig = "y"
+if ( ${backup_large_images} != "yes" ) then
+  set alsobig = "n"
+endif
 #
 set oldir = ${PWD}
 #
@@ -171,11 +177,25 @@ foreach dirfile ( ${dirlist} )
     cp -f -p ${from_dir}/2dx_image.cfg ${to_dir}
     #
     if ( ${alsobig} == "y" ) then
-      if ( ! -e ${to_dir}/${loc_imagename}.mrc ) then
-        echo ":New: ${to_dir}/${loc_imagename}.mrc"
-        cp -f -p ${from_dir}/${loc_imagename}.mrc ${to_dir}
+      if ( -e ${from_dir}/${loc_imagename}.mrc ) then
+        if ( ! -e ${to_dir}/${loc_imagename}.mrc ) then
+          echo ":New: ${to_dir}/${loc_imagename}.mrc"
+          cp -f -p ${from_dir}/${loc_imagename}.mrc ${to_dir}
+        else
+          echo ":Old: ${to_dir}/${loc_imagename}.mrc"
+        endif
       else
-        echo ":Old: ${to_dir}/${loc_imagename}.mrc"
+        echo "::WARNING ${from_dir}/${loc_imagename}.mrc not found."
+      endif
+      if ( -e ${from_dir}/${loc_imagename}.tif ) then
+        if ( ! -e ${to_dir}/${loc_imagename}.tif ) then
+          echo ":New: ${to_dir}/${loc_imagename}.tif"
+          cp -f -p ${from_dir}/${loc_imagename}.tif ${to_dir}
+        else
+          echo ":Old: ${to_dir}/${loc_imagename}.tif"
+        endif
+      else
+        echo "::WARNING ${from_dir}/${loc_imagename}.tif not found."
       endif
     endif
     #
@@ -191,11 +211,25 @@ foreach dirfile ( ${dirlist} )
     #
     if ( ${loc_imagename} != ${loc_nonmaskimagename} ) then
       if ( ${alsobig} == "y" ) then
-        if ( ! -e ${to_dir}/${loc_nonmaskimagename}.mrc ) then
-          echo ":New: ${to_dir}/${loc_nonmaskimagename}.mrc"
-          cp -f -p ${from_dir}/${loc_nonmaskimagename}.mrc ${to_dir}
+        if ( -e ${from_dir}/${loc_imagename}.mrc ) then
+          if ( ! -e ${to_dir}/${loc_nonmaskimagename}.mrc ) then
+            echo ":New: ${to_dir}/${loc_nonmaskimagename}.mrc"
+            cp -f -p ${from_dir}/${loc_nonmaskimagename}.mrc ${to_dir}
+          else
+            echo ":Old: ${to_dir}/${loc_nonmaskimagename}.mrc"
+          endif
         else
-          echo ":Old: ${to_dir}/${loc_nonmaskimagename}.mrc"
+          echo "::WARNING: ${from_dir}/${loc_nonmaskimagename}.mrc not found"
+        endif
+        if ( -e ${from_dir}/${loc_imagename}.tif ) then
+          if ( ! -e ${to_dir}/${loc_nonmaskimagename}.tif ) then
+            echo ":New: ${to_dir}/${loc_nonmaskimagename}.tif"
+            cp -f -p ${from_dir}/${loc_nonmaskimagename}.tif ${to_dir}
+          else
+            echo ":Old: ${to_dir}/${loc_nonmaskimagename}.tif"
+          endif
+        else
+          echo "::WARNING: ${from_dir}/${loc_nonmaskimagename}.tif not found"
         endif
       endif
       #

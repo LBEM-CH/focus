@@ -44,7 +44,7 @@ source ${proc_2dx}/initialize
 echo "<<@progress: 1>>"
 #
 if ( ${SYN_Ref_is_set} == "0" ) then
-  ${proc_2dx}/linblock "ERROR: First set reference to Synthetic Reference for all images."
+  ${proc_2dx}/linblock "Error: First set the Crystal Unbending parameter above."
   ${proc_2dx}/protest " Read the manual for this script and the parameter. Aborting."
 endif
 #

@@ -6,7 +6,8 @@ C Created..........: 01/03/2007
 C Last Modification: 01/03/2007       
 C Author...........: 2dx.org           
 C
-      character*200 cname1,cname2,cname3,cname4,cdir,cprocdir,cbindir
+      character*200 cname1,cname2,cname3,cname4,crunfile
+      character*200 cdir,cprocdir,cbindir
       character CROT90,CROT180
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE
@@ -17,15 +18,24 @@ C
 C
       write(*,'(/,''input name of results output file'')')
       read(*,'(A)')CFILE1
+      call shorten(CFILE1,k)
+      write(*,'(''Read: '',A)')CFILE1(1:k)
+C
+      write(*,'(/,''input name of output run file'')')
+      read(*,'(A)')crunfile
+      call shorten(crunfile,k)
+      write(*,'(''Read: '',A)')crunfile(1:k)
 C
       write(*,'(/,''input name of file with directory info'')')
       read(*,'(A)')cname1
       call shorten(cname1,k)
-      write(*,'(A)')cname1(1:k)
+      write(*,'(''Read: '',A)')cname1(1:k)
 C
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
 C
       open(11,FILE=CFILE1,STATUS='UNKNOWN',ERR=900)
+C
+      open(14,FILE=crunfile,STATUS='UNKNOWN',ERR=900)
 C
  100  continue
 C
@@ -39,8 +49,20 @@ C
 C
         call shorten(cdir,k1)
         call shortshrink(CIMAGENAME,k2)
-        write(cname4,'(''# IMAGE-IMPORTANT: '',A,''/'',A,''-p1.mrc <'',A,''-p1.mrc>'')')
+        write(cname4,'(''\rm -f LINK/'',A,''-p1.mrc'')')
+     .    CIMAGENAME(1:k2)
+        call shortshrink(cname4,k1)
+        write(14,'(A)')cname4(1:k1)
+C
+        write(cname4,'(''\ln -s '',A,''/'',
+     .     A,''-p1.mrc LINK/'',A,''-p1.mrc'')')
      .    cdir(1:k1),CIMAGENAME(1:k2),CIMAGENAME(1:k2)
+        call shortshrink(cname4,k1)
+        write(14,'(A)')cname4(1:k1)
+C
+        write(cname4,'(''# IMAGE-IMPORTANT: LINK/'',A,
+     .    ''-p1.mrc <'',A,''-p1.mrc>'')')
+     .    CIMAGENAME(1:k2),CIMAGENAME(1:k2)
         call shortshrink(cname4,k1)
         write(11,'(A)')cname4(1:k1)
 C
@@ -57,6 +79,7 @@ C
 C
       close(10)
       close(11)
+      close(14)
 C
       goto 999
 C

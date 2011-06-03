@@ -42,13 +42,23 @@ echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}-scaled.mrc <MAP: ${SYM}-symmetrized
 echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
 #
 set OUTPUTFILE = SCRATCH/2dx_mapdisplay.tmp
+set OUTRUNFILE = SCRATCH/2dx_mapdisplay.run.tmp
 #
 \rm -f ${OUTPUTFILE}
+\rm -f ${OUTRUNFILE}
 #
 ${bin_2dx}/2dx_merge_inventory.exe << eot
 ${OUTPUTFILE}
+${OUTRUNFILE}
 2dx_merge_dirfile.dat
 eot
+#
+if ( ! -d LINK ) then
+  \mkdir LINK
+endif
+chmod +x ${OUTRUNFILE}
+source ${OUTRUNFILE}
+\rm -f ${OUTRUNFILE}
 #
 cat ${OUTPUTFILE}
 cat ${OUTPUTFILE} >> LOGS/${scriptname}.results

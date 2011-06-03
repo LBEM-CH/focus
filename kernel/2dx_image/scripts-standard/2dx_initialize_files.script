@@ -103,6 +103,8 @@ set quadradb = ""
 set initialization_executable = ""
 set initialization_corr_endian = ""
 set crop = ""
+set MergeIWF = ""
+set MergeIWP = ""
 #
 #$end_vars
 #
@@ -119,6 +121,14 @@ echo "<<@progress: 1>>"
 #
 if ( ! -e ${imagename}.mrc ) then
   set initialization_executable = 'y'
+endif
+#
+if ( ${MergeIWF}x == "-1x" ) then
+  echo "set MergeIWF = 0" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${MergeIWP}x == "-1x" ) then
+  echo "set MergeIWP = 1" >> LOGS/${scriptname}.results
 endif
 #
 set testname = `echo ${imagename} | cut -c2-`

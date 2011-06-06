@@ -266,7 +266,7 @@ eot
           ${proc_2dx}/linblock "Renaming ${imagename}.tiff into ${imagename}.tif" >> History.dat
           \mv -f ${imagename}.tiff ${imagename}.tif
         endif
-        ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+        ${proc_2dx}/linblock "Image ${imagename}.tif found...converting (6)."
         #
         ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tif
@@ -280,6 +280,33 @@ eot
       endif
     else
       echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
+    endif
+    #
+    if ( ! -e ${nonmaskimagename}.mrc ) then
+      ${proc_2dx}/linblock "Image ${nonmaskimagename}.mrc does not exist."
+      #
+      if ( ! ( -e ${nonmaskimagename}.tif || -e ${nonmaskimagename}.tiff ) ) then
+        ${proc_2dx}/protest "Image ${nonmaskimagename}.tif does not exist."
+      else
+        if ( -e ${nonmaskimagename}.tiff ) then
+          ${proc_2dx}/linblock "Renaming ${nonmaskimagename}.tiff into ${nonmaskimagename}.tif"
+          ${proc_2dx}/linblock "Renaming ${nonmaskimagename}.tiff into ${nonmaskimagename}.tif" >> History.dat
+          \mv -f ${nonmaskimagename}.tiff ${nonmaskimagename}.tif
+        endif
+        ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif found...converting (7)."
+        #
+        ${bin_2dx}/tif2mrc.exe << eot
+${nonmaskimagename}.tif
+${nonmaskimagename}.mrc
+y
+eot
+        #
+        set new_mrc_created = 'y'
+        #
+        echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-masked Image>" >> LOGS/${scriptname}.results    
+      endif
+    else
+      echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-masked Image>" >> LOGS/${scriptname}.results
     endif
     #
     #################################################################################
@@ -338,7 +365,7 @@ else
         \mv -f ${imagename}.tiff ${imagename}.tif
       endif 
       if ( -e ${imagename}.tif ) then
-        ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+        ${proc_2dx}/linblock "Image ${imagename}.tif found...converting (1)."
         #
         ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tif
@@ -379,7 +406,7 @@ eot
               echo "#WARNING: Image ${imagename}.tif not existing."  >> LOGS/${scriptname}.results
               echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
             else
-              ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+              ${proc_2dx}/linblock "Image ${imagename}.tif found...converting (2)."
               #
               ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tif
@@ -407,7 +434,7 @@ eot
               echo "#WARNING: Image ${imagename}.tiff not existing."  >> LOGS/${scriptname}.results
               echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
             else
-              ${proc_2dx}/linblock "Image ${imagename}.tiff found...converting."
+              ${proc_2dx}/linblock "Image ${imagename}.tiff found...converting (3)."
               #
               ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tiff
@@ -440,6 +467,45 @@ eot
       echo ":: "
       ${proc_2dx}/protest "ABORTING."
     endif
+    #
+    #
+    #
+    #
+    #
+    if ( ! -e ${nonmaskimagename}.mrc ) then
+      #
+      #############################################################################
+      ${proc_2dx}/linblock "Image ${nonmaskimagename}.mrc does not exist."
+      #############################################################################
+      #
+      if ( ( ! -e ${nonmaskimagename}.tif ) && ( -e ${nonmaskimagename}.tiff ) ) then
+        ${proc_2dx}/linblock "Renaming ${nonmaskimagename}.tiff into ${nonmaskimagename}.tif"
+        \mv -f ${nonmaskimagename}.tiff ${nonmaskimagename}.tif
+      endif 
+      if ( -e ${nonmaskimagename}.tif ) then
+        ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif found...converting (4)."
+        #
+        ${bin_2dx}/tif2mrc.exe << eot
+${nonmaskimagename}.tif
+${nonmaskimagename}.mrc
+y
+eot
+        #
+        set new_mrc_created = 'y'
+        #
+      else
+        #############################################################################
+        ${proc_2dx}/linblock "ERROR: Image ${nonmaskimagename}.tif does not exist."
+        #############################################################################
+        # 
+      endif
+      #
+    endif
+    #
+    #
+    #
+    #
+    #
     #
     ${bin_2dx}/2dx_endianTest.exe ${imagename}.mrc | head -n 2
     #
@@ -721,7 +787,7 @@ eot
       if ( ! -e ${imagename}.tif ) then
         ${proc_2dx}/protest "Image ${imagename}.tif does not exist."
       else
-        ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+        ${proc_2dx}/linblock "Image ${imagename}.tif found...converting (5a)."
         #
         ${bin_2dx}/tif2mrc.exe << eot
 ${imagename}.tif
@@ -733,10 +799,28 @@ eot
         #
         echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
       endif
+      #
     else
       echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
     endif
     #
+    if ( ! -e ${nonmaskimagename}.mrc ) then
+      if ( ! -e ${nonmaskimagename}.tif ) then
+        ${proc_2dx}/protest "Image ${nonmaskimagename}.tif does not exist."
+      else
+        ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif found...converting (5b)."
+        #
+        ${bin_2dx}/tif2mrc.exe << eot
+${nonmaskimagename}.tif
+${nonmaskimagename}.mrc
+y
+eot
+        #
+        echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-Mask Image>" >> LOGS/${scriptname}.results    
+      endif
+    else
+      echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-Mask Image>" >> LOGS/${scriptname}.results
+    endif
   endif
   #
   if ( ${Calc_from_sample_pixel} == "y" ) then
@@ -936,6 +1020,7 @@ endif
 #
 #
 #
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
 #
 # This is to make sure that 2dx_maskCrystal displays the three file names even before it has been run
 if ( ! -e LOGS/2dx_maskCrystal.results ) then

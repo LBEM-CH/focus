@@ -129,7 +129,7 @@ C
       ITEST=JXYZ(1)/2
       IF (2*ITEST.NE.JXYZ(1)) THEN
         WRITE(6,1090)
-1090    FORMAT(/' Box size must be even number')
+1090    FORMAT(/,':: Box size must be even number')
         STOP
       ENDIF
 CHEN>
@@ -153,7 +153,7 @@ C
       CALL GUESSF(FILEIN,CFORM,EX)
       IF  (.NOT.EX) THEN
         WRITE(*,1001) FILEIN
-1001    FORMAT(' File not found ',A80)
+1001    FORMAT(':: File not found ',A80)
         STOP
       ENDIF
       CALL IOPEN(FILEIN,10,CFORM,MODE,NXYZ(1),NXYZ(2),
@@ -170,8 +170,8 @@ C
      +  BUF1(JXYZ(1)*JXYZ(2)),RMSA(NX*NY),BINS(NBIN),
      +  CBOXS(JXYZ(2)),STAT=IERR)
       IF (IERR.NE.0) THEN
-        WRITE(*,*) ' ERROR: Memory allocation failed in MAIN'
-        STOP ' Try reducing the tile size'
+        WRITE(*,*) ':: ERROR: Memory allocation failed in MAIN'
+        STOP '::  Try reducing the tile size'
       ENDIF
 C
       DRMS=0.0D0
@@ -225,8 +225,8 @@ C
       IF (2*(KXYZ(1)/2).NE.KXYZ(1)) KXYZ(1)=KXYZ(1)+1
       ALLOCATE(POWER(KXYZ(1)*KXYZ(2)),STAT=IERR)
       IF (IERR.NE.0) THEN
-        WRITE(*,*) ' ERROR: Memory allocation failed for POWER'
-        STOP ' Try reducing the tile size'
+        WRITE(*,*) ':: ERROR: Memory allocation failed for POWER'
+        STOP '::  Try reducing the tile size'
       ENDIF
       DO 30 K=1,KXYZ(1)*KXYZ(2)
         POWER(K)=0.0
@@ -264,8 +264,8 @@ C
 C
 CHEN>
       if(CNT.lt.1)then
-        write(*,*)' ERROR: BOXIMG did not produce correct tiles'
-        write(*,*)'RMSMIN:',RMSMIN,'  RMSMAX:',RMSMAX,'   last RMS:',RMS
+        write(*,'('':: ERROR: BOXIMG did not produce correct tiles'')')
+        write(*,*)':: RMSMIN:',RMSMIN,'  RMSMAX:',RMSMAX,'   last RMS:',RMS
         stop
       endif
 C
@@ -296,7 +296,7 @@ C
      +            STEPR/RESMIN,' A'
       ENDIF
       IF (RESMIN.GE.RESMAX)
-     +  STOP ' RESMIN >= RESMAX; increase RESMAX'
+     +  STOP ':: RESMIN >= RESMAX; increase RESMAX'
 C
       DFMID1=DFMIN
       DFMID2=DFMAX
@@ -379,7 +379,7 @@ CHENN>
         write(11,'(G16.3)')DRMS1
       close(11)
       GOTO 9999
-998   stop 'ERROR on file open of SCRATCH/2dx_ctffind3.result.tmp'
+998   stop ':: ERROR on file open of SCRATCH/2dx_ctffind3.result.tmp'
 9999  continue
 CHENN<
 C
@@ -667,8 +667,8 @@ CHEN<
         ID=(I2-I1+1)*(I2-I1+1)
         ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
         IF (IERR.NE.0) THEN
-          WRITE(*,*) ' ERROR: Memory allocation failed in SEARCH_CTF'
-          STOP ' Try reducing size of defocus search grid'
+          WRITE(*,*) '::  ERROR: Memory allocation failed in SEARCH_CTF'
+          STOP '::  Try reducing size of defocus search grid'
         ENDIF
         DO 10 K=0,3
           DO 11 I=I1,I2
@@ -711,8 +711,8 @@ C
         ID=I2-I1+1
         ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
         IF (IERR.NE.0) THEN
-          WRITE(*,*) ' ERROR: Memory allocation failed in SEARCH_CTF'
-          STOP ' Try reducing size of defocus search grid'
+          WRITE(*,*) '::  ERROR: Memory allocation failed in SEARCH_CTF'
+          STOP '::  Try reducing size of defocus search grid'
         ENDIF
         K=0
         J=0

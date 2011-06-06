@@ -173,7 +173,7 @@ if ( ! -e ${nonmaskimagename}.mrc ) then
 endif
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-Masked Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
@@ -385,7 +385,7 @@ ${imagesidelength}
 ${smallsize}
 7,7
 ${mode}
-${imagename}
+${nonmaskimagename}
 TMP-positions.txt
 TMP-runfile-windows.txt
 eot
@@ -513,19 +513,19 @@ eot
     ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
     #############################################################################
     #
-    \rm -f CUT/${imagename}.merge.ps.mrc
+    \rm -f CUT/${nonmaskimagename}.merge.ps.mrc
     #
     ${bin_2dx}/labelh.exe << eot
-CUT/${imagename}.1.1.ps.mrc
+CUT/${nonmaskimagename}.1.1.ps.mrc
 14
-CUT/${imagename}.merge.ps.mrc
-CUT/${imagename}
+CUT/${nonmaskimagename}.merge.ps.mrc
+CUT/${nonmaskimagename}
 eot
     #
-    echo "# IMAGE-IMPORTANT: "CUT/${imagename}.merge.ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}.merge.ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
     #
-    if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
-      ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
+    if ( ! -e CUT/${nonmaskimagename}.merge.ps.mrc ) then
+      ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}.merge.ps.mrc not produced."
     endif
     #
     cat ${defocus_pos_file}
@@ -593,19 +593,19 @@ eot
     #
     cat ${defocus_pos_select_file}
     #
-    \rm -f CUT/${imagename}.marked.merge.ps.mrc
+    \rm -f CUT/${nonmaskimagename}.marked.merge.ps.mrc
     #
     ${bin_2dx}/labelh.exe << eot
-CUT/${imagename}.marked.1.1.ps.mrc
+CUT/${nonmaskimagename}.marked.1.1.ps.mrc
 14
-CUT/${imagename}.marked.merge.ps.mrc
-CUT/${imagename}.marked
+CUT/${nonmaskimagename}.marked.merge.ps.mrc
+CUT/${nonmaskimagename}.marked
 eot
     #
-    echo "# IMAGE-IMPORTANT: "CUT/${imagename}.marked.merge.ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}.marked.merge.ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
     #
-    if ( ! -e CUT/${imagename}.merge.ps.mrc ) then
-      ${proc_2dx}/protest "ERROR: CUT/${imagename}.merge.ps.mrc not produced."
+    if ( ! -e CUT/${nonmaskimagename}.merge.ps.mrc ) then
+      ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}.merge.ps.mrc not produced."
     endif
     #
     tail -2 TMP.2dx_deftilt.run.out.txt
@@ -738,16 +738,16 @@ eot
   #
   #
   if ( ${debugmode} == "n" ) then
-    echo dummy > CUT/${imagename}.1.1.ps.mrc 
-    \rm -f CUT/${imagename}.?.?.ps.mrc
-    echo dummy > CUT/${imagename}.marked.1.1.ps.mrc 
-    \rm -f CUT/${imagename}.marked.?.?.ps.mrc
+    echo dummy > CUT/${nonmaskimagename}.1.1.ps.mrc 
+    \rm -f CUT/${nonmaskimagename}.?.?.ps.mrc
+    echo dummy > CUT/${nonmaskimagename}.marked.1.1.ps.mrc 
+    \rm -f CUT/${nonmaskimagename}.marked.?.?.ps.mrc
   endif
   #
   if ( ${tempkeep} == "n" ) then
     \rm -f TMP-positions.txt
     \rm -f TMP-runfile-windows.txt
-    \rm -f CUT/${imagename}.4.4.mrc
+    \rm -f CUT/${nonmaskimagename}.4.4.mrc
     \rm -f TMP.2dx_deftilt.run.txt
     \rm -f TMP.2dx_deftilt.run.out.txt
     \rm -f TMP.2dx_deftilt.good.txt

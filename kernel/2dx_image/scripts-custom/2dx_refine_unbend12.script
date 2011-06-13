@@ -1,0 +1,210 @@
+#!/bin/csh -ef
+####
+#############################################################################
+#                                                                           #
+# Title: Refine Parameters Unbend I (Coarse & Fine)                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 04/12/2011                                             #
+# Last Modification: 04/12/2011                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 66
+#
+# MANUAL: This script allows a lengthy brute-force test of various parameter settings to search the optimal parameter combination. The script runs the core of the <I>unbend I</I> script, testing parameters according to the defined limits. It will calculate the QVal for each parameter setting, and determine the parameter that results in the highest QVal.
+#
+# MANUAL: Be aware that a reference that is too small (boxa1 too small) will result in an artificially high QVal due to noise-correlation. Keep and open eye and mind, when trying to refine boxa1. 
+#
+# MANUAL: You can run this script on one representative image over night, and the use the determined parameters as default values for other images from the same class of images (e.g. same sample, same microscope, same tilt-angle). To set default values, either edit the system-wide default 2dx_image.cfg, or edit the 2dx_image.cfg file one level up from the current image directories.
+#
+#=============================================================================
+# SECTION: Refinement Program
+#=============================================================================
+#
+# LABEL: Refine maska and boxa1 simulaneously?
+# LEGEND: Flag, defining if maska and boxa1 should be refined, using the following values.
+# EXAMPLE: refine_maska_boxa1_doit = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
+# TYPE: Bool "y;n"
+set refine_maska_boxa1_doit = "y"
+#
+# LABEL: Refine maskb01 and boxb1 simulaneously?
+# LEGEND: Flag, defining if maskb01 and boxb1 should be refined, using the following values.
+# EXAMPLE: refine_maskb01_boxb1_doit = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
+# TYPE: Bool "y;n"
+set refine_maskb01_boxb1_doit = "n"
+#
+# LABEL: Refine maskb02?
+# LEGEND: Flag, defining if maska should be refined, using the following values.
+# EXAMPLE: refine_maskb02_doit_1 = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
+# TYPE: Bool "y;n"
+set refine_maskb02_doit_1 = "n"
+#
+#=============================================================================
+# Other parameter follow
+#=============================================================================
+#
+# DISPLAY: maska
+# DISPLAY: boxa1
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: quadpreda
+# DISPLAY: quadrada
+# DISPLAY: radlim
+# DISPLAY: refori
+# DISPLAY: IMAXCOR
+# DISPLAY: ISTEP
+# DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: ccunbend_program
+# DISPLAY: refine_maska_val
+# DISPLAY: refine_boxa1_val
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+set maska = ""
+set boxa1 = ""
+set boxa2 = ""
+set lattice = ""
+set quadpreda = ""
+set quadrada = ""
+set imagename = ""
+set defocus = ""
+set imagenumber = ""
+set realcell = ""
+set holea = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set ALAT = ""
+set radlim = ""
+set realang = ""
+set treatspotscan = ""
+set facthresha = ""
+set phacon = ""
+set CS = ""
+set KV = ""
+set refori = ""
+set IMAXCOR = ""
+set ISTEP = ""
+set RMAG = ""
+set ccunbend_program = ""
+set refine_maska_val = ""
+set refine_boxa1_val = ""
+#
+#$end_vars
+#
+source ${proc_2dx}/initialize
+#
+set scriptname = 2dx_refine_unbend12
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>"
+#
+set date = `date`
+echo date = ${date}
+#
+set rmax = 11000
+echo rmax = ${rmax}
+#
+set halimsid = ${imagesidelength}
+@ halimsid /= 1
+echo halimsid = ${halimsid}
+#
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+echo refposix = ${refposix}
+echo refposiy = ${refposiy}
+#
+set rtemp1 = ${imagesidelength}
+@ rtemp1 /= 2
+set rtemp2 = ${rtemp1}
+@ rtemp1 -= 200
+@ rtemp2 += 199
+# this gives a pattern diameter of 800 pixels.
+set boxlabel = ${rtemp1},${rtemp2},${rtemp1},${rtemp2}
+echo boxlabel = ${boxlabel}
+#
+set rtemp1 = ${imagesidelength}
+@ rtemp1 /= 2
+set rtemp2 = ${rtemp1}
+@ rtemp1 -= 13
+@ rtemp2 += 12
+# this gives a pattern diameter of 26 pixels.
+set patlabel = ${rtemp1},${rtemp2},${rtemp1},${rtemp2}
+echo patlabel = ${patlabel}
+#
+set quadradax = `echo ${quadrada} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
+set quadraday = `echo ${quadrada} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
+#
+set dowarn = 'n'
+set final_round = "n"
+#
+if ( ${refine_maska_boxa1_doit} == 'y' ) then
+  set refine_now = "maska_boxa1"
+  #################################################################################
+  ${proc_2dx}/linblock "Starting coarse parameter refinement for Unbend I"
+  #################################################################################
+  source ${proc_2dx}/2dx_refine_unbend1_sub.com
+  
+  # copy the QVal table of the coarse alignement
+  \rm -f SCRATCH/${imagename}-maska_boxa1_1.txt
+  \cp -f SCRATCH/${imagename}-maska_boxa1.txt SCRATCH/${imagename}-maska_boxa1_1.txt
+  echo "# IMAGE: SCRATCH/${imagename}-maska_boxa1_1.txt  <TXT: QVal Table of Coarse Refinement>" >> LOGS/${scriptname}.results
+  
+  set new_loc_maska_step = "1"
+  set loc_maska_start   = `echo ${maska} ${loc_maska_step} ${new_loc_maska_step} | awk '{ s = ($1 - $2) + $3 } END {print s}'`
+  set loc_maska_end   = `echo ${maska} ${loc_maska_step} ${new_loc_maska_step} | awk '{ s = ($1 + $2) - $3 } END {print s}'`
+  set loc_maska_step  = ${new_loc_maska_step}
+  set loc_maska_factor = `echo ${refine_maska_val} | cut -d\, -f4`
+  set refine_maska_val = "${loc_maska_start},${loc_maska_end},${loc_maska_step},${loc_maska_factor}"  
+  set new_loc_boxa1_step = "10"
+  set loc_boxa1_start   = `echo ${boxa1} ${loc_boxa1_step} ${new_loc_boxa1_step} | awk '{ s = ($1 - $2) + $3 } END {print s}'`
+  set loc_boxa1_end   = `echo ${boxa1} ${loc_boxa1_step} ${new_loc_boxa1_step} | awk '{ s = ($1 + $2) - $3 } END {print s}'`
+  set loc_boxa1_step  = ${new_loc_boxa1_step}
+  set loc_boxa1_factor = `echo ${refine_boxa1_val} | cut -d\, -f4`
+  set refine_boxa1_val = "${loc_boxa1_start},${loc_boxa1_end},${loc_boxa1_step},${loc_boxa1_factor}"  
+  #################################################################################
+  ${proc_2dx}/linblock "Starting fine parameter refinement for Unbend I"
+  #################################################################################
+  source ${proc_2dx}/2dx_refine_unbend1_sub.com
+  # copy the QVal table of the coarse alignement
+  \rm -f SCRATCH/${imagename}-maska_boxa1_2.txt
+  \cp -f SCRATCH/${imagename}-maska_boxa1.txt SCRATCH/${imagename}-maska_boxa1_2.txt
+  echo "# IMAGE: SCRATCH/${imagename}-maska_boxa1_1.txt  <TXT: QVal Table of Coarse Refinement>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${imagename}-maska_boxa1_2.txt  <TXT: QVal Table of Fine Refinement>" >> LOGS/${scriptname}.results
+endif
+#
+#
+if ( ${dowarn} == 'y' ) then
+  echo "# WARNING: You are refining the reference size." >> LOGS/${scriptname}.results
+  echo "# WARNING: Warning: A too small reference will give an artificially good QVal due to noise correlation." >> LOGS/${scriptname}.results
+endif
+#
+#################################################################################
+${proc_2dx}/linblock "Doing it again, with the best parameter: maska = ${maska}, boxa1 = ${boxa1}"
+#################################################################################
+#
+set final_round = "y"
+#
+source ${proc_2dx}/2dx_unbend1_sub.com
+#
+#
+echo "<<@progress: 100>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################

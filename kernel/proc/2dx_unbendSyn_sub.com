@@ -1184,13 +1184,13 @@ cat SCRATCH/TMP9871.dat >> LOGS/${scriptname}.results
 source SCRATCH/TMP9871.dat
 #
 set IQS = `echo ${US_IQ1} ${US_IQ2} ${US_IQ3} ${US_IQ4} ${US_IQ5} ${US_IQ6} ${US_IQ7} ${US_IQ8} ${US_IQ9}`
-echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "::maska=${SYN_maska}: QVal= ${QVAL_local}      IQ stat = ${IQS}"
-echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+#":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+${proc_2dx}/linblock "Synthetich Unbend with maska=${SYN_maska} maskb=${SYN_maskb} gives QVal= ${QVAL_local}      IQ stat = ${IQS}"
+#":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 #
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
-echo "::Unbend S: maska=${SYN_maska}: QVal= ${QVAL_local}      IQ stat = ${IQS}" >> History.dat
+echo "::Unbend S: maska=${SYN_maska} maskb=${SYN_maskb}: QVal= ${QVAL_local}      IQ stat = ${IQS}" >> History.dat
 #
 echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
 echo "set QVALS = ${QVAL_local}" >> LOGS/${scriptname}.results

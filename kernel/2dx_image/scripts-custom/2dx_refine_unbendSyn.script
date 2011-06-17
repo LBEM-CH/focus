@@ -1,0 +1,585 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Refine Parameters Synthetic Unbend                                 #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 06/10/2006                                             #
+# Last Modification: 06/10/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# MANUAL: This script will do the image unbending with a synthetically generated reference. 
+#
+# MANUAL: You can only use this script, after the conventional image processing with lattice and defocus determination, and unbending with Unbending-I and Unbending-II has been done, and a phase origin for merging has been determined. Only then, the synthetical reference can be created with the correct defocus, tilt and phase origin.
+#
+# MANUAL: The reference should be the result of a merging process, and should be reachable for a 2D merge dataset under "../merge/merge2D.mtz" or "../../merge/merge2D.mtz" or for a 3D merge dataset under "../merge/merge3D.mtz" or "../../merge/merge3D.mtz".
+#
+# MANUAL: <B><i>This script is here provided in draft form, not yet fully tested. Please give us feedback about your user experiences with this script. We are working on improving the 2dx_merge program, which interacts with 2dx_image through this script. This part is still under development, and your experience and knowledge is most welcome for this project. </i></B>
+#
+#
+# SORTORDER: 68 
+#
+#
+#=============================================================================
+# SECTION: Refinement Program
+#=============================================================================
+#
+# LABEL: Refine SYN_maska?
+# LEGEND: Flag, defining if SYN_maska should be refined, using the following values.
+# EXAMPLE: refine_SYN_maska_doit_1 = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
+# TYPE: Bool "y;n"
+set refine_SYN_maska_doit = "y"
+#
+# LABEL: Refine SYN_maskb?
+# LEGEND: Flag, defining if SYN_maskb should be refined, using the following values.
+# EXAMPLE: refine_SYN_maskb_doit_1 = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
+# TYPE: Bool "y;n"
+set refine_SYN_maskb_doit = "y"
+#
+#=============================================================================
+# Other parameter follow
+#=============================================================================
+#
+# DISPLAY: SYN_Unbending
+# DISPLAY: SYN_Bfact1
+# DISPLAY: SYN_Bfact2
+# DISPLAY: SYN_maska
+# DISPLAY: SYN_maskb
+# DISPLAY: SYN_facthresha
+# DISPLAY: SYN_quadrada
+# DISPLAY: SYN_quadradb
+# DISPLAY: SYN_quadpreda
+# DISPLAY: SYN_quadpredb
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: ALAT
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: radlim
+# DISPLAY: domask
+# DISPLAY: ttfcorfirst
+# DISPLAY: treatspotscan
+# DISPLAY: ctfplotresmax
+# DISPLAY: tempkeep
+# DISPLAY: refori
+# DISPLAY: createmaskinfo
+# DISPLAY: ISTEP
+# DISPLAY: IMAXCOR
+# DISPLAY: ctfrev
+# DISPLAY: ctf_ttf
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: rot90
+# DISPLAY: rot180
+# DISPLAY: revhk
+# DISPLAY: revhnd
+# DISPLAY: sgnxch
+# DISPLAY: revxsgn
+# DISPLAY: beamtilt
+# DISPLAY: phaori
+# DISPLAY: phaoriFouFilter
+# DISPLAY: do3quadserch
+# DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: refine_SYN_maska_val
+# DISPLAY: refine_SYN_maskb_val
+#
+#$end_local_vars
+#
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+set SYN_Unbending = ""
+set SYN_maska = ""
+set SYN_maskb = ""
+set SYN_Bfact1 = ""
+set SYN_Bfact2 = ""
+set SYN_facthresha = ""
+set SYN_quadrada = ""
+set SYN_quadradb = ""
+set SYN_quadpreda = ""
+set SYN_quadpredb = ""
+set PHASEORI_done = ""
+set boxb1 = ""
+set boxb2 = ""
+set quadradb = ""
+set imagename = ""
+set defocus = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set realcell = ""
+set lattice = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set ALAT = ""
+set quadpredb = ""
+set radlim = ""
+set realang = ""
+set treatspotscan = ""
+set facthresha = ""
+set phacon = ""
+set ctfplotresmax = ""
+set stepdigitizer = ""
+set CS = ""
+set KV = ""
+set domask = ""
+set TLTAXIS = ""
+set TLTAXA = ""
+set TLTANG = ""
+set TAXA = ""
+set TANGL = ""
+set ttfcorfirst = ""
+set det_tilt = ""
+set ctf_ttf = ""
+set refori = ""
+set createmaskinfo = ""
+set ISTEP = ""
+set IMAXCOR = ""
+set rot180 = ""
+set revhk = ""
+set rot90 = ""
+set revhnd = ""
+set sgnxch = ""
+set revxsgn = ""
+set ctfrev = ""
+set beamtilt = ""
+set phaori = ""
+set phaoriFouFilter = ""
+set do3quadserch = ""
+set SYM = ""
+set RMAG = ""
+set refine_SYN_maska_val = ""
+set refine_SYN_maskb_val = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_refine_unbendSyn
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+source ${bin_ccp4}/ccp4.setup-csh
+#
+source ${proc_2dx}/2dx_makedirs
+#
+echo "<<@evaluate>>"
+#
+set date = `date`
+echo date = ${date}
+#
+if ( ${SYN_Unbending} == "0" ) then
+  ${proc_2dx}/linblock "Skipping. Fourier filtered reference was used instead."
+  exit
+endif
+#
+if ( ${PHASEORI_done} == "n" ) then
+  ${proc_2dx}/linblock "Skipping. Determine the phase origin from the Fourier-filtered unbending first."
+  exit
+endif
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+set tmp1 = `echo ${boxb1} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${boxb1} ) then
+  echo boxb1 = ${boxb1}
+else
+  set boxb1 = ${tmp1}
+  echo boxb1 = ${boxb1}
+  echo "set boxb1 = ${boxb1}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: boxb1 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+  echo "#WARNING: Warning: boxb1 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${boxb2} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${boxb2} ) then
+  echo boxb2 = ${boxb2}
+else
+  set boxb2 = ${tmp1}
+  echo boxb2 = ${boxb2}
+  echo "set boxb2 = ${boxb2}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: boxb2 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+  echo "#WARNING: Warning: boxb2 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${SYN_maska} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${SYN_maska} ) then
+  echo SYN_maska = ${SYN_maska}
+else
+  set SYN_maska = ${tmp1}
+  echo SYN_maska = ${SYN_maska}
+  echo "set SYN_maska = ${SYN_maska}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: SYN_maska needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+  echo "#WARNING: Warning: SYN_maska needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+set tmp1 = `echo ${SYN_maskb} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${SYN_maskb} ) then
+  echo SYN_maskb = ${SYN_maskb}
+else
+  set SYN_maskb = ${tmp1}
+  echo SYN_maskb = ${SYN_maskb}
+  echo "set SYN_maskb = ${SYN_maskb}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: SYN_maskb needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+  echo "#WARNING: Warning: SYN_maskb needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 1>>"
+#
+set startname = `echo ${imagename} | cut -c1`
+if ( $domask == 'y' ) then
+  if ( ${startname} == 'm' ) then
+    set domask = 'n'
+    echo domask corrected to ${domask}
+  endif
+endif
+#
+if ( ${createmaskinfo} == 'y' ) then
+  if ( ${startname} == 'm' ) then
+    # set createmaskinfo = 'n'
+    ${proc_2dx}/linblock "Creating another MASKINFO, but image is already masked."
+  endif
+endif
+#
+set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
+set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
+#
+#################################################################################
+#
+if ( ${boxb1} > ${imagesidelength} ) then
+  ${proc_2dx}/linblock "WARNING: boxb1 too large."
+endif
+#  
+if ( ${boxb2} > ${imagesidelength} ) then
+  ${proc_2dx}/linblock "WARNING: boxb2 too large."
+endif
+#  
+if ( ${treatspotscan} == 'y' ) then
+  set valspotscan = '1'
+else
+  set valspotscan = '0'
+endif
+#
+set rmax = 11000
+echo rmax = ${rmax}
+#
+set reciangle = `echo ${realang} | awk '{ s = 180.0 - $1 } END { print s } '`
+echo reciangle = ${reciangle}
+#
+set imagecenter = ${imagesidelength}
+@ imagecenter /= 2
+set imagecenterx = ${imagecenter}
+set imagecentery = ${imagecenter}
+#
+set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+if ( ${tmp1} != ${refposix} ) then
+  set refori = ${refposix},${refposiy}
+  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
+  echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
+endif
+echo refposix = ${refposix}
+echo refposiy = ${refposiy}
+#
+# set RESPLOTMAX = 0.3
+set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 } else { s = 0.3 } } END { print s }'`
+# 0.3 corresponds to 3.33 Angstroem for the border of the plot.
+#
+if ( ! -d SCRATCH ) then
+  ${proc_2dx}/protest "ERROR: SCRATCH does not exist."
+endif
+#
+set u1 = `echo ${lattice} | cut -d\, -f1`
+set u2 = `echo ${lattice} | cut -d\, -f2`
+set v1 = `echo ${lattice} | cut -d\, -f3`
+set v2 = `echo ${lattice} | cut -d\, -f4`
+set ulen = `echo ${u1} ${u2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+set vlen = `echo ${v1} ${v2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+#
+set latlenok = `echo ${ulen} ${vlen} | awk '{ if ( $1 + $2 < 0.1 ) { s = 0 } else { s = 1 }} END { print s }'`
+if ( ${latlenok} == '0' ) then
+  ${proc_2dx}/linblock "ERROR: Lattice is ${lattice}"
+  ${proc_2dx}/protest "Determine lattice first. Aborting."
+endif
+#
+set istilt = `echo $TLTANG | awk '{if ( -25.0 < $1 && $1 < 25.0 ) {s = 0} else {s = 1}} END {print s}'`
+echo istilt = $istilt
+#
+if ( ${istilt} == '0' ) then
+  set istilt = 'n'
+else
+  set istilt = 'y'
+endif
+#
+set issometilt = `echo $TLTANG | awk '{if ( -5.0 < $1 && $1 < 5.0 ) {s = 0} else {s = 1}} END {print s}'`
+echo issometilt = $issometilt
+#
+if ( ${issometilt} == '0' ) then
+  set issometilt = 'n'
+  echo ":: Untilted."
+else
+  set issometilt = 'y'
+  echo ":: Tilted."
+endif
+#
+if (${ctf_ttf} == 'CTF') then
+  if ( ${ttfcorfirst} == 'y' ) then
+    ${proc_2dx}/linblock "Treating as Non-Tilted: Correcting TTFcorFirst to NO"
+    set ttfcorfirst = 'n'
+    echo "set ttfcorfirst = n" >> LOGS/${scriptname}.results
+  endif
+  set istilt = 'n'
+else
+  echo "# WARNING: Warning: You are using TTF correction. This requires a reliable tilt geometry." >> LOGS/${scriptname}.results
+endif
+#
+set u1 = `echo ${lattice} | cut -d\, -f1`
+set u2 = `echo ${lattice} | cut -d\, -f2`
+set v1 = `echo ${lattice} | cut -d\, -f3`
+set v2 = `echo ${lattice} | cut -d\, -f4`
+set ulen = `echo ${u1} ${u2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+set vlen = `echo ${v1} ${v2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+#
+set newmaska = `echo ${ulen} ${vlen} ${SYN_maska} | awk '{ if ( $1 / 2 < $3 ) { s = int( $1 / 2 ) } else { if ( $2 / 2 < $3 ) { s = int( $2 / 2 ) } else { s = $3 }}} END { print s }'`
+set newmaska = `echo ${newmaska} | awk '{ if ( $1 < 2 ) { s = 2 } else { s = $1 }} END { print s }'`
+if ( ${SYN_maska} != ${newmaska} ) then
+  ${proc_2dx}/linblock "correcting SYN_maska from ${SYN_maska} to ${newmaska}"
+  set SYN_maska = ${newmaska}
+  echo "set SYN_maska = ${newmaska}" >> LOGS/${scriptname}.results
+endif
+${proc_2dx}/linblock "Using SYN_maska=${SYN_maska} for lattice of length u=${ulen} and v=${vlen}"
+#
+if ( $do3quadserch == 'y' )then
+  set newmaskb = `echo ${ulen} ${vlen} ${SYN_maskb} | awk '{ if ( $1 / 2 < $3 ) { s = int( $1 / 2 ) } else { if ( $2 / 2 < $3 ) { s = int( $2 / 2 ) } else { s = $3 }}} END { print s }'`
+  set newmaskb = `echo ${newmaskb} | awk '{ if ( $1 < 2 ) { s = 2 } else { s = $1 }} END { print s }'`
+  if ( ${SYN_maskb} != ${newmaskb} ) then
+    ${proc_2dx}/linblock "correcting SYN_maskb from ${SYN_maskb} to ${newmaskb}"
+    set SYN_maskb = ${newmaskb}
+    echo "set SYN_maskb = ${newmaskb}" >> LOGS/${scriptname}.results
+  endif
+  ${proc_2dx}/linblock "Using SYN_maskb=${SYN_maskb} for lattice of length u=${ulen} and v=${vlen}"
+endif
+#
+if ( ${rot180} == 'y' ) then
+  set rot180val = '1'
+else
+  set rot180val = '0'
+endif
+#
+if ( ${rot90} == 'y' ) then
+  set rot90val = '1'
+else
+  set rot90val = '0'
+endif
+#
+if ( ${revhk} == 'y' ) then
+  set revhkval = '1'
+else
+  set revhkval = '0'
+endif
+#
+if ( ${revhnd} == 'y' ) then
+  set revhndval = '1'
+else
+  set revhndval = '0'
+endif
+#
+if ( ${ctfrev} == 'y' ) then
+  set ctfrevval = '1'
+else
+  set ctfrevval = '0'
+endif
+#
+echo sgnxch = ${sgnxch}
+if ( ${sgnxch} == "y" ) then
+  set sgnxchval = 1
+  set phaoriFouFilterx = `echo ${phaoriFouFilter} | cut -d\, -f1 `
+  set phaoriFouFiltery = `echo ${phaoriFouFilter} | cut -d\, -f2 | awk '{ s = -$1 } END { print s }'`
+  set phaoriFouFilter = `echo ${phaoriFouFilterx},${phaoriFouFiltery}`
+else
+  set sgnxchval = 0
+endif
+#
+echo revxsgn = ${revxsgn}
+if ( ${revxsgn} == "y" ) then
+  set revxsgnval = 1
+  set phaoriFouFilterx = `echo ${phaoriFouFilter} | cut -d\, -f1 | awk '{ s = -$1 } END { print s }'`
+  set phaoriFouFiltery = `echo ${phaoriFouFilter} | cut -d\, -f2 `
+  set phaoriFouFilter = `echo ${phaoriFouFilterx},${phaoriFouFiltery}`
+else
+  set revxsgnval = 0
+endif
+#
+if ( ${refine_SYN_maska_doit} == 'y' ) then
+  set refine_now = "syn_maska"
+    #
+  \rm -f SCRATCH/${imagename}-syn-maska.txt
+  #
+  set old_syn_maska = ${SYN_maska}
+  set syn_maska_start = `echo ${refine_SYN_maska_val} | cut -d\, -f1`
+  set syn_maska_end   = `echo ${refine_SYN_maska_val} | cut -d\, -f2`
+  set syn_maska_step  = `echo ${refine_SYN_maska_val} | cut -d\, -f3`
+  set syn_maska_factor = `echo ${refine_SYN_maska_val} | cut -d\, -f4`
+  # if the syn_maska_factor is unequal to 1 it is not linear and therfore the progress_step is wrong  
+  set progress_step = `echo ${syn_maska_start} ${syn_maska_end} ${syn_maska_step} | awk '{s = int( 100 / ( ($2 - $1 + 1 ) / $3 ) ) } END { print s }'`
+  ${proc_2dx}/linblock "progress_strep is  ${progress_step}"
+  set progress_start = 5
+ 
+  echo "<<@progress: ${progress_start} >>"
+  #################################################################################
+  ${proc_2dx}/linblock "Refining maska, from ${syn_maska_start} to ${syn_maska_end} in steps ${syn_maska_step}, fact. ${syn_maska_factor}"
+  #################################################################################
+  #
+  set syn_maska = ${syn_maska_start}
+  #
+  while ( ${syn_maska} <= ${syn_maska_end} )
+     #
+     set SYN_maska = ${syn_maska}
+     source ${proc_2dx}/2dx_unbendSyn_sub.com
+     #
+     echo ${syn_maska} ${QVAL_local} >> SCRATCH/${imagename}-syn-maska.txt
+     # ${proc_2dx}/linblock "unbend1: maska ${syn_maska} gives a QVAL of ${QVAL_local}"
+     set syn_maska = `echo ${syn_maska} ${syn_maska_step} ${syn_maska_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
+  end
+  #
+  echo "# IMAGE: SCRATCH/${imagename}-syn-maska.txt  <TXT: QVal List of SYN_maska refinement>" >> LOGS/${scriptname}.results
+  \rm -f TMP442211.tmp
+  set best_syn_maska = `cat SCRATCH/${imagename}-syn-maska.txt | ${bin_2dx}/getmax.exe`
+  set best_QVal = `cat TMP442211.tmp`
+  \rm -f TMP442211.tmp
+  #
+  ${proc_2dx}/linblock "Best value was found at ${best_syn_maska}, with QVal ${best_QVal}. Previously was ${old_syn_maska}"
+  #
+  set SYN_maska = ${best_syn_maska}
+  echo set SYN_maska = ${SYN_maska} >> LOGS/${scriptname}.results
+  #
+  source ${proc_2dx}/2dx_unbendSyn_sub.com
+endif
+#
+if ( ${refine_SYN_maskb_doit} == 'y' ) then
+  set refine_now = "syn_maskb"
+    #
+  \rm -f SCRATCH/${imagename}-syn-maskb.txt
+  #
+  set old_syn_maskb = ${SYN_maskb}
+  set syn_maskb_start = `echo ${refine_SYN_maskb_val} | cut -d\, -f1`
+  set syn_maskb_end   = `echo ${refine_SYN_maskb_val} | cut -d\, -f2`
+  set syn_maskb_step  = `echo ${refine_SYN_maskb_val} | cut -d\, -f3`
+  set syn_maskb_factor = `echo ${refine_SYN_maskb_val} | cut -d\, -f4`
+  #
+  #################################################################################
+  ${proc_2dx}/linblock "Refining maskb, from ${syn_maskb_start} to ${syn_maskb_end} in steps ${syn_maskb_step}, fact. ${syn_maskb_factor}"
+  #################################################################################
+  #
+  set syn_maskb = ${syn_maskb_start}
+  #
+  while ( ${syn_maskb} <= ${syn_maskb_end} )
+     #
+     set SYN_maskb = ${syn_maskb}
+     source ${proc_2dx}/2dx_unbendSyn_sub.com
+     #
+     echo ${syn_maskb} ${QVAL_local} >> SCRATCH/${imagename}-syn-maskb.txt
+     # ${proc_2dx}/linblock "unbend1: maskb ${syn_maskb} gives a QVAL of ${QVAL_local}"
+     set syn_maskb = `echo ${syn_maskb} ${syn_maskb_step} ${syn_maskb_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
+  end
+  #
+  echo "# IMAGE: SCRATCH/${imagename}-syn-maskb.txt  <TXT: QVal List of SYN_maskb refinement>" >> LOGS/${scriptname}.results
+  \rm -f TMP442211.tmp
+  set best_syn_maskb = `cat SCRATCH/${imagename}-syn-maskb.txt | ${bin_2dx}/getmax.exe`
+  set best_QVal = `cat TMP442211.tmp`
+  \rm -f TMP442211.tmp
+  #
+  ${proc_2dx}/linblock "Best value was found at ${best_syn_maskb}, with QVal ${best_QVal}. Previously was ${old_syn_maskb}"
+  #
+  set SYN_maskb = ${best_syn_maskb}
+  echo set SYN_maskb = ${SYN_maskb} >> LOGS/${scriptname}.results
+  #
+  source ${proc_2dx}/2dx_unbendSyn_sub.com
+endif
+#
+#
+echo "<<@progress: 5>>"
+#
+#############################################################################
+#############################################################################
+####################### BEGINNING OF THE UNBEND JOB #########################
+#############################################################################
+#############################################################################
+#
+source ${proc_2dx}/2dx_unbendSyn_sub.com
+#
+echo "<<@evaluate>>"
+#
+#############################################################################
+#############################################################################
+########################## END OF THE UNBEND JOB ############################
+#############################################################################
+#############################################################################
+#
+echo "<<@progress: 80>>"
+#
+if ( ${ttfcorfirst} == 'y' ) then
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "CTFAPPLY - to plot IQ plot without defocus and CTF application"
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f CTFPLOT.PS
+  \rm -f PS/${imagename}.ttf.nolimit.ps
+  #
+  setenv IN  APH/${imagename}.ttf.nolimit.aph
+  setenv OUT dummy.tmp
+  ${bin_2dx}/2dx_ctfapplyk.exe << eot
+${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
+0.0,0.0,0.0,${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
+${imagenumber} ${imagename}.ttf.nolimit, ${date}, No Limit, Nyquist=${ctfplotresmax}
+${phacon}
+${RESMIN},0.0
+eot
+  #
+  if ( ! -e CTFPLOT.PS ) then
+    ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
+  else
+    \mv -f CTFPLOT.PS PS/${imagename}.ttf.nolimit.ps
+    echo "# IMAGE: PS/${imagename}.ttf.nolimit.ps <PS: IQ plot, no resolution limit>" >> LOGS/${scriptname}.results
+  endif
+  #
+endif
+#
+echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
+echo "set ML_done = n" >> LOGS/${scriptname}.results
+#
+if ( ${ttfcorfirst} == 'y' || ${istilt} == 'y' ) then
+  echo "set CTF_done = y" >> LOGS/${scriptname}.results
+else
+  echo "set CTF_done = n" >> LOGS/${scriptname}.results
+endif
+#
+echo "set REPROCESSING_done = y" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+#
+#
+

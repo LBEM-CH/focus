@@ -34,6 +34,7 @@ if ( "${level}" == "radical" ) then
   #
   echo dummy > avrg.p7.hkl
   echo dummy > dummy.profile
+  echo dummy > TMP001.spi
   \rm -rf FFTIR
   \rm -rf PS
   \rm -rf PRJ
@@ -111,6 +112,7 @@ if ( "${level}" == "radical" ) then
   \rm -f ML_centric.hk
   \rm -f ML_centric.hkl
   \rm -f ML_interpolated.mrc
+  \rm -f TMP???.spi
   #
 else
   #

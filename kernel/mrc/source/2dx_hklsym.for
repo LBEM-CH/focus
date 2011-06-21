@@ -2,6 +2,9 @@
 
 C       Henning Stahlberg, 16.5.2000
 C       updated 4/19/2008
+c
+C-----Program to complete the asymmetric unit into a full P1 unit
+C
 
       PARAMETER (MAXSPOT = 100)
       CHARACTER*200  TITLE 
@@ -51,7 +54,8 @@ C
         write(*,'('' Assuming no header line.'')')
       endif
 C
-      write(*,'('' Is there a siga column (0=no,1=y,2=Background,3=no and setting sigf to one)'')')
+      write(*,'('' Is there a siga column (0=no,1=y,2=Background,'',
+     1   ''3=no and setting sigf to one)'')')
       read(*,*)isig
       i1sig=0
       if(isig.eq.2)then
@@ -392,6 +396,56 @@ C
                       WRITE (11,300) -K,H,-L,AMP,-PHASE,FOM
                       WRITE (12,300) K,-H,-L,AMP,-PHASE,FOM
                       WRITE (12,300) -K,H,-L,AMP,-PHASE,FOM
+                    endif
+                  endif
+                endif
+              endif
+              if(ispc.eq.12)then
+                if(K.ge.0)then
+                  if(isig.eq.1)then
+                    WRITE (11,310) -K,-H,L,AMP,PHASE,FOM,SIGA
+                    WRITE (12,310) -K,-H,L,AMP,PHASE,FOM,SIGA
+                    WRITE (11,310) H,-K,L,AMP,PHASE,FOM,SIGA
+                    WRITE (11,310) -H,K,L,AMP,PHASE,FOM,SIGA
+                    WRITE (12,310) H,-K,L,AMP,PHASE,FOM,SIGA
+                    WRITE (12,310) -H,K,L,AMP,PHASE,FOM,SIGA
+                    if(ineg.gt.0)then
+                      WRITE (11,310) K,H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) K,H,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310) -H,K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (11,310) H,-K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) -H,K,-L,AMP,-PHASE,FOM,SIGA
+                      WRITE (12,310) H,-K,-L,AMP,-PHASE,FOM,SIGA
+                    endif
+                  elseif(isig.eq.2)then
+                    WRITE (11,310) -K,-H,L,AMP,PHASE,BACK,FOM
+                    WRITE (12,310) -K,-H,L,AMP,PHASE,BACK,FOM
+                    WRITE (11,310) H,-K,L,AMP,PHASE,BACK,FOM
+                    WRITE (11,310) -H,K,L,AMP,PHASE,BACK,FOM
+                    WRITE (12,310) H,-K,L,AMP,PHASE,BACK,FOM
+                    WRITE (12,310) -H,K,L,AMP,PHASE,BACK,FOM
+                    if(ineg.gt.0)then
+                      WRITE (11,310) K,H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) K,H,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310) -H,K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (11,310) H,-K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) -H,K,-L,AMP,-PHASE,BACK,FOM
+                      WRITE (12,310) H,-K,-L,AMP,-PHASE,BACK,FOM
+                    endif
+                  else
+                    WRITE (11,310) -K,-H,L,AMP,PHASE,FOM
+                    WRITE (12,310) -K,-H,L,AMP,PHASE,FOM
+                    WRITE (11,310) H,-K,L,AMP,PHASE,FOM
+                    WRITE (11,310) -H,K,L,AMP,PHASE,FOM
+                    WRITE (12,310) H,-K,L,AMP,PHASE,FOM
+                    WRITE (12,310) -H,K,L,AMP,PHASE,FOM
+                    if(ineg.gt.0)then
+                      WRITE (11,310) K,H,-L,AMP,-PHASE,FOM
+                      WRITE (12,310) K,H,-L,AMP,-PHASE,FOM
+                      WRITE (11,310) -H,K,-L,AMP,-PHASE,FOM
+                      WRITE (11,310) H,-K,-L,AMP,-PHASE,FOM
+                      WRITE (12,310) -H,K,-L,AMP,-PHASE,FOM
+                      WRITE (12,310) H,-K,-L,AMP,-PHASE,FOM
                     endif
                   endif
                 endif

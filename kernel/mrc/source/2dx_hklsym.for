@@ -400,7 +400,6 @@ C
                   endif
                 endif
               endif
-              if(ispc.eq.12)then
 C
 C
 C
@@ -414,6 +413,9 @@ C
 C
 C
 C
+C-------------This is not yet right, the screw axis is not implemented. 
+C-------------It is taken out again (999912 instead of 12), for the moment:
+              if(ispc.eq.999912)then
                 if(K.ge.0)then
                   if(isig.eq.1)then
                     WRITE (11,310) -K,-H,L,AMP,PHASE,FOM,SIGA

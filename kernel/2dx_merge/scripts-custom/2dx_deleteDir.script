@@ -15,6 +15,8 @@
 #
 # MANUAL: This script moves all choosen directories into a TRASH subdirectory. Use with extreme caution !!!
 #
+# DISPLAY: delete_sure
+#
 #$end_local_vars
 #
 # This defines some variables that we might need:
@@ -23,6 +25,7 @@ set bin_2dx = ""
 set app_2dx_image = ""
 set SCRATCH_DISK = ""
 set FFTIR_DISK = ""
+set delete_sure = ""
 #
 #$end_vars
 #
@@ -36,8 +39,16 @@ set scriptname = 2dx_deleteDir
 set ccp4_setup = 'n'
 source ${proc_2dx}/initialize
 #
+echo delete_sure = ${delete_sure}
+#
+echo "set delete_sure = no" >> LOGS/${scriptname}.results
+#
 # This advances the progress bar to the 1% position:
 echo "<<@progress: 1>>"
+#
+if ( ${delete_sure} == "no" ) then
+  ${proc_2dx}/protest "Not running (Are you sure is 'no')."
+endif
 #
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
 source ${proc_2dx}/2dx_makedirs 
@@ -48,10 +59,17 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 #
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
+cd ..
+set rootdir = $PWD
 #
 if ( ! -d TRASH ) then
   \mkdir TRASH
 endif
+cd TRASH
+if ( ! -l 2dx_master.cfg ) then
+  \ln -s ../2dx_master.cfg .
+endif
+cd ..
 #
 echo ":: "
 #

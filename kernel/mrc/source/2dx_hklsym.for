@@ -401,6 +401,19 @@ C
                 endif
               endif
               if(ispc.eq.12)then
+C
+C
+C
+C
+C
+C---------------This creates the screw-axis related spots in the FFT into the output file. 
+C---------------This is for P4212. The same is still needed for all the other screw axis symmetries.
+C---------------ToDo.
+C
+C
+C
+C
+C
                 if(K.ge.0)then
                   if(isig.eq.1)then
                     WRITE (11,310) -K,-H,L,AMP,PHASE,FOM,SIGA

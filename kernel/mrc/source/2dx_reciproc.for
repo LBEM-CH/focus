@@ -16,9 +16,9 @@ C     U=(u1, u2);  V=(v1,v2);
 C     f = image size (e.g. 512, for an image of 512x512 pixels).        
 C
 C     Then the lattice in the Reciprocal space is:
-C     U*=(v2,-v1) * f / mod(UxV)        
-C     V*=(-u2,u1) * f / mod(UxV)
-C     with UxV = u1*v2 - v1*u2
+C     U*=(v2,-v1) * f / length(UxV)        
+C     V*=(-u2,u1) * f / length(UxV)
+C     with length(UxV) = u1*v2 - v1*u2
 C
 C     Created on 4/2/2007 by Henning.
 C
@@ -41,17 +41,18 @@ C
       call shorten(cname,k)
       write(*,'('' Read: '',A)')cname(1:k)
 C
-      rmodAxB = abs(ax*by-bx*ay)
+      rAxB = ax*by-bx*ay
+      rmodAxB = abs(rAxB)
 C
       if(rmodAxB.lt.0.000000001)then
         write(*,'(''::ERROR: Lattice vectors not independent.'')')
         goto 990
       endif
 C
-      rax =  by * ilength / rmodAxB
-      ray = -bx * ilength / rmodAxB
-      rbx = -ay * ilength / rmodAxB
-      rby =  ax * ilength / rmodAxB
+      rax =  by * ilength / rAxB
+      ray = -bx * ilength / rAxB
+      rbx = -ay * ilength / rAxB
+      rby =  ax * ilength / rAxB
 C
       write(*,'(/,''Reciprocal lattice in pixel is'',4F12.3,/)')
      .  rax,ray,rbx,rby

@@ -16,6 +16,7 @@ C
       REAL RFSIGA(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
       REAL RFBACK(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
       REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,4)
+      INTEGER ISTHERE(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
 C
       PI=3.1415926537
 C
@@ -70,6 +71,14 @@ C
         write(*,'('' Assuming no siga column.'')')
       endif
 C
+      write(*,'('' Write out only asymmetric unit (1=y,0=n)'')')
+      read(*,*)iwasym
+      if(iwasym.eq.1)then
+        write(*,'('' Writing only asymmetric unit.'')')
+      else
+        write(*,'('' Writing full p1 plane (but not for screw axes)'')')
+      endif
+C
       open(10,FILE=cline1,STATUS='OLD',ERR=940)
       open(11,FILE=cline2,STATUS='NEW',ERR=950)
       open(12,FILE=cline3,STATUS='NEW',ERR=950)
@@ -85,6 +94,7 @@ C
             RFAMP(H,K,L)=0.0
             RFPHASE(H,K,L)=0.0
             RFFOM(H,K,L)=0.0
+            ISTHERE(H,K,L)=0
           enddo
         enddo
       enddo
@@ -125,6 +135,7 @@ C-------Treat only right half of Fourier space (H>=0)
         RFFOM(H,K,L)=FOM
         RFSIGA(H,K,L)=SIGA
         RFBACK(H,K,L)=BACK
+        ISTHERE(H,K,L)=1
         if(ihmax.lt.abs(H))ihmax=abs(H)
         if(ikmax.lt.abs(K))ikmax=abs(K)
         if(ilmax.lt.abs(L))ilmax=abs(L)
@@ -164,7 +175,7 @@ C
             BACK=0.0
             ianz=0
 C
-            if(RFAMP(H,K,L).ne.0.0)then
+            if(ISTHERE(H,K,L).ne.0)then
               RPT=RFPHASE(H,K,L)*PI/180.0
               AMP=AMP+RFAMP(H,K,L)*RFFOM(H,K,L)
               PX=PX+cos(RPT)*RFFOM(H,K,L)
@@ -177,128 +188,122 @@ C
 C
 C-----------Symmetrize P4, if needed
             if(ispc.ge.10 .and. ispc.le.12)then
-              if(K.ge.0)then
-                NH=K
-                NK=-H
-                NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
-                  RPT=RFPHASE(NH,NK,NL)*PI/180.0
-                  AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
-                  PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
-                  FOM=FOM+RFFOM(NH,NK,NL)
-                  SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  ianz=ianz+1
-                endif
+              NH=K
+              NK=-H
+              NL=L
+              if(ISTHERE(NH,NK,NL).ne.0)then
+                RPT=RFPHASE(NH,NK,NL)*PI/180.0
+                AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
+                PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
+                PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
+                FOM=FOM+RFFOM(NH,NK,NL)
+                SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
+                BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
+                ianz=ianz+1
               endif
             endif
 C
 C-----------Symmetrize P3, if needed
             if(ispc.ge.13 .and. ispc.le.15)then
-              if(K.ge.0)then
-                NH=K
-                NK=-H-K
-                NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
-                  RPT=RFPHASE(NH,NK,NL)*PI/180.0
-                  AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
-                  PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
-                  FOM=FOM+RFFOM(NH,NK,NL)
-                  SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  ianz=ianz+1
-                endif
-                NH=-H-K
-                NK=-H
-                NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
-                  RPT=RFPHASE(NH,NK,NL)*PI/180.0
-                  AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
-                  PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
-                  FOM=FOM+RFFOM(NH,NK,NL)
-                  SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  ianz=ianz+1
-                endif
+              NH=K
+              NK=-H-K
+              NL=L
+              if(ISTHERE(NH,NK,NL).ne.0)then
+                RPT=RFPHASE(NH,NK,NL)*PI/180.0
+                AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
+                PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
+                PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
+                FOM=FOM+RFFOM(NH,NK,NL)
+                SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
+                BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
+                ianz=ianz+1
+              endif
+              NH=-H-K
+              NK=-H
+              NL=L
+              if(ISTHERE(NH,NK,NL).ne.0)then
+                RPT=RFPHASE(NH,NK,NL)*PI/180.0
+                AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
+                PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
+                PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
+                FOM=FOM+RFFOM(NH,NK,NL)
+                SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
+                BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
+                ianz=ianz+1
               endif
             endif
 C
 C-----------Symmetrize P6, if needed
             if(ispc.ge.16 .and. ispc.le.17)then
-              if(K.ge.0 .and. L.ge.0)then
-                NH=-K
-                NK=H+K
-                NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
-                  RPT=RFPHASE(NH,NK,NL)*PI/180.0
-                  AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
-                  PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
-                  FOM=FOM+RFFOM(NH,NK,NL)
-                  SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  ianz=ianz+1
-                endif
-                NH=-H-K
-                NK=H
-                NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
-                  RPT=RFPHASE(NH,NK,NL)*PI/180.0
-                  AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
-                  PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
-                  FOM=FOM+RFFOM(NH,NK,NL)
-                  SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  ianz=ianz+1
-                endif
-                NH=-H
-                NK=-K
-                NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
-                  RPT=RFPHASE(NH,NK,NL)*PI/180.0
-                  AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
-                  PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
-                  FOM=FOM+RFFOM(NH,NK,NL)
-                  SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  ianz=ianz+1
-                endif
-                NH=K
-                NK=-H-K
-                NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
-                  RPT=RFPHASE(NH,NK,NL)*PI/180.0
-                  AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
-                  PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
-                  FOM=FOM+RFFOM(NH,NK,NL)
-                  SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  ianz=ianz+1
-                endif
-                NH=H+K
-                NK=-H
-                NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
-                  RPT=RFPHASE(NH,NK,NL)*PI/180.0
-                  AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
-                  PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
-                  FOM=FOM+RFFOM(NH,NK,NL)
-                  SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
-                  ianz=ianz+1
-                endif
+              NH=-K
+              NK=H+K
+              NL=L
+              if(ISTHERE(NH,NK,NL).ne.0)then
+                RPT=RFPHASE(NH,NK,NL)*PI/180.0
+                AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
+                PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
+                PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
+                FOM=FOM+RFFOM(NH,NK,NL)
+                SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
+                BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
+                ianz=ianz+1
+              endif
+              NH=-H-K
+              NK=H
+              NL=L
+              if(ISTHERE(NH,NK,NL).ne.0)then
+                RPT=RFPHASE(NH,NK,NL)*PI/180.0
+                AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
+                PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
+                PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
+                FOM=FOM+RFFOM(NH,NK,NL)
+                SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
+                BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
+                ianz=ianz+1
+              endif
+              NH=-H
+              NK=-K
+              NL=L
+              if(ISTHERE(NH,NK,NL).ne.0)then
+                RPT=RFPHASE(NH,NK,NL)*PI/180.0
+                AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
+                PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
+                PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
+                FOM=FOM+RFFOM(NH,NK,NL)
+                SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
+                BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
+                ianz=ianz+1
+              endif
+              NH=K
+              NK=-H-K
+              NL=L
+              if(ISTHERE(NH,NK,NL).ne.0)then
+                RPT=RFPHASE(NH,NK,NL)*PI/180.0
+                AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
+                PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
+                PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
+                FOM=FOM+RFFOM(NH,NK,NL)
+                SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
+                BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
+                ianz=ianz+1
+              endif
+              NH=H+K
+              NK=-H
+              NL=L
+              if(ISTHERE(NH,NK,NL).ne.0)then
+                RPT=RFPHASE(NH,NK,NL)*PI/180.0
+                AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
+                PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
+                PY=PY+sin(RPT)*RFFOM(NH,NK,NL)
+                FOM=FOM+RFFOM(NH,NK,NL)
+                SIGA=SIGA+RFSIGA(NH,NK,NL)*RFFOM(NH,NK,NL)
+                BACK=BACK+RFBACK(NH,NK,NL)*RFFOM(NH,NK,NL)
+                ianz=ianz+1
               endif
             endif
 C
             if(ianz.gt.0)then
-C              write(*,'('':: write '',5I8)')H,K,L,ispc,ianz
+C             write(*,'('':: write '',5I8)')H,K,L,ispc,ianz
               if(FOM.gt.0.0)then
                 AMP=AMP/FOM
                 SIGA=SIGA/FOM
@@ -311,6 +316,9 @@ C              write(*,'('':: write '',5I8)')H,K,L,ispc,ianz
               if(PHASE.lt.-180.0)PHASE=PHASE+360.0
               if(PHASE.gt.180.0)PHASE=PHASE-360.0
               if(PHASE.gt.180.0)PHASE=PHASE-360.0
+              if(PHASE.lt.-179.9999 .and. PHASE.gt.-180.0001)PHASE=180.0
+              if(PHASE.gt. 179.9999 .and. PHASE.lt. 180.0001)PHASE=180.0
+              if(PHASE.gt.  -0.0001 .and. PHASE.lt.   0.0001)PHASE=  0.0
 C-------------Should FOM be plainly averaged (division by ianz here), or rather made better, by some kind of SQRT(N)? ToDo
               FOM=FOM/ianz
 C
@@ -323,7 +331,7 @@ C====================
 C====================
 C====================
 C
-C-----------ROUTP contains AMP.PHS,FOM,SIGA
+C-------------ROUTP contains AMP.PHS,FOM,SIGA
 C      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,4)
 C
               if(ispc.lt.10 .or. K.ge.0)then
@@ -351,7 +359,7 @@ C
                 endif
               endif
               if(ispc.ge.10 .and. ispc.le.12)then
-                if(K.ge.0)then
+                if(K.ge.0 .and. iwasym.eq.1)then
                   if(isig.eq.1)then
                     WRITE (11,310) -H,-K,L,AMP,PHASE,FOM,SIGA
                     WRITE (12,310) -H,-K,L,AMP,PHASE,FOM,SIGA
@@ -401,72 +409,8 @@ C
                 endif
               endif
 C
-C
-C
-C
-C
-C---------------This creates the screw-axis related spots in the FFT into the output file. 
-C---------------This is for P4212. The same is still needed for all the other screw axis symmetries.
-C---------------ToDo.
-C
-C
-C
-C
-C
-C-------------This is not yet right, the screw axis is not implemented. 
-C-------------It is taken out again (999912 instead of 12), for the moment:
-              if(ispc.eq.999912)then
-                if(K.ge.0)then
-                  if(isig.eq.1)then
-                    WRITE (11,310) -K,-H,L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) -K,-H,L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) H,-K,L,AMP,PHASE,FOM,SIGA
-                    WRITE (11,310) -H,K,L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) H,-K,L,AMP,PHASE,FOM,SIGA
-                    WRITE (12,310) -H,K,L,AMP,PHASE,FOM,SIGA
-                    if(ineg.gt.0)then
-                      WRITE (11,310) K,H,-L,AMP,-PHASE,FOM,SIGA
-                      WRITE (12,310) K,H,-L,AMP,-PHASE,FOM,SIGA
-                      WRITE (11,310) -H,K,-L,AMP,-PHASE,FOM,SIGA
-                      WRITE (11,310) H,-K,-L,AMP,-PHASE,FOM,SIGA
-                      WRITE (12,310) -H,K,-L,AMP,-PHASE,FOM,SIGA
-                      WRITE (12,310) H,-K,-L,AMP,-PHASE,FOM,SIGA
-                    endif
-                  elseif(isig.eq.2)then
-                    WRITE (11,310) -K,-H,L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) -K,-H,L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) H,-K,L,AMP,PHASE,BACK,FOM
-                    WRITE (11,310) -H,K,L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) H,-K,L,AMP,PHASE,BACK,FOM
-                    WRITE (12,310) -H,K,L,AMP,PHASE,BACK,FOM
-                    if(ineg.gt.0)then
-                      WRITE (11,310) K,H,-L,AMP,-PHASE,BACK,FOM
-                      WRITE (12,310) K,H,-L,AMP,-PHASE,BACK,FOM
-                      WRITE (11,310) -H,K,-L,AMP,-PHASE,BACK,FOM
-                      WRITE (11,310) H,-K,-L,AMP,-PHASE,BACK,FOM
-                      WRITE (12,310) -H,K,-L,AMP,-PHASE,BACK,FOM
-                      WRITE (12,310) H,-K,-L,AMP,-PHASE,BACK,FOM
-                    endif
-                  else
-                    WRITE (11,310) -K,-H,L,AMP,PHASE,FOM
-                    WRITE (12,310) -K,-H,L,AMP,PHASE,FOM
-                    WRITE (11,310) H,-K,L,AMP,PHASE,FOM
-                    WRITE (11,310) -H,K,L,AMP,PHASE,FOM
-                    WRITE (12,310) H,-K,L,AMP,PHASE,FOM
-                    WRITE (12,310) -H,K,L,AMP,PHASE,FOM
-                    if(ineg.gt.0)then
-                      WRITE (11,310) K,H,-L,AMP,-PHASE,FOM
-                      WRITE (12,310) K,H,-L,AMP,-PHASE,FOM
-                      WRITE (11,310) -H,K,-L,AMP,-PHASE,FOM
-                      WRITE (11,310) H,-K,-L,AMP,-PHASE,FOM
-                      WRITE (12,310) -H,K,-L,AMP,-PHASE,FOM
-                      WRITE (12,310) H,-K,-L,AMP,-PHASE,FOM
-                    endif
-                  endif
-                endif
-              endif
               if(ispc.ge.13 .and. ispc.le.15)then
-                if(K.ge.0)then
+                if(K.ge.0 .and. iwasym.eq.1)then
                   if(isig.eq.1)then
                     WRITE (11,310) -H-K, H, L,AMP,PHASE,FOM,SIGA
                     WRITE (11,310)  K,-H-K, L,AMP,PHASE,FOM,SIGA
@@ -503,8 +447,8 @@ C-------------It is taken out again (999912 instead of 12), for the moment:
                   endif
                 endif
               endif
-             if(ispc.ge.16 .and. ispc.le.17)then
-                if(K.ge.0.and.L.ge.0)then
+              if(ispc.ge.16 .and. ispc.le.17)then
+                if(K.ge.0.and.L.ge.0 .and. iwasym.eq.1)then
                   if(isig.eq.1)then
                     WRITE (11,310) -K, H+K, L,AMP,PHASE,FOM,SIGA
                     WRITE (11,310) -H-K, H, L,AMP,PHASE,FOM,SIGA

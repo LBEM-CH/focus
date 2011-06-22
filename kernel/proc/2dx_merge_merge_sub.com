@@ -300,6 +300,7 @@ APH/sym_noheader2D.hkl
 ${spcgrp}
 1
 ${isig}
+0     ! only write out asymmetric unit
 eot
 #
 # This is used within 2dx_hklclean:

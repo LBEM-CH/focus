@@ -13,6 +13,7 @@ C       updated 4/19/2008
       REAL RFSIGA(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
       REAL RFBACK(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
       REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,6)
+      REAL ISTHERE(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
 C
       PI=3.1415926537
 C
@@ -68,6 +69,7 @@ C
             RFPHASE(H,K,L)=0.0
             RFFOM(H,K,L)=0.0
             ROUTP(H,K,L,6)=0.0
+            ISTHERE(H,K,L)=0
           enddo
         enddo
       enddo
@@ -107,6 +109,7 @@ C-------Treat only right half of Fourier space (H>=0)
         RFFOM(H,K,L)=FOM
         RFSIGA(H,K,L)=SIGA
         RFBACK(H,K,L)=BACK
+        ISTHERE(H,K,L)=1
         if(ihmax.lt.abs(H))ihmax=abs(H)
         if(ikmax.lt.abs(K))ikmax=abs(K)
         if(ilmax.lt.abs(L))ilmax=abs(L)
@@ -142,7 +145,7 @@ C
             BACK=0.0
             ianz=0
 C
-            if(RFAMP(H,K,L).ne.0.0)then
+            if(ISTHERE(H,K,L).ne.0)then
               RPT=RFPHASE(H,K,L)*PI/180.0
               AMP=AMP+RFAMP(H,K,L)*RFFOM(H,K,L)
               PX=PX+cos(RPT)*RFFOM(H,K,L)
@@ -159,7 +162,7 @@ C-----------Symmetrize P4, if needed
                 NH=K
                 NK=-H
                 NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
+                if(ISTHERE(NH,NK,NL).ne.0)then
                   RPT=RFPHASE(NH,NK,NL)*PI/180.0
                   AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
                   PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
@@ -178,7 +181,7 @@ C-----------Symmetrize P3, if needed
                 NH=K
                 NK=-H-K
                 NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
+                if(ISTHERE(NH,NK,NL).ne.0)then
                   RPT=RFPHASE(NH,NK,NL)*PI/180.0
                   AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
                   PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
@@ -191,7 +194,7 @@ C-----------Symmetrize P3, if needed
                 NH=-H-K
                 NK=-H
                 NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
+                if(ISTHERE(NH,NK,NL).ne.0)then
                   RPT=RFPHASE(NH,NK,NL)*PI/180.0
                   AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
                   PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
@@ -210,7 +213,7 @@ C-----------Symmetrize P6, if needed
                 NH=-K
                 NK=H+K
                 NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
+                if(ISTHERE(NH,NK,NL).ne.0)then
                   RPT=RFPHASE(NH,NK,NL)*PI/180.0
                   AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
                   PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
@@ -223,7 +226,7 @@ C-----------Symmetrize P6, if needed
                 NH=-H-K
                 NK=H
                 NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
+                if(ISTHERE(NH,NK,NL).ne.0)then
                   RPT=RFPHASE(NH,NK,NL)*PI/180.0
                   AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
                   PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
@@ -236,7 +239,7 @@ C-----------Symmetrize P6, if needed
                 NH=-H
                 NK=-K
                 NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
+                if(ISTHERE(NH,NK,NL).ne.0)then
                   RPT=RFPHASE(NH,NK,NL)*PI/180.0
                   AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
                   PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
@@ -249,7 +252,7 @@ C-----------Symmetrize P6, if needed
                 NH=K
                 NK=-H-K
                 NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
+                if(ISTHERE(NH,NK,NL).ne.0)then
                   RPT=RFPHASE(NH,NK,NL)*PI/180.0
                   AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
                   PX=PX+cos(RPT)*RFFOM(NH,NK,NL)
@@ -262,7 +265,7 @@ C-----------Symmetrize P6, if needed
                 NH=H+K
                 NK=-H
                 NL=L
-                if(RFAMP(NH,NK,NL).ne.0.0)then
+                if(ISTHERE(NH,NK,NL).ne.0)then
                   RPT=RFPHASE(NH,NK,NL)*PI/180.0
                   AMP=AMP+RFAMP(NH,NK,NL)*RFFOM(NH,NK,NL)
                   PX=PX+cos(RPT)*RFFOM(NH,NK,NL)

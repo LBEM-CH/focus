@@ -206,7 +206,7 @@ echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf 
 echo "<<@progress: +5>>"
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to latfitted APH file, for volume"
+${proc_2dx}/linblock "2dx_hklsym2 - to apply symmetry to latfitted APH file, for volume"
 #############################################################################  
 #
 ${bin_2dx}/2dx_hklsym2.exe << eot
@@ -226,7 +226,7 @@ endif
 echo "# IMAGE: APH/latfitted.hkl <APH: Latline for vol after sym [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to latfitted APH file, for reference"
+${proc_2dx}/linblock "2dx_hklsym2 - to apply symmetry to latfitted APH file, for reference"
 #############################################################################  
 #
 ${bin_2dx}/2dx_hklsym2.exe << eot

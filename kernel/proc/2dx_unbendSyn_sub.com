@@ -697,18 +697,26 @@ ${radlim}                             ! RADLIM IN PROFILE GRID UNITS
 0                                     ! Dont mask the image directly
 eot
 #
-\rm -f SCRATCH/errout${imagename}.dat
-\rm -f SCRATCH/prof${imagename}.dat
-#
 \mv -f CCPLOT.PS PS/${imagename}-quadserchSa.ps
 echo "# IMAGE: PS/${imagename}-quadserchSa.ps <PS: Vector Plot of Distortion, Reference 1, Pass 1>"  >> LOGS/${scriptname}.results 
 #
 \rm -f CCPLOT.PS
 \rm -f SPIDERCOORD.spi
 #
+#
+#############################################################################
+#                                                                           #
 ${proc_2dx}/linblock "QUADSERCH - to search cross-correlation map for peaks, IPASS=3"
+#                                                                           #
+#############################################################################
+#
+setenv ERRORS   SCRATCH/errors${imagename}.dat
+setenv ERROUT   SCRATCH/errout${imagename}.dat
+\rm -f SCRATCH/errout${imagename}.dat
+\rm -f SCRATCH/prof${imagename}.dat
 #
 ${proc_2dx}/lin "quadserchh.exe, IPASS=3"
+#
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${SYN_quadpreda}			! IPASS,NRANGE
 SCRATCH/cor${imagename}.1.cor.mrc

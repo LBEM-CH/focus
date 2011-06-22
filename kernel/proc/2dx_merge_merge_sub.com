@@ -414,7 +414,8 @@ if ( ${rotate_to_Z} == "yes" ) then
   ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D run"
   #############################################################################  
   #
-  ${bin_ccp4}/f2mtz hklin SCRATCH/TMP-permutated.hkl hklout merge2D.mtz << eof
+  \rm -f SCRATCH/merge2D.mtz
+  ${bin_ccp4}/f2mtz hklin SCRATCH/TMP-permutated.hkl hklout SCRATCH/merge2D.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
 CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -424,11 +425,22 @@ SKIP 0
 END
 eof
   #
+  \rm -f merge2D.mtz
+  ${bin_ccp4}/sftools << eot
+read SCRATCH/merge2D.mtz
+merge
+expand
+write merge2D.mtz
+end
+eot
+  #
   #############################################################################
   ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D reference"
   #############################################################################  
   #
-  ${bin_ccp4}/f2mtz hklin SCRATCH/TMP-permutatedref.hkl hklout merge2Dref.mtz << eof
+  \rm -f SCRATCH/merge2Dref.mtz
+  #
+  ${bin_ccp4}/f2mtz hklin SCRATCH/TMP-permutatedref.hkl hklout SCRATCH/merge2Dref.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
 CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -437,6 +449,15 @@ CTYPOUT H H H F P W Q
 SKIP 0
 END
 eof
+  #
+  \rm -f merge2Dref.mtz
+  ${bin_ccp4}/sftools << eot
+read SCRATCH/merge2Dref.mtz
+merge
+expand
+write merge2Dref.mtz
+end
+eot
   #
   # \rm -f SCRATCH/TMP-permutated.hkl
   #
@@ -447,7 +468,9 @@ else
   #############################################################################  
   #
   set infile = APH/sym2D.hkl
-  ${bin_ccp4}/f2mtz hklin ${infile} hklout merge2D.mtz << eof
+  \rm -f SCRATCH/merge2D.mtz
+  #
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge2D.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -458,12 +481,23 @@ SKIP 0
 END
 eof
   #
+  \rm -f merge2D.mtz
+  ${bin_ccp4}/sftools << eot
+read SCRATCH/merge2D.mtz
+merge
+expand
+write merge2D.mtz
+end
+eot
+  #
   #############################################################################
   ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D reference"
   #############################################################################  
   #
   set infile = APH/sym2Dref.hkl
-  ${bin_ccp4}/f2mtz hklin ${infile} hklout merge2Dref.mtz << eof
+  \rm -f SCRATCH/merge2Dref.mtz
+  #
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge2Dref.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -473,6 +507,17 @@ FILE ${infile}
 SKIP 0
 END
 eof
+  #
+  \rm -f merge2Dref.mtz
+  ${bin_ccp4}/sftools << eot
+read SCRATCH/merge2Dref.mtz
+merge
+expand
+write merge2Dref.mtz
+end
+eot
+  #
+
   #
 endif
 #

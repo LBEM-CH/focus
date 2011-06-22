@@ -69,13 +69,13 @@ set mergedat = "../merge/merge3Dref.mtz"
 if ( ! -e ${mergedat} ) then
   set mergedat = "../../merge/merge3Dref.mtz"
   if ( ! -e ${mergedat} ) then
-    set mergedat = "../merge/merge2D.mtz"
+    set mergedat = "../merge/merge2Dref.mtz"
     if ( ! -e ${mergedat} ) then
-      set mergedat = "../../merge/merge2D.mtz"
+      set mergedat = "../../merge/merge2Dref.mtz"
       if ( ! -e ${mergedat} ) then
         ${proc_2dx}/linblock "ERROR. No merged reference dataset found."
         ${proc_2dx}/linblock "ERROR. Neither ../merge/merge3Dref.mtz nor ../../merge/merge3Dref.mtz exist."
-        ${proc_2dx}/protest "ERROR. Neither ../merge/merge2D.mtz nor ../../merge/merge2D.mtz exist."
+        ${proc_2dx}/protest "ERROR. Neither ../merge/merge2Dref.mtz nor ../../merge/merge2Dref.mtz exist."
       endif
     endif
   endif

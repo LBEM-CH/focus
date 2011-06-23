@@ -48,6 +48,7 @@
 # DISPLAY: IMAXCOR
 # DISPLAY: comment
 # DISPLAY: RMAG
+# DISPLAY: LCOLOR
 # DISPLAY: ccunbend_program
 #
 #$end_local_vars
@@ -103,6 +104,7 @@ set ISTEP = ""
 set ISTEP_h = ""
 set IMAXCOR = ""
 set RMAG = ""
+set LCOLOR = ""
 set ccunbend_program = ""
 set RB_1 = ""
 set RB_2 = ""

@@ -591,7 +591,7 @@ ${quadradbx},${quadradby}		! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}		! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N				! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG}          ! prohibit fractures in crystal (1=y,0=n),RMAG
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                               ! dont create manual Masking information
 0                               ! Dont mask the image directly
 eot
@@ -647,7 +647,7 @@ ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
 ${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG}          ! prohibit fractures in crystal (1=y,0=n),RMAG
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Dont mask the image directly
 eot
@@ -692,7 +692,7 @@ ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
 ${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG}          ! prohibit fractures in crystal (1=y,0=n),RMAG
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}			! dont create manual Masking information
 1                               ! Mask the image directly
 ${imagename}.mrc
@@ -758,7 +758,7 @@ ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG}          ! prohibit fractures in crystal (1=y,0=n),RMAG
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Dont mask the image directly
 eot
@@ -787,7 +787,7 @@ ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG}                   ! prohibit fractures in crystal (1=y,0=n),RMAG
+${valspotscan},${RMAG},${LCOLOR}                   ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}                   ! create manual Masking information (0=n,1=y)
 1                               ! Do mask the image directly
 ${imagename}.mrc
@@ -944,7 +944,7 @@ eot
       ${bin_2dx}/2dx_ccunbendk.exe << eot
 ${imagename}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${facthresha},${TLTAXIS},${RMAG}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG
+30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, UNBEND2, ${date}
 SCRATCH/cor${imagename}.notap.mrc
 UNBENT,PASS,2,${date}
@@ -971,7 +971,7 @@ eot
       ${bin_2dx}/2dx_ccunbendk.exe << eot
 SCRATCH/${imagename}.ttf.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T                !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${facthresha},${TLTAXIS},${RMAG}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG
+30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, UNBEND2, ${date}
 SCRATCH/cor${imagename}.notap.mrc
 UNBENT,PASS,2,${date}

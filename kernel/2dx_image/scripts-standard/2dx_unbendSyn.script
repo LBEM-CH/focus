@@ -65,6 +65,7 @@
 # DISPLAY: do3quadserch
 # DISPLAY: comment
 # DISPLAY: RMAG
+# DISPLAY: LCOLOR
 #
 #$end_local_vars
 #
@@ -137,6 +138,7 @@ set phaoriFouFilter = ""
 set do3quadserch = ""
 set SYM = ""
 set RMAG = ""
+set LCOLOR = ""
 #
 #$end_vars
 #

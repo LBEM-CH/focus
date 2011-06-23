@@ -692,7 +692,7 @@ ${SYN_quadrada},${SYN_quadrada}       ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}               ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                                     ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                             ! RADLIM IN PROFILE GRID UNITS
-0,${RMAG}                             ! prohibit fractures in crystal (1=y,0=n),RMAG
+0,${RMAG},${LCOLOR}                             ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                                     ! dont create manual Masking information
 0                                     ! Dont mask the image directly
 eot
@@ -727,7 +727,7 @@ ${SYN_quadrada},${SYN_quadrada}       ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy} 	      ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N				      ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}         		      ! RADLIM IN PROFILE GRID UNITS
-0,${RMAG}                             ! prohibit fractures in crystal (1=y,0=n),RMAG
+0,${RMAG},${LCOLOR}                   ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                                     ! dont create manual Masking information
 0                                     ! Dont mask the image directly
 eot
@@ -779,7 +779,7 @@ ${SYN_quadradb},${SYN_quadradb}           ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-0,${RMAG}                       ! prohibit fractures in crystal (1=y,0=n),RMAG
+0,${RMAG},${LCOLOR}             ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                               ! dont create manual Masking information
 0                               ! Dont mask the image directly
 eot
@@ -823,7 +823,7 @@ ${proc_2dx}/lin "ccunbendk.exe"
 ${bin_2dx}/2dx_ccunbendk.exe << eot
 ${imagename}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T 	 !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER 
-30,52,0.001,${SYN_facthresha},${TLTAXIS},${RMAG} !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG
+30,52,0.001,${SYN_facthresha},${TLTAXIS},${RMAG},${LCOLOR} !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, synthetical unbend, ${date}
 SCRATCH/cor${imagename}.mrc
 UNBENT with synthetical reference, ${date}

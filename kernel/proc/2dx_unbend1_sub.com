@@ -444,7 +444,7 @@ echo "${quadradax},${quadraday}"
 echo "${refposix},${refposiy}"
 echo "N		"
 echo "${radlim} "
-echo "${valspotscan},${RMAG}"
+echo "${valspotscan},${RMAG},${LCOLOR}"
 echo "0	"
 echo "0	"
 echo " "
@@ -461,7 +461,7 @@ ${quadradax},${quadraday}	! RADIUS OF CORR SEARCH
 ${refposix},${refposiy} 	! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N				! YES/NO FOR DETAILED PRINTOUT
 ${radlim}         		! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG} 		! prohibit fractures in crystal (1=y,0=n),RMAG
+${valspotscan},${RMAG},${LCOLOR}	! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0		                ! dont create manual Masking information
 0                               ! Dont mask the image directly
 eot
@@ -513,7 +513,7 @@ ${quadradax},${quadraday}         ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG}		! prohibit fractures in crystal (1=y,0=n)
+${valspotscan},${RMAG},${LCOLOR}	! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                               ! dont create manual Masking information
 0                               ! Dont mask the image directly
 eot
@@ -561,7 +561,7 @@ ${quadradax},${quadraday}         ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG}		! prohibit fractures in crystal (1=y,0=n)
+${valspotscan},${RMAG},${LCOLOR}		! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                               ! dont create manual Masking information
 0                               ! Dont mask the image directly
 eot
@@ -638,7 +638,7 @@ setenv CCORDATA SCRATCH/prof${imagename}.dat
 ${bin_2dx}/2dx_ccunbendk.exe << eot
 ${imagename}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,F	 !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${facthresha},46,${RMAG} !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG
+30,52,0.001,${facthresha},46,${RMAG},${LCOLOR} !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename},UNBEND1,${date},${imagename} PASS 1
 SCRATCH/cor${imagename}.notap.mrc
 UNBEND1,${date}
@@ -650,7 +650,7 @@ eot
   ${bin_2dx}/2dx_ccunbendk.exe << eot
 ${imagename}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,F	 !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${facthresha},46,${RMAG} !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG
+30,52,0.001,${facthresha},46,${RMAG},${LCOLOR} !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename},UNBEND1,${date},${imagename} PASS 1
 SCRATCH/cor${imagename}.notap.mrc
 UNBEND1,${date}

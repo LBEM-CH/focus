@@ -107,6 +107,7 @@ set phaori = ""
 set CS = ""
 set KV = ""
 set RMAG = ""
+set LCOLOR = ""
 #
 #$end_vars
 #

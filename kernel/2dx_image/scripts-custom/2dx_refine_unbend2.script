@@ -100,6 +100,7 @@ set refine_boxb1_doit_3 = "n"
 # DISPLAY: ISTEP
 # DISPLAY: comment
 # DISPLAY: RMAG
+# DISPLAY: LCOLOR
 # DISPLAY: ccunbend_program
 # DISPLAY: refine_maskb01_val
 # DISPLAY: refine_maskb02_val
@@ -152,6 +153,7 @@ set refori = ""
 set IMAXCOR = ""
 set ISTEP = ""
 set RMAG = ""
+set LCOLOR = ""
 set ccunbend_program = ""
 set refine_maskb01_val = ""
 set refine_boxb1_val = ""

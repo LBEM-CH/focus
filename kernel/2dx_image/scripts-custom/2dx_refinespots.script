@@ -84,6 +84,7 @@ set IQMAX = ""
 set refori = ""
 set spotrefine_IHKmax = ""
 set RMAG = ""
+set LCOLOR = ""
 #
 #$end_vars
 #

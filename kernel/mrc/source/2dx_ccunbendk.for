@@ -47,7 +47,7 @@ C  CONTROL DATA :-
 C	CARD 1 : FILE NAME OF INPUT IMAGE FILE.(ONLY HEADER READ IF IOUT=0).
 C	CARD 2 : ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 CHEN	CARD 3 : IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS
-C	CARD 3 : IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS,RMAG
+C	CARD 3 : IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 C	CARD 4 : PLOT TITLE FOR DISTORTION CORRECTION DISPLAY.
 C      and if IOUT = 1,
 C	CARD 5 : FULL FILE NAME FOR OUTPUT OF CORRECTED IMAGE.
@@ -104,6 +104,7 @@ C                        , BELOW WHICH THE PEAK IS NOT USED.
 C         TLTAXIS ------- DIRECTION OF TILTAXIS RELATIVE TO NORMAL X-Y AXES OF
 C                          IMAGE.
 C         RMAG ---------- Magnification for line length in distortion plots
+C         CCOLOR ---------y or n (character*1) True for color output in PS plotfiles
 C
 C*******************************************************************************
 C
@@ -158,7 +159,8 @@ C		see subroutine - fillempties, calctaper - parameters also.
       	INTEGER POINT(NPOINT),PX,PY,NCREAL,RANK,IFAIL,J
       REAL MAXCOR, TAPER(ISTEPMAX,ISTEPMAX),TAPER1(ISTEPMAX,ISTEPMAX)
       REAL PICIN(ISIZEX,IDEEP),PICOUT(ISIZEX,ISTEPMAX)
-      LOGICAL LTAPER, LTABOUT
+      LOGICAL LTAPER, LTABOUT, LCOLOR
+      CHARACTER*1 CCOLOR
 C
         DIMENSION NXYZ(3),MXYZ(3),NXYZ1(3),NXYZST(3)
       	CHARACTER*80 NAME,NAME1
@@ -235,7 +237,12 @@ C  INPUT OF ALL CONTROL DATA REQUIRED TO RUN THIS PROGRAM.
       ENDIF
       WRITE(6,161)ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
       WRITE(6,169)
-      READ(5,*) IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS,RMAG
+      READ(5,*) IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS,RMAG,CCOLOR
+      if(CCOLOR.eq."y")then
+        LCOLOR=.true.
+      else
+        LCOLOR=.false.
+      endif
       MAXCOR=IMAXCOR-0.0001
       THRESH=FACTOR*DENMAX
       WRITE(6,168) IKNOTX,IKNOTY,EPS,FACTOR,THRESH,TLTAXIS
@@ -396,7 +403,7 @@ C
 C
       WRITE(6,100)MDATA,NLOST,DISTMAX,NOUTSIDE
       MDATAOBS=MDATA
-      CALL PLOTCORR(TITLEIN,MDATA,XPOS,YPOS,DX,DY,NXYZ,100,RMAG)
+      CALL PLOTCORR(TITLEIN,MDATA,XPOS,YPOS,DX,DY,NXYZ,100,RMAG,LCOLOR)
       IF(ITYPE.EQ.1)CALL ROTATEXY(MDATA,DX,DY,TLTAXIS)	! BICUBIC ONLY
 C
 C  ABOVE PART OF PROGRAM HAS CALCULATED THE VALUES OF THE DISTORTION
@@ -616,7 +623,7 @@ C
         CALL ROTATEXY(MDATAOBS,DX,DY,-TLTAXIS)
         CALL ROTATEXY(MCALC,XCORR,YCORR,-TLTAXIS)
       ENDIF
-      CALL PLOTCORR(TITLE,MCALC,XOUT,YOUT,XCORR,YCORR,NXYZ,1,RMAG)
+      CALL PLOTCORR(TITLE,MCALC,XOUT,YOUT,XCORR,YCORR,NXYZ,1,RMAG,LCOLOR)
       IF(LTABOUT) 
      . CALL WRITETABLE(TITLE,ISTEP,MXDIM,MYDIM,NXYZ,XCORR,YCORR)
 
@@ -648,7 +655,7 @@ C USE DX, DY ARRAYS TO CALCULATE THE RESIDUAL FITTING ERROR FOR PLOTTING.
 1112  FORMAT(' THERE WAS A TOTAL OF CORRECTION VECTORS OF LENGTH'/
      .  ' GREATER THAN IMAXCOR(=',I4,')  OF',I8,10X,
      .  ' !!!! BEWARE DATA LOST !!!!'/' ***** PROPORTION LOST =',F7.3)
-      CALL PLOTCORR(TITLEERR,MDATAOBS,XPOS,YPOS,DX,DY,NXYZ,-1,RMAG)
+      CALL PLOTCORR(TITLEERR,MDATAOBS,XPOS,YPOS,DX,DY,NXYZ,-1,RMAG,LCOLOR)
 C
       IF(IOUT.EQ.0) STOP
       IF((ISTEP+2*IMAXCOR).GT.IDEEP) GO TO 198
@@ -906,7 +913,8 @@ C*******************************************************************************
 C
 C  SUBROUTINE TO PLOT THE LATTICE OF FITTED DISTORTION CORRECTIONS.
       	SUBROUTINE PLOTCORR(TITLE,MCALC,XOUT,YOUT,XCORR,YCORR,NXYZ,IP,
-     .   RMAG)
+     .   RMAG,LCOLOR)
+        LOGICAL LCOLOR
       	DIMENSION XOUT(1),YOUT(1),XCORR(1),YCORR(1)
       	DIMENSION TITLE(20),NXYZ(3),TITLEPLOT(20),TEXT(20)
         CHARACTER DAT*24
@@ -959,22 +967,94 @@ C  BOX ROUND THE WHOLE IMAGE AREA
 C NOW PLOT EACH ERROR VECTOR STARTING WITH A CROSS AT PROPER POSITION.
 C  CROSS TEMPORARILY DISABLED 16.8.84
       CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.5)
-      	DO 100 I=1,MCALC
+CHEN>
+      rlenmax=0.0
+      DO 99  I=1,MCALC
+        XPLOT=SPLOT*XOUT(I)
+        YPLOT=SPLOT*YOUT(I)
+        IF(XPLOT.GT.SIZEX.OR.XPLOT.LT.0.) GO TO 99
+        IF(YPLOT.GT.SIZEY.OR.YPLOT.LT.0.) GO TO 99
+        XERR=SPLOT*XCORR(I)*RMAG + XPLOT 
+        YERR=SPLOT*YCORR(I)*RMAG + YPLOT 
+        IF(XERR.GT.SIZEX.OR.XERR.LT.0.) GO TO 99
+        IF(YERR.GT.SIZEY.OR.YERR.LT.0.) GO TO 99
+        rlen=sqrt((XERR-XPLOT)**2+(YERR-YPLOT)**2)
+        if(rlen.gt.rlenmax)rlenmax=rlen
+99    CONTINUE
+C-----Adjust maximal length to width/20
+      rlenmax=rlenmax/20.0
+CHEN<
+      DO 100 I=1,MCALC
 	XPLOT=SPLOT*XOUT(I)
       	YPLOT=SPLOT*YOUT(I)
       	IF(XPLOT.GT.SIZEX.OR.XPLOT.LT.0.) GO TO 100
       	IF(YPLOT.GT.SIZEY.OR.YPLOT.LT.0.) GO TO 100
-      CALL P2K_MOVE(XPLOT,YPLOT,0.)
 C      	WRITE(TEXT,102)
 C	CALL P2K_CSTRING(TEXT,1,0.)
 102	FORMAT('X')
-      		XERR=SPLOT*XCORR(I)*RMAG + XPLOT
-      		YERR=SPLOT*YCORR(I)*RMAG + YPLOT
-      CALL P2K_MOVE(XPLOT,YPLOT,0.)
+      	XERR=SPLOT*XCORR(I)*RMAG + XPLOT
+      	YERR=SPLOT*YCORR(I)*RMAG + YPLOT
       	IF(XERR.GT.SIZEX.OR.XERR.LT.0.) GO TO 100
       	IF(YERR.GT.SIZEY.OR.YERR.LT.0.) GO TO 100
-      CALL P2K_DRAW(XERR,YERR,0.)
-100	CONTINUE
+        CALL P2K_MOVE(XPLOT,YPLOT,0.)
+CHEN>
+C---------Calculate angle and length of line:
+          rang=atan2(XERR-XPLOT,YERR-YPLOT)*180.0/3.141592654
+          if(rang.lt.0.0)rang=rang+360.0
+          rlen=sqrt((XERR-XPLOT)**2+(YERR-YPLOT)**2)/rlenmax
+          rlen=(rlen*0.5)+0.5
+          if(rlen.gt.1.0)rlen=1.0
+          if(rlen.lt.0.5)rlen=0.5
+C---------Assign HSV Values, as Hue=angle, Saturation=length, Value=1.0
+          rhue=rang
+          rsat=rlen
+          rval=0.7
+C---------Calculate RGB Values:
+          c=rval * rsat
+          rhue60=rhue / 60.0
+          x = c * (1 - abs(mod(rhue60,2.0) - 1))
+          if(rhue60<1.0)then
+            rgbr=c
+            rgbg=x
+            rgbb=0
+          elseif (rhue60<2.0)then
+            rgbr=x
+            rgbg=c
+            rgbb=0
+          elseif (rhue60<3.0)then
+            rgbr=0
+            rgbg=c
+            rgbb=x
+          elseif (rhue60<4.0)then
+            rgbr=0
+            rgbg=x
+            rgbb=c
+          elseif (rhue60<5.0)then
+            rgbr=x
+            rgbg=0
+            rgbb=c
+          else
+            rgbr=c
+            rgbg=0
+            rgbb=x
+          endif
+          rgbr=rgbr+rval-c
+          rgbg=rgbg+rval-c
+          rgbb=rgbb+rval-c
+C          write(*,'(''c,x='',2F6.3,'' rlen,rang='',2F9.3,'' r,g,b='',3F6.3)')
+C     1      c,x,rlen,rang,rgbr,rgbg,rgbb
+          if(rgbr.gt.1.0)rgbr=1.0
+          if(rgbg.gt.1.0)rgbg=1.0
+          if(rgbb.gt.1.0)rgbb=1.0
+          if(rgbr.lt.0.0)rgbr=0.0
+          if(rgbg.lt.0.0)rgbg=0.0
+          if(rgbb.lt.0.0)rgbb=0.0
+C---------Set RGB color:
+          if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+        CALL P2K_DRAW(XERR,YERR,0.)
+CHEN<
+100   CONTINUE
+      CALL P2K_COLOUR(0)
       CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
       CALL P2K_MOVE(10.,SIZEY+15.0,0.)
       CALL P2K_STRING(TITLEPLOT,80,0.)

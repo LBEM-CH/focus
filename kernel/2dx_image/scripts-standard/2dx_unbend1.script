@@ -44,6 +44,7 @@
 # DISPLAY: IMAXCOR
 # DISPLAY: comment
 # DISPLAY: RMAG
+# DISPLAY: LCOLOR
 # DISPLAY: ccunbend_program
 #
 #$end_local_vars
@@ -88,6 +89,7 @@ set IMAXCOR = ""
 set det_tilt = ""
 set ctf_ttf = ""
 set RMAG = ""
+set LCOLOR = ""
 set ccunbend_program = ""
 #
 #$end_vars

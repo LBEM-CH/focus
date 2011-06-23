@@ -88,6 +88,7 @@ set refine_SYN_maskb_doit = "y"
 # DISPLAY: do3quadserch
 # DISPLAY: comment
 # DISPLAY: RMAG
+# DISPLAY: LCOLOR
 # DISPLAY: refine_SYN_maska_val
 # DISPLAY: refine_SYN_maskb_val
 #
@@ -162,6 +163,7 @@ set phaoriFouFilter = ""
 set do3quadserch = ""
 set SYM = ""
 set RMAG = ""
+set LCOLOR = ""
 set refine_SYN_maska_val = ""
 set refine_SYN_maskb_val = ""
 #

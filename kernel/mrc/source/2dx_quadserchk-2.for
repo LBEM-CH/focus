@@ -76,7 +76,7 @@ C       7       IC,IR                   ! POSN OF SEARCH START (0,0 IS ORIGIN)
 C       8       IPRNT                   ! YES/NO FOR DETAILED PRINTOUT
 C       9       RADLIMP,RADLIMQ,RADANGP ! ELLIPTICAL CUTOFF.
 CHEN>
-C      10       VALSPOTSCAN,RMAG        ! Defines if SpotScan processing should be done (0=no)
+C      10       VALSPOTSCAN,RMAG,CCOLOR ! Defines if SpotScan processing should be done (0=no)
 C      12       DoMASKpic               ! Define, if Masking maps should be generated (0=no)
 C      11       DoXCFpic                ! Define, if XCF picture should be generated (0=no)
 CHEN<
@@ -107,6 +107,7 @@ C         RADLIMQ- same in orthogonal direction -- (20x smaller than pixels)
 C         RADANGP- angle relative to x-axis of RADLIMP (elliptical)
 C
 C         RMAG   - Magnification for line length in distortion plots
+C         CCOLOR - y or n (character*1) True for color output in PS plotfiles
 C
 C     INPUT FILES :
 C         ERRORS      - (Created if IPASS=1); Read if IPASS=2,3; Contains
@@ -148,7 +149,10 @@ C
       DIMENSION XERROR(MNY:MXY,MNY:MXY),YERROR(MNY:MXY,MNY:MXY)
       DIMENSION PEAK(MNY:MXY,MNY:MXY)
         DIMENSION XC(MDC,MDR)           ! this should be (x,y)
-        LOGICAL LREAL
+CHEN>
+        LOGICAL LREAL,LCOLOR
+        CHARACTER*1 CCOLOR
+CHEN<
         CHARACTER*80 FILENAM
         CHARACTER*80 NAME
         EQUIVALENCE (TITLE,NAME)
@@ -367,7 +371,12 @@ C
      . ' IN PROFILE GRID UNITS, RADP,RADQ,ANGP',3F8.2)
 C
 CHEN--Read switch for SpotScan mode
-      READ(5,*)IONELA,RMAG
+      READ(5,*)IONELA,RMAG,CCOLOR
+      if(CCOLOR.eq."y")then
+        LCOLOR=.true.
+      else
+        LCOLOR=.false.
+      endif
       if(IONELA.eq.1)then
         write(6,'(/,/,'' Allowing only one lattice for monocrystal '')')
       else 
@@ -847,7 +856,7 @@ C
        write(*,'('' Entering PLOTLATT'')')
 C
        CALL PLOTLATT(COOR,TITLE,NXYZ,MINA,MAXA,
-     . MINB,MAXB,A1,A2,B1,B2,IC,IR,NC,NR,IPASS,RMAG)
+     . MINB,MAXB,A1,A2,B1,B2,IC,IR,NC,NR,IPASS,RMAG,LCOLOR)
 C
 CHEN----Subroutine for image masking based on Cross-Correlation-Field COOR
 C
@@ -883,12 +892,13 @@ C******************************************************************************
 C  SUBROUTINE TO PLOT THE LATTICE OF SEARCH STARTING AND FOUND POSITIONS.
 C             ALSO THE ROUGH SIZES OF THE CORRELATION PEAKS (SYMBOLICALLY).
       SUBROUTINE PLOTLATT(COOR,TITLE,NXYZ,MINA,MAXA,
-     . MINB,MAXB,A1,A2,B1,B2,IC,IR,NC,NR,IPASS,RMAG)
+     . MINB,MAXB,A1,A2,B1,B2,IC,IR,NC,NR,IPASS,RMAG,LCOLOR)
       PARAMETER (MNY=-240)
       PARAMETER (MXY=240)
       DIMENSION COOR(3,MNY:MXY,MNY:MXY),NXYZ(3)
 CTSH    DIMENSION TEXT(20),TITLE(20),TITLEPLOT(20),PROGTIT(4)
 CTSH++
+        LOGICAL LCOLOR
         DIMENSION TITLE(20),PROGTIT(4)
         CHARACTER*80 TEXT
         CHARACTER*80 TITLEPLOT
@@ -949,6 +959,33 @@ C  BOX ROUND THE WHOLE IMAGE AREA
       CALL P2K_DRAW(0.,0.,0.)
 C NOW PLOT THE POINTS
       CALL P2K_FONT("Courier"//CHAR(0),FONTSIZE*0.5)
+CHEN>
+      rlenmax=0.0
+      DO 99 K=MINA,MAXA
+        DO 99 J=MINB,MAXB
+          XPLOT=SPLOT*XCOORD(K,J)
+          YPLOT=SPLOT*YCOORD(K,J)
+          IF(XPLOT.GT.SIZEX.OR.XPLOT.LT.0.) GO TO 99
+          IF(YPLOT.GT.SIZEY.OR.YPLOT.LT.0.) GO TO 99
+          X=COOR(1,J,K)
+          Y=COOR(2,J,K)
+          IF(X.EQ.0.) GO TO 99
+          XPLOTC=SPLOT*X
+          YPLOTC=SPLOT*Y
+          XERR=RMAG*(XPLOTC-XPLOT)+XPLOT
+          YERR=RMAG*(YPLOTC-YPLOT)+YPLOT
+          IF(XERR.GT.SIZEX.OR.XERR.LT.0.) GO TO 99
+          IF(YERR.GT.SIZEY.OR.YERR.LT.0.) GO TO 99
+          rlen=sqrt((XERR-XPLOT)**2+(YERR-YPLOT)**2)
+          if(rlen.gt.rlenmax)rlenmax=rlen
+99    CONTINUE
+C-----Adjust maximal length to width/20
+      rlenmax=rlenmax/20.0
+C
+      PEAKMAX=-1.0E30
+      XPEAKMAX=-100.
+      YPEAKMAX=-100.
+CHEN<
       DO 100 K=MINA,MAXA
         DO 100 J=MINB,MAXB
           XPLOT=SPLOT*XCOORD(K,J)
@@ -972,12 +1009,10 @@ C         PEAKMAX=MAX(PEAKMAX,COOR(3,J,K))
           IF(X.EQ.0.) GO TO 100
           XPLOTC=SPLOT*X
           YPLOTC=SPLOT*Y
-CHEN>
 C         XERR=10*XPLOTC-9*XPLOT
 C         YERR=10*YPLOTC-9*YPLOT
           XERR=RMAG*(XPLOTC-XPLOT)+XPLOT
           YERR=RMAG*(YPLOTC-YPLOT)+YPLOT
-CHEN<
 C deviations from perfect lattice plotted at 10x actual deviation
 C         CALL LOCCHR(XPLOTC,YPLOTC,0)
 C         WRITE(TEXT,101)
@@ -986,8 +1021,64 @@ C101      FORMAT('O')
           CALL P2K_MOVE(XPLOT,YPLOT,0.)
           IF(XERR.GT.SIZEX.OR.XERR.LT.0.) GO TO 100
           IF(YERR.GT.SIZEY.OR.YERR.LT.0.) GO TO 100
+CHEN> 
+C---------Calculate angle and length of line:
+          rang=atan2(XERR-XPLOT,YERR-YPLOT)*180.0/3.141592654
+          if(rang.lt.0.0)rang=rang+360.0
+          rlen=sqrt((XERR-XPLOT)**2+(YERR-YPLOT)**2)/rlenmax
+          rlen=(rlen*0.5)+0.5
+          if(rlen.gt.1.0)rlen=1.0
+          if(rlen.lt.0.5)rlen=0.5
+C---------Assign HSV Values, as Hue=angle, Saturation=length, Value=1.0
+          rhue=rang
+          rsat=rlen
+          rval=0.7
+C---------Calculate RGB Values:
+          c=rval * rsat
+          rhue60=rhue / 60.0
+          x = c * (1 - abs(mod(rhue60,2.0) - 1))
+          if(rhue60<1.0)then
+            rgbr=c
+            rgbg=x
+            rgbb=0
+          elseif (rhue60<2.0)then
+            rgbr=x
+            rgbg=c
+            rgbb=0
+          elseif (rhue60<3.0)then
+            rgbr=0
+            rgbg=c
+            rgbb=x
+          elseif (rhue60<4.0)then
+            rgbr=0
+            rgbg=x
+            rgbb=c
+          elseif (rhue60<5.0)then
+            rgbr=x
+            rgbg=0
+            rgbb=c
+          else 
+            rgbr=c
+            rgbg=0
+            rgbb=x
+          endif
+          rgbr=rgbr+rval-c
+          rgbg=rgbg+rval-c
+          rgbb=rgbb+rval-c
+C          write(*,'(''c,x='',2F6.3,'' rlen,rang='',2F9.3,'' r,g,b='',3F6.3)')
+C     1      c,x,rlen,rang,rgbr,rgbg,rgbb
+          if(rgbr.gt.1.0)rgbr=1.0
+          if(rgbg.gt.1.0)rgbg=1.0
+          if(rgbb.gt.1.0)rgbb=1.0
+          if(rgbr.lt.0.0)rgbr=0.0
+          if(rgbg.lt.0.0)rgbg=0.0
+          if(rgbb.lt.0.0)rgbb=0.0
+C---------Set RGB color:
+          if(LCOLOR)CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
           CALL P2K_DRAW(XERR,YERR,0.)
 100   CONTINUE
+      CALL P2K_COLOUR(0)
+CHEN<
       WRITE(*,9000)XPEAKMAX,YPEAKMAX
 9000  FORMAT(/,/,' POSITION OF MAXIMUM PEAK HEIGHT',2F10.2,/)
 C

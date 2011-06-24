@@ -1034,45 +1034,7 @@ C---------Assign HSV Values, as Hue=angle, Saturation=length, Value=1.0
           rsat=rlen
           rval=0.7
 C---------Calculate RGB Values:
-          c=rval * rsat
-          rhue60=rhue / 60.0
-          x = c * (1 - abs(mod(rhue60,2.0) - 1))
-          if(rhue60<1.0)then
-            rgbr=c
-            rgbg=x
-            rgbb=0
-          elseif (rhue60<2.0)then
-            rgbr=x
-            rgbg=c
-            rgbb=0
-          elseif (rhue60<3.0)then
-            rgbr=0
-            rgbg=c
-            rgbb=x
-          elseif (rhue60<4.0)then
-            rgbr=0
-            rgbg=x
-            rgbb=c
-          elseif (rhue60<5.0)then
-            rgbr=x
-            rgbg=0
-            rgbb=c
-          else 
-            rgbr=c
-            rgbg=0
-            rgbb=x
-          endif
-          rgbr=rgbr+rval-c
-          rgbg=rgbg+rval-c
-          rgbb=rgbb+rval-c
-C          write(*,'(''c,x='',2F6.3,'' rlen,rang='',2F9.3,'' r,g,b='',3F6.3)')
-C     1      c,x,rlen,rang,rgbr,rgbg,rgbb
-          if(rgbr.gt.1.0)rgbr=1.0
-          if(rgbg.gt.1.0)rgbg=1.0
-          if(rgbb.gt.1.0)rgbb=1.0
-          if(rgbr.lt.0.0)rgbr=0.0
-          if(rgbg.lt.0.0)rgbg=0.0
-          if(rgbb.lt.0.0)rgbb=0.0
+          call HSVTORGB(rhue,rsat,rval,rgbr,rgbg,rgbb)
 C---------Set RGB color:
           if(LCOLOR)CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
           CALL P2K_DRAW(XERR,YERR,0.)
@@ -1131,6 +1093,28 @@ CTSH++
           IF(PEAKNORM.GT.0.5) TEXT='<'
           IF(PEAKNORM.GT.0.7) TEXT='H'
 CTSH--
+CHEN> 
+          XPLOT=SPLOT*XCOORD(K,J)
+          YPLOT=SPLOT*YCOORD(K,J)
+          XERR=RMAG*(XPLOTC-XPLOT)+XPLOT
+          YERR=RMAG*(YPLOTC-YPLOT)+YPLOT
+C---------Calculate angle and length of line:
+          rang=atan2(XERR-XPLOT,YERR-YPLOT)*180.0/3.141592654
+          if(rang.lt.0.0)rang=rang+360.0
+          rlen=sqrt((XERR-XPLOT)**2+(YERR-YPLOT)**2)/rlenmax
+          rlen=(rlen*0.5)+0.5
+          if(rlen.gt.1.0)rlen=1.0
+          if(rlen.lt.0.5)rlen=0.5
+C---------Assign HSV Values, as Hue=angle, Saturation=length, Value=1.0
+          rhue=rang
+          rsat=rlen
+          rval=0.7
+C---------Calculate RGB Values:
+          call HSVTORGB(rhue,rsat,rval,rgbr,rgbg,rgbb)
+C---------Set RGB color:
+C=========Color in this plot isn't too helpful. Removed again. H.
+C          if(LCOLOR)CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+CHEN<
           CALL P2K_CSTRING(TEXT,1,0.)
 
           IF(PEAKNORM.GT.0.5.AND.PEAKNORM.LT.0.7) THEN
@@ -1165,6 +1149,7 @@ C 409       FORMAT('I')
 C
 300   CONTINUE
 C
+      CALL P2K_COLOUR(0)
       CALL P2K_FONT("Courier"//CHAR(0),FONTSIZE)
       YPOS=SIZEY+4.0
       CALL P2K_MOVE(10.,YPOS,0.)
@@ -2402,4 +2387,56 @@ C
       RETURN
 C
       END
+C--------------------------------------------------------------
+C--------------------------------------------------------------
+C--------------------------------------------------------------
+      SUBROUTINE HSVTORGB(rhue,rsat,rval,rgbr,rgbg,rgbb)
+C--------------------------------------------------------------
+C--------------------------------------------------------------
+C--------------------------------------------------------------
+C
+C---------Calculate RGB Values:
+          c=rval * rsat
+          rhue60=rhue / 60.0
+          x = c * (1 - abs(mod(rhue60,2.0) - 1))
+          if(rhue60<1.0)then
+            rgbr=c
+            rgbg=x
+            rgbb=0
+          elseif (rhue60<2.0)then
+            rgbr=x
+            rgbg=c
+            rgbb=0
+          elseif (rhue60<3.0)then
+            rgbr=0
+            rgbg=c
+            rgbb=x
+          elseif (rhue60<4.0)then
+            rgbr=0
+            rgbg=x
+            rgbb=c
+          elseif (rhue60<5.0)then
+            rgbr=x
+            rgbg=0
+            rgbb=c
+          else 
+            rgbr=c
+            rgbg=0
+            rgbb=x
+          endif
+          rgbr=rgbr+rval-c
+          rgbg=rgbg+rval-c
+          rgbb=rgbb+rval-c
+C          write(*,'(''c,x='',2F6.3,'' rlen,rang='',2F9.3,'' r,g,b='',3F6.3)')
+C     1      c,x,rlen,rang,rgbr,rgbg,rgbb
+          if(rgbr.gt.1.0)rgbr=1.0
+          if(rgbg.gt.1.0)rgbg=1.0
+          if(rgbb.gt.1.0)rgbb=1.0
+          if(rgbr.lt.0.0)rgbr=0.0
+          if(rgbg.lt.0.0)rgbg=0.0
+          if(rgbb.lt.0.0)rgbb=0.0
+C
+          RETURN
+          END
+         
 

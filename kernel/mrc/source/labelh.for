@@ -1620,19 +1620,18 @@ C
      . ' Fourier Transform')
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
-        DMIN = 0.0
-        DMAX = 0.0
+        DMIN = RVAL
+        DMAX = RVAL
         DOUBLMEAN = 0.0
         DO 852 IZ = 1,NZ
           DO 852 IY = 1,NY
-C            CALL IRDLIN(1,CLINE,*999)
-            DO 802 IX = 1,NX
-C             VAL = AIMAG(CLINE(IX))
-              CLINE(IX)=CMPLX(RVAL,0.0)
+C           CALL IRDLIN(1,CLINE,*999)
+            DO 802 IX = 1,NX,2
+              ALINE(IX)=RVAL
 802         CONTINUE
-            CALL IWRLIN(2,CLINE)
+            CALL IWRLIN(2,ALINE)
 852     CONTINUE
-        DMEAN = 0.0
+        DMEAN = RVAL
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
         GOTO 990
 C

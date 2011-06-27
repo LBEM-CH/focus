@@ -27,6 +27,8 @@
 # DISPLAY: secondlattice
 # DISPLAY: tempkeep
 # DISPLAY: comment
+# DISPLAY: invmask_radius
+# DISPLAY: invmask_type
 #
 #$end_local_vars
 #
@@ -44,6 +46,8 @@ set stepdigitizer = ""
 set lattice = ""
 set secondlattice = ""
 set tempkeep = ""
+set invmask_radius = ""
+set invmask_type = ""
 #
 #$end_vars
 #
@@ -57,6 +61,8 @@ set scriptname = 2dx_maskLattice
 #
 set date = `date`
 echo date = ${date}
+echo invmask_radius = ${invmask_radius}
+echo invmask_type = ${invmask_type}
 #
 source ${proc_2dx}/2dx_makedirs 
 #
@@ -90,13 +96,33 @@ eot
   setenv SPOTS ${imagename}.spt
   #
   \rm -f SCRATCH/TMPvalue1.msk.fft.mrc
-  set holea = 10
   set rmax = 11000
   echo rmax = ${rmax}
+  if ( ${invmask_type} == "0" ) then
+    set ishape = 1
+    set radius = ${invmask_radius}
+  endif
+  if ( ${invmask_type} == "1" ) then
+    set ishape = 2
+    set radius = ${invmask_radius}
+  endif
+  if ( ${invmask_type} == "2" ) then
+    set ishape = 3
+    set radius = "${invmask_radius},${invmask_radius}"
+  endif
+  #
+  echo ":: Now launching masktrana with:" 
+  cat << eof
+::  ${bin_2dx}/2dx_masktrana.exe << eot
+:: ${ishape} F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+:: ${radius}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+:: ${lattice} -50 50 -50 50 ${rmax} 1 !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
+:: eot
+eof
   #
   ${bin_2dx}/2dx_masktrana.exe << eot
-1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
-${holea}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${ishape} F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${radius}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice} -50 50 -50 50 ${rmax} 1 !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
 eot
   #
@@ -136,7 +162,7 @@ eot
   #
   echo "<<@progress: 60>>"
   #
-  echo "# IMAGE: SCRATCH/${imagename}.invmask.fft.mrc <InvMasked FFT of image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: SCRATCH/${imagename}.invmask.fft.mrc <InvMasked FFT of image>" >> LOGS/${scriptname}.results
   #
   #############################################################################
   #                                                                           #
@@ -149,7 +175,7 @@ eot
   setenv OUT SCRATCH/${nonmaskimagename}.invflt.mrc
   ${bin_2dx}/2dx_fftrans.exe  
   #
-  echo "# IMAGE: SCRATCH/${nonmaskimagename}.invflt.mrc <Inverse Fourier-filtered Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: SCRATCH/${nonmaskimagename}.invflt.mrc <Inverse Fourier-filtered Image>" >> LOGS/${scriptname}.results
   #
   echo "<<@progress: 100>>"
   ##########################################################################

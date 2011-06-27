@@ -15,7 +15,7 @@
 #
 # SORTORDER: 55
 #
-# MANUAL: This scripts assists in manually masking the crystal. 
+# MANUAL: This script assists in manually masking the crystal. 
 #
 # MANUAL: Use the full-screen browser to manually define a polygon, which will then be saved as <I>selectionList.dat</I>. Input for the manual polygon selection can come from either the raw image itself, the ManualMasking-CCmap.mrc file, or the ManualMasking-UnbendPlot.mrc file.
 #
@@ -147,7 +147,7 @@ else
   #
   ${bin_2dx}/labelh.exe << eot
 ${imagename}.mrc
-2               ! Logrithmic  OD stretch ( y = aLOGx + b )
+2               ! Linear OD stretch  ( y = mx + b )
 SCRATCH/TMPvalue1.mrc
 0.0 1.0
 0
@@ -245,7 +245,7 @@ eot
   echo "0,0"   >  SCRATCH/TMPspot.spt
   #
   set locmask = `echo ${mask_fourmask} ${imagesidelength} | awk '{ s = $1 * $2 / 2 } END { print s }'`
-  ${bin_2dx}/masktrana.exe << eot
+  ${bin_2dx}/2dx_masktrana.exe << eot
 2 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${locmask}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 10000,0,0,10000 -9 9 -9 9 200.0 1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
@@ -277,7 +277,7 @@ eot
   ${bin_2dx}/labelh.exe << eot
 SCRATCH/TMPmask2.mrc
 99
-3               ! Logrithmic  OD stretch ( y = aLOGx + b )
+3               ! CUT OFF OVER - AND UNDERFLOWS
 SCRATCH/TMPmask3.mrc
 0.0 1.0
 0

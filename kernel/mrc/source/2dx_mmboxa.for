@@ -695,7 +695,7 @@ C
 1101    FORMAT(I12,I12,F14.1,F11.1,I12,F14.1,F14.1)
 C
 CHENN>
-CHEN--write spotlist out
+CHEN--write out spotlist
 C
       IF(IOUT.EQ.3) then
         IF(IQ.LE.IQMAX) then

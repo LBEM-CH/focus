@@ -70,6 +70,8 @@ C
 C IMODE=  8: Output IMAGINARY part of Complex value
 C        no further input needed
 C
+C IMODE=  9: Fill FFT with Amplitude
+C
 C IMODE= 10: Transform 16 bit linear transmission into 16 bit OD
 C
 C IMODE= 11: Transform 16 bit linear transmission into 8 bit OD
@@ -185,11 +187,15 @@ C
      . '  5: Output amplitudes or Intensities',/,
      . '  6: Output Phases (degrees)',/,
      . '  7: Output REAL part of Complex value',/,
-     . '  8: Output IMAGINARY part of Complex value',/)
+     . '  8: Output IMAGINARY part of Complex value',/,
+     . '  9: Fill FFT with Amplitude',/,
+     . ' 32: Cut over and underflows from Amplitudes',/)
 C
         WRITE(6,1500)
 1500    FORMAT(/,'$Enter desired mode: ')
         READ(5,*) IMODE
+        write(*,'('' Read MODE Number '',I6)')IMODE
+C
                 if (imode.eq.50) then
                         call IMCLOSE(1)
                         call LABELC(INFILE)
@@ -204,8 +210,12 @@ C
      1      .and. IMODE.ne.12 .and. IMODE.ne.13 .and. IMODE.ne.14
      1      .and. IMODE.ne.15 .and. IMODE.ne.16 .and. IMODE.ne.20 
      1      .and. IMODE.ne.29 .and. IMODE.ne.30
-     1      .and. IMODE.ne.31) 
-     1      .AND. MODE .LT. 3) GOTO 1
+     1      .and. IMODE.ne.31 .and. IMODE.ne.32)
+     1      .AND. MODE .LT. 3) then
+          write(*,'('' ERROR: Illegal mode for this file type'')')
+          GOTO 1
+        endif
+C
         WRITE(6,1550)
 1550    FORMAT(10X)
 C
@@ -228,7 +238,8 @@ C
         if ( IMODE.eq.30 ) goto 95
         if ( IMODE.eq.31 ) goto 96
 C-------------------------------97 already taken for "13"
-        GOTO (113,3,5,10,20,30,40,45,50,60,70,80) IMODE+4
+        if ( IMODE.eq.32 ) goto 109
+        GOTO (113,3,5,10,20,30,40,45,50,60,70,80,90) IMODE+4
 C
 C=====================================================================
 C
@@ -1113,9 +1124,9 @@ C
         DO IZ = 1,NZ
           DO IY = 1,NY
             CALL IRDLIN(1,ALINE,*999)
-            DO 90 IX = 1,NX
+            DO 1790 IX = 1,NX
                ALINE(IX) = SCALE*ALINE(IX)
-90          CONTINUE
+1790          CONTINUE
             CALL IWRLIN(2,ALINE)
           enddo
         enddo
@@ -1293,23 +1304,36 @@ C
         DMIN =  1.E10
         DMAX = -1.E10
         domin = 1.E10
-        domax = 1.E10
+        domax =-1.E10
         DOUBLMEAN = 0.0
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         DO IZ= 1,NZ
           DO IY = 1,NY
             CALL IRDLIN(1,ALINE,*999)
-            DO 300 IX = 1,NXT
-              if(ALINE(IX) .lt. domin) domin = ALINE(IX)
-              if(ALINE(IX) .gt. domax) domax = ALINE(IX)
-              VAL = ALINE(IX)*A + B
-              IF (IQ .EQ. 1 .AND. VAL .LT. 0.0) VAL = 0.0
-              IF (VAL .LT. DMIN) DMIN = VAL
-              IF (VAL .GT. DMAX) DMAX = VAL
-              DOUBLMEAN = DOUBLMEAN + VAL
-              ALINE(IX) = VAL
-300         CONTINUE
+            if(MODE.lt.3)then
+              DO 300 IX = 1,NXT
+                if(ALINE(IX) .lt. domin) domin = ALINE(IX)
+                if(ALINE(IX) .gt. domax) domax = ALINE(IX)
+                VAL = ALINE(IX)*A + B
+                IF (IQ .EQ. 1 .AND. VAL .LT. 0.0) VAL = 0.0
+                IF (VAL .LT. DMIN) DMIN = VAL
+                IF (VAL .GT. DMAX) DMAX = VAL
+                DOUBLMEAN = DOUBLMEAN + VAL
+                ALINE(IX) = VAL
+300           CONTINUE
+            else
+              DO IX = 1,NXT,2
+                RREA=ALINE(IX)
+                RIMA=ALINE(IX+1)
+                VAL = RREA*A + B
+                IF (IQ .EQ. 1 .AND. VAL .LT. 0.0) VAL = 0.0
+                IF (VAL .LT. DMIN) DMIN = VAL
+                IF (VAL .GT. DMAX) DMAX = VAL
+                DOUBLMEAN = DOUBLMEAN + VAL
+                ALINE(IX) = VAL
+              enddo
+            endif
             CALL IWRLIN(2,ALINE)
           enddo
         enddo
@@ -1583,7 +1607,81 @@ C
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
         GOTO 990
 C
+C=====================================================================
+C
+C  MODE 9 : Fill FFT with Amplitude
+C
+90      continue
+        WRITE(6,2359)
+2359    FORMAT('$Give Value for Amplitude  ')
+        READ(5,*) RVAL
+        write(TITLE,2701)
+2701    FORMAT('LABEL Mode 9: Create Zeroed version of',
+     . ' Fourier Transform')
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        DMIN = 0.0
+        DMAX = 0.0
+        DOUBLMEAN = 0.0
+        DO 852 IZ = 1,NZ
+          DO 852 IY = 1,NY
+C            CALL IRDLIN(1,CLINE,*999)
+            DO 802 IX = 1,NX
+C             VAL = AIMAG(CLINE(IX))
+              CLINE(IX)=CMPLX(RVAL,0.0)
+802         CONTINUE
+            CALL IWRLIN(2,CLINE)
+852     CONTINUE
+        DMEAN = 0.0
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE 32 : Cut out over and underflows from FFTs Amplitude
+C
+109     continue
+        WRITE(6,2032)
+2032    FORMAT(' Enter LOWEST AND HIGHEST VALUE TO PRUNE WITH')
+        READ(5,*) A,B
+        WRITE(TITLE,2132) A,B
+2132    FORMAT(' LABEL Mode 32: LIMIT DYNAMIC RANGE TO ',2F12.4)
+        WRITE(6,2359)
+C
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        if(MODE.lt.3)goto 990
+C
+        DMIN = 0.0
+        DMAX = 0.0
+        DO IZ= 1,NZ
+          DO IY = 1,NY
+            CALL IRDLIN(1,ALINE,*999)
+            DO IX = 1,NXT,2
+              RREA=ALINE(IX)
+              RIMA=ALINE(IX+1)
+              IF (RREA.LT.A) RREA=A
+              IF (RREA.GT.B) RREA=B
+              ALINE(IX  )=RREA
+              ALINE(IX+1)=RIMA
+              IF (RREA.LT.DMIN) DMIN = RREA
+              IF (RREA.GT.DMAX) DMAX = RREA
+              DOUBLMEAN = DOUBLMEAN + RREA
+            ENDDO
+            CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+        DMEAN = 2.0*DOUBLMEAN/(NXT*NY*NZ)
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        GOTO 990
+C
+C=====================================================================
+C=====================================================================
+C=====================================================================
 C   HERE FOR FINISH
+C=====================================================================
+C=====================================================================
+C=====================================================================
 C
 990     CALL IMCLOSE(2)
 995     CALL IMCLOSE(1)
@@ -1821,7 +1919,7 @@ C
 C  MODE 3 : CUT OFF OVER AND UNDERFLOW
 C
 40      WRITE(6,2000)
-2000    FORMAT(' Enter LOWEST AND HIGHEST VALUE TO PRUNE IMAGE WITH')
+2000    FORMAT(' Enter LOWEST AND HIGHEST VALUE TO PRUNE WITH')
         READ(5,*) A,B
         WRITE(TITLE,2100) A,B
 2100    FORMAT(' MLABEL Mode 3: LIMIT DYNAMIC RANGE TO ',2F12.4)

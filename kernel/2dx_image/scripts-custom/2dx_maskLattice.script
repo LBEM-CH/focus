@@ -1,0 +1,161 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Inverse Fourier Filter (experimental)                              #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 06/27/2011                                             #
+# Last Modification: 06/27/2011                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 95
+#
+# MANUAL: This script will inverse Fourier filter a lattice from an FFT of an image. That is, it will delete the lattice spots, leaving only the crystal background.
+#
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagenumber
+# DISPLAY: imagesidelength
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: lattice
+# DISPLAY: secondlattice
+# DISPLAY: tempkeep
+# DISPLAY: comment
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set lattice = ""
+set secondlattice = ""
+set tempkeep = ""
+#
+#$end_vars
+#
+echo "<<@progress: 1>>"
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set scriptname = 2dx_maskLattice
+\rm -f LOGS/${scriptname}.results
+#
+set date = `date`
+echo date = ${date}
+#
+source ${proc_2dx}/2dx_makedirs 
+#
+echo "# IMAGE: ${nonmaskimagename}.mrc <nonmasked image>" >> LOGS/${scriptname}.results
+echo "# IMAGE: FFTIR/${nonmaskimagename}.fft.mrc <FFT of nonmasked image>" >> LOGS/${scriptname}.results
+#
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "LABEL - to create flat value=1 FFT file"
+  #############################################################################
+  #
+  \rm -f SCRATCH/TMPvalue1.fft.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+FFTIR/${nonmaskimagename}.fft.mrc
+9               ! Create Zerored FFT
+SCRATCH/TMPvalue1.fft.mrc
+1.0
+eot
+  #
+  echo "# IMAGE: SCRATCH/TMPvalue1.fft.mrc <Value 1 FFT>" >> LOGS/${scriptname}.results
+  echo "<<@progress: 10>>"
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "MASKTRAN - to delete spots of lattice"
+  #############################################################################
+  #
+  setenv IN  SCRATCH/TMPvalue1.fft.mrc
+  setenv OUT SCRATCH/TMPvalue1.msk.fft.mrc
+  setenv SPOTS ${imagename}.spt
+  #
+  \rm -f SCRATCH/TMPvalue1.msk.fft.mrc
+  set holea = 10
+  set rmax = 11000
+  echo rmax = ${rmax}
+  #
+  ${bin_2dx}/2dx_masktrana.exe << eot
+1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${holea}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${lattice} -50 50 -50 50 ${rmax} 1 !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
+eot
+  #
+  echo "# IMAGE: SCRATCH/TMPvalue1.msk.fft.mrc <Masked Value 1 FFT>" >> LOGS/${scriptname}.results
+  echo "<<@progress: 40>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "LABEL - to invert masked FFT pattern"
+  #############################################################################
+  #
+  \rm -f SCRATCH/TMPvalue2.fft.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMPvalue1.msk.fft.mrc
+2               ! Linear OD stretch  ( y = mx + b )
+SCRATCH/TMPvalue2.fft.mrc
+-1.0 1.0
+0
+eot
+  #
+  echo "# IMAGE: SCRATCH/TMPvalue2.fft.mrc <Inverted masked Value 1 FFT>" >> LOGS/${scriptname}.results
+  echo "<<@progress: 50>>"
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "TWOFILE - to multiply masked pattern with FFT of image"
+  #############################################################################
+  #
+  \rm -f m${nonmaskimagename}.mrc
+  setenv IN1 FFTIR/${nonmaskimagename}.fft.mrc
+  setenv IN2 SCRATCH/TMPvalue2.fft.mrc
+  setenv OUT SCRATCH/${nonmaskimagename}.invmask.fft.mrc
+  ${bin_2dx}/2dx_twofile.exe << eot
+1               ! ICOMB (multiply together)
+0 0 0 0 0 ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+eot
+  #
+  echo "<<@progress: 60>>"
+  #
+  echo "# IMAGE: SCRATCH/${imagename}.invmask.fft.mrc <InvMasked FFT of image>" >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "FFTTRANS - to calculate Fourier filtered image"
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f SCRATCH/${nonmaskimagename}.invflt.mrc
+  setenv IN  SCRATCH/${nonmaskimagename}.invmask.fft.mrc
+  setenv OUT SCRATCH/${nonmaskimagename}.invflt.mrc
+  ${bin_2dx}/2dx_fftrans.exe  
+  #
+  echo "# IMAGE: SCRATCH/${nonmaskimagename}.invflt.mrc <Inverse Fourier-filtered Image>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 100>>"
+  ##########################################################################
+  ${proc_2dx}/linblock "${scriptname} - normal end."
+  ##########################################################################
+  #
+endif
+#
+  

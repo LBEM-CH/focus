@@ -480,8 +480,8 @@ if ( ${istilt} == "n" ) then
   #
   \rm -f SCRATCH/${imagename}.msk.mrc
   #
-  ${proc_2dx}/lin "masktrana.exe"
-  ${bin_2dx}/masktrana.exe << eot
+  ${proc_2dx}/lin "2dx_masktrana.exe"
+  ${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F	                    ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${SYN_maska}                ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice},-30,30,-30,30,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE

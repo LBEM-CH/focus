@@ -38,7 +38,7 @@ setenv IN  FFTIR/${imagename}.fft.mrc
 setenv OUT SCRATCH/${imagename}.msk.fft.mrc
 setenv SPOTS ${imagename}.spt
 #
-${bin_2dx}/masktrana.exe << eot
+${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${maska}  ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice} -9 9 -9 9 ${rmax} 1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
@@ -80,7 +80,7 @@ setenv SPOTS ${imagename}.spt
 #
 \rm -f SCRATCH/${imagename}.ref.msk.fft.mrc
 #
-${bin_2dx}/masktrana.exe << eot
+${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${holea}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice} -30 30 -30 30 ${rmax} 1 !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE

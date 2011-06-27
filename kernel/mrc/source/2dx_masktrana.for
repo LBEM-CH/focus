@@ -72,18 +72,18 @@ CHENN<
       CHARACTER DAT*24
       EQUIVALENCE (NX,NXYZR),(ARRAY,BRRAY)
 CTSH++
-	CHARACTER*80 TMPTITLE
-	EQUIVALENCE (TMPTITLE,TITLE)
+      CHARACTER*80 TMPTITLE
+      EQUIVALENCE (TMPTITLE,TITLE)
 CTSH--
-C      DATA ZERO/0.0/,IPASS2/.FALSE./,SCALESPOT/NHOLEMAX*1.0/,IASK/'*'/
+C     DATA ZERO/0.0/,IPASS2/.FALSE./,SCALESPOT/NHOLEMAX*1.0/,IASK/'*'/
       DATA ZERO/0.0/,IPASS2/.FALSE./,SCALESPOT/NHOLEMAX*1.0/
       DATA ASUM/NHOLEMAX*0.0/,NSUM/NHOLEMAX*0/
 C*** initialization added by jms 06.03.96
-        do i=1,nholemax
-         asum(i) = 0.
-         nsum(i) = 0
-         scalespot(i) = 1.0
-        end do
+      do i=1,nholemax
+        asum(i) = 0.
+        nsum(i) = 0
+        scalespot(i) = 1.0
+      end do
       ISIZE2=ISIZE/2
       IATOT=ISIZE*IDEEP
 C
@@ -96,11 +96,11 @@ C  Read in input transform header data and open output file.
       CALL IMOPEN(2,'OUT','NEW')
       CALL FDATE(DAT)
       CALL IRDHDR(1,NXYZR,MXYZR,MODE,DMIN,DMAX,DMEAN)
-      	IF(NX*2.GT.ISIZE) THEN
-      		WRITE(6,1499) NX*2
-1499		FORMAT(' PROG DIMS NOT BIG ENOUGH, 2*NX=',I6)
-      		STOP
-      	ENDIF
+      IF(NX*2.GT.ISIZE) THEN
+        WRITE(6,1499) NX*2
+1499    FORMAT(' PROG DIMS NOT BIG ENOUGH, 2*NX=',I6)
+        STOP
+      ENDIF
       CALL ICRHDR(2,NXYZR,MXYZR,4,TITLE,0)
       CALL ITRLAB(2,1)
 CTSH      IF(IAMPLIMIT) WRITE(TITLE) DAT(5:24,1501)
@@ -142,7 +142,7 @@ C
      .         '   Hole diameter from file HOLE.TMP ? ',L1)
 CHENN<
       IF(ISHAPE.LE.2) THEN
-      	READ(5,*) RAD
+        READ(5,*) RAD
 CHENN>
         IF(IHOLFILE)THEN
           OPEN(UNIT=11,FILE='HOLE.TMP',STATUS='OLD')
@@ -150,19 +150,19 @@ CHENN>
           CLOSE(11)
         ENDIF
 CHENN<
-      	WRITE(6,1701) RAD
-1701	FORMAT('   Hole radius',F10.3)
+        WRITE(6,1701) RAD
+1701    FORMAT('   Hole radius',F10.3)
       ENDIF
       IF(ISHAPE.EQ.3) THEN
-      	READ(5,*) DELX,DELY
-      	WRITE(6,1702) DELX,DELY
-1702	FORMAT('   Hole half edge lengths, DELX,DELY',2F10.3)
+        READ(5,*) DELX,DELY
+        WRITE(6,1702) DELX,DELY
+1702    FORMAT('   Hole half edge lengths, DELX,DELY',2F10.3)
       ENDIF
       READ(5,*) AX,AY,BX,BY,IHMIN,IHMAX,IKMIN,IKMAX,RMAX,ITYPE
       IF(RMAX.GT.FLOAT(NX)) RMAX = FLOAT(NX)
       IF(RMAX.GT.FLOAT(NY2)) RMAX = FLOAT(NY2)
       WRITE(6,1703) AX,AY,BX,BY,IHMIN,IHMAX,IKMIN,IKMAX,RMAX,ITYPE
-1703	FORMAT('   Lattice parameters',4F10.3/
+1703    FORMAT('   Lattice parameters',4F10.3/
      . '   Min and Max indices for lattice generator',4I7/
      . '   Maximum transform radius for lattice generator',F10.3/
      . '   ITYPE (full lattice or selected spots) =',I5)
@@ -171,12 +171,12 @@ CHENN<
       DSTAR = SQRT((AX-BX)**2+(AY-BY)**2)
       RADMAX = AMIN1(ASTAR,BSTAR,DSTAR)/2.0
       IF(RAD.GT.RADMAX) THEN
-      	WRITE(6,1705) RAD,RADMAX
-1705	FORMAT(' Overlapped holes, radius reduced from',F6.1,' to',F6.1)
-      	RAD=RADMAX
+        WRITE(6,1705) RAD,RADMAX
+1705    FORMAT(' Overlapped holes, radius reduced from',F6.1,' to',F6.1)
+        RAD=RADMAX
       ENDIF
       WRITE(6,1704)
-1704	FORMAT('   Hole positions used in masking')
+1704    FORMAT('   Hole positions used in masking')
       RMAXSQ=RMAX**2
       NHOLE=0
 C     Set scale factor to be 1.0 since this version uses grid units as input.
@@ -190,8 +190,8 @@ C     Set scale factor to be 1.0 since this version uses grid units as input.
             IK = IKMIN+J-1
             XPOS=IH*AX+IK*BX
             YPOS=IH*AY+IK*BY
-            IF(XPOS.LT.0.) GO TO 120			!   Use only positive X,
-            IF(XPOS.EQ.0.0.AND.YPOS.LE.0.) GO TO 120	! and positive Y when X=0
+            IF(XPOS.LT.0.) GO TO 120                    !   Use only positive X,
+            IF(XPOS.EQ.0.0.AND.YPOS.LE.0.) GO TO 120    ! and positive Y when X=0
             IF(ISHAPE.LE.2) RSQ=(ABS(XPOS)+RAD)**2+(ABS(YPOS)+RAD)**2
             IF(ISHAPE.GE.3) RSQ=(ABS(XPOS)+DELX)**2+(ABS(YPOS)+DELY)**2
             IF(RSQ.GT.RMAXSQ) GO TO 120
@@ -212,9 +212,9 @@ C     Set scale factor to be 1.0 since this version uses grid units as input.
         endif
 125     continue
         IF(ISPOTFILE)  THEN
-          READ(10,*,END=130) IH,IK	! take spotdata from file SPOTS.
+          READ(10,*,END=130) IH,IK      ! take spotdata from file SPOTS.
         ELSE
-          READ(5,*,END=130) IH,IK		! take spotdata from stream 5.
+          READ(5,*,END=130) IH,IK               ! take spotdata from stream 5.
         ENDIF
         IF(IH.EQ.100) GO TO 130
         XPOS=IH*AX+IK*BX
@@ -242,7 +242,7 @@ C      TEST FOR REPEAT SPECIFICATION OF INDICES and for spot within transform.
 20133         FORMAT(' SPOT PLUS MASK OUTSIDE TRANSFORM NOT USED',2I5)
               GO TO 125
             ENDIF
-          ELSE		  ! i.e. for ISHAPE=3
+          ELSE            ! i.e. for ISHAPE=3
             IF(XPOS+DELX.GT.NX.OR.ABS(YPOS)+DELY.GT.NY2) THEN
               WRITE(6,20133)IH,IK
               GO TO 125
@@ -264,15 +264,15 @@ C      TEST FOR REPEAT SPECIFICATION OF INDICES and for spot within transform.
 1801  FORMAT('   Total number of holes = ',I7)
       IF(ISPOTFILE) CLOSE (UNIT=10)
 C
-C   Treat transform in strips of MDEEP, where MDEEP=IDEEP for all
-c   strips except the last where MDEEP may be less than IDEEP.
-      	NSEC=NY/IDEEP
+C     Treat transform in strips of MDEEP, where MDEEP=IDEEP for all
+c     strips except the last where MDEEP may be less than IDEEP.
+      NSEC=NY/IDEEP
 C
-C      	IF(NSEC*IDEEP.NE.NY) THEN
-C      		WRITE(6,1802) NSEC,IDEEP,NY
-C1802		FORMAT(' NSEC,IDEEP NOT FACTORS OF NY',3I10)
-C      		STOP
-C      	ENDIF
+C     IF(NSEC*IDEEP.NE.NY) THEN
+C       WRITE(6,1802) NSEC,IDEEP,NY
+C1802   FORMAT(' NSEC,IDEEP NOT FACTORS OF NY',3I10)
+C       STOP
+C     ENDIF
 C
       IRES=NY-(NSEC*IDEEP)
       IF(IRES.EQ.0)THEN
@@ -285,119 +285,124 @@ C
 1802  FORMAT(' DATA READ IN ',I5,' STRIPS, WITH ',I5,' LINES IN',
      .' EACH STRIP, EXCEPT FOR THE LAST ONE WITH',I5,' LINES'/)
 100   CALL IMPOSN(1,0,0)
+C
+C
       DO 500 ISEC=1,NSEC
-C   Read in strips of transform
-      IF(ISEC.EQ.NSEC)THEN
-      MDEEP=ILAST
-      ELSE
-      MDEEP=IDEEP
-      END IF
-      DO 190 M=1,MDEEP
-      CALL IRDLIN(1,ARRAY(1,M))
-190   CONTINUE
-C  Check all parts of all holes to see if present in each strip.
-C  Wasteful but simple ???
-      DO 200 NH=1,NHOLE
 C
-C     Set hole centre
-      XXC=XC(NH)/SCALE
-      YYC=NY2+YC(NH)/SCALE
-      IXC=XXC+0.5
-      IYC=YYC+0.5
-      IF(ISHAPE.EQ.3) GO TO 150
 C
-C     Set hole limits
-      RA=RAD/SCALE
-      RADSQ=RA*RA
-      IRAD=RA+0.5
-      IX1=IXC-IRAD
-      IX2=IXC+IRAD
-      IY1=IYC-IRAD
-      IY2=IYC+IRAD
-      GO TO 160
+C       Read in strips of transform
+        IF(ISEC.EQ.NSEC)THEN
+          MDEEP=ILAST
+        ELSE
+          MDEEP=IDEEP
+        END IF
+        DO 190 M=1,MDEEP
+          CALL IRDLIN(1,ARRAY(1,M))
+190     CONTINUE
 C
-150   XSIDE2=DELX/SCALE
-      YSIDE2=DELY/SCALE
-      IXS=XSIDE2+0.5
-      IYS=YSIDE2+0.5
-      IX1=IXC-IXS
-      IX2=IXC+IXS
-      IY1=IYC-IYS
-      IY2=IYC+IYS
+C       Check all parts of all holes to see if present in each strip.
+C       Wasteful but simple ???
+        DO 200 NH=1,NHOLE
 C
-C     Scan over hole
-160   DO 300 IY=IY1,IY2
-      YSQ=(IY-YYC)**2
-C     IX can be negative
-      DO 310 IX=IX1,IX2
-      IF(ISHAPE.EQ.3) GO TO 290
-      RSQ=(IX-XXC)**2+YSQ
-      IF(RSQ.GT.RADSQ) GO TO 310
-      IF(ISHAPE.EQ.2) GWT=EXP(-2.0*RSQ/RADSQ)
-C     Check if point in neg X half transform - use Friedel mate
-290   IF(IX.GE.0) THEN
-        INDEX=IY*ISIZE+2*IX+1
-      ELSE
-        INDEX=(NY-IY)*ISIZE-2*IX+1
-      END IF
-C     Check not negative half of F(0,0) centre hole
-      IF((IX.LT.0).AND.(XC(NH).EQ.0.).AND.(YC(NH).EQ.0.)) GO TO 310
+C         Set hole centre
+          XXC=XC(NH)/SCALE
+          YYC=NY2+YC(NH)/SCALE
+          IXC=XXC+0.5
+          IYC=YYC+0.5
+          IF(ISHAPE.EQ.3) GO TO 150
 C
-C     Mark points within mask by scaling
-      	INDEX=INDEX-ISIZE*IDEEP*(ISEC-1)
-      	IF((INDEX.LT.1).OR.(INDEX.GT.IATOT)) GO TO 320
-      ASUM(NH) = ASUM(NH) + SQRT(BRRAY(INDEX)**2+BRRAY(INDEX+1)**2)
-      NSUM(NH) = NSUM(NH) + 1
-      BRRAY(INDEX)=BRRAY(INDEX)*1.E10*SCALESPOT(NH)
-      BRRAY(INDEX+1)=BRRAY(INDEX+1)*1.E10*SCALESPOT(NH)
-      IF(ISHAPE.NE.2) GO TO 320
-C     Gaussian weight for soft holes
-      BRRAY(INDEX)=BRRAY(INDEX)*GWT
-      BRRAY(INDEX+1)=BRRAY(INDEX+1)*GWT
+C         Set hole limits
+          RA=RAD/SCALE
+          RADSQ=RA*RA
+          IRAD=RA+0.5
+          IX1=IXC-IRAD
+          IX2=IXC+IRAD
+          IY1=IYC-IRAD
+          IY2=IYC+IRAD
+          GO TO 160
 C
-C     On IX=0 need another segment
-320   IF(IX.NE.0) GO TO 310
-C     But not for centre hole
-      IF((XC(NH).EQ.0.).AND.(YC(NH).EQ.0.)) GO TO 310
-      INDEX=(NY-IY)*ISIZE+1
-      	INDEX=INDEX-ISIZE*IDEEP*(ISEC-1)
-      	IF((INDEX.LT.1).OR.(INDEX.GT.IATOT)) GO TO 310
-      BRRAY(INDEX)=BRRAY(INDEX)*1.E10*SCALESPOT(NH)
-      BRRAY(INDEX+1)=BRRAY(INDEX+1)*1.E10*SCALESPOT(NH)
-      IF(ISHAPE.NE.2) GO TO 310
-      BRRAY(INDEX)=BRRAY(INDEX)*GWT
-      BRRAY(INDEX+1)=BRRAY(INDEX+1)*GWT
+150       XSIDE2=DELX/SCALE
+          YSIDE2=DELY/SCALE
+          IXS=XSIDE2+0.5
+          IYS=YSIDE2+0.5
+          IX1=IXC-IXS
+          IX2=IXC+IXS
+          IY1=IYC-IYS
+          IY2=IYC+IYS
 C
-310   CONTINUE
+C         Scan over hole
+160       DO 300 IY=IY1,IY2
+            YSQ=(IY-YYC)**2
+C           IX can be negative
+            DO 310 IX=IX1,IX2
+              IF(ISHAPE.EQ.3) GO TO 290
+              RSQ=(IX-XXC)**2+YSQ
+              IF(RSQ.GT.RADSQ) GO TO 310
+              IF(ISHAPE.EQ.2) GWT=EXP(-2.0*RSQ/RADSQ)
+C             Check if point in neg X half transform - use Friedel mate
+290           IF(IX.GE.0) THEN
+                INDEX=IY*ISIZE+2*IX+1
+              ELSE
+                INDEX=(NY-IY)*ISIZE-2*IX+1
+              END IF
+C             Check not negative half of F(0,0) centre hole
+              IF((IX.LT.0).AND.(XC(NH).EQ.0.).AND.(YC(NH).EQ.0.)) GO TO 310
 C
-300   CONTINUE
+C             Mark points within mask by scaling
+              INDEX=INDEX-ISIZE*IDEEP*(ISEC-1)
+              IF((INDEX.LT.1).OR.(INDEX.GT.IATOT)) GO TO 320
+              ASUM(NH) = ASUM(NH) + SQRT(BRRAY(INDEX)**2+BRRAY(INDEX+1)**2)
+              NSUM(NH) = NSUM(NH) + 1
+              BRRAY(INDEX)=BRRAY(INDEX)*1.E10*SCALESPOT(NH)
+              BRRAY(INDEX+1)=BRRAY(INDEX+1)*1.E10*SCALESPOT(NH)
+              IF(ISHAPE.NE.2) GO TO 320
+C             Gaussian weight for soft holes
+              BRRAY(INDEX)=BRRAY(INDEX)*GWT
+              BRRAY(INDEX+1)=BRRAY(INDEX+1)*GWT
 C
-200   CONTINUE
+C             On IX=0 need another segment
+320           IF(IX.NE.0) GO TO 310
+C             But not for centre hole
+              IF((XC(NH).EQ.0.).AND.(YC(NH).EQ.0.)) GO TO 310
+              INDEX=(NY-IY)*ISIZE+1
+              INDEX=INDEX-ISIZE*IDEEP*(ISEC-1)
+              IF((INDEX.LT.1).OR.(INDEX.GT.IATOT)) GO TO 310
+              BRRAY(INDEX)=BRRAY(INDEX)*1.E10*SCALESPOT(NH)
+              BRRAY(INDEX+1)=BRRAY(INDEX+1)*1.E10*SCALESPOT(NH)
+              IF(ISHAPE.NE.2) GO TO 310
+              BRRAY(INDEX)=BRRAY(INDEX)*GWT
+              BRRAY(INDEX+1)=BRRAY(INDEX+1)*GWT
 C
-C  Rescale transform and write out if no amplitude reduction or on second pass
-C    with the application of amplitude reduction.
-      IF(.NOT.IAMPLIMIT.OR.IPASS2) THEN
+310         CONTINUE
 C
-C     	Scan transform and set everything outside mask to zero
-      	DO 400 I=1,NXP2
-      	DO 400 J=1,MDEEP
-      	IF(ABS(ARRAY(I,J)).LT.1.E10) THEN
-      	  ARRAY(I,J)=0.
-      	ELSE
-      	  ARRAY(I,J)=ARRAY(I,J)*1.E-10
-      	  IF(ARRAY(I,J).GT.1.E10) GO TO 98
-      	END IF
-400   	CONTINUE
+300       CONTINUE
 C
-C     	Write masked transform back to disc
-      	DO 495 M=1,MDEEP
-      	CALL IWRLIN(2,ARRAY(1,M))
-495   	CONTINUE
-      	CALL ICLCDN(ARRAY,ISIZE2,IDEEP,1,NX,1,MDEEP,SMIN,SMAX,SMEAN)
-      	IF(SMAX.GT.TMAX) TMAX=SMAX
-      	IF(SMIN.LT.TMIN) TMIN=SMIN
-      	TMEAN=TMEAN+SMEAN*MDEEP
-      ENDIF
+200     CONTINUE
+C
+C       Rescale transform and write out if no amplitude reduction or on second pass
+C       with the application of amplitude reduction.
+        IF(.NOT.IAMPLIMIT.OR.IPASS2) THEN
+C
+C         Scan transform and set everything outside mask to zero
+          DO 400 I=1,NXP2
+            DO 400 J=1,MDEEP
+              IF(ABS(ARRAY(I,J)).LT.1.E10) THEN
+                ARRAY(I,J)=0.
+              ELSE
+                ARRAY(I,J)=ARRAY(I,J)*1.E-10
+                IF(ARRAY(I,J).GT.1.E10) GO TO 98
+              END IF
+400       CONTINUE
+C
+C         Write masked transform back to disc
+          DO 495 M=1,MDEEP
+            CALL IWRLIN(2,ARRAY(1,M))
+495       CONTINUE
+          CALL ICLCDN(ARRAY,ISIZE2,IDEEP,1,NX,1,MDEEP,SMIN,SMAX,SMEAN)
+          IF(SMAX.GT.TMAX) TMAX=SMAX
+          IF(SMIN.LT.TMIN) TMIN=SMIN
+          TMEAN=TMEAN+SMEAN*MDEEP
+        ENDIF
 500   CONTINUE
 C
 C  Calculate statistics of spot amplitude distribution on first pass only.
@@ -406,9 +411,9 @@ C  Calculate statistics of spot amplitude distribution on first pass only.
       NSPOTS=0
       DO 600 NH=1,NHOLE
       IF(NSUM(NH).NE.0) THEN
-      	ASUM(NH)=ASUM(NH)/NSUM(NH)
-      	AMPTOT=AMPTOT+ASUM(NH)
-      	NSPOTS=NSPOTS+1
+        ASUM(NH)=ASUM(NH)/NSUM(NH)
+        AMPTOT=AMPTOT+ASUM(NH)
+        NSPOTS=NSPOTS+1
       ENDIF
 600   CONTINUE
       AVAMP=AMPTOT/NSPOTS

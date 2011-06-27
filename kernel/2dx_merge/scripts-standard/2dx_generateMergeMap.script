@@ -178,6 +178,9 @@ set scale = 1
 echo "scale = ${scale}"
 #
 \rm -f SCRATCH/scratch1.map
+#CHEN>
+set rotate_to_Z = "no"
+#CHEN<
 #
 if ( ${merge_modus} == "3D" ) then
   #############################################################################

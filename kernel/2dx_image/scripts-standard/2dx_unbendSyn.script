@@ -461,6 +461,7 @@ endif
 #
 echo "set REPROCESSING_done = y" >> LOGS/${scriptname}.results
 #
+echo ":: Done."
 echo "<<@progress: 100>>"
 #
 ##########################################################################

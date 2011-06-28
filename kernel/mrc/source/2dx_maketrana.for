@@ -1046,7 +1046,6 @@ C       Scan over hole -- holes can overlap
 C         IX can be negative
           DO 310 IX=IX1,IX2
             GWT = 1.0
-            RCONJUG = 1.0
             PHSORG = (-1.0)**(IX+IYTRUE)
             IF(ISHAPE.LE.2) THEN
               RSQ=(IX-X)**2+YSQ
@@ -1057,6 +1056,7 @@ C                  Gaussian weight from exact centre for soft holes
 C           Check if point in neg X half transform - use Friedel mate
             IF(IX.GE.0) THEN
               INDEX = (NX21*IY+IX)*2+1
+              RCONJUG = 1.0
             ELSE
               INDEX = (NX21*(NY-IY)-IX)*2+1
 CHEN>
@@ -1082,6 +1082,8 @@ CHEN>
 C-------------Friedel mate is complex conjugated
               if(IYTRUE.LT.0)then
                 RCONJUG = -1.0
+              else
+                RCONJUG = 1.0
               endif
 CHEN<
               INDEX = NX21*(NY-IY)*2+1

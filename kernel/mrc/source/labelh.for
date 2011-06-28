@@ -133,7 +133,7 @@ CHEN<
       DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX),OU2(LMAX)
       DIMENSION LABELS(20,10),CELL(6),EXTRA(29)
       DIMENSION DNCELL(6),MXYZN(3)
-      COMPLEX CLINE(LCMX),COUT(LCMX)
+      COMPLEX CLINE(LCMX),COUT(LCMX),CVAL
       CHARACTER*60 INFILE,OUTFILE
       character*80 TITLE
       character*200 cfile,cname
@@ -1324,14 +1324,15 @@ C
 300           CONTINUE
             else
               DO IX = 1,NXT,2
-                RREA=ALINE(IX)
-                RIMA=ALINE(IX+1)
-                VAL = RREA*A + B
+                RAMP = SQRT(ALINE(IX)**2+ALINE(IX+1)**2)
+                RPHA = ATAN2(ALINE(IX+1),ALINE(IX))*CNV
+                VAL = RAMP*A + B
                 IF (IQ .EQ. 1 .AND. VAL .LT. 0.0) VAL = 0.0
                 IF (VAL .LT. DMIN) DMIN = VAL
                 IF (VAL .GT. DMAX) DMAX = VAL
                 DOUBLMEAN = DOUBLMEAN + VAL
-                ALINE(IX) = VAL
+                ALINE(IX  ) = VAL * COS(RPHA)
+                ALINE(IX+1) = VAL * SIN(RPHA)
               enddo
             endif
             CALL IWRLIN(2,ALINE)
@@ -1622,16 +1623,16 @@ C
 C
         DMIN = RVAL
         DMAX = RVAL
-        DOUBLMEAN = 0.0
+        DMEAN = RVAL
         DO 852 IZ = 1,NZ
           DO 852 IY = 1,NY
 C           CALL IRDLIN(1,CLINE,*999)
             DO 802 IX = 1,NX,2
-              ALINE(IX)=RVAL
+              ALINE(IX  )=RVAL
+              ALINE(IX+1)=0.0
 802         CONTINUE
             CALL IWRLIN(2,ALINE)
 852     CONTINUE
-        DMEAN = RVAL
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
         GOTO 990
 C
@@ -1649,7 +1650,10 @@ C
 C
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
-        if(MODE.lt.3)goto 990
+        if(MODE.lt.3)then
+          write(*,'('':: ERROR: This mode only for FFTs'')')
+          goto 990
+        endif
 C
         DMIN = 0.0
         DMAX = 0.0
@@ -1657,15 +1661,16 @@ C
           DO IY = 1,NY
             CALL IRDLIN(1,ALINE,*999)
             DO IX = 1,NXT,2
-              RREA=ALINE(IX)
-              RIMA=ALINE(IX+1)
-              IF (RREA.LT.A) RREA=A
-              IF (RREA.GT.B) RREA=B
-              ALINE(IX  )=RREA
-              ALINE(IX+1)=RIMA
-              IF (RREA.LT.DMIN) DMIN = RREA
-              IF (RREA.GT.DMAX) DMAX = RREA
-              DOUBLMEAN = DOUBLMEAN + RREA
+              RAMP = SQRT(ALINE(IX)**2+ALINE(IX+1)**2)
+              RPHA = ATAN2(ALINE(IX+1),ALINE(IX))*CNV
+              RREN=RAMP
+              IF (RREN.LT.A) RREN=A
+              IF (RREN.GT.B) RREN=B
+              ALINE(IX  )=RREN*COS(RPHA)
+              ALINE(IX+1)=RREN*SIN(RPHA)
+              IF (RREN.LT.DMIN) DMIN = RREN
+              IF (RREN.GT.DMAX) DMAX = RREN
+              DOUBLMEAN = DOUBLMEAN + RREN
             ENDDO
             CALL IWRLIN(2,ALINE)
           enddo

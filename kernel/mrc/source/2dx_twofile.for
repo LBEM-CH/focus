@@ -12,8 +12,8 @@ C       ICOMB=1  Multiply two image densities pointwise, real or complex.
 C                 and calculate correlation coefficient
 C       ICOMB=2  Multiply first image point by complex conjugate of second
 C                 image point (only useful in complex image(Transform)).
-C	ICOMB=3  Minimum of the two input images
-C	ICOMB=4  Maximum of the two input images
+C       ICOMB=3  Minimum of the two input images
+C       ICOMB=4  Maximum of the two input images
 C       ICOMB=5  Amplitude-limit the first image with the info of the second image (0...1)
 C
 C       WT1,WT2  Weights for addition (ICOMB=0)   Result = (A*WT1 + B*WT2)
@@ -63,8 +63,8 @@ C
       CALL ITRHDR(3,1)
       IF(NXYZ1(1).NE.NXYZ2(1).OR.NXYZ1(2).NE.NXYZ2(2).OR.
      . NXYZ1(3).NE.NXYZ2(3)) GO TO 100
-      MOD1=MODE1/3		! 0,Real and 1,Complex 
-      MOD2=MODE2/3		! 0,Real and 1,Complex
+      MOD1=MODE1/3              ! 0,Real and 1,Complex 
+      MOD2=MODE2/3              ! 0,Real and 1,Complex
       IF(MOD1.EQ.MOD2) GO TO 140
 100   WRITE(6,1010)
 1010  FORMAT(///' Terminate - Images not of same size or type')
@@ -73,19 +73,19 @@ C
 140   READ(5,*) ICOMB
       IF(ICOMB.EQ.0) READ(5,*) WT1,WT2
       IF(MOD1.EQ.1) THEN
-      	READ(5,*)IORIGIN,ORIGXA,ORIGYA,ORIGXB,ORIGYB
-      	  NX1 = NX-1
-      	  TWOPI = 6.283185
-      	  DELPX1 = -TWOPI * ORIGXA / (2.0 * NX1)
-      	  DELPY1 = -TWOPI * ORIGYA / NY
-      	  DELPX2 = -TWOPI * ORIGXB / (2.0 * NX1)
-      	  DELPY2 = -TWOPI * ORIGYB / NY
-      	IF(IORIGIN.EQ.0)WRITE(6,1012)
-     	IF(IORIGIN.GE.1)WRITE(6,1013)IORIGIN,
+        READ(5,*)IORIGIN,ORIGXA,ORIGYA,ORIGXB,ORIGYB
+          NX1 = NX-1
+          TWOPI = 6.283185
+          DELPX1 = -TWOPI * ORIGXA / (2.0 * NX1)
+          DELPY1 = -TWOPI * ORIGYA / NY
+          DELPX2 = -TWOPI * ORIGXB / (2.0 * NX1)
+          DELPY2 = -TWOPI * ORIGYB / NY
+        IF(IORIGIN.EQ.0)WRITE(6,1012)
+        IF(IORIGIN.GE.1)WRITE(6,1013)IORIGIN,
      . ORIGXA,ORIGYA,ORIGXB,ORIGYB
-1012	FORMAT(' No origin shifts applied to Transforms before',
+1012    FORMAT(' No origin shifts applied to Transforms before',
      . ' combining')
-1013	FORMAT(' Origin shifts applied to Transforms'/' IORIGIN =',
+1013    FORMAT(' Origin shifts applied to Transforms'/' IORIGIN =',
      . I5/' ORIGXA  =',F8.1/' ORIGYA  =',F8.1/
      . ' ORIGXB  =',F8.1/' ORIGYB  =',F8.1)
       ENDIF
@@ -93,21 +93,22 @@ C
 C
 C  checks for sensible requests
       IF(MOD1.EQ.0.AND.ICOMB.EQ.2) THEN
-      	WRITE(6,1011)
-1011	FORMAT(///' Terminate - ICOMB=2 and Real image files')
-      	STOP
+        WRITE(6,1011)
+1011    FORMAT(///' Terminate - ICOMB=2 and Real image files')
+        STOP
       ENDIF
       IF(MOD1.EQ.1) THEN
-      	IF(ICOMB.EQ.3.OR.ICOMB.EQ.4) THEN
-      		WRITE(6,1014)
-1014		FORMAT(///' Terminate - ICOMB=3 or 4 must have Real image files')
-      		STOP
-      	ENDIF
-      	IF(NXYZ1(3).NE.1) THEN
-      		WRITE(6,1015)
-1015		FORMAT(///' Terminate - 3D maps must be real at present')
-      		STOP
-      	ENDIF
+        IF(ICOMB.EQ.3.OR.ICOMB.EQ.4) THEN
+          WRITE(6,1014)
+1014      FORMAT(/,/,/,' Terminate - ICOMB=3 or 4 must ',
+     .     'have Real image files')
+          STOP
+        ENDIF
+        IF(NXYZ1(3).NE.1) THEN
+                WRITE(6,1015)
+1015            FORMAT(///' Terminate - 3D maps must be real at present')
+                STOP
+        ENDIF
       ENDIF
 C
 C
@@ -220,7 +221,7 @@ C-----------Complex image (FFT)
                   ARR3(JX)=0.0
                   ARR3(JX+1)=0.0
                 ELSE
-C	          (a+ib)/(c+id)=(ac+bd)/(c**2+d**2) + i(bc-ad)/(c**2+d**2)
+C                 (a+ib)/(c+id)=(ac+bd)/(c**2+d**2) + i(bc-ad)/(c**2+d**2)
                   ARR3(JX)=(ARR1(JX)*ARR2(JX)+ARR1(JX+1)*ARR2(JX+1))/
      .              DENOM
                   ARR3(JX+1)=(ARR1(JX+1)*ARR2(JX)-ARR1(JX)*ARR2(JX+1))/
@@ -243,9 +244,9 @@ C
      1 3F10.1)
       CORBOT1=CORBOT1*CORBOT2
       IF(ICOMB.EQ.1.AND.CORBOT1.GT.0.0) THEN
-      	CORTOP=CORTOP/SQRT(CORBOT1)
-      	WRITE(6,1601) CORTOP
-1601	FORMAT('   and correlation coefficient =',F8.4)
+        CORTOP=CORTOP/SQRT(CORBOT1)
+        WRITE(6,1601) CORTOP
+1601    FORMAT('   and correlation coefficient =',F8.4)
       ENDIF
       DMEAN3=DMEAN
       CALL IWRHDR(3,TITLE,-1,DMIN,DMAX,DMEAN3)

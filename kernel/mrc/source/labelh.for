@@ -155,7 +155,11 @@ C
 C
         CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
         NXT = NX
-        IF (MODE .GE. 3) NXT = NXT*2
+        MXT = MX
+        IF (MODE .GE. 3) then
+          NXT = NXT*2
+          MXT = MXT*2
+        endif
 C
 1       WRITE(6,1300)
 1300    FORMAT(/,' Available modes of operation are: ',/,
@@ -1308,11 +1312,12 @@ C
         DOUBLMEAN = 0.0
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
-        DO IZ= 1,NZ
-          DO IY = 1,NY
-            CALL IRDLIN(1,ALINE,*999)
-            if(MODE.lt.3)then
-              DO 300 IX = 1,NXT
+        if(MODE.lt.3)then
+C
+          DO IZ= 1,NZ
+            DO IY = 1,NY
+              CALL IRDLIN(1,ALINE,*999)
+              DO IX = 1,NXT
                 if(ALINE(IX) .lt. domin) domin = ALINE(IX)
                 if(ALINE(IX) .gt. domax) domax = ALINE(IX)
                 VAL = ALINE(IX)*A + B
@@ -1321,9 +1326,19 @@ C
                 IF (VAL .GT. DMAX) DMAX = VAL
                 DOUBLMEAN = DOUBLMEAN + VAL
                 ALINE(IX) = VAL
-300           CONTINUE
-            else
+              enddo
+              CALL IWRLIN(2,ALINE)
+            enddo
+          enddo
+C
+        else
+C
+          DO IZ= 1,NZ
+            DO IY = 1,NY
+              CALL IRDLIN(1,ALINE,*999)
+              IYTRUE=IY-NY2
               DO IX = 1,NXT,2
+                PHSORG = (-1.0)**((IX/2)+1+IYTRUE)
                 RAMP = SQRT(ALINE(IX)**2+ALINE(IX+1)**2)
                 RPHA = ATAN2(ALINE(IX+1),ALINE(IX))*CNV
                 VAL = RAMP*A + B
@@ -1331,13 +1346,15 @@ C
                 IF (VAL .LT. DMIN) DMIN = VAL
                 IF (VAL .GT. DMAX) DMAX = VAL
                 DOUBLMEAN = DOUBLMEAN + VAL
-                ALINE(IX  ) = VAL * COS(RPHA)
-                ALINE(IX+1) = VAL * SIN(RPHA)
+                ALINE(IX  ) = VAL * COS(RPHA) * PHSORG
+                ALINE(IX+1) = VAL * SIN(RPHA) * PHSORG
+C                write(*,'(2I8,2F12.3)')IX,IY,ALINE(IX),ALINE(IX+1)
               enddo
-            endif
-            CALL IWRLIN(2,ALINE)
+              CALL IWRLIN(2,ALINE)
+            enddo
           enddo
-        enddo
+C
+        endif
         DMEAN = DOUBLMEAN/(NXT*NY*NZ)
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
         write(6,'('' old file extrema: '',2G12.4)')domin,domax
@@ -1619,17 +1636,28 @@ C
         write(TITLE,2701)
 2701    FORMAT('LABEL Mode 9: Create Zeroed version of',
      . ' Fourier Transform')
+        NX=NX*2
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        APART = RVAL
+        BPART = 0.0
 C
         DMIN = RVAL
         DMAX = RVAL
         DMEAN = RVAL
+C
+        NX2 = NX/2
+        NY2 = NY/2
+C
         DO 852 IZ = 1,NZ
           DO 852 IY = 1,NY
-C           CALL IRDLIN(1,CLINE,*999)
-            DO 802 IX = 1,NX,2
-              ALINE(IX  )=RVAL
-              ALINE(IX+1)=0.0
+            IYTRUE=IY-NY2
+            DO 802 IX = 1,NX2
+              PHSORG = (-1.0)**(IX+IYTRUE)
+C              PHSORG = 1.0
+              ALINE((2*IX)-1)=PHSORG*APART
+              ALINE((2*IX)  )=PHSORG*BPART
+C              write(*,'(2I6,2F12.3)')IX,IY,ALINE(2*IX-1),ALINE(2*IX)
 802         CONTINUE
             CALL IWRLIN(2,ALINE)
 852     CONTINUE

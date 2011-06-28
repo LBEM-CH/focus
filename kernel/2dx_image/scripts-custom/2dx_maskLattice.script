@@ -29,6 +29,7 @@
 # DISPLAY: comment
 # DISPLAY: invmask_radius
 # DISPLAY: invmask_type
+# DISPLAY: invmask_spots
 #
 #$end_local_vars
 #
@@ -48,6 +49,7 @@ set secondlattice = ""
 set tempkeep = ""
 set invmask_radius = ""
 set invmask_type = ""
+set invmask_spots = ""
 #
 #$end_vars
 #
@@ -69,6 +71,8 @@ source ${proc_2dx}/2dx_makedirs
 echo "# IMAGE: ${nonmaskimagename}.mrc <nonmasked image>" >> LOGS/${scriptname}.results
 echo "# IMAGE: FFTIR/${nonmaskimagename}.fft.mrc <FFT of nonmasked image>" >> LOGS/${scriptname}.results
 #
+set halimsidelen = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+#
   #
   #############################################################################
   ${proc_2dx}/linblock "LABEL - to create flat value=1 FFT file"
@@ -78,7 +82,7 @@ echo "# IMAGE: FFTIR/${nonmaskimagename}.fft.mrc <FFT of nonmasked image>" >> LO
   #
   ${bin_2dx}/labelh.exe << eot
 FFTIR/${nonmaskimagename}.fft.mrc
-9               ! Create Zerored FFT
+9               ! Fill FFT with Amplitude
 SCRATCH/TMPvalue1.fft.mrc
 1.0
 eot
@@ -111,19 +115,26 @@ eot
     set radius = "${invmask_radius},${invmask_radius}"
   endif
   #
+  if ( ${invmask_spots} == "0" ) then
+    set itype = 1
+  endif
+  if ( ${invmask_spots} == "1" ) then
+    set itype = 0
+  endif
+  #
   echo ":: Now launching masktrana with:" 
   cat << eof
 ::  ${bin_2dx}/2dx_masktrana.exe << eot
 :: ${ishape} F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 :: ${radius}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-:: ${lattice} -50 50 -50 50 ${rmax} 1 !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
+:: ${lattice} -50 50 -50 50 ${rmax} ${itype} !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
 :: eot
 eof
   #
   ${bin_2dx}/2dx_masktrana.exe << eot
 ${ishape} F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${radius}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice} -50 50 -50 50 ${rmax} 1 !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
+${lattice} -50 50 -50 50 ${rmax} ${itype} !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
 eot
   #
   echo "# IMAGE: SCRATCH/TMPvalue1.msk.fft.mrc <Masked Value 1 FFT>" >> LOGS/${scriptname}.results
@@ -157,7 +168,7 @@ eot
   setenv OUT SCRATCH/${nonmaskimagename}.invmask.fft.mrc
   ${bin_2dx}/2dx_twofile.exe << eot
 1               ! ICOMB (multiply together)
-0 0 0 0 0 ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+2 0 0 ${halimsidelen} ${halimsidelen} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
   #
   echo "<<@progress: 60>>"

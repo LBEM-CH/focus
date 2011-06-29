@@ -17,6 +17,14 @@
 #
 # MANUAL: This script will inverse Fourier filter a lattice from an FFT of an image. That is, it will delete the lattice spots, leaving only the crystal background.
 #
+# MANUAL: It is intended for projects, where biological samples are imaged on a crystalline support film, as for example a streptavidin 2D crystal or graphene, and the non-crystalline objects are of interest, and the crystalline background is to be deleted. 
+#
+# MANUAL: This script needs the reciprocal lattice to be defined. In addition, if you want not all reciprocal spots but only those spots from a spotlist to be removed, then the spotlist has to be existing.
+#
+# MANUAL: <B>Algorithm:</B><BR>This script creates a synthetic Fourier transform containing AMP-1 and PHASE=0. This is then masked with the MRC program 2dx_masktrana, based on a given lattice and potentially a spotlist, so that the result is a Fourier transform with AMP=1 and PHASE=0 with holes, where the AMP is set to 0. The resulting masked Fourier transform is then inverted, so that the background is zero and the "holes" are 1. The MRC program twofile is then used to multiply this masked-inverted Fourier transform with the Fourier transform of the (non-tapered) input image. The result is back-transformed, to give the final image.    
+#
+# MANUAL: <B>Bugs:</B><BR>The mask shape "Gaussian" does not work.<BR>The final result may have edge effects.<BR>The final result is an MRC format image. If you use MRC2TIF.exe to transform that back into a TIFF file, make sure to verify the handedness of the output TIFF image, because there might be a problem from a non-defined TIFF image origin, which by default in some programs was defined top left, and in some programs is interpreted as bottom left. The result is that if you TIFF2MRC and then MRC2TIFF transform an image, the result is flipped upside down.<BR><BR><I>Please contact Henning.Stahlberg@unibas.ch if you need any of these bugs to be removed.</I><BR>
+#
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
 # DISPLAY: imagenumber

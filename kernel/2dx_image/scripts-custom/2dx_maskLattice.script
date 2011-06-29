@@ -69,10 +69,22 @@ echo invmask_type = ${invmask_type}
 source ${proc_2dx}/2dx_makedirs 
 #
 echo "# IMAGE: ${nonmaskimagename}.mrc <nonmasked image>" >> LOGS/${scriptname}.results
-echo "# IMAGE: FFTIR/${nonmaskimagename}.fft.mrc <FFT of nonmasked image>" >> LOGS/${scriptname}.results
 #
 set halimsidelen = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
 #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "FFTTRANS - to calculate FFT of raw image"
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f SCRATCH/${nonmaskimagename}.notaper.fft.mrc
+  setenv IN  ${nonmaskimagename}.mrc
+  setenv OUT  SCRATCH/${nonmaskimagename}.notaper.fft.mrc
+  ${bin_2dx}/2dx_fftrans.exe  
+  #
+  echo "# IMAGE-IMPORTANT: SCRATCH/${nonmaskimagename}.notaper.fft.mrc <FFT of nontapered image>" >> LOGS/${scriptname}.results
+  #
   #
   #############################################################################
   ${proc_2dx}/linblock "LABEL - to create flat value=1 FFT file"
@@ -81,7 +93,7 @@ set halimsidelen = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { p
   \rm -f SCRATCH/TMPvalue1.fft.mrc
   #
   ${bin_2dx}/labelh.exe << eot
-FFTIR/${nonmaskimagename}.fft.mrc
+SCRATCH/${nonmaskimagename}.notaper.fft.mrc
 9               ! Fill FFT with Amplitude
 SCRATCH/TMPvalue1.fft.mrc
 1.0
@@ -163,7 +175,7 @@ eot
   #############################################################################
   #
   \rm -f m${nonmaskimagename}.mrc
-  setenv IN1 FFTIR/${nonmaskimagename}.fft.mrc
+  setenv IN1 SCRATCH/${nonmaskimagename}.notaper.fft.mrc
   setenv IN2 SCRATCH/TMPvalue2.fft.mrc
   setenv OUT SCRATCH/${nonmaskimagename}.invmask.fft.mrc
   ${bin_2dx}/2dx_twofile.exe << eot

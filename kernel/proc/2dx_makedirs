@@ -27,14 +27,23 @@ alias createLink 'eval " \\
     		    mkdir -p \!:1 \\
 		  endif \\
 		  if ( -e \!:2 ) then \\
-		    if (`ls -l \!:2 | wc -l` != 0 ) then \\
-	              mv \!:2/* \!:1 \\
-		    endif \\
-    		    rm -rf \!:2 \\
+    		    	rm -rf \!:2 \\
 		  endif \\
-		  ln -fs \!:1 \!:2 \\
-    		  echo "::"\!:2" disk will be:" \\
-		  echo "::"\!:1"'
+		  ln -fs \!:1 \!:2"'
+#
+alias replaceWithLink 'eval " \\
+		  if (\! -e \!:1 ) then \\
+    		    mkdir -p \!:1 \\
+		  endif \\
+		  if ( -e \!:2 ) then \\
+		  	if ( -d \!:2 ) then \\
+		    		if (`ls -l \!:2 | wc -l` != 0 ) then \\
+	              			mv \!:2/* \!:1 \\
+		   	 	endif \\
+    		    	rm -rf \!:2 \\
+		  	endif \\
+		  endif \\
+		  ln -fs \!:1 \!:2"'
 #
 if ( ${SCRATCH_DISK} == "." || ${SCRATCH_DISK} == "" ) then
   if ( ! -d SCRATCH ) then
@@ -45,12 +54,16 @@ else
   set olddir = $PWD
   set newscratch = ${SCRATCH_DISK}${olddir}/SCRATCH
   if ( ! -l SCRATCH ) then
-        createLink ${newscratch} SCRATCH
+        if ( ! -e SCRATCH ) then 
+          createLink ${newscratch} SCRATCH
+	else
+          replaceWithLink ${newscratch} SCRATCH
+        endif
   else
     set target = `readlink SCRATCH`
     if ("$target" != "$newscratch") then
 	echo "::SCRATCH target has changed."
-    	createLink $newscratch SCRATCH
+    	replaceWithLink  ${newscratch} SCRATCH
     endif
   endif
 endif
@@ -70,12 +83,16 @@ else
   set olddir = $PWD
   set newfftir = ${FFTIR_DISK}${olddir}/FFTIR
   if ( ! -l FFTIR ) then
-    createLink ${newfftir} FFTIR
+    if ( ! -e FFTIR ) then
+      createLink ${newfftir} FFTIR
+    else
+      replaceWithLink ${newfftir} FFTIR
+    endif
   else
     set target = `readlink FFTIR`
     if ("$target" != "$newfftir") then
 	echo "::FFTIR target has changed."
-    	createLink ${newfftir} FFTIR
+    	replaceWithLink ${newfftir} FFTIR
     endif
   endif
 endif

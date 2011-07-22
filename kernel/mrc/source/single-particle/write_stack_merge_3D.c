@@ -459,7 +459,7 @@ int write_stack_merge(int Numstack, char *dirname)
        in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*realcell_x*realcell_y);
        out=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*realcell_x*realcell_y); 
        
-	p2_fw=fftwf_plan_dft_2d(realcell_x,realcell_x,in,out,FFTW_FORWARD,FFTW_ESTIMATE);	
+       p2_fw=fftwf_plan_dft_2d(realcell_x,realcell_x,in,out,FFTW_FORWARD,FFTW_ESTIMATE);	
 
 
        float *ave=(float *)calloc(realcell_x*realcell_y,sizeof(float));
@@ -559,7 +559,7 @@ int write_stack_merge(int Numstack, char *dirname)
                     		 in[j+i*realcell_x][1]=0;
                 	 }
               		 
-              		 fftwf_execute(p2_fw);
+              		 fftwf_execute_dft(p2_fw, in, out);
               		
 
         	   		 for(i=0; i<realcell_x; i++)
@@ -616,7 +616,7 @@ int write_stack_merge(int Numstack, char *dirname)
                 		 }
  
               		 
-              		 fftwf_execute(p2_fw);
+              		fftwf_execute_dft(p2_fw, in, out);
       
         		
 			 	 for(i=0; i<realcell_x; i++)

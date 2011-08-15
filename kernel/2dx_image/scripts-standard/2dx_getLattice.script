@@ -599,7 +599,9 @@ if ( ${highangle} == '1' ) then
   #
 else
   #############################################################################
+  echo ":: "
   ${proc_2dx}/linblock "NOT saving tilt geometry from lattice, because of low tilt."
+  echo ":: "
   #############################################################################
   echo "TLTAXIS = ${LATTICE_TLTAXIS}"
   echo "TLTANG  = ${LATTICE_TLTANG}" 

@@ -16,15 +16,15 @@ C               remember to change version number and date in title record.
 C
 C  INPUT PARAMETERS
 C      CARD 1    AX AY BX BY ISIZE DSTEP XMAG
-CHENN>
+CHEN>
 C------CARD 2    DFMID1 DFMID2 ANGAST CS KV
 C      CARD 2    DFMID1 DFMID2 ANGAST CS KV RESMAX
-CHENN<
+CHEN<
 C      CARD 3    ISER TITLE
-CHENN>
+CHEN>
 C      CARD 4    PHACON
 C      CARD 5    RESHIG,RESLOW
-CHENN<
+CHEN<
 C
 C         AX,AY   - LATTICE PARAMETERS (FROM NNBOX) OF (1,0) AND (0,1)
 C         BX,BY   -                                     IN GRID UNITS.
@@ -40,20 +40,20 @@ C         CS      - SPHERICAL ABERRATION IN MM.
 C         KV      - E.M. ACCELERATING VOLTAGE
 C         ISER    - SERIAL NUMBER AT HEAD OF OUTPUT FILE.
 C         TITLE   - TITLE FOR OUTPUT FILE.
-CHENN>
+CHEN>
 C         RESMAX  - Maximum resolution for output ps-file.
 C         PHACON  - PHASECONTRAST, should be approx. 0.93(Cryo),0.65(neg.stain)
 C         RESHIG  - HIGHER VALUE FOR RESOLUTION CUTOFF (JUST ON OUTPUT)
 C         RESLOW  - LOWER  VALUE FOR RESOLUTION CUTOFF (JUST ON OUTPUT)
-CHENN<
+CHEN<
 C
 C   INPUT  DATASTREAM  'IN'
 C   OUTPUT DATASTREAM  'OUT'
 C
       PARAMETER (ID=150)
-CHENN>
+CHEN>
 C      PARAMETER (RESMAX=0.3)
-CHENN<
+CHEN<
       PARAMETER (PLTSIZ=300.0)
       PARAMETER (CHRSIZ=0.6)
       PARAMETER (IPTMAX=1000)
@@ -68,42 +68,42 @@ CTSH++
       CHARACTER*80 TMPTEXT
       EQUIVALENCE (TMPTEXT,TEXT)
 CTSH--
-CHENN>
+CHEN>
       CHARACTER * 60 CZEILE(60)
       DIMENSION TZEILE(15)
       INTEGER * 8 ISER,NSER
-CHENN<
+CHEN<
       TWOPI=6.28318
       FONTSIZE=4.0      ! SELECT 4MM CHAR HEIGHT FOR TEXT
       WRITE(6,1)
 1     FORMAT(/'  CTFAPPLY V2.00 : 13.8.00'//)
       READ(5,*) AX,AY,BX,BY,ISIZE,DSTEP,XMAG
-CHENN>
+CHEN>
 C      READ(5,*)DFMID1,DFMID2,ANGAST,CS,KV
       READ(5,*)DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-CHENN<
+CHEN<
       READ(5,99)ISER,TITLE
-CHENN>
+CHEN>
       READ(5,*)PHACON
       READ(5,*)RESHIG,RESLOW
-CHENN<
+CHEN<
       WRITE(6,98)TITLE, ISER
 96    FORMAT(I10,15A4,A40)
 99    FORMAT(I10,15A4)
 98    FORMAT(' TITLE FOR PLOT AND OUTPUT FILE :',15A4/
      . ' SERIAL NUMBER ON OUTPUT',I10)
       WRITE(6,101)AX,AY,BX,BY,ISIZE,DSTEP,XMAG
-CHENN>
+CHEN>
 C      WRITE(6,102)DFMID1,DFMID2,ANGAST,CS,KV
       WRITE(6,102)DFMID1,DFMID2,ANGAST,CS,KV,RESMAX,PHACON
       WRITE(6,203)RESHIG,RESLOW
-CHENN<
+CHEN<
 101   FORMAT(' LATTICE PARAMETERS AX,AY............',2F10.2/
      . '                    BX,BY............',2F10.2/
      . ' SIZE OF DENSITOMETERED ARRAY........',I7/
      . ' DENSITOMETERED STEPSIZE(MICRONS)....',F10.2/
      . ' MAGNIFICATION OF MICROGRAPH.........',F8.0)
-CHENN>
+CHEN>
 C 102   FORMAT(' UNDERFOCUS 1 .......................',F8.0/
 C      .       ' UNDERFOCUS 2 .......................',F8.0/
 C      .       ' DIRECTION FOR UNDERFOCUS 1 .........',F9.1/
@@ -118,7 +118,7 @@ C      .       ' ACCELERATING VOLTAGE (KV) ..........',F8.0)
      . ' PHASECONTRAST PORTION ..............',F9.5)
 203   FORMAT(' HIGHER RES. CUTOFF .................',F8.0/
      . ' LOWER  RES. CUTOFF .................',F8.0)
-CHENN<
+CHEN<
       CALL CCPDPN(1,'IN','READONLY','F',0,0)
       CALL CCPDPN(2,'OUT','UNKNOWN','F',0,0)
 C      CALL DOPEN(1,'IN','RO','F')      ! old vax open
@@ -128,9 +128,9 @@ C      CALL DOPEN(2,'OUT','NEW','F')    !  "   "   "
 97      FORMAT(' Serial no and tilted on input file of uncorrected data'/
      . 40X,I10,15A4)
       WRITE(2,96) ISER,TITLE,'  This is: H,K,A,P,IQ,Back,CTF(phase already applied)'
-CHENN>
+CHEN>
       ANGAST0=ANGAST
-CHENN<
+CHEN<
       ANGAST=ANGAST*TWOPI/360.0
       CALL P2K_OUTFILE('CTFPLOT.PS',10)
       CALL P2K_HOME
@@ -138,7 +138,54 @@ CHENN<
       CALL P2K_GRID(0.5*PLTSIZ,0.5*PLTSIZ,1.0)
       CALL P2K_ORIGIN(-0.5*PLTSIZ,-0.7*PLTSIZ,0.)
       CALL P2K_COLOUR(0)
-CHENN>
+C
+      ICOL=1
+      if(ICOL.eq.1)then
+        YPOSSTE=12.0
+        YPOSN=PLTSIZ+10.0+5.0*YPOSSTE
+        call P2K_MOVE(XPOSN,YPOSN,0.)
+        XPOSN=PLTSIZ-5.0 
+        XP=PLTSIZ-27.0
+        do IQIN=1,8
+          CALL P2K_FONT('Courier'//CHAR(0),0.6*FONTSIZE)  !REDUCE FONT SIZE
+          if(IQIN.eq.1)ICO=2 ! Red
+          if(IQIN.eq.2)ICO=3 ! Orange
+          if(IQIN.eq.3)ICO=6 ! Blue
+          if(IQIN.eq.4)ICO=1 ! Brown
+          if(IQIN.eq.5)ICO=7 ! Purple
+          if(IQIN.eq.6)ICO=5 ! Green
+          if(IQIN.eq.7)ICO=4 ! Yellow
+          if(IQIN.eq.8)ICO=8 ! Grey
+          if(IQIN.eq.9)ICO=8 ! Grey
+          call p2k_colour(ICO)
+          RRAD=CHRSIZ*(8.1-IQIN)/1.5
+          call P2K_MOVE(XPOSN,YPOSN,0.)
+          call p2k_circle(RRAD)
+          call p2k_colour(0)
+C
+          YP=YPOSN-1.0                    ! ADJUST CHARACTER TO BE CENTRAL IN Y.
+          WRITE(TMPTEXT(1:1),160)
+          IF(IQIN.EQ.1) WRITE(TMPTEXT(1:1),161) ! IQIN=1 include number
+          IF(IQIN.EQ.2) WRITE(TMPTEXT(1:1),162) ! IQIN=2 include number
+          IF(IQIN.EQ.3) WRITE(TMPTEXT(1:1),163) ! IQIN=3 include number
+          IF(IQIN.EQ.4) WRITE(TMPTEXT(1:1),164) ! IQIN=4 include number
+          CALL P2K_MOVE(XPOSN,YP,0.)
+          CALL P2K_CSTRING(TEXT,1,0.)
+C
+          if(IQIN.eq.1)then
+            WRITE (CZEILE,'(''IQ '',I1)') IQIN
+          else
+            WRITE (CZEILE,'(''   '',I1)') IQIN
+          endif
+          READ(CZEILE,'(15A4)') TZEILE
+          CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
+          YP=YPOSN-1.5
+          call P2K_MOVE(XP,YP,0.)
+          CALL P2K_STRING(TZEILE,60,0.)
+          YPOSN=YPOSN-YPOSSTE/2.0
+        enddo
+      endif
+C
       YPOSSTE=12.0
       YPOSN=PLTSIZ+10.0+6.0*YPOSSTE
       XPOSN=10.0
@@ -186,7 +233,7 @@ C
       READ(CZEILE,'(15A4)') TZEILE
       CALL P2K_STRING(TZEILE,60,0.)
 C
-CHENN<
+CHEN<
 C
       SCALE=PLTSIZ/(2.0*RESMAX)         !MAXIMUM RESOLUTION, 0.3=3.33 ANGSTROMS
       CALL P2K_MOVE(0.,0.,0.)
@@ -276,11 +323,30 @@ C         WRITE(6,104)X,Y
           YN=Y-CHRSIZ*(8.1-IQIN)/2
           YP=Y+CHRSIZ*(8.1-IQIN)/2
           NSPOTS=NSPOTS+1
-          CALL P2K_MOVE(XN,YN,0.)
-          CALL P2K_DRAW(XP,YN,0.)
-          CALL P2K_DRAW(XP,YP,0.)
-          CALL P2K_DRAW(XN,YP,0.)
-          CALL P2K_DRAW(XN,YN,0.)               ! SQUARE ROUND EACH SPOT.
+CHEN>
+          if(ICOL.eq.1)then
+            if(IQIN.eq.1)ICO=2 ! Red
+            if(IQIN.eq.2)ICO=3 ! Orange
+            if(IQIN.eq.3)ICO=6 ! Blue
+            if(IQIN.eq.4)ICO=1 ! Brown
+            if(IQIN.eq.5)ICO=7 ! Purple
+            if(IQIN.eq.6)ICO=5 ! Green
+            if(IQIN.eq.7)ICO=4 ! Yellow
+            if(IQIN.eq.8)ICO=8 ! Grey
+            if(IQIN.eq.9)ICO=8 ! Grey
+            call p2k_colour(ICO)
+            call P2K_MOVE(X,Y,0.)
+            RRAD=CHRSIZ*(8.1-IQIN)/1.5
+            call p2k_circle(RRAD)
+            call p2k_colour(0)
+          else
+            CALL P2K_MOVE(XN,YN,0.)
+            CALL P2K_DRAW(XP,YN,0.)
+            CALL P2K_DRAW(XP,YP,0.)
+            CALL P2K_DRAW(XN,YP,0.)
+            CALL P2K_DRAW(XN,YN,0.)               ! SQUARE ROUND EACH SPOT.
+          endif
+CHEN<
 cc        X=X-0.3                               ! ADJUST CHARACTER TO BE CENTRAL IN X.
 cc        Y=Y+0.5                               ! ADJUST CHARACTER TO BE CENTRAL IN Y.
           Y=Y-1                         ! ADJUST CHARACTER TO BE CENTRAL IN Y.
@@ -306,7 +372,7 @@ cc        Y=Y+0.5                               ! ADJUST CHARACTER TO BE CENTRAL
         C2=-C1*CS*ANGLE*ANGLE/2.0
         ANGDIF=ANGSPT-ANGAST
         CCOS=COS(2.0*ANGDIF)
-CHENN>
+CHEN>
 C       DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
 C       CHI=C1*DF+C2
 C       CNTRST=-SIN(CHI)
@@ -317,7 +383,7 @@ C       CNTRST=-SIN(CHI)
           else
             CNTRST=1.0
           endif
-CHENN<
+CHEN<
         IQ=IQIN
         IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
 C  above sets IQ to 5 for high resolution spots with ctf < 0.15.
@@ -365,7 +431,7 @@ C
       ANGSPT=ATAN2(T2,T1)
       ANGDIF=ANGSPT-ANGAST
       CCOS=COS(2.0*ANGDIF)
-CHENN>
+CHEN>
 C      DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
 C      CHI=C1*DF+C2
 C      CNTRST=-SIN(CHI)
@@ -376,7 +442,7 @@ C      CNTRST=-SIN(CHI)
           else
             CNTRST=1.0
           endif
-CHENN<
+CHEN<
       CTFAVG=CTFAVG+ABS(CNTRST)
       NCALC=NCALC+1
 200   ARRAY(IX,IY)=CNTRST
@@ -389,12 +455,12 @@ CHENN<
       NCONT=2
       M=2*ID+1
       SCALE=PLTSIZ/(2.0*ID)
-CHENN>
+CHEN>
 C     CALL HPCNTR(B,M,M,SCALE,BITS,CONT,NCONT,XV,YV,IPTMAX)
       if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0) then
         CALL HPCNTR(B,M,M,SCALE,BITS,CONT,NCONT,XV,YV,IPTMAX)
       endif
-CHENN<
+CHEN<
 C HPCNTR IS SAME AS PLUTO SUBROUTINE BUT WITHH OTHER CALLS REMOVED AND SCALE
 C ADDED TO ARGUMENT LIST.
       CALL P2K_PAGE

@@ -85,16 +85,16 @@ void	p2k_devdep_cstring(char *text, float angle);
 float	a;
 float	angle;
 float	cmyk[MAXCOLOUR+1][4]=
-	{0,0,0,1,		/* black	*/
-	.005,1,1,0,		/* brown	*/
-	0,1,1,0,		/* red		*/
-	0,.35,1,0,		/* orange	*/
-	0,0,1,0,		/* yellow	*/
-	1,0,1,0,		/* green	*/
-	1,1,0,0,		/* blue		*/
-	0,1,0,0,		/* purple	*/
-	1,1,1,0,		/* grey		*/
-	0,0,0,0};		/* white	*/
+	{0,0,0,1,		/* 0 black	*/
+	.005,1,1,0,		/* 1 brown	*/
+	0,1,1,0,		/* 2 red	*/
+	0,.35,1,0,		/* 3 orange	*/
+	0,0,1,0,		/* 4 yellow	*/
+	1,0,1,0,		/* 5 green	*/
+	1,1,0,0,		/* 6 blue	*/
+	0,1,0,0,		/* 7 purple	*/
+	1,1,1,0,		/* 8 grey	*/
+	0,0,0,0};		/* 9 white	*/
 float	cosx[3][STACKLIM+1];
 float	currentcharheight;
 int	currentcolour;

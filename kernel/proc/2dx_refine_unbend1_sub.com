@@ -113,7 +113,9 @@ if ( ${refine_now} == "maska_boxa1" ) then
   #################################################################################
   ${proc_2dx}/linblock "Refining maska and boxa1 in an exhaustive grid search."
   ${proc_2dx}/linblock " maska from ${loc_maska_start} to ${loc_maska_end} in steps ${loc_maska_step}, fact. ${loc_maska_factor}"
+  echo  "maska from ${loc_maska_start} to ${loc_maska_end} in steps ${loc_maska_step}, fact. ${loc_maska_factor}" >> SCRATCH/${imagename}-maska_boxa1.txt 
   ${proc_2dx}/linblock " boxa1 from ${loc_boxa1_start} to ${loc_boxa1_end} in steps ${loc_boxa1_step}, fact. ${loc_boxa1_factor}"
+  echo  "boxa1 from ${loc_boxa1_start} to ${loc_boxa1_end} in steps ${loc_boxa1_step}, fact. ${loc_boxa1_factor}" >> SCRATCH/${imagename}-maska_boxa1.txt 
   #################################################################################
   #
   set loc_maska = ${loc_maska_start}

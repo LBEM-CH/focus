@@ -65,6 +65,7 @@
 # DISPLAY: InnerExclusionRadius
 # DISPLAY: comment
 # DISPLAY: det_lattice
+# DISPLAY: det_tilt
 # DISPLAY: do_lattice_algorithm
 # DISPLAY: laterror_abserror
 # DISPLAY: laterror_rmsderror
@@ -136,7 +137,7 @@ if ( ${det_lattice}x == 'x' ) then
   echo ":: det_lattice corrected to ${det_lattice}"
 endif
 #
-if ( ${det_lattice} == 'n' ) then
+if ( ${det_lattice} == 'n' && ${det_tilt} == 'n' ) then
   ${proc_2dx}/linblock "Skipping. Not determining lattice."
   #
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
@@ -166,96 +167,97 @@ source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #
-set ialg = `echo ${do_lattice_algorithm} | cut -c1-1`
-#
-if ( ${ialg} == "0" ) then
+if ( ${det_lattice} == 'y' ) then
   #
-  #############################################################################
-  ${proc_2dx}/linblock "Running FindLattice"
-  #############################################################################
+  set ialg = `echo ${do_lattice_algorithm} | cut -c1-1` 
   #
-  if ( "${realcell}" == "100.0,100.0" || "${realcell}" == "100,100" ) then
-    echo ":: "
-    echo ":: "
-    echo "::                        WARNING: You are using FindLattice,"
-    echo "::                     but did you define a real lattice already?" 
-    echo ":: "
-    echo "::        (The current value of ${realcell} looks like you didn't do that yet.)"
-    echo "::       You might need to first determine the real unit cell length and angle,"
-    echo "::                            or use GetLattice instead."
-    echo ":: "
-    echo ":: "
-    echo "#WARNING: Warning: For FindLat you need a valid real lattice first." >> LOGS/${scriptname}.results
-  endif
-  #
-  if ( "${realcell}" == "0,0" || "${realcell}" == "0.0,0.0" ) then
-    echo ":: "
-    echo ":: "
-    echo "::                        ERROR: You are using FindLattice,"
-    echo "::                     but there is no real lattice defined." 
-    echo ":: "
-    echo "::            (The current value for the real lattice is ${realcell}.)"
-    echo "::        You need to first determine the real unit cell length and angle."
-    echo "::      You can do that manually, or use GetLattice instead. After that, run"
-    echo "::     the special script Evaluate Lattice to determine the real cell values."
-    echo ":: "
-    echo ":: "
-    echo "#WARNING: ERROR: For FindLat you need a valid real lattice first." >> LOGS/${scriptname}.results
-    ${proc_2dx}/protest "Aborting."
-  endif
-  #
-else
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Running GetLattice"
-  #############################################################################
-  #
-endif
-#
-echo "<<@progress: 5>>"
-#
-if ( ${regenPL} == "y" || ( ! -e ${docfile} ) || ( ! -e ${docfileraw} ) ) then
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "2dx_taperedge: To taper the edges to prevent stripes in the FFT"
-  #############################################################################
-  #
-  set largeimage = `echo ${imagesidelength} | awk '{ if ( $1 > 4097 ) { s = 1 } else { s = 0 } } END { print s }'`
-  #
-  if ( ${largeimage} == '1' ) then
-    if ( ! -e FFTIR/${imagename}.red.mrc ) then
-      ${proc_2dx}/protest "::ERROR: Downsampled image does not exist. First run Calculate-FFT."
+  if ( ${ialg} == "0" ) then
+    #
+    #############################################################################
+      ${proc_2dx}/linblock "Running FindLattice"
+    #############################################################################
+    #
+    if ( "${realcell}" == "100.0,100.0" || "${realcell}" == "100,100" ) then
+      echo ":: "
+      echo ":: "
+      echo "::                        WARNING: You are using FindLattice,"
+      echo "::                     but did you define a real lattice already?" 
+      echo ":: "
+      echo "::        (The current value of ${realcell} looks like you didn't do that yet.)"
+      echo "::       You might need to first determine the real unit cell length and angle,"
+      echo "::                            or use GetLattice instead."
+      echo ":: "
+      echo ":: "
+      echo "#WARNING: Warning: For FindLat you need a valid real lattice first." >> LOGS/${scriptname}.results
     endif
-    setenv IN FFTIR/${imagename}.red.mrc
-    ${proc_2dx}/lin "Doing peaksearch on downsampled image"
+    #
+    if ( "${realcell}" == "0,0" || "${realcell}" == "0.0,0.0" ) then
+      echo ":: "
+      echo ":: "
+      echo "::                        ERROR: You are using FindLattice,"
+      echo "::                     but there is no real lattice defined." 
+      echo ":: "
+      echo "::            (The current value for the real lattice is ${realcell}.)"
+      echo "::        You need to first determine the real unit cell length and angle."
+      echo "::      You can do that manually, or use GetLattice instead. After that, run"
+      echo "::     the special script Evaluate Lattice to determine the real cell values."
+      echo ":: "
+      echo ":: "
+      echo "#WARNING: ERROR: For FindLat you need a valid real lattice first." >> LOGS/${scriptname}.results
+      ${proc_2dx}/protest "Aborting."
+    endif
+    #
   else
-    setenv IN ${imagename}.mrc
-    ${proc_2dx}/lin "Doing peaksearch on full-sized image"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Running GetLattice"
+    #############################################################################
+    #
   endif
-  # 
-  \rm -f     SCRATCH/${imagename}.taper.mrc
-  setenv OUT SCRATCH/${imagename}.taper.mrc
-  ${bin_2dx}/2dx_taperedgek.exe << eot
+  echo "<<@progress: 5>>"
+  #
+  if ( ${regenPL} == "y" || ( ! -e ${docfile} ) || ( ! -e ${docfileraw} ) ) then
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_taperedge: To taper the edges to prevent stripes in the FFT"
+    #############################################################################
+    #
+    set largeimage = `echo ${imagesidelength} | awk '{ if ( $1 > 4097 ) { s = 1 } else { s = 0 } } END { print s }'`
+    #
+    if ( ${largeimage} == '1' ) then
+      if ( ! -e FFTIR/${imagename}.red.mrc ) then
+        ${proc_2dx}/protest "::ERROR: Downsampled image does not exist. First run Calculate-FFT."
+      endif
+      setenv IN FFTIR/${imagename}.red.mrc
+      ${proc_2dx}/lin "Doing peaksearch on downsampled image"
+    else
+      setenv IN ${imagename}.mrc
+      ${proc_2dx}/lin "Doing peaksearch on full-sized image"
+    endif
+    # 
+    \rm -f     SCRATCH/${imagename}.taper.mrc
+    setenv OUT SCRATCH/${imagename}.taper.mrc
+    ${bin_2dx}/2dx_taperedgek.exe << eot
 10,10,100,10       ! IAVER,ISMOOTH,ITAPER 
 eot
-  #
-  echo "<<@progress: 10>>"
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "2dx_peaksearch: To generate a completed peak list ..."
-  #############################################################################
-  #
-  echo "<<@progress: 20>>"
-  #
-  \rm -f ${docfile}
-  \rm -f ${docfileraw}
-  #
-  set FirstPeakNum = 80
-  echo "FirstPeakNum = ${FirstPeakNum}"
-  echo "peakNum = ${peakNum}"
-  echo "InnerExclusionRadius = ${InnerExclusionRadius}"
-  ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}.taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength}
-  endif
+    #
+    echo "<<@progress: 10>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_peaksearch: To generate a completed peak list ..."
+    #############################################################################
+    #
+    echo "<<@progress: 20>>"
+    #
+    \rm -f ${docfile}
+    \rm -f ${docfileraw}
+    #
+    set FirstPeakNum = 80
+    echo "FirstPeakNum = ${FirstPeakNum}"
+    echo "peakNum = ${peakNum}"
+    echo "InnerExclusionRadius = ${InnerExclusionRadius}"
+    ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}.taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength}
+  #endif
   #
   if ( ${tempkeep} == 'y' ) then
     #
@@ -278,53 +280,53 @@ eot
   #
   \mv -f 2dx_peaksearch-average.mrc SCRATCH/pks-average.mrc
   echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>"  >> LOGS/${scriptname}.results
-  #
-else
-  #############################################################################
-  ${proc_2dx}/linblock "2dx_peaksearch: Skipping"
-  #############################################################################
-  echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>" >> LOGS/${scriptname}.results
-  #
-endif
 #
-echo "<<@evaluate>>"
-#
-if ( ${ialg} == "0" ) then
-  #
-  echo "<<@progress: 35>>"
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "2dx_findlat: To determine a lattice ..."
-  #############################################################################
-  #
-  \rm -f 2dx_findlat.out
-  # 
-  set tltAx = ${TLTAXIS}
-  set tltAn = ${TLTANG}
-  #
-  if ( ${testHand} == 'n' ) then
-    set itesthand = 0
   else
-    set itesthand = 1
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_peaksearch: Skipping"
+    #############################################################################
+    echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>" >> LOGS/${scriptname}.results
+    #
   endif
-  #  
-  echo "starting findlat with:"
-  echo "${realcell}"
-  echo "${realang}"
-  echo "${tltAx}"
-  echo "${tltAn}"
-  echo "${imagesidelength}"
-  echo "${magnification}"
-  echo "${stepdigitizer}"
-  echo "${docfile}"
-  echo "0.1,0.008,8,${delta},12,49,${itesthand}"
-  echo " "
   #
-${bin_2dx}/2dx_findlat.exe << eot
+  echo "<<@evaluate>>"
+  #
+  if ( ${ialg} == "0" ) then
+    #
+    echo "<<@progress: 35>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_findlat: To determine a lattice ..."
+    #############################################################################
+    #
+    \rm -f 2dx_findlat.out
+    # 
+    set tltAx = ${TLTAXIS}
+    set tltAn = ${TLTANG}
+    #
+    if ( ${testHand} == 'n' ) then
+      set itesthand = 0
+    else
+      set itesthand = 1
+    endif
+    #  
+    echo "starting findlat with:"
+    echo "${realcell}"
+    echo "${realang}"
+    echo "${tltAx}"
+    echo "${tltAn}"
+    echo "${imagesidelength}"
+    echo "${magnification}"
+    echo "${stepdigitizer}"
+    echo "${docfile}"
+    echo "0.1,0.008,8,${delta},12,49,${itesthand}"
+    echo " "
+    #
+  ${bin_2dx}/2dx_findlat.exe << eot
 ${realcell}
 ${realang}
 ${tltAx}
@@ -335,92 +337,118 @@ ${stepdigitizer}
 ${docfile}
 0.1,0.008,8,${delta},12,49,${itesthand} !AngleStepSize,MagVariation,Nmin,Delta,MaxHK,MaxSpot
 eot
-  #
-  echo "findlat finished."
-  #
-  if ( ${tempkeep} == 'n' ) then
-    #\rm -f peaks_xy_final.dat
-  endif
-  #
-  if ( ! -e 2dx_findlat.out ) then
-    ${proc_2dx}/protest "2dx_findlat: ERROR occured."
-  endif
-  #
-  set tmplat = `cat 2dx_findlat.out | head -n 1`
-  set firstscore  = `cat 2dx_findlat.out | head -n 2 | tail -n 1`
-  set newlat = `echo ${tmplat} | sed 's/ /,/g'`
-  set oldlat = `echo ${lattice}`
-  #
-  echo "set lattice = "\"${newlat}\" >> LOGS/${scriptname}.results
-  set lattice = ${newlat}
-  echo "::  Old lattice is ${oldlat}"
-  echo "::  New lattice is ${lattice} (Score = ${firstscore})"
-  #
-  echo " " >> History.dat
-  echo ":Date: ${date}" >> History.dat
-  echo "::Lattice is ${lattice}" >> History.dat
-  #
-  set tmplat = `cat 2dx_findlat.out | head -n 3 | tail -n 1`
-  set secondscore  = `cat 2dx_findlat.out | head -n 4 | tail -n 1`
-  set newsecondlattice = `echo ${tmplat} | sed 's/ /,/g'`
-  set oldsecondlattice = `echo ${secondlattice}`
-  \rm -f 2dx_findlat.out
-  #
-  echo "::  Old 2nd lattice is ${oldsecondlattice}"
-  set goodsecond = `echo ${secondscore} | awk '{ if ( $1 > 0.6 ) { s = 1 } else { s = 0 }} END { print s }'`
-  if ( ${goodsecond} == 1 ) then
-    set secondlattice = ${newsecondlattice}
-    echo "::  New 2nd lattice is ${secondlattice} (Score = ${secondscore})"
-    echo "set secondlattice = "\"${newsecondlattice}\" >> LOGS/${scriptname}.results
+    #
+    echo "findlat finished."
+    #
+    if ( ${tempkeep} == 'n' ) then
+      #\rm -f peaks_xy_final.dat
+    endif
+    #
+    if ( ! -e 2dx_findlat.out ) then
+      ${proc_2dx}/protest "2dx_findlat: ERROR occured."
+    endif
+    #
+    set tmplat = `cat 2dx_findlat.out | head -n 1`
+    set firstscore  = `cat 2dx_findlat.out | head -n 2 | tail -n 1`
+    set newlat = `echo ${tmplat} | sed 's/ /,/g'`
+    set oldlat = `echo ${lattice}`
+    #
+    echo "set lattice = "\"${newlat}\" >> LOGS/${scriptname}.results
+    set lattice = ${newlat}
+    echo "::  Old lattice is ${oldlat}"
+    echo "::  New lattice is ${lattice} (Score = ${firstscore})"
+    #
+    echo " " >> History.dat
+    echo ":Date: ${date}" >> History.dat
+    echo "::Lattice is ${lattice}" >> History.dat
+    #
+    set tmplat = `cat 2dx_findlat.out | head -n 3 | tail -n 1`
+    set secondscore  = `cat 2dx_findlat.out | head -n 4 | tail -n 1`
+    set newsecondlattice = `echo ${tmplat} | sed 's/ /,/g'`
+    set oldsecondlattice = `echo ${secondlattice}`
+    \rm -f 2dx_findlat.out
+    #
+    echo "::  Old 2nd lattice is ${oldsecondlattice}"
+    set goodsecond = `echo ${secondscore} | awk '{ if ( $1 > 0.6 ) { s = 1 } else { s = 0 }} END { print s }'`
+    if ( ${goodsecond} == 1 ) then
+      set secondlattice = ${newsecondlattice}
+      echo "::  New 2nd lattice is ${secondlattice} (Score = ${secondscore})"
+      echo "set secondlattice = "\"${newsecondlattice}\" >> LOGS/${scriptname}.results
+    else
+      set secondlattice = "0.0,0.0,0.0,0.0"
+      echo "::  New 2nd lattice would have been ${newsecondlattice} (Score = ${secondscore}),"
+      echo "::  Due to the bad score it will not be used."
+    endif
+    #
   else
-    set secondlattice = "0.0,0.0,0.0,0.0"
-    echo "::  New 2nd lattice would have been ${newsecondlattice} (Score = ${secondscore}),"
-    echo "::  Due to the bad score it will not be used."
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_getlat: To determine a lattice ..."
+    #############################################################################
+    #
+    set tltAx = ${TLTAXIS}
+    set tltAn = ${TLTANG}
+    #
+    set lattice=`${bin_2dx}/2dx_getlat.exe ${docfile} | tail -n 1`
+    
+    echo set lattice = \"${lattice}\" >> LOGS/${scriptname}.results
+    #
+    echo " " >> History.dat
+    echo ":Date: ${date}" >> History.dat
+    echo "::Lattice is ${lattice}" >> History.dat
+    #
+    if ( ${tempkeep} == 'n' ) then
+      #\rm -f peaks_xy_final.dat
+    endif
+    #
+    echo "::  New lattice is ${lattice}"
   endif
   #
-else
+  echo "<<@progress: 50>>"
+  echo "<<@evaluate>>"
   #
   #############################################################################
-  ${proc_2dx}/linblock "2dx_getlat: To determine a lattice ..."
+  ${proc_2dx}/linblock "2dx_getspot - To generate a first spotlist."
   #############################################################################
   #
-  set tltAx = ${TLTAXIS}
-  set tltAn = ${TLTANG}
+  ${proc_2dx}/lin "2dx_getspot.exe - peaks_xy.dat + lattice => 2dx_getspot.out"
   #
-  set lattice=`${bin_2dx}/2dx_getlat.exe ${docfile} | tail -n 1`
-  
-  echo set lattice = \"${lattice}\" >> LOGS/${scriptname}.results
-  #
-  echo " " >> History.dat
-  echo ":Date: ${date}" >> History.dat
-  echo "::Lattice is ${lattice}" >> History.dat
-  #
-  if ( ${tempkeep} == 'n' ) then
-    #\rm -f peaks_xy_final.dat
-  endif
-  #
-  echo "::  New lattice is ${lattice}"
-endif
-#
-echo "<<@progress: 50>>"
-echo "<<@evaluate>>"
-#
-#############################################################################
-${proc_2dx}/linblock "2dx_getspot - To generate a first spotlist."
-#############################################################################
-#
-${proc_2dx}/lin "2dx_getspot.exe - peaks_xy.dat + lattice => 2dx_getspot.out"
-#
-${bin_2dx}/2dx_getspot.exe << eot
+  ${bin_2dx}/2dx_getspot.exe << eot
 ${lattice}
 ${docfileraw}
 ${iradius}
 ${imaxrad}
 eot
-#
-${proc_2dx}/lin "cp 2dx_getspot.out ${imagename}.spt"
-\cp -f 2dx_getspot.out ${imagename}.spt
-\rm -f 2dx_getspot.out
+  #
+  ${proc_2dx}/lin "cp 2dx_getspot.out ${imagename}.spt"
+  \cp -f 2dx_getspot.out ${imagename}.spt
+  \rm -f 2dx_getspot.out
+  #
+    #############################################################################
+    #############################################################################
+    #############################################################################
+    #############################################################################
+else
+  if ( "${lattice}" == "0.0,100.0,100.0,0.0" || "${lattice}" == "0.0,0.0,0.0,0.0" ) then
+    ${bin_2dx}/protest "ERROR: you need to determine the reciprocal lattice first."
+  endif
+  if ( "${realcell}" == "100.0,100.0" || "${realcell}" == "100,100" ) then
+    echo "::        (The current value of ${realcell} looks like you didn't do that yet.)"
+    echo "::       You might need to first determine the real unit cell length and angle,"
+    ${bin_2dx}/protest "ERROR: Aborting."
+  endif
+  if ( "${realcell}" == "0,0" || "${realcell}" == "0.0,0.0" ) then
+    echo "::            (The current value for the real lattice is ${realcell}.)"
+    echo "::        You need to first determine the real unit cell length and angle."
+    echo "::      You can do that manually, or use GetLattice instead. After that, run"
+    echo "::     the special script Evaluate Lattice to determine the real cell values."
+    ${proc_2dx}/protest "Aborting."
+  endif
+endif
+#############################################################################
+#############################################################################
+#############################################################################
+#############################################################################
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_lencalc: To calculate some values for the tilt geometry determination."

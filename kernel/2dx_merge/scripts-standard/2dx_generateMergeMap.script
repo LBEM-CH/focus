@@ -178,9 +178,6 @@ set scale = 1
 echo "scale = ${scale}"
 #
 \rm -f SCRATCH/scratch1.map
-#CHEN>
-set rotate_to_Z = "no"
-#CHEN<
 #
 if ( ${merge_modus} == "3D" ) then
   #############################################################################
@@ -329,7 +326,7 @@ eot
   # echo "# IMAGE: SCRATCH/scratch2.map <MAP: temporary volume 2>" >> LOGS/${scriptname}.results
   #
   #############################################################################
-  ${proc_2dx}/linblock "mapmask - to set units to 2x2x1"
+  ${proc_2dx}/linblock "extends - to correctly place 2D map for PSF"
   #############################################################################
   #
   \rm -f volume.map
@@ -339,7 +336,11 @@ KEEP
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: SCRATCH/scratch2_phase_zero.map <MAP: PSF scratch 2>" >> LOGS/${scriptname}.results
+  # echo "# IMAGE: SCRATCH/scratch2_phase_zero.map <MAP: PSF scratch 2>" >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "mapmask - to set units to 2x2x1"
+  #############################################################################
   #
   \rm -f volume.map
   $CBIN/mapmask mapin SCRATCH/scratch1.map mapout volume.map << eof
@@ -370,7 +371,7 @@ eof
   #
   \rm -f SCRATCH/volume_phase_zero.plt
   #
-  echo "# IMAGE-IMPORTANT: PS/PSF.ps <PS: PSF>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/PSF.ps <PS: PSF (draft, only X/Y, not yet X/Z. wrong scale)>" >> LOGS/${scriptname}.results
   #
   echo "<<@progress: +5>>"
   #

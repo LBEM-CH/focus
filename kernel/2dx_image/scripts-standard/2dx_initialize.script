@@ -61,6 +61,8 @@
 # DISPLAY: crop
 # DISPLAY: comment
 # DISPLAY: imagesidelength
+# DISPLAY: SCRATCH_DISK
+# DISPLAY: FFTIR_DISK
 #
 #$end_local_vars
 #

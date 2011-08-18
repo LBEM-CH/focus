@@ -105,6 +105,81 @@ set scriptname = 2dx_merge
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "The current working directory is" ${olddir}
+#
+set linkok = "y"
+cd ..
+echo "Checking link in project root director ${PWD}:"
+if ( ! -e 2dx_master.cfg ) then
+  echo ":: "
+  echo "::WARNING: 2dx_master.cfg in project root directory is missing."
+  echo ":: "
+  set linkok = "n"
+else
+  \ls -l 2dx_master.cfg
+  if ( ! -l 2dx_master.cfg ) then
+    echo ":: "
+    echo "::WARNING: 2dx_master.cfg is not a link."
+    echo ":: "
+    set linkok = "n"
+  endif
+endif
+cd ${olddir}
+#
+set dirlistfile = "${olddir}/2dx_merge_dirfile.dat"
+#
+if ( -s ${dirlistfile} ) then
+  set coutfile = 'SCRATCH/2dx_getdirectories_tmp.dat'
+  \rm -f ${coutfile}
+  #
+  ${bin_2dx}/2dx_getdirectories.exe << eot
+${olddir}/2dx_merge_dirfile.dat
+${olddir}
+${coutfile}
+eot
+  #
+  cat ${coutfile} | tr "\n" " " > SCRATCH/2dx_getdirectories_tmp2.dat
+  set dirlist = "`cat SCRATCH/2dx_getdirectories_tmp2.dat`"
+  #
+  foreach dirfile ( ${dirlist} ) 
+    echo "Checking link in ${dirfile}"
+    cd ${dirfile}
+    if ( ! -e 2dx_master.cfg ) then
+      echo ":: "
+      echo "::WARNING: 2dx_master.cfg is missing completely."
+      echo ":: "
+      set linkok = "n"
+    else
+      \ls -l 2dx_master.cfg
+      if ( ! -l 2dx_master.cfg ) then
+        echo ":: "
+        echo "::WARNING: 2dx_master.cfg is not a link."
+        echo ":: "
+        set linkok = "n"
+      endif
+    endif
+    cd ${olddir}
+  end
+endif
+#
+if ( ${linkok} == 'n' ) then
+  echo ":: "
+  echo ":: WARNING: Your project has not the correct file system structure."
+  echo ":: The files 2dx_master.cfg in the tilt-range directories should be links"
+  echo ":: to the one-level higher version, which should be a link to the one in the"
+  echo ":: merge directory."
+  echo ":: "
+  echo ":: Run the Custom Script Repair Project Links to repair this."
+  echo ":: "
+endif
+#
 if ( ${Calc_from_zstarrange} == "y" ) then
   set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
   echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
@@ -120,10 +195,6 @@ set zminmax = `echo ${zmin},${zstarrange}`
 echo zminmax = ${zminmax}
 #
 echo "<<@progress: 1>>"
-#
-#################################################################################
-${proc_2dx}/linblock "Verifying some parameters"
-#################################################################################
 #
 if ( ${MergeHKMAX}x == 'x' ) then
   set MergeHKMAX = '20'

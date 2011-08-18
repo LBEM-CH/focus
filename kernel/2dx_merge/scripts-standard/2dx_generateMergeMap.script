@@ -191,6 +191,58 @@ if ( ${merge_modus} == "3D" ) then
   #############################################################################
   #############################################################################
   #
+  set infile = merge3D_phase_zero_nophaerr.mtz
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "fft - to transform ${infile} into SCRATCH/scratch1_phase_zero.map for PSF"
+  #############################################################################  
+  #
+  if (  ${rotate_to_Z} == "yes" ) then
+    #
+    set AXIS = "Z,X,Y"
+    \rm -f SCRATCH/scratch1_phase_zero.map
+    #
+    ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1_phase_zero.map  << eot
+LABIN F1=F  PHI=PHI ##
+PROJECTION
+AXIS ${AXIS}
+SCALE F1 ${scale} ${tempfac}
+SYMMETRY ${CCP4_SYM}
+RESOLUTION ${RESMIN} ${RESMAX}
+TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
+GRID 200 200 1
+XYZLIM 0 199 0 199 0 0
+RHOLIM 250.0
+HKLMAX 50 50 50
+END
+eot
+    #
+    echo "# IMAGE: SCRATCH/scratch1_phase_zero.map <MAP: PSF scratch1 Map>" >> LOGS/${scriptname}.results
+    #
+  else
+    #
+    set AXIS = "X,Y,Z"
+    \rm -f SCRATCH/scratch1_phase_zero.map
+    #
+    ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1_phase_zero.map  << eot
+LABIN F1=F  PHI=PHI ##
+PROJECTION
+AXIS ${AXIS}
+SCALE F1 ${scale} ${tempfac}
+SYMMETRY ${CCP4_SYM}
+RESOLUTION ${RESMIN} ${RESMAX}
+TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
+GRID 200 200 1
+XYZLIM 0 199 0 199 0 0
+RHOLIM 250.0
+HKLMAX 50 50 50
+END
+eot
+    #
+    echo "# IMAGE: SCRATCH/scratch1_phase_zero.map <MAP: PSF scratch1 Map>" >> LOGS/${scriptname}.results
+    #
+  endif
+  #
   set infile = merge3D.mtz
   #
   echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
@@ -281,6 +333,15 @@ eot
   #############################################################################
   #
   \rm -f volume.map
+  ${bin_ccp4}/extends mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/scratch2_phase_zero.map << eof
+XYZLIM -100 99 -100 99 0 0
+KEEP
+END
+eof
+  #
+  echo "# IMAGE-IMPORTANT: SCRATCH/scratch2_phase_zero.map <MAP: PSF scratch 2>" >> LOGS/${scriptname}.results
+  #
+  \rm -f volume.map
   $CBIN/mapmask mapin SCRATCH/scratch1.map mapout volume.map << eof
 AXIS X,Y,Z
 scale factor 1
@@ -290,7 +351,28 @@ eof
   #
   echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
   #
-  echo "<<@progress: +10>>"
+  echo "<<@progress: +5>>"
+  #
+  \rm -f SCRATCH/volume_phase_zero.plt
+  #
+  ${bin_ccp4}/npo  MAPIN  SCRATCH/scratch2_phase_zero.map  PLOT SCRATCH/volume_phase_zero.plt  << eof
+TITLE Point Spread Function (PSF) Solid line is PSF at 50% intensity.
+MAP SCALE 2.0
+CONTRS -250 TO 250 BY 125
+MODE BELOW 125 DASHED 1 0.15 0
+SECTS 0 0
+PLOT
+END
+eof
+  #
+  \rm -f PS/PSF.ps
+  ${bin_2dx}/laserplot.exe -outputfile=PS/PSF.ps SCRATCH/volume_phase_zero.plt
+  #
+  \rm -f SCRATCH/volume_phase_zero.plt
+  #
+  echo "# IMAGE-IMPORTANT: PS/PSF.ps <PS: PSF>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: +5>>"
   #
 endif
 #

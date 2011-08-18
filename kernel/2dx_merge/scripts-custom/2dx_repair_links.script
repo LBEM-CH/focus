@@ -1,0 +1,160 @@
+#!/bin/csh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Repair Project Links                                               #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 12/22/2010                                             #
+# Last Modification: 12/22/2010                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 97
+#
+# MANUAL: <B>Repair Project Links</B>
+#
+# MANUAL: This script will verify the presence of correctly linked 2d_master.cfg files in this project.
+# MANUAL: With the switch you can decide if you want to correct the links.
+#
+# DISPLAY: repair_links
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+# Variables to be available from the config file are:
+#
+set repair_links = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_repair_links
+#
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>>"
+echo "<<@evaluate>>"
+#
+source ${proc_2dx}/2dx_makedirs
+#
+echo "# IMAGE: 2dx_merge_dirfile.dat <TXT: Directory List>" >> LOGS/${scriptname}.results
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "::The current working directory is" ${olddir}
+echo ": "
+#
+set linkok = "y"
+cd ..
+echo "::Checking link in project root director ${PWD}:"
+if ( ! -e 2dx_master.cfg ) then
+  echo ":: "
+  echo "::WARNING: 2dx_master.cfg in project root directory is missing."
+  echo ":: "
+  set linkok = "n"
+else
+  \ls -l 2dx_master.cfg
+  if ( ! -l 2dx_master.cfg ) then
+    echo ":: "
+    echo "::WARNING: 2dx_master.cfg is not a link."
+    echo ":: "
+    set linkok = "n"
+  endif
+endif
+if ( ${linkok} == 'y' ) then
+  echo "::Link is ok."
+endif
+cd ${olddir}
+#
+set dirlistfile = "${olddir}/2dx_merge_dirfile.dat"
+#
+if ( ! -s ${dirlistfile} ) then
+  echo ":: "
+  ${proc_2dx}/linblock "ERROR: Directory List File is missing."
+  ${proc_2dx}/linblock "First select all image directories."
+  ${proc_2dx}/protest "ERROR: Aborting."
+endif
+#
+set coutfile = 'SCRATCH/2dx_getdirectories_tmp.dat'
+\rm -f ${coutfile}
+#
+${bin_2dx}/2dx_getdirectories.exe << eot
+${olddir}/2dx_merge_dirfile.dat
+${olddir}
+${coutfile}
+eot
+#
+echo "# IMAGE: ${coutfile} <TXT: Tilt-range Directory List>" >> LOGS/${scriptname}.results
+#
+echo ": "
+#
+cat ${coutfile} | tr "\n" " " > SCRATCH/2dx_getdirectories_tmp2.dat
+set dirlist = "`cat SCRATCH/2dx_getdirectories_tmp2.dat`"
+#
+foreach dirfile ( ${dirlist} ) 
+  echo "::Checking link in ${dirfile}"
+  cd ${dirfile}
+  if ( ! -e 2dx_master.cfg ) then
+    echo ":: "
+    echo "::WARNING: 2dx_master.cfg is missing completely."
+    echo ":: "
+    set linkok = "n"
+  else
+    \ls -l 2dx_master.cfg
+    if ( ! -l 2dx_master.cfg ) then
+      echo ":: "
+      echo "::WARNING: 2dx_master.cfg is not a link."
+      echo ":: "
+      set linkok = "n"
+    endif
+  endif
+  cd ${olddir}
+end
+#
+if ( ${linkok} == 'n' ) then
+  if ( ${repair_links} == "yes" ) then
+    ${proc_2dx}/linblock "Links are not ok. Repairing links....."
+    #
+    cd ..
+    echo "::Repairing link in project root directory ${PWD}"
+    \rm -f 2dx_master.cfg
+    \ln -s merge/2dx_merge.cfg 2dx_master.cfg
+    \ls -l 2dx_master.cfg
+    cd ${olddir}
+    #
+    echo ": "
+    #
+    foreach dirfile ( ${dirlist} ) 
+      echo "::Repairing link in ${dirfile}"
+      cd ${dirfile}
+      \rm -f 2dx_master.cfg
+      \ln -s ../2dx_master.cfg .
+      \ls -l 2dx_master.cfg
+      cd ${olddir}
+    end
+    #
+  else
+    echo ":: "
+    ${proc_2dx}/linblock "Links are not ok. They need to be repaired."
+    ${proc_2dx}/linblock "Set the switch to yes, and run this script again."
+    echo ":: "
+  endif
+else
+  ${proc_2dx}/linblock "All links are ok."
+endif
+#
+echo "<<@progress: 100>>"
+#

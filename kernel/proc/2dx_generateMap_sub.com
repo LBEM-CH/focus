@@ -348,11 +348,13 @@ ${proc_2dx}/linblock "2dx_centric2 - to correct phases to 0 or 180"
 #
 \rm -f ${prefix}centric.hkl
 \rm -f ${prefix}centric.hk
+\rm -f ${prefix}centric_phase_zero.hkl
 #
-${bin_2dx}/2dx_centric2.exe << eot
+${bin_2dx}/2dx_centric3.exe << eot
 ${prefix}avrg.hkl
 ${prefix}centric.hkl
 ${prefix}centric.hk
+${prefix}centric_phase_zero.hkl
 ${realcell},${realang}
 ${RESMIN},${RESMAX}
 ${SYM_sub}
@@ -436,6 +438,50 @@ endif
 #
 echo "# IMAGE: ${prefix}${imagename}.mtz <MTZ file of Amp&Phs>" >> LOGS/${scriptname}.results
 #
+set infile = ${prefix}centric_phase_zero.hkl
+#
+if ( ${rotate_to_Z} == "yes" ) then
+  # Here comes a messy thing: CCP4 wants to symmetrize in the Y direction,
+  # but we want to symmetrize around the Z direction.
+  # The data are therefore permutated from XYZ to ZXY, then symmetrized, and finally again
+  # permutated to be projected in Y direction. 
+  # This is only needed for P2, P2221b, and some others.
+  #
+  set cellx = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+  set celly = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+  echo "cellx, celly = ${cellx}, ${celly}"
+  #
+  ${proc_2dx}/linblock "2dx_permutate - to transform into K,L,H for PSF file"
+  #
+  ${bin_2dx}/2dx_permutate.exe < ${infile} > ${prefix}${imagename}_phase_zero-permutated.hkl
+  #
+  ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}_phase_zero-permutated.hkl hklout ${prefix}${imagename}_phase_zero.mtz << eof
+TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}_phase_zero, ${date}
+CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang} 
+SYMMETRY ${CCP4_SYM}
+LABOUT H K L F PHI FOM
+CTYPOUT H H H F P W
+SKIP 1
+END
+eof
+  #
+  # \rm -f ${prefix}${imagename}_phase_zero-permutated.hkl
+  #
+else
+#
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}_phase_zero.mtz << eof
+TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}_phase_zero, ${date}
+CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT H K L F PHI FOM
+CTYPOUT H H H F P W
+FILE ${infile}
+SKIP 1
+END
+eof
+  #
+endif
+#
 if ( ${scriptname} == "2dx_generateMAP" ) then
   echo "<<@progress: 45>>"
 else
@@ -463,6 +509,46 @@ ${proc_2dx}/linblock "fft - to transform ${prefix}${imagename}.mtz into SCRATCH/
 # contrast for grey plot
 set scale = 1
 echo "scale = ${scale}"
+#
+\rm -f SCRATCH/scratch1_phase_zero.map
+#
+if ( ${rotate_to_Z} == "yes" ) then
+  #
+  set AXIS = "Z,X,Y"
+  #
+  ${bin_ccp4}/fft hklin ${prefix}${imagename}_phase_zero.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
+LABIN F1=F PHI=PHI ##
+PROJECTION
+AXIS ${AXIS}
+SCALE F1 ${scale} ${tempfac}
+RESOLUTION ${RESMIN} ${RESMAX}
+TITLE Sym=${SYM_sub}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
+GRID 200 2 200
+XYZLIM 0 199 0 0 0 199
+RHOLIM 250.0
+HKLMAX 50 50 50
+END
+eot
+  #
+else
+  #
+  set AXIS = "X,Y,Z"
+  #
+  ${bin_ccp4}/fft hklin ${prefix}${imagename}_phase_zero.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
+LABIN F1=F PHI=PHI ##
+PROJECTION
+AXIS ${AXIS}
+SCALE F1 ${scale} ${tempfac}
+RESOLUTION ${RESMIN} ${RESMAX}
+TITLE Sym=${SYM_sub}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
+GRID 200 200 20
+XYZLIM 0 199 0 199 0 0
+RHOLIM 250.0
+HKLMAX 50 50 50
+END
+eot
+  #
+endif
 #
 \rm -f SCRATCH/scratch1.map
 #
@@ -518,6 +604,36 @@ endif
 ${proc_2dx}/linblock "extend - to extend SCRATCH/scratch1.map into ${prefix}${imagename}-${SYM_sub}.rec.mrc"
 #############################################################################
 #
+\rm -f SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map
+#
+if ( ${rotate_to_Z} == "yes" ) then
+  #
+  \rm -f SCRATCH/TMP001_phase_zero.map
+  #
+  ${bin_ccp4}/extends mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/TMP001_phase_zero.map << eof
+XYZLIM 150 249 0 0 150 249
+KEEP
+END
+eof
+  #
+  \rm -f SCRATCH/TMP001.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMP001_phase_zero.map
+13
+SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map
+eot
+  #
+else
+  #
+  ${bin_ccp4}/extends mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map << eof
+XYZLIM 150 249 150 249 0 0
+KEEP
+END
+eof
+  #
+endif
+#
 \rm -f SCRATCH/${prefix}${imagename}-${SYM_sub}.map
 #
 if ( ${rotate_to_Z} == "yes" ) then
@@ -562,6 +678,16 @@ endif
 ${proc_2dx}/linblock "LABEL - to create a clean MRC file format instead of CCP4"
 #############################################################################
 #
+\rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
+#
+${bin_2dx}/labelh.exe << eot
+SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map 
+2
+${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
+1,0
+0
+eot
+#
 \rm -f ${prefix}${imagename}-${SYM_sub}.mrc
 #
 ${bin_2dx}/labelh.exe << eot
@@ -577,12 +703,26 @@ if ( ${SYM_sub} == 'p1' ) then
   \ln -s ${prefix}${imagename}-p1.mrc final_map.mrc
 endif
 #
+echo "# IMAGE: ${prefix}${imagename}_phase_zero-p1.mrc <PSF as map>"  >> LOGS/${scriptname}.results
+echo "# IMAGE: ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc <PSF symmetrized as map>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-p1.mrc <${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}.mrc <${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM_sub}.plt"
 #############################################################################
+#
+\rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.plt
+#
+${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map  PLOT  ${prefix}${imagename}_phase_zero-${SYM_sub}.plt  << eof
+TITLE Point Spread Function (PSF) Symmetry: ${SYM_sub}. Solid line is PSF at 50% intensity.
+MAP SCALE 2.0
+CONTRS -250 TO 250 BY 125
+MODE BELOW 125 DASHED 1 0.15 0
+SECTS 0 0
+PLOT
+END
+eof
 #
 \rm -f ${prefix}${imagename}-${SYM_sub}.plt
 #
@@ -610,11 +750,18 @@ endif
 ${proc_2dx}/linblock "laserplot - to create PS/${prefix}${imagename}MAP-${SYM_sub}.ps"
 #############################################################################
 #
+\rm -f PS/${prefix}${imagename}PSF-${SYM_sub}.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${prefix}${imagename}PSF-${SYM_sub}.ps ${prefix}${imagename}_phase_zero-${SYM_sub}.plt
+#
+\rm -f ${imagename}_phase_zero-${SYM_sub}.plt
+#
 \rm -f PS/${prefix}${imagename}MAP-${SYM_sub}.ps
 ${bin_2dx}/laserplot.exe -outputfile=PS/${prefix}${imagename}MAP-${SYM_sub}.ps ${prefix}${imagename}-${SYM_sub}.plt
 #
 \rm -f ${imagename}-${SYM_sub}.plt
 #
+echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}PSF-p1.ps <PS: PSF>"  >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}PSF-${SYM_sub}.ps <PS: PSF symmetrized>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-p1.ps <PS: ${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-${SYM_sub}.ps <PS: ${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 #

@@ -101,7 +101,7 @@ else
   \ls -l 2dx_master.cfg
   if ( ! -l 2dx_master.cfg ) then
     echo ":: "
-    echo "::WARNING: 2dx_master.cfg is not a link."
+    echo "::WARNING: 2dx_master.cfg is not a link in ${PWD}."
     echo ":: "
     set linkok = "n"
   endif
@@ -128,14 +128,14 @@ eot
     cd ${dirfile}
     if ( ! -e 2dx_master.cfg ) then
       echo ":: "
-      echo "::WARNING: 2dx_master.cfg is missing completely."
+      echo "::WARNING: 2dx_master.cfg is missing in ${PWD}."
       echo ":: "
       set linkok = "n"
     else
       \ls -l 2dx_master.cfg
       if ( ! -l 2dx_master.cfg ) then
         echo ":: "
-        echo "::WARNING: 2dx_master.cfg is not a link."
+        echo "::WARNING: 2dx_master.cfg is not a link in ${PWD}."
         echo ":: "
         set linkok = "n"
       endif

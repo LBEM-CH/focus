@@ -463,6 +463,7 @@ else if ( ${SYM} == 'p422' ) then
   set CCP4_SYM = "89"
   set ML_sym_val = "4"
   set rotate_to_Z = "no"
+  set verified = "yes"
   set set_to_90 = "yes"
 
 else if ( ${SYM} == 'p4212' ) then

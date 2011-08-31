@@ -125,22 +125,26 @@ eot
   #
   foreach dirfile ( ${dirlist} ) 
     echo "Checking link in ${dirfile}"
-    cd ${dirfile}
-    if ( ! -e 2dx_master.cfg ) then
-      echo ":: "
-      echo "::WARNING: 2dx_master.cfg is missing in ${PWD}."
-      echo ":: "
-      set linkok = "n"
-    else
-      \ls -l 2dx_master.cfg
-      if ( ! -l 2dx_master.cfg ) then
+    if ( -d ${dirfile} ) then
+      cd ${dirfile}
+      if ( ! -e 2dx_master.cfg ) then
         echo ":: "
-        echo "::WARNING: 2dx_master.cfg is not a link in ${PWD}."
+        echo "::WARNING: 2dx_master.cfg is missing in ${PWD}."
         echo ":: "
         set linkok = "n"
+      else
+        \ls -l 2dx_master.cfg
+        if ( ! -l 2dx_master.cfg ) then
+          echo ":: "
+          echo "::WARNING: 2dx_master.cfg is not a link in ${PWD}."
+          echo ":: "
+          set linkok = "n"
+        endif
       endif
+      cd ${olddir}
+    else
+      set linkok = "n"
     endif
-    cd ${olddir}
   end
 endif
 #

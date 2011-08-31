@@ -21,6 +21,7 @@
 # MANUAL: With the switch you can decide if you want to correct the links.
 #
 # DISPLAY: repair_links
+# DISPLAY: repair_dirlist
 #
 #$end_local_vars
 #
@@ -37,6 +38,7 @@ set FFTIR_DISK = ""
 # Variables to be available from the config file are:
 #
 set repair_links = ""
+set repair_dirlist = ""
 #
 #$end_vars
 #
@@ -75,17 +77,29 @@ else
   endif
 endif
 if ( ${linkok} == 'y' ) then
-  echo "::Link is ok."
+  echo "::Root link is ok."
+else
+  if ( ${repair_links} == "yes" ) then
+    echo "::Repairing link in project root directory ${PWD}"
+    \rm -f 2dx_master.cfg
+    \ln -s merge/2dx_merge.cfg 2dx_master.cfg
+    \ls -l 2dx_master.cfg
+  endif
 endif
 cd ${olddir}
 #
 set dirlistfile = "${olddir}/2dx_merge_dirfile.dat"
 #
+set dorepair_list = "n"
 if ( ! -s ${dirlistfile} ) then
   echo ":: "
   ${proc_2dx}/linblock "ERROR: Directory List File is missing."
-  ${proc_2dx}/linblock "First select all image directories."
-  ${proc_2dx}/protest "ERROR: Aborting."
+  ${proc_2dx}/linblock "First select all image directories, or repair the directory list."
+  if ( ${repair_dirlist} == "yes" ) then
+    set dorepair_list = "y"
+  else
+    ${proc_2dx}/protest "ERROR: Aborting."
+  endif
 endif
 #
 set coutfile = 'SCRATCH/2dx_getdirectories_tmp.dat'
@@ -106,34 +120,53 @@ set dirlist = "`cat SCRATCH/2dx_getdirectories_tmp2.dat`"
 #
 foreach dirfile ( ${dirlist} ) 
   echo "::Checking link in ${dirfile}"
-  cd ${dirfile}
-  if ( ! -e 2dx_master.cfg ) then
-    echo ":: "
-    echo "::WARNING: 2dx_master.cfg is missing completely."
-    echo ":: "
-    set linkok = "n"
-  else
-    \ls -l 2dx_master.cfg
-    if ( ! -l 2dx_master.cfg ) then
+  if ( -d ${dirfile} ) then
+    cd ${dirfile}
+    if ( ! -e 2dx_master.cfg ) then
       echo ":: "
-      echo "::WARNING: 2dx_master.cfg is not a link."
+      echo "::WARNING: 2dx_master.cfg is missing completely."
       echo ":: "
       set linkok = "n"
+    else
+      \ls -l 2dx_master.cfg
+      if ( ! -l 2dx_master.cfg ) then
+        echo ":: "
+        echo "::WARNING: 2dx_master.cfg is not a link."
+        echo ":: "
+        set linkok = "n"
+      endif
+    endif
+    cd ${olddir}
+  else
+    echo "::WARNING: Directory not found: ${dirfile}"
+    if ( ${repair_dirlist} == "yes" ) then
+      set dorepair_list = "y"
     endif
   endif
-  cd ${olddir}
 end
+#
+if ( ${dorepair_list} == "y" ) then
+  cd ${olddir}
+  cd ..
+  foreach dirfile ( * ) 
+    if ( -d ${dirfile} ) then
+      if ( ${dirfile} == "merge" ) then
+        echo "Not processing merge directory"
+      else
+        echo "::Creating 2dx_master.cfg link in ${dirfile}"
+        cd ${dirfile}
+        \rm -f 2dx_master.cfg
+        \ln -s ../2dx_master.cfg .
+        cd ..
+      endif
+    endif
+  end
+  ${proc_2dx}/linblock "Now refresh the directory view with the button top right in this GUI."
+endif
 #
 if ( ${linkok} == 'n' ) then
   if ( ${repair_links} == "yes" ) then
     ${proc_2dx}/linblock "Links are not ok. Repairing links....."
-    #
-    cd ..
-    echo "::Repairing link in project root directory ${PWD}"
-    \rm -f 2dx_master.cfg
-    \ln -s merge/2dx_merge.cfg 2dx_master.cfg
-    \ls -l 2dx_master.cfg
-    cd ${olddir}
     #
     echo ": "
     #

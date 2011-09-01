@@ -39,8 +39,8 @@ C
 C
 C
       WRITE(6,49)
-49    FORMAT(//' IDEAL2 (22.7.2000) - program to generate',/
-     . ' ideal data set for given max tilt and resolution to be used',/
+49    FORMAT(/,/,' IDEAL2 (22.7.2000) - program to generate',/,
+     . ' ideal data set for given max tilt and resolution to be used',/,
      . ' in calculation of reference point-spread function')
 
       DEGTORAD=3.1415962/180.0
@@ -52,12 +52,12 @@ C
       READ(5,*)IHSCR,IKSCR
       READ(5,*)INDEXMAX
       WRITE(6,50)CELLA,CELLB,GAMMA,CAXIS,TILTANGLE,RESOLUTION,INDEXMAX
-50    FORMAT('            a-axis cell dimension =============',F6.2/
-     .       '            b-axis cell dimension =============',F6.2/
-     .       '            gamma angle =======================',F6.2/
-     .	     '            c-axis cell dimension =============',F6.2/
-     .       '            Tilt angle ========================',F6.2/
-     .       '            Resolution ========================',F6.2/
+50    FORMAT('            a-axis cell dimension =============',F6.2,/,
+     .       '            b-axis cell dimension =============',F6.2,/,
+     .       '            gamma angle =======================',F6.2,/,
+     .	     '            c-axis cell dimension =============',F6.2,/,
+     .       '            Tilt angle ========================',F6.2,/,
+     .       '            Resolution ========================',F6.2,/,
      .       '            maximum h and k index==============',I4)
 C
 C
@@ -97,8 +97,8 @@ C     CHECK THAT INDEXMAX IS NOT LIMITING
       RHKM=SQRT(1/RSQKM)
       IF (RHKM.GE.RESOLUTION) THEN
       WRITE(6,51)RESOLUTION,RHKM
-51    FORMAT(5X' MAXIMUM H AND/OR K DO NOT PERMIT TO REACH REQUESTED RESOLUTION',/
-     .	       ' REQUESTED:',F8.2,' CURRENT LIMIT:',F8.2)
+51    FORMAT('::ERROR: MAXIMUM H AND/OR K DO NOT PERMIT TO REACH REQUESTED RESOLUTION',/,
+     .	       ':: REQUESTED:',F8.2,' CURRENT LIMIT:',F8.2)
       STOP
       ENDIF
       DO 10 IH=-INDEXMAX,INDEXMAX
@@ -145,7 +145,7 @@ C     IMAGINARY
 11    CONTINUE
 10    CONTINUE
       WRITE(6,56)NOUT
-56    FORMAT(' POINT RESPONSE DATA FILE COMPLETED'//
-     .	I10,' terms written out')
+56    FORMAT(': POINT RESPONSE DATA FILE COMPLETED',/,
+     .	':',I10,' terms written out')
       STOP
       END

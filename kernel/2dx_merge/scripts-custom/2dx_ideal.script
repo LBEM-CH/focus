@@ -56,6 +56,11 @@ echo "<<@progress: 1>>"
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
 source ${proc_2dx}/2dx_makedirs 
 #
+#
+############################################################################# 
+${proc_2dx}/linblock "2dx_ideal2 - to create an idealized HKL file with AMP=1,PHS=0"
+#############################################################################
+#
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 #       command file to create ideal p1 reference data set for 
 #       calculation of theoretical point spread function.
@@ -79,7 +84,7 @@ source ${proc_2dx}/2dx_makedirs
 set out = "APH/2dx_ideal.aph"
 \rm -f ${out}
 setenv OUT  ${out}
-${bin_2dx}/ideal2.exe << eot
+${bin_2dx}/2dx_ideal2.exe << eot
 Idealized Dataset of AMP=1
 ${RESMAX} ${tiltanglelimit}                            !RESOLUTION,TILTANGLE
 ${realcell} ${realang} ${ALAT}               !ACELL,BCELL,GAMMA,CAXIS

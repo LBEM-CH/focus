@@ -1,0 +1,97 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Calculate Ideal Dataset                                            #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 09/01/2011 (contributed by Vinzenz Unger)              #
+# Last Modification: 09/01/2011                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 48
+#
+# MANUAL: command file to create ideal p1 reference data set for calculation of theoretical point spread function. Note max L-index = 100 for 00L lattice line (if present)
+#
+# DISPLAY: RESMAX
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: MergeHKMAX
+# DISPLAY: tiltanglelimit
+#
+#$end_local_vars
+#
+# This defines some variables that we might need:
+set proc_2dx = ""
+set bin_2dx = ""
+set app_2dx_image = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+set RESMAX = ""
+set realcell = ""
+set realang = ""
+set ALAT = ""
+set MergeHKMAX = ""
+set tiltanglelimit = ""
+#
+#$end_vars
+#
+# This sets the scriptname variable:
+set scriptname = 2dx_ideal
+#
+# This removes the old logfile, so that a new fresh one can be created:
+\rm -f LOGS/${scriptname}.results
+#
+# This initializes the CCP4 environment, and other variables.
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+# This advances the progress bar to the 1% position:
+echo "<<@progress: 1>>"
+#
+# This creates all needed subdirectories in the current merge directory, in case they are missing:
+source ${proc_2dx}/2dx_makedirs 
+#
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#       command file to create ideal p1 reference data set for 
+#       calculation of theoretical point spread function.
+#       Note max L-index = 100 for 00L lattice line (if present)
+#        
+#       card 1                 title line to be written on top of data list
+#       RESOLUTION, TILTANGLE  max resolution and tiltangle used 
+#                              for generating data
+#       ACELL,BCELL,GAMMA,..   real space cell dimensions
+#       IHSCR,IKSCR            if =F all data generated
+#                              if =T odd relections skipped along 
+#                                    specified axis, if twofold srew axis
+#                                    causes systematic absences
+#       INDEXMAX               maximum indices for which reflections will
+#                              be generated. For simplicity, limits are 
+#                              the same for h and k. Program complains if
+#                              settings are limitting. Limits can't be set
+#                              too large because program checks resolution
+#                              for each reflection that it generates
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+set out = "APH/2dx_ideal.aph"
+\rm -f ${out}
+setenv OUT  ${out}
+${bin_2dx}/ideal2.exe << eot
+Idealized Dataset of AMP=1
+${RESMAX} ${tiltanglelimit}                            !RESOLUTION,TILTANGLE
+${realcell} ${realang} ${ALAT}               !ACELL,BCELL,GAMMA,CAXIS
+F F                             !IHSCR,IKSCR
+${MergeHKMAX}                              !INDEXMAX 
+eot
+#
+echo "# IMAGE-IMPORTANT: ${out} <APH: Ideal Dataset>" >> LOGS/${scriptname}.results
+#
+# Move the progress bar to 100%:
+echo "<<@progress: 100>>"
+#
+# Leave a message on the logfile that the script finished:
+${proc_2dx}/linblock "${scriptname} finished correctly."
+#

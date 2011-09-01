@@ -326,13 +326,12 @@ eot
   # echo "# IMAGE: SCRATCH/scratch2.map <MAP: temporary volume 2>" >> LOGS/${scriptname}.results
   #
   #############################################################################
-  ${proc_2dx}/linblock "extends - to correctly place 2D map for PSF"
+  ${proc_2dx}/linblock "mapmask - to correctly place 2D map for PSF"
   #############################################################################
   #
   \rm -f volume.map
-  ${bin_ccp4}/extends mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/scratch2_phase_zero.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/scratch2_phase_zero.map << eof
 XYZLIM -100 99 -100 99 0 0
-KEEP
 END
 eof
   #
@@ -437,7 +436,7 @@ endif
 echo "<<@progress: +10>>"
 #
 #############################################################################
-${proc_2dx}/linblock "extend - to extend SCRATCH/scratch1.map into ${imagename}-${SYM}.rec.mrc"
+${proc_2dx}/linblock "mapmask - to extend SCRATCH/scratch1.map into ${imagename}-${SYM}.rec.mrc"
 #############################################################################
 #
 \rm -f SCRATCH/${imagename}-${SYM}.map
@@ -446,9 +445,8 @@ if (${rotate_to_Z} == "yes" ) then
   #
   \rm -f SCRATCH/TMP001.map
   #
-${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/TMP001.map << eof
+${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/TMP001.map << eof
 XYZLIM 0 399 0 0 0 399
-KEEP
 END
 eof
   #
@@ -462,9 +460,8 @@ eot
   #
 else
   #
-${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/${imagename}-${SYM}.map << eof
+${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/${imagename}-${SYM}.map << eof
 XYZLIM 0 399 0 399 0 0
-KEEP
 END
 eof
   #

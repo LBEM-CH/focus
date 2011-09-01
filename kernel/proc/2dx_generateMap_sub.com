@@ -601,7 +601,7 @@ else
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "extend - to extend SCRATCH/scratch1.map into ${prefix}${imagename}-${SYM_sub}.rec.mrc"
+${proc_2dx}/linblock "mapmask - to extend SCRATCH/scratch1.map into ${prefix}${imagename}-${SYM_sub}.rec.mrc"
 #############################################################################
 #
 \rm -f SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map
@@ -610,9 +610,8 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   \rm -f SCRATCH/TMP001_phase_zero.map
   #
-  ${bin_ccp4}/extends mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/TMP001_phase_zero.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/TMP001_phase_zero.map << eof
 XYZLIM 150 249 0 0 150 249
-KEEP
 END
 eof
   #
@@ -626,9 +625,8 @@ eot
   #
 else
   #
-  ${bin_ccp4}/extends mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map << eof
 XYZLIM 150 249 150 249 0 0
-KEEP
 END
 eof
   #
@@ -640,9 +638,8 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   \rm -f SCRATCH/TMP001.map
   #
-  ${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/TMP001.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/TMP001.map << eof
 XYZLIM 0 399 0 0 0 399
-KEEP
 END
 eof
   #
@@ -656,9 +653,8 @@ eot
   #
 else
   #
-  ${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/${prefix}${imagename}-${SYM_sub}.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/${prefix}${imagename}-${SYM_sub}.map << eof
 XYZLIM 0 399 0 399 0 0
-KEEP
 END
 eof
   #

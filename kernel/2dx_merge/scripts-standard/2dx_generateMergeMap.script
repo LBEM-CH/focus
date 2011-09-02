@@ -188,58 +188,37 @@ if ( ${merge_modus} == "3D" ) then
   #############################################################################
   #############################################################################
   #
-  set infile = merge3D_phase_zero_nophaerr.mtz
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "fft - to transform ${infile} into SCRATCH/scratch1_phase_zero.map for PSF"
-  #############################################################################  
-  #
-  if (  ${rotate_to_Z} == "yes" ) then
-    #
-    set AXIS = "Z,X,Y"
-    \rm -f SCRATCH/scratch1_phase_zero.map
-    #
-    ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1_phase_zero.map  << eot
-LABIN F1=F  PHI=PHI ##
-PROJECTION
-AXIS ${AXIS}
-SCALE F1 ${scale} ${tempfac}
-SYMMETRY ${CCP4_SYM}
-RESOLUTION ${RESMIN} ${RESMAX}
-TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID 200 200 1
-XYZLIM 0 199 0 199 0 0
-RHOLIM 250.0
-HKLMAX 50 50 50
-END
-eot
-    #
-    echo "# IMAGE: SCRATCH/scratch1_phase_zero.map <MAP: PSF scratch1 Map>" >> LOGS/${scriptname}.results
-    #
+  set infile_phase_zero = merge3D_phase_zero_nophaerr.mtz
+  if ( ! -e ${infile_phase_zero} ) then
+    ${proc_2dx}/linblock "WARNING: Phase-Zero MTZ file missing. Cannot calculate PSF"
   else
     #
-    set AXIS = "X,Y,Z"
-    \rm -f SCRATCH/scratch1_phase_zero.map
+    #############################################################################
+    ${proc_2dx}/linblock "fft - to transform ${infile_phase_zero} into SCRATCH/scratch1_phase_zero.map for PSF"
+    #############################################################################  
     #
-    ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1_phase_zero.map  << eot
+    \rm -f SCRATCH/scratch1_phase_zero_XYZ.map
+    \rm -f SCRATCH/scratch1_phase_zero_XZY.map
+    \rm -f SCRATCH/scratch1_phase_zero_YZX.map
+    #
+    set AXIS = "X,Y,Z"
+    ${bin_ccp4}/fft hklin ${infile_phase_zero} mapout SCRATCH/scratch1_phase_zero_XYZ.map  << eot
 LABIN F1=F  PHI=PHI ##
-PROJECTION
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 SYMMETRY ${CCP4_SYM}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID 200 200 1
-XYZLIM 0 199 0 199 0 0
+GRID 200 200 200
+XYZLIM 0 199 0 199 0 199
 RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
     #
-    echo "# IMAGE: SCRATCH/scratch1_phase_zero.map <MAP: PSF scratch1 Map>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/scratch1_phase_zero_XYZ.map <MAP: PSF scratch1 Map XYZ>" >> LOGS/${scriptname}.results
     #
   endif
-  #
   set infile = merge3D.mtz
   #
   echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
@@ -321,24 +300,126 @@ OMAT
   0.000 0.000 0.000
 eot
   #
-  echo "<<@progress: +10>>"
-  #
-  # echo "# IMAGE: SCRATCH/scratch2.map <MAP: temporary volume 2>" >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "mapmask - to correctly place 2D map for PSF"
-  #############################################################################
-  #
-  \rm -f volume.map
-  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/scratch2_phase_zero.map << eof
-XYZLIM -100 99 -100 99 0 0
+  if ( -e ${infile_phase_zero} ) then
+    #
+    \rm -f SCRATCH/scratch2_phase_zero_XYZ.map
+    ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero_XYZ.map wrkout SCRATCH/scratch2_phase_zero_XYZ.map << eot
+MODE FROM
+CELL WORK ${cellx} ${celly} ${ALAT} 90.0 90.0 ${realang}
+GRID WORK ${cellx} ${celly} ${ALAT}
+XYZLIM -0.5 0.5 -0.5 0.5 -0.3 0.3
+AVER
+OMAT
+  1.000 0.000 0.000
+  0.000 1.000 0.000
+  0.000 0.000 1.000
+  0.000 0.000 0.000
+eot
+    #
+    \rm -f SCRATCH/scratch2_phase_zero_XZY.map
+    ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero_XYZ.map wrkout SCRATCH/scratch2_phase_zero_XZY.map << eot
+MODE FROM
+CELL WORK ${cellx} ${ALAT} ${celly} 90.0 90.0 ${realang}
+GRID WORK ${cellx} ${ALAT} ${celly}
+XYZLIM -0.5 0.5 -0.5 0.5 -0.3 0.3
+AVER
+OMAT
+  1.000 0.000 0.000
+  0.000 0.000 1.000
+  0.000 1.000 0.000
+  0.000 0.000 0.000
+eot
+    #
+    \rm -f SCRATCH/scratch2_phase_zero_YZX.map
+    ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero_XYZ.map wrkout SCRATCH/scratch2_phase_zero_YZX.map << eot
+MODE FROM
+CELL WORK ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang}
+GRID WORK ${celly} ${ALAT} ${cellx} 
+XYZLIM -0.5 0.5 -0.5 0.5 -0.3 0.3
+AVER
+OMAT
+  0.000 1.000 0.000
+  0.000 0.000 1.000
+  1.000 0.000 0.000
+  0.000 0.000 0.000
+eot
+    #
+    echo "# IMAGE: SCRATCH/scratch2_phase_zero_XYZ.map <MAP: draft PSF scratch2 Map XYZ>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/scratch2_phase_zero_XZY.map <MAP: draft PSF scratch2 Map XZY>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/scratch2_phase_zero_YZX.map <MAP: draft PSF scratch2 Map YZX>" >> LOGS/${scriptname}.results
+    #
+    echo "<<@progress: +10>>"
+    #
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "npo - produce PSF plots XY"
+    #############################################################################
+    #
+    \rm -f SCRATCH/volume_phase_zero.plt
+    #
+    ${bin_ccp4}/npo  MAPIN  SCRATCH/scratch2_phase_zero_XYZ.map  PLOT SCRATCH/volume_phase_zero.plt  << eof
+TITLE Point Spread Function (PSF). X,Y section. Grid=20. Line is PSF at 50%.
+MAP SCALE 1.0 NOBOX
+CONTRS 0 TO 250 BY 125
+MODE BELOW 125 DASHED 1 0.15 0
+GRID 20.0 20.0
+SECTS 0 0
+PLOT
 END
 eof
-  #
-  # echo "# IMAGE: SCRATCH/scratch2_phase_zero.map <MAP: PSF scratch 2>" >> LOGS/${scriptname}.results
+    #
+    \rm -f PS/PSF-XY.ps
+    ${bin_2dx}/laserplot.exe -outputfile=PS/PSF-XY.ps SCRATCH/volume_phase_zero.plt
+    \rm -f SCRATCH/volume_phase_zero.plt
+    echo "# IMAGE: PS/PSF-XY.ps <PS: draft PSF, X/Y plane>" >> LOGS/${scriptname}.results
+    echo "<<@progress: +5>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "npo - produce PSF plots XZ"
+    #############################################################################
+    #
+    ${bin_ccp4}/npo  MAPIN  SCRATCH/scratch2_phase_zero_XZY.map  PLOT SCRATCH/volume_phase_zero.plt  << eof
+TITLE Point Spread Function (PSF). X,Z section. Grid=20. Line is PSF at 50%.
+MAP SCALE 1.0 NOBOX
+CONTRS 0 TO 250 BY 125
+MODE BELOW 125 DASHED 1 0.15 0
+GRID 20.0 20.0
+SECTS 0 0
+PLOT
+END
+eof
+    #
+    \rm -f PS/PSF-XZ.ps
+    ${bin_2dx}/laserplot.exe -outputfile=PS/PSF-XZ.ps SCRATCH/volume_phase_zero.plt
+    \rm -f SCRATCH/volume_phase_zero.plt
+    echo "# IMAGE: PS/PSF-XZ.ps <PS: draft PSF, X/Z plane>" >> LOGS/${scriptname}.results
+    echo "<<@progress: +5>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "npo - produce PSF plots YZ"
+    #############################################################################
+    #
+    ${bin_ccp4}/npo  MAPIN  SCRATCH/scratch2_phase_zero_YZX.map  PLOT SCRATCH/volume_phase_zero.plt  << eof
+TITLE Point Spread Function (PSF). Y,Z section. Grid=20. Line is PSF at 50%.
+MAP SCALE 1.0 NOBOX
+CONTRS 0 TO 250 BY 125
+MODE BELOW 125 DASHED 1 0.15 0
+GRID 20.0 20.0
+SECTS 0 0
+PLOT
+END
+eof
+    #
+    \rm -f PS/PSF-YZ.ps
+    ${bin_2dx}/laserplot.exe -outputfile=PS/PSF-YZ.ps SCRATCH/volume_phase_zero.plt
+    \rm -f SCRATCH/volume_phase_zero.plt
+    echo "# IMAGE: PS/PSF-YZ.ps <PS: draft PSF, Y/Z plane>" >> LOGS/${scriptname}.results
+    echo "<<@progress: +5>>"
+    #
+  endif
   #
   #############################################################################
-  ${proc_2dx}/linblock "mapmask - to set units to 2x2x1"
+  ${proc_2dx}/linblock "mapmask - to set units to 2x2x1 for 3D Volume"
   #############################################################################
   #
   \rm -f volume.map
@@ -350,29 +431,6 @@ END
 eof
   #
   echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
-  #
-  echo "<<@progress: +5>>"
-  #
-  \rm -f SCRATCH/volume_phase_zero.plt
-  #
-  ${bin_ccp4}/npo  MAPIN  SCRATCH/scratch2_phase_zero.map  PLOT SCRATCH/volume_phase_zero.plt  << eof
-TITLE Point Spread Function (PSF) Solid line is PSF at 50% intensity.
-MAP SCALE 2.0
-CONTRS -250 TO 250 BY 125
-MODE BELOW 125 DASHED 1 0.15 0
-SECTS 0 0
-PLOT
-END
-eof
-  #
-  \rm -f PS/PSF.ps
-  ${bin_2dx}/laserplot.exe -outputfile=PS/PSF.ps SCRATCH/volume_phase_zero.plt
-  #
-  \rm -f SCRATCH/volume_phase_zero.plt
-  #
-  echo "# IMAGE-IMPORTANT: PS/PSF.ps <PS: PSF (draft, only X/Y, not yet X/Z. wrong scale)>" >> LOGS/${scriptname}.results
-  #
-  echo "<<@progress: +5>>"
   #
 endif
 #

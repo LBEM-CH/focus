@@ -56,11 +56,11 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	float  *peak_x, *peak_y, *peak_z, *real_lat;
 	int    all_peak_counter;
 	int    sx,sy, num_peaks,num_images ;
-	float  *refer,*refer1,*refer2;
+	float  *refer,*refer_env,*refer1,*refer2;
 	double  max,min,mean,devi; 
 	float   temp,r1,r2, x,y,z;
 	float *temp_image;
-	int length=100;
+	int length=400;
 	float *inter_image;
 
 	FILE  *input;
@@ -79,6 +79,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	inter_image=(float *)calloc(length*length,sizeof(float));
 
 	refer=(float *)calloc(realcell_x*realcell_y,sizeof(float)); 
+	refer_env=(float *)calloc(realcell_x*realcell_y,sizeof(float)); 
 	refer1=(float *)calloc(realcell_x*realcell_y,sizeof(float)); 
 	refer2=(float *)calloc(realcell_x*realcell_y,sizeof(float)); 
 	temp_image=(float *)calloc(realcell_x*realcell_y,sizeof(float));
@@ -380,7 +381,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 
 
 	/*    mask  the references */
-	mask(mask_radius,mask_radius,realcell_x,realcell_y,refer);
+	// mask(mask_radius,mask_radius,realcell_x,realcell_y,refer);
 	mask(mask_radius,mask_radius,realcell_x,realcell_y,refer1);
 	mask(mask_radius,mask_radius,realcell_x,realcell_y,refer2);
 
@@ -395,9 +396,6 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 
 
 
-	/*    Apply envelope function to the reference map  */  
-
-	//      envelop(realcell_x,realcell_y,refer,A,B_fac,FSC);  
 
 
 
@@ -407,19 +405,30 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	free(real_lat);
 
 
+
+
+	/*    Apply envelope function to the reference map  */  
+
+	for(i=0;i<realcell_x;i++)
+		for(j=0;j<realcell_y;j++)
+		        refer_env[IDX(i,j,realcell_x,realcell_y)]=refer[IDX(i,j,realcell_x,realcell_y)];
+
+	envelop(realcell_x,realcell_y,refer_env,A,B_fac,FSC);  
+
+
 	/*   Output reference after applying envelope into MRC format file */
 
 	max=-1.0e20;
 	min=-max;
 	for(i=0;i<realcell_x;i++)
 		for(j=0;j<realcell_y;j++)
-		{ if(refer[IDX(i,j,realcell_x,realcell_y)]>=max) max=refer[IDX(i,j,realcell_x,realcell_y)];
-			else if(refer[IDX(i,j,realcell_x,realcell_y)]<=min) min=refer[IDX(i,j,realcell_x,realcell_y)];
+		{ if(refer_env[IDX(i,j,realcell_x,realcell_y)]>=max) max=refer_env[IDX(i,j,realcell_x,realcell_y)];
+			else if(refer_env[IDX(i,j,realcell_x,realcell_y)]<=min) min=refer_env[IDX(i,j,realcell_x,realcell_y)];
 		}
 
 	for(i=0;i<realcell_x;i++)
 		for(j=0;j<realcell_y;j++)
-			temp_image[IDX(i,j,realcell_x,realcell_y)]=contrast*(refer[IDX(i,j,realcell_x,realcell_y)]-min)*256/(max-min)-(contrast-1.0)*128.0;
+			temp_image[IDX(i,j,realcell_x,realcell_y)]=contrast*(refer_env[IDX(i,j,realcell_x,realcell_y)]-min)*256/(max-min)-(contrast-1.0)*128.0;
 
 	mrcImage::mrcHeader *header2 = mrcImage::headerFromData(realcell_x,realcell_y,2,(char*)temp_image);
 
@@ -467,7 +476,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	mrcImage(header3,(char*)temp_image,fileName3);
 	cout<<fileName3<<" written"<<endl;
 
-	fprintf(results,"# IMAGE-IMPORTANT: %s <ML result, Even Reference>\n",fileName3);
+	fprintf(results,"# IMAGE-IMPORTANT: %s <ML result, Even Reference (no envelope)>\n",fileName3);
 
 	max=-1e20;min=1e20;	 
 	for(i=0;i<realcell_x;i++)
@@ -492,7 +501,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	mrcImage(header4,(char*)temp_image,fileName4);
 	cout<<fileName4<<" written"<<endl;
 
-	fprintf(results,"# IMAGE-IMPORTANT: %s <ML result, Odd Reference>\n",fileName4);
+	fprintf(results,"# IMAGE-IMPORTANT: %s <ML result, Odd Reference (no envelope)>\n",fileName4);
 
 	printf("<<@progress: 70>>\n");
 	fflush(stdout);
@@ -516,12 +525,13 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	mrcImage(header5,(char*)inter_image,fileName5);
 	cout<<fileName5<<" written"<<endl;
 
-	fprintf(results,"# IMAGE-IMPORTANT: %s <ML result UnitCell>\n",fileName5); 
+	fprintf(results,"# IMAGE-IMPORTANT: %s <ML result UnitCell (no envelope)>\n",fileName5); 
 
 
 	fclose(results);
 
 	free(refer);
+	free(refer_env);
 	free(refer1);
 	free(refer2);
 	free(inter_image);

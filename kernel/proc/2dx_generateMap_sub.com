@@ -523,7 +523,7 @@ AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${SYM_sub}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID 200 2 200
+GRID 200 20 200
 XYZLIM 0 199 0 0 0 199
 RHOLIM 250.0
 HKLMAX 50 50 50
@@ -563,7 +563,7 @@ AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${SYM_sub}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID 200 2 200
+GRID 200 20 200
 XYZLIM 0 199 0 0 0 199
 RHOLIM 250.0
 HKLMAX 50 50 50
@@ -611,7 +611,8 @@ if ( ${rotate_to_Z} == "yes" ) then
   \rm -f SCRATCH/TMP001_phase_zero.map
   #
   ${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/TMP001_phase_zero.map << eof
-XYZLIM 150 249 0 0 150 249
+MODE mapin
+XYZLIM -0.3 0.3 -0.3 0.3 -0.2 0.2
 END
 eof
   #
@@ -626,7 +627,8 @@ eot
 else
   #
   ${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map << eof
-XYZLIM 150 249 150 249 0 0
+MODE mapin
+XYZLIM -0.3 0.3 -0.3 0.3 -0.2 0.2
 END
 eof
   #
@@ -711,11 +713,12 @@ ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM_sub}.plt"
 \rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.plt
 #
 ${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map  PLOT  ${prefix}${imagename}_phase_zero-${SYM_sub}.plt  << eof
-TITLE Point Spread Function (PSF) Symmetry: ${SYM_sub}. Solid line is PSF at 50% intensity.
+TITLE Point Spread Function (PSF) Symmetry: ${SYM_sub}. Grid: 20A. Line 50% of PSF.
 MAP SCALE 2.0
-CONTRS -250 TO 250 BY 125
+CONTRS 0 TO 250 BY 125
 MODE BELOW 125 DASHED 1 0.15 0
 SECTS 0 0
+GRID 20 20
 PLOT
 END
 eof

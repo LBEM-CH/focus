@@ -227,12 +227,12 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 
 	printf(":Threshold ..................... = %f\n",threshold);
 	fflush(stdout);
-	printf(":Number of peaks above threshold = %d\n",num_peaks);
+	printf("::Number of peaks above threshold = %d\n",num_peaks);
 	fflush(stdout);
 	printf(": \n");
 	fflush(stdout);
 
-	printf("::Get particle stack \n"); 
+	printf("::Getting particle stack \n"); 
 	fflush(stdout);
 	printf("<<@progress: 25>>\n");
 	fflush(stdout);
@@ -346,7 +346,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	/*    maximum likelihood of the unit cells   */
 
 	printf("<<@progress: 40>>\n");
-	printf("::Starting maximum_likelihood \n");
+	printf("::Starting maximum_likelihood calculation\n");
 	fflush(stdout);
 
 	maximum_likelihood(realcell_x,realcell_y,refer,refer1,refer2,results);

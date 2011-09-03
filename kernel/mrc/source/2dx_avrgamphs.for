@@ -562,7 +562,10 @@ C     WRITE(6,24)ACOEFF,BCOEFF
         FOMOUT=0.0
         QFACTOR=0.0
         COMBAMP=0.0
-        STOP ' should never be reached'
+        write(*,'(''::WARNING n 2dx_avrgamphs. '',
+     1            ''No data for spot '',I5,''.'')')NSPOT
+        write(*,'('':: There may be a problem with the data.'')')
+C        STOP ' should never be reached'
       ELSE
         AVRGANG=ATAN2(SUMSIN,SUMCOS)
         COMBPHASE=AVRGANG/DRAD

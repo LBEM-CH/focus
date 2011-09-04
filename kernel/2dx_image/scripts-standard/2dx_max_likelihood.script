@@ -34,7 +34,6 @@
 # DISPLAY: stepdigitizer
 # DISPLAY: magnification
 # DISPLAY: ALAT
-# DISPLAY: tempfac
 # DISPLAY: tempkeep
 # DISPLAY: ctfrev
 # DISPLAY: realang
@@ -110,7 +109,6 @@ set revhk = ""
 set rot90 = ""
 set beamtilt = ""
 set zstarwin = ""
-set tempfac = ""
 set TLTAXIS = ""
 set TLTANG = ""
 set TLTAXA = ""

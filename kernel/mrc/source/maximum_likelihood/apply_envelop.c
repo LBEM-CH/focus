@@ -62,8 +62,12 @@ void envelop(int sx,int sy, float *refer, float A, float B, float *FSC)
 
 	float rmax=sx*DSTEP*10000/(XMAG*RESMAX);
 	float rmin=sx*DSTEP*10000/(XMAG*RESMIN);
-
+        float invresol;
+                
+        printf("\nApplying Envelope with B-factor %f\n",B);
+	printf("RESMAX=%f RESMIN=%f \n", RESMAX, RESMIN);
 	printf("rmax=%f rmin=%f \n", rmax,rmin);
+        printf("sx=%i,  sy=%i\n\n",sx,sy);
 
 
 	for(i=0;i<sx;i++) 
@@ -72,20 +76,32 @@ void envelop(int sx,int sy, float *refer, float A, float B, float *FSC)
 
 			RAD = sqrtf((i-sx/2)*(i-sx/2)*1.0+(j-sy/2)*(j-sy/2)*1.0)+1;
 			m=(int)RAD;
+                        invresol = RAD*XMAG/(sx*DSTEP*10000);
 
 
 			if(m<sx/2) // rmax  && m>rmin)
 			{
+                                if(m<rmax)
+                                        env=B*invresol*invresol/4.0;
+                                else
+                                        env=0.0;
+
+       
+                                // if(j==sy/2)   printf("m=%i, invresol=%f, env=%f\n",m,invresol,env);
 
 				//    RAD=RAD*THETATR;	      
 				//    env=B*RAD*RAD;
 
-				//    out[j+i*sy][0]=out[j+i*sy][0]*(A+(1-A)*sqrt(2*fabs(FSC[m])/(1+fabs(FSC[m]))))*exp(-env);
-				//    out[j+i*sy][1]=out[j+i*sy][1]*(A+(1-A)*sqrt(2*fabs(FSC[m])/(1+fabs(FSC[m]))))*exp(-env);
+				// out[j+i*sy][0]=out[j+i*sy][0]*(A+(1-A)*sqrt(2*fabs(FSC[m])/(1+fabs(FSC[m]))))*exp(env);
+				// out[j+i*sy][1]=out[j+i*sy][1]*(A+(1-A)*sqrt(2*fabs(FSC[m])/(1+fabs(FSC[m]))))*exp(env);
 
-				env=B/(4*RAD*RAD); 
-				out[IDX(i,j,sx,sy)][0]=out[IDX(i,j,sx,sy)][0]*exp(env);
-				out[IDX(i,j,sx,sy)][1]=out[IDX(i,j,sx,sy)][1]*exp(env);
+				out[IDX(i,j,sx,sy)][0]=out[IDX(i,j,sx,sy)][0]*(A+(1-A)*sqrt(2*fabs(FSC[m])/(1+fabs(FSC[m]))))*exp(-env);
+				out[IDX(i,j,sx,sy)][1]=out[IDX(i,j,sx,sy)][1]*(A+(1-A)*sqrt(2*fabs(FSC[m])/(1+fabs(FSC[m]))))*exp(-env);
+
+
+				// env=B/(4*RAD*RAD); 
+				// out[IDX(i,j,sx,sy)][0]=out[IDX(i,j,sx,sy)][0]*exp(env);
+				// out[IDX(i,j,sx,sy)][1]=out[IDX(i,j,sx,sy)][1]*exp(env);
 
 			}
 			else

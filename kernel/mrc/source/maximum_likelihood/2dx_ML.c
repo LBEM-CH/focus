@@ -42,11 +42,13 @@ int main()
 	FILE *input;
 	char oneline[100];
 	char *c; 
+        char *tmpstring;
 	char  *imagename, *profilename, *resultsfilename, *imagenumber, *temp_imagename;
 	int oversizexy[2], realcellxy[2], realcellxy1[2];
 	float angle[3];
 
 
+        tmpstring=(char *)calloc(200,sizeof(char));
 	imagename=(char *)calloc(400,sizeof(char));
 	profilename=(char *)calloc(400,sizeof(char));
 	imagenumber=(char *)calloc(200,sizeof(char));
@@ -69,12 +71,14 @@ int main()
 	/*  input  parameters from 2dx_image.cfg to generate stacks*/
 
 	printf("\nReading  Parameters for ML:\n");
-	imagename=cgetline(input,"imagename");
+        strcpy(tmpstring,"imagename");
+	imagename=cgetline(input,tmpstring);
 	strcpy(temp_imagename, imagename);
 	strcat(imagename,".mrc");
 	printf("Image Name..................... = %s \n",imagename);
 
-	imagenumber=cgetline(input,"imagenumber");
+        strcpy(tmpstring,"imagenumber");
+	imagenumber=cgetline(input,tmpstring);
 	printf("Image Number................... = %s \n",imagenumber);
 
 	//strcpy(profilename,"SCRATCH/prof");
@@ -87,19 +91,24 @@ int main()
 	printf("Profile Name................... = %s \n",profilename);
 
 
-	if(fgetline(input, "CS",&CS)==0); 
+        strcpy(tmpstring,"CS");
+	if(fgetline(input,tmpstring,&CS)==0); 
 	printf("CS............................. = %f  \n",CS); 
 
-	if(fgetline(input, "KV", &KV )==0)
+        strcpy(tmpstring,"KV");
+	if(fgetline(input,tmpstring, &KV )==0)
 		printf("KV............................. = %f  \n",KV); 
 
-	if(fgetline(input, "RESMIN", &RESMIN )==0)  
+        strcpy(tmpstring,"RESMIN");
+	if(fgetline(input,tmpstring, &RESMIN )==0)  
 		printf("RESMIN......................... = %f  \n",RESMIN); 
 
-	if(fgetline(input, "RESMAX",&RESMAX )==0); 
+        strcpy(tmpstring,"RESMAX");
+	if(fgetline(input,tmpstring,&RESMAX )==0); 
 	printf("RESMAX......................... = %f  \n",RESMAX); 
 
-	if(fgetline(input, "defocus", defocus)==0)
+        strcpy(tmpstring,"defocus");
+	if(fgetline(input,tmpstring, defocus)==0)
 	{ 
 		DIFMID1=defocus[0];
 		DIFMID2=defocus[1];
@@ -107,7 +116,8 @@ int main()
 		printf("DFMID1,DFMID2,ANGAST........... = %f,%f,%f\n",DIFMID1,DIFMID2, ANGAST); 
 	}
 
-	if(*(cgetline(input,"ML_do_whiten"))=='y')
+        strcpy(tmpstring,"ML_do_whiten");         
+	if(*(cgetline(input,tmpstring))=='y')
 	{   do_whiten =1;
 		printf("do_whiten...................... = yes \n");
 	}
@@ -116,7 +126,8 @@ int main()
 		printf("do_whiten...................... = no \n");
 	}
 
-	if(*(cgetline(input,"ML_correct_CTF"))=='y')
+        strcpy(tmpstring,"ML_correct_CTF");         
+	if(*(cgetline(input,tmpstring))=='y')
 	{   correct_CTF =1;
 		printf("correct_CTF.................... = yes \n");
 	}
@@ -125,10 +136,12 @@ int main()
 		printf("correct_CTF.................... = no \n");
 	}
 
-	if(fgetline(input,"stepdigitizer",&DSTEP )==0)  
+        strcpy(tmpstring,"stepdigitizer");         
+	if(fgetline(input,tmpstring,&DSTEP )==0)  
 		printf("DSTEP.......................... = %f\n",DSTEP); 
 
-	if(fgetline(input,"magnification", &XMAG)==0)
+        strcpy(tmpstring,"magnification");         
+	if(fgetline(input,tmpstring, &XMAG)==0)
 		printf("Magnification (XMAG)........... = %f \n",XMAG);
 	/*
 		 if(igetline(input, "ML_oversizexy", oversizexy)==0)  
@@ -139,7 +152,8 @@ int main()
 		 else printf("parameter ML_oversizexy does not exists \n");   
 	 */
 
-	if(igetline(input, "ML_realcellxy_outer", realcellxy)==0)  
+        strcpy(tmpstring,"ML_realcellxy_outer");         
+	if(igetline(input,tmpstring, realcellxy)==0)  
 	{   realcell_x=realcellxy[0];
 		realcell_y=realcellxy[1];
 		printf("ML_realcellxy_outer............ = %d,%d\n",realcell_x,realcell_y);
@@ -156,31 +170,38 @@ int main()
 	realcell_x1=realcell_x;
 	realcell_y1=realcell_y;
 
-	if(igetline(input, "ML_mask_radius", &mask_radius)==0) 
+        strcpy(tmpstring,"ML_mask_radius");         
+	if(igetline(input,tmpstring, &mask_radius)==0) 
 		printf("Mask radius.................... = %d \n",mask_radius); 
 	else printf("parameter ML_mask_radius does not exists \n");   
 
-	if(igetline(input, "ML_iteration", &Iteration)==0) 
+        strcpy(tmpstring,"ML_iteration");         
+	if(igetline(input,tmpstring, &Iteration)==0) 
 		printf("Iteration...................... = %d \n",Iteration); 
 	else printf("parameter ML_iteration does not exists \n");   
 
-	if(igetline(input, "ML_threshold_method", &threshold_method)==0) 
+        strcpy(tmpstring,"ML_threshold_method");         
+	if(igetline(input,tmpstring, &threshold_method)==0) 
 	{     
 		if(threshold_method==0)
 		{   
-			if(fgetline(input, "ML_absolute_threshold", &threshold)==0) 
+                        strcpy(tmpstring,"ML_absolute_threshold");      
+			if(fgetline(input,tmpstring, &threshold)==0) 
 				printf("Absolute Threshold value....... = %f \n",threshold);
 			else  printf("parameter ML_absolute_threshold does not exists \n");     
 		}
 		else  
-		{       if(fgetline(input, "ML_relative_threshold", &relative_threshold)==0)    
+		{               
+                        strcpy(tmpstring,"ML_relative_threshold");      
+                        if(fgetline(input,tmpstring, &relative_threshold)==0)    
 			printf("Percentage of peaks to use..... = %.2f% \n",relative_threshold);
 			else printf("parameter ML_relative_threshold does not exists \n");
 		}
 	}
 	else printf("parameter ML_threshold_method does not exists \n");   
 
-	if(igetline(input, "ML_ref_ind", &ref_ind)==0) 
+        strcpy(tmpstring,"ML_ref_ind");         
+	if(igetline(input,tmpstring, &ref_ind)==0) 
 	{    
 		if ( ref_ind == 0 ) 
 			printf("Initial Reference (ref_ind).... = average reference \n");
@@ -198,7 +219,8 @@ int main()
 		 printf("DS_ratio............................ = %d \n",DS_ratio); 
 		 else printf("parameter DS_ratio does not exists \n");  
 	 */
-	if(igetline(input, "ML_rotational_symmetry", &Symmetry1)==0) 
+        strcpy(tmpstring,"ML_rotational_symmetry");      
+	if(igetline(input,tmpstring, &Symmetry1)==0) 
 	{   if(Symmetry1==0) Symmetry=1;
 		else if(Symmetry1==1) Symmetry=2;
 		else if(Symmetry1==2) Symmetry=3;
@@ -208,7 +230,8 @@ int main()
 	}
 	else printf("parameter Symmetry does not exists \n");  
 
-	if(igetline(input, "ML_lp_method", &lp_method)==0) 
+        strcpy(tmpstring,"ML_lp_method");      
+	if(igetline(input,tmpstring, &lp_method)==0) 
 	{   
 		if(lp_method==1)
 			printf("Low-Pass filter................ = Gaussian \n");
@@ -219,11 +242,13 @@ int main()
 	}
 	else printf("parameter ML_lp_method does not exists \n");   	
 
-	if(fgetline(input,"ML_lp_radius",&lp_radius)==0)
+        strcpy(tmpstring,"ML_lp_radius");      
+	if(fgetline(input,tmpstring,&lp_radius)==0)
 		printf("lp_radius...................... = %f \n",lp_radius); 
 	else printf("paramter lp_radius does not exists \n");
 
-	if(fgetline(input, "ML_MinMaxStep_angle", angle)==0)
+        strcpy(tmpstring,"ML_MinMaxStep_angle");      
+	if(fgetline(input,tmpstring, angle)==0)
 	{ 
 		min_angle=angle[0];
 		max_angle=angle[1];
@@ -232,19 +257,23 @@ int main()
 	}
 	else printf("Angle parameters do not exists \n"); 
 
-	if(fgetline(input,"ML_terminate_ML",&Terminate_ML)==0)
+        strcpy(tmpstring,"ML_terminate_ML");      
+	if(fgetline(input,tmpstring,&Terminate_ML)==0)
 		printf("Terminate_ML................... = %f \n",Terminate_ML); 
 	else printf("paramter ML_terminate does not exists \n");
 
-	if(fgetline(input,"ML_B_factor",&B_fac)==0)
+        strcpy(tmpstring,"ML_B_factor");      
+	if(fgetline(input,tmpstring,&B_fac)==0)
 		printf("B_factor....................... = %f \n",B_fac); 
 	else printf("paramter B_factor does not exists \n");
 
-	if(fgetline(input,"ML_A_factor",&A)==0)
+        strcpy(tmpstring,"ML_A_factor");      
+	if(fgetline(input,tmpstring,&A)==0)
 		printf("A_factor....................... = %f \n",A); 
 	else printf("paramter A_factor does not exists \n");
 
-	if(*(cgetline(input,"ctfrev"))=='y')
+        strcpy(tmpstring,"ctfrev");         
+	if(*(cgetline(input,tmpstring))=='y')
 	{    contrast=-1;
 		printf("Contrast of final map.......... = positive\n");
 	}
@@ -253,10 +282,12 @@ int main()
 		printf("Contrast of final map.......... = negative\n");
 	}
 
-	if(fgetline(input,"phaori",phaori)==0);
+        strcpy(tmpstring,"phaori");      
+	if(fgetline(input,tmpstring,phaori)==0);
 	printf("Phase Origin................... = %f %f\n",phaori[0],phaori[1]);
 
-	if(fgetline(input,"lattice",lattice)==0)
+        strcpy(tmpstring,"lattice");      
+	if(fgetline(input,tmpstring,lattice)==0)
 		printf("Reciprocal Lattice............. = %f %f %f %f\n",lattice[0],lattice[1],lattice[2],lattice[3]);
 
 	fclose(input);

@@ -50,7 +50,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 
 
 	int    i,j, k,m,n;
-	float  tmp, *FSC;
+	float  resol, tmp, *FSC;
 
 	float  *unbend_image1,*unbend_image2;
 	float  *peak_x, *peak_y, *peak_z, *real_lat;
@@ -127,10 +127,10 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	/*     Calculate Unit-cell center in pixels, using phaseorigin and the reciprocal space lattice */
 
 	reciprocal(lattice, real_lat, sx);
-  real_lat[0]*=-1;
-  real_lat[1]*=-1;
-  real_lat[2]*=-1;
-  real_lat[3]*=-1;
+        real_lat[0]*=-1;
+        real_lat[1]*=-1;
+        real_lat[2]*=-1;
+        real_lat[3]*=-1;
 
 	x_center = real_lat[0] * (phaori[0]/360.0) + real_lat[2] * phaori[1]/360.0;
 	y_center = real_lat[1] * (phaori[0]/360.0) + real_lat[3] * phaori[1]/360.0;
@@ -391,6 +391,18 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 		FSC[i]=0.0;      
 	resolution(realcell_x,realcell_y,refer1,refer2,FSC);
 
+
+        // Write out the FSC curve;
+
+        printf("Fourier Pixel,  Resolution,   FSC\n");
+        for(i=0;i<realcell_x/2;i++)
+        {
+                resol=((realcell_x/2)*DSTEP*10000)/(i*XMAG);
+                printf("%i     %f      %f\n",i,resol,FSC[i]);
+        }
+
+	fflush(stdout);
+
 	/*   Calculate the SSNR resolution */
 	//     spec_snr(num_images,realcell_x,realcell_y,refer,Image2, ssnr);   
 
@@ -412,6 +424,9 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	for(i=0;i<realcell_x;i++)
 		for(j=0;j<realcell_y;j++)
 		        refer_env[IDX(i,j,realcell_x,realcell_y)]=refer[IDX(i,j,realcell_x,realcell_y)];
+
+        printf("\nrealcell_x=%i, realcell_y=%i\n",realcell_x,realcell_y);
+	fflush(stdout);
 
 	envelop(realcell_x,realcell_y,refer_env,A,B_fac,FSC);  
 

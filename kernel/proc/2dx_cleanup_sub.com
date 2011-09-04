@@ -27,6 +27,10 @@ echo dummy > results.spi.0
 echo dummy > dummy.plt
 echo dummy > dummy-profile.dat
 echo dummy > dummy-permutated.hkl
+if ( ! -d LOGS ) then
+  \mkdir LOGS
+endif
+echo dummy > LOGS/dummy.log
 #
 if ( "${level}" == "radical" ) then
   #
@@ -170,7 +174,7 @@ echo dummy > dummy.TMP
 \rm -f *-permutated.hkl
 #
 \rm *.results
-\rm -rf LOGS
+\rm -rf LOGS/*.log
 
 
 

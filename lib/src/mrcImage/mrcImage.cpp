@@ -81,9 +81,9 @@ void mrcImage::run()
 	{
 		//        cerr<<"Generating thumbnail."<<endl;
 		//  	    emit showProgress();
-    qDebug()<<"Generating thumbnail";
+    // qDebug()<<"Generating thumbnail";
 		generateThumbnail();
-    qDebug()<<"Thumbnail generated";
+    // qDebug()<<"Thumbnail generated";
 	}
 
 	quint32 nz = headers[0]->nz(); if(nz==0) nz = 1;

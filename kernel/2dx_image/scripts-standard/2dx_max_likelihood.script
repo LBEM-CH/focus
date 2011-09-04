@@ -162,6 +162,12 @@ if ( ${ML_doit} == 'n' ) then
   exit
 endif
 #
+${proc_2dx}/linblock "#"
+echo "::   Attention: The ML software directly accesses the saved 2dx_image.cfg file."
+echo "::   It doesn't get the data from the GUI of 2dx_image."
+echo "::   You therefore must SAVE the current parameters, before running this script."
+${proc_2dx}/linblock "#"
+#
 if ( ! -d ML ) then
   \mkdir ML
 endif

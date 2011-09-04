@@ -93,6 +93,10 @@ if ( ${location} != "all" ) then
     echo dummy > LOG.1
     echo dummy > 2dx_calcpositions.tmp
     echo dummy > dummy.TMP
+    if ( ! -d LOGS ) then
+      \mkdir LOGS
+    endif
+    echo dummy > LOGS/dummy.log
     #
     if ( "${level}" != "a" ) then
       #
@@ -105,7 +109,7 @@ if ( ${location} != "all" ) then
       \rm -rf PRJ
       \rm -rf HKL
       \rm -rf TRASH
-      \rm -rf LOGS
+      \rm -rf LOGS/*.log
       #
       if ( -d proc ) then
         cd proc

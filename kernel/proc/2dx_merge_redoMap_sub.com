@@ -117,6 +117,8 @@ else
   endif
 endif
 #
+${proc_2dx}/linblock "Using APH files ${aphfile}"
+#
 if ( ! -e ${aphfile} ) then
   ${proc_2dx}/linblock "ERROR: ${aphfile} not found."
   ${proc_2dx}/linblock "ERROR: You might first need to run previous scripts."

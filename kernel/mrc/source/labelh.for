@@ -86,6 +86,8 @@ C IMODE= 15: Cross out image
 C
 C IMODE= 16: Transform into INTEGER*2 output format (16bit) with automatic scaling to [0 ; 16000]
 C
+C IMODE= 17: Read image statistics
+C
 C IMODE= 20: Produce thumbnail image
 C        card 4 : Enter X/Y dimensions of output image
 C
@@ -178,6 +180,7 @@ C
      . ' 14: Merge 7x7 images into one large image',/,
      . ' 15: Cross out image',/,
      . ' 16: Transform [0;16000] INT*2 image',/,
+     . ' 17: Read image statistics',/,
      . ' 20: Produce thumbnail image',/,
      . ' 29: Interpolate into two times larger image',/,
      . ' 30: Pad into square image',/,
@@ -212,8 +215,8 @@ C
                 endif
         IF ((IMODE .GT. 4 .and. IMODE .ne. 10 .and. IMODE.ne.11 
      1      .and. IMODE.ne.12 .and. IMODE.ne.13 .and. IMODE.ne.14
-     1      .and. IMODE.ne.15 .and. IMODE.ne.16 .and. IMODE.ne.20 
-     1      .and. IMODE.ne.29 .and. IMODE.ne.30
+     1      .and. IMODE.ne.15 .and. IMODE.ne.16 .and. IMODE.ne.17
+     1      .and. IMODE.ne.20 .and. IMODE.ne.29 .and. IMODE.ne.30
      1      .and. IMODE.ne.31 .and. IMODE.ne.32)
      1      .AND. MODE .LT. 3) then
           write(*,'('' ERROR: Illegal mode for this file type'')')
@@ -223,7 +226,7 @@ C
         WRITE(6,1550)
 1550    FORMAT(10X)
 C
-        IF (IMODE .NE. 0) THEN
+        IF (IMODE .NE. 0 .and. IMODE.ne.17) THEN
           WRITE(6,1600)
 1600      FORMAT('$Output filename:  ')
           READ(5,1200) OUTFILE
@@ -237,6 +240,7 @@ C
         if ( IMODE.eq.14 ) goto 99
         if ( IMODE.eq.15 ) goto 107
         if ( IMODE.eq.16 ) goto 108
+        if ( IMODE.eq.17 ) goto 110
         if ( IMODE.eq.20 ) goto 94
         if ( IMODE.eq.29 ) goto 98
         if ( IMODE.eq.30 ) goto 95
@@ -744,6 +748,104 @@ C
      .     DMIN,DMAX,DMEAN
 C
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE 17 :  Read image statistics
+C
+110     continue
+        write(TITLE,'(''LABELH Mode 17: Read image statistics '')')
+        write(6,'('' Reading image statistics'')')
+C
+        CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        CALL IRTLAB(1,LABELS,NL)
+        CALL IRTEXT(1,EXTRA,1,29)
+        CALL IRTCEL(1,CELL)
+C
+        IF (MODE .GT. 2) THEN
+          STOP 'Only works on real images'
+        ENDIF
+C
+        write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+        DO IZ = 1,NZ
+          do iy = 1,NY
+            CALL IRDLIN(1,ALINE,*999)
+            do ix = 1,NX
+              VAL=ALINE(ix)
+              IF (VAL .LT. DMIN) DMIN = VAL
+              IF (VAL .GT. DMAX) DMAX = VAL
+              DOUBLMEAN = DOUBLMEAN + VAL
+            enddo
+          enddo
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Opened file has range MIN,MAX,MEAN: '',3G16.5)')
+     1     DMIN,DMAX,DMEAN
+C
+        DVAL = ABS(DMAX - DMIN)
+        write(*,'('' That is a dynamic range of: '',G16.5)')
+     1     DVAL
+C
+        CALL IMPOSN(1,0,0)
+C
+C-------Now calculate standard deviation
+C
+        DOUBLMEAN = 0.0
+        DO IZ = 1,NZ
+          do iy = 1,NY
+            CALL IRDLIN(1,ALINE,*999)
+            do ix = 1,NX
+              VAL=(ALINE(ix)-DMEAN)**2
+              DOUBLMEAN = DOUBLMEAN + VAL
+            enddo
+          enddo
+        enddo
+C
+        DOUBLMEAN=DOUBLMEAN/(NX*NY-1)
+        if(DOUBLMEAN.lt.0.0)DOUBLMEAN=ABS(DOUBLMEAN)
+        DSTD = SQRT(DOUBLMEAN)
+C
+        write(*,'('' Standard Deviation is: '',G16.5)')DSTD
+C
+C-------Limit Min and Max to 5% to 95%:
+        write(*,'('' Give percentage of cutoff (e.g. 5) '')')
+        read(*,*)DVAL1
+        write(*,'('' Cutting off upper and lower '',F8.5,''%'')')DVAL1
+        DMIN1=DMIN + (DMAX-DMIN)*DVAL1/100.0
+        DMAX1=DMAX - (DMAX-DMIN)*DVAL1/100.0
+C
+C-------Limit Min and Max to MEAD -/+ 2.5 * STD
+        write(*,'('' Give multiple of STD as width (e.g. 3) '')')
+        read(*,*)DVAL2
+        write(*,'('' Cutting off beyond '',F8.5,'' times STD'')')DVAL2
+        DMIN2=DMEAN - DSTD*DVAL2
+        DMAX2=DMEAN + DSTD*DVAL2
+C
+C-------Take the more narrow of the two:
+        if(DMIN1.lt.DMIN2)DMIN1=DMIN2
+        if(DMAX1.gt.DMAX2)DMAX1=DMAX2
+C
+        write(*,'('' Useful truncation limits are: '',2G16.5)')DMIN1,DMAX1
+C
+        call system('\rm -f labelh.tmp')
+        open(13,FILE='labelh.tmp',STATUS='NEW')
+        write(13,'('' Min, Max, Mean, STD, GoodMin, GoodMax: '')')
+        write(13,'(G16.5)')DMIN
+        write(13,'(G16.5)')DMAX 
+        write(13,'(G16.5)')DMEAN
+        write(13,'(G16.5)')DSTD 
+        write(13,'(G16.5)')DMIN1
+        write(13,'(G16.5)')DMAX2
+        close(13)
 C
         GOTO 990
 C

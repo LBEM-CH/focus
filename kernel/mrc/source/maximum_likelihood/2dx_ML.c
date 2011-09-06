@@ -194,7 +194,7 @@ int main()
 		{               
                         strcpy(tmpstring,"ML_relative_threshold");      
                         if(fgetline(input,tmpstring, &relative_threshold)==0)    
-			printf("Percentage of peaks to use..... = %.2f% \n",relative_threshold);
+			printf("Percentage of peaks to use..... = %.2f\n",relative_threshold);
 			else printf("parameter ML_relative_threshold does not exists \n");
 		}
 	}

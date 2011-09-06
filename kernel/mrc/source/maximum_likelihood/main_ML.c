@@ -161,7 +161,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 
 	if(dimension<201)
 	{ printf("::ERROR: Not enough peaks in profile !!! (dimension=%d)\n",dimension);
-		printf("::MINA=%d, MAXA=%d, MINB=%d, MAXB=%d\n",&mina,&maxa,&minb,&maxb);
+		printf("::MINA=%d, MAXA=%d, MINB=%d, MAXB=%d\n",mina,maxa,minb,maxb);
 		printf("::ABORTING.\n");
 		return -1;
 	}

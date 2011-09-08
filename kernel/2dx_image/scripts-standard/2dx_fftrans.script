@@ -44,6 +44,9 @@
 # DISPLAY: stepdigitizer
 # DISPLAY: Calc_from_sample_pixel
 # DISPLAY: sample_pixel
+# DISPLAY: crop_histogram
+# DISPLAY: crop_histogram_percent
+# DISPLAY: crop_histogram_stdev
 #
 #$end_local_vars
 #
@@ -75,6 +78,9 @@ set generatePeriodogram = ""
 set periodogramWindowsize = ""
 set periodogramNumsubsteps = ""
 set taperBeforeFFT = ""
+set crop_histogram = ""
+set crop_histogram_percent = ""
+set crop_histogram_stdev = ""
 #
 #$end_vars
 #
@@ -137,24 +143,27 @@ eot
     set goodmin = `head -6 labelh.tmp | tail -1`
     set goodmax = `head -7 labelh.tmp | tail -1`
     #
-    #############################################################################
-    #                                                                           #
-    ${proc_2dx}/linblock "labelh - to cutoff over and underflows to ${goodmin} to ${goodmax}"
-    #                                                                           #
-    #############################################################################
-    #
-    #
-    \mv -f ${imagename}.mrc SCRATCH/${imagename}.raw.mrc
-    # 
-    ${bin_2dx}/labelh.exe << eot
+    if ( ${crop_histogram} == 'y' ) then
+      #############################################################################
+      ${proc_2dx}/linblock "labelh - to cutoff over and underflows to ${goodmin} to ${goodmax}"
+      #############################################################################
+      #
+      #
+      \mv -f ${imagename}.mrc SCRATCH/${imagename}.raw.mrc
+      # 
+      ${bin_2dx}/labelh.exe << eot
 SCRATCH/${imagename}.raw.mrc
 99               ! Cut off over and underflows
 3
 ${imagename}.mrc
 ${goodmin},${goodmax}
 eot
-    #
-    echo "# IMAGE: "SCRATCH/${imagename}.raw.mrc "<raw image before histogram correction>" >> LOGS/${scriptname}.results
+      #
+      echo "# IMAGE: "SCRATCH/${imagename}.raw.mrc "<raw image before histogram correction>" >> LOGS/${scriptname}.results
+      #
+    else
+      ${proc_2dx}/lin "Not cropping histogram (Advanced parameter)."
+    endif
     #
     set new_mrc_created = 'y'
     #

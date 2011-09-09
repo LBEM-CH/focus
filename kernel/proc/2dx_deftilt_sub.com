@@ -122,14 +122,23 @@ endif
 #######################################################
 #
   if ( ! -e SCRATCH/2dx_ctffind3.result.tmp ) then
-    ${proc_2dx}/protest "2dx_deftilt_sub.com: ERROR: SCRATCH/2dx_ctffind3.result.tmp does not exist."
+    ${proc_2dx}/linblock "WARNING: 2dx_deftilt_sub.com: ERROR: SCRATCH/2dx_ctffind3.result.tmp does not exist."
+    if ( ${newX} == '4' && ${newY} == '4' ) then
+       ${proc_2dx}/protest "ABORTING."
+    endif
+    set newdef = ${dfmid}
+    # set drms1 = 
+    set def1 = ${dfref1}
+    set def2 = ${dfref2}
+    set ang  = ${astigang}
+  else
+    set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
+    set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
+    set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
+    set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
+    set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
+    \rm SCRATCH/2dx_ctffind3.result.tmp
   endif
-  set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
-  set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
-  set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
-  set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
-  set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
-  \rm SCRATCH/2dx_ctffind3.result.tmp
   #
   if ( ${newX} == '4' && ${newY} == '4' ) then
     set defocus = `echo ${def1},${def2},${ang}`

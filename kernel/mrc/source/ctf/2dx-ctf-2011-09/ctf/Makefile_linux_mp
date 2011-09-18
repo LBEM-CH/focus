@@ -1,0 +1,30 @@
+all: ctffind3_mp.exe ctftilt_mp.exe
+
+ctffind3_mp.exe: ctffind3.o iof.o ioc.o
+	gfortran -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	-fopenmp ctffind3.o iof.o ioc.o -o ctffind3_mp.exe
+
+ctftilt_mp.exe: ctftilt.o iof.o ioc.o
+	gfortran -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	-fopenmp ctftilt.o iof.o ioc.o -o ctftilt_mp.exe
+	\rm *.o
+
+ctffind3.o: ctffind3.f
+	gfortran -O3 -s -fomit-frame-pointer -Wall -falign-functions=4 \
+	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	-w -fopenmp -c ctffind3.f
+
+ctftilt.o: ctftilt.f
+	gfortran -O3 -s -fomit-frame-pointer -Wall -falign-functions=4 \
+	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	-w -fopenmp -c ctftilt.f
+
+iof.o: iof.f
+	gfortran -O3 -s -fomit-frame-pointer -Wall -falign-functions=4 \
+	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	-w -fopenmp -c iof.f
+
+ioc.o: ioc.c
+	gcc -O3 -DPROTOTYPE -Dalliant -D_FILE_OFFSET_BITS=64 \
+	-D_LARGEFILE_SOURCE -w -fopenmp -c ioc.c
+#

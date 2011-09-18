@@ -83,7 +83,7 @@ C
       COMMON/FUNCB/NXYZ,STEPR,TILTA,TILTR,SIG2
 C
       WRITE(6,1000)
-1000  FORMAT(/' CTF TILT DETERMINATION, V1.5 (19-August-2010)',
+1000  FORMAT(/' CTF TILT DETERMINATION, V1.5 (14-September-2011)',
      +       /' Distributed under the GNU',
      +        ' General Public License (GPL)')
 C                    
@@ -117,7 +117,7 @@ C
 1020  FORMAT(/' CS[mm], HT[kV], AmpCnst, XMAG, DStep[um], PAve')
       READ(5,*)CS,KV,WGH,XMAG,DSTEP,IAVE
       WRITE(6,1031)CS,KV,WGH,XMAG,DSTEP,IAVE
-1031  FORMAT(F5.1,F9.1,F8.2,F10.1,F9.1,I5)
+1031  FORMAT(F5.1,F9.1,F8.2,F10.1,F9.3,I5)
       WRITE(6,1040)
 1040  FORMAT(/' Positive defocus values for underfocus',
      +	     /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A],',
@@ -243,6 +243,8 @@ C
 101   CONTINUE
       DRMS=SQRT(DRMS/CNT)
       CALL HISTO(CNT,NBIN,RMSA,BINS,MIN,MAX)
+      RMSMIN=MIN
+      RMSMAX=MAX
       CMAX=0
       DO 70 I=1,NBIN
         IF (BINS(I).GT.CMAX) THEN
@@ -365,7 +367,8 @@ C
 C	Filter power spectrum to remove slowly varying background
 C	DMAX is maximum of filtered power spectrum (for later scaling)
 C
-      CALL FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS1,DMAX,STEPR)
+      CALL FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS1,DMAX,
+     +            RESMIN)
 C
 C	Search for rough CTF parameters DFMID1, DFMID2, ANGAST
 C
@@ -404,9 +407,10 @@ C
       	  J=M+JXYZ(2)/2
       	  IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
       	  IS=I+JXYZ(1)*(J-1)
-      	  OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
+C      	  OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
+      	  OUT(IS)=POWER(ID)/DRMS1/2+0.5
       	  IF (OUT(IS).GT.1.0) OUT(IS)=1.0
-      	  IF (OUT(IS).lT.-1.0) OUT(IS)=-1.0
+      	  IF (OUT(IS).LT.-1.0) OUT(IS)=-1.0
           RES2=(REAL(LL)/JXYZ(1))**2+(REAL(MM)/JXYZ(2))**2
           IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
             CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
@@ -620,7 +624,8 @@ C
               IF (IY.LE.-NXYZ(2)) IY=IY+NXYZ(2)
               IF (IY.LT.1) IY=1-IY
               ID=IX+NXYZ(1)*(IY-1)
-              IF (ID.NE.1) THEN
+C              IF (ID.NE.1) THEN
+              IF ((IX.GT.1).AND.(IY.GT.1)) THEN
                 SUM=SUM+ABOX(ID)
                 CNT=CNT+1
               ENDIF
@@ -647,7 +652,7 @@ C
       END
 C**************************************************************************
       SUBROUTINE FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS,DMAX,
-     +                  DSTEP)
+     +                  RESMIN)
 C**************************************************************************
 C	Filters power spectrum by removing smooth background. This
 C	is necessary to obtain a good CTF fit. Also calculates
@@ -659,12 +664,13 @@ C**************************************************************************
 C
       INTEGER I,J,JXYZ(*),KXYZ(*),IS,ID,NW
       REAL SCAL,POWER(*),DRMS,DMEAN,DSQR,BUF1(*),DMAX
-      REAL DSTEP
+      REAL RESMIN
 C
       WRITE(*,1101)
 1101  FORMAT(/,' FILTERING POWER SPECTRUM...'/)
 C
-      NW=INT(KXYZ(1)*DSTEP/20.0)
+C      NW=INT(KXYZ(1)*DSTEP/20.0)
+      NW=INT(KXYZ(1)*RESMIN*SQRT(2.0))
 C
 C	subtract smooth background
 C
@@ -675,8 +681,8 @@ C
       DMEAN=0.0
       DSQR=0.0
       DMAX=-1.0E30
-      DO 61 J=1,JXYZ(2)
-        DO 61 I=1,JXYZ(1)/2
+      DO 61 J=3,JXYZ(2)-2
+        DO 61 I=3,JXYZ(1)/2-2
           ID=I+JXYZ(1)/2*(J-1)
           IS=I+KXYZ(1)*(J-1)
           POWER(ID)=POWER(IS)
@@ -687,6 +693,11 @@ C
       DMEAN=DMEAN/JXYZ(1)/JXYZ(2)*2
       DSQR=DSQR/JXYZ(1)/JXYZ(2)*2
       DRMS=SQRT(DSQR-DMEAN**2)
+      DO 62 J=1,JXYZ(2)
+        DO 62 I=1,JXYZ(1)/2
+          ID=I+JXYZ(1)/2*(J-1)
+          IF (POWER(ID).GT.DMAX) POWER(ID)=DMAX
+62    CONTINUE
 C
       RETURN
       END
@@ -741,7 +752,7 @@ CHEN>
 998   stop 'ERROR on file open of SCRATCH/2dx_ctftilt.result.tmp'
 9999  continue
 C
-CHENN<
+CHEN<
 C
       RETURN
       END
@@ -1597,33 +1608,83 @@ C	HW is a parameter in a Gaussian filter to attenuate the calculated
 C	CTF towards higher resolution to obtain a better fit to the 
 C	observed input spectrum. The comparison is done between the squared
 C	resolution limits RMIN2 and RMAX2.
+C
+C       This part of the code was made more efficient by
+C
+C       Robert Sinkovits
+C       Department of Chemistry and Biochemistry
+C       San Diego Supercomputer Center
+C
 C**************************************************************************
+C
       IMPLICIT NONE
 C
-      INTEGER L,LL,M,MM,NXYZ(*),ID
+      INTEGER L,LL,M,MM,NXYZ(3),ID
       REAL CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,THETATR,SUM1
       REAL SUM,AIN(*),RES2,RMIN2,RMAX2,CTF,CTFV,HW,SUM2,CCTF
-      REAL SIG2,A
+      REAL A,SIG2
+      real rad2, hangle2, angspt, c1, c2, angdif, ccos, df, chi
+      real expv, twopi_wli, ctfv2, dsum, ddif, rpart1, rpart2
+      real half_thetatrsq, recip_nxyz1, recip_nxyz2
+      real :: twopi=6.2831853071796
+
+      twopi_wli  = twopi/wl      
+      dsum = dfmid1 + dfmid2
+      ddif = dfmid1 - dfmid2
+      half_thetatrsq = 0.5*thetatr*thetatr
+      recip_nxyz1 = 1.0/nxyz(1)
+      recip_nxyz2 = 1.0/nxyz(2)
+
+      SUM  = 0.0
+      SUM1 = 0.0
+      SUM2 = 0.0
+
+      DO M=1,NXYZ(2)
+         MM=M-1
+         IF (MM > NXYZ(2)/2) MM=MM-NXYZ(2)
+         rpart2 = real(mm) * recip_nxyz2
+         
+         DO L=1,NXYZ(1)/2
+            LL=L-1
+            rpart1 = real(ll) * recip_nxyz1
+            RES2 = rpart1*rpart1 + rpart2*rpart2
+            
+            IF (RES2 <= RMAX2 .AND. RES2 > RMIN2) THEN
+               RAD2 = LL*LL + MM*MM
+               IF (RAD2.NE.0.0) THEN
+                  ANGSPT = ATAN2(REAL(MM), REAL(LL))
+                  ANGDIF = ANGSPT - ANGAST
+                  CCOS   = COS(2.0*ANGDIF)
+                  DF     = 0.5*(DSUM + CCOS*DDIF)
+                  
+                  HANGLE2 = rad2 * half_thetatrsq
+                  C1      = twopi_wli*HANGLE2
+                  C2      = -C1*CS*HANGLE2
+                  CHI     = C1*DF + C2
+                  CTFV    = -WGH1*SIN(CHI)-WGH2*COS(CHI)
+               ELSE
+                  CTFV    = -WGH2
+               ENDIF
+               
+               ctfv2 = ctfv*ctfv
+               ID   = L+NXYZ(1)/2*(M-1)
+
+               if(hw == 0.0) then
+                  SUM  = SUM  + AIN(ID)*ctfv2
+                  SUM1 = SUM1 + ctfv2*ctfv2
+                  SUM2 = SUM2 + AIN(ID)*AIN(ID)
+               else
+                  expv = exp(hw*res2)
+                  SUM  = SUM  + AIN(ID)*ctfv2*expv
+                  SUM1 = SUM1 + ctfv2*ctfv2
+                  SUM2 = SUM2 + AIN(ID)*AIN(ID)*expv*expv
+               endif
+               
+            ENDIF
+
+         enddo
+      enddo
 C
-      SUM=0.0
-      SUM1=0.0
-      SUM2=0.0
-      DO 20 L=1,NXYZ(1)/2
-      	LL=L-1
-      	DO 20 M=1,NXYZ(2)
-      	  MM=M-1
-      	  IF (MM.GT.NXYZ(2)/2) MM=MM-NXYZ(2)
-      	  RES2=(REAL(LL)/NXYZ(1))**2+(REAL(MM)/NXYZ(2))**2
-      	  IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
-      	    CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
-     +		     ANGAST,THETATR,LL,MM)
-      	    ID=L+NXYZ(1)/2*(M-1)
-            CTFV=CTFV**2
-      	    SUM=SUM+AIN(ID)*CTFV*EXP(HW*RES2)
-            SUM1=SUM1+CTFV**2
-            SUM2=SUM2+AIN(ID)**2*EXP(2.0*HW*RES2)
-      	  ENDIF
-20    CONTINUE
       A=SUM/SUM1
       SIG2=((SUM2/A+SUM1*A)/SUM-2.0)*2/NXYZ(1)/NXYZ(2)
       CCTF=SUM/SQRT(SUM1*SUM2)
@@ -4179,4 +4240,3 @@ C   81 WRITE(6,82) MAXIT
   107 INN=1
       GO TO 35
       END
-

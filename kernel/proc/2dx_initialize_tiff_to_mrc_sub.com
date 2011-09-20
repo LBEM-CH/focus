@@ -6,11 +6,15 @@
 # This will then use the TIFF file and transform it into an MRC file, while checking correct size.
 #
 if ( ! -e ${imagename}.mrc ) then
-  ${proc_2dx}/linblock "Image ${imagename}.mrc does not exist."
+  if ( ${imagename} != "ScriptWillPutNameHere" ) then
+    ${proc_2dx}/linblock "Image ${imagename}.mrc does not exist."
+  endif
   #
   if ( ! ( -e ${imagename}.tif || -e ${imagename}.tiff ) ) then
     #############################################################################
-    ${proc_2dx}/linblock "Image ${imagename}.tif does not exist."
+    if ( ${imagename} != "ScriptWillPutNameHere" ) then
+      ${proc_2dx}/linblock "Image ${imagename}.tif does not exist."
+    endif
     #############################################################################
     #
     #############################################################################

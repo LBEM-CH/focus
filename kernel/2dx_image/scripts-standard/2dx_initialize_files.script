@@ -142,10 +142,10 @@ set correct = 0
 if (( ${nonmaskimagename} != ${imagename} ) && ( ${nonmaskimagename} != ${testname} )) then
   set correct = 1
 endif
-if ( ${nonmaskimagename} == "ImageName" ) then
+if ( ${nonmaskimagename} == "ScriptWillPutNameHere" ) then
   set correct = 1
 endif
-if ( ${correct} == '1' ) then
+if ( ${correct} == '1' && ${imagename} != "ScriptWillPutNameHere" ) then
   set oldval = ${nonmaskimagename}
   set nonmaskimagename = ${imagename}
   #############################################################################
@@ -154,14 +154,6 @@ if ( ${correct} == '1' ) then
   echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
 endif
 # 
-if ( ${imagenumber} == "ScriptWillPutNumberHere" ) then
-  set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
-  #############################################################################
-  ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
-  #############################################################################
-  echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
-endif
-#
 set new_mrc_created = 'n'
 #
 if ( ! -e ${imagename}.mrc ) then
@@ -173,8 +165,6 @@ if ( ! -e ${imagename}.mrc ) then
   #################################################################################
   #
 endif
-#
-#
 #
 #################################################################################
 ### Test (and Correct) Endianess of ${imagename}.mrc ############################

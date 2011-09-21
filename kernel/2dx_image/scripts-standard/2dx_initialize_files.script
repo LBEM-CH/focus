@@ -96,6 +96,12 @@ set RESMAX = ""
 set RADLIM = ""
 set det_tilt = ""
 set ctf_ttf = ""
+set maska = ""
+set maskb01 = ""
+set maskb02 = ""
+set maskb03 = ""
+set maskb04 = ""
+set maskb05 = ""
 set boxa1 = ""
 set boxa2 = ""
 set boxb1 = ""
@@ -315,16 +321,38 @@ else
     echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
   endif  
   #
+  # maska and maskb01 to maskb05 are UnbendI and UnbendII Fourier masking diameters.
+  #
+  if ( ${maska} == "PutNumberHere" ) then
+    set maska = `echo ${imagesidelength} ${realcell} | sed 's/,/ /g' | awk '{ s = int( $1 / ( 3.4 * $2 + 1) ) } END { print s }'`
+    echo "set maska = ${maska}"  >> LOGS/${scriptname}.results
+    echo ":Initializing maska as ${maska}"
+  endif
+  #
+  if ( ${maskb01} == "PutNumberHere" ) then
+    set maskb01 = `echo ${imagesidelength} ${realcell} | sed 's/,/ /g' | awk '{ s = int( $1 / ( 3.0 * $2 + 1) ) } END { print s }'`
+    echo "set maskb01 = ${maskb01}"  >> LOGS/${scriptname}.results
+    echo ":Initializing maskb01 as ${maskb01}"
+  endif
+  #
+  if ( ${maskb02} == "PutNumberHere" ) then
+    set maskb02 = `echo ${imagesidelength} ${realcell} | sed 's/,/ /g' | awk '{ s = int( $1 / ( 2.6 * $2 + 1) ) } END { print s }'`
+    echo "set maskb02 = ${maskb02}"  >> LOGS/${scriptname}.results
+    echo ":Initializing maskb02 as ${maskb02}"
+  endif
+  #
   # boxa1 and boxb1 are for the first UnbendI and following UnbendII reference diameters.
   #
   if ( ${boxa1} == "0" ) then
     set boxa1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 10 ) } END { print s }'`
     echo "set boxa1 = ${boxa1}"  >> LOGS/${scriptname}.results
+    echo ":Initializing boxa1 as ${boxa1}"
   endif
   #
   if ( ${boxb1} == "0" ) then
     set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 16 ) } END { print s }'`
     echo "set boxb1 = ${boxb1}"  >> LOGS/${scriptname}.results
+    echo ":Initializing boxb1 as ${boxb1}"
   endif
   #
   # boxa2 and boxb2 are for shifting SpotScan spots into their correct location. 
@@ -334,11 +362,13 @@ else
   if ( ${boxa2} == "0" ) then
     set boxa2 = `echo ${imagesidelength} | awk '{ s = int( $1 / 4 )  } END { print s }'`
     echo "set boxa2 = ${boxa2}"  >> LOGS/${scriptname}.results
+    echo ":Initializing boxa2 as ${boxa2}"
   endif
   #
   if ( ${boxb2} == "0" ) then
     set boxb2 = `echo ${imagesidelength} | awk '{ s = int( $1 / 4 )  } END { print s }'`
     echo "set boxb2 = ${boxb2}"  >> LOGS/${scriptname}.results
+    echo ":Initializing boxb2 as ${boxb2}"
   endif
   #
   if ( ${refori} == "0,0" ) then

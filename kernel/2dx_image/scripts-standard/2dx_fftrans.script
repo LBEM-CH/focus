@@ -151,8 +151,9 @@ source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
 #################################################################################
 #
 #
+echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
 if ( ${imagename} != ${nonmaskimagename} ) then
-  echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-masked Image>" >> LOGS/${scriptname}.results
 endif
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then

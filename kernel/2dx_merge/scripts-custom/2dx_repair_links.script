@@ -124,7 +124,7 @@ foreach dirfile ( ${dirlist} )
     cd ${dirfile}
     if ( ! -e 2dx_master.cfg ) then
       echo ":: "
-      echo "::WARNING: 2dx_master.cfg is missing completely."
+      echo "::WARNING: 2dx_master.cfg is missing."
       echo ":: "
       set linkok = "n"
     else

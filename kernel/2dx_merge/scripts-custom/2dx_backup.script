@@ -3,25 +3,29 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Backup Project                                                     #
+# Title: Synchronize Project with Backup                                    #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 30/08/2007                                             #
-# Last Modification: 30/08/2007                                             #
+# Last Modification: 22/09/2011                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
 # SORTORDER: 90
 #
-# MANUAL: This script allows to copy the significant files from the currently selected images in this project into a different location. 
+# MANUAL: This script allows to copy the significant files from the currently selected images in this project into a different location, or vice versa. You can use this to synchronize your current working copy of this project with that on a remote file server. This could, for example, allow you to work on one common project with several people. For this, you would in the morning synchronize your copy with the remote server, by issuing an "UPDATE" command. This would pull the newer versions of images and image processing data from the server to your local copy. In the evening, when you are done, you could issue a "COMMIT" command, to push your changes to the backup location. 
 #
-# MANUAL: This can be used to backup a project, for file safety. It can also be used to clone a project onto a different computer, if that computer's harddrive is NFS mounted.
+# MANUAL: This script thereby compares the creation date of the local 2dx_image.cfg files with those on the backup location, and pushes or pulls an entire image file structure over only if the target 2dx_image.cfg file is older than the source file.
+#
+# MANUAL: You could also use this script to create a backup for your project, for file safety.
 #
 # DISPLAY: backup_dir
 # DISPLAY: backup_merge
 # DISPLAY: backup_sure
+# DISPLAY: backup_all_files
+# DISPLAY: backup_direction
 #
 #$end_local_vars
 #
@@ -32,6 +36,8 @@ set app_2dx_image = ""
 set backup_dir = ""
 set backup_merge = ""
 set backup_sure = ""
+set backup_direction = ""
+set backup_all_files = ""
 #
 #$end_vars
 #
@@ -42,12 +48,15 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 echo backup_dir = ${backup_dir}
+echo backup_direction = ${backup_direction}
 echo backup_merge = ${backup_merge}
+echo backup_all_files = ${backup_all_files}
 echo backup_sure = ${backup_sure}
 #
 echo "<<@progress: 1>>"
 #
-echo "set backup_sure = no" >> LOGS/${scriptname}.results
+# echo "set backup_sure = no" >> LOGS/${scriptname}.results
+#
 if ( ! -d ${backup_dir} ) then
   #
   ${proc_2dx}/linblock "Provide an existing directory path"
@@ -66,37 +75,69 @@ set oldir = ${PWD}
 #
 cd ..
 set local_root_dir = ${PWD}
-set local_root_noslash = `echo ${local_root_dir} | sed "s/\//#/g"`
+set local_root_dir_noslash = `echo ${local_root_dir} | sed "s/\//#/g"`
 echo local_root_dir = ${local_root_dir}
+echo local_root_dir_noslash = ${local_root_dir_noslash}
 set backup_dir_noslash = `echo ${backup_dir} | sed "s/\//#/g"`
 echo backup_dir = ${backup_dir}
+echo backup_dir_noslash = ${backup_dir_noslash}
 cd ${oldir}
+#
+if ( ${backup_dir_noslash} == ${local_root_dir_noslash} ) then
+  ${proc_2dx}/protest "ERROR: You cannot sync with the local directory."
+endif
+#
+if ( ${backup_direction} == "0" ) then
+  ${proc_2dx}/linblock "Pushing local files to remote location."
+else
+  ${proc_2dx}/linblock "Pulling remote files to local working copy."
+endif
 #
 if ( ${backup_merge} == "yes" ) then
   ############################################################################# 
-  ${proc_2dx}/linblock "Backing up merge directory"
+  ${proc_2dx}/linblock "Copying merge directory"
   #############################################################################
   #
-  echo ": "
-  echo "::---- Backup merge"
-  set from_dir = ${PWD}
-  set to_dir = `echo ${from_dir} | sed "s/\//#/g" | sed "s/${local_root_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
-  if ( ! -d ${to_dir} ) then
-    \mkdir -p ${to_dir}
+  if ( ${backup_direction} == "0" ) then
+    set from_dir = ${PWD}
+    set to_dir = `echo ${from_dir} | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
     if ( ! -d ${to_dir} ) then
-      ${proc_2dx}/protest "ERROR: ${to_dir} could not be created."
+      \mkdir -p ${to_dir}
+      if ( ! -d ${to_dir} ) then
+        ${proc_2dx}/protest "ERROR: ${to_dir} could not be created."
+      endif
+    endif
+  else
+    set to_dir = ${PWD}
+    set from_dir = `echo ${to_dir} | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
+    if ( ! -d ${to_dir} ) then
+      ${proc_2dx}/protest "ERROR: ${from_dir} not found."
     endif
   endif
   #
   echo "dummy" > ${from_dir}/SELECT-dummy.dat
   cp -f ${from_dir}/SELECT* ${to_dir}
-  \rm ${from_dir}/SELECT-dummy.dat
-  \rm ${to_dir}/SELECT-dummy.dat
+  \rm -f ${from_dir}/SELECT-dummy.dat
+  \rm -f ${to_dir}/SELECT-dummy.dat
   #
   echo ":New: ${to_dir}/2dx_merge.cfg"
   cp -f -p ${from_dir}/2dx_merge.cfg ${to_dir}
   #
-  cp -f -p ${from_dir}/2dx_merge_dirfile.dat ${to_dir}
+  if ( ${backup_all_files} == "0" ) then
+    if ( ${backup_direction} == "0" ) then
+      cat ${from_dir}/2dx_merge_dirfile.dat | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g" > ${to_dir}/2dx_merge_dirfile.dat
+    else
+      cat ${from_dir}/2dx_merge_dirfile.dat | sed "s/\//#/g" | sed "s/${backup_dir_noslash}/${local_root_dir_noslash}/" | sed "s/#/\//g" > ${to_dir}/2dx_merge_dirfile.dat
+    endif
+  else
+    if ( ${backup_direction} == "0" ) then
+      cat ${from_dir}/2dx_merge_dirfile.dat | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g" > ${to_dir}/2dx_merge_dirfile.dat
+    else
+      if ( ! -e ${to_dir}/2dx_merge_dirfile.dat ) then
+        cat ${from_dir}/2dx_merge_dirfile.dat | sed "s/\//#/g" | sed "s/${backup_dir_noslash}/${local_root_dir_noslash}/" | sed "s/#/\//g" > ${to_dir}/2dx_merge_dirfile.dat
+      endif
+    endif
+  endif
   #
   if ( -d ${from_dir}/REGISTERS ) then
     echo ":New: ${to_dir}/REGISTERS"
@@ -134,108 +175,239 @@ if ( ${backup_merge} == "yes" ) then
     cp -f -p ${from_dir}/History.dat ${to_dir}
   endif
   #
+  cd ${to_dir}
+  cd ..
+  if ( ! -e 2dx_master.cfg ) then
+    set curdir = ${PWD}
+    echo "::Creating configfile link in ${curdir}."
+    \ln -s ${to_dir}/2dx_merge.cfg 2dx_master.cfg
+  endif
+  cd ${oldir}
 endif
 #
 ############################################################################# 
-${proc_2dx}/linblock "Backing up all directories"
+${proc_2dx}/linblock "Copying all directories"
 #############################################################################
 #
-cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-#
-set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
-set increment = `echo ${dirnum} | awk '{ s = 100.0 / $1 } END { print s }'`
-set curval = 0.0
-#
-foreach dirfile ( ${dirlist} ) 
-  set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
-  set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
-  echo "<<@progress:${curprogress}>>"
-  cd ${dirfile}
-  if ( -e 2dx_image.cfg ) then
-    set loc_imagename = `fgrep "set imagename = " 2dx_image.cfg | cut -d\" -f2`
-    set loc_nonmaskimagename = `fgrep "set nonmaskimagename = " 2dx_image.cfg | cut -d\" -f2`
-    echo ": "
-    echo "::---- Backup ${dirfile}"
-    set from_dir = ${PWD}
-    set to_dir = `echo ${from_dir} | sed "s/\//#/g" | sed "s/${local_root_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
-    #
+if ( ${backup_direction} == "0" ) then
+  cd ${oldir}/..
+  set from_dir = ${PWD}
+  set to_dir = `echo ${from_dir} | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
+  if ( ! -d ${to_dir} ) then
+    \mkdir -p ${to_dir}
     if ( ! -d ${to_dir} ) then
-      \mkdir -p ${to_dir}
-      if ( ! -d ${to_dir} ) then
-        ${proc_2dx}/protest "ERROR: ${to_dir} could not be created."
-      endif
+      ${proc_2dx}/protest "ERROR: ${to_dir} could not be created."
     endif
+  endif
+  cd ${oldir}
+else
+  cd ..
+  set to_dir = ${PWD}
+  set from_dir = `echo ${to_dir} | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
+  if ( ! -d ${to_dir} ) then
+    ${proc_2dx}/protest "ERROR: ${from_dir} not found."
+  endif
+  cd ${oldir}
+endif
+#
+echo ":: "
+echo "::Copying files from ${from_dir}"
+echo "::to ${to_dir}."
+echo ":: "
+#
+if ( ${backup_direction} == "0" ) then
+  # Push files
+  if ( ${backup_all_files} == "0" ) then
+    cd ..
+    find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+    cd ${oldir}
+  else
+    cp 2dx_merge_dirfile.dat ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+  endif
+else
+  # Pull files
+  if ( ${backup_all_files} == "0" ) then
+    # Pull all with 2dx_image.cfg
+    cd ${backup_dir}
+    find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+    cd ${oldir}
+  else
+    # Pull only those that are in the LOCAL 2dx_merge_dirfile.dat.
+    cat ${oldir}/2dx_merge_dirfile.dat | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g" > ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+  endif
+endif
+#
+set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
+echo ": Will work on ${dirnum} image directories."
+set increment = `echo ${dirnum} | awk '{ s = 80.0 / ( $1 + 1 ) } END { print s }'`
+set curval = 10.0
+#
+if ( ${dirnum} == "0" ) then
+  ${proc_2dx}/protest "Copying not possible, since no 2dx_image.cfg exists."
+endif
+#
+set dircounter = ${dirnum}
+while ( ${dircounter} > 0 )
+  set from_dirfile = `cat ${oldir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
+  cd ${from_dir}
+  if ( -d ${from_dirfile} ) then
+    cd ${from_dirfile}
+    set from_dirfile = ${PWD}
+    echo ": "
+    echo ":##############################################################################"
+    echo ":: Working on source directory:"
+    echo ":: ${from_dirfile}"
+    echo ":##############################################################################"
     #
-    echo ":New: ${to_dir}/2dx_image.cfg"
-    cp -f -p ${from_dir}/2dx_image.cfg ${to_dir}
+    if ( ${backup_direction} == "0" ) then
+      set to_dirfile = `echo ${from_dirfile} | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
+    else
+      set to_dirfile = `echo ${from_dirfile} | sed "s/\//#/g" | sed "s/${backup_dir_noslash}/${local_root_dir_noslash}/" | sed "s/#/\//g"`
+    endif
+    echo ":Copy ${from_dirfile}"
+    echo ": to  ${to_dirfile}"
+    #    
+    set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
+    set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
+    echo "<<@progress:${curprogress}>>"
     #
-    if ( ${alsobig} == "y" ) then
-      if ( -e ${from_dir}/${loc_imagename}.mrc && ! -e ${to_dir}/${loc_imagename}.mrc ) then
-        echo ":New: ${to_dir}/${loc_imagename}.mrc"
-        cp -f -p ${from_dir}/${loc_imagename}.mrc ${to_dir}
+    cd ${from_dirfile}
+    set docopy = 0
+    if ( -e 2dx_image.cfg ) then
+      if ( ${backup_direction} == "2" ) then
+        echo "::Copying this image directory."
+        set docopy = 1
       else
-        echo ":Old: ${to_dir}/${loc_imagename}.mrc"
-      endif
-      if ( -e ${from_dir}/${loc_imagename}.tif && ! -e ${to_dir}/${loc_imagename}.tif ) then
-        echo ":New: ${to_dir}/${loc_imagename}.tif"
-        cp -f -p ${from_dir}/${loc_imagename}.tif ${to_dir}
-      else
-        echo ":Old: ${to_dir}/${loc_imagename}.tif"
-      endif
-    endif
-    #
-    if ( -e ${from_dir}/${loc_imagename}.spt ) then
-      echo ":New: ${to_dir}/${loc_imagename}.spt"
-      cp -f -p ${from_dir}/${loc_imagename}.spt ${to_dir}
-    endif
-    #
-    if ( -e ${from_dir}/${loc_imagename}.mtz ) then
-      echo ":New: ${to_dir}/${loc_imagename}.mtz"
-      cp -f -p ${from_dir}/${loc_imagename}.mtz ${to_dir}
-    endif
-    #
-    if ( ${loc_imagename} != ${loc_nonmaskimagename} ) then
-      if ( ${alsobig} == "y" ) then
-        if ( ! -e ${to_dir}/${loc_nonmaskimagename}.mrc ) then
-          echo ":New: ${to_dir}/${loc_nonmaskimagename}.mrc"
-          cp -f -p ${from_dir}/${loc_nonmaskimagename}.mrc ${to_dir}
+        if ( -e ${to_dirfile}/2dx_image.cfg ) then
+          set newer_file = `ls -t -1 2dx_image.cfg ${to_dirfile}/2dx_image.cfg | head -n 1`
+          if ( ${newer_file} == "2dx_image.cfg" ) then
+            echo "::Copying this image directory, since 2dx_image.cfg if newer than at the destination."
+            set docopy = 1
+          else
+            echo "::Not copying this image directory, since 2dx_image.cfg if newer than at the destination."
+            set docopy = 0
+          endif
         else
-          echo ":Old: ${to_dir}/${loc_nonmaskimagename}.mrc"
+          echo "::Copying this image directory, since it doesn't exist at destination."
+          set docopy = 1
         endif
       endif
-      #
-      if ( -e ${from_dir}/${loc_nonmaskimagename}.spt ) then
-        echo ":New: ${to_dir}/${loc_nonmaskimagename}.spt"
-        cp -f -p ${from_dir}/${loc_nonmaskimagename}.spt ${to_dir}
+      if ( ${docopy} == "1" ) then
+        #
+        set loc_imagename = `fgrep "set imagename = " 2dx_image.cfg | cut -d\" -f2`
+        set loc_nonmaskimagename = `fgrep "set nonmaskimagename = " 2dx_image.cfg | cut -d\" -f2`
+        #
+        if ( ! -d ${to_dirfile} ) then
+          \mkdir -p ${to_dirfile}
+          if ( ! -d ${to_dirfile} ) then
+            ${proc_2dx}/protest "ERROR: ${to_dirfile} could not be created."
+          endif
+        endif
+        #
+        echo ":New: ${to_dirfile}/2dx_image.cfg"
+        cp -f -p ${from_dirfile}/2dx_image.cfg ${to_dirfile}
+        #
+        if ( ${alsobig} == "y" ) then
+          if ( -e ${from_dirfile}/${loc_imagename}.tif ) then
+            if ( ! -e ${to_dirfile}/${loc_imagename}.tif ) then
+              echo ":New: ${to_dirfile}/${loc_imagename}.tif"
+              cp -f -p ${from_dirfile}/${loc_imagename}.tif ${to_dirfile}
+            else
+              echo ":Old: ${to_dirfile}/${loc_imagename}.tif"
+            endif
+          else
+            if ( -e ${from_dirfile}/${loc_imagename}.mrc ) then
+              if ( ! -e ${to_dirfile}/${loc_imagename}.mrc ) then
+                echo ":New: ${to_dirfile}/${loc_imagename}.mrc"
+                cp -f -p ${from_dirfile}/${loc_imagename}.mrc ${to_dirfile}
+              else
+                echo ":Old: ${to_dirfile}/${loc_imagename}.mrc"
+              endif
+            endif
+          endif
+        endif
+        #
+        if ( -e ${from_dirfile}/${loc_imagename}.spt ) then
+          echo ":New: ${to_dirfile}/${loc_imagename}.spt"
+          cp -f -p ${from_dirfile}/${loc_imagename}.spt ${to_dirfile}
+        endif
+        #
+        if ( -e ${from_dirfile}/${loc_imagename}.mtz ) then
+          echo ":New: ${to_dirfile}/${loc_imagename}.mtz"
+          cp -f -p ${from_dirfile}/${loc_imagename}.mtz ${to_dirfile}
+        endif
+        #
+        if ( ${loc_imagename} != ${loc_nonmaskimagename} ) then
+          if ( ${alsobig} == "y" ) then
+            if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
+              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.tif ) then
+                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.tif"
+                cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.tif ${to_dirfile}
+              else
+                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.tif"
+              endif
+            else
+              if ( -e ${from_dirfile}/${loc_nonmaskimagename}.mrc ) then
+                if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.mrc ) then
+                  echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.mrc"
+                  cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.mrc ${to_dirfile}
+                else
+                  echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.mrc"
+                endif
+              endif
+            endif
+          endif
+          #
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}.spt ) then
+            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.spt"
+            cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.spt ${to_dirfile}
+          endif
+          #
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}.mtz ) then
+            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.mtz"
+            cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.mtz ${to_dirfile}
+          endif
+        endif
+        #
+        if ( -e ${from_dirfile}/History.dat ) then
+          echo ":New: ${to_dirfile}/History.dat"
+          cp -f -p ${from_dirfile}/History.dat ${to_dirfile}
+        endif
+        #
+        if ( -d ${from_dirfile}/APH ) then
+          if ( ! -d ${to_dirfile}/APH ) then
+            \mkdir ${to_dirfile}/APH
+          endif
+          echo dummy > ${from_dirfile}/APH/dummy.tmp
+          echo ":New: ${to_dirfile}/APH/*"
+          cp -f -p ${from_dirfile}/APH/* ${to_dirfile}/APH
+          \rm ${from_dirfile}/APH/dummy.tmp
+          \rm ${to_dirfile}/APH/dummy.tmp
+        endif
+        #
+        # Make sure the config files are correctly linked:
+        #
+        if ( ! -e ${to_dirfile}/../2dx_master.cfg ) then
+        cd ${to_dirfile}/..
+          if ( -e ../2dx_master.cfg ) then
+            set curdir = ${PWD}
+            echo "::Creating Master configfile link in ${curdir}."
+            \ln -s ../2dx_master.cfg .
+          else
+            if ( -e merge/2dx_master.cfg ) then
+              set curdir = ${PWD}
+              echo "::Creating configfile link in ${curdir}."
+              \ln -s merge/2dx_master.cfg .
+            endif
+          endif
+          cd ${from_dirfile}
+        #
       endif
       #
-      if ( -e ${from_dir}/${loc_nonmaskimagename}.mtz ) then
-        echo ":New: ${to_dir}/${loc_nonmaskimagename}.mtz"
-        cp -f -p ${from_dir}/${loc_nonmaskimagename}.mtz ${to_dir}
-      endif
     endif
     #
-    if ( -e ${from_dir}/History.dat ) then
-      echo ":New: ${to_dir}/History.dat"
-      cp -f -p ${from_dir}/History.dat ${to_dir}
-    endif
-    #
-    if ( -d ${from_dir}/APH ) then
-      if ( ! -d ${to_dir}/APH ) then
-        \mkdir ${to_dir}/APH
-      endif
-      echo dummy > ${from_dir}/APH/dummy.tmp
-      echo ":New: ${to_dir}/APH/*"
-      cp -f -p ${from_dir}/APH/* ${to_dir}/APH
-      \rm ${from_dir}/APH/dummy.tmp
-      \rm ${to_dir}/APH/dummy.tmp
-    endif
-    #
-  else
-    echo "::Backup from ${dirfile} not possible, since no 2dx_image.cfg exists."
   endif
-  # 
+  @ dircounter -= 1
   cd ${oldir}
 end
 #

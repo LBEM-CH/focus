@@ -15,9 +15,9 @@
 #
 # SORTORDER: 88
 #
-# MANUAL: This script will create a copy of the current image directory on the same level, and copy the current database file 2dx_image.cfg into that new cloned directory. However, instead of copying also the image file <filename>.tif or <filename>.mrc, it will only create a link in thennew directory that points to the image file in the old directory. This is to save space on the harddrive. However, it bears the risk that if you then delete the original directory, then the cloned directory doesn't have any image available any more.
+# MANUAL: This script will create a copy of the current image directory on the same level, and copy the current database file 2dx_image.cfg into that new cloned directory. However, instead of copying also the image file <filename>.tif or <filename>.mrc, it will only create a link in the new directory that points to the image file in the old directory. This is to save space on the harddrive. However, it bears the risk that if you then delete the original directory, then the cloned directory doesn't have any image available any more.
 #
-# MANUAL: The new image directory's database will be populated with a different filename and image number, as each imagenumber can only appear once. The parameter dialogue below allows you to specify the new parameter.
+# MANUAL: The new image directory's database will be populated with a different filename and image number, as each imagenumber can only appear once. The parameter dialogue below allows you to specify the new image number. The new image name will be generated automatically.
 #
 # DISPLAY: comment
 # DISPLAY: imagename
@@ -33,7 +33,7 @@
 # SECTION: Clone current image directory
 #=============================================================================
 #
-# LABEL: New Image Number
+# LABEL: New Image Number (Do not change the Image Names below for the old Image File).
 # LEGEND: Define here the new image number to be used for the new cloned image directory
 # EXAMPLE: new_imagenumber = "0012345602"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Clone
@@ -159,15 +159,19 @@ mv -f tmp.cfg 2dx_image.cfg
 ${proc_2dx}/linblock "Cloned database 2dx_image.cfg created and adapted."
 #
 if ( -e  ../${old_imagedirectory}/${nonmaskimagename}.tif ) then
+  \rm -f ${new_nonmaskimagename}.tif
   \ln -s ../${old_imagedirectory}/${nonmaskimagename}.tif ${new_nonmaskimagename}.tif
 endif
 if ( -e  ../${old_imagedirectory}/${imagename}.tif ) then
+  \rm -f ${new_imagename}.tif
   \ln -s ../${old_imagedirectory}/${imagename}.tif ${new_imagename}.tif
 endif
 if ( -e  ../${old_imagedirectory}/${nonmaskimagename}.mrc ) then
+  \rm -f ${new_nonmaskimagename}.mrc
   \ln -s ../${old_imagedirectory}/${nonmaskimagename}.mrc ${new_nonmaskimagename}.mrc
 endif
 if ( -e  ../${old_imagedirectory}/${imagename}.mrc ) then
+  \rm -f ${new_imagename}.mrc
   \ln -s ../${old_imagedirectory}/${imagename}.mrc ${new_imagename}.mrc
 endif
 #
@@ -175,7 +179,7 @@ ${proc_2dx}/linblock "Links to old image files in cloned directory created."
 #
 if ( ${doswap} == "1" ) then
   if ( -e  ../${old_imagedirectory}/${imagename}.spt ) then
-    cp ../${old_imagedirectory}/${imagename}.spt ${new_imagename}.spt
+    cp -f ../${old_imagedirectory}/${imagename}.spt ${new_imagename}.spt
   endif
   ${proc_2dx}/linblock "Old spotlist copied to new spotlist file"
 endif

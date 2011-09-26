@@ -3,7 +3,7 @@
   
 int get_units_merge_3D(int *num_images,int num_peaks,int tag, float *peak_x, float *peak_y, int sx,int sy,int realcell_x1,int realcell_y1, int realcell_x1_common, int realcell_y1_common, int realcell_x,int realcell_y,float *unbend_image1, float *unbend_image2, float *unbend_image3, float *Image1, float *Image2, float *Image3)
 {   int k,i,j,m;
-     double mean,devi_total,devi;
+     double mean,devi_total,devi, wgt, mm;
      float *temp_unit_small, *temp_unit, *temp_unit_large, *temp;
       
      temp_unit_small=(float *)calloc(realcell_x1*realcell_y1,sizeof(float));
@@ -187,51 +187,66 @@ ctf_local(realcell_x1*RA*2,realcell_y1*RA*2, temp, (peak_x[k]-sx/2), -(peak_y[k]
 		 //  padding in Fourier space, Scaling the  patch according to the  stepdigitizer       
 		 for(i=0; i<realcell_x1; i++)
         	   for(j=0; j<realcell_y1; j++)
-             {   in[j+i*realcell_x1][0]=temp_unit_small[j+i*realcell_x1]*powf(-1.0,i+j);  
-                  in[j+i*realcell_x1][1]=0;
-             }   
+             	  {	   in[j+i*realcell_x1][0]=temp_unit_small[j+i*realcell_x1]*powf(-1.0,i+j);  
+                  	   in[j+i*realcell_x1][1]=0;
+                  }   
  	                  
-	   p=fftwf_plan_dft_2d(realcell_x1,realcell_y1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
-           fftwf_execute(p);
-           fftwf_destroy_plan(p);  
+	   	p=fftwf_plan_dft_2d(realcell_x1,realcell_y1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+           	fftwf_execute(p);
+           	fftwf_destroy_plan(p);  
                   
-           for(i=0;i<realcell_x1_common; i++)
-             for(j=0;j<realcell_y1_common;j++)
-             {  out_common[j+i*realcell_y1_common][0]=0;
-                out_common[j+i*realcell_y1_common][1]=0;
-             }
+           	for(i=0;i<realcell_x1_common; i++)
+              		for(j=0;j<realcell_y1_common;j++)
+             		{  	out_common[j+i*realcell_y1_common][0]=0;
+                		out_common[j+i*realcell_y1_common][1]=0;
+             		}
                  
-           for(i=(realcell_x1_common-realcell_x1)/2 ;  i<(realcell_x1_common+realcell_x1)/2; i++)
-             for(j=(realcell_y1_common-realcell_y1)/2; j<(realcell_y1_common+realcell_y1)/2; j++)
-             { out_common[j+i*realcell_y1_common][0]=out[j-(realcell_y1_common-realcell_y1)/2+(i-(realcell_x1_common-realcell_x1)/2)*realcell_y1][0];
-                out_common[j+i*realcell_y1_common][1]=out[j-(realcell_y1_common-realcell_y1)/2+(i-(realcell_x1_common-realcell_x1)/2)*realcell_y1][1];
-             }
+           	for(i=(realcell_x1_common-realcell_x1)/2 ;  i<(realcell_x1_common+realcell_x1)/2; i++)
+             		for(j=(realcell_y1_common-realcell_y1)/2; j<(realcell_y1_common+realcell_y1)/2; j++)
+             		{ 	out_common[j+i*realcell_y1_common][0]=out[j-(realcell_y1_common-realcell_y1)/2+(i-(realcell_x1_common-realcell_x1)/2)*realcell_y1][0];
+                		out_common[j+i*realcell_y1_common][1]=out[j-(realcell_y1_common-realcell_y1)/2+(i-(realcell_x1_common-realcell_x1)/2)*realcell_y1][1];
+             		}
+
+
+ 	   	for(i=0;i<realcell_x1_common; i++)
+                	for(j=0;j<realcell_y1_common;j++)
+			{	mm=sqrtf(powf(i-realcell_x1_common/2,2.0)+powf(j-realcell_x1_common/2,2.0));
+				wgt=exp(-mm*mm/powf(rmax2*0.9,2.0));
+
+			  	out_common[j+i*realcell_y1_common][0]*=wgt;
+			  	out_common[j+i*realcell_y1_common][1]*=wgt;
+			}
+ 
  	                		
-            p=fftwf_plan_dft_2d(realcell_x1_common,realcell_y1_common,out_common, in_common, FFTW_BACKWARD,FFTW_ESTIMATE);
-            fftwf_execute(p);
-            fftwf_destroy_plan(p); 
+
+
+
+
+            	p=fftwf_plan_dft_2d(realcell_x1_common,realcell_y1_common,out_common, in_common, FFTW_BACKWARD,FFTW_ESTIMATE);
+            	fftwf_execute(p);
+            	fftwf_destroy_plan(p); 
 
  
 		  // padding in real space   
 		  for(i=0; i<realcell_x1_common; i++)
         	    for(j=0; j<realcell_y1_common; j++)
-                 temp_unit[j+i*realcell_x1_common]=in_common[j+i*realcell_x1_common][0]*powf(-1.0,i+j);       
+                 	temp_unit[j+i*realcell_x1_common]=in_common[j+i*realcell_x1_common][0]*powf(-1.0,i+j);       
  
 
-           mean=0;  
-           for(i=0;i<realcell_x1_common;i++)
-             for(j=0;j<realcell_y1_common;j++)
-               mean+=temp_unit[j+i*realcell_y1_common];
+           	mean=0;  
+           	for(i=0;i<realcell_x1_common;i++)
+             		for(j=0;j<realcell_y1_common;j++)
+               		mean+=temp_unit[j+i*realcell_y1_common];
 
-           mean/=(realcell_x1_common*realcell_y1_common);    
+           	mean/=(realcell_x1_common*realcell_y1_common);    
    
-	   for(i=0;i<realcell_x;i++)
-	        for(j=0;j<realcell_y;j++)   
-		     temp_unit_large[j+i*realcell_y]=0.0; // mean;
+	   	for(i=0;i<realcell_x;i++)
+	       		for(j=0;j<realcell_y;j++)   
+		     		temp_unit_large[j+i*realcell_y]=0.0; // mean;
 	     	      
-	      for(i=-realcell_x1_common/2;i<realcell_x1_common/2;i++)
-	        for(j=-realcell_y1_common/2;j<realcell_y1_common/2;j++)   
-			temp_unit_large[j+realcell_y/2+(i+realcell_x/2)*realcell_y]=temp_unit[j+realcell_y1_common/2+(i+realcell_x1_common/2)*realcell_y1_common];
+	      	for(i=-realcell_x1_common/2;i<realcell_x1_common/2;i++)
+	        	for(j=-realcell_y1_common/2;j<realcell_y1_common/2;j++)   
+				temp_unit_large[j+realcell_y/2+(i+realcell_x/2)*realcell_y]=temp_unit[j+realcell_y1_common/2+(i+realcell_x1_common/2)*realcell_y1_common];
 
 		mask(realcell_x1_common,realcell_y1_common,realcell_x,realcell_y,temp_unit_large);
 

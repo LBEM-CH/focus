@@ -9,7 +9,11 @@
 #include <stdlib.h>
 #include <fftw3.h>
 #include <math.h>
-int rmax2=20;
+
+int nx=420, sx=110, sz=40;
+
+int rmax2=nx/2;
+
 
 #define IRADA 0
 #define IPAD  1
@@ -23,7 +27,7 @@ int rmax2=20;
 
 
  
-int nx=400, sx=100, sz=60;
+
 
 main()
 {	
@@ -57,7 +61,7 @@ main()
 		    if((i-nx/2)*(i-nx/2)+(j-nx/2)*(j-nx/2)<sx*sx/4)
 			obj[k+j*nx+i*nx*nx]=1;
 
-   	      trans3D(nx,nx/2,obj); 
+   	      trans3D(nx,nx/2,nx/2,nx/2, obj); 
 
 
 	      for(i=0;i<nx;i++)
@@ -84,7 +88,7 @@ for(i=0;i<nx;i++)
     		B[j+i*nx+nx*nx]=0.0;
    } 
 float angles[3];
-angles[0]=80; angles[1]=40; angles[2]=30;
+angles[0]=30; angles[1]=45; angles[2]=80;
 extract2D(B, angles, nx,nx,nx,slice);
 	
 for(i=0;i<nx;i++)
@@ -132,7 +136,7 @@ aver/=k;
 
 // mask(100,100,nx,nx,mas);
 
-/* 
+ 
 maxd=-1.0e20; mind=-maxd;
 for(i=0;i<nx;i++)
    for(j=0;j<nx;j++)
@@ -141,15 +145,15 @@ for(i=0;i<nx;i++)
 for(i=0;i<nx;i++)
    for(j=0;j<nx;j++)
 	 mas[j+i*nx]=(mas[j+i*nx]-mind)/(maxd-mind)*255;
-*/
  
-
+ 
+/*
 for(i=0;i<nx;i++)
    for(j=0;j<nx;j++)
 	if(mas[j+i*nx]<aver)
 		mas[j+i*nx]=0;
 	else	mas[j+i*nx]=255;
-
+*/
 
 fprintf(output,"P2 %d %d \n  255 \n",nx,nx);
 			

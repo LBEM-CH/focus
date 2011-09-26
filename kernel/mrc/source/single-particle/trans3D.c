@@ -10,7 +10,7 @@
 
 
 
-void  trans3D(int nx, int shift_x, float *Image)
+void  trans3D(int nx, int shift_x, int shift_y, int shift_z, float *Image)
 
 {   
      float *SFimage;     
@@ -26,8 +26,8 @@ void  trans3D(int nx, int shift_x, float *Image)
         for(j=0;j<nx;j++)
           for(k=0;k<nx;k++)
 	  {   i_new=i+shift_x;
-	      j_new=j+shift_x;
-              k_new=k+shift_x;
+	      j_new=j+shift_y;
+              k_new=k+shift_z;
 	      if(i_new<0) i_new=i_new+nx;
 	      if(i_new>=nx) i_new=i_new-nx;
 	      if(j_new<0) j_new=j_new+nx;

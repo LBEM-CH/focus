@@ -30,14 +30,19 @@ printf("IN MASK3D  nx=%d  ny=%d  nz=%d  (nx+nx+nz)/6-4 =%d r0=%f  r1=%f   %f    
         for(j=0;j<sy;j++)
 		for(k=0;k<sz;k++)
          	{  	r=sqrtf(powf((float)(i-sx/2),2.0)+powf((float)(j-sy/2),2.0)+powf((float)(k-sz/2),2.0));
-            	if(r<r0 && r>=r1)
-             	{ 	 edge=(1.0+cos(pi*(r-r1)/(r0-r1)))/2.0;
-               	 refer[k+j*sz+i*sy*sz]=refer[k+j*sz+i*sy*sz]*edge+(1-edge)*t;
-             	}
-            	else if(r>=r0)
-               	 refer[k+j*sz+i*sy*sz]=t;
+            		if(r<r0 && r>=r1)
+             		{ 	 edge=(1.0+cos(pi*(r-r1)/(r0-r1)))/2.0;
+               	 		refer[k+j*sz+i*sy*sz]=refer[k+j*sz+i*sy*sz]*edge+(1-edge)*t;
+             		}
+            		else if(r>=r0)
+               	 		refer[k+j*sz+i*sy*sz]=t;
          }
-    
+
+/*
+	for(i=0;i<sx;i++)
+             for(j=0;j<sy;j++)
+		refer[k+j*sz+i*sy*sz]-=t;
+*/    
 } 	    
       	    
 	

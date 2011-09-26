@@ -12,7 +12,7 @@ float ccp(int nx, float *ang, int *shift, float *refer, float *proj, fftwf_plan 
 {	
 	
 	float FFTWPA2=nx;
-	int i,j,k ,m, k3, k4;	
+	int i,j,k ,m, n,k3, k4;	
 	float wgt, pow_RT, phas, max, corr_image_total;
  	float *A2=(float *)calloc(nx*nx,sizeof(float)); 
 	int *indx=(int *)malloc(sizeof(int)*nx*nx);
@@ -67,7 +67,7 @@ float ccp(int nx, float *ang, int *shift, float *refer, float *proj, fftwf_plan 
         	for(j=0;j<nx;j++) 
         		A2[j+i*nx]=in[j+i*nx][0]*powf(-1.0,i+j)/FFTWPA2; 
                      
-       	mask_refer(realcell_x1_common,realcell_y1_common,nx,nx,A2, base);
+        mask(realcell_x1_common-22,realcell_y1_common-22,nx,nx,A2);
 
                              
         for(i=0;i<nx;i++)
@@ -80,30 +80,36 @@ float ccp(int nx, float *ang, int *shift, float *refer, float *proj, fftwf_plan 
         fftwf_execute_dft(p2_fw, in, out);
  
                              
-        for(i=0;i<nx;i++)
+     	for(i=0;i<nx;i++)
         	for(j=0;j<nx;j++)
-                {    	phas=-2*pi*((i+nx/2)*nx/2+(j+nx/2)*nx/2)/nx;
-                        B[j+i*nx]=out[j+i*nx][0]*cos(phas)-out[j+i*nx][1]*sin(phas);
-                        B[j+i*nx+nx*nx]=out[j+i*nx][0]*sin(phas)+out[j+i*nx][1]*cos(phas);
-                }
-         B[nx/2+nx/2*nx]=0;
-         B[nx/2+nx/2*nx+nx*nx]=0;
-  
+          	{    
+                 	B[j+i*nx]=out[j+i*nx][0];  // *cos(phas)-out2[j+i*nx][1]*sin(phas);
+                        B[j+i*nx+nx*nx]=out[j+i*nx][1];   // out2[j+i*nx][0]*sin(phas)+out2[j+i*nx][1]*cos(phas);
+                 }
+                      
+
+
         pow_RT=0;
 	for(i=0;i<nx;i++)
-		for(j=0;j<nx;j++)
-	        {   
-	                pow_RT+=powf(B[j+i*nx],2.0)+powf(B[j+i*nx+nx*nx],2.0);    
-   
-               }
-     
-         for(i=0;i<nx;i++)
-	 	for(j=0;j<nx;j++)
-	        {       
-              		B[j+i*nx]=B[j+i*nx]*nx/sqrt(pow_RT);
-	  		B[j+i*nx+nx*nx]=B[j+i*nx+nx*nx]*nx/sqrt(pow_RT);
-          	}
-
+	      for(j=0;j<nx;j++)
+	     {   	m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
+ 			if(m>=rmax1 && m<rmax2)
+	                       	pow_RT+=powf(B[j+i*nx],2.0)+powf(B[j+i*nx+nx*nx],2.0);
+             }
+ 
+        for(i=0;i<nx;i++)
+	     for(j=0;j<nx;j++)
+	     {     	m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
+ 			if(m>=rmax1 && m<rmax2)
+			{
+                                B[j+i*nx]=B[j+i*nx]*nx/sqrt(pow_RT);
+	                        B[j+i*nx+nx*nx]=B[j+i*nx+nx*nx]*nx/sqrt(pow_RT);
+			}
+			else
+			{	B[j+i*nx]=0;
+	                	B[j+i*nx+nx*nx]=0;
+			}
+             }
  	
  	//  calculate the cross correlation of the reference and the projection
 	for(i=0;i<nx;i++)
@@ -112,7 +118,7 @@ float ccp(int nx, float *ang, int *shift, float *refer, float *proj, fftwf_plan 
  	
           		if(m>=rmax1 && m<rmax2)
           	        { 
-				wgt=exp(-m*m/powf(rmax2*0.8,2.0));
+				wgt=exp(-m*m/powf(rmax2*0.9,2.0));
           			out[j+i*nx][0]=proj[j+i*nx]*B[j+i*nx]+proj[j+i*nx+nx*nx]*B[j+i*nx+nx*nx];
 	      			out[j+i*nx][1]= -proj[j+i*nx]*B[j+i*nx+nx*nx]+proj[j+i*nx+nx*nx]*B[j+i*nx]; 
 
@@ -130,6 +136,35 @@ float ccp(int nx, float *ang, int *shift, float *refer, float *proj, fftwf_plan 
  
 
 	max=-1.0e20;
+    	for(k3=0; k3<nx;  k3++)
+        	for(k4=0; k4<nx; k4++)
+                 {   
+                 	i=indx[k4+k3*nx];
+                 	j=indy[k4+k3*nx];
+        
+                 	if(abs(i)<=5 && abs(j)<=5)
+                 	{
+                  				
+				corr_image_total=0;
+				k=0;
+				for(m=k3-2; m<=k3+2;m++)
+					for(n=k4-2; n<=k4+2;n++)
+						if(m>=0 &&  m<nx && n>=0 && n<nx)
+						{	corr_image_total+=in[n+m*nx][0]*powf(-1.0,n+m)/(nx)*exp(-(powf(k3-m,2.0)+powf(k4-n,2.0))/1); 
+							k++;
+						}
+	
+				corr_image_total/=k;
+				if(max< corr_image_total)
+				{	shift[0]=-i;
+					shift[1]=-j;
+					max=corr_image_total;
+				}
+			}
+		}
+
+/*
+	max=-1.0e20;
 	for(k3=0; k3<nx;  k3++)
         	for(k4=0; k4<nx; k4++)
                 {   
@@ -146,7 +181,7 @@ float ccp(int nx, float *ang, int *shift, float *refer, float *proj, fftwf_plan 
 				}
 	              	}	
 	         }
-
+*/
 
 	 free(indx);
 	 free(indy);

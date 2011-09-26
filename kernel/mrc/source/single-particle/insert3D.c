@@ -34,7 +34,7 @@ int insert3D(float *samp, float *angles, int nz, int nx, int ny, float *fgrid1, 
            for(j=-ny/2;j<ny/2;j++)
            {     
 
-		 wgt=exp(-(i*i+j*j)/powf(rmax2*0.9,2.0)); //*max_max;
+		 wgt=exp(-(i*i+j*j)/powf(rmax2*0.9,2.0));  // *max_max;
 
 //printf("wgt=%10.4e \n", wgt);
 
@@ -115,29 +115,29 @@ count[(int)zobs+(int)yobs*ny+(int)xobs*ny*nz]+=1;
  		         	  for(N=NS;N<=NT;N++)
  		         	 {     NN=N;
  		         	        N2=powf(N-nx/2,2.0);
- 		          	   arg[2]=(zobs-N);
+ 		          	   	arg[2]=(zobs-N);
  		               
- 		                  boxftv=box_ft(arg);
- 		                  rad2=L2+M2+N2;
- 		             	   if(rad2<irrec2 )
- 		                  {	
+ 		                  	boxftv=box_ft(arg);
+ 		                  	rad2=L2+M2+N2;
+ 		             	   	if(rad2<irrec2 )
+ 		                  	{	
  		               		       
- 		               		if(LL>=nx) LL=LL-nx;
- 		               	     if(MM>nx) MM=MM-ny;
- 		               	 	if(NN>nz) NN=NN-nz;
+ 		               			if(LL>=nx) LL=LL-nx;
+ 		               	     		if(MM>nx) MM=MM-ny;
+ 		               	 		if(NN>nz) NN=NN-nz;
  		               			 
- 		               	     if(LL<0) LL=LL+nx;
- 		               		if(MM<0) MM=MM+nx;
- 		               		if(NN<0) NN=NN+nx;
+ 		               	     		if(LL<0) LL=LL+nx;
+ 		               			if(MM<0) MM=MM+nx;
+ 		               			if(NN<0) NN=NN+nx;
  		               		        
  		                        	ctfv2s2=boxftv;
  
   
- 		                         fgrid1[NN+MM*ny+LL*nx*ny]+=bsamp1*boxftv;
- 		               		fgrid2[NN+MM*ny+LL*nx*ny]+=bsamp2*boxftv;
+ 		                        	fgrid1[NN+MM*ny+LL*nx*ny]+=bsamp1*boxftv;
+ 		               			fgrid2[NN+MM*ny+LL*nx*ny]+=bsamp2*boxftv;
  		               		     	
  		               		     	
- 		              		      num[NN+MM*ny+LL*ny*nz]=num[NN+MM*ny+LL*ny*nz]+boxftv;                       	 
+ 		              			num[NN+MM*ny+LL*ny*nz]=num[NN+MM*ny+LL*ny*nz]+boxftv;                       	 
  		                   }
  		             }
  		                      

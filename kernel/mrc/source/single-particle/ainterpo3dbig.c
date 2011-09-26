@@ -6,12 +6,12 @@ void  ainterpo3dbig(float  xobs, float yobs, float zobs,  int  sx, int sy, int s
        
        nx=sx*IPAD;
      
-       L=(round(xobs))*IPAD;
- 	  M=(round(yobs))*IPAD;
- 	  N=(round(zobs))*IPAD;
+       	  L=(int)(xobs*IPAD);
+ 	  M=(int)(yobs*IPAD);
+ 	  N=(int)(zobs*IPAD);
        
         samp[0]=0.0; 
- 	   samp[1]=0.0;	
+ 	samp[1]=0.0;	
   
   
  	
@@ -28,7 +28,7 @@ void  ainterpo3dbig(float  xobs, float yobs, float zobs,  int  sx, int sy, int s
   
  	          
  	 samp[0]=fgrid[NN+MM*nx+LL*nx*nx];  
-      samp[1]=fgrid[NN+MM*nx+LL*nx*nx+nx*nx*nx];
+         samp[1]=fgrid[NN+MM*nx+LL*nx*nx+nx*nx*nx];
         
   
 }

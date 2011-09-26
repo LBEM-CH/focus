@@ -8,10 +8,10 @@ void mask(int nx, int ny, int sx, int sy,  float *refer)
      
  
      
-      r0=(nx+ny)/4-4;
-      r1=(nx+ny)/4-8;
+      r0=(nx+ny)/4;
+      r1=(nx+ny)/4-4;
 
-      
+     
       t=0.0;
       int num=0;
       for(i=0;i<sx;i++)
@@ -36,10 +36,9 @@ void mask(int nx, int ny, int sx, int sy,  float *refer)
     
 
 	for(i=0;i<sx;i++)
-        for(j=0;j<sy;j++)
+             for(j=0;j<sy;j++)
 		refer[j+i*sy]-=t;
-
-
+ 
 } 	    
       	    
 	

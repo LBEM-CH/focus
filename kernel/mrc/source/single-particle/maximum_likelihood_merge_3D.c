@@ -42,9 +42,11 @@ float base;
 
 pthread_mutex_t lock1,lock2,lock3, lock4,lock5,lock6,lock7;
 
-#define Max_num 1000           /*  Maximum number of particles processed at one time */
+#define Max_num 1000            /*  Maximum number of particles processed at one time */
 
 #define MaxLoop 50
+
+ 
 
 
 //#include "MLpthread_cp.c"
@@ -93,7 +95,7 @@ void maximum_likelihood(int Numstack, int nx, int ny, char *dirfilename, float *
 
 	float FFTWPA2=nx, FFTWPA3=sqrt(nx)*nx;
 
-       int i,j,k,m,n,k1,k2,k3,k4,sta,Loop,num_refer,Num_angles, num_images_stack, num_temp, Num_images, error;
+       int i,j,k,m,n,k1,k2,k3,k4,sta,Loop,num_refer,Num_angles, num_images_stack, num_temp, Num_images, error, num_peaks, num_particle[Numstack];
        int ang1,ang2,ang3,*num, *indx, *indy;
        char *filename1, *filename2;
        float powrefer, pow_RT;
@@ -111,7 +113,7 @@ int *count, *count1, *count2,*count_total;
 
        Num_angles=((int)((2*max_ang1+1)/step_angle1)+1)*((int)((2*max_ang2+1)/step_angle2)+1)*((int)((2*max_ang3+1)/step_angle3)+1);   
 
-       SANG=(float *)calloc(3, sizeof(float));
+       SANG=(float *)calloc(4, sizeof(float));
        temp_image1=(float *)calloc(nx*nx*2,sizeof(float));
        temp_image2=(float *)calloc(nx*nx*2,sizeof(float));
        temp_image3=(float *)calloc(nx/2,sizeof(float)); 
@@ -268,7 +270,7 @@ count_total=(int *)calloc(nx*nx*nx,sizeof(int));
 
 
         for(i=0;i<nx;i++)
-          num[i]=0;
+           num[i]=0;
 
         for(i=0;i<nx;i++)
            for(j=0;j<ny;j++)
@@ -318,8 +320,9 @@ int *M=(int *)calloc(nx*ny,sizeof(int)), P, mean, devi;
 		 
 
 		    for(sta=0;sta<Numstack; sta++)
-				total_corr[sta]=0;
- 
+		     		total_corr[sta]=0;
+ 				 
+
 max_ang1=1;
 max_ang2=1;
 max_ang3=1;
@@ -346,12 +349,11 @@ shift=5;
 	{	max_ang3++;
 	//	step_angle3++;
 	}
- 	
- 
-// 	shift++;
+ 	 
+	if(rmax2<55)
+		rmax2+=2;
  }  
 
- 
 
 All_corr=0.0;
 
@@ -359,10 +361,10 @@ All_corr=0.0;
   //             Symmetrize3D(nx,ny,nx,refer);
 
 
-			trans3D(nx,nx/2, refer1);
+			trans3D(nx,nx/2, nx/2, nx/2,refer1);
 			Symmetrize3D(nx,nx,nx,refer1);
 
-			trans3D(nx,nx/2, refer2);
+			trans3D(nx,nx/2, nx/2, nx/2, refer2);
 			Symmetrize3D(nx,nx,nx,refer2);
       //        mask3D(mask_radius,mask_radius, nx,ny,refer);
      
@@ -435,7 +437,7 @@ All_corr=0.0;
  
 
 
-              trans3D(nx,nx/2,refer); 
+              trans3D(nx,nx/2,nx/2,nx/2,refer); 
 
               if(Loop>1)
               {
@@ -614,6 +616,9 @@ for(i=0;i<nx;i++)
 total_corr_old[sta]=total_corr[sta];
 total_corr[sta]=0.0;  
 
+
+ 
+
  
                   new_dev_x=0;
 	          new_dev_y=0; 
@@ -711,7 +716,10 @@ total_corr[sta]=0.0;
 
                   //   Extract different projections of  the reference, normalize the projections   
 	           
-                  size_t read=fread(SANG, sizeof(float)*3, 1, input[0]);
+                  size_t read=fread(SANG, sizeof(float)*4, 1, input[0]);
+                  num_peaks=(int)SANG[3]; 
+		 
+ 
                
 
 		
@@ -768,10 +776,10 @@ total_corr[sta]=0.0;
            		    	   for(j=0;j<nx;j++) 
            		              A2[j+i*nx]=in2[j+i*nx][0]*powf(-1.0,i+j)/FFTWPA2; 
                      
-                  //     	mask_refer(realcell_x1_common,realcell_y1_common,nx,nx,A2, base);
+                    //  	mask_refer(realcell_x1_common,realcell_y1_common,nx,nx,A2, base);
 
 
-	      mask(realcell_x1_common,realcell_y1_common,nx,nx,A2);
+	       mask(realcell_x1_common-22,realcell_y1_common-22,nx,nx,A2);
 
 
 /*
@@ -850,8 +858,8 @@ total_corr[sta]=0.0;
                                    		B[j+i*nx]=out2[j+i*nx][0];  // *cos(phas)-out2[j+i*nx][1]*sin(phas);
                                    		B[j+i*nx+nx*nx]=out2[j+i*nx][1];   // out2[j+i*nx][0]*sin(phas)+out2[j+i*nx][1]*cos(phas);
                             		}
-                  //       	B[nx/2+nx/2*nx]=0;
-                  //      	B[nx/2+nx/2*nx+nx*nx]=0;
+                        //	B[nx/2+nx/2*nx]=0;
+                  	//     	B[nx/2+nx/2*nx+nx*nx]=0;
 
 
 
@@ -861,11 +869,15 @@ total_corr[sta]=0.0;
                           	pow_RT=0;
 		          	for(i=0;i<nx;i++)
 	                    	   for(j=0;j<ny;j++)
-	                    	   {   
-	                       			re_ref[j+i*nx+k2*nx*nx]=B[j+i*nx];
-	                       			im_ref[j+i*nx+k2*nx*nx]=B[j+i*nx+nx*nx];
-	                           
-	                       			pow_RT+=powf(re_ref[j+i*nx+k2*nx*nx],2.0)+powf(im_ref[j+i*nx+k2*nx*nx],2.0);
+	                    	   {   	m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
+ 						if(m>=rmax1 && m<rmax2)
+						{
+	                       				re_ref[j+i*nx+k2*nx*nx]=B[j+i*nx];
+	                       				im_ref[j+i*nx+k2*nx*nx]=B[j+i*nx+nx*nx];
+ 
+	                       				pow_RT+=powf(re_ref[j+i*nx+k2*nx*nx],2.0)+powf(im_ref[j+i*nx+k2*nx*nx],2.0);
+						}
+						 
         
                                   }
 /*
@@ -878,9 +890,16 @@ printf("ANGLES=%f    %f     %f     pow_RT=%15.6e \n", angles[0], angles[1], angl
      
                               for(i=0;i<nx;i++)
 	                            for(j=0;j<ny;j++)
-	                            {       
-                                		re_ref[j+i*nx+k2*nx*nx]=re_ref[j+i*nx+k2*nx*nx]*nx/sqrt(pow_RT);
-	                        		im_ref[j+i*nx+k2*nx*nx]=im_ref[j+i*nx+k2*nx*nx]*nx/sqrt(pow_RT);
+	                            {     	m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
+ 					 	if(m>=rmax1 && m<rmax2)
+						{
+                                			re_ref[j+i*nx+k2*nx*nx]=re_ref[j+i*nx+k2*nx*nx]*nx/sqrt(pow_RT);
+	                        			im_ref[j+i*nx+k2*nx*nx]=im_ref[j+i*nx+k2*nx*nx]*nx/sqrt(pow_RT);
+						}
+					 	else
+					 	{	re_ref[j+i*nx+k2*nx*nx]=0;
+	                       		 		im_ref[j+i*nx+k2*nx*nx]=0;
+					 	}
                              	   }
                              
                               k2++;             
@@ -915,6 +934,12 @@ printf("ANGLES=%f    %f     %f     pow_RT=%15.6e \n", angles[0], angles[1], angl
                   read=fread(temp_image3, sizeof(float)*nx/2, 1, input[0]);
                   read=fread(temp_image2, sizeof(float)*nx*ny*2, 1, input[1]);
   
+ 
+		 if(Loop==1)
+		 	  num_particle[sta]=num_peaks*0.6;		
+		 else  if(abs(fmod((double)Loop,8.0))<1.0e-5)
+        			num_particle[sta]=num_particle[sta]+(int)(num_peaks*0.2);
+ 
 
                   num_temp=Max_num;
                   num_images_stack=0;
@@ -925,17 +950,16 @@ printf("ANGLES=%f    %f     %f     pow_RT=%15.6e \n", angles[0], angles[1], angl
                       	break;
                   } 
 		  	   else 
-                  while(num_temp==Max_num)
+                  while(num_temp==Max_num && num_images_stack<num_particle[sta] )
                   {  
-             
-                       for(n=0;n<Nthread;n++)
+                       	for(n=0;n<Nthread;n++)
                          for(j=0;j<(nx/2+20);j++)
                             	par[j+n*(nx/2+20)]=0;    
   
-                       /*  one iteration processes Max_num images */
-                       num_temp=0;
-		       while(feof(input[0])==0 && num_temp<Max_num)   
-                       {    
+                       	/*  one iteration processes Max_num images */
+                       	num_temp=0;
+		       	while(feof(input[0])==0 && num_temp<Max_num && num_images_stack<num_particle[sta])   
+                       	{    
                           	for(i=0;i<nx;i++)
                             		for(j=0;j<ny;j++)
                             		{   	re[j+i*ny+num_temp*nx*ny]=temp_image1[j+i*ny];
@@ -951,25 +975,33 @@ printf("ANGLES=%f    %f     %f     pow_RT=%15.6e \n", angles[0], angles[1], angl
                            	     pow_image[i+num_temp*nx/2]=temp_image3[i];
                                             
                            	num_temp++;
+				Num_images++;
+				num_images_stack++;				
+
                            	read=fread(temp_image1, sizeof(float)*nx*ny*2, 1, input[0]);
 				read=fread(SFimage,sizeof(float)*nx*ny,1,input[0]);
 
                            	read=fread(temp_image3, sizeof(float)*nx/2, 1, input[0]);
                            	read=fread(temp_image2, sizeof(float)*nx*ny*2, 1, input[1]);
-                       }                  
+                       	}                  
                         	 
-		       	  Num_images+=num_temp;
-		          num_images_stack+=num_temp;
-				
-		       	   if(num_temp<Max_num)
+		    //   	Num_images+=num_temp;
+		    //     num_images_stack+=num_temp;
+	
+printf("Num_images=%d num_iamges_stack=%d  Num_particle=%d  num_temp=%d \n", Num_images, num_images_stack, num_particle[sta], num_temp);
+fflush(stdout);
+			
+		        if(num_temp<Max_num || num_images_stack>=num_particle[sta])
                        {    	fclose(input[0]);
                              	fclose(input[1]);
                        }
    
+ 
 
-
-                       for(n=0;n<Nthread;n++)
-	                  {	av[n].dft2_fw=p2_fw;
+                       	for(n=0;n<Nthread;n++)
+	                {	
+				 
+				av[n].dft2_fw=p2_fw;
 				av[n].dft2_bw=p2_bw;
 
 				av[n].ref=slice;
@@ -1002,26 +1034,22 @@ printf("ANGLES=%f    %f     %f     pow_RT=%15.6e \n", angles[0], angles[1], angl
 	            	    	av[n].angle=SANG;
 	            	    	av[n].new_re_refer=&new_re_refer[n*nx*nx*nx];
 	            	    	av[n].new_im_refer=&new_im_refer[n*nx*nx*nx];
- 
 
-
-	av[n].new_re_refer1=&new_re_refer1[n*nx*nx*nx];
-	av[n].new_im_refer1=&new_im_refer1[n*nx*nx*nx];
-	av[n].new_re_refer2=&new_re_refer2[n*nx*nx*nx];
-	av[n].new_im_refer2=&new_im_refer2[n*nx*nx*nx];
+				av[n].new_re_refer1=&new_re_refer1[n*nx*nx*nx];
+				av[n].new_im_refer1=&new_im_refer1[n*nx*nx*nx];
+				av[n].new_re_refer2=&new_re_refer2[n*nx*nx*nx];
+				av[n].new_im_refer2=&new_im_refer2[n*nx*nx*nx];
 
                             	av[n].new_re_refer_CTF=&new_re_refer_CTF[n*nx*nx*nx];
 	            	    	av[n].new_im_refer_CTF=&new_im_refer_CTF[n*nx*nx*nx];
 	            	    	av[n].normal=&normal[n*nx*nx*nx];
  
-	av[n].normal1=&normal1[n*nx*nx*nx];
-	av[n].normal2=&normal2[n*nx*nx*nx];
+				av[n].normal1=&normal1[n*nx*nx*nx];
+				av[n].normal2=&normal2[n*nx*nx*nx];
 
-
-	av[n].count=&count[n*nx*nx*nx];
-	av[n].count1=&count1[n*nx*nx*nx];
-	av[n].count2=&count2[n*nx*nx*nx];
-
+				av[n].count=&count[n*nx*nx*nx];
+				av[n].count1=&count1[n*nx*nx*nx];
+				av[n].count2=&count2[n*nx*nx*nx];
 
                             	av[n].normal_CTF=&normal_CTF[n*nx*nx*nx];
 	            	    	av[n].new_par=&par[n*(nx/2+20)];	            
@@ -1030,13 +1058,13 @@ printf("ANGLES=%f    %f     %f     pow_RT=%15.6e \n", angles[0], angles[1], angl
  
 	                }   // end of threading
 	                
-  
+ 
             
 	                /*   wait for the ending of each thread  */
                        for(n=0;n<Nthread;n++)
                            error=pthread_join(tid[n],NULL);
                         
-
+ 
 
                        for(n=0;n<Nthread;n++)
 	               	{	  
@@ -1053,18 +1081,15 @@ printf("ANGLES=%f    %f     %f     pow_RT=%15.6e \n", angles[0], angles[1], angl
                 	     		new_sigma[0]+=*(av[n].new_par+9);  
 						total_corr[sta]+=*(av[n].new_par+10); 
               	       }   
+
+
  
 
                   }// end of **  while ** iterations over images in one stack
     	   
-//printf("33333333333  in thread \n");
-//fflush(stdout);
-
        
                //         pthread_mutex_lock(&lock1);  
-                   
-
-           
+                 
                   pthread_mutex_destroy(&lock1); 
                   pthread_mutex_destroy(&lock2); 
                   pthread_mutex_destroy(&lock3); 
@@ -1094,7 +1119,7 @@ printf("ANGLES=%f    %f     %f     pow_RT=%15.6e \n", angles[0], angles[1], angl
                   dev_psi[sta]=new_dev_theta/num_images_stack;
 		  dev_sigma_psi[sta]=powf(new_sigma_theta/(num_images_stack), 1.0/Gau);
 
-printf("ANGLES=%f %f %f \n", SANG[0],SANG[1],SANG[2]);
+		  printf("ANGLES=%f %f %f   num_images_stack=%d  \n", SANG[0],SANG[1],SANG[2], num_images_stack);
     	  
     	  
     	          printf("::  Loop   Stack   Dev_X  Dev_Y  Dev_Sigma   Dev_phi  Dev_Sigma_phi   Dev_theta  Dev_Sigma_Theta   Dev_psi  Dev_Sigma_psi\n");
@@ -1173,16 +1198,43 @@ All_corr+=total_corr[sta];
                fftwf_execute_dft(p3_bw, out3, in3);
  
     
-         
-                for(i=0;i<nx;i++)
+
+
+
+float max1=0, min1=-max1, max2=0, min2=-max2;
+ for(i=0;i<nx;i++)
                     for(j=0;j<nx;j++) 
                        for(k=0;k<nx;k++)
-		  	 if(Loop>3)
-                          	refer[k+j*nx+i*nx*nx]=0.2*refer[k+j*nx+i*nx*nx]+in3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/FFTWPA3;	    
-		 	 else  
-				refer[k+j*nx+i*nx*nx]=in3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/FFTWPA3;	
- 
+{	 if(refer[k+j*nx+i*nx*nx]>max1) max1=refer[k+j*nx+i*nx*nx];
+	 else if(refer[k+j*nx+i*nx*nx]<min1) min1=refer[k+j*nx+i*nx*nx];
 
+
+//	max1+=fabs(refer[k+j*nx+i*nx*nx]);	
+
+	in3[k+j*nx+i*nx*nx][0]=in3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/FFTWPA3;
+
+
+	 if(in3[k+j*nx+i*nx*nx][0]>max2) max2=in3[k+j*nx+i*nx*nx][0];
+	 else if(in3[k+j*nx+i*nx*nx][0]<min2) min2=in3[k+j*nx+i*nx*nx][0];
+
+//	max2+=fabs(in3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/FFTWPA3);
+}
+
+printf("max1=%e min1=%e  max2=%e  min2=%e \n", max1, min1, max2, min2);
+
+//max1/=(nx*nx*nx);
+//max2/=(nx*nx*nx);
+
+
+         
+            for(i=0;i<nx;i++)
+                    for(j=0;j<nx;j++) 
+                       for(k=0;k<nx;k++)
+		  	  if(Loop>3)
+                         	refer[k+j*nx+i*nx*nx]=0.3/(max1-min1)*(refer[k+j*nx+i*nx*nx]-min1)+0.7/(max2-min2)*(in3[k+j*nx+i*nx*nx][0]-min2);	    
+		 	  else  
+				refer[k+j*nx+i*nx*nx]=(in3[k+j*nx+i*nx*nx][0]-min2)/(max2-min2);	
+ 
 
 		
 
@@ -1365,7 +1417,7 @@ fflush(stdout);
 	     
 
  
-	trans3D(nx,nx/2,refer);
+	trans3D(nx,nx/2,nx/2, nx/2, refer);
         Symmetrize3D(nx,ny,nx,refer);
 
 
@@ -1495,14 +1547,14 @@ printf("max1=%f  max2=%f \n",max1,max2);
  
  
  
-/*
-  
+/* 
+if(Loop>4)  
 	for(i=0;i<20;i++)
 	{
 		 HIO(nx, out3, refer);
 //		 Symmetrize3D(nx,ny,nx,refer);
 	}
- */
+*/ 
  
 
 

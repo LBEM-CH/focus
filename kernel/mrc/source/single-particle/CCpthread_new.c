@@ -19,25 +19,25 @@
  {          
             
     int Gau=2;
-    int  rmax1, rmax2;
+    int  rmax1, rmax2, flag;
     int shift,Num_angles, Num_images;
  
     my_struct *pr;
     pr=(my_struct *)data;
              
-    int ang1,ang2,ang3,ind,i,j,k,m,n,k1,k2,k3,k4, start,end,  ind1,ind2,ind3,nx,Loop;
+    int ang1,ang2,ang3,ind,i,j,i1, j1,  k,m,n,k1,k2,k3,k4, start,end,  ind1,ind2,ind3,nx,Loop, ii, jj;
     int *num, *indx,*indy, *count, *count1,*count2;
              
     float *pdf, *re_ref, *im_ref,  *pow_refer, *re, *im,*re_CTF, *im_CTF, *pow_image, *SANG, *sigma, *image;
     float *new_re_refer, *new_im_refer, *new_re_refer1, *new_im_refer1, *new_re_refer2, *new_im_refer2, *new_re_refer_CTF, *new_im_refer_CTF;
     float *normal, *normal1, *normal2, *normal_CTF, *new_par, *SFimage, *SFimage1;
-    float dev_x,dev_y,dev_phi,dev_theta,dev_psi, wgt;
+    float dev_x,dev_y,dev_phi,dev_theta,dev_psi, wgt, max_corr, y_center, diff;
        
     
     float new_dev_sigma, new_dev_x, new_dev_y;
     float new_dev_phi, new_sigma_phi, new_dev_theta, new_sigma_theta, new_dev_psi, new_sigma_psi;
     float *new_sigma,  *B, dev_sigma_change,t1;
-    float *corr, *weight,  *corr_image, *corr_image_total;
+    float *corr, *weight,  *corr_image, *corr_image_total, *amp1, *amp2 ;
     float *refer;
  
  
@@ -143,7 +143,9 @@
     corr_image=(float *)malloc(sizeof(float)*nx*Num_angles*(2*shift+1)*(2*shift+1));
     corr_image_total=(float *)malloc(sizeof(float)*Num_angles*(2*shift+1)*(2*shift+1));
     
- 
+   amp1=(float *)calloc(nx/2, sizeof(float));
+    amp2=(float *)calloc(nx/2, sizeof(float));      
+    corr=(float *)calloc(nx/2, sizeof(float));	        
        
     fftwf_complex *in,*out;	 
 
@@ -226,7 +228,7 @@ printf(" INCCPthread   Simplex y=%f  \n",max11);    fflush(stdout);
 	ind3=ind2*Num_angles;
 	
  
-        
+      max_corr=-1.0e20;  
      for(k1=start;k1<end;k1++)
      {     
      	 
@@ -235,19 +237,96 @@ printf(" INCCPthread   Simplex y=%f  \n",max11);    fflush(stdout);
 	if(Loop>1)
 	{ 
 
+/*		Calculate weighted cross correlation 
+
+        k2=0;
+        for(ang1=-max_ang1;ang1<=max_ang1;ang1+=step_angle1)
+          for(ang2=-max_ang2;ang2<=max_ang2;ang2+=step_angle2)
+            for(ang3=-max_ang3;ang3<=max_ang3;ang3+=step_angle3)
+            {       
+			y[k2]=-1.0e20;
+			angles[0+k2*3]=ang1+(*(SANG));
+			angles[1+k2*3]=ang2+(*(SANG+1));
+			angles[2+k2*3]=ang3+(*(SANG+2));      
+  		  	max=-1.0e20;		     	 
+    		     	for(k3=-shift; k3<=shift;  k3++)
+                   	for(k4=-shift; k4<=shift; k4++)
+                 	{   		
+
+					ind=k4+shift+(k3+shift)*(2*shift+1)+k2*ind2; 
+                      			corr_image_total[ind]=0.0;
+  	
+					for(m=0;m<nx/2;m++)
+					{	amp1[m]=0.0;
+						amp2[m]=0.0;
+						corr[m]=0.0;
+					}
+
+
+				  	for(i=0;i<nx;i++)
+        	  	  	    		for(j=0;j<nx;j++)
+          	 	    			{  	m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
+          	       	   				if(m>=rmax1 && m<=rmax2)
+                    	  				{ 	 
+								phas=-2*pi*(float)(i*k3+j*k4)/(float)nx;
+
+								i1=j+i*nx+k2*nx*nx;
+ 					     			st2=re_ref[i1]*cos(phas)-im_ref[i1]*sin(phas);
+                      	     					st3=re_ref[i1]*sin(phas)+im_ref[i1]*cos(phas); 
+								amp1[m]+=powf(st2,2.0)+powf(st3,2.0);
+
+								j1=j+i*nx+k1*nx*nx;
+								amp2[m]+=powf(re[j1],2.0)+powf(im[j1],2.0);
+
+								corr[m]+=re[j1]*st2+im[j1]*st3;    
+					  		}
+				    		}  
+
+
+				 
+				 	for(m=rmax1; m<=rmax2; m++)
+				 	{		
+							wgt=exp(-m*m/powf(rmax2*0.7,2.0));
+
+							st2=corr[m]/sqrt(amp1[m]*amp2[m]+1.0e-10);
+
+						// 	corr_image_total[ind]+=fabs(powf(st2,3.0))*wgt;
+							
+						 	corr_image_total[ind]+=fabs(powf(st2,3.0))*wgt;
+
+				  	}
+
+					if(max<corr_image_total[ind])
+					{	
+							max=corr_image_total[ind];
+							y[k2]=max;
+							shift_xy[0+k2*2]=-k3;
+							shift_xy[1+k2*2]=-k4;
+					}
+				 
+        	
+	             }
+	            		         	
+	             k2++;            		     
+  	       }	 
+*/
+
+
+
 //			Calculate unweighted cross correlation using fast Fourier transform
        		k2=0;
         	for(ang1=-max_ang1;ang1<=max_ang1;ang1+=step_angle1)
          	 for(ang2=-max_ang2;ang2<=max_ang2;ang2+=step_angle2)
             		for(ang3=-max_ang3;ang3<=max_ang3;ang3+=step_angle3)
-	     		{             		 
+	     		{   
+          		 
                		 	for(i=0;i<nx;i++)
         	  		for(j=0;j<nx;j++)
           	  		{      m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
 
 				
-          	       	  		if(m>=rmax1 && m<rmax2)
-          	         		{ 
+          	       	  	//	 if(m>=rmax1 && m<rmax2)
+          	         		 { 
 						wgt=exp(-m*m/powf(rmax2*0.9,2.0));
           				      	out[j+i*nx][0]=re[j+i*nx+k1*nx*nx]*re_ref[j+i*nx+k2*nx*nx]+im[j+i*nx+k1*nx*nx]*im_ref[j+i*nx+k2*nx*nx];
 	      				      	out[j+i*nx][1]= -re[j+i*nx+k1*nx*nx]*im_ref[j+i*nx+k2*nx*nx]+im[j+i*nx+k1*nx*nx]*re_ref[j+i*nx+k2*nx*nx]; 
@@ -256,10 +335,10 @@ printf(" INCCPthread   Simplex y=%f  \n",max11);    fflush(stdout);
 						out[j+i*nx][1]*=wgt;
 			
        					  } 
-	      				  else
-	      				  {	out[j+i*nx][0]=0.0;
-	      					out[j+i*nx][1]=0.0;
-	      				  }
+	      				//  else
+	      				//  {	out[j+i*nx][0]=0.0;
+	      				//	out[j+i*nx][1]=0.0;
+	      				//  }
 	    		  	}	 
      			   
 		     		fftwf_execute_dft(p2_bw, out, in );
@@ -284,16 +363,16 @@ printf(" INCCPthread   Simplex y=%f  \n",max11);    fflush(stdout);
 
 						corr_image_total[ind]=0;
 						k=0;
-						for(m=k3-1; m<=k3+1;m++)
-							for(n=k4-1; n<=k4+1;n++)
+						for(m=k3-2; m<=k3+2;m++)
+							for(n=k4-2; n<=k4+2;n++)
 							if(m>=0 &&  m<nx && n>=0 && n<nx)
 							{	corr_image_total[ind]+=in[n+m*nx][0]*powf(-1.0,n+m)/(nx)*exp(-(powf(k3-m,2.0)+powf(k4-n,2.0))/1); 
 								k++;
 							}
 	
-						corr_image_total[ind]/=k;
+						 corr_image_total[ind]/=k;
 
-                         			//corr_image_total[ind]=in[k4+k3*nx][0]*powf(-1.0,k3+k4)/(nx); 
+                         			// corr_image_total[ind]=in[k4+k3*nx][0]*powf(-1.0,k3+k4)/(nx); 
 						if(max<corr_image_total[ind])
 						{	
 							max=corr_image_total[ind];
@@ -305,7 +384,11 @@ printf(" INCCPthread   Simplex y=%f  \n",max11);    fflush(stdout);
 	           		}	
 	         	
 	       	     		k2++;            		     
-  	  		}	 
+  	  		}
+ 
+
+		if(max_corr<max)
+			max_corr=max;	 
 
    
 	}   // for Loop >1 case
@@ -384,15 +467,27 @@ printf(" INCCPthread   Simplex y=%f  \n",max11);    fflush(stdout);
 		    	}
  
 
-/* 
+ 
 			k3=0; 
+			y_center=0;
+			for(i=0; i<NSpar; i++)
+				y_center+=y_4[i];
+			y_center/=NSpar;
+
+			diff=0;
+			for(i=0; i<NSpar; i++)
+				diff+=powf(y_center-y_4[i],2.0);
+			diff=sqrt(diff/NSpar);
+			
+
+/*
 		   	 // simplex algorithm
- 	 		while(y_4[0]>1.0e-1  && (fabs((y_4[0]-y_4[1])/y_4[0])>0.003 || k3<1 ))
+ 	 		while(y_4[0]>1.0e-1  && diff>1.0e-2 && k3<100 )
 		   	{ 	k3++;
 
  
 				//  call simplex
-				simplex(SANG, nx,refer,B,angles_4,shift_xy_4,y_4,NSpar, p2_fw, p2_bw);
+				flag=simplex(SANG, nx,refer,B,angles_4,shift_xy_4,y_4,NSpar, p2_fw, p2_bw);
  
 
 				//   sort angles by cc values
@@ -418,20 +513,33 @@ printf(" INCCPthread   Simplex y=%f  \n",max11);    fflush(stdout);
 						y_4[j-1]=tmp;
 					}
 
+
+					y_center=0;
+					for(i=0; i<NSpar; i++)
+						y_center+=y_4[i];
+					y_center/=NSpar;
+
+					diff=0;
+					for(i=0; i<NSpar; i++)
+						diff+=powf(y_center-y_4[i],2.0);
+					diff=sqrt(diff/NSpar);
+
+
  
-if(  k1==0 && Loop>1)	
- printf("k1=%d  k3=%d    angles=%f %f %f      %f %f %f    %f %f %f    shift=%d %d    y=%f   %f   %f    %f   cri=%f   \n",k1, k3, angles_4[0]-*(SANG), angles_4[1]-*(SANG+1), angles_4[2]-*(SANG+2), angles_4[3]-*(SANG), angles_4[4]-*(SANG+1), angles_4[5]-*(SANG+2), angles_4[6]-*(SANG), angles_4[7]-*(SANG+1), angles_4[8]-*(SANG+2),  shift_xy_4[0], shift_xy_4[1], y_4[0], y_4[1], y_4[2], y_4[3], fabs((y_4[0]-y_4[1])/y_4[0]) );    fflush(stdout); 
+if(  k1==100 && Loop>1)	
+ printf("k1=%d  k3=%d    angles=%f %f %f      %f %f %f    %f %f %f    shift=%d %d    y=%f   %f   %f    %f  flag=%d   diff=%f   \n",k1, k3, angles_4[0]-*(SANG), angles_4[1]-*(SANG+1), angles_4[2]-*(SANG+2), angles_4[3]-*(SANG), angles_4[4]-*(SANG+1), angles_4[5]-*(SANG+2), angles_4[6]-*(SANG), angles_4[7]-*(SANG+1), angles_4[8]-*(SANG+2),  shift_xy_4[0], shift_xy_4[1], y_4[0], y_4[1], y_4[2], y_4[3], flag, diff );   
+fflush(stdout); 
  
 		    	}
 
-*/ 
-if(  k1==0 && Loop>1)	
- printf("k1=%d  k3=%d    angles=%f %f %f      %f %f %f    %f %f %f    shift=%d %d    y=%f   %f   %f    %f   cri=%f   \n",k1, k3, angles_4[0]-*(SANG), angles_4[1]-*(SANG+1), angles_4[2]-*(SANG+2), angles_4[3]-*(SANG), angles_4[4]-*(SANG+1), angles_4[5]-*(SANG+2), angles_4[6]-*(SANG), angles_4[7]-*(SANG+1), angles_4[8]-*(SANG+2),  shift_xy_4[0], shift_xy_4[1], y_4[0], y_4[1], y_4[2], y_4[3], fabs((y_4[0]-y_4[1])/y_4[0]) );    fflush(stdout); 
+*/
 
 
-			if(y_4[0]>1.0e-1 )
-	  	    	{	 
-	
+
+		 //	if(y_4[0]>1 && y_4[1]>0 && y_4[2]>0  )
+	  	    	{	
+
+ 
 				for(i=0; i<nx; i++)
 					for(j=0;j<nx;j++)
 						SFimage[j+i*nx]=image[j+i*nx+k1*nx*nx];
@@ -450,9 +558,18 @@ if(  k1==0 && Loop>1)
 	 	 		fftwf_execute_dft(p2_fw, in, out);
 
 		 
-				//	max_max=exp(-10*acos(max/10000)+10);
+				 max_max=-acos(y_4[0]/2000)+3.1415926/2;
 
 				//	max_max=1/(acos(max/100)+3.1415927);
+
+
+if(  k1==100 && Loop>1)	
+ printf("k1=%d  k3=%d    angles=%f %f %f      %f %f %f    %f %f %f    shift=%d %d    y=%f   %f   %f    %f   max_max=%f   \n",k1, k3, angles_4[0]-*(SANG), angles_4[1]-*(SANG+1), angles_4[2]-*(SANG+2), angles_4[3]-*(SANG), angles_4[4]-*(SANG+1), angles_4[5]-*(SANG+2), angles_4[6]-*(SANG), angles_4[7]-*(SANG+1), angles_4[8]-*(SANG+2),  shift_xy_4[0], shift_xy_4[1], y_4[0], y_4[1], y_4[2], y_4[3], max_max );    fflush(stdout); 
+
+
+
+				max_max=exp(max_max);
+
 
 	 		 	total_corr+=y_4[0]; // max[k1*3+k2];
 				for(i=0;i<nx;i++)  
@@ -466,7 +583,30 @@ if(  k1==0 && Loop>1)
              
             	       		insert3D(B, rot_angles, nx,nx,nx, new_re_refer, new_im_refer, normal, count,max_max); 
  
-			 
+		  
+/*
+			angles[2]+=90;   
+
+			insert3D(B, rot_angles, nx,nx,nx, new_re_refer, new_im_refer, normal, count,max_max); 
+
+			angles[2]+=90;   
+
+			insert3D(B, rot_angles, nx,nx,nx, new_re_refer, new_im_refer, normal, count,max_max); 
+
+			angles[2]+=90;   
+
+			insert3D(B, rot_angles, nx,nx,nx, new_re_refer, new_im_refer, normal, count,max_max); 
+
+*/		 
+
+
+
+
+
+
+
+
+
 				if(fmod(k1*1.0,2.0)>=0.5)
 					insert3D(B, rot_angles, nx,nx,nx, new_re_refer1, new_im_refer1, normal1, count1,max_max);
 				else

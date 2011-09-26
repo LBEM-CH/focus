@@ -368,56 +368,63 @@ int write_stack_merge(int Numstack, char *dirname)
            for(j=dimension-1;j>i;j--)                      
 	    if(peak_z[j]>peak_z[j-1])
            {
-             tmp=peak_x[j];
-             peak_x[j]=peak_x[j-1];
-             peak_x[j-1]=tmp;
-             tmp=peak_y[j];
-             peak_y[j]=peak_y[j-1];
-             peak_y[j-1]=tmp;
-             tmp=peak_z[j];
-             peak_z[j]=peak_z[j-1];
-             peak_z[j-1]=tmp;
+             	tmp=peak_x[j];
+             	peak_x[j]=peak_x[j-1];
+             	peak_x[j-1]=tmp;
+             	tmp=peak_y[j];
+             	peak_y[j]=peak_y[j-1];
+             	peak_y[j-1]=tmp;
+             	tmp=peak_z[j];
+             	peak_z[j]=peak_z[j-1];
+             	peak_z[j-1]=tmp;
           }
 
 	  /* count peaks > 0.0 */
-	  for(i=dimension-1;i>=0;i--)
+	for(i=dimension-1;i>=0;i--)
          if(peak_z[i]>0.0) break;
   
-	  all_peak_counter=i;
+	all_peak_counter=i;
 
-	  if(all_peak_counter<2)
-	  {   printf("::ERROR: Not enough non-zero peaks in profile !!! (all_peak_counter=%d)\n",all_peak_counter);
-           printf("::ABORTING.\n");
-        	 return -1;
-       }
+	if(all_peak_counter<2)
+	{   	printf("::ERROR: Not enough non-zero peaks in profile !!! (all_peak_counter=%d)\n",all_peak_counter);
+        	printf("::ABORTING.\n");
+        	return -1;
+       	}
  
-	  printf(":Total number of peaks ......... = %d\n",all_peak_counter);
+	printf(":Total number of peaks ......... = %d\n",all_peak_counter);
 
-	  if(threshold_method==0)
-	  {   /* determine number of peaks above threshold */
-	      for(i=0;i<all_peak_counter;i++)
-           if(peak_z[i]<threshold) break;
-             num_peaks=i-1;
+	if(threshold_method==0)
+	{	/* determine number of peaks above threshold */
+	      	for(i=0;i<all_peak_counter;i++)
+           	if(peak_z[i]<threshold) break;
+             		num_peaks=i-1;
        }
        else
-	  {   /* determined threshold value for inclusion of relative percentage */
-           num_peaks=(int)(all_peak_counter*relative_threshold/100.0);
-           threshold=peak_z[num_peaks];
-           printf("\n\n********* relative threshold is   %f \n", relative_threshold);
-       }
+	{   	/* determined threshold value for inclusion of relative percentage */
+        	num_peaks=(int)(all_peak_counter*relative_threshold/100.0);
+           	threshold=peak_z[num_peaks];
+           	printf("\n\n********* relative threshold is   %f \n", relative_threshold);
+       	}
 
+/*
+	for(i=num_peaks; i>0; i--)
+	     if(peak_z[i]>peak_z[10]*0.4)
+		break;
+  
+	num_peaks=i;
+*/
        
-	  printf(":Threshold ..................... = %f\n",threshold);
-	  printf(":Number of peaks above threshold = %d\n",num_peaks);
-       printf(": \n");
+	printf(":Threshold ..................... = %f\n",threshold);
+	printf(":Number of peaks above threshold = %d\n",num_peaks);
+       	printf(": \n");
   
       /*  Output stacks of windowed particles into binary file     */  
     
-	  output[0]=fopen(filename1,"w");
-       output[1]=fopen(filename2,"w"); 
-       output[2]=fopen(filename3,"w");
-       free(filename1);
-       free(filename2);
+	output[0]=fopen(filename1,"w");
+       	output[1]=fopen(filename2,"w"); 
+       	output[2]=fopen(filename3,"w");
+       	free(filename1);
+       	free(filename2);
       
        
        /*     Get  the  unit cell windows of whitened data */ 
@@ -427,8 +434,8 @@ int write_stack_merge(int Numstack, char *dirname)
 
 	  float *temp_image, *pow_image, *SANG, *SFimage, *SFimage1;
 	  int s;
-         SANG=(float *)calloc(4,sizeof(float));
-         SFimage=(float *)calloc(realcell_x*realcell_y,sizeof(float));
+          SANG=(float *)calloc(4,sizeof(float));
+          SFimage=(float *)calloc(realcell_x*realcell_y,sizeof(float));
           SFimage1=(float *)calloc(realcell_x*realcell_y,sizeof(float)); 
 	  temp_image=(float *)calloc(realcell_x*realcell_y*2,sizeof(float));
 	  pow_image=(float  *)calloc(realcell_x/2,sizeof(float));

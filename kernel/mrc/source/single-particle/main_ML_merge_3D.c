@@ -10,14 +10,14 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define IRADA 1
-#define IPAD  1
+#define IRADA 0
+#define IPAD  3
 #define IRAD 1
 
  
 int  max_ang1=5, max_ang2=5, max_ang3=5;
 int  step_angle1=1,step_angle2=1, step_angle3=1;
-
+ 
 
  
 
@@ -83,7 +83,7 @@ typedef struct
 #include "mask2D.c"
 
 #include "mask_refer.c"
-#include "mask3DCos.c" 
+#include "mask3D.c" 
 #include "trans3D.c"
 #include "trans.c"
 #include "quadintp.c"
@@ -102,7 +102,7 @@ typedef struct
 #include "ainterpo3d.c"
 #include "insert3D.c"
 #include "extract2D.c"
-#include "maximum_likelihood_merge_3D.c"
+#include "maximum_likelihood_merge_3D_cp.c"
 #include "reciprocal.c"
 #include "amp_ph.c" 
  

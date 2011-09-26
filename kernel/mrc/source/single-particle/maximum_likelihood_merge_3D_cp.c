@@ -38,19 +38,23 @@
 #define pi 3.141592654
 #endif
 
+float base;
 
 pthread_mutex_t lock1,lock2,lock3, lock4,lock5,lock6,lock7;
 
-#define Max_num 210            /*  Maximum number of particles processed at one time */
+#define Max_num 1000            /*  Maximum number of particles processed at one time */
 
-#define MaxLoop 10
+#define MaxLoop 50
 
+ 
+//#define IPAD 2
 
 
 //#include "MLpthread_cp.c"
 
-#include "CCpthread.c"
-//#include "HIO.c"
+#include "CCpthread_new.c"
+
+#include "HIO.c"
 
 
 
@@ -64,30 +68,53 @@ void maximum_likelihood(int Numstack, int nx, int ny, char *dirfilename, float *
 {
        FILE  *input[2], *output[2];
        int  Nthread;
-       Nthread=2; 
-       int shift=1;  
+       Nthread=10; 
+       int shift=6;  
 
  //      int  rmax1=2, rmax2=(int)(0.9*nx/2);
        pthread_attr_t* thAttr=NULL;
        my_struct  av[Nthread];
        pthread_t tid[Nthread]; 
   
-       fftwf_complex *in3,*out3, *in2, *out2;
-       fftwf_plan  p2,p3; 
-	  in2=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
-       out2=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);      
-       in3=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny*nx);
-       out3=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny*nx); 
 
+float *refer_big, *B_big, *A_big, *slice_big;
+
+int PAD=IPAD;
+int nxPAD=nx*PAD;
+refer_big=(float *)calloc(nxPAD*nxPAD*nxPAD,sizeof(float));
+slice_big=(float *)calloc(nxPAD*nxPAD*nxPAD*2,sizeof(float));
+B_big=(float *)calloc(nxPAD*nxPAD*2,sizeof(float));
+A_big=(float *)calloc(nxPAD*nxPAD,sizeof(float));
+
+
+       fftwf_complex *in3,*out3, *in2, *out2, *out_big, *out3_big;
+       fftwf_plan  p2_fw, p2_bw, p3_fw, p3_bw, p2_big_bw, p3_big_fw; 
+
+                    
+       p2_fw=fftwf_plan_dft_2d(nx,nx, in2,out2,FFTW_FORWARD,FFTW_ESTIMATE);
+       p2_bw=fftwf_plan_dft_2d(nx,nx, out2,in2,FFTW_BACKWARD,FFTW_ESTIMATE);
+       p3_fw=fftwf_plan_dft_3d(nx,nx,nx, in3,out3,FFTW_FORWARD,FFTW_ESTIMATE);
+       p3_bw=fftwf_plan_dft_3d(nx,nx,nx, out3,in3,FFTW_BACKWARD,FFTW_ESTIMATE);
+       in2=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
+       out2=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);      
+       in3=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*nx*nx);
+       out3=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*nx*nx); 
+ 
+	out_big=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nxPAD*nxPAD);      
+	out3_big=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nxPAD*nxPAD*nxPAD);    
+	p2_big_bw=fftwf_plan_dft_2d(nxPAD,nxPAD, out_big,out_big,FFTW_BACKWARD,FFTW_ESTIMATE);
+	p3_big_fw=fftwf_plan_dft_3d(nxPAD,nxPAD, nxPAD, out3_big,out3_big,FFTW_FORWARD,FFTW_ESTIMATE);
 
        int CTF=1;
-       float Gau=2.0, phas;
+       float Gau=2.0, phas, wgt;
 
-       int i,j,k,m,n,k1,k2,k3,k4,sta,Loop,num_refer,Num_angles, num_images_stack, num_temp, Num_images, error;
+	float FFTWPA2=nx, FFTWPA3=sqrt(nx)*nx;
+
+       int i,j,k,m,n,k1,k2,k3,k4,sta,Loop,num_refer,Num_angles, num_images_stack, num_temp, Num_images, error, num_peaks, num_particle[Numstack];
        int ang1,ang2,ang3,*num, *indx, *indy;
        char *filename1, *filename2;
        float powrefer, pow_RT;
-       float *angles, *slice, *pdf, *par, *normal,*normal1, *normal2, *normal_CTF, *re, *im, *re_CTF, *im_CTF, *pow_image, *refer_CTF;
+       float *angles, *slice, *pdf, *par, *normal,*normal1, *normal2, *normal_CTF, *re, *im, *re_CTF, *im_CTF, *pow_image, *refer_CTF, *SFimage, *image;
        float *new_re_refer, *new_im_refer, *new_re_refer1, *new_im_refer1, *new_re_refer2, *new_im_refer2, *new_re_refer_CTF, *new_im_refer_CTF, *re_ref, *im_ref, *pow_refer;
        float *B,*dev_sigma, *dev_x, *dev_y, *dev_phi, *dev_theta, *dev_psi, *sigma;
        float new_dev_sigma,new_dev_x, new_dev_y, new_dev_phi, new_dev_theta, new_dev_psi, new_sigma_phi, new_sigma_theta, new_sigma_psi;
@@ -99,13 +126,19 @@ double total_corr_old[Numstack], total_corr[Numstack];
 int *count, *count1, *count2,*count_total;
 
 
+
+
+
+
        Num_angles=((int)((2*max_ang1+1)/step_angle1)+1)*((int)((2*max_ang2+1)/step_angle2)+1)*((int)((2*max_ang3+1)/step_angle3)+1);   
 
-       SANG=(float *)calloc(3, sizeof(float));
+       SANG=(float *)calloc(4, sizeof(float));
        temp_image1=(float *)calloc(nx*nx*2,sizeof(float));
        temp_image2=(float *)calloc(nx*nx*2,sizeof(float));
        temp_image3=(float *)calloc(nx/2,sizeof(float)); 
 	  A2=(float *)calloc(nx*nx,sizeof(float)); 
+
+SFimage=(float*)calloc(nx*nx,sizeof(float));
          
  
        num=(int *)calloc(nx, sizeof(int));
@@ -139,6 +172,8 @@ count_total=(int *)calloc(nx*nx*nx,sizeof(int));
        pdf=(float *)calloc(nx*ny*Num_angles,sizeof(float));
        re=(float *)malloc(sizeof(float)*nx*ny*Max_num);  
        im=(float *)malloc(sizeof(float)*nx*ny*Max_num);  
+	  image=(float*)malloc(sizeof(float)*nx*nx*Max_num);
+
        re_CTF=(float *)malloc(sizeof(float)*nx*ny*Max_num);  
        im_CTF=(float *)malloc(sizeof(float)*nx*ny*Max_num);  
        pow_image=(float *)malloc(sizeof(float)*nx/2*Max_num); 
@@ -254,7 +289,7 @@ count_total=(int *)calloc(nx*nx*nx,sizeof(int));
 
 
         for(i=0;i<nx;i++)
-          num[i]=0;
+           num[i]=0;
 
         for(i=0;i<nx;i++)
            for(j=0;j<ny;j++)
@@ -278,34 +313,77 @@ count_total=(int *)calloc(nx*nx*nx,sizeof(int));
           for(k4=0;k4<ny;k4++)
              powrefer+=powf(refer[k4+k3*ny+nx/2*nx*ny],2.0);
  
+
+
+int *M=(int *)calloc(nx*ny,sizeof(int)), P, mean, devi;
+	P=0;
+       	for(i=0;i<nx;i++)
+        	for(j=0;j<ny;j++)
+			if(powf(i-nx/2,2.0)+powf(j-ny/2,2.0)<rmask*rmask)
+			{	M[j+i*ny]=1;
+				P=P+1;
+			}
+			else M[j+i*ny]=0;
+			
+ 
+
+
 /*
         for(i=0;i<nx;i++)
           for(j=0;j<nx;j++)
             for(k=0;k<nx;k++)
-             refer[k+i*nx+i*nx*nx]=refer[k+j*nx+i*nx*nx]*sqrt(1/powrefer);
+             refer[k+j*nx+i*nx*nx]=refer[k+j*nx+i*nx*nx]*sqrt(1/powrefer);
 */ 
 
 		 demo=(float *)calloc(nx*ny,sizeof(float));
 		 
 
 		    for(sta=0;sta<Numstack; sta++)
-				total_corr[sta]=0;
+		     		total_corr[sta]=0;
+ 				 
 
-
+max_ang1=1;
+max_ang2=1;
+max_ang3=1;
+shift=5;
+ 
     //    while((Loop<Iteration && (dev_sigma_change>Terminate_ML*Numstack )) || Loop<6) 
-	   while(Loop<MaxLoop) 
+	 while(Loop<MaxLoop) 
         { 
+ 
+ if(abs(fmod((double)Loop,4.0))<1.0e-5)
+ {
+ 	if(max_ang1<5) 
+	{	max_ang1++; 
+	//	step_angle1++;
+	}
+
+	if(max_ang2<5)
+	{	max_ang2++;
+	//	step_angle2++;
+	}
+
+
+ 	if(max_ang3<5) 
+	{	max_ang3++;
+	//	step_angle3++;
+	}
+ 	 
+	if(rmax2<55)
+		rmax2+=2;
+ }  
+
 
 All_corr=0.0;
 
-               trans3D(nx,nx/2,refer);
-               Symmetrize3D(nx,ny,nx,refer);
+  //             trans3D(nx,nx/2,refer);
+  //             Symmetrize3D(nx,ny,nx,refer);
 
 
-			trans3D(nx,nx/2, refer1);
+			trans3D(nx,nx/2, nx/2, nx/2,refer1);
 			Symmetrize3D(nx,nx,nx,refer1);
 
-			trans3D(nx,nx/2, refer2);
+			trans3D(nx,nx/2, nx/2, nx/2, refer2);
 			Symmetrize3D(nx,nx,nx,refer2);
       //        mask3D(mask_radius,mask_radius, nx,ny,refer);
      
@@ -325,14 +403,13 @@ All_corr=0.0;
 
 
 
-
-
     
               if(Loop>1)
               {
 
-				for(i=0;i<200;i++)
+			for(i=0;i<200;i++)
 		   		filename1[i]='\0';
+
                  	strcpy(filename1,"./SCRATCH/3dmodela_");
                   	i=strlen(filename1);
                  	filename1[i]=Loop/10+'0';
@@ -354,7 +431,7 @@ All_corr=0.0;
                  	strcat(filename1,".dat");
                  	printf("Loop=%d   i=%d  rmax2=%d  %s  \n",Loop, i, rmax2, filename1);    
       
-printf("REFER1=%f  %f %f \n", refer1[1234], refer1[4567], refer1[5678]);
+ 
                   
                  	output[0]=fopen(filename1, "w");
                  	fwrite(refer1, sizeof(float)*nx*nx*nx, 1, output[0]);
@@ -373,14 +450,70 @@ printf("REFER1=%f  %f %f \n", refer1[1234], refer1[4567], refer1[5678]);
                  	output[0]=fopen(filename1, "w");
                  	fwrite(refer2, sizeof(float)*nx*nx*nx, 1, output[0]);
                  	fclose(output[0]);
-      
-printf("REFER2=%f  %f %f \n", refer2[1234], refer2[4567], refer2[5678]);
-
-              }
+               
  
 
-               trans3D(nx,nx/2,refer); 
 
+
+
+
+
+	/*3D median filtering
+		float *medi=(float *)calloc(27,sizeof(float));
+		float tmp; 
+		for(i=0;i<nx;i++)
+			for(j=0;j<nx;j++)
+				for(k=0;k<nx;k++)
+					if(i-1>0 && i+1<nx && j-1>0 && j+1<nx && k-1>0 && k+1<nx)
+					{	n=0;
+						 
+						for(k3=i-1;k3<=i+1; k3++)
+							for(k4=j-1;k4<=j+1;k4++)
+								for(m=k-1;m<=k+1; m++)
+								{	medi[n]=refer[m+k4*nx+k3*nx*nx];
+									n++;
+								}
+
+
+						for(k3=0;  k3<26;  k3++)
+			   				for(k4=26;  k4>k3;  k4--)
+								if(medi[k4]>medi[k4-1])
+								{	 
+									tmp=medi[k4-1];
+									medi[k4-1]=medi[k4];
+									medi[k4]=tmp;
+								}
+						 
+					//	for(k3=10;k3<19;k3++)
+							refer1[k+j*nx+i*nx*nx]=medi[13];
+					}
+					else refer1[k+j*nx+i*nx*nx]=0;
+
+		for(i=0;i<nx;i++)
+			for(j=0;j<nx;j++)
+				for(k=0;k<nx;k++)
+				refer[k+j*nx+i*nx*nx]=refer1[k+j*nx+i*nx*nx];
+		free(medi);
+*/
+}
+
+ 
+
+
+
+
+
+	//  mask3D(90,90,90,nx,nx,nx,refer);
+
+
+
+
+
+
+
+
+
+              trans3D(nx,nx/2,nx/2,nx/2,refer); 
 
               if(Loop>1)
               {
@@ -391,7 +524,7 @@ printf("REFER2=%f  %f %f \n", refer2[1234], refer2[4567], refer2[5678]);
                  	filename1[i]=Loop/10+'0';
                  	filename1[i+1]=Loop-Loop/10*10+'0';
                  	strcat(filename1,".dat");
-                 	printf("Loop=%d   i=%d   rmax2=%d  %s  \n",Loop, i, rmax2, filename1);    
+                 	printf("Loop=%d   i=%d   rmax2=%d  %s \n  \n",Loop, i, rmax2, filename1);    
                          
                  	output[0]=fopen(filename1, "w");
 	            //   fwrite(count_total, sizeof(float)*nx*nx*nx, 1, output[0]);
@@ -411,83 +544,78 @@ printf("REFER2=%f  %f %f \n", refer2[1234], refer2[4567], refer2[5678]);
                  	fclose(output[0]);
               }
  
-	         powrefer=0;
-              for(k3=0;k3<nx;k3++)
-                for(k4=0;k4<ny;k4++)
-                  	powrefer+=powf(refer[k4+k3*ny+nx/2*nx*ny],2.0);
+  
+	      powrefer=0;
+               for(i=0;i<nx;i++)
+                for(j=0;j<nx;j++)
+                  for(k=0;k<nx;k++)
+                   	powrefer+=powf(refer[k+j*nx+i*nx*nx],2.0);
  
+		powrefer/=(nx*nx*nx);
+
+printf("powrefer=%e    \n ",  powrefer);
+
               for(i=0;i<nx;i++)
                 for(j=0;j<nx;j++)
                   for(k=0;k<nx;k++)
-                       refer[k+i*nx+i*nx*nx]=refer[k+j*nx+i*nx*nx]*sqrt(1.0/powrefer);
+                       refer[k+j*nx+i*nx*nx]=refer[k+j*nx+i*nx*nx]*sqrt(1.0/powrefer);
 
               /*  FFT of 3D reference */
               for(i=0;i<nx;i++)
 	          for(j=0;j<nx;j++)
 	          	for(k=0;k<nx;k++)
-	          	{   	in3[k+j*nx+i*nx*nx][0]=refer[k+j*nx+i*nx*nx]*powf(-1.0,i+j+k);
+	          	{   	in3[k+j*nx+i*nx*nx][0]=refer[k+j*nx+i*nx*nx]*powf(-1.0,i+j+k)/FFTWPA3;
                       		in3[k+j*nx+i*nx*nx][1]=0.0;   
 	          	}
 	        
-              p3=fftwf_plan_dft_3d(nx,nx,nx, in3,out3,FFTW_FORWARD,FFTW_ESTIMATE);
-              fftwf_execute(p3);
-              fftwf_destroy_plan(p3);  
+
+              fftwf_execute_dft(p3_fw, in3, out3 );
+  
 
               for(i=0;i<nx;i++)
 	        for(j=0;j<ny;j++)
 	          for(k=0;k<nx;k++)
 	          {	slice[k+j*nx+i*nx*nx]=out3[k+j*nx+i*nx*nx][0];
-                    slice[k+j*nx+i*nx*nx+nx*nx*nx]=out3[k+j*nx+i*nx*nx][1];   
+                    	slice[k+j*nx+i*nx*nx+nx*nx*nx]=out3[k+j*nx+i*nx*nx][1];   
 	          }
 
-for(i=0;i<nx;i++)
-  for(j=0;j<nx;j++)
-   {  	B[j+i*nx]=0.0;
-    		B[j+i*nx+nx*nx]=0.0;
-   } 
-angles[0]=57.0; angles[1]=42.0; angles[2]=85.0;
-extract2D(B, angles, nx,nx,nx,slice);
-
-/*
-for(i=nx/2-3; i<=nx/2+3; i++)
-{  printf("\n");
-for(j=nx/2-3; j<=nx/2+3; j++)
-printf("%6.2f %6.2f   ",B[j+i*nx], B[j+i*nx+nx*nx]);
-}
-
-printf("\n\n");
-*/
+ 
 
 
+angles[0]=55; angles[1]=30; angles[2]=80;
+// extract2D(B, angles, nx,nx,nx,slice);
 
  
+
+ extract2D(B, angles, nx,nx,nx,slice_big);
 
 for(i=0;i<nx;i++)
 for(j=0;j<nx;j++)
 {	out2[j+i*nx][0]=B[j+i*nx];
 	out2[j+i*nx][1]=B[j+i*nx+nx*nx];
 }
+
+
 for(i=0;i<nx;i++)
  for(j=0;j<nx;j++)
  {     phas=-2*pi*((j+nx/2)*nx/2+(i+nx/2)*nx/2)/nx;
        out2[j+i*nx][0]=B[j+i*nx]*cos(phas)-B[j+i*nx+nx*nx]*sin(phas);
        out2[j+i*nx][1]=B[j+i*nx]*sin(phas)+B[j+i*nx+nx*nx]*cos(phas);      
  }
-p3=fftwf_plan_dft_2d(nx,nx,out2,in2,FFTW_BACKWARD,FFTW_ESTIMATE);
-fftwf_execute(p3);
-fftwf_destroy_plan(p3);
+
+ 
+ 
+fftwf_execute_dft(p2_bw, out2, in2);
+ 
                             
 for(i=0;i<nx;i++)
   for(j=0;j<nx;j++) 
-    demo[j+i*nx]=in2[j+i*nx][0]*powf(-1.0,i+j); 
+    demo[j+i*nx]=in2[j+i*nx][0]*powf(-1.0,i+j)/FFTWPA2; 
 
-/*  
-for(i=0;i<nx;i++)
-   for(j=0;j<nx;j++)
-	demo[j+i*nx]=sqrt(powf(B[j+i*nx],2.0)+powf(B[+i*nx+nx*nx],2.0));
-*/
-  
-mask(realcell_x1_common,realcell_y1_common,nx,nx,demo);
+
+
+ 
+mask(realcell_x1_common-22,realcell_y1_common-22,nx,nx,demo);
 maxd=-1.0e20; mind=-maxd;
 for(i=0;i<nx;i++)
    for(j=0;j<nx;j++)
@@ -503,24 +631,24 @@ for(i=0;i<nx;i++)
 
               /*initialize the references ( central slices ) and the parameters   */
               for(n=0;n<Nthread;n++)
-	        	for(i=0;i<nx;i++)
+	        for(i=0;i<nx;i++)
 	           for(j=0;j<nx;j++)
 	            for(k=0;k<nx;k++)
 	            {  
                         new_re_refer[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
                         new_im_refer[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
                         normal[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0; 
-				    count[k+j*nx+i*nx*nx+n*nx*nx*nx]=0; 
+			count[k+j*nx+i*nx*nx+n*nx*nx*nx]=0; 
 
-				    new_re_refer1[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
+		        new_re_refer1[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
                         new_im_refer1[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
                         normal1[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0; 
-				    count1[k+j*nx+i*nx*nx+n*nx*nx*nx]=0; 
+			count1[k+j*nx+i*nx*nx+n*nx*nx*nx]=0; 
 
-				    new_re_refer2[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
+			new_re_refer2[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
                         new_im_refer2[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
                         normal2[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0; 
-				    count2[k+j*nx+i*nx*nx+n*nx*nx*nx]=0; 
+			count2[k+j*nx+i*nx*nx+n*nx*nx*nx]=0; 
 				
 
                         new_re_refer_CTF[k+j*nx+i*nx*nx+n*nx*nx*nx]=0.0;
@@ -541,22 +669,104 @@ for(i=0;i<nx;i++)
              
               dev_sigma_change=0.0;
 
+ 
+
+
+
+
+
+
+		// padding 3D
+  			trans3D(nx,nx/2,nx/2,nx/2,refer);
+			 
+   
+			mean=0;
+			k3=0;
+		        for(i=0;i<nx; i++)
+				for(j=0;j<nx;j++)
+					for(k=0;k<nx;k++)
+					if(i==0 || i==nx-1 || j==0 || j==nx-1 || k==0 || k==nx-1)
+					{	mean+=refer[k+j*nx+i*nx*nx];
+						k3++;
+					}
+			mean/=k3; 
+
+
+
+
+
+			for(i=0;i<nxPAD;i++)
+				for(j=0;j<nxPAD;j++)
+					for(k=0;k<nxPAD;k++)
+					refer_big[k+j*nxPAD+i*nxPAD*nxPAD]=mean;
+
+
+                       printf("mean=%e  ref0=%e    %e  %e  %e   %e    \n", (double)mean, refer[0],  refer[1000], refer[10000], refer[5456], refer[12334]);
+                       fflush(stdout);
+
+ 
+			for(i=(PAD-1)*nx/2;i<(PAD+1)*nx/2;i++)
+				for(j=(PAD-1)*nx/2;j<(PAD+1)*nx/2;j++)
+					for(k=(PAD-1)*nx/2;k<(PAD+1)*nx/2;k++)
+						refer_big[k+j*nxPAD+i*nxPAD*nxPAD]=refer[k-(PAD-1)*nx/2+(j-(PAD-1)*nx/2)*nx+(i-(PAD-1)*nx/2)*nx*nx];
+			 
+ 		 
+			trans3D(nxPAD,nxPAD/2,nxPAD/2, nxPAD/2, refer_big);
+			trans3D(nx,nx/2,nx/2, nx/2, refer);
+
+ 
+   		 for(i=0;i<nxPAD;i++)
+	          for(j=0;j<nxPAD;j++)
+	          	for(k=0;k<nxPAD;k++)
+	          	{   	out3_big[k+j*nxPAD+i*nxPAD*nxPAD][0]=refer_big[k+j*nxPAD+i*nxPAD*nxPAD]*powf(-1.0,i+j+k)/sqrt(nxPAD*nxPAD*nxPAD);
+                      		out3_big[k+j*nxPAD+i*nxPAD*nxPAD][1]=0.0;   
+	          	}
+	        
+  
+  		fftwf_execute_dft(p3_big_fw, out3_big, out3_big);
+
+              for(i=0;i<nxPAD;i++)
+	        for(j=0;j<nxPAD;j++)
+	          for(k=0;k<nxPAD;k++)
+	          {	slice_big[k+j*nxPAD+i*nxPAD*nxPAD]=out3_big[k+j*nxPAD+i*nxPAD*nxPAD][0];
+                    	slice_big[k+j*nxPAD+i*nxPAD*nxPAD+nxPAD*nxPAD*nxPAD]=out3_big[k+j*nxPAD+i*nxPAD*nxPAD][1];   
+	          }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
    
-	         for(sta=0;sta<Numstack;sta++)
+	      for(sta=0;sta<Numstack;sta++)
               {  
 
 total_corr_old[sta]=total_corr[sta];
 total_corr[sta]=0.0;  
 
+
+ 
+
  
                   new_dev_x=0;
-	             new_dev_y=0; 
+	          new_dev_y=0; 
                   new_dev_sigma=0;
                   new_dev_phi=0.0;
                   new_sigma_phi=0.0;
-		        new_dev_theta=0.0;
-		        new_sigma_theta=0.0;
+		  new_dev_theta=0.0;
+		  new_sigma_theta=0.0;
                   new_dev_psi=0.0;
                   new_sigma_psi=0.0; 
 
@@ -573,39 +783,39 @@ total_corr[sta]=0.0;
  
                   /*    Calculate the statistical parameters of translation */
                   k2=0;
-		        for(ang1=-max_ang1;ang1<=max_ang1; ang1+=step_angle1)
+		  for(ang1=-max_ang1;ang1<=max_ang1; ang1+=step_angle1)
               	    for(ang2=-max_ang2; ang2<=max_ang2; ang2+=step_angle2)
               	      for(ang3=-max_ang3;ang3<=max_ang3;ang3+=step_angle3) 
 	     	      {                       
-	               	 for(k3=0;k3<nx;k3++)
+	               	 	for(k3=0;k3<nx;k3++)
 		     	   	   for(k4=0;k4<ny;k4++)
 		             		pdf[k4+k3*ny+k2*nx*ny]=0.0;
 	                                             
 	                                              
-		  	 	      for(k3=0;k3<nx;k3++)
-                   	        for(k4=0;k4<ny;k4++)
-                             if (powf((float)(indx[k4+k3*ny]-dev_x[sta]),Gau)+powf((float)(indy[k4+k3*ny]-dev_y[sta]),Gau)<=powf(2*shift+1,2.0))
- 	              	   	   {   	i=indx[k4+k3*nx];
-                               	j=indy[k4+k3*nx];
+		  	 	for(k3=0;k3<nx;k3++)
+                   	           for(k4=0;k4<ny;k4++)
+                                   if (powf((float)(indx[k4+k3*ny]-dev_x[sta]),Gau)+powf((float)(indy[k4+k3*ny]-dev_y[sta]),Gau)<=powf(2*shift+1,2.0))
+ 	              	   	   {   i=indx[k4+k3*nx];
+                               		j=indy[k4+k3*nx];
                                    
  	              	       		st1=powf((float)(indx[k4+k3*ny]-dev_x[sta]),Gau)+powf((float)(indy[k4+k3*ny]-dev_y[sta]),Gau);
-			       			st2=Gau*powf(dev_sigma[sta],Gau);
+			       		st2=Gau*powf(dev_sigma[sta],Gau);
   	                       		st3=-st1/(st2+1.0e-20);
 
-			       			st1=powf((float)(ang1-dev_phi[sta]),Gau);
-			       			st2=Gau*powf(dev_sigma_phi[sta],Gau);
-			       			st3=st3-st1/(st2+1.0e-20);
+			       		st1=powf((float)(ang1-dev_phi[sta]),Gau);
+			       		st2=Gau*powf(dev_sigma_phi[sta],Gau);
+			       		st3=st3-st1/(st2+1.0e-20);
 
-			       			st1=powf((float)(ang2-dev_theta[sta]),Gau);
-			       			st2=Gau*powf(dev_sigma_theta[sta],Gau);
-			       			st3=st3-st1/(st2+1.0e-20);
+			       		st1=powf((float)(ang2-dev_theta[sta]),Gau);
+			       		st2=Gau*powf(dev_sigma_theta[sta],Gau);
+			       		st3=st3-st1/(st2+1.0e-20);
 			  
-			       			st1=powf((float)(ang3-dev_psi[sta]),Gau);
-			       			st2=Gau*powf(dev_sigma_psi[sta],Gau);
-			       			st3=st3-st1/(st2+1.0e-20);
+			       		st1=powf((float)(ang3-dev_psi[sta]),Gau);
+			       		st2=Gau*powf(dev_sigma_psi[sta],Gau);
+			       		st3=st3-st1/(st2+1.0e-20);
 			                 
-                              	st5=powf(dev_sigma[sta],Gau)*dev_sigma_phi[sta]*dev_sigma_theta[sta]*dev_sigma_psi[sta];
-		   	       			st5=1.0/(powf(sqrtf(2*pi),5.0)*st5+1.0e-20);	
+                              		st5=powf(dev_sigma[sta],Gau)*dev_sigma_phi[sta]*dev_sigma_theta[sta]*dev_sigma_psi[sta];
+		   	       		st5=1.0/(powf(sqrtf(2*pi),5.0)*st5+1.0e-20);	
 		   			 		 		  			 
 	             	       		pdf[k4+k3*ny+k2*nx*ny]=st5*exp(st3);     
 	         			                            
@@ -646,90 +856,216 @@ total_corr[sta]=0.0;
 
                   //   Extract different projections of  the reference, normalize the projections   
 	           
-                  fread(SANG, sizeof(float)*3, 1, input[0]);
-                  
+                  size_t read=fread(SANG, sizeof(float)*4, 1, input[0]);
+                  num_peaks=(int)SANG[3]; 
+		 
+ 
+               
+
+		
+        base=0; m=0;
+	for(k=0;k<nx;k++)
+        for(i=0;i<nx;i++)
+          for(j=0;j<nx;j++)
+	 {	k3=(int)sqrtf(powf(i-nx/2,2.0)+powf(j-nx/2,2.0));	
+		if(k3<realcell_x1_common-14 );
+		{	base+=refer[j+i*nx+k*nx*nx];
+			m++;
+		}
+	 }
+	base/=m;
+
+ 
+   
 
                   k2=0; 
               	   for(ang1=-max_ang1;ang1<=max_ang1; ang1+=step_angle1)
               	     for(ang2=-max_ang2; ang2<=max_ang2; ang2+=step_angle2)
               	     	for(ang3=-max_ang3;ang3<=max_ang3;ang3+=step_angle3)
               	      	{   
-	                		angles[0]=ang1+SANG[0];
-	                  		angles[1]=ang2+SANG[1];
-	                  		angles[2]=ang3+SANG[2];
-/*	                     
-	                  		for(i=0;i<nx;i++)
-           		           for(j=0;j<nx;j++)
-           		   	  	 {  	B[j+i*nx]=0.0;
-            		      		B[j+i*nx+nx*nx]=0.0;
-          		           }  
-*/	                 
-	                  		extract2D(B, angles, nx,nx,nx,slice);
+	                	angles[0]=ang1+SANG[0];
+	                  	angles[1]=ang2+SANG[1];
+	                  	angles[2]=ang3+SANG[2];
  
- 
-						//  Mask the projections in real space
-				//		B[nx/2+nx/2*nx]=0;
-                   //         B[nx/2+nx/2*nx+nx*nx]=0;
 
-						for(i=0;i<nx;i++)
-           		   		   for(j=0;j<nx;j++)
-           		   		   {     phas=-2*pi*((j+nx/2)*nx/2+(i+nx/2)*nx/2)/nx;
-           		                   out2[j+i*nx][0]=B[j+i*nx]*cos(phas)-B[j+i*nx+nx*nx]*sin(phas);
-            		          	    out2[j+i*nx][1]=B[j+i*nx]*sin(phas)+B[j+i*nx+nx*nx]*cos(phas);      
-          		             }
+
+
+				//  Extract padded 3D
+
+ 		       // 	extract2D(B, angles, nxPAD,nxPAD,nxPAD,slice_big);
+
+
+	                  	extract2D(B, angles, nx,nx,nx,slice_big);
+ 
+ 
+				//  Mask the projections in real space
+				for(i=0;i<nx;i++)
+           		   	   for(j=0;j<nx;j++)
+           		   	   {     
+					 m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
+
+				
+          	       	  	//	if(m>=rmax1 && m<rmax2)
+          	         		{ 
+						wgt=exp(-m*m/powf(rmax2*0.9,2.0));
+
+					  	phas=-2*pi*((j+nx/2)*nx/2+(i+nx/2)*nx/2)/nx;
+           		               	  	out2[j+i*nx][0]=(B[j+i*nx]*cos(phas)-B[j+i*nx+nx*nx]*sin(phas))*wgt;
+            		            	  	out2[j+i*nx][1]=(B[j+i*nx]*sin(phas)+B[j+i*nx+nx*nx]*cos(phas))*wgt; 
+					}     
+			//		else 
+			//		{	out2[j+i*nx][0]=0;
+            		//            	  	out2[j+i*nx][1]=0;
+			//		}					
+          		           }
                   
                             
-                         	p3=fftwf_plan_dft_2d(nx,nx,out2,in2,FFTW_BACKWARD,FFTW_ESTIMATE);
-                         	fftwf_execute(p3);
-                         	fftwf_destroy_plan(p3);
+ 
+                         	fftwf_execute_dft(p2_bw, out2, in2);
+
+
+				for(i=0;i<nx;i++)
+           		    	   for(j=0;j<nx;j++) 
+           		              A2[j+i*nx]=in2[j+i*nx][0]*powf(-1.0,i+j)/FFTWPA2; 
+
+
+
+/*
+	                  	extract2D(B, angles, nx,nx,nx,slice);
+ 
+				//  Mask the projections in real space
+				for(i=0;i<nx;i++)
+           		   	   for(j=0;j<nx;j++)
+           		   	   {     phas=-2*pi*((j+nx/2)*nx/2+(i+nx/2)*nx/2)/nx;
+           		               	  out2[j+i*nx][0]=B[j+i*nx]*cos(phas)-B[j+i*nx+nx*nx]*sin(phas);
+            		            	  out2[j+i*nx][1]=B[j+i*nx]*sin(phas)+B[j+i*nx+nx*nx]*cos(phas);      
+          		           }
+                  
+                            
+ 
+                         	fftwf_execute_dft(p2_bw, out2, in2);
+ 
                             
                          	for(i=0;i<nx;i++)
-           		    		   for(j=0;j<nx;j++) 
-           		              A2[j+i*nx]=in2[j+i*nx][0]*powf(-1.0,i+j); 
+           		    	   for(j=0;j<nx;j++) 
+           		              A2[j+i*nx]=in2[j+i*nx][0]*powf(-1.0,i+j)/FFTWPA2; 
+*/
+
+
+
                      
-                         	mask(realcell_x1_common,realcell_y1_common,nx,nx,A2);
+                    //  	mask_refer(realcell_x1_common,realcell_y1_common,nx,nx,A2, base);
+
+
+
+
+
+	                     mask(realcell_x1_common-22,realcell_y1_common-22,nx,nx,A2);
+
+
+/*
+                         	for(i=0;i<nx;i++)
+           		    	   for(j=0;j<nx;j++)    
+           		           	A2[j+i*nx]=in2[j+i*nx][0]*M[j+i*nx]; 
+			 
+
+				//  normalize A2
+				mean=0;
+				 
+				for(i=0;i<nx;i++)
+           		    	   for(j=0;j<nx;j++) 
+				  	 if(M[j+i*nx]==1)
+           		           	 	mean+=A2[j+i*nx]; 
+
+				 mean/=P;
+				 devi=0;
+				 for(i=0;i<nx;i++)
+           		    	   for(j=0;j<nx;j++) 
+				   	if(M[j+i*nx]==1)
+           		           	{	A2[j+i*nx]-=mean; 
+						devi+=powf(A2[j+i*nx],2.0);
+				   	}
+
+				devi=sqrt(devi/P);
+
+		 	 	 
+				for(i=0;i<nx;i++)
+           		    	   for(j=0;j<nx;j++)
+				   { 
+				  	 if(M[j+i*nx]==1)
+						A2[j+i*nx]=A2[j+i*nx]/devi;
+					 else A2[j+i*nx]=0;
+
+				   }	
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                              
                          	for(i=0;i<nx;i++)
            		     	for(j=0;j<nx;j++)
            		     	{        
-           		          	in2[j+i*nx][0]=A2[j+i*nx]*powf(-1,i+j);
+           		          	in2[j+i*nx][0]=A2[j+i*nx]*powf(-1,i+j)/FFTWPA2;
             		          	in2[j+i*nx][1]=0;      
           		     	}    
-                         	p3=fftwf_plan_dft_2d(nx,nx,in2,out2,FFTW_FORWARD,FFTW_ESTIMATE);
-                         	fftwf_execute(p3);
-                         	fftwf_destroy_plan(p3); 
+ 
+                         	fftwf_execute_dft(p2_fw, in2, out2);
+ 
                              
                          	for(i=0;i<nx;i++)
                             		for(j=0;j<nx;j++)
-                            		{    phas=-2*pi*((i+nx/2)*nx/2+(j+nx/2)*nx/2)/nx;
-                                   	B[j+i*nx]=out2[j+i*nx][0]*cos(phas)-out2[j+i*nx][1]*sin(phas);
-                                   	B[j+i*nx+nx*nx]=out2[j+i*nx][0]*sin(phas)+out2[j+i*nx][1]*cos(phas);
+                            		{    
+                                   		B[j+i*nx]=out2[j+i*nx][0];  
+                                   		B[j+i*nx+nx*nx]=out2[j+i*nx][1];   
                             		}
-                         	B[nx/2+nx/2*nx]=0;
-                        		B[nx/2+nx/2*nx+nx*nx]=0;
-
-
-
-
-
-
+                       
                           	pow_RT=0;
-		          		for(i=0;i<nx;i++)
+		          	for(i=0;i<nx;i++)
 	                    	   for(j=0;j<ny;j++)
-	                    	   {   
-	                       			re_ref[j+i*nx+k2*nx*nx]=B[j+i*nx];
-	                       			im_ref[j+i*nx+k2*nx*nx]=B[j+i*nx+nx*nx];
-	                           
-	                       			pow_RT+=powf(re_ref[j+i*nx+k2*nx*nx],2.0)+powf(im_ref[j+i*nx+k2*nx*nx],2.0);
-        
+	                    	   {   	m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
+ 						if(m>=rmax1 && m<rmax2)
+						{
+	                       				re_ref[j+i*nx+k2*nx*nx]=B[j+i*nx];
+	                       				im_ref[j+i*nx+k2*nx*nx]=B[j+i*nx+nx*nx];
+ 
+	                       				pow_RT+=powf(re_ref[j+i*nx+k2*nx*nx],2.0)+powf(im_ref[j+i*nx+k2*nx*nx],2.0);
+						}
+
                                   }
-     
+  
                               for(i=0;i<nx;i++)
 	                            for(j=0;j<ny;j++)
-	                            {       
-                                		re_ref[j+i*nx+k2*nx*nx]=re_ref[j+i*nx+k2*nx*nx]*sqrt(powrefer/pow_RT);
-	                        			im_ref[j+i*nx+k2*nx*nx]=im_ref[j+i*nx+k2*nx*nx]*sqrt(powrefer/pow_RT);
+	                            {     	m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-nx/2)*(j-nx/2)*1.0));
+ 					 	if(m>=rmax1 && m<rmax2)
+						{
+                                			re_ref[j+i*nx+k2*nx*nx]=re_ref[j+i*nx+k2*nx*nx]*nx/sqrt(pow_RT);
+	                        			im_ref[j+i*nx+k2*nx*nx]=im_ref[j+i*nx+k2*nx*nx]*nx/sqrt(pow_RT);
+						}
+					 	else
+					 	{	re_ref[j+i*nx+k2*nx*nx]=0;
+	                       		 		im_ref[j+i*nx+k2*nx*nx]=0;
+					 	}
                              	   }
                              
                               k2++;             
@@ -744,22 +1080,32 @@ total_corr[sta]=0.0;
               	    for(ang2=-max_ang2; ang2<=max_ang2; ang2+=step_angle2)
               	      for(ang3=-max_ang3;ang3<=max_ang3;ang3+=step_angle3) 
               	      {  
-              	         	for(m=0; m<nx/2;  m++)
+              	       	    for(m=0; m<nx/2;  m++)
                          	pow_refer[k2+m*Num_angles]=0;
  
-                         for(i=0; i<nx; i++)
-	                 	   for(j=0; j<ny; j++)
-                            {    m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-ny/2)*(j-ny/2)*1.0));                 			  
-                         	   if(m>=rmax1 && m<=rmax2 )
+                            for(i=0; i<nx; i++)
+	                       for(j=0; j<ny; j++)
+                               {    m=(int)(sqrtf((i-nx/2)*(i-nx/2)*1.0+(j-ny/2)*(j-ny/2)*1.0));                 			  
+                         	     if(m>=rmax1 && m<=rmax2)
                          	  	 pow_refer[k2+m*Num_angles]+=(powf(re_ref[j+i*ny+k2*nx*nx],2.0)+powf(im_ref[j+i*ny+k2*nx*nx],2.0));
-                             }                              
-                         k2++;     
+                               } 
+                             
+                             k2++;     
                       }   
     
-                  fread(temp_image1, sizeof(float)*nx*ny*2, 1, input[0]);
-                  fread(temp_image3, sizeof(float)*nx/2, 1, input[0]);
-                  fread(temp_image2, sizeof(float)*nx*ny*2, 1, input[1]);
+                  read=fread(temp_image1, sizeof(float)*nx*ny*2, 1, input[0]);
+		  read=fread(SFimage,sizeof(float)*nx*ny,1,input[0]);
+
+
+                  read=fread(temp_image3, sizeof(float)*nx/2, 1, input[0]);
+                  read=fread(temp_image2, sizeof(float)*nx*ny*2, 1, input[1]);
   
+ 
+		 if(Loop==1)
+		 	  num_particle[sta]=num_peaks*0.6;		
+		 else  if(abs(fmod((double)Loop,8.0))<1.0e-5)
+        			num_particle[sta]=num_particle[sta]+(int)(num_peaks*0.2);
+ 
 
                   num_temp=Max_num;
                   num_images_stack=0;
@@ -770,22 +1116,23 @@ total_corr[sta]=0.0;
                       	break;
                   } 
 		  	   else 
-                  while(num_temp==Max_num)
+                  while(num_temp==Max_num && num_images_stack<num_particle[sta] )
                   {  
-             
-                       for(n=0;n<Nthread;n++)
+                       	for(n=0;n<Nthread;n++)
                          for(j=0;j<(nx/2+20);j++)
                             	par[j+n*(nx/2+20)]=0;    
   
-                       /*  one iteration processes Max_num images */
-                       num_temp=0;
-		       	   while(feof(input[0])==0 && num_temp<Max_num)   
-                       {    
+                       	/*  one iteration processes Max_num images */
+                       	num_temp=0;
+		       	while(feof(input[0])==0 && num_temp<Max_num && num_images_stack<num_particle[sta])   
+                       	{    
                           	for(i=0;i<nx;i++)
                             		for(j=0;j<ny;j++)
-                            		{   re[j+i*ny+num_temp*nx*ny]=temp_image1[j+i*ny];
+                            		{   	re[j+i*ny+num_temp*nx*ny]=temp_image1[j+i*ny];
                                 		im[j+i*ny+num_temp*nx*ny]=temp_image1[j+i*ny+nx*ny];      
-	
+						image[j+i*ny+num_temp*nx*ny]=SFimage[j+i*ny];	
+							
+
                                 		re_CTF[j+i*ny+num_temp*nx*ny]=temp_image2[j+i*ny];
                                 		im_CTF[j+i*ny+num_temp*nx*ny]=temp_image2[j+i*ny+nx*ny];
                             		}
@@ -794,81 +1141,96 @@ total_corr[sta]=0.0;
                            	     pow_image[i+num_temp*nx/2]=temp_image3[i];
                                             
                            	num_temp++;
-                           	fread(temp_image1, sizeof(float)*nx*ny*2, 1, input[0]);
-                           	fread(temp_image3, sizeof(float)*nx/2, 1, input[0]);
-                           	fread(temp_image2, sizeof(float)*nx*ny*2, 1, input[1]);
-                       }                  
+				Num_images++;
+				num_images_stack++;				
+
+                           	read=fread(temp_image1, sizeof(float)*nx*ny*2, 1, input[0]);
+				read=fread(SFimage,sizeof(float)*nx*ny,1,input[0]);
+
+                           	read=fread(temp_image3, sizeof(float)*nx/2, 1, input[0]);
+                           	read=fread(temp_image2, sizeof(float)*nx*ny*2, 1, input[1]);
+                       	}                  
                         	 
-		       	  Num_images+=num_temp;
-		            num_images_stack+=num_temp;
-				
-		       	   if(num_temp<Max_num)
+		    //   	Num_images+=num_temp;
+		    //     num_images_stack+=num_temp;
+	
+printf("Num_images=%d num_iamges_stack=%d  Num_particle=%d  num_temp=%d \n", Num_images, num_images_stack, num_particle[sta], num_temp);
+fflush(stdout);
+			
+		        if(num_temp<Max_num || num_images_stack>=num_particle[sta])
                        {    	fclose(input[0]);
                              	fclose(input[1]);
                        }
-  
-                       for(n=0;n<Nthread;n++)
-	                  {	av[n].numLoop=Loop;
+   
+ 
+
+                       	for(n=0;n<Nthread;n++)
+	                {	
+				 
+				av[n].dft2_fw=p2_fw;
+				av[n].dft2_bw=p2_bw;
+
+				av[n].ref=slice;
+				av[n].numLoop=Loop;
 	                    	av[n].rmax1=rmax1;
 	                    	av[n].rmax2=rmax2;
 	                    	av[n].shift=shift;
 	                    	av[n].dim=nx; 
 	                    	av[n].num_angles=Num_angles;  
-	           	    		av[n].start=num_temp/Nthread*n;
-	            	    		av[n].end=num_temp/Nthread*(n+1);
+	           	    	av[n].start=num_temp/Nthread*n;
+	            	    	av[n].end=num_temp/Nthread*(n+1);
 	            			
-	            	    		av[n].pdf=pdf;
-	            	    		av[n].dev_x=dev_x[sta];
-	            	    		av[n].dev_y=dev_y[sta];
-	            	    		av[n].dev_phi=dev_phi[sta];
-	            	    		av[n].dev_theta=dev_theta[sta];
-	            	    		av[n].dev_psi=dev_psi[sta];
-	            	    		av[n].re_reference=re_ref;
-	            	    		av[n].im_reference=im_ref;
-	            	    		av[n].pow_reference=pow_refer;
-	            	    		av[n].re_samp=re;
-	            	    		av[n].im_samp=im;
-                         	av[n].re_samp_CTF=re_CTF;
-	            	    		av[n].im_samp_CTF=im_CTF;
-	            	    		av[n].pow_samp=pow_image;
-	            	    		av[n].sigma=sigma;
-	            	    		av[n].angle=SANG;
-	            	    		av[n].new_re_refer=&new_re_refer[n*nx*nx*nx];
-	            	    		av[n].new_im_refer=&new_im_refer[n*nx*nx*nx];
+	            	    	av[n].pdf=pdf;
+	            	    	av[n].dev_x=dev_x[sta];
+	            	    	av[n].dev_y=dev_y[sta];
+	            	    	av[n].dev_phi=dev_phi[sta];
+	            	    	av[n].dev_theta=dev_theta[sta];
+	            	    	av[n].dev_psi=dev_psi[sta];
+	            	    	av[n].re_reference=re_ref;
+	            	    	av[n].im_reference=im_ref;
+	            	    	av[n].pow_reference=pow_refer;
+	            	    	av[n].re_samp=re;
+	            	    	av[n].im_samp=im;
+				av[n].image=image;
 
-	av[n].new_re_refer1=&new_re_refer1[n*nx*nx*nx];
-	av[n].new_im_refer1=&new_im_refer1[n*nx*nx*nx];
-	av[n].new_re_refer2=&new_re_refer2[n*nx*nx*nx];
-	av[n].new_im_refer2=&new_im_refer2[n*nx*nx*nx];
+                         	av[n].re_samp_CTF=re_CTF;
+	            	    	av[n].im_samp_CTF=im_CTF;
+	            	    	av[n].pow_samp=pow_image;
+	            	    	av[n].sigma=sigma;
+	            	    	av[n].angle=SANG;
+	            	    	av[n].new_re_refer=&new_re_refer[n*nx*nx*nx];
+	            	    	av[n].new_im_refer=&new_im_refer[n*nx*nx*nx];
+
+				av[n].new_re_refer1=&new_re_refer1[n*nx*nx*nx];
+				av[n].new_im_refer1=&new_im_refer1[n*nx*nx*nx];
+				av[n].new_re_refer2=&new_re_refer2[n*nx*nx*nx];
+				av[n].new_im_refer2=&new_im_refer2[n*nx*nx*nx];
 
                             	av[n].new_re_refer_CTF=&new_re_refer_CTF[n*nx*nx*nx];
-	            	    		av[n].new_im_refer_CTF=&new_im_refer_CTF[n*nx*nx*nx];
-	            	    		av[n].normal=&normal[n*nx*nx*nx];
+	            	    	av[n].new_im_refer_CTF=&new_im_refer_CTF[n*nx*nx*nx];
+	            	    	av[n].normal=&normal[n*nx*nx*nx];
  
-	av[n].normal1=&normal1[n*nx*nx*nx];
-	av[n].normal2=&normal2[n*nx*nx*nx];
+				av[n].normal1=&normal1[n*nx*nx*nx];
+				av[n].normal2=&normal2[n*nx*nx*nx];
 
-
-	av[n].count=&count[n*nx*nx*nx];
-	av[n].count1=&count1[n*nx*nx*nx];
-	av[n].count2=&count2[n*nx*nx*nx];
-
+				av[n].count=&count[n*nx*nx*nx];
+				av[n].count1=&count1[n*nx*nx*nx];
+				av[n].count2=&count2[n*nx*nx*nx];
 
                             	av[n].normal_CTF=&normal_CTF[n*nx*nx*nx];
-	            	    		av[n].new_par=&par[n*(nx/2+20)];	            
+	            	    	av[n].new_par=&par[n*(nx/2+20)];	            
 	          	
-                           	 error=pthread_create(&tid[n], thAttr, CCthread, (void*)&av[n]);
+                           	 error=pthread_create(&tid[n], thAttr,CCthread, (void*)&av[n]);
  
 	                }   // end of threading
 	                
  
-
             
 	                /*   wait for the ending of each thread  */
                        for(n=0;n<Nthread;n++)
                            error=pthread_join(tid[n],NULL);
                         
-
+ 
 
                        for(n=0;n<Nthread;n++)
 	               	{	  
@@ -882,21 +1244,18 @@ total_corr[sta]=0.0;
                 	  		new_sigma_theta+=*(av[n].new_par+7);
                  	  		new_sigma_psi+=*(av[n].new_par+8);
                 		 
-                	     	new_sigma[0]+=*(av[n].new_par+9);  
+                	     		new_sigma[0]+=*(av[n].new_par+9);  
 						total_corr[sta]+=*(av[n].new_par+10); 
               	       }   
+
+
  
 
                   }// end of **  while ** iterations over images in one stack
     	   
-//printf("33333333333  in thread \n");
-//fflush(stdout);
-
        
                //         pthread_mutex_lock(&lock1);  
-                   
-
-           
+                 
                   pthread_mutex_destroy(&lock1); 
                   pthread_mutex_destroy(&lock2); 
                   pthread_mutex_destroy(&lock3); 
@@ -926,7 +1285,7 @@ total_corr[sta]=0.0;
                   dev_psi[sta]=new_dev_theta/num_images_stack;
 		  dev_sigma_psi[sta]=powf(new_sigma_theta/(num_images_stack), 1.0/Gau);
 
-printf("\n ANGLES=%f %f %f \n", SANG[0],SANG[1],SANG[2]);
+		  printf("ANGLES=%f %f %f   num_images_stack=%d  \n", SANG[0],SANG[1],SANG[2], num_images_stack);
     	  
     	  
     	          printf("::  Loop   Stack   Dev_X  Dev_Y  Dev_Sigma   Dev_phi  Dev_Sigma_phi   Dev_theta  Dev_Sigma_Theta   Dev_psi  Dev_Sigma_psi\n");
@@ -946,7 +1305,7 @@ printf("\n ANGLES=%f %f %f \n", SANG[0],SANG[1],SANG[2]);
 
 
 
-		     if(sta==0)
+		  if(sta==0)
     	          {  	printf("::%5d  %5d  %5d  %15.3e  %15.3e ",Loop,  sta, num_images_stack, total_corr_old[sta], total_corr[sta]); 
                      	fflush(stdout);
 	          }
@@ -954,6 +1313,9 @@ printf("\n ANGLES=%f %f %f \n", SANG[0],SANG[1],SANG[2]);
 	          {  	printf("::%12d %5d  %15.3e  %15.3e  ",  sta, num_images_stack,total_corr_old[sta], total_corr[sta]);
                      	fflush(stdout);
     	          }
+
+
+printf("Finish one stack \n\n");
 
 All_corr+=total_corr[sta];
 
@@ -974,36 +1336,79 @@ All_corr+=total_corr[sta];
 					st4=0.0;
 
                       	for(n=0;n<Nthread;n++)
-                      	{   st1+=new_re_refer[k+j*nx+i*nx*nx+n*nx*nx*nx];
+                      	{      st1+=new_re_refer[k+j*nx+i*nx*nx+n*nx*nx*nx];
                            	st2+=new_im_refer[k+j*nx+i*nx*nx+n*nx*nx*nx];
                            	st3+=normal[k+j*nx+i*nx*nx+n*nx*nx*nx];
-						st4+=count[k+j*nx+i*nx*nx+n*nx*nx*nx];
+				st4+=count[k+j*nx+i*nx*nx+n*nx*nx*nx];
                       	} 
+
+
+
+		//if(Loop>1)
+		//	st3=st3*All_corr;
 
 
 					count_total[k+j*nx+i*nx*nx]=(int)(st4);
                       	if(st3>0.0)
                       	{ 
-               	         	in3[k+j*nx+i*nx*nx][0]=st1/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/4));  
-                         	in3[k+j*nx+i*nx*nx][1]=st2/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/4));      
+               	         	out3[k+j*nx+i*nx*nx][0]=st1/st3; // *exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/6));  
+                         	out3[k+j*nx+i*nx*nx][1]=st2/st3; // *exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/6));      
                       	}
                       	else
                       	{
-                           	in3[k+j*nx+i*nx*nx][0]=0.0;
-                			in3[k+j*nx+i*nx*nx][1]=0.0;
+                           	out3[k+j*nx+i*nx*nx][0]=0.0;
+                		out3[k+j*nx+i*nx*nx][1]=0.0;
                       	}
                   }
-               p3=fftwf_plan_dft_3d(nx,nx,nx, in3,out3,FFTW_BACKWARD,FFTW_ESTIMATE);
-               fftwf_execute(p3);
-               fftwf_destroy_plan(p3);
+               
+               fftwf_execute_dft(p3_bw, out3, in3);
+ 
     
-         
-                for(i=0;i<nx;i++)
-                    for(j=0;j<nx;j++) 
-                       for(k=0;k<nx;k++)
-                           refer[k+j*nx+i*nx*nx]=out3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k);	    
 
  
+	for(i=0;i<nx;i++)
+                    for(j=0;j<nx;j++) 
+                       for(k=0;k<nx;k++)
+				refer1[k+j*nx+i*nx*nx]=in3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/FFTWPA3;
+ 
+
+float max1=0, min1=-max1, max2=0, min2=-max2;
+ for(i=0;i<nx;i++)
+                    for(j=0;j<nx;j++) 
+                       for(k=0;k<nx;k++)
+{	//  if(refer[k+j*nx+i*nx*nx]>max1) max1=refer[k+j*nx+i*nx*nx];
+	//  else if(refer[k+j*nx+i*nx*nx]<min1) min1=refer[k+j*nx+i*nx*nx];
+
+
+ 	max1+=powf(refer1[k+j*nx+i*nx*nx],2.0);	
+
+	 
+
+	//  if(in3[k+j*nx+i*nx*nx][0]>max2) max2=in3[k+j*nx+i*nx*nx][0];
+	//  else if(in3[k+j*nx+i*nx*nx][0]<min2) min2=in3[k+j*nx+i*nx*nx][0];
+
+ 	max2+=powf(refer[k+j*nx+i*nx*nx],2.0);
+}
+
+printf("max1=%e min1=%e  max2=%e  min2=%e \n", max1, min1, max2, min2);
+
+max1=sqrt(max1/nx*nx*nx);
+max2=sqrt(max2/nx*nx*nx);
+
+
+         
+            for(i=0;i<nx;i++)
+                    for(j=0;j<nx;j++) 
+                       for(k=0;k<nx;k++)
+		  	  if(Loop>3)
+                         	refer[k+j*nx+i*nx*nx]=0.4/max2*refer[k+j*nx+i*nx*nx]+0.6/max1*refer1[k+j*nx+i*nx*nx];	    
+		 	  else  
+				refer[k+j*nx+i*nx*nx]=refer1[k+j*nx+i*nx*nx]/max1;	
+ 
+
+
+		
+
 
 
 			     		
@@ -1018,34 +1423,34 @@ All_corr+=total_corr[sta];
 					st4=0.0;
 
                       	for(n=0;n<Nthread;n++)
-                      	{   st1+=new_re_refer1[k+j*nx+i*nx*nx+n*nx*nx*nx];
+                      	{      st1+=new_re_refer1[k+j*nx+i*nx*nx+n*nx*nx*nx];
                            	st2+=new_im_refer1[k+j*nx+i*nx*nx+n*nx*nx*nx];
                            	st3+=normal1[k+j*nx+i*nx*nx+n*nx*nx*nx];
-						st4+=count1[k+j*nx+i*nx*nx+n*nx*nx*nx];
+				st4+=count1[k+j*nx+i*nx*nx+n*nx*nx*nx];
                       	} 
 
 
-					count_total[k+j*nx+i*nx*nx]=(int)(st4);
+			count_total[k+j*nx+i*nx*nx]=(int)(st4);
                       	if(st3>0.0)
                       	{ 
-               	         	in3[k+j*nx+i*nx*nx][0]=st1/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/4));  
-                         	in3[k+j*nx+i*nx*nx][1]=st2/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/4));      
+               	         	out3[k+j*nx+i*nx*nx][0]=st1/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/4));  
+                         	out3[k+j*nx+i*nx*nx][1]=st2/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/4));      
                       	}
                       	else
                       	{
-                           	in3[k+j*nx+i*nx*nx][0]=0.0;
-                			in3[k+j*nx+i*nx*nx][1]=0.0;
+                           	out3[k+j*nx+i*nx*nx][0]=0.0;
+                	        out3[k+j*nx+i*nx*nx][1]=0.0;
                       	}
                   }
-               p3=fftwf_plan_dft_3d(nx,nx,nx, in3,out3,FFTW_BACKWARD,FFTW_ESTIMATE);
-               fftwf_execute(p3);
-               fftwf_destroy_plan(p3);
+ 
+               fftwf_execute_dft(p3_bw, out3, in3);
+ 
     
          
                 for(i=0;i<nx;i++)
                     for(j=0;j<nx;j++) 
                        for(k=0;k<nx;k++)
-                           refer1[k+j*nx+i*nx*nx]=out3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k);	    
+                           refer1[k+j*nx+i*nx*nx]=in3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/FFTWPA3;	    
 
 
 
@@ -1061,34 +1466,34 @@ All_corr+=total_corr[sta];
 					st4=0.0;
 
                       	for(n=0;n<Nthread;n++)
-                      	{   st1+=new_re_refer2[k+j*nx+i*nx*nx+n*nx*nx*nx];
+                      	{      st1+=new_re_refer2[k+j*nx+i*nx*nx+n*nx*nx*nx];
                            	st2+=new_im_refer2[k+j*nx+i*nx*nx+n*nx*nx*nx];
                            	st3+=normal2[k+j*nx+i*nx*nx+n*nx*nx*nx];
 						st4+=count2[k+j*nx+i*nx*nx+n*nx*nx*nx];
                       	} 
 
 
-					count_total[k+j*nx+i*nx*nx]=(int)(st4);
+			count_total[k+j*nx+i*nx*nx]=(int)(st4);
                       	if(st3>0.0)
                       	{ 
-               	         	in3[k+j*nx+i*nx*nx][0]=st1/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/4));  
-                         	in3[k+j*nx+i*nx*nx][1]=st2/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/4));      
+               	         	out3[k+j*nx+i*nx*nx][0]=st1/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/2));  
+                         	out3[k+j*nx+i*nx*nx][1]=st2/st3; //*exp(-sqrt(powf(i-nx/2, 2.0)+powf(j-nx/2, 2.0)+powf(k-nx/2,2.0))/(nx/2));      
                       	}
                       	else
                       	{
-                           	in3[k+j*nx+i*nx*nx][0]=0.0;
-                			in3[k+j*nx+i*nx*nx][1]=0.0;
+                           	out3[k+j*nx+i*nx*nx][0]=0.0;
+                		out3[k+j*nx+i*nx*nx][1]=0.0;
                       	}
                   }
-               p3=fftwf_plan_dft_3d(nx,nx,nx, in3,out3,FFTW_BACKWARD,FFTW_ESTIMATE);
-               fftwf_execute(p3);
-               fftwf_destroy_plan(p3);
+   
+               fftwf_execute_dft(p3_bw, out3, in3);
+ 
     
          
                 for(i=0;i<nx;i++)
                     for(j=0;j<nx;j++) 
                        for(k=0;k<nx;k++)
-                           refer2[k+j*nx+i*nx*nx]=out3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k);	    
+                           refer2[k+j*nx+i*nx*nx]=in3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/FFTWPA3;	    
  
 
  
@@ -1174,42 +1579,40 @@ fflush(stdout);
 	        Loop++;
 	        num_refer++;
   
-        }	//  end of iteration of Loops	 
+     //   }	//  end of iteration of Loops	 
 	
 
 
-/*  HIO refine the 3D volume
+//  HIO refine the 3D volume
   
+	     
+
+ 
+	trans3D(nx,nx/2,nx/2, nx/2, refer);
+        Symmetrize3D(nx,ny,nx,refer);
+	mask3D(nx,refer);
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+/*
 	for(i=0;i<nx;i++)
-	 for(j=0;j<nx;j++)
-	   for(k=0;k<nx;k++)
-		{	 out3[k+j*nx+i*nx*nx][0]= in3[k+j*nx+i*nx*nx][0];
-			 out3[k+j*nx+i*nx*nx][1]= in3[k+j*nx+i*nx*nx][1];
-		}
-  
-      p3=fftwf_plan_dft_3d(nx,nx,nx, out3,out3,FFTW_BACKWARD,FFTW_ESTIMATE);
-      fftwf_execute(p3);
-      fftwf_destroy_plan(p3);
-    
-         
-      for(i=0;i<nx;i++)
-           for(j=0;j<nx;j++) 
-              for(k=0;k<nx;k++)
-                 refer[k+j*nx+i*nx*nx]=out3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/sqrt(nx*nx*nx);	    
+		for(j=0; j<nx; j++)
+			for(k=0;k<nx;k++)
+			if(i<nx/2-40 || i>nx/2+40 ||  j<nx/2-40 || j>nx/2+40 ||  k<nx/2-20 || k>nx/2+20)
+	 			refer[k+j*nx+i*nx*nx]=0;
+*/
 
-
-	trans3D(nx,nx/2,refer);
-     Symmetrize3D(nx,ny,nx,refer);
-
-	for(i=0;i<200;i++)
-		  filename1[i]='\0';
-   	strcpy(filename1,"./SCRATCH/3dmodela_HIO.dat");
-                  
-     printf("HIO started   \n" );    
-                         
-     output[0]=fopen(filename1, "w");
-     fwrite(refer, sizeof(float)*nx*nx*nx, 1, output[0]);
-     fclose(output[0]);
 
 	//  get the FFT of centered object
 	for(i=0;i<nx;i++)
@@ -1219,30 +1622,24 @@ fflush(stdout);
 				in3[k+j*nx+i*nx*nx][1]=0;
 			}
  
-	 p3=fftwf_plan_dft_3d(nx,nx,nx, in3,in3,FFTW_FORWARD,FFTW_ESTIMATE);
-      fftwf_execute(p3);
-      fftwf_destroy_plan(p3);
+ 
+      fftwf_execute_dft(p3_fw, in3, out3);
+ 
 
 
 
 
 
-
-
-
-
-
-
-
-//  initialize the mssing FFT components using random values
+ 
+/* initialize the mssing FFT components using random values
 
 float max1=0, max2=0;
 	for(i=0;i<nx;i++)
 	 for(j=0;j<nx;j++)
 	   for(k=0;k<nx;k++)
 	if(powf(in3[k+j*nx+i*nx*nx][0],2.0)+powf(in3[k+j*nx+i*nx*nx][1],2.0)<1.0e-4 &&  powf(i-nx/2,2.0)+powf(j-nx/2,2.0)+powf(k-nx/2,2.0)<rmax2*rmax2*0.49)
-		{	 out3[k+j*nx+i*nx*nx][0]=(float)random()/RAND_MAX/100;
-			 out3[k+j*nx+i*nx*nx][1]=(float)random()/RAND_MAX/100;
+		{	 out3[k+j*nx+i*nx*nx][0]=in3[k+j*nx+i*nx*nx][0]; //(float)random()/RAND_MAX/100;
+			 out3[k+j*nx+i*nx*nx][1]=in3[k+j*nx+i*nx*nx][0]; //(float)random()/RAND_MAX/100;
 
 if(powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf( out3[k+j*nx+i*nx*nx][1],2.0)>max1)
 max1=powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf( out3[k+j*nx+i*nx*nx][1],2.0);
@@ -1269,42 +1666,24 @@ printf("max1=%f  max2=%f \n",max1,max2);
            for(j=0;j<nx;j++) 
               for(k=0;k<nx;k++)
                  refer[k+j*nx+i*nx*nx]=out3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/sqrt(nx*nx*nx);	    
+ */
  
-//     Symmetrize3D(nx,ny,nx,refer);
-
-	for(i=0;i<200;i++)
-		  filename1[i]='\0';
-   	strcpy(filename1,"./SCRATCH/3dmodela_HIO1.dat");
-                  
-     printf("HIO started   \n" );    
-                         
-     output[0]=fopen(filename1, "w");
-     fwrite(refer, sizeof(float)*nx*nx*nx, 1, output[0]);
-     fclose(output[0]);
-
-
-      
-	for(i=0;i<30;i++)
+ 
+ 
+ 
+ /* 
+	for(i=0;i<20;i++)
 	{
-		 HIO(nx, in3, refer);
+		 HIO(nx, out3, refer);
 //		 Symmetrize3D(nx,ny,nx,refer);
 	}
-
-
-	for(i=0;i<200;i++)
-		  filename1[i]='\0';
-   	strcpy(filename1,"./SCRATCH/3dmodela_HIO2.dat");
-                  
-     printf("HIO finished    \n" );    
-                         
-     output[0]=fopen(filename1, "w");
-     fwrite(refer, sizeof(float)*nx*nx*nx, 1, output[0]);
-     fclose(output[0]);
-
-
-
-
 */
+ 
+
+
+
+}	//  end of iteration of Loops
+
 
 
 
@@ -1378,13 +1757,16 @@ printf("max1=%f  max2=%f \n",max1,max2);
         free(filename1);
         free(filename2);     
  
-	 fftwf_free(out2);
-     fftwf_free(in2);
+	fftwf_free(out2);
+     	fftwf_free(in2);
 
 	fftwf_free(out3);
-     fftwf_free(in3);  
+    	fftwf_free(in3);  
  
- 
+        fftwf_destroy_plan(p3_fw);
+	fftwf_destroy_plan(p3_bw);
+	fftwf_destroy_plan(p2_fw);
+	fftwf_destroy_plan(p2_bw);
 
  
   }			     

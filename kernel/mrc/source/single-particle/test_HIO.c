@@ -4,14 +4,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include <fftw3.h>
+#include "medianFilter.c"
 
+#define pi 3.1415926
 
-int rmax2=60, IPAD=1;
+int rmax2=60, IPAD=1, rmax1=1;
 
 #include "HIO.c"
 #include "HIO1.c"
-#include "ainterpo3dbig.c"
-#include "extract2D.c"
+//#include "ainterpo3dbig.c"
+//#include "extract2D.c"
 #include "quadintp.c"
 #include "rotate.c"
 #include "Symmetrize3D.c"
@@ -22,7 +24,7 @@ float angles[3];
 angles[0]=0.0, angles[1]=0.0, angles[2]=0.0;
 
 
-
+  int m;
 	int nx=140, i, j, k;
 	float *refer=(float *)calloc(nx*nx*nx,sizeof(float)), maxd,mind;
 	float *refer_temp=(float *)calloc(nx*nx*nx,sizeof(float));
@@ -39,7 +41,7 @@ angles[0]=0.0, angles[1]=0.0, angles[2]=0.0;
       out3=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*nx*nx);     
 
 
-	input[0]=fopen("/home/xiangyan/mrcImages/GLPF/GLPF-clean/merge/SCRATCH/3dmodela_37.dat","r");
+	input[0]=fopen("/home/xiangyan/mrcImages/GLPF/GLPF-clean/merge/SCRATCH/3dmodela_09.dat","r");
  
 	output[0]=fopen("/home/xiangyan/mrcImages/GLPF/GLPF-clean/merge/SCRATCH/3dmodela_HIO.dat","w");
 	output[1]=fopen("/home/xiangyan/mrcImages/GLPF/GLPF-clean/merge/SCRATCH/3dmodela_HIO1.dat","w");
@@ -56,7 +58,7 @@ angles[0]=0.0, angles[1]=0.0, angles[2]=0.0;
 	for(i=0;i<nx;i++)
 		for(j=0; j<nx; j++)
 			for(k=0;k<nx;k++)
-			refer[k+j*nx+i*nx*nx]=refer_temp[k+j*nx+i*nx*nx];
+			refer[k+j*nx+i*nx*nx]=refer_temp[k+j*nx+i*nx*nx]*1000;
  
  
 
@@ -64,7 +66,19 @@ angles[0]=0.0, angles[1]=0.0, angles[2]=0.0;
      fwrite(refer, sizeof(float)*nx*nx*nx, 1, output[0]);
      fclose(output[0]);
 
+
+
+ // 3D median filtering
+//   median(nx,refer);
+
+ 
+
 	 
+
+
+
+
+
 
 	//  get the FFT of centered object
 	mind=1.0e20; maxd=-mind;
@@ -111,14 +125,6 @@ else if(min1>powf(in3[k+j*nx+i*nx*nx][0],2.0)+powf(in3[k+j*nx+i*nx*nx][1],2.0))
 
 
  
-for(i=nx/2-1;i<=nx/2+1;i++)
-{ printf("\n");
-for(j=nx/2-1;j<=nx/2+1;j++)
-{printf("\n");
-for(k=nx/2-1;k<=nx/2+1;k++)
-printf("%e %e     ", in3[k+j*nx+i*nx*nx][0], in3[k+j*nx+i*nx*nx][1]);
-}} 
-printf("\n");
 
 
 
@@ -132,7 +138,7 @@ printf("\n");
 			}
 
  
-	extract2D(B, angles, nx,nx,nx,slice);
+	//extract2D(B, angles, nx,nx,nx,slice);
 	for(i=0;i<nx;i++)
    		for(j=0;j<nx;j++)
 			demo[j+i*nx]=sqrt(powf(B[j+i*nx],2.0)+powf(B[+i*nx+nx*nx],2.0));
@@ -175,16 +181,20 @@ printf("\n");
 
 //  initialize the mssing FFT components using random values
 
+m=0;
 	max1=0; max2=0;
 	for(i=0;i<nx;i++)
 	 for(j=0;j<nx;j++)
 	   for(k=0;k<nx;k++)
-	if(powf(in3[k+j*nx+i*nx*nx][0],2.0)+powf(in3[k+j*nx+i*nx*nx][1],2.0)<1.0e-4 &&  powf(i-nx/2,2.0)+powf(j-nx/2,2.0)+powf(k-nx/2,2.0)<rmax2*rmax2*0.49)
-		{	 out3[k+j*nx+i*nx*nx][0]=  in3[k+j*nx+i*nx*nx][0]; // + (float)random()/RAND_MAX*100000;
-			 out3[k+j*nx+i*nx*nx][1]= in3[k+j*nx+i*nx*nx][1]; //+(float)random()/RAND_MAX*100000;
+	//  if(powf(in3[k+j*nx+i*nx*nx][0],2.0)+powf(in3[k+j*nx+i*nx*nx][1],2.0)<1.0e-4 &&  powf(i-nx/2,2.0)+powf(j-nx/2,2.0)+powf(k-nx/2,2.0)<rmax2*rmax2*0.49)
+
+		if(fabs(atan2(sqrt(powf(i-nx/2,2.0)+powf(j-nx/2,2.0)),   k-nx/2))> pi/3.0)
+		{	 out3[k+j*nx+i*nx*nx][0]=  in3[k+j*nx+i*nx*nx][0];//   (float)random()/RAND_MAX*100;
+			 out3[k+j*nx+i*nx*nx][1]= in3[k+j*nx+i*nx*nx][1]; // (float)random()/RAND_MAX*100;
 
 			if(powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf( out3[k+j*nx+i*nx*nx][1],2.0)>max1)
-			max1=powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf( out3[k+j*nx+i*nx*nx][1],2.0);
+				max1=powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf( out3[k+j*nx+i*nx*nx][1],2.0);
+m++;
 
 		}
 		else
@@ -192,11 +202,78 @@ printf("\n");
 			 out3[k+j*nx+i*nx*nx][1]= in3[k+j*nx+i*nx*nx][1];
 
 			if(powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf( out3[k+j*nx+i*nx*nx][1],2.0)>max2)
-			max2=powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf( out3[k+j*nx+i*nx*nx][1],2.0);
+				max2=powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf( out3[k+j*nx+i*nx*nx][1],2.0);
 		}
 	
 
-	printf("max1=%e  max2=%e \n",max1,max2);
+ float tmp;
+	for(i=1;i<nx;i++)
+	 for(j=1;j<nx;j++)
+	   for(k=1;k<nx/2;k++)
+	   {	  tmp= (out3[k+j*nx+i*nx*nx][0]+ out3[nx-k+(nx-j)*nx+(nx-i)*nx*nx][0])/2;
+		  out3[k+j*nx+i*nx*nx][0]=tmp;
+		  out3[nx-k+(nx-j)*nx+(nx-i)*nx*nx][0]=tmp;
+
+		 tmp= (out3[k+j*nx+i*nx*nx][1]-out3[nx-k+(nx-j)*nx+(nx-i)*nx*nx][1])/2;
+		  out3[k+j*nx+i*nx*nx][1]=tmp;
+		  out3[nx-k+(nx-j)*nx+(nx-i)*nx*nx][1]=-tmp;
+	   }	
+
+		
+for(i=1;i<nx;i++)
+	 for(j=1;j<nx;j++)
+	   for(k=nx/2;k<=nx/2;k++)
+	   {	  tmp= (out3[k+j*nx+i*nx*nx][0]+ out3[nx-k+(nx-j)*nx+(nx-i)*nx*nx][0])/2;
+		  out3[k+j*nx+i*nx*nx][0]=tmp;
+		  out3[nx-k+(nx-j)*nx+(nx-i)*nx*nx][0]=tmp;
+
+		 tmp= (out3[k+j*nx+i*nx*nx][1]- out3[nx-k+(nx-j)*nx+(nx-i)*nx*nx][1])/2;
+		  out3[k+j*nx+i*nx*nx][1]=tmp;
+		  out3[nx-k+(nx-j)*nx+(nx-i)*nx*nx][1]=-tmp;
+	   }	
+
+
+
+
+
+/* 
+for(i=nx/2-1;i<=nx/2+1;i++)
+{ printf("\n");
+for(j=nx/2-1;j<=nx/2+1;j++)
+{printf("\n");
+for(k=nx/2-1;k<=nx/2+1;k++)
+printf("i=%d j=%d k=%d  %e %e          ", i,j,k, out3[k+j*nx+i*nx*nx][0], out3[k+j*nx+i*nx*nx][1]);
+}} 
+printf("\n");
+*/
+
+
+float *amp=(float *)calloc(nx*nx*nx,sizeof(float));
+
+     
+      for(i=0;i<nx;i++)
+           for(j=0;j<nx;j++) 
+              for(k=0;k<nx;k++)
+amp[k+j*nx+i*nx*nx]= (powf(out3[k+j*nx+i*nx*nx][0],2.0)+powf(out3[k+j*nx+i*nx*nx][1],2.0));
+
+fwrite(amp, sizeof(float)*nx*nx*nx, 1, output[1]);
+     fclose(output[1]);
+
+
+
+for(i=nx/2-40;i<=nx/2-35;i++)
+{ printf("\n");
+for(j=nx/2-40;j<=nx/2-35;j++)
+{printf("\n");
+for(k=nx/2-40;k<=nx/2-35;k++)
+printf(" %10e  ",   amp[k+j*nx+i*nx*nx]);
+}} 
+printf("\n");
+
+
+
+
+	printf("IN test_HIO    max1=%e  max2=%e   m=%d  \n",max1,max2,m);
 	 
 
       p3=fftwf_plan_dft_3d(nx,nx,nx, out3,out3,FFTW_BACKWARD,FFTW_ESTIMATE);
@@ -210,8 +287,7 @@ printf("\n");
                  refer[k+j*nx+i*nx*nx]=out3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/sqrt(nx*nx*nx);	    
  
  
-     fwrite(refer, sizeof(float)*nx*nx*nx, 1, output[1]);
-     fclose(output[1]);
+     
 
 
 
@@ -224,7 +300,7 @@ for(i=0;i<nx;i++)
 		}
 
  
-extract2D(B, angles, nx,nx,nx,slice);
+//extract2D(B, angles, nx,nx,nx,slice);
 for(i=0;i<nx;i++)
    for(j=0;j<nx;j++)
 	demo[j+i*nx]=sqrt(powf(B[j+i*nx],2.0)+powf(B[+i*nx+nx*nx],2.0));
@@ -265,13 +341,13 @@ fclose(proj[1]);
 
 // HIO 
 
-  int m;
-	for(m=0;m<30;m++)
+
+	for(m=0;m<50;m++)
 	{
 		 HIO(nx, in3, refer);
 
-printf("m=%d ",m);
- //		 Symmetrize3D(nx,nx,nx,refer,count);
+		printf("m=%d ",m);
+  	 	Symmetrize3D(nx,nx,nx,refer);
  
 	}
  
@@ -303,10 +379,45 @@ printf("m=%d ",m);
  */
 
 
+//  high pass and low pass filtering
 
- /* 3D median filtering
+	for(i=0;i<nx;i++)
+		for(j=0; j<nx; j++)
+			for(k=0;k<nx;k++)
+			{	 
+				in3[k+j*nx+i*nx*nx][0]=refer[k+j*nx+i*nx*nx]*powf(-1.0,i+j+k)/sqrt(nx*nx*nx);
+				in3[k+j*nx+i*nx*nx][1]=0;
+			}
+  
+	p3=fftwf_plan_dft_3d(nx,nx,nx, in3,in3,FFTW_FORWARD,FFTW_ESTIMATE);
+      	fftwf_execute(p3);
+      	fftwf_destroy_plan(p3);
+
+
+	for(i=0;i<nx;i++)
+		for(j=0; j<nx; j++)
+			for(k=0;k<nx;k++)
+			 if (powf(i-nx/2,2.0)+powf(j-nx/2,2.0)+powf(k-nx/2,2.0)>rmax2*rmax2 || powf(i-nx/2,2.0)+powf(j-nx/2,2.0)+powf(k-nx/2,2.0)<rmax1*rmax1)
+			{	in3[k+j*nx+i*nx*nx][0]=0;
+				in3[k+j*nx+i*nx*nx][1]=0;
+			}		 
+	
+
+	p3=fftwf_plan_dft_3d(nx,nx,nx, in3,in3,FFTW_BACKWARD,FFTW_ESTIMATE);
+	fftwf_execute(p3);
+      	fftwf_destroy_plan(p3);
+
+	for(i=0;i<nx;i++)
+		for(j=0; j<nx; j++)
+			for(k=0;k<nx;k++)
+				refer[k+j*nx+i*nx*nx]=in3[k+j*nx+i*nx*nx][0]*powf(-1.0,i+j+k)/sqrt(nx*nx*nx);
+
+
+
+
+ /*   3D median filtering
 		float *medi=(float *)calloc(27,sizeof(float));
-int k3, k4, m,n;
+int k3, k4,  n;
 		float tmp; 
 		for(i=0;i<nx;i++)
 			for(j=0;j<nx;j++)
@@ -320,6 +431,7 @@ int k3, k4, m,n;
 								{	medi[n]=refer[m+k4*nx+k3*nx*nx];
 									n++;
 								}
+
 
 						for(k3=0;  k3<26;  k3++)
 			   				for(k4=26;  k4>k3;  k4--)
@@ -342,8 +454,8 @@ int k3, k4, m,n;
 			for(k=0;k<nx;k++)
 			refer[k+j*nx+i*nx*nx]=refer_temp[k+j*nx+i*nx*nx];
 
-*/
-
+ */
+ 
 
 
 
@@ -388,7 +500,7 @@ for(i=0;i<nx;i++)
 		}
 
  
-extract2D(B, angles, nx,nx,nx,slice);
+//extract2D(B, angles, nx,nx,nx,slice);
 for(i=0;i<nx;i++)
    for(j=0;j<nx;j++)
 	demo[j+i*nx]=sqrt(powf(B[j+i*nx],2.0)+powf(B[+i*nx+nx*nx],2.0));
@@ -412,19 +524,7 @@ for(i=0;i<nx;i++)
 }
 fclose(proj[2]);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 

@@ -3,13 +3,14 @@
  
 
 
-void simplex(float *SANG,  int nx, float *refer, float *proj, float *ang, int *shift, float *y, int Npar, fftwf_plan p2_fw, fftwf_plan p2_bw)
+int simplex(float *SANG,  int nx, float *refer, float *proj, float *ang, int *shift, float *y, int Npar, fftwf_plan p2_fw, fftwf_plan p2_bw)
 {	float *par_1, *par_11, *par_cen, *angle_limit1, *angle_limit2;  
 	int *shift_1, *shift_11; 
 	float y_1, y_11, y_cen, y_l, y_h;
 	int i,j,k,l,h;
+ int flag;
 
-	float alpha=1, beta=0.5, gama=2;
+	float alpha=0.5, beta=1, gama=1.5;
 
  	
 	par_1=(float *)calloc(3,sizeof(float));	
@@ -28,24 +29,25 @@ void simplex(float *SANG,  int nx, float *refer, float *proj, float *ang, int *s
 		angle_limit2[i]=*(SANG+i)-max_ang1;
 	}
 
+
+	h=Npar-1; 
+	l=0;
 	// get centroid
 	for(i=0; i<3; i++)
 	{	par_cen[i]=0;
-		for(j=0; j<Npar-1; j++)
+		for(j=0; j<h; j++)
 			par_cen[i]+=ang[i+j*3];
 
-		par_cen[i]/=(Npar-1);
+		par_cen[i]/=h;
 	}
  
 
 	// reflection
-	l=Npar-1; 
-	h=0;
 	y_l=y[l];
 	y_h=y[h];
 
 	for(i=0;i<3;i++)
-	{	par_1[i]=(1+alpha)*par_cen[i]-alpha*ang[i+l*3];
+	{	par_1[i]=(1+alpha)*par_cen[i]-alpha*ang[i+h*3];
 		if(par_1[i]>angle_limit1[i]) par_1[i]=angle_limit1[i];
 		else if(par_1[i]<angle_limit2[i]) par_1[i]=angle_limit2[i];
 	} 		
@@ -60,7 +62,7 @@ fflush(stdout);
 
 
 	//  expansion
-	if(y_1>y_h)
+	if(y_1>y_l)
 	{	for(i=0;i<3;i++)
 		{	par_11[i]=gama*par_1[i]+(1-gama)*par_cen[i];
 			if(par_11[i]>angle_limit1[i]) par_11[i]=angle_limit1[i];
@@ -69,7 +71,7 @@ fflush(stdout);
  
 		y_11=ccp(nx,par_11,shift_11,refer,proj, p2_fw, p2_bw);
 
-		if(y_11>y_h)
+		if(y_11>y_l)
 		{
 			for(i=0;i<3;i++)
 				ang[i+h*3]=par_11[i];
@@ -78,6 +80,8 @@ fflush(stdout);
 				shift[i+h*2]=shift_11[i];
 
 			y[h]=y_11;
+
+			flag=1;
 		}
 		else
 		{	for(i=0;i<3;i++)
@@ -87,26 +91,29 @@ fflush(stdout);
 				shift[i+h*2]=shift_1[i];
 
 			y[h]=y_1;
+
+			flag=2;;
 		}
 	}
 	else		
 	{	
-		if(y_1>y_l)	 
+		if(y_1>y_h)	 
 		{	for(i=0;i<3;i++)
-				ang[i+l*3]=par_1[i];
+				ang[i+h*3]=par_1[i];
 		
 			for(i=0;i<2;i++)			
-				shift[i+l*2]=shift_1[i];
+				shift[i+h*2]=shift_1[i];
  		}
 		
-		for(i=Npar-1; i>0; i--)
+		for(i=h-1; i>0; i--)
 		 	if(y_1>y[i])
-			{	y[l]=y_1;	
+			{	y[h]=y_1;	
 /*
  if(k1==0)
 printf("22222  max_ang1=%d  par=%f  \n", max_ang1, ang[0]);
 fflush(stdout);
 */
+				 
 
 				free(par_1); 	
 				free(par_11); 
@@ -115,12 +122,12 @@ fflush(stdout);
 				free(shift_1);   
 				free(shift_11);  
 
-				return;  		 // p_l replaced by p_1
+				return 3;  		 // p_l replaced by p_1
 			}	
 	
 		//  contraction
 		for(i=0;i<3;i++)
-		{	par_11[i]=beta*ang[i+l*3]+(1-beta)*par_cen[i];
+		{	par_11[i]=beta*ang[i+h*3]+(1-beta)*par_cen[i];
 			if(par_11[i]>angle_limit1[i]) par_11[i]=angle_limit1[i];
 			else if(par_11[i]<angle_limit2[i]) par_11[i]=angle_limit2[i];		
 		}			
@@ -132,20 +139,22 @@ fflush(stdout);
 */
 	 	y_11=ccp(nx,par_11, shift_11,refer,proj, p2_fw, p2_bw);
 
-		if(y_11>y_l && y_11>y_1)
+		if(y_11>y_h && y_11>y_1)
 		{
 			for(i=0;i<3;i++)
-				ang[i+l*3]=par_11[i];
+				ang[i+h*3]=par_11[i];
 			 
 			for(i=0;i<2;i++)			
-				shift[i+l*2]=shift_11[i];
+				shift[i+h*2]=shift_11[i];
 
-			y[l]=y_11;
+			y[h]=y_11;
+
+			flag=4;
 		}
 		else
 		{	for(j=1;j<Npar;j++)
 			{	for(i=0;i<3;i++)
-				{	ang[i+j*3]=(ang[i+j*3]+ang[i+h*3])/2;
+				{	ang[i+j*3]=(ang[i+j*3]+ang[i+l*3])/2;
 					par_11[i]=ang[i+j*3];
 				}
 /*		
@@ -157,6 +166,8 @@ fflush(stdout);
 
 				for(i=0;i<2;i++)			
 					shift[i+j*2]=shift_11[i];
+
+				flag=5;
 			}
 		}
 
@@ -170,7 +181,7 @@ fflush(stdout);
 	free(shift_1);   
 	free(shift_11);  
 
-	return;
+	return flag;
 	
 }
 	

@@ -45,28 +45,28 @@ void extract2D(float *fobs, float *angles, int  nz, int nx, int ny, float *fgrid
  
         for(i=-nx/2;i<=nx/2;i++)
            for(j=-nx/2;j<=nx/2;j++)
-           {    i1=i+nx/2;
-                 j1=j+ny/2;
+           {    	i1=i+nx/2;
+                	j1=j+ny/2;
             
                  
-                 rad2=i*i+j*j;
- 		 	  if(rad2<irrec2  )
- 		 	  {	 		 	
+                 	rad2=i*i+j*j;
+ 		 	if(rad2<irrec2  )
+ 		 	{	 		 	
                  		xobs=i*dm[0]+j*dm[3]+nx/2;
              	 		yobs=i*dm[1]+j*dm[4]+ny/2;
              	 		zobs=i*dm[2]+j*dm[5]+nz/2;
        
  		               		     	
- 	 	 			//	 if(IRADA==0)       
- 		 	      	ainterpo3dbig(xobs, yobs, zobs, nz, nx, ny, fgrid,  samp); 
- 				 //         else 
- 				 //            ainterpo3d(xobs, yobs, zobs, nz*IPAD, nx*IPAD, ny*IPAD, fgrid, samp);
+ 	 	 		if(IRADA==0)       
+ 		 	      		ainterpo3dbig(xobs, yobs, zobs, nz, nx, ny, fgrid,  samp); 
+ 				else 
+ 				       ainterpo3d(xobs, yobs, zobs, nz*IPAD, nx*IPAD, ny*IPAD, fgrid, samp);
  		             
  	
-					fobs[j1+i1*ny]+=samp[0]; 
-					fobs[j1+i1*ny+nx*ny]+=samp[1];
+				fobs[j1+i1*ny]+=samp[0]; 
+				fobs[j1+i1*ny+nx*ny]+=samp[1];
  		             
- 		    		}	
+ 		    	}	
  	       }
  
 

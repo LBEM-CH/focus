@@ -11,7 +11,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <fftw3.h>
-  
+ #include "trans3D.c" 
+#include "mask3DCos.c"
 
 float  DSTEP=7.0, XMAG=70000;
 
@@ -24,7 +25,7 @@ float  DSTEP=7.0, XMAG=70000;
 main()
 {     
      FILE *input[2], *output;    
-     int  sx=120;
+     int  sx=140;
  	float  *ref1, *ref2, *FSC;
     
      float   mean;
@@ -60,26 +61,33 @@ main()
      num=(int *)calloc(sx,sizeof(int));
       
      
-     input[0]=fopen("/home/xiangyan/GLPF/GLPF-clean/merge/SCRATCH/CC_results_6/3dmodela1_07.dat","r");
-	input[1]=fopen("/home/xiangyan/GLPF/GLPF-clean/merge/SCRATCH/CC_results_6/3dmodela2_07.dat","r");
-     output=fopen("/home/xiangyan/GLPF/GLPF-clean/merge/SCRATCH/FSC.dat","w");
+//     input[0]=fopen("/home/xiangyan/GLPF/GLPF-clean/merge/SCRATCH/CC_results_6/3dmodela1_06.dat","r");
+//     input[1]=fopen("/home/xiangyan/GLPF/GLPF-clean/merge/SCRATCH/CC_results_6/3dmodela2_06.dat","r");
+
+
+      input[0]=fopen("/home/xiangyan/mrcImages/GLPF/GLPF-clean/merge/SCRATCH/3dmodela1_06.dat","r");
+      input[1]=fopen("/home/xiangyan/mrcImages/GLPF/GLPF-clean/merge/SCRATCH/3dmodela2_06.dat","r");
+      output=fopen("/home/xiangyan/mrcImages/GLPF/GLPF-clean/merge/SCRATCH/FSC.dat","w");
      
  
  	fread(ref1, sizeof(float)*sx*sx*sx, 1, input[0]);
 	fread(ref2, sizeof(float)*sx*sx*sx, 1, input[1]);
  
 	 
+	mask3D(90,90,90,sx,sx,sx,ref1);
+	mask3D(90,90,90,sx,sx,sx,ref2);
+
+
  
       for(i=0;i<sx;i++)
          for(j=0;j<sx;j++)
 		for(k=0;k<sx;k++)
-          {		 
+          	{		 
 	    		 in1[k+j*sx+i*sx*sx][0]=ref1[k+j*sx+i*sx*sx] ;  	 
-	     	 in2[k+j*sx+i*sx*sx][0]=ref2[k+j*sx+i*sx*sx];  
+	     		 in2[k+j*sx+i*sx*sx][0]=ref2[k+j*sx+i*sx*sx];  
 
 			 in1[k+j*sx+i*sx*sx][1]=0; 
-            	 in2[k+j*sx+i*sx*sx][1]=0;
-            	 
+            	 	in2[k+j*sx+i*sx*sx][1]=0;
            }  
       
            
@@ -110,8 +118,8 @@ main()
 		    in2[k+j*sx+i*sx*sx][0]=(in2[k+j*sx+i*sx*sx][0]-mean)*powf(-1,(i+j+k)*1.0)/(sx*sx*sx);
      
       
-      p1=fftwf_plan_dft_3d(sx,sx,sx, in1,out1,FFTW_FORWARD,FFTW_ESTIMATE);
- 	 p2=fftwf_plan_dft_3d(sx,sx,sx, in2,out2,FFTW_FORWARD,FFTW_ESTIMATE);
+      p1=fftwf_plan_dft_3d(sx,sx,sx, in1,in1,FFTW_FORWARD,FFTW_ESTIMATE);
+      p2=fftwf_plan_dft_3d(sx,sx,sx, in2,in2,FFTW_FORWARD,FFTW_ESTIMATE);
     
       fftwf_execute(p1);
       fftwf_destroy_plan(p1);
@@ -119,21 +127,71 @@ main()
       fftwf_destroy_plan(p2);
 
 
+//  align the two 3D volume
+float *cross_corr=(float *)calloc(sx*sx*sx,sizeof(float));
+ 
+for(i=0;i<sx;i++)
+        for(j=0;j<sx;j++)
+		for(k=0;k<sx;k++)
+           	{    	out1[k+j*sx+i*sx*sx][0]=in1[k+j*sx+i*sx*sx][0]*in2[k+j*sx+i*sx*sx][0]+in1[k+j*sx+i*sx*sx][1]*in2[k+j*sx+i*sx*sx][1];
+         		out1[k+j*sx+i*sx*sx][1]=-in1[k+j*sx+i*sx*sx][0]*in2[k+j*sx+i*sx*sx][1]+in1[k+j*sx+i*sx*sx][1]*in2[k+j*sx+i*sx*sx][0];
+		}
+
+	
+
+   	p1=fftwf_plan_dft_3d(sx,sx,sx, out1,out1,FFTW_BACKWARD,FFTW_ESTIMATE);
+ 	fftwf_execute(p1);
+      	fftwf_destroy_plan(p1);
+
+
+	max1=-1.0e20;
+	for(i=0;i<sx;i++)
+        	for(j=0;j<sx;j++)
+			for(k=0;k<sx;k++)
+			{	out1[k+j*sx+i*sx*sx][0]=out1[k+j*sx+i*sx*sx][0]*powf(-1.0, i+j+k);
+				if(max1<out1[k+j*sx+i*sx*sx][0])
+				{	max1=out1[k+j*sx+i*sx*sx][0];
+					im=-i;
+					jm=-j;
+					km=-k;
+				}
+			}
+
+
+printf("IM=%d  JM=%d  KM=%d   MAX=%e   %e   %e    %e\n", im,jm,km,max1, out1[0][0], out1[sx][0], out1[sx*sx][0]);
+
+	trans3D(sx, im,jm,km,ref1);
+
+
+      	for(i=0;i<sx;i++)
+         	for(j=0;j<sx;j++)
+		for(k=0;k<sx;k++)
+          	{		 
+	    		 in1[k+j*sx+i*sx*sx][0]=ref1[k+j*sx+i*sx*sx]*powf(-1.0, i+j+k);  	 
+			 in1[k+j*sx+i*sx*sx][1]=0; 
+            	} 
+
+  	p1=fftwf_plan_dft_3d(sx,sx,sx, in1,in1,FFTW_FORWARD,FFTW_ESTIMATE);
+	fftwf_execute(p1);
+      	fftwf_destroy_plan(p1);
+
+
+
+
+
 
 /*  Get amplitude and phase of FFT image   */
       for(i=0;i<sx;i++)
         for(j=0;j<sx;j++)
 		for(k=0;k<sx;k++)
-         {
-	            amp1[k+j*sx+i*sx*sx]=(pow(out1[k+j*sx+i*sx*sx][0],2)+pow(out1[k+j*sx+i*sx*sx][1],2));
+         	{
+	            amp1[k+j*sx+i*sx*sx]=(pow(in1[k+j*sx+i*sx*sx][0],2)+pow(in1[k+j*sx+i*sx*sx][1],2));
 
-			  amp2[k+j*sx+i*sx*sx]=(pow(out2[k+j*sx+i*sx*sx][0],2)+pow(out2[k+j*sx+i*sx*sx][1],2));
+	            amp2[k+j*sx+i*sx*sx]=(pow(in2[k+j*sx+i*sx*sx][0],2)+pow(in2[k+j*sx+i*sx*sx][1],2));
          	   
- 
-         
-           	  corr[k+j*sx+i*sx*sx]=(out1[k+j*sx+i*sx*sx][0]*out2[k+j*sx+i*sx*sx][0]+out1[k+j*sx+i*sx*sx][1]*out2[k+j*sx+i*sx*sx][1]);
+           	    corr[k+j*sx+i*sx*sx]=(in1[k+j*sx+i*sx*sx][0]*in2[k+j*sx+i*sx*sx][0]+in1[k+j*sx+i*sx*sx][1]*in2[k+j*sx+i*sx*sx][1]);
         
-         } 
+         	} 
 	    
 
 /*   Get  Fourier Ring Correlation  */
@@ -154,9 +212,9 @@ main()
                   m=(int)(sqrtf(powf(i-sx/2,2.0)+powf(j-sx/2,2.0)+powf(k-sx/2,2.0)));
 
                   F1[m]+=(amp1[k+j*sx+i*sx*sx]);
-		  	   F2[m]+=(amp2[k+j*sx+i*sx*sx]);
-		  	   F12[m]+=corr[k+j*sx+i*sx*sx];
-		        num[m]++;
+		  F2[m]+=(amp2[k+j*sx+i*sx*sx]);
+		  F12[m]+=corr[k+j*sx+i*sx*sx];
+		  num[m]++;
  
               }
 
@@ -185,8 +243,8 @@ main()
 
 	  FSC[0]=1;
        for(i=1;i<sx/2;i++)   
-	  {   FSC[i]=F12[i]/sqrtf(F1[i]*F2[i]);
-			printf("%d  %f  %f  %f   %f \n", i, F12[i], F1[i], F2[i], FSC[i]);
+	  {   FSC[i]=F12[i]/(sqrtf(F1[i]*F2[i])+1.0e-20);
+			printf("%d  %e  %e  %e   %f\n", i, F12[i], F1[i], F2[i], FSC[i]);
 	  }
     
 	           
@@ -205,9 +263,10 @@ main()
         if(F1[i]>max1) max1=F1[i];
         
  
-      for(i=0;i<sx/2;i++)
-            fprintf(output,"   %f     %f \n",   1.0/((float)(sx*DSTEP*10000)/(float)(XMAG*(i)*1)), FSC[i]);
-	 
+      for(i=1;i<sx/2;i++)
+	{	max3= (0.5+2.4142/sqrt(num[i]))/(1.5+1.4142/sqrt(num[i]));
+            	fprintf(output,"   %f         %f    %f  \n",   1.0/((float)(sx*DSTEP*10000)/(float)(XMAG*(i)*1)),     FSC[i], max3);
+	}
     
 
      fclose(input[0]); 

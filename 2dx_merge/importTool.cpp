@@ -216,10 +216,11 @@ void importTool::updateParsedViewRequired(int m, int n)
             item->setText(QString("%1").arg(patternText,-4,QChar('0')));
           else if(i==2)
           {
-            if(item->text().isEmpty())
-              item->setText(QString("%1").arg(patternText.toInt()+j,6,10,QChar('0')));
-            else
-              item->setText(QString("%1").arg(patternText.toInt()+item->text().toInt(),6,10,QChar('0')));
+           //CHEN>  if(item->text().isEmpty())
+           //CHEN>    item->setText(QString("%1").arg(patternText.toInt()+j,6,10,QChar('0')));
+           //CHEN>  else
+           //CHEN>    item->setText(QString("%1").arg(patternText.toInt()+item->text().toInt(),6,10,QChar('0')));
+            item->setText(QString("%1").arg(patternText.toInt()+j-1,6,10,QChar('0')));
           }
           else if(i==1 || i ==3)
             item->setText(QString("%1").arg(patternText.toInt(),2,10,QChar('0')));

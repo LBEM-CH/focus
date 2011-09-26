@@ -55,7 +55,7 @@ echo backup_sure = ${backup_sure}
 #
 echo "<<@progress: 1>>"
 #
-# echo "set backup_sure = no" >> LOGS/${scriptname}.results
+echo "set backup_sure = no" >> LOGS/${scriptname}.results
 #
 if ( ! -d ${backup_dir} ) then
   #

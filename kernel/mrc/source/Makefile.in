@@ -15,10 +15,12 @@ PEAKMAKE = cd ./peaksearch; make all; cd ..
 GETLATMAKE = cd ./2dx_getlat; make all; cd ..
 ENDIANMAKE = cd ./endianness; make all; cd ..
 CTFMAKE = cd ./ctf; make all; cd ..
+SPMAKE = cd ./single-particle; make all; cd ..
 PEAKMAKECLEAN = cd ./peaksearch; make clean; cd ..
 GETLATMAKECLEAN = cd ./2dx_getlat; make clean; cd ..
 ENDIANMAKECLEAN = cd ./endianness; make clean; cd ..
 CTFMAKECLEAN = cd ./ctf; make clean; cd ..
+SPMAKECLEAN = cd ./single-particle; make clean; cd ..
 
 
 all: $(LIBRARIES) $(BINARIES)
@@ -44,9 +46,12 @@ $(ENDIAN):
 $(CTF):  
 	$(CTFMAKE)	
 
+$(SP):  
+	$(SPMAKE)	
 clean:
 	\rm -f $(BINARIES) $(OBJECTS);
 	$(PEAKMAKECLEAN)
 	$(GETLATMAKECLEAN)
 	$(ENDIANMAKECLEAN)
 	$(CTFMAKECLEAN)
+	$(SPMAKECLEAN) 

@@ -610,13 +610,17 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   \rm -f SCRATCH/TMP001_phase_zero.map
   #
+  echo "Checkpoint 1"
+  #
   ${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/TMP001_phase_zero.map << eof
 MODE mapin
-XYZLIM -0.3 0.3 -0.3 0.3 -0.2 0.2
+XYZLIM -0.3 0.3 -0.3 0.3 -0.0 0.0
 END
 eof
   #
   \rm -f SCRATCH/TMP001.mrc
+  #
+  echo "Checkpoint 2"
   #
   ${bin_2dx}/labelh.exe << eot
 SCRATCH/TMP001_phase_zero.map
@@ -628,7 +632,7 @@ else
   #
   ${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map << eof
 MODE mapin
-XYZLIM -0.3 0.3 -0.3 0.3 -0.2 0.2
+XYZLIM -0.3 0.3 -0.3 0.3 -0.0 0.0
 END
 eof
   #

@@ -371,7 +371,7 @@ else
 endif
 #
 if ( ! -e ${prefix}centric.hkl ) then
-  ${proc_2dx}/protest "ERROR occured."
+  ${proc_2dx}/protest "ERROR occured. ${prefix}centric.hkl missing."
 endif
 #
 echo "# IMAGE: ${prefix}centric.hkl <TXT: ${prename}APH file after CENTRIC [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
@@ -381,6 +381,8 @@ ${proc_2dx}/linblock "f2mtz - to translate avrg.hkl into ${imagename}.mtz"
 #############################################################################
 #
 set infile = ${prefix}centric.hkl
+#
+echo "# IMAGE: ${infile} <TXT: HKL file>" >> LOGS/${scriptname}.results
 #
 echo "Calling now:"
 echo "${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}.mtz"
@@ -406,8 +408,22 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   ${proc_2dx}/linblock "2dx_permutate - to transform into K,L,H"
   #
-  ${bin_2dx}/2dx_permutate.exe < ${infile} > ${prefix}${imagename}-permutated.hkl
-  echo "# IMAGE: ${prefix}${imagename}-permutated.hkl <TXT: APH file after permutation>" >> LOGS/${scriptname}.results
+  set outfile = ${prefix}${imagename}-permutated.hkl
+  \rm -f ${outfile}
+  #
+  ${bin_2dx}/2dx_permutate_file.exe << eot
+${infile}
+${outfile}
+1
+eot
+  #
+  if ( ! -s ${outfile} ) then
+    ${proc_2dx}/protest "ERROR in 2dx_permutate_file.exe"
+  endif
+  #
+  echo "# IMAGE: ${outfile} <TXT: APH file after permutation>" >> LOGS/${scriptname}.results
+  #
+  ${proc_2dx}/linblock "f2mtz - to transform into MTZ file"
   #
   ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}-permutated.hkl hklout ${prefix}${imagename}.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
@@ -439,6 +455,8 @@ endif
 echo "# IMAGE: ${prefix}${imagename}.mtz <MTZ file of Amp&Phs>" >> LOGS/${scriptname}.results
 #
 set infile = ${prefix}centric_phase_zero.hkl
+echo "# IMAGE: ${infile} <HKL file of phase zero>" >> LOGS/${scriptname}.results
+#
 #
 if ( ${rotate_to_Z} == "yes" ) then
   # Here comes a messy thing: CCP4 wants to symmetrize in the Y direction,
@@ -453,7 +471,22 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   ${proc_2dx}/linblock "2dx_permutate - to transform into K,L,H for PSF file"
   #
-  ${bin_2dx}/2dx_permutate.exe < ${infile} > ${prefix}${imagename}_phase_zero-permutated.hkl
+  set outfile = ${prefix}${imagename}_phase_zero-permutated.hkl
+  \rm -f ${outfile}
+  #
+  ${bin_2dx}/2dx_permutate_file.exe << eot
+${infile}
+${outfile}
+1
+eot
+  #
+  if ( ! -s ${outfile} ) then
+    ${proc_2dx}/protest "ERROR in 2dx_permutate_file.exe"
+  endif
+  #
+  echo "# IMAGE: ${prefix}${imagename}_phase_zero-permutated.hkl <permutated HKL file>" >> LOGS/${scriptname}.results
+  #
+  ${proc_2dx}/linblock "f2mtz - to transform into MTZ file of phase zero"
   #
   ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}_phase_zero-permutated.hkl hklout ${prefix}${imagename}_phase_zero.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}_phase_zero, ${date}

@@ -66,6 +66,10 @@ cd ${SRC}/${APP}
 echo 'workinkg directory: '
 pwd
 echo '+----------------------------------------------------------------------------+'
+echo '| autoconf                                                                   |'
+echo autoconf || (echo "autoconf failed for" $APP ; read)
+autoconf || (echo "autoconf failed for" $APP ; read)
+echo '+----------------------------------------------------------------------------+'
 echo '| configure                                                                  |'
 echo ./configure || (echo "Configure failed for" $APP ; read)
 ./configure || (echo "Configure failed for" $APP ; read)

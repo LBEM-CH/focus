@@ -62,6 +62,60 @@ echo ''
 echo ''
 echo ''
 
+echo '*############################################################################*'
+echo '| packaging the source code                                                  |' 
+echo '*============================================================================*'
+echo '|                                                                            |'
+PACKAGE_PATH=$BUILD_DIR"packages/"
+echo '*============================================================================*'
+echo '| exporting the source code to $PACKAGE_PATH                                 |' 
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+EXPORT_DIR=2dx_nightly_source
+echo svn export --force  $SOURCE_DIR $EXPORT_DIR || (echo "Could not export the source code"; exit 10)
+svn export --force  $SOURCE_DIR $EXPORT_DIR || (echo "Could not export the source code"; exit 10)
+if [ $? -gt 0 ]; then
+	exit 10;
+fi
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo '| archiving the source code to 2dx_nightly_source.tar.gz                     |' 
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+OUTFILE=2dx_nightly_source.tar.gz
+echo tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR  || (echo "Could not package the source code"; exit 10)
+tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR || (echo "Could not package the source code"; exit 10)
+if [ $? -gt 0 ]; then
+	exit 10;
+fi
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+echo '*############################################################################*'
+echo '| Moving Source Package to Server				                   |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+
+
+echo ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 11)
+${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 11)
+if [ $? -gt 0 ]; then
+	exit 11;
+fi
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+
 
 echo '*############################################################################*'
 echo '| Calling ./build_all                                                       |'

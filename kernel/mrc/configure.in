@@ -59,7 +59,7 @@ fi
 #AC_FUNC_STAT
 #AC_CHECK_FUNCS([memset mkdir pow putenv setenv sqrt strchr strerror])
 
-AC_SUBST(SUBDIRS,["source source/2dx_getlat source/ctf source/peaksearch source/endianness source/periodogram source/maximum_likelihood source/single-particle"])
+AC_SUBST(SUBDIRS,["source source/2dx_getlat source/ctf source/peaksearch source/endianness source/periodogram source/maximum_likelihood lib"])
 AC_CONFIG_FILES([Makefile
                  lib/Makefile
                  source/Makefile
@@ -68,6 +68,5 @@ AC_CONFIG_FILES([Makefile
                  source/maximum_likelihood/Makefile
                  source/peaksearch/Makefile
                  source/endianness/Makefile
-                 source/periodogram/Makefile
-                 source/single-particle/Makefile])
+                 source/periodogram/Makefile])
 AC_OUTPUT

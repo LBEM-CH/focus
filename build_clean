@@ -75,6 +75,11 @@ echo ./configure || (echo "Configure failed for" $APP ; read)
 ./configure || (echo "Configure failed for" $APP ; read)
 echo ''
 echo '+----------------------------------------------------------------------------+'
+echo '| make clean                                                                 |'
+make VERBOSE=1 -j1 clean || (echo "Clean failed for $APP"; read)
+echo ''
+echo ''
+echo '+----------------------------------------------------------------------------+'
 echo '| make                                                                       |'
 make VERBOSE=1 -j1 || (echo "Build failed for $APP"; read)
 #echo ''

@@ -157,7 +157,7 @@ C
         if(TLTAXIS.gt. 90.0)TLTAXIS=TLTAXIS-180.0
         if(TLTAXIS.lt.-90.0)TLTAXIS=TLTAXIS+180.0
         if(TLTAXIS.lt.-90.0)TLTAXIS=TLTAXIS+180.0
-        write(*,'('' 1. TILTAXIS = '',F15.5,''    = ALPHA - PHITLT''
+        write(*,'('':: 1. TILTAXIS = '',F15.5,''    = ALPHA - PHITLT''
      1    )')TLTAXIS
         TLTAXS1 = TLTAXIS
 C
@@ -166,7 +166,7 @@ C
         if(TLTAXIS.gt. 90.0)TLTAXIS=TLTAXIS-180.0
         if(TLTAXIS.lt.-90.0)TLTAXIS=TLTAXIS+180.0
         if(TLTAXIS.lt.-90.0)TLTAXIS=TLTAXIS+180.0
-        write(*,'('' 2. TILTAXIS = '',F15.5,''    = ALPHA + PHITLT''
+        write(*,'('':: 2. TILTAXIS = '',F15.5,''    = ALPHA + PHITLT''
      1    )')TLTAXIS
         TLTAXS2 = TLTAXIS
 C
@@ -184,40 +184,55 @@ C
           ISGNTLTAN2=-1
         endif
 C
-        write(*,'('' TLTAXIS distance for first  option is '',F15.5)')
-     1    RDIST1
-        write(*,'('' TLTAXIS distance for second option is '',F15.5)')
-     1    RDIST2
+        RDISTMIN = RDIST1
+        if (RDISTMIN.gt.RDIST2) RDISTMIN=RDIST2
+C
+        if(RDISTMIN.gt.30.0)then
+          write(*,'('':: '')')
+          write(*,'(''::'',78(''*''))')
+          write(*,'(''::WARNING: Strong deviation between current tilt axis and lattice-determined tilt axis.'')')
+          write(*,'(''::'',78(''*''))')
+          write(*,'('':: '')')
+          write(*,'('':: TLTAXIS distance for first  option is '',F15.5)')
+     1      RDIST1
+          write(*,'('':: TLTAXIS distance for second option is '',F15.5)')
+     1      RDIST2
+        else
+          write(*,'('': TLTAXIS distance for first  option is '',F15.5)')
+     1      RDIST1
+          write(*,'('': TLTAXIS distance for second option is '',F15.5)')
+     1      RDIST2
+        endif
 C
         if(RDIST1.lt.RDIST2)then
-          write(*,'('' Taking first option.'')')
+          write(*,'('':: Taking first option.'')')
           TLTAXIS = TLTAXS1
           TLTAXA = PHITLT
           ISGNTLTANG=ISGNTLTAN1
         else
-          write(*,'('' Taking second option.'')')
+          write(*,'('':: Taking second option.'')')
           TLTAXIS = TLTAXS2
           TLTAXA = -PHITLT
           ISGNTLTANG=ISGNTLTAN2
         endif
         if(IHAND.lt.0)then
-          write(*,'('' Left-handed lattice, revertings sign of TLTAXA'')')
+          write(*,'('':: Left-handed lattice, revertings sign of TLTAXA'')')
           TLTAXA=-TLTAXA
         endif
-        write(*,'('' Sign of TLTANG is '',I6)')ISGNTLTANG
-        write(*,'('' TLTAXIS = '',F15.5)')TLTAXIS
-        write(*,'('' TLTAXA = '',F15.5)')TLTAXA
+        write(*,'('': Sign of TLTANG is '',I6)')ISGNTLTANG
+        write(*,'('': TLTAXIS = '',F15.5)')TLTAXIS
+        write(*,'('': TLTAXA = '',F15.5)')TLTAXA
 C
         if(OLDTLTAXIS.ge.0.0)THEN
           ISGNTLTAXIS = 1
         else
           ISGNTLTAXIS = -1
         endif
-        write(*,'('' Sign of OLDTLTAXIS is '',I6)')ISGNTLTAXIS
+        write(*,'('': Sign of OLDTLTAXIS is '',I6)')ISGNTLTAXIS
 C
         TAXA = abs(PHI)
         if(TLTAXA.lt.0.0)TAXA=-TAXA
-        write(*,'('' TAXA is '',F15.5)')TAXA
+        write(*,'('': TAXA is '',F15.5)')TAXA
 C
         TLTNORM = TLTAXIS + 90.0
         ANGACOMP = abs(ALPHA - TLTNORM)
@@ -226,7 +241,7 @@ C
         else
           ISGNAISABOVE = 1
         endif
-        write(*,'('' ISIGNAISABOVE is if A is above TLTAXIS = '',I6)')
+        write(*,'('': ISIGNAISABOVE is if A is above TLTAXIS = '',I6)')
      1    ISGNAISABOVE
 C
         if(TLTAXA.ge.0.0)then
@@ -234,10 +249,10 @@ C
         else
           ISGNTLTAXA = -1
         endif
-        write(*,'('' ISIGNTLTAXA = '',I6)')ISGNTLTAXA
+        write(*,'('': ISIGNTLTAXA = '',I6)')ISGNTLTAXA
 C
         TANGL = TLTANG * ISGNAISABOVE * ISGNTLTAXA * IHAND
-        write(*,'('' TANGL = '',F15.5)')TANGL
+        write(*,'('':: TANGL = '',F15.5)')TANGL
 C
         OPEN(UNIT=15,FILE=cname,STATUS='NEW')
         write(15,'('' TLTAXIS = '',/,F15.5)')TLTAXIS

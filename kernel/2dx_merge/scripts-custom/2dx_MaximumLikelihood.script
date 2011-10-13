@@ -161,11 +161,11 @@ echo date = ${date}
 #
 set system = `uname`
 if ( ${system} == "Darwin" ) then
-  say -v Vicki "Sorry, I must reformat your harddrive _ starting now" 
-  say -v Vicki "_ _"
-  say -v Vicki "_ _"
-  say -v Vicki "_ _"
-  say -v Vicki "_ _ or _ _ maybe not"
+  say -v Alex "Sorry, I must reformat your harddrive _ starting now" 
+  say -v Alex "_ _"
+  say -v Alex "_ _"
+  say -v Alex "_ _"
+  say -v Alex "_ _ or _ _ maybe not"
 endif
 #
 ${proc_2dx}/linblock "Not yet implemented. Use 2dx_image for ML processing in 2d."

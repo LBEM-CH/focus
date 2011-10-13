@@ -69,8 +69,24 @@ set scriptname = 2dx_initialize
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
-#
 source ${proc_2dx}/2dx_makedirs
+#
+# For some reason, this doesn't work:
+# set hasspace = `echo "$PWD" | grep -c --regexp=" "  `
+# The grep command waits forever for the string, and doesn't realize it is " ".
+set hasspace = "0"
+#
+if ( ${hasspace} != '0' ) then
+  echo ":: "
+  echo "::                           ERROR ERROR ERROR ERROR ERROR "
+  echo "::                           No SPACES in pathname allowed."
+  echo "::                           ERROR ERROR ERROR ERROR ERROR "
+  echo "::" $PWD
+  echo ":: has spaces in the pathname."
+  echo ":: You must rename the directories that lead to this place."
+  echo ":: "
+  ${proc_2dx}/protest "Aborting."
+endif
 #
 echo "<<@progress: 1>>"
 #

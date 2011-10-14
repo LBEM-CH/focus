@@ -152,18 +152,18 @@ void displayParametersTool::showEvent(QShowEvent *event)
 
 void displayParametersTool::setDefaults()
 {
-  latticeSize.setValue(10);
+  latticeSize.setValue(15);
   latticeSize.setSingleStep(1);
-  latticeCircleLine.setValue(1);
+  latticeCircleLine.setValue(0);
   latticeCircleLine.setSingleStep(1);
   latticeOrders.setValue(20);
   latticeOrders.setSingleStep(1);
   latticeOrders.setMinimum(1);
-  spotSize.setValue(10);
+  spotSize.setValue(20);
   spotSize.setSingleStep(1);
   latticeRefineSize.setValue(5);
   latticeRefineSize.setSingleStep(1);
-  searchRange.setValue(25);
+  searchRange.setValue(15);
   searchRange.setSingleStep(1);
   sigma.setValue(1.5);
   sigma.setSingleStep(0.5);

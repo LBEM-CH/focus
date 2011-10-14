@@ -45,6 +45,20 @@ alias replaceWithLink 'eval " \\
 		  endif \\
 		  ln -fs \!:1 \!:2"'
 #
+set path_has_space = `echo "$PWD" | wc -w`
+#
+if ( ${path_has_space} != '1' ) then
+  echo ":: "
+  echo "::                           ERROR ERROR ERROR ERROR ERROR "
+  echo "::                           No SPACES in pathname allowed."
+  echo "::                           ERROR ERROR ERROR ERROR ERROR "
+  echo "::" $PWD
+  echo ":: has spaces in the pathname."
+  echo ":: You must rename the directories that lead to this place."
+  echo ":: "
+  ${proc_2dx}/protest "Aborting."
+endif
+#
 if ( ${SCRATCH_DISK} == "." || ${SCRATCH_DISK} == "" ) then
   if ( ! -d SCRATCH ) then
     echo "::SCRATCH disk will be local."

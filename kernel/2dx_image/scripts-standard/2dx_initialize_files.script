@@ -162,7 +162,7 @@ endif
 # 
 set new_mrc_created = 'n'
 #
-if ( ! -e ${imagename}.mrc ) then
+if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc) then
   #
   #################################################################################
   ### Transform ${imagename}.tif into ${imagename}.mrc ############################

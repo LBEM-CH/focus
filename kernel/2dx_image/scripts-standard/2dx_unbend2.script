@@ -19,6 +19,9 @@
 #
 # SORTORDER: 50
 #
+# DISPLAY: imagenumber
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
 # DISPLAY: SYN_Unbending
 # DISPLAY: holeb
 # DISPLAY: maskb01
@@ -521,6 +524,10 @@ end
 ##### END OF THE BIG WHILE LOOP OVER THE DIFFERENT MASKB VALUES #############
 #############################################################################
 #############################################################################
+#
+if ( ${domask} == 'y' ) then
+  exit -1
+endif
 #
 #############################################################################
 ${proc_2dx}/${lincommand} "MASKTRAN - to mask the FFT of the unbent image"

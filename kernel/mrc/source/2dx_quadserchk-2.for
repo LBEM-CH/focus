@@ -1169,7 +1169,7 @@ C
       PARAMETER (MNY=-240)
       PARAMETER (MXY=240)
       PARAMETER (IPICDIM=512)
-      PARAMETER (IPICDI2=4096)
+      PARAMETER (IPICDI2=1024)
 C
       PARAMETER (LMAX=20100)
       PARAMETER (LCMX=10050)
@@ -1694,7 +1694,9 @@ C
 C
       ILIMIT=IGAURA2
       do I=1,IGAURA2
-        if(RGAUS(I,0).gt.0.01)ILIMIT=I
+C-------if(RGAUS(I,0).gt.0.01)ILIMIT=I
+C-------Here only for masking info, can be faster:
+        if(RGAUS(I,0).gt.0.08)ILIMIT=I
       enddo
       if(ILIMIT.gt.IGAURA2)ILIMIT=IGAURA2
 C

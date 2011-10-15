@@ -876,7 +876,6 @@ eot
     ${proc_2dx}/linblock "#"
     ${proc_2dx}/linblock "#"
     ${proc_2dx}/linblock "Image now masked, name was changed to m${imagename}"
-    ${proc_2dx}/linblock "#"
     ${proc_2dx}/linblock "SpotList link created: m${imagename}.spt -> ${imagename}.spt"
     ${proc_2dx}/linblock "#"
     ${proc_2dx}/linblock "Please relaunch the entire processing."

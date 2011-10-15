@@ -76,7 +76,11 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   confData *cfg = new confData(userPath + "/2dx.cfg", mainData->getDir("config") + "/" + "2dx.cfg");
   if(cfg->isEmpty()) {cerr<<"2dx.cfg not found."<<endl; exit(0);}
   cfg->save();    
-  
+
+
+  installedVersion = mainData->version();
+  setWindowTitle("2dx_merge, Version 2dx-" + installedVersion);
+
   mainData->setAppConf(cfg);
   
   mainData->setDir("home_2dx",userPath);

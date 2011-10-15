@@ -138,6 +138,8 @@ class mainWindow : public QMainWindow
   updateWindow *updates; 
 	aboutWindow *about;
 
+  QString installedVersion;
+
   imageAlbum *album;
 
   scriptModule *standardScripts;

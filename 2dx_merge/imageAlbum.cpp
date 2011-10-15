@@ -57,7 +57,18 @@ imageAlbum::imageAlbum(const QString &path, QWidget *parent)
 
  
   QListWidget *selectionWidget = new QListWidget;
-  selectionWidget->addItem("P1 Symmetry");
+  selectionWidget->addItem("Directory: ");
+  selectionWidget->addItem("Name: ");
+  selectionWidget->addItem("Number: ");
+  selectionWidget->addItem("QVal2: ");
+  selectionWidget->addItem("QValS: ");
+  selectionWidget->addItem("Phase Residual: ");
+  selectionWidget->addItem("TAXA: ");
+  selectionWidget->addItem("TANGL: ");
+  selectionWidget->addItem("Magnification: ");
+  selectionWidget->addItem("Theor. Magnif: ");
+  selectionWidget->addItem("Defocus: ");
+  selectionWidget->addItem("Comment: ");
   
   viewContainer *selectorContainer = new viewContainer("Selection", viewContainer::image, this);
   selectorContainer->addWidget(selectionWidget);

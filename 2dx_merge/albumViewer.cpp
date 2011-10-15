@@ -74,15 +74,20 @@ void albumViewer::paintEvent(QPaintEvent */*event*/)
   if(pixmap==NULL) return;
   QPainter *painter = new QPainter(this);
 
-  shearScale = float(pixmap->height())*tan((cellC-90.0)*PI/180.0)/float(pixmap->width());
-  if(cellA!=0.0 && cellB!=0.0 && nx!=0.0 && ny!=0.0) pixelSize = (cellB*nx)/(cellA*ny);
+  //  shearScale = float(pixmap->height())*tan((cellC-90.0)*PI/180.0)/float(pixmap->width());
+  //  if(cellA!=0.0 && cellB!=0.0 && nx!=0.0 && ny!=0.0) pixelSize = (cellB*nx)/(cellA*ny);
+  //  else pixelSize = 1.0;
+  shearScale = -1.0/tan((cellC)*PI/180.0);
+  if(cellA!=0.0 && cellB!=0.0 && nx!=0.0 && ny!=0.0) pixelSize = cellB/cellA*1.0/sqrt(fabs(1+shearScale*shearScale));
   else pixelSize = 1.0;
+
   QPointF pOrigin = QPointF(phaseOrigin.x()/360.0*pixmap->width(), phaseOrigin.y()/360.0*pixmap->height());
   
   painter->setViewTransformEnabled(true);
   painter->translate(QPointF(float(width())/2.0,float(height())/2.0));
-  if(cellC!=0.0 && cellC!=90.0) painter->shear(0.0,shearScale);
-  if(pixelSize!=1.0 && cellA/nx!=cellB/ny) painter->scale(1.0,pixelSize);
+  if(cellC!=0.0 && cellC!=90.0) painter->shear(shearScale,0.0);
+  // if(pixelSize!=1.0 && cellA/nx!=cellB/ny) painter->scale(1.0,pixelSize);
+  if(pixelSize!=1.0) painter->scale(1.0,pixelSize);
   
   painter->setClipRect(QRect(-pixmap->width()/2.0,-pixmap->height()/2.0,pixmap->width(),pixmap->height()));  
   painter->drawPixmap(QPointF(-pixmap->width()/2.0,-pixmap->height()/2.0),*pixmap);
@@ -98,6 +103,7 @@ void albumViewer::paintEvent(QPaintEvent */*event*/)
   thetaD = fmod(fmod(thetaD, 360.0) + 360.0, 360.0);
   if(thetaD>=90 && thetaD<270.0) thetaD-=180;
   if(thetaD>=270.0) thetaD -= 360.0;
+  // if(invertAngle) thetaD*=-1;
   // float theta = -(thetaD)/180.0*PI;
   
   // TAXA is defined as the angle between the Tilt Axis (in the final map) and the A Axis (the horizontal X-axis in the final map).

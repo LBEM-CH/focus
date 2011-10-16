@@ -819,9 +819,10 @@ bool mainWindow::createDir(const QString &dir)
 
 void mainWindow::launchAlbum(const QString &path)
 {
-  if(album==NULL)
+
+  if(album==NULL && dirModel!=NULL)
   {
-    album = new imageAlbum(path);
+    album = new imageAlbum(dirModel);
     connect(dirView->selectionModel(),SIGNAL(currentRowChanged(const QModelIndex&,const QModelIndex&)),album,SLOT(currentSelectionChanged(const QModelIndex&,const QModelIndex&)));      
 //    album->setModel(sortModel);
 //    album->setSelectionModel(dirView->selectionModel());

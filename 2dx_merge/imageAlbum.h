@@ -56,7 +56,7 @@ class imageAlbum : public QWidget
 	albumViewer *viewer;
 
   public:
-    imageAlbum(const QString &path, QWidget *parent = NULL);
+    imageAlbum(const projectModel *dirModel, QWidget *parent = NULL);
     void reload();  
 };
 

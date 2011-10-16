@@ -620,6 +620,42 @@ void projectModel::changeSelection(QStandardItem *currentItem, int itemCount, co
   }
 }
 
+QStringList projectModel::getSelectionNames()
+{
+  QStringList selectedFiles;
+  getSelection(item(0),rowCount(),selectedFiles);
+  return selectedFiles;
+}
+void projectModel::getSelection(QStandardItem *currentItem, int itemCount, QStringList & selected)
+{
+  QModelIndex i;
+  QList<QModelIndex> allItems = match(currentItem->index(), Qt::CheckStateRole, ".*" /*QString::number(Qt::Checked) + "|" + QString::number(Qt::PartiallyChecked) + "|" + QString::number(Qt::Unchecked)*/, itemCount, Qt::MatchRegExp);
+  foreach(i, allItems)
+  {
+	  if(i.isValid())
+	  {
+		  if(i.child(0,0).isValid()) 
+        getSelection(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), selected);
+		  else if(i.column() == 0)
+		  {
+				  if(i.data(Qt::CheckStateRole) == Qt::Checked)
+          {
+            QString name = i.data(Qt::DisplayRole).toString();
+            //QString name = item(i)->text();
+            qDebug()<<name;
+            selected<<name;
+          }
+		  }
+	  }
+  }
+}
+
+
+QString projectModel::getProjectPath() const
+{
+  return projectPath;
+}
+
 void projectModel::currentRowChanged(const QModelIndex&i,const QModelIndex&)
 {
 	if(!i.sibling(i.row(),1).isValid()) return;

@@ -23,7 +23,7 @@
 #include <QDebug>
 using namespace std;
 
-imageAlbum::imageAlbum(const QString &path, QWidget *parent)
+imageAlbum::imageAlbum(const projectModel *dirModel, QWidget *parent)
           :QWidget(parent,Qt::Window)
 {
 
@@ -32,7 +32,7 @@ imageAlbum::imageAlbum(const QString &path, QWidget *parent)
   layout->setSpacing(0);
   setLayout(layout);
 
-  model = new albumModel(path,this);
+  model = new albumModel(dirModel,this);
   view = new QListView(this);
   view->setViewMode(QListView::IconMode);
   view->setSpacing(30);

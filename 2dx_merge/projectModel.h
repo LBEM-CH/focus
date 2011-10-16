@@ -95,6 +95,9 @@ class projectModel : public QStandardItemModel
   void maskResults(QStandardItem *currentItem, int itemCount);
   uint uid(const QString & path);
 
+
+  void getSelection(QStandardItem *currentItem, int itemCount, QStringList & selected);
+
   public:
 
   enum projectModelSortRole {SortRole = Qt::UserRole + 2};
@@ -105,6 +108,8 @@ class projectModel : public QStandardItemModel
   void setResultsFile(resultsData *resultsFile);
 
   QString pathFromIndex(const QModelIndex &index);
+  QStringList getSelectionNames();
+  QString getProjectPath() const; 
   QStringList parentDirs();
   QList<bool> visibleColumns();
 

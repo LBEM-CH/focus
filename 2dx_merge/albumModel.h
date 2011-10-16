@@ -25,8 +25,9 @@
 #include <QModelIndex>
 #include <QDir>
 #include <QIcon>
-#include <mrcImage.h>
-#include <confData.h>
+#include "mrcImage.h"
+#include "confData.h"
+#include "projectModel.h"
 
 class albumModel : public QAbstractListModel
 {
@@ -38,14 +39,16 @@ class albumModel : public QAbstractListModel
 
   private:
     QString rootPath;
+    const projectModel *project;
     QStringList locations;
     QList<QPixmap> pixmaps;
     QStringList names;
 
-    void init(const QString &path);
+    void init(const projectModel *pModel);
+    void getImagePaths(QString path, const QStringList &nameFilter, QStringList &list);
 
   public:
-    albumModel(const QString &path, QObject *parent);
+    albumModel(const projectModel *pModel, QObject *parent);
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
   QModelIndex index(const QString &path);

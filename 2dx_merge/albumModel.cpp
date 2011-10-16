@@ -18,38 +18,55 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <albumModel.h>
+#include "albumModel.h"
 #include <iostream>
 using namespace std;
 
-void albumModel::init(const QString &path)
+void albumModel::init(const projectModel *pModel)
 {
-  QDir dir(path);
-  QStringList images = dir.entryList(QStringList()<<"final_map.mrc", QDir::Files | QDir::Readable);
-  QStringList dirs = dir.entryList(QStringList()<<"*", QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable);
-
-  QString location;
-  foreach(QString image, images)
+   
+  if(pModel)
   {
-    location = QDir(path + "/" + image).absolutePath();
-    locations<<location;
-    confData localData(path + "/" + "2dx_image.cfg");
-    names<<localData.get("imagenumber","value");
-    mrcImage thumb(location,true);
-    pixmaps<<thumb.getPixmap();
-  }
-
-  foreach(QString subDir, dirs)
-  {
-    init(path + "/" + subDir);
+    QString path = pModel->getProjectPath();
+   
+    QStringList imageMaps;
+    getImagePaths(path,QStringList()<<"final_map.mrc", imageMaps);
   }
 }
 
-albumModel::albumModel(const QString &path, QObject *parent)
+void albumModel::getImagePaths(QString path, const QStringList &nameFilter, QStringList &list)
+{
+    QDir dir(path);
+    QStringList images = dir.entryList(nameFilter, QDir::Files | QDir::Readable);
+    foreach(QString image, images)
+    {
+      //qDebug()<<" " << image;
+      QString location = QDir(path+ "/" + image).absolutePath();
+      locations<<location;
+      confData localData(path + "/" + "2dx_image.cfg");
+      names<<localData.get("imagenumber","value");
+      qDebug()<<" " << localData.get("imagenumber","value");
+      mrcImage thumb(location,true);
+      pixmaps<<thumb.getPixmap();
+    }
+    QStringList subdirs = dir.entryList(QStringList()<<"*", QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable);
+    foreach(QString subdir, subdirs)
+    {
+        //qDebug()<<" " << subdir;
+        getImagePaths(path+"/"+subdir, nameFilter, list);
+    }
+}
+
+albumModel::albumModel(const projectModel *pModel, QObject *parent)
           : QAbstractListModel(parent)
 {
-  rootPath = path;
-  init(path);
+  qDebug()<<"albumModel::albumModel";
+  if(pModel != NULL)
+  {
+    project = pModel;
+    rootPath = pModel->getProjectPath();
+    init(pModel);
+  }
 }
 
 int albumModel::rowCount(const QModelIndex &parent) const
@@ -68,7 +85,7 @@ void albumModel::clear()
 void albumModel::reload()
 {
   clear();
-  init(rootPath);
+  init(project);
 }
 
 QModelIndex albumModel::index(const QString &path)

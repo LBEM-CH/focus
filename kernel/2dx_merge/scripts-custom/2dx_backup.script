@@ -374,6 +374,16 @@ while ( ${dircounter} > 0 )
           cp -f -p ${from_dirfile}/History.dat ${to_dirfile}
         endif
         #
+        if ( -e ${from_dirfile}/${loc_imagename}-profile.dat.gz ) then
+          echo ":New: ${to_dirfile}/${loc_imagename}-profile.dat.gz"
+          cp -f -p ${from_dirfile}/${loc_imagename}-profile.dat.gz ${to_dirfile}
+        endif
+        #
+        if ( -e ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ) then
+          echo ":New: ${to_dirfile}/${loc_imagename}-unitcells-spider.doc"
+          cp -f -p ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ${to_dirfile}
+        endif
+        #
         if ( -d ${from_dirfile}/APH ) then
           if ( ! -d ${to_dirfile}/APH ) then
             \mkdir ${to_dirfile}/APH

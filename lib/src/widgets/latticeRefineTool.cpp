@@ -53,7 +53,6 @@ latticeRefineTool::latticeRefineTool(confData *conf, fullScreenImage *sourceImag
   peaksTable->setHorizontalHeaderLabels(QStringList() << "i" << "j" << "x" << "y");
   peaksTable->setSelectionBehavior(QAbstractItemView::SelectRows);
   peaksTable->setSelectionMode(QAbstractItemView::SingleSelection);
-  //peaksTable->setStyleSheet("selection-background-color: rgba(128, 128, 128, 40);");
   layout->addWidget(peaksTable,1,0,1,3);
 
   currentPointx = new QLabel("--");

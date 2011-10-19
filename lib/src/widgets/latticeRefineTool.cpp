@@ -159,7 +159,7 @@ void latticeRefineTool::insertPoint()
 void latticeRefineTool::updateTableView()
 {
   peaksTable->clear();
-  peaksTable->setHorizontalHeaderLabels(QStringLdist() << "i" << "j" << "x" << "y");
+  peaksTable->setHorizontalHeaderLabels(QStringList() << "i" << "j" << "x" << "y");
   peaksTable->setRowCount(peakList.size());
 
   QMapIterator<QPoint,QPoint> i(peakList);

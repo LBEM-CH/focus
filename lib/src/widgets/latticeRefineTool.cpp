@@ -51,6 +51,9 @@ latticeRefineTool::latticeRefineTool(confData *conf, fullScreenImage *sourceImag
   peaksTable = new QTableWidget(this);
   peaksTable->setColumnCount(4);
   peaksTable->setHorizontalHeaderLabels(QStringList() << "i" << "j" << "x" << "y");
+  peaksTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+  peaksTable->setSelectionMode(QAbstractItemView::SingleSelection);
+  //peaksTable->setStyleSheet("selection-background-color: rgba(128, 128, 128, 40);");
   layout->addWidget(peaksTable,1,0,1,3);
 
   currentPointx = new QLabel("--");
@@ -157,7 +160,7 @@ void latticeRefineTool::insertPoint()
 void latticeRefineTool::updateTableView()
 {
   peaksTable->clear();
-  peaksTable->setHorizontalHeaderLabels(QStringList() << "i" << "j" << "x" << "y");
+  peaksTable->setHorizontalHeaderLabels(QStringLdist() << "i" << "j" << "x" << "y");
   peaksTable->setRowCount(peakList.size());
 
   QMapIterator<QPoint,QPoint> i(peakList);
@@ -170,7 +173,7 @@ void latticeRefineTool::updateTableView()
 
     for(int j=0;j<4;j++)
     {
-      a[j]->setFlags(Qt::ItemIsEnabled);
+      a[j]->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
       peaksTable->setItem(k,j,a[j]);
       peaksTable->setColumnWidth(j,peaksTable->maximumViewportSize().width()/4);
     }

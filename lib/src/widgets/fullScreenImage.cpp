@@ -732,6 +732,11 @@ void fullScreenImage::setRefineLatticeView(bool enable)
 	refineLatticeVisible = enable;
 }
 
+void fullScreenImage::setCTFView(bool enable)
+{
+	ctfVisible = enable;
+}
+
 void fullScreenImage::toggleSpot(const QPoint &pos)
 {
 	float inv[2][2];

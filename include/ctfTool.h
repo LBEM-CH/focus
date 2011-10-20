@@ -16,9 +16,11 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include "confData.h"
+#include "fullScreenImage.h"
 #include "math.h"
 
-class ctfTool : public QWidget
+
+class ctfTool : public QDialog
 {
   Q_OBJECT
 
@@ -26,19 +28,24 @@ class ctfTool : public QWidget
   void valueChanged();
   void save();
   void load();
-
-  signals:
-  void defocusChanged(float defocusX, float defocusY, float astigmatism);
-
+  void hideThonRings();
+//  signals:
+//  void defocusChanged(float defocusX, float defocusY, float astigmatism);
+//
+  protected:
+  bool eventFilter(QObject *target, QEvent *event);
+  
   private:
   confData *data;
-  QLabel defocusX, defocusY;
-  QDoubleSpinBox defocus, defocusDifference, astigmatism;
+  fullScreenImage *image;
+  QLabel *defocusX, *defocusY;
+  QDoubleSpinBox *defocus, *defocusDifference, *astigmatism;
 
   QPushButton *revertButton, *saveButton;
 
+
   public:
-  ctfTool(confData *conf, QWidget *parent = NULL);
+  ctfTool(confData *conf, fullScreenImage *sourceImage, QWidget *parent = NULL);
 
 };
 

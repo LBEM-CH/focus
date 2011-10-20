@@ -141,6 +141,7 @@ class fullScreenImage : public QWidget
   void toggleLatticeView();
   void toggleSecondLatticeView();
   void toggleCTFView();
+  void setCTFView(bool enable);
   void setPeakListView(bool enable);
   void setLatticeView(bool enable);
   void setRefineLatticeView(bool enable);

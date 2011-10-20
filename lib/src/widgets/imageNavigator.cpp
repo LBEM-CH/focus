@@ -125,6 +125,7 @@ void imageNavigator::Initialize_Actions()
     toggleCTFViewAction->setCheckable(true);
     addAction(toggleCTFViewAction);
     connect(toggleCTFViewAction,SIGNAL(triggered()),this,SLOT(toggleCTFView()));
+    //connect(toggleCTFViewAction,SIGNAL(triggered()),image,SLOT(toggleCTFView()));
     menu->addAction(toggleCTFViewAction);
 
     QAction *displayMillerIndicesAction = new QAction(tr("Show Miller Indices"),this);
@@ -360,14 +361,15 @@ void imageNavigator::Initialize_Tools()
     cout << "latticeTool window placed at " << screenWidth-latticeTool->width()-20 << "," << screenHeight/2 << endl;
     latticeTool->hide();
 
-    ctfEditor = new ctfTool(data,mainWin);
+    ctfEditor = new ctfTool(data,image, mainWin);
   #ifdef Q_WS_MAC
     ctfEditor->showNormal();
   #endif
+    ctfEditor->raise();
     ctfEditor->move(screenWidth-ctfEditor->width()-20,screenHeight-ctfEditor->height()-35);
     cout << "ctfEditor window placed at " << screenWidth-ctfEditor->width()-20 << "," << screenHeight-ctfEditor->height()-35 << endl;
     ctfEditor->hide();
-    connect(ctfEditor,SIGNAL(defocusChanged(float,float,float)),image,SLOT(calculateCTF(float,float,float)));
+    //connect(ctfEditor,SIGNAL(defocusChanged(float,float,float)),image,SLOT(calculateCTF(float,float,float)));
 
     parameterEditor = new displayParametersTool(mainWin);
   #ifdef Q_WS_MAC
@@ -749,6 +751,7 @@ void imageNavigator::keyPressEvent(QKeyEvent *event)
     if(event->text() == "=") zoomIn();
     if(event->text() == "-") zoomOut();
   }
+  QWidget::keyPressEvent(event);
 }
 
 void imageNavigator::setType(const QString &type)
@@ -829,7 +832,6 @@ void imageNavigator::toggleLatticeRefinementMode()
       latticeTool->show();
       assignMouseButtons("Select","Move","Zoom");
       addRefinementPointAction->setEnabled(true);
-      //if(!latticeTool->isHidden()) cerr<<"I'm here"<<endl;
     }
     else
     {
@@ -878,12 +880,20 @@ void imageNavigator::toggleCTFView()
   if(imageType == "fft")
   {
     ctfView^=1;
-    image->toggleCTFView();
+    image->setCTFView(ctfView);
 
     if(ctfView)
-      ctfEditor->show();
+    {
+      ctfEditor->showNormal();
+      toggleCTFViewAction->setEnabled(true);
+      toggleCTFViewAction->setChecked(true);
+    }
     else
+    {
       ctfEditor->hide();
+      toggleCTFViewAction->setChecked(false);
+    }
+    image->update();
   }
 }
 

@@ -21,6 +21,7 @@ if ( ! -e ${imagename}.mrc ) then
     ### Testing for presence of *.mrc
     #############################################################################
     #
+    \rm -f final_map.tif
     echo "dummy" > zzzzz27765.mrc
     set filename = `ls -1 *.mrc | sort | head -n 1`
     if ( ${filename} != "zzzzz27765.mrc" ) then

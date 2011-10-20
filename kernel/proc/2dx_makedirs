@@ -22,6 +22,12 @@ if ( $?SCRATCH_DISK == 0 ) then
   set SCRATCH_DISK = "."
 endif
 #
+# Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
+# if the variable is not set
+if ( $?FFTIR_DISK == 0 ) then
+  set FFTIR_DISK = "."
+endif
+#
 alias createLink 'eval " \\
 		  if (\! -e \!:1 ) then \\
     		    mkdir -p \!:1 \\
@@ -46,6 +52,8 @@ alias replaceWithLink 'eval " \\
 		  ln -fs \!:1 \!:2"'
 #
 set path_has_space = `echo "$PWD" | wc -w`
+set SCRATCH_has_space = `echo "$SCRATCH_DISK" | wc -w`
+set FFTIR_has_space = `echo "$FFTIR_DISK" | wc -w`
 #
 if ( ${path_has_space} != '1' ) then
   echo ":: "
@@ -55,6 +63,30 @@ if ( ${path_has_space} != '1' ) then
   echo "::" $PWD
   echo ":: has spaces in the pathname."
   echo ":: You must rename the directories that lead to this place."
+  echo ":: "
+  ${proc_2dx}/protest "Aborting."
+endif
+#
+if ( ${SCRATCH_has_space} != '1' ) then
+  echo ":: "
+  echo "::                           ERROR ERROR ERROR ERROR ERROR "
+  echo "::                           No SPACES in pathname allowed."
+  echo "::                           ERROR ERROR ERROR ERROR ERROR "
+  echo "::" $SCRATCH_DISK
+  echo ":: has spaces in the pathname."
+  echo ":: You must rename the SCRATCH disk name."
+  echo ":: "
+  ${proc_2dx}/protest "Aborting."
+endif
+#
+if ( ${FFTIR_has_space} != '1' ) then
+  echo ":: "
+  echo "::                           ERROR ERROR ERROR ERROR ERROR "
+  echo "::                           No SPACES in pathname allowed."
+  echo "::                           ERROR ERROR ERROR ERROR ERROR "
+  echo "::" $FFTIR_DISK
+  echo ":: has spaces in the pathname."
+  echo ":: You must rename the FFTIR disk name."
   echo ":: "
   ${proc_2dx}/protest "Aborting."
 endif
@@ -80,12 +112,6 @@ else
     	replaceWithLink  ${newscratch} SCRATCH
     endif
   endif
-endif
-#
-# Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
-# if the variable is not set
-if ( $?FFTIR_DISK == 0 ) then
-  set FFTIR_DISK = "."
 endif
 #
 if ( ${FFTIR_DISK} == "." || ${FFTIR_DISK} == "" ) then

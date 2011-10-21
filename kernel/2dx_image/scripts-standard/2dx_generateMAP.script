@@ -191,6 +191,8 @@ else
 endif
 #
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2b.ps <PS: Vector Plot of distortions 2>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/${imagename}.ctf.nolimit.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
 set prefix = ""
 set prename = ""
 #

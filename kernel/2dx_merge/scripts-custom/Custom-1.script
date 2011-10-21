@@ -77,18 +77,25 @@ foreach dirfile ( ${dirlist} )
   # echo "set phaori = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set phaoriFouFilter = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set stepdigitizer = 7.0" >> LOGS/${scriptname}.results
+  # echo "#unlock maska" >> LOGS/${scriptname}.results
   # echo "set maska = 17.0" >> LOGS/${scriptname}.results
+  # echo "#unlock maskb01" >> LOGS/${scriptname}.results
   # echo "set maskb01 = 18.0" >> LOGS/${scriptname}.results
+  # echo "#unlock maskb02" >> LOGS/${scriptname}.results
   # echo "set maskb02 = 20.0" >> LOGS/${scriptname}.results
+  # echo "#unlock boxa1" >> LOGS/${scriptname}.results
   # echo "set boxa1 = 400.0" >> LOGS/${scriptname}.results
+  # echo "#unlock boxb1" >> LOGS/${scriptname}.results
   # echo "set boxb1 = 350.0" >> LOGS/${scriptname}.results
+  # echo "#unlock quadrada" >> LOGS/${scriptname}.results
+  # echo "set quadrada = 9,9" >> LOGS/${scriptname}.results
+  # echo "#unlock quadradb" >> LOGS/${scriptname}.results
   # echo "set quadradb = 9,9" >> LOGS/${scriptname}.results
   # echo "set rot90 = n" >> LOGS/${scriptname}.results
   # echo "set rot180 = n" >> LOGS/${scriptname}.results
 
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
   # ${app_2dx_image} ${dirfile} "2dx_phaseorigin"
-
 
   # Use the following to run all standard 2dx_image scripts on the selected images:
   # ${app_2dx_image} ${dirfile} '"*"'

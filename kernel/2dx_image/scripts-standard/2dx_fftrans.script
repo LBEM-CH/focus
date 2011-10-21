@@ -243,10 +243,10 @@ endif
 echo "<<@progress: 5>>"
 echo "<<@evaluate>>"
 #
-/bin/rm -f FFTIR/${imagename}.fft.mrc
-/bin/rm -f FFTIR/${imagename}.int.mrc
-/bin/rm -f FFTIR/${imagename}.red.mrc
-/bin/rm -f FFTIR/${imagename}.pg.mrc
+\rm -f FFTIR/${imagename}.fft.mrc
+\rm -f FFTIR/${imagename}.int.mrc
+\rm -f FFTIR/${imagename}.red.mrc
+\rm -f FFTIR/${imagename}.pg.mrc
 #
 #
 #############################################################################

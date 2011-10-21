@@ -91,6 +91,14 @@ if ( ${FFTIR_has_space} != '1' ) then
   ${proc_2dx}/protest "Aborting."
 endif
 #
+if ( ! -w SCRATCH ) then
+  \rm -rf SCRATCH
+endif
+#
+if ( ! -w FFTIR ) then
+  \rm -rf FFTIR
+endif
+#
 if ( ${SCRATCH_DISK} == "." || ${SCRATCH_DISK} == "" ) then
   if ( ! -d SCRATCH ) then
     echo "::SCRATCH disk will be local."

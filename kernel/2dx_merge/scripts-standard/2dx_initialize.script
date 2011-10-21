@@ -69,7 +69,7 @@ set scriptname = 2dx_initialize
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
-source ${proc_2dx}/2dx_makedirs
+source ${proc_2dx}/2dx_merge_makedirs 
 #
 echo "<<@progress: 1>>"
 #

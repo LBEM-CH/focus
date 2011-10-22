@@ -31,6 +31,7 @@ if ( ! -d LOGS ) then
   \mkdir LOGS
 endif
 echo dummy > LOGS/dummy.log
+echo dummy > ${imagename}-tmp.tabl
 #
 if ( "${level}" == "radical" ) then
   #
@@ -172,6 +173,13 @@ echo dummy > dummy.TMP
 \rm -f *.plt
 \rm -f APH/dummy.aph
 \rm -f *-permutated.hkl
+\rm -f mrcmergec.origtmp.com
+\rm -f mrcmergec.runjob.com
+\rm -f merge.phr
+\rm -f ${imagename}.spt.bak
+\rm -f ${imagename}-*.tabl
+\rm -f avrgwork.mtz
+\rm -f avrg.hnegkl
 #
 \rm *.results
 \rm -rf LOGS/*.log

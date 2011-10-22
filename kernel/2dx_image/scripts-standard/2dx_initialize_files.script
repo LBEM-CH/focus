@@ -135,11 +135,11 @@ if ( ! -e ${imagename}.mrc ) then
   set initialization_executable = 'y'
 endif
 #
-if ( ${MergeIWF}x == "-1x" ) then
+if ( x${MergeIWF}x == "x-1x" ) then
   echo "set MergeIWF = 0" >> LOGS/${scriptname}.results
 endif
 #
-if ( ${MergeIWP}x == "-1x" ) then
+if ( x${MergeIWP}x == "x-1x" ) then
   echo "set MergeIWP = 1" >> LOGS/${scriptname}.results
 endif
 #

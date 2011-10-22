@@ -21,19 +21,26 @@
 # SECTION: Cleanup Level
 #=============================================================================
 #
-# LABEL: Cleanup WHAT ???
+# LABEL: Cleanup which image directories?
 # LEGEND: Choose the location of the Cleanup that should be done.
-# EXAMPLE: cleanup_location = "merge"
+# EXAMPLE: cleanup_location = "1"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "all image directories;merge"
-set cleanup_location = "all"
+# TYPE: Drop_Down_Menu "0=all image directories;1=only selected directories;2=no image directories"
+set cleanup_location = "0"
+#
+# LABEL: Cleanup also merge directory?
+# LEGEND: Choose the location of the Cleanup that should be done.
+# EXAMPLE: cleanup_location = "1"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
+# TYPE: Drop_Down_Menu "0=also merge directory;1=not merge directory"
+set cleanup_merge = "0"
 #
 # LABEL: Level of Cleanup
 # LEGEND: Choose the Level of the Cleanup that should be done.
-# EXAMPLE: cleanup_level = "radical"
+# EXAMPLE: cleanup_level = "4"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "radical;a little bit;only get disk usage;remove radical and final maps"
-set cleanup_level = "radical"
+# TYPE: Drop_Down_Menu "0=radical;1=a little bit;2=only get disk usage;3=remove radical and final maps;4=remove radical and final maps and database backups"
+set cleanup_level = "4"
 #
 #$end_local_vars
 #
@@ -53,23 +60,20 @@ source ${proc_2dx}/initialize
 #
 echo "<<@progress: 1>>"
 #
-set location = `echo ${cleanup_location} | cut -d\  -f1`
-set level = `echo ${cleanup_level} | cut -d\  -f1`
+set oldir = $PWD
 #
-echo location = ${location}
-echo level = ${level}
-#
-if ( ${location} != "all" ) then
+if ( ${cleanup_merge} == "0" ) then
   #
-  if ( "${level}" == "only" ) then
+  if ( ${cleanup_level} == "2" ) then
     ############################################################################# 
     ${proc_2dx}/linblock "getting disk usage for local merge directory"
     #############################################################################
     #
-    du . | sed 's/^/::/'
+    set duval = `\du -x -s . | cut -f 1`
+    echo ":: ${duval} kB  ${oldir}" 
     #
   else
-    if ( "${level}" == "remove" ) then
+    if ( ${cleanup_level} == "4" || ${cleanup_level} == "5" ) then
       \rm -f final_map.mrc
     endif
     #
@@ -98,7 +102,7 @@ if ( ${location} != "all" ) then
     endif
     echo dummy > LOGS/dummy.log
     #
-    if ( "${level}" != "a" ) then
+    if ( "${cleanup_level}" != "1" ) then
       #
       ${proc_2dx}/linblock "Radical Cleanup"
       #
@@ -209,7 +213,7 @@ if ( ${location} != "all" ) then
     \rm -f REF*.hkl
     \rm -f TLTASM
     #
-    echo "<<@progress: 100>>" 
+    echo "<<@progress: 20>>" 
     #
     ############################################################################# 
     ${proc_2dx}/linblock "Cleanup finished correctly..... All Gone."
@@ -220,48 +224,58 @@ if ( ${location} != "all" ) then
     #
   endif
   #
-  echo ":: Done.".
+  ${proc_2dx}/linblock "-"
   #
-else
+endif
+#
+if ( ${cleanup_location} == "0" || ${cleanup_location} == "1" ) then
   #
-  if ( "${level}" == "only" ) then
-    ############################################################################# 
-    ${proc_2dx}/linblock "getting disk usage for local merge directory"
-    #############################################################################
-    #
-    cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-    set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-    set oldir = ${PWD}
-    #
-    foreach dirfile ( ${dirlist} ) 
-      cd ${dirfile}
-      set duval = `\du -x -s . | cut -f 1`
-      echo ":: ${duval}  ${dirfile}" 
-      cd ${oldir}
-    end
-    #
+  if ( ${cleanup_location} == "0" ) then
+    find .. -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/SCRATCH/2dx_merge_alldirs.dat
   else
+    cp 2dx_merge_dirfile.dat ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+  endif  
+  #
+  set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
+  echo ": Will work on ${dirnum} image directories."
+  set increment = `echo ${dirnum} | awk '{ s = 70.0 / ( $1 + 1 ) } END { print s }'`
+  set curval = 20.0  
+  #
+  set dircounter = ${dirnum}
+  while ( ${dircounter} > 0 )
+    set from_dir = `cat ${oldir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
+    cd ${from_dir}
     #
-    ############################################################################# 
-     ${proc_2dx}/lin "cleaning up all image directories"
-    #############################################################################
+    if ( "${cleanup_level}" == "2" ) then
+      set duval = `\du -x -s . | cut -f 1`
+      echo ":: ${duval} kB  ${from_dir}" 
+    endif
     #
-    cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-    set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-    set oldir = ${PWD}
-    #
-    foreach dirfile ( ${dirlist} ) 
-      cd ${dirfile}
-      echo "::Working on ${dirfile}"
+    if ( ${cleanup_level} != "2" ) then
+      ############################################################################# 
+      ${proc_2dx}/linblock "cleanup ${from_dir}"
+      #############################################################################
+      #
       #  source ${proc_2dx}/2dx_cleanup_sub.com
-      ${app_2dx_image} ${dirfile} "+2dx_cleanup"
-      if ( "${level}" == "remove" ) then
+      ${app_2dx_image} ${from_dir} "+2dx_cleanup"
+      if ( "${cleanup_level}" == "3" || "${cleanup_level}" == "4" ) then
         \rm -f final_map.mrc
       endif
-      cd ${oldir}
-    end
+      if ( "${cleanup_level}" == "4" ) then
+        \rm -f 2dx_image.cfg-backup1
+        \rm -f 2dx_image.cfg-backup2
+        \rm -f 2dx_image.cfg-backup3
+      endif
+    endif
+    cd ${oldir}
     #
-  endif 
+    set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
+    set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
+    echo "<<@progress:${curprogress}>>"
+    #
+    @ dircounter -= 1
+    cd ${oldir}
+  end
   #
 endif
 #

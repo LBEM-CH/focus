@@ -18,6 +18,9 @@
 # DISPLAY: backup_sure
 # DISPLAY: backup_all_files
 # DISPLAY: backup_database_direction
+# DISPLAY: backup_database_comment_1
+# DISPLAY: backup_database_comment_2
+# DISPLAY: backup_database_comment_3
 #
 #$end_local_vars
 #
@@ -50,28 +53,71 @@ echo "<<@progress: 1>>"
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
 source ${proc_2dx}/2dx_makedirs 
 #
-# This translates the list of directories to work on into one single long line:
-cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+# This memorizes the current merge directory under the variable "oldir":
+set oldir = $PWD
 #
-# This memorizes the current merge directory under the variable "olddir":
-set olddir = $PWD
+if ( ${backup_sure} == "no" ) then
+  ${proc_2dx}/protest "Not running (Are you sure is 'no')."
+endif
 #
-# This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
-foreach dirfile ( ${dirlist} ) 
-  echo "::Working on ${dirfile}"
+if ( ${backup_database_direction} == "0" ) then
+  set source = 2dx_image.cfg
+  set target = 2dx_image.cfg-backup1
+endif
+if ( ${backup_database_direction} == "1" ) then
+  set source = 2dx_image.cfg
+  set target = 2dx_image.cfg-backup2
+endif
+if ( ${backup_database_direction} == "2" ) then
+  set source = 2dx_image.cfg
+  set target = 2dx_image.cfg-backup3
+endif
+if ( ${backup_database_direction} == "3" ) then
+  set source = 2dx_image.cfg-backup1
+  set target = 2dx_image.cfg
+endif
+if ( ${backup_database_direction} == "4" ) then
+  set source = 2dx_image.cfg-backup2
+  set target = 2dx_image.cfg
+endif
+if ( ${backup_database_direction} == "5" ) then
+  set source = 2dx_image.cfg-backup3
+  set target = 2dx_image.cfg
+endif
+#
+if ( ${backup_all_files} == "0" ) then
+  find .. -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+else
+  cp 2dx_merge_dirfile.dat ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+endif
+#
+set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
+echo ": Will work on ${dirnum} image directories."
+set increment = `echo ${dirnum} | awk '{ s = 80.0 / ( $1 + 1 ) } END { print s }'`
+set curval = 10.0
+#
+set dircounter = ${dirnum}
+while ( ${dircounter} > 0 )
+  set from_dir = `cat ${oldir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
+  cd ${from_dir}
+  echo "::Working on ${from_dir}"
   #
-  ################################################################################
+  if ( -e ${source} ) then
+    echo "::                                  Copy ${source} to ${target}"
+    \cp -f ${source} ${target}
+  else
+    echo "::  WARNING: ${source} does not exist here."
+  endif
   #
-  # Use the following to unlock these variables avain:
-  # echo "#unlock phaori" >> LOGS/${scriptname}.results
-  # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
+  set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
+  set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
+  echo "<<@progress:${curprogress}>>"
   #
-  ################################################################################
-  ######### Modify only the section above ########################################
-  ################################################################################
-  #
+  @ dircounter -= 1
+  cd ${oldir}
 end
+#
+echo "set backup_sure = no" >> LOGS/${scriptname}.results
 #
 # Move the progress bar to 100%:
 echo "<<@progress: 100>>"

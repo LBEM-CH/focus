@@ -208,6 +208,9 @@ if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   ${proc_2dx}/lin "2dx_hklclean - to eliminated duplicates from APH file, for volume"
   #############################################################################      
   #
+  \rm -f ${refhklfile}
+  \rm -f APH/syn_nosort2D-plot.hkl
+  #
   ${bin_2dx}/2dx_hklclean.exe << eot
 TMP.tmp
 ${refhklfile}

@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 92
+# SORTORDER: 93
 #
 # MANUAL: This script will take large TIFF images in a given directory and transform them into smaller MRC files.
 # 

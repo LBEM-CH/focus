@@ -118,6 +118,13 @@ if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc ) then
   #
 endif
 #
+if ( ! -e ${imagename}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${imagename}.mrc missing. Aborting."
+endif
+if ( ! -e ${nonmaskimagename}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${nonmaskimagename}.mrc missing. Aborting."
+endif
+#
 #################################################################################
 ### Test (and Correct) Endianess of ${imagename}.mrc ############################
 ${proc_2dx}/linblock "Testing Endianess."

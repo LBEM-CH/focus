@@ -1,21 +1,23 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Delete Images                                                      #
+# Title: Backup Databases (in preparation)                                  #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 10/01/2007                                             #
-# Last Modification: 10/01/2007                                             #
+# Created..........: 10/01/2011                                             #
+# Last Modification: 10/01/2011                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 92
+# SORTORDER: 91
 #
-# MANUAL: This script moves all choosen directories into a TRASH subdirectory. Use with extreme caution !!!
+# MANUAL: This script can be used to backup or restore all 2dx_image.cfg databases.
 #
-# DISPLAY: delete_sure
+# DISPLAY: backup_sure
+# DISPLAY: backup_all_files
+# DISPLAY: backup_database_direction
 #
 #$end_local_vars
 #
@@ -25,30 +27,25 @@ set bin_2dx = ""
 set app_2dx_image = ""
 set SCRATCH_DISK = ""
 set FFTIR_DISK = ""
-set delete_sure = ""
+#
+set backup_sure = ""
+set backup_all_files = ""
+set backup_database_direction = ""
 #
 #$end_vars
 #
 # This sets the scriptname variable:
-set scriptname = 2dx_deleteDir
+set scriptname = 2dx_backup_databases
 #
 # This removes the old logfile, so that a new fresh one can be created:
 \rm -f LOGS/${scriptname}.results
 #
-# This initializes the CCP4 environment, and other variables.
-set ccp4_setup = 'n'
+# This initializes the ccp4 environment, and other variables.
+set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
-#
-echo delete_sure = ${delete_sure}
-#
-echo "set delete_sure = no" >> LOGS/${scriptname}.results
 #
 # This advances the progress bar to the 1% position:
 echo "<<@progress: 1>>"
-#
-if ( ${delete_sure} == "no" ) then
-  ${proc_2dx}/protest "Not running (Are you sure is 'no')."
-endif
 #
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
 source ${proc_2dx}/2dx_makedirs 
@@ -59,36 +56,22 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 #
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
-cd ..
-set rootdir = $PWD
-#
-if ( ! -d TRASH ) then
-  \mkdir TRASH
-endif
-cd TRASH
-if ( ! -l 2dx_master.cfg ) then
-  \ln -s ../2dx_master.cfg .
-endif
-cd ..
-#
-echo ":: "
 #
 # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
 foreach dirfile ( ${dirlist} ) 
-  echo "::Moving into TRASH: ${dirfile}"
+  echo "::Working on ${dirfile}"
   #
-  \mv -f ${dirfile} TRASH 
+  ################################################################################
+  #
+  # Use the following to unlock these variables avain:
+  # echo "#unlock phaori" >> LOGS/${scriptname}.results
+  # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
+  #
+  ################################################################################
+  ######### Modify only the section above ########################################
+  ################################################################################
   #
 end
-#
-echo ":: "
-echo "::Done."
-echo "::Images are now in ${PWD}/TRASH "
-echo ":: "
-echo ":: "
-echo ":: Dont forget to rescan all directories with the button top right in this GUI"
-echo ":: "
-echo ":: "
 #
 # Move the progress bar to 100%:
 echo "<<@progress: 100>>"

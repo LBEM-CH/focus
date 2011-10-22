@@ -419,7 +419,41 @@ void fullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
 {
   float w=screenWidth-30, h = screenHeight-30;
   double r=sqrt(image->width()*image->width()+image->height()*image->height())/2.0;
+
+  float realang = data->get("realang","value").toFloat();
+  float recipang = 180.0 - realang;
+  bool revhk = data->get("revhk")->toBool();
+  bool rot90 = data->get("rot90")->toBool();
+  bool rot180 = data->get("rot180")->toBool();
+  bool sgnxch = data->get("sgnxch")->toBool();
+  bool revhnd = data->get("revhnd")->toBool();
+  bool revxsgn = data->get("revxsgn")->toBool();
+
   float thetaD = data->get(axis,"value").toFloat();
+  thetaD = fmod(fmod(thetaD, 360.0) + 360.0, 360.0);
+  if(thetaD>=90 && thetaD<270.0) thetaD-=180;
+  if(thetaD>=270.0) thetaD -= 360.0;
+
+  if(visible["tiltaxa"]) 
+  {
+    if(revhk) thetaD = recipang-thetaD;
+    if(rot90) thetaD += 90.0;
+    if(rot180)
+    { 
+      thetaD += 180.0;
+      if(invertAngle) invertAngle = false;
+      else invertAngle = true;
+    }
+    if(sgnxch) thetaD += 0.0;
+    if(revhnd) thetaD += 0.0;
+    if(revxsgn)
+    { 
+      thetaD = -thetaD;
+      if(invertAngle) invertAngle = false;
+      else invertAngle = true;
+    }
+  }
+
   thetaD = fmod(fmod(thetaD, 360.0) + 360.0, 360.0);
   if(thetaD>=90 && thetaD<270.0) thetaD-=180;
   if(thetaD>=270.0) thetaD -= 360.0;
@@ -616,7 +650,7 @@ void fullScreenImage::drawOverlay()
 
 void fullScreenImage::drawRealOverlay()
 {
-	if(visible["tiltaxis"]) drawTiltAxis("tltaxis","tltang",true);
+	if(visible["tiltaxis"]) drawTiltAxis("tltaxis","tltang",true,false);
 	if(visible["tiltaxa"]) drawTiltAxis("taxa","tangl",true,true);
 }
 
@@ -667,7 +701,7 @@ void fullScreenImage::paintEvent(QPaintEvent *event)
 	image_base->translate(QPointF(float(width())/2.0,float(height())/2.0));
 #endif
 	if(scale!=1.0) image_base->scale(scale,scale);
-	if(visible["tiltaxis"]) drawTiltAxis("tltaxis","tltang",imageHeader->mode()!=3 && imageHeader->mode()!=4);
+	if(visible["tiltaxis"]) drawTiltAxis("tltaxis","tltang",imageHeader->mode()!=3 && imageHeader->mode()!=4,false);
 	if(visible["tiltaxa"]) drawTiltAxis("taxa","tangl",imageHeader->mode()!=3 && imageHeader->mode()!=4,true);
 	delete image_base;
 }

@@ -1,6 +1,6 @@
 /**************************************************************************
-*   Copyright (C) 2006 by UC Davis Stahlberg Laboratory                   *
-*   HStahlberg@ucdavis.edu                                                *
+*   Copyright (C) 2006 by the Stahlberg laboratory                        *
+*   Henning.Stahlberg@unibas.ch                                           *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *

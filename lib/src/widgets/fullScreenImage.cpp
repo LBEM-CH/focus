@@ -422,6 +422,7 @@ void fullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
 
   float realang = data->get("realang","value").toFloat();
   float recipang = 180.0 - realang;
+  bool inverttiltang = false;
   bool revhk = data->get("revhk")->toBool();
   bool rot90 = data->get("rot90")->toBool();
   bool rot180 = data->get("rot180")->toBool();
@@ -430,34 +431,71 @@ void fullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
   bool revxsgn = data->get("revxsgn")->toBool();
 
   float thetaD = data->get(axis,"value").toFloat();
-  thetaD = fmod(fmod(thetaD, 360.0) + 360.0, 360.0);
-  if(thetaD>=90 && thetaD<270.0) thetaD-=180;
-  if(thetaD>=270.0) thetaD -= 360.0;
+  while(thetaD>90.0) thetaD -= 180.0;
+  while(thetaD<=-90.0) thetaD += 180.0;
 
   if(visible["tiltaxa"]) 
   {
-    if(revhk) thetaD = recipang-thetaD;
-    if(rot90) thetaD += 90.0;
+    if(revhk)
+    {
+      thetaD = recipang-thetaD;
+      inverttiltang^=true;
+      if(thetaD > 90.0)
+      {
+        thetaD -= 180.0;
+        inverttiltang^=true;
+      }
+      if(thetaD <=-90.0)
+      {
+        thetaD += 180.0;
+        inverttiltang^=true;
+      }
+    }
+    if(rot90)
+    {
+      thetaD -= recipang;
+      if(thetaD > 90.0)
+      {
+        thetaD -= 180.0;
+        inverttiltang^=true;
+      }
+      if(thetaD <=-90.0)
+      {
+        thetaD += 180.0;
+        inverttiltang^=true;
+      }
+    }
     if(rot180)
     { 
-      thetaD += 180.0;
-      if(invertAngle) invertAngle = false;
-      else invertAngle = true;
+      inverttiltang^=true;
     }
-    if(sgnxch) thetaD += 0.0;
-    if(revhnd) thetaD += 0.0;
+    if(sgnxch)
+    {
+      thetaD = -thetaD;
+      inverttiltang^=true;
+    }
+    if(revhnd)
+    {
+      inverttiltang^=true;
+    }
     if(revxsgn)
     { 
       thetaD = -thetaD;
-      if(invertAngle) invertAngle = false;
-      else invertAngle = true;
     }
   }
+  if(thetaD > 90.0)
+  {
+    thetaD -= 180.0;
+    inverttiltang^=true;
+  }
+  if(thetaD <=-90.0)
+  {
+    thetaD += 180.0;
+    inverttiltang^=true;
+  }
 
-  thetaD = fmod(fmod(thetaD, 360.0) + 360.0, 360.0);
-  if(thetaD>=90 && thetaD<270.0) thetaD-=180;
-  if(thetaD>=270.0) thetaD -= 360.0;
   if(invertAngle) thetaD*=-1;
+
   float theta = -(thetaD)/180.0*pi;
 
   QTransform temp = image_base->worldTransform();
@@ -524,6 +562,7 @@ void fullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
 
 		float edgeL=-min(rho,r), edgeR=(min(rho,r)-float(metric.boundingRect(tltAng).width()));
 		float signTltAng = data->get("TLTANG","value").toFloat();
+                if(inverttiltang) signTltAng=-signTltAng;
 		if(signTltAng>=0.0) signTltAng=1.0;
 		else signTltAng=-1.0;
 		//    if(thetaD == 90.0) signTltAng*=-1;

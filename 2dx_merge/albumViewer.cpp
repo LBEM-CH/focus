@@ -100,9 +100,26 @@ void albumViewer::paintEvent(QPaintEvent */*event*/)
   double r=400;
   float thetaD = data->get("taxa","value").toFloat();
   float tangl  = data->get("tangl","value").toFloat();
-  thetaD = fmod(fmod(thetaD, 360.0) + 360.0, 360.0);
-  if(thetaD>=90 && thetaD<270.0) thetaD-=180;
-  if(thetaD>=270.0) thetaD -= 360.0;
+  float realang = data->get("realang","value").toFloat();
+  float recipang = 180.0 - realang;
+  bool revhk = data->get("revhk")->toBool();
+  bool rot90 = data->get("rot90")->toBool();
+  bool rot180 = data->get("rot180")->toBool();
+  bool sgnxch = data->get("sgnxch")->toBool();
+  bool revhnd = data->get("revhnd")->toBool();
+  bool revxsgn = data->get("revxsgn")->toBool();
+
+  while(thetaD>90.0) thetaD -= 180.0;
+  while(thetaD<=-90.0) thetaD += 180.0;
+
+  if(revhk) thetaD = recipang-thetaD;
+  if(rot90) thetaD -= recipang;
+  if(sgnxch) thetaD = -thetaD;
+  if(revxsgn) thetaD = -thetaD;
+
+  while(thetaD>90.0) thetaD -= 180.0;
+  while(thetaD<=-90.0) thetaD += 180.0;
+
   // if(invertAngle) thetaD*=-1;
   // float theta = -(thetaD)/180.0*PI;
   

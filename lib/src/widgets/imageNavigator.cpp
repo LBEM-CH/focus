@@ -311,7 +311,7 @@ void imageNavigator::Initialize_Actions()
 
   }
 
-    QAction *showTiltAxisAction = new QAction(tr("View Tilt Axis (TLTAXIS)"),this);
+    QAction *showTiltAxisAction = new QAction(tr("View Tilt Axis in Raw Image (TLTAXIS)"),this);
     menu->addAction(showTiltAxisAction);
     showTiltAxisAction->setCheckable(true);
     showTiltAxisAction->setShortcut(tr("T"));
@@ -320,7 +320,7 @@ void imageNavigator::Initialize_Actions()
     signalMap->setMapping(showTiltAxisAction,"tiltaxis");
     connect(signalMap,SIGNAL(mapped(const QString &)),image,SLOT(toggleVisible(const QString &)));
 
-    QAction *showTaxisAction = new QAction(tr("View Crystal Tilt Axis (TAXA)"),this);
+    QAction *showTaxisAction = new QAction(tr("View Tilt Axis in Final Map (TAXA)"),this);
     menu->addAction(showTaxisAction);
     showTaxisAction->setCheckable(true);
     showTaxisAction->setShortcut(tr("Shift+T"));

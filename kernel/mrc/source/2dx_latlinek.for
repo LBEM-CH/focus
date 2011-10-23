@@ -1963,13 +1963,13 @@ C       CALL P2K_MOVE(10.,-15.,0.)
         CALL P2K_MOVE(ZERO,0.,0.)
         CALL P2K_DRAW(ZERO,FMAG,0.)
 CHEN>
-        POSN=ZRANG*ZMAG*0.95
+        POSN=ZRANG*ZMAG*0.85
 CHEN<
         CALL P2K_MOVE(POSN,103.0,0.)
         WRITE(LINE(1:11),103) IHIN,IKIN
-103     FORMAT('(',I4,',',I4,')')
+103     FORMAT('(',I3,',',I3,')')
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
-        CALL P2K_STRING(LINE,11,0.)
+        CALL P2K_STRING(LINE,9,0.)
         IZ=ZRANG/DELZ
 C
 C-------Plot units on horizontal axis:
@@ -1979,8 +1979,8 @@ C-------Plot units on horizontal axis:
           XPOS=ZERO+ZPOS*ZMAG
           CALL P2K_MOVE(XPOS,0.,0.)
           CALL P2K_DRAW(XPOS,2.0,0.)
-          XPOS=XPOS-7.0
-          CALL P2K_MOVE(XPOS,-5.5,0.)
+          XPOS=XPOS-4.0
+          CALL P2K_MOVE(XPOS,-5.2,0.)
 CTSH      WRITE(LINE,26) ZPOS
 CTSH++
           WRITE(LINE(1:6),26) ZPOS
@@ -1989,16 +1989,26 @@ CTSH--
 25      CONTINUE
 26      FORMAT(F6.3)
 CHEN>
-        POSN=ZRANG*ZMAG*0.7
+        POSN=ZRANG*ZMAG*0.6
         CALL P2K_MOVE(POSN,103.0,0.)
 CHEN<
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
         CALL P2K_STRING('LATTICE LINE',12,0.)
-        POSN=ZRANG*ZMAG-2.
+        POSN=ZRANG*ZMAG-2.5
         CALL P2K_MOVE(POSN,-4.5,0.)
         CALL P2K_STRING('RECIPROCAL',10,0.)
         CALL P2K_MOVE(POSN,-7.5,0.)
         CALL P2K_STRING('ANGSTROMS',9,0.)
+CHEN>
+        POSX=-5.0
+        POSY=FMAG+GAP+PMAG - 3.0
+        CALL P2K_MOVE(POSX,POSY,0.)
+        CALL P2K_STRING('PHS',3,0.)
+
+        POSY=FMAG - 3.0
+        CALL P2K_MOVE(POSX,POSY,0.)
+        CALL P2K_STRING('AMP',3,0.)
+CHEN<
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(ZERO,0.0,0.)
         SCALE=FMAG/(1.05*FMAX)
@@ -2012,12 +2022,12 @@ C-------Plot units on vertical axis:
           ZA=ZMIN*ZMAG
           ZB=ZMAX*ZMAG
           CALL P2K_MOVE(ZA,YPOS,0.)
-          ZD=ZA+2.0
+          ZD=ZA+1.0
           CALL P2K_DRAW(ZD,YPOS,0.)
-          ZD=ZB-2.0
+          ZD=ZB-1.0
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
-          XPOS=ZB
+          XPOS=ZA-7.5
           CALL P2K_MOVE(XPOS,YPOS,0.)
 CTSH      WRITE(LINE,201) F
 CTSH++
@@ -2103,16 +2113,18 @@ C
         CALL P2K_DRAW(0.0,+YAXIS,0.)
         DO 620 J=1,7
           YPOS=(PMAG/8)*J -YAXIS
+CHEN>
           CALL P2K_MOVE(ZA,YPOS,0.)
           ZD=ZA+2.0
           CALL P2K_DRAW(ZD,YPOS,0.)
           ZD=ZB-2.0
+CHEN<
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
 620     CONTINUE
         DO 630 J=1,5
           IANG=-180+(J-1)*90
-          XPOS=ZB+1.0
+          XPOS=ZA-3.5
           YPOS=IANG*PMAG2
           CALL P2K_MOVE(XPOS,YPOS,0.)
 CTSH      WRITE(LINE,631) IANG
@@ -2120,7 +2132,9 @@ CTSH++
           WRITE(LINE(1:4),631) IANG
 CTSH--
           CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
+CHEN>
           CALL P2K_STRING(LINE,4,0.)
+CHEN<
 630     CONTINUE
 631     FORMAT(I4)
 C

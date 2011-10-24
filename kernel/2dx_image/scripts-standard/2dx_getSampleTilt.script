@@ -107,10 +107,6 @@ echo date = ${date}
 set smallimagesidelength=`echo ${imagesidelength} | awk '{if($1<2049) {s=512} else if ($1<4099) {s=1024} else {s=2048}} END {print s}'`
 echo smallimagesidelength=${smallimagesidelength}
 #
-if ( ! -e ${nonmaskimagename}.mrc ) then
-  ${proc_2dx}/protest "ERROR: The non-masked image name ${nonmaskimagename}.mrc does not exist."
-endif
-#
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results

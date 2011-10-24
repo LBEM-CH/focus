@@ -221,6 +221,17 @@ if ( ${tmp1} == 1 ) then
   echo "#WARNING: Warning: boxb2 should be larger than boxb1. Now exchanged." >> LOGS/${scriptname}.results
 endif
 #
+set tmp1 = `echo ${maskb01} | awk '{s = int( $1 ) } END { print s }'`
+if ( ${tmp1} == ${maskb01} ) then
+  echo maskb01 = ${maskb01}
+else
+  set maskb01 = ${tmp1}
+  echo maskb01 = ${maskb01}
+  echo "set maskb01 = ${maskb01}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Warning: maskb01 needs to be an integer number. Now corrected."
+  echo "#WARNING: Warning: maskb01 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
 set tmp1 = `echo ${maskb02} | awk '{s = int( $1 ) } END { print s }'`
 if ( ${tmp1} == ${maskb02} ) then
   echo maskb02 = ${maskb02}
@@ -414,6 +425,17 @@ if ( ${latlenok} == '0' ) then
   ${proc_2dx}/protest "Determine lattice first. Aborting."
 endif
 #
+if ( ! -e ${imagename}.spt ) then
+  ech ":: "
+  ${proc_2dx}/linblock "ERROR: Spotlist ${imagename}.spt missing."
+  ${proc_2dx}/protest "Aborting."
+endif
+if ( ! -e ${nonmaskimagename}.spt ) then
+  ech ":: "
+  ${proc_2dx}/linblock "ERROR: Spotlist ${nonmaskimagename}.spt missing."
+  ${proc_2dx}/protest "Aborting."
+endif
+#
 #############################################################################
 #                                                                           #
 #  UNBEND II expects the existence of FFTIR/cor${imagename}.unbend1.fft.mrc #
@@ -443,8 +465,8 @@ set u1 = `echo ${lattice} | cut -d\, -f1`
 set u2 = `echo ${lattice} | cut -d\, -f2`
 set v1 = `echo ${lattice} | cut -d\, -f3`
 set v2 = `echo ${lattice} | cut -d\, -f4`
-set ulen = `echo ${u1} ${u2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
-set vlen = `echo ${v1} ${v2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+set ulen = `echo ${u1} ${u2} | awk '{ s = int( sqrt ( $1 * $1 + $2 * $2 ) ) } END { print s }'`
+set vlen = `echo ${v1} ${v2} | awk '{ s = int( sqrt ( $1 * $1 + $2 * $2 ) ) } END { print s }'`
 set smaller_vector = `echo ${ulen} ${vlen} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 }} END { print s }'`
 #
 set newmaskb01 = `echo ${smaller_vector} ${maskb01} | awk '{ if ( $1 / 2.1 < $2 ) { s = int( $1 / 2.1 ) } else { s = $2 }} END { print s }'`

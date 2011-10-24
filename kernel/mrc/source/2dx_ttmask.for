@@ -1,17 +1,17 @@
 C*TTMASK.FOR******************************************************************
 C  Program for masking a Fourier transform, with simultaneous correction for *
 C     tilted contrast transfer function.                                     *
-C									     *
+C                                                                            *
 C     Output is written on top of input, so keep a copy if you think it will *
 C     need to be done more than once using different parameters.             *
-C									     *
+C                                                                            *
 C     Input and output masked transform is on stream 1 (INOUT)               *
 C                                                                            *
 C     Data cards for control data file in free format                        *
 C                                                                            *
-C  1.	ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT              (*)                   *
+C  1.   ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT              (*)                   *
 C                                                                            *
-C  2.	DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL   (*)                           *
+C  2.   DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL   (*)                           *
 C                                                                            *
 C  3.   ISHAPE=1 Hard edge circular holes      (*)                           *
 C       2= Soft edge circular holes (Gaussian weighted to EXP(-2) at edge)   *
@@ -22,7 +22,7 @@ C          This is used to TTF correct the entire image, (almost) without    *
 C          any masking of a diffraction spot lattice.                        *
 C                                                                            *
 C  4.    RADMIN,RADMAX (ISHAPE = 1 or 2) radius (circular holes)   (*)       *
-C   	  MIN VALUE ON TILT AXIS; MAX VALUE AT 1200 rlu FROM TILT AXIS       *
+C         MIN VALUE ON TILT AXIS; MAX VALUE AT 1200 rlu FROM TILT AXIS       *
 C         ISHAPE = 1 (Hard edged), = 2 (Gaussian fall off to exp(-2) at edge)*
 C                                                                            *
 C  5.  AX,AY,BX,BY,IHMIN,IHMAX,IKMIN,IKMAX,RMAX,ITYPE,NUMSPOT  (*)           *
@@ -35,20 +35,20 @@ C                                                                            *
 C  6. Followed by record for each required spot to be allowed through mask   *
 C         IH,IK      (*)                                                     *
 C                                                                            *
-C     ISIZEX,Y	  size of image in x and y, checked against file-header.
-C     DSTEP	  densitometer stepsize in microns.
-C     XMAG	  magnification of micrograph.
-C     CS	  spherical aberration coefficient in mm.
-C     KVOLT	  microscope voltage in KV, used to calculate wavelength. 
-C     DFMID1	  defocus in one direction (underfocus +ve) 
-C     DFMID2	  defocus at 90-degs to above
-C     ANGAST	  direction for DFMID1 in degrees relative to x,y in transform.
-C     TLTAXIS	  direction of tiltaxis in degrees relative to x,y in transform,
-C		    should be between -90 and +90 degrees.
-C     TLTANGL	  magnitude of tiltangle.
-C			(+ve for less underfocus at start of scan(y=0)).
-C			if tiltaxis is precisely parallel to y, then TLTANGL
-C			should be positive for less underfocus at x=0.
+C     ISIZEX,Y    size of image in x and y, checked against file-header.
+C     DSTEP       densitometer stepsize in microns.
+C     XMAG        magnification of micrograph.
+C     CS          spherical aberration coefficient in mm.
+C     KVOLT       microscope voltage in KV, used to calculate wavelength. 
+C     DFMID1      defocus in one direction (underfocus +ve) 
+C     DFMID2      defocus at 90-degs to above
+C     ANGAST      direction for DFMID1 in degrees relative to x,y in transform.
+C     TLTAXIS     direction of tiltaxis in degrees relative to x,y in transform,
+C                   should be between -90 and +90 degrees.
+C     TLTANGL     magnitude of tiltangle.
+C                       (+ve for less underfocus at start of scan(y=0)).
+C                       if tiltaxis is precisely parallel to y, then TLTANGL
+C                       should be positive for less underfocus at x=0.
 C                                                                            *
 C     Derived from MASKTRAN(Version 1.00) and TTBOX      3-JUL-84 (RH)       *
 c                                                                            *
@@ -155,7 +155,7 @@ C
 C  THETATR IS DIFFRACTION ANGLE OF FIRST GRID POINT IN X DIRECTION
 C   OF TRANSFORM.
 C
-C	Calculate height difference across image
+C       Calculate height difference across image
 C
       PERP=ISIZEY*COSTLTX + ISIZEX*(ABS(SINTLTX))
 C      WRITE(6,91701)STEPR,TANTILT,COSTLTX,SINTLTX,ISIZEX,ISIZEY
@@ -171,6 +171,8 @@ C  Now input of mask parameters
       WRITE(6,1700) ISHAPE
 1700  FORMAT(/,'   Hole shape',I10)
       READ(5,*) RADMIN,RADMAX
+      NHOR=2*INT(RADMAX+0.9999)+1
+      NVERT=NHOR
       WRITE(6,1701) RADMIN,RADMAX,NHOR,NVERT
 1701  FORMAT(/,' Hole radii used for masking; min on tilt axis',F10.3,/,
      . '       max at distance 1200rlu from tilt axis ',F10.3,/,
@@ -199,16 +201,14 @@ CHEN
       endif
       READ(5,'(A)') FILOU2
 CHEN
-      NHOR=2*INT(RADMAX+0.9999)+1
-      NVERT=NHOR
 C
 C  Check to make sure holes do not overlap in the convolution step which
 C       would be a real disaster.
       IF(SQRT(AX**2+AY**2).LT.FLOAT(NHOR)
-     .		.OR.SQRT(BX**2+BY**2).LT.FLOAT(NHOR)) THEN
-      	WRITE(6,1705)
-1705	FORMAT(' Mask hole size is too big for lattice spot spacing')
-      	STOP
+     .          .OR.SQRT(BX**2+BY**2).LT.FLOAT(NHOR)) THEN
+        WRITE(6,1705)
+1705    FORMAT(' Mask hole size is too big for lattice spot spacing')
+        STOP
       ENDIF
       WRITE(6,1704)
 1704  FORMAT('   Hole positions used in masking')
@@ -262,7 +262,7 @@ C
           XPOS=-XPOS
           YPOS=-YPOS
           YCPOS=-YCPOS
-C      	  WRITE(6,1803)IH,IK,XPOS,YPOS
+C         WRITE(6,1803)IH,IK,XPOS,YPOS
 1803      FORMAT(' THIS HOLE X,Y COORDS MOVED TO POSITIVE X',2I5,2F10.4)
         ENDIF
 C
@@ -270,7 +270,7 @@ C-------TEST FOR REPEAT SPECIFICATION OF INDICES
         IF(NHOLE.EQ.0)GOTO 20131
           DO 20130 ITEST=1,NHOLE
             IF(XPOS.EQ.XA(ITEST).AND.YPOS.EQ.YA(ITEST))THEN
-C	      WRITE(6,20132)IH,IK
+C             WRITE(6,20132)IH,IK
 20132         FORMAT(' REPEATED SPOT NOT USED',2I5)
             GOTO 125
             ENDIF
@@ -344,7 +344,7 @@ C-------Read in strip of transform
         DO 190 M=1,MDEEP
           CALL IRDLIN(1,ARRAY(1,M))
 190     CONTINUE
-        IPOSIT=(ISEC-1)*IDEEP		! Reposition ready for output again.
+        IPOSIT=(ISEC-1)*IDEEP           ! Reposition ready for output again.
         CALL IMPOSN(1,0,IPOSIT)
 C
 C-------Check all parts of all holes to see if present in each strip.
@@ -468,8 +468,8 @@ C
      .  TLTAXIS,TLTANGL,TANTILT,COSTLTX,SINTLTX,NUMSPOT,FILOU2)
 C
 C TTCORRECT : calculates amplitudes & phases in N * N boxes from a 
-C	  Fourier transform, fully corrected for contrast transfer function
-C	  in tilted image and writes the answer back to disc.
+C         Fourier transform, fully corrected for contrast transfer function
+C         in tilted image and writes the answer back to disc.
 C         Also gives extensive output if required.
 C
       PARAMETER (IMSIZE=20100)
@@ -488,7 +488,7 @@ c      REAL KVOLT
       DIMENSION AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
       DIMENSION ACTF(ICTFBXMAX,ICTFBXMAX),BCTF(ICTFBXMAX,ICTFBXMAX)
 c      DIMENSION TITLE(15),NXYZ(3),MXYZ(3),PHANG(4),WTS(4),
-c     .		DELX(2),DELY(2),NIQ(8)
+c     .         DELX(2),DELY(2),NIQ(8)
       DIMENSION NXYZ(3),PHANG(4),WTS(4),
      .   DELX(2),DELY(2),NIQ(8)
       LOGICAL TURN,ILIST,LIST
@@ -526,7 +526,7 @@ C
       NXM1 = NX - 1
       NXM2 = NX - 2
 C
-      XORIG=ISIZEX/2		! PUTS ORIGIN IN MIDDLE OF IMAGE AREA
+      XORIG=ISIZEX/2            ! PUTS ORIGIN IN MIDDLE OF IMAGE AREA
       YORIG=ISIZEY/2
       DELPX = -TWOPI * (XOR + XORIG) / (2. * (NXM1))
       DELPY = -TWOPI * (YOR + YORIG) / NY
@@ -548,7 +548,7 @@ C
           ISUMI(J,K) = 0
           RSUMI(J,K) = 0.0
   130 CONTINUE
-      WRITE(6,1103)		!  Asterisks to mark beginning of output.
+      WRITE(6,1103)             !  Asterisks to mark beginning of output.
 C
 C  Beginning of Do-loop over all required spots.
 C
@@ -566,8 +566,8 @@ C   calculated inside subroutine CTFGEN.
 C  INHOR,INVERT is then the necessary input box size from the transform needed
 C   to carry out the convolution multiplication successfully.
 c   It is always bigger than either ctf box or the output box.
-C		INHOR  = IHOR  + ICTFHOR  (- 1)
-C		INVERT = IVERT + ICTFVERT (- 1)
+C               INHOR  = IHOR  + ICTFHOR  (- 1)
+C               INVERT = IVERT + ICTFVERT (- 1)
 C
         CALL CTFGEN(IH(I),IK(I),XA(I),YA(I),RATIOXY,
      .      THETATR,DFMID1,DFMID2,ANGAST,
@@ -576,8 +576,8 @@ C
      .      ICTFHOR,ICTFVERT,ACTF,BCTF,
      .      ILIST,DFMID,DELCHI,CTFMID,FACTOR,ISENS)
 C
-        INHOR  = IHOR  + ICTFHOR 	! ODD = ODD +EVEN
-        INVERT = IVERT + ICTFVERT 	! ODD = ODD +EVEN
+        INHOR  = IHOR  + ICTFHOR        ! ODD = ODD +EVEN
+        INVERT = IVERT + ICTFVERT       ! ODD = ODD +EVEN
         INHOR2 = INHOR / 2
         INVERT2= INVERT/ 2
 C
@@ -726,12 +726,12 @@ C       different from the input (RDSECT) parameters, to allow for the output
 C       of the strip X=0 along the Y-axis --- this involves a change by 1 in the
 C       values of IX1, IXOUT2 and IX.
 C
-        IX1 = 0			! was 1
+        IX1 = 0                 ! was 1
         IX2 = -IXL 
         IY1 = NY2 - IYU 
         IY2 = IY1 + IVERT - 1
-        IXOUT2 = -IXL+1		! was -IXL
-        IX = 1			! was 0
+        IXOUT2 = -IXL+1         ! was -IXL
+        IX = 1                  ! was 0
         IY = IYU + 1
         TURN = .TRUE.
         CALL WRTSECT(IX1,IX2,IY1,IY2,IXOUT1,IXOUT2,IVERT,
@@ -816,9 +816,9 @@ C
         ASUM2 = 0.
         BSUM2 = 0.
         DENOM=0.
-        DO 320 L2 = 1,2	! Vector phases over 2x2 points only.
+        DO 320 L2 = 1,2 ! Vector phases over 2x2 points only.
           K = K1 + L2 - 1
-          DO 320 L1 = 1,2	!
+          DO 320 L1 = 1,2       !
             J = J1 + L1 - 1
             AMP = IAMP(J,K)
             PHASE = IPHI(J,K) / 57.2958
@@ -870,8 +870,8 @@ C
         IF(VECPHA2.LT.0.) VECPHA2 = VECPHA2 + 360.
         PHSOUT=VECPHA2
         PHSERR = (180.0/PI)*RMSBK/AMPOUT
-        IQ = 1 + (PHSERR/7.0)		! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
-        IQ = MIN(IQ,8)			!            IQ=7     AMP= 1x RMSBK
+        IQ = 1 + (PHSERR/7.0)           ! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
+        IQ = MIN(IQ,8)                  !            IQ=7     AMP= 1x RMSBK
 C
 C       sum squared amplitudes
 C
@@ -902,7 +902,7 @@ C
 C       set up pagination
 C
         NUMOUT = NUMOUT + 1
-        IF(NUMOUT.GE.NUMSPOT)	ILIST=.FALSE.
+        IF(NUMOUT.GE.NUMSPOT)   ILIST=.FALSE.
         IF(NUMOUT.EQ.NUMSPOT+1) THEN
           WRITE(6,1103)
           WRITE(6,1102)
@@ -911,7 +911,7 @@ C
 1108    FORMAT('   H   K  AMPOUT  PHSOUT IQ   RMSBK     DFMID    ',
      .    'NCTFSAMPLES    CTFINMIDDLE   RESCALING BY')
         IF(NUMOUT.GT.NUMSPOT) THEN
-          NUMAFTER=NUMOUT-NUMSPOT-1	! Test for table heading output.
+          NUMAFTER=NUMOUT-NUMSPOT-1     ! Test for table heading output.
           IF(60*((NUMAFTER)/60).EQ.NUMAFTER) WRITE(6,1108)
           WRITE(6,1101)IH(I),IK(I),ISENS,AMPOUT,PHSOUT,IQ,RMSBK,
      .    DFMID,DELCHI,ICTFHOR,CTFMID,FACTOR
@@ -955,7 +955,7 @@ C
  1180     FORMAT('+',72X,I5,4X,10I5)
           L = L - 1
   390   CONTINUE
-        IF(ILIST)WRITE(6,1103)	! Asterisks.
+        IF(ILIST)WRITE(6,1103)  ! Asterisks.
         GOTO 500
 C
 C       write amps first then phases
@@ -979,7 +979,7 @@ C
           WRITE(6,1170) IYGU(L),(IPHI(J,L),J=1,IHOR)
           L = L - 1
   440   CONTINUE
-        IF(ILIST)WRITE(6,1103)	!   Asterisks
+        IF(ILIST)WRITE(6,1103)  !   Asterisks
   500 CONTINUE
 C
 C     write summed,squared amplitudes
@@ -998,7 +998,7 @@ C
           ISUM(J,K) = SQRT(FLOAT(ISUM(J,K)) /(NSPOT)) + 0.5
   520 CONTINUE
 C
-      WRITE(6,1250)	! Amplitude output
+      WRITE(6,1250)     ! Amplitude output
  1250 FORMAT(/,/,132('*'),/,/,19X,'SQRT of summed,squared amplitudes',
      .  /,19X,33('-'),/)
       L = IVERT
@@ -1010,7 +1010,7 @@ C
       WRITE(6,1252)
 C
       SCALEFAC = 7.0/PERIM
-      WRITE(6,1251) SCALEFAC		! Intensity output
+      WRITE(6,1251) SCALEFAC            ! Intensity output
  1251 FORMAT(/,/,132('*'),/,/,19X,'scaled intensities (perimeter',
      .  ' averaged to 7.0)',
      .  '        scale factor = ',F12.7,/,19X,40('-'))
@@ -1091,14 +1091,14 @@ C       has to be turned to get hold of the right bit (normally this is
 C       when X is negative).
 C
       PSHIFT = IX * DELPX + IY * DELPY
-      IF(TURN) PSHIFT = - PSHIFT	! apply phase shift to stored transform
-C      IF(IX.LT.0) PSHIFT = - PSHIFT	! this in old MMBOX program
+      IF(TURN) PSHIFT = - PSHIFT        ! apply phase shift to stored transform
+C      IF(IX.LT.0) PSHIFT = - PSHIFT    ! this in old MMBOX program
       C = COS(PSHIFT)
       S = SIN(PSHIFT)
       A = APART * C - BPART * S
       B = APART * S + BPART * C
-      IF(TURN) B=-B			! Friedel relation for turned transform
-C      IF(IX.LT.0) B = - B		! this in old MMBOX program.
+      IF(TURN) B=-B                     ! Friedel relation for turned transform
+C      IF(IX.LT.0) B = - B              ! this in old MMBOX program.
       APART = A
       BPART = B
       AMP = SQRT(A * A + B * B)
@@ -1107,7 +1107,7 @@ C      IF(IX.LT.0) B = - B		! this in old MMBOX program.
       ELSE 
       PHASE = ATAN2(B,A) * 57.2958
       END IF
-      IF(PHASE.LT.0.) PHASE = PHASE + 360.	! Phase bet 0 and 360 degs.
+      IF(PHASE.LT.0.) PHASE = PHASE + 360.      ! Phase bet 0 and 360 degs.
       RETURN
       END
 C*******************************************************************************
@@ -1126,7 +1126,7 @@ C
       PARAMETER (ICTFBXMAX=401)
       PARAMETER (INBOXMAX=341)
       PARAMETER (ICTFHALF=200)
-      DIMENSION ARRAY(2*INBOXMAX,INBOXMAX)	! Square array of complex no's.
+      DIMENSION ARRAY(2*INBOXMAX,INBOXMAX)      ! Square array of complex no's.
       DIMENSION AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
       LOGICAL TURN
       CALL IRDPAS(1,ARRAY,2*INBOXMAX,INBOXMAX,IX1,IX2,IY1,IY2,*900)
@@ -1196,9 +1196,9 @@ C
       PARAMETER (ICTFBXMAX=401)
       PARAMETER (INBOXMAX=341)
       PARAMETER (ICTFHALF=200)
-      DIMENSION ARRAY(2*IBOXMAX,IBOXMAX)	! Square array of complex no's.
+      DIMENSION ARRAY(2*IBOXMAX,IBOXMAX)        ! Square array of complex no's.
       DIMENSION ACORR(IBOXMAX,IBOXMAX),BCORR(IBOXMAX,IBOXMAX)
-      DIMENSION ALINE(IMSIZE)		! MAX TRANSFORM SIZE IS (IMSIZE-2)/2
+      DIMENSION ALINE(IMSIZE)           ! MAX TRANSFORM SIZE IS (IMSIZE-2)/2
       LOGICAL TURN
       KX = IX
       IF(.NOT.TURN) THEN
@@ -1266,14 +1266,14 @@ C
 C     Function: to average a set of angles in degrees
 C     Created: 27/7/84 by D.J.Thomas
 C     Modified:  by R.HENDERSON 20.5.85
-      INTEGER*4	N		!number of input angles
-      REAL*4   	THETAS(1)	!array of input angles
-      REAL*4   	THGOOD		!goodness of average (0 to 1)
-      REAL*4   	THMEAN		!weighted average of input angles
-      REAL     	COMEAN		!mean value of cosines
-      REAL     	SIMEAN		!mean value of sines
-      REAL		WEIGHT		!total input weight
-      REAL*4		WEIGHTS(1)	!weights on input angles
+      INTEGER*4 N               !number of input angles
+      REAL*4    THETAS(1)       !array of input angles
+      REAL*4    THGOOD          !goodness of average (0 to 1)
+      REAL*4    THMEAN          !weighted average of input angles
+      REAL      COMEAN          !mean value of cosines
+      REAL      SIMEAN          !mean value of sines
+      REAL              WEIGHT          !total input weight
+      REAL*4            WEIGHTS(1)      !weights on input angles
 C
       IF (N .LE. 0) GOTO 20
       WEIGHT = 0.0
@@ -1290,7 +1290,7 @@ C
         IF (WEIGHT .EQ. 0.0) GOTO 20
         THGOOD = SQRT((SIMEAN*SIMEAN) + (COMEAN*COMEAN))/WEIGHT
         RETURN
-20    THGOOD = 0.0			!average is undefined
+20    THGOOD = 0.0                      !average is undefined
       RETURN
       END
 C
@@ -1310,36 +1310,36 @@ C
       PARAMETER (INBOXMAX=341)
       PARAMETER (ICTFHALF=200)
       DIMENSION IAMP(IBOXMAX,IBOXMAX),IPHI(IBOXMAX,IBOXMAX),
-     .		ACORR(IBOXMAX,IBOXMAX),BCORR(IBOXMAX,IBOXMAX),
-     .		ACTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .		BCTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .		AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
-c      DIMENSION AT(5,5),PT(5,5)		! TEST DIAGNOSTIC O/P
+     .          ACORR(IBOXMAX,IBOXMAX),BCORR(IBOXMAX,IBOXMAX),
+     .          ACTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
+     .          BCTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
+     .          AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
+c      DIMENSION AT(5,5),PT(5,5)                ! TEST DIAGNOSTIC O/P
 C
       ICTFHOR2 = ICTFHOR/2
       ICTFVERT2 = ICTFVERT/2
       DO 100 I=1,IHOR
       DO 100 J=1,IVERT
-      	A=0.
-      	B=0.
-      	DO 50 ICTF=-ICTFHOR2,ICTFHOR2
-      	DO 50 JCTF=-ICTFVERT2,ICTFVERT2
-      	   K=I-ICTF+ICTFHOR2
-      	   L=J-JCTF+ICTFVERT2
-      	   A = A + AP(K,L)*ACTF(ICTF,JCTF) - BP(K,L)*BCTF(ICTF,JCTF)
-	   B = B + AP(K,L)*BCTF(ICTF,JCTF) + BP(K,L)*ACTF(ICTF,JCTF)
-50	CONTINUE
-      	AMP = SQRT(A*A + B*B)
-      	IF(AMP.EQ.0.0) THEN
-      		PHASE = 0.
-      	ELSE
-      		PHASE = ATAN2(B,A) * 57.2958
-      	ENDIF
-      	IF(PHASE.LT.0.0) PHASE = PHASE + 360.0	! Phase bet 0 and 360 deg.
-      	IAMP(I,J) = AMP  +  0.5		! ROUNDED TO NEAREST INTEGER
-      	IPHI(I,J) = PHASE + 0.5		! ROUNDED TO NEAREST INTEGER
-      	ACORR(I,J) = A
-      	BCORR(I,J) = B
+        A=0.
+        B=0.
+        DO 50 ICTF=-ICTFHOR2,ICTFHOR2
+        DO 50 JCTF=-ICTFVERT2,ICTFVERT2
+           K=I-ICTF+ICTFHOR2
+           L=J-JCTF+ICTFVERT2
+           A = A + AP(K,L)*ACTF(ICTF,JCTF) - BP(K,L)*BCTF(ICTF,JCTF)
+           B = B + AP(K,L)*BCTF(ICTF,JCTF) + BP(K,L)*ACTF(ICTF,JCTF)
+50      CONTINUE
+        AMP = SQRT(A*A + B*B)
+        IF(AMP.EQ.0.0) THEN
+                PHASE = 0.
+        ELSE
+                PHASE = ATAN2(B,A) * 57.2958
+        ENDIF
+        IF(PHASE.LT.0.0) PHASE = PHASE + 360.0  ! Phase bet 0 and 360 deg.
+        IAMP(I,J) = AMP  +  0.5         ! ROUNDED TO NEAREST INTEGER
+        IPHI(I,J) = PHASE + 0.5         ! ROUNDED TO NEAREST INTEGER
+        ACORR(I,J) = A
+        BCORR(I,J) = B
 100   CONTINUE
 C
 CHEN>
@@ -1446,8 +1446,8 @@ C      print *,((OUTPUT(I,J),'\t',I=1,IHOR+ICTFHOR-1),'\n',J=1,IVERT+ICTFVERT-1)
           ENDIF
           IF(PHASE.LT.0.0) PHASE = PHASE + 360.0        ! Phase bet 0 and 360 deg.
           IPHI(I,J) = PHASE + 0.5
-      	  ACORR(I,J) = RREA
-      	  BCORR(I,J) = RIMA
+          ACORR(I,J) = RREA
+          BCORR(I,J) = RIMA
         enddo
       enddo
 C
@@ -1473,8 +1473,8 @@ C
       PARAMETER (INBOXMAX=341)
       PARAMETER (ICTFHALF=200)
       DIMENSION ACTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .		BCTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .		 CTF(ICTFBXMAX*ICTFBXMAX)
+     .          BCTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
+     .           CTF(ICTFBXMAX*ICTFBXMAX)
       LOGICAL ILIST
       ISENS=ICHAR(' ')
       TWOPI = 2.0 * 3.1415926
@@ -1485,38 +1485,38 @@ C
       C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
       DELCHI=C1*DELHEIGHT
       SINEWAVES=DELCHI/TWOPI
-      	  ICTFHOR=MAX(10,INT(DELCHI))
-      	  ICTFHOR=(ICTFHOR/2)*2			    ! ensure ICTFHOR is even.
-      	  IF(ICTFHOR.GT.38) ICTFHOR=(ICTFHOR/8)*8   ! ensures prime factor < 19
-      	  IF(ICTFHOR.GT.ICTFBXMAX-1) THEN	    ! ensures storage ok.
-      		WRITE(6,101)ICTFHOR
-101		FORMAT(' Subroutine CTFGEN dimensions too small,',
+          ICTFHOR=MAX(10,INT(DELCHI))
+          ICTFHOR=(ICTFHOR/2)*2                     ! ensure ICTFHOR is even.
+          IF(ICTFHOR.GT.38) ICTFHOR=(ICTFHOR/8)*8   ! ensures prime factor < 19
+          IF(ICTFHOR.GT.ICTFBXMAX-1) THEN           ! ensures storage ok.
+                WRITE(6,101)ICTFHOR
+101             FORMAT(' Subroutine CTFGEN dimensions too small,',
      .                 '  ICTFHOR needs',I16)
-      		STOP
-      	  ENDIF
-      	  ICTFVERT=ICTFHOR
-      	  ICTFHOR2=ICTFHOR/2
-      	  ICTFVERT2=ICTFVERT/2
+                STOP
+          ENDIF
+          ICTFVERT=ICTFHOR
+          ICTFHOR2=ICTFHOR/2
+          ICTFVERT2=ICTFVERT/2
       C2=-C1*CS*ANGLE*ANGLE/2.0
       ANGDIF=ANGSPT-ANGAST
-      	CCOS=COS(2.0*ANGDIF)
-      	CSIN=SIN(2.0*ANGDIF)
-C      	COST=COS(TLTAXIS)
-C      	SINT=SIN(TLTAXIS)
-      	DFMID=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-      	CTFMID=-SIN(C1*DFMID+C2)
-      	IF(DELCHI/2.GT.ASIN(ABS(CTFMID))) ISENS=ICHAR('*')  !Spot has a zero in ctf
-      	SUMC=0.0
+        CCOS=COS(2.0*ANGDIF)
+        CSIN=SIN(2.0*ANGDIF)
+C       COST=COS(TLTAXIS)
+C       SINT=SIN(TLTAXIS)
+        DFMID=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
+        CTFMID=-SIN(C1*DFMID+C2)
+        IF(DELCHI/2.GT.ASIN(ABS(CTFMID))) ISENS=ICHAR('*')  !Spot has a zero in ctf
+        SUMC=0.0
       DO 100 I=1,ICTFHOR
       DO 100 J=1,ICTFVERT
-      	ISTORE=I+(ICTFHOR+2)*(J-1)	! indexing for array CTF.
-C	  Calculate height of this element of image.
-      	XP=((I-0.5-ICTFHOR2)/(ICTFHOR))*ISIZEX*STEPR! 0.5 rounding error
-      	YP=((J-0.5-ICTFVERT2)/(ICTFVERT))*ISIZEY*STEPR! 0.5 rounding error
-      	DF = DFMID + TANTILT*(-XP*SINT+YP*COST)
-      	CHI=C1*DF+C2
-      	CNTRST=-SIN(CHI)
-      	SUMC=SUMC+ABS(CNTRST)
+        ISTORE=I+(ICTFHOR+2)*(J-1)      ! indexing for array CTF.
+C         Calculate height of this element of image.
+        XP=((I-0.5-ICTFHOR2)/(ICTFHOR))*ISIZEX*STEPR! 0.5 rounding error
+        YP=((J-0.5-ICTFVERT2)/(ICTFVERT))*ISIZEY*STEPR! 0.5 rounding error
+        DF = DFMID + TANTILT*(-XP*SINT+YP*COST)
+        CHI=C1*DF+C2
+        CNTRST=-SIN(CHI)
+        SUMC=SUMC+ABS(CNTRST)
 100   CTF(ISTORE)=CNTRST
 C
 C  Now rescale so that the same power is present in the spot after convolution.
@@ -1524,7 +1524,7 @@ C  Now rescale so that the same power is present in the spot after convolution.
       FACTOR =ICTFHOR*ICTFVERT/SUMC
       DO 120 I=1,ICTFHOR
       DO 120 J=1,ICTFVERT
-      	ISTORE=I+(ICTFHOR+2)*(J-1)	! indexing for array CTF.
+        ISTORE=I+(ICTFHOR+2)*(J-1)      ! indexing for array CTF.
 120   CTF(ISTORE)=RESCALE*CTF(ISTORE)
 C
 C
@@ -1542,45 +1542,45 @@ C  Now calculate correct phase shift for slightly offset origin for the
 C     contrast distribution function.
       PHSHFT = -TWOPI*(ICTFHOR2-0.5)/ICTFHOR
 C
-      	DO 150 I=1,ICTFHOR2+1
-      	DO 150 J=1,ICTFVERT
-      	ISTORE = (2*I-1)+(ICTFHOR+2)*(J-1)
-      	IF(J.LE.1+ICTFVERT2) THEN
-      		IX=I-1
-      		IY=J-1
-      		C=COS((IX+IY)*PHSHFT)	! assumes ICTFHOR=ICTFVERT
-      		S=SIN((IX+IY)*PHSHFT)	! assumes ICTFHOR=ICTFVERT
-      		A = CTF(ISTORE)
-      		B = CTF(ISTORE+1)
-      		ACTF(IX,IY) = A*C-B*S
-      		BCTF(IX,IY) = A*S+B*C
-      	ENDIF
-      	IF(J.GE.1+ICTFVERT2) THEN
-      		IX=I-1
-      		IY=J-1-ICTFVERT
-      		C=COS((IX+IY)*PHSHFT)	! assumes ICTFHOR=ICTFVERT
-      		S=SIN((IX+IY)*PHSHFT)	! assumes ICTFHOR=ICTFVERT
-      		A = CTF(ISTORE)
-      		B = CTF(ISTORE+1)
-      		ACTF(IX,IY) = A*C-B*S
-      		BCTF(IX,IY) = A*S+B*C
-      	ENDIF
-150	CONTINUE
-      	DO 160 I= 1,ICTFHOR2
-      	DO 160 J=-ICTFVERT2,ICTFVERT2
-      		ACTF(-I,-J) =  ACTF(I,J)
-      		BCTF(-I,-J) = -BCTF(I,J)
-160	CONTINUE
+        DO 150 I=1,ICTFHOR2+1
+        DO 150 J=1,ICTFVERT
+        ISTORE = (2*I-1)+(ICTFHOR+2)*(J-1)
+        IF(J.LE.1+ICTFVERT2) THEN
+                IX=I-1
+                IY=J-1
+                C=COS((IX+IY)*PHSHFT)   ! assumes ICTFHOR=ICTFVERT
+                S=SIN((IX+IY)*PHSHFT)   ! assumes ICTFHOR=ICTFVERT
+                A = CTF(ISTORE)
+                B = CTF(ISTORE+1)
+                ACTF(IX,IY) = A*C-B*S
+                BCTF(IX,IY) = A*S+B*C
+        ENDIF
+        IF(J.GE.1+ICTFVERT2) THEN
+                IX=I-1
+                IY=J-1-ICTFVERT
+                C=COS((IX+IY)*PHSHFT)   ! assumes ICTFHOR=ICTFVERT
+                S=SIN((IX+IY)*PHSHFT)   ! assumes ICTFHOR=ICTFVERT
+                A = CTF(ISTORE)
+                B = CTF(ISTORE+1)
+                ACTF(IX,IY) = A*C-B*S
+                BCTF(IX,IY) = A*S+B*C
+        ENDIF
+150     CONTINUE
+        DO 160 I= 1,ICTFHOR2
+        DO 160 J=-ICTFVERT2,ICTFVERT2
+                ACTF(-I,-J) =  ACTF(I,J)
+                BCTF(-I,-J) = -BCTF(I,J)
+160     CONTINUE
 C
       IF(ILIST) WRITE(6,103)DELHEIGHT,DFMID,SINEWAVES,
-     .		DELCHI,ICTFHOR,CTFMID,FACTOR
+     .          DELCHI,ICTFHOR,CTFMID,FACTOR
 103   FORMAT(' Contrast transfer function description -----',
-     .	'-------- Height difference ===================',F10.1,/,
-     .	54X,'Midpoint defocus ====================',F10.1,/,
-     .	54X,'Number ctf cycles ===================',F10.3,/,
-     .	54X,'Number ctf samples needed (used)=====',F10.1,'(',I2,')',/,
-     .	54X,'Midpoint C.T.F. =====================',F10.4,/,
-     .	54X,'Rescaling factor (keeps noise const)=',F10.4)
+     .  '-------- Height difference ===================',F10.1,/,
+     .  54X,'Midpoint defocus ====================',F10.1,/,
+     .  54X,'Number ctf cycles ===================',F10.3,/,
+     .  54X,'Number ctf samples needed (used)=====',F10.1,'(',I2,')',/,
+     .  54X,'Midpoint C.T.F. =====================',F10.4,/,
+     .  54X,'Rescaling factor (keeps noise const)=',F10.4)
       RETURN
       END
 C
@@ -1590,13 +1590,13 @@ C
       SUBROUTINE CALCRAD(RADCLC,RADMIN,FCTR,PERPMAX,XPOS,YPOS,YCPOS,
      .COSTLTX,SINTLTX)
 C
-C	FCTR=(RADMAX-RADMIN)/PERPMAX
+C       FCTR=(RADMAX-RADMIN)/PERPMAX
 C
       PERP=YCPOS*COSTLTX-XPOS*SINTLTX
       IF(PERP.LT.0.0)PERP=-PERP
       IF(PERP.GT.PERPMAX)PERP=PERPMAX
       RADCLC= RADMIN  +  PERP*FCTR 
 C      WRITE(6,10)RADCLC,XPOS,YPOS,COSTLTX,SINTLTX,PERPMAX,FCTR
-10	FORMAT(7F10.4)
+10      FORMAT(7F10.4)
       RETURN
       END

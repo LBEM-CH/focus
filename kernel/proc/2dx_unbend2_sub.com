@@ -373,6 +373,25 @@ TMP234440.dat
 `cat ${imagename}.spt`
 eot
       #
+      # There is a strange bug in ttmask on OSX, where a mask of "20" causes one funny pixel in the masked FFT to be extremely strong.
+      # The stuff below was an attempt to trace this bug, but without any success.
+      # All other masking diameters, like 18,19,21,22, work well....
+      #
+      if ( ${locround} == '-1' ) then
+        echo "::" ${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${KV}
+        echo "::" ${defocus},${TLTAXIS},${TLTANG} 
+        echo "::" 1
+        echo "::" ${maskb},${maskb} 	
+        echo "::" ${lattice},-30,30,-30,30,${rmax},1,8 	
+        echo "::" TMP234440.dat
+        echo "::" cat ${imagename}.spt
+        cp -f FFTIR/${imagename}.fft.mrc test1-input.mrc
+        echo "# IMAGE: test1-input.mrc <TEST1: FFT of Image>" >> LOGS/${scriptname}.results 
+        cp -f SCRATCH/mgf08034b.fft.msk.mrc test1.mrc
+        echo "# IMAGE: test1.mrc <TEST1: maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
+        ${proc_2dx}/protest "stop"
+      endif
+      #
     else
       #
       ${proc_2dx}/${lincommand} "TTMASK - to mask the FFT of the image with TTF-correction"
@@ -398,7 +417,6 @@ eot
   if ( ${locround} == '1' ) then
     echo "# IMAGE: SCRATCH/${imagename}.fft.msk.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
   endif
-  #
   echo "<<@progress: 55>>"
   echo "<<@evaluate>>"
   #
@@ -478,7 +496,7 @@ eot
   if ( ${tempkeep} == 'y' ) then
     \mv -f SCRATCH/${imagename}.fft.msk.mrc SCRATCH/${imagename}.fft.msk.unbend2.mrc
     if ( ${locround} == '1' ) then
-      echo "# IMAGE: SCRATCH/${imagename}.fft.msk.unbend2.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
+      echo "# IMAGE: SCRATCH/${imagename}.fft.msk.unbend2.mrc <maskb-Masked FFT of Image (2)>" >> LOGS/${scriptname}.results 
     endif
     \mv -f SCRATCH/ref1${imagename}.fft.mrc SCRATCH/ref1${imagename}.fft.unbend2.mrc
     if ( ${locround} == '1' ) then
@@ -618,6 +636,7 @@ eot
   setenv PROFDATA SCRATCH/prof${imagename}.dat
   setenv ERRORS   SCRATCH/errors${imagename}.dat
   setenv ERROUT   SCRATCH/errout${imagename}.dat
+  # echo ":: "`ls -l SCRATCH/errors${imagename}.dat`
   #
   if ( ${domask} == 'n' || ${treatspotscan} == 'y' ) then
     #

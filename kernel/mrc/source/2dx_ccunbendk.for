@@ -1,57 +1,57 @@
 C PROGRAM CCUNBENDK ***********************************************************
 C
-C		Remember to change version number in first write statement.
-C		Original pre-history versions called CCUNBEND and CCUNBENDA. 
+C               Remember to change version number in first write statement.
+C               Original pre-history versions called CCUNBEND and CCUNBENDA. 
 C
-C	VX 1.0	RH	21.6.84 CCUNBENDB - This went through a variety of
-C				changes before version numbers were started.
-C	VX 2.0	JMB	20.3.86	Debug part dealing with last strip.
-C	VX 2.1	JMB	16.6.87	Rectangular images
-C	VX 2.2	RH	12.9.87	Extra guide points > 2*IKNOTS per axis.
-C	VX 2.3	RH	04.1.88	Extra guide points > 3*IKNOTS per axis.
-C	VX 2.4	RH	29.2.88	NDATA=50000
-C	VX 2.5	RH	07.4.88	ISIZEX=7500
-C	VX 3.0  RH	20.8.88 Efficient guide points &  non-spline option.
-C				renamed CCUNBENDC, old programs retained.
-C	VX 3.1  RH     13.11.88 Optimised ISIZEX=6000,ISTEPMAX=60,IDEEP=160
+C       VX 1.0  RH      21.6.84 CCUNBENDB - This went through a variety of
+C                               changes before version numbers were started.
+C       VX 2.0  JMB     20.3.86 Debug part dealing with last strip.
+C       VX 2.1  JMB     16.6.87 Rectangular images
+C       VX 2.2  RH      12.9.87 Extra guide points > 2*IKNOTS per axis.
+C       VX 2.3  RH      04.1.88 Extra guide points > 3*IKNOTS per axis.
+C       VX 2.4  RH      29.2.88 NDATA=50000
+C       VX 2.5  RH      07.4.88 ISIZEX=7500
+C       VX 3.0  RH      20.8.88 Efficient guide points &  non-spline option.
+C                               renamed CCUNBENDC, old programs retained.
+C       VX 3.1  RH     13.11.88 Optimised ISIZEX=6000,ISTEPMAX=60,IDEEP=160
 C       VX 3.2  RH     18.12.89 Minor changes, mainly cosmetic.
-C       VX 3.3  RH     16.5.90	IMAXCOR limit on X removed.
+C       VX 3.3  RH     16.5.90  IMAXCOR limit on X removed.
 C       VX 3.4  RH     30.5.90  Fudge on XAPPLY check.
-C	VX 3.5	RH     15.6.90  REAL*8 for SUMOUT
-C	VX 4.0	RH     03.1.92	Convert for UNIX on Alliant    
-C	VX 4.1	RH     23.8.93	insert check for DMIN,DMAX,DMEAN sensible.
-C	VX 4.2	RH     07.9.94	increased NDIMX,NDIMY for smoother unbending
-C	VX 4.3	RH     09.9.94	improved efficiency for FILLEMPTIES
-C	VX 4.4	RH     13.9.94	taperedge option for single molecule work
-C				renames CCUNBENDD, extra input parameters
-C	VX 4.5	RH     27.1.95	change plot scale-factor, debug fillempties
-C	VX 4.6	RH     29.4.95	add date to plots
-C	VX 4.7	RH     25.7.95	ENCODE debug for Alpha
-C	VX 4.8	RH     9.10.95	increase dimensions to 8000
-C	VX 4.9	RH     23.3.96	optional O/P unbend correction table CCUNBENDE
-C	VX 5.0	RH     22.4.96	add initialization and reorder IF statement
-C	VX 5.1	RH     11.3.98	change distortion plot to 10x error
-C	VX 6.0	RH     23.8.00	convert to plot2000 direct postscript output
+C       VX 3.5  RH     15.6.90  REAL*8 for SUMOUT
+C       VX 4.0  RH     03.1.92  Convert for UNIX on Alliant    
+C       VX 4.1  RH     23.8.93  insert check for DMIN,DMAX,DMEAN sensible.
+C       VX 4.2  RH     07.9.94  increased NDIMX,NDIMY for smoother unbending
+C       VX 4.3  RH     09.9.94  improved efficiency for FILLEMPTIES
+C       VX 4.4  RH     13.9.94  taperedge option for single molecule work
+C                               renames CCUNBENDD, extra input parameters
+C       VX 4.5  RH     27.1.95  change plot scale-factor, debug fillempties
+C       VX 4.6  RH     29.4.95  add date to plots
+C       VX 4.7  RH     25.7.95  ENCODE debug for Alpha
+C       VX 4.8  RH     9.10.95  increase dimensions to 8000
+C       VX 4.9  RH     23.3.96  optional O/P unbend correction table CCUNBENDE
+C       VX 5.0  RH     22.4.96  add initialization and reorder IF statement
+C       VX 5.1  RH     11.3.98  change distortion plot to 10x error
+C       VX 6.0  RH     23.8.00  convert to plot2000 direct postscript output
 C               TSH    13.6.01  P2K_FONT needed string terminator
 C
-C	MODIFIED  16.6.87  TO BE CORRECT FOR RECTANGULAR IMAGES UP TO SIZE
-C	7200 X 9600
-C	MODIFIED  14.12.85   TO GREATLY INCREASE THE NUMBER OF KNOTS ALLOWED IN
-C	     ONLY IN THE DIRECTION PERPENDICULAR TO THE TILT AXIS.
+C       MODIFIED  16.6.87  TO BE CORRECT FOR RECTANGULAR IMAGES UP TO SIZE
+C       7200 X 9600
+C       MODIFIED  14.12.85   TO GREATLY INCREASE THE NUMBER OF KNOTS ALLOWED IN
+C            ONLY IN THE DIRECTION PERPENDICULAR TO THE TILT AXIS.
 C            WORKS IN CONJUNCTION WITH CCORSERCH OR PROFSERCH.
 C            THE PROGRAM UNBENDS THE CRYSTAL USING OUTPUT
 C            FROM THE CROSS-CORRELATION PEAK SEARCH PROGRAM, CCORSERCH OR
 C            ITS LATER VARIANTS PROFSERCH AND QUADSERCH(0, 1, and 2)
 C
 C  CONTROL DATA :-
-C	CARD 1 : FILE NAME OF INPUT IMAGE FILE.(ONLY HEADER READ IF IOUT=0).
-C	CARD 2 : ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-CHEN	CARD 3 : IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS
-C	CARD 3 : IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
-C	CARD 4 : PLOT TITLE FOR DISTORTION CORRECTION DISPLAY.
+C       CARD 1 : FILE NAME OF INPUT IMAGE FILE.(ONLY HEADER READ IF IOUT=0).
+C       CARD 2 : ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+CHEN    CARD 3 : IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS
+C       CARD 3 : IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+C       CARD 4 : PLOT TITLE FOR DISTORTION CORRECTION DISPLAY.
 C      and if IOUT = 1,
-C	CARD 5 : FULL FILE NAME FOR OUTPUT OF CORRECTED IMAGE.
-C	CARD 6 : TITLE TO BE ADDED TO CORRECTED IMAGE TITLE RECORD.
+C       CARD 5 : FULL FILE NAME FOR OUTPUT OF CORRECTED IMAGE.
+C       CARD 6 : TITLE TO BE ADDED TO CORRECTED IMAGE TITLE RECORD.
 C
 C   INPUT FILES:
 C         CCORDATA      - FILE OF PARAMETERS CONTAINING DETAILS OF
@@ -81,9 +81,9 @@ C         IMAXCOR ------- SIZE OF THE MAXIMUM ALLOWED CORRECTION, TO ENABLE THE
 C                          SIZE OF EACH STRIP READ INTO CORE TO BE CALCULATED -
 C                          (ISTEP + 2*IMAXCOR).
 C                          CORRECTIONS LARGER THAN IMAXCOR ARE REDUCED.
-C			   A FURTHER LIMIT THAT IMAXCOR IS NOT GREATER THAN 
-C			   ISTEP WAS INTRODUCED IN Nov-88 TO KEEP THE PROGRAM
-C			   SIMPLE. BIGGER VALUES WILL NEED A MAJOR REWRITE.
+C                          A FURTHER LIMIT THAT IMAXCOR IS NOT GREATER THAN 
+C                          ISTEP WAS INTRODUCED IN Nov-88 TO KEEP THE PROGRAM
+C                          SIMPLE. BIGGER VALUES WILL NEED A MAJOR REWRITE.
 C         LTAPER -------- T or F (logical*1) for application of a taperedge
 C         RTAPER -------- Radius to be used from centre of ISTEP boxes.
 C         LTABOUT ------- T or F (logical*1) for output of unbending table
@@ -109,25 +109,25 @@ C
 C*******************************************************************************
 C
 C  DIMENSION STATEMENTS INCLUDE THE FOLLOWING PARAMETERS :-
-C	NDATA  - MAXIMUM NUMBER OF CORRELATION PEAKS ABOVE THRESH.
-C	NDIMX   - MAXIMUM NUMBER OF BLOCKS IN WHICH DISTORTION CORRECTION
-C	  	 IS CALCULATED. (NUMBER OF BLOCKS = NXYZ(1)/ISTEP),
+C       NDATA  - MAXIMUM NUMBER OF CORRELATION PEAKS ABOVE THRESH.
+C       NDIMX   - MAXIMUM NUMBER OF BLOCKS IN WHICH DISTORTION CORRECTION
+C                IS CALCULATED. (NUMBER OF BLOCKS = NXYZ(1)/ISTEP),
 C                BOTH NXYZ(1) AND ISTEP ARE INPUT PARAMETERS.
-C	NDIMY  - NXYZ(2)/ISTEP
-C	NMAXKN - MAXIMUM NUMBER OF KNOTS - USABLE NUMBER (IKNOTS)=(NMAXKN-8).
-C	NCMAX  -      (NMAXKN+4)**2  SOMETHING TO DO WITH THE KNOT SUBROUTINE.
-C	NPOINT - NDATA+(NMAXKN+1)**2       DITTO.
-C	NPOINT ALSO - MCALC+(NMAXKN+1)**2; MCALC=NDIMX*NDIMY; MCALC SHOULD NOT 
-C		BE LARGER THAN NDATA; VALUE CAN BE ADJUSTED WITH ISTEP
-C	ISIZEX  - MAXIMUM IMAGE SIZE IN X-DIMENSION
-C	IDEEP  - IMAGE IS READ IN AND CORRECTED IN SLICES OF DEPTH UP TO IDEEP.
-C		 SMALLER IDEEP RESULTS IN MORE I/O, LARGER IN MORE PAGE FAULTS.
+C       NDIMY  - NXYZ(2)/ISTEP
+C       NMAXKN - MAXIMUM NUMBER OF KNOTS - USABLE NUMBER (IKNOTS)=(NMAXKN-8).
+C       NCMAX  -      (NMAXKN+4)**2  SOMETHING TO DO WITH THE KNOT SUBROUTINE.
+C       NPOINT - NDATA+(NMAXKN+1)**2       DITTO.
+C       NPOINT ALSO - MCALC+(NMAXKN+1)**2; MCALC=NDIMX*NDIMY; MCALC SHOULD NOT 
+C               BE LARGER THAN NDATA; VALUE CAN BE ADJUSTED WITH ISTEP
+C       ISIZEX  - MAXIMUM IMAGE SIZE IN X-DIMENSION
+C       IDEEP  - IMAGE IS READ IN AND CORRECTED IN SLICES OF DEPTH UP TO IDEEP.
+C                SMALLER IDEEP RESULTS IN MORE I/O, LARGER IN MORE PAGE FAULTS.
 C              - IDEEP MUST BE (2*IMAXCOR + ISTEP); BOTH ON DATA CARD 2
-C	NWSPCE - WORKSPACE FOR KNOT SUBROUTINE -- SEE NAGLIB WRITE-UP.
+C       NWSPCE - WORKSPACE FOR KNOT SUBROUTINE -- SEE NAGLIB WRITE-UP.
 C                  MUST BE .GT. 4+3*(NMAXKN+4)+2*NCMAX*(6+3*(NMAXKN+4))
 C                  -- i.e. increases proportional to NMAXKN**3 !!
-C	ISTEPMAX - MAXIMUM VALUE OF ISTEP ABLE TO BE USED - CONTROLS DIMENSION
-C		   OF PICOUT.
+C       ISTEPMAX - MAXIMUM VALUE OF ISTEP ABLE TO BE USED - CONTROLS DIMENSION
+C                  OF PICOUT.
 C
       PARAMETER (NDATA=250000)
       PARAMETER (NMAXKN=80)
@@ -147,46 +147,46 @@ C      PARAMETER (NDIMX=500)
 C      PARAMETER (NDIMY=500)
       PARAMETER (NDIMY=2000)
 CHENN<
-C		see subroutine - fillempties, calctaper - parameters also.
-      	DIMENSION TITLE(20),TITLEIN(20),TITLEERR(20),DATANAME(20)
-      	REAL*8 SUMOUT
-      	REAL XPOS(NDATA),YPOS(NDATA),DX(NDATA),DY(NDATA),W(NDATA)
-      	REAL DXAV(NDIMX,NDIMY),DYAV(NDIMX,NDIMY)	! Bins for guide point
-      	REAL NAV(NDIMX,NDIMY),WAV(NDIMX,NDIMY)		! and linear interpol.
-      	REAL XOUT(NDIMX*NDIMY),YOUT(NDIMX*NDIMY)
-      	REAL XCORR(NDIMX*NDIMY),YCORR(NDIMX*NDIMY),WS(NWSPCE)
-      	REAL LAMBDA(NMAXKN),MU(NMAXKN),DL(NCMAX),CX(NCMAX),CY(NCMAX)
-      	INTEGER POINT(NPOINT),PX,PY,NCREAL,RANK,IFAIL,J
+C               see subroutine - fillempties, calctaper - parameters also.
+        DIMENSION TITLE(20),TITLEIN(20),TITLEERR(20),DATANAME(20)
+        REAL*8 SUMOUT
+        REAL XPOS(NDATA),YPOS(NDATA),DX(NDATA),DY(NDATA),W(NDATA)
+        REAL DXAV(NDIMX,NDIMY),DYAV(NDIMX,NDIMY)        ! Bins for guide point
+        REAL NAV(NDIMX,NDIMY),WAV(NDIMX,NDIMY)          ! and linear interpol.
+        REAL XOUT(NDIMX*NDIMY),YOUT(NDIMX*NDIMY)
+        REAL XCORR(NDIMX*NDIMY),YCORR(NDIMX*NDIMY),WS(NWSPCE)
+        REAL LAMBDA(NMAXKN),MU(NMAXKN),DL(NCMAX),CX(NCMAX),CY(NCMAX)
+        INTEGER POINT(NPOINT),PX,PY,NCREAL,RANK,IFAIL,J
       REAL MAXCOR, TAPER(ISTEPMAX,ISTEPMAX),TAPER1(ISTEPMAX,ISTEPMAX)
       REAL PICIN(ISIZEX,IDEEP),PICOUT(ISIZEX,ISTEPMAX)
       LOGICAL LTAPER, LTABOUT, LCOLOR
       CHARACTER*1 CCOLOR
 C
         DIMENSION NXYZ(3),MXYZ(3),NXYZ1(3),NXYZST(3)
-      	CHARACTER*80 NAME,NAME1
-      	EQUIVALENCE (PICIN(1,1),WS(1))
-       	EQUIVALENCE (PICOUT(1,1),WS(1+ISIZEX*IDEEP))
+        CHARACTER*80 NAME,NAME1
+        EQUIVALENCE (PICIN(1,1),WS(1))
+        EQUIVALENCE (PICOUT(1,1),WS(1+ISIZEX*IDEEP))
 CTSH++
       CHARACTER*80 TMPTITLEIN,TMPTITLEERR
       EQUIVALENCE (TMPTITLEIN,TITLEIN),(TMPTITLEERR,TITLEERR)
 CTSH--
-      	DATA NXYZST/3*0/
-      	DATA NGUIDE/20/		! MAXIMUM EXTRA GUIDE POINTS = NGUIDE**2.
-CTSH      	DATA TITLEIN/' PLO','T OF',' INP','UT D','ATA ','ABOV','E TH',
-CTSH     .	'RESH',' in ','CCUN','BEND','K   ','    ','    ','    ','    ',
-CTSH     .	'    ','    ','    ','    '/
-CTSH      	DATA TITLEERR/' PLO','T OF',' FIT','TING',' ERR','OR A','T IN',
-CTSH     .	'PUT ','DATA',' POI','NTS ','in C','CUNB','END2','K   ','    ',
-CTSH     .	'    ','    ','    ','    '/
+        DATA NXYZST/3*0/
+        DATA NGUIDE/20/         ! MAXIMUM EXTRA GUIDE POINTS = NGUIDE**2.
+CTSH            DATA TITLEIN/' PLO','T OF',' INP','UT D','ATA ','ABOV','E TH',
+CTSH     .      'RESH',' in ','CCUN','BEND','K   ','    ','    ','    ','    ',
+CTSH     .      '    ','    ','    ','    '/
+CTSH            DATA TITLEERR/' PLO','T OF',' FIT','TING',' ERR','OR A','T IN',
+CTSH     .      'PUT ','DATA',' POI','NTS ','in C','CUNB','END2','K   ','    ',
+CTSH     .      '    ','    ','    ','    '/
 CTSH++
-      	DATA TMPTITLEIN/' PLOT OF INPUT DATA ABOVE
+        DATA TMPTITLEIN/' PLOT OF INPUT DATA ABOVE
      . THRESH in CCUNBEND K'/
-      	DATA TMPTITLEERR/' PLOT OF FITTING ERROR AT
+        DATA TMPTITLEERR/' PLOT OF FITTING ERROR AT
      . INPUT DATA POINTS in CCUNBEND2K'/
 CTSH--
 C
-	XCOORD(I,J)=A1*I+B1*J+IC
-	YCOORD(I,J)=A2*I+B2*J+IR
+        XCOORD(I,J)=A1*I+B1*J+IC
+        YCOORD(I,J)=A2*I+B2*J+IR
 C*** initialization added by jms 06.03.96
         do j=1,ndimy
          do i=1,ndimy
@@ -404,7 +404,7 @@ C
       WRITE(6,100)MDATA,NLOST,DISTMAX,NOUTSIDE
       MDATAOBS=MDATA
       CALL PLOTCORR(TITLEIN,MDATA,XPOS,YPOS,DX,DY,NXYZ,100,RMAG,LCOLOR)
-      IF(ITYPE.EQ.1)CALL ROTATEXY(MDATA,DX,DY,TLTAXIS)	! BICUBIC ONLY
+      IF(ITYPE.EQ.1)CALL ROTATEXY(MDATA,DX,DY,TLTAXIS)  ! BICUBIC ONLY
 C
 C  ABOVE PART OF PROGRAM HAS CALCULATED THE VALUES OF THE DISTORTION
 C  CORRECTIONS AT EACH OF A NUMBER OF POINTS IN THE IMAGE. BELOW A FEW 
@@ -412,50 +412,50 @@ C  POINTS ARE ADDED TO THE IMAGE SO THAT A TRUE BOUNDARY IS CREATED FOR
 C  INTERPOLATION AND SO THAT THERE ARE NO EMPTY SPACES IN THE IMAGE.
 C  RESTRICT NUMBER OF EXTRA POINTS TO NGUIDE**2 FOR SPEED.
 C
-      	MEDGE=SQRT(FLOAT(MDATA))
-      	IF(ITYPE.EQ.1) THEN
-      		MEDGE=MAX(MEDGE,NGUIDE,3*IKNOTX,3*IKNOTY)
-      	ELSE 
-      		MEDGE=MAX(MEDGE,NGUIDE)
-      	ENDIF
-      	  NGUIDMIN=MAX(1,(MEDGE**2*ISTEP**2/(NXYZ(1)*NXYZ(2))))
-      	  WRITE(6,108) NGUIDMIN	! unlikely to be different from 1,in most cases.
-      	XINT=FLOAT(NXYZ(1)-1)/(MEDGE-1)
-      	YINT=FLOAT(NXYZ(2)-1)/(MEDGE-1)
-      	DO 270 I=1,MEDGE
-            	XTEST=1+(I-1)*XINT
-      		IF(I.EQ.MEDGE) XTEST=NXYZ(1)	! ensures true edge is reached
-      	DO 270 J=1,MEDGE
-            	YTEST=1+(J-1)*YINT
-      		IF(J.EQ.MEDGE) YTEST=NXYZ(2)	! ensures true edge is reached
-      		IBINX=1+XTEST/ISTEP
-      		IBINY=1+YTEST/ISTEP
+        MEDGE=SQRT(FLOAT(MDATA))
+        IF(ITYPE.EQ.1) THEN
+                MEDGE=MAX(MEDGE,NGUIDE,3*IKNOTX,3*IKNOTY)
+        ELSE 
+                MEDGE=MAX(MEDGE,NGUIDE)
+        ENDIF
+          NGUIDMIN=MAX(1,(MEDGE**2*ISTEP**2/(NXYZ(1)*NXYZ(2))))
+          WRITE(6,108) NGUIDMIN ! unlikely to be different from 1,in most cases.
+        XINT=FLOAT(NXYZ(1)-1)/(MEDGE-1)
+        YINT=FLOAT(NXYZ(2)-1)/(MEDGE-1)
+        DO 270 I=1,MEDGE
+                XTEST=1+(I-1)*XINT
+                IF(I.EQ.MEDGE) XTEST=NXYZ(1)    ! ensures true edge is reached
+        DO 270 J=1,MEDGE
+                YTEST=1+(J-1)*YINT
+                IF(J.EQ.MEDGE) YTEST=NXYZ(2)    ! ensures true edge is reached
+                IBINX=1+XTEST/ISTEP
+                IBINY=1+YTEST/ISTEP
 C
-C	   GUIDE POINTS ROUND EDGE WILL ALWAYS BE ADDED TO
-C	   ENSURE THAT CUBIC SPLINE ROUTINES ARE OK.
-        	IF(I.EQ.1.OR.I.EQ.MEDGE.OR.J.EQ.1.OR.J.EQ.MEDGE)GOTO 275
-      		IF(NAV(IBINX,IBINY).GE.NGUIDMIN) GO TO 270  ! i.e. no guide pt.
-275	CONTINUE
-      	MDATA=MDATA+1
+C          GUIDE POINTS ROUND EDGE WILL ALWAYS BE ADDED TO
+C          ENSURE THAT CUBIC SPLINE ROUTINES ARE OK.
+                IF(I.EQ.1.OR.I.EQ.MEDGE.OR.J.EQ.1.OR.J.EQ.MEDGE)GOTO 275
+                IF(NAV(IBINX,IBINY).GE.NGUIDMIN) GO TO 270  ! i.e. no guide pt.
+275     CONTINUE
+        MDATA=MDATA+1
       IF(MDATA.GT.NDATA) THEN
-      	WRITE(6,104)MDATA
-      	STOP
+        WRITE(6,104)MDATA
+        STOP
       ENDIF
-      	XPOS(MDATA)=XTEST	! Adding single guide point per ISTEPxISTEP box
-      	YPOS(MDATA)=YTEST	!   "     "
+        XPOS(MDATA)=XTEST       ! Adding single guide point per ISTEPxISTEP box
+        YPOS(MDATA)=YTEST       !   "     "
 C  MAKE DISTORTION AT EDGE AND FILL-IN POINTS SAME AS AVERAGE OF BINNED INPUT
 C  DATA POINTS.
-      	DX(MDATA) = DXAV(IBINX,IBINY)
-      	DY(MDATA) = DYAV(IBINX,IBINY)
-      	W(MDATA)  = WAV(IBINX,IBINY)/4.0	! but lower weights
-270	CONTINUE
+        DX(MDATA) = DXAV(IBINX,IBINY)
+        DY(MDATA) = DYAV(IBINX,IBINY)
+        W(MDATA)  = WAV(IBINX,IBINY)/4.0        ! but lower weights
+270     CONTINUE
       MADDED=MDATA-MDATAOBS
       WRITE(6,105)MDATA,MADDED
 C
 C  CALCULATE POSITIONS AT WHICH SMOOTHED DISTORTION WILL BE DETERMINED.
-      	XMAX=NXYZ(1)
-      	YMAX=NXYZ(2)
-      	ICALC=0
+        XMAX=NXYZ(1)
+        YMAX=NXYZ(2)
+        ICALC=0
       DO 400 J=1,MYDIM
       DO 400 I=1,MXDIM
         ICALC=ICALC+1
@@ -468,32 +468,32 @@ C  CALCULATE POSITIONS AT WHICH SMOOTHED DISTORTION WILL BE DETERMINED.
 C
 C  this section for debugging a problem WITH POSITIONS OF KNOTS.
 C
-      	XDATMIN=1000
-      	XDATMAX=0
-      	YDATMIN=1000
-      	YDATMAX=0
-      	DO 405 I=1,MDATA
-      	XDATMIN=AMIN1(XDATMIN,XPOS(I))
-      	XDATMAX=AMAX1(XDATMAX,XPOS(I))
-      	YDATMIN=AMIN1(YDATMIN,YPOS(I))
-405   	YDATMAX=AMAX1(YDATMAX,YPOS(I))
-      	XOUTMIN=1000
-      	XOUTMAX=0
-      	YOUTMIN=1000
-      	YOUTMAX=0
-      	DO 406 I=1,MCALC
-      	XOUTMIN=AMIN1(XOUTMIN,XOUT(I))
-      	XOUTMAX=AMAX1(XOUTMAX,XOUT(I))
-      	YOUTMIN=AMIN1(YOUTMIN,YOUT(I))
-406   	YOUTMAX=AMAX1(YOUTMAX,YOUT(I))
+        XDATMIN=1000
+        XDATMAX=0
+        YDATMIN=1000
+        YDATMAX=0
+        DO 405 I=1,MDATA
+        XDATMIN=AMIN1(XDATMIN,XPOS(I))
+        XDATMAX=AMAX1(XDATMAX,XPOS(I))
+        YDATMIN=AMIN1(YDATMIN,YPOS(I))
+405     YDATMAX=AMAX1(YDATMAX,YPOS(I))
+        XOUTMIN=1000
+        XOUTMAX=0
+        YOUTMIN=1000
+        YOUTMAX=0
+        DO 406 I=1,MCALC
+        XOUTMIN=AMIN1(XOUTMIN,XOUT(I))
+        XOUTMAX=AMAX1(XOUTMAX,XOUT(I))
+        YOUTMIN=AMIN1(YOUTMIN,YOUT(I))
+406     YOUTMAX=AMAX1(YOUTMAX,YOUT(I))
       WRITE(6,407) XDATMIN,XDATMAX,YDATMIN,YDATMAX,
      . XOUTMIN,XOUTMAX,YOUTMIN,YOUTMAX
-407	FORMAT( ' MIN & MAX X & Y on input+guide data points =',4F10.3/
+407     FORMAT( ' MIN & MAX X & Y on input+guide data points =',4F10.3/
      . ' min & max X & Y at centres of ISTEP boxes  =',4F10.3)
       IF(XOUTMAX.GT.XDATMAX.OR.YOUTMAX.GT.YDATMAX) THEN
-      		WRITE(6,4060)XOUTMAX,XDATMAX,YOUTMAX,YDATMAX
-4060		FORMAT(///' ERROR IN MAXIMUM CALC GUIDE PT',4F15.5)
-      		STOP
+                WRITE(6,4060)XOUTMAX,XDATMAX,YOUTMAX,YDATMAX
+4060            FORMAT(///' ERROR IN MAXIMUM CALC GUIDE PT',4F15.5)
+                STOP
       ENDIF
 C   END OF DEBUG BIT
 C
@@ -511,7 +511,7 @@ C  SIMPLE CORRECTION BY THE AMOUNT OF THE LOCAL CORRELATION PEAK.
       ENDIF
 C
 C  MORE COMPLICATED CORRECTION WITH BICUBIC SPLINE SMOOTHING.
-      IF(ITYPE.EQ.1) THEN			! ENDS ABOUT 99 LINES DOWN.
+      IF(ITYPE.EQ.1) THEN                       ! ENDS ABOUT 99 LINES DOWN.
         IF(NPOINT.LT.(MCALC+(NMAXKN+1)**2)) THEN
           IDIMOUT=8
           GO TO 199
@@ -619,7 +619,7 @@ C
       WRITE(6,1107)
       READ(5,1108)  TITLE
       WRITE(6,1109) TITLE
-      IF(ITYPE.EQ.1) THEN		! BICUBIC ONLY
+      IF(ITYPE.EQ.1) THEN               ! BICUBIC ONLY
         CALL ROTATEXY(MDATAOBS,DX,DY,-TLTAXIS)
         CALL ROTATEXY(MCALC,XCORR,YCORR,-TLTAXIS)
       ENDIF
@@ -639,7 +639,7 @@ C USE DX, DY ARRAYS TO CALCULATE THE RESIDUAL FITTING ERROR FOR PLOTTING.
         K= 1 + (XPOS(I)/ISTEP) + MXDIM*INT(YPOS(I)/ISTEP)
         DIST = (XOUT(K)-XPOS(I))**2 + (YOUT(K)-YPOS(I))**2
         DIST = SQRT(DIST)
-        IF(DIST.GT.STEPROOT2) THEN		! CHECK CALC IS CORRECT
+        IF(DIST.GT.STEPROOT2) THEN              ! CHECK CALC IS CORRECT
           WRITE(6,1105)I,XPOS(I),YPOS(I),K,XOUT(K),YOUT(K)
         ENDIF
         XAPPLY=XCORR(K)
@@ -648,7 +648,7 @@ C USE DX, DY ARRAYS TO CALCULATE THE RESIDUAL FITTING ERROR FOR PLOTTING.
         DX(I)=DX(I)-XAPPLY
         DY(I)=DY(I)-YAPPLY
         IF(ABS(YCORR(K)).GT.MAXCOR)
-     .   NOTCORRFUL=NOTCORRFUL+1		! count up truncations
+     .   NOTCORRFUL=NOTCORRFUL+1                ! count up truncations
 1104  CONTINUE
       PROPNLOST=FLOAT(NOTCORRFUL)/MDATAOBS
       WRITE(6,1112)IMAXCOR,NOTCORRFUL,PROPNLOST
@@ -703,17 +703,17 @@ C  INPUT OF STRIP OF IMAGE...................
 C  READ IN REGION (ISTEP + 2*IMAXCOR) DEEP, EXCEPT FOR THE FIRST AND
 C   LAST STRIPS WHICH BEGIN AND END AT THE PICTURE EDGE.
         CALL IMPOSN(1,0,0)
-        NY1 =  (J-1)*ISTEP -IMAXCOR	! EXTRA IMAXCOR READ IN PER STRIP
-        IF(J.EQ.1) NY1 = 0	! EXCEPT FOR FIRST STRIP
-        NY2 = J*ISTEP + IMAXCOR - 1			! SAME AT END OF STRIP
+        NY1 =  (J-1)*ISTEP -IMAXCOR     ! EXTRA IMAXCOR READ IN PER STRIP
+        IF(J.EQ.1) NY1 = 0      ! EXCEPT FOR FIRST STRIP
+        NY2 = J*ISTEP + IMAXCOR - 1                     ! SAME AT END OF STRIP
         IF(NY2.GT.NXYZ(2)-1) THEN           ! EXCEPT FOR LAST STRIP(S)
           NY2KEEP=NY2
           NY2 = NXYZ(2)-1   
         END IF
         CALL IRDPAS(1,PICIN,ISIZEX,IDEEP,NX1,NX2,NY1,NY2,*9500)
 C
-        ITEST=ISTEP+2*IMAXCOR	! TEST FOR Y OUTSIDE RANGE OF PICIN.
-        IF(J.EQ.1) ITEST=ISTEP+IMAXCOR				   !FIRST STRIP
+        ITEST=ISTEP+2*IMAXCOR   ! TEST FOR Y OUTSIDE RANGE OF PICIN.
+        IF(J.EQ.1) ITEST=ISTEP+IMAXCOR                             !FIRST STRIP
         IF(NY2KEEP.GT.NXYZ(2)-1) ITEST=IMAXCOR+NXYZ(2)-(J-1)*ISTEP !LAST STRIPS
 C
 C SET PICOUT TO PICIN SO POINTS, WHICH (AFTER DISTORTION CORRECTION)
@@ -742,8 +742,8 @@ C
             DO 452 IY=1,ISTEP
               IYTRUE=IY + (J-1)*ISTEP
               IF (IYTRUE.GT.NXYZ(2))GO TO 452
-              IYINPIC = IY + IMAXCOR	! PICIN STARTS AT (IYTRUE-IMAXCOR).
-              IF(J.EQ.1) IYINPIC=IY	! EXCEPT FOR FIRST STRIP
+              IYINPIC = IY + IMAXCOR    ! PICIN STARTS AT (IYTRUE-IMAXCOR).
+              IF(J.EQ.1) IYINPIC=IY     ! EXCEPT FOR FIRST STRIP
               XAPPLY=XCORR(ICALC)
               YAPPLY=YCORR(ICALC)
               IF(ABS(YAPPLY).GT.MAXCOR) YAPPLY=SIGN(MAXCOR,YAPPLY)
@@ -754,8 +754,8 @@ C
      .            GO TO 1450 ! PROB OK BUT NO CHECK POSS.
                 IF(I.LE.3.OR.I.GE.MXDIM-3)GO TO 1450 !Fudge for removing Xmaxcor
                 if(ierrorcount1.lt.30)then
-                  WRITE(6,191)IXA,(NXYZ(1)-1),IX,XAPPLY		! ERROR
-                  WRITE(6,193)I,J,IX,IY,IXTRUE,IYTRUE		! ERROR
+                  WRITE(6,191)IXA,(NXYZ(1)-1),IX,XAPPLY         ! ERROR
+                  WRITE(6,193)I,J,IX,IY,IXTRUE,IYTRUE           ! ERROR
                   ierrorcount1=ierrorcount1+1
                 else
                   if(ierrorcount1.eq.30)then
@@ -765,12 +765,12 @@ C
                 endif
                 GO TO 1450
               ENDIF
-              IF((IYA.LT.1).OR.(IYA.GT.(ITEST-1))) THEN	! ITEST DEFINED ABOVE
+              IF((IYA.LT.1).OR.(IYA.GT.(ITEST-1))) THEN ! ITEST DEFINED ABOVE
                 IF(J.EQ.1.OR.NY2KEEP.GT.NXYZ(2)-1) GO TO 1451
-C   						! OK BUT NO CORRECTION POSSIBLE
+C                                               ! OK BUT NO CORRECTION POSSIBLE
                 if(ierrorcount2.lt.30)then
-                  WRITE(6,192)IYA,ITEST,IDEEP,IY,YAPPLY	! ERROR
-                  WRITE(6,193)I,J,IX,IY,IXTRUE,IYTRUE	! ERROR
+                  WRITE(6,192)IYA,ITEST,IDEEP,IY,YAPPLY ! ERROR
+                  WRITE(6,193)I,J,IX,IY,IXTRUE,IYTRUE   ! ERROR
                   ierrorcount2=ierrorcount2+1
                 else
                   if(ierrorcount2.eq.30)then
@@ -811,7 +811,7 @@ C  OUTPUT OF STRIP OF CORRECTED UNBENT IMAGE.
         ELSE
           INOUT=ISTEP
         ENDIF
-        WRITE(6,195) J,INOUT
+CHEN    WRITE(6,195) J,INOUT
         DO 495 M=1,INOUT
           CALL IWRLIN(4,PICOUT(1,M))
 495     CONTINUE
@@ -830,102 +830,102 @@ C  OUTPUT OF STRIP OF CORRECTED UNBENT IMAGE.
 C
       STOP
 9500    WRITE(6,9012)NX1,NX2,NY1,NY2,ISIZEX,IDEEP
-9012	FORMAT(' Error reading picture file from IRDPAS'/
+9012    FORMAT(' Error reading picture file from IRDPAS'/
      . '   Trying to read a strip from',I6,' to',I6,' in X'/
      . '                      and from',I6,' to',I6,' in Y'/
      . ' into array PICIN of dimension',I6,' by',I6)
-      	STOP
-197	WRITE(6,172) NMAXKN-8
-      	STOP
-198	WRITE(6,171)
-      	STOP
-199	WRITE(6,170)IDIMOUT
         STOP
-100	FORMAT(' NUMBER OF CROSS-CORRELATION PEAKS READ IN; MDATA',I10/
+197     WRITE(6,172) NMAXKN-8
+        STOP
+198     WRITE(6,171)
+        STOP
+199     WRITE(6,170)IDIMOUT
+        STOP
+100     FORMAT(' NUMBER OF CROSS-CORRELATION PEAKS READ IN; MDATA',I10/
      . ' NUMBER OF PEAKS BELOW THRESHOLD NOT READ IN; NLOST',I10/
      . ' MAXIMUM DISTORTION CORRECTION READ IN; DISTMAX',F20.1/
      . ' NUMBER OF POINTS NOT READ IN BECAUSE THEY WOULD BE OUTSIDE',
      . ' IMAGE AFTER UNBENDING; NOUTSIDE',I10)
-101	FORMAT(' FAILED KNOT SORTING E02ZAF, IFAIL=',I5)
-102	FORMAT(' CUBIC SPLINE FIT OF X-ERROR FAILED, IFAIL=',I5)
-103	FORMAT(' CUBIC SPLINE FIT OF Y-ERROR FAILED, IFAIL=',I5)
-104	FORMAT(' NDATA PROGRAM DIMENSION TOO SMALL',I10)
-105	FORMAT(' TOTAL OF MDATA AFTER ADDING EDGE AND GUIDE POINTS',I10/
+101     FORMAT(' FAILED KNOT SORTING E02ZAF, IFAIL=',I5)
+102     FORMAT(' CUBIC SPLINE FIT OF X-ERROR FAILED, IFAIL=',I5)
+103     FORMAT(' CUBIC SPLINE FIT OF Y-ERROR FAILED, IFAIL=',I5)
+104     FORMAT(' NDATA PROGRAM DIMENSION TOO SMALL',I10)
+105     FORMAT(' TOTAL OF MDATA AFTER ADDING EDGE AND GUIDE POINTS',I10/
      . '          NUMBER OF EDGE AND GUIDE POINTS ADDED   ',I10)
-106	FORMAT(' X,Y,DX,DY,W   ',5F10.2)
-107	FORMAT(' NUMBER OF CORRECTION VECTORS TO CALCULATE',2I10)
-108	FORMAT(' Min number data points in ISTEPxISTEP box - below',
+106     FORMAT(' X,Y,DX,DY,W   ',5F10.2)
+107     FORMAT(' NUMBER OF CORRECTION VECTORS TO CALCULATE',2I10)
+108     FORMAT(' Min number data points in ISTEPxISTEP box - below',
      . ' which a guide point will be added',I10)
-150	FORMAT(/' SUM OF SQUARES OF RESIDUAL AT DATA POINTS=',G20.2)
-151	FORMAT(' RANK OF SYSTEM    =',I10/
+150     FORMAT(/' SUM OF SQUARES OF RESIDUAL AT DATA POINTS=',G20.2)
+151     FORMAT(' RANK OF SYSTEM    =',I10/
      . ' VALUE OF NCREAL USED  =',I10/
      . ' VALUE OF EPS USED =',F15.3)
-159	FORMAT(': IMAXCOR ON INPUT =',I6,
+159     FORMAT(': IMAXCOR ON INPUT =',I6,
      . '  , REDUCED TO BE EQUAL TO ISTEP =',I6)
-160	FORMAT('$ ITYPE,IOUT,IMAXCOR,ISTEP ?')
-161	FORMAT('               ITYPE----------',I5/
+160     FORMAT('$ ITYPE,IOUT,IMAXCOR,ISTEP ?')
+161     FORMAT('               ITYPE----------',I5/
      . '               IOUT-----------',I5/
      . '               IMAXCOR--------',I5/
      . '               ISTEP----------',I5/
      . '               LTAPER---------',4X,L1/
      . '               RTAPER---------',F7.1/
      . '               LTABOUT--------',4X,L1)
-162	FORMAT('$ FULL FILENAME OF OUTPUT IMAGE FILE ?')
-163	FORMAT(A)
-164	FORMAT(' IMAGE FILE CREATED WAS  ',A)
-165	FORMAT('$ TITLE TO ADD TO OUTPUT IMAGE FILE ?')
-166	FORMAT(20A4)
-167	FORMAT(' TITLE ADDED TO IMAGE FILE WAS  ',20A4)
-168	FORMAT('               IKNOTX---------',I5,/,
+162     FORMAT('$ FULL FILENAME OF OUTPUT IMAGE FILE ?')
+163     FORMAT(A)
+164     FORMAT(' IMAGE FILE CREATED WAS  ',A)
+165     FORMAT('$ TITLE TO ADD TO OUTPUT IMAGE FILE ?')
+166     FORMAT(20A4)
+167     FORMAT(' TITLE ADDED TO IMAGE FILE WAS  ',20A4)
+168     FORMAT('               IKNOTX---------',I5,/,
      . '               IKNOTY---------',I5,/,
      . '               EPS------------',F10.6,/,
      . '               FACTOR---------',F10.3,/,
      . '               THRESH---------',F10.1,/,
      . '               TLTAXIS--------',F10.1)
-169	FORMAT('$ IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS ?')
-170	FORMAT(I5,' PROGRAM DIMENSIONS INADEQUATE, PLEASE CHECK',/,
+169     FORMAT('$ IKNOTX,IKNOTY,EPS,FACTOR,TLTAXIS ?')
+170     FORMAT(I5,' PROGRAM DIMENSIONS INADEQUATE, PLEASE CHECK',/,
      . ' 1=ISIZEX;2=ISTEP;3=NDIMX;4=NDIMY;5=NPOINT(NDATA);',
      . ' 6=NCMAX;,7=NWSPCE;8=NPOINT(MCALC)',/)
-171	FORMAT(' PROGRAM DIMENSION IDEEP INADEQUATE, PLEASE CHECK') 
-172	FORMAT(' PRESENT PROG DIM INADEQUATE: MAX KNOTS ALLOWED=',I5)
-191	FORMAT(' ERROR *** IXA OUTSIDE RANGE 1 - ISIZEX',3I14,F15.6)
-192	FORMAT(' ERROR *** IYA OUTSIDE RANGE 1 - ITEST',4I14,F15.6)
-193	FORMAT(' I,J,IX,IY,IXTRUE,IYTRUE=',12I6)
-194	FORMAT(' T,XDELTA,YDELTA,XAPPLY,YAPPLY=',5F15.4)
-195	FORMAT(' INTERPOLATION DONE, THIS STRIP NOW OUTPUT, J=',I6,
+171     FORMAT(' PROGRAM DIMENSION IDEEP INADEQUATE, PLEASE CHECK') 
+172     FORMAT(' PRESENT PROG DIM INADEQUATE: MAX KNOTS ALLOWED=',I5)
+191     FORMAT(' ERROR *** IXA OUTSIDE RANGE 1 - ISIZEX',3I14,F15.6)
+192     FORMAT(' ERROR *** IYA OUTSIDE RANGE 1 - ITEST',4I14,F15.6)
+193     FORMAT(' I,J,IX,IY,IXTRUE,IYTRUE=',12I6)
+194     FORMAT(' T,XDELTA,YDELTA,XAPPLY,YAPPLY=',5F15.4)
+195     FORMAT(' INTERPOLATION DONE, THIS STRIP NOW OUTPUT, J=',I6,
      . '  INOUT=',I5)
-1101	FORMAT(' FAILED KNOT SORTING IN OUTPUT E02ZAF, IFAIL=',I5)
-1102	FORMAT(' CUBIC SPLINE CALCULATION OF X-ERROR, IFAIL=',I5)
-1103	FORMAT(' CUBIC SPLINE CALCULATION OF Y-ERROR, IFAIL=',I5)
-1105	FORMAT(' I,XPOS(I),YPOS(I),K,XOUT(K),YOUT(K)=',2(I10,2F10.2))
-1106	FORMAT('  BELOW ARE ANY CORR PTS MORE THAN',F7.1,' FROM DATA')
-3210	FORMAT(' TITLE FROM CCORDATA FILE; ',20A4)
-3211	FORMAT(' FULL FILENAME OF INPUT IMAGE FILE? ')
-3212	FORMAT('  FILENAME OF IMAGE FILE TO BE USED ',A)
-8000	FORMAT(' TIME FOR STEP UP TO START OF BICUBIC SPLINE',F10.1)
-8001	FORMAT(' TIME FOR BICUBIC SPLINE FITTING OF X-DIR',F10.1)
-8002	FORMAT(' TIME FOR BICUBIC SPLINE FITTING OF Y-DIR',F10.1)
-8003	FORMAT(' TIME FOR UNBENDING IMAGE',F10.1)
-8004	FORMAT(' TIME UP TO START OF PLOT WITH ITYPE=0',2F10.1)
-	END
+1101    FORMAT(' FAILED KNOT SORTING IN OUTPUT E02ZAF, IFAIL=',I5)
+1102    FORMAT(' CUBIC SPLINE CALCULATION OF X-ERROR, IFAIL=',I5)
+1103    FORMAT(' CUBIC SPLINE CALCULATION OF Y-ERROR, IFAIL=',I5)
+1105    FORMAT(' I,XPOS(I),YPOS(I),K,XOUT(K),YOUT(K)=',2(I10,2F10.2))
+1106    FORMAT('  BELOW ARE ANY CORR PTS MORE THAN',F7.1,' FROM DATA')
+3210    FORMAT(' TITLE FROM CCORDATA FILE; ',20A4)
+3211    FORMAT(' FULL FILENAME OF INPUT IMAGE FILE? ')
+3212    FORMAT('  FILENAME OF IMAGE FILE TO BE USED ',A)
+8000    FORMAT(' TIME FOR STEP UP TO START OF BICUBIC SPLINE',F10.1)
+8001    FORMAT(' TIME FOR BICUBIC SPLINE FITTING OF X-DIR',F10.1)
+8002    FORMAT(' TIME FOR BICUBIC SPLINE FITTING OF Y-DIR',F10.1)
+8003    FORMAT(' TIME FOR UNBENDING IMAGE',F10.1)
+8004    FORMAT(' TIME UP TO START OF PLOT WITH ITYPE=0',2F10.1)
+        END
 C
 C*******************************************************************************
 C
 C  SUBROUTINE TO PLOT THE LATTICE OF FITTED DISTORTION CORRECTIONS.
-      	SUBROUTINE PLOTCORR(TITLE,MCALC,XOUT,YOUT,XCORR,YCORR,NXYZ,IP,
+        SUBROUTINE PLOTCORR(TITLE,MCALC,XOUT,YOUT,XCORR,YCORR,NXYZ,IP,
      .   RMAG,LCOLOR)
         LOGICAL LCOLOR
-      	DIMENSION XOUT(1),YOUT(1),XCORR(1),YCORR(1)
-      	DIMENSION TITLE(20),NXYZ(3),TITLEPLOT(20),TEXT(20)
+        DIMENSION XOUT(1),YOUT(1),XCORR(1),YCORR(1)
+        DIMENSION TITLE(20),NXYZ(3),TITLEPLOT(20),TEXT(20)
         CHARACTER DAT*24
 CTSH++
-	CHARACTER*80 TMPTITLEPLOT
-	EQUIVALENCE (TMPTITLEPLOT,TITLEPLOT)
+        CHARACTER*80 TMPTITLEPLOT
+        EQUIVALENCE (TMPTITLEPLOT,TITLEPLOT)
 CTSH--
 CHEN>
         DIMENSION line(20)
-	CHARACTER*80 TMPline
-	EQUIVALENCE (TMPline,line)
+        CHARACTER*80 TMPline
+        EQUIVALENCE (TMPline,line)
 C
 C-------Magnification (Exaggeration) factor 10 times:
 C        RMAG = 10.0
@@ -943,8 +943,8 @@ CHEN>
         WRITE(TMPline,'('' Vectors are plotted '',F4.1,'' times '',
      .    ''elongated.'')') RMAG
 CHEN<
-200	FORMAT('  ENTERING PLOTCORR')
-201	FORMAT(20A4)
+200     FORMAT('  ENTERING PLOTCORR')
+201     FORMAT(20A4)
        WRITE(6,200)
        WRITE(6,201)TITLEPLOT
       PLTSIZ=260.0
@@ -955,10 +955,10 @@ CHEN<
       CALL P2K_GRID(0.5*PLTSIZ,0.5*PLTSIZ,1.0)
       CALL P2K_ORIGIN(-0.5*PLTSIZ,-0.7*PLTSIZ,0.)
       CALL P2K_COLOUR(0)
-      	SPLOT=PLTSIZ/MAX(NXYZ(1),NXYZ(2))
+        SPLOT=PLTSIZ/MAX(NXYZ(1),NXYZ(2))
 C  BOX ROUND THE WHOLE IMAGE AREA
-      		SIZEX=NXYZ(1)*SPLOT
-      		SIZEY=NXYZ(2)*SPLOT
+                SIZEX=NXYZ(1)*SPLOT
+                SIZEY=NXYZ(2)*SPLOT
       CALL P2K_MOVE(0.,0.,0.)
       CALL P2K_DRAW(SIZEX,0.,0.)
       CALL P2K_DRAW(SIZEX,SIZEY,0.)
@@ -985,17 +985,17 @@ C-----Adjust maximal length to width/20
       rlenmax=rlenmax/20.0
 CHEN<
       DO 100 I=1,MCALC
-	XPLOT=SPLOT*XOUT(I)
-      	YPLOT=SPLOT*YOUT(I)
-      	IF(XPLOT.GT.SIZEX.OR.XPLOT.LT.0.) GO TO 100
-      	IF(YPLOT.GT.SIZEY.OR.YPLOT.LT.0.) GO TO 100
-C      	WRITE(TEXT,102)
-C	CALL P2K_CSTRING(TEXT,1,0.)
-102	FORMAT('X')
-      	XERR=SPLOT*XCORR(I)*RMAG + XPLOT
-      	YERR=SPLOT*YCORR(I)*RMAG + YPLOT
-      	IF(XERR.GT.SIZEX.OR.XERR.LT.0.) GO TO 100
-      	IF(YERR.GT.SIZEY.OR.YERR.LT.0.) GO TO 100
+        XPLOT=SPLOT*XOUT(I)
+        YPLOT=SPLOT*YOUT(I)
+        IF(XPLOT.GT.SIZEX.OR.XPLOT.LT.0.) GO TO 100
+        IF(YPLOT.GT.SIZEY.OR.YPLOT.LT.0.) GO TO 100
+C       WRITE(TEXT,102)
+C       CALL P2K_CSTRING(TEXT,1,0.)
+102     FORMAT('X')
+        XERR=SPLOT*XCORR(I)*RMAG + XPLOT
+        YERR=SPLOT*YCORR(I)*RMAG + YPLOT
+        IF(XERR.GT.SIZEX.OR.XERR.LT.0.) GO TO 100
+        IF(YERR.GT.SIZEY.OR.YERR.LT.0.) GO TO 100
         CALL P2K_MOVE(XPLOT,YPLOT,0.)
 CHEN>
 C---------Calculate angle and length of line:
@@ -1060,9 +1060,9 @@ CHEN<
       CALL P2K_STRING(TITLEPLOT,80,0.)
       CALL P2K_MOVE(10.,SIZEY+5.0,0.)
       CALL P2K_STRING(line,80,0.)
-      		CALL P2K_PAGE
-      	RETURN
-      	END
+                CALL P2K_PAGE
+        RETURN
+        END
 C
 C*******************************************************************************
 C
@@ -1072,8 +1072,8 @@ C
       C=COS(ANGLE*PI/180.0)
       S=SIN(ANGLE*PI/180.0)
       DO 100 I = 1,N
-      	XNEW =  DX(I)*C + DY(I)*S
-      	YNEW = -DX(I)*S + DY(I)*C
+        XNEW =  DX(I)*C + DY(I)*S
+        YNEW = -DX(I)*S + DY(I)*C
       DX(I) = XNEW
 100   DY(I) = YNEW
       RETURN
@@ -1085,70 +1085,70 @@ C
 CHENN>
 C        PARAMETER (NDIMX=500)
 C        PARAMETER (NDIMY=500)
-      	PARAMETER (NDIMX=2000)
+        PARAMETER (NDIMX=2000)
         PARAMETER (NDIMY=2000)
 CHENN<
-      	REAL DXAV(NDIMX,NDIMY),DYAV(NDIMX,NDIMY)	! Bins for guide point
-      	REAL NAV(NDIMX,NDIMY),WAV(NDIMX,NDIMY)		! and linear interpol.
-      		NZEROES=0
-      		DO 4000 I=1,MXDIM
-      		DO 4000 J=1,MYDIM
-      			IF(NAV(I,J).EQ.0) NZEROES=NZEROES+1
-4000		CONTINUE
-      		PROPZERO=FLOAT(NZEROES)/FLOAT(MXDIM*MYDIM)
-      		RATIO=SQRT(1.0/PROPZERO)
-      		IR=RATIO + 0.5
-      		NPUTIN=0
+        REAL DXAV(NDIMX,NDIMY),DYAV(NDIMX,NDIMY)        ! Bins for guide point
+        REAL NAV(NDIMX,NDIMY),WAV(NDIMX,NDIMY)          ! and linear interpol.
+                NZEROES=0
+                DO 4000 I=1,MXDIM
+                DO 4000 J=1,MYDIM
+                        IF(NAV(I,J).EQ.0) NZEROES=NZEROES+1
+4000            CONTINUE
+                PROPZERO=FLOAT(NZEROES)/FLOAT(MXDIM*MYDIM)
+                RATIO=SQRT(1.0/PROPZERO)
+                IR=RATIO + 0.5
+                NPUTIN=0
       DO 6000 ICYCLE=1,12
-      		ISTEP=2**(ICYCLE-1)
-      		IRC=IR*ISTEP
-      		DSTART=2.0*IRC**2
-      	DO 4300 I=1,MXDIM
-      	DO 4300 J=1,MYDIM
-      	IF(NAV(I,J).EQ.0) THEN	! PUT IN NEAREST REAL CORRECTION
-      		DSQMIN=DSTART
-      		IDONE=0
-      		DO 4200 IS=I-IRC,I+IRC,ISTEP  ! inefficient but fairly simple
-      		DO 4200 JS=J-IRC,J+IRC,ISTEP
-C      			IF(NAV(IS,JS).LE.0.OR.IS.LE.0.OR.JS.LE.0.OR.
-C     .				IS.GT.MXDIM.OR.JS.GT.MYDIM) GO TO 4200
+                ISTEP=2**(ICYCLE-1)
+                IRC=IR*ISTEP
+                DSTART=2.0*IRC**2
+        DO 4300 I=1,MXDIM
+        DO 4300 J=1,MYDIM
+        IF(NAV(I,J).EQ.0) THEN  ! PUT IN NEAREST REAL CORRECTION
+                DSQMIN=DSTART
+                IDONE=0
+                DO 4200 IS=I-IRC,I+IRC,ISTEP  ! inefficient but fairly simple
+                DO 4200 JS=J-IRC,J+IRC,ISTEP
+C                       IF(NAV(IS,JS).LE.0.OR.IS.LE.0.OR.JS.LE.0.OR.
+C     .                         IS.GT.MXDIM.OR.JS.GT.MYDIM) GO TO 4200
 CHENN>
-C      			IF(IS.LE.0.OR.JS.LE.0.OR.IS.GT.MXDIM.OR.
-C     *				JS.GT.MYDIM.OR.NAV(IS,JS).LE.0.) GO TO 4200
+C                       IF(IS.LE.0.OR.JS.LE.0.OR.IS.GT.MXDIM.OR.
+C     *                         JS.GT.MYDIM.OR.NAV(IS,JS).LE.0.) GO TO 4200
                         IF(IS.LE.0.OR.JS.LE.0.OR.IS.GT.MXDIM) GO TO 4200
                         IF(JS.GT.MYDIM) GO TO 4200
                         IF(NAV(IS,JS).LE.0.) GO TO 4200
 CHENN<
-      			DSQ=(IS-I)**2+(JS-J)**2
-      			IF(DSQ.LT.DSQMIN) THEN
-      				IDONE=1
-      				DSQMIN=DSQ
-      				DXUSE=DXAV(IS,JS)
-      				DYUSE=DYAV(IS,JS)
-      				WUSE=WAV(IS,JS)/(1.0+DSQ)	! w. low weight.
-      			ENDIF
-4200		CONTINUE
-      		IF(IDONE.EQ.1) THEN
-      			NPUTIN=NPUTIN+1
-      			DXAV(I,J)=DXUSE
-      			DYAV(I,J)=DYUSE
-      			WAV(I,J) =WUSE
-      			NAV(I,J) = -1		! distinguish new vectors from old
-      		ENDIF
-      	ENDIF
-4300	CONTINUE
-      		DO 4310 I=1,MXDIM
-      		DO 4310 J=1,MYDIM
-      			IF(NAV(I,J).LT.0) NAV(I,J)=-NAV(I,J)	! remove distinction
-4310		CONTINUE
-      		WRITE(6,4301) MXDIM*MYDIM,NZEROES,ICYCLE,
+                        DSQ=(IS-I)**2+(JS-J)**2
+                        IF(DSQ.LT.DSQMIN) THEN
+                                IDONE=1
+                                DSQMIN=DSQ
+                                DXUSE=DXAV(IS,JS)
+                                DYUSE=DYAV(IS,JS)
+                                WUSE=WAV(IS,JS)/(1.0+DSQ)       ! w. low weight.
+                        ENDIF
+4200            CONTINUE
+                IF(IDONE.EQ.1) THEN
+                        NPUTIN=NPUTIN+1
+                        DXAV(I,J)=DXUSE
+                        DYAV(I,J)=DYUSE
+                        WAV(I,J) =WUSE
+                        NAV(I,J) = -1           ! distinguish new vectors from old
+                ENDIF
+        ENDIF
+4300    CONTINUE
+                DO 4310 I=1,MXDIM
+                DO 4310 J=1,MYDIM
+                        IF(NAV(I,J).LT.0) NAV(I,J)=-NAV(I,J)    ! remove distinction
+4310            CONTINUE
+                WRITE(6,4301) MXDIM*MYDIM,NZEROES,ICYCLE,
      . NPUTIN,IRC,NZEROES-NPUTIN
-4301		FORMAT( ' Total number of bins         ',I7/
+4301            FORMAT( ' Total number of bins         ',I7/
      . ' Number of empty bins         ',I7/
      . ' Number filled in cycle',I3,' was',
      . I7,' using range',I5/
      . ' Number still unfilled       ',I7/)
-      	IF(NZEROES-NPUTIN.EQ.0) RETURN
+        IF(NZEROES-NPUTIN.EQ.0) RETURN
 6000  CONTINUE
       RETURN
       END
@@ -1160,7 +1160,7 @@ C       and extending out to edge of ISTEP box.
       PARAMETER (ISTEPMAX=60)
       REAL TAPER(ISTEPMAX,ISTEPMAX)
       XYRAD = (ISTEP-1)/2.0
-      IF(RTAPER.GT.XYRAD-1) RTAPER=XYRAD-1	! at least one pixel clear space
+      IF(RTAPER.GT.XYRAD-1) RTAPER=XYRAD-1      ! at least one pixel clear space
       DO 65 I = 1,ISTEP
         DO 65 J = 1,ISTEP
           RAD = (I-1-XYRAD)**2 + (J-1-XYRAD)**2
@@ -1184,9 +1184,9 @@ C
 C  WRITE OUT THE DISTORTION CORRECTION TABLE AS USED IN THE UNBENDING 
 C   PROGRAM SO THAT IT MIGHT BE USED IN ANOTHER PROGRAM.
 C
-      	SUBROUTINE  WRITETABLE(TITLE,ISTEP,MXDIM,MYDIM,NXYZ,XCORR,YCORR)
-      	DIMENSION XCORR(1),YCORR(1)
-      	INTEGER NXYZ(3)
+        SUBROUTINE  WRITETABLE(TITLE,ISTEP,MXDIM,MYDIM,NXYZ,XCORR,YCORR)
+        DIMENSION XCORR(1),YCORR(1)
+        INTEGER NXYZ(3)
         CHARACTER*4 TITLE(40),TITLEOUT(40)
         INTEGER ISTEP,MXDIM,MYDIM
 CHENN>
@@ -1194,11 +1194,11 @@ CHENN>
 CHENN<
         CHARACTER DAT*24
 CTSH++
-	CHARACTER*80 TMPTITLEOUT
-	EQUIVALENCE (TMPTITLEOUT,TITLEOUT)
+        CHARACTER*80 TMPTITLEOUT
+        EQUIVALENCE (TMPTITLEOUT,TITLEOUT)
 CTSH--
 
-      		CALL CCPDPN(9,'TABLEOUT','UNKNOWN','F',0,0)
+                CALL CCPDPN(9,'TABLEOUT','UNKNOWN','F',0,0)
                 CALL FDATE(DAT)
                 WRITE(6,10) DAT(5:24)
 10              FORMAT('  Date from fdate ----  ',A20)
@@ -1207,18 +1207,18 @@ CTSH++
                 WRITE(TMPTITLEOUT,11) (TITLE(J),J=1,15),DAT(5:24)
 CTSH--
 11              FORMAT(15A4,A20)
-20	FORMAT('  ENTERING WRITETABLE')
-21	FORMAT(20A4)
-22	FORMAT(' ISTEP,MXDIM,MYDIM,NXYZ =',6I6)
+20      FORMAT('  ENTERING WRITETABLE')
+21      FORMAT(20A4)
+22      FORMAT(' ISTEP,MXDIM,MYDIM,NXYZ =',6I6)
       WRITE(6,20)
       WRITE(9,21) TITLEOUT
       WRITE(9,22) ISTEP,MXDIM,MYDIM,(NXYZ(J),J=1,3)
       MCALC=MXDIM*MYDIM
 C Steps along X are indexed most rapidly in arrays XCORR,YCORR
 CHENN>
-C      	DO 100 I=1,MCALC
-C100   		WRITE(9,30) XCORR(I),YCORR(I)
-C30		FORMAT(2F8.2)
+C       DO 100 I=1,MCALC
+C100            WRITE(9,30) XCORR(I),YCORR(I)
+C30             FORMAT(2F8.2)
 C
 C        WRITE(6,*) XCORR(I),YCORR(I)
 C        WRITE(9,*) XCORR(I),YCORR(I)
@@ -1230,7 +1230,7 @@ C     1                XCORR(I)-XCORR(I-1),YCORR(I)-YCORR(I-1)
 100     continue
 30      FORMAT(2F8.2,2F9.2)
 CHENN<
-      	CLOSE(9)
+        CLOSE(9)
 CHENN>
 C
         DO I=-1000,1000
@@ -1250,7 +1250,7 @@ C
         enddo
 C
 CHENN<
-      	RETURN
-      	END
+        RETURN
+        END
 C
 C******************************************************************************

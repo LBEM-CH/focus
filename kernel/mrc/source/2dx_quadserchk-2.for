@@ -383,7 +383,7 @@ CHEN--Read switch for SpotScan mode
         write(6,'(/,/,
      .    '' Allowing polycrystals, running classic mode '')')
       endif
-      write(6,'(/,''RMAG = '',F6.1)')
+      write(6,'(/,''RMAG = '',F6.1)')RMAG
 C
 CHEN--Read switch for output of manual Masking information
       READ(5,*)IMASINF

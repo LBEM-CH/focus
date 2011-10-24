@@ -1964,12 +1964,12 @@ C       CALL P2K_MOVE(10.,-15.,0.)
         CALL P2K_DRAW(ZERO,FMAG,0.)
 CHEN>
         POSN=ZRANG*ZMAG*0.85
-CHEN<
         CALL P2K_MOVE(POSN,103.0,0.)
         WRITE(LINE(1:11),103) IHIN,IKIN
 103     FORMAT('(',I3,',',I3,')')
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
         CALL P2K_STRING(LINE,9,0.)
+CHEN<
         IZ=ZRANG/DELZ
 C
 C-------Plot units on horizontal axis:
@@ -1979,7 +1979,9 @@ C-------Plot units on horizontal axis:
           XPOS=ZERO+ZPOS*ZMAG
           CALL P2K_MOVE(XPOS,0.,0.)
           CALL P2K_DRAW(XPOS,2.0,0.)
+CHEN>
           XPOS=XPOS-4.0
+CHEN<
           CALL P2K_MOVE(XPOS,-5.2,0.)
 CTSH      WRITE(LINE,26) ZPOS
 CTSH++
@@ -2022,12 +2024,14 @@ C-------Plot units on vertical axis:
           ZA=ZMIN*ZMAG
           ZB=ZMAX*ZMAG
           CALL P2K_MOVE(ZA,YPOS,0.)
+CHEN>
           ZD=ZA+1.0
           CALL P2K_DRAW(ZD,YPOS,0.)
           ZD=ZB-1.0
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
           XPOS=ZA-7.5
+CHEN<
           CALL P2K_MOVE(XPOS,YPOS,0.)
 CTSH      WRITE(LINE,201) F
 CTSH++
@@ -2118,13 +2122,13 @@ CHEN>
           ZD=ZA+2.0
           CALL P2K_DRAW(ZD,YPOS,0.)
           ZD=ZB-2.0
-CHEN<
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
 620     CONTINUE
         DO 630 J=1,5
           IANG=-180+(J-1)*90
           XPOS=ZA-3.5
+CHEN<
           YPOS=IANG*PMAG2
           CALL P2K_MOVE(XPOS,YPOS,0.)
 CTSH      WRITE(LINE,631) IANG

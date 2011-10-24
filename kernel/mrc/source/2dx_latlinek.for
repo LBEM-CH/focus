@@ -1969,31 +1969,24 @@ CHEN>
 103     FORMAT('(',I3,',',I3,')')
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
         CALL P2K_STRING(LINE,9,0.)
-CHEN<
         IZ=ZRANG/DELZ
 C
 C-------Plot units on horizontal axis:
+C
         DO 25 J=1,100
           ZPOS=-0.5+J*DELZ
           IF((ZPOS.LT.ZMIN).OR.(ZPOS.GE.ZMAX))GO TO 25
           XPOS=ZERO+ZPOS*ZMAG
           CALL P2K_MOVE(XPOS,0.,0.)
           CALL P2K_DRAW(XPOS,2.0,0.)
-CHEN>
-          XPOS=XPOS-4.0
-CHEN<
-          CALL P2K_MOVE(XPOS,-5.2,0.)
-CTSH      WRITE(LINE,26) ZPOS
-CTSH++
+          XPOS=XPOS-3.0
+          CALL P2K_MOVE(XPOS,-4.5,0.)
           WRITE(LINE(1:6),26) ZPOS
-CTSH--
           CALL P2K_STRING(LINE,6,0.)
 25      CONTINUE
 26      FORMAT(F6.3)
-CHEN>
         POSN=ZRANG*ZMAG*0.6
         CALL P2K_MOVE(POSN,103.0,0.)
-CHEN<
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
         CALL P2K_STRING('LATTICE LINE',12,0.)
         POSN=ZRANG*ZMAG-2.5
@@ -2001,53 +1994,48 @@ CHEN<
         CALL P2K_STRING('RECIPROCAL',10,0.)
         CALL P2K_MOVE(POSN,-7.5,0.)
         CALL P2K_STRING('ANGSTROMS',9,0.)
-CHEN>
         POSX=-5.0
         POSY=FMAG+GAP+PMAG - 3.0
         CALL P2K_MOVE(POSX,POSY,0.)
         CALL P2K_STRING('PHS',3,0.)
 
-        POSY=FMAG - 3.0
+        POSY=FMAG - 1.0
         CALL P2K_MOVE(POSX,POSY,0.)
         CALL P2K_STRING('AMP',3,0.)
-CHEN<
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(ZERO,0.0,0.)
         SCALE=FMAG/(1.05*FMAX)
         IA=ALOG10(1.05*FMAX)
         B=10.0**IA
         IC=FMAX*1.05/B
+C
 C-------Plot units on vertical axis:
+C
         DO 200 J=1,IC
           F=J*B
-          YPOS=F*SCALE
+          YPOS=F*SCALE-0.2
           ZA=ZMIN*ZMAG
           ZB=ZMAX*ZMAG
           CALL P2K_MOVE(ZA,YPOS,0.)
-CHEN>
           ZD=ZA+1.0
           CALL P2K_DRAW(ZD,YPOS,0.)
           ZD=ZB-1.0
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
-          XPOS=ZA-7.5
-CHEN<
+          XPOS=-10.0
           CALL P2K_MOVE(XPOS,YPOS,0.)
-CTSH      WRITE(LINE,201) F
-CTSH++
           if(F.gt.10000000)then
             WRITE(LINE(1:11),'(G11.3)') F
           else
             WRITE(LINE(1:11),'(F11.1)') F
           endif
-CTSH--
           CALL P2K_STRING(LINE,11,0.)
 200     CONTINUE
-        CALL P2K_MOVE(XPOS,0.,0.)
+        CALL P2K_MOVE(XPOS,-0.2,0.)
         CALL P2K_STRING('        0.0',11,0.)
 201     FORMAT(G11.2)
 C
-C  PLOT OBSERVED AMPLITUDES FIRST
+C-------PLOT OBSERVED AMPLITUDES FIRST
 C
         CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.48)
         DO 50 J=1,NOBS
@@ -2055,9 +2043,6 @@ C
           XP=ZSTAR(J)*ZMAG
           YP=FOBS(J)*SCALE - 0.22*FONTSIZE*0.48
           CALL P2K_MOVE(XP,YP,0.)
-CHENN>
-C          CALL P2K_CSTRING('X',1,0.)
-C
           IF(IQOBS(J).le.imaxIQplot)then
             CALL P2K_CSTRING('X',1,0.)
           else
@@ -2125,18 +2110,17 @@ CHEN>
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
 620     CONTINUE
+C
+C-------Write PHASE Y-axis labels
+C
         DO 630 J=1,5
           IANG=-180+(J-1)*90
-          XPOS=ZA-3.5
-CHEN<
-          YPOS=IANG*PMAG2
+C---------XPOS=ZA-3.5
+          XPOS=-4.0
+          YPOS=IANG*PMAG2-0.3
           CALL P2K_MOVE(XPOS,YPOS,0.)
-CTSH      WRITE(LINE,631) IANG
-CTSH++
           WRITE(LINE(1:4),631) IANG
-CTSH--
           CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
-CHEN>
           CALL P2K_STRING(LINE,4,0.)
 CHEN<
 630     CONTINUE

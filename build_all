@@ -7,10 +7,6 @@
 ################################################################################
 # Configuration
 ################################################################################
-
-# Set the default prefix
-PREFIX=$1
-
 echo '*============================================================================*'
 echo '| Configuration								   |'
 echo '+----------------------------------------------------------------------------+'
@@ -18,36 +14,42 @@ echo '|                                                                         
 
 if [ $# -lt 1 ]
 then
-	echo 'No prefix is specified, the default prefix PREFIX='$HOME'/2dx is met'
-       	PREFIX=~/2dx	
+	echo 'No build directory is specified, it is set to the default: '$HOME'/2dx'
+       	BUILD=~/2dx
+else
+	BUILD=$1
 fi
-
-if [ $# -eq 2 ];
+if [ $# -lt 2 ]
 then
-	APPLE_BUNDLE=$2
+	echo 'No install directory is specified, therefore it is set to the build directory: '$BUILD''
+	echo 'This means you install in-place'
+       	PREFIX=$BUILD
+else
+	PREFIX=$2	
+fi
+# this is just a hiden argument for building the mac bundle
+if [ $# -eq 3 ];
+then
+	APPLE_BUNDLE=$3
 else
 	APPLE_BUNDLE=OFF
 fi
 
-
 # And create build dirs here
-BUILD=$PREFIX
 SRC=$(pwd)
-BUILD_LIST="
-lib/src/conf 
-lib/src/extentions 
-lib/src/mrcImage 
-lib/src/widgets
-"
+echo "The project structure is set as follows"
+echo "The source dir is:"
+echo $SRC 
+echo "The build dir is:"
+echo $BUILD 
+echo "The install dir is:"
+echo $PREFIX
 
-echo 'The build dir is' ${BUILD}
 # check if the build dir exists
 if [ ! -e $BUILD ]; then
 	echo 'The build dir does not exist, therefore it will be created.' 
 	mkdir -p $BUILD
 fi
-
-echo 'The source dir is' ${SRC}
 echo '*============================================================================*'
 echo ''
 echo ''
@@ -88,72 +90,6 @@ echo ''
 echo ''
 
 
-################################################################################
-# CMake Tools
-################################################################################
-
-APP=cmake
-echo '*============================================================================*'
-echo '| ' ${APP}
-echo '+----------------------------------------------------------------------------+'
-echo '| prepare                                                                    |'
-cd ${SRC}/tools/cmake
-echo 'workinkg directory: '
-pwd
-echo '+----------------------------------------------------------------------------+'
-echo '| configure                                                                  |'
-echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} . || (echo "Configure failed for" $APP ; read)
-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} . || (echo "Configure failed for" $APP ; read)
-echo ''
-echo '+----------------------------------------------------------------------------+'
-echo '| make                                                                       |'
-make VERBOSE=1 -j1 || (echo "Build failed for $APP"; read)
-echo ''
-echo '+----------------------------------------------------------------------------+'
-echo '| make install                                                               |'
-make VERBOSE=1 -j1 install || (echo "Install failed for $APP"; read)
-echo '*============================================================================*'
-echo ''
-echo ''
-echo ''
-echo ''
-
-################################################################################
-# Libs
-################################################################################
-
-
-for TARGET in $BUILD_LIST
-do
-	  APP=$(echo $TARGET | awk -F/ '{print $NF}')
-          echo '*============================================================================*'
-          echo '| ' ${APP}
-          echo '+----------------------------------------------------------------------------+'
-          echo '| prepare                                                                    |'
-          cd ${SRC}/${TARGET} || (echo "Build failed for $APP, it seems the sources are not in ${SRC}/${APP}."; read)
-          mkdir -p ${BUILD}/${APP}
-          cd ${BUILD}/${APP}
-          echo ''
-          echo '+----------------------------------------------------------------------------+'
-          echo '| configure                                                                  |'
-          echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_MODULE_PATH=${PREFIX}/cmake ${*} ${SRC}/${TARGET} || (echo "Configure failed for $APP"; read)
-          cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_MODULE_PATH=${PREFIX}/cmake ${*} ${SRC}/${TARGET} || (echo "Configure failed for $APP"; read)
-          echo ''
-          echo '+----------------------------------------------------------------------------+'
-          echo '| make                                                                       |'
-          make VERBOSE=1 -j1 || (echo "Build failed for $APP"; read)
-          echo ''
-          echo '+----------------------------------------------------------------------------+'
-          echo '| make install                                                               |'
-          make VERBOSE=1 -j1 install || (echo "Install failed for $APP"; read)
-          echo '*============================================================================*'
-          echo ''
-          echo ''
-          echo ''
-          echo ''
- 
-done
-
 #################################################################################
 # 2DX 
 ################################################################################
@@ -163,13 +99,13 @@ echo '*=========================================================================
 echo '| ' ${APP}
 echo '+----------------------------------------------------------------------------+'
 echo '| prepare                                                                    |'
-cd ${SRC}
+cd ${BUILD}
 echo 'workinkg directory: '
 pwd
 echo '+----------------------------------------------------------------------------+'
 echo '| configure                                                                  |'
-echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} . || (echo "Configure failed for" $APP ; read)
-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DAPPLE_BUNDLE=${APPLE_BUNDLE} . || (echo "Configure failed for" $APP ; read)
+echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${SRC} || (echo "Configure failed for" $APP ; read)
+cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${SRC} || (echo "Configure failed for" $APP ; read)
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make                                                                       |'
@@ -183,38 +119,7 @@ echo ''
 echo ''
 echo ''
 echo ''
- 
-cd ${BUILD}
 
-###############################################################################
-# Postflight 
-################################################################################
-
-echo '*============================================================================*'
-echo '| Postflight								   |'
-echo '+----------------------------------------------------------------------------+'
-echo '| prepare                                                                    |'
-cd ${PREFIX}
-echo 'workinkg directory: '
-pwd
-echo '+----------------------------------------------------------------------------+'
-echo '| creating symbolic links                                                    |'
-ln -sFhv kernel/config config
-ln -sFhv kernel/proc proc
-ln -sFhv ../kernel/2dx_image/scripts-standard 2dx_image/scripts-standard
-ln -sFhv ../kernel/2dx_image/scripts-custom 2dx_image/scripts-custom
-ln -sFhv ../kernel/2dx_merge/scripts-standard 2dx_merge/scripts-standard
-ln -sFhv ../kernel/2dx_merge/scripts-custom 2dx_merge/scripts-custom
-ln -sFhv ../kernel/mrc/bin 2dx_image/bin
-ln -sFhv ../kernel/mrc/bin 2dx_merge/bin
-echo '+----------------------------------------------------------------------------+'
-echo '*============================================================================*'
-echo ''
-echo ''
-echo ''
-echo ''
-
-cd ${BUILD}
 
 ################################################################################
 # Replacing local "kernel" in installation site with link to svn-repository copy
@@ -225,7 +130,7 @@ S3='sthennin'
 if [ "$USER" == "$S2" ] || [ "$USER" == "$S3" ];
 then
   echo User = $USER
-  cd ~/2dx
+  cd $BUILD 
   ls -ld kernel
   if [ -h kernel ];
   then
@@ -237,13 +142,10 @@ then
   if [ ! -h kernel ];
   then
     echo "Replacing with link to svn-repository"
-    \ln -s ~/Projects/repos/2dx/trunk/kernel .
+    \ln -s ${SRC}/kernel .
   fi
   ls -ld kernel
   echo "done."
 fi
 
-
-cd ${BUILD}
-
-
+exit 0

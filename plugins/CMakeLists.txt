@@ -5,6 +5,9 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-cmake_minimum_required(VERSION 2.8)
-install(DIRECTORY tools DESTINATION ${CMAKE_INSTALL_PREFIX}/plugins USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
-install(DIRECTORY translators DESTINATION ${CMAKE_INSTALL_PREFIX}/plugins USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
+cmake_minimum_required(VERSION 2.6)
+get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+set(INSTALL_DIR ${DIRECTORY})
+add_subdirectory(tools)
+add_subdirectory(translators)
+

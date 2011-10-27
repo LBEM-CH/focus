@@ -5,7 +5,6 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
 ################################################################################
 # Application Name
 set(EXETITLE 2dx_image)
@@ -16,7 +15,12 @@ set( VERSION_MAJOR "3" )
 set( VERSION_MINOR "3" )
 set( VERSION_PATCH "0" )
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
+
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/share ${CMAKE_MODULE_PATH})
+set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/share ${CMAKE_PREFIX_PATH})
+message(STATUS "CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}")
+
 #-- Need this for link line stuff?
 if(COMMAND cmake_policy)
 	   cmake_policy(SET CMP0011 NEW)
@@ -31,11 +35,16 @@ IF( APPLE )
 ENDIF( APPLE )
 
 # Libraries to use ------------------------------------------------------------
-find_package(conf)
-find_package(widgets)
-find_package(mrcImage)
-find_package(extentions)
-find_package(Qt4 COMPONENTS QtCore QtNetwork QtWebKit QtScript REQUIRED)
+set(USE_FFTWF TRUE)
+find_package(FFTW)
+if(FFTW_FOUND)
+	message(STATUS "@LIBTITLE@: Found FFTW at ${FFTW_LIB}")
+	SET(2DX_LIBRARIES  ${FFTW_LIB} ${2DX_LIBRARIES})
+elseif(FFTW_FOUND)
+	message(FATAL_ERROR "FFTW not found!")
+endif(FFTW_FOUND)
+ 
+find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork QtWebKit QtScript QtOpenGL REQUIRED)
 if(QT4_FOUND)
 	message(STATUS "Found QT4 at ${QT_LIBRARY_DIR}")
 	include(${QT_USE_FILE})
@@ -112,9 +121,13 @@ if(APPLE)
   ## This tells cmake where to place files inside the bundle
   #set_source_files_properties( ${ProjectName_RESOURCES} ${ProjectName_TRANSLATIONS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
 else(APPLE)
-  add_executable( ${EXETITLE} ${SRC} ${MOC_SRCS})
+  add_executable(${EXETITLE} ${SRC} ${MOC_SRCS})
 endif(APPLE)
 
+
+
+#add the libraries that were built before
+get_propagate_deps(conf widgets mrcImage extentions)
 
 # Libraries 
 #
@@ -125,29 +138,13 @@ endif(APPLE)
 #
 #------------------------------------------------------------------------------
 
-          target_link_libraries(${EXETITLE} ${2DX_LIBRARIES})
-#  # Includes and libraries
-#  # This rather compilcated approach is necessary to make gathering the libraries in 2DX_LIBRARIES possible
-#  # Just linking it all in does not seem to work, for some unknown reason.
-#    set(OPT_OR_DEBUG "general")
-#    foreach(LIB ${2DX_LIBRARIES})       
-#      if(LIB STREQUAL "debug") 
-#        set(OPT_OR_DEBUG "debug")
-#      elseif(LIB STREQUAL "optimized")
-#        set(OPT_OR_DEBUG "optimized")
-#      else(LIB STREQUAL "debug")
-#        if(LIB)
-#          target_link_libraries(${EXETITLE} ${OPT_OR_DEBUG} ${LIB}) 
-#        endif(LIB)
-#        set(OPT_OR_DEBUG "general")
-#      endif(LIB STREQUAL "debug")
-#    endforeach(LIB)
+target_link_libraries(${EXETITLE} ${2DX_LIBRARIES} conf widgets mrcImage extentions )
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
 #--------------------------------------------------------------------------------
-SET(plugin_dest_dir ${EXETITLE/}bin)
-SET(qtconf_dest_dir ${EXETITLE}/bin)
+SET(plugin_dest_dir ${EXETITLE}/plugins)
+SET(qtconf_dest_dir ${EXETITLE}/resources)
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/${EXETITLE}/${EXETITLE}")
 IF(APPLE)
   SET(plugin_dest_dir ${EXETITLE}/${EXETITLE}.app/Contents/PlugIns)
@@ -155,8 +152,11 @@ IF(APPLE)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/${EXETITLE}/${EXETITLE}.app/Contents/MacOS/${EXETITLE}")
 ENDIF(APPLE)
 # Installation
-install(TARGETS ${EXETITLE} DESTINATION ${CMAKE_INSTALL_PREFIX}/${EXETITLE})
+install(TARGETS ${EXETITLE} DESTINATION ${EXETITLE})
 file(GLOB PNGS resource/*.png)
+
+#create symlink to the kernel
+install(SCRIPT install_symlink.cmake)
 
 install(FILES ${PNG} DESTINATION resource)
 #--------------------------------------------------------------------------------

@@ -115,18 +115,20 @@ void ctfTool::hideThonRings()
 
 bool ctfTool::eventFilter(QObject *target, QEvent *event)
 {
-  if (target == defocus ||  target == defocusDifference || target == astigmatism)
+  /*if (target == defocus ||  target == defocusDifference || target == astigmatism)
   {
-    if (event->type() == QEvent::KeyPress)
+    f (event->type() == QEvent::KeyPress)
     {
       QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
       if (keyEvent->key() == Qt::Key_C) 
       {
-        hideThonRings();
+        //hideThonRings();
+        qDebug() << "pressing C"; 
+        QDialog::keyPressEvent(keyEvent);
         return true;
       }
     }
-  }
+  }*/
   return QDialog::eventFilter(target, event);
 }
 

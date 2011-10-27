@@ -14,27 +14,21 @@ set(LIBTITLE extentions)
 SET(LIBVERSION 1)
 project(${LIBTITLE})
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 #------------------------------------------------------------------------------
 # Configure Config file and include it.
 # The dependencies are defined in the Config.cmake file
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake
-  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake
+  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake
   @ONLY)
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake
-  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}ConfigVersion.cmake
+  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}ConfigVersion.cmake
   @ONLY)
 
-include(${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake)
-
-install(
-  FILES       
-    ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake
-    ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}ConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${LIBTITLE}-${LIBVERSION}/)
+include(${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake)
 
 # Header files -----------------------------------------------------------------
 if(NOT DEFINED 2DX_INCLUDE_DIR)
@@ -56,7 +50,6 @@ set(MOC_HDRS
 
 if(QT4_FOUND)
 	# generate moc files
-	#QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS} OPTIONS "-I${2DX_INCLUDE_DIR} -p${CMAKE_CURRENT_SOURCE_DIR}")
 	QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS}) 
 endif(QT4_FOUND)
 
@@ -72,11 +65,10 @@ add_library(${LIBTITLE} ${SRC} ${MOC_SRCS})
 #  VERSION ${LIBVERSION}
 #  SOVERSION ${LIBVERSION})
 
-# Includes and libraries
-#target_link_libraries(${LIBTITLE}
-#  ${2DX_LIBRARIES})
+set_propagate_deps(${LIBTITLE})
 
 # Installation
-install(TARGETS ${LIBTITLE} DESTINATION lib)
+#install(TARGETS ${LIBTITLE} DESTINATION lib)
 endif(SRC)
+
 

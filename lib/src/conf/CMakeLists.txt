@@ -5,7 +5,7 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake ${CMAKE_MODULE_PATH})
 ################################################################################
 #
 
@@ -19,21 +19,21 @@ project(${LIBTITLE})
 # The dependencies are defined in the Config.cmake file
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake
-  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake
+  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake
   @ONLY)
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake
-  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}ConfigVersion.cmake
+  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}ConfigVersion.cmake
   @ONLY)
 
-include(${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake)
+include(${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake)
 
-install(
-  FILES       
-    ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake
-    ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}ConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${LIBTITLE}-${LIBVERSION}/)
+#install(
+#  FILES       
+#    ${CMAKE_CURRENT_SOURCE_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}Config.cmake
+#    ${CMAKE_CURRENT_SOURCE_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}ConfigVersion.cmake
+#  DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${LIBTITLE}-${LIBVERSION}/)
 
 # Header files -----------------------------------------------------------------
 if(NOT DEFINED 2DX_INCLUDE_DIR)
@@ -78,10 +78,12 @@ set_target_properties(${LIBTITLE} PROPERTIES
   VERSION ${LIBVERSION}
   SOVERSION ${LIBVERSION})
 
+
+set_propagate_deps(${LIBTITLE})
 # Includes and libraries
 #target_link_libraries(${LIBTITLE}
 # ${2DX_LIBRARIES})
 
 # Installation
-install(TARGETS ${LIBTITLE} DESTINATION lib)
+#install(TARGETS ${LIBTITLE} DESTINATION lib)
 

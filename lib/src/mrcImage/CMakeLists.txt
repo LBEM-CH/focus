@@ -20,21 +20,15 @@ project(${LIBTITLE})
 # The dependencies are defined in the Config.cmake file
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake
-  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake
+  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake
   @ONLY)
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake
-  ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}ConfigVersion.cmake
+  ${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake
+  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}VersionConfig.cmake
   @ONLY)
 
-include(${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake)
-
-install(
-  FILES       
-    ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}Config.cmake
-    ${CMAKE_BINARY_DIR}/cmake/${LIBTITLE}ConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${LIBTITLE}-${LIBVERSION}/)
+include(${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake)
 
 # Header files -----------------------------------------------------------------
 if(NOT DEFINED 2DX_INCLUDE_DIR)
@@ -70,11 +64,12 @@ set_target_properties(${LIBTITLE} PROPERTIES
   VERSION ${LIBVERSION}
   SOVERSION ${LIBVERSION})
 
+set_propagate_deps(${LIBTITLE})
 # Includes and libraries
 #target_link_libraries(${LIBTITLE}
 #  ${2DX_LIBRARIES})
 
 # Installation
-install(TARGETS ${LIBTITLE} DESTINATION lib)
+#install(TARGETS ${LIBTITLE} DESTINATION lib)
 endif(SRC)
 

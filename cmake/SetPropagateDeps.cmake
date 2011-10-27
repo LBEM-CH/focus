@@ -1,0 +1,9 @@
+MACRO(SET_PROPAGATE_DEPS _prefix)
+
+        get_property(_DEP_INCLUDES DIRECTORY . PROPERTY INCLUDE_DIRECTORIES)
+        get_property(_DEP_DEFINITIONS DIRECTORY . PROPERTY COMPILE_DEFINITIONS)
+
+        set_property(GLOBAL PROPERTY ${_prefix}_DEP_INCLUDES ${_depincs})
+        set_property(GLOBAL PROPERTY ${_prefix}_DEP_DEFINITIONS ${_depdefs})
+
+ENDMACRO(SET_PROPAGATE_DEPS)

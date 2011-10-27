@@ -6,7 +6,7 @@
 ############################################################################
 #
 set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 ################################################################################
 # Application Name
 set(EXETITLE 2dx_merge)
@@ -25,12 +25,15 @@ IF( APPLE )
 ENDIF( APPLE )
 
 # Libraries to use ------------------------------------------------------------
-find_package(conf)
-find_package(widgets)
-find_package(mrcImage)
-find_package(extentions)
+set(USE_FFTWF TRUE)
 find_package(FFTW)
-find_package(Qt4 COMPONENTS QtCore QtNetwork QtWebKit REQUIRED)
+if(FFTW_FOUND)
+	message(STATUS "@LIBTITLE@: Found FFTW at ${FFTW_LIB}")
+	SET(2DX_LIBRARIES  ${FFTW_LIB} ${2DX_LIBRARIES})
+elseif(FFTW_FOUND)
+	message(FATAL_ERROR "FFTW not found!")
+endif(FFTW_FOUND)
+find_package(Qt4 COMPONENTS QtCore QtGui QtScript QtNetwork QtWebKit QtOpenGL REQUIRED)
 if(QT4_FOUND)
 	message(STATUS "Found QT4 at ${QT_LIBRARY_DIR}")
 	include(${QT_USE_FILE})
@@ -122,38 +125,21 @@ ELSE( APPLE )
   add_executable( ${EXETITLE} ${2DX_MERGE_SRC} ${MOC_SRCS} ${2DX_MERGE_UI_HDRS})
 ENDIF( APPLE )
 
-#
  
+get_propagate_deps(conf widgets mrcImage extentions)
 #
 # last thing we have to do is to tell CMake what olibraries our executable
 # needs,
 #
 # luckily FIND_PACKAGE prepared 2DX_LIBRARIES variable for us:
 #
-# target_link_libraries( ${EXETITLE} ${QT_LIBRARIES} ${2DX_LIBRARIES} ${LIBS})
+target_link_libraries(${EXETITLE} ${2DX_LIBRARIES} conf widgets mrcImage extentions)
  
-  # Includes and libraries
-  # This rather compilcated approach is necessary to make gathering the libraries in 2DX_LIBRARIES possible
-  # Just linking it all in does not seem to work, for some unknown reason.
-    set(OPT_OR_DEBUG "general")
-    foreach(LIB ${2DX_LIBRARIES})       
-      if(LIB STREQUAL "debug") 
-        set(OPT_OR_DEBUG "debug")
-      elseif(LIB STREQUAL "optimized")
-        set(OPT_OR_DEBUG "optimized")
-      else(LIB STREQUAL "debug")
-        if(LIB)
-          target_link_libraries(${EXETITLE} ${OPT_OR_DEBUG} ${LIB}) 
-        endif(LIB)
-        set(OPT_OR_DEBUG "general")
-      endif(LIB STREQUAL "debug")
-    endforeach(LIB)
-
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
 #--------------------------------------------------------------------------------
-SET(plugin_dest_dir ${EXETITLE/}bin)
-SET(qtconf_dest_dir ${EXETITLE}/bin)
+SET(plugin_dest_dir ${EXETITLE}/plugins)
+SET(qtconf_dest_dir ${EXETITLE}/resources)
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/${EXETITLE}/${EXETITLE}")
 IF(APPLE)
   SET(plugin_dest_dir ${EXETITLE}/${EXETITLE}.app/Contents/PlugIns)
@@ -162,14 +148,16 @@ IF(APPLE)
 ENDIF(APPLE)
 
 	# Installation
-install(TARGETS ${EXETITLE} DESTINATION ${CMAKE_INSTALL_PREFIX}/${EXETITLE})
-file(GLOB PNGS resource/*.png)
+install(TARGETS ${EXETITLE} DESTINATION ${EXETITLE})
 
+# create symlink to the kernel
+install(SCRIPT install_symlink.cmake)
+
+file(GLOB PNG resource/*.png)
 install(FILES ${PNG} DESTINATION resource)
 #--------------------------------------------------------------------------------
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'
-message(QT_PLUGINS_DIR=${QT_PLUGINS_DIR})
 INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir} COMPONENT Runtime)
 IF(APPLE)
 	#for  cocoa qt in Mac OS X

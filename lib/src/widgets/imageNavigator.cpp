@@ -122,6 +122,7 @@ void imageNavigator::Initialize_Actions()
 
     toggleCTFViewAction = new QAction(tr("View CTF"),this);
     toggleCTFViewAction->setShortcut(tr("C"));
+    toggleCTFViewAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     toggleCTFViewAction->setCheckable(true);
     addAction(toggleCTFViewAction);
     connect(toggleCTFViewAction,SIGNAL(triggered()),this,SLOT(toggleCTFView()));

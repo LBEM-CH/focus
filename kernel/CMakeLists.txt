@@ -5,16 +5,19 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-cmake_minimum_required(VERSION 2.8)
-set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-install(DIRECTORY config DESTINATION ${INSTALL_DIR} USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
-install(DIRECTORY proc DESTINATION ${INSTALL_DIR} USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
-#copy the 2dx_image directory to the build directory
-install(DIRECTORY 2dx_image DESTINATION ${INSTALL_DIR} USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
-#copy the 2dx_merge directory to the build directory
-install(DIRECTORY 2dx_merge DESTINATION ${INSTALL_DIR} USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
-install(DIRECTORY mrc/bin DESTINATION ${INSTALL_DIR}/2dx_image USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
-# could also create a symlink, but to keep it as platform independent we install it double
-install(DIRECTORY mrc/bin DESTINATION ${INSTALL_DIR}/2dx_merge USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
+cmake_minimum_required(VERSION 2.6)
+set(INSTALL_DIR kernel)
+
+add_subdirectory(config)
+add_subdirectory(2dx_image)
+add_subdirectory(2dx_merge)
+add_subdirectory(proc)
+add_subdirectory(mrc)
+add_custom_target(kernel)
+#install(DIRECTORY config DESTINATION ${INSTALL_DIR} USE_SOURCE_PERMISSIONS)
+#install(DIRECTORY 2dx_image DESTINATION ${INSTALL_DIR} USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
+#install(DIRECTORY 2dx_merge DESTINATION ${INSTALL_DIR} USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
+#install(DIRECTORY mrc/bin DESTINATION ${INSTALL_DIR}/2dx_image USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
+#install(DIRECTORY mrc/bin DESTINATION ${INSTALL_DIR}/2dx_merge USE_SOURCE_PERMISSIONS REGEX [.]svn EXCLUDE)
 
 

@@ -14,7 +14,7 @@ function notify {
   exit 1
 }
 
-TMPLOG=/tmp/$USER/nightly_build.log
+TMPLOG=/tmp/nightly_build.log
 >$TMPLOG
 function output {
 	echo $*  | tee -a $TMPLOG 

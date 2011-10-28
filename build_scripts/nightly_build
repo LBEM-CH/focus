@@ -29,7 +29,7 @@ output '|                                                                       
 if [ $# -lt 1 ]
 then
 	output "No source code directory specified"
-	output "Usage: `basename $0:` <source_dir>" >&2
+	output "Usage: `basename $0:` <source_dir>" 
 	output 'Aborting!'
 	notify $TMPLOG 1
 fi

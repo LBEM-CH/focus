@@ -4,208 +4,220 @@
 #
 # Marcel Arheit 17.09.2010
 
-#These two global variables should be changed to fit the local setup
-#Attention: When altering BUILD_DIR this has to be altered in installation/mac_osx_installer/installer_nightly_build.pmdoc as well 
-BUILD_DIR=~/code/build/2dx/
-echo '*############################################################################*'
-echo '| Locating the source code                                                   |'
-echo '*============================================================================*'
-echo '|                                                                            |'
+# to get an email notifcation if something goes wrong
+function notify {
+  _LOG=$1;
+  cat $_LOG | mail -s "[2dx] nightly build failed" arheit@gmail.com
+  if [ $# -gt 1 ]; then
+  	exit $2
+  fi
+  exit 1
+}
+
+TMPLOG=/tmp/$USER/nightly_build.log
+>$TMPLOG
+function output {
+	echo $*  | tee -a $TMPLOG 
+}
+#These global variables should be changed to fit the local setup
+BUILD_DIR=~/code/build/2dx
+output '*############################################################################*'
+output '| Locating the source code                                                   |'
+output '*============================================================================*'
+output '|                                                                            |'
 
 if [ $# -lt 1 ]
 then
-	echo "No source code directory specified"
-	echo "Usage: `basename $0:` <source_dir>" >&2
-	echo 'Aborting!'
-	exit 1
+	output "No source code directory specified"
+	output "Usage: `basename $0:` <source_dir>" >&2
+	output 'Aborting!'
+	notify $TMPLOG 1
 fi
 SOURCE_DIR=$1
-echo cd ${SOURCE_DIR} || (echo "Could not change to " $SOURCE_DIR; exit 2)
-cd ${SOURCE_DIR} || (echo "Could not change to  $SOURCE_DIR"; exit 2)
+output cd ${SOURCE_DIR} || (output "Could not change to " $SOURCE_DIR; exit 2)
+cd ${SOURCE_DIR} || (output "Could not change to  $SOURCE_DIR"; notify $TMPLOG 2)
 if [ $? -gt 0 ]; then
-	exit 2;
+	notify $TMPLOG 2;
 fi
 
 SCRIPT_DIR=$(pwd)/build_scripts
 if [ ! -d $SCRIPT_DIR ]; then
-	echo "Could not find $SCRIPT_DIR"
-       exit 9;	
+	output "Could not find $SCRIPT_DIR"
+       notify $TMPLOG 9;	
 fi
-echo '|                                                                            |'
-echo '*============================================================================*'
-echo ''
-echo ''
-echo ''
-echo ''
+output '|                                                                            |'
+output '*============================================================================*'
+output ''
+output ''
+output ''
+output ''
 
 
 
 
 
 
-echo '*############################################################################*'
-echo '| Updating the source code                                                   |'
-echo '*============================================================================*'
-echo '|                                                                            |'
+output '*############################################################################*'
+output '| Updating the source code                                                   |'
+output '*============================================================================*'
+output '|                                                                            |'
 
 eval `ssh-agent -s` 
-echo svn up || (echo "Could not update the repository"; exit 3)
-svn up || (echo "Could not update the repository"; exit 3)
+output svn up || (output "Could not update the repository"; notify $TMPLOG 3)
+svn up || (output "Could not update the repository"; notify $TMPLOG 3)
 kill $SSH_AGENT_PID
 if [ $? -gt 0 ]; then
-	exit 3;
+	notify $TMPLOG 3;
 fi
-echo '|                                                                            |'
-echo '*============================================================================*'
-echo ''
-echo ''
-echo ''
-echo ''
+output '|                                                                            |'
+output '*============================================================================*'
+output ''
+output ''
+output ''
+output ''
 
-echo '*############################################################################*'
-echo '| packaging the source code                                                  |' 
-echo '*============================================================================*'
-echo '|                                                                            |'
-PACKAGE_PATH=$BUILD_DIR"packages/"
-echo '*============================================================================*'
-echo '| exporting the source code to $PACKAGE_PATH                                 |' 
-echo '*============================================================================*'
-echo '|                                                                            |'
+output '*############################################################################*'
+output '| packaging the source code                                                  |' 
+output '*============================================================================*'
+output '|                                                                            |'
+PACKAGE_PATH=$BUILD_DIR"/packages/"
+output '*============================================================================*'
+output '| exporting the source code to $PACKAGE_PATH                                 |' 
+output '*============================================================================*'
+output '|                                                                            |'
 
 EXPORT_DIR=2dx_nightly_source
-echo svn export --force  $SOURCE_DIR $EXPORT_DIR || (echo "Could not export the source code"; exit 10)
-svn export --force  $SOURCE_DIR $EXPORT_DIR || (echo "Could not export the source code"; exit 10)
+output svn export --force  $SOURCE_DIR $EXPORT_DIR || (output "Could not export the source code"; notify $TMPLOG 10)
+svn export --force  $SOURCE_DIR $EXPORT_DIR || (output "Could not export the source code"; notify $TMPLOG 10)
 if [ $? -gt 0 ]; then
-	exit 10;
+	notify $TMPLOG 10;
 fi
-echo '|                                                                            |'
-echo '*============================================================================*'
-echo '| archiving the source code to 2dx_nightly_source.tar.gz                     |' 
-echo '*============================================================================*'
-echo '|                                                                            |'
+output '|                                                                            |'
+output '*============================================================================*'
+output '| archiving the source code to 2dx_nightly_source.tar.gz                     |' 
+output '*============================================================================*'
+output '|                                                                            |'
 
 OUTFILE=2dx_nightly_source.tar.gz
-echo tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR  || (echo "Could not package the source code"; exit 10)
-tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR || (echo "Could not package the source code"; exit 10)
+output tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR  || (output "Could not package the source code"; notify $TMPLOG 10)
+tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR || (output "Could not package the source code"; notify $TMPLOG 10)
 if [ $? -gt 0 ]; then
-	exit 10;
+	notify $TMPLOG 10;
 fi
-echo '|                                                                            |'
-echo '*============================================================================*'
-echo ''
-echo ''
-echo ''
-echo ''
+output '|                                                                            |'
+output '*============================================================================*'
+output ''
+output ''
+output ''
+output ''
 
-echo '*############################################################################*'
-echo '| Moving Source Package to Server				                   |'
-echo '*============================================================================*'
-echo '|                                                                            |'
+output '*############################################################################*'
+output '| Moving Source Package to Server                                            |'
+output '*============================================================================*'
+output '|                                                                            |'
 
 
-echo ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 11)
-${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 11)
+output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (output "Could not upload the package $OUTFILE"; notify $TMPLOG 11)
+${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (output "Could not upload the package $OUTFILE"; notify $TMPLOG 11)
 if [ $? -gt 0 ]; then
-	exit 11;
+	notify $TMPLOG 11;
 fi
-echo '|                                                                            |'
-echo '*============================================================================*'
-echo ''
-echo ''
-echo ''
-echo ''
+output '|                                                                            |'
+output '*============================================================================*'
+output ''
+output ''
+output ''
+output ''
 
 
 
-echo '*############################################################################*'
-echo '| Calling ./build_all                                                       |'
-echo '*============================================================================*'
-echo '|                                                                            |'
+output '*############################################################################*'
+output '| Calling ./build_all                                                       |'
+output '*============================================================================*'
+output '|                                                                            |'
 # in-place install so far
-echo ./build_all $BUILD_DIR $BUILD_DIR ON || (echo "Could not build the bundle"; exit 4)
-./build_all $BUILD_DIR $BUILD_DIR ON || (echo "Could not build the bundle"; exit 4)
+output ./build_all $BUILD_DIR $BUILD_DIR ON || (output "Could not build the bundle"; notify $TMPLOG 4)
+./build_all $BUILD_DIR $BUILD_DIR ON || (output "Could not build the bundle"; notify $TMPLOG 4)
 if [ $? -gt 0 ]; then
-	exit 4;
+	notify $TMPLOG 4;
 fi
-echo '|                                                                            |'
-echo '*============================================================================*'
-echo ''
-echo ''
-echo ''
-echo ''
+output '|                                                                            |'
+output '*============================================================================*'
+output ''
+output ''
+output ''
+output ''
 
 
 
 SYSTEM=`uname`
 if [ $SYSTEM = "Darwin" ]
 then
-	echo '*############################################################################*'
-	echo '| changing the plugins to link to the dylibs of the bundle                   |'
-	echo '*============================================================================*'
-	echo '|                                                                            |'
+	output '*############################################################################*'
+	output '| changing the plugins to link to the dylibs of the bundle                   |'
+	output '*============================================================================*'
+	output '|                                                                            |'
 
 	./installation/mac_osx_installer/change_dylibs.sh $BUILD_DIR
 
-	echo '|                                                                            |'
-	echo '*============================================================================*'
-	echo ''
-	echo ''
-	echo ''
-	echo ''
+	output '|                                                                            |'
+	output '*============================================================================*'
+	output ''
+	output ''
+	output ''
+	output ''
 
-	echo '*############################################################################*'
-	echo '| Making the Mac OS X installer package                                      |'
-	echo '*============================================================================*'
-	echo '|                                                                            |'
+	output '*############################################################################*'
+	output '| Making the Mac OS X installer package                                      |'
+	output '*============================================================================*'
+	output '|                                                                            |'
 	SW_VERSION=`sw_vers -productVersion`
 	DATE=`date "+%d_%b_%Y"`
 	OUTFILE="2dx_MAC_OS_X_"$SW_VERSION"_nightly_build.pkg"
 	PACKAGE_PATH=$BUILD_DIR"/packages/"
 	if [ ! -d $PACKAGE_PATH ]
 	then
-		echo mkdir $PACKAGE_PATH || (echo "Could not create the dir $PACKAGE_PATH"; exit 7)
-		mkdir $PACKAGE_PATH || (echo "Could not create the dir $PACKAGE_PATH"; exit 7)
+		output mkdir $PACKAGE_PATH || (output "Could not create the dir $PACKAGE_PATH"; notify $TMPLOG 7)
+		mkdir $PACKAGE_PATH || (output "Could not create the dir $PACKAGE_PATH"; notify $TMPLOG 7)
 	fi
 	if [ $? -gt 0 ]; then
-		exit 7;
+		notify $TMPLOG 7;
 	fi
-	echo "Writing the package "$OUTFILE" to: " $PACKAGE_PATH
-	echo installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || (echo "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; exit 8)
-	installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || (echo "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; exit 8)
+	output "Writing the package "$OUTFILE" to: " $PACKAGE_PATH
+	output installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || (output "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; notify $TMPLOG 8)
+	installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || (output "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; notify $TMPLOG 8)
 	if [ $? -gt 0 ]; then
-		exit 8;
+		notify $TMPLOG 8;
 	fi
 #	/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_nightly_build.pmdoc -o $PACKAGE_PATH$OUTFILE 
-	echo '|                                                                            |'
-	echo '*============================================================================*'
-	echo ''
-	echo ''
-	echo ''
-	echo ''
+	output '|                                                                            |'
+	output '*============================================================================*'
+	output ''
+	output ''
+	output ''
+	output ''
 	
 	
 	
-	echo '*############################################################################*'
-	echo '| Moving Package to Server				                   |'
-	echo '*============================================================================*'
-	echo '|                                                                            |'
+	output '*############################################################################*'
+	output '| Moving Package to Server				                   |'
+	output '*============================================================================*'
+	output '|                                                                            |'
 
 	
-	echo ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 9)
-		
-	echo '|                                                                            |'
-	echo '*============================================================================*'
-	echo ''
-	echo ''
-	echo ''
-	echo ''
-
-	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (echo "Could not upload the package $OUTFILE"; exit 9)
-	#echo mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
-	#mv $PACKAGE_PATH*.pkg $DROPBOX || (echo "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; exit 8)
+	output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (output "Could not upload the package $OUTFILE"; notify $TMPLOG 9)
+	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (output "Could not upload the package $OUTFILE"; notify $TMPLOG 9)
+	#output mv $PACKAGE_PATH*.pkg $DROPBOX || (output "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; notify $TMPLOG 8)
+	#mv $PACKAGE_PATH*.pkg $DROPBOX || (output "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; notify $TMPLOG 8)
 	if [ $? -gt 0 ]; then
-		exit 9;
+		notify $TMPLOG 9;
 	fi
-
+		
+	output '|                                                                            |'
+	output '*============================================================================*'
+	output ''
+	output ''
+	output ''
+	output ''
 fi
 exit 0

@@ -3,7 +3,8 @@
 # Build everything in the right order
 #
 # The args are passed to cmake
-
+set -e
+set -o pipefail
 ################################################################################
 # Configuration
 ################################################################################
@@ -64,25 +65,26 @@ echo '*=========================================================================
 echo '| ' ${APP}
 echo '+----------------------------------------------------------------------------+'
 echo '| prepare                                                                    |'
-cd ${SRC}/${APP}
+echo cd ${SRC}/${APP} || { echo "failed to change to"  ${SRC}/${APP} ; exit 1; }
+cd ${SRC}/${APP} || { echo "failed to change to"  ${SRC}/${APP} ; exit 1; }
 echo 'workinkg directory: '
 pwd
 echo '+----------------------------------------------------------------------------+'
 echo '| autoconf                                                                   |'
-echo autoconf || (echo "autoconf failed for" $APP ; read)
-autoconf || (echo "autoconf failed for" $APP ; read)
+echo autoconf || { echo "autoconf failed for" $APP ; exit 2; }
+autoconf || { echo "autoconf failed for" $APP ; exit 2; }
 echo '+----------------------------------------------------------------------------+'
 echo '| configure                                                                  |'
-echo ./configure || (echo "Configure failed for" $APP ; read)
-./configure || (echo "Configure failed for" $APP ; read)
+echo ./configure || { echo "Configure failed for" $APP ; exit 3; } 
+./configure || { echo "Configure failed for" $APP ; exit 3; } 
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make                                                                       |'
-make VERBOSE=1 -j1 || (echo "Build failed for $APP"; read)
+make VERBOSE=1 -j1 || { echo "Build failed for $APP"; exit 4; } 
 #echo ''
 #echo '+----------------------------------------------------------------------------+'
 #echo '| make install                                                               |'
-#make VERBOSE=1 -j1 install || (echo "Install failed for $APP"; read)
+#make VERBOSE=1 -j1 install || { echo "Install failed for $APP"; read)
 echo '*============================================================================*'
 echo ''
 echo ''
@@ -104,16 +106,16 @@ echo 'workinkg directory: '
 pwd
 echo '+----------------------------------------------------------------------------+'
 echo '| configure                                                                  |'
-echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${SRC} || (echo "Configure failed for" $APP ; read)
-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${SRC} || (echo "Configure failed for" $APP ; read)
+echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${SRC} || { echo "Configure failed for" $APP ; exit 5; }  
+cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${SRC} || { echo "Configure failed for" $APP ; exit 5; }
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make                                                                       |'
-make VERBOSE=1 -j1 || (echo "Build failed for $APP"; read)
+make VERBOSE=1 -j1 || { echo "Build failed for $APP"; exit 6; }
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make install                                                               |'
-make VERBOSE=1 -j1 install || (echo "Install failed for $APP"; read)
+make VERBOSE=1 -j1 install || { echo "Install failed for $APP"; exit 7; }
 echo '*============================================================================*'
 echo ''
 echo ''

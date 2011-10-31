@@ -3,7 +3,8 @@
 # scirpt to build an installer every night from the current source code in our repository.  
 #
 # Marcel Arheit 17.09.2010
-
+set -e
+set -o pipefail
 # to get an email notifcation if something goes wrong
 function notify {
   _LOG=$1;
@@ -34,16 +35,13 @@ then
 	notify $TMPLOG 1
 fi
 SOURCE_DIR=$1
-output cd ${SOURCE_DIR} || (output "Could not change to " $SOURCE_DIR; exit 2)
-cd ${SOURCE_DIR} || (output "Could not change to  $SOURCE_DIR"; notify $TMPLOG 2)
-if [ $? -gt 0 ]; then
-	notify $TMPLOG 2;
-fi
+output cd ${SOURCE_DIR} || { output "Could not change to " $SOURCE_DIR;  notify $TMPLOG 2; }
+cd ${SOURCE_DIR} || { output "Could not change to  $SOURCE_DIR"; notify $TMPLOG 2; }
 
 SCRIPT_DIR=$(pwd)/build_scripts
 if [ ! -d $SCRIPT_DIR ]; then
 	output "Could not find $SCRIPT_DIR"
-       notify $TMPLOG 9;	
+        notify $TMPLOG 9;	
 fi
 output '|                                                                            |'
 output '*============================================================================*'
@@ -63,12 +61,9 @@ output '*=======================================================================
 output '|                                                                            |'
 
 eval `ssh-agent -s` 
-output svn up || (output "Could not update the repository"; notify $TMPLOG 3)
-svn up || (output "Could not update the repository"; notify $TMPLOG 3)
+output svn up || { output "Could not update the repository"; notify $TMPLOG 3; }
+svn up || { output "Could not update the repository"; notify $TMPLOG 3; }
 kill $SSH_AGENT_PID
-if [ $? -gt 0 ]; then
-	notify $TMPLOG 3;
-fi
 output '|                                                                            |'
 output '*============================================================================*'
 output ''
@@ -87,11 +82,8 @@ output '*=======================================================================
 output '|                                                                            |'
 
 EXPORT_DIR=2dx_nightly_source
-output svn export --force  $SOURCE_DIR $EXPORT_DIR || (output "Could not export the source code"; notify $TMPLOG 10)
-svn export --force  $SOURCE_DIR $EXPORT_DIR || (output "Could not export the source code"; notify $TMPLOG 10)
-if [ $? -gt 0 ]; then
-	notify $TMPLOG 10;
-fi
+output svn export --force  $SOURCE_DIR $EXPORT_DIR || { output "Could not export the source code"; notify $TMPLOG 4; }
+svn export --force  $SOURCE_DIR $EXPORT_DIR || { output "Could not export the source code"; notify $TMPLOG 4; }
 output '|                                                                            |'
 output '*============================================================================*'
 output '| archiving the source code to 2dx_nightly_source.tar.gz                     |' 
@@ -99,11 +91,8 @@ output '*=======================================================================
 output '|                                                                            |'
 
 OUTFILE=2dx_nightly_source.tar.gz
-output tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR  || (output "Could not package the source code"; notify $TMPLOG 10)
-tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR || (output "Could not package the source code"; notify $TMPLOG 10)
-if [ $? -gt 0 ]; then
-	notify $TMPLOG 10;
-fi
+output tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR  || { output "Could not package the source code"; notify $TMPLOG 5; }
+tar -zcf $PACKAGE_PATH$OUTFILE $EXPORT_DIR || { output "Could not package the source code"; notify $TMPLOG 5; }
 output '|                                                                            |'
 output '*============================================================================*'
 output ''
@@ -117,11 +106,8 @@ output '*=======================================================================
 output '|                                                                            |'
 
 
-output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (output "Could not upload the package $OUTFILE"; notify $TMPLOG 11)
-${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (output "Could not upload the package $OUTFILE"; notify $TMPLOG 11)
-if [ $? -gt 0 ]; then
-	notify $TMPLOG 11;
-fi
+output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 6; }
+${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 6; }
 output '|                                                                            |'
 output '*============================================================================*'
 output ''
@@ -136,11 +122,8 @@ output '| Calling ./build_all                                                   
 output '*============================================================================*'
 output '|                                                                            |'
 # in-place install so far
-output ./build_all $BUILD_DIR $BUILD_DIR ON || (output "Could not build the bundle"; notify $TMPLOG 4)
-./build_all $BUILD_DIR $BUILD_DIR ON || (output "Could not build the bundle"; notify $TMPLOG 4)
-if [ $? -gt 0 ]; then
-	notify $TMPLOG 4;
-fi
+output ./build_all $BUILD_DIR $BUILD_DIR ON || { output "Could not build the bundle"; notify $TMPLOG 7; }
+./build_all $BUILD_DIR $BUILD_DIR ON || { output "Could not build the bundle"; notify $TMPLOG 7; } 
 output '|                                                                            |'
 output '*============================================================================*'
 output ''
@@ -177,19 +160,12 @@ then
 	PACKAGE_PATH=$BUILD_DIR"/packages/"
 	if [ ! -d $PACKAGE_PATH ]
 	then
-		output mkdir $PACKAGE_PATH || (output "Could not create the dir $PACKAGE_PATH"; notify $TMPLOG 7)
-		mkdir $PACKAGE_PATH || (output "Could not create the dir $PACKAGE_PATH"; notify $TMPLOG 7)
-	fi
-	if [ $? -gt 0 ]; then
-		notify $TMPLOG 7;
+		output mkdir $PACKAGE_PATH || { output "Could not create the dir $PACKAGE_PATH"; notify $TMPLOG 8; }
+		mkdir $PACKAGE_PATH || { output "Could not create the dir $PACKAGE_PATH"; notify $TMPLOG 8; }
 	fi
 	output "Writing the package "$OUTFILE" to: " $PACKAGE_PATH
-	output installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || (output "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; notify $TMPLOG 8)
-	installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || (output "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; notify $TMPLOG 8)
-	if [ $? -gt 0 ]; then
-		notify $TMPLOG 8;
-	fi
-#	/Developer/usr/bin/packagemaker -d installation/mac_osx_installer/installer_nightly_build.pmdoc -o $PACKAGE_PATH$OUTFILE 
+	output installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || { output "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; notify $TMPLOG 9; }
+	installation/mac_osx_installer/installer_nightly_build.sh $BUILD_DIR  $PACKAGE_PATH$OUTFILE || { output "Could not package MAC OS X installer  $PACKAGE_PATH$OUTFILE"; notify $TMPLOG 9; }
 	output '|                                                                            |'
 	output '*============================================================================*'
 	output ''
@@ -205,14 +181,8 @@ then
 	output '|                                                                            |'
 
 	
-	output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (output "Could not upload the package $OUTFILE"; notify $TMPLOG 9)
-	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || (output "Could not upload the package $OUTFILE"; notify $TMPLOG 9)
-	#output mv $PACKAGE_PATH*.pkg $DROPBOX || (output "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; notify $TMPLOG 8)
-	#mv $PACKAGE_PATH*.pkg $DROPBOX || (output "Could not move the packages in $PACKAGE_PATH to $DROPBOX"; notify $TMPLOG 8)
-	if [ $? -gt 0 ]; then
-		notify $TMPLOG 9;
-	fi
-		
+	output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 10; }
+	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 10; }
 	output '|                                                                            |'
 	output '*============================================================================*'
 	output ''

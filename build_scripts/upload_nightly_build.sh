@@ -4,8 +4,8 @@
 #
 # Marcel Arheit 21.01.2011
 
-URL=http://www.2dx.unibas.ch/nightly_build
-#URL=http://www.2dx.unibas.ch/download/2dx-software/2dx-installer/nightly-build
+#URL=http://www.2dx.unibas.ch/nightly_build
+URL=http://www.2dx.unibas.ch/download/2dx-software/2dx-installer/nightly-build
 echo '*############################################################################*'
 echo '| Locating the file                                                          |'
 echo '*============================================================================*'

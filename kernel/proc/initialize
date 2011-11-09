@@ -27,6 +27,9 @@ else
 		set ccp4 = "NOT_FOUND"
 		set bin_ccp4 = "NOT_FOUND"
 	endif
+  else
+	set ccp4 = "NOT_FOUND"
+	set bin_ccp4 = "NOT_FOUND"
   endif 
 endif
 #

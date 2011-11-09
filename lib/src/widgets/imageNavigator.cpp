@@ -62,7 +62,6 @@ void imageNavigator::Initialize_Actions()
     addAction(zoomOutAction);
     connect(zoomOutAction,SIGNAL(triggered()),this,SLOT(zoomOut()));
     zoomMenu->addAction(zoomOutAction);
-
     QAction *zoomStandardAction = new QAction(tr("Zoom Standard"),this);
     zoomStandardAction->setShortcut(tr("Space"));
     addAction(zoomStandardAction);
@@ -367,8 +366,12 @@ void imageNavigator::Initialize_Tools()
     ctfEditor->showNormal();
   #endif
     ctfEditor->raise();
-    ctfEditor->move(screenWidth-ctfEditor->width()-20,screenHeight-ctfEditor->height()-35);
-    cout << "ctfEditor window placed at " << screenWidth-ctfEditor->width()-20 << "," << screenHeight-ctfEditor->height()-35 << endl;
+    QPoint imageSize = QPoint(geometry().width(),geometry().height());
+    QPoint relativePos = imageSize-QPoint(20,35);
+    QPoint absolutPos = mapToGlobal(relativePos);
+    ctfEditor->move(absolutPos);
+    //ctfEditor->move(screenWidth-ctfEditor->width()-20,screenHeight-ctfEditor->height()-35);
+    cout << "ctfEditor window placed at " << absolutPos.x() << "," << absolutPos.y() << endl;
     ctfEditor->hide();
     //connect(ctfEditor,SIGNAL(defocusChanged(float,float,float)),image,SLOT(calculateCTF(float,float,float)));
 
@@ -790,9 +793,10 @@ void imageNavigator::showZoomWindow(const QPoint &pos, const QSize &size)
   #else
     point -= QPoint(image->width()/2-1,image->height()/2-1);
   #endif
+    //QPoint relativPosition = QPoint(image->geometry().x()+pos.x(),image->geometry().y()+pos.y());
   int sizex=size.width(), sizey=size.height();
 
-  zoomWin->move(pos-QPoint(sizex/2,sizey/2));
+  zoomWin->move(mapToGlobal(pos)-QPoint(sizex/2,sizey/2));
   zoomWin->zoom(image->mapFrom(this,pos)/2*2);
   zoomWin->show();
 }

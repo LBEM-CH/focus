@@ -23,7 +23,7 @@
 using namespace std;
 
 zoomWindow::zoomWindow(QWidget *imageWidget, QWidget *parent)
-                      :QWidget(parent,Qt::Tool)
+                      :QWidget(parent, Qt::Tool)
 {
   widget = imageWidget;
   p=parent;

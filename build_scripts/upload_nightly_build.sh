@@ -4,9 +4,8 @@
 #
 # Marcel Arheit 21.01.2011
 
-#These two global variables should be changed to fit the local setup
-#Attention: When altering BUILD_DIR this has to be altered in installation/mac_osx_installer/installer_nightly_build.pmdoc as well 
-URL=http://www.2dx.unibas.ch/download/2dx-software/2dx-installer/nightly-build
+URL=http://www.2dx.unibas.ch/nightly_build
+#URL=http://www.2dx.unibas.ch/download/2dx-software/2dx-installer/nightly-build
 echo '*############################################################################*'
 echo '| Locating the file                                                          |'
 echo '*============================================================================*'
@@ -48,6 +47,9 @@ cadaver $URL <<EOT
 put $FILE 
 quit
 EOT
+if [ $? -gt 0 ]; then
+	       exit 3;
+fi
 echo "cadaver $URL <<EOT
 put $FILE 
 quit

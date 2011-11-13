@@ -139,7 +139,7 @@ main()
 	for(int i=0;i<3;i++)
 		cout <<m[0][i] << "  "<<m[1][i]<< "  "<<m[2][i]<< "  "<<m[3][i]<<endl;;
 
-	double P1,P2,PA1,PA2,PB1,PB2,a,b,c;
+	double P1,P2,PA1,PA2,PB1,PB2,a,b,c,t;
 	P1=m[0][0]*m[3][1]-m[0][1]*m[3][0];
 	P2=m[0][0]*m[3][2]-m[0][2]*m[3][0];
 
@@ -149,8 +149,31 @@ main()
 	PB1=m[2][0]*m[3][1]-m[2][1]*m[3][0];
 	PB2=m[2][0]*m[3][2]-m[2][2]*m[3][0];
 
+        t=PA1*PB2-PA2*PB1;
+        if(t==0)
+        {
+                cerr << ":: ERROR: Tilt calculation failed." << endl;
+                exit(-1);
+        }       
+
 	a=(P1*PB2-P2*PB1)/(PA1*PB2-PA2*PB1);
+
+        t=PB1;
+        if(t==0)
+        {
+                cerr << ":: ERROR: Tilt calculation failed." << endl;
+                exit(-1);
+        }       
+
 	b=(P1-PA1*a)/PB1;
+
+        t=m[3][0];
+        if(t==0)
+        {
+                cerr << ":: ERROR: Tilt calculation failed." << endl;
+                exit(-1);
+        }       
+
 	c=(m[0][0]-m[1][0]*a-m[2][0]*b)/m[3][0];
 
 	Cvector<double> ori(3),n(3),x(3),axis(3),e(3),olde(3);

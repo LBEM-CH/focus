@@ -57,6 +57,8 @@
 # DISPLAY: expected_tltang
 # DISPLAY: expected_tltang_uncertainty
 # DISPLAY: df_PAve 
+# DISPLAY: defocus_res_min
+# DISPLAY: defocus_res_max
 #
 #$end_local_vars
 #
@@ -92,6 +94,8 @@ set TLTANG = ""
 set tempkeep = ""
 set expected_tltang = ""
 set expected_tltang_uncertainty = ""
+set defocus_res_min = ""
+set defocus_res_max = ""
 #
 #$end_vars
 #
@@ -149,11 +153,14 @@ echo phacon = ${phacon}
 echo det_tilt = ${det_tilt}
 echo ctf_ttf = ${ctf_ttf}
 #
-set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
-set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
+# set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
+# set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
+# set resolim = `echo ${resolim} | awk '{if ( $1 > 16.0 ) { s = 16.0 } else { s = $1 }} END { print s }'`
+set resolim =  $defocus_res_max
 echo resolim = $resolim
-set resoma = `echo ${RESMIN} | awk '{ if ( $1 > 50.0) { s = 50.0 } else { s = $1 }} END { print s }'`
-set resoma = `echo ${resoma} | awk '{ s = $1 / 2.0 } END { print s }'`
+# set resoma = `echo ${RESMIN} | awk '{ if ( $1 > 100.0) { s = 100.0 } else { s = $1 }} END { print s }'`
+# set resoma = `echo ${resoma} | awk '{ s = $1 / 2.0 } END { print s }'`
+set resoma =  $defocus_res_min
 echo resoma = ${resoma}
 #
 set ampcon = `echo ${phacon} | awk '{s=sqrt(1.0 - ( $1 * $1 ))} END {print s}'`

@@ -373,7 +373,7 @@ void imageNavigator::Initialize_Tools()
     //ctfEditor->move(screenWidth-ctfEditor->width()-20,screenHeight-ctfEditor->height()-35);
     cout << "ctfEditor window placed at " << absolutPos.x() << "," << absolutPos.y() << endl;
     ctfEditor->hide();
-    //connect(ctfEditor,SIGNAL(defocusChanged(float,float,float)),image,SLOT(calculateCTF(float,float,float)));
+    connect(ctfEditor,SIGNAL(defocusChanged(float,float,float)),image,SLOT(calculateCTF(float,float,float)));
 
     parameterEditor = new displayParametersTool(mainWin);
   #ifdef Q_WS_MAC

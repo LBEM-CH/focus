@@ -73,8 +73,7 @@ void ctfTool::valueChanged()
   double y = defocus->value()-0.5*defocusDifference->value();
   defocusX->setText(QString::number(x));
   defocusY->setText(QString::number(y));
-  //emit defocusChanged(x,y,astigmatism->value());
-  image->calculateCTF(x,y,astigmatism->value());
+  emit defocusChanged(x,y,astigmatism->value());
 }
 
 void ctfTool::load()

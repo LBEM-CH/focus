@@ -29,9 +29,10 @@ class ctfTool : public QDialog
   void save();
   void load();
   void hideThonRings();
-//  signals:
-//  void defocusChanged(float defocusX, float defocusY, float astigmatism);
-//
+
+  signals:
+  void defocusChanged(float defocusX, float defocusY, float astigmatism);
+
   protected:
   bool eventFilter(QObject *target, QEvent *event);
   

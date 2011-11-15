@@ -49,6 +49,12 @@ else
 	       	exit 2
 	fi
 fi
+executables="2dx_image/2dx_image.app/Contents/MacOS 2dx_merge/2dx_merge.app/Contents/MacOS kernel/mrc/lib"
+for loop in $executables
+do
+	cp $FFTW_LIB $build_dir/$loop
+	echo "cp $FFTW_LIB  $build_dir/$loop"
+done
 fortran_bin="kernel/mrc/bin"
 path="$build_dir/$fortran_bin"
 echo "chaning binaries in $path" 

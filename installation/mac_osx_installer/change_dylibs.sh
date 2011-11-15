@@ -49,8 +49,8 @@ else
 	       	exit 2
 	fi
 fi
-executables="2dx_image/2dx_image.app/Contents/MacOS 2dx_merge/2dx_merge.app/Contents/MacOS kernel/mrc/lib"
-for loop in $executables
+binaries="2dx_image/2dx_image.app/Contents/Frameworks 2dx_merge/2dx_merge.app/Contents/Frameworks kernel/mrc/lib"
+for loop in $binaries
 do
 	cp $FFTW_LIB $build_dir/$loop
 	echo "cp $FFTW_LIB  $build_dir/$loop"
@@ -64,5 +64,14 @@ do
 	echo "changing the dylibs of $file"
 	install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $file
 	#	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../lib/libgfortran.3.dylib $file 
+	otool -L $file 
+done
+
+executables="2dx_image/2dx_image.app/Contents/MacOS/2dx_image 2dx_merge/2dx_merge.app/Contents/MacOS/2dx_merge"
+for exe in $executables 
+do
+	file="$build_dir/$exe"
+	echo "changing the dylibs of $file"
+	install_name_tool -change $FFTW_LIB @executable_path/../Frameworks/libfftw3f.3.dylib $file
 	otool -L $file 
 done

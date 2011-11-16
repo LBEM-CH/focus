@@ -49,7 +49,7 @@ else
 	       	exit 2
 	fi
 fi
-binaries="2dx_image/2dx_image.app/Contents/Frameworks 2dx_merge/2dx_merge.app/Contents/Frameworks kernel/mrc/lib"
+binaries="2dx_image/2dx_image.app/Contents/MacOS 2dx_merge/2dx_merge.app/Contents/MacOS kernel/mrc/lib"
 for loop in $binaries
 do
 	cp $FFTW_LIB $build_dir/$loop
@@ -72,6 +72,6 @@ for exe in $executables
 do
 	file="$build_dir/$exe"
 	echo "changing the dylibs of $file"
-	install_name_tool -change $FFTW_LIB @executable_path/../Frameworks/libfftw3f.3.dylib $file
+	install_name_tool -change $FFTW_LIB @executable_path/libfftw3f.3.dylib $file
 	otool -L $file 
 done

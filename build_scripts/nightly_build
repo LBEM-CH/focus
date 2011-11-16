@@ -107,8 +107,8 @@ output '*=======================================================================
 output '|                                                                            |'
 
 
-#output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 6; }
-#${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 6; }
+output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 6; }
+${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 6; }
 output '|                                                                            |'
 output '*============================================================================*'
 output ''
@@ -182,8 +182,8 @@ then
 	output '|                                                                            |'
 
 	
-#	output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 10; }
-#	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 10; }
+	output ${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 10; }
+	${SCRIPT_DIR}/upload_nightly_build.sh  $PACKAGE_PATH$OUTFILE || { output "Could not upload the package $OUTFILE"; notify $TMPLOG 10; }
 	output '|                                                                            |'
 	output '*============================================================================*'
 	output ''

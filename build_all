@@ -106,8 +106,8 @@ echo 'workinkg directory: '
 pwd
 echo '+----------------------------------------------------------------------------+'
 echo '| configure                                                                  |'
-echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${SRC} || { echo "Configure failed for" $APP ; exit 5; }  
-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ${SRC} || { echo "Configure failed for" $APP ; exit 5; }
+echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DAPPLE_BUNDLE=${APPLE_BUNDLE} ${SRC} || { echo "Configure failed for" $APP ; exit 5; }  
+cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DAPPLE_BUNDLE=${APPLE_BUNDLE} ${SRC} || { echo "Configure failed for" $APP ; exit 5; }
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make                                                                       |'

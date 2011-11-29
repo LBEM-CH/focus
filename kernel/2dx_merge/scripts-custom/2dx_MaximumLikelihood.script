@@ -47,6 +47,7 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set app_2dx_image = ""
 set SCRATCH_DISK = ""
 set FFTIR_DISK = ""
 #
@@ -165,7 +166,7 @@ echo date = ${date}
 # endif
 #
 set user = `whoami`
-if ( ${user} != 'sthennin' ) then
+if ( ${user} != 'sthennin' && ${user} != 'henning' ) then
   ${proc_2dx}/linblock "Not yet implemented. Use 2dx_image for ML processing in 2d."
   ${proc_2dx}/protest "Then merge conventionally in 2dx_merge."
 endif
@@ -207,7 +208,13 @@ foreach dirfile ( ${dirlist} )
     \cp -f ${dirfile}/*.dat.gz ${dirfile}/temp/
     gunzip -f ${dirfile}/temp/*.dat.gz
     \cp -f ${dirfile}/temp/*.dat ${dirfile}
+    \ls -l ${dirfile}/*profile.dat
+    echo " "
     \rm -rf ${dirfile}/temp   
+
+    # Make sure the *.mrc file is existing:
+    ${app_2dx_image} ${dirfile} "2dx_initialize_files.script"
+
   endif
   \rm -f stack_ctf.binary
   \rm -f stack_whit.binary

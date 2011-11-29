@@ -159,13 +159,16 @@ endif
 set date = `date`
 echo date = ${date}
 #
-set system = `uname`
-if ( ${system} == "Darwin" ) then
-  say -v Alex "Sorry, I must reformat your harddrive." 
-endif
+# set system = `uname`
+# if ( ${system} == "Darwin" ) then
+#   say -v Alex "Sorry, I must reformat your harddrive." 
+# endif
 #
-${proc_2dx}/linblock "Not yet implemented. Use 2dx_image for ML processing in 2d."
-${proc_2dx}/protest "Then merge conventionally in 2dx_merge."
+set user = `whoami`
+if ( ${user} != 'sthennin' ) then
+  ${proc_2dx}/linblock "Not yet implemented. Use 2dx_image for ML processing in 2d."
+  ${proc_2dx}/protest "Then merge conventionally in 2dx_merge."
+endif
 #
 #
 #

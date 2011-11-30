@@ -216,7 +216,7 @@ if ( ${cleanup_merge} == "0" ) then
     echo "<<@progress: 20>>" 
     #
     ############################################################################# 
-    ${proc_2dx}/linblock "Cleanup finished correctly..... All Gone."
+    ${proc_2dx}/linblock "Merge cleaned."
     #############################################################################
     #
     sleep 3
@@ -231,20 +231,23 @@ endif
 if ( ${cleanup_location} == "0" || ${cleanup_location} == "1" ) then
   #
   if ( ${cleanup_location} == "0" ) then
-    find .. -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+    find .. -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/2dx_merge_alldirs.dat
   else
-    cp 2dx_merge_dirfile.dat ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+    cp 2dx_merge_dirfile.dat ${oldir}/2dx_merge_alldirs.dat
   endif  
   #
-  set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
+  set dirnum = `cat 2dx_merge_alldirs.dat | wc -l`
   echo ": Will work on ${dirnum} image directories."
   set increment = `echo ${dirnum} | awk '{ s = 70.0 / ( $1 + 1 ) } END { print s }'`
   set curval = 20.0  
   #
   set dircounter = ${dirnum}
   while ( ${dircounter} > 0 )
-    set from_dir = `cat ${oldir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
+    set from_dir = `cat ${oldir}/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
+    cd ${oldir}
     cd ${from_dir}
+    #
+    set fullpath = `pwd`
     #
     if ( "${cleanup_level}" == "2" ) then
       set duval = `\du -x -s . | cut -f 1`
@@ -257,7 +260,7 @@ if ( ${cleanup_location} == "0" || ${cleanup_location} == "1" ) then
       #############################################################################
       #
       #  source ${proc_2dx}/2dx_cleanup_sub.com
-      ${app_2dx_image} ${from_dir} "+2dx_cleanup"
+      ${app_2dx_image} ${fullpath} "+2dx_cleanup"
       if ( "${cleanup_level}" == "3" || "${cleanup_level}" == "4" ) then
         \rm -f final_map.mrc
       endif

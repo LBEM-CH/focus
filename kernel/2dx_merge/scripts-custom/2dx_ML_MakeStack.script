@@ -175,6 +175,7 @@ if ( ${user} != 'sthennin' && ${user} != 'henning' ) then
   ${proc_2dx}/protest "Then merge conventionally in 2dx_merge."
 endif
 #
+set oldir = `pwd`
 #
 #############################################################################
 echo ":: "
@@ -190,7 +191,15 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 # echo ":: dirlist = " ${dirlist}
 #
 foreach dirfile ( ${dirlist} ) 
+  echo ":: "
   echo "::Working on ${dirfile}"
+  
+  # Make sure the *.mrc file is existing:
+  ${app_2dx_image} ${dirfile} "2dx_initialize_files.script"
+  # cd ${dirfile}
+  # \ls -l *.mrc
+  # cd ${oldir}
+
   echo dummy > ${dirfile}/dummy.dat.gz
   ls -1 ${dirfile}/*.dat.gz > tmp.tmp
   set isthere = `wc -l tmp.tmp | cut -f1 | awk '{ if ( $1 > 1 ) { s = 1 } else { s = 2 }} END { print s }'`
@@ -203,9 +212,6 @@ foreach dirfile ( ${dirlist} )
     \ls -l ${dirfile}/*profile.dat
     echo " "
     \rm -rf ${dirfile}/temp   
-
-    # Make sure the *.mrc file is existing:
-    ${app_2dx_image} ${dirfile} "2dx_initialize_files.script"
 
   endif
   \rm -f stack_ctf.binary
@@ -233,7 +239,7 @@ echo "<<@progress: 30>"
 #
 pwd
 #
-${bin_2dx}/2dx_ML_stack.exe << eot
+${bin_2dx}/2dx_ML_stack_threads.exe << eot
 ${proc_2dx}
 ${bin_2dx}
 eot

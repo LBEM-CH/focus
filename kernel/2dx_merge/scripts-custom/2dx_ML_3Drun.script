@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: ML-3D (not yet implemented)                                        #
+# Title: ML 3D Compute 3D volume (not yet implemented)                      #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -13,7 +13,7 @@
 #
 # SORTORDER: 10
 #
-# MANUAL: This script will run a maximum likelihood processing on all selected images.
+# MANUAL: This script will run a single particle processing tool on all particles from all selected images.
 #
 # DISPLAY: ML_doMLorCC
 # DISPLAY: RESMIN
@@ -112,7 +112,7 @@ set avrgamphsRESOL = ""
 #
 echo "<<@progress: 1>>"
 #
-set scriptname = 2dx_MaximumLikelihood
+set scriptname = 2dx_ML_3Drun
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'
@@ -178,81 +178,9 @@ endif
 #
 #
 #
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
 #############################################################################
 echo ":: "
-${proc_2dx}/linblock "Uncompressing all profiles"
-echo ":: "
-#############################################################################
-#
-\rm -f SCRATCH/2dx_merge_dirfile_oneline.dat
-#
-cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-#
-# echo ":: dirlist = " ${dirlist}
-#
-foreach dirfile ( ${dirlist} ) 
-  echo "::Working on ${dirfile}"
-  echo dummy > ${dirfile}/dummy.dat.gz
-  ls -1 ${dirfile}/*.dat.gz > tmp.tmp
-  set isthere = `wc -l tmp.tmp | cut -f1 | awk '{ if ( $1 > 1 ) { s = 1 } else { s = 2 }} END { print s }'`
-  \rm -f ${dirfile}/dummy.dat.gz tmp.tmp
-  if ( ${isthere} == '1' ) then
-    \mkdir -p ${dirfile}/temp/
-    \cp -f ${dirfile}/*.dat.gz ${dirfile}/temp/
-    gunzip -f ${dirfile}/temp/*.dat.gz
-    \cp -f ${dirfile}/temp/*.dat ${dirfile}
-    \ls -l ${dirfile}/*profile.dat
-    echo " "
-    \rm -rf ${dirfile}/temp   
-
-    # Make sure the *.mrc file is existing:
-    ${app_2dx_image} ${dirfile} "2dx_initialize_files.script"
-
-  endif
-  \rm -f stack_ctf.binary
-  \rm -f stack_whit.binary
-end
-#
-#############################################################################
-echo ":: "
-${proc_2dx}/linblock "Creating image stacks"
-echo ":: "
-#############################################################################
-#
-set dirfile = "2dx_merge_dirfile.dat"
-#
-if ( ! -e ${dirfile} ) then
-  ${proc_2dx}/protest "ERROR: 2dx_merge did not provide the directory list."
-endif
-#
-if ( -z ${dirfile} ) then
-  ${proc_2dx}/linblock "ERROR: Directory list is empty."
-  ${proc_2dx}/protest "ERROR: Did you select directories?"
-endif
-#
-pwd
-#
-${bin_2dx}/2dx_ML_stack.exe << eot
-${proc_2dx}
-${bin_2dx}
-eot
-#
-echo "<<@progress: 20>"
-#
-#############################################################################
-echo ":: "
-${proc_2dx}/linblock "Running ML processing with all stacks"
+${proc_2dx}/linblock "Running single particle processing with all stacks"
 echo ":: "
 #############################################################################
 #

@@ -1,19 +1,19 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: ML-3D (not yet implemented)                                        #
+# Title: ML 3D Create Stack (not yet implemented)                           #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 05/19/2007                                             #
-# Last Modification: 05/19/2007                                             #
+# Created..........: 11/19/2011                                             #
+# Last Modification: 11/19/2011                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 10
+# SORTORDER: 08
 #
-# MANUAL: This script will run a maximum likelihood processing on all selected images.
+# MANUAL: This script will create single particle stacks from all selected images.
 #
 # DISPLAY: ML_doMLorCC
 # DISPLAY: RESMIN
@@ -112,7 +112,7 @@ set avrgamphsRESOL = ""
 #
 echo "<<@progress: 1>>"
 #
-set scriptname = 2dx_MaximumLikelihood
+set scriptname = 2dx_ML_MakeStack
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'
@@ -176,18 +176,6 @@ if ( ${user} != 'sthennin' && ${user} != 'henning' ) then
 endif
 #
 #
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
 #############################################################################
 echo ":: "
 ${proc_2dx}/linblock "Uncompressing all profiles"
@@ -241,75 +229,14 @@ if ( -z ${dirfile} ) then
   ${proc_2dx}/protest "ERROR: Did you select directories?"
 endif
 #
+echo "<<@progress: 30>"
+#
 pwd
 #
 ${bin_2dx}/2dx_ML_stack.exe << eot
 ${proc_2dx}
 ${bin_2dx}
 eot
-#
-echo "<<@progress: 20>"
-#
-#############################################################################
-echo ":: "
-${proc_2dx}/linblock "Running ML processing with all stacks"
-echo ":: "
-#############################################################################
-#
-set dirfile = "2dx_merge_dirfile.dat"
-#
-if ( ! -e ${dirfile} ) then
-  ${proc_2dx}/protest "ERROR: 2dx_merge did not provide the directory list."
-endif
-#
-if ( -z ${dirfile} ) then
-  ${proc_2dx}/linblock "ERROR: Directory list is empty."
-  ${proc_2dx}/protest "ERROR: Did you select directories?"
-endif
-#
-#
-echo "# IMAGE-IMPORTANT: APH/${imagename}.cor.aph <APH: Unbending Amp&Phase File>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: PS/${imagename}MAP-p1.ps <PS: Unbending MAP in p1>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${imagename}-p1.mrc <Unbending MAP in p1>" >> LOGS/${scriptname}.results
-#
-#
-echo dummy > SCRATCH/ML_reference_1.mrc
-\rm -f ML_result_noEnvelope.mrc
-\rm -f ML_result_withEnvelope.mrc
-\rm -f ML_result_ref_even.mrc
-\rm -f ML_result_ref_odd.mrc
-\rm -f SCRATCH/ML_reference_*.mrc
-#
-#
-${bin_2dx}/2dx_ML_merge.exe << eot
-LOGS/${scriptname}.results
-eot
-#
-#
-set aphfile = "APH/ML_result.aph"
-if ( ! -e ${aphfile} ) then
-  ${proc_2dx}/protest "ERROR: ${aphfile} does not exist. Problem in ML."
-endif
-#
-#
-echo "<<@progress: 90>>"
-#
-#############################################################################
-${proc_2dx}/linblock "Cleaning up some files"
-##############################################################################
-#
-foreach dirfile ( ${dirlist} ) 
-  echo ":Working on ${dirfile}"
-  echo dummy > ${dirfile}/dummy-profile.dat
-  \rm -f ${dirfile}/*-profile.dat
-  \rm -f stack_ctf.binary
-  \rm -f stack_whit.binary
-end
-#
-\rm -f 2dx_merge_dirfile_temp.dat
-\rm -f SCRATCH/2dx_merge_dirfile_oneline.dat
-#
-echo "set ML_done = y" >> LOGS/${scriptname}.results
 #
 ############################################################################# 
 ${proc_2dx}/linblock "${scriptname} finished correctly."

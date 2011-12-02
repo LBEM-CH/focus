@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 		}
 
                 // Save Database
-                // data->save();
+                data.save();
 
 		cout<<"<<@progress: 100>>"<<endl; 
 	}

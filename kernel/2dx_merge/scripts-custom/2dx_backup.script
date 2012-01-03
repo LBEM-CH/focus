@@ -59,8 +59,16 @@ echo "set backup_sure = no" >> LOGS/${scriptname}.results
 #
 if ( ! -d ${backup_dir} ) then
   #
-  ${proc_2dx}/linblock "Provide an existing directory path"
-  ${proc_2dx}/protest "${backup_dir} not found"
+  ${proc_2dx}/linblock "The directory ${backup_dir} does not exist"
+  set backup_root = `dirname ${backup_dir}`
+  echo "backup root is ${backup_root}" 
+  if (  -d ${backup_root} && ${backup_direction} == 0 ) then
+    ${proc_2dx}/linblock "Creating backup directory to submit the data to: ${backup_dir}"
+    mkdir ${backup_dir}
+  else
+    ${proc_2dx}/linblock "Provide an existing directory path"
+    ${proc_2dx}/protest "${backup_dir} not found"
+  endif
   #
 endif
 #
@@ -237,7 +245,7 @@ else
   endif
 endif
 #
-set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
+@ dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
 echo ": Will work on ${dirnum} image directories."
 set increment = `echo ${dirnum} | awk '{ s = 80.0 / ( $1 + 1 ) } END { print s }'`
 set curval = 10.0
@@ -246,9 +254,9 @@ if ( ${dirnum} == "0" ) then
   ${proc_2dx}/protest "Copying not possible, since no 2dx_image.cfg exists."
 endif
 #
-set dircounter = ${dirnum}
-while ( ${dircounter} > 0 )
-  set from_dirfile = `cat ${oldir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
+@ dircounter = 1
+while ( ${dircounter} <= ${dirnum} )
+  set from_dirfile = `sed -n "${dircounter}p" ${oldir}/SCRATCH/2dx_merge_alldirs.dat`
   cd ${from_dir}
   if ( -d ${from_dirfile} ) then
     cd ${from_dirfile}
@@ -281,10 +289,10 @@ while ( ${dircounter} > 0 )
         if ( -e ${to_dirfile}/2dx_image.cfg ) then
           set newer_file = `ls -t -1 2dx_image.cfg ${to_dirfile}/2dx_image.cfg | head -n 1`
           if ( ${newer_file} == "2dx_image.cfg" ) then
-            echo "::Copying this image directory, since 2dx_image.cfg if newer than at the destination."
+            echo "::Copying this image directory, since 2dx_image.cfg is newer than at the destination."
             set docopy = 1
           else
-            echo "::Not copying this image directory, since 2dx_image.cfg if newer than at the destination."
+            echo "::Not copying this image directory, since 2dx_image.cfg is newer than at the destination."
             set docopy = 0
           endif
         else
@@ -417,7 +425,7 @@ while ( ${dircounter} > 0 )
     endif
     #
   endif
-  @ dircounter -= 1
+  @ dircounter++ 
   cd ${oldir}
 end
 #

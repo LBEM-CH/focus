@@ -854,12 +854,12 @@ void mainWindow::importFile(const QString &file, const QHash<QString,QString> &i
   QDir tiltDir(mainData->getDir("project") + "/" + pC + tiltAngle);
   QString newFile = pC+tiltAngle+frame+subID;
   QString tiltDirectory = pC + tiltAngle;
+  QString tiltConfigLocation = mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg";
   if(!tiltDir.exists()) 
   {
     qDebug()<<pC+tiltAngle<<" does not exist...creating.";
     tiltDir.setPath(mainData->getDir("project"));
     tiltDir.mkdir(tiltDirectory);
-    QString tiltConfigLocation = mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg";
     //confData tiltData(tiltConfigLocation);
     confData tiltData(mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg", mainData->getDir("project") + "/2dx_master.cfg");
     tiltData.save();
@@ -870,7 +870,15 @@ void mainWindow::importFile(const QString &file, const QHash<QString,QString> &i
   tiltDir.mkdir(newFile);
 
   QFile::copy(fileName,tiltDir.path() + "/" + newFile + "/" + newFile + '.' + ext);
-  importProcess.start(mainData->getApp("2dx_image") + " " + tiltDir.path() + "/" + newFile + " " + "\"2dx_initialize\"");
+  QString newFilePath = tiltDir.path() + "/" + newFile;
+  QString newFileConfigPath = newFilePath + "/2dx_image.cfg";
+  if(!QFileInfo(newFileConfigPath).exists())
+  {
+      qDebug() << "creating " << newFileConfigPath;
+      if(!QFile::copy(tiltConfigLocation, newFileConfigPath))
+          qDebug() << "Failed to copy " << tiltConfigLocation << " to " << newFileConfigPath;
+  }
+  importProcess.start(mainData->getApp("2dx_image") + " " + newFilePath + " " + "\"2dx_initialize\"");
   importProcess.waitForFinished(8*60*60*1000);
 }
 

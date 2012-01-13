@@ -311,6 +311,8 @@ CHENN>
       WRITE(6,'(17X,''OutputFilename ============'',A40)') 
      .   OUTFILENAM(1:40)
 CHENN<
+
+
       IF(GAMMA.GT.90.0) GAMMA=180.0-GAMMA
       GAMMA=GAMMA*DRAD
 C***      ANGAST=ANGAST*DRAD
@@ -467,12 +469,14 @@ C  OX,OY = best phase origin for this symmetry
 C  TX,TY = best beam tilt for this symmetry
 C  Target = target resid. based on statistics, taking Friedel weight into account
 C 
+C
       WRITE(6,2004) SPGID(1),SYMBOL(1),SYMRS(1),NSYMRS(1),
      .  THEOR(1),NTHEOR(1)
 CHENN>
       WRITE(11,2104) SPGID(1),SYMBOL(1),SYMRS(1),NSYMRS(1),
      .  THEOR(1),NTHEOR(1)
-      rdiffmin=999999999.9
+      jbest=1
+C      rdiffmin=999999999.9
 CHENN<
       DO 2010 J=2,21
         IFLAG=' '
@@ -480,18 +484,24 @@ CHENN<
           TARGET=(SYMRS(1)*(NSYMRS(J)-NTHEOR(J)/2.0) + 
      .      THEOR(1)*NTHEOR(J))/NSYMRS(J)
 CHENN>
-         rdiff=SYMRS(J)-TARGET
-         if(rdiff.lt.rdiffmin)then
-           rdiffmin=rdiff
-           jbest=J
-         endif
+C         rdiff=SYMRS(J)-TARGET
+C         if(rdiff.lt.rdiffmin)then
+C           rdiffmin=rdiff
+C           jbest=J
+C         endif
 CHENN<
+CMAR>
+        if(SYMRS(J).le.TARGET)then
+            jbest=J
+        endif
+CMAR<
 C                                       ! within 10 degrees
           IF(SYMRS(J).LE.TARGET + 10.) IFLAG='`'
 C                                       ! within  5 degrees
           IF(SYMRS(J).LE.TARGET + 5.0) IFLAG='!'
 C                                       ! within  1 degrees
           IF(SYMRS(J).LE.TARGET + 1.0) IFLAG='*'
+C
           IF(J.EQ.17) THEN
             WRITE(6,2003) SPGID(J),SYMBOL(J),SYMRS(J),
      .        IFLAG,NSYMRS(J),(SPGORG(K,J),K=1,4),TARGET
@@ -534,6 +544,7 @@ CHENN>
      .     'Friedel weight into account',/,
      .  '::',/,/)
       close(11)
+
       open(12,FILE=SPCGRPFILENAM,STATUS='NEW')
       J=jbest
       IF(J.EQ.17) THEN

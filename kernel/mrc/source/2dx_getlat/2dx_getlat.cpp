@@ -26,9 +26,12 @@ struct intVectCmp{
 };
 
 #define vectorF vector<float>
+#define vectorPair pair <vector<float>*, vector<float>* >
 #define vectorList map<int,vectorF*>
-#define latticeVectors map<float,vector<int>*,fltCmp>
+#define latticeVectors map<float,vector<float>*>
+#define latticeIntVectors map<float,vector<int>*,fltCmp>
 #define latticePairs map<vector<int>,vectorF,intVectCmp>
+
 
 float mag(vectorF *v)
 {
@@ -42,7 +45,7 @@ float vLength(float a, float b)
 
 vectorList peakList;
 vectorList latticeCandidates;
-latticeVectors latticeResults;
+latticeIntVectors latticeResults;
 latticePairs millerVectorPairs;
 
 double nodesPerPeak(float *l, vectorList &peakList)
@@ -139,10 +142,9 @@ float latticeError(vectorF *l1, vectorF *l2)
 {
   float l[2][2];
   float invL[2][2];
-  float det;
-
   float mErr, nErr;
   float error = 0.0;
+  float det;
 
   l[0][0]=l1->at(0);
   l[1][0]=l1->at(1);
@@ -206,6 +208,57 @@ void rectify(vectorF *v)
 }
 
 
+float scalarProduct(vectorF *& l1, vectorF *& l2)
+{
+	float ml1 = mag(l1);
+	float ml2 = mag(l2);
+    float theta = acos((l1->at(0) * l2->at(0) + l1->at(1) * l2->at(1)) / (ml1 * ml2));
+    return theta;
+}
+
+bool validateCandidateVectors(vectorList& vectorCandidates, vectorPair& lattice)
+{
+	if(vectorCandidates.size() < 2)
+		return false;
+
+	//vectorPair lattice;
+	//the shortest vector should certainly be a candidate
+	vectorF* l1 = vectorCandidates.begin()->second;
+	if(DEBUG) cout<<"C1: "<<l1->at(0)<<" "<<l1->at(1)<<" "<< "length" <<mag(l1)<<endl;
+
+
+	//delete it from the candidate list
+	vectorCandidates.erase(vectorCandidates.begin());
+
+
+	  vectorList::iterator it;
+	  for(it = vectorCandidates.begin(); it!=vectorCandidates.end(); it++)
+	  {
+		vectorF* l2 = it->second;
+		float theta = scalarProduct(l1, l2);
+		if(DEBUG) cout<<"C: "<<l2->at(0)<<" "<<l2->at(1)<<" "<< it->first <<" length " <<theta*180.0/pi <<" degrees." <<endl;
+		lattice = make_pair(l1,l2);
+
+		if(theta < pi/2.0)
+		{
+			//lattice = make_pair(l1,l2);
+			//switch vectors
+			if(theta < 0.0)
+			{
+				vectorF* t = lattice.first;
+				lattice.first = lattice.second;
+				lattice.second = t;
+			}
+			if(l2->at(0) < 0.0)
+				return false;
+
+			return true;
+		}
+
+	  }
+	  return true;
+}
+
 int reduceVectors(vectorF *l1, vectorF *l2)
 {
   rectify(l1);
@@ -214,13 +267,14 @@ int reduceVectors(vectorF *l1, vectorF *l2)
   float ml1 = mag(l1);
   float ml2 = mag(l2);
   vectorF s;
+  float delta = 1.0;
 
   if(DEBUG) cout<<"Reducing Vectors: "<<endl;
   if(DEBUG) cout<<"L1: "<<l1->at(0)<<" "<<l1->at(1)<<" "<<ml1<<endl;
   if(DEBUG) cout<<"L2: "<<l2->at(0)<<" "<<l2->at(1)<<" "<<ml2<<endl;
 
 
-  float theta=acos((l1->at(0)*l2->at(0)+l1->at(1)*l2->at(1))/(ml1*ml2));
+  float theta = scalarProduct(l1, l2);
   if(DEBUG) cout<<"Theta: "<<theta<<" "<<theta*180.0/pi<<" degrees."<<endl;
   if(theta<pi/2.0)
   {
@@ -250,6 +304,13 @@ int reduceVectors(vectorF *l1, vectorF *l2)
       *l1 = s;
       return 1;
     }
+    // if both vectors have the same length (within delta) favor the one that
+    // spans the smaller angle
+    else if(fabs(mag(&s)-ml1)<delta && theta > pi/2.0)
+    {
+    	*l1 = s;
+    	return 0;
+    }
   }
   else 
   {
@@ -258,10 +319,113 @@ int reduceVectors(vectorF *l1, vectorF *l2)
       *l2 = s;
       return 1;
     }
+    // if both vectors have the same length (within delta) favor the one that
+    // spans the smaller angle
+    else if(fabs(mag(&s)-ml2)<delta && theta > pi/2.0)
+    {
+       *l2 = s;
+       return 0;
+    }
   }
   
   return 0;
 }
+
+void getCandidateVectors(vectorList& vectorCandidates, vectorPair lattice)
+{
+	vectorCandidates.clear();
+	vectorF * l1 = lattice.first;
+	vectorF * l2 = lattice.second;
+	vectorF* c;
+	vectorF* d;
+
+	//add the original vectors to the candidate list
+	vectorCandidates[mag(l1)]=l1;
+	vectorCandidates[mag(l2)]=l2;
+	float theta = scalarProduct(l1, l2);
+	if(DEBUG) cout<<"Theta: "<<theta<<" "<<theta*180.0/pi<<" degrees."<<endl;
+	if(theta<pi/2.0)
+	{
+		c = new vector<float>();
+		c->push_back(l1->at(0)-l2->at(0));
+		c->push_back(l1->at(1)-l2->at(1));
+		vectorCandidates[mag(c)] = c;
+
+		d = new vector<float>();
+		d->push_back(l2->at(0)-l1->at(0));
+		d->push_back(l2->at(1)-l1->at(1));
+		vectorCandidates[mag(d)] = d;
+	}
+	else
+	{
+		c = new vector<float>();
+		c->push_back(l1->at(0)+l2->at(0));
+		c->push_back(l1->at(1)+l2->at(1));
+		vectorCandidates[mag(c)] = c;
+
+	}
+}
+
+bool sameLattices(vectorPair lattice, vectorPair prev)
+{
+	if(lattice.first->at(0)==prev.first->at(0) && lattice.first->at(1)==prev.first->at(1) && lattice.second->at(0)==prev.second->at(0) && lattice.second->at(1)==prev.second->at(1))
+		return true;
+	return false;
+
+}
+
+
+int selectVectors(vectorF *l1, vectorF *l2)
+{
+  rectify(l1);
+  rectify(l2);
+
+  float ml1 = mag(l1);
+  float ml2 = mag(l2);
+  vectorF* c;
+  vectorF* d;
+
+
+  if(DEBUG) cout<<"Reducing Vectors: "<<endl;
+  if(DEBUG) cout<<"L1: "<<l1->at(0)<<" "<<l1->at(1)<<" "<<ml1<<endl;
+  if(DEBUG) cout<<"L2: "<<l2->at(0)<<" "<<l2->at(1)<<" "<<ml2<<endl;
+
+  vectorList vectorCandidates;
+  //the original vectors
+  vectorPair lattice = make_pair(l1,l2);
+
+  //calculate the candidate lattice vectors from the given lattice
+  getCandidateVectors(vectorCandidates, lattice);
+
+  vectorPair previousLattice = lattice;
+  while(!validateCandidateVectors(vectorCandidates,lattice))
+  {
+	  if(sameLattices(lattice, previousLattice))break;
+	  getCandidateVectors(vectorCandidates, lattice);
+  }
+
+
+  l1 = lattice.first;
+  l2 = lattice.second;
+
+//  else
+//  {
+//	  if(DEBUG) cout<<"Could not find enough candidates: "<<endl;
+//  }
+
+
+
+  if(DEBUG) cout<<"RESUTING LATTICE Vectors: "<<endl;
+  if(DEBUG) cout<<"L1: "<<l1->at(0)<<" "<<l1->at(1)<<" "<<mag(l1)<<endl;
+  if(DEBUG) cout<<"L2: "<<l2->at(0)<<" "<<l2->at(1)<<" "<<mag(l2)<<endl;
+
+
+
+  return 0;
+}
+
+
+
 
 void cannonicalForm(vectorF *&l1, vectorF *&l2)
 {
@@ -379,7 +543,7 @@ void printCandidateList()
 void printResultsList()
 {
   int k = 0;
-  latticeVectors::iterator it;
+  latticeIntVectors::iterator it;
   for(it = latticeResults.begin(); it!=latticeResults.end() && k<4; it++)
   {
     cout<<latticeCandidates[it->second->at(0)]->at(0)<<" "<<-latticeCandidates[it->second->at(0)]->at(1)<<" ";
@@ -420,7 +584,9 @@ int main(int argc, char **argv)
     if(!load(argv[1])) {cout<<argv[1]<<" not present."<<endl; return (0);}
 
   findLatticeCandidates(maxRadiusOf(8),0.0);
+
   findLatticeFitness();
+  if (DEBUG) printCandidateList();
 
 
   vectorList l;
@@ -429,6 +595,9 @@ int main(int argc, char **argv)
 
   while(reduceVectors(l[0],l[1]));
   cannonicalForm(l[0],l[1]);
+
+//  while(selectVectors(l[0],l[1]));
+//  cannonicalForm(l[0],l[1]);
 
   if(DEBUG) printResult(l);
   generatePairs(l[0],l[1]);

@@ -52,6 +52,8 @@
 # DISPLAY: produceSpiderMap
 # DISPLAY: mapscale
 # DISPLAY: unitcellnumber
+# DISPLAY: npo_cntrs_step
+# DISPLAY: npo_cntrs_below 
 #
 #$end_local_vars
 #
@@ -103,6 +105,8 @@ set SYM = ""
 set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
 set ML_doit = ""
+set npo_cntrs_step = ""
+set npo_cntrs_below = ""
 #
 #$end_vars
 #

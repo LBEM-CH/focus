@@ -48,6 +48,8 @@
 # DISPLAY: produceSpiderMap
 # DISPLAY: mapscale
 # DISPLAY: unitcellnumber
+# DISPLAY: npo_cntrs_step
+# DISPLAY: npo_cntrs_below 
 #
 # REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
 #$end_local_vars
@@ -101,6 +103,8 @@ set TANGL = ""
 set ML_doit = ""
 set SYM = ""
 set ctf_ttf = ""
+set npo_cntrs_step = ""
+set npo_cntrs_below = ""
 #
 #$end_vars
 #

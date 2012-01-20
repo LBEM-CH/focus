@@ -96,6 +96,7 @@ set expected_tltang = ""
 set expected_tltang_uncertainty = ""
 set defocus_res_min = ""
 set defocus_res_max = ""
+set defocus_tiles_count = ""
 #
 #$end_vars
 #
@@ -345,6 +346,10 @@ else
     \rm -f ${outimage}  
     #
     set searchrange1 = 10000.0
+    # TODO: check search range (int and float)
+    #if ( ${searchrange1} < ${imagesidelength} ) then
+    #  set searchrange1 = ${imagesidelength}
+    #end
     set searchrange2 = 1000.0
     #
     set mode = 0
@@ -366,14 +371,30 @@ else
     echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_file}
     echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_select_file}
     #
-    foreach newY ( 1 2 3 4 5 6 7 )
-      echo "::        " >> ${defocus_pos_file}
-      echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
-      echo "::        " >> ${defocus_pos_file}
-      echo "::        " >> ${defocus_pos_select_file}
-      echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_select_file}
-      echo "::        " >> ${defocus_pos_select_file}
+    # TODO: Make defocus_tiles_count a input paramter. And so that it works with all sizes. 
+    set defocus_tiles_count = "7" 
+    #set tiles =  `echo $defocus_tiles_count | awk 'BEGIN for (i=1; i<=$1; i++) { printf(%d\t, i); }'`
+    set tiles = `echo ${defocus_tiles_count} | awk '{s=$1} END {printf "%d\t", s}'`
+    set i = 1
+    
+    while ( $i <= ${defocus_tiles_count} )
+	set j = 1
+        echo "::        " >> ${defocus_pos_file}
+	set det_row = "::"
+    	while ( $j <= ${defocus_tiles_count} )
+		set det_row = `echo  "${det_row}        0.0"`
+      		#echo "::        " >> ${defocus_pos_file}
+      		#echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
+      		#echo "::        " >> ${defocus_pos_file}
+     		# echo "::        " >> ${defocus_pos_select_file}
+      		#echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_select_file}
+      		#echo "::        " >> ${defocus_pos_select_file}
+		@ j++
+	end
+	echo "${det_row}" >> ${defocus_pos_file}
+	@ i++
     end
+    cp  ${defocus_pos_file} ${defocus_pos_select_file}
     #
     echo "# IMAGE-IMPORTANT: ${defocus_pos_file} <TXT: Defocus Table>" >> LOGS/${scriptname}.results  
     #
@@ -390,7 +411,7 @@ else
   ${bin_2dx}/2dx_calcpositions.exe << eot
 ${imagesidelength}
 ${smallsize}
-7,7
+${defocus_tiles_count},${defocus_tiles_count}
 ${mode}
 ${nonmaskimagename}
 TMP-positions.txt
@@ -418,8 +439,13 @@ eot
     #                                                                           #
     #############################################################################
     #
+
+    set centerX = `echo ${defocus_tiles_count} | awk '{ s = int( $1 / 2 ) + 1} END { print s }'`
+    set centerY = `echo ${defocus_tiles_count} | awk '{ s = int( $1 / 2 ) + 1} END { print s }'`
+    echo ":: centerX=${centerX}" 
+    echo ":: centerY=${centerY}" 
     set dfdist = ${searchrange1} ; set inoast = 0 ; set drms1 = 0.0
-    set newX = 4 ; set newY = 4 ; set refX = 0 ; set refY = 0 ; 
+    set newX = ${centerX} ; set newY = ${centerY} ; set refX = 0 ; set refY = 0 ; 
     source ${proc_2dx}/2dx_deftilt_sub.com  
     #
     echo "<<@progress: 60>>"
@@ -431,16 +457,17 @@ eot
     #                                                                           #
     #############################################################################
     #
+    set refX = ${centerX}; set refY = ${centerY};
     set dfdist = ${searchrange2} ; set inoast = 1
-    set newX = 4 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-    set newX = 3 ; set newY = 4 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-    set newX = 5 ; set newY = 4 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-    set newX = 4 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-    #
-    set newX = 3 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-    set newX = 5 ; set newY = 3 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-    set newX = 5 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
-    set newX = 3 ; set newY = 5 ; set refX = 4 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set sub_tilesize = 128 
+    @ newX = ${centerX} - 1 ; @ newY = ${centerY} ; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} + 1; @ newY = ${centerY} ; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} ; @ newY = ${centerY} - 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} ; @ newY = ${centerY} + 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} - 1 ; @ newY = ${centerY} - 1 ; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} + 1 ; @ newY = ${centerY} - 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} - 1 ; @ newY = ${centerY} + 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} + 1 ; @ newY = ${centerY} + 1; source ${proc_2dx}/2dx_deftilt_sub.com     
     #
     echo "<<@progress: 65>>"
     #
@@ -547,12 +574,15 @@ eot
     echo "TMP.2dx_deftilt.good.txt"  >> TMP.2dx_deftilt.run.txt
     echo ${stepdigitizer} >> TMP.2dx_deftilt.run.txt
     echo ${magnification} >> TMP.2dx_deftilt.run.txt
+    echo ${defocus_tiles_count}  >> TMP.2dx_deftilt.run.txt
     echo TMP-positions.txt >> TMP.2dx_deftilt.run.txt 
     # The input order of columns and rows needs to be inverted here.
     \rm -f TMP.txt
-    foreach refX ( 1 2 3 4 5 6 7 ) 
+    set refX = 1
+    while ( ${refX} <= ${defocus_tiles_count} )
+      set refY = 1
       set line = " "
-      foreach refY ( 1 2 3 4 5 6 7 ) 
+      while ( ${refY} <= ${defocus_tiles_count} )
         #
         ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
 ${defocus_pos_file}
@@ -565,8 +595,10 @@ eot
         \rm -f TMP.txt
         set newline = "`echo ${line} ${dfmid}`"
         set line = "${newline}"
+        @ refY++
       end
       echo ${line} | sed 's/ /,/g' >> TMP.2dx_deftilt.run.txt
+      @ refX++
     end
     #
     echo 0,0,0 >> TMP.2dx_deftilt.run.txt

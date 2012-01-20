@@ -13,6 +13,10 @@ echo dfdist = ${dfdist}
 echo inoast = ${inoast}
 set second = 0
 echo second = ${second}
+if ( ${?sub_tilesize} == 0 ) then
+  set sub_tilesize = 128
+endif
+echo ${sub_tilesize}
 #
 if ( ${second} == '3' ) then
   set inimage = CUT/${image}.red.center.mrc
@@ -95,7 +99,7 @@ echo "${bin_2dx}/2dx_ctffind3.exe"
 echo "${inimage}"
 echo "${outimage}"
 echo "${CS},${KV},${ampcon},${magnification},${locstepdigitizer}"
-echo "128,${resoma},${resolim},${dfstart},${dfend},${dfstep}"
+echo "${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep}"
 echo "${inoast},${dfref},${drms1}"
 echo " "
 #
@@ -103,7 +107,7 @@ ${bin_2dx}/2dx_ctffind3.exe << eof
 ${inimage}
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
-128,${resoma},${resolim},${dfstart},${dfend},${dfstep}
+${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep}
 ${inoast},${dfref},${drms1}
 eof
 #
@@ -123,7 +127,7 @@ endif
 #
   if ( ! -e SCRATCH/2dx_ctffind3.result.tmp ) then
     ${proc_2dx}/linblock "WARNING: 2dx_deftilt_sub.com: ERROR: SCRATCH/2dx_ctffind3.result.tmp does not exist."
-    if ( ${newX} == '4' && ${newY} == '4' ) then
+    if ( ${newX} == ${centerX} && ${newY} == ${centerY} ) then
        ${proc_2dx}/protest "ABORTING."
     endif
     set newdef = ${dfmid}
@@ -140,10 +144,12 @@ endif
     \rm SCRATCH/2dx_ctffind3.result.tmp
   endif
   #
-  if ( ${newX} == '4' && ${newY} == '4' ) then
+  if ( ${newX} == ${centerX} && ${newY} == ${centerY}) then
     set defocus = `echo ${def1},${def2},${ang}`
     ${proc_2dx}/linblock "new central defocus ${defocus}"
     echo ": Central Defocus = "${defocus} > TMP.txt
+    echo `tail -n 6 ${defocus_pos_file}`     
+    #tail -n ${defocus_tiles_count} ${defocus_pos_file} >> TMP.txt
     tail -n 7 ${defocus_pos_file} >> TMP.txt
     \mv -f TMP.txt ${defocus_pos_file}
     echo ": Central Defocus = "${defocus} > TMP.txt
@@ -162,6 +168,11 @@ endif
   #
   \rm -f TMP.txt
   #
+echo ":: ${defocus_pos_file}"
+echo ":: ${newX},${newY}"
+echo ":: TMP.txt"
+echo ":: 0"
+echo ":: ${defave}"
   ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
 ${defocus_pos_file}
 ${newX},${newY}

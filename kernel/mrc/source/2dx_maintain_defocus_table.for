@@ -1,10 +1,12 @@
       PROGRAM DEFTABL
 C
-      REAL rfield(7,7)
+      INTEGER table_dim
+      parameter ( table_dim = 7 )
+      REAL rfield(table_dim,table_dim)
       character*200 cfile1,cfile2,cline1,cline2
 C
-      do i=1,7
-        do j=1,7
+      do i=1,table_dim
+        do j=1,table_dim
           rfield(i,j)=0.0
         enddo
       enddo
@@ -14,9 +16,9 @@ C
       open(11,FILE=cfile1,STATUS='OLD',ERR=900)
 C
       read(11,'(A80)')cline1
-      do j=1,7
+      do j=1,table_dim
         read(11,'(A10)') cline2(1:10)
-        read(11,'(2X,7F11.1)',ERR=920,END=800) (rfield(i,j), i=1,7)
+        read(11,'(2X,7F11.1)',ERR=920,END=800) (rfield(i,j), i=1,table_dim)
       enddo
 C
       close(11)
@@ -39,9 +41,9 @@ C
         read(*,*)rdef
         rfield(ixpos,iypos)=rdef
 C
-        do j=1,7
+        do j=1,table_dim
           write(12,'('':: '')') 
-          write(12,'(''::'',7F11.1)') (rfield(i,j), i=1,7)
+          write(12,'(''::'',7F11.1)') (rfield(i,j), i=1,table_dim)
         enddo
         write(12,'('':: '')') 
 C

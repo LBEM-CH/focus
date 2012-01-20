@@ -26,7 +26,7 @@ main()
 	vector<vector<double> > results;
 	vector<Cvector<double> *> data;
 	Cvector<double> center(3);
-	int magnification;
+	int magnification, tilenumber;
 // data aquisition
         cout << endl << "2dx_tiltgeom.exe: calculates tilt geometry from various defoci" << endl << endl;
         cout << "Name for outputfile: ";
@@ -39,7 +39,10 @@ main()
 	cout << "Magnification.....: ";
 	cin.getline(temp,99);
 	magnification=atoi(temp);
-	cout << magnification << endl;
+	cout << "Number of tiles...: ";
+	cin.getline(temp,99);
+	tilenumber=atoi(temp);
+	cout << tilenumber << endl;
 	double factor=stepsize/(double)magnification*10000;
 
 	cout << "factor = " << factor << endl;
@@ -48,9 +51,9 @@ main()
         ifstream infile(temp);
 	if ( !infile.is_open() ) { cerr << "Could not open file: " << temp << endl; return false; }
 	infile.getline(temp,300);
-	for(int i=0;i<7;i++)
+	for(int i=0;i<tilenumber;i++)
 	{
-		for(int j=0;j<7;j++)
+		for(int j=0;j<tilenumber;j++)
 		{
 			infile.getline(temp,300);
 			char *tp,*tp2=temp;
@@ -59,7 +62,7 @@ main()
 			{
 				tmp[0]=atof(tp)*factor;
 			}
-			tp=strtok(&tp2[49]," ");
+			tp=strtok(&tp2[tilenumber*tilenumber]," ");
 			if(tp!=NULL)
 			{
 				tmp[1]=atof(tp)*factor;
@@ -76,14 +79,14 @@ main()
         infile.close();
 
 
-	cout << endl << "input 49 defocus values" << endl;;
+	cout << endl << "input "<< tilenumber*tilenumber << "defocus values" << endl;;
 	int k=0;
        
-        for(int j=0;j<7;j++)
+        for(int j=0;j<tilenumber;j++)
 	{
 	        cin.getline(temp,300);
                 char *tp,*tp2=temp;
-		for(int i=0;i<7;i++)
+		for(int i=0;i<tilenumber;i++)
 		{
 			tp=strtok(tp2,",");
 			if(tp!=NULL)
@@ -338,9 +341,9 @@ main()
 
 	// write out good and bad ones
         int ig1 = 0;
-	for(int i=1;i<8;i++)
+	for(int i=1;i<tilenumber+1;i++)
 	{
-		for(int j=1;j<8;j++)
+		for(int j=1;j<tilenumber+1;j++)
 		{
                         rout << "echo \"#\"#" << endl;
                         rout << "echo \"###################################################################################################\"" << endl;

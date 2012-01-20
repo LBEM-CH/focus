@@ -19,9 +19,8 @@
 #
 # SORTORDER: 50
 #
-# DISPLAY: imagenumber
 # DISPLAY: imagename
-# DISPLAY: nonmaskimagename
+# DISPLAY: imagesidelength 
 # DISPLAY: SYN_Unbending
 # DISPLAY: holeb
 # DISPLAY: maskb01

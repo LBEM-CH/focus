@@ -23,6 +23,8 @@
 #
 # MANUAL: In this case, the actual script is not in the usual script directory, but in a separate script ${proc_2dx}2dx_unbend1_sub.com, which is called via the "source" command from the c-shell. For this reason, double-clicking the script name in the "Standard Scripts" window will only show the less interesting part of the script. The remainder can be found by using the editor directly to open the 2dx_unbend1_sub.com file in the 2dx_image/proc directory. This is designed such that it is easy to call the same core of the unbend1 job from the refinement scripts.
 #
+# DISPLAY: imagename
+# DISPLAY: imagesidelength 
 # DISPLAY: SYN_Unbending
 # DISPLAY: holea
 # DISPLAY: maska

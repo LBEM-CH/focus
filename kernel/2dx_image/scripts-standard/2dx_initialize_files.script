@@ -343,17 +343,16 @@ else
   #
   # boxa1 and boxb1 are for the first UnbendI and following UnbendII reference diameters.
   #
-  if ( ${boxa1} == "0" ) then
-    set boxa1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 10 ) } END { print s }'`
-    echo "set boxa1 = ${boxa1}"  >> LOGS/${scriptname}.results
-    echo ":Initializing boxa1 as ${boxa1}"
-  endif
+  # Since the reference size heavily depends on the size of the image, they should always be initialized when the imagesidelenght is detected.
   #
-  if ( ${boxb1} == "0" ) then
-    set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 16 ) } END { print s }'`
-    echo "set boxb1 = ${boxb1}"  >> LOGS/${scriptname}.results
-    echo ":Initializing boxb1 as ${boxb1}"
-  endif
+  set boxa1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 10 ) } END { print s }'`
+  echo "set boxa1 = ${boxa1}"  >> LOGS/${scriptname}.results
+  echo ":Initializing boxa1 as ${boxa1}"
+  #
+  #set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 16 ) } END { print s }'`
+  set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 20 ) } END { print s }'`
+  echo "set boxb1 = ${boxb1}"  >> LOGS/${scriptname}.results
+  echo ":Initializing boxb1 as ${boxb1}"
   #
   # boxa2 and boxb2 are for shifting SpotScan spots into their correct location. 
   # These references need to be much larger, optimally the diameter of one of the SpotScan spots.

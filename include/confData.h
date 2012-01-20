@@ -99,6 +99,7 @@ class confData : public QObject
 
   QString readLine(QFile &data);
   QString &parseVariables(QString &line);
+  bool saveInUpperLevel(QString variable,QString value);
   QString printLookup();
 
 
@@ -127,6 +128,7 @@ class confData : public QObject
   int set(QString element, QString value);
 
   QString getDir(QString dir);
+  QString getDataFilename(){ return dataFilename;}
   bool setDir(const QString &dirName, const QDir &directory);
   bool addApp(const QString &name, const QString &location);
   bool setApp(const QString &name, const QString &location);

@@ -218,6 +218,26 @@ QString &confData::parseVariables(QString &line)
   return line;
 }
 
+bool confData::saveInUpperLevel(QString variable, QString value)
+{
+    if(parentConf==NULL)
+    {
+        QString parentConfPath = QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg";
+        if(QFileInfo(parentConfPath).exists())
+        {
+            parentConf = new confData(parentConfPath);
+        }
+        else
+        {
+            return false;
+        }
+    }
+    //qDebug() << "syncing [" << variable << "=" << value << " to " << parentConf->getDataFilename();
+    if(parentConf->set(variable,value)>0)
+        return true;
+    return false;
+}
+
 QString confData::printLookup()
 {
   QString elementString;
@@ -528,6 +548,8 @@ void confData::saveAs(QString fileName)
     data.write((header[i] + '\n').toAscii());
   }
 
+  bool synchronized = false;
+
   for(int i=0;i<sections.size();i++)
   {
     data.write("#=============================================================================\n",79);
@@ -541,7 +563,17 @@ void confData::saveAs(QString fileName)
 	  for(int k=0;k<valueSearch.size();k++)
 	  {
 	    QString v = e->get(valueSearch[k]);
-	    if(!v.isEmpty()) data.write(("# " + valueSearch[k] + ": " + v + "\n").toAscii());
+        if(!v.isEmpty())
+        {
+            v = v.trimmed();
+            data.write(("# " + valueSearch[k] + ": " + v + "\n").toAscii());
+            if(valueSearch[k]=="SYNC_WITH_UPPER_LEVEL" && v.toLower() == "yes" )
+            {
+                //qDebug() << e->get("valuelabel") << " = " << e->get("value") << "should be synced";
+                if(saveInUpperLevel(e->get("valuelabel"),e->get("value")))
+                    synchronized = true;
+            }
+        }
 	  }
 	  data.write(("set " + e->get("valuelabel") + " = " + '"' + e->get("value") + '"' + "\n#\n").toAscii());
 	}
@@ -551,6 +583,8 @@ void confData::saveAs(QString fileName)
   setModified(false);
   emit saving();
   data.close();
+  if(synchronized)
+      parentConf->save();
 }
 
 void confData::setSaveName(QString fileName)

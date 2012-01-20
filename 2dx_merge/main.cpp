@@ -61,7 +61,7 @@ int main(int argc, char **argv)
   
   QString workingDir = QFileDialog::getExistingDirectory(0,"Select a Project Directory",userDirPath);
   if(workingDir.isEmpty() || !QDir(workingDir).exists()) exit(0);
-  //save the selected dir as working dir in 2dx_merg-user.cfg
+  //save the selected dir as working dir in 2dx_merge-user.cfg
   userData->set("workingDir", workingDir);
   userData->save();
  

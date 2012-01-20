@@ -18,7 +18,7 @@ C         VERSION VX4.02  RH  21.3.95 summary file output with OX,OY,TAXA,TANGL
 C     VAX VERSION VX4.01  RH  5.10.93 bug in plotting IREF2 fixed
 C     VAX VERSION VX4.00  RH  6.10.92 carries through background and ctf to O/P.
 C     VAX VERSION VX3.02  RH  4.3.91 Prints out total no. of refls for sorting.
-C     VAX VERSION VX3.01  RH  22.1.90 Minor change to ASYM.
+C     VAX VERSION VX3.01  RH  22.1.90 Minor change to ASYM. 
 C     VAX VERSION VX3.00  RH  19.6.89 READS AND WRITES EXTRA FLMWGT COLUMN.
 C     VAX VERSION VX2.04  RH  18.6.89 annotated output lines for summary editing
 C     VAX VERSION VX2.03  JMB 15.6.89 ALLOWS UP TO 40000 SPOTS
@@ -651,6 +651,7 @@ C
      . ' if(IQ<5)then again AMP,PHS')
 188   FORMAT('0TOO FEW POINTS TO BE WORTH PLOTTING FOR N=',I5,' L=',I5)
 CAnd ifilm 10 stellig
+CMARC>
 C190   FORMAT(1X,2I4,F8.4,F10.1,F7.1,I7,I3,F8.5,F10.1,F7.3)
 190   FORMAT(1X,2I6,F9.4,G16.6,G16.6,I12,I3,F10.6,G16.6,F8.3)
 191   FORMAT(1X,2I6,F9.4,G16.6, 16X ,I12,I3,F10.6,G16.6,F8.3)
@@ -2341,6 +2342,9 @@ C
 C
       WRITE(6,156) JREFL
       IF(NPROG.EQ.0) WRITE(3,146)IRUN  ! To ensure disk is there before sorting.
+CMARC>
+C        WRITE(3,186)
+CMARC<
         jstack=0
         l=1
         ir=JREFL

@@ -765,8 +765,8 @@ eof
 ${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}-${SYM_sub}.map  PLOT  ${prefix}${imagename}-${SYM_sub}.plt  << eof
 TITLE Symmetry: ${SYM_sub}. Filename: ${prename} ${imagename}
 MAP SCALE 0.4
-CONTRS -500 TO 500 BY 15
-MODE BELOW -40 DASHED 1 0.15 0
+CONTRS SIG -3.0 TO 3.0 BY ${npo_cntrs_step} 
+MODE GREEN BELOW ${npo_cntrs_below} DASHED 1 0.15 0
 SECTS 0 0
 PLOT
 END

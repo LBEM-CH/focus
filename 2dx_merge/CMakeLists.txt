@@ -10,12 +10,8 @@ cmake_minimum_required(VERSION 2.6)
 ################################################################################
 # Application Name
 set(EXETITLE 2dx_merge)
-project( ${EXETITLE} )
+#project( ${EXETITLE} )
 
-# set version
-set( VERSION_MAJOR "3" )
-set( VERSION_MINOR "3" )
-set( VERSION_PATCH "0" )
 ## OS specific project properties ----------------------------------------------
 IF( APPLE )
 	# for 64bit us the follwing line
@@ -108,10 +104,10 @@ IF( APPLE )
   set( MACOSX_BUNDLE_BUNDLE_NAME ${EXETITLE} )
   set( MACOSX_BUNDLE_GUI_IDENTIFIER "2dx merge" )
   set( MACOSX_BUNDLE_ICON_FILE  icon.icns )
-  set( MACOSX_BUNDLE_INFO_STRING ""${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}",www.2dx.org" )
-  set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}" )
-  set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-  set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+  set( MACOSX_BUNDLE_INFO_STRING ""${CPACK_PACKAGE_VERSION}",www.2dx.org" )
+  set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}" )
+  set( MACOSX_BUNDLE_LONG_VERSION_STRING "${CPACK_PACKAGE_VERSION}" )
+  set( MACOSX_BUNDLE_BUNDLE_VERSION "${CPACK_PACKAGE_VERSION}" )
   
   # create a bundle with an icon too!
   ADD_EXECUTABLE( ${EXETITLE} MACOSX_BUNDLE ${2DX_MERGE_SRC} ${MOC_SRCS} ${2DX_MERGE_UI_HDRS})

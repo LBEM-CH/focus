@@ -8,12 +8,7 @@
 ################################################################################
 # Application Name
 set(EXETITLE 2dx_image)
-project( ${EXETITLE} )
-
-# set version
-set( VERSION_MAJOR "3" )
-set( VERSION_MINOR "3" )
-set( VERSION_PATCH "0" )
+#project( ${EXETITLE} )
 
 cmake_minimum_required(VERSION 2.6)
 
@@ -103,10 +98,10 @@ if(APPLE)
   set( MACOSX_BUNDLE_BUNDLE_NAME ${EXETITLE} )
   set( MACOSX_BUNDLE_GUI_IDENTIFIER "2dx image" )
   set( MACOSX_BUNDLE_ICON_FILE  icon_OSX.icns)
-  set( MACOSX_BUNDLE_INFO_STRING ""${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}",www.2dx.org" )
-  set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}" )
-  set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-  set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+  set( MACOSX_BUNDLE_INFO_STRING ""${CPACK_PACKAGE_VERSION}",www.2dx.org" )
+  set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}" )
+  set( MACOSX_BUNDLE_LONG_VERSION_STRING "${CPACK_PACKAGE_VERSION}" )
+  set( MACOSX_BUNDLE_BUNDLE_VERSION "${CPACK_PACKAGE_VERSION}" )
   
   # create a bundle with an icon too!
   add_executable( ${EXETITLE} MACOSX_BUNDLE  ${SRC} ${MOC_SRCS})

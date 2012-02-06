@@ -34,6 +34,8 @@
 # DISPLAY: phaori
 # DISPLAY: phaoriFouFilter
 # DISPLAY: phaori_change
+# DISPLAY: npo_cntrs_step
+# DISPLAY: npo_cntrs_below 
 #
 #$end_local_vars
 #
@@ -82,6 +84,8 @@ set stepdigitizer = ""
 set tempfac = ""
 set tempkeep = ""
 set zstarrange = ""
+set npo_cntrs_step = ""
+set npo_cntrs_below = ""
 #
 #$end_vars
 #

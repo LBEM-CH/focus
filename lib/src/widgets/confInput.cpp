@@ -471,6 +471,8 @@ bool confInput::event(QEvent *event)
 			}
 
 			element->set("sync_with_upper_level",value);
+			data->syncPropertyWithUpper(varUID, "sync_with_upper_level");
+
 			updateWhatsThis();
 			dataModified();
 			QWhatsThis::hideText();

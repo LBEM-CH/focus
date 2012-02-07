@@ -81,7 +81,6 @@ set(MOC_HDRS
 	${2DX_INCLUDE_DIR}/displayParametersTool.h
 	${2DX_INCLUDE_DIR}/confEditor.h
 	${2DX_INCLUDE_DIR}/colorTool.h
-	${2DX_INCLUDE_DIR}/glWidget.h
 )
 
 set(CMAKE_DEBUG_POSTFIX -dbg)

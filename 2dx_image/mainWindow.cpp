@@ -124,8 +124,8 @@ mainWindow::mainWindow(char *dirArg)
 
   data->addImage("appImage", new QImage(data->getDir("application") + "/resource/" + "icon.png"));
 
-  if(initialize)
-		data->syncWithUpper("INHERITABLE_UPON_INIT");
+//  if(initialize)
+//		data->syncWithUpper("INHERITABLE_UPON_INIT");
   data->syncWithUpper();
   data->loadDefaults();
   if(!QFileInfo(workingDir + "/" + "2dx_image.cfg").exists()) data->save();
@@ -281,7 +281,6 @@ void mainWindow::saveAsProjectDefault()
 			   tr("No"),
 			   QString(),0,1) == 0)
     data->saveAs(confFile);
-
 }
 
 void mainWindow::saveAsTiltRangeDefault()

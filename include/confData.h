@@ -44,6 +44,7 @@ class confData : public QObject
   public slots:
   void save();
   void saveAs(QString fileName);
+  void saveSynchronized(QString fileName);
   void setSaveName(QString fileName);
   void load();
   void reload();
@@ -53,6 +54,8 @@ class confData : public QObject
   void setAutoSave(bool value);
   void loadDefaults();
   bool syncWithUpper(const QString &variable = "SYNC_WITH_UPPER_LEVEL", const QRegExp &exp = QRegExp());
+
+
   void setAppConf(confData *conf = NULL);
 
   confElement* get(QString element);
@@ -82,6 +85,7 @@ class confData : public QObject
   QString linkName;
   QStringList valueSearch;
   QStringList userSetProperties;
+  QStringList globalSetProperties;
   QStringList manualData;
   QString initializationScriptBaseName;
   QString initializationScriptName;
@@ -101,6 +105,7 @@ class confData : public QObject
   QString &parseVariables(QString &line);
   bool saveInUpperLevel(QString variable,QString value);
   QString printLookup();
+  bool syncProperty(const QString reference, const QString element, const QString property = "SYNC_WITH_UPPER_LEVEL");
 
 
   public:
@@ -113,6 +118,7 @@ class confData : public QObject
   ~confData();
 
   bool sync(const QString &reference, const QString &variable = "SYNC_WITH_UPPER_LEVEL", const QRegExp &exp = QRegExp());
+  bool syncPropertyWithUpper( const QString element, const QString property = "SYNC_WITH_UPPER_LEVEL");
   bool isEmpty();
   bool isModified();
   bool hasParent();

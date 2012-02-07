@@ -15,9 +15,17 @@ using namespace std;
 void confData::init(const QString &fileName, confData *parentData)
 {
   parentConf = parentData;
-  dataFilename=fileName;
+  dataFilename = fileName;
   valueSearch<<"LABEL"<<"LEGEND"<<"EXAMPLE"<<"FORMER"<<"HELP"<<"TYPE"<<"RELATION"<<"LOCKED"<<"CONCERNS"<<"USERLEVEL"<<"INHERITABLE_UPON_INIT"<<"SYNC_WITH_UPPER_LEVEL"<<"ISWRONG";
   userSetProperties<<"LOCKED"<<"SYNC_WITH_UPPER_LEVEL"<<"ISWRONG";
+  //globalSetPropeties = valueSearch - userSetProperties
+  for(int i=0; i<valueSearch.size(); ++i)
+  {
+
+	  if(!(userSetProperties.contains(valueSearch[i])))
+	  globalSetProperties << valueSearch[i];
+  }
+
   
   empty = false;
   OS_X_APP_PATH = "Contents/MacOS/";
@@ -260,7 +268,7 @@ bool confData::parseDataFile()
   //create symbolic link if lineName is set
   if(!linkName.isEmpty())
   {
-    qDebug()<< "creating the symlink to " << data.fileName() << " with the name " << linkName;
+    //qDebug()<< "creating the symlink to " << data.fileName() << " with the name " << linkName;
     data.link(data.fileName(), linkName);
   }
   QString lineData;
@@ -304,6 +312,9 @@ bool confData::parseDataFile()
       {
         verifyElement(section,element);
         lineData.remove(0,valueSearch[i].size()+1);
+//        if(valueSearch[i] == "SYNC_WITH_UPPER_LEVEL")
+//        	if(lineData.trimmed().toLower() == "no")
+//        		qDebug() << "SYNC_WITH_UPPER_LEVEL: no";
         element->set(valueSearch[i].simplified(),lineData);
         inValueSearch = true;
       }
@@ -388,13 +399,13 @@ void confData::updateConf(const QString &confFileName)
       newSections << section;
     }
 	
-    for(int i=0;i<valueSearch.size();i++)
+    for(int i=0;i<globalSetProperties.size();i++)
     {
-      if(lineData.startsWith(valueSearch[i] + ':'))
+      if(lineData.startsWith(globalSetProperties[i] + ':'))
       {
         element = getElement(element);
-        lineData.remove(0,valueSearch[i].size()+1);
-        element->set(valueSearch[i].simplified(),lineData);
+        lineData.remove(0,globalSetProperties[i].size()+1);
+        element->set(globalSetProperties[i].simplified(),lineData);
         inValueSearch = true;
       }
     }
@@ -536,7 +547,7 @@ void confData::loadDefaultConf(confData *conf, const QStringList &defaults)
 void confData::save()
 {
   QFile data(dataFilename);
-  saveAs(dataFilename);
+  saveSynchronized(dataFilename);
 }
 
 void confData::saveAs(QString fileName)
@@ -548,7 +559,6 @@ void confData::saveAs(QString fileName)
     data.write((header[i] + '\n').toAscii());
   }
 
-  bool synchronized = false;
 
   for(int i=0;i<sections.size();i++)
   {
@@ -567,9 +577,48 @@ void confData::saveAs(QString fileName)
         {
             v = v.trimmed();
             data.write(("# " + valueSearch[k] + ": " + v + "\n").toAscii());
+        }
+	  }
+	  data.write(("set " + e->get("valuelabel") + " = " + '"' + e->get("value") + '"' + "\n#\n").toAscii());
+	}
+  }
+
+  data.write("#\n#=============================================================================\n#\n",83);
+  setModified(false);
+  emit saving();
+  data.close();
+}
+
+void confData::saveSynchronized(QString fileName)
+{
+  QFile data(fileName);
+  if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+  for(int i=0;i<header.size();i++)
+  {
+    data.write((header[i] + '\n').toAscii());
+  }
+
+  bool synchronized = false;
+
+  for(int i=0;i<sections.size();i++)
+  {
+    data.write("#=============================================================================\n",79);
+    data.write(("# SECTION:" + sections[i]->title() + "\n").toAscii());
+    data.write("#=============================================================================\n",79);
+    data.putChar('#'); data.putChar('\n');
+
+	for(unsigned int j=0;j<sections[i]->size();j++)
+	{
+	  confElement *e=(*sections[i])[j];
+	  for(int k=0;k<valueSearch.size();k++)
+	  {
+	    QString v = e->get(valueSearch[k]);
+        if(!v.isEmpty())
+        {
+            v = v.trimmed();
+            data.write(("# " + valueSearch[k] + ": " + v + "\n").toAscii());
             if(valueSearch[k]=="SYNC_WITH_UPPER_LEVEL" && v.toLower() == "yes" )
             {
-                //qDebug() << e->get("valuelabel") << " = " << e->get("value") << "should be synced";
                 if(saveInUpperLevel(e->get("valuelabel"),e->get("value")))
                     synchronized = true;
             }
@@ -908,11 +957,33 @@ bool confData::sync(const QString &reference, const QString &variable, const QRe
   return true;
 }
 
+bool confData::syncPropertyWithUpper( const QString element, const QString property)
+{
+	return syncProperty(QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg",element,property);
+}
+
 bool confData::syncWithUpper(const QString &variable, const QRegExp &exp)
 {
   return sync(QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg",variable,exp);
 }
 
+bool confData::syncProperty(const QString reference, const QString element, const QString property)
+{
+	  //if(!QFileInfo(reference).exists()) {cerr<<(reference + " does not exist.").toStdString()<<endl; return false;}
+
+	  if(!parentConf) {cerr<<"parent configuration does not exist."<<endl; return false;}
+
+	  confData* upper = parentConf;
+	  //if(upper.isEmpty()) {cerr<<(reference + " is empty.").toStdString()<<endl; return false;}
+
+	  confElement* upperElement = upper->get(element);
+	  confElement* localElement = get(element);
+	  //qDebug() << "saving property " << property << " = " << localElement->get(property) << " of element " << element;
+	  upperElement->set(property, localElement->get(property));
+	  upper->save();
+
+	  return true;
+}
 const QSet<QString> &confData::subScripts()
 {
   return subScript;

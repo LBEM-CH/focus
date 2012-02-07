@@ -23,6 +23,7 @@ class confElement : public QObject
 
   signals:
   void dataChanged();
+  void syncPropertiesWithUpper(QString);
 
   private:
   QHash<QString,QString> properties;

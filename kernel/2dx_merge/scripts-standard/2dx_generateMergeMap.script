@@ -536,7 +536,7 @@ ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM}.plt"
 \rm -f ${imagename}-${SYM}.plt
 #
 ${bin_ccp4}/npo  MAPIN  SCRATCH/${imagename}-${SYM}.map  PLOT  ${imagename}-${SYM}.plt  << eof
-TITLE Merged Result
+TITLE Merged Result, 2x2 UnitCells, each ${realcell}, ang=${realang}
 MAP SCALE 0.4
 ${npo_line1}
 ${npo_line2}

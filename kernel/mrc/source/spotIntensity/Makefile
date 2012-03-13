@@ -39,7 +39,7 @@ RM = "/Applications/CMake 2.8-2.app/Contents/bin/cmake" -E remove -f
 CMAKE_EDIT_COMMAND = "/Applications/CMake 2.8-2.app/Contents/bin/ccmake"
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/sthennin/p/trunk
+CMAKE_SOURCE_DIR = /Users/sthennin/P/trunk
 
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /Users/sthennin/2dx

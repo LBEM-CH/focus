@@ -59,7 +59,7 @@ CHEN>
 C      PARAMETER (NMAX=10000)
 C      PARAMETER (NVERTMAX=21)
       PARAMETER (NMAX=20000)
-      PARAMETER (NVERTMAX=101)
+      PARAMETER (NVERTMAX=1001)
 CHEN<
       COMMON//NX,NY,NZ
       DIMENSION PX(NVERTMAX),PY(NVERTMAX),SLOPE(NVERTMAX),ALINE(NMAX),
@@ -334,13 +334,11 @@ C
 CHEN>
 C
  2000 continue
-CMAR>
-C      IF(NOVERT.GE.NVERTMAX) THEN
-C        PRINT *,' too many vertices for box'
-C        WRITE(6,'('' max vertices = '',I3)') NVERTMAX
-C        STOP
-C      ENDIF
-CMAR<
+      IF(NOVERT.GE.NVERTMAX) THEN
+        PRINT *,' too many vertices for box'
+        WRITE(6,'('' max vertices = '',I3)') NVERTMAX
+        STOP
+      ENDIF
 C
       IF(NOVERT.LT.0) THEN
 C

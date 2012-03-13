@@ -94,7 +94,8 @@ if ( ${masktobig} == '1' ) then
 endif
 #
 if ( ${nonmaskimagename} != ${imagename} ) then
-  ${proc_2dx}/protest "ERROR: Image already masked."
+  ${proc_2dx}/linblock "Image has been masked before."
+  echo "#WARNING: Image has been masked before." >> LOGS/${scriptname}.results
 endif
 #
 echo "# IMAGE: ${nonmaskimagename}.mrc" >> LOGS/${scriptname}.results

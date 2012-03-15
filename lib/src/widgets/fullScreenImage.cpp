@@ -326,7 +326,8 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
 {
   int n = 20;
   QPainterPath p;
-  QPainterPath q[n];
+  // QPainterPath q[n];
+  QPainterPath q[20];
 
   float stepSize = data->get("stepdigitizer","value").toFloat();
   float phacon = data->get("phacon","value").toFloat();

@@ -425,14 +425,24 @@ if ( ${latlenok} == '0' ) then
 endif
 #
 if ( ! -e ${imagename}.spt ) then
-  ech ":: "
+  echo ":: "
   ${proc_2dx}/linblock "ERROR: Spotlist ${imagename}.spt missing."
-  ${proc_2dx}/protest "Aborting."
+  if ( -e ${nonmaskimagename}.spt ) then
+    ${proc_2dx}/linblock "WARNING: Copying ${nonmaskimagename}.spt to ${imagename}.spt"
+    \cp ${nonmaskimagename}.spt ${imagename}.spt
+  else
+    ${proc_2dx}/protest "Aborting."
+  endif
 endif
 if ( ! -e ${nonmaskimagename}.spt ) then
-  ech ":: "
+  echo ":: "
   ${proc_2dx}/linblock "ERROR: Spotlist ${nonmaskimagename}.spt missing."
-  ${proc_2dx}/protest "Aborting."
+  if ( -e ${imagename}.spt ) then
+    ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${nonmaskimagename}.spt"
+    \cp ${imagename}.spt ${nonmaskimagename}.spt
+  else
+    ${proc_2dx}/protest "Aborting."
+  endif
 endif
 #
 #############################################################################

@@ -349,7 +349,24 @@ ${proc_2dx}/linblock "Theoretical magnification is ${theormag}, given magnificat
 echo "set CALCULATEDMAG = ${theormag}" >> LOGS/2dx_unbend1.results
 #
 if ( ! -e ${imagename}.spt ) then
-  ${proc_2dx}/protest "ERROR: spotlist not existing."
+  echo ":: "
+  ${proc_2dx}/linblock "ERROR: Spotlist ${imagename}.spt missing."
+  if ( -e ${nonmaskimagename}.spt ) then
+    ${proc_2dx}/linblock "WARNING: Copying ${nonmaskimagename}.spt to ${imagename}.spt"
+    \cp ${nonmaskimagename}.spt ${imagename}.spt
+  else
+    ${proc_2dx}/protest "Aborting."
+  endif
+endif
+if ( ! -e ${nonmaskimagename}.spt ) then
+  echo ":: "
+  ${proc_2dx}/linblock "ERROR: Spotlist ${nonmaskimagename}.spt missing."
+  if ( -e ${imagename}.spt ) then
+    ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${nonmaskimagename}.spt"
+    \cp ${imagename}.spt ${nonmaskimagename}.spt
+  else
+    ${proc_2dx}/protest "Aborting."
+  endif
 endif
 #
 if ( ! -e FFTIR/${imagename}.fft.mrc ) then

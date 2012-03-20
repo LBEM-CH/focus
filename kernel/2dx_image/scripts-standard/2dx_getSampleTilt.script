@@ -148,9 +148,9 @@ eot
     ${proc_2dx}/protest "First determine  lattice."
   endif
   #
-  set highangle = `echo ${TLTANG} | awk '{if($1>25 || $1<-25) {s=1} else {s=0}} END {print s}'`
+  # set highangle = `echo ${TLTANG} | awk '{if($1>25 || $1<-25) {s=1} else {s=0}} END {print s}'`
   #
-  if ( ${highangle} == '1' ) then
+  # if ( ${highangle} == '1' ) then
     # Only with higher tilt angle, the sample tilt is taken from the lattice distortion. 
     # At lower tilts, the sample tilt was more reliably determined by the defocus gradient in other scripts.
     #
@@ -182,11 +182,11 @@ eot
     echo "::TAXA    = ${TAXA}" >> History.dat
     echo "::TANGL   = ${TANGL}" >> History.dat
     #
-  else
-    #############################################################################
-    ${proc_2dx}/linblock "Not saving tilt geometry from lattice, because of low tilt."
-    #############################################################################
-  endif
+  # else
+  #  #############################################################################
+  #  ${proc_2dx}/linblock "Not saving tilt geometry from lattice, because of low tilt."
+  #  #############################################################################
+  # endif
   #
 else
   #

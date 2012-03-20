@@ -168,11 +168,11 @@ endif
   #
   \rm -f TMP.txt
   #
-echo ":: ${defocus_pos_file}"
-echo ":: ${newX},${newY}"
-echo ":: TMP.txt"
-echo ":: 0"
-echo ":: ${defave}"
+echo ": ${defocus_pos_file}"
+echo ": ${newX},${newY}"
+echo ": TMP.txt"
+echo ": 0"
+echo ": ${defave}"
   ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
 ${defocus_pos_file}
 ${newX},${newY}

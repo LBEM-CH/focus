@@ -82,6 +82,7 @@ set refbeamtilt = ""
 set reftiltgeo = ""
 set merge_reference = ""
 set merge_ref_num = ""
+set make_reference = ""
 set max_amp_correction = ""
 set merge_ML_data = ""
 #
@@ -264,8 +265,11 @@ set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
 set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
 \rm -f ${postprocessingfile}
 #
-# Reference projections are generated directly when the maps are made:
-set genref = "0"
+if ( ${make_reference} == 'y' ) then
+  set genref = "1"
+else
+  set genref = "0"
+endif
 #
 \rm -f LOGS/${scriptname}-tmp.results
 #
@@ -352,6 +356,13 @@ cat 2dx_origtiltk-console.log
 #
 cat LOGS/${scriptname}-tmp.results >> LOGS/${scriptname}.results
 # \rm -f LOGS/${scriptname}-tmp.results
+#
+echo "<<@progress: 70>"
+#
+echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
+chmod +x ${postprocessingfile}
+source ${postprocessingfile} > SCRATCH/2dx_merge_scriptB_postprocessing.log
+# cat SCRATCH/2dx_merge_scriptB_postprocessing.log
 #
 echo "<<@progress: 90>"
 #

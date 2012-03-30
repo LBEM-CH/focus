@@ -41,6 +41,10 @@ set genref = "1"
 #
 set NBM = F
 set NTL = F
+set ITAXASTEP = 10
+set RTAXASIZE = 0.5
+set ITANGLSTEP = 10
+set RTANGLSIZE = 0.5
 #
 ${bin_2dx}/2dx_merge_compileB.exe << eot
 LOGS/${scriptname}-tmp.results
@@ -62,6 +66,10 @@ ${IBOXPHS}
 ${NPRG}
 ${NBM}
 ${NTL}
+${ITAXASTEP}
+${RTAXASIZE}
+${ITANGLSTEP}
+${RTANGLSIZE}
 ${MergeIQMAX}
 ${MergeHKMAX}
 ${merge_res_limit}

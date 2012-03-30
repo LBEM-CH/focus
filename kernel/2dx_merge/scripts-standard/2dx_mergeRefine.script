@@ -54,6 +54,10 @@
 # DISPLAY: MergeMPRINT
 # DISPLAY: refbeamtilt
 # DISPLAY: reftiltgeo
+# DISPLAY: ITAXASTEP
+# DISPLAY: RTAXASIZE
+# DISPLAY: ITANGLSTEP
+# DISPLAY: RTANGLSIZE
 # DISPLAY: merge_reference
 # DISPLAY: MergeAK
 # DISPLAY: MergeIWF
@@ -112,6 +116,10 @@ set MergeNCYCLS = ""
 set MergeMPRINT = ""
 set refbeamtilt = ""
 set reftiltgeo = ""
+set ITAXASTEP = ""
+set RTAXASIZE = ""
+set ITANGLSTEP = ""
+set RTANGLSIZE = ""
 set merge_reference = ""
 set MergeAK = ""
 set MergeIWF = ""
@@ -374,6 +382,10 @@ ${IBOXPHS}
 ${NPRG}
 ${NBM}
 ${NTL}
+${ITAXASTEP}
+${RTAXASIZE}
+${ITANGLSTEP}
+${RTANGLSIZE}
 ${MergeIQMAX}
 ${MergeHKMAX}
 ${merge_res_limit}

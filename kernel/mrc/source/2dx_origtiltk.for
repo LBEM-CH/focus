@@ -1024,10 +1024,10 @@ C
             IBEGIN(IHOLD,IKOLD)=N
           ENDIF
 C
-          if(IVERBOSE.gt.8)then
-            write(*,'('' Reference: H,K,L,A,P,FOM,A = '',6I8,F12.3)')
-     1        IHC(N),IKC(N),ILC(N),IFCC(N),IPHC(N),IFOM(N),ADATAIN(4)
-          endif
+C          if(IVERBOSE.gt.8)then
+C            write(*,'('' Reference: H,K,L,A,P,FOM,A = '',6I8,F12.3)')
+C     1        IHC(N),IKC(N),ILC(N),IFCC(N),IPHC(N),IFOM(N),ADATAIN(4)
+C          endif
 C
         GO TO 11007
 C
@@ -3105,8 +3105,10 @@ C
           enddo
         enddo
         TAXB=TAXA+ABANG
-        WRITE(6,'('' Cycle '',I6,'' tiltaxis refinement: '',3F9.2)')
-     1     ICYCL,TAXA,TAXB,ABANG
+        if (IVERBOSE.gt.3) then
+          WRITE(6,'('' Cycle '',I6,'' tiltaxis refinement: '',3F9.2)')
+     1       ICYCL,TAXA,TAXB,ABANG
+        endif
 C
         ZH=ASTAR*TAN(TANGL*DRAD)*SIN(TAXA*DRAD)
         ZK=BSTAR*TAN(TANGL*DRAD)*SIN(TAXB*DRAD)
@@ -3249,9 +3251,11 @@ C
           STOP
 8150    THETA=FSHIFT*B(1)/DRAD
         PHI=FSHIFT*B(2)/DRAD
-        IF(ABS(PHI).GT.10.0) WRITE(6,8151)PHI,THETA
-        IF(ABS(THETA).GT.10.0) WRITE(6,8151)PHI,THETA
-8151    FORMAT(' SHIFTS CALCULATED TO BE TOO LARGE',2F12.2)
+        if(IVERBOSE.gt.3)then
+          IF(ABS(PHI).GT.10.0) WRITE(6,8151)PHI,THETA
+          IF(ABS(THETA).GT.10.0) WRITE(6,8151)PHI,THETA
+8151      FORMAT(' SHIFTS CALCULATED TO BE TOO LARGE',2F12.2)
+        endif
         IF(ABS(THETA).GT.10.0) THETA=SIGN(10.0,THETA)
         IF(ABS(PHI).GT.10.0) PHI=SIGN(10.0,PHI) 
         PHRESID=PNUMER/NP
@@ -3419,8 +3423,8 @@ C  Next section is summation over lattice line for all space groups.
 84      CONTINUE
         PHS=IPHC(I)*DRAD
 CAND
-        WRITE(6,55534)IH,IK,JLC(I),IFCC(I),IPHC(I)
-55534   FORMAT('IH,IK,JLC,IFCC,IPHC:',3I5,2I8)
+C        WRITE(6,55534)IH,IK,JLC(I),IFCC(I),IPHC(I)
+C55534   FORMAT('IH,IK,JLC,IFCC,IPHC:',3I5,2I8)
 C
         CPART=CPART+SINCDAMP*COS(PHS)*IFCC(I)
         SPART=SPART+SINCDAMP*SIN(PHS)*IFCC(I)

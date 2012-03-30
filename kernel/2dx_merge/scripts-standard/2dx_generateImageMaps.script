@@ -223,6 +223,10 @@ if ( ${make_reference} == "y" ) then
   set RFACAMP = 1.0
   set NBM = F
   set NTL = F
+  set ITAXASTEP = 10
+  set RTAXASIZE = 0.5
+  set ITANGLSTEP = 10
+  set RTANGLSIZE = 0.5
   set MergeStepSize = "0.001"
   set IBOXPHS = 5
   #
@@ -246,6 +250,10 @@ ${IBOXPHS}
 ${NPRG}
 ${NBM}
 ${NTL}
+${ITAXASTEP}
+${RTAXASIZE}
+${ITANGLSTEP}
+${RTANGLSIZE}
 ${MergeIQMAX}
 ${MergeHKMAX}
 ${merge_res_limit}

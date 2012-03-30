@@ -40,6 +40,10 @@
 # DISPLAY: ILIST
 # DISPLAY: refbeamtilt
 # DISPLAY: reftiltgeo
+# DISPLAY: ITAXASTEP
+# DISPLAY: RTAXASIZE
+# DISPLAY: ITANGLSTEP
+# DISPLAY: RTANGLSIZE
 # DISPLAY: merge_reference
 # DISPLAY: merge_ref_num
 # DISPLAY: merge_comment_1
@@ -84,6 +88,10 @@ set merge_reference = ""
 set merge_ref_num = ""
 set max_amp_correction = ""
 set merge_ML_data = ""
+set ITAXASTEP = ""
+set RTAXASIZE = ""
+set ITANGLSTEP = ""
+set RTANGLSIZE = ""
 #
 #$end_vars
 #
@@ -317,6 +325,10 @@ ${IBOXPHS}
 ${NPRG}
 ${NBM}
 ${NTL}
+${ITAXASTEP}
+${RTAXASIZE}
+${ITANGLSTEP}
+${RTANGLSIZE}
 ${MergeIQMAX}
 ${MergeHKMAX}
 ${merge_res_limit}

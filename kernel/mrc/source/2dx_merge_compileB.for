@@ -111,6 +111,22 @@ C
       read(*,*)cNTL
       write(*,'(A1)')cNTL
 C
+      write(*,'(/,''input ITAXASTEP'')')
+      read(*,*),ITAXASTEP
+      write(*,'(I8)')ITAXASTEP
+C
+      write(*,'(/,''input RTAXASIZE'')')
+      read(*,*),RTAXASIZE
+      write(*,'(F12.3)')RTAXASIZE
+C
+      write(*,'(/,''input ITANGLSTEP'')') 
+      read(*,*),ITANGLSTEP
+      write(*,'(I8)')ITANGLSTEP
+C
+      write(*,'(/,''input RTANGLSIZE'')')
+      read(*,*),RTANGLSIZE
+      write(*,'(F12.3)')RTANGLSIZE
+C
       write(*,'(/,''input IQMX'')')
       read(*,*)IQMX
       write(*,'(I8)')IQMX
@@ -253,6 +269,10 @@ C
       call shortshrink(cline,k)
       write(11,'(''set NPRG = "'',A,''"'')')cline(1:k)
       write(11,'(''set NTL  = "'',A1,''"'')')cNTL
+      write(11,'(''set ITAXASTEP = "'',I8,''"'')')ITAXASTEP
+      write(11,'(''set RTAXASIZE = "'',F12.3,''"'')')RTAXASIZE
+      write(11,'(''set ITANGLSTEP = "'',I8,''"'')')ITANGLSTEP
+      write(11,'(''set RTANGLSIZE = "'',F12.3,''"'')')RTANGLSIZE
       write(11,'(''set NBM  = "'',A1,''"'')')cNBM
       write(11,'(''set ILIST = '',I3)')ILIST
       write(cline,'(I6)')IQMX
@@ -283,7 +303,7 @@ C
 C
       write(11,'(''${spcgrp} ${NPRG} ${NTL} ${NBM} ${ILIST} ${realcell} ${ALAT} ${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
      .  ''! ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT'')')
-      write(11,'(''10,0.7,10,0.5'',52X,
+      write(11,'(''${ITAXASTEP} ${RTAXASIZE} ${ITANGLSTEP} ${RTANGLSIZE}'',10X,
      .  ''! itaxastep,rtaxasize,itanglstep,rtanglsize'')')
 C
       write(11,'(''1001 0 ${HKMX} ${IQMX} ${IBOXPHS} '',A1,

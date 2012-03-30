@@ -1797,12 +1797,14 @@ C
 C
               R1TAXA = TAXA
               R1TANGL = TANGL
-              write(*,'(/,''Entering TILTP2 with test values:'')')
-              write(*,'('' TAXA = '',F12.3,'' TANGL = '',F12.3)')
-     .            TAXA,TANGL
-              write(*,'('' ITAXA = '',I5,''   ITANGL = '',I5)')
-     .            ITAXA,ITANGL
-              write(*,'(/)')
+              if(IVERBOSE.gt.1)then
+                write(*,'(/,''Entering TILTP2 with test values:'')')
+                write(*,'('' TAXA = '',F12.3,'' TANGL = '',F12.3)')
+     .              TAXA,TANGL
+                write(*,'('' ITAXA = '',I5,''   ITANGL = '',I5)')
+     .              ITAXA,ITANGL
+                write(*,'(/)')
+              endif
 C
               CALL TILTP2(IN1,IHIN,IKIN,IQIN,AIN,
      .         PTEMP,AMP,JREFL,JH,JK,ZSTAR,
@@ -1815,27 +1817,31 @@ C
      .         REVHK,SGNXCH,ROT180,IQMAX,LREV(ISPGRP),ROT90,
      .          IAQP2,REVHND,PHRESID,RMSRESID,IVERBOSE)
 C
-              write(*,'(/,''***************************************'',
-     .            ''**************************************'')')
-              write(*,'('' This resulted in PHRESID, RMSRESID = '',
-     .                2F15.3)')PHRESID,RMSRESID
-              write(*,'('' Test values  : TAXA = '',F12.3,'' TANGL = ''
-     .               ,F12.3)')R1TAXA,R1TANGL
-              write(*,'('' Result values: TAXA = '',F12.3,'' TANGL = ''
-     .               ,F12.3,''  Residual = '',F15.3)')
-     1          TAXA,TANGL,PHRESID
-              write(*,'('' So far best  : TAXA = '',F12.3,'' TANGL = ''
-     .              ,F12.3,''  Residual = '',F15.3)')
-     1          RTAXAOPT,RTANGLOPT,PHSMIN
-              write(*,'(/,''***************************************'',
-     .            ''**************************************'')')
-              write(*,'(/)')
+              if(IVERBOSE.gt.1)then
+                write(*,'(/,''***************************************'',
+     .              ''**************************************'')')
+                write(*,'('' This resulted in PHRESID, RMSRESID = '',
+     .                  2F15.3)')PHRESID,RMSRESID
+                write(*,'('' Test values  : TAXA = '',F12.3,'' TANGL = ''
+     .                 ,F12.3)')R1TAXA,R1TANGL
+                write(*,'('' Result values: TAXA = '',F12.3,'' TANGL = ''
+     .                 ,F12.3,''  Residual = '',F15.3)')
+     1            TAXA,TANGL,PHRESID
+                write(*,'('' So far best  : TAXA = '',F12.3,'' TANGL = ''
+     .                ,F12.3,''  Residual = '',F15.3)')
+     1            RTAXAOPT,RTANGLOPT,PHSMIN
+                write(*,'(/,''***************************************'',
+     .              ''**************************************'')')
+                write(*,'(/)')
+              endif
 C
               if(PHRESID.lt.PHSMIN)then
                 PHSMIN=PHRESID
                 RTAXAOPT=TAXA
                 RTANGLOPT=TANGL
-                write(*,'(/,'' This is now the new record setter.'',/)')
+                if(IVERBOSE.gt.1)then
+                  write(*,'(/,'' This is now the new record setter.'',/)')
+                endif
               endif
 C
             enddo
@@ -1847,7 +1853,9 @@ C
      .         ,F12.3)')PHSMIN
           write(*,'('' TAXA = '',F12.3,/,'' TANGL = '',F12.3)')
      .         TAXA,TANGL
-          write(*,'(/,/,/)')
+          if(IVERBOSE.gt.1)then
+            write(*,'(/,/,/)')
+          endif
 C
         endif
 C

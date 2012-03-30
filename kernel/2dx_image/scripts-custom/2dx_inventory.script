@@ -199,6 +199,13 @@ if ( ${do} == "3" || ${do} == "6" ) then
       \ls -1 APH/*.aph | grep -v "111Adummy" | sed -e "s/^/# IMAGE-IMPORTANT: /" >> SCRATCH/inventory.txt
     endif
     \rm -f APH/111Adummy.aph
+    echo dummy > APH/111Adummy.hkl
+    echo `\ls -1 APH/*.hkl | wc -l` > tmp.tmp
+    set lines = `cat tmp.tmp`
+    if ( ${lines} != '1' ) then
+      \ls -1 APH/*.hkl | grep -v "111Adummy" | sed -e "s/^/# IMAGE-IMPORTANT: /" >> SCRATCH/inventory.txt
+    endif
+    \rm -f APH/111Adummy.hkl
   else
     ${proc_2dx}/linblock "             APH not existing"
   endif

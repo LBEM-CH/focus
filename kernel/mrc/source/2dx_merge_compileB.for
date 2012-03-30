@@ -459,8 +459,10 @@ C
         write(14,'(''  endif'')')
         write(14,'(''  \cp -f APH/REF'',A10,''.hkl '',A,''/APH'')')
      .    CIMAGENUMBER(1:10),cdir(1:k1)
-        write(14,'(''  echo "# IMAGE: APH/REF'',A10,''.hkl <APH: REF'',A10''.hkl>" >> LOGS/${scriptname}.results'')')
-     .    CIMAGENUMBER(1:10),CIMAGENUMBER(1:10)
+C
+C        write(14,'(''  echo "# IMAGE: APH/REF'',A10,''.hkl <APH: REF'',A10''.hkl>" >> LOGS/${scriptname}.results'')')
+C     .    CIMAGENUMBER(1:10),CIMAGENUMBER(1:10)
+C
         write(14,'(''  echo REF'',A10,''.hkl done.'')') CIMAGENUMBER(1:10)
         write(14,'(''else'')')
         write(14,'(''  echo "::WARNING: APH/REF'',A10,

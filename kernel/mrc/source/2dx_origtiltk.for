@@ -300,7 +300,7 @@ C##############################################################################
 C
 C
 C SPACE GROUP MATRICES --- convention for p3, p4 and p6 is H,0 (not 0,K).
-      INTEGER*2 ISPEC(5,17)
+      INTEGER*4 ISPEC(5,17)
 C     DATA ISPEC/7*0,1,3*0,1,4*0,1,4*0,1,3*0,3*1,2*0,3*1,0,-1,3*1,0,1,
 C    A 3*1,4*0,1,0,0,4*1,0,5*1,8*0,1,0,1,1,5*0,1,4*0,1,1,0/
       DATA ISPEC/
@@ -321,7 +321,7 @@ C    A 3*1,4*0,1,0,0,4*1,0,5*1,8*0,1,0,1,1,5*0,1,4*0,1,1,0/
      O  1,1,0,0,0,
      P  0,0,1,0,0,
      Q  0,0,1,1,0/
-      INTEGER*2 IGO(8,17)
+      INTEGER*4 IGO(8,17)
 C     DATA IGO/8*5,2*4,2*5,2*4,2*5,
 C    A 4,5,4,5,4,5,4,5,  4,5,4,5,4,5,4,5,  4,5,4,5,4,5,4,5,
 C    B 2,4,2,5,2,4,2,5,  2,4,2,5,2,4,2,5,  2,4,2,5,2,4,2,5,
@@ -346,14 +346,14 @@ C    E 2,4,2,4,1,5,1,5,  3,4,3,5,1,4,1,5,  2,3,2,4,1,3,1,5/
      O 2,4,2,4,1,5,1,5,
      P 3,4,3,5,1,4,1,5,
      Q 2,3,2,4,1,3,1,5/
-      INTEGER*2 IMAT(5,17)
+      INTEGER*4 IMAT(5,17)
       DATA IMAT/ 1,1,1,1,1,    1,2,1,1,1,    1,3,1,1,1,
      A           1,4,1,1,1,    1,3,1,1,1,    1,2,1,3,1,
      B           1,2,1,4,1,    1,2,1,6,1,    1,2,1,3,1,
      C           1,2,7,5,1,    1,8,1,2,3,    1,8,1,9,6,
      D           1,10,11,12,1, 1,8,1,10,11,  1,9,1,10,11,
      E           1,2,10,5,11,  1,8,9,10,11/
-      INTEGER*2 MAT(8,12)
+      INTEGER*4 MAT(8,12)
       DATA MAT/   -1,0,0,-1,-1,0,0,-1,      1,0,0,1,-1,0,0,-1,
      A            1,0,0,-1,1,0,0,-1,        1,0,0,-1,1,0,180,-1,
      B            0,1,-1,0,1,0,0,1,        1,0,0,-1,1,180,180,-1,
@@ -441,7 +441,7 @@ C  DIMENSION STATEMENTS FOR NPROG.EQ.2 REFINEMENT - i.e. using LCF files.
 C      DIMENSION CELL(6)                        ! also used in MTZ section
       INTEGER*4 IDATAIN(40)
 C     .         ,LOOKUP(40)                     ! also used in MTZ section
-      INTEGER*2 IHC(NMAXC),IKC(NMAXC),ILC(NMAXC),
+      INTEGER*4 IHC(NMAXC),IKC(NMAXC),ILC(NMAXC),
      . ISC(NMAXC),IFCC(NMAXC),IPHC(NMAXC),IFOM(NMAXC)
       INTEGER*4 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
      . IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX)
@@ -508,7 +508,7 @@ C  DIMENSION STATEMENTS FOR INPUT AND ORIGIN/TILTAXIS REFINEMENT.
       INTEGER IHIN(MAXRFL),IKIN(MAXRFL)
 C      INTEGER IIH(MAXRFL),IIK(MAXRFL),IQIN(MAXRFL)     ! see common block
       INTEGER IPTEST(MAXRFL)
-      INTEGER*2 IP1(MAXRFL),IP2(MAXRFL)
+      INTEGER*4 IP1(MAXRFL),IP2(MAXRFL)
       LOGICAL LSPEC(MAXRFL)     ! TRUE IF PHASE IS RESTRICTED BY SYMMETRY.
 C      REAL PHSI(MAXRFL),PHSC(MAXRFL),WGT(MAXRFL)       ! see common block
       REAL PTEMP(MAXRFL)
@@ -922,7 +922,8 @@ C---------AND TEST FOR PRESENCE OF THE STRUCTURE FACTOR (USING SIGFC)
      .     IDATAIN(MSIGFC).GT.0.0) GO TO 1102
           NLCFOK=NLCFOK-1               ! this was not a valid point after all.
         GO TO 1101
-1102    IFCC(NLCFOK)=IDATAIN(MFC)
+1102    continue
+        IFCC(NLCFOK)=IDATAIN(MFC)
         IPHC(NLCFOK)=IDATAIN(MPHCAL)
         IF(NLCFOK.NE.1) GO TO 1103
           IHOLD=IHC(NLCFOK)
@@ -988,6 +989,14 @@ C
           NAMPS=N
           IF(N.GT.NMAXC) GO TO 1150
 C
+CHEN>
+C          ITMP=ADATAIN(4)
+C          write(*,'(''### Read '',I9)')ITMP
+C          if(ITMP.gt.30000)then
+C            write(6,'('':: ERROR: DATA OVERFLOW in origtilt for IFCC. Scale down your data'')')
+C            stop
+C          endif
+CHEN<
           IHC(N)=ADATAIN(1)
           IKC(N)=ADATAIN(2)
           IF(ABS(IHC(N)).GT.MAXINDEX.OR.ABS(IKC(N)).GT.MAXINDEX) THEN
@@ -1015,8 +1024,10 @@ C
             IBEGIN(IHOLD,IKOLD)=N
           ENDIF
 C
-C         write(*,'('' Reference: H,K,L,A,P,FOM = '',6I6)')
-C     1      IHC(N),IKC(N),ILC(N),IFCC(N),IPHC(N),IFOM(N)
+          if(IVERBOSE.gt.8)then
+            write(*,'('' Reference: H,K,L,A,P,FOM,A = '',6I8,F12.3)')
+     1        IHC(N),IKC(N),ILC(N),IFCC(N),IPHC(N),IFOM(N),ADATAIN(4)
+          endif
 C
         GO TO 11007
 C
@@ -1279,6 +1290,12 @@ C
         PHSC(IN)=0.0
         DPERP=IH*STAXA+IK*STAXB
         Z=DPERP*TTANGL
+CHEN>
+C        if(abs(IH).lt.3 .and. abs(IK).lt.3) then
+C          PTMP=AMOD(P,360.)
+C          write(*,'('':: IH='',I6,'', IK='',I6,'' : Read Reflections: A='',F12.3,'', P='',F10.3)')IH,IK,A,PTMP
+C        endif
+CHEN<
 C
         IOK  = .TRUE.
         IOK2 = .TRUE.
@@ -1483,6 +1500,12 @@ C-----------Output of the reference data for checking:
               WRITE(4,293) -IIH(IN),-IIK(IN),IZERO,FREF,-PHSC(IN),1.0
             ENDIF
 293         FORMAT(3I5,3G16.6)
+CHEN>
+C        if(abs(IIH(IN)).lt.3 .and. abs(IIK(IN)).lt.3) then
+C          write(*,'('':: IH='',I6,'', IK='',I6,'' : REFERENCE DATA: A='',F12.3,'', P='',F10.3)')
+C     .      IIH(IN),IIK(IN),FREF,PHSC(IN)
+C        endif
+CHEN<
           endif
         ENDIF
 C
@@ -2565,8 +2588,8 @@ C*******************************************************************************
       SUBROUTINE ASYM(IH,IK,Z,IP1,IP2,SPEC,IPTEST,WSTAR,
      1  A1,A2,A3,A4,A5,IGO,ISPEC,LREV,IAQP2,IVERBOSE)
 C
-      INTEGER*2 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
-      INTEGER*2 IP1,IP2
+      INTEGER*4 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
+      INTEGER*4 IP1,IP2
       LOGICAL SPEC,LREV
 C
 C Space Group p2221 (7):
@@ -2777,7 +2800,7 @@ C                             0      0     0      0  IA(8)
 C           FOR ALL CASES.
 C
 C
-      INTEGER*2 IA(8),IP1,IP2
+      INTEGER*4 IA(8),IP1,IP2
 C      WRITE(6,900)IA,IH,IK,Z,IP1,IP2
       IH1=IA(1)*IH+IA(2)*IK
       IK=IA(3)*IH+IA(4)*IK
@@ -3051,14 +3074,14 @@ C
       PARAMETER (MAXINDEX=60)
       PARAMETER (NSLOTS=256)
       INTEGER IH,IK,IHIN(1),IKIN(1),IQIN(1)
-      INTEGER*2 JH(1),JK(1),JHC(1),JKC(1),JLC(1),JSC(1),IFCC(1),IPHC(1)
+      INTEGER*4 JH(1),JK(1),JHC(1),JKC(1),JLC(1),JSC(1),IFCC(1),IPHC(1)
       INTEGER*4 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
      .  IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX)
       REAL AIN(1),PTEMP(1),AMP(1),ZSTAR(1)
       REAL*8 A(2,2),B(2),W(20),E
 C              THESE BELOW ARE JUST DUMMY VARIABLES FOR ASYM.
-      INTEGER*2 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
-      INTEGER*2 IP1,IP2
+      INTEGER*4 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
+      INTEGER*4 IP1,IP2
       LOGICAL SPEC,LREV,IOK
       DIMENSION ASIZ(NSLOTS),FREFSIZ(NSLOTS),PHSRES(NSLOTS),
      .  NPHSRES(NSLOTS),AVIQ(NSLOTS)
@@ -3301,14 +3324,14 @@ C-----for the correct height Zstar of the tilted reflection
 C
       PARAMETER (MAXINDEX=60)
       INTEGER IH,IK,IHIN(1),IKIN(1)
-      INTEGER*2 JLC(1),IFCC(1),IPHC(1)
+      INTEGER*4 JLC(1),IFCC(1),IPHC(1)
       INTEGER*4 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
      . IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX)
       REAL*8 A(2,2),B(2),W(20),E
 C
 C              THESE BELOW ARE JUST DUMMY VARIABLES FOR ASYM.
-      INTEGER*2 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
-      INTEGER*2 IP1,IP2
+      INTEGER*4 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
+      INTEGER*4 IP1,IP2
       DATA DRAD,RDEG,PI/0.0174532,57.295779,3.14159/
       DATA BTEMP/80.0/
 C
@@ -3335,10 +3358,10 @@ C-----Check, if not existing:
 C
  70   continue
 C
-C      write(6,'('' GETCRVAL called with ISPOT,IHIN,IKIN,IH,IK,ZASYM,'',
-C     1     ''JLC,IFCC,IPHC,IBEGIN,IFINISH'',5I6,F12.3,5I6)')
-C     2 ISPOT,IHIN,IKIN,IH,IK,ZASYM,
-C     3  JLC,IFCC,IPHC,IBEGIN(IH,IK),IFINISH(IH,IK)
+      write(6,'(/,'' GETCRVAL called with ISPOT,IHIN,IKIN,IH,IK,ZASYM,'',
+     1     ''JLC,IFCC,IPHC,IBEGIN,IFINISH= '',5I6,F12.3,5I8)')
+     2 ISPOT,IHIN,IKIN,IH,IK,ZASYM,
+     3  JLC,IFCC,IPHC,IBEGIN(IH,IK),IFINISH(IH,IK)
 C
       ZBEGIN=JLC(NBEGIN)/C
       ZFINISH=JLC(NFINISH)/C
@@ -3396,7 +3419,7 @@ C  Next section is summation over lattice line for all space groups.
 84      CONTINUE
         PHS=IPHC(I)*DRAD
 CAND
-C       WRITE(6,55534)IH,IK,JLC(I),IFCC(I),IPHC(I)
+        WRITE(6,55534)IH,IK,JLC(I),IFCC(I),IPHC(I)
 55534   FORMAT('IH,IK,JLC,IFCC,IPHC:',3I5,2I8)
 C
         CPART=CPART+SINCDAMP*COS(PHS)*IFCC(I)
@@ -3443,8 +3466,8 @@ C                                               ! referred to above.
       IF(ABS(PDIFF).GT.180.0) PDIFF=PDIFF-SIGN(360.0,PDIFF)
       IF(ABS(PDIFF).GT.8.0) PDIFF=SIGN(8.0,PDIFF)
       DPDZCU = PDIFF/DZ
-C      WRITE(6,86)IH,IK,ZASYM,FREF,FREFDZ,PREF,PREFDZ,DPDZCU
-86    FORMAT(' H,K,Z,F,F+DZ,P,P+DZ,DPDZ',2I5,F8.4,2F10.2,2F10.3,F15.0)
+      WRITE(6,86)IH,IK,ZASYM,FREF,FREFDZ,PREF,PREFDZ,DPDZCU
+86    FORMAT(' H,K,Z,F,F+DZ,P,P+DZ,DPDZ= ',2I5,F8.4,2F10.2,2F10.3,F15.0)
 C
       RETURN
       END

@@ -380,6 +380,7 @@ endif
 #
 # this should guarantee that the file is never missing:
 \mv -f SCRATCH/merge3Dref_nophaerr_tmp.mtz merge3Dref_nophaerr.mtz
+# \cp -f merge3Dref_nophaerr.mtz merge3Dref.mtz
 #
 echo "# IMAGE-IMPORTANT: merge3Dref_nophaerr.mtz <MTZ: Latlines without phase-error for synref>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"

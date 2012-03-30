@@ -64,6 +64,16 @@ C
         else
           READ (10,*,END=1005) H,K,L,AMP,PHASE,FOM
         endif
+ 1001   continue
+        if(PHASE.gt.180.0)then
+          PHASE=PHASE-360.0
+          goto 1001
+        endif
+ 1002   continue
+        if(PHASE.lt.-180.0)then
+          PHASE=PHASE+360.0
+          goto 1002
+        endif
         if(H.ne.IH .or. K.ne.IK .or. L.ne.IL)then
           if(isig.eq.1)then
             write (11,210) H,K,L,AMP,PHASE,FOM,SIGA
@@ -104,7 +114,7 @@ C
             else
               IQ=9
             endif
-            write(12,'(1X,2I5,2F12.1,I4,2F12.3)') H,K,AMP,PHASE,IQ,BACK,FOM
+            write(12,'(1X,2I5,F12.1,F12.3,I4,2F12.3)') H,K,AMP,PHASE,IQ,BACK,FOM
           endif
 C
           IH=H
@@ -119,9 +129,9 @@ C
       close(12)
 C
  100  FORMAT (A50)
- 200  FORMAT (3I6,2G16.8,G16.8)
- 210  FORMAT (3I6,2G16.8,G16.8,G16.8)
- 300  FORMAT (3I6,2G16.8,G16.8)
+ 200  FORMAT (3I6,G16.8,F12.3,G16.8)
+ 210  FORMAT (3I6,G16.8,F12.3,G16.8,G16.8)
+ 300  FORMAT (3I6,G16.8,F12.3,G16.8)
 C
       goto 999
 C

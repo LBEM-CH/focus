@@ -25,6 +25,7 @@
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: merge_res_limit
+# DISPLAY: merge_reference
 # DISPLAY: tempkeep
 # DISPLAY: realcell
 # DISPLAY: realang
@@ -51,7 +52,6 @@
 # DISPLAY: merge_comment_8
 # DISPLAY: merge_comment_9
 # DISPLAY: max_amp_correction
-# DISPLAY: make_reference
 # DISPLAY: merge_ML_data
 #
 #$end_local_vars
@@ -82,7 +82,6 @@ set refbeamtilt = ""
 set reftiltgeo = ""
 set merge_reference = ""
 set merge_ref_num = ""
-set make_reference = ""
 set max_amp_correction = ""
 set merge_ML_data = ""
 #
@@ -265,11 +264,8 @@ set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
 set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
 \rm -f ${postprocessingfile}
 #
-if ( ${make_reference} == 'y' ) then
-  set genref = "1"
-else
-  set genref = "0"
-endif
+# reference HKL files are generated directly in the "Generate Image Maps" script, not here:
+set genref = "0"
 #
 \rm -f LOGS/${scriptname}-tmp.results
 #

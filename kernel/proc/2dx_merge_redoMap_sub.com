@@ -198,7 +198,7 @@ else
 endif
 if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   #
-  ${proc_2dx}/linblock "Creating reference projection map"
+  ${proc_2dx}/linblock "Creating reference projection map ${refhklfile}"
   #
   set linenum = `wc -l ${refhklfile} | awk '{ s = $1 - 1 } END { print s }'`
   head -n 1 ${refhklfile} > TMP.tmp
@@ -242,9 +242,9 @@ SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
 SKIP 1
-FILE ${refhklfile}
 END
 eof
+  #FILE ${refhklfile}
   #
   #############################################################################
   ${proc_2dx}/lin "fft - to transform ${refmtzfile} into SCRATCH/scratch1.map"
@@ -299,6 +299,13 @@ ${refmap}
 eot
   #
   \rm -f SCRATCH/scratch2.map
+  #
+  cd ${mergedir}/RESULTS-MRC
+  # \rm -f ${imagename}-${imagenumber}_ref.hkl
+  # \ln -s ${rootdir}/${refhklfile} ${imagename}-${imagenumber}_ref.hkl
+  \rm -f ${imagename}-${imagenumber}-ref.mrc
+  \ln -s ${rootdir}/${refmap} ${imagename}-${imagenumber}-ref.mrc
+  cd ${rootdir}
   #
 else
   if ( ${make_reference} == "y" ) then
@@ -438,10 +445,10 @@ if ( ${RESULTSMRC} != "y" ) then
 endif
 #
 cd ${mergedir}/RESULTS-MRC
+# \rm -f ${imagename}-${imagenumber}_d.hkl
+# \ln -s ${rootdir}/${infile} ${imagename}-${imagenumber}_d.hkl
 \rm -f ${imagename}-${imagenumber}.mrc
 \ln -s ${rootdir}/final_map.mrc ${imagename}-${imagenumber}.mrc
-\rm -f ${imagename}-${imagenumber}_ref.mrc
-\ln -s ${rootdir}/${imagename}_ref.mrc ${imagename}-${imagenumber}_ref.mrc
 cd ..
 #
 #

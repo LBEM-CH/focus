@@ -118,7 +118,7 @@ if ( ${merge_modus} == "2D" ) then
   if ( ${make_reference} == "y" ) then
     ${proc_2dx}/linblock "#"
     ${proc_2dx}/linblock "ERROR: Reference images can only be produced in 3D modus with an MTZ file."
-    ${proc_2dx}/linblock "No references calculated."
+    ${proc_2dx}/linblock "In 2D, your average is the universal reference. No references calculated."
     ${proc_2dx}/linblock "#"
     set make_reference = "n"
   endif
@@ -219,12 +219,12 @@ if ( ${make_reference} == "y" ) then
   #
   set dirfile = "2dx_merge_dirfile.dat"
   set number = 1
-  set IVERBOSE = 1
+  set IVERBOSE = 9
   set RFACAMP = 1.0
   set NBM = F
   set NTL = F
   set MergeStepSize = "0.001"
-  set IBOXPHS = 61
+  set IBOXPHS = 5
   #
   ${bin_2dx}/2dx_merge_compileB.exe << eot
 LOGS/${scriptname}-tmp.results
@@ -275,7 +275,7 @@ eot
   #############################################################################
   #
   chmod +x ${postprocessingfile}
-  ${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
+  source ${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
   #
   echo "################################################"
   echo "################################################"

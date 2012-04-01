@@ -1311,24 +1311,24 @@ C
 C##############################################################################
 C
 C SPACE GROUP MATRICES --- convention for p3, p4 and p6 is H,0 (not 0,K).
-      INTEGER*2 ISPEC(5,17)
+      INTEGER*4 ISPEC(5,17)
       DATA ISPEC/7*0,1,3*0,1,4*0,1,4*0,1,3*0,3*1,2*0,3*1,0,-1,3*1,0,1,
      A 3*1,4*0,1,0,0,4*1,0,5*1,8*0,1,0,1,1,5*0,1,4*0,1,1,0/
-      INTEGER*2 IGO(8,17)
+      INTEGER*4 IGO(8,17)
       DATA IGO/8*5,2*4,2*5,2*4,2*5,
      A 4,5,4,5,4,5,4,5,  4,5,4,5,4,5,4,5,  4,5,4,5,4,5,4,5,
      B 2,4,2,5,2,4,2,5,  2,4,2,5,2,4,2,5,  2,4,2,5,2,4,2,5,
      C 2,4,2,5,2,4,2,5,  3,4,3,5,3,4,3,5,  1,2,1,4,1,2,1,5,
      D 1,2,1,4,1,2,1,5,  4,5,4,5,3,5,3,5,  2,4,2,4,1,5,1,5,
      E 2,4,2,4,1,5,1,5,  3,4,3,5,1,4,1,5,  2,3,2,4,1,3,1,5/
-      INTEGER*2 IMAT(5,17)
+      INTEGER*4 IMAT(5,17)
       DATA IMAT/ 1,1,1,1,1,    1,2,1,1,1,    1,3,1,1,1,
      A           1,4,1,1,1,    1,3,1,1,1,    1,2,1,3,1,
      B           1,2,1,4,1,    1,2,1,6,1,    1,2,1,3,1,
      C           1,2,7,5,1,    1,8,1,2,3,    1,8,1,9,6,
      D           1,10,11,12,1, 1,8,1,10,11,  1,9,1,10,11,
      E           1,2,10,5,11,  1,8,9,10,11/
-      INTEGER*2 MAT(8,12)
+      INTEGER*4 MAT(8,12)
       DATA MAT/   -1,0,0,-1,-1,0,0,-1,      1,0,0,1,-1,0,0,-1,
      A            1,0,0,-1,1,0,0,-1,        1,0,0,-1,1,0,180,-1,
      B            0,1,-1,0,1,0,0,1,        1,0,0,-1,1,180,180,-1,
@@ -1409,7 +1409,7 @@ C******************************************************************************
 C
 C----------------------------------------------------------------from here
 C  DIMENSION STATEMENTS FOR IREF=1 MTZ DATA INPUT
-      INTEGER*2 IHC(NMAXC),IKC(NMAXC),ILC(NMAXC),
+      INTEGER*4 IHC(NMAXC),IKC(NMAXC),ILC(NMAXC),
      .  ISC(NMAXC),IFCC(NMAXC),IPHC(NMAXC),IFOM(NMAXC),
      .  IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
      .  IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
@@ -1454,12 +1454,12 @@ C----------------------------------------------------------------to here
 C
 C
 C  DIMENSION STATEMENTS FOR IREF=0 INPUT OF UNTILTED PROJECTION DATA.
-      INTEGER*2 JH(TOTRFL),JK(TOTRFL)
+      INTEGER*4 JH(TOTRFL),JK(TOTRFL)
       REAL PHS(TOTRFL),AMP(TOTRFL),ZSTAR(TOTRFL)
 C
       DIMENSION IHIN(1),IKIN(1),AREF(1),PREF(1)
       INTEGER      IPTEST
-      INTEGER*2    IP1,IP2
+      INTEGER*4    IP1,IP2
       LOGICAL      LSPEC        ! TRUE IF PHASE IS RESTRICTED BY SYMMETRY.
 C
       LOGICAL IOK
@@ -1761,8 +1761,8 @@ CTSH-      J99=99
 C******************************************************************************
       SUBROUTINE ASYM(IH,IK,Z,IP1,IP2,SPEC,IPTEST,WSTAR,
      1  A1,A2,A3,A4,A5,IGO,ISPEC,LREV)
-      INTEGER*2 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
-      INTEGER*2 IP1,IP2
+      INTEGER*4 A1(8),A2(8),A3(8),A4(8),A5(8),IGO(8),ISPEC(5)
+      INTEGER*4 IP1,IP2
       LOGICAL SPEC,LREV
 C
 C      WRITE(6,904)A1,A2,A3,A4,A5,IH,IK,Z,IP1,IP2,SPEC,IPTEST,WSTAR
@@ -1872,7 +1872,7 @@ C                             0      0     0      0  IA(8)
 C           FOR ALL CASES.
 C
 C
-      INTEGER*2 IA(8),IP1,IP2
+      INTEGER*4 IA(8),IP1,IP2
 C      WRITE(6,900)IA,IH,IK,Z,IP1,IP2
       IH1=IA(1)*IH+IA(2)*IK
       IK=IA(3)*IH+IA(4)*IK
@@ -1889,8 +1889,8 @@ C******************************************************************************
      .  JLC,IFCC,IPHC,IBEGIN,IFINISH,IOK,C,FREF,PREF,DPDZCU)
       PARAMETER (MAXINDEX=40)
       INTEGER IH,IK,IHIN(1),IKIN(1)
-      INTEGER*2 JLC(1),IFCC(1),IPHC(1)
-      INTEGER*2 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
+      INTEGER*4 JLC(1),IFCC(1),IPHC(1)
+      INTEGER*4 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
      .  IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX)
 c      REAL*8 A(2,2),B(2),W(20),E
 C              THESE BELOW ARE JUST DUMMY VARIABLES FOR ASYM.
@@ -1980,8 +1980,8 @@ C******************************************************************************
       PARAMETER (MAXINDEX=40)
       INTEGER IH,IK,IHIN(1),IKIN(1)
       INTEGER*4 IFCC(1)
-      INTEGER*2 JLC(1),IPHC(1)
-      INTEGER*2 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
+      INTEGER*4 JLC(1),IPHC(1)
+      INTEGER*4 IBEGIN(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX),
      .  IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX)
 c      REAL*8 A(2,2),B(2),W(20),E
 C              THESE BELOW ARE JUST DUMMY VARIABLES FOR ASYM.

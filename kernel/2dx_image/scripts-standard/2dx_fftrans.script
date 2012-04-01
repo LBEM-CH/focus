@@ -335,7 +335,31 @@ FFTIR/${imagename}.red.mrc
 eot
 endif
 #
+${bin_2dx}/labelh.exe << eot
+${nonmaskimagename}.mrc
+4               ! average adjacent pixels
+SCRATCH/${imagename}.red2.mrc
+2,2
+eot
+#
+${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.red2.mrc
+4               ! average adjacent pixels
+SCRATCH/${imagename}.red4.mrc
+2,2
+eot
+#
+${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.red4.mrc
+4               ! average adjacent pixels
+SCRATCH/${imagename}.red8.mrc
+2,2
+eot
+#
 echo "# IMAGE: "FFTIR/${imagename}.red.mrc "<Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "SCRATCH/${nonmaskimagename}.red2.mrc "<2x2 binned nonmaskedImage>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "SCRATCH/${nonmaskimagename}.red4.mrc "<4x4 binned nonmasked Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "SCRATCH/${nonmaskimagename}.red8.mrc "<8x8 binned nonmasked Image>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 30>>"
 echo "<<@evaluate>>"

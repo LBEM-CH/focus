@@ -471,10 +471,10 @@ C
         endif
 C
         write(14,'(''#'')')
-        write(14,'(''if(-e APH/REF'',A10,''.hkl)then'')')
+        write(14,'(''if ( -e APH/REF'',A10,''.hkl ) then'')')
      .    CIMAGENUMBER(1:10)
         call shorten(cdir,k1)
-        write(14,'(''  if(! -d '',A,''/APH)then'')')cdir(1:k1)
+        write(14,'(''  if ( ! -d '',A,''/APH ) then'')')cdir(1:k1)
         write(14,'(''    \mkdir '',A,''/APH'')')cdir(1:k1)
         write(14,'(''  endif'')')
         write(14,'(''  \cp -f APH/REF'',A10,''.hkl '',A,''/APH'')')

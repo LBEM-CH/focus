@@ -315,7 +315,7 @@ echo "<<@progress: 30>>"
 #
 #############################################################################
 #                                                                           #
-${proc_2dx}/linblock "LABEL - to down-interpolate image 2 times."
+${proc_2dx}/linblock "LABEL - to 2x down-interpolate original image, three times."
 #                                                                           #
 #############################################################################
 #

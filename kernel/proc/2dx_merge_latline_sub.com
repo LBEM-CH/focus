@@ -340,9 +340,6 @@ y
 set spacegroup
 1
 expand
-reindex matrix 1 0 0  0 0 1  0 1 0  
-y
-sort h k l 
 write merge3D_phase_zero_nophaerr.mtz
 quit
 eof

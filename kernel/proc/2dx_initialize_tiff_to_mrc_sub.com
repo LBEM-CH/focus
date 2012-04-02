@@ -25,6 +25,7 @@ if ( ! -e ${imagename}.mrc ) then
     echo "dummy" > zzzzz27765.mrc
     set filename = `ls -1 *.mrc | sort | head -n 1`
     if ( ${filename} != "zzzzz27765.mrc" ) then
+      ${proc_2dx}/linblock "Found file ${filename}."
       set imagename = `echo ${filename} | cut -d\. -f1`
       if ( ! -e ${imagename}.mrc ) then
         ${proc_2dx}/linblock "Image ${imagename}.mrc not existing."
@@ -42,7 +43,7 @@ if ( ! -e ${imagename}.mrc ) then
       set filename = `ls -1 *.tif | sort | head -n 1`
       if ( ${filename} != "zzzzz27765.tif" ) then
         set imagename = `echo ${filename} | cut -d\. -f1`
-        if ( ! -e ${imagename}.tif ) then
+               if ( ! -e ${imagename}.tif ) then
           ${proc_2dx}/linblock "Image ${imagename}.tif not existing."
           ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
           echo "#WARNING: Image ${imagename}.tif not existing."  >> LOGS/${scriptname}.results
@@ -96,6 +97,8 @@ eot
     echo "set imagename = ${imagename}"  >> LOGS/${scriptname}.results
     set nonmaskimagename = ${imagename}
     echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+    set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
+    echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
     #
   else
     if ( -e ${imagename}.tiff ) then

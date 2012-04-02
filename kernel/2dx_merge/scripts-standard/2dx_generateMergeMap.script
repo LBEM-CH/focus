@@ -430,7 +430,27 @@ xyzlim -1.0 1.0 -1.0 1.0 -0.5 0.5
 END
 eof
   #
+  #
+  \rm -f SCRATCH/scratch2.map
+  ${bin_ccp4}/maprot mapin SCRATCH/scratch1.map wrkout SCRATCH/scratch1_inverted.map << eot
+MODE FROM
+OMAT
+  1.000 0.000 0.000
+  0.000 1.000 0.000
+  0.000 0.000 -1.000
+  0.000 0.000 0.000
+eot
+  #
+  \rm -f volume.map
+  $CBIN/mapmask mapin SCRATCH/scratch1_inverted.map mapout volume_inverted.map << eof
+AXIS X,Y,Z
+scale factor 1
+xyzlim -1.0 1.0 -1.0 1.0 -0.5 0.5
+END
+eof
+  #
   echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: volume_inverted.map <MAP: Final 3D inverted Volume>" >> LOGS/${scriptname}.results
   #
 endif
 #

@@ -313,7 +313,7 @@ while ( ${dircounter} <= ${dirnum} )
         endif
         #
         echo ":New: ${to_dirfile}/2dx_image.cfg"
-        cp -f -p ${from_dirfile}/2dx_image.cfg ${to_dirfile}
+        cp -f -p ${from_dirfile}/2dx_image.cf* ${to_dirfile}
         #
         if ( ${alsobig} == "y" ) then
           if ( -e ${from_dirfile}/${loc_imagename}.tif ) then

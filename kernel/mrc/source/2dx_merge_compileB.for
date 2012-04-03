@@ -112,19 +112,19 @@ C
       write(*,'(A1)')cNTL
 C
       write(*,'(/,''input ITAXASTEP'')')
-      read(*,*),ITAXASTEP
+      read(*,*)ITAXASTEP
       write(*,'(I8)')ITAXASTEP
 C
       write(*,'(/,''input RTAXASIZE'')')
-      read(*,*),RTAXASIZE
+      read(*,*)RTAXASIZE
       write(*,'(F12.3)')RTAXASIZE
 C
       write(*,'(/,''input ITANGLSTEP'')') 
-      read(*,*),ITANGLSTEP
+      read(*,*)ITANGLSTEP
       write(*,'(I8)')ITANGLSTEP
 C
       write(*,'(/,''input RTANGLSIZE'')')
-      read(*,*),RTANGLSIZE
+      read(*,*)RTANGLSIZE
       write(*,'(F12.3)')RTANGLSIZE
 C
       write(*,'(/,''input IQMX'')')

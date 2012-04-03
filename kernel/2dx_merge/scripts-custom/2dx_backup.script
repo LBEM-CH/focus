@@ -419,6 +419,7 @@ while ( ${dircounter} <= ${dirnum} )
             endif
           endif
           cd ${from_dirfile}
+	endif
         #
       endif
       #

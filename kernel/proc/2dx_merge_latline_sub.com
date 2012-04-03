@@ -245,37 +245,6 @@ endif
 #
 echo "# IMAGE: APH/latfittedref.hkl <APH: Latline for ref after sym [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
 #
-#############################################################################
-${proc_2dx}/linblock "2dx_phasezero - to zero phases for PSF calculation"
-#############################################################################
-#
-\rm -f APH/latfitted_phase_zero.hkl
-#
-${bin_2dx}/2dx_phasezero.exe << eot
-APH/latfitted.hkl
-APH/latfitted_phase_zero.hkl
-0
-eot
-#
-#############################################################################
-${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for PSF"
-#############################################################################
-#
-set infile = APH/latfitted_phase_zero.hkl
-\rm -f merge3D_phase_zero.mtz
-#
-${bin_ccp4}/f2mtz hklin ${infile} hklout merge3D_phase_zero.mtz << eof
-TITLE  P1 map, ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
-LABOUT H K L F PHI FOM
-CTYPOUT H H H F P W
-FILE ${infile}
-SKIP 0
-END
-eof
-#
-echo "# IMAGE: merge3D_phase_zero.mtz <MTZ: Full latline for PSF>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #############################################################################
@@ -320,66 +289,6 @@ eof
 #
 echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full latline for reference>" >> LOGS/${scriptname}.results
 #
-####################################################################################
-#                                                                                  #
-${proc_2dx}/linblock "sftools to expand mtz and to eliminate lattice lines with illegal phases"
-#                                                                                  #
-####################################################################################
-#
-\rm -f merge3D_phase_zero_nophaerr.mtz
-#
-${bin_ccp4}/sftools << eof
-read merge3D_phase_zero.mtz
-sort h k l 
-set spacegroup
-${CCP4_SYM}
-select phaerr
-select invert
-purge
-y
-set spacegroup
-1
-expand
-write merge3D_phase_zero_nophaerr.mtz
-quit
-eof
-#
-echo "# IMAGE: merge3D_phase_zero_nophaerr.mtz <MTZ: Full latline for PSF, nophaerr>" >> LOGS/${scriptname}.results
-echo "<<@progress: +5>>"
-#
-####################################################################################
-#                                                                                  #
-${proc_2dx}/linblock "sftools to expand mtz and to eliminate lattice lines with illegal phases"
-#                                                                                  #
-####################################################################################
-#
-\rm -f SCRATCH/merge3Dref_nophaerr_tmp.mtz
-#
-${bin_ccp4}/sftools << eof
-read merge3Dref.mtz
-sort h k l 
-set spacegroup
-${CCP4_SYM}
-select phaerr
-select invert
-purge
-y
-set spacegroup
-1
-expand
-write SCRATCH/merge3Dref_nophaerr_tmp.mtz
-quit
-eof
-#
-if ( ! -e SCRATCH/merge3Dref_nophaerr_tmp.mtz ) then
-  ${proc_2dx}/protest "ERROR: SCRATCH/merge3Dref_nophaerr_tmp.mtz was not created."
-endif
-#
-# this should guarantee that the file is never missing:
-\mv -f SCRATCH/merge3Dref_nophaerr_tmp.mtz merge3Dref_nophaerr.mtz
-# \cp -f merge3Dref_nophaerr.mtz merge3Dref.mtz
-#
-echo "# IMAGE-IMPORTANT: merge3Dref_nophaerr.mtz <MTZ: Latlines without phase-error for synref>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #

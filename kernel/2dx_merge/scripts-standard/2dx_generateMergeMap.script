@@ -193,32 +193,48 @@ if ( ${merge_modus} == "3D" ) then
   echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
   echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
   #
-  set infile_phase_zero = merge3D_phase_zero_nophaerr.mtz
-  if ( ! -e ${infile_phase_zero} ) then
-    ${proc_2dx}/linblock "WARNING: Phase-Zero MTZ file missing. Cannot calculate PSF"
+  #############################################################################
+  ${proc_2dx}/linblock "sftools - to set phases to zero for PSF"
+  #############################################################################  
+  #
+  \rm -f SCRATCH/merge3D_phase_zero.mtz
+  #
+  ${bin_ccp4}/sftools << eof
+read merge3Dref.mtz
+sort h k l 
+set spacegroup
+${CCP4_SYM}
+select phaerr
+select invert
+purge
+y
+set spacegroup
+1
+expand
+calc COL PHI = 0
+write SCRATCH/merge3D_phase_zero.mtz
+quit
+eof
+  #
+  echo "# IMAGE: SCRATCH/merge3D_phase_zero.mtz <MTZ: Phase Zero volume>" >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "fft - to transform SCRATCH/merge3D_phase_zero.mtz into SCRATCH/scratch1_phase_zero.map for PSF"
+  #############################################################################  
+  #
+  ${proc_2dx}/lin "rotate_to_Z = ${rotate_to_Z}" 
+  if (  ${rotate_to_Z} == "yes" ) then
+    set AXIS = "Z,X,Y"
   else
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "fft - to transform ${infile_phase_zero} into SCRATCH/scratch1_phase_zero.map for PSF"
-    #############################################################################  
-    #
-    \rm -f SCRATCH/scratch1_phase_zero_XYZ.map
-    \rm -f SCRATCH/scratch1_phase_zero_XZY.map
-    \rm -f SCRATCH/scratch1_phase_zero_YZX.map
-    #
-    ${proc_2dx}/lin "rotate_to_Z = ${rotate_to_Z}" 
-    if (  ${rotate_to_Z} == "yes" ) then
-      set AXIS = "Z,X,Y"
-    else
-      set AXIS = "X,Y,Z"
-    endif
-    #
-    \rm -f SCRATCH/scratch1_phase_zero.map
-    ${bin_ccp4}/fft hklin ${infile_phase_zero} mapout SCRATCH/scratch1_phase_zero.map  << eot
+    set AXIS = "X,Y,Z"
+  endif
+  #
+  \rm -f SCRATCH/scratch1_phase_zero.map
+  ${bin_ccp4}/fft hklin SCRATCH/merge3D_phase_zero.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
 LABIN F1=F  PHI=PHI ##
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
-SYMMETRY ${CCP4_SYM}
+SYMMETRY P1
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID 200 200 200
@@ -227,20 +243,12 @@ RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
-    #
-    echo "# IMAGE: SCRATCH/scratch1_phase_zero.map <MAP: PSF scratch1>" >> LOGS/${scriptname}.results
-    #
-  endif
+  #
+  # echo "# IMAGE: SCRATCH/scratch1_phase_zero.map <MAP: PSF scratch1>" >> LOGS/${scriptname}.results
   #
   #############################################################################
-  ${proc_2dx}/linblock "fft - to transform ${infile} into SCRATCH/scratch1.map"
+  ${proc_2dx}/linblock "fft - to transform ${infile} into SCRATCH/scratch1.map for Volume"
   #############################################################################  
-  #
-  if (  ${rotate_to_Z} == "yes" ) then
-    set AXIS = "Z,X,Y"
-  else
-    set AXIS = "X,Y,Z"
-  endif
   #
   \rm -f SCRATCH/scratch1.map
   ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1.map  << eot
@@ -260,7 +268,7 @@ eot
   echo "<<@progress: +10>>"
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to rescale map into correct dimensions"
+  ${proc_2dx}/linblock "maprot - to rescale map into correct dimensions for PSF"
   #############################################################################
   #
   set cellx = `echo ${realcell} | cut -d\, -f1`
@@ -274,6 +282,22 @@ eot
   set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
   echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
   #
+  \rm -f SCRATCH/scratch2_phase_zero.map
+  ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero.map wrkout SCRATCH/scratch2_phase_zero.map << eot
+MODE FROM
+CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
+GRID WORK ${cellx} ${celly} ${ALAT}
+XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
+SYMM WORK 1
+AVER
+ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
+TRANS  0.000 0.000 0.000
+eot
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "maprot - to rescale map into correct dimensions for Volume"
+  #############################################################################
+  #
   \rm -f SCRATCH/scratch2.map
   ${bin_ccp4}/maprot mapin SCRATCH/scratch1.map wrkout SCRATCH/scratch2.map << eot
 MODE FROM
@@ -286,25 +310,23 @@ ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
 TRANS  0.000 0.000 0.000
 eot
   #
-  if ( -e ${infile_phase_zero} ) then
-    #
-    \rm -f SCRATCH/scratch2_phase_zero.map
-    ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero.map wrkout SCRATCH/scratch2_phase_zero.map << eot
-MODE FROM
-CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
-GRID WORK ${cellx} ${celly} ${ALAT}
-XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
-SYMM WORK 1
-AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
-TRANS  0.000 0.000 0.000
-eot
-    #
-    echo "# IMAGE: SCRATCH/scratch2_phase_zero.map <MAP: PSF scratch2>" >> LOGS/${scriptname}.results
-    #
-    echo "<<@progress: +10>>"
-    #
-  endif
+  # echo "# IMAGE: SCRATCH/scratch2_phase_zero.map <MAP: PSF scratch2>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: +10>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "mapmask - to set units to 1x1x1 for PSF"
+  #############################################################################
+  #
+  \rm -f volume-PSF.map
+  $CBIN/mapmask mapin SCRATCH/scratch2_phase_zero.map mapout volume-PSF.map << eof
+AXIS X,Y,Z
+scale factor 1
+xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
+END
+eof
+  #
+  echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function 3D Volume>" >> LOGS/${scriptname}.results
   #
   #############################################################################
   ${proc_2dx}/linblock "mapmask - to set units to 2x2x1 for 3D Volume"
@@ -321,7 +343,7 @@ eof
   echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
   #
   #############################################################################
-  ${proc_2dx}/linblock "mapmask - to calculate 3D volume with inverted hand"
+  ${proc_2dx}/linblock "maprot - to calculate 3D volume with inverted hand"
   #############################################################################
   #
   \rm -f SCRATCH/scratch2_inverted.map
@@ -336,6 +358,10 @@ ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
 TRANS  0.000 0.000 0.000
 eot
   #
+  #############################################################################
+  ${proc_2dx}/linblock "mapmask - to set units to 2x2x1 for 3D volume with inverted hand"
+  #############################################################################
+  #
   \rm -f volume_inverted.map
   $CBIN/mapmask mapin SCRATCH/scratch2_inverted.map mapout volume_inverted.map << eof
 AXIS X,Y,Z
@@ -346,24 +372,6 @@ eof
   #
   \rm -f SCRATCH/scratch2_inverted.map
   echo "# IMAGE: volume_inverted.map <MAP: inverted-handedness (wrong) 3D Volume, for checking only>" >> LOGS/${scriptname}.results
-  #
-  if ( -e ${infile_phase_zero} ) then
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "mapmask - to calculate PSF volume"
-    #############################################################################
-    #
-    \rm -f volume-PSF.map
-    $CBIN/mapmask mapin SCRATCH/scratch2_phase_zero.map mapout volume-PSF.map << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
-END
-eof
-    #
-    echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function 3D Volume>" >> LOGS/${scriptname}.results
-    #
-  endif
   #
 endif
 #

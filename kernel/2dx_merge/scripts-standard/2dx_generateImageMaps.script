@@ -72,6 +72,7 @@ echo ALAT = ${ALAT}
 echo realang = ${realang}
 echo realcell = ${realcell}
 echo tempfac = ${tempfac}
+echo MergeHKMAX = ${MergeHKMAX}
 #
 set imagenumber = 1001
 set imagename = "merge"

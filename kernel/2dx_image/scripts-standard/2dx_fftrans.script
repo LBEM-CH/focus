@@ -320,6 +320,9 @@ ${proc_2dx}/linblock "LABEL - to 2x down-interpolate original image, three times
 #############################################################################
 #
 if ( ${taperBeforeFFT} == "y" ) then
+  #
+  \rm -f FFTIR/${imagename}.red.mrc
+  #
   ${bin_2dx}/labelh.exe << eot
 SCRATCH/${imagename}.taper.mrc
 4               ! average adjacent pixels
@@ -327,6 +330,9 @@ FFTIR/${imagename}.red.mrc
 2,2
 eot
 else
+  #
+  \rm -f FFTIR/${imagename}.red.mrc
+  #
   ${bin_2dx}/labelh.exe << eot
 ${imagename}.mrc
 4               ! average adjacent pixels
@@ -335,24 +341,30 @@ FFTIR/${imagename}.red.mrc
 eot
 endif
 #
+\rm -f SCRATCH/${nonmaskimagename}.red2.mrc
+#
 ${bin_2dx}/labelh.exe << eot
 ${nonmaskimagename}.mrc
 4               ! average adjacent pixels
-SCRATCH/${imagename}.red2.mrc
+SCRATCH/${nonmaskimagename}.red2.mrc
 2,2
 eot
 #
+\rm -f SCRATCH/${nonmaskimagename}.red4.mrc
+#
 ${bin_2dx}/labelh.exe << eot
-SCRATCH/${imagename}.red2.mrc
+SCRATCH/${nonmaskimagename}.red2.mrc
 4               ! average adjacent pixels
-SCRATCH/${imagename}.red4.mrc
+SCRATCH/${nonmaskimagename}.red4.mrc
 2,2
 eot
 #
+\rm -f SCRATCH/${nonmaskimagename}.red8.mrc
+#
 ${bin_2dx}/labelh.exe << eot
-SCRATCH/${imagename}.red4.mrc
+SCRATCH/${nonmaskimagename}.red4.mrc
 4               ! average adjacent pixels
-SCRATCH/${imagename}.red8.mrc
+SCRATCH/${nonmaskimagename}.red8.mrc
 2,2
 eot
 #

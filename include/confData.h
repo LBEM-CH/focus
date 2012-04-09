@@ -33,7 +33,7 @@
 #include "confElement.h"
 #include "confSection.h"
 
-const QString VERSION_2DX="3.3.0";
+const QString VERSION_2DX="3.4.1";
 
 class confData;
 

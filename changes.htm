@@ -1,6 +1,86 @@
 <html>
-<##3.3.0##>
+<##3.4.1##>
 <body>
+<font color="blue">3.4.1</font> Apr. 9, 2012 <br>
+<ul> 
+<li>PSF in 3D now calculated
+<li>tilt geometry variable naming simplified
+<li>imagenumber is now also updated, when a default config is used with a wrong image name and number and a new MRC image is found
+<li>8x8 binned downsampled nonmasked image now calculated by FFTIR script, for visual tilt geometry from Thon ring fitting.
+<li>Changed MRC programs from INTEGER*2 to INTEGER*4
+<li>Tilt geometry refinement from MTZ lattice lines can now be done with GUI-definable parameters
+<li>Extended reference maps are displayed in 2dx_merge for each image
+<li>Refinement now puts out reference APH files
+<li>spotlist is copied from masked to nonmasked name, if needed
+<li>allows masking multiple times and with as many vertices as 2dx_boximage can handle
+<li>the synchronized property is now also changed in the upper 2dx_master.cfg and we have two save functions, one that synchronizes with the upper config and the other not.
+<li>you can now change the threshold for the background and the step size for the contours in the CCP4 map generation
+<li>when a parameter in 2dx with the attribute SYNC_WITH_UPPER=yes is saved, it is now also stored in the upper config. 
+<li>getLattice now favors the vectors that span the smaller angle when reducing them to the shortest even if the one vector is bigger by a delta then the reduced one
+<li>allspace now picks the highest symmetry, whose residual is still below the target (=acceptable)
+<li><font color="red">[bug]</font>fixed bug in file selection in the Synchronize Project with Backup script
+<li>have the C Shortcut to toggle the thon rings back
+<li>Lattice line plot output updated
+<li>TAXA display in 2dx_image and 2dx_merge now correctly respects revhk, rot90, etc.
+<li>Backup/Restore Databases script created.
+<li>CTFTool now allows toggeling of the Thon ring overlay
+<li>the Lattice Refine Dialog now shows the selection of a point
+<li>changed internal structure of the albumModel to enable more features in the imageAlbum
+<li><font color="red">[bug]</font>fixed bug in display of sheared final maps in Protein Album
+<li>Automatic masking in Unbend-II accelerated.
+<li>generate_sym_map now works also in p2. A header line was ignored in 2dx_permutate, now fixed.
+<li><font color="red">[bug]</font>bug in 2dx_image script generate-sym-map fixed
+<li>Cloning of Image Directory updated.
+<li>Synchronization Script created
+<li>raw TIFF image handling cleaned up.
+<li>FSC-weighted envelope function implemented into Maximum Likelihood code.
+<li>cleanup leaves LOGS/*.results in place
+<li>ML output map increased, envelope convolution activated.
+<li>Script to Repair directory structure added.
+<li>Implemented verification of correctly linked 2dx_master.cfg files.
+<li>the getLattice script now also allows to refine the tiltgeometry with emtlilt without having to determine the lattice automatically
+<li><font color="red">[bug]</font> SCRATCH_DISK and FFTIR_DISK work even if the original directories do not exist
+<li>Inverse Fourier Filtering implemented
+<li>color output in distortion plots
+<li><font color="red">[bug]</font>synthetic reference script debugged
+<li>only asymmetric unit produced during merging
+<li>script to delete images (move to TRASH) updated
+<li>2dx_hklsym.for now can do p4212
+<li>added parameter refinement script for synthetic unbending
+<li>added custom scripts to refine parameters for Unbend I & II first in a coarse grid search over box & mask and then a fine refinement
+<li>ctffind3 now works on nonmaskimage, instead of image
+<li>Refine Defocus from merged data script
+<li>2dx_refine_unbend2 now also allows the refinement of maskb02
+<li>2dx_makedirs checks if dirs are empty or not before linking and moves the existing files
+<li>2dx_makedirs now creates the symbolic links to the SCRATCH and FFTIR disk
+<li>QVAL table is now written as a result of the simultaneous refinement of boxb/boxa and maska/maskb for the Unbending
+<li>2dx_image.cfg is now updated appropriately: new paramters are added, changes in parmater properties are updated, and user set parameter properties are kept
+<li>SCRATCH_DISK and FFTIR_DISK implemented. 
+<li>logbrowser becomes the acitve window when popping out of 2dx_image
+<li>ztarwin warning only when modus=3D
+<li>New Script added to clone an image directory
+<li>updates in script Mask Crystal from Polygon
+<li>initialization moved into separate script
+<li>2dx_maketran.for altered, to prevent gfortran compiler crash
+<li>shearing of the generated CCP4 2d map is corrected
+<li><font color="red">[bug]</font>fixed bug #32: update version text. Plus the http get request is now done the qt4 way.
+<li>verbose logging of merging statistics in 2dx_origtiltk implemented. An additional file 2dx_origtiltk-reflections.log is created now.
+<li><font color="red">[bug]</font>bug in 2dx_latlinek resolved, where ZSTG was not initialized (reported by William Nicholson)
+<li>progressStamps are visible again
+<li>changes to get the resources path
+<li>IS_WRONG is now depicted by the background color
+<li>Automatic Scaling to INTEGER*2 0...16000 implemented
+<li>Now also reads *.tiff in addition to *.tif
+<li><font color="red">[bug]</font>bug removed that led to crash when 2dx_image.cfg was outdated.
+<li>Delete Image as script added.
+<li>PLTILTK in 2dx_merge included. 
+
+</ul>
+
+<BR>
+<hr>
+<BR>
+
 <font color="blue">3.3.0</font> Dec. 24, 2010 <br>
 <ul> 
 <li> <font color="red">[Bug]</font> 3D reference values from lattice lines are now correctly sorted, so that the creation of synthetic unbending references via MAKETRAN now works.

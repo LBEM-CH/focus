@@ -208,9 +208,7 @@ select phaerr
 select invert
 purge
 y
-set spacegroup
-1
-expand
+expand 1
 calc COL PHI = 0
 write SCRATCH/merge3D_phase_zero.mtz
 quit

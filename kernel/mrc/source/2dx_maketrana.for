@@ -632,9 +632,10 @@ C
      .                  (ZSTAR.LE.ZFINISH+ZALLOW))) THEN
           NOTFOUND=NOTFOUND+1
           WRITE(6,1108) NH,NK,IHS(J),IKS(J),ZSTAR,
-     $                  ILI(NBEGIN),ILI(NFINISH)
+     .                  ILI(NBEGIN),ILI(NFINISH),
+     .                  ZBEGIN-ZALLOW, ZFINISH+ZALLOW
 1108      FORMAT(' ZSTAR outside range on line',2I5,'   spot',2I5,
-     .  '        ZSTAR=',F8.5,' range=',2I5)
+     .  '        ZSTAR=',F8.5,' range=',2I5,', or ',2F8.5)
           GOTO 1200
         ENDIF
         CPART=0.0

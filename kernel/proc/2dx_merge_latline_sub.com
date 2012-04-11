@@ -274,9 +274,9 @@ ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for r
 #############################################################################
 #
 set infile = APH/latfittedref.hkl
-\rm -f merge3Dref.mtz
+\rm -f SCRATCH/merge3Dref.mtz
 #
-${bin_ccp4}/f2mtz hklin ${infile} hklout merge3Dref.mtz << eof
+${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3Dref.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -287,7 +287,29 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full latline for reference>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/merge3Dref.mtz <MTZ: Full latline for reference, Symmetry ${CCP4_SYM}>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "sftools - to extend to P1 symmetry"
+#############################################################################  
+#
+\rm -f merge3Dref.mtz
+#
+${bin_ccp4}/sftools << eof
+read SCRATCH/merge3Dref.mtz
+sort h k l 
+set spacegroup
+${CCP4_SYM}
+select phaerr
+select invert
+purge
+y
+expand 1
+write merge3Dref.mtz
+quit
+eof
+#
+echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full latline for reference, in P1>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #

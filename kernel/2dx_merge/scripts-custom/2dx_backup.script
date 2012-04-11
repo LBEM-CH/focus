@@ -183,6 +183,11 @@ if ( ${backup_merge} == "yes" ) then
     cp -f -p ${from_dir}/History.dat ${to_dir}
   endif
   #
+  if ( -e ${from_dir}/2dx_merge_dirfile.dat ) then
+    echo ":New: ${to_dir}/2dx_merge_dirfile.dat"
+    cp -f -p ${from_dir}/2dx_merge_dirfil*.dat ${to_dir}
+  endif
+  #
   cd ${to_dir}
   cd ..
   if ( ! -e 2dx_master.cfg ) then

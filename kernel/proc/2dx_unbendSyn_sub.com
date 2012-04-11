@@ -64,6 +64,7 @@ set SYN_RefRESMAX = ${RESMAX}
 echo SYN_RefRESMIN = ${SYN_RefRESMIN}
 echo SYN_RefRESMAX = ${SYN_RefRESMAX}
 #
+echo ":: "
 # Test if reference is existing:
 set mergedat = "../merge/merge3Dref.mtz"
 if ( ! -e ${mergedat} ) then
@@ -81,7 +82,8 @@ if ( ! -e ${mergedat} ) then
   endif
 endif
 #
-${proc_2dx}/linblock "Using reference datafile ${mergedat}"
+echo "::        Using reference datafile ${mergedat}"
+echo ":: "
 #
 echo SYM = ${SYM}
 echo realang = $realang
@@ -91,7 +93,8 @@ echo reciangle = ${reciangle}
 #
 source ${proc_2dx}/2dx_sym2spcgrp_sub.com
 echo spcgrp = ${spcgrp}
-set spcgrp_maketran = 1
+set spcgrp_maketran = ${spcgrp}
+# set spcgrp_maketran = 1
 echo spcgrp_maketran = ${spcgrp_maketran}
 echo " "
 #
@@ -277,6 +280,7 @@ eot
 endif
 #
 echo "<<@progress: 15>>"
+exit
 #
 #############################################################################
 #                                                                           #

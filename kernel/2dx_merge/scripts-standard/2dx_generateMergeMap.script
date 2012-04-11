@@ -280,6 +280,8 @@ eot
   set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
   echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
   #
+  ${proc_2dx}/linblock "WARNING: Correct handedness is now achieved, but MTZ data are inverted."
+  #
   \rm -f SCRATCH/scratch2_phase_zero.map
   ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero.map wrkout SCRATCH/scratch2_phase_zero.map << eot
 MODE FROM

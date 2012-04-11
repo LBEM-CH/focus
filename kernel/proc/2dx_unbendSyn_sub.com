@@ -66,9 +66,9 @@ echo SYN_RefRESMAX = ${SYN_RefRESMAX}
 #
 echo ":: "
 # Test if reference is existing:
-set mergedat = "../merge/merge3Dref.mtz"
+set mergedat = "../merge/merge3DrefMAKETRAN.mtz"
 if ( ! -e ${mergedat} ) then
-  set mergedat = "../../merge/merge3Dref.mtz"
+  set mergedat = "../../merge/merge3DrefMAKETRAN.mtz"
   if ( ! -e ${mergedat} ) then
     set mergedat = "../merge/merge2Dref.mtz"
     if ( ! -e ${mergedat} ) then
@@ -280,7 +280,6 @@ eot
 endif
 #
 echo "<<@progress: 15>>"
-exit
 #
 #############################################################################
 #                                                                           #

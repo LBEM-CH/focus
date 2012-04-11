@@ -265,7 +265,7 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Full latline for volume>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Latline data for volume>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #
@@ -287,8 +287,6 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE: SCRATCH/merge3Dref.mtz <MTZ: Full latline for reference, Symmetry ${CCP4_SYM}>" >> LOGS/${scriptname}.results
-#
 #############################################################################
 ${proc_2dx}/linblock "sftools - to extend to P1 symmetry"
 #############################################################################  
@@ -304,12 +302,17 @@ select phaerr
 select invert
 purge
 y
-expand 1
 write merge3Dref.mtz
 quit
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full latline for reference, in P1>" >> LOGS/${scriptname}.results
+# Not used:
+#   expand 1
+#   reduce matrix 1 0 0 0 1 0 0 0 1
+# 
+\rm -f SCRATCH/merge3Dref.mtz
+#
+echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for reference>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #

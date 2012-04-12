@@ -116,7 +116,19 @@ output ''
 output ''
 output ''
 
-
+output '*############################################################################*'
+output '| Removig previous build                                                     |'
+output '*============================================================================*'
+output '|                                                                            |'
+# in-place install so far
+output rm -rf $BUILD_DIR || { output "Could not remove the previous build"; notify $TMPLOG 7; }
+rm -rf $BUILD_DIR || { output "Could not remove the previous build"; notify $TMPLOG 7; }
+output '|                                                                            |'
+output '*============================================================================*'
+output ''
+output ''
+output ''
+output ''
 
 output '*############################################################################*'
 output '| Calling ./build_all                                                       |'

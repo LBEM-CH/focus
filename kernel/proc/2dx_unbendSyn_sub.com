@@ -68,6 +68,7 @@ echo ":: "
 # Test if reference is existing:
 set mergedat = "../merge/merge3Dref.mtz"
 if ( ! -e ${mergedat} ) then
+  # set mergedat = "../../merge/merge3Dref_p1_maketran.mtz"
   set mergedat = "../../merge/merge3Dref.mtz"
   if ( ! -e ${mergedat} ) then
     set mergedat = "../merge/merge2Dref.mtz"
@@ -195,7 +196,7 @@ if ( ${istilt} == "y" ) then
   #
 endif
 #
-# set locfactor = `echo ${locfactor} | awk '{ s = 0.001 * $1 } END { print s }'`
+set locfactor = `echo ${locfactor} | awk '{ s = 0.00001 * $1 } END { print s }'`
 #
 echo " "
 echo locdef = ${locdef}
@@ -210,7 +211,7 @@ echo " "
 echo "0 2 F $SYN_maska                                  ! NPROG,ISHAPE (1circ,2gauss,3square),IAMPLIM,RAD"
 echo "$imagesidelength $imagesidelength $stepdigitizer $magnification                      ! NX NY DSTEP XMAG"
 echo "$lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval} ! AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND"
-echo "$oxoy ${beamtilt} $TAXA $TANGL $realcell ${realang}   ! OX OY TX TY TAXA TANGL A B GAMMA"
+echo "${oxoy} ${beamtilt} $TAXA $TANGL $realcell ${realang}   ! OX OY TX TY TAXA TANGL A B GAMMA"
 echo "$SYN_RefRESMIN $SYN_RefRESMAX                                ! RESMIN RESMAX, resolution limits (Angstroms)"
 echo "${locdef} ${CS} ${KV}           ! DFMID1 DFMID2 ANGAST CS KV"
 echo "SCRATCH/make${imagename}.1.fft.mrc"
@@ -230,7 +231,7 @@ ${bin_2dx}/2dx_maketrana.exe << eot
 0 2 F $SYN_maska     ! NPROG,ISHAPE (1circ,2gauss,3square),IAMPLIM,RAD
 $imagesidelength $imagesidelength $stepdigitizer $magnification    ! NX NY DSTEP XMAG
 $lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval}  ! AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND
-$oxoy ${beamtilt} $TAXA $TANGL $realcell ${realang}                ! OX OY TX TY TAXA TANGL A B GAMMA
+${oxoy} ${beamtilt} $TAXA $TANGL $realcell ${realang}                ! OX OY TX TY TAXA TANGL A B GAMMA
 $SYN_RefRESMIN $SYN_RefRESMAX                                      ! RESMIN RESMAX, resolution limits (Angstroms)
 ${locdef} ${CS} ${KV}		                                   ! DFMID1 DFMID2 ANGAST CS KV
 SCRATCH/make${imagename}.1.fft.mrc
@@ -540,6 +541,7 @@ eot-ttmask
   #
 endif
 #
+# echo "# IMAGE: SCRATCH/${imagename}.msk.mrc <Fourier-filtered image before twofile>" >> LOGS/${scriptname}.results
 echo "<<@progress: 45>>"
 #
 #############################################################################
@@ -846,7 +848,7 @@ ${proc_2dx}/${lincommand} "gzip - to compact profile to save space on the harddr
 #############################################################################
 #
 \cp -f SCRATCH/prof${imagename}.dat ${imagename}-profile.dat
-\rm -rf ${imagename}-profile.dat.gz
+\rm -f ${imagename}-profile.dat.gz
 #
 gzip ${imagename}-profile.dat
 #
@@ -1196,7 +1198,8 @@ source SCRATCH/TMP9871.dat
 #
 set IQS = `echo ${US_IQ1} ${US_IQ2} ${US_IQ3} ${US_IQ4} ${US_IQ5} ${US_IQ6} ${US_IQ7} ${US_IQ8} ${US_IQ9}`
 #":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-${proc_2dx}/linblock "Synthetich Unbend with maska=${SYN_maska} maskb=${SYN_maskb} gives QVal= ${QVAL_local}      IQ stat = ${IQS}"
+${proc_2dx}/linblock "Synthetic Unbend with maska=${SYN_maska} maskb=${SYN_maskb} gives QVal= ${QVAL_local}"
+${proc_2dx}/linblock "IQ stat = ${IQS}"
 #":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 #
 echo " " >> History.dat

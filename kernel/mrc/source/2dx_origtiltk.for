@@ -1025,7 +1025,7 @@ C
           ENDIF
 C
 C          if(IVERBOSE.gt.8)then
-C            write(*,'('' Reference: H,K,L,A,P,FOM,A = '',6I8,F12.3)')
+C            write(*,'('' Reference: H,K,L,F,P,FOM,F = '',6I8,F12.3)')
 C     1        IHC(N),IKC(N),ILC(N),IFCC(N),IPHC(N),IFOM(N),ADATAIN(4)
 C          endif
 C

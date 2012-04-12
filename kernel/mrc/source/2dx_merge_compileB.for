@@ -315,7 +315,7 @@ C
         write(11,'(''0000001001 Merge'')')
         write(11,'(''APH/merge.aph'')')
       else if(NPRG.eq.3)then
-        write(11,'(''LABIN AMP=F SIG=SIGA PHASE=PHI FOM=FOM'')')
+        write(11,'(''LABIN AMP=F SIG=SIGF PHASE=PHI FOM=FOM'')')
       else
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')

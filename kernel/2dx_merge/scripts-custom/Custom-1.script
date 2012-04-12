@@ -100,6 +100,9 @@ foreach dirfile ( ${dirlist} )
   # echo "set rot90 = n" >> LOGS/${scriptname}.results
   # echo "set rot180 = n" >> LOGS/${scriptname}.results
   # echo "set revhnd = n" >> LOGS/${scriptname}.results
+  # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
+  # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
+  # echo "set overwrite = y" >> LOGS/${scriptname}.results
 
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
   # ${app_2dx_image} ${dirfile} "2dx_phaseorigin"

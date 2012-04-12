@@ -187,10 +187,10 @@ setenv IN SCRATCH/latfitteds.dat
 setenv OUT APH/latfitted_nosym.hkl
 setenv REFHKL APH/latfittedref_nosym.hkl
 #
-${bin_2dx}/prepmklcf.exe << eot > LOGS/prepmklcf.log
+${bin_2dx}/2dx_prepmklcf.exe << eot > LOGS/prepmklcf.log
 ${RESMAX},1.5                          ! RESOLUTION,REDUCAC (1.5 = 60deg phase error)
 ${realcell},${realang},${ALAT}         ! a,b,gamma,c
-1.0                                    ! SCALE
+0.0                                    ! SCALE (automatic scaling to max(AMP)=32000.0)
 eot
 #
 echo "################################################"
@@ -200,58 +200,68 @@ echo "################################################"
 echo "################################################"
 #
 echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Latline for vol after prepmklcf [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+if ( ${tempkeep} == "y" ) then
+  echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Latline for vol after prepmklcf [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
+endif
 #
 echo "<<@progress: +5>>"
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_hklsym2 - to apply symmetry to latfitted APH file, for volume"
+# ${proc_2dx}/linblock "2dx_hklsym2 - to apply symmetry to latfitted APH file, for volume"
 #############################################################################  
 #
-${bin_2dx}/2dx_hklsym2.exe << eot
-APH/latfitted_nosym.hkl
-APH/latfitted.hkl
-${spcgrp}
-0     ! no header line
-0     ! no sigma column
-eot
+# \rm -f APH/latfitted.hkl
 #
-echo "<<@progress: +5>>"
+# ${bin_2dx}/2dx_hklsym2.exe << eot
+# APH/latfitted_nosym.hkl
+# APH/latfitted.hkl
+# ${spcgrp}
+# 0     ! no header line
+# 0     ! no sigma column
+# eot
 #
-if ( ! -e APH/latfitted.hkl ) then
-  ${proc_2dx}/protest "ERROR: APH/latfitted.hkl not produced."
-endif
+# echo "<<@progress: +5>>"
 #
-echo "# IMAGE: APH/latfitted.hkl <APH: Latline for vol after sym [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+# if ( ! -e APH/latfitted.hkl ) then
+#   ${proc_2dx}/protest "ERROR: APH/latfitted.hkl not produced."
+# endif
+#
+# if ( ${tempkeep} == "y" ) then
+#   echo "# IMAGE: APH/latfitted.hkl <APH: Latline for vol after sym [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+# endif
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_hklsym2 - to apply symmetry to latfitted APH file, for reference"
+${proc_2dx}/linblock "2dx_hklsym2 - to apply symmetry to latfitted APH file, for MAKETRAN reference"
 #############################################################################  
 #
-${bin_2dx}/2dx_hklsym2.exe << eot
-APH/latfittedref_nosym.hkl
-APH/latfittedref.hkl
-${spcgrp}
-0     ! no header line
-1     ! with sigma column
-eot
+# \rm -f APH/latfittedref_p1_maketran.hkl
 #
-echo "<<@progress: +5>>"
+# ${bin_2dx}/2dx_hklsym2.exe << eot
+# APH/latfittedref_nosym.hkl
+# APH/latfittedref_p1_maketran.hkl
+# ${spcgrp}
+# 0     ! no header line
+# 1     ! with sigma column
+# eot
 #
-if ( ! -e APH/latfittedref.hkl ) then
-  ${proc_2dx}/protest "ERROR: APH/latfittedref.hkl not produced."
-endif
+# echo "<<@progress: +5>>"
 #
-echo "# IMAGE: APH/latfittedref.hkl <APH: Latline for ref after sym [H,K,L,A,P,FOM,SIGA]>" >> LOGS/${scriptname}.results
+# if ( ! -e APH/latfittedref_p1_maketran.hkl ) then
+#   ${proc_2dx}/protest "ERROR: APH/latfittedref_p1_maketran.hkl not produced."
+# endif
 #
-echo "<<@progress: +5>>"
+# if ( ${tempkeep} == "y" ) then
+#   echo "# IMAGE: APH/latfittedref_p1_maketran.hkl <APH: Latline for ref after sym for MAKETRAN [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
+# endif
+#
+# echo "<<@progress: +5>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for volume"
 #############################################################################
 #
-set infile = APH/latfitted.hkl
+set infile = APH/latfitted_nosym.hkl
 \rm -f merge3D.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout merge3D.mtz << eof
@@ -273,25 +283,26 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for reference"
 #############################################################################
 #
-set infile = APH/latfittedref.hkl
+set infile = APH/latfittedref_nosym.hkl
 \rm -f SCRATCH/merge3Dref.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3Dref.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
-LABOUT H K L F PHI FOM SIGA
+LABOUT H K L F PHI FOM SIGF
 CTYPOUT H H H F P W W
 FILE ${infile}
 SKIP 0
 END
 eof
 #
+#
 #############################################################################
 ${proc_2dx}/linblock "sftools - to extend to P1 symmetry"
 #############################################################################  
 #
-\rm -f merge3Dref.mtz
+\rm -f SCRATCH/merge3Dref-clean.mtz
 #
 ${bin_ccp4}/sftools << eof
 read SCRATCH/merge3Dref.mtz
@@ -302,7 +313,7 @@ select phaerr
 select invert
 purge
 y
-write merge3Dref.mtz
+write SCRATCH/merge3Dref-clean.mtz
 quit
 eof
 #
@@ -310,9 +321,38 @@ eof
 #   expand 1
 #   reduce matrix 1 0 0 0 1 0 0 0 1
 # 
-\rm -f SCRATCH/merge3Dref.mtz
+\rm -f SCRATCH/merge3Dref-clean-p1.mtz
 #
-echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for reference>" >> LOGS/${scriptname}.results
+${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref-clean.mtz hklout SCRATCH/merge3Dref-clean-p1.mtz << eof
+reso overall 10000 1
+outlim spacegroup 1
+labin file 1 all
+end
+eof
+#
+\rm -f merge3Dref.mtz
+#
+${bin_ccp4}/sftools << eof
+read SCRATCH/merge3Dref-clean-p1.mtz
+sort h k l 
+set spacegroup
+1
+reduce matrix 1 0 0 0 1 0 0 0 1
+write merge3Dref.mtz
+quit
+eof
+#
+# \rm -f SCRATCH/merge3Dref.mtz
+# \rm -f SCRATCH/merge3Dref-clean.mtz
+# \rm -f SCRATCH/merge3Dref-clean-p1.mtz
+# 
+# \cp -f SCRATCH/merge3Dref.mtz merge3Dref.mtz
+#
+# echo "# IMAGE: SCRATCH/merge3Dref.mtz <MTZ: SCRATCH/merge3Dref.mtz>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: SCRATCH/merge3Dref-clean.mtz <MTZ: SCRATCH/merge3Dref-clean.mtz>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: SCRATCH/merge3Dref-clean-p1.mtz <MTZ: SCRATCH/merge3Dref-clean-p1.mtz>" >> LOGS/${scriptname}.results
+#
+echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for ORIGTILT reference>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #

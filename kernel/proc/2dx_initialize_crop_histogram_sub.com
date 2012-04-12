@@ -66,8 +66,8 @@ eot
   #
   if ( ${imageorigin} == '5' ) then
     #############################################################################
-    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...32k."
-    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...32k." >> History.dat
+    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k."
+    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k." >> History.dat
     #############################################################################  
     #
     \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc

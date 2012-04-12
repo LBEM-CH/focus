@@ -275,6 +275,8 @@ echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.mrc <Downsampled Image>" >> LOGS
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
+echo "# IMAGE-IMPORTANT: APH/${infile_nolimit} <APH: Image data for refinement>" >> LOGS/${scriptname}.results
+#
 if ( ! -e APH/${infile_nolimit} ) then
   ${proc_2dx}/protest "ERROR: APH/${infile_nolimit} does not exist."
 endif
@@ -290,14 +292,12 @@ if ( $iref == 2 ) then
   ######################################################################################
   #
   setenv HKLIN ${mergedat}
-  echo "# IMAGE-IMPORTANT: ${mergedat} <MTZ: Input reference file>" >> LOGS/${scriptname}.results
   if ( ! -e ${mergedat} ) then
     ${proc_2dx}/protest "ERROR: Reference file not found: ${mergedat}"
   endif
   #
-  # set spcgrp = 1
   set spcgrp_local = ${spcgrp}
-  set spcgrp_local = 1
+  # set spcgrp_local = 1
   #
   #
   echo ": now comes ctfsearch2 with:"
@@ -309,7 +309,7 @@ if ( $iref == 2 ) then
   echo ":${phaori} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${IAQP2}        ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 IAQP2"
   echo ":${RESMIN} ${refine_def_RESMAX}                             ! RESMIN RESMAX"
   echo ":${spcgrp_local} ${iref} ${ctfsearch_ncyc} ${ctfsearch_iphase} ${ctfsearch_df_step} ${ctfsearch_df_range} ! ISPGRP,IREF,NCYC,IPHASE,ctfsearch_df_step,ctfsearch_df_range"
-  echo ":LABIN AMP=F PHASE=PHI FOM=FOM SIG=SIGA          ! IF IREF=2 MTZ CONTROL"
+  echo ":LABIN AMP=F PHASE=PHI FOM=FOM SIG=SIGF          ! IF IREF=2 MTZ CONTROL"
   echo " "
   #
   ${bin_2dx}/ctfsearch2.exe << eot

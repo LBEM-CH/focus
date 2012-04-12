@@ -240,7 +240,9 @@ echo "################################################"
 #\mv -f fort.4 APH/avrg2D.nolimit.aph
 \rm -f fort.4
 echo "# IMAGE: LOGS/2dx_avrgamphs2D.log <LOG: 2dx_avrgamphs output for 2D run>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/avrg2D.hkl <APH: averaged amp&phs for 2D [H,K,A,P,IQ,FOM]>" >> LOGS/${scriptname}.results
+if ( ${tempkeep} == "y" ) then
+  echo "# IMAGE: APH/avrg2D.hkl <APH: averaged amp&phs for 2D [H,K,F,P,IQ,FOM]>" >> LOGS/${scriptname}.results
+endif
 \mv -f TMP444789.tmp LOGS/avramphs.table.txt
 \rm -f TMP444888.tmp
 if ( ${merge_modus} == "2D" ) then
@@ -277,7 +279,9 @@ endif
 # This is not used:
 \rm -f APH/centric2d.hk
 #
-echo "# IMAGE: APH/centric2D.hkl <APH after CENTRIC for 2D [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+if ( ${tempkeep} == "y" ) then
+  echo "# IMAGE: APH/centric2D.hkl <APH after CENTRIC for 2D [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+endif
 #
 echo "<<@progress: 35>>"
 #
@@ -307,10 +311,14 @@ eot
 \rm -f APH/sym_nosort2D.hkl
 \rm -f APH/syn_nosort2D-plot.hkl
 #
-echo "# IMAGE: APH/sym_noheader2D.hkl <APH after hklsym for 2D [H,K,L,A,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+if ( ${tempkeep} == "y" ) then
+  echo "# IMAGE: APH/sym_noheader2D.hkl <APH after hklsym for 2D [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+endif
 #
 sort < APH/sym_noheader2D.hkl > APH/sym_sort2D.hkl
-echo "# IMAGE: APH/sym_sort2D.hkl <APH after sort [H,K,L,A,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+if ( ${tempkeep} == "y" ) then
+  echo "# IMAGE: APH/sym_sort2D.hkl <APH after sort [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+endif
 set withsigf = 0
 #
 ${bin_2dx}/2dx_hklclean.exe << eot
@@ -337,9 +345,11 @@ if ( ! -e APH/sym2D.hkl ) then
   ${proc_2dx}/protest "ERROR occured."
 endif
 #
-echo "# IMAGE: APH/sym2D.hkl <APH after 2dx_clean for 2D [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/sym2Dref.hkl <APH after 2dx_clean for 2D ref [H,K,L,A,P,FOM,1.0]>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/syn_nosort2D-plot.hkl <APH after 2dx_clean for merge plot [H,K,A,P,IQ,0,FOM]>" >> LOGS/${scriptname}.results
+if ( ${tempkeep} == "y" ) then
+  echo "# IMAGE: APH/sym2D.hkl <APH after 2dx_clean for 2D [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: APH/sym2Dref.hkl <APH after 2dx_clean for 2D ref [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: APH/syn_nosort2D-plot.hkl <APH after 2dx_clean for merge plot [H,K,F,P,IQ,0,FOM]>" >> LOGS/${scriptname}.results
+endif
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_plotreska - to plot the powerspectrum with resolution circles"

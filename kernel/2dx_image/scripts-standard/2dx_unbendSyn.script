@@ -305,14 +305,6 @@ endif
 set issometilt = `echo $TLTANG | awk '{if ( -5.0 < $1 && $1 < 5.0 ) {s = 0} else {s = 1}} END {print s}'`
 echo issometilt = $issometilt
 #
-if ( ${issometilt} == '0' ) then
-  set issometilt = 'n'
-  echo ":: Untilted."
-else
-  set issometilt = 'y'
-  echo ":: Tilted."
-endif
-#
 if (${ctf_ttf} == 'CTF') then
   if ( ${ttfcorfirst} == 'y' ) then
     ${proc_2dx}/linblock "Treating as Non-Tilted: Correcting TTFcorFirst to NO"
@@ -322,6 +314,18 @@ if (${ctf_ttf} == 'CTF') then
   set istilt = 'n'
 else
   echo "# WARNING: Warning: You are using TTF correction. This requires a reliable tilt geometry." >> LOGS/${scriptname}.results
+endif
+#
+if ( ${issometilt} == '0' ) then
+  set issometilt = 'n'
+  echo ":: Untilted."
+else
+  set issometilt = 'y'
+  if ( ${istilt} == "y" ) then
+    echo ":: Tilted."
+  else
+    echo ":: Tilted, but treating as untilted."
+  endif
 endif
 #
 set u1 = `echo ${lattice} | cut -d\, -f1`

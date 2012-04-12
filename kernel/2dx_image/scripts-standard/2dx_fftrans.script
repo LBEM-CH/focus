@@ -149,7 +149,7 @@ if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) t
   echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
 endif
 #
-echo "<<@progress: 40>>"
+echo "<<@progress: 5>>"
 #
 #################################################################################
 ### Make input image square and correct size ####################################
@@ -188,7 +188,7 @@ if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname}
   echo "set nonmaskimagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
 endif
 # 
-echo "<<@progress: 3>>"
+echo "<<@progress: 10>>"
 #
 if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
   set oldval = ${RESMIN}

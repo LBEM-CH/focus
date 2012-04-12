@@ -188,7 +188,7 @@ if ( ${merge_modus} == "3D" ) then
   #############################################################################
   #############################################################################
   #
-  set infile = merge3D.mtz
+  set infile = merge3Dref.mtz
   #
   echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
   echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results

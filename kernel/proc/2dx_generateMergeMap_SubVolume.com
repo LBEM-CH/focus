@@ -46,9 +46,13 @@ AVER
 ROTA POLAR 0.0 0.0 45.0
 TRANS  0.0 0.0 0.0
 eot
-    #
-    \rm -f SCRATCH/rot_volume.map
-    ${bin_ccp4}/maprot mapin SCRATCH/scratch1b.map wrkout SCRATCH/rot_volume.map << eot
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  #############################################################################
+  #
+  \rm -f SCRATCH/rot_volume.map
+  ${bin_ccp4}/maprot mapin SCRATCH/scratch1b.map wrkout SCRATCH/rot_volume.map << eot
 MODE FROM
 CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
 GRID WORK ${cellx} ${celly} ${ALAT}
@@ -155,5 +159,8 @@ if ( ${calculate_subvolume}x == "5x" ) then
   #############################################################################
   #
 endif
+#
+#
+#
 #
 #

@@ -28,7 +28,7 @@
 # EXAMPLE: overwrite = "n"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/searchdefocus
 # TYPE: Bool "y;n"
-set overwrite = "n"
+set overwrite = "y"
 #
 #=============================================================================
 #
@@ -49,6 +49,7 @@ set overwrite = "n"
 # DISPLAY: sgnxch
 # DISPLAY: rot180
 # DISPLAY: rot90
+# DISPLAY: ctfrev
 # DISPLAY: IQMAX
 # DISPLAY: comment
 # DISPLAY: ctf_ttf
@@ -81,6 +82,7 @@ set rot180 = ""
 set rot90 = ""
 set revhnd = ""
 set sgnxch = ""
+set ctfrev = ""
 set realang = ""
 set RESMIN = ""
 set RESMAX = ""
@@ -160,7 +162,14 @@ else
   set revhndval = '0'
 endif
 #
+if ( ${ctfrev} == 'y' ) then
+  set ctfrevval = '1'
+else
+  set ctfrevval = '0'
+endif
+#
 echo sgnxch = ${sgnxch}
+set phaori_local = ${phaori}
 #
 if ( ${sgnxch} == "y" ) then
   set sgnxchval = 1
@@ -301,23 +310,23 @@ if ( $iref == 2 ) then
   #
   #
   echo ": now comes ctfsearch2 with:"
-  echo ":${bin_2dx}/ctfsearch2.exe"
+  echo ":${bin_2dx}/2dx_ctfsearch2.exe"
   echo ": F F ${IQMAX}                                         ! LIST LISTW QMAX"
   echo ":${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG"
   echo ":${defocus} ${CS} ${KV} ${phacon}                           ! DFMID1 DFMID2 ANGAST CS KV PHACON"
   echo ":${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT."
-  echo ":${phaori} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${IAQP2}        ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 IAQP2"
+  echo ":${phaori_local} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${ctfrevval} ${IAQP2}        ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 ICTFREV IAQP2"
   echo ":${RESMIN} ${refine_def_RESMAX}                             ! RESMIN RESMAX"
   echo ":${spcgrp_local} ${iref} ${ctfsearch_ncyc} ${ctfsearch_iphase} ${ctfsearch_df_step} ${ctfsearch_df_range} ! ISPGRP,IREF,NCYC,IPHASE,ctfsearch_df_step,ctfsearch_df_range"
   echo ":LABIN AMP=F PHASE=PHI FOM=FOM SIG=SIGF          ! IF IREF=2 MTZ CONTROL"
   echo " "
   #
-  ${bin_2dx}/ctfsearch2.exe << eot
+  ${bin_2dx}/2dx_ctfsearch2.exe << eot
 F F ${IQMAX}                                         ! LIST LISTW QMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                         ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT.
-${phaori} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${IAQP2}       ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 IAQP2
+${phaori_local} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${ctfrevval} ${IAQP2}       ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 ICTFREV IAQP2
 ${RESMIN} ${refine_def_RESMAX}                             ! RESMIN RESMAX
 ${spcgrp_local} ${iref} ${ctfsearch_ncyc} ${ctfsearch_iphase} ${ctfsearch_df_step} ${ctfsearch_df_range} ! ISPGRP,IREF,NCYC,IPHASE,ctfsearch_df_step,ctfsearch_df_range
 LABIN AMP=F PHASE=PHI FOM=FOM SIG=SIGF          ! IF IREF=2 MTZ CONTROL
@@ -332,12 +341,12 @@ else if ( $iref == 0 ) then
   endif
   setenv INREF ${averagedat}
   #
-  ${bin_2dx}/ctfsearch2.exe << eot
+  ${bin_2dx}/2dx_ctfsearch2.exe << eot
 F F ${IQMAX}                                                 ! LIST LISTW QMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}               ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                                 ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                             ! TITLE FOR PLOT OF FINAL BEST FIT.
-${phaori} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${IAQP2}       ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 IAQP2
+${phaori_local} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${ctfrevval} ${IAQP2}       ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 ICTFREV IAQP2
 ${RESMIN} ${refine_def_RESMAX}                                     ! RESMIN RESMAX
 ${spcgrp} ${iref} ${ctfsearch_ncyc} ${ctfsearch_iphase} ${ctfsearch_df_step} ${ctfsearch_df_range}        ! ISPGRP,IREF,NCYC,IPHASE,ctfsearch_df_step,ctfsearch_df_range
                                                         ! FC SIGFC PHCAL FOM or LABIN AMP SIG PHS FOM
@@ -353,12 +362,12 @@ else if ( $iref == '-1' ) then
   endif
   setenv INREF ${averagedat}
   #
-  ${bin_2dx}/ctfsearch2.exe << eot
+  ${bin_2dx}/2dx_ctfsearch2.exe << eot
 F F ${IQMAX}                                         ! LIST LISTW QMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                           ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT.
-${phaori} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${IAQP2}        ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 IAQP2
+${phaori_local} ${TAXA} ${TANGL} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${ctfrevval} ${IAQP2}        ! ORIGH ORIGK TAXA TANGL REVHK ROT180 SGNXCH ROT90 ICTFREV IAQP2
 ${RESMIN} ${refine_def_RESMAX}                             ! RESMIN RESMAX
 ${spcgrp} ${iref} ${ctfsearch_ncyc} ${ctfsearch_iphase} ${ctfsearch_df_step} ${ctfsearch_df_range} ! ISPGRP,IREF,NCYC,IPHASE,ctfsearch_df_step,ctfsearch_df_range
                                                 ! FC SIGFC PHCAL FOM or LABIN AMP SIG PHS FOM

@@ -405,7 +405,7 @@ eot
   #############################################################################
   #
   \rm -f volume.map
-  $CBIN/mapmask mapin SCRATCH/scratch1.map mapout volume.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout volume.map << eof
 AXIS X,Y,Z
 scale factor 1
 xyzlim -1.0 1.0 -1.0 1.0 -0.5 0.5

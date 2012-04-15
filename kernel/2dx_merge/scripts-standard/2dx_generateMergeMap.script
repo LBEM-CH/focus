@@ -36,6 +36,7 @@
 # DISPLAY: unitcellnumber
 # DISPLAY: npo_line1
 # DISPLAY: npo_line2
+# DISPLAY: calculate_subvolume
 #
 #$end_local_vars
 #
@@ -90,6 +91,7 @@ set mapscale = ""
 set unitcellnumber = ""
 set npo_line1 = ""
 set npo_line2 = ""
+set calculate_subvolume = ""
 #
 #$end_vars
 #
@@ -319,7 +321,7 @@ eot
   #############################################################################
   #
   \rm -f volume-PSF.map
-  $CBIN/mapmask mapin SCRATCH/scratch2_phase_zero.map mapout volume-PSF.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch2_phase_zero.map mapout volume-PSF.map << eof
 AXIS X,Y,Z
 scale factor 1
 xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
@@ -333,7 +335,7 @@ eof
   #############################################################################
   #
   \rm -f volume.map
-  $CBIN/mapmask mapin SCRATCH/scratch2.map mapout volume.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch2.map mapout volume.map << eof
 AXIS X,Y,Z
 scale factor 1
 xyzlim -1.0 1.0 -1.0 1.0 -0.5 0.5
@@ -341,6 +343,17 @@ END
 eof
   #
   echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  #############################################################################
+  #############################################################################
+  if ( ${calculate_subvolume}x != "0x" ) then  
+    source ${proc_2dx}/2dx_generateMergeMap_SubVolume.com
+  endif
+  #############################################################################
+  #############################################################################
+  #############################################################################
+  #
   #
   #############################################################################
   ${proc_2dx}/linblock "maprot - to calculate 3D volume with inverted hand"
@@ -363,7 +376,7 @@ eot
   #############################################################################
   #
   \rm -f volume_inverted.map
-  $CBIN/mapmask mapin SCRATCH/scratch2_inverted.map mapout volume_inverted.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch2_inverted.map mapout volume_inverted.map << eof
 AXIS X,Y,Z
 scale factor 1
 xyzlim -1.0 1.0 -1.0 1.0 -0.5 0.5

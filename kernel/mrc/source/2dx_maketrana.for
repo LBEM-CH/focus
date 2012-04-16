@@ -26,7 +26,7 @@ C   CARD 1 : NPROG,ISHAPE,IAMPLIM,RAD
 C   CARD 2 : NX NY DSTEP XMAG
 CHEN>
 CC   CARD 3 : AX,AY,BX,BY,  REVHK,SGNXCH,ROT180
-C   CARD 3 : AX,AY,BX,BY,  REVHK,SGNXCH,ROT180,ROT90,REVHND
+C   CARD 3 : AX,AY,BX,BY,  REVHK,SGNXCH,ROT180,ROT90,REVHND,ICTFREV,PHACON
 CHEN<
 C   CARD 4 : OX OY TX TY   TAXA TANGL A B GAMMA
 C   CARD 5 : RESMIN RESMAX     resolution limits to be used in Angstroms
@@ -67,6 +67,8 @@ C                  damned handedness.
 C                  NOTE THAT ALL OTHER
 C                  PARAMETERS, SUCH AS TAXA,TANGL MUST REMAIN CORRECT
 C                  W.R.T. THE ORIGINAL DIRECTIONS FOR H AND K.
+C         ICTFREV - IF YES=1, THEN INVERT THE CONTRAST OF THE OUTPUT MAP.
+C         PHACON  - Phase contrast portion of the CTF. Typically 0.93 or so.
 CHEN<
 C         REVHK   - IF NOT = 0, H AND K ARE INTERCHANGED ON INPUT.
 C                         THIS IS A COSMETIC FEATURE TO FACILITATE INDEXING
@@ -139,7 +141,7 @@ C
 CHEN>
 C      READ(5,*) AX,AY,BX,BY,REVHK,SGNXCH,ROT180
 C
-      READ(5,*) AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND
+      READ(5,*) AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND,ICTFREV,PHACON
 CHEN<
       READ(5,*) OX,OY,TX,TY,TAXA,TANGL,A,B,GAMMA
       ABANG = GAMMA
@@ -161,7 +163,7 @@ CHEN<
       READ(5,*) DFMID1,DFMID2,ANGAST,CS,KV
       WRITE(6,1001) AX,AY,BX,BY,NX,NY,DSTEP,XMAG,DFMID1,DFMID2,
      .  ANGAST,CS,KV,OX,OY,TX,TY,TAXA,TANGL,RESMIN,RESMAX,
-     .  A,B,GAMMA,REVHK,SGNXCH,ROT180,ROT90,REVHND,
+     .  A,B,GAMMA,REVHK,SGNXCH,ROT180,ROT90,REVHND,ICTFREV,PHACON,
      .  ISHAPE,IAMPLIM,RAD
 1001  FORMAT( ' AX,AY,BX,BY ............=',4F9.2,/,
      .  ' NX,NY ..................=',2I8,/,
@@ -176,6 +178,8 @@ CHEN<
      .  ' A,B,GAMMA ..............=',3F6.1,/,
      .  ' REVHK,SGNXCH,ROT180.....=',3F6.0,/,
      .  ' ROT90,REVHND............=',2F6.0,/,
+     .  ' ICTFREV.................=',I2,/,
+     .  ' PHACON..................=',F8.3,/,
      .  ' ISHAPE,IAMPLIM,RAD .....=',I4,3X,L1,F7.1,/)
       KV=KV*1000.0
       WL=12.3/SQRT(KV+KV**2/(10.0**6.0))
@@ -313,7 +317,10 @@ C        WRITE(6,131) AMP(J),PHASE(J),APART(J),BPART(J),IHS(J),IKS(J)
 131     FORMAT(' After GETSFS, AMP,PHS,a,b',4F10.1,2I8)
 130   CONTINUE
       CALL INSERT(ARRAY,NHOLE,ISHAPE,RAD,NX,NY,APART,BPART,XC,YC)
-      CALL CTF(ARRAY,NX,NY,THETATR,WL,CS,DFMID1,DFMID2,ANGAST)
+CHEN>
+C      CALL CTF(ARRAY,NX,NY,THETATR,WL,CS,DFMID1,DFMID2,ANGAST)
+      CALL CTF(ARRAY,NX,NY,THETATR,WL,CS,DFMID1,DFMID2,ANGAST,ICTFREV,PHACON)
+CHEN<
 C
 C  Output of transform
       CALL IWRPAS(1,ARRAY,NXP2,NY,0,NX2,0,NYM1) ! top/bottom done in INSERT
@@ -1115,7 +1122,7 @@ C
       END
 C*******************************************************************************
 C
-      SUBROUTINE CTF(ARRAY,NX,NY,THETATR,WL,CS,DFMID1,DFMID2,ANGAST)
+      SUBROUTINE CTF(ARRAY,NX,NY,THETATR,WL,CS,DFMID1,DFMID2,ANGAST,ICTFREV,PHACON)
 C
       PARAMETER (IARRMXSIZ=410000000)
       DIMENSION ARRAY(IARRMXSIZ)
@@ -1129,6 +1136,15 @@ C
 20      FORMAT(/,' Appying CTF simulation using DFMID1,DFMID2,ANGAST =',
      .    2F9.1,F8.1)
       ENDIF
+CHEN>
+      if(ICTFREV.eq.1)then
+        write(6,'('':Inverting CTF'')')
+      else
+        write(6,'('':Not inverting CTF'')')
+      endif
+C
+      AMPCON=SQRT(1.0-PHACON*PHACON)
+CHEN<
       TWOPI = 2*3.14159265
       ANGAST=ANGAST*TWOPI/360.0
       NX2  = NX/2
@@ -1154,7 +1170,11 @@ C
                 CCOS=COS(2.0*ANGDIF)
                 DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
                 CHI=C1*DF+C2
-                CNTRST=-SIN(CHI)
+CHEN>
+C               CNTRST=-SIN(CHI)
+                CNTRST=-SIN(CHI)*PHACON-COS(CHI)*AMPCON
+                if(ICTFREV.eq.1)CNTRST=-CNTRST
+CHEN<
            ELSE
                 CNTRST=0.0
            ENDIF
@@ -1282,11 +1302,11 @@ C
  200  continue
         if(RPHSHFT.lt.-180.0)then
           RPHSHFT=RPHSHFT+360.0
-          goto 200
-        endif
-C
-      PHSHF2=RPHSHFT
-      RETURN
-      END
-C******************************************************************************
+          goto 200 
+        endif 
+C 
+      PHSHF2=RPHSHFT 
+      RETURN 
+      END 
+C****************************************************************************** 
 CHEN<

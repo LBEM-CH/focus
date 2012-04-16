@@ -171,11 +171,7 @@ echo " "
 ${proc_2dx}/lin "Protein is dark in the images before CTF correction."
 #
 set locdef = ${defocus}
-if ( ${ctfrev} == "y" ) then
-  set locfactor = '-1.0'
-else
-  set locfactor = '1.0'
-endif
+set locfactor = '1.0'
 if ( ${istilt} == "y" ) then
   #
   set locdef = '0.0,0.0,0.0'
@@ -210,7 +206,7 @@ ${proc_2dx}/lin "-"
 echo " "
 echo "0 2 F $SYN_maska                                  ! NPROG,ISHAPE (1circ,2gauss,3square),IAMPLIM,RAD"
 echo "$imagesidelength $imagesidelength $stepdigitizer $magnification                      ! NX NY DSTEP XMAG"
-echo "$lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval} ! AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND"
+echo "$lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval}  ${ctfrevval} ${phacon} ! AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND,CTFREV,PHACON"
 echo "${oxoy} ${beamtilt} $TAXA $TANGL $realcell ${realang}   ! OX OY TX TY TAXA TANGL A B GAMMA"
 echo "$SYN_RefRESMIN $SYN_RefRESMAX                                ! RESMIN RESMAX, resolution limits (Angstroms)"
 echo "${locdef} ${CS} ${KV}           ! DFMID1 DFMID2 ANGAST CS KV"
@@ -230,7 +226,7 @@ echo " "
 ${bin_2dx}/2dx_maketrana.exe << eot
 0 2 F $SYN_maska     ! NPROG,ISHAPE (1circ,2gauss,3square),IAMPLIM,RAD
 $imagesidelength $imagesidelength $stepdigitizer $magnification    ! NX NY DSTEP XMAG
-$lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval}  ! AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND
+$lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval} ${ctfrevval} ${phacon}  ! AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND,CTFREV,PHACON
 ${oxoy} ${beamtilt} $TAXA $TANGL $realcell ${realang}                ! OX OY TX TY TAXA TANGL A B GAMMA
 $SYN_RefRESMIN $SYN_RefRESMAX                                      ! RESMIN RESMAX, resolution limits (Angstroms)
 ${locdef} ${CS} ${KV}		                                   ! DFMID1 DFMID2 ANGAST CS KV
@@ -257,7 +253,7 @@ if ( $do3quadserch == 'y' )then
   ${bin_2dx}/2dx_maketrana.exe << eot
 0 2 F $SYN_maskb     ! NPROG,ISHAPE (1circ,2gauss,3square),IAMPLIM,RAD
 $imagesidelength $imagesidelength $stepdigitizer $magnification    ! NX NY DSTEP XMAG
-$lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval}  ! AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND
+$lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval} ${ctfrevval} ${phacon}  ! AX,AY,BX,BY,REVHK,SGNXCH,ROT180,ROT90,REVHND,CTFREV,PHACON
 $oxoy ${beamtilt} $TAXA $TANGL $realcell ${realang}                ! OX OY TX TY TAXA TANGL A B GAMMA
 $SYN_RefRESMIN $SYN_RefRESMAX                                      ! RESMIN RESMAX, resolution limits (Angstroms)
 ${locdef} ${CS} ${KV}		                                   ! DFMID1 DFMID2 ANGAST CS KV

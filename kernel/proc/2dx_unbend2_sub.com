@@ -24,7 +24,7 @@ ${proc_2dx}/${lincommand} "2dx_unbend2_sub.com: Starting round ${locround}..."
 #   MASKTRANA - to mask the FFT in order to create the reference map.       #
 #   TTMASK    - same, but with TTF-convolution.                             #
 #                                                                           #
-#        ${imagename}.spt  +  cor${imagename}.fft  =>  ref${imagename}.msk  #
+#  ${imagename}.spt + cor${imagename}.fft.mrc => ref${imagename}.fft.msk.mrc  #
 #                                                                           #
 #############################################################################  
   #
@@ -96,7 +96,7 @@ eot
   #                                                                           #
   ${proc_2dx}/${lincommand} "FFTTRANS - to calculate real-space image of masked FFT"     
   #                                                                           #
-  #                             ref${imagename}.msk  =>  ref${imagename}.flt  #
+  #                 ref${imagename}.fft.msk.mrc  =>  ref${imagename}.flt.mrc  #
   #                                                                           #
   ############################################################################# 
   #
@@ -121,7 +121,7 @@ eot
   ${proc_2dx}/${lincommand} "LABEL - to cut out a larger area from the centre of created reference"
   #           just for debugging.                                             #
   #                                                                           #
-  #            make${imagename}.flt1.mrc  =>  make${imagename}.reference1.mrc #
+  #                ref${imagename}.flt.mrc  =>  ${imagename}.reference2.mrc   #
   #                                                                           #
   #############################################################################  
   # 
@@ -147,7 +147,7 @@ echo "<<@evaluate>>"
   #                                                                           #
   ${proc_2dx}/${lincommand} "LABEL - to cut out small box in center of reference image"
   #                                                                           #
-  #                             ref${imagename}.flt  =>  box${imagename}.flt  #
+  #                     ref${imagename}.flt.mrc  =>  box${imagename}.flt.mrc  #
   #                                                                           #
   #############################################################################  
   #

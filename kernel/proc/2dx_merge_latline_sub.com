@@ -104,7 +104,7 @@ set MergeIGUESS = 1
 if ( ${tempkeep} == 'y' ) then
   set iverbose = 1
 else
-  set iverbose = 1
+  set iverbose = 3
 endif
 #
 setenv  OBS   SCRATCH/latlines.dat
@@ -352,7 +352,7 @@ eof
 # echo "# IMAGE: SCRATCH/merge3Dref-clean.mtz <MTZ: SCRATCH/merge3Dref-clean.mtz>" >> LOGS/${scriptname}.results
 # echo "# IMAGE: SCRATCH/merge3Dref-clean-p1.mtz <MTZ: SCRATCH/merge3Dref-clean-p1.mtz>" >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for ORIGTILT reference>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for reference>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #

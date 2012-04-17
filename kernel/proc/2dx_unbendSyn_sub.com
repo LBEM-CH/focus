@@ -693,7 +693,7 @@ ${SYN_quadrada},${SYN_quadrada}       ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}               ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                                     ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                             ! RADLIM IN PROFILE GRID UNITS
-0,${RMAG},${LCOLOR}                             ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${valspotscan},${RMAG},${LCOLOR}                             ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                                     ! dont create manual Masking information
 0                                     ! Dont mask the image directly
 eot
@@ -728,7 +728,7 @@ ${SYN_quadrada},${SYN_quadrada}       ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy} 	      ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N				      ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}         		      ! RADLIM IN PROFILE GRID UNITS
-0,${RMAG},${LCOLOR}                   ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${valspotscan},${RMAG},${LCOLOR}                   ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                                     ! dont create manual Masking information
 0                                     ! Dont mask the image directly
 eot
@@ -780,7 +780,7 @@ ${SYN_quadradb},${SYN_quadradb}           ! RADIUS OF CORR SEARCH
 ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-0,${RMAG},${LCOLOR}             ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${valspotscan},${RMAG},${LCOLOR}             ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 0                               ! dont create manual Masking information
 0                               ! Dont mask the image directly
 eot

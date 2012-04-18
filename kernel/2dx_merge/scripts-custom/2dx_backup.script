@@ -193,6 +193,7 @@ if ( ${backup_merge} == "yes" ) then
   if ( ! -e 2dx_master.cfg ) then
     set curdir = ${PWD}
     echo "::Creating configfile link in ${curdir}."
+    \rm -f 2dx_master.cfg
     \ln -s ${to_dir}/2dx_merge.cfg 2dx_master.cfg
   endif
   cd ${oldir}

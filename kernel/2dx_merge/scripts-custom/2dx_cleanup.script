@@ -282,4 +282,6 @@ if ( ${cleanup_location} == "0" || ${cleanup_location} == "1" ) then
   #
 endif
 #
+echo "<<@progress: 100>>"
+#
 #

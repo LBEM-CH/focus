@@ -342,7 +342,7 @@ xyzlim -1.0 1.0 -1.0 1.0 -0.5 0.5
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume (2x2 unit cells)>" >> LOGS/${scriptname}.results
   #
   #############################################################################
   #############################################################################

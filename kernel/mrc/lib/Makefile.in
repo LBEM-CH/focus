@@ -74,3 +74,4 @@ libconv.a: $(CONVCPP) libfft.a lib2dx.a libplot2k.a libim2k.a libmisc.a libgen.a
 
 clean:
 	\rm -f *.o *.f *.a
+	\rm -f fsplit

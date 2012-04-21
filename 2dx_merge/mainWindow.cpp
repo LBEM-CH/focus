@@ -204,8 +204,8 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   connect(standardScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(standardScriptChanged(QModelIndex)));
   connect(customScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(customScriptChanged(QModelIndex)));
 
-  userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg");
-//  userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg", mainData->getDir("config") + "/" + "2dx_merge-user.cfg");
+  //userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg");
+  userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg", mainData->getDir("config") + "/" + "2dx_merge-user.cfg");
   userData->save();
   mainData->setUserConf(userData);
 

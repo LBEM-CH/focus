@@ -23,7 +23,7 @@
 #include <QDebug>
 using namespace std;
 
-imageAlbum::imageAlbum(const projectModel *dirModel, QWidget *parent)
+imageAlbum::imageAlbum(projectModel *dirModel, QWidget *parent)
           :QWidget(parent,Qt::Window)
 {
 
@@ -32,7 +32,8 @@ imageAlbum::imageAlbum(const projectModel *dirModel, QWidget *parent)
   layout->setSpacing(0);
   setLayout(layout);
 
-  model = new albumModel(dirModel,this);
+  model = dirModel;
+  //model = new albumModel(dirModel,this);
   view = new QListView(this);
   view->setViewMode(QListView::IconMode);
   view->setSpacing(30);
@@ -56,25 +57,25 @@ imageAlbum::imageAlbum(const projectModel *dirModel, QWidget *parent)
   albumSplitter->addWidget(viewer);
 
  
-  QListWidget *selectionWidget = new QListWidget;
-  selectionWidget->addItem("Directory: ");
-  selectionWidget->addItem("Name: ");
-  selectionWidget->addItem("Number: ");
-  selectionWidget->addItem("QVal2: ");
-  selectionWidget->addItem("QValS: ");
-  selectionWidget->addItem("Phase Residual: ");
-  selectionWidget->addItem("TAXA: ");
-  selectionWidget->addItem("TANGL: ");
-  selectionWidget->addItem("Magnification: ");
-  selectionWidget->addItem("Theor. Magnif: ");
-  selectionWidget->addItem("Defocus: ");
-  selectionWidget->addItem("Comment: ");
+//  QListWidget *selectionWidget = new QListWidget;
+//  selectionWidget->addItem("Directory: ");
+//  selectionWidget->addItem("Name: ");
+//  selectionWidget->addItem("Number: ");
+//  selectionWidget->addItem("QVal2: ");
+//  selectionWidget->addItem("QValS: ");
+//  selectionWidget->addItem("Phase Residual: ");
+//  selectionWidget->addItem("TAXA: ");
+//  selectionWidget->addItem("TANGL: ");
+//  selectionWidget->addItem("Magnification: ");
+//  selectionWidget->addItem("Theor. Magnif: ");
+//  selectionWidget->addItem("Defocus: ");
+//  selectionWidget->addItem("Comment: ");
   
-  viewContainer *selectorContainer = new viewContainer("Selection", viewContainer::image, this);
-  selectorContainer->addWidget(selectionWidget);
+//  viewContainer *selectorContainer = new viewContainer("Selection", viewContainer::image, this);
+//  selectorContainer->addWidget(selectionWidget);
  
   QSplitter *splitter = new QSplitter(Qt::Horizontal);
-  splitter->addWidget(selectorContainer);
+//  splitter->addWidget(selectorContainer);
   splitter->addWidget(albumSplitter);
   splitter->setStretchFactor(0,1);
   splitter->setStretchFactor(1,3);

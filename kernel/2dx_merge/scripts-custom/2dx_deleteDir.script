@@ -56,15 +56,15 @@ echo "<<@progress: 1>>"
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
 source ${proc_2dx}/2dx_makedirs 
 #
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+cd ..
+set rootdir = $PWD
+#
 if ( ${delete_sure} == "yes" ) then
 	# This translates the list of directories to work on into one single long line:
 	cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
 	set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-	#
-	# This memorizes the current merge directory under the variable "olddir":
-	set olddir = $PWD
-	cd ..
-	set rootdir = $PWD
 	#
 	if ( ! -d TRASH ) then
 	  \mkdir TRASH
@@ -96,11 +96,16 @@ if ( ${delete_sure} == "yes" ) then
 else
 	${proc_2dx}/linblock "Not moving selected directories to TRASH  (Are you sure is 'no')."
 endif
+#
+#
+#
 if ( ${delete_trash} == "yes" ) then
-	if ( -d ../TRASH ) then
+	if ( -d TRASH ) then
 		${proc_2dx}/linblock "emptying TRASH"
 		echo "<<@progress: 50>>"
-		rm -rf ../TRASH/*
+                cd TRASH
+		rm -rf *
+                cd ..
 		echo ":: "
 		echo ":: Done."
 		echo ":: TRASH is now empty"

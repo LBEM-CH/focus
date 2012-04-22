@@ -284,7 +284,7 @@ void projectModel::initDir(const QString &path, QStandardItem *parent)
         parent->appendRow(entryItems);
       else
         appendRow(entryItems);
-      paths.insert(uid, QDir(path + "/" + entry + "/").absolutePath());
+      paths.insert(uid, QDir(path+"/" + entry + "/").absolutePath());
     }
   }
 }
@@ -294,6 +294,7 @@ bool projectModel::loadSelection(const QString &fileName)
   if(items.isEmpty()) return false;
   QString selectedFile = fileName, line;
   quint32 uid;
+  QDir tempDir;
   QStandardItem *item = NULL;
   if(fileName.isEmpty()) selectedFile = saveFileName;
 
@@ -306,7 +307,17 @@ bool projectModel::loadSelection(const QString &fileName)
   while(!file.atEnd())
   {
     line = file.readLine().trimmed();
-    uid = qHash(QDir(line).canonicalPath());
+    tempDir =  QDir(line);
+    //if absolute path is saved in the selection file
+    if(tempDir.exists())
+    {
+        uid = qHash(QDir(line).canonicalPath());
+    }
+    //or the relative path
+    else
+    {
+        uid = qHash(QDir(projectPath+"/"+line).canonicalPath());
+    }
     item = items[uid][columns[0]["uid"].toString()];
     if(item!=NULL) item->setCheckState(Qt::Checked);
     else cerr<<line.toStdString()<<" not found."<<endl;
@@ -376,6 +387,13 @@ QString projectModel::pathFromIndex(const QModelIndex& index)
   return paths[index.sibling(index.row(),0).data(Qt::UserRole + 1).toUInt()];
 }
 
+QString projectModel::relativePathFromIndex(const QModelIndex& index)
+{
+  if(!index.isValid()) return QString();
+  QString absolutePath = paths[index.sibling(index.row(),0).data(Qt::UserRole + 1).toUInt()];
+  return QDir(projectPath).relativeFilePath(absolutePath);
+}
+
 void projectModel::itemActivated(const QModelIndex& index)
 {
   QString dirName = pathFromIndex(index);
@@ -401,11 +419,16 @@ bool projectModel::save(QStandardItem *currentItem, int itemCount, QFile &saveFi
   if(currentItem==NULL) return false;
   foreach(i, match(currentItem->index(), Qt::CheckStateRole, QString::number(Qt::Checked) + "|" + QString::number(Qt::PartiallyChecked), itemCount, Qt::MatchRegExp))
   {
-//    qDebug()<<pathFromIndex(i);
     if(i.isValid())
     {
-	    if(i.child(0,0).isValid()) save(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), saveFile);
-	    else saveFile.write((pathFromIndex(i) + '\n').toAscii());
+            if(i.child(0,0).isValid())
+            {
+                save(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), saveFile);
+            }
+            else
+            {
+                saveFile.write((relativePathFromIndex(i) + '\n').toAscii());
+            }
     }
   }
   return true;
@@ -633,19 +656,21 @@ void projectModel::getSelection(QStandardItem *currentItem, int itemCount, QStri
   foreach(i, allItems)
   {
 	  if(i.isValid())
-	  {
-		  if(i.child(0,0).isValid()) 
-        getSelection(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), selected);
-		  else if(i.column() == 0)
-		  {
-				  if(i.data(Qt::CheckStateRole) == Qt::Checked)
           {
-            QString name = i.data(Qt::DisplayRole).toString();
-            //QString name = item(i)->text();
-            qDebug()<<name;
-            selected<<name;
-          }
-		  }
+              if(i.child(0,0).isValid())
+              {
+                  getSelection(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), selected);
+              }
+              else if(i.column() == 0)
+              {
+                  if(i.data(Qt::CheckStateRole) == Qt::Checked)
+                  {
+                      QString name = i.data(Qt::DisplayRole).toString();
+                      //QString name = item(i)->text();
+                      qDebug()<<name;
+                      selected<<name;
+                  }
+              }
 	  }
   }
 }

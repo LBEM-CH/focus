@@ -108,6 +108,7 @@ class projectModel : public QStandardItemModel
   void setResultsFile(resultsData *resultsFile);
 
   QString pathFromIndex(const QModelIndex &index);
+  QString relativePathFromIndex(const QModelIndex& index);
   QStringList getSelectionNames();
   QString getProjectPath() const; 
   QStringList parentDirs();

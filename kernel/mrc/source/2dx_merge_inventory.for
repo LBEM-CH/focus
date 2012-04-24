@@ -53,16 +53,22 @@ C
         call cgetline(CIMAGENAME,"imagename")
         close(12)
 C
-        call shorten(cdir,k1)
+        call shorten(cdir,k0)
         call shortshrink(CIMAGENAME,k2)
         write(cname4,'(''\rm -f LINK/'',A,''-p1.mrc'')')
      .    CIMAGENAME(1:k2)
         call shortshrink(cname4,k1)
         write(14,'(A)')cname4(1:k1)
 C
-        write(cname4,'(''\ln -s '',A,''/'',
-     .     A,''-p1.mrc LINK/'',A,''-p1.mrc'')')
-     .    cdir(1:k1),CIMAGENAME(1:k2),CIMAGENAME(1:k2)
+        if(ctmpdir(1:1).eq.'/')then
+          write(cname4,'(''\ln -s '',A,''/'',
+     .       A,''-p1.mrc LINK/'',A,''-p1.mrc'')')
+     .      cdir(1:k0),CIMAGENAME(1:k2),CIMAGENAME(1:k2)
+        else
+          write(cname4,'(''\ln -s ../'',A,''/'',
+     .       A,''-p1.mrc LINK/'',A,''-p1.mrc'')')
+     .      cdir(1:k0),CIMAGENAME(1:k2),CIMAGENAME(1:k2)
+        endif
         call shortshrink(cname4,k1)
         write(14,'(A)')cname4(1:k1)
 C
@@ -72,10 +78,10 @@ C
         call shortshrink(cname4,k1)
         write(11,'(A)')cname4(1:k1)
 C
-        call shorten(cdir,k1)
+        call shorten(cdir,k0)
         call shortshrink(CIMAGENAME,k2)
         write(cname4,'(A,''/'',A,''-p1.mrc'')')
-     .    cdir(1:k1),CIMAGENAME(1:k2)
+     .    cdir(1:k0),CIMAGENAME(1:k2)
         call shortshrink(cname4,k1)
         write(*,'(''::  Map is '',A)')cname4(1:k1)
 C

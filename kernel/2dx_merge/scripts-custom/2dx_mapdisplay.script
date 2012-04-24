@@ -61,7 +61,9 @@ source ${OUTRUNFILE}
 \rm -f ${OUTRUNFILE}
 #
 cat ${OUTPUTFILE}
-cat ${OUTPUTFILE} >> LOGS/${scriptname}.results
+# cat ${OUTPUTFILE} >> LOGS/${scriptname}.results
+#
+echo "# IMAGE-IMPORTANT: LINK <LINK>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 #

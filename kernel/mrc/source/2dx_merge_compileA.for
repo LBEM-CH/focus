@@ -10,7 +10,7 @@ C This program will create a cshell script that performs the actual merging,
 C making use of the MRC program 2dx_origtiltk.for
 C
       character*200 cname1,cname2,cname3,cname4
-      character*200 cdir,cprocdir,cbindir
+      character*200 cdir,cprocdir,cbindir,ctmpdir
       character CROT90,CROT180
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE,CMLMERGE
@@ -166,8 +166,10 @@ C
       call shorten(CFILE1,k)
       write(11,'(A)')CFILE1(1:k)
 C
-      write(11,'(''${spcgrp} 0 F F ${ILIST} ${realcell} ${ALAT} ${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
-     .   ''!ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT'')')
+      write(11,'(''${spcgrp} 0 F F ${ILIST} ${realcell} ${ALAT} '',
+     .   ''${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
+     .   ''!ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE'',
+     ,   '',LOGOUTPUT'')')
       write(11,'(''10,0.7,10,0.5'',28X,
      .   ''!itaxastep,rtaxasize,itanglstep,rtanglsize'')')
 C
@@ -195,10 +197,19 @@ C
 C
  100  continue
 C
-        read(10,'(A)',END=200)cdir
+        read(10,'(A)',END=200)ctmpdir
+        call shorten(ctmpdir,k)
+        if(ctmpdir(1:1).eq.'/')then
+          write(cdir,'(A)')ctmpdir(1:k)
+        else
+          write(cdir,'(''../'',A)')ctmpdir(1:k)
+        endif
         call shorten(cdir,k)
         write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)
         write(*,'(''opening '',A)')cname3
+C
+        call system("pwd")
+C
         open(12,FILE=cname3,STATUS='OLD',ERR=910)
 C
         call cgetline(CIMAGENAME,"imagename")
@@ -336,6 +347,7 @@ C
         write(*,'(''::'',79(''#''))')
         write(*,'(''::ERROR on directory file open '',
      .     ''in 2dx_merge_compileA'')')
+        write(*,'('':: Could not open: '',A)')cname3(1:k)
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')

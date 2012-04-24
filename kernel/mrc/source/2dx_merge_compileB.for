@@ -11,7 +11,7 @@ C of the image parameters, making use of the adapted MRC program
 C 2dx_origtiltk.for
 C
       character*200 cname1,cname2,cname3,cname4,cname5
-      character*200 cdir,cprocdir,cbindir
+      character*200 cdir,cprocdir,cbindir,ctmpdir
       character CROT90,CROT180
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE,CPHOPROT,CMLMERGE
@@ -330,7 +330,13 @@ C
 C
  100  continue
 C
-        read(10,'(A)',END=200)cdir
+        read(10,'(A)',END=200)ctmpdir
+        call shorten(ctmpdir,k)
+        if(ctmpdir(1:1).eq.'/')then
+          write(cdir,'(A)')ctmpdir(1:k)
+        else
+          write(cdir,'(''../'',A)')ctmpdir(1:k)
+        endif
         call shorten(cdir,k)
         write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)
         write(*,'(''opening '',A)')cname3
@@ -524,6 +530,8 @@ C
         write(*,'(''::'',79(''#''))')
         write(*,'(''::ERROR on directory file open '',
      .     ''in 2dx_merge_compileB'')')
+        call shorten(cname3,k)
+        write(*,'(''::Tried to open:'',A)')cname3(1:k)
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')

@@ -16,7 +16,8 @@ C
 C
       DEBUG = .false.
 C
-      write(*,'(/,/,''2dx_getdirectories.exe: Program to extract tilt-range directories from paths'')')
+      write(*,'(/,/,''2dx_getdirectories.exe: Program to extract'',
+     .        '' tilt-range directories from paths'')')
       write(*,'(/,''input filename with directories list'')')
       read(*,'(A)')CDIRLIST
       call shorten(CDIRLIST,k)

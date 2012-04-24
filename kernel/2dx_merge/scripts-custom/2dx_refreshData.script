@@ -45,9 +45,13 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 set olddir = $PWD
 #
 foreach dirfile ( ${dirlist} ) 
-  echo "::Working on ${dirfile}"
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
+  echo "::Working on ${newdir}"
   #
-  echo "<IMAGEDIR="\"${dirfile}\"">" >> LOGS/${scriptname}.results
+  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
   echo "set dummy = 1" >> LOGS/${scriptname}.results
 
   # Use the following to invert the CTF in all directories, so that cryo setting is valid:
@@ -70,7 +74,7 @@ foreach dirfile ( ${dirlist} )
   # echo "#unlock phaori" >> LOGS/${scriptname}.results
   # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
   # 
-  # ${app_2dx_image} ${dirfile} "+2dx_evaluateLattice"
+  # ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
   #
   echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
 end

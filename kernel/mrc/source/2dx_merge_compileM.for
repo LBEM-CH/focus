@@ -7,7 +7,7 @@ C Last Modification: 01/03/2007
 C Author...........: 2dx.org           
 C
       character*200 cname1,cname2,cname3,cname4,cdir,cprocdir,cbindir
-      character*200 cccp4dir,cccp4
+      character*200 cccp4dir,cccp4,ctmpdir
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE,CMLMERGE
       character*200 CFILE1,cline
@@ -82,7 +82,13 @@ C
       imcount = 0
 C
  100  continue
-        read(10,'(A)',END=200)cdir
+        read(10,'(A)',END=200)ctmpdir
+        call shorten(ctmpdir,k)
+        if(ctmpdir(1:1).eq.'/')then
+          write(cdir,'(A)')ctmpdir(1:k)
+        else
+          write(cdir,'(''../'',A)')ctmpdir(1:k)
+        endif
         call shorten(cdir,k)
         write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)
         write(*,'(''opening '',A)')cname3

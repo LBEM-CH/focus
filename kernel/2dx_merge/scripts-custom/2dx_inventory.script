@@ -29,6 +29,7 @@ set do = "0"
 #$end_local_vars
 #
 set proc_2dx = ""
+set bin_2dx = ""
 #
 #$end_vars
 #

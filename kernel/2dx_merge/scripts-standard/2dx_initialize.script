@@ -124,6 +124,7 @@ eot
   set dirlist = "`cat SCRATCH/2dx_getdirectories_tmp2.dat`"
   #
   foreach dirfile ( ${dirlist} ) 
+    cd ${olddir}/..
     echo "Checking link in ${dirfile}"
     if ( -d ${dirfile} ) then
       cd ${dirfile}
@@ -141,12 +142,14 @@ eot
           set linkok = "n"
         endif
       endif
-      cd ${olddir}
+      cd ${olddir}/..
     else
       set linkok = "n"
     endif
   end
 endif
+#
+cd ${olddir}
 #
 if ( ${linkok} == 'n' ) then
   echo ":: "

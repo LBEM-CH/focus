@@ -53,9 +53,13 @@ set olddir = $PWD
 #
 # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
 foreach dirfile ( ${dirlist} ) 
-  echo "::Working on ${dirfile}"
-  # This tells the 2dx_merge GUI that the following variable output concerns the image "dirfile":
-  echo "<IMAGEDIR="\"${dirfile}\"">" >> LOGS/${scriptname}.results
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
+  echo "::Working on ${newdir}"
+  # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
+  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
   echo "set dummy = 1" >> LOGS/${scriptname}.results
   #
   ################################################################################
@@ -105,32 +109,32 @@ foreach dirfile ( ${dirlist} )
   # echo "set overwrite = y" >> LOGS/${scriptname}.results
 
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
-  # ${app_2dx_image} ${dirfile} "2dx_phaseorigin"
+  # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
 
   # Use the following to run all standard 2dx_image scripts on the selected images:
-  # ${app_2dx_image} ${dirfile} '"*"'
+  # ${app_2dx_image} ${newdir} '"*"'
 
   # Use the following to apply the CTF to all selected images:
-  # ${app_2dx_image} ${dirfile} "2dx_applyCTF"
+  # ${app_2dx_image} ${newdir} "2dx_applyCTF"
 
   # Use the following to run a few selected scripts on all selected images:
-  # ${app_2dx_image} ${dirfile} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
+  # ${app_2dx_image} ${newdir} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
   
   # Use the following to run somme of the standard scripts again:
-  # ${app_2dx_image} ${dirfile} "2dx_fftrans"
-  # ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
-  # ${app_2dx_image} ${dirfile} "2dx_refineLattice"
-  # ${app_2dx_image} ${dirfile} "2dx_getspots"
-  # ${app_2dx_image} ${dirfile} "2dx_unbend1"
-  # ${app_2dx_image} ${dirfile} "2dx_unbend2"
-  # ${app_2dx_image} ${dirfile} "2dx_applyCTF"
-  # ${app_2dx_image} ${dirfile} "2dx_generateMAP"
+  # ${app_2dx_image} ${newdir} "2dx_fftrans"
+  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
+  # ${app_2dx_image} ${newdir} "2dx_refineLattice"
+  # ${app_2dx_image} ${newdir} "2dx_getspots"
+  # ${app_2dx_image} ${newdir} "2dx_unbend1"
+  # ${app_2dx_image} ${newdir} "2dx_unbend2"
+  # ${app_2dx_image} ${newdir} "2dx_applyCTF"
+  # ${app_2dx_image} ${newdir} "2dx_generateMAP"
 
   # Use the following to recalculate the TAXA and TANGL values for all selected images:
-  # ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
+  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
  
   # Use the following to calculate the local real-space lattice for each selected image:
-  # ${app_2dx_image} ${dirfile} "+2dx_evaluateLattice"
+  # ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
   
   # Use the following to lock certain variables, for example to lock the phase origin for the selected images:
   # This can be used to protect these phase origin settings, if you are happy with them and want to perform 

@@ -9,7 +9,7 @@ C
 C This program will create a cshell script that calls pltiltk.for
 C
       character*200 cname1,cname2,cname3,cname4
-      character*200 cdir,cprocdir,cbindir
+      character*200 cdir,cprocdir,cbindir,ctmpdir
       character CROT90,CROT180
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE
@@ -185,7 +185,13 @@ C
 C
  100  continue
 C
-        read(10,'(A)',END=200)cdir
+        read(10,'(A)',END=200)ctmpdir
+        call shorten(ctmpdir,k)
+        if(ctmpdir(1:1).eq.'/')then
+          write(cdir,'(A)')ctmpdir(1:k)
+        else
+          write(cdir,'(''../'',A)')ctmpdir(1:k)
+        endif
         call shorten(cdir,k)
         write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)
         write(*,'(''opening '',A)')cname3
@@ -294,6 +300,7 @@ C
         write(*,'(''::'',79(''#''))')
         write(*,'(''::ERROR on directory file open '',
      .     ''in 2dx_merge_compilePLT'')')
+        write(*,'('':: Could not open: '',A)')cname3(1:k)
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')

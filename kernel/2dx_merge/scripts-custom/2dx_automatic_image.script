@@ -54,6 +54,12 @@ set olddir = $PWD
 #
 # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
 foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  #
+  cd ${olddir}
+  #
   echo "::Working on ${dirfile}"
   # This tells the 2dx_merge GUI that the following variable output concerns the image "dirfile":
   echo "<IMAGEDIR="\"${dirfile}\"">" >> LOGS/${scriptname}.results
@@ -109,31 +115,31 @@ foreach dirfile ( ${dirlist} )
   echo "set comment = AUTOMATIC" >> LOGS/${scriptname}.results
   
 # First we run all standard 2dx_image scripts on the selected images:
-  ${app_2dx_image} ${dirfile} '"*"'
+  ${app_2dx_image} ${newdir} '"*"'
 
   # Now set the variable to allow automatic masking
   echo "set domask = y" >> LOGS/${scriptname}.results
   
   # Run Unbend II again to mask the image
-  #${app_2dx_image} ${dirfile} "2dx_unbend2"
+  #${app_2dx_image} ${newdir} "2dx_unbend2"
  
   # Now we have to rerun the following scripts:
-  #${app_2dx_image} ${dirfile} "2dx_fftrans"
-  #${app_2dx_image} ${dirfile} "2dx_getspots1"
-  #${app_2dx_image} ${dirfile} "2dx_unbend1"
-  #${app_2dx_image} ${dirfile} "2dx_getspots"
-  #${app_2dx_image} ${dirfile} "2dx_unbend2"
-  #${app_2dx_image} ${dirfile} "2dx_applyCTF"
-  #${app_2dx_image} ${dirfile} "2dx_generateMAP"
+  #${app_2dx_image} ${newdir} "2dx_fftrans"
+  #${app_2dx_image} ${newdir} "2dx_getspots1"
+  #${app_2dx_image} ${newdir} "2dx_unbend1"
+  #${app_2dx_image} ${newdir} "2dx_getspots"
+  #${app_2dx_image} ${newdir} "2dx_unbend2"
+  #${app_2dx_image} ${newdir} "2dx_applyCTF"
+  #${app_2dx_image} ${newdir} "2dx_generateMAP"
 
 
   # Use the following to recalculate the TAXA and TANGL values for all selected images:
-  # ${app_2dx_image} ${dirfile} "2dx_getSampleTilt"
-  # ${app_2dx_image} ${dirfile} "2dx_getDefTilt"
-  # ${app_2dx_image} ${dirfile} "2dx_getLattice"
+  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
+  # ${app_2dx_image} ${newdir} "2dx_getDefTilt"
+  # ${app_2dx_image} ${newdir} "2dx_getLattice"
  
   # Use the following to calculate the local real-space lattice for each selected image:
-  # ${app_2dx_image} ${dirfile} "+2dx_evaluateLattice"
+  # ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
   
   # Use the following to lock certain variables, for example to lock the phase origin for the selected images:
   # This can be used to protect these phase origin settings, if you are happy with them and want to perform 

@@ -47,7 +47,7 @@ set scriptname = 2dx_repair_links
 \rm -f LOGS/${scriptname}.results
 #
 echo "<<@progress: 1>>"
-echo "<<@evaluate>>"
+# echo "<<@evaluate>>"
 #
 source ${proc_2dx}/2dx_makedirs
 #
@@ -76,6 +76,7 @@ else
     set linkok = "n"
   endif
 endif
+echo "<<@progress: +10>>"
 if ( ${linkok} == 'y' ) then
   echo "::Root link is ok."
 else
@@ -101,6 +102,8 @@ if ( ! -s ${dirlistfile} ) then
     ${proc_2dx}/protest "ERROR: Aborting."
   endif
 endif
+#
+echo "<<@progress: +10>>"
 #
 set coutfile = 'SCRATCH/2dx_getdirectories_tmp.dat'
 \rm -f ${coutfile}
@@ -145,6 +148,8 @@ foreach dirfile ( ${dirlist} )
   endif
 end
 #
+echo "<<@progress: +10>>"
+#
 if ( ${dorepair_list} == "y" ) then
   cd ${olddir}
   cd ..
@@ -163,6 +168,8 @@ if ( ${dorepair_list} == "y" ) then
   end
   ${proc_2dx}/linblock "Now refresh the directory view with the button top right in this GUI."
 endif
+#
+echo "<<@progress: +10>>"
 #
 if ( ${linkok} == 'n' ) then
   if ( ${repair_links} == "yes" ) then

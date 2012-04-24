@@ -6,7 +6,7 @@ C Created..........: 01/03/2007
 C Last Modification: 01/03/2007       
 C Author...........: 2dx.org           
 C
-      character*200 cname1,cname3,cdir
+      character*200 cname1,cname3,cdir,ctmpdir
       character*80 cphaori,cphaoriFouFilter,cbeamtilt
       character*200 CFILE1
       integer*8 imnum(10000)
@@ -45,7 +45,13 @@ C
 C
  100  continue
 C
-        read(10,'(A)',END=800)cdir
+        read(10,'(A)',END=800)ctmpdir
+        call shorten(ctmpdir,k)
+        if(ctmpdir(1:1).eq.'/')then
+          write(cdir,'(A)')ctmpdir(1:k)
+        else
+          write(cdir,'(''../'',A)')ctmpdir(1:k)
+        endif
         call shorten(cdir,k)
         write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)
         write(*,'(/,''opening '',A)')cname3

@@ -389,7 +389,12 @@ C
 C
         if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
           call cgetline(CPHORI,"phaori")
-          read(CPHORI,*)RPHAORIH,RPHAORIK
+          read(CPHORI,*,ERR=901)RPHAORIH,RPHAORIK
+          goto 902
+ 901      continue
+          RPHAORIH=0.0
+          RPHAORIK=0.0
+ 902      continue
           write(*,'(''   using Fourier filtered results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
         else
           RPHAORIH=0.0

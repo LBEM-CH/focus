@@ -175,7 +175,7 @@ if ( ${user} != 'sthennin' && ${user} != 'henning' ) then
   ${proc_2dx}/protest "Then merge conventionally in 2dx_merge."
 endif
 #
-set oldir = `pwd`
+set olddir = `pwd`
 #
 #############################################################################
 echo ":: "
@@ -191,27 +191,31 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 # echo ":: dirlist = " ${dirlist}
 #
 foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
   echo ":: "
-  echo "::Working on ${dirfile}"
+  echo "::Working on ${newdir}"
   
   # Make sure the *.mrc file is existing:
-  ${app_2dx_image} ${dirfile} "2dx_initialize_files.script"
-  # cd ${dirfile}
+  ${app_2dx_image} ${newdir} "2dx_initialize_files.script"
+  # cd ${newdir}
   # \ls -l *.mrc
-  # cd ${oldir}
+  # cd ${olddir}
 
-  echo dummy > ${dirfile}/dummy.dat.gz
-  ls -1 ${dirfile}/*.dat.gz > tmp.tmp
+  echo dummy > ${newdir}/dummy.dat.gz
+  ls -1 ${newdir}/*.dat.gz > tmp.tmp
   set isthere = `wc -l tmp.tmp | cut -f1 | awk '{ if ( $1 > 1 ) { s = 1 } else { s = 2 }} END { print s }'`
-  \rm -f ${dirfile}/dummy.dat.gz tmp.tmp
+  \rm -f ${newdir}/dummy.dat.gz tmp.tmp
   if ( ${isthere} == '1' ) then
-    \mkdir -p ${dirfile}/temp/
-    \cp -f ${dirfile}/*.dat.gz ${dirfile}/temp/
-    gunzip -f ${dirfile}/temp/*.dat.gz
-    \cp -f ${dirfile}/temp/*.dat ${dirfile}
-    \ls -l ${dirfile}/*profile.dat
+    \mkdir -p ${newdir}/temp/
+    \cp -f ${newdir}/*.dat.gz ${newdir}/temp/
+    gunzip -f ${newdir}/temp/*.dat.gz
+    \cp -f ${newdir}/temp/*.dat ${newdir}
+    \ls -l ${newdir}/*profile.dat
     echo " "
-    \rm -rf ${dirfile}/temp   
+    \rm -rf ${newdir}/temp   
 
   endif
   \rm -f stack_ctf.binary

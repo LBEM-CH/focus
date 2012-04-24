@@ -122,9 +122,14 @@ cat ${coutfile} | tr "\n" " " > SCRATCH/2dx_getdirectories_tmp2.dat
 set dirlist = "`cat SCRATCH/2dx_getdirectories_tmp2.dat`"
 #
 foreach dirfile ( ${dirlist} ) 
-  echo "::Checking link in ${dirfile}"
-  if ( -d ${dirfile} ) then
-    cd ${dirfile}
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
+  #
+  echo "::Checking link in ${newdir}"
+  if ( -d ${newdir} ) then
+    cd ${newdir}
     if ( ! -e 2dx_master.cfg ) then
       echo ":: "
       echo "::WARNING: 2dx_master.cfg is missing."
@@ -141,7 +146,7 @@ foreach dirfile ( ${dirlist} )
     endif
     cd ${olddir}
   else
-    echo "::WARNING: Directory not found: ${dirfile}"
+    echo "::WARNING: Directory not found: ${newdir}"
     if ( ${repair_dirlist} == "yes" ) then
       set dorepair_list = "y"
     endif
@@ -178,8 +183,10 @@ if ( ${linkok} == 'n' ) then
     echo ": "
     #
     foreach dirfile ( ${dirlist} ) 
-      echo "::Repairing link in ${dirfile}"
-      cd ${dirfile}
+      cd ..
+      set newdir = $PWD
+      echo "::Repairing link in ${newdir}"
+      cd ${newdir}
       \rm -f 2dx_master.cfg
       \ln -s ../2dx_master.cfg .
       \ls -l 2dx_master.cfg

@@ -314,9 +314,14 @@ while ( ${currentline} <= ${linenum} )
   echo "linenum = ${linenum};  currentline = ${currentline}"
   ${proc_2dx}/2dx_split.com 2dx_merge_dirfile.dat SCRATCH/2dx_refine_longfile.dat SCRATCH/2dx_refine_onefile.dat ${currentline}
   set oneline = `cat SCRATCH/2dx_refine_onefile.dat`
+  set olddir = $PWD
+  cd ..
+  cd ${oneline}
+  set newdir = $PWD
+  cd ${olddir}
   #
   echo "::"
-  echo "::Image: ${oneline}"
+  echo "::Image: ${newdir}"
   #
   set best_phares = 9999.0
   set found_better = "n"
@@ -375,8 +380,8 @@ while ( ${currentline} <= ${linenum} )
   set olddir = $PWD
   if ( ${found_better} == "y" ) then
     echo "::Found better setting, with PhaseResidual = ${best_phares}"
-    echo "<IMAGEDIR="\"${oneline}\"">" >> LOGS/${scriptname}.results
-    cd ${oneline}
+    echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+    cd ${newdir}
     #
     if ( ${best_revhk} == "invert" ) then
       set revhk = `cat 2dx_image.cfg | grep "set revhk" | cut -d\" -f2`

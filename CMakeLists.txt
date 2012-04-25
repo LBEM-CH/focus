@@ -34,15 +34,26 @@ add_subdirectory(2dx_logbrowser)
 add_subdirectory(plugins)
 add_subdirectory(bin)
 install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_BINARY_DIR} )
+
 #packaging
- set(CPACK_GENERATOR "TGZ;RPM")
- # set(CPACK_PACKAGE_DEFAULT_LOCATION "/usr/local/2dx")
- set(CPACK_PACKAGE_INSTALL_DIRECTORY "2dx")
- set(CPACK_PACKAGING_INSTALL_PREFIX "/Applications/2dx_test")
+set(CPACK_GENERATOR "DEB")
+# set(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/2dx")
+# set(CPACK_PACKAGE_INSTALL_DIRECTORY "2dx")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/2dx")
+
 # set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
- set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_osx_installer/Resources/License.rtf")
- #set(CPACK_RESOURCE_FILE_README "/Applications/CMake 2.8-1.app/Contents/share/cmake-2.8/Templates/CPack.GenericDescription.txt")
- set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_osx_installer/Resources/WelcomeNightly.html")
- set(CPACK_OSX_PACKAGE_VERSION "10.6")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_osx_installer/Resources/License.rtf")
+
+#set(CPACK_RESOURCE_FILE_README "/Applications/CMake 2.8-1.app/Contents/share/cmake-2.8/Templates/CPack.GenericDescription.txt")
+
+set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_osx_installer/Resources/WelcomeNightly.html")
+
+set(CPACK_OSX_PACKAGE_VERSION "10.6")
+set(CPACK_PACKAGE_CONTACT "2dx.org")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/cmake/debian/postinst")
+
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "tcsh (>=6.17.00)")
+
+
 include(CPack)
 

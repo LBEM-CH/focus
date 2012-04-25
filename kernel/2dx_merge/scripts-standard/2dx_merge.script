@@ -150,6 +150,8 @@ eot
   #
   foreach dirfile ( ${dirlist} ) 
     echo "Checking link in ${dirfile}"
+    cd ${olddir}
+    cd ..
     if ( -d ${dirfile} ) then
       cd ${dirfile}
       if ( ! -e 2dx_master.cfg ) then

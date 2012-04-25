@@ -536,7 +536,7 @@ C                           NSHFTIN=.T. SHIFTED INPUT DATA.
       CHARACTER*40 FNAME
       CHARACTER*1 CTMP
 C
-      CHARACTER*200 cfile1,cline1,cline2
+      CHARACTER*200 cfile1,cline1,cline2,cline3
 C
 C  DIMENSION STATEMENTS FOR OUTPUT SORTING.
       REAL PZ(MAXPLT),PAMP(MAXPLT),PPHS(MAXPLT)
@@ -1895,6 +1895,26 @@ C-----                "../ML-00/ML0012345601" needs to be found:
         if(ihen2.le.1) goto 411
       ihen1=ihen1-1
 C
+      if(.not.LOGOUTPUT)goto 414
+        call system("\rm -f tmp.1")
+        write(cline1,'(''cd '',A,''; pwd > tmp.1'')')FILIN(1:ihen1)
+        call shorten(cline1,k)
+C        write(6,'(''Calling system with '',A)')cline1(1:k)
+        call system(cline1(1:k))
+        write(cline2,'(A,''/tmp.1'')')FILIN(1:ihen1)
+        call shorten(cline2,k2)
+        write(cline3,'(''\rm -f '',A,''/tmp.1'')')FILIN(1:ihen1)
+        call shorten(cline3,k3)
+        open(23,FILE=cline2(1:k2),ERR=413)
+        read(23,'(A)')FILIN
+        call shorten(FILIN,ihen1)
+        close(23)
+        call system(cline3(1:k3))
+        goto 414
+ 413    continue
+          write(6,'(''::ERROR: in 2dx_origtiltk.exe: '',
+     .       ''Could not open tmp.1'')')
+ 414  continue
       if(LOGOUTPUT)then
         write(17,'(''<IMAGEDIR="'',A,''">'')')FILIN(1:ihen1)
       endif

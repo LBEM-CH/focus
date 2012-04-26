@@ -47,10 +47,10 @@ echo '| Uploading the file                                                      
 echo '*============================================================================*'
 echo '|                                                                            |'
 
-echo "Uploading $FILE to $URL" || (exit 3)
-cadaver $URL <<EOT || (exit 3)
-put $FILE || (exit 3)
-quit || (exit 3)
+echo "Uploading $FILE to $URL"
+cadaver $URL <<EOT
+put $FILE
+quit
 EOT
 if [ $? -gt 0 ]; then
 	       exit 3;

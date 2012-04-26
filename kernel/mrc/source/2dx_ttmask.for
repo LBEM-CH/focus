@@ -870,8 +870,13 @@ C
         IF(VECPHA2.LT.0.) VECPHA2 = VECPHA2 + 360.
         PHSOUT=VECPHA2
         PHSERR = (180.0/PI)*RMSBK/AMPOUT
+CHEN>
+        if(PHSERR.gt.10000.0)PHSERR=10000.0
         IQ = 1 + (PHSERR/7.0)           ! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
-        IQ = MIN(IQ,8)                  !            IQ=7     AMP= 1x RMSBK
+C      write(*,'(''Hier 3o, IQ='',I20,3G16.3)')IQ,RMSBK,AMPOUT,PHSERR
+C        IQ = MIN(IQ,8)                  !            IQ=7     AMP= 1x RMSBK
+        if(IQ.GT.8)IQ=8
+CHEN<
 C
 C       sum squared amplitudes
 C
@@ -910,6 +915,7 @@ C
 1102    FORMAT(/,' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS')
 1108    FORMAT('   H   K  AMPOUT  PHSOUT IQ   RMSBK     DFMID    ',
      .    'NCTFSAMPLES    CTFINMIDDLE   RESCALING BY')
+
         IF(NUMOUT.GT.NUMSPOT) THEN
           NUMAFTER=NUMOUT-NUMSPOT-1     ! Test for table heading output.
           IF(60*((NUMAFTER)/60).EQ.NUMAFTER) WRITE(6,1108)

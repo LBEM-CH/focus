@@ -91,6 +91,11 @@ set RESULTSMRC = "n"
 set date = `date`
 echo date = ${date}
 #
+set olddir = $PWD
+cd ..
+set basedir = $PWD
+cd ${olddir}
+#
 if ( ${ALAT} == "0" || ${ALAT} == "0.0" ) then
   ${proc_2dx}/protest "ALAT is not defined."
 endif
@@ -310,6 +315,7 @@ set scriptMfile = "SCRATCH/2dx_merge_scriptM.com"
 \rm -f ${scriptMfile}
 #
 ${bin_2dx}/2dx_merge_compileM.exe << eot
+${basedir}
 ${dirfile}
 ${scriptMfile}
 ${realcell}

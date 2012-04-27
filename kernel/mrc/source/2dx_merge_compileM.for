@@ -7,7 +7,7 @@ C Last Modification: 01/03/2007
 C Author...........: 2dx.org           
 C
       character*200 cname1,cname2,cname3,cname4,cdir,cprocdir,cbindir
-      character*200 cccp4dir,cccp4,ctmpdir
+      character*200 cccp4dir,cccp4,ctmpdir,cbasedir
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE,CMLMERGE
       character*200 CFILE1,cline
@@ -16,6 +16,11 @@ C
 C
       write(*,'('':2dx_merge_compileM - '',
      .    ''compiling a script to generate the maps'')')
+C
+      write(*,'(/,''input name of base directory'')')
+      read(*,'(A)')cbasedir
+      call shorten(cbasedir,k)
+      write(*,'(A)')cbasedir(1:k)
 C
       write(*,'(/,''input name of file with directory info'')')
       read(*,'(A)')cname1
@@ -81,13 +86,14 @@ C
 C
       imcount = 0
 C
+      call shorten(cbasedir,kbase)
  100  continue
         read(10,'(A)',END=200)ctmpdir
         call shorten(ctmpdir,k)
         if(ctmpdir(1:1).eq.'/')then
           write(cdir,'(A)')ctmpdir(1:k)
         else
-          write(cdir,'(''../'',A)')ctmpdir(1:k)
+          write(cdir,'(A,''/'',A)')cbasedir(1:kbase),ctmpdir(1:k)
         endif
         call shorten(cdir,k)
         write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)

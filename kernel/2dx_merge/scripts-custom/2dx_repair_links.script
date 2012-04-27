@@ -21,7 +21,6 @@
 # MANUAL: With the switch you can decide if you want to correct the links.
 #
 # DISPLAY: repair_links
-# DISPLAY: repair_dirlist
 #
 #$end_local_vars
 #
@@ -38,7 +37,6 @@ set FFTIR_DISK = ""
 # Variables to be available from the config file are:
 #
 set repair_links = ""
-set repair_dirlist = ""
 #
 #$end_vars
 #
@@ -71,7 +69,7 @@ else
   \ls -l 2dx_master.cfg
   if ( ! -l 2dx_master.cfg ) then
     echo ":: "
-    echo "::WARNING: 2dx_master.cfg is not a link."
+    echo "::WARNING: 2dx_master.cfg in project root directory is not a link."
     echo ":: "
     set linkok = "n"
   endif
@@ -81,118 +79,53 @@ if ( ${linkok} == 'y' ) then
   echo "::Root link is ok."
 else
   if ( ${repair_links} == "yes" ) then
-    echo "::Repairing link in project root directory ${PWD}"
+    ${proc_2dx}/linblock "Repairing link in project root directory ${PWD}"
     \rm -f 2dx_master.cfg
     \ln -s merge/2dx_merge.cfg 2dx_master.cfg
     \ls -l 2dx_master.cfg
   endif
 endif
 cd ${olddir}
-#
-set dirlistfile = "${olddir}/2dx_merge_dirfile.dat"
-#
-set dorepair_list = "n"
-if ( ! -s ${dirlistfile} ) then
-  echo ":: "
-  ${proc_2dx}/linblock "ERROR: Directory List File is missing."
-  ${proc_2dx}/linblock "First select all image directories, or repair the directory list."
-  if ( ${repair_dirlist} == "yes" ) then
-    set dorepair_list = "y"
-  else
-    ${proc_2dx}/protest "ERROR: Aborting."
-  endif
-endif
+cd ..
 #
 echo "<<@progress: +10>>"
 #
-set coutfile = 'SCRATCH/2dx_getdirectories_tmp.dat'
-\rm -f ${coutfile}
-#
-${bin_2dx}/2dx_getdirectories.exe << eot
-${olddir}/2dx_merge_dirfile.dat
-${olddir}
-${coutfile}
-eot
-#
-echo "# IMAGE: ${coutfile} <TXT: Tilt-range Directory List>" >> LOGS/${scriptname}.results
-#
-echo ": "
-#
-cat ${coutfile} | tr "\n" " " > SCRATCH/2dx_getdirectories_tmp2.dat
-set dirlist = "`cat SCRATCH/2dx_getdirectories_tmp2.dat`"
-#
-foreach dirfile ( ${dirlist} ) 
-  cd ..
-  cd ${dirfile}
-  set newdir = $PWD
-  cd ${olddir}
-  #
-  echo "::Checking link in ${newdir}"
-  if ( -d ${newdir} ) then
-    cd ${newdir}
-    if ( ! -e 2dx_master.cfg ) then
-      echo ":: "
-      echo "::WARNING: 2dx_master.cfg is missing."
-      echo ":: "
-      set linkok = "n"
+foreach dirfile ( * ) 
+  if ( -d ${dirfile} ) then
+    if ( ${dirfile} == "merge" ) then
+      echo "Not processing merge directory"
     else
-      \ls -l 2dx_master.cfg
-      if ( ! -l 2dx_master.cfg ) then
-        echo ":: "
-        echo "::WARNING: 2dx_master.cfg is not a link."
-        echo ":: "
+      cd ${dirfile}
+      set herelinkok = "y"
+      if ( ! -e 2dx_master.cfg ) then
+        ${proc_2dx}/linblock "WARNING: 2dx_master.cfg is missing in ${dirfile}."
+        set herelinkok = "n"
         set linkok = "n"
+      else
+        \ls -l 2dx_master.cfg
+        if ( ! -l 2dx_master.cfg ) then
+          ${proc_2dx}/linblock "::WARNING: 2dx_master.cfg is not a link in ${dirfile}."
+          set herelinkok = "n"
+          set linkok = "n"
+        endif
       endif
+      if( ( ${herelinkok} != "y" ) && ( ${repair_links} == "yes" ) ) then
+        echo "::Creating 2dx_master.cfg link in ${dirfile}"
+        \rm -f 2dx_master.cfg
+        \ln -s ../2dx_master.cfg .
+      endif
+      cd ..
     endif
-    cd ${olddir}
-  else
-    echo "::WARNING: Directory not found: ${newdir}"
-    if ( ${repair_dirlist} == "yes" ) then
-      set dorepair_list = "y"
-    endif
+    cd ${olddir}/..
   endif
 end
 #
 echo "<<@progress: +10>>"
 #
-if ( ${dorepair_list} == "y" ) then
-  cd ${olddir}
-  cd ..
-  foreach dirfile ( * ) 
-    if ( -d ${dirfile} ) then
-      if ( ${dirfile} == "merge" ) then
-        echo "Not processing merge directory"
-      else
-        echo "::Creating 2dx_master.cfg link in ${dirfile}"
-        cd ${dirfile}
-        \rm -f 2dx_master.cfg
-        \ln -s ../2dx_master.cfg .
-        cd ..
-      endif
-    endif
-  end
-  ${proc_2dx}/linblock "Now refresh the directory view with the button top right in this GUI."
-endif
-#
-echo "<<@progress: +10>>"
-#
 if ( ${linkok} == 'n' ) then
   if ( ${repair_links} == "yes" ) then
-    ${proc_2dx}/linblock "Links are not ok. Repairing links....."
-    #
-    echo ": "
-    #
-    foreach dirfile ( ${dirlist} ) 
-      cd ..
-      set newdir = $PWD
-      echo "::Repairing link in ${newdir}"
-      cd ${newdir}
-      \rm -f 2dx_master.cfg
-      \ln -s ../2dx_master.cfg .
-      \ls -l 2dx_master.cfg
-      cd ${olddir}
-    end
-    #
+    ${proc_2dx}/linblock "Now refreshing the directory list."
+    echo "<<@evaluate>>"
   else
     echo ":: "
     ${proc_2dx}/linblock "Links are not ok. They need to be repaired."
@@ -203,5 +136,6 @@ else
   ${proc_2dx}/linblock "All links are ok."
 endif
 #
+${proc_2dx}/linblock "Done."
 echo "<<@progress: 100>>"
 #

@@ -702,11 +702,14 @@ C
 C
 C-------Calculate offset and scaling factors
 C
+C        RTARGET=256.0
+        RTARGET=16000.0
+        RTARGET=RTARGET-1.0
         ROFF = DMIN - 1.0
         if ( DVAL .gt. 0.00000001 ) then
-          RSCALE = 15999.0 / DVAL
+          RSCALE = RTARGET / DVAL
         else
-          RSCALE = 15999.0  
+          RSCALE = RTARGET  
         endif
 C
         write(*,'('' Calculated offset of '',G16.5)')ROFF

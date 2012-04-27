@@ -203,7 +203,7 @@ C     Set scale factor to be 1.0 since this version uses grid units as input.
             XC(NHOLE)=XPOS
             YC(NHOLE)=YPOS
             WRITE(6,1800) IH,IK,XC(NHOLE),YC(NHOLE)
-1800        FORMAT(5X,2I5,3F10.4)
+1800        FORMAT(5X,2I6,3F14.4)
 120     CONTINUE
       ENDIF
       IF(ITYPE.EQ.1) THEN

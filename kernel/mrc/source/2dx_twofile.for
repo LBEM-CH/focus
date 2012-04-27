@@ -241,7 +241,7 @@ C
       DMEAN=DMEAN/(NX*NY)
       WRITE(6,1600) DMIN,DMAX,DMEAN
 1600  FORMAT(///'  Min max and mean density in combined image',
-     1 3F10.1)
+     1 3G16.1)
       CORBOT1=CORBOT1*CORBOT2
       IF(ICOMB.EQ.1.AND.CORBOT1.GT.0.0) THEN
         CORTOP=CORTOP/SQRT(CORBOT1)

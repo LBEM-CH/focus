@@ -35,6 +35,9 @@ add_subdirectory(plugins)
 add_subdirectory(bin)
 install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_BINARY_DIR} )
 
+file(GLOB DES installation/*.desktop)
+install(FILES ${DES} DESTINATION resource)
+
 #packaging
 set(CPACK_GENERATOR "DEB")
 # set(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/2dx")
@@ -50,7 +53,7 @@ set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_os
 
 set(CPACK_OSX_PACKAGE_VERSION "10.6")
 set(CPACK_PACKAGE_CONTACT "2dx.org")
-set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/cmake/debian/postinst")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/cmake/debian/postinst;${CMAKE_CURRENT_SOURCE_DIR}/cmake/debian/preinst;${CMAKE_CURRENT_SOURCE_DIR}/cmake/debian/postrm")
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "tcsh (>=6.17.00)")
 

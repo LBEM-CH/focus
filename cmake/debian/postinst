@@ -16,6 +16,8 @@ chmod -R 755 /opt/2dx
 
 ln -sf /opt/2dx/bin/2dx_merge /usr/bin/2dx
 
+cp resource/2dx.desktop /usr/share/applications/
+
 
 #
 exit 0

@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+#
+
+rm -f /usr/bin/2dx
+mr -f /usr/share/applications/2dx.desktop
+
+exit 0

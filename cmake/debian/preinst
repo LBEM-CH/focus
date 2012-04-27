@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+#
+
+rm -rf /opt/2dx
+rm -rf /usr/bin/2dx
+mr -f /usr/share/applications/2dx.desktop
+
+
+exit 0

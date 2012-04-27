@@ -31,8 +31,8 @@ fi
 --domain system \
 --verbose \
 --no-relocate \
--l "/usr/local/2dx" \
---target 10.5 \
+-l "/opt/2dx" \
+--target 10.6 \
 --id org.2dx.pkg \
 --root $ROOT \
 --out $OUTFILE

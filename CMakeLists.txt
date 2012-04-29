@@ -39,7 +39,7 @@ file(GLOB DES installation/*.desktop)
 install(FILES ${DES} DESTINATION resource)
 
 #packaging
-set(CPACK_GENERATOR "DEB")
+set(CPACK_GENERATOR "DEB;RMP")
 # set(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/2dx")
 # set(CPACK_PACKAGE_INSTALL_DIRECTORY "2dx")
 set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/2dx")
@@ -56,6 +56,8 @@ set(CPACK_PACKAGE_CONTACT "2dx.org")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/cmake/debian/postinst;${CMAKE_CURRENT_SOURCE_DIR}/cmake/debian/preinst;${CMAKE_CURRENT_SOURCE_DIR}/cmake/debian/postrm")
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "tcsh (>=6.17.00)")
+
+set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/redhat/postinst.sh")
 
 
 include(CPack)

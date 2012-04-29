@@ -39,7 +39,7 @@ file(GLOB DES installation/*.desktop)
 install(FILES ${DES} DESTINATION resource)
 
 #packaging
-set(CPACK_GENERATOR "DEB;RMP")
+set(CPACK_GENERATOR "DEB;RPM")
 # set(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/2dx")
 # set(CPACK_PACKAGE_INSTALL_DIRECTORY "2dx")
 set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/2dx")

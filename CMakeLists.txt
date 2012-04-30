@@ -53,6 +53,12 @@ install(FILES ${DES} DESTINATION Resource)
 file(GLOB DES installation/mac_osx_installer/Resources/postupgrade)
 install(FILES ${DES} DESTINATION Resource)
 
+file(GLOB DES installation/mac_osx_installer/Resources/preinstall)
+install(FILES ${DES} DESTINATION Resource)
+
+file(GLOB DES installation/mac_osx_installer/Resources/preupgrade)
+install(FILES ${DES} DESTINATION Resource)
+
 #packaging
 set(CPACK_GENERATOR "DEB;RPM")
 # set(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/2dx")

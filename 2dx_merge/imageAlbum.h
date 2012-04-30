@@ -48,8 +48,7 @@ class imageAlbum : public QWidget
   void confSelected(const QString &confFile);
 
   private:
-    //albumModel *model;
-    projectModel *model;
+    albumModel *model;
     QListView *view; 
     
     QItemSelectionModel *selection;
@@ -57,7 +56,7 @@ class imageAlbum : public QWidget
 	albumViewer *viewer;
 
   public:
-    imageAlbum(projectModel *dirModel, QWidget *parent = NULL);
+    imageAlbum(const projectModel *dirModel, QWidget *parent = NULL);
     void reload();  
 };
 

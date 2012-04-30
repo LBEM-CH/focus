@@ -16,7 +16,7 @@ chmod -R 777 ${INSTALL_DIR}/kernel
 #
 
 
-ln -sf /opt/2dx/bin/2dx_merge /usr/bin/2dx
+ln -sf ${INSTALL_DIR}/bin/2dx_merge.app /usr/bin/2dx
 
 \rm -f /Applications/2dx
 ln -sf ${INSTALL_DIR}/bin/2dx_merge.app /Applications/2dx

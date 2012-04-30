@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+export INSTALL_DIR=$2
+#
+
+rm -rf /usr/local/2dx
+rm -rf /opt/2dx
+
+exit 0

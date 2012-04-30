@@ -39,4 +39,5 @@ ls $ROOT/Resource
 --id org.2dx.pkg \
 --root $ROOT \
 --out $OUTFILE \
+--discard-forks \
 --verbose

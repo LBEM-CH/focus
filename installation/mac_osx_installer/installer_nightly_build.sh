@@ -20,6 +20,9 @@ then
 	rm $OUTFILE
 fi
 
+echo "rec-dir: $ROOT/Resource"
+ls $ROOT/Resource
+
 
 /Developer/usr/bin/packagemaker \
 --title "2dx Nightly Build" \

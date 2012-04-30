@@ -36,7 +36,22 @@ add_subdirectory(bin)
 install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_BINARY_DIR} )
 
 file(GLOB DES installation/*.desktop)
-install(FILES ${DES} DESTINATION resource)
+install(FILES ${DES} DESTINATION Resource)
+
+file(GLOB DES installation/mac_osx_installer/Resources/background.pdf)
+install(FILES ${DES} DESTINATION Resource)
+
+file(GLOB DES installation/mac_osx_installer/Resources/License.rtf)
+install(FILES ${DES} DESTINATION Resource)
+
+file(GLOB DES installation/mac_osx_installer/Resources/Welcome.html)
+install(FILES ${DES} DESTINATION Resource)
+
+file(GLOB DES installation/mac_osx_installer/Resources/postinstall)
+install(FILES ${DES} DESTINATION Resource)
+
+file(GLOB DES installation/mac_osx_installer/Resources/postupgrade)
+install(FILES ${DES} DESTINATION Resource)
 
 #packaging
 set(CPACK_GENERATOR "DEB;RPM")

@@ -150,7 +150,7 @@ install(TARGETS ${EXETITLE} DESTINATION ${EXETITLE})
 install(SCRIPT install_symlink.cmake)
 
 file(GLOB PNG resource/*.png)
-install(FILES ${PNG} DESTINATION resource)
+install(FILES ${PNG} DESTINATION Resource)
 #--------------------------------------------------------------------------------
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'

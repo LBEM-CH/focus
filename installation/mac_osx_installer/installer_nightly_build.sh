@@ -25,8 +25,8 @@ fi
 --title "2dx Nightly Build" \
 --version  DATE=`date "+%d_%b_%Y"` \
 --filter "\.DS_Store" \
---resources $DIR/Resources \
---scripts $DIR/Resources/scripts \
+--resources $DIR/Resource \
+--scripts $DIR/Resource \
 --root-volume-only \
 --domain system \
 --verbose \

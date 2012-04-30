@@ -35,4 +35,5 @@ fi
 --target 10.5 \
 --id org.2dx.pkg \
 --root $ROOT \
---out $OUTFILE
+--out $OUTFILE \
+-v

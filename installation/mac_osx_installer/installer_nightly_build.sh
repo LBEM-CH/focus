@@ -25,14 +25,14 @@ fi
 --title "2dx Nightly Build" \
 --version  DATE=`date "+%d_%b_%Y"` \
 --filter "\.DS_Store" \
---resources $DIR/Resources/ \
---scripts $DIR/Resources/ \
+--resources $DIR/Resources/res \
+--scripts $DIR/Resources/scripts \
 --root-volume-only \
 --domain system \
 --verbose \
 --no-relocate \
 -l "/opt/2dx" \
---target 10.6 \
+--target 10.5 \
 --id org.2dx.pkg \
 --root $ROOT \
 --out $OUTFILE

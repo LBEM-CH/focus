@@ -10,6 +10,11 @@ cmake_minimum_required(VERSION 2.6)
 set(CPACK_PACKAGE_NAME "2dx")
 set(CPACK_PACKAGE_VENDOR "2dx.org")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "2dx -Allows interactive processing of single EM-Micrographs of 2D membrane crystals.")
+
+set (2dx_VERSION_MAJOR 3)
+set (2dx_VERSION_MINOR 4)
+set (2dx_VERSION_PATCH 1)
+
 set(CPACK_PACKAGE_VERSION "3.4.0")
 set(CPACK_PACKAGE_VERSION_MAJOR "3")
 set(CPACK_PACKAGE_VERSION_MINOR "4")
@@ -34,6 +39,9 @@ add_subdirectory(2dx_logbrowser)
 add_subdirectory(plugins)
 add_subdirectory(bin)
 install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_BINARY_DIR} )
+
+configure_file("changes.htm.in" "changes.htm")
+configure_file("kernel/config/2dx_image/about.htm.in" "about.htm")
 
 file(GLOB DES installation/*.desktop)
 install(FILES ${DES} DESTINATION Resource)

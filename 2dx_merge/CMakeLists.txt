@@ -121,7 +121,8 @@ ELSE( APPLE )
   add_executable( ${EXETITLE} ${2DX_MERGE_SRC} ${MOC_SRCS} ${2DX_MERGE_UI_HDRS})
 ENDIF( APPLE )
 
- 
+include_directories(${CMAKE_INSTALL_PREFIX}/include) 
+
 get_propagate_deps(conf widgets mrcImage extentions)
 #
 # last thing we have to do is to tell CMake what olibraries our executable

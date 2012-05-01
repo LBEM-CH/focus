@@ -837,7 +837,33 @@ bool confData::isModified()
 
 const QString &confData::version()
 {
-  return VERSION_2DX;
+	// TODO introduce BOOST
+	
+	std::stringstream ss_major;//create a stringstream
+	ss_major << VERSION_MAJOR;//add number to the stream
+	std::string version_major = ss_major.str();
+	
+	std::stringstream ss_minor;//create a stringstream
+	ss_minor << VERSION_MINOR;//add number to the stream
+	std::string version_minor = ss_minor.str();
+	
+	std::stringstream ss_patch;//create a stringstream
+	ss_patch << VERSION_PATCH;//add number to the stream
+	std::string version_patch = ss_patch.str();
+	
+	std::string version_dot(".");
+
+	std::string version_string = std::string();
+	
+	version_string += version_major;
+	version_string += version_dot;
+	version_string += version_minor;
+	version_string += version_dot;
+	version_string += version_patch;
+
+	version_2dx = QString::fromUtf8(version_string.c_str());
+	
+	return version_2dx;
 }
 
 confData *confData::userConf()

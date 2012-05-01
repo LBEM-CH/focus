@@ -37,6 +37,7 @@ if(NOT DEFINED 2DX_INCLUDE_DIR)
 endif(NOT DEFINED 2DX_INCLUDE_DIR)
 include_directories(${2DX_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_INSTALL_PREFIX}/include)
 
 # Source files -----------------------------------------------------------------
 file(GLOB SRC *.cpp)

@@ -62,7 +62,7 @@ aboutWindow::aboutWindow(confData *conf, QWidget *parent)
   aboutText->setFont(QFont("Times",12));
   aboutText->viewport()->setAutoFillBackground(true);
   aboutText->viewport()->setPalette(pal);
-  aboutText->setLocalSource(data->getDir("application") + "../config/2dx_image/about.htm");
+  aboutText->setLocalSource(data->getDir("application") + "../about.htm");
   aboutText->setFrameShape(QFrame::NoFrame);
 
   layout->addWidget(aboutText,1,1,1,1);

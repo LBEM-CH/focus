@@ -8,4 +8,5 @@
 
 file(GLOB install_files *.h)
 install(FILES ${install_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-cmake_minimum_required(VERSION 2.6)
+
+configure_file("confVersion.h.in" "confVersion.h")

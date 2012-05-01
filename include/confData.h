@@ -30,10 +30,17 @@
 #include <QDir>
 #include <QString>
 #include <QIcon>
+
+#include <iostream>
+#include <sstream>
+
 #include "confElement.h"
 #include "confSection.h"
+#include "confVersion.h"
 
-const QString VERSION_2DX="3.4.1    ";
+const QString VERSION_2DX="3.4.1";
+
+//std::string version_string_asdf = std::string();
 
 class confData;
 
@@ -89,6 +96,9 @@ class confData : public QObject
   QStringList manualData;
   QString initializationScriptBaseName;
   QString initializationScriptName;
+
+  QString version_2dx;
+
   bool empty;
   bool modified;
   bool autoSave;

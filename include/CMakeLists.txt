@@ -11,4 +11,3 @@ install(FILES ${install_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 
 configure_file("confVersion.h.in" "confVersion.h")
 
-include_directories(${CMAKE_INSTALL_PREFIX}/include)

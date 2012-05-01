@@ -93,17 +93,17 @@ C
 C                    
       IMP=0
 #ifdef _OPENMP
-#      CALL GETENV('OMP_NUM_THREADS',NCPUS)
-#      READ(NCPUS,*,ERR=111,END=111)IMP
-#111   CONTINUE
-#      IF (IMP.LE.0) THEN
-#        CALL GETENV('NCPUS',NCPUS)
-#        READ(NCPUS,*,ERR=112,END=112)IMP
-#112     CONTINUE
-#      ENDIF
-#      IF (IMP.LE.0) THEN
-#        IMP=OMP_GET_NUM_PROCS()
-#      ENDIF
+      CALL GETENV('OMP_NUM_THREADS',NCPUS)
+      READ(NCPUS,*,ERR=111,END=111)IMP
+111   CONTINUE
+      IF (IMP.LE.0) THEN
+        CALL GETENV('NCPUS',NCPUS)
+        READ(NCPUS,*,ERR=112,END=112)IMP
+112     CONTINUE
+      ENDIF
+      IF (IMP.LE.0) THEN
+        IMP=OMP_GET_NUM_PROCS()
+      ENDIF
 #endif
       IF (IMP.LE.0) IMP=1
 C
@@ -772,18 +772,6 @@ C
       WRITE(*,1100)DFMID1,DFMID2,ANGAST/PI*180.0,
      +             TLTAXIS/PI*180.0,TANGLE/PI*180.0,-RF
 1100  FORMAT(/,5F12.2,F12.5,'  Final Values')
-C
-CHEN>
-      open(11,FILE='SCRATCH/2dx_ctftilt.result.tmp',STATUS='NEW',
-     .  ERR=998)
-        write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
-        write(11,'(3F12.2)')TLTAXIS/PI*180.0,TANGLE/PI*180.0,-RF
-      close(11)
-      GOTO 9999
-998   stop 'ERROR on file open of SCRATCH/2dx_ctftilt.result.tmp'
-9999  continue
-C
-CHEN<
 C
       RETURN
       END

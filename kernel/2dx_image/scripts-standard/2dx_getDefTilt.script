@@ -54,6 +54,7 @@
 # DISPLAY: lattice
 # DISPLAY: comment
 # DISPLAY: tempkeep
+# DISPLAY: expected_astig
 # DISPLAY: expected_tltang
 # DISPLAY: expected_tltang_uncertainty
 # DISPLAY: df_PAve 
@@ -92,6 +93,7 @@ set TLTAXIS = ""
 set TLTAXA = ""
 set TLTANG = ""
 set tempkeep = ""
+set expected_astig = ""
 set expected_tltang = ""
 set expected_tltang_uncertainty = ""
 set defocus_res_min = ""
@@ -686,7 +688,7 @@ eot
 ${inimage}
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${stepdigitizer},${df_PAve}
-${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${expected_tltang},${expected_tltang_uncertainty}
+${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${expected_astig},${expected_tltang},${expected_tltang_uncertainty}
 eof
     #
     if ( ! -e ${outimage} ) then

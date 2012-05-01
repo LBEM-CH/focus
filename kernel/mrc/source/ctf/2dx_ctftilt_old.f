@@ -8,7 +8,7 @@ C
 C       CARD 1: Input file name for image
 C       CARD 2: Output file name to check result
 C       CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um],PAve
-C       CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep[A], dAst[A], TiltA[deg], TiltR[deg]
+C       CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep[A], TiltA[deg], TiltR[deg]
 C
 C               The output image file to check the result of the fitting
 C               shows the filtered average power spectrum of the input
@@ -38,9 +38,8 @@ C                      and astigmatism before fitting a CTF to machine
 C                      precision.
 C               dFMax: End defocus value for grid search in Angstrom.
 C               FStep: Step width for grid search in Angstrom.
-C               dAst: Expected amount of astigmatism in Angstrom.
-C               TiltA: Expected tilt angle in degrees.
-C               TiltR: Expected tilt angle uncertainty in degrees.
+C               TiltA: Expected tilt angle in degrees
+C               TiltR: Expected tilt angle uncertainty in degrees
 C
 C*****************************************************************************
 C       example command file (UNIX):
@@ -53,7 +52,7 @@ C       time /public/image/bin/ctftilt.exe << eof
 C       image.mrc
 C       power.mrc
 C       2.6,200.0,0.07,60000.0,28.0,2
-C       128,100.0,15.0,30000.0,90000.0,5000.0,500.0,100.0,0.0,5.0
+C       128,100.0,15.0,30000.0,90000.0,5000.0,0.0,5.0
 C       eof
 C       #
 C*****************************************************************************
@@ -67,11 +66,10 @@ C
       INTEGER NXYZ(3),MODE,JXYZ(3),I,J,IS,KXYZ(3),NX,NY
       INTEGER ID,L,M,LL,MM,ITEST,IAVE,K,IERR
       INTEGER IX,IP,NBIN,NR,CNT,IY,IMP
-      INTEGER OMP_GET_NUM_PROCS
       PARAMETER (NR=5,NBIN=100)
       REAL DMIN,DMAX,DMEAN,DRMS,WGH1,WGH2,SCAL,WL,MEAN,PI
       REAL CS,KV,WGH,XMAG,DSTEP,RESMIN,RESMAX,DFMID1,DFMID2
-      REAL THETATR,STEPR,RMIN2,RMAX2,HW,TLTAXIS,ANGAST,DAST
+      REAL THETATR,STEPR,RMIN2,RMAX2,HW,TLTAXIS,ANGAST
       REAL RES2,CTF,CTFV,TMP,FLT,DFMIN,DFMAX,FSTEP,R,RMS
       REAL DRMS1,TANGLE,SIG2,TILTA,TILTR
       REAL MIN,MAX,RMSMIN,RMSMAX,CMAX
@@ -79,34 +77,26 @@ C
       REAL,ALLOCATABLE :: BUF2(:),RMSA(:),BINS(:)
       PARAMETER (FLT=-0.1,PI=3.1415926535898)
       COMPLEX,ALLOCATABLE :: CBOXS(:)
-      CHARACTER FILEIN*200,FILEOUT*200,TITLE*1600,CFORM
-      CHARACTER NCPUS*10
+      CHARACTER FILEIN*70,FILEOUT*70,TITLE*1600,CFORM,NCPUS*10
       LOGICAL EX
-      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,
-     +            DAST
+      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW
       COMMON/FUNCB/NXYZ,STEPR,TILTA,TILTR,SIG2
 C
       WRITE(6,1000)
-1000  FORMAT(/' CTF TILT DETERMINATION, V1.6 (7-March-2012)',
+1000  FORMAT(/' CTF TILT DETERMINATION, V1.5 (14-September-2011)',
      +       /' Distributed under the GNU',
      +        ' General Public License (GPL)')
 C                    
       IMP=0
-#ifdef _OPENMP
-#      CALL GETENV('OMP_NUM_THREADS',NCPUS)
-#      READ(NCPUS,*,ERR=111,END=111)IMP
-#111   CONTINUE
-#      IF (IMP.LE.0) THEN
-#        CALL GETENV('NCPUS',NCPUS)
-#        READ(NCPUS,*,ERR=112,END=112)IMP
-#112     CONTINUE
-#      ENDIF
-#      IF (IMP.LE.0) THEN
-#        IMP=OMP_GET_NUM_PROCS()
-#      ENDIF
-#endif
+      CALL GETENV('OMP_NUM_THREADS',NCPUS)
+      READ(NCPUS,*,ERR=111,END=111)IMP
+111   CONTINUE
+      IF (IMP.LE.0) THEN
+        CALL GETENV('NCPUS',NCPUS)
+        READ(NCPUS,*,ERR=112,END=112)IMP
+112     CONTINUE
+      ENDIF
       IF (IMP.LE.0) IMP=1
-C
       IF (IMP.GT.1) THEN
         WRITE(*,7000) IMP
 7000    FORMAT(/' Parallel processing: NCPUS =   ',I8)
@@ -131,40 +121,20 @@ C
       WRITE(6,1040)
 1040  FORMAT(/' Positive defocus values for underfocus',
      +       /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A],',
-     +        ' FStep[A], dAst[A], TiltA[deg], TiltR[deg]')
-      READ(5,*,END=98)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,
-     +         DAST,TILTA,TILTR
+     +        ' FStep[A], TiltA[deg], TiltR[deg]')
+      READ(5,*)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,TILTA,
+     +         TILTR
       WRITE(6,1051)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,
-     +         DAST,TILTA,TILTR
-1051  FORMAT(I4,2F11.1,2F10.1,2F7.1,2F12.1/)
-      GOTO 99
-C
-98    CONTINUE
-      WRITE(6,*) ' ERROR reading CARD 4. Trying old CARD 4...'
-C      READ(5,*)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,
-C     +         TILTA,TILTR
-      TILTR=TILTA
-      TILTA=DAST
-      WRITE(6,1052)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,
      +         TILTA,TILTR
-1052  FORMAT(I4,2F11.1,2F10.1,F7.1,2F12.1/)
-      WRITE(6,*) ' Setting DAST = 100.0'
-      DAST=100.0
-C
-99    CONTINUE
 C
 C       Check input parameters
 C
+1051  FORMAT(I4,2F11.1,2F10.1,F10.1,2F12.1/)
       ITEST=JXYZ(1)/2
       IF (2*ITEST.NE.JXYZ(1)) THEN
         WRITE(6,1090)
 1090    FORMAT(/' Box size must be even number')
         STOP
-      ENDIF
-      IF (DAST.LE.0.0) THEN
-        DAST=500.0
-        WRITE(6,1120)
-1120    FORMAT(/' Invalid dAst value; reset to 500.0')
       ENDIF
 C
 C     JXYZ is size of box, X,Y dimensions equal
@@ -283,18 +253,18 @@ C
         ENDIF
 70    CONTINUE
       IF (J.GT.1) THEN
-        DO 71 I=1,J-1
-          IF (BINS(I).GE.CMAX/10.0) THEN
-            RMSMIN=I*(MAX-MIN)/(NBIN-1)+MIN
+        DO 71 I=J-1,1,-1
+          IF (BINS(I).LT.CMAX/10.0) THEN
+            RMSMIN=(I-1)*(MAX-MIN)/(NBIN-1)+MIN
             GOTO 72
           ENDIF
 71      CONTINUE
       ENDIF
 72    CONTINUE
       IF (J.LT.NBIN) THEN
-        DO 73 I=NBIN,J+1,-1
-          IF (BINS(I).GE.CMAX/10.0) THEN
-            RMSMAX=I*(MAX-MIN)/(NBIN-1)+MIN
+        DO 73 I=J+1,NBIN
+          IF (BINS(I).LT.CMAX/10.0) THEN
+            RMSMAX=(I-1)*(MAX-MIN)/(NBIN-1)+MIN
             GOTO 74
           ENDIF
 73      CONTINUE
@@ -405,7 +375,7 @@ C
       DFMID1=DFMIN
       DFMID2=DFMAX
       CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
-     +           POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
+     +           POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
 C
 C       The following parameters are passed to the refinement
 C       routine via common block FUNC
@@ -419,7 +389,7 @@ C      HW=-1.0/0.4**2
 
       CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,AIN,POWER)
       CALL EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
-     +        THETATR,HW,AIN,JXYZ,RMIN2,RMAX2,CMAX,SIG2,DAST)
+     +        THETATR,HW,AIN,JXYZ,RMIN2,RMAX2,CMAX,SIG2)
 C
 C       Create diagnostic image showing power spectrum
 C       and matching squared CTF
@@ -483,13 +453,12 @@ C
 C
       CALL FIND_TANGLE(JXYZ,ABOX,CS,WL,
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,TLTAXIS,
-     +  STEPR,RMIN2,RMAX2,HW,TANGLE,AIN,DAST)
+     +  STEPR,RMIN2,RMAX2,HW,TANGLE,AIN)
 C
 C       Refine all parameters
 C       Some parameters are passed through common block FUNCB
 C
-      CALL REFINE_TILT(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,AIN,
-     +                 POWER)
+      CALL REFINE_TILT(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,AIN,POWER)
 C
       GOTO 9999
 999   STOP 'END-OF-FILE ERROR ON READ'
@@ -747,7 +716,7 @@ C
       REAL DFMID1,DFMID2,ANGAST,XPAR(5),EPAR(5),RF,ESCALE,PI
       REAL TLTAXIS,TANGLE,AIN(*),ABOX(*)
       PARAMETER (PI=3.1415926535898)
-      DATA EPAR/0.1,0.1,100.0,100.0,0.5/
+      DATA EPAR/0.05,0.05,100.0,100.0,0.5/
       DATA ESCALE/100.0/
       EXTERNAL CALCFXB
 C
@@ -766,9 +735,9 @@ C
       CALL VA04A(XPAR,EPAR,5,RF,ESCALE,0,1,NCYCLS,AIN,ABOX,CALCFXB)
       DFMID1=XPAR(3)
       DFMID2=XPAR(4)
-      ANGAST=XPAR(5)-PI*NINT(XPAR(5)/PI)
-      TLTAXIS=XPAR(1)-2.0*PI*NINT(XPAR(1)/2.0/PI)
-      TANGLE=XPAR(2)-2.0*PI*NINT(XPAR(2)/2.0/PI)
+      ANGAST=XPAR(5)
+      TLTAXIS=XPAR(1)
+      TANGLE=XPAR(2)
       WRITE(*,1100)DFMID1,DFMID2,ANGAST/PI*180.0,
      +             TLTAXIS/PI*180.0,TANGLE/PI*180.0,-RF
 1100  FORMAT(/,5F12.2,F12.5,'  Final Values')
@@ -791,7 +760,7 @@ C
 C**************************************************************************
       SUBROUTINE FIND_TANGLE(JXYZ,ABOX,CS,WL,
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,TLTAXIS,
-     +  PSIZE,RMIN2,RMAX2,HW,TANGLE,AIN,DAST)
+     +  PSIZE,RMIN2,RMAX2,HW,TANGLE,AIN)
 C**************************************************************************
 C       Search for tilt angle in 10 deg increments, starting from
 C       -65 deg to +65 deg. The function EVAL_TILT calculates the
@@ -802,7 +771,7 @@ C**************************************************************************
 C
       INTEGER JXYZ(*),NXYZ(3),K,ITILTA,ITILTR,IXMX
       REAL WGH1,WGH2,ANGAST,THETATR,EVAL_TILT,SIG2
-      REAL AIN(*),ABOX(*),TLTAXIS,PI,TA,WL,DAST
+      REAL AIN(*),ABOX(*),TLTAXIS,PI,TA,WL
       REAL DFMID1,DFMID2,PSIZE,CS,HW,TAR,TILTA,TILTR
       REAL SUM,SUMMAX,RMIN2,RMAX2,TANGLE,STEPR
       PARAMETER (PI=3.1415926535898)
@@ -818,7 +787,7 @@ C
         TA=K/180.0*PI
         SUM=EVAL_TILT(JXYZ,NXYZ,AIN,CS,WL,
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,TLTAXIS,
-     +  PSIZE,RMIN2,RMAX2,HW,TA,DAST)+TAR(SIG2,TA,TILTA,TILTR)
+     +  PSIZE,RMIN2,RMAX2,HW,TA)+TAR(SIG2,TA,TILTA,TILTR)
         IF (SUM.GT.SUMMAX) THEN
           SUMMAX=SUM
           TANGLE=K
@@ -834,7 +803,7 @@ C
 C**************************************************************************
       REAL FUNCTION EVAL_TILT(JXYZ,NXYZ,AIN,CS,WL,
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,TLTAXIS,
-     +  PSIZE,RMIN2,RMAX2,HW,TA,DAST)
+     +  PSIZE,RMIN2,RMAX2,HW,TA)
 C**************************************************************************
 C       Calculates the correlation coefficient between the calculated
 C       CTF for each tile in AIN, and the power spectrum of the tile.
@@ -843,7 +812,7 @@ C**************************************************************************
 C
       INTEGER NX,NY,JXYZ(*),NXYZ(*),I,J,IX,IY
       INTEGER CNT,CX,CY,KXYZ(3),IS,IERR,ID,K
-      REAL WGH1,WGH2,ANGAST,THETATR,DAST
+      REAL WGH1,WGH2,ANGAST,THETATR
       REAL AIN(*),MEAN,RMS,HW,TLTAXIS
       REAL DFMID1,DFMID2,PSIZE,CS,PI,TA,WL
       REAL SUM,SUMMAX,RMIN2,RMAX2,N(2),SIG2
@@ -896,14 +865,14 @@ C
         DO 100 J=1,NX
           CALL EVAL_TILT_S(JXYZ,NXYZ,AIN,CS,WL,
      +      WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,PSIZE,
-     +      RMIN2,RMAX2,HW,TA,CX,CY,KXYZ,N,NX,CCTF,DAST,I,J)
+     +      RMIN2,RMAX2,HW,TA,CX,CY,KXYZ,N,NX,CCTF,I,J)
 100     CONTINUE
 C
       SUM=0.0
       CNT=0
 C
-      DO 101 I=1,NY
-        DO 101 J=1,NX
+      DO 101 I=1,NX
+        DO 101 J=1,NY
           IX=(J-1)*JXYZ(1)+1
           IY=1+(I-1)*JXYZ(2)
           ID=IX-1+JXYZ(1)+NXYZ(1)*(IY-1+JXYZ(2)-1)
@@ -930,7 +899,7 @@ C
 C**************************************************************************
       SUBROUTINE EVAL_TILT_S(JXYZ,NXYZ,AIN,CS,WL,
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,PSIZE,
-     +  RMIN2,RMAX2,HW,TA,CX,CY,KXYZ,N,NX,CCTF,DAST,I,J)
+     +  RMIN2,RMAX2,HW,TA,CX,CY,KXYZ,N,NX,CCTF,I,J)
 C**************************************************************************
 C       Calculates the correlation coefficient between the calculated
 C       CTF for each tile in AIN, and the power spectrum of the tile.
@@ -940,7 +909,7 @@ C
       INTEGER JXYZ(*),NXYZ(*),I,J,IX,IY,ID
       INTEGER CNT,CX,CY,KXYZ(3),NX,IS,IERR
       REAL WGH1,WGH2,ANGAST,THETATR,CCTF(*)
-      REAL AIN(*),MEAN,RMS,HW,TA,WL,DAST
+      REAL AIN(*),MEAN,RMS,HW,TA,WL
       REAL DFL1,DFL2,DFMID1,DFMID2,DF,DX,DY,R
       REAL RMIN2,RMAX2,N(2),SIG2,PSIZE,CS
       REAL,ALLOCATABLE :: ABOX(:)
@@ -997,7 +966,7 @@ C       which to do the correlation analysis.
 C
         IS=J+(I-1)*NX
         CALL EVALCTF(CS,WL,WGH1,WGH2,DFL1,DFL2,ANGAST,
-     +    THETATR,HW,ABOX,JXYZ,RMIN2,RMAX2,CCTF(IS),SIG2,DAST)
+     +    THETATR,HW,ABOX,JXYZ,RMIN2,RMAX2,CCTF(IS),SIG2)
 C
         DEALLOCATE(ABOX)
       ENDIF
@@ -1543,7 +1512,7 @@ C
 C
 C**************************************************************************
       SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
-     +          AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
+     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
 C**************************************************************************
 C       Searches for values of DFMID1,DFMID2,ANGAST to maximize
 C       correlation coefficient between power spectrum AIN and
@@ -1556,7 +1525,7 @@ C
       INTEGER I,J,K,NXYZ(3),I1,I2,ID,IERR
       REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
       REAL RMIN2,RMAX2,RMIN,RMAX,AIN(*),SUMMAX,FSTEP
-      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF,DAST
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
       REAL,ALLOCATABLE :: SUMS(:),DF1(:),DF2(:),ANG(:)
       PARAMETER (PI=3.1415926535898)
 C
@@ -1582,8 +1551,8 @@ C
 !$OMP PARALLEL DO
           DO 12 J=I1,I2
             CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +        RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
-     +        SUMMAX,DFMID1S,DFMID2S,ANGASTS,DAST,I,J,K,I1,I2)
+     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
 12        CONTINUE
 11      CONTINUE
         DO 13 I=1,ID
@@ -1607,15 +1576,15 @@ C
       END      
 C**************************************************************************
       SUBROUTINE SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +        RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
-     +        SUMMAX,DFMID1S,DFMID2S,ANGASTS,DAST,I,J,K,I1,I2)
+     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
 C**************************************************************************
       IMPLICIT NONE
 C
       INTEGER I,J,K,NXYZ(3),I1,I2,ID
       REAL CS,WL,WGH1,WGH2,THETATR,DF1(*),DF2(*),ANG(*)
       REAL RMIN2,RMAX2,SUMS(*),AIN(*),SUMMAX,FSTEP
-      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,SIG2,DAST
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,SIG2
       PARAMETER (PI=3.1415926535898)
 C
       ID=I-I1+1+(I2-I1+1)*(J-I1)
@@ -1624,14 +1593,14 @@ C
       ANG(ID)=22.5*K
       ANG(ID)=ANG(ID)/180.0*PI
       CALL EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),ANG(ID),
-     +  THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,SUMS(ID),SIG2,DAST)
+     +      THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,SUMS(ID),SIG2)
 C
       RETURN
       END      
 C
 C**************************************************************************
       SUBROUTINE EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
-     +          THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,CCTF,SIG2,DAST)
+     +          THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,CCTF,SIG2)
 C**************************************************************************
 C       Calculates the correlation coefficient between an input power
 C       spectrum AIN and the calculated squared CTF.
@@ -1650,10 +1619,10 @@ C**************************************************************************
 C
       IMPLICIT NONE
 C
-      INTEGER L,LL,M,MM,NXYZ(3),ID,IS
+      INTEGER L,LL,M,MM,NXYZ(3),ID
       REAL CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,THETATR,SUM1
       REAL SUM,AIN(*),RES2,RMIN2,RMAX2,CTF,CTFV,HW,SUM2,CCTF
-      REAL A,SIG2,DAST
+      REAL A,SIG2
       real rad2, hangle2, angspt, c1, c2, angdif, ccos, df, chi
       real expv, twopi_wli, ctfv2, dsum, ddif, rpart1, rpart2
       real half_thetatrsq, recip_nxyz1, recip_nxyz2
@@ -1669,7 +1638,6 @@ C
       SUM  = 0.0
       SUM1 = 0.0
       SUM2 = 0.0
-      IS   = 0
 
       DO M=1,NXYZ(2)
          MM=M-1
@@ -1700,7 +1668,6 @@ C
                
                ctfv2 = ctfv*ctfv
                ID   = L+NXYZ(1)/2*(M-1)
-               IS   = IS + 1
 
                if(hw == 0.0) then
                   SUM  = SUM  + AIN(ID)*ctfv2
@@ -1719,13 +1686,9 @@ C
       enddo
 C
       A=SUM/SUM1
-      SIG2=0.0
-      IF (IS.NE.0) THEN
-        SIG2=((SUM2/A+SUM1*A)/SUM-2.0)/IS
-        SUM=SUM/SQRT(SUM1*SUM2)-DDIF**2/2.0/DAST**2/IS
-      ENDIF
+      SIG2=((SUM2/A+SUM1*A)/SUM-2.0)*2/NXYZ(1)/NXYZ(2)
+      CCTF=SUM/SQRT(SUM1*SUM2)
 C
-      CCTF=SUM
       RETURN
       END
 C
@@ -1779,16 +1742,15 @@ C
       INTEGER JXYZ(3),NXYZ(3),NX,IXMX,IXBMX
       REAL WGH1,WGH2,THETATR,EVAL_TILT
       REAL AIN(*),ABOX(*),PI,WL
-      REAL PSIZE,CS,XPAR(*),HW,DAST
+      REAL PSIZE,CS,XPAR(*),HW
       REAL RMIN2,RMAX2,RF,TAR,TILTA,TILTR,SIG2
       PARAMETER (PI=3.1415926535898)
-      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,
-     +            DAST
+      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW
       COMMON/FUNCB/NXYZ,PSIZE,TILTA,TILTR,SIG2
 C
       RF=-EVAL_TILT(JXYZ,NXYZ,AIN,CS,WL,WGH1,WGH2,
      +  THETATR,XPAR(3),XPAR(4),XPAR(5),XPAR(1),PSIZE,RMIN2,
-     +  RMAX2,HW,XPAR(2),DAST)-TAR(SIG2,XPAR(2),TILTA,TILTR)
+     +  RMAX2,HW,XPAR(2))-TAR(SIG2,XPAR(2),TILTA,TILTR)
       WRITE(*,1000)XPAR(3),XPAR(4),XPAR(5)/PI*180.0
      +          ,XPAR(1)/pi*180.0,XPAR(2)/PI*180.0,-RF
 1000  FORMAT(5F12.2,F12.5)
@@ -1824,13 +1786,12 @@ C
       INTEGER JXYZ(3),NX,IXBMX
       REAL CS,WL,WGH1,WGH2,THETATR,CCTF
       REAL RMIN2,RMAX2,AIN(*),ABOX(*)
-      REAL HW,PI,XPAR(*),RF,SIG2,DAST
+      REAL HW,PI,XPAR(*),RF,SIG2
       PARAMETER (PI=3.1415926535898)
-      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,
-     +            DAST
+      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW
 C
       CALL EVALCTF(CS,WL,WGH1,WGH2,XPAR(1),XPAR(2),XPAR(3),
-     +     THETATR,HW,ABOX,JXYZ,RMIN2,RMAX2,CCTF,SIG2,DAST)
+     +            THETATR,HW,ABOX,JXYZ,RMIN2,RMAX2,CCTF,SIG2)
       RF=-CCTF
 C
       RETURN

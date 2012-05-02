@@ -47,6 +47,8 @@ configure_file("kernel/config/2dx_image/about.htm.in" "about.htm")
 
 configure_file("build_scripts/make_pkg_on_jenkins.sh.in" "make_pkg_on_jenkins.sh")
 
+configure_file("build_scripts/add_version_to_src.sh.in" "add_version_to_src.sh")
+
 file(GLOB DES installation/*.desktop)
 install(FILES ${DES} DESTINATION Resource)
 

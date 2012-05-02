@@ -10,20 +10,22 @@ then
   source $HOME/.profile
 fi
 #URL=http://www.2dx.unibas.ch/nightly_build
-URL=http://www.2dx.unibas.ch/download/2dx-software/2dx-installer/nightly-build
+#URL=http://www.2dx.unibas.ch/download/2dx-software/2dx-installer/nightly-build
+
 echo '*############################################################################*'
 echo '| Locating the file                                                          |'
 echo '*============================================================================*'
 echo '|                                                                            |'
 
-if [ $# -lt 1 ]
+if [ $# -lt 2 ]
 then
 	echo "No file specified"
-	echo "Usage: `basename $0:` <file>" >&2
+	echo "Usage: `basename $0:` <file> <destination>" >&2
 	echo 'Aborting!'
 	exit 1
 fi
 FILE=$1
+URL=$2
 
 if [ ! -f $FILE ]; then
 	"Could not find file $FILE"

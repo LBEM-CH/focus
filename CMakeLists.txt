@@ -80,11 +80,11 @@ set(CPACK_GENERATOR "DEB;RPM")
 set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/2dx")
 
 # set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
-#set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_osx_installer/Resources/License.rtf")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_osx_installer/Resources/License.rtf")
 
 #set(CPACK_RESOURCE_FILE_README "/Applications/CMake 2.8-1.app/Contents/share/cmake-2.8/Templates/CPack.GenericDescription.txt")
 
-#set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_osx_installer/Resources/WelcomeNightly.html")
+set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_CURRENT_SOURCE_DIR}/installation/mac_osx_installer/Resources/WelcomeNightly.html")
 
 set(CPACK_OSX_PACKAGE_VERSION "10.6")
 set(CPACK_PACKAGE_CONTACT "2dx.org")

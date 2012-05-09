@@ -107,6 +107,7 @@ foreach dirfile ( ${dirlist} )
   # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
   # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
   # echo "set overwrite = y" >> LOGS/${scriptname}.results
+  # echo "set ccunbend_program = 0" >> LOGS/${scriptname}.results
 
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
   # ${app_2dx_image} ${newdir} "2dx_phaseorigin"

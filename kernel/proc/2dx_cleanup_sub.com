@@ -25,6 +25,7 @@ echo dummy > REFdummy.hkl
 echo dummy > dummy.results
 echo dummy > results.spi.0
 echo dummy > dummy.plt
+echo dummy > dummy_phase_zero.mtz
 echo dummy > dummy-profile.dat
 echo dummy > dummy-permutated.hkl
 if ( ! -d LOGS ) then
@@ -180,6 +181,8 @@ echo dummy > dummy.TMP
 \rm -f ${imagename}-*.tabl
 \rm -f avrgwork.mtz
 \rm -f avrg.hnegkl
+\rm -f centric_phase_zero.hkl
+\rm -f *_phase_zero.mtz
 #
 \rm *.results
 \rm -rf LOGS/*.log

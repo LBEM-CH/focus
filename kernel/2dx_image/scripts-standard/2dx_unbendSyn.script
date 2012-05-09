@@ -161,7 +161,7 @@ if ( ${SYN_Unbending} == "0" ) then
 endif
 #
 if ( ${PHASEORI_done} == "n" ) then
-  ${proc_2dx}/linblock "Skipping. Determine the phase origin from the Fourier-filtered unbending first."
+  ${proc_2dx}/linblock "Skipping. First determine the phase origin from the Fourier-filtered unbending."
   exit
 endif
 #

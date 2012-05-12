@@ -87,26 +87,24 @@ C
       COMMON/FUNCB/NXYZ,STEPR,TILTA,TILTR,SIG2
 C
       WRITE(6,1000)
-1000  FORMAT(/' CTF TILT DETERMINATION, V1.7 (6-May-2012)',
+1000  FORMAT(/' CTF TILT DETERMINATION, V1.6 (7-March-2012)',
      +       /' Distributed under the GNU',
      +        ' General Public License (GPL)')
 C                    
       IMP=0
-CHEN>
-C#ifdef _OPENMP
-C      CALL GETENV('OMP_NUM_THREADS',NCPUS)
-C      READ(NCPUS,*,ERR=111,END=111)IMP
-C111   CONTINUE
-C      IF (IMP.LE.0) THEN
-C        CALL GETENV('NCPUS',NCPUS)
-C        READ(NCPUS,*,ERR=112,END=112)IMP
-C112     CONTINUE
-C      ENDIF
-C      IF (IMP.LE.0) THEN
-C        IMP=OMP_GET_NUM_PROCS()
-C      ENDIF
-C#endif
-CHEN<
+#ifdef _OPENMP
+#      CALL GETENV('OMP_NUM_THREADS',NCPUS)
+#      READ(NCPUS,*,ERR=111,END=111)IMP
+#111   CONTINUE
+#      IF (IMP.LE.0) THEN
+#        CALL GETENV('NCPUS',NCPUS)
+#        READ(NCPUS,*,ERR=112,END=112)IMP
+#112     CONTINUE
+#      ENDIF
+#      IF (IMP.LE.0) THEN
+#        IMP=OMP_GET_NUM_PROCS()
+#      ENDIF
+#endif
       IF (IMP.LE.0) IMP=1
 C
       IF (IMP.GT.1) THEN
@@ -501,8 +499,12 @@ C       Close input file
 C       Write out a little figure explaining the meaning of the
 C       final refined parameters
 C
-      CALL FIGURE(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,NXYZ,IAVE,
+CHEN>
+C      CALL FIGURE(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,NXYZ,IAVE,
+C     +            STEPR)
+      CALL FIGURE2dx(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,NXYZ,IAVE,
      +            STEPR)
+CHEN<
       END
 C
 C**************************************************************************
@@ -549,12 +551,97 @@ C
 C
       CX=(NXYZ(1)*IAVE)/2
       CY=(NXYZ(2)*IAVE)/2
-C       the signs here are inverted following advice from
-C       Henning Stahlberg and Richard Henderson about MRC tilt
-C       conventions. the inverted signs should make ctftilt
-C       compatible with the 2d crystal programs.
-      N(1)=SIN(TLTAXIS)
-      N(2)=-COS(TLTAXIS)
+      N(1)=-SIN(TLTAXIS)
+      N(2)=COS(TLTAXIS)
+C
+      DX=CX-1
+      DY=CY-1
+      R=(N(1)*DX+N(2)*DY)*PSIZE/IAVE
+      DF=R*TAN(TANGLE)
+      DFL11=DFMID1+DF
+      DFL12=DFMID2+DF
+      DX=CX-NXYZ(1)*IAVE
+      DY=CY-1
+      R=(N(1)*DX+N(2)*DY)*PSIZE/IAVE
+      DF=R*TAN(TANGLE)
+      DFL21=DFMID1+DF
+      DFL22=DFMID2+DF
+      WRITE(*,900)CX,CY,PSIZE/IAVE,N(1),N(2)
+900   FORMAT(//,5X,'EQUATION FOR CALCULATING DEFOCUS ',
+     +       'DFL1,DFL2 AT LOCATION NX,NY:',//,
+     +       10X,'DFL1  = DFMID1 +DF',/,
+     +       10X,'DFL2  = DFMID2 +DF',/,
+     +       10X,'DF    = (N1*DX+N2*DY)*PSIZE*TAN(TANGLE)',/,
+     +       10X,'DX    = CX-NX',/,
+     +       10X,'DY    = CY-NY',/,
+     +       10X,'CX    = CENTER_X = ',I12,/,
+     +       10X,'CY    = CENTER_Y = ',I12,/,
+     +       10X,'PSIZE = PIXEL SIZE [A] = ',F12.4,/,
+     +       10X,'N1,N2 = TILT AXIS NORMAL:',/,
+     +       13X,'N1 = -SIN(TLTAXIS) = ',F12.6,/,
+     +       13X,'N2 =  COS(TLTAXIS) = ',F12.6,//)
+      WRITE(*,1000)DFL11,DFL12,DFL21,DFL22
+1000  FORMAT(F12.2,',',F12.2,4X,'<--(DFMID1,DFMID2)-->',
+     +       3X,F12.2,',',F12.2)
+      WRITE(*,1100)1,1,NXYZ(1)*IAVE,1
+1100  FORMAT(I12,',',I12,4X,'<------(NX,NY)------>',
+     +       3X,I12,',',I12)
+      WRITE(*,1200)
+1200  FORMAT(10X,'+-----------------------------',
+     +            '-----------------------------+')
+      DO 10 I=1,REAL(NXYZ(2))/NXYZ(1)*IW/2-2
+        IF(I.EQ.INT(REAL(NXYZ(2))/NXYZ(1)*IW/4-1)) THEN
+          WRITE(*,1300)DFMID1,DFMID2
+1300      FORMAT(10X,'|',15X,F12.2,',',F12.2,18X,'|')
+          WRITE(*,1400)CX,CY
+1400      FORMAT(10X,'|',15X,I12,',',I12,18X,'|')
+        ELSE
+          WRITE(*,1500)
+1500      FORMAT(10x,'|',58X,'|')
+        ENDIF
+10    CONTINUE
+      WRITE(*,1200)
+      DX=CX-1
+      DY=CY-NXYZ(2)*IAVE
+      R=(N(1)*DX+N(2)*DY)*PSIZE/IAVE
+      DF=R*TAN(TANGLE)
+      DFL11=DFMID1+DF
+      DFL12=DFMID2+DF
+      DX=CX-NXYZ(1)*IAVE
+      DY=CY-NXYZ(2)*IAVE
+      R=(N(1)*DX+N(2)*DY)*PSIZE/IAVE
+      DF=R*TAN(TANGLE)
+      DFL21=DFMID1+DF
+      DFL22=DFMID2+DF
+      WRITE(*,1100)1,NXYZ(2)*IAVE,NXYZ(1)*IAVE,NXYZ(2)*IAVE
+      WRITE(*,1000)DFL11,DFL12,DFL21,DFL22
+C
+      RETURN
+      END
+C
+CHEN>
+C**************************************************************************
+      SUBROUTINE FIGURE2dx(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,
+     +                  NXYZ,IAVE,PSIZE)
+C**************************************************************************
+C       Writes out a figure indicating the scanned image with defocus
+C       values in the center and at the four corners. Also writes out
+C       a formula for calculating the defocus at an arbitrary location
+C**************************************************************************
+      IMPLICIT NONE
+C
+      INTEGER NXYZ(3),IAVE,IW,I,CX,CY
+      PARAMETER (IW=60)
+      REAL DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,PSIZE
+      REAL DX,DY,N(2),DF,DFL11,DFL12,R,DFL21,DFL22
+C
+      character*200 cline1,cline2,cline3,cline4,cline5,cline6
+      integer k1,k2,k3,k4,k5,k6,ipiclen
+C
+      CX=(NXYZ(1)*IAVE)/2
+      CY=(NXYZ(2)*IAVE)/2
+      N(1)=-SIN(TLTAXIS)
+      N(2)=COS(TLTAXIS)
 C
       DX=CX-1
       DY=CY-NXYZ(2)*IAVE
@@ -580,29 +667,56 @@ C
      +       10X,'CY    = CENTER_Y = ',I12,/,
      +       10X,'PSIZE = PIXEL SIZE [A] = ',F12.4,/,
      +       10X,'N1,N2 = TILT AXIS NORMAL:',/,
-     +       13X,'N1 =  SIN(TLTAXIS) = ',F12.6,/,
-     +       13X,'N2 = -COS(TLTAXIS) = ',F12.6,//)
-      WRITE(*,1000)DFL11,DFL12,DFL21,DFL22
-1000  FORMAT(F12.2,',',F12.2,4X,'<--(DFMID1,DFMID2)-->',
-     +       3X,F12.2,',',F12.2)
-      WRITE(*,1100)1,NXYZ(2)*IAVE,NXYZ(1)*IAVE,NXYZ(2)*IAVE
-1100  FORMAT(I12,',',I12,4X,'<------(NX,NY)------>',
-     +       3X,I12,',',I12)
-      WRITE(*,1200)
-1200  FORMAT(10X,'+-----------------------------',
-     +            '-----------------------------+')
-      DO 10 I=1,REAL(NXYZ(2))/NXYZ(1)*IW/2-2
-        IF(I.EQ.INT(REAL(NXYZ(2))/NXYZ(1)*IW/4-1)) THEN
-          WRITE(*,1300)DFMID1,DFMID2
-1300      FORMAT(10X,'|',15X,F12.2,',',F12.2,18X,'|')
-          WRITE(*,1400)CX,CY
-1400      FORMAT(10X,'|',15X,I12,',',I12,18X,'|')
+     +       13X,'N1 = -SIN(TLTAXIS) = ',F12.6,/,
+     +       13X,'N2 =  COS(TLTAXIS) = ',F12.6,//)
+CHEN>
+      WRITE(*,'('' '')')
+      WRITE(*,'('' WARNING: For the 2dx version of this program,'',/,
+     .  '' the definition of the image origin was changed:'')')
+      WRITE(*,'('' IMAGE ORIGIN is now assumed bottom left.'')')
+      WRITE(*,'('' '')')
+      WRITE(*,'('' WARNING: This leads to an inversion of the sign '',/,
+     .  '' of TLTANG with respect to the original version'',/,
+     .  '' of the ctftilt program.'')')
+      WRITE(*,'('' '')')
+C
+      ipiclen=40
+C
+      WRITE(*,'('': '')')
+      WRITE(*,1201)
+1201  FORMAT(':',2X,'+',42('-'),'+')
+      write(cline1,'(F12.1,50X)')(DFL11+DFL12)/2.0
+      call shortshrink(cline1,k1)
+      write(cline2,'(F12.1,50X)')(DFL21+DFL22)/2.0
+      call shortshrink(cline2,k2)
+      write(cline5,'(''                                        '',
+     . ''                                                  '')')
+      k5=ipiclen-k1-k2
+      write(cline6,'('':  | '',A,A,A,'' |'')')cline1(1:k1),cline5(1:k5),
+     .  cline2(1:k2)
+      call shortshrink(cline6,k6)
+      write(*,'(A)')cline6(1:k6)
+C
+      DO 10 I=1,REAL(NXYZ(2))/NXYZ(1)*IW/2-16
+        IF(I.EQ.INT(REAL(NXYZ(2))/NXYZ(1)*IW/4-8)) THEN
+          write(*,1205)
+ 1205     FORMAT(':  |',15X,'Mid Defocus:',15X,'|')
+          write(cline1,'(F12.1,50X)')(DFMID1+DFMID2)/2.0
+          call shortshrink(cline1,k1)
+          k5=(ipiclen-k1)/2
+          k4=ipiclen-k1-k5
+          write(cline6,'('':  | '',A,A,A,'' |'')')
+     .      cline5(1:k5),cline1(1:k1),cline5(1:k4)
+          call shortshrink(cline6,k6)
+          write(*,'(A)')cline6(1:k6)
+          write(*,1206)
+ 1206     FORMAT(':  |',10X,'(Underfocus positive)',11X,'|')
         ELSE
           WRITE(*,1500)
-1500      FORMAT(10x,'|',58X,'|')
+1500      FORMAT(':',2X,'|',42X,'|')
         ENDIF
 10    CONTINUE
-      WRITE(*,1200)
+C
       DX=CX-1
       DY=CY-1
       R=(N(1)*DX+N(2)*DY)*PSIZE/IAVE
@@ -615,11 +729,24 @@ C
       DF=R*TAN(TANGLE)
       DFL21=DFMID1+DF
       DFL22=DFMID2+DF
-      WRITE(*,1100)1,1,NXYZ(1)*IAVE,1
-      WRITE(*,1000)DFL11,DFL12,DFL21,DFL22
+C
+      write(cline1,'(F12.1,50X)')(DFL11+DFL12)/2.0
+      call shortshrink(cline1,k1)
+      write(cline2,'(F12.1,50X)')(DFL21+DFL22)/2.0
+      call shortshrink(cline2,k2)
+      k5=ipiclen-k1-k2
+      write(cline6,'('':  | '',A,A,A,'' |'')')cline1(1:k1),cline5(1:k5),
+     .  cline2(1:k2)
+      call shortshrink(cline6,k6)
+      write(*,'(A)')cline6(1:k6)
+C
+      WRITE(*,1201)
+      write(*,'('': '')')
 C
       RETURN
       END
+C
+CHEN<
 C
 C**************************************************************************
       SUBROUTINE MSMOOTH(ABOX,NXYZ,NW,BUF)
@@ -752,6 +879,9 @@ C
       PARAMETER (NCYCLS=50)
       REAL DFMID1,DFMID2,ANGAST,XPAR(5),EPAR(5),RF,ESCALE,PI
       REAL TLTAXIS,TANGLE,AIN(*),ABOX(*)
+CHEN>
+      REAL RN_TANGLE
+CHEN<
       PARAMETER (PI=3.1415926535898)
       DATA EPAR/0.1,0.1,100.0,100.0,0.5/
       DATA ESCALE/100.0/
@@ -775,19 +905,16 @@ C
       ANGAST=XPAR(5)-PI*NINT(XPAR(5)/PI)
       TLTAXIS=XPAR(1)-2.0*PI*NINT(XPAR(1)/2.0/PI)
       TANGLE=XPAR(2)-2.0*PI*NINT(XPAR(2)/2.0/PI)
-      IF (ABS(TLTAXIS).GT.PI/2.0) THEN
-        TLTAXIS=TLTAXIS-PI*NINT(TLTAXIS/PI)
-        TANGLE=-TANGLE
-      ENDIF
-      WRITE(*,1100)DFMID1,DFMID2,180.0*(ANGAST/PI-NINT(ANGAST/PI)),
+      WRITE(*,1100)DFMID1,DFMID2,ANGAST/PI*180.0,
      +             TLTAXIS/PI*180.0,TANGLE/PI*180.0,-RF
 1100  FORMAT(/,5F12.2,F12.5,'  Final Values')
 C
 CHEN>
       open(11,FILE='SCRATCH/2dx_ctftilt.result.tmp',STATUS='NEW',
      .  ERR=998)
-        WRITE(11,'(3F12.2)')DFMID1,DFMID2,180.0*(ANGAST/PI-NINT(ANGAST/PI))
-        write(11,'(3F12.2)')TLTAXIS/PI*180.0,TANGLE/PI*180.0,-RF
+        RN_TANGLE=-TANGLE
+        write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
+        write(11,'(3F12.2)')TLTAXIS/PI*180.0,RN_TANGLE/PI*180.0,-RF
       close(11)
       GOTO 9997
 998   stop 'ERROR on file open of SCRATCH/2dx_ctftilt.result.tmp'
@@ -881,12 +1008,8 @@ C
 C       N is normal to tilt axis, indicates the direction
 C       in which defocus varies most
 C
-C       the signs here are inverted following advice from
-C       Henning Stahlberg and Richard Henderson about MRC tilt
-C       conventions. the inverted signs should make ctftilt
-C       compatible with the 2d crystal programs.
-      N(1)=SIN(TLTAXIS)
-      N(2)=-COS(TLTAXIS)
+      N(1)=-SIN(TLTAXIS)
+      N(2)=COS(TLTAXIS)
 C
 C       check here if tilt angle TA happens to be +-90 deg.
 C       if so, apply small offset to avoid degeneracy in
@@ -1772,8 +1895,7 @@ C
       DFMID1=XPAR(1)
       DFMID2=XPAR(2)
       ANGAST=XPAR(3)
-      WRITE(*,1100)DFMID1,DFMID2,
-     +  180.0*(ANGAST/PI-NINT(ANGAST/PI)),-RF
+      WRITE(*,1100)DFMID1,DFMID2,ANGAST/PI*180.0,-RF
 1100  FORMAT(3F12.2,F12.5,'  Refined Values at Center')
 C
       RETURN
@@ -1804,9 +1926,8 @@ C
       RF=-EVAL_TILT(JXYZ,NXYZ,AIN,CS,WL,WGH1,WGH2,
      +  THETATR,XPAR(3),XPAR(4),XPAR(5),XPAR(1),PSIZE,RMIN2,
      +  RMAX2,HW,XPAR(2),DAST)-TAR(SIG2,XPAR(2),TILTA,TILTR)
-      WRITE(*,1000)XPAR(3),XPAR(4),
-     +           180.0*(XPAR(5)/PI-NINT(XPAR(5)/PI)),
-     +           XPAR(1)/PI*180.0,XPAR(2)/PI*180.0,-RF
+      WRITE(*,1000)XPAR(3),XPAR(4),XPAR(5)/PI*180.0
+     +          ,XPAR(1)/pi*180.0,XPAR(2)/PI*180.0,-RF
 1000  FORMAT(5F12.2,F12.5)
 C
       RETURN
@@ -4295,3 +4416,72 @@ C   81 WRITE(6,82) MAXIT
   107 INN=1
       GO TO 35
       END
+C
+CHEN>
+
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+C
+c==========================================================
+c
+      SUBROUTINE SHORTSHRINK(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CHARACTER * 200 CZEIL2
+      CTMP2=' '
+C
+C-----find the leading spaces and remove them
+C
+      ilen=len(czeile)
+      k=ilen
+C
+      DO 90 J=1,k
+         READ(CZEILE(J:J),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)THEN
+           GOTO 95
+         ENDIF
+ 90   CONTINUE
+ 95   CONTINUE
+C
+      WRITE(CZEIL2(1:k),'(A)')CZEILE(J:k)
+      WRITE(CZEILE(1:k),'(A)')CZEIL2(1:k)
+C
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+C
+CHEN<

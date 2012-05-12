@@ -1,0 +1,27 @@
+all: ctffind3.exe ctftilt.exe
+
+ctffind3.exe: ctffind3.o iof.o ioc.o
+	pgf90 -Bstatic_pgi -mcmodel=medium \
+	ctffind3.o iof.o ioc.o -o ctffind3.exe
+
+ctftilt.exe: ctftilt.o iof.o ioc.o
+	pgf90 -Bstatic_pgi -mcmodel=medium \
+	ctftilt.o iof.o ioc.o -o ctftilt.exe
+	\rm *.o
+
+ctffind3.o: ctffind3.f
+	pgf90 -tp=amd64 -O3 -mcmodel=medium -Mpreprocess -c \
+	ctffind3.f
+
+ctftilt.o: ctftilt.f
+	pgf90 -tp=amd64 -O3 -mcmodel=medium -Mpreprocess -c \
+	ctftilt.f
+
+iof.o: iof.f
+	pgf90 -tp=amd64 -O3 -mcmodel=medium -c \
+	iof.f
+
+ioc.o: ioc.c
+	pgcc -tp=amd64 -O3 -mcmodel=medium -c \
+	-c ioc.c
+#

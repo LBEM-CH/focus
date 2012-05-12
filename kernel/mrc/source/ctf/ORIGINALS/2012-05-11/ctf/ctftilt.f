@@ -1,66 +1,66 @@
 C*****************************************************************************
 C
-C       CTFTILT - determines defocus, astigmatism tilt axis and tilt angle
-C       for images of arbitrary size (MRC format). Astigmatic angle is measured
-C       from x axis (same conventions as in the MRC 2D image processing 
-C       programs).
+C	CTFTILT - determines defocus, astigmatism tilt axis and tilt angle
+C	for images of arbitrary size (MRC format). Astigmatic angle is measured
+C	from x axis (same conventions as in the MRC 2D image processing 
+C	programs).
 C
-C       CARD 1: Input file name for image
-C       CARD 2: Output file name to check result
-C       CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um],PAve
-C       CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep[A], dAst[A], TiltA[deg], TiltR[deg]
+C	CARD 1: Input file name for image
+C	CARD 2: Output file name to check result
+C	CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um],PAve
+C	CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep[A], dAst[A], TiltA[deg], TiltR[deg]
 C
-C               The output image file to check the result of the fitting
-C               shows the filtered average power spectrum of the input
-C               image in one half, and the fitted CTF (squared) in the
-C               other half. The two halves should agree very well for a
-C               successful fit.
+C		The output image file to check the result of the fitting
+C		shows the filtered average power spectrum of the input
+C		image in one half, and the fitted CTF (squared) in the
+C		other half. The two halves should agree very well for a
+C		successful fit.
 C
-C               CS: Spherical aberration coefficient of the objective in mm
-C               HT: Electron beam voltage in kV
-C               AmpCnst: Amount of amplitude contrast (fraction). For ice
-C                        images 0.07, for negative stain about 0.15.
-C               XMAG: Magnification of original image
-C               DStep: Pixel size on scanner in microns
-C               PAve: Pixel averaging (PAve x PAve) for input image 
-C               Box: Tile size. The program divides the image into square
-C                    tiles and calculates the average power spectrum. Tiles
-C                    with a significantly higher or lower variance are 
-C                    excluded; these are parts of the image which are unlikely
-C                    to contain useful information (beam edge, film number 
-C                    etc). IMPORTANT: Box must have a even pixel dimensions.
-C               ResMin: Low resolution end of data to be fitted.
-C               ResMaX: High resolution end of data to be fitted.
-C               dFMin: Starting defocus value for grid search in Angstrom. 
-C                      Positive values represent an underfocus. The program
-C                      performs a systematic grid search of defocus values 
-C                      and astigmatism before fitting a CTF to machine 
-C                      precision.
-C               dFMax: End defocus value for grid search in Angstrom.
-C               FStep: Step width for grid search in Angstrom.
-C               dAst: Expected amount of astigmatism in Angstrom.
-C               TiltA: Expected tilt angle in degrees.
-C               TiltR: Expected tilt angle uncertainty in degrees.
+C		CS: Spherical aberration coefficient of the objective in mm
+C		HT: Electron beam voltage in kV
+C		AmpCnst: Amount of amplitude contrast (fraction). For ice
+C		         images 0.07, for negative stain about 0.15.
+C		XMAG: Magnification of original image
+C		DStep: Pixel size on scanner in microns
+C		PAve: Pixel averaging (PAve x PAve) for input image 
+C		Box: Tile size. The program divides the image into square
+C		     tiles and calculates the average power spectrum. Tiles
+C		     with a significantly higher or lower variance are 
+C		     excluded; these are parts of the image which are unlikely
+C		     to contain useful information (beam edge, film number 
+C		     etc). IMPORTANT: Box must have a even pixel dimensions.
+C		ResMin: Low resolution end of data to be fitted.
+C		ResMaX: High resolution end of data to be fitted.
+C		dFMin: Starting defocus value for grid search in Angstrom. 
+C		       Positive values represent an underfocus. The program
+C		       performs a systematic grid search of defocus values 
+C		       and astigmatism before fitting a CTF to machine 
+C		       precision.
+C		dFMax: End defocus value for grid search in Angstrom.
+C		FStep: Step width for grid search in Angstrom.
+C		dAst: Expected amount of astigmatism in Angstrom.
+C		TiltA: Expected tilt angle in degrees.
+C		TiltR: Expected tilt angle uncertainty in degrees.
 C
 C*****************************************************************************
-C       example command file (UNIX):
+C	example command file (UNIX):
 C
-C       #!/bin/csh -x
-C       #
-C       #   ctftilt
-C       #
-C       time /public/image/bin/ctftilt.exe << eof
-C       image.mrc
-C       power.mrc
-C       2.6,200.0,0.07,60000.0,28.0,2
-C       128,100.0,15.0,30000.0,90000.0,5000.0,500.0,100.0,0.0,5.0
-C       eof
-C       #
+C	#!/bin/csh -x
+C	#
+C	#   ctftilt
+C	#
+C	time /public/image/bin/ctftilt.exe << eof
+C	image.mrc
+C	power.mrc
+C	2.6,200.0,0.07,60000.0,28.0,2
+C	128,100.0,15.0,30000.0,90000.0,5000.0,500.0,100.0,0.0,5.0
+C	eof
+C	#
 C*****************************************************************************
 C
       PROGRAM CTFTILT
 C
-C       NIKO, 21 SEPTEMBER 2002
+C	NIKO, 21 SEPTEMBER 2002
 C
       IMPLICIT NONE
 C
@@ -92,21 +92,19 @@ C
      +        ' General Public License (GPL)')
 C                    
       IMP=0
-CHEN>
-C#ifdef _OPENMP
-C      CALL GETENV('OMP_NUM_THREADS',NCPUS)
-C      READ(NCPUS,*,ERR=111,END=111)IMP
-C111   CONTINUE
-C      IF (IMP.LE.0) THEN
-C        CALL GETENV('NCPUS',NCPUS)
-C        READ(NCPUS,*,ERR=112,END=112)IMP
-C112     CONTINUE
-C      ENDIF
-C      IF (IMP.LE.0) THEN
-C        IMP=OMP_GET_NUM_PROCS()
-C      ENDIF
-C#endif
-CHEN<
+#ifdef _OPENMP
+      CALL GETENV('OMP_NUM_THREADS',NCPUS)
+      READ(NCPUS,*,ERR=111,END=111)IMP
+111   CONTINUE
+      IF (IMP.LE.0) THEN
+        CALL GETENV('NCPUS',NCPUS)
+        READ(NCPUS,*,ERR=112,END=112)IMP
+112     CONTINUE
+      ENDIF
+      IF (IMP.LE.0) THEN
+        IMP=OMP_GET_NUM_PROCS()
+      ENDIF
+#endif
       IF (IMP.LE.0) IMP=1
 C
       IF (IMP.GT.1) THEN
@@ -114,7 +112,7 @@ C
 7000    FORMAT(/' Parallel processing: NCPUS =   ',I8)
       ENDIF
 C
-C       Read in all input parameters and I/O files
+C	Read in all input parameters and I/O files
 C
       WRITE(6,1002)
 1002  FORMAT(/' Input image file name')
@@ -132,7 +130,7 @@ C
 1031  FORMAT(F5.1,F9.1,F8.2,F10.1,F9.3,I5)
       WRITE(6,1040)
 1040  FORMAT(/' Positive defocus values for underfocus',
-     +       /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A],',
+     +	     /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A],',
      +        ' FStep[A], dAst[A], TiltA[deg], TiltR[deg]')
       READ(5,*,END=98)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,
      +         DAST,TILTA,TILTR
@@ -155,13 +153,13 @@ C     +         TILTA,TILTR
 C
 99    CONTINUE
 C
-C       Check input parameters
+C	Check input parameters
 C
       ITEST=JXYZ(1)/2
       IF (2*ITEST.NE.JXYZ(1)) THEN
-        WRITE(6,1090)
-1090    FORMAT(/' Box size must be even number')
-        STOP
+      	WRITE(6,1090)
+1090	FORMAT(/' Box size must be even number')
+      	STOP
       ENDIF
       IF (DAST.LE.0.0) THEN
         DAST=500.0
@@ -174,23 +172,23 @@ C
       JXYZ(2)=JXYZ(1)
       JXYZ(3)=1
 C
-C       Make sure RESMIN is larger than RESMAX
+C	Make sure RESMIN is larger than RESMAX
 C
       IF (RESMIN.LT.RESMAX) THEN
-        TMP=RESMAX
-        RESMAX=RESMIN
-        RESMIN=TMP
+      	TMP=RESMAX
+      	RESMAX=RESMIN
+      	RESMIN=TMP
       ENDIF
 C
-C       Same for DFMIN, DFMAX
+C	Same for DFMIN, DFMAX
 C
       IF (DFMAX.LT.DFMIN) THEN
-        TMP=DFMAX
-        DFMAX=DFMIN
-        DFMIN=TMP
+      	TMP=DFMAX
+      	DFMAX=DFMIN
+      	DFMIN=TMP
       ENDIF
 C
-C       Open input image
+C	Open input image
 C
       CALL GUESSF(FILEIN,CFORM,EX)
       IF  (.NOT.EX) THEN
@@ -201,7 +199,7 @@ C
       CALL IOPEN(FILEIN,10,CFORM,MODE,NXYZ(1),NXYZ(2),
      +           NXYZ(3),'OLD',STEPR,TITLE)
 C
-C       STEPR is pixel size in Angstrom
+C	STEPR is pixel size in Angstrom
 C
       STEPR=DSTEP*(10.0**4.0)/XMAG
 C
@@ -217,7 +215,7 @@ C
         STOP ' Try reducing the image size or increase PAVE'
       ENDIF
 C
-C       Read in image and compress at the same time
+C	Read in image and compress at the same time
 C
       DO 10 J=1,NXYZ(2)/IAVE
         IP=(J-1)*IAVE
@@ -303,19 +301,19 @@ C
       ENDIF
 74    CONTINUE
 C
-C       Convert units
+C	Convert units
 C
       CS=CS*(10.0**7.0)                          ! Angstroms
       KV=KV*1000.0                               ! Volts
       WL=12.26/SQRT(KV+0.9785*KV**2/(10.0**6.0)) ! Angstroms
 C
-C       Parameters for CTF calculation
+C	Parameters for CTF calculation
 C
       WGH1=SQRT(1.0-WGH**2)
       WGH2=WGH
       THETATR=WL/(STEPR*JXYZ(1))
 C
-C       Convert resolution into pixel resolution
+C	Convert resolution into pixel resolution
 C
       RESMIN=STEPR/RESMIN
       RESMAX=STEPR/RESMAX
@@ -328,8 +326,8 @@ C
       IF (RESMIN.GE.RESMAX)
      +  STOP ' RESMIN >= RESMAX; increase RESMAX'
 C
-C       KXYZ is dimension of power spectrum
-C       This needs to be even for later filtering
+C	KXYZ is dimension of power spectrum
+C	This needs to be even for later filtering
 C
       KXYZ(1)=JXYZ(1)/2
       KXYZ(2)=JXYZ(2)
@@ -342,14 +340,14 @@ C
       ENDIF
 C
 C
-C       Find approx. direction of tilt axis
-C       POWER is average power spectrum along tilt axis
-C       TLTAXIS is angle between X-axis and tilt axis
+C	Find approx. direction of tilt axis
+C	POWER is average power spectrum along tilt axis
+C	TLTAXIS is angle between X-axis and tilt axis
 C
       CALL FIND_TAXIS(AIN,NXYZ,RMSMIN,RMSMAX,
      +  JXYZ,POWER,KXYZ,TLTAXIS,NR)
 C
-C       If expected tilt angle is 0.0 deg, use entire image to do
+C	If expected tilt angle is 0.0 deg, use entire image to do
 C       initial CTF fit (as in CTFFIND3)
 C
       IF (TILTA.LE.20.0) THEN
@@ -396,22 +394,22 @@ C
      +           '    IMAGE CENTER FOR INITIAL CTF FIT...'/)
       ENDIF
 C
-C       Filter power spectrum to remove slowly varying background
-C       DMAX is maximum of filtered power spectrum (for later scaling)
+C	Filter power spectrum to remove slowly varying background
+C	DMAX is maximum of filtered power spectrum (for later scaling)
 C
       CALL FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS1,DMAX,
      +            RESMIN)
 C
-C       Search for rough CTF parameters DFMID1, DFMID2, ANGAST
+C	Search for rough CTF parameters DFMID1, DFMID2, ANGAST
 C
       DFMID1=DFMIN
       DFMID2=DFMAX
       CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
-     +           POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
+     +		 POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
 C
-C       The following parameters are passed to the refinement
-C       routine via common block FUNC
-C       HW is exponent in low bass filter
+C	The following parameters are passed to the refinement
+C	routine via common block FUNC
+C	HW is exponent in low bass filter
 C
       RMIN2=RESMIN**2
       RMAX2=RESMAX**2
@@ -423,11 +421,11 @@ C      HW=-1.0/0.4**2
       CALL EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
      +        THETATR,HW,AIN,JXYZ,RMIN2,RMAX2,CMAX,SIG2,DAST)
 C
-C       Create diagnostic image showing power spectrum
-C       and matching squared CTF
+C	Create diagnostic image showing power spectrum
+C	and matching squared CTF
 C
       DO 50 I=1,JXYZ(1)*JXYZ(2)
-        OUT(I)=0.0
+      	OUT(I)=0.0
 50    CONTINUE
       DO 200 L=1,JXYZ(1)/2
         LL=L-1
@@ -435,28 +433,28 @@ C
           MM=M-1
           IF (MM.GT.JXYZ(2)/2) MM=MM-JXYZ(2)
           ID=L+JXYZ(1)/2*(M-1)
-          I=L+JXYZ(1)/2
-          J=M+JXYZ(2)/2
-          IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
-          IS=I+JXYZ(1)*(J-1)
-C         OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
-          OUT(IS)=POWER(ID)/DRMS1/2+0.5
-          IF (OUT(IS).GT.1.0) OUT(IS)=1.0
-          IF (OUT(IS).LT.-1.0) OUT(IS)=-1.0
+      	  I=L+JXYZ(1)/2
+      	  J=M+JXYZ(2)/2
+      	  IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
+      	  IS=I+JXYZ(1)*(J-1)
+C      	  OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
+      	  OUT(IS)=POWER(ID)/DRMS1/2+0.5
+      	  IF (OUT(IS).GT.1.0) OUT(IS)=1.0
+      	  IF (OUT(IS).LT.-1.0) OUT(IS)=-1.0
           RES2=(REAL(LL)/JXYZ(1))**2+(REAL(MM)/JXYZ(2))**2
           IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
             CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
      +               ANGAST,THETATR,LL,MM)
-            I=JXYZ(1)/2-L+1
-            J=JXYZ(2)-J+2
-            IF (J.LE.JXYZ(2)) THEN
-              IS=I+JXYZ(1)*(J-1)
+     	    I=JXYZ(1)/2-L+1
+      	    J=JXYZ(2)-J+2
+      	    IF (J.LE.JXYZ(2)) THEN
+      	      IS=I+JXYZ(1)*(J-1)
               OUT(IS)=CTFV**2
-            ENDIF
+      	    ENDIF
           ENDIF
 200   CONTINUE
 C
-C       Write out diagnostic image in mode 2 (floating point)
+C	Write out diagnostic image in mode 2 (floating point)
 C
       MODE=2
       IF (STEPR.NE.0.0) DSTEP=1.0/STEPR
@@ -468,16 +466,16 @@ C
 210   CONTINUE
       CALL ICLOSE(10)
 C
-C       Replace array AIN with input image by local power spectra
-C       by dividing up the image into tiles of size KXYZ and
-C       calculating power spectra for each tile 
+C	Replace array AIN with input image by local power spectra
+C	by dividing up the image into tiles of size KXYZ and
+C	calculating power spectra for each tile 
 C
       CALL TILE(JXYZ,KXYZ,NXYZ,AIN,ABOX,ABOX,CBOXS,
      +             RMSMIN,RMSMAX,POWER,BUF1)
 C
-C       Search for the tilt angle that produces the highest
-C       correlation coefficient between power spectra and
-C       calculated squared CTF
+C	Search for the tilt angle that produces the highest
+C	correlation coefficient between power spectra and
+C	calculated squared CTF
 C
       IF (TILTR.LT.2.5) TILTR=2.4999
       TILTA=ABS(TILTA/180.0*PI)
@@ -487,8 +485,8 @@ C
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,TLTAXIS,
      +  STEPR,RMIN2,RMAX2,HW,TANGLE,AIN,DAST)
 C
-C       Refine all parameters
-C       Some parameters are passed through common block FUNCB
+C	Refine all parameters
+C	Some parameters are passed through common block FUNCB
 C
       CALL REFINE_TILT(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,AIN,
      +                 POWER)
@@ -497,9 +495,9 @@ C
 999   STOP 'END-OF-FILE ERROR ON READ'
 9999  CONTINUE
 C
-C       Close input file
-C       Write out a little figure explaining the meaning of the
-C       final refined parameters
+C	Close input file
+C	Write out a little figure explaining the meaning of the
+C	final refined parameters
 C
       CALL FIGURE(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,NXYZ,IAVE,
      +            STEPR)
@@ -536,9 +534,9 @@ C**************************************************************************
       SUBROUTINE FIGURE(DFMID1,DFMID2,ANGAST,TLTAXIS,TANGLE,
      +                  NXYZ,IAVE,PSIZE)
 C**************************************************************************
-C       Writes out a figure indicating the scanned image with defocus
-C       values in the center and at the four corners. Also writes out
-C       a formula for calculating the defocus at an arbitrary location
+C	Writes out a figure indicating the scanned image with defocus
+C	values in the center and at the four corners. Also writes out
+C	a formula for calculating the defocus at an arbitrary location
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -624,30 +622,30 @@ C
 C**************************************************************************
       SUBROUTINE MSMOOTH(ABOX,NXYZ,NW,BUF)
 C**************************************************************************
-C       Calculates a smooth background in the power spectrum
-C       in ABOX using a box convolution with box size 2NW+1 x 2NW+1.
-C       Replaces input with background-subtracted power spectrum.
+C	Calculates a smooth background in the power spectrum
+C	in ABOX using a box convolution with box size 2NW+1 x 2NW+1.
+C	Replaces input with background-subtracted power spectrum.
 C**************************************************************************
       IMPLICIT NONE
 C
       INTEGER NXYZ(*),NW,I,J,K,L,IX,IY,ID,CNT
       REAL ABOX(*),SUM,BUF(*)
 C
-C       loop over X and Y
+C	loop over X and Y
 C
       DO 10 I=1,NXYZ(1)
         DO 10 J=1,NXYZ(2)
           SUM=0.0
           CNT=0
 C
-C       loop over box to average
+C	loop over box to average
 C
           DO 20 K=-NW,NW
             DO 20 L=-NW,NW
               IX=I+K
               IY=J+L
 C
-C       here reset IX to wrap around spectrum
+C	here reset IX to wrap around spectrum
 C
               IF (IX.GT.NXYZ(1)) IX=IX-2*NXYZ(1)
               IF (IX.LT.1) THEN
@@ -655,7 +653,7 @@ C
                 IY=1-IY
               ENDIF
 C
-C       here reset IY to wrap around spectrum
+C	here reset IY to wrap around spectrum
 C
               IF (IY.GT.NXYZ(2)) IY=IY-NXYZ(2)
               IF (IY.LE.-NXYZ(2)) IY=IY+NXYZ(2)
@@ -676,7 +674,7 @@ C              IF (ID.NE.1) THEN
           ENDIF
 10    CONTINUE
 C
-C       replace input with background-subtracted spectrum
+C	replace input with background-subtracted spectrum
 C       need to take difference of squares to obtain power spectrum
 C       since input was sqrt of average power spectrum to enable
 C       better background subtraction (reduced slope)
@@ -691,11 +689,11 @@ C**************************************************************************
       SUBROUTINE FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS,DMAX,
      +                  RESMIN)
 C**************************************************************************
-C       Filters power spectrum by removing smooth background. This
-C       is necessary to obtain a good CTF fit. Also calculates
-C       mean, STD and maximum of filtered spectrum.
-C       Resizes the power spectrum to be exactly of dimension
-C       JXYZ(1) x JXYZ(2)
+C	Filters power spectrum by removing smooth background. This
+C	is necessary to obtain a good CTF fit. Also calculates
+C	mean, STD and maximum of filtered spectrum.
+C	Resizes the power spectrum to be exactly of dimension
+C	JXYZ(1) x JXYZ(2)
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -709,11 +707,11 @@ C
 C      NW=INT(KXYZ(1)*DSTEP/20.0)
       NW=INT(KXYZ(1)*RESMIN*SQRT(2.0))
 C
-C       subtract smooth background
+C	subtract smooth background
 C
       CALL MSMOOTH(POWER,KXYZ,NW,BUF1)
 C
-C       calculate mean, STD, resize power spectrum
+C	calculate mean, STD, resize power spectrum
 C
       DMEAN=0.0
       DSQR=0.0
@@ -724,7 +722,7 @@ C
           IS=I+KXYZ(1)*(J-1)
           POWER(ID)=POWER(IS)
           DMEAN=DMEAN+POWER(ID)
-          DSQR=DSQR+POWER(ID)**2
+      	  DSQR=DSQR+POWER(ID)**2
           IF (POWER(ID).GT.DMAX) DMAX=POWER(ID)
 61    CONTINUE
       DMEAN=DMEAN/JXYZ(1)/JXYZ(2)*2
@@ -743,8 +741,8 @@ C**************************************************************************
       SUBROUTINE REFINE_TILT(DFMID1,DFMID2,ANGAST,
      +       TLTAXIS,TANGLE,AIN,ABOX)
 C**************************************************************************
-C       Refines all five image parameters using Powell minimizer
-C       VA04A
+C	Refines all five image parameters using Powell minimizer
+C	VA04A
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -783,18 +781,6 @@ C
      +             TLTAXIS/PI*180.0,TANGLE/PI*180.0,-RF
 1100  FORMAT(/,5F12.2,F12.5,'  Final Values')
 C
-CHEN>
-      open(11,FILE='SCRATCH/2dx_ctftilt.result.tmp',STATUS='NEW',
-     .  ERR=998)
-        WRITE(11,'(3F12.2)')DFMID1,DFMID2,180.0*(ANGAST/PI-NINT(ANGAST/PI))
-        write(11,'(3F12.2)')TLTAXIS/PI*180.0,TANGLE/PI*180.0,-RF
-      close(11)
-      GOTO 9997
-998   stop 'ERROR on file open of SCRATCH/2dx_ctftilt.result.tmp'
-9997  continue
-C
-CHEN<
-C
       RETURN
       END
 C
@@ -803,10 +789,10 @@ C**************************************************************************
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,TLTAXIS,
      +  PSIZE,RMIN2,RMAX2,HW,TANGLE,AIN,DAST)
 C**************************************************************************
-C       Search for tilt angle in 10 deg increments, starting from
-C       -65 deg to +65 deg. The function EVAL_TILT calculates the
-C       correlation coefficient between the calculated CTF for each
-C       tile in AIN, and the power spectrum of the tile.
+C	Search for tilt angle in 10 deg increments, starting from
+C	-65 deg to +65 deg. The function EVAL_TILT calculates the
+C	correlation coefficient between the calculated CTF for each
+C	tile in AIN, and the power spectrum of the tile.
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -829,12 +815,12 @@ C
         SUM=EVAL_TILT(JXYZ,NXYZ,AIN,CS,WL,
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,TLTAXIS,
      +  PSIZE,RMIN2,RMAX2,HW,TA,DAST)+TAR(SIG2,TA,TILTA,TILTR)
-        IF (SUM.GT.SUMMAX) THEN
-          SUMMAX=SUM
+      	IF (SUM.GT.SUMMAX) THEN
+      	  SUMMAX=SUM
           TANGLE=K
-          WRITE(*,1000)TANGLE,SUM
+      	  WRITE(*,1000)TANGLE,SUM
 1000      FORMAT('  Tilt angle, CC = ',F5.1,F12.5)
-        ENDIF
+      	ENDIF
 10    CONTINUE
       TANGLE=TANGLE/180.0*PI
 C
@@ -846,8 +832,8 @@ C**************************************************************************
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,TLTAXIS,
      +  PSIZE,RMIN2,RMAX2,HW,TA,DAST)
 C**************************************************************************
-C       Calculates the correlation coefficient between the calculated
-C       CTF for each tile in AIN, and the power spectrum of the tile.
+C	Calculates the correlation coefficient between the calculated
+C	CTF for each tile in AIN, and the power spectrum of the tile.
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -860,26 +846,26 @@ C
       REAL,ALLOCATABLE :: CCTF(:)
       PARAMETER (PI=3.1415926535898)
 C
-C       JXYZ is tile size
-C       calculate number of tiles in X and Y
+C	JXYZ is tile size
+C	calculate number of tiles in X and Y
 C
       NX=NXYZ(1)/JXYZ(1)
       NY=NXYZ(2)/JXYZ(2)
 C
-C       calculate center of image
+C	calculate center of image
 C
       CX=NXYZ(1)/2
       CY=NXYZ(2)/2
 C
-C       KXYZ is size of power spectrum (same as KXYZ
-C       but half the size in X)
+C	KXYZ is size of power spectrum (same as KXYZ
+C	but half the size in X)
 C
       KXYZ(1)=JXYZ(1)/2
       KXYZ(2)=JXYZ(2)
       KXYZ(3)=JXYZ(3)
 C
-C       N is normal to tilt axis, indicates the direction
-C       in which defocus varies most
+C	N is normal to tilt axis, indicates the direction
+C	in which defocus varies most
 C
 C       the signs here are inverted following advice from
 C       Henning Stahlberg and Richard Henderson about MRC tilt
@@ -888,9 +874,9 @@ C       compatible with the 2d crystal programs.
       N(1)=SIN(TLTAXIS)
       N(2)=-COS(TLTAXIS)
 C
-C       check here if tilt angle TA happens to be +-90 deg.
-C       if so, apply small offset to avoid degeneracy in
-C       refinement of tilt axis
+C	check here if tilt angle TA happens to be +-90 deg.
+C	if so, apply small offset to avoid degeneracy in
+C	refinement of tilt axis
 C
       IF (ABS(ABS(TA)-PI/2.0).LT.0.0001) THEN
         IF (TA.GT.0.0) TA=PI/2.0-0.0001
@@ -903,7 +889,7 @@ C
         STOP ' Try reducing number of tiles by increasing tile size'
       ENDIF
 C
-C       loop over all tiles
+C	loop over all tiles
 C
       DO 100 I=1,NY
 !$OMP PARALLEL DO
@@ -926,12 +912,12 @@ C     AIN(ID) is 1 if tile was good, otherwise 0 (see subroutine TILE)
 C
           IF (AIN(ID).EQ.1.0) THEN
             IS=J+(I-1)*NX
-            SUM=SUM+CCTF(IS)
+      	    SUM=SUM+CCTF(IS)
             CNT=CNT+1
           ENDIF
 101     CONTINUE
 C
-C       calculate average correlation coefficient
+C	calculate average correlation coefficient
 C
       SUM=SUM/CNT
 C
@@ -946,8 +932,8 @@ C**************************************************************************
      +  WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST,PSIZE,
      +  RMIN2,RMAX2,HW,TA,CX,CY,KXYZ,N,NX,CCTF,DAST,I,J)
 C**************************************************************************
-C       Calculates the correlation coefficient between the calculated
-C       CTF for each tile in AIN, and the power spectrum of the tile.
+C	Calculates the correlation coefficient between the calculated
+C	CTF for each tile in AIN, and the power spectrum of the tile.
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -959,13 +945,13 @@ C
       REAL RMIN2,RMAX2,N(2),SIG2,PSIZE,CS
       REAL,ALLOCATABLE :: ABOX(:)
 C
-C       calculate upper left corner of tile: IX, IY
+C	calculate upper left corner of tile: IX, IY
 C
       IX=(J-1)*JXYZ(1)+1
       IY=1+(I-1)*JXYZ(2)
 C
-C       calculate array element of AIN for lower right corner
-C       of this tile: ID
+C	calculate array element of AIN for lower right corner
+C	of this tile: ID
 C
       ID=IX-1+JXYZ(1)+NXYZ(1)*(IY-1+JXYZ(2)-1)
 C
@@ -973,7 +959,7 @@ C     AIN(ID) is 1 if tile was good, otherwise 0 (see subroutine TILE)
 C
       IF (AIN(ID).EQ.1.0) THEN
 C
-C       cut out power spectrum and put into ABOX
+C	cut out power spectrum and put into ABOX
 C
         ALLOCATE(ABOX(KXYZ(1)*KXYZ(2)),STAT=IERR)
         IF (IERR.NE.0) THEN
@@ -983,31 +969,31 @@ C
 C
         CALL BOXIMGP(AIN,NXYZ,ABOX,KXYZ,IX,IY,MEAN,RMS)
 C
-C       calculate coordinates of center of tile relative to
-C       center of image for which CTF values are being refined
+C	calculate coordinates of center of tile relative to
+C	center of image for which CTF values are being refined
 C
         DX=CX-IX+JXYZ(1)/2
         DY=CY-IY+JXYZ(2)/2
 C
-C       calculate how far along tilt axis normal we are
+C	calculate how far along tilt axis normal we are
 C
         R=(N(1)*DX+N(2)*DY)*PSIZE
 C
-C       now calculate by how much the defocus changes over
-C       the distance along the tilt axis normal
+C	now calculate by how much the defocus changes over
+C	the distance along the tilt axis normal
 C
         DF=R*TAN(TA)
 C
-C       add this defocus change to DFMID1 and DFMID2
+C	add this defocus change to DFMID1 and DFMID2
 C
         DFL1=DFMID1+DF
         DFL2=DFMID2+DF
 C
-C       calculate the correlation coefficient between the power
-C       spectrum of this tile and the calculated CTF.
-C       HW is parameter in Gaussian filter for calculated
-C       squared CTF, RMIN2,RMAX2 are resolution limits between
-C       which to do the correlation analysis.
+C	calculate the correlation coefficient between the power
+C	spectrum of this tile and the calculated CTF.
+C	HW is parameter in Gaussian filter for calculated
+C	squared CTF, RMIN2,RMAX2 are resolution limits between
+C	which to do the correlation analysis.
 C
         IS=J+(I-1)*NX
         CALL EVALCTF(CS,WL,WGH1,WGH2,DFL1,DFL2,ANGAST,
@@ -1023,9 +1009,9 @@ C**************************************************************************
       SUBROUTINE TILE(JXYZ,KXYZ,NXYZ,AIN,ABOX,CBOX,CBOXS,
      +                RMSMIN,RMSMAX,POWER,BUF1)
 C**************************************************************************
-C       Divides the input image AIN into tiles of size KXYZ
-C       and replaces each tile with its power spectrum.
-C       Also calculates average power spectrum POWER.
+C	Divides the input image AIN into tiles of size KXYZ
+C	and replaces each tile with its power spectrum.
+C	Also calculates average power spectrum POWER.
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -1038,73 +1024,73 @@ C
       WRITE(*,1100)
 1100  FORMAT(/,' TILING IMAGE...'/)
 C
-C       set power to zero
+C	set power to zero
 C
       DO 30 K=1,KXYZ(1)*KXYZ(2)
-        POWER(K)=0.0
+      	POWER(K)=0.0
 30    CONTINUE
 C
-C       NW is size of window for averaging to strip
-C       power spectrum if smooth background
+C	NW is size of window for averaging to strip
+C	power spectrum if smooth background
 C
       NW=KXYZ(1)/10
 C
-C       SCAL is scale factor to keep numbers in reasonable range
+C	SCAL is scale factor to keep numbers in reasonable range
 C
       SCAL=1.0/SQRT(REAL(JXYZ(1)*JXYZ(2)))
 C
-C       NX, NY are numger of tiles in X, Y
+C	NX, NY are numger of tiles in X, Y
 C
       NX=NXYZ(1)/JXYZ(1)
       NY=NXYZ(2)/JXYZ(2)
       CNT=0
 C
-C       loop over all tiles
+C	loop over all tiles
 C
       DO 100 I=1,NY
-        DO 100 J=1,NX
+      	DO 100 J=1,NX
 C
-C       calculate upper left corner of tile: IX, IY
+C	calculate upper left corner of tile: IX, IY
 C
-          IX=(J-1)*JXYZ(1)+1
+      	  IX=(J-1)*JXYZ(1)+1
           IY=1+(I-1)*JXYZ(2)
 C
-C       cut out tile and put into ABOX, tile size is JXYZ
+C	cut out tile and put into ABOX, tile size is JXYZ
 C
-          CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
+      	  CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
 C
-C       exclude tile if STD is too small or too large
+C	exclude tile if STD is too small or too large
 C
-          IF ((RMS.LE.RMSMAX).AND.(RMS.GE.RMSMIN)) THEN
+      	  IF ((RMS.LE.RMSMAX).AND.(RMS.GE.RMSMIN)) THEN
 C
-C       calculate power spectrum
+C	calculate power spectrum
 C       store sqrt of power spectrum in BUF1 to reduce slope
 C       of background (makes background subtraction in MSMOOTH
 C       more accurate, background-subtracted power spectrum will
 C       be squared after background subtraction)
 C
-            CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+      	    CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
             DO 40 L=1,JXYZ(2)
-              DO 41 K=1,JXYZ(1)/2
+      	      DO 41 K=1,JXYZ(1)/2
                 ID=K+JXYZ(1)/2*(L-1)
                 IS=K+KXYZ(1)*(L-1)
                 P=CABS(CBOX(ID)*SCAL)
                 POWER(IS)=POWER(IS)+P**2
                 BUF1(IS)=P
-41            CONTINUE
+41	      CONTINUE
 C
-C       if KXYZ(1) larger than JXYZ(1)/2 then need to store extra
-C       line to get power spectrum with even dimensions
+C	if KXYZ(1) larger than JXYZ(1)/2 then need to store extra
+C	line to get power spectrum with even dimensions
 C
               IF (KXYZ(1).GT.JXYZ(1)/2) THEN
                 P=CABS(CBOXS(L)*SCAL)
                 POWER(IS+1)=POWER(IS+1)+P**2
                 BUF1(IS+1)=P
               ENDIF
-40          CONTINUE
+40	    CONTINUE
 C
-C       strip smooth background from power spectrum and
-C       put back into AIN to replace tile
+C	strip smooth background from power spectrum and
+C	put back into AIN to replace tile
 C
             CALL MSMOOTH(BUF1,KXYZ,NW,ABOX)
             DO 62 L=1,KXYZ(2)
@@ -1113,26 +1099,26 @@ C
                 IS=K+KXYZ(1)*(L-1)
                 AIN(ID)=BUF1(IS)
 62          CONTINUE
-            CNT=CNT+1
+      	    CNT=CNT+1
 C
-C       set lower right corner of tile to 1 to indicate good tile
-C       (this corner is not used to store data)
+C	set lower right corner of tile to 1 to indicate good tile
+C	(this corner is not used to store data)
 C
             ID=IX-1+JXYZ(1)+NXYZ(1)*(IY-1+JXYZ(2)-1)
             AIN(ID)=1.0
           ELSE
             ID=IX-1+JXYZ(1)+NXYZ(1)*(IY-1+JXYZ(2)-1)
 C
-C       set lower right corner of tile to 0 to indicate bad tile
+C	set lower right corner of tile to 0 to indicate bad tile
 C
             AIN(ID)=0.0
-          ENDIF
+      	  ENDIF
 100   CONTINUE
 C
-C       calculate sqrt of average power spectrum
+C	calculate sqrt of average power spectrum
 C
       DO 60 K=1,KXYZ(1)*KXYZ(2)
-        POWER(K)=SQRT(POWER(K))
+      	POWER(K)=SQRT(POWER(K))
 60    CONTINUE
       SCAL=1.0/CNT
       CALL SCLIMG(POWER,KXYZ,SCAL)
@@ -1146,9 +1132,9 @@ C**************************************************************************
       SUBROUTINE FIND_TAXIS(AIN,NXYZ,RMSMIN,RMSMAX,
      +                  JXYZ,POWER,KXYZ,TLTAXIS,NR)
 C**************************************************************************
-C       Finds tilt axis by calculating power spectra along lines
-C       across input image AIN to minimize variance between spectra.
-C       JXYZ gives tile size
+C	Finds tilt axis by calculating power spectra along lines
+C	across input image AIN to minimize variance between spectra.
+C	JXYZ gives tile size
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -1164,7 +1150,7 @@ C
 C
       MINV=1.0E30
 C
-C       search for tilt axis in 2 deg increments
+C	search for tilt axis in 2 deg increments
 C
       ALLOCATE(VARP2(179),STAT=IERR)
       IF (IERR.NE.0)
@@ -1176,7 +1162,7 @@ C
      +              JXYZ,POWER,KXYZ,NR,VARP2,I,0)
 100   CONTINUE
 C
-C       find tilt axis with lowest variance
+C	find tilt axis with lowest variance
 C
       DO 101 I=1,179,2
         IF (VARP2(I).LT.MINV) THEN
@@ -1190,7 +1176,7 @@ C
       CALL FIND_TAXIS_S(AIN,NXYZ,RMSMIN,RMSMAX,
      +      JXYZ,POWER,KXYZ,NR,VARP2,K,1)
 C
-C       convert TLTAXIS into radiants
+C	convert TLTAXIS into radiants
 C
       TLTAXIS=TLTAXIS/180.0*PI
       DEALLOCATE(VARP2)
@@ -1202,9 +1188,9 @@ C**************************************************************************
       SUBROUTINE FIND_TAXIS_S(AIN,NXYZ,RMSMIN,RMSMAX,
      +              JXYZ,POWER,KXYZ,NR,VARP2,I,STORE)
 C**************************************************************************
-C       Finds tilt axis by calculating power spectra along lines
-C       across input image AIN to minimize variance between spectra.
-C       JXYZ gives tile size
+C	Finds tilt axis by calculating power spectra along lines
+C	across input image AIN to minimize variance between spectra.
+C	JXYZ gives tile size
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -1219,23 +1205,23 @@ C
       REAL,ALLOCATABLE :: ABOX(:),BUF1(:),BUF2(:),OUT(:)
       COMPLEX,ALLOCATABLE :: CBOXS(:)
 C
-C       calculate number of tiles in X, Y
+C	calculate number of tiles in X, Y
 C
       NX=NXYZ(1)/JXYZ(1)
       NY=NXYZ(2)/JXYZ(2)
 C
-C       set NX to minimum of NX and NY to avoid lines
-C       across image which are too long for some directions
+C	set NX to minimum of NX and NY to avoid lines
+C	across image which are too long for some directions
 C
       IF (NX.GT.NY) NX=NY
 C
-C       calculate center of image
+C	calculate center of image
 C
       CX=NXYZ(1)/2
       CY=NXYZ(2)/2
 C
-C       restrict resolution of power spectra to half
-C       the Nyquist frequency
+C	restrict resolution of power spectra to half
+C	the Nyquist frequency
 C
       IRL2=(JXYZ(1)/2)**2
 C
@@ -1249,9 +1235,9 @@ C
         STOP ' Try reducing the tile size'
       ENDIF
 C
-C       calculate power spectra along 2*NR+1 parallel lines (JJ=-NR...+NR).
-C       lines are offset so that circles cut out by BOXIMAGE2 do not
-C       overlap.
+C	calculate power spectra along 2*NR+1 parallel lines (JJ=-NR...+NR).
+C	lines are offset so that circles cut out by BOXIMAGE2 do not
+C	overlap.
 C
       CNT3=0
       CNT4=0
@@ -1262,7 +1248,7 @@ C
       VARP2(I)=0.0
       DO 21 JJ=-NR,NR
 C
-C       set buffers to zero
+C	set buffers to zero
 C
       DO 10 J=1,JXYZ(1)/2*JXYZ(2)
         BUF1(J)=0.0
@@ -1274,40 +1260,40 @@ C
 C
       DO 20 J=1,NX-ABS(JJ)
 C
-C       calculate upper left corner of tile
+C	calculate upper left corner of tile
 C
-        IX=CX+COS(ALPHA)*(J-NX/2)*JXYZ(1)
+      	IX=CX+COS(ALPHA)*(J-NX/2)*JXYZ(1)
      +       +ABS(JJ)*COS(A2)*JXYZ(1)-JXYZ(1)/2
-        IY=CY+SIN(ALPHA)*(J-NX/2)*JXYZ(1)
+      	IY=CY+SIN(ALPHA)*(J-NX/2)*JXYZ(1)
      +       +ABS(JJ)*SIN(A2)*JXYZ(1)-JXYZ(2)/2
 C
-C       cut out tile and put into ABOX
-C       the corners of the tile are set to the mean of the masked
-C       circular area in center of tile
+C	cut out tile and put into ABOX
+C	the corners of the tile are set to the mean of the masked
+C	circular area in center of tile
 C
-        CALL BOXIMG2(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
+      	CALL BOXIMG2(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
 C
-C       exclude tile if STD is too small or too large
+C	exclude tile if STD is too small or too large
 C
-        IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
+      	IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
           CNT=CNT+1
           CNT3=CNT3+1
 C
-C       calculate power spectrum and accumulate sums in BUF1, BUF2
+C	calculate power spectrum and accumulate sums in BUF1, BUF2
 C
-          CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+      	  CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
           DO 40 L=1,JXYZ(2)
-            DO 41 K=1,JXYZ(1)/2
+      	    DO 41 K=1,JXYZ(1)/2
               ID=(K+JXYZ(1)/2*(L-1))*2
               IS=K+KXYZ(1)*(L-1)
               P=(ABOX(ID-1)**2+ABOX(ID)**2)/RMS**2
               BUF2(IS)=BUF2(IS)+P**2
               BUF1(IS)=BUF1(IS)+P
               OUT(IS)=OUT(IS)+P
-41          CONTINUE
+41	    CONTINUE
 C
-C       if KXYZ(1) larger than JXYZ(1)/2 then need to store extra
-C       line to get power spectrum with even dimensions
+C	if KXYZ(1) larger than JXYZ(1)/2 then need to store extra
+C	line to get power spectrum with even dimensions
 C
             IF (KXYZ(1).GT.JXYZ(1)/2) THEN
               P=CABS(CBOXS(L)/RMS)**2
@@ -1315,15 +1301,15 @@ C
               BUF1(IS+1)=BUF1(IS+1)+P
               OUT(IS+1)=OUT(IS+1)+P
             ENDIF
-40        CONTINUE
-        ENDIF
+40	  CONTINUE
+      	ENDIF
 C
 20    CONTINUE
 C
       VARP=0.0
       CNT2=0
 C
-C       calculate total variance of power spectra
+C	calculate total variance of power spectra
 C
       IF (CNT.GT.1) THEN
         DO 30 L=1,KXYZ(2)
@@ -1334,8 +1320,8 @@ C
             BUF2(IS)=BUF2(IS)-BUF1(IS)**2
             IR2=(L-1)**2+(K-1)**2
 C
-C       exclude origin of power spectrum and any frequency larger
-C       than IRL2
+C	exclude origin of power spectrum and any frequency larger
+C	than IRL2
 C
             IF ((L.GT.5).AND.(K.GT.5).AND.(IR2.LT.IRL2)) THEN
               VARP=VARP+BUF2(IS)
@@ -1353,7 +1339,7 @@ C
 C
       IF (STORE.NE.0) THEN
 C
-C       store power spectrum for new minimum
+C	store power spectrum for new minimum
 C       take sqrt to reduce slope of background (makes background
 C       subtraction in MSMOOTH more accurate, background-subtracted
 C       power spectrum will be squared after background subtraction)
@@ -1372,10 +1358,10 @@ C
 C**************************************************************************
       SUBROUTINE BOXIMG2(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
 C**************************************************************************
-C       Cuts out an area of size JXYZ from array AIN. IX, IY are
-C       upper left corner of boxed area.
-C       Only central circular area is kept; pixels outside this area
-C       are set to mean of pixels inside the area.
+C	Cuts out an area of size JXYZ from array AIN. IX, IY are
+C	upper left corner of boxed area.
+C	Only central circular area is kept; pixels outside this area
+C	are set to mean of pixels inside the area.
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -1434,7 +1420,7 @@ C
 C
       RMS=0.0
       DO 20 I=1,JXYZ(1)*JXYZ(2)
-        RMS=RMS+ABOX(I)**2
+      	RMS=RMS+ABOX(I)**2
 20    CONTINUE
       RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
       RETURN
@@ -1448,8 +1434,8 @@ C
 C**************************************************************************
       SUBROUTINE BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
 C**************************************************************************
-C       Cuts out an area of size JXYZ from array AIN. IX, IY are
-C       upper left corner of boxed area.
+C	Cuts out an area of size JXYZ from array AIN. IX, IY are
+C	upper left corner of boxed area.
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -1464,12 +1450,12 @@ C
       M4=0.0
       DO 10 J=1,JXYZ(2)
         DO 10 I=1,JXYZ(1)
-          II=I+IX-1
-          JJ=J+IY-1
+      	  II=I+IX-1
+      	  JJ=J+IY-1
           ID=II+NXYZ(1)*(JJ-1)
           IDB=I+JXYZ(1)*(J-1)
           ABOX(IDB)=AIN(ID)
-          MEAN=MEAN+ABOX(IDB)
+      	  MEAN=MEAN+ABOX(IDB)
           IF (I.EQ.1) M1=M1+ABOX(IDB)
           IF (I.EQ.JXYZ(1)) M2=M2+ABOX(IDB)
           IF (J.EQ.1) M3=M3+ABOX(IDB)
@@ -1482,7 +1468,7 @@ C
       M4=M4/JXYZ(1)
       RMS=0.0
       DO 20 I=1,JXYZ(1)*JXYZ(2)
-        RMS=RMS+(ABOX(I)-MEAN)**2
+      	RMS=RMS+(ABOX(I)-MEAN)**2
 20    CONTINUE
       RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
       DO 30 J=1,JXYZ(2)
@@ -1498,8 +1484,8 @@ C
 C**************************************************************************
       SUBROUTINE BOXIMGP(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
 C**************************************************************************
-C       Cuts out an area of size JXYZ from array AIN. IX, IY are
-C       upper left corner of boxed area.
+C	Cuts out an area of size JXYZ from array AIN. IX, IY are
+C	upper left corner of boxed area.
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -1510,17 +1496,17 @@ C
       MEAN=0.0
       DO 10 J=1,JXYZ(2)
         DO 10 I=1,JXYZ(1)
-          II=I+IX-1
-          JJ=J+IY-1
+      	  II=I+IX-1
+      	  JJ=J+IY-1
           ID=II+NXYZ(1)*(JJ-1)
           IDB=I+JXYZ(1)*(J-1)
           ABOX(IDB)=AIN(ID)
-          MEAN=MEAN+ABOX(IDB)
+      	  MEAN=MEAN+ABOX(IDB)
 10    CONTINUE
       MEAN=MEAN/JXYZ(1)/JXYZ(2)
       RMS=0.0
       DO 20 I=1,JXYZ(1)*JXYZ(2)
-        RMS=RMS+(ABOX(I)-MEAN)**2
+      	RMS=RMS+(ABOX(I)-MEAN)**2
 20    CONTINUE
       RMS=SQRT(RMS/JXYZ(1)/JXYZ(2))
 C
@@ -1531,7 +1517,7 @@ C**************************************************************************
       REAL FUNCTION CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
      +                  THETATR,IX,IY)
 C**************************************************************************
-C       Calculates CTF value for reciprocal space coordinates IX, IY
+C	Calculates CTF value for reciprocal space coordinates IX, IY
 C**************************************************************************
 C
       PARAMETER (TWOPI=6.2831853071796)
@@ -1557,12 +1543,12 @@ C
 C
 C**************************************************************************
       SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
-     +          AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
+     +		AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
 C**************************************************************************
-C       Searches for values of DFMID1,DFMID2,ANGAST to maximize
-C       correlation coefficient between power spectrum AIN and
-C       calculated squared CTF. FSTEP is step size for grit search
-C       of DFMID1,DFMID2. Step size for ANGAST is fixed at 22.5 deg.
+C	Searches for values of DFMID1,DFMID2,ANGAST to maximize
+C	correlation coefficient between power spectrum AIN and
+C	calculated squared CTF. FSTEP is step size for grit search
+C	of DFMID1,DFMID2. Step size for ANGAST is fixed at 22.5 deg.
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -1594,21 +1580,21 @@ C
       DO 10 K=0,3
         DO 11 I=I1,I2
 !$OMP PARALLEL DO
-          DO 12 J=I1,I2
+      	  DO 12 J=I1,I2
             CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
      +        RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
      +        SUMMAX,DFMID1S,DFMID2S,ANGASTS,DAST,I,J,K,I1,I2)
 12        CONTINUE
 11      CONTINUE
         DO 13 I=1,ID
-          IF (SUMS(I).GT.SUMMAX) THEN
-            WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
-1100        FORMAT(3F12.2,F12.5)
-            SUMMAX=SUMS(I)
-            DFMID1S=DF1(I)
-            DFMID2S=DF2(I)
-            ANGASTS=ANG(I)
-          ENDIF
+      	  IF (SUMS(I).GT.SUMMAX) THEN
+      	    WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
+1100	    FORMAT(3F12.2,F12.5)
+      	    SUMMAX=SUMS(I)
+      	    DFMID1S=DF1(I)
+      	    DFMID2S=DF2(I)
+      	    ANGASTS=ANG(I)
+      	  ENDIF
 13      CONTINUE
 10    CONTINUE
       DEALLOCATE(SUMS,DF1,DF2,ANG)
@@ -1621,7 +1607,7 @@ C
       END      
 C**************************************************************************
       SUBROUTINE SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +        RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +	      RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
      +        SUMMAX,DFMID1S,DFMID2S,ANGASTS,DAST,I,J,K,I1,I2)
 C**************************************************************************
       IMPLICIT NONE
@@ -1638,21 +1624,21 @@ C
       ANG(ID)=22.5*K
       ANG(ID)=ANG(ID)/180.0*PI
       CALL EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),ANG(ID),
-     +  THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,SUMS(ID),SIG2,DAST)
+     +	THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,SUMS(ID),SIG2,DAST)
 C
       RETURN
       END      
 C
 C**************************************************************************
       SUBROUTINE EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
-     +          THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,CCTF,SIG2,DAST)
+     +		THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,CCTF,SIG2,DAST)
 C**************************************************************************
-C       Calculates the correlation coefficient between an input power
-C       spectrum AIN and the calculated squared CTF.
-C       HW is a parameter in a Gaussian filter to attenuate the calculated
-C       CTF towards higher resolution to obtain a better fit to the 
-C       observed input spectrum. The comparison is done between the squared
-C       resolution limits RMIN2 and RMAX2.
+C	Calculates the correlation coefficient between an input power
+C	spectrum AIN and the calculated squared CTF.
+C	HW is a parameter in a Gaussian filter to attenuate the calculated
+C	CTF towards higher resolution to obtain a better fit to the 
+C	observed input spectrum. The comparison is done between the squared
+C	resolution limits RMIN2 and RMAX2.
 C
 C       This part of the code was made more efficient by
 C
@@ -1746,8 +1732,8 @@ C
 C**************************************************************************
       SUBROUTINE REFINE_CTF(DFMID1,DFMID2,ANGAST,AIN,ABOX)
 C**************************************************************************
-C       Refines defocus and astigmatism using Powell minimizer
-C       VA04A
+C	Refines defocus and astigmatism using Powell minimizer
+C	VA04A
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -1786,8 +1772,8 @@ C
 C     CALCULATES NEW VALUE FOR F TO INPUT TO SUBROUTINE VA04A
 C
 C**************************************************************************
-C       Called by VA04A to refine defocus, astigmatism, tilt axis and
-C       tilt angle
+C	Called by VA04A to refine defocus, astigmatism, tilt axis and
+C	tilt angle
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -1833,7 +1819,7 @@ C
 C     CALCULATES NEW VALUE FOR F TO INPUT TO SUBROUTINE VA04A
 C
 C**************************************************************************
-C       Called by VA04A to refine defocus and astigmatism
+C	Called by VA04A to refine defocus and astigmatism
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -1855,7 +1841,7 @@ C
 C**************************************************************************
       SUBROUTINE SCLIMG(AIN,NXYZ,SCAL)
 C**************************************************************************
-C       Scales input AIN
+C	Scales input AIN
 C**************************************************************************
       IMPLICIT NONE
 C
@@ -4020,7 +4006,7 @@ C**************************************************************************
 C  STANDARD FORTRAN 66 (A VERIFIED PFORT SUBROUTINE)
       DIMENSION W(40),X(1),E(1),AIN(*),ABOX(*)
       EXTERNAL FX
-C       W[N*(N+3)]
+C	W[N*(N+3)]
       DDMAG=0.1*ESCALE
       SCER=0.05/ESCALE
       JJ=N*N+N

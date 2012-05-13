@@ -196,7 +196,7 @@ if ( ${merge_modus} == "3D" ) then
   echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
   #
   #############################################################################
-  ${proc_2dx}/linblock "sftools - to set phases to zero for PSF"
+  ${proc_2dx}/linblock "sftools - to set amps to 1 and phases to 0 for PSF"
   #############################################################################  
   #
   \rm -f SCRATCH/merge3D_phase_zero.mtz
@@ -211,6 +211,7 @@ select invert
 purge
 y
 expand 1
+calc COL F = 1
 calc COL PHI = 0
 write SCRATCH/merge3D_phase_zero.mtz
 quit

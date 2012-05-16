@@ -97,6 +97,9 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "C-CINA Uni Basel <2dx.jenkins@gmail.com>")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "tcsh (>=6.17.00)")
 
 set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/redhat/postinst.sh")
+set(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/redhat/preinst.sh")
+
+set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/redhat/postrm.sh")
 
 
 include(CPack)

@@ -149,12 +149,13 @@ IF(APPLE)
 ENDIF(APPLE)
 # Installation
 install(TARGETS ${EXETITLE} DESTINATION ${EXETITLE})
-file(GLOB PNGS resource/*.png)
+file(GLOB PNG resource/*.png)
 
 #create symlink to the kernel
 install(SCRIPT install_symlink.cmake)
 
 install(FILES ${PNG} DESTINATION resource)
+install(FILES ${PNG} DESTINATION Resource)
 #--------------------------------------------------------------------------------
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'

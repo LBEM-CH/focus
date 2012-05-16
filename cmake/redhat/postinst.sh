@@ -27,8 +27,8 @@ ln -sf /opt/2dx/kernel/proc /opt/2dx/
 
 ln -sf /opt/2dx/bin/2dx_merge /usr/bin/2dx
 
-#cp /opt/2dx/resource/2dx.desktop /usr/share/applications/
-#cp /opt/2dx/resource/icon.png /usr/share/pixmaps/2dx.png
+cp /opt/2dx/resource/2dx.desktop /usr/share/applications/
+cp /opt/2dx/resource/icon.png /usr/share/pixmaps/2dx.png
 
 
 #

@@ -1,0 +1,159 @@
+#!/bin/csh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Export Image as EMX format                                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 05/21/2012                                             #
+# Last Modification: 05/21/2012                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 97
+#
+# MANUAL: <B>Export several images as EMX format data<B>
+#
+# MANUAL: This script allows to export several images as EMX format, which means that a MRC-format file will be produced, accompanied with a EMX text file. All these will be placed into a sub-folder, called EMX.
+#
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: comment
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
+# DISPLAY: phacon
+# DISPLAY: KV
+# DISPLAY: CS
+# DISPLAY: defocus
+#
+#$end_local_vars
+#
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set comment = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set realang = ""
+set defocus = ""
+set KV = ""
+set CS = ""
+set phacon = ""
+set RESMIN = ""
+set RESMAX = ""
+#
+# Variables to be available from the config file are:
+#
+#$end_vars
+#
+set scriptname = 2dx_exportEMX
+#
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>>"
+echo "<<@evaluate>>"
+#
+source ${proc_2dx}/2dx_makedirs
+#
+if ( ! -d EMX ) then
+  \mkdir EMX
+endif
+#
+set olddir = $PWD
+cd EMX
+set emx_dir = $PWD
+cd ${olddir}
+#
+#############################################################################
+echo ":: "
+echo "::Preparing data into directory ${emx_dir}"
+echo ":: "
+#############################################################################
+#
+set ampcon = `echo ${phacon} | awk '{s=sqrt(1.0 - ( $1 * $1 ))} END {print s}'`
+#
+set filename = ${nonmaskimagename}
+if ( ! -e ${filename}.mrc ) then
+  ${proc_2dx}/protest "${filename}.mrc missing. Create file first."
+endif
+${proc_2dx}/linblock "Creating EMX/${filename}.mrc and EMX/${filename}.emx"
+cp -f ${filename}.mrc EMX
+#
+echo "# EMX1.0 *" > EMX/${filename}.emx
+echo "# "${comment} >> EMX/${filename}.emx
+echo "# " >> EMX/${filename}.emx
+echo "#UNITS: " >> EMX/${filename}.emx
+echo "# samplingRate         -> Angstroms / pixel" >> EMX/${filename}.emx
+echo "# defocus_U            -> Angstroms, underfocus positive" >> EMX/${filename}.emx
+echo "# defocus_V            -> Angstroms, underfocus positive" >> EMX/${filename}.emx
+echo "# astigmatism_angle    -> degrees" >> EMX/${filename}.emx
+echo "# voltage              -> kV" >> EMX/${filename}.emx
+echo "# spherical aberration -> mm" >> EMX/${filename}.emx
+echo " " >> EMX/${filename}.emx
+echo "data_micrograph " >> EMX/${filename}.emx
+echo "loop_" >> EMX/${filename}.emx
+echo " _emx_micrograph.samplingRate" >> EMX/${filename}.emx
+echo " _emx_micrograph.defocus_U" >> EMX/${filename}.emx
+echo " _emx_micrograph.defocus_V" >> EMX/${filename}.emx
+echo " _emx_micrograph.astigmatism_angle" >> EMX/${filename}.emx
+echo " _emx_micrograph.voltage" >> EMX/${filename}.emx
+echo " _emx_micrograph.Cs" >> EMX/${filename}.emx
+echo " _emx_micrograph.amplitude_contrast" >> EMX/${filename}.emx
+echo " _emx_micrograph.url" >> EMX/${filename}.emx
+set def_val1 = `echo ${defocus} | cut -d\, -f1`
+set def_val2 = `echo ${defocus} | cut -d\, -f2`
+set def_val3 = `echo ${defocus} | cut -d\, -f3`
+echo " ${sample_pixel} ${def_val1} ${def_val2} ${def_val3} ${KV} ${CS} ${ampcon} ${filename}.mrc" >> EMX/${filename}.emx
+#
+set filename = ${imagename}
+if ( ! -e ${filename}.mrc ) then
+  ${proc_2dx}/protest "${filename}.mrc missing. Create file first."
+endif
+${proc_2dx}/linblock "Creating EMX/${filename}.mrc and EMX/${filename}.emx"
+cp -r ${filename}.mrc EMX
+#
+echo "# EMX1.0 *" > EMX/${filename}.emx
+echo "# "${comment} >> EMX/${filename}.emx
+echo "# " >> EMX/${filename}.emx
+echo "#UNITS: " >> EMX/${filename}.emx
+echo "# samplingRate         -> Angstroms / pixel" >> EMX/${filename}.emx
+echo "# defocus_U            -> Angstroms, underfocus positive" >> EMX/${filename}.emx
+echo "# defocus_V            -> Angstroms, underfocus positive" >> EMX/${filename}.emx
+echo "# astigmatism_angle    -> degrees" >> EMX/${filename}.emx
+echo "# voltage              -> kV" >> EMX/${filename}.emx
+echo "# spherical aberration -> mm" >> EMX/${filename}.emx
+echo " " >> EMX/${filename}.emx
+echo "data_micrograph " >> EMX/${filename}.emx
+echo "loop_" >> EMX/${filename}.emx
+echo " _emx_micrograph.samplingRate" >> EMX/${filename}.emx
+echo " _emx_micrograph.defocus_U" >> EMX/${filename}.emx
+echo " _emx_micrograph.defocus_V" >> EMX/${filename}.emx
+echo " _emx_micrograph.astigmatism_angle" >> EMX/${filename}.emx
+echo " _emx_micrograph.voltage" >> EMX/${filename}.emx
+echo " _emx_micrograph.Cs" >> EMX/${filename}.emx
+echo " _emx_micrograph.amplitude_contrast" >> EMX/${filename}.emx
+echo " _emx_micrograph.url" >> EMX/${filename}.emx
+set def_val1 = `echo ${defocus} | cut -d\, -f1`
+set def_val2 = `echo ${defocus} | cut -d\, -f2`
+set def_val3 = `echo ${defocus} | cut -d\, -f3`
+echo " ${sample_pixel} ${def_val1} ${def_val2} ${def_val3} ${KV} ${CS} ${ampcon} ${filename}.mrc" >> EMX/${filename}.emx
+#
+echo ":: "
+${proc_2dx}/linblock "Data can be found in sub-directory EMX."
+echo "<<@progress: 100>>"
+#

@@ -57,6 +57,9 @@ C
       IK=-99999
       IL=-99999
  1000 continue
+        BACK=0.0
+        SIGA=0.0
+        FOM=0.0
         if(isig.eq.1)then
           READ (10,*,END=1005) H,K,L,AMP,PHASE,FOM,SIGA
         elseif(isig.eq.2)then

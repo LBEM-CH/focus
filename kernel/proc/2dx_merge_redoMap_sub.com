@@ -444,11 +444,33 @@ if ( ${RESULTSMRC} != "y" ) then
   set RESULTSMRC = "y"
 endif
 #
+#############################################################################
+${proc_2dx}/lin "MRC2TIF - to create TIFF file of final map"
+#############################################################################
+#
+#
+\rm -f ${imagename}-${symmetry}.tif
+#
+${bin_2dx}/mrc2tif.exe << eot
+${imagename}-${symmetry}.mrc
+${imagename}-${symmetry}.tif
+eot
+#
+\rm -f final_map.tif
+\ln -s ${imagename}-${symmetry}.tif final_map.tif
+#
 cd ${mergedir}/RESULTS-MRC
 # \rm -f ${imagename}-${imagenumber}_d.hkl
 # \ln -s ${rootdir}/${infile} ${imagename}-${imagenumber}_d.hkl
 \rm -f ${imagename}-${imagenumber}.mrc
 \ln -s ${rootdir}/final_map.mrc ${imagename}-${imagenumber}.mrc
+cd ${mergedir}/RESULTS-TIFF
+# \rm -f ${imagename}-${imagenumber}.tif
+# \ln -s ${rootdir}/final_map.tif ${imagename}-${imagenumber}.tif
+set filenum = `cat filenum.tmp`
+\cp ${rootdir}/final_map.tif TIFF${filenum}.tif
+@ filenum += 1
+echo ${filenum} > filenum.tmp
 cd ..
 #
 #

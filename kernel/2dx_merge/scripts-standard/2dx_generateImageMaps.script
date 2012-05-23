@@ -84,8 +84,11 @@ source ${proc_2dx}/2dx_merge_makedirs
 set RESULTSPS = "n"
 set RESULTSMRC = "n"
 \rm -rf RESULTS-MRC
+\rm -rf RESULTS-TIFF
 \rm -rf RESULTS-PS
 \mkdir RESULTS-MRC
+\mkdir RESULTS-TIFF
+echo 1000001 > RESULTS-TIFF/filenum.tmp
 \mkdir RESULTS-PS
 #
 set date = `date`

@@ -95,7 +95,13 @@ ${proc_2dx}/linblock "Creating EMX/${filename}.mrc and EMX/${filename}.emx"
 cp -f ${filename}.mrc EMX
 #
 echo "# EMX1.0 *" > EMX/${filename}.emx
+echo "# ======================================================================" > EMX/${filename}.emx
+echo "# .................EMX Exchange file...................................." > EMX/${filename}.emx
 echo "# "${comment} >> EMX/${filename}.emx
+echo "#=======================================================================" > EMX/${filename}.emx
+echo "# More information on the emx file format is available at" > EMX/${filename}.emx
+echo "# http://i2pc.cnb.csic.es/emx/CargarDictionaryFormat.htm?type=LabelList" > EMX/${filename}.emx
+echo "#=======================================================================" > EMX/${filename}.emx
 echo "# " >> EMX/${filename}.emx
 echo "#UNITS: " >> EMX/${filename}.emx
 echo "# samplingRate         -> Angstroms / pixel" >> EMX/${filename}.emx
@@ -128,7 +134,13 @@ ${proc_2dx}/linblock "Creating EMX/${filename}.mrc and EMX/${filename}.emx"
 cp -r ${filename}.mrc EMX
 #
 echo "# EMX1.0 *" > EMX/${filename}.emx
+echo "# ======================================================================" > EMX/${filename}.emx
+echo "# .................EMX Exchange file...................................." > EMX/${filename}.emx
 echo "# "${comment} >> EMX/${filename}.emx
+echo "#=======================================================================" > EMX/${filename}.emx
+echo "# More information on the emx file format is available at" > EMX/${filename}.emx
+echo "# http://i2pc.cnb.csic.es/emx/CargarDictionaryFormat.htm?type=LabelList" > EMX/${filename}.emx
+echo "#=======================================================================" > EMX/${filename}.emx
 echo "# " >> EMX/${filename}.emx
 echo "#UNITS: " >> EMX/${filename}.emx
 echo "# samplingRate         -> Angstroms / pixel" >> EMX/${filename}.emx

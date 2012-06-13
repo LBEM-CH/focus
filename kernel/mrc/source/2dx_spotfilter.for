@@ -73,17 +73,40 @@ C
         open(9,FILE=CSPOT1,STATUS='OLD',ERR=810)
 C
  100    continue
-          ionspt=ionspt + 1
-          read(9,*,ERR=150,END=150)
-     1         IOXSPT(ionspt),IOYSPT(ionspt)
-          if(IOXSPT(ionspt).lt.0)then
-            IOXSPT(ionspt)=-IOXSPT(ionspt)
-            IOYSPT(ionspt)=-IOYSPT(ionspt)
+          read(9,*,ERR=150,END=150)ixtmp,iytmp
+          if(ixtmp.lt.0)then
+            ixtmp=-ixtmp
+            iytmp=-iytmp
+          endif
+          if(ixtmp.eq.0)then
+            if(iytmp.lt.0)then
+              ixtmp=-ixtmp
+              iytmp=-iytmp
+            endif
+          endif
+          isthere=0
+          if(ionspt.gt.0)then
+            do j=1,ionspt
+              if(IOXSPT(j).eq.ixtmp .and. IOYSPT(j).eq.iytmp)then
+                isthere=1
+              endif
+            enddo
+          endif
+          if(isthere.eq.0)then
+            ionspt=ionspt + 1
+            IOXSPT(ionspt)=ixtmp
+            IOYSPT(ionspt)=iytmp
           endif
           goto 100
  150    continue
         close(9)
       endif
+C
+      do ix=0,imaxn
+        do iy=-imaxn,imaxn
+          ISPOTL(ix,iy)=0
+        enddo
+      enddo
 C
       do 240 ix=0,imaxn
         do 230 iy=-imaxn,imaxn
@@ -126,6 +149,7 @@ C                write(*,'(''iby='',I6)')iby
                 ISPOTL(ix,iy)=2
                 icbad  = icbad  + 1
                 icgood = icgood - 1
+                write(6,'('':Bad spot: '',2I6)')ix,iy
                 goto 225
               endif
 C
@@ -150,7 +174,7 @@ C
           elseif(ISPOTL(ix,iy).eq.2)then
             if(imodsp.eq.1)then
               write(11,'(I6,'','',I6)')ix,iy
-              do 305 in=1,ionspt-1
+              do 305 in=1,ionspt
                 if(IOXSPT(in).eq.ix .and.
      1             IOYSPT(in).eq.iy ) then
                    IOXSPT(in) = 0
@@ -170,9 +194,9 @@ C
         close(11)
 C
         open(12,FILE=CNAME4,STATUS='NEW',ERR=820)
-        do 410 in=1,ionspt-1
-          if(IOXSPT(in).ne.0 .or.
-     1       IOYSPT(in).ne.0 ) then
+        do 410 in=1,ionspt
+          if(( IOXSPT(in).ne.0 .or. IOYSPT(in).ne.0 ) .and.
+     1         ISPOTL(IOXSPT(in),IOYSPT(in)).eq.1) then
             write(12,'(I6,'','',I6)')
      1       IOXSPT(in),IOYSPT(in)
           endif

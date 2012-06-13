@@ -46,7 +46,7 @@ set new_imagenumber = "PutUniqueNumberHere"
 # EXAMPLE: doswap = "1"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
 # TYPE: Drop_Down_Menu "0=yes;1=no"
-set doswap = "1"
+set doswap = "0"
 #
 #$end_local_vars
 #
@@ -132,12 +132,12 @@ if ( ${err_val} == 1 ) then
   ${proc_2dx}/protest "ABORTING..."
 endif
 #
-if ( ${doswap} == "1" ) then
-  set new_lattice = `echo ${lattice} | sed 's/, /,/g'`
-  set new_secondlattice = `echo ${secondlattice} | sed 's/, /,/g'`
-else
+if ( ${doswap} == "0" ) then
   set new_lattice = `echo ${secondlattice} | sed 's/, /,/g'`
   set new_secondlattice = `echo ${lattice} | sed 's/, /,/g'`
+else
+  set new_lattice = `echo ${lattice} | sed 's/, /,/g'`
+  set new_secondlattice = `echo ${secondlattice} | sed 's/, /,/g'`
 endif
 #
 \mkdir ${new_imagedirectory}
@@ -173,7 +173,7 @@ endif
 #
 ${proc_2dx}/linblock "Links to old image files in cloned directory created."
 #
-if ( ${doswap} == "1" ) then
+if ( ${doswap} == "0" ) then
   if ( -e  ../${old_imagedirectory}/${imagename}.spt ) then
     cp -f ../${old_imagedirectory}/${imagename}.spt ${new_imagename}.spt
   endif

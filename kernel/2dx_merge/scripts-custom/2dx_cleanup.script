@@ -245,6 +245,7 @@ if ( ${cleanup_location} == "0" || ${cleanup_location} == "1" ) then
   while ( ${dircounter} > 0 )
     set from_dir = `cat ${oldir}/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
     cd ${oldir}
+    cd ..
     cd ${from_dir}
     #
     set fullpath = `pwd`

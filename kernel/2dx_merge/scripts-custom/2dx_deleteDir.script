@@ -62,10 +62,12 @@ cd ..
 set rootdir = $PWD
 #
 if ( ${delete_sure} == "yes" ) then
+        cd ${olddir}
 	# This translates the list of directories to work on into one single long line:
 	cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
 	set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 	#
+        cd ${rootdir}
 	if ( ! -d TRASH ) then
 	  \mkdir TRASH
 	endif
@@ -101,6 +103,7 @@ endif
 #
 if ( ${delete_trash} == "yes" ) then
 	if ( -d TRASH ) then
+                cd ${rootdir}
 		${proc_2dx}/linblock "emptying TRASH"
 		echo "<<@progress: 50>>"
                 cd TRASH

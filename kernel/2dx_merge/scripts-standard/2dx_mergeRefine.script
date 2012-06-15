@@ -77,6 +77,10 @@
 # DISPLAY: make_reference
 # DISPLAY: merge_ML_data
 # DISPLAY: plotres_rings
+# DISPLAY: scalimamp3d_rref
+# DISPLAY: scalimamp3d_BXYMINMAX
+# DISPLAY: scalimamp3d_BZMINMAX
+# DISPLAY: scalimamp3d_BEXTRA
 #
 #$end_local_vars
 #
@@ -129,6 +133,10 @@ set max_amp_correction = ""
 set merge_ML_data = ""
 set plotres_rings = ""
 set lattice = ""
+set scalimamp3d_rref = ""
+set scalimamp3d_BXYMINMAX = ""
+set scalimamp3d_BZMINMAX = ""
+set scalimamp3d_BEXTRA = ""
 #
 #$end_vars
 #

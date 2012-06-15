@@ -54,6 +54,10 @@
 # DISPLAY: MergeIWP
 # DISPLAY: max_amp_correction
 # DISPLAY: plotres_rings
+# DISPLAY: scalimamp3d_rref
+# DISPLAY: scalimamp3d_BXYMINMAX
+# DISPLAY: scalimamp3d_BZMINMAX
+# DISPLAY: scalimamp3d_BEXTRA
 #
 #$end_local_vars
 #
@@ -96,6 +100,10 @@ set MergeIWP = ""
 set max_amp_correction = ""
 set plotres_rings = ""
 set lattice = ""
+set scalimamp3d_rref = ""
+set scalimamp3d_BXYMINMAX = ""
+set scalimamp3d_BZMINMAX = ""
+set scalimamp3d_BEXTRA = ""
 #
 #$end_vars
 #

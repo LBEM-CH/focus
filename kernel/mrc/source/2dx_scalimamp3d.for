@@ -24,19 +24,13 @@ C       Version 2.13    JMS     30-Oct-2001     Correction to format statement
 C
 C       card input:
 C
-CHENN>
-C C  card 1: selected reference data, chosen from FF,BT,LZ,BR:   RREF - (A2)
-C  card 1: selected reference data, chosen from FF,BT,LZ,BR,AQ:   RREF - (A2)
-CHENN<
+C  card 1: selected reference data, chosen from FF,BT,LZ,BR:   RREF
 C       FF - eldiff formfactors for IAM C,N,O average from Internl Tab Cryst.
 C       BT - Bacillus thuringiensis toxin cry3a - X-ray amplitudes to 2.5 A.
 C       LZ - tetragonal lyzozyme.
 C       BR - bacteriorhodopsin, average of p3 and orthorhombic crystal amps.
 C               only the BR selection allows anisotropic scaling to account for
 C               the likely orientation of helices perpendicular to membrane.
-CHENN>
-C       AQ - same as LZ.
-CHENN<
 C
 C  card 2: type of input data to be scaled: 
 C               NPROG,TWOFOLD,BXYMIN,BXYMAX,BZMIN,BZMAX - (*)
@@ -69,9 +63,10 @@ C               - scaled up version of required data on  'OUT'  - unit 3
 C
 C****************************************************************************** 
       PARAMETER (NMAX=80000)
-      PARAMETER (NSLOTS=80)
-      PARAMETER (NREF=5)
+      PARAMETER (NSLOTS=2000)
+      PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)
+      PARAMETER (NREF=4)
       DIMENSION IH(NMAX),IK(NMAX),IL(NMAX),ZSTAR(NMAX),AMP(NMAX),
      .  PHASE(NMAX),JQ(NMAX),WGT(NMAX),BCK(NMAX),
      .  CTFS(NMAX),FOM(NMAX),AMPOUT(NMAX),BCKOUT(NMAX),
@@ -151,15 +146,11 @@ C      DATA ALYSOZ/  /, LZSPACING/  /   ! to be added
 C
 CTSH      DATA DREF/'FF  ','BT  ','LZ  ','BR  '/
 CTSH++
-CHENN>
-C       DATA TMPDREF/'FF  ','BT  ','LZ  ','BR  '/
 C
-      DATA TMPDREF/'FF  ','BT  ','LZ  ','BR  ','AQ  '/
-CHENN<
+      DATA TMPDREF/'FF  ','BT  ','LZ  ','BR  '/
 CTSH--
       DATA DESCRIPTION/'IAM formfactors     ','B.t. cry3a          ',
-     .  'Lysozyme            ','Bacteriorhodopsin   ',
-     .  'Aquaporin           '/
+     .  'Lysozyme            ','Bacteriorhodopsin   '/
 C
       WRITE(6,1)
 1     FORMAT(/'   SCALIMAMP3D - VX 3.00 (30-Oct-2005),'/
@@ -184,9 +175,6 @@ CTSH--
         WRITE(6,32) DESCRIPTION(J)
 32      FORMAT(/' Reference data selected - ',A)
         IR=J
-CHENN>
-        if(IR.eq.5)IR=3
-CHENN<
       ENDIF
 31    CONTINUE
       READ(5,*) NPROG,TWOFOLD,BXYMIN,BXYMAX,BZMIN,BZMAX ! card 2 : 
@@ -295,7 +283,12 @@ C      OPEN(UNIT=11,FILE=FILIN,READONLY,STATUS='OLD')
           ENDIF
         ENDIF
 150   CONTINUE
-160   NDATA=I-1
+CHEN>
+      write(6,'('':: ERROR: Too many reflections. Increase NMAX in SCALIMAMP3D.'')')
+      stop
+CHEN<
+160   continue
+      NDATA=I-1
       WRITE(6,161) NDATA
 161    FORMAT(' Number of data for scaling =',I6/)
       CLOSE(UNIT=11)
@@ -443,7 +436,7 @@ C      origmerg scaling
         DO 260 I=1,NDATA
           WRITE(3,262) IH(I),IK(I),ZSTAR(I),AMPOUT(I),PHASE(I),
      .            JFILM(I),JQ(I),WGT(I),BCKOUT(I),CTFS(I)
-262       FORMAT(1X,2I4,F8.4,F10.1,F7.1,I7,I3,F8.5,F10.1,F7.3)
+262       FORMAT(1X,2I4,F8.4,G16.3,F9.3,I12,I3,F9.5,G16.3,F8.3)
 260     CONTINUE
       ELSE
         DO 280 I=1,NDATA
@@ -480,7 +473,7 @@ C      origmerg scaling
                   WRITE(3,282) IH(I),IK(I),IL(I),AMPOUT(I),SIGAMPOUT(I)
              ELSE         ! i.e. NPROG=1
                   WRITE(3,282) IH(I),IK(I),IL(I),AMPOUT(I),PHASE(I),FOM(I)
-282          FORMAT(3I4,2F8.1,F8.3)
+282          FORMAT(3I4,2G16.3,F8.3)
              ENDIF
             ENDIF
           ENDIF
@@ -545,8 +538,8 @@ C*SCALORIGTILT*****************************************************************
      .          BR3DT,BRSPAC,AVERREF,IR,IRESTEP,
      .          BXYMIN,BXYMAX,BZMIN,BZMAX,RESLIMXY,RESLIMZ,BEXTRA)
       PARAMETER (NMAX=80000)
-      PARAMETER (NSLOTS=200)
-      PARAMETER (NFILMS=200)
+      PARAMETER (NSLOTS=2000)
+      PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)
       DIMENSION IH(NMAX),IK(NMAX),ZSTAR(NMAX),AMP(NMAX),CTFS(NMAX),
      .  BCK(NMAX),AMPOUT(NMAX),BCKOUT(NMAX),
@@ -643,8 +636,9 @@ C           STOP ' BR3DT data too low resolution for input data'
 300   CONTINUE
 C  calculate and write out sharpening factors
       WRITE(6,380)
-380   FORMAT('  FILMNO       BXY        BZ',
-     .  '  B-factors, ASCALE truncated by input limits')
+380   FORMAT('  FILMNO        BXY        BZ',
+     .  '  B-factors XY, B-factor Z, ASCALE',
+     .  ' truncated by input limits')
       DO 400 I=1,NF
         P1=C2(I)*A1(I)-A2(I)*C1(I)
         Q1=C2(I)*B1(I)-B2(I)*C1(I)

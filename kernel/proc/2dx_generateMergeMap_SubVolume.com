@@ -70,13 +70,20 @@ eot
   #############################################################################
   #   
   # 0.7071 = 1/sqrt(2)
+  set lim_min_offset = "0.02"
+  set lim_offset = "0.05"
   set limx = "0.70710678"
+  #
+  set limxmin = `echo ${lim_min_offset} ${lim_offset} ${limx} | awk '{ s = -$2 + $1 } END { print s }'`
+  set limxmax = `echo ${lim_min_offset} ${lim_offset} ${limx} | awk '{ s =  $2 + $3 } END { print s }'`
+  set limymin = `echo ${lim_min_offset} ${lim_offset} ${limx} | awk '{ s = -$2 + $1 } END { print s }'`
+  set limymax = `echo ${lim_min_offset} ${lim_offset} ${limx} | awk '{ s =  $2 + $3 } END { print s }'`
   #
   \rm -f volume_sub.map
   ${bin_ccp4}/mapmask mapin SCRATCH/rot_volume.map mapout volume_sub.map << eof
 AXIS X,Y,Z
 scale factor 1
-xyzlim 0.0 ${limx} 0.0 ${limx} -0.5 0.5
+xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} -0.5 0.5
 END
 eof
   #

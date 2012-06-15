@@ -231,8 +231,12 @@ endif
 if ( ${cleanup_location} == "0" || ${cleanup_location} == "1" ) then
   #
   if ( ${cleanup_location} == "0" ) then
-    find .. -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/2dx_merge_alldirs.dat
+    cd ${oldir}
+    cd ..
+    find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/2dx_merge_alldirs.dat
+    cd ${oldir}
   else
+    cd ${oldir}
     cp 2dx_merge_dirfile.dat ${oldir}/2dx_merge_alldirs.dat
   endif  
   #

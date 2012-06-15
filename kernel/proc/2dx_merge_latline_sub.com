@@ -23,6 +23,62 @@ set mode = 0
 #
 if ( ${mode} == 0 ) then
   #
+  if ( ${scalimamp3d_rref} != "0" ) then
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "SCALIMAMP3D - to scale image amplitudes to selected reference data"
+    #                                                                           #
+    #############################################################################
+    #
+    if ( ${scalimamp3d_rref} == "1" ) then 
+      set scalimamp3d_refdata = BT
+    endif
+    if ( ${scalimamp3d_rref} == "2" ) then 
+      set scalimamp3d_refdata = LZ
+      echo ":: "
+      ${proc_2dx}/linblock "WARNING: SCALIMAMP3D option LZ is not yet working"
+      echo ":: "
+    endif
+    if ( ${scalimamp3d_rref} == "3" ) then 
+      set scalimamp3d_refdata = BR
+    endif
+    set bextra = 0.0
+    #
+    \rm -f SCALIMAMP3D.DAT
+    \rm -f OUT
+    #
+    echo ": "
+    echo ": calling 2dx_scalimamp3d.exe with the following parameters:"
+    echo ": ${scalimamp3d_refdata}"
+    echo ": 0,F,${scalimamp3d_BXYMINMAX},${scalimamp3d_BZMINMAX} ! NPROG,TWOFOLD,BXYMIN,BXYMAX,BZMIN,BZMAX"
+    echo ": ${RESMAX}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA"
+    echo ": APH/merge.aph"
+    echo ": ${realcell}, ${realang}, ${RESMAX} !  A,B,GAMMA,RESOL"
+    echo ":  "
+    #
+    ${bin_2dx}/2dx_scalimamp3d.exe << eot 
+${scalimamp3d_refdata}
+0,F,${scalimamp3d_BXYMINMAX},${scalimamp3d_BZMINMAX} ! NPROG,TWOFOLD,BXYMIN,BXYMAX,BZMIN,BZMAX
+${RESMAX}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA
+APH/merge.aph
+${realcell}, ${realang}, ${RESMAX} !  A,B,GAMMA,RESOL
+eot
+    #
+    if ( ! -e OUT ) then
+      ${proc_2dx}/protest "ERROR: Problem in scalimamp3d.exe."
+    else    
+      \mv -f APH/merge.aph APH/merge_before_scalimamp3d.aph
+      \mv -f OUT APH/merge.aph
+      echo "# IMAGE: APH/merge.aph <APH: merge.aph after scalimamp3d>" >> LOGS/${scriptname}.results
+    endif
+    #
+    echo " "
+    ${proc_2dx}/lin "-"
+    echo " "
+    #
+  endif
+  #
   #############################################################################
   #                                                                           #
   ${proc_2dx}/linblock "LATLINPRESCAL - to apply CTF correction and weight calculation"

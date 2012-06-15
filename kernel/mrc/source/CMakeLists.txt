@@ -88,7 +88,7 @@ set(CMAKE_DEBUG_POSTFIX -dbg)
 # Libraries --------------------------------------------------------------------i
 set(LOCAL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/../lib)
 find_library(LIB2DX lib2dx.a PATH ${LOCAL_LIB_DIR})
-find_library(LIBSTDCXX libstdc++.a)  
+find_library(LIBSTDCXX libstdc++.a libstdc++-static.a)  
 #find_library(LIBSTDCXX stdc++)  
 if(LIBSTDCXX)
 	message(STATUS "KERNEL: Found stdc++ at ${LIBSTDCXX}")

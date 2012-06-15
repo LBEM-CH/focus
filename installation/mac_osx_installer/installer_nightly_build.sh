@@ -28,8 +28,8 @@ ls $ROOT/Resource
 --title "2dx Nightly Build" \
 --version  DATE=`date "+%d_%b_%Y"` \
 --filter "\.DS_Store" \
---resources "$ROOT/Resource" \
---scripts "$ROOT/Resource" \
+--resources "$DIR/Resources" \
+--scripts $DIR/Resources/scripts \
 --root-volume-only \
 --domain system \
 --verbose \

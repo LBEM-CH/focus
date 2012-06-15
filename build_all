@@ -60,36 +60,36 @@ echo ''
 ################################################################################
 # Fortran
 ################################################################################
-APP=kernel/mrc
-echo '*============================================================================*'
-echo '| ' ${APP}
-echo '+----------------------------------------------------------------------------+'
-echo '| prepare                                                                    |'
-echo cd ${SRC}/${APP} || { echo "failed to change to"  ${SRC}/${APP} ; exit 1; }
-cd ${SRC}/${APP} || { echo "failed to change to"  ${SRC}/${APP} ; exit 1; }
-echo 'workinkg directory: '
-pwd
-echo '+----------------------------------------------------------------------------+'
-echo '| autoconf                                                                   |'
-echo autoconf || { echo "autoconf failed for" $APP ; exit 2; }
-autoconf || { echo "autoconf failed for" $APP ; exit 2; }
-echo '+----------------------------------------------------------------------------+'
-echo '| configure                                                                  |'
-echo ./configure || { echo "Configure failed for" $APP ; exit 3; } 
-./configure || { echo "Configure failed for" $APP ; exit 3; } 
-echo ''
-echo '+----------------------------------------------------------------------------+'
-echo '| make                                                                       |'
-make VERBOSE=1 -j1 || { echo "Build failed for $APP"; exit 4; } 
+#APP=kernel/mrc
+#echo '*============================================================================*'
+#echo '| ' ${APP}
+#echo '+----------------------------------------------------------------------------+'
+#echo '| prepare                                                                    |'
+#echo cd ${SRC}/${APP} || { echo "failed to change to"  ${SRC}/${APP} ; exit 1; }
+#cd ${SRC}/${APP} || { echo "failed to change to"  ${SRC}/${APP} ; exit 1; }
+#echo 'workinkg directory: '
+#pwd
+#echo '+----------------------------------------------------------------------------+'
+#echo '| autoconf                                                                   |'
+#echo autoconf || { echo "autoconf failed for" $APP ; exit 2; }
+#autoconf || { echo "autoconf failed for" $APP ; exit 2; }
+#echo '+----------------------------------------------------------------------------+'
+#echo '| configure                                                                  |'
+#echo ./configure || { echo "Configure failed for" $APP ; exit 3; } 
+#./configure || { echo "Configure failed for" $APP ; exit 3; } 
+#echo ''
+#echo '+----------------------------------------------------------------------------+'
+#echo '| make                                                                       |'
+#make VERBOSE=1 -j1 || { echo "Build failed for $APP"; exit 4; } 
 #echo ''
 #echo '+----------------------------------------------------------------------------+'
 #echo '| make install                                                               |'
 #make VERBOSE=1 -j1 install || { echo "Install failed for $APP"; read)
-echo '*============================================================================*'
-echo ''
-echo ''
-echo ''
-echo ''
+#echo '*============================================================================*'
+#echo ''
+#echo ''
+#echo ''
+#echo ''
 
 
 #################################################################################

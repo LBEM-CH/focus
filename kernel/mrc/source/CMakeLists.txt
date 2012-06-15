@@ -6,26 +6,160 @@
 ############################################################################
 #
 cmake_minimum_required(VERSION 2.6)
-get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-if(INSTALL_DIR)
-	set(INSTALL_DIR ${INSTALL_DIR}/${DIRECTORY})
-else(INSTALL_DIR)
-	set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/${DIRECTORY})
-endif(INSTALL_DIR)
-file(GLOB FORTRAN_SOURCE *.for)
-file(GLOB C_SOURCE *.c *.h)
-file(GLOB CPP_SOURCE *.cc *.cpp)
-set(BUILD_FILES Makefile.in)
-set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE} ${BUILD_FILES} README) 
-install(FILES ${SOURCES} DESTINATION ${INSTALL_DIR})
-add_subdirectory(2dx_getlat)
-add_subdirectory(ctf)
-add_subdirectory(endianness)
-add_subdirectory(image_conversion)
-add_subdirectory(incompatible)
-add_subdirectory(maximum_likelihood)
-add_subdirectory(peaksearch)
-add_subdirectory(periodogram)
-add_subdirectory(rmeasure)
-add_subdirectory(spotIntensity)
+################################################################################
+# Application Name
+enable_language(Fortran)
 
+
+# make sure that the default is a RELEASE
+if (NOT CMAKE_BUILD_TYPE)
+  set (CMAKE_BUILD_TYPE RELEASE CACHE STRING
+      "Choose the type of build, options are: None Debug Release."
+      FORCE)
+endif (NOT CMAKE_BUILD_TYPE)
+
+################################################################################
+# Fortran Compiler -------------------------------------------------------------
+get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+message(STATUS "adding ${Fortran_COMPILER_NAME} specific flags")
+
+if(Fortran_COMPILER_NAME STREQUAL "gfortran")
+	#gfortra
+	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
+	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")
+	if(APPLE)
+		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
+		set(LIBRARIES stdc++)
+		set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG}  -dead_strip -D_LARGEFILE_SOURCE -static-libgcc")
+	endif(APPLE)
+elseif(Fortran_COMPILER_NAME STREQUAL "ifort")
+	#ifort
+	LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
+	set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -axN -w -132 -cxxlib")
+elseif (Fortran_COMPILER_NAME STREQUAL "g77")
+	# g77
+  	set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -m32")
+  	set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
+else (Fortran_COMPILER_NAME STREQUAL "gfortran")
+  	message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
+  	message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
+  	message ("No optimized Fortran compiler flags are known, we just try -O2...")
+  	set (CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  	set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
+endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
+
+################################################################################
+# C Compiler -------------------------------------------------------------------
+#add_definitions(-DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -c)
+set(CMAKE_C_FLAGS_RELEASE "-ffast-math -dead_strip -static-libgcc")
+set(CMAKE_C_FLAGS_DEBUG  "-ffast-math -dead_strip -static-libgcc")
+
+################################################################################
+# C++ Compiler -----------------------------------------------------------------
+if(CMAKE_CXX_COMPILER STREQUAL "icpc")
+	set(CMAKE_CXX_FLAGS "-axN -w -132 -cxxlib")
+else(CMAKE_CXX_COMPILER STREQUAL "icpc")
+	set(CMAKE_CXX_FLAGS "-ffast-math") 
+	if(APPLE)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -dead_strip -static-libgcc")
+	endif(APPLE)
+endif(CMAKE_CXX_COMPILER STREQUAL "icpc")
+
+
+# Header files -----------------------------------------------------------------
+#include_directories(${2DX_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Source files -----------------------------------------------------------------
+file(GLOB FORTRAN_SOURCE *.for)
+file(GLOB C_SOURCE *.c)
+file(GLOB CPP_SOURCE *.cc)
+list(REMOVE_ITEM CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Creflectionsarray.cc)
+file(GLOB DAT_FILES *.dat)
+file(GLOB BUILD_FILES Makefile.*)
+file(GLOB README README*)
+set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE} ${DAT_FILES} ${BUILD_FILES} ${README}) 
+###############################################################################
+
+set(CMAKE_DEBUG_POSTFIX -dbg)
+
+################################################################################
+# Libraries --------------------------------------------------------------------i
+set(LOCAL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/../lib)
+find_library(LIB2DX lib2dx.a PATH ${LOCAL_LIB_DIR})
+if(LIB2DX_FOUND)
+	message(SATUS "${LIBD2DX} found!")
+endif(LIB2DX_FOUND)
+
+list(APPEND LOCAL_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a ${LOCAL_LIB_DIR}/libim2k.a ${LOCAL_LIB_DIR}/libmisc.a ${LOCAL_LIB_DIR}/libgen.a ${LOCAL_LIB_DIR}/libplot2k.a ${LOCAL_LIB_DIR}/libfft.a ${LOCAL_LIB_DIR}/libconv.a)
+list(APPEND LIBRARIES ${2DX_LIBRARIES})
+
+set(USE_FFTWF TRUE)
+find_package(FFTW)
+if(FFTW_FOUND)
+	message(STATUS "KERNEL: Found FFTW at ${FFTW_LIB}")
+	list(APPEND LIBRARIES  ${FFTW_LIB} ${2DX_LIBRARIES})
+	include_directories(${FFTW_INCLUDE})
+elseif(FFTW_FOUND)
+	message(FATAL_ERROR "FFTW not found!")
+endif(FFTW_FOUND)
+ 
+
+
+
+################################################################################
+# Executables ------------------------------------------------------------------
+
+# create Fortran object files
+set(CMAKE_FORTRAN_COMPILE_OBJECT ON)
+set(CMAKE_EXECUTABLE_SUFFIX ".exe")
+
+# fortran 
+foreach(i ${FORTRAN_SOURCE})
+	get_filename_component(EXECUTABLE ${i}  NAME_WE)
+	add_executable(${EXECUTABLE} ${i})
+	target_link_libraries(${EXECUTABLE} ${LOCAL_LIBRARIES} ${LIBRARIES})
+	list(APPEND EXECUTABLES ${EXECUTABLE})
+endforeach(i ${FORTRAN_SOURCE})
+
+# c++ 
+set(CPP_ADD_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Creflectionsarray.cc ${CMAKE_CURRENT_SOURCE_DIR}/Cspotarrays.cpp)
+foreach(i ${CPP_SOURCE})
+	get_filename_component(EXECUTABLE ${i}  NAME_WE)
+	add_executable(${EXECUTABLE} ${i} ${CPP_ADD_SOURCES})
+	list(APPEND EXECUTABLES ${EXECUTABLE})
+endforeach(i ${CPP_SOURCE})
+
+# c 
+foreach(i ${C_SOURCE})
+	get_filename_component(EXECUTABLE ${i}  NAME_WE)
+	add_executable(${EXECUTABLE} ${i})
+	list(APPEND EXECUTABLES ${EXECUTABLE})
+endforeach(i ${C_SOURCE})
+
+###############################################################################
+# sub directories -------------------------------------------------------------
+add_subdirectory(peaksearch)
+add_subdirectory(2dx_getlat)
+add_subdirectory(endianness)
+add_subdirectory(ctf)
+add_subdirectory(maximum_likelihood)
+
+
+
+###############################################################################
+# Installation  ---------------------------------------------------------------
+get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+if(INSTALL_SRC_DIR)
+	set(INSTALL_DIR ${INSTALL_SRC_DIR}/${DIRECTORY})
+else(INSTALL_SRC_DIR)
+	set(INSTALL_SRC_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/source/ctf/${DIRECTORY})
+endif(INSTALL_SRC_DIR)
+if(NOT INSTALL_BIN_DIR)
+	set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/bin)
+endif(NOT INSTALL_BIN_DIR)
+# sources
+install(FILES ${SOURCES} DESTINATION ${INSTALL_SRC_DIR})
+# executables
+install(TARGETS ${EXECUTABLES} DESTINATION ${INSTALL_BIN_DIR})
+###############################################################################

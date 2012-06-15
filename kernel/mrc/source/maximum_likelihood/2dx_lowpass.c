@@ -6,7 +6,7 @@
  */
 
 #include <common.h>
-
+#include <fftw3.h>
 void low_pass(int sx,int sy,float *amp, float q_l, int lp_m)
 {  
 

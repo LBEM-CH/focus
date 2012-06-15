@@ -5,11 +5,9 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
 cmake_minimum_required(VERSION 2.6)
 ################################################################################
 # Application Name
-project(mrc)
 enable_language(Fortran)
 
 
@@ -27,7 +25,7 @@ message(STATUS "adding ${Fortran_COMPILER_NAME} specific flags")
 
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#gfortran
-	set(CMAKE_Fortran_FLAGS_RELEASE "-O1 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
+	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
 	#set(CMAKE_Fortran_FLAGS_RELEASE -O1 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -dead_strip -static-libgcc -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -w) 
 	#set(CMAKE_Fortran_FLAGS_RELEASE "-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -w")
 	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")

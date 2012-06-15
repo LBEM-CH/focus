@@ -6,16 +6,39 @@
 ############################################################################
 #
 cmake_minimum_required(VERSION 2.6)
+
+# Header files -----------------------------------------------------------------
+if(NOT KERNEL_INCLUDE_DIR)
+	set(KERNEL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
+endif(NOT KERNEL_INCLUDE_DIR)
+include_directories(${KERNEL_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Source files -----------------------------------------------------------------
+file(GLOB FORTRAN_SOURCE *.for *.f)
+file(GLOB C_SOURCE *.c *.h)
+file(GLOB CPP_SOURCE *.cc *.cpp)
+set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE}) 
+
+# Executables ------------------------------------------------------------------
+
+set(LOCAL_EXECUTABLES "")
+foreach(i ${CPP_SOURCE})
+	get_filename_component(EXECUTABLE ${i}  NAME_WE)
+	add_executable(${EXECUTABLE} ${i})
+	list(APPEND LOCAL_EXECUTABLES ${EXECUTABLE})
+	#target_link_libraries(${EXECUTABLE} ${LOCAL_LIBRARIES} ${LIBRARIES})
+endforeach(i ${CPP_SOURCE})
+
+# Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 if(INSTALL_DIR)
 	set(INSTALL_DIR ${INSTALL_DIR}/${DIRECTORY})
 else(INSTALL_DIR)
 	set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/source/${DIRECTORY})
 endif(INSTALL_DIR)
-file(GLOB FORTRAN_SOURCE *.for)
-file(GLOB C_SOURCE *.c *.h)
-file(GLOB CPP_SOURCE *.cc *.cpp)
-file(GLOB DAT_FILES *.dat)
-set(BUILD_FILES Makefile.in)
-set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE} ${DAT_FILES} ${BUILD_FILES}) 
+if(NOT INSTALL_BIN_DIR)
+	set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/bin)
+endif(NOT INSTALL_BIN_DIR)
 install(FILES ${SOURCES} DESTINATION ${INSTALL_DIR})
+install(TARGETS ${LOCAL_EXECUTABLES} DESTINATION ${INSTALL_BIN_DIR})

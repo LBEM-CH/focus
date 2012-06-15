@@ -27,11 +27,12 @@ if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#gfortra
 	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
 	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")
+	set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}  -static-libgcc")
+	set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -static-libgcc")
 	if(APPLE)
-		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
-		set(LIBRARIES stdc++)
-		set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG}  -dead_strip -D_LARGEFILE_SOURCE -static-libgcc")
+		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -D_LARGEFILE_SOURCE")
 	endif(APPLE)
+
 elseif(Fortran_COMPILER_NAME STREQUAL "ifort")
 	#ifort
 	LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
@@ -51,8 +52,11 @@ endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
 ################################################################################
 # C Compiler -------------------------------------------------------------------
 #add_definitions(-DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -c)
-set(CMAKE_C_FLAGS_RELEASE "-ffast-math -dead_strip -static-libgcc")
-set(CMAKE_C_FLAGS_DEBUG  "-ffast-math -dead_strip -static-libgcc")
+set(CMAKE_C_FLAGS_RELEASE "-ffast-math  -static-libgcc")
+if(APPLE)
+	list(APPEND CMAKE_C_FLAGS_RELEASE -dead_strip)
+endif(APPLE)
+set(CMAKE_C_FLAGS_DEBUG  "-ffast-math  -static-libgcc")
 
 ################################################################################
 # C++ Compiler -----------------------------------------------------------------
@@ -87,9 +91,18 @@ set(CMAKE_DEBUG_POSTFIX -dbg)
 # Libraries --------------------------------------------------------------------i
 set(LOCAL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/../lib)
 find_library(LIB2DX lib2dx.a PATH ${LOCAL_LIB_DIR})
-if(LIB2DX_FOUND)
-	message(SATUS "${LIBD2DX} found!")
-endif(LIB2DX_FOUND)
+find_library(LIBSTDCXX libstdc++.a)  
+#find_library(LIBSTDCXX stdc++)  
+if(LIBSTDCXX)
+	message(STATUS "[DEBUG] found ${LIBSTDCXX}")
+	list(APPEND LIBRARIES  ${LIBSTDCXX})
+else(LIBSTDCXX)
+	message(STATUS "[DEBUG] not found libstdc++.a")
+	list(APPEND LIBRARIES stdc++)
+endif(LIBSTDCXX)
+#if(LIB2DX_FOUND)
+#	message(SATUS "${LIBD2DX} found!")
+#endif(LIB2DX_FOUND)
 
 list(APPEND LOCAL_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a ${LOCAL_LIB_DIR}/libim2k.a ${LOCAL_LIB_DIR}/libmisc.a ${LOCAL_LIB_DIR}/libgen.a ${LOCAL_LIB_DIR}/libplot2k.a ${LOCAL_LIB_DIR}/libfft.a ${LOCAL_LIB_DIR}/libconv.a)
 list(APPEND LIBRARIES ${2DX_LIBRARIES})

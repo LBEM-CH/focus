@@ -54,7 +54,7 @@ endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
 #add_definitions(-DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -c)
 set(CMAKE_C_FLAGS_RELEASE "-ffast-math  -static-libgcc")
 if(APPLE)
-	list(APPEND CMAKE_C_FLAGS_RELEASE -dead_strip)
+	set(CMAKE_C_FLAGS_RELEASE "-dead_strip ${CMAKE_C_FLAGS_RELEASE}")
 endif(APPLE)
 set(CMAKE_C_FLAGS_DEBUG  "-ffast-math  -static-libgcc")
 
@@ -64,9 +64,6 @@ if(CMAKE_CXX_COMPILER STREQUAL "icpc")
 	set(CMAKE_CXX_FLAGS "-axN -w -132 -cxxlib")
 else(CMAKE_CXX_COMPILER STREQUAL "icpc")
 	set(CMAKE_CXX_FLAGS "-ffast-math") 
-	if(APPLE)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -dead_strip -static-libgcc")
-	endif(APPLE)
 endif(CMAKE_CXX_COMPILER STREQUAL "icpc")
 
 

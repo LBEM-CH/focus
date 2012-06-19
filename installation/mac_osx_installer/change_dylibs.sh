@@ -49,11 +49,30 @@ else
 	       	exit 2
 	fi
 fi
+
+
+if [ -f /opt/local/lib/libfftw3f_threads.3.dylib ]; then
+	FFTW_LIB_THREAD=/opt/local/lib/libfftw3f_threads.3.dylib
+	echo "Found FFTW-threaded in $FFTW_LIB_THREAD"
+else
+       if [ -f /usr/local/lib/libfftw3f_threads.3.dylib ]; then
+		FFTW_LIB_THREAD=/usr/local/lib/libfftw3f_threads.3.dylib
+		echo "Found FFTW-threaded in $FFTW_LIB_THREAD"
+	else
+		FFTW_LIB_THREAD=NOT_FOUND
+		echo "FFTW-threaded not FOUND!"
+	       	exit 2
+	fi
+fi
+
+
 binaries="2dx_image/2dx_image.app/Contents/MacOS 2dx_merge/2dx_merge.app/Contents/MacOS kernel/mrc/lib"
 for loop in $binaries
 do
-	cp $FFTW_LIB $build_dir/$loop
 	echo "cp $FFTW_LIB  $build_dir/$loop"
+	cp $FFTW_LIB $build_dir/$loop
+	echo "cp $FFTW_LIB_THREAD  $build_dir/$loop"
+	cp $FFTW_LIB_THREAD $build_dir/$loop	
 done
 fortran_bin="kernel/mrc/bin"
 path="$build_dir/$fortran_bin"
@@ -63,6 +82,7 @@ do
 	file="$path/$exe"
 	echo "changing the dylibs of $file"
 	install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $file
+	install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $file
 	#	install_name_tool -change /usr/local/lib/libgfortran.3.dylib @executable_path/../lib/libgfortran.3.dylib $file 
 	otool -L $file 
 done
@@ -73,5 +93,6 @@ do
 	file="$build_dir/$exe"
 	echo "changing the dylibs of $file"
 	install_name_tool -change $FFTW_LIB @executable_path/libfftw3f.3.dylib $file
+	install_name_tool -change $FFTW_LIB_THREAD @executable_path/libfftw3f_threads.3.dylib $file
 	otool -L $file 
 done

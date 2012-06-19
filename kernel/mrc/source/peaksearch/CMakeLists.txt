@@ -27,11 +27,19 @@ file(GLOB BUILD_FILES Makefile.* *.in)
 file(GLOB README README* readme*)
 set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE} ${DAT_FILES} ${BUILD_FILES} ${README}) 
 set(EXECUTABLE 2dx_peaksearch)
+list(APPEND PEAKSEARCH_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a)
+if(FFTW_FOUND)
+	list(APPEND PEAKSEARCH_LIBRARIES ${FFTW_LIB})
+	include_directories(${FFTW_INCLUDE})
+elseif(FFTW_FOUND)
+	message(FATAL_ERROR "FFTW not found!")
+endif(FFTW_FOUND)
+set(LOCAL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/../lib)
 
 # Executables ------------------------------------------------------------------
 add_executable(${EXECUTABLE} ${CPP_SOURCE})
 set(LOCAL_EXECUTABLES ${EXECUTABLE})
-target_link_libraries(${EXECUTABLE} ${LOCAL_LIBRARIES} ${LIBRARIES})
+target_link_libraries(${EXECUTABLE} ${PEAKSEARCH_LIBRARIES})
 
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)

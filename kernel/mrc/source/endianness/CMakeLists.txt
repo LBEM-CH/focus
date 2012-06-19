@@ -30,7 +30,6 @@ foreach(i ${CPP_SOURCE})
 	get_filename_component(EXECUTABLE ${i}  NAME_WE)
 	add_executable(${EXECUTABLE} ${i} ${OBJ_SOURCE})
 	list(APPEND LOCAL_EXECUTABLES ${EXECUTABLE})
-	target_link_libraries(${EXECUTABLE} ${LOCAL_LIBRARIES} ${LIBRARIES})
 endforeach(i ${CPP_SOURCE})
 
 # Installation  ---------------------------------------------------------------

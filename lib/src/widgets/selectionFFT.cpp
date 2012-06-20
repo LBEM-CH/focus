@@ -125,7 +125,7 @@ void selectionFFT::calculateFFT()
   else
     display->setPixmap(QPixmap::fromImage(tempImage).scaledToHeight(int(scale*tempImage.height())));
 
-  delete fft; delete imageFinal; delete normalizedFinal;
+  delete[] fft; delete[] imageFinal; delete[] normalizedFinal;
 #ifdef DEBUG
   cout<<"Cleanup Time: "<<timer.elapsed()-startLoad<<endl;
   cout<<"Miliseconds :"<<timer.elapsed()<<endl;

@@ -553,7 +553,8 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	free(FSC);
 	free(temp_image);
 
-
+ 
+	return 0;
 
 }  
 

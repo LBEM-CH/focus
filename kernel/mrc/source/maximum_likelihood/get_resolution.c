@@ -10,7 +10,7 @@
 
 #include <common.h>
 
-float resolution(int sx1,int sy1,float *image1,float *image2,float *FRC)
+void resolution(int sx1,int sy1,float *image1,float *image2,float *FRC)
 {     
 	FILE *output[2];    
 	int  sx2=sx1, sy2=sy1, sx=sx1, sy=sy1;

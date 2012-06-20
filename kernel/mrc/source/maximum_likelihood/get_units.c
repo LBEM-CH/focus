@@ -2,7 +2,7 @@
 
 #include <common.h>
 
-int get_units(int *num_images,int num_peaks,int tag, float *peak_x, float *peak_y, int sx,int sy,int realcell_x1,int realcell_y1,int realcell_x,int realcell_y,float *unbend_image1, float *unbend_image2, float *Image1, float *Image2)
+void get_units(int *num_images,int num_peaks,int tag, float *peak_x, float *peak_y, int sx,int sy,int realcell_x1,int realcell_y1,int realcell_x,int realcell_y,float *unbend_image1, float *unbend_image2, float *Image1, float *Image2)
 {   int k,i,j,m;
 	double mean,devi_total,devi;
 	float *temp_unit;

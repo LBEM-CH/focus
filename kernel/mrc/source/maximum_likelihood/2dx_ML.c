@@ -92,20 +92,28 @@ int main()
 
 
         strcpy(tmpstring,"CS");
-	if(fgetline(input,tmpstring,&CS)==0); 
-	printf("CS............................. = %f  \n",CS); 
+	if(fgetline(input,tmpstring,&CS)==0) 
+ 		printf("CS............................. = %f  \n",CS); 
+        else
+ 		printf(":: ERROR in CS assignment.");
 
         strcpy(tmpstring,"KV");
 	if(fgetline(input,tmpstring, &KV )==0)
 		printf("KV............................. = %f  \n",KV); 
+        else
+ 		printf(":: ERROR in KV assignment.");
 
         strcpy(tmpstring,"RESMIN");
 	if(fgetline(input,tmpstring, &RESMIN )==0)  
 		printf("RESMIN......................... = %f  \n",RESMIN); 
+        else
+ 		printf(":: ERROR in RESMIN assignment.");
 
         strcpy(tmpstring,"RESMAX");
-	if(fgetline(input,tmpstring,&RESMAX )==0); 
-	printf("RESMAX......................... = %f  \n",RESMAX); 
+	if(fgetline(input,tmpstring,&RESMAX )==0) 
+		printf("RESMAX......................... = %f  \n",RESMAX); 
+        else
+ 		printf(":: ERROR in RESMAX assignment.");
 
         strcpy(tmpstring,"defocus");
 	if(fgetline(input,tmpstring, defocus)==0)
@@ -283,12 +291,16 @@ int main()
 	}
 
         strcpy(tmpstring,"phaori");      
-	if(fgetline(input,tmpstring,phaori)==0);
-	printf("Phase Origin................... = %f %f\n",phaori[0],phaori[1]);
+	if(fgetline(input,tmpstring,phaori)==0)
+		printf("Phase Origin................... = %f %f\n",phaori[0],phaori[1]);
+        else
+ 		printf(":: ERROR in Phase Origin assignment.");
 
         strcpy(tmpstring,"lattice");      
 	if(fgetline(input,tmpstring,lattice)==0)
 		printf("Reciprocal Lattice............. = %f %f %f %f\n",lattice[0],lattice[1],lattice[2],lattice[3]);
+        else
+ 		printf(":: ERROR in Reciprocal Lattice assignment.");
 
 	fclose(input);
 

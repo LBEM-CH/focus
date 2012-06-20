@@ -543,7 +543,7 @@ QPoint mrcImage::maxValue(const QPoint &pos, int distance, mrcImage::maxValueMet
     }
     else if(method == mrcImage::gauss_fit)
     {
-      fftwf_complex *data = new(fftwf_complex[36*int(distance*distance)]);
+      fftwf_complex *data = new fftwf_complex[36*int(distance*distance)];
       fftwf_complex *gaussian = new fftwf_complex[36*int(distance*distance)];
       //fftwf_complex *transform;
       fftwf_plan p;
@@ -670,8 +670,8 @@ QPoint mrcImage::maxValue(const QPoint &pos, int distance, mrcImage::maxValueMet
      cc.close();
   #endif
 
-      delete gaussian;
-      delete data;
+      delete[] gaussian;
+      delete[] data;
     }
   }
   return location;

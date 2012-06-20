@@ -1,0 +1,16 @@
+/Users/sthennin/2dx/kernel/mrc/lib/bigfilt.f
+/Users/sthennin/2dx/kernel/mrc/lib/cinterp.f
+/Users/sthennin/2dx/kernel/mrc/lib/filter.f
+/Users/sthennin/2dx/kernel/mrc/lib/iclcdn.f
+/Users/sthennin/2dx/kernel/mrc/lib/iclden.f
+/Users/sthennin/2dx/kernel/mrc/lib/icllim.f
+/Users/sthennin/2dx/kernel/mrc/lib/ictlim.f
+/Users/sthennin/2dx/kernel/mrc/lib/imopen.f
+/Users/sthennin/2dx/kernel/mrc/lib/imposn.f
+/Users/sthennin/2dx/kernel/mrc/lib/imunit.f
+/Users/sthennin/2dx/kernel/mrc/lib/interp.f
+/Users/sthennin/2dx/kernel/mrc/lib/irdhdr.f
+/Users/sthennin/2dx/kernel/mrc/lib/irdlin.f
+/Users/sthennin/2dx/kernel/mrc/lib/irdpas.f
+/Users/sthennin/2dx/kernel/mrc/lib/iwrlin.f
+/Users/sthennin/2dx/kernel/mrc/lib/iwrpas.f

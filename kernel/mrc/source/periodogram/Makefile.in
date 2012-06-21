@@ -1,6 +1,6 @@
 CXX=@CXX@
 CFLAGS= -w -ffast-math -DUSE_THREADS_2DX @CPPFLAGS@
-SOURCES=main.cpp
+SOURCES=2dx_periodogram.cpp
 LDIR = -L../../lib/ -L../../lib64 -L/opt/local/lib/
 LIB=-lfftw3f -l2dx -lpthread
 BIN=../../bin/

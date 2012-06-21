@@ -101,7 +101,7 @@ void Chkamparray::writelst(char *file)
 	double a;
 	FILE *fp;
 	fp=fopen(file,"w");
-	fprintf(fp,title);
+	fprintf(fp,"%s\n",title);
 	for(h=-maxdim/2;h<maxdim/2;h++)
 	{
 		for(k=-maxdim/2;k<maxdim/2;k++)
@@ -286,7 +286,7 @@ void Chkampsigarray::writelst(char *file)
 	FILE *fp;
 	fp=fopen(file,"w");
 	Chkamparray::gettitle(t);
-	fprintf(fp,t);
+	fprintf(fp,"%s\n",t);
 	for(h=0;h<=maxdim/2;h++)
 	{
 		for(k=-maxdim/2;k<=maxdim/2;k++)
@@ -512,7 +512,7 @@ void Chkampphafomarray::writelst(char *file)
 	FILE *fp;
 	fp=fopen(file,"w");
 	gettitle(t);
-	fprintf(fp,t);
+	fprintf(fp,"%s\n",t);
 	for(h=0;h<=maxdim/2;h++)
 	{
 		for(k=-maxdim/2;k<=maxdim/2;k++)

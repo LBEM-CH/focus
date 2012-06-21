@@ -82,7 +82,7 @@ unsigned Creflectionsarray::getdim(void)
 double Creflectionsarray::get(int h,int k, int l)
 {
 	unsigned maxhkl,maxkl;
-	if(h<0 || h==0 && k<0)
+	if(h<0 || ( h==0 && k<0 ) )
 		h*=-1,k*=-1,l*=-1;
 	maxkl=max(abs(k),abs(l));
 	maxhkl=max(maxkl,abs(h));
@@ -290,7 +290,7 @@ double Cphasearray::get(int h,int k, int l)
 {
 	double val;
 	val=reduce(Creflectionsarray::get(h,k,l));	
-	if(h<0 || h==0 && k<0)
+	if(h<0 || ( h==0 && k<0 ) )
 		val*=-1;
 	return val;
 }

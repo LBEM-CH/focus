@@ -58,6 +58,7 @@ vector<vector<float> > parseFile(char* filename)
     //cout << "[Element " << i++ << "] " << input << endl;
    ++j;
   } 
+  return table;
 }
 
 template <class T>
@@ -70,6 +71,7 @@ vector<T> maxElements(vector< vector<T> > table )
     maxima.push_back(table[0][i]);
 
   //for(table.begin(), table.)
+  return maxima;
 }
 
 template <class T>

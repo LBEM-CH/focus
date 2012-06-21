@@ -70,7 +70,8 @@ foreach dirfile ( ${dirlist} )
   # echo "set ctfrev = y" >> LOGS/${scriptname}.results
 
   # Use the following to activate the synthetic unbending in all directories:
-  # echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
+  echo "#unlock SYN_Unbending" >> LOGS/${scriptname}.results
+  echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
   
   # Use the following to set have the resolution of the Nyquist frequency automatically determined:
   # echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results

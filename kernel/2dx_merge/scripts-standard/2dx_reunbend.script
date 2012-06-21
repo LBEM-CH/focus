@@ -48,29 +48,35 @@ if ( ${SYN_Ref_is_set} == "0" ) then
   ${proc_2dx}/protest " Read the manual for this script and the parameter. Aborting."
 endif
 #
-set oldir = ${PWD}
+set olddir = ${PWD}
+cd ..
+set rootdir = ${PWD}
 #
 ############################################################################# 
 ${proc_2dx}/linblock "(Re-)unbending all directories"
 #############################################################################
 #
+cd ${olddir}
+#
 cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
 set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 #
 foreach dirfile ( ${dirlist} ) 
+  cd ${olddir}
   cd ..
   cd ${dirfile}
   if ( -e 2dx_image.cfg ) then
     echo ":: "
     ${proc_2dx}/linblock "::Working on ${dirfile}"
-    echo ":: ${app_2dx_image} ${dirfile} "'"*"'
-    ${app_2dx_image} ${dirfile} '"*"'
+    set curdir = ${PWD}
+    echo ":: ${app_2dx_image} ${curdir} "'"*"'
+    ${app_2dx_image} ${curdir} '"*"'
     echo ":: Done."
   else
     echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
   endif
   # 
-  cd ${oldir}
+  cd ${olddir}
 end
 #
 echo "<<@progress: 100>>"

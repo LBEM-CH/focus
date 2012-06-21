@@ -17,7 +17,7 @@ using namespace std;
 
 
 //---------------------------------------------------------------------------------------
-main()
+int main()
 {
 	char  temp[1000],buffer[1000];
         char name[200];
@@ -49,7 +49,7 @@ main()
 
 	cin.getline(temp,99);
         ifstream infile(temp);
-	if ( !infile.is_open() ) { cerr << "Could not open file: " << temp << endl; return false; }
+	if ( !infile.is_open() ) { cerr << "Could not open file: " << temp << endl; return -1; }
 	infile.getline(temp,300);
 	for(int i=0;i<tilenumber;i++)
 	{
@@ -401,6 +401,8 @@ main()
 	// memory deallocation
 	for(int i=0;i<data.size();i++)
 		delete data[i];
+
+        return 0;
 }
 
 

@@ -76,7 +76,7 @@ inline double rad2grad(double a)
 /******************************************************************************************
 Start of main program
 *******************************************************************************************/ 
-main()
+int main()
 {
 	cout <<"Program to calculate tiltaxis and tiltangle from different defocus values" << endl;
  	cout <<"-------------------------------------------------------------------------" << endl;

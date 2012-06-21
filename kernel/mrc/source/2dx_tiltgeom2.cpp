@@ -36,7 +36,7 @@ inline double grad2rad(double a)
 /******************************************************************************************
 Start of main program
 *******************************************************************************************/ 
-main()
+int main()
 {
 	cout << endl;
 	cout << ":Program to calculate remaining tiltgeometry values" << endl;

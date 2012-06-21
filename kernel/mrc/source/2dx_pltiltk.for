@@ -91,7 +91,7 @@ C       ROT180          IF NOT=0, ROTATE 180 DEG ABOUT Z-AXIS, USEFUL IN P1,P3
 C       IREVHK          IF NOT = 0, H AND K ARE INTERCHANGED ON INPUT.
 C       IROT90          IF NOT=0, ROTATE 90  DEG ABOUT Z-AXIS, USEFUL IN P2
 C       IREVHND         IF NOT = 0, H AND K ARE INTERCHANGED ON INPUT, and Z flipped
-C       REVXSGN         IF NOT = 0, H is transformed into -H
+C       IREVXSGN        IF NOT = 0, H is transformed into -H
 C
 C       IMQ     Image Quality value. IMQ is determined by the highest
 C               resolution bin in which more than RGOOD of the spots have IQ
@@ -263,7 +263,7 @@ C
 157   FORMAT('  INITIAL TAXA=',F8.3,' TANGL=',F8.3)
 158   FORMAT('    FINAL TAXA=',F8.3,' TANGL=',F8.3)
 163   FORMAT(' ISGNXCH=',I3,', ROT180=',I3,', IREVHK=',I3,', IROT90=',
-     .  I3,', IREVHND=',I3,', REVXSGN=',I3)
+     .  I3,', IREVHND=',I3,', IREVXSGN=',I3)
 166   FORMAT(/,3X,I10,' REFLECTIONS READ INTO CORE. ')
 167   FORMAT(3X,I10,' REFLECTIONS IN THE HIGH TILT QUADRANTS')
 168   FORMAT(' Cur_RESMAX TOTAL GOOD Completeness Curr_IMQ')
@@ -637,7 +637,7 @@ C
 C
 C     Convert to conventional unit cells
 C
-      CALL FIDDLE2(IH,IK,Z,IREVHK,ISGNXCH,IROT180,IROT90,IREVHND,REVXSGN)
+      CALL FIDDLE2(IH,IK,Z,IREVHK,ISGNXCH,IROT180,IROT90,IREVHND,IREVXSGN)
 
 C
 C     3D resolution
@@ -681,7 +681,7 @@ C
 C     convert tilt axis to conventional, useful in certain space group
 C
       CALL FIDDL2T(ABAANGT,TAXA,TANGL,IREVHK,ISGNXCH,IROT180,
-     .   IROT90,IREVHND,REVXSGN)
+     .   IROT90,IREVHND,IREVXSGN)
 C
 C     TAXA,TANGL conversion into asymmetric unit
 C
@@ -883,7 +883,7 @@ C******************************************************************************
 C  FIDDLING WITH THE INDEXING TO GET CORRECT MATCH TO INDEXING CONVENTION
 C  USEFUL IN A NUMBER OF SPACE GROUPS -- SEE WRITE-UP AT TOP OF PROGRAM.
       SUBROUTINE FIDDLE2(IH,IK,Z,IREVHK,ISGNXCH,IROT180,IROT90,IREVHND,
-     1  REVXSGN)
+     1  IREVXSGN)
       IF(IREVHK.EQ.0.0) GO TO 225
         I=IH
         IH=IK
@@ -905,7 +905,7 @@ C  USEFUL IN A NUMBER OF SPACE GROUPS -- SEE WRITE-UP AT TOP OF PROGRAM.
       if(IREVHND.ne.0)then
         Z=-Z
       endif
-      if(REVXSGN.ne.0)then
+      if(IREVXSGN.ne.0)then
         IH=-IH
       endif
       RETURN
@@ -947,7 +947,7 @@ C  CONVENTION
 C  USEFUL IN A NUMBER OF SPACE GROUPS
 
       SUBROUTINE FIDDL2T(ANG,TAXA,TANGL,IREVHK,ISGNXCH,IROT180,IROT90,IREVHND,
-     1  REVXSGN)
+     1  IREVXSGN)
       REAL*8 TAXA,TANGL
 
       IF(IREVHK.EQ.0.0) GO TO 225
@@ -978,13 +978,13 @@ C  USEFUL IN A NUMBER OF SPACE GROUPS
         ENDIF
       ENDIF
       if(IROT90.ne.0)then
-        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for:  this needs to be implemented still.'')')
+        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for: ROT90 needs to be implemented still.'')')
       endif
       if(IREVHND.ne.0)then
-        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for:  this needs to be implemented still.'')')
+        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for: REVHND needs to be implemented still.'')')
       endif
       if(IREVXSGN.ne.0)then
-        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for:  this needs to be implemented still.'')')
+        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for: REVXSGN needs to be implemented still.'')')
       endif
       if(IROT90.ne.0)then
       endif

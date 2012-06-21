@@ -590,7 +590,7 @@ CHEN<
         TAXB=TAXA+ABANGST
         TAXA0=TAXA
         TANGL0=TANGL
-      READ(5,*)ORIGH,ORIGK,STEP,WIN,ISGNXCH,SCALE,IIOT180,IREVHK,CTFREV,IROT90,IIREVHND,IREVXSGN
+      READ(5,*)ORIGH,ORIGK,STEP,WIN,ISGNXCH,SCALE,IROT180,IREVHK,CTFREV,IROT90,IIREVHND,IREVXSGN
       READ(5,*)CS,KV,TLTH,TLTK
       WRITE(6,163)ISGNXCH,IROT180,IREVHK,IROT90,IIREVHND,IREVXSGN
 C
@@ -680,8 +680,8 @@ C
 C
 C     convert tilt axis to conventional, useful in certain space group
 C
-      CALL FIDDL2T(ABANGST,TAXA,TANGL,IREVHK,ISGNXCH,IROT180)
-C
+      CALL FIDDL2T(ABAANGT,TAXA,TANGL,IREVHK,ISGNXCH,IROT180,
+     .   IROT90,IREVHND,REVXSGN)
 C
 C     TAXA,TANGL conversion into asymmetric unit
 C
@@ -977,8 +977,18 @@ C  USEFUL IN A NUMBER OF SPACE GROUPS
           GO TO 235
         ENDIF
       ENDIF
+      if(IROT90.ne.0)then
+        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for:  this needs to be implemented still.'')')
+      endif
+      if(IREVHND.ne.0)then
+        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for:  this needs to be implemented still.'')')
+      endif
       if(IREVXSGN.ne.0)then
-        write(*,'(/,/,''::ERROR: this needs to be implemented still.'')')
+        write(*,'(/,/,''::ERROR: 2dx_pltiltk.for:  this needs to be implemented still.'')')
+      endif
+      if(IROT90.ne.0)then
+      endif
+      if(IREVHND.ne.0)then
       endif
       RETURN
       END

@@ -152,6 +152,7 @@ endforeach(i ${C_SOURCE})
 
 ###############################################################################
 # sub directories -------------------------------------------------------------
+add_subdirectory(periodogram)
 add_subdirectory(peaksearch)
 add_subdirectory(2dx_getlat)
 add_subdirectory(endianness)

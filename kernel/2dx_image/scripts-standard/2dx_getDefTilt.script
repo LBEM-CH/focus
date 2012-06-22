@@ -98,7 +98,6 @@ set expected_tltang = ""
 set expected_tltang_uncertainty = ""
 set defocus_res_min = ""
 set defocus_res_max = ""
-# set defocus_tiles_count = ""
 #
 #$end_vars
 #

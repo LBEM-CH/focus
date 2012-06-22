@@ -678,6 +678,23 @@ int confData::set(QString element, QString value)
   return 1;
 }
 
+int confData::setForce(QString element, QString value)
+{
+  if(lookup[element.toLower()]==NULL) return 0;
+
+  if(lookup[element.toLower()]->get("iswrong").toLower().trimmed() == "yes" )
+  {
+    lookup[element.toLower()]->set("iswrong","NO");
+  }
+  if(lookup[element.toLower()]->get("value") != value)
+  {
+    lookup[element.toLower()]->set("value",value);
+    setModified(true);
+  }
+
+  return 1;
+}
+
 QString confData::getDir(QString dir)
 {
   return QDir(directories[dir.toLower()]).canonicalPath() + "/";

@@ -142,6 +142,7 @@ class confData : public QObject
   void clear();
 
   int set(QString element, QString value);
+  int setForce(QString element, QString value);
 
   QString getDir(QString dir);
   QString getDataFilename(){ return dataFilename;}

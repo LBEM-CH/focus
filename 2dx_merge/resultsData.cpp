@@ -74,9 +74,6 @@ bool resultsData::load(const QString &name)
           images[currentDirectory][order + image] = important+nickName;
         k++;
       }
-      // HEN>
-      // else if(pattern.errorString().trimmed().toLower()!="no error occured") qDebug()<<pattern.errorString();
-      // HEN<
     }
     else
     {
@@ -91,12 +88,29 @@ bool resultsData::load(const QString &name)
         currentDirectory = mainDir;
         results[currentDirectory]["##CONFFILE##"] = "2dx_merge.cfg";
       }
+      else if(line.contains(QRegExp("set -force\\s*\\w*\\s*=", Qt::CaseInsensitive)))
+      {
+        QStringList resultKeyValue = line.replace(QRegExp("\\s*set -force\\s*(\\w*)\\s*=[\\s\"]*([^\\s\"]*)[\\s\"]*.*", Qt::CaseInsensitive), "\\1|@|\\2").split("|@|");
+        if(resultKeyValue.size() == 2)
+        {
+          resultKeyValue[0] = "##FORCE##" + resultKeyValue[0];
+          results[currentDirectory][resultKeyValue[0]] = resultKeyValue[1];
+
+	  // if(resultKeyValue[0] != "dummy" ) 
+          //	qDebug() << "##FORCE##resultKeyValue[0] = " << resultKeyValue[0] << ",   resultKeyValue[1] = " << resultKeyValue[1] << "   " << currentDirectory;
+
+        }
+      }
       else if(line.contains(QRegExp("set\\s*\\w*\\s*=", Qt::CaseInsensitive)))
       {
         QStringList resultKeyValue = line.replace(QRegExp("\\s*set\\s*(\\w*)\\s*=[\\s\"]*([^\\s\"]*)[\\s\"]*.*", Qt::CaseInsensitive), "\\1|@|\\2").split("|@|");
         if(resultKeyValue.size() == 2)
         {
           results[currentDirectory][resultKeyValue[0]] = resultKeyValue[1];
+
+	  // if(resultKeyValue[0] != "dummy" ) 
+          //	qDebug() << "resultKeyValue[0] = " << resultKeyValue[0] << ",   resultKeyValue[1] = " << resultKeyValue[1] << "   " << currentDirectory;
+
           //DEBUG
           //QString key = resultKeyValue[0];
           //key = key.trimmed().remove('"');
@@ -118,6 +132,7 @@ bool resultsData::load(const QString &name)
       }
       else if(line.contains(QRegExp("^\\s*#\\s*lock",Qt::CaseInsensitive)))
       {
+ 	qDebug() << "2dx_merge results contains [un]lock. This is not yet implemented.";
 
       }
     }
@@ -153,7 +168,14 @@ bool resultsData::save()
 						if(!j.key().contains(QRegExp("^##\\w*##$")))
 						{
 							if(!masked(it.key(),j.key()) && !dryRun)
-								local.set(j.key().trimmed(),j.value().trimmed());
+							{
+								if(j.key().contains("##FORCE##"))
+ 									// qDebug() << "setForce " << j.key().trimmed().replace("##FORCE##","") << " to " << j.value().trimmed(); 
+									local.setForce(j.key().trimmed().replace("##FORCE##",""),j.value().trimmed());
+ 								else
+ 									// qDebug() << "set " << j.key().trimmed() << " to " << j.value().trimmed(); 
+									local.set(j.key().trimmed(),j.value().trimmed());
+							}
 						}
 					}
 					local.save();
@@ -206,13 +228,13 @@ void resultsData::printValues()
 	while(k.hasNext())
 	{ 
 		k.next();
-  	QMapIterator<QString, QString> j(it.value());   
-    while(j.hasNext())
-    {
-      j.next();
-      cerr<<k.key().toStdString()<<endl;
-      cerr<<" "<<j.value().toStdString()<<endl;      
-    }
+  		QMapIterator<QString, QString> j(it.value());   
+		while(j.hasNext())
+    		{
+      			j.next();
+      			cerr<<k.key().toStdString()<<endl;
+      			cerr<<" "<<j.value().toStdString()<<endl;      
+    		}
 	}
 }
 

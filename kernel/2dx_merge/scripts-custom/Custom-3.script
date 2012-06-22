@@ -70,8 +70,7 @@ foreach dirfile ( ${dirlist} )
   # echo "set ctfrev = y" >> LOGS/${scriptname}.results
 
   # Use the following to activate the synthetic unbending in all directories:
-  # echo "#unlock SYN_Unbending" >> LOGS/${scriptname}.results
-  # echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
+  # echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
   
   # Use the following to set have the resolution of the Nyquist frequency automatically determined:
   # echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
@@ -81,6 +80,28 @@ foreach dirfile ( ${dirlist} )
   # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
   # echo "set phaori = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set phaoriFouFilter = 0.0,0.0" >> LOGS/${scriptname}.results
+  # echo "set stepdigitizer = 7.0" >> LOGS/${scriptname}.results
+  # echo "set maska = 17.0" >> LOGS/${scriptname}.results
+  # echo "set maskb01 = 18.0" >> LOGS/${scriptname}.results
+  # echo "set maskb02 = 20.0" >> LOGS/${scriptname}.results
+  # echo "set boxa1 = 400.0" >> LOGS/${scriptname}.results
+  # echo "set boxa2 = 1200.0" >> LOGS/${scriptname}.results
+  # echo "set boxb1 = 350.0" >> LOGS/${scriptname}.results
+  # echo "set boxb2 = 1200.0" >> LOGS/${scriptname}.results
+  # echo "set quadrada = 9,9" >> LOGS/${scriptname}.results
+  # echo "set quadradb = 9,9" >> LOGS/${scriptname}.results
+  # echo "set ctf_ttf = TTF" >> LOGS/${scriptname}.results
+  # echo "set treatspotscan = y" >> LOGS/${scriptname}.results
+  # echo "set rot90 = n" >> LOGS/${scriptname}.results
+  # echo "set rot180 = n" >> LOGS/${scriptname}.results
+  # echo "set revhnd = n" >> LOGS/${scriptname}.results
+  # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
+  # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
+  # echo "set overwrite = y" >> LOGS/${scriptname}.results
+  # echo "set ccunbend_program = 0" >> LOGS/${scriptname}.results
+
+  # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
+  # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
 
   # Use the following to run all standard 2dx_image scripts on the selected images:
   # ${app_2dx_image} ${newdir} '"*"'
@@ -108,16 +129,6 @@ foreach dirfile ( ${dirlist} )
   # Use the following to calculate the local real-space lattice for each selected image:
   # ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
   
-  # Use the following to lock certain variables, for example to lock the phase origin for the selected images:
-  # This can be used to protect these phase origin settings, if you are happy with them and want to perform 
-  # a coarse search for some other not yet correctly centered projection maps.
-  #
-  # echo "#lock phaori" >> LOGS/${scriptname}.results
-  # echo "#lock phaoriFouFilter" >> LOGS/${scriptname}.results
- 
-  # Use the following to unlock these variables avain:
-  # echo "#unlock phaori" >> LOGS/${scriptname}.results
-  # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
   #
   ################################################################################
   ######### Modify only the section above ########################################

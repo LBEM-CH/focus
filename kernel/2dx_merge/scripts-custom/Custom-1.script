@@ -71,7 +71,7 @@ foreach dirfile ( ${dirlist} )
 
   # Use the following to activate the synthetic unbending in all directories:
   # echo "#unlock SYN_Unbending" >> LOGS/${scriptname}.results
-  # echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
+  # echo "set SYN_Unbending = 1 " >> LOGS/${scriptname}.results
   
   # Use the following to set have the resolution of the Nyquist frequency automatically determined:
   # echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
@@ -126,8 +126,9 @@ foreach dirfile ( ${dirlist} )
   # ${app_2dx_image} ${newdir} "2dx_fftrans"
   # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
   # ${app_2dx_image} ${newdir} "2dx_refineLattice"
-  # ${app_2dx_image} ${newdir} "2dx_getspots"
+  # ${app_2dx_image} ${newdir} "2dx_getspots1"
   # ${app_2dx_image} ${newdir} "2dx_unbend1"
+  # ${app_2dx_image} ${newdir} "2dx_getspots1"
   # ${app_2dx_image} ${newdir} "2dx_unbend2"
   # ${app_2dx_image} ${newdir} "2dx_applyCTF"
   # ${app_2dx_image} ${newdir} "2dx_generateMAP"

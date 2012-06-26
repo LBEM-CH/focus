@@ -490,9 +490,12 @@ void mainWindow::setupActions()
   connect(importAction,SIGNAL(triggered()),this,SLOT(import()));
   fileMenu->addAction(importAction);
   
-  QAction *autoImportAction = new QAction("Auto Import...",this);
+/*
+  QAction *autoImportAction = new QAction("Auto Import... (in development)",this);
   connect(autoImportAction,SIGNAL(triggered()),this,SLOT(autoImport()));
   fileMenu->addAction(autoImportAction);
+*/
+
 /*  QAction *removeImagesAction = new QAction("Remove Selected (Experimental/Unstable ****Careful****)...",this);
   connect(removeImagesAction,SIGNAL(triggered()),dirModel,SLOT(removeSelected()));
   fileMenu->addAction(removeImagesAction);

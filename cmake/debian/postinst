@@ -14,6 +14,17 @@ ln -sf ../2dx_logbrowser/2dx_logbrowser ./
 
 chmod -R 755 /opt/2dx
 
+ln -sf /opt/2dx/kernel/2dx_image/scripts-standard /opt/2dx/2dx_image/
+ln -sf /opt/2dx/kernel/2dx_image/scripts-custom /opt/2dx/2dx_image/
+ln -sf /opt/2dx/kernel/mrc/bin /opt/2dx/2dx_image/bin
+
+ln -sf /opt/2dx/kernel/2dx_merge/scripts-standard /opt/2dx/2dx_merge/
+ln -sf /opt/2dx/kernel/2dx_merge/scripts-custom /opt/2dx/2dx_merge/
+ln -sf /opt/2dx/kernel/mrc/bin /opt/2dx/2dx_merge/bin
+
+ln -sf /opt/2dx/kernel/config /opt/2dx/
+ln -sf /opt/2dx/kernel/proc /opt/2dx/
+
 ln -sf /opt/2dx/bin/2dx_merge /usr/bin/2dx
 
 cp /opt/2dx/Resource/2dx.desktop /usr/share/applications/

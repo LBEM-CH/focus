@@ -21,6 +21,14 @@ file(GLOB CPP_SOURCE *.cc *.cpp)
 set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE}) 
 set(PER_TARGETS 2dx_periodogram)
 
+
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+if(Boost_FOUND)
+	message(STATUS "PER: Found Boost at ${Boost_INCLUDE_DIR}")
+elseif(Boost_FOUND)
+	message(FATAL_ERROR "Boost not found!")
+endif(Boost_FOUND)
+
 # Libraries --------------------------------------------------------------------i
 if(FFTWF_FOUND)
 	list(APPEND PER_LIBRARIES  ${FFTWF_LIB})

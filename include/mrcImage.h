@@ -19,7 +19,6 @@
 #include <QString>
 #include <QTime>
 #include <QDebug>
-#include <fftw3.h>
 #include "mrcHeader.h"
 #include <threadedLoad.h>
 

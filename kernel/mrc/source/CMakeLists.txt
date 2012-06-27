@@ -109,13 +109,13 @@ list(APPEND LIBRARIES ${2DX_LIBRARIES})
 
 set(USE_FFTWF TRUE)
 find_package(FFTW)
-if(FFTW_FOUND)
-	message(STATUS "KERNEL: Found FFTW at ${FFTW_LIB}")
-	list(APPEND LIBRARIES  ${FFTW_LIB} ${2DX_LIBRARIES})
+if(FFTWF_FOUND)
+	message(STATUS "KERNEL: Found FFTW at ${FFTWF_LIB}")
+	list(APPEND LIBRARIES  ${FFTWF_LIB} ${2DX_LIBRARIES})
 	include_directories(${FFTW_INCLUDE})
-elseif(FFTW_FOUND)
-	message(FATAL_ERROR "FFTW not found!")
-endif(FFTW_FOUND)
+elseif(FFTWF_FOUND)
+	message(FATAL_ERROR "FFTWF not found!")
+endif(FFTWF_FOUND)
  
 
 

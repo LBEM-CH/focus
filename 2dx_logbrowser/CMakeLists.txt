@@ -21,13 +21,13 @@ ENDIF( APPLE )
 # Libraries to use ------------------------------------------------------------
 find_package(Qt4 REQUIRED)
   if(QT4_FOUND)
-    message(STATUS "@LIBTITLE@: Found QT4 at ${QT_LIBRARY_DIR}")
+    message(STATUS "@EXETITLE@: Found QT4 at ${QT_LIBRARY_DIR}")
     SET(QT_INCLUDES  ${QT_QTCORE_INCLUDE_DIR}  ${QT_INCLUDES})
     include(${QT_USE_FILE})
     INCLUDE_DIRECTORIES(${QT_INCLUDES})
-    SET(LIBRARIES   ${QT_LIBRARIES})
+    SET(2DX_LOG_LIBRARIES   ${QT_LIBRARIES})
   else(QT4_FOUND)
-    message(STATUS "@LIBTITLE@: Qt4 not Found!")
+    message(STATUS "@EXETITLE@: Qt4 not Found!")
   endif(QT4_FOUND)
   
 
@@ -86,7 +86,7 @@ else(APPLE)
 endif(APPLE)
 
 # Linking
-target_link_libraries(${EXETITLE} ${LIBRARIES}) 
+target_link_libraries(${EXETITLE} ${2DX_LOG_LIBRARIES}) 
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below

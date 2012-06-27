@@ -32,25 +32,25 @@ ENDIF( APPLE )
 # Libraries to use ------------------------------------------------------------
 set(USE_FFTWF TRUE)
 find_package(FFTW)
-if(FFTW_FOUND)
-	message(STATUS "@LIBTITLE@: Found FFTW at ${FFTW_LIB}")
-	SET(2DX_LIBRARIES  ${FFTW_LIB} ${2DX_LIBRARIES})
-elseif(FFTW_FOUND)
-	message(FATAL_ERROR "FFTW not found!")
-endif(FFTW_FOUND)
+if(FFTWF_FOUND)
+	message(STATUS "@EXETITLE@: Found FFTW at ${FFTWF_LIB}")
+	SET(2DX_IMAGE_LIBRARIES  ${FFTWF_LIB} ${2DX_IMAGE_LIBRARIES})
+else(FFTWF_FOUND)
+	message(FATAL_ERROR "@EXETITLE@: FFTW not found!")
+endif(FFTWF_FOUND)
  
 find_package(Qt4 COMPONENTS QtCore QtGui QtWebKit QtNetwork QtScript QtOpenGL REQUIRED)
 if(QT4_FOUND)
-	message(STATUS "Found QT4 at ${QT_LIBRARY_DIR}")
+	message(STATUS "@EXETITLE@: Found QT4 at ${QT_LIBRARY_DIR}")
 	include(${QT_USE_FILE})
-        SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${QT_LIBRARIES})
-        #message(STATUS "2DX_LIBRARIES ${2DX_LIBRARIES}")
+        SET(2DX_IMAGE_LIBRARIES ${2DX_IMAGE_LIBRARIES} ${QT_LIBRARIES})
+        #message(STATUS "2DX_IMAGE_LIBRARIES ${2DX_IMAGE_LIBRARIES}")
 endif(QT4_FOUND)
 find_package(OpenGL)
 if(OPENGL_FOUND)
-        message(STATUS "Found OpenGL at ${OPENGL_LIBRARIES}")
+        message(STATUS "@EXETITLE@: Found OpenGL at ${OPENGL_LIBRARIES}")
         INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-        SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${OPENGL_LIBRARIES})
+        SET(2DX_IMAGE_LIBRARIES ${2DX_IMAGE_LIBRARIES} ${OPENGL_LIBRARIES})
 endif(OPENGL_FOUND)
 
 # Header files -----------------------------------------------------------------
@@ -130,11 +130,11 @@ get_propagate_deps(conf widgets mrcImage extentions)
 # last thing we have to do is to tell CMake what libraries our executable
 # needs,
 #
-# luckily FIND_PACKAGE prepared 2DX_LIBRARIES variable for us:
+# luckily FIND_PACKAGE prepared 2DX_IMAGE_LIBRARIES variable for us:
 #
 #------------------------------------------------------------------------------
 
-target_link_libraries(${EXETITLE}  conf widgets mrcImage extentions ${2DX_LIBRARIES})
+target_link_libraries(${EXETITLE}  conf widgets mrcImage extentions ${2DX_IMAGE_LIBRARIES})
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
@@ -187,7 +187,7 @@ INSTALL(CODE "
 if(APPLE_BUNDLE)
 	INSTALL(CODE "
 	    include(BundleUtilities)
-	       fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
+	       fixup_bundle(\"${APPS}\" \"\${2DX_IMAGE_LIBRARIES}\" \"\")
 	    " COMPONENT Runtime)
 endif(APPLE_BUNDLE)
 

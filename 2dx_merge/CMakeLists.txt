@@ -23,24 +23,24 @@ ENDIF( APPLE )
 # Libraries to use ------------------------------------------------------------
 set(USE_FFTWF TRUE)
 find_package(FFTW)
-if(FFTW_FOUND)
-	message(STATUS "@LIBTITLE@: Found FFTW at ${FFTW_LIB}")
-	SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${FFTW_LIB})
-elseif(FFTW_FOUND)
+if(FFTWF_FOUND)
+	message(STATUS "@EXETITLE@: Found FFTW at ${FFTWF_LIB}")
+	SET(2DX_MERGE_LIBRARIES ${2DX_MERGE_LIBRARIES} ${FFTWF_LIB})
+elseif(FFTWF_FOUND)
 	message(FATAL_ERROR "FFTW not found!")
-endif(FFTW_FOUND)
+endif(FFTWF_FOUND)
 find_package(Qt4 COMPONENTS QtCore QtGui QtScript QtNetwork QtWebKit QtOpenGL REQUIRED)
 if(QT4_FOUND)
 	message(STATUS "Found QT4 at ${QT_LIBRARY_DIR}")
 	include(${QT_USE_FILE})
-        SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${QT_LIBRARIES})
-        #message(STATUS "2DX_LIBRARIES ${2DX_LIBRARIES}")
+        SET(2DX_MERGE_LIBRARIES ${2DX_MERGE_LIBRARIES} ${QT_LIBRARIES})
+        #message(STATUS "2DX_MERGE_LIBRARIES ${2DX_MERGE_LIBRARIES}")
 endif(QT4_FOUND)
 find_package(OpenGL)
 if(OPENGL_FOUND)
         message(STATUS "Found OpenGL at ${OPENGL_LIBRARIES}")
         INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-        SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${OPENGL_LIBRARIES})
+        SET(2DX_MERGE_LIBRARIES ${2DX_MERGE_LIBRARIES} ${OPENGL_LIBRARIES})
 endif(OPENGL_FOUND)
 
 # Header files -----------------------------------------------------------------
@@ -128,9 +128,9 @@ get_propagate_deps(conf widgets mrcImage extentions)
 # last thing we have to do is to tell CMake what olibraries our executable
 # needs,
 #
-# luckily FIND_PACKAGE prepared 2DX_LIBRARIES variable for us:
+# luckily FIND_PACKAGE prepared 2DX_MERGE_LIBRARIES variable for us:
 #
-target_link_libraries(${EXETITLE} conf widgets mrcImage extentions ${2DX_LIBRARIES})
+target_link_libraries(${EXETITLE} conf widgets mrcImage extentions ${2DX_MERGE_LIBRARIES})
  
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
@@ -183,7 +183,7 @@ SET(DIRS ${QT_LIBRARY_DIRS})
 if(APPLE_BUNDLE)
 	INSTALL(CODE "
 	    include(BundleUtilities)
-	    fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
+	    fixup_bundle(\"${APPS}\" \"\${2DX_MERGE_LIBRARIES}\" \"\")
 	    " COMPONENT Runtime)
 endif(APPLE_BUNDLE)
 

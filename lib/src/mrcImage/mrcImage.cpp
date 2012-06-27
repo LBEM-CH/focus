@@ -11,8 +11,11 @@
 #include <QFile>
 #include <QRgb>
 #include <math.h>
-#include "mrcImage.h"
+#include <fftw3.h>
 #include <iostream>
+
+#include "mrcImage.h"
+
 using namespace std;
 
 #define PI 3.14159265

@@ -111,11 +111,11 @@ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DAPPLE_BUNDLE=${APPLE_BUNDLE} ${SRC} || 
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make                                                                       |'
-make VERBOSE=1 -j1 || { echo "Build failed for $APP"; exit 6; }
+make -j1 || { echo "Build failed for $APP"; exit 6; }
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make install                                                               |'
-make VERBOSE=1 -j1 install || { echo "Install failed for $APP"; exit 7; }
+make -j1 install || { echo "Install failed for $APP"; exit 7; }
 echo '*============================================================================*'
 echo ''
 echo ''

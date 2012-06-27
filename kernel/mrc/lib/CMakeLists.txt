@@ -114,23 +114,27 @@ set(FSPLIT_EXE fsplit)
 set(FSPLIT_COMMAND "./fsplit")
 add_executable(${FSPLIT_EXE} ${FSPLIT_SRC})
 
+function(did_lib_sources_change RETURN_VALUE LIB SOURCES)
+	set(${RETURN_VALUE} 0 PARENT_SCOPE) 
+	foreach(FORFILE ${SOURCES})
+		if(${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE} IS_NEWER_THAN ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
+			set(${RETURN_VALUE} 1  PARENT_SCOPE)
+			message(STATUS "MRC/LIB: ${FORFILE} is newer than ${LIB}")
+		endif()
+	endforeach()
+endfunction()
+
 # libgen -----------------------------------------------------------------------
 set(TARGET gen)
 set(LIB "lib${TARGET}.a")
-#set(CMAKE_C_COMPILE_OBJECT ON)
-if(NOT EXISTS  ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
-	message(STATUS "${LIB} does not exist.")
+did_lib_sources_change(ISNEWER lib${TARGET}.a "${GENFOR};${GENC}")
+if(${ISNEWER})
+	message(STATUS "${LIB} is outdated.")
 	foreach(GENFILE ${GENFOR})
 		add_custom_command(OUTPUT ${GENFILE}  DEPENDS ${FSPLIT_EXE} COMMAND ${FSPLIT_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${GENFILE})
 		list(APPEND GENF_ORIG ${GENFILE})
 	endforeach(GENFILE)
-
-	# wirte files for postprocessing
-	#file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/library.cmake "${CMAKE_CURRENT_SOURCE_DIR}/${GENC}\n" )
-	# creating libraries
-	#message("${CMAKE_C_COMPILE_OBJECT} ${GENC}")	
-	#add_custom_command(OUTPUT GENC_OUT  COMMAND ${CMAKE_C_COMPILE_OBJECT} ${GENC})
-	#	message(status "GENC_OUT=${GENC_OUT}")
+	
 	add_custom_target(${TARGET} ALL
 				DEPENDS ${GENF_ORIG} ${GENC}
 				COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
@@ -140,15 +144,14 @@ if(NOT EXISTS  ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
 				WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				COMMENT "compiling ${LIB}"
 				VERBATIM)
-else(NOT EXISTS  ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
-	message(STATUS "${LIB} already exists.")
-endif(NOT EXISTS  ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
+endif()
 # libmisc ----------------------------------------------------------------------
 set(TARGET misc)
 set(LIB "lib${TARGET}.a")
 message(STATUS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
-	message(STATUS "${LIB} does not exist.")
+did_lib_sources_change(ISNEWER lib${TARGET}.a "${MISCFOR}")
+if(${ISNEWER})	
+	message(STATUS "${LIB} is outdated.")
 	foreach(FORFILE ${MISCFOR})
 		add_custom_command(OUTPUT ${FORFILE} DEPENDS ${FSPLIT_EXE} COMMAND ${FSPLIT_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE})
 		list(APPEND MISC_FSPLIT ${FORFILE})
@@ -162,38 +165,17 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
 				WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				COMMENT "compiling ${LIB}"
 				VERBATIM)
-else(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
-	message(STATUS "${LIB} already exists.")
-endif(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
+endif()
 # libim2k ----------------------------------------------------------------------
 set(TARGET im2k)
 set(LIB "lib${TARGET}.a")
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
+did_lib_sources_change(ISNEWER lib${TARGET}.a "${IMLIBFOR}")
+if(${ISNEWER})
+	message(STATUS "${LIB} is outdated.")
 	foreach(FORFILE ${IMLIBFOR})
 		add_custom_command(OUTPUT ${FORFILE} DEPENDS ${FSPLIT_EXE} COMMAND ${FSPLIT_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE})
 		list(APPEND IM2K_FSPLIT ${FORFILE})
 	endforeach(FORFILE)
-	#add_custom_command(OUTPUT IM2K_OBJ 
-	#			DEPENDS ${IM2K_FSPLIT}
-	#			COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
-	#			COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
-	#                   	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	#                   	COMMENT "compiling lib${IM2K}.a"
-	#                   	VERBATIM)
-	#
-	#		aux_source_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/obj GENOBJS)
-	#		add_library(${IM2K} STATIC IM2K_OBJ ${GENOBJS})
-
-	#set_target_properties(${IM2K} PROPERTIES LINKER_LANGUAGE Fortran)
-	#
-	#foreach(IFILE ${MISCFOR})
-	#	if(${IFILE} IS_NEWER_THAN lib${IM2K}.a)
-	#		set(RECOMPILE TRUE)
-	#	endif(${IFILE} IS_NEWER_THAN lib${IM2K}.a)
-	#
-	#endforeach(IFILE ${MISCFOR})
-	#
-	#if((lib${IM2K}.a NOT EXISTS) OR ) 
 	add_custom_target(${TARGET} ALL
 				DEPENDS ${IM2K_FSPLIT}
 				COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
@@ -202,9 +184,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
 				WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				COMMENT "compiling ${LIB}"
 				VERBATIM)
-else(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
-	message(STATUS "${LIB} already exists.")
-endif(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
+endif()
 # libplot2k --------------------------------------------------------------------
 set(PLOT2K plot2k)
 add_library(${PLOT2K} STATIC ${PLOT2KC})

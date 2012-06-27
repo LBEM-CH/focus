@@ -1,6 +1,6 @@
 message(STATUS "creating lib${LIB_NAME}.a")
 file(GLOB OBJECT_FILES *.o)
-message("OBJECT_FILES=${OBJECT_FILES}")
+#message("OBJECT_FILES=${OBJECT_FILES}")
 execute_process(COMMAND ar crs lib${LIB_NAME}.a ${OBJECT_FILES}) 
 message("rm -f *.o *.f")
 file(GLOB FSPLIT_FILES *.f)

@@ -108,10 +108,10 @@ echo '+-------------------------------------------------------------------------
 echo '| configure                                                                  |'
 echo cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DAPPLE_BUNDLE=${APPLE_BUNDLE} ${SRC} || { echo "Configure failed for" $APP ; exit 5; }  
 cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -DAPPLE_BUNDLE=${APPLE_BUNDLE} ${SRC} || { echo "Configure failed for" $APP ; exit 5; }
-echo ''
-echo '+----------------------------------------------------------------------------+'
-echo '| make                                                                       |'
-make -j1 || { echo "Build failed for $APP"; exit 6; }
+#echo ''
+#echo '+----------------------------------------------------------------------------+'
+#echo '| make                                                                       |'
+#make -j1 || { echo "Build failed for $APP"; exit 6; }
 echo ''
 echo '+----------------------------------------------------------------------------+'
 echo '| make install                                                               |'

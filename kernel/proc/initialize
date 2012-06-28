@@ -13,8 +13,13 @@ echo date = ${date}
 set system = `uname -s`
 echo system = ${system}
 #
-if ( -d /usr/local/ccp4 ) then
-  set ccp4 = /usr/local/ccp4
+if ($?CCP4) then
+  set ccp4_dir = $CCP4
+else
+  set ccp4_dir = /usr/local/ccp4 )
+endif 
+if ( -d ${ccp4_dir} ) then
+  set ccp4 = ${ccp4_dir}
   set bin_ccp4 = ${ccp4}/bin
 else
   if ( ${system} == "Darwin") then

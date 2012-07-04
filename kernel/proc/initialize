@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh 
 #
 # This is not an executable script.
 #
@@ -16,7 +16,7 @@ echo system = ${system}
 if ($?CCP4) then
   set ccp4_dir = $CCP4
 else
-  set ccp4_dir = /usr/local/ccp4 )
+  set ccp4_dir = /usr/local/ccp4
 endif 
 if ( -d ${ccp4_dir} ) then
   set ccp4 = ${ccp4_dir}

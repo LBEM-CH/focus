@@ -8,10 +8,12 @@
   # endif
   #
   if ( ! -d SCRATCH ) then
+    \rm -rf SCRATCH
     \mkdir SCRATCH
   endif
   #
   if ( ! -d LOGS ) then
+    \rm -rf LOGS
     \mkdir LOGS
   endif
   #

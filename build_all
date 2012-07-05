@@ -138,6 +138,8 @@ then
   then
     echo "Link already existing."
   else
+    echo "Moving executables into kernel/mrc/bin"
+    \cp -rf kernel/mrc/bin/* ${SRC}/kernel/mrc/bin
     echo "Removing kernel directory in local ~/2dx"
     \rm -rf kernel
   fi

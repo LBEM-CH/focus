@@ -9,7 +9,7 @@
 file(GLOB install_files *.h)
 install(FILES ${install_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 
-configure_file("confVersion.h.in" "confVersion.h")
-include_directories("${PROJECT_BINARY_DIR}/include")
+configure_file(confVersion.h.in ${CMAKE_CURRENT_BINARY_DIR}/confVersion.h)
+
 
 

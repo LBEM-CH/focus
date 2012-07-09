@@ -22,6 +22,27 @@ set(CPACK_PACKAGE_VERSION_MINOR ${2dx_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${2dx_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
 
+
+include(FindSubversion)
+FIND_PACKAGE(Subversion)
+
+EXECUTE_PROCESS(COMMAND svn info ${CMAKE_SOURCE_DIR}
+	RESULT_VARIABLE check_wc)
+message(STATUS "SVN dummy return: ${check_wc}")
+
+set(2dx_SVN_REVISION_NUMBER unknown)
+
+IF(NOT ${check_wc} EQUAL 0)
+	MESSAGE(STATUS "No svn revision found")
+ELSE(NOT ${check_wc} EQUAL 0)
+	IF(SUBVERSION_FOUND)
+		Subversion_WC_INFO(${CMAKE_SOURCE_DIR} myapp)
+		set(2dx_SVN_REVISION_NUMBER ${myapp_WC_REVISION})
+	ENDIF(SUBVERSION_FOUND)
+ENDIF(NOT ${check_wc} EQUAL 0)
+
+message(STATUS "SVN revision number: ${2dx_SVN_REVISION_NUMBER}")
+
 set(2DX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "The path of the 2dx root source directory.")
 message(STATUS "The variable 2DX_ROOT_DIR is set to: ${2DX_ROOT_DIR}")
 set(2DX_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE PATH "The path of the 2dx include directory.")

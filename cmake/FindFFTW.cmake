@@ -27,6 +27,7 @@ IF(USE_FFTWD OR USE_FFTWF)
     /usr/include/fftw
     /usr/local/include/fftw
     /opt/local/include
+    /programs/i386-mac/fftw/3.0.1/include
   )
 
   FIND_PATH(FFTW_INCLUDE_PATH fftw3.h ${FFTW_INC_SEARCHPATH})

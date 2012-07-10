@@ -28,7 +28,7 @@ set(ML_TARGETS 2dx_ML)
 # Libraries --------------------------------------------------------------------i
 if(FFTWF_FOUND)
 	list(APPEND ML_LIBRARIES  ${FFTWF_LIB})
-	include_directories(${FFTW_INCLUDE})
+	include_directories(${FFTW_INCLUDE_PATH})
 elseif(FFTWF_FOUND)
 	message(FATAL_ERROR "FFTW not found!")
 endif(FFTWF_FOUND)

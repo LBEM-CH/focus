@@ -25,7 +25,7 @@ set(PER_TARGETS 2dx_periodogram)
 # Libraries --------------------------------------------------------------------i
 if(FFTWF_FOUND)
 	list(APPEND PER_LIBRARIES  ${FFTWF_LIB})
-	include_directories(${FFTW_INCLUDE})
+	include_directories(${FFTW_INCLUDE_PATH})
 elseif(FFTWF_FOUND)
 	message(FATAL_ERROR "FFTW not found!")
 endif(FFTWF_FOUND)

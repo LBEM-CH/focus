@@ -8,7 +8,10 @@
 cmake_minimum_required(VERSION 2.6)
 set(INSTALL_DIR kernel)
 
-# Libraries --------------------------------------------------------------------i
+# Libraries --------------------------------------------------------------------
+
+set(USE_FFTWF TRUE)
+find_package(FFTW)
 if(FFTWF_FOUND)
 	list(APPEND PER_LIBRARIES  ${FFTWF_LIB})
 	include_directories(${FFTW_INCLUDE_PATH})

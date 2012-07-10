@@ -93,12 +93,14 @@ set(MISC misc)
 set(MISCFOR mtzlib.for lcflib.for miscsubs.for)
 set(IM2K im2k)
 set(IMLIBFOR imsubs2000.for imsubs2.for)
+set(IMLIBFORABS ${CMAKE_CURRENT_SOURCE_DIR}/imsubs2000.for ${CMAKE_CURRENT_SOURCE_DIR}/imsubs2.for)
 set(PLOT2KC plot2k.c)
 set(FFTCPP fftlib.cpp)
 set(CONVCPP 2dx_conv.cpp)
 set(FSPLIT_SRC fsplit.c)
 set(LIB2DX 2dx_func.for mrcImage.cpp)
 list(APPEND SOURCES ${GENFOR} ${GENC} ${MISCFOR} ${IMLIBFOR} ${PLOT2KC} ${FFTCPP} ${CONVCPP} ${FSPLIT} ${LIB2DX}) 
+set(SOURCES_FILE ${CMAKE_CURRENT_BINARY_DIR}/sources.cmake)
 ###############################################################################
 
 set(CMAKE_DEBUG_POSTFIX -dbg)
@@ -140,14 +142,16 @@ set(LIB "lib${TARGET}.a")
 did_lib_sources_change(ISNEWER lib${TARGET}.a "${GENFOR};${GENC}")
 if(${ISNEWER})
 	message(STATUS "${LIB} is outdated.")
+	file(WRITE ${SOURCES_FILE} "")
 	foreach(GENFILE ${GENFOR})
 		add_custom_command(OUTPUT ${GENFILE}  DEPENDS ${FSPLIT_EXE} COMMAND ${FSPLIT_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${GENFILE})
 		list(APPEND GENF_ORIG ${GENFILE})
+		file(APPEND ${SOURCES_FILE} "${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE};")
 	endforeach(GENFILE)
 	
 	add_custom_target(${TARGET} ALL
 				DEPENDS ${GENF_ORIG} ${GENC}
-				COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
+				COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
 				COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
 				COMMAND ${CMAKE_C_COMPILER} -DPROTOTYPE -Dalliant -w -ffast-math -c ${CMAKE_CURRENT_SOURCE_DIR}/${GENC}
 				COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
@@ -162,14 +166,16 @@ message(STATUS ${CMAKE_CURRENT_BINARY_DIR}/${LIB})
 did_lib_sources_change(ISNEWER lib${TARGET}.a "${MISCFOR}")
 if(${ISNEWER})	
 	message(STATUS "${LIB} is outdated.")
+	file(WRITE ${SOURCES_FILE} "")
 	foreach(FORFILE ${MISCFOR})
 		add_custom_command(OUTPUT ${FORFILE} DEPENDS ${FSPLIT_EXE} COMMAND ${FSPLIT_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE})
 		list(APPEND MISC_FSPLIT ${FORFILE})
+		file(APPEND ${SOURCES_FILE} "${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE};")
 	endforeach(FORFILE)
 
 	add_custom_target(${TARGET} ALL
 				DEPENDS ${MISC_FSPLIT}
-				COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
+				COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
 				COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
 				COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
 				WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -182,18 +188,20 @@ set(LIB "lib${TARGET}.a")
 did_lib_sources_change(ISNEWER lib${TARGET}.a "${IMLIBFOR}")
 if(${ISNEWER})
 	message(STATUS "${LIB} is outdated.")
+	file(WRITE ${SOURCES_FILE} "")
 	foreach(FORFILE ${IMLIBFOR})
 		add_custom_command(OUTPUT ${FORFILE} DEPENDS ${FSPLIT_EXE} COMMAND ${FSPLIT_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE})
 		list(APPEND IM2K_FSPLIT ${FORFILE})
+		file(APPEND ${SOURCES_FILE} "${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE};")
 	endforeach(FORFILE)
-	add_custom_target(${TARGET} ALL
-				DEPENDS ${IM2K_FSPLIT}
-				COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
-				COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
-				COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
-				WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-				COMMENT "compiling ${LIB}"
-				VERBATIM)
+		add_custom_target(${TARGET} ALL
+					DEPENDS ${IM2K_FSPLIT}
+					COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
+					COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
+					COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
+					WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+					COMMENT "compiling ${LIB}"
+					VERBATIM)
 endif()
 # libplot2k --------------------------------------------------------------------
 set(PLOT2K plot2k)

@@ -8,6 +8,17 @@
 cmake_minimum_required(VERSION 2.6)
 set(INSTALL_DIR kernel)
 
+# Libraries --------------------------------------------------------------------i
+if(FFTWF_FOUND)
+	list(APPEND PER_LIBRARIES  ${FFTWF_LIB})
+	include_directories(${FFTW_INCLUDE_PATH})
+elseif(FFTWF_FOUND)
+	message(FATAL_ERROR "FFTW not found!")
+endif(FFTWF_FOUND)
+if(LOCAL_LIB_DIR)
+	list(APPEND PER_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a )
+endif(LOCAL_LIB_DIR)
+
 add_subdirectory(config)
 add_subdirectory(2dx_image)
 add_subdirectory(2dx_merge)

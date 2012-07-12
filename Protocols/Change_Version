@@ -1,4 +1,22 @@
+# Change version process:
+
+No longer needed to change the version in the source code.
+Please just change the version in the top-level CMakeLists.txt. The build process will take care of all required steps.
+
+The only manual change has to be done on the 2dx.org server in order to ensure the update notification for all users in 2dx_merge
+
+########################################
+
+
+
+
+
+# Former change version process
+
 Version Occurs in:
+
 2dx/lib/src/conf/confData.h (1 Line)
 2dx/config/2dx_image/about.htm (2 Lines)
 installation/mac_osx_installer/Resources/Welcome.html (1 Line)
+
+########################################

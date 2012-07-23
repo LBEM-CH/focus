@@ -28,6 +28,7 @@ IF(USE_FFTWD OR USE_FFTWF)
     /usr/local/include/fftw
     /opt/local/include
     /programs/i386-mac/fftw/3.0.1/include
+    /programs/i386-linux/fftw/3.3/include
   )
 
   FIND_PATH(FFTW_INCLUDE_PATH fftw3.h ${FFTW_INC_SEARCHPATH})
@@ -46,6 +47,7 @@ IF(USE_FFTWD OR USE_FFTWF)
     ${FFTW_INSTALL_BASE_PATH}/lib
     /usr/lib/fftw
     /usr/local/lib/fftw
+    /programs/i386-linux/fftw/3.3/lib
   )
 
   IF(USE_FFTWD)

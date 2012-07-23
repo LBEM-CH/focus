@@ -21,6 +21,7 @@ SET(FFTW_FOUND 0)
 IF(USE_FFTWD OR USE_FFTWF)
 
   SET(FFTW_INC_SEARCHPATH
+    /programs/i386-linux/fftw/3.3/include
     /sw/include
     /usr/include
     /usr/local/include

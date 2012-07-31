@@ -173,14 +173,17 @@ add_subdirectory(maximum_likelihood)
 ###############################################################################
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+
 if(INSTALL_SRC_DIR)
-	set(INSTALL_DIR ${INSTALL_SRC_DIR}/${DIRECTORY})
+	set(INSTALL_SRC_DIR ${INSTALL_SRC_DIR}/${DIRECTORY})
 else(INSTALL_SRC_DIR)
-	set(INSTALL_SRC_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/source/ctf/${DIRECTORY})
+	set(INSTALL_SRC_DIR kernel/mrc/${DIRECTORY})
 endif(INSTALL_SRC_DIR)
+
 if(NOT INSTALL_BIN_DIR)
-	set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/bin)
+	set(INSTALL_BIN_DIR kernel/mrc/bin)
 endif(NOT INSTALL_BIN_DIR)
+
 # sources
 install(FILES ${SOURCES} DESTINATION ${INSTALL_SRC_DIR})
 # executables

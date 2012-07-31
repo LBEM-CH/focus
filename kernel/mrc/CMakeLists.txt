@@ -7,11 +7,11 @@
 #
 cmake_minimum_required(VERSION 2.6)
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-if(INSTALL_DIR)
-	set(INSTALL_DIR ${INSTALL_DIR}/${DIRECTORY})
-else(INSTALL_DIR)
-	set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/kernel/${DIRECTORY})
-endif(INSTALL_DIR)
+
+set(INSTALL_SRC_DIR kernel/${DIRECTORY})
+set(INSTALL_BIN_DIR kernel/${DIRECTORY}/bin)
+
+
 set(KERNEL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_subdirectory(include)
 include_directories(include)

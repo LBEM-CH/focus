@@ -40,15 +40,19 @@ foreach(i ${PER_TARGETS})
 	target_link_libraries(${i} ${PER_LIBRARIES})
 	list(APPEND LOCAL_EXECUTABLES ${i})
 endforeach(i ${PER_TARGETS})
+
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-if(INSTALL_DIR)
-	set(INSTALL_DIR ${INSTALL_DIR}/${DIRECTORY})
-else(INSTALL_DIR)
-	set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/source/${DIRECTORY})
-endif(INSTALL_DIR)
+
+if(INSTALL_SRC_DIR)
+	set(INSTALL_SRC_DIR ${INSTALL_SRC_DIR}/${DIRECTORY})
+else(INSTALL_SRC_DIR)
+	set(INSTALL_SRC_DIR kernel/mrc/source/${DIRECTORY})
+endif(INSTALL_SRC_DIR)
+
 if(NOT INSTALL_BIN_DIR)
-	set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/bin)
+	set(INSTALL_BIN_DIR kernel/mrc/bin)
 endif(NOT INSTALL_BIN_DIR)
-install(FILES ${SOURCES} DESTINATION ${INSTALL_DIR})
+
+install(FILES ${SOURCES} DESTINATION ${INSTALL_SRC_DIR})
 install(TARGETS ${LOCAL_EXECUTABLES} DESTINATION ${INSTALL_BIN_DIR})

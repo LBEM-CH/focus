@@ -29,11 +29,11 @@ ln -sf /opt/2dx/bin/2dx_merge /usr/bin/2dx
 ln -sf /opt/2dx/bin/2dx_image /usr/bin/2dx_image
 
 
-cp /opt/2dx/resource/2dx.desktop /usr/share/applications/
-cp /opt/2dx/resource/2dx_merge/icon.png /usr/share/pixmaps/2dx.png
+cp /opt/2dx/Resource/2dx.desktop /usr/share/applications/
+cp /opt/2dx/Resource/2dx_merge/icon.png /usr/share/pixmaps/2dx.png
 
-cp /opt/2dx/resource/2dx_image.desktop /usr/share/applications/
-cp /opt/2dx/resource/2dx_image/icon.png /usr/share/pixmaps/2dx_image.png
+cp /opt/2dx/Resource/2dx_image.desktop /usr/share/applications/
+cp /opt/2dx/Resource/2dx_image/icon.png /usr/share/pixmaps/2dx_image.png
 
 
 #

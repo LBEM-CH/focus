@@ -18,11 +18,15 @@ set(CONF
         2dx_merge-user.cfg 
         status-window 
         2dx.cshrc 
-        2dx.cfg 
         2dx_image-algo-1.jpg 
         2dx_image-algo-2.jpg 
         2dx_master.cfg)
 install(FILES ${CONF} DESTINATION ${INSTALL_DIR})
+if(APPLE)
+	configure_file(2dx-mac.cfg  ${INSTALL_DIR}/2dx.cfg COPYONLY)	
+else(APPLE)
+	configure_file(2dx-linux.cfg  ${INSTALL_DIR}/2dx.cfg COPYONLY)	
+endif(APPLE)
 install(SCRIPT install_symlink.cmake)
 set(CONF_2DX_IMAGE
         2dx_image/about.htm

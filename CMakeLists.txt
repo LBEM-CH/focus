@@ -73,7 +73,6 @@ configure_file("build_scripts/add_version_to_src.sh.in" "add_version_to_src.sh")
 
 file(GLOB DES installation/*.desktop)
 install(FILES ${DES} DESTINATION Resource)
-install(FILES ${DES} DESTINATION resource)
 
 file(GLOB DES installation/mac_osx_installer/Resources/background.pdf)
 install(FILES ${DES} DESTINATION Resource)

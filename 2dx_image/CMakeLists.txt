@@ -154,8 +154,7 @@ file(GLOB PNG resource/*.png)
 #create symlink to the kernel
 install(SCRIPT install_symlink.cmake)
 
-install(FILES ${PNG} DESTINATION resource)
-install(FILES ${PNG} DESTINATION Resource)
+install(FILES ${PNG} DESTINATION Resource/2dx_image)
 #--------------------------------------------------------------------------------
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'

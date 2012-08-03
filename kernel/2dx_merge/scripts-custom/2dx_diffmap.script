@@ -1,0 +1,384 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Difference Map                                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 08/02/2012                                             #
+# Last Modification: 08/02/2012                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 56 
+#
+# MANUAL: This script makes use of CCP4 commands to generate difference map.
+#
+#=============================================================================
+# SECTION: Difference Map
+#=============================================================================
+#
+# LABEL: projection map 1 
+# LEGEND: This is the MTZ file from which the other map is subtracted, hence the minuend. 
+# EXAMPLE: map1 = "AII0000123456.mtz"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/diffmap
+# TYPE: Text_Edit
+# INHERITABLE_UPON_INIT: NO
+# SYNC_WITH_UPPER_LEVEL: NO
+# USERLEVEL: SIMPLE
+# ISWRONG: YES
+set map1 = "merge2D.mtz"
+# LABEL: name of map 1 
+# LEGEND: This labels the map 1 and is reflected in the title of the plots. 
+# EXAMPLE: map1 = "conformation1"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/diffmap
+# TYPE: Text_Edit
+# INHERITABLE_UPON_INIT: NO
+# SYNC_WITH_UPPER_LEVEL: NO
+# USERLEVEL: SIMPLE
+# ISWRONG: YES
+set map1_name = "map1"
+#
+# LABEL: projection map 2 
+# LEGEND: This is the MTZ file which is subtracted from the original map, hence the minuend subtrahend. 
+# EXAMPLE: map2 = "AII0000123456.mtz"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/diffmap
+# TYPE: Text_Edit
+# INHERITABLE_UPON_INIT: NO
+# SYNC_WITH_UPPER_LEVEL: NO
+# USERLEVEL: SIMPLE
+# ISWRONG: YES
+set map2 = "/Users/marheit/data/2dx/diffmap/CLC_ph7_merge2D.mtz"
+#
+## LABEL: name of map 2 
+# LEGEND: This labels the map 2 and is reflected in the title of the plots. 
+# EXAMPLE: map2 = "conformation2"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/diffmap
+# TYPE: Text_Edit
+# INHERITABLE_UPON_INIT: NO
+# SYNC_WITH_UPPER_LEVEL: NO
+# USERLEVEL: SIMPLE
+# ISWRONG: YES
+set map2_name = "map2"
+#
+# REMARK: The following section defines variables that will be displayed in the GUI:
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: realcell 
+# DISPLAY: realang
+# DISPLAY: SYM
+# DISPLAY: npo_cntrs_step
+# DISPLAY: npo_cntrs_below 
+#
+# REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+#
+set imagename = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set realang = ""
+set realcell = ""
+set SYM = ""
+set ctf_ttf = ""
+set npo_cntrs_step = ""
+set npo_cntrs_below = ""
+set npo_cntrs_step = ""
+#
+#$end_vars
+#
+echo "<<@progress: 1>>"
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set scriptname = 2dx_diffmap
+#
+source ${proc_2dx}/2dx_makedirs 
+#
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+#
+set date = `date`
+echo date = ${date}
+#
+set filename1 = `echo $map1 | awk -F/ '{print $NF }' | awk -F. '{ print $1 }'`
+echo "the filename of map 1: ${filename1}"
+set filename2 = `echo $map2 | awk -F/ '{print $NF }' | awk -F. '{ print $1 }'`
+echo "the filename of map 2: ${filename2}"
+#
+##############################################################################
+${proc_2dx}/linblock  "Scaling amplitudes" 
+##############################################################################
+if ( -e ${map1} ) then
+	echo "scaling amplitudes of  ${map1} "
+	\rm -f  ${filename1}_scaled.mtz  
+	${proc_2dx}/2dx_scaleamp_ccp4.com ${map1} ${filename1}_scaled.mtz
+	echo "# IMAGE: ${filename1}_scaled.mtz <MTZ: Map 1 with scaled amplitudes >" >> LOGS/${scriptname}.results
+else
+	${proc_2dx}/protest "Could not find ${map2}"
+endif
+if ( -e ${map2} ) then
+	echo "scaling amplitudes of  ${map2} "
+	\rm -f  ${filename2}_scaled.mtz  
+	${proc_2dx}/2dx_scaleamp_ccp4.com ${map2} ${filename2}_scaled.mtz
+	echo "# IMAGE: ${filename2}_scaled.mtz <MTZ: Map 2 with scaled amplitudes >" >> LOGS/${scriptname}.results
+else
+	${proc_2dx}/protest "Could not find ${map2}"
+endif
+##############################################################################
+${proc_2dx}/linblock  "Limiting the resolution to ${RESMAX}" 
+##############################################################################
+\rm -f  ${filename1}_res.mtz  
+${bin_ccp4}/sftools << eot
+read ${filename1}_scaled.mtz
+select resolution >= ${RESMAX}
+checkhkl
+write ${filename1}_res.mtz
+end
+eot
+#
+echo "# IMAGE: ${filename1}_res.mtz <MTZ: Map 1 (resolution limited) >" >> LOGS/${scriptname}.results
+#
+\rm -f  ${filename2}_res.mtz  
+${bin_ccp4}/sftools << eot
+read ${filename2}_scaled.mtz
+select resolution >= ${RESMAX}
+checkhkl
+write ${filename2}_res.mtz
+end
+eot
+#
+echo "# IMAGE: ${filename2}_res.mtz <MTZ: Map 2 (resolution limited) >" >> LOGS/${scriptname}.results
+#
+##############################################################################
+${proc_2dx}/linblock  "Inverse fft to get map" 
+##############################################################################
+set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($1)  } END { print s }'`
+set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($2)  } END { print s }'`
+set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($1 -  ($1 % 4))  } END { print s }'`
+set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($2 -  ($2 % 4))  } END { print s }'`
+
+if( $grid_a  < $realcell_a || $grid_b < $realcell_b ) then
+	echo  ":: The unit cell was cropped to ${grid_a}, ${grid_b}, ${realang}. (Dividable by 4)" 
+endif
+#
+\rm -f ${filename1}.map
+#
+${bin_ccp4}/fft HKLIN   ${filename1}_res.mtz MAPOUT  ${filename1}.map \
+    << eot
+resol 200 ${RESMAX}
+! Fo
+TITLE "${RESMAX} EM map for ${filename1}"
+LABIN F1=F PHI=PHI W=FOM
+scale F1 1.0
+AXIS Y X Z
+GRID  ${grid_a} ${grid_b} ${realang}
+end
+eot
+#
+\rm -f ${filename2}.map
+#
+${bin_ccp4}/fft HKLIN   ${filename2}_res.mtz MAPOUT  ${filename2}.map \
+    << eot
+resol 200 ${RESMAX}
+! Fo
+TITLE "${RESMAX} EM map for ${filename1}"
+LABIN F1=F PHI=PHI W=FOM
+scale F1 1.0
+AXIS Y X Z
+GRID  ${grid_a} ${grid_b} ${realang}
+end
+eot
+#
+##############################################################################
+${proc_2dx}/linblock  "npo - to create a line plot for both maps" 
+##############################################################################
+${bin_ccp4}/npo  MAPIN ${filename1}.map PLOT ${filename1}.plot <<EOF
+TITLE   ${map1_name}
+MAP SCALE 0.5
+CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
+MODE BELOW 0 DASHED 1 0.25 0
+MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+SECTS 0 0
+PLOT 
+EOF
+#
+${bin_ccp4}/npo  MAPIN ${filename2}.map PLOT ${filename2}.plot <<EOF
+TITLE   ${map2_name}
+MAP SCALE 0.5
+CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
+MODE BELOW 0 DASHED 1 0.25 0
+MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+SECTS 0 0
+PLOT 
+EOF
+#
+#############################################################################
+${proc_2dx}/linblock "laserplot - to create PS/${map1_name}.ps"
+#############################################################################
+#
+\rm -f PS/${map1_name}.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${map1_name}.ps ${filename1}.plot
+\rm -f ${filename1}.plot
+echo "# IMAGE-IMPORTANT: PS/${map1_name}.ps <PS: map 1>"  >> LOGS/${scriptname}.results
+#
+\rm -f PS/${map2_name}.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${map2_name}.ps ${filename2}.plot
+\rm -f ${filename2}.plot
+echo "# IMAGE-IMPORTANT: PS/${map2_name}.ps <PS: map 2>"  >> LOGS/${scriptname}.results
+#
+##############################################################################
+${proc_2dx}/linblock  "npo - to plot the overlay" 
+##############################################################################
+${bin_ccp4}/npo  MAPIN ${filename1}.map MAPIN2 ${filename2}.map PLOT overlay.plot <<EOF
+TITLE "${map1_name} & ${map2_name} overlay"
+MAP SCALE 0.5 
+CONTRS SIG -2.0 to 2.0 BY ${npo_cntrs_step}	  #1st map  
+MODE BELOW  ${npo_cntrs_below} DASHED 1 0.25 0
+MODE YELLOW #RED
+CONTRS SIG -2.0 to 2.0 BY ${npo_cntrs_step}       #2nd map
+MODE BELOW  ${npo_cntrs_below} DASHED 1 0.25 0
+MODE GREEN #BLUE
+SECTS 0 0
+PLOT 
+EOF
+#############################################################################
+${proc_2dx}/linblock "laserplot - to create PS/${map1_name}_${map2_name}_overlay.ps"
+#############################################################################
+\rm -f PS/${map1_name}_${map2_name}_overlay.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${map1_name}_${map2_name}_overlay.ps overlay.plot
+\rm -f overlay.plot
+echo "# IMAGE-IMPORTANT: PS/${map1_name}_${map2_name}_overlay.ps <PS: overlay of both maps >"  >> LOGS/${scriptname}.results
+
+##
+# rm ${filename}.ps
+# /opt/2dx/kernel/mrc/bin/laserplot.exe -outputfile=${filename}.ps map.plot
+# rm map.plot
+# open ${filename}.ps
+
+#if ( ${Calc_from_zstarrange} == "y" ) then
+#  set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+#  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
+#  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
+#else
+#  set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+#  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results   
+#  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
+#endif
+##
+#set ABANG = `echo $realang | awk '{s=180-$1} END {print s}'`
+#echo ABANG = ${ABANG}
+#set IAQP2 = 0
+#set IVERBOSE = 1
+#set LOGOUTPUT = F
+#set LPROTFOUFIL = T
+#set phastepnum = 1
+#set phastep = 0.1
+##
+##############################################################################
+##
+#set SYM_sub = 'p1'
+#set spcgrp = "1"
+#set spcgroup_num = "1"
+#set CCP4_SYM = "1"
+#set ML_sym_val = "1"
+##
+#set symmetry = 'p1'
+#set spcgrp_local = 1
+#set produceSpiderMapLocal = ${produceSpiderMap}
+#set CCP4_SYM = 1
+#set rotate_to_Z = "no"
+##
+## origtilt does something strange when working with spcgrp>1. (TODO).
+## Symmetrization is therefore here only done by the CCP4 programs.
+##
+#set spcgrp_first = 1
+#echo spcgrp_first = ${spcgrp_first}
+##
+#echo spcgrp = ${spcgrp}
+#echo SYM_sub = ${SYM_sub}
+#echo CCP4_SYM = ${CCP4_SYM}
+#echo rotate_to_Z = ${rotate_to_Z}
+##
+##
+##############################################################################
+#echo ":: "
+#${proc_2dx}/linblock "Sourcing generateMap script for Unbending reconstruction in p1 symmetry"
+#echo ":: "
+##############################################################################
+##############################################################################
+##############################################################################
+##
+#set phaori_local = ${phaori}
+##
+#if ( ${SYN_Unbending} == "0" ) then
+#    # FouFilter Unbending result is used:
+#    set aphfile = APH/${imagename}.fou.cor.aph
+#    #
+#    # A check in case somebody just upgraded from an earlier version of 2dx:
+#    if ( ! -e ${aphfile} ) then
+#      if ( -e APH/${imagename}.cor.aph ) then
+#        \cp APH/${imagename}.cor.aph ${aphfile}
+#      endif
+#    endif
+#    #
+#else
+#    # Synthetic Unbending result is used:
+#    set aphfile = APH/${imagename}.syn.cor.aph
+#endif
+##
+#echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+#echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2b.ps <PS: Vector Plot of distortions 2>" >> LOGS/${scriptname}.results
+#if ( ${ctf_ttf} == 'CTF' ) then
+#  echo "# IMAGE-IMPORTANT: PS/${imagename}.ctf.nolimit.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+#else
+#  echo "# IMAGE-IMPORTANT: PS/${imagename}.ttplot.nolimit.unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
+#endif
+#
+#set prefix = ""
+#set prename = ""
+##
+#source ${proc_2dx}/2dx_generateMap_sub.com
+##
+#if ( ${ML_doit} == 'y' ) then
+#  echo ":: "
+#  ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
+#  echo ":: "
+#  set phaori_local = "0.0,0.0"
+#  set aphfile = APH/ML_result.aph
+#  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+#  set prefix = "ML_"
+#  set prename = "ML "
+#  #
+#  source ${proc_2dx}/2dx_generateMap_sub.com
+#  #
+#endif
+#
+#############################################################################
+#############################################################################
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#
+## Just to make sure it is displayed in the 2dx GUI:
+#source ${proc_2dx}/2dx_checklattice_sub.com 
+##
+##
+

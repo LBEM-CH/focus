@@ -1,5 +1,8 @@
 #!/bin/csh
-#scaleamp.sh
+#2dx_scaleamp_cpp4.sh
+#
+# To scale the amplitudes of a MTZ file to 100
+#
 if ( $#argv < 2 ) then
 	echo "$#argv"
 	echo "Usage: `basename $0` <mtz-map> <output>" 

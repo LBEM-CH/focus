@@ -246,10 +246,10 @@ TITLE "${map1_name} & ${map2_name} overlay"
 MAP SCALE 0.5 
 CONTRS SIG -2.0 to 2.0 BY ${npo_cntrs_step}	  #1st map  
 MODE BELOW  ${npo_cntrs_below} DASHED 1 0.25 0
-MODE YELLOW #RED
-CONTRS SIG -2.0 to 2.0 BY ${npo_cntrs_step}       #2nd map
-MODE BELOW  ${npo_cntrs_below} DASHED 1 0.25 0
 MODE GREEN #BLUE
+CONTRS SIG -2.0 to 2.0 BY ${npo_cntrs_step}       #2nd map
+MODE YELLOW #RED
+MODE BELOW  ${npo_cntrs_below} DASHED 1 0.25 0
 SECTS 0 0
 PLOT 
 EOF
@@ -261,109 +261,56 @@ ${bin_2dx}/laserplot.exe -outputfile=PS/${map1_name}_${map2_name}_overlay.ps ove
 \rm -f overlay.plot
 echo "# IMAGE-IMPORTANT: PS/${map1_name}_${map2_name}_overlay.ps <PS: overlay of both maps >"  >> LOGS/${scriptname}.results
 
-##
-# rm ${filename}.ps
-# /opt/2dx/kernel/mrc/bin/laserplot.exe -outputfile=${filename}.ps map.plot
-# rm map.plot
-# open ${filename}.ps
-
-#if ( ${Calc_from_zstarrange} == "y" ) then
-#  set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
-#  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
-#  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
-#else
-#  set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
-#  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results   
-#  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
-#endif
-##
-#set ABANG = `echo $realang | awk '{s=180-$1} END {print s}'`
-#echo ABANG = ${ABANG}
-#set IAQP2 = 0
-#set IVERBOSE = 1
-#set LOGOUTPUT = F
-#set LPROTFOUFIL = T
-#set phastepnum = 1
-#set phastep = 0.1
-##
-##############################################################################
-##
-#set SYM_sub = 'p1'
-#set spcgrp = "1"
-#set spcgroup_num = "1"
-#set CCP4_SYM = "1"
-#set ML_sym_val = "1"
-##
-#set symmetry = 'p1'
-#set spcgrp_local = 1
-#set produceSpiderMapLocal = ${produceSpiderMap}
-#set CCP4_SYM = 1
-#set rotate_to_Z = "no"
-##
-## origtilt does something strange when working with spcgrp>1. (TODO).
-## Symmetrization is therefore here only done by the CCP4 programs.
-##
-#set spcgrp_first = 1
-#echo spcgrp_first = ${spcgrp_first}
-##
-#echo spcgrp = ${spcgrp}
-#echo SYM_sub = ${SYM_sub}
-#echo CCP4_SYM = ${CCP4_SYM}
-#echo rotate_to_Z = ${rotate_to_Z}
-##
-##
-##############################################################################
-#echo ":: "
-#${proc_2dx}/linblock "Sourcing generateMap script for Unbending reconstruction in p1 symmetry"
-#echo ":: "
-##############################################################################
-##############################################################################
-##############################################################################
-##
-#set phaori_local = ${phaori}
-##
-#if ( ${SYN_Unbending} == "0" ) then
-#    # FouFilter Unbending result is used:
-#    set aphfile = APH/${imagename}.fou.cor.aph
-#    #
-#    # A check in case somebody just upgraded from an earlier version of 2dx:
-#    if ( ! -e ${aphfile} ) then
-#      if ( -e APH/${imagename}.cor.aph ) then
-#        \cp APH/${imagename}.cor.aph ${aphfile}
-#      endif
-#    endif
-#    #
-#else
-#    # Synthetic Unbending result is used:
-#    set aphfile = APH/${imagename}.syn.cor.aph
-#endif
-##
-#echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-#echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2b.ps <PS: Vector Plot of distortions 2>" >> LOGS/${scriptname}.results
-#if ( ${ctf_ttf} == 'CTF' ) then
-#  echo "# IMAGE-IMPORTANT: PS/${imagename}.ctf.nolimit.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
-#else
-#  echo "# IMAGE-IMPORTANT: PS/${imagename}.ttplot.nolimit.unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
-#endif
+#############################################################################
+${proc_2dx}/linblock " overlapmap -  to calulate difference map - ${map1_name} - ${map2_name}"
+#############################################################################
+${bin_ccp4}/overlapmap mapin1 ${filename1}.map mapin2 ${filename2}.map mapout diffmap_${filename1}-${filename2}.map <<eof
+map add 1 -1
+end 
+eof
 #
-#set prefix = ""
-#set prename = ""
-##
-#source ${proc_2dx}/2dx_generateMap_sub.com
-##
-#if ( ${ML_doit} == 'y' ) then
-#  echo ":: "
-#  ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
-#  echo ":: "
-#  set phaori_local = "0.0,0.0"
-#  set aphfile = APH/ML_result.aph
-#  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
-#  set prefix = "ML_"
-#  set prename = "ML "
-#  #
-#  source ${proc_2dx}/2dx_generateMap_sub.com
-#  #
-#endif
+##############################################################################
+${proc_2dx}/linblock  "npo - to create a line plot for difference map" 
+##############################################################################
+${bin_ccp4}/npo  MAPIN diffmap_${filename1}-${filename2}.map  PLOT diffmap.plot <<EOF
+TITLE Difference Map of ${map1_name} - ${map2_name} 
+MAP SCALE 0.5
+CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
+MODE GREEN #BLUE 		#map1 
+MODE BELOW 0 YELLOW #RED 	#map2 
+SECTS 0 0
+PLOT 
+EOF
+#
+#############################################################################
+${proc_2dx}/linblock "laserplot - to create  PS/${filename1}-${filename2}_diffmap.ps"
+#############################################################################
+\rm -f PS/${filename1}-${filename2}_diffmap.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${filename1}-${filename2}_diffmap.ps diffmap.plot
+\rm -f diffmap.plot
+echo "# IMAGE-IMPORTANT: PS/${filename1}-${filename2}_diffmap.ps <PS: Difference Map >"  >> LOGS/${scriptname}.results
+#
+##############################################################################
+${proc_2dx}/linblock  "npo - to create a line plot for map 1 & difference map" 
+##############################################################################
+${bin_ccp4}/npo  MAPIN ${filename1}.map MAPIN2 diffmap_${filename1}-${filename2}.map PLOT map1_diff.plot <<EOF
+TITLE ${map1_name} and the difference map
+MAP SCALE 0.5
+CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step}	#1st map 
+MODE BELOW 0 DASHED 1 0.25 0
+CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step}	#2nd map 
+MODE YELLOW
+MODE BELOW 0 GREEN
+SECTS 0 0
+PLOT 
+EOF
+#############################################################################
+${proc_2dx}/linblock "laserplot - to create PS/${filename1}and${filename1}-${filename2}_diffmap.ps"
+#############################################################################
+\rm -f PS/${filename1}and${filename1}-${filename2}_diffmap.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${filename1}and${filename1}-${filename2}_diffmap.ps map1_diff.plot
+\rm -f map1_diff.plot
+echo "# IMAGE-IMPORTANT: PS/${filename1}and${filename1}-${filename2}_diffmap.ps <PS: <Map 1 and Difference Map >"  >> LOGS/${scriptname}.results
 #
 #############################################################################
 #############################################################################

@@ -51,7 +51,7 @@ set map1_name = "map1"
 # SYNC_WITH_UPPER_LEVEL: NO
 # USERLEVEL: SIMPLE
 # ISWRONG: YES
-set map2 = "/Users/marheit/data/2dx/diffmap/CLC_ph7_merge2D.mtz"
+set map2 = "~/data/2dx/poject/merge2D.mtz"
 #
 ## LABEL: name of map 2 
 # LEGEND: This labels the map 2 and is reflected in the title of the plots. 
@@ -193,7 +193,7 @@ ${bin_ccp4}/fft HKLIN   ${filename2}_res.mtz MAPOUT  ${filename2}.map \
     << eot
 resol 200 ${RESMAX}
 ! Fo
-TITLE "${RESMAX} EM map for ${filename1}"
+TITLE "${RESMAX} EM map for ${filename2}"
 LABIN F1=F PHI=PHI W=FOM
 scale F1 1.0
 AXIS Y X Z
@@ -242,7 +242,7 @@ echo "# IMAGE-IMPORTANT: PS/${map2_name}.ps <PS: map 2>"  >> LOGS/${scriptname}.
 ${proc_2dx}/linblock  "npo - to plot the overlay" 
 ##############################################################################
 ${bin_ccp4}/npo  MAPIN ${filename1}.map MAPIN2 ${filename2}.map PLOT overlay.plot <<EOF
-TITLE "${map1_name} & ${map2_name} overlay"
+TITLE ${map1_name} & ${map2_name} overlay
 MAP SCALE 0.5 
 CONTRS SIG -2.0 to 2.0 BY ${npo_cntrs_step}	  #1st map  
 MODE BELOW  ${npo_cntrs_below} DASHED 1 0.25 0

@@ -692,6 +692,7 @@ QWidget *mainWindow::setupFooter()
 
   graphicalButton *infoButton = new graphicalButton(mainData->getIcon("info"),this);
   infoButton->setCheckable(true);
+  infoButton->setToolTip("Show/Hide image header information");
 //  infoButton->setChecked(true);
   connect(infoButton,SIGNAL(clicked(bool)),preview,SLOT(toggleInfo()));
 

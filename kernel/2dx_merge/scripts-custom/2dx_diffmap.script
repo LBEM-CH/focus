@@ -17,60 +17,20 @@
 #
 # MANUAL: This script makes use of CCP4 commands to generate difference map.
 #
-#=============================================================================
-# SECTION: Difference Map
-#=============================================================================
-#
-# LABEL: projection map 1 
-# LEGEND: This is the MTZ file from which the other map is subtracted, hence the minuend. 
-# EXAMPLE: map1 = "AII0000123456.mtz"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/diffmap
-# TYPE: Text_Edit
-# INHERITABLE_UPON_INIT: NO
-# SYNC_WITH_UPPER_LEVEL: NO
-# USERLEVEL: SIMPLE
-# ISWRONG: YES
-set map1 = "merge2D.mtz"
-# LABEL: name of map 1 
-# LEGEND: This labels the map 1 and is reflected in the title of the plots. 
-# EXAMPLE: map1 = "conformation1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/diffmap
-# TYPE: Text_Edit
-# INHERITABLE_UPON_INIT: NO
-# SYNC_WITH_UPPER_LEVEL: NO
-# USERLEVEL: SIMPLE
-# ISWRONG: YES
-set map1_name = "map1"
-#
-# LABEL: projection map 2 
-# LEGEND: This is the MTZ file which is subtracted from the original map, hence the minuend subtrahend. 
-# EXAMPLE: map2 = "AII0000123456.mtz"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/diffmap
-# TYPE: Text_Edit
-# INHERITABLE_UPON_INIT: NO
-# SYNC_WITH_UPPER_LEVEL: NO
-# USERLEVEL: SIMPLE
-# ISWRONG: YES
-set map2 = "~/data/2dx/poject/merge2D.mtz"
-#
-## LABEL: name of map 2 
-# LEGEND: This labels the map 2 and is reflected in the title of the plots. 
-# EXAMPLE: map2 = "conformation2"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/diffmap
-# TYPE: Text_Edit
-# INHERITABLE_UPON_INIT: NO
-# SYNC_WITH_UPPER_LEVEL: NO
-# USERLEVEL: SIMPLE
-# ISWRONG: YES
-set map2_name = "map2"
-#
 # REMARK: The following section defines variables that will be displayed in the GUI:
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
 # DISPLAY: realcell 
 # DISPLAY: realang
-# DISPLAY: SYM
-# DISPLAY: npo_cntrs_step
+# DISPLAY: diff_map1
+# DISPLAY: diff_map1_name
+# DISPLAY: diff_map2
+# DISPLAY: diff_map2_name
+# DISPLAY: diffmap_cntrs_mode
+# DISPLAY: diffmap_cntrs_max
+# DISPLAY: diffmap_cntrs_min
+# DISPLAY: diffmap_cntrs_step
+# DISPLAY: npo_cntrs_step 
 # DISPLAY: npo_cntrs_below 
 #
 # REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
@@ -90,7 +50,14 @@ set realang = ""
 set realcell = ""
 set SYM = ""
 set ctf_ttf = ""
-set npo_cntrs_step = ""
+set diff_map1 = ""
+set diff_map1_name = ""
+set diff_map2 = ""
+set diff_map2_name = ""
+set diffmap_cntrs_mode = ""
+set diffmap_cntrs_max = ""
+set diffmap_cntrs_min = ""
+set diffmap_cntrs_step = ""
 set npo_cntrs_below = ""
 set npo_cntrs_step = ""
 #
@@ -112,29 +79,31 @@ echo "<<@evaluate>>"
 set date = `date`
 echo date = ${date}
 #
-set filename1 = `echo $map1 | awk -F/ '{print $NF }' | awk -F. '{ print $1 }'`
+set filename1 = `echo $diff_map1 | awk -F/ '{print $NF }' | awk -F. '{ print $1 }'`
+set filename1 = "diff_map1_${filename1}"
 echo "the filename of map 1: ${filename1}"
-set filename2 = `echo $map2 | awk -F/ '{print $NF }' | awk -F. '{ print $1 }'`
+set filename2 = `echo $diff_map2 | awk -F/ '{print $NF }' | awk -F. '{ print $1 }'`
+set filename2 = "diff_map2_${filename2}"
 echo "the filename of map 2: ${filename2}"
 #
 ##############################################################################
 ${proc_2dx}/linblock  "Scaling amplitudes" 
 ##############################################################################
-if ( -e ${map1} ) then
-	echo "scaling amplitudes of  ${map1} "
+if ( -e ${diff_map1} ) then
+	echo "scaling amplitudes of  ${diff_map1} "
 	\rm -f  ${filename1}_scaled.mtz  
-	${proc_2dx}/2dx_scaleamp_ccp4.com ${map1} ${filename1}_scaled.mtz
+	${proc_2dx}/2dx_scaleamp_ccp4.com ${diff_map1} ${filename1}_scaled.mtz
 	echo "# IMAGE: ${filename1}_scaled.mtz <MTZ: Map 1 with scaled amplitudes >" >> LOGS/${scriptname}.results
 else
-	${proc_2dx}/protest "Could not find ${map2}"
+	${proc_2dx}/protest "Could not find ${diff_map2}"
 endif
-if ( -e ${map2} ) then
-	echo "scaling amplitudes of  ${map2} "
+if ( -e ${diff_map2} ) then
+	echo "scaling amplitudes of  ${diff_map2} "
 	\rm -f  ${filename2}_scaled.mtz  
-	${proc_2dx}/2dx_scaleamp_ccp4.com ${map2} ${filename2}_scaled.mtz
+	${proc_2dx}/2dx_scaleamp_ccp4.com ${diff_map2} ${filename2}_scaled.mtz
 	echo "# IMAGE: ${filename2}_scaled.mtz <MTZ: Map 2 with scaled amplitudes >" >> LOGS/${scriptname}.results
 else
-	${proc_2dx}/protest "Could not find ${map2}"
+	${proc_2dx}/protest "Could not find ${diff_map2}"
 endif
 ##############################################################################
 ${proc_2dx}/linblock  "Limiting the resolution to ${RESMAX}" 
@@ -205,7 +174,7 @@ eot
 ${proc_2dx}/linblock  "npo - to create a line plot for both maps" 
 ##############################################################################
 ${bin_ccp4}/npo  MAPIN ${filename1}.map PLOT ${filename1}.plot <<EOF
-TITLE   ${map1_name}
+TITLE   ${diff_map1_name}
 MAP SCALE 0.5
 CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
 MODE BELOW 0 DASHED 1 0.25 0
@@ -215,7 +184,7 @@ PLOT
 EOF
 #
 ${bin_ccp4}/npo  MAPIN ${filename2}.map PLOT ${filename2}.plot <<EOF
-TITLE   ${map2_name}
+TITLE   ${diff_map2_name}
 MAP SCALE 0.5
 CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
 MODE BELOW 0 DASHED 1 0.25 0
@@ -225,24 +194,24 @@ PLOT
 EOF
 #
 #############################################################################
-${proc_2dx}/linblock "laserplot - to create PS/${map1_name}.ps"
+${proc_2dx}/linblock "laserplot - to create PS/${diff_map1_name}.ps"
 #############################################################################
 #
-\rm -f PS/${map1_name}.ps
-${bin_2dx}/laserplot.exe -outputfile=PS/${map1_name}.ps ${filename1}.plot
+\rm -f PS/${diff_map1_name}.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${diff_map1_name}.ps ${filename1}.plot
 \rm -f ${filename1}.plot
-echo "# IMAGE-IMPORTANT: PS/${map1_name}.ps <PS: map 1>"  >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/${diff_map1_name}.ps <PS: map 1>"  >> LOGS/${scriptname}.results
 #
-\rm -f PS/${map2_name}.ps
-${bin_2dx}/laserplot.exe -outputfile=PS/${map2_name}.ps ${filename2}.plot
+\rm -f PS/${diff_map2_name}.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${diff_map2_name}.ps ${filename2}.plot
 \rm -f ${filename2}.plot
-echo "# IMAGE-IMPORTANT: PS/${map2_name}.ps <PS: map 2>"  >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/${diff_map2_name}.ps <PS: map 2>"  >> LOGS/${scriptname}.results
 #
 ##############################################################################
 ${proc_2dx}/linblock  "npo - to plot the overlay" 
 ##############################################################################
 ${bin_ccp4}/npo  MAPIN ${filename1}.map MAPIN2 ${filename2}.map PLOT overlay.plot <<EOF
-TITLE ${map1_name} & ${map2_name} overlay
+TITLE ${diff_map1_name} & ${diff_map2_name} overlay
 MAP SCALE 0.5 
 CONTRS SIG -2.0 to 2.0 BY ${npo_cntrs_step}	  #1st map  
 MODE BELOW  ${npo_cntrs_below} DASHED 1 0.25 0
@@ -254,15 +223,15 @@ SECTS 0 0
 PLOT 
 EOF
 #############################################################################
-${proc_2dx}/linblock "laserplot - to create PS/${map1_name}_${map2_name}_overlay.ps"
+${proc_2dx}/linblock "laserplot - to create PS/${diff_map1_name}_${diff_map2_name}_overlay.ps"
 #############################################################################
-\rm -f PS/${map1_name}_${map2_name}_overlay.ps
-${bin_2dx}/laserplot.exe -outputfile=PS/${map1_name}_${map2_name}_overlay.ps overlay.plot
+\rm -f PS/${diff_map1_name}_${diff_map2_name}_overlay.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${diff_map1_name}_${diff_map2_name}_overlay.ps overlay.plot
 \rm -f overlay.plot
-echo "# IMAGE-IMPORTANT: PS/${map1_name}_${map2_name}_overlay.ps <PS: overlay of both maps >"  >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/${diff_map1_name}_${diff_map2_name}_overlay.ps <PS: overlay of both maps >"  >> LOGS/${scriptname}.results
 
 #############################################################################
-${proc_2dx}/linblock " overlapmap -  to calulate difference map - ${map1_name} - ${map2_name}"
+${proc_2dx}/linblock " overlapmap -  to calulate difference map - ${diff_map1_name} - ${diff_map2_name}"
 #############################################################################
 ${bin_ccp4}/overlapmap mapin1 ${filename1}.map mapin2 ${filename2}.map mapout diffmap_${filename1}-${filename2}.map <<eof
 map add 1 -1
@@ -273,11 +242,11 @@ eof
 ${proc_2dx}/linblock  "npo - to create a line plot for difference map" 
 ##############################################################################
 ${bin_ccp4}/npo  MAPIN diffmap_${filename1}-${filename2}.map  PLOT diffmap.plot <<EOF
-TITLE Difference Map of ${map1_name} - ${map2_name} 
+TITLE Difference Map of ${diff_map1_name} - ${diff_map2_name} 
 MAP SCALE 0.5
-CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
-MODE GREEN #BLUE 		#map1 
-MODE BELOW 0 YELLOW #RED 	#map2 
+CONTRS ${diffmap_cntrs_mode} ${diffmap_cntrs_min} to ${diffmap_cntrs_max}  BY ${diffmap_cntrs_step}
+MODE GREEN #BLUE 		#diff_map1 
+MODE BELOW 0 YELLOW #RED 	#diff_map2 
 SECTS 0 0
 PLOT 
 EOF
@@ -293,12 +262,12 @@ echo "# IMAGE-IMPORTANT: PS/${filename1}-${filename2}_diffmap.ps <PS: Difference
 ##############################################################################
 ${proc_2dx}/linblock  "npo - to create a line plot for map 1 & difference map" 
 ##############################################################################
-${bin_ccp4}/npo  MAPIN ${filename1}.map MAPIN2 diffmap_${filename1}-${filename2}.map PLOT map1_diff.plot <<EOF
-TITLE ${map1_name} and the difference map
+${bin_ccp4}/npo  MAPIN ${filename1}.map MAPIN2 diffmap_${filename1}-${filename2}.map PLOT diff_map1_diff.plot <<EOF
+TITLE ${diff_map1_name} and the difference map
 MAP SCALE 0.5
 CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step}	#1st map 
 MODE BELOW 0 DASHED 1 0.25 0
-CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step}	#2nd map 
+CONTRS ${diffmap_cntrs_mode} ${diffmap_cntrs_min} to ${diffmap_cntrs_max}  BY ${diffmap_cntrs_step}	#2nd map 
 MODE YELLOW
 MODE BELOW 0 GREEN
 SECTS 0 0
@@ -308,8 +277,8 @@ EOF
 ${proc_2dx}/linblock "laserplot - to create PS/${filename1}and${filename1}-${filename2}_diffmap.ps"
 #############################################################################
 \rm -f PS/${filename1}and${filename1}-${filename2}_diffmap.ps
-${bin_2dx}/laserplot.exe -outputfile=PS/${filename1}and${filename1}-${filename2}_diffmap.ps map1_diff.plot
-\rm -f map1_diff.plot
+${bin_2dx}/laserplot.exe -outputfile=PS/${filename1}and${filename1}-${filename2}_diffmap.ps diff_map1_diff.plot
+\rm -f diff_map1_diff.plot
 echo "# IMAGE-IMPORTANT: PS/${filename1}and${filename1}-${filename2}_diffmap.ps <PS: <Map 1 and Difference Map >"  >> LOGS/${scriptname}.results
 #
 #############################################################################

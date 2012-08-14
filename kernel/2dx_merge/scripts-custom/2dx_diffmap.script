@@ -105,6 +105,7 @@ if ( -e ${diff_map2} ) then
 else
 	${proc_2dx}/protest "Could not find ${diff_map2}"
 endif
+echo "<<@progress: 10>>"
 ##############################################################################
 ${proc_2dx}/linblock  "Limiting the resolution to ${RESMAX}" 
 ##############################################################################
@@ -129,6 +130,8 @@ end
 eot
 #
 echo "# IMAGE: ${filename2}_res.mtz <MTZ: Map 2 (resolution limited) >" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 20>>"
 #
 ##############################################################################
 ${proc_2dx}/linblock  "Inverse fft to get map" 
@@ -170,6 +173,7 @@ GRID  ${grid_a} ${grid_b} ${realang}
 end
 eot
 #
+echo "<<@progress: 30>>"
 ##############################################################################
 ${proc_2dx}/linblock  "npo - to create a line plot for both maps" 
 ##############################################################################
@@ -193,6 +197,7 @@ SECTS 0 0
 PLOT 
 EOF
 #
+echo "<<@progress: 35>>"
 #############################################################################
 ${proc_2dx}/linblock "laserplot - to create PS/${diff_map1_name}.ps"
 #############################################################################
@@ -207,6 +212,7 @@ ${bin_2dx}/laserplot.exe -outputfile=PS/${diff_map2_name}.ps ${filename2}.plot
 \rm -f ${filename2}.plot
 echo "# IMAGE-IMPORTANT: PS/${diff_map2_name}.ps <PS: map 2>"  >> LOGS/${scriptname}.results
 #
+echo "<<@progress: 40>>"
 ##############################################################################
 ${proc_2dx}/linblock  "npo - to plot the overlay" 
 ##############################################################################
@@ -222,6 +228,8 @@ MODE BELOW  ${npo_cntrs_below} DASHED 1 0.25 0
 SECTS 0 0
 PLOT 
 EOF
+#
+echo "<<@progress: 45>>"
 #############################################################################
 ${proc_2dx}/linblock "laserplot - to create PS/${diff_map1_name}_${diff_map2_name}_overlay.ps"
 #############################################################################
@@ -229,15 +237,18 @@ ${proc_2dx}/linblock "laserplot - to create PS/${diff_map1_name}_${diff_map2_nam
 ${bin_2dx}/laserplot.exe -outputfile=PS/${diff_map1_name}_${diff_map2_name}_overlay.ps overlay.plot
 \rm -f overlay.plot
 echo "# IMAGE-IMPORTANT: PS/${diff_map1_name}_${diff_map2_name}_overlay.ps <PS: overlay of both maps >"  >> LOGS/${scriptname}.results
-
+#
+echo "<<@progress: 50>>"
 #############################################################################
-${proc_2dx}/linblock " overlapmap -  to calulate difference map - ${diff_map1_name} - ${diff_map2_name}"
+${proc_2dx}/linblock "overlapmap -  to calulate difference map - ${diff_map1_name} - ${diff_map2_name}"
 #############################################################################
 ${bin_ccp4}/overlapmap mapin1 ${filename1}.map mapin2 ${filename2}.map mapout diffmap_${filename1}-${filename2}.map <<eof
 map add 1 -1
 end 
 eof
 #
+#
+echo "<<@progress: 60>>"
 ##############################################################################
 ${proc_2dx}/linblock  "npo - to create a line plot for difference map" 
 ##############################################################################
@@ -251,6 +262,8 @@ SECTS 0 0
 PLOT 
 EOF
 #
+#
+echo "<<@progress: 70>>"
 #############################################################################
 ${proc_2dx}/linblock "laserplot - to create  PS/${filename1}-${filename2}_diffmap.ps"
 #############################################################################
@@ -259,6 +272,7 @@ ${bin_2dx}/laserplot.exe -outputfile=PS/${filename1}-${filename2}_diffmap.ps dif
 \rm -f diffmap.plot
 echo "# IMAGE-IMPORTANT: PS/${filename1}-${filename2}_diffmap.ps <PS: Difference Map >"  >> LOGS/${scriptname}.results
 #
+echo "<<@progress: 80>>"
 ##############################################################################
 ${proc_2dx}/linblock  "npo - to create a line plot for map 1 & difference map" 
 ##############################################################################
@@ -273,6 +287,8 @@ MODE BELOW 0 GREEN
 SECTS 0 0
 PLOT 
 EOF
+#
+echo "<<@progress: 90>>"
 #############################################################################
 ${proc_2dx}/linblock "laserplot - to create PS/${filename1}and${filename1}-${filename2}_diffmap.ps"
 #############################################################################
@@ -281,8 +297,7 @@ ${bin_2dx}/laserplot.exe -outputfile=PS/${filename1}and${filename1}-${filename2}
 \rm -f diff_map1_diff.plot
 echo "# IMAGE-IMPORTANT: PS/${filename1}and${filename1}-${filename2}_diffmap.ps <PS: <Map 1 and Difference Map >"  >> LOGS/${scriptname}.results
 #
-#############################################################################
-#############################################################################
+###########################################################################
 #############################################################################
 #
 echo "<<@progress: 100>>"

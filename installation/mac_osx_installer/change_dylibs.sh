@@ -112,8 +112,8 @@ fortran_bin="kernel/mrc/bin"
 path="$build_dir/$fortran_bin"
 lib_path="$build_dir/kernel/mrc/lib"
 
-echo "install_name_tool -change $QUADMATH_LIB  @executable_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
-install_name_tool -change $QUADMATH_LIB  @executable_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
+echo "install_name_tool -change $QUADMATH_LIB  $lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
+install_name_tool -change $QUADMATH_LIB  $lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
 
 echo "chaning binaries in $path" 
 for exe in `ls $path`
@@ -141,9 +141,9 @@ do
 done
 
 lib_path="$build_dir/2dx_image/2dx_image.app/Contents/MacOS"
-echo "install_name_tool -change $QUADMATH_LIB  @executable_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
-install_name_tool -change $QUADMATH_LIB  @executable_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
+echo "install_name_tool -change $QUADMATH_LIB  $lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
+install_name_tool -change $QUADMATH_LIB  $lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
 
 lib_path="$build_dir/2dx_merge/2dx_merge.app/Contents/MacOS"
-echo "install_name_tool -change $QUADMATH_LIB  @executable_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
-install_name_tool -change $QUADMATH_LIB  @executable_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
+echo "install_name_tool -change $QUADMATH_LIB  $lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
+install_name_tool -change $QUADMATH_LIB  $lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib

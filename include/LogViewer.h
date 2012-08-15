@@ -76,6 +76,7 @@ class LogViewer : public QWidget
         int byte_ending_number;
     } LineInfo;
 
+
     private:
 	
     int num_bytes_read;

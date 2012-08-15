@@ -219,3 +219,4 @@ bool LogViewer::load(int verbosity)
   return true;
 }
 
+

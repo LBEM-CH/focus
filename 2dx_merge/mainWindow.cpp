@@ -149,6 +149,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   QWidget *dirWidget = setupDirectoryView(mainData->getDir("project"), mainData->getDir("working") + "/2dx_merge_dirfile.dat");
 
   logViewer = new LogViewer("Standard Output",NULL);
+
   connect(standardScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
   connect(standardScripts,SIGNAL(standardError(const QByteArray &)),logViewer,SLOT(insertError(const QByteArray &)));
   connect(customScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
@@ -164,6 +165,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   verbosityControl->setLevel(1);
   
   viewContainer *logWindow = new viewContainer("Logfile - Low Verbosity",viewContainer::data,NULL,viewContainer::grey);
+  connect(logWindow,SIGNAL(doubleClicked()),this,SLOT(launchLogBrowser()));
   logWindow->setHeaderWidget(verbosityControl);
   logWindow->addWidget(logViewer);
   connect(verbosityControl, SIGNAL(titleChanged(const QString &)), logWindow, SLOT(setText(const QString &)));
@@ -1023,6 +1025,12 @@ void mainWindow::editHelperConf()
 {
   new confEditor(mainData->getSubConf("appConf")); 
 }
+
+void mainWindow::launchLogBrowser()
+{
+  QProcess::startDetached(mainData->getApp("logBrowser") + " " +logViewer->getLogFile());
+}
+
 
 
 void mainWindow::loadProjectState()

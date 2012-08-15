@@ -76,6 +76,7 @@ class mainWindow : public QMainWindow
   void saveProjectState();
   void loadProjectState();
   void editHelperConf();
+  void launchLogBrowser();
 
   void setSaveState(bool state);
   

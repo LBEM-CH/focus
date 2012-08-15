@@ -19,6 +19,7 @@
 ***************************************************************************/
 
 #include "centralWindow.h"
+#include  <QDesktopServices>
 #include <iostream>
 using namespace std;
 
@@ -199,10 +200,12 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
 
 
   viewContainer *imagesContainer = new viewContainer("Images", viewContainer::data);
+  connect(imagesContainer,SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
 
   imageParser = new resultsParser(data,QStringList()<<"",resultsParser::images);
   connect(imageParser,SIGNAL(imageSelected(const QString &)), preview, SLOT(setImage(const QString&)));
   connect(imageParser,SIGNAL(cellActivated(int,int)), preview, SLOT(launchNavigator()));
+
 
   imagesContainer->addWidget(imageParser);
 
@@ -433,6 +436,15 @@ void centralWindow::updateFontInfo()
 void centralWindow::launchLogBrowser()
 {
   QProcess::startDetached(data->getApp("logBrowser") + " " + logViewer->getLogFile());
+}
+
+void centralWindow::launchFileBrowser()
+{
+//    QFileDialog* fileDialog = new QFileDialog(this, "Images", data->getDir("working"));
+//    fileDialog->setViewMode(QFileDialog::List);
+//    fileDialog->exec();
+    QString path = QDir::toNativeSeparators( data->getDir("working"));
+    QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
 void centralWindow::toggleHistoryView(bool show)

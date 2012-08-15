@@ -73,6 +73,7 @@ class centralWindow : public QWidget
   void viewHelp();
   void reportBug();
   void launchLogBrowser();
+  void launchFileBrowser();
 
   void updateFontInfo();
   

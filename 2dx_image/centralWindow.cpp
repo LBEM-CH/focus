@@ -440,9 +440,6 @@ void centralWindow::launchLogBrowser()
 
 void centralWindow::launchFileBrowser()
 {
-//    QFileDialog* fileDialog = new QFileDialog(this, "Images", data->getDir("working"));
-//    fileDialog->setViewMode(QFileDialog::List);
-//    fileDialog->exec();
     QString path = QDir::toNativeSeparators( data->getDir("working"));
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }

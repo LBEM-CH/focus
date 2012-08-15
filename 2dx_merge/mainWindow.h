@@ -100,6 +100,7 @@ class mainWindow : public QMainWindow
   void openURL(const QString &url);
 
   void launchAlbum(const QString &path);
+  void launchFileBrowser();
   void showManual(bool show);
 
   void saveDirectorySelection();
@@ -179,6 +180,7 @@ class mainWindow : public QMainWindow
   
   public:
   mainWindow(const QString &directory, QWidget *parent = NULL);
+
 };
 
 #endif

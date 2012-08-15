@@ -20,6 +20,7 @@
 
 #include "mainWindow.h"
 #include <QDebug>
+#include <QDesktopServices>
 #include <iostream>
 using namespace std;
 
@@ -251,6 +252,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   resultsContainer->setMinimumSize(QSize(200,100));
 
   viewContainer *imagesContainer = new viewContainer("Images",viewContainer::data,this,viewContainer::grey);
+  connect(imagesContainer,SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
   resultsModule *imagesView = new resultsModule(mainData,results, resultsModule::images, mainData->getDir("project"));
   imagesContainer->addWidget(imagesView);
   imagesContainer->setMinimumSize(QSize(200,100));
@@ -301,7 +303,6 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   about->hide();
 
 	setupActions();
-
   album = NULL;
   
   importCount = 0;
@@ -833,6 +834,12 @@ void mainWindow::launchAlbum(const QString &path)
 //    album->setModel(sortModel);
 //    album->setSelectionModel(dirView->selectionModel());
   }
+}
+
+void mainWindow::launchFileBrowser()
+{
+    QString path = QDir::toNativeSeparators(mainData->getDir("working"));
+    QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
 void mainWindow::importFiles(const QHash<QString, QHash<QString,QString> > &imageList)

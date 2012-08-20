@@ -186,6 +186,7 @@ echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-Masked Image>" >> LOGS/$
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "IMAGE: FFTIR/${imagename}.pg.mrc" "<Periodogram>" >> LOGS/${scriptname}.results
 #
 if ( ${magnification} == '' ) then
   ${proc_2dx}/protest "ERROR: Magnification is not defined."

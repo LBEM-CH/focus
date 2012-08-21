@@ -30,6 +30,7 @@
     int    i,j, k,m,n, start_x,start_y;
     int    num_peak, flag,*mask;
     float  *temp_amp, mean, rin,rout,w, A, min, max, dist, min_dist;
+    double dmean;
    
  
     cout<<" sx = "<<sx<<"     sy = "<<sy<<endl;
@@ -47,6 +48,7 @@
    
    
     mean=0;
+    dmean=0;
     k=0;
     for(i=0;i<sx;i++)
       for(j=0;j<sy;j++)
@@ -54,11 +56,11 @@
            mask[j+i*sy]=1;
 	   
 	   if((powf(float(i-sx/2),2.0)+powf(float(j-sy/2),2.0))<(rin*rin))
-	    {   mean=mean+amp[j+i*sy];  k++;}
+	    {   dmean=dmean+amp[j+i*sy];  k++;}
         }
 	
 
-    mean=mean/k;
+    mean=dmean/k;
 
 
 /*  Mask the image: Preprocessing to remove the lines, the horizental and vertical  center   */
@@ -130,7 +132,7 @@
      
      cout<<" amp outside of mask set to mean."<<endl;
 
-     min=1.0e40; max=-min;
+     min=1.0e20; max=-min;
      for(i=0;i<sx; i++)
        for(j=0;j<sy;j++)
          {
@@ -138,18 +140,8 @@
            if(max<amp[j+i*sy]) max=amp[j+i*sy];
         }
 
-   // ToDo: Why is this next block done here again??? 
+     cout<<"2dx_mask.cpp:  min = "<<min<<"      max = "<<max<<endl;
 
-    for(i=0;i<sx;i++)
-       for(j=0;j<sy;j++)
-          {  mask[j+i*sy]=1;
-	     if(((i-sx/2)*(i-sx/2)+(j-sy/2)*(j-sy/2))>rout*rout || 
-	       ((i-sx/2)*(i-sx/2)+(j-sy/2)*(j-sy/2))<rin*rin ||
-	        (abs(i-sx/2)<w) || (abs(j-sy/2)<w) )  mask[j+i*sy]=0;
-//	     if(((i-sx/2+1)*(i-sx/2+1)+(j-sy/2+1)*(j-sy/2+1))>rout*rout || 
-//	       ((i-sx/2+1)*(i-sx/2+1)+(j-sy/2+1)*(j-sy/2+1))<rin*rin ||
-//	        (abs(i-sx/2+1)<w) || (abs(j-sy/2+1)<w) )  mask[j+i*sy]=0;
-           }
 
 /*  write the masked image and the mask  */
 
@@ -159,7 +151,6 @@
  
              temp_amp[i+j*sx]=amp[j+i*sy];
 	  }  
-      
       
      char *complexData = mrcImage::complexFromReal(sx,sy,2,(char*)temp_amp);
      cout<<"Data converted"<<endl;

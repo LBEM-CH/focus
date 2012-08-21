@@ -120,7 +120,7 @@ int shift(int sx, int sy, float *amp, int ML, int *peak_x, int  *peak_y, float *
     
 /*  Normalize the image  */    
 
-     min=1.0e40; max=-min;
+     min=1.0e20; max=-min;
      for(i=0;i<sx; i++)
         for(j=0;j<sy;j++)
          {   if(min>new_amp[j+i*sy]) min=new_amp[j+i*sy];
@@ -136,6 +136,7 @@ int shift(int sx, int sy, float *amp, int ML, int *peak_x, int  *peak_y, float *
    for(i=0;i<sx;i++)
         for(j=0;j<sy;j++)
 	  {   new_amp[j+i*sy]=(new_amp[j+i*sy]-min)*1.0/(max-min);
+              if(i<3 || j<3 || i>sx-4 || j>sy-4) new_amp[j+i*sy]=0;
               amp[j+i*sy]=new_amp[j+i*sy];
 	      
 	      amp_1[i+j*sy]=new_amp[j+i*sy];

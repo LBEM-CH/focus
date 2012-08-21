@@ -59,6 +59,7 @@
 # DISPLAY: SYM
 # DISPLAY: tempkeep
 # DISPLAY: delta
+# DISPLAY: FirstPeakNum
 # DISPLAY: peakNum
 # DISPLAY: testHand
 # DISPLAY: regenPL
@@ -102,6 +103,7 @@ set ALAT = ""
 set det_tilt = ""
 set ctf_ttf = ""
 set delta = ""
+set FirstPeakNum = ""
 set peakNum = ""
 set testHand = ""
 set regenPL = ""
@@ -252,7 +254,6 @@ eot
     \rm -f ${docfile}
     \rm -f ${docfileraw}
     #
-    set FirstPeakNum = 80
     echo "FirstPeakNum = ${FirstPeakNum}"
     echo "peakNum = ${peakNum}"
     echo "InnerExclusionRadius = ${InnerExclusionRadius}"
@@ -262,7 +263,9 @@ eot
   if ( ${tempkeep} == 'y' ) then
     #
     \mv -f 2dx_peaksearch-non-masked_image.mrc SCRATCH/pks-non-masked_image.mrc
-    #\mv -f 2dx_peaksearch-amp_LHpass.mrc SCRATCH/pks-amp_LHpass.mrc
+    if ( -e 2dx_peaksearch-amp_LHpass.mrc ) then
+      \mv -f 2dx_peaksearch-amp_LHpass.mrc SCRATCH/pks-amp_LHpass.mrc
+    endif
     \mv -f 2dx_peaksearch-masked_image.mrc SCRATCH/pks-masked_image.mrc
     \rm -f 2dx_peaksearch-phase.mrc
     echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
@@ -366,7 +369,8 @@ eot
     set secondscore  = `cat 2dx_findlat.out | head -n 4 | tail -n 1`
     set newsecondlattice = `echo ${tmplat} | sed 's/ /,/g'`
     set oldsecondlattice = `echo ${secondlattice}`
-    \rm -f 2dx_findlat.out
+    #
+    # \rm -f 2dx_findlat.out
     #
     echo "::  Old 2nd lattice is ${oldsecondlattice}"
     set goodsecond = `echo ${secondscore} | awk '{ if ( $1 > 0.6 ) { s = 1 } else { s = 0 }} END { print s }'`

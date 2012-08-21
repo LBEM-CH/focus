@@ -73,7 +73,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
    int    *peak_x, *peak_y;
    int    *peak_x_final, *peak_y_final;
    float  *peak_value, *peak_value_final, Mask_radius_inner;
-   float  *amp, *temp_phase, delta, *amp_small, mean, temp, max,min; 
+   float  *amp, *temp_phase, delta, *amp_small, temp, max,min; 
     
 
 
@@ -125,7 +125,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
            else if(image->mode()==1)  temp=(float)((unsigned short*)image->rawData())[j*image->width()+i];  
 	   else if(image->mode()==2) temp=(float)((float*)image->rawData())[j*image->width()+i];
            else {printf("Unsupported mode.\n Exiting..."); exit(1);}
-           in[j+i*ny][0]=temp*pow(-1,(i+j)*1.0);
+           in[j+i*ny][0]=temp*powf(-1,i+j);
            in[j+i*ny][1]=0;
         }
 
@@ -138,21 +138,14 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
 
 /*  Get amplitude and phase of FFT image*/
 
-    mean=0;
     for(i=0;i<nx;i++)
       for(j=0;j<ny;j++)
         {
            amp[j+i*ny]=sqrt(powf(out[j+i*ny][0],2.0)+powf(out[j+i*ny][1],2.0));
-           mean=mean+amp[j+i*nx];
-
    /*  the following phase will be used in IFFTW of the real image */
            temp_phase[i+j*nx]=atan2(out[j+i*ny][1],out[j+i*ny][0]);
-	   
-	  
         }
    
- 
-       
      fftwf_free(in);fftwf_free(out);   
 
 
@@ -233,10 +226,10 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
 
 
      printf("Low and highpass filter.\n"); 
-     //low_high_pass(sx,sy,amp_small,q_low,q_high);
+     low_high_pass(sx,sy,amp_small,q_low,q_high);
 
 
-     min=1.0e40; max=-min;
+     min=1.0e16; max=-min;
      for(i=0;i<sx; i++)
       for(j=0;j<sy;j++)
         {
@@ -244,7 +237,8 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
            if(max<amp_small[j+i*sy]) max=amp_small[j+i*sy]; 
         }
 
- 
+     cout<<"min = "<<min<<"      max = "<<max<<endl;
+
      for(i=0;i<sx;i++)
         for(j=0;j<sy;j++)
 	     amp_small[j+i*sy]=(amp_small[j+i*sy]-min)*10000.0/(max-min)+1;
@@ -256,7 +250,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
    
        cout<<":Masking "<<Mask_radius_in2<<endl;
      
-			 mask_image(sx,sy,amp_small,Mask_width1, Mask_radius_inner, Mask_radius_out1);
+       mask_image(sx,sy,amp_small,Mask_width1, Mask_radius_inner, Mask_radius_out1);
        //mask_image(sx,sy,amp_small,Mask_width2, Mask_radius_in2, Mask_radius_out2);
  
 

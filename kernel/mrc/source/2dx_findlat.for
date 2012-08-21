@@ -18,12 +18,13 @@ C
 C----------------IREPORT=2: Verbose logging, 
 C----------------IREPORT=1: Medium logging.
 C----------------IREPORT=0: Short logging.
-      PARAMETER (IREPORT=0)
+      PARAMETER (IREPORT=1)
 C
 C
       integer IMAXPOS,ISIZE,ilocmag,ICOUNT,IERR,NUM
       integer i,j,k,l,IPOS,IANZ,ISPOTANZ
       integer iwasthere,flag,IANZ1,LOOP,ifirst,itesthand,ihandto
+      integer IFOUND2
       real RLATORI,rmag,rpix,RX,RY,PI
       real REALAN
       real TLTAXIS,TLTANG,RMAXCOU,RCOUNT,RMAXMAG,RLOCMAG,RMSD,RMAXRMSD
@@ -37,6 +38,8 @@ C
       real RREALU(2),RREALV(2)
       real RLAT1H(2),RLAT1K(2)
       real RDIFFH,RDIFFK,RDIFFALL
+      real RDIFF1,RDIFF2,RDIFF3,RDIFF4
+      real RDIFF5,RDIFF6,RDIFF7,RDIFF8
       integer nmin,maxhk,maxspot
       integer ihand
       real rtmp1,rtmp2
@@ -169,7 +172,9 @@ C
 C
 C-----Currently, only two lattices are determined.
 C
-      do 850 LOOP=1,2
+      IFOUND2 = 0
+C
+      do 850 LOOP=1,20
 C
         RMAXCOU=0
 C
@@ -482,30 +487,6 @@ C
 C
         write(6,'('' MaxRMSD is '',F12.3)')RMAXRMSD
 C
-C-------Check if this is the second lattice, and if it is the same as before
-C
-        if ( LOOP .eq. 1 ) then
-          RLAT1H(1) = RLATH(1)
-          RLAT1H(2) = RLATH(2)
-          RLAT1K(1) = RLATK(1)
-          RLAT1K(2) = RLATK(2)
-        else
-          RDIFFH = sqrt(   (RLAT1H(1)-RLATH(1))**2 
-     1                   + (RLAT1H(2)-RLATH(2))**2 )
-          RDIFFK = sqrt(   (RLAT1K(1)-RLATK(1))**2 
-     1                   + (RLAT1K(2)-RLATK(2))**2 )
-          RDIFFALL = sqrt( RDIFFH**2 + RDIFFK**2 )
-          if ( RDIFFALL .lt. 4.0 ) then
-            write(6,'(/,'': This second lattice is the same as '',
-     1        ''the first one. It is deleted'')')
-            RLATH(1) = 0.0
-            RLATH(2) = 0.0
-            RLATK(1) = 0.0
-            RLATK(2) = 0.0
-            RMAXCOU = 0.0
-          endif
-        endif
-C
 C-------First vector on the right side:
         if(RLATH(1).lt.0.0)then
           RLATH(1) = -RLATH(1) 
@@ -514,13 +495,55 @@ C-------First vector on the right side:
           RLATK(2) = -RLATK(2) 
         endif
 C
+C-------Check if this is the second lattice, and if it is the same as before
+C
+        if ( LOOP .eq. 1 ) then
+          RLAT1H(1) = RLATH(1)
+          RLAT1H(2) = RLATH(2)
+          RLAT1K(1) = RLATK(1)
+          RLAT1K(2) = RLATK(2)
+        else
+          RDIFF1 = sqrt(   (RLAT1H(1)-RLATH(1))**2 
+     1                   + (RLAT1H(2)-RLATH(2))**2 )
+          RDIFF2 = sqrt(   (RLAT1K(1)-RLATK(1))**2 
+     1                   + (RLAT1K(2)-RLATK(2))**2 )
+          RDIFF3 = sqrt(   (RLAT1K(1)-RLATH(1))**2 
+     1                   + (RLAT1K(2)-RLATH(2))**2 )
+          RDIFF4 = sqrt(   (RLAT1H(1)-RLATK(1))**2 
+     1                   + (RLAT1H(2)-RLATK(2))**2 )
+          RDIFF5 = sqrt(   (RLAT1H(1)+RLATH(1))**2 
+     1                   + (RLAT1H(2)+RLATH(2))**2 )
+          RDIFF6 = sqrt(   (RLAT1K(1)+RLATK(1))**2 
+     1                   + (RLAT1K(2)+RLATK(2))**2 )
+          RDIFF7 = sqrt(   (RLAT1K(1)+RLATH(1))**2 
+     1                   + (RLAT1K(2)+RLATH(2))**2 )
+          RDIFF8 = sqrt(   (RLAT1H(1)+RLATK(1))**2 
+     1                   + (RLAT1H(2)+RLATK(2))**2 )
+          if ( RDIFF1.lt.3 .or. RDIFF2.lt.3 .or. 
+     .         RDIFF3.lt.3 .or. RDIFF4.lt.3 .or.
+     .         RDIFF5.lt.3 .or. RDIFF6.lt.3 .or.
+     .         RDIFF7.lt.3 .or. RDIFF8.lt.3) then
+            write(6,'(/,'': This second lattice is the same as '',
+     1        ''the first one. It is deleted'')')
+            RLATH(1) = 0.0
+            RLATH(2) = 0.0
+            RLATK(1) = 0.0
+            RLATK(2) = 0.0
+            RMAXCOU = 0.0
+          else
+            IFOUND2 = 1
+          endif
+        endif
+C
 C-------Output the final lattice
 C
-        write(12,'(4F12.3)')
-     1    RLATH(1),RLATH(2),RLATK(1),RLATK(2)
+        if(RMAXCOU.ne.0.0)then
+          write(12,'(4F12.3)')
+     1      RLATH(1),RLATH(2),RLATK(1),RLATK(2)
 C
-        write(12,'(F12.3)')
-     1    RMAXCOU
+          write(12,'(F12.3)')
+     1      RMAXCOU
+        endif
 C
 C-------For the second lattice:
 C-------Find the spots that are not on the first determined lattice.
@@ -554,7 +577,23 @@ C
           RFV(k)=RFVTEMP(k)
         enddo    
 C
+        if (IFOUND2.eq.1) then
+          goto 999
+        endif
  850  continue
+C
+      if (IFOUND2.eq.0)then
+C-------Output the zero second lattice
+C
+        write(12,'(4F12.3)')
+     1    RLATH(1),RLATH(2),RLATK(1),RLATK(2)
+C
+        write(12,'(F12.3)')
+     1    RMAXCOU
+C
+C-------For the second lattice:
+C-------Find the spots that are not on the first determined lattice.
+      endif
 C
       goto 999
 C

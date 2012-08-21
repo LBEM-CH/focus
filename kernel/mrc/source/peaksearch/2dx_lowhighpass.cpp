@@ -30,30 +30,19 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
    temp_amp=(float *)malloc(sizeof(float)*sx*sy);
    phase=(float *)malloc(sizeof(float)*sx*sy);
    
-  
-  
-
-
    in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*sy);
    out=( fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*sy);
-
 
    //importWisdom(); 
    p1=fftwf_plan_dft_2d(sx,sy,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
    p2=fftwf_plan_dft_2d(sx,sy,out,in,FFTW_BACKWARD,FFTW_ESTIMATE);
 
-
-
-  
-
     for(i=0;i<sx;i++)
       for(j=0;j<sy;j++)
         {  
-           in[j+i*sy][0]=amp[j+i*sy]*pow(-1,(i+j)*1.0); 
+           in[j+i*sy][0]=0.0001*amp[j+i*sy]*powf(-1,i+j); 
            in[j+i*sy][1]=0;
         }
- 
-   
    
     fftwf_execute(p1);
     //exportWisdom();
@@ -65,16 +54,10 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
       for(j=0;j<sy;j++)
         {
            amp[j+i*sy]=sqrt(pow(out[j+i*sy][0],2)+pow(out[j+i*sy][1],2));
-
-          
            phase[j+i*sy]=atan2(out[j+i*sy][1],out[j+i*sy][0]);
-           
         }  
 
-
-
 /*  Masking the frequency */
-    
     
     delta_low=q_l*(sx+sy)/4;
     delta_high=q_h*(sx+sy)/4;
@@ -85,7 +68,6 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
               mask_low=exp(tt/(2*delta_low*delta_low)); 
               mask_high=exp(tt/(2*delta_high*delta_high));
 
-
                // if(abs((double)(i-sx/2)*2)/sx<q_l && abs((double)(i-sx/2)*2)/sx>q_h)
                //    amp[j+i*sy]=0;   /*  for hard cut of frequency  */
             
@@ -93,38 +75,31 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
 
 	       out[j+i*sy][0]=amp[j+i*sy]*cos(phase[j+i*sy]);
                out[j+i*sy][1]=amp[j+i*sy]*sin(phase[j+i*sy]);                    
-
            }  
 
-
-
 /*  IFFT transform  */
-
-
 
     fftwf_execute(p2);
     fftwf_destroy_plan(p2); 
      
 
-   	
-	
-     min=1.0e40; max=-min;
+     min=1e10; max=-min;
      for(i=0;i<sx; i++)
        for(j=0;j<sy;j++)
          { 
-	   amp[j+i*sy]=in[j+i*sy][0]*pow(-1,(i+j)*1.0); 
+	   amp[j+i*sy]=in[j+i*sy][0]*powf(-1,i+j); 
            if(min>amp[j+i*sy]) min=amp[j+i*sy];
            if(max<amp[j+i*sy]) max=amp[j+i*sy];
          }
-	
-	
+
+     cout<<"min = "<<min<<"      max = "<<max<<endl;
+
      for(i=0;i<sx;i++)
         for(j=0;j<sy;j++)
 	  {  amp[j+i*sy]=(amp[j+i*sy]-min)*100.0/(max-min);
              temp_amp[i+j*sx]=amp[j+i*sy];
 	  }  
       	
-	
 	 
      char *complexData = mrcImage::complexFromReal(sx,sy,2,(char*)temp_amp);
      mrcImage::mrcHeader *header = mrcImage::headerFromData(sx/2+1,sy,4,complexData);
@@ -134,12 +109,7 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
      cout<<fileName<<" written"<<endl;
 
 
-	 
-	 
-	 
-      
     fftwf_free(in); fftwf_free(out);
     free(phase);    free(temp_amp);
-
 
 }

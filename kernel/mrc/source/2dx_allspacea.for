@@ -477,21 +477,30 @@ CHENN>
      .  THEOR(1),NTHEOR(1)
       jbest=1
 C      rdiffmin=999999999.9
+C
+C-----Pre-calculate the best jbest space group:
+      DO 2009 J2=2,21
+        IF(IOUT(J2)) THEN
+          TARGET=(SYMRS(1)*(NSYMRS(J2)-NTHEOR(J2)/2.0) + 
+     .      THEOR(1)*NTHEOR(J2))/NSYMRS(J2)
+         rdiff=SYMRS(J2)-TARGET
+         if(rdiff.lt.rdiffmin)then
+           rdiffmin=rdiff
+           jbest=J2
+         endif
+        endif
+ 2009 continue
 CHENN<
+C
       DO 2010 J=2,21
         IFLAG=' '
         IF(IOUT(J)) THEN
           TARGET=(SYMRS(1)*(NSYMRS(J)-NTHEOR(J)/2.0) + 
      .      THEOR(1)*NTHEOR(J))/NSYMRS(J)
-CHENN>
-C         rdiff=SYMRS(J)-TARGET
-C         if(rdiff.lt.rdiffmin)then
-C           rdiffmin=rdiff
-C           jbest=J
-C         endif
-CHENN<
 CMAR>
-        if(SYMRS(J).le.TARGET)then
+C-------See, if there is an absolutely best space group, which
+C-------then is the last one in the list that still is acceptable:
+        if(SYMRS(J).le.(TARGET+1.0))then
             jbest=J
         endif
 CMAR<

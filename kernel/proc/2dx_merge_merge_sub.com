@@ -134,7 +134,7 @@ if ( ${merge_modus} == "3D" ) then
   set RFACAMP = 1.0
   #
   set TANGLST = 15.0
-  set TANGLMAX = 90.001
+  set TANGLMAX = 70.001
   set IMQLABEL = 1
   set RMAX = ${RESMAX}
   set IQMAX = 5
@@ -178,6 +178,10 @@ eot
   \rm -f PS/2dx_tltplotk.ps
   #
   ${scriptPLTfile} > LOGS/2dx_merge_scriptPLT.log
+  if ( -e TLTASM ) then
+      mv -f TLTASM LOGS/2dx_tltplotk.txt
+      echo "# IMAGE: LOGS/2dx_tltplotk.txt <LOG: PLTILTK summary>" >> LOGS/${scriptname}.results
+  endif
   #
   # cat LOGS/2dx_merge_scriptPLT.log
   echo "################################################"

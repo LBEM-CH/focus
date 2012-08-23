@@ -211,7 +211,7 @@ select invert
 purge
 y
 expand 1
-calc COL F = 1
+calc COL F = FOM
 calc COL PHI = 0
 write SCRATCH/merge3D_phase_zero.mtz
 quit

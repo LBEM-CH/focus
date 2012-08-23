@@ -134,7 +134,11 @@ if ( ${merge_modus} == "3D" ) then
   set RFACAMP = 1.0
   #
   set TANGLST = 15.0
+  #
+  # The following paramter should be slightly larger than your highest tilt angle,
+  # but smaller than 90.0 degrees.
   set TANGLMAX = 70.001
+  #
   set IMQLABEL = 1
   set RMAX = ${RESMAX}
   set IQMAX = 5

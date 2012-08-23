@@ -107,6 +107,8 @@ set avrgamphsRESOL = ""
 set ML_doit = ""
 set npo_cntrs_step = ""
 set npo_cntrs_below = ""
+set PHARES_SYM = ""
+set PHARES_NUM_SPOTS = ""
 #
 #$end_vars
 #

@@ -21,7 +21,7 @@ function load()
 {
   var tag;
   var values = document.getElementsByTagName("*");
-  re = /.*(U._IQ|R._.).*/
+  re = /.*(U._IQ|R._.|PHARES_NUM_SPOTS).*/
   for(i = 0; i < values.length; i++)
   {
     var key = values[i].id;
@@ -113,25 +113,11 @@ function load()
 </TABLE>
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TR>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-</TR>
-<TR>
 <TD align="left"  ><B><U>Tilt Info</U></B> </TD>
 <TD align="center">Defoc. </TD>
 <TD align="center">Latt.  </TD>
 <TD align="center">SpSplit</TD>
 <TD align="center">Merge  </TD>
-</TR>
-<TR>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
 </TR>
 <TR>
 <TD align="left">Grd.TAxis</TD>
@@ -148,13 +134,6 @@ function load()
 <TD align="center" ID="MERGE_TLTANG">-</TD>
 </TR>
 <TR>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-<TD align="left" height=5> </TD>
-</TR>
-<TR>
 <TD align="left">Xst.TAxis</TD>
 <TD align="center" ID="DEFOCUS_TAXA">-</TD>
 <TD align="center" ID="LATTICE_TAXA">-</TD>
@@ -167,6 +146,14 @@ function load()
 <TD align="center" ID="LATTICE_TANGL">-</TD>
 <TD align="center" ID="TTREFINE_TANGL">-</TD>
 <TD align="center" ID="MERGE_TANGL">-</TD>
+</TR>
+</TABLE>
+<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+<TR>
+<TD align="left">Sym.PhaRes= </TD>
+<TD align="left" ID="PHARES_SYM">-</TD>
+<TD align="right"> Num.Spots= </TD>
+<TD align="right" ID="PHARES_NUM_SPOTS">-</TD>
 </TR>
 </TABLE>
 </BODY>

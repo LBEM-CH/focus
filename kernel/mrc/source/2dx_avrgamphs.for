@@ -449,6 +449,15 @@ C
         WRITE(6,10174)SERRESALL/NRESALL,NRESALL
         WRITE(14,20174)SERRESALL/NRESALL,NRESALL
 C
+CHENN>
+        call system("\rm -f 2dx_avrgamphs.phares.txt")
+        open(15,FILE="2dx_avrgamphs.phares.txt",STATUS='NEW',ERR=10186)
+        write(15,'(F8.3)')SERRESALL/NRESALL
+        write(15,'(I8)')NRESALL
+        close(15)
+10186   continue
+CHENN<
+C
         IF(NRESALL.NE.0)WRITE(6,10174)SERRESALL/NRESALL,NRESALL
 10174   FORMAT(/,'  OVERALL',19X,F10.3,I7,/,/)
 20174   FORMAT('::  Overall:    Phaseresidual =',F8.3,

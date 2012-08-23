@@ -240,6 +240,15 @@ eot
   \mv -f fort.4 APH/${prefix}ctfmerge.nolimit-1.aph
   \mv -f TMP444789.tmp LOGS/${prefix}avramphs.table.txt
   \rm -f TMP444888.tmp
+  if ( -e 2dx_avrgamphs.phares.txt ) then
+    set PHARES_SYM = `cat 2dx_avrgamphs.phares.txt | head -n 1 | tail -n 1`
+    set PHARES_NUM_SPOTS = `cat 2dx_avrgamphs.phares.txt | head -n 2 | tail -n 1`
+    echo "set PHARES_SYM = ${PHARES_SYM}" >> LOGS/${scriptname}.results
+    echo "set PHARES_NUM_SPOTS = ${PHARES_NUM_SPOTS}" >> LOGS/${scriptname}.results
+    echo ":PHARES_SYM set to ${PHARES_SYM}"
+  else
+    echo "::PROBLEM IN AVRGAMPHS"
+  endif
   #
   cat LOGS/${prefix}avramphs.table.txt
   cat LOGS/${prefix}avramphs.table.txt | sed 's/:://g' > LOGS/${prefix}phase-residuals.txt

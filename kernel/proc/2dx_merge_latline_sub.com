@@ -122,7 +122,7 @@ eot
   if ( -e fort.3 ) then
     \mv -f fort.3 SCRATCH/latlines.dat
     echo "# IMAGE: LOGS/latlinprescal.log <LOG: latlinprescal output>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/latlines.dat <Latline after prescal [H,K,Z,A,P,FOM,SAMP,SANG,IQ]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/latlines.dat <Latline after prescal [H,K,Z,A,P,SAMP,SANG,IQ]>" >> LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: latlines.dat does not exist."
   endif

@@ -211,7 +211,7 @@ select invert
 purge
 y
 expand 1
-calc COL F = FOM
+calc COL F = 1
 calc COL PHI = 0
 write SCRATCH/merge3D_phase_zero.mtz
 quit
@@ -232,7 +232,7 @@ eof
   #
   \rm -f SCRATCH/scratch1_phase_zero.map
   ${bin_ccp4}/fft hklin SCRATCH/merge3D_phase_zero.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
-LABIN F1=F  PHI=PHI ##
+LABIN F1=F  PHI=PHI  W=FOM ##
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 SYMMETRY P1
@@ -253,7 +253,7 @@ eot
   #
   \rm -f SCRATCH/scratch1.map
   ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1.map  << eot
-LABIN F1=F  PHI=PHI ##
+LABIN F1=F  PHI=PHI   W=FOM ##
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 SYMMETRY ${CCP4_SYM}
@@ -274,7 +274,7 @@ eot
   #
   \rm -f SCRATCH/scratch1b.map
   ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1b.map  << eot
-LABIN F1=F  PHI=PHI ##
+LABIN F1=F  PHI=PHI  W=FOM ##
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 SYMMETRY ${CCP4_SYM}

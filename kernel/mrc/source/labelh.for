@@ -181,6 +181,7 @@ C
      . ' 15: Cross out image',/,
      . ' 16: Transform [0;16000] INT*2 image',/,
      . ' 17: Read image statistics',/,
+     . ' 18: Swap unsigned/signed, and Transform [0;16000] INT*2 image',/,
      . ' 20: Produce thumbnail image',/,
      . ' 29: Interpolate into two times larger image',/,
      . ' 30: Pad into square image',/,
@@ -216,6 +217,7 @@ C
         IF ((IMODE .GT. 4 .and. IMODE .ne. 10 .and. IMODE.ne.11 
      1      .and. IMODE.ne.12 .and. IMODE.ne.13 .and. IMODE.ne.14
      1      .and. IMODE.ne.15 .and. IMODE.ne.16 .and. IMODE.ne.17
+     1      .and. IMODE.ne.18
      1      .and. IMODE.ne.20 .and. IMODE.ne.29 .and. IMODE.ne.30
      1      .and. IMODE.ne.31 .and. IMODE.ne.32)
      1      .AND. MODE .LT. 3) then
@@ -241,6 +243,7 @@ C
         if ( IMODE.eq.15 ) goto 107
         if ( IMODE.eq.16 ) goto 108
         if ( IMODE.eq.17 ) goto 110
+        if ( IMODE.eq.18 ) goto 111
         if ( IMODE.eq.20 ) goto 94
         if ( IMODE.eq.29 ) goto 98
         if ( IMODE.eq.30 ) goto 95
@@ -849,6 +852,109 @@ C
         write(13,'(G16.5)')DMIN1
         write(13,'(G16.5)')DMAX2
         close(13)
+C
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE 18 : Swap Unsigned/Signed, and Produce INTEGER*2 (16 bit) output image with range [0;16000]
+C
+111     continue
+        write(TITLE,'(''LABELH Mode 18: Swap unsigned/signed, and '',
+     .                ''Produce INT*2 [1;16k] image '')')
+        write(6,'('' Swapping UNSIGNED/SIGNED, and '')')
+        write(6,'('' Producing INT*2 with Autoscaling [1;16000] '')')
+C
+        CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        CALL IRTLAB(1,LABELS,NL)
+        CALL IRTEXT(1,EXTRA,1,29)
+        CALL IRTCEL(1,CELL)
+C
+        IF (MODE .GT. 2) THEN
+          STOP 'Only works on real images'
+        ENDIF
+C
+        write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Copy entire file into output picture, while swapping unsigned/signed:
+        do iy = 1,NY
+          CALL IRDLIN(1,ALINE,*999)
+          do ix = 1,NX
+            VAL=ALINE(ix)
+            if (VAL.lt.0.0) then
+               VAL=VAL+65536.0
+            endif
+            APIC(ix,iy)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Opened file has range MIN,MAX,MEAN: '',3G16.5)')
+     1     DMIN,DMAX,DMEAN
+C
+        DVAL = ABS(DMAX - DMIN)
+        write(*,'('' That is a dynamic range of: '',G16.5)')
+     1     DVAL
+C
+C-------Calculate offset and scaling factors
+C
+C        RTARGET=256.0
+        RTARGET=16000.0
+        RTARGET=RTARGET-1.0
+        ROFF = DMIN - 1.0
+        if ( DVAL .gt. 0.00000001 ) then
+          RSCALE = RTARGET / DVAL
+        else
+          RSCALE = RTARGET  
+        endif
+C
+        write(*,'('' Calculated offset of '',G16.5)')ROFF
+        write(*,'('' Calculated scaling factor of '',G16.5)')RSCALE
+C
+C-------Output file is INT*2 (16 bit, Mode=1)
+C
+        MODE = 1
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Put title labels, new cell and extra information only into header
+C
+        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+        CALL IALEXT(2,EXTRA,1,29)
+        CALL IALCEL(2,CELL)
+        CALL IALMOD(2,MODE)
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+C-------Write the file into the output file
+        do iy = 1,NY
+          do ix = 1,NX
+            DOUBLTMP = APIC(ix,iy)
+            DOUBLTMP = (DOUBLTMP - ROFF) * RSCALE
+            VAL=DOUBLTMP
+            ALINE(ix)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+          CALL IWRLIN(2,ALINE)
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+     .     DMIN,DMAX,DMEAN
+C
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
 C
         GOTO 990
 C

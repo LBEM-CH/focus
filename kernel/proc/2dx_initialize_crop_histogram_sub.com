@@ -74,7 +74,23 @@ eot
     #
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${imagename}.tmp.mrc
-16               ! switch to INTEGER*2 (MODE 1) with autoscaling 0…32000
+16               ! switch to INTEGER*2 (MODE 1) with autoscaling 0…16000
+${imagename}.mrc
+eot
+    #
+  endif
+  #
+  if ( ${imageorigin} == '6' ) then
+    #############################################################################
+    ${proc_2dx}/linblock "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k."
+    ${proc_2dx}/linblock "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k." >> History.dat
+    #############################################################################  
+    #
+    \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+18               ! switch to INTEGER*2 (MODE 1) with unsigned/signed swap and autoscaling 0…16000
 ${imagename}.mrc
 eot
     #

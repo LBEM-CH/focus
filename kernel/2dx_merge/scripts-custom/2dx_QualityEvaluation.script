@@ -1,0 +1,207 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Quality Evaluation                                                 #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 08/27/2012                                             #
+# Last Modification: 08/27/2012                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 11
+#
+# MANUAL: This script reports the data processing statistics.
+#
+# 
+# DISPLAY: MergeResolution
+# DISPLAY: merge_modus
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: set merge_res_limit
+# DISPLAY: tempkeep
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: SYM
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: merge_ML_data
+# DISPLAY: ILIST
+# DISPLAY: MergeHKMAX
+# DISPLAY: MergeIQMAX
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set create_merged_dataset = ""
+set MergeResolution = ""
+set merge_modus = ""
+set zstarwin = ""
+set RESMIN = ""
+set RESMAX = ""
+set merge_res_limit = ""
+set tempkeep = ""
+set realcell = ""
+set realang = ""
+set ALAT = ""
+set MergeStepSize = ""
+set IBOXPHS = ""
+set SYM = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set merge_ML_data = ""
+set ILIST = ""
+set MergeHKMAX = ""
+set MergeIQMAX = ""
+set refbeamtilt = ""
+set reftiltgeo = ""
+set merge_reference = ""
+set merge_ref_num = ""
+set max_amp_correction = ""
+set JREFL = ""
+set Reflections_Unique = ""
+set num_amplitudes_observed = ""
+set num_phases_observed = ""
+set overall_R_factor = ""
+set overall_phase_residual = ""
+set overall_weighted_R_factor = ""
+set overall_weighted_phase_residual = ""
+set zstarrange_real = ""
+#
+#$end_vars
+#
+setenv OMP_NUM_THREADS 8
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set date = `date`
+echo date = ${date}
+#
+set scriptname = 2dx_QualityEvaluation
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>>"
+#
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing sym2spsgrp_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+#
+echo SYM = ${SYM}
+echo spcgrp = ${spcgrp}
+echo CCP4_SYM = ${CCP4_SYM}
+#
+############################################################################# 
+${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
+#############################################################################
+#
+source ${proc_2dx}/2dx_merge_makedirs
+#
+echo "<<@progress: 5>"
+#
+if ( ${merge_modus} == '2D' ) then
+  if ( ! -e APH/merge.aph ) then
+    ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+  endif
+endif
+if ( ${merge_modus} == '3D' ) then
+  if ( ${merge_reference} == '0' ) then
+    # Use merge.aph files
+    if ( ! -e APH/merge.aph ) then
+      ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+    endif
+  else
+    # User interpolated lattice lines latlinesref.mtz
+    if ( ! -e merge3D.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge.mtz not found. No reference for refinement available."
+    endif
+    set NPRG = 3
+  endif
+  #
+  #
+  set tmp = `wc -l 2dx_merge_dirfile.dat`
+  set tmp_num_lines = `echo ${tmp} | awk '{ print $1 }'`
+  #
+  #
+  # This memorizes the current merge directory under the variable "olddir":
+  set olddir = $PWD
+  # This translates the list of directories to work on into one single long line:
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
+  #
+  set tmp_TANGL_max = -999999999.9
+  set tmp_defocus_min = 999999999.9
+  set tmp_defocus_max = -999999999.9
+  #
+  foreach dirfile ( ${dirlist} ) 
+    cd ..
+    cd ${dirfile}
+    if ( -e 2dx_image.cfg ) then
+      set tmp_TANGL_now = `cat 2dx_image.cfg | grep 'set TANGL =' | cut -d\" -f2`
+      set tmp = `cat 2dx_image.cfg | grep 'set defocus =' | cut -d\" -f2`
+      set tmp_defocus_now = `echo ${tmp} | sed 's/,/ /g' | awk '{ s = ( $1 + $2 ) / 2.0 } END { printf ( "%16.0f", s ) }'`
+      echo "Image ${dirfile} has ${tmp}, therefore defocus = ${tmp_defocus_now}"
+      set tmp_TANGL_max = `echo ${tmp_TANGL_now} ${tmp_TANGL_max} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 } } END { printf ( "%10.1f", s ) }'`
+      set tmp_defocus_min = `echo ${tmp_defocus_now} ${tmp_defocus_min} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 } } END { printf ( "%16.0f", s ) }'`
+      set tmp_defocus_max = `echo ${tmp_defocus_now} ${tmp_defocus_max} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 } } END { printf ( "%16.0f", s ) }'`
+    endif
+    cd ${olddir}
+  end
+  #
+  set tmp_overall_R_factor = `echo ${overall_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
+  set tmp_overall_weighted_R_factor = `echo ${overall_weighted_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
+  #
+  echo "3D Reconstruction Parameters" > Summary_Statistics_3D.txt
+  echo "==============================================================================" >> Summary_Statistics_3D.txt
+  echo "Number of images: ${tmp_num_lines}" >> Summary_Statistics_3D.txt
+  echo "Range of defocus [Angstroems]: ${tmp_defocus_min} ... ${tmp_defocus_max}" >> Summary_Statistics_3D.txt
+  echo "IQ range used: 1 ... ${MergeIQMAX}" >> Summary_Statistics_3D.txt
+  echo "Tilt range used [deg]: 0.0 ... ${tmp_TANGL_max}" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  echo "Number of observed amplitudes and phases: ${JREFL}" >> Summary_Statistics_3D.txt
+  echo "Number of unique reflections: ${Reflections_Unique}" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  echo "Symmetry: ${SYM}" >> Summary_Statistics_3D.txt
+  echo "Nominal resolution limit [Angstroems]: ${RESMAX}" >> Summary_Statistics_3D.txt
+  echo "Nominal vertical resolution limit [Angstroems]: ${zstarrange_real}" >> Summary_Statistics_3D.txt
+  echo "Nominal tilt angle limit [deg]: TBD" >> Summary_Statistics_3D.txt
+  echo "Percent completeness at nominal limits: TBD" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  echo "In-plane resolution cut-off [Angstroems]: ${RESMAX}" >> Summary_Statistics_3D.txt
+  echo "Estimated vertical resolution [Angstroems]: TBD" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  echo "Overall phase residual [deg]: ${overall_phase_residual}" >> Summary_Statistics_3D.txt
+  echo "Overall weighted phase residual [deg]: ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  echo "Overall R-factor: ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
+  echo "Overall weighted R-factor: ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  #
+  #
+  #
+  echo "::"
+  cat Summary_Statistics_3D.txt | sed 's/ /_/g' | sed 's/:_/: /g' | awk '{ printf "%-48s %28s\n", $1, $2 }' | sed 's/_/ /g' > tmp
+  mv -f tmp Summary_Statistics_3D.txt
+  cat Summary_Statistics_3D.txt | sed 's/^/::/'
+  echo "::"
+  echo "# IMAGE-IMPORTANT: Summary_Statistics_3D.txt <TXT: Summary_Statistics_3D>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: LOGS/2dx_tltplotk.txt <LOG: PLTILTK summary>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/2dx_tltplotk.ps <PS: TLTPLOT file>" >> LOGS/${scriptname}.results
+  #
+endif
+#
+echo "<<@progress: 100>>"
+${proc_2dx}/linblock "Normal End."
+
+#

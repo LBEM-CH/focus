@@ -115,6 +115,12 @@ if ( ${IVERBOSE} > 5 ) then
   echo "# IMAGE: LOGS/2dx_origtiltk-reflections.log <LOG: reflections after origtiltk>" >> LOGS/${scriptname}.results
 endif
 #
+if ( -e SCRATCH/2dx_origtiltk_jrefl.txt ) then
+  set JREFL = `cat SCRATCH/2dx_origtiltk_jrefl.txt`
+  echo ":: Total number of reflections processed is ${JREFL}"
+  echo "set JREFL = ${JREFL}" >> LOGS/${scriptname}.results
+endif
+#
 if ( ${scriptname} == "2dx_refine_cyclic" ) then
   if ( ${itogo} > 1 ) then
     exit

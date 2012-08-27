@@ -133,6 +133,10 @@ eot
   #
 endif
 #
+set Reflections_Unique = `wc -l SCRATCH/latlines.dat | cut -f1`
+echo "set Reflections_Unique = ${Reflections_Unique}" >> LOGS/${scriptname}.results
+echo "::Unique Reflections = ${Reflections_Unique}"
+#
 #############################################################################
 #                                                                           #
 ${proc_2dx}/linblock "LATLINEK - to fit lattice lines to merged data (D.Agard's program)"
@@ -154,7 +158,7 @@ set idoh = 0
 set idok = 0
 set IAQP2 = 0
 set iplterr = 1         
-set imaxIQplot = 4
+set imaxIQplot = ${MergeIQMAX}
 set MergeIGUESS = 1
 #
 if ( ${tempkeep} == 'y' ) then
@@ -172,7 +176,7 @@ echo " Parameters for latline are:"
 echo " "
 echo "2dx_merge_latline_sub.com, ${date}"
 echo "${spcgrp}                            # IPG (Plane group number 1-17)"
-echo "0                             # IPAT, 0=F & Phase, 1=Intensity data"
+echo "${MergeIPAT}                             # IPAT, 0=F & Phase, 1=Intensity data"
 echo "${MergeAK},${MergeIWF_VAL},${MergeIWP_VAL}                      # AK,IWF,IWP - relative weights, + individual sigmas"
 echo "${ALAT},${zminmax},${MergeDELPLT}        # ALAT,ZMIN,ZMAX,DELPLT "
 echo "${MergeDELPRO},${MergeRminRmax},${MergeRCUT},${MergePFACT}        # DELPRO,RMIN,RMAX,RCUT,PFACT"
@@ -185,7 +189,7 @@ echo " "
 ${bin_2dx}/2dx_latlinek.exe << eot > LOGS/2dx_latlinek.log
 2dx_merge_latline_sub.com, ${date}
 ${spcgrp}                                                    ! IPG (Plane group number 1-17)
-0                                                            ! IPAT, 0=F & Phase, 1=Intensity data
+${MergeIPAT}                                                            ! IPAT, 0=F & Phase, 1=Intensity data
 ${MergeAK},${MergeIWF_VAL},${MergeIWP_VAL}                   ! AK,IWF,IWP - relative weights, + individual sigmas
 ${ALAT},${zminmax},${MergeDELPLT}                            ! ALAT,ZMIN,ZMAX,DELPLT
 ${MergeDELPRO},${MergeRminRmax},${MergeRCUT},${MergePFACT}   ! DELPRO,RMIN,RMAX,RCUT,PFACT
@@ -213,6 +217,18 @@ if ( ! -e latline.statistics ) then
   ${proc_2dx}/protest "ERROR in latlinek. Check logfile."
 endif
 \mv -f latline.statistics SCRATCH/latline_stat.dat
+set num_amplitudes_observed = `cat SCRATCH/latline_stat.dat | grep "Number of amplitudes observed" | cut -c55-`
+set num_phases_observed = `cat SCRATCH/latline_stat.dat | grep "Number of phases observed" | cut -c55-`
+set overall_R_factor =  `cat SCRATCH/latline_stat.dat | grep "Overall R-factor" | cut -c55-`
+set overall_phase_residual =  `cat SCRATCH/latline_stat.dat | grep "Overall phase residual" | cut -c55-`
+set overall_weighted_R_factor =  `cat SCRATCH/latline_stat.dat | grep "Overall weighted R-factor" | cut -c55-`
+set overall_weighted_phase_residual =  `cat SCRATCH/latline_stat.dat | grep "Overall weighted phase residual" | cut -c55-`
+echo "set num_amplitudes_observed = ${num_amplitudes_observed}" >> LOGS/${scriptname}.results
+echo "set num_phases_observed = ${num_phases_observed}" >> LOGS/${scriptname}.results
+echo "set overall_R_factor = ${overall_R_factor}" >> LOGS/${scriptname}.results
+echo "set overall_phase_residual = ${overall_phase_residual}" >> LOGS/${scriptname}.results
+echo "set overall_weighted_R_factor = ${overall_weighted_R_factor}" >> LOGS/${scriptname}.results
+echo "set overall_weighted_phase_residual = ${overall_weighted_phase_residual}" >> LOGS/${scriptname}.results
 #
 if ( ! -e PLOT.PS ) then
   ${proc_2dx}/protest "2dx_latlinek: ERROR occured."
@@ -226,10 +242,6 @@ ${proc_2dx}/lin "-"
 echo " "
 #
 echo "<<@progress: +5>>"
-#
-# if ( ${mode} != 0 ) then
-#   exit
-# endif
 #
 #############################################################################
 #                                                                           #
@@ -262,56 +274,6 @@ if ( ${tempkeep} == "y" ) then
 endif
 #
 echo "<<@progress: +5>>"
-#
-#############################################################################
-# ${proc_2dx}/linblock "2dx_hklsym2 - to apply symmetry to latfitted APH file, for volume"
-#############################################################################  
-#
-# \rm -f APH/latfitted.hkl
-#
-# ${bin_2dx}/2dx_hklsym2.exe << eot
-# APH/latfitted_nosym.hkl
-# APH/latfitted.hkl
-# ${spcgrp}
-# 0     ! no header line
-# 0     ! no sigma column
-# eot
-#
-# echo "<<@progress: +5>>"
-#
-# if ( ! -e APH/latfitted.hkl ) then
-#   ${proc_2dx}/protest "ERROR: APH/latfitted.hkl not produced."
-# endif
-#
-# if ( ${tempkeep} == "y" ) then
-#   echo "# IMAGE: APH/latfitted.hkl <APH: Latline for vol after sym [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
-# endif
-#
-#############################################################################
-${proc_2dx}/linblock "2dx_hklsym2 - to apply symmetry to latfitted APH file, for MAKETRAN reference"
-#############################################################################  
-#
-# \rm -f APH/latfittedref_p1_maketran.hkl
-#
-# ${bin_2dx}/2dx_hklsym2.exe << eot
-# APH/latfittedref_nosym.hkl
-# APH/latfittedref_p1_maketran.hkl
-# ${spcgrp}
-# 0     ! no header line
-# 1     ! with sigma column
-# eot
-#
-# echo "<<@progress: +5>>"
-#
-# if ( ! -e APH/latfittedref_p1_maketran.hkl ) then
-#   ${proc_2dx}/protest "ERROR: APH/latfittedref_p1_maketran.hkl not produced."
-# endif
-#
-# if ( ${tempkeep} == "y" ) then
-#   echo "# IMAGE: APH/latfittedref_p1_maketran.hkl <APH: Latline for ref after sym for MAKETRAN [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
-# endif
-#
-# echo "<<@progress: +5>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for volume"
@@ -373,10 +335,6 @@ write SCRATCH/merge3Dref-clean.mtz
 quit
 eof
 #
-# Not used:
-#   expand 1
-#   reduce matrix 1 0 0 0 1 0 0 0 1
-# 
 \rm -f SCRATCH/merge3Dref-clean-p1.mtz
 #
 ${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref-clean.mtz hklout SCRATCH/merge3Dref-clean-p1.mtz << eof

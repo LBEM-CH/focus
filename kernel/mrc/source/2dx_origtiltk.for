@@ -2392,6 +2392,21 @@ C------------------------------------------------------------------------
 C
 C
       WRITE(6,156) JREFL
+C
+CHEN>
+      call system("\rm -f SCRATCH/2dx_origtiltk_jrefl.txt")
+      open(27,FILE="SCRATCH/2dx_origtiltk_jrefl.txt",STATUS="NEW",ERR=767)
+      goto 768
+767   continue
+        write(6,'(''::ERROR on file open in 2dx_origtiltk.for for SCRATCH/2dx_origtiltk_jrefl.txt'')')
+        goto 769
+768   continue
+      write(27,'(I16)')JREFL
+      close(27)
+769   continue
+C
+CHEN<
+C
       IF(NPROG.EQ.0) WRITE(3,146)IRUN  ! To ensure disk is there before sorting.
 CMARC>
 C        WRITE(3,186)

@@ -159,13 +159,16 @@ if ( ${merge_modus} == '3D' ) then
     cd ${olddir}
   end
   #
+  set tmp_defocus_min = `echo ${tmp_defocus_min} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
+  set tmp_defocus_max = `echo ${tmp_defocus_max} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
   set tmp_overall_R_factor = `echo ${overall_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
   set tmp_overall_weighted_R_factor = `echo ${overall_weighted_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
   #
-  echo "3D Reconstruction Parameters" > Summary_Statistics_3D.txt
+  echo "==============================================================================" > Summary_Statistics_3D.txt
+  echo "3D Reconstruction Parameters" >> Summary_Statistics_3D.txt
   echo "==============================================================================" >> Summary_Statistics_3D.txt
   echo "Number of images: ${tmp_num_lines}" >> Summary_Statistics_3D.txt
-  echo "Range of defocus [Angstroems]: ${tmp_defocus_min} ... ${tmp_defocus_max}" >> Summary_Statistics_3D.txt
+  echo "Range of defocus [micrometers]: ${tmp_defocus_min} ... ${tmp_defocus_max}" >> Summary_Statistics_3D.txt
   echo "IQ range used: 1 ... ${MergeIQMAX}" >> Summary_Statistics_3D.txt
   echo "Tilt range used [deg]: 0.0 ... ${tmp_TANGL_max}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt

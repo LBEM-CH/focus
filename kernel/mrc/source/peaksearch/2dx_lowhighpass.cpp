@@ -27,11 +27,11 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
    int i,j,k;
    float  *phase, max,min, *temp_amp, mask_low, mask_high, delta_low, delta_high, tt; 
 
-   temp_amp=(float *)malloc(sizeof(float)*sx*(sy+1));
-   phase=(float *)malloc(sizeof(float)*sx*(sy+1));
+   temp_amp=(float *)malloc(sizeof(float)*sx*(sy+2));
+   phase=(float *)malloc(sizeof(float)*sx*(sy+2));
    
    in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*sy);
-   out=( fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*(sy+1));
+   out=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*(sy+1));
 
    //importWisdom(); 
    p1=fftwf_plan_dft_2d(sx,sy,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
@@ -57,7 +57,7 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
            phase[j+i*sy]=atan2(out[j+i*sy][1],out[j+i*sy][0]);
         }  
 
-/*  Masking the frequency */
+/*  Masking the frequency in reciprocal space */
     
     delta_low=q_l*(sx+sy)/4;
     delta_high=q_h*(sx+sy)/4;
@@ -99,7 +99,13 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
 	  {  amp[j+i*sy]=(amp[j+i*sy]-min)*100.0/(max-min);
              temp_amp[i+j*sx]=amp[j+i*sy];
 	  }  
+
+     // we are in real space with amp, but want to prepare this for output as reciprocal space. 
+     // so, we need to add one column:
       	
+     j=sy;
+     for(i=0;i<sx;i++)
+        temp_amp[i+j*sx]=amp[(sy-1)+i*sy];
 	 
      char *complexData = mrcImage::complexFromReal(sx,sy,2,(char*)temp_amp);
      mrcImage::mrcHeader *header = mrcImage::headerFromData(sx/2+1,sy,4,complexData);

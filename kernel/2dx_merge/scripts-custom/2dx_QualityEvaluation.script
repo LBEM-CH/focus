@@ -110,6 +110,9 @@ source ${proc_2dx}/2dx_merge_makedirs
 echo "<<@progress: 5>"
 #
 if ( ${merge_modus} == '2D' ) then
+  echo ":: "
+  ${proc_2dx}/linblock "So far, only 3D reporting is implemented."
+  echo ":: "
   if ( ! -e APH/merge.aph ) then
     ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
   endif
@@ -162,39 +165,43 @@ if ( ${merge_modus} == '3D' ) then
   set tmp_defocus_min = `echo ${tmp_defocus_min} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
   set tmp_defocus_max = `echo ${tmp_defocus_max} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
   set tmp_overall_R_factor = `echo ${overall_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
-  set tmp_overall_weighted_R_factor = `echo ${overall_weighted_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
+  set tmp_overall_weighted_R_factor = `echo ${overall_weighted_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'`
+  set tmp_nominal_tilt_angle = `echo ${tmp_TANGL_max} | awk '{ s = int ( $1 / 5 ) * 5 } END { printf ( "%10.1f", s ) }'` 
+  set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
+  set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { printf ( "%10.1f", s ) }'`
+  set realcell_gamma = `echo ${realang} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
+  set realcell_c = `echo ${ALAT} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
   #
   echo "==============================================================================" > Summary_Statistics_3D.txt
   echo "3D Reconstruction Parameters" >> Summary_Statistics_3D.txt
   echo "==============================================================================" >> Summary_Statistics_3D.txt
-  echo "Number of images: ${tmp_num_lines}" >> Summary_Statistics_3D.txt
-  echo "Range of defocus [micrometers]: ${tmp_defocus_min} ... ${tmp_defocus_max}" >> Summary_Statistics_3D.txt
-  echo "IQ range used: 1 ... ${MergeIQMAX}" >> Summary_Statistics_3D.txt
-  echo "Tilt range used [deg]: 0.0 ... ${tmp_TANGL_max}" >> Summary_Statistics_3D.txt
+  echo "Crystal plane group symmetry:# ${SYM}" >> Summary_Statistics_3D.txt
+  echo "Crystal unit cell parameters:# a=${realcell_a}A, b=${realcell_b}A" >> Summary_Statistics_3D.txt
+  echo "                             #  gamma=${realcell_gamma}deg, c=${realcell_c}A" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Number of observed amplitudes and phases: ${JREFL}" >> Summary_Statistics_3D.txt
-  echo "Number of unique reflections: ${Reflections_Unique}" >> Summary_Statistics_3D.txt
+  echo "Number of images:# ${tmp_num_lines}" >> Summary_Statistics_3D.txt
+  echo "Range of defocus [micrometers]:# ${tmp_defocus_min} ... ${tmp_defocus_max}" >> Summary_Statistics_3D.txt
+  echo "IQ range used:# 1 ... ${MergeIQMAX}" >> Summary_Statistics_3D.txt
+  echo "Tilt range used [deg]:# 0.0 ... ${tmp_TANGL_max}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Symmetry: ${SYM}" >> Summary_Statistics_3D.txt
-  echo "Nominal resolution limit [Angstroems]: ${RESMAX}" >> Summary_Statistics_3D.txt
-  echo "Nominal vertical resolution limit [Angstroems]: ${zstarrange_real}" >> Summary_Statistics_3D.txt
-  echo "Nominal tilt angle limit [deg]: TBD" >> Summary_Statistics_3D.txt
-  echo "Percent completeness at nominal limits: TBD" >> Summary_Statistics_3D.txt
+  echo "Number of observed amplitudes and phases:# ${JREFL}" >> Summary_Statistics_3D.txt
+  echo "Number of unique reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "In-plane resolution cut-off [Angstroems]: ${RESMAX}" >> Summary_Statistics_3D.txt
-  echo "Estimated vertical resolution [Angstroems]: TBD" >> Summary_Statistics_3D.txt
+  echo "In-plane resolution cut-off [Angstroems]:# ${RESMAX}" >> Summary_Statistics_3D.txt
+  echo "Vertical resolution cut-off [Angstroems]:# ${zstarrange_real}" >> Summary_Statistics_3D.txt
+  echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A):# TBD" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Overall phase residual [deg]: ${overall_phase_residual}" >> Summary_Statistics_3D.txt
-  echo "Overall weighted phase residual [deg]: ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt
+  echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
+  echo "Overall weighted phase residual [deg]:# ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Overall R-factor: ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
-  echo "Overall weighted R-factor: ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
+  echo "Overall R-factor:# ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
+  echo "Overall weighted R-factor:# ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   #
   #
   #
   echo "::"
-  cat Summary_Statistics_3D.txt | sed 's/ /_/g' | sed 's/:_/: /g' | awk '{ printf "%-48s %28s\n", $1, $2 }' | sed 's/_/ /g' > tmp
+  cat Summary_Statistics_3D.txt | sed 's/ /_/g' | sed 's/#/ /g' | awk '{ printf "%-48s %28s\n", $1, $2 }' | sed 's/_/ /g' > tmp
   mv -f tmp Summary_Statistics_3D.txt
   cat Summary_Statistics_3D.txt | sed 's/^/::/'
   echo "::"

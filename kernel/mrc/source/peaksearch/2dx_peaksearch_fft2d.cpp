@@ -86,21 +86,28 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
   // Henning on Aug. 28, 2012:
    // If the input image has dimensions of nx,ny, then it ranges from 0...nx-1; 0...ny-1.
    // Then its Fourier Transformation will have complex values, so that it requires twice
-   // as many pixels in each row. The FT then will have dimensions nx,ny+1, ranging from 0...nx-1; 0...ny/2,
+   // as many pixels in each row. The FT then will have dimensions nx,ny/2+1, ranging from 0...nx-1; 0...ny/2,
    // where each pixel is complex and occupies two floating point register.
-   // The total memmory requirements therefore are in floats: 0...nx-1;0...ny.
-   // Note that this is one column longer than in real space.
+   // The total memmory requirements therefore are in floats: nx * (ny+2).
+   // Note that this is two columns longer than in real space.
    // see:
    // http://www.fftw.org/fftw3_doc/Multi_002dDimensional-DFTs-of-Real-Data.html#Multi_002dDimensional-DFTs-of-Real-Data
    //
    // So: Real space image:   nx * ny     floats.
-   //     FFT space:          nx * (ny+1) floats.
+   //     FFT space:          nx * (ny+2) floats.
    //     FFT space:          nx * (ny/2+1) complex.
    //
+   // This is further complicated by the fact that we usually display and deal with the right half of the FFTs, 
+   // which means x = 0...nx/2 and y = -ny/2 ... ny/2
+   // while FFTW deals with a somewhat rotated understanding of the data, with x = 0...nx-1 and y=0...ny/2,
+   // which would be the upper half of the screen, while the origin of the FFT is placed in the bottom left corner at x,y = 0,0.
+   // Very confusing indeed.
+   // 
+  
    amp=(float *)malloc(sizeof(float)*nx*ny);
    temp_phase=(float *)malloc(sizeof(float)*nx*ny);
 
-   // or should this rather be this ???:
+   // If this is for the reciprocal space, then Should this rather be this ???:
    //
    // amp=(float *)malloc(sizeof(float)*nx*(ny+1));
    // temp_phase=(float *)malloc(sizeof(float)*nx*(ny+1));
@@ -108,7 +115,9 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
    in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
    out=( fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
 
-   // or should this rather be this ???:
+   // "in" is for the real space (but nevertheless using "fftwf_complex").
+   // "out" is for the reciprocal space.
+   // Should this rather be this ???:
    //
    // in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
    // out=( fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*(ny/2+1));

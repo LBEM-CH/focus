@@ -27,11 +27,11 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
    int i,j,k;
    float  *phase, max,min, *temp_amp, mask_low, mask_high, delta_low, delta_high, tt; 
 
-   temp_amp=(float *)malloc(sizeof(float)*sx*sy);
-   phase=(float *)malloc(sizeof(float)*sx*sy);
+   temp_amp=(float *)malloc(sizeof(float)*sx*(sy+1));
+   phase=(float *)malloc(sizeof(float)*sx*(sy+1));
    
    in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*sy);
-   out=( fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*sy);
+   out=( fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*(sy+1));
 
    //importWisdom(); 
    p1=fftwf_plan_dft_2d(sx,sy,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
@@ -51,9 +51,9 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
 
 /*  Get amplitude and phase of FFT image*/
      for(i=0;i<sx;i++)
-      for(j=0;j<sy;j++)
+      for(j=0;j<sy+1;j++)
         {
-           amp[j+i*sy]=sqrt(pow(out[j+i*sy][0],2)+pow(out[j+i*sy][1],2));
+           temp_amp[j+i*sy]=sqrt(pow(out[j+i*sy][0],2)+pow(out[j+i*sy][1],2));
            phase[j+i*sy]=atan2(out[j+i*sy][1],out[j+i*sy][0]);
         }  
 
@@ -62,7 +62,7 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
     delta_low=q_l*(sx+sy)/4;
     delta_high=q_h*(sx+sy)/4;
     for(i=0;i<sx;i++)
-       for(j=0;j<sy;j++)
+       for(j=0;j<sy+1;j++)
            {   
               tt=-pow((double)(i-sx/2.0),2.0)-pow((double)(j-sy/2.0),2.0);
               mask_low=exp(tt/(2*delta_low*delta_low)); 
@@ -71,10 +71,10 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
                // if(abs((double)(i-sx/2)*2)/sx<q_l && abs((double)(i-sx/2)*2)/sx>q_h)
                //    amp[j+i*sy]=0;   /*  for hard cut of frequency  */
             
-               amp[j+i*sy]=amp[j+i*sy]*mask_low*(1-mask_high);
+               temp_amp[j+i*sy]=temp_amp[j+i*sy]*mask_low*(1-mask_high);
 
-	       out[j+i*sy][0]=amp[j+i*sy]*cos(phase[j+i*sy]);
-               out[j+i*sy][1]=amp[j+i*sy]*sin(phase[j+i*sy]);                    
+	       out[j+i*sy][0]=temp_amp[j+i*sy]*cos(phase[j+i*sy]);
+               out[j+i*sy][1]=temp_amp[j+i*sy]*sin(phase[j+i*sy]);                    
            }  
 
 /*  IFFT transform  */

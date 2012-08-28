@@ -83,12 +83,12 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
    cout<<": Working on image of dimensions "<<nx<<","<<ny<<endl;
    cout<<": "<<endl;
    
-  // Henning on Aug. 28, 2012:
+   // Henning on Aug. 28, 2012:
    // If the input image has dimensions of nx,ny, then it ranges from 0...nx-1; 0...ny-1.
-   // Then its Fourier Transformation will have complex values, so that it requires twice
+   // Then its Fourier Transformation will have complex values, so that it requires twice 
    // as many pixels in each row. The FT then will have dimensions nx,ny+1, ranging from 0...nx-1; 0...ny/2,
    // where each pixel is complex and occupies two floating point register.
-   // The total memmory requirements therefore are in floats: 0...nx-1;0...ny.
+   // The total memmory requirements therefore are in floats: 0...nx-1;0...ny.  
    // Note that this is one column longer than in real space.
    // see:
    // http://www.fftw.org/fftw3_doc/Multi_002dDimensional-DFTs-of-Real-Data.html#Multi_002dDimensional-DFTs-of-Real-Data
@@ -97,22 +97,19 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
    //     FFT space:          nx * (ny+1) floats.
    //     FFT space:          nx * (ny/2+1) complex.
    //
-   amp=(float *)malloc(sizeof(float)*nx*ny);
-   temp_phase=(float *)malloc(sizeof(float)*nx*ny);
-
-   // or should this rather be this ???:
-   //
-   // amp=(float *)malloc(sizeof(float)*nx*(ny+1));
-   // temp_phase=(float *)malloc(sizeof(float)*nx*(ny+1));
-
+   // amp=(float *)malloc(sizeof(float)*nx*ny);
+   // temp_phase=(float *)malloc(sizeof(float)*nx*ny);
+  
+   amp=(float *)malloc(sizeof(float)*nx*(ny+1));
+   temp_phase=(float *)malloc(sizeof(float)*nx*(ny+1));
+  
    in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
    out=( fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
 
-   // or should this rather be this ???:
+   // or should this rather be this???:
    //
    // in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
    // out=( fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*nx*(ny/2+1));
-
 
    peak_x=(int *)malloc(sizeof(int)*Npeaks);
    peak_y=(int *)malloc(sizeof(int)*Npeaks);
@@ -163,7 +160,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
 /*  Get amplitude and phase of FFT image*/
 
     for(i=0;i<nx;i++)
-      for(j=0;j<ny;j++)
+      for(j=0;j<2*(ny/2+1);j++)
         {
            amp[j+i*ny]=sqrt(powf(out[j+i*ny][0],2.0)+powf(out[j+i*ny][1],2.0));
    /*  the following phase will be used in IFFTW of the real image */
@@ -197,7 +194,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
      {  amp_small=(float *)malloc(sizeof(float)*sx/4*sy/4);
 
        for(i=nx/2-sx/8;i<(nx/2+sx/8); i++)
-         for(j=ny/2-sy/8;j<(ny/2+sy/8); j++)
+         for(j=ny/2-sy/8;j<(ny/2+sy/8)+2; j++)
            {  amp_small[(j-(ny/2-sy/8))+(i-(nx/2-sx/8))*sy/4]=amp[j+i*ny];
   	   }
        sx=sx/4;  sy=sy/4; 
@@ -206,14 +203,14 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
      {  amp_small=(float *)malloc(sizeof(float)*sx/2*sy/2);
    
        for(i=nx/2-sx/4;i<(nx/2+sx/4); i++)
-         for(j=ny/2-sy/4;j<(ny/2+sy/4); j++)
+         for(j=ny/2-sy/4;j<(ny/2+sy/4)+2; j++)
            {  amp_small[(j-(ny/2-sy/4))+(i-(nx/2-sx/4))*sy/2]=amp[j+i*ny];
   	   }
        sx=sx/2;  sy=sy/2; 
      }
      else
      { amp_small=(float *)malloc(sizeof(float)*sx*sy);
-       for(i=0;i<sx*sy; i++)
+       for(i=0;i<sx*2*(sy/2+1); i++)
        { 
          amp_small[i]=amp[i];
        }
@@ -255,7 +252,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
 
      min=1.0e16; max=-min;
      for(i=0;i<sx; i++)
-      for(j=0;j<sy;j++)
+      for(j=0;j<2*(sy/2+1);j++)
         {
            if(min>amp_small[j+i*sy]) min=amp_small[j+i*sy];
            if(max<amp_small[j+i*sy]) max=amp_small[j+i*sy]; 
@@ -264,7 +261,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
      cout<<"min = "<<min<<"      max = "<<max<<endl;
 
      for(i=0;i<sx;i++)
-        for(j=0;j<sy;j++)
+        for(j=0;j<2*(sy/2+1);j++)
 	     amp_small[j+i*sy]=(amp_small[j+i*sy]-min)*10000.0/(max-min)+1;
 
  

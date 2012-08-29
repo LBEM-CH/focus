@@ -63,6 +63,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
   menu = NULL;
   yes = NULL; no = NULL;
   yesLabel = NULL; noLabel = NULL;
+  browse = NULL;
 
   updateWhatsThis();
 
@@ -443,6 +444,10 @@ void confInput::setReadOnlyState(int state)
 			yes->setDisabled(true);
 			no->setDisabled(true);
 		}
+                if(browse!=NULL)
+                {
+                    browse->setDisabled(true);
+                }
 	}
 	else if(state == Qt::Unchecked)
 	{
@@ -457,6 +462,10 @@ void confInput::setReadOnlyState(int state)
 			yes->setDisabled(false);
 			no->setDisabled(false);
 		}
+                if(browse!=NULL)
+                {
+                    browse->setDisabled(false);
+                }
 	}
 }
 

@@ -253,6 +253,8 @@ eot
     #
     \rm -f ${docfile}
     \rm -f ${docfileraw}
+    \rm -f 2dx_peaksearch-amp_before_LHpass.mrc
+    \rm -f 2dx_peaksearch-amp_LHpass.mrc
     #
     echo "FirstPeakNum = ${FirstPeakNum}"
     echo "peakNum = ${peakNum}"
@@ -263,6 +265,9 @@ eot
   if ( ${tempkeep} == 'y' ) then
     #
     \mv -f 2dx_peaksearch-non-masked_image.mrc SCRATCH/pks-non-masked_image.mrc
+    if ( -e 2dx_peaksearch-amp_before_LHpass.mrc ) then
+      \mv -f 2dx_peaksearch-amp_before_LHpass.mrc SCRATCH/pks-amp_before_LHpass.mrc
+    endif
     if ( -e 2dx_peaksearch-amp_LHpass.mrc ) then
       \mv -f 2dx_peaksearch-amp_LHpass.mrc SCRATCH/pks-amp_LHpass.mrc
     endif
@@ -270,7 +275,8 @@ eot
     \rm -f 2dx_peaksearch-phase.mrc
     echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/pks-amp_before_LHpass.mrc <Pre Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Post Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
     #
   else

@@ -30,6 +30,27 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
    temp_amp=(float *)malloc(sizeof(float)*sx*(sy+2));
    phase=(float *)malloc(sizeof(float)*sx*(sy+2));
    
+   // output the image before filtration:
+
+   for(i=0;i<sx;i++)
+      for(j=0;j<sy;j++)
+        { 
+           temp_amp[i+j*sx]=amp[j+i*sy];
+        }  
+
+   // we are in real space with amp, but want to prepare this for output as reciprocal space. 
+   // so, we need to add one column:
+      	
+   for(i=0;i<sx;i++)
+      temp_amp[i+sy*sx]=temp_amp[i+(sy-1)*sx];
+
+   char *firstcomplexData = mrcImage::complexFromReal(sx,sy,2,(char*)temp_amp);
+   mrcImage::mrcHeader *firstheader = mrcImage::headerFromData(sx/2+1,sy,4,firstcomplexData);
+   
+   char firstfileName[] = "2dx_peaksearch-amp_before_LHpass.mrc";
+   mrcImage(firstheader,firstcomplexData,firstfileName);
+   cout<<firstfileName<<" written"<<endl;
+
    in=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*sy);
    out=(fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex)*sx*(sy+1));
 
@@ -51,7 +72,7 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
 
 /*  Get amplitude and phase of FFT image*/
      for(i=0;i<sx;i++)
-      for(j=0;j<sy+1;j++)
+      for(j=0;j<sy/2+1;j++)
         {
            temp_amp[j+i*sy]=sqrt(pow(out[j+i*sy][0],2)+pow(out[j+i*sy][1],2));
            phase[j+i*sy]=atan2(out[j+i*sy][1],out[j+i*sy][0]);
@@ -62,7 +83,7 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
     delta_low=q_l*(sx+sy)/4;
     delta_high=q_h*(sx+sy)/4;
     for(i=0;i<sx;i++)
-       for(j=0;j<sy+1;j++)
+       for(j=0;j<sy/2+1;j++)
            {   
               tt=-pow((double)(i-sx/2.0),2.0)-pow((double)(j-sy/2.0),2.0);
               mask_low=exp(tt/(2*delta_low*delta_low)); 
@@ -103,9 +124,8 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
      // we are in real space with amp, but want to prepare this for output as reciprocal space. 
      // so, we need to add one column:
       	
-     j=sy;
      for(i=0;i<sx;i++)
-        temp_amp[i+j*sx]=amp[(sy-1)+i*sy];
+        temp_amp[i+sy*sx]=temp_amp[i+(sy-1)*sx];
 	 
      char *complexData = mrcImage::complexFromReal(sx,sy,2,(char*)temp_amp);
      mrcImage::mrcHeader *header = mrcImage::headerFromData(sx/2+1,sy,4,complexData);

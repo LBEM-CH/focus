@@ -20,6 +20,7 @@
 #include <QLineEdit>
 #include <QButtonGroup>
 #include <QRadioButton>
+#include <QPushButton>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QSpacerItem>
@@ -45,6 +46,8 @@ class confInput : public QWidget
   void updateStatus();
   void updateWhatsThis();
   void show();
+  void openFileDialog();
+  void openDirDialog();
 
   signals:
   void shown();
@@ -68,6 +71,7 @@ class confInput : public QWidget
   QComboBox *menu;
 
   QRadioButton *yes,*no;
+  QPushButton *browse;
   QLabel *yesLabel, *noLabel;
 
   graphicalButton *lockedBox;

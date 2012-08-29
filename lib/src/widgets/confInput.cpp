@@ -12,6 +12,7 @@
 #include <QListView>
 #include <QApplication>
 #include <QDebug>
+#include <QFileDialog>
 using namespace std;
 
 confInput::confInput(confData *conf, confElement *e, QWidget *parent)
@@ -89,182 +90,215 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
 
   if(type=="text_edit" || type == "integer" || type == "float")
   {
-    QStringList range = defaults.remove('"').split(';');
-    float min=-FLT_MAX, max=FLT_MAX;
-    if(type == "text_edit") value = element->get("value");
-    if(type == "integer") value = QString::number(element->get("value").toInt());
-    if(type == "float") value = QString::number(element->get("value").toFloat());
+      QStringList range = defaults.remove('"').split(';');
+      float min=-FLT_MAX, max=FLT_MAX;
+      if(type == "text_edit") value = element->get("value");
+      if(type == "integer") value = QString::number(element->get("value").toInt());
+      if(type == "float") value = QString::number(element->get("value").toFloat());
 
-    lEdits << new QLineEdit(value,this);
-    layout->setColumnStretch(2,1);
-    if(type=="text_edit" && range.size()==2) 
-		{
-      float w = range.first().toFloat(), h = range.last().toFloat();
-      if(w <= 0.0) w = 1.0;
-      if(h <= 0.0) h = 1.0;
-    
-			lEdits[0]->setFixedWidth(int(LINE_EDIT_WIDTH*w));
-			lEdits[0]->setFixedHeight(int(LINE_EDIT_HEIGHT*h));
+      lEdits << new QLineEdit(value,this);
+      layout->setColumnStretch(2,1);
+      if(type=="text_edit" && range.size()==2)
+      {
+          float w = range.first().toFloat(), h = range.last().toFloat();
+          if(w <= 0.0) w = 1.0;
+          if(h <= 0.0) h = 1.0;
 
-      if(h!=1.0) label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-		}
-		else
-		{
-			lEdits[0]->setFixedWidth(LINE_EDIT_WIDTH);
-			lEdits[0]->setFixedHeight(LINE_EDIT_HEIGHT);
-		}
-    //lEdits[0]->setAutoFillBackground(true);
-		lEdits[0]->setFont(labelFont);
+          lEdits[0]->setFixedWidth(int(LINE_EDIT_WIDTH*w));
+          lEdits[0]->setFixedHeight(int(LINE_EDIT_HEIGHT*h));
 
-		if(type!="text_edit")
-		{
-			foreach(QString s, range)
-			{
-				QStringList rangeValue = s.remove('"').split('=');
-				if(rangeValue.first().trimmed().toLower().startsWith("min"))
-					min = rangeValue.last().toFloat();
-				else if(rangeValue.first().trimmed().toLower().startsWith("max"))
-					max = rangeValue.last().toFloat();
-			}
+          if(h!=1.0) label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+      }
+      else
+      {
+          lEdits[0]->setFixedWidth(LINE_EDIT_WIDTH);
+          lEdits[0]->setFixedHeight(LINE_EDIT_HEIGHT);
+      }
+      //lEdits[0]->setAutoFillBackground(true);
+      lEdits[0]->setFont(labelFont);
 
-			//confValidator *v = new confValidator(lEdits[0]);
-			//v->setRange(min,max);
-			//lEdits[0]->setValidator(v);
-		}
+      if(type!="text_edit")
+      {
+          foreach(QString s, range)
+          {
+              QStringList rangeValue = s.remove('"').split('=');
+              if(rangeValue.first().trimmed().toLower().startsWith("min"))
+                  min = rangeValue.last().toFloat();
+              else if(rangeValue.first().trimmed().toLower().startsWith("max"))
+                  max = rangeValue.last().toFloat();
+          }
 
-	  lEdits[0]->setPalette(pal);
-		layout->addWidget(lEdits[0],0,3,1,1);
-		connect(lEdits[0],SIGNAL(textEdited(const QString &)),this,SLOT(save()));
-	}
+          //confValidator *v = new confValidator(lEdits[0]);
+          //v->setRange(min,max);
+          //lEdits[0]->setValidator(v);
+      }
 
-	if(type == "two_float" || type == "three_float" || type == "four_float" || type == "fourtynine_float")
-	{
-		int k = 0;
-		QList<float> min, max;
-		float lower, upper;
+      lEdits[0]->setPalette(pal);
+      layout->addWidget(lEdits[0],0,3,1,1);
+      connect(lEdits[0],SIGNAL(textEdited(const QString &)),this,SLOT(save()));
+  }
 
-		QStringList range = defaults.split(';');
-		foreach(QString s, range)
-		{
-			QStringList rangeValue = s.remove('"').split('=');
-			if(rangeValue.first().trimmed().toLower().startsWith("min"))
-				min << rangeValue.last().toFloat();
-			else if(rangeValue.first().trimmed().toLower().startsWith("max"))
-				max << rangeValue.last().toFloat();
-		}
+  else if(type == "two_float" || type == "three_float" || type == "four_float" || type == "fourtynine_float")
+  {
+      int k = 0;
+      QList<float> min, max;
+      float lower, upper;
 
-		if(type == "two_float") k = 2;
-		if(type == "three_float") k = 3;
-		if(type == "four_float") k = 4;
-		if(type == "fourtynine_float") k = 49;
+      QStringList range = defaults.split(';');
+      foreach(QString s, range)
+      {
+          QStringList rangeValue = s.remove('"').split('=');
+          if(rangeValue.first().trimmed().toLower().startsWith("min"))
+              min << rangeValue.last().toFloat();
+          else if(rangeValue.first().trimmed().toLower().startsWith("max"))
+              max << rangeValue.last().toFloat();
+      }
 
-		QStringList fValues = element->get("value").split(',');
-		for(int i=0;i<k;i++)
-		{
-			if(i<fValues.size())
-				lEdits << new QLineEdit(fValues[i],this);
-			else
-				lEdits << new QLineEdit(this);
-			lEdits[i]->setFixedHeight(20);
+      if(type == "two_float") k = 2;
+      if(type == "three_float") k = 3;
+      if(type == "four_float") k = 4;
+      if(type == "fourtynine_float") k = 49;
 
-			if(i<min.size()) lower = min[i]; else lower = min.last();
-			if(i<max.size()) upper = max[i]; else upper = max.last();
+      QStringList fValues = element->get("value").split(',');
+      for(int i=0;i<k;i++)
+      {
+          if(i<fValues.size())
+              lEdits << new QLineEdit(fValues[i],this);
+          else
+              lEdits << new QLineEdit(this);
+          lEdits[i]->setFixedHeight(20);
 
-			if(!min.isEmpty() && !max.isEmpty())
-			{
-				//confValidator *v = new confValidator(lEdits[i]);
-				//v->setRange(lower,upper);
-				//lEdits[i]->setValidator(v);
-			}
+          if(i<min.size()) lower = min[i]; else lower = min.last();
+          if(i<max.size()) upper = max[i]; else upper = max.last();
 
-			//if(type!="fourtynine_float") 
-			lEdits[i]->setMaximumWidth(LINE_EDIT_WIDTH/2);
-			lEdits[i]->setPalette(pal);
-			//else lEdits[i]->setMaximumWidth(LINE_EDIT_WIDTH/(2));
+          if(!min.isEmpty() && !max.isEmpty())
+          {
+              //confValidator *v = new confValidator(lEdits[i]);
+              //v->setRange(lower,upper);
+              //lEdits[i]->setValidator(v);
+          }
 
-			if(type!="fourtynine_float")
-				layout->addWidget(lEdits[i],0,i+3,1,1);
-			else
-				layout->addWidget(lEdits[i],1+i/7,i%7,1,1);
-			connect(lEdits[i],SIGNAL(textEdited(const QString &)),this,SLOT(save()));
-		}
+          //if(type!="fourtynine_float")
+          lEdits[i]->setMaximumWidth(LINE_EDIT_WIDTH/2);
+          lEdits[i]->setPalette(pal);
+          //else lEdits[i]->setMaximumWidth(LINE_EDIT_WIDTH/(2));
 
-		if(type=="fourtynine_float")
-		{
-			lEdits[24]->setPalette(pal);
-		}
-	}
+          if(type!="fourtynine_float")
+              layout->addWidget(lEdits[i],0,i+3,1,1);
+          else
+              layout->addWidget(lEdits[i],1+i/7,i%7,1,1);
+          connect(lEdits[i],SIGNAL(textEdited(const QString &)),this,SLOT(save()));
+      }
 
-	if(type == "drop_down_menu")
-	{
-		menu = new QComboBox(this);
-		menu->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-		int k;
-		bool ok;
-		QStringList menuOptions = defaults.split(';');
-		for(int i=0;i<menuOptions.size();i++)
-		{
-			QStringList menuItem = menuOptions[i].split('=');
-			menu->addItem(menuItem.last());
-		}
+      if(type=="fourtynine_float")
+      {
+          lEdits[24]->setPalette(pal);
+      }
 
-		k = value.toInt(&ok);
-		if(!ok || k<0)
-		{
-			if(menuOptions.contains(QString::number(k))) k = menuOptions.indexOf(value);
-		}
-		else k=0;
+  }
+  else if(type == "drop_down_menu")
+  {
+      menu = new QComboBox(this);
+      menu->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+      int k;
+      bool ok;
+      QStringList menuOptions = defaults.split(';');
+      for(int i=0;i<menuOptions.size();i++)
+      {
+          QStringList menuItem = menuOptions[i].split('=');
+          menu->addItem(menuItem.last());
+      }
 
-		if(k>=0)
-			menu->setCurrentIndex(k);
-		else
-			menu->setCurrentIndex(0);
+      k = value.toInt(&ok);
+      if(!ok || k<0)
+      {
+          if(menuOptions.contains(QString::number(k))) k = menuOptions.indexOf(value);
+      }
+      else k=0;
 
-		layout->addWidget(menu,0,3,1,1);
+      if(k>=0)
+          menu->setCurrentIndex(k);
+      else
+          menu->setCurrentIndex(0);
 
-		connect(menu,SIGNAL(currentIndexChanged(int)),this,SLOT(save()));
-	}
+      layout->addWidget(menu,0,3,1,1);
 
-	if(type == "bool")
-	{
-		QButtonGroup *buttonGroup = new QButtonGroup(this);
-		yes = new QRadioButton(this);
-		yesLabel = new QLabel("Yes");
-		no = new QRadioButton(this);
-		noLabel = new QLabel("No");
-		buttonGroup->addButton(yes);
-		buttonGroup->addButton(no);
-		buttonGroup->setExclusive(true);
-		if(value.toLower()=="y") yes->setChecked(true);
-		else if(value.toLower()=="n") no->setChecked(true);
-		layout->addWidget(yes,0,3,1,1);
-		layout->addWidget(yesLabel,0,4,1,1);
-		layout->addWidget(no,0,5,1,1);
-		layout->addWidget(noLabel,0,6,1,1);
-		yes->setFixedHeight(20);
-		//layout->setAlignment(yes,Qt::AlignRight);
-		//layout->setAlignment(no,Qt::AlignRight);
-		connect(buttonGroup,SIGNAL(buttonClicked(int)),this,SLOT(save()));
-	}
+      connect(menu,SIGNAL(currentIndexChanged(int)),this,SLOT(save()));
+  }
+  else if(type == "bool")
+  {
+      QButtonGroup *buttonGroup = new QButtonGroup(this);
+      yes = new QRadioButton(this);
+      yesLabel = new QLabel("Yes");
+      no = new QRadioButton(this);
+      noLabel = new QLabel("No");
+      buttonGroup->addButton(yes);
+      buttonGroup->addButton(no);
+      buttonGroup->setExclusive(true);
+      if(value.toLower()=="y") yes->setChecked(true);
+      else if(value.toLower()=="n") no->setChecked(true);
+      layout->addWidget(yes,0,3,1,1);
+      layout->addWidget(yesLabel,0,4,1,1);
+      layout->addWidget(no,0,5,1,1);
+      layout->addWidget(noLabel,0,6,1,1);
+      yes->setFixedHeight(20);
+      //layout->setAlignment(yes,Qt::AlignRight);
+      //layout->setAlignment(no,Qt::AlignRight);
+      connect(buttonGroup,SIGNAL(buttonClicked(int)),this,SLOT(save()));
+  }
 
-	if(!locked.isEmpty())
-	{
-		lockedBox = new graphicalButton(data->getIcon("lock"),this);
-		lockedBox->setCheckable(true);
-		lockedBox->setFixedHeight(20);
-		if(locked.startsWith("yes")) {lockedBox->setChecked(true); setReadOnlyState(Qt::Checked);}
-		else {lockedBox->setChecked(false); setReadOnlyState(Qt::Unchecked);}
-		if(type == "fourtynine_float")
-			layout->addWidget(lockedBox,0,2,1,6);
-		else
-			layout->addWidget(lockedBox,0,2,1,1);
-		layout->setAlignment(lockedBox,Qt::AlignRight | Qt::AlignVCenter);
-		connect(lockedBox,SIGNAL(stateChanged(int)),this,SLOT(setReadOnlyState(int)));
-		connect(lockedBox,SIGNAL(stateChanged(int)),this,SLOT(save()));
-	}
-	updateFontInfo();
-	//cerr<<connect(element,SIGNAL(dataChanged()),this,SLOT(load()))<<endl;
-	//cerr<<connect(data,SIGNAL(loading()),this,SLOT(load()))<<endl;
+  else if(type=="file_path" || type=="dir_path")
+  {
+      value = element->get("value");
+
+      browse = new QPushButton("Browse", this);
+      browse->setFixedWidth(LINE_EDIT_WIDTH/2);
+      //browse->setFixedHeight(LINE_EDIT_HEIGHT);
+      layout->addWidget(browse,0,4,1,1);
+      if(type=="file_path")
+      {
+        connect(browse,SIGNAL(clicked()),this,SLOT(openFileDialog()));
+      }
+      else
+      {
+          connect(browse,SIGNAL(clicked()),this,SLOT(openDirDialog()));
+      }
+
+
+      lEdits << new QLineEdit(value,this);
+      layout->setColumnStretch(2,1);
+
+      lEdits[0]->setFixedWidth(LINE_EDIT_WIDTH);
+      lEdits[0]->setFixedHeight(LINE_EDIT_HEIGHT);
+
+      lEdits[0]->setFont(labelFont);
+
+      lEdits[0]->setPalette(pal);
+      layout->addWidget(lEdits[0],0,2,1,1);
+      connect(lEdits[0],SIGNAL(textChanged(const QString &)),this,SLOT(save()));
+  }
+
+
+  if(!locked.isEmpty())
+  {
+      lockedBox = new graphicalButton(data->getIcon("lock"),this);
+      lockedBox->setCheckable(true);
+      lockedBox->setFixedHeight(20);
+      if(locked.startsWith("yes")) {lockedBox->setChecked(true); setReadOnlyState(Qt::Checked);}
+      else {lockedBox->setChecked(false); setReadOnlyState(Qt::Unchecked);}
+      if(type == "fourtynine_float")
+          layout->addWidget(lockedBox,0,2,1,6);
+      else if(type == "file_path" || type == "dir_path")
+          layout->addWidget(lockedBox,0,1,1,1);
+      else
+          layout->addWidget(lockedBox,0,2,1,1);
+      layout->setAlignment(lockedBox,Qt::AlignRight | Qt::AlignVCenter);
+      connect(lockedBox,SIGNAL(stateChanged(int)),this,SLOT(setReadOnlyState(int)));
+      connect(lockedBox,SIGNAL(stateChanged(int)),this,SLOT(save()));
+  }
+  updateFontInfo();
+  //cerr<<connect(element,SIGNAL(dataChanged()),this,SLOT(load()))<<endl;
+  //cerr<<connect(data,SIGNAL(loading()),this,SLOT(load()))<<endl;
 }
 
 void confInput::save()
@@ -273,7 +307,7 @@ void confInput::save()
 	QStringList type_default=element->get("type").split('"');
 	QString type = type_default[0].trimmed().toLower();
 
-	if(type=="text_edit" || type == "integer" || type == "float")
+        if(type=="text_edit" || type == "integer" || type == "float" || type == "file_path" || type == "dir_path")
 	{
 		change = element->set("value",lEdits[0]->text()) || change;
 	}
@@ -345,12 +379,12 @@ void confInput::load()
     pal.setColor(QPalette::Base,Qt::white);
   }
 
-	if(type=="text_edit" || type == "integer" || type == "float")
+  if(type=="text_edit" || type == "integer" || type == "float" || type == "file_path" ||  type == "dir_path")
 	{
 		lEdits[0]->setText(value);
-    //QPalette pal(palette());
+                //QPalette pal(palette());
 		//pal.setColor(QPalette::Base,QColor(250,0,0));
-    lEdits[0]->setPalette(pal);
+                lEdits[0]->setPalette(pal);
 	}
 
 	if(type == "two_float" || type == "three_float" || type == "four_float" || type == "fourtynine_float")
@@ -619,6 +653,24 @@ void confInput::show()
 	update();
 	QWidget::show();
 	emit shown();
+}
+
+void confInput::openFileDialog()
+{
+    QString filePath = QFileDialog::getOpenFileName(this,
+                                                    tr("Select File"), data->getDir("working"));
+    //TODO: check if lEdits[0] exists and what type it is
+    lEdits[0]->setText(filePath);
+    dataModified();
+}
+
+void confInput::openDirDialog()
+{
+    QString dirPath = QFileDialog::getExistingDirectory(this,
+                                                    tr("Select Directory"), data->getDir("working"));
+    //TODO: check if lEdits[0] exists and what type it is
+    lEdits[0]->setText(dirPath);
+    dataModified();
 }
 
 void confInput::setIsWrongValueColor()

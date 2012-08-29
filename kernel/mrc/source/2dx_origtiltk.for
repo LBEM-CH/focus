@@ -3297,6 +3297,7 @@ C          B(2)=99999.9
           WRITE(*,'('':: '')')
           WRITE(*,'('':: MA21AD Failed, but continuing nevertheless...'')')
           WRITE(*,'('':: '')')
+          STOP
 C---------STOP
 CHEN<
 8150    THETA=FSHIFT*B(1)/DRAD

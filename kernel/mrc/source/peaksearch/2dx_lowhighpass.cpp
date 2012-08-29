@@ -96,6 +96,7 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
 
 	       out[j+i*sy][0]=temp_amp[j+i*sy]*cos(phase[j+i*sy]);
                out[j+i*sy][1]=temp_amp[j+i*sy]*sin(phase[j+i*sy]);                    
+
            }  
 
 /*  IFFT transform  */
@@ -126,6 +127,26 @@ void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h)
       	
      for(i=0;i<sx;i++)
         temp_amp[i+sy*sx]=temp_amp[i+(sy-1)*sx];
+  
+
+     // temporary test:
+     /* 
+     int i2;
+     int j2;
+     for(i=0;i<sx;i++)
+        for(j=0;j<sy;j++)
+        {
+               q_l = 0.01;
+               q_h = 0.0101;
+               i2 = i-sx/2;
+               j2 = j-sy/2;
+               if((i2*i2+j2*j2)/(sx*sy/4.0)>q_l && (i2*i2+j2*j2)/(sx*sy/4.0)<q_h)
+                  temp_amp[j+i*sy]=1.0;
+               else
+                  temp_amp[j+i*sy]=2.0; 
+        }
+     */
+              
 	 
      char *complexData = mrcImage::complexFromReal(sx,sy,2,(char*)temp_amp);
      mrcImage::mrcHeader *header = mrcImage::headerFromData(sx/2+1,sy,4,complexData);

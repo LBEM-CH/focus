@@ -99,6 +99,8 @@ set curval = 10.0
 set dircounter = ${dirnum}
 while ( ${dircounter} > 0 )
   set from_dir = `cat ${oldir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
+  cd ${oldir}
+  cd ..
   cd ${from_dir}
   echo "::Working on ${from_dir}"
   #

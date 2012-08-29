@@ -20,6 +20,8 @@
 # MANUAL: This script will verify the presence of correctly linked 2d_master.cfg files in this project.
 # MANUAL: With the switch you can decide if you want to correct the links.
 #
+# DISPLAY: SCRATCH_DISK
+# DISPLAY: FFTIR_DISK
 # DISPLAY: repair_links
 #
 #$end_local_vars

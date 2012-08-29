@@ -342,6 +342,10 @@ APH/sym2Dref.hkl
 1
 eot
 #
+if ( -e APH/syn_nosort2D-plot.hkl ) then
+  \mv -f APH/syn_nosort2D-plot.hkl APH/sym2Dref.hk
+endif
+#
 # This is used within 2dx_hklclean:
 \rm -f APH/sym_nosort2D.hkl
 \rm -f APH/syn_nosort2D-plot.hkl
@@ -362,6 +366,7 @@ endif
 if ( ${tempkeep} == "y" ) then
   echo "# IMAGE: APH/sym2D.hkl <APH after 2dx_clean for 2D [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
   echo "# IMAGE: APH/sym2Dref.hkl <APH after 2dx_clean for 2D ref [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: APH/sym2Dref.hk <APH after 2dx_clean for 2D ref [H,K,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
   echo "# IMAGE: APH/syn_nosort2D-plot.hkl <APH after 2dx_clean for merge plot [H,K,F,P,IQ,0,FOM]>" >> LOGS/${scriptname}.results
 endif
 #

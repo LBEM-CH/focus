@@ -194,9 +194,11 @@ endif
 #
 if ( ${refine_def_reference} == "1" ) then
   set iref=0
-  set averagedat = ../../merge/APH/avrg2D.hkl
+  set averagedat = ../../merge/APH/avrg2D.hk
+  set averagedat = ../../merge/APH/sym2Dref.hk
   if ( ! -e ${averagedat} ) then
-    set averagedat = ../merge/APH/avrg2D.hkl
+    set averagedat = ../merge/APH/avrg2D.hk
+    set averagedat = ../merge/APH/sym2Dref.hk
     if ( ! -e ${averagedat} ) then
       ${proc_2dx}/protest "ERROR: no suitable reference file found."
     endif

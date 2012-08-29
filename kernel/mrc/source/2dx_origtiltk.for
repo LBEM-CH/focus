@@ -3290,8 +3290,15 @@ C
         CALL MA21AD(A,IA,N,B,W,E)
         IF(E.EQ.0.0) GO TO 8150
           WRITE(6,8101)E
-8101      FORMAT(' MA21AD FAILED',F10.5)
-          STOP
+8101      FORMAT(':: MA21AD FAILED',F10.5)
+CHEN>
+C          B(1)=99999.9
+C          B(2)=99999.9
+          WRITE(*,'('':: '')')
+          WRITE(*,'('':: MA21AD Failed, but continuing nevertheless...'')')
+          WRITE(*,'('':: '')')
+C---------STOP
+CHEN<
 8150    THETA=FSHIFT*B(1)/DRAD
         PHI=FSHIFT*B(2)/DRAD
         if(IVERBOSE.gt.3)then

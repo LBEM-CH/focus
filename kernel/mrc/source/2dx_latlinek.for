@@ -547,10 +547,10 @@ C         ACCUMULATE THE OVERALL RESIDUAL SUMS
         NPSUM = NPSUM + NP
         RFSUM = RFSUM + RF*NF
         RMSPSUM = RMSPSUM + RMSP*NP
-                WSUMSUM = WSUMSUM + WSUM
-                WRFSUM = WRFSUM + WRF
-                WRMSPSUM = WRMSPSUM + WRMSP
-                WNPSUM = WNPSUM + WNP
+        WSUMSUM = WSUMSUM + WSUM
+        WRFSUM = WRFSUM + WRF
+        WRMSPSUM = WRMSPSUM + WRMSP
+        WNPSUM = WNPSUM + WNP
 C
 C   CALCULATE OUTPUT INTERVALS
 C
@@ -809,10 +809,11 @@ C
         F = 0.0
         NF = 0
         NP = 0
-                WRF = 0.0               ! for weighted R-factors and residuals
-                WRMSP = 0.0
-                WNP = 0.0
-                WSUM = 0.0
+        WRF = 0.0               ! for weighted R-factors and residuals
+        WRMSP = 0.0
+        WNP = 0.0
+        WSUM = 0.0
+C
         DO 100 J = 1,NOBS
           CALL ABCALC(A,B,ZSTAR(J))
           FC2 = A*A + B*B

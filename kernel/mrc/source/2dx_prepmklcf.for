@@ -17,6 +17,7 @@ C
       NFOMLOW=0
       NRESHI=0
       NGOOD=0
+      NGFOM50=0
       NIN=0
       WRITE(6,51)
 51    FORMAT('   2DX_PREPMKLCF VX 1.1(22.9.93) -',
@@ -106,6 +107,9 @@ CHEN<
                 GO TO 100
       ENDIF
       NGOOD=NGOOD+1
+      if(FOMCALC.ge.50.0)then
+        NGFOM50=NGFOM50+1
+      endif
       WRITE(2,55)IH,IK,IL,A,P,FOMCALC
       WRITE(3,54)IH,IK,IL,A,P,FOMCALC,SIGA
       WRITE(6,55)IH,IK,IL,A,P,FOMCALC
@@ -114,12 +118,25 @@ CHEN<
 C54    FORMAT(3I4,F8.1,F7.1,F6.1,F10.1)
 C55    FORMAT(3I4,F8.1,F7.1,F6.1)
       GO TO 100
-400   WRITE(6,56)NGOOD,NIN,NSIGZERO,NAZERO,NFOMLOW,NRESHI,RESOLUTION
-56    FORMAT(' MKLCF FILE COMPLETED',/,/,
-     .  I10,' good phases written out',
+400   WRITE(6,56)NGOOD,NIN,NSIGZERO,NAZERO,NFOMLOW,NRESHI,RESOLUTION,NGFOM50
+56    FORMAT(': MKLCF FILE COMPLETED',/,/,
+     .  ':',I10,' good phases written out',
      .  ', from a total read in of',I10,/,
-     .  I10,' of these had zero sigma(s)',/,
-     .  I10,' of them had zero amplitude',/,
-     .  I10,' of them had figure of merit <0.01, and',/,
-     .  I10,' were beyond resolution limit of',F8.1)
+     .  ':',I10,' of these had zero sigma(s)',/,
+     .  ':',I10,' of them had zero amplitude',/,
+     .  ':',I10,' of them had figure of merit <0.01, and',/,
+     .  ':',I10,' were beyond resolution limit of',F8.1,/,
+     .  ':',I10,' of them had FOM>50%',/)
+CHEN>
+      call system("\rm -f 2dx_prepmklcf.statistics")
+      open(27,FILE="2dx_prepmklcf.statistics",STATUS="NEW",ERR=404)
+      write(27,'(''Number of good phases = '',I10)')NGOOD
+      write(27,'(''Number of phases with FOM>50% = '',I10)')NGFOM50
+      close(27)
+      goto 405
+404   continue
+        write(*,'(''::ERROR on file open of 2dx_prepmklcf.statistics'')')
+405   continue
+CHEN<
+      STOP
       END

@@ -141,6 +141,8 @@ set scalimamp3d_rref = ""
 set scalimamp3d_BXYMINMAX = ""
 set scalimamp3d_BZMINMAX = ""
 set scalimamp3d_BEXTRA = ""
+set num_reflections_fitted = ""
+set num_reflections_FOM50 = ""
 #
 #$end_vars
 #

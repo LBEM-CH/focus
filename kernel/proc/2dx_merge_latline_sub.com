@@ -219,12 +219,14 @@ endif
 \mv -f latline.statistics SCRATCH/latline_stat.dat
 set num_amplitudes_observed = `cat SCRATCH/latline_stat.dat | grep "Number of amplitudes observed" | cut -c55-`
 set num_phases_observed = `cat SCRATCH/latline_stat.dat | grep "Number of phases observed" | cut -c55-`
+set num_reflections_fitted = `cat SCRATCH/latfitteds.dat | wc -l`
 set overall_R_factor =  `cat SCRATCH/latline_stat.dat | grep "Overall R-factor" | cut -c55-`
 set overall_phase_residual =  `cat SCRATCH/latline_stat.dat | grep "Overall phase residual" | cut -c55-`
 set overall_weighted_R_factor =  `cat SCRATCH/latline_stat.dat | grep "Overall weighted R-factor" | cut -c55-`
 set overall_weighted_phase_residual =  `cat SCRATCH/latline_stat.dat | grep "Overall weighted phase residual" | cut -c55-`
 echo "set num_amplitudes_observed = ${num_amplitudes_observed}" >> LOGS/${scriptname}.results
 echo "set num_phases_observed = ${num_phases_observed}" >> LOGS/${scriptname}.results
+echo "set num_reflections_fitted = ${num_reflections_fitted}" >> LOGS/${scriptname}.results 
 echo "set overall_R_factor = ${overall_R_factor}" >> LOGS/${scriptname}.results
 echo "set overall_phase_residual = ${overall_phase_residual}" >> LOGS/${scriptname}.results
 echo "set overall_weighted_R_factor = ${overall_weighted_R_factor}" >> LOGS/${scriptname}.results
@@ -250,6 +252,7 @@ ${proc_2dx}/linblock "PREPMKMTZ - Program to convert fitted data to CCP4 format"
 #############################################################################
 #
 \rm -f APH/latfitted_nosym.hkl
+\rm -f 2dx_prepmklcf.statistics
 #
 setenv IN SCRATCH/latfitteds.dat
 setenv OUT APH/latfitted_nosym.hkl
@@ -267,6 +270,14 @@ echo "output in file LOGS/prepmklcf.log"
 echo "################################################"
 echo "################################################"
 #
+if ( ! -e 2dx_prepmklcf.statistics ) then
+  ${proc_2dx}/linblock "ERROR: 2dx_prepmklcf.statistics file is missing."
+else
+  set num_reflections_FOM50 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM' | sed s'/_/ /g' | cut -d= -f2`
+  echo "::Number of phases with FOM>50% is ${num_reflections_FOM50}"
+  echo "set num_reflections_FOM50 = ${num_reflections_FOM50}" >> LOGS/${scriptname}.results
+  \mv -f 2dx_prepmklcf.statistics SCRATCH
+endif
 echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
 if ( ${tempkeep} == "y" ) then
   echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Latline for vol after prepmklcf [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results

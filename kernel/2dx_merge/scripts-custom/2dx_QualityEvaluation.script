@@ -69,6 +69,8 @@ set JREFL = ""
 set Reflections_Unique = ""
 set num_amplitudes_observed = ""
 set num_phases_observed = ""
+set num_reflections_fitted = ""
+set num_reflections_FOM50 = ""
 set overall_R_factor = ""
 set overall_phase_residual = ""
 set overall_weighted_R_factor = ""
@@ -184,19 +186,18 @@ if ( ${merge_modus} == '3D' ) then
   echo "IQ range used:# 1 ... ${MergeIQMAX}" >> Summary_Statistics_3D.txt
   echo "Tilt range used [deg]:# 0.0 ... ${tmp_TANGL_max}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Number of observed amplitudes and phases:# ${JREFL}" >> Summary_Statistics_3D.txt
-  echo "Number of unique reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
-  echo "Number of unique reflections in MTZ file:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
-  echo "Number of unique reflections with FOM>50%:# TBD" >> Summary_Statistics_3D.txt
-  echo "Number of unique reflections in total accessible Fourier volume:# TBD " >> Summary_Statistics_3D.txt
-  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   echo "In-plane resolution cut-off [Angstroems]:# ${RESMAX}" >> Summary_Statistics_3D.txt
   echo "Vertical resolution cut-off [Angstroems]:# ${zstarrange_real}" >> Summary_Statistics_3D.txt
-  echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A):# TBD" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  echo "Number of observed amplitudes and phases:# ${JREFL}" >> Summary_Statistics_3D.txt
+  echo "Number of observed unique reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
+  echo "Number of unique reflections in lattice lines:# ${num_reflections_fitted}" >> Summary_Statistics_3D.txt
+  echo "Number of unique reflections with FOM>50%:# ${num_reflections_FOM50}" >> Summary_Statistics_3D.txt
+  echo "Theoretically possible number of unique reflections:# TBD" >> Summary_Statistics_3D.txt
+  echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A vertical):# TBD" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   # echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
   echo "Overall weighted phase residual [deg]:# ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt
-  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   # echo "Overall R-factor:# ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
   echo "Overall weighted R-factor:# ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
@@ -204,7 +205,7 @@ if ( ${merge_modus} == '3D' ) then
   #
   #
   echo "::"
-  cat Summary_Statistics_3D.txt | sed 's/ /_/g' | sed 's/#/ /g' | awk '{ printf "%-48s %28s\n", $1, $2 }' | sed 's/_/ /g' > tmp
+  cat Summary_Statistics_3D.txt | sed 's/ /_/g' | sed 's/#/ /g' | awk '{ printf "%-53s%25s\n", $1, $2 }' | sed 's/_/ /g' > tmp
   mv -f tmp Summary_Statistics_3D.txt
   cat Summary_Statistics_3D.txt | sed 's/^/::/'
   echo "::"

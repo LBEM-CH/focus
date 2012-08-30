@@ -727,10 +727,8 @@ C     THE FIRST DATASET IS A FULLY-FLEDGED MTZ FILE.
 C
 CHEN>
       OPEN(UNIT=17,FILE=cfile1,STATUS='UNKNOWN')
-      if(IVERBOSE.gt.5)then
-        call system('\rm -f 2dx_origtiltk-reflections.log')
-        OPEN(UNIT=18,FILE='2dx_origtiltk-reflections.log',STATUS='NEW')
-      endif
+      call system('\rm -f 2dx_origtiltk-reflections.log')
+      OPEN(UNIT=18,FILE='2dx_origtiltk-reflections.log',STATUS='NEW')
       OPEN(UNIT=21,FILE='2dx_origtiltk-console.log',STATUS='NEW')
 CHEN<
 C
@@ -2534,7 +2532,7 @@ C
           IF(KK.NE.JREFL) IREF1=IREFL-1
           IREF2=IREF1-1
           IF(IREF2.GE.MINRFL) GO TO 563
-            if(IVERBOSE.gt.5)WRITE(18,188) LH,LK
+            WRITE(18,188) LH,LK
           GO TO 565
 563         IF (LH.LT.LHMIN) GO TO 565
 C-----------IF (LH.GT.LHMAX) GO TO 600
@@ -2575,7 +2573,7 @@ C
           write(CZEIL(ILEN:50),'(F10.1,F7.1)') AMP(KJ),PHS(KJ)
           ILEN = ILEN + 17
         endif
-        if(IVERBOSE.gt.1)WRITE(18,192) LH,LK,ZSTAR(KJ),AMP(KJ),PHS(KJ),
+        WRITE(18,192) LH,LK,ZSTAR(KJ),AMP(KJ),PHS(KJ),
      .     JFILM(KJ),JSIGN(KJ),FLMWGT(KJ),BACK(KJ),CTFS(KJ),
      .     CZEIL(1:ILEN)
 C
@@ -2584,14 +2582,14 @@ C
         WRITE(3,190) LH,LK,ZSTAR(KJ),AMP(KJ),PHS(KJ),
      .    JFILM(KJ),JSIGN(KJ),FLMWGT(KJ),BACK(KJ),CTFS(KJ)
         GO TO 600
-  555   if(IVERBOSE.gt.1)WRITE(18,191) LH,LK,ZSTAR(KJ),AMP(KJ),
+  555   WRITE(18,191) LH,LK,ZSTAR(KJ),AMP(KJ),
      .     JFILM(KJ),JSIGN(KJ),
      .   FLMWGT(KJ),BACK(KJ),CTFS(KJ)
 600   CONTINUE
       GO TO 1107
 601   WRITE(6,149) TOTRFL
       CLOSE(UNIT=17)
-      if(IVERBOSE.gt.5)CLOSE(UNIT=18)
+      CLOSE(UNIT=18)
       CLOSE(UNIT=21)
       STOP
 C

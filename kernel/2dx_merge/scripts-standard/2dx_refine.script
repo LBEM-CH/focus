@@ -386,7 +386,7 @@ source ${postprocessingfile} > SCRATCH/2dx_merge_scriptB_postprocessing.log
 echo "<<@progress: 90>"
 #
 # Issue evaluate here to reload the Ph-Ori-Change column
-#echo "<<@evaluate>>"
+echo "<<@evaluate>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_refine normal end."

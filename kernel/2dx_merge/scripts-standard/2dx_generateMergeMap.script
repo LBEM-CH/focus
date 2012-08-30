@@ -211,11 +211,14 @@ select invert
 purge
 y
 expand 1
-calc COL F = 1
 calc COL PHI = 0
 write SCRATCH/merge3D_phase_zero.mtz
 quit
 eof
+  #
+  # Not to be used, because this would eliminate the (bad) effect 
+  # of B-factor on high resolution reflections:
+  # calc COL F = 1
   #
   echo "# IMAGE: SCRATCH/merge3D_phase_zero.mtz <MTZ: Phase Zero volume>" >> LOGS/${scriptname}.results
   #

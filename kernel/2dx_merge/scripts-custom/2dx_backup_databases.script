@@ -123,6 +123,7 @@ echo "set backup_sure = no" >> LOGS/${scriptname}.results
 #
 # Move the progress bar to 100%:
 echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
 #
 # Leave a message on the logfile that the script finished:
 ${proc_2dx}/linblock "${scriptname} finished correctly."

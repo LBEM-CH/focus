@@ -186,15 +186,18 @@ if ( ${merge_modus} == '3D' ) then
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   echo "Number of observed amplitudes and phases:# ${JREFL}" >> Summary_Statistics_3D.txt
   echo "Number of unique reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
+  echo "Number of unique reflections in MTZ file:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
+  echo "Number of unique reflections with FOM>50%:# TBD" >> Summary_Statistics_3D.txt
+  echo "Number of unique reflections in total accessible Fourier volume:# TBD " >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   echo "In-plane resolution cut-off [Angstroems]:# ${RESMAX}" >> Summary_Statistics_3D.txt
   echo "Vertical resolution cut-off [Angstroems]:# ${zstarrange_real}" >> Summary_Statistics_3D.txt
   echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A):# TBD" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
+  # echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
   echo "Overall weighted phase residual [deg]:# ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Overall R-factor:# ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
+  # echo "Overall R-factor:# ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
   echo "Overall weighted R-factor:# ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   #

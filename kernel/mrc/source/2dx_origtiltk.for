@@ -1847,7 +1847,10 @@ C
             enddo
           enddo
 C
-          TAXA=RTAXAOPT
+          TAXA=MOD(RTAXAOPT,360.0)
+          if(TAXA.gt.180.0)then
+            TAXA=TAXA-360.0
+          endif
           TANGL=RTANGLOPT
           write(*,'(/,/,'' Best TAXA and TANGL found with PHSMIN = ''
      .         ,F12.3)')PHSMIN
@@ -3292,13 +3295,12 @@ C
           WRITE(6,8101)E
 8101      FORMAT(':: MA21AD FAILED',F10.5)
 CHEN>
-C          B(1)=99999.9
-C          B(2)=99999.9
           WRITE(*,'('':: '')')
           WRITE(*,'('':: MA21AD Failed, but continuing nevertheless...'')')
           WRITE(*,'('':: '')')
-          STOP
 C---------STOP
+          PHRESID = 99999.9
+          RETURN
 CHEN<
 8150    THETA=FSHIFT*B(1)/DRAD
         PHI=FSHIFT*B(2)/DRAD

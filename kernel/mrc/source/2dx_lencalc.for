@@ -101,13 +101,18 @@ C-----This then gives a reciprocal lattice with reciproc. u in X-axis direction.
       realb(1) = 0.0
       realb(2) = (realy*rmag)/(rpix*10000.0)
 C
+      write(*,'(''real lattice = '',4F12.3)')reala(1),reala(2),realb(1),realb(2)
+      write(*,'(''included angle='',F12.3)')realspace_angle
+C
 C-----transform non-tilted theoretical real-space lattice into reciprocal space
 C
       call reciproc(reala,realb,reciu,reciv,ISIZE)
+      write(*,'(''reci lattice = '',4F12.3)')reciu(1),reciu(2),reciv(1),reciv(2)
 C
 C-----Calculate the included angle in the non-tilted theoretical reciprocal lattice
 C
       call getang(reciu,reciv,reciang)
+      write(*,'(''included angle='',F12.3)')reciang
 C
 C-----Calculate the lengths of the non-tilted theoretical reciprocal lattice, in rec. Pixels
 C

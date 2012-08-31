@@ -273,8 +273,11 @@ echo "################################################"
 if ( ! -e 2dx_prepmklcf.statistics ) then
   ${proc_2dx}/linblock "ERROR: 2dx_prepmklcf.statistics file is missing."
 else
-  set num_reflections_FOM50 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM' | sed s'/_/ /g' | cut -d= -f2`
+  set num_reflections_FOM1 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM_over_1' | sed s'/_/ /g' | cut -d= -f2`
+  set num_reflections_FOM50 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM_over_50' | sed s'/_/ /g' | cut -d= -f2`
+  echo "::Number of phases with FOM>1% is ${num_reflections_FOM1}"
   echo "::Number of phases with FOM>50% is ${num_reflections_FOM50}"
+  echo "set num_reflections_FOM1 = ${num_reflections_FOM1}" >> LOGS/${scriptname}.results
   echo "set num_reflections_FOM50 = ${num_reflections_FOM50}" >> LOGS/${scriptname}.results
   \mv -f 2dx_prepmklcf.statistics SCRATCH
 endif

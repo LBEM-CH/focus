@@ -27,6 +27,7 @@
 # DISPLAY: realcell
 # DISPLAY: realang
 # DISPLAY: ALAT
+# DISPLAY: zstarrange
 # DISPLAY: SYM
 # DISPLAY: avrgamphsNUMBER
 # DISPLAY: avrgamphsRESOL
@@ -51,6 +52,7 @@ set tempkeep = ""
 set realcell = ""
 set realang = ""
 set ALAT = ""
+set zstarrange = ""
 set MergeStepSize = ""
 set IBOXPHS = ""
 set SYM = ""
@@ -70,6 +72,7 @@ set Reflections_Unique = ""
 set num_amplitudes_observed = ""
 set num_phases_observed = ""
 set num_reflections_fitted = ""
+set num_reflections_FOM1 = ""
 set num_reflections_FOM50 = ""
 set overall_R_factor = ""
 set overall_phase_residual = ""
@@ -119,6 +122,9 @@ if ( ${merge_modus} == '2D' ) then
     ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
   endif
 endif
+#
+#
+#
 if ( ${merge_modus} == '3D' ) then
   if ( ${merge_reference} == '0' ) then
     # Use merge.aph files
@@ -174,6 +180,30 @@ if ( ${merge_modus} == '3D' ) then
   set realcell_gamma = `echo ${realang} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
   set realcell_c = `echo ${ALAT} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
   #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_calc_num_phases - to estimate theoretically possible numbers of reflections"
+  #############################################################################  
+  #
+  \rm -f 2dx_calc_num_phases.out
+  #
+  ${bin_2dx}/2dx_calc_num_phases.exe << eot
+${spcgrp}
+${realcell},${realang}
+${ALAT}
+${tmp_TANGL_max}
+${RESMAX}
+${zstarrange}
+eot
+  # 
+  if ( ! -e 2dx_calc_num_phases.out ) then
+    ${proc_2dx}/protest "ERROR in 2dx_calc_num_phases"
+  endif
+  set num_reflections_theoretic = `cat 2dx_calc_num_phases.out`
+  \rm 2dx_calc_num_phases.out
+  set completeness1 = `echo ${num_reflections_theoretic} ${num_reflections_FOM1} | awk '{ s = 100.0 * $2 / $1 } END { printf ( "%10.1f", s ) }'`
+  set completeness50 = `echo ${num_reflections_theoretic} ${num_reflections_FOM50} | awk '{ s = 100.0 * $2 / $1 } END { printf ( "%10.1f", s ) }'`
+  #
   echo "==============================================================================" > Summary_Statistics_3D.txt
   echo "3D Reconstruction Parameters" >> Summary_Statistics_3D.txt
   echo "==============================================================================" >> Summary_Statistics_3D.txt
@@ -189,12 +219,18 @@ if ( ${merge_modus} == '3D' ) then
   echo "In-plane resolution cut-off [Angstroems]:# ${RESMAX}" >> Summary_Statistics_3D.txt
   echo "Vertical resolution cut-off [Angstroems]:# ${zstarrange_real}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Number of observed amplitudes and phases:# ${JREFL}" >> Summary_Statistics_3D.txt
+  echo "Number of observed reflections:# ${JREFL}" >> Summary_Statistics_3D.txt
   echo "Number of observed unique reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
-  echo "Number of unique reflections in lattice lines:# ${num_reflections_fitted}" >> Summary_Statistics_3D.txt
-  echo "Number of unique reflections with FOM>50%:# ${num_reflections_FOM50}" >> Summary_Statistics_3D.txt
-  echo "Theoretically possible number of unique reflections:# TBD" >> Summary_Statistics_3D.txt
-  echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A vertical):# TBD" >> Summary_Statistics_3D.txt
+  echo "Number of possible unique reflections in asym. unit:# ${num_reflections_theoretic}" >> Summary_Statistics_3D.txt
+  echo "Number of observed unique reflections in asym. unit:# ${num_reflections_fitted}" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  echo "Number of observed unique reflections with FOM>1%:# ${num_reflections_FOM1}" >> Summary_Statistics_3D.txt
+  echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
+  echo "counting reflections with FOM > 1%:# ${completeness1}%" >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  echo "Number of obs. unique reflections with FOM>50%:# ${num_reflections_FOM50}" >> Summary_Statistics_3D.txt
+  echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
+  echo "counting reflections with FOM > 50%:# ${completeness50}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   # echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
   echo "Overall weighted phase residual [deg]:# ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt

@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Quality Evaluation                                                 #
+# Title: Quality Evaluation (3D)                                            #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 11
+# SORTORDER: 95
 #
 # MANUAL: This script reports the data processing statistics.
 #

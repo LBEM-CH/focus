@@ -71,18 +71,18 @@ C
       write(6,'(''2dx_calc_num_phases program'')')
 C
       READ(5,*)IPG
-      write(6,'(''Plane group number: '',I3)')IPG
+      write(6,'('':Plane group number: '',I3)')IPG
       READ(5,*)RA,RB,RGAMMA
-      write(6,'(''Real unit cell A,B: '',2F12.3)')RA,RB
-      write(6,'(''Real unit cell GAMMA: '',F12.3)')RGAMMA
+      write(6,'('':Real unit cell A,B: '',2F12.3)')RA,RB
+      write(6,'('':Real unit cell GAMMA: '',F12.3)')RGAMMA
       READ(5,*)ALAT
-      write(6,'(''Real unit cell C: '',F12.3)')ALAT
+      write(6,'('':Real unit cell C: '',F12.3)')ALAT
       READ(5,*)RANGMAX
-      write(6,'(''Maximally included tilt angle: '',F8.3)')RANGMAX
+      write(6,'('':Maximally included tilt angle: '',F8.3)')RANGMAX
       READ(5,*)RESMAX
-      write(6,'(''Radial resolution limit [Angstroems]: '',F8.3)')RESMAX
+      write(6,'('':Radial resolution limit [Angstroems]: '',F8.3)')RESMAX
       READ(5,*)RZRESMAX
-      write(6,'(''Vertical resolution limit [reci Angstroems]: '',F8.3)')RZRESMAX
+      write(6,'('':Vertical resolution limit [reci Angstroems]: '',F8.3)')RZRESMAX
 C
 C-----Create the non-tilted theoretical real-space lattice
 C
@@ -166,8 +166,13 @@ C     .          3I4,7F12.3)')i,j,k,RRESH2,RRESH,RRESV,RES,RESMAX,RANG,RANGMAX
         enddo
       enddo
 C
+      write(*,'('': '')')
+      write(*,'('':WARNING: This program ignores the systematic absences.'')')
+      write(*,'('':The reported number includes systematically absent reflections.'')')
+      write(*,'('': '')')
       write(*,'('' '')')
-      write(*,'(''Total number of possible reflections = '',I16)')ISPOTS
+      write(*,'('':Total number of possible reflections in the assymetric'',
+     .   '' unit = '',I16)')ISPOTS
 C
       call system("\rm -f 2dx_calc_num_phases.out")
       open(UNIT=27,FILE="2dx_calc_num_phases.out",STATUS="NEW",ERR=901)

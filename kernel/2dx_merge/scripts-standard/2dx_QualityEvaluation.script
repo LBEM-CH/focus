@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Quality Evaluation (3D)                                            #
+# Title: Quality Evaluation                                                 #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -68,6 +68,7 @@ set merge_reference = ""
 set merge_ref_num = ""
 set max_amp_correction = ""
 set JREFL = ""
+set JREFL_2D = ""
 set Reflections_Unique = ""
 set num_amplitudes_observed = ""
 set num_phases_observed = ""
@@ -78,6 +79,8 @@ set overall_R_factor = ""
 set overall_phase_residual = ""
 set overall_weighted_R_factor = ""
 set overall_weighted_phase_residual = ""
+set overall_phase_residual_2D = ""
+set overall_weighted_phase_residual_2D = ""
 set zstarrange_real = ""
 #
 #$end_vars
@@ -114,72 +117,91 @@ source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 5>"
 #
-if ( ${merge_modus} == '2D' ) then
-  echo ":: "
-  ${proc_2dx}/linblock "So far, only 3D reporting is implemented."
-  echo ":: "
-  if ( ! -e APH/merge.aph ) then
-    ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+############################################################################# 
+${proc_2dx}/lin "Gathering statistics"
+#############################################################################
+#
+set tmp = `wc -l 2dx_merge_dirfile.dat`
+set tmp_num_lines = `echo ${tmp} | awk '{ print $1 }'`
+#
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+#
+set tmp_TANGL_max = -999999999.9
+set tmp_defocus_min = 999999999.9
+set tmp_defocus_max = -999999999.9
+#
+foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  if ( -e 2dx_image.cfg ) then
+    set tmp_TANGL_now = `cat 2dx_image.cfg | grep 'set TANGL =' | cut -d\" -f2`
+    set tmp = `cat 2dx_image.cfg | grep 'set defocus =' | cut -d\" -f2`
+    set tmp_defocus_now = `echo ${tmp} | sed 's/,/ /g' | awk '{ s = ( $1 + $2 ) / 2.0 } END { printf ( "%16.0f", s ) }'`
+    echo "Image ${dirfile} has ${tmp}, therefore defocus = ${tmp_defocus_now}"
+    set tmp_TANGL_max = `echo ${tmp_TANGL_now} ${tmp_TANGL_max} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 } } END { printf ( "%10.1f", s ) }'`
+    set tmp_defocus_min = `echo ${tmp_defocus_now} ${tmp_defocus_min} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 } } END { printf ( "%16.0f", s ) }'`
+    set tmp_defocus_max = `echo ${tmp_defocus_now} ${tmp_defocus_max} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 } } END { printf ( "%16.0f", s ) }'`
   endif
+  cd ${olddir}
+end
+#
+set tmp_defocus_min = `echo ${tmp_defocus_min} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
+set tmp_defocus_max = `echo ${tmp_defocus_max} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
+set tmp_overall_R_factor = `echo ${overall_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
+set tmp_overall_weighted_R_factor = `echo ${overall_weighted_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'`
+set tmp_nominal_tilt_angle = `echo ${tmp_TANGL_max} | awk '{ s = int ( $1 / 5 ) * 5 } END { printf ( "%10.0f", s ) }'` 
+set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
+set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { printf ( "%10.1f", s ) }'`
+set realcell_gamma = `echo ${realang} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
+set realcell_c = `echo ${ALAT} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
+#
+set tmp_overall_phase_residual_2D = `echo ${overall_phase_residual_2D} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
+set tmp_overall_weighted_phase_residual_2D = `echo ${overall_weighted_phase_residual_2D} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
+#
+#
+if ( ${merge_modus} == '2D' ) then
+  #
+  echo "==============================================================================" > Summary_Statistics_2D.txt
+  echo "2D Reconstruction Parameters" >> Summary_Statistics_2D.txt
+  echo "==============================================================================" >> Summary_Statistics_2D.txt
+  echo "Crystal plane group symmetry:# ${SYM}" >> Summary_Statistics_2D.txt
+  echo "Crystal unit cell parameters:# a=${realcell_a}A, b=${realcell_b}A" >> Summary_Statistics_2D.txt
+  echo "                             #  gamma=${realcell_gamma}deg" >> Summary_Statistics_2D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_2D.txt
+  echo "Number of images:# ${tmp_num_lines}" >> Summary_Statistics_2D.txt
+  echo "Range of defocus [micrometers]:# ${tmp_defocus_min} ... ${tmp_defocus_max}" >> Summary_Statistics_2D.txt
+  echo "Number of observed reflections:# ${JREFL_2D}" >> Summary_Statistics_2D.txt
+  echo "IQ range used:# 1 ... ${MergeIQMAX}" >> Summary_Statistics_2D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_2D.txt
+  echo "Resolution cut-off [Angstroems]:# ${RESMAX}" >> Summary_Statistics_2D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_2D.txt
+  echo "Overall phase residual [deg]:# ${tmp_overall_phase_residual_2D}" >> Summary_Statistics_2D.txt
+  # echo "Overall weighted phase residual [deg]:# ${tmp_overall_weighted_phase_residual_2D}" >> Summary_Statistics_2D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_2D.txt
+  #
+  echo "::"
+  cat Summary_Statistics_2D.txt | sed 's/ /_/g' | sed 's/#/ /g' | awk '{ printf "%-53s%25s\n", $1, $2 }' | sed 's/_/ /g' > tmp
+  mv -f tmp Summary_Statistics_2D.txt
+  cat Summary_Statistics_2D.txt | sed 's/^/::/'
+  echo "::"
+  echo "# IMAGE-IMPORTANT: Summary_Statistics_2D.txt <TXT: Summary_Statistics_2D>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: LOGS/phase-residuals.txt <TXT: Phase residual table>" >> LOGS/${scriptname}.results
+  cat LOGS/phase-residuals.txt | sed 's/^/::/'
+  echo "::        This table is only valid for reflections from non-tilted images"
+  echo "::"
+  echo "::"
+  echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Plot of non-tilted data>" >> LOGS/${scriptname}.results
 endif
 #
 #
 #
 if ( ${merge_modus} == '3D' ) then
-  if ( ${merge_reference} == '0' ) then
-    # Use merge.aph files
-    if ( ! -e APH/merge.aph ) then
-      ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
-    endif
-  else
-    # User interpolated lattice lines latlinesref.mtz
-    if ( ! -e merge3D.mtz ) then
-      ${proc_2dx}/linblock "ERROR: merge.mtz not found. No reference for refinement available."
-    endif
-    set NPRG = 3
-  endif
-  #
-  #
-  set tmp = `wc -l 2dx_merge_dirfile.dat`
-  set tmp_num_lines = `echo ${tmp} | awk '{ print $1 }'`
-  #
-  #
-  # This memorizes the current merge directory under the variable "olddir":
-  set olddir = $PWD
-  # This translates the list of directories to work on into one single long line:
-  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-  #
-  #
-  set tmp_TANGL_max = -999999999.9
-  set tmp_defocus_min = 999999999.9
-  set tmp_defocus_max = -999999999.9
-  #
-  foreach dirfile ( ${dirlist} ) 
-    cd ..
-    cd ${dirfile}
-    if ( -e 2dx_image.cfg ) then
-      set tmp_TANGL_now = `cat 2dx_image.cfg | grep 'set TANGL =' | cut -d\" -f2`
-      set tmp = `cat 2dx_image.cfg | grep 'set defocus =' | cut -d\" -f2`
-      set tmp_defocus_now = `echo ${tmp} | sed 's/,/ /g' | awk '{ s = ( $1 + $2 ) / 2.0 } END { printf ( "%16.0f", s ) }'`
-      echo "Image ${dirfile} has ${tmp}, therefore defocus = ${tmp_defocus_now}"
-      set tmp_TANGL_max = `echo ${tmp_TANGL_now} ${tmp_TANGL_max} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 } } END { printf ( "%10.1f", s ) }'`
-      set tmp_defocus_min = `echo ${tmp_defocus_now} ${tmp_defocus_min} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 } } END { printf ( "%16.0f", s ) }'`
-      set tmp_defocus_max = `echo ${tmp_defocus_now} ${tmp_defocus_max} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 } } END { printf ( "%16.0f", s ) }'`
-    endif
-    cd ${olddir}
-  end
-  #
-  set tmp_defocus_min = `echo ${tmp_defocus_min} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
-  set tmp_defocus_max = `echo ${tmp_defocus_max} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
-  set tmp_overall_R_factor = `echo ${overall_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
-  set tmp_overall_weighted_R_factor = `echo ${overall_weighted_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'`
-  set tmp_nominal_tilt_angle = `echo ${tmp_TANGL_max} | awk '{ s = int ( $1 / 5 ) * 5 } END { printf ( "%10.1f", s ) }'` 
-  set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
-  set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { printf ( "%10.1f", s ) }'`
-  set realcell_gamma = `echo ${realang} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
-  set realcell_c = `echo ${ALAT} | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
-  #
   #
   #############################################################################
   ${proc_2dx}/linblock "2dx_calc_num_phases - to estimate theoretically possible numbers of reflections"
@@ -225,11 +247,11 @@ eot
   echo "Number of observed unique reflections in asym. unit:# ${num_reflections_fitted}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   echo "Number of observed unique reflections with FOM>1%:# ${num_reflections_FOM1}" >> Summary_Statistics_3D.txt
-  echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
+  echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
   echo "counting reflections with FOM > 1%:# ${completeness1}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   echo "Number of obs. unique reflections with FOM>50%:# ${num_reflections_FOM50}" >> Summary_Statistics_3D.txt
-  echo "Completeness to ${tmp_nominal_tilt_angle}º tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
+  echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
   echo "counting reflections with FOM > 50%:# ${completeness50}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   # echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
@@ -248,6 +270,7 @@ eot
   echo "# IMAGE-IMPORTANT: Summary_Statistics_3D.txt <TXT: Summary_Statistics_3D>" >> LOGS/${scriptname}.results
   echo "# IMAGE: LOGS/2dx_tltplotk.txt <LOG: PLTILTK summary>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: PS/2dx_tltplotk.ps <PS: TLTPLOT file>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/latline.ps <PS: Lattice lines>" >> LOGS/${scriptname}.results
   #
 endif
 #

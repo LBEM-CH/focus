@@ -263,6 +263,14 @@ if ( ${merge_modus} == "2D" ) then
   cat LOGS/avramphs.table.txt
   cat LOGS/avramphs.table.txt | sed 's/:://g' > LOGS/phase-residuals.txt
   echo "# IMAGE: LOGS/phase-residuals.txt <TXT: Phase residual table>" >> LOGS/${scriptname}.results
+  if ( -e 2dx_avrgamphs.phares.txt ) then
+    set overall_phase_residual_2D = `cat 2dx_avrgamphs.phares.txt | head -n 1`
+    set JREFL_2D = `cat 2dx_avrgamphs.phares.txt | head -n 2 | tail -n 1`
+    echo "set overall_phase_residual_2D = ${overall_phase_residual_2D}" >> LOGS/${scriptname}.results
+    echo "set JREFL_2D = ${JREFL_2D}" >> LOGS/${scriptname}.results
+    \mv -f 2dx_avrgamphs.phares.txt LOGS
+    # echo "# IMAGE: LOGS/2dx_avrgamphs.phares.txt <TXT: Phase residual statistics>" >> LOGS/${scriptname}.results
+  endif
 endif
 \rm -f LOGS/avramphs.table.txt
 #

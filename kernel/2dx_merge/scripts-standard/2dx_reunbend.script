@@ -72,7 +72,7 @@ if ( ${ReUnbend_All} == "1" ) then
     echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
     echo "set dummy = 1" >> LOGS/${scriptname}.results
     echo "set -force SYN_Unbending = 0" >> LOGS/${scriptname}.results
-    echo "set tempkeep = 0" >> LOGS/${scriptname}.results
+    echo "set tempkeep = n" >> LOGS/${scriptname}.results
     echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
   end
 endif
@@ -97,7 +97,7 @@ if ( ${ReUnbend_All} == "2" ) then
     echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
     echo "set dummy = 1" >> LOGS/${scriptname}.results
     echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
-    echo "set tempkeep = 0" >> LOGS/${scriptname}.results
+    echo "set tempkeep = n" >> LOGS/${scriptname}.results
     echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
   end
 endif

@@ -18,7 +18,7 @@ C
 C----------------IREPORT=2: Verbose logging, 
 C----------------IREPORT=1: Medium logging.
 C----------------IREPORT=0: Short logging.
-      PARAMETER (IREPORT=1)
+      PARAMETER (IREPORT=0)
 C
 C
       integer IMAXPOS,ISIZE,ilocmag,ICOUNT,IERR,NUM
@@ -578,21 +578,19 @@ C
         enddo    
 C
         if (IFOUND2.eq.1) then
+C---------Output the zero second lattice
+          write(12,'(''0.0,0.0,0.0,0.0'')')
+          write(12,'(''0.0'')')
           goto 999
         endif
  850  continue
 C
       if (IFOUND2.eq.0)then
 C-------Output the zero second lattice
-C
         write(12,'(4F12.3)')
      1    RLATH(1),RLATH(2),RLATK(1),RLATK(2)
-C
         write(12,'(F12.3)')
      1    RMAXCOU
-C
-C-------For the second lattice:
-C-------Find the spots that are not on the first determined lattice.
       endif
 C
       goto 999

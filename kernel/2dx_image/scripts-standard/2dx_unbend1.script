@@ -48,6 +48,7 @@
 # DISPLAY: RMAG
 # DISPLAY: LCOLOR
 # DISPLAY: ccunbend_program
+# DISPLAY: createmaskinfo
 #
 #$end_local_vars
 #
@@ -94,6 +95,7 @@ set ctf_ttf = ""
 set RMAG = ""
 set LCOLOR = ""
 set ccunbend_program = ""
+set createmaskinfo = ""
 #
 #$end_vars
 #

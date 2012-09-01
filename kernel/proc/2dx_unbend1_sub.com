@@ -502,6 +502,14 @@ setenv ERROUT   SCRATCH/errout${imagename}.dat
 \rm -f TMP-quadserch-6.mrc
 \rm -f TMP-quadserch-7.mrc
 #
+if ( ${createmaskinfo}x == 'yx' ) then
+      set createmask = '1'
+      \rm -f ManualMasking-CCmap.mrc
+      \rm -f ManualMasking-UnbendPlot.mrc
+      ${proc_2dx}/linblock "Creating info for manual masking"
+else
+      set createmask = '0'
+endif
 #
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpreda}                     ! IPASS,NRANGE
@@ -514,7 +522,7 @@ ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}	! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
-0                               ! dont create manual Masking information
+${createmask}                               ! do/dont create manual Masking information
 0                               ! Dont mask the image directly
 eot
 #
@@ -547,6 +555,15 @@ if ( ${treatspotscan} == 'y' ) then
   \rm -f TMP-quadserch-6.mrc
   \rm -f TMP-quadserch-7.mrc
   #
+  if ( ${createmaskinfo}x == 'yx' ) then
+      set createmask = '1'
+      \rm -f ManualMasking-CCmap.mrc
+      \rm -f ManualMasking-UnbendPlot.mrc
+      ${proc_2dx}/linblock "Creating info for manual masking"
+  else
+      set createmask = '0'
+  endif
+  #
   setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
   setenv PROFDATA SCRATCH/prof${imagename}.dat
   setenv ERRORS   SCRATCH/errout${imagename}.dat
@@ -562,7 +579,7 @@ ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}		! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
-0                               ! dont create manual Masking information
+${createmask}                               ! do/dont create manual Masking information
 0                               ! Dont mask the image directly
 eot
   #

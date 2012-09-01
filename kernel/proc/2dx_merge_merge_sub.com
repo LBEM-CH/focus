@@ -308,7 +308,92 @@ endif
 echo "<<@progress: 35>>"
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to APH file for 2D run"
+${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to APH file for 2D run, here in p1"
+#############################################################################  
+#
+\rm -f APH/sym2D.hkl
+\rm -f APH/sym_nosort2D.hkl
+\rm -f APH/sym_sort2D.hkl
+\rm -f APH/sym_noheader2D.hkl
+#
+# Set isig to 3, for NO SIGF BUT SET SIGF to 1.0
+set isig = 3
+#
+${bin_2dx}/2dx_hklsym.exe << eot
+APH/centric2D.hkl
+APH/sym_nosort2D.hkl
+APH/sym_noheader2D.hkl
+${spcgrp}
+1
+${isig}
+1     ! write out full p1 plane
+eot
+#
+# This is used within 2dx_hklclean:
+\rm -f APH/sym_nosort2D.hkl
+\rm -f APH/syn_nosort2D-plot.hkl
+#
+sort < APH/sym_noheader2D.hkl > APH/sym_sort2D.hkl
+set withsigf = 0
+#
+${bin_2dx}/2dx_hklclean.exe << eot
+APH/sym_sort2D.hkl
+APH/sym2Dref.hkl
+0
+1
+eot
+#
+if ( -e APH/syn_nosort2D-plot.hkl ) then
+  \mv -f APH/syn_nosort2D-plot.hkl APH/sym2Dref.hk
+endif
+#
+# This is used within 2dx_hklclean:
+\rm -f APH/sym_nosort2D.hkl
+\rm -f APH/syn_nosort2D-plot.hkl
+#
+${bin_2dx}/2dx_hklclean.exe << eot
+APH/sym_sort2D.hkl
+APH/sym2D.hkl
+0
+${withsigf}
+eot
+#
+if ( ! -e APH/sym2D.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_plotreska - to plot the powerspectrum with resolution circles"
+${proc_2dx}/linblock "Using plotreska, contributed by Anchi Cheng."
+#############################################################################  
+#
+\rm -f PLOTRES.PS
+#
+# plot ellipses in canonical HK space
+set plotres_ellipse = "1"
+#
+# Plot as non-tilted section in 3D Fourier space
+# 
+${bin_2dx}/2dx_plotreska.exe << eot
+0.0,0.0
+3 	! Show as (here: non-)tilted projections, based on real-space lattice
+${realcell},${realang},${lattice}
+APH/syn_nosort2D-plot.hkl
+1	! Include IQ Value label
+${plotres_ellipse}
+${RESMAX}
+${plotres_rings}
+eot
+#
+if ( ! -e PLOTRES.PS ) then
+  ${proc_2dx}/protest "ERROR: Problem in 2dx_plotreska."
+endif
+\mv -f PLOTRES.PS PS/2dx_plotreska_canonical.ps
+echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Plot of non-tilted data>" >> LOGS/${scriptname}.results
+#
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to APH file for 2D run, in asym. unit"
 #############################################################################  
 #
 \rm -f APH/sym2D.hkl
@@ -377,36 +462,6 @@ if ( ${tempkeep} == "y" ) then
   echo "# IMAGE: APH/sym2Dref.hk <APH after 2dx_clean for 2D ref [H,K,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
   echo "# IMAGE: APH/syn_nosort2D-plot.hkl <APH after 2dx_clean for merge plot [H,K,F,P,IQ,0,FOM]>" >> LOGS/${scriptname}.results
 endif
-#
-#############################################################################
-${proc_2dx}/linblock "2dx_plotreska - to plot the powerspectrum with resolution circles"
-${proc_2dx}/linblock "Using plotreska, contributed by Anchi Cheng."
-#############################################################################  
-#
-\rm -f PLOTRES.PS
-#
-# plot ellipses in canonical HK space
-set plotres_ellipse = "1"
-#
-# Plot as non-tilted section in 3D Fourier space
-# 
-${bin_2dx}/2dx_plotreska.exe << eot
-0.0,0.0
-3 	! Show as (here: non-)tilted projections, based on real-space lattice
-${realcell},${realang},${lattice}
-APH/syn_nosort2D-plot.hkl
-1	! Include IQ Value label
-${plotres_ellipse}
-${RESMAX}
-${plotres_rings}
-eot
-#
-if ( ! -e PLOTRES.PS ) then
-  ${proc_2dx}/protest "ERROR: Problem in 2dx_plotreska."
-endif
-\mv -f PLOTRES.PS PS/2dx_plotreska_canonical.ps
-echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Plot of non-tilted data>" >> LOGS/${scriptname}.results
-#
 #
 #
 #

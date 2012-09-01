@@ -23,7 +23,7 @@
 #
 # MANUAL: Now you can run this standard script "Re-Unbend", to re-unbend all selected images with the merged dataset as reference.  This should give better values than the Fourier filtered unbending. Otherwise, there is something wrong with either the merged reference, or the tilt geometry, or the phase origin, or still something else.
 #
-# DISPLAY: SYN_Ref_is_set
+# DISPLAY: ReUnbend_All
 #
 #$end_local_vars
 #
@@ -31,7 +31,7 @@ set bin_2dx = ""
 set proc_2dx = ""
 set app_2dx_image = ""
 #
-set SYN_Ref_is_set = ""
+set ReUnbend_All = ""
 #
 #$end_vars
 #
@@ -43,41 +43,94 @@ source ${proc_2dx}/initialize
 #
 echo "<<@progress: 1>>"
 #
-if ( ${SYN_Ref_is_set} == "0" ) then
-  ${proc_2dx}/linblock "Error: First set the Crystal Unbending parameter above."
-  ${proc_2dx}/protest " Read the manual for this script and the parameter. Aborting."
+if ( ${ReUnbend_All} == "0" ) then
+  ${proc_2dx}/protest "Nothing done here."
 endif
 #
 set olddir = ${PWD}
 cd ..
 set rootdir = ${PWD}
 #
-############################################################################# 
-${proc_2dx}/linblock "(Re-)unbending all directories"
-#############################################################################
+if ( ${ReUnbend_All} == "1" ) then
+  #
+  ############################################################################# 
+  ${proc_2dx}/linblock "Setting all images to Fourier Filtration Reference processing"
+  ############################################################################# 
+  #
+  cd ${olddir} 
+  #
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
+  foreach dirfile ( ${dirlist} ) 
+    cd ..
+    cd ${dirfile}
+    set newdir = $PWD
+    cd ${olddir}
+    echo "::Working on ${newdir}"
+    # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
+    echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+    echo "set dummy = 1" >> LOGS/${scriptname}.results
+    echo "set -force SYN_Unbending = 0" >> LOGS/${scriptname}.results
+    echo "set tempkeep = 0" >> LOGS/${scriptname}.results
+    echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+  end
+endif
 #
-cd ${olddir}
+if ( ${ReUnbend_All} == "2" ) then
+  #
+  ############################################################################# 
+  ${proc_2dx}/linblock "Setting all images to Synthetic Reference processing"
+  ############################################################################# 
+  #
+  cd ${olddir} 
+  #
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
+  foreach dirfile ( ${dirlist} ) 
+    cd ..
+    cd ${dirfile}
+    set newdir = $PWD
+    cd ${olddir}
+    echo "::Working on ${newdir}"
+    echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+    echo "set dummy = 1" >> LOGS/${scriptname}.results
+    echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
+    echo "set tempkeep = 0" >> LOGS/${scriptname}.results
+    echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+  end
+endif
 #
-cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-#
-foreach dirfile ( ${dirlist} ) 
-  cd ${olddir}
-  cd ..
-  cd ${dirfile}
-  if ( -e 2dx_image.cfg ) then
-    echo ":: "
-    ${proc_2dx}/linblock "::Working on ${dirfile}"
-    set curdir = ${PWD}
-    echo ":: ${app_2dx_image} ${curdir} "'"*"'
-    ${app_2dx_image} ${curdir} '"*"'
-    echo ":: Done."
-  else
-    echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
-  endif
-  # 
-  cd ${olddir}
-end
+if ( ${ReUnbend_All} == "3" ) then
+  #
+  ############################################################################# 
+  ${proc_2dx}/linblock "Processing all directories"
+  ############################################################################# 
+  #
+  cd ${olddir} 
+  #
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
+  foreach dirfile ( ${dirlist} ) 
+    cd ${olddir}
+    cd ..
+    cd ${dirfile}
+    if ( -e 2dx_image.cfg ) then
+      echo ":: "
+      ${proc_2dx}/linblock "::Working on ${dirfile}"
+      set curdir = ${PWD}
+      echo ":: ${app_2dx_image} ${curdir} "'"*"'
+      ${app_2dx_image} ${curdir} '"*"'
+      echo ":: Done."
+    else
+      echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
+    endif
+    # 
+    cd ${olddir}
+  end
+endif
 #
 echo "<<@progress: 100>>"
 #

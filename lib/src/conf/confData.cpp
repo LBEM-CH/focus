@@ -643,12 +643,19 @@ void confData::setSaveName(QString fileName)
 
 confElement* confData::get(QString element)
 {
-  return lookup[element.toLower()];
+    if(lookup.contains(element.toLower()))
+    {
+        return lookup[element.toLower()];
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 QString confData::get(QString element, QString value)
 {
-  if(lookup[element.toLower()]!=NULL)
+  if(lookup.contains(element.toLower()))
     return lookup[element.toLower()]->get(value);
   else
     return "";

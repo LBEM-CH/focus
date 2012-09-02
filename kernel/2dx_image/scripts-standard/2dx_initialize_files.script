@@ -442,6 +442,23 @@ if ( ! -e LOGS/2dx_maskCrystal.results ) then
 endif
 #
 #############################################################################
+#                                                                           #
+${proc_2dx}/linblock "HISTO - to produce a histogram of the grey-values in the image"
+#                                                                           #
+#############################################################################
+#
+setenv IN ${imagename}.mrc
+#
+${bin_2dx}/histok.exe << eot
+0,${imagesidelength},0,${imagesidelength}
+0
+eot
+#
+\mv -f HISTO.PS PS/${imagename}-histo.ps
+#
+echo "# IMAGE: "PS/${imagename}-histo.ps "<Histogram>" >> LOGS/${scriptname}.results
+#
+#############################################################################
 echo ":: "
 ${proc_2dx}/linblock "Done."
 echo ":: "

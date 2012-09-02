@@ -598,13 +598,9 @@ void fullScreenImage::drawSelectionPath()
 void fullScreenImage::drawReferenceLocation(int i)
 {
 	QPointF p;
-	if(!data->get("refCenterImage")->toBool())
-	{
-		p = data->get("refori")->toQPointF()-QPointF(image->width()/2.0,image->height()/2.0);
-		p = QPointF(p.x(),-p.y());
-	}
-	else
-		p = QPointF(0.0,0.0);
+	
+	p = data->get("refori")->toQPointF()-QPointF(image->width()/2.0,image->height()/2.0);
+	p = QPointF(p.x(),-p.y());
 
 	float sideLength = data->get(refBoxes[i])->toFloat();
 

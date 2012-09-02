@@ -49,6 +49,9 @@ set test_spacegroups_val = "ALL"
 # DISPLAY: realang
 # DISPLAY: rot180
 # DISPLAY: revhk
+# DISPLAY: rot90
+# DISPLAY: revhnd
+# DISPLAY: revxsgn
 # DISPLAY: comment
 # DISPLAY: allspace_step
 # DISPLAY: allspace_stepnum
@@ -74,6 +77,9 @@ set KV = ""
 set SYM = ""
 set rot180 = ""
 set revhk = ""
+set rot90 = ""
+set revhnd = ""
+set revxsgn = ""
 set realcell = ""
 set realang = ""
 set phaori = ""
@@ -159,6 +165,25 @@ else
   set revhkval = '0'
 endif
 #
+if ( ${rot90} == 'y' ) then
+  set rot90val = '1'
+else
+  set rot90val = '0'
+endif
+#
+if ( ${revhnd} == 'y' ) then
+  set revhndval = '1'
+else
+  set revhndval = '0'
+endif
+#
+if ( ${revxsgn} == 'y' ) then
+  set revxsgnval = '1'
+else
+  set revxsgnval = '0'
+endif
+#
+#
 echo "<<@progress: 40>>"
 #
 if ( ${test_spacegroups_val} == "SPEC" ) then
@@ -170,7 +195,7 @@ T T F 4000				! SEARCH,REFINE,TILT,NCYC
 0. 0. 0. 0.				! ORIGH,ORIGK,TILTH,TILTK
 ${allspace_step},${allspace_stepnum} 	! STEPSIZE, PHASE SEARCH ARRAY SIZE
 ${realcell} ${realang} ${RESMIN} ${allspace_RESMAX} ${CS} ${KV} ! A, B, GAMMA, RIN, ROUT, CS, KV
-F ${rot180val} ${allspace_IQMAX} ${revhkval}	! ILIST,ROT180,IQMAX,REVHK
+F ${rot180val} ${allspace_IQMAX} ${revhkval} ${rot90val} ${revhndval} ${revxsgnval}	! ILIST,ROT180,IQMAX,REVHK,ROT90,REVHND,REVXSGN
 "SCRATCH/${scriptname}-SPCGRP.txt"
 "SCRATCH/${scriptname}-OUTFILE.txt"
 eot
@@ -183,7 +208,7 @@ T T F 4000                              ! SEARCH,REFINE,TILT,NCYC
 0. 0. 0. 0.                             ! ORIGH,ORIGK,TILTH,TILTK
 ${allspace_step},${allspace_stepnum}    ! STEPSIZE, PHASE SEARCH ARRAY SIZE
 ${realcell} ${realang} ${RESMIN} ${allspace_RESMAX} ${CS} ${KV} ! A, B, GAMMA, RIN, ROUT, CS, KV
-F ${rot180val} ${allspace_IQMAX} ${revhkval}       ! ILIST,ROT180,IQMAX,REVHK
+F ${rot180val} ${allspace_IQMAX} ${revhkval} ${rot90val} ${revhndval} ${revxsgnval}	! ILIST,ROT180,IQMAX,REVHK,ROT90,REVHND,REVXSGN
 "SCRATCH/${scriptname}-SPCGRP.txt"
 "SCRATCH/${scriptname}-OUTFILE.txt"
 eot

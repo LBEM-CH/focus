@@ -386,6 +386,7 @@ ${spcgrp}
 0     ! no header line
 0     ! no sigma column
 0     ! only write out asymmetric unit
+0     ! do not write out also negative L values (left side of FFT)
 eot
 #
 \rm -f APH/latfitted_sym_noheader.hkl
@@ -406,6 +407,7 @@ ${spcgrp}
 0     ! no header line
 1     ! with sigma column
 0     ! only write out asymmetric unit
+0     ! do not write out also negative L values (left side of FFT)
 eot
 #
 \rm -f APH/latfittedref_sym_noheader.hkl

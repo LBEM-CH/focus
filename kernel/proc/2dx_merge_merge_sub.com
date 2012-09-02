@@ -233,7 +233,7 @@ echo "<<@progress: 24>>"
 ${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D.log
 T
 1001,${zminmaxlocal}
-8
+${MergeIQMAX}
 ${avrgamphsNUMBER}
 ${avrgamphsRESlocal}
 ${realcell} ${realang}
@@ -326,7 +326,8 @@ APH/sym_noheader2D.hkl
 ${spcgrp}
 1
 ${isig}
-1     ! write out full p1 plane
+0     ! write out full p1 plane
+0     ! do not write out negative L values
 eot
 #
 # This is used within 2dx_hklclean:
@@ -388,9 +389,10 @@ eot
 if ( ! -e PLOTRES.PS ) then
   ${proc_2dx}/protest "ERROR: Problem in 2dx_plotreska."
 endif
+\cp -f APH/syn_nosort2D-plot.hkl APH/syn_nosort2D-plot-p1.hkl
 \mv -f PLOTRES.PS PS/2dx_plotreska_canonical.ps
 echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Plot of non-tilted data>" >> LOGS/${scriptname}.results
-#
+echo "# IMAGE-IMPORTANT: APH/syn_nosort2D-plot-p1.hkl <APH: Resolution Circle Plot data>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to APH file for 2D run, in asym. unit"
@@ -411,7 +413,8 @@ APH/sym_noheader2D.hkl
 ${spcgrp}
 1
 ${isig}
-0     ! only write out asymmetric unit
+1     ! only write out asymmetric unit
+0     ! do not write out also negative L values 
 eot
 #
 # This is used within 2dx_hklclean:

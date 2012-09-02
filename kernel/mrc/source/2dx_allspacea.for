@@ -57,12 +57,34 @@ C         CELL DIMENSIONS AND RESOLUTION RANGE IN ANGSTROMS, SPHERICAL
 C         ABERRATION(in mm) AND MICROSCOPE OPERATING VOLTAGE (in KV, used to
 C         calcuate the wavelength).
 C
-C   6.  ILIST,ROT180,IQMAX,REVHK
+C   6.  ILIST,ROT180,IQMAX,REVHK,ROT90,REVHND,REVXSGN
 C         ILIST=T  GIVES MORE DETAILED OUTPUT
 C         ROT180=1 ENABLES SAME CONVENTION AS OTHER PROGRAMS TO BE USED FOR
 C           P3 INDEXING CONVENTION - e.g. so that origin is same as in ORIGTILT.
 C         IQMAX is used to restrict the comparisons to spots with IQ<=IQMAX
 C         REVHK=1 enables switching H and K values
+C                ROT90  - IF NOT=0, ROTATE 90  DEG ABOUT Z-AXIS, USEFUL IN P2221 
+C                         THIS IS A COSMETIC FEATURE TO FACILITATE INDEXING
+C                         DIFFICULT HIGHLY TILTED FILMS. NOTE THAT ALL OTHER
+C                         PARAMETERS, SUCH AS TAXA,TANGL MUST REMAIN CORRECT
+C                         W.R.T. THE ORIGINAL DIRECTIONS FOR H AND K.
+C                REVHK  - IF NOT = 0, H AND K ARE INTERCHANGED ON INPUT.
+C                         THIS IS A COSMETIC FEATURE TO FACILITATE INDEXING
+C                         DIFFICULT HIGHLY TILTED FILMS. NOTE THAT ALL OTHER
+C                         PARAMETERS, SUCH AS TAXA,TANGL MUST REMAIN CORRECT
+C                         W.R.T. THE ORIGINAL DIRECTIONS FOR H AND K.
+C                REVHND - IF NOT = 0, sign of Z is inverted.
+C                         THIS IS A COSMETIC FEATURE TO FACILITATE debugging the 
+C                         damned handedness. 
+C                         NOTE THAT ALL OTHER
+C                         PARAMETERS, SUCH AS TAXA,TANGL MUST REMAIN CORRECT
+C                         W.R.T. THE ORIGINAL DIRECTIONS FOR H AND K.
+C                REVXSGN - IF NOT = 0, sign of X is inverted.
+C                         THIS IS A COSMETIC FEATURE TO FACILITATE debugging the 
+C                         damned handedness. 
+C                         NOTE THAT ALL OTHER
+C                         PARAMETERS, SUCH AS TAXA,TANGL MUST REMAIN CORRECT
+C                         W.R.T. THE ORIGINAL DIRECTIONS FOR H AND K.
 C
 C   7.  SPCGRPFILENAM
 C         suggested best space group
@@ -277,7 +299,7 @@ C
       READ(5,*) ORIGH,ORIGK,TILTH,TILTK
       READ(5,*) STEP, ISIZE
       READ(5,*) ACELL,BCELL,GAMMA,RIN,ROUT,CS,REALKV
-      READ(5,*) ILIST,ROT180,IQMAX,REVHK
+      READ(5,*) ILIST,ROT180,IQMAX,REVHK,ROT90,REVHND,REVXSGN
 CHENN>
       read(5,*) SPCGRPFILENAM
       read(5,*) OUTFILENAM
@@ -302,10 +324,13 @@ CHENN<
       WRITE(6,'(17X,''CS (Spherical aberration)=='',F10.3,/)') CS
       WRITE(6,'(17X,''KV (Accelerating voltage)=='',F10.3,/)') REALKV
       WRITE(6,'(17X,''ILIST ===================== '',L1,/)')   ILIST
-      WRITE(6,'(17X,''ROT180 ===================='',F7.0,/)')  ROT180
 CHENN>
-      WRITE(6,'(17X,''IQMAX ====================='',I6,/)')    IQMAX
+      WRITE(6,'(17X,''ROT180 ===================='',F7.0)')    ROT180
       WRITE(6,'(17X,''REVHK ====================='',F7.0)')    REVHK
+      WRITE(6,'(17X,''ROT90 ====================='',F7.0)')    ROT90
+      WRITE(6,'(17X,''REVHND ===================='',F7.0)')    REVHND
+      WRITE(6,'(17X,''REVXSGN ==================='',F7.0)')    REVXSGN
+      WRITE(6,'(17X,''IQMAX ====================='',I6,/)')    IQMAX
       WRITE(6,'(17X,''SpaceGroupFileName ========'',A40)') 
      .   SPCGRPFILENAM(1:40)
       WRITE(6,'(17X,''OutputFilename ============'',A40)') 
@@ -358,13 +383,28 @@ C                    space for Friedel storage too
         IGNORE=IGNORE + 1
         GO TO 3
       ENDIF
+CHEN>
+      if(ROT90.ne.0)then
+        ITMP=IH
+        IH=-IK
+        IK=ITMP
+      endif
+      if(REVHND.ne.0)then
+        AIN=-AIN
+      endif
+      if(REVXSGN.ne.0)then
+        IH=-IH
+      endif
       IF(ROT180.EQ.1.0) THEN
-        IHIN(J) = -IH
-        IKIN(J) = -IK
+        IH = -IH
+        IK = -IK
       ELSE
-        IHIN(J)=IH
-        IKIN(J)=IK
+        IH=IH
+        IK=IK
       ENDIF
+      IHIN(J)=IH
+      IKIN(J)=IK
+CHEN<
       IQIN(J)=IQ
       AMP(J)=AIN
       PHSIN(J)=P

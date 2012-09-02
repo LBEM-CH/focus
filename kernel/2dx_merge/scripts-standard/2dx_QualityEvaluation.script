@@ -222,6 +222,11 @@ eot
     ${proc_2dx}/protest "ERROR in 2dx_calc_num_phases"
   endif
   set num_reflections_theoretic = `cat 2dx_calc_num_phases.out`
+  if ( ${SYM} == 'c222' ) then
+    echo "::For symmetry c222 reducing the numbers of reflections by 50%,"
+    echo "::to compensate for the systematically absent odd lattice lines."
+    set num_reflections_theoretic = `echo ${num_reflections_theoretic} | awk '{ s = $1 / 2.0 } END { print s }'`
+  endif
   \rm 2dx_calc_num_phases.out
   set completeness1 = `echo ${num_reflections_theoretic} ${num_reflections_FOM1} | awk '{ s = 100.0 * $2 / $1 } END { printf ( "%10.1f", s ) }'`
   set completeness50 = `echo ${num_reflections_theoretic} ${num_reflections_FOM50} | awk '{ s = 100.0 * $2 / $1 } END { printf ( "%10.1f", s ) }'`

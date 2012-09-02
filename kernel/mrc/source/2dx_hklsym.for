@@ -79,6 +79,16 @@ C
         write(*,'('' Writing full p1 plane (but not for screw axes)'')')
       endif
 C
+      write(*,'('' Write out negative L values also (1=y,0=n)'')')
+      read(*,*)ineg
+      if(ineg.eq.1)then
+        write(*,'('' Writing also negative L values.'')')
+      else
+        write(*,'('' Writing only positive L values.'')')
+      endif
+C
+C-----write(*,'(''isig,i1sig,iwasym,ineg,ispc'',5I3)')isig,i1sig,iwasym,ineg,ispc
+C
       open(10,FILE=cline1,STATUS='OLD',ERR=940)
       open(11,FILE=cline2,STATUS='NEW',ERR=950)
       open(12,FILE=cline3,STATUS='NEW',ERR=950)
@@ -105,6 +115,7 @@ C
       ilmax=0
       SIGA=0.0
       FOM=0.0
+      FERROR=0.0
       BACK=0.0
  1000 continue
         if(isig.eq.1)then
@@ -319,14 +330,12 @@ C             write(*,'('':: write '',5I8)')H,K,L,ispc,ianz
               if(PHASE.lt.-179.9999 .and. PHASE.gt.-180.0001)PHASE=180.0
               if(PHASE.gt. 179.9999 .and. PHASE.lt. 180.0001)PHASE=180.0
               if(PHASE.gt.  -0.0001 .and. PHASE.lt.   0.0001)PHASE=  0.0
-C-------------Should FOM be plainly averaged (division by ianz here), or rather made better, by some kind of SQRT(N)? ToDo
+C-------------Should FOM be plainly averaged (division by ianz here), or rather done better? Answer:
+C-------------FOM is equal to cos(phase_error). 
+C-------------Maybe this: The phase error should be averaged, then the cos(result) taken.
+C-------------This remains to be resolved. ToDo.
               FOM=FOM/ianz
 C
-C====================
-C====================
-C====================
-C-------------Do not write out negative L values:
-              ineg=0
 C====================
 C====================
 C====================
@@ -358,8 +367,56 @@ C
                   endif
                 endif
               endif
+              if(ispc.eq.3 .or. ispc.eq.7)then
+                if(isig.eq.1)then
+                  WRITE (11,310) -H,K,L,AMP,PHASE,FOM,SIGA
+                  WRITE (12,310) -H,K,L,AMP,PHASE,FOM,SIGA
+                  if(ineg.gt.0)then
+                    WRITE (11,310) -H,K,-L,AMP,-PHASE,FOM,SIGA
+                    WRITE (12,310) -H,K,-L,AMP,-PHASE,FOM,SIGA
+                  endif
+                elseif(isig.eq.2)then
+                  WRITE (11,310) -H,K,L,AMP,PHASE,BACK,FOM
+                  WRITE (12,310) -H,K,L,AMP,PHASE,BACK,FOM
+                  if(ineg.gt.0)then
+                    WRITE (11,310) -H,K,-L,AMP,-PHASE,BACK,FOM
+                    WRITE (12,310) -H,K,-L,AMP,-PHASE,BACK,FOM
+                  endif
+                else
+                  WRITE (11,300) -H,K,L,AMP,PHASE,FOM
+                  WRITE (12,300) -H,K,L,AMP,PHASE,FOM
+                  if(ineg.gt.0)then
+                    WRITE (11,300) -H,K,-L,AMP,-PHASE,FOM
+                    WRITE (12,300) -H,K,-L,AMP,-PHASE,FOM
+                  endif
+                endif
+              endif
+              if(ispc.eq.4 .or. ispc.eq.8)then
+                if(isig.eq.1)then
+                  WRITE (11,310) H,-K,L,AMP,PHASE,FOM,SIGA
+                  WRITE (12,310) H,-K,L,AMP,PHASE,FOM,SIGA
+                  if(ineg.gt.0)then
+                    WRITE (11,310) H,-K,-L,AMP,-PHASE,FOM,SIGA
+                    WRITE (12,310) H,-K,-L,AMP,-PHASE,FOM,SIGA
+                  endif
+                elseif(isig.eq.2)then
+                  WRITE (11,310) H,-K,L,AMP,PHASE,BACK,FOM
+                  WRITE (12,310) H,-K,L,AMP,PHASE,BACK,FOM
+                  if(ineg.gt.0)then
+                    WRITE (11,310) H,-K,-L,AMP,-PHASE,BACK,FOM
+                    WRITE (12,310) H,-K,-L,AMP,-PHASE,BACK,FOM
+                  endif
+                else
+                  WRITE (11,300) H,-K,L,AMP,PHASE,FOM
+                  WRITE (12,300) H,-K,L,AMP,PHASE,FOM
+                  if(ineg.gt.0)then
+                    WRITE (11,300) H,-K,-L,AMP,-PHASE,FOM
+                    WRITE (12,300) H,-K,-L,AMP,-PHASE,FOM
+                  endif
+                endif
+              endif
               if(ispc.ge.10 .and. ispc.le.12)then
-                if(K.ge.0 .and. iwasym.eq.1)then
+                if(K.ge.0 .and. iwasym.ne.1)then
                   if(isig.eq.1)then
                     WRITE (11,310) -H,-K,L,AMP,PHASE,FOM,SIGA
                     WRITE (12,310) -H,-K,L,AMP,PHASE,FOM,SIGA
@@ -410,7 +467,7 @@ C
               endif
 C
               if(ispc.ge.13 .and. ispc.le.15)then
-                if(K.ge.0 .and. iwasym.eq.1)then
+                if(K.ge.0 .and. iwasym.ne.1)then
                   if(isig.eq.1)then
                     WRITE (11,310) -H-K, H, L,AMP,PHASE,FOM,SIGA
                     WRITE (11,310)  K,-H-K, L,AMP,PHASE,FOM,SIGA
@@ -448,7 +505,7 @@ C
                 endif
               endif
               if(ispc.ge.16 .and. ispc.le.17)then
-                if(K.ge.0.and.L.ge.0 .and. iwasym.eq.1)then
+                if(K.ge.0.and.L.ge.0 .and. iwasym.ne.1)then
                   if(isig.eq.1)then
                     WRITE (11,310) -K, H+K, L,AMP,PHASE,FOM,SIGA
                     WRITE (11,310) -H-K, H, L,AMP,PHASE,FOM,SIGA

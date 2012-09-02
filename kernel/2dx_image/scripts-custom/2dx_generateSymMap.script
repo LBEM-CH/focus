@@ -54,6 +54,7 @@
 # DISPLAY: unitcellnumber
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
+# DISPLAY: MergeIQMAX
 #
 #$end_local_vars
 #
@@ -109,6 +110,7 @@ set npo_cntrs_step = ""
 set npo_cntrs_below = ""
 set PHARES_SYM = ""
 set PHARES_NUM_SPOTS = ""
+set MergeIQMAX = ""
 #
 #$end_vars
 #

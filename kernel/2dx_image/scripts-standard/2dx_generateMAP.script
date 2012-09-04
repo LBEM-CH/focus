@@ -106,7 +106,7 @@ set SYM = ""
 set ctf_ttf = ""
 set npo_cntrs_step = ""
 set npo_cntrs_below = ""
-set mergeIQMAX = ""
+set MergeIQMAX = ""
 #
 #$end_vars
 #

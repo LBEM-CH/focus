@@ -649,13 +649,17 @@ confElement* confData::get(QString element)
     }
     else
     {
-        return NULL;
+       /* This is wrong here. but something needs to be returned, otherwise calling functions crash. */
+       // return NULL;
+        return lookup[element.toLower()];
     }
 }
 
 QString confData::get(QString element, QString value)
 {
-  if(lookup.contains(element.toLower()))
+  /* This again is wrong here, but appears to be needed: */
+  // if(lookup.contains(element.toLower()))
+  if(lookup[element.toLower()]!=NULL)
     return lookup[element.toLower()]->get(value);
   else
     return "";

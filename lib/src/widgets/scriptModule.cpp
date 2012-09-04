@@ -52,7 +52,7 @@ scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::
     connect(&process,SIGNAL(readyReadStandardOutput()),this,SLOT(readStdOut()));
     connect(&process,SIGNAL(readyReadStandardError()),this,SLOT(readStdErr()));
     connect(&process,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(scriptFinished(int)));
-    connect(view,SIGNAL(activated(QModelIndex)),this,SLOT(scriptActivated(QModelIndex)));
+    connect(view,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(scriptActivated(QModelIndex)));
   }
   view->selectionModel()->clearSelection();
 }

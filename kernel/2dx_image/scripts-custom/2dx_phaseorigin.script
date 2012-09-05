@@ -36,6 +36,7 @@
 # DISPLAY: phaori_change
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
+# DISPLAY: MergeIQMAX
 #
 #$end_local_vars
 #
@@ -86,6 +87,7 @@ set tempkeep = ""
 set zstarrange = ""
 set npo_cntrs_step = ""
 set npo_cntrs_below = ""
+set MergeIQMAX = ""
 #
 #$end_vars
 #

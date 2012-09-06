@@ -15,13 +15,13 @@ C
       write(*,'('' imode = '',I8)')imode
 C
       read(*,'(A)')cinimage
-      write(*,'('' cinimage = '',A20)')cinimage
+      write(*,'('' cinimage = '',A60)')cinimage
 C
       read(*,'(A)')coutfile
-      write(*,'('' coutfile = '',A20)')coutfile
+      write(*,'('' coutfile = '',A60)')coutfile
 C
       read(*,'(A)')crunfile
-      write(*,'('' crunfile = '',A20)')crunfile
+      write(*,'('' crunfile = '',A60)')crunfile
 C
       open(11,FILE=coutfile,STATUS='NEW',ERR=900)
       open(12,FILE=crunfile,STATUS='NEW',ERR=900)
@@ -30,7 +30,7 @@ C
      1'(''   X   Y    anfX    anfY    endX    endY    cenX    cenY'')')
 C
       write(12,'(''#'')')
-      write(12,'(''set image = '',A20)')cinimage
+      write(12,'(''set image = '',A60)')cinimage
       write(12,'(''#'')')
 C
       do i = 1,inumx

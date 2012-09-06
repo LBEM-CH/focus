@@ -152,6 +152,8 @@ C
 1100    FORMAT('$Input filename:  ')
         READ(5,1200) INFILE
 1200    FORMAT(A)
+        call shorten(INFILE,k)
+        write(6,'(''Read: '',A)')INFILE(1:k)
 
         CALL IMOPEN(1,INFILE,'RO')
 C

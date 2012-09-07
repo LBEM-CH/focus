@@ -142,7 +142,6 @@ set phacon = ""
 set CS = ""
 set KV = ""
 set domask = ""
-set createmaskinfo = ""
 set TLTAXIS = ""
 set TLTANG = ""
 set TANGL = ""
@@ -272,7 +271,13 @@ set refine_maskb02_val = ""
 #=============================================================================
 #=============================================================================
 #
-set scriptname = 2dx_refine_unbend1
+set createmaskinfo = "n"
+#
+#=============================================================================
+#=============================================================================
+#=============================================================================
+#
+set scriptname = 2dx_refine_unbend2
 #
 \rm -f LOGS/${scriptname}.results
 #
@@ -286,11 +291,6 @@ echo date = ${date}
 if ( $domask == 'y' ) then
   set domask = 'n'
   echo domask corrected to ${domask}
-endif
-#
-if ( $createmaskinfo == 'y' ) then
-  set createmaskinfo = 'n'
-  echo createmaskinfo corrected to ${createmaskinfo}
 endif
 #
 \rm -f HOLEref.TMP HOLE.TMP

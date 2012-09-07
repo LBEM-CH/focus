@@ -69,7 +69,6 @@ set refine_SYN_maskb_doit = "y"
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
 # DISPLAY: refori
-# DISPLAY: createmaskinfo
 # DISPLAY: ISTEP
 # DISPLAY: IMAXCOR
 # DISPLAY: ctfrev
@@ -147,7 +146,6 @@ set ttfcorfirst = ""
 set det_tilt = ""
 set ctf_ttf = ""
 set refori = ""
-set createmaskinfo = ""
 set ISTEP = ""
 set IMAXCOR = ""
 set rot180 = ""
@@ -171,6 +169,8 @@ set refine_SYN_maskb_val = ""
 #
 set scriptname = 2dx_refine_unbendSyn
 \rm -f LOGS/${scriptname}.results
+#
+set createmaskinfo = "n"
 #
 source ${proc_2dx}/initialize
 source ${bin_ccp4}/ccp4.setup-csh
@@ -247,13 +247,6 @@ if ( $domask == 'y' ) then
   if ( ${startname} == 'm' ) then
     set domask = 'n'
     echo domask corrected to ${domask}
-  endif
-endif
-#
-if ( ${createmaskinfo} == 'y' ) then
-  if ( ${startname} == 'm' ) then
-    # set createmaskinfo = 'n'
-    ${proc_2dx}/linblock "Creating another MASKINFO, but image is already masked."
   endif
 endif
 #

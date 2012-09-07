@@ -142,6 +142,7 @@ set quadraday = `echo ${quadrada} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END {
 #
 set dowarn = 'n'
 set final_round = "n"
+set createmaskinfo = "n"
 #
 if ( ${refine_maska_boxa1_doit} == 'y' ) then
   set refine_now = "maska_boxa1"

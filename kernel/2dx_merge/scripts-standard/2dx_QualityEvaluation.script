@@ -249,7 +249,8 @@ eot
   echo "Number of observed reflections:# ${JREFL}" >> Summary_Statistics_3D.txt
   echo "Number of observed unique reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
   echo "Number of possible unique reflections in asym. unit:# ${num_reflections_theoretic}" >> Summary_Statistics_3D.txt
-  echo "Number of observed unique reflections in asym. unit:# ${num_reflections_fitted}" >> Summary_Statistics_3D.txt
+  # The following number is without resolution limit:
+  # echo "Number of observed unique reflections in asym. unit without resolution limit:# ${num_reflections_fitted}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   echo "Number of observed unique reflections with FOM>1%:# ${num_reflections_FOM1}" >> Summary_Statistics_3D.txt
   echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt

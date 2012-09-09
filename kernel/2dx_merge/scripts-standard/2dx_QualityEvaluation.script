@@ -252,11 +252,11 @@ eot
   # The following number is without resolution limit:
   # echo "Number of observed unique reflections in asym. unit without resolution limit:# ${num_reflections_fitted}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Number of observed unique reflections with FOM>1%:# ${num_reflections_FOM1}" >> Summary_Statistics_3D.txt
+  echo "Number obs. uniq. refl. in asym. unit with FOM>1%:# ${num_reflections_FOM1}" >> Summary_Statistics_3D.txt
   echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
   echo "counting reflections with FOM > 1%:# ${completeness1}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Number of obs. unique reflections with FOM>50%:# ${num_reflections_FOM50}" >> Summary_Statistics_3D.txt
+  echo "Number obs. uniq. refl. in asym. unit with FOM>50%:# ${num_reflections_FOM50}" >> Summary_Statistics_3D.txt
   echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
   echo "counting reflections with FOM > 50%:# ${completeness50}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt

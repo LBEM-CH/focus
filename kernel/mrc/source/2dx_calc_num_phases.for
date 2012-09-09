@@ -116,6 +116,8 @@ C
       write(*,'(''V = '',3F12.3)')(reciv(i),i=1,3)
       write(*,'(''W = '',3F12.3)')(reciw(i),i=1,3)
 C
+C-----Count the number of reflecfions that are within the asym. unit
+C
       imax=IMAXREFL
       imin=-imax
       ISPOTS=0

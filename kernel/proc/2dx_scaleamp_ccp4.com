@@ -21,7 +21,7 @@ echo $average
 
 sftools << eot
 read  ${map}
-calc col F = col 1 ${average} / 100.0 *
+calc col F = col 1 ${average} / 200.0 *
 set type col 4 
 F
 write ${output}

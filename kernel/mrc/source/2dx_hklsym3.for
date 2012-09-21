@@ -155,6 +155,7 @@ C
         enddo
       enddo
 C
+      icount=0
       ihmax=0
       ikmax=0
       ilmax=0
@@ -222,13 +223,16 @@ C
         goto 980
       endif
 C
+      write(*,'('':Read '',I8,'' reflections.'')')icount
+      write(*,'('':H,K,L max = '',3I8)')ihmax,ikmax,ilmax
+C
 C-----Now write out all reflexes in the correct sorting
       do H=0,ihmax
         do K=-ikmax,ikmax
           do L=-ilmax,ilmax
 C
 C      RPT=PHASE*PI/180.0
-C      RAMP=AMP*FOM
+C      RAMP=AMP*FOM/100.0
 C      PX=cos(RPT)*FOM
 C      PY=sin(RPT)*FOM
 C      RFOM=acos(FOM/100.0)*180.0/PI
@@ -244,6 +248,7 @@ C      ROUTP(H,K,L,6) = ROUTP(H,K,L,6)+RSIGA
 C      ROUTP(H,K,L,7) = ROUTP(H,K,L,7)+FOM/100.0
 C
             FOMSUM=ROUTP(H,K,L,7)
+            if(FOMSUM.lt.0.01)FOMSUM=0.01
 C
             AMP  =ROUTP(H,K,L,1)/FOMSUM
 C
@@ -282,6 +287,8 @@ C
                 write(11,300) H,K,L,AMP,PHASE,FOM
               endif
             endif
+            write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
+     .        3I4,6F10.3)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,RFILL
 C
           enddo
         enddo
@@ -346,9 +353,9 @@ C       H  differ by 180 * H            JSIMPL  = number to compare directly
 C       K  differ by 180 * K            JSCREW   = number to compare + 180 * M
 C       HK differ by 180 * (H+K)         where M = H*JH180 + K*JK180
 C                                        
-      PARAMETER (MAXSPOT = 100)
+      PARAMETER (MAXSPOT = 200)
       INTEGER H,K,L
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,6)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,8)
 C
       if(abs(H).gt.MAXSPOT)STOP'too big index for ROUTP'
       if(abs(K).gt.MAXSPOT)STOP'too big index for ROUTP'
@@ -379,7 +386,7 @@ C
       endif
 C
       RPT=PHASE*PI/180.0
-      RAMP=AMP*FOM
+      RAMP=AMP*FOM/100.0
       PX=cos(RPT)*FOM
       PY=sin(RPT)*FOM
       RFOM=acos(FOM/100.0)*180.0/PI

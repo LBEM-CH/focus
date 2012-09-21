@@ -347,6 +347,14 @@ C
 C---------------Normal case
                 call ROUTFIL(ROUTP, H, K, L,AMP, PHASE,BACK,FOM,SIGA)
               endif
+              if(ispc.eq.8)then
+                if(K.ge.0)then
+C-----------------P22121
+                  call ROUTFIS(ROUTP,-H, K, L,AMP, PHASE,BACK,FOM,SIGA,4)
+                  call ROUTFIS(ROUTP, H,-K, L,AMP, PHASE,BACK,FOM,SIGA,4)
+                  call ROUTFIS(ROUTP,-H,-K, L,AMP, PHASE,BACK,FOM,SIGA,1)
+                endif
+              endif
               if(ispc.ge.10 .and. ispc.le.11)then
                 if(K.ge.0)then
 C-----------------P4
@@ -469,16 +477,15 @@ C
       ROUTP( H, K, L,3) = BACK
       ROUTP( H, K, L,4) = FOM
       ROUTP( H, K, L,5) = SIGA
+      ROUTP( H, K, L,6) = 1.0
 C
 C-----Also fill Friedel symmetric spots:
-C      ROUTP(-H,-K,-L,1) = AMP
-C      ROUTP(-H,-K,-L,2) = -PHASE
-C      ROUTP(-H,-K,-L,3) = BACK
-C      ROUTP(-H,-K,-L,4) = FOM
-C      ROUTP(-H,-K,-L,5) = SIGA
-C
-C      ROUTP( H, K, L,6) = 1.0
-C      ROUTP(-H,-K,-L,6) = 1.0
+      ROUTP(-H,-K,-L,1) = AMP
+      ROUTP(-H,-K,-L,2) = -PHASE
+      ROUTP(-H,-K,-L,3) = BACK
+      ROUTP(-H,-K,-L,4) = FOM
+      ROUTP(-H,-K,-L,5) = SIGA
+      ROUTP(-H,-K,-L,6) = 1.0
 C
       RETURN
 C
@@ -566,6 +573,7 @@ C
       ROUTP( H, K, L,3) = BACK
       ROUTP( H, K, L,4) = FOM
       ROUTP( H, K, L,5) = SIGA
+      ROUTP( H, K, L,6) = 1.0
 C
 C-----Also fill Friedel symmetric spots:
       ROUTP(-H,-K,-L,1) = AMP
@@ -573,8 +581,6 @@ C-----Also fill Friedel symmetric spots:
       ROUTP(-H,-K,-L,3) = BACK
       ROUTP(-H,-K,-L,4) = FOM
       ROUTP(-H,-K,-L,5) = SIGA
-C
-      ROUTP( H, K, L,6) = 1.0
       ROUTP(-H,-K,-L,6) = 1.0
 C
       RETURN

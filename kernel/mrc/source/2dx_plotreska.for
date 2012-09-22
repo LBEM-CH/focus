@@ -120,7 +120,7 @@ C
       call shorten(CNAME,k)
       write(*,'('' Read: '',A)')CNAME(1:k)
 C
-      PRINT *,'INCLUDE IQ value label? YES-1 NO-0'
+      PRINT *,'INCLUDE IQ value label? YES-1 NO-0 INTERNAL=2'
       READ (5,*)IQLABEL
       write(*,'('' Read: '',I2)')IQLABEL
 C
@@ -599,9 +599,34 @@ C=====Plot data================================================================
 C==============================================================================
 C
 20    continue
-      READ(1,*,END=900)IH,IK,AMP,PHASE,IQ,BCK,CTF 
+      if(IQLABEL.ne.2)then
+        READ(1,*,END=900)IH,IK,AMP,PHASE,IQ,BCK,CTF 
         call PLOTIT( IH, IK,IQ,AX,BX,AY,BY)
         call PLOTIT(-IH,-IK,IQ,AX,BX,AY,BY)
+      else
+        READ(1,*,END=900)IH,IK,AMP,PHASE,FOM,SIGF
+        if(FOM.gt.95.0)then
+          IQ=1
+        elseif(FOM.gt.90.0)then
+          IQ=2
+        elseif(FOM.gt.85.0)then
+          IQ=3
+        elseif(FOM.gt.80.0)then
+          IQ=4
+        elseif(FOM.gt.75.0)then
+          IQ=5
+        elseif(FOM.gt.70.0)then
+          IQ=6
+        elseif(FOM.gt.65.0)then
+          IQ=7
+        elseif(FOM.gt.60.0)then
+          IQ=8
+        else
+          IQ=9
+        endif
+        call PLOTIT( IH, IK,IQ,AX,BX,AY,BY)
+        call PLOTIT(-IH,-IK,IQ,AX,BX,AY,BY)
+      endif
       goto 20
 C
  900  continue

@@ -118,7 +118,7 @@ C
 C
       write(*,'('' Input spacegroup'')')
       READ (5,'(I6)') ispc
-      WRITE (6,'(''Spacegroup = '',I6)') ispc
+      WRITE (6,'('':Spacegroup = '',I6)') ispc
 C
       write(*,'('' Is there a header line (1=y,0=no)'')')
       read(*,*)iheader
@@ -195,11 +195,6 @@ C
         else
           READ (10,*,END=1005) H,K,L,AMP,PHASE,FOM
         endif
-        write (*,'('':Read: H,K,L,A,P,Ba,Sig,FOM'',3I6,5G12.5)')H,K,L,AMP,PHASE,BACK,SIGA,FOM
-C
-C        if(abs(H).le.2 .and. abs(K).le.2)then
-C          write (*,'(''::Read===: H,K,L,A,P,Ba,Sig,FOM'',3I6,5G12.5)')H,K,L,AMP,PHASE,BACK,SIGA,FOM
-C        endif
 C
         if(FOM.gt.100.0)then
           write(*,'('':: ERROR: FOM greater than 100.'')')
@@ -220,11 +215,6 @@ C          K=-K
 C          L=-L
 C          PHASE=-PHASE
 C        endif
-C
-C-------Shift phases to correct phase origin for this symmetry:
-C
-C        if(ISYMFIELD(16,ispc).eq.1) PHASE=PHASE+180.0*H
-C        if(ISYMFIELD(17,ispc).eq.1) PHASE=PHASE+180.0*K
 C
         call PHACOR(PHASE)
 C
@@ -273,24 +263,6 @@ C-----Now write out all reflexes in the correct sorting
         do K=-ikmax,ikmax
           do L=-ilmax,ilmax
 C
-C      FOMFAC=FOM/100.0
-C      RPT=PHASE*PI/180.0
-C      RAMP=AMP*FOMFAC
-C      PX=cos(RPT)*FOMFAC
-C      PY=sin(RPT)*FOMFAC
-C      RFOM=acos(FOMFAC)
-C      RSIGA=SIGA*FOMFAC
-C      RBACK=BACK*FOMFAC
-C
-C      ROUTP(H,K,L,1) = ROUTP(H,K,L,1)+RAMP
-C      ROUTP(H,K,L,2) = ROUTP(H,K,L,2)+PX
-C      ROUTP(H,K,L,3) = ROUTP(H,K,L,3)+PY
-C      ROUTP(H,K,L,4) = ROUTP(H,K,L,4)+RBACK
-C      ROUTP(H,K,L,5) = ROUTP(H,K,L,5)+RFOM
-C      ROUTP(H,K,L,6) = ROUTP(H,K,L,6)+RSIGA
-C      ROUTP(H,K,L,7) = ROUTP(H,K,L,7)+FOMFAC
-C      ROUTP(H,K,L,8) = ROUTP(H,K,L,8)+1.0
-C
             RFILL=ROUTP(H,K,L,8)
 C
             if(RFILL.gt.0.1)then
@@ -304,10 +276,6 @@ C
               PY=ROUTP(H,K,L,3)
               PHASE=atan2(PY,PX)*180.0/PI
 C
-C-------------Shift the phase origin back:
-C              if(ISYMFIELD(16,ispc).eq.1) PHASE=PHASE+180.0*H
-C              if(ISYMFIELD(17,ispc).eq.1) PHASE=PHASE+180.0*K
-C
               call PHACOR(PHASE)
 C
               BACK =ROUTP(H,K,L,4)/FOMSUM
@@ -316,6 +284,8 @@ C
               FOM  =cos(PHERR)*100.0
 C
               SIGA =ROUTP(H,K,L,6)/FOMSUM
+C
+              if(i1sig.eq.3)SIGA=1.0
 C
               if(isig.eq.1)then
                 write(11,310) H,K,L,AMP,PHASE,FOM,SIGA
@@ -331,14 +301,6 @@ C
                   write(11,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
                   write(12,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
                 endif
-              elseif(isig.eq.3)then
-                SIGA=1.0
-                write(11,310) H,K,L,AMP,PHASE,FOM,SIGA
-                write(12,310) H,K,L,AMP,PHASE,FOM,SIGA
-                if(ineg.gt.1)then
-                  write(11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
-                  write(12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
-                endif
               else
                 write(11,300) H,K,L,AMP,PHASE,FOM
                 write(12,300) H,K,L,AMP,PHASE,FOM
@@ -349,12 +311,6 @@ C
               endif
               write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
      .          3I4,X,6G11.5)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,RFILL
-C
-C        if(abs(H).le.2 .and. abs(K).le.2)then
-C          write (*,'(''::OUT ===: H,K,L,A,P,Ba,Sig,FOM,RFILL'',3I6,
-C     .     6G12.5)')H,K,L,AMP,PHASE,BACK,SIGA,FOM,RFILL
-C        endif
-C
             endif
           enddo
         enddo
@@ -416,6 +372,23 @@ C       1  directly identical
 C       H  differ by 180 * H            JSIMPL  = number to compare directly
 C       K  differ by 180 * K            JSCREW   = number to compare + 180 * M
 C       HK differ by 180 * (H+K)         where M = H*JH180 + K*JK180
+C
+C All reflections are added to a giant matrix REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,8)
+C to all possible symmetry-related positions.
+C
+C By doing so, the ISYMFIELD(column,spacegroupnumber) decides, if a reflection should be added, 
+C and if so, if there should be a phase shift of 180 or not.
+C
+C This all ends up in the table ROUTP, whereby the 8 positions for each H,K,L reflection mean:
+C  1 = amplitude  (FOM-weighted)
+C  2 = cos component of phase  (FOM-weighted)
+C  3 = sin component of phase  (FOM-weighted)
+C  4 = background (FOM-weighted)
+C  5 = arccos(FOM)
+C  6 = SIGA  (FOM-weighted)
+C  7 = sum of all FOMs
+C  8 = counter to see how many reflections were added here.
+C
 C                                        
       IMPLICIT NONE
 C
@@ -431,11 +404,6 @@ C
       if(ISHIFT.eq.0)then
         RETURN
       endif
-C
-C      if(abs(H).le.2 .and. abs(K).le.2)then
-C        write (*,'(''::ROUTF==: H,K,L,A,P,Ba,Sig,FOM,ISHIFT'',3I6,
-C     .    5G12.5,I3)')H,K,L,AMP,PHASE,BACK,SIGA,FOM,ISHIFT
-C      endif
 C
       PI=3.1415926537
 C
@@ -453,10 +421,6 @@ C
         PHASE=PHASE+(H+K)*180.0
       endif
       call PHACOR(PHASE)
-C
-C      if(abs(H).le.2 .and. abs(K).le.2)then
-C        write (*,'(''::ROUTF=>: P = '',G12.5)')PHASE
-C      endif
 C
       FOMFAC=FOM/100.0
       RPT=PHASE*PI/180.0

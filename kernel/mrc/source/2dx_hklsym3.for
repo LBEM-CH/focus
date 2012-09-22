@@ -3,10 +3,17 @@
 C       Henning Stahlberg, 16.5.2000
 C       updated 4/19/2008
 
+      IMPLICIT NONE
+C
+      INTEGER MAXSPOT
       PARAMETER (MAXSPOT = 200)
+C
       CHARACTER*200  TITLE 
       CHARACTER*200 cline1,cline2,cline3,cline4
-      INTEGER H,K,L
+      INTEGER H,K,L,i1sig,icount,ihmax,ikmax,ilmax,ineg,isig
+      INTEGER iheader,inum,iwasym,N,ispc
+      REAL AMP,PHASE,FOM,SIGA,BACK,PI,PX,PY,RFILL,PHERR
+      REAL FOMSUM
       REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,8)
 C
 C-----------ROUTP contains AMP,PHS,BACK,FOM,SIGA
@@ -47,25 +54,42 @@ C 19    15  p321   -  -  -  1  -  -  -  1  -  1  -  1  -  1  -   5  0   -   -
 C 20    16  p6     -  -  1  -  -  -  -  -  -  1  1  1  1  -  -   5  0   -   -
 C 21    17  p622   -  -  1  1  -  -  1  1  1  1  1  1  1  1  1   11 0   -   -
 C
-      INTEGER ISYMFIELD(17,15)
+C
+C-----Fortran counts indices starting with 1 (not with 0 as in C)
+C
+C-----Fortran matrices are (columns,rows)
+C   (1,1)  (1,2)  (1,3)  (1,4)  (1,5)
+C   (2,1)  (2,2)  (2,3)  (2,4)  (2,5)
+C   (3,1)  (3,2)  (3,3)  (3,4)  (3,5)
+C
+C-----Fortran stores fields by columns
+C in the above example, array element (1,2) will follow element (3,1).
+C
+C ISYMFIELD(1:15, of spacegroup=p22121) is 4,4,1,0,0,0,0,0,0,0,0,0,0,0,0,
+C ISYMFIELD(16, of spacegroup=p22121) is 1, meaning JH180=1
+C ISYMFIELD(17, of spacegroup=p22121) is 1, meaning JK180=1
+C
+C             ISYMFIELD(OPERATION,SPACEGROUP)
+C
+      INTEGER ISYMFIELD(17,17)
       DATA ISYMFIELD / 
-     . 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 4,4,1,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
-     . 0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,
-     . 1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,
-     . 4,4,1,1,4,4,1,0,0,0,0,0,0,0,0,
-     . 0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,
-     . 0,0,0,0,0,0,1,0,1,1,0,1,0,0,1,
-     . 0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,
-     . 0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,
-     . 0,0,1,1,0,0,1,1,1,1,1,1,1,1,1  /
+     . 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     . 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     . 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     . 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+     . 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     . 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     . 2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+     . 4,4,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+     . 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     . 0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,
+     . 1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,
+     . 4,4,1,1,4,4,1,0,0,0,0,0,0,0,0,1,1,
+     . 0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,
+     . 0,0,0,0,0,0,1,0,1,1,0,1,0,0,1,0,0,
+     . 0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,0,0,
+     . 0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,
+     . 0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0  /
 C
       PI=3.1415926537
 C
@@ -107,15 +131,14 @@ C
       write(*,'('' Is there a siga column (0=no,1=y,2=Background,'',
      1   ''3=no and setting sigf to one)'')')
       read(*,*)isig
-      i1sig=0
-      if(isig.eq.2)then
-        write(*,'('' Assuming Background, FOM columns.'')')
-      elseif(isig.eq.1)then
+      i1sig=isig
+      if(isig.eq.1)then
         write(*,'('' Assuming siga column.'')')
+      elseif(isig.eq.2)then
+        write(*,'('' Assuming Background, FOM columns.'')')
       elseif(isig.eq.3)then
         write(*,'('' Creating siga=1 column.'')')
-        i1sig=1
-        isig=0
+        isig=1
       else
         write(*,'('' Assuming no siga column.'')')
       endif
@@ -123,7 +146,9 @@ C
       write(*,'('' Write out only asymmetric unit (1=y,0=n)'')')
       read(*,*)iwasym
       if(iwasym.eq.1)then
-        write(*,'('' Writing only asymmetric unit.'')')
+        write(*,'('':: Writing only asymmetric unit.'')')
+        write(*,'('':: This is not supported right now.'')')
+        stop
       else
         write(*,'('' Writing full p1 plane (but not for screw axes)'')')
       endif
@@ -141,8 +166,9 @@ C
       open(12,FILE=cline3,STATUS='NEW',ERR=950)
 C
       if(iheader.eq.1)then
-        READ (10,100) TITLE
-        WRITE (11,100) TITLE
+        READ (10,'(A200)') TITLE
+        call shorten(TITLE,k)
+        WRITE (11,'(A)') TITLE(1:k)
       endif
 C
       do H=-MAXSPOT,MAXSPOT
@@ -160,19 +186,23 @@ C
       ikmax=0
       ilmax=0
  1000 continue
-        if(isig.eq.1)then
-          BACK=0.0
+        BACK=0.0
+        SIGA=0.0
+        if(i1sig.eq.1)then
           READ (10,*,END=1005) H,K,L,AMP,PHASE,FOM,SIGA
-          write (*,210) H,K,L,AMP,PHASE,FOM,SIGA
-        elseif(isig.eq.2)then
-          SIGA=0.0
+        elseif(i1sig.eq.2)then
           READ (10,*,END=1005) H,K,L,AMP,PHASE,BACK,FOM
-          write (*,210) H,K,L,AMP,PHASE,BACK,FOM
         else
-          BACK=0.0
-          SIGA=0.0
           READ (10,*,END=1005) H,K,L,AMP,PHASE,FOM
-          write (*,200) H,K,L,AMP,PHASE,FOM
+        endif
+        write (*,'('':Read: H,K,L,A,P,Ba,Sig,FOM'',3I6,5G12.5)')H,K,L,AMP,PHASE,BACK,SIGA,FOM
+        if(FOM.gt.100.0)then
+          write(*,'('':: ERROR: FOM greater than 100.'')')
+          STOP
+        endif
+        if(FOM.lt.0.0)then
+          write(*,'('':: ERROR: FOM less than 0.'')')
+          STOP
         endif
         if(abs(H).gt.MAXSPOT)goto 970
         if(abs(K).gt.MAXSPOT)goto 970
@@ -186,6 +216,13 @@ C          L=-L
 C          PHASE=-PHASE
 C        endif
 C
+C-------Shift phases to correct phase origin for this symmetry:
+C
+C        if(ISYMFIELD(16,ispc).eq.1) PHASE=PHASE+180.0*H
+C        if(ISYMFIELD(17,ispc).eq.1) PHASE=PHASE+180.0*K
+C
+        call PHACOR(PHASE)
+C
         if(ihmax.lt.abs(H))ihmax=abs(H)
         if(ikmax.lt.abs(K))ikmax=abs(K)
         if(ilmax.lt.abs(L))ilmax=abs(L)
@@ -198,22 +235,22 @@ C ref in
 C  prog # symb  K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180
 C               K=                     -k +k -k +k                         JK180
 
-        call ROUTF(ROUTP, H  ,   K, L,AMP, PHASE,BACK,FOM,SIGA,1)
-        call ROUTF(ROUTP,-H  ,   K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP, H  ,  -K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,-H  ,  -K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,   K, H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,   K,-H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,  -K, H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,  -K,-H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP, H  ,-H-K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,-H  , H+K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,   K,-H-K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,  -K, H+K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,-H-K, H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP, H+K,-H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,-H-K,   K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP, H+K,  -K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
+        call ROUTF(ROUTP, H  ,   K, L,AMP,PHASE,BACK,FOM,SIGA,1)
+        call ROUTF(ROUTP,-H  ,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(1,ispc))
+        call ROUTF(ROUTP, H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(2,ispc))
+        call ROUTF(ROUTP,-H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(3,ispc))
+        call ROUTF(ROUTP,   K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(4,ispc))
+        call ROUTF(ROUTP,   K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(5,ispc))
+        call ROUTF(ROUTP,  -K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(6,ispc))
+        call ROUTF(ROUTP,  -K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(7,ispc))
+        call ROUTF(ROUTP, H  ,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(8,ispc))
+        call ROUTF(ROUTP,-H  , H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(9,ispc))
+        call ROUTF(ROUTP,   K,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(10,ispc))
+        call ROUTF(ROUTP,  -K, H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(11,ispc))
+        call ROUTF(ROUTP,-H-K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(12,ispc))
+        call ROUTF(ROUTP, H+K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(13,ispc))
+        call ROUTF(ROUTP,-H-K,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(14,ispc))
+        call ROUTF(ROUTP, H+K,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(15,ispc))
 C
       goto 1000
 C
@@ -231,74 +268,91 @@ C-----Now write out all reflexes in the correct sorting
         do K=-ikmax,ikmax
           do L=-ilmax,ilmax
 C
+C      FOMFAC=FOM/100.0
 C      RPT=PHASE*PI/180.0
-C      RAMP=AMP*FOM/100.0
-C      PX=cos(RPT)*FOM
-C      PY=sin(RPT)*FOM
-C      RFOM=acos(FOM/100.0)*180.0/PI
-C      RSIGA=SIGA*FOM/100.0
-C      RBACK=BACK*FOM/100.0
+C      RAMP=AMP*FOMFAC
+C      PX=cos(RPT)*FOMFAC
+C      PY=sin(RPT)*FOMFAC
+C      RFOM=acos(FOMFAC)
+C      RSIGA=SIGA*FOMFAC
+C      RBACK=BACK*FOMFAC
 C
 C      ROUTP(H,K,L,1) = ROUTP(H,K,L,1)+RAMP
 C      ROUTP(H,K,L,2) = ROUTP(H,K,L,2)+PX
-C      ROUTP(H,K,L,3) = PHASE(H,K,L,3)+PY
+C      ROUTP(H,K,L,3) = ROUTP(H,K,L,3)+PY
 C      ROUTP(H,K,L,4) = ROUTP(H,K,L,4)+RBACK
 C      ROUTP(H,K,L,5) = ROUTP(H,K,L,5)+RFOM
 C      ROUTP(H,K,L,6) = ROUTP(H,K,L,6)+RSIGA
-C      ROUTP(H,K,L,7) = ROUTP(H,K,L,7)+FOM/100.0
-C
-            FOMSUM=ROUTP(H,K,L,7)
-            if(FOMSUM.lt.0.01)FOMSUM=0.01
-C
-            AMP  =ROUTP(H,K,L,1)/FOMSUM
-C
-            PX=ROUTP(H,K,L,2)
-            PY=ROUTP(H,K,L,3)
-            PHASE=atan2(PY,PX)*180.0/PI
-            if(PHASE.lt.0.0)PHASE=PHASE+360.0
-            if(PHASE.lt.0.0)PHASE=PHASE+360.0
-            if(PHASE.lt.0.0)PHASE=PHASE+360.0
-            if(PHASE.lt.0.0)PHASE=PHASE+360.0
-            if(PHASE.gt.360.0)PHASE=PHASE-360.0
-            if(PHASE.gt.360.0)PHASE=PHASE-360.0
-            if(PHASE.gt.360.0)PHASE=PHASE-360.0
-            if(PHASE.gt.360.0)PHASE=PHASE-360.0
-            if(PHASE.lt.-179.9999 .and. PHASE.gt.-180.0001)PHASE=180.0
-            if(PHASE.gt. 179.9999 .and. PHASE.lt. 180.0001)PHASE=180.0
-            if(PHASE.gt. 359.9999 .and. PHASE.lt. 360.0001)PHASE=  0.0
-            if(PHASE.gt.  -0.0001 .and. PHASE.lt.   0.0001)PHASE=  0.0
-C
-            BACK =ROUTP(H,K,L,4)/FOMSUM
-C
-            INUM=ROUTP(H,K,L,8)
-            PHERR=ROUTP(H,K,L,5)/INUM
-            FOM  =cos(PHERR*PI/180.0)
-C
-            SIGA =ROUTP(H,K,L,6)/FOMSUM
+C      ROUTP(H,K,L,7) = ROUTP(H,K,L,7)+FOMFAC
+C      ROUTP(H,K,L,8) = ROUTP(H,K,L,8)+1.0
 C
             RFILL=ROUTP(H,K,L,8)
 C
-            if(RFILL.gt.0.0)then
+            if(RFILL.gt.0.1)then
+C
+              FOMSUM=ROUTP(H,K,L,7)
+              if(FOMSUM.lt.0.01)FOMSUM=0.01
+C
+              AMP  =ROUTP(H,K,L,1)/FOMSUM
+C
+              PX=ROUTP(H,K,L,2)
+              PY=ROUTP(H,K,L,3)
+              PHASE=atan2(PY,PX)*180.0/PI
+C
+C-------------Shift the phase origin back:
+C              if(ISYMFIELD(16,ispc).eq.1) PHASE=PHASE+180.0*H
+C              if(ISYMFIELD(17,ispc).eq.1) PHASE=PHASE+180.0*K
+C
+              call PHACOR(PHASE)
+C
+              BACK =ROUTP(H,K,L,4)/FOMSUM
+C
+              PHERR=ROUTP(H,K,L,5)/RFILL
+              FOM  =cos(PHERR)*100.0
+C
+              SIGA =ROUTP(H,K,L,6)/FOMSUM
+C
               if(isig.eq.1)then
                 write(11,310) H,K,L,AMP,PHASE,FOM,SIGA
+                write(12,310) H,K,L,AMP,PHASE,FOM,SIGA
+                if(ineg.gt.1)then
+                  write(11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                  write(12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                endif
               elseif(isig.eq.2)then
                 write(11,310) H,K,L,AMP,PHASE,BACK,FOM
+                write(12,310) H,K,L,AMP,PHASE,BACK,FOM
+                if(ineg.gt.1)then
+                  write(11,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                  write(12,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                endif
+              elseif(isig.eq.3)then
+                SIGA=1.0
+                write(11,310) H,K,L,AMP,PHASE,FOM,SIGA
+                write(12,310) H,K,L,AMP,PHASE,FOM,SIGA
+                if(ineg.gt.1)then
+                  write(11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                  write(12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                endif
               else
                 write(11,300) H,K,L,AMP,PHASE,FOM
+                write(12,300) H,K,L,AMP,PHASE,FOM
+                if(ineg.gt.1)then
+                  write(11,300) -H,-K,-L,AMP,-PHASE,FOM
+                  write(12,300) -H,-K,-L,AMP,-PHASE,FOM
+                endif
               endif
-            endif
-            write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
-     .        3I4,6F10.3)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,RFILL
+              write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
+     .          3I4,X,6G11.5)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,RFILL
 C
+            endif
           enddo
         enddo
       enddo
 C
       close(11)
+      close(12)
 C
- 100  FORMAT (A50)
- 200  FORMAT (3I6,G16.8,G16.8,G16.8)
- 210  FORMAT (3I6,G16.8,G16.8,G16.8,G16.8)
  300  FORMAT (3I6,G16.8,G16.8,G16.8)
  310  FORMAT (3I6,G16.8,G16.8,G16.8,G16.8)
 C
@@ -353,18 +407,27 @@ C       H  differ by 180 * H            JSIMPL  = number to compare directly
 C       K  differ by 180 * K            JSCREW   = number to compare + 180 * M
 C       HK differ by 180 * (H+K)         where M = H*JH180 + K*JK180
 C                                        
+      IMPLICIT NONE
+C
+      INTEGER MAXSPOT
       PARAMETER (MAXSPOT = 200)
+C
       INTEGER H,K,L
+      INTEGER ISHIFT
+      REAL AMP,PHASE,BACK,FOM,FOMFAC,SIGA,PX,PY,RPT,PI
+      REAL RAMP,RBACK,RFOM,RSIGA
       REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,8)
+C
+      if(ISHIFT.eq.0)then
+        RETURN
+      endif
+C
+      PI=3.1415926537
 C
       if(abs(H).gt.MAXSPOT)STOP'too big index for ROUTP'
       if(abs(K).gt.MAXSPOT)STOP'too big index for ROUTP'
       if(abs(L).gt.MAXSPOT)STOP'too big index for ROUTP'
 C      
-      if(ISHIFT.eq.0)then
-        RETURN
-      endif
-C
       if(ISHIFT.eq.2)then
         PHASE=PHASE+H*180.0
       endif
@@ -374,24 +437,16 @@ C
       if(ISHIFT.eq.4)then
         PHASE=PHASE+(H+K)*180.0
       endif
- 100  continue
-      if(PHASE.gt.360.0)then
-        PHASE=PHASE-360.0
-        goto 100
-      endif
- 110  continue
-      if(PHASE.lt.0.0)then
-        PHASE=PHASE+360.0
-        goto 110
-      endif
+      call PHACOR(PHASE)
 C
+      FOMFAC=FOM/100.0
       RPT=PHASE*PI/180.0
-      RAMP=AMP*FOM/100.0
-      PX=cos(RPT)*FOM
-      PY=sin(RPT)*FOM
-      RFOM=acos(FOM/100.0)*180.0/PI
-      RSIGA=SIGA*FOM/100.0
-      RBACK=BACK*FOM/100.0
+      RAMP=AMP*FOMFAC
+      PX=cos(RPT)*FOMFAC
+      PY=sin(RPT)*FOMFAC
+      RFOM=acos(FOMFAC)
+      RSIGA=SIGA*FOMFAC
+      RBACK=BACK*FOMFAC
 C
       ROUTP(H,K,L,1) = ROUTP(H,K,L,1)+RAMP
       ROUTP(H,K,L,2) = ROUTP(H,K,L,2)+PX
@@ -399,7 +454,7 @@ C
       ROUTP(H,K,L,4) = ROUTP(H,K,L,4)+RBACK
       ROUTP(H,K,L,5) = ROUTP(H,K,L,5)+RFOM
       ROUTP(H,K,L,6) = ROUTP(H,K,L,6)+RSIGA
-      ROUTP(H,K,L,7) = ROUTP(H,K,L,7)+FOM/100.0
+      ROUTP(H,K,L,7) = ROUTP(H,K,L,7)+FOMFAC
       ROUTP(H,K,L,8) = ROUTP(H,K,L,8)+1.0
 C
 C-----Also fill Friedel symmetric spots:
@@ -409,8 +464,33 @@ C-----Also fill Friedel symmetric spots:
       ROUTP(-H,-K,-L,4) = ROUTP(-H,-K,-L,4)+RBACK
       ROUTP(-H,-K,-L,5) = ROUTP(-H,-K,-L,5)+RFOM
       ROUTP(-H,-K,-L,6) = ROUTP(-H,-K,-L,6)+RSIGA
-      ROUTP(-H,-K,-L,7) = ROUTP(-H,-K,-L,7)+FOM/100.0
+      ROUTP(-H,-K,-L,7) = ROUTP(-H,-K,-L,7)+FOMFAC
       ROUTP(-H,-K,-L,8) = ROUTP(-H,-K,-L,8)+1.0
+C
+      RETURN
+C
+      END
+C
+C=========================================================
+C
+      SUBROUTINE PHACOR(PHASE)
+C
+ 100  continue
+        if(PHASE.lt.0.0)then
+          PHASE=PHASE+360.0
+          goto 100
+        endif
+C
+ 200  continue
+        if(PHASE.gt.360.0)then
+          PHASE=PHASE-360.0
+          goto 200
+        endif
+C
+      if(PHASE.lt.-179.9999 .and. PHASE.gt.-180.0001)PHASE=180.0
+      if(PHASE.gt. 179.9999 .and. PHASE.lt. 180.0001)PHASE=180.0
+      if(PHASE.gt. 359.9999 .and. PHASE.lt. 360.0001)PHASE=  0.0
+      if(PHASE.gt.  -0.0001 .and. PHASE.lt.   0.0001)PHASE=  0.0
 C
       RETURN
 C

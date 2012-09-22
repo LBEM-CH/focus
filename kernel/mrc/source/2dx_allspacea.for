@@ -633,6 +633,13 @@ C
       DIMENSION IH(NMAX),IK(NMAX),JPOINT(11,NMAX,21),IPOINT(15,NMAX),
      .          ISYM(2,2,15),LOOK(15,21)
 
+C
+C   SPACEGROUP  H=-h +h -h +k +k -k -k +h -h +k -k -h +h -h +h  JSIMPL
+C               H=                                 -k +k -k +k     JSCREW
+C ref in
+C  prog # symb  K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180
+C               K=                     -k +k -k +k                         JK180
+C
       DATA ISYM/-1, 0, 0, 1,
      A           1, 0, 0,-1,
      B          -1, 0, 0,-1,

@@ -89,7 +89,7 @@ C
 C            if((FOM.le.100.0).and.(FOM.ge.0.0))then
 C              SIGA=ACOS(FOM/100.0)
 C            else
-C              write(*,'(''::ERROR: Illegale FOM value of '',F16.8)')FOM
+C              write(*,'(''::ERROR: Illegal FOM value of '',F16.8)')FOM
 C              stop
 C            endif
 C           write (11,210) H,K,L,AMP,PHASE,FOM,SIGA

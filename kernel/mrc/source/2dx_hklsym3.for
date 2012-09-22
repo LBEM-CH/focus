@@ -196,6 +196,11 @@ C
           READ (10,*,END=1005) H,K,L,AMP,PHASE,FOM
         endif
         write (*,'('':Read: H,K,L,A,P,Ba,Sig,FOM'',3I6,5G12.5)')H,K,L,AMP,PHASE,BACK,SIGA,FOM
+C
+C        if(abs(H).le.2 .and. abs(K).le.2)then
+C          write (*,'(''::Read===: H,K,L,A,P,Ba,Sig,FOM'',3I6,5G12.5)')H,K,L,AMP,PHASE,BACK,SIGA,FOM
+C        endif
+C
         if(FOM.gt.100.0)then
           write(*,'('':: ERROR: FOM greater than 100.'')')
           STOP
@@ -345,6 +350,11 @@ C
               write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
      .          3I4,X,6G11.5)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,RFILL
 C
+C        if(abs(H).le.2 .and. abs(K).le.2)then
+C          write (*,'(''::OUT ===: H,K,L,A,P,Ba,Sig,FOM,RFILL'',3I6,
+C     .     6G12.5)')H,K,L,AMP,PHASE,BACK,SIGA,FOM,RFILL
+C        endif
+C
             endif
           enddo
         enddo
@@ -422,6 +432,11 @@ C
         RETURN
       endif
 C
+C      if(abs(H).le.2 .and. abs(K).le.2)then
+C        write (*,'(''::ROUTF==: H,K,L,A,P,Ba,Sig,FOM,ISHIFT'',3I6,
+C     .    5G12.5,I3)')H,K,L,AMP,PHASE,BACK,SIGA,FOM,ISHIFT
+C      endif
+C
       PI=3.1415926537
 C
       if(abs(H).gt.MAXSPOT)STOP'too big index for ROUTP'
@@ -438,6 +453,10 @@ C
         PHASE=PHASE+(H+K)*180.0
       endif
       call PHACOR(PHASE)
+C
+C      if(abs(H).le.2 .and. abs(K).le.2)then
+C        write (*,'(''::ROUTF=>: P = '',G12.5)')PHASE
+C      endif
 C
       FOMFAC=FOM/100.0
       RPT=PHASE*PI/180.0

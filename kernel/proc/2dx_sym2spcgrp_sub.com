@@ -166,7 +166,7 @@
 #       HK differ by 180 * (H+K)         where M = H*JH180 + K*JK180
 #                                        
 #
-#   SPACEGROUP  H=-h +h -h +k +k -k -k +h -h +k -k -h +h -h +h  JSIMPL
+#   SPACEGROUP  H=-: -h +k +k -k -k +h -h +k -k -h +h -h +h  JSIMPL
 #               H=                                 -k +k -k +k     JSCREW
 # ref in
 #  prog # symb  K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180

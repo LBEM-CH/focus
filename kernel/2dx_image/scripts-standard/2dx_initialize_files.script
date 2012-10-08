@@ -447,16 +447,16 @@ ${proc_2dx}/linblock "HISTO - to produce a histogram of the grey-values in the i
 #                                                                           #
 #############################################################################
 #
-setenv IN ${imagename}.mrc
+setenv IN ${nonmaskimagename}.mrc
 #
 ${bin_2dx}/histok.exe << eot
 0,${imagesidelength},0,${imagesidelength}
 0
 eot
 #
-\mv -f HISTO.PS PS/${imagename}-histo.ps
+\mv -f HISTO.PS PS/${nonmaskimagename}-histo.ps
 #
-echo "# IMAGE: "PS/${imagename}-histo.ps "<Histogram>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "PS/${nonmaskimagename}-histo.ps "<Histogram Non-Masked Image>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 echo ":: "

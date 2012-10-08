@@ -453,7 +453,7 @@ if ( ${rotate_to_Z} == "yes" ) then
   set AXIS = "Z,X,Y"
   #
   ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1.map  << eot
-LABIN F1=F  PHI=PHI ##
+LABIN F1=F  PHI=PHI W=FOM ##
 PROJECTION
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
@@ -472,7 +472,7 @@ eot
     set AXIS = "X,Y,Z"
     #
     ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1.map  << eot
-LABIN F1=F  PHI=PHI ##
+LABIN F1=F  PHI=PHI W=FOM ##
 PROJECTION
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}

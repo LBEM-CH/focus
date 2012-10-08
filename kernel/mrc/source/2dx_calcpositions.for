@@ -73,12 +73,16 @@ C
           call shorten(cname1,k)
           write(12,'(''\rm -f '',A)')cname1(1:k)
           write(12,'(''#'')')
-          write(12,'(''${bin_2dx}/labelh.exe << eot'')')
-          write(12,'(''SCRATCH/TMP.mrc'')')
-          write(12,'(''4'')')
-          write(12,'(A)')cname1(1:k)
-          write(12,'(''2,2'')')
-          write(12,'(''eot'')')
+          if(ismallsize.eq.2048) then
+            write(12,'(''${bin_2dx}/labelh.exe << eot'')')
+            write(12,'(''SCRATCH/TMP.mrc'')')
+            write(12,'(''4'')')
+            write(12,'(A)')cname1(1:k)
+            write(12,'(''2,2'')')
+            write(12,'(''eot'')')
+          else
+            write(12,'(''\mv -f SCRATCH/TMP.mrc '',A)')cname1(1:k)
+          endif
           write(12,'(''#'')')
           if(imode.eq.1 .or. (i.eq.4 .and. j.eq.4))then
             write(12,'(''echo "# IMAGE: '',A,'' <Tile '',I1,'','',I1,

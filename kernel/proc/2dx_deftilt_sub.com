@@ -90,8 +90,12 @@ ${proc_2dx}/lin "2dx_ctffind3 - search the defocus"
 #
 \rm -f ${outimage}
 #
-# The image tiles are 2-times downsampled:
-set locstepdigitizer = `echo ${stepdigitizer} | awk '{ s = 2 * $1 } END { print s }'`
+if ( ${downsample} == '1' ) then
+  # The image tiles are 2-times downsampled:
+  set locstepdigitizer = `echo ${stepdigitizer} | awk '{ s = 2 * $1 } END { print s }'`
+else
+  set locstepdigitizer = ${stepdigitizer}
+endif
 #
 echo " "
 echo "Calling:"  

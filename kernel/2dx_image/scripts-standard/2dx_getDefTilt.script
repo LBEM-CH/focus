@@ -359,8 +359,21 @@ else
       set mode = 1
     endif
     # 
-    set smallsize=2048
-    echo smallsize=${smallsize}
+    set petit = `echo ${imagesidelength} | awk ' { if ( $1 < 2050 ) { s = 1 } else { s = 0 } } END { print s }'`
+    set trespetit = `echo ${imagesidelength} | awk ' { if ( $1 < 1025 ) { s = 1 } else { s = 0 } } END { print s }'`
+    if ( ${petit} == '1' ) then
+      set downsample = 0
+      if ( ${trespetit} == '1' ) then
+        set smallsize = 512
+      else
+        set smallsize = 1024
+      endif
+    else
+      set downsample = 1
+      set smallsize = 2048
+    endif
+    #
+    echo ":: imagesidelength = ${imagesidelength}, smallsize = ${smallsize}"
     #
     #############################################################################
     #                                                                           #
@@ -428,6 +441,7 @@ eot
     echo "# IMAGE: TMP-runfile-windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
     #
     if ( ! -d CUT ) then
+      \rm -fr CUT
       \mkdir CUT
     endif 
     #

@@ -180,6 +180,7 @@ set quadraday = `echo ${quadrada} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END {
 #
 set dowarn = 'n'
 set final_round = "n"
+set createmaskinfo = "n"
 #
 if ( ${refine_maska_doit_1} == 'y' ) then
   set refine_now = "maska"
@@ -223,8 +224,6 @@ if ( ${dowarn} == 'y' ) then
   echo "# WARNING: You are refining the reference size." >> LOGS/${scriptname}.results
   echo "# WARNING: Warning: A too small reference will give an artificially good QVal due to noise correlation." >> LOGS/${scriptname}.results
 endif
-#
-set createmaskinfo = "n"
 #
 #################################################################################
 ${proc_2dx}/linblock "Doing it again, with the best parameter: maska = ${maska}, boxa1 = ${boxa1}"

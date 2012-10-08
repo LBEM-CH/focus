@@ -29,23 +29,28 @@ int main()
 	int magnification, tilenumber;
 // data aquisition
         cout << endl << "2dx_tiltgeom.exe: calculates tilt geometry from various defoci" << endl << endl;
-        cout << "Name for outputfile: ";
+        cout << ": Name for outputfile: ";
         cin.getline(name,99);
         cout << name << endl;
-	cout << "stepsize..........: ";
+
+	cout << ": stepsize..........: ";
 	cin.getline(temp,99);
 	stepsize=atof(temp);
 	cout << stepsize << endl;
-	cout << "Magnification.....: ";
+
+	cout << ": Magnification.....: ";
 	cin.getline(temp,99);
 	magnification=atoi(temp);
-	cout << "Number of tiles...: ";
+	cout << magnification << endl;
+
+	cout << ": Number of tiles...: ";
 	cin.getline(temp,99);
 	tilenumber=atoi(temp);
 	cout << tilenumber << endl;
+
 	double factor=stepsize/(double)magnification*10000;
 
-	cout << "factor = " << factor << endl;
+	cout << ": Pixel size in Angstroems = " << factor << endl << endl;
 
 	cin.getline(temp,99);
         ifstream infile(temp);
@@ -79,7 +84,7 @@ int main()
         infile.close();
 
 
-	cout << endl << "input "<< tilenumber*tilenumber << "defocus values" << endl;;
+	cout << endl << "input "<< tilenumber*tilenumber << " defocus values" << endl;;
 	int k=0;
        
         for(int j=0;j<tilenumber;j++)
@@ -108,7 +113,7 @@ int main()
 		exit(1);
 	}
 	cout << endl << "Number of defocus values read: " << data.size() << endl << endl;
-        cout << "Xpos,Ypos ==> Defocus" << endl;
+        cout << "Xpos   ,Ypos    ==> Defocus" << endl;
         for(int i=0;i<data.size();i++)
 	{
 		cout << (*data[i])[0] << "," << (*data[i])[1] << " ==> " << (*data[i])[2] << endl;
@@ -278,7 +283,7 @@ int main()
 			if(rlimit < 200.0) rlimit = 200.0;
 		}
 
-        	cout << endl << jtotal << ":  Tilt plane is :" << endl;
+        	cout << endl << jtotal << "  Tilt plane is :" << endl;
 		cout << "e[0]=" << e[0] << "    e[1]=" << e[1] << "    e[2]=" << e[2] << endl;
 
 		cout << endl << "New rlimit =  " << rlimit << endl;
@@ -321,8 +326,8 @@ int main()
 	ofstream resu( "2dx_tiltgeom.out", ios::out); //creates new outfile
         if (!resu)
 	{
-                cerr << "ERROR: Not able to create output file 2dx_tiltgeom.out ."<< endl;
-		cerr  << "File already exists." << endl;;
+                cerr << ":: ERROR: Not able to create output file 2dx_tiltgeom.out ."<< endl;
+		cerr  << ":: File already exists." << endl;;
                 exit(-1);
 	};
 	resu << "set TLTANG = " << rTLTANG << endl;
@@ -331,7 +336,7 @@ int main()
 
         ofstream rout(name, ios::out); //creates new outfile
         if (!name){
-                cerr << "ERROR: Not able to create output file ";
+                cerr << ":: ERROR: Not able to create output file ";
                 cerr << name << ". File already exists \n";
                 exit(-1);};
 

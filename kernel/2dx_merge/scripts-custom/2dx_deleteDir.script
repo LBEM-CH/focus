@@ -91,10 +91,6 @@ if ( ${delete_sure} == "yes" ) then
 	echo "::Done."
 	echo "::Images are now in ${PWD}/TRASH "
 	echo ":: "
-	echo ":: "
-	echo ":: Dont forget to rescan all directories with the button top right in this GUI"
-	echo ":: "
-	echo ":: "
 else
 	${proc_2dx}/linblock "Not moving selected directories to TRASH  (Are you sure is 'no')."
 endif
@@ -113,9 +109,6 @@ if ( ${delete_trash} == "yes" ) then
 		echo ":: Done."
 		echo ":: TRASH is now empty"
 		echo ":: "
-		echo ":: "
-		echo ":: Dont forget to rescan all directories with the button top right in this GUI"
-		echo ":: "
 	endif
 endif
 #
@@ -125,4 +118,6 @@ echo "<<@progress: 100>>"
 #
 # Leave a message on the logfile that the script finished:
 ${proc_2dx}/linblock "${scriptname} finished correctly."
+#
+echo "<<@evaluate>>"
 #

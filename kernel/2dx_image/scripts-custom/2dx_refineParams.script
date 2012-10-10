@@ -148,7 +148,6 @@ endif
 #
 if ( ${ctfrev} == 'y' ) then
   set ctfrevval = '1'
-  ${proc_2dx}/protest "WARNING: ctfrev Not used here."
 else
   set ctfrevval = '0'
 endif
@@ -241,7 +240,7 @@ ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${
 0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT
 ${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX
 ${lattice},${ABANG}                             ! AX, AY, BX, BY  , ABANG
-${spcgrp} ${phaori_local} ${revhkval} ${rot180val} ${sgnxchval}           ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
+${spcgrp} ${phaori_local} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${ctfrevval}          ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH,ROT90,CTFREV
 ${defocus} ${TLTAXIS} ${TLTANG}              ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 eot
     #
@@ -284,9 +283,9 @@ ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${
 0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT
 ${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX
 ${lattice},${ABANG}                             ! AX, AY, BX, BY  , ABANG
-${spcgrp} ${phaori_local} ${revhkval} ${rot180val} ${sgnxchval}      ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
+${spcgrp} ${phaori_local} ${revhkval} ${rot180val} ${sgnxchval} ${rot90val} ${ctfrevval}          ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH,ROT90,CTFREV
 ${defocus} ${TLTAXIS} ${TLTANG}              ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-LABIN AMP=F SIG=SIGA PHASE=PHI FOM=FOM
+LABIN AMP=F PHASE=PHI FOM=FOM SIG=SIGF 
 eot
     #
   endif

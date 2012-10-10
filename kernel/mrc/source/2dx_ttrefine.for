@@ -42,7 +42,7 @@ C  5.   RESMIN, RESMAX                              (*)
 C
 C  6.   AX, AY, BX, BY                              (*)
 C
-C  7.   ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH      (*)
+C  7.   ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH,ROT90,CTFREV      (*)
 C
 C  8.   DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL   (*)  These are parameters which
 C                                                       can be refined.
@@ -104,6 +104,8 @@ C                 phases to the precise crystallographic origin (from ORIGMERG).
 C     REVHK       reverses H and K before comparing to reference data.
 C     ROT180      rotates by 180 degs about c-axis. (needed in p3)
 C     SGNXCH      rotates by 180 degs about a-axis. (needed in p121)
+C     ROT90       rotates by 90  degs about c-axis.
+C     CTFREV      invertes contrast
 C
 C  The function which this program minimises (when MTZ=.TRUE. and MAXIM=.FALSE.)
 C    is :-
@@ -235,14 +237,16 @@ C
  1050 FORMAT(/,' coordinates of 1,0 & 0,1 , ABANG ',5F10.3)
       AYR = AY/RATIOYX  ! coords referred to x-scale.
       BYR = BY/RATIOYX
-      READ(5,*) ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
+      READ(5,*) ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH,ROT90,CTFREV
       WRITE(6,1051) ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
 1051  FORMAT(/,'          ISPGRP -------------------',I5,/,
      .  '          ORIGH --------------------',F7.1,/,
      .  '          ORIGK --------------------',F7.1,/,
      .  '          REVHK --------------------',F7.1,/,
      .  '          ROT180 -------------------',F7.1,/,
-     .  '          SGNXCH -------------------',F7.1,/)
+     .  '          SGNXCH -------------------',F7.1,/,
+     .  '          ROT90 --------------------',F7.1,/,
+     .  '          CTFREV -------------------',F7.1,/)
       READ(5,*) DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
       IF(DFMID1.EQ.DFMID2.AND.IMODE.EQ.2) DFMID2=DFMID2+1
       IF(DFMID1.EQ.DFMID2.AND.IMODE.EQ.5) DFMID2=DFMID2+1
@@ -328,7 +332,7 @@ C
      .  '    the correct value of gammastar.',/,
      .       ' TANGL ( for ORIGTILT) ......',F9.1)
 C
-CHEN
+CHEN>
       OPEN(17,FILE='TMP123333.tmp',STATUS='NEW')
       write(17,'(''set refine_defocus = "'',F9.0,'','',F9.0,'','',
      .     F9.2,''"'')')DFMID1,DFMID2,ANGAST
@@ -338,7 +342,12 @@ CHEN
       write(17,'(''set refine_TAXA = "'',F12.4,''"'')')TAXA  
       write(17,'(''set refine_TANGL = "'',F12.4,''"'')')TANGL 
       CLOSE(17)
-CHEN
+C
+      if(CTFREV.gt.0.001)then
+        DFMID1=-DFMID1
+        DFMID2=-DFMID2
+      endif
+CHEN<
       if (IMODE .eq. 0) STOP
 C
       ANGAST=ANGAST*DRAD
@@ -382,10 +391,10 @@ C
            DO 120 I=1,NSPOT
                 IHTRUE(I)=IH(I)
                 IKTRUE(I)=IK(I)
-120        CALL FIDDLE(IHTRUE(I),IKTRUE(I),Z,REVHK,SGNXCH,ROT180)
+120        CALL FIDDLE(IHTRUE(I),IKTRUE(I),Z,REVHK,SGNXCH,ROT180,ROT90)
 C
       IF(MTZ)CALL GETREFDAT(NSPOT,IH,IK,AREF,PREF,TAXA,TANGL,
-     .          REVHK,SGNXCH,ROT180,ISPGRP,IREF,LIST,LISTS,ABANG)
+     .          REVHK,SGNXCH,ROT180,ROT90,CTFREV,ISPGRP,IREF,LIST,LISTS,ABANG)
 C
 C     data read in proceed
 C
@@ -1070,6 +1079,13 @@ C      IF(ABS(B(3)).GT.0.10*DRAD) GO TO 8000    ! ANGLES MUST BE IN RADIANS
 8004   FORMAT(/,'  END OF FIXED NUMBER OF CYCLES, NCYC =',I5)
 C
 C  REFINEMENT CONVERGED OR END OF FIXED NUMBER OF CYCLES
+CHEN>
+      if(CTFREV.gt.0.001)then
+        DFMID1=-DFMID1
+        DFMID2=-DFMID2
+      endif
+CHEN<
+
 8001  WRITE(6,8002) DFMID1,DFMID2,ANGAST*RDEG,TLTAXIS*RDEG,TLTANGL*RDEG
 8002  FORMAT(': Final parameters ......',/,
      .':',25X,'DFMID1  =',F9.0,/,
@@ -1303,7 +1319,7 @@ C
 C
 C*******************************************************************************
       SUBROUTINE GETREFDAT(NSPOTS,IHIN,IKIN,AREF,PREF,TAXA,TANGL,
-     .  REVHK,SGNXCH,ROT180,ISPGRP,IREF,LIST,LISTS,ABANG)
+     .  REVHK,SGNXCH,ROT180,ROT90,CTFREV,ISPGRP,IREF,LIST,LISTS,ABANG)
 C
 C##############################################################################
 C  18.8.84 ############  IMPORTANT CHANGE #####################################
@@ -1692,7 +1708,7 @@ C  WHEN (IREF.EQ.0), NEW FILMS ARE COMPARED ONLY TO FIRST DATASET(UNTILTED)
       ELSE
             Z=0.0
       ENDIF
-            CALL FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180)
+            CALL FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180,ROT90)
 C
       CALL ASYM(IH,IK,Z,IP1,IP2,LSPEC,IPTEST,
      1  WSTAR,MAT(1,IMAT(1,ISPGRP)),MAT(1,IMAT(2,ISPGRP)),
@@ -2046,7 +2062,7 @@ C      WRITE(6,86)IH,IK,ZASYM,FREF
 C******************************************************************************
 C  FIDDLING WITH THE INDEXING TO GET CORRECT MATCH TO INDEXING CONVENTION
 C  USEFUL IN A NUMBER OF SPACE GROUPS -- SEE WRITE-UP AT TOP OF PROGRAM.
-      SUBROUTINE FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180)
+      SUBROUTINE FIDDLE(IH,IK,Z,REVHK,SGNXCH,ROT180,ROT90)
       IF(REVHK.EQ.0.0) GO TO 225
       I=IH
       IH=IK
@@ -2060,6 +2076,12 @@ C  USEFUL IN A NUMBER OF SPACE GROUPS -- SEE WRITE-UP AT TOP OF PROGRAM.
       IH=-IH
       IK=-IK
 231   CONTINUE
+      if(ROT90.ne.0.0)then
+        I=IH
+        IH=-IK
+        IK=I
+      endif
+C
       RETURN
       END
 C*****************************************************************************

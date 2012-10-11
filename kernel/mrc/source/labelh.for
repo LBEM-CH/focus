@@ -1523,6 +1523,12 @@ C
         domin = 1.E10
         domax =-1.E10
         DOUBLMEAN = 0.0
+C
+        CALL IRTLAB(1,LABELS,NL)
+        CALL IRTEXT(1,EXTRA,1,29)
+        CALL IRTCEL(1,CELL)
+        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+        CALL IALEXT(2,EXTRA,1,29)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         if(MODE.lt.3)then

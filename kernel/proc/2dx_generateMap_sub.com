@@ -686,18 +686,11 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   \rm -f SCRATCH/TMP001.map
   #
-  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/TMP001.map << eof
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/${prefix}${imagename}-${SYM_sub}.map << eof
 XYZLIM 0 399 0 0 0 399
+AXIS Z X Y
 END
 eof
-  #
-  \rm -f SCRATCH/TMP001.mrc
-  #
-  ${bin_2dx}/labelh.exe << eot
-SCRATCH/TMP001.map
-13
-SCRATCH/${prefix}${imagename}-${SYM_sub}.map
-eot
   #
 else
   #
@@ -756,10 +749,17 @@ echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}.mrc <${prename}${SYM_s
 ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM_sub}.plt"
 #############################################################################
 #
+if ( ${rotate_to_Z} == "yes" ) then
+  set title_phase_zero = "TITLE PSF. Symmetry: ${SYM_sub}. Grid: 20A. Line 50% of PSF. Axis: right=X, down=Y."
+  set title_map = "TITLE Symmetry: ${SYM_sub}. Filename: ${prename} ${imagename}. Axis: right=X, down=Y."
+else
+  set title_phase_zero = "TITLE PSF. Symmetry: ${SYM_sub}. Grid: 20A. Line 50% of PSF."
+  set title_map = "TITLE Symmetry: ${SYM_sub}. Filename: ${prename} ${imagename}"
+endif
 \rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.plt
 #
 ${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map  PLOT  ${prefix}${imagename}_phase_zero-${SYM_sub}.plt  << eof
-TITLE Point Spread Function (PSF) Symmetry: ${SYM_sub}. Grid: 20A. Line 50% of PSF.
+${title_phase_zero}
 MAP SCALE 2.0
 CONTRS 0 TO 250 BY 125
 MODE BELOW 125 DASHED 1 0.15 0
@@ -772,7 +772,7 @@ eof
 \rm -f ${prefix}${imagename}-${SYM_sub}.plt
 #
 ${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}-${SYM_sub}.map  PLOT  ${prefix}${imagename}-${SYM_sub}.plt  << eof
-TITLE Symmetry: ${SYM_sub}. Filename: ${prename} ${imagename}
+${title_map}
 MAP SCALE 0.4
 CONTRS SIG -3.0 TO 3.0 BY ${npo_cntrs_step} 
 MODE GREEN BELOW ${npo_cntrs_below} DASHED 1 0.15 0

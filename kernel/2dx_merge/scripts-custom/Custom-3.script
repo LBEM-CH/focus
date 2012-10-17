@@ -114,14 +114,20 @@ foreach dirfile ( ${dirlist} )
   # ${app_2dx_image} ${newdir} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
   
   # Use the following to run somme of the standard scripts again:
+  # ${app_2dx_image} ${newdir} "2dx_initialize"
+  # ${app_2dx_image} ${newdir} "2dx_initialize_files"
   # ${app_2dx_image} ${newdir} "2dx_fftrans"
-  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
+  # ${app_2dx_image} ${newdir} "2dx_getDefTilt"
+  # ${app_2dx_image} ${newdir} "2dx_getLattice"
   # ${app_2dx_image} ${newdir} "2dx_refineLattice"
+  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
   # ${app_2dx_image} ${newdir} "2dx_getspots1"
   # ${app_2dx_image} ${newdir} "2dx_unbend1"
-  # ${app_2dx_image} ${newdir} "2dx_getspots1"
+  # ${app_2dx_image} ${newdir} "2dx_getspots"
   # ${app_2dx_image} ${newdir} "2dx_unbend2"
+  # ${app_2dx_image} ${newdir} "2dx_unbendSyn"
   # ${app_2dx_image} ${newdir} "2dx_applyCTF"
+  # ${app_2dx_image} ${newdir} "2dx_max_likelihood"
   # ${app_2dx_image} ${newdir} "2dx_generateMAP"
 
   # Use the following to recalculate the TAXA and TANGL values for all selected images:

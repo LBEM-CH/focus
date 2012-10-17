@@ -740,10 +740,19 @@ if ( ${SYM_sub} == 'p1' ) then
   \ln -s ${prefix}${imagename}-p1.mrc final_map.mrc
 endif
 #
+if ( ${SYN_Unbending} == "0" ) then
+  \cp -f final_map.mrc final_map_FouFilter.mrc
+else
+  \cp -f final_map.mrc final_map_SynRef.mrc
+endif
+#
 echo "# IMAGE: ${prefix}${imagename}_phase_zero-p1.mrc <PSF as map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc <PSF symmetrized as map>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-p1.mrc <${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}.mrc <${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
+#
+echo "# IMAGE: final_map_FouFilter.mrc <${prename}Non-symmetrized Map Fourier Filter>"  >> LOGS/${scriptname}.results
+echo "# IMAGE: final_map_SynRef.mrc <${prename}Non-symmetrized Map Synthetic Reference>"  >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM_sub}.plt"

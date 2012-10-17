@@ -85,6 +85,15 @@ source ${proc_2dx}/2dx_makedirs
 #
 set old_imagedirectory = `basename $PWD`
 #
+set tlen = `echo ${old_imagedirectory} | wc -c`
+set tlen2 = `echo ${tlen} | awk '{ s = abs ( $1 - 2 ) } END { print s }'`
+set tlen3 = `echo ${tlen} | awk '{ s = abs ( $1 - 3 ) } END { print s }'`
+set tlen4 = `echo ${tlen} | awk '{ s = abs ( $1 - 4 ) } END { print s }'`
+set tend = `echo ${old_imagedirectory} | cut -c ${tlen3}-${tlen2}`
+if ( ${tend} == "_c" ) then
+  set old_imagedirectory = `echo ${old_imagedirectory} | cut -c 1-${tlen4}`
+endif
+#
 set clone_number = "1"
 set new_imagedirectory = ${old_imagedirectory}_c${clone_number}
 while ( -d ../${new_imagedirectory} )

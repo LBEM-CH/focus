@@ -64,6 +64,7 @@
 # DISPLAY: crop_histogram
 # DISPLAY: crop_histogram_percent
 # DISPLAY: crop_histogram_stdev
+# DISPLAY: SYN_Unbending
 #
 #$end_local_vars
 #
@@ -117,6 +118,7 @@ set MergeIWP = ""
 set crop_histogram = ""
 set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
+set SYN_Unbending = ""
 #
 #$end_vars
 #

@@ -63,6 +63,7 @@
 # DISPLAY: imagesidelength
 # DISPLAY: SCRATCH_DISK
 # DISPLAY: FFTIR_DISK
+# DISPLAY: SYN_Unbending
 #
 #$end_local_vars
 #
@@ -105,6 +106,7 @@ set quadradb = ""
 set initialization_executable = ""
 set initialization_corr_endian = ""
 set crop = ""
+set SYN_Unbending = ""
 #
 #$end_vars
 #

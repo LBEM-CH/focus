@@ -380,8 +380,23 @@ C
         CALL P2K_GRID(0.5*PLTSIZ,0.5*PLTSIZ,1.0)
         CALL P2K_ORIGIN(-0.5*PLTSIZ,-0.7*PLTSIZ,0.)
         CALL P2K_COLOUR(0)
-        CALL P2K_MOVE(10.0,YPOSN,0.)
+C
+        CALL P2K_MOVE(10.0,YPOSN,0.)		! Plot title
         CALL P2K_STRING(TITLP,60,0.)
+C
+        YTPOS=+30.0
+        CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
+        CALL P2K_STRING('Image distribution by tilt angles, in asymetric triangle.',57,0.0)
+        YTPOS=YTPOS-10.0
+        CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
+        CALL P2K_STRING('Symbol size represents significance of the image in the 3D dataset.',67,0.0)
+        YTPOS=YTPOS-10.0
+        CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
+        CALL P2K_STRING('Details in: Cheng & Yeager, Acta Cryst. A60(4), 351-354 (2004)',62,0.0)
+        YTPOS=YTPOS-10.0
+        CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
+        CALL P2K_STRING('http://dx.doi.org/10.1107/S0108767304010396',43,0.0)
+
         CALL P2K_MOVE(0.,0.,0.)
 C        CALL P2K_DRAW(PLTSIZ,0.,0.)            !No box drawing
 C        CALL P2K_DRAW(PLTSIZ,PLTSIZ,0.)
@@ -407,7 +422,7 @@ C        CALL P2K_DRAW(0.,0.,0.)
         X2=X/2
         Y=-4*ROFF
         CALL P2K_MOVE(X2,Y,0)
-        CALL P2K_CSTRING('TANGL(deg)',10,0)   !TANGL LEGEND
+        CALL P2K_CSTRING('TANGL(deg)',10,0.0)   !TANGL LEGEND
         BLENGTH=SQRT(BX**2+BY**2)
         X=COS(ASANGL1)*(PLTSIZ/2.0)
         Y=SIN(ASANGL1)*(PLTSIZ/2.0)
@@ -471,7 +486,7 @@ C        CALL P2K_DRAW(0.,0.,0.)
             X=RAD
             Y=-2*ROFF
             CALL P2K_MOVE(X,Y,0)
-            CALL P2K_CSTRING(ARCSTR,4,0)
+            CALL P2K_CSTRING(ARCSTR,4,0.0)
           ENDIF
           ISTEP=ASANGL
            DO 3360 I=1,ISTEP

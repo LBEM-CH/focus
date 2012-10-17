@@ -53,9 +53,6 @@ echo "<<@progress: 1>>"
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
 source ${proc_2dx}/2dx_makedirs 
 #
-# This memorizes the current merge directory under the variable "oldir":
-set oldir = $PWD
-#
 if ( ${backup_sure} == "no" ) then
   ${proc_2dx}/protest "Not running (Are you sure is 'no')."
 endif
@@ -85,10 +82,18 @@ if ( ${backup_database_direction} == "5" ) then
   set target = 2dx_image.cfg
 endif
 #
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+cd ..
+set rootdir = $PWD
+#
 if ( ${backup_all_files} == "0" ) then
-  find .. -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+  cd ${rootdir}
+  find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${olddir}/SCRATCH/2dx_merge_alldirs.dat
+  cd ${olddir}
 else
-  cp 2dx_merge_dirfile.dat ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+  cd ${olddir}
+  cp 2dx_merge_dirfile.dat ${olddir}/SCRATCH/2dx_merge_alldirs.dat
 endif
 #
 set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
@@ -98,17 +103,16 @@ set curval = 10.0
 #
 set dircounter = ${dirnum}
 while ( ${dircounter} > 0 )
-  set from_dir = `cat ${oldir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
-  cd ${oldir}
-  cd ..
-  cd ${from_dir}
+  set from_dir = `cat ${olddir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
   echo "::Working on ${from_dir}"
+  cd ${rootdir}
+  cd ${from_dir}
   #
   if ( -e ${source} ) then
-    echo "::                                  Copy ${source} to ${target}"
+    echo "::                                              Copy ${source} to ${target}"
     \cp -f ${source} ${target}
   else
-    echo "::  WARNING: ${source} does not exist here."
+    ${proc_2dx}/linblock "WARNING: ${source} does not exist here."
   endif
   #
   set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
@@ -116,7 +120,7 @@ while ( ${dircounter} > 0 )
   echo "<<@progress:${curprogress}>>"
   #
   @ dircounter -= 1
-  cd ${oldir}
+  cd ${olddir}
 end
 #
 echo "set backup_sure = no" >> LOGS/${scriptname}.results

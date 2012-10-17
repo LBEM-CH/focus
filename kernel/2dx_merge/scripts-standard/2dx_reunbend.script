@@ -119,7 +119,7 @@ if ( ${ReUnbend_All} == "3" ) then
     cd ${dirfile}
     if ( -e 2dx_image.cfg ) then
       echo ":: "
-      ${proc_2dx}/linblock "::Working on ${dirfile}"
+      ${proc_2dx}/linblock "Working on ${dirfile}"
       set curdir = ${PWD}
       echo ":: ${app_2dx_image} ${curdir} "'"*"'
       ${app_2dx_image} ${curdir} '"*"'

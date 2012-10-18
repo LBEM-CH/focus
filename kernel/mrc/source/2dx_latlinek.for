@@ -277,6 +277,7 @@ C
 CHENN>
       READ(5,*) IDOH,IDOK
       READ(5,*) IAQP2,iplterr,imaxIQplot
+      READ(5,*) RMAXAMP
 CHENN<
       IF(NCYCLS.EQ.0) NCYCLS=2000
 C
@@ -404,8 +405,12 @@ CHENN<
           FOBS(NOBS) = FO
 CHENN>
           IQOBS(NOBS) = IQQ
+          if(RMAXAMP.eq.0.0)then
+            IF (FO .GT. FMAX) FMAX = FO
+          else
+            FMAX=RMAXAMP
+          endif
 CHENN<
-          IF (FO .GT. FMAX) FMAX = FO
           IF (PHIO .LE. -900.) GOTO 13
           IF (PHIO .GT.  180.) PHIO = PHIO - 360.
           IF (PHIO .LT. -180.) PHIO = PHIO + 360.
@@ -865,7 +870,7 @@ C
         IF(SUM.NE.0.0) RF = RF/SUM
         IF (.NOT. INTEN.AND.NP.NE.0) RMSP = SQRT(RMSP/NP)
         IF (MOD(NCOUNT,NPRNT) .NE. 0) GOTO 90
-        WRITE(6,1000) NF,NP,RF,RMSP,EF,EP,F
+C        WRITE(6,1000) NF,NP,RF,RMSP,EF,EP,F
 1000    FORMAT(' #FP,RF,RMS,FPT ',2I4,F9.4,F9.3,4E12.4)
         FCOMMON=F
 90      NCOUNT = NCOUNT + 1
@@ -1995,8 +2000,8 @@ C
         CALL P2K_STRING('RECIPROCAL',10,0.)
         CALL P2K_MOVE(POSN,-7.5,0.)
         CALL P2K_STRING('ANGSTROMS',9,0.)
-        POSX=-5.0
         POSY=FMAG+GAP+PMAG - 3.0
+        POSX = -5.0
         CALL P2K_MOVE(POSX,POSY,0.)
         CALL P2K_STRING('PHS',3,0.)
 
@@ -2012,6 +2017,7 @@ C
 C
 C-------Plot units on vertical axis:
 C
+        XPOS = -0.16 * XPLTSIZ
         DO 200 J=1,IC
           F=J*B
           YPOS=F*SCALE-0.2
@@ -2023,7 +2029,6 @@ C
           ZD=ZB-1.0
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
-          XPOS=-10.0
           CALL P2K_MOVE(XPOS,YPOS,0.)
           if(F.gt.10000000)then
             WRITE(LINE(1:11),'(G11.3)') F

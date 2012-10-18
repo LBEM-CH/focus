@@ -308,7 +308,7 @@ endif
 echo "<<@progress: 35>>"
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_hklsym - to apply symmetry to APH file for 2D run"
+${proc_2dx}/linblock "2dx_hklsym3 - to apply symmetry to APH file for 2D run"
 #############################################################################  
 #
 \rm -f APH/sym2D.hkl

@@ -448,6 +448,11 @@ ${proc_2dx}/linblock "Now for 2D processing:"
 #
 echo "# IMAGE: ${infile} <MTZ: input data for 2D (from last merging)>"  >> LOGS/${scriptname}.results
 #
+# in 2D there is no ratation
+if ( ${merge_modus} == "2D" ) then
+  set rotate_to_Z = "no"
+endif
+#
 if ( ${rotate_to_Z} == "yes" ) then
   #
   set AXIS = "Z,X,Y"

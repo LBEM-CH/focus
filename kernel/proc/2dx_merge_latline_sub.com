@@ -127,6 +127,14 @@ eot
     ${proc_2dx}/protest "ERROR: latlines.dat does not exist."
   endif
   #
+  if ( -e TMP_RMAXAMP.dat ) then
+    set RMAXAMP = `cat TMP_RMAXAMP.dat | awk ' { s = $1 / 5.0 } END { print s }'`
+  else
+    set RMAXAMP = 0.0
+  endif
+  #
+  set RMAXAMP = 0.0
+  #
   echo " "
   ${proc_2dx}/lin "-"
   echo " "
@@ -197,6 +205,7 @@ ${MergeIGUESS},${MergeBINSIZ}                                ! IGUESS,BINSIZ
 ${MergeNCYCLS},${MergeMPRINT}                                ! NCYCLS,MPRINT
 ${idoh},${idok}                                              ! H,K indices to plot. 0 0 = all.
 ${IAQP2},${iplterr},${imaxIQplot}                            ! IAQP2: 1=y,0=n, iplterr=1:errbar in PHS, maxIQ for PSplot
+${RMAXAMP}
 eot
 #
 echo "################################################"

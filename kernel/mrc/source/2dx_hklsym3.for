@@ -3,11 +3,14 @@
 C       Henning Stahlberg, 16.5.2000
 C       updated 4/19/2008
 
-      PARAMETER (MAXSPOT = 200)
+C      IMPLICIT NONE
+C
+      INTEGER MAXSPOT
+      PARAMETER (MAXSPOT = 100)
       CHARACTER*200  TITLE 
       CHARACTER*200 cline1,cline2,cline3,cline4
       INTEGER H,K,L
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,8)
+      COMMON // ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,8)
 C
 C-----------ROUTP contains AMP,PHS,BACK,FOM,SIGA
 C 
@@ -197,22 +200,22 @@ C ref in
 C  prog # symb  K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180
 C               K=                     -k +k -k +k                         JK180
 
-        call ROUTF(ROUTP, H  ,   K, L,AMP, PHASE,BACK,FOM,SIGA,1)
-        call ROUTF(ROUTP,-H  ,   K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP, H  ,  -K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,-H  ,  -K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,   K, H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,   K,-H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,  -K, H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,  -K,-H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP, H  ,-H-K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,-H  , H+K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,   K,-H-K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,  -K, H+K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,-H-K, H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP, H+K,-H  , L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP,-H-K,   K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
-        call ROUTF(ROUTP, H+K,  -K, L,AMP, PHASE,BACK,FOM,SIGA,ISYMFIELD(ispc,irun))
+        call ROUTF( H  ,   K, L,AMP,PHASE,BACK,FOM,SIGA,1)
+        call ROUTF(-H  ,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(1,ispc))
+        call ROUTF( H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(2,ispc))
+        call ROUTF(-H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(3,ispc))
+        call ROUTF(   K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(4,ispc))
+        call ROUTF(   K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(5,ispc))
+        call ROUTF(  -K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(6,ispc))
+        call ROUTF(  -K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(7,ispc))
+        call ROUTF( H  ,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(8,ispc))
+        call ROUTF(-H  , H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(9,ispc))
+        call ROUTF(   K,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(10,ispc))
+        call ROUTF(  -K, H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(11,ispc))
+        call ROUTF(-H-K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(12,ispc))
+        call ROUTF( H+K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(13,ispc))
+        call ROUTF(-H-K,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(14,ispc))
+        call ROUTF( H+K,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(15,ispc))
 C
       goto 1000
 C
@@ -329,7 +332,7 @@ C
 C
 C==========================================================
 C
-      SUBROUTINE ROUTF(ROUTP,H,K,L,AMP,PHASE,BACK,FOM,SIGA,ISHIFT)
+      SUBROUTINE ROUTF(H,K,L,AMP,PHASE,BACK,FOM,SIGA,ISHIFT)
 C
 C fill in the AMP,PHASE,FOM,SIGA into ROUTP field
 C IPHSHIFT is defined as 
@@ -346,9 +349,16 @@ C       H  differ by 180 * H            JSIMPL  = number to compare directly
 C       K  differ by 180 * K            JSCREW   = number to compare + 180 * M
 C       HK differ by 180 * (H+K)         where M = H*JH180 + K*JK180
 C                                        
-      PARAMETER (MAXSPOT = 100)
+C      IMPLICIT NONE
+C
+      INTEGER MAXSPOT
+      PARAMETER (MAXSPOT = 200)
+C
       INTEGER H,K,L
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,6)
+      INTEGER ISHIFT
+      REAL AMP,PHASE,BACK,FOM,FOMFAC,SIGA,PX,PY,RPT,PI
+      REAL RAMP,RBACK,RFOM,RSIGA
+      COMMON // ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,8)
 C
       if(abs(H).gt.MAXSPOT)STOP'too big index for ROUTP'
       if(abs(K).gt.MAXSPOT)STOP'too big index for ROUTP'

@@ -190,7 +190,7 @@ if ( ${merge_modus} == "3D" ) then
   #############################################################################
   #############################################################################
   #
-  set infile = merge3Dref.mtz
+  set infile = merge3D.mtz
   #
   echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
   echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
@@ -434,23 +434,27 @@ eof
   \rm -f SCRATCH/scratch2_inverted.map
   echo "# IMAGE: volume_inverted.map <MAP: inverted-handedness (wrong) 3D Volume, for checking only>" >> LOGS/${scriptname}.results
   #
+else
+  set infile = merge2D.mtz
 endif
 #
 #############################################################################
 #############################################################################
 #############################################################################
-# Here for 2D work:
+${proc_2dx}/linblock "Now for 2D processing:"
 #############################################################################
 #############################################################################
 #############################################################################
-#
-set infile = merge2D.mtz
 #
 echo "# IMAGE: ${infile} <MTZ: input data for 2D (from last merging)>"  >> LOGS/${scriptname}.results
 #
 if ( ${rotate_to_Z} == "yes" ) then
   #
   set AXIS = "Z,X,Y"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "fft - to calculate map with ${AXIS} orientation"
+  #############################################################################
   #
   ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1.map  << eot
 LABIN F1=F  PHI=PHI W=FOM ##
@@ -466,12 +470,16 @@ RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
-    #
-  else
-    #
-    set AXIS = "X,Y,Z"
-    #
-    ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1.map  << eot
+  #
+else
+  #
+  set AXIS = "X,Y,Z"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "fft - to calculate map with ${AXIS} orientation"
+  #############################################################################
+  #
+  ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1.map  << eot
 LABIN F1=F  PHI=PHI W=FOM ##
 PROJECTION
 AXIS ${AXIS}
@@ -485,8 +493,7 @@ RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
-    #
-  endif
+  #
 endif
 #
 #############################################################################
@@ -495,13 +502,13 @@ endif
 #
 echo "<<@progress: +10>>"
 #
-#############################################################################
-${proc_2dx}/linblock "mapmask - to extend SCRATCH/scratch1.map into ${imagename}-${SYM}.rec.mrc"
-#############################################################################
-#
 \rm -f SCRATCH/${imagename}-${SYM}.map
 #
 if (${rotate_to_Z} == "yes" ) then
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "mapmask - to extend SCRATCH/scratch1.map into ${imagename}-${SYM}.mrc"
+  #############################################################################
   #
   \rm -f SCRATCH/TMP001.map
   #
@@ -509,6 +516,10 @@ ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/TMP001.map << eof
 XYZLIM 0 399 0 0 0 399
 END
 eof
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "labelh - to cyclically permutate header information"
+  #############################################################################
   #
   \rm -f SCRATCH/TMP001.mrc
   #
@@ -519,6 +530,10 @@ SCRATCH/${imagename}-${SYM}.map
 eot
   #
 else
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "mapmask - to extend SCRATCH/scratch1.map into ${imagename}-${SYM}.mrc"
+  #############################################################################
   #
 ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/${imagename}-${SYM}.map << eof
 XYZLIM 0 399 0 399 0 0
@@ -588,7 +603,7 @@ else
   echo "<<@progress: 70>>"
   #
   #############################################################################
-  ${proc_2dx}/linblock "Launching SPIDER script - to create a scaled version of the final map"
+  ${proc_2dx}/linblock "labelh - to transform the map into BYTE format with automatic scaling"
   #############################################################################
   #
   set realu = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
@@ -601,6 +616,10 @@ ${imagename}-${SYM}.mrc
 SCRATCH/${imagename}-${SYM}.mrc
 eot
   #
+  #############################################################################
+  ${proc_2dx}/linblock "mrc2tif - to create a TIFF file from the map that can be read by SPIDER"
+  #############################################################################
+  #
   ${bin_2dx}/mrc2tif.exe << eot
 SCRATCH/${imagename}-${SYM}.mrc
 SCRATCH/${imagename}-${SYM}.tif
@@ -608,6 +627,10 @@ Y
 eot
   #
   # echo "# IMAGE: SCRATCH/${imagename}-${SYM}.mrc"  >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Launching SPIDER script - to create a scaled version of the final map"
+  #############################################################################
   #
   ### THIS NEEDS TO BE A VALID PATH TO SPIDER: For example:
   #/usr/local/spider/bin/spider.exe

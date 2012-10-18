@@ -84,6 +84,8 @@ eot
 AXIS X,Y,Z
 scale factor 1
 xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} -0.5 0.5
+pad -100
+SYMM 1
 END
 eof
   #

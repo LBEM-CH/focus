@@ -753,6 +753,7 @@ echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}.mrc <${prename}${SYM_s
 #
 echo "# IMAGE: final_map_FouFilter.mrc <${prename}Non-symmetrized Map Fourier Filter>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: final_map_SynRef.mrc <${prename}Non-symmetrized Map Synthetic Reference>"  >> LOGS/${scriptname}.results
+echo "# IMAGE: ${imagename}_ref.mrc <Reference 3D Map Projection>"  >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM_sub}.plt"

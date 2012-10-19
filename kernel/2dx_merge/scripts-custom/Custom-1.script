@@ -144,7 +144,7 @@ foreach dirfile ( ${dirlist} )
   # Use the following, to set the defocus refinement script to backup modus, for each selected image:
   # echo "set defocus_direction = 1" >> LOGS/${scriptname}.results
   # Use the following, to backup the defocus values for each selected image:
-  ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
+  # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
 
   # Use the following, to refine the defocus for each selected image:
   # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"

@@ -43,7 +43,7 @@ alias replaceWithLink 'eval " \\
 		  endif \\
 		  if ( -e \!:2 ) then \\
 		  	if ( -d \!:2 ) then \\
-		    		if (`ls -l \!:2 | wc -l` != 0 ) then \\
+		    		if (`ls -l \!:2/ | wc -l` != 0 ) then \\
 	              			mv \!:2/* \!:1 \\
 		   	 	endif \\
     		    	rm -rf \!:2 \\
@@ -140,7 +140,7 @@ else
     set target = `readlink FFTIR`
     if ("$target" != "$newfftir") then
 	echo "::FFTIR target has changed."
-    	replaceWithLink ${newfftir} FFTIR
+	replaceWithLink ${newfftir} FFTIR
     endif
   endif
 endif

@@ -61,6 +61,7 @@ set overwrite = "y"
 # DISPLAY: SYN_Unbending
 # DISPLAY: refine_def_reference
 # DISPLAY: refine_def_RESMAX
+# DISPLAY: defocus_direction
 #
 #$end_local_vars
 #
@@ -111,6 +112,7 @@ set phacon = ""
 set SYN_Unbending = ""
 set refine_def_reference = ""
 set refine_def_RESMAX = ""
+set defocus_direction = ""
 #
 #$end_vars
 #
@@ -137,6 +139,24 @@ echo " "
 source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
+#
+if ( ${defocus_direction}x == "1x" ) then
+  set defocusbackup = ${defocus}
+  echo "set defocusbackup = ${defocusbackup}" >> LOGS/${scriptname}.results
+  echo "set defocus_direction = 0" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Backing up defocus values: ${defocus}"
+  echo "<<@progress: 100>>"
+  exit 
+endif
+#
+if ( ${defocus_direction}x == "2x" ) then
+  set defocus = ${defocusbackup}
+  echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+  echo "set defocus_direction = 0" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Restoring defocus values: ${defocus}"
+  echo "<<@progress: 100>>"
+  exit 
+endif
 #
 if ( ${rot180} == 'y' ) then
   set rot180val = '1'

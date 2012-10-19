@@ -64,6 +64,7 @@
 # DISPLAY: MergeAK
 # DISPLAY: MergeIWF
 # DISPLAY: MergeIWP
+# DISPLAY: MergeLatLine_MaxAmpFactor
 # DISPLAY: merge_ref_num
 # DISPLAY: merge_comment_1
 # DISPLAY: merge_comment_2
@@ -122,6 +123,7 @@ set MergePFACT = ""
 set MergeBINSIZ = ""
 set MergeNCYCLS = ""
 set MergeMPRINT = ""
+set MergeLatLine_MaxAmpFactor = ""
 set refbeamtilt = ""
 set reftiltgeo = ""
 set ITAXASTEP = ""

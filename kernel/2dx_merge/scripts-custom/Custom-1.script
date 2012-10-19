@@ -136,6 +136,19 @@ foreach dirfile ( ${dirlist} )
   # Use the following to calculate the local real-space lattice for each selected image:
   # ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
   
+  # Use the following, to set the defocus refinement option to "phases alone", for each selected image:
+  # echo "set ctfsearch_iphase = 2" >> LOGS/${scriptname}.results
+  # echo "set ctfsearch_ncyc = 10" >> LOGS/${scriptname}.results
+  # echo "set ctfsearch_df_step = 100" >> LOGS/${scriptname}.results
+
+  # Use the following, to set the defocus refinement script to backup modus, for each selected image:
+  # echo "set defocus_direction = 1" >> LOGS/${scriptname}.results
+  # Use the following, to backup the defocus values for each selected image:
+  ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
+
+  # Use the following, to refine the defocus for each selected image:
+  # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
+  
   #
   ################################################################################
   ######### Modify only the section above ########################################

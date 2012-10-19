@@ -127,13 +127,27 @@ eot
     ${proc_2dx}/protest "ERROR: latlines.dat does not exist."
   endif
   #
-  if ( -e TMP_RMAXAMP.dat ) then
-    set RMAXAMP = `cat TMP_RMAXAMP.dat | awk ' { s = $1 / 5.0 } END { print s }'`
-  else
-    set RMAXAMP = 0.0
+  set New_MergeLatLine_MaxAmpFactor = `echo ${MergeLatLine_MaxAmpFactor} | awk ' { if ( $1 < 1.0 ) { s = 0.0 } else { s = $1 } } END { printf "%.1f", s }'`
+  if ( ${New_MergeLatLine_MaxAmpFactor}x != ${MergeLatLine_MaxAmpFactor}x ) then
+    set MergeLatLine_MaxAmpFactor = ${New_MergeLatLine_MaxAmpFactor}
+    echo "::Correcting MergeLatLine_MaxAmpFactor to ${MergeLatLine_MaxAmpFactor}"
+    echo "set MergeLatLine_MaxAmpFactor = ${MergeLatLine_MaxAmpFactor}" >> LOGS/${scriptname}.results
   endif
-  #
-  set RMAXAMP = 0.0
+  echo ": MergeLatLine_MaxAmpFactor = ${MergeLatLine_MaxAmpFactor}"
+  if ( ${MergeLatLine_MaxAmpFactor}x == "0.0x" ) then
+    set RMAXAMP = 0.0
+    echo ":Using variable lattice line amplitude scaling."
+  else
+    if ( -e TMP_RMAXAMP.dat ) then
+      set TMPVAL = `cat TMP_RMAXAMP.dat`
+      \rm -f TMP_RMAXAMP.dat
+      set RMAXAMP = `echo ${TMPVAL} ${MergeLatLine_MaxAmpFactor} | awk ' { s = $1 / $2 } END { print s }'`
+      echo "::Using static lattice line amplitude scaling, ${MergeLatLine_MaxAmpFactor} below highest amplitude."
+    else
+      set RMAXAMP = 0.0
+      echo ":Using variable lattice line amplitude scaling."
+    endif
+  endif
   #
   echo " "
   ${proc_2dx}/lin "-"

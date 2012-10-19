@@ -2044,15 +2044,27 @@ C
 C-------PLOT OBSERVED AMPLITUDES FIRST
 C
         CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.48)
+        YMAX=FMAX*SCALE - 0.22*FONTSIZE*0.48
         DO 50 J=1,NOBS
           IF(FOBS(J).EQ.-999.) GO TO 50
           XP=ZSTAR(J)*ZMAG
           YP=FOBS(J)*SCALE - 0.22*FONTSIZE*0.48
-          CALL P2K_MOVE(XP,YP,0.)
-          IF(IQOBS(J).le.imaxIQplot)then
-            CALL P2K_CSTRING('X',1,0.)
+CHEN>
+          if(YP.gt.YMAX)THEN
+            YP=YMAX
+            CALL P2K_MOVE(XP,YP,0.)
+            IF(IQOBS(J).le.imaxIQplot)then
+              CALL P2K_CSTRING('#',1,0.)
+            else
+              CALL P2K_CSTRING('*',1,0.)
+            endif
           else
-            CALL P2K_CSTRING('+',1,0.)
+            CALL P2K_MOVE(XP,YP,0.)
+            IF(IQOBS(J).le.imaxIQplot)then
+              CALL P2K_CSTRING('X',1,0.)
+            else
+              CALL P2K_CSTRING('+',1,0.)
+            endif
           endif
 CHENN<
 50      CONTINUE

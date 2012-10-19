@@ -812,7 +812,7 @@ C
 C       WRITE(6,9030) (COOR(I,J,K),I=1,3)
         WRITE(3,9030) (COOR(I,J,K),I=1,3)
         if(COOR(3,J,K).ne.0.0)then
-          write(13,'(I5,'' 3'',G13.4,G13.4,G13.4)')
+          write(13,'(I5,'' 3'',F13.2,F13.2,G13.4)')
      .      ispidernum,COOR(1,J,K),COOR(2,J,K),COOR(3,J,K)/DENMAX
           ispidernum = ispidernum + 1
         endif

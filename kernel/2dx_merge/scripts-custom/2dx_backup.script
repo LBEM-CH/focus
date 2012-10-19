@@ -46,6 +46,7 @@ set scriptname = 2dx_backup
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
+source ${proc_2dx}/2dx_merge_makedirs 
 #
 echo backup_dir = ${backup_dir}
 echo backup_direction = ${backup_direction}

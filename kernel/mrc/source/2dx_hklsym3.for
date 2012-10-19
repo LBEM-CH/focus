@@ -8,6 +8,10 @@ C
       INTEGER MAXSPOT
       PARAMETER (MAXSPOT = 100)
 C
+C-----NFIELD is 8*(MAXSPOT*2+1)**3
+      INTEGER NFIELD
+      PARAMETER (NFIELD = 64964808)
+C
       CHARACTER*200  TITLE 
       CHARACTER*200 cline1,cline2,cline3,cline4
       INTEGER H,K,L,i1sig,icount,ihmax,ikmax,ilmax,ineg,isig
@@ -91,6 +95,19 @@ C
      . 0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,
      . 0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0  /
 C
+      DATA ROUTP /NFIELD*0.0/
+C
+C------This is done with the DATA statement above
+C      do H=-MAXSPOT,MAXSPOT
+C        do K=-MAXSPOT,MAXSPOT
+C          do L=-MAXSPOT,MAXSPOT
+C            do N=1,8
+C              ROUTP(H,K,L,N)=0.0
+C            enddo
+C          enddo
+C        enddo
+C      enddo
+C
       PI=3.1415926537
 C
       WRITE(*,'('': 2dx_sym, to symmetrize APH file '')')
@@ -170,16 +187,6 @@ C
         call shorten(TITLE,k)
         WRITE (11,'(A)') TITLE(1:k)
       endif
-C
-      do H=-MAXSPOT,MAXSPOT
-        do K=-MAXSPOT,MAXSPOT
-          do L=-MAXSPOT,MAXSPOT
-            do N=1,8
-              ROUTP(H,K,L,N)=0.0
-            enddo
-          enddo
-        enddo
-      enddo
 C
       icount=0
       ihmax=0

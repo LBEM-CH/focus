@@ -3316,7 +3316,8 @@ C
 8101      FORMAT(':: MA21AD FAILED',F10.5)
 CHEN>
           WRITE(*,'('':: '')')
-          WRITE(*,'('':: MA21AD Failed, but continuing nevertheless...'')')
+          WRITE(*,'('':: MA21AD Failed, but continuing '',
+     .     ''nevertheless...'')')
           WRITE(*,'('':: '')')
 C---------STOP
           PHRESID = 99999.9

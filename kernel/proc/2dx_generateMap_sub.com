@@ -436,7 +436,7 @@ eot
   #
   ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}-permutated.hkl hklout ${prefix}${imagename}.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
-CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang} 
+CELL ${celly} ${ALAT} ${cellx} 90.0  ${realang} 90.0 
 SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
@@ -499,7 +499,7 @@ eot
   #
   ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}_phase_zero-permutated.hkl hklout ${prefix}${imagename}_phase_zero.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}_phase_zero, ${date}
-CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang} 
+CELL ${celly} ${ALAT} ${cellx} 90.0 ${realang} 90.0 
 SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
@@ -712,28 +712,32 @@ else
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "LABEL - to create a clean MRC file format instead of CCP4"
+# ${proc_2dx}/linblock "LABEL - to create a clean MRC file format instead of CCP4"
 #############################################################################
 #
-\rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
+# \rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
 #
-${bin_2dx}/labelh.exe << eot
-SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map 
-2
-${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
-1,0
-0
-eot
+# ${bin_2dx}/labelh.exe << eot
+# SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map 
+# 2
+# ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
+# 1,0
+# 0
+# eot
 #
-\rm -f ${prefix}${imagename}-${SYM_sub}.mrc
+cp -f SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
 #
-${bin_2dx}/labelh.exe << eot
-SCRATCH/${prefix}${imagename}-${SYM_sub}.map 
-2
-${prefix}${imagename}-${SYM_sub}.mrc
-1,0
-0
-eot
+# \rm -f ${prefix}${imagename}-${SYM_sub}.mrc
+#
+# ${bin_2dx}/labelh.exe << eot
+# SCRATCH/${prefix}${imagename}-${SYM_sub}.map 
+# 2
+# ${prefix}${imagename}-${SYM_sub}.mrc
+# 1,0
+# 0
+# eot
+#
+cp -f SCRATCH/${prefix}${imagename}-${SYM_sub}.map ${prefix}${imagename}-${SYM_sub}.mrc
 #
 if ( ${SYM_sub} == 'p1' ) then
   \rm -f final_map.mrc
@@ -748,7 +752,9 @@ endif
 #
 echo "# IMAGE: ${prefix}${imagename}_phase_zero-p1.mrc <PSF as map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc <PSF symmetrized as map>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: SCRATCH/${prefix}${imagename}-p1.mrc <SCRATCH/${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-p1.mrc <${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
+# echo "# IMAGE: SCRATCH/${prefix}${imagename}-${SYM_sub}.map <SCRATCH/${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}.mrc <${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE: final_map_FouFilter.mrc <${prename}Non-symmetrized Map Fourier Filter>"  >> LOGS/${scriptname}.results

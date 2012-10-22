@@ -336,7 +336,7 @@ C-------------This is taken from AVRGAMPS, and the following explanation
 C-------------from Richard Henderson in an email to Henning Stahlberg on
 C-------------Oct. 20, 2012:
 C-------------
-C-------------  FOMOUT is the most complicated one.  Here we calculate the vector length
+C-------------  [...] FOMOUT is the most complicated one.  Here we calculate the vector length
 C-------------  given by XARG = SQRT(SUMCOS**2 + SUMSIN**2) where SUMCOS and SUMSIN are
 C-------------  the same weighted sums as used to calculate COMBPHASE.  The most important
 C-------------  aspect of XARG is that it's magnitude is the combined signal-to-noise

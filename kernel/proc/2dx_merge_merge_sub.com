@@ -112,7 +112,7 @@ endif
 #
 if ( -e 2dx_origtiltk-reflections.log ) then
   \mv -f 2dx_origtiltk-reflections.log LOGS
-  echo "# IMAGE: LOGS/2dx_origtiltk-reflections.log <LOG: reflections after origtiltk -----------------IQ AMP PHS>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: LOGS/2dx_origtiltk-reflections.log <LOG: reflections after origtiltk [H,K,Z,A,P,#,IQ,WT,BK,CTF,--------IQ AMP PHS]>" >> LOGS/${scriptname}.results
 endif
 #
 if ( -e SCRATCH/2dx_origtiltk_jrefl.txt ) then

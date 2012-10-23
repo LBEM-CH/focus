@@ -543,7 +543,7 @@ C       WRITE(6,20)I,PHASE(I)
         IARG=IABS(IQ(I))
 CHENN>
 C       WEIGHT=WEIGHTABLE(IARG)
-        if(iarg.ne.0)then
+        if(iarg.ge.1.and.iarg.le.8)then
           WEIGHT=WEIGHTABLE(IARG)
         else
           WEIGHT=0
@@ -656,7 +656,7 @@ C       EXCLUDE ONE DATA POINT
           IARG=IABS(IQ(I))
 CHENN>
 C         WEIGHT=WEIGHTABLE(IARG)
-          if(iarg.ne.0)then
+          if(iarg.ge.1.and.iarg.le.8)then
             WEIGHT=WEIGHTABLE(IARG)
           else
             WEIGHT=0
@@ -721,7 +721,7 @@ C
         IARG=IABS(IQ(I))
 CHENN>
 C       WEIGHT=WEIGHTABLE(IARG)
-        if(iarg.ne.0)then
+        if(iarg.ge.1.and.iarg.le.8)then
           WEIGHT=WEIGHTABLE(IARG)
         else
           WEIGHT=0

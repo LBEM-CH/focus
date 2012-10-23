@@ -200,6 +200,9 @@ C
       CHARACTER*6   CSTAB(21)
       INTEGER H,K,L
       DIMENSION DELTA(-100:100,-100:100)
+C
+      DATA DELTA / 40401*-9999.0 /
+C
       DATA CSTAB /
      .  'p1    ',
      .  'p2    ',
@@ -345,12 +348,6 @@ C
       DELTOT = 0.0
       VARTOT = 0.0
       FOMTOT = 0.0
-C
-      DO H=-100,100
-        DO K=-100,100
-          DELTA(H,K) = -9999.0
-        ENDDO
-      ENDDO
 C
 C-----Construct the real-space lattice, in Angstroems
 C

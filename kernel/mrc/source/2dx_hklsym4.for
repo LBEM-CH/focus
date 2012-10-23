@@ -24,7 +24,7 @@ C
       INTEGER IFAIL,JFAIL
       REAL AMP,PHASE,FOM,SIGA,BACK,PI,PX,PY,PHERR
       REAL AMPWGTSUM,PHSWGTSUM,AMPSUM
-      REAL SIGMA,WT,R1,R2,SNRX,SNRY
+      REAL SIGMA,WT,R1,R2,SNRX,SNRY,FOM100SNR
       REAL*8 XARG,S18AEF,S18AFF
       REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
@@ -372,10 +372,13 @@ C-------------
 C
 C-------------The remaining problem is, how to translate FOM into SNR. 
 C-------------The IQ WEIGHTABLE in AVRGAMPS is defining as weight for IQ1 a value of 49.
-C-------------In analogy to that, here a FOM of 100 is defined as SNR of 49.
+C-------------This is roughly proportional to (7/IQ)**2. 
+C-------------Here, the FOM**2 as weight is multiplied with 7, to give similar values.
 C
-              SNRX = PX*49.0
-              SNRY = PY*49.0
+              FOM100SNR = 7.0
+C
+              SNRX = PX*FOM100SNR
+              SNRY = PY*FOM100SNR
               XARG = SQRT(SNRX**2 + SNRY**2)
 C
               IFAIL=1
@@ -383,7 +386,7 @@ C
 C       
               R1=S18AFF(XARG,JFAIL)
               R2=S18AEF(XARG,IFAIL)
-              if(abs(R2).gt.0.00000000001)then
+              if(abs(R2).gt.0.0)then
                 WT=R1 / R2
               else
                 IFAIL=1
@@ -401,7 +404,7 @@ C
                 FOM=WT * 100.0
               END IF
 C
-              write(6,'(''::XARG,R1,R2,FOM '',4F12.3)')XARG,R1,R2,FOM
+C              write(6,'(''::H,K,L,XARG,R1,R2,FOM '',3I5,4G18.6)')H,K,L,XARG,R1,R2,FOM
 C
 C-------------QFACTOR is the length of the vector addition of all vector phases, 
 C------------------------divided by the sum of all vector phases.
@@ -577,15 +580,26 @@ C
       endif
       call PHACOR(PHASE)
 C
+C-----IQ  |  WEIGHT  |  FOM
+C     1      49.00     100.0
+C     2      27.56      56.2
+C     3       8.51      17.4
+C     4       4.17       8.51
+C     5       2.48       5.06
+C     6       1.65       3.37
+C     7       1.17       2.39
+C     8       0.25       0.51
+C     9       0.00       0.0
+C
       PHSWGT=FOM/100.0
       RPT=PHASE*PI/180.0
 C
-      PX=cos(RPT)*PHSWGT
-      PY=sin(RPT)*PHSWGT
-C
       if(isig.ne.2)then
-        AMPWGT = PHSWGT 
+        AMPWGT=PHSWGT**2
       else
+C
+C-------What about SIGA here???        ToDo
+C
         if(BACK.gt.0.0)then
           AMPWGT = 1.0 / (BACK**2)
         else
@@ -593,6 +607,11 @@ C
           STOP '::ERROR in 2dx_hklsym4'
         endif
       endif
+C
+      PHSWGT = AMPWGT
+C
+      PX=cos(RPT)*PHSWGT
+      PY=sin(RPT)*PHSWGT
 C
       RAMP=AMP*AMPWGT
 C

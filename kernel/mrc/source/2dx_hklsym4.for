@@ -24,7 +24,7 @@ C
       INTEGER IFAIL,JFAIL
       REAL AMP,PHASE,FOM,SIGA,BACK,PI,PX,PY,PHERR
       REAL AMPWGTSUM,PHSWGTSUM,AMPSUM
-      REAL SIGMA,WT,R1,R2
+      REAL SIGMA,WT,R1,R2,SNRX,SNRY
       REAL*8 XARG,S18AEF,S18AFF
       REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
@@ -370,7 +370,13 @@ C-------------
 C-------------  Richard
 C-------------
 C
-              XARG = SQRT(PX**2 + PY**2)
+C-------------The remaining problem is, how to translate FOM into SNR. 
+C-------------The IQ WEIGHTABLE in AVRGAMPS is defining as weight for IQ1 a value of 49.
+C-------------In analogy to that, here a FOM of 100 is defined as SNR of 49.
+C
+              SNRX = PX*49.0
+              SNRY = PY*49.0
+              XARG = SQRT(SNRX**2 + SNRY**2)
 C
               IFAIL=1
               JFAIL=1

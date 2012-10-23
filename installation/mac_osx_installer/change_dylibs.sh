@@ -66,8 +66,8 @@ else
 fi
 
 # BUILD SYSTEM DEPENDENT, FIX IT LATER
-if [ -f /opt/local/lib/gcc47/libgfortran.3.dylib ]; then
-	GFORTRAN_LIB=/opt/local/lib/gcc47/libgfortran.3.dylib
+if [ -f /opt/local/lib/gcc46/libgfortran.3.dylib ]; then
+	GFORTRAN_LIB=/opt/local/lib/gcc46/libgfortran.3.dylib
 	echo "Found gfortran in $GFORTRAN_LIB"
 else
        if [ -f /usr/local/lib/libgfortran.3.dylib ]; then
@@ -80,8 +80,8 @@ else
 	fi
 fi
 
-if [ -f /opt/local/lib/gcc47/libquadmath.0.dylib ]; then
-	QUADMATH_LIB=/opt/local/lib/gcc47/libquadmath.0.dylib
+if [ -f /opt/local/lib/gcc46/libquadmath.0.dylib ]; then
+	QUADMATH_LIB=/opt/local/lib/gcc46/libquadmath.0.dylib
 	echo "Found quadmath in $QUADMATH_LIB"
 else
        if [ -f /usr/local/lib/libquadmath.0.dylib  ]; then
@@ -122,6 +122,8 @@ for exe in `ls $path`
 do
 	file="$path/$exe"
 	echo "changing the dylibs of $file"
+	otool -L $file
+	echo "changed otool command:"
 	install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $file
 	install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $file
 	install_name_tool -change $GFORTRAN_LIB  @executable_path/../lib/libgfortran.3.dylib $file 

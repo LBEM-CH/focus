@@ -67,7 +67,7 @@ fi
 
 # BUILD SYSTEM DEPENDENT, FIX IT LATER
 if [ -f /opt/local/lib/gcc47/libgfortran.3.dylib ]; then
-	GFORTRAN_LIB=/opt/local/lib/libgfortran.3.dylib
+	GFORTRAN_LIB=/opt/local/lib/gcc47/libgfortran.3.dylib
 	echo "Found gfortran in $GFORTRAN_LIB"
 else
        if [ -f /usr/local/lib/libgfortran.3.dylib ]; then
@@ -81,7 +81,7 @@ else
 fi
 
 if [ -f /opt/local/lib/gcc47/libquadmath.0.dylib ]; then
-	QUADMATH_LIB=/opt/local/lib/libquadmath.0.dylib
+	QUADMATH_LIB=/opt/local/lib/gcc47/libquadmath.0.dylib
 	echo "Found quadmath in $QUADMATH_LIB"
 else
        if [ -f /usr/local/lib/libquadmath.0.dylib  ]; then

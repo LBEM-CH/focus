@@ -129,11 +129,11 @@ void *generatePeriodogramRange(void *arg)
 				} 
 		} 
 #ifdef USE_THREADS_2DX
-  pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);
 #endif
 	fftwf_destroy_plan(p);
 #ifdef USE_THREADS_2DX
-  pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
 #endif
 	fftwf_free(window);
 }
@@ -217,7 +217,9 @@ int main(int argc, char **argv)
 	fftwf_complex *image = dataFromMrc(argv[1], imageWidth, imageHeight);
 	if(image == NULL) {cout<<"Error loading "<<argv[1]<<endl; return 1;}
 
-	generatePeriodogram(image,imageWidth,imageHeight,size,steps,"./periodogram.mrc");
+        char str[80]; 
+        strcpy(str,"./periodogram.mrc");
+	generatePeriodogram(image,imageWidth,imageHeight,size,steps,str);
 	fftwf_free(image);
 	return 0;
 }

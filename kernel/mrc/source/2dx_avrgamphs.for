@@ -249,7 +249,7 @@ C                       IF(IARG.EQ.1)IARG=2
                         WRITE(6,23)LH,LK,NSPOT,CTFSF,
      .                    COMBAMP,COMBPHASE,QFACTOR,
      .                    FOMOUT,CHAR1,FOMANG,PHSERROR
-                        FOMCALC=100.0*COS(FOMANG*3.142/180.)
+                        FOMCALC=100.0*COS(FOMANG*3.1415927/180.)
                         WRITE(2,30)LH,LK,IZFIX,COMBAMP,COMBPHASE,FOMCALC
 CHENN>
                         WRITE(3,29)LH,LK,COMBAMP,COMBPHASE,FOMCALC
@@ -377,7 +377,7 @@ C
         WRITE(14,20171)(I,I=1,8)
 10171   FORMAT(' RANGE  DMIN  DMAX     IQ =',/,18X,8(5X,I1))
 20171   FORMAT('::  #   DMIN DMAX  IQ=',I2,7(I6),
-     1  ' all IQs IQ-wght',/,'::',80('-'))
+     1  ' all IQs',/,'::',72('-'))
 C
         DO 10175 I=1,NPSLOTS
 CHEN>
@@ -420,8 +420,8 @@ C
 C
           WRITE(6,10172)I,DMIN,DMAX,(ERR(I,J),J=1,8),TRES
           WRITE(6,10179)I,(NN(I,J),J=1,8),NRES(I)
-          WRITE(14,20172)I,DMIN,DMAX,(ERR(I,J),J=1,8),TRES,SIQWALL
-          WRITE(14,20179)I,(NN(I,J),J=1,8),NRES(I),NRES(I)
+          WRITE(14,20172)I,DMIN,DMAX,(ERR(I,J),J=1,8),TRES
+          WRITE(14,20179)I,(NN(I,J),J=1,8),NRES(I)
           if(I.lt.NPSLOTS) write(14,'(''::'')')
 10175   CONTINUE
 C
@@ -433,7 +433,7 @@ C
       END IF
 10181   CONTINUE
 C
-        write(14,'(''::'',80(''-''))')
+        write(14,'(''::'',72(''-''))')
         WRITE(6,10177) (TQ(J),J=1,8)
         WRITE(6,10178) (NQ(J),J=1,8)
         WRITE(14,20177) (TQ(J),J=1,8)
@@ -442,10 +442,10 @@ C
 10179   FORMAT(I5,12X,1X,8I6,I8,/)
 10177   FORMAT(18X,8F6.1)
 10178   FORMAT(18X,8I6,/)
-20172   FORMAT('::',I3,F7.1,F5.1,1X,8(F6.1),F8.1,F8.1)
-20179   FORMAT('::',I3,7X,5X,1X,8(I6),I8,I8)
+20172   FORMAT('::',I3,F7.1,F5.1,1X,8(F6.1),F8.1)
+20179   FORMAT('::',I3,7X,5X,1X,8(I6),I8)
 20177   FORMAT('::',16X,7(F6.1),F6.1)
-20178   FORMAT('::',16X,7(I6),I6,/,'::',80('-'))
+20178   FORMAT('::',16X,7(I6),I6,/,'::',72('-'))
         WRITE(6,10174)SERRESALL/NRESALL,NRESALL
         WRITE(14,20174)SERRESALL/NRESALL,NRESALL
 C

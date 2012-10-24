@@ -34,7 +34,7 @@ endif
 #
 if ( ${spcgrp} != "1" ) then
   if ( ${avrgamphsRESOL} == '0' || ${avrgamphsRESOL} == '0.0' ) then
-    set avrgamphsRESlocal = `echo ${RESMAX} | awk '{ s = int ( $1 * 9.5 / 10.0 ) } END { print s }'`
+    set avrgamphsRESlocal = ${RESMAX}
   else
     set avrgamphsRESlocal = ${avrgamphsRESOL}
   endif

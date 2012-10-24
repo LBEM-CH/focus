@@ -22,7 +22,7 @@ set shftin = "0"
 #
 if ( ${spcgrp} != "1" ) then
   if ( ${avrgamphsRESOL} == '0' || ${avrgamphsRESOL} == '0.0' ) then
-    set avrgamphsRESlocal = `echo ${RESMAX} | awk '{ s = int ( $1 * 9.5 / 10.0 ) } END { print s }'`
+    set avrgamphsRESlocal = ${RESMAX}
   else
     set avrgamphsRESlocal = ${avrgamphsRESOL}
   endif
@@ -308,7 +308,7 @@ endif
 echo "<<@progress: 35>>"
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_hklsym3 - to apply symmetry to APH file for 2D run"
+${proc_2dx}/linblock "2dx_hklsym4 - to apply symmetry to APH file for 2D run"
 #############################################################################  
 #
 \rm -f APH/sym2D.hkl
@@ -319,7 +319,7 @@ ${proc_2dx}/linblock "2dx_hklsym3 - to apply symmetry to APH file for 2D run"
 # Set isig to 3, for NO SIGF BUT SET SIGF to 1.0
 set isig = 3
 #
-${bin_2dx}/2dx_hklsym3.exe << eot
+${bin_2dx}/2dx_hklsym4.exe << eot
 APH/centric2D.hkl
 APH/sym_nosort2D.hkl
 APH/sym2D.hkl
@@ -333,7 +333,7 @@ eot
 # LABOUT H K L F PHI FOM SIGF
 # CTYPOUT H H H F P W Q
 #
-echo "# IMAGE: APH/sym2D.hkl <APH after hklsym3 [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/sym2D.hkl <APH after hklsym4 [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
 #
 if ( ! -e APH/sym2D.hkl ) then
   ${proc_2dx}/protest "ERROR occured."

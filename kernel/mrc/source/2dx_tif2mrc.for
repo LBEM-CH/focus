@@ -99,6 +99,7 @@ C***
        real*4          scalepixel
        real*4          title(20)
        real*4          ftmp
+       real*4          postmag
        real*4          fvector(20)
 C***
        real*8          dnum
@@ -113,7 +114,10 @@ C
 C
        real den,dmin,dmax,dmean,fbuf,fmin,fmax,frange
        real range_scale,real_max
+       real rdef,rdef1,rdef2,rdefang,rastig,rtmp
+       real rbinning,rpixsize
 C
+       real PI
 C
 C*** test machine little or big endian 
        equivalence       (btest(1),int2_test)
@@ -135,6 +139,8 @@ C*** test machine little or big endian
        equivalence       (fvector(1),byte_buf(1))
 C***
        common/big/mapbuf
+C
+       PI = 3.14159265437
 C***
 C**************** start of program *********************************
        write(6,'(/'' *** tif2mrc V5.16 convert TIFF'',
@@ -608,6 +614,9 @@ C------TVIPS tag?
        if(LTVIPS)then
          write(6,'(//,'':Reading TVIPS private tags'')')
 C
+         call system("\rm -f TVIPS_data.txt")
+         open(26,FILE="TVIPS_data.txt",STATUS='NEW')
+C
          ivalue_offset = itvips_offset
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
@@ -621,60 +630,77 @@ C
          read(cstring(1:80),'(A)')cline
          call shorten(cline,k)
          write(6,'(''Comment: '',A)')cline(1:k)
+         write(26,'(''set comment = '',A)')cline(1:k)
 C
          ivalue_offset = itvips_offset + 84
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
          write(6,'(''High Tension [kV]............: '',F12.3)')ftmp
+         write(26,'(''set kV = '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 88
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
          write(6,'(''Spherical Abberation [mm]....: '',F12.3)')ftmp
+         write(26,'(''set CS = '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 96
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
          write(6,'(''Magnification [kx]...........: '',F12.3)')ftmp
+         write(26,'(''set magnification = '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 100
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
+         postmag = ftmp
          write(6,'(''Post Magnification [x].......: '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 108
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
+         rdef = ftmp
          write(6,'(''Defocus [nm].................: '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 112
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
+         rastig = ftmp
          write(6,'(''Astigmatism [nm].............: '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 116
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
+         rdefang = ftmp
          write(6,'(''Astigmatism direction [mrad].: '',F12.3)')ftmp
+C
+         rdef1=rdef+rastig*cos(rdefang*PI/180.0)
+         rdef2=rdef+rastig*sin(rdefang*PI/180.0)
+         write(cline,'(F12.3,'','',F12.3,'','',F12.3)')rdef1,rdef2,rdefang
+         call inkomma(cline,k)
+         write(6,'(''Defocus and Astig............: '',A)')cline(1:k)
+         write(26,'(''set defocus = '',A)')cline(1:k)
 C
          ivalue_offset = itvips_offset + 124
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
          write(6,'(''Specimen tilt angle [deg]....: '',F12.3)')ftmp
+         write(26,'(''set TLTANG = '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 128
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
-         ftmp = int4 * 0.0001
+         ftmp = real(int4) * 0.0001
          write(6,'(''Specimen tilt direction [deg]: '',F12.3)')ftmp
+         write(26,'(''set TLTAXA = '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 140
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
@@ -703,33 +729,42 @@ C
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
          ftmp = int4 * 0.0001
+         rpixsize = ftmp
          write(6,'(''Pixel size [um]..............: '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 180
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
          ftmp = int4 * 0.0001
+         rbinning = ftmp
          write(6,'(''Binning Factor...............: '',F12.3)')ftmp
+         ftmp = ( rpixsize * rbinning ) / postmag
+         write(26,'(''set stepdigitizer = '',F12.3)')ftmp
 C
          ivalue_offset = itvips_offset + 580
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,4,ier)
          write(6,'(''Data Type ...................: '',I12  )')int4
 C
-         ivalue_offset = itvips_offset + 3536
-         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
-         call qread(idevin,byte_buf,4,ier)
-         write(6,'(''Current Mag rel.to plate.....: '',F12.3)')fvector(1)
+C         ivalue_offset = itvips_offset + 3272
+C         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+C         call qread(idevin,byte_buf,4,ier)
+C         write(6,'(''High Tension [Volts].........: '',F12.3)')fvector(1)
 C
-         ivalue_offset = itvips_offset + 3540
-         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
-         call qread(idevin,byte_buf,4,ier)
-         write(6,'(''Corrected Magnification......: '',F12.3)')fvector(1)
+C         ivalue_offset = itvips_offset + 3536
+C         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+C         call qread(idevin,byte_buf,4,ier)
+C         write(6,'(''Current Mag rel.to plate.....: '',F12.3)')fvector(1)
 C
-         ivalue_offset = itvips_offset + 3544
-         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
-         call qread(idevin,byte_buf,4,ier)
-         write(6,'(''Post Magnification...........: '',F12.3)')fvector(1)
+C         ivalue_offset = itvips_offset + 3540
+C         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+C         call qread(idevin,byte_buf,4,ier)
+C         write(6,'(''Corrected Magnification......: '',F12.3)')fvector(1)
+C
+C         ivalue_offset = itvips_offset + 3544
+C         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+C         call qread(idevin,byte_buf,4,ier)
+C         write(6,'(''Post Magnification...........: '',F12.3)')fvector(1)
 C
          ivalue_offset = itvips_offset + 3552
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
@@ -739,18 +774,27 @@ C
          write(6,'(''Stage Position Z [um] .......: '',F12.3)')fvector(3)
          write(6,'(''Stage Position A [deg] ......: '',F12.3)')fvector(4)
          write(6,'(''Stage Position B [deg] ......: '',F12.3)')fvector(5)
+         write(cline,'(F12.3,'','',F12.3)')fvector(1),fvector(2)
+         call inkomma(cline,k)
+         write(26,'(''set grid_stage_position = '',A)')cline(1:k)
 C
          ivalue_offset = itvips_offset + 3572
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,8,ier)
          write(6,'(''Image Shift X [a.u.].........: '',F12.3)')fvector(1)
          write(6,'(''Image Shift Y [a.u.].........: '',F12.3)')fvector(2)
+         write(cline,'(F12.3,'','',F12.3)')fvector(1),fvector(2)
+         call inkomma(cline,k)
+         write(26,'(''set grid_image_shift = '',A)')cline(1:k)
 C
          ivalue_offset = itvips_offset + 3580
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
          call qread(idevin,byte_buf,8,ier)
          write(6,'(''Beam Shift X [a.u.]..........: '',F12.3)')fvector(1)
          write(6,'(''Beam Shift Y [a.u.]..........: '',F12.3)')fvector(2)
+         write(cline,'(F12.3,'','',F12.3)')fvector(1),fvector(2)
+         call inkomma(cline,k)
+         write(26,'(''set grid_beam_shift = '',A)')cline(1:k)
 C
          ivalue_offset = itvips_offset + 3596
          call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
@@ -773,7 +817,20 @@ C
            write(6,'(''Overlap Y....................: '',F12.3)')fvector(7)
          endif
 C
+         write(cline,'(F12.3,'','',F12.3)')fvector(2),fvector(3)
+         call inkomma(cline,k)
+         write(26,'(''set tile_pos_current = '',A)')cline(1:k)
+C
+         write(cline,'(F12.3,'','',F12.3)')fvector(4),fvector(5)
+         call inkomma(cline,k)
+         write(26,'(''set tile_pos_max = '',A)')cline(1:k)
+C
+         write(cline,'(F12.3,'','',F12.3)')fvector(6),fvector(7)
+         call inkomma(cline,k)
+         write(26,'(''set tile_pos_overlap = '',A)')cline(1:k)
+C
          write(6,'(/,''TVIPS finished.'',/,/)')
+         close(26)
        endif
 C
        nbytes_per_row = (ncols * nsamples_per_pixel * 
@@ -980,4 +1037,110 @@ C
 C
 c==========================================================
 c
+      SUBROUTINE INKOMMA(CZEILE,k)
+C
+C replaces intermedieate spaces within the actual text string
+C in CZEILE up to the length k by komma.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1,CTMP2,CTMP3
+      CHARACTER * 200 CZEIL2
+      CTMP2=' '
+      CTMP3=','
+C
+      ilen=len(czeile)
+      DO 70 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 80
+  70  CONTINUE
+  80  CONTINUE
+      IF(k.LT.1)k=1
+C
+C-----find the leading spaces and remove them
+C
+      DO 90 J=1,k
+         READ(CZEILE(J:J),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)THEN
+           GOTO 95
+         ENDIF
+ 90   CONTINUE
+ 95   CONTINUE
+C
+      WRITE(CZEIL2(1:k),'(A)') CZEILE(J:k)
+C
+C     WRITE(*,'('' INKOMMA 2: k='',I4,'' J='',I4,'':'',A)')
+C    1      k,j,CZEIL2(1:k)
+C
+C-----Was there a komma recently ?
+      KWAR=0
+C
+      I=1
+      L=1
+ 100  continue
+        READ(CZEIL2(I:I),'(A1)')CTMP1
+        IF(CTMP1.EQ.CTMP3)THEN
+C---------There is a komma.
+          IF(KWAR.EQ.0)THEN
+C-----------There is a komma, before was no komma. Insert one.
+            WRITE(CZEILE(L:L),'('','')')
+            KWAR=1
+          ELSE
+C-----------There is a komma, before was already a komma. Shrink.
+            L=L-1
+          ENDIF
+        ELSEIF(CTMP1.EQ.CTMP2)THEN
+C---------There is a space.
+          IF(KWAR.EQ.0)THEN
+C-----------There is a space, before was no komma. Insert komma.
+            WRITE(CZEILE(L:L),'('','')')
+            KWAR=1
+          ELSE
+C-----------There is a space, before was a komma. Shrink.
+            L=L-1
+          ENDIF
+        ELSE
+C---------There is no komma, no space. Anulate KWAR, do nothing.
+          WRITE(CZEILE(L:L),'(A1)')CZEIL2(I:I)
+          KWAR=0
+        ENDIF
+        I=I+1
+        L=L+1
+C       WRITE(*,'('' INKOMMA 2b: I='',I4,'' L='',I3,'':'',A)')I,L,CTMP1
+C
+      IF(I.LE.K)GOTO 100
+C
+C     WRITE(*,'('' INKOMMA 3: k='',I4,'':'',A)')k,CZEILE(1:k)
+C
+      IF(L.LE.K)THEN
+        WRITE(CZEILE(L:K),'('' '')')
+      ENDIF
+C
+C-----Now check, if the last sign is a komma. If so, remove it.
+C
+      K=L
+      I=K
+ 200  continue
+        READ(CZEILE(I:I),'(A1)')CTMP1
+        IF(CTMP1.NE.CTMP2)GOTO 220
+        I=I-1
+      IF(I.GE.1)GOTO 200
+ 220  CONTINUE
+C
+      K=I
+C
+      IF(CTMP1.EQ.CTMP3)then
+        WRITE(CZEILE(I:I),'('' '')')
+        K=K-1
+      endif
+C
+      if(k.lt.1)k=1
+C
+C      WRITE(*,'('':: INKOMMA 4: k='',I4,'': "'',A,''"'')')k,CZEILE(1:k)
+C
+      RETURN
+      END
+C
+c==========================================================
+
 

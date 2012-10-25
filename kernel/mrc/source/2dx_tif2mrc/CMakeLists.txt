@@ -25,7 +25,7 @@ set(tif2mrc_TARGETS 2dx_tif2mrc)
 # Executables ------------------------------------------------------------------
 set(LOCAL_EXECUTABLES "")
 foreach(i ${tif2mrc_TARGETS})
-	set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${i}.c PROPERTIES LANGUAGE CXX )
+	set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${i}.c PROPERTIES LANGUAGE C )
 	add_executable(${i}  ${CMAKE_CURRENT_SOURCE_DIR}/${i}.c)
 	# target_link_libraries(${i} ${tif2mrc_LIBRARIES})
 	list(APPEND LOCAL_EXECUTABLES ${i})

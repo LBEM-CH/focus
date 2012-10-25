@@ -11,19 +11,26 @@
  *  $Id$
  */
 
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "mrcc.h"
+
+#undef __cplusplus
+
+#include "mrcfiles.h"
+#include "mrcslice.h"
 #include "b3dtiff.h"
 #include "b3dutil.h"
 #include "parse_params.h"
-#include "cfsemshare.h"
-#include "hvemtypes.h"
-#include "iimage.h"
-#include "imodconfig.h"
-#include "mrcfiles.h"
-#include "mrcslice.h"
+#include "b3dutil.c"
+#include "tiff.c"
+#include "iimage.c"
+#include "mrcfiles.c"
+#include "mrcslice.c"
+#include "pip_fwrap.c"
+#include "iitif.c"
 
 static float minmaxmean(unsigned char *tifdata, int mode, int unsign, 
                         int divide, int xsize, int ysize, int *min, int *max);
@@ -38,9 +45,12 @@ static int manageTVIPSdata(ImodImageFile *iifile, char *label, float *tiltAngle)
 int main( int argc, char *argv[])
 {
 
-  FILE *bgfp  = NULL;
-  FILE *tiffp = NULL;
-  FILE *mrcfp = NULL;
+  // FILE *bgfp  = NULL;
+  // FILE *tiffp = NULL;
+  // FILE *mrcfp = NULL;
+  FILE *bgfp;
+  FILE *tiffp;
+  FILE *mrcfp;
 
   Tf_info tiff;
   struct MRCheader hdata;
@@ -75,7 +85,8 @@ int main( int argc, char *argv[])
   short shortFill;
   unsigned short ushortFill;
   char label[MRC_LABEL_SIZE];
-  char *tiltFile = NULL;
+  // char *tiltFile = NULL;
+  char *tiltFile;
   FILE *tiltfp;
   char *openmode = "rb";
   char *bgfile;
@@ -581,7 +592,7 @@ int main( int argc, char *argv[])
       }
       if (tifdata)
         free (tifdata);
-      tifdata = NULL;
+      // tifdata = NULL;
     }
 
     tiff_close_file(&tiff);

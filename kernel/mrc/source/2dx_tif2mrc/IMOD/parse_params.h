@@ -9,7 +9,7 @@
 
 #ifndef PARSE_PARAMS_H
 #define PARSE_PARAMS_H
-#include <stdio.h>
+// #include <stdio.h>
 #define PIP_INTEGER  1
 #define PIP_FLOAT    2
 #ifdef __cplusplus

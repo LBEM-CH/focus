@@ -14,8 +14,9 @@
 #ifndef MRCFILES_H
 #define MRCFILES_H
 
-#include <stdio.h>
-#include <stdlib.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+
 #include "hvemtypes.h"
 #include "imodconfig.h"
 
@@ -31,6 +32,16 @@
 #define SEEK_CUR 1
 #define SEEK_END 2
 #endif
+
+
+#define b3dInt16        short 
+#define b3dUInt16       unsigned short
+#define b3dInt32        int
+#define b3dUInt32       unsigned int
+#define b3dFloat        float
+#define b3dByte         char
+#define b3dUByte        unsigned char
+
 
 
 

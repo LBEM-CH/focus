@@ -11,7 +11,7 @@
 #ifndef B3DUTIL_H
 #define B3DUTIL_H
 
-#include <stdio.h>
+// #include <stdio.h>
 
 /* Include this since this include file was split off from here */
 #include "cfsemshare.h"
@@ -37,7 +37,7 @@
   (a2)*(b3)*(c1) - (a2)*(b1)*(c3) + (a3)*(b1)*(c2) - (a3)*(b2)*(c1))
 
 #ifdef __cplusplus
-extern "C" {
+ extern "C" {
 #endif
 
   int imodVersion(const char *pname);
@@ -82,7 +82,7 @@ extern "C" {
 
 
 #ifdef __cplusplus
-}
+ }
 #endif
 
 

@@ -6,7 +6,9 @@
 #define LAB_NAME1 "Boulder Laboratory for 3-Dimensional"
 #define LAB_NAME2 "Electron Microscopy of Cells"
 #define DRAW_OpenGL 1
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 #define G77__HACK
 #ifndef LITTLE_ENDIAN
 #define LITTLE_ENDIAN

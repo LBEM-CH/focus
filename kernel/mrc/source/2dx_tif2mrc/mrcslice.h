@@ -46,22 +46,22 @@ typedef float Ival[SLICE_MAX_CSIZE];
 union MRCdata
 {
   unsigned char *b;
-  b3dInt16      *s;
-  b3dUInt16     *us;
-  b3dFloat      *f;
+  short      *s;
+  unsigned short     *us;
+  float      *f;
 };
 
 /* The Islice structure */
 typedef struct MRCslice
 {
   union MRCdata data;              /* pointer to data: data.b, data.s, etc */
-  b3dInt32 xsize;                  /* size of data.           */
-  b3dInt32 ysize;
-  b3dInt32 mode;                   /* type of storage         */
-  b3dInt32 csize;                  /* number of data channels */
-  b3dInt32 dsize;                  /* data size for pixel     */
+  int xsize;                  /* size of data.           */
+  int ysize;
+  int mode;                   /* type of storage         */
+  int csize;                  /* number of data channels */
+  int dsize;                  /* data size for pixel     */
   float  min, max, mean;
-  b3dInt32 index;                  /* index of current value  */
+  int index;                  /* index of current value  */
   float  cval[SLICE_MAX_CSIZE];  /* value of current index  */
 }Islice;
 /* END_CODE */
@@ -71,7 +71,7 @@ typedef struct MRCslice
 typedef struct MRCvolume
 {
   struct MRCslice **vol;
-  b3dInt32           zsize;
+  int           zsize;
 }Istack;
 /* END_CODE */
 

@@ -211,7 +211,7 @@ extern "C" {
   void setZoomValueScaling(float factor);
   int zoomWithFilter(unsigned char **slines, int sXsize, int sYsize, float sXoff,
                      float sYoff, int dXsize, int dYsize, int dXdim, int dXoff, int dtype,
-                     void *outData, b3dUInt32 *cindex, unsigned char *bindex);
+                     void *outData, unsigned int *cindex, unsigned char *bindex);
   int zoomFiltInterp(float *array, float *bray, int nxa, int nya, int nxb, int nyb,
                      float xc, float yc, float xt, float yt, float dmean);
 

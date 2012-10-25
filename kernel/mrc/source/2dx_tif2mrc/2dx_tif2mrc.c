@@ -18,6 +18,12 @@
 #include "b3dtiff.h"
 #include "b3dutil.h"
 #include "parse_params.h"
+#include "cfsemshare.h"
+#include "hvemtypes.h"
+#include "iimage.h"
+#include "imodconfig.h"
+#include "mrcfiles.h"
+#include "mrcslice.h"
 
 static float minmaxmean(unsigned char *tifdata, int mode, int unsign, 
                         int divide, int xsize, int ysize, int *min, int *max);
@@ -60,20 +66,20 @@ int main( int argc, char *argv[])
   int mrcxsize = 0, mrcysize = 0, mrcsizeset;
   float userFill, fillVal, mean, tmean, tiltAngle, pixelSize = 1., yPixelSize = 1.;
   float chunkCriterion = 100.;
-  b3dInt16 *sptr;
-  b3dInt16 *bgshort;
+  short *sptr;
+  short *bgshort;
   int bgBits, bgxsize, bgysize, xoffset, yoffset, y, ydo;
   int doChunks, chunk, numChunks, linesPerChunk, nlines, linesDone;
   unsigned char *fillPtr;
   unsigned char byteFill[3];
-  b3dInt16 shortFill;
-  b3dUInt16 ushortFill;
+  short shortFill;
+  unsigned short ushortFill;
   char label[MRC_LABEL_SIZE];
   char *tiltFile = NULL;
   FILE *tiltfp;
   char *openmode = "rb";
   char *bgfile;
-  char *progname = imodProgName(argv[0]);
+  char *progname = "2dx_tif2mrc";
   char prefix[100];
   sprintf(prefix, "\nERROR: %s - ", progname);
   setExitPrefix(prefix);
@@ -86,9 +92,7 @@ int main( int argc, char *argv[])
   label[0] = 0x00;
 
   if (argc < 3){
-    printf("Tif2mrc Version %s %s %s\n" , VERSION_NAME,
-            __DATE__, __TIME__);
-    imodCopyright();
+    printf("2dx_tif2mrc");
     printf("Usage: %s [options] <tiff files...> <mrcfile>\n" , progname);
     printf("Options:\n");
     printf("\t-g      Convert 24-bit RGB to 8-bit grayscale\n");
@@ -504,8 +508,8 @@ int main( int argc, char *argv[])
             }
           }
         } else {
-          sptr = (b3dInt16 *)tifdata;
-          bgshort = (b3dInt16 *)bgdata;
+          sptr = (short *)tifdata;
+          bgshort = (short *)bgdata;
           for (y = 0; y < ydo; y++)
             for (x = 0; x < xdo; x++)
               sptr[x + (y * xdo)] -= bgshort[x + (y * xdo)];
@@ -705,9 +709,9 @@ static void expandIndexToRGB(unsigned char **datap, ImodImageFile *iifile,
 /* Convert long int or uint to floats for now */
 static void convertLongToFloat(unsigned char *tifdata, ImodImageFile *iifile)
 {
-  b3dInt32 *iptr = (b3dInt32 *)tifdata;
-  b3dUInt32 *uiptr = (b3dUInt32 *)tifdata;
-  b3dFloat *fptr = (b3dFloat *)tifdata;
+  int *iptr = (int *)tifdata;
+  unsigned int *uiptr = (unsigned int *)tifdata;
+  float *fptr = (float *)tifdata;
   size_t i, xysize;
   if (!iifile || (iifile->type != IITYPE_UINT && iifile->type != IITYPE_INT))
     return;
@@ -731,9 +735,9 @@ static float minmaxmean(unsigned char *tifdata, int mode, int unsign,
   double tmean = 0.;
   size_t x, xysize;
   int pixel;
-  b3dInt16 *sptr;
-  b3dUInt16 *usptr;
-  b3dFloat *fptr;
+  short *sptr;
+  unsigned short *usptr;
+  float *fptr;
 
   xysize = (size_t)xsize * (size_t)ysize;
   if (mode == MRC_MODE_BYTE)
@@ -747,12 +751,12 @@ static float minmaxmean(unsigned char *tifdata, int mode, int unsign,
     }
 
   if (mode == MRC_MODE_SHORT) {
-    sptr = (b3dInt16 *)tifdata;
+    sptr = (short *)tifdata;
 
     /* DNM 11/17/01: if unsigned ints, either divide by 2 or 
        subtract 32768 to get into range of signed ints */
     if (unsign) {
-      usptr = (b3dUInt16 *)tifdata;
+      usptr = (unsigned short *)tifdata;
       if (divide) {
         for (x = 0; x < xysize; x++) {
           pixel = usptr[x];
@@ -776,7 +780,7 @@ static float minmaxmean(unsigned char *tifdata, int mode, int unsign,
     }
   }
   if (mode == MRC_MODE_USHORT) {
-    usptr = (b3dUInt16 *)tifdata;
+    usptr = (unsigned short *)tifdata;
     for (x = 0; x < xysize; x++) {
       pixel = usptr[x];
       if (pixel < *min)
@@ -787,7 +791,7 @@ static float minmaxmean(unsigned char *tifdata, int mode, int unsign,
     }
   }
   if (mode == MRC_MODE_FLOAT) {
-    fptr = (b3dFloat *)tifdata;
+    fptr = (float *)tifdata;
     for (x = 0; x < xysize; x++) {
       pixel = fptr[x];
       if (pixel < *min)

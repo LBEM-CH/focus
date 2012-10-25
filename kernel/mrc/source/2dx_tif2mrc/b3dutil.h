@@ -64,7 +64,7 @@ extern "C" {
   int fgetline(FILE *fp, char s[],int limit);
 
   void b3dHeaderItemBytes(int *nflags, int *nbytes);
-  void setOrClearFlags(b3dUInt32 *flags, b3dUInt32 mask, int state);
+  void setOrClearFlags(unsigned int *flags, unsigned int mask, int state);
   int numberInList(int num, int *list, int nlist, int noListValue);
   unsigned char **makeLinePointers(void *array, int xsize, int ysize, int dsize);
 

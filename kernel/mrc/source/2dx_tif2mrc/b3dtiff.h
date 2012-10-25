@@ -92,21 +92,21 @@
 typedef struct Tiff_header {
      short byteorder;
      short version;
-     b3dInt32  firstIFDoffset;
+     int  firstIFDoffset;
 } Tf_header;
 
 typedef struct Tiff_entry {
      short  tagfield;
      short  ftype;
-     b3dInt32   length;
-     b3dInt32   value;
+     int   length;
+     int   value;
 } Tf_entry;
 
 typedef struct Image_info {
      short func;          /* MAG = 0, MESH = 1, DIFF = 2, SA = 3     */
      short mag;           /* if (MAG) divide by 1000 else just value */
      short tilt;
-     b3dInt32  date;          /* seconds since Jan 1, 1970 00:00:00 GMT */
+     int  date;          /* seconds since Jan 1, 1970 00:00:00 GMT */
      char  comment[128];
      char  extra[128];
 } Im_info;
@@ -115,19 +115,19 @@ typedef struct Tiff_info {
      Tf_header     header;
      short         numentries;
      Tf_entry      directory[TIFFENTRIES];
-     b3dInt32          nextIFD;
+     int          nextIFD;
      Im_info       imageinfo;
      ImodImageFile *iifile;
      FILE          *fp;
      unsigned char *data;
-     b3dInt32          nstrip;     /* number of strips */
-     b3dInt32          *stripoff;
-     b3dInt32          *stripsize;
-     b3dInt32          width, length;
-     b3dInt32          rows_per_strip;
-     b3dInt32          strip_pos;
-     b3dInt32          strip_byte_counts;
-     b3dInt32          BitsPerSample;
+     int          nstrip;     /* number of strips */
+     int          *stripoff;
+     int          *stripsize;
+     int          width, length;
+     int          rows_per_strip;
+     int          strip_pos;
+     int          strip_byte_counts;
+     int          BitsPerSample;
      int           PhotometricInterpretation;
      int           mode;
 } Tf_info;
@@ -151,10 +151,10 @@ int read_tiffentries(FILE *fp, Tf_info *tiff);
 int read_barf_tiff(FILE *tif_fp, unsigned char *pixels);
 
 int tiff_write_image(FILE *fout, int xsize, int ysize, int mode,
-                     unsigned char *pixels, b3dUInt32 *ifdOffset, 
-                     b3dUInt32 *dataOffset, float dmin, float dmax);
+                     unsigned char *pixels, unsigned int *ifdOffset, 
+                     unsigned int *dataOffset, float dmin, float dmax);
 void tiff_write_entry(short tag, short type,
-                      b3dInt32 length, b3dUInt32 offset, FILE *fout);
+                      int length, unsigned int offset, FILE *fout);
 
 #endif /* !__TIFF_H__ */
 

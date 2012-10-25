@@ -68,21 +68,21 @@
 #define MRC_LABEL_SIZE         80
 #define MRC_NEXTRA             16
 #define MRC_NLABELS            10
-#define MRC_HEADER_SIZE        1024   /* Length of Header is 1024 Bytes. */
+#define MRC_HEADER_SIZE        1024   /* Length of Header is 1024 bytes. */
 #define MRC_MAXCSIZE           3
 
 
 typedef struct  /*complex floating number*/
 {
-  b3dFloat a;
-  b3dFloat b;
+  float a;
+  float b;
 
-} ComplexFloat;
+} Complexfloat;
 
 typedef struct  /*complex short number*/
 {
-  b3dInt16 a;
-  b3dInt16 b;
+  short a;
+  short b;
 
 } ComplexShort;
 
@@ -90,97 +90,97 @@ typedef struct  /*complex short number*/
 /* The header structure for MRC files */
 typedef struct MRCheader
 {
-  b3dInt32   nx;         /*  # of Columns                  */
-  b3dInt32   ny;         /*  # of Rows                     */
-  b3dInt32   nz;         /*  # of Sections.                */
-  b3dInt32   mode;       /*  given by #define MRC_MODE...  */
+  int   nx;         /*  # of Columns                  */
+  int   ny;         /*  # of Rows                     */
+  int   nz;         /*  # of Sections.                */
+  int   mode;       /*  given by #define MRC_MODE...  */
 
-  b3dInt32   nxstart;    /*  Starting point of sub image.  */
-  b3dInt32   nystart;
-  b3dInt32   nzstart;
+  int   nxstart;    /*  Starting point of sub image.  */
+  int   nystart;
+  int   nzstart;
 
-  b3dInt32   mx;         /* Number of rows to read.        */
-  b3dInt32   my;
-  b3dInt32   mz;
+  int   mx;         /* Number of rows to read.        */
+  int   my;
+  int   mz;
 
-  b3dFloat   xlen;       /* length of x element in um.     */
-  b3dFloat   ylen;       /* get scale = xlen/nx ...        */
-  b3dFloat   zlen;
+  float   xlen;       /* length of x element in um.     */
+  float   ylen;       /* get scale = xlen/nx ...        */
+  float   zlen;
 
-  b3dFloat   alpha;      /* cell angles, ignore */
-  b3dFloat   beta;
-  b3dFloat   gamma;
+  float   alpha;      /* cell angles, ignore */
+  float   beta;
+  float   gamma;
 
-  b3dInt32   mapc;       /* map coloumn 1=x,2=y,3=z.       */
-  b3dInt32   mapr;       /* map row     1=x,2=y,3=z.       */
-  b3dInt32   maps;       /* map section 1=x,2=y,3=z.       */
+  int   mapc;       /* map coloumn 1=x,2=y,3=z.       */
+  int   mapr;       /* map row     1=x,2=y,3=z.       */
+  int   maps;       /* map section 1=x,2=y,3=z.       */
 
-  b3dFloat   amin;
-  b3dFloat   amax;
-  b3dFloat   amean;
+  float   amin;
+  float   amax;
+  float   amean;
   
   /* 1/12/12: Removed nsymbt and made ispg be 4 bytes to match standard */
-  b3dInt32   ispg;       /* space group number in the standard */
+  int   ispg;       /* space group number in the standard */
 
   /* 64 bytes */
 
-  b3dInt32   next;     /* This is nsymbt in the MRC standard */
-  b3dInt16   creatid;  /* Used to be creator id, hvem = 1000, now 0 */
+  int   next;     /* This is nsymbt in the MRC standard */
+  short   creatid;  /* Used to be creator id, hvem = 1000, now 0 */
 
-  b3dByte    blank[30];
+  char    blank[30];
   
-  b3dInt16   nint;
-  b3dInt16   nreal;
-  b3dInt16   sub;
-  b3dInt16   zfac;
+  short   nint;
+  short   nreal;
+  short   sub;
+  short   zfac;
 
-  b3dFloat   min2;
-  b3dFloat   max2;
-  b3dFloat   min3;
-  b3dFloat   max3;
-  b3dInt32   imodStamp;
-  b3dInt32   imodFlags;
+  float   min2;
+  float   max2;
+  float   min3;
+  float   max3;
+  int   imodStamp;
+  int   imodFlags;
 
   /*  UINT   extra[MRC_NEXTRA];*/
 
   /* HVEM extra data */
   /* DNM 3/16/01: divide idtype into two shorts */
-  b3dInt16   idtype;
-  b3dInt16   lens;
-  b3dInt16   nd1;     /* Devide by 100 to get float value. */
-  b3dInt16   nd2;
-  b3dInt16   vd1;
-  b3dInt16   vd2;
-  b3dFloat   tiltangles[6];  /* 0,1,2 = original:  3,4,5 = current */
+  short   idtype;
+  short   lens;
+  short   nd1;     /* Devide by 100 to get float value. */
+  short   nd2;
+  short   vd1;
+  short   vd2;
+  float   tiltangles[6];  /* 0,1,2 = original:  3,4,5 = current */
 
 #ifdef OLD_STYLE_HEADER
   /* before 2.6.20 */
   /* DNM 3/16/01: redefine the last three floats as wavelength numbers */
-  b3dInt16   nwave;   /* # of wavelengths and values */
-  b3dInt16   wave1;
-  b3dInt16   wave2;
-  b3dInt16   wave3;
-  b3dInt16   wave4;
-  b3dInt16   wave5;
-  b3dFloat   zorg;           /* origin */
+  short   nwave;   /* # of wavelengths and values */
+  short   wave1;
+  short   wave2;
+  short   wave3;
+  short   wave4;
+  short   wave5;
+  float   zorg;           /* origin */
   
-  b3dFloat   xorg;
-  b3dFloat   yorg;
+  float   xorg;
+  float   yorg;
 #else
   /* MRC 2000 standard */
-  b3dFloat   xorg;
-  b3dFloat   yorg;
-  b3dFloat   zorg;
-  b3dByte    cmap[4];
-  b3dByte    stamp[4];
-  b3dFloat   rms;
+  float   xorg;
+  float   yorg;
+  float   zorg;
+  char    cmap[4];
+  char    stamp[4];
+  float   rms;
 #endif
 
-  b3dInt32 nlabl;
-  b3dByte  labels[MRC_NLABELS][MRC_LABEL_SIZE + 1];
+  int nlabl;
+  char  labels[MRC_NLABELS][MRC_LABEL_SIZE + 1];
 
   /* Internal data not stored in file header */
-  b3dUByte *symops;
+  unsigned char *symops;
   FILE   *fp;
   int    pos;
   struct LoadInfo *li;
@@ -292,7 +292,7 @@ void *mrc_mread_slice(FILE *fin, MrcHeader *hdata,
                       int slice, char axis);
 int mrc_read_slice(void *buf, FILE *fin, MrcHeader *hdata, 
                    int slice, char axis);
-int mrcReadFloatSlice(b3dFloat *buf, MrcHeader *hdata, int slice);
+int mrcReadfloatSlice(float *buf, MrcHeader *hdata, int slice);
 
   unsigned char **mrcGetDataMemory(struct LoadInfo *li, size_t xysize,
                                    int zsize, int pixsize);
@@ -311,9 +311,9 @@ unsigned char **mrc_read_byte(FILE *fin, MrcHeader *hdata,
                               struct LoadInfo *li,
                               void (*func)(const char *));
 
-int mrcReadSectionByte(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int z);
-int mrcReadZByte(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int z);
-int mrcReadYByte(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int y);
+int mrcReadSectionbyte(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int z);
+int mrcReadZbyte(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int z);
+int mrcReadYbyte(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int y);
 int mrcReadSectionUShort(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, 
                          int z);
 int mrcReadZUShort(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int z);
@@ -321,9 +321,9 @@ int mrcReadYUShort(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, in
 int mrcReadZ(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int cz);
 int mrcReadY(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int cy);
 int mrcReadSection(MrcHeader *hdata, struct LoadInfo *li, unsigned char *buf, int z);
-int mrcReadSectionFloat(MrcHeader *hdata, IloadInfo *li, b3dFloat *buf, int z);
-int mrcReadYFloat(MrcHeader *hdata, IloadInfo *li, b3dFloat *buf, int z);
-int mrcReadZFloat(MrcHeader *hdata, IloadInfo *li, b3dFloat *buf, int z);
+int mrcReadSectionfloat(MrcHeader *hdata, IloadInfo *li, float *buf, int z);
+int mrcReadYfloat(MrcHeader *hdata, IloadInfo *li, float *buf, int z);
+int mrcReadZfloat(MrcHeader *hdata, IloadInfo *li, float *buf, int z);
 
 /* misc stdio functions */
 int  loadtilts(struct TiltInfo *ti, MrcHeader *hdata);
@@ -351,9 +351,9 @@ unsigned char *get_short_map(float slope, float offset, int outmin, int outmax,
 int getfilename(char *name, char *prompt);
 void mrc_default_status(const char *string);
 int mrc_getdcsize(int mode, int *dsize, int *csize);
-void mrc_swap_shorts(b3dInt16 *data, int amt);
-void mrc_swap_longs(b3dInt32 *data, int amt);
-void mrc_swap_floats(b3dFloat *data, int amt);
+void mrc_swap_shorts(short *data, int amt);
+void mrc_swap_longs(int *data, int amt);
+void mrc_swap_floats(float *data, int amt);
 void mrc_swap_header(MrcHeader *hdata);
 void mrc_set_cmap_stamp(MrcHeader *hdata);
 

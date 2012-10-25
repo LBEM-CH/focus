@@ -167,7 +167,7 @@ add_subdirectory(2dx_getlat)
 add_subdirectory(endianness)
 add_subdirectory(ctf)
 add_subdirectory(maximum_likelihood)
-add_subdirectory(2dx_tif2mrc)
+#add_subdirectory(2dx_tif2mrc)
 
 
 

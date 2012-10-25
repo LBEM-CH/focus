@@ -46,6 +46,12 @@ C***
        character       title_string*80
        character       cvalue_type2
        character       yesno*1
+       character       cstring*200
+C
+       character       cline*200
+       character       cline1*200
+       character       cline2*200
+       character       cline3*200
 C***
 CHENN>
 C------This may be a compiler/platform dependent thing: 
@@ -64,6 +70,7 @@ C***
        integer*4       ifiletag
        integer*4       ioffset
        integer*4       int4
+       integer*4       itmp
        integer*4       length
        integer*4       lnblank
        integer*4       mxyz(3)
@@ -77,10 +84,12 @@ C***
        integer*4       ivalue_type4
        integer*4       ixresolution
        integer*4       iyresolution
+       integer*4       itvips_offset
 C***
        logical         bigendian
        logical         byteswap
        logical         chess
+       logical         LTVIPS
        logical         molecular_dynamics
        logical         adobe_photoshop
        logical         newtag
@@ -89,6 +98,8 @@ C***
        real*4          rbuf(maxcols)
        real*4          scalepixel
        real*4          title(20)
+       real*4          ftmp
+       real*4          fvector(20)
 C***
        real*8          dnum
        real*8          dtot
@@ -98,6 +109,7 @@ C
        integer idevin,nbits_per_sample,nbytes_per_row,nchitm,ncols
        integer nentries,nitems,nrows,nrowsperstrip,nstaples_per_pixel
        integer nsecs,nstripsperimage,nsamples_per_pixel,itag
+       integer j,k,l
 C
        real den,dmin,dmax,dmean,fbuf,fmin,fmax,frange
        real range_scale,real_max
@@ -119,6 +131,8 @@ C*** test machine little or big endian
        equivalence       (idenominator,byte_buf(5))
        equivalence       (int2,byte_buf(1))
        equivalence       (int4,byte_buf(1))
+       equivalence       (cstring,byte_buf(1))
+       equivalence       (fvector(1),byte_buf(1))
 C***
        common/big/mapbuf
 C***
@@ -148,10 +162,10 @@ C*** little endian
 C*** input file names
        filin = ' '
        write(6,'(
-     *  '' Type input file name e.g. /pcnfs/phosim1/jms.gel ...'')')
+     *  '' Type input file name'')')
        read(5,'(a)') filin
   900       write(6,'(
-     *  '' Type output file name e.g. /scr0/jms/jms.map ...'')')
+     *  '' Type output file name'')')
        read(5,'(a)') filout
        if(filin(1:lnblank(filin)) .eq. 
      *  filout(1:lnblank(filout))) then
@@ -204,21 +218,32 @@ C
        nitems = 4
        call qread(idevin,byte_buf,nitems,ier)
        if(ier.ne.0) go to 9000
-       if(byteswap) call byteswapfourbytes(byte_buf(1),nitems)
-       if(ioffset .eq. 0) go to 3000
+       if(byteswap)then
+         call byteswapfourbytes(byte_buf(1),nitems)
+       endif
+       if(ioffset .eq. 0)then
+         write(6,'(''...no further directory entries.'',/)')
+         go to 3000
+       endif
 C*** read number of entries for this directory
        ielement = ioffset + 1
+       write(6,'(''Reading position '',I6)') ielement
        call qseek(idevin,istartblock,ielement,lrecl)
        nitems = 2
        call qread(idevin,byte_buf,nitems,ier)
        if(byteswap) call byteswaptwobytes(byte_buf(1),nitems)
        nentries = int2
-       write(6,'(/,''Reading '',I5,'' directory entries '',/)') nentries
+       write(6,'(/,''Reading '',I6,'' directory entries'')') nentries
 C*** loop to extract tag information
        ielement = ielement + nitems
        nitems = 12
+C*****************************************************************
        open(unit=4,file='tag_data',status='unknown')
+C*****************************************************************
+C*****************************************************************
+C*****************************************************************
        do n=1,nentries
+        write(6,'(/,''Reading position '',I6)') ielement
         call qseek(idevin,istartblock,ielement,lrecl)
         call qread(idevin,byte_buf,nitems,ier)
         if(byteswap) then
@@ -235,8 +260,6 @@ C*** loop to extract tag information
 C*****************************************************************
 C*** extract tag information
 C*****************************************************************
-C
-        write(6,'(''TAG '',I6)')itag
 C
 C*** NewSubfileType
         if(itag .eq. 254) then
@@ -546,6 +569,12 @@ C*** Private Chess tag(s)
          write(6,'(''TAG '',I6,'' Private Chess tag(s)'')')itag
          chess = .true.
          go to 2000
+C*** Private TVIPS tag(s)
+        else if(itag .eq. 37706) then
+         write(6,'(''TAG '',I6,'' Private TVIPS tag'')')itag
+         LTVIPS = .true.
+         itvips_offset = ivalue_type4
+         go to 2000
 C*** unknown tag
         else
          newtag = .true.
@@ -555,29 +584,198 @@ C*** unknown tag
         end if
  2000   continue
         ielement = ielement + nitems
+        write(6,'(''At end of loop, ielement is '',I6)') ielement
        end do
        go to 1000
 C*****************************************************
 C*** open output image format file
 C*****************************************************
 C*** check map not too large for program
- 3000       if(ncols.gt.maxcols) then
-        write(6,'('' ncols > maxcols = '',2i8)') ncols, maxcols        
+ 3000  continue
+       if(ncols.gt.maxcols) then
+         write(6,'('' ncols > maxcols = '',2i8)') ncols, maxcols        
          go to 8200
        else if(nrows.gt.maxrows) then
-        write(6,'('' nrows > maxrows = '',2i8)') nrows, maxrows        
+          write(6,'('' nrows > maxrows = '',2i8)') nrows, maxrows        
          go to 8200
        end if
 C*** unknown tag ?
        if(newtag) then
-C
-C         write(6,'('' Unknown tag(s) present, continue ? (y/n)'')')
-C         read(5,'(a1)') yesno
-C         if(yesno .ne. 'y' .and. yesno .ne. 'Y') go to 8200
-C
           write(6,'(''::WARNING: Unknown tags encountered.'')')
-C
        end if
+C
+C------TVIPS tag?
+       if(LTVIPS)then
+         write(6,'(//,'':Reading TVIPS private tags'')')
+C
+         ivalue_offset = itvips_offset
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         if(byteswap) call byteswapfourbytes(byte_buf(1),8)
+         itmp = int4 
+         write(6,'(/,''TVIPS file, Version number '',I8)')itmp
+C
+         ivalue_offset = itvips_offset + 4
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,80,ier)
+         read(cstring(1:80),'(A)')cline
+         call shorten(cline,k)
+         write(6,'(''Comment: '',A)')cline(1:k)
+C
+         ivalue_offset = itvips_offset + 84
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''High Tension [kV]............: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 88
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Spherical Abberation [mm]....: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 96
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Magnification [kx]...........: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 100
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Post Magnification [x].......: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 108
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Defocus [nm].................: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 112
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Astigmatism [nm].............: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 116
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Astigmatism direction [mrad].: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 124
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Specimen tilt angle [deg]....: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 128
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Specimen tilt direction [deg]: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 140
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         if(int4.eq.0)then
+           write(cline,'(''        Image'')')
+         else
+           write(cline,'(''PowerSpectrum'')')
+         endif
+         call shorten(cline,k)
+         write(6,'(''Image Mode...................:'',A)')cline(1:k)
+C
+         ivalue_offset = itvips_offset + 168
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Origin X.....................: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 172
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Origin Y.....................: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 176
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Pixel size [um]..............: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 180
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         ftmp = int4 * 0.0001
+         write(6,'(''Binning Factor...............: '',F12.3)')ftmp
+C
+         ivalue_offset = itvips_offset + 580
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         write(6,'(''Data Type ...................: '',I12  )')int4
+C
+         ivalue_offset = itvips_offset + 3536
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         write(6,'(''Current Mag rel.to plate.....: '',F12.3)')fvector(1)
+C
+         ivalue_offset = itvips_offset + 3540
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         write(6,'(''Corrected Magnification......: '',F12.3)')fvector(1)
+C
+         ivalue_offset = itvips_offset + 3544
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,4,ier)
+         write(6,'(''Post Magnification...........: '',F12.3)')fvector(1)
+C
+         ivalue_offset = itvips_offset + 3552
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,20,ier)
+         write(6,'(''Stage Position X [um] .......: '',F12.3)')fvector(1)
+         write(6,'(''Stage Position Y [um] .......: '',F12.3)')fvector(2)
+         write(6,'(''Stage Position Z [um] .......: '',F12.3)')fvector(3)
+         write(6,'(''Stage Position A [deg] ......: '',F12.3)')fvector(4)
+         write(6,'(''Stage Position B [deg] ......: '',F12.3)')fvector(5)
+C
+         ivalue_offset = itvips_offset + 3572
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,8,ier)
+         write(6,'(''Image Shift X [a.u.].........: '',F12.3)')fvector(1)
+         write(6,'(''Image Shift Y [a.u.].........: '',F12.3)')fvector(2)
+C
+         ivalue_offset = itvips_offset + 3580
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,8,ier)
+         write(6,'(''Beam Shift X [a.u.]..........: '',F12.3)')fvector(1)
+         write(6,'(''Beam Shift Y [a.u.]..........: '',F12.3)')fvector(2)
+C
+         ivalue_offset = itvips_offset + 3596
+         call qseek(idevin,istartblock,ivalue_offset+1,lrecl)
+         call qread(idevin,byte_buf,28,ier)
+         if(fvector(1).lt.0.1)then
+           write(6,'(''No Image Tiling'')')
+           write(6,'(''Current Tile Number X........: '',F12.3)')fvector(2)
+           write(6,'(''Current Tile Number X........: '',F12.3)')fvector(3)
+           write(6,'(''Max Tile Number X............: '',F12.3)')fvector(4)
+           write(6,'(''Max Tile Number Y............: '',F12.3)')fvector(5)
+           write(6,'(''Overlap X....................: '',F12.3)')fvector(6)
+           write(6,'(''Overlap Y....................: '',F12.3)')fvector(7)
+         else
+           write(6,'(''Image Tiling:'')')
+           write(6,'(''Current Tile Number X........: '',F12.3)')fvector(2)
+           write(6,'(''Current Tile Number X........: '',F12.3)')fvector(3)
+           write(6,'(''Max Tile Number X............: '',F12.3)')fvector(4)
+           write(6,'(''Max Tile Number Y............: '',F12.3)')fvector(5)
+           write(6,'(''Overlap X....................: '',F12.3)')fvector(6)
+           write(6,'(''Overlap Y....................: '',F12.3)')fvector(7)
+         endif
+C
+         write(6,'(/,''TVIPS finished.'',/,/)')
+       endif
+C
        nbytes_per_row = (ncols * nsamples_per_pixel * 
      *                    nbits_per_sample + 7) / 8
 C*** initialize header parameters, turn map round by 90 degrees antic
@@ -755,3 +953,31 @@ C*** string and set remainder to ' '
   100        continue
        return
        end
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+C
+c==========================================================
+c
+

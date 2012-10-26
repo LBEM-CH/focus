@@ -34,6 +34,7 @@ if ( ${calculate_subvolume}x == "1x" ) then
   set psin = "0.52532199"
   set mcos = -${pcos}
   set msin = -${psin}
+  set ALAT2 = `echo ${ALAT} | awk '{ s = $1 / 2.0 } END { print s }'`
   #
   \rm -f SCRATCH/scratch1b.map
   ${bin_ccp4}/maprot mapin SCRATCH/scratch1.map wrkout SCRATCH/scratch1b.map << eot
@@ -43,8 +44,8 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA POLAR 0.0 0.0 45.0
-TRANS  0.0 0.0 0.0
+ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
+TRANS  0.0 -20.0 ${ALAT2}
 eot
   #
   #############################################################################
@@ -59,7 +60,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0
+ROTA POLAR 0.0 0.0 45.0
 TRANS  0.0 0.0 0.0
 eot
   #
@@ -70,20 +71,22 @@ eot
   #############################################################################
   #   
   # 0.7071 = 1/sqrt(2)
-  set lim_min_offset = "0.02"
-  set lim_offset = "0.05"
-  set limx = "0.70710678"
+  set middlex = "0.45"
+  set middley = "0.45"
+  set diam = "0.82"
   #
-  set limxmin = `echo ${lim_min_offset} ${lim_offset} ${limx} | awk '{ s = -$2 + $1 } END { print s }'`
-  set limxmax = `echo ${lim_min_offset} ${lim_offset} ${limx} | awk '{ s =  $2 + $3 } END { print s }'`
-  set limymin = `echo ${lim_min_offset} ${lim_offset} ${limx} | awk '{ s = -$2 + $1 } END { print s }'`
-  set limymax = `echo ${lim_min_offset} ${lim_offset} ${limx} | awk '{ s =  $2 + $3 } END { print s }'`
+  set limxmin = `echo ${middlex} ${diam} | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
+  set limxmax = `echo ${middlex} ${diam} | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
+  set limymin = `echo ${middley} ${diam}  | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
+  set limymax = `echo ${middley} ${diam}  | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
+  #
+  echo ":Limits are ${limxmin} to ${limxmax}, ${limymin} to ${limymax}"
   #
   \rm -f volume_sub.map
   ${bin_ccp4}/mapmask mapin SCRATCH/rot_volume.map mapout volume_sub.map << eof
 AXIS X,Y,Z
 scale factor 1
-xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} -0.5 0.5
+xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} 0.0 1.0
 pad -100
 SYMM 1
 END

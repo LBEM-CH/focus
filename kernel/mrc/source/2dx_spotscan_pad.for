@@ -34,15 +34,18 @@ C
       INTEGER*4 iover,iunder,ilow
       INTEGER*8 inumber
 C
-      REAL outimage(IOUTDIM,IOUTDIM)
+      INTEGER*2 tmpimage(IOUTDIM,IOUTDIM)
+      INTEGER*2 outimage(IOUTDIM,IOUTDIM)
 C
       EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
       EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
 C
       DATA NXYZST/3*0/, CNV/57.29578/
-      DATA outimage/IOUTDIM2*0.0/
+      DATA tmpimage/IOUTDIM2*0/
+      DATA outimage/IOUTDIM2*0/
 C
-      write(6,'(/,/,''2dx_SpotScan_Pad: Merge several SpotScan images into one'')')
+      write(6,'(/,/,''2dx_SpotScan_Pad: Merge several SpotScan images'',
+     .  '' into one'')')
 C
       write(6,'(/,''Input name for output file'')')
       read(5,'(A)')coutfile
@@ -65,7 +68,8 @@ C
 C
         imagenumber = imagenumber + 1
         if ( imagenumber.gt.IMAXFILE) then
-          write(6,'(''::ERROR: maximum file number reached. Increase IMAXFILE'')')
+          write(6,'(''::ERROR: maximum file number reached.'',
+     .    '' Increase IMAXFILE'')')
           stop
         endif
 C
@@ -128,12 +132,12 @@ C-------Calculate offset for first corner of output image
         IOFFSX=rgridpos_x(i)
         IOFFSY=rgridpos_y(i)
 C
-C-------Copy entire file into output picture
+C-------Copy this spot image into output picture
         do iy = 1,ispotdim_y(i)
           CALL IRDLIN(1,ALINE,*999)
           do ix = 1,ispotdim_x(i)
             VAL=ALINE(ix)
-            outimage(IOFFSX+ix,IOFFSY+iy)=VAL
+            tmpimage(IOFFSX+ix,IOFFSY+iy)=VAL
             IF (VAL .LT. DMIN) DMIN = VAL
             IF (VAL .GT. DMAX) DMAX = VAL
             DOUBLMEAN = DOUBLMEAN + VAL
@@ -143,15 +147,19 @@ C-------Copy entire file into output picture
         CALL IMCLOSE(1)
       enddo
 C
-C  Put title labels, new cell and extra information only into header
+      DOUBLMEAN = DOUBLMEAN/inumber
+      DMEAN = DOUBLMEAN
+C
+C-----Mask the area arond the spots with average grey
+C
+      call maskpic(tmpimage,outimage,IOUTDIM,NX,DMEAN)
+C
+C-----Put title labels, new cell and extra information only into header
 C
       NX=imaxx
       NY=imaxx
       NXYZ(1)=NX
       NXYZ(2)=NY
-C
-      DOUBLMEAN = DOUBLMEAN/inumber
-      DMEAN = DOUBLMEAN
 C
       MODE = 2
 C
@@ -194,7 +202,173 @@ C
       stop
       end
 C
-c==========================================================
+C==========================================================
+C
+      SUBROUTINE maskpic(inimage,outimage,IOUTDIM,NX,DMEAN)
+C
+C-----Replace the areas around the spots in the input image with 
+C-----average grey
+C
+      PARAMETER (IPICDIM=2048)
+C
+      INTEGER*2 inimage(IOUTDIM,IOUTDIM)
+      INTEGER*2 outimage(IOUTDIM,IOUTDIM)
+C
+      DIMENSION TEXT(20),PROGTIT(4)
+C
+      CHARACTER*80 FILENAM,TEXT
+C
+      REAL*8 DOUBLMEAN
+      INTEGER*8 INT8COUNTER
+C
+      INTEGER iworkimage(IPICDIM,IPICDIM)
+      INTEGER ipict1(IPICDIM,IPICDIM)
+C
+      rmax=inimage(1,1)
+      iposmaxx=1
+      iposmaxy=1
+C
+      rscale=NX/IPICDIM
+C
+C-----Get PEAKMAX and its position
+C
+      DO i=1,NX
+        DO j=1,NX
+          IF(inimage(i,j).gt.rmax)then
+            iposmaxx=i
+            iposmaxy=j
+            rmax=inimage(i,j)
+          END IF
+        ENDDO
+      ENDDO
+C
+      rthresh = 0.35
+C
+C-----Prepare workimage with 0 and 1
+C
+      DOUBLMEAN=0.0
+      INT8COUNTER=0
+C
+      DO i=1,IPICDIM
+        DO j=1,IPICDIM
+          ix=i*rscale 
+          iy=j*rscale 
+          if(inimage(ix,iy).gt.rthresh)then
+            iworkimage(i,j)=255
+            DOUBLMEAN=DOUBLMEAN+inimage(ix,iy)
+            INT8COUNTER=INT8COUNTER+1
+          else
+            iworkimage(i,j)=0
+          endif
+        ENDDO
+      ENDDO
+C
+      DOUBLMEAN=DOUBLMEAN/INT8COUNTER
+      write(6,'(''Mean of entire image is '',F12.3)')DMEAN
+      DMEAN=DOUBLMEAN
+      write(6,'(''Mean of spot areas   is '',F12.3)')DMEAN
+C
+C-----Write out workimage
+C
+      write(FILENAM(1:80),'(''TMP-2dx_spotscan_pad-1.mrc'')')
+      write(TEXT(1:80),'(''2dx_spotscan_pad: Initial '',
+     .  ''thresholded image'')')
+      CALL PICWRIINT(iworkimage,FILENAM,TEXT,IPICDIM,IPICDIM)
+C
+C-----Do morphological operations on test picture iworkimage
+C
+      isize1 = IPICDIM/25
+      isize2 = isize1 - 1
+      isize3 = isize1/4
+      rsize4 = real(isize1)/20.0
+      if(rsize4.lt.10.0)rsize4=10.0
+C      rsize4 = 3.0
+C
+C.....Expand to get rid of holes
+      CALL EXPAND(iworkimage,ipict1,IPICDIM,IPICDIM,isize1)
+C  
+      write(FILENAM(1:80),'(''TMP-2dx_spotscan_pad-2.mrc'')')
+      if(icontrol.gt.0)CALL PICWRI(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
+C
+C.....Contract to get the original size back
+      CALL CONTRA(ipict1,iworkimage,IPICDIM,IPICDIM,isize2)
+C
+      write(FILENAM(1:80),'(''TMP-2dx_spotscan_pad-3.mrc'')')
+      if(icontrol.gt.0)CALL PICWRI(iworkimage,FILENAM,TEXT,IPICDIM,IPICDIM)
+C
+C.....Contract to get rid of islands
+      CALL CONTRA(iworkimage,ipict1,IPICDIM,IPICDIM,isize2)
+C
+      write(FILENAM(1:80),'(''TMP-2dx_spotscan_pad-4.mrc'')')
+      if(icontrol.gt.0)CALL PICWRI(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
+C
+C.....Expand to get the original size back
+      CALL EXPAND(ipict1,iworkimage,IPICDIM,IPICDIM,isize1)
+C
+      write(FILENAM(1:80),'(''TMP-2dx_spotscan_pad-5.mrc'')')
+      if(icontrol.gt.0)CALL PICWRI(iworkimage,FILENAM,TEXT,IPICDIM,IPICDIM)
+C
+C.....Mask edges of image 
+      CALL MASKEDGE(iworkimage,ipict1,IPICDIM,IPICDIM,isize3)
+C
+      write(FILENAM(1:80),'(''TMP-2dx_spotscan_pad-6.mrc'')')
+      if(icontrol.ne.0)CALL PICWRI(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
+C
+C.....Smooth picture
+      CALL SMOOTH(ipict1,iworkimage,IPICDIM,IPICDIM,rsize4)
+C     
+      write(FILENAM(1:80),'(''TMP-2dx_spotscan_pad-7.mrc'')')
+      if(icontrol.ne.0)CALL PICWRI(iworkimage,FILENAM,TEXT,IPICDI2,IPICDIM)
+C
+C-----mask the original image with this pattern
+C
+      write(6,'('' masking picture'')')
+C
+      iunder=0
+      iover=0
+      rmin=0.0
+      rmax=32000.0
+      DMIN= 1.0E30
+      DMAX=-1.0E30
+      DOUBLMEAN=0.0
+      write(*,'(''starting masking big image'')')
+      DO IY = 1,NX
+        ilk=(IY*IPICDIM)/NX
+        if(ilk.lt.1)ilk=1
+        if(ilk.gt.IPICDIM)ilk=IPICDIM
+        DO IX = 1,NX
+          ilj=(IX*IPICDIM)/NX
+          if(ilj.lt.1)ilj=1
+          if(ilj.gt.IPICDI2)ilj=IPICDI2
+          VAL=(real(inimage(IX,IY))-DMEAN)*(real(iworkimage(ilj,ilk))/255.0)+DMEAN
+          if(VAL.lt.rmin)then
+            iunder=iunder+1
+            VAL=rmin
+          endif
+          if(VAL.gt.rmax)then
+            iover=iover+1
+            VAL=rmax
+          endif
+          IF (VAL .LT. DMIN) DMIN = VAL
+          IF (VAL .GT. DMAX) DMAX = VAL
+          DOUBLMEAN = DOUBLMEAN + VAL
+          outimage(IX,IY)=VAL
+        enddo
+      enddo
+      DMEAN = DOUBLMEAN/(NX*NX)
+C
+      if(iunder.ne.0)then
+        print *,'WARNING: iunder = ',iunder
+      endif
+C
+      if(iover.ne.0)then
+        print *,'WARNING: iover = ',iover
+      endif
+C
+      RETURN
+      END
+C
+C==========================================================
 c
       SUBROUTINE shorten(czeile,k)
 C
@@ -218,6 +392,249 @@ C
       RETURN
       END
 C
+C************************************************************************
 C
-
+      SUBROUTINE EXPAND(IPICTU,IPICT1,IPICDIM,IPICSIZ,idist)
+C
+C-----The input image IPICTU is an integer image, containing either 255 or 0.
+C-----This routine expands the 255-islands by a radius of idist.
+C-----The output image IPICT1 is also an integer image.
+C
+      INTEGER IPICTU(IPICDIM,IPICDIM)
+      INTEGER IPICT1(IPICDIM,IPICDIM)
+C
+      print *,'EXPAND called with ',idist
+C
+      ianf = -idist
+      iend =  idist
+      id2 = idist * idist
+      DO K=1,IPICSIZ
+        DO J=1,IPICSIZ
+          IOUT=0
+          do ikrun=ianf,iend
+            ikloc=K+ikrun
+            if(ikloc.lt.1      )ikloc=1
+            if(ikloc.gt.IPICSIZ)ikloc=IPICSIZ
+            ik2 = ikrun * ikrun
+            do ijrun=ianf,iend
+              ijloc=J+ijrun
+              if(ijloc.lt.1      )ijloc=1
+              if(ijloc.gt.IPICSIZ)ijloc=IPICSIZ
+              if(ik2+ijrun*ijrun.le.id2)then
+                if(IPICTU(ijloc,ikloc).ne.0)IOUT=255
+              endif
+            enddo
+          enddo
+          IPICT1(J,K)=IOUT
+        ENDDO
+      ENDDO
+C
+      RETURN
+      END
+C
+C************************************************************************
+C
+      SUBROUTINE CONTRA(IPICTU,IPICT1,IPICDIM,IPICSIZ,idist)
+C
+C-----The input image IPICTU is an integer image, containing either 255 or 0.
+C-----This routine contracts the 255-islands by a radius of idist.
+C-----The output image IPICT1 is also an integer image.
+C
+      INTEGER IPICTU(IPICDIM,IPICDIM)
+      INTEGER IPICT1(IPICDIM,IPICDIM)
+C
+      print *,'CONTRA called with ',idist
+C
+      ianf = -idist
+      iend =  idist
+      id2 = idist * idist
+      DO K=1,IPICSIZ
+        DO J=1,IPICSIZ
+          IOUT=255
+          do ikrun=ianf,iend
+            ikloc=K+ikrun
+            if(ikloc.lt.1      )ikloc=1
+            if(ikloc.gt.IPICSIZ)ikloc=IPICSIZ
+            ik2 = ikrun * ikrun
+            do ijrun=ianf,iend
+              ijloc=J+ijrun
+              if(ijloc.lt.1      )ijloc=1
+              if(ijloc.gt.IPICSIZ)ijloc=IPICSIZ
+              if(ik2+ijrun*ijrun.le.id2)then
+                if(IPICTU(ijloc,ikloc).eq.0)IOUT=0
+              endif
+            enddo
+          enddo
+          IPICT1(J,K)=IOUT
+        ENDDO
+      ENDDO
+C
+      RETURN
+      END
+C
+C************************************************************************
+C
+      SUBROUTINE MASKEDGE(IPICTU,IPICT1,IPICDIM,IPICSIZ,idist)
+C
+C-----The input image IPICTU is an integer image, containing either 255 or 0.
+C-----This routine masks the edges of idist width with 0
+C-----The output image IPICT1 is also an integer image.
+C
+      INTEGER IPICTU(IPICDIM,IPICDIM)
+      INTEGER IPICT1(IPICDIM,IPICDIM)
+C
+      print *,'MASKEDGE called with ',idist
+C
+      DO K=1,IPICSIZ
+        DO J=1,IPICSIZ
+          IVAL=IPICTU(J,K)
+          if((J.le.idist        ) .or.
+     1       (J.ge.IPICSIZ-idist) .or. 
+     2       (K.le.idist        ) .or. 
+     3       (K.ge.IPICSIZ-idist)     )then
+            IVAL=0
+          endif
+          IPICT1(J,K)=IVAL
+        ENDDO
+      ENDDO
+C
+      RETURN
+      END
+C
+C************************************************************************
+C
+      SUBROUTINE SMOOTH(IPICTU,IPICT1,IPICDIM,IPICSIZ,rdist)
+C
+C-----The input image IPICTU is an integer image, containing either 255 or 0.
+C-----This routine smoothes the edges of 255-areas with a Gaussian.
+C-----The output image IPICT1 is also an integer image.
+C
+      PARAMETER (IGAURA1=-100)
+      PARAMETER (IGAURA2=100)
+C
+      INTEGER IPICTU(IPICDIM,IPICDIM)
+      INTEGER IPICT1(IPICDIM,IPICDIM)
+C
+      REAL RGAUS(IGAURA1:IGAURA2,IGAURA1:IGAURA2)
+      REAL*8 RSUM,RINT
+C
+      print *,'SMOOTH called with ',rdist
+C
+      do K=IGAURA1,IGAURA2
+       do J=IGAURA1,IGAURA2
+          rrad=SQRT(1.0*K*K+1.0*J*J)
+          RGAUS(J,K)=exp(-rrad/rdist)
+        enddo
+      enddo
+C
+      ILIMIT=IGAURA2
+      do I=1,IGAURA2
+C-------if(RGAUS(I,0).gt.0.01)ILIMIT=I
+C-------Here only for masking info, can be faster:
+        if(RGAUS(I,0).gt.0.02)ILIMIT=I
+      enddo
+      if(ILIMIT.gt.IGAURA2)ILIMIT=IGAURA2
+C
+      ianf = -ILIMIT
+      iend =  ILIMIT
+      RINT=0.0
+      do K=ianf,iend
+        do J=ianf,iend
+          RINT=RINT+RGAUS(J,K)
+        enddo
+      enddo
+C
+      write(6,'('' RGAUS field calculated'')')
+      print *,' reaching until ',ILIMIT,' with integral = ',RINT
+C
+      write(*,'(''Convoluting: IPICDIM='',I8,
+     .  '', ianf,iend = '',2I8)')IPICDIM,ianf,iend
+      call system("echo `date`")
+C
+      DO K=1,IPICDIM
+        DO J=1,IPICDIM
+          RSUM=0.0
+          do ikrun=ianf,iend
+            ikloc=K+ikrun
+            if(ikloc.lt.1      )ikloc=1
+            if(ikloc.gt.IPICDIM)ikloc=IPICDIM
+            do ijrun=ianf,iend
+              ijloc=J+ijrun
+              if(ijloc.lt.1      )ijloc=1
+              if(ijloc.gt.IPICDI2)ijloc=IPICDIM
+              RSUM=RSUM+IPICTU(ijloc,ikloc)*RGAUS(ijrun,ikrun)
+            enddo
+          enddo
+          RSUM=RSUM/RINT
+          IPICT1(J,K)=RSUM
+        ENDDO
+      ENDDO
+C
+      write(6,'('' IPICTU smoothed to IPICT1'')')
+      call system("echo `date`")
+C
+      RETURN
+      END
+C
+C************************************************************************
+C
+      SUBROUTINE PICWRIINT(IPICTU,FILENAM,TEXT,IPICDIM,IPICSIZ)
+C
+      PARAMETER (LMAX=20100)
+      PARAMETER (LCMX=10050)
+C
+      INTEGER IPICTU(IPICDIM,IPICDIM)
+C
+      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+C
+      DIMENSION ALINE(LMAX),TITLE(20),NXYZ(3),MXYZ(3)
+      DIMENSION NXYZST(3)
+      DIMENSION LABELS(20,10)
+C
+      DIMENSION TEXT(20),PROGTIT(4)
+C
+      CHARACTER*80 FILENAM
+C
+      DMIN =  0.0
+      DMAX =  255.0
+      DMEAN = 0.5
+      MODE = 0
+C
+      NX=IPICSIZ
+      NY=IPICSIZ
+      NXYZ(1)=NX
+      NXYZ(2)=NY
+      NXYZ(3)=1 
+      NXYZST(1) = NXYZ(1)
+      NXYZST(2) = NXYZ(2)
+      NXYZST(3) = NXYZ(3)
+C
+      write(6,'('' Writing picture into '',A40)')FILENAM
+      write(6,'('' Size '',I15,'' (total array size: '',I15)')IPICDIM,IPICSIZ
+C
+      MODE=0
+      CALL IMOPEN(2,FILENAM,'NEW')
+      CALL ICRHDR(2,NXYZST,NXYZST,MODE,LABELS,0)
+      CALL ITRLAB(2,1)
+      CALL IWRHDR(2,TEXT,1,DMIN,DMAX,DMEAN)
+C
+      DMIN=100.0
+      DMAX=-100.0
+      DOUBLMEAN=0.0
+      DO K=1,IPICSIZ
+        DO J=1,IPICSIZ
+          ALINE(J) = IPICTU(J,K)
+          if(IPICTU(J,K).lt.DMIN)DMIN=IPICTU(J,K)
+          if(IPICTU(J,K).gt.DMAX)DMAX=IPICTU(J,K)
+          DOUBLMEAN=DOUBLMEAN+IPICTU(J,K) 
+        enddo 
+        CALL IWRLIN(2,ALINE)
+      enddo
+      DMEAN=DOUBLMEAN/(IPICSIZ*IPICSIZ)
+      CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+      CALL IMCLOSE(2)
+C
+      RETURN
+      END
+C
 

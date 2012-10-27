@@ -598,6 +598,33 @@ eot
 #
 echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}.mrc <${SYM}-symmetrized final 2D map>" >> LOGS/${scriptname}.results
 #
+#############################################################################
+${proc_2dx}/linblock "labelh - to transform the map into BYTE format with automatic scaling"
+#############################################################################
+#
+${bin_2dx}/labelh.exe << eot
+${imagename}-${SYM}.mrc
+-3
+SCRATCH/${imagename}-${SYM}.mrc
+eot
+#
+#############################################################################
+${proc_2dx}/linblock "mrc2tif - to create a TIFF file from the map that can be read by SPIDER"
+#############################################################################
+#
+if ( ! -d RESULTS-TIFF ) then
+  \mkdir RESULTS-TIFF
+endif
+#
+${bin_2dx}/mrc2tif.exe << eot
+SCRATCH/${imagename}-${SYM}.mrc
+RESULTS-TIFF/${imagename}-${SYM}.tif
+Y
+eot
+#
+echo "# IMAGE: RESULTS-TIFF/${imagename}-${SYM}.tif"  >> LOGS/${scriptname}.results
+${proc_2dx}/linblock "TIFF file created: RESULTS-TIFF/${imagename}-${SYM}.tif"
+#
 if ( ${produceSpiderMap} != 'y' ) then
   #
   echo "<<@progress: 100>>"
@@ -608,34 +635,12 @@ else
   echo "<<@progress: 70>>"
   #
   #############################################################################
-  ${proc_2dx}/linblock "labelh - to transform the map into BYTE format with automatic scaling"
+  ${proc_2dx}/linblock "Launching SPIDER script - to create a scaled version of the final map"
   #############################################################################
   #
   set realu = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
   set realv = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
   ${proc_2dx}/linblock "Unit cell = ${realu}, ${realv}, ${realang}"
-  #
-  ${bin_2dx}/labelh.exe << eot
-${imagename}-${SYM}.mrc
--3
-SCRATCH/${imagename}-${SYM}.mrc
-eot
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "mrc2tif - to create a TIFF file from the map that can be read by SPIDER"
-  #############################################################################
-  #
-  ${bin_2dx}/mrc2tif.exe << eot
-SCRATCH/${imagename}-${SYM}.mrc
-SCRATCH/${imagename}-${SYM}.tif
-Y
-eot
-  #
-  # echo "# IMAGE: SCRATCH/${imagename}-${SYM}.mrc"  >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Launching SPIDER script - to create a scaled version of the final map"
-  #############################################################################
   #
   ### THIS NEEDS TO BE A VALID PATH TO SPIDER: For example:
   #/usr/local/spider/bin/spider.exe
@@ -657,7 +662,7 @@ X70=200.0
 ; for example 17,024, then adjust that number from "198" to "1024":
 ;
 ;cp from raw
-;SCRATCH/${imagename}-${SYM}.tif
+;RESULTS-TIFF/${imagename}-${SYM}.tif
 ;8
 ;400,400,1
 ;198
@@ -734,7 +739,7 @@ X
 ;
 cp to tiff
 TMP006
-${imagename}-${SYM}-scaled.tif
+RESULTS-TIFF/${imagename}-${SYM}-scaled.tif
 ;
 ; cp to ccp4
 ; TMP005
@@ -775,8 +780,8 @@ y
 eot
   \mv temp.mrc ${imagename}-${SYM}-scaled.mrc
   #
-  # echo "# IMAGE: ${imagename}-${SYM}-scaled.tif <TIFF: ${SYM}-symmetrized MultiUnitCell Map>" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "TIFF file created: ${imagename}-${SYM}-scaled.tif"
+  # echo "# IMAGE: RESULTS-TIFF/${imagename}-${SYM}-scaled.tif <TIFF: ${SYM}-symmetrized MultiUnitCell Map>" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "TIFF file created: RESULTS-TIFF/${imagename}-${SYM}-scaled.tif"
   #
 endif
 #

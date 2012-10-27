@@ -1,0 +1,6 @@
+#!/bin/csh -ef
+#
+set infile = $1
+#
+$tifViewer_2dx_app ${infile}
+

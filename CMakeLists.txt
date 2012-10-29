@@ -27,9 +27,16 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(FindSubversion)
 FIND_PACKAGE(Subversion)
 
-EXECUTE_PROCESS(COMMAND svn info ${CMAKE_SOURCE_DIR}
-	RESULT_VARIABLE check_wc)
+#EXECUTE_PROCESS(COMMAND svn log -l10 ${CMAKE_SOURCE_DIR}
+#	RESULT_VARIABLE check_wc)
+
+exec_program(./test.sh ${CMAKE_SOURCE_DIR})
+
+#EXECUTE_PROCESS(COMMAND svn info ${CMAKE_SOURCE_DIR}
+#	RESULT_VARIABLE check_wc)
 message(STATUS "SVN dummy return: ${check_wc}")
+
+
 
 set(2dx_SVN_REVISION_NUMBER unknown)
 

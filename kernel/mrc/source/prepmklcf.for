@@ -11,6 +11,7 @@ C
 C       3.   SCALE              (*)  scale factor to ensure data >1 and <32000
 C                                       for LCF file.
 C
+      character*300 czeile
       DEGTORAD=3.1415962/180.0
       NSIGZERO=0
       NAZERO=0
@@ -48,7 +49,19 @@ CHEN>
 C61    FORMAT(35X,2I4,F7.3,F8.1,F7.1,F8.1,F6.1,F10.1)
 61    FORMAT(35X,2I4,F7.3,G13.6,F7.1,G13.6,F6.1,F10.1)
 CHEN<
-100   READ(1,*,END=400)IH,IK,ZSTAR,A,P,SIGA,SIGP,FOM
+100   continue
+        read(1,'(A)',END=400)czeile
+        call shorten(czeile,k)
+        READ(czeile,*,ERR=120)IH,IK,ZSTAR,A,P,SIGA,SIGP,FOM
+        goto 130
+120     continue
+          write(6,'(''::ERROR during file read in prephklcf.'')')
+          write(6,'(''::Last read line:'')')
+          write(6,'(''::'',A)')czeile(1:k)
+          write(6,'(''::Experted format: 2 integer, 6 floats'')')
+          write(6,'(''::ABORTING.'')')
+          stop -1
+130     continue
         A=A*SCALE       ! too big for LCF file
         NIN=NIN+1
         IF(SIGA.EQ.0.0.OR.SIGP.EQ.0.0) THEN
@@ -96,3 +109,30 @@ C55    FORMAT(3I4,F8.1,F7.1,F6.1)
      .  I10,' of them had figure of merit <0.01, and',/,
      .  I10,' were beyond resolution limit of',F8.1)
       END
+C
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+C
+

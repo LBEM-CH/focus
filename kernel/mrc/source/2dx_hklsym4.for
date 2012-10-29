@@ -572,7 +572,7 @@ C
       PAMPX=cos(RPT)*AMPWGT
       PAMPY=sin(RPT)*AMPWGT
 C
-      RAMP=AMP*AMPWGT
+      RAMP=AMP*PHSWGT
 C
 C-----Store AMP and PHASE
       ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + RAMP
@@ -733,6 +733,9 @@ C
       SUBROUTINE prepdata
 C
       REAL*8 XARG,S18AEF,S18AFF
+C
+C-----This subroutine is usually not called.
+C-----It was called only once, to produce the FOM vs XARG values above.
 C
 C-----Use the following to produce a Look-Up-Table for FOM(XARG):
 C

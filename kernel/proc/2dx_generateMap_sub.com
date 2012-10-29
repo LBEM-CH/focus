@@ -715,29 +715,29 @@ endif
 # ${proc_2dx}/linblock "LABEL - to create a clean MRC file format instead of CCP4"
 #############################################################################
 #
-# \rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
+\rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
 #
-# ${bin_2dx}/labelh.exe << eot
-# SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map 
-# 2
-# ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
-# 1,0
-# 0
-# eot
+${bin_2dx}/labelh.exe << eot
+SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map 
+2
+${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
+1,0
+0
+eot
 #
-cp -f SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
+# cp -f SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
 #
-# \rm -f ${prefix}${imagename}-${SYM_sub}.mrc
+\rm -f ${prefix}${imagename}-${SYM_sub}.mrc
 #
-# ${bin_2dx}/labelh.exe << eot
-# SCRATCH/${prefix}${imagename}-${SYM_sub}.map 
-# 2
-# ${prefix}${imagename}-${SYM_sub}.mrc
-# 1,0
-# 0
-# eot
+${bin_2dx}/labelh.exe << eot
+SCRATCH/${prefix}${imagename}-${SYM_sub}.map 
+2
+${prefix}${imagename}-${SYM_sub}.mrc
+1,0
+0
+eot
 #
-cp -f SCRATCH/${prefix}${imagename}-${SYM_sub}.map ${prefix}${imagename}-${SYM_sub}.mrc
+# cp -f SCRATCH/${prefix}${imagename}-${SYM_sub}.map ${prefix}${imagename}-${SYM_sub}.mrc
 #
 if ( ${SYM_sub} == 'p1' ) then
   \rm -f final_map.mrc

@@ -1524,10 +1524,16 @@ C
         domax =-1.E10
         DOUBLMEAN = 0.0
 C
+        NXT = NX
+        MXT = MX
+        IF (MODE .GE. 3) then
+          NXT = NXT*2
+          MXT = MXT*2
+        endif
         CALL IRTLAB(1,LABELS,NL)
         CALL IRTEXT(1,EXTRA,1,29)
         CALL IRTCEL(1,CELL)
-        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+C         CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
         CALL IALEXT(2,EXTRA,1,29)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C

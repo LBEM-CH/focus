@@ -8,9 +8,9 @@ C
       INTEGER MAXSPOT
       PARAMETER (MAXSPOT = 100)
 C
-C-----NFIELD has to be NFIELD=5*(MAXSPOT*2+1)**3
+C-----NFIELD has to be NFIELD=7*(MAXSPOT*2+1)**3
       INTEGER NFIELD
-      PARAMETER (NFIELD = 40603005)
+      PARAMETER (NFIELD = 56844207)
 C
 C-----MFIELD has to be MFIELD=(MAXSPOT*2+1)**3
       INTEGER MFIELD
@@ -23,10 +23,10 @@ C
       INTEGER IFILL
       INTEGER IFAIL,JFAIL
       REAL AMP,PHASE,FOM,SIGA,BACK,PI,PX,PY,PHERR
-      REAL AMPWGTSUM,PHSWGTSUM,AMPSUM
+      REAL WGTSUM,AMPSUM
       REAL SIGMA,WT,R1,R2,SNRX,SNRY,FOM100SNR
       REAL*8 XARG,S18AEF,S18AFF
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,7)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
 C
       COMMON // isig
@@ -108,7 +108,7 @@ C
 C
       PI=3.1415926537
 C
-      WRITE(*,'('': 2dx_hklsym3, to symmetrize an APH file '')')
+      WRITE(*,'('': 2dx_hklsym4, to symmetrize an APH file '')')
 C
       write(*,'('' Give input file name'')')
       read(*,'(A)')cline1
@@ -298,14 +298,22 @@ C
 C-----------output only for right half of Fourier plane (and top half of H=0 line):
             if(H.gt.0 .or. K.ge.0 .and. IFILL.gt.0)then
 C
-C-------------Get the sum of the weights for AMPs
-              AMPWGTSUM=ROUTP(H,K,L,4)
+C  1 = sum of weighted amplitudes
+C  2 = sum of FOM-weighted os component of phase
+C  3 = sum of FOM-weighted in component of phase
+C  4 = sum of phase_weights
+C  5 = sum of XARG-weighted os component of phase
+C  6 = sum of XARG-weighted in component of phase
+C  7 = sum of XARG-weights
 C
 C-------------Calculate the average AMPlitude
               AMPSUM=ROUTP(H,K,L,1)
 C
-              if(AMPWGTSUM.gt.0.0000001)then
-                AMP = AMPSUM/AMPWGTSUM
+C-------------Get the sum of the weights
+              WGTSUM=ROUTP(H,K,L,4)
+C
+              if(WGTSUM.gt.0.0000001)then
+                AMP = AMPSUM/WGTSUM
               else
                 AMP = 0.0
                 write(6,'('':WARNING: FOM of zero for '',3I6)')H,K,L
@@ -321,10 +329,6 @@ C
               PHASE=atan2(PY,PX)*180.0/PI
 C
               call PHACOR(PHASE)
-C
-C-------------Get the sum of the weights for PHASES
-              PHSWGTSUM=ROUTP(H,K,L,5)
-              if(PHSWGTSUM.lt.0.01)PHSWGTSUM=0.01
 C
 C-------------Calculate the average FOM
 C
@@ -366,15 +370,9 @@ C-------------
 C-------------  Richard
 C-------------
 C
-C-------------The remaining problem is, how to translate FOM into SNR. 
-C-------------The IQ WEIGHTABLE in AVRGAMPS is defining as weight for IQ1 a value of 49.
-C-------------This is roughly proportional to (7/IQ)**2. 
-C-------------Here, the FOM**2 as weight is multiplied with 7, to give similar values.
-C
-              FOM100SNR = 7.0
-C
-              SNRX = PX*FOM100SNR
-              SNRY = PY*FOM100SNR
+C-------------Calculate the average PHASE
+              SNRX=ROUTP(H,K,L,5)
+              SNRY=ROUTP(H,K,L,6)
               XARG = SQRT(SNRX**2 + SNRY**2)
 C
               IFAIL=1
@@ -479,21 +477,6 @@ C
       close(11)
       close(12)
 C
-C-----Produce a Look-Up-Table for WT(XARG):
-C     call system("\rm -f WT-TABLE.txt")
-C     open (18,FILE='WT-TABLE.txt',STATUS='NEW')
-C     xarg=0.0
-C     do H=1,2000
-C       xarg=xarg+0.01
-C       IFAIL=1
-C       JFAIL=1
-C       R1=S18AFF(XARG,JFAIL)
-C       R2=S18AEF(XARG,IFAIL)
-C       WT=R1 / R2
-C       write(18,'(2F16.6)')XARG,WT
-C     enddo
-C     close(18)
-C
       STOP
 
       END     
@@ -526,10 +509,12 @@ C and if so, if there should be a phase shift of 180 or not.
 C
 C This all ends up in the table ROUTP, whereby the positions for each H,K,L reflection mean:
 C  1 = sum of weighted amplitudes
-C  2 = sum of weighted os component of phase
-C  3 = sum of weighted in component of phase
-C  4 = sum of amp_weights
-C  5 = sum of phase_weights
+C  2 = sum of FOM-weighted os component of phase
+C  3 = sum of FOM-weighted in component of phase
+C  4 = sum of phase_weights
+C  5 = sum of XARG-weighted os component of phase
+C  6 = sum of XARG-weighted in component of phase
+C  7 = sum of XARG-weights
 C
 C The field IOUTP counts how many entries were added to each HKL spot
 C
@@ -543,8 +528,9 @@ C
       INTEGER ISHIFT,IMAXSPOT
       INTEGER isig
       REAL AMP,PHASE,BACK,FOM,SIGA,PX,PY,RPT,PI
-      REAL RAMP,RBACK,RFOM,RSIGA,AMPWGT,PHSWGT
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
+      REAL PAMPX,PAMPY
+      REAL RAMP,RBACK,RFOM,RSIGA,AMPWGT,PHSWGT,XARG
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,7)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
 C
       COMMON // isig
@@ -576,38 +562,15 @@ C
       endif
       call PHACOR(PHASE)
 C
-C-----IQ  |  WEIGHT  |  FOM
-C     1      49.00     100.0
-C     2      27.56      56.2
-C     3       8.51      17.4
-C     4       4.17       8.51
-C     5       2.48       5.06
-C     6       1.65       3.37
-C     7       1.17       2.39
-C     8       0.25       0.51
-C     9       0.00       0.0
-C
       PHSWGT=FOM/100.0
       RPT=PHASE*PI/180.0
-C
-      if(isig.ne.2)then
-        AMPWGT=PHSWGT**2
-      else
-C
-C-------What about SIGA here???        ToDo
-C
-        if(BACK.gt.0.0)then
-          AMPWGT = 1.0 / (BACK**2)
-        else
-          write(6,'(''::ERROR: BACK value of zero for HKL='',3I6)')H,K,L
-          STOP '::ERROR in 2dx_hklsym4'
-        endif
-      endif
-C
-      PHSWGT = AMPWGT
-C
       PX=cos(RPT)*PHSWGT
       PY=sin(RPT)*PHSWGT
+C
+      call FOM2XARG(FOM,XARG)
+      AMPWGT=XARG
+      PAMPX=cos(RPT)*AMPWGT
+      PAMPY=sin(RPT)*AMPWGT
 C
       RAMP=AMP*AMPWGT
 C
@@ -615,8 +578,10 @@ C-----Store AMP and PHASE
       ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + RAMP
       ROUTP( H, K, L,2) = ROUTP( H, K, L,2) + PX
       ROUTP( H, K, L,3) = ROUTP( H, K, L,3) + PY
-      ROUTP( H, K, L,4) = ROUTP( H, K, L,4) + AMPWGT
-      ROUTP( H, K, L,5) = ROUTP( H, K, L,5) + PHSWGT
+      ROUTP( H, K, L,4) = ROUTP( H, K, L,4) + PHSWGT
+      ROUTP( H, K, L,5) = ROUTP( H, K, L,5) + PAMPX
+      ROUTP( H, K, L,6) = ROUTP( H, K, L,6) + PAMPY
+      ROUTP( H, K, L,7) = ROUTP( H, K, L,7) + AMPWGT
 C
       IOUTP( H, K, L) = IOUTP( H, K, L) + 1.0
 C
@@ -624,14 +589,198 @@ C-----Also fill Friedel symmetric spots:
       ROUTP(-H,-K,-L,1) = ROUTP(-H,-K,-L,1) + RAMP
       ROUTP(-H,-K,-L,2) = ROUTP(-H,-K,-L,2) + PX
       ROUTP(-H,-K,-L,3) = ROUTP(-H,-K,-L,3) - PY
-      ROUTP(-H,-K,-L,4) = ROUTP(-H,-K,-L,4) + AMPWGT
-      ROUTP(-H,-K,-L,5) = ROUTP(-H,-K,-L,5) + PHSWGT
+      ROUTP(-H,-K,-L,4) = ROUTP(-H,-K,-L,4) + PHSWGT
+      ROUTP(-H,-K,-L,5) = ROUTP(-H,-K,-L,5) + PAMPX
+      ROUTP(-H,-K,-L,6) = ROUTP(-H,-K,-L,6) - PAMPY
+      ROUTP(-H,-K,-L,7) = ROUTP(-H,-K,-L,7) + AMPWGT
 C
       IOUTP(-H,-K,-L) = IOUTP(-H,-K,-L) + 1.0
 C
       RETURN
 C
       END
+C
+C=========================================================
+C
+      SUBROUTINE FOM2XARG(FOM,XARG)
+C
+C-----This routine returns XARG as a function of FOM.
+C-----XARG will be used for the Bessel function ratio.
+C
+C-----Here, FOM should be between 0 and 100.
+C
+      real FOMXARG(202)
+      DATA FOMXARG / 
+     .      0.000000,    0.000000,
+     .      1.049942,    0.021000,
+     .      2.152001,    0.043050,
+     .      3.308313,    0.066202,
+     .      4.521002,    0.090513,
+     .      5.792169,    0.116038,
+     .      7.123854,    0.142840,
+     .      8.518017,    0.170982,
+     .      9.976499,    0.200531,
+     .     11.500977,    0.231558,
+     .     13.092929,    0.264136,
+     .     14.753577,    0.298342,
+     .     16.483826,    0.334260,
+     .     18.284201,    0.371973,
+     .     20.154779,    0.411571,
+     .     22.095135,    0.453150,
+     .     24.104219,    0.496807,
+     .     26.180330,    0.542647,
+     .     28.320995,    0.590780,
+     .     30.522934,    0.641319,
+     .     32.781960,    0.694385,
+     .     35.092937,    0.750104,
+     .     37.449760,    0.808609,
+     .     39.845322,    0.870039,
+     .     42.271519,    0.934541,
+     .     44.719318,    1.002268,
+     .     47.178829,    1.073382,
+     .     49.639431,    1.148051,
+     .     52.089916,    1.226453,
+     .     54.518742,    1.308776,
+     .     56.914192,    1.395215,
+     .     59.264709,    1.485975,
+     .     61.559139,    1.581274,
+     .     63.787025,    1.681338,
+     .     65.938858,    1.786404,
+     .     68.006363,    1.896724,
+     .     69.982666,    2.012561,
+     .     71.862434,    2.134189,
+     .     73.641998,    2.261898,
+     .     75.319344,    2.395993,
+     .     76.894043,    2.536792,
+     .     78.367195,    2.684632,
+     .     79.741211,    2.839863,
+     .     81.019623,    3.002856,
+     .     82.206879,    3.173999,
+     .     83.308060,    3.353699,
+     .     84.328720,    3.542383,
+     .     85.274574,    3.740502,
+     .     86.151398,    3.948527,
+     .     86.964813,    4.166953,
+     .     87.720207,    4.396301,
+     .     88.422630,    4.637116,
+     .     89.076744,    4.889971,
+     .     89.686783,    5.155470,
+     .     90.256584,    5.434243,
+     .     90.789612,    5.726955,
+     .     91.288910,    6.034302,
+     .     91.757240,    6.357017,
+     .     92.197037,    6.695868,
+     .     92.610481,    7.051661,
+     .     92.999527,    7.425243,
+     .     93.365936,    7.817505,
+     .     93.711273,    8.229380,
+     .     94.037003,    8.661849,
+     .     94.344406,    9.115941,
+     .     94.634712,    9.592737,
+     .     94.908974,   10.093374,
+     .     95.168236,   10.619042,
+     .     95.413422,   11.170993,
+     .     95.645378,   11.750542,
+     .     95.864914,   12.359069,
+     .     96.072754,   12.998022,
+     .     96.269608,   13.668922,
+     .     96.456085,   14.373368,
+     .     96.632813,   15.113036,
+     .     96.800323,   15.889687,
+     .     96.959152,   16.705170,
+     .     97.109779,   17.561428,
+     .     97.252663,   18.460498,
+     .     97.388214,   19.404522,
+     .     97.516861,   20.395748,
+     .     97.638962,   21.436534,
+     .     97.754875,   22.529360,
+     .     97.864922,   23.676827,
+     .     97.969421,   24.881667,
+     .     98.068687,   26.146749,
+     .     98.162964,   27.475085,
+     .     98.252541,   28.869838,
+     .     98.337639,   30.334329,
+     .     98.418518,   31.872044,
+     .     98.495361,   33.486644,
+     .     98.568420,   35.181975,
+     .     98.637848,   36.962072,
+     .     98.703857,   38.831174,
+     .     98.766617,   40.793731,
+     .     98.826294,   42.854415,
+     .     98.883026,   45.018134,
+     .     98.936981,   47.290039,
+     .     98.988304,   49.675538,
+     .     99.037102,   52.180313,
+     .     99.083527,   54.810326  /
+C
+      itest=1
+ 100  continue
+        if(FOM.lt.FOMXARG(itest))then
+          XARG=FOMXARG(itest+1)
+        else
+          itest=itest+2
+          if(itest.lt.200)then
+            goto 100
+          else
+            XARG=54.81
+          endif
+        endif
+      return
+      end
+C
+C=================================================================================
+C
+      SUBROUTINE prepdata
+C
+      REAL*8 XARG,S18AEF,S18AFF
+C
+C-----Use the following to produce a Look-Up-Table for FOM(XARG):
+C
+      call system("\rm -f WT-TABLE.txt")
+      open (18,FILE='WT-TABLE.txt',STATUS='NEW')
+      rtmp = 0.0
+      xarg=rtmp
+      istep=100
+      xmax=100.0
+      do H=0,istep
+        IFAIL=1
+        JFAIL=1
+        R1=S18AFF(XARG,JFAIL)
+        R2=S18AEF(XARG,IFAIL)
+        if(abs(R2).gt.0.0)then
+          WT=R1 / R2
+        else
+          IFAIL=1
+        endif
+C
+C-------IF ABOVE FAILS, GAUSSIAN WILL DO AS PROBABILITY MUST BE VERY SHARP
+C
+        IF((JFAIL.NE.IFAIL).or.
+     .     (IFAIL.EQ.1.OR.JFAIL.EQ.1))THEN
+          WRITE(6,'(''S18AFF or S18AEF failed for XARG= '',F12.3,'',  R1='',F12.3,
+     .      '',  R2='',F12.3,'' IFAIL='',I1,'', JFAIL='',I1)')XARG,R1,R2,IFAIL,JFAIL
+        endif
+        IF(IFAIL.EQ.1.OR.JFAIL.EQ.1)THEN
+          if(XARG.eq.0.0)then
+            FOM=0.0
+          else
+            SIGMA=SQRT(1.0/XARG)
+            FOM=COS(SIGMA) * 100.0
+          endif
+        ELSE
+          FOM=WT * 100.0
+        END IF
+C
+C       wwrite(6,'(''::H,K,L,XARG,R1,R2,FOM '',3I5,4G18.6)')H,K,L,XARG,R1,R2,FOM
+C
+        write(18,'(''     .  '',F12.6,'','',F12.6,'','')')FOM,XARG
+C
+        xarg=(xarg+0.02)*1.05
+      enddo
+      close(18)
+C
+      return
+      end
 C
 C=========================================================
 C

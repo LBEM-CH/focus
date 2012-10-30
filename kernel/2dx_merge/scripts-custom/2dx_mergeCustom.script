@@ -219,9 +219,10 @@ else
   setenv REFHKL APH/latfittedref_nosym.hkl
   #
   ${bin_2dx}/prepmklcf.exe << eot 
-${RESMAX},1.1                          ! RESOLUTION,REDUCAC
+${RESMAX},1.0                          ! RESOLUTION,REDUCAC
 ${realcell},${realang},${ALAT}         ! a,b,gamma,c
 1.0                                    ! SCALE
+1				       ! 1=Calculate FOM from SIGF and SIGP. 0=Calculate FOM only from SIGP (this was the original version) 
 eot
   #
   echo "################################################"

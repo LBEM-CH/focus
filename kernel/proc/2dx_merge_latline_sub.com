@@ -270,7 +270,7 @@ echo "<<@progress: +5>>"
 #
 #############################################################################
 #                                                                           #
-${proc_2dx}/linblock "PREPMKMTZ - Program to convert fitted data to CCP4 format"
+${proc_2dx}/linblock "PREPMKLCF - Program to convert fitted data to CCP4 format"
 #                                                                           #
 #############################################################################
 #
@@ -281,10 +281,16 @@ setenv IN SCRATCH/latfitteds.dat
 setenv OUT APH/latfitted_nosym.hkl
 setenv REFHKL APH/latfittedref_nosym.hkl
 #
+# (1.0 to leave FOM values as they are, or 1.5 = to add a 60deg phase error)
+set REDUCAC = 1.0   
+#
+echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
+@
 ${bin_2dx}/2dx_prepmklcf.exe << eot > LOGS/prepmklcf.log
-${RESMAX},1.5                          ! RESOLUTION,REDUCAC (1.5 = 60deg phase error)
+${RESMAX},${REDUCAC}                   ! RESOLUTION,REDUCAC
 ${realcell},${realang},${ALAT}         ! a,b,gamma,c
 0.0                                    ! SCALE (automatic scaling to max(AMP)=32000.0)
+1				       ! 1=Calculate FOM from SIGF and SIGP. 0=Calculate FOM only from SIGP (this was the original version) 
 eot
 #
 echo "################################################"
@@ -304,7 +310,6 @@ else
   echo "set num_reflections_FOM50 = ${num_reflections_FOM50}" >> LOGS/${scriptname}.results
   \mv -f 2dx_prepmklcf.statistics SCRATCH
 endif
-echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
 if ( ${tempkeep} == "y" ) then
   echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Latline for vol after prepmklcf [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
   echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
@@ -330,7 +335,7 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Latline data for volume>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Latline data for volume [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #
@@ -403,7 +408,7 @@ eof
 # echo "# IMAGE: SCRATCH/merge3Dref-clean.mtz <MTZ: SCRATCH/merge3Dref-clean.mtz>" >> LOGS/${scriptname}.results
 # echo "# IMAGE: SCRATCH/merge3Dref-clean-p1.mtz <MTZ: SCRATCH/merge3Dref-clean-p1.mtz>" >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for reference>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #

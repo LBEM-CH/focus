@@ -1,6 +1,7 @@
 C       PREPARE LATLINE OUTPUT DATA FOR MKLCF
 C       VX 1.0          18.11.88        RH
 C       VX 1.1          22.09.93        RH
+C       V  2.0          29.10.12        HST
 C
 C       CONTROL CARDS
 C
@@ -11,7 +12,15 @@ C
 C       3.   SCALE              (*)  scale factor to ensure data >1 and <32000
 C                                       for LCF file.
 C
+C       4.   ifomcalc           (*)  switch, deciding if FOM should be calculated from
+C                                    0: FOM=100*cos(PHASE_ERROR),   or
+C                                    1: FOM=100*cos(PHASE_ERROR)*BESSEL_Ratio(SNR)
+C                                       only if FOM=100 and PHASE=0,180,or 90
+C
       character*300 czeile
+      character*200 cline
+      REAL*8 XARG,S18AEF,S18AFF
+C
       DEGTORAD=3.1415962/180.0
       NSIGZERO=0
       NAZERO=0
@@ -29,15 +38,23 @@ C
       READ(5,*)SCALE
 CHEN>
 C      IF(SCALE.EQ.0.0) SCALE=1.0
+      READ(5,*)ifomcalc
+      if(ifomcalc.eq.0)then
+        write(cline,'(''SIGP'')')
+      else
+        write(cline,'(''SIGP & SIGF'')')
+      endif
+      call shorten(cline,k)
 CHEN<
-      WRITE(6,50)REDUCAC,CELLA,CELLB,GAMMA,CAXIS,RESOLUTION,SCALE
+      WRITE(6,50)REDUCAC,CELLA,CELLB,GAMMA,CAXIS,RESOLUTION,SCALE,cline(1:k)
 50    FORMAT('            Reduce phase accuracy by factor ===',F6.2,/,
      .       '            a-axis cell dimension =============',F6.2,/,
      .       '            b-axis cell dimension =============',F6.2,/,
      .       '            gamma angle =======================',F6.2,/,
      .       '            c-axis cell dimension =============',F6.2,/,
      .       '            Resolution ========================',F6.2,/,
-     .       '            Amplitudes scaled by===============',F6.2)
+     .       '            Amplitudes scaled by ==============',F6.2,/,
+     .       '            Calculate FOM from ================',A)
       IF(GAMMA.GT.90.0)GAMMA=180.0-GAMMA
       ASTAR=1.0/(CELLA*SIN(GAMMA*DEGTORAD))
       BSTAR=1.0/(CELLB*SIN(GAMMA*DEGTORAD))
@@ -47,11 +64,13 @@ CHEN<
       CALL CCPDPN(3,'REFHKL','UNKNOWN','F',0,0)
 C      CALL DOPEN(1,'IN','RO','F')
 C      CALL DOPEN(2,'OUT','NEW','F')
-      WRITE(6,60)
-60    FORMAT('   H   K   L      A      P     FOM*100         REJECTS')
 CHEN>
-C61    FORMAT(35X,2I4,F7.3,F8.1,F7.1,F8.1,F6.1,F10.1)
-61    FORMAT(35X,2I4,F7.3,G13.6,F7.1,G13.6,F6.1,F10.1)
+54    FORMAT(3I6,G16.8,G16.8,G16.8,G16.8)
+55    FORMAT(3I6,G16.8,G16.8,G16.8)
+59    FORMAT('Used:    ',3I6,X,   F13.3,F7.1,F12.3,F9.1,F9.1)
+60    FORMAT(/,'              H     K     L         A        P     ',
+     .    '   FOM        SIGA     SIGP        RES')
+61    FORMAT('IGNORED: ',2I6,F7.3,F13.3,F7.1,12X,  F9.1,F9.1,A)
 C
       if(SCALE.EQ.0.0)then
         AMAX=0.0
@@ -73,6 +92,7 @@ C
       endif
 C
 CHEN<
+      HOLD = -9999
 100   continue
         read(1,'(A)',END=400)czeile
         call shorten(czeile,k)
@@ -86,6 +106,10 @@ CHEN<
           write(6,'(''::ABORTING.'')')
           stop -1
 130     continue
+        if(HOLD.ne.IH)then
+          WRITE(6,60)
+          HOLD=IH
+        endif
 C 
         A=A*SCALE       ! too big for LCF file
 CHEN>
@@ -95,31 +119,81 @@ CHEN>
 CHEN<
         NIN=NIN+1
         IF(SIGA.EQ.0.0.OR.SIGP.EQ.0.0) THEN
-                NSIGZERO=NSIGZERO+1
-                WRITE(6,61)IH,IK,ZSTAR,A,P,SIGA,SIGP
-                GO TO 100
+          NSIGZERO=NSIGZERO+1
+          write(cline,'('' (SIG is zero)'')')
+          call shorten(cline,k)
+          WRITE(6,61)IH,IK,ZSTAR,A,P,SIGA,SIGP,cline(1:k)
+          GO TO 100
         ENDIF
         IF(A.LE.0.0) THEN
-                NAZERO=NAZERO+1
-                WRITE(6,61)IH,IK,ZSTAR,A,P,SIGA,SIGP
-                GO TO 100
+          NAZERO=NAZERO+1
+          write(cline,'('' (A is below zero)'')')
+          call shorten(cline,k)
+          WRITE(6,61)IH,IK,ZSTAR,A,P,SIGA,SIGP,cline(1:k)
+          GO TO 100
         ENDIF
+C
         SIGPR=SIGP*REDUCAC
         IF(SIGPR.GT.90.0)SIGPR=90.0
-        FOMCALC=100.0*COS(SIGPR*DEGTORAD)
+C
+        if(ifomcalc.eq.0)then
+          FOMAMP=1.0
+        else
+          if(SIGA.gt.0.0)then
+            PTMP=amod(P,90.0)
+            if(abs(SIGP-1.0).lt.0.1 .and. abs(PTMP).lt.0.01)then
+              XARG=A/SIGA
+              if(XARG.gt.49.0)XARG=49.0
+              IFAIL=1
+              JFAIL=1
+              R1=S18AFF(XARG,JFAIL)
+              R2=S18AEF(XARG,IFAIL)
+              if(abs(R2).gt.0.0)then
+                WT=R1 / R2
+              else
+                IFAIL=1
+              endif
+C-------------IF ABOVE FAILS, GAUSSIAN WILL DO AS PROBABILITY MUST BE VERY SHARP
+              IF(JFAIL.NE.IFAIL) WRITE(6,299)IH,IK,ZSTAR,JFAIL,IFAIL
+ 299            FORMAT('::S18AFF or S18AEF failed for spot ',2I5,F10.3,
+     .           ', J/I FAIL=',2I6)
+              IF(IFAIL.EQ.1.OR.JFAIL.EQ.1)THEN
+                SIGMA=SQRT(1.0/XARG)
+                FOMAMP=COS(SIGMA)
+              ELSE
+                FOMAMP=WT
+              END IF
+            else
+              FOMAMP=1.0
+            endif
+          else
+            FOMAMP=1.0
+          endif
+        endif
+C
+        FOMCALC=100.0*COS(SIGPR*DEGTORAD)*FOMAMP
+C
         IF(FOMCALC.LT.1.0) THEN
-                NFOMLOW=NFOMLOW+1
-                WRITE(6,61)IH,IK,ZSTAR,A,P,SIGA,SIGP
-                GO TO 100       ! skip this one
+          NFOMLOW=NFOMLOW+1
+          RARG=XARG
+          write(cline,'('' (FOMCALC<1.0)   XARG,IFAIL,JFAIL,'',
+     .      ''R1,R2,SIGMA,FOMAMP,FOMCALC: '',
+     .      F12.3,2I2,5G15.3)') RARG,IFAIL,JFAIL,R1,R2,SIGMA,FOMAMP,FOMCALC
+          call shorten(cline,k)
+          WRITE(6,61)IH,IK,ZSTAR,A,P,SIGA,SIGP,cline(1:k)
+
+          GO TO 100       ! skip this one
         ENDIF
         IL=NINT(ZSTAR*CAXIS)
         RSQ=IH**2*ASTAR**2+IK**2*BSTAR**2+ZSTAR**2+
      .          2.0*IH*IK*ASTAR*BSTAR*COS(GAMMA*DEGTORAD)
         IF(RSQ.GT.1.0/RESOLUTION**2) THEN
-                NRESHI=NRESHI+1
-                RES=SQRT(1.0/RSQ)
-                WRITE(6,61)IH,IK,ZSTAR,A,P,SIGA,SIGP,RES
-                GO TO 100
+          NRESHI=NRESHI+1
+          RES=SQRT(1.0/RSQ)
+          write(cline,'('' (Resolution is '',F7.3,'')'')')RES
+          call shorten(cline,k)
+          WRITE(6,61)IH,IK,ZSTAR,A,P,SIGA,SIGP,cline(1:k)
+          GO TO 100
         ENDIF
         NGOOD=NGOOD+1
         if(FOMCALC.ge.1.0)then
@@ -130,11 +204,7 @@ CHEN<
         endif
         WRITE(2,55)IH,IK,IL,A,P,FOMCALC
         WRITE(3,54)IH,IK,IL,A,P,FOMCALC,SIGA
-        WRITE(6,55)IH,IK,IL,A,P,FOMCALC
-54      FORMAT(3I6,G16.8,G16.8,G16.8,G16.8)
-55      FORMAT(3I6,G16.8,G16.8,G16.8)
-C54      FORMAT(3I4,F8.1,F7.1,F6.1,F10.1)
-C55      FORMAT(3I4,F8.1,F7.1,F6.1)
+        WRITE(6,59)IH,IK,IL,A,P,FOMCALC,SIGA,SIGP
       GO TO 100
 C
 CHEN>

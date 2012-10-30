@@ -1,16 +1,20 @@
       PROGRAM HKLSYM4
 
 C       Henning Stahlberg, 16.5.2000
-C       updated 10/21/2012
+C       updated 10/29/2012
+C
+C-----I am thankful to Richard Henderson for detailed and very patient
+C-----explanations on how to deal with SNR, IQ, FOM, weights, and XARG.
+C-----Henning, Oct. 29, 2012. 
 
       IMPLICIT NONE
 C
       INTEGER MAXSPOT
       PARAMETER (MAXSPOT = 100)
 C
-C-----NFIELD has to be NFIELD=7*(MAXSPOT*2+1)**3
+C-----NFIELD has to be NFIELD=5*(MAXSPOT*2+1)**3
       INTEGER NFIELD
-      PARAMETER (NFIELD = 56844207)
+      PARAMETER (NFIELD = 40603005)
 C
 C-----MFIELD has to be MFIELD=(MAXSPOT*2+1)**3
       INTEGER MFIELD
@@ -26,15 +30,13 @@ C
       REAL WGTSUM,AMPSUM
       REAL SIGMA,WT,R1,R2,SNRX,SNRY,FOM100SNR
       REAL*8 XARG,S18AEF,S18AFF
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,7)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
 C
       COMMON // isig
 C
 C-----The following table comes from the ALLSPACE program:
 C
-C-----------ROUTP contains AMP,PHS,BACK,FOM,SIGA
-C 
 C Table of phase comparisons to be made
 C       -  not comparable       
 C       1  directly identical
@@ -298,82 +300,35 @@ C
 C-----------output only for right half of Fourier plane (and top half of H=0 line):
             if(H.gt.0 .or. K.ge.0 .and. IFILL.gt.0)then
 C
-C  1 = sum of weighted amplitudes
+C  1 = sum of amplitudes
 C  2 = sum of FOM-weighted os component of phase
 C  3 = sum of FOM-weighted in component of phase
-C  4 = sum of phase_weights
-C  5 = sum of XARG-weighted os component of phase
-C  6 = sum of XARG-weighted in component of phase
-C  7 = sum of XARG-weights
+C  4 = sum of XARG-weighted os component of phase
+C  5 = sum of XARG-weighted in component of phase
 C
 C-------------Calculate the average AMPlitude
+C-------------Here, this is the linear average of AMPS, as 
+C-------------Average_AMP=sum(AMP)/N
+C
               AMPSUM=ROUTP(H,K,L,1)
-C
-C-------------Get the sum of the weights
-              WGTSUM=ROUTP(H,K,L,4)
-C
-              if(WGTSUM.gt.0.0000001)then
-                AMP = AMPSUM/WGTSUM
-              else
-                AMP = 0.0
-                write(6,'('':WARNING: FOM of zero for '',3I6)')H,K,L
-              endif
-C
-C              write(6,'('':HKL, AMPSUM,PX,PY,AWGT,PWGT'',3I3,5F12.3)')
-C     .          H,K,L,ROUTP(H,K,L,1),ROUTP(H,K,L,2),ROUTP(H,K,L,3),ROUTP(H,K,L,4),ROUTP(H,K,L,5)
+              AMP=AMPSUM/IFILL
 C
 C-------------Calculate the average PHASE
+C-------------Here, this is the angle of the added phase vectors.
               PX=ROUTP(H,K,L,2)
               PY=ROUTP(H,K,L,3)
-C
               PHASE=atan2(PY,PX)*180.0/PI
-C
               call PHACOR(PHASE)
 C
 C-------------Calculate the average FOM
+C-------------Here, this is calculated as
+C-------------Average_FOM=BESSEL_Ratio(sqrt(sum(cos(PHASE)*XARG)**2+sum(sin(PHASE)*XARG)**2))
+C-------------whereby XARG is taken from a look-up table as a function of the FOM values of the reclections.
 C
-C-------------This is taken from AVRGAMPS, and the following explanation 
-C-------------from Richard Henderson in an email to Henning Stahlberg on
-C-------------Oct. 20, 2012:
-C-------------
-C-------------  [...] FOMOUT is the most complicated one.  Here we calculate the vector length
-C-------------  given by XARG = SQRT(SUMCOS**2 + SUMSIN**2) where SUMCOS and SUMSIN are
-C-------------  the same weighted sums as used to calculate COMBPHASE.  The most important
-C-------------  aspect of XARG is that it's magnitude is the combined signal-to-noise
-C-------------  ratio of the vectorially added structure factors.  In other words, the
-C-------------  vector length is XARG and the standard deviation is 1.0.  The way to get
-C-------------  the figure of merit, FOM, from this involves integrating around the circle
-C-------------  of radius XARG in Argand space with a standard deviation of 1.0.  This is
-C-------------  given by the formula S18AFF/S18AEF.  S18AFF and S18AEF are two NAGLIB
-C-------------  subroutines that return the modified Bessel functions I1(x) and I0(x)
-C-------------  respectively.  I tabulate below the values given by S18AFF and S18AEF, and
-C-------------  the corresponding FOM for a range of value of XARG = signal-to-noise
-C-------------  ratios.
-C-------------  
-C-------------  XARG     S18AFF   S18AEF    FOM
-C-------------  0        1        0         0
-C-------------  0.5      0.257    1.06      0.24
-C-------------  1        0.565    1.26      0.45
-C-------------  3        3.9      4.9       0.8
-C-------------  6        61       67        0.91
-C-------------  8        399      427       0.93
-C-------------  10       2670     2800      0.95
-C-------------  15       328000   339000    0.97
-C-------------  20       42400000 43000000  0.99
-C-------------  
-C-------------  If you don't want to call anyone else's subroutines, you could just create
-C-------------  your own look-up table and put in values that you calculate.  We did it
-C-------------  this way so we could get a continuously evaluated function.
-C-------------  
-C-------------  I hope this is helpful.
-C-------------  
-C-------------  Richard
-C-------------
-C
-C-------------Calculate the average PHASE
-              SNRX=ROUTP(H,K,L,5)
-              SNRY=ROUTP(H,K,L,6)
+              SNRX=ROUTP(H,K,L,4)
+              SNRY=ROUTP(H,K,L,5)
               XARG = SQRT(SNRX**2 + SNRY**2)
+              if(XARG.gt.49.0)XARG=49.0
 C
               IFAIL=1
               JFAIL=1
@@ -501,20 +456,18 @@ C       H  differ by 180 * H            JSIMPL  = number to compare directly
 C       K  differ by 180 * K            JSCREW   = number to compare + 180 * M
 C       HK differ by 180 * (H+K)         where M = H*JH180 + K*JK180
 C
-C All reflections are added to a giant matrix REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,8)
+C All reflections are added to a giant matrix REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
 C to all possible symmetry-related positions.
 C
 C By doing so, the ISYMFIELD(column,spacegroupnumber) decides, if a reflection should be added, 
 C and if so, if there should be a phase shift of 180 or not.
 C
 C This all ends up in the table ROUTP, whereby the positions for each H,K,L reflection mean:
-C  1 = sum of weighted amplitudes
+C  1 = sum of amplitudes
 C  2 = sum of FOM-weighted os component of phase
 C  3 = sum of FOM-weighted in component of phase
-C  4 = sum of phase_weights
-C  5 = sum of XARG-weighted os component of phase
-C  6 = sum of XARG-weighted in component of phase
-C  7 = sum of XARG-weights
+C  4 = sum of XARG-weighted os component of phase
+C  5 = sum of XARG-weighted in component of phase
 C
 C The field IOUTP counts how many entries were added to each HKL spot
 C
@@ -528,12 +481,42 @@ C
       INTEGER ISHIFT,IMAXSPOT
       INTEGER isig
       REAL AMP,PHASE,BACK,FOM,SIGA,PX,PY,RPT,PI
-      REAL PAMPX,PAMPY
+      REAL PAMPX,PAMPY,SNR
       REAL RAMP,RBACK,RFOM,RSIGA,AMPWGT,PHSWGT,XARG
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,7)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      REAL FOMWEIGHT(9)
 C
       COMMON // isig
+C
+      DATA FOMWEIGHT/0.990,0.982,0.939,0.870,0.763,0.630,0.505,0.124,0.000/
+C
+C-----IQ   S/Nratio   AMP/BACK    XARG    FOM
+C---------------------------------------------
+C-----1       7          7          7     0.998
+C-----2      3.5        3.5        3.5    0.982
+C-----3      2.3        2.3        2.3    0.939
+C-----4      1.7        1.7        1.7    0.870
+C-----5      1.4        1.4        1.4    0.763
+C-----6      1.15       1.15       1.15   0.630
+C-----7      1.0        1.0        1.0    0.505
+C-----8      0.5        0.5        0.5    0.124
+C-----9       0          0          0     0.000
+C
+C
+C-----XARG     S18AFF   S18AEF    FOM
+C-----        (Bessel Functions)
+C--------------------------------------
+C-----20       42400000 43000000  0.9
+C-----15       328000   339000    0.97
+C-----10       2670     2800      0.95
+C-----8        399      427       0.93
+C-----6        61       67        0.91
+C-----3        3.9      4.9       0.8
+C-----1        0.565    1.26      0.45
+C-----0.5      0.257    1.06      0.24
+C-----0        1        0         0
+
 C
       if(ISHIFT.eq.0)then
         RETURN
@@ -563,38 +546,32 @@ C
       call PHACOR(PHASE)
 C
       PHSWGT=FOM/100.0
+C
       RPT=PHASE*PI/180.0
       PX=cos(RPT)*PHSWGT
       PY=sin(RPT)*PHSWGT
 C
       call FOM2XARG(FOM,XARG)
-      AMPWGT=XARG
-      PAMPX=cos(RPT)*AMPWGT
-      PAMPY=sin(RPT)*AMPWGT
-C
-      RAMP=AMP*PHSWGT
+      PAMPX=cos(RPT)*XARG
+      PAMPY=sin(RPT)*XARG
 C
 C-----Store AMP and PHASE
-      ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + RAMP
+      ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + AMP
       ROUTP( H, K, L,2) = ROUTP( H, K, L,2) + PX
       ROUTP( H, K, L,3) = ROUTP( H, K, L,3) + PY
-      ROUTP( H, K, L,4) = ROUTP( H, K, L,4) + PHSWGT
-      ROUTP( H, K, L,5) = ROUTP( H, K, L,5) + PAMPX
-      ROUTP( H, K, L,6) = ROUTP( H, K, L,6) + PAMPY
-      ROUTP( H, K, L,7) = ROUTP( H, K, L,7) + AMPWGT
+      ROUTP( H, K, L,4) = ROUTP( H, K, L,4) + PAMPX
+      ROUTP( H, K, L,5) = ROUTP( H, K, L,5) + PAMPY
 C
-      IOUTP( H, K, L) = IOUTP( H, K, L) + 1.0
+      IOUTP( H, K, L) = IOUTP( H, K, L) + 1
 C
 C-----Also fill Friedel symmetric spots:
-      ROUTP(-H,-K,-L,1) = ROUTP(-H,-K,-L,1) + RAMP
+      ROUTP(-H,-K,-L,1) = ROUTP(-H,-K,-L,1) + AMP
       ROUTP(-H,-K,-L,2) = ROUTP(-H,-K,-L,2) + PX
       ROUTP(-H,-K,-L,3) = ROUTP(-H,-K,-L,3) - PY
-      ROUTP(-H,-K,-L,4) = ROUTP(-H,-K,-L,4) + PHSWGT
-      ROUTP(-H,-K,-L,5) = ROUTP(-H,-K,-L,5) + PAMPX
-      ROUTP(-H,-K,-L,6) = ROUTP(-H,-K,-L,6) - PAMPY
-      ROUTP(-H,-K,-L,7) = ROUTP(-H,-K,-L,7) + AMPWGT
+      ROUTP(-H,-K,-L,4) = ROUTP(-H,-K,-L,4) + PAMPX
+      ROUTP(-H,-K,-L,5) = ROUTP(-H,-K,-L,5) - PAMPY
 C
-      IOUTP(-H,-K,-L) = IOUTP(-H,-K,-L) + 1.0
+      IOUTP(-H,-K,-L) = IOUTP(-H,-K,-L) + 1
 C
       RETURN
 C

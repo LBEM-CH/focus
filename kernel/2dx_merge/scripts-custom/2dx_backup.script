@@ -268,10 +268,9 @@ while ( ${dircounter} <= ${dirnum} )
   if ( -d ${from_dirfile} ) then
     cd ${from_dirfile}
     set from_dirfile = ${PWD}
-    echo ": "
+    echo ":: "
     echo ":##############################################################################"
-    echo ":: Working on source directory:"
-    echo ":: ${from_dirfile}"
+    echo "::Working on source directory: ${from_dirfile}"
     echo ":##############################################################################"
     #
     if ( ${backup_direction} == "0" ) then
@@ -299,7 +298,7 @@ while ( ${dircounter} <= ${dirnum} )
             echo "::Copying this image directory, since 2dx_image.cfg is newer than at the destination."
             set docopy = 1
           else
-            echo "::Not copying this image directory, since 2dx_image.cfg is newer than at the destination."
+            echo "::NOT copying this image directory, since 2dx_image.cfg is older than at the destination."
             set docopy = 0
           endif
         else

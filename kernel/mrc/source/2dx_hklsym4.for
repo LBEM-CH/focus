@@ -12,9 +12,9 @@ C
       INTEGER MAXSPOT
       PARAMETER (MAXSPOT = 100)
 C
-C-----NFIELD has to be NFIELD=5*(MAXSPOT*2+1)**3
+C-----NFIELD has to be NFIELD=3*(MAXSPOT*2+1)**3
       INTEGER NFIELD
-      PARAMETER (NFIELD = 40603005)
+      PARAMETER (NFIELD = 24361803)
 C
 C-----MFIELD has to be MFIELD=(MAXSPOT*2+1)**3
       INTEGER MFIELD
@@ -30,7 +30,7 @@ C
       REAL WGTSUM,AMPSUM
       REAL SIGMA,WT,R1,R2,SNRX,SNRY,FOM100SNR
       REAL*8 XARG,S18AEF,S18AFF
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,3)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
 C
       COMMON // isig
@@ -301,10 +301,8 @@ C-----------output only for right half of Fourier plane (and top half of H=0 lin
             if(H.gt.0 .or. K.ge.0 .and. IFILL.gt.0)then
 C
 C  1 = sum of amplitudes
-C  2 = sum of FOM-weighted os component of phase
-C  3 = sum of FOM-weighted in component of phase
-C  4 = sum of XARG-weighted os component of phase
-C  5 = sum of XARG-weighted in component of phase
+C  2 = sum of XARG-weighted os component of phase
+C  3 = sum of XARG-weighted in component of phase
 C
 C-------------Calculate the average AMPlitude
 C-------------Here, this is the linear average of AMPS, as 
@@ -325,9 +323,7 @@ C-------------Here, this is calculated as
 C-------------Average_FOM=BESSEL_Ratio(sqrt(sum(cos(PHASE)*XARG)**2+sum(sin(PHASE)*XARG)**2))
 C-------------whereby XARG is taken from a look-up table as a function of the FOM values of the reclections.
 C
-              SNRX=ROUTP(H,K,L,4)
-              SNRY=ROUTP(H,K,L,5)
-              XARG = SQRT(SNRX**2 + SNRY**2)
+              XARG = SQRT(PX**2 + PY**2)
               if(XARG.gt.49.0)XARG=49.0
 C
               IFAIL=1
@@ -456,7 +452,7 @@ C       H  differ by 180 * H            JSIMPL  = number to compare directly
 C       K  differ by 180 * K            JSCREW   = number to compare + 180 * M
 C       HK differ by 180 * (H+K)         where M = H*JH180 + K*JK180
 C
-C All reflections are added to a giant matrix REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
+C All reflections are added to a giant matrix REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,3)
 C to all possible symmetry-related positions.
 C
 C By doing so, the ISYMFIELD(column,spacegroupnumber) decides, if a reflection should be added, 
@@ -464,10 +460,8 @@ C and if so, if there should be a phase shift of 180 or not.
 C
 C This all ends up in the table ROUTP, whereby the positions for each H,K,L reflection mean:
 C  1 = sum of amplitudes
-C  2 = sum of FOM-weighted os component of phase
-C  3 = sum of FOM-weighted in component of phase
-C  4 = sum of XARG-weighted os component of phase
-C  5 = sum of XARG-weighted in component of phase
+C  2 = sum of XARG-weighted os component of phase
+C  3 = sum of XARG-weighted in component of phase
 C
 C The field IOUTP counts how many entries were added to each HKL spot
 C
@@ -483,40 +477,10 @@ C
       REAL AMP,PHASE,BACK,FOM,SIGA,PX,PY,RPT,PI
       REAL PAMPX,PAMPY,SNR
       REAL RAMP,RBACK,RFOM,RSIGA,AMPWGT,PHSWGT,XARG
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,3)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
-      REAL FOMWEIGHT(9)
 C
       COMMON // isig
-C
-      DATA FOMWEIGHT/0.990,0.982,0.939,0.870,0.763,0.630,0.505,0.124,0.000/
-C
-C-----IQ   S/Nratio   AMP/BACK    XARG    FOM
-C---------------------------------------------
-C-----1       7          7          7     0.998
-C-----2      3.5        3.5        3.5    0.982
-C-----3      2.3        2.3        2.3    0.939
-C-----4      1.7        1.7        1.7    0.870
-C-----5      1.4        1.4        1.4    0.763
-C-----6      1.15       1.15       1.15   0.630
-C-----7      1.0        1.0        1.0    0.505
-C-----8      0.5        0.5        0.5    0.124
-C-----9       0          0          0     0.000
-C
-C
-C-----XARG     S18AFF   S18AEF    FOM
-C-----        (Bessel Functions)
-C--------------------------------------
-C-----20       42400000 43000000  0.9
-C-----15       328000   339000    0.97
-C-----10       2670     2800      0.95
-C-----8        399      427       0.93
-C-----6        61       67        0.91
-C-----3        3.9      4.9       0.8
-C-----1        0.565    1.26      0.45
-C-----0.5      0.257    1.06      0.24
-C-----0        1        0         0
-
 C
       if(ISHIFT.eq.0)then
         RETURN
@@ -545,22 +509,17 @@ C
       endif
       call PHACOR(PHASE)
 C
-      PHSWGT=FOM/100.0
+      call FOM2XARG(FOM,XARG)
 C
       RPT=PHASE*PI/180.0
-      PX=cos(RPT)*PHSWGT
-      PY=sin(RPT)*PHSWGT
 C
-      call FOM2XARG(FOM,XARG)
-      PAMPX=cos(RPT)*XARG
-      PAMPY=sin(RPT)*XARG
+      PX=cos(RPT)*XARG
+      PY=sin(RPT)*XARG
 C
 C-----Store AMP and PHASE
       ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + AMP
       ROUTP( H, K, L,2) = ROUTP( H, K, L,2) + PX
       ROUTP( H, K, L,3) = ROUTP( H, K, L,3) + PY
-      ROUTP( H, K, L,4) = ROUTP( H, K, L,4) + PAMPX
-      ROUTP( H, K, L,5) = ROUTP( H, K, L,5) + PAMPY
 C
       IOUTP( H, K, L) = IOUTP( H, K, L) + 1
 C
@@ -568,8 +527,6 @@ C-----Also fill Friedel symmetric spots:
       ROUTP(-H,-K,-L,1) = ROUTP(-H,-K,-L,1) + AMP
       ROUTP(-H,-K,-L,2) = ROUTP(-H,-K,-L,2) + PX
       ROUTP(-H,-K,-L,3) = ROUTP(-H,-K,-L,3) - PY
-      ROUTP(-H,-K,-L,4) = ROUTP(-H,-K,-L,4) + PAMPX
-      ROUTP(-H,-K,-L,5) = ROUTP(-H,-K,-L,5) - PAMPY
 C
       IOUTP(-H,-K,-L) = IOUTP(-H,-K,-L) + 1
 C
@@ -585,6 +542,35 @@ C-----This routine returns XARG as a function of FOM.
 C-----XARG will be used for the Bessel function ratio.
 C
 C-----Here, FOM should be between 0 and 100.
+C
+C
+C
+C-----IQ   S/Nratio   AMP/BACK     FOM    IQ-Weight
+C-----------------------------------------------------
+C-----1       7          7        0.998     49.00
+C-----2      3.5        3.5       0.982     27.56
+C-----3      2.3        2.3       0.939      8.51
+C-----4      1.7        1.7       0.870      4.17
+C-----5      1.4        1.4       0.763      2.48
+C-----6      1.15       1.15      0.630      1.65
+C-----7      1.0        1.0       0.505      1.17
+C-----8      0.5        0.5       0.124      0.25
+C-----9       0          0        0.000      0.00
+C
+C
+C-----XARG     S18AFF   S18AEF    FOM
+C-----        (Bessel Functions)
+C--------------------------------------
+C-----20       42400000 43000000  0.9
+C-----15       328000   339000    0.97
+C-----10       2670     2800      0.95
+C-----8        399      427       0.93
+C-----6        61       67        0.91
+C-----3        3.9      4.9       0.8
+C-----1        0.565    1.26      0.45
+C-----0.5      0.257    1.06      0.24
+C-----0        1        0         0
+C
 C
       real FOMXARG(202)
       DATA FOMXARG / 

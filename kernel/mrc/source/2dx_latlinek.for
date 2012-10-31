@@ -1886,6 +1886,8 @@ C
         PARAMETER (NPROMX=1001)
         PARAMETER (IPPFPDIM=500)
 C
+        LOGICAL LCOLOR
+C
 C       COMMON/FIT/FOBS(NOBSMX),PHIOBS(NOBSMX),ZSTAR(NOBSMX),
 C     . WTFOB(NOBSMX),WTPHI(NOBSMX),
 C     . ACALC(NCALMX),BCALC(NCALMX),ZCALC(NCALMX),
@@ -1905,9 +1907,12 @@ CTSH++
         SAVE INIT,CNV
         DIMENSION TITLE(1),PHASE(1),SIGF(1),SIGPHI(1)
         CHARACTER*80 LINE
+        CHARACTER*80 cline
 CTSH--
         DIMENSION ZOUT(1),FOUT(1),PHIOUT(1)
         LOGICAL INTEN,LAST
+C
+        LCOLOR=.true.
 C
       IF(NOBS.LE.8) THEN
         WRITE(6,104) IHIN,IKIN
@@ -1921,6 +1926,7 @@ C
       PMAG=60.
       GAP=8.
       DELZ = .05
+      BARWIDTH = 0.4
       IF(INIT.EQ.1) THEN
         CALL P2K_PAGE
         GO TO 5
@@ -1938,6 +1944,11 @@ C  Scale the plotsize. (ZMIN=-0.1, ZMAX=0.1 uses PLTSIZ=136)
       CALL P2K_ORIGIN(-0.5*XPLTSIZ,-0.8*YPLTSIZ,0.)
       CALL P2K_COLOUR(0)
       CALL P2K_LWIDTH(0.3)
+      rgbr = 0.0
+      rgbg = 0.0
+      rgbb = 0.0
+      if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
       INIT=1
       ZRANG=ZMAX-ZMIN
 CHEN>
@@ -1961,6 +1972,28 @@ C       CALL P2K_MOVE(10.,-15.,0.)
         CALL P2K_MOVE(-5.,-12.,0.)
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.8)
         CALL P2K_STRING(TITLE,80,0.)
+C
+        rgbr = 0.0
+        rgbg = 0.0
+        rgbb = 1.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
+        WRITE(cline,'(''Legend: IQ     1 2 3 4 5 6 7 8 9'')')
+        call shorten(cline,k)
+        CALL P2K_MOVE(24.,-17.,0.)
+        CALL P2K_STRING(cline,k,0.)
+C
+        WRITE(cline,'(''        Symbol X x * + ~ - , . .'')')
+        call shorten(cline,k)
+        CALL P2K_MOVE(24.,-20.,0.)
+        CALL P2K_STRING(cline,k,0.)
+C
+        rgbr = 0.0
+        rgbg = 0.0
+        rgbb = 0.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_DRAW(0.,FMAG,0.)
         CALL P2K_DRAW(ZMM,FMAG,0.)
@@ -2054,24 +2087,58 @@ CHEN<
 CHEN>
           if(YP.gt.YMAX)THEN
             YP=YMAX
-            CALL P2K_MOVE(XP,YP,0.)
-            IF(IQOBS(J).le.imaxIQplot)then
-              CALL P2K_CSTRING('#',1,0.)
-            else
-              CALL P2K_CSTRING('*',1,0.)
-            endif
+            rgbr = 1.0
+            rgbg = 0.0
+            rgbb = 0.0
           else
-            CALL P2K_MOVE(XP,YP,0.)
-            IF(IQOBS(J).le.imaxIQplot)then
-              CALL P2K_CSTRING('X',1,0.)
-            else
-              CALL P2K_CSTRING('+',1,0.)
-            endif
+            rgbr = 0.0
+            rgbg = 0.0
+            rgbb = 1.0
           endif
-CHENN<
+C---------Set RGB color:
+          if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+          CALL P2K_MOVE(XP,YP,0.)  
+C---------IQ   = 1 2 3 4 5 6 7 8 9
+C---------Sign = X x * + ~ - , . .
+          if(IQOBS(J).eq.1) CALL P2K_CSTRING('X',1,0.)
+          if(IQOBS(J).eq.2) CALL P2K_CSTRING('x',1,0.)
+          if(IQOBS(J).eq.3) CALL P2K_CSTRING('*',1,0.)
+          if(IQOBS(J).eq.4) CALL P2K_CSTRING('+',1,0.)
+          if(IQOBS(J).eq.5) CALL P2K_CSTRING('~',1,0.)
+          if(IQOBS(J).eq.6) CALL P2K_CSTRING('-',1,0.)
+          if(IQOBS(J).eq.7) CALL P2K_CSTRING(',',1,0.)
+          if(IQOBS(J).eq.8) CALL P2K_CSTRING('.',1,0.)
+          if(IQOBS(J).eq.9) CALL P2K_CSTRING('.',1,0.)
 50      CONTINUE
 C
+CHENN<
+C
+C   PLOT SIGMA F
+C
+        rgbr = 0.0
+        rgbg = 0.4
+        rgbb = 0.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
+        DO 610 J = 1,NOUT
+          XP = ZOUT(J)*ZMAG
+          YP = FOUT(J)*SCALE
+          YL = AMAX1(0., FOUT(J) - SIGF(J))*SCALE
+          YU = AMIN1(FMAX, FOUT(J) + SIGF(J))*SCALE
+          CALL P2K_MOVE(XP - BARWIDTH, YL,0.)
+          CALL P2K_DRAW(XP + BARWIDTH, YL,0.)
+          CALL P2K_MOVE(XP, YL,0.)
+          CALL P2K_DRAW(XP, YU,0.)
+          CALL P2K_MOVE(XP - BARWIDTH, YU,0.)
+          CALL P2K_DRAW(XP + BARWIDTH, YU,0.)
+610     CONTINUE
+C
 C  CALCULATE AND DRAW FITTED AMPL CURVE.
+C
+        rgbr = 0.0
+        rgbg = 0.0
+        rgbb = 0.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
         Z=ZCALC(1)-DELPLT
         DO 600 J=1,NPLT
@@ -2088,23 +2155,14 @@ C
           CALL P2K_DRAW(XP,YP,0.)
 600     CONTINUE
 C
-C   PLOT SIGMA F
-C
-        DO 610 J = 1,NOUT
-          XP = ZOUT(J)*ZMAG
-          YP = FOUT(J)*SCALE
-          YL = AMAX1(0., FOUT(J) - SIGF(J))*SCALE
-          YU = AMIN1(FMAX, FOUT(J) + SIGF(J))*SCALE
-          CALL P2K_MOVE(XP - 0.8, YL,0.)
-          CALL P2K_DRAW(XP + 0.8, YL,0.)
-          CALL P2K_MOVE(XP, YL,0.)
-          CALL P2K_DRAW(XP, YU,0.)
-          CALL P2K_MOVE(XP - 0.8, YU,0.)
-          CALL P2K_DRAW(XP + 0.8, YU,0.)
-610     CONTINUE
         IF (INTEN) RETURN
 C
 C  DRAW AXES FOR PHASE BOX.
+C
+        rgbr = 0.0
+        rgbg = 0.0
+        rgbb = 0.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
         PMAG2 = PMAG/360.
         YPOS=FMAG+GAP+PMAG/2.0
@@ -2148,44 +2206,94 @@ CHEN<
 C
 C  PLOT OBS PHASE POINTS
 C
+        rgbr = 0.0
+        rgbg = 0.0
+        rgbb = 1.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
         DO 500 J=1,NOBS
           IF(PHIOBS(J).EQ.-999.) GO TO 500
-C BEST PHASES (1,2) ARE PLOTTED AS LARGE X; 
-C GOOD ONES (3,4)  AS SMALLER x;
-C LESS GOOD ONES (5,6) AS +; GRADE 7,8 AS SMALL +.
-C LIMITS SET ARE OKAY FOR WEIGHTS AS SET UP BY READBOTH.FOR and
-C input to latline using option 2.
-        IF(WTPHI(J) .GT. 16.414)THEN
-                CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.75)
+          if(1.eq.1)then
+            CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.48)
+            XP=ZSTAR(J)*ZMAG
+            YP=PHIOBS(J)*PMAG2 - 0.22*FONTSIZE*0.48
+            CALL P2K_MOVE(XP,YP,0.)
+            if(IQOBS(J).eq.1) CALL P2K_CSTRING('X',1,0.)
+            if(IQOBS(J).eq.2) CALL P2K_CSTRING('x',1,0.)
+            if(IQOBS(J).eq.3) CALL P2K_CSTRING('*',1,0.)
+            if(IQOBS(J).eq.4) CALL P2K_CSTRING('+',1,0.)
+            if(IQOBS(J).eq.5) CALL P2K_CSTRING('~',1,0.)
+            if(IQOBS(J).eq.6) CALL P2K_CSTRING('-',1,0.)
+            if(IQOBS(J).eq.7) CALL P2K_CSTRING(',',1,0.)
+            if(IQOBS(J).eq.8) CALL P2K_CSTRING('.',1,0.)
+            if(IQOBS(J).eq.9) CALL P2K_CSTRING('.',1,0.)
+          else
+C-----------BEST PHASES (1,2) ARE PLOTTED AS LARGE X; 
+C-----------GOOD ONES (3,4)  AS SMALLER x;
+C-----------LESS GOOD ONES (5,6) AS +; GRADE 7,8 AS SMALL +.
+C-----------LIMITS SET ARE OKAY FOR WEIGHTS AS SET UP BY READBOTH.FOR and
+C-----------input to latline using option 2.
+            IF(WTPHI(J) .GT. 16.414)THEN
+                CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.5)
                 XP=ZSTAR(J)*ZMAG
-                YP=PHIOBS(J)*PMAG2 - 0.22*FONTSIZE*0.75
+                YP=PHIOBS(J)*PMAG2 - 0.22*FONTSIZE*0.5
                 CALL P2K_MOVE(XP,YP,0.)
                 CALL P2K_CSTRING('X',1,0.)
-        END IF
-        IF(WTPHI(J).LE. 16.414.AND.WTPHI(J).GT. 3.2828)THEN
-                CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.48)
+            END IF
+            IF(WTPHI(J).LE. 16.414.AND.WTPHI(J).GT. 3.2828)THEN
+                CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.4)
                 XP=ZSTAR(J)*ZMAG
-                YP=PHIOBS(J)*PMAG2 - 0.22*FONTSIZE*0.48
+                YP=PHIOBS(J)*PMAG2 - 0.22*FONTSIZE*0.4
                 CALL P2K_MOVE(XP,YP,0.)
                 CALL P2K_CSTRING('X',1,0.)
-        END IF
-        IF(WTPHI(J).LE. 3.2828.AND.WTPHI(J).GT. 1.3131)THEN
-                CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.6)
-                XP=ZSTAR(J)*ZMAG
-                YP=PHIOBS(J)*PMAG2 - 0.22*FONTSIZE*0.6
-                CALL P2K_MOVE(XP,YP,0.)
-                CALL P2K_CSTRING('+',1,0.)
-        END IF
-        IF(WTPHI(J).LE. 1.3131)THEN
+            END IF
+            IF(WTPHI(J).LE. 3.2828.AND.WTPHI(J).GT. 1.3131)THEN
                 CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.4)
                 XP=ZSTAR(J)*ZMAG
                 YP=PHIOBS(J)*PMAG2 - 0.22*FONTSIZE*0.4
                 CALL P2K_MOVE(XP,YP,0.)
                 CALL P2K_CSTRING('+',1,0.)
-        END IF
+            END IF
+            IF(WTPHI(J).LE. 1.3131)THEN
+                CALL P2K_FONT('Helvetica'//CHAR(0),FONTSIZE*0.3)
+                XP=ZSTAR(J)*ZMAG
+                YP=PHIOBS(J)*PMAG2 - 0.22*FONTSIZE*0.3
+                CALL P2K_MOVE(XP,YP,0.)
+                CALL P2K_CSTRING('+',1,0.)
+            END IF
+          endif
 500     CONTINUE
 C
+C  PLOT SIGMA PHASE
+C
+        if(iplterr.eq.1)then
+          rgbr = 0.0
+          rgbg = 0.4
+          rgbb = 0.0
+          if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
+          DO 700 J = 1,NOUT
+            XP = ZOUT(J)*ZMAG
+            YP = PHIOUT(J)*PMAG2
+            YL = AMAX1(-180., PHIOUT(J) - SIGPHI(J))*PMAG2
+            YU = AMIN1( 180., PHIOUT(J) + SIGPHI(J))*PMAG2
+            CALL P2K_MOVE(XP - BARWIDTH, YL,0.)
+            CALL P2K_DRAW(XP + BARWIDTH, YL,0.)
+            CALL P2K_MOVE(XP, YL,0.)
+            CALL P2K_DRAW(XP, YU,0.)
+            CALL P2K_MOVE(XP - BARWIDTH, YU,0.)
+            CALL P2K_DRAW(XP + BARWIDTH, YU,0.)
+C           CALL MOVETO(XP - 0.8, YP)
+C           CALL DRAWTO(XP + 0.8, YP)
+700       CONTINUE
+        endif
+C
 C  DRAW  CALCULATED PHASE CURVE
+C
+        rgbr = 0.0
+        rgbg = 0.0
+        rgbb = 0.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
         Z=ZCALC(1)-DELPLT
         DO 660 J=1,NPLT
@@ -2197,32 +2305,15 @@ C
           CALL P2K_DRAW(XP,YP,0.)
 660     CONTINUE
 C
-C  PLOT SIGMA PHASE
+        rgbr = 0.0
+        rgbg = 0.0
+        rgbb = 0.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
-CHENN>
-        if(iplterr.eq.1)then
-CHENN<
-C
-        DO 700 J = 1,NOUT
-          XP = ZOUT(J)*ZMAG
-          YP = PHIOUT(J)*PMAG2
-          YL = AMAX1(-180., PHIOUT(J) - SIGPHI(J))*PMAG2
-          YU = AMIN1( 180., PHIOUT(J) + SIGPHI(J))*PMAG2
-          CALL P2K_MOVE(XP - 0.8, YL,0.)
-          CALL P2K_DRAW(XP + 0.8, YL,0.)
-          CALL P2K_MOVE(XP, YL,0.)
-          CALL P2K_DRAW(XP, YU,0.)
-          CALL P2K_MOVE(XP - 0.8, YU,0.)
-          CALL P2K_DRAW(XP + 0.8, YU,0.)
-C         CALL MOVETO(XP - 0.8, YP)
-C         CALL DRAWTO(XP + 0.8, YP)
-700     CONTINUE
-CHENN>
-        endif
-CHENN<
 C
         RETURN
         END
+C
 C*MATINV.FOR*********************************************************
 C
 C     VERSION 2.0 WITH SMALL CHANGES RH 15.3.91
@@ -2860,3 +2951,29 @@ C
 1       B(I)=A(I)
         RETURN
         END
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+C
+

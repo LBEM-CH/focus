@@ -94,6 +94,20 @@ else
 	fi
 fi
 
+if [ -f /opt/local/lib/gcc46/libstdc++.6.dylib ]; then
+	CPP_LIB=/opt/local/lib/gcc46/libstdc++.6.dylib
+	echo "Found libstdc++.6.dylib in $CPP_LIB"
+else
+       if [ -f /usr/local/lib/gcc46/libstdc++.6.dylib ]; then
+		CPP_LIB=/usr/local/lib/gcc46/libstdc++.6.dylib
+		echo "Found libstdc++.6.dylib in $CPP_LIB"
+	else
+		CPP_LIB=NOT_FOUND
+		echo "quadmath not FOUND!"
+	       	exit 2
+	fi
+fi
+
 
 
 
@@ -108,6 +122,8 @@ do
 	cp $GFORTRAN_LIB $build_dir/$loop
 	echo "cp $QUADMATH_LIB $build_dir/$loop"
 	cp $QUADMATH_LIB $build_dir/$loop
+	echo "cp $CPP_LIB $build_dir/$loop"
+	cp $CPP_LIB $build_dir/$loop
 done
 fortran_bin="kernel/mrc/bin"
 path="$build_dir/$fortran_bin"
@@ -127,7 +143,8 @@ do
 	install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $file
 	install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $file
 	install_name_tool -change $GFORTRAN_LIB  @executable_path/../lib/libgfortran.3.dylib $file 
-	install_name_tool -change $QUADMATH_LIB @executable_path/../lib/libquadmath.0.dylib  $file 
+	install_name_tool -change $QUADMATH_LIB @executable_path/../lib/libquadmath.0.dylib  $file
+	install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $file  
 	otool -L $file 
 done
 

@@ -1913,6 +1913,7 @@ CTSH--
         LOGICAL INTEN,LAST
 C
         LCOLOR=.true.
+        PI=3.14159265437
 C
       IF(NOBS.LE.8) THEN
         WRITE(6,104) IHIN,IKIN
@@ -2277,6 +2278,21 @@ C
             YP = PHIOUT(J)*PMAG2
             YL = AMAX1(-180., PHIOUT(J) - SIGPHI(J))*PMAG2
             YU = AMIN1( 180., PHIOUT(J) + SIGPHI(J))*PMAG2
+C
+            PHAERR = abs(SIGPHI(J))
+            if(PHAERR.lt. 0.0)PHAERR= 0.0
+            if(PHAERR.lt.90.0)then
+              FACTOR = 1.0 - cos(PHAERR*PI/180.0)
+              rgbr = 0.0 + FACTOR * 0.5
+              rgbg = 0.5 + FACTOR * 0.5
+              rgbb = 0.0 + FACTOR * 0.5
+            else
+              rgbr = 1.0
+              rgbg = 0.0
+              rgbb = 0.0 
+            endif
+            if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
             CALL P2K_MOVE(XP - BARWIDTH, YL,0.)
             CALL P2K_DRAW(XP + BARWIDTH, YL,0.)
             CALL P2K_MOVE(XP, YL,0.)

@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 
 			if(QFileInfo(standardScriptsDir.path() + "/" + script + ".script").exists())
 			{
-				cout<<"::  Executing: "<<script.toStdString()<<" in "<<data.getDir("working").toStdString()<<endl;
+				cout<<"::  Executing in "<<data.getDir("working").toStdString()<<" :  "<<script.toStdString()<<endl;
 				parser.parse(standardScriptsDir.path() + "/" + script + ".script", data.getDir("working") + "/proc/" + script + ".com");
 				parser.execute(script,&data);
 			}
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 			script.remove(QRegExp("\\.script$"));
 			if(QFileInfo(customScriptsDir.path() + "/" + script + ".script").exists())
 			{
-				cout<<"Executing: "<<script.toStdString()<<" in "<<data.getDir("working").toStdString()<<endl;
+				cout<<"::  Executing in "<<data.getDir("working").toStdString()<<" : +"<<script.toStdString()<<endl;
 				parser.parse(customScriptsDir.path() + "/" + script + ".script", data.getDir("working") + "/proc/" + script + ".com");
 				parser.execute(script,&data);
 			}

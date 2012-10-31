@@ -133,6 +133,39 @@ if ( ${ReUnbend_All} == "3" ) then
   end
 endif
 #
+if ( ${ReUnbend_All} == "4" ) then
+  #
+  ############################################################################# 
+  ${proc_2dx}/linblock "Processing all directories"
+  ############################################################################# 
+  #
+  cd ${olddir} 
+  #
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
+  foreach dirfile ( ${dirlist} ) 
+    cd ${olddir}
+    cd ..
+    cd ${dirfile}
+    if ( -e 2dx_image.cfg ) then
+      echo ":: "
+      ${proc_2dx}/linblock "Working on ${dirfile}"
+      set curdir = ${PWD}
+      ${app_2dx_image} ${curdir} "2dx_initialize"
+      ${app_2dx_image} ${curdir} "2dx_initialize_files"
+      ${app_2dx_image} ${curdir} "2dx_fftrans"
+      ${app_2dx_image} ${curdir} "+2dx_refinedefocus"
+      ${app_2dx_image} ${curdir} '"*"'
+      echo ":: Done."
+    else
+      echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
+    endif
+    # 
+    cd ${olddir}
+  end
+endif
+#
 echo "<<@progress: 100>>"
 #
 ############################################################################# 

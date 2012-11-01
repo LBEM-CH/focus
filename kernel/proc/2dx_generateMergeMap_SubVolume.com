@@ -92,7 +92,7 @@ SYMM 1
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Sub Volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Volume (Sub Volume)>" >> LOGS/${scriptname}.results
   #
 endif
 #
@@ -162,7 +162,7 @@ xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} -0.5 0.5
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Sub Volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Volume (Sub Volume)>" >> LOGS/${scriptname}.results
   #
   #
 endif
@@ -239,7 +239,7 @@ xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} ${limzmin} ${limzmax}
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Sub Volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Volume (Sub Volume)>" >> LOGS/${scriptname}.results
   #
 endif
 #
@@ -312,7 +312,7 @@ xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} -0.5 0.5
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Sub Volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Volume (Sub Volume)>" >> LOGS/${scriptname}.results
   #
   #############################################################################
   #

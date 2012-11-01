@@ -136,42 +136,7 @@ C
         SIGPR=SIGP*REDUCAC
         IF(SIGPR.GT.90.0)SIGPR=90.0
 C
-        if(ifomcalc.eq.0)then
-          FOMAMP=1.0
-        else
-          if(SIGA.gt.0.0)then
-            PTMP=amod(P,90.0)
-            if(abs(SIGP-1.0).lt.0.1 .and. abs(PTMP).lt.0.01)then
-              XARG=A/SIGA
-              if(XARG.gt.49.0)XARG=49.0
-              IFAIL=1
-              JFAIL=1
-              R1=S18AFF(XARG,JFAIL)
-              R2=S18AEF(XARG,IFAIL)
-              if(abs(R2).gt.0.0)then
-                WT=R1 / R2
-              else
-                IFAIL=1
-              endif
-C-------------IF ABOVE FAILS, GAUSSIAN WILL DO AS PROBABILITY MUST BE VERY SHARP
-              IF(JFAIL.NE.IFAIL) WRITE(6,299)IH,IK,ZSTAR,JFAIL,IFAIL
- 299            FORMAT('::S18AFF or S18AEF failed for spot ',2I5,F10.3,
-     .           ', J/I FAIL=',2I6)
-              IF(IFAIL.EQ.1.OR.JFAIL.EQ.1)THEN
-                SIGMA=SQRT(1.0/XARG)
-                FOMAMP=COS(SIGMA)
-              ELSE
-                FOMAMP=WT
-              END IF
-            else
-              FOMAMP=1.0
-            endif
-          else
-            FOMAMP=1.0
-          endif
-        endif
-C
-        FOMCALC=100.0*COS(SIGPR*DEGTORAD)*FOMAMP
+        FOMCALC=100.0*COS(SIGPR*DEGTORAD)
 C
         IF(FOMCALC.LT.1.0) THEN
           NFOMLOW=NFOMLOW+1

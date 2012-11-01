@@ -247,8 +247,11 @@ CHENN<
         DIMENSION ZOUT(NOUTMX),FOUT(NOUTMX),PHIOUT(NOUTMX)
         DIMENSION TITLE(20),SCALE(NCALMX*2)
 C
+        REAL*8 XARG,S18AEF,S18AFF
+C
         LOGICAL PLOT,INTEN,EOF
         EQUIVALENCE (ZOUT,GRADS), (FOUT,SCALE), (PHIOUT,PARMS)
+C
         DATA TOPI/6.2831853/, PLOT/.FALSE./
         DATA CNV/57.2957795/,  EOF/.FALSE./
 C       DATA NOBSMX/500/, NCALMX/50/, NPLTMX/500/, NPROMX/251/
@@ -260,6 +263,8 @@ C       DATA NOBSMX/500/, NCALMX/50/, NPLTMX/500/, NPROMX/251/
         istilt = 0
         ZSTG = 0.0
         ZSTO = 0.0
+C
+        PI=3.1415926537
 C
 C   READ INPUT DATA
 C
@@ -594,15 +599,71 @@ C
           FOUT(J) = F
           PHIOUT(J) = PHI
           SIGOUT=ABS(SIGPHI(J))
+C
+CHEN>
+C---------Catch case, where due to symmetry constraints the 
+C---------phase error is coming out as zero.
+          if(ISYML.ne.0)then
+C-----------Replace SIGOUT with FOM value:
+C
+            if(1.eq.1)then
+C-------------This is a dirty hack, to fudge something that
+C-------------looks ok in the latline plots....
+C-------------This is not a scientifically sound solution...:
+              if(abs(SIGF(J)).gt.0.001)then
+                FMERIT=((F/SIGF(J))**2)/100.0
+              else
+                FMERIT=0.0
+              endif
+              if(FMERIT.gt.1.0)FMERIT=1.0
+              if(FMERIT.lt.0.1)FMERIT=0.0
+              SIGOUT=acos(FMERIT)*180.0/PI
+              SIGPHI(J)=SIGOUT
+C
+            else
+C-------------This below is another attempt to come up with 
+C-------------something scientifically correct. But the results
+C-------------aren't looking convincing....:
+C
+C-------------This is an empiric correction factor, to 
+C-------------downweight the influence of symmetry-constrained 
+C-------------reflections with bad signal to noise ratio:
+              XARG=((F/SIGF(J))**2)/5.0
+C
+              if(XARG.gt.49.0)XARG=49.0
+              IFAIL=1
+              JFAIL=1
+              R1=S18AFF(XARG,JFAIL)
+              R2=S18AEF(XARG,IFAIL)
+              if(abs(R2).gt.0.0)then
+                WT=R1 / R2
+              else
+                IFAIL=1
+              endif
+C-------------IF ABOVE FAILS, GAUSSIAN WILL DO AS PROBABILITY MUST BE VERY SHARP
+              IF(JFAIL.NE.IFAIL) WRITE(6,299)IH,IK,ZSTAR,JFAIL,IFAIL
+ 299            FORMAT(':S18AFF or S18AEF failed for spot ',2I5,F10.3,
+     .           ', J/I FAIL=',2I6)
+              IF(IFAIL.EQ.1.OR.JFAIL.EQ.1)THEN
+                SIGMA=SQRT(1.0/XARG)
+                FMERIT=COS(SIGMA*PI/180.0)
+              ELSE
+                FMERIT=WT
+              END IF
+              if(FMERIT.gt.1.0)FMERIT=1.0
+              if(FMERIT.lt.0.0)FMERIT=0.0
+              SIGOUT=acos(FMERIT)*180.0/PI
+              SIGPHI(J)=SIGOUT
+            endif
+          endif
+C
           IF(SIGOUT.LT.1.0) SIGOUT=1.0
-CHENN>
           if(SIGOUT.gt.100.0) SIGOUT=100.0
 C
           IF(SIGF(J).LT.-99999.0) SIGF(J)=-99999.0
           IF(SIGF(J).GT. 99999.0) SIGF(J)= 99999.0
           FMERIT = ABS(COS(AMIN1(ABS(SIGPHI(J)),90.0)/CNV))
           if(FMERIT.lt.0.00001)FMERIT=0.0
-C
 CHEN------WRITE(3,3000) IHIN,IKIN,Z,F,PHI,SIGF(J),SIGOUT,FMERIT
           if(NOBS.gt.8)then
             WRITE(3,3000) IHIN,IKIN,Z,F,PHI,SIGF(J),SIGOUT,FMERIT
@@ -958,146 +1019,149 @@ C
 C
 C    INVERT NORMAL MATRIX TO GET STANDARD DEVS
 C
-        DO 300 L = 1,NPARM
-          DO 300 K = L,NPARM
-            ARRAY(L,K) = ARRAY(K,L)
-300     CONTINUE
+      DO 300 L = 1,NPARM
+        DO 300 K = L,NPARM
+          ARRAY(L,K) = ARRAY(K,L)
+300   CONTINUE
 C
-        CALL MATINV(ARRAY,NPARM,D,IFLAG)
+      CALL MATINV(ARRAY,NPARM,D,IFLAG)
 C
-        WRITE(6,1000)D,NF,NP,NPARM
-1000    FORMAT(/,' Matrix Determinant = ',G14.6,/,' # of Fs, Phases,'
-     .  ' Parameters = ',3I6)
+      WRITE(6,1000)D,NF,NP,NPARM
+1000  FORMAT(/,' Matrix Determinant = ',G14.6,/,' # of Fs, Phases,'
+     .' Parameters = ',3I6)
       NDAT = NF + NP
       IF ( NDAT.LE.NPARM ) GO TO 91
-        ESCALE = F/(NF + NP - NPARM)
-        WRITE(6,1001)ESCALE
-1001    FORMAT(' Scale factor= ',G14.5,/)
+      ESCALE = F/(NF + NP - NPARM)
+      WRITE(6,1001)ESCALE
+1001  FORMAT(' Scale factor= ',G14.5,/)
 C
-        IF (IFLAG.EQ.0) GOTO 90 
-        IF (D .LT. 1.E-30) WRITE(6,2002) 
-2002    FORMAT(/,' ********** WARNING DETERMINANT NEAR ZERO : ',
-     .  ' SIGMAS CALCULATED FOR THIS LINE, BUT SUSPECT !!! *****')
-C
-        DO 501 K = 1,NPARM
-          DO 500 J = K,NPARM
-            ARRAY(J,K) = ESCALE*ARRAY(J,K)
-            ARRAY(K,J) = ARRAY(J,K)
+      IF (IFLAG.EQ.0) GOTO 90 
+      IF (D .LT. 1.E-30) WRITE(6,2002) 
+2002  FORMAT(/,' ********** WARNING DETERMINANT NEAR ZERO : ',
+     .' SIGMAS CALCULATED FOR THIS LINE, BUT SUSPECT !!! *****')
+
+      DO 501 K = 1,NPARM
+        DO 500 J = K,NPARM
+          ARRAY(J,K) = ESCALE*ARRAY(J,K)
+          ARRAY(K,J) = ARRAY(J,K)
 500     CONTINUE
-501     CONTINUE
+501   CONTINUE
 C
       IF(MPRINT.EQ.0)GO TO 9006
 C
       DO 9001 J=1,NPARM
-      IF(NPARM.LE.14)THEN
-        WRITE(6,9000)(ARRAY(J,K),K=1,NPARM)
-      ELSE
-        WRITE(6,9000)(ARRAY(J,K),K=1,14)
-      END IF      
-9001    CONTINUE
+        IF(NPARM.LE.14)THEN
+          WRITE(6,9000)(ARRAY(J,K),K=1,NPARM)
+        ELSE
+          WRITE(6,9000)(ARRAY(J,K),K=1,14)
+        END IF      
+9001  CONTINUE
 C
       IF(NPARM.LE.14)GO TO 9003
       WRITE(6,9004)
-9004    FORMAT(//)
+9004  FORMAT(//)
       DO 9002 J=1,NPARM
-      IF(NPARM.LE.28)THEN
-        WRITE(6,9000)(ARRAY(J,K),K=15,NPARM)
-      ELSE
-        WRITE(6,9000)(ARRAY(J,K),K=15,28)
-      END IF      
-9002    CONTINUE
+        IF(NPARM.LE.28)THEN
+          WRITE(6,9000)(ARRAY(J,K),K=15,NPARM)
+        ELSE
+          WRITE(6,9000)(ARRAY(J,K),K=15,28)
+        END IF      
+9002  CONTINUE
 C
       IF(NPARM.LE.28)GO TO 9003
       WRITE(6,9004)
       DO 9005 J=1,NPARM
-      IF(NPARM.LE.42)THEN
-        WRITE(6,9000)(ARRAY(J,K),K=29,NPARM)
-      ELSE
-        WRITE(6,9000)(ARRAY(J,K),K=29,42)
-      END IF      
-9005    CONTINUE
+        IF(NPARM.LE.42)THEN
+          WRITE(6,9000)(ARRAY(J,K),K=29,NPARM)
+        ELSE
+          WRITE(6,9000)(ARRAY(J,K),K=29,42)
+        END IF      
+9005  CONTINUE
 C
-9003    CONTINUE
-9000    FORMAT(/,/,14E9.1)
+9003  CONTINUE
+9000  FORMAT(/,/,14E9.1)
 C
       IF(NPARM.LE.22)THEN
-      NLOOP=NPARM
+        NLOOP=NPARM
       ELSE
-      NLOOP=22
+        NLOOP=22
       ENDIF
       DO 9007 J=1,NPARM
-      XX=SQRT(ARRAY(J,J))
-      DO 9011 K=1,NLOOP
-      CARRAY(K)=ARRAY(J,K)/(XX*SQRT(ARRAY(K,K)))
+        XX=SQRT(ARRAY(J,J))
+        DO 9011 K=1,NLOOP
+          CARRAY(K)=ARRAY(J,K)/(XX*SQRT(ARRAY(K,K)))
 9011    CONTINUE
         WRITE(6,9008)(CARRAY(K),K=1,NLOOP)
-9007    CONTINUE
-9008    FORMAT(//22F6.2)
+9007  CONTINUE
+9008  FORMAT(//22F6.2)
 C
       IF(NPARM.LE.22)GO TO 9010
       WRITE(6,9004)
       IF(NPARM.LE.44)THEN
-      NLOOP=NPARM
+        NLOOP=NPARM
       ELSE
-      NLOOP=44
+        NLOOP=44
       END IF
       DO 9009 J=1,NPARM
-      XX=SQRT(ARRAY(J,J))
-      DO 9012 K=23,NLOOP
-      CARRAY(K)=ARRAY(J,K)/(XX*SQRT(ARRAY(K,K)))
+        XX=SQRT(ARRAY(J,J))
+        DO 9012 K=23,NLOOP
+          CARRAY(K)=ARRAY(J,K)/(XX*SQRT(ARRAY(K,K)))
 9012    CONTINUE
         WRITE(6,9008)(CARRAY(K),K=23,NLOOP)
-9009    CONTINUE
+9009  CONTINUE
 C
-9010    CONTINUE
+9010  CONTINUE
 C
-9006    CONTINUE
+9006  CONTINUE
+C
 C   CALCULATE NEW SIGMAS AT LATTICE POINTS
 C
-        DO 800 J = 1,NOUT
-          Z = ZOUT(J)
-          SIGF(J) = 0.0
-          SIGPHI(J) = 0.0
-          IF (ISYMLZ .EQ. 1 .AND. J .EQ. 1) GOTO 800
-          CALL ABCALC(A,B,Z)
-          FC = SQRT(A*A + B*B)
+      DO 800 J = 1,NOUT
+        Z = ZOUT(J)
+        SIGF(J) = 0.0
+        SIGPHI(J) = 0.0
+        IF (ISYMLZ .EQ. 1 .AND. J .EQ. 1) GOTO 800
+        CALL ABCALC(A,B,Z)
+        FC = SQRT(A*A + B*B)
 C
-          CALL DERIV(A,B,FC,Z,PARMS,DIAG,0.,0.)
-      IF(MPRINT.NE.0)WRITE(6,9004)
-      IF(MPRINT.NE.0)      WRITE(6,*)J
-      IF(MPRINT.NE.0)WRITE (6,9000)(PPFP(K),K=1,NPARM)
-      IF(MPRINT.NE.0)WRITE (6,9000)(PFFP(K),K=1,NPARM)
+        CALL DERIV(A,B,FC,Z,PARMS,DIAG,0.,0.)
+        IF(MPRINT.NE.0)WRITE(6,9004)
+        IF(MPRINT.NE.0)WRITE(6,*)J
+        IF(MPRINT.NE.0)WRITE (6,9000)(PPFP(K),K=1,NPARM)
+        IF(MPRINT.NE.0)WRITE (6,9000)(PFFP(K),K=1,NPARM)
 C
-          SUMF2 = 0.0
-          SUMPHI2 = 0.0
-          DO 700 K = 1,NPARM
-            SUMF = 0.0
-            SUMPHI = 0.0
-            DO 600 L = 1,NPARM
-              SUMF = SUMF + ARRAY(L,K)*PFFP(L)
-              SUMPHI = SUMPHI + ARRAY(L,K)*PPFP(L)
-600         CONTINUE
-            SUMF2 = SUMF2 + SUMF*PFFP(K)
-            SUMPHI2 = SUMPHI2 + SUMPHI*PPFP(K)
-700       CONTINUE
-          SIGF(J) = SIGN(SQRT(ABS(SUMF2)),SUMF2)
-          SIGPHI(J) = SIGN(SQRT(ABS(SUMPHI2)),SUMPHI2)*CNV
-800     CONTINUE
+        SUMF2 = 0.0
+        SUMPHI2 = 0.0
+        DO 700 K = 1,NPARM
+          SUMF = 0.0
+          SUMPHI = 0.0
+          DO 600 L = 1,NPARM
+            SUMF = SUMF + ARRAY(L,K)*PFFP(L)
+            SUMPHI = SUMPHI + ARRAY(L,K)*PPFP(L)
+600       CONTINUE
+          SUMF2 = SUMF2 + SUMF*PFFP(K)
+          SUMPHI2 = SUMPHI2 + SUMPHI*PPFP(K)
+700     CONTINUE
+        SIGF(J) = SIGN(SQRT(ABS(SUMF2)),SUMF2)
+        SIGPHI(J) = SIGN(SQRT(ABS(SUMPHI2)),SUMPHI2)*CNV
+800   CONTINUE
 C
-        RETURN
+      RETURN
 C
-90      WRITE(6,2000) 
-2000    FORMAT(/,' ********** WARNING DETERMINANT NEAR ZERO : ',
-     .  'NO SIGMAS CALCULATED FOR THIS LINE *********')
-        CALL ZERO(SIGF,NOUT*4)
-        CALL ZERO(SIGPHI,NOUT*4)
+90    WRITE(6,2000) 
+2000  FORMAT(/,' ********** WARNING DETERMINANT NEAR ZERO : ',
+     .         'NO SIGMAS CALCULATED FOR THIS LINE *********')
+      CALL ZERO(SIGF,NOUT*4)
+      CALL ZERO(SIGPHI,NOUT*4)
 C
-        RETURN
-91      WRITE(6,2001)
-2001    FORMAT(/,' **** NOT ENOUGH DATA POINTS FOR # OF PARAMS :',
-     .' NO SIGMAS FOR THIS LINE ****')
-        RETURN
-        END
+      RETURN
+91    WRITE(6,2001)
+2001  FORMAT(/,' **** NOT ENOUGH DATA POINTS FOR # OF PARAMS :',
+     .         ' NO SIGMAS FOR THIS LINE ****')
+C
+      RETURN
+      END
+C
 C*ABCALC**************************************************************
 C
 C       SUBROUTINE TO CALCULATE A,B FROM CURRENT SET OF ACALC
@@ -1257,26 +1321,30 @@ C
         DO 100 J = 1,NCALC
           IF (ISYML) 1,3,2
 C
-1         ACALC(J) = 0.0
-          J1 = J - ISYMZ
-          IF (J1 .LT. 1) GOTO 100
-          IF (ABS(BCALC(J)) .LT. THRESH)BCALC(J)=SIGN(THRESH,BCALC(J))
-          PARMS(J1) = BCALC(J)
+1         continue
+            ACALC(J) = 0.0
+            J1 = J - ISYMZ
+            IF (J1 .LT. 1) GOTO 100
+            IF (ABS(BCALC(J)) .LT. THRESH)BCALC(J)=SIGN(THRESH,BCALC(J))
+            PARMS(J1) = BCALC(J)
           GOTO 100
 C
-2         IF (ABS(ACALC(J)) .LT. THRESH)ACALC(J)=SIGN(THRESH,ACALC(J))
-          PARMS(J) = ACALC(J)
-          BCALC(J) = 0.0
+2         continue
+            IF (ABS(ACALC(J)) .LT. THRESH)ACALC(J)=SIGN(THRESH,ACALC(J))
+            PARMS(J) = ACALC(J)
+            BCALC(J) = 0.0
           GOTO 100
 C
-3         IF (ISYMZ .NE. 0 .AND. J .EQ. 1) GOTO 2
-          K = J + NCALC - ISYMZ
-          PARMS(J) = SQRT(ACALC(J)**2 + BCALC(J)**2)
-          PARMS(K) = 0.0
-          IF (PARMS(J) .GT. 1.E-4) PARMS(K) = ATAN2(BCALC(J),ACALC(J))
-          IF (PARMS(J) .LT. THRESH) PARMS(J) = THRESH
+3         continue
+            IF (ISYMZ .NE. 0 .AND. J .EQ. 1) GOTO 2
+            K = J + NCALC - ISYMZ
+            PARMS(J) = SQRT(ACALC(J)**2 + BCALC(J)**2)
+            PARMS(K) = 0.0
+            IF (PARMS(J) .GT. 1.E-4) PARMS(K) = ATAN2(BCALC(J),ACALC(J))
+            IF (PARMS(J) .LT. THRESH) PARMS(J) = THRESH
 C
 100     CONTINUE
+C
         RETURN
 C
 C===========================================================================
@@ -1353,7 +1421,7 @@ C
 CHENN<
         COMMON/SYM/IPG,ISYMP,ISYML,ISYMZ,ISYMLZ
         DIMENSION ABIN(301),BBIN(301),CBIN(301),NBINF(301),NBINP(301)
-      DIMENSION SUMWT(301)
+        DIMENSION SUMWT(301)
         LOGICAL INTEN
         DATA CNV/0.017453292/, TOPI/6.2831853/, NBINMX/301/
 C       DATA NCALMX/50/
@@ -1386,10 +1454,10 @@ C
           SUMWT(IND)= SUMWT(IND) + WTPHI(J)
 200     CONTINUE
 C
-      DO 900 J=INDLO,INDHI
-      IF(NBINP(J).LE.0)GO TO 900
-      BBIN(J)=BBIN(J)/SUMWT(J)
-      CBIN(J)=CBIN(J)/SUMWT(J)
+        DO 900 J=INDLO,INDHI
+          IF(NBINP(J).LE.0)GO TO 900
+            BBIN(J)=BBIN(J)/SUMWT(J)
+            CBIN(J)=CBIN(J)/SUMWT(J)
 900     CONTINUE
 C
 C  NOW LINEARLY INTERPOLATE TO FILL ANY HOLES (FIRST F, THEN PHI)
@@ -1458,7 +1526,7 @@ C
         ZSTART = NINT(ZOBS/DELAT)*DELAT
         ZEND = NINT(Z2/DELAT)*DELAT
         NCALC = NINT((ZEND - ZSTART)/DELAT) + 1
-      IF(ISYML.EQ.-1.AND.NCALC.EQ.1.AND.INDHI.NE.INDLO) NCALC=2
+        IF(ISYML.EQ.-1.AND.NCALC.EQ.1.AND.INDHI.NE.INDLO) NCALC=2
 C above line added to force a fit on low index imaginary lattice lines with
 C enough data to be able to fit at a single non-zero zstar value of the
 C requested sampling lattice (22.1.95-R.Henderson).
@@ -1913,7 +1981,7 @@ CTSH--
         LOGICAL INTEN,LAST
 C
         LCOLOR=.true.
-        PI=3.14159265437
+        PI=3.1415926537
 C
       IF(NOBS.LE.8) THEN
         WRITE(6,104) IHIN,IKIN
@@ -1980,15 +2048,51 @@ C
         if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
-        WRITE(cline,'(''Legend: IQ     1 2 3 4 5 6 7 8 9'')')
+        WRITE(cline,'(''IQ....:  1 2 3 4 5 6 7 8 9'')')
         call shorten(cline,k)
-        CALL P2K_MOVE(24.,-17.,0.)
+        CALL P2K_MOVE(4.,-17.,0.)
         CALL P2K_STRING(cline,k,0.)
 C
-        WRITE(cline,'(''        Symbol X x * + ~ - , . .'')')
+        WRITE(cline,'(''Symbol:  X x * + ~ - , . .'')')
         call shorten(cline,k)
-        CALL P2K_MOVE(24.,-20.,0.)
+        CALL P2K_MOVE(4.,-20.,0.)
         CALL P2K_STRING(cline,k,0.)
+C
+        XP=25.0
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
+        WRITE(cline,'(''Error bars:'')')
+        call shorten(cline,k)
+        CALL P2K_MOVE(XP,-17.,0.)
+        CALL P2K_STRING(cline,k,0.)
+C 
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
+        WRITE(cline,'(''(FOM Output)'')')
+        call shorten(cline,k)
+        CALL P2K_MOVE(XP,-20.,0.)
+        CALL P2K_STRING(cline,k,0.)
+C 
+        XP=XP+5.0
+        do i=100,0,-10
+          FOM = i
+C            FACTOR = 1.0 - cos(PHAERR*PI/180.0)
+          if(FOM.gt.0.0)then
+            FACTOR = 1.0 - FOM/100.0
+            rgbr = 0.0 + FACTOR * 0.5
+            rgbg = 0.5 + FACTOR * 0.5
+            rgbb = 0.0 + FACTOR * 0.5
+          else
+            rgbr = 1.0
+            rgbg = 0.0
+            rgbb = 0.0 
+          endif
+          if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
+          WRITE(cline,'(I3)')i
+          call shorten(cline,k)
+          XP=XP+1.5
+          CALL P2K_MOVE(XP,-17.,0.)
+          CALL P2K_STRING(cline,k,0.)
+        enddo
 C
         rgbr = 0.0
         rgbg = 0.0
@@ -2126,6 +2230,21 @@ C
           YP = FOUT(J)*SCALE
           YL = AMAX1(0., FOUT(J) - SIGF(J))*SCALE
           YU = AMIN1(FMAX, FOUT(J) + SIGF(J))*SCALE
+C
+          PHAERR = abs(SIGPHI(J))
+          if(PHAERR.lt. 0.0)PHAERR= 0.0
+          if(PHAERR.lt.89.0)then
+            FACTOR = 1.0 - cos(PHAERR*PI/180.0)
+            rgbr = 0.0 + FACTOR * 0.5
+            rgbg = 0.5 + FACTOR * 0.5
+            rgbb = 0.0 + FACTOR * 0.5
+          else
+            rgbr = 1.0
+            rgbg = 0.0
+            rgbb = 0.0 
+          endif
+          if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
           CALL P2K_MOVE(XP - BARWIDTH, YL,0.)
           CALL P2K_DRAW(XP + BARWIDTH, YL,0.)
           CALL P2K_MOVE(XP, YL,0.)
@@ -2281,7 +2400,7 @@ C
 C
             PHAERR = abs(SIGPHI(J))
             if(PHAERR.lt. 0.0)PHAERR= 0.0
-            if(PHAERR.lt.90.0)then
+            if(PHAERR.lt.89.0)then
               FACTOR = 1.0 - cos(PHAERR*PI/180.0)
               rgbr = 0.0 + FACTOR * 0.5
               rgbg = 0.5 + FACTOR * 0.5

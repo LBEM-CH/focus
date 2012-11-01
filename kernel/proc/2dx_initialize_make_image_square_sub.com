@@ -125,11 +125,11 @@ eot
       #
       ${proc_2dx}/lin "Padding done."
       #
-     \mv -f SCRATCH/TMPnewsize2.mrc ${imagename}.mrc
+      \mv -f SCRATCH/TMPnewsize2.mrc ${imagename}.mrc
       #
       set sizeX = ${bettersize}
       #
-      \rm SCRATCH/TMPnewsize1.mrc
+      \rm -f SCRATCH/TMPnewsize1.mrc
       \rm ${primesfile}
     endif
     #

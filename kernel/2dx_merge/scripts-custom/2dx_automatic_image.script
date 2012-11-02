@@ -114,7 +114,7 @@ foreach dirfile ( ${dirlist} )
   # To make sure automatic masking is not on
   echo "set comment = AUTOMATIC" >> LOGS/${scriptname}.results
   
-# First we run all standard 2dx_image scripts on the selected images:
+  # First we run all standard 2dx_image scripts on the selected images:
   ${app_2dx_image} ${newdir} '"*"'
 
   # Now set the variable to allow automatic masking

@@ -191,11 +191,22 @@ eot
   ${proc_2dx}/linblock "2dx_avrgamphs - to calculate statistics and produce phase residual table"
   #############################################################################
   #
-  set zmaxlocal = `echo ${ALAT} | awk '{ s = ( 1 / ( 2 * $1 ) ) } END { print s }'`
-  set zminmaxlocal = `echo -${zmaxlocal},${zmaxlocal}`
+  # set zmaxlocal = `echo ${ALAT} | awk '{ s = ( 1 / ( 2 * $1 ) ) } END { print s }'`
+  # set zminmaxlocal = `echo -${zmaxlocal},${zmaxlocal}`
   # avramphs only works for 2D projection data.
-  ${proc_2dx}/linblock "Symmetry statistics here are only good in 2D."
-  ${proc_2dx}/linblock "Using therefore zminmax=${zminmaxlocal}."
+  # ${proc_2dx}/linblock "Symmetry statistics here are only good in 2D."
+  #
+  set zminmaxlocal = "-0.5,0.5"
+  #
+  ${proc_2dx}/linblock "Using zminmax=${zminmaxlocal}."
+  set istilt = `echo ${TANGL} | awk ' { if ( abs ( $1 ) > 0.1 ) { s = 1 } else { s = 0 }} END { print s }'`
+  if ( ${istilt} == "1" ) then
+    echo ":: "
+    echo "::   WARNING: Your sample has a tilt angle of ${TANGL} degrees."
+    echo "::            Symmetry is only partially valid. The table below is likely not relevant, "
+    echo "::            i.e., your data might be better than shown here."
+    echo ":: "
+  endif
   #
   \cp -f APH/${prefix}${imagename}.cor.origtiltd.aph fort.1
   \rm -f fort.2

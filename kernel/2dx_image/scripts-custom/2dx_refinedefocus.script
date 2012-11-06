@@ -318,6 +318,9 @@ echo "# IMAGE-IMPORTANT: APH/${infile_nolimit} <APH: Input data file>" >> LOGS/$
 set IAQP2 = 0
 set fittitle = "ctfsearch2 run"
 #
+set local_max = 4
+set IQMAX_local = `echo ${IQMAX} ${local_max} | awk ' { if ( $1 > $2 ) { s = $2 } else { s = $1 } } END { print s }'`
+#
 ######################################################################################
 if ( $iref == 2 ) then
   ######################################################################################
@@ -333,7 +336,7 @@ if ( $iref == 2 ) then
   #
   echo ": now comes ctfsearch2 with:"
   echo ":${bin_2dx}/2dx_ctfsearch2.exe"
-  echo ": F F ${IQMAX}                                         ! LIST LISTW QMAX"
+  echo ": F F ${IQMAX_local}                                         ! LIST LISTW QMAX"
   echo ":${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG"
   echo ":${defocus} ${CS} ${KV} ${phacon}                           ! DFMID1 DFMID2 ANGAST CS KV PHACON"
   echo ":${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT."
@@ -344,7 +347,7 @@ if ( $iref == 2 ) then
   echo " "
   #
   ${bin_2dx}/2dx_ctfsearch2.exe << eot
-F F ${IQMAX}                                         ! LIST LISTW QMAX
+F F ${IQMAX_local}                                         ! LIST LISTW QMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                         ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT.
@@ -364,7 +367,7 @@ else if ( $iref == 0 ) then
   setenv INREF ${averagedat}
   #
   ${bin_2dx}/2dx_ctfsearch2.exe << eot
-F F ${IQMAX}                                                 ! LIST LISTW QMAX
+F F ${IQMAX_local}                                                 ! LIST LISTW QMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}               ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                                 ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                             ! TITLE FOR PLOT OF FINAL BEST FIT.
@@ -385,7 +388,7 @@ else if ( $iref == '-1' ) then
   setenv INREF ${averagedat}
   #
   ${bin_2dx}/2dx_ctfsearch2.exe << eot
-F F ${IQMAX}                                         ! LIST LISTW QMAX
+F F ${IQMAX_local}                                         ! LIST LISTW QMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                           ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT.

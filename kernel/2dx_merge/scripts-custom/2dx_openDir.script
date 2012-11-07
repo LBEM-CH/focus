@@ -43,8 +43,6 @@ set scriptname = 2dx_openDir
 echo "<<@progress: 1>>"
 echo "<<@evaluate>>"
 #
-source ${proc_2dx}/2dx_makedirs
-#
 #############################################################################
 echo ":: "
 echo "::The current working directory is:"

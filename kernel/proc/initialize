@@ -91,4 +91,7 @@ if ( $?ccp4_setup ) then
   endif
 endif
 #
+source ${proc_2dx}/2dx_makedirs
+#
+
 

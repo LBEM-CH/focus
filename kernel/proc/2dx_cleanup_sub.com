@@ -41,6 +41,10 @@ if ( "${level}" == "radical" ) then
   echo dummy > avrg.p7.hkl
   echo dummy > dummy.profile
   echo dummy > TMP001.spi
+  cd FFTIR
+  echo dummy > tmp.1
+  \rm -rf *
+  cd ${dir}
   \rm -rf FFTIR
   \rm -rf PS
   \rm -rf PRJ
@@ -126,6 +130,12 @@ else
   #
 endif
 #
+cd SCRATCH
+echo dummy > tmp.1
+\rm -rf *
+cd ${dir}
+\rm -rf SCRATCH
+#
 \rm -f SUMMARY
 \rm -f 2dx_calcposition-positions.dat
 \rm -f 2dx_calcposition-runfile.com
@@ -153,7 +163,6 @@ endif
 \rm -f avrg.hk
 \rm -f avrg.hkl
 \rm -f *-profile.dat
-\rm -rf SCRATCH
 \rm -rf THUMB
 \rm -rf CUT
 \rm -rf 2dx_origtiltk-console.log

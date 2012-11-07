@@ -94,6 +94,8 @@ C
 C
  991  continue
       write(*,'(''::ERROR on file open in 2dx_getdirectories (flag 991)'')')
+      call shorten(COUTFILE,k)
+      write(*,'('':: Could not open output file '',A)')COUTFILE(1:k)
       goto 999
 C
  999  continue

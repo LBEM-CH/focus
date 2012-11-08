@@ -41,7 +41,7 @@ void 	swap_bytes(char *swap_data,int nbytes_to_swap,int nitems);
 /**********************************************************************/
 /*		start of main program                                 */
 /**********************************************************************/
-main()
+int main()
 {
 	char		data[65536];
 	char		filename[256];

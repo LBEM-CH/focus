@@ -24,7 +24,7 @@ get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 message(STATUS "adding ${Fortran_COMPILER_NAME} specific flags")
 
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")
-	#gfortra
+	#gfortran
 	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
 	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")
 	set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}  -static-libgcc")
@@ -33,7 +33,6 @@ if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -D_LARGEFILE_SOURCE")
 	endif(APPLE)
 elseif(Fortran_COMPILER_NAME STREQUAL "f95")
-	#gfortra
 	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
 	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")
 	if(APPLE)
@@ -47,7 +46,7 @@ elseif(Fortran_COMPILER_NAME STREQUAL "ifort")
 	LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
 	set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -axN -w -132 -cxxlib")
 elseif (Fortran_COMPILER_NAME STREQUAL "g77")
-	# g77
+	#g77
   	set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -m32")
   	set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
 else (Fortran_COMPILER_NAME STREQUAL "gfortran")
@@ -61,11 +60,20 @@ endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
 ################################################################################
 # C Compiler -------------------------------------------------------------------
 #add_definitions(-DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -c)
-set(CMAKE_C_FLAGS_RELEASE "-ffast-math  -static-libgcc")
-if(APPLE)
-	set(CMAKE_C_FLAGS_RELEASE "-dead_strip ${CMAKE_C_FLAGS_RELEASE}")
-endif(APPLE)
-set(CMAKE_C_FLAGS_DEBUG  "-ffast-math  -static-libgcc")
+
+get_filename_component(C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
+message(STATUS "adding ${C_COMPILER_NAME} specific flags")
+if(C_COMPILER_NAME STREQUAL "gcc")
+	set(CMAKE_C_FLAGS_RELEASE "-ffast-math  -static-libgcc")
+	if(APPLE)
+		set(CMAKE_C_FLAGS_RELEASE "-dead_strip ${CMAKE_C_FLAGS_RELEASE}")
+	endif(APPLE)
+	set(CMAKE_C_FLAGS_DEBUG  "-ffast-math  -static-libgcc")
+elseif(C_COMPILER_NAME STREQUAL "cc")
+	set(CMAKE_C_FLAGS_RELEASE "-ffast-math")
+else()
+  	message (STATUS "c compiler is: " ${C_COMPILER_NAME})
+endif()
 
 ################################################################################
 # C++ Compiler -----------------------------------------------------------------

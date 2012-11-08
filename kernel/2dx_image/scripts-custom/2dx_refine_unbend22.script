@@ -56,6 +56,7 @@ set refine_maskb02_doit_1 = "y"
 # DISPLAY: refori
 # DISPLAY: IMAXCOR
 # DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
 # DISPLAY: comment
 # DISPLAY: RMAG
 # DISPLAY: LCOLOR
@@ -109,6 +110,7 @@ set ctf_ttf = ""
 set refori = ""
 set IMAXCOR = ""
 set ISTEP = ""
+set ISTEP_h = ""
 set RMAG = ""
 set LCOLOR = ""
 set ccunbend_program = ""

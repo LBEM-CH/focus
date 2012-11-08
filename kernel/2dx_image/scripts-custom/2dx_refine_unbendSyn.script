@@ -70,6 +70,7 @@ set refine_SYN_maskb_doit = "y"
 # DISPLAY: tempkeep
 # DISPLAY: refori
 # DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
 # DISPLAY: IMAXCOR
 # DISPLAY: ctfrev
 # DISPLAY: ctf_ttf
@@ -147,6 +148,7 @@ set det_tilt = ""
 set ctf_ttf = ""
 set refori = ""
 set ISTEP = ""
+set ISTEP_h = ""
 set IMAXCOR = ""
 set rot180 = ""
 set revhk = ""

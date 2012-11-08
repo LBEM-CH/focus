@@ -47,6 +47,7 @@ set refine_maska_boxa1_doit = "y"
 # DISPLAY: refori
 # DISPLAY: IMAXCOR
 # DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
 # DISPLAY: comment
 # DISPLAY: RMAG
 # DISPLAY: LCOLOR
@@ -89,6 +90,7 @@ set KV = ""
 set refori = ""
 set IMAXCOR = ""
 set ISTEP = ""
+set ISTEP_h = ""
 set RMAG = ""
 set LCOLOR = ""
 set ccunbend_program = ""

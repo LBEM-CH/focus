@@ -92,7 +92,6 @@ set refine_SYN_maskb_val = "5,40,2,1"
 # DISPLAY: tempkeep
 # DISPLAY: refori
 # DISPLAY: ISTEP
-# DISPLAY: ISTEP_h
 # DISPLAY: IMAXCOR
 # DISPLAY: ctfrev
 # DISPLAY: ctf_ttf
@@ -170,7 +169,6 @@ set det_tilt = ""
 set ctf_ttf = ""
 set refori = ""
 set ISTEP = ""
-set ISTEP_h = ""
 set IMAXCOR = ""
 set rot180 = ""
 set revhk = ""
@@ -330,6 +328,8 @@ set v1 = `echo ${lattice} | cut -d\, -f3`
 set v2 = `echo ${lattice} | cut -d\, -f4`
 set ulen = `echo ${u1} ${u2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
 set vlen = `echo ${v1} ${v2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
+echo ulen = ${ulen}
+echo ulen = ${vlen}
 #
 set latlenok = `echo ${ulen} ${vlen} | awk '{ if ( $1 + $2 < 0.1 ) { s = 0 } else { s = 1 }} END { print s }'`
 if ( ${latlenok} == '0' ) then
@@ -375,7 +375,10 @@ set v2 = `echo ${lattice} | cut -d\, -f4`
 set ulen = `echo ${u1} ${u2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
 set vlen = `echo ${v1} ${v2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
 #
-set newmaska = `echo ${ulen} ${vlen} ${SYN_maska} | awk '{ if ( $1 / 2 < $3 ) { s = int( $1 / 2 ) } else { if ( $2 / 2 < $3 ) { s = int( $2 / 2 ) } else { s = $3 }}} END { print s }'`
+set shorter_vector =  `echo ${ulen} ${vlen} | awk '{ if ( $1 < $2 ) { min = $1 } else { min = $2 }} END { print min }'`
+set maxmask = `echo ${shorter_vector} | awk '{ min = int( $1 / 2 ) } END { print min }'`
+echo ":: maxmask = ${maxmask}" 
+set newmaska = ${maxmask}
 set newmaska = `echo ${newmaska} | awk '{ if ( $1 < 2 ) { s = 2 } else { s = $1 }} END { print s }'`
 if ( ${SYN_maska} != ${newmaska} ) then
   ${proc_2dx}/linblock "correcting SYN_maska from ${SYN_maska} to ${newmaska}"
@@ -385,7 +388,7 @@ endif
 ${proc_2dx}/linblock "Using SYN_maska=${SYN_maska} for lattice of length u=${ulen} and v=${vlen}"
 #
 if ( $do3quadserch == 'y' )then
-  set newmaskb = `echo ${ulen} ${vlen} ${SYN_maskb} | awk '{ if ( $1 / 2 < $3 ) { s = int( $1 / 2 ) } else { if ( $2 / 2 < $3 ) { s = int( $2 / 2 ) } else { s = $3 }}} END { print s }'`
+  set newmaskb = ${maxmask}
   set newmaskb = `echo ${newmaskb} | awk '{ if ( $1 < 2 ) { s = 2 } else { s = $1 }} END { print s }'`
   if ( ${SYN_maskb} != ${newmaskb} ) then
     ${proc_2dx}/linblock "correcting SYN_maskb from ${SYN_maskb} to ${newmaskb}"
@@ -445,6 +448,9 @@ else
   set revxsgnval = 0
 endif
 #
+#################################################################################
+# SYN_maska REFINEMENT 
+#################################################################################
 if ( ${refine_SYN_maska_doit} == 'y' ) then
   set refine_now = "syn_maska"
     #
@@ -455,6 +461,17 @@ if ( ${refine_SYN_maska_doit} == 'y' ) then
   set syn_maska_end   = `echo ${refine_SYN_maska_val} | cut -d\, -f2`
   set syn_maska_step  = `echo ${refine_SYN_maska_val} | cut -d\, -f3`
   set syn_maska_factor = `echo ${refine_SYN_maska_val} | cut -d\, -f4`
+  # Check if range is not over max mask size
+  if ( ${syn_maska_end} > ${maxmask} ) then
+    set syn_maska_end   = ${maxmask}
+    if ( ${syn_maska_start} > ${maxmask} ) then
+    	 ${proc_2dx}/protest "ERROR: SYN_maska refinement values are out of range. Should be smaller than ${maxmask}"
+    endif
+    ${proc_2dx}/linblock "Warnig: The refinement range can not exceed ${maxmask}. SYN_maska set to ${syn_maska_end}."
+    echo  "#WARNING: Warnig: The refinement range can not exceed ${maxmask}. SYN_maska set to ${syn_maska_end}."
+  endif
+
+
   set old_syn_maskb = ${SYN_maskb}
   set SYN_maskb = 0
   set old_do3quadserch = ${do3quadserch}
@@ -463,12 +480,13 @@ if ( ${refine_SYN_maska_doit} == 'y' ) then
  
   # if the syn_maska_factor is unequal to 1 it is not linear and therfore the progress_step is wrong  
   set progress_step = `echo ${syn_maska_start} ${syn_maska_end} ${syn_maska_step} | awk '{s = int( 100 / ( ($2 - $1 + 1 ) / $3 ) ) } END { print s }'`
-  ${proc_2dx}/linblock "progress_strep is  ${progress_step}"
   set progress_start = 5
  
   echo "<<@progress: ${progress_start} >>"
   #################################################################################
+  echo ":: "
   ${proc_2dx}/linblock "Refining maska, from ${syn_maska_start} to ${syn_maska_end} in steps ${syn_maska_step}, fact. ${syn_maska_factor}"
+  echo ":: "
   #################################################################################
   #
   set syn_maska = ${syn_maska_start}
@@ -479,7 +497,8 @@ if ( ${refine_SYN_maska_doit} == 'y' ) then
      source ${proc_2dx}/2dx_unbendSyn_sub.com
      #
      echo ${syn_maska} ${QVAL_local} >> SCRATCH/${imagename}-syn-maska.txt
-     # ${proc_2dx}/linblock "unbend1: maska ${syn_maska} gives a QVAL of ${QVAL_local}"
+     ${proc_2dx}/linblock "Unbend S: maska ${syn_maska} gives a QVAL of ${QVAL_local}"
+     echo "<<@progress: +${progress_step}>>"
      set syn_maska = `echo ${syn_maska} ${syn_maska_step} ${syn_maska_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
   end
   #
@@ -489,7 +508,7 @@ if ( ${refine_SYN_maska_doit} == 'y' ) then
   set best_QVal = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_syn_maska}, with QVal ${best_QVal}. Previously was ${old_syn_maska}"
+  ${proc_2dx}/linblock "Best value was found at SYN_maska=${best_syn_maska}, with QVal ${best_QVal}. Previously was ${old_syn_maska}"
   #
   set SYN_maska = ${best_syn_maska}
   set SYN_maskb = ${old_syn_maskb}
@@ -499,23 +518,52 @@ if ( ${refine_SYN_maska_doit} == 'y' ) then
   source ${proc_2dx}/2dx_unbendSyn_sub.com
 endif
 #
+#################################################################################
+# SYN_maskb REFINEMENT 
+#################################################################################
 if ( ${refine_SYN_maskb_doit} == 'y' ) then
   set refine_now = "syn_maskb"
     #
   \rm -f SCRATCH/${imagename}-syn-maskb.txt
   #
   set old_syn_maskb = ${SYN_maskb}
-  set syn_maskb_start = `echo ${refine_SYN_maskb_val} | cut -d\, -f1`
+
+  if ( ${refine_SYN_maska_doit} == 'y' ) then
+    set syn_maskb_start = `echo ${SYN_maska} ${maxmask} | awk '{ if ( $1 == $2 ) { s = $1 }  else { s =  int( $1 + 1 ) } } END { print s }'`
+    ${proc_2dx}/linblock "Attention: SYN_maskb start value is set to ${syn_maskb_start}, since SYN_maska is ${SYN_maska}"
+  else
+    set syn_maskb_start = `echo ${refine_SYN_maskb_val} | cut -d\, -f1`
+  endif
   set syn_maskb_end   = `echo ${refine_SYN_maskb_val} | cut -d\, -f2`
   set syn_maskb_step  = `echo ${refine_SYN_maskb_val} | cut -d\, -f3`
   set syn_maskb_factor = `echo ${refine_SYN_maskb_val} | cut -d\, -f4`
+  
+  if ( ${syn_maskb_end} > ${maxmask} ) then
+    set syn_maskb_end   = ${maxmask}
+    if ( ${syn_maskb_start} > ${maxmask} ) then
+    	 ${proc_2dx}/protest "ERROR: SYN_maska refinement values are out of range. Should be smaller than ${maxmask}"
+    endif
+    ${proc_2dx}/linblock "Warnig: The refinement range can not exceed ${maxmask}. SYN_maska set to ${syn_maskb_end}."
+    echo  "#WARNING: Warnig: The refinement range can not exceed ${maxmask}. SYN_maska set to ${syn_maskb_end}."
+  endif
+
+
+
   #
   if ( ${do3quadserch} == 'n' ) then
 	set do3quadserch = 'y'
 	${proc_2dx}/linblock "Warning: For Refining maskb, do3quadserch is set to: ${do3do3quadserch}"
   endif
+  # if the syn_maskb_factor is unequal to 1 it is not linear and therfore the progress_step is wrong  
+  set progress_step = `echo ${syn_maskb_start} ${syn_maskb_end} ${syn_maskb_step} | awk '{s = int( 100 / ( ($2 - $1 + 1 ) / $3 ) ) } END { print s }'`
+  set progress_start = 5
+  
+  echo "<<@progress: ${progress_start} >>"
   #################################################################################
+  #################################################################################
+  echo ":: "
   ${proc_2dx}/linblock "Refining maskb, from ${syn_maskb_start} to ${syn_maskb_end} in steps ${syn_maskb_step}, fact. ${syn_maskb_factor}"
+  echo ":: "
   #################################################################################
   #
   set syn_maskb = ${syn_maskb_start}
@@ -526,7 +574,8 @@ if ( ${refine_SYN_maskb_doit} == 'y' ) then
      source ${proc_2dx}/2dx_unbendSyn_sub.com
      #
      echo ${syn_maskb} ${QVAL_local} >> SCRATCH/${imagename}-syn-maskb.txt
-     # ${proc_2dx}/linblock "unbend1: maskb ${syn_maskb} gives a QVAL of ${QVAL_local}"
+     ${proc_2dx}/linblock "Unbend S: maskb ${syn_maskb} gives a QVAL of ${QVAL_local}"
+     echo "<<@progress: +${progress_step}>>"
      set syn_maskb = `echo ${syn_maskb} ${syn_maskb_step} ${syn_maskb_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
   end
   #
@@ -536,7 +585,7 @@ if ( ${refine_SYN_maskb_doit} == 'y' ) then
   set best_QVal = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_syn_maskb}, with QVal ${best_QVal}. Previously was ${old_syn_maskb}"
+  ${proc_2dx}/linblock "Best value was found at SYN_maskb=${best_syn_maskb}, with QVal ${best_QVal}. Previously was ${old_syn_maskb}"
   #
   set SYN_maskb = ${best_syn_maskb}
   echo set SYN_maskb = ${SYN_maskb} >> LOGS/${scriptname}.results

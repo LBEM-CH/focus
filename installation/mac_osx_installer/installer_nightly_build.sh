@@ -12,6 +12,7 @@ then
 	exit 1
 fi
 DIR=`dirname $0`
+echo "DIR=$DIR"
 ROOT=$1
 OUTFILE=$2
 if [ -f $OUTFILE ]

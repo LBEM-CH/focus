@@ -14,6 +14,8 @@ set(LIBTITLE conf)
 SET(LIBVERSION 1)
 project(${LIBTITLE})
 
+include(GetPropagateDeps)
+include(SetPropagateDeps)
 #------------------------------------------------------------------------------
 # Configure Config file and include it.
 # The dependencies are defined in the Config.cmake file

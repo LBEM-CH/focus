@@ -16,26 +16,6 @@ fi
 
 build_dir=$1
 echo "the build dir is $1"
-apps="2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
-for loop in $apps
-do
-        path=$build_dir"/"$loop	
-	echo "in $path"
-	for loop in `ls $path`
-	do
-		file=$path"/"$loop
-		echo "changing the dylibs of" $loop
-		echo "with absolute path" $file
-		install_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $file 	
-		install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $file 
-		otool -L $file
-		if [ $loop = "libqsvg.dylib" ] ; then
-			echo "removing $file"
-			rm $file
-		fi
-	done
-done
-
 if [ -f /opt/local/lib/libfftw3f.3.dylib ]; then
 	FFTW_LIB=/opt/local/lib/libfftw3f.3.dylib
 	echo "Found FFTW in $FFTW_LIB"
@@ -103,7 +83,21 @@ else
 		echo "Found libstdc++.6.dylib in $CPP_LIB"
 	else
 		CPP_LIB=NOT_FOUND
-		echo "quadmath not FOUND!"
+		echo "libstdc++ not FOUND!"
+	       	exit 2
+	fi
+fi
+
+if [ -f /opt/local/lib/gcc46/libgcc_s.1.dylib ]; then
+	GCC_LIB=/opt/local/lib/gcc46/libgcc_s.1.dylib
+	echo "Found libgcc_s.1.dylib in $CPP_LIB"
+else
+       if [ -f /usr/local/lib/gcc46/libgcc_s.1.dylib ]; then
+		CPP_LIB=/usr/local/lib/gcc46/libgcc_s.1.dylib
+		echo "Found libgcc_s.1.dylib in $CPP_LIB"
+	else
+		CPP_LIB=NOT_FOUND
+		echo "libgcc_s.1.dylib not FOUND!"
 	       	exit 2
 	fi
 fi
@@ -111,7 +105,7 @@ fi
 
 
 
-binaries="2dx_image/2dx_image.app/Contents/MacOS 2dx_merge/2dx_merge.app/Contents/MacOS kernel/mrc/lib"
+binaries="kernel/mrc/lib"
 for loop in $binaries
 do
 	echo "cp $FFTW_LIB  $build_dir/$loop"
@@ -147,24 +141,46 @@ do
 	install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $file  
 	otool -L $file 
 done
-
-executables="2dx_image/2dx_image.app/Contents/MacOS/2dx_image 2dx_merge/2dx_merge.app/Contents/MacOS/2dx_merge"
-for exe in $executables 
+apps="2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
+for loop in $apps
 do
-	file="$build_dir/$exe"
-	echo "changing the dylibs of $file"
-	install_name_tool -change $FFTW_LIB @executable_path/libfftw3f.3.dylib $file
-	install_name_tool -change $FFTW_LIB_THREAD @executable_path/libfftw3f_threads.3.dylib $file
-	install_name_tool -change $QUADMATH_LIB @executable_path/libquadmath.0.dylib  $file 
-	install_name_tool -change $GFORTRAN_LIB  @executable_path/libgfortran.3.dylib $file 
-	install_name_tool -change $QUADMATH_LIB  @executable_path/libquadmath.0.dylib $gfortran.3.dylib
-	otool -L $file 
+        path=$build_dir"/"$loop	
+	echo "in $path"
+	for loop in `ls $path`
+	do
+		file=$path"/"$loop
+		echo "changing the dylibs of" $loop
+		echo "with absolute path" $file
+		install_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $file 	
+		install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $file 
+		install_name_tool -change $CPP_LIB @executable_path/../MacOS/libstdc++.6.dylib $file  
+		install_name_tool -change $GCC_LIB @executable_path/../MacOS/libgcc_s.1.dylib $file  
+		otool -L $file
+		if [ $loop = "libqsvg.dylib" ] ; then
+			echo "removing $file"
+			rm $file
+		fi
+	done
 done
 
-lib_path="$build_dir/2dx_image/2dx_image.app/Contents/MacOS"
-echo "install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
-install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
 
-lib_path="$build_dir/2dx_merge/2dx_merge.app/Contents/MacOS"
-echo "install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
-install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
+#executables="2dx_image/2dx_image.app/Contents/MacOS/2dx_image 2dx_merge/2dx_merge.app/Contents/MacOS/2dx_merge"
+#for exe in $executables 
+#do
+#	file="$build_dir/$exe"
+#	echo "changing the dylibs of $file"
+#	install_name_tool -change $FFTW_LIB @executable_path/libfftw3f.3.dylib $file
+#	install_name_tool -change $FFTW_LIB_THREAD @executable_path/libfftw3f_threads.3.dylib $file
+#	install_name_tool -change $QUADMATH_LIB @executable_path/libquadmath.0.dylib  $file 
+#	install_name_tool -change $GFORTRAN_LIB  @executable_path/libgfortran.3.dylib $file 
+#	install_name_tool -change $QUADMATH_LIB  @executable_path/libquadmath.0.dylib $gfortran.3.dylib
+#	otool -L $file 
+#done
+#
+#lib_path="$build_dir/2dx_image/2dx_image.app/Contents/MacOS"
+#echo "install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
+#install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
+#
+#lib_path="$build_dir/2dx_merge/2dx_merge.app/Contents/MacOS"
+#echo "install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
+#install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib

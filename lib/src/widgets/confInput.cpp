@@ -8,6 +8,7 @@
  */
 
 #include "confInput.h"
+#include "noscrollcombobox.h"
 #include <iostream>
 #include <QListView>
 #include <QApplication>
@@ -199,8 +200,9 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
   }
   else if(type == "drop_down_menu")
   {
-      menu = new QComboBox(this);
+      menu = new NoScrollComboBox(this);
       menu->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+      menu->installEventFilter(this);
       int k;
       bool ok;
       QStringList menuOptions = defaults.split(';');
@@ -526,6 +528,27 @@ bool confInput::event(QEvent *event)
 	}
 	else
 		return QWidget::event(event);
+}
+/**
+* event filter to stop scrolling when the mouse hovers over a combo box.
+*/
+bool confInput::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::Wheel &&
+       qobject_cast<QComboBox*>(obj))
+    {
+        if(qobject_cast<QComboBox*>(obj)->focusPolicy() == Qt::WheelFocus)
+        {
+            event->accept();
+            return false;
+        }
+        else
+        {
+            event->ignore();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(obj, event);
 }
 
 int confInput::userLevel()

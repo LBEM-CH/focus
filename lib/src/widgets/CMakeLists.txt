@@ -16,6 +16,10 @@ SET(LIBVERSION 1)
 project(${LIBTITLE})
 
 cmake_minimum_required(VERSION 2.6)
+
+
+include(GetPropagateDeps)
+include(SetPropagateDeps)
 #------------------------------------------------------------------------------
 # Configure Config file and include it.
 # The dependencies are defined in the Config.cmake file
@@ -82,6 +86,7 @@ set(MOC_HDRS
 	${2DX_INCLUDE_DIR}/displayParametersTool.h
 	${2DX_INCLUDE_DIR}/confEditor.h
 	${2DX_INCLUDE_DIR}/colorTool.h
+	${2DX_INCLUDE_DIR}/noScrollComboBox.h
 )
 
 set(CMAKE_DEBUG_POSTFIX -dbg)

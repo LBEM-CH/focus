@@ -89,6 +89,7 @@ class confInput : public QWidget
   protected:
   void mousePressEvent(QMouseEvent *event);
   bool event(QEvent *event);
+  bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif

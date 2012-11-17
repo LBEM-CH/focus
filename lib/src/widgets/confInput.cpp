@@ -8,7 +8,7 @@
  */
 
 #include "confInput.h"
-#include "noscrollcombobox.h"
+#include "noScrollComboBox.h"
 #include <iostream>
 #include <QListView>
 #include <QApplication>

@@ -1,5 +1,5 @@
 #include <QtGui>
-#include "noscrollcombobox.h"
+#include "noScrollComboBox.h"
 
 NoScrollComboBox::NoScrollComboBox(QWidget *parent) : QComboBox(parent)
 {

@@ -7,7 +7,7 @@ NoScrollComboBox::NoScrollComboBox(QWidget *parent) : QComboBox(parent)
 
 void NoScrollComboBox::focusInEvent(QFocusEvent *e)
 {
-    setFocusPolicy(Qt::WheelFocus);
+    setFocusPolicy(Qt::StrongFocus);
 }
 
 void NoScrollComboBox::focusOutEvent(QFocusEvent *e)

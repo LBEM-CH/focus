@@ -202,6 +202,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
   {
       menu = new NoScrollComboBox(this);
       menu->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+      menu->setFocusPolicy(Qt::StrongFocus);
       menu->installEventFilter(this);
       int k;
       bool ok;

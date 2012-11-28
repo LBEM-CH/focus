@@ -44,6 +44,7 @@ set outfile = TMP-${tmpold}.html
 # If -1, then ALL reflections will be dumped. (Default 10.)
 #
 ${bin_ccp4}/mtzdump hklin ${infile} << eot > ${outfile}
+NREF 99999999
 END
 eot
 #

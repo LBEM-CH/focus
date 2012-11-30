@@ -121,6 +121,7 @@ C remember to change IBOXMAX in subroutine
 CHEN>
       REAL*8 NEWMAX,AMPTOTAL,AMPTOT,RMSBK,RMSBKOLD,AMPSQ,AMPINT
       INTEGER*8 ISUM(IBOXMAX,IBOXMAX)
+      REAL*8 RSUM(IBOXMAX,IBOXMAX)
       INTEGER*8 ISUMI(IBOXMAX,IBOXMAX)
       INTEGER*8 IAMP(IBOXMAX,IBOXMAX)
       INTEGER*8 IPERIM,ICENTRE,INEAR
@@ -373,6 +374,7 @@ C
       DO 130 K=1,IBOXMAX
       DO 130 J=1,IBOXMAX
       ISUM(J,K) = 0
+      RSUM(J,K) = 0.0
       ISUMI(J,K) = 0
 CHEN
       RSUMI(J,K) = 0.0
@@ -675,6 +677,10 @@ C
           IAMP(J,K) = AAMP(J,K) + 0.5
           IPHI(J,K) = PPHI(J,K) + 0.5
           ISUM(J,K) = ISUM(J,K) + IAMP(J,K) * IAMP(J,K)
+CMAR>
+C like in mmbox 
+          RSUM(J,K) = RSUM(J,K) + FLOAT(IAMP(J,K))**2
+CMAR<
         enddo
       enddo 
 C
@@ -817,19 +823,18 @@ C
 C
 C     write summed,squared amplitudes
 C
-      IPERIM=0
+      PERIM = 0.0
       DO 530 K=1,IVERT
-530   IPERIM=IPERIM+ISUM(1,K)+ISUM(IHOR,K)
+530   PERIM=PERIM+RSUM(1,K)+RSUM(IHOR,K)
       DO 535 J=2,IHOR-1
-535   IPERIM=IPERIM+ISUM(J,1)+ISUM(J,IVERT)
-      RFLOAT=IPERIM
-      PERIM=RFLOAT/(2.0*(IVERT+IHOR-2))
+535   PERIM=PERIM+RSUM(J,1)+RSUM(J,IVERT)
+      PERIM=PERIM/(2.0*(IVERT+IHOR-2))
 C
       DO 520 K=1,IVERT
         DO 520 J=1,IHOR
           ISUMI(J,K)=ISUM(J,K)*7.0/PERIM + 0.5
 CHEN
-          RSUMI(J,K)=ISUM(J,K)*7.0/PERIM + 0.5
+          RSUMI(J,K)=RSUM(J,K)*7.0/PERIM + 0.5
 CHEN
           if(NSPOT.ne.0)then
             ISUM(J,K) = SQRT(FLOAT(ISUM(J,K)) /(NSPOT)) + 0.5

@@ -709,10 +709,8 @@ void confInput::openDirDialog()
 void confInput::setIsWrongValueColor()
 {
   for(int i=0;i<lEdits.size();i++)
-	{
-    
-    pal.setColor(QPalette::Base,Qt::white);
-		lEdits[i]->setPalette(pal);
-	}
-
+  {
+      pal.setColor(QPalette::Base,Qt::white);
+          lEdits[i]->setPalette(pal);
+   }
 }

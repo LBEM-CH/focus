@@ -273,7 +273,7 @@ def write_hkl_file(merged_reflections, filename):
 	with open(filename,'w') as hkl_file:
 		hkl_file.write('      1001\n')
 		for ref in merged_reflections:
-			line= '  {0:4d}  {1:4d}  {2:4d}     {3:8.1f}    {3:8.1f}    {5:8.3f}'.format(ref.h, ref.k, ref.l,ref.amp, ref.phase, ref.fom)
+			line= '  {0:4d}  {1:4d}  {2:4d}     {3:8.1f}    {4:8.1f}    {5:8.3f}'.format(ref.h, ref.k, ref.l,ref.amp, ref.phase, ref.fom)
 			print("%s" % line)
 			hkl_file.write("%s\n" % line)
 

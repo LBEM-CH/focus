@@ -291,14 +291,14 @@ C
 C-----Now write out all reflexes in the correctly sorted order
 C
       do H=0,ihmax
-        do K=-ikmax,ikmax
+        do K=0,ikmax
           do L=-ilmax,ilmax
 C
 C-----------Test, if this reflection was present
             IFILL=IOUTP(H,K,L)
 C
 C-----------output only for right half of Fourier plane (and top half of H=0 line):
-            if(H.gt.0 .or. K.ge.0 .and. IFILL.gt.0)then
+            if(IFILL.gt.0)then
 C
 C  1 = sum of amplitudes
 C  2 = sum of XARG-weighted os component of phase

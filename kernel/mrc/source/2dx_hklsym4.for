@@ -291,105 +291,107 @@ C
 C-----Now write out all reflexes in the correctly sorted order
 C
       do H=0,ihmax
-        do K=0,ikmax
+        do K=-ikmax,ikmax
           do L=-ilmax,ilmax
 C
 C-----------Test, if this reflection was present
             IFILL=IOUTP(H,K,L)
 C
 C-----------output only for right half of Fourier plane (and top half of H=0 line):
-            if(IFILL.gt.0)then
-C
-C  1 = sum of amplitudes
-C  2 = sum of XARG-weighted os component of phase
-C  3 = sum of XARG-weighted in component of phase
-C
-C-------------Calculate the average AMPlitude
-C-------------Here, this is the linear average of AMPS, as 
-C-------------Average_AMP=sum(AMP)/N
-C
-              AMPSUM=ROUTP(H,K,L,1)
-              AMP=AMPSUM/IFILL
-C
-C-------------Calculate the average PHASE
-C-------------Here, this is the angle of the added phase vectors.
-              PX=ROUTP(H,K,L,2)
-              PY=ROUTP(H,K,L,3)
-              PHASE=atan2(PY,PX)*180.0/PI
-              call PHACOR(PHASE)
-C
-C-------------Calculate the average FOM
-C-------------Here, this is calculated as
-C-------------Average_FOM=BESSEL_Ratio(sqrt(sum(cos(PHASE)*XARG)**2+sum(sin(PHASE)*XARG)**2))
-C-------------whereby XARG is taken from a look-up table as a function of the FOM values of the reclections.
-C
-              XARG = SQRT(PX**2 + PY**2)
-              if(XARG.gt.49.0)XARG=49.0
-C
-              IFAIL=1
-              JFAIL=1
-C       
-              R1=S18AFF(XARG,JFAIL)
-              R2=S18AEF(XARG,IFAIL)
-              if(abs(R2).gt.0.0)then
-                WT=R1 / R2
-              else
-                IFAIL=1
-              endif
-C
-C-------------IF ABOVE FAILS, GAUSSIAN WILL DO AS PROBABILITY MUST BE VERY SHARP
-C
-              IF(JFAIL.NE.IFAIL) WRITE(6,299)H,K,L,JFAIL,IFAIL
- 299            FORMAT('::S18AFF or S18AEF failed for spot ',3I5,
-     .           ', J/I FAIL=',2I6)
-              IF(IFAIL.EQ.1.OR.JFAIL.EQ.1)THEN
-                SIGMA=SQRT(1.0/XARG)
-                FOM=COS(SIGMA) * 100.0
-              ELSE
-                FOM=WT * 100.0
-              END IF
-C
-C              write(6,'(''::H,K,L,XARG,R1,R2,FOM '',3I5,4G18.6)')H,K,L,XARG,R1,R2,FOM
-C
-C-------------QFACTOR is the length of the vector addition of all vector phases, 
-C------------------------divided by the sum of all vector phases.
-C-------------If the phases all agreed with each other, QFACTOR will be one.
-C-------------Otherwise, QFACTOR is smaller than one.
-C
-C             QFACTOR=XARG/PHSWGTSUM
-C             AMP=AMP*QFACTOR         ! takes account of bad phases
-C
-C-------------Fudge something together for BACK and SIGA:
-              BACK=0.0
-              SIGA=1.0
-C
-              if(i1sig.eq.3)SIGA=1.0
-C
-C-------------Output the values into the output channels
-              if(isig.eq.1)then
-                write(11,310) H,K,L,AMP,PHASE,FOM,SIGA
-                write(12,310) H,K,L,AMP,PHASE,FOM,SIGA
-                if(ineg.gt.1)then
-                  write(11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
-                  write(12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+            if(H.gt.0 or K.ge.0)then
+                if(IFILL.gt.0)then
+C        
+C                       1 = sum of amplitudes
+C                       2 = sum of XARG-weighted os component of phase
+C                       3 = sum of XARG-weighted in component of phase
+C        
+C        -------------Calculate the average AMPlitude
+C        -------------Here, this is the linear average of AMPS, as 
+C        -------------Average_AMP=sum(AMP)/N
+C        
+                      AMPSUM=ROUTP(H,K,L,1)
+                      AMP=AMPSUM/IFILL
+C        
+C        -------------Calculate the average PHASE
+C        -------------Here, this is the angle of the added phase vectors.
+                      PX=ROUTP(H,K,L,2)
+                      PY=ROUTP(H,K,L,3)
+                      PHASE=atan2(PY,PX)*180.0/PI
+                      call PHACOR(PHASE)
+C        
+C        -------------Calculate the average FOM
+C        -------------Here, this is calculated as
+C        -------------Average_FOM=BESSEL_Ratio(sqrt(sum(cos(PHASE)*XARG)**2+sum(sin(PHASE)*XARG)**2))
+C        -------------whereby XARG is taken from a look-up table as a function of the FOM values of the reclections.
+C        
+                      XARG = SQRT(PX**2 + PY**2)
+                      if(XARG.gt.49.0)XARG=49.0
+C        
+                      IFAIL=1
+                      JFAIL=1
+C               
+                      R1=S18AFF(XARG,JFAIL)
+                      R2=S18AEF(XARG,IFAIL)
+                      if(abs(R2).gt.0.0)then
+                        WT=R1 / R2
+                      else
+                        IFAIL=1
+                      endif
+C        
+C        -------------IF ABOVE FAILS, GAUSSIAN WILL DO AS PROBABILITY MUST BE VERY SHARP
+C        
+                      IF(JFAIL.NE.IFAIL) WRITE(6,299)H,K,L,JFAIL,IFAIL
+         299            FORMAT('::S18AFF or S18AEF failed for spot ',3I5,
+             .           ', J/I FAIL=',2I6)
+                      IF(IFAIL.EQ.1.OR.JFAIL.EQ.1)THEN
+                        SIGMA=SQRT(1.0/XARG)
+                        FOM=COS(SIGMA) * 100.0
+                      ELSE
+                        FOM=WT * 100.0
+                      END IF
+C        
+C                      write(6,'(''::H,K,L,XARG,R1,R2,FOM '',3I5,4G18.6)')H,K,L,XARG,R1,R2,FOM
+C        
+C        -------------QFACTOR is the length of the vector addition of all vector phases, 
+C        ------------------------divided by the sum of all vector phases.
+C        -------------If the phases all agreed with each other, QFACTOR will be one.
+C        -------------Otherwise, QFACTOR is smaller than one.
+C        
+C                     QFACTOR=XARG/PHSWGTSUM
+C                     AMP=AMP*QFACTOR         ! takes account of bad phases
+C        
+C        -------------Fudge something together for BACK and SIGA:
+                      BACK=0.0
+                      SIGA=1.0
+C        
+                      if(i1sig.eq.3)SIGA=1.0
+C        
+C        -------------Output the values into the output channels
+                      if(isig.eq.1)then
+                        write(11,310) H,K,L,AMP,PHASE,FOM,SIGA
+                        write(12,310) H,K,L,AMP,PHASE,FOM,SIGA
+                        if(ineg.gt.1)then
+                          write(11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                          write(12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                        endif
+                      elseif(isig.eq.2)then
+                        write(11,310) H,K,L,AMP,PHASE,BACK,FOM
+                        write(12,310) H,K,L,AMP,PHASE,BACK,FOM
+                        if(ineg.gt.1)then
+                          write(11,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                          write(12,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                        endif
+                      else
+                        write(11,300) H,K,L,AMP,PHASE,FOM
+                        write(12,300) H,K,L,AMP,PHASE,FOM
+                        if(ineg.gt.1)then
+                          write(11,300) -H,-K,-L,AMP,-PHASE,FOM
+                          write(12,300) -H,-K,-L,AMP,-PHASE,FOM
+                        endif
+                      endif
+                      write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
+             .          3I4,X,5G11.5,I8)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL
                 endif
-              elseif(isig.eq.2)then
-                write(11,310) H,K,L,AMP,PHASE,BACK,FOM
-                write(12,310) H,K,L,AMP,PHASE,BACK,FOM
-                if(ineg.gt.1)then
-                  write(11,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
-                  write(12,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
-                endif
-              else
-                write(11,300) H,K,L,AMP,PHASE,FOM
-                write(12,300) H,K,L,AMP,PHASE,FOM
-                if(ineg.gt.1)then
-                  write(11,300) -H,-K,-L,AMP,-PHASE,FOM
-                  write(12,300) -H,-K,-L,AMP,-PHASE,FOM
-                endif
-              endif
-              write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
-     .          3I4,X,5G11.5,I8)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL
             endif
           enddo
         enddo

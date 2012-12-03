@@ -298,7 +298,7 @@ C-----------Test, if this reflection was present
             IFILL=IOUTP(H,K,L)
 C
 C-----------output only for right half of Fourier plane (and top half of H=0 line):
-            if(H.gt.0 or K.ge.0)then
+            if(H.gt.0.or.K.ge.0)then
                 if(IFILL.gt.0)then
 C        
 C                       1 = sum of amplitudes
@@ -341,8 +341,8 @@ C
 C        -------------IF ABOVE FAILS, GAUSSIAN WILL DO AS PROBABILITY MUST BE VERY SHARP
 C        
                       IF(JFAIL.NE.IFAIL) WRITE(6,299)H,K,L,JFAIL,IFAIL
-         299            FORMAT('::S18AFF or S18AEF failed for spot ',3I5,
-             .           ', J/I FAIL=',2I6)
+299                     FORMAT('::S18AFF or S18AEF failed for spot ',3I5,
+     .                   ', J/I FAIL=',2I6)
                       IF(IFAIL.EQ.1.OR.JFAIL.EQ.1)THEN
                         SIGMA=SQRT(1.0/XARG)
                         FOM=COS(SIGMA) * 100.0
@@ -390,7 +390,7 @@ C        -------------Output the values into the output channels
                         endif
                       endif
                       write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
-             .          3I4,X,5G11.5,I8)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL
+     .                3I4,X,5G11.5,I8)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL
                 endif
             endif
           enddo

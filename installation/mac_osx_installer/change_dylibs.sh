@@ -141,27 +141,27 @@ do
 	install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $file  
 	otool -L $file 
 done
-apps="2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
-for loop in $apps
-do
-        path=$build_dir"/"$loop	
-	echo "in $path"
-	for loop in `ls $path`
-	do
-		file=$path"/"$loop
-		echo "changing the dylibs of" $loop
-		echo "with absolute path" $file
-		install_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $file 	
-		install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $file 
-		install_name_tool -change $CPP_LIB @executable_path/../MacOS/libstdc++.6.dylib $file  
-		install_name_tool -change $GCC_LIB @executable_path/../MacOS/libgcc_s.1.dylib $file  
-		otool -L $file
-		if [ $loop = "libqsvg.dylib" ] ; then
-			echo "removing $file"
-			rm $file
-		fi
-	done
-done
+#apps="2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
+#for loop in $apps
+#do
+#        path=$build_dir"/"$loop	
+#	echo "in $path"
+#	for loop in `ls $path`
+#	do
+#		file=$path"/"$loop
+#		echo "changing the dylibs of" $loop
+#		echo "with absolute path" $file
+#		install_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $file 	
+#		install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $file 
+#		install_name_tool -change $CPP_LIB @executable_path/../MacOS/libstdc++.6.dylib $file  
+#		install_name_tool -change $GCC_LIB @executable_path/../MacOS/libgcc_s.1.dylib $file  
+#		otool -L $file
+#		if [ $loop = "libqsvg.dylib" ] ; then
+#			echo "removing $file"
+#			rm $file
+#		fi
+#	done
+#done
 
 
 #executables="2dx_image/2dx_image.app/Contents/MacOS/2dx_image 2dx_merge/2dx_merge.app/Contents/MacOS/2dx_merge"

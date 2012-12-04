@@ -177,7 +177,6 @@ INSTALL(CODE "
 
 # directories to look for dependencies
 SET(DIRS ${QT_LIBRARY_DIRS})
-
 # Now the work of copying dependencies into the bundle/package
 # The quotes are escaped and variables to use at install time have their $ escaped
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
@@ -185,8 +184,12 @@ SET(DIRS ${QT_LIBRARY_DIRS})
 # over.
 if(APPLE_BUNDLE)
 	INSTALL(CODE "
+	    file(GLOB_RECURSE QTPLUGINS
+		       \"${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+	    include(InstallRequiredSystemLibraries)    
 	    include(BundleUtilities)
-	    fixup_bundle(\"${APPS}\" \"\${2DX_MERGE_LIBRARIES}\" \"\")
+	    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"\${DIRS}\" \"\")
+	    verify_app(\"${APPS}\")
 	    " COMPONENT Runtime)
 endif(APPLE_BUNDLE)
 

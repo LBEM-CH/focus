@@ -137,8 +137,10 @@ INSTALL(CODE "
 # over.
 if(APPLE_BUNDLE)
 	INSTALL(CODE "
+	    include(InstallRequiredSystemLibraries)    
 	    include(BundleUtilities)
 	      fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
+	    verify_app(\"${APPS}\")
 	    " COMPONENT Runtime)
 endif(APPLE_BUNDLE)
 

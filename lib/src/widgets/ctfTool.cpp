@@ -84,7 +84,7 @@ void ctfTool::load()
   {
     x=cell[0].toDouble();
     y=cell[1].toDouble();
-    astigmatism->setValue(fmod(cell[2].toFloat(),360.0));
+    astigmatism->setValue(fmod(cell[2].toFloat()+360.0,360.0));
   }
   else
   {

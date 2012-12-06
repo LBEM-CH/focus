@@ -48,6 +48,8 @@
 # DISPLAY: crop_histogram
 # DISPLAY: crop_histogram_percent
 # DISPLAY: crop_histogram_stdev
+# DISPLAY: defocus
+# DISPLAY: defocusbackup
 #
 #$end_local_vars
 #

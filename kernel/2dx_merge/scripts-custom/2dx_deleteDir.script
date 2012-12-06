@@ -83,6 +83,10 @@ if ( ${delete_sure} == "yes" ) then
 	foreach dirfile ( ${dirlist} ) 
 	  echo "::Moving into TRASH: ${dirfile}"
 	  #
+         cd TRASH
+         if ( -d ${dirfile} ) then
+         endif
+         cd ${rootdir}
 	  \mv -f ${dirfile} TRASH 
 	  #
 	end

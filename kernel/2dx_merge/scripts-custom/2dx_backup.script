@@ -129,6 +129,16 @@ if ( ${backup_merge} == "yes" ) then
   \rm -f ${from_dir}/SELECT-dummy.dat
   \rm -f ${to_dir}/SELECT-dummy.dat
   #
+  echo "dummy" > ${from_dir}/volume-dummy.tmp
+  cp -f ${from_dir}/volume* ${to_dir}
+  \rm -f ${from_dir}/volume-dummy.tmp
+  \rm -f ${to_dir}/volume-dummy.tmp
+  #
+  echo "dummy" > ${from_dir}/2dx_merge_dummy.tmp
+  cp -f ${from_dir}/2dx_merge* ${to_dir}
+  \rm -f ${from_dir}/2dx_merge_dummy.tmp
+  \rm -f ${to_dir}/2dx_merge_dummy.tmp
+  #
   echo ":New: ${to_dir}/2dx_merge.cfg"
   cp -f ${from_dir}/2dx_merge.cfg ${to_dir}
   #
@@ -158,9 +168,19 @@ if ( ${backup_merge} == "yes" ) then
     cp -f ${from_dir}/merge2D.mtz ${to_dir}
   endif
   #
+  if ( -e ${from_dir}/merge2Dref.mtz ) then
+    echo ":New: ${to_dir}/merge2Dref.mtz"
+    cp -f ${from_dir}/merge2Dref.mtz ${to_dir}
+  endif
+  #
   if ( -e ${from_dir}/merge3D.mtz ) then
     echo ":New: ${to_dir}/merge3D.mtz"
     cp -f ${from_dir}/merge3D.mtz ${to_dir}
+  endif
+  #
+  if ( -e ${from_dir}/merge3Dref.mtz ) then
+    echo ":New: ${to_dir}/merge3Dref.mtz"
+    cp -f ${from_dir}/merge3Dref.mtz ${to_dir}
   endif
   #
   if ( -e ${from_dir}/merge.aph ) then

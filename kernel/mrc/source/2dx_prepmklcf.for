@@ -104,7 +104,7 @@ CHEN<
           write(6,'(''::'',A)')czeile(1:k)
           write(6,'(''::Experted format: 2 integer, 6 floats'')')
           write(6,'(''::ABORTING.'')')
-          stop -1
+          stop
 130     continue
         if(HOLD.ne.IH)then
           WRITE(6,60)

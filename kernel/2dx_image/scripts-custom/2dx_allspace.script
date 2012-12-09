@@ -45,6 +45,7 @@ set test_spacegroups_val = "ALL"
 # DISPLAY: SYM
 # DISPLAY: phaori
 # DISPLAY: phaoriFouFilter
+# DISPLAY: beamtilt
 # DISPLAY: realcell
 # DISPLAY: realang
 # DISPLAY: rot180
@@ -84,6 +85,7 @@ set realcell = ""
 set realang = ""
 set phaori = ""
 set phaoriFouFilter = ""
+set beamtilt = ""
 set allspace_step = ""
 set allspace_stepnum = ""
 set allspace_IQMAX = ""
@@ -192,7 +194,7 @@ if ( ${test_spacegroups_val} == "SPEC" ) then
 ${test_spacegroups_val}
 ${spcgrp}
 T T F 4000				! SEARCH,REFINE,TILT,NCYC
-0. 0. 0. 0.				! ORIGH,ORIGK,TILTH,TILTK
+${phaori} ${beamtilt}			! ORIGH,ORIGK,TILTH,TILTK
 ${allspace_step},${allspace_stepnum} 	! STEPSIZE, PHASE SEARCH ARRAY SIZE
 ${realcell} ${realang} ${RESMIN} ${allspace_RESMAX} ${CS} ${KV} ! A, B, GAMMA, RIN, ROUT, CS, KV
 F ${rot180val} ${allspace_IQMAX} ${revhkval} ${rot90val} ${revhndval} ${revxsgnval}	! ILIST,ROT180,IQMAX,REVHK,ROT90,REVHND,REVXSGN
@@ -205,7 +207,7 @@ else
   ${bin_2dx}/2dx_allspacea.exe << eot 
 ${test_spacegroups_val}
 T T F 4000                              ! SEARCH,REFINE,TILT,NCYC
-0. 0. 0. 0.                             ! ORIGH,ORIGK,TILTH,TILTK
+${phaori} ${beamtilt}                             ! ORIGH,ORIGK,TILTH,TILTK
 ${allspace_step},${allspace_stepnum}    ! STEPSIZE, PHASE SEARCH ARRAY SIZE
 ${realcell} ${realang} ${RESMIN} ${allspace_RESMAX} ${CS} ${KV} ! A, B, GAMMA, RIN, ROUT, CS, KV
 F ${rot180val} ${allspace_IQMAX} ${revhkval} ${rot90val} ${revhndval} ${revxsgnval}	! ILIST,ROT180,IQMAX,REVHK,ROT90,REVHND,REVXSGN

@@ -277,6 +277,38 @@ endif
 echo "<<@progress: 26>>"
 #
 #############################################################################
+${proc_2dx}/linblock "fomstats - to calculate FOM statistics"
+#############################################################################  
+#
+setenv IN  APH/avrg2D.hkl
+setenv OUT APH/avrg2D_fomstat.hkl
+setenv OUT2 SCRATCH/fomstats_statistics.dat
+#
+echo "# IMAGE: APH/avrg2D_fomstat.hkl <APH: FOMSTATS HKL output>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/fomstats_statistics.dat <TXT: FOMSTATS statistics>" >> LOGS/${scriptname}.results
+#
+\rm -f APH/avrg2D_fomstat.hkl
+\rm -f SCRATCH/fomstats_statistics.dat
+#
+set FOMSTATS_NUM = 100
+set FOMSTATS_BINS = 7
+#
+${bin_2dx}/fomstats.exe << eot
+${FOMSTATS_NUM}
+F               !CUTOFFS
+90 90           !IMIN,IMAX
+${realcell} ${realang}        !A,B,GAMMA
+${TWOFOLD} F F           !TWOFOLD,IHSCR,IKSCR
+${RESMAX} ${FOMSTATS_BINS}             !RESOL, IBAND (# OF BINS)
+eot
+#
+echo ": "
+echo ": FOMSTATS output:"
+echo ": "
+cat SCRATCH/fomstats_statistics.dat | sed 's/^/:/g'
+echo ": "
+#
+#############################################################################
 ${proc_2dx}/linblock "2dx_centric2 - to correct phases to 0 or 180 for 2D run"
 #############################################################################  
 #

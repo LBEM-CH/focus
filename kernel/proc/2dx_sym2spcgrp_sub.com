@@ -328,6 +328,7 @@
 set verified = "no"
 set set_to_90 = "no"
 set set_to_120 = "no"
+set TWOFOLD = "F"
 #
 if ( ${SYM} == 'p1' ) then
   set spcgrp = "1"
@@ -418,6 +419,7 @@ else if ( ${SYM} == 'p2221a' ) then
   set CCP4_SYM = "17"
   set ML_sym_val = "2"
   set rotate_to_Z = "yes"
+  set TWOFOLD = "T"
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
   ${proc_2dx}/linblock "#" 
   ${proc_2dx}/linblock "WARNING: symmetry p2221_a needs reassignment of axis for CCP4, not yet implemented." 
@@ -430,6 +432,7 @@ else if ( ${SYM} == 'p2221b' ) then
   set CCP4_SYM = "17"
   set ML_sym_val = "2"
   set rotate_to_Z = "yes"
+  set TWOFOLD = "T"
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
 
 else if ( ${SYM} == 'p22121' ) then
@@ -439,6 +442,7 @@ else if ( ${SYM} == 'p22121' ) then
   set ML_sym_val = "2"
   set CCP4_SYM = "18"
   set rotate_to_Z = "no"
+  set TWOFOLD = "T"
   set verified = "yes"
 
 else if ( ${SYM} == 'c222' ) then
@@ -447,6 +451,7 @@ else if ( ${SYM} == 'c222' ) then
   set CCP4_SYM = "21"
   set ML_sym_val = "2"
   set rotate_to_Z = "no"
+  set TWOFOLD = "T"
 
 else if ( ${SYM} == 'p4' ) then
   set spcgrp = "10"
@@ -456,6 +461,7 @@ else if ( ${SYM} == 'p4' ) then
   set rotate_to_Z = "no"
   set verified = "yes"
   set set_to_90 = "yes"
+  set TWOFOLD = "T"
 
 else if ( ${SYM} == 'p422' ) then
   set spcgrp = "11"
@@ -465,6 +471,7 @@ else if ( ${SYM} == 'p422' ) then
   set rotate_to_Z = "no"
   set verified = "yes"
   set set_to_90 = "yes"
+  set TWOFOLD = "T"
 
 else if ( ${SYM} == 'p4212' ) then
   set spcgrp = "12"
@@ -474,6 +481,7 @@ else if ( ${SYM} == 'p4212' ) then
   set rotate_to_Z = "no"
   set verified = "yes"
   set set_to_90 = "yes"
+  set TWOFOLD = "T"
 
 else if ( ${SYM} == 'p3' ) then
   set spcgrp = "13"
@@ -508,6 +516,7 @@ else if ( ${SYM} == 'p6' ) then
   set rotate_to_Z = "no"
   set verified = "yes"
   set set_to_120 = "yes"
+  set TWOFOLD = "T"
 
 else if ( ${SYM} == 'p622' ) then
   set spcgrp = "17"
@@ -516,6 +525,7 @@ else if ( ${SYM} == 'p622' ) then
   set ML_sym_val = "6"
   set rotate_to_Z = "no"
   set set_to_120 = "yes"
+  set TWOFOLD = "T"
 
 else
   ${proc_2dx}/protest "ERROR: sym2spcgrp: SYM of ${SYM} not supported"
@@ -535,6 +545,8 @@ echo ":sym2spcgrp: Output in spcgroup_num = ${spcgroup_num}"
 echo ":sym2spcgrp: Output in CCP4_SYM = ${CCP4_SYM}"
 echo ":sym2spcgrp: Output in ML_sym_val = ${ML_sym_val}"
 echo ":sym2spcgrp: Output in rotate_to_Z = ${rotate_to_Z}"
+echo ":sym2spcgrp: Output in TWOFOLD = ${TWOFOLD}"
+#
 if ( ${set_to_90} == "yes" ) then
   echo ":sym2spcgrp: Output in set_to_90 = ${set_to_90}"
   if ( ${realang}x != "90.0"x ) then

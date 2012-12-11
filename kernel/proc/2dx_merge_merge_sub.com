@@ -22,7 +22,7 @@ set shftin = "0"
 #
 if ( ${spcgrp} != "1" ) then
   if ( ${avrgamphsRESOL} == '0' || ${avrgamphsRESOL} == '0.0' ) then
-    set avrgamphsRESlocal = `echo ${RESMAX} | awk '{ s = int ( $1 * 9.5 / 10.0 ) } END { print s }'`
+    set avrgamphsRESlocal = ${RESMAX}
   else
     set avrgamphsRESlocal = ${avrgamphsRESOL}
   endif
@@ -290,16 +290,13 @@ echo "# IMAGE: SCRATCH/fomstats_statistics.dat <TXT: FOMSTATS statistics>" >> LO
 \rm -f APH/avrg2D_fomstat.hkl
 \rm -f SCRATCH/fomstats_statistics.dat
 #
-set FOMSTATS_NUM = 100
-set FOMSTATS_BINS = 7
-#
 ${bin_2dx}/fomstats.exe << eot
-${FOMSTATS_NUM}
+100
 F               !CUTOFFS
 90 90           !IMIN,IMAX
 ${realcell} ${realang}        !A,B,GAMMA
 ${TWOFOLD} F F           !TWOFOLD,IHSCR,IKSCR
-${RESMAX} ${FOMSTATS_BINS}             !RESOL, IBAND (# OF BINS)
+${avrgamphsRESlocal} ${avrgamphsNUMBER}             !RESOL, IBAND (# OF BINS)
 eot
 #
 echo ": "

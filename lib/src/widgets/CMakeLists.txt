@@ -88,8 +88,6 @@ set(MOC_HDRS
 	${2DX_INCLUDE_DIR}/colorTool.h
 	${2DX_INCLUDE_DIR}/noScrollComboBox.h
 )
-
-set(CMAKE_DEBUG_POSTFIX -dbg)
   
 if(QT4_FOUND)
 	# generate moc files

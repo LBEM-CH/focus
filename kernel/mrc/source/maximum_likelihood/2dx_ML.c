@@ -57,13 +57,20 @@ int main()
 
 	printf("\n2dx_ML: Performs Maximum Likelihood processing. \n");
 
-	scanf("%d",&doMLorCC);
+	//scanf("%d",&doMLorCC);
+	// FOR DEBUGING>
+	doMLorCC = 0;
+	// FOR DEBUGING<
 	if(doMLorCC==0)
 		printf("Weights for ref calculation... = from Maximum Likelihood estimate\n");
 	else
 		printf("Weights for ref calculation... = from Cross-Correlation between particle and old reference\n");
-
-	scanf("%s",resultsfilename);
+	
+	//FOR DEBUGING>
+	strncpy(resultsfilename, "debug.log",200);
+	//FOR DEBUGING<
+	//scanf("%s",resultsfilename);
+	
 	printf("Results File Name............. = %s \n",resultsfilename);
 
 	input=fopen("2dx_image.cfg" ,"r"); 

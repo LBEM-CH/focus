@@ -20,6 +20,7 @@ endif (NOT CMAKE_BUILD_TYPE)
 # Fortran Compiler -------------------------------------------------------------
 get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
+set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#gfortran
 	if(APPLE)

@@ -56,8 +56,6 @@ if(QT4_FOUND)
 	QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS}) 
 endif(QT4_FOUND)
 
-set(CMAKE_DEBUG_POSTFIX -dbg)
-
 if(SRC)
 add_library(${LIBTITLE} ${SRC} ${MOC_SRCS})
 

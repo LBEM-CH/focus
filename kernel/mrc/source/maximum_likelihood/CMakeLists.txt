@@ -36,6 +36,9 @@ if(LOCAL_LIB_DIR)
 	list(APPEND ML_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a )
 endif(LOCAL_LIB_DIR)
 # Executables ------------------------------------------------------------------
+
+set(CMAKE_C_FLAGS_RELEASE "-ffast-math  -static-libgcc")
+set(CMAKE_C_FLAGS_DEBUG "-g -ffast-math  -static-libgcc")
 set(LOCAL_EXECUTABLES "")
 foreach(i ${ML_TARGETS})
 	set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${i}.c PROPERTIES LANGUAGE CXX )

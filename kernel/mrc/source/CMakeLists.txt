@@ -16,6 +16,8 @@ if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE RELEASE CACHE STRING
       "Choose the type of build, options are: None Debug Release."
       FORCE)
+else (NOT CMAKE_BUILD_TYPE)
+	message(STATUS "THE BUILD TYPE IS SET TO: ${CMAKE_BUILD_TYPE}")
 endif (NOT CMAKE_BUILD_TYPE)
 
 ################################################################################
@@ -26,7 +28,8 @@ message(STATUS "adding ${Fortran_COMPILER_NAME} specific flags")
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#gfortran
 	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
-	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")
+	set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
+	#set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")
 	set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}  -static-libgcc")
 	set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -static-libgcc")
 	if(APPLE)
@@ -68,7 +71,7 @@ if(C_COMPILER_NAME STREQUAL "gcc")
 	if(APPLE)
 		set(CMAKE_C_FLAGS_RELEASE "-dead_strip ${CMAKE_C_FLAGS_RELEASE}")
 	endif(APPLE)
-	set(CMAKE_C_FLAGS_DEBUG  "-ffast-math  -static-libgcc")
+	set(CMAKE_C_FLAGS_DEBUG  "-g -ffast-math  -static-libgcc")
 elseif(C_COMPILER_NAME STREQUAL "cc")
 	set(CMAKE_C_FLAGS_RELEASE "-ffast-math")
 else()
@@ -80,7 +83,8 @@ endif()
 if(CMAKE_CXX_COMPILER STREQUAL "icpc")
 	set(CMAKE_CXX_FLAGS "-axN -w -132 -cxxlib")
 else(CMAKE_CXX_COMPILER STREQUAL "icpc")
-	set(CMAKE_CXX_FLAGS "-ffast-math") 
+	set(CMAKE_CXX_FLAGS_RELEASE "-ffast-math") 
+	set(CMAKE_CXX_FLAGS_DEBUG  "-g -ffast-math")
 endif(CMAKE_CXX_COMPILER STREQUAL "icpc")
 
 

@@ -103,7 +103,6 @@ list(APPEND SOURCES ${GENFOR} ${GENC} ${MISCFOR} ${IMLIBFOR} ${PLOT2KC} ${FFTCPP
 set(SOURCES_FILE ${CMAKE_CURRENT_BINARY_DIR}/sources.cmake)
 ###############################################################################
 
-set(CMAKE_DEBUG_POSTFIX -dbg)
 
 ################################################################################
 # Libraries --------------------------------------------------------------------i

@@ -12,6 +12,7 @@
 
 
 #include <common.h>
+#include <limits.h>
 
 
 void whitening(int sx,int sy, float *Image1)
@@ -19,7 +20,7 @@ void whitening(int sx,int sy, float *Image1)
 
 	int *num;
 	int   ISIZE=sx, Loop; 
-	int i,j,k,m;
+	int i,j,k,m,posik; //for debugging
 
 	float  WL,STEPR,THETATR,RAD,ANGLE,C1,C2,ANGDIF,CNTRST,DF,PHACON,ANGSPT,CCOS, AMPCON;
 	float CS1, KV1; 
@@ -106,9 +107,9 @@ void whitening(int sx,int sy, float *Image1)
 		}   
 
 
-
-	CHI_max=-1.0e20;
-	CHI_min=-CHI_max; 
+	
+	CHI_max=FLT_MIN;
+	CHI_min=FLT_MAX; 
 	for(i=0;i<sx;i++)
 		for(j=0;j<sy;j++)
 		{  if(CHI_max<CHI[IDX(i,j,sx,sy)])  CHI_max=CHI[IDX(i,j,sx,sy)];
@@ -141,6 +142,7 @@ void whitening(int sx,int sy, float *Image1)
 			{  
 				amp1=pow(out[IDX(i,j,sx,sy)][0],2.0)+pow(out[IDX(i,j,sx,sy)][1],2.0);       
 				k=(int)(sqrtf(CHI[IDX(i,j,sx,sy)]-CHI_min)/sqrtf(CHI_max-CHI_min)*(MAXBIN-1));
+
 				if(Loop==0 || pow(amp1-av_F[k],2.0)<devi[k]) 
 				{
 					total_num+=1;
@@ -182,7 +184,7 @@ void whitening(int sx,int sy, float *Image1)
 		{      amp1=pow(out[IDX(i,j,sx,sy)][0],2.0)+pow(out[IDX(i,j,sx,sy)][1],2.0);
 
 			k=(int)(sqrtf(CHI[IDX(i,j,sx,sy)]-CHI_min)/sqrtf(CHI_max-CHI_min)*(MAXBIN-1));
-
+			
 			if((k<MAXBIN/3 || amp1<av_F[k]*8) && mean_F[k]>0) 
 			{
 				total_num+=1.0;

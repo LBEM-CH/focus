@@ -67,6 +67,7 @@ add_subdirectory(2dx_merge)
 add_subdirectory(2dx_logbrowser)
 add_subdirectory(plugins)
 add_subdirectory(bin)
+
 install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_BINARY_DIR} )
 
 configure_file("changes.htm.in" "changes.htm")
@@ -78,6 +79,9 @@ configure_file("build_scripts/add_version_to_src.sh.in" "add_version_to_src.sh")
 
 file(GLOB DES installation/*.desktop)
 install(FILES ${DES} DESTINATION Resource)
+
+file(GLOB DES ${CMAKE_BINARY_DIR}/*.htm)
+install(FILES ${DES} DESTINATION Resource/..)
 
 file(GLOB DES installation/mac_osx_installer/Resources/background.pdf)
 install(FILES ${DES} DESTINATION Resource)

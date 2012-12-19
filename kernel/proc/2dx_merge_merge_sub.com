@@ -273,7 +273,7 @@ if ( ${merge_modus} == "2D" ) then
   endif
   echo ":: "
   echo ":: The last column shows the average phase residual in that resolution range,"
-  echo ":: which is the mean weighted squared distance of the phase values from the averaged value."
+  echo ":: which is the root mean weighted squared distance of the phase values from the averaged value."
   echo ":: (90 deg = random)"
   echo ":: "
 endif

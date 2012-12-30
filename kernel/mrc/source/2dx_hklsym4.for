@@ -341,8 +341,8 @@ C
 C        -------------IF ABOVE FAILS, GAUSSIAN WILL DO AS PROBABILITY MUST BE VERY SHARP
 C        
                       IF(JFAIL.NE.IFAIL) WRITE(6,299)H,K,L,JFAIL,IFAIL
-299                     FORMAT('::S18AFF or S18AEF failed for spot ',3I5,
-     .                   ', J/I FAIL=',2I6)
+299                     FORMAT('::S18AFF or S18AEF failed for spot ',
+     .                   3I5,', J/I FAIL=',2I6)
                       IF(IFAIL.EQ.1.OR.JFAIL.EQ.1)THEN
                         SIGMA=SQRT(1.0/XARG)
                         FOM=COS(SIGMA) * 100.0
@@ -389,8 +389,10 @@ C        -------------Output the values into the output channels
                           write(12,300) -H,-K,-L,AMP,-PHASE,FOM
                         endif
                       endif
-                      write(*,'('':H,K,L,AMP,PHASE,BACK,SIGA,FOM,FILL='',
-     .                3I4,X,5G11.5,I8)') H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL
+                      write(*,'('':H,K,L,AMP,PHASE,BACK,'',
+     .                ''SIGA,FOM,FILL='',
+     .                3I4,X,5G11.5,I8)') 
+     .                H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL
                 endif
             endif
           enddo
@@ -494,7 +496,8 @@ C
      .    (abs(K).gt.MAXSPOT) .or.
      .    (abs(L).gt.MAXSPOT)      ) then
         IMAXSPOT = MAXSPOT
-        write(6,'('':: ERROR: Too big index for ROUTP. Increase MAXSPOT'')')
+        write(6,'('':: ERROR: Too big index for ROUTP. '',
+     .    ''Increase MAXSPOT'')')
         write(6,'('':: MAXSPOT = '',I8,'', H,K,L = '',3I6)')
      .    IMAXSPOT,H,K,L
         STOP 'too big index for ROUTP. Increase MAXSPOT'

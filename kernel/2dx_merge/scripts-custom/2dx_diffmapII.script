@@ -1,0 +1,699 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Diffmap II                                                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/03/2007                                             #
+# Last Modification: 01/03/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 99 
+#
+#
+# MANUAL: This is still under the development 
+#
+#=============================================================================
+# Other parameters follow 
+#=============================================================================
+#
+# DISPLAY: MergeResolution
+# DISPLAY: zstarrange
+# DISPLAY: Calc_from_zstarrange
+# DISPLAY: zstarrange_real
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: merge_res_limit
+# DISPLAY: MergeIQMAX
+# DISPLAY: tempkeep
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: SYM
+# DISPLAY: max_amp_correction
+# DISPLAY: diff_map1_name
+# DISPLAY: diff_map2_name
+# DISPLAY: diffmap_cntrs_mode
+# DISPLAY: diffmap_cntrs_max
+# DISPLAY: diffmap_cntrs_min
+# DISPLAY: diffmap_cntrs_step
+# DISPLAY: npo_cntrs_step 
+# DISPLAY: npo_cntrs_below 
+# DISPLAY: diff_map2_dir
+# DISPLAY: diff_map_confidence
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set merge_modus = ""
+set zstarwin  = ""
+set zstarrange  = ""
+set Calc_from_zstarrange = ""
+set zstarrange_real = ""
+set RESMIN = ""
+set RESMAX = ""
+set merge_res_limit = ""
+set MergeIQMAX = ""
+set tempkeep = ""
+set realcell = ""
+set realang = ""
+set ALAT = ""
+set SYM = ""
+set merge_ref_num = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set max_amp_correction = ""
+set diffmap_cntrs_mode = ""
+set diffmap_cntrs_max = ""
+set diffmap_cntrs_min = ""
+set diffmap_cntrs_step = ""
+set npo_cntrs_step  = ""
+set npo_cntrs_below = ""
+#
+set lattice = ""
+set diff_map2_dir = ""
+set diff_map1_name = ""
+set diff_map2_name = ""
+set  diff_map_confidence = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_diffmapII
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "The current working directory is" ${olddir}
+#
+# tried to check for python
+#set python_cmd = `where python` || echo "python not found"
+#echo "python_cmd = ${python_cmd}"
+#if ( ${python_cmd} == "" ) then
+#    ${proc_2dx}/protest "python not found!"
+#endif
+#
+if ( ! -d ${diff_map2_dir} ) then
+    ${proc_2dx}/protest "The diffmap2 project directory does not exist: ${diff_map2_dir}"
+ endif
+#
+if ( ${Calc_from_zstarrange} == "y" ) then
+  set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
+else
+  set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
+endif
+#
+set map1 = "map1"
+set map2 = "map2"
+set zmin = `echo ${zstarrange} | awk '{s = -$1} END {print s}'`
+set zminmax = `echo ${zmin},${zstarrange}`
+echo zminmax = ${zminmax}
+#
+echo "<<@progress: 1>>"
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 5>>"
+#
+#############################################################################
+${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+#
+echo SYM = ${SYM}
+echo spcgrp = ${spcgrp}
+echo CCP4_SYM = ${CCP4_SYM}
+#
+############################################################################# 
+${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
+#############################################################################
+#
+source ${proc_2dx}/2dx_merge_makedirs
+#
+echo "<<@progress: 10>"
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_avrgamphs - onlt to calculate FOM"
+#############################################################################
+#
+echo "current zminmax = ${zminmax}"
+set zmaxlocal = `echo ${ALAT} | awk '{ s = ( 1 / ( 2 * $1 ) ) } END { print s }'`
+set zminmaxlocal = `echo -${zmaxlocal},${zmaxlocal}`
+# avramphs only works for 2D projection data.
+${proc_2dx}/linblock "Symmetry statistics here are only good in 2D."
+${proc_2dx}/linblock "Using therefore zminmax=${zminmaxlocal}."
+#
+# map1
+#
+\rm -f fort.1
+\cp -f APH/merge.aph fort.1
+echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
+\rm -f fort.2
+\rm -f APH/avrg2D_${map1}.hkl
+\rm -f fort.3
+\rm -f fort.4
+\rm -f TMP444888.tmp
+\rm -f TMP444789.tmp
+\rm -f LOGS/avramphs_${map1}.table.txt
+# 
+${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map1}.log
+T
+1001,${zminmaxlocal}
+8
+${avrgamphsNUMBER}
+${avrgamphsRESOL}
+${realcell} ${realang}
+${max_amp_correction}
+eot
+#
+\rm -f fort.1
+\mv -f fort.2 APH/avrg2D_${map1}.hkl
+\rm -f fort.3
+\rm -f fort.4
+echo "# IMAGE: LOGS/2dx_avrgamphs2D_{map1}.log <LOG: 2dx_avrgamphs output for 2D run>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/avrg2D_${map1}.hkl <map1  averaged amp&phs for FOM [H,K,F,P,IQ,FOM]>" >> LOGS/${scriptname}.results
+\rm -f TMP444789.tmp 
+\rm -f TMP444888.tmp
+#
+# map2
+#
+\rm -f fort.1
+\cp -f APH/merge.aph fort.1
+echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
+\rm -f fort.2
+\rm -f APH/avrg2D_${map2}.hkl
+\rm -f fort.3
+\rm -f fort.4
+\rm -f TMP444888.tmp
+\rm -f TMP444789.tmp
+\rm -f LOGS/avramphs_${map2}.table.txt
+#
+${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map2}.log
+T
+1001,${zminmaxlocal}
+8
+${avrgamphsNUMBER}
+${avrgamphsRESOL}
+${realcell} ${realang}
+${max_amp_correction}
+eot
+#
+\rm -f fort.1
+\mv -f fort.2 APH/avrg2D_${map2}.hkl
+\rm -f fort.3
+\rm -f fort.4
+echo "# IMAGE: LOGS/2dx_avrgamphs2D_{map1}.log <LOG: 2dx_avrgamphs output for 2D run>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/avrg2D_${map2}.hkl <map2  averaged amp&phs for FOM [H,K,F,P,IQ,FOM]>" >> LOGS/${scriptname}.results
+\rm -f TMP444789.tmp 
+\rm -f TMP444888.tmp
+##
+##############################################################################
+${proc_2dx}/linblock "2dx_diffmap_sub - avrgamphs with t-test"
+#############################################################################
+# remove files from previous run
+\rm -f APH/avrg2D_sig1.hkl 
+\rm -f APH/avrg2D_sig2.hkl 
+#
+#
+echo "<<@progress: 24>>"
+#
+python ${proc_2dx}/2dx_diffmap_sub.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${diff_map_confidence}
+#
+echo "# IMAGE-IMPORTANT: APH/avrg2D_sig1.hkl <map1 significant reflections [H,K,Z,A,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: APH/avrg2D_sig2.hkl <map2 significant reflections [H,K,Z,A,P,FOM]>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_centric2 - to correct phases to 0 or 180 for 2D run"
+#############################################################################  
+#
+# map1
+#
+\rm -f APH/centric2D_${map1}.hkl
+\rm -f APH/centric2D_${map1}.hk
+#
+${bin_2dx}/2dx_centric2.exe << eot
+APH/avrg2D_${map1}.hkl
+APH/centric2D_${map1}.hkl
+APH/centric2D_${map1}.hk
+${realcell},${realang}
+${RESMIN},${RESMAX}
+${SYM}
+eot
+#
+if ( ! -e APH/centric2D_${map1}.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+# sigmap1
+#
+\rm -f APH/centric2D_${map1}_sig.hkl
+\rm -f APH/centric2D_${map1}_sig.hk
+#
+if ( ! -e APH/avrg2D_sig1.hkl ) then
+  ${proc_2dx}/protest "avrg2D_sig1.hkl does not exist."
+else
+  echo "avrg2D_sig1.hkl exists."
+endif
+#
+${bin_2dx}/2dx_centric2.exe << eot
+APH/avrg2D_sig1.hkl
+APH/centric2D_${map1}_sig.hkl
+APH/centric2D_${map1}_sig.hk
+${realcell},${realang}
+${RESMIN},${RESMAX}
+${SYM}
+eot
+#
+if ( ! -e APH/centric2D_${map1}_sig.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+#
+# sigmap2
+#
+\rm -f APH/centric2D_${map2}_sig.hkl
+\rm -f APH/centric2D_${map2}_sig.hk
+#
+${bin_2dx}/2dx_centric2.exe << eot
+APH/avrg2D_sig2.hkl
+APH/centric2D_${map2}_sig.hkl
+APH/centric2D_${map2}_sig.hk
+${realcell},${realang}
+${RESMIN},${RESMAX}
+${SYM}
+eot
+#
+echo "<<@progress: 30>>"
+#
+if ( ! -e APH/centric2D_${map2}_sig.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+#
+# This is not used:
+\rm -f APH/centric2D_{map1}.hk
+\rm -f APH/centric2D_{map2}.hk
+#
+#if ( ${tempkeep} == "y" ) then
+  echo "# IMAGE: APH/centric2D_${map1}_sig.hkl <map1 after CENTRIC for 2D [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: APH/centric2D_${map2}_sig.hkl <map2 after CENTRIC for 2D [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+#endif
+#
+echo "<<@progress: 35>>"
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_hklsym4 - to apply symmetry to APH file for 2D run"
+#############################################################################  
+# TODO: Replace this and symmetrize already earlier
+#
+\rm -f APH/sym2D_{map1}.hkl
+\rm -f APH/sym_nosort2D_{map1}.hkl
+\rm -f APH/sym_sort2D_{map1}.hkl
+\rm -f APH/sym_noheader2D_{map1}.hkl
+#
+# Set isig to 3, for NO SIGF BUT SET SIGF to 1.0
+set isig = 3
+#
+# map1
+${bin_2dx}/2dx_hklsym4.exe << eot
+APH/centric2D_${map1}.hkl
+APH/sym_nosort2D_${map1}.hkl
+APH/sym2D_${map1}.hkl
+1     ! ${spcgrp}
+1
+${isig}
+0     ! write out full p1 plane
+0     ! do not write out negative L values
+eot
+#
+# LABOUT H K L F PHI FOM SIGF
+# CTYPOUT H H H F P W Q
+#
+#echo "# IMAGE: APH/sym2D_${map1}.hkl <map1 APH after symmetrization [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+#
+if ( ! -e APH/sym2D_${map1}_sig.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+#
+# sigmap1
+\rm -f APH/sym2D_{map1}_sig.hkl
+\rm -f APH/sym_nosort2D_{map1}_sig.hkl
+\rm -f APH/sym_sort2D_{map1}_sig.hkl
+\rm -f APH/sym_noheader2D_{map1}_sig.hkl
+#
+${bin_2dx}/2dx_hklsym4.exe << eot
+APH/centric2D_${map1}_sig.hkl
+APH/sym_nosort2D_${map1}_sig.hkl
+APH/sym2D_${map1}_sig.hkl
+1     ! ${spcgrp}
+1
+${isig}
+0     ! write out full p1 plane
+0     ! do not write out negative L values
+eot
+#
+echo "# IMAGE: APH/sym2D_${map1}_sig.hkl <map1 APH after symmetrization [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+#
+if ( ! -e APH/sym2D_${map1}_sig.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+#
+# sigmap2
+\rm -f APH/sym2D_{map2}_sig.hkl
+\rm -f APH/sym_nosort2D_{map2}_sig.hkl
+\rm -f APH/sym_sort2D_{map2}_sig.hkl
+\rm -f APH/sym_noheader2D_{map2}_sig.hkl
+#
+${bin_2dx}/2dx_hklsym4.exe << eot
+APH/centric2D_${map2}_sig.hkl
+APH/sym_nosort2D_${map2}_sig.hkl
+APH/sym2D_${map2}_sig.hkl
+1     ! ${spcgrp}
+1
+${isig}
+0     ! write out full p1 plane
+0     ! do not write out negative L values
+eot
+#
+#
+echo "# IMAGE: APH/sym2D_${map2}_sig.hkl <map2 APH after symmetrization [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+#
+if ( ! -e APH/sym2D_${map2}_sig.hkl ) then
+  ${proc_2dx}/protest "ERROR occured."
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D run"
+#############################################################################  
+#
+set LABOUTval = "H K L F PHI FOM"
+set CTYPOUTval = "H H H F P W"
+#
+# map1
+set infile = APH/sym2D_${map1}.hkl
+set outfile = SCRATCH/${map1}.mtz
+\rm -f SCRATCH/${map1}.mtz
+#
+${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
+TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
+CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT ${LABOUTval}
+CTYPOUT ${CTYPOUTval}
+FILE ${infile}
+SKIP 0
+END
+eof
+#
+\rm -f ${map1}.mtz 
+${bin_ccp4}/sftools << eot
+read ${outfile} 
+merge
+expand
+write ${map1}.mtz
+end
+eot
+#
+# sigmap1
+set infile = APH/sym2D_${map1}_sig.hkl
+set outfile = SCRATCH/${map1}_sig.mtz
+\rm -f SCRATCH/${map1}_sig.mtz
+#
+${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
+TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
+CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT ${LABOUTval}
+CTYPOUT ${CTYPOUTval}
+FILE ${infile}
+SKIP 0
+END
+eof
+#
+\rm -f ${map1}_sig.mtz 
+${bin_ccp4}/sftools << eot
+read ${outfile} 
+merge
+expand
+write ${map1}_sig.mtz
+end
+eot
+#
+# sigmap2
+set infile = APH/sym2D_${map2}_sig.hkl
+set outfile = SCRATCH/${map2}_sig.mtz
+\rm -f SCRATCH/${map2}_sig.mtz
+#
+${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
+TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
+CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+SYMMETRY ${CCP4_SYM}
+LABOUT ${LABOUTval}
+CTYPOUT ${CTYPOUTval}
+FILE ${infile}
+SKIP 0
+END
+eof
+#
+\rm -f ${map2}_sig.mtz 
+${bin_ccp4}/sftools << eot
+read ${outfile} 
+merge
+expand
+write ${map2}_sig.mtz
+end
+eot
+#
+echo "# IMAGE-IMPORTANT: ${map1}_sig.mtz <MTZ: map 1 merged full 2D data>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${map2}_sig.mtz <MTZ: map 1 merged full 2D data>" >> LOGS/${scriptname}.results
+#
+##############################################################################
+${proc_2dx}/linblock  "Inverse fft to get map" 
+##############################################################################
+set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($1)  } END { print s }'`
+set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($2)  } END { print s }'`
+set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($1 -  ($1 % 4))  } END { print s }'`
+set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($2 -  ($2 % 4))  } END { print s }'`
+#
+if( $grid_a  < $realcell_a || $grid_b < $realcell_b ) then
+	echo  ":: The unit cell was cropped to ${grid_a}, ${grid_b}, ${realang}. (Dividable by 4)" 
+endif
+#
+# map1
+\rm -f ${map1}.map
+#
+${bin_ccp4}/fft HKLIN  ${map1}.mtz MAPOUT  ${map1}.map \
+    << eot
+LABIN F1=F PHI=PHI W=FOM
+TITLE "${RESMAX} EM map for ${map1}"
+PROJECTION
+AXIS X Y Z
+SCALE F1 1.0
+RESOLUTION ${RESMIN} ${RESMAX}
+#GRID  ${grid_a} ${grid_b} ${realang}
+GRID 200 200 20
+XYZLIM 0 199 0 199 0 0
+END
+eot
+#
+# sigmap1
+\rm -f ${map1}_sig.map
+#
+${bin_ccp4}/fft HKLIN  ${map1}_sig.mtz MAPOUT  ${map1}_sig.map \
+    << eot
+LABIN F1=F PHI=PHI W=FOM
+TITLE "${RESMAX} EM map for ${diff_map1_name}"
+PROJECTION
+AXIS X Y Z
+SCALE F1 1.0
+RESOLUTION ${RESMIN} ${RESMAX}
+#GRID  ${grid_a} ${grid_b} ${realang}
+GRID 200 200 20
+XYZLIM 0 199 0 199 0 0
+END
+eot
+#
+# sigmap2
+\rm -f ${map2}_sig.map
+#
+${bin_ccp4}/fft HKLIN  ${map2}_sig.mtz MAPOUT  ${map2}_sig.map \
+    << eot
+LABIN F1=F PHI=PHI W=FOM
+TITLE "${RESMAX} EM map for ${diff_map2_name}"
+PROJECTION
+AXIS X Y Z
+SCALE F1 1.0
+RESOLUTION ${RESMIN} ${RESMAX}
+#GRID  ${grid_a} ${grid_b} ${realang}
+GRID 200 200 20
+XYZLIM 0 199 0 199 0 0
+END
+eot
+#
+
+
+echo "<<@progress: 30>>"
+##############################################################################
+${proc_2dx}/linblock  "npo - to create a line plot for both maps" 
+##############################################################################
+# map1
+${bin_ccp4}/npo  MAPIN ${map1}.map PLOT ${map1}.plot <<EOF
+TITLE   ${map1}
+MAP SCALE 0.5
+CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
+MODE BELOW 0 DASHED 1 0.25 0
+MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+SECTS 0 0
+PLOT 
+EOF
+#
+# sigmap1
+${bin_ccp4}/npo  MAPIN ${map1}_sig.map PLOT ${map1}_sig.plot <<EOF
+TITLE   ${diff_map1_name}
+MAP SCALE 0.5
+CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
+MODE BELOW 0 DASHED 1 0.25 0
+MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+SECTS 0 0
+PLOT 
+EOF
+# 
+# sigmap2
+${bin_ccp4}/npo  MAPIN ${map2}_sig.map PLOT ${map2}_sig.plot <<EOF
+TITLE   ${diff_map2_name}
+MAP SCALE 0.5
+CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
+MODE BELOW 0 DASHED 1 0.25 0
+MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+SECTS 0 0
+PLOT 
+EOF
+#
+echo "<<@progress: 35>>"
+#############################################################################
+${proc_2dx}/linblock "laserplot - to create contour plots"
+#############################################################################
+#
+# map1
+\rm -f PS/${map1}.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${map1}.ps ${map1}.plot
+\rm -f ${map1}.plot
+echo "# IMAGE-IMPORTANT: PS/${map1}.ps <PS: map 1>"  >> LOGS/${scriptname}.results
+#
+# sigmap1
+\rm -f PS/${map1}_sig.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${map1}_sig.ps ${map1}_sig.plot
+\rm -f ${map1}_sig.plot
+echo "# IMAGE-IMPORTANT: PS/${map1}_sig.ps <PS: significant map 1>"  >> LOGS/${scriptname}.results
+#
+# sigmap2
+\rm -f PS/${map2}_sig.ps
+${bin_2dx}/laserplot.exe -outputfile=PS/${map2}_sig.ps ${map2}_sig.plot
+\rm -f ${map2}_sig.plot
+echo "# IMAGE-IMPORTANT: PS/${map2}_sig.ps <PS: significant map 2>"  >> LOGS/${scriptname}.results
+#############################################################################
+${proc_2dx}/linblock "LABEL - to create a clean MRC file format instead of CCP4"
+#############################################################################
+#
+# map1
+\rm -f ${map1}.mrc
+#
+${bin_2dx}/labelh.exe << eot
+${map1}.map 
+2
+${map1}.mrc
+1,0
+0
+eot
+#
+echo "# IMAGE-IMPORTANT: ${map1}.mrc <map 1>" >> LOGS/${scriptname}.results
+# sigmap1
+\rm -f ${map1}_sig.mrc
+#
+${bin_2dx}/labelh.exe << eot
+${map1}_sig.map 
+2
+${map1}_sig.mrc
+1,0
+0
+eot
+#
+echo "# IMAGE-IMPORTANT: ${map1}_sig.mrc <significant map 1>" >> LOGS/${scriptname}.results
+#
+# sigmap2
+\rm -f ${diff_map1_name}.mrc
+#
+${bin_2dx}/labelh.exe << eot
+${map2}_sig.map 
+2
+${map2}_sig.mrc 
+1,0
+0
+eot
+#
+echo "# IMAGE-IMPORTANT: ${map2}_sig.mrc <significant map 2>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "labelh - to transform the map into BYTE format with automatic scaling"
+#############################################################################
+#
+${bin_2dx}/labelh.exe << eot
+${map1}.mrc
+-3
+SCRATCH/${map1}.mrc
+eot
+#
+${bin_2dx}/labelh.exe << eot
+${map1}_sig.mrc
+-3
+SCRATCH/${map1}_sig.mrc
+eot
+#
+${bin_2dx}/labelh.exe << eot
+${map2}_sig.mrc
+-3
+SCRATCH/${map2}_sig.mrc
+eot
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
+#############################################################################
+#
+python ~/code/2dx/trunk/proc/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc
+#
+#
+##############################################################################
+#${proc_2dx}/linblock "Sourcing 2dx_merge.sub"
+##############################################################################
+##
+#source ${proc_2dx}/2dx_merge_merge_sub.com
+##
+#############################################################################
+${proc_2dx}/linblock "2dx_merge normal end."
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

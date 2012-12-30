@@ -1,9 +1,10 @@
 from __future__ import division
 import sys
 import os 
+from decimal import *
+from operator import attrgetter
 from numpy import * 
-from scipy import stats
-from math import copysign 
+from scipy import stats, special
 no_of_elements = 10
 
 class Reflection:
@@ -34,20 +35,10 @@ class Reflection:
 		self.params['ctf'] = self.ctf
 		self.fom = float(fom)
 		self.params['fom'] = self.fom
-
-
 	
-#	def __init__(self, param_list):
-#		assert len(param_list) >= len(self.param_labels), 'Reflection parameters mssing!'
-#		self.params = {}	
-#		for i in range(len(self.param_labels)):
-#			if i in (0,1,5,6):
-#				value = int(param_list[i])
-#			else:
-#				value = float(param_list[i])
-#			self.params[self.param_labels[i]]=value
-		
-
+	def __repr__(self):
+		return repr((self.h, self.k, self.z, self.amp, self.phase, self.number, self.iq, self.weight, self.background, self.ctf, self.fom))
+	
 	def __str__(self):
 		params_string = ''
 		for key in self.param_labels:
@@ -108,11 +99,12 @@ def parse_aph_file(aph_filepath):
 		for line in aph_file:
 			el = line.split()
 			if len(el) >= no_of_elements:
-				#rint('['+str(line_no)+']\t'+line)
 				r =  Reflection(el[0],el[1],el[2],el[3],el[4],el[5],el[6],el[7],el[8],el[9]);
 				#r =  Reflection(el)
 				reflection_list.append(r)
-				#print(str(r))
+				if line_no < 0:
+					print('['+str(line_no)+']\t'+line)
+					print(str(r))
 				line_no += 1
 
 		return reflection_list
@@ -139,7 +131,7 @@ def scale_amplitudes(r_list, scale):
 
 
 
-def merge_phase(reflections):
+def merge_phase_calc_fom(reflections):
 	combphase = 360.0
 	iq_weights  = [49.00,27.56,8.51,4.17,2.48,1.65,1.17,0.25]
 	if reflections:
@@ -148,7 +140,10 @@ def merge_phase(reflections):
 		sumsin = sum(weights*sin(phase)) 
 		sumcos = sum(weights*cos(phase)) 
 		combphase = degrees(arctan2(sumsin,sumcos))
-	return combphase
+		xarg = sqrt(sumsin**2+sumcos**2)
+		# bessel function 1 and 0
+		fom = 100*(special.iv(1,xarg)/special.iv(0,xarg)) 
+	return (combphase, fom)
  
 
 
@@ -171,9 +166,9 @@ def merge_reflection(reflections):
 		var = sum(weight * ((xi - mu)**2))
 	else:
 		var = 0.0
-	combphase = merge_phase(reflections)
+	(combphase,fom) = merge_phase_calc_fom(reflections)
 	ref = reflections[0];
-	merged = MergedReflection(ref.h, ref.k, int(abs(ref.z)), combamp, combphase, n, var)
+	merged = MergedReflection(ref.h, ref.k, int(abs(ref.z)), combamp, combphase, n, var, fom)
 	return merged
 		#for ref in reflections:
 			#print(str(ref.h)+','+str(ref.k)+'|')
@@ -204,12 +199,13 @@ def merge_reflections(reflection_list, z_max = 0.0025, iq_max = 6, max_amp_corre
 				same_reflection.append(ref)
 		else:
 			no_skipped +=1
-	#print(reflections_by_index.keys())
+	print(sorted(reflections_by_index.keys()))
 	return reflections_by_index
 
 
-def determine_significance(reflections1, reflections2, confidence=1.0):
-	p_threshold = confidence/100.0
+def determine_significance(reflections1, reflections2, confidence=99.0):
+	p_threshold = (100.0-confidence)/100.0
+	#p_threshold = 1.0 
 	ref_no_compared = 0
 	ref_no_significant = 0
 	ref_unmatched = 0
@@ -223,20 +219,32 @@ def determine_significance(reflections1, reflections2, confidence=1.0):
 			#[k2_a, p_normal_a] = stats.mstats.normaltest(a,None)
 			#[k2_b, p_normal_b] = stats.mstats.normaltest(b,None)
 			[t, p] = stats.ttest_ind(a, b, False)
-			if p < p_threshold:
+			if p <= p_threshold:
 				print('p = '+str(p))
 				print('t = '+str(t))
 				merged_reflections1.append(merge_reflection(reflections1[key]))
 				merged_reflections2.append(merge_reflection(reflections2[key]))
 				ref_no_significant += 1
 		else:
-			print('the reflection with index '+str(key)+'is not present in the both coformations')
 			ref_unmatched +=1
-	print('compared reflections: '+str(ref_no_compared)+'\n')
-	print('significant reflections: '+str(ref_no_significant)+'\n')
-	if ref_no_compared > 0:
-		print('percentage of significance: '+str(float(ref_no_significant)/ref_no_compared)+'\n')
-	print('unmatched reflections: '+str(ref_unmatched)+'\n')
+	# addinng unmatched reflections	
+	refs_only_in1 = set(reflections1.keys()) - set(reflections2.keys())
+	print(str(sorted(refs_only_in1)))
+	for key in sorted(refs_only_in1):
+		merged_reflections1.append((merge_reflection(reflections1[key])))
+	refs_only_in2 = set(reflections2.keys()) - set(reflections1.keys())
+	print(str(sorted(refs_only_in2)))
+	for key in sorted(refs_only_in2):
+		merged_reflections2.append((merge_reflection(reflections2[key])))
+		
+	merged_reflections1 = sorted(merged_reflections1,  key=attrgetter('h','k','l'))
+	merged_reflections2 = sorted(merged_reflections2,  key=attrgetter('h','k','l'))
+	for ref in merged_reflections1:
+		print(str(ref))
+	print('unmatched reflections 1: '+str(len(refs_only_in1))+'\n')
+	print('unmatched reflections 1: '+str(ref_unmatched)+'\n')
+	print('unmatched reflections 2: '+str(len(refs_only_in2))+'\n')
+	
 	return [merged_reflections1, merged_reflections2]
 
 
@@ -257,7 +265,7 @@ def avramphs(reflection_list, z_max = 0.0025, iq_max = 6, max_amp_correction = 0
 				ref.ctf = copysign(max_amp_correction, ref.ctf)
 			# same miller index
 			if  (ref.h == h_prev and ref.k == k_prev):
-				same_reflection.append(ref)
+				print('('+str(ref.h)+','+str(ref.k)+')')
 			else:
 				if same_reflection:
 					merged_reflections.append(merge_reflection(same_reflection))
@@ -273,7 +281,7 @@ def write_hkl_file(merged_reflections, filename):
 	with open(filename,'w') as hkl_file:
 		hkl_file.write('      1001\n')
 		for ref in merged_reflections:
-			line= '  {0:4d}  {1:4d}  {2:4d}     {3:8.1f}    {4:8.1f}    {5:8.3f}'.format(ref.h, ref.k, ref.l,ref.amp, ref.phase, ref.fom)
+			line= '  {0:4d}  {1:4d}  {2:4d}     {3:6.6}    {4:6.6}    {5:6.6}'.format(ref.h, ref.k, ref.l,ref.amp, ref.phase, ref.fom)
 			print("%s" % line)
 			hkl_file.write("%s\n" % line)
 
@@ -302,16 +310,17 @@ if __name__ == '__main__':
 	elif no_args == 5:
 		merged_refs1 = merge_reflections(reflection_list1, float(sys.argv[3]),int(sys.argv[4]))
 		merged_refs2 = merge_reflections(reflection_list2, float(sys.argv[3]),int(sys.argv[4]))
-	elif no_args == 6:
+	elif no_args >= 6:
 		merged_refs1 = merge_reflections(reflection_list1, float(sys.argv[3]),int(sys.argv[4]),1.0/float(sys.argv[5]))
 		merged_refs2 = merge_reflections(reflection_list2, float(sys.argv[3]),int(sys.argv[4]),1.0/float(sys.argv[5]))
-	if no_args >= 6: 
+	if no_args > 6: 
 		[sig_refs1, sig_refs2] = determine_significance(merged_refs1, merged_refs2, float(sys.argv[6]))
 	else:
 		[sig_refs1, sig_refs2] = determine_significance(merged_refs1, merged_refs2)
 	hkl_file1 = os.path.join(file_path1,'avrg2D_sig1.hkl')
 	hkl_file2 = os.path.join(file_path1,'avrg2D_sig2.hkl')
 	write_hkl_file(sig_refs1, hkl_file1)	
+	write_hkl_file(sig_refs2, hkl_file2)	
 	#print('reflections: '+str(len(reflection_list)))
 	#print('**************************************************')
 	#print('Merged Reflections Conformation 1 ****************')

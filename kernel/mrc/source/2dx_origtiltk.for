@@ -2069,11 +2069,11 @@ C  Calculate TAXA,TANGL from input values TLTAXIS,TLTANGL.
       ANGB=ATAN2(rlattv1,rlattv2)/DRAD
       IF(ABS(ANGB-ANGA).GT.180.0) ANGB=ANGB-SIGN(360.0,ANGB-ANGA)
 C
+C-----Is this correct????:
       TLTAXA = ATAN(TAN(TAXA*DRAD) / cos(TANGL*DRAD)) / DRAD
 C
 C-----TLTAXA should have the same sign as TAXA
-      if(TLTAXA.lt.0)TLTAXA = -TLTAXA
-      if(TAXA  .lt.0)TLTAXA = -TLTAXA
+      TLTAXA = SIGN(TLTAXA,TAXA)
 C
       TLTAXIS = ANGA-TLTAXA
       if(TLTAXIS.le.-90.0)TLTAXIS=TLTAXIS+180.0
@@ -2081,8 +2081,8 @@ C
       if(TLTAXIS.gt. 90.0)TLTAXIS=TLTAXIS-180.0
       if(TLTAXIS.gt. 90.0)TLTAXIS=TLTAXIS-180.0
 C
-      TLTAXA  = ANGA-TLTAXIS
-      TLTAXB  = ANGB-TLTAXIS
+      TLTAXA = ANGA-TLTAXIS
+      TLTAXB = ANGB-TLTAXIS
       IF(TLTAXB-TLTAXA.GT.0.0) THEN    ! TLTAXB always greater than TLTAXA.
         HAND = 1.0
       ELSE

@@ -2007,11 +2007,9 @@ C
         call shorten(cline1,k)
         if(LOGOUTPUT)then
           write(17,'(''set TANGL = "'',A,''"'')')cline1(1:k)
-          write(17,'(''set DEFOCUS_ACTIVE = 4'')')
         endif
         write(6,'(''new TANGL = "'',A,''"'')')cline1(1:k)
 C
-C        write(2,'(''mrctestangle 1'')')
       endif
 C
       if(LOGOUTPUT)then
@@ -2071,55 +2069,29 @@ C  Calculate TAXA,TANGL from input values TLTAXIS,TLTANGL.
       ANGB=ATAN2(rlattv1,rlattv2)/DRAD
       IF(ABS(ANGB-ANGA).GT.180.0) ANGB=ANGB-SIGN(360.0,ANGB-ANGA)
 C
-C      write(*,'(/,'' ANGA      = '',2F12.3)')ANGA
-C      write(*,'('' ANGB      = '',2F12.3)')ANGB
-C
       TLTAXA = ATAN(TAN(TAXA*DRAD) / cos(TANGL*DRAD)) / DRAD
-C
-C      write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
 C
 C-----TLTAXA should have the same sign as TAXA
       if(TLTAXA.lt.0)TLTAXA = -TLTAXA
       if(TAXA  .lt.0)TLTAXA = -TLTAXA
 C
-C      write(*,'('' TLTAXA = '',F12.3)')TLTAXA
-C
-C  angle between A and B now between -180 and +180 degs.
-C     TLTAXA=ANGA-TLTAXIS
-C     TLTAXB=ANGB-TLTAXIS
-C
       TLTAXIS = ANGA-TLTAXA
-C
-C      write(*,'(/,'' TLTAXIS = '',F12.3)')TLTAXIS
-C
       if(TLTAXIS.le.-90.0)TLTAXIS=TLTAXIS+180.0
       if(TLTAXIS.le.-90.0)TLTAXIS=TLTAXIS+180.0
       if(TLTAXIS.gt. 90.0)TLTAXIS=TLTAXIS-180.0
       if(TLTAXIS.gt. 90.0)TLTAXIS=TLTAXIS-180.0
-C
-C      write(*,'('' TLTAXIS = '',F12.3)')TLTAXIS
 C
       TLTAXA  = ANGA-TLTAXIS
       TLTAXB  = ANGB-TLTAXIS
-C
-C      write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
-C      write(*,'(/,'' TLTAXB = '',F12.3)')TLTAXB
-C
       IF(TLTAXB-TLTAXA.GT.0.0) THEN    ! TLTAXB always greater than TLTAXA.
         HAND = 1.0
       ELSE
         HAND = -1.0
-C
-C-------??? is this correct ??? :
         TLTAXA=-TLTAXA
         TLTAXB=-TLTAXB
-C
       ENDIF
 C
       write(*,'(/,'' HAND   = '',F12.3)')HAND
-C
-C     write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
-C     write(*,'('' TLTAXB = '',F12.3)')TLTAXB
 C
 96    IF(TLTAXA.GE.90.0) THEN
         TLTAXA=TLTAXA-180.0             ! PUTS TLTAXA BETWEEN +/-90.
@@ -2132,9 +2104,6 @@ C
         GO TO 97
       ENDIF
 C
-C      write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
-C      write(*,'('' TLTAXB = '',F12.3)')TLTAXB
-C
 C Now get sign of crystallographic tiltangle.
 C  by first calculating whether A_IS_ABOVE the original TLTAXIS on the film.
 C
@@ -2146,14 +2115,6 @@ C
         AISABOVE =  1.0
       ENDIF
       SIGNTLTAXA = SIGN(1.0,TLTAXA)
-C
-C      write(*,'(/,'' TLTAXIS   = '',F12.3)')TLTAXIS
-C      write(*,'('' ANGA      = '',F12.3)')ANGA
-C      write(*,'('' TLTNORM   = '',F12.3)')TLTNORM
-C      write(*,'('' ANGACOMP  = '',F12.3)')ANGACOMP
-C
-C      write(*,'(/,'' AISABOVE  = '',F12.3)')AISABOVE
-C      write(*,'('' SIGNTLTAXA= '',F12.3)')SIGNTLTAXA
 C
       TLTANG  = (AISABOVE * SIGNTLTAXA * HAND) * TANGL
 C
@@ -2181,20 +2142,17 @@ C     .     ERRMIN,NRESALL
 C  
         write(cline1,'(F9.3)')TLTAXIS
         call shorten(cline1,k)
-        write(17,'(''# set MERGE_TLTAXIS = "'',A,''"'')')
-     .    cline1(1:k)
+        write(17,'(''set MERGE_TLTAXIS = "'',A,''"'')')cline1(1:k)
         write(6,'(''new MERGE_TLTAXIS = "'',A,''"'')')cline1(1:k)
 C
         write(cline1,'(F9.3)')TLTANG
         call shorten(cline1,k)
-        write(17,'(''# set MERGE_TLTANG  = "'',A,''"'')')
-     .    cline1(1:k)
+        write(17,'(''set MERGE_TLTANG  = "'',A,''"'')')cline1(1:k)
         write(6,'(''new MERGE_TLTANG  = "'',A,''"'')')cline1(1:k)
 C
         write(cline1,'(F9.3)')TLTAXA
         call shorten(cline1,k)
-        write(17,'(''# set MERGE_TLTAXA  = "'',A,''"'')')
-     .    cline1(1:k)
+        write(17,'(''set MERGE_TLTAXA  = "'',A,''"'')')cline1(1:k)
         write(6,'(''new MERGE_TLTAXA  = "'',A,''"'')')cline1(1:k)
 C
 C        WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 

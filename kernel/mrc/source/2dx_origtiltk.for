@@ -2105,7 +2105,7 @@ C
 C      write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
 C      write(*,'(/,'' TLTAXB = '',F12.3)')TLTAXB
 C
-      IF(TLTAXB-TLTAXA.GT.0.0) THEN             ! TLTAXB always greater than TLTAXA.
+      IF(TLTAXB-TLTAXA.GT.0.0) THEN    ! TLTAXB always greater than TLTAXA.
         HAND = 1.0
       ELSE
         HAND = -1.0
@@ -2181,19 +2181,19 @@ C     .     ERRMIN,NRESALL
 C  
         write(cline1,'(F9.3)')TLTAXIS
         call shorten(cline1,k)
-        write(17,'(''# not yet set MERGE_TLTAXIS = "'',A,''"'')')
+        write(17,'(''# set MERGE_TLTAXIS = "'',A,''"'')')
      .    cline1(1:k)
         write(6,'(''new MERGE_TLTAXIS = "'',A,''"'')')cline1(1:k)
 C
         write(cline1,'(F9.3)')TLTANG
         call shorten(cline1,k)
-        write(17,'(''# not yet set MERGE_TLTANG  = "'',A,''"'')')
+        write(17,'(''# set MERGE_TLTANG  = "'',A,''"'')')
      .    cline1(1:k)
         write(6,'(''new MERGE_TLTANG  = "'',A,''"'')')cline1(1:k)
 C
         write(cline1,'(F9.3)')TLTAXA
         call shorten(cline1,k)
-        write(17,'(''# not yet set MERGE_TLTAXA  = "'',A,''"'')')
+        write(17,'(''# set MERGE_TLTAXA  = "'',A,''"'')')
      .    cline1(1:k)
         write(6,'(''new MERGE_TLTAXA  = "'',A,''"'')')cline1(1:k)
 C

@@ -2070,7 +2070,7 @@ C  Calculate TAXA,TANGL from input values TLTAXIS,TLTANGL.
       IF(ABS(ANGB-ANGA).GT.180.0) ANGB=ANGB-SIGN(360.0,ANGB-ANGA)
 C
 C-----Is this correct????:
-      TLTAXA = ATAN(TAN(TAXA*DRAD) / cos(TANGL*DRAD)) / DRAD
+      TLTAXA = ASIN(SIN(TAXA*DRAD) * COS(TANGL*DRAD)) / DRAD
 C
 C-----TLTAXA should have the same sign as TAXA
       TLTAXA = SIGN(TLTAXA,TAXA)

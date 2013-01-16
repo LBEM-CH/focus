@@ -501,7 +501,7 @@ if ( ${rotate_to_Z} == "yes" ) then
   \rm -f SCRATCH/merge2D.mtz
   ${bin_ccp4}/f2mtz hklin SCRATCH/TMP-permutated.hkl hklout SCRATCH/merge2D.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
-CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 ${realang}
+CELL ${celly} ${ALAT} ${cellx} 90.0 ${realang} 90.0
 SYMMETRY ${CCP4_SYM}
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}

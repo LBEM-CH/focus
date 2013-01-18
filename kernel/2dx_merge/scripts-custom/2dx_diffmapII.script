@@ -682,7 +682,7 @@ eot
 ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #############################################################################
 #
-python ~/code/2dx/trunk/proc/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc
+python ${proc_2dx}/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc
 #
 #
 ##############################################################################

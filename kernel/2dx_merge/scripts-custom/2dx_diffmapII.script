@@ -354,7 +354,7 @@ eot
 #
 #echo "# IMAGE: APH/sym2D_${map1}.hkl <map1 APH after symmetrization [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
 #
-if ( ! -e APH/sym2D_${map1}_sig.hkl ) then
+if ( ! -e APH/sym2D_${map1}.hkl ) then
   ${proc_2dx}/protest "ERROR occured."
 endif
 #

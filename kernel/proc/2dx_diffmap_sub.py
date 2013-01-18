@@ -142,7 +142,14 @@ def merge_phase_calc_fom(reflections):
 		combphase = degrees(arctan2(sumsin,sumcos))
 		xarg = sqrt(sumsin**2+sumcos**2)
 		# bessel function 1 and 0
-		fom = 100*(special.iv(1,xarg)/special.iv(0,xarg)) 
+		bessel_0 = special.iv(0,xarg)
+		bessel_1 = special.iv(1,xarg)
+		#print('bessel functions for xarg = '+str(xarg)+ ', iv_0= '+str(bessel_0)+' iv_1= '+str(bessel_1))
+		if isfinite(bessel_0) and isfinite(bessel_1):
+			fom = 100.0*(bessel_1/bessel_0)
+		else:
+			sigma = sqrt(1.0/xarg)
+			fom = 100.0*cos(sigma)
 	return (combphase, fom)
  
 
@@ -239,11 +246,11 @@ def determine_significance(reflections1, reflections2, confidence=99.0):
 		
 	merged_reflections1 = sorted(merged_reflections1,  key=attrgetter('h','k','l'))
 	merged_reflections2 = sorted(merged_reflections2,  key=attrgetter('h','k','l'))
-	for ref in merged_reflections1:
-		print(str(ref))
-	print('unmatched reflections 1: '+str(len(refs_only_in1))+'\n')
-	print('unmatched reflections 1: '+str(ref_unmatched)+'\n')
-	print('unmatched reflections 2: '+str(len(refs_only_in2))+'\n')
+	#for ref in merged_reflections1:
+	#	print(str(ref))
+	#print('unmatched reflections 1: '+str(len(refs_only_in1))+'\n')
+	#print('unmatched reflections 1: '+str(ref_unmatched)+'\n')
+	#print('unmatched reflections 2: '+str(len(refs_only_in2))+'\n')
 	
 	return [merged_reflections1, merged_reflections2]
 
@@ -281,7 +288,7 @@ def write_hkl_file(merged_reflections, filename):
 	with open(filename,'w') as hkl_file:
 		hkl_file.write('      1001\n')
 		for ref in merged_reflections:
-			line= '  {0:4d}  {1:4d}  {2:4d}     {3:6.6}    {4:6.6}    {5:6.6}'.format(ref.h, ref.k, ref.l,ref.amp, ref.phase, ref.fom)
+			line= '  {0:4d}  {1:4d}  {2:4d}     {3:6.6}    {4:6.6}    {5:2.4F}'.format(ref.h, ref.k, ref.l,ref.amp, ref.phase, ref.fom)
 			print("%s" % line)
 			hkl_file.write("%s\n" % line)
 

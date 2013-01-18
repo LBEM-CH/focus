@@ -233,7 +233,7 @@ echo "<<@progress: 24>>"
 ${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D.log
 T
 1001,${zminmaxlocal}
-8
+${MergeIQMAX}
 ${avrgamphsNUMBER}
 ${avrgamphsRESlocal}
 ${realcell} ${realang}

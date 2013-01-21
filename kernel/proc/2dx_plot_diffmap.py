@@ -5,6 +5,7 @@ import array
 import numpy as np
 import scipy.misc
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 import matplotlib.pylab as plab
 
 class MRCImage:
@@ -144,17 +145,21 @@ def plotImage(mrcImage):
 	plt.imshow(image)
 	return image
 
-def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2):
+
+def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2, mapName1="map1", mapName2="map2"):
 	contour = mrcImage1.image
 	image1 = mrcDiff1.image
 	image2 = mrcDiff2.image
 	diffmap = image1-image2
-	title = mrcDiff1.name+' - '+mrcDiff2.name
-	filename = mrcDiff1.name+'-'+mrcDiff2.name+'.pdf'
+	max_range = max(diffmap.max(),abs(diffmap.min()))
+	norm = colors.Normalize(vmin=-max_range, vmax=max_range) 
+	print('max_range is '+str(max_range))
+	title = mapName1+' - '+mapName2
+	filename = title+'.pdf'
 	fig = plt.figure()
 	plt.title(title)
 	plt.hold(True)
-	plt.imshow(diffmap,origin='lower')
+	plt.imshow(diffmap, origin='upper', norm=norm)
 	plt.colorbar()
 	plt.contour(contour, [0])
 	plt.hold(False)
@@ -184,7 +189,10 @@ if __name__ == '__main__':
 	saveImage(im1sig)
 	#plotImage(im2sig)
 	saveImage(im2sig)
-	plotDiffmap(im1,im1sig,im2sig)
+	if no_args < 6:
+		plotDiffmap(im1,im1sig,im2sig)
+	else:
+		plotDiffmap(im1,im1sig,im2sig, sys.argv[4], sys.argv[5])
 	plt.show()
 
 	

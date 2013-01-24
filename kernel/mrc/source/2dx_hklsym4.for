@@ -255,21 +255,51 @@ C               H=                                 -k +k -k +k     JSCREW
 C               K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180
 C               K=                     -k +k -k +k                         JK180
 
-        call ROUTF(ROUTP,IOUTP,-H  ,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(1,ispc))
-        call ROUTF(ROUTP,IOUTP, H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(2,ispc))
-        call ROUTF(ROUTP,IOUTP,-H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(3,ispc))
-        call ROUTF(ROUTP,IOUTP,   K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(4,ispc))
-        call ROUTF(ROUTP,IOUTP,   K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(5,ispc))
-        call ROUTF(ROUTP,IOUTP,  -K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(6,ispc))
-        call ROUTF(ROUTP,IOUTP,  -K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(7,ispc))
-        call ROUTF(ROUTP,IOUTP, H  ,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(8,ispc))
-        call ROUTF(ROUTP,IOUTP,-H  , H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(9,ispc))
-        call ROUTF(ROUTP,IOUTP,   K,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(10,ispc))
-        call ROUTF(ROUTP,IOUTP,  -K, H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(11,ispc))
-        call ROUTF(ROUTP,IOUTP,-H-K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(12,ispc))
-        call ROUTF(ROUTP,IOUTP, H+K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(13,ispc))
-        call ROUTF(ROUTP,IOUTP,-H-K,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(14,ispc))
-        call ROUTF(ROUTP,IOUTP, H+K,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(15,ispc))
+        if(ISYMFIELD(1,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,-H  ,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(1,ispc))
+        endif
+        if(ISYMFIELD(2,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP, H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(2,ispc))
+        endif
+        if(ISYMFIELD(3,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,-H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(3,ispc))
+        endif
+        if(ISYMFIELD(4,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,   K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(4,ispc))
+        endif
+        if(ISYMFIELD(5,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,   K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(5,ispc))
+        endif
+        if(ISYMFIELD(6,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,  -K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(6,ispc))
+        endif
+        if(ISYMFIELD(7,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,  -K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(7,ispc))
+        endif
+        if(ISYMFIELD(8,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP, H  ,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(8,ispc))
+        endif
+        if(ISYMFIELD(9,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,-H  , H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(9,ispc))
+        endif
+        if(ISYMFIELD(10,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,   K,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(10,ispc))
+        endif
+        if(ISYMFIELD(11,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,  -K, H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(11,ispc))
+        endif
+        if(ISYMFIELD(12,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,-H-K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(12,ispc))
+        endif
+        if(ISYMFIELD(13,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP, H+K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(13,ispc))
+        endif
+        if(ISYMFIELD(14,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP,-H-K,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(14,ispc))
+        endif
+        if(ISYMFIELD(15,ispc).gt.0) then
+                call ROUTF(ROUTP,IOUTP, H+K,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(15,ispc))
+        endif
 C
       goto 1000
 C
@@ -298,7 +328,7 @@ C-----------Test, if this reflection was present
             IFILL=IOUTP(H,K,L)
 C
 C-----------output only for right half of Fourier plane (and top half of H=0 line):
-            if(H.gt.0.or.K.ge.0)then
+            if(H.gt.0.or. (H.eq.0. and.K.gt.0))then
                 if(IFILL.gt.0)then
 C        
 C                       1 = sum of amplitudes
@@ -349,6 +379,7 @@ C
                       ELSE
                         FOM=WT * 100.0
                       END IF
+
 C        
 C                      write(6,'(''::H,K,L,XARG,R1,R2,FOM '',3I5,4G18.6)')H,K,L,XARG,R1,R2,FOM
 C        
@@ -520,6 +551,15 @@ C
 C
       PX=cos(RPT)*XARG
       PY=sin(RPT)*XARG
+C#DEBUG
+C      if(abs(PX).lt.0.1 .and. abs(PY).lt.0.1) then
+C        write(*,'(''::PX and PY are both 0: '',2G18.6,'', for H,K,L= '',3I6)')PX,PY,H,K,L
+C        write(*,'(''::XARG = '',G18.6,'',FOM = '',G18.6,'', PHASE = '',G18.6)')XARG,FOM,PHASE
+C      endif 
+C      if(H.eq.1 .and. K.eq.-1) then
+C        write(*,'(''::[H=1,K=-1] AMP = '',G18.6,'', for PHASE= '',3G18.6)')AMP,PHASE,PX,PY
+C      endif
+C#DEBUG
 C
 C-----Store AMP and PHASE
       ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + AMP
@@ -532,9 +572,9 @@ C-----Also fill Friedel symmetric spots:
       ROUTP(-H,-K,-L,1) = ROUTP(-H,-K,-L,1) + AMP
       ROUTP(-H,-K,-L,2) = ROUTP(-H,-K,-L,2) + PX
       ROUTP(-H,-K,-L,3) = ROUTP(-H,-K,-L,3) - PY
-C
+
       IOUTP(-H,-K,-L) = IOUTP(-H,-K,-L) + 1
-C
+
       RETURN
 C
       END

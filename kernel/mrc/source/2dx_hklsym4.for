@@ -1,12 +1,12 @@
       PROGRAM HKLSYM4
 
-C       Henning Stahlberg, 16.5.2000
+C       Henning Stahlberg, 16.5.2000 
+C       Marcel Arheit,     28.1.2013 
 C       updated 10/29/2012
 C
 C-----I am thankful to Richard Henderson for detailed and very patient
 C-----explanations on how to deal with SNR, IQ, FOM, weights, and XARG.
 C-----Henning, Oct. 29, 2012. 
-
       IMPLICIT NONE
 C
       INTEGER MAXSPOT
@@ -23,15 +23,19 @@ C
       CHARACTER*200  TITLE 
       CHARACTER*200 cline1,cline2,cline3,cline4
       INTEGER H,K,L,i1sig,icount,ihmax,ikmax,ilmax,ineg,isig
-      INTEGER iheader,inum,iwasym,N,ispc
+      INTEGER iheader,inum,iwasym,N,ispc,isymop
       INTEGER IFILL
       INTEGER IFAIL,JFAIL
       REAL AMP,PHASE,FOM,SIGA,BACK,PI,PX,PY,PHERR
       REAL WGTSUM,AMPSUM
       REAL SIGMA,WT,R1,R2,SNRX,SNRY,FOM100SNR
       REAL*8 XARG,S18AEF,S18AFF
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,3)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
+      REAL RFAMP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      REAL RFPHASE(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      REAL RFFOM(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      LOGICAL ININDEX(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
 C
       COMMON // isig
 C
@@ -105,9 +109,14 @@ C
      . 0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,
      . 0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0  /
 C
-      DATA ROUTP /NFIELD*0.0/
-      DATA IOUTP /MFIELD*0/
 C
+      ININDEX(:,:,:) = .FALSE.       
+      ROUTP(:,:,:,5) = 0.0
+      RFAMP(:,:,:) = 0.0
+      RFPHASE(:,:,:) = 0.0
+      RFFOM(:,:,:) = 0.0
+      ININDEX(:,:,:) = 0
+C      
       PI=3.1415926537
 C
       WRITE(*,'('': 2dx_hklsym4, to symmetrize an APH file '')')
@@ -245,63 +254,13 @@ C
 C
 C-------Place this reflection into the ROUTP field:
 C
+        RFAMP(H,K,L)=AMP 
+        RFPHASE(H,K,L)=PHASE
+        RFFOM(H,K,L)=FOM
+        ININDEX(H,K,L)=.TRUE.
         call ROUTF(ROUTP,IOUTP, H  ,   K, L,AMP,PHASE,BACK,FOM,SIGA,1)
 C
-C-------And place also the symmetry-related reflections for this one into ROUTF:
-C
-C-------Below is an implementation of the ALLSPACE table, using:
-C               H=-h +h -h +k +k -k -k +h -h +k -k -h +h -h +h  JSIMPL
-C               H=                                 -k +k -k +k     JSCREW
-C               K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180
-C               K=                     -k +k -k +k                         JK180
-
-        if(ISYMFIELD(1,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,-H  ,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(1,ispc))
-        endif
-        if(ISYMFIELD(2,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP, H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(2,ispc))
-        endif
-        if(ISYMFIELD(3,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,-H  ,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(3,ispc))
-        endif
-        if(ISYMFIELD(4,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,   K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(4,ispc))
-        endif
-        if(ISYMFIELD(5,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,   K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(5,ispc))
-        endif
-        if(ISYMFIELD(6,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,  -K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(6,ispc))
-        endif
-        if(ISYMFIELD(7,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,  -K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(7,ispc))
-        endif
-        if(ISYMFIELD(8,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP, H  ,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(8,ispc))
-        endif
-        if(ISYMFIELD(9,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,-H  , H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(9,ispc))
-        endif
-        if(ISYMFIELD(10,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,   K,-H-K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(10,ispc))
-        endif
-        if(ISYMFIELD(11,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,  -K, H+K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(11,ispc))
-        endif
-        if(ISYMFIELD(12,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,-H-K, H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(12,ispc))
-        endif
-        if(ISYMFIELD(13,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP, H+K,-H  , L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(13,ispc))
-        endif
-        if(ISYMFIELD(14,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP,-H-K,   K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(14,ispc))
-        endif
-        if(ISYMFIELD(15,ispc).gt.0) then
-                call ROUTF(ROUTP,IOUTP, H+K,  -K, L,AMP,PHASE,BACK,FOM,SIGA,ISYMFIELD(15,ispc))
-        endif
-C
-      goto 1000
+        goto 1000
 C
  1005 continue
 C
@@ -312,6 +271,20 @@ C
       write(*,'('':Read '',I8,'' reflections.'')')icount
       write(*,'('':H,K,L max = '',3I8)')ihmax,ikmax,ilmax
 C
+C
+C-------And place also the symmetry-related reflections for this one into ROUTF:
+C
+C-------Below we go through all symmery opperation (isymop) for the according space group
+C       and check in the table ISYMFIELD if it is applicable
+C
+      do isymop=1,15
+        if(ISYMFIELD(isymop,ispc).gt.0) then
+                call SYMMETRIZE(RFAMP,RFPHASE,RFFOM,ROUTP,IOUTP,ININDEX,
+     .                          ihmax,ikmax,ilmax,isymop,ISYMFIELD(isymop,ispc))
+        endif
+      enddo
+
+
 C================================================================================
 C================================================================================
 C==== Input file is now read in. Now output section.
@@ -380,7 +353,7 @@ C
                         FOM=WT * 100.0
                       END IF
 
-C        
+        
 C                      write(6,'(''::H,K,L,XARG,R1,R2,FOM '',3I5,4G18.6)')H,K,L,XARG,R1,R2,FOM
 C        
 C        -------------QFACTOR is the length of the vector addition of all vector phases, 
@@ -469,6 +442,53 @@ C
 C
 C==========================================================
 C
+C
+      SUBROUTINE SYMMETRIZE(RFAMP,RFPHASE,RFFOM,ROUTP,IOUTP,ININDEX,ihmax,ikmax,ilmax,isymop,ISHIFT)
+C
+C 
+C-----Iterate over all possible reflection
+C
+      IMPLICIT NONE
+      INTEGER MAXSPOT
+      PARAMETER (MAXSPOT = 100)
+C
+      INTEGER H,K,L,HMOD,KMOD,LMOD,ihmax,ikmax,ilmax
+      INTEGER ISHIFT,IMAXSPOT
+      INTEGER isymop
+      REAL AMP,PHASE,BACK,FOM,SIGA
+      REAL RFAMP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      REAL RFPHASE(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      REAL RFFOM(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,3)
+      INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+      LOGICAL ININDEX(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
+C
+
+      do H=-ihmax,ihmax
+        do K=-ikmax,ikmax
+          do L=-ilmax,ilmax
+                if(ININDEX(H,K,L)) then
+                  AMP = RFAMP(H,K,L)
+                  PHASE = RFPHASE(H,K,L)
+                  FOM = RFFOM(H,K,L)
+C---------------  TODO: get  BACK and SIGA from the file
+                  BACK=0.0
+                  SIGA=1.0
+                  HMOD=H
+                  KMOD=K
+                  LMOD=L
+
+                  call GETINDEX(HMOD,KMOD,LMOD,isymop)
+                  call ROUTF(ROUTP,IOUTP,HMOD,KMOD,LMOD,AMP,PHASE,BACK,FOM,SIGA,ISHIFT)
+                endif
+          enddo
+        enddo
+      enddo
+      RETURN
+      END
+C
+C==========================================================
+C
       SUBROUTINE ROUTF(ROUTP,IOUTP,H,K,L,AMP,PHASE,BACK,FOM,SIGA,ISHIFT)
 C
 C fill in the AMP,PHASE,BACK,FOM,SIGA into ROUTP field
@@ -512,7 +532,7 @@ C
       REAL AMP,PHASE,BACK,FOM,SIGA,PX,PY,RPT,PI
       REAL PAMPX,PAMPY,SNR
       REAL RAMP,RBACK,RFOM,RSIGA,AMPWGT,PHSWGT,XARG
-      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,3)
+      REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
       INTEGER IOUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT)
 C
       COMMON // isig
@@ -551,20 +571,13 @@ C
 C
       PX=cos(RPT)*XARG
       PY=sin(RPT)*XARG
-C#DEBUG
-C      if(abs(PX).lt.0.1 .and. abs(PY).lt.0.1) then
-C        write(*,'(''::PX and PY are both 0: '',2G18.6,'', for H,K,L= '',3I6)')PX,PY,H,K,L
-C        write(*,'(''::XARG = '',G18.6,'',FOM = '',G18.6,'', PHASE = '',G18.6)')XARG,FOM,PHASE
-C      endif 
-C      if(H.eq.1 .and. K.eq.-1) then
-C        write(*,'(''::[H=1,K=-1] AMP = '',G18.6,'', for PHASE= '',3G18.6)')AMP,PHASE,PX,PY
-C      endif
-C#DEBUG
 C
 C-----Store AMP and PHASE
       ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + AMP
       ROUTP( H, K, L,2) = ROUTP( H, K, L,2) + PX
       ROUTP( H, K, L,3) = ROUTP( H, K, L,3) + PY
+      ROUTP( H, K, L,4) = ROUTP( H, K, L,4) + PHASE
+      ROUTP( H, K, L,5) = ROUTP( H, K, L,5) + FOM
 C
       IOUTP( H, K, L) = IOUTP( H, K, L) + 1
 C
@@ -572,6 +585,8 @@ C-----Also fill Friedel symmetric spots:
       ROUTP(-H,-K,-L,1) = ROUTP(-H,-K,-L,1) + AMP
       ROUTP(-H,-K,-L,2) = ROUTP(-H,-K,-L,2) + PX
       ROUTP(-H,-K,-L,3) = ROUTP(-H,-K,-L,3) - PY
+      ROUTP(-H,-K,-L,4) = ROUTP(-H,-K,-L,4) - PHASE
+      ROUTP(-H,-K,-L,5) = ROUTP(-H,-K,-L,5) + FOM
 
       IOUTP(-H,-K,-L) = IOUTP(-H,-K,-L) + 1
 
@@ -841,4 +856,98 @@ C
       RETURN
       END
 C
+C
+C==========================================================
+C
+      SUBROUTINE GETINDEX(H,K,L,ISHIFT)
+C
+C----- returns the modified miller index according to the 
+C      symmetry operation.
+C
+C-------Below is a matrix hodling how the miller index of the reflection has to  
+C       be modfied for the symmetry opperation accosiated with the plane group.
+C       This is taken from the program ALLSPACE:
+C               H=-h +h -h +k +k -k -k +h -h +k -k -h +h -h +h  JSIMPL
+C               H=                                 -k +k -k +k     JSCREW
+C               K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180
+C               K=                     -k +k -k +k                         JK180
+C
+C
+C
+      INTEGER SYMINDEX(15,2)
+      DATA SYMINDEX / 
+     . -1, 1,-1, 2, 2,-2,-2, 1,-1, 2,-2,-3, 3,-3 ,3,
+     .  2,-2,-2, 1,-1, 1,-1,-3, 3,-3, 3, 1,-1, 2,-2 /
+      INTEGER H, K, HMOD, KMOD
+C
+C-----modify the H index
+      HMOD = SYMINDEX(ISHIFT,1)
+      if(abs(HMOD).eq.1) then
+        H=H * sign(1,HMOD)
+      else if(abs(HMOD).eq.2) then
+        H=K * sign(1,HMOD)
+      else
+        H=(H+K) * sign(1,HMOD)
+      endif
+C
+C-----modify the K index
+      KMOD = SYMINDEX(ISHIFT,2)
+      if(abs(KMOD).eq.1) then
+        K=H * sign(1,KMOD)
+      else if(abs(KMOD).eq.2) then
+        K=K * sign(1,KMOD)
+      else
+        K=(H+K) * sign(1,KMOD)
+      endif
+
+C      write(*,'('':HMOD, KMOD = '',2I8)')HMOD,KMOD
+C-----L stays the same
+      
+      RETURN
+C
+      END
+C
+C==========================================================
+C
+C-----reflection_list declaration
+      MODULE DYNAMIC_LIST
+
+      IMPLICIT NONE
+
+      type REFLECTION_TYPE
+C        INTEGER, DIMENSION(3), allocatable :: MINDEX
+         INTEGER, allocatable :: MINDEX(:)
+      end type
+C
+      type LIST_TYPE
+        integer :: n
+        type(REFLECTION_TYPE),allocatable :: REFLECTION(:)
+      end type
+       
+      CONTAINS
+
+      SUBROUTINE APPEND(LIST,REF)
+        type(LIST_TYPE),intent(inout) :: LIST
+        INTEGER, DIMENSION(3) :: REF 
+        type(REFLECTION_TYPE), allocatable :: temporary(:)
+        INTEGER :: i
+        if(.not.allocated(LIST%REFLECTION)) then
+          allocate(LIST%REFLECTION(10))
+          LIST%n=0
+        else if(LIST%n >= size(LIST%REFLECTION)) then
+          allocate(temporary(2*LIST%n))
+          do i=1,LIST%n
+            call move_alloc(LIST%REFLECTION(i)%MINDEX,temporary(i)%MINDEX)
+          enddo
+          call move_alloc(temporary,LIST%REFLECTION)
+        endif
+        
+        LIST%n=LIST%n+1
+        allocate(LIST%REFLECTION(LIST%n)%MINDEX(size(REF)))
+        LIST%REFLECTION(LIST%n)%MINDEX=REF
+      
+      END
+
+      END MODULE     
+
 

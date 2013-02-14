@@ -2097,12 +2097,14 @@ C
 C
       write(*,'(/,'' HAND   = '',F12.3)')HAND
 C
-96    IF(TLTAXA.GE.90.0) THEN
+96    continue
+      IF(TLTAXA.GE.90.0) THEN
         TLTAXA=TLTAXA-180.0             ! PUTS TLTAXA BETWEEN +/-90.
         TLTAXB=TLTAXB-180.0
         GO TO 96
       ENDIF
-97    IF(TLTAXA.LE.-90.0) THEN
+97    continue
+      IF(TLTAXA.LE.-90.0) THEN
         TLTAXA=TLTAXA+180.0             ! PUTS TLTAXA BETWEEN +/-90.
         TLTAXB=TLTAXB+180.0
         GO TO 97

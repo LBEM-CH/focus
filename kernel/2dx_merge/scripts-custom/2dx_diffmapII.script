@@ -647,7 +647,7 @@ eot
 echo "# IMAGE-IMPORTANT: ${map1}_sig.mrc <significant map 1>" >> LOGS/${scriptname}.results
 #
 # sigmap2
-\rm -f ${diff_map1_name}.mrc
+\rm -f ${map2}_sig.mrc
 #
 ${bin_2dx}/labelh.exe << eot
 ${map2}_sig.map 
@@ -662,7 +662,7 @@ echo "# IMAGE-IMPORTANT: ${map2}_sig.mrc <significant map 2>" >> LOGS/${scriptna
 #############################################################################
 ${proc_2dx}/linblock "labelh - to transform the map into BYTE format with automatic scaling"
 #############################################################################
-#
+
 ${bin_2dx}/labelh.exe << eot
 ${map1}.mrc
 -3
@@ -680,7 +680,7 @@ ${map2}_sig.mrc
 -3
 SCRATCH/${map2}_sig.mrc
 eot
-#
+
 #############################################################################
 ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #############################################################################

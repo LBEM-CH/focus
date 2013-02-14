@@ -16,6 +16,7 @@ __license__ = "GNU GENERAL PUBLIC LICENSE (GPL) Version 2"
 import os
 import sys
 from math import copysign
+from copy import copy
 from collections import defaultdict
 import diffmap 
 
@@ -208,7 +209,10 @@ class Symmetry(dict):
         "symmetrize all reflections according the symmetry operation"
         for index in sorted(reflections.keys()):
             sym_index = self.modify_miller_index(index,sym_op)
-            self.__add_sym_reflection(sym_index,sym_op,reflections[index])
+            # copy of the reflection list gto not modify the original
+            # reflections
+            idx_reflections = reflections[index][:]
+            self.__add_sym_reflection(sym_index,sym_op,idx_reflections)
             #print(str(key)+" -> "+str(sym_index))
 
     def modify_miller_index(self, index, sym_op):
@@ -238,8 +242,9 @@ class Symmetry(dict):
         sym_idx_reflections = []
         for ref in idx_reflections:
             #TODO: ucomment this for symmetrization
-            #ref.phase = (ref.phase + phase_change) % 360.0
-            sym_idx_reflections.append(ref)
+            new_ref = copy(ref)
+            new_ref.phase = (ref.phase + phase_change) % 360.0
+            sym_idx_reflections.append(new_ref)
         self.__add_reflection(h,k,l,sym_idx_reflections)
         return sym_idx_reflections 
             

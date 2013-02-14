@@ -204,7 +204,7 @@ echo "# IMAGE: APH/avrg2D_${map1}.hkl <map1  averaged amp&phs for FOM [H,K,F,P,I
 # map2
 #
 \rm -f fort.1
-\cp -f APH/merge.aph fort.1
+\cp -f ${diff_map2_dir}/merge/APH/merge.aph fort.1
 echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
 \rm -f fort.2
 \rm -f APH/avrg2D_${map2}.hkl
@@ -217,7 +217,7 @@ echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >>
 ${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map2}.log
 T
 1001,${zminmaxlocal}
-8
+${MergeIQMAX}
 ${avrgamphsNUMBER}
 ${avrgamphsRESOL}
 ${realcell} ${realang}
@@ -243,7 +243,7 @@ ${proc_2dx}/linblock "2dx_diffmap_sub - avrgamphs with t-test"
 #
 echo "<<@progress: 24>>"
 #
-python ${proc_2dx}/2dx_diffmap_sub.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${diff_map_confidence}
+python ${bin_2dx}/diffmap/2dx_diffmap_sub.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
 #
 echo "# IMAGE-IMPORTANT: APH/avrg2D_sig1.hkl <map1 significant reflections [H,K,Z,A,P,FOM]>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: APH/avrg2D_sig2.hkl <map2 significant reflections [H,K,Z,A,P,FOM]>" >> LOGS/${scriptname}.results
@@ -342,7 +342,7 @@ ${bin_2dx}/2dx_hklsym4.exe << eot
 APH/centric2D_${map1}.hkl
 APH/sym_nosort2D_${map1}.hkl
 APH/sym2D_${map1}.hkl
-1     ! ${spcgrp}
+${spcgrp}
 1
 ${isig}
 0     ! write out full p1 plane
@@ -368,7 +368,7 @@ ${bin_2dx}/2dx_hklsym4.exe << eot
 APH/centric2D_${map1}_sig.hkl
 APH/sym_nosort2D_${map1}_sig.hkl
 APH/sym2D_${map1}_sig.hkl
-1     ! ${spcgrp}
+${spcgrp}
 1
 ${isig}
 0     ! write out full p1 plane
@@ -391,7 +391,7 @@ ${bin_2dx}/2dx_hklsym4.exe << eot
 APH/centric2D_${map2}_sig.hkl
 APH/sym_nosort2D_${map2}_sig.hkl
 APH/sym2D_${map2}_sig.hkl
-1     ! ${spcgrp}
+${spcgrp}
 1
 ${isig}
 0     ! write out full p1 plane
@@ -418,9 +418,9 @@ set outfile = SCRATCH/${map1}.mtz
 \rm -f SCRATCH/${map1}.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
-TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
+TITLE  Map, Symmetry=${CCP4_SYM}, ${map1} , ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
+SYMMETRY 1 
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}
 FILE ${infile}
@@ -439,13 +439,15 @@ eot
 #
 # sigmap1
 set infile = APH/sym2D_${map1}_sig.hkl
+#set infile = APH/sym2D_sig1.hkl
+#set infile = APH/sym_sig.hkl
 set outfile = SCRATCH/${map1}_sig.mtz
 \rm -f SCRATCH/${map1}_sig.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
-TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
+TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map1_name} , ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
+SYMMETRY 1 
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}
 FILE ${infile}
@@ -464,13 +466,14 @@ eot
 #
 # sigmap2
 set infile = APH/sym2D_${map2}_sig.hkl
+#set infile = APH/sym2D_sig2.hkl
 set outfile = SCRATCH/${map2}_sig.mtz
 \rm -f SCRATCH/${map2}_sig.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
+SYMMETRY 1
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}
 FILE ${infile}
@@ -488,7 +491,7 @@ end
 eot
 #
 echo "# IMAGE-IMPORTANT: ${map1}_sig.mtz <MTZ: map 1 merged full 2D data>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${map2}_sig.mtz <MTZ: map 1 merged full 2D data>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${map2}_sig.mtz <MTZ: map 2 merged full 2D data>" >> LOGS/${scriptname}.results
 #
 ##############################################################################
 ${proc_2dx}/linblock  "Inverse fft to get map" 

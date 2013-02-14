@@ -171,16 +171,6 @@ foreach(i ${C_SOURCE})
 	list(APPEND EXECUTABLES ${EXECUTABLE})
 endforeach(i ${C_SOURCE})
 
-###############################################################################
-# sub directories -------------------------------------------------------------
-add_subdirectory(periodogram)
-add_subdirectory(peaksearch)
-add_subdirectory(2dx_getlat)
-add_subdirectory(endianness)
-add_subdirectory(ctf)
-add_subdirectory(maximum_likelihood)
-
-
 
 ###############################################################################
 # Installation  ---------------------------------------------------------------
@@ -192,12 +182,21 @@ else(INSTALL_SRC_DIR)
 	set(INSTALL_SRC_DIR kernel/mrc/${DIRECTORY})
 endif(INSTALL_SRC_DIR)
 
-if(NOT INSTALL_BIN_DIR)
-	set(INSTALL_BIN_DIR kernel/mrc/bin)
-endif(NOT INSTALL_BIN_DIR)
+set(INSTALL_BIN_DIR kernel/mrc/bin)
 
 # sources
 install(FILES ${SOURCES} DESTINATION ${INSTALL_SRC_DIR})
 # executables
 install(TARGETS ${EXECUTABLES} DESTINATION ${INSTALL_BIN_DIR})
+###############################################################################
+# sub directories -------------------------------------------------------------
+add_subdirectory(periodogram)
+add_subdirectory(peaksearch)
+add_subdirectory(2dx_getlat)
+add_subdirectory(endianness)
+add_subdirectory(ctf)
+add_subdirectory(maximum_likelihood)
+add_subdirectory(diffmap)
+
+
 ###############################################################################

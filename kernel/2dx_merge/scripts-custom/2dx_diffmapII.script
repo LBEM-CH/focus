@@ -111,6 +111,12 @@ if ( ! -d ${diff_map2_dir} ) then
     ${proc_2dx}/protest "The diffmap2 project directory does not exist: ${diff_map2_dir}"
  endif
 #
+set map1 = "map1"
+set map2 = "map2"
+# get the unit cell size of the 2nd map 
+set realcell_map2 = `grep " realcell[ =]"  ${diff_map2_dir}/merge/2dx_merge.cfg  | grep "set" | awk '{print $4}' |  sed 's/"/ /g'`
+echo ": real cell ${map2}: ${realcell_map2}"
+#
 if ( ${Calc_from_zstarrange} == "y" ) then
   set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
   echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
@@ -121,11 +127,10 @@ else
   ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
 endif
 #
-set map1 = "map1"
-set map2 = "map2"
 set zmin = `echo ${zstarrange} | awk '{s = -$1} END {print s}'`
 set zminmax = `echo ${zmin},${zstarrange}`
 echo zminmax = ${zminmax}
+#
 #
 echo "<<@progress: 1>>"
 #
@@ -158,8 +163,21 @@ source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
 #
+############################################################################# 
+${proc_2dx}/lin "comparing the unit cells size of both maps"
 #############################################################################
-${proc_2dx}/linblock "2dx_avrgamphs - onlt to calculate FOM"
+#
+set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1  } END { print s }'`
+set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2  } END { print s }'`
+set realcell_map2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = $1  } END { print s }'`
+set realcell_map2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = $2  } END { print s }'`
+set unitcell_equal = `echo ${realcell_a} ${realcell_map2_a} ${realcell_b}  ${realcell_map2_b} | awk '{ if( int($1)==int($2) && int($3)==int($4) ) {print 1} else {print 0}}'`
+if( ${unitcell_equal} == 0 ) then
+    echo ":: The unit cell of both maps are not equal and will be cropped"
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_avrgamphs - only to calculate FOM"
 #############################################################################
 #
 echo "current zminmax = ${zminmax}"
@@ -243,7 +261,15 @@ ${proc_2dx}/linblock "2dx_diffmap_sub - avrgamphs with t-test"
 #
 echo "<<@progress: 24>>"
 #
-python ${bin_2dx}/diffmap/2dx_diffmap_sub.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+#
+if( ${unitcell_equal} == 1 ) then
+    python ${bin_2dx}/diffmap/2dx_diffmap_sub.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+else
+    ${proc_2dx}/linblock "the unit cell is not equal"
+    cp APH/avrg2D_${map1}.hkl APH/avrg2D_sig1.hkl 
+    cp APH/avrg2D_${map2}.hkl APH/avrg2D_sig2.hkl
+    #TODO: change all the image names for the non significant case
+endif
 #
 echo "# IMAGE-IMPORTANT: APH/avrg2D_sig1.hkl <map1 significant reflections [H,K,Z,A,P,FOM]>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: APH/avrg2D_sig2.hkl <map2 significant reflections [H,K,Z,A,P,FOM]>" >> LOGS/${scriptname}.results
@@ -302,7 +328,7 @@ ${bin_2dx}/2dx_centric2.exe << eot
 APH/avrg2D_sig2.hkl
 APH/centric2D_${map2}_sig.hkl
 APH/centric2D_${map2}_sig.hk
-${realcell},${realang}
+${realcell_map2},${realang}
 ${RESMIN},${RESMAX}
 ${SYM}
 eot
@@ -472,7 +498,7 @@ set outfile = SCRATCH/${map2}_sig.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
+CELL ${realcell_map2} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY 1
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}
@@ -496,14 +522,30 @@ echo "# IMAGE-IMPORTANT: ${map2}_sig.mtz <MTZ: map 2 merged full 2D data>" >> LO
 ##############################################################################
 ${proc_2dx}/linblock  "Inverse fft to get map" 
 ##############################################################################
-set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($1)  } END { print s }'`
-set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($2)  } END { print s }'`
-set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($1 -  ($1 % 4))  } END { print s }'`
-set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = int($2 -  ($2 % 4))  } END { print s }'`
-#
-if( $grid_a  < $realcell_a || $grid_b < $realcell_b ) then
-	echo  ":: The unit cell was cropped to ${grid_a}, ${grid_b}, ${realang}. (Dividable by 4)" 
-endif
+#TODO: have it determined by the unit cell size
+set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($1 - ($1 % 4))  } END { print s }'`
+set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 *  int($2 -  ($2 % 4)) } END { print s }'`
+set xlim1 = `echo ${grid_a} | awk '{ s = $1 - 1} END { print s }'`
+set ylim1 = `echo ${grid_b} | awk '{ s = $1 - 1} END { print s }'`
+#echo  ": The unit cell was cropped to ${grid_a}, ${grid_b}, with the limit ${xlim1} and ${ylim1}" 
+
+set grid2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2 * int($1 -  ($1 % 4))  } END { print s }'`
+set grid2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2 * int($2 -  ($2 % 4))  } END { print s }'`
+set xlim2 = `echo ${grid2_a} | awk '{ s = $1 - 1} END { print s }'`
+set ylim2 = `echo ${grid2_b} | awk '{ s = $1 - 1} END { print s }'`
+#echo  ": The unit cell was cropped to ${grid2_a}, ${grid2_b}, with the limit ${xlim2} and ${ylim2}" 
+
+# THIS WAS ONLY USED FOR CCP4 CROPING
+# which is not used anymore
+#set realcell_max_a = `echo ${realcell_a} ${realcell_map2_a} | awk '{ if( $1 > $2 ) {print $1} else {print $2} }'`
+#set realcell_max_b = `echo ${realcell_b} ${realcell_map2_b} | awk '{ if( $1 > $2 ) {print $1} else {print $2} }'`
+#set realcell_min_a = `echo ${realcell_a} ${realcell_map2_a} | awk '{ if( $1 < $2 ) {print $1} else {print $2} }'`
+#set realcell_min_b = `echo ${realcell_b} ${realcell_map2_b} | awk '{ if( $1 < $2 ) {print $1} else {print $2} }'`
+#set realcell_max = "${realcell_max_a} ${realcell_max_b}"
+#set grid_min_a = `echo ${realcell_min_a} | awk '{ s = int($1)+1 } END { print s }'`
+#set grid_min_b = `echo ${realcell_min_b} | awk '{ s = int($1)+1 } END { print s }'`
+#set xlim_min = `echo ${grid_min_a} | awk '{ s = $1 - 1} END { print s }'`
+#set ylim_min = `echo ${grid_min_b} | awk '{ s = $1 - 1} END { print s }'`
 #
 # map1
 \rm -f ${map1}.map
@@ -516,9 +558,8 @@ PROJECTION
 AXIS X Y Z
 SCALE F1 1.0
 RESOLUTION ${RESMIN} ${RESMAX}
-#GRID  ${grid_a} ${grid_b} ${realang}
-GRID 200 200 20
-XYZLIM 0 199 0 199 0 0
+GRID  ${grid_a} ${grid_b} 20 
+XYZLIM 0 ${xlim1} 0 ${ylim1} 0 0 
 END
 eot
 #
@@ -533,9 +574,8 @@ PROJECTION
 AXIS X Y Z
 SCALE F1 1.0
 RESOLUTION ${RESMIN} ${RESMAX}
-#GRID  ${grid_a} ${grid_b} ${realang}
-GRID 200 200 20
-XYZLIM 0 199 0 199 0 0
+GRID  ${grid_a} ${grid_b} 20 
+XYZLIM 0 ${xlim1} 0 ${ylim1} 0 0 
 END
 eot
 #
@@ -550,13 +590,106 @@ PROJECTION
 AXIS X Y Z
 SCALE F1 1.0
 RESOLUTION ${RESMIN} ${RESMAX}
-#GRID  ${grid_a} ${grid_b} ${realang}
-GRID 200 200 20
-XYZLIM 0 199 0 199 0 0
+GRID  ${grid2_a} ${grid2_b} 20
+XYZLIM 0 ${xlim2} 0 ${ylim2} 0 0  
 END
 eot
 #
 
+if( ${unitcell_equal} == 0 ) then
+#    ##############################################################################
+#    ${proc_2dx}/linblock  "mapmask - to extend the maps to unit cell size" 
+#    ##############################################################################
+#    #extend with enough space, here 40
+#    set xlim_ext = `echo ${xlim1} | awk '{ s = $1 + 40} END { print s }'`
+#    set ylim_ext = `echo ${ylim1} | awk '{ s = $1 + 40} END { print s }'`
+#    mapmask mapin  ${map1}.map mapout ${map1}_ext.map <<eof
+#    XYZLIM 0 ${xlim_ext} 0 ${ylim_ext} 0 0 
+#eof
+#    
+#    mapmask mapin  ${map1}_ext.map  mskout ${map1}.msk <<eof
+#    XYZLIM 0 ${xlim_ext} 0 ${ylim_ext} 0 0 
+#    EXTEND XTAL
+#    MASK FRAC 1.0
+#    PAD 0
+#eof
+#
+#
+#    ##############################################################################
+#    ${proc_2dx}/linblock  "maprot - cutting density and pasting it into new cell" 
+#    ##############################################################################
+#    maprot wrkin ${map1}_ext.map mskin ${map1}.msk cutout ${map1}_newcell_ext.map <<eof
+#    MODE TO
+#    CELL XTAL ${realcell_max} 20 90.0 90.0 ${realang}
+#    GRID XTAL  82 108 1 
+#    AVER
+#    ROTA POLAR 0 0 0 
+#    TRANS 0 0 0
+#eof
+#
+#
+#    ###########################################################
+#    #    CORRECTION OF GRID SAMPLING
+#    ###########################################################
+#    mapmask mapin ${map1}_newcell_ext.map mapout ${map1}_newcell_ext1.map <<eof
+#    XYZLIM 0 81 0 107 0 0 
+#    mode mapin
+#eof
+#
+#    set trans_a = `echo ${realcell_a} ${realcell_map2_a} | awk '{ s = ($1 - $2)/2.0  } END { print s }'`
+#    set trans_b = `echo ${realcell_b} ${realcell_map2_b} | awk '{ s = ($1 - $2)/2.0  } END { print s }'`
+#
+#    ##############################################################################
+#    ${proc_2dx}/linblock  "maprot - move the map to the right place" 
+#    ##############################################################################
+#    maprot mapin ${map1}_newcell_ext1.map  wrkout ${map1}_scaled.map <<eof
+#    MODE FROM
+#    CELL WORK  ${realcell_max} 20  90.0 90.0 ${realang}
+#    GRID WORK  82 108 1 
+#    XYZLIM 0 81 0 107 0 0  
+#    AVER
+#    ROTA POLAR 0 0 0 
+#    TRANS 0 0 0 
+#eof
+#
+#    ###########################################################
+#    #   CHANGING AXIS ORDER
+#    ###########################################################
+#
+#    mapmask mapin ${map1}_scaled.map mapout ${map1}_scaled.map <<eof
+#    AXIS Y X Z
+#    mode mapin
+#    XYZLIM 0 81 0 107 0 0  
+#eof
+#
+###############################################################################
+#${proc_2dx}/linblock  "npo - to create a line plot for both maps" 
+###############################################################################
+## map1
+#${bin_ccp4}/npo  MAPIN ${map1}_scaled.map PLOT ${map1}.plot <<EOF
+#TITLE   ${map1}
+#MAP SCALE 0.5
+#CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
+#MODE BELOW 0 DASHED 1 0.25 0
+#MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+#SECTS 0 0
+#PLOT 
+#EOF
+##
+#
+##############################################################################
+#${proc_2dx}/linblock "laserplot - to create contour plots"
+##############################################################################
+##
+## map1
+#\rm -f PS/${map1}.ps
+#${bin_2dx}/laserplot.exe -outputfile=PS/${map1}.ps ${map1}.plot
+#\rm -f ${map1}.plot
+#echo "# IMAGE-IMPORTANT: PS/${map1}.ps <PS: map 1>"  >> LOGS/${scriptname}.results
+##
+#
+#
+endif
 
 echo "<<@progress: 30>>"
 ##############################################################################
@@ -594,6 +727,7 @@ MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
 SECTS 0 0
 PLOT 
 EOF
+#
 #
 echo "<<@progress: 35>>"
 #############################################################################

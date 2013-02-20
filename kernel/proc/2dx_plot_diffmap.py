@@ -103,9 +103,9 @@ class MRCImage:
 			
 			self.image = np.fromfile(f,fmt,self.nx*self.ny*self.nz)
 			if(self.nz == 1):
-				self.image = self.image.reshape(self.nx,self.ny)
+				self.image = self.image.reshape(self.ny,self.nx)
 			else:
-				self.image = self.image.reshape(self.nx, self.ny, self.nz)
+				self.image = self.image.reshape(self.ny, self.nx, self.nz)
 				print('Warning: Image dimensions: '+str(self.image.shape))
 		else:
 			sys.exit('Error: The mode in the image header was not read!')
@@ -113,12 +113,63 @@ class MRCImage:
 def scaleImages(mrcImage1, mrcImage2):
 	image1 = mrcImage1.image
 	image2 = mrcImage2.image
-	m = max(abs(image1).max(),abs(image2).max())
+	m = max((np.absolute(image1)).max(),(np.absolute(image2)).max())
 	print('Max Intensity in the images is: '+str(m))
 	mrcImage1.image = image1/m
 	mrcImage2.image = image2/m
 	return m 
 
+def cropImages(mrcImage1, mrcImage2):
+        """if the images do not habve the same size they are cropped to the smaller
+        width and height"""
+        width1 = mrcImage1.nx
+        height1 = mrcImage1.ny
+        width2 = mrcImage2.nx
+        height2 = mrcImage2.ny
+        if width1 == width2 and height1 == height2:
+            #no cropping needed
+            return [mrcImage1, mrcImage2]
+        [width_min, width_max] = minmax(width1, width2) 
+        [height_min, height_max] = minmax(height1, height2)
+        d_width = width_max - width_min
+        d2_width = d_width/2
+        d_height = height_max - height_min
+        d2_height = d_height/2
+        if d2_width > 0:
+            if d2_width % 2 > 0:
+                istart = d2_width
+            else:
+                istart = d2_width-1
+            iend = -d2_width-1
+            if width1 > width_min:
+                mrcImage1.image = mrcImage1.image[:,istart:iend]
+                #mrcImage1.image = mrcImage1.image[istart:iend,:]
+                mrcImage1.nx = width_min
+            else:
+                mrcImage2.image = mrcImage2.image[:,istart:iend]
+                mrcImage2.nx = width_min
+        if d2_height > 0:
+            if d2_height % 2 > 0:
+                istart = d2_height
+            else:
+                istart = d2_height-1
+            iend = -d2_height-1
+            if height1 > height_min:
+                mrcImage1.image = mrcImage1.image[istart:iend,:]
+                mrcImage1.ny = height_min
+            else:
+                mrcImage2.image = mrcImage2.image[istart:iend,:]
+                mrcImage2.ny = height_min
+        print(": image 1 cropped to size:"+str(np.shape(mrcImage1.image)))
+        print(": image 2 cropped to size:"+str(np.shape(mrcImage2.image)))
+        return [mrcImage1,mrcImage2]
+
+def minmax(value1, value2):
+    """compares the values and returns the minimum and maximum"""
+    if value1 < value2:
+        return [value1, value2]
+    else:
+        return [value2, value1]
 
 def cutImages(mrcImage1, mrcImage2):
 	im1 = mrcImage1.image
@@ -160,6 +211,7 @@ def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2, mapName1="map1", mapName2="map2")
 	plt.title(title)
 	plt.hold(True)
 	plt.imshow(diffmap, origin='upper', norm=norm)
+        plt.set_cmap('seismic')
 	plt.colorbar()
 	plt.contour(contour, [0])
 	plt.hold(False)
@@ -182,12 +234,13 @@ if __name__ == '__main__':
 	with open(diffmap1_filepath,'r') as mrcFile:
 		 im1sig = MRCImage(mrcFile)	
 	with open(diffmap2_filepath,'r') as mrcFile:
-		 im2sig = MRCImage(mrcFile)	
+		 im2sig = MRCImage(mrcFile)
+        cropImages(im1sig,im2sig)
 	scaleImages(im1sig,im2sig)
 	cutImages(im1sig,im2sig)
-	#plotImage(im1sig)
+	plotImage(im1sig)
 	saveImage(im1sig)
-	#plotImage(im2sig)
+	plotImage(im2sig)
 	saveImage(im2sig)
 	if no_args < 6:
 		plotDiffmap(im1,im1sig,im2sig)

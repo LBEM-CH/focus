@@ -202,7 +202,7 @@ class Symmetry(dict):
         # TODO: should the last two sym ops be considered?
         for i in range(len(symmetry_operations)-2):
             if symmetry_operations[i] > 0:
-                print(":: symmetry operator: "+str(i))
+                print("symmetry operator: "+str(i))
                 self.__symmetrize_reflections(i, reflections)
 
     def __symmetrize_reflections(self, sym_op, reflections):

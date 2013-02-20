@@ -146,7 +146,7 @@ def group_reflection_by_index(reflection_list):
 			l_prev = ref.l
 			same_reflection = []
 			same_reflection.append(ref)
-    print(sorted(reflections_by_index.keys()))
+    #print(sorted(reflections_by_index.keys()))
     return reflections_by_index
 
 
@@ -208,7 +208,6 @@ def average_reflection_by_idx(reflections, index):
 	return avrg_reflection
 
 def merge_reflection(reflections):
-	#print('number of reflections: '+str(len(reflections)))
 	n = len(reflections)
 	amp = array([ref.amp for ref in reflections])
 	ctf = array([ref.ctf for ref in reflections])
@@ -229,9 +228,6 @@ def merge_reflection(reflections):
 	ref = reflections[0];
 	merged = AvramphsReflection(ref.h, ref.k, int(abs(ref.z)), combamp, combphase, n, var, fom)
 	return merged
-		#for ref in reflections:
-			#print(str(ref.h)+','+str(ref.k)+'|')
-		#print(combamp)
 
 def merge_reflections(reflection_list, z_max = 0.0025, iq_max = 6, max_amp_correction = 0.2):
 	"""merges relfections with the same miller index to a list, which then
@@ -261,7 +257,6 @@ def merge_reflections(reflection_list, z_max = 0.0025, iq_max = 6, max_amp_corre
         if same_reflection and k_prev > 0:
 		reflections_by_index[h_prev,k_prev] = same_reflection
 		same_reflection.append(ref)
-	#print(sorted(reflections_by_index.keys()))
 	return reflections_by_index
 
 def average_reflections_by_idx(reflections):
@@ -304,24 +299,19 @@ def determine_significance(reflections1, reflections2, confidence=99.0):
 	# addinng unmatched reflections	
 	refs_only_in1 = set(reflections1.keys()) - set(reflections2.keys())
         if len(refs_only_in1) > 0:
-            print(":: reflections only in map1: "+str(len(refs_only_in1)))
+            print("reflections only in map1: "+str(len(refs_only_in1)))
 	    print(str(sorted(refs_only_in1)))
 	    for key in sorted(refs_only_in1):
 		merged_reflections1.append((average_reflection_by_idx(reflections1[key],key)))
 	refs_only_in2 = set(reflections2.keys()) - set(reflections1.keys())
         if len(refs_only_in2) > 0:
-            print(":: reflections only in map2: "+str(len(refs_only_in2)))
+            print("reflections only in map2: "+str(len(refs_only_in2)))
 	    print(str(sorted(refs_only_in2)))
 	    for key in sorted(refs_only_in2):
 		merged_reflections2.append((average_reflection_by_idx(reflections2[key],key)))
 		
 	merged_reflections1 = sorted(merged_reflections1,  key=attrgetter('h','k','l'))
 	merged_reflections2 = sorted(merged_reflections2,  key=attrgetter('h','k','l'))
-	#for ref in merged_reflections1:
-	#	print(str(ref))
-	#print('unmatched reflections 1: '+str(len(refs_only_in1))+'\n')
-	#print('unmatched reflections 1: '+str(ref_unmatched)+'\n')
-	#print('unmatched reflections 2: '+str(len(refs_only_in2))+'\n')
 	
 	return [merged_reflections1, merged_reflections2]
 
@@ -351,8 +341,6 @@ def determine_significant_reflections(reflections1, reflections2, confidence=99.
     reflections2 = {k: reflections2[k] for k in sig_idx2 if k in reflections2}
     averaged_reflections1 = average_reflections_by_idx(reflections1)
     averaged_reflections2 = average_reflections_by_idx(reflections2)
-    print(":: significant averaged reflections 1: "+str(len(averaged_reflections1)))
-    print(":: significant averaged reflections 2: "+str(len(averaged_reflections2)))
 
     return [averaged_reflections1, averaged_reflections2]
     
@@ -390,8 +378,8 @@ def determine_significance_indices(reflections1, reflections2, confidence=99.0):
         sig_indices2.extend(refs_only_in2)
 	sig_indices1= sorted(sig_indices1)
 	sig_indices2 = sorted(sig_indices2)
-        print(":: significant reflections 1: "+str(len(sig_indices1)))
-        print(":: significant reflections 2: "+str(len(sig_indices2)))
+        print(": significant reflections 1: "+str(len(sig_indices1)))
+        print(": significant reflections 2: "+str(len(sig_indices2)))
 	
 	return [sig_indices1, sig_indices2]
 

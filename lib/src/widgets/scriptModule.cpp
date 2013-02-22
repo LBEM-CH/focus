@@ -424,9 +424,10 @@ bool scriptModule::runningScriptSelected()
 
 bool scriptModule::writeToLog(const QString &logText)
 {
-	QFile log(getScriptProperty(currentUid,"logFile").toString());
+	QString logFilename = getScriptProperty(currentUid,"logFile").toString();
+	QFile log(logFilename);
 	if(!log.open(QIODevice::Append | QIODevice::Text))
-	{cerr<<"Failed to write to "<<getScriptProperty(currentUid,"logFile").toString().toStdString()<<endl; return false;}
+	  {cerr<<"Failed to write to "<<getScriptProperty(currentUid,"logFile").toString().toStdString()<<endl; return false;}
 	log.write(logText.toAscii());
 	log.close();
 	return true;

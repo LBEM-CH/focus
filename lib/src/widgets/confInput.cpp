@@ -690,8 +690,7 @@ void confInput::show()
 
 void confInput::openFileDialog()
 {
-    QString filePath = QFileDialog::getOpenFileName(this,
-                                                    tr("Select File"), data->getDir("working"));
+    QString filePath = QFileDialog::getOpenFileName(this,tr("Select File"), data->getDir("working"));
     //TODO: check if lEdits[0] exists and what type it is
     lEdits[0]->setText(filePath);
     dataModified();
@@ -699,11 +698,10 @@ void confInput::openFileDialog()
 
 void confInput::openDirDialog()
 {
-    QString dirPath = QFileDialog::getExistingDirectory(this,
-                                                    tr("Select Directory"), data->getDir("working"));
+    QString dirPath = QFileDialog::getExistingDirectory(this,tr("Select Directory"), data->getDir("working"));
     //TODO: check if lEdits[0] exists and what type it is
     lEdits[0]->setText(dirPath);
-    dataModified();
+  dataModified();
 }
 
 void confInput::setIsWrongValueColor()

@@ -72,8 +72,11 @@ mainWindow::mainWindow(char *dirArg)
 
   
   QString applicationConfigPath =  configDir.canonicalPath() + "/" + "2dx_master.cfg";
-  confData masterData(userPath + "/2dx_master.cfg", applicationConfigPath); 
-  masterData.updateConf(applicationConfigPath);
+  confData masterData(userPath + "/2dx_master.cfg", applicationConfigPath);
+  if(QFileInfo(applicationConfigPath).exists())
+  {
+    masterData.updateConf(applicationConfigPath);
+  }
   masterData.save();
    
   if(initialize)
@@ -83,7 +86,9 @@ mainWindow::mainWindow(char *dirArg)
   else
   {
     data = new confData(workingDir + "/" + "2dx_image.cfg");
-    data->updateConf(userPath + "/2dx_master.cfg");
+    QString userConfigPath = userPath + "/2dx_master.cfg";
+    if(QFileInfo(userConfigPath).exists())
+      data->updateConf(userConfigPath);
   }
   data->setUserConf(userData);
   data->setDir("application",applicationDir);

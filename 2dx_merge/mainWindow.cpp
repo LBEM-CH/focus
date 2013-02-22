@@ -44,7 +44,10 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   if(QFileInfo(mergeConfigLocation).exists())
   {
     mainData = new confData(mergeConfigLocation, appConfigLocation);
-    mainData->updateConf(appConfigLocation);
+    if(QFileInfo(appConfigLocation).exists())
+      {
+        mainData->updateConf(appConfigLocation);
+      }
   }
   else
   {	  
@@ -71,7 +74,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   mainData->setDir("config",configDir);
   
   createDir(QDir::homePath() + "/.2dx/");
-  QString userPath = QDir::homePath() + "/.2dx/";  
+  QString userPath = QDir::homePath() + "/.2dx";
   createDir(userPath + "/2dx_merge");
   
   confData *cfg = new confData(userPath + "/2dx.cfg", mainData->getDir("config") + "/" + "2dx.cfg");
@@ -96,7 +99,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   createDir(mainData->getDir("working") + "/proc");
   mainData->setDir("remoteProc",mainData->getDir("working") + "/proc/");
   createDir(mainData->getDir("working") + "/LOGS");
-  mainData->setDir("logs",mainData->getDir("working") + "/LOGS");  
+  mainData->setDir("logs",mainData->getDir("working") + "/LOGS");
   mainData->setDir("standardScripts",QDir(mainData->getDir("application") + "/" + "scripts-standard/"));
   mainData->setDir("customScripts",QDir(mainData->getDir("application") + "/" + "scripts-custom/"));
   mainData->addImage("appImage",new QImage("resource/icon.png"));
@@ -1042,16 +1045,24 @@ void mainWindow::launchLogBrowser()
 
 void mainWindow::loadProjectState()
 {
-  QFile f(mainData->getDir("working") + "/config/projectHeaderState.dat");
-  if(!f.open(QIODevice::ReadOnly)) return;
-  dirView->header()->restoreState(f.readAll());
-  f.close();  
+  QString projectHeaderState = mainData->getDir("working") + "/config/projectHeaderState.dat";
+  if(QFileInfo(projectHeaderState).exists())
+  {
+    QFile f(projectHeaderState);
+    if(!f.open(QIODevice::ReadOnly)) return;
+    dirView->header()->restoreState(f.readAll());
+    f.close();
+  }
 }
 
 void mainWindow::saveProjectState()
 {
-  QFile f(mainData->getDir("working") + "/config/projectHeaderState.dat");
-  if(!f.open(QIODevice::WriteOnly)) return;
-  f.write(dirView->header()->saveState());
-  f.close();
+  QString projectHeaderState = mainData->getDir("working") + "/config/projectHeaderState.dat";
+  if(!projectHeaderState.isEmpty())
+  {
+    QFile f(projectHeaderState);
+    if(!f.open(QIODevice::WriteOnly)) return;
+    f.write(dirView->header()->saveState());
+    f.close();
+  }
 }

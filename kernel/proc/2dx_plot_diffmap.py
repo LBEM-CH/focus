@@ -119,6 +119,42 @@ def scaleImages(mrcImage1, mrcImage2):
 	mrcImage2.image = image2/m
 	return m 
 
+def cropImage(mrcImage, width, height):
+    "crops the mrc image to the width and height"
+    image = mrcImage.image
+    [orig_height, orig_width] = np.shape(image)
+    if width == orig_width and height == orig_height:
+        return mrcImage
+    elif width > orig_width and height > orig_height:
+        exit("the image cannnot be cropped to an size larger then itself")
+    else:
+        d_width = orig_width - width
+        d_height = orig_height - height
+        d2_width = d_width/2
+        d2_height = d_height/2
+        if d2_width > 0:
+            if d_width % 2 > 0:
+                istart = d2_width
+            else:
+                istart = d2_width-1
+            iend = -d2_width-1
+            image = image[:,istart:iend]
+        if d2_height > 0:
+            if d_height % 2 > 0:
+                istart = d2_height
+            else:
+                istart = d2_height-1
+            iend = -d2_height-1
+            image = image[istart:iend,:]
+        mrcImage.image = image
+        mrcImage.nx = width
+        mrcImage.ny = height
+        return mrcImage
+
+
+
+
+
 def cropImages(mrcImage1, mrcImage2):
         """if the images do not habve the same size they are cropped to the smaller
         width and height"""
@@ -128,7 +164,7 @@ def cropImages(mrcImage1, mrcImage2):
         height2 = mrcImage2.ny
         if width1 == width2 and height1 == height2:
             #no cropping needed
-            return [mrcImage1, mrcImage2]
+            return (width1, height1)
         [width_min, width_max] = minmax(width1, width2) 
         [height_min, height_max] = minmax(height1, height2)
         d_width = width_max - width_min
@@ -136,7 +172,7 @@ def cropImages(mrcImage1, mrcImage2):
         d_height = height_max - height_min
         d2_height = d_height/2
         if d2_width > 0:
-            if d2_width % 2 > 0:
+            if d_width % 2 > 0:
                 istart = d2_width
             else:
                 istart = d2_width-1
@@ -149,7 +185,7 @@ def cropImages(mrcImage1, mrcImage2):
                 mrcImage2.image = mrcImage2.image[:,istart:iend]
                 mrcImage2.nx = width_min
         if d2_height > 0:
-            if d2_height % 2 > 0:
+            if d_height % 2 > 0:
                 istart = d2_height
             else:
                 istart = d2_height-1
@@ -162,7 +198,7 @@ def cropImages(mrcImage1, mrcImage2):
                 mrcImage2.ny = height_min
         print(": image 1 cropped to size:"+str(np.shape(mrcImage1.image)))
         print(": image 2 cropped to size:"+str(np.shape(mrcImage2.image)))
-        return [mrcImage1,mrcImage2]
+        return (width_min, height_min)
 
 def minmax(value1, value2):
     """compares the values and returns the minimum and maximum"""
@@ -235,7 +271,8 @@ if __name__ == '__main__':
 		 im1sig = MRCImage(mrcFile)	
 	with open(diffmap2_filepath,'r') as mrcFile:
 		 im2sig = MRCImage(mrcFile)
-        cropImages(im1sig,im2sig)
+        [width, height] = cropImages(im1sig,im2sig)
+        cropImage(im1, width, height)
 	scaleImages(im1sig,im2sig)
 	cutImages(im1sig,im2sig)
 	plotImage(im1sig)

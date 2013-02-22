@@ -465,8 +465,6 @@ eot
 #
 # sigmap1
 set infile = APH/sym2D_${map1}_sig.hkl
-#set infile = APH/sym2D_sig1.hkl
-#set infile = APH/sym_sig.hkl
 set outfile = SCRATCH/${map1}_sig.mtz
 \rm -f SCRATCH/${map1}_sig.mtz
 #
@@ -492,7 +490,6 @@ eot
 #
 # sigmap2
 set infile = APH/sym2D_${map2}_sig.hkl
-#set infile = APH/sym2D_sig2.hkl
 set outfile = SCRATCH/${map2}_sig.mtz
 \rm -f SCRATCH/${map2}_sig.mtz
 #
@@ -523,14 +520,18 @@ echo "# IMAGE-IMPORTANT: ${map2}_sig.mtz <MTZ: map 2 merged full 2D data>" >> LO
 ${proc_2dx}/linblock  "Inverse fft to get map" 
 ##############################################################################
 #TODO: have it determined by the unit cell size
-set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($1 - ($1 % 4))  } END { print s }'`
-set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 *  int($2 -  ($2 % 4)) } END { print s }'`
+set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 4 * int($1)  } END { print s }'`
+set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 4 *  int($2) } END { print s }'`
+#set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($1 - ($1 % 4))  } END { print s }'`
+#set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 *  int($2 -  ($2 % 4)) } END { print s }'`
 set xlim1 = `echo ${grid_a} | awk '{ s = $1 - 1} END { print s }'`
 set ylim1 = `echo ${grid_b} | awk '{ s = $1 - 1} END { print s }'`
 #echo  ": The unit cell was cropped to ${grid_a}, ${grid_b}, with the limit ${xlim1} and ${ylim1}" 
 
-set grid2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2 * int($1 -  ($1 % 4))  } END { print s }'`
-set grid2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2 * int($2 -  ($2 % 4))  } END { print s }'`
+set grid2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 4 * int($1)  } END { print s }'`
+set grid2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 4 * int($2)  } END { print s }'`
+#set grid2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2 * int($1 -  ($1 % 4))  } END { print s }'`
+#set grid2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2 * int($2 -  ($2 % 4))  } END { print s }'`
 set xlim2 = `echo ${grid2_a} | awk '{ s = $1 - 1} END { print s }'`
 set ylim2 = `echo ${grid2_b} | awk '{ s = $1 - 1} END { print s }'`
 #echo  ": The unit cell was cropped to ${grid2_a}, ${grid2_b}, with the limit ${xlim2} and ${ylim2}" 

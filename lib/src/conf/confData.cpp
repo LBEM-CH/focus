@@ -112,7 +112,7 @@ void confData::setUserConf(confData *userConf)
 
 void confData::setSymLink(const QString fileName, const QString linkName)
 {
-  qDebug()<<"dataFilename = " << dataFilename;
+  //qDebug()<<"dataFilename = " << dataFilename;
   QFile data(dataFilename);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   //dele the file that lies where link should be
@@ -262,7 +262,7 @@ QString confData::printLookup()
 
 bool confData::parseDataFile()
 {
-  qDebug()<<" parsed dataFilename = " << dataFilename;
+  //qDebug()<<" parsed dataFilename = " << dataFilename;
   QFile data(dataFilename);
   if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
   //data.setTextModeEnabled(true);
@@ -369,7 +369,7 @@ bool confData::parseDataFile()
 
 void confData::updateConf(const QString &confFileName)
 {
-  qDebug()<<"updating configuration";
+  //qDebug()<<"updating configuration";
   QFile data(confFileName);
   if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return;
   
@@ -547,14 +547,14 @@ void confData::loadDefaultConf(confData *conf, const QStringList &defaults)
 
 void confData::save()
 {
-  qDebug()<<"[save] dataFilename = " << dataFilename;
+  //qDebug()<<"[save] dataFilename = " << dataFilename;
   QFile data(dataFilename);
   saveSynchronized(dataFilename);
 }
 
 void confData::saveAs(QString fileName)
 {
-  qDebug()<<"[saveAS] fileName = " << fileName;
+  //qDebug()<<"[saveAS] fileName = " << fileName;
   QFile data(fileName);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   for(int i=0;i<header.size();i++)
@@ -594,7 +594,7 @@ void confData::saveAs(QString fileName)
 
 void confData::saveSynchronized(QString fileName)
 {
-  qDebug()<<"[saveSynchornized] fileName = " << fileName;
+  //qDebug()<<"[saveSynchornized] fileName = " << fileName;
   QFile data(fileName);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   for(int i=0;i<header.size();i++)

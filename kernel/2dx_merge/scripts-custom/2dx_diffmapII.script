@@ -167,14 +167,20 @@ echo "<<@progress: 10>"
 ${proc_2dx}/lin "comparing the unit cells size of both maps"
 #############################################################################
 #
-set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1  } END { print s }'`
-set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2  } END { print s }'`
-set realcell_map2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = $1  } END { print s }'`
-set realcell_map2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = $2  } END { print s }'`
+set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2*$1  } END { print s }'`
+set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2*$2  } END { print s }'`
+set realcell_map2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2*$1  } END { print s }'`
+set realcell_map2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2*$2  } END { print s }'`
+#set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1  } END { print s }'`
+#set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2  } END { print s }'`
+#set realcell_map2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = $1  } END { print s }'`
+#set realcell_map2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = $2  } END { print s }'`
 set unitcell_equal = `echo ${realcell_a} ${realcell_map2_a} ${realcell_b}  ${realcell_map2_b} | awk '{ if( int($1)==int($2) && int($3)==int($4) ) {print 1} else {print 0}}'`
 if( ${unitcell_equal} == 0 ) then
-    echo ":: The unit cell of both maps are not equal and will be cropped"
+    echo ":: The unit cell of both maps are not equal and will be cropped: "
+    echo ":: The unit cell map1: ${realcell} map2: ${realcell_map2}"
 endif
+#TODO: delete the following line again after mlok1
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_avrgamphs - only to calculate FOM"
@@ -263,7 +269,7 @@ echo "<<@progress: 24>>"
 #
 #
 if( ${unitcell_equal} == 1 ) then
-    python ${bin_2dx}/diffmap/2dx_diffmap_sub.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+    python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
 else
     ${proc_2dx}/linblock "the unit cell is not equal"
     cp APH/avrg2D_${map1}.hkl APH/avrg2D_sig1.hkl 
@@ -445,6 +451,7 @@ set outfile = SCRATCH/${map1}.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${map1} , ${date}
+#CELL ${realcell_a} ${realcell_b} ${ALAT} 90.0 90.0 ${realang}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY 1 
 LABOUT ${LABOUTval}
@@ -470,6 +477,7 @@ set outfile = SCRATCH/${map1}_sig.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map1_name} , ${date}
+#CELL ${realcell_a} ${realcell_b} ${ALAT} 90.0 90.0 ${realang}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY 1 
 LABOUT ${LABOUTval}
@@ -495,6 +503,7 @@ set outfile = SCRATCH/${map2}_sig.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
+#CELL ${realcell_map2_a} ${realcell_map2_b} ${ALAT} 90.0 90.0 ${realang}
 CELL ${realcell_map2} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY 1
 LABOUT ${LABOUTval}
@@ -520,12 +529,16 @@ echo "# IMAGE-IMPORTANT: ${map2}_sig.mtz <MTZ: map 2 merged full 2D data>" >> LO
 ${proc_2dx}/linblock  "Inverse fft to get map" 
 ##############################################################################
 #TODO: have it determined by the unit cell size
+#set grid_a = `echo ${realcell_a} | sed 's/,/ /g' | awk '{ s = 10 * int($1)  } END { print s }'`
+#set grid_b = `echo ${realcell_b} | sed 's/,/ /g' | awk '{ s = 10 * int($1) } END { print s }'`
 set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($1 - ($1 % 4))  } END { print s }'`
-set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 *  int($2 -  ($2 % 4)) } END { print s }'`
+set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($2 -  ($2 % 4)) } END { print s }'`
 set xlim1 = `echo ${grid_a} | awk '{ s = $1 - 1} END { print s }'`
 set ylim1 = `echo ${grid_b} | awk '{ s = $1 - 1} END { print s }'`
 #echo  ": The unit cell was cropped to ${grid_a}, ${grid_b}, with the limit ${xlim1} and ${ylim1}" 
 
+#set grid2_a = `echo ${realcell_map2_a} | sed 's/,/ /g' | awk '{ s = 10 * int($1)  } END { print s }'`
+#set grid2_b = `echo ${realcell_map2_b} | sed 's/,/ /g' | awk '{ s = 10 * int($1)  } END { print s }'`
 set grid2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2 * int($1 -  ($1 % 4))  } END { print s }'`
 set grid2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2 * int($2 -  ($2 % 4))  } END { print s }'`
 set xlim2 = `echo ${grid2_a} | awk '{ s = $1 - 1} END { print s }'`
@@ -536,13 +549,15 @@ set ylim2 = `echo ${grid2_b} | awk '{ s = $1 - 1} END { print s }'`
 # which is not used anymore
 #set realcell_max_a = `echo ${realcell_a} ${realcell_map2_a} | awk '{ if( $1 > $2 ) {print $1} else {print $2} }'`
 #set realcell_max_b = `echo ${realcell_b} ${realcell_map2_b} | awk '{ if( $1 > $2 ) {print $1} else {print $2} }'`
-#set realcell_min_a = `echo ${realcell_a} ${realcell_map2_a} | awk '{ if( $1 < $2 ) {print $1} else {print $2} }'`
-#set realcell_min_b = `echo ${realcell_b} ${realcell_map2_b} | awk '{ if( $1 < $2 ) {print $1} else {print $2} }'`
+set realcell_min_a = `echo ${realcell_a} ${realcell_map2_a} | awk '{ if( $1 < $2 ) {print $1} else {print $2} }'`
+set realcell_min_b = `echo ${realcell_b} ${realcell_map2_b} | awk '{ if( $1 < $2 ) {print $1} else {print $2} }'`
 #set realcell_max = "${realcell_max_a} ${realcell_max_b}"
-#set grid_min_a = `echo ${realcell_min_a} | awk '{ s = int($1)+1 } END { print s }'`
-#set grid_min_b = `echo ${realcell_min_b} | awk '{ s = int($1)+1 } END { print s }'`
+set grid_min_a = `echo ${realcell_min_a} | awk '{ s = int($1)+1 } END { print s }'`
+set grid_min_b = `echo ${realcell_min_b} | awk '{ s = int($1)+1 } END { print s }'`
 #set xlim_min = `echo ${grid_min_a} | awk '{ s = $1 - 1} END { print s }'`
 #set ylim_min = `echo ${grid_min_b} | awk '{ s = $1 - 1} END { print s }'`
+set xlim_2x = `echo ${grid_min_a} | awk '{ s = 2*$1 - 1} END { print s }'`
+set ylim_2x = `echo ${grid_min_b} | awk '{ s = 2*$1 - 1} END { print s }'`
 #
 # map1
 \rm -f ${map1}.map
@@ -555,8 +570,10 @@ PROJECTION
 AXIS X Y Z
 SCALE F1 1.0
 RESOLUTION ${RESMIN} ${RESMAX}
+#GRID SAMPLE 20 
 GRID  ${grid_a} ${grid_b} 20 
-XYZLIM 0 ${xlim1} 0 ${ylim1} 0 0 
+XYZLIM ASU
+#XYZLIM 0 ${xlim1} 0 ${ylim1} 0 0 
 END
 eot
 #
@@ -571,7 +588,9 @@ PROJECTION
 AXIS X Y Z
 SCALE F1 1.0
 RESOLUTION ${RESMIN} ${RESMAX}
+#GRID SAMPLE 20 
 GRID  ${grid_a} ${grid_b} 20 
+XYZLIM ASU 
 XYZLIM 0 ${xlim1} 0 ${ylim1} 0 0 
 END
 eot
@@ -587,8 +606,10 @@ PROJECTION
 AXIS X Y Z
 SCALE F1 1.0
 RESOLUTION ${RESMIN} ${RESMAX}
+#GRID SAMPLE 20 
 GRID  ${grid2_a} ${grid2_b} 20
-XYZLIM 0 ${xlim2} 0 ${ylim2} 0 0  
+#XYZLIM 0 ${xlim2} 0 ${ylim2} 0 0  
+XYZLIM ASU 
 END
 eot
 #
@@ -688,6 +709,25 @@ if( ${unitcell_equal} == 0 ) then
 #
 endif
 
+#TODO: add if clause for 2x2 unti cell
+set two_by_two = 0
+if( ${two_by_two} == 1 ) then
+    ${bin_ccp4}/mapmask mapin ${map1}.map mapout ${map1}.map <<eof
+        XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0
+        END
+eof
+
+    ${bin_ccp4}/mapmask mapin ${map1}_sig.map mapout ${map1}_sig.map <<eof
+        XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0
+        END
+eof
+
+    ${bin_ccp4}/mapmask mapin ${map2}_sig.map mapout ${map2}_sig.map <<eof
+        XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0
+        END
+eof
+endif
+
 echo "<<@progress: 30>>"
 ##############################################################################
 ${proc_2dx}/linblock  "npo - to create a line plot for both maps" 
@@ -699,6 +739,7 @@ MAP SCALE 0.5
 CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
 MODE BELOW 0 DASHED 1 0.25 0
 MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0 
 SECTS 0 0
 PLOT 
 EOF
@@ -710,6 +751,7 @@ MAP SCALE 0.5
 CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
 MODE BELOW 0 DASHED 1 0.25 0
 MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0 
 SECTS 0 0
 PLOT 
 EOF
@@ -721,6 +763,7 @@ MAP SCALE 0.5
 CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
 MODE BELOW 0 DASHED 1 0.25 0
 MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
+XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0 
 SECTS 0 0
 PLOT 
 EOF

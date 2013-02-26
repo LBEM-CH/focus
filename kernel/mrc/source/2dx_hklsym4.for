@@ -878,29 +878,32 @@ C
       DATA SYMINDEX / 
      . -1, 1,-1, 2, 2,-2,-2, 1,-1, 2,-2,-3, 3,-3 ,3,
      .  2,-2,-2, 1,-1, 1,-1,-3, 3,-3, 3, 1,-1, 2,-2 /
-      INTEGER H, K, HMOD, KMOD
+      INTEGER H, K, NH, NK,  HMOD, KMOD
+
 C
 C-----modify the H index
       HMOD = SYMINDEX(ISHIFT,1)
       if(abs(HMOD).eq.1) then
-        H=H * sign(1,HMOD)
+        NH=H * sign(1,HMOD)
       else if(abs(HMOD).eq.2) then
-        H=K * sign(1,HMOD)
+        NH=K * sign(1,HMOD)
       else
-        H=(H+K) * sign(1,HMOD)
+        NH=(H+K) * sign(1,HMOD)
       endif
 C
 C-----modify the K index
       KMOD = SYMINDEX(ISHIFT,2)
       if(abs(KMOD).eq.1) then
-        K=H * sign(1,KMOD)
+        NK=H * sign(1,KMOD)
       else if(abs(KMOD).eq.2) then
-        K=K * sign(1,KMOD)
+        NK=K * sign(1,KMOD)
       else
-        K=(H+K) * sign(1,KMOD)
+        NK=(H+K) * sign(1,KMOD)
       endif
-
-C      write(*,'('':HMOD, KMOD = '',2I8)')HMOD,KMOD
+C
+      H = NH
+      K = NK
+C
 C-----L stays the same
       
       RETURN

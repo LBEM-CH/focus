@@ -230,6 +230,7 @@ def plotImage(mrcImage):
 	title = mrcImage.name
 	plt.title(title)
 	plt.imshow(image)
+        plt.colorbar()
 	return image
 
 
@@ -248,6 +249,7 @@ def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2, mapName1="map1", mapName2="map2")
 	plt.hold(True)
 	plt.imshow(diffmap, origin='upper', norm=norm)
         plt.set_cmap('bwr')
+        #plt.set_cmap('spring')
 	plt.colorbar()
 	plt.contour(contour, [0])
 	#plt.contour(image2, [0], colors='b')

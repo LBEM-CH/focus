@@ -14,12 +14,18 @@ if __name__ == '__main__':
 	amp1 = get_reference_amplitude(reflection_list1)
 	amp2 = get_reference_amplitude(reflection_list2)
 	amp_scale = amp1/amp2
-	print('amplitude scale: '+str(amp_scale))
-	print(reflection_list2[0])
+
+        #print(':: amplitude scale: '+str(amp_scale))
 	reflection_list2 = scale_amplitudes(reflection_list2, amp_scale)
-	print(reflection_list2[0])
-	print(str(amp1)+" is the amplitude mean.")
-	if no_args == 3:
+        #print(":: reference amplitude 1: "+str(amp1))
+        #print(":: reference amplitude 2: "+str(amp2))
+	amp2_scaled = get_reference_amplitude(reflection_list2)
+        #print(":: reference amplitude 2 scaled: "+str(amp2_scaled))
+	
+        #TODO: the amplitudes should be scaled to have the same mean
+        #[reflection_list1, reflection_list2] = scale_all_amplitudes(reflection_list1, reflection_list2)
+
+        if no_args == 3:
 	    merged_refs1 = merge_reflections(reflection_list1)
 	    merged_refs2 = merge_reflections(reflection_list2)
 	elif no_args == 4:

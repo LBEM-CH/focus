@@ -271,9 +271,10 @@ echo "<<@progress: 24>>"
 if( ${unitcell_equal} == 1 ) then
     python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
 else
+    python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     ${proc_2dx}/linblock "the unit cell is not equal"
-    cp APH/avrg2D_${map1}.hkl APH/avrg2D_sig1.hkl 
-    cp APH/avrg2D_${map2}.hkl APH/avrg2D_sig2.hkl
+    #cp APH/avrg2D_${map1}.hkl APH/avrg2D_sig1.hkl 
+    #cp APH/avrg2D_${map2}.hkl APH/avrg2D_sig2.hkl
     #TODO: change all the image names for the non significant case
 endif
 #
@@ -710,7 +711,7 @@ if( ${unitcell_equal} == 0 ) then
 endif
 
 #TODO: add if clause for 2x2 unti cell
-set two_by_two = 0
+set two_by_two = 0 
 if( ${two_by_two} == 1 ) then
     ${bin_ccp4}/mapmask mapin ${map1}.map mapout ${map1}.map <<eof
         XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0

@@ -21,8 +21,10 @@ from operator import attrgetter
 from numpy import * 
 from scipy import stats, special
 from UserDict import UserDict
-no_of_elements = 10
 
+#global static variables
+no_of_elements = 10
+default_amplitude_mean = 200.0
 
 class Reflection(UserDict):
     """the parent class for all reflections"""
@@ -104,6 +106,9 @@ def parse_aph_file(aph_filepath):
 		return reflection_list
 
 def get_reference_amplitude(reflection_list):
+    """ since origitilt always takes the first image as a reference to scale
+    the amplitudes of the following images, one can just look at the mean of
+    the amplitudes of the first image in the list"""
     reference_no = reflection_list[0].number
     ref_sum_amp = 0
     ref_reflections = 0
@@ -116,6 +121,11 @@ def get_reference_amplitude(reflection_list):
 		    ref_reflections+=1
     return ref_sum_amp/ref_reflections
 
+def get_mean_amplitude(reflection_list):
+    """returns the mean of the reflections amplitudes"""
+    amps = array([ref.amp for ref in reflection_list])
+    mean_amp = mean(amps)
+    return mean_amp
 
 def scale_amplitudes(r_list, scale):
     "scales the amplitudes of all reflections in the list by the scale factor"    
@@ -123,6 +133,23 @@ def scale_amplitudes(r_list, scale):
         r_list[i].amp = r_list[i].amp*scale
         r_list[i]['amp'] = r_list[i].amp
     return r_list
+
+
+def scale_amplitudes2common_mean(reflection_list):
+    "scales the amplitudes of the reflections to have a mean of default_amplitude_mean"
+    mean_amp = get_mean_amplitude(reflection_list)
+    amp_scale = default_amplitude_mean / mean_amp
+    reflection_list = scale_amplitudes(reflection_list, amp_scale)
+    mean_amp = get_mean_amplitude(reflection_list)
+    print(" mean amplitude is:"+str(mean_amp))
+    return reflection_list
+
+def scale_all_amplitudes(reflections1, reflections2):
+    """scales the amplitudes of reflections for both confirmations to a common
+    mean"""
+    reflections1 = scale_amplitudes2common_mean(reflections1)
+    reflections2 = scale_amplitudes2common_mean(reflections2)
+    return [reflections1, reflections2]
 
 def group_reflection_by_index(reflection_list):
     """
@@ -175,6 +202,7 @@ def merge_phase_calc_fom(reflections):
 		if isfinite(bessel_0) and isfinite(bessel_1):
 			fom = 100.0*(bessel_1/bessel_0)
 		else:
+                        #print(":: xarg is "+str(xarg))
 			sigma = sqrt(1.0/xarg)
 			fom = 100.0*cos(sigma)
 	return (combphase, fom)
@@ -266,7 +294,7 @@ def average_reflections_by_idx(reflections):
         return average_reflections
 
 def average_significant_reflections(reflections, sig_indices):
-    "averages only the signifcant reflections and retrun them as a list"
+    "averages only the signifcant reflections and returns them as a list"
     reflections = {k: reflections[k] for k in sig_indices if k in reflections}
     averaged_sig_refs = average_reflections_by_idx(reflections)
     return averaged_sig_refs

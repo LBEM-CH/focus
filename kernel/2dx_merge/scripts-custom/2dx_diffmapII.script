@@ -46,6 +46,8 @@
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: diff_map2_dir
 # DISPLAY: diff_map_confidence
+# DISPLAY: diffmap_colormap
+# DISPLAY: diffmap_two_by_two
 #
 #$end_local_vars
 #
@@ -82,6 +84,8 @@ set diff_map2_dir = ""
 set diff_map1_name = ""
 set diff_map2_name = ""
 set  diff_map_confidence = ""
+set diffmap_colormap = ""
+set diffmap_two_by_two = ""
 #
 #$end_vars
 #
@@ -710,9 +714,7 @@ if( ${unitcell_equal} == 0 ) then
 #
 endif
 
-#TODO: add if clause for 2x2 unti cell
-set two_by_two = 0 
-if( ${two_by_two} == 1 ) then
+if( "${diffmap_two_by_two}" == "y" ) then
     ${bin_ccp4}/mapmask mapin ${map1}.map mapout ${map1}.map <<eof
         XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0
         END
@@ -860,7 +862,7 @@ eot
 ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #############################################################################
 #
-python ${proc_2dx}/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc ${diff_map1_name} ${diff_map2_name}
+python ${proc_2dx}/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap}
 #
 #
 #############################################################################

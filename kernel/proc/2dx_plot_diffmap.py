@@ -234,7 +234,7 @@ def plotImage(mrcImage):
 	return image
 
 
-def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2, mapName1="map1", mapName2="map2"):
+def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2, mapName1="map1", mapName2="map2", colormap="jet"):
 	contour = mrcImage1.image
 	image1 = mrcDiff1.image
 	image2 = mrcDiff2.image
@@ -248,8 +248,8 @@ def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2, mapName1="map1", mapName2="map2")
 	plt.title(title)
 	plt.hold(True)
 	plt.imshow(diffmap, origin='upper', norm=norm)
-        plt.set_cmap('bwr')
-        #plt.set_cmap('spring')
+        #if(colormap == "rwb")
+        plt.set_cmap(colormap)
 	plt.colorbar()
 	plt.contour(contour, [0])
 	#plt.contour(image2, [0], colors='b')
@@ -283,9 +283,11 @@ if __name__ == '__main__':
 	plotImage(im2sig)
 	saveImage(im2sig)
 	if no_args < 6:
-		plotDiffmap(im1,im1sig,im2sig)
-	else:
-		plotDiffmap(im1,im1sig,im2sig, sys.argv[4], sys.argv[5])
+	    plotDiffmap(im1,im1sig,im2sig)
+	elif no_args == 6:
+	    plotDiffmap(im1,im1sig,im2sig, sys.argv[4], sys.argv[5])
+        else:
+	    plotDiffmap(im1,im1sig,im2sig, sys.argv[4], sys.argv[5], sys.argv[6])
 	plt.show()
 
 	

@@ -30,7 +30,9 @@
 # DISPLAY: RESMAX
 # DISPLAY: merge_res_limit
 # DISPLAY: MergeIQMAX
+# DISPLAY: MergeHKMAX
 # DISPLAY: tempkeep
+# DISPLAY: merge_ML_data
 # DISPLAY: realcell
 # DISPLAY: realang
 # DISPLAY: ALAT
@@ -63,6 +65,9 @@ set RESMIN = ""
 set RESMAX = ""
 set merge_res_limit = ""
 set MergeIQMAX = ""
+set MergeHKMAX = ""
+set merge_ML_data = ""
+set ILIST = ""
 set tempkeep = ""
 set realcell = ""
 set realang = ""
@@ -113,13 +118,18 @@ echo "The current working directory is" ${olddir}
 #
 if ( ! -d ${diff_map2_dir} ) then
     ${proc_2dx}/protest "The diffmap2 project directory does not exist: ${diff_map2_dir}"
- endif
+endif
 #
 set map1 = "map1"
 set map2 = "map2"
+#
+if ( ! -d diffmap ) then
+    echo "::The directory diffmap does not exist and therefore will be created."
+    mkdir diffmap
+endif
 # get the unit cell size of the 2nd map 
 set realcell_map2 = `grep " realcell[ =]"  ${diff_map2_dir}/merge/2dx_merge.cfg  | grep "set" | awk '{print $4}' |  sed 's/"/ /g'`
-echo ": real cell ${map2}: ${realcell_map2}"
+echo ":real cell ${map2}: ${realcell_map2}"
 #
 if ( ${Calc_from_zstarrange} == "y" ) then
   set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
@@ -275,6 +285,9 @@ echo "<<@progress: 24>>"
 if( ${unitcell_equal} == 1 ) then
     python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
 else
+    python ${bin_2dx}/diffmap/mixed_merge_list.py 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
+    #mix and merge both conoformation to find out what differences are significant
+    source ${proc_2dx}/2dx_diffmap_mixed_merge.com 
     python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     ${proc_2dx}/linblock "the unit cell is not equal"
     #cp APH/avrg2D_${map1}.hkl APH/avrg2D_sig1.hkl 

@@ -642,9 +642,11 @@ if( ${unitcell_equal} == 0 ) then
         ${proc_2dx}/linblock "Determine variance between the mixed merge sets"
         #############################################################################
         set merge_aph = diffmap/mixed_merge1.aph
+        python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph} 
         set postfix = "mixed_merge1"
         source ${proc_2dx}/2dx_from_merge2map.com
         set merge_aph = diffmap/mixed_merge2.aph
+        python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph}
         set postfix = "mixed_merge2"
         source ${proc_2dx}/2dx_from_merge2map.com
         set map_mixed1 = map_mixed_merge1
@@ -964,7 +966,11 @@ eot
 ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #############################################################################
 #
-python ${proc_2dx}/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap}
+if ( "${diffmap_det_significance}" == "y" && ${unitcell_equal} == 0 ) then
+    python ${bin_2dx}/diffmap/2dx_plot_significant_diffmap.py  ${map1}_sig.mrc ${map2}_sig.mrc ${map_mixed1}.mrc ${map_mixed2}.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap}
+else
+    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap}
+endif
 #
 #
 #############################################################################

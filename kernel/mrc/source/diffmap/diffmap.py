@@ -449,6 +449,16 @@ def write_hkl_file(merged_reflections, filename):
 			print("%s" % line)
 			hkl_file.write("%s\n" % line)
 
+def write_aph_file(reflection_list, filename):
+	with open(filename,'w') as aph_file:
+		aph_file.write('      1001\n')
+		for ref in reflection_list:
+	                #param_labels =  ('h', 'k', 'z', 'amp', 'phase', 'number', 'iq', 'weight', 'background', 'ctf', 'fom')
+                        line= '  {0:4d}  {1:4d}  {2:6.4}     {3:6.6}    {4:6.6}           {5:6d}  {6:2d}  {7:6.6}    {8:4.2}    {9:2.3}    '.format(ref.h, ref.k, ref.z ,ref.amp, ref.phase, ref.number, ref.iq, ref. weight, ref.background, ref.ctf)
+			print("%s" % line)
+			aph_file.write("%s\n" % line)
+
+
 def write_sym_hkl_file(merged_reflections, filename):
 	with open(filename,'w') as hkl_file:
 		for ref in merged_reflections:

@@ -110,13 +110,11 @@ class MRCImage:
 		else:
 			sys.exit('Error: The mode in the image header was not read!')
 	
-def scaleImages(mrcImage1, mrcImage2):
-	image1 = mrcImage1.image
-	image2 = mrcImage2.image
-	m = max((np.absolute(image1)).max(),(np.absolute(image2)).max())
+def scaleImages(mrc_image_list):
+        m = max([ np.absolute(mrcImage.image).max() for mrcImage in mrc_image_list])
 	print('Max Intensity in the images is: '+str(m))
-	mrcImage1.image = image1/m
-	mrcImage2.image = image2/m
+        for mrcImage in mrc_image_list:
+            mrcImage.image/m
 	return m 
 
 def cropImage(mrcImage, width, height):
@@ -207,13 +205,11 @@ def minmax(value1, value2):
     else:
         return [value2, value1]
 
-def cutImages(mrcImage1, mrcImage2):
-	im1 = mrcImage1.image
-	im2 = mrcImage2.image
-	im1[im1<0] = 0
-	im2[im2<0] = 0
-	mrcImage1.image = im1
-	mrcImage2.image = im2
+def cutImages(mrc_image_list):
+    for mrc_image in mrc_image_list:
+        im = mrc_image.image
+        im[im<0] = 0.0
+	mrc_image.image = im
 
 def saveImage(mrcImage):
 	image = mrcImage.image
@@ -222,23 +218,42 @@ def saveImage(mrcImage):
 	plt.imsave(filename, image,  vmin=None, vmax=None, cmap=plt.cm.jet, format='pdf', origin='lower')
  	return image
 
+def getDiffmap(mrc_image1, mrc_image2):
+    """returns the difference map of the two images"""
+    im1 = mrc_image1.image  
+    im2 = mrc_image2.image
+    diffmap = im1-im2
+    return diffmap
 
 
-def plotImage(mrcImage):
-	image = mrcImage.image
-	fg =  plt.figure()
-	title = mrcImage.name
+def significantDifferences(mrc_image1, mrc_image2, mrc_mixed1, mrc_mixed2):
+    """determines which differences are significant base on the mixed merge data set """
+    im1 = mrc_image1.image  
+    im2 = mrc_image2.image  
+    mix1 = mrc_mixed1.image  
+    mix2 = mrc_mixed2.image
+    diffmap = im1-im2
+    variance = mix1-mix2
+    diffmap[abs(diffmap)<abs(variance)] = 0.0
+    return diffmap
+
+def plotImage(image, crange=0.0,title=""):
+        plt.figure()
 	plt.title(title)
-	plt.imshow(image)
+        if crange > 0.0:
+	    norm = colors.Normalize(vmin=0.0, vmax=crange) 
+	    plt.imshow(image, norm=norm)
+        else:
+	    plt.imshow(image)
         plt.colorbar()
-	return image
+
+def plotMRCImage(mrcImage,crange=0.0):
+	image = mrcImage.image
+	plotImage(image, crange, mrcImage.name) 	
+        return image
 
 
-def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2, mapName1="map1", mapName2="map2", colormap="jet"):
-	contour = mrcImage1.image
-	image1 = mrcDiff1.image
-	image2 = mrcDiff2.image
-	diffmap = image1-image2
+def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="jet"):
 	max_range = max(diffmap.max(),abs(diffmap.min()))
 	norm = colors.Normalize(vmin=-max_range, vmax=max_range) 
 	print('max_range is '+str(max_range))
@@ -255,43 +270,6 @@ def plotDiffmap(mrcImage1, mrcDiff1, mrcDiff2, mapName1="map1", mapName2="map2",
 	#plt.contour(image2, [0], colors='b')
 	plt.hold(False)
 	plt.savefig(filename)
+        plt.show()
 	return diffmap
-
-
-
-
-if __name__ == '__main__':
-	no_args = len(sys.argv)
-	if no_args < 4:
-		sys.exit('Usage: python '+sys.argv[0]+' <map1> <map1-sig> <map2-sig>')
-	map1_filepath=sys.argv[1]
-	diffmap1_filepath=sys.argv[2]
-	diffmap2_filepath=sys.argv[3]
-	header = []
-	with open(map1_filepath,'r') as mrcFile:
-		 im1 = MRCImage(mrcFile)	
-	with open(diffmap1_filepath,'r') as mrcFile:
-		 im1sig = MRCImage(mrcFile)	
-	with open(diffmap2_filepath,'r') as mrcFile:
-		 im2sig = MRCImage(mrcFile)
-        [width, height] = cropImages(im1sig,im2sig)
-        cropImage(im1, width, height)
-	scaleImages(im1sig,im2sig)
-	cutImages(im1sig,im2sig)
-	plotImage(im1sig)
-	saveImage(im1sig)
-	plotImage(im2sig)
-	saveImage(im2sig)
-	if no_args < 6:
-	    plotDiffmap(im1,im1sig,im2sig)
-	elif no_args == 6:
-	    plotDiffmap(im1,im1sig,im2sig, sys.argv[4], sys.argv[5])
-        else:
-	    plotDiffmap(im1,im1sig,im2sig, sys.argv[4], sys.argv[5], sys.argv[6])
-	plt.show()
-
-	
-
-	
-
 	

@@ -28,7 +28,7 @@ if __name__ == '__main__':
 	saveImage(images[0])
 	plotImage(images[1].image, max_val, "map2")
 	saveImage(images[1])
-        contour = images[0].image
+        contour = im1.image
         diffmap = getDiffmap(images[0],images[1])
 	if no_args < 6:
 	    plotDiffmap(contour,diffmap)

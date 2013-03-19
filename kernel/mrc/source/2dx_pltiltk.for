@@ -386,7 +386,7 @@ C
 C
         YTPOS=+30.0
         CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
-        CALL P2K_STRING('Image distribution by tilt angles, in asymetric triangle.',57,0.0)
+        CALL P2K_STRING('Image distribution by tilt angles, in asymmetric triangle.',57,0.0)
         YTPOS=YTPOS-10.0
         CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
         CALL P2K_STRING('Symbol size represents significance of the image in the 3D dataset.',67,0.0)

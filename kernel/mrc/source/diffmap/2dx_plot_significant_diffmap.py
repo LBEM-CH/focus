@@ -12,7 +12,22 @@ if __name__ == '__main__':
 	map2_filepath=sys.argv[2]
 	map_mixed1_filepath=sys.argv[3]
 	map_mixed2_filepath=sys.argv[4]
-	header = []
+        if no_args >= 7:
+            map1_name = sys.argv[5]
+            print("::map 1 name: "+map1_name)
+            map2_name = sys.argv[6]
+            print("::map 2 name: "+map2_name)
+        else:
+            # this is to allow plotting without title
+            map1_name = ""
+            map2_name = ""
+        if no_args > 7:
+            colormap = sys.argv[7]
+        else:
+            colormap = "jet"
+	shift = False
+        if no_args >= 9:
+            shift = bool(sys.argv[8])
 	with open(map1_filepath,'r') as mrcFile:
 		 im1 = MRCImage(mrcFile)	
 	with open(map2_filepath,'r') as mrcFile:
@@ -27,22 +42,21 @@ if __name__ == '__main__':
         mrc_images = [im1,im2,im_mixed1,im_mixed2]
 	max_val = scaleImages(mrc_images)
 	cutImages(mrc_images)
-	plotImage(im1.image, max_val,"map1")
-	saveImage(im1)
-	plotImage(im2.image, max_val,"map1")
-	saveImage(im2)
-        contour = im1.image
+        if shift == True:
+            print "shifting images half a unit cell size in x"
+            mrc_images = shiftImagesHalfX(mrc_images)
+	plotImage(mrc_images[0].image, max_val, map1_name)
+	saveImage(mrc_images[0])
+	plotImage(mrc_images[1].image, max_val, map2_name)
+	saveImage(mrc_images[1])
+        contour = mrc_images[0].image
         diffmap = significantDifferences(mrc_images[0], mrc_images[1], mrc_images[2], mrc_images[3])
-        variance = getDiffmap(im_mixed1,im_mixed2)
+        variance = getDiffmap(mrc_images[2],mrc_images[3])
         raw_diffmap = getDiffmap(mrc_images[0],mrc_images[1])
-        plotImage(variance, max_val, "variance")
-        plotImage(raw_diffmap, max_val, "diffmap raw")
-	if no_args < 7:
-	    plotDiffmap(contour, diffmap)
-	elif no_args == 7:
-	    plotDiffmap(contour, diffmap, sys.argv[5], sys.argv[6])
-        else:
-	    plotDiffmap(contour, diffmap, sys.argv[5], sys.argv[6], sys.argv[7])
+        plotImage(variance, 0.0, "variance")
+        plotImage(raw_diffmap, 0.0, "diffmap raw")
+	    
+        plotDiffmap(contour, diffmap, map1_name, map2_name, colormap)
 	plt.show()
 
 	

@@ -7,6 +7,7 @@ import scipy.misc
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.pylab as plab
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 class MRCImage:
 
@@ -211,6 +212,35 @@ def cutImages(mrc_image_list):
         im[im<0] = 0.0
 	mrc_image.image = im
 
+def shiftImage(image, xshift, yshift):
+    """shifts the image by x shift and y shift"""
+    im_xshift = np.roll(image, xshift,axis=1)
+    im_xyshift = np.roll(im_xshift, yshift,axis=0)
+    return im_xyshift
+
+
+def shiftImages(mrc_image_list, xshift, yshift):
+    """shifts the images in the list by x shift and y shift"""
+    for mrc_image in mrc_image_list:
+        im = shiftImage(mrc_image.image, xshift, yshift)
+	mrc_image.image = im
+    return mrc_image_list
+
+def shiftHalfUnitCellX(image):
+    width = np.size(image,1)
+    half_x = width/2
+    im_shifted = shiftImage(image, half_x, 0)
+    return im_shifted
+
+def shiftImagesHalfX(mrc_image_list):
+    """shifts all images in the list half a unit cell in x direction"""
+    for mrc_image in mrc_image_list:
+        im = shiftHalfUnitCellX(mrc_image.image)
+	mrc_image.image = im
+    return mrc_image_list
+
+
+
 def saveImage(mrcImage):
 	image = mrcImage.image
 	title = mrcImage.name
@@ -237,7 +267,22 @@ def significantDifferences(mrc_image1, mrc_image2, mrc_mixed1, mrc_mixed2):
     diffmap[abs(diffmap)<abs(variance)] = 0.0
     return diffmap
 
-def plotImage(image, crange=0.0,title=""):
+def addScaleBar(axes):
+    "adds a scale bar to the figure and removes the ticks"
+    axes.get_xaxis().set_visible(False)
+    axes.get_yaxis().set_visible(False)
+    bar = AnchoredSizeBar(axes.transData, 20, '10 $\AA$',loc=4, sep=5, frameon=False)
+    axes.add_artist(bar)
+
+def scaleTicks(axes):
+    "the ticks have to be scaled by a factor of 2, since we plot CCP4 2 * (unit cell size - unti cell size % 4)"
+    xticks = axes.get_xticks()/2
+    yticks = axes.get_yticks()/2
+    axes.set_xticklabels(xticks)
+    axes.set_yticklabels(yticks)
+    axes.set_xlabel('$\AA$')
+
+def plotImage(image, crange=0.0, title="", plot_scalebar=False):
         plt.figure()
 	plt.title(title)
         if crange > 0.0:
@@ -245,6 +290,11 @@ def plotImage(image, crange=0.0,title=""):
 	    plt.imshow(image, norm=norm)
         else:
 	    plt.imshow(image)
+        ax = plt.axes()
+        if plot_scalebar:
+            addScaleBar(ax)
+        else:
+            scaleTicks(ax)
         plt.colorbar()
 
 def plotMRCImage(mrcImage,crange=0.0):
@@ -253,16 +303,21 @@ def plotMRCImage(mrcImage,crange=0.0):
         return image
 
 
-def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="jet"):
-	max_range = max(diffmap.max(),abs(diffmap.min()))
+def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="jet", plot_scalebar=False):
+        max_range = max(diffmap.max(),abs(diffmap.min()))
 	norm = colors.Normalize(vmin=-max_range, vmax=max_range) 
 	print('max_range is '+str(max_range))
 	title = mapName1+' - '+mapName2
 	filename = title+'.pdf'
 	fig = plt.figure()
 	plt.title(title)
-	plt.hold(True)
+        plt.hold(True)
 	plt.imshow(diffmap, origin='upper', norm=norm)
+        ax = plt.axes()
+        if plot_scalebar:
+            addScaleBar(ax)
+        else:
+            scaleTicks(ax)
         #if(colormap == "rwb")
         plt.set_cmap(colormap)
 	plt.colorbar()

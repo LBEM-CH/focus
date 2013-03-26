@@ -11,8 +11,15 @@ if __name__ == '__main__':
 	map1_filepath=sys.argv[1]
 	diffmap1_filepath=sys.argv[2]
 	diffmap2_filepath=sys.argv[3]
-	header = []
-	with open(map1_filepath,'r') as mrcFile:
+        map1_name = ""
+        map2_name = ""
+        if no_args >= 6:
+            map1_name = sys.argv[4]
+            map2_name = sys.argv[5]
+	shift = False
+        if no_args >= 8:
+            shift = bool(sys.argv[7])
+        with open(map1_filepath,'r') as mrcFile:
 		 im1 = MRCImage(mrcFile)	
 	with open(diffmap1_filepath,'r') as mrcFile:
 		 im1sig = MRCImage(mrcFile)	
@@ -24,18 +31,21 @@ if __name__ == '__main__':
 	max_val = scaleImages(images)
         print "maxval is "+str(max_val)
 	cutImages(images)
-	plotImage(images[0].image, max_val, "map1")
+        if shift == True:
+            print "shifting images half a unit cell size in x"
+            images = shiftImagesHalfX(images)
+	plotImage(images[0].image, max_val, map1_name)
 	saveImage(images[0])
-	plotImage(images[1].image, max_val, "map2")
+	plotImage(images[1].image, max_val, map2_name)
 	saveImage(images[1])
         contour = im1.image
         diffmap = getDiffmap(images[0],images[1])
 	if no_args < 6:
-	    plotDiffmap(contour,diffmap)
+            plotDiffmap(contour, diffmap, sys.argv[4])
 	elif no_args == 6:
-	    plotDiffmap(contour,diffmap, sys.argv[4], sys.argv[5])
+	    plotDiffmap(contour, diffmap, sys.argv[4], sys.argv[5])
         else:
-	    plotDiffmap(contour,diffmap, sys.argv[4], sys.argv[5], sys.argv[6])
+	    plotDiffmap(contour, diffmap, sys.argv[4], sys.argv[5], sys.argv[6])
 	plt.show()
 
 	

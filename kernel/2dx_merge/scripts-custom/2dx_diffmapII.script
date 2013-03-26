@@ -459,7 +459,7 @@ if ( ! -e APH/sym2D_${map2}_sig.hkl ) then
   ${proc_2dx}/protest "ERROR occured."
 endif
 #
-#############################################################################
+############################################################################
 ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D run"
 #############################################################################  
 #
@@ -475,7 +475,7 @@ ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${map1} , ${date}
 #CELL ${realcell_a} ${realcell_b} ${ALAT} 90.0 90.0 ${realang}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY 1 
+SYMMETRY ${CCP4_SYM} 
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}
 FILE ${infile}
@@ -491,7 +491,17 @@ expand
 write ${map1}.mtz
 end
 eot
+#TODO: This is still just a test
+#${bin_ccp4}/sftools << eot
+#read ${map1}.mtz
+#calc P col PHI = col 2 3.14159 +
+#delete col 2
+#write ${map1}_shifted.mtz
+#END
+#eot
 #
+#\rm -f ${map1}.mtz 
+#cp ${map1}_shifted.mtz ${map1}.mtz
 # sigmap1
 set infile = APH/sym2D_${map1}_sig.hkl
 set outfile = SCRATCH/${map1}_sig.mtz
@@ -501,7 +511,7 @@ ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map1_name} , ${date}
 #CELL ${realcell_a} ${realcell_b} ${ALAT} 90.0 90.0 ${realang}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY 1 
+SYMMETRY ${CCP4_SYM} 
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}
 FILE ${infile}
@@ -527,7 +537,7 @@ ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
 #CELL ${realcell_map2_a} ${realcell_map2_b} ${ALAT} 90.0 90.0 ${realang}
 CELL ${realcell_map2} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY 1
+SYMMETRY ${CCP4_SYM}
 LABOUT ${LABOUTval}
 CTYPOUT ${CTYPOUTval}
 FILE ${infile}
@@ -557,7 +567,7 @@ set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($1 - ($1 % 4
 set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($2 -  ($2 % 4)) } END { print s }'`
 set xlim1 = `echo ${grid_a} | awk '{ s = $1 - 1} END { print s }'`
 set ylim1 = `echo ${grid_b} | awk '{ s = $1 - 1} END { print s }'`
-#echo  ": The unit cell was cropped to ${grid_a}, ${grid_b}, with the limit ${xlim1} and ${ylim1}" 
+echo  ":: The unit cell was cropped to ${grid_a}, ${grid_b}, with the limit ${xlim1} and ${ylim1}" 
 
 #set grid2_a = `echo ${realcell_map2_a} | sed 's/,/ /g' | awk '{ s = 10 * int($1)  } END { print s }'`
 #set grid2_b = `echo ${realcell_map2_b} | sed 's/,/ /g' | awk '{ s = 10 * int($1)  } END { print s }'`
@@ -817,7 +827,9 @@ if( ${unitcell_equal} == 0 ) then
 #
 #
 endif
-
+#
+#
+#
 if( "${diffmap_two_by_two}" == "y" ) then
     ${bin_ccp4}/mapmask mapin ${map1}.map mapout ${map1}.map <<eof
         XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0
@@ -962,14 +974,24 @@ ${map2}_sig.mrc
 SCRATCH/${map2}_sig.mrc
 eot
 
+
+#
+# SHIFT by 180 degrees in u direction for plane groups
+# TODO: check for which plane groups
+set shift_180_x = 0 
+if ( ${SYM} == 'p4212' ) then
+    ${proc_2dx}/linblock  "plane group is P4212"
+    set shift_180_x = 1
+endif
+#
 #############################################################################
 ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #############################################################################
 #
 if ( "${diffmap_det_significance}" == "y" && ${unitcell_equal} == 0 ) then
-    python ${bin_2dx}/diffmap/2dx_plot_significant_diffmap.py  ${map1}_sig.mrc ${map2}_sig.mrc ${map_mixed1}.mrc ${map_mixed2}.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap}
+    python ${bin_2dx}/diffmap/2dx_plot_significant_diffmap.py  ${map1}_sig.mrc ${map2}_sig.mrc ${map_mixed1}.mrc ${map_mixed2}.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap} ${shift_180_x}
 else
-    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap}
+    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap} ${shift_180_x}
 endif
 #
 #

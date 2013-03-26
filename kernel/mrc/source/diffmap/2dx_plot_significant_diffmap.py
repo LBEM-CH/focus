@@ -27,7 +27,7 @@ if __name__ == '__main__':
             colormap = "jet"
 	shift = False
         if no_args >= 9:
-            shift = bool(sys.argv[8])
+            shift = int(sys.argv[8])
 	with open(map1_filepath,'r') as mrcFile:
 		 im1 = MRCImage(mrcFile)	
 	with open(map2_filepath,'r') as mrcFile:

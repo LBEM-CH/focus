@@ -235,6 +235,23 @@ def average_reflection_by_idx(reflections, index):
 	avrg_reflection = AvramphsReflection(h, k, l, combamp, combphase, n, var, fom)
 	return avrg_reflection
 
+def get_weighted_amplitudes(reflections):
+    """
+    returns a list of weighted and ctf corrected reflections for the given list of reflections
+    the assumption is that the list belongs to data for one miller index
+    """
+    amp = array([ref.amp for ref in reflections])
+    ctf = array([ref.ctf for ref in reflections])
+    back = array([ref.background for ref in reflections])
+    weight = ctf**2/back**2
+    sumampw = sum(weight)
+    amp_ctf_corrected = amp*abs(ctf)/back**2
+    amp_weighted = amp_ctf_corrected/sumampw
+    return amp_weighted
+
+
+
+
 def merge_reflection(reflections):
 	n = len(reflections)
 	amp = array([ref.amp for ref in reflections])
@@ -386,11 +403,12 @@ def determine_significance_indices(reflections1, reflections2, confidence=99.0):
 	for key in sorted(reflections1):
 		if key in sorted(reflections2):
 			ref_no_compared += 1
-			a =  array([ref.amp/abs(ref.ctf) for ref in reflections1[key]])
-                        b =  array([ref.amp/abs(ref.ctf) for ref in reflections2[key]])
+                        amps_w_1 = get_weighted_amplitudes(reflections1[key])
+                        amps_w_2 = get_weighted_amplitudes(reflections2[key])
+                        #b =  array([ref.amp/abs(ref.ctf) for ref in reflections2[key]])
 			#[k2_a, p_normal_a] = stats.mstats.normaltest(a,None)
 			#[k2_b, p_normal_b] = stats.mstats.normaltest(b,None)
-			[t, p] = stats.ttest_ind(a, b)
+			[t, p] = stats.ttest_ind(amps_w_1, amps_w_2)
 			if p <= p_threshold:
 				#print('p = '+str(p))
 				#print('t = '+str(t))

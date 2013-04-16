@@ -949,7 +949,7 @@ C
         allocate(LIST%REFLECTION(LIST%n)%MINDEX(size(REF)))
         LIST%REFLECTION(LIST%n)%MINDEX=REF
       
-      END
+      END SUBROUTINE
 
       END MODULE     
 

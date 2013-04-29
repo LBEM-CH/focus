@@ -42,21 +42,25 @@ if __name__ == '__main__':
         else:
             planegroup = 'p1'
         
-        sym1 = Symmetry(planegroup)
-        sym_refs1 = sym1.symmetrize(merged_refs1)
-        sym2 = Symmetry(planegroup)
-        sym_refs2 = sym2.symmetrize(merged_refs2)
-        
-	if no_args > 7:
-	    #[sig_refs1, sig_refs2] = determine_significant_reflections(sym_refs1,sym_refs2, float(sys.argv[7]))
-            [sig_idx1, sig_idx2] = determine_significance_indices(sym_refs1, sym_refs2, float(sys.argv[7]))
-	else:
-	    #[sig_refs1, sig_refs2] = determine_significant_reflections(sym_refs1, sym_refs2)
-            [sig_idx1, sig_idx2] = determine_significance_indices(sym_refs1, sym_refs2)
-        print(str(sig_idx1))
+        #sym1 = Symmetry(planegroup)
+        #sym_refs1 = sym1.symmetrize(merged_refs1)
+        #sym2 = Symmetry(planegroup)
+        #sym_refs2 = sym2.symmetrize(merged_refs2)
+        sym_refs1 = merged_refs1
+        sym_refs2 = merged_refs2
 
-        sig_refs1 = get_significant_reflections(merged_refs1, sig_idx1)
-        sig_refs2 = get_significant_reflections(merged_refs2, sig_idx2)
+	if no_args > 7:
+	    [sig_refs1, sig_refs2] = determine_significance(sym_refs1,sym_refs2, float(sys.argv[7]))
+	    #[sig_refs1, sig_refs12] = determine_significance(sym_refs1,sym_refs2, 0.0)
+	    #[sig_refs2, sig_refs22] = determine_significance(sym_refs1,sym_refs2, float(sys.argv[7]))
+            #[sig_idx1, sig_idx2] = determine_significance_indices(sym_refs1, sym_refs2, float(sys.argv[7]))
+	else:
+	    [sig_refs1, sig_refs2] = determine_significance(sym_refs1, sym_refs2)
+            #[sig_idx1, sig_idx2] = determine_significance_indices(sym_refs1, sym_refs2)
+        #print(str(sig_idx1))
+
+        #sig_refs1 = get_significant_reflections(merged_refs1, sig_idx1)
+        #sig_refs2 = get_significant_reflections(merged_refs2, sig_idx2)
         
         hkl_file1 = os.path.join(file_path1,'avrg2D_sig1.hkl')
 	hkl_file2 = os.path.join(file_path1,'avrg2D_sig2.hkl')

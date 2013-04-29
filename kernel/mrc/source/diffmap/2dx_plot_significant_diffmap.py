@@ -45,9 +45,13 @@ if __name__ == '__main__':
         if shift == True:
             print "shifting images half a unit cell size in x"
             mrc_images = shiftImagesHalfX(mrc_images)
-	plotImage(mrc_images[0].image, max_val, map1_name)
+	plotImage(mrc_images[2].image, 1.0, 'map1 mixed')
+	saveImage(mrc_images[2])
+	plotImage(mrc_images[3].image, 1.0, 'map2 mixed')
+	saveImage(mrc_images[3])
+	plotImage(mrc_images[0].image, 1.0, map1_name)
 	saveImage(mrc_images[0])
-	plotImage(mrc_images[1].image, max_val, map2_name)
+	plotImage(mrc_images[1].image, 1.0, map2_name)
 	saveImage(mrc_images[1])
         contour = mrc_images[0].image
         diffmap = significantDifferences(mrc_images[0], mrc_images[1], mrc_images[2], mrc_images[3])
@@ -57,6 +61,7 @@ if __name__ == '__main__':
         plotImage(raw_diffmap, 0.0, "diffmap raw")
 	    
         plotDiffmap(contour, diffmap, map1_name, map2_name, colormap)
+        #plotTwoContours(contour, mrc_images[1].image, diffmap, map1_name, map2_name, colormap)
 	plt.show()
 
 	

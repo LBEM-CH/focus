@@ -35,14 +35,14 @@ if __name__ == '__main__':
         if shift == True:
             print "shifting images half a unit cell size in x"
             images = shiftImagesHalfX(images)
-	plotImage(images[0].image, max_val, map1_name)
+	plotImage(images[0].image, 1.0, map1_name)
 	saveImage(images[0])
-	plotImage(images[1].image, max_val, map2_name)
+	plotImage(images[1].image, 1.0, map2_name)
 	saveImage(images[1])
         contour = images[2].image
         diffmap = getDiffmap(images[0],images[1])
 	if no_args < 6:
-            plotDiffmap(contour, diffmap, sys.argv[4])
+            plotDiffmap(contour, diffmap)
 	elif no_args == 6:
 	    plotDiffmap(contour, diffmap, sys.argv[4], sys.argv[5])
         else:

@@ -115,7 +115,7 @@ def scaleImages(mrc_image_list):
         m = max([ np.absolute(mrcImage.image).max() for mrcImage in mrc_image_list])
 	print('Max Intensity in the images is: '+str(m))
         for mrcImage in mrc_image_list:
-            mrcImage.image/m
+            mrcImage.image = mrcImage.image/m
 	return m 
 
 def cropImage(mrcImage, width, height):
@@ -161,6 +161,8 @@ def cropImages(mrcImage1, mrcImage2):
         height1 = mrcImage1.ny
         width2 = mrcImage2.nx
         height2 = mrcImage2.ny
+        print(": image 1 size:"+str(np.shape(mrcImage1.image)))
+        print(": image 2 size:"+str(np.shape(mrcImage2.image)))
         if width1 == width2 and height1 == height2:
             #no cropping needed
             return (width1, height1)
@@ -304,6 +306,8 @@ def plotMRCImage(mrcImage,crange=0.0):
 
 
 def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="jet", plot_scalebar=False):
+        #DEBUG:
+        #max_range = 0.07
         max_range = max(diffmap.max(),abs(diffmap.min()))
 	norm = colors.Normalize(vmin=-max_range, vmax=max_range) 
 	print('max_range is '+str(max_range))
@@ -323,6 +327,34 @@ def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="je
 	plt.colorbar()
 	plt.contour(contour, [0])
 	#plt.contour(image2, [0], colors='b')
+	plt.hold(False)
+	plt.savefig(filename)
+        plt.show()
+	return diffmap
+
+def plotTwoContours(contour, contour2, diffmap, mapName1="map1", mapName2="map2", colormap="jet", plot_scalebar=False):
+        #DEBUG:
+        #max_range = 0.07
+        max_range = max(diffmap.max(),abs(diffmap.min()))
+	norm = colors.Normalize(vmin=-max_range, vmax=max_range) 
+	print('max_range is '+str(max_range))
+	title = mapName1+' - '+mapName2
+	filename = title+'.pdf'
+	fig = plt.figure()
+	plt.title(title)
+        plt.hold(True)
+	plt.imshow(diffmap, origin='upper', norm=norm)
+        ax = plt.axes()
+        if plot_scalebar:
+            addScaleBar(ax)
+        else:
+            scaleTicks(ax)
+        #if(colormap == "rwb")
+        plt.set_cmap(colormap)
+	plt.colorbar()
+	plt.contour(contour, [0], colors='r')
+	#plt.contour(image2, [0], colors='b')
+	plt.contour(contour2, [0], colors='b')
 	plt.hold(False)
 	plt.savefig(filename)
         plt.show()

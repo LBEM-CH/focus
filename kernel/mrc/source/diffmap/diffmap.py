@@ -318,27 +318,37 @@ def average_significant_reflections(reflections, sig_indices):
 
 
 def determine_significance(reflections1, reflections2, confidence=99.0):
-	#p_threshold = (100.0-confidence)/100.0
-	p_threshold = 1.0 
+	p_threshold = (100.0-confidence)/100.0
+	#p_threshold = 1.0 
         ref_no_compared = 0
         ref_no_significant = 0
 	ref_unmatched = 0
 	merged_reflections1 = []
 	merged_reflections2 = []
+	nonsig_indices = []
 	for key in sorted(reflections1):
 		if key in sorted(reflections2):
 			ref_no_compared += 1
-			a =  array([ref.amp/abs(ref.ctf) for ref in reflections1[key]])
-                        b =  array([ref.amp/abs(ref.ctf) for ref in reflections2[key]])
+                        amps_w_1 = get_weighted_amplitudes(reflections1[key])
+                        amps_w_2 = get_weighted_amplitudes(reflections2[key])
 			#[k2_a, p_normal_a] = stats.mstats.normaltest(a,None)
 			#[k2_b, p_normal_b] = stats.mstats.normaltest(b,None)
-			[t, p] = stats.ttest_ind(a, b)
+			[t, p] = stats.ttest_ind(amps_w_1, amps_w_2)
 			if p <= p_threshold:
 				#print('p = '+str(p))
 				#print('t = '+str(t))
 				merged_reflections1.append(average_reflection_by_idx(reflections1[key],key))
 				merged_reflections2.append(average_reflection_by_idx(reflections2[key],key))
 				ref_no_significant += 1
+                        else:
+                            ref1 = average_reflection_by_idx(reflections1[key],key)
+                            ref2 = average_reflection_by_idx(reflections2[key],key)
+                            amp = (ref1.amp + ref2.amp)/2
+                            ref1.amp = amp
+                            ref2.amp = amp
+			    merged_reflections1.append(ref1)
+			    merged_reflections2.append(ref2)
+                            nonsig_indices.append(key)
 		else:
 			ref_unmatched +=1
 	# addinng unmatched reflections	
@@ -357,7 +367,11 @@ def determine_significance(reflections1, reflections2, confidence=99.0):
 		
 	merged_reflections1 = sorted(merged_reflections1,  key=attrgetter('h','k','l'))
 	merged_reflections2 = sorted(merged_reflections2,  key=attrgetter('h','k','l'))
-	
+        
+        #DEBUG:
+        print("NON SIGNIFICANT REFLECTIONS")
+        print(nonsig_indices)
+
 	return [merged_reflections1, merged_reflections2]
 
 def get_significant_reflections(reflections, sig_indices):
@@ -372,7 +386,19 @@ def get_significant_reflections(reflections, sig_indices):
     averaged_reflections = average_reflections_by_idx(sig_reflections)
 
     return averaged_reflections
- 
+
+def average_nonsignificant_reflections(reflections1, reflections2, indices):
+    "returns the significant reflection list"
+    sig_reflection = {}
+    idx_length = len(reflections.keys()[0])
+    if  idx_length == 3:
+        sig_reflections = {k: reflections[k] for k in sig_indices if k in reflections}
+    elif idx_length == 2:
+        sig_reflections = {k: reflections[(k[0],k[1])] for k in sig_indices if (k[0],k[1]) in reflections}
+    averaged_reflections = average_reflections_by_idx(sig_reflections)
+
+    return averaged_reflections
+
 
 
 def determine_significant_reflections(reflections1, reflections2, confidence=99.0):

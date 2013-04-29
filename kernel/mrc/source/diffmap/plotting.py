@@ -174,10 +174,11 @@ def cropImages(mrcImage1, mrcImage2):
         d2_height = d_height/2
         if d2_width > 0:
             if d_width % 2 > 0:
-                istart = d2_width
-            else:
                 istart = d2_width-1
-            iend = -d2_width-1
+            else:
+                istart = d2_width
+            iend = -d2_width
+            print(": width difference: "+str(d_width)+" start: "+str(istart)+" end: "+str(iend))
             if width1 > width_min:
                 mrcImage1.image = mrcImage1.image[:,istart:iend]
                 #mrcImage1.image = mrcImage1.image[istart:iend,:]
@@ -187,10 +188,11 @@ def cropImages(mrcImage1, mrcImage2):
                 mrcImage2.nx = width_min
         if d2_height > 0:
             if d_height % 2 > 0:
-                istart = d2_height
-            else:
                 istart = d2_height-1
-            iend = -d2_height-1
+            else:
+                istart = d2_height
+            iend = -d2_height
+            print(": height difference: "+str(d_height)+" start: "+str(istart)+" end: "+str(iend))
             if height1 > height_min:
                 mrcImage1.image = mrcImage1.image[istart:iend,:]
                 mrcImage1.ny = height_min

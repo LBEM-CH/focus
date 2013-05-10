@@ -271,10 +271,57 @@ if ( ${merge_modus} == "2D" ) then
     \mv -f 2dx_avrgamphs.phares.txt LOGS
     # echo "# IMAGE: LOGS/2dx_avrgamphs.phares.txt <TXT: Phase residual statistics>" >> LOGS/${scriptname}.results
   endif
+  echo ":: "
+  echo ":: The last column shows the average phase residual in that resolution range,"
+  echo ":: which is the mean weighted squared distance of the phase values from the averaged value."
+  echo ":: (90 deg = random)"
+  echo ":: "
 endif
 \rm -f LOGS/avramphs.table.txt
 #
 echo "<<@progress: 26>>"
+#
+if ( ${merge_modus} == "2D" ) then
+  #
+  if ( ${TWOFOLD} == "T" ) then
+#############################################################################
+    ${proc_2dx}/linblock "fomstats - to calculate FOM statistics"
+    #############################################################################  
+    #
+    setenv IN  APH/avrg2D.hkl
+    setenv OUT APH/avrg2D_fomstat.hkl
+    setenv OUT2 SCRATCH/fomstats_statistics.dat
+    #
+    \rm -f APH/avrg2D_fomstat.hkl
+    \rm -f SCRATCH/fomstats_statistics.dat
+    #
+    ${bin_2dx}/fomstats.exe << eot
+100
+F               !CUTOFFS
+90 90           !IMIN,IMAX
+${realcell} ${realang}        !A,B,GAMMA
+${TWOFOLD} F F           !TWOFOLD,IHSCR,IKSCR
+${avrgamphsRESlocal} ${avrgamphsNUMBER}             !RESOL, IBAND (# OF BINS)
+eot
+    echo ":: "
+    echo ":: FOMSTATS output:"
+    echo ":: "
+    cat SCRATCH/fomstats_statistics.dat | sed 's/^/::/g'
+    echo ":: "
+    echo ":: The last column shows the average distance of the averaged phase values"
+    echo ":: from the symmetry-constrained target values of 0 or 180 degrees."
+    echo ":: (45 deg = random)"
+    echo ":: "
+    echo "# IMAGE-IMPORTANT: APH/avrg2D_fomstat.hkl <APH: FOMSTATS HKL output>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: SCRATCH/fomstats_statistics.dat <TXT: FOMSTATS statistics>" >> LOGS/${scriptname}.results
+  else
+    #############################################################################
+    ${proc_2dx}/linblock "fomstats is not used, since the symmetry ${SYM} does not require ist."
+    #############################################################################  
+    #
+  endif
+  #
+endif
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_centric2 - to correct phases to 0 or 180 for 2D run"

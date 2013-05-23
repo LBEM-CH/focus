@@ -124,6 +124,7 @@ ${proc_2dx}/lin "Gathering statistics"
 set tmp = `wc -l 2dx_merge_dirfile.dat`
 set tmp_num_lines = `echo ${tmp} | awk '{ print $1 }'`
 #
+cat 2dx_merge_dirfile.dat | sort | ${bin_2dx}/2dx_statistics_file.exe > SCRATCH/2dx_statistics_file.dat
 #
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
@@ -183,6 +184,8 @@ if ( ${merge_modus} == '2D' ) then
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_2D.txt
   echo "Overall phase residual [deg]:# ${tmp_overall_phase_residual_2D}" >> Summary_Statistics_2D.txt
   # echo "Overall weighted phase residual [deg]:# ${tmp_overall_weighted_phase_residual_2D}" >> Summary_Statistics_2D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_2D.txt
+  cat SCRATCH/2dx_statistics_file.dat >> Summary_Statistics_2D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_2D.txt
   #
   echo "::"
@@ -265,7 +268,8 @@ eot
   # echo "Overall R-factor:# ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
   echo "Overall weighted R-factor:# ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  #
+  cat SCRATCH/2dx_statistics_file.dat >> Summary_Statistics_3D.txt
+  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   #
   #
   echo "::"

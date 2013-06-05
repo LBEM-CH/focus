@@ -13,9 +13,12 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 92
+# SORTORDER: 47
 #
 # MANUAL: This script allows to reunbend all images, using the merged dataset as synthetical reference
+#
+# MANUAL: <B>BEWARE: Using a 3D structure as reference for iterative unbending introduces massive reference bias. The IQ statistics may look better, but the results might actually be non-interpretable and therefore worse. A clean FOM weighting of conventionally unbent images (using the Fourier filtered image as reference) may give more reliable data in the end.  Use this script at your own risk, and make sure you backup all data before, so that you can get back to the earlier state.</B>
+#
 #
 # MANUAL: Before you can use this script, you should have all available images merged into a reliable 2D or 3D data set. You should then backup the current state of the project (Custom Script "Backup Project"). Then switch all selected images to "Use Synthetic Reference", by running the custom script "Refresh Databases", in which you can for all images set the variable SYN_Unbending to "1". 
 #

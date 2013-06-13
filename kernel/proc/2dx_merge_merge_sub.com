@@ -147,7 +147,7 @@ if ( ${merge_modus} == "3D" ) then
   #
   set IMQLABEL = 1
   set RMAX = ${RESMAX}
-  set IQMAX = 5
+  set IQMAX = 8
   set RGOOD = 0.5
   #
   ${bin_2dx}/2dx_merge_compilePLT.exe << eot

@@ -37,14 +37,16 @@ if __name__ == '__main__':
 	with open(map_mixed2_filepath,'r') as mrcFile:
 		 im_mixed2 = MRCImage(mrcFile)
         [width, height] = cropImages(im1,im2)
+        #contour = im1.image
         cropImage(im_mixed1, width, height)
         cropImage(im_mixed2, width, height)
         mrc_images = [im1,im2,im_mixed1,im_mixed2]
-	max_val = scaleImages(mrc_images)
-	cutImages(mrc_images)
         if shift == True:
             print "shifting images half a unit cell size in x"
             mrc_images = shiftImagesHalfX(mrc_images)
+        contour = mrc_images[0].image
+	max_val = scaleImages(mrc_images)
+	cutImages(mrc_images)
 	plotImage(mrc_images[2].image, 1.0, 'map1 mixed')
 	saveImage(mrc_images[2])
 	plotImage(mrc_images[3].image, 1.0, 'map2 mixed')
@@ -53,15 +55,14 @@ if __name__ == '__main__':
 	saveImage(mrc_images[0])
 	plotImage(mrc_images[1].image, 1.0, map2_name)
 	saveImage(mrc_images[1])
-        contour = mrc_images[0].image
-        diffmap = significantDifferences(mrc_images[0], mrc_images[1], mrc_images[2], mrc_images[3])
-        variance = getDiffmap(mrc_images[2],mrc_images[3])
+        #contour = mrc_images[0].image
+        varmap = getDiffmap(mrc_images[2],mrc_images[3])
         raw_diffmap = getDiffmap(mrc_images[0],mrc_images[1])
-        plotImage(variance, 0.0, "variance")
-        plotImage(raw_diffmap, 0.0, "diffmap raw")
+        diffmap = significantDifferences(raw_diffmap, varmap, 1.0)
+        plotImage(varmap, 0.0, "variation")
+        plotImage(raw_diffmap, 0.0, "raw difference map")
 	    
         plotDiffmap(contour, diffmap, map1_name, map2_name, colormap)
-        #plotTwoContours(contour, mrc_images[1].image, diffmap, map1_name, map2_name, colormap)
 	plt.show()
 
 	

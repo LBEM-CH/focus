@@ -127,9 +127,10 @@ endif
 set map1 = "map1"
 set map2 = "map2"
 #
-if ( ! -d diffmap ) then
+set diffmap_dir = diffmap
+if ( ! -d ${diffmap_dir} ) then
     echo "::The directory diffmap does not exist and therefore will be created."
-    mkdir diffmap
+    mkdir ${diffmap_dir}
 endif
 # get the unit cell size of the 2nd map 
 set realcell_map2 = `grep " realcell[ =]"  ${diff_map2_dir}/merge/2dx_merge.cfg  | grep "set" | awk '{print $4}' |  sed 's/"/ /g'`
@@ -203,7 +204,12 @@ if( ${unitcell_equal} == 0 ) then
         set diffmap_sig_algorithm = "Mixed Merge"
     endif
 endif
-#TODO: delete the following line again after mlok1
+#
+if( "${diffmap_sig_algorithm}" == "t-Test" ||  "${diffmap_sig_algorithm}" == "t-Welch" ) then
+    set diffmap_sig_class = "statistical"
+else
+    set diffmap_sig_class = "empirical"
+endif
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_avrgamphs - only to calculate FOM"
@@ -290,18 +296,43 @@ ${proc_2dx}/linblock "2dx_diffmap_sub - avrgamphs with t-test"
 #
 echo "<<@progress: 24>>"
 #
+#TODO: set ${diffmap_nsplits} in GUI
+set diffmap_nsplits = 3
 #
-if( "${diffmap_sig_algorithm}" == "t-Test" && ${unitcell_equal} == 1 ) then
-    ${proc_2dx}/protest "t-Test"
-    python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
-else
-    if ( "${diffmap_det_significance}" == "y") then
-        python ${bin_2dx}/diffmap/mixed_merge_list.py 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
-        #mix and merge both conoformation to find out what differences are significant
-        source ${proc_2dx}/2dx_diffmap_mixed_merge.com
+if ( "${diffmap_det_significance}" == "y" ) then
+    echo ":: 1st if"
+    if( "${diffmap_sig_class}" == "statistical"  && ${unitcell_equal} == 1 ) then
+        echo ":: 2nd if"
+        if( "${diffmap_sig_algorithm}" == "t-Welch" ) then 
+            echo ":: in if"
+            python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+        else
+            echo ":: in else"
+            ${proc_2dx}/protest "t-Test"
+        endif
+    else  
+        set diffmap_selections_dir = "${diffmap_dir}/selections"
+        rm -f ${diffmap_selections_dir}/*.dat
+        set diffmap_selection_filebase = "diffmap_split_selection" 
+        if( "${diffmap_sig_algorithm}" == "Mixed Merge" ) then
+            python ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode mix -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
+        else
+            python ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode classic -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
+        endif
+        set diffmap_selections = `find ${diffmap_selections_dir} -name ${diffmap_selection_filebase}*.dat`
+        echo "${diffmap_selections}"
+        set diffmap_merge_output_dir = ${diffmap_selections_dir} 
+        foreach selection (${diffmap_selections})
+            set diffmap_split_selection = ${selection} 
+            set diffmap_selection_stripped = `echo "${diffmap_split_selection}" | awk -F/ '{ print $NF }' `
+            set diffmap_merge_output = `echo "${diffmap_selection_stripped}" | cut -d'.' -f1`
+            echo ${diffmap_merge_output}
+            echo ${diffmap_merge_output_dir}
+            source ${proc_2dx}/2dx_diffmap_merge_selection.com
+        end
+        python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     endif
-    python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
-    ${proc_2dx}/linblock "the unit cell is not equal"
+    #${proc_2dx}/linblock "the unit cell is not equal"
     #cp APH/avrg2D_${map1}.hkl APH/avrg2D_sig1.hkl 
     #cp APH/avrg2D_${map2}.hkl APH/avrg2D_sig2.hkl
     #TODO: change all the image names for the non significant case
@@ -654,188 +685,64 @@ END
 eot
 #
 
-if( "${diffmap_sig_algorithm}" == "Mixed Merge" ) then
+if( "${diffmap_sig_class}" == "empirical" ) then
     if ( "${diffmap_det_significance}" == "y") then
-        #############################################################################
-        ${proc_2dx}/linblock "Determine variance between the mixed merge sets"
-        #############################################################################
-        set merge_aph = diffmap/mixed_merge1.aph
-        python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph} 
-        set postfix = "mixed_merge1"
-        source ${proc_2dx}/2dx_from_merge2map.com
-        set merge_aph = diffmap/mixed_merge2.aph
-        python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph}
-        set postfix = "mixed_merge2"
-        source ${proc_2dx}/2dx_from_merge2map.com
-        set map_mixed1 = map_mixed_merge1
-        if ( ! -e ${map_mixed1}.mtz ) then
-            ${proc_2dx}/protest "${map_mixed1}.mtz does not exist."
-        endif
-        \rm -f ${map_mixed1}.map 
-        #
-        ${bin_ccp4}/fft HKLIN ${map_mixed1}.mtz  MAPOUT ${map_mixed1}.map << eot
-        LABIN F1=F PHI=PHI W=FOM
-        TITLE "${RESMAX} EM map for ${map1}"
-        PROJECTION
-        AXIS X Y Z
-        SCALE F1 1.0
-        RESOLUTION ${RESMIN} ${RESMAX}
-        GRID  ${grid_a} ${grid_b} 20 
-        XYZLIM ASU
-        END
-eot
-        if( "${diffmap_two_by_two}" == "y" ) then
-            ${bin_ccp4}/mapmask mapin ${map_mixed1}.map mapout ${map_mixed1}.map <<eof
-            XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0
+        set merge2map_output_dir = ${diffmap_selections_dir}
+        set merged_selections = `find diffmap -name *.aph`
+        foreach merge_aph ($merged_selections)
+            #############################################################################
+            ${proc_2dx}/linblock "Scaling amplitudes of ${merge_aph}"
+            #############################################################################
+            python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph} 
+            set postfix = ` echo ${merge_aph} | awk -F /  '{print $NF}' | sed s/.aph//`
+            source ${proc_2dx}/2dx_from_merge2map.com
+            set map_postfix = "${merge2map_output_dir}/map_${postfix}"
+            if ( ! -e ${map_postfix}.mtz ) then
+                ${proc_2dx}/protest "${map_postfix}.mtz does not exist."
+            endif
+            \rm -f ${map_postfix}.map 
+            #
+            ${bin_ccp4}/fft HKLIN ${map_postfix}.mtz  MAPOUT ${map_postfix}.map << eot
+            LABIN F1=F PHI=PHI W=FOM
+            TITLE "${RESMAX} EM map for ${postfix}"
+            PROJECTION
+            AXIS X Y Z
+            SCALE F1 1.0
+            RESOLUTION ${RESMIN} ${RESMAX}
+            GRID  ${grid_a} ${grid_b} 20 
+            XYZLIM ASU
             END
+eot
+            if( "${diffmap_two_by_two}" == "y" ) then
+                ${bin_ccp4}/mapmask mapin ${map_postfix}.map mapout ${map_postfix}.map <<eof
+                XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0
+                END
 eof
-        endif
-        #
-        \rm -f ${map_mixed1}.mrc
-        #
+            endif
+            #
+            \rm -f ${map_postfix}.mrc
+            #
 ${bin_2dx}/labelh.exe << eot
-${map_mixed1}.map 
+${map_postfix}.map 
 2
-${map_mixed1}.mrc
+${map_postfix}.mrc
 1,0
 0
 eot
-        echo "# IMAGE-IMPORTANT: ${map_mixed1}.mrc <mixed merge map 1>" >> LOGS/${scriptname}.results
-        # 
-        set map_mixed2 = map_mixed_merge2
-        if ( ! -e ${map_mixed2}.mtz ) then
-            ${proc_2dx}/protest "${map_mixed2}.mtz does not exist."
-        endif
-        \rm -f ${map_mixed2}.map 
-        #
-        ${bin_ccp4}/fft HKLIN ${map_mixed2}.mtz  MAPOUT ${map_mixed2}.map << eot
-        LABIN F1=F PHI=PHI W=FOM
-        TITLE "${RESMAX} EM map for ${map1}"
-        PROJECTION
-        AXIS X Y Z
-        SCALE F1 1.0
-        RESOLUTION ${RESMIN} ${RESMAX}
-        GRID  ${grid_a} ${grid_b} 20 
-        XYZLIM ASU
-        END
-eot
-        # 
-        if( "${diffmap_two_by_two}" == "y" ) then
-            ${bin_ccp4}/mapmask mapin ${map_mixed2}.map mapout ${map_mixed2}.map <<eof
-            XYZLIM 0 ${xlim_2x} 0 ${ylim_2x} 0 0
-            END
-eof
-        endif
-        #
-        \rm -f ${map_mixed2}.mrc
-        #
-${bin_2dx}/labelh.exe << eot
-${map_mixed2}.map 
-2
-${map_mixed2}.mrc
-1,0
-0
-eot
-        echo "# IMAGE-IMPORTANT: ${map_mixed2}.mrc <mixed merge map 2>" >> LOGS/${scriptname}.results
-    #
-   #
+        end
+#       END FOREACH
     endif
 endif
-if( ${unitcell_equal} == 0 ) then
-##    ##############################################################################
-#    ${proc_2dx}/linblock  "mapmask - to extend the maps to unit cell size" 
-#    ##############################################################################
-#    #extend with enough space, here 40
-#    set xlim_ext = `echo ${xlim1} | awk '{ s = $1 + 40} END { print s }'`
-#    set ylim_ext = `echo ${ylim1} | awk '{ s = $1 + 40} END { print s }'`
-#    mapmask mapin  ${map1}.map mapout ${map1}_ext.map <<eof
-#    XYZLIM 0 ${xlim_ext} 0 ${ylim_ext} 0 0 
-#eof
-#    
-#    mapmask mapin  ${map1}_ext.map  mskout ${map1}.msk <<eof
-#    XYZLIM 0 ${xlim_ext} 0 ${ylim_ext} 0 0 
-#    EXTEND XTAL
-#    MASK FRAC 1.0
-#    PAD 0
-#eof
 #
-#
-#    ##############################################################################
-#    ${proc_2dx}/linblock  "maprot - cutting density and pasting it into new cell" 
-#    ##############################################################################
-#    maprot wrkin ${map1}_ext.map mskin ${map1}.msk cutout ${map1}_newcell_ext.map <<eof
-#    MODE TO
-#    CELL XTAL ${realcell_max} 20 90.0 90.0 ${realang}
-#    GRID XTAL  82 108 1 
-#    AVER
-#    ROTA POLAR 0 0 0 
-#    TRANS 0 0 0
-#eof
-#
-#
-#    ###########################################################
-#    #    CORRECTION OF GRID SAMPLING
-#    ###########################################################
-#    mapmask mapin ${map1}_newcell_ext.map mapout ${map1}_newcell_ext1.map <<eof
-#    XYZLIM 0 81 0 107 0 0 
-#    mode mapin
-#eof
-#
-#    set trans_a = `echo ${realcell_a} ${realcell_map2_a} | awk '{ s = ($1 - $2)/2.0  } END { print s }'`
-#    set trans_b = `echo ${realcell_b} ${realcell_map2_b} | awk '{ s = ($1 - $2)/2.0  } END { print s }'`
-#
-#    ##############################################################################
-#    ${proc_2dx}/linblock  "maprot - move the map to the right place" 
-#    ##############################################################################
-#    maprot mapin ${map1}_newcell_ext1.map  wrkout ${map1}_scaled.map <<eof
-#    MODE FROM
-#    CELL WORK  ${realcell_max} 20  90.0 90.0 ${realang}
-#    GRID WORK  82 108 1 
-#    XYZLIM 0 81 0 107 0 0  
-#    AVER
-#    ROTA POLAR 0 0 0 
-#    TRANS 0 0 0 
-#eof
-#
-#    ###########################################################
-#    #   CHANGING AXIS ORDER
-#    ###########################################################
-#
-#    mapmask mapin ${map1}_scaled.map mapout ${map1}_scaled.map <<eof
-#    AXIS Y X Z
-#    mode mapin
-#    XYZLIM 0 81 0 107 0 0  
-#eof
-#
-###############################################################################
-#${proc_2dx}/linblock  "npo - to create a line plot for both maps" 
-###############################################################################
-## map1
-#${bin_ccp4}/npo  MAPIN ${map1}_scaled.map PLOT ${map1}.plot <<EOF
-#TITLE   ${map1}
-#MAP SCALE 0.5
-#CONTRS SIG -3.0  to 3.0 BY ${npo_cntrs_step} 
-#MODE BELOW 0 DASHED 1 0.25 0
-#MODE BELOW ${npo_cntrs_below}  DASHED 1 0.25 0
-#SECTS 0 0
-#PLOT 
-#EOF
-##
-#
+#TODO: set this by the GUI
+set diffmap_threshold_method = "max"
 ##############################################################################
-#${proc_2dx}/linblock "laserplot - to create contour plots"
+${proc_2dx}/linblock  "2dx_variationmap - merge all variation maps to one map" 
 ##############################################################################
-##
-## map1
-#\rm -f PS/${map1}.ps
-#${bin_2dx}/laserplot.exe -outputfile=PS/${map1}.ps ${map1}.plot
-#\rm -f ${map1}.plot
-#echo "# IMAGE-IMPORTANT: PS/${map1}.ps <PS: map 1>"  >> LOGS/${scriptname}.results
-##
-#
-#
+if( "${diffmap_det_significance}" == "y" && "${diffmap_sig_class}" == "empirical" ) then
+    set varmap = "${diffmap_selections_dir}/varmap.mrc"  
+    python ${bin_2dx}/diffmap/2dx_variationmap.py ${diffmap_selections_dir} -m ${diffmap_threshold_method} -o ${varmap} 
 endif
-#
 #
 #
 if( "${diffmap_two_by_two}" == "y" ) then
@@ -985,21 +892,21 @@ eot
 
 #
 # SHIFT by 180 degrees in u direction for plane groups
-# TODO: check for which plane groups
-set shift_180_x = 0 
-if ( ${SYM} == 'p4212' ) then
-    ${proc_2dx}/linblock  "plane group is P4212"
-    set shift_180_x = 1
+set shift_180_x = "" 
+if ( ${SYM} == 'p4212' ||  ${SYM} == 'p121_b' || ${SYM} == 'p2221b' ) then
+    set shift_180_x = "-s"
 endif
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #############################################################################
 #
-if ( "${diffmap_det_significance}" == "y" && "${diffmap_sig_algorithm}" == "Mixed Merge" ) then
-    python ${bin_2dx}/diffmap/2dx_plot_significant_diffmap.py  ${map1}_sig.mrc ${map2}_sig.mrc ${map_mixed1}.mrc ${map_mixed2}.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap} ${shift_180_x}
+#TODO: set the diffmap_var_factor form GUI
+set diffmap_var_factor = 1.0
+if ( "${diffmap_det_significance}" == "y" && "${diffmap_sig_class}" == "empirical" ) then
+    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py  --varmap ${varmap} --variation-factor ${diffmap_var_factor} --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} {map1}_sig.mrc ${map2}_sig.mrc  
 else
-    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py ${map1}.mrc ${map1}_sig.mrc ${map2}_sig.mrc ${diff_map1_name} ${diff_map2_name} ${diffmap_colormap} ${shift_180_x}
+    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py  --contour-map ${map1}.mrc --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} {map1}_sig.mrc ${map2}_sig.mrc  
 endif
 #
 #

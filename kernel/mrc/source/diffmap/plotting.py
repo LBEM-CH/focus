@@ -49,10 +49,10 @@ class MRCImage:
 	def __init__(self, f):
 		filename = os.path.basename(f.name)
 		self.name = os.path.splitext(filename)[0]
-		self.readHeader(f)
-		self.readImage(f)
+		self.__readHeader(f)
+		self.__readImage(f)
 	
-	def readHeader(self, f):
+	def __readHeader(self, f):
 		for label in self.field_labels:
 			fmt = '='+label[1]
 			if label[1] != 'P':
@@ -76,16 +76,19 @@ class MRCImage:
 				elif label[0] == 'labels':
 					labels = []
 					fmt = '80s'
+                                        print("labels:")
 					for i in range(10):
 						bytes_read = f.read(80)
 						if not bytes_read: 
 							break
 						field = struct.unpack(fmt, bytes_read)[0]
-						labels.append(field)
-					self.__dict__.update({'lalbels':labels})
-	
-	def readImage(self, f):
-		# check if the mode was read by the header
+                                                print(str(field))
+					        labels.append(field)
+					self.__dict__.update({'labels':labels})
+
+
+	def __readImage(self, f):
+	        "check if the mode was read by the header"
 		if 'mode' in self.__dict__:
 			if self.mode == 0:
 				print('MRC image mode: '+str(self.mode))
@@ -110,7 +113,101 @@ class MRCImage:
 				print('Warning: Image dimensions: '+str(self.image.shape))
 		else:
 			sys.exit('Error: The mode in the image header was not read!')
-	
+
+
+
+        def __writeHeader(self, f):
+            "writes the header of the mrc file"
+            print('############## writing header ###############')
+            for label in self.field_labels:
+                label_key = label[0]
+                label_fmt = label[1]
+                label_value = self.__dict__.get(label[0])
+                if label_fmt != 'P':
+                    label_fmt = '='+label_fmt
+                    c_struct = struct.pack(label_fmt, label_value)
+                    f.write(c_struct)
+                else:
+                    no_elements = 0
+                    if label_key == 'extra':
+                        label_fmt = '=f'
+                        no_elements = 25
+                        for i in range(no_elements):
+                            if i < len(label_value):
+                                c_struct = struct.pack(label_fmt, label_value[i]) 
+                            else:
+                                c_struct = struct.pack(label_fmt, 0) 
+                            f.write(c_struct)
+                    elif label_key == 'labels':
+                        "label_key is now labels"
+                        label_fmt = '=80s'
+                        no_elements = 10 
+                        print(label_key)
+                        for i in range(no_elements):
+                            if i < len(label_value):
+                                line = '{0: <80}'.format(label_value[i]) 
+                            else:
+                                line = '{0: <80}'.format(' ') 
+                            c_struct = struct.pack(label_fmt, line) 
+                            f.write(c_struct)
+	    
+        def __writeImage(self, f):
+	        "writes out the image"
+		if 'mode' in self.__dict__:
+			if self.mode == 0:
+				print('MRC image mode: '+str(self.mode))
+				fmt = '%i' 
+			elif self.mode == 1:
+				print('MRC image mode: '+str(self.mode))
+				fmt = '%f' 
+			elif self.mode == 2:
+				print('MRC image mode: '+str(self.mode))
+				fmt = '%lf'
+			else:
+				raise Exception("Unsupported MRC image mode: "+self.mode)
+			self.image.tofile(f,format=fmt)
+		else:
+			sys.exit('Error: The mode in the image header was not read!')
+
+        def __update_Header(self):
+            "updates the header parameters according to the image characteristics"
+            dims = np.shape(self.image)
+            self.nx = self.mx = dims[1]
+            print('nx = '+str(self.nx))
+            self.ny = self.my = dims[0]
+            if len(dims) > 2:
+                self.nz = self.mz = dims[2]
+            else:
+                self.nz = self.mz = 1
+            #mode is kept as before
+            self.nxStart = self.nyStart = self.nzStart = 0;
+            self.amin = self.image.min() 
+            self.amax = self.image.max() 
+            self.amean = self.image.mean()
+            d = self.image-self.amean
+            self.rms = np.sqrt(np.mean(d*d))
+            
+            
+        def setImage(self, image):
+            "update the image through the specified img"
+            self.image = image
+            self.__update_Header()
+
+		    
+        def tofile(self, filename):
+            """writes the mrc image and header to the file with the specified filename"""
+            with open(filename,'wb') as f:
+                self.__writeHeader(f)
+                self.__writeImage(f)
+
+                
+
+def getImage(mrcfilepath):
+    """reads the mrc image and returns the image as numpy array"""
+    with open(mrcfilepath,'r') as mrcFile:
+        mrc = MRCImage(mrcFile)
+        return  mrc.image 
+
 def scaleImages(mrc_image_list):
         m = max([ np.absolute(mrcImage.image).max() for mrcImage in mrc_image_list])
 	print('Max Intensity in the images is: '+str(m))
@@ -259,16 +356,14 @@ def getDiffmap(mrc_image1, mrc_image2):
     diffmap = im1-im2
     return diffmap
 
+def getAbsDiffmap(image1, image2):
+    "return the absolute of the differenece of image1 and image2"
+    diffmap = image1 - image2
+    return np.abs(diffmap)
 
-def significantDifferences(mrc_image1, mrc_image2, mrc_mixed1, mrc_mixed2):
-    """determines which differences are significant base on the mixed merge data set """
-    im1 = mrc_image1.image  
-    im2 = mrc_image2.image  
-    mix1 = mrc_mixed1.image  
-    mix2 = mrc_mixed2.image
-    diffmap = im1-im2
-    variance = mix1-mix2
-    diffmap[abs(diffmap)<abs(variance)] = 0.0
+def significantDifferences(diffmap, varmap, var_factor=1.0):
+    """determines which differences are significant based on the variation map """
+    diffmap[abs(diffmap)<var_factor*abs(varmap)] = 0.0
     return diffmap
 
 def addScaleBar(axes):
@@ -313,7 +408,10 @@ def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="je
         max_range = max(diffmap.max(),abs(diffmap.min()))
 	norm = colors.Normalize(vmin=-max_range, vmax=max_range) 
 	print('max_range is '+str(max_range))
-	title = mapName1+' - '+mapName2
+        if mapName1 and mapName2:
+	    title = mapName1+' - '+mapName2
+        else:
+            title = ""
 	filename = title+'.pdf'
 	fig = plt.figure()
 	plt.title(title)
@@ -327,7 +425,7 @@ def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="je
         #if(colormap == "rwb")
         plt.set_cmap(colormap)
 	plt.colorbar()
-	plt.contour(contour, [0])
+	plt.contour(contour, [0], colors='b')
 	#plt.contour(image2, [0], colors='b')
 	plt.hold(False)
 	plt.savefig(filename)

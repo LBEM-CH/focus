@@ -16,7 +16,28 @@
 #
 # merge_aph is the input file needed
 #
-set debug = 0 
+set debug = 0
+if ( ! ($?merge2map_output_dir) ) then
+    set merge2map_output_dir = "."
+    ${proc_2dx}/protest "merge2map_output_dir not set."
+endif
+
+if ( ! -d ${merge2map_output_dir} ) then
+    mkdir -p ${merge2map_output_dir}
+    mkdir -p ${merge2map_output_dir}/APH
+    mkdir -p ${merge2map_output_dir}/LOGS
+    mkdir -p ${merge2map_output_dir}/SCRATCH
+else
+    if ( ! -d ${merge2map_output_dir}/APH ) then
+        mkdir -p ${merge2map_output_dir}/APH
+    endif
+    if ( ! -d ${merge2map_output_dir}/LOGS ) then
+        mkdir -p ${merge2map_output_dir}/LOGS
+    endif
+    if ( ! -d ${merge2map_output_dir}/SCRATCH ) then
+        mkdir -p ${merge2map_output_dir}/SCRATCH
+    endif
+endif 
 #############################################################################
 ${proc_2dx}/linblock "2dx_avrgamphs - only to calculate FOM"
 #############################################################################
@@ -36,14 +57,14 @@ if( ${debug} ) then
     echo "# IMAGE-IMPORTANT: ${merge_aph} <${merge_aph} [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
 endif
 \rm -f fort.2
-\rm -f APH/avrg2D_${postfix}.hkl
+\rm -f ${merge2map_output_dir}/APH/avrg2D_${postfix}.hkl
 \rm -f fort.3
 \rm -f fort.4
 \rm -f TMP444888.tmp
 \rm -f TMP444789.tmp
-\rm -f LOGS/avramphs_${postfix}.table.txt
+\rm -f ${merge2map_output_dir}/LOGS/avramphs_${postfix}.table.txt
 #
-${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_${postfix}.log
+${bin_2dx}/2dx_avrgamphs.exe << eot > ${merge2map_output_dir}/LOGS/2dx_avrgamphs2D_${postfix}.log
 T
 1001,${zminmaxlocal}
 8
@@ -54,11 +75,11 @@ ${max_amp_correction}
 eot
 #
 \rm -f fort.1
-\mv -f fort.2 APH/avrg2D_${postfix}.hkl
+\mv -f fort.2 ${merge2map_output_dir}/APH/avrg2D_${postfix}.hkl
 \rm -f fort.3
 \rm -f fort.4
 if ( ${debug} ) then
-    echo "# IMAGE: APH/avrg2D_${postfix}.hkl <averaged amp&phs avrg2D_${postfix}.hkl [H,K,F,P,IQ,FOM]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${merge2map_output_dir}/APH/avrg2D_${postfix}.hkl <averaged amp&phs avrg2D_${postfix}.hkl [H,K,F,P,IQ,FOM]>" >> LOGS/${scriptname}.results
 endif
 \rm -f TMP444789.tmp 
 \rm -f TMP444888.tmp
@@ -67,42 +88,42 @@ endif
 ${proc_2dx}/linblock "2dx_centric2 - to correct phases to 0 or 180 for 2D run"
 #############################################################################  
 #
-\rm -f APH/centric2D_${postfix}.hkl
-\rm -f APH/centric2D_${postfix}.hk
+\rm -f ${merge2map_output_dir}/APH/centric2D_${postfix}.hkl
+\rm -f ${merge2map_output_dir}/APH/centric2D_${postfix}.hk
 #
 ${bin_2dx}/2dx_centric2.exe << eot
-APH/avrg2D_${postfix}.hkl
-APH/centric2D_${postfix}.hkl
-APH/centric2D_${postfix}.hk
+${merge2map_output_dir}/APH/avrg2D_${postfix}.hkl
+${merge2map_output_dir}/APH/centric2D_${postfix}.hkl
+${merge2map_output_dir}/APH/centric2D_${postfix}.hk
 ${realcell},${realang}
 ${RESMIN},${RESMAX}
 ${SYM}
 eot
 #
-if ( ! -e APH/centric2D_${postfix}.hkl ) then
+if ( ! -e ${merge2map_output_dir}/APH/centric2D_${postfix}.hkl ) then
   ${proc_2dx}/protest "ERROR occured."
 endif
 
 if ( ${debug} ) then
-  echo "# IMAGE: APH/centric2D_${postfix}.hkl < centric2D_${postfix}.hkl >" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${merge2map_output_dir}/APH/centric2D_${postfix}.hkl < centric2D_${postfix}.hkl >" >> LOGS/${scriptname}.results
 endif
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_hklsym4 - to apply symmetry to APH file for 2D run"
 #############################################################################  
 #
-\rm -f APH/sym2D_${postfix}.hkl
-\rm -f APH/sym_nosort2D_${postfix}.hkl
-\rm -f APH/sym_sort2D_${postfix}.hkl
-\rm -f APH/sym_noheader2D_${postfix}.hkl
+\rm -f ${merge2map_output_dir}/APH/sym2D_${postfix}.hkl
+\rm -f ${merge2map_output_dir}/APH/sym_nosort2D_${postfix}.hkl
+\rm -f ${merge2map_output_dir}/APH/sym_sort2D_${postfix}.hkl
+\rm -f ${merge2map_output_dir}/APH/sym_noheader2D_${postfix}.hkl
 #
 # Set isig to 3, for NO SIGF BUT SET SIGF to 1.0
 set isig = 3
 #
 ${bin_2dx}/2dx_hklsym4.exe << eot
-APH/centric2D_${postfix}.hkl
-APH/sym_nosort2D_${postfix}.hkl
-APH/sym2D_${postfix}.hkl
+${merge2map_output_dir}/APH/centric2D_${postfix}.hkl
+${merge2map_output_dir}/APH/sym_nosort2D_${postfix}.hkl
+${merge2map_output_dir}/APH/sym2D_${postfix}.hkl
 ${spcgrp}
 1
 ${isig}
@@ -114,10 +135,10 @@ eot
 # CTYPOUT H H H F P W Q
 #
 if ( ${debug} ) then
-    echo "# IMAGE: APH/sym2D_${postfix}.hkl <sym2D_${postfix}.hkl after symmetrization [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${merge2map_output_dir}/APH/sym2D_${postfix}.hkl <sym2D_${postfix}.hkl after symmetrization [H,K,L,F,P,FOM,1.0]>" >> LOGS/${scriptname}.results
 endif
 #
-if ( ! -e APH/sym2D_${postfix}.hkl ) then
+if ( ! -e ${merge2map_output_dir}/APH/sym2D_${postfix}.hkl ) then
   ${proc_2dx}/protest "ERROR occured."
 endif
 #
@@ -128,9 +149,9 @@ ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D run"
 set LABOUTval = "H K L F PHI FOM"
 set CTYPOUTval = "H H H F P W"
 #
-set infile = APH/sym2D_${postfix}.hkl
-set outfile = SCRATCH/map_${postfix}.mtz
-\rm -f SCRATCH/${postfix}.mtz
+set infile = ${merge2map_output_dir}/APH/sym2D_${postfix}.hkl
+set outfile = ${merge2map_output_dir}/SCRATCH/map_${postfix}.mtz
+\rm -f ${merge2map_output_dir}/SCRATCH/${postfix}.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${postfix} , ${date}
@@ -143,16 +164,16 @@ SKIP 0
 END
 eof
 #
-\rm -f map_${postfix}.mtz 
+\rm -f ${merge2map_output_dir}/map_${postfix}.mtz 
 ${bin_ccp4}/sftools << eot
 read ${outfile} 
 merge
 expand
-write map_${postfix}.mtz
+write ${merge2map_output_dir}/map_${postfix}.mtz
 end
 eot
 #
 if( ${debug} ) then
-    echo "# IMAGE-IMPORTANT: map_${postfix}.mtz <MTZ: map_${postfix}.mtz>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${merge2map_output_dir}/map_${postfix}.mtz <MTZ: map_${postfix}.mtz>" >> LOGS/${scriptname}.results
 endif
 #

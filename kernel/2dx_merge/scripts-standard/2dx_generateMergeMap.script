@@ -489,7 +489,8 @@ LABIN F1=F  PHI=PHI W=FOM ##
 PROJECTION
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
-SYMMETRY 1 
+SYMMETRY ${CCP4_SYM}
+#SYMMETRY 1 
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${SYM}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
 GRID 200 200 1

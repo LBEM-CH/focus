@@ -36,6 +36,14 @@ set ALATnew = `echo ${ALAT} | awk '{ if ( $1 < 0 ) { s = -$1 } else { s = $1 }} 
 if ( ${ALAT} != ${ALATnew} ) then
   set ALAT = ${ALATnew}
 endif
+if ( ! ($?gridsize) ) then
+  set gridsize = "200 200 20"
+  set xyzlim = "0 199 0 199 0 0"
+  set extends = 1
+else
+  set xyzlim = "ASU"
+  set extends = 0
+endif
 #
 #############################################################################
 ${proc_2dx}/lin "ORIGTILT - to transform the APH file into merge.amp"
@@ -264,12 +272,14 @@ AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Reference map for ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID 200 200 20
-XYZLIM 0 199 0 199 0 0
+GRID ${gridsize}
+XYZLIM ${xyzlim}
 RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
+
+if( ${extends} == 1 ) then
   #
   #############################################################################
   ${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/scratch2.map"
@@ -284,7 +294,11 @@ eof
   #
   \rm -f SCRATCH/scratch1.map
   #
-  #############################################################################
+else
+  \cp SCRATCH/scratch1.map SCRATCH/scratch2.map
+  \rm -f SCRATCH/scratch1.map
+endif
+  ############################################################################
   ${proc_2dx}/lin "LABEL - to create a clean MRC file format ${refmap}"
   #############################################################################
   #
@@ -365,23 +379,27 @@ AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${symmetry}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID 200 200 20
-XYZLIM 0 199 0 199 0 0
+GRID ${gridsize}
+XYZLIM ${xyzlim}
 RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
 #
-#############################################################################
-${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/${imagename}-${symmetry}.map"
-#############################################################################
-#
-\rm -f SCRATCH/${imagename}-${symmetry}.map
-${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/${imagename}-${symmetry}.map << eof
+if( ${extends} == 1 ) then
+    #############################################################################
+    ${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/${imagename}-${symmetry}.map"
+    #############################################################################
+    #
+    \rm -f SCRATCH/${imagename}-${symmetry}.map
+    ${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/${imagename}-${symmetry}.map << eof
 XYZLIM 0 399 0 399 0 0
 KEEP
 END
 eof
+else
+    \cp SCRATCH/scratch1.map SCRATCH/${imagename}-${symmetry}.map
+endif
 #
 if ( ${create_PS} == "y" ) then
   #

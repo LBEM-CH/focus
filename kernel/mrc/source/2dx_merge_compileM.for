@@ -9,10 +9,11 @@ C
       character*200 cname1,cname2,cname3,cname4,cdir,cprocdir,cbindir
       character*200 cccp4dir,cccp4,ctmpdir,cbasedir
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
-      character*80 CIMAGENUMBER,CLATTICE,CMLMERGE
+      character*80 CIMAGENUMBER,CLATTICE,CMLMERGE,cgrid
       character*200 CFILE1,cline
       character*1 CNREFOUT,CNSHFTIN
       integer*8 imnum(10000)
+      integer stat 
 C
       write(*,'('':2dx_merge_compileM - '',
      .    ''compiling a script to generate the maps'')')
@@ -52,7 +53,18 @@ C
         write(*,'(I1,'' = Using Maximum Likelihood results'',
      .          '' where allowed'')')IMERGEML
       endif
+
+      read(*,'(A)',iostat=stat)cgrid
+      if(stat.ne.0)then
+        write(*,'('':: reached EOF '')')
+        GOTO 85
+      endif
+      write(*,'(A40)')cgrid
+      write(*,'('':: read grid size: '',A40)')cgrid
+      call shorten(cgrid,k)
+      write(11,'(''set gridsize = "'',A,''"'')')cgrid(1:k)
 C
+  85  continue
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
 C
       open(11,FILE=cname2,STATUS='NEW',ERR=900)

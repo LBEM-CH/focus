@@ -2,7 +2,7 @@ import sys
 import os
 from optparse import OptionParser
 from plotting import *
-
+from utilities import *
 
 def list_selection_maps(selection_dir):
     """lists all the mrc files in the selection directory"""
@@ -75,14 +75,6 @@ def get_varmap(varmap_list, measure, global_threshold=False):
         if global_threshold:
             varmap.fill(np.mean(varmap))
     return varmap
-
-def save_varmap(varmap, mrc, output_file):
-    "saves the map to the specified output file as an mrc file"
-    mrc.setImage(varmap)
-    mrc.tofile(output_file)
-    
-
-
     
 
 if __name__ == '__main__':
@@ -112,7 +104,7 @@ if __name__ == '__main__':
     varmap = get_varmap(varmap_list, options.measure, options.global_threshold)
     mrc_image = get_mrc_image(map_list[0])
     #varmap_output_file =  os.path.join(selection_dir, options.output_file) 
-    save_varmap(varmap, mrc_image, options.output_file)
+    save_mrc_image(varmap, mrc_image, options.output_file)
     #plotImage(varmap)
     #plt.show()
     

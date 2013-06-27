@@ -21,6 +21,9 @@ endif (NOT CMAKE_BUILD_TYPE)
 # Python files -----------------------------------------------------------------
 file(GLOB PYTHON_FILES *.py)
 
+# CShell files -----------------------------------------------------------------
+file(GLOB COM_FILES *.com)
+
 ###############################################################################
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
@@ -32,4 +35,5 @@ else(INSTALL_BIN_DIR)
 endif(INSTALL_BIN_DIR)
 
 install(FILES ${PYTHON_FILES} DESTINATION ${INSTALL_DIFFMAP_DIR})
+install(FILES ${COM_FILES} DESTINATION ${INSTALL_DIFFMAP_DIR})
 ###############################################################################

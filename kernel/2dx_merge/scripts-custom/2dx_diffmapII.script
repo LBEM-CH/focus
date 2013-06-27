@@ -190,6 +190,9 @@ set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2*$1  } END { pr
 set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2*$2  } END { print s }'`
 set realcell_map2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2*$1  } END { print s }'`
 set realcell_map2_b = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = 2*$2  } END { print s }'`
+set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($1 - ($1 % 4))  } END { print s }'`
+set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($2 -  ($2 % 4)) } END { print s }'`
+set gridsize = "${grid_a} ${grid_b} 20" 
 #set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1  } END { print s }'`
 #set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2  } END { print s }'`
 #set realcell_map2_a = `echo ${realcell_map2} | sed 's/,/ /g' | awk '{ s = $1  } END { print s }'`
@@ -205,10 +208,18 @@ if( ${unitcell_equal} == 0 ) then
     endif
 endif
 #
-if( "${diffmap_sig_algorithm}" == "t-Test" ||  "${diffmap_sig_algorithm}" == "t-Welch" ) then
+if( "${diffmap_sig_algorithm}" == "Welch's t-test" ||  "${diffmap_sig_algorithm}" == "Student's t-test" ) then
     set diffmap_sig_class = "statistical"
 else
     set diffmap_sig_class = "empirical"
+endif
+#
+if( "${diffmap_sig_algorithm}" == "Welch's t-test" ) then
+    set diffmap_domain = "fourier"
+    echo ":: Fourier"
+else
+    echo ":: Real Space"
+    set diffmap_domain = "real"
 endif
 #
 #############################################################################
@@ -234,6 +245,9 @@ echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >>
 \rm -f TMP444888.tmp
 \rm -f TMP444789.tmp
 \rm -f LOGS/avramphs_${map1}.table.txt
+#
+#TODO: check if dir exist clean up
+\cp -f APH/merge.aph APH/merge1.aph 
 # 
 ${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map1}.log
 T
@@ -267,6 +281,9 @@ echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >>
 \rm -f TMP444789.tmp
 \rm -f LOGS/avramphs_${map2}.table.txt
 #
+#TODO: check if dir exist clean up
+\cp -f ${diff_map2_dir}/merge/APH/merge.aph APH/merge2.aph 
+#
 ${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map2}.log
 T
 1001,${zminmaxlocal}
@@ -285,7 +302,7 @@ echo "# IMAGE: LOGS/2dx_avrgamphs2D_{map1}.log <LOG: 2dx_avrgamphs output for 2D
 echo "# IMAGE: APH/avrg2D_${map2}.hkl <map2  averaged amp&phs for FOM [H,K,F,P,IQ,FOM]>" >> LOGS/${scriptname}.results
 \rm -f TMP444789.tmp 
 \rm -f TMP444888.tmp
-##
+#
 ##############################################################################
 ${proc_2dx}/linblock "2dx_diffmap_sub - avrgamphs with t-test"
 #############################################################################
@@ -300,41 +317,69 @@ echo "<<@progress: 24>>"
 set diffmap_nsplits = 3
 #
 if ( "${diffmap_det_significance}" == "y" ) then
-    echo ":: 1st if"
-    if( "${diffmap_sig_class}" == "statistical"  && ${unitcell_equal} == 1 ) then
-        echo ":: 2nd if"
-        if( "${diffmap_sig_algorithm}" == "t-Welch" ) then 
-            echo ":: in if"
-            python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
-        else
-            echo ":: in else"
-            ${proc_2dx}/protest "t-Test"
-        endif
-    else  
-        set diffmap_selections_dir = "${diffmap_dir}/selections"
-        rm -f ${diffmap_selections_dir}/*.dat
-        set diffmap_selection_filebase = "diffmap_split_selection" 
-        if( "${diffmap_sig_algorithm}" == "Mixed Merge" ) then
-            python ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode mix -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
-        else
-            python ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode classic -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
-        endif
-        set diffmap_selections = `find ${diffmap_selections_dir} -name ${diffmap_selection_filebase}*.dat`
-        echo "${diffmap_selections}"
-        set diffmap_merge_output_dir = ${diffmap_selections_dir} 
-        foreach selection (${diffmap_selections})
-            set diffmap_split_selection = ${selection} 
-            set diffmap_selection_stripped = `echo "${diffmap_split_selection}" | awk -F/ '{ print $NF }' `
-            set diffmap_merge_output = `echo "${diffmap_selection_stripped}" | cut -d'.' -f1`
-            echo ${diffmap_merge_output}
-            echo ${diffmap_merge_output_dir}
+    if( "${diffmap_domain}" == "fourier"  && ${unitcell_equal} == 1 ) then
+        #Welch's t-test
+        python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+    else #real space
+        if ( "${diffmap_sig_class}" == "empirical" ) then
+            set diffmap_selections_dir = "${diffmap_dir}/selections"
+            rm -f ${diffmap_selections_dir}/*.dat
+            set diffmap_selection_filebase = "diffmap_split_selection" 
+            if( "${diffmap_sig_algorithm}" == "Mixed Merge" ) then
+                python ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode mix -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
+            else
+                python ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode classic -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
+            endif
+            set diffmap_selections = `find ${diffmap_selections_dir} -name ${diffmap_selection_filebase}*.dat`
+            echo "${diffmap_selections}"
+            set diffmap_merge_output_dir = ${diffmap_selections_dir} 
+            foreach selection (${diffmap_selections})
+                set diffmap_split_selection = ${selection} 
+                set diffmap_selection_stripped = `echo "${diffmap_split_selection}" | awk -F/ '{ print $NF }' `
+                set diffmap_merge_output = `echo "${diffmap_selection_stripped}" | cut -d'.' -f1`
+                echo ${diffmap_merge_output}
+                echo ${diffmap_merge_output_dir}
+                source ${proc_2dx}/2dx_diffmap_merge_selection.com
+            end
+        else # Student's t-Test
+            set diffmap_genmaps_dir = "${diffmap_dir}/maps"
+            set varmap = "${diffmap_dir}/varmap.mrc"
+            rm -rf ${diffmap_genmaps_dir}
+            mkdir -p ${diffmap_genmaps_dir}
+            set olddir = $PWD
+            cd ..
+            set basedir = $PWD
+            cd ${olddir}
+            set diffmap_maps_dir1 = "${diffmap_genmaps_dir}/conformation1" 
+            set diffmap_t_test_maps_dir = ${diffmap_maps_dir1} 
+            set diffmap_t_test_selection = "2dx_merge_dirfile.dat" 
+            source  ${bin_2dx}/diffmap/2dx_diffmap_t-test.com
+            set diffmap_maps_dir2 = "${diffmap_genmaps_dir}/conformation2" 
+            set diffmap_t_test_maps_dir = ${diffmap_maps_dir2} 
+            set basedir = ${diff_map2_dir}
+            set diffmap_t_test_selection = "${diff_map2_dir}/merge/2dx_merge_dirfile.dat"
+            source  ${bin_2dx}/diffmap/2dx_diffmap_t-test.com
+            python ${bin_2dx}/diffmap/2dx_diffmap_t-test.py --confidence ${diff_map_confidence} -o ${varmap} ${diffmap_maps_dir1} ${diffmap_maps_dir2}
+            #redo merge
+            ${proc_2dx}/linblock "remerging map 1"
+            set diffmap_split_selection = "2dx_merge_dirfile.dat"
+            set diffmap_merge_output = merge 
+            set diffmap_merge_output_dir = APH 
             source ${proc_2dx}/2dx_diffmap_merge_selection.com
-        end
-        python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+            # redo merge for map2
+            cd ${diff_map2_dir}/merge
+            echo ":: current working dir $PWD"
+            ${proc_2dx}/linblock "remerging map 2"
+            set diffmap_split_selection = "2dx_merge_dirfile.dat"
+            set diffmap_merge_output = merge 
+            set diffmap_merge_output_dir = "${diff_map2_dir}/merge/APH" 
+            source ${proc_2dx}/2dx_diffmap_merge_selection.com
+            cd ${olddir}
+        endif 
+        python ${bin_2dx}/diffmap/2dx_diffmap_real.py  APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     endif
-    #${proc_2dx}/linblock "the unit cell is not equal"
-    #cp APH/avrg2D_${map1}.hkl APH/avrg2D_sig1.hkl 
-    #cp APH/avrg2D_${map2}.hkl APH/avrg2D_sig2.hkl
+else
+    python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     #TODO: change all the image names for the non significant case
 endif
 #
@@ -602,8 +647,6 @@ ${proc_2dx}/linblock  "Inverse fft to get map"
 #TODO: have it determined by the unit cell size
 #set grid_a = `echo ${realcell_a} | sed 's/,/ /g' | awk '{ s = 10 * int($1)  } END { print s }'`
 #set grid_b = `echo ${realcell_b} | sed 's/,/ /g' | awk '{ s = 10 * int($1) } END { print s }'`
-set grid_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($1 - ($1 % 4))  } END { print s }'`
-set grid_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = 2 * int($2 -  ($2 % 4)) } END { print s }'`
 set xlim1 = `echo ${grid_a} | awk '{ s = $1 - 1} END { print s }'`
 set ylim1 = `echo ${grid_b} | awk '{ s = $1 - 1} END { print s }'`
 echo  ":: The unit cell was cropped to ${grid_a}, ${grid_b}, with the limit ${xlim1} and ${ylim1}" 
@@ -644,7 +687,6 @@ RESOLUTION ${RESMIN} ${RESMAX}
 #GRID SAMPLE 20 
 GRID  ${grid_a} ${grid_b} 20 
 XYZLIM ASU
-#XYZLIM 0 ${xlim1} 0 ${ylim1} 0 0 
 END
 eot
 #
@@ -662,7 +704,6 @@ RESOLUTION ${RESMIN} ${RESMAX}
 #GRID SAMPLE 20 
 GRID  ${grid_a} ${grid_b} 20 
 XYZLIM ASU 
-XYZLIM 0 ${xlim1} 0 ${ylim1} 0 0 
 END
 eot
 #
@@ -740,7 +781,7 @@ set diffmap_threshold_method = "max"
 ${proc_2dx}/linblock  "2dx_variationmap - merge all variation maps to one map" 
 ##############################################################################
 if( "${diffmap_det_significance}" == "y" && "${diffmap_sig_class}" == "empirical" ) then
-    set varmap = "${diffmap_selections_dir}/varmap.mrc"  
+    set varmap = "${diffmap_dir}/varmap.mrc"  
     python ${bin_2dx}/diffmap/2dx_variationmap.py ${diffmap_selections_dir} -m ${diffmap_threshold_method} -o ${varmap} 
 endif
 #
@@ -903,10 +944,10 @@ ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #
 #TODO: set the diffmap_var_factor form GUI
 set diffmap_var_factor = 1.0
-if ( "${diffmap_det_significance}" == "y" && "${diffmap_sig_class}" == "empirical" ) then
-    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py  --varmap ${varmap} --variation-factor ${diffmap_var_factor} --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} {map1}_sig.mrc ${map2}_sig.mrc  
+if ( "${diffmap_det_significance}" == "y" &&  "${diffmap_domain}" == "real" ) then
+   python ${bin_2dx}/diffmap/2dx_plot_diffmap.py  --varmap ${varmap} --variation-factor ${diffmap_var_factor} --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} ${map1}_sig.mrc ${map2}_sig.mrc  
 else
-    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py  --contour-map ${map1}.mrc --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} {map1}_sig.mrc ${map2}_sig.mrc  
+    python ${bin_2dx}/diffmap/2dx_plot_diffmap.py  --contour-map ${map1}.mrc --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} ${map1}_sig.mrc ${map2}_sig.mrc  
 endif
 #
 #

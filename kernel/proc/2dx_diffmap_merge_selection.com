@@ -12,8 +12,6 @@
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
-#TODO: set selection outside
-#set selection = $1
 set scriptAfile = "SCRATCH/2dx_merge_selection_script.com"
 #
 set genref = "0"

@@ -37,12 +37,13 @@ if ( ${ALAT} != ${ALATnew} ) then
   set ALAT = ${ALATnew}
 endif
 if ( ! ($?gridsize) ) then
-  set gridsize = "200 200 20"
+  set local_gridsize = "200 200 20"
   set xyzlim = "0 199 0 199 0 0"
-  set extends = 1
+  set extends = "y"
 else
+  set local_gridsize = ${gridsize} 
   set xyzlim = "ASU"
-  set extends = 0
+  set extends = "n"
 endif
 #
 #############################################################################
@@ -272,14 +273,14 @@ AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Reference map for ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID ${gridsize}
+GRID ${local_gridsize}
 XYZLIM ${xyzlim}
 RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
-
-if( ${extends} == 1 ) then
+echo ":: ${extends}"
+if( ${extends} == "y" ) then
   #
   #############################################################################
   ${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/scratch2.map"
@@ -379,14 +380,14 @@ AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${symmetry}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID ${gridsize}
+GRID ${local_gridsize}
 XYZLIM ${xyzlim}
 RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
 #
-if( ${extends} == 1 ) then
+if( ${extends} == "y" ) then
     #############################################################################
     ${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/${imagename}-${symmetry}.map"
     #############################################################################
@@ -397,9 +398,9 @@ XYZLIM 0 399 0 399 0 0
 KEEP
 END
 eof
-else
-    \cp SCRATCH/scratch1.map SCRATCH/${imagename}-${symmetry}.map
-endif
+#else
+#    \cp SCRATCH/scratch1.map SCRATCH/${imagename}-${symmetry}.map
+#endif
 #
 if ( ${create_PS} == "y" ) then
   #

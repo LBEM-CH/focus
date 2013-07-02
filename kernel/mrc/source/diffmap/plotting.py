@@ -216,6 +216,8 @@ def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="je
         else:
             title = ""
 	filename = title+'.pdf'
+        if os.path.isdir("diffmap"):
+            filename = os.path.join("diffmap", filename)
 	fig = plt.figure()
 	plt.title(title)
         plt.hold(True)

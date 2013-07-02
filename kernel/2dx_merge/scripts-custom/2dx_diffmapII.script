@@ -931,6 +931,8 @@ SCRATCH/${map2}_sig.mrc
 eot
 
 
+#TODO: let this be a user variable
+#set diffmap_shift180 = 'y'
 #
 # SHIFT by 180 degrees in u direction for plane groups
 set shift_180_x = "" 

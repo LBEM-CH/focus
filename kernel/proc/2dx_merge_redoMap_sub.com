@@ -21,7 +21,7 @@ set symmetry = 'p1'
 set spcgrp = 1
 set CCP4_SYM = 1
 set ABANG = `echo $realang | awk '{s=180-$1} END {print s}'`
-echo ABANG = ${ABANG}
+echo "ABANG = ${ABANG}"
 set IAQP2 = 0
 set IVERBOSE = 1
 set LOGOUTPUT = F
@@ -41,7 +41,7 @@ if ( ! ($?gridsize) ) then
   set xyzlim = "0 199 0 199 0 0"
   set extends = "y"
 else
-  set local_gridsize = ${gridsize} 
+  set local_gridsize = "${gridsize}"
   set xyzlim = "ASU"
   set extends = "n"
 endif
@@ -398,10 +398,10 @@ XYZLIM 0 399 0 399 0 0
 KEEP
 END
 eof
-#else
-#    \cp SCRATCH/scratch1.map SCRATCH/${imagename}-${symmetry}.map
-#endif
-#
+else
+    \cp SCRATCH/scratch1.map SCRATCH/${imagename}-${symmetry}.map
+endif
+
 if ( ${create_PS} == "y" ) then
   #
   #############################################################################

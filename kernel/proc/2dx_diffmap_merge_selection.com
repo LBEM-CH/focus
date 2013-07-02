@@ -111,7 +111,7 @@ else
 endif
 #
 if ( -e 2dx_origtiltk-reflections.log ) then
-  \mv -f 2dx_origtiltk-reflections.log diffmap/2dx_origtiltk-${diffmap_merge_output}.log
+  \mv -f 2dx_origtiltk-reflections.log LOGS/2dx_origtiltk-${diffmap_merge_output}.log
 endif
 #
 #if ( -e SCRATCH/2dx_origtiltk_jrefl.txt ) then

@@ -51,6 +51,7 @@
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
+# DISPLAY: map_without_ctf
 #
 # REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
 #$end_local_vars
@@ -107,6 +108,7 @@ set ctf_ttf = ""
 set npo_cntrs_step = ""
 set npo_cntrs_below = ""
 set MergeIQMAX = ""
+set map_without_ctf = ""
 #
 #$end_vars
 #
@@ -223,6 +225,19 @@ if ( ${ML_doit} == 'y' ) then
   echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
   set prefix = "ML_"
   set prename = "ML "
+  #
+  source ${proc_2dx}/2dx_generateMap_sub.com
+  #
+endif
+#
+if ( ${map_without_ctf} == 'y' ) then
+  echo ":: "
+  ${proc_2dx}/linblock "Generating map without CTF correction"
+  echo ":: "
+  set aphfile = APH/${imagename}.fou.limit.aph
+  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase File without CTF correction>" >> LOGS/${scriptname}.results
+  set prefix = "no_ctf_"
+  set prename = "no ctf "
   #
   source ${proc_2dx}/2dx_generateMap_sub.com
   #

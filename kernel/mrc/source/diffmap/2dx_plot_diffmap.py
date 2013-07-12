@@ -23,6 +23,15 @@ if __name__ == '__main__':
             type="float",
             default=1.0, 
             help="factor with which the variation is multiplied when comparing to the raw differences")
+    parser.add_option("--plot-range", 
+            type="float",
+            help="specfies the range that is plotted in the diffmap i.e. [-val, val]")
+    parser.add_option("--plot-scalebar", 
+            action="store_true", default=False,
+            help="plots the map with a scale bar instead of the ticks on the axes")
+    parser.add_option("--plot-map-only", 
+            action="store_true", default=False,
+            help="plots only the difference map without color bar and title etc.")
     parser.add_option("--colormap", 
             default="jet", 
             help="colormap used for coloring the difference map.")
@@ -64,12 +73,23 @@ if __name__ == '__main__':
         #TODO: check if varmap is scaled correctly
         varmap = getImage(options.varmap)
         raw_diffmap = getDiffmap(images[0],images[1])
+        plotImage(raw_diffmap, 0.0, "raw difference map")
         diffmap = significantDifferences(raw_diffmap, varmap, options.variation_factor)
         plotImage(varmap, 0.0, "variation")
-        plotImage(raw_diffmap, 0.0, "raw difference map")
     else:
         diffmap = getDiffmap(images[0],images[1])
-    plotDiffmap(contour, diffmap, options.map1_name, options.map2_name, options.colormap)
+    plot_options = {}
+    if options.map1_name and options.map2_name:
+        plot_options['map1_name'] = options.map1_name
+        plot_options['map2_name'] = options.map2_name
+    plot_options['colormap'] = options.colormap
+    if options.plot_range: 
+        plot_options['max_range'] = options.plot_range
+    if options.plot_scalebar:
+        plot_options['plot_scalebar'] = True
+    if options.plot_map_only:
+        plot_options['map_only'] = True
+    plotDiffmap(contour, diffmap, plot_options)
     plt.show()
 
 	

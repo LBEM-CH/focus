@@ -198,6 +198,12 @@ def plotImage(image, crange=0.0, title="", plot_scalebar=False):
         else:
             scaleTicks(ax)
         plt.colorbar()
+        if title:
+	    filename = title+'.pdf'
+            if os.path.isdir("diffmap"):
+                filename = os.path.join("diffmap", filename)
+	    plt.savefig(filename)
+
 
 def plotMRCImage(mrcImage,crange=0.0):
 	image = mrcImage.image
@@ -205,21 +211,31 @@ def plotMRCImage(mrcImage,crange=0.0):
         return image
 
 
-def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="jet", plot_scalebar=False):
-        #DEBUG:
-        #max_range = 0.07
-        max_range = max(diffmap.max(),abs(diffmap.min()))
+def plotDiffmap(contour, diffmap, options):
+        if 'max_range' in options:
+            max_range = options['max_range']
+        else:
+            max_range = max(diffmap.max(),abs(diffmap.min()))
 	norm = colors.Normalize(vmin=-max_range, vmax=max_range) 
 	print('max_range is '+str(max_range))
-        if mapName1 and mapName2:
-	    title = mapName1+' - '+mapName2
+        if 'map1_name' in options and 'map2_name' in options:
+            title = options['map1_name']+' - '+options['map2_name']
+	    filename = title+'.pdf'
         else:
             title = ""
-	filename = title+'.pdf'
-        if os.path.isdir("diffmap"):
-            filename = os.path.join("diffmap", filename)
+            filename = 'diffmap.pdf'
+        if 'plot_scalebar' in options:
+            plot_scalebar = options['plot_scalebar']
+        else:
+            plot_scalebar = False
+        if 'map_only' in options:
+            map_only = options['map_only']
+        else:
+            map_only = False
+
 	fig = plt.figure()
-	plt.title(title)
+        if title and not map_only:
+	    plt.title(title)
         plt.hold(True)
 	plt.imshow(diffmap, origin='upper', norm=norm)
         ax = plt.axes()
@@ -227,12 +243,14 @@ def plotDiffmap(contour, diffmap, mapName1="map1", mapName2="map2", colormap="je
             addScaleBar(ax)
         else:
             scaleTicks(ax)
-        #if(colormap == "rwb")
-        plt.set_cmap(colormap)
-	plt.colorbar()
+        if 'colormap' in options:
+            plt.set_cmap(options['colormap'])
+        if not map_only:
+            plt.colorbar()
 	plt.contour(contour, [0], colors='b')
-	#plt.contour(image2, [0], colors='b')
 	plt.hold(False)
+        if os.path.isdir("diffmap"):
+            filename = os.path.join("diffmap", filename)
 	plt.savefig(filename)
         plt.show()
 	return diffmap

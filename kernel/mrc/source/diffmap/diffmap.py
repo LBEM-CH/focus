@@ -319,7 +319,8 @@ def average_significant_reflections(reflections, sig_indices):
 
 def determine_significance(reflections1, reflections2, confidence=99.0):
 	p_threshold = (100.0-confidence)/100.0
-	#p_threshold = 1.0 
+	#p_threshold = 1.0
+        ref_no_phases_diff = 0
         ref_no_compared = 0
         ref_no_significant = 0
 	ref_unmatched = 0
@@ -331,6 +332,10 @@ def determine_significance(reflections1, reflections2, confidence=99.0):
 			ref_no_compared += 1
                         amps_w_1 = get_weighted_amplitudes(reflections1[key])
                         amps_w_2 = get_weighted_amplitudes(reflections2[key])
+                        ref_avrg1 = average_reflection_by_idx(reflections1[key],key)
+                        ref_avrg2 = average_reflection_by_idx(reflections2[key],key)
+                        if ref_avrg1.phase - ref_avrg2.phase > 1.0:
+                            ref_no_phases_diff += 1
 			#[k2_a, p_normal_a] = stats.mstats.normaltest(a,None)
 			#[k2_b, p_normal_b] = stats.mstats.normaltest(b,None)
 			[t, p] = stats.ttest_ind(amps_w_1, amps_w_2)
@@ -371,6 +376,8 @@ def determine_significance(reflections1, reflections2, confidence=99.0):
         #DEBUG:
         print("NON SIGNIFICANT REFLECTIONS")
         print(nonsig_indices)
+        print("REFLECTIONS WITH DIFFERING PHASES")
+        print(ref_no_phases_diff)
 
 	return [merged_reflections1, merged_reflections2]
 

@@ -11,19 +11,20 @@ if __name__ == '__main__':
 	no_args = len(sys.argv)
 	reflection_list1 = parse_aph_file(aph_file1)
 	reflection_list2 = parse_aph_file(aph_file2)
-	amp1 = get_reference_amplitude(reflection_list1)
-	amp2 = get_reference_amplitude(reflection_list2)
-	amp_scale = amp1/amp2
-
+	
+        #THIS IS HOW ORIGTILT SCALES AMPLITUDES
+        #amp1 = get_reference_amplitude(reflection_list1)
+	#amp2 = get_reference_amplitude(reflection_list2)
+	#amp_scale = amp1/amp2
         #print(':: amplitude scale: '+str(amp_scale))
-	reflection_list2 = scale_amplitudes(reflection_list2, amp_scale)
+	#reflection_list2 = scale_amplitudes(reflection_list2, amp_scale)
         #print(":: reference amplitude 1: "+str(amp1))
         #print(":: reference amplitude 2: "+str(amp2))
-	amp2_scaled = get_reference_amplitude(reflection_list2)
+	#amp2_scaled = get_reference_amplitude(reflection_list2)
         #print(":: reference amplitude 2 scaled: "+str(amp2_scaled))
 	
-        #TODO: the amplitudes should be scaled to have the same mean
-        #[reflection_list1, reflection_list2] = scale_all_amplitudes(reflection_list1, reflection_list2)
+        #the amplitudes are scaled to have the same mean
+        [reflection_list1, reflection_list2] = scale_all_amplitudes(reflection_list1, reflection_list2)
 
         if no_args == 3:
 	    merged_refs1 = merge_reflections(reflection_list1)
@@ -61,6 +62,8 @@ if __name__ == '__main__':
 
         #sig_refs1 = get_significant_reflections(merged_refs1, sig_idx1)
         #sig_refs2 = get_significant_reflections(merged_refs2, sig_idx2)
+        #TODO: should this be done here, or before determining the significance?
+        [sig_refs1, sig_refs2] = scale_all_amplitudes(sig_refs1, sig_refs2)
         
         hkl_file1 = os.path.join(file_path1,'avrg2D_sig1.hkl')
 	hkl_file2 = os.path.join(file_path1,'avrg2D_sig2.hkl')

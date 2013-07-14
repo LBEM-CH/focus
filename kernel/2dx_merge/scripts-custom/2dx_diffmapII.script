@@ -53,7 +53,8 @@
 # DISPLAY: diffmap_colormap
 # DISPLAY: diffmap_two_by_two
 # DISPLAY: diffmap_fixed_plotrange 
-# DISPLAY: diffmap_plotrange 
+# DISPLAY: diffmap_plotrange
+# DISPLAY: diffmap_plot_clean 
 #
 #$end_local_vars
 #
@@ -99,6 +100,7 @@ set diffmap_colormap = ""
 set diffmap_two_by_two = ""
 set diffmap_fixed_plotrange = ""
 set diffmap_plotrange = ""
+set diffmap_plot_clean = ""
 #
 #$end_vars
 #
@@ -955,6 +957,9 @@ else
 endif
 if ( ${diffmap_fixed_plotrange} == "y" ) then
     set diffmap_plot_options = "${diffmap_plot_options} --plot-range ${diffmap_plotrange}"
+endif
+if ( ${diffmap_plot_clean} == "y" ) then
+    set diffmap_plot_options = "${diffmap_plot_options} --plot-map-only "
 endif
 python ${bin_2dx}/diffmap/2dx_plot_diffmap.py ${diffmap_plot_options}  ${map1}_sig.mrc ${map2}_sig.mrc  
 #

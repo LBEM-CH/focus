@@ -1023,7 +1023,10 @@ eot
   #############################################################################
   #
   \rm -f     SCRATCH/cor${imagename}.mrc
+  #
+  # UNBENDING
   setenv IN  SCRATCH/cor${imagename}.notap.mrc
+  #setenv IN  ${imagename}.mrc
   setenv OUT SCRATCH/cor${imagename}.mrc
   ${bin_2dx}/2dx_taperedgek.exe << eot
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER

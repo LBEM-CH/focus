@@ -419,6 +419,7 @@ QWidget *mainWindow::setupDirectoryView(const QDir &dir, const QString &savePath
 
   dirView = new QTreeView(this);
   dirView->setModel(sortModel);
+  dirView->setSelectionMode(QAbstractItemView::ExtendedSelection);
   dirView->setSortingEnabled(true);
   dirView->setAllColumnsShowFocus(true);
   loadProjectState();

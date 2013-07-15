@@ -209,7 +209,7 @@ if( ${unitcell_equal} == 0 ) then
     echo ":: The unit cell map1: ${realcell} map2: ${realcell_map2}"
     if("${diffmap_sig_algorithm}" == "t-Test" ) then
         echo ":: The t-Test can only be used when the unit cell of both maps have the same size"
-        echo ":: Therefore the the mixed merge method is used"
+        echo ":: Therefore the mixed merge method is used"
         set diffmap_sig_algorithm = "Mixed Merge"
     endif
 endif
@@ -227,6 +227,20 @@ else
 endif
 #
 #############################################################################
+${proc_2dx}/linblock "2dx_scale_amplitudes.py - scaling amplitudes"
+#############################################################################
+#TODO: this is also done in 2dx_diffmap scripts, but for the contour to be right we have to do it here as well
+set merge_aph1 = "APH/merge.aph"
+set merge_aph2 = "${diff_map2_dir}/merge/APH/merge.aph" 
+if ( ! -f ${merge_aph1} ) then
+    ${proc_2dx}/protest "The merged aph file ${merge_aph1} does not exist!"
+endif
+if ( ! -f ${merge_aph2} ) then
+    ${proc_2dx}/protest "The merged aph file ${merge_aph2} does not exist!"
+endif
+python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph1} 
+python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph2} 
+#############################################################################
 ${proc_2dx}/linblock "2dx_avrgamphs - only to calculate FOM"
 #############################################################################
 #
@@ -240,7 +254,7 @@ ${proc_2dx}/linblock "Using therefore zminmax=${zminmaxlocal}."
 # map1
 #
 \rm -f fort.1
-\cp -f APH/merge.aph fort.1
+\cp -f ${merge_aph1} fort.1
 echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
 \rm -f fort.2
 \rm -f APH/avrg2D_${map1}.hkl
@@ -275,7 +289,7 @@ echo "# IMAGE: APH/avrg2D_${map1}.hkl <map1  averaged amp&phs for FOM [H,K,F,P,I
 # map2
 #
 \rm -f fort.1
-\cp -f ${diff_map2_dir}/merge/APH/merge.aph fort.1
+\cp -f ${merge_aph2} fort.1
 echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
 \rm -f fort.2
 \rm -f APH/avrg2D_${map2}.hkl

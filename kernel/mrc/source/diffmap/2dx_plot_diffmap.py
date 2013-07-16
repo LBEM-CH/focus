@@ -69,8 +69,11 @@ if __name__ == '__main__':
     plotImage(images[1].image, 1.0, options.map2_name)
     saveImage(images[1])
     contour = images[2].image
+    
     #TODO: scale amplitudes
     plotImage(contour, 1.0, "contour")
+    #plotImage(images[0].image -contour, 1.0, "diffmap contour")
+
     if options.varmap:
         #TODO: check if varmap is scaled correctly
         varmap = getImage(options.varmap)

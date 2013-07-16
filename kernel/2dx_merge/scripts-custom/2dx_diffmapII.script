@@ -266,11 +266,12 @@ echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >>
 #
 #TODO: check if dir exist clean up
 \cp -f APH/merge.aph APH/merge1.aph 
-# 
+ 
+python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
 ${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map1}.log
 T
 1001,${zminmaxlocal}
-8
+${MergeIQMAX}
 ${avrgamphsNUMBER}
 ${avrgamphsRESOL}
 ${realcell} ${realang}
@@ -286,41 +287,41 @@ echo "# IMAGE: APH/avrg2D_${map1}.hkl <map1  averaged amp&phs for FOM [H,K,F,P,I
 \rm -f TMP444789.tmp 
 \rm -f TMP444888.tmp
 #
-# map2
-#
-\rm -f fort.1
-\cp -f ${merge_aph2} fort.1
-echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
-\rm -f fort.2
-\rm -f APH/avrg2D_${map2}.hkl
-\rm -f fort.3
-\rm -f fort.4
-\rm -f TMP444888.tmp
-\rm -f TMP444789.tmp
-\rm -f LOGS/avramphs_${map2}.table.txt
-#
-#TODO: check if dir exist clean up
-\cp -f ${diff_map2_dir}/merge/APH/merge.aph APH/merge2.aph 
-#
-${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map2}.log
-T
-1001,${zminmaxlocal}
-${MergeIQMAX}
-${avrgamphsNUMBER}
-${avrgamphsRESOL}
-${realcell} ${realang}
-${max_amp_correction}
-eot
-#
-\rm -f fort.1
-\mv -f fort.2 APH/avrg2D_${map2}.hkl
-\rm -f fort.3
-\rm -f fort.4
-echo "# IMAGE: LOGS/2dx_avrgamphs2D_{map1}.log <LOG: 2dx_avrgamphs output for 2D run>" >> LOGS/${scriptname}.results
-echo "# IMAGE: APH/avrg2D_${map2}.hkl <map2  averaged amp&phs for FOM [H,K,F,P,IQ,FOM]>" >> LOGS/${scriptname}.results
-\rm -f TMP444789.tmp 
-\rm -f TMP444888.tmp
-#
+## map2
+##
+#\rm -f fort.1
+#\cp -f ${merge_aph2} fort.1
+#echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >> LOGS/${scriptname}.results
+#\rm -f fort.2
+#\rm -f APH/avrg2D_${map2}.hkl
+#\rm -f fort.3
+#\rm -f fort.4
+#\rm -f TMP444888.tmp
+#\rm -f TMP444789.tmp
+#\rm -f LOGS/avramphs_${map2}.table.txt
+##
+##TODO: check if dir exist clean up
+#\cp -f ${diff_map2_dir}/merge/APH/merge.aph APH/merge2.aph 
+##
+#${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map2}.log
+#T
+#1001,${zminmaxlocal}
+#${MergeIQMAX}
+#${avrgamphsNUMBER}
+#${avrgamphsRESOL}
+#${realcell} ${realang}
+#${max_amp_correction}
+#eot
+##
+#\rm -f fort.1
+#\mv -f fort.2 APH/avrg2D_${map2}.hkl
+#\rm -f fort.3
+#\rm -f fort.4
+#echo "# IMAGE: LOGS/2dx_avrgamphs2D_{map1}.log <LOG: 2dx_avrgamphs output for 2D run>" >> LOGS/${scriptname}.results
+#echo "# IMAGE: APH/avrg2D_${map2}.hkl <map2  averaged amp&phs for FOM [H,K,F,P,IQ,FOM]>" >> LOGS/${scriptname}.results
+#\rm -f TMP444789.tmp 
+#\rm -f TMP444888.tmp
+##
 ##############################################################################
 ${proc_2dx}/linblock "2dx_diffmap_sub - avrgamphs with t-test"
 #############################################################################
@@ -337,6 +338,7 @@ set diffmap_nsplits = 3
 if ( "${diffmap_det_significance}" == "y" ) then
     if( "${diffmap_domain}" == "fourier"  && ${unitcell_equal} == 1 ) then
         #Welch's t-test
+        rm -rf APH/avrg2D_{map1}.hkl 
         python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     else #real space
         if ( "${diffmap_sig_class}" == "empirical" ) then
@@ -408,6 +410,7 @@ echo "# IMAGE-IMPORTANT: APH/avrg2D_sig2.hkl <map2 significant reflections [H,K,
 ${proc_2dx}/linblock "2dx_centric2 - to correct phases to 0 or 180 for 2D run"
 #############################################################################  
 #
+#TODO: only if domain is fourier 
 # map1
 #
 \rm -f APH/centric2D_${map1}.hkl
@@ -964,10 +967,14 @@ ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #
 #TODO: set the diffmap_var_factor form GUI
 set diffmap_var_factor = 1.0
-if ( "${diffmap_det_significance}" == "y" &&  "${diffmap_domain}" == "real" ) then
-   set diffmap_plot_options = "--varmap ${varmap} --variation-factor ${diffmap_var_factor} --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} " 
-else
-    set diffmap_plot_options = "--contour-map ${map1}.mrc --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} "
+set diffmap_plot_options =   "--map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} " 
+if ( ${diffmap_det_significance} == "y" ) then
+    if ( ${diffmap_domain} == "real" ) then
+        set diffmap_plot_options = "--varmap ${varmap} --variation-factor ${diffmap_var_factor} ${diffmap_plot_options}"
+    else
+        # t-Welch
+        set diffmap_plot_options = "--contour-map ${map1}.mrc --map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} "
+    endif 
 endif
 if ( ${diffmap_fixed_plotrange} == "y" ) then
     set diffmap_plot_options = "${diffmap_plot_options} --plot-range ${diffmap_plotrange}"

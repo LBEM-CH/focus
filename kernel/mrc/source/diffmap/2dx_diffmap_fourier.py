@@ -69,4 +69,8 @@ if __name__ == '__main__':
 	hkl_file2 = os.path.join(file_path1,'avrg2D_sig2.hkl')
 	write_hkl_file(sig_refs1, hkl_file1)	
 	write_hkl_file(sig_refs2, hkl_file2)	
+        averaged_refs1 = average_reflections_by_idx(merged_refs1)
+	contour_filename = os.path.join(file_path1,'avrg2D_map1.hkl')
+	write_hkl_file(averaged_refs1, contour_filename)	
+
 

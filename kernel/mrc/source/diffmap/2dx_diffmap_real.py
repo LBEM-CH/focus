@@ -28,7 +28,7 @@ if __name__ == '__main__':
         #average amplitudes and phase like in 2dx_avrgamphs.for
         averaged_refs1 = average_reflections_by_idx(merged_refs1)
         averaged_refs2 = average_reflections_by_idx(merged_refs2)
-	[averaged_ref1, averaged_refs2] = scale_all_amplitudes(averaged_refs1, averaged_refs2)
+	#[averaged_ref1, averaged_refs2] = scale_all_amplitudes(averaged_refs1, averaged_refs2)
 
         #mean1 = get_mean_amplitude(averaged_refs1)
         #mean2 = get_mean_amplitude(averaged_refs2)

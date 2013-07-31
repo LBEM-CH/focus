@@ -41,6 +41,124 @@ void initializeProject(const QString &appDir, const QString &workingDir)
   data.save();
 }
 
+bool backupSelection(const QString selectionFileName)
+{
+    std::cout << "backing up " << selectionFileName.toStdString() <<std::endl;
+    bool status = QFile::rename(selectionFileName, selectionFileName+".bak");
+    if(!status)
+         std::cerr << "moving " << selectionFileName.toStdString() << " to " << selectionFileName.toStdString() << ".bak failed \n";
+     return status;
+}
+
+bool restoreSelection(const QString selectionFileName)
+{
+    return QFile::rename(selectionFileName+".bak", selectionFileName);
+}
+
+bool backupDefaultSelection(QDir mergeDir)
+{
+    QString defaultSelection(mergeDir.absolutePath()+"/2dx_merge_dirfile.dat");
+    if(!QFileInfo(defaultSelection).exists())
+        std::cerr << defaultSelection.toStdString() << " does not exist.\n";
+    return backupSelection(defaultSelection);
+}
+bool restoreDefaultSelection(QDir mergeDir)
+{
+    QString defaultSelection(mergeDir.absolutePath()+"/2dx_merge_dirfile.dat");
+    bool status = QFile::remove(defaultSelection);
+    return restoreSelection(defaultSelection) && status;
+}
+
+bool writeSelection2File(QList<QString> selection, const QString fileName, QString projectPath)
+{
+    std::cout << "project path" << projectPath.toStdString() << std::endl;
+    QFile file(fileName);
+    if (file.open(QFile::WriteOnly | QFile::Text))
+    {
+      QTextStream s(&file);
+      for (int i = 0; i < selection.size(); ++i)
+      {
+          QString image = selection.at(i);
+          if(QFileInfo(projectPath+image).exists())
+            s << image << '\n';
+          else
+          {
+              std::cerr << "file " << image.toStdString() <<" does not exist." <<std::endl ;
+              return false;
+          }
+      }
+    }
+    else
+    {
+      std::cerr << "error opening selection file\n";
+      return false;
+    }
+    file.close();
+    return true;
+}
+
+bool setSelection(QList<QString> selection, QDir mergeDir)
+{
+    //QFile selectionFile;
+    QString defaultSelection(mergeDir.absolutePath()+"/2dx_merge_dirfile.dat");
+    if(QFileInfo(defaultSelection).exists())
+    {
+        if(!backupDefaultSelection(mergeDir))
+        {
+            std::cerr<< "error backing up selection " <<defaultSelection.toStdString() <<std::endl;
+            return false;
+        }
+    }
+
+    QString selectionString = selection[0];
+    selectionString = selectionString.remove('"').trimmed();
+    if(selectionString.endsWith(".dat"))
+    {
+        QString selectionPath(mergeDir.absolutePath()+"/"+selectionString);
+        if(QFileInfo(defaultSelection).exists())
+            std::cerr<< "default selection does still exist: " <<defaultSelection.toStdString() <<std::endl;
+
+        if(QFileInfo(selectionPath).exists())
+        {
+            bool status = QFile::rename(selectionPath,defaultSelection);
+            //TODO: check the status, but right now it seems to retunr false, even when the rename works
+            if(!status)
+            {
+                std::cerr<< "error moving " <<selectionPath.toStdString()  << " to " << defaultSelection.toStdString()<<std::endl;
+                return false;
+            }
+        }
+        else
+        {
+            std::cerr<< "specified selection file " <<selectionPath.toStdString()  << " does not exist." <<std::endl;
+            return false;
+        }
+    }
+    else
+    {
+        QString projectPath = mergeDir.absoluteFilePath("../");
+        return writeSelection2File(selection, defaultSelection, projectPath);
+    }
+    return true;
+}
+
+bool restoreSelections(QList<QString> selection, QDir mergeDir)
+{
+    QString defaultSelection(mergeDir.absolutePath()+"/2dx_merge_dirfile.dat");
+    QString selectionString = selection[0];
+    selectionString = selectionString.remove('"').trimmed();
+    if(selectionString.endsWith(".dat"))
+    {
+         QString specSelection(mergeDir.absolutePath()+"/"+selectionString);
+         if(!QFile::rename(defaultSelection, specSelection))
+         {
+             std::cerr<< "error moving " <<defaultSelection.toStdString()  << " to " << specSelection.toStdString()<<std::endl;
+             return false;
+         }
+    }
+    return restoreDefaultSelection(mergeDir);
+}
+
 confData* readConfig(const QString workingPath, const QString applicationPath)
 {
     confData* data;
@@ -74,37 +192,40 @@ bool scriptExists(QString scriptName, QDir scriptsDir)
 
 void execute(QString scriptName, QString scriptsDir, confData* config)
 {
-    QProcess process;
     confData* scriptConf;
     QString scriptPath = scriptsDir +"/"+scriptName;
     scriptName.remove(QRegExp("\\.script$"));
     if(QFileInfo(scriptPath).exists())
     {
         scriptConf = new confData(scriptPath);
+        QString selectionFile = scriptConf->get("dirfile","value");
+        std::cout << "dirfile: " << selectionFile.toStdString() << std::endl;
     }
     scriptParser parser(QList<confData *>()<< scriptConf<<config);
     std::cout<<"::  Executing in "<<config->getDir("working").toStdString()<<" : +"<<scriptName.toStdString()<<std::endl;
     parser.parse(scriptPath, config->getDir("working") + "/proc/" + scriptName + ".com");
     parser.execute(scriptName,config);
-//    process.setWorkingDirectory(config->getDir("working"));
-//    std::cout<< parser.executionString().toStdString()<<std::endl;
-//    process.start('"' + parser.executionString() + '"', QIODevice::ReadOnly);
 
     if(scriptConf) delete scriptConf;
 }
 
 
-void commandLineMerge(const QString appDir, const QString workingDir, const QString fileSelection, const QString script)
+void commandLineMerge(const QString appDir, const QString workingDir, const QStringList fileSelection, const QString script)
 {
     confData* config;
     config = readConfig(workingDir, appDir);
+    QDir mergeDir = config->getDir("working");
+    if(!setSelection(fileSelection, mergeDir))
+    {
+        restoreDefaultSelection(mergeDir);
+        return;
+    }
     QDir standardScriptsDir(appDir + "/2dx_merge/" + "scripts-standard/");
     QDir customScriptsDir(appDir + "/2dx_merge/" + "scripts-custom/");
     QDir scriptsDir;
     bool isCustomScript = false;
     //TODO: allow more then just one script
     QString strippedScript = QString(script).remove('"').trimmed();
-    std::cout << "stripped script file: "<< strippedScript.toStdString() <<std::endl;
     if(strippedScript.startsWith('+'))
     {
         strippedScript = strippedScript.remove(0,1);
@@ -128,8 +249,7 @@ void commandLineMerge(const QString appDir, const QString workingDir, const QStr
     }
     else
         std::cerr << "There is no script " <<scriptFile.toStdString() <<std::endl;
-
-
+    restoreSelections(fileSelection, mergeDir);
     delete config;
 }
 
@@ -142,28 +262,24 @@ int main(int argc, char **argv)
         std::cout << "command line version of 2dx_merge" << std::endl;
         QCoreApplication app(argc, argv);
         QCoreApplication::setApplicationName("2dx_merge");
+        QStringList arguments = QCoreApplication::arguments();
         QString applicationDir = getAppDir();
         std::cout << "Application dir: " << applicationDir.toStdString() <<std::endl;
-        QString workingDir = argv[1];
+        QString workingDir = arguments[1];
         std::cout << "working dir: " << workingDir.toStdString() <<std::endl;
-        QString script = argv[2];
-        QString fileSelection;
-        if (argc > 3)
+        QString script = arguments[2];
+        QList<QString> fileSelection;
+        if (arguments.size() > 3)
         {
-            fileSelection = QString(argv[3]);
+            //remove first 2 elements
+            for(int i = 0; i < 3;++i)
+                arguments.pop_front();
+            fileSelection = arguments;
         }
         else
         {
-            fileSelection = workingDir + "/merge/2dx_merge_dirfile.dat";
-
-            if(!QFileInfo(fileSelection).exists())
-            {
-                std::cerr << "The selection file " << fileSelection.toStdString() << " does not exist!" <<std::endl;
-                return 1;
-            }
+            fileSelection << "2dx_merge_dirfile.dat";
         }
-
-        std::cout << "selection file: " << fileSelection.toStdString() <<std::endl;
         commandLineMerge(applicationDir, workingDir, fileSelection, script);
     }
     else

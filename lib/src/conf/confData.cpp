@@ -935,6 +935,11 @@ void confData::setDefaults(const QString &workingDirName)
   workingDir.mkdir("LOGS");
   QString referenceConf = appDir + sep + "config/2dx_master.cfg";
   QString localConf = workingDir.absolutePath() + "/" + "2dx_image.cfg";
+  if(!QFileInfo(localConf).exists())
+  {
+    localConf = workingDir.absolutePath() + "/" + "2dx_master.cfg";
+  }
+  if(!QFileInfo(localConf).exists()){qDebug()<<(localConf + " does not exist!"); exit(0);}
   QDir standardScriptsDir(appDir + "/" + "scripts-standard/");
   QDir customScriptsDir(appDir + "/" + "scripts-custom/");
   QDir working(QDir(workingDirName).absolutePath());

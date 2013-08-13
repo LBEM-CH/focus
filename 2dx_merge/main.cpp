@@ -198,11 +198,9 @@ void execute(QString scriptName, QString scriptsDir, confData* config)
     if(QFileInfo(scriptPath).exists())
     {
         scriptConf = new confData(scriptPath);
-        QString selectionFile = scriptConf->get("dirfile","value");
-        std::cout << "dirfile: " << selectionFile.toStdString() << std::endl;
     }
     scriptParser parser(QList<confData *>()<< scriptConf<<config);
-    std::cout<<"::  Executing in "<<config->getDir("working").toStdString()<<" : +"<<scriptName.toStdString()<<std::endl;
+    std::cout<<"::  Executing in "<<config->getDir("working").toStdString()<<" : "<<scriptName.toStdString()<<std::endl;
     parser.parse(scriptPath, config->getDir("working") + "/proc/" + scriptName + ".com");
     parser.execute(scriptName,config);
 
@@ -278,6 +276,8 @@ int main(int argc, char **argv)
         }
         else
         {
+            std::cout << "Warning! No selection specified." <<std::endl;
+            std::cout << "  taking 2dx_merge_dirfile.dat" <<std::endl;
             fileSelection << "2dx_merge_dirfile.dat";
         }
         commandLineMerge(applicationDir, workingDir, fileSelection, script);

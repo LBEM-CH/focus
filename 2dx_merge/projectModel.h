@@ -30,6 +30,7 @@
 #include <QCheckBox>
 #include <QStyle>
 #include <QDebug>
+#include <QModelIndexList>
 //#include <imageItem.h>
 #include <confData.h>
 #include <resultsData.h>
@@ -41,7 +42,9 @@ class projectModel : public QStandardItemModel
 
   public slots:
   void itemActivated(const QModelIndex& index);
-//  void itemSelected(const QModelIndex &index);
+  void itemSelected(const QModelIndex &index);
+  void itemDeselected(const QModelIndex &index);
+  void changeItemCheckedRole(const QModelIndex &index, bool check = true);
   void currentRowChanged(const QModelIndex&,const QModelIndex&) ;
   void confChanged(const QString &path);
   bool removeSelected();
@@ -73,8 +76,6 @@ class projectModel : public QStandardItemModel
   confData *data;
   resultsData *resultData;
   QFileSystemWatcher watcher;
-  
-  QItemSelectionModel *selection;
 
   QHash<quint32,QString> paths;
   QMap<quint32, QHash<QString,QVariant> > columns;

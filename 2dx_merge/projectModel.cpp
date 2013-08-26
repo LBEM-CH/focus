@@ -400,6 +400,45 @@ void projectModel::itemActivated(const QModelIndex& index)
   QProcess::startDetached(data->getApp("2dx_image"), QStringList()<<dirName);
 }
 
+void  projectModel::itemSelected(const QModelIndex &index)
+{
+    changeItemCheckedRole(index, true);
+}
+
+void  projectModel::itemDeselected(const QModelIndex &index)
+{
+   changeItemCheckedRole(index, false);
+}
+
+void  projectModel::changeItemCheckedRole(const QModelIndex &index, bool check)
+{
+    QVariant checkedState;
+    if(check)
+        checkedState = Qt::Checked;
+    else
+        checkedState = Qt::Unchecked;
+
+    if(index.isValid())
+    {
+
+        if(index.child(0,0).isValid())
+        {
+            itemSelected(index.child(0,0));
+        }
+        else if(index.column() == 0)
+        {
+            if(index.data(Qt::CheckStateRole) != checkedState)
+            {
+                if(!setData(index,checkedState,Qt::CheckStateRole))
+                {
+                    qDebug()<< "Setting CheckStateRole did not work!";
+                }
+            }
+        }
+    }
+}
+
+
 QStringList projectModel::parentDirs()
 {
   QStringList dirs;
@@ -605,8 +644,12 @@ void projectModel::changeSelection(QStandardItem *currentItem, int itemCount, co
 			  }
 			  else if(checkAction == "selectall")
 			  {
-				  if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);
+                                  if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);
 			  }
+                            else if(checkAction == "extend")
+                          {
+                                  if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);
+                          }
 			  else if(checkAction == "clear")
 				  setData(i,Qt::Unchecked,Qt::CheckStateRole);
 			  else if(checkAction == "removeitems")
@@ -667,7 +710,6 @@ void projectModel::getSelection(QStandardItem *currentItem, int itemCount, QStri
                   {
                       QString name = i.data(Qt::DisplayRole).toString();
                       //QString name = item(i)->text();
-                      qDebug()<<name;
                       selected<<name;
                   }
               }

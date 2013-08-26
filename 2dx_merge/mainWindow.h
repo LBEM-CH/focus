@@ -36,6 +36,7 @@
 #include <QSplitter>
 #include <QDebug>
 #include <QFileDialog>
+#include <QModelIndexList>
 #include <confData.h>
 #include <confManual.h>
 #include <scriptProgress.h>
@@ -83,6 +84,9 @@ class mainWindow : public QMainWindow
   void showAlbum(bool show = true);
 
   void columnActivated(int i);
+
+  void extendSelection();
+  void reduceSelection();
 
   void maximizeWindow(int option);
 
@@ -177,6 +181,7 @@ class mainWindow : public QMainWindow
   
   void initializeDirectory();
   bool createDir(const QString &dir);
+  void modifySelection(bool select = true);
   
   public:
   mainWindow(const QString &directory, QWidget *parent = NULL);

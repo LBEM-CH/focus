@@ -21,6 +21,8 @@
 #include "mainWindow.h"
 #include <QDebug>
 #include <QDesktopServices>
+#include <QModelIndexList>
+#include <QItemSelectionModel>
 #include <iostream>
 using namespace std;
 
@@ -440,9 +442,24 @@ QWidget *mainWindow::setupDirectoryView(const QDir &dir, const QString &savePath
   for(int i=2;i<sortModel->columnCount();i++)
     dirView->setItemDelegateForColumn(i, delegate);
 
+
+  //Right-Click Menu
+  QAction *addSelectionAction;
+  addSelectionAction = new QAction("add to selection", dirView);
+  dirView->addAction(addSelectionAction);
+  connect(addSelectionAction,SIGNAL(triggered(bool)),this,SLOT(extendSelection()));
+  QAction *removeSelectionAction;
+  removeSelectionAction = new QAction("remove from selection", dirView);
+  dirView->addAction(removeSelectionAction);
+  connect(removeSelectionAction,SIGNAL(triggered(bool)),this,SLOT(reduceSelection()));
+  dirView->setContextMenuPolicy(Qt::ActionsContextMenu);
+
+
+
   QAction *action;
 
   QSignalMapper *mapper = new QSignalMapper(this);
+
 
   for(int i=0;i<dirModel->columnCount();i++)
   {
@@ -761,6 +778,40 @@ void mainWindow::setSaveState(bool state)
     saveButton->setCheckable(true);
     saveButton->setChecked(true);
   }
+}
+
+void mainWindow::extendSelection()
+{
+    modifySelection(true);
+}
+
+void mainWindow::reduceSelection()
+{
+    modifySelection(false);
+}
+
+
+
+void mainWindow::modifySelection(bool select)
+{
+    QModelIndex i;
+    QModelIndexList selection  = dirView->selectionModel()->selectedIndexes();
+
+    if(select)
+    {
+        foreach(i, selection)
+        {
+                dirModel->itemSelected(sortModel->mapToSource(i));
+        }
+
+    }
+    else
+    {
+        foreach(i, selection)
+        {
+                dirModel->itemDeselected(sortModel->mapToSource(i));
+        }
+    }
 }
 
 void mainWindow::columnActivated(int i)

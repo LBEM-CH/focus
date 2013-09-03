@@ -107,7 +107,7 @@ class MRCImage:
 				#self.image = array.array('f')
 				#self.image.fromfile(f,self.nx*self.ny*self.nz)
 			else:
-				raise Exception("Unsupported MRC image mode: "+self.mode)
+				raise Exception("Unsupported MRC image mode: "+str(self.mode))
 			
 			self.image = np.fromfile(f,fmt,self.nx*self.ny*self.nz)
 			if(self.nz == 1):

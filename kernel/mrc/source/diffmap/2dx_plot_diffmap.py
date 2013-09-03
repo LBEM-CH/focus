@@ -74,15 +74,6 @@ if __name__ == '__main__':
     plotImage(contour, 1.0, "contour")
     #plotImage(images[0].image -contour, 1.0, "diffmap contour")
 
-    if options.varmap:
-        #TODO: check if varmap is scaled correctly
-        varmap = getImage(options.varmap)
-        raw_diffmap = getDiffmap(images[0],images[1])
-        plotImage(raw_diffmap, 0.0, "raw difference map")
-        diffmap = significantDifferences(raw_diffmap, varmap, options.variation_factor)
-        plotImage(varmap, 0.0, "variation")
-    else:
-        diffmap = getDiffmap(images[0],images[1])
     plot_options = {}
     if options.map1_name and options.map2_name:
         plot_options['map1_name'] = options.map1_name
@@ -94,6 +85,17 @@ if __name__ == '__main__':
         plot_options['plot_scalebar'] = True
     if options.plot_map_only:
         plot_options['map_only'] = True
+    if options.varmap:
+        #TODO: check if varmap is scaled correctly
+        varmap = getImage(options.varmap)
+        raw_diffmap = getDiffmap(images[0],images[1])
+        plotImage(raw_diffmap, 0.0, "raw difference map")
+        diffmap = significantDifferences(raw_diffmap, varmap, options.variation_factor)
+        #plotImage(varmap, 0.0, "variation")
+        plotVarmap(contour,varmap,plot_options)
+    else:
+        diffmap = getDiffmap(images[0],images[1])
+
     plotDiffmap(contour, diffmap, plot_options)
     plt.show()
 

@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from matplotlib.ticker import MultipleLocator
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from mrcimage import *
                 
@@ -210,20 +211,13 @@ def plotMRCImage(mrcImage,crange=0.0):
 	plotImage(image, crange, mrcImage.name) 	
         return image
 
-
-def plotDiffmap(contour, diffmap, options):
+def plotContouredMap(contour, diffmap, title, options):
         if 'max_range' in options:
             max_range = options['max_range']
         else:
             max_range = max(diffmap.max(),abs(diffmap.min()))
 	norm = colors.Normalize(vmin=-max_range, vmax=max_range) 
 	print('max_range is '+str(max_range))
-        if 'map1_name' in options and 'map2_name' in options:
-            title = options['map1_name']+' - '+options['map2_name']
-	    filename = title+'.pdf'
-        else:
-            title = ""
-            filename = 'diffmap.pdf'
         if 'plot_scalebar' in options:
             plot_scalebar = options['plot_scalebar']
         else:
@@ -249,11 +243,34 @@ def plotDiffmap(contour, diffmap, options):
             plt.colorbar()
 	plt.contour(contour, [0], colors='b')
 	plt.hold(False)
+        filename = title+'.pdf'
+        filename.replace(' ', '_') 
         if os.path.isdir("diffmap"):
             filename = os.path.join("diffmap", filename)
-	plt.savefig(filename)
+        if map_only:
+	    plt.savefig(filename, bbox_inches='tight', pad_inches=0)
+        else:
+	    plt.savefig(filename)
         plt.show()
 	return diffmap
+
+def plotDiffmap(contour, diffmap, options):
+        if 'map1_name' in options and 'map2_name' in options:
+            title = options['map1_name']+' - '+options['map2_name']
+	    filename = title+'.pdf'
+        else:
+            title = "diffmap"
+        plotContouredMap(contour, diffmap, title, options)
+       	return diffmap
+
+def plotVarmap(contour, varmap, options):
+        if 'map1_name' in options and 'map2_name' in options:
+            title = 'varmap '+options['map1_name']+' & '+options['map2_name']
+        else:
+            title = "varmap"
+        varmap = plotContouredMap(contour, varmap, title, options)
+       	return varmap 
+
 
 def plotTwoContours(contour, contour2, diffmap, mapName1="map1", mapName2="map2", colormap="jet", plot_scalebar=False):
         #DEBUG:
@@ -282,4 +299,57 @@ def plotTwoContours(contour, contour2, diffmap, mapName1="map1", mapName2="map2"
 	plt.savefig(filename)
         plt.show()
 	return diffmap
+
+def plotMontage(varmap, diffmap, raw_diffmap, patch_size):
+    """plots sub patches of the significant diffmap, the raw diffmap, and the variation map next to each other in a montage"""
+    (height,width) = np.shape(diffmap)
+    print np.shape(varmap) 
+    restx = patch_size - width%patch_size
+    resty = patch_size - height%patch_size
+    print restx,resty
+    xindices = range(0, width, patch_size)
+    yindices = range(0, height, patch_size)
+    montage =  np.zeros((height+len(yindices)+resty, 3*(width+len(xindices)+restx)))
+    varmap_ext = np.zeros((height+resty, width+restx))
+    varmap_ext[:height,:width] = varmap
+    raw_diffmap_ext = np.zeros((height+resty, width+restx))
+    raw_diffmap_ext[:height,:width] = diffmap
+    diffmap_ext = np.zeros((height+resty, width+restx))
+    diffmap_ext[:height,:width] = diffmap
+    j = 0
+    for y in yindices:
+        i = 0
+        for x in xindices:
+            montage[j:j+patch_size,i:i+patch_size] = varmap_ext[y:y+patch_size,x:x+patch_size]
+            i = i+patch_size
+            montage[j:j+patch_size,i:i+patch_size] = diffmap_ext[y:y+patch_size,x:x+patch_size]
+            i = i+patch_size
+            montage[j:j+patch_size,i:i+patch_size] = raw_diffmap_ext[y:y+patch_size,x:x+patch_size]
+            i = i+patch_size
+        j = j+patch_size
+    #print np.shape(montage)
+    #montage = montage[:height+len(yindices),:3*(width+len(xindices))]
+    #print np.shape(montage)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    (mheight,mwidth) = np.shape(montage)
+    minor_locator = MultipleLocator(patch_size)
+    plt.xticks(np.arange(0,mwidth,3*patch_size))
+    plt.axes().xaxis.set_minor_locator(minor_locator) 
+    plt.yticks(np.arange(0,mwidth,patch_size))
+    plt.grid(b=True, which='minor', color='b', linestyle='-')
+    plt.grid(b=True, which='major', linestyle='-', linewidth=1.5 )
+    plt.imshow(montage)
+    cid = fig.canvas.mpl_connect('button_press_event', onclick) 
+    cid = fig.canvas.mpl_connect('button_release_event', onclick) 
+    plt.show()
+
+def onclick(event):
+    """callback function that is fired when the mouse is clicked"""
+    print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(event.button, event.x, event.y, event.xdata, event.ydata)
+
+
+
 	

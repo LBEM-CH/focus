@@ -62,18 +62,38 @@ def get_meanmap(varmap_list):
     varmap_array = np.array(varmap_list)
     meanmap = np.mean(varmap_array,0)
     return meanmap 
- 
+
+def get_meanmap(varmap_list):
+    "returns mean of all variations maps"
+    varmap_array = np.array(varmap_list)
+    meanmap = np.mean(varmap_array,0)
+    return meanmap
+
+def get_rmsdmap(varmap_list):
+    "returns the root mean square difference of all variation maps"
+    square = [ var*var for var in varmap_list ]
+    meanmap = get_meanmap(square)
+    return np.sqrt(meanmap)
+
+
 
 def get_varmap(varmap_list, measure, global_threshold=False):
     "returns variation map of all variation maps specified by the measure"
-    if measure == 'max':
-        varmap = get_maxmap(varmap_list)
-        if global_threshold:
-            varmap.fill(varmap.max())
-    else:
+    if measure == 'mean':
         varmap = get_meanmap(varmap_list)
         if global_threshold:
             varmap.fill(np.mean(varmap))
+            print(":: global threshold: "+str(np.mean(varmap)))
+    elif measure == 'rmsd':
+        varmap = get_rmsdmap(varmap_list)
+        if global_threshold:
+            varmap.fill(np.mean(varmap))
+            print(":: global threshold: "+str(np.mean(varmap)))
+    else:
+        varmap = get_maxmap(varmap_list)
+        if global_threshold:
+            print(":: global threshold: "+str(varmap.max()))
+            varmap.fill(varmap.max())
     return varmap
     
 

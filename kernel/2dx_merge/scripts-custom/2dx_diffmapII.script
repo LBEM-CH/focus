@@ -56,6 +56,9 @@
 # DISPLAY: diffmap_plotrange
 # DISPLAY: diffmap_plot_clean 
 # DISPLAY: diffmap_plot_scalebar 
+# DISPLAY: diffmap_threshold_method
+# DISPLAY: diffmap_threshold_global
+# DISPLAY: diffmap_var_factor 
 #
 #$end_local_vars
 #
@@ -103,6 +106,9 @@ set diffmap_fixed_plotrange = ""
 set diffmap_plotrange = ""
 set diffmap_plot_clean = ""
 set diffmap_plot_scalebar = ""
+set diffmap_threshold_method = ""
+set diffmap_threshold_global = ""
+set diffmap_var_factor = ""
 #
 #$end_vars
 #
@@ -138,6 +144,9 @@ set map2 = "map2"
 set diffmap_dir = diffmap
 if ( ! -d ${diffmap_dir} ) then
     echo "::The directory diffmap does not exist and therefore will be created."
+    mkdir ${diffmap_dir}
+else
+    rm -rf ${diffmap_dir}
     mkdir ${diffmap_dir}
 endif
 # get the unit cell size of the 2nd map 
@@ -798,14 +807,16 @@ eot
     endif
 endif
 #
-#TODO: set this by the GUI
-set diffmap_threshold_method = "max"
 ##############################################################################
 ${proc_2dx}/linblock  "2dx_variationmap - merge all variation maps to one map" 
 ##############################################################################
 if( "${diffmap_det_significance}" == "y" && "${diffmap_sig_class}" == "empirical" ) then
-    set varmap = "${diffmap_dir}/varmap.mrc"  
-    python ${bin_2dx}/diffmap/2dx_variationmap.py ${diffmap_selections_dir} -m ${diffmap_threshold_method} -o ${varmap} 
+    set varmap = "${diffmap_dir}/varmap.mrc"
+    set variationmap_options =  "-m ${diffmap_threshold_method} -o ${varmap}"
+    if( "${diffmap_threshold_global}" == "y" ) then
+        set variationmap_options = "${variationmap_options} -g" 
+    endif
+    python ${bin_2dx}/diffmap/2dx_variationmap.py ${diffmap_selections_dir} ${variationmap_options} 
 endif
 #
 #
@@ -967,8 +978,6 @@ endif
 ${proc_2dx}/linblock "2dx_plot_diffmap - to plot the diffmap"
 #############################################################################
 #
-#TODO: set the diffmap_var_factor form GUI
-set diffmap_var_factor = 1.0
 set diffmap_plot_options =   "--map1-name ${diff_map1_name} --map2-name ${diff_map2_name} --colormap ${diffmap_colormap} ${shift_180_x} " 
 if ( ${diffmap_det_significance} == "y" ) then
     if ( ${diffmap_domain} == "real" ) then

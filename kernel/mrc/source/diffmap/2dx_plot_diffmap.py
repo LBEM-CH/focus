@@ -97,7 +97,7 @@ if __name__ == '__main__':
         diffmap = getDiffmap(images[0],images[1])
 
     plotDiffmap(contour, diffmap, plot_options)
-    plt.show()
+    #plt.show()
 
 	
 

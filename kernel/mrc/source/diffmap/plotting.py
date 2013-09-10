@@ -168,13 +168,15 @@ def getAbsDiffmap(image1, image2):
 def significantDifferences(diffmap, varmap, var_factor=1.0):
     """determines which differences are significant based on the variation map """
     diffmap[abs(diffmap)<var_factor*abs(varmap)] = 0.0
+    idx = np.nonzero(diffmap)
+    diffmap[idx] = np.sign(diffmap[idx])*(abs(diffmap[idx])-var_factor*abs(varmap[idx]))
     return diffmap
 
 def addScaleBar(axes):
     "adds a scale bar to the figure and removes the ticks"
     axes.get_xaxis().set_visible(False)
     axes.get_yaxis().set_visible(False)
-    bar = AnchoredSizeBar(axes.transData, 20, '10 $\AA$',loc=4, sep=5, frameon=False)
+    bar = AnchoredSizeBar(axes.transData, 20, '' ,loc=4, sep=5, borderpad=0.5, frameon=False)
     axes.add_artist(bar)
 
 def scaleTicks(axes):
@@ -244,19 +246,19 @@ def plotContouredMap(contour, diffmap, title, options):
 	plt.contour(contour, [0], colors='b')
 	plt.hold(False)
         filename = title+'.pdf'
-        filename.replace(' ', '_') 
+        filename = filename.replace(' ', '_') 
         if os.path.isdir("diffmap"):
             filename = os.path.join("diffmap", filename)
         if map_only:
 	    plt.savefig(filename, bbox_inches='tight', pad_inches=0)
         else:
 	    plt.savefig(filename)
-        plt.show()
+        #plt.show()
 	return diffmap
 
 def plotDiffmap(contour, diffmap, options):
         if 'map1_name' in options and 'map2_name' in options:
-            title = options['map1_name']+' - '+options['map2_name']
+            title = 'diffmap '+options['map1_name']+' - '+options['map2_name']
 	    filename = title+'.pdf'
         else:
             title = "diffmap"
@@ -297,7 +299,7 @@ def plotTwoContours(contour, contour2, diffmap, mapName1="map1", mapName2="map2"
 	plt.contour(contour2, [0], colors='b')
 	plt.hold(False)
 	plt.savefig(filename)
-        plt.show()
+        #plt.show()
 	return diffmap
 
 def plotMontage(varmap, diffmap, raw_diffmap, patch_size):

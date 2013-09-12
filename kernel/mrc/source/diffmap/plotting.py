@@ -270,6 +270,7 @@ def plotVarmap(contour, varmap, options):
             title = 'varmap '+options['map1_name']+' & '+options['map2_name']
         else:
             title = "varmap"
+        #plotContouredMap(contour.T[ ::-1,:], varmap.T[ ::-1,:], title, options)
         varmap = plotContouredMap(contour, varmap, title, options)
        	return varmap 
 

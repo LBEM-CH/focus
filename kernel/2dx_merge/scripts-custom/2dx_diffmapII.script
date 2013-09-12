@@ -761,7 +761,7 @@ eot
 if( "${diffmap_sig_class}" == "empirical" ) then
     if ( "${diffmap_det_significance}" == "y") then
         set merge2map_output_dir = ${diffmap_selections_dir}
-        set merged_selections = `find diffmap -name *.aph`
+        set merged_selections = `find diffmap -name "*.aph"`
         foreach merge_aph ($merged_selections)
             #############################################################################
             ${proc_2dx}/linblock "Scaling amplitudes of ${merge_aph}"

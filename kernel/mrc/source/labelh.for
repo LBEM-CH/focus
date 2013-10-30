@@ -127,15 +127,13 @@ C IMODE=  4: GET RID OF OUTLIERS BY INTERPOLATION
 C        card  4 : critdiff, enter critical difference
 C
 C****************************************************************************
-CHEN>
 C     PARAMETER (LMAX=16384,LCMX=8192)
       PARAMETER (LMAX=22000)
       PARAMETER (LCMX=11000)
       PARAMETER (LPIC=21000)
-CHEN<
-      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,APIC,BPIC
+      DIMENSION APIC(LPIC,LPIC),BPIC(LPIC,LPIC)
       DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
-      DIMENSION APIC(LPIC,LPIC)
       DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX),OU2(LMAX)
       DIMENSION LABELS(20,10),CELL(6),EXTRA(29)
       DIMENSION DNCELL(6),MXYZN(3)
@@ -2064,16 +2062,14 @@ C       LABELB Version 1.2      20-APR-85    RH   bigger line length    *
 C************************************************************************
 C
       SUBROUTINE LABELB(INFILE)
-CHEN>
 C     PARAMETER (LMAX=16384,LCMX=8192)
       PARAMETER (LMAX=22000)
       PARAMETER (LCMX=11000)
-C      PARAMETER (IBMX=256)
-      PARAMETER (IBMX=9000)
-CHEN<
-        COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+      PARAMETER (IBMX=256)
+      PARAMETER (LPIC=21000)
+      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,APIC,BPIC
+      DIMENSION APIC(LPIC,LPIC),BPIC(LPIC,LPIC)
         DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
-        DIMENSION BILD(IBMX,IBMX),CILD(IBMX,IBMX)
         DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX)
 c       DIMENSION LABELS(20,10),CELL(6)
         DIMENSION LABELS(20,10)
@@ -2145,7 +2141,7 @@ C
 C  MODE 1 : VARIOUS 90 DEG TURNS
 C
 20      CONTINUE
-        IF(NXYZ(1).GT.IBMX.OR.NXYZ(2).GT.IBMX) THEN
+        IF(NXYZ(1).GT.LPIC.OR.NXYZ(2).GT.LPIC) THEN
                 WRITE(6,201) IBMX, NXYZ(1), NXYZ(2)
 201             FORMAT(' CANNOT DO TURNS OR MIRRORS IF IMAGE SIZE',
      .                  ' . GT.',I7,', NX AND NY ARE',2I7)
@@ -2177,19 +2173,19 @@ C       the cell parameters are not transformed or transfered, because this
 C       operation was intended just for beautifying pictures
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
-C       READ THE WHOLE PICTURE INTO BILD. IT HAS TO BE ONE LAYER ONLY
-C       AND SMALLER THAN THE DIMENSIONS OF BILD.
+C       READ THE WHOLE PICTURE INTO APIC. IT HAS TO BE ONE LAYER ONLY
+C       AND SMALLER THAN THE DIMENSIONS OF APIC.
         DO IZ = 1,NXYZ(3) !FOR EACH SECTION SEPERATELY
 
         DO IY = 1,NXYZ(2)       
-            CALL IRDLIN(1,BILD(1,IY),*999)
+            CALL IRDLIN(1,APIC(1,IY),*999)
         ENDDO
 C       NOW TRANSFORM THIS IN SUITABLE MANNER
 
         IF (ITURN.EQ.5) THEN
         DO IY = 1,NXYZ(2)
                 DO IX = 1,NXYZ(1)
-                        CILD(NXYZ(1)-IX+1,IY)=BILD(IX,IY)
+                        BPIC(NXYZ(1)-IX+1,IY)=APIC(IX,IY)
                 ENDDO
         ENDDO
         ENDIF
@@ -2197,7 +2193,7 @@ C       NOW TRANSFORM THIS IN SUITABLE MANNER
         IF (ITURN.EQ.4) THEN
         DO IX = 1,NXYZ(1)
                 DO IY = 1,NXYZ(2)
-                        CILD(IX,NXYZ(2)-IY+1)=BILD(IX,IY)
+                        BPIC(IX,NXYZ(2)-IY+1)=APIC(IX,IY)
                 ENDDO
         ENDDO
         ENDIF
@@ -2206,7 +2202,7 @@ C       NOW TRANSFORM THIS IN SUITABLE MANNER
         IF (ITURN.EQ.1) THEN
         DO IX = 1,NXYZ(1)
                 DO IY = 1,NXYZ(2)
-                        CILD(IY,NXYZ(1)-IX+1)=BILD(IX,IY)
+                        BPIC(IY,NXYZ(1)-IX+1)=APIC(IX,IY)
                 ENDDO
         ENDDO
         ENDIF
@@ -2215,7 +2211,7 @@ C       NOW TRANSFORM THIS IN SUITABLE MANNER
         IF (ITURN.EQ.2) THEN
         DO IX = 1,NXYZ(1)
                 DO IY = 1,NXYZ(2)
-                        CILD(NXYZ(2)-IY+1,IX)=BILD(IX,IY)
+                        BPIC(NXYZ(2)-IY+1,IX)=APIC(IX,IY)
                 ENDDO
         ENDDO
         ENDIF
@@ -2224,14 +2220,14 @@ C       NOW TRANSFORM THIS IN SUITABLE MANNER
         IF (ITURN.EQ.3) THEN
         DO IX = 1,NXYZ(1)
                 DO IY = 1,NXYZ(2)
-                        CILD(NXYZ(1)-IX+1,NXYZ(2)-IY+1)=BILD(IX,IY)
+                        BPIC(NXYZ(1)-IX+1,NXYZ(2)-IY+1)=APIC(IX,IY)
                 ENDDO
         ENDDO
         ENDIF
 
 
         DO IY = 1,NXYZST(2)
-                CALL IWRLIN(2,CILD(1,IY))
+                CALL IWRLIN(2,BPIC(1,IY))
         ENDDO
 
         ENDDO !IZ
@@ -2497,7 +2493,9 @@ C
       SUBROUTINE LABELC(INFILE)
       PARAMETER (NDIM=150000)
       PARAMETER (NAREA=15000)
-        COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+      PARAMETER (LPIC=21000)
+      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,APIC,BPIC
+      DIMENSION APIC(LPIC,LPIC),BPIC(LPIC,LPIC)
         DIMENSION ARRAY(NDIM),NXYZ(3),MXYZ(3),NXYZST(3)
         DIMENSION NXYZBOX(3),NXYZTMP(3)
         DIMENSION IXYZMIN(3),IXYZMAX(3)

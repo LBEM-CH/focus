@@ -845,7 +845,7 @@ C-------Limit Min and Max to MEAD -/+ 2.5 * STD
         DMAX2=DMEAN + DSTD*DVAL2
 C
 C-------Take the more narrow of the two:
-        if(DMIN1.lt.DMIN2)DMIN1=DMIN2
+C        if(DMIN1.lt.DMIN2)DMIN1=DMIN2
         if(DMAX1.gt.DMAX2)DMAX1=DMAX2
 C
         write(*,'('' Useful truncation limits are: '',2G16.5)')DMIN1,DMAX1
@@ -2069,7 +2069,7 @@ C     PARAMETER (LMAX=16384,LCMX=8192)
       PARAMETER (LMAX=22000)
       PARAMETER (LCMX=11000)
 C      PARAMETER (IBMX=256)
-      PARAMETER (IBMX=11000)
+      PARAMETER (IBMX=9000)
 CHEN<
         COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
         DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)

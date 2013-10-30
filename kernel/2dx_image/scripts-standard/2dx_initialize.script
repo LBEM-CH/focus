@@ -64,6 +64,7 @@
 # DISPLAY: SCRATCH_DISK
 # DISPLAY: FFTIR_DISK
 # DISPLAY: SYN_Unbending
+# DISPLAY: movie_enable
 #
 #$end_local_vars
 #
@@ -107,6 +108,7 @@ set initialization_executable = ""
 set initialization_corr_endian = ""
 set crop = ""
 set SYN_Unbending = ""
+set movie_enable = ""
 #
 #$end_vars
 #

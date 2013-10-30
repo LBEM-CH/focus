@@ -82,7 +82,7 @@ set(2DXCTFTILT_SRC ${2DXCTFTILT}.f)
 set(2DXCTFTILT_EXE ${2DXCTFTILT})
 add_executable(${2DXCTFTILT_EXE} ${2DXCTFTILT_SRC} ${IOF} ${IOC}) 
 
-set(EXECUTABLES  ${CTFFIND3_EXE} ${2DXCTFFIND3_EXE} ${2DXCTFTILT_EXE})
+set(EXECUTABLES  ${CTFFIND3_EXE} ${2DXCTFFIND3_EXE} ${2DXCTFFIND3_ORI_EXE} ${2DXCTFTILT_EXE})
 ###############################################################################
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)

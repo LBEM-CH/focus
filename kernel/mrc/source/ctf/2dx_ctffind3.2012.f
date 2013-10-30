@@ -8,7 +8,10 @@ C
 C       CARD 1: Input file name for image
 C       CARD 2: Output file name to check result
 C       CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
-C       CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep[A], dAst[A]
+C       CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep
+CHEN>
+C       CARD 5: INOAST, RefDef1, RefDef2, RefDefAng
+CHEN<
 C
 C               The output image file to check the result of the fitting
 C               shows the filtered average power spectrum of the input
@@ -37,7 +40,13 @@ C                      and astigmatism before fitting a CTF to machine
 C                      precision.
 C               dFMax: End defocus value for grid search in Angstrom.
 C               FStep: Step width for grid search in Angstrom.
-C               dAst: Expected amount of astigmatism in Angstrom.
+CHEN>
+C               INOAST: If 0, then normal mode.
+C                       If 1, then only one-dimensional search without astig.
+C               RefDef1: Reference defocus value for one-dimensional search
+C               RefDef2 
+C               RefDefAng 
+CHEN<
 C
 C*****************************************************************************
 C       example command file (UNIX):
@@ -50,7 +59,7 @@ C       time /public/image/bin/ctffind3.exe << eof
 C       image.mrc
 C       power.mrc
 C       2.6,200.0,0.07,60000.0,28.0
-C       128,100.0,15.0,30000.0,90000.0,5000.0,500.0,100.0
+C       128,100.0,15.0,30000.0,90000.0,5000.0
 C       eof
 C       #
 C*****************************************************************************
@@ -63,29 +72,37 @@ C
 C
       INTEGER NXYZ(3),MODE,JXYZ(3),I,J,NX,NY,IX,IS,KXYZ(3)
       INTEGER K,CNT,ID,L,M,LL,MM,ITEST,IP,NBIN,IMP,IERR
-      INTEGER OMP_GET_NUM_PROCS
+CHEN>
+      INTEGER INOAST
+      REAL DEFREF(3),DRMSH
+CHEN<
       PARAMETER (NBIN=100)
       REAL DMAX,DMEAN,DRMS,RMS,WGH1,WGH2,RMSMIN
       REAL SCAL,MEAN,WL,PI,MIN,MAX,ANGAST
       REAL CS,KV,WGH,XMAG,DSTEP,RESMIN,RESMAX,DFMID1,DFMID2
-      REAL THETATR,STEPR,RMIN2,RMAX2,HW,RMSMAX,DAST
+      REAL THETATR,STEPR,RMIN2,RMAX2,HW,RMSMAX
       REAL RES2,CTF,CTFV,TMP,FLT,DFMIN,DFMAX,FSTEP,DRMS1,CMAX
-      REAL,ALLOCATABLE :: AIN(:),ABOX(:),POWER(:),OUT(:),BUF1(:)
+      REAL,ALLOCATABLE :: AIN(:),ABOX(:),OUT(:),BUF1(:)
       REAL,ALLOCATABLE :: RMSA(:),BINS(:)
+      REAL,ALLOCATABLE :: POWER(:)
       PARAMETER (FLT=-0.1,PI=3.1415926535898)
       COMPLEX,ALLOCATABLE :: CBOXS(:)
       CHARACTER FILEIN*200,FILEOUT*200,TITLE*1600,CFORM,NCPUS*10
       LOGICAL EX
 C
       WRITE(6,1000)
-1000  FORMAT(/' CTF DETERMINATION, V3.5 (9-Mar-2013)',
-     +       /' Distributed under the GNU',
-     +        ' General Public License (GPL)')
 CHEN>
-      WRITE(6,'(''This version was adapted to the 2dx environment.'')')
+C 1000  FORMAT(/' CTF DETERMINATION, V3.4 (14-September-2011)',
+C      +       /' Distributed under the GNU',
+C      +        ' General Public License (GPL)')
+C
+1000  FORMAT(/,' CTF DETERMINATION, V3.4 (14-September-2011)',
+     +       /,' Distributed under the GNU',
+     +        ' General Public License (GPL)',/,
+     +        ' This version was adapted to the 2dx environment.')
+C
 CHEN<
       IMP=0
-#ifdef _OPENMP
       CALL GETENV('OMP_NUM_THREADS',NCPUS)
       READ(NCPUS,*,ERR=111,END=111)IMP
 111   CONTINUE
@@ -94,13 +111,7 @@ CHEN<
         READ(NCPUS,*,ERR=112,END=112)IMP
 112     CONTINUE
       ENDIF
-      IF (IMP.LE.0) THEN
-        IMP=OMP_GET_NUM_PROCS()
-      ENDIF
-      CALL OMP_SET_NUM_THREADS(IMP)
-#endif
       IF (IMP.LE.0) IMP=1
-C
       IF (IMP.GT.1) THEN
         WRITE(*,7000) IMP
 7000    FORMAT(/' Parallel processing: NCPUS =   ',I8)
@@ -122,33 +133,21 @@ C
 1031  FORMAT(F5.1,F9.1,F8.2,F10.1,F9.3)
       WRITE(6,1040)
 1040  FORMAT(/' Positive defocus values for underfocus',
-     +       /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A],',
-     +        ' FStep[A], dAst[A]')
-      READ(5,*,END=98)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,DAST
-      WRITE(6,1051)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,DAST
-1051  FORMAT(I4,2F11.1,2F10.1,2F7.1/)
-      GOTO 99
-C
-98    CONTINUE
-      WRITE(6,*) ' ERROR reading CARD 4. Trying old CARD 4...'
-C      READ(5,*)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
-      WRITE(6,1052)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
-1052  FORMAT(I4,2F11.1,2F10.1,F7.1/)
-      WRITE(6,*) ' Setting DAST = 100.0'
-      DAST=100.0
-C
-99    CONTINUE
+     +       /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep')
+      READ(5,*)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
+      WRITE(6,1051)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
+1051  FORMAT(I4,2F11.1,2F10.1,F7.1/)
       ITEST=JXYZ(1)/2
       IF (2*ITEST.NE.JXYZ(1)) THEN
         WRITE(6,1090)
 1090    FORMAT(/' Box size must be even number')
         STOP
       ENDIF
-      IF (DAST.LT.0.0) THEN
-        DAST=500.0
-        WRITE(6,1120)
-1120    FORMAT(/' Invalid dAst value; reset to 500.0')
-      ENDIF
+CHEN>
+      READ(5,*)INOAST,DEFREF(1),DEFREF(2),DEFREF(3),DRMSH
+      WRITE(6,'(''INOAST = '',I4)')INOAST
+      WRITE(6,'(''DEFREF = '',3F12.1)')(DEFREF(i),i=1,3)
+CHEN<
       JXYZ(2)=JXYZ(1)
       JXYZ(3)=1
 C
@@ -219,18 +218,18 @@ C
         ENDIF
 70    CONTINUE
       IF (J.GT.1) THEN
-        DO 71 I=1,J-1
-          IF (BINS(I).GE.CMAX/10.0) THEN
-            RMSMIN=I*(MAX-MIN)/(NBIN-1)+MIN
+        DO 71 I=J-1,1,-1
+          IF (BINS(I).LT.CMAX/10.0) THEN
+            RMSMIN=(I-1)*(MAX-MIN)/(NBIN-1)+MIN
             GOTO 72
           ENDIF
 71      CONTINUE
       ENDIF
 72    CONTINUE
       IF (J.LT.NBIN) THEN
-        DO 73 I=NBIN,J+1,-1
-          IF (BINS(I).GE.CMAX/10.0) THEN
-            RMSMAX=I*(MAX-MIN)/(NBIN-1)+MIN
+        DO 73 I=J+1,NBIN
+          IF (BINS(I).LT.CMAX/10.0) THEN
+            RMSMAX=(I-1)*(MAX-MIN)/(NBIN-1)+MIN
             GOTO 74
           ENDIF
 73      CONTINUE
@@ -286,8 +285,8 @@ CHEN>
         write(*,*)':: RMSMIN:',RMSMIN,'  RMSMAX:',RMSMAX,'   last RMS:',RMS
         stop
       endif
-CHEN<
 C
+CHEN<
       SCAL=1.0/CNT
       DO 60 K=1,KXYZ(1)*KXYZ(2)
         POWER(K)=SQRT(POWER(K)*SCAL)
@@ -320,15 +319,39 @@ C
 C
       DFMID1=DFMIN
       DFMID2=DFMAX
+CHEN>
+C      CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
+C     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
+      write(*,'(''Entering SEARCH_CTF subroutine'')')
+C-----input parameters; DFMID1, DFMID2, for lower and higher boundaries of search.
       CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
-     +            POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
+     +                POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,INOAST,DEFREF)
+c-----output parameters: DFMID1,DFMID2,ANGAST for A,B,angle of defocus.
+CHEN<
       RMIN2=RESMIN**2
       RMAX2=RESMAX**2
       HW=-1.0/RMAX2
       hw=0.0
 
-      CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,CS,WL,
-     +       WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,DAST)
+CHEN>
+      if(INOAST.eq.0)then
+C-------Considering astigmatism variation:
+        write(*,'(''Entering REFINE_CTF subroutine'')')
+C
+        CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,
+     +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW)
+C
+      else
+C-------Not considering astigmatism variation:
+        write(*,'(''Skipping REFINE_CTF subroutine'')')
+C
+      endif
+C
+      if(DRMSH.ne.0.0)then
+        DRMS1 = DRMSH
+      endif
+C
+CHEN<
 C
       DO 50 I=1,JXYZ(1)*JXYZ(2)
         OUT(I)=0.0
@@ -344,7 +367,10 @@ C
           IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
           IS=I+JXYZ(1)*(J-1)
 C         OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
-          OUT(IS)=POWER(ID)/DRMS1/2.0+0.5
+CHEN>
+C          OUT(IS)=POWER(ID)/DRMS1/2.0+0.5
+          OUT(IS)=POWER(ID)/DRMS1/3.0+0.5
+CHEN<
           IF (OUT(IS).GT.1.0) OUT(IS)=1.0
           IF (OUT(IS).LT.-1.0) OUT(IS)=-1.0
           RES2=(REAL(LL)/JXYZ(1))**2+(REAL(MM)/JXYZ(2))**2
@@ -371,7 +397,7 @@ C
 210   CONTINUE
       CALL ICLOSE(10)
 C
-CHEN>
+CHEN<
       open(11,FILE='SCRATCH/2dx_ctffind3.result.tmp',STATUS='NEW',ERR=998)
         write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
         write(11,'(G16.3)')DRMS1
@@ -380,7 +406,6 @@ CHEN>
 998   stop ':: ERROR on file open of SCRATCH/2dx_ctffind3.result.tmp'
 9999  continue
 CHEN<
-C
       END
 C
 C**************************************************************************
@@ -423,7 +448,8 @@ C**************************************************************************
       IMPLICIT NONE
 C
       INTEGER I,J,JXYZ(*),KXYZ(*),IS,ID,NW
-      REAL SCAL,POWER(*),DRMS,DMEAN,DSQR,BUF1(*),DMAX
+      REAL SCAL,DRMS,DMEAN,DSQR,BUF1(*),DMAX
+      REAL POWER(*)
       REAL RESMIN
 C
       WRITE(*,1101)
@@ -537,7 +563,7 @@ C
 C
       INTEGER I,J,NXYZ(3),JXYZ(3),IX,IY,ID,IDB,II,JJ
       REAL AIN(*),ABOX(*),MEAN,RMS,M1,M2,M3,M4
-      REAL*8 DRMS,DMEAN,DM1,DM2,DM3,DM4,DTMP
+      REAL DRMS,DMEAN,DM1,DM2,DM3,DM4,DTMP
 C
       DMEAN=0.0
       DM1=0.0
@@ -606,16 +632,24 @@ C
       END
 C
 C**************************************************************************
+CHEN>
+C      SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
+C     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP)
       SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
-     +          AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
+     +                  AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,INOAST,DEFREF)
+CHEN<
 C**************************************************************************
 C
       IMPLICIT NONE
 C
       INTEGER I,J,K,NXYZ(3),I1,I2,ID,IERR
+CHEN>
+      INTEGER INOAST
+      REAL DEFREF(3)
+CHEN<
       REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
       REAL RMIN2,RMAX2,RMIN,RMAX,AIN(*),SUMMAX,FSTEP
-      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF,DAST
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
       REAL,ALLOCATABLE :: SUMS(:),DF1(:),DF2(:),ANG(:)
       PARAMETER (PI=3.1415926535898)
 C
@@ -628,6 +662,10 @@ C
       HW=-1.0/RMAX2
       hw=0.0
       SUMMAX=-1.0E20
+CHEN>
+      if(INOAST.eq.0)then
+C-------Normal mode: Search X,Y,Angls for defocus and astigmatism
+CHEN<
       I1=INT(DFMID1/FSTEP)
       I2=INT(DFMID2/FSTEP)
       ID=(I2-I1+1)*(I2-I1+1)
@@ -636,13 +674,12 @@ C
         WRITE(*,*) ' ERROR: Memory allocation failed in SEARCH_CTF'
         STOP ' Try reducing size of defocus search grid'
       ENDIF
-C      DO 10 K=0,3
-      DO 10 K=0,17
+      DO 10 K=0,3
         DO 11 I=I1,I2
 !$OMP PARALLEL DO
           DO 12 J=I1,I2
             CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,DAST,
+     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
      +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
 12        CONTINUE
 11      CONTINUE
@@ -662,13 +699,63 @@ C
       DFMID1=DFMID1S
       DFMID2=DFMID2S
       ANGAST=ANGASTS
+CHEN>
+        WRITE(*,'(''Best Values: '',3G12.2,G12.5)')
+     .     DFMID1,DFMID2,ANGAST,SUMMAX
+C
+      else
+C-------One-dimensinal defocus search, while keeping astigmatism constant
+C
+        write(*,'('':Reference defocus was '',3F12.3)')DEFREF(1),DEFREF(2),DEFREF(3)
+C
+C-------How many steps to do in each direction:
+        I2=ABS(INT((DFMID2-DFMID1)/FSTEP))
+C-------and in the other direction the same:
+        I1=-I2
+C-------The total number of search steps:
+        ID=I2-I1+1
+C
+        ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
+        IF (IERR.NE.0) THEN
+          WRITE(*,*) '::  ERROR: Memory allocation failed in SEARCH_CTF'
+          STOP '::  Try reducing size of defocus search grid'
+        ENDIF
+        K=0
+        J=0
+        ANGASTS=ANGAST
+!$OMP PARALLEL DO
+        DO 21 I=1,ID
+C---------This search is from the reference position -I2 to +I2 in ID steps:
+          J=I1+I-1
+C           write(*,'(''calling SEARCH_CTF_S_INOAST with '',3I6)')I,I1,I2
+          CALL SEARCH_CTF_S_INOAST(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+     +          RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +          SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2,DEFREF)
+21      CONTINUE
+        DO 23 I=1,ID
+C         WRITE(*,1200)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
+          IF (SUMS(I).GT.SUMMAX) THEN
+1200        FORMAT(3F12.2,F12.5)
+            SUMMAX=SUMS(I)
+            DFMID1S=DF1(I)
+            DFMID2S=DF2(I)
+          ENDIF
+23      CONTINUE
+        DEALLOCATE(SUMS,DF1,DF2,ANG)
+        DFMID1=DFMID1S
+        DFMID2=DFMID2S
+        ANGAST=DEFREF(3)
+        write(*,'('':Best Defocus found at '',4F12.3)')DFMID1,DFMID2,ANGAST,SUMMAX
+C
+      endif
+CHEN<
 C
       RETURN
       END      
 C
 C**************************************************************************
       SUBROUTINE SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
-     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,DAST,
+     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
      +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
 C**************************************************************************
 C
@@ -677,24 +764,53 @@ C
       INTEGER I,J,K,NXYZ(3),I1,I2,ID
       REAL CS,WL,WGH1,WGH2,THETATR,DF1(*),DF2(*),ANG(*)
       REAL RMIN2,RMAX2,SUMS(*),AIN(*),SUMMAX,FSTEP
-      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF,DAST
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
       PARAMETER (PI=3.1415926535898)
 C
       ID=I-I1+1+(I2-I1+1)*(J-I1)
       DF1(ID)=FSTEP*I
       DF2(ID)=FSTEP*J
-C      ANG(ID)=22.5*K
-      ANG(ID)=5.0*K
+      ANG(ID)=22.5*K
       ANG(ID)=ANG(ID)/180.0*PI
       SUMS(ID)=EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),
-     +  ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,DAST)
+     +  ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
 C
       RETURN
       END      
 C
+CHEN>
+C**************************************************************************
+      SUBROUTINE SEARCH_CTF_S_INOAST(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,
+     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2,DEFREF)
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+CHEN>
+      REAL DEFREF(3)
+CHEN<
+      INTEGER I,J,K,NXYZ(3),I1,I2,ID
+      REAL CS,WL,WGH1,WGH2,THETATR,DF1(*),DF2(*),ANG(*)
+      REAL RMIN2,RMAX2,SUMS(*),AIN(*),SUMMAX,FSTEP
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF
+      PARAMETER (PI=3.1415926535898)
+C
+      ID=I
+      DF1(ID)=DEFREF(1)+FSTEP*J
+      DF2(ID)=DEFREF(2)+FSTEP*J
+      ANG(ID)=DEFREF(3)
+      ANG(ID)=ANG(ID)/180.0*PI
+C      write(*,'(''testing DF1,DF2,ANG of '',3F12.3)')DF1(ID),DF2(ID),ANG(ID)
+      SUMS(ID)=EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),
+     +  ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
+C
+      RETURN
+      END
+CHEN<
 C**************************************************************************
       REAL FUNCTION EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
-     +                      THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,DAST)
+     +                      THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
 C**************************************************************************
 C     This part of the code was made more efficient by
 C
@@ -706,9 +822,9 @@ C**************************************************************************
 C
       IMPLICIT NONE
 C
-      INTEGER L,LL,M,MM,NXYZ(3),ID,IS
+      INTEGER L,LL,M,MM,NXYZ(3),ID
       REAL CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,THETATR,SUM1
-      REAL SUM,AIN(*),RES2,RMIN2,RMAX2,CTF,CTFV,HW,SUM2,DAST
+      REAL SUM,AIN(*),RES2,RMIN2,RMAX2,CTF,CTFV,HW,SUM2
       real rad2, hangle2, angspt, c1, c2, angdif, ccos, df, chi
       real expv, twopi_wli, ctfv2, dsum, ddif, rpart1, rpart2
       real half_thetatrsq, recip_nxyz1, recip_nxyz2
@@ -724,7 +840,6 @@ C
       SUM  = 0.0
       SUM1 = 0.0
       SUM2 = 0.0
-      IS   = 0
 
       DO M=1,NXYZ(2)
          MM=M-1
@@ -755,7 +870,6 @@ C
                
                ctfv2 = ctfv*ctfv
                ID   = L+NXYZ(1)/2*(M-1)
-               IS   = IS + 1
 
                if(hw == 0.0) then
                   SUM  = SUM  + AIN(ID)*ctfv2
@@ -773,17 +887,14 @@ C
          enddo
       enddo
 
-      IF (IS.NE.0) THEN
-        SUM=SUM/SQRT(SUM1*SUM2)
-        IF (DAST.GT.0.0) SUM=SUM-DDIF**2/2.0/DAST**2/IS
-      ENDIF
+      SUM=SUM/SQRT(SUM1*SUM2)
       EVALCTF=SUM
       RETURN
       END
 C
 C**************************************************************************
       SUBROUTINE REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+     +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
 C**************************************************************************
 C
       IMPLICIT NONE
@@ -791,9 +902,10 @@ C
       INTEGER NCYCLS,NXYZ(3)
       PARAMETER (NCYCLS=50)
       REAL DFMID1,DFMID2,ANGAST,XPAR(3),EPAR(3),RF,ESCALE,PI
-      REAL POWER(*),CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,HW,DAST
+      REAL CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,HW
+      REAL POWER(*)
       PARAMETER (PI=3.1415926535898)
-      DATA EPAR/100.0,100.0,0.5/
+      DATA EPAR/100.0,100.0,0.05/
       DATA ESCALE/100.0/
 C
       WRITE(*,1000)
@@ -805,10 +917,10 @@ C
       XPAR(3)=ANGAST
       IF (XPAR(1).EQ.XPAR(2)) XPAR(1)=XPAR(1)+1.0
       CALL VA04A(XPAR,EPAR,3,RF,ESCALE,0,1,NCYCLS,POWER,
-     +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+     +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
       DFMID1=XPAR(1)
       DFMID2=XPAR(2)
-      ANGAST=XPAR(3)-PI*NINT(XPAR(3)/PI)
+      ANGAST=XPAR(3)
       WRITE(*,1100)DFMID1,DFMID2,ANGAST/PI*180.0,-RF
 1100  FORMAT(3F12.2,F12.5,'  Final Values')
 C
@@ -818,7 +930,7 @@ C
 C******************************************************************************
 C
       SUBROUTINE CALCFX(NX,XPAR,RF,AIN,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
 C
 C     CALCULATES NEW VALUE FOR F TO INPUT TO SUBROUTINE VA04A
 C
@@ -829,12 +941,12 @@ C
       INTEGER NXYZ(3),NX,IXBMX
       PARAMETER (IXBMX=512)
       REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
-      REAL RMIN2,RMAX2,AIN(*),EVALCTF,DAST
+      REAL RMIN2,RMAX2,AIN(*),EVALCTF
       REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,XPAR(3),RF
       PARAMETER (PI=3.1415926535898)
 C
       RF=-EVALCTF(CS,WL,WGH1,WGH2,XPAR(1),XPAR(2),XPAR(3),
-     +            THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,DAST)
+     +            THETATR,HW,AIN,NXYZ,RMIN2,RMAX2)
 C
       RETURN
       END
@@ -1413,26 +1525,20 @@ C         FAC = 1.0/SQRT( REAL ( N ) )
 *  dimension. If the next dimension is the dimension currently being
 *  transformed, skip over it so that it stays at 1 (but increment the
 *  vector address to account for the skip).
-C
-C  The following 16 lines contain code corrected by Alexis Rohou
-C  7 Feb 13
-               DO WHILE( (K .LE. NDIM))
-                  IF ((CART( K ) .GT. DIM( K )) ) THEN
-                      CART( K ) = 1
-                      K = K + 1
+               DO WHILE( (K .LE. NDIM) .AND. 
+     +            (CART( K ) .GT. DIM( K )) ) 
+                  CART( K ) = 1
+                  K = K + 1
 
-                      IF( K .EQ. I ) THEN
-                         K = K + 1
-                         V0 = V0 + STEP
-                      END IF
+                  IF( K .EQ. I ) THEN
+                     K = K + 1
+                     V0 = V0 + STEP
+                  END IF
 
-                      CART( K ) = CART( K ) + 1
-                  ELSE
-                      K = K + 1
-                  ENDIF
+                  CART( K ) = CART( K ) + 1
 
                END DO
-
+                  
             END DO
 
 *  Store the increment in vector address between adjacent elements of
@@ -1670,7 +1776,7 @@ C         FAC = 1.0/SQRT( REAL ( N ) )
                   V = V + INC
                   IW = IW + 2
                END DO
-
+   
 *  Increment the co-ordinates of the start of the current "row".
                V0 = V0 + 1
                K = 1
@@ -1681,36 +1787,30 @@ C         FAC = 1.0/SQRT( REAL ( N ) )
 *  dimension. If the next dimension is the dimension currently being
 *  transformed, skip over it so that it stays at 1 (but increment the
 *  vector address to account for the skip).
-C
-C  The following 16 lines contain code corrected by Alexis Rohou
-C  7 Feb 13
-               DO WHILE( (K .LE. NDIM))
-                  IF ((CART( K ) .GT. DIM( K )) ) THEN
-                      CART( K ) = 1
-                      K = K + 1
+               DO WHILE( (K .LE. NDIM) .AND. 
+     +            (CART( K ) .GT. DIM( K )) )
+                  CART( K ) = 1
+                  K = K + 1
 
-                      IF( K .EQ. I ) THEN
-                         K = K + 1
-                         V0 = V0 + STEP
-                      END IF
+                  IF( K .EQ. I ) THEN
+                     K = K + 1
+                     V0 = V0 + STEP
+                  END IF
 
-                      CART( K ) = CART( K ) + 1
-                  ELSE
-                      K = K + 1
-                  ENDIF
+                  CART( K ) = CART( K ) + 1
 
                END DO
-
+                  
             END DO
 
 *  Store the increment in vector address between adjacent elements of
 *  the next "row".
             INC = INC*M
-
+            
          END DO
 
       END IF
-
+         
       END
       SUBROUTINE PDA_PASSB2 (IDO,L1,CC,CH,WA1)
       DIMENSION       CC(IDO,2,L1)           ,CH(IDO,L1,2)           ,
@@ -3012,7 +3112,7 @@ C
       END
 C**************************************************************************
       SUBROUTINE VA04A(X,E,N,F,ESCALE,IPRINT,ICON,MAXIT,AIN,
-     +      CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+     +          CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
 C**************************************************************************
 C  STANDARD FORTRAN 66 (A VERIFIED PFORT SUBROUTINE)
       DIMENSION W(40),X(1),E(1),AIN(*),NXYZ(3)
@@ -3037,7 +3137,7 @@ C       W[N*(N+3)]
       ITERC=1
       ISGRAD=2
       CALL CALCFX(N,X,F,AIN,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
       FKEEP=ABS(F)+ABS(F)
     5 ITONE=1
       FP=F
@@ -3069,7 +3169,7 @@ C       W[N*(N+3)]
       K=K+1
     9 CONTINUE
       CALL CALCFX(N,X,F,AIN,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
 C
       NFCC=NFCC+1
       GO TO (10,11,12,13,14,96),IS
@@ -3243,7 +3343,7 @@ C
   102 CONTINUE
       FKEEP=F
       CALL CALCFX (N,X,F,AIN,
-     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
       NFCC=NFCC+1
       DDMAG=0.
       GO TO 108

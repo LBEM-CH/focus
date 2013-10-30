@@ -254,7 +254,7 @@ int main()
 
 		Cplane<double> pl2(ori,e);
 
-		if(icount < 16) {
+		if(icount < 24) {
 			rlimit *= 1.2;
 			rlimit += 100;
 		} else {
@@ -277,7 +277,7 @@ int main()
 			j--;
 		}
 
-		if(icount > 24) {
+		if(icount > 39) {
 			rlimit *= 0.9;
 			rlimit -= 50;
 			if(rlimit < 200.0) rlimit = 200.0;

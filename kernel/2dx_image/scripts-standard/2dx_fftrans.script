@@ -50,6 +50,9 @@
 # DISPLAY: crop_histogram_stdev
 # DISPLAY: defocus
 # DISPLAY: defocusbackup
+# DISPLAY: movie_enable
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: movie_imagenumber_touse
 #
 #$end_local_vars
 #
@@ -85,6 +88,9 @@ set crop = ""
 set crop_histogram = ""
 set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
+set movie_enable = ""
+set movie_imagenumber_total = ""
+set movie_imagenumber_touse = ""
 #
 #$end_vars
 #
@@ -104,11 +110,19 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
+set movie_verbose = 1
+#
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
 #
 set new_mrc_created = 'n'
+#
+if ( -e ${nonmaskimagename}.mrc ) then
+  if ( ! -e ${nonmaskimagename}.raw.mrc ) then
+    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}.raw.mrc
+  endif
+endif
 #
 if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc ) then
   #

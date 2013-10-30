@@ -111,6 +111,8 @@ source ${proc_2dx}/initialize
 #
 echo "<<@evaluate>>"
 #
+set df_dast = ${expected_astig}
+#
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used"
   ${proc_2dx}/linblock "Defocus should be determined already."
@@ -196,7 +198,7 @@ if ( ${stepdigitizer} == '' ) then
   ${proc_2dx}/protest "ERROR: Digitizer stepsize is not defined."
 endif
 #
-echo ":df_start,df_end,df_step = ${df_start}, ${df_end}, ${df_step}"
+echo ":df_start,df_end,df_step,df_dast = ${df_start}, ${df_end}, ${df_step}, ${df_dast}"
 #
 set oldlat = `echo ${lattice}`
 set lattice = `echo ${lattice} | sed 's/ /,/g' | sed 's/,,,/,/g' | sed 's/,,/,/g'`
@@ -290,8 +292,7 @@ eot
 SCRATCH/2dx_ctffind-cut-down.mrc
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${downstepdigitizer}
-${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step}
-${inoast},${dfref},0.0
+${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${df_dast}
 eof
   #
   if ( ! -e ${outimage} ) then

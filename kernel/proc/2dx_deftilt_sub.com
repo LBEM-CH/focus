@@ -37,6 +37,7 @@ if ( ${refX} == '0' || ${refY} == '0' ) then
   set dfstart = ${df_start}
   set dfend = ${df_end}
   set dfstep = ${df_step}
+  set dfdast  = ${df_dast}
   #
 else
   #
@@ -75,10 +76,11 @@ eot
   set dfstart = `echo ${dftmp} ${dfmin} | awk '{ if ($1 < $2) { s = $2 } else { s = $1 }} END {print s}'`
   set dfend   = `echo ${dfmid} ${dfdist} | awk '{s = $1 + $2 } END {print s}'`
   set dfstep = 10.0
+  set dfdast = 100.0
   #
 endif
 #
-echo ":Search range is ${dfstart}, ${dfend}, ${dfstep}"
+echo ":Search range is ${dfstart}, ${dfend}, ${dfstep}, ${dfdast}"
 #
 #############################################################################
 #                                                                           #
@@ -97,6 +99,11 @@ else
   set locstepdigitizer = ${stepdigitizer}
 endif
 #
+if ( ${refX} == '0' || ${refY} == '0' ) then
+  inoast = 0
+else
+  inoast = 1
+endif
 echo " "
 echo "Calling:"  
 echo "${bin_2dx}/2dx_ctffind3.exe"
@@ -124,8 +131,7 @@ endif
 # card1: Input file name for image
 # card2: Output file name to check result
 # card3:  CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
-# card4:  JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
-# card5:  inoast,dfx,dfy,dfast
+# card4:  JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,DAST
 #
 #######################################################
 #

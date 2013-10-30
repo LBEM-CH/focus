@@ -65,6 +65,9 @@
 # DISPLAY: crop_histogram_percent
 # DISPLAY: crop_histogram_stdev
 # DISPLAY: SYN_Unbending
+# DISPLAY: movie_enable
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: movie_imagenumber_touse
 #
 #$end_local_vars
 #
@@ -119,6 +122,9 @@ set crop_histogram = ""
 set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
 set SYN_Unbending = ""
+set movie_enable = ""
+set movie_imagenumber_total = ""
+set movie_imagenumber_touse = ""
 #
 #$end_vars
 #
@@ -145,6 +151,8 @@ if ( x${MergeIWP}x == "x-1x" ) then
   echo "set MergeIWP = 1" >> LOGS/${scriptname}.results
 endif
 #
+set movie_verbose = 1
+#
 set testname = `echo ${imagename} | cut -c2-`
 set correct = 0
 if (( ${nonmaskimagename} != ${imagename} ) && ( ${nonmaskimagename} != ${testname} )) then
@@ -164,48 +172,161 @@ endif
 # 
 set new_mrc_created = 'n'
 #
-if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc ) then
+if ( -e ${nonmaskimagename}.mrc ) then
+  if ( ! -e ${nonmaskimagename}.raw.mrc ) then
+    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}.raw.mrc
+  endif
+endif
+#
+if ( ${movie_enable} == "y" ) then
+  ${proc_2dx}/linblock "Movie Mode."
+  #
+  if ( ! -e ${imagename}.00.mrc ) then
+    if ( ! -d SOURCE ) then
+      ${proc_2dx}/protest "directory SOURCE not existing."
+    endif
+    if ( ! -e SOURCE/${imagename}.00.mrc ) then
+      echo "dummy" > SOURCE/zzzzz27765.mrc
+      set lfilename = `ls -1 SOURCE/*.mrc | sort | head -n 1`
+      if ( ${lfilename} != "SOURCE/zzzzz27765.mrc" ) then
+        set filename = `echo ${filename} | cut -c2-`
+        ${proc_2dx}/linblock "Found file ${filename}."
+        set imagename = `echo ${filename} | cut -d\. -f1`
+      endif
+      if ( ! -e SOURCE/${imagename}.00.mrc ) then
+        ${proc_2dx}/linblock "Image SOURCE/${imagename}.00.mrc not existing."
+        ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
+        echo "#WARNING: Image SOURCE/${imagename}.00.mrc not existing."  >> LOGS/${scriptname}.results
+        echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
+      endif
+    endif
+    cp -f SOURCE/${imagename}.00.mrc .
+    echo "set imagename = ${imagename}"  >> LOGS/${scriptname}.results
+    set nonmaskimagename = ${imagename}
+    echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+    set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
+    echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+    \rm -f SOURCE/zzzzz27765.mrc
+  endif
+  #################################################################################
+  ### Make input image square and correct size ####################################
+  echo ":: "
+  ${proc_2dx}/linblock "Testing correct size of input image."
+  set movie_imagename = ${nonmaskimagename}.00
+  set movie_verbose = 1
+  source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
+  #################################################################################
+  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Average Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Average Image>" >> LOGS/${scriptname}.results
+  set curnum = "1"
+  echo ":: "
+  while ( ${curnum} < ${movie_imagenumber_total} )
+    if ( ${curnum} < 10 ) then
+      set curnumtext = `echo 0${curnum}`
+    else
+      set curnumtext = ${curnum}
+    endif
+    set movie_imagename = ${nonmaskimagename}.${curnumtext}
+    \cp -f SOURCE/${movie_imagename}.mrc ${movie_imagename}.mrc
+    set movie_verbose = 0
+    source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
+    ${bin_2dx}/labelh.exe << eot
+${movie_imagename}.mrc
+17
+5.0
+3.0
+eot
+    echo " "
+    cat < labelh.tmp
+    echo " "
+    set imagemin     = `head -2 labelh.tmp | tail -1`
+    set imagemax     = `head -3 labelh.tmp | tail -1`
+    set imagemean    = `head -4 labelh.tmp | tail -1`
+    set imagestd     = `head -5 labelh.tmp | tail -1`
+    set imagegoodmin = `head -6 labelh.tmp | tail -1`
+    set imagegoodmax = `head -7 labelh.tmp | tail -1`
+    echo "::                                                         Min=${imagemin}, Max=${imagemax}, Mean=${imagemean}, STD=${imagestd}"
+    echo "# IMAGE-IMPORTANT: ${movie_imagename}.mrc <Non-Masked Image ${curnumtext}>" >> LOGS/${scriptname}.results
+    @ curnum += 1
+  end
   #
   #################################################################################
-  ### Transform ${imagename}.tif into ${imagename}.mrc ############################
-  ${proc_2dx}/linblock "Creating MRC format file."
-  source ${proc_2dx}/2dx_initialize_tiff_to_mrc_sub.com
+  echo ":: "
+  ${proc_2dx}/linblock "Creating Average file."
+  #################################################################################
+  #
+  \rm -f ${nonmaskimagename}.mrc
+  ${bin_2dx}/labelh.exe << eot
+${nonmaskimagename}.01.mrc
+19
+${nonmaskimagename}.mrc
+${nonmaskimagename}
+${movie_imagenumber_touse}
+eot
+  #
+  ${bin_2dx}/labelh.exe << eot
+${nonmaskimagename}.mrc
+17
+5.0
+3.0
+eot
+  echo " "
+  cat < labelh.tmp
+  echo " "
+  set imagemin     = `head -2 labelh.tmp | tail -1`
+  set imagemax     = `head -3 labelh.tmp | tail -1`
+  set imagemean    = `head -4 labelh.tmp | tail -1`
+  set imagestd     = `head -5 labelh.tmp | tail -1`
+  set imagegoodmin = `head -6 labelh.tmp | tail -1`
+  set imagegoodmax = `head -7 labelh.tmp | tail -1`
+  echo "::                                                         Min=${imagemin}, Max=${imagemax}, Mean=${imagemean}, STD=${imagestd}"
+  \rm -f labelh.tmp
+  #
+else
+  if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc) then
+    #
+    #################################################################################
+    ### Transform ${imagename}.tif into ${imagename}.mrc ############################
+    ${proc_2dx}/linblock "Creating MRC format file."
+    source ${proc_2dx}/2dx_initialize_tiff_to_mrc_sub.com
+    #################################################################################
+    #
+  endif
+  #
+  #################################################################################
+  ### Test (and Correct) Endianess of ${imagename}.mrc ############################
+  ${proc_2dx}/linblock "Testing Endianess."
+  source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
+  #################################################################################  
+  #
+  #
+  set testname = `echo ${imagename} | cut -c2-`
+  if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
+    set oldval = ${nonmaskimagename}
+    set nonmaskimagename = ${imagename}
+    #############################################################################
+    ${proc_2dx}/linblock "Warning: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
+    #############################################################################
+    echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+  endif
+  # 
+  if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) then
+    set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
+    #############################################################################
+    ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
+    #############################################################################
+    echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  echo "<<@progress: 40>>" 
+  #
+  #################################################################################
+  ### Make input image square and correct size ####################################
+  ${proc_2dx}/linblock "Testing correct size of input image."
+  source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
   #################################################################################
   #
 endif
-#
-#################################################################################
-### Test (and Correct) Endianess of ${imagename}.mrc ############################
-${proc_2dx}/linblock "Testing Endianess."
-source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
-#################################################################################
-#
-#
-set testname = `echo ${imagename} | cut -c2-`
-if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
-  set oldval = ${nonmaskimagename}
-  set nonmaskimagename = ${imagename}
-  #############################################################################
-  ${proc_2dx}/linblock "Warning: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
-  #############################################################################
-  echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
-endif
-# 
-if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) then
-  set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
-  #############################################################################
-  ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
-  #############################################################################
-  echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
-endif
-#
-echo "<<@progress: 40>>"
-#
-#################################################################################
-### Make input image square and correct size ####################################
-${proc_2dx}/linblock "Testing correct size of input image."
-source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
-#################################################################################
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then
   set magnification = `echo ${stepdigitizer} ${sample_pixel} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
@@ -422,7 +543,7 @@ endif
 #############################################################################
 #############################################################################
 #
-if ( ${new_mrc_created} == 'y' ) then
+if ( ${new_mrc_created} == 'y' && ${movie_enable} == "n" ) then
   #
   #################################################################################
   ### Treat histogram width, if needed ############################################
@@ -434,32 +555,38 @@ endif
 #
 #
 #
-echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
-#
-# This is to make sure that 2dx_maskCrystal displays the three file names even before it has been run
-if ( ! -e LOGS/2dx_maskCrystal.results ) then
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/2dx_maskCrystal.results
-  echo "# IMAGE-IMPORTANT: ManualMasking-CCmap.mrc <XCF map for Manual Masking>" >> LOGS/2dx_maskCrystal.results
-  echo "# IMAGE-IMPORTANT: ManualMasking-UnbendPlot.mrc <Unbending Plot for Manual Masking>" >> LOGS/2dx_maskCrystal.results
-endif
-#
-#############################################################################
-#                                                                           #
-${proc_2dx}/linblock "HISTO - to produce a histogram of the grey-values in the image"
-#                                                                           #
-#############################################################################
-#
-setenv IN ${nonmaskimagename}.mrc
-#
-${bin_2dx}/histok.exe << eot
-0,${imagesidelength},0,${imagesidelength}
-0
+if ( ${movie_enable} == "n" ) then
+  #
+  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
+  #
+  # This is to make sure that 2dx_maskCrystal displays the three file names even before it has been run
+  if ( ! -e LOGS/2dx_maskCrystal.results ) then
+    echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/2dx_maskCrystal.results
+    echo "# IMAGE-IMPORTANT: ManualMasking-CCmap.mrc <XCF map for Manual Masking>" >> LOGS/2dx_maskCrystal.results
+    echo "# IMAGE-IMPORTANT: ManualMasking-UnbendPlot.mrc <Unbending Plot for Manual Masking>" >> LOGS/2dx_maskCrystal.results
+  endif
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "HISTO - to produce a histogram of the grey-values in the image"
+  #                                                                           #
+  #############################################################################
+  #
+  setenv IN ${nonmaskimagename}.mrc
+  #
+  ${bin_2dx}/histok.exe << eot
+  0,${imagesidelength},0,${imagesidelength}  
+  0
 eot
-#
-\mv -f HISTO.PS PS/${nonmaskimagename}-histo.ps
-#
-echo "# IMAGE: "PS/${nonmaskimagename}-histo.ps "<Histogram Non-Masked Image>" >> LOGS/${scriptname}.results
-#
+  #
+  \mv -f HISTO.PS PS/${nonmaskimagename}-histo.ps
+  #
+  echo "# IMAGE: "PS/${nonmaskimagename}-histo.ps "<Histogram Non-Masked Image>" >> LOGS/${scriptname}.results
+  #
+else
+  #
+  #
+endif
 #############################################################################
 echo ":: "
 ${proc_2dx}/linblock "Done."

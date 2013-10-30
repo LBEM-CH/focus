@@ -28,6 +28,7 @@ if ( ! -e ${imagename}.mrc ) then
     \rm -f final_map.tif
     echo "dummy" > zzzzz27765.raw.mrc
     set filename = `ls -1 *.raw.mrc | sort | head -n 1`
+    \rm -f zzzzz27765.raw.mrc
     if ( ${filename} != "zzzzz27765.raw.mrc" ) then
       ${proc_2dx}/linblock "Found file ${filename}."
       set imagename = `echo ${filename} | cut -d\. -f1`
@@ -37,7 +38,6 @@ if ( ! -e ${imagename}.mrc ) then
         echo "#WARNING: Image ${imagename}.raw.mrc not existing."  >> LOGS/${scriptname}.results
         echo "#WARNING: You probably use more than one or two dots in the image name, which is not recommended."  >> LOGS/${scriptname}.results
       endif
-      \rm -f zzzzz27765.raw.mrc
       cp -f ${imagename}.raw.mrc ${imagename}.mrc
       set new_mrc_created = 'y'
       #
@@ -57,6 +57,9 @@ if ( ! -e ${imagename}.mrc ) then
           ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
           echo "#WARNING: Image ${imagename}.mrc not existing."  >> LOGS/${scriptname}.results
           echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
+        else
+          \cp -f ${imagename}.mrc ${imagename}.raw.mrc
+          set new_mrc_created = 'y'
         endif
       else
         #

@@ -355,6 +355,7 @@ if ( ${initialization_executable} == "n" ) then
   if ( ${nonmaskimagename} != ${imagename} ) then
     echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
   endif
+  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
   #
   if ( -e ${nonmaskimagename}-original-big-old.mrc ) then
@@ -515,6 +516,7 @@ else
     echo "set quadradb = ${quadradb}"  >> LOGS/${scriptname}.results
   endif
   #
+  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
   if ( ${nonmaskimagename} != ${imagename} ) then
     echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>"  >> LOGS/${scriptname}.results
   endif

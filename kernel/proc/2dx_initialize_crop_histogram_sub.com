@@ -95,4 +95,28 @@ ${imagename}.mrc
 eot
     #
   endif
-
+  #
+    if ( ${imageorigin} == '7' ) then
+    #############################################################################
+    ${proc_2dx}/linblock "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg."
+    ${proc_2dx}/linblock "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg." >> History.dat
+    #############################################################################  
+    #
+    \mv -f ${imagename}.mrc SCRATCH/${imagename}.tmp.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.mrc
+19               ! switch to REAL (MODE 2) with autoscaling 0…16000
+SCRATCH/${imagename}.tmp.2.mrc
+eot
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${imagename}.tmp.2.mrc
+99               ! further modes
+1		 ! various roations
+${imagename}.mrc
+1		 ! Z90 rotation
+eot
+    #
+  endif
+  #

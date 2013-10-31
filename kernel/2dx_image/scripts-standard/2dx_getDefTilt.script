@@ -284,6 +284,7 @@ eot
   # Dummy setting of parameters that are not used here, as long as inoast = 0
   set inoast = 0
   set dfref = "1.0,1.0,0.0"
+  set drms1 = 0.0
   set downstepdigitizer = `echo ${stepdigitizer} | awk '{ s = 2 * $1 } END { print s }'`
   #
   echo "# IMAGE-IMPORTANT: LOGS/2dx_ctffind3.txt <TXT: Logfile of 2dx_ctffind3.exe>" >>  LOGS/${scriptname}.results
@@ -293,6 +294,7 @@ SCRATCH/2dx_ctffind-cut-down.mrc
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${downstepdigitizer}
 ${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${df_dast}
+${inoast},${dfref},${drms1}
 eof
   #
   if ( ! -e ${outimage} ) then

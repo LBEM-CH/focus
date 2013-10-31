@@ -158,6 +158,14 @@ eot
   endif
 endif
 #
+if ( ${new_mrc_created} == "y" ) then
+  echo "set imagename = ${imagename}"  >> LOGS/${scriptname}.results
+  set nonmaskimagename = ${imagename}
+  echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+  set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
+  echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+endif
+#
 echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
 #
 if ( ! -e ${imagename}.mrc ) then

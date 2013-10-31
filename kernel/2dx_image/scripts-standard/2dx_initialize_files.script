@@ -349,22 +349,11 @@ if ( ${initialization_executable} == "n" ) then
   echo ":: "
   #################################################################################
   #
-  if ( -e ${imagename}-orignal.mrc ) then
-    echo "# IMAGE-IMPORTANT: ${imagename}-orignal.mrc <Original Image>" >> LOGS/${scriptname}.results
-  endif
   if ( ${nonmaskimagename} != ${imagename} ) then
     echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
   endif
   echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
-  #
-  if ( -e ${nonmaskimagename}-original-big-old.mrc ) then
-    echo "# IMAGE: ${nonmaskimagename}-original-big-old.mrc <Non-Masked Original Big Old Image>"  >> LOGS/${scriptname}.results
-  endif
-  #
-  if ( -e ${nonmaskimagename}-original-big.mrc ) then
-    echo "# IMAGE: ${nonmaskimagename}-original-big.mrc <Non-Masked Original Big Image>"  >> LOGS/${scriptname}.results
-  endif
   #
 else
   #
@@ -473,8 +462,7 @@ else
   echo "set boxa1 = ${boxa1}"  >> LOGS/${scriptname}.results
   echo ":Initializing boxa1 as ${boxa1}"
   #
-  #set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 16 ) } END { print s }'`
-  set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 20 ) } END { print s }'`
+  set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 13 ) } END { print s }'`
   echo "set boxb1 = ${boxb1}"  >> LOGS/${scriptname}.results
   echo ":Initializing boxb1 as ${boxb1}"
   #
@@ -522,14 +510,6 @@ else
   endif
   echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
   #
-  if ( -e ${nonmaskimagename}-original-big-old.mrc ) then
-    echo "# IMAGE: ${nonmaskimagename}-original-big-old.mrc <Non-Masked Original Big Old Image>"  >> LOGS/${scriptname}.results
-  endif
-  #
-  if ( -e ${nonmaskimagename}-original-big.mrc ) then
-    echo "# IMAGE: ${nonmaskimagename}-original-big.mrc <Non-Masked Original Big Image>"  >> LOGS/${scriptname}.results
-  endif
-  #
   if ( ${initialization_executable} == "y" ) then
     set initialization_executable = "n"
     echo "set initialization_executable = ${initialization_executable}"  >> LOGS/${scriptname}.results
@@ -556,10 +536,11 @@ if ( ${new_mrc_created} == 'y' && ${movie_enable} == "n" ) then
 endif
 #
 #
+echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_enable} == "n" ) then
   #
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
   #
   # This is to make sure that 2dx_maskCrystal displays the three file names even before it has been run
   if ( ! -e LOGS/2dx_maskCrystal.results ) then

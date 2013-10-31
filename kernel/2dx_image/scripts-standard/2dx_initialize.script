@@ -65,6 +65,7 @@
 # DISPLAY: FFTIR_DISK
 # DISPLAY: SYN_Unbending
 # DISPLAY: movie_enable
+# DISPLAY: initialization_reset
 #
 #$end_local_vars
 #
@@ -104,6 +105,7 @@ set boxb2 = ""
 set refori = ""
 set quadrada = ""
 set quadradb = ""
+set initialization_reset = ""
 set initialization_executable = ""
 set initialization_corr_endian = ""
 set crop = ""
@@ -122,6 +124,148 @@ source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@evaluate>>"
 echo "<<@progress: 1>>"
+#
+if ( ${initialization_executable} == "n" ) then
+  set initialization_reset = "n"
+endif
+#
+if ( ${initialization_reset} == "y" ) then
+  echo "::Resetting image data"
+  #
+  set reset_var = imagename          ; set reset_val = "ScriptWillPutNameHere" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = nonmaskimagename   ; set reset_val = "ScriptWillPutNameHere" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = imagenumber        ; set reset_val = "ScriptWillPutNumberHere" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = imagesidelength    ; set reset_val = "ScriptWillPutLengthHere" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = defocus            ; set reset_val = "5000.0,5000.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = defocusbackup      ; set reset_val = "5000.0,5000.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = realcell_local     ; set reset_val = "100.0,100.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = realang_local      ; set reset_val = "90.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = lattice            ; set reset_val = "0.0,0.0,0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = secondlattice      ; set reset_val = "0.0,0.0,0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = backuplattice      ; set reset_val = "0.0,0.0,0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = phaori             ; set reset_val = "0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = phaoriFourFilter   ; set reset_val = "0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = phaori_change      ; set reset_val = "0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = phaori_last_change ; set reset_val = "0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = MergePhaseResidual ; set reset_val = "999.90" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = comment            ; set reset_val = "-"      ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_val = "."
+  #
+  set reset_var = JREFL ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = JREFL_2D ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = Reflections_Unique ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = num_amplitudes_observed ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = num_phases_observed ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = num_reflections_fitted ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = num_reflections_FOM1 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = num_reflections_FOM50 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = overall_R_factor ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = overall_phase_residual ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = overall_weighted_R_factor ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = overall_weighted_phase_residual ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = overall_phase_residual_2D ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = overall_weighted_phase_residual_2D ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = PHARES_SYM ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = PHARES_NUM_SPOTS ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = PHARES_Merge ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = QVAL ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = QVAL1 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = QVAL2 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = QVALS ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = CALCULATEDMAG ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_var = U1_IQ1 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U1_IQ2 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U1_IQ3 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U1_IQ4 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U1_IQ5 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U1_IQ6 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U1_IQ7 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U1_IQ8 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U1_IQ9 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_var = U2_IQ1 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U2_IQ2 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U2_IQ3 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U2_IQ4 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U2_IQ5 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U2_IQ6 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U2_IQ7 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U2_IQ8 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = U2_IQ9 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_var = US_IQ1 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = US_IQ2 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = US_IQ3 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = US_IQ4 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = US_IQ5 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = US_IQ6 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = US_IQ7 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = US_IQ8 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = US_IQ9 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_var = RB_1 ; set reset_val = "15" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RB_2 ; set reset_val = "12" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RB_3 ; set reset_val = "9" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RB_4 ; set reset_val = "7" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RB_5 ; set reset_val = "5" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RB_6 ; set reset_val = "3" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_val = "."
+  #
+  set reset_var = RP_1 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RP_2 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RP_3 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RP_4 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RP_5 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = RP_6 ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_val = "--"
+  set reset_var = DEFOCUS_TLTAXIS ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = DEFOCUS_TLTANG ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = DEFOCUS_TLTAXA ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = DEFOCUS_TAXA ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = DEFOCUS_TANGL ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_var = LATTICE_TLTAXIS ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = LATTICE_TLTANG ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = LATTICE_TLTAXA ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = LATTICE_TAXA ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = LATTICE_TANGL ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_var = TTREFINE_TLTAXIS ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = TTREFINE_TLTANG ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = TTREFINE_TLTAXA ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = TTREFINE_TAXA ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = TTREFINE_TANGL ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  set reset_var = MERGE_TLTAXIS ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = MERGE_TLTANG ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = MERGE_TLTAXA ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = MERGE_TAXA ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = MERGE_TANGL ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  #
+  set reset_var = DEFOCUS_ACTIVE ; set reset_val = "0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = FFT_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = DEFOCUS_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = LATTICE_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = SPOTS_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = UNBENDING_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = ML_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = CTF_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = MASKING_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = PHASEORI_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = MERGING_done ; set reset_val = "n" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = REPROCESSING_done ; set reset_val = "n"  ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = dummy ; set reset_val = "0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  #
+  #
+  #
+  set initialization_reset = "n"
+  echo "set initialization_reset = n" >> LOGS/${scriptname}.results
+endif
 #
 #############################################################################
 echo ":: "

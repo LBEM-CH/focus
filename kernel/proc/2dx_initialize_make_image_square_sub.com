@@ -57,13 +57,7 @@ ${newsize}
 eot
       #
       if (  ${movie_enable} != "y" ) then  
-        if ( ! -e ${loc_imagename}-original.mrc ) then
-          \mv -f ${loc_imagename}.mrc ${loc_imagename}-original.mrc
-        else
-          ${proc_2dx}/linblock "${loc_imagename}-original.mrc already existing."
-          ${proc_2dx}/protest "ERROR: Renaming not possible."
-        endif
-        echo "# IMAGE-IMPORTANT: ${loc_imagename}-orignal.mrc <Original Image>"  >> LOGS/${scriptname}.results
+        echo "# IMAGE-IMPORTANT: ${loc_imagename}.raw.mrc <Raw Image>"  >> LOGS/${scriptname}.results
       endif
       \mv -f SCRATCH/TMPnewsize.mrc ${loc_imagename}.mrc
       #
@@ -189,11 +183,6 @@ eot
       endif
       #
       echo "<<@progress: 62>>"
-      #
-      if ( ! -e ORIGINAL.mrc ) then
-        \mv -f ${loc_imagename}.mrc ORIGINAL.mrc
-        echo "#IMAGE-IMPORTANT: ORIGINAL.mrc <Original image>" >> LOGS/${scriptname}.results
-      endif
       #
       \mv -f SCRATCH/TMPnewsize1.mrc ${loc_imagename}.mrc
       #

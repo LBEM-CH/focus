@@ -100,9 +100,9 @@ else
 endif
 #
 if ( ${refX} == '0' || ${refY} == '0' ) then
-  inoast = 0
+  set inoast = 0
 else
-  inoast = 1
+  set inoast = 1
 endif
 echo " "
 echo "Calling:"  
@@ -110,7 +110,7 @@ echo "${bin_2dx}/2dx_ctffind3.exe"
 echo "${inimage}"
 echo "${outimage}"
 echo "${CS},${KV},${ampcon},${magnification},${locstepdigitizer}"
-echo "${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep}"
+echo "${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}"
 echo "${inoast},${dfref},${drms1}"
 echo " "
 #
@@ -118,7 +118,7 @@ ${bin_2dx}/2dx_ctffind3.exe << eof
 ${inimage}
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
-${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep}
+${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}
 ${inoast},${dfref},${drms1}
 eof
 #

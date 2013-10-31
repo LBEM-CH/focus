@@ -482,7 +482,7 @@ else
     echo ":Initializing boxb2 as ${boxb2}"
   endif
   #
-  if ( ${refori} == "0,0" ) then
+  if ( ${refori} == "0,0" || ${refori} == "0.0,0.0" ) then
     set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
     set refori = ${reforix},${reforix}
     echo "set refori = ${refori}"  >> LOGS/${scriptname}.results

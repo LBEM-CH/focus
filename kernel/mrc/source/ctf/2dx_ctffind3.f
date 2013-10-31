@@ -71,6 +71,7 @@ C
       PROGRAM CTFFIND3
 C
 C       NIKO, 21 SEPTEMBER 2002
+C       with 2dx additions, Oct. 31, 2013, Henning.
 C
       IMPLICIT NONE
 C

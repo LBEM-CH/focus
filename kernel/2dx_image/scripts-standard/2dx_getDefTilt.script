@@ -78,6 +78,7 @@ set stepdigitizer = ""
 set CS = ""
 set KV = ""
 set defocus = ""
+set defocusbackup = ""
 set df_start = ""
 set df_end = ""
 set df_step = ""
@@ -458,7 +459,6 @@ eot
     #                                                                           #
     #############################################################################
     #
-
     set centerX = `echo ${defocus_tiles_count} | awk '{ s = int( $1 / 2 ) + 1} END { print s }'`
     set centerY = `echo ${defocus_tiles_count} | awk '{ s = int( $1 / 2 ) + 1} END { print s }'`
     echo ":: centerX=${centerX}" 
@@ -818,6 +818,11 @@ eot
   echo "set CTF_done = n" >> LOGS/${scriptname}.results
   echo "set MERGING_done = n" >> LOGS/${scriptname}.results
   #
+endif
+#
+if ( ${defocusbackup} == "5000.0,5000.0,0.0" ) then
+  set defocusbackup = ${defocus}
+  echo "set defocusbackup = ${defocusbackup}" >> LOGS/${scriptname}.results
 endif
 #
 echo "<<@progress: 100>>"

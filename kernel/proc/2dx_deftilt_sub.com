@@ -63,8 +63,8 @@ eot
   #
   set astigval = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = ( $2 - $1 ) / 2.0 } END { print s }'`
   set astigang = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
-  set dfref1 = `echo ${dfmid} ${astigval} | awk '{ s = $1 - $2 } END { print s }'`
-  set dfref2 = `echo ${dfmid} ${astigval} | awk '{ s = $1 + $2 } END { print s }'`
+  set dfref1 = `echo ${dfmid} ${astigval} | awk '{ s = $1 + $2 } END { print s }'`
+  set dfref2 = `echo ${dfmid} ${astigval} | awk '{ s = $1 - $2 } END { print s }'`
   set dfref = `echo ${dfref1},${dfref2},${astigang}`
   echo "Reference defocus is ${dfref}"
   #

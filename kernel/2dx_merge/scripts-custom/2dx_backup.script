@@ -351,7 +351,14 @@ while ( ${dircounter} <= ${dirnum} )
         endif
         #
         if ( ${alsobig} == "y" ) then
-          if ( -e ${from_dirfile}/${loc_imagename}.tif ) then
+          if ( -e ${from_dirfile}/${loc_imagename}.raw.mrc ) then
+            if ( ! -e ${to_dirfile}/${loc_imagename}.raw.mrc ) then
+              echo ":New: ${to_dirfile}/${loc_imagename}.raw.mrc"
+              cp -f ${from_dirfile}/${loc_imagename}.raw.mrc ${to_dirfile}
+            else
+              echo ":Old: ${to_dirfile}/${loc_imagename}.raw.mrc"
+            endif
+          else if ( -e ${from_dirfile}/${loc_imagename}.tif ) then
             if ( ! -e ${to_dirfile}/${loc_imagename}.tif ) then
               echo ":New: ${to_dirfile}/${loc_imagename}.tif"
               cp -f ${from_dirfile}/${loc_imagename}.tif ${to_dirfile}
@@ -382,7 +389,14 @@ while ( ${dircounter} <= ${dirnum} )
         #
         if ( ${loc_imagename} != ${loc_nonmaskimagename} ) then
           if ( ${alsobig} == "y" ) then
-            if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
+            if ( -e ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ) then
+              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.raw.mrc ) then
+                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.raw.mrc"
+                cp -f ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ${to_dirfile}
+              else
+                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.raw.mrc"
+              endif
+            else if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
               if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.tif ) then
                 echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.tif"
                 cp -f ${from_dirfile}/${loc_nonmaskimagename}.tif ${to_dirfile}

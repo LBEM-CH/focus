@@ -2,17 +2,18 @@
 #
 # this is not an independent script. It should only be called from other scripts.
 #
-# This sub-script will make sure the ${imagename}.mrc is square, by either padding or cropping it.
+# This sub-script will make sure the ${nonmaskimagename}.mrc is square, by either padding or cropping it.
 # It will also make sure the image size is an allowed product of small prime factors.
 #
 #
-#
-if ( ${movie_enable} == "y" ) then
-    set loc_imagename = ${movie_imagename}
-else
-    set loc_imagename = ${imagename}
-endif
-#
+if ( ${new_mrc_created} == "y" ) then
+  #
+  if ( ${movie_enable} == "y" ) then
+      set loc_imagename = ${movie_imagename}
+  else
+      set loc_imagename = ${nonmaskimagename}
+  endif  
+  #
     setenv IN ${loc_imagename}.mrc
     set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
     set sizeX = `echo ${dimens} | cut -d\  -f1` 
@@ -199,6 +200,8 @@ eot
       echo "set imagesidelength = ${imagesidelength}"  >> LOGS/${scriptname}.results
     endif
     #
+endif
+#
 
 
 

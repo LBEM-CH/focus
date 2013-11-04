@@ -401,7 +401,7 @@ SCRATCH/${nonmaskimagename}.red8.mrc
 eot
 #
 echo "# IMAGE: "FFTIR/${imagename}.red.mrc "<Downsampled Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "SCRATCH/${nonmaskimagename}.red2.mrc "<2x2 binned nonmaskedImage>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "SCRATCH/${nonmaskimagename}.red2.mrc "<2x2 binned nonmasked Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE: "SCRATCH/${nonmaskimagename}.red4.mrc "<4x4 binned nonmasked Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE: "SCRATCH/${nonmaskimagename}.red8.mrc "<8x8 binned nonmasked Image>" >> LOGS/${scriptname}.results
 #

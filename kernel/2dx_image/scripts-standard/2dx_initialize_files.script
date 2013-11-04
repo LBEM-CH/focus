@@ -286,7 +286,7 @@ else
   if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc) then
     #
     #################################################################################
-    ### Transform ${imagename}.tif into ${imagename}.mrc ############################
+    ### Transform ${nonmaskimagename}.tif into ${nonmaskimagename}.mrc ############################
     ${proc_2dx}/linblock "Creating MRC format file."
     source ${proc_2dx}/2dx_initialize_tiff_to_mrc_sub.com
     #################################################################################
@@ -294,7 +294,7 @@ else
   endif
   #
   #################################################################################
-  ### Test (and Correct) Endianess of ${imagename}.mrc ############################
+  ### Test (and Correct) Endianess of ${nonmaskimagename}.mrc ############################
   ${proc_2dx}/linblock "Testing Endianess."
   source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
   #################################################################################  
@@ -311,7 +311,7 @@ else
   endif
   # 
   if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) then
-    set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
+    set imagenumber = `echo ${nonmaskimagename} | ${bin_2dx}/2dx_getnumber.exe`
     #############################################################################
     ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
     #############################################################################
@@ -321,7 +321,7 @@ else
   echo "<<@progress: 40>>" 
   #
   #################################################################################
-  ### Make input image square and correct size ####################################
+  ### Make input image square, correct size, and potentially rotate for correct tilt axis:
   ${proc_2dx}/linblock "Testing correct size of input image."
   source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
   #################################################################################

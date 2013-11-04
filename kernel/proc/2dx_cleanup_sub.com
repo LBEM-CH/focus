@@ -86,7 +86,6 @@ if ( "${level}" == "radical" ) then
   #
   \rm -f ManualMasking-CCmap.mrc
   \rm -f ManualMasking-UnbendPlot.mrc
-  \rm -f selectionList.dat
   \rm -f centric.hk
   \rm -f centric.hkl
   \rm -f avrg-1.hk

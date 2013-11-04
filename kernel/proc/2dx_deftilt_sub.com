@@ -59,12 +59,13 @@ eot
   #
   set dfmin = 500.0
   echo dfmin = ${dfmin}
-  echo defocus = ${defocus}
+  echo defocus in image center = ${defocus}
+  echo defocus mid value at reference location = ${dfmid}
   #
   set astigval = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = ( $2 - $1 ) / 2.0 } END { print s }'`
   set astigang = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
-  set dfref1 = `echo ${dfmid} ${astigval} | awk '{ s = $1 + $2 } END { print s }'`
-  set dfref2 = `echo ${dfmid} ${astigval} | awk '{ s = $1 - $2 } END { print s }'`
+  set dfref1 = `echo ${dfmid} ${astigval} | awk '{ s = $1 - $2 } END { print s }'`
+  set dfref2 = `echo ${dfmid} ${astigval} | awk '{ s = $1 + $2 } END { print s }'`
   set dfref = `echo ${dfref1},${dfref2},${astigang}`
   echo "Reference defocus is ${dfref}"
   #
@@ -148,9 +149,9 @@ endif
   else
     set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
     set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
-    set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
-    set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
-    set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
+    set def1 = `echo $newdef | awk '{ s = $1 } END { print s }'`
+    set def2 = `echo $newdef | awk '{ s = $2 } END { print s }'`
+    set ang  = `echo $newdef | awk '{ s = $3 } END { print s }'`
     \rm SCRATCH/2dx_ctffind3.result.tmp
   endif
   #

@@ -90,7 +90,8 @@ CHEN<
       REAL RES2,CTF,CTFV,TMP,FLT,DFMIN,DFMAX,FSTEP,DRMS1,CMAX
       REAL,ALLOCATABLE :: AIN(:),ABOX(:),POWER(:),OUT(:),BUF1(:)
       REAL,ALLOCATABLE :: RMSA(:),BINS(:)
-      PARAMETER (FLT=-0.1,PI=3.1415926535898)
+      PARAMETER (FLT=-0.1)
+      PARAMETER (PI=3.1415926535898)
       COMPLEX,ALLOCATABLE :: CBOXS(:)
       CHARACTER FILEIN*200,FILEOUT*200,TITLE*1600,CFORM,NCPUS*10
       LOGICAL EX
@@ -363,17 +364,17 @@ CHEN<
       hw=0.0
 
 CHEN>
+C
       if(INOAST.eq.0)then
 C-------Considering astigmatism variation:
         write(*,'(''Entering REFINE_CTF subroutine'')')
-C
         CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,CS,WL,
      +       WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,DAST)
-C
       else
 C-------Not considering astigmatism variation:
         write(*,'(''Skipping REFINE_CTF subroutine'')')
-C
+C-------From here on, ANGAST has to change from DEG to RAD... (!)
+        ANGAST = ANGAST * PI / 180.0
       endif
 C
       if(DRMSH.ne.0.0)then
@@ -381,7 +382,6 @@ C
       endif
 C
 CHEN<
-
 C
       DO 50 I=1,JXYZ(1)*JXYZ(2)
         OUT(I)=0.0
@@ -427,7 +427,7 @@ C
 CHEN>
       open(11,FILE='SCRATCH/2dx_ctffind3.result.tmp',STATUS='NEW',ERR=998)
         write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
-        write(11,'(G16.3)')DRMS1
+        write(11,'(G18.6)')DRMS1
       close(11)
       GOTO 9999
 998   stop ':: ERROR on file open of SCRATCH/2dx_ctffind3.result.tmp'

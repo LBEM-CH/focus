@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Synthetic Unbend                                                   #
+# Title: Synthetic Unbend (NOT RECOMMENDED)                                 #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -14,6 +14,8 @@
 #############################################################################
 #
 # MANUAL: This script will do the image unbending with a synthetically generated reference. 
+#
+# MANUAL: WE STRONGLY ADVISE AGAINST THIS, AS THIS WILL ONLY INTRODUCE REFERENCE BIAS, WHICH MAKES YOUR STATISTICS LOOK NICE, BUT PREVENTS AXESS TO HIGH-RESOLUTION DATA. PLEASE CONSULT WITH THE DEVELOPER TEAM IF YOU HAVE QUESTIONS.
 #
 # MANUAL: You can only use this script, after the conventional image processing with lattice and defocus determination, and unbending with Unbending-I and Unbending-II has been done, and a phase origin for merging has been determined. Only then, the synthetical reference can be created with the correct defocus, tilt and phase origin.
 #

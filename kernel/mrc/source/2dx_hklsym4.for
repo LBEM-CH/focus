@@ -277,6 +277,9 @@ C
 C-------Below we go through all symmery opperation (isymop) for the according space group
 C       and check in the table ISYMFIELD if it is applicable
 C
+      ihmax=max(ihmax,ikmax)
+      ikmax=ihmax
+C
       do isymop=1,15
         if(ISYMFIELD(isymop,ispc).gt.0) then
                 call SYMMETRIZE(RFAMP,RFPHASE,RFFOM,ROUTP,IOUTP,ININDEX,

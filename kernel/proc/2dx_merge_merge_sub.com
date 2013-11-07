@@ -405,7 +405,7 @@ ${bin_2dx}/2dx_plotreska.exe << eot
 3 	! Show as (here: non-)tilted projections, based on real-space lattice
 ${realcell},${realang},${lattice}
 APH/sym2D.hkl
-2	! calculate IQ Value label
+3	! calculate IQ Value label and expect L column
 ${plotres_ellipse}
 ${RESMAX}
 ${plotres_rings}

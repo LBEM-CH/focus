@@ -193,10 +193,12 @@ eot
       echo "# IMAGE: LOGS/2dx_tltplotk.txt <LOG: PLTILTK summary>" >> LOGS/${scriptname}.results
   endif
   #
-  # cat LOGS/2dx_merge_scriptPLT.log
+  # if ( -e LOGS/2dx_merge_scriptPLT.log ) then
+  #   cat LOGS/2dx_merge_scriptPLT.log  
+  # endif
   echo "################################################"
   echo "################################################"
-  echo "output in file LOGS/2dx_merge_scriptPLT.log"
+  echo "::Check output in file LOGS/2dx_merge_scriptPLT.log"
   echo "################################################"
   echo "################################################"
   #

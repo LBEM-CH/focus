@@ -36,6 +36,11 @@ else
 	APPLE_BUNDLE=OFF
 fi
 
+# Quick fix to enforce gnu-compilers on Macs
+export CC=gcc
+export CXX=g++
+
+
 # And create build dirs here
 SRC=$(pwd)
 echo "The project structure is set as follows"

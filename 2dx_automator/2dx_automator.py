@@ -37,30 +37,55 @@ def tbox(master):
 	class TBOX(object):
 		def __init__(self, info):
 			self.msgbox = Toplevel(master)
+			
+			self.msgbox.title("2dx_automator Project Statistics Overview")
+			
 			#label0 = Label(self.msgbox, text=info)
 			#label0.pack()
 			#self.entry0 = Entry(self.msgbox)
 			#self.entry0.pack()
 			
-			
+			nx = int(800 * 0.7)
+			ny = int(600 * 0.7)
 				
 			self.def_label = Label(self.msgbox, image=master.default_tkimage)
-			self.def_label.grid(row=0, column=0, padx=20, pady=20)
+			self.def_label.grid(row=0, column=0, padx=10, pady=20)
 		
-			self.def_image = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/tilts.tif"))
+			self.def_image = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/tilts.tif").resize((nx,ny),Image.ANTIALIAS))
 			self.def_label.configure(image=self.def_image)
-			
-			
 			
 			self.def_label2 = Label(self.msgbox, image=master.default_tkimage)
 			self.def_label2.grid(row=0, column=1, padx=10, pady=20)
 		
-			self.def_image2 = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/defoci.tif"))
+			self.def_image2 = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/defoci.tif").resize((nx,ny),Image.ANTIALIAS))
 			self.def_label2.configure(image=self.def_image2)
 			
+			self.def_label3 = Label(self.msgbox, image=master.default_tkimage)
+			self.def_label3.grid(row=0, column=2, padx=10, pady=20)
+		
+			self.def_image3 = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/qval.tif").resize((nx,ny),Image.ANTIALIAS))
+			self.def_label3.configure(image=self.def_image3)
+			
+			self.def_label4 = Label(self.msgbox, image=master.default_tkimage)
+			self.def_label4.grid(row=1, column=0, padx=10, pady=10)
+		
+			self.def_image4 = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/tilt_qval.tif").resize((nx,ny),Image.ANTIALIAS))
+			self.def_label4.configure(image=self.def_image4)
+			
+			self.def_label5 = Label(self.msgbox, image=master.default_tkimage)
+			self.def_label5.grid(row=1, column=1, padx=10, pady=10)
+		
+			self.def_image5 = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/defocis.tif").resize((nx,ny),Image.ANTIALIAS))
+			self.def_label5.configure(image=self.def_image5)
+			
+			self.def_label6 = Label(self.msgbox, image=master.default_tkimage)
+			self.def_label6.grid(row=1, column=2, padx=10, pady=10)
+		
+			self.def_image6 = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/qvals.tif").resize((nx,ny),Image.ANTIALIAS))
+			self.def_label6.configure(image=self.def_image6)
 			
 			button0 = Button(self.msgbox, text='Close',command=self.b0_action)
-			button0.grid(row=1, column=2, padx=10, pady=10)
+			button0.grid(row=2, column=4, padx=10, pady=10)
 			
 		def b0_action(self):
 			#master.username = self.entry0.get()
@@ -120,6 +145,17 @@ class Auto2dxGUI(Frame):
 		self.centralrightframe2 = Frame(self.centralrightframe)
 		self.centralrightframe2.pack()
 		
+		
+	def getAllQVals(self):
+		qvals = []
+		for f in self.image_dirs:
+			config_name = f + "/2dx_image.cfg"
+			content = read_text_row(config_name)
+			for c in content:
+				if len(c)>1 and c[1] == "QVAL":
+					qvals.append(abs(float(c[3][1:-1])))
+		return qvals	
+
 	def getAllTiltAngles(self):
 		tilt_anlges = []
 		for f in self.image_dirs:
@@ -144,16 +180,137 @@ class Auto2dxGUI(Frame):
 		
 	def getProjectStat(self):
 		tilts = self.getAllTiltAngles()
-		hist(tilts, bins=60)
+		ang_min = 0
+		ang_max = 70
+		ang_dx = 2
+		
+		hist(tilts, bins=(ang_max-ang_min)/ang_dx, range=(ang_min,ang_max), facecolor='blue', alpha=0.5)
 		plt.title('Tilt Angle Histogram')
+		plt.xlabel('Tilt Angle')
+		plt.ylabel('Counts')
 		plt.savefig(self.output_dir + "/automatic/tilts.tif")
 		plt.close()
 		
+		def_min = 0
+		def_max = 50000
+		def_dx = 1000
 		defs = self.getAllDefoci()
-		hist(defs, bins=60)
-		plt.title('Defocus Histogram')
+		qvals = self.getAllQVals()
+		
+		defs_pertilt = [[],[],[],[]]
+		angs_pertilt = [[],[],[],[]]
+		qvals_pertilt = [[],[],[],[]]
+		
+		for i in range(len(defs)):
+			if abs(tilts[i]) < 10:
+				angs_pertilt[0].append(tilts[i])
+				defs_pertilt[0].append(defs[i])
+				qvals_pertilt[0].append(qvals[i])
+			elif abs(tilts[i]) < 20 and abs(tilts[i])>=10:
+				angs_pertilt[1].append(tilts[i])
+				defs_pertilt[1].append(defs[i])
+				qvals_pertilt[1].append(qvals[i])
+			elif abs(tilts[i]) < 30 and abs(tilts[i])>=20:
+				angs_pertilt[2].append(tilts[i])
+				defs_pertilt[2].append(defs[i])
+				qvals_pertilt[2].append(qvals[i])
+			else:
+				angs_pertilt[3].append(tilts[i])
+				defs_pertilt[3].append(defs[i])
+				qvals_pertilt[3].append(qvals[i])
+		
+		hist(defs, bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
+		plt.title('Defoci Histogram')
+		plt.xlabel('Defocus')
+		plt.ylabel('Counts')
 		plt.savefig(self.output_dir + "/automatic/defoci.tif")
 		plt.close()
+		
+		qval_min = min(qvals)
+		qval_max = max(qvals)
+		qval_n_bins = 40
+		
+		hist(qvals, bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
+		plt.title('QVal Histogram')
+		plt.xlabel('QVal')
+		plt.ylabel('Counts')
+		plt.savefig(self.output_dir + "/automatic/qval.tif")
+		plt.close()
+		
+		plt.subplots_adjust(hspace=0.6)
+		if len(qvals_pertilt[0])>0:
+			plt.subplot(411)
+			hist(qvals_pertilt[0], bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
+			plt.title('QVAL Histogram (0-10 degrees)')
+			plt.ylabel('Counts')
+			if len(qvals_pertilt[1])==0 and len(qvals_pertilt[2])==0 and len(qvals_pertilt[3])==0:
+				plt.xlabel('QVAL')
+		if len(qvals_pertilt[1])>0:
+			plt.subplot(412)
+			hist(qvals_pertilt[1], bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
+			plt.title('QVAL Histogram (10-20 degrees)')
+			plt.ylabel('Counts')
+			if len(qvals_pertilt[2])==0 and len(qvals_pertilt[3])==0:
+				plt.xlabel('QVAL')
+		if len(qvals_pertilt[2])>0:
+			plt.subplot(413)
+			hist(qvals_pertilt[2], bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
+			plt.title('QVAL Histogram (20-30 degrees)')
+			plt.ylabel('Counts')
+			if len(qvals_pertilt[3])==0:
+				plt.xlabel('QVAL')
+		if len(qvals_pertilt[3])>0:
+			plt.subplot(414)
+			hist(qvals_pertilt[3], bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
+			plt.title('QVAL Histogram (>30 degrees)')
+			plt.ylabel('Counts')
+			plt.xlabel('QVAL')
+		
+		plt.savefig(self.output_dir + "/automatic/qvals.tif")
+		plt.close()
+		
+		plt.subplot(111)
+		plt.plot(tilts, qvals, 'o', alpha=0.6)
+		plt.title('Tilt angle vs. QVAL')
+		plt.ylabel('QVAL')
+		plt.xlabel('Tilt angle')
+		plt.savefig(self.output_dir + "/automatic/tilt_qval.tif")
+		plt.close()
+		
+		plt.subplots_adjust(hspace=0.6)
+		if len(defs_pertilt[0])>0:
+			plt.subplot(411)
+			hist(defs_pertilt[0], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
+			plt.title('Defocus Histogram (0-10 degrees)')
+			plt.ylabel('Counts')
+			if len(defs_pertilt[1])==0 and len(defs_pertilt[2])==0 and len(defs_pertilt[3])==0:
+				plt.xlabel('Defocus')
+		if len(defs_pertilt[1])>0:
+			plt.subplot(412)
+			hist(defs_pertilt[1], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
+			plt.title('Defocus Histogram (10-20 degrees)')
+			plt.ylabel('Counts')
+			if len(defs_pertilt[2])==0 and len(defs_pertilt[3])==0:
+				plt.xlabel('Defocus')
+		if len(defs_pertilt[2])>0:
+			plt.subplot(413)
+			hist(defs_pertilt[2], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
+			plt.title('Defocus Histogram (20-30 degrees)')
+			plt.ylabel('Counts')
+			if len(defs_pertilt[3])==0:
+				plt.xlabel('Defocus')
+		if len(defs_pertilt[3])>0:
+			plt.subplot(414)
+			hist(defs_pertilt[3], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
+			plt.title('Defocus Histogram (20-30 degrees)')
+			plt.ylabel('Counts')
+			plt.xlabel('Defocus')
+		
+		plt.savefig(self.output_dir + "/automatic/defocis.tif")
+		plt.close()
+		
+		
+		
 		
 	def updateImages(self):
 		print "update called"

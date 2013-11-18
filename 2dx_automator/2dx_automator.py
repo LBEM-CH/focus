@@ -40,11 +40,6 @@ def tbox(master):
 			
 			self.msgbox.title("2dx_automator Project Statistics Overview")
 			
-			#label0 = Label(self.msgbox, text=info)
-			#label0.pack()
-			#self.entry0 = Entry(self.msgbox)
-			#self.entry0.pack()
-			
 			nx = int(800 * 0.7)
 			ny = int(600 * 0.7)
 				
@@ -88,7 +83,6 @@ def tbox(master):
 			button0.grid(row=2, column=4, padx=10, pady=10)
 			
 		def b0_action(self):
-			#master.username = self.entry0.get()
 			self.msgbox.destroy()
 	return TBOX
 
@@ -99,7 +93,6 @@ class Auto2dxGUI(Frame):
 		self.index_selected = 0
 		self.parent = parent
 		self.initUI()
-		
 		
 		
 	def getFolders(self):
@@ -156,6 +149,7 @@ class Auto2dxGUI(Frame):
 					qvals.append(abs(float(c[3][1:-1])))
 		return qvals	
 
+
 	def getAllTiltAngles(self):
 		tilt_anlges = []
 		for f in self.image_dirs:
@@ -165,6 +159,7 @@ class Auto2dxGUI(Frame):
 				if len(c)>1 and c[1] == "TLTANG":
 					tilt_anlges.append(abs(float(c[3][1:-1])))
 		return tilt_anlges
+	
 	
 	def getAllDefoci(self):
 		defoci = []
@@ -181,22 +176,24 @@ class Auto2dxGUI(Frame):
 	def getProjectStat(self):
 		tilts = self.getAllTiltAngles()
 		ang_min = 0
-		ang_max = 70
+		ang_max = max(tilts)
 		ang_dx = 2
 		
 		hist(tilts, bins=(ang_max-ang_min)/ang_dx, range=(ang_min,ang_max), facecolor='blue', alpha=0.5)
 		plt.title('Tilt Angle Histogram')
-		plt.xlabel('Tilt Angle')
+		plt.xlabel('Tilt Angle (degrees)')
 		plt.ylabel('Counts')
 		plt.savefig(self.output_dir + "/automatic/tilts.tif")
 		plt.close()
 		
-		def_min = 0
-		def_max = 50000
-		def_dx = 1000
 		defs = self.getAllDefoci()
 		qvals = self.getAllQVals()
+
 		
+		def_min = 0
+		def_max = max(defs)
+		def_dx = 1000
+				
 		defs_pertilt = [[],[],[],[]]
 		angs_pertilt = [[],[],[],[]]
 		qvals_pertilt = [[],[],[],[]]
@@ -221,7 +218,7 @@ class Auto2dxGUI(Frame):
 		
 		hist(defs, bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
 		plt.title('Defoci Histogram')
-		plt.xlabel('Defocus')
+		plt.xlabel('Defocus (A)')
 		plt.ylabel('Counts')
 		plt.savefig(self.output_dir + "/automatic/defoci.tif")
 		plt.close()
@@ -273,7 +270,7 @@ class Auto2dxGUI(Frame):
 		plt.plot(tilts, qvals, 'o', alpha=0.6)
 		plt.title('Tilt angle vs. QVAL')
 		plt.ylabel('QVAL')
-		plt.xlabel('Tilt angle')
+		plt.xlabel('Tilt angle (degrees)')
 		plt.savefig(self.output_dir + "/automatic/tilt_qval.tif")
 		plt.close()
 		
@@ -284,41 +281,38 @@ class Auto2dxGUI(Frame):
 			plt.title('Defocus Histogram (0-10 degrees)')
 			plt.ylabel('Counts')
 			if len(defs_pertilt[1])==0 and len(defs_pertilt[2])==0 and len(defs_pertilt[3])==0:
-				plt.xlabel('Defocus')
+				plt.xlabel('Defocus (A)')
 		if len(defs_pertilt[1])>0:
 			plt.subplot(412)
 			hist(defs_pertilt[1], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
 			plt.title('Defocus Histogram (10-20 degrees)')
 			plt.ylabel('Counts')
 			if len(defs_pertilt[2])==0 and len(defs_pertilt[3])==0:
-				plt.xlabel('Defocus')
+				plt.xlabel('Defocus (A)')
 		if len(defs_pertilt[2])>0:
 			plt.subplot(413)
 			hist(defs_pertilt[2], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
 			plt.title('Defocus Histogram (20-30 degrees)')
 			plt.ylabel('Counts')
 			if len(defs_pertilt[3])==0:
-				plt.xlabel('Defocus')
+				plt.xlabel('Defocus (A)')
 		if len(defs_pertilt[3])>0:
 			plt.subplot(414)
 			hist(defs_pertilt[3], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
-			plt.title('Defocus Histogram (20-30 degrees)')
+			plt.title('Defocus Histogram (>30 degrees)')
 			plt.ylabel('Counts')
-			plt.xlabel('Defocus')
+			plt.xlabel('Defocus (A)')
 		
 		plt.savefig(self.output_dir + "/automatic/defocis.tif")
 		plt.close()
-		
-		
 		
 		
 	def updateImages(self):
 		print "update called"
 		
 		i = self.index_selected
-		#print self.image_names[i][:-4], self.image_dirs[i]
 		dia_folder = self.image_dirs[i] + "/automation_output"
-		#print dia_folder
+		
 		core_name = self.image_names[i].split(".")[0]
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/SCRATCH/" + core_name + ".red8.mrc", dia_folder + "/image.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/CUT/" + core_name + ".marked.merge.ps.mrc", dia_folder + "/defoci.mrc")
@@ -336,6 +330,7 @@ class Auto2dxGUI(Frame):
 		self.watcher.drawTiltAxisOnDefo(dia_folder + "/defoci.png", dia_folder + "/defoci_axis.gif", tltaxis)
 		
 		self.indexChanged()
+	
 	
 	def getInfoString(self, folder):
 		config_name = folder + "/2dx_image.cfg"
@@ -377,7 +372,6 @@ class Auto2dxGUI(Frame):
 						comment_string += "\n"
 	
 		result = "Image Statistics:\n\n\n"
-		
 		result += "2dx image folder: " + folder.split("/")[-2] + "/" + folder.split("/")[-1] + "\n"
 		
 		file_time = datetime.datetime.fromtimestamp(os.path.getmtime(folder)) 
@@ -414,34 +408,20 @@ class Auto2dxGUI(Frame):
 				self.image_dirs.append(line.split()[1])
 				self.image_names.append(line.split()[0])
 		self.listbox.selection_set(END)
-		#self.index_selected = len(self.image_dirs)-1
 		self.indexChanged()
 
 		
 	def runAutomation(self):
 		if not self.is_running:
-			
 			if tkMessageBox.askyesno("Automation Launch", "Relaunching may take a while as all new images are processed!\n\nDo you want to continue?"):
 				self.status.configure(text="Automation starting up...", fg="orange")
 				self.parent.update()
 				time.sleep(2)
 				if self.watcher.restart():
 					self.resetResultOverview()
-				
-				#self.thread_running = thread.start_new_thread(self.watcher.run, ())
-				
-				#os.chdir("/run/user/1000/gvfs/smb-share:server=cina-home,share=scherers$/automation/")
-
-				#self.proc = subprocess.Popen("cd /run/user/1000/gvfs/smb-share:server=cina-home,share=scherers$/automation/; python auto_2dx.py " + self.input_dir + " " + self.output_dir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-				#self.subproc = subprocess.Popen(["sleep 10; ls"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-				#self.subproc = subprocess.Popen(self.watcher.run(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-				
-				
 				self.status.configure(text="Automation running", fg="green")
 				self.is_running = True
 				
-				#print self.subproc.stdout.readline()
-	
 			
 	def lauch2dxImage(self):
 		print self.index_selected
@@ -449,6 +429,7 @@ class Auto2dxGUI(Frame):
 		os.system("2dx_image " + self.image_dirs[self.index_selected])
 		time.sleep (1)
 		self.indexChanged()
+		
 		
 	def editComment(self):
 		folder = self.image_dirs[self.index_selected]
@@ -462,7 +443,6 @@ class Auto2dxGUI(Frame):
 				for c in comment:
 					comment_string += c + " "
 					
-		
 		data = tkSimpleDialog.askstring('Edit Comment', 'Please enter your new comment', initialvalue=comment_string[1:-2])
 		
 		if data==None:
@@ -537,14 +517,14 @@ class Auto2dxGUI(Frame):
 			if num>self.count:
 				self.count = num
 				self.resetResultOverview()
-		#self.after(1000, self.check_for_new_images)
+		
 		
 	def autom_do_check(self):
-		#print "checked"
 		if self.is_running:
 			if self.watcher.test4new():
 				self.resetResultOverview()
 		self.after(2000, self.autom_do_check)
+		
 		
 	def switchAutomationOff(self):
 		if tkMessageBox.askyesno("Stop Automation", "Do you realy want to stop the automation?"):
@@ -567,7 +547,6 @@ class Auto2dxGUI(Frame):
 		refresh = 10
 		self.watcher = Add2dxImageWatcher(refresh, wait, in_folder, out_folder, logfile)
 
-		
 		self.initLayout()
 		
 		self.is_running = False
@@ -612,15 +591,9 @@ class Auto2dxGUI(Frame):
 		self.reload_button.pack(padx=20, pady=5)
 		
 		self.box_test = tbox(self)
-		#self.button1 = Button(self, text='Logged in',command=lambda: self.box("asdf"))
-		#self.button1.pack()
-		
-		#self.stat_button = Button(self.lowleftframe ,text='Show Project Statistics', width=40, command=self.getProjectStat)
-		
 		
 		def test_func():
 			self.getProjectStat()
-			#lambda: self.box_test("asdf")
 			self.box_test("asdf")
 		
 		self.stat_button = Button(self.lowleftframe ,text='Show Project Statistics', width=40, command=test_func)

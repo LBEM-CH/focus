@@ -16,16 +16,20 @@ class Add2dxImageWatcher(WatcherBase):
 		self.lock_2dx = threading.Lock()
 		self.lock_eman2 = threading.Lock()
 	
+	
 	def file_filter(self, filename):
 		return filename.endswith(".mrc")
 		
+		
 	def getNumberOfDoneImages(self, filename):
 		return len(read_text_row(self.log_file_name))
+		
 		
 	def getImageNumber(self, filename):
 		data = read_text_file(self.log_file_name)
 		print data
 		return data.index(filename)
+		
 		
 	def write_log(self, filename):
 		image_count = len(read_text_row(self.log_file_name))
@@ -73,10 +77,7 @@ class Add2dxImageWatcher(WatcherBase):
 		
 		tltaxis = self.get_tltaxis_from_config(image_2dx_name + "/2dx_image.cfg")
 		self.drawTiltAxisOnDefo(dia_folder + "/defoci.png", dia_folder + "/defoci_axis.gif", tltaxis)
-		
-		
-		#self.copy_image_if_there(image_2dx_name + "/2dx_image.cfg", dia_folder + "/2dx_image.cfg")
-		
+			
 		print "2dx automatic processing done for", filename
 		
 	def copy_image_if_there(self, src, dest):
@@ -84,6 +85,7 @@ class Add2dxImageWatcher(WatcherBase):
 			shutil.copyfile( src, dest )
 		else:
 			print "file not there:", src
+			
 			
 	def convert_mrc_to_png(self, folder):
 		old_path = os.getcwd()
@@ -177,7 +179,7 @@ class Add2dxImageWatcher(WatcherBase):
 		w = 650
 		im2.crop((nx/2-w, ny/2-w, nx/2+w, ny/2+w)).save(outfile)
 		
-	
+		
 	def drawTiltAxisOnDefo(self, infile, outfile, tltaxis):
 		from PIL import Image, ImageDraw, ImageFont
 		im = Image.open(infile)
@@ -210,6 +212,7 @@ class Add2dxImageWatcher(WatcherBase):
 		png_name = outfile.split(".")[0] + ".png"
 		im2.save(png_name)
 		os.system("convert " + png_name + " " + outfile )
+	
 	
 	def drawLattice(self, infile, outfile, lattice):
 		from PIL import Image, ImageDraw
@@ -244,6 +247,7 @@ class Add2dxImageWatcher(WatcherBase):
 		w = 260
 		im2.crop((nx/2-w, ny/2-w, nx/2+w, ny/2+w)).save(outfile)
 		
+		
 	def fix_fft(self, dia_folder):
 		image = get_image(dia_folder + "/fft.mrc").get_fft_amplitude()
 		image_new = model_blank(image.get_xsize(), image.get_ysize())
@@ -257,6 +261,7 @@ class Add2dxImageWatcher(WatcherBase):
 				image_new.set_value_at(i+nx/2, j, image(i+nx/2,j+nx/2))
 	
 		image_new.write_image( dia_folder + "/fft.png")
+		
 		
 	def get_ctf_from_config(self, config_name):
 		content = read_text_row(config_name)
@@ -282,6 +287,7 @@ class Add2dxImageWatcher(WatcherBase):
 				
 		result = {'defX': defocus[0], 'defY': defocus[1], 'ast': defocus[2], 'step': step, 'phacon': phacon, 'CS': CS, 'KV': KV, 'mag': magnification}
 		return result
+		
 		
 	def get_tltaxis_from_config(self, config_name):
 		content = read_text_row(config_name)

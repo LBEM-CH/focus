@@ -39,7 +39,7 @@ class WatcherBase:
 					print d, "not yet processed"
 					self.write_log(d)
 					thread.start_new_thread(self.image_added, (d,))
-					time.sleep(5)
+					time.sleep(1)
 		self.before = dict ([(f, None) for f in os.listdir (self.infolder)])
 		return some_thing_changed
 					

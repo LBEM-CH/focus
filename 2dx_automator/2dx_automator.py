@@ -307,10 +307,11 @@ class Auto2dxGUI(Frame):
 		plt.close()
 		
 		
-	def updateImages(self):
+	def updateImages(self, i):
 		print "update called"
 		
-		i = self.index_selected
+		self.watcher.lock_eman2.acquire()
+		
 		dia_folder = self.image_dirs[i] + "/automation_output"
 		
 		core_name = self.image_names[i].split(".")[0]
@@ -329,8 +330,12 @@ class Auto2dxGUI(Frame):
 		tltaxis = self.watcher.get_tltaxis_from_config(self.image_dirs[i] + "/2dx_image.cfg")
 		self.watcher.drawTiltAxisOnDefo(dia_folder + "/defoci.png", dia_folder + "/defoci_axis.gif", tltaxis)
 		
-		self.indexChanged()
+		self.watcher.lock_eman2.release()
 	
+	def regenerateDiaImages(self):
+		i = self.index_selected
+		self.updateImages(i)
+		self.indexChanged()
 	
 	def getInfoString(self, folder):
 		config_name = folder + "/2dx_image.cfg"
@@ -531,6 +536,37 @@ class Auto2dxGUI(Frame):
 			self.is_running = False
 			self.status.configure(text="Automation not running", fg="red")
 		
+	def reprocess2dx(self, i):
+		self.watcher.lock_2dx.acquire()
+		old_path = os.getcwd()
+		os.chdir(self.watcher.outfolder)
+		os.system("2dx_image " + self.image_dirs[i] + ' "*"' )
+		os.chdir(old_path)
+		self.watcher.lock_2dx.release()
+		
+	def reprocessCaller(self,i):
+		config_name = self.image_dirs[i] + "/2dx_image.cfg"
+		if os.path.exists(config_name):
+			os.remove(config_name)
+		
+		self.watcher.copy_image_if_there(self.image_dirs[i] + "/../2dx_master.cfg", config_name)
+		
+		self.reprocess2dx(i)
+		self.updateImages(i)
+		
+		
+	def reprocessImage(self):
+		i = self.index_selected
+		dia_folder = self.image_dirs[i] + "/automation_output"
+		
+		if os.path.exists(dia_folder):
+			shutil.rmtree(dia_folder)
+		
+		os.makedirs(dia_folder)
+		self.indexChanged()
+		
+		thread.start_new_thread(self.reprocessCaller, (i,))
+		
 		
 	def initUI(self):
 		self.parent.title("2dx_automator")
@@ -587,8 +623,11 @@ class Auto2dxGUI(Frame):
 		self.comment_button = Button(self.lowleftframe ,text='Edit Comment', width=40, command=self.editComment)
 		self.comment_button.pack(padx=20, pady=5)
 		
-		self.reload_button = Button(self.lowleftframe ,text='Regenerating Diagnostic Images', width=40, command=self.updateImages)
+		self.reload_button = Button(self.lowleftframe ,text='Regenerating Diagnostic Images', width=40, command=self.regenerateDiaImages)
 		self.reload_button.pack(padx=20, pady=5)
+		
+		self.reprocess_button = Button(self.lowleftframe ,text='Reprocess Image', width=40, command=self.reprocessImage)
+		self.reprocess_button.pack(padx=20, pady=5)
 		
 		self.box_test = tbox(self)
 		

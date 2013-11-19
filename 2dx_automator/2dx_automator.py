@@ -391,14 +391,14 @@ class Auto2dxGUI(Frame):
 		file_time = datetime.datetime.fromtimestamp(os.path.getmtime(folder)) 
 		result += "Time: " + str(file_time) + "\n\n"
 		
-		result += "Defocus: " + str(defocus[0]) + "\n"
-		result += "Defocus (astigmatic): " + str(defocus[1]) + "\n"
-		result += "Astigmatism Angle: " + str(defocus[2]) + "\n\n"
+		result += "Defocus (mean): " + str((defocus[0]+defocus[1])/2) + " A\n"
+		result += "Astigmatism : " +  str((defocus[0]-defocus[1])/2) + " A\n"
+		result += "Astigmatism Angle: " + str(defocus[2]) + " deg\n\n"
 		
 		result += "Magnification: " + str(magnification) + "\n\n"
 		
-		result += "TLTAXIS: " + str(tltaxis) + "\n"
-		result += "TLTANG: " + str(tltang) + "\n\n"
+		result += "TLTAXIS: " + str(tltaxis) + " deg\n"
+		result += "TLTANG: " + str(tltang) + " deg\n\n"
 		
 		result += "QVAL: " + str(qval) + "\n"
 		result += "IQ1: " + str(iq1) + "\n"

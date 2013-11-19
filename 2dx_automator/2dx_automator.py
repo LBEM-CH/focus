@@ -89,10 +89,11 @@ def tbox(master):
 	
 class Auto2dxGUI(Frame):
 	def __init__(self, parent):
-		self.index_selected = 0
 		Frame.__init__(self, parent, background="white")
 		self.parent = parent
-		self.initUI()
+		self.index_selected = 0
+		self.initUI()	
+		self.resetResultOverview()
 		self.index_selected = self.count-1
 		self.indexChanged()
 		
@@ -420,7 +421,10 @@ class Auto2dxGUI(Frame):
 				self.listbox.insert(END, line.split()[0])
 				self.image_dirs.append(line.split()[1])
 				self.image_names.append(line.split()[0])
+		
+		self.image_count_label.configure(text=str(len(self.image_names)) + " Images")
 		self.listbox.selection_set(END)
+		self.index_selecte = self.count-1
 		self.indexChanged()
 
 		
@@ -436,10 +440,16 @@ class Auto2dxGUI(Frame):
 				self.is_running = True
 				
 			
-	def lauch2dxImage(self):
+	def launch2dxImage(self):
 		print self.index_selected
 		print self.image_dirs[self.index_selected]
 		os.system("2dx_image " + self.image_dirs[self.index_selected])
+		time.sleep (1)
+		self.indexChanged()
+		
+		
+	def launch2dxMerge(self):
+		thread.start_new_thread(os.system, ("2dx " + self.output_dir,))
 		time.sleep (1)
 		self.indexChanged()
 		
@@ -478,6 +488,9 @@ class Auto2dxGUI(Frame):
 		self.indexChanged()
 		
 	def indexChanged(self):
+		
+		if len(self.image_dirs) == 0:
+			return
 		
 		all_fine = True
 		
@@ -623,7 +636,8 @@ class Auto2dxGUI(Frame):
 		stop_button = Button(self.toprightframe ,text='Stop Automation', command=self.switchAutomationOff, width=30)
 		stop_button.pack(padx=5, pady=2)
 		
-		Label(self.centralleftframe, text="Images").pack()		
+		self.image_count_label = Label(self.centralleftframe, text="Images")
+		self.image_count_label.pack()
 		
 		self.scrollbar = Scrollbar(self.centralleftframe)
 		self.scrollbar.pack(side=RIGHT, fill=Y)
@@ -644,7 +658,7 @@ class Auto2dxGUI(Frame):
 			self.index_selected = index
 			self.indexChanged()
 			
-		self.lauch_2dx_image_button = Button(self.lowleftframe ,text='Lauch 2dx_image', width=40, command=self.lauch2dxImage)
+		self.lauch_2dx_image_button = Button(self.lowleftframe ,text='Lauch 2dx_image', width=40, command=self.launch2dxImage)
 		self.lauch_2dx_image_button.pack(padx=20, pady=20)
 		
 		self.comment_button = Button(self.lowleftframe ,text='Edit Comment', width=40, command=self.editComment)
@@ -663,7 +677,10 @@ class Auto2dxGUI(Frame):
 			self.box_test("asdf")
 		
 		self.stat_button = Button(self.lowleftframe ,text='Show Project Statistics', width=40, command=test_func)
-		self.stat_button.pack(padx=20, pady=60)
+		self.stat_button.pack(padx=20, pady=50)
+		
+		self.merge_button = Button(self.lowleftframe ,text='Launch 2dx_merge', width=40, command=self.launch2dxMerge)
+		self.merge_button.pack(padx=20, pady=50)
 		
 		self.default_image = Image.new("RGB", (n,n), "white")
 		self.default_tkimage = ImageTk.PhotoImage(self.default_image)
@@ -687,7 +704,6 @@ class Auto2dxGUI(Frame):
 		self.usebox = Checkbutton(self.centralrightframe3, variable=self.usevar, text="Use image", command=self.useButtonClicked)
 		self.usebox.pack(side=BOTTOM, pady=10)
 		self.usebox.select()
-		
 		
 		self.default_image_small = Image.new("RGB", (n_small,n_small), "white")
 		self.default_tkimage_small = ImageTk.PhotoImage(self.default_image_small)

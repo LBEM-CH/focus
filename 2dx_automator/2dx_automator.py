@@ -88,11 +88,13 @@ def tbox(master):
 
 	
 class Auto2dxGUI(Frame):
-	def __init__(self, parent):		
-		Frame.__init__(self, parent, background="white")
+	def __init__(self, parent):
 		self.index_selected = 0
+		Frame.__init__(self, parent, background="white")
 		self.parent = parent
 		self.initUI()
+		self.index_selected = self.count-1
+		self.indexChanged()
 		
 		
 	def getFolders(self):
@@ -143,10 +145,12 @@ class Auto2dxGUI(Frame):
 		qvals = []
 		for f in self.image_dirs:
 			config_name = f + "/2dx_image.cfg"
-			content = read_text_row(config_name)
-			for c in content:
-				if len(c)>1 and c[1] == "QVAL":
-					qvals.append(abs(float(c[3][1:-1])))
+			skip_file = f + "/automation_scipt_flag"
+			if not os.path.exists(skip_file):
+				content = read_text_row(config_name)
+				for c in content:
+					if len(c)>1 and c[1] == "QVAL":
+						qvals.append(abs(float(c[3][1:-1])))
 		return qvals	
 
 
@@ -154,10 +158,12 @@ class Auto2dxGUI(Frame):
 		tilt_anlges = []
 		for f in self.image_dirs:
 			config_name = f + "/2dx_image.cfg"
-			content = read_text_row(config_name)
-			for c in content:
-				if len(c)>1 and c[1] == "TLTANG":
-					tilt_anlges.append(abs(float(c[3][1:-1])))
+			skip_file = f + "/automation_scipt_flag"
+			if not os.path.exists(skip_file):
+				content = read_text_row(config_name)
+				for c in content:
+					if len(c)>1 and c[1] == "TLTANG":
+						tilt_anlges.append(abs(float(c[3][1:-1])))
 		return tilt_anlges
 	
 	
@@ -165,11 +171,13 @@ class Auto2dxGUI(Frame):
 		defoci = []
 		for f in self.image_dirs:
 			config_name = f + "/2dx_image.cfg"
-			content = read_text_row(config_name)
-			for c in content:
-				if len(c)>1 and c[1] == "defocus":
-					defocus = c[3].split(",")
-					defoci.append(float(defocus[0][1:]))
+			skip_file = f + "/automation_scipt_flag"
+			if not os.path.exists(skip_file):
+				content = read_text_row(config_name)
+				for c in content:
+					if len(c)>1 and c[1] == "defocus":
+						defocus = c[3].split(",")
+						defoci.append(float(defocus[0][1:]))
 		return defoci
 			
 		
@@ -513,6 +521,12 @@ class Auto2dxGUI(Frame):
 			info += "2dx image folder: " + self.image_dirs[self.index_selected].split("/")[-2] + "/" + self.image_dirs[self.index_selected].split("/")[-1] + "\n\n\n"
 			info += "processing..."
 		self.info_label.configure(text=info)
+		
+		skip_file = self.image_dirs[self.index_selected] + "/automation_scipt_flag"
+		if os.path.exists(skip_file):
+			self.usebox.deselect()
+		else:
+			self.usebox.select()
 
 	
 	def check_for_new_images(self):
@@ -566,6 +580,19 @@ class Auto2dxGUI(Frame):
 		self.indexChanged()
 		
 		thread.start_new_thread(self.reprocessCaller, (i,))
+		
+	
+	def useButtonClicked(self):
+		skip_file = self.image_dirs[self.index_selected] + "/automation_scipt_flag"
+		
+		if self.usevar.get() == 1:
+			if os.path.exists(skip_file):
+				os.remove(skip_file)
+		else:
+			if not os.path.exists(skip_file):
+				skip = open(skip_file, "w")
+				skip.write("This image is skipped by the 2dx_automator\n")
+				skip.close()
 		
 		
 	def initUI(self):
@@ -656,10 +683,17 @@ class Auto2dxGUI(Frame):
 		self.info_label = Label(self.centralrightframe3, text="Image Staticstics:\n", height=28)
 		self.info_label.pack()
 		
+		self.usevar = IntVar()
+		self.usebox = Checkbutton(self.centralrightframe3, variable=self.usevar, text="Use image", command=self.useButtonClicked)
+		self.usebox.pack(side=BOTTOM, pady=10)
+		self.usebox.select()
+		
+		
 		self.default_image_small = Image.new("RGB", (n_small,n_small), "white")
 		self.default_tkimage_small = ImageTk.PhotoImage(self.default_image_small)
 		self.map_label = Label(self.centralrightframe3, image=self.default_tkimage_small)
 		self.map_label.pack(side=RIGHT, padx=5, pady=5)
+		
 		
 		self.status = Label(self.parent, text="Automation not running", bd=1, relief=SUNKEN, anchor=W, fg="red")
 		self.status.pack(side=BOTTOM, fill=X)

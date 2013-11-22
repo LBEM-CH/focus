@@ -278,8 +278,8 @@ class Auto2dxGUI(Frame):
 	
 		self.getFolders()
 		
-	#	self.input_dir = '/mnt/46652e86-6bef-4a8e-9cbb-013b4afb9aea/scherers/motion_in'
-	#	self.output_dir = '/mnt/46652e86-6bef-4a8e-9cbb-013b4afb9aea/scherers/motion_out' 
+		self.input_dir = '/home/scherers/Desktop/mc_in'
+		self.output_dir = '/home/scherers/Desktop/mc_out'
 		
 		in_folder = self.input_dir
 		out_folder = self.output_dir

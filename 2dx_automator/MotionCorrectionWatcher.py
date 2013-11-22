@@ -7,42 +7,9 @@ from pylab import plt, plot, subplot, figure, hist
 class MotionCorrectionWatcher(WatcherBase):
 	
 	def generateDriftPlot(self, filename):
-		print filename
-		print filename.split(".")[0]
-		print self.infolder
-		log_motion_file = self.infolder + "/" + filename.split(".")[0] + "_ready_Log.txt"
-		print log_motion_file
-		content = read_text_row(log_motion_file)
-		
-		x = []
-		y = []
-		for c in content:
-			if c != []:
-				if c[0] == "......Shift":
-					x.append(float(c[5]))
-					y.append(float(c[6]))
-		
-		plot(x,y, 'o-')
-		plt.title('Shift profile')
-		plt.xlabel('shift x (pixel)')
-		plt.ylabel('shift y (pixel)')
-		plt.savefig(self.infolder + "/dosef_quick/" + filename.split(".")[0] + ".tif")
-		plt.close()
-		
-		sx_power = get_image(self.infolder + "/dosef_quick/" + filename.split(".")[0] + "_ready_CorrFFT.mrc")
-		sx_rot = rot_avg(sx_power)
-		r_fft = sx_rot.get_data_as_vector()
-		max_index = int(0.6 * len(r_fft) )
-		plot(r_fft[:max_index], linewidth=2.0, label="drift corrected")
-		
-		sx_power = get_image(self.infolder + "/dosef_quick/" + filename.split(".")[0] + "_ready_RawFFT.mrc")
-		sx_rot = rot_avg(sx_power)
-		r_fft = sx_rot.get_data_as_vector()
-		plot(r_fft[:max_index], label="original")
-		
-		plt.legend()
-		plt.savefig(self.infolder + "/dosef_quick/" + filename.split(".")[0] + "_rotpower.tif")
-		plt.close()
+		command = "python driftplotter.py " + filename + " " + self.infolder
+		print command
+		os.system(command)
 		
 	def __init__(self, refresh_time, wait_time, infolder, outfolder, log_file_name, first_frame=0, last_frame=0):
 		self.refresh_time = refresh_time

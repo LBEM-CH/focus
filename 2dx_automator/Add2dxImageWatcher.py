@@ -37,7 +37,7 @@ class Add2dxImageWatcher(WatcherBase):
 		open(self.log_file_name,"a").write(filename + "\t" + image_2dx_name + "\t" + time.strftime("%c") + '\n')
 	
 		
-	def image_added(self, filename):
+	def image_added(self, filename, do_wait = True):
 		print "2dx automatic processing launched for", filename
 		time.sleep(1)
 		if not os.path.exists(self.outfolder + "/automatic"):

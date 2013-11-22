@@ -6,7 +6,6 @@ import tkMessageBox
 
 from pylab import plt, plot, subplot, figure, hist
 
-#from threading import Thread
 import thread
 
 from PIL import Image, ImageDraw, ImageTk
@@ -424,7 +423,7 @@ class Auto2dxGUI(Frame):
 		
 		self.image_count_label.configure(text=str(len(self.image_names)) + " Images")
 		self.listbox.selection_set(END)
-		self.index_selecte = self.count-1
+		self.index_selected = self.count-1
 		self.indexChanged()
 
 		

@@ -35,7 +35,7 @@ plt.close()
 sx_power = get_image(infolder + "/dosef_quick/" + filename.split(".")[0] + "_ready_CorrFFT.mrc")
 sx_rot = rot_avg(sx_power)
 r_fft = sx_rot.get_data_as_vector()
-max_index = int(0.6 * len(r_fft) )
+max_index = int(0.8 * len(r_fft) )
 plot(r_fft[:max_index], linewidth=2.0, label="drift corrected")
 
 sx_power = get_image(infolder + "/dosef_quick/" + filename.split(".")[0] + "_ready_RawFFT.mrc")

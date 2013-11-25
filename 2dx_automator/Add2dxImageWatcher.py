@@ -52,7 +52,9 @@ class Add2dxImageWatcher(WatcherBase):
 		self.lock_2dx.acquire()
 		old_path = os.getcwd()
 		os.chdir(self.outfolder)
-		os.system("2dx_image " + image_2dx_name + ' "*"' )
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"*"' + "'" 
+		print "2dx_command", command_2dx_image
+		os.system(command_2dx_image)
 		os.chdir(old_path)
 		self.lock_2dx.release()
 		

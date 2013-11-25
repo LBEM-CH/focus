@@ -566,7 +566,9 @@ class Auto2dxGUI(Frame):
 		self.watcher.lock_2dx.acquire()
 		old_path = os.getcwd()
 		os.chdir(self.watcher.outfolder)
-		os.system("2dx_image " + self.image_dirs[i] + ' "*"' )
+		command_2dx_image = "2dx_image " + self.image_dirs[i] + " '" + '"*"' + "'"
+		print command_2dx_image
+		os.system( command_2dx_image )
 		os.chdir(old_path)
 		self.watcher.lock_2dx.release()
 		
@@ -612,8 +614,8 @@ class Auto2dxGUI(Frame):
 	
 		self.getFolders()
 		
-		#self.input_dir = "/mnt/46652e86-6bef-4a8e-9cbb-013b4afb9aea/scherers/k2_mlok1/test_in"
-		#self.output_dir = "/mnt/46652e86-6bef-4a8e-9cbb-013b4afb9aea/scherers/k2_mlok1/test_out"
+		self.input_dir = "/home/scherers/Desktop/k2_mlok1/test_in"
+		self.output_dir = "/home/scherers/Desktop/k2_mlok1/test_out"
 		
 		in_folder = self.input_dir
 		out_folder = self.output_dir

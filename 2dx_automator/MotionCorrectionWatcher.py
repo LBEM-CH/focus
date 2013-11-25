@@ -7,7 +7,7 @@ from pylab import plt, plot, subplot, figure, hist
 class MotionCorrectionWatcher(WatcherBase):
 	
 	def generateDriftPlot(self, filename):
-		command = "python driftplotter.py " + filename + " " + self.infolder
+		command = "driftplotter.py " + filename + " " + self.infolder
 		print command
 		os.system(command)
 		

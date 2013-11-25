@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from EMAN2  import *
 from sparx  import *
 

@@ -39,6 +39,9 @@ class Auto2dxGUI(Frame):
 		self.index_selected = 0
 		self.initUI()	
 		self.resetResultOverview()
+		self.listbox.selection_clear(0, END)
+		self.listbox.selection_set(END)
+		self.listbox.activate(END)
 		self.index_selected = self.count-1
 		self.indexChanged()
 		
@@ -107,8 +110,10 @@ class Auto2dxGUI(Frame):
 				self.image_names.append(line.split()[0])
 		
 		self.image_count_label.configure(text=str(len(self.image_names)) + " Images")
-		self.listbox.selection_set(END)
-		self.index_selecte = self.count-1
+		
+		self.listbox.selection_clear(0, END)
+		self.listbox.selection_set(self.index_selected)
+		self.listbox.activate(self.index_selected)
 		self.indexChanged()
 
 		

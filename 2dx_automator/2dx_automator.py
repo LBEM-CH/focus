@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
+#from pylab import plt, plot, subplot, figure, hist
+
 from Tkinter import *
 import tkFileDialog
 import tkMessageBox
-
-from pylab import plt, plot, subplot, figure, hist
 
 import thread
 
@@ -35,19 +35,20 @@ def bind(widget, event):
 def tbox(master):
 	class TBOX(object):
 		def __init__(self, info):
+			
 			self.msgbox = Toplevel(master)
 			
 			self.msgbox.title("2dx_automator Project Statistics Overview")
 			
 			nx = int(800 * 0.7)
 			ny = int(600 * 0.7)
-				
+							
 			self.def_label = Label(self.msgbox, image=master.default_tkimage)
 			self.def_label.grid(row=0, column=0, padx=10, pady=20)
-		
+				
 			self.def_image = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/tilts.tif").resize((nx,ny),Image.ANTIALIAS))
 			self.def_label.configure(image=self.def_image)
-			
+						
 			self.def_label2 = Label(self.msgbox, image=master.default_tkimage)
 			self.def_label2.grid(row=0, column=1, padx=10, pady=20)
 		
@@ -77,7 +78,7 @@ def tbox(master):
 		
 			self.def_image6 = ImageTk.PhotoImage(Image.open(master.output_dir + "/automatic/qvals.tif").resize((nx,ny),Image.ANTIALIAS))
 			self.def_label6.configure(image=self.def_image6)
-			
+						
 			button0 = Button(self.msgbox, text='Close',command=self.b0_action)
 			button0.grid(row=2, column=4, padx=10, pady=10)
 			
@@ -93,6 +94,9 @@ class Auto2dxGUI(Frame):
 		self.index_selected = 0
 		self.initUI()	
 		self.resetResultOverview()
+		self.listbox.selection_clear(0, END)
+		self.listbox.selection_set(END)
+		self.listbox.activate(END)
 		self.index_selected = self.count-1
 		self.indexChanged()
 		
@@ -142,7 +146,7 @@ class Auto2dxGUI(Frame):
 		
 		
 	def getAllQVals(self):
-		qvals = []
+		qvals = ""
 		for f in self.image_dirs:
 			config_name = f + "/2dx_image.cfg"
 			skip_file = f + "/automation_scipt_flag"
@@ -150,12 +154,12 @@ class Auto2dxGUI(Frame):
 				content = read_text_row(config_name)
 				for c in content:
 					if len(c)>1 and c[1] == "QVAL":
-						qvals.append(abs(float(c[3][1:-1])))
+						qvals += str(abs(float(c[3][1:-1]))) + " "
 		return qvals	
 
 
 	def getAllTiltAngles(self):
-		tilt_anlges = []
+		tilt_anlges = ""
 		for f in self.image_dirs:
 			config_name = f + "/2dx_image.cfg"
 			skip_file = f + "/automation_scipt_flag"
@@ -163,12 +167,12 @@ class Auto2dxGUI(Frame):
 				content = read_text_row(config_name)
 				for c in content:
 					if len(c)>1 and c[1] == "TLTANG":
-						tilt_anlges.append(abs(float(c[3][1:-1])))
+						tilt_anlges += str(abs(float(c[3][1:-1]))) + " "
 		return tilt_anlges
 	
 	
 	def getAllDefoci(self):
-		defoci = []
+		defoci = ""
 		for f in self.image_dirs:
 			config_name = f + "/2dx_image.cfg"
 			skip_file = f + "/automation_scipt_flag"
@@ -177,142 +181,23 @@ class Auto2dxGUI(Frame):
 				for c in content:
 					if len(c)>1 and c[1] == "defocus":
 						defocus = c[3].split(",")
-						defoci.append(float(defocus[0][1:]))
+						defoci += str(float(defocus[0][1:])) + " "
 		return defoci
 			
 		
 	def getProjectStat(self):
 		tilts = self.getAllTiltAngles()
-		ang_min = 0
-		ang_max = max(tilts)
-		ang_dx = 2
-		
-		hist(tilts, bins=(ang_max-ang_min)/ang_dx, range=(ang_min,ang_max), facecolor='blue', alpha=0.5)
-		plt.title('Tilt Angle Histogram')
-		plt.xlabel('Tilt Angle (degrees)')
-		plt.ylabel('Counts')
-		plt.savefig(self.output_dir + "/automatic/tilts.tif")
-		plt.close()
-		
 		defs = self.getAllDefoci()
 		qvals = self.getAllQVals()
-
 		
-		def_min = 0
-		def_max = max(defs)
-		def_dx = 1000
-				
-		defs_pertilt = [[],[],[],[]]
-		angs_pertilt = [[],[],[],[]]
-		qvals_pertilt = [[],[],[],[]]
+		out_file = open( self.output_dir + "/automatic/stat_data.txt", 'w')
+		out_file.write(tilts + "\n")
+		out_file.write(defs + "\n")
+		out_file.write(qvals + "\n")
+		out_file.close()
 		
-		for i in range(len(defs)):
-			if abs(tilts[i]) < 10:
-				angs_pertilt[0].append(tilts[i])
-				defs_pertilt[0].append(defs[i])
-				qvals_pertilt[0].append(qvals[i])
-			elif abs(tilts[i]) < 20 and abs(tilts[i])>=10:
-				angs_pertilt[1].append(tilts[i])
-				defs_pertilt[1].append(defs[i])
-				qvals_pertilt[1].append(qvals[i])
-			elif abs(tilts[i]) < 30 and abs(tilts[i])>=20:
-				angs_pertilt[2].append(tilts[i])
-				defs_pertilt[2].append(defs[i])
-				qvals_pertilt[2].append(qvals[i])
-			else:
-				angs_pertilt[3].append(tilts[i])
-				defs_pertilt[3].append(defs[i])
-				qvals_pertilt[3].append(qvals[i])
-		
-		hist(defs, bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
-		plt.title('Defoci Histogram')
-		plt.xlabel('Defocus (A)')
-		plt.ylabel('Counts')
-		plt.savefig(self.output_dir + "/automatic/defoci.tif")
-		plt.close()
-		
-		qval_min = min(qvals)
-		qval_max = max(qvals)
-		qval_n_bins = 40
-		
-		hist(qvals, bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
-		plt.title('QVal Histogram')
-		plt.xlabel('QVal')
-		plt.ylabel('Counts')
-		plt.savefig(self.output_dir + "/automatic/qval.tif")
-		plt.close()
-		
-		plt.subplots_adjust(hspace=0.6)
-		if len(qvals_pertilt[0])>0:
-			plt.subplot(411)
-			hist(qvals_pertilt[0], bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
-			plt.title('QVAL Histogram (0-10 degrees)')
-			plt.ylabel('Counts')
-			if len(qvals_pertilt[1])==0 and len(qvals_pertilt[2])==0 and len(qvals_pertilt[3])==0:
-				plt.xlabel('QVAL')
-		if len(qvals_pertilt[1])>0:
-			plt.subplot(412)
-			hist(qvals_pertilt[1], bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
-			plt.title('QVAL Histogram (10-20 degrees)')
-			plt.ylabel('Counts')
-			if len(qvals_pertilt[2])==0 and len(qvals_pertilt[3])==0:
-				plt.xlabel('QVAL')
-		if len(qvals_pertilt[2])>0:
-			plt.subplot(413)
-			hist(qvals_pertilt[2], bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
-			plt.title('QVAL Histogram (20-30 degrees)')
-			plt.ylabel('Counts')
-			if len(qvals_pertilt[3])==0:
-				plt.xlabel('QVAL')
-		if len(qvals_pertilt[3])>0:
-			plt.subplot(414)
-			hist(qvals_pertilt[3], bins=qval_n_bins, range=(qval_min,qval_max), facecolor='red', alpha=0.5)
-			plt.title('QVAL Histogram (>30 degrees)')
-			plt.ylabel('Counts')
-			plt.xlabel('QVAL')
-		
-		plt.savefig(self.output_dir + "/automatic/qvals.tif")
-		plt.close()
-		
-		plt.subplot(111)
-		plt.plot(tilts, qvals, 'o', alpha=0.6)
-		plt.title('Tilt angle vs. QVAL')
-		plt.ylabel('QVAL')
-		plt.xlabel('Tilt angle (degrees)')
-		plt.savefig(self.output_dir + "/automatic/tilt_qval.tif")
-		plt.close()
-		
-		plt.subplots_adjust(hspace=0.6)
-		if len(defs_pertilt[0])>0:
-			plt.subplot(411)
-			hist(defs_pertilt[0], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
-			plt.title('Defocus Histogram (0-10 degrees)')
-			plt.ylabel('Counts')
-			if len(defs_pertilt[1])==0 and len(defs_pertilt[2])==0 and len(defs_pertilt[3])==0:
-				plt.xlabel('Defocus (A)')
-		if len(defs_pertilt[1])>0:
-			plt.subplot(412)
-			hist(defs_pertilt[1], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
-			plt.title('Defocus Histogram (10-20 degrees)')
-			plt.ylabel('Counts')
-			if len(defs_pertilt[2])==0 and len(defs_pertilt[3])==0:
-				plt.xlabel('Defocus (A)')
-		if len(defs_pertilt[2])>0:
-			plt.subplot(413)
-			hist(defs_pertilt[2], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
-			plt.title('Defocus Histogram (20-30 degrees)')
-			plt.ylabel('Counts')
-			if len(defs_pertilt[3])==0:
-				plt.xlabel('Defocus (A)')
-		if len(defs_pertilt[3])>0:
-			plt.subplot(414)
-			hist(defs_pertilt[3], bins=(def_max-def_min)/def_dx, range=(def_min,def_max), facecolor='green', alpha=0.5)
-			plt.title('Defocus Histogram (>30 degrees)')
-			plt.ylabel('Counts')
-			plt.xlabel('Defocus (A)')
-		
-		plt.savefig(self.output_dir + "/automatic/defocis.tif")
-		plt.close()
+		command = "crystalplotter.py " + self.output_dir
+		os.system(command)
 		
 		
 	def updateImages(self, i):
@@ -422,8 +307,10 @@ class Auto2dxGUI(Frame):
 				self.image_names.append(line.split()[0])
 		
 		self.image_count_label.configure(text=str(len(self.image_names)) + " Images")
-		self.listbox.selection_set(END)
-		self.index_selected = self.count-1
+		
+		self.listbox.selection_clear(0, END)
+		self.listbox.selection_set(self.index_selected)
+		self.listbox.activate(self.index_selected)
 		self.indexChanged()
 
 		
@@ -448,7 +335,7 @@ class Auto2dxGUI(Frame):
 		
 		
 	def launch2dxMerge(self):
-		thread.start_new_thread(os.system, ("2dx " + self.output_dir,))
+		thread.start_new_thread(os.system, ("2dx_merge " + self.output_dir,))
 		time.sleep (1)
 		self.indexChanged()
 		
@@ -610,12 +497,12 @@ class Auto2dxGUI(Frame):
 		
 		
 	def initUI(self):
-		self.parent.title("2dx_automator")
+		self.parent.title("2dx_automator GUI (alpha)")
 	
 		self.getFolders()
 		
-		#self.input_dir = "/home/scherers/Desktop/k2_mlok1/test_in"
-		#self.output_dir = "/home/scherers/Desktop/k2_mlok1/test_out"
+		self.input_dir = "/home/scherers/Desktop/k2_mlok1/test_in"
+		self.output_dir = "/home/scherers/Desktop/k2_mlok1/test_out"
 		
 		in_folder = self.input_dir
 		out_folder = self.output_dir
@@ -674,6 +561,7 @@ class Auto2dxGUI(Frame):
 		self.box_test = tbox(self)
 		
 		def test_func():
+			print "huhu"
 			self.getProjectStat()
 			self.box_test("asdf")
 		

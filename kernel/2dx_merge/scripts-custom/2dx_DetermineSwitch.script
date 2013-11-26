@@ -51,6 +51,7 @@
 # DISPLAY: refrevhnd
 # DISPLAY: refrevxsgn
 # DISPLAY: refinvert_tiltangle
+# DISPLAY: reftiltgeo
 # DISPLAY: merge_reference
 # DISPLAY: merge_ref_num
 # DISPLAY: merge_comment_1
@@ -126,7 +127,6 @@ set number = 1
 set IVERBOSE = 9
 set RFACAMP = 1.0
 set refbeamtilt = "n"
-set reftiltgeo = "n"
 #
 set date = `date`
 echo date = ${date}
@@ -377,6 +377,10 @@ while ( ${currentline} <= ${linenum} )
                   set best_phaori = ${phaori}
                   # set best_phaoriFouFilter = ${phaoriFouFilter}
                   set best_phaori_last_change = ${phaori_last_change}
+                  set best_MERGE_TAXA = ${MERGE_TAXA}
+                  set best_MERGE_TANGL = ${MERGE_TANGL}
+                  set best_TAXA = ${TAXA}
+                  set best_TANGL = ${TANGL}
                   set found_better = "y"
                 endif
                 set number = `echo ${number} | awk '{ s = $1 + 1 } END { print s}'`
@@ -493,7 +497,13 @@ while ( ${currentline} <= ${linenum} )
     echo "set phaori = ${best_phaori}" >> LOGS/${scriptname}.results
     # echo "set phaoriFouFilter = ${best_phaoriFouFilter}" >> LOGS/${scriptname}.results
     echo "set phaori_last_change = ${best_phaori_last_change}" >> LOGS/${scriptname}.results
-    echo "set MergePhaseResidual = ${best_phares}" >> LOGS/${scriptname}.results
+    echo "set MergePhaseResidual = ${best_phares}"             >> LOGS/${scriptname}.results
+    if ( ${best_invert_tiltangle} != "invert" ) then
+      echo "set MERGE_TAXA         = ${best_MERGE_TAXA}"         >> LOGS/${scriptname}.results
+      echo "set MERGE_TANGL        = ${best_MERGE_TANGL}"        >> LOGS/${scriptname}.results
+      echo "set TAXA               = ${best_TAXA}"               >> LOGS/${scriptname}.results
+      echo "set TANGL              = ${best_TANGL}"              >> LOGS/${scriptname}.results
+    endif 
     echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
   else
     if ( ${MergePhaseResidual} != "nan" ) then

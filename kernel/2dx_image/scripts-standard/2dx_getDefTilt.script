@@ -114,6 +114,8 @@ echo "<<@evaluate>>"
 #
 set df_dast = ${expected_astig}
 #
+set old_defocus = ${defocus}
+#
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used"
   ${proc_2dx}/linblock "Defocus should be determined already."
@@ -821,7 +823,7 @@ eot
 endif
 #
 if ( ${defocusbackup} == "5000.0,5000.0,0.0" ) then
-  set defocusbackup = ${defocus}
+  set defocusbackup = ${old_defocus}
   echo "set defocusbackup = ${defocusbackup}" >> LOGS/${scriptname}.results
 endif
 #

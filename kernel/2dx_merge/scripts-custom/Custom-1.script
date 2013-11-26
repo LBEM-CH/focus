@@ -110,7 +110,12 @@ foreach dirfile ( ${dirlist} )
   # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
   # echo "set overwrite = y" >> LOGS/${scriptname}.results
   # echo "set ccunbend_program = 0" >> LOGS/${scriptname}.results
+
   # echo "set defocus_res_max = 5.0" >> LOGS/${scriptname}.results
+  # echo "set df_end = 25000.0" >> LOGS/${scriptname}.results
+  # echo "set det_defocus = y" >> LOGS/${scriptname}.results
+  # echo "set det_tilt = y" >> LOGS/${scriptname}.results
+  # echo "set det_tlt_alg = 0" >> LOGS/${scriptname}.results
 
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
   # ${app_2dx_image} ${newdir} "2dx_phaseorigin"

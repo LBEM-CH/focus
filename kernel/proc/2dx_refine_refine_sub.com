@@ -40,11 +40,24 @@ set genref = "1"
 \rm -f LOGS/${scriptname}-tmp.results
 #
 set NBM = F
-set NTL = F
-set ITAXASTEP = 10
-set RTAXASIZE = 0.5
-set ITANGLSTEP = 10
-set RTANGLSIZE = 0.5
+if ( ${reftiltgeo} == 'y' ) then
+  if ( ${merge_modus} == '3D' ) then
+    set NTL = T
+    ${proc_2dx}/lin "NTL=T, doing crystal tiltangle and tiltaxis refinement."
+  else
+    ${proc_2dx}/linblock "ERROR: Tilt Geometry Refinement only in 3D modus possible."
+    set NTL = F
+    ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."
+  endif
+else
+  set NTL = F
+  ${proc_2dx}/lin "NTL=F, no crystal tiltangle or tiltaxis refinement."
+endif
+#
+set ITAXASTEP = 1
+set RTAXASIZE = 0.0001
+set ITANGLSTEP = 1
+set RTANGLSIZE = 0.0001
 #
 ${bin_2dx}/2dx_merge_compileB.exe << eot
 LOGS/${scriptname}-tmp.results
@@ -110,6 +123,10 @@ if ( -s LOGS/${scriptname}-tmp.results ) then
   set phaori             = `cat LOGS/${scriptname}-tmp.results | grep "phaori "          | cut -d\" -f2` 
   # set phaoriFouFilter    = `cat LOGS/${scriptname}-tmp.results | grep phaoriFouFilter    | cut -d\" -f2` 
   set phaori_last_change = `cat LOGS/${scriptname}-tmp.results | grep phaori_last_change | cut -d\" -f2` 
+  set MERGE_TAXA         = `cat LOGS/${scriptname}-tmp.results | grep " MERGE_TAXA "     | cut -d\" -f2` 
+  set MERGE_TANGL        = `cat LOGS/${scriptname}-tmp.results | grep " MERGE_TANGL "    | cut -d\" -f2` 
+  set TAXA               = `cat LOGS/${scriptname}-tmp.results | grep " TAXA "           | cut -d\" -f2` 
+  set TANGL              = `cat LOGS/${scriptname}-tmp.results | grep " TANGL "          | cut -d\" -f2` 
   echo ":MergePhaseResidual = ${MergePhaseResidual}"
 else
   ${proc_2dx}/lin "ERROR: LOGS/${scriptname}-tmp.results not existing or zero length."

@@ -131,7 +131,7 @@ class Auto2dxGUI(Frame):
 		
 		all_fine = True
 		
-		corename = self.image_names[self.index_selected].split(".")[0]
+		corename = self.watcher.getFileCoreName(self.image_names[self.index_selected])
 		raw_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_RawFFT.gif"
 		corr_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrFFT.gif"
 		corr_img_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrSum.gif"
@@ -240,18 +240,18 @@ class Auto2dxGUI(Frame):
 	def reprocessALLImage(self):
 		if tkMessageBox.askyesno("Reprocess all images", "Continue?"):
 			for f in self.image_names:
-				corename = f.split(".")[0]
+				corename = self.watcher.getFileCoreName(f)
 				self.reprocessOneImage(corename)
 			
 			
 	def reprocessImage(self):
-		corename = self.image_names[self.index_selected].split(".")[0]
+		corename = self.watcher.getFileCoreName(self.image_names[self.index_selected])
 		self.reprocessOneImage(corename)
 		
 		
 	def openImageEman(self):
 		i = self.index_selected
-		image_name = self.image_names[i].split(".")[0]
+		image_name = self.watcher.getFileCoreName(self.image_names[i])
 		image_to_show = self.output_dir + "/" + image_name + "_aligned.mrc"
 		print image_to_show
 		
@@ -274,12 +274,12 @@ class Auto2dxGUI(Frame):
 			self.watcher.setLastFrame(self.maxframe)
 		
 	def initUI(self):
-		self.parent.title("Motion Correction")
+		self.parent.title("Motion Correction GUI (beta)")
 	
 		self.getFolders()
 		
-		#self.input_dir = '/home/scherers/Desktop/mc_in'
-		#self.output_dir = '/home/scherers/Desktop/mc_out'
+		self.input_dir = '/home/scherers/Desktop/mc_in'
+		self.output_dir = '/home/scherers/Desktop/mc_out'
 		
 		in_folder = self.input_dir
 		out_folder = self.output_dir

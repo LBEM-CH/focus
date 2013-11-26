@@ -25,10 +25,13 @@ class MotionCorrectionWatcher(WatcherBase):
 	
 	def file_filter(self, filename):
 		return ((filename.endswith(".mrc")) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
-		
+	
+	def getFileCoreName(self, filename):
+		return filename[:-4]
+	
 	def image_added(self, filename, do_wait = True):
 		print "motion_correction for", filename
-		filecorename = filename.split(".")[0]
+		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
 			time.sleep(30)
@@ -66,7 +69,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		old_path = os.getcwd()
 		os.chdir(self.infolder + "/dosef_quick")
 		
-		corename = filename.split(".")[0]
+		corename = self.getFileCoreName(filename)
 		
 		os.system("e2proc2d.py " + corename + "_ready_CorrFFT.mrc" + " " + corename + "_ready_CorrFFT.png" )
 		os.system("convert " + corename + "_ready_CorrFFT" + ".png " + corename + "_ready_CorrFFT" + ".gif" )

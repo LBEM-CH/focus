@@ -277,14 +277,28 @@ class Auto2dxGUI(Frame):
 			self.maxframe = number
 			self.maxframe_label.configure(text="Ending Frame Number: " + str(self.maxframe))
 			self.watcher.setLastFrame(self.maxframe)
+			
+	def changeExportLocation(self):
+		self.export_location = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory")
+		if len(self.export_location) == 0:
+			self.export_location = "not set"
+		self.export_location_label.configure(text="Export Location:\n" + self.export_location)
+		
+	def exportImage(self):
+		i = self.index_selected
+		image_name = self.watcher.getFileCoreName(self.image_names[i])
+		image_to_show = self.output_dir + "/" + image_name + "_aligned.mrc"
+		image_name = image_to_show.split("/")[-1]
+		shutil.copy(image_to_show, self.export_location + "/" + image_name)
+		
 		
 	def initUI(self):
 		self.parent.title("Motion Correction GUI (beta)")
 	
 		self.getFolders()
 		
-		#self.input_dir = '/home/scherers/Desktop/mc_in'
-		#self.output_dir = '/home/scherers/Desktop/mc_out'
+		self.input_dir = '/mnt/46652e86-6bef-4a8e-9cbb-013b4afb9aea/scherers/motion_in'
+		self.output_dir = '/mnt/46652e86-6bef-4a8e-9cbb-013b4afb9aea/scherers/motion_out'
 		
 		in_folder = self.input_dir
 		out_folder = self.output_dir
@@ -310,18 +324,31 @@ class Auto2dxGUI(Frame):
 		self.maxframe = 0
 		
 		self.minframe_label = Label(self.centralleftframe, text="Starting Frame Number: " + str(self.minframe))
-		self.minframe_label.pack(padx=5, pady=10)
+		self.minframe_label.pack(padx=5, pady=5)
 		
 		change_min_frame_button = Button(self.centralleftframe ,text='Change min frame', width=20, command=self.minFrameChanged)
 		change_min_frame_button.pack()
 		
-		Label(self.centralleftframe, text=" ", height=2).pack()
+		Label(self.centralleftframe, text=" ", height=1).pack()
 		
 		self.maxframe_label = Label(self.centralleftframe, text="Ending Frame Number: " + str(self.maxframe))
-		self.maxframe_label.pack(padx=5, pady=10)
+		self.maxframe_label.pack(padx=5, pady=5)
 		
 		change_max_frame_button = Button(self.centralleftframe ,text='Change max frame', width=20, command=self.maxFrameChanged)
 		change_max_frame_button.pack()
+		
+		Label(self.centralleftframe, text=" ", height=1).pack()
+		
+		## Export
+		self.export_location = "not set"
+		self.exportframe = Frame(self.centralleftframe, relief=RAISED, borderwidth=2)
+		self.exportframe.pack(pady=5)
+		self.export_location_label = Label(self.exportframe, text="Export Location:\n" + self.export_location, width=45)
+		self.export_location_label.pack(pady=5)
+		self.change_export_location_button = Button(self.exportframe ,text='Change Export Location', width=20, command=self.changeExportLocation)
+		self.change_export_location_button.pack()
+		self.export_button = Button(self.exportframe ,text='Export Image', width=20, command=self.exportImage)
+		self.export_button.pack(pady=5)
 		
 		Label(self.centralleftframe, text=" ", height=5).pack()
 		
@@ -358,7 +385,7 @@ class Auto2dxGUI(Frame):
 		Label(self.centralleftframe, text=" ", height=2).pack()
 		
 		self.open_button = Button(self.lowleftframe ,text='Open Image', width=40, command=self.openImageEman)
-		self.open_button.pack(padx=20, pady=30)
+		self.open_button.pack(padx=20, pady=5)
 	
 		in_folder = self.input_dir
 		out_folder = self.output_dir
@@ -402,7 +429,8 @@ class Auto2dxGUI(Frame):
 		
 def main():
 	root = Tk()
-	root.geometry("850x650+300+300")
+	root.geometry("1920x1080+000+000")
+	#root.geometry("800x600+300+300")
 	app = Auto2dxGUI(root)
 	root.mainloop()
 	

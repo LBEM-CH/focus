@@ -34,7 +34,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
-			time.sleep(30)
+			time.sleep(45)
 		
 		self.lock_eman2.acquire()
 		eman2_command = "e2proc2d.py " + self.infolder + "/" + filename + " " + self.infolder + "/" + filecorename + "_ready.mrc --threed2threed"

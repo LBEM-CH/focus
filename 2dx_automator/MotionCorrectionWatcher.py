@@ -37,26 +37,32 @@ class MotionCorrectionWatcher(WatcherBase):
 			time.sleep(45)
 		
 		self.lock_eman2.acquire()
-		eman2_command = "e2proc2d.py " + self.infolder + "/" + filename + " " + self.infolder + "/" + filecorename + "_ready.mrc --threed2threed"
+		shutil.copyfile(self.infolder + "/" + filename, "/tmp/mc_tmp.mrc")
+		eman2_command = "e2proc2d.py " + "/tmp/mc_tmp.mrc" + " " + "/tmp/mc_ready.mrc --threed2threed"
 		os.system(eman2_command)
-		self.lock_eman2.release()
 		
-		self.lock_motion.acquire()
 		old_path = os.getcwd()
-		os.chdir(self.infolder)
-		motion_command = "motioncorr " + self.infolder + "/" + filecorename + "_ready.mrc -nst " + str(self.first_frame) + " -ned " + str(self.last_frame)
+		os.chdir("/tmp")
+		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame)
 		os.system(motion_command)
-		shutil.move(filecorename + "_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
 		os.chdir(old_path)
 		
+		if not os.path.exists(self.infolder + "/dosef_quick"):
+			os.makedirs(self.infolder + "/dosef_quick")
 		
-		#self.lock_convert.acquire()
+		shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+		
+		shutil.copyfile("/tmp/mc_ready_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
+		
+		shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
+		shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
+		shutil.copyfile("/tmp/dosef_quick/mc_ready_RawFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_RawFFT.mrc")
+		
 		self.convert_mrc_to_png(filename)
 		self.generateDriftPlot(filename)
-		#self.lock_convert.release()
-		
-		self.lock_motion.release()
-		
+				
+		self.lock_eman2.release()
+				
 		print "motion_correction done for", filename
 		
 	def setFirstFrame(self, rhs):

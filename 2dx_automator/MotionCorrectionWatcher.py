@@ -34,7 +34,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
-			time.sleep(45)
+			time.sleep(60)
 		
 		self.lock_eman2.acquire()
 		shutil.copyfile(self.infolder + "/" + filename, "/tmp/mc_tmp.mrc")

@@ -19,9 +19,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.log_file_name = log_file_name
 		self.first_frame = first_frame
 		self.last_frame = last_frame
-		self.lock_eman2 = threading.Lock()
-		self.lock_convert = threading.Lock()
-		self.lock_motion = threading.Lock()
+		self.lock_compute = threading.Lock()
 	
 	def file_filter(self, filename):
 		return ((filename.endswith(".mrc")) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
@@ -34,9 +32,13 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
-			time.sleep(100)
+			waiting_time = 100
+			print "Waiting for", waiting_time, "seconds to make sure that the copy is done"
+			time.sleep(waiting_time)
+			
+		print "*** In case you see this for a long time consider troubleshooting the automation ***"
 		
-		self.lock_eman2.acquire()
+		self.lock_compute.acquire()
 		shutil.copyfile(self.infolder + "/" + filename, "/tmp/mc_tmp.mrc")
 		eman2_command = "e2proc2d.py " + "/tmp/mc_tmp.mrc" + " " + "/tmp/mc_ready.mrc --threed2threed"
 		os.system(eman2_command)
@@ -61,7 +63,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.convert_mrc_to_png(filename)
 		self.generateDriftPlot(filename)
 				
-		self.lock_eman2.release()
+		self.lock_compute.release()
 				
 		print "motion_correction done for", filename
 		

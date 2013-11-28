@@ -144,22 +144,31 @@ class Auto2dxGUI(Frame):
 		plot_name = self.input_dir + "/dosef_quick/" + corename + ".tif"
 		
 		if os.path.exists(raw_fft_name):
-			self.fft_in_image = ImageTk.PhotoImage(Image.open(raw_fft_name).resize((n,n),Image.ANTIALIAS))
-			self.fft_in_label.configure(image=self.fft_in_image)
+			try:
+				self.fft_in_image = ImageTk.PhotoImage(Image.open(raw_fft_name).resize((n,n),Image.ANTIALIAS))
+				self.fft_in_label.configure(image=self.fft_in_image)
+			except:
+				print "image not found"
 		else:
 			self.fft_in_label.configure(image=self.default_tkimage)
 			all_fine = False
 		
 		if os.path.exists(corr_fft_name):
-			self.fft_out_image = ImageTk.PhotoImage(Image.open(corr_fft_name).resize((n,n),Image.ANTIALIAS))
-			self.fft_out_label.configure(image=self.fft_out_image)
+			try:
+				self.fft_out_image = ImageTk.PhotoImage(Image.open(corr_fft_name).resize((n,n),Image.ANTIALIAS))
+				self.fft_out_label.configure(image=self.fft_out_image)
+			except:
+				print "image not found"
 		else:
 			self.fft_out_label.configure(image=self.default_tkimage)
 			all_fine = False
 	
 		if os.path.exists(corr_img_name):
-			self.corr_image = ImageTk.PhotoImage(Image.open(corr_img_name).resize((n,n),Image.ANTIALIAS))
-			self.image_label.configure(image=self.corr_image)
+			try:
+				self.corr_image = ImageTk.PhotoImage(Image.open(corr_img_name).resize((n,n),Image.ANTIALIAS))
+				self.image_label.configure(image=self.corr_image)
+			except:
+				print "image not found"
 		else:
 			self.image_label.configure(image=self.default_tkimage)
 			all_fine = False
@@ -168,8 +177,11 @@ class Auto2dxGUI(Frame):
 		ny = int(600 * 0.635)	
 			
 		if os.path.exists(rot_name):
-			self.power_image = ImageTk.PhotoImage(Image.open(rot_name).resize((nx,ny),Image.ANTIALIAS))
-			self.rotpower_label.configure(image=self.power_image)
+			try:
+				self.power_image = ImageTk.PhotoImage(Image.open(rot_name).resize((nx,ny),Image.ANTIALIAS))
+				self.rotpower_label.configure(image=self.power_image)
+			except:
+				print "image not found"
 		else:
 			self.rotpower_label.configure(image=self.default_tkimage)
 			all_fine = False
@@ -178,8 +190,11 @@ class Auto2dxGUI(Frame):
 		ny = int(600 * 0.55)	
 		
 		if os.path.exists(plot_name):
-			self.plot_image = ImageTk.PhotoImage(Image.open(plot_name).resize((nx,ny),Image.ANTIALIAS))
-			self.drift_label.configure(image=self.plot_image)
+			try:
+				self.plot_image = ImageTk.PhotoImage(Image.open(plot_name).resize((nx,ny),Image.ANTIALIAS))
+				self.drift_label.configure(image=self.plot_image)
+			except:
+				print "image not found"
 		else:
 			self.drift_label.configure(image=self.default_tkimage_small)
 			all_fine = False
@@ -291,14 +306,21 @@ class Auto2dxGUI(Frame):
 		image_name = image_to_show.split("/")[-1]
 		shutil.copy(image_to_show, self.export_location + "/" + image_name)
 		
-		
+	def troubleshootGUI(self):
+		if tkMessageBox.askyesno("Troubleshooting", "Do you realy want to remove all locks?"):
+			print "Troubleshooting..."
+			try:
+				self.watcher.lock_compute.release()
+			except:
+				print "releasing the locks did not help"
+	
 	def initUI(self):
 		self.parent.title("Motion Correction GUI (beta)")
 	
 		self.getFolders()
 		
-		#self.input_dir = '/mnt/46652e86-6bef-4a8e-9cbb-013b4afb9aea/scherers/motion_in'
-		#self.output_dir = '/mnt/46652e86-6bef-4a8e-9cbb-013b4afb9aea/scherers/motion_out'
+		#self.input_dir = '/mnt/afd867f9-f76e-40f3-9b3a-12c42385bba8/scherers/mlok_k2/mc_in'
+		#self.output_dir = '/mnt/afd867f9-f76e-40f3-9b3a-12c42385bba8/scherers/mlok_k2/mc_out'
 		
 		in_folder = self.input_dir
 		out_folder = self.output_dir
@@ -350,7 +372,10 @@ class Auto2dxGUI(Frame):
 		self.export_button = Button(self.exportframe ,text='Export Image', width=20, command=self.exportImage)
 		self.export_button.pack(pady=5)
 		
-		Label(self.centralleftframe, text=" ", height=5).pack()
+		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)
+		self.troubles_button.pack(padx=20, pady=8)
+		
+		Label(self.centralleftframe, text=" ", height=1).pack()
 		
 		self.image_count_label = Label(self.centralleftframe, text="Images")
 		self.image_count_label.pack()

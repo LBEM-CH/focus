@@ -51,7 +51,7 @@ class WatcherBase:
 			print "Added: ", ", ".join (added)
 			for f in added:
 				if self.file_filter(f) == True:
-					print "Waiting for", self.wait_time, "seconds to make sure that the copy is done"
+					#print "Waiting for", self.wait_time, "seconds to make sure that the copy is done"
 					time.sleep(self.wait_time)
 					self.write_log(f)
 					thread.start_new_thread(self.image_added, (f,))	

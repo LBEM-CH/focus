@@ -148,9 +148,9 @@ class Add2dxImageWatcher(WatcherBase):
 			for j in range(1,n+1):
 				
 				if dz>0.0:
-					k0 = imageWidth/magnification*stepSize/(lam)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lam*Cs*(acos(phacon)/pi-float(j)))))
+					k0 = imageWidth/magnification*stepSize/(lam)*sqrt(abs(1.0/Cs*(dz-sqrt(abs(dz*dz+2.0*lam*Cs*(acos(phacon)/pi-float(j)))))))
 				else:
-					k0 = imageWidth/magnification*stepSize/(lam)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lam*Cs*(acos(phacon)/pi+float(j)))));
+					k0 = imageWidth/magnification*stepSize/(lam)*sqrt(abs(1.0/Cs*(dz+sqrt(abs(dz*dz+2.0*lam*Cs*(acos(phacon)/pi+float(j)))))));
 			
 				u = k0*cost
 				v = k0*sint

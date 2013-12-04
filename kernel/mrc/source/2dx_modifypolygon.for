@@ -1,5 +1,7 @@
       PROGRAM MODIFP
 C
+C-----Henning, 2dx.org
+C
       character * 80 czeile,czeil2
       character * 80 filin,filout,filcor,fildim
       character * 1 ctmp1

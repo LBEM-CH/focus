@@ -13,18 +13,15 @@ CFLAGS = -DPROTOTYPE -Dalliant -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFIL
 
 BIN = ../../bin
 
-all: $(BIN)/2dx_ctffind3.exe $(BIN)/2dx_ctffind3_noOMP.exe ${BIN}/2dx_ctffind3_ori.exe $(BIN)/2dx_ctftilt.exe $(BIN)/ctffind3.exe
+all: $(BIN)/2dx_ctffind3.exe $(BIN)/2dx_ctffind3_noOMP.exe $(BIN)/2dx_ctftilt.exe $(BIN)/ctffind3.exe
 
 $(BIN)/ctffind3.exe: ctffind3.o iof.o ioc.o
 	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
 
 $(BIN)/2dx_ctffind3.exe: 2dx_ctffind3.o iof.o ioc.o
-	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
+	$(F77) $(FFLAGS) -fopenmp iof.o ioc.c -o $@ $< 
 
 $(BIN)/2dx_ctffind3_noOMP.exe: 2dx_ctffind3_noOMP.o iof.o ioc.o
-	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
-
-$(BIN)/2dx_ctffind3_ori.exe: 2dx_ctffind3_ori.o iof.o ioc.o
 	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
 
 $(BIN)/2dx_ctftilt.exe: 2dx_ctftilt.o iof.o ioc.o
@@ -34,12 +31,9 @@ ctffind3.o: ctffind3.f
 	$(F77) $(FFLAGS) -c $< 
 
 2dx_ctffind3.o: 2dx_ctffind3.f
-	$(F77) $(FFLAGS) -c $< 
+	$(F77) $(FFLAGS) -fopenmp -c $< 
 
 2dx_ctffind3_noOMP.o: 2dx_ctffind3_noOMP.f
-	$(F77) $(FFLAGS) -c $< 
-
-2dx_ctffind3_ori.o: 2dx_ctffind3_ori.f
 	$(F77) $(FFLAGS) -c $< 
 
 2dx_ctftilt.o: 2dx_ctftilt.f
@@ -56,7 +50,6 @@ ioc.o: ioc.c
 clean:
 	\rm -f ../../bin/2dx_ctffind3.exe
 	\rm -f ../../bin/2dx_ctffind3_noOMP.exe
-	\rm -f ../../bin/2dx_ctffind3_ori.exe
 	\rm -f ../../bin/2dx_ctftilt.exe
 	\rm -f *.o
 

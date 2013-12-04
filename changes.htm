@@ -272,10 +272,10 @@
 <li> <b>2dx_image</b> Gui-free mode added.
 <ul>
 <li> <b>2dx_image</b> can now be called from either the command line or from 2dx_merge.
-<li> Command line syntax is: <font color="grey">./2dx_image ${image_directory} "Standard_Scripts,+Custom_Scripts"</font>
+<li> Command line syntax is: <font color="grey">./2dx_image  "Standard_Scripts,+Custom_Scripts"</font>
 <li> Example: <font color="green">./2dx_image ~/Proteins/Prot-2000 "2dx_initialize,2dx_fftrans,+2dx_evaluateLattice"</font>
 <li> Calling from <b>2dx_merge</b> scripts is identical except that by adding '<font color="green">set app_2dx_image=""</font>' to the top of a script will allow the script to be called as:
-<li> <font color="green">${app_2dx_image} ${image_directory} "Standard_Scripts,+Custom_Scripts"</font>
+<li> <font color="green">  "Standard_Scripts,+Custom_Scripts"</font>
 </ul>
 <li> Added script for unbending with <i>Synthetic Reference</i> from a merged 2D or 3D dataset.
 <li> Added script for manual definition of a <font color="green">>phase origin</font> within the final map, via mouse positioning and <font color="green">Shift + "P"</font>. Re-running the script then updates the phase origin and re-calculates the final map.

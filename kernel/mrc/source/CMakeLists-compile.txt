@@ -92,6 +92,8 @@ add_custom_command(OUTPUT 2dx_ctftilt.o  COMMAND ${Fortran_COMPILER_NAME} ${CMAK
 #add_custom_command(TARGET EXE_CTFTILT PRE_LINK COMMAND ${Fortran_COMPILER_NAME} ARGS ${CMAKE_Fortran_FLAGS_RELEASE} -c 2dx_ctftilt.f)
 add_custom_command(OUTPUT 2dx_ctffind3.o COMMAND ${Fortran_COMPILER_NAME}  ${CMAKE_Fortran_FLAGS_RELEASE} -c 2dx_ctffind3.f)
 #add_custom_command(TARGET EXE_CTFFIND PRE_LINK COMMAND ${Fortran_COMPILER_NAME} ARGS ${CMAKE_Fortran_FLAGS_RELEASE} -c 2dx_ctffindi3.f)
+add_custom_command(OUTPUT 2dx_ctffind3_noOMP.o COMMAND ${Fortran_COMPILER_NAME}  ${CMAKE_Fortran_FLAGS_RELEASE} -c 2dx_ctffind3_noOMP.f)
+#add_custom_command(TARGET EXE_CTFFIND PRE_LINK COMMAND ${Fortran_COMPILER_NAME} ARGS ${CMAKE_Fortran_FLAGS_RELEASE} -c 2dx_ctffindi3_noOMP.f)
 	
 add_custom_command(OUTPUT library.o COMMAND ${CMAKE_C_COMPILER} -DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -c library.c )
 
@@ -111,6 +113,7 @@ add_library(CXX_LIB_STATIC STATIC stdc++)
 
   
 add_executable( ${EXE_CTFFIND} 2dx_ctffind3.o mrc_ccp4.o library )
+add_executable( ${EXE_CTFFIND} 2dx_ctffind3_noOMP.o mrc_ccp4.o library )
 add_executable( ${EXE_CTFTILT} 2dx_ctftilt.o mrc_ccp4.o library)
 
 set_target_properties(${EXE_CTFFIND} ${EXE_CTFTILT} PROPERTIES LINKER_LANGUAGE Fortran)

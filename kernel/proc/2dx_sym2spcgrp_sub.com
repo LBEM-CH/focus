@@ -241,18 +241,18 @@
 # c222 is equivalent to C222 in CCP4 (number 21). CENTRIC applies to all (H,K). 
 # Note the requirement for systematic absences.
 #
+# p3 is equivalent to P3 in CCP4 (number 143). CENTRIC does not apply.
+#
+# p312 is equivalent to P312 in CCP4 (number 149). CENTRIC applies for h=k only
+#
+# p321 is equivalent to P321 in CCP4 (number 150). CENTRIC only applies to (h,0) and (0,k).
+#
 # p4 is equivalent to P4 (number 75) in CCP4. CENTRIC applies to all (h,k).
 #
 # p422 is equivalent to P422 (number 89) in CCP4. CENTRIC applies to all (h,k).
 #
 # p4212 is equivalent to P4212 in CCP (number 90). CENTRIC applies to all (h,k). 
 # Note systematic absences for (2n+1,0) and (0,2n+1).
-#
-# p3 is equivalent to P3 in CCP4 (number 143). CENTRIC does not apply.
-#
-# p312 is equivalent to P312 in CCP4 (number 149). CENTRIC applies for h=k only
-#
-# p321 is equivalent to P321 in CCP4 (number 150). CENTRIC only applies to (h,0) and (0,k).
 #
 # p6 is equivalent to CCP4 P6 (168). CENTRIC applies to all (h,k)
 #

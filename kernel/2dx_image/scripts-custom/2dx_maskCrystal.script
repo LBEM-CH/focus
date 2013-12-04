@@ -39,7 +39,6 @@
 # DISPLAY: refori
 # DISPLAY: comment
 # DISPLAY: mask_fourmask
-# DISPLAY: mask_crop
 # DISPLAY: mask_reset_reflocation
 #
 #$end_local_vars
@@ -66,7 +65,6 @@ set maskb05 = ""
 set tempkeep = ""
 set refori = ""
 set mask_fourmask = ""
-set mask_crop = ""
 set mask_reset_reflocation = ""
 #
 #$end_vars
@@ -83,6 +81,9 @@ set date = `date`
 echo date = ${date}
 #
 source ${proc_2dx}/2dx_makedirs 
+#
+# ATTENTION: mask_crop needs to remain on "n", because otherwise there is a conflict between the sizes of non-masked and maseked images after a CLEANUP.
+set mask_crop = "n"
 #
 set originalpolygon = selectionList.dat
 #
@@ -101,6 +102,10 @@ endif
 echo "# IMAGE: ${nonmaskimagename}.mrc" >> LOGS/${scriptname}.results
 echo "# IMAGE: ManualMasking-CCmap.mrc" >> LOGS/${scriptname}.results
 echo "# IMAGE: ManualMasking-UnbendPlot.mrc" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${originalpolygon} <TXT: Original Polygon File>"  >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/TMPpolygon.dat <TXT: Polygon File>"  >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/TMPcoordinate.dat <TXT: Coordinate File>"  >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/TMPnewimagesidelength.dat <TXT: Polygon File>"  >> LOGS/${scriptname}.results
 #
 if ( ! -e ${originalpolygon} ) then
   if ( -e ManualMasking-CCmap.mrc ) then

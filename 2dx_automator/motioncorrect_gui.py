@@ -454,7 +454,7 @@ class Auto2dxGUI(Frame):
 		
 def main():
 	root = Tk()
-	root.geometry("1920x1080+000+000")
+	root.geometry("1920x1200+000+000")
 	#root.geometry("800x600+300+300")
 	app = Auto2dxGUI(root)
 	root.mainloop()

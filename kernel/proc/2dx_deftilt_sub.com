@@ -105,9 +105,15 @@ if ( ${refX} == '0' || ${refY} == '0' ) then
 else
   set inoast = 1
 endif
+if ( ${use_paralellized} == "y" ) then
+  set progname = 2dx_ctffind3.exe
+else
+  set progname = 2dx_ctffind3_noOMP.exe
+endif
+#
 echo " "
 echo "Calling:"  
-echo "${bin_2dx}/2dx_ctffind3.exe"
+echo "${bin_2dx}/${progname}"
 echo "${inimage}"
 echo "${outimage}"
 echo "${CS},${KV},${ampcon},${magnification},${locstepdigitizer}"
@@ -115,7 +121,7 @@ echo "${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_da
 echo "${inoast},${dfref},${drms1}"
 echo " "
 #
-${bin_2dx}/2dx_ctffind3.exe << eof
+${bin_2dx}/${progname} << eof
 ${inimage}
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${locstepdigitizer}

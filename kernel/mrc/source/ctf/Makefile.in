@@ -21,6 +21,9 @@ $(BIN)/ctffind3.exe: ctffind3.o iof.o ioc.o
 $(BIN)/2dx_ctffind3.exe: 2dx_ctffind3.o iof.o ioc.o
 	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
 
+$(BIN)/2dx_ctffind3_noOMP.exe: 2dx_ctffind3_noOMP.o iof.o ioc.o
+	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
+
 $(BIN)/2dx_ctffind3_ori.exe: 2dx_ctffind3_ori.o iof.o ioc.o
 	$(F77) $(FFLAGS) iof.o ioc.c -o $@ $< 
 
@@ -31,6 +34,9 @@ ctffind3.o: ctffind3.f
 	$(F77) $(FFLAGS) -c $< 
 
 2dx_ctffind3.o: 2dx_ctffind3.f
+	$(F77) $(FFLAGS) -c $< 
+
+2dx_ctffind3_noOMP.o: 2dx_ctffind3_noOMP.f
 	$(F77) $(FFLAGS) -c $< 
 
 2dx_ctffind3_ori.o: 2dx_ctffind3_ori.f
@@ -49,6 +55,7 @@ ioc.o: ioc.c
 
 clean:
 	\rm -f ../../bin/2dx_ctffind3.exe
+	\rm -f ../../bin/2dx_ctffind3_noOMP.exe
 	\rm -f ../../bin/2dx_ctffind3_ori.exe
 	\rm -f ../../bin/2dx_ctftilt.exe
 	\rm -f *.o

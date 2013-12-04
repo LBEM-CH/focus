@@ -60,6 +60,7 @@
 # DISPLAY: df_PAve 
 # DISPLAY: defocus_res_min
 # DISPLAY: defocus_res_max
+# DISPLAY: use_paralellized
 #
 #$end_local_vars
 #
@@ -99,6 +100,7 @@ set expected_tltang = ""
 set expected_tltang_uncertainty = ""
 set defocus_res_min = ""
 set defocus_res_max = ""
+set use_paralellized = ""
 #
 #$end_vars
 #
@@ -292,7 +294,12 @@ eot
   #
   echo "# IMAGE-IMPORTANT: LOGS/2dx_ctffind3.txt <TXT: Logfile of 2dx_ctffind3.exe>" >>  LOGS/${scriptname}.results
   #
-  ${bin_2dx}/2dx_ctffind3.exe > LOGS/2dx_ctffind3.txt << eof
+  if ( ${use_paralellized} == "y" ) then
+    set progname = 2dx_ctffind3.exe
+  else
+    set progname = 2dx_ctffind3_noOMP.exe
+  endif
+  ${bin_2dx}/${progname} > LOGS/2dx_ctffind3.txt << eof
 SCRATCH/2dx_ctffind-cut-down.mrc
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${downstepdigitizer}

@@ -36,6 +36,24 @@ class Add2dxImageWatcher(WatcherBase):
 		image_2dx_name = self.outfolder + "/automatic/" + self.protein_name + str(image_count)
 		open(self.log_file_name,"a").write(filename + "\t" + image_2dx_name + "\t" + time.strftime("%c") + '\n')
 	
+	def set_image_number(self, folder, number):
+		f = open(folder + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if not l.startswith("set imagenumber ="):
+				lines_out.append(l)
+			else:
+				number_as_string = str(number+1)
+				leading_zeros = 10 - len(number_as_string)
+				number_as_string = leading_zeros * "0" + str(number+1)
+				toadd = "set imagenumber = " + '"' + number_as_string + '"'
+				lines_out.append(toadd)
+				print toadd
+		f.close()
+		f_out = open(folder + "/2dx_image.cfg", "w")
+		f_out.writelines(lines_out)
+		f_out.close()
 		
 	def image_added(self, filename, do_wait = True):
 		print "2dx automatic processing launched for", filename
@@ -52,16 +70,25 @@ class Add2dxImageWatcher(WatcherBase):
 		self.lock_2dx.acquire()
 		old_path = os.getcwd()
 		os.chdir(self.outfolder)
-		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"*"' + "'" 
-		print "2dx_command", command_2dx_image
+		
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize"' + "'" 
 		os.system(command_2dx_image)
+		
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize_files"' + "'" 
+		os.system(command_2dx_image)
+		
+		self.set_image_number(image_2dx_name, image_count)
+		
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"*"' + "'" 
+		os.system(command_2dx_image)
+		
 		os.chdir(old_path)
 		self.lock_2dx.release()
 		
 		filename_core = filename.split(".")[0]
 		dia_folder = image_2dx_name + "/automation_output"
 		os.makedirs(dia_folder)
-		self.copy_image_if_there(image_2dx_name + "/SCRATCH/" + filename_core + ".red8.mrc", dia_folder + "/image.mrc")
+		self.copy_image_if_there(image_2dx_name + "/ManualMasking-CCmap.mrc", dia_folder + "/image.mrc")
 		self.copy_image_if_there(image_2dx_name + "/CUT/" + filename_core + ".marked.merge.ps.mrc", dia_folder + "/defoci.mrc")
 		self.copy_image_if_there(image_2dx_name + "/FFTIR/" + filename_core + ".red.fft.mrc", dia_folder + "/fft.mrc")
 		self.copy_image_if_there(image_2dx_name + "/" + filename_core + "-p1.mrc", dia_folder + "/map.mrc")
@@ -79,7 +106,7 @@ class Add2dxImageWatcher(WatcherBase):
 		
 		tltaxis = self.get_tltaxis_from_config(image_2dx_name + "/2dx_image.cfg")
 		self.drawTiltAxisOnDefo(dia_folder + "/defoci.png", dia_folder + "/defoci_axis.gif", tltaxis)
-			
+		
 		print "2dx automatic processing done for", filename
 		
 	def copy_image_if_there(self, src, dest):

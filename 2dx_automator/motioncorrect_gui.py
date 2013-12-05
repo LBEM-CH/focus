@@ -293,6 +293,13 @@ class Auto2dxGUI(Frame):
 			self.maxframe_label.configure(text="Ending Frame Number: " + str(self.maxframe))
 			self.watcher.setLastFrame(self.maxframe)
 			
+	def fodChanged(self):
+		number = tkSimpleDialog.askinteger("Edit drift correction", "Offset")
+		if number>=0:
+			self.fod = number
+			self.fod_label.configure(text="Frame Offset: " + str(self.fod))
+			self.watcher.setFOD(self.fod)
+			
 	def changeExportLocation(self):
 		self.export_location = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory")
 		if len(self.export_location) == 0:
@@ -344,6 +351,7 @@ class Auto2dxGUI(Frame):
 		
 		self.minframe = 0
 		self.maxframe = 0
+		self.fod = 2
 		
 		self.minframe_label = Label(self.centralleftframe, text="Starting Frame Number: " + str(self.minframe))
 		self.minframe_label.pack(padx=5, pady=5)
@@ -351,13 +359,17 @@ class Auto2dxGUI(Frame):
 		change_min_frame_button = Button(self.centralleftframe ,text='Change min frame', width=20, command=self.minFrameChanged)
 		change_min_frame_button.pack()
 		
-		Label(self.centralleftframe, text=" ", height=1).pack()
-		
 		self.maxframe_label = Label(self.centralleftframe, text="Ending Frame Number: " + str(self.maxframe))
 		self.maxframe_label.pack(padx=5, pady=5)
 		
 		change_max_frame_button = Button(self.centralleftframe ,text='Change max frame', width=20, command=self.maxFrameChanged)
 		change_max_frame_button.pack()
+		
+		self.fod_label = Label(self.centralleftframe, text="Frame Offset: " + str(self.fod))
+		self.fod_label.pack(padx=5, pady=5)
+		
+		change_fod_button = Button(self.centralleftframe ,text='Change frame offset', width=20, command=self.fodChanged)
+		change_fod_button.pack()
 		
 		Label(self.centralleftframe, text=" ", height=1).pack()
 		

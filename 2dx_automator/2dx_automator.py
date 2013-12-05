@@ -208,7 +208,7 @@ class Auto2dxGUI(Frame):
 		dia_folder = self.image_dirs[i] + "/automation_output"
 		
 		core_name = self.image_names[i].split(".")[0]
-		self.watcher.copy_image_if_there(self.image_dirs[i] + "/SCRATCH/" + core_name + ".red8.mrc", dia_folder + "/image.mrc")
+		self.watcher.copy_image_if_there(self.image_dirs[i] + "/ManualMasking-CCmap.mrc", dia_folder + "/image.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/CUT/" + core_name + ".marked.merge.ps.mrc", dia_folder + "/defoci.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/FFTIR/" + core_name + ".red.fft.mrc", dia_folder + "/fft.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
@@ -449,24 +449,56 @@ class Auto2dxGUI(Frame):
 			self.is_running = False
 			self.status.configure(text="Automation not running", fg="red")
 		
-	def reprocess2dx(self, i):
+	def reprocess2dx(self, i, line):
 		self.watcher.lock_2dx.acquire()
 		old_path = os.getcwd()
 		os.chdir(self.watcher.outfolder)
-		command_2dx_image = "2dx_image " + self.image_dirs[i] + " '" + '"*"' + "'"
-		print command_2dx_image
-		os.system( command_2dx_image )
+		
+		command_2dx_image = "2dx_image " + self.image_dirs[i] + " '" + '"2dx_initialize"' + "'" 
+		os.system(command_2dx_image)
+		
+		command_2dx_image = "2dx_image " + self.image_dirs[i] + " '" + '"2dx_initialize_files"' + "'" 
+		os.system(command_2dx_image)
+		
+		f = open(self.image_dirs[i] + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if not l.startswith("set imagenumber ="):
+				lines_out.append(l)
+			else:
+				lines_out.append(line)
+		f.close()
+		
+		f_out = open(self.image_dirs[i] + "/2dx_image.cfg", "w")
+		f_out.writelines(lines_out)
+		f_out.close()
+		
+		command_2dx_image = "2dx_image " + self.image_dirs[i] + " '" + '"*"' + "'" 
+		os.system(command_2dx_image)
+		
 		os.chdir(old_path)
 		self.watcher.lock_2dx.release()
 		
 	def reprocessCaller(self,i):
+		f = open(self.image_dirs[i] + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if l.startswith("set imagenumber ="):
+				keep_line = l
+				break
+				
+		print keep_line
+		f.close()
+		
 		config_name = self.image_dirs[i] + "/2dx_image.cfg"
 		if os.path.exists(config_name):
 			os.remove(config_name)
 		
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/../2dx_master.cfg", config_name)
 		
-		self.reprocess2dx(i)
+		self.reprocess2dx(i, keep_line)
 		self.updateImages(i)
 		
 		

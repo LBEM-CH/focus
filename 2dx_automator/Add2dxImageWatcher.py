@@ -36,6 +36,20 @@ class Add2dxImageWatcher(WatcherBase):
 		image_2dx_name = self.outfolder + "/automatic/" + self.protein_name + str(image_count)
 		open(self.log_file_name,"a").write(filename + "\t" + image_2dx_name + "\t" + time.strftime("%c") + '\n')
 	
+	def setDoMask(self, folder):
+		f = open(folder + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if not l.startswith("set domask ="):
+				lines_out.append(l)
+			else:
+				lines_out.append('set domask = "y"')
+		f.close()
+		f_out = open(folder + "/2dx_image.cfg", "w")
+		f_out.writelines(lines_out)
+		f_out.close()
+		
 	def set_image_number(self, folder, number):
 		f = open(folder + "/2dx_image.cfg", "r")
 		lines = f.readlines()
@@ -79,7 +93,41 @@ class Add2dxImageWatcher(WatcherBase):
 		
 		self.set_image_number(image_2dx_name, image_count)
 		
-		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"*"' + "'" 
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize_files"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_fftrans"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getDefTilt"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getLattice"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots"' + "'" 
+		os.system(command_2dx_image)
+		
+		self.setDoMask(image_2dx_name)
+		
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend2"' + "'" 
+		os.system(command_2dx_image)
+		
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_fftrans"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend2"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_applyCTF"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_generateMAP"' + "'" 
 		os.system(command_2dx_image)
 		
 		os.chdir(old_path)
@@ -91,22 +139,30 @@ class Add2dxImageWatcher(WatcherBase):
 		self.copy_image_if_there(image_2dx_name + "/ManualMasking-CCmap.mrc", dia_folder + "/image.mrc")
 		self.copy_image_if_there(image_2dx_name + "/CUT/" + filename_core + ".marked.merge.ps.mrc", dia_folder + "/defoci.mrc")
 		self.copy_image_if_there(image_2dx_name + "/FFTIR/" + filename_core + ".red.fft.mrc", dia_folder + "/fft.mrc")
-		self.copy_image_if_there(image_2dx_name + "/" + filename_core + "-p1.mrc", dia_folder + "/map.mrc")
+		self.copy_image_if_there(image_2dx_name + "/m" + filename_core + "-p1.mrc", dia_folder + "/map.mrc")
 		
 		self.lock_eman2.acquire()
-		self.convert_mrc_to_png(dia_folder)
-		self.fix_fft(dia_folder)
+		
+		try:
+			self.convert_mrc_to_png(dia_folder)
+			self.fix_fft(dia_folder)
+		except:
+			pass
+			
 		self.lock_eman2.release()
 
-		lattice = self.get_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
-		self.drawLattice(dia_folder + "/fft.png", dia_folder + "/fft_lattice.gif", lattice)
+		try:
+			lattice = self.get_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
+			self.drawLattice(dia_folder + "/fft.png", dia_folder + "/fft_lattice.gif", lattice)
 		
-		ctf = self.get_ctf_from_config(image_2dx_name + "/2dx_image.cfg")
-		self.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)
+			ctf = self.get_ctf_from_config(image_2dx_name + "/2dx_image.cfg")
+			self.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)
 		
-		tltaxis = self.get_tltaxis_from_config(image_2dx_name + "/2dx_image.cfg")
-		self.drawTiltAxisOnDefo(dia_folder + "/defoci.png", dia_folder + "/defoci_axis.gif", tltaxis)
-		
+			tltaxis = self.get_tltaxis_from_config(image_2dx_name + "/2dx_image.cfg")
+			self.drawTiltAxisOnDefo(dia_folder + "/defoci.png", dia_folder + "/defoci_axis.gif", tltaxis)
+		except:
+			pass
+			
 		print "2dx automatic processing done for", filename
 		
 	def copy_image_if_there(self, src, dest):
@@ -328,17 +384,29 @@ class Add2dxImageWatcher(WatcherBase):
 		
 	def get_lattice_from_config(self, config_name):
 		content = read_text_row(config_name)
+		lattice = []
 		for c in content:
 			if len(c)>1 and c[1] == "lattice":
-				data = c[3].split(",")
-		data[0] = data[0][1:]
-		data[3] = data[3][:-1]
-		lattice = []
-		for d in data:
-			try:
-				lattice.append(float(d))
-			except:
-				lattice.append(0.0)
+				try:
+					lattice.append(float(c[3][1:-1]))
+				except:
+					lattice.append(0)
+					
+				try:
+					lattice.append(float(c[4][0:-1]))
+				except:
+					lattice.append(0)
+					
+				try:
+					lattice.append(float(c[5][0:-1]))
+				except:
+					lattice.append(0)
+				
+				try:
+					lattice.append(float(c[6][0:-1]))
+				except:
+					lattice.append(0)
+					
 		return lattice
 	
 		

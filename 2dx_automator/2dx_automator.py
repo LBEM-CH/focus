@@ -211,9 +211,17 @@ class Auto2dxGUI(Frame):
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/ManualMasking-CCmap.mrc", dia_folder + "/image.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/CUT/" + core_name + ".marked.merge.ps.mrc", dia_folder + "/defoci.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/FFTIR/" + core_name + ".red.fft.mrc", dia_folder + "/fft.mrc")
-		self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
-		self.watcher.convert_mrc_to_png(dia_folder)
-		self.watcher.fix_fft(dia_folder)
+		
+		if os.path.exists(self.image_dirs[i] + "/m" + core_name + "-p1.mrc"):
+			self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
+		else:
+			self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
+		
+		try:
+			self.watcher.convert_mrc_to_png(dia_folder)
+			self.watcher.fix_fft(dia_folder)
+		except:
+			pass
 		
 		lattice = self.watcher.get_lattice_from_config(self.image_dirs[i] + "/2dx_image.cfg")
 		self.watcher.drawLattice(dia_folder + "/fft.png", dia_folder + "/fft_lattice.gif", lattice)

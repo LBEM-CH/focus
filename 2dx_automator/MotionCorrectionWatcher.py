@@ -21,6 +21,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.last_frame = last_frame
 		self.lock_compute = threading.Lock()
 		self.fod = 2
+		self.waittime = 30
 	
 	def file_filter(self, filename):
 		return ((filename.endswith(".mrc")) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
@@ -33,7 +34,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
-			waiting_time = 100
+			waiting_time = self.waittime
 			print "Waiting for", waiting_time, "seconds to make sure that the copy is done"
 			time.sleep(waiting_time)
 			
@@ -76,6 +77,9 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 	def setFOD(self, rhs):
 		self.fod = rhs
+
+	def setWaittime(self, rhs):
+		self.waittime = rhs
 		
 	def convert_mrc_to_png(self, filename):
 		old_path = os.getcwd()

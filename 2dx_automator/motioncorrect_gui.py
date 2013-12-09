@@ -321,6 +321,13 @@ class Auto2dxGUI(Frame):
 			except:
 				print "releasing the locks did not help"
 	
+	def waittimeChanged(self):
+		number = tkSimpleDialog.askinteger("Change wait time", "Wait time")
+		if number>=0:
+			self.waittime = number
+			self.time_label.configure(text="Wait time: " + str(self.waittime))
+			self.watcher.setWaittime(self.waittime)
+	
 	def initUI(self):
 		self.parent.title("Motion Correction GUI (beta)")
 	
@@ -352,6 +359,7 @@ class Auto2dxGUI(Frame):
 		self.minframe = 0
 		self.maxframe = 0
 		self.fod = 2
+		self.waittime = 30
 		
 		self.minframe_label = Label(self.centralleftframe, text="Starting Frame Number: " + str(self.minframe))
 		self.minframe_label.pack(padx=5, pady=5)
@@ -370,6 +378,12 @@ class Auto2dxGUI(Frame):
 		
 		change_fod_button = Button(self.centralleftframe ,text='Change frame offset', width=20, command=self.fodChanged)
 		change_fod_button.pack()
+
+		self.time_label = Label(self.centralleftframe, text="Waiting Time: " + str(self.waittime))
+		self.time_label.pack(padx=5, pady=5)
+		
+		change_time_button = Button(self.centralleftframe ,text='Change wait time', width=20, command=self.waittimeChanged)
+		change_time_button.pack()
 		
 		Label(self.centralleftframe, text=" ", height=1).pack()
 		
@@ -411,7 +425,7 @@ class Auto2dxGUI(Frame):
 			self.index_selected = index
 			self.indexChanged()
 			
-		Label(self.centralleftframe, text=" ", height=2).pack()
+		#Label(self.centralleftframe, text=" ", height=2).pack()
 		
 		self.reprocess_button = Button(self.lowleftframe ,text='Reprocess Image', width=40, command=self.reprocessImage)
 		self.reprocess_button.pack(padx=20, pady=5)

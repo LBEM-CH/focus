@@ -386,27 +386,20 @@ class Add2dxImageWatcher(WatcherBase):
 		content = read_text_row(config_name)
 		lattice = []
 		for c in content:
-			if len(c)>1 and c[1] == "lattice":
-				try:
-					lattice.append(float(c[3][1:-1]))
-				except:
-					lattice.append(0)
-					
-				try:
-					lattice.append(float(c[4][0:-1]))
-				except:
-					lattice.append(0)
-					
-				try:
-					lattice.append(float(c[5][0:-1]))
-				except:
-					lattice.append(0)
-				
-				try:
-					lattice.append(float(c[6][0:-1]))
-				except:
-					lattice.append(0)
-					
+			
+			if len(c) > 2 and (c[0] != "#"):
+				c_string = ""
+				for c_loc in c:				
+					c_string += str(c_loc)
+				line_without_space = c_string.replace(" ", "")
+				if line_without_space.startswith("setlattice"):
+					data = line_without_space.split("=")[1][1:-1]
+					for d in data.split(","):
+						try:
+							lattice.append(float(d))
+						except:
+							lattice.append(0)
+		
 		return lattice
 	
 		

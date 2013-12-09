@@ -534,6 +534,11 @@ class Auto2dxGUI(Frame):
 				skip = open(skip_file, "w")
 				skip.write("This image is skipped by the 2dx_automator\n")
 				skip.close()
+
+	def showIQ(self):
+		i = self.index_selected
+		command = "evince " + self.image_dirs[i] + "/PS/2dx_plotreska_canonical.ps"
+		os.system(command)
 		
 		
 	def initUI(self):
@@ -628,7 +633,10 @@ class Auto2dxGUI(Frame):
 		
 		self.info_label = Label(self.centralrightframe3, text="Image Staticstics:\n", height=28)
 		self.info_label.pack()
-		
+
+		self.iqplot_button = Button(self.centralrightframe3 ,text='Show IQ-Plot', width=20, command=self.showIQ)
+		self.iqplot_button.pack(side=BOTTOM, pady=5)		
+
 		self.usevar = IntVar()
 		self.usebox = Checkbutton(self.centralrightframe3, variable=self.usevar, text="Use image", command=self.useButtonClicked)
 		self.usebox.pack(side=BOTTOM, pady=10)
@@ -651,7 +659,7 @@ class Auto2dxGUI(Frame):
 		
 def main():
 	root = Tk()
-	root.geometry("850x650+300+300")
+	root.geometry("1900x1200+0+0")
 	app = Auto2dxGUI(root)
 	root.mainloop()
 	

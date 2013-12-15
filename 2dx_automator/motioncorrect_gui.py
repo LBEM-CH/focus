@@ -327,6 +327,50 @@ class Auto2dxGUI(Frame):
 			self.waittime = number
 			self.time_label.configure(text="Wait time: " + str(self.waittime))
 			self.watcher.setWaittime(self.waittime)
+			
+	def deleteImage(self):
+		if tkMessageBox.askyesno("Delete Image (Feature for Kenny)", "Do you realy want to delete the image?"):
+			print "now I should delete the image"
+			
+			i = self.index_selected
+			
+			file_to_delete = self.input_dir + "/" + self.image_names[i]
+			
+			filecorename = self.watcher.getFileCoreName(self.image_names[i])
+			file_to_delete2 = self.output_dir + "/" + filecorename + "_aligned.mrc"
+			
+			try:
+				os.remove(file_to_delete)
+			except:
+				print "Failed to delete" + file_to_delete
+				
+			try:
+				os.remove(file_to_delete2)
+			except:
+				print "Failed to delete" + file_to_delete2
+			
+			count = 0
+			lines_out = []
+			
+			if os.path.exists(self.output_dir + "/automatic_import_log.txt"):
+				f = open( self.output_dir + "/automatic_import_log.txt", 'r')
+				for line in f:
+					if count != i:
+						lines_out.append(line)
+					count += 1
+				
+				f_out = open( self.output_dir + "/automatic_import_log.txt", 'w')
+				for line_out in lines_out:
+					f_out.write(line_out)
+				f_out.close()
+				
+			if i > 0:
+				self.index_selected = i-1
+			else:
+				self.index_selected = 0
+				
+			self.resetResultOverview()
+		
 	
 	def initUI(self):
 		self.parent.title("Motion Correction GUI (beta)")
@@ -413,7 +457,7 @@ class Auto2dxGUI(Frame):
 		self.listbox.pack(padx=14)
 
 		# attach listbox to scrollbar
-		self.listbox.config(yscrollcommand=self.scrollbar.set, height=30)
+		self.listbox.config(yscrollcommand=self.scrollbar.set, height=26)
 		self.scrollbar.config(command=self.listbox.yview)
 		
 		@bind(self.listbox, '<<ListboxSelect>>')
@@ -467,7 +511,10 @@ class Auto2dxGUI(Frame):
 		self.default_image_small = Image.new("RGB", (n_small,n_small), "white")
 		self.default_tkimage_small = ImageTk.PhotoImage(self.default_image_small)
 		self.drift_label = Label(self.centralrightframe3, image=self.default_tkimage_small)
-		self.drift_label.pack(side=BOTTOM, padx=5, pady=5)
+		self.drift_label.pack(padx=5, pady=5)
+		
+		self.delete_button = Button(self.centralrightframe3, text='Delete Image', width=20, command=self.deleteImage)
+		self.delete_button.pack(padx=20, pady=15, side=BOTTOM)
 		
 		self.status = Label(self.parent, text="Automation not running", bd=1, relief=SUNKEN, anchor=W, fg="red")
 		self.status.pack(side=BOTTOM, fill=X)

@@ -329,8 +329,7 @@ class Auto2dxGUI(Frame):
 			self.watcher.setWaittime(self.waittime)
 			
 	def deleteImage(self):
-		if tkMessageBox.askyesno("Delete Image (Feature for Kenny)", "Do you realy want to delete the image?"):
-			print "now I should delete the image"
+		if tkMessageBox.askyesno("Delete Image", "Do you realy want to delete the image?"):
 			
 			i = self.index_selected
 			
@@ -373,7 +372,7 @@ class Auto2dxGUI(Frame):
 		
 	
 	def initUI(self):
-		self.parent.title("Motion Correction GUI (beta)")
+		self.parent.title("Motion Correction GUI (beta_2)")
 	
 		self.getFolders()
 		
@@ -528,7 +527,6 @@ class Auto2dxGUI(Frame):
 def main():
 	root = Tk()
 	root.geometry("1920x1200+000+000")
-	#root.geometry("800x600+300+300")
 	app = Auto2dxGUI(root)
 	root.mainloop()
 	

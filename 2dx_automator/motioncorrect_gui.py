@@ -369,10 +369,13 @@ class Auto2dxGUI(Frame):
 				self.index_selected = 0
 				
 			self.resetResultOverview()
+			
+	def binButtonClicked(self):
+		self.watcher.setBinning(self.binvar.get()+1)
 		
 	
 	def initUI(self):
-		self.parent.title("Motion Correction GUI (beta_2)")
+		self.parent.title("Motion Correction GUI (beta_3)")
 	
 		self.getFolders()
 		
@@ -407,26 +410,30 @@ class Auto2dxGUI(Frame):
 		self.minframe_label = Label(self.centralleftframe, text="Starting Frame Number: " + str(self.minframe))
 		self.minframe_label.pack(padx=5, pady=5)
 		
-		change_min_frame_button = Button(self.centralleftframe ,text='Change min frame', width=20, command=self.minFrameChanged)
-		change_min_frame_button.pack()
+		self.change_min_frame_button = Button(self.centralleftframe ,text='Change min frame', width=20, command=self.minFrameChanged)
+		self.change_min_frame_button.pack()
 		
 		self.maxframe_label = Label(self.centralleftframe, text="Ending Frame Number: " + str(self.maxframe))
 		self.maxframe_label.pack(padx=5, pady=5)
 		
-		change_max_frame_button = Button(self.centralleftframe ,text='Change max frame', width=20, command=self.maxFrameChanged)
-		change_max_frame_button.pack()
+		self.change_max_frame_button = Button(self.centralleftframe ,text='Change max frame', width=20, command=self.maxFrameChanged)
+		self.change_max_frame_button.pack()
 		
 		self.fod_label = Label(self.centralleftframe, text="Frame Offset: " + str(self.fod))
 		self.fod_label.pack(padx=5, pady=5)
 		
-		change_fod_button = Button(self.centralleftframe ,text='Change frame offset', width=20, command=self.fodChanged)
-		change_fod_button.pack()
+		self.change_fod_button = Button(self.centralleftframe ,text='Change frame offset', width=20, command=self.fodChanged)
+		self.change_fod_button.pack()
 
 		self.time_label = Label(self.centralleftframe, text="Waiting Time: " + str(self.waittime))
 		self.time_label.pack(padx=5, pady=5)
 		
-		change_time_button = Button(self.centralleftframe ,text='Change wait time', width=20, command=self.waittimeChanged)
-		change_time_button.pack()
+		self.change_time_button = Button(self.centralleftframe ,text='Change wait time', width=20, command=self.waittimeChanged)
+		self.change_time_button.pack()
+		
+		self.binvar = IntVar()
+		self.binbox = Checkbutton(self.centralleftframe, variable=self.binvar, text="2x2 binning (super-resolution mode only)", command=self.binButtonClicked)
+		self.binbox.pack(pady=8)
 		
 		Label(self.centralleftframe, text=" ", height=1).pack()
 		

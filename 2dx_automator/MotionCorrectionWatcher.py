@@ -22,6 +22,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.lock_compute = threading.Lock()
 		self.fod = 2
 		self.waittime = 30
+		self.binning = 1
 	
 	def file_filter(self, filename):
 		return ((filename.endswith(".mrc")) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
@@ -47,7 +48,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 		old_path = os.getcwd()
 		os.chdir("/tmp")
-		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod)
+		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning)
 		os.system(motion_command)
 		os.chdir(old_path)
 		
@@ -80,6 +81,10 @@ class MotionCorrectionWatcher(WatcherBase):
 
 	def setWaittime(self, rhs):
 		self.waittime = rhs
+		
+	def setBinning(self, rhs):
+		self.binning = rhs
+		
 		
 	def convert_mrc_to_png(self, filename):
 		old_path = os.getcwd()

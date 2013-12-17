@@ -23,6 +23,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.fod = 2
 		self.waittime = 30
 		self.binning = 1
+		self.bfac = 150
 	
 	def file_filter(self, filename):
 		return ((filename.endswith(".mrc")) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
@@ -48,20 +49,77 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 		old_path = os.getcwd()
 		os.chdir("/tmp")
-		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning)
+		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac)
 		os.system(motion_command)
 		os.chdir(old_path)
 		
 		if not os.path.exists(self.infolder + "/dosef_quick"):
 			os.makedirs(self.infolder + "/dosef_quick")
 		
-		shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
-		
-		shutil.copyfile("/tmp/mc_ready_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
-		
-		shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
-		shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
-		shutil.copyfile("/tmp/dosef_quick/mc_ready_RawFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_RawFFT.mrc")
+		if self.binning == 1:
+			shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+			shutil.copyfile("/tmp/mc_ready_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
+			shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
+			shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
+			shutil.copyfile("/tmp/dosef_quick/mc_ready_RawFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_RawFFT.mrc")
+			
+			try:
+				os.remove("/tmp/mc_ready_SumCorr.mrc")
+			except:
+				pass
+				
+			try:
+				os.remove("/tmp/mc_ready_Log.txt")
+			except:
+				pass
+				
+			try:
+				os.remove("/tmp/dosef_quick/mc_ready_CorrFFT.mrc")
+			except:
+				pass
+				
+			try:
+				os.remove("/tmp/dosef_quick/mc_ready_CorrSum.mrc")
+			except:
+				pass
+				
+			try:
+				os.remove("/tmp/dosef_quick/mc_ready_RawFFT.mrc")
+			except:
+				pass
+				
+				
+		else:
+			shutil.copyfile("/tmp/mc_ready_2x_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+			shutil.copyfile("/tmp/mc_ready_2x_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
+			shutil.copyfile("/tmp/dosef_quick/mc_ready_2x_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
+			shutil.copyfile("/tmp/dosef_quick/mc_ready_2x_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
+			shutil.copyfile("/tmp/dosef_quick/mc_ready_2x_RawFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_RawFFT.mrc")
+			
+			try:
+				os.remove("/tmp/mc_ready_2x_SumCorr.mrc")
+			except:
+				pass
+				
+			try:
+				os.remove("/tmp/mc_ready_2x_Log.txt")
+			except:
+				pass
+				
+			try:
+				os.remove("/tmp/dosef_quick/mc_ready_2x_CorrFFT.mrc")
+			except:
+				pass
+				
+			try:
+				os.remove("/tmp/dosef_quick/mc_ready_2x_CorrSum.mrc")
+			except:
+				pass
+				
+			try:
+				os.remove("/tmp/dosef_quick/mc_ready_2x_RawFFT.mrc")
+			except:
+				pass
 		
 		self.convert_mrc_to_png(filename)
 		self.generateDriftPlot(filename)
@@ -84,6 +142,9 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 	def setBinning(self, rhs):
 		self.binning = rhs
+		
+	def setBFactor(self, rhs):
+		self.bfac = rhs
 		
 		
 	def convert_mrc_to_png(self, filename):

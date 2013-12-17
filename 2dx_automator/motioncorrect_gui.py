@@ -74,6 +74,15 @@ class Auto2dxGUI(Frame):
 		self.centralleftframe = Frame(self.centralframe)
 		self.centralleftframe.pack(side=LEFT)
 		
+		self.topleftframe2 = Frame(self.centralleftframe)
+		self.topleftframe2.pack(side=TOP)
+		
+		self.low_ll_frame = Frame(self.topleftframe2)
+		self.low_ll_frame.pack(side=LEFT)
+		
+		self.low_lr_frame = Frame(self.topleftframe2)
+		self.low_lr_frame.pack(side=RIGHT)
+		
 		self.lowleftframe = Frame(self.centralleftframe)
 		self.lowleftframe.pack(side=BOTTOM)
 		
@@ -373,9 +382,15 @@ class Auto2dxGUI(Frame):
 	def binButtonClicked(self):
 		self.watcher.setBinning(self.binvar.get()+1)
 		
+	def bfacChanged(self):
+		number = tkSimpleDialog.askinteger("Edit BFactor", "BFactor")
+		if number>=0:
+			self.bfac = number
+			self.bfac_label.configure(text="BFactor: " + str(self.bfac))
+			self.watcher.setBFactor(self.bfac)
 	
 	def initUI(self):
-		self.parent.title("Motion Correction GUI (beta_3)")
+		self.parent.title("Motion Correction GUI (beta_4)")
 	
 		self.getFolders()
 		
@@ -406,30 +421,37 @@ class Auto2dxGUI(Frame):
 		self.maxframe = 0
 		self.fod = 2
 		self.waittime = 30
+		self.bfac = 150
 		
-		self.minframe_label = Label(self.centralleftframe, text="Starting Frame Number: " + str(self.minframe))
-		self.minframe_label.pack(padx=5, pady=5)
+		self.minframe_label = Label(self.low_ll_frame, text="Starting Frame Number: " + str(self.minframe))
+		self.minframe_label.pack(padx=15, pady=10)
 		
-		self.change_min_frame_button = Button(self.centralleftframe ,text='Change min frame', width=20, command=self.minFrameChanged)
-		self.change_min_frame_button.pack()
+		self.change_min_frame_button = Button(self.low_lr_frame ,text='Change min frame', width=20, command=self.minFrameChanged)
+		self.change_min_frame_button.pack(padx=10, pady=5)
 		
-		self.maxframe_label = Label(self.centralleftframe, text="Ending Frame Number: " + str(self.maxframe))
-		self.maxframe_label.pack(padx=5, pady=5)
+		self.maxframe_label = Label(self.low_ll_frame, text="Ending Frame Number: " + str(self.maxframe))
+		self.maxframe_label.pack(padx=15, pady=10)
 		
-		self.change_max_frame_button = Button(self.centralleftframe ,text='Change max frame', width=20, command=self.maxFrameChanged)
-		self.change_max_frame_button.pack()
+		self.change_max_frame_button = Button(self.low_lr_frame ,text='Change max frame', width=20, command=self.maxFrameChanged)
+		self.change_max_frame_button.pack(padx=10, pady=5)
 		
-		self.fod_label = Label(self.centralleftframe, text="Frame Offset: " + str(self.fod))
-		self.fod_label.pack(padx=5, pady=5)
+		self.fod_label = Label(self.low_ll_frame, text="Frame Offset: " + str(self.fod))
+		self.fod_label.pack(padx=15, pady=10)
 		
-		self.change_fod_button = Button(self.centralleftframe ,text='Change frame offset', width=20, command=self.fodChanged)
-		self.change_fod_button.pack()
+		self.change_fod_button = Button(self.low_lr_frame ,text='Change frame offset', width=20, command=self.fodChanged)
+		self.change_fod_button.pack(padx=10, pady=5)
 
-		self.time_label = Label(self.centralleftframe, text="Waiting Time: " + str(self.waittime))
-		self.time_label.pack(padx=5, pady=5)
+		self.time_label = Label(self.low_ll_frame, text="Waiting Time: " + str(self.waittime))
+		self.time_label.pack(padx=15, pady=10)
 		
-		self.change_time_button = Button(self.centralleftframe ,text='Change wait time', width=20, command=self.waittimeChanged)
-		self.change_time_button.pack()
+		self.change_time_button = Button(self.low_lr_frame ,text='Change wait time', width=20, command=self.waittimeChanged)
+		self.change_time_button.pack(padx=10, pady=5)
+		
+		self.bfac_label = Label(self.low_ll_frame, text="BFactor: " + str(self.bfac))
+		self.bfac_label.pack(padx=15, pady=10)
+		
+		self.change_bfac_button = Button(self.low_lr_frame ,text='Change BFactor', width=20, command=self.bfacChanged)
+		self.change_bfac_button.pack(padx=10, pady=5)
 		
 		self.binvar = IntVar()
 		self.binbox = Checkbutton(self.centralleftframe, variable=self.binvar, text="2x2 binning (super-resolution mode only)", command=self.binButtonClicked)

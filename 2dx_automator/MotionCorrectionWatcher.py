@@ -24,6 +24,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.waittime = 30
 		self.binning = 1
 		self.bfac = 150
+		self.mode = 0
 	
 	def file_filter(self, filename):
 		return ((filename.endswith(".mrc")) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
@@ -49,15 +50,25 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 		old_path = os.getcwd()
 		os.chdir("/tmp")
+		
+		# introduce align to first 
+		
 		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac)
 		os.system(motion_command)
+		shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+	
+		if self.mode == 1:
+			motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(0) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac)
+			os.system(motion_command)
+			shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_fullaligned.mrc")
+	
 		os.chdir(old_path)
 		
 		if not os.path.exists(self.infolder + "/dosef_quick"):
 			os.makedirs(self.infolder + "/dosef_quick")
 		
 		if self.binning == 1:
-			shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+			#shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
 			shutil.copyfile("/tmp/mc_ready_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
 			shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
 			shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
@@ -90,7 +101,7 @@ class MotionCorrectionWatcher(WatcherBase):
 				
 				
 		else:
-			shutil.copyfile("/tmp/mc_ready_2x_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+			#shutil.copyfile("/tmp/mc_ready_2x_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
 			shutil.copyfile("/tmp/mc_ready_2x_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
 			shutil.copyfile("/tmp/dosef_quick/mc_ready_2x_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
 			shutil.copyfile("/tmp/dosef_quick/mc_ready_2x_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
@@ -145,6 +156,9 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 	def setBFactor(self, rhs):
 		self.bfac = rhs
+		
+	def setMode(self, rhs):
+		self.mode = rhs
 		
 		
 	def convert_mrc_to_png(self, filename):

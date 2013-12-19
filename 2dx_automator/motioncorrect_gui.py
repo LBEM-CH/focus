@@ -44,6 +44,7 @@ class Auto2dxGUI(Frame):
 		self.listbox.activate(END)
 		self.index_selected = self.count-1
 		self.indexChanged()
+		self.pairModeChanged()
 		
 		
 	def getFolders(self):
@@ -288,6 +289,17 @@ class Auto2dxGUI(Frame):
 			eman_command = "e2display.py " + image_to_show
 			os.system(eman_command)
 		
+	def openFullImageEman(self):
+		i = self.index_selected
+		image_name = self.watcher.getFileCoreName(self.image_names[i])
+		image_to_show = self.output_dir + "/" + image_name + "_fullaligned.mrc"
+		print image_to_show
+		
+		if os.path.exists(image_to_show):
+			eman_command = "e2display.py " + image_to_show
+			os.system(eman_command)
+			
+		
 	def minFrameChanged(self):
 		number = tkSimpleDialog.askinteger("Edit Motion Correct Properties", "First Frame")
 		if number>=0:
@@ -382,15 +394,24 @@ class Auto2dxGUI(Frame):
 	def binButtonClicked(self):
 		self.watcher.setBinning(self.binvar.get()+1)
 		
+		
 	def bfacChanged(self):
 		number = tkSimpleDialog.askinteger("Edit BFactor", "BFactor")
 		if number>=0:
 			self.bfac = number
 			self.bfac_label.configure(text="BFactor: " + str(self.bfac))
 			self.watcher.setBFactor(self.bfac)
+			
+	def pairModeChanged(self):
+		self.watcher.setMode(self.modevar.get())		
+		if self.modevar.get() == 0:
+			self.open_full_button.configure(state=DISABLED)
+		else:
+			self.open_full_button.configure(state=NORMAL)
+			
 	
 	def initUI(self):
-		self.parent.title("Motion Correction GUI (beta_4)")
+		self.parent.title("Motion Correction GUI (beta_5)")
 	
 		self.getFolders()
 		
@@ -422,6 +443,7 @@ class Auto2dxGUI(Frame):
 		self.fod = 2
 		self.waittime = 30
 		self.bfac = 150
+		self.pair_mode = 0
 		
 		self.minframe_label = Label(self.low_ll_frame, text="Starting Frame Number: " + str(self.minframe))
 		self.minframe_label.pack(padx=15, pady=10)
@@ -455,7 +477,11 @@ class Auto2dxGUI(Frame):
 		
 		self.binvar = IntVar()
 		self.binbox = Checkbutton(self.centralleftframe, variable=self.binvar, text="2x2 binning (super-resolution mode only)", command=self.binButtonClicked)
-		self.binbox.pack(pady=8)
+		self.binbox.pack(pady=4)
+		
+		self.modevar = IntVar()
+		self.modebox = Checkbutton(self.centralleftframe, variable=self.modevar, text="Dose pair mode", command=self.pairModeChanged)
+		self.modebox.pack(pady=4)
 		
 		Label(self.centralleftframe, text=" ", height=1).pack()
 		
@@ -497,8 +523,6 @@ class Auto2dxGUI(Frame):
 			self.index_selected = index
 			self.indexChanged()
 			
-		#Label(self.centralleftframe, text=" ", height=2).pack()
-		
 		self.reprocess_button = Button(self.lowleftframe ,text='Reprocess Image', width=40, command=self.reprocessImage)
 		self.reprocess_button.pack(padx=20, pady=5)
 		
@@ -507,8 +531,11 @@ class Auto2dxGUI(Frame):
 		
 		Label(self.centralleftframe, text=" ", height=2).pack()
 		
-		self.open_button = Button(self.lowleftframe ,text='Open Image', width=40, command=self.openImageEman)
-		self.open_button.pack(padx=20, pady=5)
+		self.open_button = Button(self.centralrightframe3 ,text='Open Image', width=20, command=self.openImageEman)
+		self.open_button.pack(padx=20, pady=5, side=BOTTOM)
+	
+		self.open_full_button = Button(self.centralrightframe3 ,text='Open Fulldose Image', width=20, command=self.openFullImageEman)
+		self.open_full_button.pack(padx=20, pady=5, side=BOTTOM)
 	
 		in_folder = self.input_dir
 		out_folder = self.output_dir
@@ -532,7 +559,6 @@ class Auto2dxGUI(Frame):
 		self.image_label = Label(self.centralrightframe2, image=self.default_tkimage)
 		self.image_label.pack(side=LEFT, padx=5, pady=5)
 		
-		
 		self.info_label = Label(self.centralrightframe3, text="Image Staticstics:\n", height=28, width=50)
 		self.info_label.pack()
 		
@@ -542,7 +568,7 @@ class Auto2dxGUI(Frame):
 		self.drift_label.pack(padx=5, pady=5)
 		
 		self.delete_button = Button(self.centralrightframe3, text='Delete Image', width=20, command=self.deleteImage)
-		self.delete_button.pack(padx=20, pady=15, side=BOTTOM)
+		self.delete_button.pack(padx=20, pady=5, side=BOTTOM)
 		
 		self.status = Label(self.parent, text="Automation not running", bd=1, relief=SUNKEN, anchor=W, fg="red")
 		self.status.pack(side=BOTTOM, fill=X)

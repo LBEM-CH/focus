@@ -53,12 +53,17 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 		# introduce align to first 
 		
-		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac)
+		if self.mode == 0:
+			align_to = 1
+		else:
+			align_to = 0
+		
+		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)
 		os.system(motion_command)
 		shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
 	
 		if self.mode == 1:
-			motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(0) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac)
+			motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(0) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)
 			os.system(motion_command)
 			shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_fullaligned.mrc")
 	

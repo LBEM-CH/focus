@@ -112,7 +112,7 @@ fi
 
 # omp-lib
 if [ -f /opt/local/lib/gcc46/libgomp.1.dylib ]; then
-	OMP_LIB= /opt/local/lib/gcc46/libgomp.1.dylib
+	OMP_LIB=/opt/local/lib/gcc46/libgomp.1.dylib
 	echo "Found libgomp.1.dylib in $OMP_LIB"
 else
        if [ -f /usr/local/lib/gcc46/libgomp.1.dylib ]; then

@@ -4,6 +4,8 @@
 # scirpt to change the dylibs of the 2dx and MRC binaries
 #
 # Marcel Arheit
+# 
+# Adapted by Sebastian Scherer
 
 
 if [ $# -lt 1 ]

@@ -32,7 +32,7 @@ class Add2dxImageWatcher(WatcherBase):
 		
 		
 	def write_log(self, filename):
-		image_count = len(read_text_row(self.log_file_name))
+		image_count = len(read_text_row(self.log_file_name)) + 1
 		image_2dx_name = self.outfolder + "/automatic/" + self.protein_name + str(image_count)
 		open(self.log_file_name,"a").write(filename + "\t" + image_2dx_name + "\t" + time.strftime("%c") + '\n')
 	
@@ -58,9 +58,9 @@ class Add2dxImageWatcher(WatcherBase):
 			if not l.startswith("set imagenumber ="):
 				lines_out.append(l)
 			else:
-				number_as_string = str(number+1)
+				number_as_string = str(number)
 				leading_zeros = 10 - len(number_as_string)
-				number_as_string = leading_zeros * "0" + str(number+1)
+				number_as_string = leading_zeros * "0" + str(number)
 				toadd = "set imagenumber = " + '"' + number_as_string + '"'
 				lines_out.append(toadd)
 				print toadd
@@ -75,10 +75,11 @@ class Add2dxImageWatcher(WatcherBase):
 		if not os.path.exists(self.outfolder + "/automatic"):
 			os.makedirs(self.outfolder + "/automatic" )
 			shutil.copyfile( self.outfolder + "/2dx_master.cfg", self.outfolder + "/automatic/2dx_master.cfg" )
-		image_count = self.getImageNumber(filename)
+		image_count = self.getImageNumber(filename) + 1
 		image_2dx_name = self.outfolder + "/automatic/" + self.protein_name + str(image_count)
 		os.makedirs(image_2dx_name)
-		shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + filename )
+		#shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + filename )
+		shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + self.protein_name + str(image_count) + ".mrc" )
 		shutil.copyfile( self.outfolder + "/2dx_master.cfg", image_2dx_name + "/2dx_image.cfg" )
 		
 		self.lock_2dx.acquire()
@@ -133,7 +134,8 @@ class Add2dxImageWatcher(WatcherBase):
 		os.chdir(old_path)
 		self.lock_2dx.release()
 		
-		filename_core = filename.split(".")[0]
+		#filename_core = filename.split(".")[0]
+		filename_core = image_2dx_name.split("/")[-1]
 		dia_folder = image_2dx_name + "/automation_output"
 		os.makedirs(dia_folder)
 		self.copy_image_if_there(image_2dx_name + "/ManualMasking-CCmap.mrc", dia_folder + "/image.mrc")

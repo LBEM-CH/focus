@@ -20,7 +20,7 @@ import datetime
 
 
 n = 508
-n_small = 400
+n_small = 390
 
 import tkSimpleDialog
 		
@@ -86,12 +86,13 @@ def tbox(master):
 			self.msgbox.destroy()
 	return TBOX
 
-	
+
 class Auto2dxGUI(Frame):
 	def __init__(self, parent):
 		Frame.__init__(self, parent, background="white")
 		self.parent = parent
 		self.index_selected = 0
+		self.ref_mode = True
 		self.initUI()	
 		self.resetResultOverview()
 		self.listbox.selection_clear(0, END)
@@ -206,8 +207,10 @@ class Auto2dxGUI(Frame):
 		self.watcher.lock_eman2.acquire()
 		
 		dia_folder = self.image_dirs[i] + "/automation_output"
+		os.makedirs(dia_folder)
 		
-		core_name = self.image_names[i].split(".")[0]
+		#core_name = self.image_names[i].split(".")[0]
+		core_name = self.image_dirs[i].split("/")[-1]
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/ManualMasking-CCmap.mrc", dia_folder + "/image.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/CUT/" + core_name + ".marked.merge.ps.mrc", dia_folder + "/defoci.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/FFTIR/" + core_name + ".red.fft.mrc", dia_folder + "/fft.mrc")
@@ -237,6 +240,73 @@ class Auto2dxGUI(Frame):
 		i = self.index_selected
 		self.updateImages(i)
 		self.indexChanged()
+		
+	def regenerateALLMaps(self):
+		if tkMessageBox.askyesno("Map regeneration", "Do you want to regenerate all image maps?\n\nDo you want to continue?"):
+			for i in range(len(self.image_dirs)):
+				print self.image_dirs[i]
+				dia_folder = self.image_dirs[i] + "/automation_output"
+			
+				if not os.path.exists(dia_folder):
+					continue
+			
+				#core_name = self.image_names[i].split(".")[0]
+				core_name = self.image_dirs[i].split("/")[-1]
+				if os.path.exists(self.image_dirs[i] + "/m" + core_name + "-p1.mrc"):
+					self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
+				else:
+					self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
+				old_path = os.getcwd()
+				os.chdir(dia_folder)
+				if os.path.exists(dia_folder + "/map.mrc"):
+					os.chdir(dia_folder)
+					os.system("e2proc2d.py " + "map.mrc" + " " + "map.png" )
+					os.system("convert " + "map.png " + "map.gif" )
+					os.chdir(old_path)
+				#if os.path.exists(self.image_dirs[i] + "/m" + core_name + "_ref.mrc"):
+				#	self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "_ref.mrc", dia_folder + "/ref.mrc")
+				#elif os.path.exists(self.image_dirs[i] + "/" + core_name + "_ref.mrc"):
+				#	self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "_ref.mrc", dia_folder + "/ref.mrc")
+				#if os.path.exists(dia_folder + "/ref.mrc"):
+				#	os.chdir(dia_folder)
+				#	os.system("e2proc2d.py " + "ref.mrc" + " " + "ref.png" )
+				#	os.system("convert " + "ref.png " + "ref.gif" )
+				#	os.chdir(old_path)
+			self.indexChanged()
+		
+#	def regenerateMaps(self):
+#		i = self.index_selected
+#		dia_folder = self.image_dirs[i] + "/automation_output"
+#		
+#		core_name = self.image_names[i].split(".")[0]
+#		
+#		if os.path.exists(self.image_dirs[i] + "/m" + core_name + "-p1.mrc"):
+#			self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
+#		else:
+#			self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
+#		
+#		old_path = os.getcwd()
+#		os.chdir(dia_folder)
+#		
+#		if os.path.exists(dia_folder + "/map.mrc"):
+#			os.chdir(dia_folder)
+#			os.system("e2proc2d.py " + "map.mrc" + " " + "map.png" )
+#			os.system("convert " + "map.png " + "map.gif" )
+#			os.chdir(old_path)
+#			
+#		if os.path.exists(self.image_dirs[i] + "/m" + core_name + "_ref.mrc"):
+#			self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "_ref.mrc", dia_folder + "/ref.mrc")
+#		elif os.path.exists(self.image_dirs[i] + "/" + core_name + "_ref.mrc"):
+#			self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "_ref.mrc", dia_folder + "/ref.mrc")
+#		
+#		if os.path.exists(dia_folder + "/ref.mrc"):
+#			os.chdir(dia_folder)
+#			os.system("e2proc2d.py " + "ref.mrc" + " " + "ref.png" )
+#			os.system("convert " + "ref.png " + "ref.gif" )
+#			os.chdir(old_path)
+#			
+#		self.indexChanged()
+		
 	
 	def getInfoString(self, folder):
 		config_name = folder + "/2dx_image.cfg"
@@ -408,6 +478,20 @@ class Auto2dxGUI(Frame):
 		else:
 			self.map_label.configure(image=self.default_tkimage_small)
 		
+		
+#		if self.ref_mode:
+#			if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/ref.gif"):
+#				self.ref_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/ref.gif").resize((n_small,n_small),Image.ANTIALIAS))
+#				self.ref_label.configure(image=self.ref_image)
+#			else:
+#				self.ref_label.configure(image=self.default_tkimage_small)
+#		else:
+#			if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/map.gif"):
+#				self.ref_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/map.gif").resize((n_small,n_small),Image.ANTIALIAS))
+#				self.ref_label.configure(image=self.ref_image)
+#			else:
+#				self.ref_label.configure(image=self.default_tkimage_small)
+		
 		if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/defoci_axis.gif"):
 			self.def_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/defoci_axis.gif").resize((n,n),Image.ANTIALIAS))
 			self.def_label.configure(image=self.def_image)
@@ -432,8 +516,10 @@ class Auto2dxGUI(Frame):
 		skip_file = self.image_dirs[self.index_selected] + "/automation_scipt_flag"
 		if os.path.exists(skip_file):
 			self.usebox.deselect()
+			self.info_label.configure(state=DISABLED)
 		else:
 			self.usebox.select()
+			self.info_label.configure(state=NORMAL)
 
 	
 	def check_for_new_images(self):
@@ -456,58 +542,100 @@ class Auto2dxGUI(Frame):
 		if tkMessageBox.askyesno("Stop Automation", "Do you realy want to stop the automation?"):
 			self.is_running = False
 			self.status.configure(text="Automation not running", fg="red")
+			
+#	def automerge(self):
+#		print "automerge"
+#		i = self.index_selected
+#		tmp = self.image_dirs[i].split("/")
+#		image_dir_relative = tmp[-2] + "/" +  tmp[-1]
+#		print image_dir_relative
+#		
+#		dir_file_name = self.output_dir + "/merge/2dx_automerge_dirfile.dat"
+#		dirfile = open(dir_file_name, "w")
+#		dirfile.write(image_dir_relative + "\n")
+#		dirfile.close()
+#		
+#		command = "2dx_merge " + self.output_dir + " 2dx_refine " + "2dx_automerge_dirfile.dat"
+#		print command
+#		os.system(command)
+#		
+#		command = "2dx_merge " + self.output_dir + " 2dx_generateImageMaps " + "2dx_automerge_dirfile.dat"
+#		print command
+#		os.system(command)
 		
-	def reprocess2dx(self, i, line):
+	def reprocess2dx(self, i):
 		self.watcher.lock_2dx.acquire()
 		old_path = os.getcwd()
 		os.chdir(self.watcher.outfolder)
 		
-		command_2dx_image = "2dx_image " + self.image_dirs[i] + " '" + '"2dx_initialize"' + "'" 
+		image_count = i + 1
+		protein_name = "auto_"
+		
+		image_2dx_name = self.watcher.outfolder + "/automatic/" + protein_name + str(image_count)
+		os.makedirs(image_2dx_name)
+		#shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + filename )
+		shutil.copyfile( self.watcher.infolder + "/" + self.image_names[i], image_2dx_name + "/" + protein_name + str(image_count) + ".mrc" )
+		shutil.copyfile( self.watcher.outfolder + "/2dx_master.cfg", image_2dx_name + "/2dx_image.cfg" )
+		
+		
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize_files"' + "'" 
 		os.system(command_2dx_image)
 		
-		command_2dx_image = "2dx_image " + self.image_dirs[i] + " '" + '"2dx_initialize_files"' + "'" 
+		self.watcher.set_image_number(image_2dx_name, image_count)
+		
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_initialize"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_initialize_files"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_fftrans"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getDefTilt"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getLattice"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getspots"' + "'" 
 		os.system(command_2dx_image)
 		
-		f = open(self.image_dirs[i] + "/2dx_image.cfg", "r")
-		lines = f.readlines()
-		lines_out = []
-		for l in lines:
-			if not l.startswith("set imagenumber ="):
-				lines_out.append(l)
-			else:
-				lines_out.append(line)
-		f.close()
+		self.watcher.setDoMask( image_2dx_name )
 		
-		f_out = open(self.image_dirs[i] + "/2dx_image.cfg", "w")
-		f_out.writelines(lines_out)
-		f_out.close()
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_unbend2"' + "'" 
+		os.system(command_2dx_image)
 		
-		command_2dx_image = "2dx_image " + self.image_dirs[i] + " '" + '"*"' + "'" 
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_fftrans"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getspots"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_unbend2"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_applyCTF"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_generateMAP"' + "'" 
 		os.system(command_2dx_image)
 		
 		os.chdir(old_path)
 		self.watcher.lock_2dx.release()
 		
 	def reprocessCaller(self,i):
-		f = open(self.image_dirs[i] + "/2dx_image.cfg", "r")
-		lines = f.readlines()
-		lines_out = []
-		for l in lines:
-			if l.startswith("set imagenumber ="):
-				keep_line = l
-				break
-				
-		print keep_line
-		f.close()
+		if os.path.exists(self.image_dirs[i]):
+			shutil.rmtree(self.image_dirs[i])
 		
-		config_name = self.image_dirs[i] + "/2dx_image.cfg"
-		if os.path.exists(config_name):
-			os.remove(config_name)
-		
-		self.watcher.copy_image_if_there(self.image_dirs[i] + "/../2dx_master.cfg", config_name)
-		
-		self.reprocess2dx(i, keep_line)
+		self.reprocess2dx(i)
 		self.updateImages(i)
+		
+#	def changeMapMode(self):
+#		self.ref_mode = not self.ref_mode
+#		self.indexChanged()
+#		print "change ref/map mode"
 		
 		
 	def reprocessImage(self):
@@ -521,6 +649,7 @@ class Auto2dxGUI(Frame):
 		self.indexChanged()
 		
 		thread.start_new_thread(self.reprocessCaller, (i,))
+		#self.reprocessCaller(i)
 		
 	
 	def useButtonClicked(self):
@@ -534,6 +663,7 @@ class Auto2dxGUI(Frame):
 				skip = open(skip_file, "w")
 				skip.write("This image is skipped by the 2dx_automator\n")
 				skip.close()
+		self.indexChanged()
 
 	def showIQ(self):
 		i = self.index_selected
@@ -542,7 +672,7 @@ class Auto2dxGUI(Frame):
 		
 		
 	def initUI(self):
-		self.parent.title("2dx_automator GUI (alpha)")
+		self.parent.title("2dx_automator GUI (alpha_2)")
 	
 		self.getFolders()
 		
@@ -597,8 +727,17 @@ class Auto2dxGUI(Frame):
 		self.comment_button = Button(self.lowleftframe ,text='Edit Comment', width=40, command=self.editComment)
 		self.comment_button.pack(padx=20, pady=5)
 		
-		self.reload_button = Button(self.lowleftframe ,text='Regenerating Diagnostic Images', width=40, command=self.regenerateDiaImages)
+		self.reload_button = Button(self.lowleftframe ,text='Regenerate Diagnostic Images', width=40, command=self.regenerateDiaImages)
 		self.reload_button.pack(padx=20, pady=5)
+		
+#		self.reload_maps_button = Button(self.lowleftframe ,text='Regenerate Maps', width=40, command=self.regenerateMaps)
+#		self.reload_maps_button.pack(padx=20, pady=5)
+		
+#		self.merge_button = Button(self.lowleftframe ,text='Automerge', width=40, command=self.automerge)
+#		self.merge_button.pack(padx=20, pady=5)
+		
+		self.reload_maps_button = Button(self.lowleftframe ,text='Regenerate ALL Maps', width=40, command=self.regenerateALLMaps)
+		self.reload_maps_button.pack(padx=20, pady=5)
 		
 		self.reprocess_button = Button(self.lowleftframe ,text='Reprocess Image', width=40, command=self.reprocessImage)
 		self.reprocess_button.pack(padx=20, pady=5)
@@ -606,7 +745,6 @@ class Auto2dxGUI(Frame):
 		self.box_test = tbox(self)
 		
 		def test_func():
-			print "huhu"
 			self.getProjectStat()
 			self.box_test("asdf")
 		
@@ -644,10 +782,13 @@ class Auto2dxGUI(Frame):
 		
 		self.default_image_small = Image.new("RGB", (n_small,n_small), "white")
 		self.default_tkimage_small = ImageTk.PhotoImage(self.default_image_small)
+		
+		#self.ref_label = Label(self.centralrightframe3, image=self.default_tkimage_small)
+		#self.ref_label.pack(side=BOTTOM, padx=40, pady=10)
+		
 		self.map_label = Label(self.centralrightframe3, image=self.default_tkimage_small)
-		self.map_label.pack(side=RIGHT, padx=5, pady=5)
-		
-		
+		self.map_label.pack(side=BOTTOM, padx=40, pady=5)
+				
 		self.status = Label(self.parent, text="Automation not running", bd=1, relief=SUNKEN, anchor=W, fg="red")
 		self.status.pack(side=BOTTOM, fill=X)
 		
@@ -660,7 +801,13 @@ class Auto2dxGUI(Frame):
 def main():
 	root = Tk()
 	root.geometry("1900x1200+0+0")
+	
 	app = Auto2dxGUI(root)
+	
+#	def greet(*ignore): app.changeMapMode()
+#	root.bind('<Shift_L>', greet)
+#	root.bind('<Shift_R>', greet)
+	
 	root.mainloop()
 	
 if __name__ == '__main__':

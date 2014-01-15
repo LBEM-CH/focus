@@ -71,7 +71,7 @@ bool restoreDefaultSelection(QDir mergeDir)
 
 bool writeSelection2File(QList<QString> selection, const QString fileName, QString projectPath)
 {
-    std::cout << "project path" << projectPath.toStdString() << std::endl;
+    std::cout << "project-path " << projectPath.toStdString() << std::endl;
     QFile file(fileName);
     if (file.open(QFile::WriteOnly | QFile::Text))
     {

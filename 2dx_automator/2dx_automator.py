@@ -207,6 +207,10 @@ class Auto2dxGUI(Frame):
 		self.watcher.lock_eman2.acquire()
 		
 		dia_folder = self.image_dirs[i] + "/automation_output"
+		
+		if os.path.exists(dia_folder):
+			shutil.rmtree(dia_folder)
+				
 		os.makedirs(dia_folder)
 		
 		#core_name = self.image_names[i].split(".")[0]

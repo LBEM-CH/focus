@@ -244,7 +244,7 @@ TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID 200 200 200
 XYZLIM 0 199 0 199 0 199
 RHOLIM 250.0
-HKLMAX 50 50 50
+HKLMAX 99 99 99
 END
 eot
   #
@@ -265,7 +265,7 @@ TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID 200 200 200
 XYZLIM 0 199 0 199 0 199
 RHOLIM 250.0
-HKLMAX 50 50 50
+HKLMAX 99 99 99
 END
 eot
   #
@@ -283,10 +283,10 @@ SCALE F1 ${scale} ${tempfac}
 SYMMETRY ${CCP4_SYM}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID 126 126 126
-XYZLIM 0 125 0 125 0 125
+GRID 220 220 220
+XYZLIM 0 220 0 220 0 220
 RHOLIM 250.0
-HKLMAX 50 50 50
+HKLMAX 100 100 100
 END
 eot
   #

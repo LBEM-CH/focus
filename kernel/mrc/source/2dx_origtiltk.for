@@ -1749,7 +1749,9 @@ C---------------------------------------------------------------------------
 C  INSERT HERE FOR BEAMTILT REFINEMENT.
 C---------------------------------------------------------------------------
 C
+
       IF (NBEAM) THEN
+        PRINT *, "::HELLO FROM BEAMTILT IF!"
         CALL BEAMTILTA
         WRITE(6,355)ORIGH+SHMIN,ORIGK+SKMIN,TLTH+TILTH,TLTK+TILTK
 355     FORMAT(' AGGREGATE TOTAL OF PARAMETERS --- INPUT PLUS REFINED'/
@@ -1771,6 +1773,7 @@ C
 CHEN
 C
       ENDIF
+      
 C
 C------------------------------------------------------------------------
 C  INSERT HERE FOR TILTANGLE/AXIS REFINEMENT.
@@ -1986,7 +1989,8 @@ C
      .    cline1(1:k)
        endif
 C
-      if(ibeamtiltref.eq.1)then
+C      if(ibeamtiltref.eq.1)then
+       if ( NBEAM ) then
         write(cline1,'(2F12.3)')HTHLT,HTKLT
         call inkomma(cline1,k)
         if(LOGOUTPUT)then

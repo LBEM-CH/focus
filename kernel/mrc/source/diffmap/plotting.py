@@ -233,6 +233,8 @@ def plotContouredMap(contour, diffmap, title, options):
         if title and not map_only:
 	    plt.title(title)
         plt.hold(True)
+        # used for syn data to be aligend like real CitS
+        #diffmap = np.rot90(diffmap)
 	plt.imshow(diffmap, origin='upper', norm=norm)
         ax = plt.axes()
         if plot_scalebar:
@@ -243,6 +245,8 @@ def plotContouredMap(contour, diffmap, title, options):
             plt.set_cmap(options['colormap'])
         if not map_only:
             plt.colorbar()
+        # used for syn data to be aligend like real CitS
+        #contour = np.rot90(contour)
 	plt.contour(contour, [0], colors='b')
 	plt.hold(False)
         filename = title+'.pdf'

@@ -28,7 +28,7 @@ def get_conformation_array(image_list):
     conformation_array = np.array(image_list)
     return conformation_array
 
-def determine_significance(conformation1, conformation2, confidence=99.0, method="t-Test"):
+def determine_significance(conformation1, conformation2, confidence=99.0, method="student"):
     if method == "welch":
         equal_variances = False
     else:
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     usage = 'usage: %prog [options] maps_dir1 maps_dir2'
     parser = OptionParser(usage=usage)
     parser.add_option("-m", "--method", 
-            default="t-test", 
+            default="student", 
             help="method used to determine the signifincance of the conformational differences: t-test or welch")
     parser.add_option("-c", "--confidence",
             type=float, default=99.0,

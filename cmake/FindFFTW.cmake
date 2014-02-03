@@ -21,17 +21,19 @@ SET(FFTW_FOUND 0)
 IF(USE_FFTWD OR USE_FFTWF)
 
   SET(FFTW_INC_SEARCHPATH
-    /sw/include
     /usr/include
+    /sw/include
     /usr/local/include
     /usr/include/fftw
     /usr/local/include/fftw
     /opt/local/include
     /programs/i386-mac/fftw/3.0.1/include
     /programs/i386-linux/fftw/3.3/include
+    $ENV{FFTW3_ROOT_DIR}/include
   )
 
   FIND_PATH(FFTW_INCLUDE_PATH fftw3.h ${FFTW_INC_SEARCHPATH})
+  MESSAGE(found: ${FFTW_INCLUDE_PATH})
 
   IF(FFTW_INCLUDE_PATH)
     SET(FFTW_INCLUDE ${FFTW_INCLUDE_PATH})
@@ -44,6 +46,7 @@ IF(USE_FFTWD OR USE_FFTWF)
   GET_FILENAME_COMPONENT(FFTW_INSTALL_BASE_PATH ${FFTW_INCLUDE_PATH} PATH)
 
   SET(FFTW_LIB_SEARCHPATH
+    $ENV{FFTW3_ROOT_DIR}/lib64
     ${FFTW_INSTALL_BASE_PATH}/lib
     /usr/lib/fftw
     /usr/local/lib/fftw

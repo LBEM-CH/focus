@@ -1,0 +1,166 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: 2dx Consistency Refine Script                                      #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 05/19/2007                                             #
+# Last Modification: 05/19/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 203
+#
+# MANUAL: Single Particle Refinement (still under construction)
+#
+# DISPLAY: particle_size_sp2dx
+# DISPLAY: invert_sp2dx
+# DISPLAY: maximum_mag_sp2dx
+# DISPLAY: symmetry_sp2dx
+# DISPLAY: is_glpf_sp2dx
+#
+# DISPLAY: projection_method_sp2dx
+# DISPLAY: cache_projections_sp2dx
+# DISPLAY: parallel_projection_sp2dx
+# DISPLAY: back_projection_method_sp2dx
+# DISPLAY: local_ctf_sp2dx
+# DISPLAY: local_ctf_ampcon_sp2dx
+# DISPLAY: hist_equal_sp2dx
+# DISPLAY: sym_inplane_sp2dx
+# DISPLAY: max_inplane_tltang_sp2dx
+# DISPLAY: particle_selection_method_sp2dx
+# DISPLAY: number_particles_sp2dx
+# DISPLAY: percent_particles_sp2dx
+# DISPLAY: cc_window_size_sp2dx
+# DISPLAY: cc_freq_range_sp2dx
+#
+# DISPLAY: cons_click_number_sp2dx
+# DISPLAY: cons_click_size_sp2dx
+# DISPLAY: cons_reuse_sp2dx
+# DISPLAY: cons_cont_only_sp2dx
+#
+# DISPLAY: lp_volume_filter_sp2dx
+#
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set particle_size_sp2dx = ""
+set invert_sp2dx = ""
+set maximum_mag_sp2dx = ""
+set symmetry_sp2dx = ""
+set is_glpf_sp2dx = ""
+#
+set max_iteration_sp2dx = ""
+set min_angular_change_sp2dx = ""
+set refinement_method_sp2dx = ""
+set cc_window_size_sp2dx = ""
+set cc_freq_range_sp2dx = ""
+set projection_method_sp2dx = ""
+set cache_projections_sp2dx = "0"
+set parallel_projection_sp2dx = "0"
+set back_projection_method_sp2dx = ""
+set local_ctf_sp2dx = ""
+set local_ctf_ampcon_sp2dx = ""
+set hist_equal_sp2dx = ""
+set sym_inplane_sp2dx = ""
+set max_inplane_tltang_sp2dx = ""
+set particle_selection_method_sp2dx = ""
+set number_particles_sp2dx = ""
+set percent_particles_sp2dx = ""
+set angle_sampling_method_sp2dx = ""
+set sampling_ang1_sp2dx = ""
+set sampling_ang2_sp2dx = ""
+set sampling_ang3_sp2dx = ""
+set missing_cone_sp2dx = ""
+#
+set particle_masking_sp2dx = "0"
+set particle_masking_params_sp2dx = ""
+set projection_masking_sp2dx = "0"
+set projection_masking_params_sp2dx = ""
+set reconstruction_masking_sp2dx = "0"
+set reconstruction_masking_r_params_sp2dx = ""
+set reconstruction_masking_h_params_sp2dx = ""
+set reconstruction_final_masking_sp2dx = "0"
+set reconstruction_final_masking_r_params_sp2dx = ""
+set reconstruction_final_masking_h_params_sp2dx = ""
+#
+set lp_particle_filter_sp2dx = ""
+set hp_particle_filter_sp2dx = ""
+set lp_projection_filter_sp2dx = ""
+set lp_volume_filter_sp2dx = ""
+#
+set cons_click_number_sp2dx = ""
+set cons_click_size_sp2dx = "" 
+set cons_reuse_sp2dx = "" 
+set cons_cont_only_sp2dx = "" 
+#
+#$end_vars
+
+set scriptname = "SingleParticle_CC_cons_refine"
+
+echo "<<@progress: 1>>"
+
+\rm -f LOGS/${scriptname}.results
+echo "<<@evaluate>>"
+
+if ( ${invert_sp2dx} == 'y' ) then
+	set b_invert_sp2dx = "1"
+else
+	set b_invert_sp2dx = "0"
+endif
+
+source ${proc_2dx}/2dx_makedirs 
+\rm -f SCRATCH/2dx_merge_dirfile_oneline.dat
+\rm -f SCRATCH/2dx_SP_convergence.txt
+\rm -f container_stat.txt
+
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#set dirstack = `pwd`
+#echo $dirstack
+
+echo "set called now"
+#rm mergevars_written_to_file.txt
+set > mergevars_written_to_file.txt
+
+set olddir = `pwd`
+
+foreach dirfile (${dirlist}) 
+	echo "::Extracting profile in ${dirfile}"
+	cd ../${dirfile}
+	cp `ls -1 *.gz` cc_profile.dat.gz
+	gunzip -f cc_profile.dat.gz
+	#ls *.mrc
+	cd ${olddir}
+end
+
+set checkfirst = "y"
+foreach dirfile (${dirlist})
+	if ( ${checkfirst} == 'y' ) then
+		set refimage = "${dirfile}"
+		set checkfirst = "n"
+	endif
+end
+
+set checkfirst = "y"
+echo "::REF: ${refimage}"
+foreach dirfile (${dirlist})
+	if ( ${checkfirst} == 'y' ) then
+		set checkfirst = "n"
+	else
+		echo "::Working on in ${dirfile} with ${refimage} as reference"
+		${bin_2dx}/2dx_singleparticle/2dx_ConsRefine.exe --ReferenceImage ${refimage} --RefineImage ${dirfile}
+	endif
+end
+
+
+
+
+
+echo "<<@progress: 100>>"
+

@@ -17,8 +17,18 @@ IF( APPLE )
 	# for 64bit us the follwing line
 	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386;ppc64;x86_64) 
 	#to be able to use the QT Carbon 32 bit
-	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386) 
+	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386)
 ENDIF( APPLE )
+
+# C++ Compiler -----------------------------------------------------------------
+if(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")
+	#set(CMAKE_CXX_FLAGS "-openmp -O3 -xhost -no-prec-div -opt-prefetch -unroll-aggressive -m64")
+	set(CMAKE_CXX_FLAGS "-openmp -O3 -xhost")
+	#set(CMAKE_CXX_FLAGS "-openmp -O3 -xhost -ipo -fast -xavx -no-prec-div -unroll")
+	add_definitions( -DUSE_CILK )
+else(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")
+	set(CMAKE_CXX_FLAGS "-fopenmp -O3 -funroll-loops -W -Waddress -Wchar-subscripts -Wcomment -Wformat -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized  -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wvolatile-register-var -Wno-long-long -Wextra")
+endif(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")
 
 # Libraries to use ------------------------------------------------------------
 set(USE_FFTWF TRUE)
@@ -43,6 +53,9 @@ if(OPENGL_FOUND)
         SET(2DX_MERGE_LIBRARIES ${2DX_MERGE_LIBRARIES} ${OPENGL_LIBRARIES})
 endif(OPENGL_FOUND)
 
+INCLUDE_DIRECTORIES("../kernel/mrc/source/2dx_single_particle_lib")
+INCLUDE_DIRECTORIES("../kernel/mrc/source/2dx_single_particle_lib/eman2/libEM")
+
 # Header files -----------------------------------------------------------------
 if(NOT DEFINED 2DX_INCLUDE_DIR)
         set(2DX_INCLUDE_DIR ../include CACHE INTERNAL "the 2dx include dir")
@@ -53,6 +66,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 if(APPLE)
 	include_directories(/opt/local/include)
 endif(APPLE)
+
 
 # Source files -----------------------------------------------------------------
 # takes all files ending with .cpp
@@ -73,6 +87,7 @@ set(MOC_HDRS
 	albumView.h
 	albumViewer.h
 	imageAlbum.h
+        eulerWindow.h
 	importBox.h  
 	importTool.h  
 	mainWindow.h  
@@ -80,22 +95,19 @@ set(MOC_HDRS
 	projectModel.h  
 	resultsData.h  
 	resultsModule.h  
-	translator.h  
+	translator.h
 	)
 ###############################################################################
 set(CMAKE_DEBUG_POSTFIX -dbg)
 
 
 # generate moc files
-QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
+QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
 
 # generate headers from the ui files
 QT4_WRAP_UI(2DX_MERGE_UI_HDRS ${2DX_MERGE_UI_FORMS})
 # to wrap thethe UI files 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-
-
 
 message(STATUS "Creating: ${EXETITLE}")
 
@@ -130,7 +142,30 @@ get_propagate_deps(conf widgets mrcImage extentions)
 #
 # luckily FIND_PACKAGE prepared 2DX_MERGE_LIBRARIES variable for us:
 #
+
+find_package(Boost COMPONENTS serialization system filesystem program_options REQUIRED)
+
+
 target_link_libraries(${EXETITLE} conf widgets mrcImage extentions ${2DX_MERGE_LIBRARIES})
+
+#target_link_libraries(${EXETITLE} ${CMAKE_CURRENT_BINARY_DIR}/../kernel/mrc/source/2dx_single_particle_lib/libSingleParticle2dx.a)
+#target_link_libraries(${EXETITLE} ${CMAKE_CURRENT_BINARY_DIR}/../kernel/mrc/source/2dx_single_particle_lib/eman2/libEM/libEM2.a)
+
+#if (ENABLE_CUDA)
+#	target_link_libraries(${EXETITLE} ${CMAKE_CURRENT_BINARY_DIR}/../kernel/mrc/source/2dx_single_particle_lib/libSingleParticleCUDA2dx.a)
+#	target_link_libraries(${EXETITLE} /usr/local/cuda/lib64/libcudart.so.5.5)
+#	target_link_libraries(${EXETITLE} /usr/local/cuda/lib64/libcufft.so)
+#endif(ENABLE_CUDA)
+
+#target_link_libraries(${EXETITLE} ${GSL_LIBRARY})
+#target_link_libraries(${EXETITLE} ${GSL_CBLAS_LIBRARY})
+#target_link_libraries(${EXETITLE} ${TIFF_LIBRARY})
+#target_link_libraries(${EXETITLE} ${HDF5_LIBRARY})
+#target_link_libraries(${EXETITLE} ${PNG_LIBRARY})
+#target_link_libraries(${EXETITLE} ${JPEG_LIBRARY})
+#target_link_libraries(${EXETITLE} ${Boost_LIBRARIES})
+
+
  
 #--------------------------------------------------------------------------------
 # Now the installation stuff below

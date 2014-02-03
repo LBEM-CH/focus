@@ -1,0 +1,110 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Prepare image containers for consistency check                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 02/27/2013                                             #
+# Last Modification: 02/27/2013                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 10
+#
+# MANUAL: Single Particle Refinement (still under construction)
+#
+# DISPLAY: particle_size_sp2dx
+# DISPLAY: invert_sp2dx
+# DISPLAY: maximum_mag_sp2dx
+# DISPLAY: symmetry_sp2dx
+# DISPLAY: is_glpf_sp2dx
+#
+# DISPLAY: local_ctf_sp2dx
+# DISPLAY: local_ctf_ampcon_sp2dx
+# DISPLAY: hist_equal_sp2dx
+# DISPLAY: sym_inplane_sp2dx
+# DISPLAY: max_inplane_tltang_sp2dx
+# DISPLAY: particle_selection_method_consp_sp2dx
+# DISPLAY: number_particles_consp_sp2dx
+# DISPLAY: percent_particles_consp_sp2dx
+# DISPLAY: particle_masking_sp2dx
+# DISPLAY: particle_masking_params_sp2dx
+# DISPLAY: hp_particle_filter_sp2dx
+#
+#
+#$end_local_vars
+#
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set particle_size_sp2dx = ""
+set invert_sp2dx = ""
+set maximum_mag_sp2dx = ""
+set symmetry_sp2dx = ""
+set is_glpf_sp2dx = ""
+#
+set local_ctf_sp2dx = ""
+set local_ctf_ampcon_sp2dx = ""
+set hist_equal_sp2dx = ""
+set sym_inplane_sp2dx = ""
+set max_inplane_tltang_sp2dx = ""
+set particle_selection_method_consp_sp2dx = ""
+set number_particles_consp_sp2dx = ""
+set percent_particles_consp_sp2dx = ""
+set particle_masking_sp2dx = ""
+set particle_masking_params_sp2dx = ""
+set hp_particle_filter_sp2dx = ""
+#
+#$end_vars
+
+set scriptname = "PrepareConsCheckContainers"
+
+set particle_selection_method_incharge = $particle_selection_method_consp_sp2dx
+set number_particles_incharge = $number_particles_consp_sp2dx
+set percent_particles_incharge = $percent_particles_consp_sp2dx
+
+echo "<<@progress: 1>>"
+
+
+\rm -f LOGS/${scriptname}.results
+echo "<<@evaluate>>"
+
+if ( ${invert_sp2dx} == 'y' ) then
+	set b_invert_sp2dx = "1"
+else
+	set b_invert_sp2dx = "0"
+endif
+
+source ${proc_2dx}/2dx_makedirs 
+\rm -f SCRATCH/2dx_merge_dirfile_oneline.dat
+\rm -f SCRATCH/2dx_SP_convergence.txt
+\rm -f container_stat.txt
+
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#set dirstack = `pwd`
+#echo $dirstack
+
+echo "set called now"
+#rm mergevars_written_to_file.txt
+set > mergevars_written_to_file.txt
+
+set olddir = `pwd`
+
+foreach dirfile (${dirlist}) 
+	echo "::Extracting profile in ${dirfile}"
+	cd ../${dirfile}
+	cp `ls -1 *.gz` cc_profile.dat.gz
+	gunzip -f cc_profile.dat.gz
+	#ls *.mrc
+	cd ${olddir}
+end
+
+time ${bin_2dx}/2dx_singleparticle/2dx_cons_prepare.exe
+
+
+echo "<<@progress: 100>>"
+

@@ -45,8 +45,9 @@ elseif(Fortran_COMPILER_NAME STREQUAL "f95")
 	endif(APPLE)
 elseif(Fortran_COMPILER_NAME STREQUAL "ifort")
 	#ifort
-	LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
-	set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -axN -w -132 -cxxlib")
+	#LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
+	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -w -132 -cxxlib")
+	#set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -axN -w -132 -cxxlib")
 elseif (Fortran_COMPILER_NAME STREQUAL "g77")
 	# g77
   	set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -m32")
@@ -106,7 +107,7 @@ set(SOURCES_FILE ${CMAKE_CURRENT_BINARY_DIR}/sources.cmake)
 
 ################################################################################
 # Libraries --------------------------------------------------------------------i
-set(LOCAL_LIB_DIR ../lib)
+#set(LOCAL_LIB_DIR ../lib)
 list(APPEND LOCAL_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a ${LOCAL_LIB_DIR}/libim2k.a ${LOCAL_LIB_DIR}/libmisc.a ${LOCAL_LIB_DIR}/libgen.a ${LOCAL_LIB_DIR}/libplot2k.a ${LOCAL_LIB_DIR}/libfft.a  ${LOCAL_LIB_DIR}/libconv.a)
 
 
@@ -122,7 +123,7 @@ set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -I${CMAKE_CURREN
 
 # fsplit -----------------------------------------------------------------------
 set(FSPLIT_EXE fsplit)
-set(FSPLIT_COMMAND "./fsplit")
+set(FSPLIT_COMMAND ${FSPLIT_EXE})
 add_executable(${FSPLIT_EXE} ${FSPLIT_SRC})
 
 function(did_lib_sources_change RETURN_VALUE LIB SOURCES)

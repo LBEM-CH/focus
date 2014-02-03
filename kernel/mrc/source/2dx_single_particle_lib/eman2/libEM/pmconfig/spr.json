@@ -1,0 +1,357 @@
+/* JSON file to configure the project manager SPR mode */
+/* The ICON string needs to correspond to a dict key listed in the PM */
+/* The available keys can be found by browsing the JSON files of looking at e2 projectmanager.py */ 
+[
+  {
+    "ICON": "single_image", 
+    "TABLE": "EMRawDataTable(withmodal=False,multiselect=True)", 
+    "NAME": "Raw Data", 
+    "CHILDREN": [
+      {
+        "ICON": "single_image", 
+        "MODE": "eval",
+        "PROGRAM": "e2evalimage.py", 
+        "WIZARD":"/lib/pmconfig/evalrawdata.json", 
+        "NAME": "Evaluate & Import Micrographs", 
+        "CHILDREN": []
+      },
+      {
+        "ICON": "single_image", 
+        "MODE": "filter",
+        "PROGRAM": "e2rawdata.py", 
+        "WIZARD":"/lib/pmconfig/rawdata.json",
+        "NAME": "Import Micrographs", 
+        "CHILDREN": []
+      }
+    ]
+  }, 
+  {
+    "ICON": "green_boxes", 
+    "TABLE": "EMParticlesTable(withmodal=False,multiselect=True)", 
+    "NAME": "Particles", 
+    "CHILDREN": [
+      {
+        "ICON": "green_boxes", 
+        "MODE": "boxing",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2boxer",
+        "PROGRAM": "e2boxer.py", 
+        "WIZARD":"/lib/pmconfig/boxer.json", 
+        "NAME": "Interactive Boxing-  e2boxer", 
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "green_boxes",
+        "MODE": "extraction",
+        "EXPERT": 1, 
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2boxer",
+        "PROGRAM": "e2boxer.py", 
+        "WIZARD":"/lib/pmconfig/boxergo.json", 
+        "NAME": "Generate Output -e2boxer", 
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "green_boxes",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2RCTboxer",
+        "MODE": "boxing",
+        "PROGRAM": "e2RCTboxer.py", 
+        "WIZARD":"/lib/pmconfig/RCTboxer.json", 
+        "NAME": "Tilt Pair Boxing-  e2RCTboxer", 
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "green_boxes",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2RCTboxer",
+        "MODE": "extraction",
+        "EXPERT": 1,
+        "PROGRAM": "e2RCTboxer.py", 
+        "WIZARD":"/lib/pmconfig/RCTboxergo.json", 
+        "NAME": "Generate Output -e2RCTboxer", 
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "green_boxes", 
+	"MODE": "parts", 
+        "PROGRAM": "e2import.py", 
+        "WIZARD":"/lib/pmconfig/particleimport.json", 
+        "NAME": "Particle Import -e2import.py", 
+        "CHILDREN": []
+      }
+    ]
+  }, 
+  {
+    "ICON": "ctf", 
+    "TABLE": "EMCTFcorrectedParticlesTable(withmodal=False,multiselect=True)", 
+    "NAME": "CTF", 
+    "CHILDREN": [
+      {
+        "ICON": "ctf", 
+        "PROGRAM": "e2ctf.py",
+        "MODE": "autofit",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2ctf",
+        "WIZARD":"/lib/pmconfig/ctfautofit.json", 
+        "NAME": "Automated Fitting -e2ctf", 
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "ctf", 
+        "PROGRAM": "e2ctf.py",
+	"MODE": "tuning", 
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2ctf",
+        "WIZARD":"/lib/pmconfig/ctftuning.json", 
+        "NAME": "Interactive Tuning -e2ctf", 
+        "CHILDREN": []
+      },
+      {
+        "ICON": "ctf", 
+        "PROGRAM": "e2ctf.py", 
+        "MODE": "gensf",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2ctf",
+        "WIZARD":"/lib/pmconfig/ctfsf.json", 
+        "NAME": "Generate Structure Factor - e2ctf", 
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      },
+      {
+        "ICON": "ctf", 
+        "PROGRAM": "e2ctf.py", 
+        "MODE": "genoutp",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2ctf",
+        "WIZARD":"/lib/pmconfig/ctfgo.json", 
+        "NAME": "Generate Output - e2ctf", 
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      }
+    ]
+  }, 
+  {
+    "ICON": "multiple_images", 
+    "TABLE": "EMSetsTable(withmodal=False,multiselect=True)", 
+    "NAME": "Particle Sets", 
+    "CHILDREN": [
+      {
+        "ICON": "multiple_images", 
+        "PROGRAM": "e2buildsets.py", 
+        "NAME": "Build Particle Sets", 
+        "WIZARD":"/lib/pmconfig/buildsets.json",
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "multiple_images", 
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2evalparticles",
+        "PROGRAM": "e2evalparticles.py", 
+        "NAME": "Evaluate Particle Sets",
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      }
+    ]
+  }, 
+  {
+    "ICON": "web", 
+    "TABLE": "EMRefine2dTable(withmodal=False,multiselect=False)", 
+    "NAME": "Reference Free Class Averages", 
+    "CHILDREN": [
+      {
+        "ICON": "web",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2refine2d",
+        "PROGRAM": "e2refine2d.py", 
+        "NAME": "Generate Classes - e2refine2d", 
+        "CHILDREN": []
+      },
+      {
+	"ICON": "single_image",
+	"PROGRAM":"e2refinetorelion2d.py",
+	"WIZARD":"/lib/pmconfig/relion2d.json",
+	"NAME": "Relion 2D Maximum Likelihood",
+	"NOTELEVEL": "1",
+	"CHILDREN": []
+      }
+    ]
+  }, 
+  {
+    "ICON": "single_image_3d", 
+    "TABLE": "EMModelsTable(withmodal=False,multiselect=False)", 
+    "NAME": "Initial Model", 
+    "CHILDREN": [
+      {
+        "ICON": "single_image_3d",
+        "EXPERT": 1,
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2initialmodel", 
+        "PROGRAM": "e2initialmodel.py", 
+        "NAME": "Make Model - e2initialmodel", 
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      },
+      {
+        "ICON": "single_image_3d",
+        "EXPERT": 1,
+        "WIZARD":"/lib/pmconfig/montecarlo.json",
+        "PROGRAM": "e2montecarlorecon.py", 
+        "NAME": "Make Model - e2montecarlo",
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      },
+      {
+        "ICON": "single_image_3d", 
+        "EXPERT": 1,
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2rct",
+        "WIZARD":"/lib/pmconfig/rct.json",
+        "PROGRAM": "e2rct.py", 
+        "NAME": "Make Model - e2rct",
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      },
+      {
+        "ICON": "single_image_3d",
+	"MODE":"align",
+        "WIZARD":"/lib/pmconfig/symsearch.json",
+        "PROGRAM": "e2symsearch3d.py", 
+        "NAME": "Align to Symmetry Axis",
+	"NOTELEVEL": "1",
+        "CHILDREN": [] 
+      }
+    ]
+  }, 
+  {
+    "ICON": "refine", 
+    "TABLE": "EMRefineTable(withmodal=False,multiselect=False)", 
+    "NAME": "3D Refinement", 
+    "CHILDREN": [
+      {
+        "ICON": "refine",
+        "MODE": "refinement",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2refine", 
+        "PROGRAM": "e2refine.py", 
+        "NAME": "Run e2refine", 
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "refine", 
+        "MODE": "refinement",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2refinemulti",
+        "PROGRAM": "e2refinemulti.py", 
+        "NAME": "Run e2refinemulti",
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "eulers",
+        "PROGRAM": "e2eulerxplor.py", 
+        "NAME": "Run e2eulerxplor", 
+	"WIKIPAGE":"http://blake.bcm.edu/emanwiki/EMAN2/Programs/e2eulerxplor",
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "eulers",
+        "WIZARD":"/lib/pmconfig/ploteulers.json",
+        "PROGRAM": "e2plotEulers.py", 
+        "NAME": "Run e2plotEulers", 
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "refine", 
+        "TABLE": "EMRefineTable(withmodal=False,multiselect=False)", 
+        "NAME": "Frealign", 
+        "CHILDREN": [
+          {
+            "ICON": "refine", 
+            "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2refinetofrealign",
+            "PROGRAM": "e2refinetofrealign.py", 
+            "NAME": "FreAlign Refinement - e2refinetofrealign",
+	    "NOTELEVEL": "1",
+            "CHILDREN": []
+          }, 
+          {
+            "ICON": "refine",
+            "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2runfrealign", 
+            "PROGRAM": "e2runfrealign.py", 
+            "NAME": "Run e2runfrealign",
+	    "NOTELEVEL": "1",
+            "CHILDREN": []
+          }, 
+          {
+            "ICON": "refine", 
+            "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2refinefromfrealign",
+            "PROGRAM": "e2refinefromfrealign.py", 
+            "NAME": "Run e2refinefromfrealign",
+	    "NOTELEVEL": "1",
+            "CHILDREN": []
+          }
+        ]
+      },
+      {
+	"ICON": "refine",
+	"PROGRAM": "e2refinetorelion3d.py",
+        "WIZARD":"/lib/pmconfig/relion3d.json",
+	"NAME": "Relion 3D Refinement",
+	"CHILDREN": []
+      }
+    ]
+  }, 
+  {
+    "ICON": "resolution",
+    "TABLE": "PMFSCTableWidget('fsclist','','',resize=True)", 
+    "NAME": "Resolution", 
+    "CHILDREN": [
+      {
+        "ICON": "resolution",
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2eotest",
+        "PROGRAM": "e2eotest.py", 
+        "NAME": "Run e2eotest",
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      }, 
+      {
+        "ICON": "resolution", 
+        "PROGRAM": "e2resolution.py", 
+        "NAME": "Run e2resolution",
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      },
+      {
+        "ICON": "resolution", 
+        "WIZARD":"/lib/pmconfig/plotfsc.json",
+        "PROGRAM": "e2plotFSC.py", 
+        "NAME": "Run e2plotFSC",
+	"NOTELEVEL": "1",
+        "CHILDREN": []
+      }
+    ]
+  },
+  {
+    "ICON": "single_image_3d", 
+    "TABLE": "EMValidateTable(withmodal=False,multiselect=False)",  
+    "NAME": "Validation", 
+    "CHILDREN": [
+      {
+        "ICON": "single_image_3d", 
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2tiltvalidate.py",
+        "EXPERT": 1,
+        "MODE": "analysis",
+        "PROGRAM": "e2tiltvalidate.py", 
+        "NAME": "Run e2tiltvalidate",
+	"NOTELEVEL": "1",
+        "WIZARD":"/lib/pmconfig/runtiltvalidation.json",
+        "CHILDREN": []
+      },
+      {
+        "ICON": "single_image_3d", 
+        "WIKIPAGE": "http://blake.bcm.tmc.edu/emanwiki/EMAN2/Programs/e2tiltvalidate.py",
+        "MODE": "gui",
+        "PROGRAM": "e2tiltvalidate.py", 
+        "NAME": "Plot Validation", 
+        "WIZARD":"/lib/pmconfig/plottiltvalidation.json",
+        "CHILDREN": []
+      },
+      {
+        "ICON": "eulers",
+        "WIZARD":"/lib/pmconfig/symsearch.json",
+        "PROGRAM": "e2plotEulers.py", 
+        "NAME": "Run e2plotEulers", 
+        "CHILDREN": []
+      }
+    ]
+  }
+]

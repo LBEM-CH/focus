@@ -1,0 +1,12 @@
+#include "Methods/PeakSearchMethods.hpp"
+#include "Methods/FindBestProjectionMethods.hpp"
+#include "Methods/RefinementMethods.hpp"
+#include "Methods/RestoreMissingConeMethods.hpp"
+#include "Methods/Interpolate2dMethods.hpp"
+#include "Methods/CalcCCMethods.hpp"
+#include "Methods/ProjectionMethods.hpp"
+#include "Methods/ReconstructionMethods.hpp"
+#include "Methods/3dMaskingMethods.hpp"
+#include "Methods/2dMaskingMethods.hpp"
+#include "Methods/TrialAngleGenerators.hpp"
+

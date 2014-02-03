@@ -20,6 +20,7 @@ else (NOT CMAKE_BUILD_TYPE)
 	message(STATUS "THE BUILD TYPE IS SET TO: ${CMAKE_BUILD_TYPE}")
 endif (NOT CMAKE_BUILD_TYPE)
 
+
 ################################################################################
 # Fortran Compiler -------------------------------------------------------------
 get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
@@ -46,8 +47,10 @@ elseif(Fortran_COMPILER_NAME STREQUAL "f95")
 	endif(APPLE)
 elseif(Fortran_COMPILER_NAME STREQUAL "ifort")
 	#ifort
-	LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
-	set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -axN -w -132 -cxxlib")
+	#SET(CMAKE_Fortran_FLAGS_RELEASE "-w -132 -cxxlib")
+	#LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
+	set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -w -132 -cxxlib")
+	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -w -132 -cxxlib")
 elseif (Fortran_COMPILER_NAME STREQUAL "g77")
 	#g77
   	set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -m32")
@@ -83,7 +86,7 @@ endif()
 if(CMAKE_CXX_COMPILER STREQUAL "icpc")
 	set(CMAKE_CXX_FLAGS "-axN -w -132 -cxxlib")
 else(CMAKE_CXX_COMPILER STREQUAL "icpc")
-	set(CMAKE_CXX_FLAGS_RELEASE "-ffast-math") 
+	#set(CMAKE_CXX_FLAGS_RELEASE "") 
 	set(CMAKE_CXX_FLAGS_DEBUG  "-g -ffast-math")
 endif(CMAKE_CXX_COMPILER STREQUAL "icpc")
 
@@ -190,6 +193,7 @@ install(FILES ${SOURCES} DESTINATION ${INSTALL_SRC_DIR})
 install(TARGETS ${EXECUTABLES} DESTINATION ${INSTALL_BIN_DIR})
 ###############################################################################
 # sub directories -------------------------------------------------------------
+#add_subdirectory(2dx_single_particle_lib)
 add_subdirectory(periodogram)
 add_subdirectory(peaksearch)
 add_subdirectory(2dx_getlat)

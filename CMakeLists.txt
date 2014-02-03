@@ -5,8 +5,64 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
+
+
+find_program(HOSTNAME_CMD NAMES hostname)
+exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
+
+cmake_policy(SET CMP0012 NEW)
+
+if ("$ENV{USE_CUDA}" STREQUAL "TRUE")
+	message("Try to use the GPU")
+else()
+	message(No GPU-support)
+endif()
+
+#if( ${HOSTNAME} STREQUAL "bs-powerlinux-ethz-ch" )
+#	if ("$ENV{USE_CUDA}" STREQUAL "TRUE")
+#		option(INTEL_CC "Use the Intel compiler." OFF)
+#	else()
+#		option(INTEL_CC "Use the Intel compiler." ON)
+#		message("icc on")
+#	endif()
+#else()
+#	option(INTEL_CC "Use the Intel compiler." OFF)
+#endif()
+
+
+if (INTEL_CC)
+  find_program(CMAKE_C_COMPILER NAMES icc)
+  find_program(CMAKE_CXX_COMPILER NAMES icpc)
+  find_program(CMAKE_AR NAMES xiar)
+  find_program(CMAKE_LINKER NAMES xild)
+
+  if (CMAKE_C_COMPILER MATCHES CMAKE_C_COMPILER-NOTFOUND OR
+      CMAKE_CXX_COMPILER MATCHES CMAKE_CXX_COMPILER-NOTFOUND OR
+      CMAKE_AR MATCHES CMAKE_AR-NOTFOUND OR
+      CMAKE_LINKER MATCHES CMAKE_LINKER-NOTFOUND)
+    message(FATAL_ERROR "Cannot find Intel compiler.  You may need to run `. /opt/intel/bin/compilervars.sh intel64'")
+  endif ()
+endif (INTEL_CC) 
+
 project(2dx)
 cmake_minimum_required(VERSION 2.6)
+
+
+if ("$ENV{USE_CUDA}" STREQUAL "TRUE")
+	FIND_PACKAGE(CUDA)
+endif()
+
+
+if(CUDA_FOUND)
+	OPTION(ENABLE_CUDA "enable 2dx CUDA usage" ON)
+	message("USING CUDA")
+	add_definitions( -DUSE_CUDA )
+	include_directories(/usr/local/cuda-5.5/include)
+else()
+	message("NOOOOOT USING CUDA")
+	OPTION(ENABLE_CUDA "enable 2dx CUDA usage" OFF)
+endif()
+
 
 set(CPACK_PACKAGE_VENDOR "2dx.org")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "2dx -Allows interactive processing of single EM-Micrographs of 2D membrane crystals.")
@@ -48,6 +104,7 @@ ELSE(NOT ${check_wc} EQUAL 0)
 ENDIF(NOT ${check_wc} EQUAL 0)
 
 message(STATUS "SVN revision number: ${2dx_SVN_REVISION_NUMBER}")
+
 
 set(2DX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "The path of the 2dx root source directory.")
 message(STATUS "The variable 2DX_ROOT_DIR is set to: ${2DX_ROOT_DIR}")

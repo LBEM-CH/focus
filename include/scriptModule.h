@@ -26,7 +26,7 @@ class scriptModule : public QWidget
   Q_OBJECT
 
   public:
-  enum moduleType {standard, custom};
+  enum moduleType {standard, custom, singleparticle};
 
   public slots:
   void execute(bool run);

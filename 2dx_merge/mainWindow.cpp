@@ -52,7 +52,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
       }
   }
   else
-  {	  
+  {
     mainData = new confData(mergeConfigLocation, appConfigLocation);
   }
   mainData->setDir("project",QDir(directory));
@@ -102,8 +102,9 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   mainData->setDir("remoteProc",mainData->getDir("working") + "/proc/");
   createDir(mainData->getDir("working") + "/LOGS");
   mainData->setDir("logs",mainData->getDir("working") + "/LOGS");
-  mainData->setDir("standardScripts",QDir(mainData->getDir("application") + "/" + "scripts-standard/"));
-  mainData->setDir("customScripts",QDir(mainData->getDir("application") + "/" + "scripts-custom/"));
+  mainData->setDir("standardScripts",QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-standard/"));
+  mainData->setDir("customScripts",QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-custom/"));
+  mainData->setDir("singleParticleScripts",QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-singleparticle/"));
   mainData->addImage("appImage",new QImage("resource/icon.png"));
   
   mainData->addApp("logBrowser", mainData->getDir("application") + "/../" + "bin/" + "2dx_logbrowser");
@@ -123,32 +124,45 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   QWidget *headerWidget = setupHeader();
 
   standardScripts = new scriptModule(mainData,mainData->getDir("standardScripts"),scriptModule::standard);
-
   connect(standardScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(standardScriptCompleted(QModelIndex)));
   connect(standardScripts,SIGNAL(reload()),this,SLOT(updateModel()));
-
   connect(this,SIGNAL(execute(bool)),standardScripts,SLOT(execute(bool)));
   QWidget *standardScriptWidget = setupScriptContainer(standardScripts, "Standard Scripts");
   connect(standardScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
   connect(standardScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
 
   customScripts = new scriptModule(mainData,mainData->getDir("customScripts"),scriptModule::custom);
-
   connect(customScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(customScriptCompleted(QModelIndex)));
   connect(customScripts,SIGNAL(reload()),this,SLOT(reload()));
-
   connect(this,SIGNAL(execute(bool)),customScripts,SLOT(execute(bool)));
   QWidget *customScriptWidget = setupScriptContainer(customScripts, "Custom Scripts");
   connect(customScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
-  connect(customScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));  
+  connect(customScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
+
+  singleParticleScripts = new scriptModule(mainData,mainData->getDir("singleParticleScripts"),scriptModule::singleparticle);
+  connect(singleParticleScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(singleParticleScriptCompleted(QModelIndex)));
+  connect(singleParticleScripts,SIGNAL(reload()),this,SLOT(reload()));
+  connect(this,SIGNAL(execute(bool)),singleParticleScripts,SLOT(execute(bool)));
+  QWidget *singleParticleScriptWidget = setupScriptContainer(singleParticleScripts, "SP Scripts (NOT READY YET)");
+  connect(singleParticleScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
+  connect(singleParticleScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
+
+
   standardScripts->extendSelectionTo(customScripts);
+  standardScripts->extendSelectionTo(singleParticleScripts);
+  
   customScripts->extendSelectionTo(standardScripts);
+  customScripts->extendSelectionTo(singleParticleScripts);
+  
+  singleParticleScripts->extendSelectionTo(standardScripts);
+  singleParticleScripts->extendSelectionTo(customScripts);
 
   int minWidth = int(QApplication::desktop()->width()/5.00);
   if(minWidth>235) minWidth = 235;  
 
   standardScripts->setMaximumWidth(minWidth);
   customScripts->setMaximumWidth(minWidth);
+  singleParticleScripts->setMaximumWidth(minWidth);
 
   results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
 
@@ -158,10 +172,16 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
   connect(standardScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
   connect(standardScripts,SIGNAL(standardError(const QByteArray &)),logViewer,SLOT(insertError(const QByteArray &)));
+  
   connect(customScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
   connect(customScripts,SIGNAL(standardError(const QByteArray &)),logViewer,SLOT(insertError(const QByteArray &)));
+
+  connect(singleParticleScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
+  connect(singleParticleScripts,SIGNAL(standardError(const QByteArray &)),logViewer,SLOT(insertError(const QByteArray &)));
+  
   connect(standardScripts,SIGNAL(scriptLaunched()),logViewer,SLOT(clear()));
   connect(customScripts,SIGNAL(scriptLaunched()),logViewer,SLOT(clear()));
+  connect(singleParticleScripts,SIGNAL(scriptLaunched()),logViewer,SLOT(clear()));
 
   verbosityControl = new levelGroup(mainData, 4,
       QStringList()<<"Logfile - Silent"<<"Logfile - Low Verbosity"<<"Logfile - Moderate Verbosity"<<"Logfile - Highest Verbosity",
@@ -178,6 +198,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   connect(verbosityControl, SIGNAL(levelChanged(int)), logViewer, SLOT(load(int)));
   connect(verbosityControl, SIGNAL(levelChanged(int)), standardScripts, SLOT(setVerbosity(int)));
   connect(verbosityControl, SIGNAL(levelChanged(int)), customScripts, SLOT(setVerbosity(int)));
+  connect(verbosityControl, SIGNAL(levelChanged(int)), singleParticleScripts, SLOT(setVerbosity(int)));
 
   parameterContainer = new viewContainer("Processing Data -- Standard", viewContainer::data);
 
@@ -211,6 +232,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
   connect(standardScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(standardScriptChanged(QModelIndex)));
   connect(customScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(customScriptChanged(QModelIndex)));
+  connect(singleParticleScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(singleParticleScriptChanged(QModelIndex)));
 
   //userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg");
   userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg", mainData->getDir("config") + "/" + "2dx_merge-user.cfg");
@@ -295,9 +317,11 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   layout->addWidget(headerWidget,0,0,1,2);
   layout->addWidget(standardScriptWidget,1,0,1,1);
   layout->addWidget(customScriptWidget,2,0,1,1);
-  layout->addWidget(previewContainer,3,0,1,1);
-  layout->addWidget(centerRightSplitter,1,1,3,1);
-  layout->addWidget(footerWidget,4,0,1,2);
+  layout->addWidget(singleParticleScriptWidget,3,0,1,1);
+  layout->addWidget(previewContainer,4,0,1,1);
+
+  layout->addWidget(centerRightSplitter,1,1,4,1);
+  layout->addWidget(footerWidget,5,0,1,2);
   layout->setColumnStretch(1,3);
   layout->setRowStretch(1,3);
   layout->setRowStretch(2,3);
@@ -309,6 +333,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
 	setupActions();
   album = NULL;
+  euler = NULL;
   
   importCount = 0;
 
@@ -568,6 +593,12 @@ void mainWindow::setupActions()
   connect(viewAlbum,SIGNAL(triggered()),this,SLOT(showAlbum()));
   viewMenu->addAction(viewAlbum);
 
+  QAction *viewEuler = new QAction("Show Single Particle Orienter (Euler)",this);
+  viewEuler->setShortcut(tr("Ctrl+Shift+E"));
+  connect(viewEuler,SIGNAL(triggered()),this,SLOT(showEuler()));
+  viewMenu->addAction(viewEuler);
+
+
 //  QMenu *projectMenu = new QMenu("Project");
   
   QMenu *selectMenu = new QMenu("Select");
@@ -700,6 +731,11 @@ void mainWindow::standardScriptChanged(QModelIndex index)
 void mainWindow::customScriptChanged(QModelIndex index)
 {
   scriptChanged(customScripts, index);
+}
+
+void mainWindow::singleParticleScriptChanged(QModelIndex index)
+{
+  scriptChanged(singleParticleScripts, index);
 }
 
 void mainWindow::scriptLaunched(scriptModule * /*module*/, QModelIndex /*index*/)
@@ -854,6 +890,12 @@ void mainWindow::customScriptCompleted(QModelIndex index)
   scriptCompleted(customScripts,index);
 }
 
+void mainWindow::singleParticleScriptCompleted(QModelIndex index)
+{
+//  cerr<<"Single Particle ";
+  scriptCompleted(singleParticleScripts,index);
+}
+
 void mainWindow::maximizeWindow(int option)
 {
   container->maximizeWindow(option - 1);
@@ -886,6 +928,17 @@ void mainWindow::launchAlbum(const QString &path)
   {
     album = new imageAlbum(dirModel);
     connect(dirView->selectionModel(),SIGNAL(currentRowChanged(const QModelIndex&,const QModelIndex&)),album,SLOT(currentSelectionChanged(const QModelIndex&,const QModelIndex&)));      
+//    album->setModel(sortModel);
+//    album->setSelectionModel(dirView->selectionModel());
+  }
+}
+
+void mainWindow::launchEuler()
+{
+
+  if(euler==NULL)
+  {
+    euler = new eulerWindow(mainData);
 //    album->setModel(sortModel);
 //    album->setSelectionModel(dirView->selectionModel());
   }
@@ -1082,6 +1135,15 @@ void mainWindow::showAlbum(bool show)
 
   album->setHidden(!show);
 }
+
+void mainWindow::showEuler(bool show)
+{
+  if(euler==NULL)
+      launchEuler();
+
+    euler->setHidden(!show);
+}
+
 
 void mainWindow::editHelperConf()
 {

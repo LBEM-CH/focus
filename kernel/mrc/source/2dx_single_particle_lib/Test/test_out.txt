@@ -1,0 +1,40 @@
+FFTIR_DISK	.
+FFTIR_has_space	1
+SCRATCH_DISK	.
+SCRATCH_has_space	1
+_	
+addsuffix	
+argv	()
+bin_2dx	/Users/sebastianscherer/2dx/kernel/mrc/bin/
+csubstnonl	
+cwd	/Users/sebastianscherer/Desktop/2dx_test_project/merge
+
+dirlist	glpf00/glpf0000655301 glpf00/glpf0000655501 glpf00/glpf0000655701
+dirlist_test	glpf
+
+
+dirstack	/Users/sebastianscherer/Desktop/2dx_test_project/merge
+echo_style	bsd
+gid	20
+group	staff
+history	100
+home	/Users/sebastianscherer
+killring	30
+my_test	100
+my_test_2	100
+my_test_23	100
+testvarible 1234 3333
+my_test_asdf	100
+owd	
+path	(/opt/local/bin /opt/local/sbin /opt/local/bin /opt/local/sbin /opt/local/bin /opt/local/sbin /opt/local/bin /opt/local/sbin /opt/local/bin /opt/local/sbin /opt/local/bin /opt/local/sbin /usr/bin /bin /usr/sbin /sbin /usr/local/bin /Users/sebastianscherer/QtSDK/Desktop/Qt/4.8.1/gcc/bin)
+path_has_space	1
+proc_2dx	/Users/sebastianscherer/2dx/kernel/proc/
+shell	/bin/tcsh
+shlvl	3
+status	0
+tcsh	6.17.00
+term	xterm
+tty	
+uid	501
+user	sebastianscherer
+version	tcsh 6.17.00 (Astron) 2009-07-10 (x86_64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec

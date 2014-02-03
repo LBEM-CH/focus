@@ -43,6 +43,7 @@ scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::
   {
     if(type == scriptModule::standard) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
     if(type == scriptModule::custom) view->setSelectionMode(QAbstractItemView::SingleSelection);
+    if(type == scriptModule::singleparticle) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
     layout->addWidget(view,0,0,1,1);
     //connect(selection,SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),this,SLOT(clearExtendedSelections()));
     //connect(view,SIGNAL(pressed(QModelIndex)),this,SLOT(clearExtendedSelections()));
@@ -107,6 +108,8 @@ QTreeView *scriptModule::setupModule()
       item->setIcon(*data->getIcon("scriptIcon"));
     else if(scriptType == custom)
       item->setIcon(*data->getIcon("customScriptIcon"));
+    else if(scriptType == singleparticle)
+      item->setIcon(*data->getIcon("spScriptIcon"));
 
     item->setTextAlignment(Qt::AlignVCenter);
 
@@ -190,7 +193,8 @@ const QVariant & scriptModule::getScriptProperty(quint32 uid, const QString &pro
 void scriptModule::clearSelection()
 {
   if(selection->hasSelection())
-		selection->clearSelection();
+	selection->clearSelection();
+	
 }
 
 void scriptModule::extendSelectionTo(scriptModule *module)
@@ -204,6 +208,10 @@ void scriptModule::clearExtendedSelections()
   QListIterator<scriptModule *> it(selectionObjects);
   while(it.hasNext())
     it.next()->clearSelection();
+  
+  QListIterator<scriptModule *> it2(selectionObjects);
+  while(it2.hasPrevious())
+    it2.previous()->clearSelection();
 }
 
 bool scriptModule::initializeExecution()

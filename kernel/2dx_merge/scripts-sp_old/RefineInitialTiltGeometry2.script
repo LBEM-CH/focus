@@ -1,0 +1,161 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Refine Initial Geometry II                                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 05/19/2007                                             #
+# Last Modification: 05/19/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 60
+#
+# MANUAL: Single Particle Refinement (still under construction)
+#
+# DISPLAY: particle_size_sp2dx
+# DISPLAY: symmetry_sp2dx
+# DISPLAY: cont_folder_sp2dx
+# DISPLAY: keep_all_sp2dx
+# DISPLAY: restart_ref_sp2dx
+# DISPLAY: tangl_mode_sp2dx
+# DISPLAY: taxa_mode_sp2dx
+# DISPLAY: binn_sp2dx
+# DISPLAY: which_ref_sp2dx
+#
+# DISPLAY: min_angular_change_sp2dx
+# DISPLAY: refinement_method_sp2dx
+# DISPLAY: cc_window_size_sp2dx
+# DISPLAY: cc_freq_range_sp2dx
+# DISPLAY: projection_method_sp2dx
+# DISPLAY: cache_projections_sp2dx
+# DISPLAY: parallel_projection_sp2dx
+# DISPLAY: back_projection_method_sp2dx
+# DISPLAY: angle_sampling_method_sp2dx
+# DISPLAY: max_iteration_init_sp2dx
+# DISPLAY: min_angular_change_init_sp2dx
+# DISPLAY: ave_weight_sp2dx
+# DISPLAY: missing_cone_sp2dx
+# DISPLAY: model_keep_sp2dx
+# DISPLAY: nn_number_refp_sp2dx
+#
+# DISPLAY: emantrial_max_init_sp2dx
+# DISPLAY: emantrial_n_init_sp2dx
+# DISPLAY: sampling_ang3_sp2dx
+# DISPLAY: cone_parameters_sp2dx
+#
+# DISPLAY: cc_window_size_init_sp2dx
+# DISPLAY: cc_freq_range_init_sp2dx
+#
+# DISPLAY: particle_masking_sp2dx
+# DISPLAY: particle_masking_params_sp2dx
+# DISPLAY: projection_masking_sp2dx
+# DISPLAY: projection_masking_params_sp2dx
+# DISPLAY: reconstruction_masking_sp2dx
+# DISPLAY: reconstruction_masking_r_params_sp2dx
+# DISPLAY: reconstruction_masking_h_params_sp2dx
+#
+# DISPLAY: lp_particle_filter_sp2dx
+# DISPLAY: lp_projection_filter_sp2dx
+# DISPLAY: lp_volume_filter_init_sp2dx
+#
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set particle_size_sp2dx = ""
+set symmetry_sp2dx = ""
+set cont_folder_sp2dx = ""
+set keep_all_sp2dx = ""
+set restart_ref_sp2dx = ""
+set binn_sp2dx = ""
+set which_ref_sp2dx = ""
+set missing_cone_sp2dx = ""
+#
+set min_angular_change_sp2dx = ""
+set refinement_method_sp2dx = ""
+set cc_window_size_sp2dx = ""
+set cc_freq_range_sp2dx = ""
+set projection_method_sp2dx = ""
+set cache_projections_sp2dx = ""
+set parallel_projection_sp2dx = ""
+set back_projection_method_sp2dx = ""
+set angle_sampling_method_sp2dx = ""
+set max_iteration_init_sp2dx = ""
+set min_angular_change_init_sp2dx = ""
+set ave_weight_sp2dx = ""
+set model_keep_sp2dx = ""
+set nn_number_refp_sp2dx = ""
+#
+set emantrial_max_init_sp2dx = ""
+set emantrial_n_init_sp2dx = ""
+set sampling_ang3_sp2dx = ""
+set cone_parameters_sp2dx = ""
+#
+set cc_window_size_init_sp2dx = ""
+set cc_freq_range_init_sp2dx = ""
+# 
+set particle_masking_sp2dx = ""
+set particle_masking_params_sp2dx = ""
+set projection_masking_sp2dx = ""
+set projection_masking_params_sp2dx = ""
+set reconstruction_masking_sp2dx = ""
+set reconstruction_masking_r_params_sp2dx = ""
+set reconstruction_masking_h_params_sp2dx = ""
+# 
+set lp_particle_filter_sp2dx = ""
+set lp_projection_filter_sp2dx = ""
+set lp_volume_filter_init_sp2dx = ""
+#
+#$end_vars
+
+echo "<<@progress: 1>>"
+
+set scriptname = RefineInitialTiltGeometry2
+
+set max_iteration_incharge = $max_iteration_init_sp2dx
+set lp_volume_filter_incharge = $lp_volume_filter_init_sp2dx
+set cc_freq_range_incharge = $cc_freq_range_init_sp2dx
+set cc_window_size_incharge = $cc_window_size_init_sp2dx
+set emantrial_n_incharge = $emantrial_n_init_sp2dx
+set emantrial_max_incharge = $emantrial_max_init_sp2dx
+set min_angular_change_incharge = $min_angular_change_init_sp2dx
+set nn_number_incharge = $nn_number_refp_sp2dx
+
+
+\rm -f LOGS/${scriptname}.results
+echo "<<@evaluate>>"
+
+
+
+source ${proc_2dx}/2dx_makedirs 
+\rm -f SCRATCH/2dx_merge_dirfile_oneline.dat
+\rm -f SCRATCH/2dx_SP_convergence.txt
+\rm -f SCRATCH/2dx_SP_convergence_tree.txt
+\rm -f container_stat.txt
+
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#set dirstack = `pwd`
+#echo $dirstack
+
+echo "set called now"
+#rm mergevars_written_to_file.txt
+set > mergevars_written_to_file.txt
+
+set olddir = `pwd`
+
+${bin_2dx}/2dx_singleparticle/RefineInitialTiltGeometry.exe --mode 2
+
+python ${bin_2dx}/2dx_singleparticle/angle_hist_plotter.py "$cont_folder_sp2dx/ContainerStatsTXT/cont_stat_initref2.txt" "$cont_folder_sp2dx/ContainerStatsPDF/cont_stat_initref2.pdf"
+python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/ContainerStatsPDF/cont_stat_initref2.pdf" "Container Angle Hist Refine2" "$scriptname" 0
+
+python ${bin_2dx}/2dx_singleparticle/convergence_plotter.py "SCRATCH/2dx_SP_convergence.txt" "$cont_folder_sp2dx/ContainerStatsPDF/conv_initref2.pdf"
+python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/ContainerStatsPDF/conv_initref2.pdf" "Convergence InitRef2" "$scriptname" 0
+
+echo "<<@progress: 100>>"
+

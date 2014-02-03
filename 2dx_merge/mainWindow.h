@@ -54,6 +54,7 @@
 #include <projectModel.h>
 #include <imagePreview.h>
 #include <imageAlbum.h>
+#include <eulerWindow.h>
 #include <importBox.h>
 #include <importTool.h>
 #include <aboutWindow.h>
@@ -70,10 +71,12 @@ class mainWindow : public QMainWindow
   void scriptChanged(scriptModule *module, QModelIndex index);
   void standardScriptChanged(QModelIndex index);
   void customScriptChanged(QModelIndex index);
+  void singleParticleScriptChanged(QModelIndex index);
   void scriptLaunched(scriptModule *module, QModelIndex index);
   void scriptCompleted(scriptModule *module, QModelIndex index);
   void standardScriptCompleted(QModelIndex index);
   void customScriptCompleted(QModelIndex index);
+  void singleParticleScriptCompleted(QModelIndex index);
   void saveProjectState();
   void loadProjectState();
   void editHelperConf();
@@ -82,6 +85,7 @@ class mainWindow : public QMainWindow
   void setSaveState(bool state);
   
   void showAlbum(bool show = true);
+  void showEuler(bool show = true);
 
   void columnActivated(int i);
 
@@ -104,6 +108,7 @@ class mainWindow : public QMainWindow
   void openURL(const QString &url);
 
   void launchAlbum(const QString &path);
+  void launchEuler();
   void launchFileBrowser();
   void showManual(bool show);
 
@@ -147,9 +152,11 @@ class mainWindow : public QMainWindow
   QString installedVersion;
 
   imageAlbum *album;
+  eulerWindow *euler;
 
   scriptModule *standardScripts;
   scriptModule *customScripts;
+  scriptModule *singleParticleScripts;
 
   resultsModule *resultsView;
   QSortFilterProxyModel *sortModel;

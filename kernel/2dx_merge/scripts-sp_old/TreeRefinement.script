@@ -1,0 +1,233 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Tree Refinement                                                    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 05/19/2007                                             #
+# Last Modification: 05/19/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 70
+#
+# MANUAL: Single Particle Refinement (still under construction)
+#
+# DISPLAY: particle_size_sp2dx
+# DISPLAY: symmetry_sp2dx
+# DISPLAY: cont_folder_sp2dx
+#
+# DISPLAY: refinement_method_sp2dx
+# DISPLAY: projection_method_sp2dx
+# DISPLAY: cache_projections_sp2dx
+# DISPLAY: parallel_projection_sp2dx
+# DISPLAY: back_projection_method_sp2dx
+# DISPLAY: angle_sampling_method_sp2dx
+# DISPLAY: max_iteration_tree_sp2dx
+# DISPLAY: min_angular_change_tree_sp2dx
+# DISPLAY: nn_number_tree_sp2dx
+# DISPLAY: keep_all_sp2dx
+#
+# DISPLAY: emantrial_max_t2_sp2dx
+# DISPLAY: emantrial_max_t3_sp2dx
+# DISPLAY: emantrial_max_t4_sp2dx
+# DISPLAY: emantrial_n_t2_sp2dx
+# DISPLAY: emantrial_n_t3_sp2dx
+# DISPLAY: emantrial_n_t4_sp2dx
+# DISPLAY: sampling_ang3_sp2dx
+# DISPLAY: cone_parameters_sp2dx
+#
+# DISPLAY: cc_window_size_tree_sp2dx
+# DISPLAY: cc_freq_range_t2_sp2dx
+# DISPLAY: cc_freq_range_t3_sp2dx
+# DISPLAY: cc_freq_range_t4_sp2dx
+# DISPLAY: shaking_rate_tree_sp2dx
+# DISPLAY: cc_discard_t2_sp2dx
+# DISPLAY: cc_discard_t3_sp2dx
+# DISPLAY: cc_discard_t4_sp2dx
+#
+# DISPLAY: particle_masking_sp2dx
+# DISPLAY: particle_masking_params_sp2dx
+# DISPLAY: projection_masking_sp2dx
+# DISPLAY: projection_masking_params_sp2dx
+# DISPLAY: reconstruction_masking_sp2dx
+# DISPLAY: reconstruction_masking_r_params_sp2dx
+# DISPLAY: reconstruction_masking_h_params_sp2dx
+#
+# DISPLAY: lp_particle_filter_sp2dx
+# DISPLAY: lp_projection_filter_sp2dx
+# DISPLAY: lp_volume_filter_t2_sp2dx
+# DISPLAY: lp_volume_filter_t3_sp2dx
+# DISPLAY: lp_volume_filter_t4_sp2dx
+#
+# DISPLAY: tree_level_sp2dx
+#
+#
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set particle_size_sp2dx = ""
+set symmetry_sp2dx = ""
+set cont_folder_sp2dx = ""
+# 
+set refinement_method_sp2dx = ""
+set projection_method_sp2dx = ""
+set cache_projections_sp2dx = ""
+set parallel_projection_sp2dx = ""
+set back_projection_method_sp2dx = ""
+set angle_sampling_method_sp2dx = ""
+set max_iteration_tree_sp2dx = ""
+set min_angular_change_tree_sp2dx = ""
+set nn_number_tree_sp2dx = ""
+set keep_all_sp2dx = ""
+# 
+set emantrial_max_t2_sp2dx = ""
+set emantrial_max_t3_sp2dx = ""
+set emantrial_max_t4_sp2dx = ""
+set emantrial_n_t2_sp2dx = ""
+set emantrial_n_t3_sp2dx = ""
+set emantrial_n_t4_sp2dx = ""
+set sampling_ang3_sp2dx = ""
+set cone_parameters_sp2dx = ""
+# 
+set cc_window_size_tree_sp2dx = ""
+set cc_freq_range_t2_sp2dx = ""
+set cc_freq_range_t3_sp2dx = ""
+set cc_freq_range_t4_sp2dx = ""
+set doubling_rate_tree_sp2dx = ""
+set shaking_rate_tree_sp2dx = ""
+set number_of_levels_t2_sp2dx = ""
+set number_of_levels_t3_sp2dx = ""
+set number_of_levels_t4_sp2dx = ""
+set cc_discard_t2_sp2dx = ""
+set cc_discard_t3_sp2dx = ""
+set cc_discard_t4_sp2dx = ""
+# 
+set particle_masking_sp2dx = ""
+set particle_masking_params_sp2dx = ""
+set projection_masking_sp2dx = ""
+set projection_masking_params_sp2dx = ""
+set reconstruction_masking_sp2dx = ""
+set reconstruction_masking_r_params_sp2dx = ""
+set reconstruction_masking_h_params_sp2dx = ""
+# 
+set lp_particle_filter_sp2dx = ""
+set lp_projection_filter_sp2dx = ""
+set lp_volume_filter_t2_sp2dx = ""
+set lp_volume_filter_t3_sp2dx = ""
+set lp_volume_filter_t4_sp2dx = ""
+#
+set tree_level_sp2dx = ""
+#
+#$end_vars
+
+echo "<<@progress: 1>>"
+
+set scriptname = TreeRefinement
+
+
+set max_iteration_incharge = $max_iteration_tree_sp2dx
+set min_angular_change_incharge = $min_angular_change_tree_sp2dx
+set cc_window_size_incharge = $cc_window_size_tree_sp2dx
+set nn_number_incharge = $nn_number_tree_sp2dx
+
+set missing_cone_sp2dx = "0"
+
+if ( ${tree_level_sp2dx} == "0" ) then
+	set lp_volume_filter_incharge = $lp_volume_filter_t2_sp2dx
+	set cc_freq_range_incharge = $cc_freq_range_t2_sp2dx
+	set emantrial_n_incharge = $emantrial_n_t2_sp2dx
+	set emantrial_max_incharge = $emantrial_max_t2_sp2dx
+	set number_of_levels_incharge = $number_of_levels_t2_sp2dx
+	set cc_discard_incharge = $cc_discard_t2_sp2dx
+endif
+
+if ( ${tree_level_sp2dx} == "1" ) then
+	set lp_volume_filter_incharge = $lp_volume_filter_t3_sp2dx
+	set cc_freq_range_incharge = $cc_freq_range_t3_sp2dx
+	set emantrial_n_incharge = $emantrial_n_t3_sp2dx
+	set emantrial_max_incharge = $emantrial_max_t3_sp2dx
+	set number_of_levels_incharge = $number_of_levels_t3_sp2dx
+	set cc_discard_incharge = $cc_discard_t3_sp2dx
+endif
+
+if ( ${tree_level_sp2dx} == "2" ) then
+	set lp_volume_filter_incharge = $lp_volume_filter_t4_sp2dx
+	set cc_freq_range_incharge = $cc_freq_range_t4_sp2dx
+	set emantrial_n_incharge = $emantrial_n_t4_sp2dx
+	set emantrial_max_incharge = $emantrial_max_t4_sp2dx
+	set number_of_levels_incharge = $number_of_levels_t4_sp2dx
+	set cc_discard_incharge = $cc_discard_t4_sp2dx
+endif
+
+
+if ( ${tree_level_sp2dx} == "0" ) then
+	\rm -f LOGS/${scriptname}.results
+endif
+
+echo "<<@evaluate>>"
+
+
+
+set tree_level_true_sp2dx = `echo ${tree_level_sp2dx} | awk '{ s = 2.0 + $1 } END { print s }'`
+
+source ${proc_2dx}/2dx_makedirs 
+\rm -f SCRATCH/2dx_merge_dirfile_oneline.dat
+\rm -f SCRATCH/2dx_SP_convergence.txt
+\rm -f SCRATCH/2dx_SP_convergence_tree.txt
+\rm -f container_stat.txt
+
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#set dirstack = `pwd`
+#echo $dirstack
+
+echo "set called now"
+#rm mergevars_written_to_file.txt
+set > mergevars_written_to_file.txt
+
+set olddir = `pwd`
+
+if ( ${tree_level_sp2dx} == "2" ) then
+	echo "::LargeExeUsed"
+	set content_number = `\ls -1 "${cont_folder_sp2dx}/ParticleContainers/cont_part3" | wc -l`
+	echo "::Number: ${content_number}"
+
+	foreach x (`seq 0 1 ${content_number}`)
+		echo "::$x"
+		${bin_2dx}/2dx_singleparticle/TreeRefinement_prepare_big.exe --number $x
+	end
+else
+	${bin_2dx}/2dx_singleparticle/TreeRefinement.exe --mode 1
+endif
+
+if ( ${tree_level_sp2dx} == "0" ) then
+	python ${bin_2dx}/2dx_singleparticle/sim_tiltang_plotter.py "$cont_folder_sp2dx/Div_output/cc_ang.txt" "$cont_folder_sp2dx/Div_output/cc_ang.pdf"
+	python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/Div_output/cc_ang.pdf" "CC-Ang plot" "$scriptname" 0
+endif
+
+${bin_2dx}/2dx_singleparticle/TreeRefinement.exe --mode 2
+
+
+${bin_2dx}/2dx_singleparticle/TreeRefinement.exe --mode 3
+
+python ${bin_2dx}/2dx_singleparticle/convergence_plotter.py "SCRATCH/2dx_SP_convergence.txt" "$cont_folder_sp2dx/ContainerStatsPDF/conv_t${tree_level_true_sp2dx}.pdf"
+python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/ContainerStatsPDF/conv_t${tree_level_true_sp2dx}.pdf" "Convergence Tree ${tree_level_true_sp2dx}" "$scriptname" 0
+
+python ${bin_2dx}/2dx_singleparticle/image_plotter_tree_fast.py "$cont_folder_sp2dx/ContainerStatsTXT/tree_refine_t2.txt" "$cont_folder_sp2dx/ContainerStatsPDF/tree_refine_t2.pdf"
+python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/ContainerStatsPDF/tree_refine_t2.pdf" "Container Stat T2" "$scriptname" 1
+
+python ${bin_2dx}/2dx_singleparticle/image_plotter_shift_fast.py "$cont_folder_sp2dx/Div_output/tree_shifts.txt" "$cont_folder_sp2dx/Div_output/tree_shifts.pdf"
+python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/Div_output/tree_shifts.pdf" "Tree Shifts" "$scriptname" 1
+
+#mv "image_stat_tree.pdf" "image_stat_tree_${tree_level_true_sp2dx}.pdf"
+#${bin_2dx}/2dx_singleparticle/ShowResults.exe "image_stat_tree_${tree_level_true_sp2dx}.pdf" "Tree Stat ${tree_level_true_sp2dx}" "$scriptname" 0
+#python ${bin_2dx}/2dx_singleparticle/unique_result_file.py "$scriptname"
+
+echo "<<@progress: 100>>"
+

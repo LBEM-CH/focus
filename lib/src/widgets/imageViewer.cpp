@@ -16,8 +16,12 @@ imageViewer::imageViewer(const QString &fileName, confData *conf, QWidget *paren
   setAttribute(Qt::WA_DeleteOnClose);
 
   data = conf;
+  
+  std::cout << "hi 1" << std::endl;
 
   image = new largeMRC(fileName,this);
+  
+   std::cout << "hi 2" << std::endl;
 
   QGridLayout *layout = new QGridLayout(this);
   layout->setMargin(0);

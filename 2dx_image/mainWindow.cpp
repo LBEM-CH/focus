@@ -94,8 +94,8 @@ mainWindow::mainWindow(char *dirArg)
   data->setDir("application",applicationDir);
   data->setDir("plugins",QDir(applicationDir.absolutePath() + "/../plugins"));
   data->setDir("tools",data->getDir("plugins") + "/tools/");
-  data->setDir("standardScripts",applicationDir.absolutePath() + "/scripts-standard/");
-  data->setDir("customScripts",applicationDir.absolutePath() + "/scripts-custom/");
+  data->setDir("standardScripts",applicationDir.absolutePath() + "/../kernel/2dx_image" + "/scripts-standard/");
+  data->setDir("customScripts",applicationDir.absolutePath() + "/../kernel/2dx_image" + "/scripts-custom/");
   data->setDir("config",configDir);
   data->setDir("project",QDir(workingDir + "/../"));
   data->setDir("icons",data->getDir("config") + "/resource");

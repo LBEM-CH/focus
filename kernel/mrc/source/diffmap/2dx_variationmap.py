@@ -51,6 +51,14 @@ def get_variationmaps(map_pairs):
     varmap_list = [get_variation_from_pair(pair) for pair in map_pairs ]
     return varmap_list
 
+def plot_varmaps(varmap_list, plot_range=0.0):
+    "plots the variation maps in the list"
+    i = 0
+    for varmap in varmap_list:
+        plotImage(varmap, plot_range, 'varmap'+str(i), True)
+        i = i+1
+    
+
 def get_maxmap(varmap_list):
     "returns max of all variations maps"
     varmap_array = np.array(varmap_list)
@@ -110,6 +118,9 @@ if __name__ == '__main__':
     parser.add_option("-o", "--output_file", 
             default="varmap.mrc", 
             help="is the filename that the variation map is written to")
+    parser.add_option("--plot-range", 
+            type="float",
+            help="specfies the range that is plotted in the diffmap i.e. [-val, val]")
     (options, args) = parser.parse_args()
     if len(args) == 0:
         selection_dir = os.getcwd()
@@ -121,6 +132,10 @@ if __name__ == '__main__':
     map_pairs = get_map_pairs(map_list)
     map_pairs = remove_mismatched_pairs(map_pairs)
     varmap_list = get_variationmaps(map_pairs)
+    if options.plot_range: 
+        plot_varmaps(varmap_list, options.plot_range)
+    else:
+        plot_varmaps(varmap_list)
     varmap = get_varmap(varmap_list, options.measure, options.global_threshold)
     mrc_image = get_mrc_image(map_list[0])
     #varmap_output_file =  os.path.join(selection_dir, options.output_file) 

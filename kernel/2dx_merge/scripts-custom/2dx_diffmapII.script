@@ -146,6 +146,7 @@ if ( ! -d ${diffmap_dir} ) then
     echo "::The directory diffmap does not exist and therefore will be created."
     mkdir ${diffmap_dir}
 else
+#TODO: uncomment
     rm -rf ${diffmap_dir}
     mkdir ${diffmap_dir}
 endif
@@ -344,7 +345,7 @@ ${proc_2dx}/linblock "2dx_diffmap_sub - avrgamphs with t-test"
 echo "<<@progress: 24>>"
 #
 #TODO: set ${diffmap_nsplits} in GUI
-set diffmap_nsplits = 3
+set diffmap_nsplits = 3 
 #
 if ( "${diffmap_det_significance}" == "y" ) then
     if( "${diffmap_domain}" == "fourier"  && ${unitcell_equal} == 1 ) then

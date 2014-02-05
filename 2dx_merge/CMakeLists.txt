@@ -102,7 +102,8 @@ set(CMAKE_DEBUG_POSTFIX -dbg)
 
 
 # generate moc files
-QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+#QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS} OPTIONS)
 
 # generate headers from the ui files
 QT4_WRAP_UI(2DX_MERGE_UI_HDRS ${2DX_MERGE_UI_FORMS})
@@ -143,7 +144,7 @@ get_propagate_deps(conf widgets mrcImage extentions)
 # luckily FIND_PACKAGE prepared 2DX_MERGE_LIBRARIES variable for us:
 #
 
-find_package(Boost COMPONENTS serialization system filesystem program_options REQUIRED)
+#find_package(Boost COMPONENTS serialization system filesystem program_options REQUIRED)
 
 
 target_link_libraries(${EXETITLE} conf widgets mrcImage extentions ${2DX_MERGE_LIBRARIES})

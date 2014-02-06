@@ -34,6 +34,7 @@
 # DISPLAY: beamtilt
 # DISPLAY: RESMAX
 # DISPLAY: ctfplotresmax
+# DISPLAY: imagename_original
 # DISPLAY: CS
 # DISPLAY: KV
 # DISPLAY: phacon

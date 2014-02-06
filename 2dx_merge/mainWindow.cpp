@@ -944,6 +944,25 @@ void mainWindow::launchEuler()
   }
 }
 
+void mainWindow::closeEvent(QCloseEvent *event)
+{
+  if(!mainData->isModified())
+    event->accept();
+  else
+  {
+    int choice = QMessageBox::question(this,tr("Confirm Exit"),tr("Data not saved, exit?"),tr("Save && Quit"),tr("Quit Anyway"),QString("Cancel"),0,1);
+    if(choice == 0)
+    {
+      mainData->save();
+      event->accept();
+    }
+    else if(choice == 1)
+      event->accept();
+    else if(choice == 2)
+      event->ignore();
+  }
+}
+
 void mainWindow::launchFileBrowser()
 {
     QString path = QDir::toNativeSeparators(mainData->getDir("working"));

@@ -192,7 +192,9 @@ class mainWindow : public QMainWindow
   
   public:
   mainWindow(const QString &directory, QWidget *parent = NULL);
-
+  
+  protected:
+  void closeEvent(QCloseEvent *event);
 };
 
 #endif

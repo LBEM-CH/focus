@@ -125,7 +125,7 @@ mainWindow::mainWindow(char *dirArg)
   data->addApp("logBrowser", data->getDir("application") + "/../" + "bin/" + "2dx_logbrowser");
 
   data->setURL("help","http://2dx.org/documentation/2dx-software");
-  data->setURL("bugReport","http://2dx.org/documentation/2dx-bug-tracker");
+  data->setURL("bugReport","https://github.com/C-CINA/2dx/issues");
 
   data->addImage("appImage", new QImage(data->getDir("application") + "/resource/" + "icon.png"));
 

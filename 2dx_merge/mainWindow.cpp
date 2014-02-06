@@ -110,7 +110,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   mainData->addApp("logBrowser", mainData->getDir("application") + "/../" + "bin/" + "2dx_logbrowser");
 
   mainData->setURL("help","http://2dx.org/documentation/2dx-software");
-  mainData->setURL("bugReport","http://2dx.org/documentation/2dx-bug-tracker");
+  mainData->setURL("bugReport","https://github.com/C-CINA/2dx/issues");
 
   if(!setupIcons(mainData, mainData->getDir("resource"))) cerr<<"Error loading images."<<mainData->getDir("resource").toStdString()<<endl;
 

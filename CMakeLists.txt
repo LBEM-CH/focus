@@ -80,30 +80,39 @@ set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-include(FindSubversion)
-FIND_PACKAGE(Subversion)
+#include(FindSubversion)
+#FIND_PACKAGE(Subversion)
 
 #EXECUTE_PROCESS(COMMAND svn log -l10 ${CMAKE_SOURCE_DIR}
 #	RESULT_VARIABLE check_wc)
 
 #exec_program(./test.sh ${CMAKE_SOURCE_DIR})
 
-EXECUTE_PROCESS(COMMAND svn info ${CMAKE_SOURCE_DIR}
-	RESULT_VARIABLE check_wc)
-message(STATUS "SVN dummy return: ${check_wc}")
+#EXECUTE_PROCESS(COMMAND svn info ${CMAKE_SOURCE_DIR}
+#	RESULT_VARIABLE check_wc)
+#message(STATUS "SVN dummy return: ${check_wc}")
 
-set(2dx_SVN_REVISION_NUMBER unknown)
+#set(2dx_SVN_REVISION_NUMBER unknown)
 
-IF(NOT ${check_wc} EQUAL 0)
-	MESSAGE(STATUS "No svn revision found")
-ELSE(NOT ${check_wc} EQUAL 0)
-	IF(SUBVERSION_FOUND)
-		Subversion_WC_INFO(${CMAKE_SOURCE_DIR} myapp)
-		set(2dx_SVN_REVISION_NUMBER ${myapp_WC_REVISION})
-	ENDIF(SUBVERSION_FOUND)
-ENDIF(NOT ${check_wc} EQUAL 0)
+#IF(NOT ${check_wc} EQUAL 0)
+#	MESSAGE(STATUS "No svn revision found")
+#ELSE(NOT ${check_wc} EQUAL 0)
+#	IF(SUBVERSION_FOUND)
+#		Subversion_WC_INFO(${CMAKE_SOURCE_DIR} myapp)
+#		set(2dx_SVN_REVISION_NUMBER ${myapp_WC_REVISION})
+#	ENDIF(SUBVERSION_FOUND)
+#ENDIF(NOT ${check_wc} EQUAL 0)
 
-message(STATUS "SVN revision number: ${2dx_SVN_REVISION_NUMBER}")
+#message(STATUS "SVN revision number: ${2dx_SVN_REVISION_NUMBER}")
+
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+#message(${GIT_COMMIT_HASH})
 
 
 set(2DX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "The path of the 2dx root source directory.")
@@ -130,9 +139,7 @@ install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_BINARY_DIR} )
 
 configure_file("changes.htm.in" "changes.htm")
 configure_file("kernel/config/2dx_image/about.htm.in" "about.htm")
-
 configure_file("build_scripts/make_pkg_on_jenkins.sh.in" "make_pkg_on_jenkins.sh")
-
 configure_file("build_scripts/add_version_to_src.sh.in" "add_version_to_src.sh")
 
 file(GLOB DES installation/*.desktop)

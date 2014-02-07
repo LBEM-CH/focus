@@ -13,6 +13,8 @@
 #
 # SORTORDER: 42
 #
+#$end_local_vars
+#
 # MANUAL: Single Particle Refinement (still under construction)
 #
 # DISPLAY: particle_size_sp2dx
@@ -24,7 +26,6 @@
 # DISPLAY: particle_masking_params_sp2dx
 #
 #
-#$end_local_vars
 #
 set bin_2dx = ""
 set proc_2dx = ""

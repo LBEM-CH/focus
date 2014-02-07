@@ -13,6 +13,8 @@
 #
 # SORTORDER: 30
 #
+#$end_local_vars
+#
 # MANUAL: Single Particle Refinement (still under construction)
 #
 # DISPLAY: particle_size_sp2dx
@@ -28,7 +30,6 @@
 # DISPLAY: lp_volume_filter_init_sp2dx
 # DISPLAY: show_sights_sp2dx
 #
-#$end_local_vars
 #
 set bin_2dx = ""
 set proc_2dx = ""

@@ -38,6 +38,7 @@
 # MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_image-algo-2.jpg">
 #
 # DISPLAY: imageorigin
+# DISPLAY: imagename_original
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
 # DISPLAY: imagenumber

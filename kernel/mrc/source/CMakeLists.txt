@@ -201,6 +201,7 @@ add_subdirectory(endianness)
 add_subdirectory(ctf)
 add_subdirectory(maximum_likelihood)
 add_subdirectory(diffmap)
+add_subdirectory(py_util)
 
 
 ###############################################################################

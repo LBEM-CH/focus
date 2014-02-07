@@ -35,6 +35,7 @@
 # DISPLAY: periodogramNumsubsteps
 # DISPLAY: imagenumber
 # DISPLAY: imagename
+# DISPLAY: imagename_original
 # DISPLAY: nonmaskimagename
 # DISPLAY: imageorigin
 # DISPLAY: imagesidelength

@@ -28,6 +28,7 @@
 # DISPLAY: RESMIN
 # DISPLAY: ALAT
 # DISPLAY: tempfac
+# DISPLAY: imagename_original
 # DISPLAY: SYM
 # DISPLAY: phaori
 # DISPLAY: phaoriFouFilter

@@ -1,0 +1,134 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: TTF Correction Script                                              #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2007                                             #
+# Last Modification: 10/01/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 30
+#
+# MANUAL: Switches to TTF-correction for all images with a tilt angle higher then a given value and reruns Unbend2, CTF-correction and GenerateMap
+#
+# DISPLAY: min_ttf
+#
+#$end_local_vars
+#
+# This defines some variables that we might need:
+set proc_2dx = ""
+set bin_2dx = ""
+set app_2dx_image = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+set min_ttf = ""
+#
+#$end_vars
+#
+# This sets the scriptname variable:
+set scriptname = TTF_Correction
+#
+# This removes the old logfile, so that a new fresh one can be created:
+\rm -f LOGS/${scriptname}.results
+#
+# This initializes the ccp4 environment, and other variables.
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+# This advances the progress bar to the 1% position:
+echo "<<@progress: 1>>"
+#
+# This creates all needed subdirectories in the current merge directory, in case they are missing:
+source ${proc_2dx}/2dx_makedirs 
+#
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+set tmp = `wc -l 2dx_merge_dirfile.dat`
+set images_num = `echo ${tmp} | cut -d\  -f1`
+set images_increment = `echo ${images_num} | awk '{ s = 80.0 / $1 } END { print s }'`
+set images_current = 10.0
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "<<@progress: 10>>"
+#
+# This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
+foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
+  echo "::Working on ${newdir}"
+  # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
+  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+  echo "set dummy = 1" >> LOGS/${scriptname}.results
+  set images_progres = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
+  echo "<<@progres: ${images_progres}>>"
+  set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
+  #
+  ################################################################################
+  ######### Modify only the section below ########################################
+  ################################################################################
+  #
+  
+  if (`python ${bin_2dx}/py_util/getDoTTF.py ${min_ttf} ${newdir}` == "True") then
+    echo "::TTF correction on ${newdir}"
+    echo "set ctf_ttf = TTF" >> LOGS/${scriptname}.results
+  else
+    echo "set ctf_ttf = CTF" >> LOGS/${scriptname}.results
+  endif
+  
+  #
+  ################################################################################
+  ######### Modify only the section above ########################################
+  ################################################################################
+  #
+  # This tells 2dx_merge that the output for the image is done:
+  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+end
+
+# Second loop doing the correction
+foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
+  echo "::Working on ${newdir}"
+  # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
+  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+  echo "set dummy = 1" >> LOGS/${scriptname}.results
+  set images_progres = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
+  echo "<<@progres: ${images_progres}>>"
+  set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
+  #
+  ################################################################################
+  ######### Modify only the section below ########################################
+  ################################################################################
+  #
+
+   ${app_2dx_image} ${newdir} "2dx_unbend2"
+   ${app_2dx_image} ${newdir} "2dx_applyCTF"
+   ${app_2dx_image} ${newdir} "2dx_generateMAP"
+
+  #
+  ################################################################################
+  ######### Modify only the section above ########################################
+  ################################################################################
+  #
+  # This tells 2dx_merge that the output for the image is done:
+  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+end
+#
+# Move the progress bar to 100%:
+echo "<<@progress: 100>>"
+#
+# Leave a message on the logfile that the script finished:
+${proc_2dx}/linblock "${scriptname} finished correctly."
+#

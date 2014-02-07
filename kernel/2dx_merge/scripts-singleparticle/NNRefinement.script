@@ -13,6 +13,7 @@
 #
 # SORTORDER: 80
 #
+#$end_local_vars
 #
 # DISPLAY: particle_size_sp2dx
 # DISPLAY: symmetry_sp2dx
@@ -54,7 +55,6 @@
 # DISPLAY: lp_volume_filter_nn_sp2dx
 #
 #
-#$end_local_vars
 #
 set bin_2dx = ""
 set proc_2dx = ""

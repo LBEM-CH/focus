@@ -13,11 +13,12 @@
 #
 # SORTORDER: 20
 #
+#$end_local_vars
+#
 # MANUAL: Single Particle Refinement (still under construction)
 #
 # DISPLAY: cont_folder_sp2dx
 #
-#$end_local_vars
 #
 set bin_2dx = ""
 set proc_2dx = ""

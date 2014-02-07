@@ -25,8 +25,7 @@ set bin_2dx = ""
 set app_2dx_image = ""
 set SCRATCH_DISK = ""
 set FFTIR_DISK = ""
-
-set min_ttf
+set min_ttf = ""
 #
 #$end_vars
 #
@@ -78,101 +77,46 @@ foreach dirfile ( ${dirlist} )
   ######### Modify only the section below ########################################
   ################################################################################
   #
-  # Use the following to invert the CTF in all directories, so that cryo setting is valid:
-  # echo "set ctfrev = y" >> LOGS/${scriptname}.results
-
-  python ${bin_2dx}/py_util/pyutil_test.py
-
-  # Use the following to activate the synthetic unbending in all directories:
-  # echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
-  # echo "set tempkeep = n" >> LOGS/${scriptname}.results
   
-  # Use the following to set have the resolution of the Nyquist frequency automatically determined:
-  # echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
-
-  # Use the following to set all tilt angle and phase origin values to zero:
-  # echo "set TAXA = 0.0" >> LOGS/${scriptname}.results
-  # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
-  # echo "set phaori = 0.0,0.0" >> LOGS/${scriptname}.results
-  # echo "set phaoriFouFilter = 0.0,0.0" >> LOGS/${scriptname}.results
-  # echo "set stepdigitizer = 7.0" >> LOGS/${scriptname}.results
-  # echo "set maska = 17.0" >> LOGS/${scriptname}.results
-  # echo "set maskb01 = 18.0" >> LOGS/${scriptname}.results
-  # echo "set maskb02 = 20.0" >> LOGS/${scriptname}.results
-  # echo "set boxa1 = 400.0" >> LOGS/${scriptname}.results
-  # echo "set boxa2 = 1200.0" >> LOGS/${scriptname}.results
-  # echo "set boxb1 = 350.0" >> LOGS/${scriptname}.results
-  # echo "set boxb2 = 1200.0" >> LOGS/${scriptname}.results
-  # echo "set quadrada = 9,9" >> LOGS/${scriptname}.results
-  # echo "set quadradb = 9,9" >> LOGS/${scriptname}.results
-  # echo "set ctf_ttf = TTF" >> LOGS/${scriptname}.results
-  # echo "set treatspotscan = y" >> LOGS/${scriptname}.results
-  # echo "set rot90 = n" >> LOGS/${scriptname}.results
-  # echo "set rot180 = n" >> LOGS/${scriptname}.results
-  # echo "set revhnd = n" >> LOGS/${scriptname}.results
-  # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
-  # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
-  # echo "set overwrite = y" >> LOGS/${scriptname}.results
-  # echo "set ccunbend_program = 0" >> LOGS/${scriptname}.results
-
-  # echo "set defocus_res_max = 5.0" >> LOGS/${scriptname}.results
-  # echo "set imageorigin = 5" >> LOGS/${scriptname}.results
-  # echo "set df_end = 25000.0" >> LOGS/${scriptname}.results
-  # echo "set det_defocus = y" >> LOGS/${scriptname}.results
-  # echo "set det_tilt = y" >> LOGS/${scriptname}.results
-  # echo "set det_tlt_alg = 0" >> LOGS/${scriptname}.results
-
-  # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
-  # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
-
-  # Use the following to run all standard 2dx_image scripts on the selected images:
-  # ${app_2dx_image} ${newdir} '"*"'
-
-  # Use the following to apply the CTF to all selected images:
-  # ${app_2dx_image} ${newdir} "2dx_applyCTF"
-
-  # Use the following to run a few selected scripts on all selected images:
-  # ${app_2dx_image} ${newdir} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
+  if (`python ${bin_2dx}/py_util/getDoTTF.py ${min_ttf} ${newdir}` == "True") then
+    echo "::TTF correction on ${newdir}"
+    echo "set ctf_ttf = TTF" >> LOGS/${scriptname}.results
+  else
+    echo "set ctf_ttf = CTF" >> LOGS/${scriptname}.results
+  endif
   
-  #------------------------------------------------------------------------
-  # Use the following to run somme of the standard scripts again:
-  # ${app_2dx_image} ${newdir} "2dx_initialize"
-  # ${app_2dx_image} ${newdir} "2dx_initialize_files"
-  # ${app_2dx_image} ${newdir} "2dx_fftrans"
-  # ${app_2dx_image} ${newdir} "2dx_getDefTilt"
-  # ${app_2dx_image} ${newdir} "2dx_getLattice"
-  # ${app_2dx_image} ${newdir} "2dx_refineLattice"
-  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
-  # ${app_2dx_image} ${newdir} "2dx_getspots1"
-  # ${app_2dx_image} ${newdir} "2dx_unbend1"
-  # ${app_2dx_image} ${newdir} "2dx_getspots"
-  # ${app_2dx_image} ${newdir} "2dx_unbend2"
-  # ${app_2dx_image} ${newdir} "2dx_unbendSyn"
-  # ${app_2dx_image} ${newdir} "2dx_applyCTF"
-  # ${app_2dx_image} ${newdir} "2dx_max_likelihood"
-  # ${app_2dx_image} ${newdir} "2dx_generateMAP"
-  #------------------------------------------------------------------------
+  #
+  ################################################################################
+  ######### Modify only the section above ########################################
+  ################################################################################
+  #
+  # This tells 2dx_merge that the output for the image is done:
+  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+end
 
-  # Use the following to recalculate the TAXA and TANGL values for all selected images:
-  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
- 
-  # Use the following to calculate the local real-space lattice for each selected image:
-  # ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
-  
-  # Use the following, to set the defocus refinement option to "phases alone", for each selected image:
-  # echo "set ctfsearch_iphase = 2" >> LOGS/${scriptname}.results
-  # echo "set ctfsearch_ncyc = 10" >> LOGS/${scriptname}.results
-  # echo "set ctfsearch_df_step = 100" >> LOGS/${scriptname}.results
-  # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
+# Second loop doing the correction
+foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
+  echo "::Working on ${newdir}"
+  # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
+  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+  echo "set dummy = 1" >> LOGS/${scriptname}.results
+  set images_progres = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
+  echo "<<@progres: ${images_progres}>>"
+  set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
+  #
+  ################################################################################
+  ######### Modify only the section below ########################################
+  ################################################################################
+  #
 
-  # Use the following, to set the defocus refinement script to backup modus, for each selected image:
-  # echo "set defocus_direction = 1" >> LOGS/${scriptname}.results
-  # Then use the following, to backup the defocus values for each selected image:
-  # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
+   ${app_2dx_image} ${newdir} "2dx_unbend2"
+   ${app_2dx_image} ${newdir} "2dx_applyCTF"
+   ${app_2dx_image} ${newdir} "2dx_generateMAP"
 
-  # Use the following, to refine the defocus for each selected image:
-  # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
-  
   #
   ################################################################################
   ######### Modify only the section above ########################################

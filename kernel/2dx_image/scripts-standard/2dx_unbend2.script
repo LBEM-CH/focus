@@ -39,7 +39,6 @@
 # DISPLAY: radlim
 # DISPLAY: domask
 # DISPLAY: ctf_ttf
-# DISPLAY: ttfcorfirst
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
@@ -97,7 +96,6 @@ set domask = ""
 set TLTAXIS = ""
 set TLTANG = ""
 set TANGL = ""
-set ttfcorfirst = ""
 set det_tilt = ""
 set ctf_ttf = ""
 set refori = ""
@@ -123,6 +121,9 @@ set RP_6 = ""
 #
 #$end_vars
 #
+
+set ttfcorfirst = "n"
+
 set scriptname = 2dx_unbend2
 \rm -f LOGS/${scriptname}.results
 #

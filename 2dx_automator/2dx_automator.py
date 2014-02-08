@@ -588,6 +588,7 @@ class Auto2dxGUI(Frame):
 		os.system(command_2dx_image)
 		
 		self.watcher.set_image_number(image_2dx_name, image_count)
+		self.watcher.set_orignal_filename(image_2dx_name, self.image_names[i])
 		
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_initialize"' + "'" 
 		os.system(command_2dx_image)

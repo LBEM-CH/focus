@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-#from pylab import plt, plot, subplot, figure, hist
 
 from Tkinter import *
 import tkFileDialog
@@ -17,7 +16,6 @@ from Add2dxImageWatcher import *
 
 import os
 import datetime
-
 
 n = 508
 n_small = 390
@@ -213,7 +211,6 @@ class Auto2dxGUI(Frame):
 				
 		os.makedirs(dia_folder)
 		
-		#core_name = self.image_names[i].split(".")[0]
 		core_name = self.image_dirs[i].split("/")[-1]
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/ManualMasking-CCmap.mrc", dia_folder + "/image.mrc")
 		self.watcher.copy_image_if_there(self.image_dirs[i] + "/CUT/" + core_name + ".marked.merge.ps.mrc", dia_folder + "/defoci.mrc")
@@ -240,10 +237,12 @@ class Auto2dxGUI(Frame):
 		
 		self.watcher.lock_eman2.release()
 	
+	
 	def regenerateDiaImages(self):
 		i = self.index_selected
 		self.updateImages(i)
 		self.indexChanged()
+		
 		
 	def regenerateALLMaps(self):
 		if tkMessageBox.askyesno("Map regeneration", "Do you want to regenerate all image maps?\n\nDo you want to continue?"):
@@ -254,7 +253,6 @@ class Auto2dxGUI(Frame):
 				if not os.path.exists(dia_folder):
 					continue
 			
-				#core_name = self.image_names[i].split(".")[0]
 				core_name = self.image_dirs[i].split("/")[-1]
 				if os.path.exists(self.image_dirs[i] + "/m" + core_name + "-p1.mrc"):
 					self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
@@ -267,49 +265,7 @@ class Auto2dxGUI(Frame):
 					os.system("e2proc2d.py " + "map.mrc" + " " + "map.png" )
 					os.system("convert " + "map.png " + "map.gif" )
 					os.chdir(old_path)
-				#if os.path.exists(self.image_dirs[i] + "/m" + core_name + "_ref.mrc"):
-				#	self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "_ref.mrc", dia_folder + "/ref.mrc")
-				#elif os.path.exists(self.image_dirs[i] + "/" + core_name + "_ref.mrc"):
-				#	self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "_ref.mrc", dia_folder + "/ref.mrc")
-				#if os.path.exists(dia_folder + "/ref.mrc"):
-				#	os.chdir(dia_folder)
-				#	os.system("e2proc2d.py " + "ref.mrc" + " " + "ref.png" )
-				#	os.system("convert " + "ref.png " + "ref.gif" )
-				#	os.chdir(old_path)
 			self.indexChanged()
-		
-#	def regenerateMaps(self):
-#		i = self.index_selected
-#		dia_folder = self.image_dirs[i] + "/automation_output"
-#		
-#		core_name = self.image_names[i].split(".")[0]
-#		
-#		if os.path.exists(self.image_dirs[i] + "/m" + core_name + "-p1.mrc"):
-#			self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
-#		else:
-#			self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "-p1.mrc", dia_folder + "/map.mrc")
-#		
-#		old_path = os.getcwd()
-#		os.chdir(dia_folder)
-#		
-#		if os.path.exists(dia_folder + "/map.mrc"):
-#			os.chdir(dia_folder)
-#			os.system("e2proc2d.py " + "map.mrc" + " " + "map.png" )
-#			os.system("convert " + "map.png " + "map.gif" )
-#			os.chdir(old_path)
-#			
-#		if os.path.exists(self.image_dirs[i] + "/m" + core_name + "_ref.mrc"):
-#			self.watcher.copy_image_if_there(self.image_dirs[i] + "/m" + core_name + "_ref.mrc", dia_folder + "/ref.mrc")
-#		elif os.path.exists(self.image_dirs[i] + "/" + core_name + "_ref.mrc"):
-#			self.watcher.copy_image_if_there(self.image_dirs[i] + "/" + core_name + "_ref.mrc", dia_folder + "/ref.mrc")
-#		
-#		if os.path.exists(dia_folder + "/ref.mrc"):
-#			os.chdir(dia_folder)
-#			os.system("e2proc2d.py " + "ref.mrc" + " " + "ref.png" )
-#			os.system("convert " + "ref.png " + "ref.gif" )
-#			os.chdir(old_path)
-#			
-#		self.indexChanged()
 		
 	
 	def getInfoString(self, folder):
@@ -455,6 +411,7 @@ class Auto2dxGUI(Frame):
 			
 		self.indexChanged()
 		
+		
 	def indexChanged(self):
 		
 		if len(self.image_dirs) == 0:
@@ -481,21 +438,7 @@ class Auto2dxGUI(Frame):
 			self.map_label.configure(image=self.map_image)
 		else:
 			self.map_label.configure(image=self.default_tkimage_small)
-		
-		
-#		if self.ref_mode:
-#			if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/ref.gif"):
-#				self.ref_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/ref.gif").resize((n_small,n_small),Image.ANTIALIAS))
-#				self.ref_label.configure(image=self.ref_image)
-#			else:
-#				self.ref_label.configure(image=self.default_tkimage_small)
-#		else:
-#			if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/map.gif"):
-#				self.ref_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/map.gif").resize((n_small,n_small),Image.ANTIALIAS))
-#				self.ref_label.configure(image=self.ref_image)
-#			else:
-#				self.ref_label.configure(image=self.default_tkimage_small)
-		
+
 		if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/defoci_axis.gif"):
 			self.def_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/defoci_axis.gif").resize((n,n),Image.ANTIALIAS))
 			self.def_label.configure(image=self.def_image)
@@ -546,26 +489,7 @@ class Auto2dxGUI(Frame):
 		if tkMessageBox.askyesno("Stop Automation", "Do you realy want to stop the automation?"):
 			self.is_running = False
 			self.status.configure(text="Automation not running", fg="red")
-			
-#	def automerge(self):
-#		print "automerge"
-#		i = self.index_selected
-#		tmp = self.image_dirs[i].split("/")
-#		image_dir_relative = tmp[-2] + "/" +  tmp[-1]
-#		print image_dir_relative
-#		
-#		dir_file_name = self.output_dir + "/merge/2dx_automerge_dirfile.dat"
-#		dirfile = open(dir_file_name, "w")
-#		dirfile.write(image_dir_relative + "\n")
-#		dirfile.close()
-#		
-#		command = "2dx_merge " + self.output_dir + " 2dx_refine " + "2dx_automerge_dirfile.dat"
-#		print command
-#		os.system(command)
-#		
-#		command = "2dx_merge " + self.output_dir + " 2dx_generateImageMaps " + "2dx_automerge_dirfile.dat"
-#		print command
-#		os.system(command)
+
 		
 	def reprocess2dx(self, i):
 		self.watcher.lock_2dx.acquire()
@@ -577,10 +501,8 @@ class Auto2dxGUI(Frame):
 		
 		image_2dx_name = self.watcher.outfolder + "/automatic/" + protein_name + str(image_count)
 		os.makedirs(image_2dx_name)
-		#shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + filename )
 		shutil.copyfile( self.watcher.infolder + "/" + self.image_names[i], image_2dx_name + "/" + protein_name + str(image_count) + ".mrc" )
 		shutil.copyfile( self.watcher.outfolder + "/2dx_master.cfg", image_2dx_name + "/2dx_image.cfg" )
-		
 		
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize"' + "'" 
 		os.system(command_2dx_image)
@@ -588,6 +510,7 @@ class Auto2dxGUI(Frame):
 		os.system(command_2dx_image)
 		
 		self.watcher.set_image_number(image_2dx_name, image_count)
+		self.watcher.set_orignal_filename(image_2dx_name, self.image_names[i])
 		
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_initialize"' + "'" 
 		os.system(command_2dx_image)
@@ -629,6 +552,7 @@ class Auto2dxGUI(Frame):
 		os.chdir(old_path)
 		self.watcher.lock_2dx.release()
 		
+		
 	def reprocessCaller(self,i):
 		if os.path.exists(self.image_dirs[i]):
 			shutil.rmtree(self.image_dirs[i])
@@ -636,12 +560,7 @@ class Auto2dxGUI(Frame):
 		self.reprocess2dx(i)
 		self.updateImages(i)
 		
-#	def changeMapMode(self):
-#		self.ref_mode = not self.ref_mode
-#		self.indexChanged()
-#		print "change ref/map mode"
-		
-		
+
 	def reprocessImage(self):
 		i = self.index_selected
 		dia_folder = self.image_dirs[i] + "/automation_output"
@@ -653,7 +572,6 @@ class Auto2dxGUI(Frame):
 		self.indexChanged()
 		
 		thread.start_new_thread(self.reprocessCaller, (i,))
-		#self.reprocessCaller(i)
 		
 	
 	def useButtonClicked(self):
@@ -669,6 +587,7 @@ class Auto2dxGUI(Frame):
 				skip.close()
 		self.indexChanged()
 
+
 	def showIQ(self):
 		i = self.index_selected
 		command = "evince " + self.image_dirs[i] + "/PS/2dx_plotreska_canonical.ps"
@@ -679,10 +598,7 @@ class Auto2dxGUI(Frame):
 		self.parent.title("2dx_automator GUI (alpha_2)")
 	
 		self.getFolders()
-		
-		#self.input_dir = "/home/scherers/Desktop/k2_mlok1/test_in"
-		#self.output_dir = "/home/scherers/Desktop/k2_mlok1/test_out"
-		
+	
 		in_folder = self.input_dir
 		out_folder = self.output_dir
 		logfile = out_folder + "/automatic_import_log.txt"
@@ -734,12 +650,6 @@ class Auto2dxGUI(Frame):
 		self.reload_button = Button(self.lowleftframe ,text='Regenerate Diagnostic Images', width=40, command=self.regenerateDiaImages)
 		self.reload_button.pack(padx=20, pady=5)
 		
-#		self.reload_maps_button = Button(self.lowleftframe ,text='Regenerate Maps', width=40, command=self.regenerateMaps)
-#		self.reload_maps_button.pack(padx=20, pady=5)
-		
-#		self.merge_button = Button(self.lowleftframe ,text='Automerge', width=40, command=self.automerge)
-#		self.merge_button.pack(padx=20, pady=5)
-		
 		self.reload_maps_button = Button(self.lowleftframe ,text='Regenerate ALL Maps', width=40, command=self.regenerateALLMaps)
 		self.reload_maps_button.pack(padx=20, pady=5)
 		
@@ -787,9 +697,6 @@ class Auto2dxGUI(Frame):
 		self.default_image_small = Image.new("RGB", (n_small,n_small), "white")
 		self.default_tkimage_small = ImageTk.PhotoImage(self.default_image_small)
 		
-		#self.ref_label = Label(self.centralrightframe3, image=self.default_tkimage_small)
-		#self.ref_label.pack(side=BOTTOM, padx=40, pady=10)
-		
 		self.map_label = Label(self.centralrightframe3, image=self.default_tkimage_small)
 		self.map_label.pack(side=BOTTOM, padx=40, pady=5)
 				
@@ -808,11 +715,8 @@ def main():
 	
 	app = Auto2dxGUI(root)
 	
-#	def greet(*ignore): app.changeMapMode()
-#	root.bind('<Shift_L>', greet)
-#	root.bind('<Shift_R>', greet)
-	
 	root.mainloop()
+	
 	
 if __name__ == '__main__':
 	main() 

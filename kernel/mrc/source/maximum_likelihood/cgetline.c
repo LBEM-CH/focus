@@ -13,10 +13,10 @@ char  *  cgetline(FILE *imgcfg, char *strchar)
 	st5=(char *)calloc(200,sizeof(char));
 	st6=(char *)calloc(200,sizeof(char));
 
-
-
-	fgets(st,200,imgcfg);
-
+	if ( fgets(st,200,imgcfg) == NULL)
+	{
+		perror ("Error reading file");
+	}
 
 	if(feof(imgcfg)==0)
 	{  
@@ -28,7 +28,11 @@ char  *  cgetline(FILE *imgcfg, char *strchar)
 
 		while(feof(imgcfg)==0 && ( strncmp(st4,"set",3)!=0 ||  strncmp(st1, strchar,strlen(strchar))!=0))
 		{
-			fgets(st,200,imgcfg);
+			if ( fgets(st,200,imgcfg) == NULL )
+			{
+				perror ("Error reading file");
+			}
+			
 			strcpy(st4,"");
 			strncat(st4,st,3);
 

@@ -287,12 +287,24 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 
 
 		input[0]=fopen("stack_whit.binary","r");
-		input[1]=fopen("stack_ctf.binary","r"); 
-		fread(temp_image1, sizeof(float)*nx*ny, 1, input[0]);
-		fread(temp_image2, sizeof(float)*nx*ny, 1, input[1]);
+		input[1]=fopen("stack_ctf.binary","r");
+		
+		size_t result;
+		result = fread(temp_image1, sizeof(float)*nx*ny, 1, input[0]);
+		if (result != 1) 
+		{
+			fputs ("Reading error",stderr);
+			exit(3);
+		}
+		
+		result = fread(temp_image2, sizeof(float)*nx*ny, 1, input[1]);
+		if (result != 1) 
+		{
+			fputs ("Reading error",stderr);
+			exit(3);
+		}
+		
 		num_temp=Max_num;
-
-
 
 		if(feof(input[0])!=0 && feof(input[1])!=0)
 		{   printf("there are not particles extracted from the files \n");
@@ -310,8 +322,20 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 						Image_CTF[IDX(i,j,nx,ny)+num_temp*nx*ny]=temp_image2[IDX(i,j,nx,ny)];
 					}
 				num_temp++;
-				fread(temp_image1, sizeof(float)*nx*ny, 1, input[0]);
-				fread(temp_image2, sizeof(float)*nx*ny, 1, input[1]);
+				
+				result = fread(temp_image1, sizeof(float)*nx*ny, 1, input[0]);
+				if (result != 1) 
+				{
+					fputs ("Reading error",stderr);
+					exit(3);
+				}
+				
+				result = fread(temp_image2, sizeof(float)*nx*ny, 1, input[1]);
+				if (result != 1) 
+				{
+					fputs ("Reading error",stderr);
+					exit(3);
+				}
 			}                  
 
 			Num_images+=num_temp;

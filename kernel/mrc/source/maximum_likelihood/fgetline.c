@@ -13,7 +13,10 @@ int  fgetline(FILE *imgcfg, char *strchar, float *x)
 	st6=(char *)calloc(200,sizeof(char));
 
 
-	fgets(st,200,imgcfg);
+	if ( fgets(st,200,imgcfg) == NULL )
+	{
+		perror ("Error reading file");
+	}
 
 	if(feof(imgcfg)==0)
 	{  
@@ -21,12 +24,17 @@ int  fgetline(FILE *imgcfg, char *strchar, float *x)
 		strncat(st4,st,3);
 
 		strcpy(st1,"");
-		strncat(st1,st+4,200);
-
-
+		
+		//strncat(st1,st+4,200);
+		st1 = const_cast<char*>((std::string(st1) + std::string(st)).c_str());
+	
 		while(feof(imgcfg)==0 && ( strncmp(st4,"set",3)!=0 ||  strncmp(st1, strchar,strlen(strchar))!=0))
 		{
-			fgets(st,200,imgcfg);
+			if ( fgets(st,200,imgcfg) == NULL )
+			{
+				perror ("Error reading file");
+			}
+			
 			strcpy(st4,"");
 			strncat(st4,st,3);
 

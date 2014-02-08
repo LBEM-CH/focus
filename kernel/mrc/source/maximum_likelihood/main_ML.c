@@ -154,8 +154,15 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	for(i=0;i<5;i++)
 		c=fgets(oneline,120,input);
 
-	fscanf(input,"%d %d %d %d %f %f %f %f %d %d %d %d",&nc,&nr,&ic,&ir,&a1,&a2,&b1,&b2,&mina,&maxa,&minb,&maxb);
-	fscanf(input,"%f",&denmax);
+	if ( fscanf(input,"%d %d %d %d %f %f %f %f %d %d %d %d",&nc,&nr,&ic,&ir,&a1,&a2,&b1,&b2,&mina,&maxa,&minb,&maxb) == EOF)
+	{
+		perror ("Error fscan failed");
+	}
+	
+	if ( fscanf(input,"%f",&denmax) == EOF )
+	{
+		perror ("Error fscan failed");
+	}
 
 	int dimension = (maxa-mina+1)*(maxb-minb+1);
 
@@ -173,10 +180,16 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	/* Read peaks into core */
 	for(i=0;i<dimension;i++)
 	{
-		fscanf(input,"%f %f %f",&x,&y,&z);
-		peak_x[i]=x+x_center;  
-		peak_y[i]=y+y_center;  
-		peak_z[i]=z;  
+		if ( fscanf(input,"%f %f %f",&x,&y,&z) != EOF )
+		{
+			peak_x[i]=x+x_center;  
+			peak_y[i]=y+y_center;  
+			peak_z[i]=z;
+		}
+		else
+		{
+			perror ("Error fscan failed");
+		}
 	}
 	fclose(input);
 

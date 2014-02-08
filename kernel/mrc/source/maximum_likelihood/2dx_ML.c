@@ -14,7 +14,6 @@
 #include <mrcImage.h>
 
 
-
 /*   All the parameters used as common variables  */ 
 float  CS, KV, RESMIN, RESMAX, DIFMID1, DIFMID2, ANGAST, DSTEP, XMAG;
 float  threshold, relative_threshold, Terminate_ML,x_center, y_center,lp_radius, min_angle, max_angle,step_angle;

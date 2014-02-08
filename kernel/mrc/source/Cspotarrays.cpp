@@ -2,7 +2,9 @@
 #include <string.h>
 #include <math.h>
 #include "Cspotarrays.h"
+
 #define MAX(v1, v2) ((v1) > (v2)? (v1) : (v2))
+
 Chkamparray::Chkamparray(void)
 {
 	int i,j;
@@ -11,7 +13,7 @@ Chkamparray::Chkamparray(void)
 		{
 			amp[i][j]=0;
 		}
-	title[0]=NULL;
+	title[0]=0;
 }
 Chkamparray::Chkamparray(char *file)
 {
@@ -65,16 +67,28 @@ void Chkamparray::readlst(char *file)
 	double a;
 	FILE *fp;
 	fp=fopen(file,"r");
-	fgets(title,100,fp);
-	for(;;)
+	if ( fgets(title,100,fp) != NULL )
 	{
-		fscanf(fp,"%d %d %lf",&h,&k,&a);
-		if(h==100)
-			break;
-		amp[h+maxdim/2][k+maxdim/2]=a;		
-		amp[-h+maxdim/2][-k+maxdim/2]=a;		
+		for(;;)
+		{
+			if ( fscanf(fp,"%d %d %lf",&h,&k,&a) != EOF )
+			{
+				if(h==100)
+					break;
+				amp[h+maxdim/2][k+maxdim/2]=a;		
+				amp[-h+maxdim/2][-k+maxdim/2]=a;
+			}
+			else
+			{
+				perror ("Error fscan failed");
+			}
+		}
+		fclose(fp);
 	}
-	fclose(fp);
+	else
+	{
+		perror ("Error reading file");
+	}
 }
 void Chkamparray::readp4lst(char *file)
 {
@@ -82,18 +96,30 @@ void Chkamparray::readp4lst(char *file)
 	double a;
 	FILE *fp;
 	fp=fopen(file,"r");
-	fgets(title,100,fp);
-	for(;;)
+	if ( fgets(title,100,fp) != NULL )
 	{
-		fscanf(fp,"%d %d %lf",&h,&k,&a);
-		if(h==100)
-			break;
-		amp[h+maxdim/2][k+maxdim/2]=a;		
-		amp[-h+maxdim/2][-k+maxdim/2]=a;		
-		amp[-k+maxdim/2][h+maxdim/2]=a;		
-		amp[k+maxdim/2][-h+maxdim/2]=a;		
+		for(;;)
+		{
+			if ( fscanf(fp,"%d %d %lf",&h,&k,&a) != EOF )
+			{
+				if(h==100)
+					break;
+				amp[h+maxdim/2][k+maxdim/2]=a;		
+				amp[-h+maxdim/2][-k+maxdim/2]=a;		
+				amp[-k+maxdim/2][h+maxdim/2]=a;		
+				amp[k+maxdim/2][-h+maxdim/2]=a;
+			}
+			else
+			{
+				perror ("Error fscan failed");
+			}
+		}
+		fclose(fp);
 	}
-	fclose(fp);
+	else
+	{
+		perror ("Error reading file");
+	}
 }
 void Chkamparray::writelst(char *file)
 {
@@ -241,18 +267,25 @@ void Chkampsigarray::readlst(char *file)
 	char t[100];
 	FILE *fp;
 	fp=fopen(file,"r");
-	fgets(t,100,fp);
-	Chkamparray::puttitle(t);
-	while(fscanf(fp,"%d %d %lf %lf",&h,&k,&a,&s)!=EOF)
+
+	if ( fgets(t,100,fp) != NULL )
 	{
-		if(h==100)
-			break;
-		Chkamparray::putamp(h,k,a);		
-		Chkamparray::putamp(-h,-k,a);		
-		sig[h+maxdim/2][k+maxdim/2]=s;		
-		sig[-h+maxdim/2][-k+maxdim/2]=s;		
+		Chkamparray::puttitle(t);
+		while(fscanf(fp,"%d %d %lf %lf",&h,&k,&a,&s)!=EOF)
+		{
+			if(h==100)
+				break;
+			Chkamparray::putamp(h,k,a);		
+			Chkamparray::putamp(-h,-k,a);		
+			sig[h+maxdim/2][k+maxdim/2]=s;		
+			sig[-h+maxdim/2][-k+maxdim/2]=s;		
+		}
+		fclose(fp);
 	}
-	fclose(fp);
+	else
+	{
+		perror ("Error reading file");
+	}
 }
 void Chkampsigarray::readp4lst(char *file)
 {
@@ -261,22 +294,29 @@ void Chkampsigarray::readp4lst(char *file)
 	char t[100];
 	FILE *fp;
 	fp=fopen(file,"r");
-	fgets(t,100,fp);
-	Chkamparray::puttitle(t);
-	while(fscanf(fp,"%d %d %lf %lf",&h,&k,&a,&s)!=EOF)
+	
+	if ( fgets(t,100,fp) != NULL )
 	{
-		if(h==100)
-			break;
-		Chkamparray::putamp(h,k,a);		
-		Chkamparray::putamp(-h,-k,a);		
-		Chkamparray::putamp(-k,h,a);		
-		Chkamparray::putamp(k,-h,a);		
-		sig[h+maxdim/2][k+maxdim/2]=s;		
-		sig[-h+maxdim/2][-k+maxdim/2]=s;		
-		sig[-k+maxdim/2][h+maxdim/2]=s;		
-		sig[k+maxdim/2][-h+maxdim/2]=s;		
+		Chkamparray::puttitle(t);
+		while(fscanf(fp,"%d %d %lf %lf",&h,&k,&a,&s)!=EOF)
+		{
+			if(h==100)
+				break;
+			Chkamparray::putamp(h,k,a);		
+			Chkamparray::putamp(-h,-k,a);		
+			Chkamparray::putamp(-k,h,a);		
+			Chkamparray::putamp(k,-h,a);		
+			sig[h+maxdim/2][k+maxdim/2]=s;		
+			sig[-h+maxdim/2][-k+maxdim/2]=s;		
+			sig[-k+maxdim/2][h+maxdim/2]=s;		
+			sig[k+maxdim/2][-h+maxdim/2]=s;		
+		}
+		fclose(fp);
 	}
-	fclose(fp);
+	else
+	{
+		perror ("Error reading file");
+	}
 }
 void Chkampsigarray::writelst(char *file)
 {
@@ -459,21 +499,34 @@ void Chkampphafomarray::readlst(char *file)
 	char t[100];
 	FILE *fp;
 	fp=fopen(file,"r");
-	fgets(t,100,fp);
-	Chkamparray::puttitle(t);
-	for(;;)
+	
+	if ( fgets(t,100,fp) != NULL )
 	{
-		fscanf(fp,"%d %d %lf %lf %lf",&h,&k,&a,&p,&f);
-		if(h==100)
-			break;
-		Chkamparray::putamp(h,k,a);		
-		Chkamparray::putamp(-h,-k,a);		
-		pha[h+maxdim/2][k+maxdim/2]=p;		
-		pha[-h+maxdim/2][-k+maxdim/2]=p;		
-		fom[h+maxdim/2][k+maxdim/2]=f;		
-		fom[-h+maxdim/2][-k+maxdim/2]=f;		
+		Chkamparray::puttitle(t);
+		for(;;)
+		{
+			if ( fscanf(fp,"%d %d %lf %lf %lf",&h,&k,&a,&p,&f) != EOF )
+			{
+				if(h==100)
+					break;
+				Chkamparray::putamp(h,k,a);		
+				Chkamparray::putamp(-h,-k,a);		
+				pha[h+maxdim/2][k+maxdim/2]=p;		
+				pha[-h+maxdim/2][-k+maxdim/2]=p;		
+				fom[h+maxdim/2][k+maxdim/2]=f;	
+				fom[-h+maxdim/2][-k+maxdim/2]=f;
+			}
+			else
+			{
+				perror ("Error fscan failed");
+			}
+		}
+		fclose(fp);
 	}
-	fclose(fp);
+	else
+	{
+		perror ("Error reading file");
+	}
 }
 void Chkampphafomarray::readp4lst(char *file)
 {
@@ -482,27 +535,39 @@ void Chkampphafomarray::readp4lst(char *file)
 	char t[100];
 	FILE *fp;
 	fp=fopen(file,"r");
-	fgets(t,100,fp);
-	Chkamparray::puttitle(t);
-	for(;;)
+	if ( fgets(t,100,fp) != NULL )
 	{
-		fscanf(fp,"%d %d %lf %lf %lf",&h,&k,&a,&p,&f);
-		if(h==100)
-			break;
-		Chkamparray::putamp(h,k,a);		
-		Chkamparray::putamp(-h,-k,a);		
-		Chkamparray::putamp(-k,h,a);		
-		Chkamparray::putamp(k,-h,a);		
-		pha[h+maxdim/2][k+maxdim/2]=p;		
-		pha[-h+maxdim/2][-k+maxdim/2]=p;		
-		pha[-k+maxdim/2][h+maxdim/2]=p;		
-		pha[k+maxdim/2][-h+maxdim/2]=p;		
-		fom[h+maxdim/2][k+maxdim/2]=f;		
-		fom[-h+maxdim/2][-k+maxdim/2]=f;		
-		fom[-k+maxdim/2][h+maxdim/2]=f;		
-		fom[k+maxdim/2][-h+maxdim/2]=f;		
+		Chkamparray::puttitle(t);
+		for(;;)
+		{
+			if ( fscanf(fp,"%d %d %lf %lf %lf",&h,&k,&a,&p,&f) != EOF )
+			{
+				if(h==100)
+					break;
+				Chkamparray::putamp(h,k,a);		
+				Chkamparray::putamp(-h,-k,a);		
+				Chkamparray::putamp(-k,h,a);		
+				Chkamparray::putamp(k,-h,a);		
+				pha[h+maxdim/2][k+maxdim/2]=p;		
+				pha[-h+maxdim/2][-k+maxdim/2]=p;		
+				pha[-k+maxdim/2][h+maxdim/2]=p;		
+				pha[k+maxdim/2][-h+maxdim/2]=p;		
+				fom[h+maxdim/2][k+maxdim/2]=f;		
+				fom[-h+maxdim/2][-k+maxdim/2]=f;		
+				fom[-k+maxdim/2][h+maxdim/2]=f;		
+				fom[k+maxdim/2][-h+maxdim/2]=f;
+			}
+			else
+			{
+				perror ("Error fscan failed");
+			}
+		}
+		fclose(fp);
 	}
-	fclose(fp);
+	else
+	{
+		perror ("Error reading file");
+	}
 }
 void Chkampphafomarray::writelst(char *file)
 {

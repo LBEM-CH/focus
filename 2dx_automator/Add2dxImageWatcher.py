@@ -69,6 +69,23 @@ class Add2dxImageWatcher(WatcherBase):
 		f_out.writelines(lines_out)
 		f_out.close()
 		
+	def set_orignal_filename(self, folder, name):
+		f = open(folder + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if not l.startswith("set imagename_original ="):
+				lines_out.append(l)
+			else:
+				toadd = "set imagename_original = " + '"' + name + '"'
+				lines_out.append(toadd)
+				print toadd
+		f.close()
+		f_out = open(folder + "/2dx_image.cfg", "w")
+		f_out.writelines(lines_out)
+		f_out.close()
+		
+		
 	def image_added(self, filename, do_wait = True):
 		print "2dx automatic processing launched for", filename
 		time.sleep(1)
@@ -93,6 +110,7 @@ class Add2dxImageWatcher(WatcherBase):
 		os.system(command_2dx_image)
 		
 		self.set_image_number(image_2dx_name, image_count)
+		self.set_orignal_filename(image_2dx_name, filename)
 		
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize"' + "'" 
 		os.system(command_2dx_image)

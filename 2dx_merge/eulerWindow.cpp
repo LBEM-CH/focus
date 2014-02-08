@@ -288,6 +288,8 @@ int eulerWindow::determineSize()
 	SingleParticle2dx::DataStructures::ParticleContainer::deserializeContainerFromDisk(folder_content[0], cont, true);
 	return cont(0).getSizeX();
 	*/
+	
+	return 0;
 }
 
 

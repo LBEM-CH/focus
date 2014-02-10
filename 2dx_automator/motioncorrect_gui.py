@@ -438,10 +438,10 @@ class Auto2dxGUI(Frame):
 		stop_button = Button(self.toprightframe ,text='Stop Automation', command=self.switchAutomationOff, width=30)
 		stop_button.pack(padx=5, pady=2)
 		
-		self.minframe = 0
+		self.minframe = 2
 		self.maxframe = 0
-		self.fod = 2
-		self.waittime = 30
+		self.fod = 7
+		self.waittime = 40
 		self.bfac = 150
 		self.pair_mode = 0
 		

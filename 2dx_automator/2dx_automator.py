@@ -279,6 +279,9 @@ class Auto2dxGUI(Frame):
 		defocus[1] = float(defocus[1])
 		defocus[2] = float(defocus[2][:-1])
 		
+		u2_iqs = []
+		u2_rb = []
+		
 		for c in content:
 			if len(c)>1 and c[1] == "magnification":
 				magnification = float(c[3][1:-1])
@@ -296,6 +299,30 @@ class Auto2dxGUI(Frame):
 				iq3 = int(c[3][1:-1])
 			if len(c)>1 and c[1] == "U2_IQ4":
 				iq4 = int(c[3][1:-1])
+			if len(c)>1 and c[1] == "RP_1":
+				u2_iqs.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RP_2":
+				u2_iqs.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RP_3":
+				u2_iqs.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RP_4":
+				u2_iqs.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RP_5":
+				u2_iqs.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RP_6":
+				u2_iqs.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RB_1":
+				u2_rb.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RB_2":
+				u2_rb.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RB_3":
+				u2_rb.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RB_4":
+				u2_rb.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RB_5":
+				u2_rb.append(int(c[3][1:-1]))
+			if len(c)>1 and c[1] == "RB_6":
+				u2_rb.append(int(c[3][1:-1]))
 			if len(c)>1 and c[1] == "comment":
 				comment = c[3:]
 				comment_string = ""
@@ -326,8 +353,11 @@ class Auto2dxGUI(Frame):
 		result += "IQ1: " + str(iq1) + "\n"
 		result += "IQ2: " + str(iq2) + "\n"
 		result += "IQ3: " + str(iq3) + "\n"
-		result += "IQ4: " + str(iq4) + "\n\n"
+		result += "IQ4: " + str(iq4) + "\n\n\n"
 		
+		result += "PowerBins\t[A] " + str(u2_rb[0]) + "\t" + str(u2_rb[1]) + "\t" + str(u2_rb[2]) + "\t" + str(u2_rb[3]) + "\t" + str(u2_rb[4]) + "\t" + str(u2_rb[5])  + "\n"
+		result += "(noise=7)\t #  " + str(u2_iqs[0]) + "\t" + str(u2_iqs[1]) + "\t" + str(u2_iqs[2]) + "\t" + str(u2_iqs[3]) + "\t" + str(u2_iqs[4]) + "\t" + str(u2_iqs[5])  + "\n\n\n"
+				
 		result += "Comment: " + comment_string + "\n\n"
 		
 		return result

@@ -32,6 +32,8 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   QTime time;
   time.start();
   QDir applicationDir, configDir;
+  
+  m_do_autosave = true;
 
   #ifdef Q_WS_MAC
   applicationDir = QDir(QApplication::applicationDirPath() + "/../../../");
@@ -529,6 +531,11 @@ void mainWindow::setupActions()
   saveAction->setShortcut(tr("Ctrl+S"));
   connect(saveAction,SIGNAL(triggered()),mainData,SLOT(save()));
   fileMenu->addAction(saveAction);
+  
+  timer_refresh = 10000;
+  timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), mainData, SLOT(save()));
+  timer->start(timer_refresh);
 
   QAction *refreshAction = new QAction("Refresh Results",this);
   refreshAction->setShortcut(tr("Ctrl+Shift+r"));
@@ -576,9 +583,13 @@ void mainWindow::setupActions()
   connect(showUpdatesAction,SIGNAL(triggered()),updates,SLOT(show()));
   optionMenu->addAction(showUpdatesAction);
   
+  QAction *showAutoSaveAction = new QAction("Autosave On/Off",this);
+  connect(showAutoSaveAction,SIGNAL(triggered()),this,SLOT(toggleAutoSave()));
+  optionMenu->addAction(showAutoSaveAction);
+  
   QAction *showAboutAction = new QAction("About",this);
   connect(showAboutAction,SIGNAL(triggered()),about,SLOT(show()));
-	optionMenu->addAction(showAboutAction);
+  optionMenu->addAction(showAboutAction);
 
   QMenu *viewMenu = new QMenu("View");
   
@@ -1111,6 +1122,22 @@ void mainWindow::decreaseFontSize()
   mainData->userConf()->save();
   QApplication::setFont(font);
   updateFontInfo();
+}
+
+void mainWindow::toggleAutoSave()
+{
+  m_do_autosave = !m_do_autosave;
+  
+  if (m_do_autosave)
+  {
+	  QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched on"));
+	  timer->start(timer_refresh);
+  }
+  else
+  {
+	  QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched off"));
+	  timer->stop();
+  }
 }
 
 void mainWindow::updateFontInfo()

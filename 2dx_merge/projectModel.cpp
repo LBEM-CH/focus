@@ -18,9 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <iostream>
+#include <fstream>
+
+#include <QMessageBox>
 
 #include "projectModel.h"
-#include <iostream>
+
+
 using namespace std;
 
 bool projectModel::saveColumns(const QString &columnsFile)
@@ -396,8 +401,19 @@ QString projectModel::relativePathFromIndex(const QModelIndex& index)
 
 void projectModel::itemActivated(const QModelIndex& index)
 {
-  QString dirName = pathFromIndex(index);
-  QProcess::startDetached(data->getApp("2dx_image"), QStringList()<<dirName);
+	QString dirName = pathFromIndex(index);
+	std::cout << dirName.toStdString() << std::endl;
+	
+	ifstream file((dirName.toStdString()+"/2dx_image.cfg").c_str());
+	
+	if(!file)
+	{
+		QMessageBox::warning(NULL, tr("Not a valid image directory"), tr("The selected image directory is not a valid 2dx image item"));
+	}
+	else
+	{
+		QProcess::startDetached(data->getApp("2dx_image"), QStringList()<<dirName);
+	}
 }
 
 void  projectModel::itemSelected(const QModelIndex &index)

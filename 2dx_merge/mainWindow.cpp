@@ -1138,8 +1138,6 @@ void mainWindow::toggleAutoSave()
 	  QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched off"));
 	  timer->stop();
   }
-  
-  updateFontInfo();
 }
 
 void mainWindow::updateFontInfo()

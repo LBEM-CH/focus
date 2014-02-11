@@ -50,6 +50,7 @@ class mainWindow : public QMainWindow
   void revert();
   void showUpdates();
   void editHelperConf();
+  void toggleAutoSave();
 
   private:
 
@@ -76,6 +77,11 @@ class mainWindow : public QMainWindow
 
   confData *data;
   confData *userData;
+  
+  bool m_do_autosave;
+  QTimer *timer;
+  int timer_refresh;
+
 
   confData *getUserConf(const QString &fileName);
   bool setupIcons(confData *data, const QDir &directory);

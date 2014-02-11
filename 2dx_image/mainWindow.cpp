@@ -28,7 +28,8 @@ mainWindow::mainWindow(char *dirArg)
   QString workingDir;
 
   
-  
+  m_do_autosave = true;
+
   
  QDir applicationDir, configDir;
 
@@ -186,9 +187,10 @@ void mainWindow::createActions()
   saveAction->setShortcut(tr("Ctrl+S"));
   connect(saveAction,SIGNAL(triggered()),this,SLOT(save()));
   
-  QTimer *timer = new QTimer(this);
+  timer_refresh = 10000;
+  timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(save()));
-  timer->start(10000);
+  timer->start(timer_refresh);
 
   saveAsDefaultAction = new QAction("Save As Tilt-Range Default",this);
   saveAsDefaultAction->setShortcut(tr("Ctrl+D"));
@@ -260,12 +262,32 @@ void mainWindow::createMenus()
   optionsMenu->addAction(showUpdatesAction);
   optionsMenu->addAction(showAboutAction);
   optionsMenu->addAction(actionList["useNewViewerAction"]);
+  
+  QAction *showAutoSaveAction = new QAction("Autosave On/Off",this);
+  connect(showAutoSaveAction,SIGNAL(triggered()),this,SLOT(toggleAutoSave()));
+  optionsMenu->addAction(showAutoSaveAction);
 //  setMenuBar(menuBar);
 }
 
 void mainWindow::open()
 {
   QProcess::startDetached(data->getApp("this"));
+}
+
+void mainWindow::toggleAutoSave()
+{
+  m_do_autosave = !m_do_autosave;
+  
+  if (m_do_autosave)
+  {
+	  QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched on"));
+	  timer->start(timer_refresh);
+  }
+  else
+  {
+	  QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched off"));
+	  timer->stop();
+  }
 }
 
 void mainWindow::save()

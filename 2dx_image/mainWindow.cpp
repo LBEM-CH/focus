@@ -185,6 +185,10 @@ void mainWindow::createActions()
   saveAction = new QAction("Save Config",this);
   saveAction->setShortcut(tr("Ctrl+S"));
   connect(saveAction,SIGNAL(triggered()),this,SLOT(save()));
+  
+  QTimer *timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(save()));
+  timer->start(10000);
 
   saveAsDefaultAction = new QAction("Save As Tilt-Range Default",this);
   saveAsDefaultAction->setShortcut(tr("Ctrl+D"));

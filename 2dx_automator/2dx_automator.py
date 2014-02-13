@@ -606,7 +606,7 @@ class Auto2dxGUI(Frame):
 	
 	def useButtonClicked(self):
 		skip_file = self.image_dirs[self.index_selected] + "/automation_scipt_flag"
-		
+				
 		if self.usevar.get() == 1:
 			if os.path.exists(skip_file):
 				os.remove(skip_file)
@@ -616,7 +616,10 @@ class Auto2dxGUI(Frame):
 				skip.write("This image is skipped by the 2dx_automator\n")
 				skip.close()
 		self.indexChanged()
-
+		
+	def select_image(self):
+		self.usebox.toggle()
+		self.useButtonClicked()
 
 	def showIQ(self):
 		i = self.index_selected
@@ -744,6 +747,11 @@ def main():
 	root.geometry("1900x1200+0+0")
 	
 	app = Auto2dxGUI(root)
+	
+	def greet(*ignore):
+		app.select_image()
+	
+	root.bind('<s>', greet)
 	
 	root.mainloop()
 	

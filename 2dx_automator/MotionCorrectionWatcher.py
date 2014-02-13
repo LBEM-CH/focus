@@ -20,8 +20,8 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.first_frame = first_frame
 		self.last_frame = last_frame
 		self.lock_compute = threading.Lock()
-		self.fod = 2
-		self.waittime = 30
+		self.fod = 7
+		self.waittime = 40
 		self.binning = 1
 		self.bfac = 150
 		self.mode = 0

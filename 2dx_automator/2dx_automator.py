@@ -716,7 +716,7 @@ class Auto2dxGUI(Frame):
 		self.image_label = Label(self.centralrightframe2, image=self.default_tkimage)
 		self.image_label.pack(side=LEFT)
 		
-		self.info_label = Label(self.centralrightframe3, text="Image Staticstics:\n", height=28)
+		self.info_label = Label(self.centralrightframe3, text="Image Staticstics:\n", height=30)
 		self.info_label.pack()
 
 		self.iqplot_button = Button(self.centralrightframe3 ,text='Show IQ-Plot', width=20, command=self.showIQ)

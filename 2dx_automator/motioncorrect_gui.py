@@ -438,10 +438,10 @@ class Auto2dxGUI(Frame):
 		stop_button = Button(self.toprightframe ,text='Stop Automation', command=self.switchAutomationOff, width=30)
 		stop_button.pack(padx=5, pady=2)
 		
-		self.minframe = 0
+		self.minframe = 2
 		self.maxframe = 0
-		self.fod = 2
-		self.waittime = 30
+		self.fod = 7
+		self.waittime = 40
 		self.bfac = 150
 		self.pair_mode = 0
 		
@@ -542,7 +542,7 @@ class Auto2dxGUI(Frame):
 		logfile = out_folder + "/automatic_import_log.txt"
 		wait = 1
 		refresh = 1
-		self.watcher = MotionCorrectionWatcher(refresh, wait, in_folder, out_folder, logfile, first_frame=0, last_frame=0)
+		self.watcher = MotionCorrectionWatcher(refresh, wait, in_folder, out_folder, logfile, first_frame=self.minframe, last_frame=self.maxframe)
 	
 		self.default_image = Image.new("RGB", (n,n), "white")
 		self.default_tkimage = ImageTk.PhotoImage(self.default_image)

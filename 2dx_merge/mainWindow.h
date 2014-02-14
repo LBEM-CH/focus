@@ -106,6 +106,7 @@ class mainWindow : public QMainWindow
   void open();
   void reload();
   void openURL(const QString &url);
+  void toggleAutoSave();
 
   void launchAlbum(const QString &path);
   void launchEuler();
@@ -176,7 +177,10 @@ class mainWindow : public QMainWindow
   QHash<uint,int> manualIndex;
   
   int importCount;
-
+  
+  bool m_do_autosave;
+  QTimer *timer;
+  int timer_refresh;
 
   QWidget *setupScriptContainer(QWidget *widget, const QString &title = "");
   QWidget *setupHeader();

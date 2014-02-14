@@ -1,3 +1,5 @@
 *~
 *.exe
 kernel/mrc/bin
+*.DS_store
+

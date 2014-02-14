@@ -542,7 +542,7 @@ class Auto2dxGUI(Frame):
 		logfile = out_folder + "/automatic_import_log.txt"
 		wait = 1
 		refresh = 1
-		self.watcher = MotionCorrectionWatcher(refresh, wait, in_folder, out_folder, logfile, first_frame=0, last_frame=0)
+		self.watcher = MotionCorrectionWatcher(refresh, wait, in_folder, out_folder, logfile, first_frame=self.minframe, last_frame=self.maxframe)
 	
 		self.default_image = Image.new("RGB", (n,n), "white")
 		self.default_tkimage = ImageTk.PhotoImage(self.default_image)

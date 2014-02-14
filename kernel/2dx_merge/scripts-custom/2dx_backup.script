@@ -215,7 +215,7 @@ if ( ${backup_merge} == "yes" ) then
     set curdir = ${PWD}
     echo "::Creating configfile link in ${curdir}."
     \rm -f 2dx_master.cfg
-    \ln -s ${to_dir}/2dx_merge.cfg 2dx_master.cfg
+   # \ln -s ${to_dir}/2dx_merge.cfg 2dx_master.cfg
   endif
   cd ${oldir}
 endif
@@ -459,12 +459,12 @@ while ( ${dircounter} <= ${dirnum} )
           if ( -e ../2dx_master.cfg ) then
             set curdir = ${PWD}
             echo "::Creating Master configfile link in ${curdir}."
-            \ln -s ../2dx_master.cfg .
+       #     \ln -s ../2dx_master.cfg .
           else
             if ( -e merge/2dx_master.cfg ) then
               set curdir = ${PWD}
               echo "::Creating configfile link in ${curdir}."
-              \ln -s merge/2dx_master.cfg .
+        #      \ln -s merge/2dx_master.cfg .
             endif
           endif
           cd ${from_dirfile}

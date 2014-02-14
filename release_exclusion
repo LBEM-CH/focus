@@ -1,8 +1,0 @@
-# This file serves as a list of files *not* included in releases destined for the general public.
-# Can be in the form of specific files or entire directories.
-# Base directory should be 2dx/
-
-mrc/Ximdisp
-mrc/lib/old
-mrc/source/rmeasure
-mrc/source/spotIntensity

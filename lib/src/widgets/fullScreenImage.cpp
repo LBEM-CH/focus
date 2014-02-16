@@ -335,6 +335,12 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
   float kV = data->get("kv","value").toFloat();
   float magnification = data->get("magnification","value").toFloat();
 
+  // Quick fix to allow 2dx to be used on Cs-corrected mircoscopes
+  if (Cs < 0.001)
+  {
+	  Cs = 0.001;
+  }
+
   float N = 1000;
   float dz = 0.0;
   float theta = 0.0;

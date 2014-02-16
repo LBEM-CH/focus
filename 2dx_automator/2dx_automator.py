@@ -36,6 +36,15 @@ def about(master):
 		def __init__(self):
 			self.msgbox = Toplevel(master)
 			self.msgbox.title("2dx_automator About")
+			
+			self.about_text = "2dx_automator \n\n"
+			self.about_text += "License and Availability:\n\t2dx_automator is released under the GNU-GPL, and is available on 2dx.org.\n\tIt runs natively on Linux.\n\n"
+			self.about_text += "Written by: \n\tSebastian Scherer, \n\tCenter for Cellular Imaging and Nano Analytics (C-CINA), \n\tBiozentrum, \n\tUniversity Basel, \n\tSwitzerland\n\n"
+			self.about_text += "Contact:\n\tEmail: sebastian.scherer@unibas.ch\n\tWeb: c-cina.unibas.ch and 2dx.org"
+			
+			self.about_label = Label(self.msgbox, text=self.about_text, justify=LEFT)
+			self.about_label.grid(row=0, column=0, padx=20, pady=20)
+			
 		def b0_action(self):
 			self.msgbox.destroy()
 	return ABOUT

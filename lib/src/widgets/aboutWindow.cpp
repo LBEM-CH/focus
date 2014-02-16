@@ -22,7 +22,7 @@
 #include <iostream>
 using namespace std;
 
-aboutWindow::aboutWindow(confData *conf, QWidget *parent)
+aboutWindow::aboutWindow(confData *conf, QWidget *parent, bool is_merge)
              :QWidget(parent,Qt::Window)
 {
 
@@ -31,7 +31,14 @@ aboutWindow::aboutWindow(confData *conf, QWidget *parent)
   addAction(hideWindow);
   connect(hideWindow,SIGNAL(triggered()),this,SLOT(hide()));
 
-  setWindowTitle("About 2dx_image");
+  if (is_merge)
+  {
+    setWindowTitle("About 2dx_merge");
+  }
+  else
+  {
+	setWindowTitle("About 2dx_image");  
+  }
 
   data = conf;
 

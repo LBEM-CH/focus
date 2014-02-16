@@ -330,7 +330,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 //  layout->setColumnStretch(2,1);
 //  resize(1024,743);
 
-  about = new aboutWindow(mainData,this);
+  about = new aboutWindow(mainData,this,true);
   about->hide();
 
 	setupActions();

@@ -30,6 +30,27 @@ def bind(widget, event):
 	return decorator
 	
 	
+
+def about(master):
+	class ABOUT(object):
+		def __init__(self):
+			self.msgbox = Toplevel(master)
+			self.msgbox.title("2dx_automator About")
+		def b0_action(self):
+			self.msgbox.destroy()
+	return ABOUT
+
+
+def helpbox(master):
+	class HELP(object):
+		def __init__(self):
+			self.msgbox = Toplevel(master)
+			self.msgbox.title("2dx_automator Help")
+		def b0_action(self):
+			self.msgbox.destroy()
+	return HELP
+	
+	
 def tbox(master):
 	class TBOX(object):
 		def __init__(self, info):
@@ -626,6 +647,11 @@ class Auto2dxGUI(Frame):
 		command = "evince " + self.image_dirs[i] + "/PS/2dx_plotreska_canonical.ps"
 		os.system(command)
 		
+	def showAbout(self):
+		self.about_box()
+	
+	def showHelp(self):
+		self.help_box()	
 		
 	def initUI(self):
 		self.parent.title("2dx_automator GUI (alpha_2)")
@@ -690,6 +716,8 @@ class Auto2dxGUI(Frame):
 		self.reprocess_button.pack(padx=20, pady=5)
 		
 		self.box_test = tbox(self)
+		self.about_box = about(self)
+		self.help_box = helpbox(self)
 		
 		def test_func():
 			self.getProjectStat()
@@ -752,6 +780,25 @@ def main():
 		app.select_image()
 	
 	root.bind('<s>', greet)
+	
+	menubar = Menu(root)
+	filemenu = Menu(menubar, tearoff=0)
+	filemenu.add_separator()
+	filemenu.add_command(label="Exit", command=root.quit)
+	menubar.add_cascade(label="File", menu=filemenu)
+	
+	editmenu = Menu(menubar, tearoff=0)
+	editmenu.add_command(label="Show Config")
+	menubar.add_cascade(label="Edit", menu=editmenu)
+	
+	helpmenu = Menu(menubar, tearoff=0)
+	helpmenu.add_command(label="Help...", command=app.showHelp)
+	helpmenu.add_command(label="About...", command=app.showAbout)
+	menubar.add_cascade(label="Help", menu=helpmenu)
+
+	root.config(menu=menubar)
+	
+	root.mainloop()
 	
 	root.mainloop()
 	

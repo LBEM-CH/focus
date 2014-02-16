@@ -53,7 +53,7 @@ def helpbox(master):
 	
 def tbox(master):
 	class TBOX(object):
-		def __init__(self, info):
+		def __init__(self):
 			
 			self.msgbox = Toplevel(master)
 			
@@ -721,7 +721,7 @@ class Auto2dxGUI(Frame):
 		
 		def test_func():
 			self.getProjectStat()
-			self.box_test("asdf")
+			self.box_test()
 		
 		self.stat_button = Button(self.lowleftframe ,text='Show Project Statistics', width=40, command=test_func)
 		self.stat_button.pack(padx=20, pady=50)

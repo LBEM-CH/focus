@@ -847,8 +847,20 @@ void mainWindow::copyImage()
 {
 	std::cout << "hi from copy image" << std::endl;
 	
+	QModelIndex i;
+    QModelIndexList selection  = dirView->selectionModel()->selectedIndexes();
+	
+	foreach(i, selection)
+	{
+		dirModel->itemSelected(sortModel->mapToSource(i));
+	}
+
+	QString path = dirModel->pathFromIndex(i);
+	
+	std::cout << path.toStdString() << std::endl;
+    
 	//QModelIndex i = 0;
-	//QString dirModel->pathFromIndex(i);
+	//
 }
 
 

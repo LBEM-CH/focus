@@ -475,12 +475,17 @@ QWidget *mainWindow::setupDirectoryView(const QDir &dir, const QString &savePath
   addSelectionAction = new QAction("add to selection", dirView);
   dirView->addAction(addSelectionAction);
   connect(addSelectionAction,SIGNAL(triggered(bool)),this,SLOT(extendSelection()));
+
   QAction *removeSelectionAction;
   removeSelectionAction = new QAction("remove from selection", dirView);
   dirView->addAction(removeSelectionAction);
   connect(removeSelectionAction,SIGNAL(triggered(bool)),this,SLOT(reduceSelection()));
   dirView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
+  QAction *copyImageAction;
+  copyImageAction = new QAction("copy image to second project", dirView);
+  dirView->addAction(copyImageAction);
+  connect(copyImageAction,SIGNAL(triggered(bool)),this,SLOT(copyImage()));
 
 
   QAction *action;
@@ -835,6 +840,12 @@ void mainWindow::extendSelection()
 void mainWindow::reduceSelection()
 {
     modifySelection(false);
+}
+
+
+void mainWindow::copyImage()
+{
+	std::cout << "hi from copy image" << std::endl;
 }
 
 

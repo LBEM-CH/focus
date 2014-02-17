@@ -17,7 +17,7 @@ from Add2dxImageWatcher import *
 import os
 import datetime
 
-n = 508
+n = 490
 n_small = 390
 
 import tkSimpleDialog
@@ -55,6 +55,13 @@ def helpbox(master):
 		def __init__(self):
 			self.msgbox = Toplevel(master)
 			self.msgbox.title("2dx_automator Help")
+			
+			self.about_text = "2dx_automator Help\n\n"
+			self.about_text += "Online Documenation:\n\thttps://github.com/C-CINA/2dx/wiki/2dx_automator\n\n"
+			self.about_text += "Contact:\n\tEmail: sebastian.scherer@unibas.ch\n\tWeb: c-cina.unibas.ch and 2dx.org"
+			
+			self.about_label = Label(self.msgbox, text=self.about_text, justify=LEFT)
+			self.about_label.grid(row=0, column=0, padx=20, pady=20)
 		def b0_action(self):
 			self.msgbox.destroy()
 	return HELP

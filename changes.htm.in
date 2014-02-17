@@ -5,6 +5,7 @@
 	
 <font color="blue">3.4.2</font> Feb. 6, 2014 <br>
 <ul>
+<li>Auto-saving added
 <li>Move image to another project now supported on right-click, useful in case of two crystal conformations
 <li>New bug tracker and developer wiki
 <li>TTF correction script added for images with a higher tilt then a given value

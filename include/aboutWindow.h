@@ -45,7 +45,7 @@ class aboutWindow : public QWidget
   QLabel *aboutTitle, *aboutInfo;
 
   public:
-  aboutWindow(confData *conf, QWidget *parent = NULL);
+  aboutWindow(confData *conf, QWidget *parent = NULL, bool is_merge=false);
 
 };
 

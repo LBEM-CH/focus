@@ -856,8 +856,10 @@ void mainWindow::copyImage()
 	}
 
 	QString path = dirModel->pathFromIndex(i);
-	
 	std::cout << path.toStdString() << std::endl;
+	
+	QString relpath = dirModel->relativePathFromIndex(i);
+	std::cout << relpath.toStdString() << std::endl;
     
 	//QModelIndex i = 0;
 	//

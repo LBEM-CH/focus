@@ -18,6 +18,12 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+//#include <stdlib.h>
+
 #include "mainWindow.h"
 #include <QDebug>
 #include <QDesktopServices>
@@ -330,7 +336,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 //  layout->setColumnStretch(2,1);
 //  resize(1024,743);
 
-  about = new aboutWindow(mainData,this);
+  about = new aboutWindow(mainData,this,true);
   about->hide();
 
 	setupActions();
@@ -475,12 +481,17 @@ QWidget *mainWindow::setupDirectoryView(const QDir &dir, const QString &savePath
   addSelectionAction = new QAction("add to selection", dirView);
   dirView->addAction(addSelectionAction);
   connect(addSelectionAction,SIGNAL(triggered(bool)),this,SLOT(extendSelection()));
+
   QAction *removeSelectionAction;
   removeSelectionAction = new QAction("remove from selection", dirView);
   dirView->addAction(removeSelectionAction);
   connect(removeSelectionAction,SIGNAL(triggered(bool)),this,SLOT(reduceSelection()));
   dirView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
+  QAction *copyImageAction;
+  copyImageAction = new QAction("copy image to second project", dirView);
+  dirView->addAction(copyImageAction);
+  connect(copyImageAction,SIGNAL(triggered(bool)),this,SLOT(copyImage()));
 
 
   QAction *action;
@@ -837,6 +848,43 @@ void mainWindow::reduceSelection()
     modifySelection(false);
 }
 
+
+void mainWindow::copyImage()
+{
+	std::string target_folder = mainData->get("second_dir","value").toStdString();
+	
+	if ( !boost::filesystem::exists(target_folder + "/export"))
+	{
+		boost::filesystem::create_directory(target_folder + "/export");
+	} 
+	
+	QModelIndex i;
+    QModelIndexList selection  = dirView->selectionModel()->selectedIndexes();
+	
+	foreach(i, selection)
+	{
+		std::string path = dirModel->pathFromIndex(i).toStdString();
+		std::string relpath = dirModel->relativePathFromIndex(i).toStdString();
+				
+		std::vector<std::string> strVec;
+		using boost::is_any_of; 
+		boost::algorithm::split(strVec, relpath, is_any_of("/"));     
+		
+		dirModel->itemDeselected(sortModel->mapToSource(i));
+		
+		std::string dest_folder = target_folder + "/export/";
+		std::string dest_image = target_folder + "/export/" + strVec[1];
+		
+		if ( !boost::filesystem::exists(dest_image) )
+		{			
+			std::string call = "cp -r " + path + " " + dest_folder;
+			std::cout << call << std::endl;
+			system(call.c_str());
+			
+			break;
+		}
+	}
+}
 
 
 void mainWindow::modifySelection(bool select)

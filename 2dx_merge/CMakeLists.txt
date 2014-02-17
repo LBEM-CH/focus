@@ -146,6 +146,8 @@ get_propagate_deps(conf widgets mrcImage extentions)
 
 #find_package(Boost COMPONENTS serialization system filesystem program_options REQUIRED)
 
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+
 
 target_link_libraries(${EXETITLE} conf widgets mrcImage extentions ${2DX_MERGE_LIBRARIES})
 
@@ -164,7 +166,7 @@ target_link_libraries(${EXETITLE} conf widgets mrcImage extentions ${2DX_MERGE_L
 #target_link_libraries(${EXETITLE} ${HDF5_LIBRARY})
 #target_link_libraries(${EXETITLE} ${PNG_LIBRARY})
 #target_link_libraries(${EXETITLE} ${JPEG_LIBRARY})
-#target_link_libraries(${EXETITLE} ${Boost_LIBRARIES})
+target_link_libraries(${EXETITLE} ${Boost_LIBRARIES})
 
 
  

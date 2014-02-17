@@ -6,6 +6,7 @@
 ############################################################################
 #
 cmake_minimum_required(VERSION 2.6)
+
 add_subdirectory(conf)
 add_subdirectory(extentions)
 add_subdirectory(mrcImage)

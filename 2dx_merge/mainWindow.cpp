@@ -18,6 +18,12 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+//#include <stdlib.h>
+
 #include "mainWindow.h"
 #include <QDebug>
 #include <QDesktopServices>
@@ -845,26 +851,40 @@ void mainWindow::reduceSelection()
 
 void mainWindow::copyImage()
 {
-	std::cout << "hi from copy image" << std::endl;
+	std::string target_folder = mainData->get("second_dir","value").toStdString();
+	
+	if ( !boost::filesystem::exists(target_folder + "/export"))
+	{
+		boost::filesystem::create_directory(target_folder + "/export");
+	} 
 	
 	QModelIndex i;
     QModelIndexList selection  = dirView->selectionModel()->selectedIndexes();
 	
 	foreach(i, selection)
 	{
-		dirModel->itemSelected(sortModel->mapToSource(i));
+		std::string path = dirModel->pathFromIndex(i).toStdString();
+		std::string relpath = dirModel->relativePathFromIndex(i).toStdString();
+				
+		std::vector<std::string> strVec;
+		using boost::is_any_of; 
+		boost::algorithm::split(strVec, relpath, is_any_of("/"));     
+		
+		dirModel->itemDeselected(sortModel->mapToSource(i));
+		
+		std::string dest_folder = target_folder + "/export/";
+		std::string dest_image = target_folder + "/export/" + strVec[1];
+		
+		if ( !boost::filesystem::exists(dest_image) )
+		{			
+			std::string call = "cp -r " + path + " " + dest_folder;
+			std::cout << call << std::endl;
+			system(call.c_str());
+			
+			break;
+		}
 	}
-
-	QString path = dirModel->pathFromIndex(i);
-	std::cout << path.toStdString() << std::endl;
-	
-	QString relpath = dirModel->relativePathFromIndex(i);
-	std::cout << relpath.toStdString() << std::endl;
-    
-	//QModelIndex i = 0;
-	//
 }
-
 
 
 void mainWindow::modifySelection(bool select)

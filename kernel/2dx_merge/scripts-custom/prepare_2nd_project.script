@@ -1,0 +1,51 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Prepare 2nd Project                                                #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2007                                             #
+# Last Modification: 10/01/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 31
+#
+# MANUAL: Switches to TTF-correction for all images with a tilt angle higher then a given value and reruns Unbend2, CTF-correction and GenerateMap
+#
+# DISPLAY: second_dir
+#
+#$end_local_vars
+#
+# This defines some variables that we might need:
+set proc_2dx = ""
+set bin_2dx = ""
+set app_2dx_image = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+set second_dir = ""
+#
+#$end_vars
+#
+# This sets the scriptname variable:
+set scriptname = prepare_2nd_project
+#
+# This removes the old logfile, so that a new fresh one can be created:
+\rm -f LOGS/${scriptname}.results
+#
+
+if( -e ${second_dir} ) then 
+    \rm -rf ${second_dir}
+endif
+
+\mkdir ${second_dir}
+
+\cp -r ../merge ${second_dir}
+
+
+
+# Leave a message on the logfile that the script finished:
+${proc_2dx}/linblock "${scriptname} finished correctly."
+#

@@ -846,6 +846,9 @@ void mainWindow::reduceSelection()
 void mainWindow::copyImage()
 {
 	std::cout << "hi from copy image" << std::endl;
+	
+	//QModelIndex i = 0;
+	//QString dirModel->pathFromIndex(i);
 }
 
 

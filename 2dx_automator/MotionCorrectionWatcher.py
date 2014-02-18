@@ -4,6 +4,8 @@ from sparx  import *
 
 from pylab import plt, plot, subplot, figure, hist
 
+import os
+
 class MotionCorrectionWatcher(WatcherBase):
 	
 	def generateDriftPlot(self, filename):
@@ -37,9 +39,16 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
-			waiting_time = self.waittime
-			print "Waiting for", waiting_time, "seconds to make sure that the copy is done"
-			time.sleep(waiting_time)
+			#waiting_time = self.waittime
+			#print "Waiting for", waiting_time, "seconds to make sure that the copy is done"
+			#time.sleep(waiting_time)
+			old_size = os.path.getsize(filename)
+			new_size = old_size + 1
+			while old_size != new_size:
+				print "file stil changing"
+				time.sleep(2)
+				old_size = new_size
+				new_size = os.path.getsize(filename)
 			
 		print "*** In case you see this for a long time consider troubleshooting the automation ***"
 		

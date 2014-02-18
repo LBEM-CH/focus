@@ -29,6 +29,21 @@ def bind(widget, event):
 		return func
 	return decorator
 	
+
+def config(master):
+	class CONFIG(object):
+		def __init__(self):
+			self.msgbox = Toplevel(master)
+			self.msgbox.title("2dx_automator Config")
+			
+			self.about_text = "2dx_automator Config \n\n"
+			
+			self.about_label = Label(self.msgbox, text=self.about_text, justify=LEFT)
+			self.about_label.grid(row=0, column=0, padx=20, pady=20)
+			
+		def b0_action(self):
+			self.msgbox.destroy()
+	return CONFIG
 	
 
 def about(master):
@@ -669,6 +684,9 @@ class Auto2dxGUI(Frame):
 	def showHelp(self):
 		self.help_box()	
 		
+	def showConfig(self):
+		self.config_box()
+		
 	def initUI(self):
 		self.parent.title("2dx_automator GUI (alpha_2)")
 	
@@ -734,6 +752,7 @@ class Auto2dxGUI(Frame):
 		self.box_test = tbox(self)
 		self.about_box = about(self)
 		self.help_box = helpbox(self)
+		self.config_box = config(self)
 		
 		def test_func():
 			self.getProjectStat()
@@ -808,14 +827,13 @@ def main():
 	menubar.add_cascade(label="Edit", menu=editmenu)
 	
 	helpmenu = Menu(menubar, tearoff=0)
-	helpmenu.add_command(label="Help...", command=app.showHelp)
+	helpmenu.add_command(label="Help", command=app.showHelp)
+	helpmenu.add_separator()
 	helpmenu.add_command(label="About...", command=app.showAbout)
 	menubar.add_cascade(label="Help", menu=helpmenu)
 
 	root.config(menu=menubar)
-	
-	root.mainloop()
-	
+		
 	root.mainloop()
 	
 	

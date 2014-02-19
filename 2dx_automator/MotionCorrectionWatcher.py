@@ -39,6 +39,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
+			time.sleep(10)
 			old_size = os.path.getsize(self.infolder + "/" + filename)
 			new_size = old_size + 1
 			while old_size != new_size:
@@ -48,6 +49,7 @@ class MotionCorrectionWatcher(WatcherBase):
 				old_size = new_size
 				new_size = os.path.getsize(self.infolder + "/" + filename)
 				time.sleep(2)
+			print os.path.getsize(self.infolder + "/" + filename)
 			
 		print "*** In case you see this for a long time consider troubleshooting the automation ***"
 		

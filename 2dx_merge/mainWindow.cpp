@@ -171,6 +171,14 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   standardScripts->setMaximumWidth(minWidth);
   customScripts->setMaximumWidth(minWidth);
   singleParticleScripts->setMaximumWidth(minWidth);
+  
+  int minHeight = int(QApplication::desktop()->height()/8.00);
+  standardScripts->setMinimumHeight(minHeight);
+  customScripts->setMinimumHeight(minHeight);
+  singleParticleScripts->setMinimumHeight(minHeight);
+    
+  standardScripts->setMaximumHeight(130);
+  singleParticleScripts->setMaximumHeight(150);
 
   results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
 

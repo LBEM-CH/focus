@@ -17,7 +17,7 @@ from Add2dxImageWatcher import *
 import os
 import datetime
 
-n = 508
+n = 490
 n_small = 390
 
 import tkSimpleDialog
@@ -29,10 +29,80 @@ def bind(widget, event):
 		return func
 	return decorator
 	
+
+def config(master):
+	class CONFIG(object):
+		def __init__(self, project_folder, condense):
+			self.msgbox = Toplevel(master)
+			
+			if condense:
+				self.msgbox.title("2dx_automator Processing Parameters")
+			else:
+				self.msgbox.title("2dx_automator Merge Configuration File")
+
+			
+			self.s = Scrollbar(self.msgbox)
+			self.T = Text(self.msgbox, height=40, width=140)
+
+			self.T.focus_set()
+			self.s.pack(side=RIGHT, fill=Y)
+			self.T.pack(side=LEFT, fill=Y)
+			self.s.config(command=self.T.yview)
+			self.T.config(yscrollcommand=self.s.set)
+
+			config_file = open(project_folder + "/2dx_master.cfg")
+
+			for l in config_file:
+				if condense:
+					if l.startswith("set"):
+						self.T.insert(END, l)
+				else:
+					self.T.insert(END, l)
+			
+		def b0_action(self):
+			self.msgbox.destroy()
+	return CONFIG
+	
+
+def about(master):
+	class ABOUT(object):
+		def __init__(self):
+			self.msgbox = Toplevel(master)
+			self.msgbox.title("2dx_automator About")
+			
+			self.about_text = "2dx_automator \n\n"
+			self.about_text += "License and Availability:\n\t2dx_automator is released under the GNU-GPL, and is available on 2dx.org.\n\tIt runs natively on Linux.\n\n"
+			self.about_text += "Written by: \n\tSebastian Scherer, \n\tCenter for Cellular Imaging and Nano Analytics (C-CINA), \n\tBiozentrum, \n\tUniversity Basel, \n\tSwitzerland\n\n"
+			self.about_text += "Contact:\n\tEmail: sebastian.scherer@unibas.ch\n\tWeb: c-cina.unibas.ch and 2dx.org"
+			
+			self.about_label = Label(self.msgbox, text=self.about_text, justify=LEFT)
+			self.about_label.grid(row=0, column=0, padx=20, pady=20)
+			
+		def b0_action(self):
+			self.msgbox.destroy()
+	return ABOUT
+
+
+def helpbox(master):
+	class HELP(object):
+		def __init__(self):
+			self.msgbox = Toplevel(master)
+			self.msgbox.title("2dx_automator Help")
+			
+			self.about_text = "2dx_automator Help\n\n"
+			self.about_text += "Online Documenation:\n\thttps://github.com/C-CINA/2dx/wiki/2dx_automator\n\n"
+			self.about_text += "Contact:\n\tEmail: sebastian.scherer@unibas.ch\n\tWeb: c-cina.unibas.ch and 2dx.org"
+			
+			self.about_label = Label(self.msgbox, text=self.about_text, justify=LEFT)
+			self.about_label.grid(row=0, column=0, padx=20, pady=20)
+		def b0_action(self):
+			self.msgbox.destroy()
+	return HELP
+	
 	
 def tbox(master):
 	class TBOX(object):
-		def __init__(self, info):
+		def __init__(self):
 			
 			self.msgbox = Toplevel(master)
 			
@@ -86,7 +156,7 @@ def tbox(master):
 
 
 class Auto2dxGUI(Frame):
-	def __init__(self, parent):
+	def __init__(self, parent, folder):
 		Frame.__init__(self, parent, background="white")
 		self.parent = parent
 		self.index_selected = 0
@@ -98,6 +168,7 @@ class Auto2dxGUI(Frame):
 		self.listbox.activate(END)
 		self.index_selected = self.count-1
 		self.indexChanged()
+		self.config_folder = folder
 		
 		
 	def getFolders(self):
@@ -285,6 +356,8 @@ class Auto2dxGUI(Frame):
 		for c in content:
 			if len(c)>1 and c[1] == "magnification":
 				magnification = float(c[3][1:-1])
+			if len(c)>1 and c[1] == "imagenumber":
+				number = c[3][1:-1]
 			if len(c)>1 and c[1] == "QVAL":
 				qval = float(c[3][1:-1])
 			if len(c)>1 and c[1] == "TLTAXIS":
@@ -336,6 +409,7 @@ class Auto2dxGUI(Frame):
 	
 		result = "Image Statistics:\n\n\n"
 		result += "2dx image folder: " + folder.split("/")[-2] + "/" + folder.split("/")[-1] + "\n"
+		result += "Image Number: " + number + "\n"
 		
 		file_time = datetime.datetime.fromtimestamp(os.path.getmtime(folder)) 
 		result += "Time: " + str(file_time) + "\n\n"
@@ -617,15 +691,54 @@ class Auto2dxGUI(Frame):
 				skip.close()
 		self.indexChanged()
 		
+		
 	def select_image(self):
 		self.usebox.toggle()
 		self.useButtonClicked()
+
 
 	def showIQ(self):
 		i = self.index_selected
 		command = "evince " + self.image_dirs[i] + "/PS/2dx_plotreska_canonical.ps"
 		os.system(command)
+
 		
+	def showAbout(self):
+		self.about_box()
+
+	
+	def showHelp(self):
+		self.help_box()	
+
+		
+	def showFullConfig(self):
+		self.config_box(self.output_dir, False)
+
+		
+	def showRedConfig(self):
+		self.config_box(self.output_dir, True)
+
+		
+	def moveConfigFile(self, config):
+		shutil.copyfile( config, self.output_dir + "/merge/2dx_merge.cfg")
+
+		
+	def getConfigFileFromDisk(self):
+		file_path = tkFileDialog.askopenfilename(parent=self.parent, title="Please select a config file")
+		self.moveConfigFile(file_path)
+
+		
+	def load_config_mlok1(self):
+		self.moveConfigFile(self.config_folder + "/default_mlok1.cfg")
+		
+	
+	def load_config_mlok1_nocAMP(self):
+		self.moveConfigFile(self.config_folder + "/default_mlok1_nocAMP.cfg")
+		
+		
+	def load_config_clc(self):
+		self.moveConfigFile(self.config_folder + "/default_clc.cfg")
+
 		
 	def initUI(self):
 		self.parent.title("2dx_automator GUI (alpha_2)")
@@ -690,10 +803,13 @@ class Auto2dxGUI(Frame):
 		self.reprocess_button.pack(padx=20, pady=5)
 		
 		self.box_test = tbox(self)
+		self.about_box = about(self)
+		self.help_box = helpbox(self)
+		self.config_box = config(self)
 		
 		def test_func():
 			self.getProjectStat()
-			self.box_test("asdf")
+			self.box_test()
 		
 		self.stat_button = Button(self.lowleftframe ,text='Show Project Statistics', width=40, command=test_func)
 		self.stat_button.pack(padx=20, pady=50)
@@ -746,13 +862,47 @@ def main():
 	root = Tk()
 	root.geometry("1900x1200+0+0")
 	
-	app = Auto2dxGUI(root)
+	tmp = sys.argv[0].split("/")[:-1]
+	config_dir = ""
+	for t in tmp:
+		config_dir += t +"/"
+	config_dir += "default_configs"
+	app = Auto2dxGUI(root, config_dir) 
 	
 	def greet(*ignore):
 		app.select_image()
 	
 	root.bind('<s>', greet)
 	
+	menubar = Menu(root)
+	filemenu = Menu(menubar, tearoff=0)
+	filemenu.add_separator()
+	filemenu.add_command(label="Exit", command=root.quit)
+	menubar.add_cascade(label="File", menu=filemenu)
+	
+	editmenu = Menu(menubar, tearoff=0)
+	editmenu.add_command(label="Show config file", command=app.showFullConfig)
+	editmenu.add_command(label="Show processing parameters", command=app.showRedConfig)
+	editmenu.add_separator()
+	
+	submenu = Menu(editmenu)
+	submenu.add_command(label="MloK1", command=app.load_config_mlok1)
+	submenu.add_command(label="MloK1_nocAMP", command=app.load_config_mlok1_nocAMP)
+	submenu.add_command(label="CLC")
+	editmenu.add_cascade(label='Load default config', menu=submenu)
+	
+	editmenu.add_command(label="Load config from file", command=app.getConfigFileFromDisk)
+	
+	menubar.add_cascade(label="Configuration", menu=editmenu)
+	
+	helpmenu = Menu(menubar, tearoff=0)
+	helpmenu.add_command(label="Help", command=app.showHelp)
+	helpmenu.add_separator()
+	helpmenu.add_command(label="About...", command=app.showAbout)
+	menubar.add_cascade(label="Help", menu=helpmenu)
+
+	root.config(menu=menubar)
+		
 	root.mainloop()
 	
 	

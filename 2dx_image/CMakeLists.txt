@@ -12,6 +12,8 @@ set(EXETITLE 2dx_image)
 
 cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -W -Waddress -Wchar-subscripts -Wcomment -Wformat -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized  -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wvolatile-register-var -Wno-long-long -Wextra -Wno-cpp")
+
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/share ${CMAKE_MODULE_PATH})
 set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/share ${CMAKE_PREFIX_PATH})
 message(STATUS "CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}")

@@ -12,12 +12,14 @@ if(INSTALL_DIR)
 else(INSTALL_DIR)
 	set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/kernel/${DIRECTORY})
 endif(INSTALL_DIR)
+
 # configure 2dx.cfg according to the os it is built on
 if(APPLE)
 	configure_file(2dx-mac.cfg ${CMAKE_CURRENT_SOURCE_DIR}/2dx.cfg COPYONLY)	
 else(APPLE)
 	configure_file(2dx-linux.cfg ${CMAKE_CURRENT_SOURCE_DIR}/2dx.cfg COPYONLY)	
 endif(APPLE)
+
 set(CONF 
         VARIABLE.txt 
         2dx_image-user.cfg 
@@ -28,8 +30,10 @@ set(CONF
         2dx_image-algo-1.jpg 
         2dx_image-algo-2.jpg 
         2dx_master.cfg)
+
 install(FILES ${CONF} DESTINATION ${INSTALL_DIR})
 install(SCRIPT install_symlink.cmake)
+
 set(CONF_2DX_IMAGE
         2dx_image/about.htm
         2dx_image/navigator_help.htm

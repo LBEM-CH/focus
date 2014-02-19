@@ -50,7 +50,7 @@ def config(master):
 			self.s.config(command=self.T.yview)
 			self.T.config(yscrollcommand=self.s.set)
 
-			config_file = open(project_folder + "/merge/2dx_merge.cfg")
+			config_file = open(project_folder + "/2dx_master.cfg")
 
 			for l in config_file:
 				if condense:
@@ -711,6 +711,13 @@ class Auto2dxGUI(Frame):
 	def showRedConfig(self):
 		self.config_box(self.output_dir, True)
 		
+	def moveConfigFile(self, config):
+		shutil.copyfile( config, self.output_dir + "/merge/2dx_merge.cfg")
+		
+	def getConfigFileFromDisk(self):
+		file_path = tkFileDialog.askopenfilename(parent=self.parent, title="Please select a config file")
+		self.moveConfigFile(file_path)
+		
 	def initUI(self):
 		self.parent.title("2dx_automator GUI (alpha_2)")
 	
@@ -850,7 +857,15 @@ def main():
 	editmenu.add_command(label="Show config file", command=app.showFullConfig)
 	editmenu.add_command(label="Show processing parameters", command=app.showRedConfig)
 	editmenu.add_separator()
-	menubar.add_cascade(label="Edit", menu=editmenu)
+	
+	submenu = Menu(editmenu)
+	submenu.add_command(label="MloK1")
+	submenu.add_command(label="CLC")
+	editmenu.add_cascade(label='Load default config', menu=submenu)
+	
+	editmenu.add_command(label="Load config from file", command=app.getConfigFileFromDisk)
+	
+	menubar.add_cascade(label="Configuration", menu=editmenu)
 	
 	helpmenu = Menu(menubar, tearoff=0)
 	helpmenu.add_command(label="Help", command=app.showHelp)

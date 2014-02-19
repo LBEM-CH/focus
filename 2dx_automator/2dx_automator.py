@@ -32,12 +32,17 @@ def bind(widget, event):
 
 def config(master):
 	class CONFIG(object):
-		def __init__(self):
+		def __init__(self, project_folder, condense):
 			self.msgbox = Toplevel(master)
-			self.msgbox.title("2dx_automator Config")
+			
+			if condense:
+				self.msgbox.title("2dx_automator Processing Parameters")
+			else:
+				self.msgbox.title("2dx_automator Merge Configuration File")
+
 			
 			self.s = Scrollbar(self.msgbox)
-			self.T = Text(self.msgbox)
+			self.T = Text(self.msgbox, height=40, width=140)
 
 			self.T.focus_set()
 			self.s.pack(side=RIGHT, fill=Y)
@@ -45,12 +50,14 @@ def config(master):
 			self.s.config(command=self.T.yview)
 			self.T.config(yscrollcommand=self.s.set)
 
-			for i in range(40): 
-				self.T.insert(END, "This is line %d\n" % i)
-			
-			
-			#self.about_label = Label(self.msgbox, text=self.about_text, justify=LEFT)
-			#self.about_label.grid(row=0, column=0, padx=20, pady=20)
+			config_file = open(project_folder + "/merge/2dx_merge.cfg")
+
+			for l in config_file:
+				if condense:
+					if l.startswith("set"):
+						self.T.insert(END, l)
+				else:
+					self.T.insert(END, l)
 			
 		def b0_action(self):
 			self.msgbox.destroy()
@@ -698,8 +705,11 @@ class Auto2dxGUI(Frame):
 	def showHelp(self):
 		self.help_box()	
 		
-	def showConfig(self):
-		self.config_box()
+	def showFullConfig(self):
+		self.config_box(self.output_dir, False)
+		
+	def showRedConfig(self):
+		self.config_box(self.output_dir, True)
 		
 	def initUI(self):
 		self.parent.title("2dx_automator GUI (alpha_2)")
@@ -837,7 +847,9 @@ def main():
 	menubar.add_cascade(label="File", menu=filemenu)
 	
 	editmenu = Menu(menubar, tearoff=0)
-	editmenu.add_command(label="Show Config", command=app.showConfig)
+	editmenu.add_command(label="Show config file", command=app.showFullConfig)
+	editmenu.add_command(label="Show processing parameters", command=app.showRedConfig)
+	editmenu.add_separator()
 	menubar.add_cascade(label="Edit", menu=editmenu)
 	
 	helpmenu = Menu(menubar, tearoff=0)

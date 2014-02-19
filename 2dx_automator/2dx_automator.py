@@ -722,6 +722,8 @@ class Auto2dxGUI(Frame):
 		self.parent.title("2dx_automator GUI (alpha_2)")
 	
 		self.getFolders()
+		
+		os.system("pwd")
 	
 		in_folder = self.input_dir
 		out_folder = self.output_dir

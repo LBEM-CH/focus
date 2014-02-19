@@ -59,8 +59,8 @@ class Add2dxImageWatcher(WatcherBase):
 				lines_out.append(l)
 			else:
 				number_as_string = str(number)
-				leading_zeros = 10 - len(number_as_string)
-				number_as_string = leading_zeros * "0" + str(number)
+				leading_zeros = 7 - len(number_as_string)
+				number_as_string = leading_zeros * "0" + str(number) + "000"
 				toadd = "set imagenumber = " + '"' + number_as_string + '"'
 				lines_out.append(toadd)
 				print toadd

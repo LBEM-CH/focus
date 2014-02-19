@@ -341,13 +341,6 @@ class Auto2dxGUI(Frame):
 				self.watcher.lock_compute.release()
 			except:
 				print "releasing the locks did not help"
-	
-	def waittimeChanged(self):
-		number = tkSimpleDialog.askinteger("Change wait time", "Wait time")
-		if number>=0:
-			self.waittime = number
-			self.time_label.configure(text="Wait time: " + str(self.waittime))
-			self.watcher.setWaittime(self.waittime)
 			
 	def deleteImage(self):
 		if tkMessageBox.askyesno("Delete Image", "Do you realy want to delete the image?"):
@@ -441,7 +434,7 @@ class Auto2dxGUI(Frame):
 		self.minframe = 2
 		self.maxframe = 0
 		self.fod = 7
-		self.waittime = 40
+		self.waittime = 1
 		self.bfac = 150
 		self.pair_mode = 0
 		
@@ -462,12 +455,6 @@ class Auto2dxGUI(Frame):
 		
 		self.change_fod_button = Button(self.low_lr_frame ,text='Change frame offset', width=20, command=self.fodChanged)
 		self.change_fod_button.pack(padx=10, pady=5)
-
-		self.time_label = Label(self.low_ll_frame, text="Waiting Time: " + str(self.waittime))
-		self.time_label.pack(padx=15, pady=10)
-		
-		self.change_time_button = Button(self.low_lr_frame ,text='Change wait time', width=20, command=self.waittimeChanged)
-		self.change_time_button.pack(padx=10, pady=5)
 		
 		self.bfac_label = Label(self.low_ll_frame, text="BFactor: " + str(self.bfac))
 		self.bfac_label.pack(padx=15, pady=10)

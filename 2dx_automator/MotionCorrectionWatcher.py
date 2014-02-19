@@ -39,20 +39,20 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
-			#waiting_time = self.waittime
-			#print "Waiting for", waiting_time, "seconds to make sure that the copy is done"
-			#time.sleep(waiting_time)
-			old_size = os.path.getsize(filename)
+			old_size = os.path.getsize(self.infolder + "/" + filename)
 			new_size = old_size + 1
 			while old_size != new_size:
 				print "file stil changing"
-				time.sleep(2)
+				print old_size
+				time.sleep(1)
 				old_size = new_size
-				new_size = os.path.getsize(filename)
+				new_size = os.path.getsize(self.infolder + "/" + filename)
+				time.sleep(2)
 			
 		print "*** In case you see this for a long time consider troubleshooting the automation ***"
 		
 		self.lock_compute.acquire()
+		time.sleep(3)
 		shutil.copyfile(self.infolder + "/" + filename, "/tmp/mc_tmp.mrc")
 		eman2_command = "e2proc2d.py " + "/tmp/mc_tmp.mrc" + " " + "/tmp/mc_ready.mrc --threed2threed"
 		os.system(eman2_command)

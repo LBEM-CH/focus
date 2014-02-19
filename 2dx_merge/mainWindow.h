@@ -55,6 +55,7 @@
 #include <imagePreview.h>
 #include <imageAlbum.h>
 #include <eulerWindow.h>
+#include <reprojectWindow.h>
 #include <importBox.h>
 #include <importTool.h>
 #include <aboutWindow.h>
@@ -86,6 +87,7 @@ class mainWindow : public QMainWindow
   
   void showAlbum(bool show = true);
   void showEuler(bool show = true);
+  void showReproject(bool show = true);
 
   void columnActivated(int i);
 
@@ -111,6 +113,7 @@ class mainWindow : public QMainWindow
 
   void launchAlbum(const QString &path);
   void launchEuler();
+  void launchReproject();
   void launchFileBrowser();
   void showManual(bool show);
 
@@ -155,6 +158,7 @@ class mainWindow : public QMainWindow
 
   imageAlbum *album;
   eulerWindow *euler;
+  reprojectWindow *reproject;
 
   scriptModule *standardScripts;
   scriptModule *customScripts;

@@ -350,6 +350,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 	setupActions();
   album = NULL;
   euler = NULL;
+reproject = NULL;
   
   importCount = 0;
 
@@ -627,6 +628,11 @@ void mainWindow::setupActions()
   viewEuler->setShortcut(tr("Ctrl+Shift+E"));
   connect(viewEuler,SIGNAL(triggered()),this,SLOT(showEuler()));
   viewMenu->addAction(viewEuler);
+
+  QAction *viewReproject = new QAction("Show Reproject GUI",this);
+  viewReproject->setShortcut(tr("Ctrl+Shift+R"));
+  connect(viewReproject,SIGNAL(triggered()),this,SLOT(showReproject()));
+  viewMenu->addAction(viewReproject);
 
 
 //  QMenu *projectMenu = new QMenu("Project");
@@ -1011,6 +1017,15 @@ void mainWindow::launchEuler()
   }
 }
 
+void mainWindow::launchReproject()
+{
+  if(reproject==NULL)
+  {
+    reproject = new reprojectWindow(mainData);
+  }
+}
+
+
 void mainWindow::closeEvent(QCloseEvent *event)
 {
   if(!mainData->isModified())
@@ -1244,6 +1259,15 @@ void mainWindow::showEuler(bool show)
       launchEuler();
 
     euler->setHidden(!show);
+}
+
+
+void mainWindow::showReproject(bool show)
+{
+  if(reproject==NULL)
+      launchReproject();
+
+    reproject->setHidden(!show);
 }
 
 

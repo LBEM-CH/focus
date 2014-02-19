@@ -36,10 +36,21 @@ def config(master):
 			self.msgbox = Toplevel(master)
 			self.msgbox.title("2dx_automator Config")
 			
-			self.about_text = "2dx_automator Config \n\n"
+			self.s = Scrollbar(self.msgbox)
+			self.T = Text(self.msgbox)
+
+			self.T.focus_set()
+			self.s.pack(side=RIGHT, fill=Y)
+			self.T.pack(side=LEFT, fill=Y)
+			self.s.config(command=self.T.yview)
+			self.T.config(yscrollcommand=self.s.set)
+
+			for i in range(40): 
+				self.T.insert(END, "This is line %d\n" % i)
 			
-			self.about_label = Label(self.msgbox, text=self.about_text, justify=LEFT)
-			self.about_label.grid(row=0, column=0, padx=20, pady=20)
+			
+			#self.about_label = Label(self.msgbox, text=self.about_text, justify=LEFT)
+			#self.about_label.grid(row=0, column=0, padx=20, pady=20)
 			
 		def b0_action(self):
 			self.msgbox.destroy()
@@ -823,7 +834,7 @@ def main():
 	menubar.add_cascade(label="File", menu=filemenu)
 	
 	editmenu = Menu(menubar, tearoff=0)
-	editmenu.add_command(label="Show Config")
+	editmenu.add_command(label="Show Config", command=app.showConfig)
 	menubar.add_cascade(label="Edit", menu=editmenu)
 	
 	helpmenu = Menu(menubar, tearoff=0)

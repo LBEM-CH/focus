@@ -39,7 +39,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
-			time.sleep(10)
+			time.sleep(15)
 			old_size = os.path.getsize(self.infolder + "/" + filename)
 			new_size = old_size + 1
 			while old_size != new_size:

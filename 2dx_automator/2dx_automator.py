@@ -156,7 +156,7 @@ def tbox(master):
 
 
 class Auto2dxGUI(Frame):
-	def __init__(self, parent):
+	def __init__(self, parent, folder):
 		Frame.__init__(self, parent, background="white")
 		self.parent = parent
 		self.index_selected = 0
@@ -168,6 +168,8 @@ class Auto2dxGUI(Frame):
 		self.listbox.activate(END)
 		self.index_selected = self.count-1
 		self.indexChanged()
+		self.config_folder = folder
+		
 		
 		
 	def getFolders(self):
@@ -722,8 +724,6 @@ class Auto2dxGUI(Frame):
 		self.parent.title("2dx_automator GUI (alpha_2)")
 	
 		self.getFolders()
-		
-		os.system("pwd")
 	
 		in_folder = self.input_dir
 		out_folder = self.output_dir
@@ -842,7 +842,12 @@ def main():
 	root = Tk()
 	root.geometry("1900x1200+0+0")
 	
-	app = Auto2dxGUI(root)
+	tmp = sys.argv[0].split("/")[:-1]
+	config_dir = ""
+	for t in tmp:
+		config_dir += t +"/"
+	config_dir + "default_configs"
+	app = Auto2dxGUI(root, config_dir) 
 	
 	def greet(*ignore):
 		app.select_image()
@@ -876,6 +881,8 @@ def main():
 	menubar.add_cascade(label="Help", menu=helpmenu)
 
 	root.config(menu=menubar)
+	
+	print app.config_folder
 		
 	root.mainloop()
 	

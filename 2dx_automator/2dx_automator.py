@@ -348,6 +348,8 @@ class Auto2dxGUI(Frame):
 		for c in content:
 			if len(c)>1 and c[1] == "magnification":
 				magnification = float(c[3][1:-1])
+			if len(c)>1 and c[1] == "imagenumber":
+				number = c[3][1:-1]
 			if len(c)>1 and c[1] == "QVAL":
 				qval = float(c[3][1:-1])
 			if len(c)>1 and c[1] == "TLTAXIS":
@@ -399,6 +401,7 @@ class Auto2dxGUI(Frame):
 	
 		result = "Image Statistics:\n\n\n"
 		result += "2dx image folder: " + folder.split("/")[-2] + "/" + folder.split("/")[-1] + "\n"
+		result += "Image Number: " + number + "\n"
 		
 		file_time = datetime.datetime.fromtimestamp(os.path.getmtime(folder)) 
 		result += "Time: " + str(file_time) + "\n\n"

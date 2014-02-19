@@ -4,6 +4,8 @@ from sparx  import *
 
 from pylab import plt, plot, subplot, figure, hist
 
+import os
+
 class MotionCorrectionWatcher(WatcherBase):
 	
 	def generateDriftPlot(self, filename):
@@ -37,13 +39,22 @@ class MotionCorrectionWatcher(WatcherBase):
 		filecorename = self.getFileCoreName(filename)
 		
 		if do_wait:
-			waiting_time = self.waittime
-			print "Waiting for", waiting_time, "seconds to make sure that the copy is done"
-			time.sleep(waiting_time)
+			time.sleep(10)
+			old_size = os.path.getsize(self.infolder + "/" + filename)
+			new_size = old_size + 1
+			while old_size != new_size:
+				print "file stil changing"
+				print old_size
+				time.sleep(1)
+				old_size = new_size
+				new_size = os.path.getsize(self.infolder + "/" + filename)
+				time.sleep(2)
+			print os.path.getsize(self.infolder + "/" + filename)
 			
 		print "*** In case you see this for a long time consider troubleshooting the automation ***"
 		
 		self.lock_compute.acquire()
+		time.sleep(3)
 		shutil.copyfile(self.infolder + "/" + filename, "/tmp/mc_tmp.mrc")
 		eman2_command = "e2proc2d.py " + "/tmp/mc_tmp.mrc" + " " + "/tmp/mc_ready.mrc --threed2threed"
 		os.system(eman2_command)

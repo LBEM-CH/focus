@@ -171,7 +171,6 @@ class Auto2dxGUI(Frame):
 		self.config_folder = folder
 		
 		
-		
 	def getFolders(self):
 		self.input_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an input directory for 2dx_automator")
 		if len(self.input_dir)==0:
@@ -692,33 +691,54 @@ class Auto2dxGUI(Frame):
 				skip.close()
 		self.indexChanged()
 		
+		
 	def select_image(self):
 		self.usebox.toggle()
 		self.useButtonClicked()
+
 
 	def showIQ(self):
 		i = self.index_selected
 		command = "evince " + self.image_dirs[i] + "/PS/2dx_plotreska_canonical.ps"
 		os.system(command)
+
 		
 	def showAbout(self):
 		self.about_box()
+
 	
 	def showHelp(self):
 		self.help_box()	
+
 		
 	def showFullConfig(self):
 		self.config_box(self.output_dir, False)
+
 		
 	def showRedConfig(self):
 		self.config_box(self.output_dir, True)
+
 		
 	def moveConfigFile(self, config):
 		shutil.copyfile( config, self.output_dir + "/merge/2dx_merge.cfg")
+
 		
 	def getConfigFileFromDisk(self):
 		file_path = tkFileDialog.askopenfilename(parent=self.parent, title="Please select a config file")
 		self.moveConfigFile(file_path)
+
+		
+	def load_config_mlok1(self):
+		self.moveConfigFile(self.config_folder + "/default_mlok1.cfg")
+		
+	
+	def load_config_mlok1_nocAMP(self):
+		self.moveConfigFile(self.config_folder + "/default_mlok1_nocAMP.cfg")
+		
+		
+	def load_config_clc(self):
+		self.moveConfigFile(self.config_folder + "/default_clc.cfg")
+
 		
 	def initUI(self):
 		self.parent.title("2dx_automator GUI (alpha_2)")
@@ -846,7 +866,7 @@ def main():
 	config_dir = ""
 	for t in tmp:
 		config_dir += t +"/"
-	config_dir + "default_configs"
+	config_dir += "default_configs"
 	app = Auto2dxGUI(root, config_dir) 
 	
 	def greet(*ignore):
@@ -866,7 +886,8 @@ def main():
 	editmenu.add_separator()
 	
 	submenu = Menu(editmenu)
-	submenu.add_command(label="MloK1")
+	submenu.add_command(label="MloK1", command=app.load_config_mlok1)
+	submenu.add_command(label="MloK1_nocAMP", command=app.load_config_mlok1_nocAMP)
 	submenu.add_command(label="CLC")
 	editmenu.add_cascade(label='Load default config', menu=submenu)
 	
@@ -881,8 +902,6 @@ def main():
 	menubar.add_cascade(label="Help", menu=helpmenu)
 
 	root.config(menu=menubar)
-	
-	print app.config_folder
 		
 	root.mainloop()
 	

@@ -15,5 +15,9 @@ kernel/mrc/lib/*/*/*.o
 kernel/mrc/*/CMakefiles/*/*.txt
 kernel/mrc/*/CMakefiles/*/*.o
 kernel/mrc/*/*/CMakefiles/*/*.txt
+kernel/mrc/*/*/CMakefiles/*/*.o
 kernel/mrc/lib/fsplit
 .build_all.swp
+kernel/mrc/source/*.mod
+kernel/mrc/source/CMakeFiles/*/*.stamp
+kernel/mrc/source/CMakeFiles/*/*.build

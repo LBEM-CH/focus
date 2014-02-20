@@ -3,4 +3,9 @@
 kernel/mrc/bin
 *.DS_store
 kernel/config/2dx.cfg
-
+Makefile
+*.cmake
+*.make
+*.marks
+*.internal
+*.includecache

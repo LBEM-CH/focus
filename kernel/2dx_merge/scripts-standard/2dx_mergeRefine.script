@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# ITERATIONCOUNTER: MAX=100;DEFAULT=5
+# ITERATIONCOUNTER: MAX=100;DEFAULT=3
 #
 # SORTORDER: 40
 #
@@ -44,6 +44,7 @@
 # DISPLAY: Merge_Reference_IQMAX
 # DISPLAY: MergeHKMAX
 # DISPLAY: Merge_Reference_HKMAX
+# DISPLAY: MergeLatLine_REDUCAC
 # DISPLAY: ILIST
 # DISPLAY: MergeIPAT
 # DISPLAY: MergeDELPLT
@@ -124,6 +125,7 @@ set MergeBINSIZ = ""
 set MergeNCYCLS = ""
 set MergeMPRINT = ""
 set MergeLatLine_MaxAmpFactor = ""
+set MergeLatLine_REDUCAC = ""
 set refbeamtilt = ""
 set reftiltgeo = ""
 set ITAXASTEP = ""

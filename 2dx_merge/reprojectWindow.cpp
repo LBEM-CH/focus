@@ -56,6 +56,13 @@ void reprojectWindow::particleChanged()
 	QString imagename = data->get("imagename", "value");
 	QString imagenumber = data->get("imagenumber", "value");
 	
+	int tilt_axis = data->get("TLTAXIS", "value").toFloat();
+	int tilt_ang = data->get("TLTANG", "value").toFloat();
+	int taxa = data->get("TAXA", "value").toFloat();
+		
+	taxisSpinBox->setValue(tilt_axis);
+    tanglSpinBox->setValue(tilt_ang);
+    taxaSpinBox->setValue(taxa);
 	
 	QString map_file = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/final_map.mrc") ;
 	QString ref_file = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/") + imagename + QString("_ref.mrc") ;
@@ -169,8 +176,8 @@ void reprojectWindow::setupGUI()
     //TAXIS
     taxisLabel = new QLabel("Tilt Axis");
     taxisSpinBox = new QSpinBox();
-    taxisSpinBox->setRange(0,360);
-    taxisSpinBox->setValue(180);
+    taxisSpinBox->setRange(-180,180);
+    taxisSpinBox->setValue(0);
 
     taxisValueLayout = new QHBoxLayout();
     taxisValueLayout->addWidget(taxisLabel);
@@ -193,8 +200,8 @@ void reprojectWindow::setupGUI()
     //TANGL
     tanglLabel = new QLabel("Tilt Angle");
     tanglSpinBox = new QSpinBox();
-    tanglSpinBox->setRange(0,360);
-    tanglSpinBox->setValue(180);
+    tanglSpinBox->setRange(-180,180);
+    tanglSpinBox->setValue(0);
 
     tanglValueLayout = new QHBoxLayout();
     tanglValueLayout->addWidget(tanglLabel);
@@ -217,8 +224,8 @@ void reprojectWindow::setupGUI()
     //TAXA
     taxaLabel = new QLabel("TAXA");
     taxaSpinBox = new QSpinBox();
-    taxaSpinBox->setRange(0,360);
-    taxaSpinBox->setValue(180);
+    taxaSpinBox->setRange(-180,180);
+    taxaSpinBox->setValue(0);
 
     taxaValueLayout = new QHBoxLayout();
     taxaValueLayout->addWidget(taxaLabel);

@@ -91,6 +91,7 @@ class mainWindow : public QMainWindow
 
   void extendSelection();
   void reduceSelection();
+  void copyImage();
 
   void maximizeWindow(int option);
 

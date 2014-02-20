@@ -15,6 +15,8 @@ set(LIBTITLE mrcImage)
 SET(LIBVERSION 1)
 project(${LIBTITLE})
 
+set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -Wno-cpp")
+
 #------------------------------------------------------------------------------
 # Configure Config file and include it.
 # The dependencies are defined in the Config.cmake file

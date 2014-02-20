@@ -155,7 +155,7 @@ end
 set tmp_defocus_min = `echo ${tmp_defocus_min} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
 set tmp_defocus_max = `echo ${tmp_defocus_max} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
 set tmp_overall_R_factor = `echo ${overall_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'` 
-set tmp_overall_weighted_R_factor = `echo ${overall_weighted_R_factor} | awk '{ s = $1 * 100.0 } END { print s }'`
+set tmp_overall_weighted_R_factor = `echo ${overall_weighted_R_factor} | awk '{ s = $1 * 1.0 } END { print s }'`
 set tmp_nominal_tilt_angle = `echo ${tmp_TANGL_max} | awk '{ s = int ( $1 / 5 ) * 5 } END { printf ( "%10.0f", s ) }'` 
 set realcell_a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { printf ( "%10.1f", s ) }'`
 set realcell_b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { printf ( "%10.1f", s ) }'`

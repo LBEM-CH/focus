@@ -9,3 +9,11 @@ Makefile
 *.marks
 *.internal
 *.includecache
+kernel/mrc/lib/*.a
+kernel/mrc/lib/*/*.o
+kernel/mrc/lib/*/*/*.o
+kernel/mrc/*/CMakefiles/*/*.txt
+kernel/mrc/*/CMakefiles/*/*.o
+kernel/mrc/*/*/CMakefiles/*/*.txt
+kernel/mrc/lib/fsplit
+.build_all.swp

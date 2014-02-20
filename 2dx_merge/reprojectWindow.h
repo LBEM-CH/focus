@@ -35,13 +35,58 @@ signals:
 
 
 public slots:
-    
+	void selectPrevParticle();
+    void selectNextParticle();
+    void updateProjection();
+	void lauch2dxImage();
+	void particleChanged();
 
 
 protected:
+	void setupGUI();
+
 	
 
 private:
+	QLabel* particleLabel;
+    QComboBox* particleSelection;
+    
+
+    QLabel* taxisLabel;
+    QLabel* tanglLabel;
+    QLabel* taxaLabel;
+    
+    QSpinBox* taxisSpinBox;
+    QSpinBox* tanglSpinBox;
+    QSpinBox* taxaSpinBox;
+    
+    QSlider* taxisSlider;
+    QSlider* tanglSlider;
+    QSlider* taxaSlider;
+
+	QVBoxLayout *layout;
+	QHBoxLayout* particlePanel;
+	QVBoxLayout* anglesLayout;
+	
+	QHBoxLayout* taxisValueLayout;
+	QVBoxLayout* taxisLayout;
+	QHBoxLayout* tanglValueLayout;
+	QHBoxLayout* taxaValueLayout;
+	QVBoxLayout* taxaLayout;
+	
+	QPixmap pixmap_part;
+	QPixmap pixmap_proj;
+	
+	QLabel* projPixmapLabel;
+	QLabel* particlePixmapLabel;
+	
+	QPushButton* nextParticleButton;
+	QPushButton* prevParticleButton;
+	QPushButton* updateProjectionButton;
+	QPushButton* launch2dxImageButton;
+	
+	
+	
 	
 	confData* config_gui;
 

@@ -628,7 +628,7 @@ void mainWindow::setupActions()
   viewMenu->addAction(viewEuler);
 
   QAction *viewReproject = new QAction("Show Reproject GUI",this);
-  viewReproject->setShortcut(tr("Ctrl+Shift+R"));
+  viewReproject->setShortcut(tr("Ctrl+Shift+P"));
   connect(viewReproject,SIGNAL(triggered()),this,SLOT(showReproject()));
   viewMenu->addAction(viewReproject);
 

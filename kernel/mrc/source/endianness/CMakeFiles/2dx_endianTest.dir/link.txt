@@ -1,0 +1,1 @@
+/usr/bin/g++   -O3 -DNDEBUG -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/2dx_endianTest.dir/2dx_endianTest.cpp.o CMakeFiles/2dx_endianTest.dir/endianOperations.cpp.o  -o 2dx_endianTest.exe  

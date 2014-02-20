@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/sthennin/Projects/2dx/kernel/mrc/include/mrcImage.h
+iostream
+-
+complex
+-
+fstream
+-
+float.h
+-
+fftw3.h
+-
+
+/Users/sthennin/Projects/2dx/kernel/mrc/source/periodogram/2dx_periodogram.cpp
+iostream
+-
+complex
+-
+cstdlib
+-
+string.h
+-
+mrcImage.h
+-
+fftw3.h
+-
+pthread.h
+-
+
+/usr/local/include/fftw3.h
+stdio.h
+-
+stddef.h
+-
+

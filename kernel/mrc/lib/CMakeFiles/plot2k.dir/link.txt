@@ -1,0 +1,2 @@
+/usr/bin/ar cr libplot2k.a  CMakeFiles/plot2k.dir/plot2k.c.o
+/usr/bin/ranlib libplot2k.a

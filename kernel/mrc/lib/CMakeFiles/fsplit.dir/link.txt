@@ -1,0 +1,1 @@
+/usr/bin/gcc  -DPROTOTYPE -Dalliant -w -ffast-math -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/fsplit.dir/fsplit.c.o  -o fsplit  

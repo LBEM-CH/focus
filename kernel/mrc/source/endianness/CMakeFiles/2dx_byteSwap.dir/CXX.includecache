@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/sthennin/Projects/2dx/kernel/mrc/include/mrcImage.h
+iostream
+-
+complex
+-
+fstream
+-
+float.h
+-
+fftw3.h
+-
+
+/Users/sthennin/Projects/2dx/kernel/mrc/source/endianness/2dx_byteSwap.cpp
+iostream
+-
+mrcImage.h
+-
+endianOperations.h
+-
+
+/Users/sthennin/Projects/2dx/kernel/mrc/source/endianness/endianOperations.cpp
+endianOperations.h
+/Users/sthennin/Projects/2dx/kernel/mrc/source/endianness/endianOperations.h
+
+/Users/sthennin/Projects/2dx/kernel/mrc/source/endianness/endianOperations.h
+iostream
+-
+mrcImage.h
+-
+
+/usr/local/include/fftw3.h
+stdio.h
+-
+stddef.h
+-
+

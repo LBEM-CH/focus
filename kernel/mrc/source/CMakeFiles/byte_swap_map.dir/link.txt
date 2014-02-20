@@ -1,0 +1,1 @@
+/usr/bin/gcc  -dead_strip -ffast-math  -static-libgcc -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/byte_swap_map.dir/byte_swap_map.c.o  -o byte_swap_map.exe  

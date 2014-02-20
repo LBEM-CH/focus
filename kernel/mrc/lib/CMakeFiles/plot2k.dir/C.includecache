@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/sthennin/Projects/2dx/kernel/mrc/lib/plot2k.c
+math.h
+-
+stdio.h
+-
+stdlib.h
+-
+strings.h
+-
+

@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/sthennin/Projects/2dx/kernel/mrc/lib/2dx_conv.cpp
+complex
+-
+math.h
+-
+fftw3.h
+-
+iostream
+-
+
+/usr/local/include/fftw3.h
+stdio.h
+-
+stddef.h
+-
+

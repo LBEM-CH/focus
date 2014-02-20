@@ -1,0 +1,2 @@
+/usr/bin/ar cr libconv.a  CMakeFiles/conv.dir/2dx_conv.cpp.o
+/usr/bin/ranlib libconv.a

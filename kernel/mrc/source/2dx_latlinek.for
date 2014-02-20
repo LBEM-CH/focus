@@ -211,11 +211,10 @@ C       PARAMETER (NCALMX=50)
 C       PARAMETER (NPROMX=251)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPROMX=1001)
         PARAMETER (IPPFPDIM=500)
-        PARAMETER (ISPACEDIM=100000)
 CHENN<
         PARAMETER (NPLTMX=2000)
         PARAMETER (NPRMX=401)
@@ -243,7 +242,7 @@ C       COMMON/FUN/ NCOUNT,NPRNT,THRESH,PFFP(100),PPFP(100)
         COMMON/FUN/ NCOUNT,NPRNT,THRESH,PFFP(IPPFPDIM),PPFP(IPPFPDIM)
 CHENN<
         DIMENSION PROF(NPROMX),RP(NPROMX)
-        DIMENSION PARMS(100),GRADS(100),SPACE(ISPACEDIM)
+        DIMENSION PARMS(100),GRADS(100),SPACE(10500)
         DIMENSION SIGF(NOUTMX),SIGPHI(NOUTMX)
         DIMENSION ZOUT(NOUTMX),FOUT(NOUTMX),PHIOUT(NOUTMX)
         DIMENSION TITLE(20),SCALE(NCALMX*2)
@@ -722,8 +721,8 @@ C               Output of overall statistics
      .          WRFSUM/WSUMSUM,SQRT(WRMSPSUM/WNPSUM)
 CHENN>
         OPEN(UNIT=17,FILE='latline.statistics',STATUS='NEW')
-        WRITE(17,4400) NFSUM,NPSUM,100.0*RFSUM/NFSUM,RMSPSUM/NPSUM,
-     .          100.0*WRFSUM/WSUMSUM,SQRT(WRMSPSUM/WNPSUM)
+        WRITE(17,4400) NFSUM,NPSUM,RFSUM/NFSUM,RMSPSUM/NPSUM,
+     .          WRFSUM/WSUMSUM,SQRT(WRMSPSUM/WNPSUM)
         CLOSE(17)
 CHENN<
 4400    FORMAT(/,' Overall statistics :',/,
@@ -747,7 +746,7 @@ C       PARAMETER (NCALMX=50)
 C       PARAMETER (NPROMX=251)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPROMX=1001)
         PARAMETER (IPPFPDIM=500)
@@ -834,7 +833,7 @@ C       PARAMETER (NPRMX=401)
 C       PARAMETER (NOUTMX=300)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -956,7 +955,7 @@ C       PARAMETER (NPRMX=401)
 C       PARAMETER (NOUTMX=300)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -1176,7 +1175,7 @@ C       PARAMETER (NPRMX=401)
 C       PARAMETER (NOUTMX=300)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -1236,7 +1235,7 @@ C       PARAMETER (NPRMX=401)
 C       PARAMETER (NOUTMX=300)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -1288,7 +1287,7 @@ C       PARAMETER (NPRMX=401)
 C       PARAMETER (NOUTMX=300)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -1400,7 +1399,7 @@ C       PARAMETER (NPRMX=401)
 C       PARAMETER (NOUTMX=300)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -1648,7 +1647,7 @@ C
         SUBROUTINE SETSA2(IH,IK)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -1820,7 +1819,7 @@ C       PARAMETER (NPRMX=401)
 C       PARAMETER (NOUTMX=300)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -1947,7 +1946,7 @@ C       PARAMETER (NPRMX=401)
 C       PARAMETER (NOUTMX=300)
 C
         INTEGER PPFPDIM
-        PARAMETER (NOBSMX=6000)
+        PARAMETER (NOBSMX=3000)
         PARAMETER (NPLTMX=2000)
         PARAMETER (NCALMX=100)
         PARAMETER (NPRMX=401)
@@ -2024,10 +2023,6 @@ C
 CHEN>
       ZMM=ZRANG*ZMAG
       ZMAGlocal=ZMAG
-      write(6,'(''XPLTSIZ='',F12.3)')XPLTSIZ
-      write(6,'(''YPLTSIZ='',F12.3)')YPLTSIZ
-      write(6,'(''ZMIN,ZMAX='',2F12.3)')ZMIN,ZMAX
-      write(6,'(''ZMM,ZMAG='',2F12.3)')ZMM,ZMAG
 6     continue
       ZMMlocal=ZRANG*ZMAGlocal
       IF (ZMMlocal .GT. 75.0) GOTO 7
@@ -2037,16 +2032,14 @@ CHEN>
 CHEN<
 7     continue
       ZERO=-ZMIN*ZMAG
-      write(6,'(''ZERO='',F12.3)')ZERO
 C
 C  DRAW AXES FOR AMPLITUDE BOX
 C
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(5.0,30.0,0.)
-        XP=0.05*ZMM
 C       CALL P2K_MOVE(10.,-15.,0.)
-        CALL P2K_MOVE(XP,-12.7,0.)
-        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
+        CALL P2K_MOVE(-5.,-12.,0.)
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.8)
         CALL P2K_STRING(TITLE,80,0.)
 C
         rgbr = 0.0
@@ -2057,16 +2050,15 @@ C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
         WRITE(cline,'(''IQ....:  1 2 3 4 5 6 7 8 9'')')
         call shorten(cline,k)
-        CALL P2K_MOVE(XP,-17.,0.)
+        CALL P2K_MOVE(4.,-17.,0.)
         CALL P2K_STRING(cline,k,0.)
 C
         WRITE(cline,'(''Symbol:  X x * + ~ - , . .'')')
         call shorten(cline,k)
-        CALL P2K_MOVE(XP,-20.,0.)
+        CALL P2K_MOVE(4.,-20.,0.)
         CALL P2K_STRING(cline,k,0.)
 C
-C       XP=25.0
-        XP=0.5*ZMM
+        XP=25.0
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
         WRITE(cline,'(''Error bars:'')')
         call shorten(cline,k)
@@ -2079,7 +2071,7 @@ C
         CALL P2K_MOVE(XP,-20.,0.)
         CALL P2K_STRING(cline,k,0.)
 C 
-        XP=XP+0.1*ZMM
+        XP=XP+5.0
         do i=100,0,-10
           FOM = i
 C            FACTOR = 1.0 - cos(PHAERR*PI/180.0)
@@ -2097,7 +2089,7 @@ C            FACTOR = 1.0 - cos(PHAERR*PI/180.0)
 C
           WRITE(cline,'(I3)')i
           call shorten(cline,k)
-          XP=XP+0.03*ZMM
+          XP=XP+1.5
           CALL P2K_MOVE(XP,-17.,0.)
           CALL P2K_STRING(cline,k,0.)
         enddo
@@ -2125,7 +2117,6 @@ CHEN>
 C
 C-------Plot units on horizontal axis:
 C
-        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
         DO 25 J=1,100
           ZPOS=-0.5+J*DELZ
           IF((ZPOS.LT.ZMIN).OR.(ZPOS.GE.ZMAX))GO TO 25
@@ -2133,7 +2124,7 @@ C
           CALL P2K_MOVE(XPOS,0.,0.)
           CALL P2K_DRAW(XPOS,2.0,0.)
           XPOS=XPOS-3.0
-          CALL P2K_MOVE(XPOS,-3.5,0.)
+          CALL P2K_MOVE(XPOS,-4.5,0.)
           WRITE(LINE(1:6),26) ZPOS
           CALL P2K_STRING(LINE,6,0.)
 25      CONTINUE
@@ -2143,13 +2134,12 @@ C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
         CALL P2K_STRING('LATTICE LINE',12,0.)
         POSN=ZRANG*ZMAG-2.5
-        CALL P2K_MOVE(POSN,-7.5,0.)
+        CALL P2K_MOVE(POSN,-4.5,0.)
         CALL P2K_STRING('RECIPROCAL',10,0.)
-        CALL P2K_MOVE(POSN,-10.5,0.)
+        CALL P2K_MOVE(POSN,-7.5,0.)
         CALL P2K_STRING('ANGSTROMS',9,0.)
         POSY=FMAG+GAP+PMAG - 3.0
-C        POSX = -5.0
-        POSX=-0.05*ZMM
+        POSX = -5.0
         CALL P2K_MOVE(POSX,POSY,0.)
         CALL P2K_STRING('PHS',3,0.)
 
@@ -2165,8 +2155,7 @@ C        POSX = -5.0
 C
 C-------Plot units on vertical axis:
 C
-        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
-        XPOS = ZMIN*ZMAG - 0.11*ZMM
+        XPOS = -0.16 * XPLTSIZ
         DO 200 J=1,IC
           F=J*B
           YPOS=F*SCALE-0.2
@@ -2235,18 +2224,12 @@ C
         rgbg = 0.4
         rgbb = 0.0
         if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
-        YBOTTOM=0.2
 C
         DO 610 J = 1,NOUT
           XP = ZOUT(J)*ZMAG
           YP = FOUT(J)*SCALE
-          YL = (FOUT(J) - ABS(SIGF(J)))*SCALE
-          YU = (FOUT(J) + ABS(SIGF(J)))*SCALE
-          if(YL.lt.YBOTTOM)YL=YBOTTOM
-          if(YL.gt.FMAX*SCALE)YL=FMAX*SCALE
-          if(YU.lt.YBOTTOM)YU=YBOTTOM
-          if(YU.gt.FMAX*SCALE)YU=FMAX*SCALE
-C         write(6,'(I6,6F12.3)') J,FOUT(J),SIGF(J),SCALE,FMAX,YL,YU
+          YL = AMAX1(0., FOUT(J) - SIGF(J))*SCALE
+          YU = AMIN1(FMAX, FOUT(J) + SIGF(J))*SCALE
 C
           PHAERR = abs(SIGPHI(J))
           if(PHAERR.lt. 0.0)PHAERR= 0.0
@@ -2328,13 +2311,14 @@ CHEN>
 C
 C-------Write PHASE Y-axis labels
 C
-        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
         DO 630 J=1,5
           IANG=-180+(J-1)*90
-          XPOS=ZA-0.04*ZMM
+C---------XPOS=ZA-3.5
+          XPOS=-4.0
           YPOS=IANG*PMAG2-0.3
           CALL P2K_MOVE(XPOS,YPOS,0.)
           WRITE(LINE(1:4),631) IANG
+          CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
           CALL P2K_STRING(LINE,4,0.)
 CHEN<
 630     CONTINUE
@@ -2411,8 +2395,8 @@ C
           DO 700 J = 1,NOUT
             XP = ZOUT(J)*ZMAG
             YP = PHIOUT(J)*PMAG2
-            YL = AMAX1(-180., PHIOUT(J) - ABS(SIGPHI(J)))*PMAG2
-            YU = AMIN1( 180., PHIOUT(J) + ABS(SIGPHI(J)))*PMAG2
+            YL = AMAX1(-180., PHIOUT(J) - SIGPHI(J))*PMAG2
+            YU = AMIN1( 180., PHIOUT(J) + SIGPHI(J))*PMAG2
 C
             PHAERR = abs(SIGPHI(J))
             if(PHAERR.lt. 0.0)PHAERR= 0.0

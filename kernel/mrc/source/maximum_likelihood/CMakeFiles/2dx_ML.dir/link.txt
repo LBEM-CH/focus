@@ -1,1 +1,0 @@
-/usr/bin/g++   -O3 -DNDEBUG -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/2dx_ML.dir/2dx_ML.c.o  -o 2dx_ML.exe  /usr/local/lib/libfftw3f.dylib ../../lib/lib2dx.a 

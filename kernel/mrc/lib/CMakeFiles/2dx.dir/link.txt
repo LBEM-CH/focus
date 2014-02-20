@@ -1,2 +1,0 @@
-/usr/bin/ar cr lib2dx.a  CMakeFiles/2dx.dir/2dx_func.for.o CMakeFiles/2dx.dir/mrcImage.cpp.o
-/usr/bin/ranlib lib2dx.a

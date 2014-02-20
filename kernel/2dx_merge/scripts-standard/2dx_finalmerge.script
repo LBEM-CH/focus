@@ -52,7 +52,6 @@
 # DISPLAY: MergeIWF
 # DISPLAY: MergeIWP
 # DISPLAY: MergeLatLine_MaxAmpFactor
-# DISPLAY: MergeLatLine_REDUCAC
 # DISPLAY: max_amp_correction
 # DISPLAY: merge_ML_data
 # DISPLAY: plotres_rings
@@ -102,7 +101,6 @@ set MergeAK = ""
 set MergeIWF = ""
 set MergeIWP = ""
 set MergeLatLine_MaxAmpFactor = ""
-set MergeLatLine_REDUCAC = ""
 set max_amp_correction = ""
 set merge_ML_data = ""
 set plotres_rings = ""

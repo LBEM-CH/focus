@@ -282,8 +282,7 @@ setenv OUT APH/latfitted_nosym.hkl
 setenv REFHKL APH/latfittedref_nosym.hkl
 #
 # (1.0 to leave FOM values as they are, or 1.5 = to add a 60deg phase error)
-set REDUCAC = ${MergeLatLine_REDUCAC}   
-echo REDUCAC = ${REDUCAC}
+set REDUCAC = 1.0   
 #
 echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
 @

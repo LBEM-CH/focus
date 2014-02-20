@@ -1,1 +1,0 @@
-/usr/bin/gcc  -dead_strip -ffast-math  -static-libgcc -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/floatcompare.dir/floatcompare.c.o  -o floatcompare.exe  

@@ -172,13 +172,10 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   customScripts->setMaximumWidth(minWidth);
   singleParticleScripts->setMaximumWidth(minWidth);
   
-  int minHeight = int(QApplication::desktop()->height()/8.00);
+  int minHeight = int(QApplication::desktop()->height()/10.00);
   standardScripts->setMinimumHeight(minHeight);
   customScripts->setMinimumHeight(minHeight);
   singleParticleScripts->setMinimumHeight(minHeight);
-    
-  standardScripts->setMaximumHeight(130);
-  singleParticleScripts->setMaximumHeight(150);
 
   results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
 
@@ -313,6 +310,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   resultsSplitter->addWidget(imagesContainer);
 
   viewContainer *previewContainer = new viewContainer("Image Preview",viewContainer::image,this,viewContainer::grey);
+  previewContainer->setMaximumWidth(minWidth);
   preview = new imagePreview(mainData,"",false,menuBar(),previewContainer);
   previewContainer->addWidget(preview);
 //  preview->toggleInfo();

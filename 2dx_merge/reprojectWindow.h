@@ -69,6 +69,7 @@ private:
 	QVBoxLayout *layout;
 	QHBoxLayout* particlePanel;
 	QVBoxLayout* anglesLayout;
+	QVBoxLayout* phaoriLayout;
 	
 	QHBoxLayout* taxisValueLayout;
 	QVBoxLayout* taxisLayout;

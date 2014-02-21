@@ -92,8 +92,10 @@ void reprojectWindow::updateProjection()
 	
 	std::string command = "2dx_merge ";
 	command += config_gui->getDir("working").toStdString();
-	command += ".. 2dx_generateImageMaps ";
+	command += "/.. 2dx_generateImageMaps ";
 	command += particleSelection->currentText().toStdString();
+	
+	std::cout << "command: " << command << std::endl << std::endl;
 	system(command.c_str());
 	particleChanged();
 }
@@ -102,6 +104,40 @@ void reprojectWindow::updateProjection()
 void reprojectWindow::doAutoMerge()
 {
 	std::cout << "now auto-merging" << std::endl;
+	
+	std::string command = "2dx_merge ";
+	command += config_gui->getDir("working").toStdString();
+	command += "../ 2dx_refine ";
+	command += particleSelection->currentText().toStdString();
+	
+	system(command.c_str());
+	
+	std::string file_name = config_gui->getDir("working").toStdString() + "LOGS/2dx_refine.results";
+	std::cout << file_name << std::endl;
+	std::ifstream infile(file_name.c_str());
+	std::string line;
+	
+	QString conf_name = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/2dx_image.cfg");
+	confData* data = new confData(conf_name);
+	
+	while (std::getline(infile, line))
+	{
+		QString qline = QString(line.c_str());
+		if (qline.startsWith(QString("set phaori = ")))
+		{
+			QStringList tmp = qline.split(QString(" "));
+			data->set(QString("phaori"), tmp.at(3));
+		}
+		
+		if (qline.startsWith(QString("set phaoriFouFilter = ")))
+		{
+			QStringList tmp = qline.split(QString(" "));
+			data->set(QString("phaoriFouFilter"), tmp.at(3));
+		}
+	}
+	
+	data->save();
+	updateProjection();
 }
 
 

@@ -888,7 +888,7 @@ def main():
 	submenu = Menu(editmenu)
 	submenu.add_command(label="MloK1", command=app.load_config_mlok1)
 	submenu.add_command(label="MloK1_nocAMP", command=app.load_config_mlok1_nocAMP)
-	submenu.add_command(label="CLC")
+	submenu.add_command(label="CLC", command=app.load_config_clc)
 	editmenu.add_cascade(label='Load default config', menu=submenu)
 	
 	editmenu.add_command(label="Load config from file", command=app.getConfigFileFromDisk)

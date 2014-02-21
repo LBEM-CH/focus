@@ -15,7 +15,7 @@ set(LIBTITLE mrcImage)
 SET(LIBVERSION 1)
 project(${LIBTITLE})
 
-set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -Wno-cpp")
+set(CMAKE_CXX_FLAGS "-O3 -funroll-loops")
 
 #------------------------------------------------------------------------------
 # Configure Config file and include it.

@@ -84,7 +84,12 @@ void reprojectWindow::particleChanged()
 
 void reprojectWindow::updateProjection()
 {
-	std::cout << "updating proj" << std::endl;
+	std::string command = "2dx_merge ";
+	command += config_gui->getDir("working").toStdString();
+	command += ".. 2dx_generateImageMaps ";
+	command += particleSelection->currentText().toStdString();
+	system(command.c_str());
+	particleChanged();
 }
 
 

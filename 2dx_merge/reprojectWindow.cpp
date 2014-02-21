@@ -8,7 +8,8 @@
 
 reprojectWindow::reprojectWindow(confData* config,QWidget *parent)
  : QWidget(parent),
-   config_gui(config)
+   config_gui(config),
+   show_proj(true)
 {
 	setupGUI();
 	particleChanged();
@@ -74,6 +75,10 @@ void reprojectWindow::particleChanged()
 	
 	particlePixmapLabel->setPixmap(image->getPixmap());
 	projPixmapLabel->setPixmap(ref->getPixmap());
+	
+	delete image;
+	delete ref;
+	delete data;
 }
 
 
@@ -89,6 +94,51 @@ void reprojectWindow::lauch2dxImage()
 	QProcess::startDetached(config_gui->getApp("2dx_image"), QStringList()<<image);
 }
 
+
+void reprojectWindow::changeToggle()
+{
+	
+	QString conf_name = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/2dx_image.cfg");
+	confData* data = new confData(conf_name);
+	QString imagename = data->get("imagename", "value");
+	QString imagenumber = data->get("imagenumber", "value");
+	QString map_file = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/final_map.mrc") ;
+	QString ref_file = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/") + imagename + QString("_ref.mrc") ;
+	
+	if(show_proj)
+	{
+		mrcImage* image = new mrcImage(map_file, true);
+		projPixmapLabel->setPixmap(image->getPixmap());
+		delete image;
+	}
+	else
+	{
+		mrcImage* ref = new mrcImage(ref_file, true);
+		projPixmapLabel->setPixmap(ref->getPixmap());
+		delete ref;
+	}
+	show_proj = !show_proj;
+	
+	delete data;
+}
+
+
+
+void reprojectWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Left)
+    {
+		selectPrevParticle();
+	}
+	if(event->key() == Qt::Key_Right)
+    {
+		selectNextParticle();
+	}
+	if( (event->key() == Qt::Key_Shift) || (event->key() == Qt::Key_T) )
+    {
+       	changeToggle();
+    }
+}
 
 void reprojectWindow::setupGUI()
 {

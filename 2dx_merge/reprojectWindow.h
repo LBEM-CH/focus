@@ -40,11 +40,12 @@ public slots:
     void updateProjection();
 	void lauch2dxImage();
 	void particleChanged();
+	void changeToggle();
 
 
 protected:
 	void setupGUI();
-
+	void keyPressEvent(QKeyEvent *event);
 	
 
 private:
@@ -86,9 +87,9 @@ private:
 	QPushButton* launch2dxImageButton;
 	
 	
-	
-	
 	confData* config_gui;
+	
+	bool show_proj;
 
 };
 

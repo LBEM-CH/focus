@@ -46,19 +46,13 @@ void reprojectWindow::selectNextParticle()
 
 void reprojectWindow::particleChanged()
 {
-	std::cout << "particle changed" << std::endl;
-	
-	std::string result = std::string("asdf");
-	
 	QString conf_name = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/2dx_image.cfg");
-	
 	confData* data = new confData(conf_name);
-	
 	QString imagename = data->get("imagename", "value");
 	QString imagenumber = data->get("imagenumber", "value");
 	
 	int tilt_axis = data->get("TLTAXIS", "value").toFloat();
-	int tilt_ang = data->get("TLTANG", "value").toFloat();
+	int tilt_ang = data->get("TANGL", "value").toFloat();
 	int taxa = data->get("TAXA", "value").toFloat();
 		
 	taxisSpinBox->setValue(tilt_axis);
@@ -67,8 +61,6 @@ void reprojectWindow::particleChanged()
 	
 	QString map_file = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/final_map.mrc") ;
 	QString ref_file = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/") + imagename + QString("_ref.mrc") ;
-	
-	std::cout << "ref_file-name: " << ref_file.toStdString() << std::endl;
 	
 	mrcImage* image = new mrcImage(map_file, true);
 	mrcImage* ref = new mrcImage(ref_file, true);
@@ -84,12 +76,32 @@ void reprojectWindow::particleChanged()
 
 void reprojectWindow::updateProjection()
 {
+	QString conf_name = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/2dx_image.cfg");
+	confData* data = new confData(conf_name);
+	QString imagename = data->get("imagename", "value");
+	QString imagenumber = data->get("imagenumber", "value");
+	
+	int tilt_axis = taxisSpinBox->value();
+	int tilt_ang = tanglSpinBox->value();
+	int taxa =  taxaSpinBox->value();
+	
+	data->set(QString("TLTAXIS"), QString::number(tilt_axis));
+	data->set(QString("TANGL"), QString::number(tilt_ang));
+	data->set(QString("TAXA"), QString::number(taxa));
+	data->save();
+	
 	std::string command = "2dx_merge ";
 	command += config_gui->getDir("working").toStdString();
 	command += ".. 2dx_generateImageMaps ";
 	command += particleSelection->currentText().toStdString();
 	system(command.c_str());
 	particleChanged();
+}
+
+
+void reprojectWindow::doAutoMerge()
+{
+	std::cout << "now auto-merging" << std::endl;
 }
 
 
@@ -156,6 +168,8 @@ void reprojectWindow::setupGUI()
     
     QVBoxLayout* controlPanel = new QVBoxLayout();
     QVBoxLayout* selectPanel = new QVBoxLayout();
+    anglesLayout = new QVBoxLayout();
+
     
     layout->addLayout(selectPanel);
     
@@ -176,18 +190,9 @@ void reprojectWindow::setupGUI()
 	int count = 1;
 	while (std::getline(infile, line))
 	{
-		//QString part_name = "Particle " + QString::number(count++);
 		QString part_name = QString(line.c_str());
 		particleSelection->addItem(part_name);
 	}
-
-
-//	for(int i=0; i<cont_ave->getNumberOfParticles(); i++)
-//	{
-//		int particle_number = (*cont_ave)(i).getGlobalParticleInformation().getImageNumber();
-//		QString part_name = "Particle " + QString::number(particle_number);
-//		particleSelection->addItem(part_name);
-//	}
     
     selectPanel->addWidget(particleLabel);
     selectPanel->addWidget(particleSelection);
@@ -202,8 +207,11 @@ void reprojectWindow::setupGUI()
     controlPanel->addWidget(nextParticleButton);
     QObject::connect(nextParticleButton, SIGNAL(pressed()),this, SLOT(selectNextParticle()));
     
+    automergeButton = new QPushButton("Automatic merge");
+    controlPanel->addWidget(automergeButton);
+    QObject::connect(automergeButton, SIGNAL(pressed()),this, SLOT(doAutoMerge()));
+    
     updateProjectionButton = new QPushButton("Update Projection");
-    controlPanel->addWidget(updateProjectionButton);
     QObject::connect(updateProjectionButton, SIGNAL(pressed()),this, SLOT(updateProjection()));
     
     launch2dxImageButton = new QPushButton("Launch 2dx_image");
@@ -226,8 +234,7 @@ void reprojectWindow::setupGUI()
     particlePanel->addWidget(projPixmapLabel);
 
  
-    anglesLayout = new QVBoxLayout();
-
+    
     //TAXIS
     taxisLabel = new QLabel("Tilt Axis");
     taxisSpinBox = new QSpinBox();
@@ -301,6 +308,8 @@ void reprojectWindow::setupGUI()
     QObject::connect(taxaSpinBox, SIGNAL(valueChanged(int)),this, SLOT(update()));
 
     particlePanel->addLayout(anglesLayout);
+    
+    anglesLayout->addWidget(updateProjectionButton);
 
     setLayout(layout);
     setWindowTitle("Manual Geometry Manipulation");

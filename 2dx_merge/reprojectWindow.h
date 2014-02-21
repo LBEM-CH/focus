@@ -41,6 +41,7 @@ public slots:
 	void lauch2dxImage();
 	void particleChanged();
 	void changeToggle();
+	void doAutoMerge();
 
 
 protected:
@@ -83,6 +84,7 @@ private:
 	
 	QPushButton* nextParticleButton;
 	QPushButton* prevParticleButton;
+	QPushButton* automergeButton;
 	QPushButton* updateProjectionButton;
 	QPushButton* launch2dxImageButton;
 	

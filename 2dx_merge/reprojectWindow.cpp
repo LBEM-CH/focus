@@ -9,7 +9,8 @@
 reprojectWindow::reprojectWindow(confData* config,QWidget *parent)
  : QWidget(parent),
    config_gui(config),
-   show_proj(true)
+   show_proj(true),
+   size(400)
 {
 	setupGUI();
 	particleChanged();
@@ -74,8 +75,8 @@ void reprojectWindow::particleChanged()
 	mrcImage* image = new mrcImage(map_file, true);
 	mrcImage* ref = new mrcImage(ref_file, true);
 	
-	particlePixmapLabel->setPixmap(image->getPixmap());
-	projPixmapLabel->setPixmap(ref->getPixmap());
+	particlePixmapLabel->setPixmap(image->getPixmap().scaled(size,size));
+	projPixmapLabel->setPixmap(ref->getPixmap().scaled(size,size));
 	
 	delete image;
 	delete ref;
@@ -186,13 +187,13 @@ void reprojectWindow::changeToggle()
 	if(show_proj)
 	{
 		mrcImage* image = new mrcImage(map_file, true);
-		projPixmapLabel->setPixmap(image->getPixmap());
+		projPixmapLabel->setPixmap(image->getPixmap().scaled(size,size));
 		delete image;
 	}
 	else
 	{
 		mrcImage* ref = new mrcImage(ref_file, true);
-		projPixmapLabel->setPixmap(ref->getPixmap());
+		projPixmapLabel->setPixmap(ref->getPixmap().scaled(size,size));
 		delete ref;
 	}
 	show_proj = !show_proj;

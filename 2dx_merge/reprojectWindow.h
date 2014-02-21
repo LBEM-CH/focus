@@ -103,6 +103,7 @@ private:
 	confData* config_gui;
 	
 	bool show_proj;
+	int size;
 
 };
 

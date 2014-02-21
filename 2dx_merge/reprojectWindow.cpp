@@ -54,10 +54,19 @@ void reprojectWindow::particleChanged()
 	int tilt_axis = data->get("TLTAXIS", "value").toFloat();
 	int tilt_ang = data->get("TANGL", "value").toFloat();
 	int taxa = data->get("TAXA", "value").toFloat();
-		
+	
 	taxisSpinBox->setValue(tilt_axis);
     tanglSpinBox->setValue(tilt_ang);
     taxaSpinBox->setValue(taxa);
+	
+	QString q_phaori = data->get("phaori", "value");
+	QStringList phaori_list = q_phaori.split(",");
+	
+	int phaoriX = phaori_list.at(0).toFloat();
+	int phaoriY = phaori_list.at(1).toFloat();
+	
+	phaoriXSpinBox->setValue(phaoriX);
+	phaoriYSpinBox->setValue(phaoriY);
 	
 	QString map_file = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/final_map.mrc") ;
 	QString ref_file = config_gui->getDir("working") + QString("../") + particleSelection->currentText() + QString("/") + imagename + QString("_ref.mrc") ;
@@ -88,6 +97,11 @@ void reprojectWindow::updateProjection()
 	data->set(QString("TLTAXIS"), QString::number(tilt_axis));
 	data->set(QString("TANGL"), QString::number(tilt_ang));
 	data->set(QString("TAXA"), QString::number(taxa));
+	
+	int phaoriX = phaoriXSpinBox->value();
+	int phaoriY = phaoriYSpinBox->value();
+	data->set(QString("phaori"), QString::number(phaoriX) + QString(",") + QString::number(phaoriY));
+	
 	data->save();
 	
 	std::string command = "2dx_merge ";
@@ -127,6 +141,17 @@ void reprojectWindow::doAutoMerge()
 		{
 			QStringList tmp = qline.split(QString(" "));
 			data->set(QString("phaori"), tmp.at(3));
+			
+			QString data_string = tmp.at(3);
+			data_string = data_string.remove(0,1);
+			data_string = data_string.remove(data_string.size()-1,1);
+			QStringList tmp2 = data_string.split(",");
+			
+			int phaoriX = tmp2.at(0).toFloat();
+			int phaoriY = tmp2.at(1).toFloat();
+			
+			phaoriXSpinBox->setValue(phaoriX);
+			phaoriYSpinBox->setValue(phaoriY);
 		}
 		
 		if (qline.startsWith(QString("set phaoriFouFilter = ")))
@@ -204,7 +229,9 @@ void reprojectWindow::setupGUI()
     
     QVBoxLayout* controlPanel = new QVBoxLayout();
     QVBoxLayout* selectPanel = new QVBoxLayout();
+    
     anglesLayout = new QVBoxLayout();
+    phaoriLayout = new QVBoxLayout();
 
     
     layout->addLayout(selectPanel);
@@ -216,7 +243,7 @@ void reprojectWindow::setupGUI()
     auxPanel->addLayout(controlPanel);
     auxPanel->addLayout(particlePanel);
 
-    particleLabel = new QLabel("Particle:");
+    particleLabel = new QLabel("Image:");
     particleSelection = new QComboBox();
 
 
@@ -269,7 +296,6 @@ void reprojectWindow::setupGUI()
     projPixmapLabel->setPixmap(pixmap_proj);
     particlePanel->addWidget(projPixmapLabel);
 
- 
     
     //TAXIS
     taxisLabel = new QLabel("Tilt Axis");
@@ -342,8 +368,61 @@ void reprojectWindow::setupGUI()
     QObject::connect(taxaSpinBox, SIGNAL(valueChanged(int)),taxaSlider, SLOT(setValue(int)));
     QObject::connect(taxaSlider, SIGNAL(valueChanged(int)),taxaSpinBox, SLOT(setValue(int)));
     QObject::connect(taxaSpinBox, SIGNAL(valueChanged(int)),this, SLOT(update()));
+    
+    
+    
+    phaoriXLabel = new QLabel("Phaori X");
+    phaoriXSpinBox = new QSpinBox();
+    phaoriXSpinBox->setRange(-180,180);
+    phaoriXSpinBox->setValue(0);
 
+    phaoriXValueLayout = new QHBoxLayout();
+    phaoriXValueLayout->addWidget(phaoriXLabel);
+    phaoriXValueLayout->addWidget(phaoriXSpinBox);
+
+    phaoriXSlider = new QSlider(Qt::Horizontal);
+    phaoriXSlider->setMinimum(phaoriXSpinBox->minimum());
+    phaoriXSlider->setMaximum(phaoriXSpinBox->maximum());
+    phaoriXSlider->setValue(phaoriXSpinBox->value());
+
+    phaoriXLayout = new QVBoxLayout();
+    phaoriXLayout->addLayout(phaoriXValueLayout);
+    phaoriXLayout->addWidget(phaoriXSlider);
+    phaoriLayout->addLayout(phaoriXLayout);
+
+    QObject::connect(phaoriXSpinBox, SIGNAL(valueChanged(int)),phaoriXSlider, SLOT(setValue(int)));
+    QObject::connect(phaoriXSlider, SIGNAL(valueChanged(int)),phaoriXSpinBox, SLOT(setValue(int)));
+    QObject::connect(phaoriXSpinBox, SIGNAL(valueChanged(int)),this, SLOT(update()));
+    
+    
+    
+    phaoriYLabel = new QLabel("Phaori Y");
+    phaoriYSpinBox = new QSpinBox();
+    phaoriYSpinBox->setRange(-180,180);
+    phaoriYSpinBox->setValue(0);
+
+    phaoriYValueLayout = new QHBoxLayout();
+    phaoriYValueLayout->addWidget(phaoriYLabel);
+    phaoriYValueLayout->addWidget(phaoriYSpinBox);
+
+    phaoriYSlider = new QSlider(Qt::Horizontal);
+    phaoriYSlider->setMinimum(phaoriYSpinBox->minimum());
+    phaoriYSlider->setMaximum(phaoriYSpinBox->maximum());
+    phaoriYSlider->setValue(phaoriYSpinBox->value());
+
+    phaoriYLayout = new QVBoxLayout();
+    phaoriYLayout->addLayout(phaoriYValueLayout);
+    phaoriYLayout->addWidget(phaoriYSlider);
+    phaoriLayout->addLayout(phaoriYLayout);
+
+    QObject::connect(phaoriYSpinBox, SIGNAL(valueChanged(int)),phaoriYSlider, SLOT(setValue(int)));
+    QObject::connect(phaoriYSlider, SIGNAL(valueChanged(int)),phaoriYSpinBox, SLOT(setValue(int)));
+    QObject::connect(phaoriYSpinBox, SIGNAL(valueChanged(int)),this, SLOT(update()));
+    
+    
+    
     particlePanel->addLayout(anglesLayout);
+    particlePanel->addLayout(phaoriLayout);
     
     anglesLayout->addWidget(updateProjectionButton);
 

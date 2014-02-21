@@ -53,19 +53,24 @@ private:
 	QLabel* particleLabel;
     QComboBox* particleSelection;
     
-
     QLabel* taxisLabel;
     QLabel* tanglLabel;
     QLabel* taxaLabel;
+    QLabel* phaoriXLabel;
+    QLabel* phaoriYLabel;
     
     QSpinBox* taxisSpinBox;
     QSpinBox* tanglSpinBox;
     QSpinBox* taxaSpinBox;
+    QSpinBox* phaoriXSpinBox;
+    QSpinBox* phaoriYSpinBox;
     
     QSlider* taxisSlider;
     QSlider* tanglSlider;
     QSlider* taxaSlider;
-
+    QSlider* phaoriXSlider;
+    QSlider* phaoriYSlider;
+      
 	QVBoxLayout *layout;
 	QHBoxLayout* particlePanel;
 	QVBoxLayout* anglesLayout;
@@ -76,6 +81,11 @@ private:
 	QHBoxLayout* tanglValueLayout;
 	QHBoxLayout* taxaValueLayout;
 	QVBoxLayout* taxaLayout;
+	QVBoxLayout* phaoriXLayout;
+	QVBoxLayout* phaoriYLayout;
+	QHBoxLayout* phaoriXValueLayout;
+	QHBoxLayout* phaoriYValueLayout;
+	
 	
 	QPixmap pixmap_part;
 	QPixmap pixmap_proj;

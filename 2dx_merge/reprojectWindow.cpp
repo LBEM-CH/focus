@@ -118,8 +118,6 @@ void reprojectWindow::updateProjection()
 
 void reprojectWindow::doAutoMerge()
 {
-	std::cout << "now auto-merging" << std::endl;
-	
 	std::string command = "2dx_merge ";
 	command += config_gui->getDir("working").toStdString();
 	command += "../ 2dx_refine ";
@@ -202,7 +200,6 @@ void reprojectWindow::changeToggle()
 }
 
 
-
 void reprojectWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Left)
@@ -219,10 +216,10 @@ void reprojectWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
+
 void reprojectWindow::setupGUI()
 {
 	QString dir_work = config_gui->getDir("working");
-	std::cout << dir_work.toStdString() << std::endl;
 	
 	layout = new QVBoxLayout();
     particlePanel = new QHBoxLayout();
@@ -418,6 +415,4 @@ void reprojectWindow::setupGUI()
 
     setLayout(layout);
     setWindowTitle("Manual Geometry Manipulation");
-   
-	
 }

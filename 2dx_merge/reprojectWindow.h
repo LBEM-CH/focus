@@ -18,10 +18,8 @@
 #include <QSize>
 #include <QProcess>
 
-
 #include "confData.h"
 
-//#include "../kernel/mrc/source/2dx_single_particle_lib/2dxSingleParticle.hpp"
 
 class reprojectWindow : public QWidget
 {
@@ -29,10 +27,6 @@ class reprojectWindow : public QWidget
 
 public:
     reprojectWindow(confData* config, QWidget *parent = 0);
-
-
-signals:
-
 
 public slots:
 	void selectPrevParticle();
@@ -43,12 +37,10 @@ public slots:
 	void changeToggle();
 	void doAutoMerge();
 
-
 protected:
 	void setupGUI();
 	void keyPressEvent(QKeyEvent *event);
 	
-
 private:
 	QLabel* particleLabel;
     QComboBox* particleSelection;
@@ -86,7 +78,6 @@ private:
 	
 	QGridLayout* controlRLayout;
 	
-	
 	QPixmap pixmap_part;
 	QPixmap pixmap_proj;
 	
@@ -99,12 +90,10 @@ private:
 	QPushButton* updateProjectionButton;
 	QPushButton* launch2dxImageButton;
 	
-	
 	confData* config_gui;
 	
 	bool show_proj;
 	int size;
-
 };
 
 #endif 

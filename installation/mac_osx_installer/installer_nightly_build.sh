@@ -25,7 +25,7 @@ echo "rec-dir: $ROOT/Resource"
 ls $ROOT/Resource
 
 
-/Developer/usr/bin/packagemaker \
+packagemaker \
 --title "2dx Nightly Build" \
 --version  DATE=`date "+%d_%b_%Y"` \
 --filter "\.DS_Store" \

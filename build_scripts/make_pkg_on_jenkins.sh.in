@@ -1,1 +1,1 @@
-sh installation/mac_osx_installer/installer_nightly_build.sh "/Users/mac-hudson/jenkins_builds/trunk_nb" "/Users/mac-hudson/jenkins_builds/trunk_nb/packages/2dx-@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@-OSX.pkg"
+sh installation/mac_osx_installer/installer_nightly_build.sh "/Users/bs-hudson/jenkins/jenkins_builds/trunk_nb" "/Users/bs-hudson/jenkins/jenkins_builds/trunk_nb/packages/2dx-@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@-OSX.pkg"

@@ -54,8 +54,8 @@ else
 fi
 
 # BUILD SYSTEM DEPENDENT, FIX IT LATER
-if [ -f /opt/local/lib/gcc47/libgfortran.3.dylib ]; then
-	GFORTRAN_LIB=/opt/local/lib/gcc47/libgfortran.3.dylib
+if [ -f /opt/local/lib/gcc48/libgfortran.3.dylib ]; then
+	GFORTRAN_LIB=/opt/local/lib/gcc48/libgfortran.3.dylib
 	echo "Found gfortran in $GFORTRAN_LIB"
 else
        if [ -f /usr/local/lib/libgfortran.3.dylib ]; then
@@ -68,8 +68,8 @@ else
 	fi
 fi
 
-if [ -f /opt/local/lib/gcc47/libquadmath.0.dylib ]; then
-	QUADMATH_LIB=/opt/local/lib/gcc47/libquadmath.0.dylib
+if [ -f /opt/local/lib/gcc48/libquadmath.0.dylib ]; then
+	QUADMATH_LIB=/opt/local/lib/gcc48/libquadmath.0.dylib
 	echo "Found quadmath in $QUADMATH_LIB"
 else
        if [ -f /usr/local/lib/libquadmath.0.dylib  ]; then
@@ -82,12 +82,12 @@ else
 	fi
 fi
 
-if [ -f /opt/local/lib/gcc47/libstdc++.6.dylib ]; then
-	CPP_LIB=/opt/local/lib/gcc47/libstdc++.6.dylib
+if [ -f /opt/local/lib/gcc48/libstdc++.6.dylib ]; then
+	CPP_LIB=/opt/local/lib/gcc48/libstdc++.6.dylib
 	echo "Found libstdc++.6.dylib in $CPP_LIB"
 else
-       if [ -f /usr/local/lib/gcc47/libstdc++.6.dylib ]; then
-		CPP_LIB=/usr/local/lib/gcc47/libstdc++.6.dylib
+       if [ -f /usr/local/lib/gcc48/libstdc++.6.dylib ]; then
+		CPP_LIB=/usr/local/lib/gcc48/libstdc++.6.dylib
 		echo "Found libstdc++.6.dylib in $CPP_LIB"
 	else
 		CPP_LIB=NOT_FOUND
@@ -96,12 +96,12 @@ else
 	fi
 fi
 
-if [ -f /opt/local/lib/gcc47/libgcc_s.1.dylib ]; then
-	GCC_LIB=/opt/local/lib/gcc47/libgcc_s.1.dylib
+if [ -f /opt/local/lib/gcc48/libgcc_s.1.dylib ]; then
+	GCC_LIB=/opt/local/lib/gcc48/libgcc_s.1.dylib
 	echo "Found libgcc_s.1.dylib in $CPP_LIB"
 else
-       if [ -f /usr/local/lib/gcc47/libgcc_s.1.dylib ]; then
-		CPP_LIB=/usr/local/lib/gcc47/libgcc_s.1.dylib
+       if [ -f /usr/local/lib/gcc48/libgcc_s.1.dylib ]; then
+		CPP_LIB=/usr/local/lib/gcc48/libgcc_s.1.dylib
 		echo "Found libgcc_s.1.dylib in $CPP_LIB"
 	else
 		CPP_LIB=NOT_FOUND
@@ -111,12 +111,12 @@ else
 fi
 
 # omp-lib
-if [ -f /opt/local/lib/gcc47/libgomp.1.dylib ]; then
-	OMP_LIB=/opt/local/lib/gcc47/libgomp.1.dylib
+if [ -f /opt/local/lib/gcc48/libgomp.1.dylib ]; then
+	OMP_LIB=/opt/local/lib/gcc48/libgomp.1.dylib
 	echo "Found libgomp.1.dylib in $OMP_LIB"
 else
-       if [ -f /usr/local/lib/gcc47/libgomp.1.dylib ]; then
-		OMP_LIB=/usr/local/lib/gcc47/libgomp.1.dylib
+       if [ -f /usr/local/lib/gcc48/libgomp.1.dylib ]; then
+		OMP_LIB=/usr/local/lib/gcc48/libgomp.1.dylib
 		echo "Found libgomp.1.dylib in $OMP_LIB"
 	else
 		OMP_LIB=NOT_FOUND

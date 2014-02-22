@@ -73,8 +73,6 @@ private:
       
 	QVBoxLayout *layout;
 	QHBoxLayout* particlePanel;
-	QVBoxLayout* anglesLayout;
-	QVBoxLayout* phaoriLayout;
 	
 	QHBoxLayout* taxisValueLayout;
 	QVBoxLayout* taxisLayout;
@@ -85,6 +83,8 @@ private:
 	QVBoxLayout* phaoriYLayout;
 	QHBoxLayout* phaoriXValueLayout;
 	QHBoxLayout* phaoriYValueLayout;
+	
+	QGridLayout* controlRLayout;
 	
 	
 	QPixmap pixmap_part;

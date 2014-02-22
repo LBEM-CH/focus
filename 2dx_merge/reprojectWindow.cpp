@@ -221,7 +221,6 @@ void reprojectWindow::keyPressEvent(QKeyEvent *event)
 
 void reprojectWindow::setupGUI()
 {
-
 	QString dir_work = config_gui->getDir("working");
 	std::cout << dir_work.toStdString() << std::endl;
 	
@@ -230,10 +229,6 @@ void reprojectWindow::setupGUI()
     
     QVBoxLayout* controlPanel = new QVBoxLayout();
     QVBoxLayout* selectPanel = new QVBoxLayout();
-    
-    anglesLayout = new QVBoxLayout();
-    phaoriLayout = new QVBoxLayout();
-
     
     layout->addLayout(selectPanel);
     
@@ -246,7 +241,6 @@ void reprojectWindow::setupGUI()
 
     particleLabel = new QLabel("Image:");
     particleSelection = new QComboBox();
-
 
 	std::ifstream infile((dir_work.toStdString() + "/2dx_merge_dirfile.dat").c_str());
 	std::string line;
@@ -271,17 +265,16 @@ void reprojectWindow::setupGUI()
     controlPanel->addWidget(nextParticleButton);
     QObject::connect(nextParticleButton, SIGNAL(pressed()),this, SLOT(selectNextParticle()));
     
+	QSpacerItem *spacer = new QSpacerItem(40, 100, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	controlPanel->addItem(spacer);
+
     automergeButton = new QPushButton("Automatic merge");
     controlPanel->addWidget(automergeButton);
     QObject::connect(automergeButton, SIGNAL(pressed()),this, SLOT(doAutoMerge()));
     
-    updateProjectionButton = new QPushButton("Update Projection");
-    QObject::connect(updateProjectionButton, SIGNAL(pressed()),this, SLOT(updateProjection()));
-    
     launch2dxImageButton = new QPushButton("Launch 2dx_image");
     controlPanel->addWidget(launch2dxImageButton);
     QObject::connect(launch2dxImageButton, SIGNAL(pressed()),this, SLOT(lauch2dxImage()));
-    
     
     //Particle
     pixmap_part =  QPixmap(300,300);
@@ -296,8 +289,9 @@ void reprojectWindow::setupGUI()
     projPixmapLabel = new QLabel();
     projPixmapLabel->setPixmap(pixmap_proj);
     particlePanel->addWidget(projPixmapLabel);
-
     
+	controlRLayout = new QGridLayout();
+
     //TAXIS
     taxisLabel = new QLabel("Tilt Axis");
     taxisSpinBox = new QSpinBox();
@@ -316,8 +310,8 @@ void reprojectWindow::setupGUI()
     taxisLayout = new QVBoxLayout();
     taxisLayout->addLayout(taxisValueLayout);
     taxisLayout->addWidget(taxisSlider);
-    anglesLayout->addLayout(taxisLayout);
-
+	controlRLayout->addLayout(taxisLayout, 0, 0);
+	
     QObject::connect(taxisSpinBox, SIGNAL(valueChanged(int)),taxisSlider, SLOT(setValue(int)));
     QObject::connect(taxisSlider, SIGNAL(valueChanged(int)),taxisSpinBox, SLOT(setValue(int)));
     QObject::connect(taxisSpinBox, SIGNAL(valueChanged(int)),this, SLOT(update()));
@@ -340,7 +334,7 @@ void reprojectWindow::setupGUI()
     QVBoxLayout* tanglLayout = new QVBoxLayout();
     tanglLayout->addLayout(tanglValueLayout);
     tanglLayout->addWidget(tanglSlider);
-    anglesLayout->addLayout(tanglLayout);
+	controlRLayout->addLayout(tanglLayout, 1, 0);
 
     QObject::connect(tanglSpinBox, SIGNAL(valueChanged(int)),tanglSlider, SLOT(setValue(int)));
     QObject::connect(tanglSlider, SIGNAL(valueChanged(int)),tanglSpinBox, SLOT(setValue(int)));
@@ -364,13 +358,11 @@ void reprojectWindow::setupGUI()
     taxaLayout = new QVBoxLayout();
     taxaLayout->addLayout(taxaValueLayout);
     taxaLayout->addWidget(taxaSlider);
-    anglesLayout->addLayout(taxaLayout);
+	controlRLayout->addLayout(taxaLayout, 2, 0);
 
     QObject::connect(taxaSpinBox, SIGNAL(valueChanged(int)),taxaSlider, SLOT(setValue(int)));
     QObject::connect(taxaSlider, SIGNAL(valueChanged(int)),taxaSpinBox, SLOT(setValue(int)));
     QObject::connect(taxaSpinBox, SIGNAL(valueChanged(int)),this, SLOT(update()));
-    
-    
     
     phaoriXLabel = new QLabel("Phaori X");
     phaoriXSpinBox = new QSpinBox();
@@ -389,13 +381,11 @@ void reprojectWindow::setupGUI()
     phaoriXLayout = new QVBoxLayout();
     phaoriXLayout->addLayout(phaoriXValueLayout);
     phaoriXLayout->addWidget(phaoriXSlider);
-    phaoriLayout->addLayout(phaoriXLayout);
+	controlRLayout->addLayout(phaoriXLayout, 0, 1);
 
     QObject::connect(phaoriXSpinBox, SIGNAL(valueChanged(int)),phaoriXSlider, SLOT(setValue(int)));
     QObject::connect(phaoriXSlider, SIGNAL(valueChanged(int)),phaoriXSpinBox, SLOT(setValue(int)));
     QObject::connect(phaoriXSpinBox, SIGNAL(valueChanged(int)),this, SLOT(update()));
-    
-    
     
     phaoriYLabel = new QLabel("Phaori Y");
     phaoriYSpinBox = new QSpinBox();
@@ -414,18 +404,17 @@ void reprojectWindow::setupGUI()
     phaoriYLayout = new QVBoxLayout();
     phaoriYLayout->addLayout(phaoriYValueLayout);
     phaoriYLayout->addWidget(phaoriYSlider);
-    phaoriLayout->addLayout(phaoriYLayout);
+	controlRLayout->addLayout(phaoriYLayout, 1, 1);
 
     QObject::connect(phaoriYSpinBox, SIGNAL(valueChanged(int)),phaoriYSlider, SLOT(setValue(int)));
     QObject::connect(phaoriYSlider, SIGNAL(valueChanged(int)),phaoriYSpinBox, SLOT(setValue(int)));
     QObject::connect(phaoriYSpinBox, SIGNAL(valueChanged(int)),this, SLOT(update()));
     
+	particlePanel->addLayout(controlRLayout);
     
-    
-    particlePanel->addLayout(anglesLayout);
-    particlePanel->addLayout(phaoriLayout);
-    
-    anglesLayout->addWidget(updateProjectionButton);
+	updateProjectionButton = new QPushButton("Update View...");
+    QObject::connect(updateProjectionButton, SIGNAL(pressed()),this, SLOT(updateProjection()));
+    controlRLayout->addWidget(updateProjectionButton, 3, 0, 1, 2);
 
     setLayout(layout);
     setWindowTitle("Manual Geometry Manipulation");

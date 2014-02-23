@@ -180,7 +180,7 @@ do
 done
 
 
-for loop in $build_dir$binaries/*.dylib
+for loop in $build_dir/$binaries/*.dylib
 do
 install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $loop
 install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $loop

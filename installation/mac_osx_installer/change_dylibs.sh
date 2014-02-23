@@ -126,6 +126,12 @@ else
 fi
 
 
+# sys-lib
+if [ -f  /usr/lib/libSystem.B.dylib ]; then
+    SYS_LIB=/usr/lib/libSystem.B.dylib
+    echo "Found libSystem.B.dylib in $SYS_LIB"
+fi
+
 binaries="kernel/mrc/lib"
 for loop in $binaries
 do
@@ -143,6 +149,8 @@ do
     cp $GCC_LIB $build_dir/$loop
 	echo "cp $OMP_LIB $build_dir/$loop"
 	cp $OMP_LIB $build_dir/$loop
+    echo "cp $SYS_LIB $build_dir/$loop"
+    cp $SYS_LIB $build_dir/$loop
 done
 
 fortran_bin="kernel/mrc/bin"
@@ -167,8 +175,24 @@ do
 	install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $file
     install_name_tool -change $GCC_LIB @executable_path/../lib/libgcc_s.1.dylib  $file
 	install_name_tool -change $OMP_LIB @executable_path/../lib/libgomp.1.dylib  $file
+    install_name_tool -change $SYS_LIB @executable_path/../lib/libSystem.B.dylib  $file
 	otool -L $file 
 done
+
+
+for loop in $build_dir$binaries/*.dylib
+do
+install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $loop
+install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $loop
+install_name_tool -change $GFORTRAN_LIB  @executable_path/../lib/libgfortran.3.dylib $loop
+install_name_tool -change $QUADMATH_LIB @executable_path/../lib/libquadmath.0.dylib  $loop
+install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $loop
+install_name_tool -change $GCC_LIB @executable_path/../lib/libgcc_s.1.dylib  $loop
+install_name_tool -change $OMP_LIB @executable_path/../lib/libgomp.1.dylib  $loop
+install_name_tool -change $SYS_LIB @executable_path/../lib/libSystem.B.dylib  $loop
+otool -L $loop
+done
+
 #apps="2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
 #for loop in $apps
 #do

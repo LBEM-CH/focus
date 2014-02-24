@@ -54,8 +54,8 @@ else
 fi
 
 # BUILD SYSTEM DEPENDENT, FIX IT LATER
-if [ -f /opt/local/lib/gcc48/libgfortran.3.dylib ]; then
-	GFORTRAN_LIB=/opt/local/lib/gcc48/libgfortran.3.dylib
+if [ -f /opt/local/lib/libgcc/libgfortran.3.dylib ]; then
+	GFORTRAN_LIB=/opt/local/lib/libgcc/libgfortran.3.dylib
 	echo "Found gfortran in $GFORTRAN_LIB"
 else
        if [ -f /usr/local/lib/libgfortran.3.dylib ]; then
@@ -68,8 +68,8 @@ else
 	fi
 fi
 
-if [ -f /opt/local/lib/gcc48/libquadmath.0.dylib ]; then
-	QUADMATH_LIB=/opt/local/lib/gcc48/libquadmath.0.dylib
+if [ -f /opt/local/lib/libgcc/libquadmath.0.dylib ]; then
+	QUADMATH_LIB=/opt/local/lib/libgcc/libquadmath.0.dylib
 	echo "Found quadmath in $QUADMATH_LIB"
 else
        if [ -f /usr/local/lib/libquadmath.0.dylib  ]; then
@@ -82,8 +82,8 @@ else
 	fi
 fi
 
-if [ -f /opt/local/lib/gcc48/libstdc++.6.dylib ]; then
-	CPP_LIB=/opt/local/lib/gcc48/libstdc++.6.dylib
+if [ -f /opt/local/lib/libgcc/libstdc++.6.dylib ]; then
+	CPP_LIB=/opt/local/lib/libgcc/libstdc++.6.dylib
 	echo "Found libstdc++.6.dylib in $CPP_LIB"
 else
        if [ -f /usr/local/lib/gcc48/libstdc++.6.dylib ]; then
@@ -96,8 +96,8 @@ else
 	fi
 fi
 
-if [ -f /opt/local/lib/gcc48/libgcc_s.1.dylib ]; then
-	GCC_LIB=/opt/local/lib/gcc48/libgcc_s.1.dylib
+if [ -f /opt/local/lib/libgcc/libgcc_s.1.dylib ]; then
+	GCC_LIB=/opt/local/lib/libgcc/libgcc_s.1.dylib
 	echo "Found libgcc_s.1.dylib in $CPP_LIB"
 else
        if [ -f /usr/local/lib/gcc48/libgcc_s.1.dylib ]; then
@@ -111,8 +111,8 @@ else
 fi
 
 # omp-lib
-if [ -f /opt/local/lib/gcc48/libgomp.1.dylib ]; then
-	OMP_LIB=/opt/local/lib/gcc48/libgomp.1.dylib
+if [ -f /opt/local/lib/libgcc/libgomp.1.dylib ]; then
+	OMP_LIB=/opt/local/lib/libgcc/libgomp.1.dylib
 	echo "Found libgomp.1.dylib in $OMP_LIB"
 else
        if [ -f /usr/local/lib/gcc48/libgomp.1.dylib ]; then
@@ -125,6 +125,12 @@ else
 	fi
 fi
 
+
+# sys-lib
+if [ -f  /usr/lib/libSystem.B.dylib ]; then
+    SYS_LIB=/usr/lib/libSystem.B.dylib
+    echo "Found libSystem.B.dylib in $SYS_LIB"
+fi
 
 binaries="kernel/mrc/lib"
 for loop in $binaries
@@ -139,8 +145,12 @@ do
 	cp $QUADMATH_LIB $build_dir/$loop
 	echo "cp $CPP_LIB $build_dir/$loop"
 	cp $CPP_LIB $build_dir/$loop
+    echo "cp $GCC_LIB $build_dir/$loop"
+    cp $GCC_LIB $build_dir/$loop
 	echo "cp $OMP_LIB $build_dir/$loop"
 	cp $OMP_LIB $build_dir/$loop
+    echo "cp $SYS_LIB $build_dir/$loop"
+    cp $SYS_LIB $build_dir/$loop
 done
 
 fortran_bin="kernel/mrc/bin"
@@ -156,16 +166,33 @@ for exe in `ls $path`
 do
 	file="$path/$exe"
 	echo "changing the dylibs of $file"
-	otool -L $file
+#otool -L $file
 	echo "changed otool command:"
 	install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $file
 	install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $file
 	install_name_tool -change $GFORTRAN_LIB  @executable_path/../lib/libgfortran.3.dylib $file 
 	install_name_tool -change $QUADMATH_LIB @executable_path/../lib/libquadmath.0.dylib  $file
 	install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $file
+    install_name_tool -change $GCC_LIB @executable_path/../lib/libgcc_s.1.dylib  $file
 	install_name_tool -change $OMP_LIB @executable_path/../lib/libgomp.1.dylib  $file
+    install_name_tool -change $SYS_LIB @executable_path/../lib/libSystem.B.dylib  $file
 	otool -L $file 
 done
+
+
+for loop in $build_dir/$binaries/*.dylib
+do
+install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3f.3.dylib $loop
+install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $loop
+install_name_tool -change $GFORTRAN_LIB  @executable_path/../lib/libgfortran.3.dylib $loop
+install_name_tool -change $QUADMATH_LIB @executable_path/../lib/libquadmath.0.dylib  $loop
+install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $loop
+install_name_tool -change $GCC_LIB @executable_path/../lib/libgcc_s.1.dylib  $loop
+install_name_tool -change $OMP_LIB @executable_path/../lib/libgomp.1.dylib  $loop
+install_name_tool -change $SYS_LIB @executable_path/../lib/libSystem.B.dylib  $loop
+otool -L $loop
+done
+
 #apps="2dx_image/2dx_image.app/Contents/PlugIns/imageformats 2dx_merge/2dx_merge.app/Contents/PlugIns/imageformats"
 #for loop in $apps
 #do

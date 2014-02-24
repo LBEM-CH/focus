@@ -56,7 +56,7 @@ C
 
       read(*,'(A)',iostat=stat)cgrid
       if(stat.ne.0)then
-        write(*,'('':: reached EOF '')')
+        write(*,'('': reached EOF '')')
         GOTO 85
       endif
       write(*,'(A40)')cgrid

@@ -88,7 +88,7 @@ class Add2dxImageWatcher(WatcherBase):
 		
 	def image_added(self, filename, do_wait = True):
 		print "2dx automatic processing launched for", filename
-		time.sleep(1)
+		time.sleep(15)
 		if not os.path.exists(self.outfolder + "/automatic"):
 			os.makedirs(self.outfolder + "/automatic" )
 			shutil.copyfile( self.outfolder + "/2dx_master.cfg", self.outfolder + "/automatic/2dx_master.cfg" )

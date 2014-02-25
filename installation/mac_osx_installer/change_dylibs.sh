@@ -159,23 +159,22 @@ do
 cp $sys_lib $build_dir/kernel/mrc/lib/system/
 done
 
-for loop in `ls /usr/lib/system/`
-do
-echo $loop
-echo "install_name_tool -change /usr/lib/system/$loop @executable_path/../lib/system/$loop $build_dir/kernel/mrc/lib/libSystem.B.dylib"
-install_name_tool -change /usr/lib/system/$loop @executable_path/../lib/system/$loop $build_dir/kernel/mrc/lib/libSystem.B.dylib
-done
+#for loop in `ls /usr/lib/system/`
+#do
+#echo $loop
+#echo "install_name_tool -change /usr/lib/system/$loop @executable_path/../lib/system/$loop $build_dir/kernel/mrc/lib/libSystem.B.dylib"
+#install_name_tool -change /usr/lib/system/$loop @executable_path/../lib/system/$loop $build_dir/kernel/mrc/lib/libSystem.B.dylib
+#done
 
-
-for loop1 in `ls /usr/lib/system/`
-do
-    for loop2 in `ls /usr/lib/system/`
-    do
-        echo "install_name_tool -change /usr/lib/system/$loop2 @executable_path/../lib/system/$loop2 $build_dir/kernel/mrc/lib/system/$loop1"
-        install_name_tool -change /usr/lib/system/$loop2 @executable_path/../lib/system/$loop2 $build_dir/kernel/mrc/lib/system/$loop1
-    done
-    otool -L $build_dir/kernel/mrc/lib/system/$loop1
-done
+#for loop1 in `ls /usr/lib/system/`
+#do
+#    for loop2 in `ls /usr/lib/system/`
+#    do
+#        echo "install_name_tool -change /usr/lib/system/$loop2 @executable_path/../lib/system/$loop2 $build_dir/kernel/mrc/lib/system/$loop1"
+#        install_name_tool -change /usr/lib/system/$loop2 @executable_path/../lib/system/$loop2 $build_dir/kernel/mrc/lib/system/$loop1
+#    done
+#    otool -L $build_dir/kernel/mrc/lib/system/$loop1
+#done
 
 fortran_bin="kernel/mrc/bin"
 path="$build_dir/$fortran_bin"

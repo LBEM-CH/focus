@@ -24,7 +24,6 @@ fi
 echo "rec-dir: $ROOT/Resource"
 ls $ROOT/Resource
 
-
 packagemaker \
 --title "2dx Nightly Build" \
 --version  DATE=`date "+%d_%b_%Y"` \
@@ -35,9 +34,8 @@ packagemaker \
 --domain system \
 --verbose \
 --no-relocate \
--l "/opt/2dx" \
---target 10.7 \
--i com.mycompany.myproduct \
+--install-to "/opt/2dx" \
+--target 10.6 \
 --id org.2dx.pkg \
 --root $ROOT \
 --out $OUTFILE \

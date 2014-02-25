@@ -40,4 +40,5 @@ packagemaker \
 --root $ROOT \
 --out $OUTFILE \
 --discard-forks \
---verbose
+--verbose \
+

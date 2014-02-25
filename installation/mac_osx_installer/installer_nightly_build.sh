@@ -36,7 +36,8 @@ packagemaker \
 --verbose \
 --no-relocate \
 -l "/opt/2dx" \
---target 10.8 \
+--target 10.7 \
+-i com.mycompany.myproduct \
 --id org.2dx.pkg \
 --root $ROOT \
 --out $OUTFILE \

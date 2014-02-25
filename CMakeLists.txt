@@ -10,7 +10,7 @@
 find_program(HOSTNAME_CMD NAMES hostname)
 exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
 
-cmake_policy(SET CMP0012 NEW)
+#cmake_policy(SET CMP0012 NEW)
 
 if ("$ENV{USE_CUDA}" STREQUAL "TRUE")
 	message("Try to use the GPU")

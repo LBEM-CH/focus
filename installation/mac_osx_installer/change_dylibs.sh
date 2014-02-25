@@ -153,11 +153,11 @@ do
     cp $SYS_LIB $build_dir/$loop
 done
 
-mkdir $build_dir/kernel/mrc/lib/system/
-for sys_lib in `ls /usr/lib/system/*.dylib`
-do
-cp $sys_lib $build_dir/kernel/mrc/lib/system/
-done
+#mkdir $build_dir/kernel/mrc/lib/system/
+#for sys_lib in `ls /usr/lib/system/*.dylib`
+#do
+#cp $sys_lib $build_dir/kernel/mrc/lib/system/
+#done
 
 #for loop in `ls /usr/lib/system/`
 #do

@@ -174,6 +174,7 @@ do
         echo "install_name_tool -change /usr/lib/system/$loop2 @executable_path/../lib/system/$loop2 $build_dir/kernel/mrc/lib/system/$loop1"
         install_name_tool -change /usr/lib/system/$loop2 @executable_path/../lib/system/$loop2 $build_dir/kernel/mrc/lib/system/$loop1
     done
+    otool -L $build_dir/kernel/mrc/lib/system/$loop1
 done
 
 fortran_bin="kernel/mrc/bin"

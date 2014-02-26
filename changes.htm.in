@@ -23,8 +23,8 @@
 <li>Refine switch now also refines the tilt-geometry
 <li><font color="red">[bug]</font> Resolution plot fixed
 <li><font color="red">[bug]</font> Error on PLTILTK fixed
-<li><font color="red">[bug]</font> Big in astigmatic handling of CTF fixed
-<li><font color="red">File initialization improved
+<li><font color="red">[bug]</font> Bug in astigmatic handling of CTF fixed
+<li>File initialization improved
 <li><font color="red">[bug]</font> Synchronization for .raw.mrc files fixed
 <li><font color="red">[bug]</font> Reference origin resetting works now
 <li>Parameters are reset for a new image now

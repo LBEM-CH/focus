@@ -6,7 +6,6 @@
 ############################################################################
 #
 
-
 find_program(HOSTNAME_CMD NAMES hostname)
 exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
 

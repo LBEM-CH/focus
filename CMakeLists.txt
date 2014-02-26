@@ -10,7 +10,7 @@
 find_program(HOSTNAME_CMD NAMES hostname)
 exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
 
-cmake_policy(SET CMP0012 NEW)
+#cmake_policy(SET CMP0012 NEW)
 
 if ("$ENV{USE_CUDA}" STREQUAL "TRUE")
 	message("Try to use the GPU")
@@ -71,7 +71,7 @@ set(CPACK_PACKAGE_NAME 2dx)
 
 set (2dx_VERSION_MAJOR 3)
 set (2dx_VERSION_MINOR 4)
-set (2dx_VERSION_PATCH 1)
+set (2dx_VERSION_PATCH 2)
 
 set(CPACK_PACKAGE_VERSION_MAJOR ${2dx_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${2dx_VERSION_MINOR})
@@ -139,6 +139,7 @@ install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_BINARY_DIR} )
 
 configure_file("changes.htm.in" "changes.htm")
 configure_file("kernel/config/2dx_image/about.htm.in" "about.htm")
+configure_file("build_scripts/make_pkg_on_jenkins_old.sh.in" "make_pkg_on_jenkins_old.sh")
 configure_file("build_scripts/make_pkg_on_jenkins.sh.in" "make_pkg_on_jenkins.sh")
 configure_file("build_scripts/add_version_to_src.sh.in" "add_version_to_src.sh")
 

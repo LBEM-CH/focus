@@ -28,7 +28,6 @@ endif()
 #	option(INTEL_CC "Use the Intel compiler." OFF)
 #endif()
 
-
 if (INTEL_CC)
   find_program(CMAKE_C_COMPILER NAMES icc)
   find_program(CMAKE_CXX_COMPILER NAMES icpc)

@@ -17,16 +17,16 @@
 <li>Single Particle Processing scripts added, but not ready to use so far
 <li>Difference-map functions added
 <li>Command line merger 
-<li><font color="red">[bug] Beam-tilt refinement now working
-<li><font color="red">[bug] Maximal index in CCP4-script changed in order to achieve high resolution (better than 6A)
+<li><font color="red">[bug]</font> Beam-tilt refinement now working
+<li><font color="red">[bug]</font> Maximal index in CCP4-script changed in order to achieve high resolution (better than 6A)
 <li>Latest version of CTFFIND3 integrated (incl. OMP)
 <li>Refine switch now also refines the tilt-geometry
-<li><font color="red">[bug] Resolution plot fixed
-<li><font color="red">[bug] Error on PLTILTK fixed
-<li><font color="red">[bug] Big in astigmatic handling of CTF fixed
-<li><font color="red">File initialization improved
-<li><font color="red">[bug] Synchronization for .raw.mrc files fixed
-<li><font color="red">[bug] Reference origin resetting works now
+<li><font color="red">[bug]</font> Resolution plot fixed
+<li><font color="red">[bug]</font> Error on PLTILTK fixed
+<li><font color="red">[bug]</font> Bug in astigmatic handling of CTF fixed
+<li>File initialization improved
+<li><font color="red">[bug]</font> Synchronization for .raw.mrc files fixed
+<li><font color="red">[bug]</font> Reference origin resetting works now
 <li>Parameters are reset for a new image now
 <li>Optimal image import for K2 Summit data
 <li>Selection of multiple images with right-click now possible
@@ -35,7 +35,7 @@
 <li>Added options for tilt-angle range statistics
 <li>Included fomstat in 2dx_merge_merge again
 <li>Masking both lattices at the same time now possible
-<li><font color="red">[bug] Issue with symmetry p4 in hklsym fixed
+<li><font color="red">[bug]</font> Issue with symmetry p4 in hklsym fixed
 <li>PDF translator added
 <li>Better sync with backup script
 <li>NANs removed from hklsym4-output
@@ -49,13 +49,13 @@
 <li>Support for TVIPS-headers
 <li>Origtilt output extended
 <li>2dx_hklsym3 removed
-<li><font color="red">[bug] Contour plot in p2 now working
+<li><font color="red">[bug]</font> Contour plot in p2 now working
 <li>Amplitude scaling added
 <li>Quality evaluation added (2D and 3D)
 <li>Longer image names now supported
 <li>MergeIQMAX added
-<li><font color="red">[bug] Unsigned/singed integer issue finally fixed
-<li><font color="red">[bug]TLTPLOT now used correctly
+<li><font color="red">[bug]</font> Unsigned/singed integer issue finally fixed
+<li><font color="red">[bug]</font> TLTPLOT now used correctly
 <li>Second lattice determination
 <li>Shortcuts to image/merge directory added in 2dx_image/2dx_merge
 <li>Shortcut to logbrowser added

@@ -1,7 +1,83 @@
 <html>
 <##@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@##>
 <body>
-<font color="blue">@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@</font> Apr. 9, 2012 <br>
+	
+	
+<font color="blue">3.4.2</font> Feb. 6, 2014 <br>
+<ul>
+<li>Full OSX-10.8 and OSX-10.9 support
+<li>Auto-saving added
+<li>Move image to another project now supported on right-click, useful in case of two crystal conformations
+<li>New bug tracker and developer wiki
+<li>TTF correction script added for images with a higher tilt then a given value
+<li>Internal version control system switched to git
+<li>ttfcorfitst removed from Unbend2, as we do not recommend this option at all
+<li>2dx_automator added
+<li>Automated drift-correction GUI added 
+<li>Single Particle Processing scripts added, but not ready to use so far
+<li>Difference-map functions added
+<li>Command line merger 
+<li><font color="red">[bug] Beam-tilt refinement now working
+<li><font color="red">[bug] Maximal index in CCP4-script changed in order to achieve high resolution (better than 6A)
+<li>Latest version of CTFFIND3 integrated (incl. OMP)
+<li>Refine switch now also refines the tilt-geometry
+<li><font color="red">[bug] Resolution plot fixed
+<li><font color="red">[bug] Error on PLTILTK fixed
+<li><font color="red">[bug] Big in astigmatic handling of CTF fixed
+<li><font color="red">File initialization improved
+<li><font color="red">[bug] Synchronization for .raw.mrc files fixed
+<li><font color="red">[bug] Reference origin resetting works now
+<li>Parameters are reset for a new image now
+<li>Optimal image import for K2 Summit data
+<li>Selection of multiple images with right-click now possible
+<li>Possibility to generate non-CTF-corrected map
+<li>Removed re-unbending from the standard script list
+<li>Added options for tilt-angle range statistics
+<li>Included fomstat in 2dx_merge_merge again
+<li>Masking both lattices at the same time now possible
+<li><font color="red">[bug] Issue with symmetry p4 in hklsym fixed
+<li>PDF translator added
+<li>Better sync with backup script
+<li>NANs removed from hklsym4-output
+<li>mtzdunp now displays all reflections
+<li>Non-scroll QComboBox added
+<li>refine Defocus now uses only spots up to IQ-4
+<li>FOM calculation for symmetry-constraint lattice lines implemented into 2dx_latlinek.for
+<li>Lattice line in color now
+<li>Tiff translator added
+<li>Better spot scan masking functionally 
+<li>Support for TVIPS-headers
+<li>Origtilt output extended
+<li>2dx_hklsym3 removed
+<li><font color="red">[bug] Contour plot in p2 now working
+<li>Amplitude scaling added
+<li>Quality evaluation added (2D and 3D)
+<li>Longer image names now supported
+<li>MergeIQMAX added
+<li><font color="red">[bug] Unsigned/singed integer issue finally fixed
+<li><font color="red">[bug]TLTPLOT now used correctly
+<li>Second lattice determination
+<li>Shortcuts to image/merge directory added in 2dx_image/2dx_merge
+<li>Shortcut to logbrowser added
+<li>Updated change_dylib.sh
+<li>More stable Linux support 
+<li>SBGrid integration
+<li>Full build-process done in cmake now
+<li>Compilation optimized
+<li>SCALIMAMP3d added
+<li>Final map exported also as .tif
+<li>Sub-volume generation of final map
+<li>Use of cpack for Linux package generation
+<li>Improved trash functionality
+</ul>
+
+
+<BR>
+<hr>
+<BR>
+
+	
+<font color="blue">3.4.1</font> Apr. 9, 2012 <br>
 <ul> 
 <li>PSF in 3D now calculated
 <li>tilt geometry variable naming simplified

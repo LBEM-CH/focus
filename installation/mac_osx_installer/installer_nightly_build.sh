@@ -21,7 +21,7 @@ then
 	rm $OUTFILE
 fi
 
-echo "rec-dir: $ROOT/Resource"
+ls
 ls $ROOT/Resource
 
 packagemaker \
@@ -35,7 +35,6 @@ packagemaker \
 --verbose \
 --no-relocate \
 --install-to "/opt/2dx" \
---target 10.5 \
 --id org.2dx.pkg \
 --root $ROOT \
 --out $OUTFILE \

@@ -21,22 +21,20 @@ then
 	rm $OUTFILE
 fi
 
-echo "rec-dir: $ROOT/Resource"
+ls
 ls $ROOT/Resource
-
 
 packagemaker \
 --title "2dx Nightly Build" \
 --version  DATE=`date "+%d_%b_%Y"` \
 --filter "\.DS_Store" \
---resources "$DIR/Resources" \
---scripts $DIR/Resources/scripts \
+--resources $DIR/Resources/ \
+--scripts $DIR/Resources/scripts/ \
 --root-volume-only \
 --domain system \
 --verbose \
 --no-relocate \
--l "/opt/2dx" \
---target 10.5 \
+--install-to "/opt/2dx" \
 --id org.2dx.pkg \
 --root $ROOT \
 --out $OUTFILE \

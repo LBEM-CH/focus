@@ -27,10 +27,10 @@ fi
 FILE=$1
 URL=$2
 
-if [ ! -f $FILE ]; then
-	"Could not find file $FILE"
-	exit 2;
-fi
+#if [ ! -f $FILE ]; then
+#	"Could not find file $FILE"
+#	exit 2;
+#fi
 
 echo '|                                                                            |'
 echo '*============================================================================*'

@@ -35,7 +35,7 @@ packagemaker \
 --verbose \
 --no-relocate \
 --install-to "/opt/2dx" \
---target 10.7 \
+--target 10.5 \
 --id org.2dx.pkg \
 --root $ROOT \
 --out $OUTFILE \

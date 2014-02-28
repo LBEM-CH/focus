@@ -666,7 +666,17 @@ C
           FMERIT = ABS(COS(AMIN1(ABS(SIGPHI(J)),90.0)/CNV))
           if(FMERIT.lt.0.00001)FMERIT=0.0
 
-          if(SIGF(J).gt.99998)then
+CHEN>  
+C          if(FMERIT.lt.0.5 .or. NOBS.le.8 .or.abs(SIGF(J)).gt.99998.0)then
+C            F=0.0
+C            FOUT(J)=0.0
+C            SIGF=0.0
+C            SIGF(J)=0.0
+C            FMERIT=0.0
+C            SIGOUT=100.0
+C          endif
+CHEN<
+          if(abs(SIGF(J)).gt.99998)then
             FMERIT=0.0
             SIGOUT=100.0
           endif
@@ -709,28 +719,34 @@ CHENN>
 C95     WRITE(6,4000) NPRO,NPROMX
 95      WRITE(6,4000) NPROF,NPROMX
 CHENN<
-        GOTO 99
+        GOTO 991
 96      WRITE(6,4100) NOBS,NOBSMX
-        GOTO 99
+        GOTO 991
 97      WRITE(6,4200) NCALC,NCALMX
-        GOTO 99
+        GOTO 991
 98      WRITE(6,4300) NPLT,NPLTMX
-4000    FORMAT(/,/,' TOO MANY POINTS IN PROFILE!!    FOUND= ',I8,
+        GOTO 991
+4000    FORMAT(/,/,':: TOO MANY POINTS IN PROFILE!!    FOUND= ',I8,
      .  ' MAX= ',I8)
-4100    FORMAT(/,/,' TOO MANY OBSERVED DATA POINTS!! FOUND= ',I8,
+4100    FORMAT(/,/,':: TOO MANY OBSERVED DATA POINTS!! FOUND= ',I8,
      .  ' MAX= ',I8)
-4200    FORMAT(/,/,' TOO MANY LATTICE POINTS!!       FOUND= ',I8,
+4200    FORMAT(/,/,':: TOO MANY LATTICE POINTS!!       FOUND= ',I8,
      .  ' MAX= ',I8)
-4300    FORMAT(/,/,' TOO MANY POINTS TO PLOT!!       FOUND= ',I8,
+4300    FORMAT(/,/,':: TOO MANY POINTS TO PLOT!!       FOUND= ',I8,
      .  ' MAX= ',I8)
+
 C               Output of overall statistics
-99      WRITE(6,4400) NFSUM,NPSUM,RFSUM/NFSUM,RMSPSUM/NPSUM,
-     .          WRFSUM/WSUMSUM,SQRT(WRMSPSUM/WNPSUM)
 CHENN>
+99      continue
         OPEN(UNIT=17,FILE='latline.statistics',STATUS='NEW')
         WRITE(17,4400) NFSUM,NPSUM,100.0*RFSUM/NFSUM,RMSPSUM/NPSUM,
      .          100.0*WRFSUM/WSUMSUM,SQRT(WRMSPSUM/WNPSUM)
         CLOSE(17)
+991     continue
+C-------Skip writing the above latline.statistics file, 
+C-------to produce a crash to notice the problem in this program.
+        WRITE(6,4400) NFSUM,NPSUM,RFSUM/NFSUM,RMSPSUM/NPSUM,
+     .          WRFSUM/WSUMSUM,SQRT(WRMSPSUM/WNPSUM)
 CHENN<
 4400    FORMAT(/,' Overall statistics :',/,
      .  '               Number of amplitudes observed==========',I8,/,
@@ -1043,7 +1059,11 @@ C
 1001  FORMAT(' Scale factor= ',G14.5,/)
 C
       IF (IFLAG.EQ.0) GOTO 90 
-      IF (D .LT. 1.E-30) WRITE(6,2002) 
+CHEN>
+      if (D .LT. 1.E-30) then
+        WRITE(6,2002) 
+      endif
+CHEN<
 2002  FORMAT(/,' ********** WARNING DETERMINANT NEAR ZERO : ',
      .' SIGMAS CALCULATED FOR THIS LINE, BUT SUSPECT !!! *****')
 
@@ -2030,10 +2050,6 @@ C
 CHEN>
       ZMM=ZRANG*ZMAG
       ZMAGlocal=ZMAG
-      write(6,'(''XPLTSIZ='',F12.3)')XPLTSIZ
-      write(6,'(''YPLTSIZ='',F12.3)')YPLTSIZ
-      write(6,'(''ZMIN,ZMAX='',2F12.3)')ZMIN,ZMAX
-      write(6,'(''ZMM,ZMAG='',2F12.3)')ZMM,ZMAG
 6     continue
       ZMMlocal=ZRANG*ZMAGlocal
       IF (ZMMlocal .GT. 75.0) GOTO 7
@@ -2043,7 +2059,6 @@ CHEN>
 CHEN<
 7     continue
       ZERO=-ZMIN*ZMAG
-      write(6,'(''ZERO='',F12.3)')ZERO
 C
 C  DRAW AXES FOR AMPLITUDE BOX
 C

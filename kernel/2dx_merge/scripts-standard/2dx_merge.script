@@ -53,6 +53,7 @@
 # DISPLAY: Merge_Reference_HKMAX
 # DISPLAY: MergeAK
 # DISPLAY: MergeIWF
+# DISPLAY: AMP_Scale_Factor
 # DISPLAY: MergeIWP
 # DISPLAY: MergeLatLine_MaxAmpFactor
 # DISPLAY: MergeLatLine_REDUCAC
@@ -84,6 +85,7 @@ set realang = ""
 set ALAT = ""
 set SYM = ""
 set merge_ref_num = ""
+set AMP_Scale_Factor = ""
 set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
 set ILIST = ""
@@ -244,6 +246,12 @@ endif
 #
 echo "<<@progress: 5>>"
 #
+if ( ${AMP_Scale_Factor}x == ‘x’ ) then
+  set AMP_Scale_Factor = 0.001
+  echo "set AMP_Scale_Factor = ${AMP_Scale_Factor}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: AMP_Scale_Factor corrected to ${AMP_Scale_Factor}"
+endif
+# 
 if ( ${MergeAK}x == 'x' ) then
   set MergeAK = "10"
   echo "set MergeAK = ${MergeAK}" >> LOGS/${scriptname}.results

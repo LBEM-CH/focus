@@ -151,8 +151,8 @@ void imagePreview::resetImage(bool ignore_size)
 	if( (!ignore_size) && (result.toLower().endsWith(".mrc") || result.toLower().endsWith(".map")) )
 	{
 		mrcImage *tempImage = new mrcImage(result,true,this);
-		int size = tempImage->getHeader()->nx();
-		if (size < max_size)
+		int sizex = tempImage->getHeader()->nx();
+		if (sizex < max_size)
 		{
 			showInfo = false;
 		}

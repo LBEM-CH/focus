@@ -126,7 +126,7 @@ else
   endif
 endif
 #
-${proc_2dx}/linblock "Using APH files ${aphfile}"
+${proc_2dx}/lin "Using APH files ${aphfile}"
 #
 if ( ! -e ${aphfile} ) then
   ${proc_2dx}/linblock "ERROR: ${aphfile} not found."
@@ -208,7 +208,7 @@ else
 endif
 if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   #
-  ${proc_2dx}/linblock "Creating reference projection map ${refhklfile}"
+  ${proc_2dx}/lin "Creating reference projection map ${refhklfile}"
   #
   set linenum = `wc -l ${refhklfile} | awk '{ s = $1 - 1 } END { print s }'`
   head -n 1 ${refhklfile} > TMP.tmp
@@ -280,7 +280,7 @@ RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
-echo ":: ${extends}"
+#
 if( ${extends} == "y" ) then
   #
   #############################################################################

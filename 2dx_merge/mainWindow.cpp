@@ -884,15 +884,8 @@ void mainWindow::copyImage()
 		if ( !boost::filesystem::exists(dest_image) )
 		{			
 			std::string call = "cp -r " + path + " " + dest_folder;
-			
-			if(system(call.c_str()))
-			{
-				// all went fine
-			}
-			else
-			{
-				std::cerr << "was not able to copy the image" << std::endl;
-			}
+			std::cout << call << std::endl;
+			system(call.c_str());
 			
 			break;
 		}

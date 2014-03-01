@@ -160,9 +160,8 @@ eot
 ${proc_2dx}/lin "AVRAMPHS - to transform merge.aph into avrg.hkl"
 #############################################################################
 #
-set zminmax = "-1.0,1.0"
-# avramphs only works for 2D projection data.  
-# But here, we exclude the limitation since we only want the projection map.
+set zminmax = "-0.05,0.05"
+# avramphs only works for 2D projection data.
 ${proc_2dx}/lin "WARNING: Using zminmax=${zminmax}, but statistics only good for 2D."
 #
 \cp -f APH/${imagename}.cor.origtiltd.aph fort.1

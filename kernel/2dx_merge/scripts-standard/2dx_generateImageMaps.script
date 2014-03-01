@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 97
+# SORTORDER: 92
 #
 # MANUAL: This script makes use of MRC and CCP4 commands to generate the projection maps of all selected images, using the latest phase origin settings.
 #
@@ -30,7 +30,6 @@
 # DISPLAY: merge_ref_num
 # DISPLAY: create_PS
 # DISPLAY: merge_ML_data
-# DISPLAY: merge_res_limit
 #
 #$end_local_vars
 #

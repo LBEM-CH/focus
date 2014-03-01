@@ -145,23 +145,8 @@ void imagePreview::resetInfo()
 		headerWidget->setHeader(result,header);
 }
 
-void imagePreview::resetImage(bool ignore_size)
+void imagePreview::resetImage()
 {
-	int max_size = 500;
-	if( (!ignore_size) && (result.toLower().endsWith(".mrc") || result.toLower().endsWith(".map")) )
-	{
-		mrcImage *tempImage = new mrcImage(result,true,this);
-		int sizex = tempImage->getHeader()->nx();
-		if (sizex < max_size)
-		{
-			showInfo = false;
-		}
-		else 
-		{
-			showInfo = true;
-		}
-	}
-
 
 	QString suffix = QFileInfo(result).suffix().toLower();
 	imageLabel->clear();
@@ -173,7 +158,6 @@ void imagePreview::resetImage(bool ignore_size)
 		if(!result.isEmpty() && (result.contains(".mrc")))
 		{
 			mrcImage *tempImage = new mrcImage(result,true,this);
-			
 			if(tempImage->isEmpty())
 			{
 				delete tempImage;
@@ -250,7 +234,7 @@ void imagePreview::shade()
 void imagePreview::toggleInfo()
 {
 	showInfo = showInfo ^ true;
-	resetImage(true);
+	resetImage();
 }
 
 void imagePreview::progressDialog()

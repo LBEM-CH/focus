@@ -69,7 +69,7 @@ class imagePreview : public QFrame
   bool showInfo;
 
   void resetInfo();
-  void resetImage(bool ignore_size=false);
+  void resetImage();
   void clearImage();
 
   public:

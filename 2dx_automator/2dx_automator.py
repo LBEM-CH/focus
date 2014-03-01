@@ -300,6 +300,12 @@ class Auto2dxGUI(Frame):
 		
 		lattice = self.watcher.get_lattice_from_config(self.image_dirs[i] + "/2dx_image.cfg")
 		self.watcher.drawLattice(dia_folder + "/fft.png", dia_folder + "/fft_lattice.gif", lattice)
+		
+		if self.watcher.showSecondLattice == 1:
+			lattice2 = self.watcher.get_second_lattice_from_config(self.image_dirs[i] + "/2dx_image.cfg")
+			if not ( (abs(lattice2[0]<0.1)) and (abs(lattice2[1]<0.1)) and (abs(lattice2[2]<0.1)) and (abs(lattice2[3]<0.1)) ):
+				self.watcher.drawSecondLattice(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice.gif", lattice2)
+		
 		ctf = self.watcher.get_ctf_from_config(self.image_dirs[i] + "/2dx_image.cfg")
 		self.watcher.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)
 		
@@ -692,6 +698,10 @@ class Auto2dxGUI(Frame):
 		self.indexChanged()
 		
 		
+	def secondLatticeButtonClicked(self):
+		self.watcher.setShowSecondLattice(self.secondLatticeVar.get())
+		
+		
 	def select_image(self):
 		self.usebox.toggle()
 		self.useButtonClicked()
@@ -764,6 +774,10 @@ class Auto2dxGUI(Frame):
 		
 		stop_button = Button(self.toprightframe ,text='Stop Automation', command=self.switchAutomationOff, width=30)
 		stop_button.pack(padx=5, pady=2)
+		
+		self.secondLatticeVar = IntVar()
+		self.secondLatticeButton = Checkbutton(self.centralleftframe, variable=self.secondLatticeVar, text="Show second lattice", command=self.secondLatticeButtonClicked)
+		self.secondLatticeButton.pack(side=TOP, pady=10)
 		
 		self.image_count_label = Label(self.centralleftframe, text="Images")
 		self.image_count_label.pack()
@@ -852,6 +866,7 @@ class Auto2dxGUI(Frame):
 		self.status = Label(self.parent, text="Automation not running", bd=1, relief=SUNKEN, anchor=W, fg="red")
 		self.status.pack(side=BOTTOM, fill=X)
 		
+		self.secondLatticeButtonClicked()
 		self.count = 0
 		self.check_for_new_images()
 		self.autom_do_check()

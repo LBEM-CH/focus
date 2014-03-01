@@ -12,6 +12,7 @@ class Add2dxImageWatcher(WatcherBase):
 		self.outfolder = outfolder
 		self.log_file_name = log_file_name
 		self.protein_name = "auto_"
+		self.showSecondLattice = 1
 		
 		self.lock_2dx = threading.Lock()
 		self.lock_eman2 = threading.Lock()
@@ -19,6 +20,10 @@ class Add2dxImageWatcher(WatcherBase):
 	
 	def file_filter(self, filename):
 		return filename.endswith(".mrc")
+		
+	def setShowSecondLattice(self, rhs):
+		self.showSecondLattice = rhs
+		print self.showSecondLattice
 		
 		
 	def getNumberOfDoneImages(self, filename):
@@ -174,6 +179,11 @@ class Add2dxImageWatcher(WatcherBase):
 		try:
 			lattice = self.get_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
 			self.drawLattice(dia_folder + "/fft.png", dia_folder + "/fft_lattice.gif", lattice)
+			
+			if self.showSecondLattice == 1:
+				lattice2 = self.get_second_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
+				if not ( (abs(lattice2[0]<0.1)) and (abs(lattice2[1]<0.1)) and (abs(lattice2[2]<0.1)) and (abs(lattice2[3]<0.1)) ):
+					self.drawSecondLattice(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice.gif", lattice2)
 		
 			ctf = self.get_ctf_from_config(image_2dx_name + "/2dx_image.cfg")
 			self.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)
@@ -353,6 +363,42 @@ class Add2dxImageWatcher(WatcherBase):
 		im2.crop((nx/2-w, ny/2-w, nx/2+w, ny/2+w)).save(outfile)
 		
 		
+	def drawSecondLattice(self, infile, outfile, lattice):
+		from PIL import Image, ImageDraw
+		im = Image.open(infile)
+		nx = im.size[0]
+		ny = im.size[1]
+		im2 = Image.new("RGB", (nx,ny), "white")
+		dx = 16
+		max_pixel = float(max(im.getdata()))
+		for x in range(nx):
+			for y in range(ny):
+				col = int(im.getpixel((x,y))/max_pixel*255)
+				im2.putpixel((x,y), (col,col,col))
+		draw = ImageDraw.Draw(im2)
+		order = 12
+		for i in range(-order,order+1,1):
+			for j in range(-order,order+1,1):
+				
+				if i==0 and j==0:
+					color = (0,0,0)
+				elif i==1 and j==0:
+					color = (230,26,13)
+				elif i==0 and j==1:
+					color = (1,3,230)
+				else:
+					color = (255,0,17)
+					
+				color = (255,255,255)
+					
+				u = lattice[0]*float(i) + lattice[2]*float(j) - dx/2
+				v = lattice[1]*float(i) + lattice[3]*float(j) - dx/2
+				draw.ellipse((u+nx/2, -v+ny/2-dx, u+dx+nx/2, -v+ny/2), outline=color, fill=None)
+				draw.ellipse((u+nx/2-1, -v+ny/2-dx-1, u+dx+nx/2+1, -v+ny/2+1), outline=color, fill=None)
+		w = 260
+		im2.crop((nx/2-w, ny/2-w, nx/2+w, ny/2+w)).save(outfile)
+		
+		
 	def fix_fft(self, dia_folder):
 		image = get_image(dia_folder + "/fft.mrc").get_fft_amplitude()
 		image_new = model_blank(image.get_xsize(), image.get_ysize())
@@ -419,8 +465,26 @@ class Add2dxImageWatcher(WatcherBase):
 							lattice.append(float(d))
 						except:
 							lattice.append(0)
-		
 		return lattice
 	
+	
+	def get_second_lattice_from_config(self, config_name):
+		content = read_text_row(config_name)
+		lattice = []
+		for c in content:
+			
+			if len(c) > 2 and (c[0] != "#"):
+				c_string = ""
+				for c_loc in c:				
+					c_string += str(c_loc)
+				line_without_space = c_string.replace(" ", "")
+				if line_without_space.startswith("setsecondlattice"):
+					data = line_without_space.split("=")[1][1:-1]
+					for d in data.split(","):
+						try:
+							lattice.append(float(d))
+						except:
+							lattice.append(0)
+		return lattice
 		
 	

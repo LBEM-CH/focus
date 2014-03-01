@@ -83,6 +83,14 @@ C
           write(*,'(''This is corrected to= '',F12.1)')RMAXVAL
         endif
 C
+      write(*,'(/,''Give Scale Factor to downscale AMP and BCK (e.g. 0.001):'')')
+      READ(5,*)RSCALEFAC
+      if(RSCALEFAC.lt.0.000001)RSCALEFAC=0.001
+      if(RSCALEFAC.gt.1.0)RSCALEFAC=1.0
+      write(*,'(''Scale Factor for AMPlitudes and BACKground values is '',F16.9)')
+      write(*,'(''Use this to make sure that the SIGF values stay below 999.0'')')
+      write(*,'(''so that errors can be encoded with that number'')')
+C
       NPASS=0
       NOUT=0
       NREAD=0
@@ -98,6 +106,11 @@ C
       READ(czeile,*,ERR=18)
      1 IHM,IKM,ZM,AMP,PHASE,IFILM,IQ,WTFACTOR,BCK,CTF
 C
+CHEN>
+      RSCALEFAC=0.0001
+      AMP=AMP*RSCALEFAC
+      BCK=BCK*RSCALEFAC
+CHEN<
 C       write(*,'('' read: '',2I,3F,2I,3F)')
 C      1 IHM,IKM,ZM,AMP,PHASE,IFILM,IQ,WTFACTOR,BCK,CTF
 C

@@ -100,16 +100,17 @@ eot
   echo "1001,${zminmax} ! NSER,ZMIN,ZMAX " >> LOGS/latlinprescal.log
   echo "${MergeIQMAX}               ! IQMAX " >> LOGS/latlinprescal.log
   echo "${max_amp_correction}       ! Max_Amp_Correction" >> LOGS/latlinprescal.log
+  echo "${AMP_Scale_Factor}         ! AMP_Background_Scale Factor" >> LOGS/latlinprescal.log
   echo "eot " >> LOGS/latlinprescal.log
   echo " " >> LOGS/latlinprescal.log
   echo "Running: " >> LOGS/latlinprescal.log
   echo "======== " >> LOGS/latlinprescal.log
   #
-  #
   ${bin_2dx}/2dx_latlinprescal.exe << eot >> LOGS/latlinprescal.log
 1001,${zminmax} ! NSER,ZMIN,ZMAX
 ${MergeIQMAX}               ! IQMAX
 ${max_amp_correction}       ! Max_Amp_Correction
+${AMP_Scale_Factor}         ! AMP_Background_Scale Factor
 eot
   #
   \rm -f fort.1
@@ -206,6 +207,7 @@ echo "${MergeIGUESS},${MergeBINSIZ}                       # IGUESS,BINSIZ"
 echo "${MergeNCYCLS},${MergeMPRINT}                          # NCYCLS,MPRINT"
 echo "${idoh},${idok}		                          # H,K indices to plot. 0 0 = all."
 echo "${IAQP2},${iplterr},${imaxIQplot}                         # IAQP2: 1=y,0=n, iplterr=1:errbar in PHS, maxIQ for PSplot"
+echo "${RMAXAMP}"
 echo " "
 #
 ${bin_2dx}/2dx_latlinek.exe << eot > LOGS/2dx_latlinek.log

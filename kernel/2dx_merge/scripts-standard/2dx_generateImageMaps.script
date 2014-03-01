@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 92
+# SORTORDER: 97
 #
 # MANUAL: This script makes use of MRC and CCP4 commands to generate the projection maps of all selected images, using the latest phase origin settings.
 #

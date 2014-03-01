@@ -134,7 +134,7 @@ void imagePreview::setImage(const QString &imageName)
 	result = imageName;
 	if(!QFileInfo(result).exists()) result = "";
 	resetInfo();
-	if(!isHidden()) resetImage();
+	if(!isHidden()) resetImage(true);
 }
 
 void imagePreview::resetInfo()
@@ -240,7 +240,7 @@ void imagePreview::shade()
 {
 	if(isHidden())
 	{
-		resetImage();
+		resetImage(true);
 		show();
 	}
 	else

@@ -134,7 +134,7 @@ void imagePreview::setImage(const QString &imageName)
 	result = imageName;
 	if(!QFileInfo(result).exists()) result = "";
 	resetInfo();
-	if(!isHidden()) resetImage(true);
+	if(!isHidden()) resetImage();
 }
 
 void imagePreview::resetInfo()
@@ -148,9 +148,10 @@ void imagePreview::resetInfo()
 void imagePreview::resetImage(bool ignore_size)
 {
 	int max_size = 500;
-	if( (!ignore_size) && (result.toLower().endsWith(".mrc") || result.toLower().endsWith(".map")) )
+	if( (!ignore_size) && result.toLower().endsWith(".mrc")  )
 	{
 		mrcImage *tempImage = new mrcImage(result,true,this);
+			
 		int sizex = tempImage->getHeader()->nx();
 		if (sizex < max_size)
 		{

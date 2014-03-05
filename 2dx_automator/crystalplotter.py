@@ -10,7 +10,7 @@ import sys
 def convertToFloat(data_in):
 	data_out = []
 	for d in data_in:
-		data_out.append(float(d))
+		data_out.append(abs(float(d)))
 	return data_out
 
 

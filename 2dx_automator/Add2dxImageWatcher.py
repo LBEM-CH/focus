@@ -148,6 +148,9 @@ class Add2dxImageWatcher(WatcherBase):
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_generateMAP"' + "'" 
 		os.system(command_2dx_image)
+
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"+2dx_evaluteLattice"' + "'" 
+		os.system(command_2dx_image)
 		
 		os.chdir(old_path)
 		self.lock_2dx.release()

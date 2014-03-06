@@ -10,7 +10,7 @@ import sys
 def convertToFloat(data_in):
 	data_out = []
 	for d in data_in:
-		data_out.append(float(d))
+		data_out.append(abs(float(d)))
 	return data_out
 
 
@@ -127,10 +127,10 @@ plt.savefig(output_dir + "/automatic/qvals.tif")
 plt.close()
 		
 plt.subplot(111)
-plt.plot(tilts, qvals, 'o', alpha=0.6)
-plt.title('Tilt angle vs. QVAL')
+plt.plot(defs, qvals, 'o', alpha=0.6)
+plt.title('Defocus vs. QVAL')
 plt.ylabel('QVAL')
-plt.xlabel('Tilt angle (degrees)')
+plt.xlabel('Defocus')
 plt.savefig(output_dir + "/automatic/tilt_qval.tif")
 plt.close()
 		

@@ -140,14 +140,17 @@ C
 C
         write(11,'(''set ML_use_for_merging = "'',A1,''"'')')CMLMERGE(1:1)
 C
-        write(11,'(''echo "::"'')')
+        write(11,'(''echo ":: "'')')
         call shorten(cdir,k)
         if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
-          write(11,'(''${proc_2dx}/linhash "Entering Directory ####### (FOURIER FILTERED RESULT)"'')')
+          write(cline,'(''${proc_2dx}/linhash "Working on '',A,'' #### (FOURIER FILTERED RESULT)"'')')
+     .       cdir(1:k)
         else
-          write(11,'(''${proc_2dx}/linhash "Entering Directory ####### (SINGLE PARTICLE RESULT)"'')')
+          write(cline,'(''${proc_2dx}/linhash "Working on '',A,'' #### (SINGLE PARTICLE RESULT)"'')')
+     .       cdir(1:k)
         endif
-        write(11,'(''echo "::'',A,''"'')')cdir(1:k)
+        call shortshrink(cline,k)
+        write(11,'(A)')cline(1:k)
 C
         write(11,'(''#'')')
         write(11,'(79(''#''))')

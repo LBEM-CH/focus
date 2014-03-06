@@ -27,13 +27,9 @@ ${proc_2dx}/linblock "SubVolume generation Script called, with option ${calculat
 if ( ${calculate_subvolume}x == "1x" ) then  
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to rotate volue for sub-volume preparation"
+  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
   #############################################################################
   #
-  set pcos = "0.85090352"
-  set psin = "0.52532199"
-  set mcos = -${pcos}
-  set msin = -${psin}
   set ALAT2 = `echo ${ALAT} | awk '{ s = $1 / 2.0 } END { print s }'`
   #
   \rm -f SCRATCH/scratch1b.map
@@ -49,7 +45,7 @@ TRANS  0.0 -20.0 ${ALAT2}
 eot
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  ${proc_2dx}/linblock "maprot - to rotate volue for sub-volume preparation"
   #############################################################################
   #
   \rm -f SCRATCH/rot_volume.map
@@ -77,8 +73,8 @@ eot
   #
   set limxmin = `echo ${middlex} ${diam} | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
   set limxmax = `echo ${middlex} ${diam} | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
-  set limymin = `echo ${middley} ${diam}  | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
-  set limymax = `echo ${middley} ${diam}  | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
+  set limymin = `echo ${middley} ${diam} | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
+  set limymax = `echo ${middley} ${diam} | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
   #
   echo ":Limits are ${limxmin} to ${limxmax}, ${limymin} to ${limymax}"
   #
@@ -260,11 +256,6 @@ if ( ${calculate_subvolume}x == "4x" ) then
   ${proc_2dx}/linblock "maprot - to rotate volue for sub-volume preparation"
   #############################################################################
   #
-  set pcos = "0.85090352"
-  set psin = "0.52532199"
-  set mcos = -${pcos}
-  set msin = -${psin}
-  #
   \rm -f SCRATCH/scratch1b.map
   ${bin_ccp4}/maprot mapin SCRATCH/scratch1.map wrkout SCRATCH/scratch1b.map << eot
 MODE FROM
@@ -399,6 +390,57 @@ endif
 #############################################################################
 #############################################################################
 if ( ${calculate_subvolume}x == "6x" ) then  
+  #############################################################################
+  #############################################################################
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  #############################################################################
+  #
+  \rm -f SCRATCH/scratch2.map
+  ${bin_ccp4}/maprot mapin SCRATCH/scratch1.map wrkout SCRATCH/scratch2.map << eot
+MODE FROM
+CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
+GRID WORK ${cellx} ${celly} ${ALAT}
+XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
+SYMM WORK 1
+AVER
+ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0
+TRANS  0.0 0.0 0.0
+eot
+  #
+  # echo "# IMAGE: SCRATCH/scratch2.map <MAP: flipped volume >" >> LOGS/${scriptname}.results
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "mapmask - to cut sub-volume"
+  #############################################################################
+  #   
+  #
+  \rm -f volume_sub.map
+  ${bin_ccp4}/mapmask mapin SCRATCH/scratch2.map mapout volume_sub.map << eof
+AXIS X,Y,Z
+scale factor 1
+xyzlim -1.0 1.0 -1.0 1.0 -0.25 0.25
+SYMM 1
+END
+eof
+  #
+  echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Volume (Sub Volume)>" >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  #
+endif
+#
+#
+#
+#
+#
+#############################################################################
+#############################################################################
+#############################################################################
+if ( ${calculate_subvolume}x == "7x" ) then  
   #############################################################################
   #############################################################################
   #############################################################################

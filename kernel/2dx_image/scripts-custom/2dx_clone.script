@@ -19,6 +19,8 @@
 #
 # MANUAL: The new image directory's database will be populated with a different filename and image number, as each imagenumber can only appear once. The parameter dialogue below allows you to specify the new image number. The new image name will be generated automatically.
 #
+# DISPLAY: new_imagenumber
+# DISPLAY: doswap
 # DISPLAY: comment
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
@@ -28,25 +30,6 @@
 # DISPLAY: imagesidelength
 # DISPLAY: lattice
 # DISPLAY: secondlattice
-#
-#=============================================================================
-# SECTION: Clone current image directory
-#=============================================================================
-#
-# LABEL: New Image Number (Do not change the Image Names below for the old Image File).
-# LEGEND: Define here the new image number to be used for the new cloned image directory
-# EXAMPLE: new_imagenumber = "0012345602"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Clone
-# TYPE: Text_Edit
-# ISWRONG: YES
-set new_imagenumber = "PutUniqueNumberHere"
-#
-# LABEL: Swap first and second lattice in cloned image directory
-# LEGEND: This allows to exchange the lattices that are stored as primary and secondary lattice.
-# EXAMPLE: doswap = "1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=yes;1=no"
-set doswap = "0"
 #
 #$end_local_vars
 #
@@ -64,6 +47,8 @@ set comment = ""
 set imagesidelength = ""
 set lattice = ""
 set secondlattice = ""
+set new_imagenumber = ""
+set doswap = ""
 #
 #$end_vars
 #

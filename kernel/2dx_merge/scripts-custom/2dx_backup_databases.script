@@ -60,26 +60,32 @@ endif
 if ( ${backup_database_direction} == "0" ) then
   set source = 2dx_image.cfg
   set target = 2dx_image.cfg-backup1
+  set do_eval = 0
 endif
 if ( ${backup_database_direction} == "1" ) then
   set source = 2dx_image.cfg
   set target = 2dx_image.cfg-backup2
+  set do_eval = 0
 endif
 if ( ${backup_database_direction} == "2" ) then
   set source = 2dx_image.cfg
   set target = 2dx_image.cfg-backup3
+  set do_eval = 0
 endif
 if ( ${backup_database_direction} == "3" ) then
   set source = 2dx_image.cfg-backup1
   set target = 2dx_image.cfg
+  set do_eval = 1
 endif
 if ( ${backup_database_direction} == "4" ) then
   set source = 2dx_image.cfg-backup2
   set target = 2dx_image.cfg
+  set do_eval = 1
 endif
 if ( ${backup_database_direction} == "5" ) then
   set source = 2dx_image.cfg-backup3
   set target = 2dx_image.cfg
+  set do_eval = 1
 endif
 #
 # This memorizes the current merge directory under the variable "olddir":
@@ -127,7 +133,9 @@ echo "set backup_sure = no" >> LOGS/${scriptname}.results
 #
 # Move the progress bar to 100%:
 echo "<<@progress: 100>>"
-echo "<<@evaluate>>"
+if ( ${do_eval} == "1" ) then
+  echo "<<@evaluate>>"
+endif
 #
 # Leave a message on the logfile that the script finished:
 ${proc_2dx}/linblock "${scriptname} finished correctly."

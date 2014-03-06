@@ -300,6 +300,11 @@ class Auto2dxGUI(Frame):
 		
 		lattice = self.watcher.get_lattice_from_config(self.image_dirs[i] + "/2dx_image.cfg")
 		self.watcher.drawLattice(dia_folder + "/fft.png", dia_folder + "/fft_lattice.gif", lattice)
+		
+		lattice2 = self.watcher.get_second_lattice_from_config(self.image_dirs[i] + "/2dx_image.cfg")
+		if not ( (abs(lattice2[0]<0.1)) and (abs(lattice2[1]<0.1)) and (abs(lattice2[2]<0.1)) and (abs(lattice2[3]<0.1)) ):
+			self.watcher.drawBothLattices(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice_both.gif", lattice, lattice2)
+		
 		ctf = self.watcher.get_ctf_from_config(self.image_dirs[i] + "/2dx_image.cfg")
 		self.watcher.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)
 		
@@ -431,6 +436,13 @@ class Auto2dxGUI(Frame):
 		
 		result += "PowerBins\t[A] " + str(u2_rb[0]) + "\t" + str(u2_rb[1]) + "\t" + str(u2_rb[2]) + "\t" + str(u2_rb[3]) + "\t" + str(u2_rb[4]) + "\t" + str(u2_rb[5])  + "\n"
 		result += "(noise=7)\t #  " + str(u2_iqs[0]) + "\t" + str(u2_iqs[1]) + "\t" + str(u2_iqs[2]) + "\t" + str(u2_iqs[3]) + "\t" + str(u2_iqs[4]) + "\t" + str(u2_iqs[5])  + "\n\n\n"
+		
+		if os.path.exists(folder + "_c1"):
+			second_lattice_done = "done"
+		else:
+			second_lattice_done = "not yet"
+			
+		result += "Second lattice: " + second_lattice_done + "\n\n\n"
 				
 		result += "Comment: " + comment_string + "\n\n"
 		
@@ -523,12 +535,24 @@ class Auto2dxGUI(Frame):
 		
 		all_fine = True
 		
-		if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif"):
-			self.lattice_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif").resize((n,n),Image.ANTIALIAS))
-			self.lattice_label.configure(image=self.lattice_image)
+		if self.secondLatticeVar.get() == 0:
+			if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif"):
+				self.lattice_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif").resize((n,n),Image.ANTIALIAS))
+				self.lattice_label.configure(image=self.lattice_image)
+			else:
+				self.lattice_label.configure(image=self.default_tkimage)
+				all_fine = False
 		else:
-			self.lattice_label.configure(image=self.default_tkimage)
-			all_fine = False
+			if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice_both.gif"):
+				self.lattice_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice_both.gif").resize((n,n),Image.ANTIALIAS))
+				self.lattice_label.configure(image=self.lattice_image)
+			elif os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif"):
+				self.lattice_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif").resize((n,n),Image.ANTIALIAS))
+				self.lattice_label.configure(image=self.lattice_image)
+			else:
+				self.lattice_label.configure(image=self.default_tkimage)
+				all_fine = False
+			
 		
 		if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_ctf.gif"):
 			self.ctf_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_ctf.gif").resize((n,n),Image.ANTIALIAS))
@@ -594,6 +618,55 @@ class Auto2dxGUI(Frame):
 			self.is_running = False
 			self.status.configure(text="Automation not running", fg="red")
 
+	def secondLatticeAutoClicked(self):
+		self.watcher.setSecondLatticeAuto(self.secondLatticeProcVar.get())
+
+
+	def processSecondLattice(self, i):
+		image_count = i + 1
+		protein_name = "auto_"
+		image_2dx_name = self.watcher.outfolder + "/automatic/" + protein_name + str(image_count)
+		self.watcher.set_new_imagenumber(image_2dx_name)
+		
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"+2dx_clone"' + "'" 
+		os.system(command_2dx_image)
+		
+		image_2dx_name_new = image_2dx_name + "_c1"
+	
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_initialize_files"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_fftrans"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getSampleTilt"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots"' + "'" 
+		os.system(command_2dx_image)		
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend2"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_applyCTF"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_generateMAP"' + "'" 
+		os.system(command_2dx_image)
+		
+		
+	def reprocessSecondLatticeUI(self):
+		i = self.index_selected
+		image_count = i + 1
+		protein_name = "auto_"
+		image_2dx_name = self.watcher.outfolder + "/automatic/" + protein_name + str(image_count)
+		image_2dx_name_new = image_2dx_name + "_c1"
+		
+		if os.path.exists(image_2dx_name_new):
+			print "already done"
+			tkMessageBox.showerror("Already done", "The second lattice of image #" + str(image_count) + " is already processed" )
+		else:
+			thread.start_new_thread(self.processSecondLattice, (i,))
+			#self.processSecondLattice(i)
+		
 		
 	def reprocess2dx(self, i):
 		self.watcher.lock_2dx.acquire()
@@ -626,6 +699,8 @@ class Auto2dxGUI(Frame):
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getLattice"' + "'" 
 		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getSampleTilt"' + "'" 
+		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
@@ -651,6 +726,9 @@ class Auto2dxGUI(Frame):
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_applyCTF"' + "'" 
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_generateMAP"' + "'" 
+		os.system(command_2dx_image)
+
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"+2dx_evaluteLattice"' + "'" 
 		os.system(command_2dx_image)
 		
 		os.chdir(old_path)
@@ -689,6 +767,10 @@ class Auto2dxGUI(Frame):
 				skip = open(skip_file, "w")
 				skip.write("This image is skipped by the 2dx_automator\n")
 				skip.close()
+		self.indexChanged()
+		
+		
+	def secondLatticeButtonClicked(self):
 		self.indexChanged()
 		
 		
@@ -765,6 +847,23 @@ class Auto2dxGUI(Frame):
 		stop_button = Button(self.toprightframe ,text='Stop Automation', command=self.switchAutomationOff, width=30)
 		stop_button.pack(padx=5, pady=2)
 		
+		self.latticeSpacer = Label(self.centralleftframe, text=" ", height=2)
+		self.latticeSpacer.pack()
+		
+		self.secondLatticeVar = IntVar()
+		self.secondLatticeButton = Checkbutton(self.centralleftframe, variable=self.secondLatticeVar, text="Show second lattice", command=self.secondLatticeButtonClicked)
+		self.secondLatticeButton.pack(side=TOP, pady=5)
+		
+		self.procSecondLatticeButton = Button(self.centralleftframe ,text='Process Second Lattice', width=20, command=self.reprocessSecondLatticeUI)
+		self.procSecondLatticeButton.pack(padx=10, pady=5)
+		
+		self.secondLatticeProcVar = IntVar()
+		self.secondLatticeProcButton = Checkbutton(self.centralleftframe, variable=self.secondLatticeProcVar, text="Process second lattice automatically", command=self.secondLatticeAutoClicked)
+		self.secondLatticeProcButton.pack(side=TOP, pady=5)
+		
+		self.latticeSpacer2 = Label(self.centralleftframe, text=" ", height=2)
+		self.latticeSpacer2.pack()
+		
 		self.image_count_label = Label(self.centralleftframe, text="Images")
 		self.image_count_label.pack()
 		
@@ -812,10 +911,10 @@ class Auto2dxGUI(Frame):
 			self.box_test()
 		
 		self.stat_button = Button(self.lowleftframe ,text='Show Project Statistics', width=40, command=test_func)
-		self.stat_button.pack(padx=20, pady=50)
+		self.stat_button.pack(padx=20, pady=30)
 		
 		self.merge_button = Button(self.lowleftframe ,text='Launch 2dx_merge', width=40, command=self.launch2dxMerge)
-		self.merge_button.pack(padx=20, pady=50)
+		self.merge_button.pack(padx=20, pady=30)
 		
 		self.default_image = Image.new("RGB", (n,n), "white")
 		self.default_tkimage = ImageTk.PhotoImage(self.default_image)
@@ -860,7 +959,7 @@ class Auto2dxGUI(Frame):
 		
 def main():
 	root = Tk()
-	root.geometry("1900x1200+0+0")
+	root.geometry("1900x1100+0+0")
 	
 	tmp = sys.argv[0].split("/")[:-1]
 	config_dir = ""

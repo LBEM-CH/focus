@@ -26,12 +26,12 @@
 #define pi 3.1415926
 #define q_high 0.05
 #define q_low 0.25
-#define Mask_width1 0.003
-#define Mask_width2 0.002
+#define Mask_width1 0.002
+#define Mask_width2 0.003
 #define Mask_radius_in1 0.01
 #define Mask_radius_in2 0.05
 #define Mask_radius_out1 0.49
-#define Mask_radius_out2 0.49
+#define Mask_radius_out2 0.48
 
 using namespace std;
 
@@ -72,7 +72,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
    int    sx,sy, nx,ny, i,j, k;
    int    *peak_x, *peak_y;
    int    *peak_x_final, *peak_y_final;
-   float  *peak_value, *peak_value_final, Mask_radius_inner;
+   float  *peak_value, *peak_value_final, Mask_radius_inner, Mask_radius_inner1;
    float  *amp, *temp_phase, delta, *amp_small, temp, max,min; 
     
 
@@ -254,6 +254,10 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
      if (abs(inner_exclusion_radius-0.01)>0.0001) Mask_radius_inner = (float) inner_exclusion_radius;
      cout<<":Using an inner exclusion radius of "<<Mask_radius_inner<<" (in FFT units [0...0.5])"<<endl;
       
+     Mask_radius_inner1 = Mask_radius_inner * 0.9;
+     cout<<":Masking "<<Mask_radius_inner1<<endl;
+     
+     mask_image(sx,sy,amp_small,Mask_width1, Mask_radius_inner1, Mask_radius_out1);
 
 /*   Low-pass and high-pass to the small image  */
 
@@ -281,10 +285,8 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
 /*   Mask the image */
 
    
-       cout<<":Masking "<<Mask_radius_in2<<endl;
-     
-       mask_image(sx,sy,amp_small,Mask_width1, Mask_radius_inner, Mask_radius_out1);
-       //mask_image(sx,sy,amp_small,Mask_width2, Mask_radius_in2, Mask_radius_out2);
+       cout<<":Masking "<<Mask_radius_inner<<endl;
+       mask_image(sx,sy,amp_small,Mask_width2, Mask_radius_inner, Mask_radius_out2);
  
 
 /*     Peak search  */

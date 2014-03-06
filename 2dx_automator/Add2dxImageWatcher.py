@@ -15,6 +15,7 @@ class Add2dxImageWatcher(WatcherBase):
 		
 		self.lock_2dx = threading.Lock()
 		self.lock_eman2 = threading.Lock()
+		self.secondAuto = 0
 	
 	
 	def file_filter(self, filename):
@@ -29,6 +30,37 @@ class Add2dxImageWatcher(WatcherBase):
 		data = read_text_file(self.log_file_name)
 		print data
 		return data.index(filename)
+		
+		
+	def setSecondLatticeAuto(self, rhs):
+		self.secondAuto = rhs
+		
+	def processesSecondLattice(self, folder):
+		self.set_new_imagenumber(folder)
+		
+		command_2dx_image = "2dx_image " +  folder + " '" + '"+2dx_clone"' + "'" 
+		os.system(command_2dx_image)
+		
+		image_2dx_name_new = folder + "_c1"
+	
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_initialize_files"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_fftrans"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getSampleTilt"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots"' + "'" 
+		os.system(command_2dx_image)		
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend2"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_applyCTF"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_generateMAP"' + "'" 
+		os.system(command_2dx_image)
 		
 		
 	def write_log(self, filename):
@@ -85,6 +117,28 @@ class Add2dxImageWatcher(WatcherBase):
 		f_out.writelines(lines_out)
 		f_out.close()
 		
+	def set_new_imagenumber(self, folder):
+		old_number = self.get_imagenumber_from_config(folder + "/2dx_image.cfg")
+		new_number = str(int(old_number)+1)
+		
+		number_as_string = str(new_number)
+		leading_zeros = 10 - len(number_as_string)
+		number_as_string = leading_zeros * "0" + number_as_string
+		
+		f = open(folder + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if not l.startswith("set new_imagenumber ="):
+				lines_out.append(l)
+			else:
+				toadd = "set new_imagenumber = " + '"' + number_as_string + '"\n'
+				lines_out.append(toadd)
+				print toadd
+		f.close()
+		f_out = open(folder + "/2dx_image.cfg", "w")
+		f_out.writelines(lines_out)
+		f_out.close()
 		
 	def image_added(self, filename, do_wait = True):
 		print "2dx automatic processing launched for", filename
@@ -122,6 +176,8 @@ class Add2dxImageWatcher(WatcherBase):
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getLattice"' + "'" 
 		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getSampleTilt"' + "'" 
+		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
@@ -148,9 +204,15 @@ class Add2dxImageWatcher(WatcherBase):
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_generateMAP"' + "'" 
 		os.system(command_2dx_image)
+
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"+2dx_evaluteLattice"' + "'" 
+		os.system(command_2dx_image)
 		
 		os.chdir(old_path)
 		self.lock_2dx.release()
+		
+		if self.secondAuto == 1:
+			self.processesSecondLattice(image_2dx_name)
 		
 		#filename_core = filename.split(".")[0]
 		filename_core = image_2dx_name.split("/")[-1]
@@ -174,6 +236,10 @@ class Add2dxImageWatcher(WatcherBase):
 		try:
 			lattice = self.get_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
 			self.drawLattice(dia_folder + "/fft.png", dia_folder + "/fft_lattice.gif", lattice)
+			
+			lattice2 = self.get_second_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
+			if not ( (abs(lattice2[0]<0.1)) and (abs(lattice2[1]<0.1)) and (abs(lattice2[2]<0.1)) and (abs(lattice2[3]<0.1)) ):
+				self.drawBothLattices(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice_both.gif", lattice, lattice2)
 		
 			ctf = self.get_ctf_from_config(image_2dx_name + "/2dx_image.cfg")
 			self.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)
@@ -353,6 +419,56 @@ class Add2dxImageWatcher(WatcherBase):
 		im2.crop((nx/2-w, ny/2-w, nx/2+w, ny/2+w)).save(outfile)
 		
 		
+	def drawBothLattices(self, infile, outfile, lattice1, lattice2):
+		from PIL import Image, ImageDraw
+		im = Image.open(infile)
+		nx = im.size[0]
+		ny = im.size[1]
+		im2 = Image.new("RGB", (nx,ny), "white")
+		dx = 16
+		max_pixel = float(max(im.getdata()))
+		for x in range(nx):
+			for y in range(ny):
+				col = int(im.getpixel((x,y))/max_pixel*255)
+				im2.putpixel((x,y), (col,col,col))
+		draw = ImageDraw.Draw(im2)
+		order = 12
+		for i in range(-order,order+1,1):
+			for j in range(-order,order+1,1):
+				if i==0 and j==0:
+					color = (0,0,0)
+				elif i==1 and j==0:
+					color = (230,26,13)
+				elif i==0 and j==1:
+					color = (1,3,230)
+				else:
+					color = (0,255,17)
+				u = lattice1[0]*float(i) + lattice1[2]*float(j) - dx/2
+				v = lattice1[1]*float(i) + lattice1[3]*float(j) - dx/2
+				draw.ellipse((u+nx/2, -v+ny/2-dx, u+dx+nx/2, -v+ny/2), outline=color, fill=None)
+				draw.ellipse((u+nx/2-1, -v+ny/2-dx-1, u+dx+nx/2+1, -v+ny/2+1), outline=color, fill=None)
+				
+		for i in range(-order,order+1,1):
+			for j in range(-order,order+1,1):
+				
+				if i==0 and j==0:
+					color = (0,0,0)
+				elif i==1 and j==0:
+					color = (230,26,13)
+				elif i==0 and j==1:
+					color = (1,3,230)
+				else:
+					color = (113,126,230)
+					
+				u = lattice2[0]*float(i) + lattice2[2]*float(j) - dx/2
+				v = lattice2[1]*float(i) + lattice2[3]*float(j) - dx/2
+				draw.rectangle((u+nx/2, -v+ny/2-dx, u+dx+nx/2, -v+ny/2), outline=color, fill=None)
+				draw.rectangle((u+nx/2-1, -v+ny/2-dx-1, u+dx+nx/2+1, -v+ny/2+1), outline=color, fill=None)		
+		
+		w = 260
+		im2.crop((nx/2-w, ny/2-w, nx/2+w, ny/2+w)).save(outfile)
+		
+		
 	def fix_fft(self, dia_folder):
 		image = get_image(dia_folder + "/fft.mrc").get_fft_amplitude()
 		image_new = model_blank(image.get_xsize(), image.get_ysize())
@@ -419,8 +535,40 @@ class Add2dxImageWatcher(WatcherBase):
 							lattice.append(float(d))
 						except:
 							lattice.append(0)
-		
 		return lattice
+		
+	def get_imagenumber_from_config(self, config_name):
+		content = read_text_row(config_name)
+		lattice = []
+		for c in content:
+			
+			if len(c) > 2 and (c[0] != "#"):
+				c_string = ""
+				for c_loc in c:				
+					c_string += str(c_loc)
+				line_without_space = c_string.replace(" ", "")
+				if line_without_space.startswith("setimagenumber"):
+					data = line_without_space.split("=")[1][1:-1]
+					return data
 	
+	
+	def get_second_lattice_from_config(self, config_name):
+		content = read_text_row(config_name)
+		lattice = []
+		for c in content:
+			
+			if len(c) > 2 and (c[0] != "#"):
+				c_string = ""
+				for c_loc in c:				
+					c_string += str(c_loc)
+				line_without_space = c_string.replace(" ", "")
+				if line_without_space.startswith("setsecondlattice"):
+					data = line_without_space.split("=")[1][1:-1]
+					for d in data.split(","):
+						try:
+							lattice.append(float(d))
+						except:
+							lattice.append(0)
+		return lattice
 		
 	

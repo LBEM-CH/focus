@@ -34,6 +34,7 @@
 # DISPLAY: phaori
 # DISPLAY: phaoriFouFilter
 # DISPLAY: phaori_change
+# DISPLAY: phaori_manual_target
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
@@ -76,6 +77,7 @@ set realcell = ""
 set refori = ""
 set revhk = ""
 set revhnd = ""
+set phaori_manual_target = ""
 set revxsgn = ""
 set rot180 = ""
 set rot90 = ""
@@ -138,12 +140,25 @@ set phaori_y = `echo ${phaori_local} | sed 's/,/ /g' | awk '{ s = $2 } END { pri
 set phaori_change_x = `echo ${phaori_change} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
 set phaori_change_y = `echo ${phaori_change} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
 #
-set phaori_x = `echo ${phaori_x} ${phaori_change_x} | awk '{ s = $1 + $2 } END { print s }'`
-set phaori_y = `echo ${phaori_y} ${phaori_change_y} | awk '{ s = $1 + $2 } END { print s }'`
+set phaori_manual_targ_x = 0.0
+set phaori_manual_targ_y = 0.0
+if ( ${phaori_manual_target} == '1' ) then
+  if ( ${phaori_change_x} != '0.0' && ${phaori_change_y} != '0.0' ) then
+    set phaori_manual_targ_x = 180.0
+    set phaori_manual_targ_y = 180.0
+  endif
+endif
+#
+set phaori_x = `echo ${phaori_x} ${phaori_change_x} ${phaori_manual_targ_x} | awk '{ s = $1 + $2 + $3 } END { print s }'`
+set phaori_y = `echo ${phaori_y} ${phaori_change_y} ${phaori_manual_targ_y} | awk '{ s = $1 + $2 + $3 } END { print s }'`
 #
 set phaori_x = `echo ${phaori_x} | awk '{ if ( $1 >   180.0) { s = $1 - 360.0 } else {  s = $1 }} END { print s }'`
+set phaori_x = `echo ${phaori_x} | awk '{ if ( $1 >   180.0) { s = $1 - 360.0 } else {  s = $1 }} END { print s }'`
+set phaori_x = `echo ${phaori_x} | awk '{ if ( $1 <= -180.0) { s = $1 + 360.0 } else {  s = $1 }} END { print s }'`
 set phaori_x = `echo ${phaori_x} | awk '{ if ( $1 <= -180.0) { s = $1 + 360.0 } else {  s = $1 }} END { print s }'`
 set phaori_y = `echo ${phaori_y} | awk '{ if ( $1 >   180.0) { s = $1 - 360.0 } else {  s = $1 }} END { print s }'`
+set phaori_y = `echo ${phaori_y} | awk '{ if ( $1 >   180.0) { s = $1 - 360.0 } else {  s = $1 }} END { print s }'`
+set phaori_y = `echo ${phaori_y} | awk '{ if ( $1 <= -180.0) { s = $1 + 360.0 } else {  s = $1 }} END { print s }'`
 set phaori_y = `echo ${phaori_y} | awk '{ if ( $1 <= -180.0) { s = $1 + 360.0 } else {  s = $1 }} END { print s }'`
 #
 set phaori_local = `echo ${phaori_x},${phaori_y}`

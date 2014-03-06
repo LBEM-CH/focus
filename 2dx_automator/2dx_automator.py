@@ -853,10 +853,10 @@ class Auto2dxGUI(Frame):
 			self.box_test()
 		
 		self.stat_button = Button(self.lowleftframe ,text='Show Project Statistics', width=40, command=test_func)
-		self.stat_button.pack(padx=20, pady=50)
+		self.stat_button.pack(padx=20, pady=30)
 		
 		self.merge_button = Button(self.lowleftframe ,text='Launch 2dx_merge', width=40, command=self.launch2dxMerge)
-		self.merge_button.pack(padx=20, pady=50)
+		self.merge_button.pack(padx=20, pady=30)
 		
 		self.default_image = Image.new("RGB", (n,n), "white")
 		self.default_tkimage = ImageTk.PhotoImage(self.default_image)

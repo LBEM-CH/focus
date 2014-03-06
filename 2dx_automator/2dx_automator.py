@@ -528,12 +528,24 @@ class Auto2dxGUI(Frame):
 		
 		all_fine = True
 		
-		if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif"):
-			self.lattice_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif").resize((n,n),Image.ANTIALIAS))
-			self.lattice_label.configure(image=self.lattice_image)
+		if self.secondLatticeVar.get() == 0:
+			if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif"):
+				self.lattice_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif").resize((n,n),Image.ANTIALIAS))
+				self.lattice_label.configure(image=self.lattice_image)
+			else:
+				self.lattice_label.configure(image=self.default_tkimage)
+				all_fine = False
 		else:
-			self.lattice_label.configure(image=self.default_tkimage)
-			all_fine = False
+			if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice_both.gif"):
+				self.lattice_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice_both.gif").resize((n,n),Image.ANTIALIAS))
+				self.lattice_label.configure(image=self.lattice_image)
+			elif os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif"):
+				self.lattice_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_lattice.gif").resize((n,n),Image.ANTIALIAS))
+				self.lattice_label.configure(image=self.lattice_image)
+			else:
+				self.lattice_label.configure(image=self.default_tkimage)
+				all_fine = False
+			
 		
 		if os.path.exists(self.image_dirs[self.index_selected] + "/automation_output/fft_ctf.gif"):
 			self.ctf_image = ImageTk.PhotoImage(Image.open(self.image_dirs[self.index_selected] + "/automation_output/fft_ctf.gif").resize((n,n),Image.ANTIALIAS))
@@ -701,7 +713,7 @@ class Auto2dxGUI(Frame):
 		
 		
 	def secondLatticeButtonClicked(self):
-		self.watcher.setShowSecondLattice(self.secondLatticeVar.get())
+		self.indexChanged()
 		
 		
 	def select_image(self):
@@ -881,7 +893,6 @@ class Auto2dxGUI(Frame):
 		self.status = Label(self.parent, text="Automation not running", bd=1, relief=SUNKEN, anchor=W, fg="red")
 		self.status.pack(side=BOTTOM, fill=X)
 		
-		self.secondLatticeButtonClicked()
 		self.count = 0
 		self.check_for_new_images()
 		self.autom_do_check()
@@ -890,7 +901,7 @@ class Auto2dxGUI(Frame):
 		
 def main():
 	root = Tk()
-	root.geometry("1900x1200+0+0")
+	root.geometry("1900x1100+0+0")
 	
 	tmp = sys.argv[0].split("/")[:-1]
 	config_dir = ""

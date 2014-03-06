@@ -12,7 +12,6 @@ class Add2dxImageWatcher(WatcherBase):
 		self.outfolder = outfolder
 		self.log_file_name = log_file_name
 		self.protein_name = "auto_"
-		self.showSecondLattice = 1
 		
 		self.lock_2dx = threading.Lock()
 		self.lock_eman2 = threading.Lock()
@@ -20,10 +19,6 @@ class Add2dxImageWatcher(WatcherBase):
 	
 	def file_filter(self, filename):
 		return filename.endswith(".mrc")
-		
-	def setShowSecondLattice(self, rhs):
-		self.showSecondLattice = rhs
-		print self.showSecondLattice
 		
 		
 	def getNumberOfDoneImages(self, filename):

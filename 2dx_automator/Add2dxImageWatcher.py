@@ -15,6 +15,7 @@ class Add2dxImageWatcher(WatcherBase):
 		
 		self.lock_2dx = threading.Lock()
 		self.lock_eman2 = threading.Lock()
+		self.secondAuto = 0
 	
 	
 	def file_filter(self, filename):
@@ -29,6 +30,37 @@ class Add2dxImageWatcher(WatcherBase):
 		data = read_text_file(self.log_file_name)
 		print data
 		return data.index(filename)
+		
+		
+	def setSecondLatticeAuto(self, rhs):
+		self.secondAuto = rhs
+		
+	def processesSecondLattice(self, folder):
+		self.set_new_imagenumber(folder)
+		
+		command_2dx_image = "2dx_image " +  folder + " '" + '"+2dx_clone"' + "'" 
+		os.system(command_2dx_image)
+		
+		image_2dx_name_new = folder + "_c1"
+	
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_initialize_files"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_fftrans"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getSampleTilt"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots"' + "'" 
+		os.system(command_2dx_image)		
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend2"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_applyCTF"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_generateMAP"' + "'" 
+		os.system(command_2dx_image)
 		
 		
 	def write_log(self, filename):
@@ -178,6 +210,9 @@ class Add2dxImageWatcher(WatcherBase):
 		
 		os.chdir(old_path)
 		self.lock_2dx.release()
+		
+		if self.secondAuto == 1:
+			self.processesSecondLattice(image_2dx_name)
 		
 		#filename_core = filename.split(".")[0]
 		filename_core = image_2dx_name.split("/")[-1]

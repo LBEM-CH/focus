@@ -618,6 +618,9 @@ class Auto2dxGUI(Frame):
 			self.is_running = False
 			self.status.configure(text="Automation not running", fg="red")
 
+	def secondLatticeAutoClicked(self):
+		self.watcher.setSecondLatticeAuto(self.secondLatticeProcVar.get())
+
 
 	def processSecondLattice(self, i):
 		image_count = i + 1
@@ -648,10 +651,6 @@ class Auto2dxGUI(Frame):
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_generateMAP"' + "'" 
 		os.system(command_2dx_image)
-		
-
-#		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"+2dx_evaluteLattice"' + "'" 
-#		os.system(command_2dx_image)
 		
 		
 	def reprocessSecondLatticeUI(self):
@@ -859,7 +858,7 @@ class Auto2dxGUI(Frame):
 		self.procSecondLatticeButton.pack(padx=10, pady=5)
 		
 		self.secondLatticeProcVar = IntVar()
-		self.secondLatticeProcButton = Checkbutton(self.centralleftframe, variable=self.secondLatticeProcVar, text="Process second lattice automatically")
+		self.secondLatticeProcButton = Checkbutton(self.centralleftframe, variable=self.secondLatticeProcVar, text="Process second lattice automatically", command=self.secondLatticeAutoClicked)
 		self.secondLatticeProcButton.pack(side=TOP, pady=5)
 		
 		self.latticeSpacer2 = Label(self.centralleftframe, text=" ", height=2)

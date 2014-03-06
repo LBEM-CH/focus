@@ -54,7 +54,8 @@ class WatcherBase:
 					#print "Waiting for", self.wait_time, "seconds to make sure that the copy is done"
 					time.sleep(self.wait_time)
 					self.write_log(f)
-					thread.start_new_thread(self.image_added, (f,))	
+					thread.start_new_thread(self.image_added, (f,))
+					#self.image_added(f)	
 		self.before = self.after
 		if added:
 			return True

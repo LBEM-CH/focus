@@ -183,10 +183,9 @@ class Add2dxImageWatcher(WatcherBase):
 			lattice = self.get_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
 			self.drawLattice(dia_folder + "/fft.png", dia_folder + "/fft_lattice.gif", lattice)
 			
-			if self.showSecondLattice == 1:
-				lattice2 = self.get_second_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
-				if not ( (abs(lattice2[0]<0.1)) and (abs(lattice2[1]<0.1)) and (abs(lattice2[2]<0.1)) and (abs(lattice2[3]<0.1)) ):
-					self.drawSecondLattice(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice.gif", lattice2)
+			lattice2 = self.get_second_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
+			if not ( (abs(lattice2[0]<0.1)) and (abs(lattice2[1]<0.1)) and (abs(lattice2[2]<0.1)) and (abs(lattice2[3]<0.1)) ):
+				self.drawBothLattice(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice.gif", lattice, lattice2)
 		
 			ctf = self.get_ctf_from_config(image_2dx_name + "/2dx_image.cfg")
 			self.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)
@@ -366,7 +365,7 @@ class Add2dxImageWatcher(WatcherBase):
 		im2.crop((nx/2-w, ny/2-w, nx/2+w, ny/2+w)).save(outfile)
 		
 		
-	def drawSecondLattice(self, infile, outfile, lattice):
+	def drawBothLattices(self, infile, outfile, lattice1, lattice2):
 		from PIL import Image, ImageDraw
 		im = Image.open(infile)
 		nx = im.size[0]
@@ -394,8 +393,8 @@ class Add2dxImageWatcher(WatcherBase):
 					
 				color = (255,255,255)
 					
-				u = lattice[0]*float(i) + lattice[2]*float(j) - dx/2
-				v = lattice[1]*float(i) + lattice[3]*float(j) - dx/2
+				u = lattice1[0]*float(i) + lattice1[2]*float(j) - dx/2
+				v = lattice1[1]*float(i) + lattice1[3]*float(j) - dx/2
 				draw.ellipse((u+nx/2, -v+ny/2-dx, u+dx+nx/2, -v+ny/2), outline=color, fill=None)
 				draw.ellipse((u+nx/2-1, -v+ny/2-dx-1, u+dx+nx/2+1, -v+ny/2+1), outline=color, fill=None)
 		w = 260

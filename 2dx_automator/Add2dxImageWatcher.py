@@ -381,7 +381,6 @@ class Add2dxImageWatcher(WatcherBase):
 		order = 12
 		for i in range(-order,order+1,1):
 			for j in range(-order,order+1,1):
-				
 				if i==0 and j==0:
 					color = (0,0,0)
 				elif i==1 and j==0:
@@ -389,14 +388,20 @@ class Add2dxImageWatcher(WatcherBase):
 				elif i==0 and j==1:
 					color = (1,3,230)
 				else:
-					color = (255,0,17)
-					
-				color = (255,255,255)
-					
+					color = (0,255,17)
 				u = lattice1[0]*float(i) + lattice1[2]*float(j) - dx/2
 				v = lattice1[1]*float(i) + lattice1[3]*float(j) - dx/2
 				draw.ellipse((u+nx/2, -v+ny/2-dx, u+dx+nx/2, -v+ny/2), outline=color, fill=None)
 				draw.ellipse((u+nx/2-1, -v+ny/2-dx-1, u+dx+nx/2+1, -v+ny/2+1), outline=color, fill=None)
+				
+		for i in range(-order,order+1,1):
+			for j in range(-order,order+1,1):
+				color = (113,126,230)
+				u = lattice2[0]*float(i) + lattice2[2]*float(j) - dx/2
+				v = lattice2[1]*float(i) + lattice2[3]*float(j) - dx/2
+				draw.rectangle((u+nx/2, -v+ny/2-dx, u+dx+nx/2, -v+ny/2), outline=color, fill=None)
+				draw.rectangle((u+nx/2-1, -v+ny/2-dx-1, u+dx+nx/2+1, -v+ny/2+1), outline=color, fill=None)		
+		
 		w = 260
 		im2.crop((nx/2-w, ny/2-w, nx/2+w, ny/2+w)).save(outfile)
 		

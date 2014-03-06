@@ -303,7 +303,7 @@ class Auto2dxGUI(Frame):
 		
 		lattice2 = self.watcher.get_second_lattice_from_config(self.image_dirs[i] + "/2dx_image.cfg")
 		if not ( (abs(lattice2[0]<0.1)) and (abs(lattice2[1]<0.1)) and (abs(lattice2[2]<0.1)) and (abs(lattice2[3]<0.1)) ):
-			self.watcher.drawBothLattices(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice.gif", lattice, lattice2)
+			self.watcher.drawBothLattices(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice_both.gif", lattice, lattice2)
 		
 		ctf = self.watcher.get_ctf_from_config(self.image_dirs[i] + "/2dx_image.cfg")
 		self.watcher.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)

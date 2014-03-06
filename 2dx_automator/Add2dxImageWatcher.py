@@ -185,7 +185,7 @@ class Add2dxImageWatcher(WatcherBase):
 			
 			lattice2 = self.get_second_lattice_from_config(image_2dx_name + "/2dx_image.cfg")
 			if not ( (abs(lattice2[0]<0.1)) and (abs(lattice2[1]<0.1)) and (abs(lattice2[2]<0.1)) and (abs(lattice2[3]<0.1)) ):
-				self.drawBothLattice(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice.gif", lattice, lattice2)
+				self.drawBothLattices(dia_folder + "/fft_lattice.gif", dia_folder + "/fft_lattice_both.gif", lattice, lattice2)
 		
 			ctf = self.get_ctf_from_config(image_2dx_name + "/2dx_image.cfg")
 			self.drawCTF(dia_folder + "/fft.png", dia_folder + "/fft_ctf.gif", ctf)

@@ -436,6 +436,13 @@ class Auto2dxGUI(Frame):
 		
 		result += "PowerBins\t[A] " + str(u2_rb[0]) + "\t" + str(u2_rb[1]) + "\t" + str(u2_rb[2]) + "\t" + str(u2_rb[3]) + "\t" + str(u2_rb[4]) + "\t" + str(u2_rb[5])  + "\n"
 		result += "(noise=7)\t #  " + str(u2_iqs[0]) + "\t" + str(u2_iqs[1]) + "\t" + str(u2_iqs[2]) + "\t" + str(u2_iqs[3]) + "\t" + str(u2_iqs[4]) + "\t" + str(u2_iqs[5])  + "\n\n\n"
+		
+		if os.path.exists(folder + "_c1"):
+			second_lattice_done = "done"
+		else:
+			second_lattice_done = "not yet"
+			
+		result += "Second lattice: " + second_lattice_done + "\n\n\n"
 				
 		result += "Comment: " + comment_string + "\n\n"
 		

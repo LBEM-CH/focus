@@ -643,6 +643,8 @@ class Auto2dxGUI(Frame):
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getLattice"' + "'" 
 		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getSampleTilt"' + "'" 
+		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"2dx_unbend1"' + "'" 

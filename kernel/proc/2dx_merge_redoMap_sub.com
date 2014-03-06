@@ -126,7 +126,7 @@ else
   endif
 endif
 #
-${proc_2dx}/linblock "Using APH files ${aphfile}"
+${proc_2dx}/lin "Using APH files ${aphfile}"
 #
 if ( ! -e ${aphfile} ) then
   ${proc_2dx}/linblock "ERROR: ${aphfile} not found."
@@ -160,8 +160,9 @@ eot
 ${proc_2dx}/lin "AVRAMPHS - to transform merge.aph into avrg.hkl"
 #############################################################################
 #
-set zminmax = "-0.05,0.05"
-# avramphs only works for 2D projection data.
+set zminmax = "-1.0,1.0"
+# avramphs only works for 2D projection data.  
+# But here, we exclude the limitation since we only want the projection map.
 ${proc_2dx}/lin "WARNING: Using zminmax=${zminmax}, but statistics only good for 2D."
 #
 \cp -f APH/${imagename}.cor.origtiltd.aph fort.1
@@ -207,7 +208,7 @@ else
 endif
 if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   #
-  ${proc_2dx}/linblock "Creating reference projection map ${refhklfile}"
+  ${proc_2dx}/lin "Creating reference projection map ${refhklfile}"
   #
   set linenum = `wc -l ${refhklfile} | awk '{ s = $1 - 1 } END { print s }'`
   head -n 1 ${refhklfile} > TMP.tmp
@@ -279,7 +280,7 @@ RHOLIM 250.0
 HKLMAX 50 50 50
 END
 eot
-echo ":: ${extends}"
+#
 if( ${extends} == "y" ) then
   #
   #############################################################################

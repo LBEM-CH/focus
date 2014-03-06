@@ -21,3 +21,4 @@ kernel/mrc/lib/fsplit
 kernel/mrc/source/*.mod
 kernel/mrc/source/CMakeFiles/*/*.stamp
 kernel/mrc/source/CMakeFiles/*/*.build
+*.swp

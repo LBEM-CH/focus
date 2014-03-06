@@ -148,11 +148,12 @@ void imagePreview::resetInfo()
 void imagePreview::resetImage(bool ignore_size)
 {
 	int max_size = 500;
-	if( (!ignore_size) && (result.toLower().endsWith(".mrc") || result.toLower().endsWith(".map")) )
+	if( (!ignore_size) && result.toLower().endsWith(".mrc")  )
 	{
 		mrcImage *tempImage = new mrcImage(result,true,this);
-		int size = tempImage->getHeader()->nx();
-		if (size < max_size)
+			
+		int sizex = tempImage->getHeader()->nx();
+		if (sizex < max_size)
 		{
 			showInfo = false;
 		}
@@ -240,7 +241,7 @@ void imagePreview::shade()
 {
 	if(isHidden())
 	{
-		resetImage();
+		resetImage(true);
 		show();
 	}
 	else

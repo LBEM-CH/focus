@@ -29,7 +29,7 @@
     
     int    i,j, k,m,n, start_x,start_y;
     int    num_peak, flag,*mask;
-    float  *temp_amp, mean, rin,rout,w, A, min, max, dist, min_dist;
+    float  *temp_amp, mean, rin,rin2,rout,rout2,rpos2,w, A, min, max, dist, min_dist;
     double dmean;
    
  
@@ -45,7 +45,13 @@
     rout=radius_out*(sx+sy)/4/0.5;
     rin=radius_in*(sx+sy)/4/0.5;
     w=slit_width*(sx+sy)/4/0.5;
+    rin2=rin*rin;
+    rout2=rout*rout;
    
+    cout<<" rin   = "<<rin<<endl;
+    cout<<" rin2  = "<<rin2<<endl;
+    cout<<" rout  = "<<rout<<endl;
+    cout<<" rout2 = "<<rout2<<endl<<endl;
    
     mean=0;
     dmean=0;
@@ -53,14 +59,42 @@
     for(i=0;i<sx;i++)
       for(j=0;j<sy;j++)
         {  
-           mask[j+i*sy]=1;
-	   
-	   if((powf(float(i-sx/2),2.0)+powf(float(j-sy/2),2.0))<(rin*rin))
-	    {   dmean=dmean+amp[j+i*sy];  k++;}
+	   rpos2=powf(float(i-sx/2),2.0)+powf(float(j-sy/2),2.0);
+           
+	   if(rpos2>rin2 && rpos2<rout2)
+           {   
+               dmean=dmean+amp[j+i*sy];  
+               k++;
+           }
         }
 	
 
     mean=dmean/k;
+    cout<<" 1st. mean  = "<<mean<<endl;
+
+
+    dmean=0;
+    k=0;
+    for(i=0;i<sx;i++)
+      for(j=0;j<sy;j++)
+        {  
+           mask[j+i*sy]=1;
+	   
+	   rpos2=powf(float(i-sx/2),2.0)+powf(float(j-sy/2),2.0);
+           
+	   if(rpos2>rin2 && rpos2<rout2)
+           {   
+               if(amp[j+i*sx]<mean*2)
+               {   
+                   dmean=dmean+amp[j+i*sy];  
+                   k++;
+               }
+           }
+        }
+	
+    mean=dmean/k;
+
+    cout<<" 2nd. mean  = "<<mean<<endl<<endl;
 
 
 /*  Mask the image: Preprocessing to remove the lines, the horizental and vertical  center   */
@@ -74,7 +108,7 @@
                  if(amp[j+i*sy]>max) { k=i; m=j; max=amp[j+i*sy];}
             }
          
-    cout<<" Max determined."<<endl;
+    cout<<" Max determined:   max = "<<max<<endl;
 
     while(max>mean)
       {   start_x=k; start_y=m;
@@ -94,11 +128,7 @@
                    if(i!=k  ||  j!=m)   
                         {  amp[j+i*sy]=mean;  mask[j+i*sy]=0; }
 
-
              start_x=k; start_y=m;
-
-
-
            }
         
           for(i=sx/2-10;i<sx/2+10;i++)
@@ -110,19 +140,23 @@
 		 
        }       
       
-     mean=0; m=0;
+     dmean=0; m=0;
      for(i=0;i<sx;i++)
        for(j=0;j<sy;j++)
          {  
             if(((i-sx/2)*(i-sx/2)+(j-sy/2)*(j-sy/2))>rout*rout || 
-	       ((i-sx/2)*(i-sx/2)+(j-sy/2)*(j-sy/2))<rin*rin ||
-	        (abs(i-sx/2)<w) || (abs(j-sy/2)<w)  || mask[j+i*sy]==0)
-                  {  mean=mean+amp[j+i*sy]; m++;  mask[j+i*sy]=0; }
+	        ((i-sx/2)*(i-sx/2)+(j-sy/2)*(j-sy/2))<rin*rin ||
+	        (abs(i-sx/2)<w) || (abs(j-sy/2)<w) || mask[j+i*sy]==0 || amp[j+i*sy]>mean*1000)
+                  {  mask[j+i*sy]=0; }
+                 else
+                  {  dmean=dmean+amp[j+i*sy]; m++; }
          }
 
      cout<<" binary mask determined."<<endl;
 
-     mean=mean/m; 
+     mean=dmean/m; 
+     cout<<" 3rd. mean  = "<<mean<<endl<<endl;
+
      for(i=0;i<sx;i++)
        for(j=0;j<sy;j++)
          {  

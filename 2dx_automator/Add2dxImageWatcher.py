@@ -85,6 +85,28 @@ class Add2dxImageWatcher(WatcherBase):
 		f_out.writelines(lines_out)
 		f_out.close()
 		
+	def set_new_imagenumber(self, folder):
+		old_number = self.get_imagenumber_from_config(folder + "/2dx_image.cfg")
+		new_number = str(int(old_number)+1)
+		
+		number_as_string = str(new_number)
+		leading_zeros = 10 - len(number_as_string)
+		number_as_string = leading_zeros * "0" + number_as_string
+		
+		f = open(folder + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if not l.startswith("set new_imagenumber ="):
+				lines_out.append(l)
+			else:
+				toadd = "set new_imagenumber = " + '"' + number_as_string + '"\n'
+				lines_out.append(toadd)
+				print toadd
+		f.close()
+		f_out = open(folder + "/2dx_image.cfg", "w")
+		f_out.writelines(lines_out)
+		f_out.close()
 		
 	def image_added(self, filename, do_wait = True):
 		print "2dx automatic processing launched for", filename
@@ -470,6 +492,20 @@ class Add2dxImageWatcher(WatcherBase):
 						except:
 							lattice.append(0)
 		return lattice
+		
+	def get_imagenumber_from_config(self, config_name):
+		content = read_text_row(config_name)
+		lattice = []
+		for c in content:
+			
+			if len(c) > 2 and (c[0] != "#"):
+				c_string = ""
+				for c_loc in c:				
+					c_string += str(c_loc)
+				line_without_space = c_string.replace(" ", "")
+				if line_without_space.startswith("setimagenumber"):
+					data = line_without_space.split("=")[1][1:-1]
+					return data
 	
 	
 	def get_second_lattice_from_config(self, config_name):

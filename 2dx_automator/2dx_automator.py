@@ -611,6 +611,56 @@ class Auto2dxGUI(Frame):
 			self.is_running = False
 			self.status.configure(text="Automation not running", fg="red")
 
+
+	def processSecondLattice(self, i):
+		image_count = i + 1
+		protein_name = "auto_"
+		image_2dx_name = self.watcher.outfolder + "/automatic/" + protein_name + str(image_count)
+		self.watcher.set_new_imagenumber(image_2dx_name)
+		
+		command_2dx_image = "2dx_image " +  image_2dx_name + " '" + '"+2dx_clone"' + "'" 
+		os.system(command_2dx_image)
+		
+		image_2dx_name_new = image_2dx_name + "_c1"
+	
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_initialize_files"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_fftrans"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getSampleTilt"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend1"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots"' + "'" 
+		os.system(command_2dx_image)		
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend2"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_applyCTF"' + "'" 
+		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_generateMAP"' + "'" 
+		os.system(command_2dx_image)
+		
+
+#		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"+2dx_evaluteLattice"' + "'" 
+#		os.system(command_2dx_image)
+		
+		
+	def reprocessSecondLatticeUI(self):
+		i = self.index_selected
+		image_count = i + 1
+		protein_name = "auto_"
+		image_2dx_name = self.watcher.outfolder + "/automatic/" + protein_name + str(image_count)
+		image_2dx_name_new = image_2dx_name + "_c1"
+		
+		if os.path.exists(image_2dx_name_new):
+			print "already done"
+			tkMessageBox.showerror("Already done", "The second lattice of image #" + str(image_count) + " is already processed" )
+		else:
+			thread.start_new_thread(self.processSecondLattice, (i,))
+			#self.processSecondLattice(i)
+		
 		
 	def reprocess2dx(self, i):
 		self.watcher.lock_2dx.acquire()
@@ -798,7 +848,7 @@ class Auto2dxGUI(Frame):
 		self.secondLatticeButton = Checkbutton(self.centralleftframe, variable=self.secondLatticeVar, text="Show second lattice", command=self.secondLatticeButtonClicked)
 		self.secondLatticeButton.pack(side=TOP, pady=5)
 		
-		self.procSecondLatticeButton = Button(self.centralleftframe ,text='Process Second Lattice', width=20)
+		self.procSecondLatticeButton = Button(self.centralleftframe ,text='Process Second Lattice', width=20, command=self.reprocessSecondLatticeUI)
 		self.procSecondLatticeButton.pack(padx=10, pady=5)
 		
 		self.secondLatticeProcVar = IntVar()

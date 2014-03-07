@@ -129,8 +129,27 @@ class Auto2dxGUI(Frame):
 		
 	def runAutomation(self):
 		if not self.is_running:
+			
+			input_var = self.variable.get()
+			if input_var=="chose the input type":
+				tkMessageBox.showerror("Launch failed","Please select the input data type")
+				return
+			
 			if tkMessageBox.askyesno("Automation Launch", "Relaunching may take a while as all new images are processed!\n\nDo you want to continue?"):
 				self.status.configure(text="Automation starting up...", fg="orange")
+				
+				if input_var.startswith("4k"):
+					self.watcher.binning = 1
+				else:
+					self.watcher.binning = 2
+					
+				if input_var.endswith("MRC"):
+					self.watcher.input_mode = 1
+					self.watcher.filter_string = ".mrc"
+				else:
+					self.watcher.input_mode = 2
+					self.watcher.filter_string = ".dm4"
+				
 				self.parent.update()
 				time.sleep(2)
 				if self.watcher.restart():
@@ -242,6 +261,12 @@ class Auto2dxGUI(Frame):
 	
 	
 	def reprocessOneImage(self, corename):
+		
+		input_var = self.variable.get()
+		if input_var=="chose the input type":
+			tkMessageBox.showerror("Launch failed","Please select the input data type")
+			return
+		
 		raw_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_RawFFT.gif"
 		corr_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrFFT.gif"
 		corr_img_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrSum.gif"
@@ -262,9 +287,22 @@ class Auto2dxGUI(Frame):
 		
 		if os.path.exists(plot_name):
 			os.remove(plot_name)
-		
-		filename = corename + ".mrc"
+			
+		if input_var.startswith("4k"):
+			self.watcher.binning = 1
+		else:
+			self.watcher.binning = 2
+			
+		if input_var.endswith("MRC"):
+			self.watcher.input_mode = 1
+			self.watcher.filter_string = ".mrc"
+		else:
+			self.watcher.input_mode = 2
+			self.watcher.filter_string = ".dm4"	
+
+		filename = corename + self.watcher.filter_string
 		thread.start_new_thread(self.watcher.image_added, (filename, False,))
+		#self.watcher.image_added(filename, False)
 	
 	
 	def reprocessALLImage(self):
@@ -322,11 +360,26 @@ class Auto2dxGUI(Frame):
 			self.watcher.setFOD(self.fod)
 			
 	def changeExportLocation(self):
-		self.export_location = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory")
+		self.export_location = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory for average")
 		if len(self.export_location) == 0:
 			self.export_location = "not set"
-		self.export_location_label.configure(text="Export Location:\n" + self.export_location)
+		self.export_location_label.configure(text="Export AverageLocation:\n" + self.export_location)
 		
+	def changeExportLocationStack(self):
+		self.export_location_stack = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory for stack")
+		if len(self.export_location_stack) == 0:
+			self.export_location_stack = "not set"
+		self.export_location_stack_label.configure(text="Export Stack Location:\n" + self.export_location_stack)
+		self.watcher.storelocation = self.export_location_stack
+		
+	def changeTempLocation(self):
+		self.tmp_location = tkFileDialog.askdirectory(parent=self.parent, title="Select Temp Location (SSD)")
+		if len(self.tmp_location) == 0:
+			self.tmp_location = "/tmp"
+		self.tmp_location_label.configure(text="Temp Location:\n" + self.tmp_location)
+		self.watcher.tmp_location = self.tmp_location
+	
+	
 	def exportImage(self):
 		i = self.index_selected
 		image_name = self.watcher.getFileCoreName(self.image_names[i])
@@ -401,10 +454,15 @@ class Auto2dxGUI(Frame):
 			self.open_full_button.configure(state=DISABLED)
 		else:
 			self.open_full_button.configure(state=NORMAL)
+	
+	
+	def saveStackModeChanged(self):		
+		self.watcher.storestack = self.savestack.get()
 			
 	
 	def initUI(self):
-		self.parent.title("Motion Correction GUI (beta_5)")
+		self.parent.title("Motion Correction GUI (beta_6)")
+		self.parent.title("Motion Correction GUI (beta_6)")
 	
 		self.getFolders()
 		
@@ -430,6 +488,13 @@ class Auto2dxGUI(Frame):
 		
 		stop_button = Button(self.toprightframe ,text='Stop Automation', command=self.switchAutomationOff, width=30)
 		stop_button.pack(padx=5, pady=2)
+		
+		
+		self.variable = StringVar(self.centralleftframe)
+		self.variable.set("chose the input type") # default value
+
+		self.w = OptionMenu(self.centralleftframe, self.variable, "chose the input type", "4k MRC", "4k DM4", "8k MRC", "8k DM4")
+		self.w.pack(pady=5)
 		
 		self.minframe = 2
 		self.maxframe = 0
@@ -462,9 +527,9 @@ class Auto2dxGUI(Frame):
 		self.change_bfac_button = Button(self.low_lr_frame ,text='Change BFactor', width=20, command=self.bfacChanged)
 		self.change_bfac_button.pack(padx=10, pady=5)
 		
-		self.binvar = IntVar()
-		self.binbox = Checkbutton(self.centralleftframe, variable=self.binvar, text="2x2 binning (super-resolution mode only)", command=self.binButtonClicked)
-		self.binbox.pack(pady=4)
+	#	self.binvar = IntVar()
+	#	self.binbox = Checkbutton(self.centralleftframe, variable=self.binvar, text="2x2 binning (super-resolution mode only)", command=self.binButtonClicked)
+	#	self.binbox.pack(pady=4)
 		
 		self.modevar = IntVar()
 		self.modebox = Checkbutton(self.centralleftframe, variable=self.modevar, text="Dose pair mode", command=self.pairModeChanged)
@@ -475,13 +540,38 @@ class Auto2dxGUI(Frame):
 		## Export
 		self.export_location = "not set"
 		self.exportframe = Frame(self.centralleftframe, relief=RAISED, borderwidth=2)
-		self.exportframe.pack(pady=5)
-		self.export_location_label = Label(self.exportframe, text="Export Location:\n" + self.export_location, width=45)
-		self.export_location_label.pack(pady=5)
-		self.change_export_location_button = Button(self.exportframe ,text='Change Export Location', width=20, command=self.changeExportLocation)
-		self.change_export_location_button.pack()
-		self.export_button = Button(self.exportframe ,text='Export Image', width=20, command=self.exportImage)
-		self.export_button.pack(pady=5)
+		self.exportframe.pack(pady=3)
+		self.export_location_label = Label(self.exportframe, text="Export Average Location:\n" + self.export_location, width=45)
+		self.export_location_label.pack(pady=3)
+		tmp_frame = Frame(self.exportframe)
+		tmp_frame.pack()
+		self.change_export_location_button = Button(tmp_frame ,text='Change Export Location', width=18, command=self.changeExportLocation)
+		self.change_export_location_button.pack(side=LEFT, padx=5, pady=5)
+		self.export_button = Button(tmp_frame ,text='Export Average', width=12, command=self.exportImage)
+		self.export_button.pack(side=RIGHT, padx=5, pady=3)
+		self.line = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
+		self.line.pack(fill=X, padx=5, pady=3)
+		
+		self.export_location_stack = "not set"
+		self.export_location_stack_label = Label(self.exportframe, text="Export Stack Location:\n" + self.export_location_stack, width=45)
+		self.export_location_stack_label.pack(pady=3)
+		tmp_frame2 = Frame(self.exportframe)
+		tmp_frame2.pack()
+		self.savestack = IntVar()
+		self.saveStackBox = Checkbutton(tmp_frame2, variable=self.savestack, text="Save aligned stack", command=self.saveStackModeChanged)
+		self.saveStackBox.pack(side=LEFT, padx=5, pady=3)
+		self.change_export_location_button = Button(tmp_frame2 ,text='Change Export Location', width=18, command=self.changeExportLocationStack)
+		self.change_export_location_button.pack(side=RIGHT, padx=5, pady=3)
+		
+		self.line2 = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
+		self.line2.pack(fill=X, padx=5, pady=3)
+		
+		self.tmp_location = "/tmp"
+		self.tmp_location_label = Label(self.exportframe, text="Temp Location:\n" + self.tmp_location, width=45)
+		self.tmp_location_label.pack(pady=3)
+		self.change_tmp_location_button = Button(self.exportframe ,text='Change Temp Location', width=20, command=self.changeTempLocation)
+		self.change_tmp_location_button.pack(padx=5, pady=3)
+		
 		
 		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)
 		self.troubles_button.pack(padx=20, pady=8)
@@ -510,11 +600,15 @@ class Auto2dxGUI(Frame):
 			self.index_selected = index
 			self.indexChanged()
 			
-		self.reprocess_button = Button(self.lowleftframe ,text='Reprocess Image', width=40, command=self.reprocessImage)
-		self.reprocess_button.pack(padx=20, pady=5)
 		
-		self.reprocess_ALL_button = Button(self.lowleftframe ,text='Reprocess ALL Image', width=40, command=self.reprocessALLImage)
-		self.reprocess_ALL_button.pack(padx=20, pady=5)
+		helper_frame = Frame(self.lowleftframe)
+		helper_frame.pack()
+			
+		self.reprocess_button = Button(helper_frame ,text='Reprocess Image', width=20, command=self.reprocessImage)
+		self.reprocess_button.pack(padx=5, pady=5, side=LEFT)
+		
+		self.reprocess_ALL_button = Button(helper_frame ,text='Reprocess ALL Image', width=20, command=self.reprocessALLImage)
+		self.reprocess_ALL_button.pack(padx=5, pady=5, side=RIGHT)
 		
 		Label(self.centralleftframe, text=" ", height=2).pack()
 		

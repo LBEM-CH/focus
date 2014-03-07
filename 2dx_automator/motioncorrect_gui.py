@@ -431,6 +431,13 @@ class Auto2dxGUI(Frame):
 		stop_button = Button(self.toprightframe ,text='Stop Automation', command=self.switchAutomationOff, width=30)
 		stop_button.pack(padx=5, pady=2)
 		
+		
+		self.variable = StringVar(self.centralleftframe)
+		self.variable.set("chose the input type") # default value
+
+		self.w = OptionMenu(self.centralleftframe, self.variable, "chose the input type", "4k MRC", "4k MRC (legacy mode)", "4k DM4", "8k MRC", "8k DM4")
+		self.w.pack(pady=5)
+		
 		self.minframe = 2
 		self.maxframe = 0
 		self.fod = 7
@@ -462,9 +469,9 @@ class Auto2dxGUI(Frame):
 		self.change_bfac_button = Button(self.low_lr_frame ,text='Change BFactor', width=20, command=self.bfacChanged)
 		self.change_bfac_button.pack(padx=10, pady=5)
 		
-		self.binvar = IntVar()
-		self.binbox = Checkbutton(self.centralleftframe, variable=self.binvar, text="2x2 binning (super-resolution mode only)", command=self.binButtonClicked)
-		self.binbox.pack(pady=4)
+	#	self.binvar = IntVar()
+	#	self.binbox = Checkbutton(self.centralleftframe, variable=self.binvar, text="2x2 binning (super-resolution mode only)", command=self.binButtonClicked)
+	#	self.binbox.pack(pady=4)
 		
 		self.modevar = IntVar()
 		self.modebox = Checkbutton(self.centralleftframe, variable=self.modevar, text="Dose pair mode", command=self.pairModeChanged)
@@ -476,12 +483,27 @@ class Auto2dxGUI(Frame):
 		self.export_location = "not set"
 		self.exportframe = Frame(self.centralleftframe, relief=RAISED, borderwidth=2)
 		self.exportframe.pack(pady=5)
-		self.export_location_label = Label(self.exportframe, text="Export Location:\n" + self.export_location, width=45)
+		self.export_location_label = Label(self.exportframe, text="Export Average Location:\n" + self.export_location, width=45)
 		self.export_location_label.pack(pady=5)
-		self.change_export_location_button = Button(self.exportframe ,text='Change Export Location', width=20, command=self.changeExportLocation)
-		self.change_export_location_button.pack()
-		self.export_button = Button(self.exportframe ,text='Export Image', width=20, command=self.exportImage)
-		self.export_button.pack(pady=5)
+		tmp_frame = Frame(self.exportframe)
+		tmp_frame.pack()
+		self.change_export_location_button = Button(tmp_frame ,text='Change Export Location', width=18, command=self.changeExportLocation)
+		self.change_export_location_button.pack(side=LEFT, padx=5, pady=5)
+		self.export_button = Button(tmp_frame ,text='Export Average', width=12, command=self.exportImage)
+		self.export_button.pack(side=RIGHT, padx=5, pady=5)
+		self.line = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
+		self.line.pack(fill=X, padx=5, pady=5)
+		
+		self.export_location_label = Label(self.exportframe, text="Export Stack Location:\n" + self.export_location, width=45)
+		self.export_location_label.pack(pady=5)
+		tmp_frame2 = Frame(self.exportframe)
+		tmp_frame2.pack()
+		self.savestack = IntVar()
+		self.saveStackBox = Checkbutton(tmp_frame2, variable=self.savestack, text="Save aligned stack", command=self.pairModeChanged)
+		self.saveStackBox.pack(side=LEFT, padx=5, pady=5)
+		self.change_export_location_button = Button(tmp_frame2 ,text='Change Export Location', width=18, command=self.changeExportLocation)
+		self.change_export_location_button.pack(side=RIGHT, padx=5, pady=5)
+		
 		
 		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)
 		self.troubles_button.pack(padx=20, pady=8)

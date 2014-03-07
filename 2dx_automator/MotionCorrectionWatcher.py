@@ -70,7 +70,6 @@ class MotionCorrectionWatcher(WatcherBase):
 			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.mrc" + " " + self.tmp_location + "/mc_ready.mrc --threed2threed"
 		else:
 			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.dm4" + " " + self.tmp_location + "/mc_ready.mrc --twod2threed"
-		print eman2_command 
 		os.system(eman2_command)
 		
 		old_path = os.getcwd()
@@ -85,14 +84,9 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 		motion_command = "motioncorr " + self.tmp_location + "/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)
 		
-		print self.storestack
-		print self.storelocation
-		
 		if self.storestack == 1 and self.storelocation != "-" and self.mode==0:
 			motion_command += " -ssc 1 -fct " + self.storelocation + "/" + filecorename + "_aligned.mrc"
-		
-		print motion_command
-		
+			
 		os.system(motion_command)
 		
 		if self.binning == 1:

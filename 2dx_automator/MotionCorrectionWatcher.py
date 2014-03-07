@@ -30,9 +30,11 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.storestack = 0
 		self.storelocation = "-"
 		self.tmp_location = "/tmp"
+		self.input_mode = 1
+		self.filter_string = ".mrc"
 	
 	def file_filter(self, filename):
-		return ((filename.endswith(".mrc")) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
+		return ((filename.endswith(self.filter_string)) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
 	
 	def getFileCoreName(self, filename):
 		return filename[:-4]
@@ -83,7 +85,11 @@ class MotionCorrectionWatcher(WatcherBase):
 		print motion_command
 		
 		os.system(motion_command)
-		shutil.copyfile(self.tmp_location + "/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+		
+		if self.binning == 1:
+			shutil.copyfile(self.tmp_location + "/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+		else:
+			shutil.copyfile(self.tmp_location + "/mc_ready_2x_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
 	
 		if self.mode == 1:
 			motion_command = "motioncorr " + self.tmp_location + "/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(0) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)	

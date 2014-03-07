@@ -129,8 +129,27 @@ class Auto2dxGUI(Frame):
 		
 	def runAutomation(self):
 		if not self.is_running:
+			
+			input_var = self.variable.get()
+			if input_var=="chose the input type":
+				tkMessageBox.showerror("Launch failed","Please select the input data type")
+				return
+			
 			if tkMessageBox.askyesno("Automation Launch", "Relaunching may take a while as all new images are processed!\n\nDo you want to continue?"):
 				self.status.configure(text="Automation starting up...", fg="orange")
+				
+				if input_var.startswith("4k"):
+					self.watcher.binning = 1
+				else:
+					self.watcher.binning = 2
+					
+				if input_var.endswith("MRC"):
+					self.watcher.input_mode = 1
+					self.watcher.filter_string = ".mrc"
+				else:
+					self.watcher.input_mode = 2
+					self.watcher.filter_string = ".dm4"
+				
 				self.parent.update()
 				time.sleep(2)
 				if self.watcher.restart():
@@ -456,7 +475,7 @@ class Auto2dxGUI(Frame):
 		self.variable = StringVar(self.centralleftframe)
 		self.variable.set("chose the input type") # default value
 
-		self.w = OptionMenu(self.centralleftframe, self.variable, "chose the input type", "4k MRC", "4k MRC (legacy mode)", "4k DM4", "8k MRC", "8k DM4")
+		self.w = OptionMenu(self.centralleftframe, self.variable, "chose the input type", "4k MRC", "4k DM4", "8k MRC", "8k DM4")
 		self.w.pack(pady=5)
 		
 		self.minframe = 2

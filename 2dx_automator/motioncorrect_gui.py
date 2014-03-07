@@ -503,37 +503,37 @@ class Auto2dxGUI(Frame):
 		## Export
 		self.export_location = "not set"
 		self.exportframe = Frame(self.centralleftframe, relief=RAISED, borderwidth=2)
-		self.exportframe.pack(pady=5)
+		self.exportframe.pack(pady=3)
 		self.export_location_label = Label(self.exportframe, text="Export Average Location:\n" + self.export_location, width=45)
-		self.export_location_label.pack(pady=5)
+		self.export_location_label.pack(pady=3)
 		tmp_frame = Frame(self.exportframe)
 		tmp_frame.pack()
 		self.change_export_location_button = Button(tmp_frame ,text='Change Export Location', width=18, command=self.changeExportLocation)
 		self.change_export_location_button.pack(side=LEFT, padx=5, pady=5)
 		self.export_button = Button(tmp_frame ,text='Export Average', width=12, command=self.exportImage)
-		self.export_button.pack(side=RIGHT, padx=5, pady=5)
+		self.export_button.pack(side=RIGHT, padx=5, pady=3)
 		self.line = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
-		self.line.pack(fill=X, padx=5, pady=5)
+		self.line.pack(fill=X, padx=5, pady=3)
 		
 		self.export_location_stack = "not set"
 		self.export_location_stack_label = Label(self.exportframe, text="Export Stack Location:\n" + self.export_location_stack, width=45)
-		self.export_location_stack_label.pack(pady=5)
+		self.export_location_stack_label.pack(pady=3)
 		tmp_frame2 = Frame(self.exportframe)
 		tmp_frame2.pack()
 		self.savestack = IntVar()
 		self.saveStackBox = Checkbutton(tmp_frame2, variable=self.savestack, text="Save aligned stack", command=self.saveStackModeChanged)
-		self.saveStackBox.pack(side=LEFT, padx=5, pady=5)
+		self.saveStackBox.pack(side=LEFT, padx=5, pady=3)
 		self.change_export_location_button = Button(tmp_frame2 ,text='Change Export Location', width=18, command=self.changeExportLocationStack)
-		self.change_export_location_button.pack(side=RIGHT, padx=5, pady=5)
+		self.change_export_location_button.pack(side=RIGHT, padx=5, pady=3)
 		
 		self.line2 = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
-		self.line2.pack(fill=X, padx=5, pady=5)
+		self.line2.pack(fill=X, padx=5, pady=3)
 		
 		self.tmp_location = "/tmp"
 		self.tmp_location_label = Label(self.exportframe, text="Temp Location:\n" + self.tmp_location, width=45)
-		self.tmp_location_label.pack(pady=5)
+		self.tmp_location_label.pack(pady=3)
 		self.change_tmp_location_button = Button(self.exportframe ,text='Change Temp Location', width=20, command=self.changeTempLocation)
-		self.change_tmp_location_button.pack(padx=5, pady=5)
+		self.change_tmp_location_button.pack(padx=5, pady=3)
 		
 		
 		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)
@@ -563,11 +563,15 @@ class Auto2dxGUI(Frame):
 			self.index_selected = index
 			self.indexChanged()
 			
-		self.reprocess_button = Button(self.lowleftframe ,text='Reprocess Image', width=40, command=self.reprocessImage)
-		self.reprocess_button.pack(padx=20, pady=5)
 		
-		self.reprocess_ALL_button = Button(self.lowleftframe ,text='Reprocess ALL Image', width=40, command=self.reprocessALLImage)
-		self.reprocess_ALL_button.pack(padx=20, pady=5)
+		helper_frame = Frame(self.lowleftframe)
+		helper_frame.pack()
+			
+		self.reprocess_button = Button(helper_frame ,text='Reprocess Image', width=20, command=self.reprocessImage)
+		self.reprocess_button.pack(padx=5, pady=5, side=LEFT)
+		
+		self.reprocess_ALL_button = Button(helper_frame ,text='Reprocess ALL Image', width=20, command=self.reprocessALLImage)
+		self.reprocess_ALL_button.pack(padx=5, pady=5, side=RIGHT)
 		
 		Label(self.centralleftframe, text=" ", height=2).pack()
 		

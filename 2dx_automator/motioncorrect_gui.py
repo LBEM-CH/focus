@@ -265,6 +265,7 @@ class Auto2dxGUI(Frame):
 		
 		filename = corename + ".mrc"
 		thread.start_new_thread(self.watcher.image_added, (filename, False,))
+		#self.watcher.image_added(filename, False)
 	
 	
 	def reprocessALLImage(self):
@@ -322,11 +323,26 @@ class Auto2dxGUI(Frame):
 			self.watcher.setFOD(self.fod)
 			
 	def changeExportLocation(self):
-		self.export_location = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory")
+		self.export_location = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory for average")
 		if len(self.export_location) == 0:
 			self.export_location = "not set"
-		self.export_location_label.configure(text="Export Location:\n" + self.export_location)
+		self.export_location_label.configure(text="Export AverageLocation:\n" + self.export_location)
 		
+	def changeExportLocationStack(self):
+		self.export_location_stack = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory for stack")
+		if len(self.export_location_stack) == 0:
+			self.export_location_stack = "not set"
+		self.export_location_stack_label.configure(text="Export Stack Location:\n" + self.export_location_stack)
+		self.watcher.storelocation = self.export_location_stack
+		
+	def changeTempLocation(self):
+		self.tmp_location = tkFileDialog.askdirectory(parent=self.parent, title="Select Temp Location (SSD)")
+		if len(self.tmp_location) == 0:
+			self.tmp_location = "/tmp"
+		self.tmp_location_label.configure(text="Temp Location:\n" + self.tmp_location)
+		self.watcher.tmp_location = self.tmp_location
+	
+	
 	def exportImage(self):
 		i = self.index_selected
 		image_name = self.watcher.getFileCoreName(self.image_names[i])
@@ -401,10 +417,15 @@ class Auto2dxGUI(Frame):
 			self.open_full_button.configure(state=DISABLED)
 		else:
 			self.open_full_button.configure(state=NORMAL)
+	
+	
+	def saveStackModeChanged(self):		
+		self.watcher.storestack = self.savestack.get()
 			
 	
 	def initUI(self):
-		self.parent.title("Motion Correction GUI (beta_5)")
+		self.parent.title("Motion Correction GUI (beta_6)")
+		self.parent.title("Motion Correction GUI (beta_6)")
 	
 		self.getFolders()
 		
@@ -494,15 +515,25 @@ class Auto2dxGUI(Frame):
 		self.line = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
 		self.line.pack(fill=X, padx=5, pady=5)
 		
-		self.export_location_label = Label(self.exportframe, text="Export Stack Location:\n" + self.export_location, width=45)
-		self.export_location_label.pack(pady=5)
+		self.export_location_stack = "not set"
+		self.export_location_stack_label = Label(self.exportframe, text="Export Stack Location:\n" + self.export_location_stack, width=45)
+		self.export_location_stack_label.pack(pady=5)
 		tmp_frame2 = Frame(self.exportframe)
 		tmp_frame2.pack()
 		self.savestack = IntVar()
-		self.saveStackBox = Checkbutton(tmp_frame2, variable=self.savestack, text="Save aligned stack", command=self.pairModeChanged)
+		self.saveStackBox = Checkbutton(tmp_frame2, variable=self.savestack, text="Save aligned stack", command=self.saveStackModeChanged)
 		self.saveStackBox.pack(side=LEFT, padx=5, pady=5)
-		self.change_export_location_button = Button(tmp_frame2 ,text='Change Export Location', width=18, command=self.changeExportLocation)
+		self.change_export_location_button = Button(tmp_frame2 ,text='Change Export Location', width=18, command=self.changeExportLocationStack)
 		self.change_export_location_button.pack(side=RIGHT, padx=5, pady=5)
+		
+		self.line2 = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
+		self.line2.pack(fill=X, padx=5, pady=5)
+		
+		self.tmp_location = "/tmp"
+		self.tmp_location_label = Label(self.exportframe, text="Temp Location:\n" + self.tmp_location, width=45)
+		self.tmp_location_label.pack(pady=5)
+		self.change_tmp_location_button = Button(self.exportframe ,text='Change Temp Location', width=20, command=self.changeTempLocation)
+		self.change_tmp_location_button.pack(padx=5, pady=5)
 		
 		
 		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)

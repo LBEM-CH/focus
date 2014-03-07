@@ -60,8 +60,17 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 		self.lock_compute.acquire()
 		time.sleep(3)
-		shutil.copyfile(self.infolder + "/" + filename, self.tmp_location + "/mc_tmp.mrc")
-		eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.mrc" + " " + self.tmp_location + "/mc_ready.mrc --threed2threed"
+		
+		if self.input_mode == 1:
+			shutil.copyfile(self.infolder + "/" + filename, self.tmp_location + "/mc_tmp.mrc")
+		else:
+			shutil.copyfile(self.infolder + "/" + filename, self.tmp_location + "/mc_tmp.dm4")
+		
+		if self.input_mode == 1:
+			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.mrc" + " " + self.tmp_location + "/mc_ready.mrc --threed2threed"
+		else:
+			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.dm4" + " " + self.tmp_location + "/mc_ready.mrc --twod2threed"
+		print eman2_command 
 		os.system(eman2_command)
 		
 		old_path = os.getcwd()

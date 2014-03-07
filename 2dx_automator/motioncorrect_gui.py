@@ -261,6 +261,12 @@ class Auto2dxGUI(Frame):
 	
 	
 	def reprocessOneImage(self, corename):
+		
+		input_var = self.variable.get()
+		if input_var=="chose the input type":
+			tkMessageBox.showerror("Launch failed","Please select the input data type")
+			return
+		
 		raw_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_RawFFT.gif"
 		corr_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrFFT.gif"
 		corr_img_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrSum.gif"
@@ -281,8 +287,20 @@ class Auto2dxGUI(Frame):
 		
 		if os.path.exists(plot_name):
 			os.remove(plot_name)
-		
-		filename = corename + ".mrc"
+			
+		if input_var.startswith("4k"):
+			self.watcher.binning = 1
+		else:
+			self.watcher.binning = 2
+			
+		if input_var.endswith("MRC"):
+			self.watcher.input_mode = 1
+			self.watcher.filter_string = ".mrc"
+		else:
+			self.watcher.input_mode = 2
+			self.watcher.filter_string = ".dm4"	
+
+		filename = corename + self.watcher.filter_string
 		thread.start_new_thread(self.watcher.image_added, (filename, False,))
 		#self.watcher.image_added(filename, False)
 	

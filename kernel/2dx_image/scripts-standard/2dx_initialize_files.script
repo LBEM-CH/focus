@@ -184,12 +184,23 @@ if ( ${movie_enable} == "y" ) then
   ${proc_2dx}/linblock "Movie Mode."
   if ( ! -e ${movie_stackname}) then
 	${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
-  else 
+  else
+	# Get the number of frames
 	e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
 	set movie_imagenumber_total = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
-	${proc_2dx}/linblock "Stack contains  ${movie_imagenumber_total} frames"
+	${proc_2dx}/linblock "Stack contains ${movie_imagenumber_total} frames"
 	echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
 	\rm tmp_stack_header.txt
+	
+	# Generate subfolder for frame images
+	set frame_folder = "frames"
+	if ( -e ${frame_folder}) then
+		\rm -rf ${frame_folder}
+	endif
+	\mkdir ${frame_folder}
+	
+	python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname}
+	
   endif
 else
   if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc) then

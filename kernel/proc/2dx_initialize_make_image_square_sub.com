@@ -6,13 +6,11 @@
 # It will also make sure the image size is an allowed product of small prime factors.
 #
 #
+set movie_verbose = 1
+#
 if ( ${new_mrc_created} == "y" ) then
   #
-  if ( ${movie_enable} == "y" ) then
-      set loc_imagename = ${movie_imagename}
-  else
-      set loc_imagename = ${nonmaskimagename}
-  endif  
+  set loc_imagename = ${nonmaskimagename}
   #
     setenv IN ${loc_imagename}.mrc
     set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
@@ -57,9 +55,6 @@ SCRATCH/TMPnewsize.mrc
 ${newsize}
 eot
       #
-      if (  ${movie_enable} != "y" ) then  
-        echo "# IMAGE-IMPORTANT: ${loc_imagename}.raw.mrc <Raw Image>"  >> LOGS/${scriptname}.results
-      endif
       \mv -f SCRATCH/TMPnewsize.mrc ${loc_imagename}.mrc
       #
       set sizeX = ${newsize}

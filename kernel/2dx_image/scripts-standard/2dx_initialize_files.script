@@ -188,6 +188,7 @@ if ( ${movie_enable} == "y" ) then
 	e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
 	set movie_imagenumber_total = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
 	${proc_2dx}/linblock "Stack contains  ${movie_imagenumber_total} frames"
+	echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
 	\rm tmp_stack_header.txt
   endif
 else

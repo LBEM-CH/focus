@@ -199,7 +199,7 @@ if ( ${movie_enable} == "y" ) then
 	endif
 	\mkdir ${frame_folder}
 	
-	python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname}
+	python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename}
 	
   endif
 else

@@ -66,6 +66,7 @@
 # DISPLAY: crop_histogram_percent
 # DISPLAY: crop_histogram_stdev
 # DISPLAY: SYN_Unbending
+# DISPLAY: movie_stackname
 # DISPLAY: movie_enable
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_imagenumber_touse
@@ -124,6 +125,7 @@ set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
 set SYN_Unbending = ""
 set movie_enable = ""
+set movie_stackname = ""
 set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 #
@@ -152,7 +154,6 @@ if ( x${MergeIWP}x == "x-1x" ) then
   echo "set MergeIWP = 1" >> LOGS/${scriptname}.results
 endif
 #
-set movie_verbose = 1
 #
 set testname = `echo ${imagename} | cut -c2-`
 set correct = 0
@@ -181,108 +182,9 @@ endif
 #
 if ( ${movie_enable} == "y" ) then
   ${proc_2dx}/linblock "Movie Mode."
-  #
-  if ( ! -e ${imagename}.00.mrc ) then
-    if ( ! -d SOURCE ) then
-      ${proc_2dx}/protest "directory SOURCE not existing."
-    endif
-    if ( ! -e SOURCE/${imagename}.00.mrc ) then
-      echo "dummy" > SOURCE/zzzzz27765.mrc
-      set lfilename = `ls -1 SOURCE/*.mrc | sort | head -n 1`
-      if ( ${lfilename} != "SOURCE/zzzzz27765.mrc" ) then
-        set filename = `echo ${filename} | cut -c2-`
-        ${proc_2dx}/linblock "Found file ${filename}."
-        set imagename = `echo ${filename} | cut -d\. -f1`
-      endif
-      if ( ! -e SOURCE/${imagename}.00.mrc ) then
-        ${proc_2dx}/linblock "Image SOURCE/${imagename}.00.mrc not existing."
-        ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
-        echo "#WARNING: Image SOURCE/${imagename}.00.mrc not existing."  >> LOGS/${scriptname}.results
-        echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
-      endif
-    endif
-    cp -f SOURCE/${imagename}.00.mrc .
-    echo "set imagename = ${imagename}"  >> LOGS/${scriptname}.results
-    set nonmaskimagename = ${imagename}
-    echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
-    set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
-    echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
-    \rm -f SOURCE/zzzzz27765.mrc
+  if ( ! -e ${movie_stackname}) then
+	${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
   endif
-  #################################################################################
-  ### Make input image square and correct size ####################################
-  echo ":: "
-  ${proc_2dx}/linblock "Testing correct size of input image."
-  set movie_imagename = ${nonmaskimagename}.00
-  set movie_verbose = 1
-  source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
-  #################################################################################
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Average Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Average Image>" >> LOGS/${scriptname}.results
-  set curnum = "1"
-  echo ":: "
-  while ( ${curnum} < ${movie_imagenumber_total} )
-    if ( ${curnum} < 10 ) then
-      set curnumtext = `echo 0${curnum}`
-    else
-      set curnumtext = ${curnum}
-    endif
-    set movie_imagename = ${nonmaskimagename}.${curnumtext}
-    \cp -f SOURCE/${movie_imagename}.mrc ${movie_imagename}.mrc
-    set movie_verbose = 0
-    source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
-    ${bin_2dx}/labelh.exe << eot
-${movie_imagename}.mrc
-17
-5.0
-3.0
-eot
-    echo " "
-    cat < labelh.tmp
-    echo " "
-    set imagemin     = `head -2 labelh.tmp | tail -1`
-    set imagemax     = `head -3 labelh.tmp | tail -1`
-    set imagemean    = `head -4 labelh.tmp | tail -1`
-    set imagestd     = `head -5 labelh.tmp | tail -1`
-    set imagegoodmin = `head -6 labelh.tmp | tail -1`
-    set imagegoodmax = `head -7 labelh.tmp | tail -1`
-    echo "::                                                         Min=${imagemin}, Max=${imagemax}, Mean=${imagemean}, STD=${imagestd}"
-    echo "# IMAGE-IMPORTANT: ${movie_imagename}.mrc <Non-Masked Image ${curnumtext}>" >> LOGS/${scriptname}.results
-    @ curnum += 1
-  end
-  #
-  #################################################################################
-  echo ":: "
-  ${proc_2dx}/linblock "Creating Average file."
-  #################################################################################
-  #
-  \rm -f ${nonmaskimagename}.mrc
-  ${bin_2dx}/labelh.exe << eot
-${nonmaskimagename}.01.mrc
-19
-${nonmaskimagename}.mrc
-${nonmaskimagename}
-${movie_imagenumber_touse}
-eot
-  #
-  ${bin_2dx}/labelh.exe << eot
-${nonmaskimagename}.mrc
-17
-5.0
-3.0
-eot
-  echo " "
-  cat < labelh.tmp
-  echo " "
-  set imagemin     = `head -2 labelh.tmp | tail -1`
-  set imagemax     = `head -3 labelh.tmp | tail -1`
-  set imagemean    = `head -4 labelh.tmp | tail -1`
-  set imagestd     = `head -5 labelh.tmp | tail -1`
-  set imagegoodmin = `head -6 labelh.tmp | tail -1`
-  set imagegoodmax = `head -7 labelh.tmp | tail -1`
-  echo "::                                                         Min=${imagemin}, Max=${imagemax}, Mean=${imagemean}, STD=${imagestd}"
-  \rm -f labelh.tmp
-  #
 else
   if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc) then
     #

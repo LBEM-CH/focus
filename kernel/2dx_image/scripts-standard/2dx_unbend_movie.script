@@ -1,0 +1,155 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Unbend Movie Mode                                                  #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 02/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# MANUAL: Movie mode unbending script
+#
+# MANUAL: 
+#
+# SORTORDER: 52
+#
+# DISPLAY: imagename
+# DISPLAY: imagesidelength 
+# DISPLAY: SYN_Unbending
+# DISPLAY: holeb
+# DISPLAY: maskb01
+# DISPLAY: maskb02
+# DISPLAY: maskb03
+# DISPLAY: maskb04
+# DISPLAY: maskb05
+# DISPLAY: boxb1
+# DISPLAY: boxb2
+# DISPLAY: quadradb
+# DISPLAY: facthreshb
+# DISPLAY: quadpredb
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: ALAT
+# DISPLAY: radlim
+# DISPLAY: domask
+# DISPLAY: ctf_ttf
+# DISPLAY: treatspotscan
+# DISPLAY: ctfplotresmax
+# DISPLAY: tempkeep
+# DISPLAY: refori
+# DISPLAY: createmaskinfo
+# DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
+# DISPLAY: IMAXCOR
+# DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: LCOLOR
+# DISPLAY: ccunbend_program
+#
+# DISPLAY: movie_stackname
+# DISPLAY: movie_enable
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: movie_imagenumber_touse
+#
+#$end_local_vars
+#
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SYN_Unbending = ""
+set PHASEORI_done = ""
+set boxb1 = ""
+set boxb2 = ""
+set quadradb = ""
+set imagename = ""
+set defocus = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set realcell = ""
+set lattice = ""
+set holeb = ""
+set maskb01 = ""
+set maskb02 = ""
+set maskb03 = ""
+set maskb04 = ""
+set maskb05 = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set ALAT = ""
+set quadpredb = ""
+set radlim = ""
+set realang = ""
+set treatspotscan = ""
+set facthresha = ""
+set phacon = ""
+set ctfplotresmax = ""
+set stepdigitizer = ""
+set CS = ""
+set KV = ""
+set domask = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set TANGL = ""
+set det_tilt = ""
+set ctf_ttf = ""
+set refori = ""
+set createmaskinfo = ""
+set ISTEP = ""
+set ISTEP_h = ""
+set IMAXCOR = ""
+set RMAG = ""
+set LCOLOR = ""
+set ccunbend_program = ""
+set RB_1 = ""
+set RB_2 = ""
+set RB_3 = ""
+set RB_4 = ""
+set RB_5 = ""
+set RB_6 = ""
+set RP_1 = ""
+set RP_2 = ""
+set RP_3 = ""
+set RP_4 = ""
+set RP_5 = ""
+set RP_6 = ""
+set movie_stackname = ""
+set movie_enable = ""
+set movie_imagenumber_total = ""
+set movie_imagenumber_touse = ""
+#
+#$end_vars
+#
+
+set ttfcorfirst = "n"
+
+set scriptname = 2dx_unbend_movie
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+#
+source ${proc_2dx}/initialize
+#
+set date = `date`
+echo date = ${date}
+#
+
+foreach f  (`ls frames`)
+	echo $f
+	\cp 2dx_image.cfg frames/$f/
+
+	#TODO
+	# call the first three scripts of 2dx_image here
+end
+
+

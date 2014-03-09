@@ -127,6 +127,7 @@ set movie_stackname = ""
 set movie_enable = ""
 set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
+set app_2dx_image = ""
 #
 #$end_vars
 #
@@ -144,12 +145,34 @@ set date = `date`
 echo date = ${date}
 #
 
+# Generate subfolder for frame images
+set frame_folder = "frames"
+if ( -e ${frame_folder}) then
+	\rm -rf ${frame_folder}
+endif
+\mkdir ${frame_folder}
+	
+python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename}
+
+#cp 2dx_image.cfg frames/2dx_master.cfg
+
 foreach f  (`ls frames`)
 	echo $f
 	\cp 2dx_image.cfg frames/$f/
-
-	#TODO
-	# call the first three scripts of 2dx_image here
+	python ${bin_2dx}/movie_mode_py/disable_movie.py  frames/$f/
 end
+
+foreach f  (`ls frames`)
+	${app_2dx_image} frames/$f/ "2dx_initialize"
+	${app_2dx_image} frames/$f/ "2dx_initialize_files"
+	${app_2dx_image} frames/$f/ "2dx_fftrans"
+end
+
+@ i = 1
+foreach f  (`ls frames`)
+	echo "# IMAGE: frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc <FFT Frame #${i}>" >> LOGS/${scriptname}.results
+	@ i += 1
+end
+
 
 

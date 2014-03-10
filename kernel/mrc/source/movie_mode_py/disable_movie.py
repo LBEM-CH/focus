@@ -10,10 +10,11 @@ if __name__ == "__main__":
 		sys.exit("Missuseage detected")
 
 	frame_folder = sys.argv[1]
+	print "disabling movie_mode for", frame_folder
 	
 	f = open(frame_folder + "2dx_image.cfg", 'r')
 	lines = []
-	
+		
 	for l in f:
 		if l.startswith("set movie_enable"):
 			lines.append('set movie_enable = "n"\n')

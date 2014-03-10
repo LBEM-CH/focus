@@ -157,7 +157,6 @@ python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmask
 #cp 2dx_image.cfg frames/2dx_master.cfg
 
 foreach f  (`ls frames`)
-	echo $f
 	\cp 2dx_image.cfg frames/$f/
 	python ${bin_2dx}/movie_mode_py/disable_movie.py  frames/$f/
 end

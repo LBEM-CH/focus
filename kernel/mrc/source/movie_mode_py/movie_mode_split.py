@@ -12,8 +12,6 @@ if __name__ == "__main__":
 	stack_file = sys.argv[1]
 	image_name = sys.argv[2]
 	
-	
-
 	stack = get_image(stack_file)
 	nx = stack.get_xsize()
 	ny = stack.get_ysize()

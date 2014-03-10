@@ -154,8 +154,6 @@ endif
 	
 python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename}
 
-#cp 2dx_image.cfg frames/2dx_master.cfg
-
 foreach f  (`ls frames`)
 	\cp 2dx_image.cfg frames/$f/
 	python ${bin_2dx}/movie_mode_py/disable_movie.py  frames/$f/
@@ -165,6 +163,21 @@ foreach f  (`ls frames`)
 	${app_2dx_image} frames/$f/ "2dx_initialize"
 	${app_2dx_image} frames/$f/ "2dx_initialize_files"
 	${app_2dx_image} frames/$f/ "2dx_fftrans"
+	${app_2dx_image} frames/$f/ "2dx_getspots1"
+	${app_2dx_image} frames/$f/ "2dx_unbend1"
+	${app_2dx_image} frames/$f/ "2dx_getspots"
+	
+	python ${bin_2dx}/movie_mode_py/enable_masking.py  frames/$f/
+	${app_2dx_image} frames/$f/ "2dx_unbend2"
+	python ${bin_2dx}/movie_mode_py/disable_masking.py  frames/$f/
+	
+	${app_2dx_image} frames/$f/ "2dx_fftrans"
+	${app_2dx_image} frames/$f/ "2dx_getspots1"
+	${app_2dx_image} frames/$f/ "2dx_unbend1"
+	${app_2dx_image} frames/$f/ "2dx_getspots"
+	${app_2dx_image} frames/$f/ "2dx_unbend2"
+	${app_2dx_image} frames/$f/ "2dx_applyCTF"
+	${app_2dx_image} frames/$f/ "2dx_generateMAP"
 end
 
 @ i = 1
@@ -173,5 +186,16 @@ foreach f  (`ls frames`)
 	@ i += 1
 end
 
+set qvalfile = "movie_qvals.txt"
+if ( -e ${qvalfile}) then
+	\rm -f ${qvalfile}
+endif
 
+@ i = 1
+foreach f  (`ls frames`)
+	python ${bin_2dx}/movie_mode_py/writeQVal2.py  ${i}
+	@ i += 1
+end
 
+python ${bin_2dx}/movie_mode_py/plotQVal2.py ${qvalfile} "qvals.pdf"
+echo "# IMAGE: qvals.pdf <QVal per frame number>" >> LOGS/${scriptname}.results

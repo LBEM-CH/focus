@@ -128,6 +128,7 @@ set movie_enable = ""
 set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 set app_2dx_image = ""
+set lincommand = ""
 #
 #$end_vars
 #
@@ -164,31 +165,57 @@ foreach f  (`ls frames`)
 	python ${bin_2dx}/movie_mode_py/disable_movie.py  frames/$f/
 end
 
+
+
+@ i = 1
 foreach f  (`ls frames`)
-	${app_2dx_image} frames/$f/ "2dx_initialize"
-	${app_2dx_image} frames/$f/ "2dx_initialize_files"
-	${app_2dx_image} frames/$f/ "2dx_fftrans"
 	
-	setenv IN  FFTIR/${imagename}.fft.mrc
-    setenv OUT SCRATCH/${imagename}.fft.msk.mrc
-    setenv SPOTS ${imagename}.spt
-    #
-    ${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT of the image"
+	${app_2dx_image} frames/frame_${i} "2dx_initialize"
+	${app_2dx_image} frames/frame_${i} "2dx_initialize_files"
+	${app_2dx_image} frames/frame_${i} "2dx_fftrans"
+
+	echo frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
+	
+	setenv IN  frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
+	setenv SPOTS ${imagename}.spt
+
+	set maskb = ${maskb02}
+	set rmax = 11000
     ${bin_2dx}/2dx_masktrana.exe << eot
-		1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
-		${maskb}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-		${lattice},-30,30,-30,30,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
-	eot
+	1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+	${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+	${lattice},-30,30,-30,30,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+
+	set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+	set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+	\rm -f frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
+	setenv IN1 frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
+	setenv IN2 SCRATCH/ref1${imagename}.fft.unbend2.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
+	${bin_2dx}/twofile.exe << eot
+		2 ! ICOMB = 2
+		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+eot
+	
+	/bin/rm -f frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
+	setenv IN frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
+	${bin_2dx}/2dx_fftrans.exe
+
 	
 #	python ${bin_2dx}/movie_mode_py/enable_masking.py  frames/$f/
 #	${app_2dx_image} frames/$f/ "2dx_unbend2"
 #	python ${bin_2dx}/movie_mode_py/disable_masking.py  frames/$f/
 	
+	@ i += 1
 end
+
 
 @ i = 1
 foreach f  (`ls frames`)
-	echo "# IMAGE: frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc <FFT Frame #${i}>" >> LOGS/${scriptname}.results
+	echo "# IMAGE: frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc <Corr #${i}>" >> LOGS/${scriptname}.results
 	@ i += 1
 end
 

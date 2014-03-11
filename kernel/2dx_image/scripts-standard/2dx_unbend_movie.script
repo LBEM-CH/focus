@@ -145,6 +145,11 @@ set date = `date`
 echo date = ${date}
 #
 
+if ( ${movie_enable} == "n" ) then
+  ${proc_2dx}/linblock "Skipping movie mode unbending."
+  exit
+endif
+
 # Generate subfolder for frame images
 set frame_folder = "frames"
 if ( -e ${frame_folder}) then
@@ -163,21 +168,22 @@ foreach f  (`ls frames`)
 	${app_2dx_image} frames/$f/ "2dx_initialize"
 	${app_2dx_image} frames/$f/ "2dx_initialize_files"
 	${app_2dx_image} frames/$f/ "2dx_fftrans"
-	${app_2dx_image} frames/$f/ "2dx_getspots1"
-	${app_2dx_image} frames/$f/ "2dx_unbend1"
-	${app_2dx_image} frames/$f/ "2dx_getspots"
 	
-	python ${bin_2dx}/movie_mode_py/enable_masking.py  frames/$f/
-	${app_2dx_image} frames/$f/ "2dx_unbend2"
-	python ${bin_2dx}/movie_mode_py/disable_masking.py  frames/$f/
+	setenv IN  FFTIR/${imagename}.fft.mrc
+    setenv OUT SCRATCH/${imagename}.fft.msk.mrc
+    setenv SPOTS ${imagename}.spt
+    #
+    ${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT of the image"
+    ${bin_2dx}/2dx_masktrana.exe << eot
+		1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+		${maskb}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+		${lattice},-30,30,-30,30,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+	eot
 	
-	${app_2dx_image} frames/$f/ "2dx_fftrans"
-	${app_2dx_image} frames/$f/ "2dx_getspots1"
-	${app_2dx_image} frames/$f/ "2dx_unbend1"
-	${app_2dx_image} frames/$f/ "2dx_getspots"
-	${app_2dx_image} frames/$f/ "2dx_unbend2"
-	${app_2dx_image} frames/$f/ "2dx_applyCTF"
-	${app_2dx_image} frames/$f/ "2dx_generateMAP"
+#	python ${bin_2dx}/movie_mode_py/enable_masking.py  frames/$f/
+#	${app_2dx_image} frames/$f/ "2dx_unbend2"
+#	python ${bin_2dx}/movie_mode_py/disable_masking.py  frames/$f/
+	
 end
 
 @ i = 1

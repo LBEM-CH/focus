@@ -27,9 +27,14 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.binning = 1
 		self.bfac = 150
 		self.mode = 0
+		self.storestack = 0
+		self.storelocation = "-"
+		self.tmp_location = "/tmp"
+		self.input_mode = 1
+		self.filter_string = ".mrc"
 	
 	def file_filter(self, filename):
-		return ((filename.endswith(".mrc")) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
+		return ((filename.endswith(self.filter_string)) and not (filename.endswith("_ready.mrc")) and not (filename.endswith("_ready_SumCorr.mrc")))
 	
 	def getFileCoreName(self, filename):
 		return filename[:-4]
@@ -55,12 +60,20 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 		self.lock_compute.acquire()
 		time.sleep(3)
-		shutil.copyfile(self.infolder + "/" + filename, "/tmp/mc_tmp.mrc")
-		eman2_command = "e2proc2d.py " + "/tmp/mc_tmp.mrc" + " " + "/tmp/mc_ready.mrc --threed2threed"
+		
+		if self.input_mode == 1:
+			shutil.copyfile(self.infolder + "/" + filename, self.tmp_location + "/mc_tmp.mrc")
+		else:
+			shutil.copyfile(self.infolder + "/" + filename, self.tmp_location + "/mc_tmp.dm4")
+		
+		if self.input_mode == 1:
+			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.mrc" + " " + self.tmp_location + "/mc_ready.mrc --threed2threed"
+		else:
+			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.dm4" + " " + self.tmp_location + "/mc_ready.mrc --twod2threed"
 		os.system(eman2_command)
 		
 		old_path = os.getcwd()
-		os.chdir("/tmp")
+		os.chdir(self.tmp_location)
 		
 		# introduce align to first 
 		
@@ -69,14 +82,24 @@ class MotionCorrectionWatcher(WatcherBase):
 		else:
 			align_to = 0
 		
-		motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)
+		motion_command = "motioncorr " + self.tmp_location + "/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(self.last_frame) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)
+		
+		if self.storestack == 1 and self.storelocation != "-" and self.mode==0:
+			motion_command += " -ssc 1 -fct " + self.storelocation + "/" + filecorename + "_aligned.mrc"
+			
 		os.system(motion_command)
-		shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+		
+		if self.binning == 1:
+			shutil.copyfile(self.tmp_location + "/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
+		else:
+			shutil.copyfile(self.tmp_location + "/mc_ready_2x_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
 	
 		if self.mode == 1:
-			motion_command = "motioncorr " + "/tmp/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(0) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)
+			motion_command = "motioncorr " + self.tmp_location + "/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(0) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)	
+			if self.storestack == 1 and self.storelocation != "-":
+				motion_command += " -fct " + self.storelocation
 			os.system(motion_command)
-			shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_fullaligned.mrc")
+			shutil.copyfile(self.tmp_location + "/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_fullaligned.mrc")
 	
 		os.chdir(old_path)
 		
@@ -84,67 +107,65 @@ class MotionCorrectionWatcher(WatcherBase):
 			os.makedirs(self.infolder + "/dosef_quick")
 		
 		if self.binning == 1:
-			#shutil.copyfile("/tmp/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
-			shutil.copyfile("/tmp/mc_ready_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
-			shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
-			shutil.copyfile("/tmp/dosef_quick/mc_ready_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
-			shutil.copyfile("/tmp/dosef_quick/mc_ready_RawFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_RawFFT.mrc")
+			shutil.copyfile(self.tmp_location + "/mc_ready_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
+			shutil.copyfile(self.tmp_location + "/dosef_quick/mc_ready_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
+			shutil.copyfile(self.tmp_location + "/dosef_quick/mc_ready_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
+			shutil.copyfile(self.tmp_location + "/dosef_quick/mc_ready_RawFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_RawFFT.mrc")
 			
 			try:
-				os.remove("/tmp/mc_ready_SumCorr.mrc")
+				os.remove(self.tmp_location + "/mc_ready_SumCorr.mrc")
 			except:
 				pass
 				
 			try:
-				os.remove("/tmp/mc_ready_Log.txt")
+				os.remove(self.tmp_location + "/mc_ready_Log.txt")
 			except:
 				pass
 				
 			try:
-				os.remove("/tmp/dosef_quick/mc_ready_CorrFFT.mrc")
+				os.remove(self.tmp_location + "/dosef_quick/mc_ready_CorrFFT.mrc")
 			except:
 				pass
 				
 			try:
-				os.remove("/tmp/dosef_quick/mc_ready_CorrSum.mrc")
+				os.remove(self.tmp_location + "/dosef_quick/mc_ready_CorrSum.mrc")
 			except:
 				pass
 				
 			try:
-				os.remove("/tmp/dosef_quick/mc_ready_RawFFT.mrc")
+				os.remove(self.tmp_location + "/dosef_quick/mc_ready_RawFFT.mrc")
 			except:
 				pass
 				
 				
 		else:
-			#shutil.copyfile("/tmp/mc_ready_2x_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
-			shutil.copyfile("/tmp/mc_ready_2x_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
-			shutil.copyfile("/tmp/dosef_quick/mc_ready_2x_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
-			shutil.copyfile("/tmp/dosef_quick/mc_ready_2x_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
-			shutil.copyfile("/tmp/dosef_quick/mc_ready_2x_RawFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_RawFFT.mrc")
+			shutil.copyfile(self.tmp_location + "/mc_ready_2x_Log.txt", self.infolder + "/" + filecorename + "_ready_Log.txt")
+			shutil.copyfile(self.tmp_location + "/dosef_quick/mc_ready_2x_CorrFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrFFT.mrc")
+			shutil.copyfile(self.tmp_location + "/dosef_quick/mc_ready_2x_CorrSum.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_CorrSum.mrc")
+			shutil.copyfile(self.tmp_location + "/dosef_quick/mc_ready_2x_RawFFT.mrc", self.infolder + "/dosef_quick/" + filecorename + "_ready_RawFFT.mrc")
 			
 			try:
-				os.remove("/tmp/mc_ready_2x_SumCorr.mrc")
+				os.remove(self.tmp_location + "/mc_ready_2x_SumCorr.mrc")
 			except:
 				pass
 				
 			try:
-				os.remove("/tmp/mc_ready_2x_Log.txt")
+				os.remove(self.tmp_location + "/mc_ready_2x_Log.txt")
 			except:
 				pass
 				
 			try:
-				os.remove("/tmp/dosef_quick/mc_ready_2x_CorrFFT.mrc")
+				os.remove(self.tmp_location + "/dosef_quick/mc_ready_2x_CorrFFT.mrc")
 			except:
 				pass
 				
 			try:
-				os.remove("/tmp/dosef_quick/mc_ready_2x_CorrSum.mrc")
+				os.remove(self.tmp_location + "/dosef_quick/mc_ready_2x_CorrSum.mrc")
 			except:
 				pass
 				
 			try:
-				os.remove("/tmp/dosef_quick/mc_ready_2x_RawFFT.mrc")
+				os.remove(self.tmp_location + "/dosef_quick/mc_ready_2x_RawFFT.mrc")
 			except:
 				pass
 		

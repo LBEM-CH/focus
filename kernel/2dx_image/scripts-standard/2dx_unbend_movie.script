@@ -241,7 +241,7 @@ frames/frame_${i}/${nonmaskimagename}_${i}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, UNBEND2, ${date}
-frames/frame_${i}/SCRATCH/cor${imagename}.notap.mrc
+frames/frame_${i}/SCRATCH/cor${nonmaskimagename}.notap.mrc
 UNBENT,PASS,2,${date}
 eot
 
@@ -255,15 +255,45 @@ eot
 		mv out.pdf frame_unbending.pdf
 	endif
 	
-	setenv IN  frames/frame_${i}/SCRATCH/cor${imagename}.notap.mrc
-	setenv OUT frames/frame_${i}/SCRATCH/cor${imagename}.mrc
+	setenv IN  frames/frame_${i}/SCRATCH/cor${nonmaskimagename}.notap.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/cor${nonmaskimagename}.mrc
 	${bin_2dx}/2dx_taperedgek.exe << eot
 		30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
 
-	setenv IN  frames/frame_${i}/SCRATCH/cor${imagename}.mrc
-	setenv OUT frames/frame_${i}/SCRATCH/cor${imagename}.fft.mrc
+	setenv IN  frames/frame_${i}/SCRATCH/cor${nonmaskimagename}.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/cor${nonmaskimagename}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
+	
+	${bin_2dx}/2dx_mmboxa.exe << eot
+frames/frame_${i}/SCRATCH/cor${nonmaskimagename}.fft.mrc
+${imagenumber} ${nonmaskimagename}_${i}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+frames/frame_${i}/APH/${nonmaskimagename}.fou.nolimit.aph
+SCRATCH/TMP9873.dat
+U2
+${refposix},${refposiy}           ! XORIG,YORIG
+200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
+
+	${bin_2dx}/2dx_mmboxa.exe << eot
+frames/frame_${i}/SCRATCH/cor${nonmaskimagename}.fft.mrc
+${imagenumber} ${nonmaskimagename}_${i}, Unbend2, ${date}
+Y				! Use grid units?
+Y				! Generate grid from lattice?
+N				! Generate points from lattice?
+2,2,0,50,50,19,19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+frames/frame_${i}/APH/${nonmaskimagename}.fou.limit.aph
+SCRATCH/TMP9882.dat
+U2
+${refposix},${refposiy}		! XORIG,YORIG
+${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}				! Lattice vectors
+eot
 	
 #	python ${bin_2dx}/movie_mode_py/enable_masking.py  frames/$f/
 #	${app_2dx_image} frames/$f/ "2dx_unbend2"

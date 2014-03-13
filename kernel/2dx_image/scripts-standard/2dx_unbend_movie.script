@@ -165,6 +165,8 @@ foreach f  (`ls frames`)
 	python ${bin_2dx}/movie_mode_py/disable_movie.py  frames/$f/
 end
 
+\rm -f frame_unbending.pdf
+\touch frame_unbending.pdf
 
 
 @ i = 1
@@ -203,7 +205,65 @@ eot
 	setenv IN frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
 	${bin_2dx}/2dx_fftrans.exe
+	
+	\rm -f frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
+	\rm -f SPIDERCOORD.spi
+    setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+    setenv PROFDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
+    setenv ERRORS   SCRATCH/errout${imagename}.dat
 
+	set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
+	set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
+	set valspotscan = '0'
+	set createmask = '0'
+	${bin_2dx}/2dx_quadserchk-2.exe << eot
+2,${quadpredb}                     ! IPASS,NRANGE
+frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! create manual Masking information (0=n,1=y)
+0                               ! Dont mask the image directly
+eot
+
+	setenv CCORDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
+	setenv TABLEOUT frames/frame_${i}/SCRATCH/ccunbend-table-${nonmaskimagename}.dat
+	set ITYPE = 0
+	set ROFFSET = 50.0
+	set NNUM = 6
+	${bin_2dx}/2dx_ccunbendk.exe << eot
+frames/frame_${i}/${nonmaskimagename}_${i}.mrc
+${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+${imagename}, UNBEND2, ${date}
+frames/frame_${i}/SCRATCH/cor${imagename}.notap.mrc
+UNBENT,PASS,2,${date}
+eot
+
+	if ( ${i} == '1' ) then
+		ps2pdf CCPLOT.PS frame_unbending.pdf
+		pdftk A=frame_unbending.pdf cat A2 output out.pdf
+		mv out.pdf frame_unbending.pdf
+	else
+		ps2pdf CCPLOT.PS ccplot.pdf
+		pdftk A=frame_unbending.pdf B=ccplot.pdf cat A1-end B2 output out.pdf
+		mv out.pdf frame_unbending.pdf
+	endif
+	
+	setenv IN  frames/frame_${i}/SCRATCH/cor${imagename}.notap.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/cor${imagename}.mrc
+	${bin_2dx}/2dx_taperedgek.exe << eot
+		30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+eot
+
+	setenv IN  frames/frame_${i}/SCRATCH/cor${imagename}.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/cor${imagename}.fft.mrc
+	${bin_2dx}/2dx_fftrans.exe
 	
 #	python ${bin_2dx}/movie_mode_py/enable_masking.py  frames/$f/
 #	${app_2dx_image} frames/$f/ "2dx_unbend2"
@@ -215,7 +275,7 @@ end
 
 @ i = 1
 foreach f  (`ls frames`)
-	echo "# IMAGE: frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc <Corr #${i}>" >> LOGS/${scriptname}.results
+	echo "# IMAGE: frames/frame_${i}/SCRATCH/cor${imagename}.fft.mrc <Unbent FFT #${i}>" >> LOGS/${scriptname}.results
 	@ i += 1
 end
 

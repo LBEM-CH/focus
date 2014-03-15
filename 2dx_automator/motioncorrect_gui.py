@@ -530,7 +530,7 @@ class Auto2dxGUI(Frame):
 		self.modebox = Checkbutton(self.centralleftframe, variable=self.modevar, text="Dose pair mode", command=self.pairModeChanged)
 		self.modebox.pack(pady=4)
 		
-		Label(self.centralleftframe, text=" ", height=1).pack()
+		#Label(self.centralleftframe, text=" ", height=1).pack()
 		
 		## Export
 		self.export_location = "not set"
@@ -571,7 +571,7 @@ class Auto2dxGUI(Frame):
 		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)
 		self.troubles_button.pack(padx=20, pady=8)
 		
-		Label(self.centralleftframe, text=" ", height=1).pack()
+		#Label(self.centralleftframe, text=" ", height=1).pack()
 		
 		self.image_count_label = Label(self.centralleftframe, text="Images")
 		self.image_count_label.pack()

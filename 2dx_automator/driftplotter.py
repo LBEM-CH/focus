@@ -17,7 +17,7 @@ watcher = MotionCorrectionWatcher(1,2,3,4,5)
 print filename
 print watcher.getFileCoreName(filename)
 print outfolder
-log_motion_file = outfolder + "/dosef_quick" + watcher.getFileCoreName(filename) + "_ready_Log.txt"
+log_motion_file = outfolder + "/dosef_quick/" + watcher.getFileCoreName(filename) + "_ready_Log.txt"
 print log_motion_file
 content = read_text_row(log_motion_file)
 

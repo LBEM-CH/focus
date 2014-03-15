@@ -224,7 +224,7 @@ end
 
 
 @ i = 1
-while ($i <= 20)
+while ($i <= ${movie_imagenumber_touse})
 	
 	${app_2dx_image} frames/frame_${i} "2dx_initialize"
 	${app_2dx_image} frames/frame_${i} "2dx_initialize_files"
@@ -349,257 +349,10 @@ ${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,
 ${lattice}				! Lattice vectors
 eot
 
-	#set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 } else { s = 0.3 } } END { print s }'`
-	set RESPLOTMAX = 0.3
-
-	setenv IN  frames/frame_${i}/APH/${nonmaskimagename}.fou.nolimit.aph
-	setenv OUT frames/frame_${i}/APH/${nonmaskimagename}.fou.ctf.nolimit.aph
-	${bin_2dx}/2dx_ctfapplyk.exe << eot
-${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
-${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${nonmaskimagename}_${i}, ${date}
-${phacon}
-${RESMIN},1.0
-eot
-
-	setenv IN  frames/frame_${i}/APH/${nonmaskimagename}.fou.limit.aph
-	setenv OUT frames/frame_${i}/APH/${nonmaskimagename}.fou.ctf.limit.aph
-	${bin_2dx}/2dx_ctfapplyk.exe << eot
-${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
-${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${nonmaskimagename}_${i}, ${date}
-${phacon}
-${RESMIN},${RESMAX}
-eot
-	
-	if ( ${i} == '1' ) then
-		ps2pdf CTFPLOT.PS frame_ctf.pdf
-		pdftk A=frame_ctf.pdf cat A1 output out.pdf
-		mv out.pdf frame_ctf.pdf
-	else
-		ps2pdf CTFPLOT.PS ctfplot.pdf
-		pdftk A=frame_ctf.pdf B=ctfplot.pdf cat A1-end B1 output out.pdf
-		mv out.pdf frame_ctf.pdf
-	endif
-	
-	if ( ${rot180} == 'y' ) then
-		set rot180val = '1'
-	else
-		set rot180val = '0'
-	endif
-
-	if ( ${rot90} == 'y' ) then
-		set rot90val = '1'
-	else
-		set rot90val = '0'
-	endif
-
-	if ( ${revhk} == 'y' ) then
-		set revhkval = '1'
-	else
-		set revhkval = '0'
-	endif
-
-	if ( ${revhnd} == 'y' ) then
-		set revhndval = '1'
-	else
-		set revhndval = '0'
-	endif
-
-	if ( ${ctfrev} == 'y' ) then
-		set ctfrevval = '1'
-	else
-		set ctfrevval = '0'
-	endif
-
-	echo sgnxch = ${sgnxch}
-	if ( ${sgnxch} == "y" ) then
-		set sgnxchval = 1
-		set phaorix = `echo ${phaori_local} | cut -d\, -f1 `
-		set phaoriy = `echo ${phaori_local} | cut -d\, -f2 | awk '{ s = -$1 } END { print s }'`
-		set phaori_local = `echo ${phaorix},${phaoriy}`
-	else
-		set sgnxchval = 0
-	endif
-
-	echo revxsgn = ${revxsgn}
-	if ( ${revxsgn} == "y" ) then
-		set revxsgnval = 1
-		set phaorix = `echo ${phaori_local} | cut -d\, -f1 | awk '{ s = -$1 } END { print s }'`
-		set phaoriy = `echo ${phaori_local} | cut -d\, -f2 `
-		set phaori_local = `echo ${phaorix},${phaoriy}`
-	else
-		set revxsgnval = 0
-	endif
-
-	set SCL = 1
-	echo "SCL = ${SCL}"
-	set phastep = 0.1
-	set scl = 1
-	set zwinlocal = 0.5
-	set phaori_local = ${phaori}
-
-	set ampweight = 0.5
-	set aphdummy = ${proc_2dx}/dummy.aph
-	
-	set aphdummy = ${proc_2dx}/dummy.aph
-	set aphfile = frames/frame_${i}/APH/${nonmaskimagename}.fou.ctf.limit.aph
-	
-	\rm -f frames/frame_${i}/SCRATCH/2dx_origtilt-LOG1.dat
-	\rm -f 2dx_origtiltk-console.log
-	
-	${bin_2dx}/2dx_origtiltk.exe << eot
-frames/frame_${i}/SCRATCH/2dx_origtilt-LOG1.dat
-${spcgrp_first},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT}
-10,0.7,10,0.5
-${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${ampweight}
-0000000100 DUMMY
-${aphdummy}
-${imagenumber}, ${nonmaskimagename}_${i}, ${date}
-${aphfile}
-F
-${TAXA},${TANGL},0                                                  ! TAXA,TANGL,IORIGT
-${lattice} 					! Reciprocal lattice
-${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT,REV,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL
-${CS},${KV},${beamtilt}                                                ! cs,kv,tx,ty
-${RESMIN},${RESMAX}                                                 ! resolution limits
--1
-eot
-
-	cp fort.3  frames/frame_${i}/APH/
-
-	\cp -f fort.3 fort.1
-	\rm -f fort.2
-	\rm -f fort.3
-	\rm -f fort.4
-	\rm -f TMP444888.tmp
-		
-	set zminmax = "-0.5,0.5"
-	${bin_2dx}/avrgamphs.exe << eot
-T
-${imagenumber},${zminmax}
-8
-${realcell} ${realang}
-eot
-
-	set prefix = ""
-
-	\rm -f fort.1
-	\mv -f fort.2 ${prefix}avrg.hkl
-	\mv -f fort.3 ${prefix}avrg.hk
-	\mv -f fort.4 APH/${prefix}ctfmerge.nolimit.aph
-	\rm -f TMP444888.tmp
-	
-	
-	set SYM_sub = 'p1'
-	
-	\rm -f ${prefix}centric.hkl
-	\rm -f ${prefix}centric.hk
-	\rm -f ${prefix}centric_phase_zero.hkl
-	
-	${bin_2dx}/2dx_centric3.exe << eot
-${prefix}avrg.hkl
-${prefix}centric.hkl
-${prefix}centric.hk
-${prefix}centric_phase_zero.hkl
-${realcell},${realang}
-${RESMIN},${RESMAX}
-${SYM_sub}
-eot
-
-	set CCP4_SYM = "1"
-	set prename = ""
-	set infile = ${prefix}centric_phase_zero.hkl
-	${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}.mtz << eof
-TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
-LABOUT H K L F PHI FOM
-CTYPOUT H H H F P W
-FILE ${infile}
-SKIP 1
-END
-eof
-
-	${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}_phase_zero.mtz << eof
-TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}_phase_zero, ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
-LABOUT H K L F PHI FOM
-CTYPOUT H H H F P W
-FILE ${infile}
-SKIP 1
-END
-eof
-
-
-	${bin_ccp4}/mtzdump hklin ${prefix}${imagename}.mtz << eot > mtzdump.txt
-NREF 100
-END
-eot
-
-	set AXIS = "X,Y,Z"
-	set scale = 1
-    ${bin_ccp4}/fft hklin ${prefix}${imagename}_phase_zero.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
-LABIN F1=F PHI=PHI ##
-PROJECTION
-AXIS ${AXIS}
-SCALE F1 ${scale} ${tempfac}
-RESOLUTION ${RESMIN} ${RESMAX}
-TITLE Sym=${SYM_sub}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID 200 200 20
-XYZLIM 0 199 0 199 0 0
-RHOLIM 250.0
-HKLMAX 50 50 50
-END
-eot
-
-	${bin_ccp4}/fft hklin ${prefix}${imagename}.mtz mapout SCRATCH/scratch1.map  << eot
-LABIN F1=F PHI=PHI ##
-PROJECTION
-AXIS ${AXIS}
-SCALE F1 ${scale} ${tempfac}
-RESOLUTION ${RESMIN} ${RESMAX}
-TITLE Sym=${SYM_sub}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID 200 200 20
-XYZLIM 0 199 0 199 0 0
-RHOLIM 250.0
-HKLMAX 50 50 50
-END
-eot
-
-
-	${bin_ccp4}/mapmask mapin SCRATCH/scratch1_phase_zero.map mapout SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map << eof
-MODE mapin
-XYZLIM -0.3 0.3 -0.3 0.3 -0.0 0.0
-END
-eof
-
-
-	${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/${prefix}${imagename}-${SYM_sub}.map << eof
-XYZLIM 0 399 0 399 0 0
-END
-eof
-
-	${bin_2dx}/labelh.exe << eot
-SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map 
-2
-${prefix}${imagename}_phase_zero-${SYM_sub}.mrc
-1,0
-0
-eot
-
-
-	${bin_2dx}/labelh.exe << eot
-SCRATCH/${prefix}${imagename}-${SYM_sub}.map 
-2
-${prefix}${imagename}-${SYM_sub}.mrc
-1,0
-0
-eot
-
-	 \cp -f final_map.mrc frames/frame_${i}/final_map_FouFilter.mrc
-
+	#if ( ${i} == '1' ) then
+	#	cp frames/frame_${i}/APH/${nonmaskimagename}.fou.limit.aph APH/${imagename}.fou.limit.aph
+	#	cp frames/frame_${i}/APH/${nonmaskimagename}.fou.nolimit.aph APH/${imagename}.fou.nolimit.aph
+	#endif
 	
 #	python ${bin_2dx}/movie_mode_py/enable_masking.py  frames/$f/
 #	${app_2dx_image} frames/$f/ "2dx_unbend2"
@@ -608,10 +361,15 @@ eot
 	@ i += 1
 end
 
+python ${bin_2dx}/movie_mode_py/aveAHP.py ${nonmaskimagename} 1 1 ${movie_imagenumber_touse}
+python ${bin_2dx}/movie_mode_py/aveAHP.py ${nonmaskimagename} 2 1 ${movie_imagenumber_touse}
+
+mv frame.limit.aph APH/${imagename}.fou.limit.aph
+mv frame.nolimit.aph APH/${imagename}.fou.nolimit.aph
 
 @ i = 1
 foreach f  (`ls frames`)
-	echo "# IMAGE: frames/frame_${i}/final_map_FouFilter.mrc <Map #${i}>" >> LOGS/${scriptname}.results
+	#echo "# IMAGE: frames/frame_${i}/final_map_FouFilter.mrc <Map #${i}>" >> LOGS/${scriptname}.results
 	@ i += 1
 end
 

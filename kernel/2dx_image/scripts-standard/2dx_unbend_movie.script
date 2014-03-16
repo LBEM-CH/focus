@@ -56,23 +56,6 @@
 # DISPLAY: movie_enable
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_imagenumber_touse
-
-# DISPLAY: zwinlocal
-# DISPLAY: sgnxch
-# DISPLAY: SCL
-# DISPLAY: rot180
-# DISPLAY: revhk
-# DISPLAY: ctfrev
-# DISPLAY: rot90
-# DISPLAY: revhnd
-# DISPLAY: revxsgn
-# DISPLAY: MergeIQMAX
-# DISPLAY: ampweight
-# DISPLAY: TAXA
-# DISPLAY: TANGL
-# DISPLAY: phastep
-# DISPLAY: phaori
-# DISPLAY: tempfac
 #
 #$end_local_vars
 #
@@ -145,45 +128,10 @@ set movie_enable = ""
 set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 set app_2dx_image = ""
-set beamtilt = ""
-set plotres_rings = ""
-set tempfac = ""
-
-
-set phaori = "" 
-set sgnxch = ""
-set rot180 = ""
-set revhk = ""
-set ctfrev = ""
-set rot90 = ""
-set revhnd = ""
-set revxsgn = ""
-set MergeIQMAX = ""
-set ampweight = ""
-set TAXA = ""
-set TANGL = ""
 #
 #$end_vars
 #
 
-
-set spcgrp_first = 1
-set IAQP2 = 0
-set IVERBOSE = 1
-set LOGOUTPUT = F
-set LPROTFOUFIL = T
-set phastepnum = 1
-set phastep = 0.1
-
-if ( ${rot90} == 'y' ) then
-  set rot90val = '1'
-else
-  set rot90val = '0'
-endif
-
-
-
-set ttfcorfirst = "n"
 
 set scriptname = 2dx_unbend_movie
 \rm -f LOGS/${scriptname}.results
@@ -368,8 +316,15 @@ mv frame.limit.aph APH/${imagename}.fou.limit.aph
 mv frame.nolimit.aph APH/${imagename}.fou.nolimit.aph
 
 @ i = 1
-foreach f  (`ls frames`)
-	#echo "# IMAGE: frames/frame_${i}/final_map_FouFilter.mrc <Map #${i}>" >> LOGS/${scriptname}.results
+while ($i <= ${movie_imagenumber_touse})
+	echo  "# IMAGE: frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc <Raw FFT #${i}>" >> LOGS/${scriptname}.results
+	@ i += 1
+end
+
+
+@ i = 1
+while ($i <= ${movie_imagenumber_touse})
+	echo  "# IMAGE: frames/frame_${i}/SCRATCH/cor${nonmaskimagename}.fft.mrc <Corr FFT #${i}>" >> LOGS/${scriptname}.results
 	@ i += 1
 end
 
@@ -384,5 +339,8 @@ foreach f  (`ls frames`)
 	@ i += 1
 end
 
-python ${bin_2dx}/movie_mode_py/plotQVal2.py ${qvalfile} "qvals.pdf"
-echo "# IMAGE: qvals.pdf <QVal per frame number>" >> LOGS/${scriptname}.results
+pdf2ps frame_unbending.pdf frame_unbending.ps
+echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results
+
+
+

@@ -1,6 +1,8 @@
 from EMAN2 import *
 from sparx import *
 
+import math
+
 import os
 
 
@@ -32,17 +34,20 @@ if __name__ == "__main__":
 	data_out = []
 	data_out.append(data[0][0])
 	
+	drad = 3.141592654/180.0
+	
 	for i in range(1,len(data[0])):
-		sum_A = 0
-		sum_P = 0
-		sum_B = 0
-		sum_W = 0
+		sum_A = 0.0
+		sum_Aw = 0.0
+		sum_sin = 0.0
+		sum_cos = 0.0
+		sum_P = 0.0
+		counter = 0.0
 		for j in range(starting-1, ending):
 			line = data[j][i].split()
 			if j==1:
 				H = line[0]
 				K = line[1]
-				IQ = line[4]
 				
 			iq = int(line[4])
 			if iq < 9:
@@ -50,22 +55,33 @@ if __name__ == "__main__":
 			else:
 				w = 0
 			
-			sum_A += w*float(line[2])
-			sum_P += w*float(line[3])
-			sum_B += w*float(line[5])
-			sum_W += w
+			back = float(line[5])
+			sum_A += float(line[2]) * 1.0/back
+			sum_Aw += 1.0/back
 			
-		if sum_W > 0:
-			sum_A /= float(sum_W)	
-			sum_P /= float(sum_W)	
-			sum_B /= float(sum_W)
-		else:
-			sum_A = 0	
-			sum_P = 0	
-			sum_B = 0
+			ang = drad * float(line[3])
+			cosang = cos(ang)
+			sinang = sin(ang)
+			
+			sum_sin += w * sinang
+			sum_cos += w * cosang
+			sum_P += w
+			
+			counter += 1
+			
+		AMP = sum_A / sum_Aw
+		AVRGANG = math.atan2(sum_sin, sum_cos)
+		COMBPHASE = AVRGANG / drad
+
+		tmp = sum_Aw / float(counter)
+		BACK = 1.0 / tmp
 		
-		IQ = 1
-		line_out = H + '\t' + K + '\t' + str(sum_A) + '\t' + str(sum_P) + '\t' + "1" + '\t' + str(sum_B) + '\t' + "0.0" + "\n"
+		if AMP < 0.001:
+			IQ = 9
+		else:
+			IQ = 1 + int(BACK/(AMP + 1))
+		
+		line_out = H + '\t' + K + '\t' + str(round(AMP,1)) + '\t' + str(round(COMBPHASE)) + '\t' + str(IQ) + '\t' + str(round(BACK,1)) + '\t' + "0.0" + "\n"
 		data_out.append(line_out)
 		
 	

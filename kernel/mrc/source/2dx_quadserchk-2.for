@@ -1176,6 +1176,9 @@ C
 C
       COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
       DIMENSION ALINE(LMAX),TITLE(20),NXYZ(3),MXYZ(3)
+      DIMENSION NXYZIPIC(3),MXYZIPIC(3)
+      EQUIVALENCE (NCOLIPIC,NXYZIPIC(1)),(NLINEIPIC,NXYZIPIC(2))
+
       DIMENSION NXYZST(3)
       DIMENSION LABELS(20,10)
 C
@@ -1211,6 +1214,10 @@ C
       read(*,'(I10)')icontrol
       print *,' icontrol= ',icontrol
 C
+      write(6,'(/,'' use external masking template (0=no, 1=yes)'')')
+      read(*,'(I10)')iexternmask
+      print *,' iexternmask= ',iexternmask
+C
       if(icontrol.le.0)then
         IPICSIZ=256
       else
@@ -1229,6 +1236,10 @@ C
       SPLOT=SIZE/NXYZ(1)
       SIZEX=SPLOT*NXYZ(1)
       SIZEY=SPLOT*NXYZ(2)
+C
+C======================================
+      IF(iexternmask.eq.1)goto 555
+C======================================
 C
 C-----Get PEAKMAX and its position
 C
@@ -1352,6 +1363,20 @@ C
       write(FILENAM(1:80),'(''TMP-quadserch-7.mrc'')')
       if(icontrol.ne.0)CALL PICWRI(IPICT2,FILENAM,TEXT,IPICDI2,IPICDI2)
 C
+C======================================
+      goto 556
+555   continue
+      write(FILENAM(1:80),'(''TMP-quadserch-7.mrc'')')
+      CALL IMOPEN(1,FILENAM,'RO')
+      CALL IRDHDR(1,NXYZIPIC,MXYZIPIC,MODEIPIC,DMINIPIC,DMAXIPIC,DMEANIPIC)
+      CALL IMPOSN(1,0,0)
+      NCOLPIC=NXYZIPIC(1)
+      NLINEPIC=NXYZIPIC(2)
+      CALL IRDPAS(1,IPICT2,NCOLIPIC,NLINEIPIC,0,NCOLIPIC-1,0,NLINEIPIC-1,*9400)
+      CALL IMCLOSE(1)      
+556   continue
+C======================================
+
 C-----mask the original image with this pattern
 C
       CALL IMOPEN(1,INFILE,'RO')
@@ -1436,6 +1461,10 @@ C
 C
  999  continue
       RETURN
+C
+9400   WRITE(6,9013)
+9013   FORMAT(':: Error reading mask TMP-quadserch-7.mrc')
+       STOP
 C
       END
 C

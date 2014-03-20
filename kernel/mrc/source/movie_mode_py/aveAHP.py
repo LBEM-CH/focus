@@ -42,12 +42,12 @@ if __name__ == "__main__":
 		sum_sin = 0.0
 		sum_cos = 0.0
 		sum_P = 0.0
+		sum_Back = 0.0
 		counter = 0.0
 		for j in range(starting-1, ending):
 			line = data[j][i].split()
-			if j==1:
-				H = line[0]
-				K = line[1]
+			H = line[0]
+			K = line[1]
 				
 			iq = int(line[4])
 			if iq < 9:
@@ -56,30 +56,50 @@ if __name__ == "__main__":
 				w = 0
 			
 			back = float(line[5])
-			sum_A += float(line[2]) * 1.0/back
-			sum_Aw += 1.0/back
 			
-			ang = drad * float(line[3])
-			cosang = cos(ang)
-			sinang = sin(ang)
 			
-			sum_sin += w * sinang
-			sum_cos += w * cosang
-			sum_P += w
+			amp = float(line[2])
+			r = sqrt(float(H)**2 + float(K)**2)
+			amp = amp * exp(-0.12*r)
 			
-			counter += 1
+			if amp>0.0001:
+				sum_A += amp * amp/back
+				sum_Aw += amp/back
+				sum_Back += 1.0 / back
+				counter += 1
+				
+				ang = drad * float(line[3])
+				cosang = cos(ang)
+				sinang = sin(ang)
+				
+				w = amp/back
+				
+				sum_sin += w * sinang
+				sum_cos += w * cosang
+				sum_P += w
 			
-		AMP = sum_A / sum_Aw
+			
+			
+		if sum_A > 0.0:
+			AMP = sum_A / sum_Aw
+		else:
+			AMP = 0
+			
 		AVRGANG = math.atan2(sum_sin, sum_cos)
 		COMBPHASE = AVRGANG / drad
 
-		tmp = sum_Aw / float(counter)
-		BACK = 1.0 / tmp
+		if counter>0:
+			tmp = sum_Back / sqrt(float(counter))
+			BACK = 1.0 / tmp
+		else:
+			BACK = 0.0
 		
 		if AMP < 0.001:
 			IQ = 9
 		else:
-			IQ = 1 + int(BACK/(AMP + 1))
+			PHSERR = (BACK/AMP)
+			IQ = 1 + int(7*PHSERR)
+			IQ = min(IQ,8)
 		
 		line_out = H + '\t' + K + '\t' + str(round(AMP,1)) + '\t' + str(round(COMBPHASE)) + '\t' + str(IQ) + '\t' + str(round(BACK,1)) + '\t' + "0.0" + "\n"
 		data_out.append(line_out)

@@ -24,7 +24,7 @@ if __name__ == "__main__":
 		folder_name = "frames/frame_" + str(i+1)
 		output_name = folder_name + "/" + image_name + "_" + str(i+1) + ".mrc"
 		
-		print "Slitting frame", i+1, "into", output_name
+		print "Splitting frame", i+1, "into", output_name
 		
 		os.mkdir(folder_name)   
 		image = stack.get_clip(Region(0,0,i,nx,ny,1))

@@ -95,7 +95,7 @@ class MotionCorrectionWatcher(WatcherBase):
 			shutil.copyfile(self.tmp_location + "/mc_ready_2x_SumCorr.mrc", self.outfolder + "/" + filecorename + "_aligned.mrc")
 	
 		if self.mode == 1:
-			motion_command = "motioncorr " + self.tmp_location + "/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(0) + " -fod " + str(self.fod) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)	
+			motion_command = "motioncorr " + self.tmp_location + "/mc_ready.mrc" + " -nst " + str(self.first_frame) + " -ned " + str(0) + " -fod " + str(15) + " -bin " + str(self.binning) + " -bft " + str(self.bfac) + " -atm " + str(align_to)	
 			if self.storestack == 1 and self.storelocation != "-":
 				motion_command += " -fct " + self.storelocation
 			os.system(motion_command)

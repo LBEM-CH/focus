@@ -57,6 +57,10 @@
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_imagenumber_touse
 # DISPLAY: movie_masking_mode
+# DISPLAY: movie_show_fftraw
+# DISPLAY: movie_show_fftcorr
+# DISPLAY: movie_show_frame
+# DISPLAY: movie_show_cc
 #
 #$end_local_vars
 #
@@ -130,6 +134,10 @@ set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 set app_2dx_image = ""
 set movie_masking_mode = ""
+set movie_show_fftraw = ""
+set movie_show_fftcorr = ""
+set movie_show_frame = ""
+set movie_show_cc = ""
 #
 #$end_vars
 #
@@ -458,30 +466,37 @@ eot
 #end
 
 
-@ i = 1
-while ($i <= ${movie_imagenumber_touse})
-	echo  "# IMAGE: frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc <Raw FFT #${i}>" >> LOGS/${scriptname}.results
-	@ i += 1
-end
+if ( ${movie_show_fftraw} == '1' ) then
+	@ i = 1
+	while ($i <= ${movie_imagenumber_touse})
+		echo  "# IMAGE: frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc <Raw FFT #${i}>" >> LOGS/${scriptname}.results
+		@ i += 1
+	end
+endif
 
-@ i = 1
-while ($i <= ${movie_imagenumber_touse})
-	echo  "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc <Corr FFT #${i}>" >> LOGS/${scriptname}.results
-	@ i += 1
-end
+if ( ${movie_show_fftcorr} == '1' ) then
+	@ i = 1
+	while ($i <= ${movie_imagenumber_touse})
+		echo  "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc <Corr FFT #${i}>" >> LOGS/${scriptname}.results
+		@ i += 1
+	end
+endif
 
-@ i = 1
-while ($i <= ${movie_imagenumber_touse})
-	echo  "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc <Frame #${i}>" >> LOGS/${scriptname}.results
-	@ i += 1
-end
+if ( ${movie_show_frame} == '1' ) then
+	@ i = 1
+	while ($i <= ${movie_imagenumber_touse})
+		echo  "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc <Frame #${i}>" >> LOGS/${scriptname}.results
+		@ i += 1
+	end
+endif
 
-@ i = 1
-while ($i <= ${movie_imagenumber_touse})
-	echo  "# IMAGE: frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc <CC #${i}>" >> LOGS/${scriptname}.results
-	@ i += 1
-end
-
+if ( ${movie_show_cc} == '1' ) then
+	@ i = 1
+	while ($i <= ${movie_imagenumber_touse})
+		echo  "# IMAGE: frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc <CC #${i}>" >> LOGS/${scriptname}.results
+		@ i += 1
+	end
+endif
 
 
 

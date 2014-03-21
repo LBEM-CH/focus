@@ -99,7 +99,10 @@ class MotionCorrectionWatcher(WatcherBase):
 			if self.storestack == 1 and self.storelocation != "-":
 				motion_command += " -fct " + self.storelocation
 			os.system(motion_command)
-			shutil.copyfile(self.tmp_location + "/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_fullaligned.mrc")
+			if self.binning == 1:
+				shutil.copyfile(self.tmp_location + "/mc_ready_SumCorr.mrc", self.outfolder + "/" + filecorename + "_fullaligned.mrc")
+			else:
+				shutil.copyfile(self.tmp_location + "/mc_ready_2x_SumCorr.mrc", self.outfolder + "/" + filecorename + "_fullaligned.mrc")
 	
 		os.chdir(old_path)
 		

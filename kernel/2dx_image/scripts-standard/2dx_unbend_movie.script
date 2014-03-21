@@ -56,6 +56,7 @@
 # DISPLAY: movie_enable
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_imagenumber_touse
+# DISPLAY: movie_masking_mode
 #
 #$end_local_vars
 #
@@ -128,6 +129,7 @@ set movie_enable = ""
 set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 set app_2dx_image = ""
+set movie_masking_mode = ""
 #
 #$end_vars
 #
@@ -185,6 +187,7 @@ set createmask = '0'
 set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
 
 \rm -f SCRATCH/errout2${imagename}.dat
+\rm -f SPIDERCOORD.spi
   
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpredb}                     ! IPASS,NRANGE
@@ -207,7 +210,6 @@ while ($i <= ${movie_imagenumber_touse})
 	
 	${app_2dx_image} frames/frame_${i} "2dx_initialize"
 	${app_2dx_image} frames/frame_${i} "2dx_initialize_files"
-#	${app_2dx_image} frames/frame_${i} "2dx_fftrans"
 
 	echo frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	
@@ -253,13 +255,30 @@ eot
 	set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
 	set valspotscan = '0'
 	set createmask = '0'
-	# ToDo
-	#$set quadradbx = '2'
-	#set quadradby = '2'
 	
-	\cp -f ${nonmaskimagename}-masking-final.mrc TMP-quadserch-7.mrc
-	
-	${bin_2dx}/2dx_quadserchk-2.exe << eot
+		
+	if ( ${movie_masking_mode} == '0' ) then
+		${bin_2dx}/2dx_quadserchk-2.exe << eot
+2,${quadpredb}                     ! IPASS,NRANGE
+frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! create manual Masking information (0=n,1=y)
+1                               ! Do mask the image directly
+frames/frame_${i}/${nonmaskimagename}_${i}.mrc
+frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
+-1                              ! create output images (0=no, <0 = one, >0 =size)
+0                               ! use external masking template (0=no, 1=yes)
+eot
+	else
+		\cp -f ${nonmaskimagename}-masking-final.mrc TMP-quadserch-7.mrc
+		${bin_2dx}/2dx_quadserchk-2.exe << eot
 2,${quadpredb}                     ! IPASS,NRANGE
 frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
@@ -276,10 +295,10 @@ frames/frame_${i}/${nonmaskimagename}_${i}.mrc
 frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
 -1                              ! create output images (0=no, <0 = one, >0 =size)
 1                               ! use external masking template (0=no, 1=yes)
-CUT/${imagename}-masking-final.mrc
+TMP-quadserch-7.mrc
 eot
-
-
+	endif
+	
 	setenv IN frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
 	setenv OUT frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
@@ -336,8 +355,6 @@ ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0
 ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Do mask the image directly
 eot
-
-	
 
 	setenv CCORDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
 	setenv TABLEOUT frames/frame_${i}/SCRATCH/ccunbend-table-m${nonmaskimagename}.dat
@@ -447,19 +464,25 @@ while ($i <= ${movie_imagenumber_touse})
 	@ i += 1
 end
 
-
 @ i = 1
 while ($i <= ${movie_imagenumber_touse})
 	echo  "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc <Corr FFT #${i}>" >> LOGS/${scriptname}.results
 	@ i += 1
 end
 
-
 @ i = 1
 while ($i <= ${movie_imagenumber_touse})
 	echo  "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc <Frame #${i}>" >> LOGS/${scriptname}.results
 	@ i += 1
 end
+
+@ i = 1
+while ($i <= ${movie_imagenumber_touse})
+	echo  "# IMAGE: frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc <CC #${i}>" >> LOGS/${scriptname}.results
+	@ i += 1
+end
+
+
 
 
 set qvalfile = "movie_qvals.txt"

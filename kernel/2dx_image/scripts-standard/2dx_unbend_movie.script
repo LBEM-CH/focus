@@ -170,10 +170,6 @@ end
 \rm -f frame_ctf.pdf
 \touch frame_ctf.pdf
 
-#python ${bin_2dx}/movie_mode_py/plotDist.py APH/${imagename}.fou.limit.aph amp_dist_full.pdf
-#pdf2ps amp_dist_full.pdf amp_dist_full.ps
-#echo "# IMAGE-IMPORTANT:  amp_dist_full.ps <Amplidutes FullImage>" >> LOGS/${scriptname}.results
-
 
 setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
 setenv PROFDATA SCRATCH/prof${imagename}.dat
@@ -187,6 +183,8 @@ set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { p
 set valspotscan = '0'
 set createmask = '0'
 set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
+
+\rm -f SCRATCH/errout2${imagename}.dat
   
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpredb}                     ! IPASS,NRANGE
@@ -277,7 +275,8 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 frames/frame_${i}/${nonmaskimagename}_${i}.mrc
 frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
 -1                              ! create output images (0=no, <0 = one, >0 =size)
-0                               ! use external masking template (0=no, 1=yes)
+1                               ! use external masking template (0=no, 1=yes)
+CUT/${imagename}-masking-final.mrc
 eot
 
 
@@ -374,59 +373,7 @@ eot
 	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
-	
-	${bin_2dx}/2dx_mmboxa.exe << eot
-frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
-${imagenumber} ${nonmaskimagename}_${i}, Unbend2, ${date}
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-frames/frame_${i}/APH/m${nonmaskimagename}.fou.nolimit.aph
-frames/frame_${i}/SCRATCH/TMP9873.dat
-U2
-${refposix},${refposiy}           ! XORIG,YORIG
-200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}                         ! Lattice vectors
-eot
 
-	${bin_2dx}/2dx_mmboxa.exe << eot
-frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
-${imagenumber} ${nonmaskimagename}_${i}, Unbend2, ${date}
-Y				! Use grid units?
-Y				! Generate grid from lattice?
-N				! Generate points from lattice?
-2,2,0,50,50,19,19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-frames/frame_${i}/APH/m${nonmaskimagename}.fou.limit.aph
-frames/frame_${i}/SCRATCH/TMP9882.dat
-U2
-${refposix},${refposiy}		! XORIG,YORIG
-${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}				! Lattice vectors
-eot
-
-	#if ( ${i} == '1' ) then
-	#	cp frames/frame_${i}/APH/${nonmaskimagename}.fou.limit.aph APH/${imagename}.fou.limit.aph
-	#	cp frames/frame_${i}/APH/${nonmaskimagename}.fou.nolimit.aph APH/${imagename}.fou.nolimit.aph
-	#endif
-	
-#	python ${bin_2dx}/movie_mode_py/enable_masking.py  frames/$f/
-#	${app_2dx_image} frames/$f/ "2dx_unbend2"
-#	python ${bin_2dx}/movie_mode_py/disable_masking.py  frames/$f/
-	
-	
-#	python ${bin_2dx}/movie_mode_py/plotDist.py frames/frame_${i}/APH/m${nonmaskimagename}.fou.limit.aph frames/frame_${i}/dist.pdf
-	
-#	if ( ${i} == '1' ) then
-#		cp -f frames/frame_${i}/dist.pdf amp_dist.pdf
-#		pdftk A=amp_dist.pdf cat A1 output out.pdf
-#		mv out.pdf amp_dist.pdf
-#	else
-#		cp -f frames/frame_${i}/dist.pdf tmp.pdf
-#		pdftk A=amp_dist.pdf B=tmp.pdf cat A1-end B1 output out.pdf
-#		mv out.pdf amp_dist.pdf
-#	endif
-#	
 	@ i += 1
 end
 
@@ -479,23 +426,19 @@ ${lattice}				! Lattice vectors
 eot
 
 
-set rolling_offset = 5
-python ${bin_2dx}/movie_mode_py/rolling_ave.py ${movie_imagenumber_touse} ${rolling_offset} ${nonmaskimagename}
+#set rolling_offset = 5
+#python ${bin_2dx}/movie_mode_py/rolling_ave.py ${movie_imagenumber_touse} ${rolling_offset} ${nonmaskimagename}
 
-@ i = 3
-while ($i <= 21)
+#@ i = 3
+#while ($i <= 21)
 
-	setenv IN frames/rolling_aves/ave_${i}.mrc
-	setenv OUT frames/rolling_aves/ave_${i}.fft.mrc
-	${bin_2dx}/2dx_fftrans.exe
+#	setenv IN frames/rolling_aves/ave_${i}.mrc
+#	setenv OUT frames/rolling_aves/ave_${i}.fft.mrc
+#	${bin_2dx}/2dx_fftrans.exe
 
-	echo  "# IMAGE: frames/rolling_aves/ave_${i}.fft.mrc <Rolling ave fft #${i}>" >> LOGS/${scriptname}.results
-	@ i += 1
-end
-
-
-pdf2ps amp_dist.pdf amp_dist.ps
-echo "# IMAGE-IMPORTANT: amp_dist.ps <Amplidutes>" >> LOGS/${scriptname}.results
+#	echo  "# IMAGE: frames/rolling_aves/ave_${i}.fft.mrc <Rolling ave fft #${i}>" >> LOGS/${scriptname}.results
+#	@ i += 1
+#end
 
 
 @ i = 1

@@ -1243,8 +1243,8 @@ C======================================
 C
 C-----Get PEAKMAX and its position
 C
-      DO K=MINA,MAXA
-        DO J=MINB,MAXB
+       DO K=MINA,MAXA
+         DO J=MINB,MAXB
           IF(COOR(3,J,K).GT.PEAKMAX)THEN
             PEAKMAX=COOR(3,J,K)
             XPEAKMAX=COOR(1,J,K)
@@ -1369,11 +1369,19 @@ C======================================
       write(FILENAM(1:80),'(''TMP-quadserch-7.mrc'')')
       CALL IMOPEN(1,FILENAM,'RO')
       CALL IRDHDR(1,NXYZIPIC,MXYZIPIC,MODEIPIC,DMINIPIC,DMAXIPIC,DMEANIPIC)
+      print *,"MODEIPIC = ", MODEIPIC
+      print *,"DMINIPIC = ", DMINIPIC
+      print *,"DMAXIPIC = ", DMAXIPIC
+      print *,"DMEANIPIC = ", DMEANIPIC
+      print *,"DEBUG = ",  IPICT2(10,10)
       CALL IMPOSN(1,0,0)
       NCOLPIC=NXYZIPIC(1)
       NLINEPIC=NXYZIPIC(2)
       CALL IRDPAS(1,IPICT2,NCOLIPIC,NLINEIPIC,0,NCOLIPIC-1,0,NLINEIPIC-1,*9400)
-      CALL IMCLOSE(1)      
+      
+      print *,"DEBUG2 = ",  IPICT2(10,10)
+      
+      CALL IMCLOSE(1)
 556   continue
 C======================================
 
@@ -1420,7 +1428,7 @@ C
             ilj=(IX*IPICDI2)/NX
             if(ilj.lt.1)ilj=1
             if(ilj.gt.IPICDI2)ilj=IPICDI2
-            VAL=(ALINE(IX)-DOMEAN)*(IPICT2(ilj,ilk)/255.0)+DOMEAN
+                VAL=(ALINE(IX)-DOMEAN)*(IPICT2(ilj,ilk)/255.0)+DOMEAN
             if(VAL.lt.rmin)then
               iunder=iunder+1
               VAL=rmin

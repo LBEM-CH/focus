@@ -302,6 +302,7 @@ class Auto2dxGUI(Frame):
 		#self.watcher.image_added(filename, False)
 	
 	
+	
 	def reprocessALLImage(self):
 		if tkMessageBox.askyesno("Reprocess all images", "Continue?"):
 			for f in self.image_names:

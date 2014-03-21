@@ -26,5 +26,6 @@ if __name__ == "__main__":
 	
 	file_name_out = "frames/direct_sum.mrc"
 	print file_name_out
-		
+	
+	image /= total_number
 	image.write_image(file_name_out)

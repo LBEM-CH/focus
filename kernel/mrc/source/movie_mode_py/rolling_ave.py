@@ -44,4 +44,5 @@ if __name__ == "__main__":
 		file_name_out = "frames/rolling_aves/ave_" + str(i) + ".mrc"
 		print file_name_out
 		
+		image /= offset
 		image.write_image(file_name_out)

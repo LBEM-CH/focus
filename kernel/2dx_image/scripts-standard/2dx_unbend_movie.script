@@ -174,6 +174,36 @@ end
 #pdf2ps amp_dist_full.pdf amp_dist_full.ps
 #echo "# IMAGE-IMPORTANT:  amp_dist_full.ps <Amplidutes FullImage>" >> LOGS/${scriptname}.results
 
+
+setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+setenv PROFDATA SCRATCH/prof${imagename}.dat
+setenv ERRORS   SCRATCH/errout${imagename}.dat
+setenv ERROUT   SCRATCH/errout2${imagename}.dat
+
+set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
+set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+set valspotscan = '0'
+set createmask = '0'
+set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
+  
+${bin_2dx}/2dx_quadserchk-2.exe << eot
+3,${quadpredb}                     ! IPASS,NRANGE
+${cormap}
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}			! dont create manual Masking information
+0                               ! Mask the image directly
+eot
+
+
 @ i = 1
 while ($i <= ${movie_imagenumber_touse})
 	
@@ -219,7 +249,7 @@ eot
 	\rm -f SPIDERCOORD.spi
     setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
     setenv PROFDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
-    setenv ERRORS   SCRATCH/errout${imagename}.dat
+    setenv ERRORS   SCRATCH/errout2${imagename}.dat
 
 	set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
 	set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
@@ -287,7 +317,7 @@ eot
 	\rm -f SPIDERCOORD.spi
     setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
     setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
-    setenv ERRORS   SCRATCH/errout${imagename}.dat
+    setenv ERRORS   SCRATCH/errout2${imagename}.dat
 
 	#set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
 	#set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
@@ -404,7 +434,15 @@ end
 \mkdir frames/rolling_aves
 
 python ${bin_2dx}/movie_mode_py/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
-setenv IN "frames/direct_sum.mrc"
+
+setenv IN  frames/direct_sum.mrc
+setenv OUT frames/direct_sum_fixed.mrc
+${bin_2dx}/2dx_taperedgek.exe << eot
+	30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+eot
+
+
+setenv IN "frames/direct_sum_fixed.mrc"
 setenv OUT "frames/direct_sum.fft.mrc"
 ${bin_2dx}/2dx_fftrans.exe
 echo  "# IMAGE: frames/direct_sum.fft.mrc <DirectSum FFT>" >> LOGS/${scriptname}.results

@@ -435,6 +435,8 @@ ${refposix},${refposiy}           ! XORIG,YORIG
 ${lattice}                         ! Lattice vectors
 eot
 
+\rm -f SCRATCH/TMP9882.dat
+
 	${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum.fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
@@ -450,6 +452,40 @@ ${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,
 ${lattice}				! Lattice vectors
 eot
 
+source SCRATCH/TMP9882.dat
+
+
+echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
+echo "set QVALS = ${QVAL_local}" >> LOGS/${scriptname}.results
+
+echo "set US_IQ1 = ${U2_IQ1}" >> LOGS/${scriptname}.results
+echo "set US_IQ2 = ${U2_IQ2}" >> LOGS/${scriptname}.results
+echo "set US_IQ3 = ${U2_IQ3}" >> LOGS/${scriptname}.results
+echo "set US_IQ4 = ${U2_IQ4}" >> LOGS/${scriptname}.results
+echo "set US_IQ5 = ${U2_IQ5}" >> LOGS/${scriptname}.results
+echo "set US_IQ6 = ${U2_IQ6}" >> LOGS/${scriptname}.results
+echo "set US_IQ7 = ${U2_IQ7}" >> LOGS/${scriptname}.results
+echo "set US_IQ8 = ${U2_IQ8}" >> LOGS/${scriptname}.results
+echo "set US_IQ9 = ${U2_IQ9}" >> LOGS/${scriptname}.results
+
+set RP_6 = ${PSMAX}
+#
+echo "::  ResBin     Power "
+echo ":: ${RB_1}      ${RP_1}"
+echo ":: ${RB_2}      ${RP_2}"
+echo ":: ${RB_3}      ${RP_3}"
+echo ":: ${RB_4}      ${RP_4}"
+echo ":: ${RB_5}      ${RP_5}"
+echo ":: ${RB_6}      ${RP_6}"
+#
+echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
+echo "set RP_2 = ${RP_2}" >> LOGS/${scriptname}.results
+echo "set RP_3 = ${RP_3}" >> LOGS/${scriptname}.results
+echo "set RP_4 = ${RP_4}" >> LOGS/${scriptname}.results
+echo "set RP_5 = ${RP_5}" >> LOGS/${scriptname}.results
+echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
+
+echo "<<@evaluate>>"
 
 #set rolling_offset = 5
 #python ${bin_2dx}/movie_mode_py/rolling_ave.py ${movie_imagenumber_touse} ${rolling_offset} ${nonmaskimagename}
@@ -509,5 +545,6 @@ endif
 pdf2ps frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results
 
+echo "<<@evaluate>>"
 
 

@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Prepare movie mode script                                          #
+# Title: Run movie mode script                                              #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -11,14 +11,13 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 08
+# SORTORDER: 10
 #
 # MANUAL: Adapt this script to do some task on all selected image directories.
 #
 # MANUAL: To do so, double-click on the script name in the "Customs Script" panel. Edit the script, save it, and use it for your purposes.
 #
 #
-# DISPLAY: movie_stack_folder
 #
 #$end_local_vars
 #
@@ -28,12 +27,11 @@ set bin_2dx = ""
 set app_2dx_image = ""
 set SCRATCH_DISK = ""
 set FFTIR_DISK = ""
-set movie_stack_folder = ""
 #
 #$end_vars
 #
 # This sets the scriptname variable:
-set scriptname = 2dx_moviemode_prepare
+set scriptname = 2dx_moviemode_run
 #
 # This removes the old logfile, so that a new fresh one can be created:
 \rm -f LOGS/${scriptname}.results
@@ -63,53 +61,5 @@ set olddir = $PWD
 echo "<<@progress: 10>>"
 #
 # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
-foreach dirfile ( ${dirlist} ) 
-  cd ..
-  cd ${dirfile}
-  set newdir = $PWD
-  cd ${olddir}
-  echo "::Working on ${newdir}"
-  # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
-  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
-  echo "set dummy = 1" >> LOGS/${scriptname}.results
-  set images_progres = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
-  echo "<<@progres: ${images_progres}>>"
-  set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
-  
-  set name = `python ${bin_2dx}/movie_mode_py/getOriginalImageName.py ${newdir}`
-  echo name = ${name}
-  
-  if ( -e ${movie_stack_folder}/${name}) then
-	${proc_2dx}/linblock "Movie mode for ${name} possible"
-	time \cp -f ${movie_stack_folder}/${name} ${newdir}
-	echo "set movie_enable = y" >> LOGS/${scriptname}.results
-	echo "set movie_stackname = ${name}" >> LOGS/${scriptname}.results
-  endif
 
-  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
-end
-#
-foreach dirfile ( ${dirlist} ) 
-  cd ..
-  cd ${dirfile}
-  set newdir = $PWD
-  cd ${olddir}
-  echo "::Working on ${newdir}"
-  # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
-  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
-  echo "set dummy = 1" >> LOGS/${scriptname}.results
-  set images_progres = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
-  echo "<<@progres: ${images_progres}>>"
-  set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
-
-  ${app_2dx_image} ${newdir} "2dx_initialize_files"
-  
-  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
-end
-#
-# Move the progress bar to 100%:
-echo "<<@progress: 100>>"
-#
-# Leave a message on the logfile that the script finished:
-${proc_2dx}/linblock "${scriptname} finished correctly."
-#
+python ${bin_2dx}/movie_mode_py/runMovieMode.py ${dirlist}

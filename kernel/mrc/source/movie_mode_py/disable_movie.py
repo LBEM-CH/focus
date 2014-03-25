@@ -17,7 +17,13 @@ if __name__ == "__main__":
 		
 	for l in f:
 		if l.startswith("set movie_enable"):
-			lines.append('set movie_enable = "n"\n')
+			lines.append('set movie_enable = "n"\n')	
+		elif l.startswith("set crop_histogram = "):
+			lines.append('set crop_histogram = "y"\n')
+		elif l.startswith("set crop_histogram_percent = "):
+			lines.append('set crop_histogram_percent = "4"\n')
+		elif l.startswith("set crop_histogram_stdev = "):
+			lines.append('set crop_histogram_stdev = "1"\n')
 		else:
 			lines.append(l)
 	f.close()

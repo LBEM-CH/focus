@@ -220,8 +220,6 @@ while ($i <= ${movie_imagenumber_touse})
 	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize"
 	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize_files"
 
-
-
 	echo frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	
 	setenv IN frames/frame_${i}/${nonmaskimagename}_${i}.mrc

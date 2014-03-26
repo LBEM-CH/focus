@@ -100,13 +100,11 @@ class Auto2dxGUI(Frame):
 		self.centralrightframe2.pack()
 		
 		
-	
 	def getInfoString(self, folder):
 		result = "Image Statistics:\n\n\n"
 		result += "Input image: " + self.image_names[self.index_selected] + "\n\n\n"
-		file_time = datetime.datetime.fromtimestamp(os.path.getmtime(self.input_dir + "/" + self.image_names[self.index_selected])) 
-		result += "Time: " + str(file_time) + "\n\n"
-		
+		#file_time = datetime.datetime.fromtimestamp(os.path.getmtime(self.input_dir + "/" + self.image_names[self.index_selected])) 
+		#result += "Time: " + str(file_time) + "\n\n"
 		return result
 		
 	
@@ -166,11 +164,11 @@ class Auto2dxGUI(Frame):
 		all_fine = True
 		
 		corename = self.watcher.getFileCoreName(self.image_names[self.index_selected])
-		raw_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_RawFFT.gif"
-		corr_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrFFT.gif"
-		corr_img_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrSum.gif"
-		rot_name = self.input_dir + "/dosef_quick/" + corename + "_rotpower.tif"
-		plot_name = self.input_dir + "/dosef_quick/" + corename + ".tif"
+		raw_fft_name = self.output_dir + "/dosef_quick/" + corename + "_ready_RawFFT.gif"
+		corr_fft_name = self.output_dir + "/dosef_quick/" + corename + "_ready_CorrFFT.gif"
+		corr_img_name = self.output_dir + "/dosef_quick/" + corename + "_ready_CorrSum.gif"
+		rot_name = self.output_dir + "/dosef_quick/" + corename + "_rotpower.tif"
+		plot_name = self.output_dir + "/dosef_quick/" + corename + ".tif"
 		
 		if os.path.exists(raw_fft_name):
 			try:
@@ -228,7 +226,6 @@ class Auto2dxGUI(Frame):
 			self.drift_label.configure(image=self.default_tkimage_small)
 			all_fine = False
 
-
 		if all_fine:
 			info = self.getInfoString(self.image_names[self.index_selected])
 		else:
@@ -236,6 +233,15 @@ class Auto2dxGUI(Frame):
 			info += "Input image: " + self.image_names[self.index_selected] + "\n\n\n"
 			info += "processing..."
 		self.info_label.configure(text=info)
+		
+		print self.input_dir + "/" + self.image_names[self.index_selected]
+		
+		if os.path.exists(self.input_dir + "/" + self.image_names[self.index_selected]):
+			self.reprocess_button.configure(state=NORMAL)
+			self.reprocess_ALL_button.configure(state=NORMAL)
+		else:					
+			self.reprocess_button.configure(state=DISABLED)
+			self.reprocess_ALL_button.configure(state=DISABLED)
 
 	
 	def check_for_new_images(self):
@@ -267,11 +273,11 @@ class Auto2dxGUI(Frame):
 			tkMessageBox.showerror("Launch failed","Please select the input data type")
 			return
 		
-		raw_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_RawFFT.gif"
-		corr_fft_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrFFT.gif"
-		corr_img_name = self.input_dir + "/dosef_quick/" + corename + "_ready_CorrSum.gif"
-		rot_name = self.input_dir + "/dosef_quick/" + corename + "_rotpower.tif"
-		plot_name = self.input_dir + "/dosef_quick/" + corename + ".tif"
+		raw_fft_name = self.output_dir + "/dosef_quick/" + corename + "_ready_RawFFT.gif"
+		corr_fft_name = self.output_dir + "/dosef_quick/" + corename + "_ready_CorrFFT.gif"
+		corr_img_name = self.output_dir + "/dosef_quick/" + corename + "_ready_CorrSum.gif"
+		rot_name = self.output_dir + "/dosef_quick/" + corename + "_rotpower.tif"
+		plot_name = self.output_dir + "/dosef_quick/" + corename + ".tif"
 		
 		if os.path.exists(raw_fft_name):
 			os.remove(raw_fft_name)
@@ -305,6 +311,7 @@ class Auto2dxGUI(Frame):
 		#self.watcher.image_added(filename, False)
 	
 	
+	
 	def reprocessALLImage(self):
 		if tkMessageBox.askyesno("Reprocess all images", "Continue?"):
 			for f in self.image_names:
@@ -327,6 +334,7 @@ class Auto2dxGUI(Frame):
 			eman_command = "e2display.py " + image_to_show
 			os.system(eman_command)
 		
+		
 	def openFullImageEman(self):
 		i = self.index_selected
 		image_name = self.watcher.getFileCoreName(self.image_names[i])
@@ -345,12 +353,14 @@ class Auto2dxGUI(Frame):
 			self.minframe_label.configure(text="Starting Frame Number: " + str(self.minframe))
 			self.watcher.setFirstFrame(self.minframe)
 		
+		
 	def maxFrameChanged(self):
 		number = tkSimpleDialog.askinteger("Edit Motion Correct Properties", "Last Frame")
 		if number>=0:
 			self.maxframe = number
 			self.maxframe_label.configure(text="Ending Frame Number: " + str(self.maxframe))
 			self.watcher.setLastFrame(self.maxframe)
+		
 			
 	def fodChanged(self):
 		number = tkSimpleDialog.askinteger("Edit drift correction", "Offset")
@@ -359,11 +369,13 @@ class Auto2dxGUI(Frame):
 			self.fod_label.configure(text="Frame Offset: " + str(self.fod))
 			self.watcher.setFOD(self.fod)
 			
+			
 	def changeExportLocation(self):
 		self.export_location = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory for average")
 		if len(self.export_location) == 0:
 			self.export_location = "not set"
 		self.export_location_label.configure(text="Export AverageLocation:\n" + self.export_location)
+		
 		
 	def changeExportLocationStack(self):
 		self.export_location_stack = tkFileDialog.askdirectory(parent=self.parent, title="Select export directory for stack")
@@ -371,6 +383,7 @@ class Auto2dxGUI(Frame):
 			self.export_location_stack = "not set"
 		self.export_location_stack_label.configure(text="Export Stack Location:\n" + self.export_location_stack)
 		self.watcher.storelocation = self.export_location_stack
+		
 		
 	def changeTempLocation(self):
 		self.tmp_location = tkFileDialog.askdirectory(parent=self.parent, title="Select Temp Location (SSD)")
@@ -386,6 +399,7 @@ class Auto2dxGUI(Frame):
 		image_to_show = self.output_dir + "/" + image_name + "_aligned.mrc"
 		image_name = image_to_show.split("/")[-1]
 		shutil.copy(image_to_show, self.export_location + "/" + image_name)
+	
 		
 	def troubleshootGUI(self):
 		if tkMessageBox.askyesno("Troubleshooting", "Do you realy want to remove all locks?"):
@@ -394,6 +408,7 @@ class Auto2dxGUI(Frame):
 				self.watcher.lock_compute.release()
 			except:
 				print "releasing the locks did not help"
+	
 			
 	def deleteImage(self):
 		if tkMessageBox.askyesno("Delete Image", "Do you realy want to delete the image?"):
@@ -405,6 +420,8 @@ class Auto2dxGUI(Frame):
 			filecorename = self.watcher.getFileCoreName(self.image_names[i])
 			file_to_delete2 = self.output_dir + "/" + filecorename + "_aligned.mrc"
 			
+			file_to_delete3 = self.export_location_stack + "/" + filecorename + "_aligned.mrc"
+			
 			try:
 				os.remove(file_to_delete)
 			except:
@@ -414,6 +431,12 @@ class Auto2dxGUI(Frame):
 				os.remove(file_to_delete2)
 			except:
 				print "Failed to delete" + file_to_delete2
+				
+			try:
+				os.remove(file_to_delete3)
+			except:
+				print "Failed to delete" + file_to_delete3
+				
 			
 			count = 0
 			lines_out = []
@@ -437,6 +460,7 @@ class Auto2dxGUI(Frame):
 				
 			self.resetResultOverview()
 			
+			
 	def binButtonClicked(self):
 		self.watcher.setBinning(self.binvar.get()+1)
 		
@@ -447,6 +471,7 @@ class Auto2dxGUI(Frame):
 			self.bfac = number
 			self.bfac_label.configure(text="BFactor: " + str(self.bfac))
 			self.watcher.setBFactor(self.bfac)
+			
 			
 	def pairModeChanged(self):
 		self.watcher.setMode(self.modevar.get())		
@@ -461,20 +486,13 @@ class Auto2dxGUI(Frame):
 			
 	
 	def initUI(self):
-		self.parent.title("Motion Correction GUI (beta_6)")
-		self.parent.title("Motion Correction GUI (beta_6)")
+		self.parent.title("Motion Correction GUI (beta_7)")
 	
 		self.getFolders()
 		
-		#self.input_dir = '/mnt/afd867f9-f76e-40f3-9b3a-12c42385bba8/scherers/mlok_k2/mc_in'
-		#self.output_dir = '/mnt/afd867f9-f76e-40f3-9b3a-12c42385bba8/scherers/mlok_k2/mc_out'
-		
-		in_folder = self.input_dir
-		out_folder = self.output_dir
-		logfile = out_folder + "/automatic_import_log.txt"
+		logfile = self.output_dir + "/automatic_import_log.txt"
 		wait = 1
 		refresh = 10
-	#	self.watcher = Add2dxImageWatcher(refresh, wait, in_folder, out_folder, logfile)
 
 		self.initLayout()
 		
@@ -489,9 +507,8 @@ class Auto2dxGUI(Frame):
 		stop_button = Button(self.toprightframe ,text='Stop Automation', command=self.switchAutomationOff, width=30)
 		stop_button.pack(padx=5, pady=2)
 		
-		
 		self.variable = StringVar(self.centralleftframe)
-		self.variable.set("chose the input type") # default value
+		self.variable.set("chose the input type")
 
 		self.w = OptionMenu(self.centralleftframe, self.variable, "chose the input type", "4k MRC", "4k DM4", "8k MRC", "8k DM4")
 		self.w.pack(pady=5)
@@ -527,15 +544,11 @@ class Auto2dxGUI(Frame):
 		self.change_bfac_button = Button(self.low_lr_frame ,text='Change BFactor', width=20, command=self.bfacChanged)
 		self.change_bfac_button.pack(padx=10, pady=5)
 		
-	#	self.binvar = IntVar()
-	#	self.binbox = Checkbutton(self.centralleftframe, variable=self.binvar, text="2x2 binning (super-resolution mode only)", command=self.binButtonClicked)
-	#	self.binbox.pack(pady=4)
-		
 		self.modevar = IntVar()
 		self.modebox = Checkbutton(self.centralleftframe, variable=self.modevar, text="Dose pair mode", command=self.pairModeChanged)
 		self.modebox.pack(pady=4)
 		
-		Label(self.centralleftframe, text=" ", height=1).pack()
+		#Label(self.centralleftframe, text=" ", height=1).pack()
 		
 		## Export
 		self.export_location = "not set"
@@ -576,7 +589,7 @@ class Auto2dxGUI(Frame):
 		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)
 		self.troubles_button.pack(padx=20, pady=8)
 		
-		Label(self.centralleftframe, text=" ", height=1).pack()
+		#Label(self.centralleftframe, text=" ", height=1).pack()
 		
 		self.image_count_label = Label(self.centralleftframe, text="Images")
 		self.image_count_label.pack()
@@ -618,12 +631,10 @@ class Auto2dxGUI(Frame):
 		self.open_full_button = Button(self.centralrightframe3 ,text='Open Fulldose Image', width=20, command=self.openFullImageEman)
 		self.open_full_button.pack(padx=20, pady=5, side=BOTTOM)
 	
-		in_folder = self.input_dir
-		out_folder = self.output_dir
-		logfile = out_folder + "/automatic_import_log.txt"
+		logfile = self.output_dir + "/automatic_import_log.txt"
 		wait = 1
 		refresh = 1
-		self.watcher = MotionCorrectionWatcher(refresh, wait, in_folder, out_folder, logfile, first_frame=self.minframe, last_frame=self.maxframe)
+		self.watcher = MotionCorrectionWatcher(refresh, wait, self.input_dir, self.output_dir, logfile, first_frame=self.minframe, last_frame=self.maxframe)
 	
 		self.default_image = Image.new("RGB", (n,n), "white")
 		self.default_tkimage = ImageTk.PhotoImage(self.default_image)
@@ -665,6 +676,7 @@ def main():
 	root.geometry("1920x1200+000+000")
 	app = Auto2dxGUI(root)
 	root.mainloop()
+	
 	
 if __name__ == '__main__':
 	main() 

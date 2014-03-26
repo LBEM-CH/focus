@@ -238,10 +238,10 @@ class Auto2dxGUI(Frame):
 		
 		if os.path.exists(self.input_dir + "/" + self.image_names[self.index_selected]):
 			self.reprocess_button.configure(state=NORMAL)
-			self.reprocess_ALL_button.configure(state=NORMAL)
+			#self.reprocess_ALL_button.configure(state=NORMAL)
 		else:					
 			self.reprocess_button.configure(state=DISABLED)
-			self.reprocess_ALL_button.configure(state=DISABLED)
+			#self.reprocess_ALL_button.configure(state=DISABLED)
 
 	
 	def check_for_new_images(self):
@@ -620,8 +620,8 @@ class Auto2dxGUI(Frame):
 		self.reprocess_button = Button(helper_frame ,text='Reprocess Image', width=20, command=self.reprocessImage)
 		self.reprocess_button.pack(padx=5, pady=5, side=LEFT)
 		
-		self.reprocess_ALL_button = Button(helper_frame ,text='Reprocess ALL Image', width=20, command=self.reprocessALLImage)
-		self.reprocess_ALL_button.pack(padx=5, pady=5, side=RIGHT)
+		#self.reprocess_ALL_button = Button(helper_frame ,text='Reprocess ALL Image', width=20, command=self.reprocessALLImage)
+		#self.reprocess_ALL_button.pack(padx=5, pady=5, side=RIGHT)
 		
 		Label(self.centralleftframe, text=" ", height=2).pack()
 		

@@ -886,7 +886,7 @@ class Auto2dxGUI(Frame):
 			self.index_selected = index
 			self.indexChanged()
 			
-		self.lauch_2dx_image_button = Button(self.lowleftframe ,text='Lauch 2dx_image', width=40, command=self.launch2dxImage)
+		self.lauch_2dx_image_button = Button(self.lowleftframe ,text='Launch 2dx_image', width=40, command=self.launch2dxImage)
 		self.lauch_2dx_image_button.pack(padx=20, pady=20)
 		
 		self.comment_button = Button(self.lowleftframe ,text='Edit Comment', width=40, command=self.editComment)

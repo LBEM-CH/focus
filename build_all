@@ -13,7 +13,6 @@ echo '| Configuration								   |'
 echo '+----------------------------------------------------------------------------+'
 echo '|                                                                            |'
 
-
 if [ $# -lt 1 ]
 then
 	echo 'No build directory is specified, it is set to the default: '$HOME'/2dx'

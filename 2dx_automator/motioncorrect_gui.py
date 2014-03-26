@@ -103,8 +103,8 @@ class Auto2dxGUI(Frame):
 	def getInfoString(self, folder):
 		result = "Image Statistics:\n\n\n"
 		result += "Input image: " + self.image_names[self.index_selected] + "\n\n\n"
-		file_time = datetime.datetime.fromtimestamp(os.path.getmtime(self.input_dir + "/" + self.image_names[self.index_selected])) 
-		result += "Time: " + str(file_time) + "\n\n"
+		#file_time = datetime.datetime.fromtimestamp(os.path.getmtime(self.input_dir + "/" + self.image_names[self.index_selected])) 
+		#result += "Time: " + str(file_time) + "\n\n"
 		return result
 		
 	
@@ -233,6 +233,15 @@ class Auto2dxGUI(Frame):
 			info += "Input image: " + self.image_names[self.index_selected] + "\n\n\n"
 			info += "processing..."
 		self.info_label.configure(text=info)
+		
+		print self.input_dir + "/" + self.image_names[self.index_selected]
+		
+		if os.path.exists(self.input_dir + "/" + self.image_names[self.index_selected]):
+			self.reprocess_button.configure(state=NORMAL)
+			self.reprocess_ALL_button.configure(state=NORMAL)
+		else:					
+			self.reprocess_button.configure(state=DISABLED)
+			self.reprocess_ALL_button.configure(state=DISABLED)
 
 	
 	def check_for_new_images(self):
@@ -411,6 +420,8 @@ class Auto2dxGUI(Frame):
 			filecorename = self.watcher.getFileCoreName(self.image_names[i])
 			file_to_delete2 = self.output_dir + "/" + filecorename + "_aligned.mrc"
 			
+			file_to_delete3 = self.export_location_stack + "/" + filecorename + "_aligned.mrc"
+			
 			try:
 				os.remove(file_to_delete)
 			except:
@@ -420,6 +431,12 @@ class Auto2dxGUI(Frame):
 				os.remove(file_to_delete2)
 			except:
 				print "Failed to delete" + file_to_delete2
+				
+			try:
+				os.remove(file_to_delete3)
+			except:
+				print "Failed to delete" + file_to_delete3
+				
 			
 			count = 0
 			lines_out = []

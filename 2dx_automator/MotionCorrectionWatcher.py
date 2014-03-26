@@ -69,7 +69,7 @@ class MotionCorrectionWatcher(WatcherBase):
 		if self.input_mode == 1:
 			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.mrc" + " " + self.tmp_location + "/mc_ready.mrc --threed2threed"
 		else:
-			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.dm4" + " " + self.tmp_location + "/mc_ready.mrc --twod2threed"
+			eman2_command = "e2proc2d.py " + self.tmp_location + "/mc_tmp.dm4" + " " + self.tmp_location + "/mc_ready.mrc --twod2threed --process xform.flip:axis=y"
 		os.system(eman2_command)
 		
 		old_path = os.getcwd()

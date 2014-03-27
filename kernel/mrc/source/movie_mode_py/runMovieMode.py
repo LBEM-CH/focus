@@ -13,6 +13,12 @@ def process(name):
 	command = "2dx_image " + old_path + "/../" + name + " '" + '"2dx_unbend_movie"' + "'"
 	print command 
 	os.system(command)
+	command = "2dx_image " + old_path + "/../" + name + " '" + '"2dx_applyCTF"' + "'"
+	print command 
+	os.system(command)
+	command = "2dx_image " + old_path + "/../" + name + " '" + '"2dx_generateMAP"' + "'"
+	print command 
+	os.system(command)
 	os.chdir(old_path)
 
 if __name__ == "__main__":
@@ -21,5 +27,5 @@ if __name__ == "__main__":
 	for i in range(1,len(sys.argv)):
 		image_list.append(sys.argv[i])
 	
-	#Parallel(n_jobs=32)(delayed(process)(i) for i in image_list)
-	[process(i) for i in image_list]
+	Parallel(n_jobs=32)(delayed(process)(i) for i in image_list)
+	#[process(i) for i in image_list]

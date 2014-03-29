@@ -45,6 +45,8 @@ class Auto2dxGUI(Frame):
 		self.index_selected = self.count-1
 		self.indexChanged()
 		self.pairModeChanged()
+		self.saveStackModeChanged()
+		self.watcher.storelocation = self.export_location_stack
 		
 		
 	def getFolders(self):
@@ -56,6 +58,11 @@ class Auto2dxGUI(Frame):
 		if len(self.output_dir)==0:
 			raise SystemExit("No output directory selected")
 			
+		stack_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an output directory the aligned stacks")
+		if len(self.output_dir)==0:
+			raise SystemExit("No stack-output directory selected")
+		self.export_location_stack = stack_dir
+		
 			
 	def initLayout(self):
 		
@@ -565,12 +572,12 @@ class Auto2dxGUI(Frame):
 		self.line = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
 		self.line.pack(fill=X, padx=5, pady=3)
 		
-		self.export_location_stack = "not set"
 		self.export_location_stack_label = Label(self.exportframe, text="Export Stack Location:\n" + self.export_location_stack, width=45)
 		self.export_location_stack_label.pack(pady=3)
 		tmp_frame2 = Frame(self.exportframe)
 		tmp_frame2.pack()
 		self.savestack = IntVar()
+		self.savestack.set(1)
 		self.saveStackBox = Checkbutton(tmp_frame2, variable=self.savestack, text="Save aligned stack", command=self.saveStackModeChanged)
 		self.saveStackBox.pack(side=LEFT, padx=5, pady=3)
 		self.change_export_location_button = Button(tmp_frame2 ,text='Change Export Location', width=18, command=self.changeExportLocationStack)

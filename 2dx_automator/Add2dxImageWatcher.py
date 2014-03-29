@@ -153,6 +153,8 @@ class Add2dxImageWatcher(WatcherBase):
 		shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + self.protein_name + str(image_count) + ".mrc" )
 		shutil.copyfile( self.outfolder + "/2dx_master.cfg", image_2dx_name + "/2dx_image.cfg" )
 		
+		time.sleep(1)
+
 		self.lock_2dx.acquire()
 		old_path = os.getcwd()
 		os.chdir(self.outfolder)

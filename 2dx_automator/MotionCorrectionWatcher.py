@@ -75,8 +75,6 @@ class MotionCorrectionWatcher(WatcherBase):
 		old_path = os.getcwd()
 		os.chdir(self.tmp_location)
 		
-		# introduce align to first 
-		
 		if self.mode == 0:
 			align_to = 1
 		else:

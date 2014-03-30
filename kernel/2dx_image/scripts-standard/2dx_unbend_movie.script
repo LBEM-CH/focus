@@ -61,6 +61,7 @@
 # DISPLAY: movie_show_fftcorr
 # DISPLAY: movie_show_frame
 # DISPLAY: movie_show_cc
+# DISPLAY: movie_window
 #
 #$end_local_vars
 #
@@ -138,6 +139,7 @@ set movie_show_fftraw = ""
 set movie_show_fftcorr = ""
 set movie_show_frame = ""
 set movie_show_cc = ""
+set movie_window = ""
 #
 #$end_vars
 #
@@ -159,6 +161,7 @@ if ( ${movie_enable} == "n" ) then
   ${proc_2dx}/linblock "Skipping movie mode unbending."
   exit
 endif
+
 
 # Generate subfolder for frame images
 set frame_folder = "frames"
@@ -488,19 +491,36 @@ echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
 
 echo "<<@evaluate>>"
 
-#set rolling_offset = 5
-#python ${bin_2dx}/movie_mode_py/rolling_ave.py ${movie_imagenumber_touse} ${rolling_offset} ${nonmaskimagename}
+python ${bin_2dx}/movie_mode_py/rolling_ave.py ${movie_imagenumber_touse} ${movie_window} ${nonmaskimagename}
 
-#@ i = 3
-#while ($i <= 21)
+set rolling_1 = `echo ${movie_window} | awk '{s = int( $1/2 + 1 ) } END { print s }'`
+set rolling_end = `echo ${movie_imagenumber_touse} ${movie_window} | awk '{s = int($1 - int( $2/ 2)) } END { print s }'`
 
-#	setenv IN frames/rolling_aves/ave_${i}.mrc
-#	setenv OUT frames/rolling_aves/ave_${i}.fft.mrc
-#	${bin_2dx}/2dx_fftrans.exe
-
-#	echo  "# IMAGE: frames/rolling_aves/ave_${i}.fft.mrc <Rolling ave fft #${i}>" >> LOGS/${scriptname}.results
-#	@ i += 1
-#end
+@ i = ${rolling_1}
+while ($i <= ${rolling_end})
+	setenv IN frames/rolling_aves/ave_${i}.mrc
+	setenv OUT frames/rolling_aves/ave_${i}.fft.mrc
+	${bin_2dx}/2dx_fftrans.exe
+	
+	echo  "# IMAGE: frames/rolling_aves/ave_${i}.fft.mrc <Rolling ave fft #${i}>" >> LOGS/${scriptname}.results
+	
+${bin_2dx}/2dx_mmboxa.exe << eot
+frames/rolling_aves/ave_${i}.mrc
+${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+frames/rolling_aves/ave_${i}.fou.nolimit.aph
+SCRATCH/TMP9873.dat
+U2
+${refposix},${refposiy}           ! XORIG,YORIG
+200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
+	
+	@ i += 1
+end
 
 
 if ( ${movie_show_fftraw} == '1' ) then

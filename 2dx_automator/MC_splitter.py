@@ -39,7 +39,7 @@ def extactImage(name, output, first, last):
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 5:
-		sys.exit("Usage infolder outfolder starting_frame ending_frame")
+		sys.exit("Usage: MC_splitter.py <infolder> <outfolder> <starting_frame> <ending_frame>")
 
 	infolder = sys.argv[1]
 	outfolder = sys.argv[2]

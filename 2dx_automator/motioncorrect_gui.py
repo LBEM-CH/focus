@@ -586,12 +586,14 @@ class Auto2dxGUI(Frame):
 		self.line2 = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
 		self.line2.pack(fill=X, padx=5, pady=3)
 		
-		self.tmp_location = "/tmp"
+		self.tmp_location = "/media/cina_automator/cache"
+		if not os.path.exists(self.tmp_location):
+			self.tmp_location = "/tmp" 
+		
 		self.tmp_location_label = Label(self.exportframe, text="Temp Location:\n" + self.tmp_location, width=45)
 		self.tmp_location_label.pack(pady=3)
 		self.change_tmp_location_button = Button(self.exportframe ,text='Change Temp Location', width=20, command=self.changeTempLocation)
 		self.change_tmp_location_button.pack(padx=5, pady=3)
-		
 		
 		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)
 		self.troubles_button.pack(padx=20, pady=8)
@@ -642,7 +644,8 @@ class Auto2dxGUI(Frame):
 		wait = 1
 		refresh = 1
 		self.watcher = MotionCorrectionWatcher(refresh, wait, self.input_dir, self.output_dir, logfile, first_frame=self.minframe, last_frame=self.maxframe)
-	
+		self.watcher.tmp_location = self.tmp_location
+
 		self.default_image = Image.new("RGB", (n,n), "white")
 		self.default_tkimage = ImageTk.PhotoImage(self.default_image)
 		

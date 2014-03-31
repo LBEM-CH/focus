@@ -45,6 +45,8 @@ class Auto2dxGUI(Frame):
 		self.index_selected = self.count-1
 		self.indexChanged()
 		self.pairModeChanged()
+		self.saveStackModeChanged()
+		self.watcher.storelocation = self.export_location_stack
 		
 		
 	def getFolders(self):
@@ -56,6 +58,11 @@ class Auto2dxGUI(Frame):
 		if len(self.output_dir)==0:
 			raise SystemExit("No output directory selected")
 			
+		stack_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an output directory the aligned stacks")
+		if len(self.output_dir)==0:
+			raise SystemExit("No stack-output directory selected")
+		self.export_location_stack = stack_dir
+		
 			
 	def initLayout(self):
 		
@@ -565,12 +572,12 @@ class Auto2dxGUI(Frame):
 		self.line = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
 		self.line.pack(fill=X, padx=5, pady=3)
 		
-		self.export_location_stack = "not set"
 		self.export_location_stack_label = Label(self.exportframe, text="Export Stack Location:\n" + self.export_location_stack, width=45)
 		self.export_location_stack_label.pack(pady=3)
 		tmp_frame2 = Frame(self.exportframe)
 		tmp_frame2.pack()
 		self.savestack = IntVar()
+		self.savestack.set(1)
 		self.saveStackBox = Checkbutton(tmp_frame2, variable=self.savestack, text="Save aligned stack", command=self.saveStackModeChanged)
 		self.saveStackBox.pack(side=LEFT, padx=5, pady=3)
 		self.change_export_location_button = Button(tmp_frame2 ,text='Change Export Location', width=18, command=self.changeExportLocationStack)
@@ -579,12 +586,14 @@ class Auto2dxGUI(Frame):
 		self.line2 = Frame(self.exportframe, height=2, bd=1, relief=SUNKEN)
 		self.line2.pack(fill=X, padx=5, pady=3)
 		
-		self.tmp_location = "/tmp"
+		self.tmp_location = "/media/cina_automator/cache"
+		if not os.path.exists(self.tmp_location):
+			self.tmp_location = "/tmp" 
+		
 		self.tmp_location_label = Label(self.exportframe, text="Temp Location:\n" + self.tmp_location, width=45)
 		self.tmp_location_label.pack(pady=3)
 		self.change_tmp_location_button = Button(self.exportframe ,text='Change Temp Location', width=20, command=self.changeTempLocation)
 		self.change_tmp_location_button.pack(padx=5, pady=3)
-		
 		
 		self.troubles_button = Button(self.centralleftframe ,text='Troubleshoot ', width=20, command=self.troubleshootGUI)
 		self.troubles_button.pack(padx=20, pady=8)
@@ -635,7 +644,8 @@ class Auto2dxGUI(Frame):
 		wait = 1
 		refresh = 1
 		self.watcher = MotionCorrectionWatcher(refresh, wait, self.input_dir, self.output_dir, logfile, first_frame=self.minframe, last_frame=self.maxframe)
-	
+		self.watcher.tmp_location = self.tmp_location
+
 		self.default_image = Image.new("RGB", (n,n), "white")
 		self.default_tkimage = ImageTk.PhotoImage(self.default_image)
 		

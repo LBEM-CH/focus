@@ -29,7 +29,6 @@ class MotionCorrectionWatcher(WatcherBase):
 		self.mode = 0
 		self.storestack = 0
 		self.storelocation = "-"
-		self.tmp_location = "/tmp"
 		self.input_mode = 1
 		self.filter_string = ".mrc"
 	
@@ -74,8 +73,6 @@ class MotionCorrectionWatcher(WatcherBase):
 		
 		old_path = os.getcwd()
 		os.chdir(self.tmp_location)
-		
-		# introduce align to first 
 		
 		if self.mode == 0:
 			align_to = 1

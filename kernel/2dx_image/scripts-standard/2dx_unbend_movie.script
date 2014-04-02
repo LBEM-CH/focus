@@ -491,36 +491,39 @@ echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
 
 echo "<<@evaluate>>"
 
-python ${bin_2dx}/movie_mode_py/rolling_ave.py ${movie_imagenumber_touse} ${movie_window} ${nonmaskimagename}
 
-set rolling_1 = `echo ${movie_window} | awk '{s = int( $1/2 + 1 ) } END { print s }'`
-set rolling_end = `echo ${movie_imagenumber_touse} ${movie_window} | awk '{s = int($1 - int( $2/ 2)) } END { print s }'`
+#python ${bin_2dx}/movie_mode_py/rolling_ave.py ${movie_imagenumber_touse} ${movie_window} ${nonmaskimagename}
 
-@ i = ${rolling_1}
-while ($i <= ${rolling_end})
-	setenv IN frames/rolling_aves/ave_${i}.mrc
-	setenv OUT frames/rolling_aves/ave_${i}.fft.mrc
-	${bin_2dx}/2dx_fftrans.exe
+#set rolling_1 = `echo ${movie_window} | awk '{s = int( $1/2 + 1 ) } END { print s }'`
+#set rolling_end = `echo ${movie_imagenumber_touse} ${movie_window} | awk '{s = int($1 - int( $2/ 2)) } END { print s }'`
+
+#@ i = 1
+#while ($i <= ${rolling_end})
+#	setenv IN frames/rolling_aves/ave_${i}.mrc
+#	setenv OUT frames/rolling_aves/ave_${i}.fft.mrc
+#	${bin_2dx}/2dx_fftrans.exe
 	
-	echo  "# IMAGE: frames/rolling_aves/ave_${i}.fft.mrc <Rolling ave fft #${i}>" >> LOGS/${scriptname}.results
-	
-${bin_2dx}/2dx_mmboxa.exe << eot
-frames/rolling_aves/ave_${i}.mrc
-${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-frames/rolling_aves/ave_${i}.fou.nolimit.aph
-SCRATCH/TMP9873.dat
-U2
-${refposix},${refposiy}           ! XORIG,YORIG
-200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}                         ! Lattice vectors
-eot
-	
-	@ i += 1
-end
+#	echo  "# IMAGE: frames/rolling_aves/ave_${i}.fft.mrc <Rolling ave fft #${i}>" >> LOGS/${scriptname}.results
+	#
+#${bin_2dx}/2dx_mmboxa.exe << eot
+#frames/rolling_aves/ave_${i}.mrc
+#${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+#Y                               ! Use grid units?
+#Y                               ! Generate grid from lattice?
+#N                               ! Generate points from lattice?
+#2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+#frames/rolling_aves/ave_${i}.fou.nolimit.aph
+#SCRATCH/TMP9873.dat
+#U2
+#${refposix},${refposiy}           ! XORIG,YORIG
+#200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+#${lattice}                         ! Lattice vectors
+#eot
+#	
+#	@ i += ${movie_window}
+#end
+
+#python ${bin_2dx}/movie_mode_py/rolling_ave_collect.py ${movie_imagenumber_touse} ${movie_window} frames/rolling_aves/aph_data.txt
 
 
 if ( ${movie_show_fftraw} == '1' ) then
@@ -555,7 +558,7 @@ if ( ${movie_show_cc} == '1' ) then
 	end
 endif
 
-\rm -rf frames/frame*
+#\rm -rf frames/frame*
 
 pdf2ps frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results

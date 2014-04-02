@@ -586,7 +586,7 @@ if ( ${movie_show_cc} == '1' ) then
 	end
 endif
 
-#\rm -rf frames/frame*
+\rm -rf frames/frame*
 
 pdf2ps frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results

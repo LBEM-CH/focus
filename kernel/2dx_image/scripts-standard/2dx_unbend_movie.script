@@ -61,7 +61,7 @@
 # DISPLAY: movie_show_fftcorr
 # DISPLAY: movie_show_frame
 # DISPLAY: movie_show_cc
-# DISPLAY: movie_window
+# DISPLAY: movie_refbox
 #
 #$end_local_vars
 #
@@ -139,7 +139,7 @@ set movie_show_fftraw = ""
 set movie_show_fftcorr = ""
 set movie_show_frame = ""
 set movie_show_cc = ""
-set movie_window = ""
+set movie_refbox = ""
 #
 #$end_vars
 #
@@ -200,6 +200,8 @@ set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
 \rm -f SCRATCH/errout2${imagename}.dat
 \rm -f SPIDERCOORD.spi
   
+${proc_2dx}/linblock "Updating Error Field" 
+ 
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpredb}                     ! IPASS,NRANGE
 ${cormap}
@@ -215,6 +217,29 @@ ${createmask}			! dont create manual Masking information
 0                               ! Mask the image directly
 eot
 
+${proc_2dx}/linblock "Boxing reference"
+
+\rm -f SCRATCH/refbm${imagename}.flt.mrc
+setenv IN  SCRATCH/ref${imagename}.flt.unbend2.mrc
+setenv OUT SCRATCH/refbm${imagename}.flt.mrc
+${bin_2dx}/2dx_boximage.exe << eot
+-1 0                        ! NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
+0 0                         ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
+${refposix} ${refposiy}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
+${movie_refbox}
+eot
+
+echo  "# IMAGE: SCRATCH/refbm${imagename}.flt.mrc <Movie Mode Ref>" >> LOGS/${scriptname}.results
+
+${proc_2dx}/linblock "FFT of REF"
+
+\rm -f SCRATCH/refm${imagename}.fft.mrc
+setenv IN  SCRATCH/refbm${imagename}.flt.mrc
+setenv OUT SCRATCH/refm${imagename}.fft.mrc
+${bin_2dx}/2dx_fftrans.exe
+
+echo  "# IMAGE: SCRATCH/refm${imagename}.fft.mrc <Movie Mode Ref (FFT)>" >> LOGS/${scriptname}.results
+
 
 @ i = 1
 while ($i <= ${movie_imagenumber_touse})
@@ -225,10 +250,13 @@ while ($i <= ${movie_imagenumber_touse})
 
 	echo frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	
+	# FFT of frame
 	setenv IN frames/frame_${i}/${nonmaskimagename}_${i}.mrc
 	setenv OUT frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
 	
+	
+	# Mask FFT of frame
 	setenv IN  frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
 	setenv SPOTS ${imagename}.spt
@@ -241,17 +269,18 @@ while ($i <= ${movie_imagenumber_touse})
 	${lattice},-30,30,-30,30,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
 
-	set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-	set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+	
+	## CC with the ref
 	\rm -f frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	setenv IN1 frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
-	setenv IN2 SCRATCH/ref1${imagename}.fft.unbend2.mrc
+	setenv IN2 SCRATCH/refm${imagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	${bin_2dx}/twofile.exe << eot
 		2 ! ICOMB = 2
 		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
 	
+	## Quad search
 	/bin/rm -f frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
 	setenv IN frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
@@ -267,7 +296,6 @@ eot
 	set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
 	set valspotscan = '0'
 	set createmask = '0'
-	
 		
 	if ( ${movie_masking_mode} == '0' ) then
 		${bin_2dx}/2dx_quadserchk-2.exe << eot
@@ -331,7 +359,7 @@ eot
 	set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
 	\rm -f frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
 	setenv IN1 frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
-	setenv IN2 SCRATCH/ref1${imagename}.fft.unbend2.mrc
+	setenv IN2 SCRATCH/refm${imagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
 	${bin_2dx}/twofile.exe << eot
 		2 ! ICOMB = 2

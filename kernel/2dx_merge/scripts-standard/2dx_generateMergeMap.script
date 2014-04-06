@@ -259,7 +259,7 @@ eot
 LABIN F1=F  PHI=PHI   W=FOM ##
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
-SYMMETRY ${CCP4_SYM}
+SYMMETRY P1
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID 200 200 200
@@ -280,7 +280,7 @@ eot
 LABIN F1=F  PHI=PHI  W=FOM ##
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
-SYMMETRY ${CCP4_SYM}
+SYMMETRY P1
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID 220 220 220

@@ -189,6 +189,8 @@ setenv PROFDATA SCRATCH/prof${imagename}.dat
 setenv ERRORS   SCRATCH/errout${imagename}.dat
 setenv ERROUT   SCRATCH/errout2${imagename}.dat
 
+
+
 set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
 set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
 set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
@@ -217,32 +219,46 @@ ${createmask}			! dont create manual Masking information
 0                               ! Mask the image directly
 eot
 
-${proc_2dx}/linblock "Boxing reference"
 
-\rm -f SCRATCH/refbm${imagename}.flt.mrc
-setenv IN  SCRATCH/ref${imagename}.flt.unbend2.mrc
-setenv OUT SCRATCH/refbm${imagename}.flt.mrc
-${bin_2dx}/2dx_boximage.exe << eot
--1 0                        ! NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
-0 0                         ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
-${refposix} ${refposiy}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
-${movie_refbox}
-eot
+@ i = 1
+while ($i <= ${movie_imagenumber_touse})
+	echo "LP on: " frames/frame_${i}/${nonmaskimagename}_${i}.mrc
+	echo `python ${bin_2dx}/movie_mode_py/getFilter.py ${i}`
+	python ${bin_2dx}/movie_mode_py/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie_mode_py/getFilter.py ${i}` ${i}
+@ i += 1
+end
 
-echo  "# IMAGE: SCRATCH/refbm${imagename}.flt.mrc <Movie Mode Ref>" >> LOGS/${scriptname}.results
-
-${proc_2dx}/linblock "FFT of REF"
-
-\rm -f SCRATCH/refm${imagename}.fft.mrc
-setenv IN  SCRATCH/refbm${imagename}.flt.mrc
-setenv OUT SCRATCH/refm${imagename}.fft.mrc
-${bin_2dx}/2dx_fftrans.exe
-
-echo  "# IMAGE: SCRATCH/refm${imagename}.fft.mrc <Movie Mode Ref (FFT)>" >> LOGS/${scriptname}.results
+echo  "# IMAGE: weight.mrc <Fourier weights>" >> LOGS/${scriptname}.results
 
 
 @ i = 1
 while ($i <= ${movie_imagenumber_touse})
+	
+	
+	set test = `echo ${i} ${movie_refbox} | awk '{s = $2 + int($1/10)*50 } END { print s }'`
+	
+	${proc_2dx}/linblock "Boxing reference: ${test}"
+
+	\rm -f SCRATCH/refbm${imagename}.flt.mrc
+	setenv IN  SCRATCH/ref${imagename}.flt.unbend2.mrc
+	setenv OUT SCRATCH/refbm${imagename}.flt.mrc
+	${bin_2dx}/2dx_boximage.exe << eot
+-1 0                        ! NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
+0 0                         ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
+${refposix} ${refposiy}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
+${test}
+eot
+
+	echo  "# IMAGE: SCRATCH/refbm${imagename}.flt.mrc <Movie Mode Ref>" >> LOGS/${scriptname}.results
+	#${proc_2dx}/linblock "FFT of REF"
+
+	\rm -f SCRATCH/refm${imagename}.fft.mrc
+	setenv IN  SCRATCH/refbm${imagename}.flt.mrc
+	setenv OUT SCRATCH/refm${imagename}.fft.mrc
+	${bin_2dx}/2dx_fftrans.exe
+
+	echo  "# IMAGE: SCRATCH/refm${imagename}.fft.mrc <Movie Mode Ref (FFT)>" >> LOGS/${scriptname}.results
+
 	
 	set image_dir = `pwd`	
 	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize"
@@ -292,8 +308,6 @@ eot
     setenv PROFDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
     setenv ERRORS   SCRATCH/errout2${imagename}.dat
 
-	set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
-	set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
 	set valspotscan = '0'
 	set createmask = '0'
 		
@@ -377,8 +391,7 @@ eot
     setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
     setenv ERRORS   SCRATCH/errout2${imagename}.dat
 
-	#set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
-	#set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
+
 	set valspotscan = '0'
 	set createmask = '0'
 	${bin_2dx}/2dx_quadserchk-2.exe << eot
@@ -438,6 +451,7 @@ end
 \mkdir frames/rolling_aves
 
 python ${bin_2dx}/movie_mode_py/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
+python ${bin_2dx}/movie_mode_py/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum.mrc
 
 setenv IN  frames/direct_sum.mrc
 setenv OUT frames/direct_sum_fixed.mrc
@@ -553,6 +567,10 @@ echo "<<@evaluate>>"
 
 #python ${bin_2dx}/movie_mode_py/rolling_ave_collect.py ${movie_imagenumber_touse} ${movie_window} frames/rolling_aves/aph_data.txt
 
+python ${bin_2dx}/movie_mode_py/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
+pdf2ps frames/sd.pdf frames/sd.ps
+echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
+
 
 if ( ${movie_show_fftraw} == '1' ) then
 	@ i = 1
@@ -586,7 +604,7 @@ if ( ${movie_show_cc} == '1' ) then
 	end
 endif
 
-\rm -rf frames/frame*
+#\rm -rf frames/frame*
 
 pdf2ps frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results

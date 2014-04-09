@@ -87,7 +87,8 @@ set(MOC_HDRS
 	albumView.h
 	albumViewer.h
 	imageAlbum.h
-        eulerWindow.h
+	eulerWindow.h
+	reprojectWindow.h
 	importBox.h  
 	importTool.h  
 	mainWindow.h  

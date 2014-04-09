@@ -325,9 +325,9 @@ ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for v
 #############################################################################
 #
 set infile = APH/latfitted_nosym.hkl
-\rm -f merge3D.mtz
+\rm -f SCRATCH/merge3D.mtz
 #
-${bin_ccp4}/f2mtz hklin ${infile} hklout merge3D.mtz << eof
+${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3D.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -362,7 +362,80 @@ eof
 #
 #
 #############################################################################
-${proc_2dx}/linblock "sftools - to extend to P1 symmetry"
+${proc_2dx}/linblock "sftools - to extend to P1 symmetry, for volume"
+#############################################################################  
+#
+\rm -f SCRATCH/merge3D-clean.mtz
+#
+${bin_ccp4}/sftools << eof
+read SCRATCH/merge3D.mtz
+sort h k l 
+set spacegroup
+${CCP4_SYM}
+select phaerr
+select invert
+purge
+y
+write SCRATCH/merge3D-clean.mtz
+quit
+eof
+#
+\rm -f SCRATCH/merge3D-clean-p1.mtz
+#
+${bin_ccp4}/cad hklin1 SCRATCH/merge3D-clean.mtz hklout SCRATCH/merge3D-clean-p1.mtz << eof
+reso overall 10000 1
+outlim spacegroup 1
+labin file 1 all
+end
+eof
+#
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+# Something is needed her for the case of P2 and similar symmetries,
+# where the symmetrization by CCP4 (sftools below) is happening in Y and not in Z direction.
+# So, we first need to rotate the entire HKL dataset from Z into Y direction, 
+# then expand to SPACEGROUP 1, and then rotate back from Y into Z direction.
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#
+# ${proc_2dx}/lin "rotate_to_Z = ${rotate_to_Z}" 
+# if (  ${rotate_to_Z} == "yes" ) then
+#   set AXIS = "Z,X,Y"
+# else
+#   set AXIS = "X,Y,Z"
+# endif
+#
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+#
+\rm -f merge3D.mtz
+#
+${bin_ccp4}/sftools << eof
+read SCRATCH/merge3D-clean-p1.mtz
+sort h k l 
+set spacegroup
+1
+reduce matrix 1 0 0 0 1 0 0 0 1
+write merge3D.mtz
+quit
+eof
+#
+#
+#############################################################################
+${proc_2dx}/linblock "sftools - to extend to P1 symmetry, for reference"
 #############################################################################  
 #
 \rm -f SCRATCH/merge3Dref-clean.mtz

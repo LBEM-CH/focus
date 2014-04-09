@@ -7,6 +7,7 @@ def w(x):
 	return 0.7559*exp(-0.06881*x)
 
 def getCutoff(n):
+	#return 0.5
 	return min(0.5, w(n))
 
 if __name__ == "__main__":

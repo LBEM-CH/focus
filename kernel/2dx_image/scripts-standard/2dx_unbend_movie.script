@@ -230,6 +230,11 @@ end
 
 echo  "# IMAGE: weight.mrc <Fourier weights>" >> LOGS/${scriptname}.results
 
+\mkdir frames/dia
+set Nstart = '1'
+set Nhalf = `echo ${movie_imagenumber_touse} | awk '{s = int($1/2) } END { print s }'`
+set Nend = ${movie_imagenumber_touse}
+
 
 @ i = 1
 while ($i <= ${movie_imagenumber_touse})
@@ -443,6 +448,21 @@ eot
 	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
+	
+	if (${i} == ${Nstart}) then
+		pdftk A=ccplot.pdf cat A1 output out1.pdf
+		\cp -f out1.pdf frames/dia/prof_first.pdf
+	endif
+	
+	if (${i} == ${Nhalf}) then
+		pdftk A=ccplot.pdf cat A1 output out2.pdf
+		\cp -f out2.pdf frames/dia/prof_half.pdf
+	endif
+	
+	if (${i} == ${Nend}) then
+		pdftk A=ccplot.pdf cat A1 output out3.pdf
+		\cp -f out3.pdf frames/dia/prof_last.pdf
+	endif	
 
 	@ i += 1
 end
@@ -603,6 +623,14 @@ if ( ${movie_show_cc} == '1' ) then
 		@ i += 1
 	end
 endif
+
+\cp -f frames/frame_${Nstart}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_start.mrc
+\cp -f frames/frame_${Nhalf}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_half.mrc
+\cp -f frames/frame_${Nend}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_end.mrc
+
+e2proc2d.py frames/dia/cc_start.mrc frames/dia/cc_start.jpg
+e2proc2d.py frames/dia/cc_half.mrc frames/dia/cc_half.jpg
+e2proc2d.py frames/dia/cc_end.mrc frames/dia/cc_end.jpg
 
 #\rm -rf frames/frame*
 

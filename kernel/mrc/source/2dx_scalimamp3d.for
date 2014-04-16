@@ -62,7 +62,7 @@ C               - output for CURVY on 'SCALIMAMP3D.DAT'         - unit 2
 C               - scaled up version of required data on  'OUT'  - unit 3
 C
 C****************************************************************************** 
-      PARAMETER (NMAX=80000)
+      PARAMETER (NMAX=160000)
       PARAMETER (NSLOTS=2000)
       PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)
@@ -537,7 +537,7 @@ C*SCALORIGTILT*****************************************************************
      .          AMPOUT,BCKOUT,ASTAR,BSTAR,GSTAR,
      .          BR3DT,BRSPAC,AVERREF,IR,IRESTEP,
      .          BXYMIN,BXYMAX,BZMIN,BZMAX,RESLIMXY,RESLIMZ,BEXTRA)
-      PARAMETER (NMAX=80000)
+      PARAMETER (NMAX=160000)
       PARAMETER (NSLOTS=2000)
       PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)

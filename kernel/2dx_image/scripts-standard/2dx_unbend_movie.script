@@ -165,9 +165,7 @@ endif
 
 # Generate subfolder for frame images
 set frame_folder = "frames"
-if ( -e ${frame_folder}) then
-	\rm -rf ${frame_folder}
-endif
+\rm -rf ${frame_folder}
 \mkdir ${frame_folder}
 	
 python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename}
@@ -431,6 +429,7 @@ eot
 
 	if ( ${i} == '1' ) then
 		ps2pdf CCPLOT.PS frame_unbending.pdf
+		\cp -f frame_unbending.pdf ccplot.pdf
 		pdftk A=frame_unbending.pdf cat A1 output out.pdf
 		mv out.pdf frame_unbending.pdf
 	else
@@ -452,16 +451,19 @@ eot
 	if (${i} == ${Nstart}) then
 		pdftk A=ccplot.pdf cat A1 output out1.pdf
 		\cp -f out1.pdf frames/dia/prof_first.pdf
+		convert frames/dia/prof_first.pdf frames/dia/prof_first.jpg
 	endif
 	
 	if (${i} == ${Nhalf}) then
 		pdftk A=ccplot.pdf cat A1 output out2.pdf
 		\cp -f out2.pdf frames/dia/prof_half.pdf
+		convert frames/dia/prof_half.pdf frames/dia/prof_half.jpg
 	endif
 	
 	if (${i} == ${Nend}) then
 		pdftk A=ccplot.pdf cat A1 output out3.pdf
 		\cp -f out3.pdf frames/dia/prof_last.pdf
+		convert frames/dia/prof_last.pdf frames/dia/prof_last.jpg
 	endif	
 
 	@ i += 1
@@ -589,8 +591,8 @@ echo "<<@evaluate>>"
 
 python ${bin_2dx}/movie_mode_py/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
 pdf2ps frames/sd.pdf frames/sd.ps
+convert frames/sd.ps frames/sd.jpg
 echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
-
 
 if ( ${movie_show_fftraw} == '1' ) then
 	@ i = 1
@@ -632,7 +634,11 @@ e2proc2d.py frames/dia/cc_start.mrc frames/dia/cc_start.jpg
 e2proc2d.py frames/dia/cc_half.mrc frames/dia/cc_half.jpg
 e2proc2d.py frames/dia/cc_end.mrc frames/dia/cc_end.jpg
 
-#\rm -rf frames/frame*
+python ${bin_2dx}/movie_mode_py/generate_dia.py movie_dia.pdf
+convert movie_dia.pdf movie_dia.ps
+echo "# IMAGE: movie_dia.ps <Movie Mode Diagnostics>" >> LOGS/${scriptname}.results
+
+\rm -rf frames/frame*
 
 pdf2ps frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results

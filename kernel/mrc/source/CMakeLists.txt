@@ -209,6 +209,7 @@ add_subdirectory(maximum_likelihood)
 add_subdirectory(diffmap)
 add_subdirectory(py_util)
 add_subdirectory(movie_mode_py)
+add_subdirectory(RUtils)
 
 
 ###############################################################################

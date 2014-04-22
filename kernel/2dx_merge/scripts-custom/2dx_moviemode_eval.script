@@ -1,0 +1,125 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Eval movie mode                                                    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2007                                             #
+# Last Modification: 10/01/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 11
+#
+# MANUAL: Adapt this script to do some task on all selected image directories.
+#
+# MANUAL: To do so, double-click on the script name in the "Customs Script" panel. Edit the script, save it, and use it for your purposes.
+#
+#
+#
+#$end_local_vars
+#
+# This defines some variables that we might need:
+set proc_2dx = ""
+set bin_2dx = ""
+set app_2dx_image = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+#$end_vars
+#
+# This sets the scriptname variable:
+set scriptname = 2dx_moviemode_eval
+#
+# This removes the old logfile, so that a new fresh one can be created:
+\rm -f LOGS/${scriptname}.results
+\rm -f movie_factor.pdf
+\rm -f PS/movie_factor.ps
+#
+# This initializes the ccp4 environment, and other variables.
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+# This advances the progress bar to the 1% position:
+echo "<<@progress: 1>>"
+#
+# This creates all needed subdirectories in the current merge directory, in case they are missing:
+source ${proc_2dx}/2dx_makedirs 
+#
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+set tmp = `wc -l 2dx_merge_dirfile.dat`
+set images_num = `echo ${tmp} | cut -d\  -f1`
+set images_increment = `echo ${images_num} | awk '{ s = 80.0 / $1 } END { print s }'`
+set images_current = 10.0
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "<<@progress: 10>>"
+#
+# This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
+
+set data_file = SCRATCH/movie_data.txt
+rm -f $data_file
+
+set dia_file = "dia.pdf"
+rm -f $dia_file
+touch $dia_file
+
+echo "QVal2 QValM Factor" >> $data_file
+
+@ i = 1
+
+foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
+  echo "::Working on ${newdir}"
+  # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
+  #echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+  #echo "set dummy = 1" >> LOGS/${scriptname}.results
+  set images_progres = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
+  echo "<<@progres: ${images_progres}>>"
+  set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
+
+  echo `python ${bin_2dx}/movie_mode_py/getQvals.py ${newdir}/2dx_image.cfg` >> $data_file
+
+  if ( ${i} == '1' ) then
+    cp -f ${newdir}/movie_dia.pdf $dia_file
+    @ i = 10
+  else
+    set dia_name = ${newdir}/movie_dia.pdf
+    if ( -e $dia_name ) then
+      pdftk A=$dia_name B=$dia_file cat B A output out.pdf
+      mv out.pdf $dia_file
+    endif
+  endif
+
+  set config_file = ${newdir}/2dx_image.cfg
+  echo "Config: $config_file"
+
+# This tells 2dx_merge that the output for the image is done:
+  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+end
+
+Rscript ${bin_2dx}/RUtils/plotMovieImprovement.r
+pdf2ps "movie_factor.pdf" "PS/movie_factor.ps"
+echo "# IMAGE: PS/movie_factor.ps <Improvement>" >> LOGS/${scriptname}.results
+
+echo "# IMAGE: dia.pdf <Movie Mode Dia>" >> LOGS/${scriptname}.results
+
+#
+# Move the progress bar to 100%:
+echo "<<@progress: 100>>"
+#
+# Leave a message on the logfile that the script finished:
+${proc_2dx}/linblock "${scriptname} finished correctly."
+#
+
+

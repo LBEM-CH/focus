@@ -57,6 +57,7 @@
 # DISPLAY: MergeIWP
 # DISPLAY: MergeLatLine_MaxAmpFactor
 # DISPLAY: MergeLatLine_REDUCAC
+# DISPLAY: MergeLatLine_RFOMSCALE
 # DISPLAY: max_amp_correction
 # DISPLAY: plotres_rings
 # DISPLAY: scalimamp3d_rref
@@ -108,6 +109,7 @@ set MergeIWF = ""
 set MergeIWP = ""
 set MergeLatLine_MaxAmpFactor = ""
 set MergeLatLine_REDUCAC = ""
+set MergeLatLine_RFOMSCALE = ""
 set max_amp_correction = ""
 set plotres_rings = ""
 set lattice = ""

@@ -71,7 +71,7 @@ set dia_file = "dia.pdf"
 rm -f $dia_file
 touch $dia_file
 
-echo "QVal2 QValM Factor" >> $data_file
+echo "QVal2 QValM Factor Ang" >> $data_file
 
 @ i = 1
 

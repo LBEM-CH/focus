@@ -17,5 +17,8 @@ if __name__ == "__main__":
 		if line.startswith("set QVALS"):
 			qvalS = float(line.split('"')[1])
 			continue
+		if line.startswith("set TLTANG"):
+			ang = float(line.split('"')[1])
+			continue
 	
-	print qval2, qvalS, round(qvalS/qval2,2)
+	print qval2, qvalS, round(qvalS/qval2,2), abs(ang)

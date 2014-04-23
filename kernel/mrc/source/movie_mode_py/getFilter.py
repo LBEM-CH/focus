@@ -4,6 +4,7 @@ from sparx import *
 import os
 
 def w(x):
+	#return 0.5
 	return 0.7559*exp(-0.06881*x)
 
 def getCutoff(n):

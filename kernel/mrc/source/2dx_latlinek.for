@@ -612,7 +612,7 @@ C-------------This is a dirty hack, to fudge something that
 C-------------looks ok in the latline plots....
 C-------------This is not a scientifically sound solution...:
               if(abs(SIGF(J)).gt.0.001)then
-                FMERIT=((F/SIGF(J))**2)/25.0 
+                FMERIT=((F/SIGF(J))**2)/10.0 
               else
                 FMERIT=0.0
               endif

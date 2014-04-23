@@ -150,6 +150,13 @@ eot
     endif
   endif
   #
+  if ( ${MergeLatLine_RFOMSCALE}x == "0.0x" ) then
+    set MergeLatLine_RFOMSCALE = 1.0
+    echo "::Correcting MergeLatLine_RFOMSCALE to ${MergeLatLine_RFOMSCALE}"
+    echo "set MergeLatLine_RFOMSCALE = ${MergeLatLine_RFOMSCALE}" >> LOGS/${scriptname}.results
+  endif
+  echo MergeLatLine_RFOMSCALE = ${MergeLatLine_RFOMSCALE}
+  #
   echo " "
   ${proc_2dx}/lin "-"
   echo " "
@@ -221,7 +228,7 @@ ${MergeIGUESS},${MergeBINSIZ}                                ! IGUESS,BINSIZ
 ${MergeNCYCLS},${MergeMPRINT}                                ! NCYCLS,MPRINT
 ${idoh},${idok}                                              ! H,K indices to plot. 0 0 = all.
 ${IAQP2},${iplterr},${imaxIQplot}                            ! IAQP2: 1=y,0=n, iplterr=1:errbar in PHS, maxIQ for PSplot
-${RMAXAMP}
+${RMAXAMP},${MergeLatLine_RFOMSCALE}                         ! RMAXAMP: maximum amplitude; RFOMSCALE: increase in FOM for symmetry-restricted lattice lines
 eot
 #
 echo "################################################"

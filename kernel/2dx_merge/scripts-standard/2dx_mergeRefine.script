@@ -45,6 +45,7 @@
 # DISPLAY: MergeHKMAX
 # DISPLAY: Merge_Reference_HKMAX
 # DISPLAY: MergeLatLine_REDUCAC
+# DISPLAY: MergeLatLine_RFOMSCALE
 # DISPLAY: AMP_Scale_Factor
 # DISPLAY: ILIST
 # DISPLAY: MergeIPAT
@@ -128,6 +129,7 @@ set MergeNCYCLS = ""
 set MergeMPRINT = ""
 set MergeLatLine_MaxAmpFactor = ""
 set MergeLatLine_REDUCAC = ""
+set MergeLatLine_RFOMSCALE = ""
 set refbeamtilt = ""
 set reftiltgeo = ""
 set ITAXASTEP = ""

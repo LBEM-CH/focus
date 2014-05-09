@@ -88,18 +88,20 @@ foreach dirfile ( ${dirlist} )
   echo "<<@progres: ${images_progres}>>"
   set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
 
-  echo `python ${bin_2dx}/movie_mode_py/getQvals.py ${newdir}/2dx_image.cfg` >> $data_file
-
-  if ( ${i} == '1' ) then
-    cp -f ${newdir}/movie_dia.pdf $dia_file
-    @ i = 10
-  else
-    set dia_name = ${newdir}/movie_dia.pdf
-    if ( -e $dia_name ) then
-      pdftk A=$dia_name B=$dia_file cat B A output out.pdf
-      mv out.pdf $dia_file
-    endif
-  endif
+  echo `python ${bin_2dx}/movie_mode_py/getQvals.py ${newdir}/LOGS/2dx_unbend_movie.results ${newdir}/2dx_image.cfg` >> $data_file
+  
+  python ${bin_2dx}/movie_mode_py/getQvalsInspect.py ${newdir}/LOGS/2dx_unbend_movie.results ${newdir}/2dx_image.cfg
+  
+  #if ( ${i} == '1' ) then
+  #  cp -f ${newdir}/movie_dia.pdf $dia_file
+  #  @ i = 10
+  #else
+  #  set dia_name = ${newdir}/movie_dia.pdf
+  #  if ( -e $dia_name ) then
+  #    pdftk A=$dia_name B=$dia_file cat B A output out.pdf
+  #    mv out.pdf $dia_file
+  #  endif
+  #endif
 
   set config_file = ${newdir}/2dx_image.cfg
   echo "Config: $config_file"

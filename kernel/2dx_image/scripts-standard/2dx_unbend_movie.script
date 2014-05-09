@@ -62,6 +62,7 @@
 # DISPLAY: movie_show_frame
 # DISPLAY: movie_show_cc
 # DISPLAY: movie_refbox
+# DISPLAY: movie_imagenumber_toave
 #
 #$end_local_vars
 #
@@ -140,6 +141,7 @@ set movie_show_fftcorr = ""
 set movie_show_frame = ""
 set movie_show_cc = ""
 set movie_refbox = ""
+set movie_imagenumber_toave = ""
 #
 #$end_vars
 #
@@ -168,7 +170,8 @@ set frame_folder = "frames"
 \rm -rf ${frame_folder}
 \mkdir ${frame_folder}
 	
-python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename}
+python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
+
 
 foreach f  (`ls frames`)
 	\cp 2dx_image.cfg frames/$f/
@@ -219,11 +222,13 @@ eot
 
 
 @ i = 1
+@ n = 1
 while ($i <= ${movie_imagenumber_touse})
 	echo "LP on: " frames/frame_${i}/${nonmaskimagename}_${i}.mrc
-	echo `python ${bin_2dx}/movie_mode_py/getFilter.py ${i}`
-	python ${bin_2dx}/movie_mode_py/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie_mode_py/getFilter.py ${i}` ${i}
-@ i += 1
+	echo `python ${bin_2dx}/movie_mode_py/getFilter.py ${n}`
+	python ${bin_2dx}/movie_mode_py/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie_mode_py/getFilter.py ${n}` ${i}
+	@ i += 1
+	@ n += ${movie_imagenumber_toave}
 end
 
 echo  "# IMAGE: weight.mrc <Fourier weights>" >> LOGS/${scriptname}.results
@@ -235,15 +240,18 @@ set Nend = ${movie_imagenumber_touse}
 
 
 @ i = 1
+@ n = 1
 while ($i <= ${movie_imagenumber_touse})
 	
 	
-	set test = `echo ${i} ${movie_refbox} | awk '{s = $2 + int($1/10)*50 } END { print s }'`
-	
+	#set test = `echo ${n} ${movie_refbox} | awk '{s = $2 + int($1/10)*50 } END { print s }'`
+	set test = ${movie_refbox}
+
 	${proc_2dx}/linblock "Boxing reference: ${test}"
 
 	\rm -f SCRATCH/refbm${imagename}.flt.mrc
-	setenv IN  SCRATCH/ref${imagename}.flt.unbend2.mrc
+	#setenv IN  SCRATCH/ref${imagename}.flt.unbend2.mrc
+	setenv IN  SCRATCH/${imagename}.unbent-filtered.mrc
 	setenv OUT SCRATCH/refbm${imagename}.flt.mrc
 	${bin_2dx}/2dx_boximage.exe << eot
 -1 0                        ! NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
@@ -417,7 +425,7 @@ eot
 	set ITYPE = 0
 	set ROFFSET = 50.0
 	set NNUM = 6
-	set facthresha = 0.06
+	set facthresha = 0.05
 	${bin_2dx}/2dx_ccunbendk.exe << eot
 frames/frame_${i}/${nonmaskimagename}_${i}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
@@ -448,25 +456,59 @@ eot
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
 	
-	if (${i} == ${Nstart}) then
-		pdftk A=ccplot.pdf cat A1 output out1.pdf
-		\cp -f out1.pdf frames/dia/prof_first.pdf
-		convert frames/dia/prof_first.pdf frames/dia/prof_first.jpg
-	endif
+#	if (${i} == ${Nstart}) then
+#		pdftk A=ccplot.pdf cat A1 output out1.pdf
+#		\cp -f out1.pdf frames/dia/prof_first.pdf
+#		convert frames/dia/prof_first.pdf frames/dia/prof_first.jpg
+#	endif
 	
-	if (${i} == ${Nhalf}) then
-		pdftk A=ccplot.pdf cat A1 output out2.pdf
-		\cp -f out2.pdf frames/dia/prof_half.pdf
-		convert frames/dia/prof_half.pdf frames/dia/prof_half.jpg
-	endif
+#	if (${i} == ${Nhalf}) then
+#		pdftk A=ccplot.pdf cat A1 output out2.pdf
+#		\cp -f out2.pdf frames/dia/prof_half.pdf
+#		convert frames/dia/prof_half.pdf frames/dia/prof_half.jpg
+#	endif
 	
-	if (${i} == ${Nend}) then
-		pdftk A=ccplot.pdf cat A1 output out3.pdf
-		\cp -f out3.pdf frames/dia/prof_last.pdf
-		convert frames/dia/prof_last.pdf frames/dia/prof_last.jpg
-	endif	
+#	if (${i} == ${Nend}) then
+#		pdftk A=ccplot.pdf cat A1 output out3.pdf
+#		\cp -f out3.pdf frames/dia/prof_last.pdf
+#		convert frames/dia/prof_last.pdf frames/dia/prof_last.jpg
+#	endif	
+
+	${proc_2dx}/linblock "Updating Error Field" 
+
+	setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+	setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
+	setenv ERRORS   SCRATCH/errout2${imagename}.dat
+	setenv ERROUT   SCRATCH/errout3${imagename}.dat
+
+	\rm -f SPIDERCOORD.spi
+	\rm -f ${ERROUT}
+
+	set cormap = frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
+	${bin_2dx}/2dx_quadserchk-2.exe << eot
+3,${quadpredb}                     ! IPASS,NRANGE
+${cormap}
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}			! dont create manual Masking information
+0                               ! Mask the image directly
+eot
+
+	\mv -f SCRATCH/errout3${imagename}.dat SCRATCH/errout2${imagename}.dat
+	
+	#set quadradbx = 2
+	#set quadradby = 2
 
 	@ i += 1
+	@ n += ${movie_imagenumber_toave}
+
+
 end
 
 
@@ -626,17 +668,17 @@ if ( ${movie_show_cc} == '1' ) then
 	end
 endif
 
-\cp -f frames/frame_${Nstart}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_start.mrc
-\cp -f frames/frame_${Nhalf}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_half.mrc
-\cp -f frames/frame_${Nend}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_end.mrc
+#\cp -f frames/frame_${Nstart}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_start.mrc
+#\cp -f frames/frame_${Nhalf}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_half.mrc
+#\cp -f frames/frame_${Nend}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_end.mrc
 
-e2proc2d.py frames/dia/cc_start.mrc frames/dia/cc_start.jpg
-e2proc2d.py frames/dia/cc_half.mrc frames/dia/cc_half.jpg
-e2proc2d.py frames/dia/cc_end.mrc frames/dia/cc_end.jpg
+#e2proc2d.py frames/dia/cc_start.mrc frames/dia/cc_start.jpg
+#e2proc2d.py frames/dia/cc_half.mrc frames/dia/cc_half.jpg
+#e2proc2d.py frames/dia/cc_end.mrc frames/dia/cc_end.jpg
 
-python ${bin_2dx}/movie_mode_py/generate_dia.py movie_dia.pdf
-convert movie_dia.pdf movie_dia.ps
-echo "# IMAGE: movie_dia.ps <Movie Mode Diagnostics>" >> LOGS/${scriptname}.results
+#python ${bin_2dx}/movie_mode_py/generate_dia.py movie_dia.pdf
+#convert movie_dia.pdf movie_dia.ps
+#echo "# IMAGE: movie_dia.ps <Movie Mode Diagnostics>" >> LOGS/${scriptname}.results
 
 \rm -rf frames/frame*
 

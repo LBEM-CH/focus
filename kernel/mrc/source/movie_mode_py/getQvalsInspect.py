@@ -25,6 +25,8 @@ if __name__ == "__main__":
 		if line.startswith("set TLTANG"):
 			ang = float(line.split('"')[1])
 			continue
-			
-	if qvalS/qval2 > 1:
-		print qval2, qvalS, round(qvalS/qval2,2), abs(ang)
+	
+	if (qvalS/qval2)<=1:
+		print ":: \tRevisit", filename.split("/")[-1]
+	
+	print qval2, qvalS, round(qvalS/qval2,2), abs(ang)

@@ -28,6 +28,7 @@ displayParametersTool::displayParametersTool(QWidget *parent)
   connect(&latticeOrders,SIGNAL(valueChanged(int)),this,SLOT(changeLatticeOrders(int)));
   connect(&spotSize,SIGNAL(valueChanged(int)),this,SLOT(changeSpotSize(int)));
   connect(&latticeRefineSize,SIGNAL(valueChanged(int)),this,SLOT(changeRefinementSize(int)));
+  connect(&fontSize,SIGNAL(valueChanged(int)),this,SLOT(changeFontSize(int)));
   connect(&searchRange,SIGNAL(valueChanged(int)),this,SIGNAL(searchRangeChanged(int)));
   connect(&sigma,SIGNAL(valueChanged(double)),this,SIGNAL(sigmaChanged(double)));
   connect(&viewFit,SIGNAL(stateChanged(int)),this,SLOT(changeViewFitState(int)));
@@ -41,6 +42,10 @@ displayParametersTool::displayParametersTool(QWidget *parent)
   signalMapper->setMapping(&spotSize,&spotSize);
   connect(&latticeRefineSize,SIGNAL(editingFinished()),signalMapper,SLOT(map()));
   signalMapper->setMapping(&latticeRefineSize,&latticeRefineSize);
+  
+  connect(&fontSize,SIGNAL(editingFinished()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(&fontSize,&fontSize);
+  
   connect(&latticeCircleLine,SIGNAL(editingFinished()),signalMapper,SLOT(map()));
   signalMapper->setMapping(&latticeCircleLine,&latticeCircleLine);
   connect(&searchRange,SIGNAL(editingFinished()),signalMapper,SLOT(map()));
@@ -61,16 +66,20 @@ displayParametersTool::displayParametersTool(QWidget *parent)
   layout->addWidget(&spotSize,4,1,1,1);
   layout->addWidget(new QLabel("Lattice Refinement Circle Radius [px]:"),5,0,1,1);
   layout->addWidget(&latticeRefineSize,5,1,1,1);
-  layout->addItem(new QSpacerItem(10,20),6,0,1,1);
-  layout->addWidget(new QLabel("<b>Smart Mouse Parameters</b>"),7,0,1,1);
-  layout->addWidget(new QLabel("Maximum Value Method:"),8,0,1,1);
-  layout->addWidget(&maxValueMethodChooser,8,1,1,1);
-  layout->addWidget(new QLabel("Max Value Search Range [px]:"),9,0,1,1);
-  layout->addWidget(&searchRange,9,1,1,1);
-  layout->addWidget(new QLabel("Max Value Sigma [px]:"),10,0,1,1);
-  layout->addWidget(&sigma,10,1,1,1);
-  layout->addWidget(new QLabel("View Fit:"),11,0,1,1);
-  layout->addWidget(&viewFit,11,1,1,1);
+  
+  layout->addWidget(new QLabel("Font size (Miller indices):"),6,0,1,1);
+  layout->addWidget(&fontSize,6,1,1,1);
+  
+  layout->addItem(new QSpacerItem(10,20),7,0,1,1);
+  layout->addWidget(new QLabel("<b>Smart Mouse Parameters</b>"),8,0,1,1);
+  layout->addWidget(new QLabel("Maximum Value Method:"),9,0,1,1);
+  layout->addWidget(&maxValueMethodChooser,9,1,1,1);
+  layout->addWidget(new QLabel("Max Value Search Range [px]:"),10,0,1,1);
+  layout->addWidget(&searchRange,10,1,1,1);
+  layout->addWidget(new QLabel("Max Value Sigma [px]:"),11,0,1,1);
+  layout->addWidget(&sigma,11,1,1,1);
+  layout->addWidget(new QLabel("View Fit:"),12,0,1,1);
+  layout->addWidget(&viewFit,12,1,1,1);
   setLayout(layout);
 }
 
@@ -92,6 +101,11 @@ void displayParametersTool::changeLatticeOrders(int value)
 void displayParametersTool::changeSpotSize(int value)
 {
   emit spotSizeChanged(value*2);
+}
+
+void displayParametersTool::changeFontSize(int value)
+{
+  emit fontSizeChanged(value);
 }
 
 void displayParametersTool::changeRefinementSize(int value)
@@ -122,6 +136,7 @@ void displayParametersTool::flush()
   emit refinementSizeChanged(latticeRefineSize.value()*2);
   emit searchRangeChanged(searchRange.value());
   emit sigmaChanged(sigma.value());
+  emit fontSizeChanged(fontSize.value());
   changeSearchMethod(maxValueMethodChooser.currentIndex());
 }
 
@@ -163,6 +178,8 @@ void displayParametersTool::setDefaults()
   spotSize.setSingleStep(1);
   latticeRefineSize.setValue(5);
   latticeRefineSize.setSingleStep(1);
+  fontSize.setValue(10);
+  fontSize.setSingleStep(1);
   searchRange.setValue(15);
   searchRange.setSingleStep(1);
   sigma.setValue(1.5);

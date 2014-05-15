@@ -45,7 +45,7 @@ Output
 using namespace std;
 
 
-void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *refer2, FILE *results)
+void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *refer2, FILE *results, int unitcell_num)
 
 {
 	FILE  *input[0],  *output[2];
@@ -56,6 +56,7 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 	float Gau=2.0;
 
 	int i,j,k,m,n,k1,k2,k3,k4,Loop,num_refer,Num_angles, num_temp, Num_images;
+        int num_tem2;
 	double dev_sigma, dev_x,dev_y,sigma, dev_theta, dev_sigma_theta, dev_sigma_theta_change;
 	double new_dev_sigma, new_dev_x, new_dev_y, new_dev_theta, new_sigma, new_sigma_theta, dev_sigma_change;
 
@@ -286,25 +287,28 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 
 
 
+	        // printf("Opening File stack_whit.binary\n");
 		input[0]=fopen("stack_whit.binary","r");
+	        // printf("Opening File stack_ctf.binary\n");
 		input[1]=fopen("stack_ctf.binary","r");
 		
 		size_t result;
 		result = fread(temp_image1, sizeof(float)*nx*ny, 1, input[0]);
 		if (result != 1) 
 		{
-			fputs ("Reading error",stderr);
+			fputs ("Reading error temp_image1 (1)",stderr);
 			exit(3);
 		}
 		
 		result = fread(temp_image2, sizeof(float)*nx*ny, 1, input[1]);
 		if (result != 1) 
 		{
-			fputs ("Reading error",stderr);
+			fputs ("Reading error temp_image2 (1)",stderr);
 			exit(3);
 		}
 		
 		num_temp=Max_num;
+		num_tem2=1;
 
 		if(feof(input[0])!=0 && feof(input[1])!=0)
 		{   printf("there are not particles extracted from the files \n");
@@ -314,26 +318,31 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 		else while(num_temp==Max_num)
 		{
 			num_temp=0;
-			while(feof(input[0])==0 && num_temp<Max_num)  
+			while(num_tem2<unitcell_num && feof(input[0])==0 && num_temp<Max_num)  
 			{     
 				for(i=0;i<nx;i++)
 					for(j=0;j<ny;j++)
-					{      Image[IDX(i,j,nx,ny)+num_temp*nx*ny]=temp_image1[IDX(i,j,nx,ny)];
-						Image_CTF[IDX(i,j,nx,ny)+num_temp*nx*ny]=temp_image2[IDX(i,j,nx,ny)];
+					{       Image[IDX(i,j,nx,ny)+num_temp*nx*ny]=temp_image1[IDX(i,j,nx,ny)];
+					        Image_CTF[IDX(i,j,nx,ny)+num_temp*nx*ny]=temp_image2[IDX(i,j,nx,ny)];
 					}
 				num_temp++;
+				num_tem2++;
 				
+                                // printf("num_tem2 = %d\n",num_tem2);
+                                fflush(stdout);
 				result = fread(temp_image1, sizeof(float)*nx*ny, 1, input[0]);
 				if (result != 1) 
 				{
-					fputs ("Reading error",stderr);
+					fputs ("Reading error temp_image1 (2)\n",stderr);
 					exit(3);
 				}
 				
+                                // printf ("Running: num_temp = %d\n",&num_temp);
 				result = fread(temp_image2, sizeof(float)*nx*ny, 1, input[1]);
 				if (result != 1) 
 				{
-					fputs ("Reading error",stderr);
+                                        printf ("ERROR: num_temp = %d\n",&num_temp);
+					fputs ("Reading error temp_image2 (2)\n",stderr);
 					exit(3);
 				}
 			}                  
@@ -341,7 +350,7 @@ void maximum_likelihood( int nx, int ny, float *refer, float *refer1, float *ref
 			Num_images+=num_temp;
 
 			if(num_temp<Max_num)
-			{   fclose(input[0]);
+			{       fclose(input[0]);
 				fclose(input[1]);
 			} 
 

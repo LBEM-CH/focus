@@ -1,10 +1,10 @@
-
 #include <common.h>
 
 
 char  *  cgetline(FILE *imgcfg, char *strchar)
 {          
 	char *st,  *st1,  *st4, *st5, *st6, *pch;
+        char *strcha2;
 
 	st=(char *)calloc(200,sizeof(char));
 	st1=(char *)calloc(200,sizeof(char));
@@ -12,10 +12,15 @@ char  *  cgetline(FILE *imgcfg, char *strchar)
 	st4=(char *)calloc(200,sizeof(char));
 	st5=(char *)calloc(200,sizeof(char));
 	st6=(char *)calloc(200,sizeof(char));
+ 
+	strcha2=(char *)calloc(200,sizeof(char));
+
+        strcpy(strcha2,strchar);
+        strncat(strcha2," ",1);
 
 	if ( fgets(st,200,imgcfg) == NULL)
 	{
-		perror ("Error reading file");
+		perror ("Error reading file in cgetline (1)");
 	}
 
 	if(feof(imgcfg)==0)
@@ -26,11 +31,11 @@ char  *  cgetline(FILE *imgcfg, char *strchar)
 		strcpy(st1,"");
 		strncat(st1,st+4,115);
 
-		while(feof(imgcfg)==0 && ( strncmp(st4,"set",3)!=0 ||  strncmp(st1, strchar,strlen(strchar))!=0))
+		while(feof(imgcfg)==0 && ( strncmp(st4,"set",3)!=0 ||  strncmp(st1, strcha2,strlen(strcha2))!=0))
 		{
 			if ( fgets(st,200,imgcfg) == NULL )
 			{
-				perror ("Error reading file");
+				perror ("Error reading file in cgetline (2)");
 			}
 			
 			strcpy(st4,"");
@@ -40,7 +45,7 @@ char  *  cgetline(FILE *imgcfg, char *strchar)
 			strncat(st1,st+4,115);
 		}
 
-		if(feof(imgcfg)==0 && strncmp(st1, strchar,strlen(strchar))==0)
+		if(feof(imgcfg)==0 && strncmp(st1, strcha2,strlen(strcha2))==0)
 		{ 
 			pch=(char *)memchr(st, '"', 180);   
 			strcpy(st5,pch+1);
@@ -62,7 +67,6 @@ char  *  cgetline(FILE *imgcfg, char *strchar)
 	free(st4);
 	free(st5);
 	free(st6);  
-
 
 }
 

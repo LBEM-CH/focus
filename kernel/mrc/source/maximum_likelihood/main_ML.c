@@ -363,7 +363,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	printf("::Starting maximum_likelihood calculation\n");
 	fflush(stdout);
 
-	maximum_likelihood(realcell_x,realcell_y,refer,refer1,refer2,results);
+	maximum_likelihood(realcell_x,realcell_y,refer,refer1,refer2,results,m);
 
 
 	/*   Output reference before applying envelope into MRC format file */

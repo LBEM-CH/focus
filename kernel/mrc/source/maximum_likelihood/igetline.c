@@ -3,6 +3,7 @@
 int  igetline(FILE *imgcfg, char *strchar, int *x)
 {          
 	char *st,  *st1,  *st4, *st5, *st6, *pch;
+        char *strcha2;
 	int k, len;
 
 	st=(char *)calloc(200,sizeof(char));
@@ -11,11 +12,15 @@ int  igetline(FILE *imgcfg, char *strchar, int *x)
 	st4=(char *)calloc(200,sizeof(char));
 	st5=(char *)calloc(200,sizeof(char));
 	st6=(char *)calloc(200,sizeof(char));
+ 
+        strcha2=(char *)calloc(200,sizeof(char));
 
+        strcpy(strcha2,strchar);
+        strncat(strcha2," ",1);
 
 	if ( fgets(st,200,imgcfg) == NULL )
 	{
-		perror ("Error reading file");
+		perror ("Error reading file in igetline (1)");
 	}
 
 	if(feof(imgcfg)==0)
@@ -26,13 +31,14 @@ int  igetline(FILE *imgcfg, char *strchar, int *x)
 		strcpy(st1,"");
 		
 		//strncat(st1,st+4,200);
-		st1 = const_cast<char*>((std::string(st1) + std::string(st)).c_str());
+		// st1 = const_cast<char*>((std::string(st1) + std::string(st)).c_str());
+		strncat(st1,st+4,120);
 
-		while(feof(imgcfg)==0 && ( strncmp(st4,"set",3)!=0 ||  strncmp(st1, strchar,strlen(strchar))!=0))
+		while(feof(imgcfg)==0 && ( strncmp(st4,"set",3)!=0 ||  strncmp(st1, strcha2,strlen(strcha2))!=0))
 		{
 			if (fgets(st,200,imgcfg) == NULL )
 			{
-				perror ("Error reading file");
+				perror ("Error reading file in igetline (2)");
 			}
 			
 			strcpy(st4,"");
@@ -42,7 +48,7 @@ int  igetline(FILE *imgcfg, char *strchar, int *x)
 			strncat(st1,st+4,120);
 		}
 
-		if(feof(imgcfg)==0 && strncmp(st1, strchar,strlen(strchar))==0)
+		if(feof(imgcfg)==0 && strncmp(st1, strcha2,strlen(strcha2))==0)
 		{ 
 
 

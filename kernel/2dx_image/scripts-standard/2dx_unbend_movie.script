@@ -191,6 +191,7 @@ setenv ERRORS   SCRATCH/errout${imagename}.dat
 setenv ERROUT   SCRATCH/errout2${imagename}.dat
 
 
+set num_dia = 100
 
 set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
 set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
@@ -238,6 +239,8 @@ set Nstart = '1'
 set Nhalf = `echo ${movie_imagenumber_touse} | awk '{s = int($1/2) } END { print s }'`
 set Nend = ${movie_imagenumber_touse}
 
+touch frames/peaks_dummy
+\rm -f frames/peaks*
 
 @ i = 1
 @ n = 1
@@ -436,6 +439,15 @@ UNBENT,PASS,2,${date}
 eot
 
 	python ${bin_2dx}/movie_mode_py/deleteZeros.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
+	
+	
+	set x_1_4 = `echo ${imagesidelength} | awk '{s = int($1/4) } END { print s }'`
+	set x_3_4 = `echo ${imagesidelength} | awk '{s = int(3*$1/4) } END { print s }'`
+	
+	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_I.dat   ${x_1_4} ${x_1_4} ${num_dia} frames/peaks_I.dat
+	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_II.dat  ${x_3_4} ${x_1_4} ${num_dia} frames/peaks_II.dat
+	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} frames/peaks_III.dat
+	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} frames/peaks_IV.dat
 
 	if ( ${i} == '1' ) then
 		ps2pdf CCPLOT.PS frame_unbending.pdf
@@ -682,7 +694,11 @@ endif
 #convert movie_dia.pdf movie_dia.ps
 #echo "# IMAGE: movie_dia.ps <Movie Mode Diagnostics>" >> LOGS/${scriptname}.results
 
-\rm -rf frames/frame*
+#\rm -rf frames/frame*
+
+python ${bin_2dx}/movie_mode_py/plotLocalDrift.py frames frames/drifts.pdf ${num_dia}
+pdf2ps frames/drifts.pdf frames/drifts.ps
+echo  "# IMAGE: frames/drifts.ps <Local drifts>" >> LOGS/${scriptname}.results
 
 pdf2ps frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results

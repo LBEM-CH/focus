@@ -217,7 +217,7 @@ C
         PARAMETER (IPPFPDIM=500)
         PARAMETER (ISPACEDIM=100000)
 CHENN<
-        PARAMETER (NPLTMX=2000)
+        PARAMETER (NPLTMX=3000)
         PARAMETER (NPRMX=401)
         PARAMETER (NOUTMX=300)
 C remember to change any parameter values in all subroutines too

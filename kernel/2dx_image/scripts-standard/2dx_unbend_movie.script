@@ -435,6 +435,8 @@ frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc
 UNBENT,PASS,2,${date}
 eot
 
+	python ${bin_2dx}/movie_mode_py/deleteZeros.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
+
 	if ( ${i} == '1' ) then
 		ps2pdf CCPLOT.PS frame_unbending.pdf
 		\cp -f frame_unbending.pdf ccplot.pdf

@@ -2,6 +2,7 @@ import sys
 import os
 
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure, show
 import numpy as np
 
 
@@ -84,20 +85,37 @@ if __name__ == "__main__":
 	outfile = sys.argv[2]
 	n = int(sys.argv[3])
 	
+	fig = figure(figsize=(6,6))
+	ax = fig.add_subplot(1,1,1,aspect='equal')
+	
+	
 	x,y = getTraj(folder + "/peaks_I.dat", n)
-	plt.plot(x, y, '-o', label="Region SW")
+	#ax.plot(x, y, '-8', c='gray', label="Region SW")
+	ax.plot(x, y, '-o', label="Region SW")
 	
 	x,y = getTraj(folder + "/peaks_II.dat", n)
-	plt.plot(x, y, '-o', label="Region SE")
+	#ax.plot(x, y, '-^', c='gray', label="Region SE")
+	ax.plot(x, y, '-o', label="Region SE")
 	
 	x,y = getTraj(folder + "/peaks_III.dat", n)
-	plt.plot(x, y, '-o', label="Region NW")
+	#ax.plot(x, y, '-v', c='gray', label="Region NW")
+	ax.plot(x, y, '-o', label="Region NW")
 	
 	x,y = getTraj(folder + "/peaks_IV.dat", n)
+	#plt.plot(x, y, '->', c='gray', label="Region NE")
 	plt.plot(x, y, '-o', label="Region NE")
 	
-	plt.axis('equal')
-	plt.legend(loc=2)
+	plt.plot([0], [0], 'sk')
+	
+	#plt.xlabel(r'Drift X [$\AA$]')
+	#plt.ylabel(r'Drift Y [$\AA$]')
+	plt.xlabel('Drift X [px]')
+	plt.ylabel('Drift Y [px]')
+	
+	plt.grid()
+	
+	ax.axis('equal')
+	ax.legend(loc=1)
 	
 	plt.savefig(outfile)
 	

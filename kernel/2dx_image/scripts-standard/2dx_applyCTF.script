@@ -21,6 +21,8 @@
 #
 # MANUAL: This makes only sense if the Amplitudes and Phases are not already CTF-corrected by some TTF correction. The script therefore automatically determines whether the data are from a TTF correction run (ttbox), or form a normal evaluation (mmbox).
 #
+# MANUAL: In order to use the movie-mode unbent APH-files, switch the "Enable movie-mode" option ON!
+#
 # DISPLAY: SYN_Unbending
 # DISPLAY: movie_enable
 # DISPLAY: imagesidelength

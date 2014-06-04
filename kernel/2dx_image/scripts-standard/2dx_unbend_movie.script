@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Unbend Movie Mode                                                  #
+# Title: Unbend Movie-Mode                                                  #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -15,7 +15,15 @@
 #
 # MANUAL: Movie mode unbending script
 #
-# MANUAL: tbd
+# MANUAL: Prerequisite I: Installed eman2/sparx package. Ensure that the eman2.bashrc is sourced (optimally in you bash.rc file) before starting 2dx. 
+#
+# MANUAL: Prerequisite II: Python-2.7 (or higher) including matplotlib and numpy.
+#
+# MANUAL: Before using movie-mode unbending, switch movie-mode processing on and rerun "InitFilesAndParams" to preset set used batch size dependent on the number of available movie-frames.
+#
+# MANUAL: Using the movie-mode unbent APH-file requires selecting the movie-mode option in "Correct CTF" and rerunning of "Generate Map".
+#
+# MANUAL: Careful prevention of overfitting is crucial for successful movie-mode 3D reconstructions.
 #
 #
 # SORTORDER: 52

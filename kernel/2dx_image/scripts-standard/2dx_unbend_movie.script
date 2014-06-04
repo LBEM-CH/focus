@@ -57,10 +57,6 @@
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_imagenumber_touse
 # DISPLAY: movie_masking_mode
-# DISPLAY: movie_show_fftraw
-# DISPLAY: movie_show_fftcorr
-# DISPLAY: movie_show_frame
-# DISPLAY: movie_show_cc
 # DISPLAY: movie_refbox
 # DISPLAY: movie_imagenumber_toave
 #
@@ -136,10 +132,6 @@ set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 set app_2dx_image = ""
 set movie_masking_mode = ""
-set movie_show_fftraw = ""
-set movie_show_fftcorr = ""
-set movie_show_frame = ""
-set movie_show_cc = ""
 set movie_refbox = ""
 set movie_imagenumber_toave = ""
 #
@@ -164,6 +156,8 @@ if ( ${movie_enable} == "n" ) then
   exit
 endif
 
+set num_dia = 100
+
 
 # Generate subfolder for frame images
 set frame_folder = "frames"
@@ -171,7 +165,6 @@ set frame_folder = "frames"
 \mkdir ${frame_folder}
 	
 python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
-
 
 foreach f  (`ls frames`)
 	\cp 2dx_image.cfg frames/$f/
@@ -184,14 +177,11 @@ end
 \rm -f frame_ctf.pdf
 \touch frame_ctf.pdf
 
-
 setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
 setenv PROFDATA SCRATCH/prof${imagename}.dat
 setenv ERRORS   SCRATCH/errout${imagename}.dat
 setenv ERROUT   SCRATCH/errout2${imagename}.dat
 
-
-set num_dia = 100
 
 set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
 set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
@@ -232,8 +222,6 @@ while ($i <= ${movie_imagenumber_touse})
 	@ n += ${movie_imagenumber_toave}
 end
 
-echo  "# IMAGE: weight.mrc <Fourier weights>" >> LOGS/${scriptname}.results
-
 \mkdir frames/dia
 set Nstart = '1'
 set Nhalf = `echo ${movie_imagenumber_touse} | awk '{s = int($1/2) } END { print s }'`
@@ -242,38 +230,32 @@ set Nend = ${movie_imagenumber_touse}
 touch frames/peaks_dummy
 \rm -f frames/peaks*
 
-@ i = 1
-@ n = 1
-while ($i <= ${movie_imagenumber_touse})
-	
-	
-	#set test = `echo ${n} ${movie_refbox} | awk '{s = $2 + int($1/10)*50 } END { print s }'`
-	set test = ${movie_refbox}
+${proc_2dx}/linblock "Boxing reference: ${movie_refbox}"
 
-	${proc_2dx}/linblock "Boxing reference: ${test}"
-
-	\rm -f SCRATCH/refbm${imagename}.flt.mrc
-	#setenv IN  SCRATCH/ref${imagename}.flt.unbend2.mrc
-	setenv IN  SCRATCH/${imagename}.unbent-filtered.mrc
-	setenv OUT SCRATCH/refbm${imagename}.flt.mrc
-	${bin_2dx}/2dx_boximage.exe << eot
+\rm -f SCRATCH/refbm${imagename}.flt.mrc
+setenv IN  SCRATCH/${imagename}.unbent-filtered.mrc
+setenv OUT SCRATCH/refbm${imagename}.flt.mrc
+${bin_2dx}/2dx_boximage.exe << eot
 -1 0                        ! NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
 0 0                         ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
 ${refposix} ${refposiy}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
-${test}
+${movie_refbox}
 eot
 
-	echo  "# IMAGE: SCRATCH/refbm${imagename}.flt.mrc <Movie Mode Ref>" >> LOGS/${scriptname}.results
-	#${proc_2dx}/linblock "FFT of REF"
+echo  "# IMAGE: SCRATCH/refbm${imagename}.flt.mrc <Movie Mode Ref>" >> LOGS/${scriptname}.results
+#${proc_2dx}/linblock "FFT of REF"
 
-	\rm -f SCRATCH/refm${imagename}.fft.mrc
-	setenv IN  SCRATCH/refbm${imagename}.flt.mrc
-	setenv OUT SCRATCH/refm${imagename}.fft.mrc
-	${bin_2dx}/2dx_fftrans.exe
+\rm -f SCRATCH/refm${imagename}.fft.mrc
+setenv IN  SCRATCH/refbm${imagename}.flt.mrc
+setenv OUT SCRATCH/refm${imagename}.fft.mrc
+${bin_2dx}/2dx_fftrans.exe
 
-	echo  "# IMAGE: SCRATCH/refm${imagename}.fft.mrc <Movie Mode Ref (FFT)>" >> LOGS/${scriptname}.results
+echo  "# IMAGE: SCRATCH/refm${imagename}.fft.mrc <Movie Mode Ref (FFT)>" >> LOGS/${scriptname}.results
 
-	
+@ i = 1
+@ n = 1
+while ($i <= ${movie_imagenumber_touse})
+		
 	set image_dir = `pwd`	
 	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize"
 	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize_files"
@@ -298,7 +280,6 @@ eot
 	${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 	${lattice},-30,30,-30,30,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
-
 	
 	## CC with the ref
 	\rm -f frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
@@ -310,7 +291,7 @@ eot
 		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
 	
-	## Quad search
+	## Quadserch
 	/bin/rm -f frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
 	setenv IN frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
@@ -470,24 +451,6 @@ eot
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
 	
-#	if (${i} == ${Nstart}) then
-#		pdftk A=ccplot.pdf cat A1 output out1.pdf
-#		\cp -f out1.pdf frames/dia/prof_first.pdf
-#		convert frames/dia/prof_first.pdf frames/dia/prof_first.jpg
-#	endif
-	
-#	if (${i} == ${Nhalf}) then
-#		pdftk A=ccplot.pdf cat A1 output out2.pdf
-#		\cp -f out2.pdf frames/dia/prof_half.pdf
-#		convert frames/dia/prof_half.pdf frames/dia/prof_half.jpg
-#	endif
-	
-#	if (${i} == ${Nend}) then
-#		pdftk A=ccplot.pdf cat A1 output out3.pdf
-#		\cp -f out3.pdf frames/dia/prof_last.pdf
-#		convert frames/dia/prof_last.pdf frames/dia/prof_last.jpg
-#	endif	
-
 	${proc_2dx}/linblock "Updating Error Field" 
 
 	setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
@@ -515,14 +478,9 @@ ${createmask}			! dont create manual Masking information
 eot
 
 	\mv -f SCRATCH/errout3${imagename}.dat SCRATCH/errout2${imagename}.dat
-	
-	#set quadradbx = 2
-	#set quadradby = 2
 
 	@ i += 1
 	@ n += ${movie_imagenumber_toave}
-
-
 end
 
 
@@ -541,8 +499,6 @@ eot
 setenv IN "frames/direct_sum_fixed.mrc"
 setenv OUT "frames/direct_sum.fft.mrc"
 ${bin_2dx}/2dx_fftrans.exe
-echo  "# IMAGE: frames/direct_sum.fft.mrc <DirectSum FFT>" >> LOGS/${scriptname}.results
-
 
 	${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum.fft.mrc
@@ -611,90 +567,13 @@ echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
 
 echo "<<@evaluate>>"
 
+# Variation plot generation (no longer used)
+#python ${bin_2dx}/movie_mode_py/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
+#pdf2ps frames/sd.pdf frames/sd.ps
+#convert frames/sd.ps frames/sd.jpg
+#echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
 
-#python ${bin_2dx}/movie_mode_py/rolling_ave.py ${movie_imagenumber_touse} ${movie_window} ${nonmaskimagename}
-
-#set rolling_1 = `echo ${movie_window} | awk '{s = int( $1/2 + 1 ) } END { print s }'`
-#set rolling_end = `echo ${movie_imagenumber_touse} ${movie_window} | awk '{s = int($1 - int( $2/ 2)) } END { print s }'`
-
-#@ i = 1
-#while ($i <= ${rolling_end})
-#	setenv IN frames/rolling_aves/ave_${i}.mrc
-#	setenv OUT frames/rolling_aves/ave_${i}.fft.mrc
-#	${bin_2dx}/2dx_fftrans.exe
-	
-#	echo  "# IMAGE: frames/rolling_aves/ave_${i}.fft.mrc <Rolling ave fft #${i}>" >> LOGS/${scriptname}.results
-	#
-#${bin_2dx}/2dx_mmboxa.exe << eot
-#frames/rolling_aves/ave_${i}.mrc
-#${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
-#Y                               ! Use grid units?
-#Y                               ! Generate grid from lattice?
-#N                               ! Generate points from lattice?
-#2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-#frames/rolling_aves/ave_${i}.fou.nolimit.aph
-#SCRATCH/TMP9873.dat
-#U2
-#${refposix},${refposiy}           ! XORIG,YORIG
-#200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-#${lattice}                         ! Lattice vectors
-#eot
-#	
-#	@ i += ${movie_window}
-#end
-
-#python ${bin_2dx}/movie_mode_py/rolling_ave_collect.py ${movie_imagenumber_touse} ${movie_window} frames/rolling_aves/aph_data.txt
-
-python ${bin_2dx}/movie_mode_py/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
-pdf2ps frames/sd.pdf frames/sd.ps
-convert frames/sd.ps frames/sd.jpg
-echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
-
-if ( ${movie_show_fftraw} == '1' ) then
-	@ i = 1
-	while ($i <= ${movie_imagenumber_touse})
-		echo  "# IMAGE: frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc <Raw FFT #${i}>" >> LOGS/${scriptname}.results
-		@ i += 1
-	end
-endif
-
-if ( ${movie_show_fftcorr} == '1' ) then
-	@ i = 1
-	while ($i <= ${movie_imagenumber_touse})
-		echo  "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc <Corr FFT #${i}>" >> LOGS/${scriptname}.results
-		@ i += 1
-	end
-endif
-
-if ( ${movie_show_frame} == '1' ) then
-	@ i = 1
-	while ($i <= ${movie_imagenumber_touse})
-		echo  "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc <Frame #${i}>" >> LOGS/${scriptname}.results
-		@ i += 1
-	end
-endif
-
-if ( ${movie_show_cc} == '1' ) then
-	@ i = 1
-	while ($i <= ${movie_imagenumber_touse})
-		echo  "# IMAGE: frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc <CC #${i}>" >> LOGS/${scriptname}.results
-		@ i += 1
-	end
-endif
-
-#\cp -f frames/frame_${Nstart}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_start.mrc
-#\cp -f frames/frame_${Nhalf}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_half.mrc
-#\cp -f frames/frame_${Nend}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc frames/dia/cc_end.mrc
-
-#e2proc2d.py frames/dia/cc_start.mrc frames/dia/cc_start.jpg
-#e2proc2d.py frames/dia/cc_half.mrc frames/dia/cc_half.jpg
-#e2proc2d.py frames/dia/cc_end.mrc frames/dia/cc_end.jpg
-
-#python ${bin_2dx}/movie_mode_py/generate_dia.py movie_dia.pdf
-#convert movie_dia.pdf movie_dia.ps
-#echo "# IMAGE: movie_dia.ps <Movie Mode Diagnostics>" >> LOGS/${scriptname}.results
-
-#\rm -rf frames/frame*
+\rm -rf frames/frame*
 
 python ${bin_2dx}/movie_mode_py/plotLocalDrift.py frames frames/drifts.pdf ${num_dia}
 pdf2ps frames/drifts.pdf frames/drifts.ps

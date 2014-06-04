@@ -1,10 +1,10 @@
 from EMAN2 import *
 from sparx import *
 
-import math
-from pylab import *
-from matplotlib import rc
-import numpy as np
+#import math
+#from pylab import *
+#from matplotlib import rc
+#import numpy as np
 
 import os
 

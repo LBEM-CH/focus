@@ -14,8 +14,9 @@
 #############################################################################
 #
 # MANUAL: Movie mode unbending script
+
+# MANUAL: tbd
 #
-# MANUAL: 
 #
 # SORTORDER: 52
 #
@@ -58,6 +59,8 @@
 # DISPLAY: movie_imagenumber_touse
 # DISPLAY: movie_masking_mode
 # DISPLAY: movie_refbox
+# DISPLAY: movie_filter_type
+# DISPLAY: movie_filter_param
 # DISPLAY: movie_imagenumber_toave
 #
 #$end_local_vars
@@ -130,6 +133,8 @@ set movie_stackname = ""
 set movie_enable = ""
 set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
+set movie_filter_type = ""
+set movie_filter_param = ""
 set app_2dx_image = ""
 set movie_masking_mode = ""
 set movie_refbox = ""
@@ -142,6 +147,7 @@ set scriptname = 2dx_unbend_movie
 \rm -f LOGS/${scriptname}.results
 #
 echo "<<@evaluate>>"
+echo "<<@progress: 1>>"
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
@@ -162,6 +168,8 @@ set frame_folder = "frames"
 \rm -rf ${frame_folder}
 \mkdir ${frame_folder}
 
+echo "<<@progress: 10>>"
+
 ${proc_2dx}/linblock "Splitting Stack"
 python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
 
@@ -169,6 +177,8 @@ foreach f  (`ls frames`)
 	\cp 2dx_image.cfg frames/$f/
 	python ${bin_2dx}/movie_mode_py/disable_movie.py  frames/$f/
 end
+
+echo "<<@progress: 20>>"
 
 \rm -f frame_unbending.pdf
 \touch frame_unbending.pdf
@@ -186,10 +196,15 @@ set valspotscan = '0'
 set createmask = '0'
 set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
 
+set filt_a = `echo ${movie_filter_param} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+set filt_b = `echo ${movie_filter_param} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+
 \rm -f SCRATCH/errout2${imagename}.dat
 \rm -f SPIDERCOORD.spi
   
 ${proc_2dx}/linblock "Updating Initial Error Field" 
+
+echo "<<@progress: 40>>"
  
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpredb}                     ! IPASS,NRANGE
@@ -208,16 +223,20 @@ eot
 
 ${proc_2dx}/linblock "Applying pre-processing filters"
 
+echo "<<@progress: 50>>"
+
 @ i = 1
 @ n = 1
 while ($i <= ${movie_imagenumber_touse})
 	echo ":  Filter frame average #${i}"
 	echo "LP on: " frames/frame_${i}/${nonmaskimagename}_${i}.mrc
-	echo `python ${bin_2dx}/movie_mode_py/getFilter.py ${n}`
-	python ${bin_2dx}/movie_mode_py/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie_mode_py/getFilter.py ${n}` ${i}
+	echo `python ${bin_2dx}/movie_mode_py/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
+	python ${bin_2dx}/movie_mode_py/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie_mode_py/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}` ${i}
 	@ i += 1
 	@ n += ${movie_imagenumber_toave}
 end
+
+echo "<<@progress: 60>>"
 
 touch frames/peaks_dummy
 \rm -f frames/peaks*
@@ -252,6 +271,8 @@ while ($i <= ${movie_imagenumber_touse})
 	set image_dir = `pwd`	
 	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize"
 	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize_files"
+	
+	echo "<<@progress: 70>>"
 
 	echo frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	
@@ -492,6 +513,8 @@ eot
 	@ n += ${movie_imagenumber_toave}
 end
 
+echo "<<@progress: 80>>"
+
 ${proc_2dx}/linblock "Collecting information from all frame averages" 
 python ${bin_2dx}/movie_mode_py/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
 python ${bin_2dx}/movie_mode_py/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum.mrc
@@ -578,6 +601,8 @@ echo "<<@evaluate>>"
 #convert frames/sd.ps frames/sd.jpg
 #echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
 
+echo "<<@progress: 90>>"
+
 ${proc_2dx}/linblock "Deleting frame averages temporay files"
 \rm -rf frames/frame*
 
@@ -591,6 +616,7 @@ echo  "# IMAGE: frames/drifts.ps <Local drifts>" >> LOGS/${scriptname}.results
 pdf2ps frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results
 
+echo "<<@progress: 100>>"
 echo "<<@evaluate>>"
 
 

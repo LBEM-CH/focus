@@ -217,7 +217,7 @@ C
         PARAMETER (IPPFPDIM=500)
         PARAMETER (ISPACEDIM=100000)
 CHENN<
-        PARAMETER (NPLTMX=2000)
+        PARAMETER (NPLTMX=3000)
         PARAMETER (NPRMX=401)
         PARAMETER (NOUTMX=300)
 C remember to change any parameter values in all subroutines too
@@ -612,7 +612,7 @@ C-------------This is a dirty hack, to fudge something that
 C-------------looks ok in the latline plots....
 C-------------This is not a scientifically sound solution...:
               if(abs(SIGF(J)).gt.0.001)then
-                FMERIT=((F/SIGF(J))**2)*RFOMSCALE/10.0
+                FMERIT=((F/SIGF(J))**2)*RFOMSCALE
               else
                 FMERIT=0.0
               endif

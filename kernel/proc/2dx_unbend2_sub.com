@@ -717,11 +717,13 @@ ${createmask}			! dont create manual Masking information
 ${imagename}.mrc
 m${imagename}.mrc
 -1        
+0
 eot
     #
     if ( -e TMP-quadserch-6.mrc ) then
       \mv -f TMP-quadserch-6.mrc CUT/${imagename}-masking.mrc
       \mv -f TMP-quadserch-7.mrc CUT/${imagename}-masking-final.mrc
+      \cp -f CUT/${imagename}-masking-final.mrc ${imagename}-masking-final.mrc
       echo "# IMAGE-IMPORTANT: CUT/${imagename}-masking.mrc <Masking Area from Automatic Masking>" >> LOGS/${scriptname}.results 
       echo "# IMAGE-IMPORTANT: CUT/${imagename}-masking-final.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
     else
@@ -812,11 +814,13 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 ${imagename}.mrc
 m${imagename}.mrc
 -1
+0
 eot
       #
       if ( -e TMP-quadserch-6.mrc ) then
         \mv -f TMP-quadserch-6.mrc CUT/${imagename}-masking.mrc
         \mv -f TMP-quadserch-7.mrc CUT/${imagename}-masking-final.mrc
+        \cp -f CUT/${imagename}-masking-final.mrc ${imagename}-masking-final.mrc
         if ( ${locround} == '1' ) then
           echo "# IMAGE-IMPORTANT: CUT/${imagename}-masking.mrc <Masking Area from Automatic Masking>" >> LOGS/${scriptname}.results 
           echo "# IMAGE-IMPORTANT: CUT/${imagename}-masking-final.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 

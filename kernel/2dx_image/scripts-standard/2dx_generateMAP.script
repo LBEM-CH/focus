@@ -53,6 +53,7 @@
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
 # DISPLAY: map_without_ctf
+# DISPLAY: movie_enable
 #
 # REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
 #$end_local_vars
@@ -110,6 +111,7 @@ set npo_cntrs_step = ""
 set npo_cntrs_below = ""
 set MergeIQMAX = ""
 set map_without_ctf = ""
+set movie_enable = ""
 #
 #$end_vars
 #

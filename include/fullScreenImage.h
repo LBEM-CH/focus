@@ -62,7 +62,7 @@ class fullScreenImage : public QWidget
   QMap<QPoint,QPoint> *latticeRefineList;
   QPointF *refinementCandidate;
   int peakNum;
-  int latticeEllipseSize, latticeEllipseLineThickness, latticeOrders, peakEllipseSize, refinementEllipseSize;
+  int latticeEllipseSize, latticeEllipseLineThickness, latticeOrders, peakEllipseSize, refinementEllipseSize, fontSize;
 
   int maximumValueFitRange;
   double maximumValueSigma;
@@ -164,6 +164,7 @@ class fullScreenImage : public QWidget
   int gaussian(int i, int j);
 
   void setLatticeEllipseSize(int size);
+  void setFontSize(int size);
   void setLatticeEllipseLineThickness(int thickness);
   void setLatticeOrders(int orders);
   void setPeakEllipseSize(int size);

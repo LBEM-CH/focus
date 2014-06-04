@@ -50,7 +50,7 @@ mainWindow::mainWindow(char *dirArg)
   
   if(dirArg==NULL || !QFileInfo(dirArg).exists())
   {
-    if(!QFileInfo(dirArg).exists()) cerr<<dirArg<<" does not exist."<<endl;
+    if(!QFileInfo(dirArg).exists()) cout<<dirArg<<" does not exist."<<endl;
     QString userDirPath = userData->get("workingDir","value");
     cout << "The last used working dir is: " << userDirPath.toStdString() << endl;
     if(userDirPath.isEmpty()) 

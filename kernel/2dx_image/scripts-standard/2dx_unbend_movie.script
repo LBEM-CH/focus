@@ -1,0 +1,630 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Unbend Movie-Mode                                                  #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 02/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# MANUAL: Movie mode unbending script
+#
+# MANUAL: Prerequisite I: Installed eman2/sparx package. Ensure that the eman2.bashrc is sourced (optimally in you bash.rc file) before starting 2dx. 
+#
+# MANUAL: Prerequisite II: Python-2.7 (or higher) including matplotlib and numpy.
+#
+# MANUAL: Before using movie-mode unbending, switch movie-mode processing on and rerun "InitFilesAndParams" to preset set used batch size dependent on the number of available movie-frames.
+#
+# MANUAL: Using the movie-mode unbent APH-file requires selecting the movie-mode option in "Correct CTF" and rerunning of "Generate Map".
+#
+# MANUAL: Careful prevention of overfitting is crucial for successful movie-mode 3D reconstructions.
+#
+#
+# SORTORDER: 52
+#
+# DISPLAY: imagename
+# DISPLAY: imagesidelength 
+# DISPLAY: SYN_Unbending
+# DISPLAY: holeb
+# DISPLAY: maskb01
+# DISPLAY: maskb02
+# DISPLAY: maskb03
+# DISPLAY: maskb04
+# DISPLAY: maskb05
+# DISPLAY: boxb1
+# DISPLAY: boxb2
+# DISPLAY: quadradb
+# DISPLAY: facthreshb
+# DISPLAY: quadpredb
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: ALAT
+# DISPLAY: radlim
+# DISPLAY: domask
+# DISPLAY: ctf_ttf
+# DISPLAY: treatspotscan
+# DISPLAY: ctfplotresmax
+# DISPLAY: tempkeep
+# DISPLAY: refori
+# DISPLAY: createmaskinfo
+# DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
+# DISPLAY: IMAXCOR
+# DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: LCOLOR
+# DISPLAY: ccunbend_program
+# DISPLAY: plotres_rings
+# DISPLAY: movie_stackname
+# DISPLAY: movie_enable
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: movie_imagenumber_touse
+# DISPLAY: movie_masking_mode
+# DISPLAY: movie_refbox
+# DISPLAY: movie_filter_type
+# DISPLAY: movie_filter_param
+# DISPLAY: movie_imagenumber_toave
+#
+#$end_local_vars
+#
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SYN_Unbending = ""
+set PHASEORI_done = ""
+set boxb1 = ""
+set boxb2 = ""
+set quadradb = ""
+set imagename = ""
+set defocus = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set realcell = ""
+set lattice = ""
+set holeb = ""
+set maskb01 = ""
+set maskb02 = ""
+set maskb03 = ""
+set maskb04 = ""
+set maskb05 = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set ALAT = ""
+set quadpredb = ""
+set radlim = ""
+set realang = ""
+set treatspotscan = ""
+set facthresha = ""
+set phacon = ""
+set ctfplotresmax = ""
+set stepdigitizer = ""
+set CS = ""
+set KV = ""
+set domask = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set TANGL = ""
+set det_tilt = ""
+set ctf_ttf = ""
+set refori = ""
+set createmaskinfo = ""
+set ISTEP = ""
+set ISTEP_h = ""
+set IMAXCOR = ""
+set RMAG = ""
+set LCOLOR = ""
+set ccunbend_program = ""
+set RB_1 = ""
+set RB_2 = ""
+set RB_3 = ""
+set RB_4 = ""
+set RB_5 = ""
+set RB_6 = ""
+set RP_1 = ""
+set RP_2 = ""
+set RP_3 = ""
+set RP_4 = ""
+set RP_5 = ""
+set RP_6 = ""
+set movie_stackname = ""
+set movie_enable = ""
+set movie_imagenumber_total = ""
+set movie_imagenumber_touse = ""
+set movie_filter_type = ""
+set movie_filter_param = ""
+set app_2dx_image = ""
+set movie_masking_mode = ""
+set movie_refbox = ""
+set movie_imagenumber_toave = ""
+#
+#$end_vars
+#
+
+set scriptname = 2dx_unbend_movie
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+echo "<<@progress: 1>>"
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set date = `date`
+echo date = ${date}
+#
+
+if ( ${movie_enable} == "n" ) then
+  ${proc_2dx}/linblock "Skipping movie mode unbending."
+  exit
+endif
+
+set num_dia = 100
+
+# Generate subfolder for frame images
+set frame_folder = "frames"
+\rm -rf ${frame_folder}
+\mkdir ${frame_folder}
+
+echo "<<@progress: 10>>"
+
+${proc_2dx}/linblock "Splitting Stack"
+python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
+
+foreach f  (`ls frames`)
+	\cp 2dx_image.cfg frames/$f/
+	python ${bin_2dx}/movie_mode_py/disable_movie.py  frames/$f/
+end
+
+echo "<<@progress: 20>>"
+
+\rm -f frame_unbending.pdf
+\touch frame_unbending.pdf
+
+setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+setenv PROFDATA SCRATCH/prof${imagename}.dat
+setenv ERRORS   SCRATCH/errout${imagename}.dat
+setenv ERROUT   SCRATCH/errout2${imagename}.dat
+
+set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
+set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+set valspotscan = '0'
+set createmask = '0'
+set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
+
+set filt_a = `echo ${movie_filter_param} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+set filt_b = `echo ${movie_filter_param} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+
+\rm -f SCRATCH/errout2${imagename}.dat
+\rm -f SPIDERCOORD.spi
+  
+${proc_2dx}/linblock "Updating Initial Error Field" 
+
+echo "<<@progress: 40>>"
+ 
+${bin_2dx}/2dx_quadserchk-2.exe << eot
+3,${quadpredb}                     ! IPASS,NRANGE
+${cormap}
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}			! dont create manual Masking information
+0                               ! Mask the image directly
+eot
+
+${proc_2dx}/linblock "Applying pre-processing filters"
+
+echo "<<@progress: 50>>"
+
+@ i = 1
+@ n = 1
+while ($i <= ${movie_imagenumber_touse})
+	echo ":  Filter frame average #${i}"
+	echo "LP on: " frames/frame_${i}/${nonmaskimagename}_${i}.mrc
+	echo `python ${bin_2dx}/movie_mode_py/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
+	python ${bin_2dx}/movie_mode_py/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie_mode_py/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}` ${i}
+	@ i += 1
+	@ n += ${movie_imagenumber_toave}
+end
+
+echo "<<@progress: 60>>"
+
+touch frames/peaks_dummy
+\rm -f frames/peaks*
+
+${proc_2dx}/linblock "Boxing reference: ${movie_refbox}"
+
+\rm -f SCRATCH/refbm${imagename}.flt.mrc
+setenv IN  SCRATCH/${imagename}.unbent-filtered.mrc
+setenv OUT SCRATCH/refbm${imagename}.flt.mrc
+${bin_2dx}/2dx_boximage.exe << eot
+-1 0                        ! NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
+0 0                         ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
+${refposix} ${refposiy}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
+${movie_refbox}
+eot
+
+echo  "# IMAGE: SCRATCH/refbm${imagename}.flt.mrc <Movie Mode Ref>" >> LOGS/${scriptname}.results
+
+\rm -f SCRATCH/refm${imagename}.fft.mrc
+setenv IN  SCRATCH/refbm${imagename}.flt.mrc
+setenv OUT SCRATCH/refm${imagename}.fft.mrc
+${bin_2dx}/2dx_fftrans.exe
+
+echo  "# IMAGE: SCRATCH/refm${imagename}.fft.mrc <Movie Mode Ref (FFT)>" >> LOGS/${scriptname}.results
+
+@ i = 1
+@ n = 1
+while ($i <= ${movie_imagenumber_touse})
+
+	${proc_2dx}/linblock "Processing frame average #${i}"
+		
+	set image_dir = `pwd`	
+	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize"
+	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize_files"
+	
+	echo "<<@progress: 70>>"
+
+	echo frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
+	
+	# FFT of frame
+	echo ":  FFT of raw frame average"
+	setenv IN frames/frame_${i}/${nonmaskimagename}_${i}.mrc
+	setenv OUT frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
+	${bin_2dx}/2dx_fftrans.exe
+	
+	
+	# Mask FFT of frame
+	echo ":  Masked FFT of raw frame average"
+	setenv IN  frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
+	setenv SPOTS ${imagename}.spt
+
+	set maskb = ${maskb02}
+	set rmax = 11000
+    ${bin_2dx}/2dx_masktrana.exe << eot
+	1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+	${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+	${lattice},-30,30,-30,30,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+	
+	## CC with the ref
+	echo ":  Cross-correlate frame and reference in Fourier-space"
+	\rm -f frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
+	setenv IN1 frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
+	setenv IN2 SCRATCH/refm${imagename}.fft.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
+	${bin_2dx}/twofile.exe << eot
+		2 ! ICOMB = 2
+		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+eot
+	
+	## Quadserch
+	echo ":  IFFT to obtain peak profile (raw frame with reference)"
+	/bin/rm -f frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
+	setenv IN frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
+	${bin_2dx}/2dx_fftrans.exe
+	
+	\rm -f frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
+	\rm -f SPIDERCOORD.spi
+    setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+    setenv PROFDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
+    setenv ERRORS   SCRATCH/errout2${imagename}.dat
+
+	set valspotscan = '0'
+	set createmask = '0'
+	
+	echo ":  Invoke quadserch (1st round, IPASS=2)"
+		
+	if ( ${movie_masking_mode} == '0' ) then
+		${bin_2dx}/2dx_quadserchk-2.exe << eot
+2,${quadpredb}                     ! IPASS,NRANGE
+frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! create manual Masking information (0=n,1=y)
+1                               ! Do mask the image directly
+frames/frame_${i}/${nonmaskimagename}_${i}.mrc
+frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
+-1                              ! create output images (0=no, <0 = one, >0 =size)
+0                               ! use external masking template (0=no, 1=yes)
+eot
+	else
+		\cp -f ${nonmaskimagename}-masking-final.mrc TMP-quadserch-7.mrc
+		${bin_2dx}/2dx_quadserchk-2.exe << eot
+2,${quadpredb}                     ! IPASS,NRANGE
+frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! create manual Masking information (0=n,1=y)
+1                               ! Do mask the image directly
+frames/frame_${i}/${nonmaskimagename}_${i}.mrc
+frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
+-1                              ! create output images (0=no, <0 = one, >0 =size)
+1                               ! use external masking template (0=no, 1=yes)
+TMP-quadserch-7.mrc
+eot
+	endif
+	
+	echo ":  FFT of masked frame average"
+	setenv IN frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
+	setenv OUT frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc
+	${bin_2dx}/2dx_fftrans.exe
+
+	setenv IN  frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
+	setenv SPOTS ${imagename}.spt
+
+	echo ":  Mask FFT of real-space masked frame average"
+	set maskb = ${maskb02}
+	set rmax = 11000
+    ${bin_2dx}/2dx_masktrana.exe << eot
+	1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+	${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+	${lattice},-30,30,-30,30,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+
+	echo ":  Cross-correlation in Fourier-space"
+	set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+	set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+	\rm -f frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
+	setenv IN1 frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
+	setenv IN2 SCRATCH/refm${imagename}.fft.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
+	${bin_2dx}/twofile.exe << eot
+		2 ! ICOMB = 2
+		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+eot
+	
+	echo ":  IFFT to obtain peak profile (masked frame averge with reference)"
+	/bin/rm -f frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
+	setenv IN frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
+	${bin_2dx}/2dx_fftrans.exe
+	
+	\rm -f frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
+	\rm -f SPIDERCOORD.spi
+    setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+    setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
+    setenv ERRORS   SCRATCH/errout2${imagename}.dat
+
+	echo ":  Invoke quadserch (2nd round, IPASS=2)"
+	set valspotscan = '0'
+	set createmask = '0'
+	${bin_2dx}/2dx_quadserchk-2.exe << eot
+2,${quadpredb}                     ! IPASS,NRANGE
+frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! create manual Masking information (0=n,1=y)
+0                               ! Do mask the image directly
+eot
+
+	echo ":  Unbend the frame average (call of ccunbend)"
+	setenv CCORDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
+	setenv TABLEOUT frames/frame_${i}/SCRATCH/ccunbend-table-m${nonmaskimagename}.dat
+	set ITYPE = 0
+	set ROFFSET = 50.0
+	set NNUM = 6
+	set facthresha = 0.05
+	${bin_2dx}/2dx_ccunbendk.exe << eot
+frames/frame_${i}/${nonmaskimagename}_${i}.mrc
+${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+${imagename}, UNBEND2, ${date}
+frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc
+UNBENT,PASS,2,${date}
+eot
+
+	echo ":  Extract trajectory for region drift plotting"
+	python ${bin_2dx}/movie_mode_py/deleteZeros.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
+		
+	set x_1_4 = `echo ${imagesidelength} | awk '{s = int($1/4) } END { print s }'`
+	set x_3_4 = `echo ${imagesidelength} | awk '{s = int(3*$1/4) } END { print s }'`
+	
+	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_I.dat   ${x_1_4} ${x_1_4} ${num_dia} frames/peaks_I.dat
+	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_II.dat  ${x_3_4} ${x_1_4} ${num_dia} frames/peaks_II.dat
+	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} frames/peaks_III.dat
+	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} frames/peaks_IV.dat
+
+	echo ":  Store distortion-vector-field for visual inspection"
+	if ( ${i} == '1' ) then
+		ps2pdf CCPLOT.PS frame_unbending.pdf
+		\cp -f frame_unbending.pdf ccplot.pdf
+		pdftk A=frame_unbending.pdf cat A1 output out.pdf
+		mv out.pdf frame_unbending.pdf
+	else
+		ps2pdf CCPLOT.PS ccplot.pdf
+		pdftk A=frame_unbending.pdf B=ccplot.pdf cat A1-end B1 output out.pdf
+		mv out.pdf frame_unbending.pdf
+	endif
+	
+	echo ":  correct unbent frame average for taper edges"
+	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
+	${bin_2dx}/2dx_taperedgek.exe << eot
+		30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+eot
+
+	echo ":  Obtain Fourier-transform of unbent and masked frame average"
+	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
+	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
+	${bin_2dx}/2dx_fftrans.exe
+	
+	set iplusone = `echo ${i} | awk '{s = int($1+1) } END { print s }'`
+	${proc_2dx}/linblock "Updating Error Field for frame average #${iplusone}" 
+
+	setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+	setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
+	setenv ERRORS   SCRATCH/errout2${imagename}.dat
+	setenv ERROUT   SCRATCH/errout3${imagename}.dat
+
+	\rm -f SPIDERCOORD.spi
+	\rm -f ${ERROUT}
+
+	echo ":  Call quadserch to update error field (3rd round IPASS=3)"
+	set cormap = frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
+	${bin_2dx}/2dx_quadserchk-2.exe << eot
+3,${quadpredb}                     ! IPASS,NRANGE
+${cormap}
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}			! dont create manual Masking information
+0                               ! Mask the image directly
+eot
+
+	\mv -f SCRATCH/errout3${imagename}.dat SCRATCH/errout2${imagename}.dat
+
+	@ i += 1
+	@ n += ${movie_imagenumber_toave}
+end
+
+echo "<<@progress: 80>>"
+
+${proc_2dx}/linblock "Collecting information from all frame averages" 
+python ${bin_2dx}/movie_mode_py/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
+python ${bin_2dx}/movie_mode_py/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum.mrc
+
+${proc_2dx}/linblock "Producing final APH files"
+
+setenv IN  frames/direct_sum.mrc
+setenv OUT frames/direct_sum_fixed.mrc
+${bin_2dx}/2dx_taperedgek.exe << eot
+	30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+eot
+
+
+setenv IN "frames/direct_sum_fixed.mrc"
+setenv OUT "frames/direct_sum.fft.mrc"
+${bin_2dx}/2dx_fftrans.exe
+
+echo ":  MMBoxA without limits"
+
+	${bin_2dx}/2dx_mmboxa.exe << eot
+frames/direct_sum.fft.mrc
+${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/${imagename}.fou.movie.nolimit.aph
+SCRATCH/TMP9873.dat
+U2
+${refposix},${refposiy}           ! XORIG,YORIG
+200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
+
+\rm -f SCRATCH/TMP9882.dat
+
+echo ":  MMBoxA with limits"
+
+	${bin_2dx}/2dx_mmboxa.exe << eot
+frames/direct_sum.fft.mrc
+${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+Y				! Use grid units?
+Y				! Generate grid from lattice?
+N				! Generate points from lattice?
+2,2,0,50,50,19,19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/${imagename}.fou.movie.limit.aph
+SCRATCH/TMP9882.dat
+U2
+${refposix},${refposiy}		! XORIG,YORIG
+${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}				! Lattice vectors
+eot
+
+source SCRATCH/TMP9882.dat
+
+echo ":  Generate IQ-stat output"
+
+echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
+echo "set QVALS = ${QVAL_local}" >> LOGS/${scriptname}.results
+
+echo "set US_IQ1 = ${U2_IQ1}" >> LOGS/${scriptname}.results
+echo "set US_IQ2 = ${U2_IQ2}" >> LOGS/${scriptname}.results
+echo "set US_IQ3 = ${U2_IQ3}" >> LOGS/${scriptname}.results
+echo "set US_IQ4 = ${U2_IQ4}" >> LOGS/${scriptname}.results
+echo "set US_IQ5 = ${U2_IQ5}" >> LOGS/${scriptname}.results
+echo "set US_IQ6 = ${U2_IQ6}" >> LOGS/${scriptname}.results
+echo "set US_IQ7 = ${U2_IQ7}" >> LOGS/${scriptname}.results
+echo "set US_IQ8 = ${U2_IQ8}" >> LOGS/${scriptname}.results
+echo "set US_IQ9 = ${U2_IQ9}" >> LOGS/${scriptname}.results
+
+set RP_6 = ${PSMAX}
+echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
+echo "set RP_2 = ${RP_2}" >> LOGS/${scriptname}.results
+echo "set RP_3 = ${RP_3}" >> LOGS/${scriptname}.results
+echo "set RP_4 = ${RP_4}" >> LOGS/${scriptname}.results
+echo "set RP_5 = ${RP_5}" >> LOGS/${scriptname}.results
+echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
+
+echo "<<@evaluate>>"
+
+# Variation plot generation (no longer used)
+#python ${bin_2dx}/movie_mode_py/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
+#pdf2ps frames/sd.pdf frames/sd.ps
+#convert frames/sd.ps frames/sd.jpg
+#echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
+
+echo "<<@progress: 90>>"
+
+${proc_2dx}/linblock "Deleting frame averages temporay files"
+\rm -rf frames/frame*
+
+${proc_2dx}/linblock "Plotting local drift"
+python ${bin_2dx}/movie_mode_py/plotLocalDrift.py frames frames/drifts.pdf ${num_dia}
+
+${proc_2dx}/linblock "Finalizing output"
+pdf2ps frames/drifts.pdf frames/drifts.ps
+echo  "# IMAGE: frames/drifts.ps <Local drifts>" >> LOGS/${scriptname}.results
+
+pdf2ps frame_unbending.pdf frame_unbending.ps
+echo "# IMAGE-IMPORTANT: frame_unbending.ps <Unbend Profiles>" >> LOGS/${scriptname}.results
+
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+
+

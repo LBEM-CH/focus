@@ -754,6 +754,11 @@ if ( ${SYM_sub} == 'p1' ) then
   \rm -f final_map.mrc
   \ln -s ${prefix}${imagename}-p1.mrc final_map.mrc
 endif
+
+if ( ${movie_enable} == "n" ) then
+  \cp -f ${prefix}${imagename}-p1.mrc u2_map.mrc
+endif
+
 #
 if ( ${SYN_Unbending} == "0" ) then
   \cp -f final_map.mrc final_map_FouFilter.mrc
@@ -836,6 +841,10 @@ echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}PSF-p1.ps <PS: PSF>"  >> LOGS/$
 echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}PSF-${SYM_sub}.ps <PS: PSF symmetrized>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-p1.ps <PS: ${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-${SYM_sub}.ps <PS: ${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
+#
+if ( ${movie_enable} == "n" ) then
+  \cp -f PS/${prefix}${imagename}MAP-p1.ps u2_map.ps
+endif
 #
 if ( ${scriptname} == "2dx_generateMAP" ) then
   echo "<<@progress: 90>>"

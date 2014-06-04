@@ -994,7 +994,7 @@ QList<confElement*> confData::find(const QString &field, const QRegExp &exp)
 
 bool confData::sync(const QString &reference, const QString &variable, const QRegExp &exp)
 {
-  if(!QFileInfo(reference).exists()) {cerr<<(reference + " does not exist.").toStdString()<<endl; return false;}
+  if(!QFileInfo(reference).exists()) {cout<<(reference + " does not exist.").toStdString()<<endl; return false;}
 
   confData local(reference);
   if(local.isEmpty()) {cerr<<(reference + " is empty.").toStdString()<<endl; return false;}

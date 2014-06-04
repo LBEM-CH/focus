@@ -62,6 +62,7 @@
 # DISPLAY: scalimamp3d_BZMINMAX
 # DISPLAY: AMP_Scale_Factor
 # DISPLAY: scalimamp3d_BEXTRA
+# DISPLAY: latline_pdf
 #
 #$end_local_vars
 #
@@ -124,6 +125,7 @@ set overall_R_factor = ""
 set overall_phase_residual = ""
 set overall_weighted_R_factor = ""
 set overall_weighted_phase_residual = ""
+set latline_pdf = ""
 #
 #$end_vars
 #

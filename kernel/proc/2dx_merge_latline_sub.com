@@ -271,6 +271,12 @@ endif
 \mv -f PLOT.PS PS/latline.ps 
 echo "# IMAGE-IMPORTANT: PS/latline.ps <PS: Lattice lines>" >> LOGS/${scriptname}.results
 #
+if ( ${latline_pdf} == 'y' ) then
+  \rm -f PS/latline.pdf
+  ps2pdf PS/latline.ps PS/latline.pdf
+  echo "# IMAGE-IMPORTANT: PS/latline.pdf <PDF: Lattice lines>" >> LOGS/${scriptname}.results
+endif
+#
 echo " "
 ${proc_2dx}/lin "-"
 echo " "

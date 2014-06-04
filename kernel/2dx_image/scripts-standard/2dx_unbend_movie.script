@@ -138,7 +138,6 @@ set movie_imagenumber_toave = ""
 #$end_vars
 #
 
-
 set scriptname = 2dx_unbend_movie
 \rm -f LOGS/${scriptname}.results
 #
@@ -158,12 +157,12 @@ endif
 
 set num_dia = 100
 
-
 # Generate subfolder for frame images
 set frame_folder = "frames"
 \rm -rf ${frame_folder}
 \mkdir ${frame_folder}
-	
+
+${proc_2dx}/linblock "Splitting Stack"
 python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
 
 foreach f  (`ls frames`)
@@ -174,14 +173,10 @@ end
 \rm -f frame_unbending.pdf
 \touch frame_unbending.pdf
 
-\rm -f frame_ctf.pdf
-\touch frame_ctf.pdf
-
 setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
 setenv PROFDATA SCRATCH/prof${imagename}.dat
 setenv ERRORS   SCRATCH/errout${imagename}.dat
 setenv ERROUT   SCRATCH/errout2${imagename}.dat
-
 
 set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
 set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
@@ -194,7 +189,7 @@ set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
 \rm -f SCRATCH/errout2${imagename}.dat
 \rm -f SPIDERCOORD.spi
   
-${proc_2dx}/linblock "Updating Error Field" 
+${proc_2dx}/linblock "Updating Initial Error Field" 
  
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpredb}                     ! IPASS,NRANGE
@@ -211,21 +206,18 @@ ${createmask}			! dont create manual Masking information
 0                               ! Mask the image directly
 eot
 
+${proc_2dx}/linblock "Applying pre-processing filters"
 
 @ i = 1
 @ n = 1
 while ($i <= ${movie_imagenumber_touse})
+	echo ":  Filter frame average #${i}"
 	echo "LP on: " frames/frame_${i}/${nonmaskimagename}_${i}.mrc
 	echo `python ${bin_2dx}/movie_mode_py/getFilter.py ${n}`
 	python ${bin_2dx}/movie_mode_py/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie_mode_py/getFilter.py ${n}` ${i}
 	@ i += 1
 	@ n += ${movie_imagenumber_toave}
 end
-
-\mkdir frames/dia
-set Nstart = '1'
-set Nhalf = `echo ${movie_imagenumber_touse} | awk '{s = int($1/2) } END { print s }'`
-set Nend = ${movie_imagenumber_touse}
 
 touch frames/peaks_dummy
 \rm -f frames/peaks*
@@ -243,7 +235,6 @@ ${movie_refbox}
 eot
 
 echo  "# IMAGE: SCRATCH/refbm${imagename}.flt.mrc <Movie Mode Ref>" >> LOGS/${scriptname}.results
-#${proc_2dx}/linblock "FFT of REF"
 
 \rm -f SCRATCH/refm${imagename}.fft.mrc
 setenv IN  SCRATCH/refbm${imagename}.flt.mrc
@@ -255,6 +246,8 @@ echo  "# IMAGE: SCRATCH/refm${imagename}.fft.mrc <Movie Mode Ref (FFT)>" >> LOGS
 @ i = 1
 @ n = 1
 while ($i <= ${movie_imagenumber_touse})
+
+	${proc_2dx}/linblock "Processing frame average #${i}"
 		
 	set image_dir = `pwd`	
 	2dx_image ${image_dir}/frames/frame_${i} "2dx_initialize"
@@ -263,12 +256,14 @@ while ($i <= ${movie_imagenumber_touse})
 	echo frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	
 	# FFT of frame
+	echo ":  FFT of raw frame average"
 	setenv IN frames/frame_${i}/${nonmaskimagename}_${i}.mrc
 	setenv OUT frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
 	
 	
 	# Mask FFT of frame
+	echo ":  Masked FFT of raw frame average"
 	setenv IN  frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
 	setenv SPOTS ${imagename}.spt
@@ -282,6 +277,7 @@ while ($i <= ${movie_imagenumber_touse})
 eot
 	
 	## CC with the ref
+	echo ":  Cross-correlate frame and reference in Fourier-space"
 	\rm -f frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	setenv IN1 frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
 	setenv IN2 SCRATCH/refm${imagename}.fft.mrc
@@ -292,6 +288,7 @@ eot
 eot
 	
 	## Quadserch
+	echo ":  IFFT to obtain peak profile (raw frame with reference)"
 	/bin/rm -f frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
 	setenv IN frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
@@ -305,6 +302,8 @@ eot
 
 	set valspotscan = '0'
 	set createmask = '0'
+	
+	echo ":  Invoke quadserch (1st round, IPASS=2)"
 		
 	if ( ${movie_masking_mode} == '0' ) then
 		${bin_2dx}/2dx_quadserchk-2.exe << eot
@@ -348,6 +347,7 @@ TMP-quadserch-7.mrc
 eot
 	endif
 	
+	echo ":  FFT of masked frame average"
 	setenv IN frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
 	setenv OUT frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
@@ -356,6 +356,7 @@ eot
 	setenv OUT frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
 	setenv SPOTS ${imagename}.spt
 
+	echo ":  Mask FFT of real-space masked frame average"
 	set maskb = ${maskb02}
 	set rmax = 11000
     ${bin_2dx}/2dx_masktrana.exe << eot
@@ -364,6 +365,7 @@ eot
 	${lattice},-30,30,-30,30,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
 
+	echo ":  Cross-correlation in Fourier-space"
 	set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
 	set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
 	\rm -f frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
@@ -375,6 +377,7 @@ eot
 		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
 	
+	echo ":  IFFT to obtain peak profile (masked frame averge with reference)"
 	/bin/rm -f frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
 	setenv IN frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
@@ -386,7 +389,7 @@ eot
     setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
     setenv ERRORS   SCRATCH/errout2${imagename}.dat
 
-
+	echo ":  Invoke quadserch (2nd round, IPASS=2)"
 	set valspotscan = '0'
 	set createmask = '0'
 	${bin_2dx}/2dx_quadserchk-2.exe << eot
@@ -404,6 +407,7 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Do mask the image directly
 eot
 
+	echo ":  Unbend the frame average (call of ccunbend)"
 	setenv CCORDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
 	setenv TABLEOUT frames/frame_${i}/SCRATCH/ccunbend-table-m${nonmaskimagename}.dat
 	set ITYPE = 0
@@ -419,9 +423,9 @@ frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc
 UNBENT,PASS,2,${date}
 eot
 
+	echo ":  Extract trajectory for region drift plotting"
 	python ${bin_2dx}/movie_mode_py/deleteZeros.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
-	
-	
+		
 	set x_1_4 = `echo ${imagesidelength} | awk '{s = int($1/4) } END { print s }'`
 	set x_3_4 = `echo ${imagesidelength} | awk '{s = int(3*$1/4) } END { print s }'`
 	
@@ -430,6 +434,7 @@ eot
 	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} frames/peaks_III.dat
 	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} frames/peaks_IV.dat
 
+	echo ":  Store distortion-vector-field for visual inspection"
 	if ( ${i} == '1' ) then
 		ps2pdf CCPLOT.PS frame_unbending.pdf
 		\cp -f frame_unbending.pdf ccplot.pdf
@@ -441,17 +446,20 @@ eot
 		mv out.pdf frame_unbending.pdf
 	endif
 	
+	echo ":  correct unbent frame average for taper edges"
 	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
 	${bin_2dx}/2dx_taperedgek.exe << eot
 		30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
 
+	echo ":  Obtain Fourier-transform of unbent and masked frame average"
 	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
 	
-	${proc_2dx}/linblock "Updating Error Field" 
+	set iplusone = `echo ${i} | awk '{s = int($1+1) } END { print s }'`
+	${proc_2dx}/linblock "Updating Error Field for frame average #${iplusone}" 
 
 	setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
 	setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
@@ -461,6 +469,7 @@ eot
 	\rm -f SPIDERCOORD.spi
 	\rm -f ${ERROUT}
 
+	echo ":  Call quadserch to update error field (3rd round IPASS=3)"
 	set cormap = frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
 	${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpredb}                     ! IPASS,NRANGE
@@ -483,11 +492,11 @@ eot
 	@ n += ${movie_imagenumber_toave}
 end
 
-
-\mkdir frames/rolling_aves
-
+${proc_2dx}/linblock "Collecting information from all frame averages" 
 python ${bin_2dx}/movie_mode_py/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
 python ${bin_2dx}/movie_mode_py/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum.mrc
+
+${proc_2dx}/linblock "Producing final APH files"
 
 setenv IN  frames/direct_sum.mrc
 setenv OUT frames/direct_sum_fixed.mrc
@@ -499,6 +508,8 @@ eot
 setenv IN "frames/direct_sum_fixed.mrc"
 setenv OUT "frames/direct_sum.fft.mrc"
 ${bin_2dx}/2dx_fftrans.exe
+
+echo ":  MMBoxA without limits"
 
 	${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum.fft.mrc
@@ -517,6 +528,8 @@ eot
 
 \rm -f SCRATCH/TMP9882.dat
 
+echo ":  MMBoxA with limits"
+
 	${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum.fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
@@ -534,6 +547,7 @@ eot
 
 source SCRATCH/TMP9882.dat
 
+echo ":  Generate IQ-stat output"
 
 echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
 echo "set QVALS = ${QVAL_local}" >> LOGS/${scriptname}.results
@@ -549,15 +563,6 @@ echo "set US_IQ8 = ${U2_IQ8}" >> LOGS/${scriptname}.results
 echo "set US_IQ9 = ${U2_IQ9}" >> LOGS/${scriptname}.results
 
 set RP_6 = ${PSMAX}
-#
-echo "::  ResBin     Power "
-echo ":: ${RB_1}      ${RP_1}"
-echo ":: ${RB_2}      ${RP_2}"
-echo ":: ${RB_3}      ${RP_3}"
-echo ":: ${RB_4}      ${RP_4}"
-echo ":: ${RB_5}      ${RP_5}"
-echo ":: ${RB_6}      ${RP_6}"
-#
 echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
 echo "set RP_2 = ${RP_2}" >> LOGS/${scriptname}.results
 echo "set RP_3 = ${RP_3}" >> LOGS/${scriptname}.results
@@ -573,9 +578,13 @@ echo "<<@evaluate>>"
 #convert frames/sd.ps frames/sd.jpg
 #echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
 
+${proc_2dx}/linblock "Deleting frame averages temporay files"
 \rm -rf frames/frame*
 
+${proc_2dx}/linblock "Plotting local drift"
 python ${bin_2dx}/movie_mode_py/plotLocalDrift.py frames frames/drifts.pdf ${num_dia}
+
+${proc_2dx}/linblock "Finalizing output"
 pdf2ps frames/drifts.pdf frames/drifts.ps
 echo  "# IMAGE: frames/drifts.ps <Local drifts>" >> LOGS/${scriptname}.results
 

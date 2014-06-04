@@ -549,7 +549,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.fou.nolimit.aph
+APH/${imagename}.fou.movie.nolimit.aph
 SCRATCH/TMP9873.dat
 U2
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -568,7 +568,7 @@ Y				! Use grid units?
 Y				! Generate grid from lattice?
 N				! Generate points from lattice?
 2,2,0,50,50,19,19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.fou.limit.aph
+APH/${imagename}.fou.movie.limit.aph
 SCRATCH/TMP9882.dat
 U2
 ${refposix},${refposiy}		! XORIG,YORIG

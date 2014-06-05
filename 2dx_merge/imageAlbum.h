@@ -33,31 +33,33 @@
 
 class imageAlbum : public QWidget
 {
-  Q_OBJECT
-  
-  public slots:
-  void viewImage(const QModelIndex &index);
-  void setConf(const QModelIndex &index);
-  void setModel(QAbstractItemModel *model);
-  void setSelectionModel(QItemSelectionModel *selectionModel);
-  void currentSelectionChanged(const QModelIndex &current,const QModelIndex &previous);  
-  
-  signals:
-  
-  void imageSelected(const QString &imageName);
-  void confSelected(const QString &confFile);
-
-  private:
-    albumModel *model;
-    QListView *view; 
-    
-    QItemSelectionModel *selection;
+	Q_OBJECT
 	
-	albumViewer *viewer;
+	public slots:
+		void viewImage(const QModelIndex &index);
+		void setConf(const QModelIndex &index);
+		void setModel(QAbstractItemModel *model);
+		void setSelectionModel(QItemSelectionModel *selectionModel);
+		void currentSelectionChanged(const QModelIndex &current,const QModelIndex &previous);  
+  
+	signals:
+		void imageSelected(const QString &imageName);
+		void confSelected(const QString &confFile);
 
-  public:
-    imageAlbum(const projectModel *dirModel, QWidget *parent = NULL);
-    void reload();  
+	private:
+		albumModel *model;
+		QListView *view;
+		
+		QListWidget *selectionWidget;
+
+		QItemSelectionModel *selection;
+		albumViewer *viewer;
+		
+		void updateParameterSection(QString confName);
+
+	public:
+		imageAlbum(const projectModel *dirModel, QWidget *parent = NULL);
+		void reload();  
 };
 
 #endif

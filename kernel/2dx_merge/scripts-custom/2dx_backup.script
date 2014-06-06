@@ -451,6 +451,17 @@ while ( ${dircounter} <= ${dirnum} )
           \rm ${from_dirfile}/APH/dummy.tmp
           \rm ${to_dirfile}/APH/dummy.tmp
         endif
+	#
+	if ( -d ${from_dirfile}/frames ) then
+          if ( ! -d ${to_dirfile}/frames ) then
+            \mkdir ${to_dirfile}/frames
+          endif
+          echo dummy > ${from_dirfile}/frames/dummy.tmp
+          echo ":New: ${to_dirfile}/frames/*"
+          cp -f ${from_dirfile}/frames/* ${to_dirfile}/frames
+          \rm ${from_dirfile}/frames/dummy.tmp
+          \rm ${to_dirfile}/frames/dummy.tmp
+        endif
         #
         # Make sure the config files are correctly linked:
         #

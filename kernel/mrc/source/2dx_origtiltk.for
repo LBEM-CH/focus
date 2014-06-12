@@ -660,7 +660,7 @@ C190   FORMAT(1X,2I4,F8.4,F10.1,F7.1,I7,I3,F8.5,F10.1,F7.3)
 190   FORMAT(1X,2I6,F9.4,G16.6,G16.6,I12,I3,F10.6,G16.6,F8.3)
 191   FORMAT(1X,2I6,F9.4,G16.6, 16X ,I12,I3,F10.6,G16.6,F8.3)
 192   FORMAT(1X,2I6,F9.4,G16.6,G16.6,I12,I3,F10.6,G16.6,F8.3,A)
-193   FORMAT(' FOR "EQUAL WEIGHT PER INPUT SPOT ON NEW FILM" TYPE'/
+193   FORMAT(' FOR "EQUAL WEIGHT PER INPUT SPOT ON NEW FILM" TYPE',/,
      1'   OF ORIGIN REFINEMENT, TOTAL COMPARISONS =',I5)
 195   FORMAT(' IORIGT =',I5)
 196   FORMAT(' LATTICE LINE POINTER ARRAY TOO SMALL, MAXINDEX=',I5)
@@ -1376,26 +1376,27 @@ C
 C
         NSUM=0
 C
+CHEN>
 C-------Check if this reflection is within valid boundaries:
 C
         IF(DRES.LT.DRESMIN.OR.DRES.GT.DRESMAX)then
           IOK2 = .FALSE.
-          GOTO 244
         endif
 C
         IF(IQ.GT.IQMAX)then
 C         write(6,'('' IQ > IQMAX for IQ,IQMAX,H,K,Z,W = '',4I6,2F12.3)')
 C     1      IQ,IQMAX,IH,IK,Z,W
           IOK2 = .FALSE.
-          GO TO 244
         endif
 C
 C-------Skip reflections without significant amplitude ?
 C       IF(A.LT.0.001)THEN
 C          IOK2 = .FALSE.
-C          goto 244
 C        endif
 C
+C        if(.not.IOK2) goto 244
+        if(.not.IOK2) goto 245
+CHEN<
         IF(LSPEC(IN)) NINEC=NINEC+1
 C
 C========================================

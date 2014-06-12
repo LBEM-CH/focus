@@ -367,7 +367,7 @@ TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM SIGF
-CTYPOUT H H H F P W W
+CTYPOUT H H H F P W Q
 FILE ${infile}
 SKIP 0
 END

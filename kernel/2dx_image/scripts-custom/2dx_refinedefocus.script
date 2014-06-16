@@ -336,7 +336,7 @@ if ( $iref == 2 ) then
   #
   echo ": now comes ctfsearch2 with:"
   echo ":${bin_2dx}/2dx_ctfsearch2.exe"
-  echo ": F F ${IQMAX_local}                                         ! LIST LISTW QMAX"
+  echo ": F F ${IQMAX_local}                                         ! LIST LISTW IQMAX"
   echo ":${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG"
   echo ":${defocus} ${CS} ${KV} ${phacon}                           ! DFMID1 DFMID2 ANGAST CS KV PHACON"
   echo ":${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT."
@@ -347,7 +347,7 @@ if ( $iref == 2 ) then
   echo " "
   #
   ${bin_2dx}/2dx_ctfsearch2.exe << eot
-F F ${IQMAX_local}                                         ! LIST LISTW QMAX
+F F ${IQMAX_local}                                         ! LIST LISTW IQMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                         ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT.
@@ -367,7 +367,7 @@ else if ( $iref == 0 ) then
   setenv INREF ${averagedat}
   #
   ${bin_2dx}/2dx_ctfsearch2.exe << eot
-F F ${IQMAX_local}                                                 ! LIST LISTW QMAX
+F F ${IQMAX_local}                                                 ! LIST LISTW IQMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}               ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                                 ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                             ! TITLE FOR PLOT OF FINAL BEST FIT.
@@ -388,7 +388,7 @@ else if ( $iref == '-1' ) then
   setenv INREF ${averagedat}
   #
   ${bin_2dx}/2dx_ctfsearch2.exe << eot
-F F ${IQMAX_local}                                         ! LIST LISTW QMAX
+F F ${IQMAX_local}                                         ! LIST LISTW IQMAX
 ${lattice} ${imagesidelength} ${stepdigitizer} ${magnification}       ! AX AY BX BY ISIZEX DSTEP XMAG
 ${defocus} ${CS} ${KV} ${phacon}                           ! DFMID1 DFMID2 ANGAST CS KV PHACON
 ${fittitle}                                     ! TITLE FOR PLOT OF FINAL BEST FIT.

@@ -1998,6 +1998,13 @@ C      if(ibeamtiltref.eq.1)then
           write(17,'(''set beamtilt = "'',A,''"'')')cline1(1:k)
         endif
         write(6,'(''new beamtilt = "'',A,''"'')')cline1(1:k)
+C
+        write(cline1,'(2F12.3)')HSHTHLT,HSHTKLT
+        call inkomma(cline1,k)
+        if(LOGOUTPUT)then
+          write(17,'(''set beamtilt_change = "'',A,''"'')')cline1(1:k)
+        endif
+        write(6,'(''new beamtilt_change = "'',A,''"'')')cline1(1:k)
       endif
 C
       if(itiltaxref.eq.1)then

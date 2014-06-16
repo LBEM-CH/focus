@@ -447,6 +447,7 @@ C     .         ,LOOKUP(40)                     ! also used in MTZ section
      . IFINISH(-MAXINDEX:MAXINDEX,-MAXINDEX:MAXINDEX)
 CAND (40+40+1)^2=6561 bei MAXINDEX 40
 C      DATA IBEGIN/6561*-999/,IFINISH/6561*-999/
+CHEN (60+60+1)^2=14641 bei MAXINDEX 60
       DATA IBEGIN/14641*-999/,IFINISH/14641*-999/
 C
 C----------------------------------------------------------------from here
@@ -1493,9 +1494,8 @@ C
 290     continue
 C
 292     IF(NREFOUT .and. IREFOUT.eq.1) THEN
-C---------IF(IOK .and. IOK2)then
-C---------IF(IOK)then
-          IF(IOK)then
+          IF(IOK .and. IOK2)then
+CHEN--------IF(IOK)then
 C-----------Output of the reference data for checking:
             IF(IIK(IN).GE.0) THEN
               WRITE(4,293) IIH(IN),IIK(IN),IZERO,FREF,PHSC(IN),1.0
@@ -3549,8 +3549,10 @@ C                                               ! referred to above.
       IF(ABS(PDIFF).GT.180.0) PDIFF=PDIFF-SIGN(360.0,PDIFF)
       IF(ABS(PDIFF).GT.8.0) PDIFF=SIGN(8.0,PDIFF)
       DPDZCU = PDIFF/DZ
-C      WRITE(6,86)IH,IK,ZASYM,FREF,FREFDZ,PREF,PREFDZ,DPDZCU
-C86    FORMAT(' H,K,Z,F,F+DZ,P,P+DZ,DPDZ= ',2I5,F8.4,2F10.2,2F10.3,F15.0)
+      if (IVERBOSE.gt.6) then
+         WRITE(6,86)IH,IK,ZASYM,FREF,FREFDZ,PREF,PREFDZ,DPDZCU
+86       FORMAT(' H,K,Z,F,F+DZ,P,P+DZ,DPDZ= ',2I5,F8.4,2F10.2,2F10.3,F15.0)
+      endif
 C
       RETURN
       END

@@ -37,6 +37,9 @@
 # DISPLAY: npo_line1
 # DISPLAY: npo_line2
 # DISPLAY: calculate_subvolume
+# DISPLAY: mask_subvolume_PDB
+# DISPLAY: mask_subvolume_PDB_file
+# DISPLAY: mask_subvolume_PDB_radius
 #
 #$end_local_vars
 #
@@ -92,6 +95,9 @@ set unitcellnumber = ""
 set npo_line1 = ""
 set npo_line2 = ""
 set calculate_subvolume = ""
+set mask_subvolume_PDB = ""
+set mask_subvolume_PDB_file = ""
+set mask_subvolume_PDB_radius = ""
 #
 #$end_vars
 #
@@ -402,6 +408,7 @@ eof
   #############################################################################
   #############################################################################
   #
+exit
   #
   #############################################################################
   ${proc_2dx}/linblock "maprot - to calculate 3D volume with inverted hand"

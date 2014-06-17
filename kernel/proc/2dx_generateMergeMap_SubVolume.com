@@ -62,6 +62,24 @@ eot
   #
   # echo "# IMAGE: SCRATCH/rot_volume.map <MAP: rotated 3D Volume>" >> LOGS/${scriptname}.results
   #
+  echo ":mask_subvolume_PDB = ${mask_subvolume_PDB}"
+  \rm -f SCRATCH/rot_volume_tmp.map
+  if ( ${mask_subvolume_PDB} == 'y' ) then
+    #############################################################################
+    ${proc_2dx}/linblock "mapmask - to mask with PDB file"
+    #############################################################################
+    #
+    \cp -f ${mask_subvolume_PDB_file} SCRATCH/PDB-tmp.pdb
+    ${bin_ccp4}/mapmask mapin SCRATCH/rot_volume.map mapout XYZIN SCRATCH/PDB-tmp.pdb SCRATCH/rot_volume_tmp.map << eot
+MODE MAPIN
+BORDER ${mask_subvolume_PDB_radius}
+END
+eot
+    #
+    mv -f SCRATCH/rot_volume_tmp.map volume_masked.map
+    echo "# IMAGE-IMPORTANT: volume_masked.map <MAP: PDB-file masked 3D Sub-Volume>" >> LOGS/${scriptname}.results
+  endif
+  #
   #############################################################################
   ${proc_2dx}/linblock "mapmask - to cut sub-volume"
   #############################################################################

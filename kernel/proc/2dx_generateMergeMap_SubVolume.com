@@ -440,7 +440,7 @@ eot
   ${bin_ccp4}/mapmask mapin SCRATCH/scratch2.map mapout volume_sub.map << eof
 AXIS X,Y,Z
 scale factor 1
-xyzlim -1.0 1.0 -1.0 1.0 -0.25 0.25
+xyzlim -0.25 1.0 -1.0 0.25 -0.25 0.07
 SYMM 1
 END
 eof

@@ -56,6 +56,7 @@
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
+# DISPLAY: movie_enable
 #
 #$end_local_vars
 #
@@ -112,6 +113,7 @@ set npo_cntrs_below = ""
 set PHARES_SYM = ""
 set PHARES_NUM_SPOTS = ""
 set MergeIQMAX = ""
+set movie_enable = ""
 #
 #$end_vars
 #

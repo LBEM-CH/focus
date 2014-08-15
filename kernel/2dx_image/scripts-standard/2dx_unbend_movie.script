@@ -629,11 +629,13 @@ echo "<<@evaluate>>"
 #echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
 
 echo "<<@progress: 90>>"
-
-python ${bin_2dx}/movie_mode_py/extractAMP.py `ls frames/aph_*`
-python ${bin_2dx}/movie_mode_py/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
-pdf2ps frames/AMPs.pdf frames/AMPs.ps
-echo  "# IMAGE: frames/AMPs.ps <AMP Decay>" >> LOGS/${scriptname}.results
+if (${movie_filter_type} == '1') then
+	${proc_2dx}/linblock "Plotting AMP-Decay"
+	python ${bin_2dx}/movie_mode_py/extractAMP.py `ls frames/aph_*`
+	python ${bin_2dx}/movie_mode_py/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
+	pdf2ps frames/AMPs.pdf frames/AMPs.ps
+	echo  "# IMAGE: frames/AMPs.ps <AMP Decay>" >> LOGS/${scriptname}.results
+endif
 
 ${proc_2dx}/linblock "Deleting frame averages temporay files"
 \rm -rf frames/frame*

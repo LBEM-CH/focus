@@ -29,7 +29,7 @@ if __name__ == "__main__":
 		
 		for j in range(0,ave_num):
 		
-			print "Splitting frame", i+1, "into", output_name, j
+			print "Splitting frame", i+1, "into", output_name, i*ave_num+j
 			
 			if j==0:
 				image = stack.get_clip(Region(0,0,i*ave_num+j,nx,ny,1))

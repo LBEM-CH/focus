@@ -169,6 +169,10 @@ if ( ${movie_enable} == "n" ) then
   exit
 endif
 
+#python ${bin_2dx}/movie_mode_py/extractAMP.py `ls frames/aph_*`
+#python ${bin_2dx}/movie_mode_py/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
+#exit 
+
 set num_dia = 100
 
 # Generate subfolder for frame images
@@ -406,7 +410,7 @@ eot
 		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
 	
-	echo ":  IFFT to obtain peak profile (masked frame averge with reference)"
+	echo ":  IFFT to obtain peak profile (masked frame average with reference)"
 	/bin/rm -f frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
 	setenv IN frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
@@ -486,6 +490,21 @@ eot
 	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
+
+	${bin_2dx}/2dx_mmboxa.exe << eot
+frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
+${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+frames/aph_${i}.fou.nolimit.aph
+SCRATCH/TMP9873.dat
+U2
+${refposix},${refposiy}           ! XORIG,YORIG
+200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
 	
 	set iplusone = `echo ${i} | awk '{s = int($1+1) } END { print s }'`
 	${proc_2dx}/linblock "Updating Error Field for frame average #${iplusone}" 
@@ -610,6 +629,11 @@ echo "<<@evaluate>>"
 #echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
 
 echo "<<@progress: 90>>"
+
+python ${bin_2dx}/movie_mode_py/extractAMP.py `ls frames/aph_*`
+python ${bin_2dx}/movie_mode_py/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
+pdf2ps frames/AMPs.pdf frames/AMPs.ps
+echo  "# IMAGE: frames/AMPs.ps <AMP Decay>" >> LOGS/${scriptname}.results
 
 ${proc_2dx}/linblock "Deleting frame averages temporay files"
 \rm -rf frames/frame*

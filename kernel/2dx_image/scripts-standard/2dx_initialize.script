@@ -278,3 +278,8 @@ echo ":: "
 #
 echo "<<@progress: 100>>"
 #
+exit
+#
+# This here is just to make sure the script is displayed in the GUI:
+source ${proc_2dx}/2dx_initialize_reset_sub.com
+#

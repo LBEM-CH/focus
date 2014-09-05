@@ -549,7 +549,7 @@ echo ":sym2spcgrp: Output in TWOFOLD = ${TWOFOLD}"
 #
 if ( ${set_to_90} == "yes" ) then
   echo ":sym2spcgrp: Output in set_to_90 = ${set_to_90}"
-  if ( ${realang}x != "90.0"x ) then
+   if ( ${realang}x != "90.0"x ) then
     set realang = 90.0
     echo "set realang = ${realang}" >> LOGS/${scriptname}.results
   endif

@@ -141,6 +141,11 @@ else
   set ILIST_VAL = 1
 endif
 #
+# The following is to make sure that for the next "Import Images", the default is correctly initialized.
+set initialization_reset = "y"
+set initialization_executable = "y"
+echo "set initialization_reset = ${initialization_reset}" >> LOGS/${scriptname}.results
+echo "set initialization_executable = ${initialization_executable}" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 1>>"
 #

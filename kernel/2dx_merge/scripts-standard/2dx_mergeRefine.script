@@ -174,6 +174,12 @@ set RFACAMP = 1.0
 set scriptname = 2dx_mergeRefine
 \rm -f LOGS/${scriptname}.results
 #
+# The following is to make sure that for the next "Import Images", the default is correctly initialized.
+set initialization_reset = "y"
+set initialization_executable = "y"
+echo "set initialization_reset = ${initialization_reset}" >> LOGS/${scriptname}.results
+echo "set initialization_executable = ${initialization_executable}" >> LOGS/${scriptname}.results
+#
 if ( ${merge_ref_num} != "0" ) then
   ${proc_2dx}/linblock "ERROR: Iterative refinement does not make sense with"
   ${proc_2dx}/linblock "a saved static reference."

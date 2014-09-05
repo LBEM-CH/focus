@@ -138,7 +138,6 @@ source ${proc_2dx}/2dx_merge_makedirs
 #
 \rm -f LOGS/${scriptname}.results
 #
-#
 set date = `date`
 echo date = ${date}
 #
@@ -146,6 +145,12 @@ set IAQP2 = 0
 set IVERBOSE = 1
 set phastepnum = 1
 set phastep = 0.1
+#
+# The following is to make sure that for the next "Import Images", the default is correctly initialized.
+set initialization_reset = "y"
+set initialization_executable = "y"
+echo "set initialization_reset = ${initialization_reset}" >> LOGS/${scriptname}.results
+echo "set initialization_executable = ${initialization_executable}" >> LOGS/${scriptname}.results
 #
 if ( ${ALAT} == "0" || ${ALAT} == "0.0" ) then
   ${proc_2dx}/protest "ALAT is not defined."

@@ -117,7 +117,8 @@ CHENN<
      .     '    - normal averaging + calculation of FOMOUT')
 C
         WRITE(6,22)
-22      FORMAT(/,' Refln.  No. ctf_sf    COMBINED(A+P)     QFACT      FOM ',
+22      FORMAT(/,' Refln.  No. ctf_sf    COMBINED(A+P)',
+     .    '     QFACT      FOM ',
      .    '         FOM   STD ERROR',/,
      .    '                       AMP    PHASE                          
      .    ',
@@ -159,7 +160,9 @@ C               CONTINUING SAME INDICES
                 IF(Z(I).GE.ZMIN.AND.Z(I).LE.ZMAX.AND.IQQ.LE.IQMAX)THEN
 C                 Z NEAR ENOUGH TO ZERO AND IQ WITHIN RANGE
                   I=I+1
-                  IF(I.GT.NMAX) STOP ' Too many spots for program dimensions'
+                  IF(I.GT.NMAX) then
+                    STOP ' Too many spots for program dimensions'
+                  endif
                   GO TO 19
                 ELSE
 C                 Z TOO FAR FROM ZERO; OR IQ TOO LARGE; BYPASS THIS DATA POINT

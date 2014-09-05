@@ -309,7 +309,7 @@ for (i=0; i<=newnticks; i++)
   p2k_move(x0, Y0, 0.0);
   p2k_here();
   p2k_grid(1.0, ((float)A4WIDTHmm)/2.0, 1.0);
-  p2k_draw(0.0, signoftick*TICKLEN, 0.0);
+  p2k_draw(0.0, (float)signoftick*TICKLEN, 0.0);
   if (signoftick < 0) p2k_move(0.0, -(TICKLEN+currentcharheight+1.0), 0.0);
   if (signoftick > 0) p2k_move(0.0, (TICKLEN+1.0), 0.0);
   sprintf(tempstr,"%3.1f",x0/f);
@@ -328,22 +328,24 @@ Draw label in fontsize=2*ticklabelsize
 p2k_move((newaxmax+newaxmin)/2.0, Y0, 0.0);
 p2k_here();
 p2k_grid(1.0, ((float)A4WIDTHmm)/2.0, 1.0);
-if (signoftick < 0) p2k_move(0.0, -(TICKLEN+2.5*currentcharheight+3.0), 0.0);
-if (signoftick > 0) p2k_move(0.0, (TICKLEN+currentcharheight+3.0), 0.0);
+if (signoftick < 0) p2k_move(0.0, (float)(-(TICKLEN+2.5*currentcharheight+3.0)), 0.0);
+if (signoftick > 0) p2k_move(0.0, (float)(TICKLEN+currentcharheight+3.0), 0.0);
 f=currentcharheight;
-p2k_font(currentfont,1.5*f);
+
+// The following causes a crash, even though the font was set before.
+// fprintf("::curentfont = %s, size = %i \n\n",currentfont,f);
+//p2k_font(currentfont,1.5*f);
 p2k_cstring(axislabel,nchars,0.0);
 if (exponent != 0)
   {
   sprintf(tempstr," ( x by 10**%i)",exponent);
   p2k_tstring(tempstr, 0.0);
   }
-p2k_font(currentfont,f);
+//p2k_font(currentfont,f);
 p2k_rgr();
 p2k_ror();
 p2k_rtw();
 p2k_ror();
-
 }
 
 /*****************************************************************************/

@@ -401,11 +401,14 @@ C---------   Noise is the Background Signal, which is BIN.
 C---------   Amplitude is AIN.
 C
           WIENVAL = (CNTRST**2/BIN**2 + 1.0/AIN**2)
+C
+C---------The following prevents division by zero:
           if ( ABS(WIENVAL).gt.1e-15)then
             WIENFILTER = (CNTRST/BIN**2) / WIENVAL
           else
             WIENFILTER = 0.0
             AIN=0.0
+            IQ=9
           endif
           if(WIENFILTER.gt. 100.0)WIENFILTER= 100.0
           if(WIENFILTER.lt.-100.0)WIENFILTER=-100.0
@@ -413,6 +416,7 @@ C
 C---------The better "Contrast" should then be the inverse of the Wiener Filter value.
 C---------Since the phase shift is done elsewhere (+180deg), we only calculate the ABS().
 C
+C---------The following prevents division by zero:
           if(ABS(WIENFILTER).gt.0.00001)then
             CNTRST = 1.0 / WIENFILTER
             if(CNTRST.gt. 100.0) CNTRST = 100.0

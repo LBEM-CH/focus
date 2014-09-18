@@ -717,9 +717,8 @@ X31=${realang}
 X32=180.0-X31
 X36=1.0/${mapscale}
 ; X36 is how many pixels are in one Angstroem
-X34=${unitcellnumber}*X36*${realu}/cos(${realang}-90.0)
 X34=${unitcellnumber}*X36*${realu}
-X35=${unitcellnumber}*X36*${realv}
+X35=${unitcellnumber}*X36*${realv}/cos(X31 - 90.0)
 ;
 IP
 TMP003

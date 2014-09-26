@@ -90,6 +90,7 @@ set zstarrange = ""
 set npo_cntrs_step = ""
 set npo_cntrs_below = ""
 set MergeIQMAX = ""
+set movie_enable = ""
 #
 #$end_vars
 #

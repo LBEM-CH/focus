@@ -755,7 +755,7 @@ if ( ${SYM_sub} == 'p1' ) then
   \ln -s ${prefix}${imagename}-p1.mrc final_map.mrc
 endif
 
-if ( ${movie_enable} == "n" ) then
+if ( ${movie_enable}x == "nx" ) then
   \cp -f ${prefix}${imagename}-p1.mrc u2_map.mrc
 endif
 
@@ -842,7 +842,7 @@ echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}PSF-${SYM_sub}.ps <PS: PSF symm
 echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-p1.ps <PS: ${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-${SYM_sub}.ps <PS: ${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 #
-if ( ${movie_enable} == "n" ) then
+if ( ${movie_enable}x == "nx" ) then
   \cp -f PS/${prefix}${imagename}MAP-p1.ps u2_map.ps
 endif
 #
@@ -956,11 +956,11 @@ TMP003
 LB5
 ;
 X31=${realang}
-X32=180.0-X31
+X32=X31-90.0
+X33=180.0-X31
 X36=1.0/${mapscale}
 ; X36 is how many pixels are in one Angstroem
-X34=${unitcellnumber}*X36*${realu}/cos(-${realang}-90.0)
-X34=${unitcellnumber}*X36*${realu}
+X34=${unitcellnumber}*X36*${realu}/cos(X32)
 X35=${unitcellnumber}*X36*${realv}
 ;
 ;
@@ -972,12 +972,12 @@ X34,X35
 ; NOW SHEARING:
 ;
 vm
-echo "X32 = {*****X32}"
+echo "::X33 = {*****X33}"
 ;
-if(X32.lt.90.0)then
+if(X33.lt.90.0)then
 SZ
 TMP004
-X32
+X33
 TMP005
 else
 cp
@@ -992,9 +992,10 @@ TMP006
 ;
 cp to mrc
 TMP006
-${prefix}${imagename}-${SYM_sub}-scaled-from_Spider.mrc
+${prefix}${imagename}-${SYM_sub}-scaled.mrc
 -9999
 ;
+goto LB77
 ; the usual origin top-left / bottom-left issue:
 MR
 TMP006
@@ -1004,9 +1005,19 @@ X
 fs
 TMP007
 ;
+fi
+TMP007
+;
 cp to tiff
 TMP007
 ${prefix}${imagename}-${SYM_sub}-scaled.tif
+;
+cp to mrc
+TMP007
+${prefix}${imagename}-${SYM_sub}-scaled.mrc
+-9999
+;
+LB77
 ;
 de a
 TMP001
@@ -1020,18 +1031,19 @@ eot
   \rm -f LOG.spi
   \rm -f fort.1
   ${proc_2dx}/linblock "TIFF file created: ${prefix}${imagename}-${SYM_sub}-scaled.tif"
-  echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}-scaled-from_Spider.mrc <${prename}${SYM_sub} Spider Map>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}-scaled.tif <${prename}${SYM_sub} Spider Map (TIFF)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}-scaled.mrc <${prename}${SYM_sub} Spider Map (MRC)>" >> LOGS/${scriptname}.results
   #
-  #############################################################################
-  ${proc_2dx}/linblock "tif2mrc - to create a MRC file format from the TIFF file"
-  ############################################################################# 
+#  #############################################################################
+#  ${proc_2dx}/linblock "tif2mrc - to create a MRC file format from the TIFF file"
+#  ############################################################################# 
+#  #
+#   \rm -f ${prefix}${imagename}-${SYM_sub}-scaled.mrc
+#   ${bin_2dx}/tif2mrc.exe << eot
+# ${prefix}${imagename}-${SYM_sub}-scaled.tif
+# ${prefix}${imagename}-${SYM_sub}-scaled.mrc
+# eot
   #
-  ${bin_2dx}/tif2mrc.exe << eot
-${prefix}${imagename}-${SYM_sub}-scaled.tif
-${prefix}${imagename}-${SYM_sub}-scaled.mrc
-eot
-  #
-  echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}-scaled.mrc <${prename}${SYM_sub} Spider Map from TIFF>" >> LOGS/${scriptname}.results
   #
 endif
 #

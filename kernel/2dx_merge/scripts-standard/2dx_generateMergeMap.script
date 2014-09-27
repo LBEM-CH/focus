@@ -207,21 +207,25 @@ if ( ${merge_modus} == "3D" ) then
   echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
   #
   #############################################################################
+  ${proc_2dx}/linblock "cad - to set spacegroup info to p1 for PSF"
+  #############################################################################  
+  #
+  \rm -f SCRATCH/merge3Dref-p1.mtz
+  #
+  ${bin_ccp4}/cad hklin1 merge3Dref.mtz hklout SCRATCH/merge3Dref-p1.mtz << eof
+symmetry p1
+labin file 1 all
+end
+eof
+  #
+  #############################################################################
   ${proc_2dx}/linblock "sftools - to set amps to 1 and phases to 0 for PSF"
   #############################################################################  
   #
   \rm -f SCRATCH/merge3D_phase_zero.mtz
   #
   ${bin_ccp4}/sftools << eof
-read merge3Dref.mtz
-sort h k l 
-set spacegroup
-${CCP4_SYM}
-select phaerr
-select invert
-purge
-y
-expand 1
+read SCRATCH/merge3Dref-p1.mtz
 calc COL PHI = 0
 write SCRATCH/merge3D_phase_zero.mtz
 quit
@@ -373,7 +377,7 @@ xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function 3D Volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function (display at level 128)>" >> LOGS/${scriptname}.results
   #
   #############################################################################
   ${proc_2dx}/linblock "mapmask - to set units to 1x1x1 for 3D Volume"

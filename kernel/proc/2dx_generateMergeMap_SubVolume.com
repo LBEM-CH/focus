@@ -80,6 +80,7 @@ eot
     echo "# IMAGE-IMPORTANT: volume_masked.map <MAP: PDB-file masked 3D Sub-Volume>" >> LOGS/${scriptname}.results
   endif
   #
+
   #############################################################################
   ${proc_2dx}/linblock "mapmask - to cut sub-volume"
   #############################################################################
@@ -109,7 +110,6 @@ eof
   echo "# IMAGE-IMPORTANT: volume_sub.map <MAP: Final 3D Volume (Sub Volume)>" >> LOGS/${scriptname}.results
   #
 endif
-#
 #
 #
 #

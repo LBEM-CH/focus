@@ -101,7 +101,7 @@
 #
 #  CCP4 Space group numbers:
 #
-#        1:  P1          2:  P-1         3:  P2            4:  P21
+#        1:  P1          2:  P-1         3:  P2(see below) 4:  P21
 #        5:  C2         10:  P2/m       16:  P222         17:  P2221
 #       18: P21212    1018: P21212      19: P212121       20:C2221
 #       21:  C222       22:  F222       23:  I222         24: I212121
@@ -124,6 +124,9 @@
 #      204: Im-3       207: P432       208: P4232        209: F432
 #      210: F4132      211: I432       212: P4332        213: P4132
 #      214: I4132      221: Pm-3m      225: Fm-3m        229: Im-3m
+#
+#        3: P2 with symmetrization in Y
+#     1003: P2 with symmetrization in Z
 #
 # There is also this non-standard definition:
 #    1 P1               3 P2              -3 P112             4 P21       
@@ -341,9 +344,9 @@ if ( ${SYM} == 'p1' ) then
 else if ( ${SYM} == 'p2' ) then
   set spcgrp = "2"
   set spcgroup_num = "2"
-  set CCP4_SYM = "3"
+  set CCP4_SYM = "1003"
   set ML_sym_val = "2"
-  set rotate_to_Z = "yes"
+  set rotate_to_Z = "no"
   set verified = "yes"
 
 else if ( ${SYM} == 'p12_a' ) then
@@ -549,7 +552,7 @@ echo ":sym2spcgrp: Output in TWOFOLD = ${TWOFOLD}"
 #
 if ( ${set_to_90} == "yes" ) then
   echo ":sym2spcgrp: Output in set_to_90 = ${set_to_90}"
-  if ( ${realang}x != "90.0"x ) then
+   if ( ${realang}x != "90.0"x ) then
     set realang = 90.0
     echo "set realang = ${realang}" >> LOGS/${scriptname}.results
   endif

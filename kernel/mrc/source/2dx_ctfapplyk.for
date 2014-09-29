@@ -24,6 +24,7 @@ C      CARD 3    ISER TITLE
 CHEN>
 C      CARD 4    PHACON
 C      CARD 5    RESHIG,RESLOW
+C      CARD 6    CALCWIEN
 CHEN<
 C
 C         AX,AY   - LATTICE PARAMETERS (FROM NNBOX) OF (1,0) AND (0,1)
@@ -45,6 +46,8 @@ C         RESMAX  - Maximum resolution for output ps-file.
 C         PHACON  - PHASECONTRAST, should be approx. 0.93(Cryo),0.65(neg.stain)
 C         RESHIG  - HIGHER VALUE FOR RESOLUTION CUTOFF (JUST ON OUTPUT)
 C         RESLOW  - LOWER  VALUE FOR RESOLUTION CUTOFF (JUST ON OUTPUT)
+C         CALCWIEN- Switch, deciding if Wiener filtration should be done,
+C                   or plain CTF calculation. 1=Wien,0=CTF.
 CHEN<
 C
 C   INPUT  DATASTREAM  'IN'
@@ -86,6 +89,7 @@ CHEN<
 CHEN>
       READ(5,*)PHACON
       READ(5,*)RESHIG,RESLOW
+      READ(5,*)CALCWIEN
 CHEN<
       WRITE(6,98)TITLE, ISER
 96    FORMAT(I10,15A4,A40)
@@ -127,7 +131,8 @@ C      CALL DOPEN(2,'OUT','NEW','F')    !  "   "   "
       WRITE(6,97) NSER,TITLEIN
 97      FORMAT(' Serial no and tilted on input file of uncorrected data'/
      . 40X,I10,15A4)
-      WRITE(2,96) ISER,TITLE,'  This is: H,K,A,P,IQ,Back,CTF(phase already applied)'
+      WRITE(2,96) ISER,TITLE,
+     .'  This is: H,K,A,P,IQ,Back,CTF(phase already applied)'
 CHEN>
       ANGAST0=ANGAST
 CHEN<
@@ -376,17 +381,62 @@ CHEN>
 C       DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
 C       CHI=C1*DF+C2
 C       CNTRST=-SIN(CHI)
-          if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0)then
-            DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-            CHI=C1*DF+C2
-            CNTRST=-SIN(CHI)*PHACON-COS(CHI)*SQRT(1.0-PHACON*PHACON)
+        if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0)then
+          DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
+          CHI=C1*DF+C2
+          CNTRST=-SIN(CHI)*PHACON-COS(CHI)*SQRT(1.0-PHACON*PHACON)
+        else
+          CNTRST=1.0
+        endif
+C
+        if(CALCWIEN.eq.1)then
+C
+C---------An attempt to implement Wiener filtration:
+C---------The Wiener filter is:
+C
+C---------   Filter = ( CTF/Noise**2 * Amplitude ) / (CTF**2/Noise**2 + 1/Amplitude**2)
+C
+C---------   The CTF was just calculated, and is CNTRST.
+C---------   Noise is the Background Signal, which is BIN.
+C---------   Amplitude is AIN.
+C
+          WIENVAL = (CNTRST**2/BIN**2 + 1.0/AIN**2)
+C
+C---------The following prevents division by zero:
+          if ( ABS(WIENVAL).gt.1e-15)then
+            WIENFILTER = (CNTRST/BIN**2) / WIENVAL
           else
-            CNTRST=1.0
+            WIENFILTER = 0.0
+            AIN=0.0
+            IQ=9
           endif
+          if(WIENFILTER.gt. 100.0)WIENFILTER= 100.0
+          if(WIENFILTER.lt.-100.0)WIENFILTER=-100.0
+C
+C---------The better "Contrast" should then be the inverse of the Wiener Filter value.
+C---------Since the phase shift is done elsewhere (+180deg), we only calculate the ABS().
+C
+C---------The following prevents division by zero:
+          if(ABS(WIENFILTER).gt.0.00001)then
+            CNTRST = 1.0 / WIENFILTER
+            if(CNTRST.gt. 100.0) CNTRST = 100.0
+            if(CNTRST.lt.-100.0) CNTRST =-100.0
+            IQ=IQIN
+          else
+            CNTRST = 0.0
+            AIN=0.0
+            IQ=9
+          endif
+C
+        else
+C
+          IQ=IQIN
+C-------- This sets IQ to 5 for high resolution spots with ctf < 0.15.
+          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
+C
+        endif
 CHEN<
-        IQ=IQIN
-        IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
-C  above sets IQ to 5 for high resolution spots with ctf < 0.15.
+C
         P=PIN
         IF(CNTRST.LT.0.0) P=PIN+180.0
         IF(P.GE.360.0) P=P-360.0
@@ -395,12 +445,12 @@ C               NOTE A FEW SPOTS NEAR CTF ZEROES HAVE THEIR IQ CHANGED TO 5.
 1000    FORMAT(2I5,2F12.1,I4,F12.1,F12.3)
         NTOTSPOTS = NTOTSPOTS +1
         IF(IQ.LE.7) THEN
-          WRITE(6,1001)IHIN,IKIN,AIN,PIN,IQIN,P,IQ,CNTRST
-1001      FORMAT(1X,2I5,2F12.1,I4,F18.1,I3,F12.3)
-1003      FORMAT(1X,2I5,2F12.1,I4,F18.1,I3,F12.3,
+          WRITE(6,1001)IHIN,IKIN,AIN,PIN,IQIN,P,IQ,CNTRST,WIENFILTER
+1001      FORMAT(1X,2I5,2F12.1,I4,F18.1,I3,F12.3,F12.3)
+1003      FORMAT(1X,2I5,2F12.1,I4,F18.1,I3,F12.3,F12.3,
      1        ' WRITTEN OUT, BUT IQ=8,9')
         ELSE
-          WRITE(6,1003)IHIN,IKIN,AIN,PIN,IQIN,P,IQ,CNTRST
+          WRITE(6,1003)IHIN,IKIN,AIN,PIN,IQIN,P,IQ,CNTRST,WIENFILTER
         ENDIF
       GO TO 109
 110   CLOSE(1)

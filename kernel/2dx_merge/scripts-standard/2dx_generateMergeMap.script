@@ -138,7 +138,6 @@ source ${proc_2dx}/2dx_merge_makedirs
 #
 \rm -f LOGS/${scriptname}.results
 #
-#
 set date = `date`
 echo date = ${date}
 #
@@ -146,6 +145,12 @@ set IAQP2 = 0
 set IVERBOSE = 1
 set phastepnum = 1
 set phastep = 0.1
+#
+# The following is to make sure that for the next "Import Images", the default is correctly initialized.
+set initialization_reset = "y"
+set initialization_executable = "y"
+echo "set initialization_reset = ${initialization_reset}" >> LOGS/${scriptname}.results
+echo "set initialization_executable = ${initialization_executable}" >> LOGS/${scriptname}.results
 #
 if ( ${ALAT} == "0" || ${ALAT} == "0.0" ) then
   ${proc_2dx}/protest "ALAT is not defined."
@@ -202,21 +207,25 @@ if ( ${merge_modus} == "3D" ) then
   echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
   #
   #############################################################################
+  ${proc_2dx}/linblock "cad - to set spacegroup info to p1 for PSF"
+  #############################################################################  
+  #
+  \rm -f SCRATCH/merge3Dref-p1.mtz
+  #
+  ${bin_ccp4}/cad hklin1 merge3Dref.mtz hklout SCRATCH/merge3Dref-p1.mtz << eof
+symmetry p1
+labin file 1 all
+end
+eof
+  #
+  #############################################################################
   ${proc_2dx}/linblock "sftools - to set amps to 1 and phases to 0 for PSF"
   #############################################################################  
   #
   \rm -f SCRATCH/merge3D_phase_zero.mtz
   #
   ${bin_ccp4}/sftools << eof
-read merge3Dref.mtz
-sort h k l 
-set spacegroup
-${CCP4_SYM}
-select phaerr
-select invert
-purge
-y
-expand 1
+read SCRATCH/merge3Dref-p1.mtz
 calc COL PHI = 0
 write SCRATCH/merge3D_phase_zero.mtz
 quit
@@ -368,7 +377,7 @@ xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function 3D Volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function (display at level 128)>" >> LOGS/${scriptname}.results
   #
   #############################################################################
   ${proc_2dx}/linblock "mapmask - to set units to 1x1x1 for 3D Volume"
@@ -712,9 +721,8 @@ X31=${realang}
 X32=180.0-X31
 X36=1.0/${mapscale}
 ; X36 is how many pixels are in one Angstroem
-X34=${unitcellnumber}*X36*${realu}/cos(${realang}-90.0)
 X34=${unitcellnumber}*X36*${realu}
-X35=${unitcellnumber}*X36*${realv}
+X35=${unitcellnumber}*X36*${realv}/cos(X31 - 90.0)
 ;
 IP
 TMP003

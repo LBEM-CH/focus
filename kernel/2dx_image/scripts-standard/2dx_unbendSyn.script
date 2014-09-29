@@ -68,6 +68,7 @@
 # DISPLAY: comment
 # DISPLAY: RMAG
 # DISPLAY: LCOLOR
+# DISPLAY: calcwien
 #
 #$end_local_vars
 #
@@ -141,6 +142,7 @@ set do3quadserch = ""
 set SYM = ""
 set RMAG = ""
 set LCOLOR = ""
+set calcwien = ""
 #
 #$end_vars
 #
@@ -445,6 +447,7 @@ ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,IS
 ${imagenumber} ${imagename}.ttf.nolimit, ${date}, No Limit, Nyquist=${ctfplotresmax}
 ${phacon}
 ${RESMIN},0.0
+${calcwien}  !  Calculate Wiener Filter
 eot
   #
   if ( ! -e CTFPLOT.PS ) then

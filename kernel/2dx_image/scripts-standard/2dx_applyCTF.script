@@ -48,6 +48,7 @@
 # DISPLAY: realcell
 # DISPLAY: realang
 # DISPLAY: lattice
+# DISPLAY: calcwien
 #
 #$end_local_vars
 #
@@ -81,6 +82,7 @@ set tempkeep = ""
 set plotres_rings = ""
 set realcell = ""
 set realang = ""
+set calcwien = ""
 #
 #$end_vars
 #
@@ -207,6 +209,7 @@ ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
 ${imagenumber} ${imagename}, ${date}
 ${phacon}
 ${RESMIN},1.0
+${calcwien}  !  Calculate Wiener Filter
 eot
   #
   echo "# IMAGE-IMPORTANT: APH/${outfile_nolimit} <APH File after CTF correction (No Res.Limit) [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
@@ -230,6 +233,7 @@ ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
 ${imagenumber} ${imagename}, ${date}
 ${phacon}
 ${RESMIN},${RESMAX}
+${calcwien}  !  Calculate Wiener Filter
 eot
   #
   echo "# IMAGE-IMPORTANT: APH/${outfile_limit} <APH File after CTF correction (Res.Limit) [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results

@@ -351,7 +351,6 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Latline data for volume [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #
@@ -373,119 +372,38 @@ SKIP 0
 END
 eof
 #
-#
 #############################################################################
-${proc_2dx}/linblock "sftools - to extend to P1 symmetry, for volume"
+${proc_2dx}/linblock "cad - to create MTZ file for volume"
 #############################################################################  
-#
-\rm -f SCRATCH/merge3D-clean.mtz
-#
-${bin_ccp4}/sftools << eof
-read SCRATCH/merge3D.mtz
-sort h k l 
-set spacegroup
-${CCP4_SYM}
-select phaerr
-select invert
-purge
-y
-write SCRATCH/merge3D-clean.mtz
-quit
-eof
-#
-\rm -f SCRATCH/merge3D-clean-p1.mtz
-#
-${bin_ccp4}/cad hklin1 SCRATCH/merge3D-clean.mtz hklout SCRATCH/merge3D-clean-p1.mtz << eof
-reso overall 10000 1
-outlim spacegroup 1
-labin file 1 all
-end
-eof
-#
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-# Something is needed her for the case of P2 and similar symmetries,
-# where the symmetrization by CCP4 (sftools below) is happening in Y and not in Z direction.
-# So, we first need to rotate the entire HKL dataset from Z into Y direction, 
-# then expand to SPACEGROUP 1, and then rotate back from Y into Z direction.
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-#
-# ${proc_2dx}/lin "rotate_to_Z = ${rotate_to_Z}" 
-# if (  ${rotate_to_Z} == "yes" ) then
-#   set AXIS = "Z,X,Y"
-# else
-#   set AXIS = "X,Y,Z"
-# endif
-#
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-#######################################################
-#######################################################
 #
 \rm -f merge3D.mtz
 #
-${bin_ccp4}/sftools << eof
-read SCRATCH/merge3D-clean-p1.mtz
-sort h k l 
-set spacegroup
-1
-reduce matrix 1 0 0 0 1 0 0 0 1
-write merge3D.mtz
-quit
-eof
-#
-#
-#############################################################################
-${proc_2dx}/linblock "sftools - to extend to P1 symmetry, for reference"
-#############################################################################  
-#
-\rm -f SCRATCH/merge3Dref-clean.mtz
-#
-${bin_ccp4}/sftools << eof
-read SCRATCH/merge3Dref.mtz
-sort h k l 
-set spacegroup
-${CCP4_SYM}
-select phaerr
-select invert
-purge
-y
-write SCRATCH/merge3Dref-clean.mtz
-quit
-eof
-#
-\rm -f SCRATCH/merge3Dref-clean-p1.mtz
-#
-${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref-clean.mtz hklout SCRATCH/merge3Dref-clean-p1.mtz << eof
-reso overall 10000 1
+${bin_ccp4}/cad hklin1 SCRATCH/merge3D.mtz hklout merge3D.mtz << eof
+sort h k l
+resolution overall ${RESMAX} ${RESMIN}
 outlim spacegroup 1
 labin file 1 all
+valm NaN NOOUTPUT
 end
 eof
 #
+echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Latline data for volume [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "cad - to create MTZ file for reference"
+#############################################################################  
+#
 \rm -f merge3Dref.mtz
 #
-${bin_ccp4}/sftools << eof
-read SCRATCH/merge3Dref-clean-p1.mtz
+${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref.mtz hklout merge3Dref.mtz << eof
 sort h k l 
-set spacegroup
-1
-reduce matrix 1 0 0 0 1 0 0 0 1
-write merge3Dref.mtz
-quit
+resolution overall ${MergeResolution} ${RESMIN}
+outlim spacegroup 1
+labin file 1 all
+valm NaN NOOUTPUT
+end
 eof
+#
 #
 # \rm -f SCRATCH/merge3Dref.mtz
 # \rm -f SCRATCH/merge3Dref-clean.mtz

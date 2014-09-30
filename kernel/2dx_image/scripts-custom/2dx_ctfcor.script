@@ -1,0 +1,110 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Correct CTF (Experimental)                                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 30/09/2014                                             #
+# Last Modification: 30/09/2014	                                            #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 98
+#
+# MANUAL: This script applies CTF correction to the raw image
+#
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagenumber
+# DISPLAY: imagesidelength
+# DISPLAY: comment
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: defocus
+# DISPLAY: phacon
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: ctfcor_noise
+# DISPLAY: ctfcor_inner_tile
+# DISPLAY: ctfcor_outer_tile
+# DISPLAY: ctfcor_imode
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set CS = ""
+set KV = ""
+set phacon = ""
+set secondlattice = ""
+set magnification = ""
+set stepdigitizer = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set defocus = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
+set ctfcor_noise = ""
+set ctfcor_inner_tile = ""
+set ctfcor_outer_tile = ""
+set ctfcor_imode = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_ctfcor
+#
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@evaluate>>"
+#
+#
+#################################################################################
+${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image"
+#################################################################################
+#
+set ctfcor_outfile = "SCRATCH/2dx_ctfcor_out.mrc"
+set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
+set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
+\rm -f ${ctfcor_outfile}
+\rm -f ${ctfcor_tilefile}
+\rm -f ${ctfcor_psfile}
+#
+${bin_2dx}/2dx_ctfcor.exe << eot
+${imagename}.mrc
+${ctfcor_outfile}
+${ctfcor_tilefile}
+${ctfcor_psfile}
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${ctfcor_noise}
+${ctfcor_inner_tile}
+${ctfcor_outer_tile}
+${ctfcor_imode}
+eot
+#
+echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${ctfcor_outfile} <Output Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${ctfcor_tilefile} <Output Image with Tiles>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${ctfcor_psfile} <Output Image with PowerSpectra>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#

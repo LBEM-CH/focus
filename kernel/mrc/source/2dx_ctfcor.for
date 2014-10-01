@@ -7,7 +7,11 @@ C                                               Part of 2dx                   *
 C                                                                             *
 C******************************************************************************
 C
-C Input is a single file in mapformat, output is a single file in mapformat
+C Input is a single file in mapformat, output is a single file in mapformat, plus debugging info maps.
+C
+C-----The image is cut into OUTER tiles (e.g. 256 wide), which are CTF corrected, and from which the 
+C-----INNER tiles (e.g. 128 wide) are then centrally windowed. The inner tiles are then placed back
+C-----into the large picture. 
 C
 C      Card input, or online control
 C
@@ -21,10 +25,12 @@ C        card  7 :  DEF1,DEF2,ANGAST
 C        card  8 :  NOISE (for Wiener option, otherwise give 0.0)
 C        card  9 :  Inner tile size (use 100 pixels)
 C        card 10 :  Outer tile size (use 200 pixels)
-C        card 11 :  IMODE, describes which of the various simple manipulations
-C                   IMOD=1: PhaseFlip
-C                   IMOD=2: CTF multiplication
-C                   IMOD=3: Wiener Filter
+C        card 11 :  Taper edge around CTF corrected zone
+C        card 12 :  IMODE, describes which of the various simple manipulations
+C                   IMODE=0: Nothing
+C                   IMODE=1: PhaseFlip
+C                   IMODE=2: CTF multiplication
+C                   IMODE=3: Wiener Filter
 C
 C******************************************************************************
 C
@@ -50,21 +56,27 @@ C
       INTEGER IINNERXSTART,IOUTERXSTART
       INTEGER KTILEINNER,KTILEOUTER
       INTEGER IS,ID,I,J,K,L,M,LL,MM
-      INTEGER*8 IBELOW
+      INTEGER*8 IBELOW,IABOVE,IHISTOFRAC
+      INTEGER icount
+      INTEGER idist
 C
-      REAL CTF,RHISTOFRAC
+      REAL CTF
 C
       REAL APIC(LMAX,LMAX),BPIC(LMAX,LMAX)
       REAL PSPIC(LMAX,LMAX),TILEPIC(LMAX,LMAX)
 C
       REAL AINNERTILE(LTPIC,LTPIC)
       REAL AOUTERTILE(LTPIC,LTPIC)
-      REAL ATMPTILE(LTPIC,LTPIC)
-      REAL PSTILE(LTPIC,LTPIC)
       REAL TILETILE(LTPIC,LTPIC)
-      COMPLEX CTMPTILE(LTPIC,LTPIC)
+C
       REAL POWER(LTPIC*LTPIC)
-      REAL CTFOUT(LTPIC*LTPIC)
+      REAL APOWERTILE(LTPIC,LTPIC)
+C
+      REAL CTFTILE(LTPIC,LTPIC)
+      REAL PSTILE(LTPIC,LTPIC)
+C
+      COMPLEX CFFT(LTPIC*LTPIC)
+      COMPLEX CFFTTILE(LTPIC,LTPIC)
 C
       REAL ABOX(LTPIC*LTPIC)
       COMPLEX CBOX(LTPIC)
@@ -79,6 +91,8 @@ C
       REAL TLTAXA,TLTANG
       REAL CS,HT,PHACON,RMAG,STEPD,AMPCON,WL
       REAL VAL,DMIN,DMAX,DMEAN
+      REAL DIMIN,DIMAX,DIMEAN
+      REAL DOMIN,DOMAX,DOMEAN
       REAL DAMPMAX
       REAL RDEF1,RDEF2,ANGAST
       REAL RNOISE
@@ -86,7 +100,7 @@ C
       REAL rgamma,rbeta
       REAL rdist1,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM
 C
-      REAL*8 DOUBLMEAN,DOUBLOMEAN,DOUBLTMP
+      REAL*8 DOUBLMEAN,DOUBLOMEAN,DVAL
 C
       COMPLEX CVAL
 C
@@ -200,6 +214,12 @@ C
       WRITE(6,'(''Inner tile size'')')
       read(5,*)ITILEINNER
       write(6,'(''    Read: '',I6)')ITILEINNER
+      k=ITILEINNER/2
+      if(2*k.ne.ITILEINNER)then
+        ITILEINNER=ITILEINNER+1
+        write(6,'(''::WARNING: Inner tile size needs to be '',
+     .    ''even number. Corrected to '',I6)')ITILEINNER
+      endif
       if(ITILEINNER.lt.50 .or. ITILEINNER.gt.500 .or.
      .   ITILEINNER.gt.LTPIC)then
         write(6,'(''::ERROR, ITILEINNER not reasonable or too large.'')')
@@ -209,6 +229,12 @@ C
       WRITE(6,'(''Outer tile size'')')
       read(5,*)ITILEOUTER
       write(6,'(''    Read: '',I6)')ITILEOUTER
+      k=ITILEOUTER/2
+      if(2*k.ne.ITILEOUTER)then
+        ITILEOUTER=ITILEOUTER+1
+        write(6,'(''::WARNING: Outer tile size needs to be '',
+     .    ''even number. Corrected to '',I6)')ITILEOUTER
+      endif
       if(ITILEINNER.gt.LTPIC)then
         write(6,'(''::ERROR, ITILEOUTER is too large.'')')
         goto 900
@@ -217,6 +243,10 @@ C
         write(6,'(''::ERROR, ITILEOUTER too small.'')')
         goto 900
       endif
+C
+      WRITE(6,'(''Width of edge taper'')')
+      read(5,*)idist
+      write(6,'(''    Read: '',I6)')idist
 C
       WRITE(6,'(''MODE'')')
       read(5,*)IMODE
@@ -228,6 +258,8 @@ C
         write(6,'('':Applying CTF multiplication'')')
       elseif(IMODE.eq.3)then
         write(6,'('':Applying Wiener filtration'')')
+      else
+        write(6,'('':No CTF correction done'')')
       endif
 C
 C******************************************************************************
@@ -253,7 +285,7 @@ C-----calculate center of image
       NCX=NX/2
       NCY=NY/2
 C
-      SCAL=1.0/SQRT(REAL(NX*NY))/100.0
+      SCAL=1.0/SQRT(REAL(NX*NY))
 C
 C-----N is normal to tilt axis, indicates the direction
 C-----in which defocus varies most
@@ -296,8 +328,21 @@ C
       DOUBLMEAN = DOUBLMEAN/(NX*NY)
       DMEAN = DOUBLMEAN
 C
+      DIMIN=DMIN
+      DIMAX=DMAX
+      DIMEAN=DMEAN
       write(6,'('':Read input image. Min,Max,Mean = '',3F12.3)')
-     .  DMIN,DMAX,DMEAN
+     .  DIMIN,DIMAX,DIMEAN
+C
+C-----Mark input image for debugging
+C
+C      do ix=1,NX
+C        do iy=1,NY
+C          if(((ix-  0)**2+(iy-  0)**2).lt.500**2)then
+C            APIC(ix,iy)=3.0
+C          endif
+C        enddo
+C      enddo
 C
 C-----Prepare output image with DMEAN, to make sure edges are defined
 C
@@ -314,13 +359,13 @@ C
       IXTILENUM = (NX - (ITILEOUTER - ITILEINNER)) / ITILEINNER
       write(6,'('':Will use '',I6,'' x '',I6,'' tiles.'')')IXTILENUM,IXTILENUM
 C
-C-----Tiles are centrally placed. Calculate left edge of first inner tile
+C-----Tiles are centrally placed. Calculate lower left corner point of first inner tile.
 C-----This tile should have an edge so that the outer tile could be cropped.
 C
       IINNERXSTART = (NX - IXTILENUM*ITILEINNER) / 2
-      write(6,'('':Inner Tile 1,1 bottom left corner is '',2I9)')IINNERXSTART,IINNERXSTART
+      write(6,'(''Inner Tile 1,1 bottom left corner is '',2I9)')IINNERXSTART,IINNERXSTART
       IOUTERXSTART = IINNERXSTART - (ITILEOUTER - ITILEINNER) / 2
-      write(6,'('':Outer Tile 1,1 bottom left corner is '',2I9)')IOUTERXSTART,IOUTERXSTART
+      write(6,'(''Outer Tile 1,1 bottom left corner is '',2I9)')IOUTERXSTART,IOUTERXSTART
 C
 C-----Loop over all inner tiles
 C
@@ -336,12 +381,17 @@ C---------Coordinates of inner tiles:
           iytilecen = (iytilestart + iytileend) / 2
 C          write(6,'(''Tile '',2I6,'', X/Y from '',2I6,'' to '',2I6)')
 C     .      itilex,itiley,ixtilestart,iytilestart,ixtileend,iytileend
+          if(itilex.eq.1 .and. itiley.eq.1)then
+            write(6,'(''ixtilestart = '',I6)')ixtilestart
+            write(6,'(''ixtileend   = '',I6)')ixtileend
+            write(6,'(''ixtilecen   = '',I6)')ixtilecen
+          endif
 C
 C---------Cut outer tile
           do iy = 1,ITILEOUTER
             do ix = 1,ITILEOUTER
-              iix = ixtilestart - 1 - (ITILEOUTER-ITILEINNER) + ix
-              iiy = iytilestart - 1 - (ITILEOUTER-ITILEINNER) + iy
+              iix = ixtilestart - 1 - (ITILEOUTER-ITILEINNER)/2 + ix
+              iiy = iytilestart - 1 - (ITILEOUTER-ITILEINNER)/2 + iy
               VAL=APIC(iix,iiy)
 C              if(itilex.eq.1 .and. itiley.eq.1) VAL=100.0
               AOUTERTILE(ix,iy)=VAL
@@ -384,32 +434,33 @@ C---------  rdist3 * tan(TLTANG)
      .      '' A. Def = '',F12.3)')
      .      itilex,itiley,ixtilecen,iytilecen,rdist2,rdist3,RLDEFM
 C
+C----------------------------------------
 C---------Calculate local CTF profile
+C----------------------------------------
 C
-          do I=1,ITILEOUTER*ITILEOUTER
-            CTFOUT(I)=0.0
+          do ix=1,ITILEOUTER
+            do iy=1,ITILEOUTER
+              CTFTILE(ix,iy)=0.0
+            enddo
           enddo
 C
-          DO L=1,ITILEOUTER/2
-            LL=L-1
-            DO M=1,ITILEOUTER
-              MM=M-1
+          DO ix=1,ITILEOUTER/2
+            LL=ix-1
+            DO iy=1,ITILEOUTER
+              MM=iy-1
               IF (MM.GT.ITILEOUTER/2) MM=MM-ITILEOUTER
-              I=L+ITILEOUTER/2
-              J=M+ITILEOUTER/2
+              I=ix+ITILEOUTER/2
+              J=iy+ITILEOUTER/2
               IF (J.GT.ITILEOUTER) J=J-ITILEOUTER
               CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
      +               ANGAST,THETATR,LL,MM)
 C
-              IS=I+ITILEOUTER*(J-1)
-              CTFOUT(IS)=CTFV**2
-C
-              I=ITILEOUTER/2-L+1
+              CTFTILE(I,J)=CTFV
+              I=ITILEOUTER/2-ix+1
               J=ITILEOUTER-J+2
-              IF (J.LE.ITILEOUTER) THEN
-                IS=I+ITILEOUTER*(J-1)
-                CTFOUT(IS)=CTFV**2
-              ENDIF
+              if(J.le.ITILEOUTER)then
+                CTFTILE(I,J)=CTFV
+              endif
             enddo
           enddo
 C
@@ -422,70 +473,119 @@ C
             enddo
           enddo
 C
-C---------Apply CTF correction to outer tile (AOUTERTILE)
+C---------Calculate in-place Fourier Transform from outer tile
 C
-C---------Original call:
-C---------  CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
-C
+C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
           call RLFT3(ABOX,CBOX,ITILEOUTER,ITILEOUTER,1,1)
+C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
-C---------Calculate Powerspectrum for verfication of tiles
+C---------Calculate Powerspectrum for verfication
 C
-          do iy = 1,ITILEOUTER 
-            do ix = 1,ITILEOUTER 
-              ID=ix+ITILEOUTER*(iy-1)
-              POWER(ID)=0.0
-            enddo
-          enddo
-C 
           do iy = 1,ITILEOUTER 
             do ix = 1,ITILEOUTER/2
               ID=(ix + ITILEOUTER/2*(iy-1))*2
               IS= ix + ITILEOUTER/2*(iy-1)
-              POWER(IS)=SQRT((ABOX(ID-1)**2+ABOX(ID)**2)*SCAL)
+              CFFT(IS)=CMPLX(REAL(ABOX(ID-1)),REAL(ABOX(ID)))
+            enddo
+          enddo
+C
+          do iy = 1,ITILEOUTER
+            do ix = 1,ITILEOUTER/2
+              IS=ix + ITILEOUTER/2*(iy-1)
+              iix=ix+ITILEOUTER/2
+              iiy=iy+ITILEOUTER/2
+              if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
+              CFFTTILE(iix,iiy)=CFFT(IS)
+            enddo
+          enddo
+C
+C--------------------------------------------------------------
+C---------Apply CTF correction
+C--------------------------------------------------------------
+C
+          do iy = 1,ITILEOUTER
+            do ix = 1,ITILEOUTER/2
+              iox=ix+ITILEOUTER/2
+              ioy=iy
+              if(IMODE.eq.1)then
+C               write(6,'('':Applying CTF Phase flipping only'')')
+                IF(CTFTILE(iox,ioy).ge.0.0)then
+                  CFFTTILE(iox,ioy) = -CFFTTILE(iox,ioy)
+                endif
+              elseif(IMODE.eq.2)then
+C               write(6,'('':Applying CTF multiplication'')')
+                CFFTTILE(iox,ioy)=CFFTTILE(iox,ioy)*CTFTILE(iox,ioy)
+              elseif(IMODE.eq.3)then
+C               write(6,'('':Applying Wiener filtration'')')
+                CFFTTILE(iox,ioy)=CFFTTILE(iox,ioy)*CTFTILE(iox,ioy)/(CTFTILE(iox,ioy)**2+RNOISE)
+              endif
+              APOWERTILE(iox,ioy)=(AIMAG(CFFTTILE(iox,ioy))**2+REAL(CFFTTILE(iox,ioy))**2)*SCAL**2
+            enddo
+          enddo
+C         Mask central pixel at origin
+          APOWERTILE(ITILEOUTER/2+1,ITILEOUTER/2+1)=0.0
+C
+C---------Calculate inverse in-place Fourier Transform from outer tile (AOUTERTILE)
+C
+          do iy = 1,ITILEOUTER 
+            do ix = 1,ITILEOUTER/2
+              iix=ix+ITILEOUTER/2
+              iiy=iy+ITILEOUTER/2
+              if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
+              ID=(ix + ITILEOUTER/2*(iy-1))*2
+              ABOX(ID-1)= REAL(CFFTTILE(iix,iiy))
+              ABOX(ID  )=AIMAG(CFFTTILE(iix,iiy))
+            enddo
+          enddo
+C
+C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+          call RLFT3(ABOX,CBOX,ITILEOUTER,ITILEOUTER,1,-1)
+C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+C
+          do iy = 1,ITILEOUTER 
+            do ix = 1,ITILEOUTER
+              IS= ix + ITILEOUTER*(iy-1)
+              AOUTERTILE(ix,iy)=ABOX(IS)
             enddo
           enddo
 C
 C---------Calculate DAMPMAX value, where 10% of pixels in POWER are above DAMPMAX
 C
-          do iy = 1,ITILEOUTER
-            do ix = 1,ITILEOUTER/2
-              ID=ix + ITILEOUTER/2*(iy-1)
-              iix=ix+ITILEOUTER/2
-              iiy=iy+ITILEOUTER/2
-              if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
-              ATMPTILE(iix,iiy)=POWER(ID)
-            enddo
-          enddo
-C         Mask central pixel at origin
-          ATMPTILE(ITILEOUTER/2+1,ITILEOUTER/2+1)=0.0
-C
-          DAMPMAX=1E-10
+          DAMPMAX=-1.0E10
           do iy = 1,ITILEINNER
             do ix = 1,ITILEINNER/2
               iox=ix+ITILEOUTER/2
               ioy=iy+(ITILEOUTER-ITILEINNER)/2
-              if(DAMPMAX.lt.ATMPTILE(iox,ioy))DAMPMAX=ATMPTILE(iox,ioy)
+              if(DAMPMAX.lt.APOWERTILE(iox,ioy))DAMPMAX=APOWERTILE(iox,ioy)
             enddo
           enddo
+C          write(6,'('':DAMPMAX = '',G12.3,'' APOWERTILE(100,100) = ''
+C     .      ,G12.3)')DAMPMAX,APOWERTILE(ITILEOUTER/2+100,ITILEOUTER/2+100)
 C
-C         What fraction of pixels should be non-saturated:
-          RHISTOFRAC=0.999
+C         What fraction of pixels should be below 50% value?
+          IHISTOFRAC=INT(0.30 * REAL(ITILEINNER*ITILEINNER/2))
+          DAMPMAX=DAMPMAX/1000.0
+          icount=0
  100      continue
-C           write(6,'('':SCAL='',G12.3,''   DAMPMAX = '',G12.3)')SCAL,DAMPMAX
-            IBELOW = 0
+C            write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
+C     .        '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12)')
+C     .        SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
+            DAMPMAX=DAMPMAX*1.5
+            icount=icount+1
+            IABOVE = 0
             do iy = 1,ITILEINNER
               do ix = 1,ITILEINNER/2
                 iox=ix+ITILEOUTER/2
                 ioy=iy+(ITILEOUTER-ITILEINNER)/2
-                if(ATMPTILE(iox,ioy).lt.DAMPMAX)IBELOW=IBELOW+1
+                if(APOWERTILE(iox,ioy).gt.DAMPMAX)IABOVE=IABOVE+1
+                if(IABOVE.gt.IHISTOFRAC .and. icount.lt.100)goto 100
               enddo
             enddo
-            if(REAL(IBELOW).gt.RHISTOFRAC*REAL(ITILEINNER*ITILEINNER/2))then
-              DAMPMAX=DAMPMAX/2.0
-              goto 100
-            endif
-C
+          DAMPMAX=DAMPMAX*2.0
+C          write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
+C     .      '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12,
+C     .      '' is final'')')
+C     .      SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
 C
 C---------Extract inner tile from outer tile
 C
@@ -494,51 +594,29 @@ C
 C
               iox=ix+(ITILEOUTER-ITILEINNER)/2
               ioy=iy+(ITILEOUTER-ITILEINNER)/2
-              if(ix.le.ITILEINNER/2)then
-                AINNERTILE(ix,iy)=AOUTERTILE(iox,ioy)
-C               Left half of PS: Mirror
-                ilx = (ITILEOUTER+ITILEINNER)/2 - ix + 2
-                ily = (ITILEOUTER+ITILEINNER)/2 - iy + 2
-                IS=ilx+ITILEOUTER*(ily-1)
-C                PSTILE(ix,iy)=ATMPTILE(ilx,ily)
-                PSTILE(ix,iy)=CTFOUT(IS)
-              else
-                AINNERTILE(ix,iy)=ATMPTILE(iox,ioy)
-C               Right half of PS:
-                PSTILE(ix,iy)=MIN(ATMPTILE(iox,ioy)/DAMPMAX,1.0)
-              endif
-              TILETILE(ix,iy)=AOUTERTILE(iox,ioy)
 C
-C-------------Draw a frame around the inner tile
-              if(iy.eq.1 .or. iy.eq.ITILEINNER .or. 
-     .           ix.eq.1 .or. ix.eq.ITILEINNER)then
-                TILETILE(ix,iy)=(ix+iy)/(ITILEINNER**2)*DMAX
+              AINNERTILE(ix,iy)=AOUTERTILE(iox,ioy)
+C
+              if(ix.le.ITILEINNER/2)then
+C               Left half of PS: Copy synthetic CTF
+                PSTILE(ix,iy)=CTFTILE(iox,ioy)**2
+              else
+C               Right half of PS: Copy FFT of CTF-corrected tile
+                PSTILE(ix,iy)=MIN(APOWERTILE(iox,ioy)/DAMPMAX,1.0)
               endif
 C
             enddo
           enddo
 C
-C---------Mask central pixel at origin
-C
-          ix=ITILEINNER/2+1
-          iy=ITILEINNER/2+1
-          PSTILE(ix,iy)=0.0
-C
-C---------Extract inner tile and place into output image
+C---------Place tile into output image
           do iy = 1,ITILEINNER
             do ix = 1,ITILEINNER
               ixcor = ixtilestart - 1 + ix
               iycor = iytilestart - 1 + iy
-C              write(6,'(''ixcor,iycor = '',2I6,'' , VAL = '',F12.3)')ixcor,iycor,VAL
               BPIC(ixcor,iycor) = AINNERTILE(ix,iy)
-              TILEPIC(ixcor,iycor) = TILETILE(ix,iy)
               PSPIC(ixcor,iycor) = PSTILE(ix,iy)
             enddo
           enddo
-C          write(6,'(''Tile '',2I6,'', X/Y from '',2I6,'' to '',2I6,
-C     .      '',  last ixcor/iycor = '',2I6)')
-C     .      itilex,itiley,ixtilestart,iytilestart,
-C     .      ixtileend,iytileend,ixcor,iycor
 C
         enddo
       enddo
@@ -546,9 +624,105 @@ C
 C-----Copy input image into output image
       do ix=1,NX
         do iy=1,NY
-          BPIC(ix,iy)=APIC(ix,iy)
+          TILEPIC(ix,iy)=APIC(ix,iy)
         enddo
       enddo
+C
+C---------------------------------------------------
+C-----Taper edge to DIMEAN value
+C---------------------------------------------------
+C
+C
+C-----Reset edge to DIMEAN value
+C-----Edge width is IINNERXSTART
+C     IINNERXSTART = (NX - IXTILENUM*ITILEINNER) / 2
+      do ix = 1,NX
+        do iy = 1,NY
+          APIC(ix,iy)=1.0
+        enddo
+      enddo
+C
+      do ix = 1,NX
+        do iy = 1,idist
+C---------bottom edge
+          APIC(ix,iy+IINNERXSTART)=REAL(iy)/REAL(idist)
+C---------top edge
+          APIC(ix,NY-IINNERXSTART-iy+1)=REAL(iy)/REAL(idist)
+        enddo
+        do iy = 1,IINNERXSTART
+          APIC(ix,iy)=0.0
+          APIC(ix,NY-IINNERXSTART+iy)=0.0
+        enddo
+      enddo
+      do iy = 1,NY
+        do ix = 1,idist
+C---------Left edge
+          i=ix+IINNERXSTART
+C---------Right edge
+          j=NX-IINNERXSTART-ix+1
+          if(i.lt.iy .and. i.lt.NY-iy)then
+            APIC(i,iy)=REAL(ix)/REAL(idist)
+            APIC(j,iy)=REAL(ix)/REAL(idist)
+          endif
+        enddo
+        do ix = 1,IINNERXSTART
+          APIC(ix,iy)=0.0
+          APIC(NX-IINNERXSTART+ix,iy)=0.0
+        enddo
+      enddo
+C
+C-----Use APIC to modulate amplitude in BPIC
+C
+      DOMIN= 1.0e30
+      DOMAX=-1.0e30
+      do ix=1,NX
+        do iy=1,NY
+          if(DOMIN.gt.BPIC(ix,iy))DOMIN=BPIC(ix,iy)
+          if(DOMAX.lt.BPIC(ix,iy))DOMAX=BPIC(ix,iy)
+        enddo
+      enddo
+      write(*,'('':Min, Max of raw output file are '',2G12.3)')DOMIN,DOMAX
+      do ix=1,NX
+        do iy=1,NY
+          DVAL = BPIC(ix,iy)
+          DVAL = (DVAL - DOMIN) / DOMAX
+          DVAL = DVAL * (DIMAX-DIMIN) + DIMIN
+          BPIC(ix,iy) = DVAL
+        enddo
+      enddo
+      write(*,'('':Min, Max, Mean of output file is '',3F12.3)')
+     .  DIMIN,DIMAX
+      DOMIN= 1.0e30
+      DOMAX=-1.0e30
+      DOUBLMEAN=0.0
+      do ix=1,NX
+        do iy=1,NY
+          if(DOMIN.gt.BPIC(ix,iy))DOMIN=BPIC(ix,iy)
+          if(DOMAX.lt.BPIC(ix,iy))DOMAX=BPIC(ix,iy)
+          DOUBLMEAN=DOUBLMEAN+BPIC(ix,iy)
+        enddo
+      enddo
+      DOUBLMEAN=DOUBLMEAN / NX 
+      DOUBLMEAN=DOUBLMEAN / NY 
+      DOMEAN = DOUBLMEAN
+C
+      write(*,'('':Min, Max, Mean of raw output file are '',3G12.3)')DOMIN,DOMAX,DOMEAN
+      do ix=1,NX
+        do iy=1,NY
+          DVAL = BPIC(ix,iy) 
+C         Float to zero with amplitude one
+          DVAL = (DVAL - DOMEAN) / (DOMAX - DOMIN)
+C         Keep floated to zero, taper amplitude between zero and one
+          DVAL = DVAL * APIC(ix,iy) 
+C         Push up between DMIN and DMAX
+          DVAL = DVAL * (DIMAX-DIMIN) + DIMIN
+          BPIC(ix,iy) = DVAL
+        enddo
+      enddo
+      write(*,'('':Min, Max, Mean of output file is '',3F12.3)')
+     .  DIMIN,DIMAX
+C
+C-----Prepare image marked with tile positions:
 C
       do itilex = 1,IXTILENUM
         do itiley = 1,IXTILENUM
@@ -561,7 +735,7 @@ C---------Draw a frame around the iiner tiles
      .           ix.eq.1 .or. ix.eq.ITILEINNER)then
                 ixcor = ixtilestart - 1 + ix
                 iycor = iytilestart - 1 + iy
-                BPIC(ixcor,iycor)=DMAX
+                TILEPIC(ixcor,iycor)=DIMAX
               endif
             enddo
           enddo
@@ -574,7 +748,7 @@ C---------Draw a frame around the outer tiles
      .           ix.eq.1 .or. ix.eq.ITILEOUTER)then
                 ixcor = ixtilestart - 1 + ix
                 iycor = iytilestart - 1 + iy
-                BPIC(ixcor,iycor)=DMIN
+                TILEPIC(ixcor,iycor)=DIMIN
               endif
             enddo
           enddo
@@ -624,7 +798,7 @@ C
       DOUBLMEAN = DOUBLMEAN/(NX*NY)
       DMEAN = DOUBLMEAN
 C
-      write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+      write(*,'('':Min, Max, Mean of output file is '',3F12.3)')
      .   DMIN,DMAX,DMEAN
 C
       CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
@@ -649,7 +823,7 @@ C
       DOUBLMEAN = DOUBLMEAN/(NX*NY)
       DMEAN = DOUBLMEAN
 C
-      write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+      write(*,'('' Min, Max, Mean of produced tile file is '',3F12.3)')
      .   DMIN,DMAX,DMEAN
 C
       CALL IWRHDR(3,TITLE,-1,DMIN,DMAX,DMEAN)
@@ -674,7 +848,8 @@ C
       DOUBLMEAN = DOUBLMEAN/(NX*NY)
       DMEAN = DOUBLMEAN
 C
-      write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+      write(*,'('' Min, Max, Mean of produced Powerspectra '',
+     .   ''file is '',3F12.3)')
      .   DMIN,DMAX,DMEAN
 C
       CALL IWRHDR(4,TITLE,-1,DMIN,DMAX,DMEAN)

@@ -33,6 +33,7 @@
 # DISPLAY: ctfcor_noise
 # DISPLAY: ctfcor_inner_tile
 # DISPLAY: ctfcor_outer_tile
+# DISPLAY: ctfcor_taper
 # DISPLAY: ctfcor_imode
 #
 #$end_local_vars
@@ -59,6 +60,7 @@ set RESMAX = ""
 set ctfcor_noise = ""
 set ctfcor_inner_tile = ""
 set ctfcor_outer_tile = ""
+set ctfcor_taper = ""
 set ctfcor_imode = ""
 #
 #$end_vars
@@ -69,8 +71,12 @@ set scriptname = 2dx_ctfcor
 #
 source ${proc_2dx}/initialize
 #
+echo "<<@progress: 5>>"
+#
 echo "<<@evaluate>>"
 #
+echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
 #
 #################################################################################
 ${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image"
@@ -94,13 +100,29 @@ ${defocus}
 ${ctfcor_noise}
 ${ctfcor_inner_tile}
 ${ctfcor_outer_tile}
+${ctfcor_taper}
 ${ctfcor_imode}
 eot
 #
-echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${ctfcor_outfile} <Output Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${ctfcor_tilefile} <Output Image with Tiles>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${ctfcor_psfile} <Output Image with PowerSpectra>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${ctfcor_outfile} <Output Image CTF corrected>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 80>>"
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "FFTRANS - to calculate Fourier transform"
+#                                                                           #
+#############################################################################
+#
+\rm -f SCRATCH/2dx_ctfcor_out_fft.mrc
+#
+setenv IN  ${ctfcor_outfile}
+setenv OUT SCRATCH/2dx_ctfcor_out_fft.mrc
+${bin_2dx}/2dx_fftrans.exe
+#
+echo "# IMAGE-IMPORTANT: "SCRATCH/2dx_ctfcor_out_fft.mrc "<FFT of CTF corrected image>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 #

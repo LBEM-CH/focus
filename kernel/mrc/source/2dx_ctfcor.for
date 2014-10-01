@@ -40,7 +40,7 @@ C
       INTEGER IXYZMIN(3),IXYZMAX(3),OUT(LMAX),OU2(LMAX)
       INTEGER MXYZN(3)
       INTEGER NCX,NCY
-      INTEGER ix,iy,iix,iiy,k,ixcor,iycor,iox,ioy,ilx,ily
+      INTEGER ix,iy,iix,iiy,ixcor,iycor,iox,ioy,ilx,ily
       INTEGER*4 iover,iunder,ilow
       INTEGER MODE,IMODE
       INTEGER NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,NL
@@ -49,7 +49,10 @@ C
       INTEGER ITILEINNER,ITILEOUTER,itilex,itiley
       INTEGER IINNERXSTART,IOUTERXSTART
       INTEGER KTILEINNER,KTILEOUTER
-      INTEGER IS,ID
+      INTEGER IS,ID,I,J,K,L,M,LL,MM
+      INTEGER*8 IBELOW
+C
+      REAL CTF,RHISTOFRAC
 C
       REAL APIC(LMAX,LMAX),BPIC(LMAX,LMAX)
       REAL PSPIC(LMAX,LMAX),TILEPIC(LMAX,LMAX)
@@ -61,6 +64,7 @@ C
       REAL TILETILE(LTPIC,LTPIC)
       COMPLEX CTMPTILE(LTPIC,LTPIC)
       REAL POWER(LTPIC*LTPIC)
+      REAL CTFOUT(LTPIC*LTPIC)
 C
       REAL ABOX(LTPIC*LTPIC)
       COMPLEX CBOX(LTPIC)
@@ -68,12 +72,14 @@ C
       REAL ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
       REAL LABELS(20,10),CELL(6),EXTRA(29)
       REAL DNCELL(6)
-      REAL CNV,SCAL
+      REAL CNV,SCAL,CTFV
       REAL RNORMX,RNORMY
+      REAL THETATR
 C
       REAL TLTAXA,TLTANG
       REAL CS,HT,PHACON,RMAG,STEPD,AMPCON,WL
       REAL VAL,DMIN,DMAX,DMEAN
+      REAL DAMPMAX
       REAL RDEF1,RDEF2,ANGAST
       REAL RNOISE
       REAL RPIXEL
@@ -254,14 +260,12 @@ C-----in which defocus varies most
       RNORMX= SIN(TLTAXA*PI/180.0)
       RNORMY=-COS(TLTAXA*PI/180.0)
 C
-C-----Convert units
+C-----Parameters for CTF calculation
 C
       CS=CS*(10.0**7.0)                          ! Angstroms
       HT=HT*1000.0                               ! Volts
       WL=12.26/SQRT(HT+0.9785*HT**2/(10.0**6.0)) ! Angstroms
-C
-C-----Parameters for CTF calculation
-C
+      THETATR=WL/(RPIXEL*ITILEOUTER)
       AMPCON=SQRT(1.0-PHACON**2)
 C
       write(*,'('':Opened file has dimensions '',2I6)')NX,NY
@@ -313,7 +317,7 @@ C
 C-----Tiles are centrally placed. Calculate left edge of first inner tile
 C-----This tile should have an edge so that the outer tile could be cropped.
 C
-      IINNERXSTART = NX / 2 - IXTILENUM / 2 * ITILEINNER
+      IINNERXSTART = (NX - IXTILENUM*ITILEINNER) / 2
       write(6,'('':Inner Tile 1,1 bottom left corner is '',2I9)')IINNERXSTART,IINNERXSTART
       IOUTERXSTART = IINNERXSTART - (ITILEOUTER - ITILEINNER) / 2
       write(6,'('':Outer Tile 1,1 bottom left corner is '',2I9)')IOUTERXSTART,IOUTERXSTART
@@ -322,6 +326,8 @@ C-----Loop over all inner tiles
 C
       do itilex = 1,IXTILENUM
         do itiley = 1,IXTILENUM
+C
+C---------Coordinates of inner tiles:
           ixtilestart = IINNERXSTART + (itilex - 1) * ITILEINNER
           iytilestart = IINNERXSTART + (itiley - 1) * ITILEINNER
           ixtileend = ixtilestart + ITILEINNER - 1
@@ -334,7 +340,10 @@ C
 C---------Cut outer tile
           do iy = 1,ITILEOUTER
             do ix = 1,ITILEOUTER
-              VAL=APIC(ixtilestart - 1 + ix,iytilestart - 1 + iy)
+              iix = ixtilestart - 1 - (ITILEOUTER-ITILEINNER) + ix
+              iiy = iytilestart - 1 - (ITILEOUTER-ITILEINNER) + iy
+              VAL=APIC(iix,iiy)
+C              if(itilex.eq.1 .and. itiley.eq.1) VAL=100.0
               AOUTERTILE(ix,iy)=VAL
             enddo
           enddo
@@ -375,7 +384,36 @@ C---------  rdist3 * tan(TLTANG)
      .      '' A. Def = '',F12.3)')
      .      itilex,itiley,ixtilecen,iytilecen,rdist2,rdist3,RLDEFM
 C
-C---------copy into ABOX array:
+C---------Calculate local CTF profile
+C
+          do I=1,ITILEOUTER*ITILEOUTER
+            CTFOUT(I)=0.0
+          enddo
+C
+          DO L=1,ITILEOUTER/2
+            LL=L-1
+            DO M=1,ITILEOUTER
+              MM=M-1
+              IF (MM.GT.ITILEOUTER/2) MM=MM-ITILEOUTER
+              I=L+ITILEOUTER/2
+              J=M+ITILEOUTER/2
+              IF (J.GT.ITILEOUTER) J=J-ITILEOUTER
+              CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
+     +               ANGAST,THETATR,LL,MM)
+C
+              IS=I+ITILEOUTER*(J-1)
+              CTFOUT(IS)=CTFV**2
+C
+              I=ITILEOUTER/2-L+1
+              J=ITILEOUTER-J+2
+              IF (J.LE.ITILEOUTER) THEN
+                IS=I+ITILEOUTER*(J-1)
+                CTFOUT(IS)=CTFV**2
+              ENDIF
+            enddo
+          enddo
+C
+C---------copy outer tile into ABOX array:
 C
           do iy = 1,ITILEOUTER 
             do ix = 1,ITILEOUTER 
@@ -383,7 +421,7 @@ C
               ABOX(ID)=AOUTERTILE(ix,iy)
             enddo
           enddo
-          
+C
 C---------Apply CTF correction to outer tile (AOUTERTILE)
 C
 C---------Original call:
@@ -408,16 +446,46 @@ C
             enddo
           enddo
 C
+C---------Calculate DAMPMAX value, where 10% of pixels in POWER are above DAMPMAX
+C
           do iy = 1,ITILEOUTER
             do ix = 1,ITILEOUTER/2
               ID=ix + ITILEOUTER/2*(iy-1)
               iix=ix+ITILEOUTER/2
               iiy=iy+ITILEOUTER/2
               if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
-C             IS=iix + ITILEOUTER*(iiy-1)
               ATMPTILE(iix,iiy)=POWER(ID)
             enddo
           enddo
+C         Mask central pixel at origin
+          ATMPTILE(ITILEOUTER/2+1,ITILEOUTER/2+1)=0.0
+C
+          DAMPMAX=1E-10
+          do iy = 1,ITILEINNER
+            do ix = 1,ITILEINNER/2
+              iox=ix+ITILEOUTER/2
+              ioy=iy+(ITILEOUTER-ITILEINNER)/2
+              if(DAMPMAX.lt.ATMPTILE(iox,ioy))DAMPMAX=ATMPTILE(iox,ioy)
+            enddo
+          enddo
+C
+C         What fraction of pixels should be non-saturated:
+          RHISTOFRAC=0.999
+ 100      continue
+C           write(6,'('':SCAL='',G12.3,''   DAMPMAX = '',G12.3)')SCAL,DAMPMAX
+            IBELOW = 0
+            do iy = 1,ITILEINNER
+              do ix = 1,ITILEINNER/2
+                iox=ix+ITILEOUTER/2
+                ioy=iy+(ITILEOUTER-ITILEINNER)/2
+                if(ATMPTILE(iox,ioy).lt.DAMPMAX)IBELOW=IBELOW+1
+              enddo
+            enddo
+            if(REAL(IBELOW).gt.RHISTOFRAC*REAL(ITILEINNER*ITILEINNER/2))then
+              DAMPMAX=DAMPMAX/2.0
+              goto 100
+            endif
+C
 C
 C---------Extract inner tile from outer tile
 C
@@ -431,11 +499,13 @@ C
 C               Left half of PS: Mirror
                 ilx = (ITILEOUTER+ITILEINNER)/2 - ix + 2
                 ily = (ITILEOUTER+ITILEINNER)/2 - iy + 2
-                PSTILE(ix,iy)=ATMPTILE(ilx,ily)
+                IS=ilx+ITILEOUTER*(ily-1)
+C                PSTILE(ix,iy)=ATMPTILE(ilx,ily)
+                PSTILE(ix,iy)=CTFOUT(IS)
               else
                 AINNERTILE(ix,iy)=ATMPTILE(iox,ioy)
 C               Right half of PS:
-                PSTILE(ix,iy)=ATMPTILE(iox,ioy)
+                PSTILE(ix,iy)=MIN(ATMPTILE(iox,ioy)/DAMPMAX,1.0)
               endif
               TILETILE(ix,iy)=AOUTERTILE(iox,ioy)
 C
@@ -652,6 +722,32 @@ C
   100 CONTINUE
   300 CONTINUE
       IF(k.LT.1)k=1
+C
+      RETURN
+      END
+C
+C**************************************************************************
+      REAL FUNCTION CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
+     +                  THETATR,IX,IY)
+C**************************************************************************
+C
+      PARAMETER (TWOPI=6.2831853071796)
+C
+      RAD=IX**2+IY**2
+      IF (RAD.NE.0.0) THEN
+        RAD=SQRT(RAD)
+        ANGLE=RAD*THETATR
+        ANGSPT=ATAN2(REAL(IY),REAL(IX))
+        C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
+        C2=-C1*CS*ANGLE*ANGLE/2.0
+        ANGDIF=ANGSPT-ANGAST
+        CCOS=COS(2.0*ANGDIF)
+        DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
+        CHI=C1*DF+C2
+        CTF=-WGH1*SIN(CHI)-WGH2*COS(CHI)
+      ELSE
+        CTF=-WGH2
+      ENDIF
 C
       RETURN
       END

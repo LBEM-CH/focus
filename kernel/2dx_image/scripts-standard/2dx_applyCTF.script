@@ -49,6 +49,7 @@
 # DISPLAY: realang
 # DISPLAY: lattice
 # DISPLAY: calcwien
+# DISPLAY: ctfcor_imode
 #
 #$end_local_vars
 #
@@ -83,8 +84,15 @@ set plotres_rings = ""
 set realcell = ""
 set realang = ""
 set calcwien = ""
+set ctfcor_imode = ""
 #
 #$end_vars
+#
+if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
+  # Nothing here
+else
+  set defocus = "0.0,0.0,0.0"
+endif
 #
 set scriptname = 2dx_applyCTF
 \rm -f LOGS/${scriptname}.results

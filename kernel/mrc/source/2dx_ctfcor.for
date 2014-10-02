@@ -31,6 +31,7 @@ C                   IMODE=0: Nothing
 C                   IMODE=1: PhaseFlip
 C                   IMODE=2: CTF multiplication
 C                   IMODE=3: Wiener Filter
+C        card 13 :  Debug mode: y=yes, n=no
 C
 C******************************************************************************
 C
@@ -104,9 +105,12 @@ C
 C
       COMPLEX CVAL
 C
+      LOGICAL LDEBUG
+C
       CHARACTER*60 INFILE,OUTFILE,TILEFILE,PSFILE
       character*80 TITLE
       character*200 cfile,cname
+      CHARACTER*1 CDEBUG
 C
       EQUIVALENCE (NX,NXYZ)
       EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
@@ -262,6 +266,16 @@ C
         write(6,'('':No CTF correction done'')')
       endif
 C
+      WRITE(6,'(''Debug Mode: y or n'')')
+      read(5,*)CDEBUG
+      write(6,'(''    Read: '',A1)')CDEBUG
+C
+      if(CDEBUG.eq.'y')then
+        LDEBUG=.true.
+      else
+        LDEBUG=.false.
+      endif
+C
 C******************************************************************************
 C******************************************************************************
 C******************************************************************************
@@ -336,13 +350,23 @@ C
 C
 C-----Mark input image for debugging
 C
-C      do ix=1,NX
-C        do iy=1,NY
-C          if(((ix-  0)**2+(iy-  0)**2).lt.500**2)then
-C            APIC(ix,iy)=3.0
-C          endif
-C        enddo
-C      enddo
+      if (LDEBUG) then
+        do ix=1,NX
+          do iy=1,NY
+            if(((ix-900)**2+(iy-900)**2).lt.500**2)then
+              APIC(ix,iy)=3.0
+            endif
+          enddo
+        enddo
+C
+        do ix=1,NX
+          do iy=1,NY
+            if(((ix-900)**2+(iy-900)**2).lt.3**2)then
+              APIC(ix,iy)=DIMAX
+            endif
+          enddo
+        enddo
+      endif
 C
 C-----Prepare output image with DMEAN, to make sure edges are defined
 C
@@ -508,16 +532,16 @@ C
               iox=ix+ITILEOUTER/2
               ioy=iy
               if(IMODE.eq.1)then
-C               write(6,'('':Applying CTF Phase flipping only'')')
-                IF(CTFTILE(iox,ioy).ge.0.0)then
-                  CFFTTILE(iox,ioy) = -CFFTTILE(iox,ioy)
+C                write(6,'('':Applying CTF Phase flipping only'')')
+                IF(CTFTILE(iox,ioy).gt.0.0)then
+                  CFFTTILE(iox,ioy) = -1.0*CFFTTILE(iox,ioy)
                 endif
               elseif(IMODE.eq.2)then
 C               write(6,'('':Applying CTF multiplication'')')
-                CFFTTILE(iox,ioy)=CFFTTILE(iox,ioy)*CTFTILE(iox,ioy)
+                CFFTTILE(iox,ioy)=CFFTTILE(iox,ioy)*(-1.0*CTFTILE(iox,ioy))
               elseif(IMODE.eq.3)then
 C               write(6,'('':Applying Wiener filtration'')')
-                CFFTTILE(iox,ioy)=CFFTTILE(iox,ioy)*CTFTILE(iox,ioy)/(CTFTILE(iox,ioy)**2+RNOISE)
+                CFFTTILE(iox,ioy)=CFFTTILE(iox,ioy)*(-1.0*CTFTILE(iox,ioy))/(CTFTILE(iox,ioy)**2+RNOISE)
               endif
               APOWERTILE(iox,ioy)=(AIMAG(CFFTTILE(iox,ioy))**2+REAL(CFFTTILE(iox,ioy))**2)*SCAL**2
             enddo
@@ -675,25 +699,6 @@ C-----Use APIC to modulate amplitude in BPIC
 C
       DOMIN= 1.0e30
       DOMAX=-1.0e30
-      do ix=1,NX
-        do iy=1,NY
-          if(DOMIN.gt.BPIC(ix,iy))DOMIN=BPIC(ix,iy)
-          if(DOMAX.lt.BPIC(ix,iy))DOMAX=BPIC(ix,iy)
-        enddo
-      enddo
-      write(*,'('':Min, Max of raw output file are '',2G12.3)')DOMIN,DOMAX
-      do ix=1,NX
-        do iy=1,NY
-          DVAL = BPIC(ix,iy)
-          DVAL = (DVAL - DOMIN) / DOMAX
-          DVAL = DVAL * (DIMAX-DIMIN) + DIMIN
-          BPIC(ix,iy) = DVAL
-        enddo
-      enddo
-      write(*,'('':Min, Max, Mean of output file is '',3F12.3)')
-     .  DIMIN,DIMAX
-      DOMIN= 1.0e30
-      DOMAX=-1.0e30
       DOUBLMEAN=0.0
       do ix=1,NX
         do iy=1,NY
@@ -705,21 +710,34 @@ C
       DOUBLMEAN=DOUBLMEAN / NX 
       DOUBLMEAN=DOUBLMEAN / NY 
       DOMEAN = DOUBLMEAN
-C
       write(*,'('':Min, Max, Mean of raw output file are '',3G12.3)')DOMIN,DOMAX,DOMEAN
       do ix=1,NX
         do iy=1,NY
-          DVAL = BPIC(ix,iy) 
-C         Float to zero with amplitude one
+          DVAL = BPIC(ix,iy)
           DVAL = (DVAL - DOMEAN) / (DOMAX - DOMIN)
-C         Keep floated to zero, taper amplitude between zero and one
-          DVAL = DVAL * APIC(ix,iy) 
-C         Push up between DMIN and DMAX
+          DVAL = DVAL * APIC(ix,iy) * (DIMAX-DIMIN) + DIMIN
+          BPIC(ix,iy) = DVAL
+        enddo
+      enddo
+      DOMIN= 1.0e30
+      DOMAX=-1.0e30
+      do ix=1,NX
+        do iy=1,NY
+          if(DOMIN.gt.BPIC(ix,iy))DOMIN=BPIC(ix,iy)
+          if(DOMAX.lt.BPIC(ix,iy))DOMAX=BPIC(ix,iy)
+        enddo
+      enddo
+      write(*,'('':Min, Max of raw output file are '',2G12.3)')DOMIN,DOMAX
+C
+      do ix=1,NX
+        do iy=1,NY
+          DVAL = BPIC(ix,iy) 
+          DVAL = (DVAL - DOMIN) / (DOMAX - DOMIN)
           DVAL = DVAL * (DIMAX-DIMIN) + DIMIN
           BPIC(ix,iy) = DVAL
         enddo
       enddo
-      write(*,'('':Min, Max, Mean of output file is '',3F12.3)')
+      write(*,'('':Min, Max of output file is '',2F12.3)')
      .  DIMIN,DIMAX
 C
 C-----Prepare image marked with tile positions:

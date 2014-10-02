@@ -52,6 +52,7 @@
 # DISPLAY: LCOLOR
 # DISPLAY: ccunbend_program
 # DISPLAY: calcwien
+# DISPLAY: ctfcor_imode
 #
 #$end_local_vars
 #
@@ -120,6 +121,7 @@ set RP_3 = ""
 set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
+set ctfcor_imode = ""
 #
 #$end_vars
 #

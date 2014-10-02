@@ -36,6 +36,7 @@
 # DISPLAY: ctfcor_taper
 # DISPLAY: ctfcor_imode
 # DISPLAY: ctfcor_debug
+# DISPLAY: ctfcor_maxamp_factor
 #
 #$end_local_vars
 #
@@ -64,6 +65,7 @@ set ctfcor_outer_tile = ""
 set ctfcor_taper = ""
 set ctfcor_imode = ""
 set ctfcor_debug = ""
+set ctfcor_maxamp_factor = ""
 #
 #$end_vars
 #
@@ -110,6 +112,7 @@ ${ctfcor_outer_tile}
 ${ctfcor_taper}
 ${ctfcor_imode}
 ${ctfcor_debug}
+${ctfcor_maxamp_factor}
 eot
 #
 echo "# IMAGE-IMPORTANT: ${ctfcor_outfile} <Output Image CTF corrected>" >> LOGS/${scriptname}.results

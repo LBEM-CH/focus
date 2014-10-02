@@ -98,6 +98,7 @@ C
       REAL RDEF1,RDEF2,ANGAST
       REAL RNOISE
       REAL RPIXEL
+      REAL RMAXAMPFACTOR
       REAL rgamma,rbeta
       REAL rdist1,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM
 C
@@ -275,6 +276,10 @@ C
       else
         LDEBUG=.false.
       endif
+C
+      WRITE(6,'(''MAXAMP Correction Factor for Display (use 1.0)'')')
+      read(5,*)RMAXAMPFACTOR
+      write(6,'(''    Read: '',F12.3)')RMAXAMPFACTOR
 C
 C******************************************************************************
 C******************************************************************************
@@ -605,7 +610,7 @@ C     .        SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
                 if(IABOVE.gt.IHISTOFRAC .and. icount.lt.100)goto 100
               enddo
             enddo
-          DAMPMAX=DAMPMAX*2.0
+          DAMPMAX=DAMPMAX*2.0*RMAXAMPFACTOR
 C          write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
 C     .      '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12,
 C     .      '' is final'')')
@@ -953,8 +958,12 @@ C-----Calculate the FFT of an image.
 C
 C-----This is copied from Niko Grigorieffs CTFFIND3.f
 C
-C     data: input dataset. If image, use 2D real array.
-C     speq: output dataset. If FFT, use 2D complex array.
+C     data: input and also output dataset. 
+C        If input real image, use 2D real array.
+C        If input FFT, use complex 2D array.
+C
+C     speq: one-dimensional temporary vector. Only needed for odd-numbered image sizes.
+C
 C     nn1: dimensions in x. If FFT, then width is nn1/2
 C     nn2: dimensions in y
 C     nn3: dimensions in z. Use 1 here.

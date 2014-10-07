@@ -98,6 +98,23 @@ set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
 \rm -f ${ctfcor_tilefile}
 \rm -f ${ctfcor_psfile}
 #
+# For example:
+# ${bin_2dx}/2dx_ctfcor.exe << eot
+# ${imagename}.mrc
+# ${ctfcor_outfile}
+# ${ctfcor_tilefile}
+# ${ctfcor_psfile}
+# 10.0, 60.0
+# 2.7, 300.0, 0.07, 39411.0, 5.0
+# 51579.8, 8919.84, 68.0
+# 0.1
+# 256
+# 512
+# 50
+# n
+# 0.1
+# eot
+#
 ${bin_2dx}/2dx_ctfcor.exe << eot
 ${imagename}.mrc
 ${ctfcor_outfile}

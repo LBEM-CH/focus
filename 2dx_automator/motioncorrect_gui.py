@@ -50,19 +50,19 @@ class Auto2dxGUI(Frame):
 		
 		
 	def getFolders(self):
-		self.input_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an input directory for Motion Correction. This should be where the raw movies arrive.")
-		if len(self.input_dir)==0:
-			raise SystemExit("No input directory selected")
-		
-		self.output_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an output directory for Motion Correction, where the drift-corrected movies will be saved.")
-		if len(self.output_dir)==0:
-			raise SystemExit("No output directory selected")
-			
-		stack_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an output directory for the drift-corrected and averaged images.")
-		if len(self.stack_dir)==0:
-			raise SystemExit("No stack-output directory selected")
-		self.export_location_stack = stack_dir
-		
+                self.input_dir = tkFileDialog.askdirectory(parent=self.parent, title="Input directory for movies from the DED camera, e.g. /run/user/1001/gvfs/ftp:host=192.168.210.1.port=8021/...")
+                if len(self.input_dir)==0:
+                        raise SystemExit("No input directory selected")
+
+                self.output_dir = tkFileDialog.askdirectory(parent=self.parent, title="Output directory for averages and other files, e.g. /mnt/cina-qnap01/.../DC_averages")
+                if len(self.output_dir)==0:
+                        raise SystemExit("No averages output directory selected")
+
+                stack_dir = tkFileDialog.askdirectory(parent=self.parent, title="Output directory for aligned stacks, e.g. /mnt/cina-qnap01/.../DC_stacks")
+                if len(self.stack_dir)==0:
+                        raise SystemExit("No stack-output directory selected")
+                self.export_location_stack = stack_dir
+
 			
 	def initLayout(self):
 		

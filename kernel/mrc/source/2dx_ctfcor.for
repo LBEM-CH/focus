@@ -95,7 +95,7 @@ C
       REAL DIMIN,DIMAX,DIMEAN
       REAL DOMIN,DOMAX,DOMEAN
       REAL DAMPMAX
-      REAL RDEF1,RDEF2,ANGAST
+      REAL RDEF1,RDEF2,ANGAST,ANGASTRAD
       REAL RNOISE
       REAL RPIXEL
       REAL RMAXAMPFACTOR
@@ -199,7 +199,7 @@ C
         write(6,'(''::ERROR: TLTANG should be between +-90.0'')')
         goto 900
       endif
-      if(TLTANG.gt.80.0 .or. TLTANG.lt.-80.0) then
+      if(TLTANG.gt.88.0 .or. TLTANG.lt.-88.0) then
         write(6,'(''::ERROR: TLTANG strangely high. Aborting.'')')
         goto 900
       endif
@@ -225,7 +225,7 @@ C
         write(6,'(''::WARNING: Inner tile size needs to be '',
      .    ''even number. Corrected to '',I6)')ITILEINNER
       endif
-      if(ITILEINNER.lt.50 .or. ITILEINNER.gt.500 .or.
+      if(ITILEINNER.lt.64 .or. ITILEINNER.gt.1024 .or.
      .   ITILEINNER.gt.LTPIC)then
         write(6,'(''::ERROR, ITILEINNER not reasonable or too large.'')')
         goto 900
@@ -244,7 +244,7 @@ C
         write(6,'(''::ERROR, ITILEOUTER is too large.'')')
         goto 900
       endif
-      if(ITILEOUTER.lt.1.2*ITILEINNER)then
+      if(ITILEOUTER.lt.1.0*ITILEINNER)then
         write(6,'(''::ERROR, ITILEOUTER too small.'')')
         goto 900
       endif
@@ -427,7 +427,7 @@ C              if(itilex.eq.1 .and. itiley.eq.1) VAL=100.0
             enddo
           enddo
 C
-C---------Calculate local defocus for the center of the tile
+C---------Calculate local defocus for the center of the current tile
 C
 C---------Defocus is "defocus = RDEF1,RDEF2,ANGAST".  TLTAXIS, TLTANG.  Pixel size in Angstroems is RPIXEL
 C
@@ -435,20 +435,20 @@ C---------Calculate distance from tilt axis for the center of this tile, in pixe
 C---------Center of image is NCX,NCY
 C---------Center of tile is ixtilecen,iytilecen (here called px,py)
 C---------distance between image center and tile center is
-C---------  sqrt((cx-px)**2 + (cy-py)**2)
+C---------  sqrt((ncx-px)**2 + (ncy-py)**2)
           rdist1 = sqrt(real(ixtilecen-NCX)**2 + real(iytilecen-NCY)**2)
 C
 C---------Angle "beta" between X-axis and line from image-center to tile-center is 
-C---------  arctan((px-ncx) / (py-ncy))
-          rbeta = atan2(real(iytilecen-NCY),real(ixtilecen-NCX))
+C---------  arctan((py-ncy) / (px-ncx))
+          rbeta = atan2(real(iytilecen-NCY),real(ixtilecen-NCX))*180.0/PI
 C
 C---------Angle between tilt axis and line from image-center to tile-center is
-C---------  180 - beta + TLTAXA
-          rgamma = 180.0 - rbeta + TLTAXA
+C---------  beta - TLTAXA
+          rgamma = rbeta - TLTAXA
 C
 C---------Distance between tile-center and closest point on tilt axis is
 C---------  sin(rgamma)*rdist1
-          rdist2 = sin(rgamma) * rdist1
+          rdist2 = sin(rgamma*PI/180.0) * rdist1
 C
 C---------Distance in Angstroems is
           rdist3 = rdist2 * RPIXEL
@@ -481,8 +481,9 @@ C
               I=ix+ITILEOUTER/2
               J=iy+ITILEOUTER/2
               IF (J.GT.ITILEOUTER) J=J-ITILEOUTER
+              ANGASTRAD=ANGAST*PI/180.0
               CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
-     +               ANGAST,THETATR,LL,MM)
+     +                ANGASTRAD,THETATR,LL,MM)
 C
               CTFTILE(I,J)=CTFV
               I=ITILEOUTER/2-ix+1

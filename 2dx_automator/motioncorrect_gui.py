@@ -50,16 +50,16 @@ class Auto2dxGUI(Frame):
 		
 		
 	def getFolders(self):
-		self.input_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an input directory for Motion Correction")
+		self.input_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an input directory for Motion Correction. This should be where the raw movies arrive.")
 		if len(self.input_dir)==0:
 			raise SystemExit("No input directory selected")
 		
-		self.output_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an output directory for Motion Correction")
+		self.output_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an output directory for Motion Correction, where the drift-corrected movies will be saved.")
 		if len(self.output_dir)==0:
 			raise SystemExit("No output directory selected")
 			
-		stack_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an output directory the aligned stacks")
-		if len(self.output_dir)==0:
+		stack_dir = tkFileDialog.askdirectory(parent=self.parent, title="Please select an output directory for the drift-corrected and averaged images.")
+		if len(self.stack_dir)==0:
 			raise SystemExit("No stack-output directory selected")
 		self.export_location_stack = stack_dir
 		

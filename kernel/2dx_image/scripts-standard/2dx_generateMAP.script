@@ -112,6 +112,7 @@ set npo_cntrs_below = ""
 set MergeIQMAX = ""
 set map_without_ctf = ""
 set movie_enable = ""
+set ctfcor_imode = ""
 #
 #$end_vars
 #
@@ -130,6 +131,12 @@ echo "<<@evaluate>>"
 #
 set date = `date`
 echo date = ${date}
+#
+if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
+  set iname = ${imagename}
+else
+  set iname = ${imagename}_ctfcor
+endif
 #
 if ( ${Calc_from_zstarrange} == "y" ) then
   set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
@@ -188,30 +195,30 @@ set phaori_local = ${phaori}
 #
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set aphfile = APH/${imagename}.fou.cor.aph
+    set aphfile = APH/${iname}.fou.cor.aph
     #
     # A check in case somebody just upgraded from an earlier version of 2dx:
     if ( ! -e ${aphfile} ) then
-      if ( -e APH/${imagename}.cor.aph ) then
-        \cp APH/${imagename}.cor.aph ${aphfile}
+      if ( -e APH/${iname}.cor.aph ) then
+        \cp APH/${iname}.cor.aph ${aphfile}
       endif
     endif
     #
 else
     # Synthetic Unbending result is used:
-    set aphfile = APH/${imagename}.syn.cor.aph
+    set aphfile = APH/${iname}.syn.cor.aph
 endif
 #
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
 if ( ${SYN_Unbending} == "0" ) then
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2b.ps <PS: Vector Plot of distortions 2>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserch2b.ps <PS: Vector Plot of distortions 2>" >> LOGS/${scriptname}.results
 else
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserchSc.ps <PS: Vector Plot of distortions Sc>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserchSc.ps <PS: Vector Plot of distortions Sc>" >> LOGS/${scriptname}.results
 endif
 if ( ${ctf_ttf} == 'CTF' ) then
-  echo "# IMAGE-IMPORTANT: PS/${imagename}.ctf.nolimit.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}.ctf.nolimit.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
 else
-  echo "# IMAGE-IMPORTANT: PS/${imagename}.ttplot.nolimit.unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}.ttplot.nolimit.unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
 endif
 
 set prefix = ""
@@ -237,7 +244,7 @@ if ( ${map_without_ctf} == 'y' ) then
   echo ":: "
   ${proc_2dx}/linblock "Generating map without CTF correction"
   echo ":: "
-  set aphfile = APH/${imagename}.fou.limit.aph
+  set aphfile = APH/${iname}.fou.limit.aph
   echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase File without CTF correction>" >> LOGS/${scriptname}.results
   set prefix = "no_ctf_"
   set prename = "no ctf "

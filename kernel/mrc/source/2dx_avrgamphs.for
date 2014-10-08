@@ -229,13 +229,29 @@ C48             continue
 C                       ONLY ONE PHASE ANGLE
                         COMBPHASE=PHASE(1)
                         COMBAMP=AMP(1)
+CHEN>
 C                       for only one measurement, maximum correction is 2.0
-                        IF(ABS(CTF(1)).LT.0.5) THEN
-                                COMBAMP=COMBAMP*2.0
-                                CTFSF=2.0
+C                       IF(ABS(CTF(1)).LT.0.5) THEN
+C                               COMBAMP=COMBAMP*2.0
+C                               CTFSF=2.0
+C
+C                       for only one measurement, maximum correction is 7.0
+                        IF(ABS(CTF(1)).LT.0.15) THEN
+                                COMBAMP=COMBAMP*7.0
+                                CTFSF=7.0
                         ELSE
-                                COMBAMP=COMBAMP/ABS(CTF(1))
+C---------------------------Wiener filter should be:
+C-----------------------------   Filter = ( Amplitude * CTF/Noise**2 ) / (CTF**2/Noise**2 + 1/Amplitude**2)
+C-----------------------------     Here with ABS(CTF), because phase-flipping was already done.
+C
+C                               COMBAMP=COMBAMP/ABS(CTF(1))
+C                               CTFSF=1.0/ABS(CTF(1))
+C
+                                COMBBACK = BACK(1)
+                                IF(COMBBACK.EQ.0.0) COMBBACK=7.0*ABS(COMBAMP/IQ(1))     ! fudge BACK=0
+                                COMBAMP=COMBAMP * ABS(CTF(1)) / COMBBACK**2 / (CTF(1)**2/COMBBACK**2 + 1.0/COMBAMP**2)
                                 CTFSF=1.0/ABS(CTF(1))
+CHEN<
                         ENDIF
                         PHSERROR=0.0
                         IARG=IABS(IQ(1))
@@ -555,8 +571,17 @@ C       WRITE(6,23)WEIGHT,COSANG,SINANG
 23      FORMAT(' WEIGHT,COSANG,SINANG',3F10.5)
         SUMAMPOLD=SUMAMPOLD+AMP(I)
         IF(BACK(I).EQ.0.0) BACK(I)=7.0*AMP(I)/IQ(I)     ! fudge BACK=0
+CHEN>
+C       SUMAMP =SUMAMP + AMP(I)*ABS(CTF(I))/BACK(I)**2
+C       SUMAMPW=SUMAMPW + CTF(I)**2/BACK(I)**2
+C
+C-------Wiener filter should be:
+C---------   Filter = ( Amplitude * CTF/Noise**2 ) / (CTF**2/Noise**2 + 1/Amplitude**2)
+C---------     Here with ABS(CTF), because phase-flipping was already done.
+C
         SUMAMP =SUMAMP + AMP(I)*ABS(CTF(I))/BACK(I)**2
-        SUMAMPW=SUMAMPW + CTF(I)**2/BACK(I)**2
+        SUMAMPW=SUMAMPW + CTF(I)**2/BACK(I)**2 + 1.0/AMP(I)**2
+CHEN<
         NAMP=NAMP+1
         SUMCOS=SUMCOS+WEIGHT*COSANG
         SUMSIN=SUMSIN+WEIGHT*SINANG

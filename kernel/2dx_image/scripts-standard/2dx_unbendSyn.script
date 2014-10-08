@@ -143,6 +143,7 @@ set SYM = ""
 set RMAG = ""
 set LCOLOR = ""
 set calcwien = ""
+set ctfcor_imode = ""
 #
 #$end_vars
 #
@@ -158,6 +159,10 @@ echo "<<@evaluate>>"
 #
 set date = `date`
 echo date = ${date}
+#
+if ( ${ctfcor_imode}x != "0x" ) then
+  ${proc_2dx}/protest "ERROR: CTF correction before unbending and Synthetic unbending cannot (yet) be done on the same time. Aborting."
+endif
 #
 if ( ${SYN_Unbending} == "0" ) then
   ${proc_2dx}/linblock "Skipping. Fourier filtered reference was used instead."

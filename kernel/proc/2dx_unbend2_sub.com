@@ -1009,26 +1009,6 @@ eot
     #
   endif
   #
-  if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
-    # Nothing here
-  else
-    if ( ! -e SCRATCH/2dx_ctfcor_out.mrc ) then
-      echo "::CTFCOR file missing. Skipping this part."
-    else
-      ${proc_2dx}/${lincommand} "CCUNBENDK using CTF-Corrected file"
-      \rm -f SCRATCH/cor${imagename}.notap.mrc
-      ${bin_2dx}/2dx_ccunbendk.exe << eot
-SCRATCH/2dx_ctfcor_out.mrc
-${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T                !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
-${imagename}, UNBEND2, ${date}
-SCRATCH/cor${imagename}.notap.mrc
-UNBENT,PASS,2,${date}
-eot
-      #
-    endif
-  endif
-  #
   \mv -f CCPLOT.PS PS/${imagename}-ccunbend2.ps
   if ( ${locround} == '1' ) then
     echo "# IMAGE-IMPORTANT: PS/${imagename}-ccunbend2.ps <PS: Vector Plot for Unbending>"  >> LOGS/${scriptname}.results 

@@ -98,6 +98,7 @@ set LCOLOR = ""
 set ccunbend_program = ""
 set createmaskinfo = ""
 set calcwien = ""
+set ctfcor_imode = ""
 #
 #$end_vars
 #
@@ -108,34 +109,43 @@ echo "<<@evaluate>>"
 #
 source ${proc_2dx}/initialize
 #
+if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
+  set iname = ${imagename}
+else
+  set iname = ${imagename}_ctfcor
+endif
+#
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
+  if ( ${ctfcor_imode}x != "0x" ) then
+    ${proc_2dx}/protest "ERROR: CTF correction before unbending and Synthetic unbending cannot (yet) be done on the same time. Aborting."
+  endif
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used instead."
   #
-  echo "# IMAGE: SCRATCH/${imagename}.ref.msk.unbend1.fft.mrc <Tightly-masked Reference FFT>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${imagename}.reference1.mrc <General Reference Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/box${imagename}.flt.unbend1.mrc <Reference Patch>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/auto${imagename}.cor.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/auto${imagename}.map.mrc <Central Peak of Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref1${imagename}.flt.unbend1.mrc <Reference 1 for XCF>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref1${imagename}.fft.mrc <FFT of Reference 1 for XCF>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref2${imagename}.flt.unbend1.mrc <Reference 2 for XCF>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref2${imagename}.fft.mrc <FFT of Reference 2 for XCF>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor1${imagename}.unbend1.fft.mrc <XCF with Reference 1>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor2${imagename}.unbend1.fft.mrc <XCF with Reference 2>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${imagename}.msk.unbend1.fft.mrc <maska-Masked FFT of Image>"  >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${imagename}.reference.unbend1.mrc <maska-Masked Reference Image for SNR calculation>"  >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${imagename}.mrc <tapered raw Image for SNR calculation>"  >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor1${imagename}.unbend1.fft.mrc <FFT of XCF Map for Reference 1>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor2${imagename}.cor.mrc <FFT of XCF Map for Reference 2>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch1a.ps <PS: Vector Plot for Distortions, Pass 1>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch1b.ps <PS: Vector Plot for Distortions, Pass 2>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor2${imagename}.cor.unbend1.mrc <XCF Map for Reference 2>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch1c.ps <PS: Vector Plot for Distortions, Pass 3>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor1${imagename}.cor.unbend1.mrc <XCF Map for Reference 1>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-ccunbend1.ps <PS: Vector Plot for Unbending>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor${imagename}.unbend1.notap.mrc <Raw Unbent Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor${imagename}.mrc <Edge-Tapered Unbent Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/cor${imagename}.unbend1.fft.mrc <FFT of Edge-Tapered and Unbent Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${iname}.ref.msk.unbend1.fft.mrc <Tightly-masked Reference FFT>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${iname}.reference1.mrc <General Reference Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/box${iname}.flt.unbend1.mrc <Reference Patch>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/auto${iname}.cor.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/auto${iname}.map.mrc <Central Peak of Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/ref1${iname}.flt.unbend1.mrc <Reference 1 for XCF>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/ref1${iname}.fft.mrc <FFT of Reference 1 for XCF>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/ref2${iname}.flt.unbend1.mrc <Reference 2 for XCF>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/ref2${iname}.fft.mrc <FFT of Reference 2 for XCF>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor1${iname}.unbend1.fft.mrc <XCF with Reference 1>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor2${iname}.unbend1.fft.mrc <XCF with Reference 2>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${iname}.msk.unbend1.fft.mrc <maska-Masked FFT of Image>"  >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${iname}.reference.unbend1.mrc <maska-Masked Reference Image for SNR calculation>"  >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${iname}.mrc <tapered raw Image for SNR calculation>"  >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor1${iname}.unbend1.fft.mrc <FFT of XCF Map for Reference 1>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor2${iname}.cor.mrc <FFT of XCF Map for Reference 2>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserch1a.ps <PS: Vector Plot for Distortions, Pass 1>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserch1b.ps <PS: Vector Plot for Distortions, Pass 2>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor2${iname}.cor.unbend1.mrc <XCF Map for Reference 2>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserch1c.ps <PS: Vector Plot for Distortions, Pass 3>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor1${iname}.cor.unbend1.mrc <XCF Map for Reference 1>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}-ccunbend1.ps <PS: Vector Plot for Unbending>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor${iname}.unbend1.notap.mrc <Raw Unbent Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor${iname}.mrc <Edge-Tapered Unbent Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/cor${iname}.unbend1.fft.mrc <FFT of Edge-Tapered and Unbent Image>" >> LOGS/${scriptname}.results
   #
   exit
 endif
@@ -145,8 +155,8 @@ echo "<<@progress: 1>>"
 set date = `date`
 echo date = ${date}
 #
-if ( ! -e ${imagename}.mrc ) then
-  ${proc_2dx}/protest "Image ${imagename}.mrc does not exist."
+if ( ! -e ${iname}.mrc ) then
+  ${proc_2dx}/protest "Image ${iname}.mrc does not exist."
 endif
 #
 #################################################################################
@@ -320,8 +330,8 @@ if ( ${ccunbend_program} != "0" && ${ccunbend_program} != "1" ) then
   echo "set ccunbend_program = ${ccunbend_program}" >> LOGS/${scriptname}.results
 endif
 #
-echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${iname}.fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${iname}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 set final_round = "y"
 #
@@ -353,29 +363,39 @@ ${proc_2dx}/linblock "Theoretical magnification is ${theormag}, given magnificat
 #
 echo "set CALCULATEDMAG = ${theormag}" >> LOGS/2dx_unbend1.results
 #
-if ( ! -e ${imagename}.spt ) then
+if ( ! -e ${iname}.spt ) then
   echo ":: "
-  ${proc_2dx}/linblock "ERROR: Spotlist ${imagename}.spt missing."
-  if ( -e ${nonmaskimagename}.spt ) then
-    ${proc_2dx}/linblock "WARNING: Copying ${nonmaskimagename}.spt to ${imagename}.spt"
-    \cp ${nonmaskimagename}.spt ${imagename}.spt
+  ${proc_2dx}/linblock "Spotlist ${iname}.spt missing."
+  if ( -e ${imagename}.spt ) then
+    ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${iname}.spt"
+    \cp ${imagename}.spt ${iname}.spt
   else
-    ${proc_2dx}/protest "Aborting."
+    if ( -e ${nonmaskimagename}.spt ) then
+      ${proc_2dx}/linblock "WARNING: Copying ${nonmaskimagename}.spt to ${iname}.spt"
+      \cp ${nonmaskimagename}.spt ${iname}.spt
+    else
+      ${proc_2dx}/protest "Aborting."
+    endif
   endif
 endif
 if ( ! -e ${nonmaskimagename}.spt ) then
   echo ":: "
-  ${proc_2dx}/linblock "ERROR: Spotlist ${nonmaskimagename}.spt missing."
+  ${proc_2dx}/linblock "Spotlist ${nonmaskimagename}.spt missing."
   if ( -e ${imagename}.spt ) then
     ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${nonmaskimagename}.spt"
     \cp ${imagename}.spt ${nonmaskimagename}.spt
   else
-    ${proc_2dx}/protest "Aborting."
+    if ( -e ${iname}.spt ) then
+      ${proc_2dx}/linblock "WARNING: Copying ${iname}.spt to ${nonmaskimagename}.spt"
+      \cp ${iname}.spt ${nonmaskimagename}.spt
+    else
+      ${proc_2dx}/protest "Aborting."
+    endif
   endif
 endif
 #
-if ( ! -e FFTIR/${imagename}.fft.mrc ) then
-  ${proc_2dx}/protest "ERROR: FFTIR/${imagename}.fft.mrc not existing."
+if ( ! -e FFTIR/${iname}.fft.mrc ) then
+  ${proc_2dx}/protest "ERROR: FFTIR/${iname}.fft.mrc not existing."
 endif
 #
 echo "<<@progress: 5>>"
@@ -384,57 +404,64 @@ echo "<<@progress: 5>>"
 ${proc_2dx}/linblock "Sourcing 2dx_unbend1_sub.com"
 #################################################################################
 #
+# this is only done for 2dx_unbend1_sub.com, so that it can stay as before:
+set imagename = ${iname}
+#
 source ${proc_2dx}/2dx_unbend1_sub.com
 #
 #################################################################################
 ${proc_2dx}/linblock "Back in 2dx_unbend1.com"
 #################################################################################
 #
-#############################################################################
-#                                                                           #
-${proc_2dx}/linblock "CTFAPPLY - to produce a first CTF overview"
-#                                                                           #
-#                     ${imagename}.limit.aph  =>  ${imagename}-limit-ctf.ps #
-#                                                                           #
-#############################################################################
-#
-\rm -f CTFPLOT.PS
-setenv IN  APH/${imagename}.nolimit.aph
-setenv OUT APH/${imagename}.unbend1.ctf.nolimit.aph
-${bin_2dx}/2dx_ctfapplyk.exe << eot
+if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
+  #
+  #############################################################################
+  #                                                                           #
+  ${proc_2dx}/linblock "CTFAPPLY - to produce a first CTF overview"
+  #                                                                           #
+  #                     ${iname}.limit.aph  =>  ${iname}-limit-ctf.ps #
+  #                                                                           #
+  #############################################################################
+  #
+  \rm -f CTFPLOT.PS
+  setenv IN  APH/${iname}.nolimit.aph
+  setenv OUT APH/${iname}.unbend1.ctf.nolimit.aph
+  ${bin_2dx}/2dx_ctfapplyk.exe << eot
 ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
 ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESPLOTMAX
-${imagenumber} ${imagename}.u1, No Lim, Nyq=${ctfplotresmax}, ${date}
+${imagenumber} ${iname}.u1, No Lim, Nyq=${ctfplotresmax}, ${date}
 ${phacon}
 ${RESMIN},0.0
 ${calcwien}  !  Calculate Wiener Filter
 eot
-if ( ! -e CTFPLOT.PS ) then
-  ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
-else
-  \mv -f CTFPLOT.PS PS/${imagename}.unbend1.nolimit.ps
-  echo "# IMAGE-IMPORTANT: PS/${imagename}.unbend1.nolimit.ps <PS: IQ Plot (No Resolution Limit)>"  >> LOGS/${scriptname}.results
-endif
-#
-echo "<<@progress: 90>"
-#
-\rm -f CTFPLOT.PS
-setenv IN  APH/${imagename}.limit.aph
-setenv OUT APH/${imagename}.unbend1.ctf.limit.aph
-${bin_2dx}/2dx_ctfapplyk.exe << eot
+  if ( ! -e CTFPLOT.PS ) then
+    ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
+  else
+    \mv -f CTFPLOT.PS PS/${iname}.unbend1.nolimit.ps
+    echo "# IMAGE-IMPORTANT: PS/${iname}.unbend1.nolimit.ps <PS: IQ Plot (No Resolution Limit)>"  >> LOGS/${scriptname}.results
+  endif
+  #
+  echo "<<@progress: 90>"
+  #
+  \rm -f CTFPLOT.PS
+  setenv IN  APH/${iname}.limit.aph
+  setenv OUT APH/${iname}.unbend1.ctf.limit.aph
+  ${bin_2dx}/2dx_ctfapplyk.exe << eot
 ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
 ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESPLOTMAX
-${imagenumber} ${imagename}.u1, Lim=${RESMAX}, Nyq=${ctfplotresmax}, ${date}
+${imagenumber} ${iname}.u1, Lim=${RESMAX}, Nyq=${ctfplotresmax}, ${date}
 ${phacon}
 ${RESMIN},${RESMAX}
 ${calcwien}  !  Calculate Wiener Filter
 eot
+  #
+  if ( ! -e CTFPLOT.PS ) then
+    ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
+  else
+    \mv -f CTFPLOT.PS PS/${iname}.unbend1.limit.ps
+    echo "# IMAGE-IMPORTANT: PS/${iname}.unbend1.limit.ps <PS: IQ Plot (Resolution Limited)>" >> LOGS/${scriptname}.results
+  endif
 #
-if ( ! -e CTFPLOT.PS ) then
-  ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
-else
-  \mv -f CTFPLOT.PS PS/${imagename}.unbend1.limit.ps
-  echo "# IMAGE-IMPORTANT: PS/${imagename}.unbend1.limit.ps <PS: IQ Plot (Resolution Limited)>" >> LOGS/${scriptname}.results
 endif
 #
 echo "<<@progress: 100>"

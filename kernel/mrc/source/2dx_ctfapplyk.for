@@ -24,7 +24,7 @@ C      CARD 3    ISER TITLE
 CHEN>
 C      CARD 4    PHACON
 C      CARD 5    RESHIG,RESLOW
-C      CARD 6    CALCWIEN
+C      CARD 6    CTFCOR  
 CHEN<
 C
 C         AX,AY   - LATTICE PARAMETERS (FROM NNBOX) OF (1,0) AND (0,1)
@@ -46,8 +46,12 @@ C         RESMAX  - Maximum resolution for output ps-file.
 C         PHACON  - PHASECONTRAST, should be approx. 0.93(Cryo),0.65(neg.stain)
 C         RESHIG  - HIGHER VALUE FOR RESOLUTION CUTOFF (JUST ON OUTPUT)
 C         RESLOW  - LOWER  VALUE FOR RESOLUTION CUTOFF (JUST ON OUTPUT)
-C         CALCWIEN- Switch, deciding if Wiener filtration should be done,
-C                   or plain CTF calculation. 1=Wien,0=CTF.
+C         CTFCOR  - Switch to indicate how CTF correction is to be done:
+C                   0 = conventional way: CTF correction done here.
+C                   1 = Original image has been Phase flipped. Here only AMP correction.
+C                   2 = Original image has been multiplied by CTF. Here only AMP correction (taking care of multiplied CTF).
+C                   3 = Original image has been Wiener filtered. Here nothing is to be done.
+C                   
 CHEN<
 C
 C   INPUT  DATASTREAM  'IN'
@@ -88,8 +92,9 @@ CHEN<
       READ(5,99)ISER,TITLE
 CHEN>
       READ(5,*)PHACON
+      AMPCON=SQRT(1.0-(PHACON*PHACON))
       READ(5,*)RESHIG,RESLOW
-      READ(5,*)CALCWIEN
+      READ(5,*)CTFCOR  
 CHEN<
       WRITE(6,98)TITLE, ISER
 96    FORMAT(I10,15A4,A40)
@@ -232,7 +237,6 @@ C
 C
       YPOSN=YPOSN-YPOSSTE
       CALL P2K_MOVE(XPOSN,YPOSN,0.)
-      AMPCON=SQRT(1.0-(PHACON*PHACON))
       WRITE (CZEILE,1235)PHACON,AMPCON
  1235 FORMAT('Phase Contrast = ',F6.3,', Amplitude Contrast = ',F6.3)
       READ(CZEILE,'(15A4)') TZEILE
@@ -384,55 +388,63 @@ C       CNTRST=-SIN(CHI)
         if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0)then
           DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
           CHI=C1*DF+C2
-          CNTRST=-SIN(CHI)*PHACON-COS(CHI)*SQRT(1.0-PHACON*PHACON)
+          CNTRST=-SIN(CHI)*PHACON-COS(CHI)*AMPCON
         else
           CNTRST=1.0
         endif
 C
-        if(CALCWIEN.eq.1)then
+C################################################################################
+C################################################################################
+C################################################################################
+C-------Phase flipping will be done here.
+C-------AVRAMPHS will later devide the AMPLITUDE by CNTRST.
+C-------  or, more precisely with CTF(I)=CNTRST:
 C
-C---------An attempt to implement Wiener filtration:
-C---------The Wiener filter is:
+C            In loop over all reflections I for same spot:
+C              IF(BACK(I).EQ.0.0) BACK(I)=7.0*AMP(I)/IQ(I)     ! fudge BACK=0
+C              SUMAMP =SUMAMP + AMP(I)*ABS(CTF(I))/BACK(I)**2
+C              SUMAMPW=SUMAMPW + CTF(I)**2/BACK(I)**2
+C            end loop
+C            COMBAMP=SUMAMP/SUMAMPW
 C
-C---------   Filter = ( CTF/Noise**2 * Amplitude ) / (CTF**2/Noise**2 + 1/Amplitude**2)
+C-------Here, we take this into account by doing the opposite.
+C-------That means: CTF (or CNTRST) and IQ have to be defined.
 C
-C---------   The CTF was just calculated, and is CNTRST.
-C---------   Noise is the Background Signal, which is BIN.
-C---------   Amplitude is AIN.
+C################################################################################
+C################################################################################
+C################################################################################
 C
-          WIENVAL = (CNTRST**2/BIN**2 + 1.0/AIN**2)
+        if(CTFCOR.eq.0)then
 C
-C---------The following prevents division by zero:
-          if ( ABS(WIENVAL).gt.1e-15)then
-            WIENFILTER = (CNTRST/BIN**2) / WIENVAL
-          else
-            WIENFILTER = 0.0
-            AIN=0.0
-            IQ=9
-          endif
-          if(WIENFILTER.gt. 100.0)WIENFILTER= 100.0
-          if(WIENFILTER.lt.-100.0)WIENFILTER=-100.0
-C
-C---------The better "Contrast" should then be the inverse of the Wiener Filter value.
-C---------Since the phase shift is done elsewhere (+180deg), we only calculate the ABS().
-C
-C---------The following prevents division by zero:
-          if(ABS(WIENFILTER).gt.0.00001)then
-            CNTRST = 1.0 / WIENFILTER
-            if(CNTRST.gt. 100.0) CNTRST = 100.0
-            if(CNTRST.lt.-100.0) CNTRST =-100.0
-            IQ=IQIN
-          else
-            CNTRST = 0.0
-            AIN=0.0
-            IQ=9
-          endif
-C
-        else
+C--------- 0 = conventional way: CTF correction done here.
 C
           IQ=IQIN
 C-------- This sets IQ to 5 for high resolution spots with ctf < 0.15.
           IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
+C
+        else if(CTFCOR.eq.1)then
+C
+C--------- 1 = Original image has been Phase flipped. Here only CNTRST calculation.
+C
+          IQ=IQIN
+          IF(ABS(CNTRST).LT.0.15) IQ=MAX(IQ,5)
+          CNTRST = -1.0 * ABS(CNTRST)
+C
+        else if(CTFCOR.eq.2)then
+C
+C--------- 2 = Original image has been multiplied by CTF. Here only AMP correction (taking care of multiplied CTF).
+C
+          IQ=IQIN
+          IF(ABS(CNTRST).LT.0.15) IQ=MAX(IQ,5)
+          CNTRST = -1.0 * CNTRST*CNTRST
+C
+        else if(CTFCOR.eq.3)then
+C
+C--------- 3 = Original image has been Wiener filtered. Here nothing is to be done.
+C
+          IQ=IQIN
+          IF(ABS(CNTRST).LT.0.15) IQ=MAX(IQ,5)
+          CNTRST = -1.0
 C
         endif
 CHEN<
@@ -463,39 +475,45 @@ C
       WRITE(6,105)NSPOTS,NUNIQUE
 105   FORMAT(I10,'  SPOTS WITH IQ 8 OR LESS PLOTTED,',I10,
      $  ' OF THEM UNIQUE')
+C
+C-----Now for making the plot:
+C
       NCALC=0
       CTFAVG=0.0
+C
       DO 200 IX=-ID,ID
-      DO 200 IY=-ID,ID
-      IF(IX.EQ.0.AND.IY.EQ.0) THEN
-        CNTRST=0.0
-        GO TO 200
-      ENDIF
-      T1=IX
-      T2=IY
-      RAD2=T1*T1+T2*T2
-      RAD=SQRT(RAD2)
-      ANGLE=RAD*THETAPL
-      C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
-      C2=-C1*CS*ANGLE*ANGLE/2.0
-      ANGSPT=ATAN2(T2,T1)
-      ANGDIF=ANGSPT-ANGAST
-      CCOS=COS(2.0*ANGDIF)
+        DO 200 IY=-ID,ID
+          IF(IX.EQ.0.AND.IY.EQ.0) THEN
+            CNTRST=0.0
+            GO TO 200
+          ENDIF
+          T1=IX
+          T2=IY
+          RAD2=T1*T1+T2*T2
+          RAD=SQRT(RAD2)
+          ANGLE=RAD*THETAPL
+          C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
+          C2=-C1*CS*ANGLE*ANGLE/2.0
+          ANGSPT=ATAN2(T2,T1)
+          ANGDIF=ANGSPT-ANGAST
+          CCOS=COS(2.0*ANGDIF)
 CHEN>
-C      DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-C      CHI=C1*DF+C2
-C      CNTRST=-SIN(CHI)
+C         DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
+C         CHI=C1*DF+C2
+C         CNTRST=-SIN(CHI)
           if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0)then
             DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
             CHI=C1*DF+C2
-            CNTRST=-SIN(CHI)*PHACON-COS(CHI)*SQRT(1.0-PHACON*PHACON)
+            CNTRST=-SIN(CHI)*PHACON-COS(CHI)*AMPCON
           else
             CNTRST=1.0
           endif
 CHEN<
-      CTFAVG=CTFAVG+ABS(CNTRST)
-      NCALC=NCALC+1
-200   ARRAY(IX,IY)=CNTRST
+          CTFAVG=CTFAVG+ABS(CNTRST)
+          NCALC=NCALC+1
+          ARRAY(IX,IY)=CNTRST
+200   continue
+C
       IF(NCALC.NE.0) CTFAVG=CTFAVG/NCALC
       WRITE(6,106)NCALC,CTFAVG
 106   FORMAT(' C.T.F. NOW GENERATED',I10,' CALCULATED POINTS',
@@ -514,7 +532,10 @@ CHEN<
 C HPCNTR IS SAME AS PLUTO SUBROUTINE BUT WITHH OTHER CALLS REMOVED AND SCALE
 C ADDED TO ARGUMENT LIST.
       CALL P2K_PAGE
+C
+      STOP
       END
+C
 C**APLOT***********************************************************************
       SUBROUTINE APLOT(XV,YV,NPT,SCALE)
       DIMENSION XV(NPT),YV(NPT)

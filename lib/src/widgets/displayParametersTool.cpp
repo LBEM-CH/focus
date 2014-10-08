@@ -171,7 +171,7 @@ void displayParametersTool::setDefaults()
   latticeSize.setSingleStep(1);
   latticeCircleLine.setValue(0);
   latticeCircleLine.setSingleStep(1);
-  latticeOrders.setValue(20);
+  latticeOrders.setValue(30);
   latticeOrders.setSingleStep(1);
   latticeOrders.setMinimum(1);
   spotSize.setValue(20);

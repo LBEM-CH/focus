@@ -138,51 +138,61 @@ source ${proc_2dx}/initialize
 set date = `date`
 echo date = ${date}
 #
+if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
+  set iname = ${imagename}
+else
+  set iname = ${imagename}_ctfcor
+endif
+#
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
+  if ( ${ctfcor_imode}x != "0x" ) then
+    ${proc_2dx}/protest "ERROR: CTF correction before unbending and Synthetic unbending cannot (yet) be done on the same time. Aborting."
+  endif
+  #
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used instead."
   #
-  echo "# IMAGE-IMPORTANT: FFTIR/cor${imagename}.fft.unbend2.mrc <FFT of Unbent Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref${imagename}.fft.msk.unbend2.mrc <FFT of Unbent Reference>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${imagename}.reference2.mrc <Reference Patch>" >> LOGS/${scriptname}.results  
-  echo "# IMAGE: SCRATCH/auto${imagename}.cor.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/box${imagename}.flt2.mrc <Center of Reference Patch>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/auto${imagename}.cor.unbend2.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/auto${imagename}.map.mrc <Central Peak of Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/refb1${imagename}.flt.mrc <Reference 1>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/refb2${imagename}.flt.mrc <Reference 2>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/ref${imagename}.flt.unbend2.mrc <Filtered Image for Reference generation>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/refb1${imagename}.flt.unbend2.mrc <Reference 1>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/refb2${imagename}.flt.unbend2.mrc <Reference 2>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/${imagename}.fft.msk.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/${imagename}.ttf.mrc <Image after TTF correction>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/corel2${imagename}.fft.mrc <XCF between Reference 2 and Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/${imagename}.fft.msk.unbend2.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/ref1${imagename}.fft.unbend2.mrc <FFT of Reference 1>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/ref2${imagename}.fft.unbend2.mrc <FFT of Reference 2>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/corel1${imagename}.fft.mrc <XCF between Reference 1 and Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/cor2${imagename}.cor.mrc <XCF between Reference 2 and Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2a.ps <PS: Vector Plot of Distortion, Pass 1>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: FFTIR/cor${iname}.fft.unbend2.mrc <FFT of Unbent Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/ref${iname}.fft.msk.unbend2.mrc <FFT of Unbent Reference>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${iname}.reference2.mrc <Reference Patch>" >> LOGS/${scriptname}.results  
+  echo "# IMAGE: SCRATCH/auto${iname}.cor.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/box${iname}.flt2.mrc <Center of Reference Patch>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/auto${iname}.cor.unbend2.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/auto${iname}.map.mrc <Central Peak of Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/refb1${iname}.flt.mrc <Reference 1>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/refb2${iname}.flt.mrc <Reference 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/ref${iname}.flt.unbend2.mrc <Filtered Image for Reference generation>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/refb1${iname}.flt.unbend2.mrc <Reference 1>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/refb2${iname}.flt.unbend2.mrc <Reference 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/${iname}.fft.msk.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/${iname}.ttf.mrc <Image after TTF correction>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/corel2${iname}.fft.mrc <XCF between Reference 2 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/${iname}.fft.msk.unbend2.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/ref1${iname}.fft.unbend2.mrc <FFT of Reference 1>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/ref2${iname}.fft.unbend2.mrc <FFT of Reference 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/corel1${iname}.fft.mrc <XCF between Reference 1 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor2${iname}.cor.mrc <XCF between Reference 2 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserch2a.ps <PS: Vector Plot of Distortion, Pass 1>" >> LOGS/${scriptname}.results 
   echo "# IMAGE-IMPORTANT: ManualMasking-UnbendPlot.mrc <Distortion Plot for Manual Masking>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: CUT/${imagename}-masking.mrc <Masking Area from Automatic Masking>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2b.ps <PS: Vector Plot of Distortion, Pass 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: CUT/${iname}-masking.mrc <Masking Area from Automatic Masking>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserch2b.ps <PS: Vector Plot of Distortion, Pass 2>" >> LOGS/${scriptname}.results 
   echo "# IMAGE-IMPORTANT: ManualMasking-CCmap.mrc <XCF Map for Manual Masking>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ManualMasking-UnbendPlot.mrc <Distortion Plot for Manual Masking>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-quadserch2c.ps <PS: Vector Plot for Distortions, Pass 2>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/cor2${imagename}.cor.unbend2.mrc <XCF Map between Reference 2 and Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/cor1${imagename}.cor.unbend2.mrc <XCF Map between Reference 1 and Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: ${imagename}.mrc" >> LOGS/${scriptname}.results
-  echo "# IMAGE: m${imagename}.mrc" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${imagename}-ccunbend2.ps <PS: Vector Plot for Unbending>"  >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/cor${imagename}.notap.unbend2.mrc <Raw Unbent Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/cor${imagename}.mrc <Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE-IMPORTANT: FFTIR/cor${imagename}.fft.mrc <FFT of Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE-IMPORTANT: APH/${imagename}.nolimit.aph <APH File (No Resolution Limitation)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: APH/${imagename}.ttf.nolimit.aph <APH File after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${imagename}.ttplot.nolimit.unbend2.ps <PS: IQ Plot after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE-IMPORTANT: APH/${imagename}.cor.aph <Link to Final APH File>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: APH/${imagename}.limit.aph <APH File (Resolution Limitation)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${imagename}.ttplot.limit.unbend2.ps <PS: IQ Plot after TTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE-IMPORTANT: APH/${imagename}.ttf.limit.aph <APH File after TTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserch2c.ps <PS: Vector Plot for Distortions, Pass 2>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor2${iname}.cor.unbend2.mrc <XCF Map between Reference 2 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor1${iname}.cor.unbend2.mrc <XCF Map between Reference 1 and Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: ${iname}.mrc" >> LOGS/${scriptname}.results
+  echo "# IMAGE: m${iname}.mrc" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}-ccunbend2.ps <PS: Vector Plot for Unbending>"  >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor${iname}.notap.unbend2.mrc <Raw Unbent Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/cor${iname}.mrc <Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: FFTIR/cor${iname}.fft.mrc <FFT of Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: APH/${iname}.nolimit.aph <APH File (No Resolution Limitation)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: APH/${iname}.ttf.nolimit.aph <APH File after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}.ttplot.nolimit.unbend2.ps <PS: IQ Plot after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: APH/${iname}.cor.aph <Link to Final APH File>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: APH/${iname}.limit.aph <APH File (Resolution Limitation)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}.ttplot.limit.unbend2.ps <PS: IQ Plot after TTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: APH/${iname}.ttf.limit.aph <APH File after TTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results
   exit
 endif
 #
@@ -297,7 +307,7 @@ if ( ${maskb05} > '0' ) then
   @ round += 1
 endif
 #
-set startname = `echo ${imagename} | cut -c1`
+set startname = `echo ${iname} | cut -c1`
 if ( $domask == 'y' ) then
   if ( ${startname} == 'm' ) then
     set domask = 'n'
@@ -429,38 +439,48 @@ if ( ${latlenok} == '0' ) then
   ${proc_2dx}/protest "Determine lattice first. Aborting."
 endif
 #
-if ( ! -e ${imagename}.spt ) then
+if ( ! -e ${iname}.spt ) then
   echo ":: "
-  ${proc_2dx}/linblock "ERROR: Spotlist ${imagename}.spt missing."
-  if ( -e ${nonmaskimagename}.spt ) then
-    ${proc_2dx}/linblock "WARNING: Copying ${nonmaskimagename}.spt to ${imagename}.spt"
-    \cp ${nonmaskimagename}.spt ${imagename}.spt
+  ${proc_2dx}/linblock "Spotlist ${iname}.spt missing."
+  if ( -e ${imagename}.spt ) then
+    ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${iname}.spt"
+    \cp ${imagename}.spt ${iname}.spt
   else
-    ${proc_2dx}/protest "Aborting."
+    if ( -e ${nonmaskimagename}.spt ) then
+      ${proc_2dx}/linblock "WARNING: Copying ${nonmaskimagename}.spt to ${iname}.spt"
+      \cp ${nonmaskimagename}.spt ${iname}.spt
+    else
+      ${proc_2dx}/protest "Aborting."
+    endif
   endif
 endif
 if ( ! -e ${nonmaskimagename}.spt ) then
   echo ":: "
-  ${proc_2dx}/linblock "ERROR: Spotlist ${nonmaskimagename}.spt missing."
+  ${proc_2dx}/linblock "Spotlist ${nonmaskimagename}.spt missing."
   if ( -e ${imagename}.spt ) then
     ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${nonmaskimagename}.spt"
     \cp ${imagename}.spt ${nonmaskimagename}.spt
   else
-    ${proc_2dx}/protest "Aborting."
+    if ( -e ${iname}.spt ) then
+      ${proc_2dx}/linblock "WARNING: Copying ${iname}.spt to ${nonmaskimagename}.spt"
+      \cp ${iname}.spt ${nonmaskimagename}.spt
+    else
+      ${proc_2dx}/protest "Aborting."
+    endif
   endif
 endif
 #
 #############################################################################
 #                                                                           #
-#  UNBEND II expects the existence of FFTIR/cor${imagename}.unbend1.fft.mrc #
+#  UNBEND II expects the existence of FFTIR/cor${iname}.unbend1.fft.mrc #
 #                                                                           #
 #############################################################################
 #
-if ( ! -e FFTIR/cor${imagename}.unbend1.fft.mrc ) then
-  ${proc_2dx}/protest "ERROR: cor${imagename}.mrc not existing."
+if ( ! -e FFTIR/cor${iname}.unbend1.fft.mrc ) then
+  ${proc_2dx}/protest "ERROR: cor${iname}.mrc not existing."
 endif
 #
-\cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+\cp -f FFTIR/cor${iname}.unbend1.fft.mrc FFTIR/cor${iname}.fft.mrc
 #
 echo "<<@progress: 5>>"
 #
@@ -541,6 +561,9 @@ endif
 set locround = 1
 set final_round = "n"
 #
+# this is only done for 2dx_unbend2_sub.com, so that it can stay as before:
+set imagename = ${iname}
+#
 while ( ${locround} <= ${round} ) 
   #
   if ( ${locround} == ${round} ) then
@@ -569,12 +592,12 @@ endif
 ${proc_2dx}/${lincommand} "MASKTRAN - to mask the FFT of the unbent image"
 #############################################################################
 #
-\rm -f SCRATCH/cor${imagename}.msk.fft.mrc
+\rm -f SCRATCH/cor${iname}.msk.fft.mrc
 #
-setenv IN  FFTIR/cor${imagename}.fft.mrc
-setenv OUT SCRATCH/cor${imagename}.msk.fft.mrc
+setenv IN  FFTIR/cor${iname}.fft.mrc
+setenv OUT SCRATCH/cor${iname}.msk.fft.mrc
 # ITYPE=0 uses all spots (below). The following line is thereby probably not needed:
-setenv SPOTS ${imagename}.spt
+setenv SPOTS ${iname}.spt
 #
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -585,18 +608,18 @@ eot
 #############################################################################
 ${proc_2dx}/linblock "2dx_fftrans - to create a Fourier-filtered direct reconstruction"
 #############################################################################
-\rm -f SCRATCH/${imagename}.unbent-filtered.mrc
-setenv IN SCRATCH/cor${imagename}.msk.fft.mrc
-setenv OUT SCRATCH/${imagename}.unbent-filtered.mrc
+\rm -f SCRATCH/${iname}.unbent-filtered.mrc
+setenv IN SCRATCH/cor${iname}.msk.fft.mrc
+setenv OUT SCRATCH/${iname}.unbent-filtered.mrc
 ${bin_2dx}/2dx_fftrans.exe 
 #
 if ( ${tempkeep} == 'y' ) then
-  echo "# IMAGE: SCRATCH/cor${imagename}.msk.fft.mrc <FFT after Unbending and tight Fourier-filtering>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/cor${iname}.msk.fft.mrc <FFT after Unbending and tight Fourier-filtering>" >> LOGS/${scriptname}.results
 else
-  \rm -f SCRATCH/cor${imagename}.msk.fft.mrc
+  \rm -f SCRATCH/cor${iname}.msk.fft.mrc
 endif
 #
-echo "# IMAGE-IMPORTANT: SCRATCH/${imagename}.unbent-filtered.mrc <Unbent and Fourier-filtered Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: SCRATCH/${iname}.unbent-filtered.mrc <Unbent and Fourier-filtered Image>" >> LOGS/${scriptname}.results
 #
 if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
   #############################################################################
@@ -609,8 +632,8 @@ if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
   set rlocmax = ${RB_1}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/cor${imagename}.fft.mrc
-${imagenumber} ${imagename}, Unbend2, ${date}
+FFTIR/cor${iname}.fft.mrc
+${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -633,8 +656,8 @@ eot
   set rlocmax = ${RB_2}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/cor${imagename}.fft.mrc
-${imagenumber} ${imagename}, Unbend2, ${date}
+FFTIR/cor${iname}.fft.mrc
+${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -657,8 +680,8 @@ eot
   set rlocmax = ${RB_3}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/cor${imagename}.fft.mrc
-${imagenumber} ${imagename}, Unbend2, ${date}
+FFTIR/cor${iname}.fft.mrc
+${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -681,8 +704,8 @@ eot
   set rlocmax = ${RB_4}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/cor${imagename}.fft.mrc
-${imagenumber} ${imagename}, Unbend2, ${date}
+FFTIR/cor${iname}.fft.mrc
+${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -705,8 +728,8 @@ eot
   set rlocmax = ${RB_5}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/cor${imagename}.fft.mrc
-${imagenumber} ${imagename}, Unbend2, ${date}
+FFTIR/cor${iname}.fft.mrc
+${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -729,8 +752,8 @@ eot
   set rlocmax = ${RB_6}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/cor${imagename}.fft.mrc
-${imagenumber} ${imagename}, Unbend2, ${date}
+FFTIR/cor${iname}.fft.mrc
+${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?

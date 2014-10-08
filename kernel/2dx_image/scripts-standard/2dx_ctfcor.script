@@ -1,0 +1,172 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Correct CTF (Experimental)                                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 30/09/2014                                             #
+# Last Modification: 30/09/2014	                                            #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 37
+#
+# MANUAL: This script applies CTF correction to the raw image
+#
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagenumber
+# DISPLAY: imagesidelength
+# DISPLAY: comment
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: defocus
+# DISPLAY: phacon
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: realang
+# DISPLAY: realcell
+# DISPLAY: ctfcor_noise
+# DISPLAY: ctfcor_inner_tile
+# DISPLAY: ctfcor_outer_tile
+# DISPLAY: ctfcor_taper
+# DISPLAY: ctfcor_imode
+# DISPLAY: ctfcor_debug
+# DISPLAY: ctfcor_maxamp_factor
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+set SYN_Unbending = ""
+set PHASEORI_done = ""
+#
+set imageorigin = ""
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set realang = ""
+set phacon = ""
+set RESMIN = ""
+set RESMAX = ""
+set RADLIM = ""
+set generatePeriodogram = ""
+set periodogramWindowsize = ""
+set periodogramNumsubsteps = ""
+set taperBeforeFFT = ""
+set CS = ""
+set KV = ""
+set phacon = ""
+set secondlattice = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set defocus = ""
+set ctfcor_noise = ""
+set ctfcor_inner_tile = ""
+set ctfcor_outer_tile = ""
+set ctfcor_taper = ""
+set ctfcor_imode = ""
+set ctfcor_debug = ""
+set ctfcor_maxamp_factor = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_ctfcor
+#
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@progress: 5>>"
+#
+echo "<<@evaluate>>"
+#
+if (${ctfcor_imode}x == "0x" ) then
+  ${proc_2dx}/linblock "Not applying any CTF correction."
+#  exit
+endif
+#  
+echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image"
+#################################################################################
+#
+set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
+set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
+\rm -f ${imagename}_ctfcor.mrc
+\rm -f ${ctfcor_tilefile}
+\rm -f ${ctfcor_psfile}
+#
+# For example:
+# ${bin_2dx}/2dx_ctfcor.exe << eot
+# ${imagename}.mrc
+# ${imagename}_ctfcor.mrc
+# ${ctfcor_tilefile}
+# ${ctfcor_psfile}
+# 10.0, 60.0
+# 2.7, 300.0, 0.07, 39411.0, 5.0
+# 51579.8, 8919.84, 68.0
+# 0.1
+# 256
+# 512
+# 50
+# n
+# 0.1
+# eot
+#
+${bin_2dx}/2dx_ctfcor.exe << eot
+${imagename}.mrc
+${imagename}_ctfcor.mrc
+${ctfcor_tilefile}
+${ctfcor_psfile}
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${ctfcor_noise}
+${ctfcor_inner_tile}
+${ctfcor_outer_tile}
+${ctfcor_taper}
+${ctfcor_imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+#
+echo "# IMAGE-IMPORTANT: ${imagename}_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 10>>"
+#
+#################################################################################
+${proc_2dx}/linblock "Sourcing 2dx_fftrans_sub.com"
+#################################################################################
+#
+source ${proc_2dx}/2dx_fftrans_sub.com
+#
+#################################################################################
+${proc_2dx}/linblock "Back in 2dx_fftrans.com"
+#################################################################################
+#
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#

@@ -184,6 +184,10 @@ endif
 #
 if ( ${movie_enable} == "y" ) then
   ${proc_2dx}/linblock "Movie Mode."
+  if ( -e ${movie_stackname}.mrc ) then
+    set movie_stackname = ${movie_stackname}.mrc
+    echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
+  endif
   if ( ! -e ${movie_stackname}) then
 	${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
   else

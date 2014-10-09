@@ -1076,7 +1076,9 @@ void mainWindow::importFile(const QString &file, const QHash<QString,QString> &i
   QString tiltAngle = imageCodes["tilt_angle"];
   QString frame = imageCodes["frame_number"];
   QString subID = imageCodes["sub_image_number"];
-  QString ext = QFileInfo(file).completeSuffix();
+  QString ext = QFileInfo(file).suffix();
+ 
+  qDebug()<<"pC="<<pC<<"  tiltAngle="<<tiltAngle<<"  frame="<<frame<<"  subID="<<subID<<"  ext="<<ext;
   
   QDir tiltDir(mainData->getDir("project") + "/" + pC + tiltAngle);
   QString newFile = pC+tiltAngle+frame+subID;

@@ -544,7 +544,7 @@ void fullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
   pen.setWidth(2);
   image_base->setPen(pen);
   image_base->drawLine(QPointF(-r,-1.0+1.0/scale),QPointF(r,-1.0+1.0/scale));
-  pen.setColor(QColor(100,204,210));
+  pen.setColor(QColor(254,254,0));
   image_base->setPen(pen);
   image_base->drawLine(QPointF(-r,-1.0),QPointF(r,-1.0));
   pen.setColor(Qt::black);
@@ -598,7 +598,7 @@ void fullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
 		image_base->drawText(QPointF(-metric.boundingRect(lessDefocus).width()/2.0+1.0/(float)scale,(signTltAng*(p-metric.boundingRect(lessDefocus).height()))+1.0/(float)scale),lessDefocus);
 
 
-		pen.setColor(QColor(100,204,210));
+                pen.setColor(QColor(254,254,0));
 		pen.setWidth(2);
 		image_base->setPen(pen);
 

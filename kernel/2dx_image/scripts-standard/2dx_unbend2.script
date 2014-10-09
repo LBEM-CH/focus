@@ -51,7 +51,6 @@
 # DISPLAY: RMAG
 # DISPLAY: LCOLOR
 # DISPLAY: ccunbend_program
-# DISPLAY: calcwien
 # DISPLAY: ctfcor_imode
 #
 #$end_local_vars
@@ -108,7 +107,6 @@ set IMAXCOR = ""
 set RMAG = ""
 set LCOLOR = ""
 set ccunbend_program = ""
-set calcwien = ""
 set RB_1 = ""
 set RB_2 = ""
 set RB_3 = ""
@@ -805,7 +803,7 @@ ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,IS
 ${imagenumber} ${imagename}.ttf.nolimit, ${date}, No Limit, Nyquist=${ctfplotresmax}
 ${phacon}
 ${RESMIN},0.0
-${calcwien}  !  Calculate Wiener Filter
+${ctfcor_imode} 
 eot
   #
   if ( ! -e CTFPLOT.PS ) then

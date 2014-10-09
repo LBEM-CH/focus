@@ -49,7 +49,6 @@
 # DISPLAY: LCOLOR
 # DISPLAY: ccunbend_program
 # DISPLAY: createmaskinfo
-# DISPLAY: calcwien
 #
 #$end_local_vars
 #
@@ -97,7 +96,6 @@ set RMAG = ""
 set LCOLOR = ""
 set ccunbend_program = ""
 set createmaskinfo = ""
-set calcwien = ""
 set ctfcor_imode = ""
 #
 #$end_vars
@@ -432,7 +430,7 @@ ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESPLOTMAX
 ${imagenumber} ${iname}.u1, No Lim, Nyq=${ctfplotresmax}, ${date}
 ${phacon}
 ${RESMIN},0.0
-${calcwien}  !  Calculate Wiener Filter
+${ctfcor_imode}  !  Mode of CTF correction
 eot
   if ( ! -e CTFPLOT.PS ) then
     ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
@@ -452,7 +450,7 @@ ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESPLOTMAX
 ${imagenumber} ${iname}.u1, Lim=${RESMAX}, Nyq=${ctfplotresmax}, ${date}
 ${phacon}
 ${RESMIN},${RESMAX}
-${calcwien}  !  Calculate Wiener Filter
+${ctfcor_imode}  !  Mode of CTF correction
 eot
   #
   if ( ! -e CTFPLOT.PS ) then

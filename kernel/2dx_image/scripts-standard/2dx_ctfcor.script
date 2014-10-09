@@ -97,7 +97,8 @@ echo "<<@evaluate>>"
 #
 if (${ctfcor_imode}x == "0x" ) then
   ${proc_2dx}/linblock "Not applying any CTF correction."
-#  exit
+  echo "<<@progress: 100>>"
+  exit
 endif
 #  
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results

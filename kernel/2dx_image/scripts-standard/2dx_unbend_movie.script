@@ -175,9 +175,9 @@ echo system = ${system}
 ##########################################
 ##########################################
 if ( ${system} == "Darwin" ) then
-  S2='henning'
-  S3='sthennin'
-  if ( "$USER" == "$S2" ) || ( "$USER" == "$S3" )) then
+  set S2 = "henning"
+  set S3 = "sthennin"
+  if (( "$USER" == "$S2" ) || ( "$USER" == "$S3" )) then
     set app_2dx_image = "~/2dx/bin/2dx_image"
   else
     set app_2dx_image = "${bin_2dx}/../../../bin/2dx_image"
@@ -190,6 +190,7 @@ endif
 ##########################################
 ##########################################
 #
+echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_enable} == "n" ) then
   ${proc_2dx}/linblock "Skipping movie mode unbending."

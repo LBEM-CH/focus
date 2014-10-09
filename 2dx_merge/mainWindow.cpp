@@ -1103,9 +1103,54 @@ void mainWindow::importFile(const QString &file, const QHash<QString,QString> &i
   QString newFileConfigPath = newFilePath + "/2dx_image.cfg";
   if(!QFileInfo(newFileConfigPath).exists())
   {
-      qDebug() << "creating " << newFileConfigPath;
+//HENN>
+      qDebug() << "Copying " << tiltConfigLocation << " to " << newFileConfigPath;
       if(!QFile::copy(tiltConfigLocation, newFileConfigPath))
           qDebug() << "Failed to copy " << tiltConfigLocation << " to " << newFileConfigPath;
+      else
+      {
+          QFileInfo oldFile(fileName);
+          QString name = oldFile.fileName();
+          QString oldFileDir = oldFile.absolutePath();
+          QString oldStackName = oldFileDir + "/../aligned_stacks/" + name;
+          QFileInfo oldStack(oldStackName); 
+          if(!oldStack.exists())
+          {
+             // qDebug() << "Stack " << oldStackName << " not found. Trying ";
+             oldStackName = oldFileDir + "/../DC_stacks/" + name;
+             // qDebug() << oldStackName;
+          }
+          
+          QString newStackName = newFilePath + "/" + newFile + "_stack." + ext;
+          // qDebug() << "oldStackName = " << oldStackName << ", newStackName = " << newStackName;
+
+          QFile f(newFileConfigPath);
+          if ( f.open(QIODevice::Append | QIODevice::Text))
+          {
+              // qDebug() << "Apending imagename_original = " << name << " to 2dx_image.cfg file.";
+              QTextStream stream( &f );
+              // qDebug() << "set imagename = " << newFile;
+              stream   << "set imagename = " << newFile << endl;
+              // qDebug() << "set imagenumber = " << frame+ subID;
+              stream   << "set imagenumber = " << frame+subID << endl;
+              // qDebug() << "set nonmaskimagename = " << newFile;
+              stream   << "set nonmaskimagename = " << newFile << endl;
+              // qDebug() << "set imagename_original = " << name;
+              stream   << "set imagename_original = " << name << endl;
+
+              if( oldStack.exists() ) 
+              { 
+                qDebug() << "Copying " << oldStackName << " to " << newStackName;
+                stream << "set movie_stackname = " << newFile + "_stack." + ext << endl;
+                if(!QFile::copy(oldStackName,newStackName))
+                { 
+                  qDebug() << "ERROR when trying to copy stack." << endl;
+                }
+              } 
+              f.close();
+          }
+      }
+//HENN<
   }
   importProcess.start(mainData->getApp("2dx_image") + " " + newFilePath + " " + "\"2dx_initialize\"");
   importProcess.waitForFinished(8*60*60*1000);

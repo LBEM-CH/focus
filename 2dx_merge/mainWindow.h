@@ -35,6 +35,7 @@
 #include <QGridLayout>
 #include <QSplitter>
 #include <QDebug>
+#include <QFile>
 #include <QFileDialog>
 #include <QModelIndexList>
 #include <confData.h>

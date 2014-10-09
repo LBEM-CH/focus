@@ -167,17 +167,29 @@ source ${proc_2dx}/initialize
 set date = `date`
 echo date = ${date}
 #
+set system = `uname -s`
+echo system = ${system}
+#
 ##########################################
 ##########################################
 ##########################################
 ##########################################
+if ( ${system} == "Darwin" ) then
+  S2='henning'
+  S3='sthennin'
+  if ( "$USER" == "$S2" ) || ( "$USER" == "$S3" )) then
+    set app_2dx_image = "~/2dx/bin/2dx_image"
+  else
+    set app_2dx_image = "${bin_2dx}/../../../bin/2dx_image"
+  endif
+else
+  set app_2dx_image = "2dx_image"
+endif
 ##########################################
-set app_2dx_image = "~/2dx/bin/2dx_image"
 ##########################################
 ##########################################
 ##########################################
-##########################################
-##########################################
+#
 #
 if ( ${movie_enable} == "n" ) then
   ${proc_2dx}/linblock "Skipping movie mode unbending."
@@ -351,17 +363,17 @@ while ($i <= ${movie_imagenumber_touse})
 
 	echo frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	
-       #########################################################################
+        #########################################################################
 	${proc_2dx}/lin "FFT of raw frame average"
-       #########################################################################
+        #########################################################################
 	setenv IN frames/frame_${i}/${nonmaskimagename}_${i}.mrc
 	setenv OUT frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
 	
 	
-       #########################################################################
+        #########################################################################
 	${proc_2dx}/lin "Masked FFT of raw frame average"
-       #########################################################################
+        #########################################################################
 	setenv IN  frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
 	setenv SPOTS ${imagename}.spt
@@ -369,15 +381,15 @@ while ($i <= ${movie_imagenumber_touse})
 	set maskb = ${maskb02}
 	set rmax = 11000
 
-    ${bin_2dx}/2dx_masktrana.exe << eot
+        ${bin_2dx}/2dx_masktrana.exe << eot
 	1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 	${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 	${lattice},-30,30,-30,30,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
 	
-       #########################################################################
+        #########################################################################
 	${proc_2dx}/lin "Cross-correlate frame and reference in Fourier-space"
-       #########################################################################
+        #########################################################################
 	\rm -f frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	setenv IN1 frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
 	setenv IN2 SCRATCH/refm${imagename}.fft.mrc
@@ -387,9 +399,9 @@ eot
 		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
 	
-       #########################################################################
+        #########################################################################
 	${proc_2dx}/lin "IFFT to obtain peak profile (raw frame with reference)"
-       #########################################################################
+        #########################################################################
 	/bin/rm -f frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
 	setenv IN frames/frame_${i}/SCRATCH/corel1${nonmaskimagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/cor1${nonmaskimagename}.cor.mrc
@@ -398,16 +410,16 @@ eot
 	\rm -f frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
 	\rm -f SPIDERCOORD.spi
 
-       setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
-       setenv PROFDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
-       setenv ERRORS   SCRATCH/errout2${imagename}.dat
+        setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+        setenv PROFDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
+        setenv ERRORS   SCRATCH/errout2${imagename}.dat
 
 	set valspotscan = '0'
 	set createmask = '0'
 	
-       #########################################################################
+        #########################################################################
 	${proc_2dx}/lin "Invoke quadserch (1st round, IPASS=2)"
-       #########################################################################
+        #########################################################################
 		
 	if ( ${movie_masking_mode} == '0' ) then
 		${bin_2dx}/2dx_quadserchk-2.exe << eot
@@ -451,9 +463,9 @@ TMP-quadserch-7.mrc
 eot
 	endif
 	
-       ######################################################
+        ######################################################
 	${proc_2dx}/lin "FFT of masked frame average"
-       ######################################################
+        ######################################################
 	setenv IN frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
 	setenv OUT frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
@@ -462,22 +474,22 @@ eot
 	setenv OUT frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
 	setenv SPOTS ${imagename}.spt
 
-       ######################################################
+        ######################################################
 	${proc_2dx}/lin "Mask FFT of real-space masked frame average"
-       ######################################################
+        ######################################################
 
 	set maskb = ${maskb02}
 	set rmax = 11000
 
-    ${bin_2dx}/2dx_masktrana.exe << eot
+        ${bin_2dx}/2dx_masktrana.exe << eot
 	1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 	${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 	${lattice},-30,30,-30,30,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
 
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "Cross-correlation in Fourier-space"
-       ###########################################################################
+        ###########################################################################
 	set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
 	set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
 	\rm -f frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
@@ -489,9 +501,9 @@ eot
 		2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
 	
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "IFFT to obtain peak profile (masked frame average with reference)"
-       ###########################################################################
+        ###########################################################################
 	/bin/rm -f frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
 	setenv IN frames/frame_${i}/SCRATCH/corel1m${nonmaskimagename}.fft.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
@@ -499,13 +511,13 @@ eot
 	
 	\rm -f frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
 	\rm -f SPIDERCOORD.spi
-    setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
-    setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
-    setenv ERRORS   SCRATCH/errout2${imagename}.dat
+        setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+        setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
+        setenv ERRORS   SCRATCH/errout2${imagename}.dat
 
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "Invoke quadserch (2nd round, IPASS=2)"
-       ###########################################################################
+        ###########################################################################
 	set valspotscan = '0'
 	set createmask = '0'
 	${bin_2dx}/2dx_quadserchk-2.exe << eot
@@ -523,9 +535,9 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Do mask the image directly
 eot
 
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "Unbend the frame average (call of ccunbend)"
-       ###########################################################################
+        ###########################################################################
 	setenv CCORDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
 	setenv TABLEOUT frames/frame_${i}/SCRATCH/ccunbend-table-m${nonmaskimagename}.dat
 	set ITYPE = 0
@@ -541,9 +553,9 @@ frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc
 UNBENT,PASS,2,${date}
 eot
 
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "Extract trajectory for region drift plotting"
-       ###########################################################################
+        ###########################################################################
 	python ${bin_2dx}/movie_mode_py/deleteZeros.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
 		
 	set x_1_4 = `echo ${imagesidelength} | awk '{s = int($1/4) } END { print s }'`
@@ -554,9 +566,9 @@ eot
 	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} frames/peaks_III.dat
 	python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} frames/peaks_IV.dat
 
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "Store distortion-vector-field for visual inspection"
-       ###########################################################################
+        ###########################################################################
 	if ( ${i} == '1' ) then
 		pstopdf CCPLOT.PS frame_unbending.pdf
 		# ps2pdf CCPLOT.PS frame_unbending.pdf
@@ -569,18 +581,18 @@ eot
 		mv out.pdf frame_unbending.pdf
 	endif
 	
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "correct unbent frame average for taper edges"
-       ###########################################################################
+        ###########################################################################
 	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
 	${bin_2dx}/2dx_taperedgek.exe << eot
 		30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
 
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "Obtain Fourier-transform of unbent and masked frame average"
-       ###########################################################################
+        ###########################################################################
 	setenv IN  frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.mrc
 	setenv OUT frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.fft.mrc
 	${bin_2dx}/2dx_fftrans.exe
@@ -601,9 +613,9 @@ ${lattice}                         ! Lattice vectors
 eot
 	
 	set iplusone = `echo ${i} | awk '{s = int($1+1) } END { print s }'`
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "Updating Error Field for frame average #${iplusone}" 
-       ###########################################################################
+        ###########################################################################
 
 	setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
 	setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
@@ -613,9 +625,9 @@ eot
 	\rm -f SPIDERCOORD.spi
 	\rm -f ${ERROUT}
 
-       ###########################################################################
+        ###########################################################################
 	${proc_2dx}/lin "Call quadserch to update error field (3rd round IPASS=3)"
-       ###########################################################################
+        ###########################################################################
 	set cormap = frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc
 	${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpredb}                     ! IPASS,NRANGE
@@ -663,7 +675,7 @@ setenv OUT "frames/direct_sum.fft.mrc"
 ${bin_2dx}/2dx_fftrans.exe
 
 ###########################################################################
-echo ":  MMBoxA without limits"
+${proc_2dx}/linblock "MMBoxA without limits"
 ###########################################################################
 
 	${bin_2dx}/2dx_mmboxa.exe << eot
@@ -684,7 +696,7 @@ eot
 \rm -f SCRATCH/TMP9882.dat
 
 ###########################################################################
-echo ":  MMBoxA with limits"
+${proc_2dx}/linblock "MMBoxA with limits"
 ###########################################################################
 
 	${bin_2dx}/2dx_mmboxa.exe << eot
@@ -705,7 +717,7 @@ eot
 source SCRATCH/TMP9882.dat
 
 ###########################################################################
-echo ":  Generate IQ-stat output"
+${proc_2dx}/linblock "Generate IQ-stat output"
 ###########################################################################
 
 echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results

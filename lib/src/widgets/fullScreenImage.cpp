@@ -341,10 +341,10 @@ void fullScreenImage::drawRefinementList()
 
 void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigmatism)
 {
-  int n = 20;
+  int n = 50;
   QPainterPath p;
   // QPainterPath q[n];
-  QPainterPath q[20];
+  QPainterPath q[50];
 
   float stepSize = data->get("stepdigitizer","value").toFloat();
   float phacon = data->get("phacon","value").toFloat();
@@ -386,7 +386,7 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
     for(int j = 1; j < n + 1; j++)
     {
       if(dz>0.0) k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi-(float)j))));
-      else k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi+(float)j))));
+      else       k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi+(float)j))));
       u = k0*cost; v = k0*sint;
       if(u>0.0) u+=0.5; else u-=0.5;
       if(v>0.0) v+=0.5; else v-=0.5;

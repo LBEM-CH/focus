@@ -716,7 +716,7 @@ ${createmask}			! dont create manual Masking information
 1                               ! Mask the image directly
 ${imagename}.mrc
 m${imagename}.mrc
--1        
+256       
 0
 eot
     #
@@ -724,6 +724,19 @@ eot
       \mv -f TMP-quadserch-6.mrc CUT/${imagename}-masking.mrc
       \mv -f TMP-quadserch-7.mrc CUT/${imagename}-masking-final.mrc
       \cp -f CUT/${imagename}-masking-final.mrc ${imagename}-masking-final.mrc
+      if ( ${tempkeep} == 'y' ) then
+        echo "# IMAGE-IMPORTANT: TMP-quadserch-1.mrc <Masking file 1>" >> LOGS/${scriptname}.results 
+        echo "# IMAGE-IMPORTANT: TMP-quadserch-2.mrc <Masking file 2>" >> LOGS/${scriptname}.results 
+        echo "# IMAGE-IMPORTANT: TMP-quadserch-3.mrc <Masking file 3>" >> LOGS/${scriptname}.results 
+        echo "# IMAGE-IMPORTANT: TMP-quadserch-4.mrc <Masking file 4>" >> LOGS/${scriptname}.results 
+        echo "# IMAGE-IMPORTANT: TMP-quadserch-5.mrc <Masking file 5>" >> LOGS/${scriptname}.results 
+      else
+        \rm -f TMP-quadsearch-1.mrc
+        \rm -f TMP-quadsearch-2.mrc
+        \rm -f TMP-quadsearch-3.mrc
+        \rm -f TMP-quadsearch-4.mrc
+        \rm -f TMP-quadsearch-5.mrc
+      endif
       echo "# IMAGE-IMPORTANT: CUT/${imagename}-masking.mrc <Masking Area from Automatic Masking>" >> LOGS/${scriptname}.results 
       echo "# IMAGE-IMPORTANT: CUT/${imagename}-masking-final.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
     else

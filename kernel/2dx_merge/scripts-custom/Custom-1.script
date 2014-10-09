@@ -103,7 +103,7 @@ foreach dirfile ( ${dirlist} )
   # echo "set quadradb = 9,9" >> LOGS/${scriptname}.results
   # echo "set ctf_ttf = TTF" >> LOGS/${scriptname}.results
   # echo "set treatspotscan = y" >> LOGS/${scriptname}.results
-  # echo "set rot90 = n" >> LOGS/${scriptname}.results
+  echo "set rot90 = n" >> LOGS/${scriptname}.results
   # echo "set rot180 = n" >> LOGS/${scriptname}.results
   # echo "set revhnd = n" >> LOGS/${scriptname}.results
   # echo "set revhk = n" >> LOGS/${scriptname}.results

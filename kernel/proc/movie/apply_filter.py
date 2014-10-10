@@ -12,12 +12,13 @@ import os
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 4:
-		sys.exit("Missuseage detected (apply filter")
+	if len(sys.argv) != 5:
+		sys.exit("Missuse detected (apply filter")
 
 	filename_in = sys.argv[1]
 	freq = float(sys.argv[2])
 	i = int(sys.argv[3])
+        imagesidelength = int(sys.argv[4])
 	
 	print freq
 	
@@ -27,10 +28,10 @@ if __name__ == "__main__":
 	
 	if i != 1:
 		w = get_image("weight.mrc")
-		w += model_circle(3808*freq, 3808, 3808)
+		w += model_circle(imagesidelength*freq, imagesidelength, imagesidelength)
 		w.write_image("weight.mrc")
 	else:
-		w = model_circle(3808*freq, 3808, 3808)
+		w = model_circle(imagesidelength*freq, imagesidelength, imagesidelength)
 		w.write_image("weight.mrc")
 		
 	

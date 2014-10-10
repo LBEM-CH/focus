@@ -17,7 +17,7 @@ if __name__ == "__main__":
 	# Usage getFilter.py n type a b
 	
 	if len(sys.argv) != 5:
-		sys.exit("Missuseage detected filter")
+		sys.exit("Missuse detected filter")
 
 	number = int(sys.argv[1])
 	ftype = int(sys.argv[2])

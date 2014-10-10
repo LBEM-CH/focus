@@ -7,7 +7,7 @@ import os
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 3:
-		sys.exit("Missuseage detected (apply filter)")
+		sys.exit("Missuse detected (apply_filter_sum.py)")
 
 	filename_in = sys.argv[1]
 	filename_out = sys.argv[2]

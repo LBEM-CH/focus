@@ -7,7 +7,7 @@ import os
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 3:
-		sys.exit("Missuseage detected")
+		sys.exit("Missuse detected (direct_sum.py)")
 
 	total_number = int(sys.argv[1])
 	image_name = sys.argv[2]

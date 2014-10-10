@@ -185,28 +185,7 @@ if ( -e ${nonmaskimagename}.mrc ) then
   endif
 endif
 #
-if ( ${movie_enable} == "y" ) then
-  ${proc_2dx}/linblock "Movie Mode."
-  if ( -e ${movie_stackname}.mrc ) then
-    set movie_stackname = ${movie_stackname}.mrc
-    echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
-  endif
-  if ( ! -e ${movie_stackname}) then
-	${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
-  else
-	# Get the number of frames
-	e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
-	set movie_imagenumber_total = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
-	${proc_2dx}/linblock "Stack contains ${movie_imagenumber_total} frames"
-	echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
-
-	set test = `echo ${movie_imagenumber_total} ${movie_imagenumber_toave} | awk '{s = int($1/$2) } END { print s }'`
-	
-	echo "set movie_imagenumber_touse = ${test}"  >> LOGS/${scriptname}.results
-	\rm tmp_stack_header.txt
-  endif
-else
-  if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc || ${correct} == 1 ) then
+if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc || ${correct} == 1 ) then
     #
     #################################################################################
     ### Transform ${nonmaskimagename}.tif into ${nonmaskimagename}.mrc ############################
@@ -214,42 +193,40 @@ else
     source ${proc_2dx}/2dx_initialize_tiff_to_mrc_sub.com
     #################################################################################
     #
-  endif
-  #
-  #################################################################################
-  ### Test (and Correct) Endianess of ${nonmaskimagename}.mrc ############################
-  ${proc_2dx}/linblock "Testing Endianess."
-  source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
-  #################################################################################  
-  #
-  #
-  set testname = `echo ${imagename} | cut -c2-`
-  if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
+endif
+#
+#################################################################################
+### Test (and Correct) Endianess of ${nonmaskimagename}.mrc ############################
+${proc_2dx}/linblock "Testing Endianess."
+source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
+#################################################################################  
+#
+#
+set testname = `echo ${imagename} | cut -c2-`
+if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
     set oldval = ${nonmaskimagename}
     set nonmaskimagename = ${imagename}
     #############################################################################
     ${proc_2dx}/linblock "Warning: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
     #############################################################################
     echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
-  endif
-  # 
-  if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) then
+endif
+# 
+if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) then
     set imagenumber = `echo ${nonmaskimagename} | ${bin_2dx}/2dx_getnumber.exe`
     #############################################################################
     ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
     #############################################################################
     echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
-  endif
-  #
-  echo "<<@progress: 40>>" 
-  #
-  #################################################################################
-  ### Make input image square, correct size, and potentially rotate for correct tilt axis:
-  ${proc_2dx}/linblock "Testing correct size of input image."
-  source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
-  #################################################################################
-  #
 endif
+#
+echo "<<@progress: 40>>" 
+#
+#################################################################################
+### Make input image square, correct size, and potentially rotate for correct tilt axis:
+${proc_2dx}/linblock "Testing correct size of input image."
+source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
+#################################################################################
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then
   set magnification = `echo ${stepdigitizer} ${sample_pixel} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
@@ -456,6 +433,28 @@ if ( ${new_mrc_created} == 'y' && ${movie_enable} == "n" ) then
   source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
   #################################################################################  
   #
+endif
+#
+if ( ${movie_enable} == "y" ) then
+  ${proc_2dx}/linblock "Movie Mode."
+  if ( -e ${movie_stackname}.mrc ) then
+    set movie_stackname = ${movie_stackname}.mrc
+    echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
+  endif
+  if ( ! -e ${movie_stackname}) then
+	${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
+  else
+	# Get the number of frames
+	e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
+	set movie_imagenumber_total = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
+	${proc_2dx}/linblock "Stack contains ${movie_imagenumber_total} frames"
+	echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
+
+	set test = `echo ${movie_imagenumber_total} ${movie_imagenumber_toave} | awk '{s = int($1/$2) } END { print s }'`
+	
+	echo "set movie_imagenumber_touse = ${test}"  >> LOGS/${scriptname}.results
+	\rm tmp_stack_header.txt
+  endif
 endif
 #
 #

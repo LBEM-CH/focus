@@ -7,7 +7,7 @@ import os
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 4:
-		sys.exit("Missuseage detected")
+		sys.exit("Missuse detected")
 
 	stack_file = sys.argv[1]
 	image_name = sys.argv[2]

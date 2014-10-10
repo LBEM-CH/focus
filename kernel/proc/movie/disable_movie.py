@@ -7,7 +7,7 @@ import os
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 2:
-		sys.exit("Missuseage detected")
+		sys.exit("Missuse detected")
 
 	frame_folder = sys.argv[1]
 	print "disabling movie_mode for", frame_folder

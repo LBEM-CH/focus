@@ -186,9 +186,9 @@ else
       endif
     endif
     if ( ${movie_enable} == "y" ) then
-		set infile_nolimit = ${iname}.fou.movie.nolimit.aph
-		set infile_limit = ${iname}.fou.movie.limit.aph
-	endif
+	set infile_nolimit = ${iname}.fou.movie.nolimit.aph
+	set infile_limit = ${iname}.fou.movie.limit.aph
+    endif
     cd ..
     #
     set outfile_nolimit = ${iname}.fou.ctf.nolimit.aph

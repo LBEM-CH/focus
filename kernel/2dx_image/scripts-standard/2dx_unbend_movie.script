@@ -189,12 +189,6 @@ if ( ${system} == "Darwin" ) then
     set ps2pdf = pstopdf
   endif
   set pdf2ps = `which pdf2ps`
-  if ( ${pdf2ps}x == 'x' ) then
-    set pdf2ps = "echo ::ERROR: pdf2ps not found. Install ghostview."
-    echo ::
-    echo ::ERROR: pdf2ps not found. Install ghostview.
-    echo ::
-  endif
 else
   set app_2dx_image = "2dx_image"
   set ps2pdf = ps2pdf
@@ -202,6 +196,12 @@ else
 endif
 echo ":pdf2ps is ${pdf2ps}"
 echo ":ps2pdf is ${ps2pdf}"
+if ( ${pdf2ps}x == 'x' ) then
+  set pdf2ps = "echo ::ERROR: pdf2ps not found. Install ghostview."
+  echo ::
+  echo ::ERROR: pdf2ps not found. Install ghostview.
+  echo ::
+endif
 ##########################################
 ##########################################
 #
@@ -245,7 +245,7 @@ set frame_folder = "frames"
 echo "<<@progress: 10>>"
 #
 ###############################################################
-${proc_2dx}/linblock "Splitting Stack"
+${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_toave} frames, merging ${movie_imagenumber_toave} movie images into each"
 ###############################################################
 #
 python ${proc_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
@@ -328,6 +328,7 @@ while ($i <= ${movie_imagenumber_touse})
   echo  "# IMAGE: frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc <Frame ${i} filtered (FFT)>" >> LOGS/${scriptname}.results
   echo  "# IMAGE: frames/frame_${i}/m${nonmaskimagename}_${i}.mrc <Frame ${i} masked >" >> LOGS/${scriptname}.results
   echo  "# IMAGE-IMPORTANT: frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc <Frame ${i} masked (FFT)>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: frames/frame_${i}/SCRATCH/cor1m${nonmaskimagename}.cor.mrc <Frame ${i} CC Map >" >> LOGS/${scriptname}.results
   #
   @ i += 1
   @ n += ${movie_imagenumber_toave}
@@ -733,25 +734,28 @@ python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct
 
 
 ###########################################################################
-${proc_2dx}/linblock "Producing final APH files"
+${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
 ###########################################################################
 
 setenv IN  frames/direct_sum.mrc
 setenv OUT frames/direct_sum_fixed.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
-        30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
 
+###########################################################################
+${proc_2dx}/linblock "FFTRANS - Producing final FFT"
+###########################################################################
 
 setenv IN "frames/direct_sum_fixed.mrc"
 setenv OUT "frames/direct_sum.fft.mrc"
 ${bin_2dx}/2dx_fftrans.exe
 
 ###########################################################################
-${proc_2dx}/linblock "MMBoxA without limits"
+${proc_2dx}/linblock "MMBOX - Evaluating APH values, without resolution limit"
 ###########################################################################
 
-        ${bin_2dx}/2dx_mmboxa.exe << eot
+${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum.fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
 Y                               ! Use grid units?
@@ -769,10 +773,10 @@ eot
 \rm -f SCRATCH/TMP9882.dat
 
 ###########################################################################
-${proc_2dx}/linblock "MMBoxA with limits"
+${proc_2dx}/linblock "MMBOX - Evaluating APH values, with resolution limit"
 ###########################################################################
 
-        ${bin_2dx}/2dx_mmboxa.exe << eot
+${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum.fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
 Y                               ! Use grid units?
@@ -823,7 +827,7 @@ echo "<<@evaluate>>"
 #echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
 
 echo "<<@progress: 90>>"
-if ( ${movie_filter_type} == '1' ) then
+if ( ${movie_filter_type} == '0' ) then
         ${proc_2dx}/linblock "Plotting AMP-Decay"
         python ${proc_2dx}/movie/extractAMP.py `ls frames/aph_*`
         python ${proc_2dx}/movie/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
@@ -835,7 +839,9 @@ if ( ${tempkeep} != "y" ) then
   ###########################################################################
   ${proc_2dx}/linblock "Deleting frame averages temporay files"
   ###########################################################################
-  \rm -rf frames/frame*
+  cd frames
+  \rm -rf frame*
+  cd ..
 endif
 
 ${proc_2dx}/linblock "Plotting local drift"
@@ -847,6 +853,14 @@ echo  "# IMAGE: frames/drifts.ps <PS: Local drifts>" >> LOGS/${scriptname}.resul
 
 ${pdf2ps} frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Unbend Profiles>" >> LOGS/${scriptname}.results
+
+echo "# IMAGE: frames/direct_sum.mrc <Sum unbent frames>" >> LOGS/${scriptname}.results
+echo "# IMAGE: frames/direct_sum.fft.mrc <Sum unbent frames (FFT)>" >> LOGS/${scriptname}.results
+echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
+
+echo "# IMAGE-IMPORTANT: APH/${imagename}.fou.movie.limit.aph <APH: APH file after movie-mode unbending with resolution limit>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: APH/${imagename}.fou.movie.nolimit.aph <APH: APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
+
 
 ###########################################################################
 ${proc_2dx}/linblock "Script finished correctly."

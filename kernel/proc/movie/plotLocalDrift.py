@@ -79,7 +79,7 @@ def getTraj(name, n):
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 4:
-		sys.exit("Missuseage detected")
+		sys.exit("Missuse detected")
 
 	folder = sys.argv[1]
 	outfile = sys.argv[2]

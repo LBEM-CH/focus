@@ -165,6 +165,9 @@ endif
 if ( ${nonmaskimagename} == "ScriptWillPutNameHere" ) then
   set correct = 1
 endif
+if ( ${imagesidelength} == "ScriptWillPutLengthHere" ) then
+  set correct = 1
+endif
 if ( ${correct} == '1' && ${imagename} != "ScriptWillPutNameHere" ) then
   set oldval = ${nonmaskimagename}
   set nonmaskimagename = ${imagename}
@@ -203,7 +206,7 @@ if ( ${movie_enable} == "y" ) then
 	\rm tmp_stack_header.txt
   endif
 else
-  if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc) then
+  if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc || ${correct} == 1 ) then
     #
     #################################################################################
     ### Transform ${nonmaskimagename}.tif into ${nonmaskimagename}.mrc ############################

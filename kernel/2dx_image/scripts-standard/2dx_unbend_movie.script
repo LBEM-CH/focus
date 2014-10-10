@@ -219,8 +219,8 @@ endif
         \rm tmp_stack_header.txt
   endif
 #
-#python ${bin_2dx}/movie_mode_py/extractAMP.py `ls frames/aph_*`
-#python ${bin_2dx}/movie_mode_py/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
+#python ${bin_2dx}/movie/extractAMP.py `ls frames/aph_*`
+#python ${bin_2dx}/movie/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
 #exit 
 #
 set num_dia = 100
@@ -236,11 +236,11 @@ echo "<<@progress: 10>>"
 ${proc_2dx}/linblock "Splitting Stack"
 ###############################################################
 #
-python ${bin_2dx}/movie_mode_py/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
+python ${bin_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
 #
 foreach f  (`ls frames`)
         \cp 2dx_image.cfg frames/$f/
-        python ${bin_2dx}/movie_mode_py/disable_movie.py  frames/$f/
+        python ${bin_2dx}/movie/disable_movie.py  frames/$f/
 end
 cd frames
 \ln -s ../2dx_image.cfg 2dx_master.cfg
@@ -306,8 +306,8 @@ echo "<<@progress: 50>>"
 while ($i <= ${movie_imagenumber_touse})
         echo ":  Filter frame average #${i}"
         echo "LP on: " frames/frame_${i}/${nonmaskimagename}_${i}.mrc
-        echo `python ${bin_2dx}/movie_mode_py/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
-        python ${bin_2dx}/movie_mode_py/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie_mode_py/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}` ${i}
+        echo "python ${bin_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}"
+        python ${bin_2dx}/movie/apply_filter.py frames/frame_${i}/${nonmaskimagename}_${i}.mrc `python ${bin_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}` ${i}
         @ i += 1
         @ n += ${movie_imagenumber_toave}
 end
@@ -559,15 +559,15 @@ eot
         ###########################################################################
         ${proc_2dx}/lin "Extract trajectory for region drift plotting"
         ###########################################################################
-        python ${bin_2dx}/movie_mode_py/deleteZeros.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
+        python ${bin_2dx}/movie/deleteZeros.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
                 
         set x_1_4 = `echo ${imagesidelength} | awk '{s = int($1/4) } END { print s }'`
         set x_3_4 = `echo ${imagesidelength} | awk '{s = int(3*$1/4) } END { print s }'`
         
-        python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_I.dat   ${x_1_4} ${x_1_4} ${num_dia} frames/peaks_I.dat
-        python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_II.dat  ${x_3_4} ${x_1_4} ${num_dia} frames/peaks_II.dat
-        python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} frames/peaks_III.dat
-        python ${bin_2dx}/movie_mode_py/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} frames/peaks_IV.dat
+        python ${bin_2dx}/movie/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_I.dat   ${x_1_4} ${x_1_4} ${num_dia} frames/peaks_I.dat
+        python ${bin_2dx}/movie/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_II.dat  ${x_3_4} ${x_1_4} ${num_dia} frames/peaks_II.dat
+        python ${bin_2dx}/movie/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} frames/peaks_III.dat
+        python ${bin_2dx}/movie/getClosestPeaks.py frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat frames/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} frames/peaks_IV.dat
 
         ###########################################################################
         ${proc_2dx}/lin "Store distortion-vector-field for visual inspection"
@@ -670,8 +670,8 @@ echo "<<@progress: 80>>"
 ###########################################################################
 ${proc_2dx}/linblock "Collecting information from all frame averages" 
 ###########################################################################
-python ${bin_2dx}/movie_mode_py/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
-python ${bin_2dx}/movie_mode_py/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum.mrc
+python ${bin_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
+python ${bin_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum.mrc
 
 
 ###########################################################################
@@ -759,7 +759,7 @@ echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
 echo "<<@evaluate>>"
 
 # Variation plot generation (no longer used)
-#python ${bin_2dx}/movie_mode_py/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
+#python ${bin_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
 #pdf2ps frames/sd.pdf frames/sd.ps
 #convert frames/sd.ps frames/sd.jpg
 #echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
@@ -767,8 +767,8 @@ echo "<<@evaluate>>"
 echo "<<@progress: 90>>"
 if (${movie_filter_type} == '1') then
         ${proc_2dx}/linblock "Plotting AMP-Decay"
-        python ${bin_2dx}/movie_mode_py/extractAMP.py `ls frames/aph_*`
-        python ${bin_2dx}/movie_mode_py/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
+        python ${bin_2dx}/movie/extractAMP.py `ls frames/aph_*`
+        python ${bin_2dx}/movie/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}
         echo  "# IMAGE: frames/AMPs.pdf <PDF: AMP Decay>" >> LOGS/${scriptname}.results
 endif
 
@@ -778,7 +778,7 @@ ${proc_2dx}/linblock "Deleting frame averages temporay files"
 \rm -rf frames/frame*
 
 ${proc_2dx}/linblock "Plotting local drift"
-python ${bin_2dx}/movie_mode_py/plotLocalDrift.py frames frames/drifts.pdf ${num_dia}
+python ${bin_2dx}/movie/plotLocalDrift.py frames frames/drifts.pdf ${num_dia}
 
 ${proc_2dx}/linblock "Finalizing output"
 echo  "# IMAGE: frames/drifts.pdf <PDF: Local drifts>" >> LOGS/${scriptname}.results
@@ -793,5 +793,5 @@ echo "<<@evaluate>>"
 #
 exit
 #
-source ${bin_2dx}/movie_mode_py/apply_filter.py
+source ${bin_2dx}/movie/apply_filter.py
 

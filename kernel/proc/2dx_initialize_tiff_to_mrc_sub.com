@@ -5,7 +5,7 @@
 # This sub-script is to be called, if the ${imagename}.mrc file or the ${nonmaskimagename}.mrc file are missing.
 # This will then use the TIFF file and transform it into an MRC file, while checking correct size.
 #
-if ( ! -e ${nonmaskimagename}.mrc ) then
+if ( ! -e ${nonmaskimagename}.mrc || ${correct} == 1 ) then
   if ( ${nonmaskimagename} != "ScriptWillPutNameHere" ) then
     ${proc_2dx}/linblock "Image ${nonmaskimagename}.mrc does not exist."
   endif

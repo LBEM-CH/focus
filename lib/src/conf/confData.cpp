@@ -356,11 +356,14 @@ bool confData::parseDataFile()
     }
   }
 
-  QRegExp sep("^\\s*source\\s+\\$\\{proc_2dx\\}\\/(\\S+)");
+  QRegExp sep1("^\\s*python\\s+\\$\\{bin_2dx\\}\\/(\\S+\\.py).+");
+  QRegExp sep2("^\\s*source\\s+\\$\\{proc_2dx\\}\\/(\\S+)");
   while(!data.atEnd())
   {
-    if(sep.indexIn(data.readLine()) != -1)
-      subScript<<sep.cap(1);
+    if(sep1.indexIn(data.readLine()) != -1)
+      subScript<<sep1.cap(1);
+    if(sep2.indexIn(data.readLine()) != -1)
+      subScript<<sep2.cap(1);
   }
 
   data.close();

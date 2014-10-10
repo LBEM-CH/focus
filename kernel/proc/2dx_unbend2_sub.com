@@ -24,7 +24,7 @@ ${proc_2dx}/${lincommand} "2dx_unbend2_sub.com: Starting round ${locround}..."
 #   MASKTRANA - to mask the FFT in order to create the reference map.       #
 #   TTMASK    - same, but with TTF-convolution.                             #
 #                                                                           #
-#  ${imagename}.spt + cor${imagename}.fft.mrc => ref${imagename}.fft.msk.mrc  #
+#  ${imagename}.spt + cor${imagename}.fft.mrc => ref${imagename}.fft.msk.mrc#
 #                                                                           #
 #############################################################################  
   #
@@ -864,13 +864,9 @@ eot
     endif
   endif
   #
-  if ( ${tempkeep} == 'y' ) then
-    \mv -f SCRATCH/cor1${imagename}.cor.mrc SCRATCH/cor1${imagename}.cor.unbend2.mrc
-    if ( ${locround} == '1' ) then
-      echo "# IMAGE: SCRATCH/cor1${imagename}.cor.unbend2.mrc <XCF Map between Reference 1 and Image>" >> LOGS/${scriptname}.results 
-    endif
-  else
-    \rm -f SCRATCH/cor1${imagename}.cor.mrc
+  \mv -f SCRATCH/cor1${imagename}.cor.mrc SCRATCH/cor1${imagename}.cor.unbend2.mrc
+  if ( ${locround} == '1' ) then
+    echo "# IMAGE: SCRATCH/cor1${imagename}.cor.unbend2.mrc <XCF Map between Reference 1 and Image>" >> LOGS/${scriptname}.results 
   endif
   echo "<<@progress: 85>>"
   echo "<<@evaluate>>"

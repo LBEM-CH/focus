@@ -827,7 +827,7 @@ echo "<<@evaluate>>"
 #echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
 
 echo "<<@progress: 90>>"
-if ( ${movie_filter_type} == '0' ) then
+if ( ${movie_filter_type} == '1' ) then
         ${proc_2dx}/linblock "Plotting AMP-Decay"
         python ${proc_2dx}/movie/extractAMP.py `ls frames/aph_*`
         python ${proc_2dx}/movie/plotAMP.py frames/AMPs.txt ${movie_imagenumber_toave}

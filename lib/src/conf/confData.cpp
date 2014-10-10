@@ -358,11 +358,13 @@ bool confData::parseDataFile()
 
   QRegExp sep1("^\\s*python\\s+\\$\\{proc_2dx\\}\\/(\\S+\\.py).+");
   QRegExp sep2("^\\s*source\\s+\\$\\{proc_2dx\\}\\/(\\S+)");
+  QString seplineData;
   while(!data.atEnd())
   {
-    if(sep1.indexIn(data.readLine()) != -1)
+    seplineData = data.readLine();
+    if(sep1.indexIn(seplineData) != -1)
       subScript<<sep1.cap(1);
-    if(sep2.indexIn(data.readLine()) != -1)
+    if(sep2.indexIn(seplineData) != -1)
       subScript<<sep2.cap(1);
   }
 

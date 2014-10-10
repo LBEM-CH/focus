@@ -791,7 +791,4 @@ ${proc_2dx}/linblock "Script finished correctly."
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"
 #
-exit
-#
-source ${proc_2dx}/movie/apply_filter.py
 

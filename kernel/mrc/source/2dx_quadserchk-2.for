@@ -606,7 +606,7 @@ C-------------MINX: PIXTURE LIMITS  e.g. 0
 C-------------MAXX: PIXTURE LIMITS  e.g. 4096
 C
               IF(IX-KDC1.LT.MINX.OR.IX+KDC1.GT.MAXX.OR.
-     . IY-KDR1.LT.MINY.OR.IY+KDR1.GT.MAXY)GO TO 23
+     .           IY-KDR1.LT.MINY.OR.IY+KDR1.GT.MAXY)GO TO 23
 C
 C-------------COUNT NUMBER OF BOXES READ ON EACH HALF LINE; 
               NALINE=NALINE+1
@@ -635,8 +635,11 @@ C-------------AND THE DENSITIES OF THE 4 NEAR NEIGHBOURS
                 DO 9031 IIY=-KDR,KDR
                  IXST =IIX+KDC+2
                  IYST =IIY+KDR+2
-                 XC5=XC(IXST,IYST)+XC(IXST+1,IYST)+XC(IXST-1,IYST)+
-     . XC(IXST,IYST+1)+XC(IXST,IYST-1)
+                 XC5=XC(IXST  ,IYST  )
+     .              +XC(IXST+1,IYST  )
+     .              +XC(IXST-1,IYST  )
+     .              +XC(IXST  ,IYST+1)
+     .              +XC(IXST  ,IYST-1)
                  IF(XC5.LE.BIG5) GO TO 9031
                    BIG5=XC5
                    BIG=XC(IXST,IYST)   
@@ -2015,7 +2018,7 @@ CHEN----this is against an SGI optimization error :
         if(ITYP.gt.101) ITYP=101
 C
         IF(LXBEST.GT.20 .OR. LXBEST.LT.-20 .OR.
-     . LYBEST.GT.20 .OR. LYBEST.LT.-20)  THEN
+     .     LYBEST.GT.20 .OR. LYBEST.LT.-20)  THEN
           BIGFACTR=0.0
         ELSE
           BIGFACTR=PROFILE(51,51)/PROFILE(ITXP,ITYP)

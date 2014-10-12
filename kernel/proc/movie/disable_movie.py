@@ -21,9 +21,9 @@ if __name__ == "__main__":
 		elif l.startswith("set crop_histogram = "):
 			lines.append('set crop_histogram = "y"\n')
 		elif l.startswith("set crop_histogram_percent = "):
-			lines.append('set crop_histogram_percent = "4"\n')
+			lines.append('set crop_histogram_percent = "2"\n')
 		elif l.startswith("set crop_histogram_stdev = "):
-			lines.append('set crop_histogram_stdev = "1"\n')
+			lines.append('set crop_histogram_stdev = "4"\n')
 		else:
 			lines.append(l)
 	f.close()

@@ -125,6 +125,7 @@ set crop_histogram = ""
 set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
 set SYN_Unbending = ""
+set movie_inmovie = ""
 set movie_enable = ""
 set movie_stackname = ""
 set movie_imagenumber_total = ""
@@ -141,8 +142,9 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
-echo "<<@evaluate>>"
-echo "<<@progress: 1>>"
+if ( ${movie_inmovie} == "n" ) then
+  echo "<<@evaluate>>"
+endif
 #
 if ( ! -e ${imagename}.mrc ) then
   set initialization_executable = 'y'
@@ -170,6 +172,12 @@ if ( ${imagesidelength} == "ScriptWillPutLengthHere" ) then
   set correct = 1
   set new_mrc_created = 'y'
 endif
+#
+if ( ${movie_inmovie} == "y" ) then
+  set correct = 1
+  set new_mrc_created = 'y'
+endif
+#
 if ( ${correct} == '1' && ${imagename} != "ScriptWillPutNameHere" ) then
   set oldval = ${nonmaskimagename}
   set nonmaskimagename = ${imagename}
@@ -220,7 +228,9 @@ if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) t
     echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
 endif
 #
-echo "<<@progress: 40>>" 
+if ( ${movie_inmovie} == "n" ) then
+  echo "<<@progress: 40>>" 
+endif
 #
 #################################################################################
 ### Make input image square, correct size, and potentially rotate for correct tilt axis:
@@ -275,7 +285,9 @@ else
     echo "set phacon = ${phacon}"  >> LOGS/${scriptname}.results
   endif
   #
-  echo "<<@progress: 65>>"
+  if ( ${movie_inmovie} == "n" ) then
+    echo "<<@progress: 65>>"
+  endif
   #
   if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
     set oldval = ${RESMIN}
@@ -365,6 +377,10 @@ else
   set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 13 ) } END { print s }'`
   echo "set boxb1 = ${boxb1}"  >> LOGS/${scriptname}.results
   echo ":Initializing boxb1 as ${boxb1}"
+  #
+  set movie_refbox = `echo ${imagesidelength} | awk '{ s = int( $1 / 7 )  } END { print s }'`
+  echo "set movie_refbox = ${movie_refbox}"  >> LOGS/${scriptname}.results
+  echo ":Initializing movie_refbox as ${movie_refbox}"
   #
   # boxa2 and boxb2 are for shifting SpotScan spots into their correct location. 
   # These references need to be much larger, optimally the diameter of one of the SpotScan spots.
@@ -499,5 +515,7 @@ ${proc_2dx}/linblock "Done."
 echo ":: "
 #############################################################################
 #
-echo "<<@progress: 100>>"
+if ( ${movie_inmovie} == "n" ) then
+  echo "<<@progress: 100>>"
+endif
 #

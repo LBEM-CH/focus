@@ -24,6 +24,8 @@ if __name__ == "__main__":
 			lines.append('set crop_histogram_percent = "2"\n')
 		elif l.startswith("set crop_histogram_stdev = "):
 			lines.append('set crop_histogram_stdev = "4"\n')
+		elif l.startswith("set movie_inmovie = "):
+			lines.append('set movie_inmovie = "y"\n')
 		else:
 			lines.append(l)
 	f.close()

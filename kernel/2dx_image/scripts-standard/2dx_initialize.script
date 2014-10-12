@@ -110,6 +110,7 @@ set initialization_executable = ""
 set initialization_corr_endian = ""
 set crop = ""
 set SYN_Unbending = ""
+set movie_inmovie = ""
 #
 #$end_vars
 #
@@ -121,8 +122,10 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
-echo "<<@evaluate>>"
-echo "<<@progress: 1>>"
+if ( ${movie_inmovie} == "n" ) then
+  echo "<<@evaluate>>"
+  echo "<<@progress: 1>>"
+endif
 #
 if ( ${initialization_executable} == "n" ) then
   set initialization_reset = "n"
@@ -276,7 +279,9 @@ echo "::                (activate the MANUAL button top right for help)"
 echo ":: "
 #############################################################################
 #
-echo "<<@progress: 100>>"
+if ( ${movie_inmovie} == "n" ) then
+  echo "<<@progress: 100>>"
+endif
 #
 exit
 #

@@ -303,6 +303,12 @@ echo "<<@progress: 15>>"
 \rm -f frame_unbending.pdf
 \touch frame_unbending.pdf
 #
+if ( ! -e SCRATCH/errout_unbend2_${imagename}.dat ) then
+  ${proc_2dx}/protest "ERROR: First run Unbend II."
+endif
+#
+\cp -f SCRATCH/errout_unbend2_${imagename}.dat SCRATCH/errout${imagename}.dat
+#
 setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
 setenv PROFDATA SCRATCH/prof${imagename}.dat
 setenv ERRORS   SCRATCH/errout${imagename}.dat

@@ -597,7 +597,7 @@ if ( ${tempkeep} != "y" ) then
 endif
 
 # Prevent the "frames" directory from showing up in 2dx_merge:
-# \rm -f frames/2dx_master.cfg
+\rm -f frames/2dx_master.cfg
 
 ${proc_2dx}/linblock "Plotting local drift"
 python ${proc_2dx}/movie/plotLocalDrift.py frames frames/drifts.pdf ${num_dia}

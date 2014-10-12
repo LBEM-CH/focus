@@ -22,9 +22,9 @@ C----------------IREPORT=0: Short logging.
 C
 C
       integer IMAXPOS,ISIZE,ilocmag,ICOUNT,IERR,NUM
-      integer i,j,k,l,IPOS,IANZ,ISPOTANZ
+      integer I,j,k,l,IPOS,IANZ,ISPOTANZ,IRUN
       integer iwasthere,flag,IANZ1,LOOP,ifirst,itesthand,ihandto
-      integer IFOUND2
+      integer IFOUND2,IMAXHND
       real RLATORI,rmag,rpix,RX,RY,PI
       real REALAN
       real TLTAXIS,TLTANG,RMAXCOU,RCOUNT,RMAXMAG,RLOCMAG,RMSD,RMAXRMSD
@@ -89,24 +89,26 @@ C
      1    ''Delta,MaxHK,MaxSpot,itesthand '')')
       write(6,'(''(itesthand=1 for testing inverted hand.)'')')
       read(5,*)stepsize,magvari,nmin,delta,maxhk,maxspot,itesthand
-      if(maxspot.gt.80)maxspot=80
+      if(maxspot.gt.300)maxspot=300
       write(6,'('' read: '',2F12.3,I5,F12.6,3I6,/)')
      1    stepsize,magvari,nmin,delta,maxhk,maxspot,itesthand
 C
       ifirst = 0
 C
-      open(11,FILE=CNAME,STATUS='OLD',ERR=900)
+      open(11,FILE=cname,STATUS='OLD',ERR=900)
 C
 C      read(11,'(A)')
       I=1
+      IRUN=0
   100 continue
         read(11,'(A79)',ERR=109,END=110)cline
         read(cline,*,ERR=101)RFX(I),RFY(I),RFV(I)
+        IRUN=IRUN+1
         goto 104
   101   continue
           if(ifirst.eq.0)then
             write(*,'('':: ERROR: There is a problem with '',
-     1        A40)')CNAME
+     1        A40)')cname
             write(*,'('':: ERROR reading input file, but ignoring'')')
             ifirst = 1
           else
@@ -130,6 +132,9 @@ C-------eliminate douplicates due to Friedel symmetry
             RFX(j)=(RFX(j)+RFX(I))/2.0
             RFY(j)=(RFY(j)+RFY(I))/2.0
             RFV(j)=(RFV(j)+RFV(I))/2.0
+C            write(6,'('' Skip  spot '',I6,'': '',3F12.3,
+C     .        '', since same as '',I6,'': '',3F12.3)')
+C     .        I,RFX(I),RFY(I),RFV(I),j,RFX(j),RFY(j),RFV(j)
             iwasthere=1
           endif
         enddo
@@ -158,10 +163,12 @@ C
         goto 999
       endif
 C
-      do I=1,IANZ
-        write(6,'('' read spot: '',3F12.3)')
-     1    RFX(I),RFY(I),RFV(I)
-      enddo
+      write(6,'(/,'' In total, read '',I6,'' spots. Keeping '',
+     .   I6,'' spots. '')')IRUN,IANZ
+C      do I=1,IANZ
+C        write(6,'('' Using spot '',I6,'': '',3F12.3)')
+C     1    I,RFX(I),RFY(I),RFV(I)
+C      enddo
 C
       write(6,'(/,'' Number of peaks read is '',I10)')IANZ
 C
@@ -176,11 +183,12 @@ C
 C
       do 850 LOOP=1,20
 C
-        RMAXCOU=0
+        RMAXCOU=0.0
+        IMAXPOS=0
+        IMAXHND=0
 C
 C-------Loop over lattice orientation 
 C
-     
         if(itesthand.eq.1) then
           ihandto = 2
         else
@@ -189,7 +197,6 @@ C
 C
         do 310 ihand=1,ihandto
 C
-          IMAXPOS=0
           write(6,'(/,'' testing hand '',I3)')ihand
 C
 C---------Prepare non-rotated hypothetical lattice
@@ -438,6 +445,7 @@ C
               if(RCOUNT.gt.RMAXCOU)then
                 RMAXCOU=RCOUNT
                 IMAXPOS=IPOS
+                IMAXHND=ihand
                 RMAXRMSD=RMSD
                 RMAXMAG=RLOCMAG
                 RGOODH(1)=RNLATH(1)
@@ -450,9 +458,9 @@ C
                   Y(i)=RSPOTY(i)
 290             enddo
 C
-                write(6,'('' Score = '',F12.4,'',  Lat='',4F10.3,
-     1                    '' Mag='',F10.1)')
-     2            RCOUNT,RNLATH(1),RNLATH(2),RNLATK(1),RNLATK(2),RLOCMAG
+                write(6,'('' Hand = '',I1,'', Position = '',I4,'', Score = '',F12.4,'',    Lat='',4F10.3,
+     1                    '',     Mag='',F10.1)')
+     2            IMAXHND,IMAXPOS,RCOUNT,RNLATH(1),RNLATH(2),RNLATK(1),RNLATK(2),RLOCMAG
 C
 C                 write(6,'(/,'' Score = '',I9,'',  Lat='',4F12.3)')
 C     2            ICOUNT,RNLATH(1),RNLATH(2),RNLATK(1),RNLATK(2)
@@ -469,8 +477,8 @@ C
 C
 C-------Report best lattice:
 C
-        write(6,'(/,/,'': best lattice was at position '',I8,
-     1      '' with score of '',F12.3)')IMAXPOS,RMAXCOU
+        write(6,'(/,/,'': best lattice was for hand '',I1,'' at position '',I8,
+     1      '' with score of '',F12.3)')IMAXHND,IMAXPOS,RMAXCOU
 C
         write(6,'(/,'': reciprocal local lattice is '',4F12.3)')
      1      RGOODH(1),RGOODH(2),RGOODK(1),RGOODK(2)
@@ -540,26 +548,37 @@ C
         if(RMAXCOU.ne.0.0)then
           write(12,'(4F12.3)')
      1      RLATH(1),RLATH(2),RLATK(1),RLATK(2)
-C
           write(12,'(F12.3)')
      1      RMAXCOU
+        endif
+C
+        if (IFOUND2.eq.1) then
+C---------Output the second lattice
+          write(6,'('': Found second lattice. Stopping search.'',/)')
+          goto 851
         endif
 C
 C-------For the second lattice:
 C-------Find the spots that are not on the first determined lattice.
       
         l=1
-        do k=1,IANZ1 
+        do k=1,IANZ 
           flag=1
           do j=1,NUM
             if((abs(RFX(k)-X(j)).lt.delta).and.
      1         (abs(RFY(k)-Y(j)).lt.delta)     )then
-C              write(6,'(/,/,'' PEAK SPOT at position '',
-C     1           2F12.3)')RFX(k),RFY(k)
               flag=0
+              goto 849
             endif
           enddo
-          if(flag.eq.1) then
+ 849      continue
+          if(flag.eq.0) then
+C            write(6,'('' Spot at position '',
+C     .           2F12.3,'' is on first lattice. Eliminating it. (same as ''
+C     .           ,2F12.3,'')'')')RFX(k),RFY(k),X(j),Y(j)
+          else
+C            write(6,'('' Spot at position '',
+C     1           2F12.3,'' is new. Keeping it.'')')RFX(k),RFY(k)
             RFXTEMP(l)=RFX(k)
             RFYTEMP(l)=RFY(k)
             RFVTEMP(l)=RFV(k)
@@ -577,20 +596,23 @@ C
           RFV(k)=RFVTEMP(k)
         enddo    
 C
-        if (IFOUND2.eq.1) then
-C---------Output the zero second lattice
-          write(12,'(''0.0,0.0,0.0,0.0'')')
-          write(12,'(''0.0'')')
-          goto 999
+        if (IANZ.gt.5) then
+          write(6,'('': Now searching for other lattices with remaining ''
+     .      ,I8,'' spots'')'),IANZ
+        else
+C---------There is no significant other lattice. 
+          write(6,'('': Stopping search, there is no significant'',
+     .      '' other lattice.'',/)')
+          goto 851
         endif
  850  continue
 C
+ 851  continue
+C
       if (IFOUND2.eq.0)then
 C-------Output the zero second lattice
-        write(12,'(4F12.3)')
-     1    RLATH(1),RLATH(2),RLATK(1),RLATK(2)
-        write(12,'(F12.3)')
-     1    RMAXCOU
+          write(12,'(''0.0,0.0,0.0,0.0'')')
+          write(12,'(''0.0'')')
       endif
 C
       goto 999

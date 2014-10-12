@@ -39,7 +39,7 @@ ${proc_2dx}/${lincommand} "2dx_unbend2_sub.com: Starting round ${locround}..."
     #
     echo 2 T T F	
     echo 1	
-    echo ${lattice},-30,30,-30,30,${rmax},1 
+    echo ${lattice},-50,50,-50,50,${rmax},1 
     #
     ${bin_2dx}/2dx_masktrana.exe << eot
 2 T T F				! ISHAPE= 1(CIRC),2(GAUSS CIRC),OR 3(RECT) HOLE, IAMPLIMIT(T or F)
@@ -76,7 +76,7 @@ eot
     echo ${defocus},${TLTAXIS},${TLTANG}
     echo 1                          
     echo ${holeb},${holeb}       
-    echo ${lattice},-30,30,-30,30,${rmax},1,8 
+    echo ${lattice},-50,50,-50,50,${rmax},1,8 
     echo TMP234439.dat
     #
     ${bin_2dx}/2dx_ttmask.exe << eot
@@ -84,7 +84,7 @@ ${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${
 ${defocus},${TLTAXIS},${TLTANG}   	! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 1                          		! ISHAPE= 1(circ),2(gauss circ),3(rect)
 ${holeb},${holeb}       		! radius hole if circular, X,Y half-edge-len if rect
-${lattice},-30,30,-30,30,${rmax},1,8   	! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
+${lattice},-50,50,-50,50,${rmax},1,8   	! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
 TMP234439.dat
 `cat ${imagename}.spt`
 eot
@@ -368,7 +368,7 @@ ${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${
 ${defocus},${TLTAXIS},${TLTANG}   	! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 1       				! ISHAPE= 1(circ),2(gauss circ),3(rect),4(circ,maxrad)
 ${maskb},${maskb} 			! radius hole if circular, X,Y half-edge-len if rect
-${lattice},-30,30,-30,30,${rmax},1,8 	! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
+${lattice},-50,50,-50,50,${rmax},1,8 	! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
 TMP234440.dat
 `cat ${imagename}.spt`
 eot
@@ -406,7 +406,7 @@ ${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${
 ${defocus},${TLTAXIS},${TLTANG}         ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 4                                       ! ISHAPE= 1(circ),2(gauss circ),3(rect),4(circ,maxrad)
 ${maskb},${maskb}                       ! radius hole if circular, X,Y half-edge-len if rect
-${lattice},-30,30,-30,30,${rmax},0,8       ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
+${lattice},-50,50,-50,50,${rmax},0,8       ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
 TMP234440.dat
 eot
       #
@@ -454,7 +454,7 @@ eot
   #
   #############################################################################
   #                                                                           #
-  ${proc_2dx}/${lincommand} "TWOFILE - to calculate cross-correlation"
+  ${proc_2dx}/${lincommand} "TWOFILE - to calculate cross-correlation between reference and image"
   #                                                                           #
   #    ${imagename}.msk  +  ref${imagename}.fft  =>  corel${imagename}.fft    #
   #                                                                           #

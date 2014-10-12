@@ -83,7 +83,7 @@ setenv SPOTS ${imagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${holea}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice} -30 30 -30 30 ${rmax} 1 !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
+${lattice} -50 50 -50 50 ${rmax} 1 !A/B X/Y,IH/IK MN/MX,RMAX,ITYPE
 eot
 #
 echo "<<@progress: 10>"

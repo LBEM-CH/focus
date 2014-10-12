@@ -21,6 +21,38 @@ if __name__ == "__main__":
 	print "Doing splitting for:", stack_file
 	print "nz =", nz
 	
+
+
+
+        #########################################
+        # create frames 0, which is a central high-contrast frame: The second quarter of frames.
+        #########################################
+
+	folder_name = "frames/frame_0" 
+	output_name = folder_name + "/" + image_name + "_0.mrc"
+	os.mkdir(folder_name)
+	
+        fat_num_from = int(nz / 4);
+        fat_num_to   = int(nz / 2);
+
+	for j in range(fat_num_from,fat_num_to):
+	
+		print "Creating frame 0 as", output_name, "by adding sub-frame", j
+			
+		if j==fat_num_from:
+			image = stack.get_clip(Region(0,0,j,nx,ny,1))
+		else:
+			image += stack.get_clip(Region(0,0,j,nx,ny,1))
+		
+	image.write_image(output_name)
+	
+
+
+
+        #########################################
+        # create frames 1 to nz/ave_num:
+        #########################################
+
 	for i in range(0,int(nz/ave_num)):
 		
 		folder_name = "frames/frame_" + str(i+1)
@@ -29,7 +61,7 @@ if __name__ == "__main__":
 		
 		for j in range(0,ave_num):
 		
-			print "Splitting frame", i+1, "into", output_name, i*ave_num+j
+			print "Creating frame", i+1, "as", output_name, "by adding sub-frame", i*ave_num+j
 			
 			if j==0:
 				image = stack.get_clip(Region(0,0,i*ave_num+j,nx,ny,1))

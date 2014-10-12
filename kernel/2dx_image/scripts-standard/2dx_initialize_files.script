@@ -156,9 +156,10 @@ if ( x${MergeIWP}x == "x-1x" ) then
   echo "set MergeIWP = 1" >> LOGS/${scriptname}.results
 endif
 #
+set new_mrc_created = 'n'
+set correct = 0
 #
 set testname = `echo ${imagename} | cut -c2-`
-set correct = 0
 if (( ${nonmaskimagename} != ${imagename} ) && ( ${nonmaskimagename} != ${testname} )) then
   set correct = 1
 endif
@@ -167,6 +168,7 @@ if ( ${nonmaskimagename} == "ScriptWillPutNameHere" ) then
 endif
 if ( ${imagesidelength} == "ScriptWillPutLengthHere" ) then
   set correct = 1
+  set new_mrc_created = 'y'
 endif
 if ( ${correct} == '1' && ${imagename} != "ScriptWillPutNameHere" ) then
   set oldval = ${nonmaskimagename}
@@ -177,8 +179,6 @@ if ( ${correct} == '1' && ${imagename} != "ScriptWillPutNameHere" ) then
   echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
 endif
 # 
-set new_mrc_created = 'n'
-#
 if ( -e ${nonmaskimagename}.mrc ) then
   if ( ! -e ${nonmaskimagename}.raw.mrc ) then
     \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}.raw.mrc

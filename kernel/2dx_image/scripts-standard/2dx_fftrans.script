@@ -113,6 +113,19 @@ ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
 #
 set new_mrc_created = 'n'
+set correct = 0
+#
+set testname = `echo ${imagename} | cut -c2-`
+if (( ${nonmaskimagename} != ${imagename} ) && ( ${nonmaskimagename} != ${testname} )) then
+  set correct = 1
+endif
+if ( ${nonmaskimagename} == "ScriptWillPutNameHere" ) then
+  set correct = 1
+endif
+if ( ${imagesidelength} == "ScriptWillPutLengthHere" ) then
+  set correct = 1
+  set new_mrc_created = 'y'
+endif
 #
 if ( -e ${nonmaskimagename}.mrc ) then
   if ( ! -e ${nonmaskimagename}.raw.mrc ) then

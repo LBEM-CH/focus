@@ -6,6 +6,7 @@ import os
 import sys
 
 def getResolution(h,k):
+        # This is really badly case specific here.....:
 	spacing = 39.1
 	xh = h * spacing
 	xk = k * spacing
@@ -23,7 +24,7 @@ def getKey(item):
 if __name__ == "__main__":
 	
 	if len(sys.argv) < 3:
-		sys.exit("Missuseage detected, usage exe mode stating ending")
+		sys.exit("Missuse detected, usage exe mode stating ending")
 
 	image_names = sys.argv[1:]
 	

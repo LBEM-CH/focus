@@ -3,11 +3,11 @@ from sparx import *
 
 import os
 
-def w(x, t, a, b):
-	if t==0:
-		return a*exp(b*x)
-	else:
+def w(n, t, a, b):
+	if t == 2:
 		return 0.5
+	else:
+		return a*exp(b*n)
 
 def getCutoff(n, t, a, b):
 	return min(0.5, w(n, t, a, b))

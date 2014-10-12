@@ -169,6 +169,9 @@ source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#
 if ( ${det_lattice} == 'y' ) then
   #
   set ialg = `echo ${do_lattice_algorithm} | cut -c1-1` 
@@ -332,7 +335,7 @@ eot
     echo "${magnification}"
     echo "${stepdigitizer}"
     echo "${docfile}"
-    echo "0.1,0.008,8,${delta},12,49,${itesthand}"
+    echo "0.1,0.008,8,${delta},16,300,${itesthand}"
     echo " "
     #
   ${bin_2dx}/2dx_findlat.exe << eot
@@ -344,7 +347,7 @@ ${imagesidelength}
 ${magnification}
 ${stepdigitizer}
 ${docfile}
-0.1,0.008,8,${delta},12,49,${itesthand} !AngleStepSize,MagVariation,Nmin,Delta,MaxHK,MaxSpot
+0.1,0.008,8,${delta},16,300,${itesthand} !AngleStepSize,MagVariation,Nmin,Delta,MaxHK,MaxSpot
 eot
     #
     echo "findlat finished."

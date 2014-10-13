@@ -245,38 +245,38 @@ endif
 #exit 
 #
 if ( ${movie_filter_type} == "0" ) then
-	#
-	# automatic calculation of A and B for exponential filter:  
-	# filter type:   res = a * exp(b * N)  ; with N being the frame number, up to Nmax.
-	# res should be between 0.0 and 0.5 (Nyquist)
-	#
-	# For first half of frames, resolution should be the full 0.5.
-	# 0.50 = A * exp(B * Nmax/2)
-	# At last frame, limit resolution to 0.25
-	# 0.25 = A * exp(B * Nmax)
-	# 
-	# Second equation equals:  A = 0.25 / exp(B * Nmax)
-	# Into first equation gives: 
-        # 0.50 = 0.25 / exp(B * Nmax) * exp(B * Nmax/2)
-        # or: 0.50 = 0.25 / exp(B * Nmax/2)
-	# or: 0.5 = exp(B * Nmax/2) 
-	# or: ln(0.5) = B * Nmax/2 
-	# or: B = 2 * ln(0.5) / Nmax
-	# or: B = -1.38629 / Nmax
-	#
-	# Insertion into first equation gives: 
-	# A = 0.5 / exp(2*ln(0.5)/Nmax * Nmax/2)
-	# A = 0.5 / exp(2*ln(0.5)/2)
-	# A = 0.5 / 0.5 = 1.0
-	#
-	set filt_a = 1.0
-	set filt_b = `echo ${movie_imagenumber_total} | awk '{ s =  -1.38629 / $1 } END { print s }'`
-	echo ":Automatic filters: filt_a = ${filt_a},  filt_b = ${filt_b}"
-	echo "set filt_a = ${filt_a}"  >> LOGS/${scriptname}.results
-	echo "set filt_b = ${filt_b}"  >> LOGS/${scriptname}.results
+  #
+  # automatic calculation of A and B for exponential filter:  
+  # filter type:   res = a * exp(b * N)  ; with N being the frame number, up to Nmax.
+  # res should be between 0.0 and 0.5 (Nyquist)
+  #
+  # For first half of frames, resolution should be the full 0.5.
+  # 0.50 = A * exp(B * Nmax/2)
+  # At last frame, limit resolution to 0.25
+  # 0.25 = A * exp(B * Nmax)
+  # 
+  # Second equation equals:  A = 0.25 / exp(B * Nmax)
+  # Into first equation gives: 
+  # 0.50 = 0.25 / exp(B * Nmax) * exp(B * Nmax/2)
+  # or: 0.50 = 0.25 / exp(B * Nmax/2)
+  # or: 0.5 = exp(B * Nmax/2) 
+  # or: ln(0.5) = B * Nmax/2 
+  # or: B = 2 * ln(0.5) / Nmax
+  # or: B = -1.38629 / Nmax
+  #
+  # Insertion into first equation gives: 
+  # A = 0.5 / exp(2*ln(0.5)/Nmax * Nmax/2)
+  # A = 0.5 / exp(2*ln(0.5)/2)
+  # A = 0.5 / 0.5 = 1.0
+  #
+  set filt_a = 1.0
+  set filt_b = `echo ${movie_imagenumber_total} | awk '{ s =  -1.38629 / $1 } END { print s }'`
+  echo ":Automatic filters: filt_a = ${filt_a},  filt_b = ${filt_b}"
+  echo "set filt_a = ${filt_a}"  >> LOGS/${scriptname}.results
+  echo "set filt_b = ${filt_b}"  >> LOGS/${scriptname}.results
 else
-	set filt_a = `echo ${movie_filter_param} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-	set filt_b = `echo ${movie_filter_param} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+  set filt_a = `echo ${movie_filter_param} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+  set filt_b = `echo ${movie_filter_param} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
 endif
 #
 set num_dia = 100
@@ -295,8 +295,8 @@ ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} frames, me
 python ${proc_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
 #
 foreach f  (`ls frames`)
-        \cp 2dx_image.cfg frames/$f/
-        python ${proc_2dx}/movie/disable_movie.py  frames/$f/
+  \cp 2dx_image.cfg frames/$f/
+  python ${proc_2dx}/movie/disable_movie.py  frames/$f/
 end
 #
 cd frames

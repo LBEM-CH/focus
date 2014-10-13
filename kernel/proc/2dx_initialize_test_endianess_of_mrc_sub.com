@@ -36,7 +36,6 @@
 ${nonmaskimagename}.mrc
 SCRATCH/TMPconverted.mrc
 eot
-      echo "<<@progress: 30>>"
       #
       if ( ! -e SCRATCH/TMPconverted.mrc ) then
         #############################################################################

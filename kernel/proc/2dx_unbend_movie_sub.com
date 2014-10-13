@@ -194,16 +194,18 @@ eot
         2 ! ICOMB = 2
         2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
-        
-        \rm -f frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.fft.mrc
-        setenv IN1 frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
-        setenv IN2 SCRATCH/refbm${imagename}.fft.mrc
-        setenv OUT frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.fft.mrc
-        ${bin_2dx}/twofile.exe << eot
-        2 ! ICOMB = 2
-        2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+
+        if ( ${movie_refboxb} != "0" ) then
+       
+          \rm -f frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.fft.mrc
+          setenv IN1 frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
+          setenv IN2 SCRATCH/refbm${imagename}.fft.mrc
+          setenv OUT frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.fft.mrc
+          ${bin_2dx}/twofile.exe << eot
+          2 ! ICOMB = 2
+          2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
-        
+        endif 
 
         ###########################################################################
         ${proc_2dx}/lin "FFTRANS - IFFT to obtain cross correlation profiles"
@@ -213,11 +215,13 @@ eot
         setenv OUT frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
         ${bin_2dx}/2dx_fftrans.exe
         
-        /bin/rm -f frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc
-        setenv IN frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.fft.mrc
-        setenv OUT frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc
-        ${bin_2dx}/2dx_fftrans.exe
-        
+        if ( ${movie_refboxb} != "0" ) then
+          /bin/rm -f frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc
+          setenv IN frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.fft.mrc
+          setenv OUT frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc
+          ${bin_2dx}/2dx_fftrans.exe
+        endif
+   
 
         ###########################################################################
         ${proc_2dx}/lin "QUADSERCH - Search unbending profile with first reference (1nd round, IPASS=3)"
@@ -251,26 +255,28 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Do mask the image directly
 eot
         
-        ###########################################################################
-        ${proc_2dx}/lin "QUADSERCH - Refine unbending profile with second reference (2nd round, IPASS=3)"
-        ###########################################################################
+        if ( ${movie_refboxb} != "0" ) then
 
-        \mv -f SCRATCH/errout3${imagename}.dat SCRATCH/errout2${imagename}.dat
+          ###########################################################################
+          ${proc_2dx}/lin "QUADSERCH - Refine unbending profile with second reference (2nd round, IPASS=3)"
+          ###########################################################################
 
-        \rm -f frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
-        \rm -f SPIDERCOORD.spi
-        \rm -f CCPLOT.PS
+          \mv -f SCRATCH/errout3${imagename}.dat SCRATCH/errout2${imagename}.dat
 
-        setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
-        setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
-        setenv ERRORS   SCRATCH/errout2${imagename}.dat
-        setenv ERROUT   SCRATCH/errout3${imagename}.dat
+          \rm -f frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
+          \rm -f SPIDERCOORD.spi
+          \rm -f CCPLOT.PS
 
-        set valspotscan = '0'
-        set createmask = '0'
-        set IPASS = 3
+          setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+          setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
+          setenv ERRORS   SCRATCH/errout2${imagename}.dat
+          setenv ERROUT   SCRATCH/errout3${imagename}.dat
 
-        ${bin_2dx}/2dx_quadserchk-2.exe << eot
+          set valspotscan = '0'
+          set createmask = '0'
+          set IPASS = 3
+
+          ${bin_2dx}/2dx_quadserchk-2.exe << eot
 ${IPASS},${quadpredb}                     ! IPASS,NRANGE
 frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
@@ -284,7 +290,9 @@ ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0
 ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Do mask the image directly
 eot
-        
+        endif
+
+
         ###########################################################################
         ${proc_2dx}/lin "Store distortion-vector-field for visual inspection"
         ###########################################################################

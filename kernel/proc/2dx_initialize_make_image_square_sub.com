@@ -142,7 +142,6 @@ SCRATCH/TMPnewsize1.mrc
 SCRATCH/TMPnewsize2.mrc
 ${bettersize}
 eot
-      echo "<<@progress: 60>>"
       #
       ${proc_2dx}/lin "Padding done."
       #
@@ -178,7 +177,6 @@ eot
         ${proc_2dx}/linblock "Interpolation done."
       endif
       #
-      echo "<<@progress: 62>>"
       #
       \mv -f SCRATCH/TMPnewsize1.mrc ${loc_imagename}.mrc
       #

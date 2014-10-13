@@ -4,7 +4,7 @@ import sys
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 3:
-		sys.exit("Missuseage detected")
+		sys.exit("Missuse detected")
 
 
 	filename = sys.argv[1]	

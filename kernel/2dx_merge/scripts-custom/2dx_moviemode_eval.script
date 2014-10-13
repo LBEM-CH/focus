@@ -88,9 +88,9 @@ foreach dirfile ( ${dirlist} )
   echo "<<@progres: ${images_progres}>>"
   set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
 
-  echo `python ${bin_2dx}/movie_mode_py/getQvals.py ${newdir}/LOGS/2dx_unbend_movie.results ${newdir}/2dx_image.cfg` >> $data_file
+  echo `python ${proc_2dx}/movie/getQvals.py ${newdir}/LOGS/2dx_unbend_movie.results ${newdir}/2dx_image.cfg` >> $data_file
   
-  python ${bin_2dx}/movie_mode_py/getQvalsInspect.py ${newdir}/LOGS/2dx_unbend_movie.results ${newdir}/2dx_image.cfg
+  python ${proc_2dx}/movie/getQvalsInspect.py ${newdir}/LOGS/2dx_unbend_movie.results ${newdir}/2dx_image.cfg
   
   #if ( ${i} == '1' ) then
   #  cp -f ${newdir}/movie_dia.pdf $dia_file

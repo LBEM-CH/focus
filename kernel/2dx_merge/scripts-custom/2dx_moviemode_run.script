@@ -62,4 +62,4 @@ echo "<<@progress: 10>>"
 #
 # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
 
-python ${bin_2dx}/movie_mode_py/runMovieMode.py ${dirlist}
+python ${proc_2dx}/movie/runMovieMode.py ${dirlist}

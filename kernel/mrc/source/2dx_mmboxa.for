@@ -343,10 +343,10 @@ C-------Calculate the Cross-product RC=RAxRB
         RC(3) = RA(1)*RB(2) - RA(2)*RB(1)
 C
         if(RC(3).ge.0)then
-          WRITE(*,'('': Right-handed lattice'')')
+          WRITE(*,'('' Right-handed lattice'')')
           ihand=1
         else
-          WRITE(*,'('':: Left-handed lattice'')')
+          WRITE(*,'('' Left-handed lattice'')')
           ihand=-1
         endif
 C

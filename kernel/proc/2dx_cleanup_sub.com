@@ -109,12 +109,14 @@ if ( "${level}" == "radical" ) then
   #
   if ( -e ${imagename}.tif ) then
     \rm -f ${imagename}.mrc
+    \rm -f ${imagename}.raw.mrc
     \rm -f ${imagename}-original.mrc
     \rm -f ${imagename}-original-big.mrc
   endif
   #
   if ( -e ${nonmaskimagename}.tif ) then
     \rm -f ${nonmaskimagename}.mrc
+    \rm -f ${nonmaskimagename}.raw.mrc
     \rm -f ${nonmaskimagename}-original.mrc
     \rm -f ${nonmaskimagename}-original-big.mrc
   endif

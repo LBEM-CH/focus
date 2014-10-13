@@ -41,7 +41,9 @@ ${nonmaskimagename}.mrc
 ${goodmin},${goodmax}
 eot
     #
-    echo "# IMAGE: "SCRATCH/${nonmaskimagename}.tmp.mrc "<raw image before histogram correction>" >> LOGS/${scriptname}.results
+    \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
+    #
+    # echo "# IMAGE: "SCRATCH/${nonmaskimagename}.tmp.mrc "<raw image before histogram correction>" >> LOGS/${scriptname}.results
     #
   else
     ${proc_2dx}/lin "Not cropping histogram (Advanced parameter)."
@@ -63,6 +65,8 @@ ${nonmaskimagename}.mrc
 1
 eot
     #
+    \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
+    #
   endif
   #
   if ( ${imageorigin} == '5' ) then
@@ -79,6 +83,8 @@ SCRATCH/${nonmaskimagename}.tmp.mrc
 ${nonmaskimagename}.mrc
 eot
     #
+    \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
+    #
   endif
   #
   if ( ${imageorigin} == '6' ) then
@@ -94,6 +100,8 @@ SCRATCH/${nonmaskimagename}.tmp.mrc
 18               ! switch to INTEGER*2 (MODE 1) with unsigned/signed swap and autoscaling 0…16000
 ${nonmaskimagename}.mrc
 eot
+    #
+    \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
     #
   endif
   #
@@ -119,6 +127,7 @@ ${nonmaskimagename}.mrc
 1		 ! Z90 rotation
 eot
     #
+    \rm -f SCRATCH/${nonmaskimagename}.tmp.2.mrc
   endif
   #
 endif

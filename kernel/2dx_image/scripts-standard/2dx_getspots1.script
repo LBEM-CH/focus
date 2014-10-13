@@ -20,6 +20,7 @@
 #
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
+# DISPLAY: spotlist_RESMAX
 # DISPLAY: lattice
 # DISPLAY: secondlattice
 # DISPLAY: realcell
@@ -62,6 +63,7 @@ set revhk = ""
 set realang = ""
 set RESMIN = ""
 set RESMAX = ""
+set spotlist_RESMAX = ""
 set ALAT = "" 
 set lattice = ""
 set IQMAX1 = ""
@@ -173,8 +175,7 @@ echo "<<@progress: 20>>"
 #   16 * 45000
 #
 #
-set local_RESMAX = `echo ${RESMAX} | awk '{ if ( $1 < 8.0 ) { s = 8.0 } else { s = $1 } } END { print s }'`
-set local_RESMAX = `echo ${local_RESMAX} | awk '{ s = 1.2 * $1 } END { print s }'`
+set local_RESMAX = `echo ${spotlist_RESMAX} | awk '{ if ( $1 < 8.0 ) { s = 8.0 } else { s = $1 } } END { print s }'`
 ${proc_2dx}/linblock "Using resolution limit of ${local_RESMAX} Angstroems"
 #
 set RINNER = 1

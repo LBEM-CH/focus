@@ -81,6 +81,9 @@ if ( "${level}" == "radical" ) then
     \rm -f 2dx_getDefTilt.com
     \rm -f 2dx_openDir.com
     \rm -f 2dx_refinedefocus.com
+    \rm -f 2dx_unbend_movie.com
+    \rm -f 2dx_initialize_files.com
+    \rm -f 2dx_ctfcor.com
     cd ..
   endif
   #
@@ -136,11 +139,21 @@ if ( "${level}" == "radical" ) then
   \rm -f ML_centric.hkl
   \rm -f ML_interpolated.mrc
   \rm -f TMP???.spi
+  \rm -f CCPLOT.pdf
+  \rm -f weight.mrc
+  \rm -f frame_quadserch.pdf
+  \rm -f frame_unbending.pdf
+  \rm -f 2dx_origtiltk-reflections.log
   #
 else
   #
   ${proc_2dx}/linblock "Slight Cleanup"
   #
+endif
+#
+#
+if ( -d frames ) then
+  \rm -rf frames
 endif
 #
 cd SCRATCH

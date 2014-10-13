@@ -21,6 +21,7 @@
 # DISPLAY: SYN_Unbending
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
+# DISPLAY: spotlist_RESMAX
 # DISPLAY: lattice
 # DISPLAY: secondlattice
 # DISPLAY: realcell
@@ -63,6 +64,7 @@ set revhk = ""
 set realang = ""
 set RESMIN = ""
 set RESMAX = ""
+set spotlist_RESMAX = ""
 set ALAT = "" 
 set lattice = ""
 set IQMAX = ""
@@ -182,7 +184,7 @@ echo "<<@progress: 20>>"
 #
 #
 set RINNER = 1
-set ROUTER = `echo ${imagesidelength} ${stepdigitizer} ${magnification} ${RESMAX} | awk '{ s = ( $1 * $2 *10000 ) / ( $3 * $4 ) } END { print s }'`
+set ROUTER = `echo ${imagesidelength} ${stepdigitizer} ${magnification} ${spotlist_RESMAX} | awk '{ s = ( $1 * $2 *10000 ) / ( $3 * $4 ) } END { print s }'`
 ${proc_2dx}/linblock "Outer radius = ${ROUTER}"
 #
 set spot_source_begin = `echo ${spot_source} | cut -c1-3`

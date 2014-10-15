@@ -140,7 +140,8 @@ C         ERRORS      - Produced when IPASS=1v2; File contains list of
 C                        XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)
 C
 C-----Max input image is 16000 x 16000, which is an array of 256'000'000
-      PARAMETER (IARRMXSIZ=256000000)
+C-----Max input image is 12000 x 12000, which is an array of 144'000'000
+      PARAMETER (IARRMXSIZ=144000000)
       PARAMETER (MDR=120)
       PARAMETER (MDC=120)
       PARAMETER (MNY=-240)
@@ -166,7 +167,7 @@ C
       DIMENSION PEAK(MNY:MXY,MNY:MXY)
       DIMENSION XC(MDC,MDR)           ! this should be (x,y)
 C
-      PARAMETER (LPIC=16000)
+      PARAMETER (LPIC=12000)
       PARAMETER (LMAX=20100)
       DIMENSION APIC2(LPIC,LPIC)
       DIMENSION ALINE(LMAX)

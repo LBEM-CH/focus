@@ -12,10 +12,8 @@
                 
         set image_dir = `pwd`
 
-        ${proc_2dx}/lin "launching ${app_2dx_image} ${image_dir}/frames/frame_${i} 2dx_initialize"
         ${app_2dx_image} ${image_dir}/frames/frame_${i} "2dx_initialize"
 
-        ${proc_2dx}/lin "launching ${app_2dx_image} ${image_dir}/frames/frame_${i} 2dx_initialize_files"
         ${app_2dx_image} ${image_dir}/frames/frame_${i} "2dx_initialize_files"
 
         set prog_num = `echo ${irunner} ${movie_imagenumber_touse} | awk '{ s = 30 + int( 50 * $1 / $2 ) } END { print s }'` 
@@ -69,6 +67,7 @@ eot
 
         \rm -f frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
         \rm -f SPIDERCOORD.spi
+        \rm -f CCPLOT.PS
 
         setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
         setenv PROFDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
@@ -96,8 +95,8 @@ frames/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}.cor.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${movie_quadradax},${movie_quadraday}           ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${movie_quadradbx},${movie_quadradby}         ! RADIUS OF CORR SEARCH, search offset in pixels
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -122,7 +121,7 @@ frames/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}.cor.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${movie_quadradax},${movie_quadraday}           ! RADIUS OF CORR SEARCH
+${movie_quadradbx},${movie_quadradby}           ! RADIUS OF CORR SEARCH, search offset in pixels
 ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
@@ -136,7 +135,7 @@ frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
 eot
                 #
            endif
-           
+
            ######################################################
            ${proc_2dx}/lin "FFT of masked frame average"
            ######################################################
@@ -230,6 +229,9 @@ eot
         \rm -f SPIDERCOORD.spi
         \rm -f SCRATCH/errout3${imagename}.dat
         \rm -f CCPLOT.PS
+        \rm -f frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc
+
+        # \cp -f frames/frame_${i}/m${nonmaskimagename}_${i}.mrc frames/frame_${i}/m${nonmaskimagename}_${i}_ori.mrc
 
         setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
         setenv PROFDATA frames/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
@@ -238,22 +240,33 @@ eot
 
         set valspotscan = '0'
         set createmask = '0'
-        set IPASS = 3
+
+        # IPASS = 13   ! same as IPASS=3, but align images also
+        set IPASS = 13
 
         ${bin_2dx}/2dx_quadserchk-2.exe << eot
 ${IPASS},${quadpredb}                     ! IPASS,NRANGE
 frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
+frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
+frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${movie_quadradax},${movie_quadraday}           ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${movie_quadradbx},${movie_quadradby},500,500           ! RADIUS OF CORR SEARCH, search offset in pixels
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Do mask the image directly
 eot
+        #
+        if ( ! -e frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc ) then
+          ${proc_2dx}/protest "ERROR in 2dx_quadserchk-3" 
+        else
+          \mv -f frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
+        endif
+        
         
         if ( ${movie_refboxb} != "0" ) then
 
@@ -282,8 +295,8 @@ frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${movie_quadradbx},${movie_quadradby}           ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${movie_quadradbx},${movie_quadradby}           ! RADIUS OF CORR SEARCH, search offset in pixels
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -291,6 +304,17 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Do mask the image directly
 eot
         endif
+
+        if ( -e TMP-quadserch3-autocor.mrc ) then
+          \mv -f TMP-quadserch3-autocor.mrc frames/frame_${i}/SCRATCH/TMP-quadserch3-autocor.mrc
+        endif 
+
+        if ( ! -e SCRATCH/errout3${imagename}.dat ) then
+          ${proc_2dx}/protest "ERROR: Problem in 2dx_quadserchk-2: SCRATCH/errout3${imagename}.dat does not exist."
+        endif
+ 
+        # The other frames are subsequently used as refinement reference:
+        \mv -f SCRATCH/errout3${imagename}.dat SCRATCH/errout2${imagename}.dat
 
 
         ###########################################################################
@@ -301,17 +325,9 @@ eot
         endif
         #
         \cp -f CCPLOT.PS frames/frame_${i}/PS/${nonmaskimagename}-quadserch.ps
-        echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-quadserch.ps <PS: Frame ${i} QUADSERCH Plot>" >> LOGS/${scriptname}.results 
 
-
-        if ( ${i} == "0" ) then
-            # The high-contrast frame-0 is only used as refinement reference:
-            \mv -f SCRATCH/errout3${imagename}.dat SCRATCH/errout2${imagename}.dat
-
-        else
-  
-            # The other frames are subsequently used as refinement reference:
-            \mv -f SCRATCH/errout3${imagename}.dat SCRATCH/errout2${imagename}.dat
+        # The high-contrast frame-0 is only used as refinement reference  
+        if ( ${i} != "0" ) then
 
             if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
@@ -350,7 +366,7 @@ ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTA
 30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
 frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc
-MOVIE-UNBENT,PASS,2,${date}
+CCUNBEND, frame_${i}/m${nonmaskimagename}_${i}.mrc, ${date}
 eot
 
             ###########################################################################

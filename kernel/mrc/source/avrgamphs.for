@@ -268,10 +268,10 @@ CHENN>
                         WRITE(3,29)LH,LK,COMBAMP,COMBPHASE,FOMCALC
                         IQVAL = 1
                         WRITE(4,28)LH,LK,COMBAMP,COMBPHASE,IQVAL,FOMCALC
-28                      FORMAT(2I6,2F12.1,I6,F12.3)
-29                      FORMAT(2I6,2F12.1,F12.3)
+28                      FORMAT(2I6,2G15.5,I6,F12.3)
+29                      FORMAT(2I6,2G15.5,F12.3)
 CHENN<
-30                      FORMAT(3I6,2F12.1,F12.3) 
+30                      FORMAT(3I6,2G15.5,F12.3) 
 C
                         OBSERRSQ=OBSERRSQ+PHSERROR**2
                         FOMANGSQ=FOMANGSQ+FOMANG**2
@@ -311,8 +311,10 @@ C
         IF(FOMANGSQ.NE.0.0)THEN
                 RATIO=SQRT(OBSERRSQ/FOMANGSQ)
                 WRITE(6,501)RATIO,NOBS
-501             FORMAT(' RATIO RMS OBSERVED RESIDUAL TO RMS FOM ANGLE',F10.3,/,
-     .  '       CALCULATED ON',I5,' SPOTS WITH MORE THAN ONE MEASUREMENT')
+501             FORMAT(' RATIO RMS OBSERVED RESIDUAL',
+     .          ' TO RMS FOM ANGLE',F10.3,/,
+     .  '       CALCULATED ON',I5,' SPOTS WITH',
+     .          ' MORE THAN ONE MEASUREMENT')
         ENDIF
 500     CONTINUE
 C********

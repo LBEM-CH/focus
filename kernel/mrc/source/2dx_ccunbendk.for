@@ -134,73 +134,58 @@ C
 C-----PARAMETER (NPOINT=NDATA+6561)
       PARAMETER (NPOINT=256561)
       PARAMETER (NCMAX=7056)
-CHENN>
       PARAMETER (NWSPCE=410000000)
       PARAMETER (ISIZEX=20100)
-CHENN<
       PARAMETER (ISTEPMAX=120)
-CHENN>
-C      PARAMETER (IDEEP=162)
       PARAMETER (IDEEP=220)
-C      PARAMETER (NDIMX=500)
       PARAMETER (NDIMX=2000)
-C      PARAMETER (NDIMY=500)
       PARAMETER (NDIMY=2000)
-CHENN<
+C
 C               see subroutine - fillempties, calctaper - parameters also.
-        DIMENSION TITLE(20),TITLEIN(20),TITLEERR(20),DATANAME(20)
-        REAL*8 SUMOUT
-        REAL XPOS(NDATA),YPOS(NDATA),DX(NDATA),DY(NDATA),W(NDATA)
-        REAL DXAV(NDIMX,NDIMY),DYAV(NDIMX,NDIMY)        ! Bins for guide point
-        REAL NAV(NDIMX,NDIMY),WAV(NDIMX,NDIMY)          ! and linear interpol.
-        REAL XOUT(NDIMX*NDIMY),YOUT(NDIMX*NDIMY)
-        REAL XCORR(NDIMX*NDIMY),YCORR(NDIMX*NDIMY),WS(NWSPCE)
-        REAL LAMBDA(NMAXKN),MU(NMAXKN),DL(NCMAX),CX(NCMAX),CY(NCMAX)
-        INTEGER POINT(NPOINT),PX,PY,NCREAL,RANK,IFAIL,J
+      DIMENSION TITLE(20),TITLEIN(20),TITLEERR(20),DATANAME(20)
+      REAL*8 SUMOUT
+      REAL XPOS(NDATA),YPOS(NDATA),DX(NDATA),DY(NDATA),W(NDATA)
+      REAL DXAV(NDIMX,NDIMY),DYAV(NDIMX,NDIMY)        ! Bins for guide point
+      REAL NAV(NDIMX,NDIMY),WAV(NDIMX,NDIMY)          ! and linear interpol.
+      REAL XOUT(NDIMX*NDIMY),YOUT(NDIMX*NDIMY)
+      REAL XCORR(NDIMX*NDIMY),YCORR(NDIMX*NDIMY),WS(NWSPCE)
+      REAL LAMBDA(NMAXKN),MU(NMAXKN),DL(NCMAX),CX(NCMAX),CY(NCMAX)
+      INTEGER POINT(NPOINT),PX,PY,NCREAL,RANK,IFAIL,J
       REAL MAXCOR, TAPER(ISTEPMAX,ISTEPMAX),TAPER1(ISTEPMAX,ISTEPMAX)
       REAL PICIN(ISIZEX,IDEEP),PICOUT(ISIZEX,ISTEPMAX)
       LOGICAL LTAPER, LTABOUT, LCOLOR
       CHARACTER*1 CCOLOR
+      CHARACTER DAT*24
 C
-        DIMENSION NXYZ(3),MXYZ(3),NXYZ1(3),NXYZST(3)
-        CHARACTER*80 NAME,NAME1
-        EQUIVALENCE (PICIN(1,1),WS(1))
-        EQUIVALENCE (PICOUT(1,1),WS(1+ISIZEX*IDEEP))
-CTSH++
+      DIMENSION NXYZ(3),MXYZ(3),NXYZ1(3),NXYZST(3)
+      CHARACTER*80 NAME,NAME1
+      EQUIVALENCE (PICIN(1,1),WS(1))
+      EQUIVALENCE (PICOUT(1,1),WS(1+ISIZEX*IDEEP))
       CHARACTER*80 TMPTITLEIN,TMPTITLEERR
       EQUIVALENCE (TMPTITLEIN,TITLEIN),(TMPTITLEERR,TITLEERR)
-CTSH--
-        DATA NXYZST/3*0/
-        DATA NGUIDE/20/         ! MAXIMUM EXTRA GUIDE POINTS = NGUIDE**2.
-CTSH            DATA TITLEIN/' PLO','T OF',' INP','UT D','ATA ','ABOV','E TH',
-CTSH     .      'RESH',' in ','CCUN','BEND','K   ','    ','    ','    ','    ',
-CTSH     .      '    ','    ','    ','    '/
-CTSH            DATA TITLEERR/' PLO','T OF',' FIT','TING',' ERR','OR A','T IN',
-CTSH     .      'PUT ','DATA',' POI','NTS ','in C','CUNB','END2','K   ','    ',
-CTSH     .      '    ','    ','    ','    '/
-CTSH++
-        DATA TMPTITLEIN/' PLOT OF INPUT DATA ABOVE
-     . THRESH in CCUNBEND K'/
-        DATA TMPTITLEERR/' PLOT OF FITTING ERROR AT
-     . INPUT DATA POINTS in CCUNBEND2K'/
-CTSH--
+      DATA NXYZST/3*0/
+      DATA NGUIDE/20/         ! MAXIMUM EXTRA GUIDE POINTS = NGUIDE**2.
+      DATA TMPTITLEIN/' PLOT OF INPUT DATA ABOVE
+     .   THRESH in CCUNBEND K'/
+      DATA TMPTITLEERR/' PLOT OF FITTING ERROR AT
+     .   INPUT DATA POINTS in CCUNBEND2K'/
 C
-        XCOORD(I,J)=A1*I+B1*J+IC
-        YCOORD(I,J)=A2*I+B2*J+IR
+      XCOORD(I,J)=A1*I+B1*J+IC
+      YCOORD(I,J)=A2*I+B2*J+IR
 C*** initialization added by jms 06.03.96
-        do j=1,ndimy
-         do i=1,ndimy
+      do j=1,ndimy
+        do i=1,ndimy
           WAV(i,j) = 0.
           NAV(i,j) = 0
           DXAV(i,j) = 0.
           DYAV(i,j) = 0.
-         end do
         end do
-        do j=1,istepmax
-         do i=1,istepmax
+      end do
+      do j=1,istepmax
+        do i=1,istepmax
           taper(i,j) = 0.
-         end do
         end do
+      end do
 C
 C  INPUT OF LIST OF ALL IMAGE PARAMETERS AS IN PRODUCED BY CCORSERCH
       WRITE(6,13211)
@@ -219,14 +204,23 @@ C
       READ(3,*)DENMAX
       WRITE(6,9001)NC,NR,IC,IR,A1,A2,B1,B2,MINA,MAXA,MINB,MAXB,DENMAX
 9001  FORMAT('$NC,NR ',2I5/
-     $  '$IC,IR ',2I5/
-     $  '$A1,A2,B1,B2 ',4F10.4/
-     $  '$LAST XCOR X,Y ',4I5/
-     $  '$MAX DENSITY IN CORRELATION MAP',F12.1)
+     .  '$IC,IR ',2I5/
+     .  '$A1,A2,B1,B2 ',4F10.4/
+     .  '$LAST XCOR X,Y ',4I5/
+     .  '$MAX DENSITY IN CORRELATION MAP',F12.1)
 C READ IN NAME OF IMAGE FILE TO BE USED.
       WRITE(6,3211)
       READ(5,163)NAME
       WRITE(6,3212)NAME
+C
+      CALL FDATE(DAT)
+      WRITE(6,'('' Date is '',A20)') DAT(5:24)
+C
+      call shorten(NAME,k)
+      if(k.gt.60)k=60
+      WRITE(TMPTITLEIN(1:80),'(80X)')
+      WRITE(TMPTITLEIN(1:60),'(A)')NAME(1:k)
+      WRITE(TMPTITLEIN(61:80),'(A)')DAT(5:24)
 C
 C  INPUT OF ALL CONTROL DATA REQUIRED TO RUN THIS PROGRAM.
       WRITE(6,160)
@@ -304,7 +298,7 @@ C
      . '                 Y DIRECTION = ',F8.5,/,/)
       ICOMPRSSX=NINT(COMPRSSX)
       ICOMPRSSY=NINT(COMPRSSY)
-        WRITE(6,14999)ICOMPRSSX,ICOMPRSSY
+      WRITE(6,14999)ICOMPRSSX,ICOMPRSSY
 14999 FORMAT(' ICOMPRSSX=',I5,' ICOMPRSSY=',I5,/)
       IF(ITYPE.EQ.0) GO TO 250
       IF(IKNOTX.GT.(NMAXKN-8)) GO TO 197
@@ -1253,4 +1247,28 @@ CHENN<
         RETURN
         END
 C
-C******************************************************************************
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+

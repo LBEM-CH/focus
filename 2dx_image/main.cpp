@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 		QMapIterator<int, QString> it(scripts);
 		while(it.hasNext())
 		{
-			cout<<"<<@progress: "<<int(scriptCount/float(scripts.size()+cScripts.size())*100.0)<<">>"<<endl;
+			// cout<<"<<@progress: "<<int(scriptCount/float(scripts.size()+cScripts.size())*100.0)<<">>"<<endl;
 			scriptCount++;
 			it.next();
 			scriptParser parser(QList<confData *>()<<localConfList[it.key()]<<&data);
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 
 			if(QFileInfo(standardScriptsDir.path() + "/" + script + ".script").exists())
 			{
-				cout<<"::  Executing in "<<data.getDir("working").toStdString()<<" :  "<<script.toStdString()<<endl;
+				cout<<":==== Executing in "<<data.getDir("working").toStdString()<<" :  "<<script.toStdString()<<endl;
 				parser.parse(standardScriptsDir.path() + "/" + script + ".script", data.getDir("working") + "/proc/" + script + ".com");
 				parser.execute(script,&data);
 			}
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 		QMapIterator<int, QString> it2(cScripts);
 		while(it2.hasNext())
 		{
-			cout<<"<<@progress: "<<int(scriptCount/float(scripts.size()+cScripts.size())*100.0)<<">>"<<endl;
+			// cout<<"<<@progress: "<<int(scriptCount/float(scripts.size()+cScripts.size())*100.0)<<">>"<<endl;
 			scriptCount++;
 			it2.next();
 			scriptParser parser(QList<confData *>()<<localCConfList[it2.key()]<<&data);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 			script.remove(QRegExp("\\.script$"));
 			if(QFileInfo(customScriptsDir.path() + "/" + script + ".script").exists())
 			{
-				cout<<"::  Executing in "<<data.getDir("working").toStdString()<<" : +"<<script.toStdString()<<endl;
+				cout<<":==== Executing in "<<data.getDir("working").toStdString()<<" : +"<<script.toStdString()<<endl;
 				parser.parse(customScriptsDir.path() + "/" + script + ".script", data.getDir("working") + "/proc/" + script + ".com");
 				parser.execute(script,&data);
 			}
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
                 // Save Database
                 data.save();
 
-		cout<<"<<@progress: 100>>"<<endl; 
+		// cout<<"<<@progress: 100>>"<<endl; 
 	}
 	else
 	{

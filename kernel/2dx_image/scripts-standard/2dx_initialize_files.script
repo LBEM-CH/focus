@@ -382,7 +382,8 @@ else
   echo "set movie_refboxa = ${movie_refboxa}"  >> LOGS/${scriptname}.results
   echo ":Initializing movie_refboxa as ${movie_refboxa}"
   #
-  set movie_refboxb = `echo ${imagesidelength} | awk '{ s = int( $1 / 9 )  } END { print s }'`
+  # set movie_refboxb = `echo ${imagesidelength} | awk '{ s = int( $1 / 9 )  } END { print s }'`
+  set movie_refboxb = 0
   echo "set movie_refboxb = ${movie_refboxb}"  >> LOGS/${scriptname}.results
   echo ":Initializing movie_refboxb as ${movie_refboxb}"
   #

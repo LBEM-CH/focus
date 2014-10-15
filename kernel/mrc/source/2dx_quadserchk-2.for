@@ -24,6 +24,7 @@ C                                 input card 4 changed, therefore QUADSERCHC
 C       VX3.2   RH      11.3.98  add QUADSERCHC to plot title
 C       VX4.0   RH      23.8.00  convert to plot2000 direct postscript output
 C       VX5.0   HS     31.10.05  2dx
+C       VX6.0   HS      5.10.14  2dx - Adding origin offset
 C
 C  MODIFIED JUN 1987 TO HANDLE RECTANGULAR IMAGES.   JMB.
 C  MODIFIED FROM PROFSERCH DEC 1986.   JMB.
@@ -67,11 +68,14 @@ C
 C     CARDS ON UNIT 5 : 
 C       1       IPASS,NRANGE            ! controls search learning algorithm.
 C       2       FILENAME                ! name of cross-correlation file
+C       2b      FILE1                   ! name of input image (only if IPASS>9)
+C       2c      FILE2                   ! name of (aligned) output image (only if IPASS>9)
 C       3       ISIZEX,ISIZEY           ! SIZE OF TRANSFORM
 C       4       ASTR1,ASTR2,BSTR1,BSTR2,LREAL
 C                                       ! Lattice vectors, real(T) or recip(F)
 C       5       MINA,MAXA,MINB,MAXB     ! NUMBER UNIT CELLS TO SEARCH
-C       6       KDC,KDR                 ! RADIUS OF CORR SEARCH
+C       6       KDC,KDR,IOFFX,IOFFY     ! RADIUS OF CORR SEARCH, 
+C                                       ! Radius of central offset (zero for none, only if IPASS>9)
 C       7       IC,IR                   ! POSN OF SEARCH START (0,0 IS ORIGIN)
 C       8       IPRNT                   ! YES/NO FOR DETAILED PRINTOUT
 C       9       RADLIMP,RADLIMQ,RADANGP ! ELLIPTICAL CUTOFF.
@@ -85,6 +89,10 @@ C         IPASS -0 no error input or output, simple search only.
 C               -1 writes error file with peak positions for use in later pass.
 C               -2 reads error file for use in better initial peak predict.
 C               -3 reads and writes error file for use in better initial peak predict.
+C               -10 as for 0, but reading image and writing (aligned) image out
+C               -11 as for 0, but reading image and writing (aligned) image out
+C               -12 as for 0, but reading image and writing (aligned) image out
+C               -13 as for 0, but reading image and writing (aligned) image out
 C         NRANGE- range of previous peaks used in prediction of next peak posn.
 C         ISIZEX- size of transform in x-pixels (eg. 3000,3000)
 C         ISIZEY-                  and y-pixels
@@ -99,6 +107,8 @@ C         MINB  -   ""
 C         MAXB  -   ""
 C         KDC   - search over +/- this number of pixels on each side of the
 C         KDR   - predicted centre of each correlation peak.
+C         IOFFX - search over +/- this number of pixels on each side for the offset of the 
+C         IOFFY - central lattice. Use 0,0 for none.
 C         IC    - position of search origin for the first correlation peak
 C         IR    - relative to corner of image at 0,0 -  e.g.(1500,1500)
 C         IPRNT - more (Y) or less (N) printout
@@ -129,52 +139,76 @@ C                     - by CCUNBENDA
 C         ERRORS      - Produced when IPASS=1v2; File contains list of
 C                        XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)
 C
-        COMMON/PROFITC/PROFILE,XC
-        PARAMETER (IARRMXSIZ=410000000)
-        PARAMETER (MDR=120)
-        PARAMETER (MDC=120)
-        PARAMETER (MNY=-240)
-        PARAMETER (MXY=240)
-        PARAMETER (NDATA=40)
-        PARAMETER (NSMOTH=5)
+C-----Max input image is 16000 x 16000, which is an array of 256'000'000
+      PARAMETER (IARRMXSIZ=256000000)
+      PARAMETER (MDR=120)
+      PARAMETER (MDC=120)
+      PARAMETER (MNY=-240)
+      PARAMETER (MXY=240)
+      PARAMETER (NDATA=40)
+      PARAMETER (NSMOTH=5)
 C
-        DIMENSION ARRAY(IARRMXSIZ)
-        DIMENSION NASTOP(2)
-        DIMENSION NSTART(10),NFIN(10),NSTEP(10)
-        DIMENSION PROFILE(101,101),NCOUNT(11),RADSTORE(-180:180)
-        DIMENSION NXYZ2(3),MXYZ2(3)
-        DIMENSION TITLE(20),NXYZ(3),MXYZ(3)
+      PARAMETER (MNI=-500)
+      PARAMETER (MXI= 500)
+C----------------MFIELD needs to be MXI-MNI
+      PARAMETER (MFIELD=1001)
+C
+      DIMENSION ARRAY(IARRMXSIZ)
+      DIMENSION ARRA2(IARRMXSIZ)
+      DIMENSION NASTOP(2)
+      DIMENSION NSTART(10),NFIN(10),NSTEP(10)
+      DIMENSION PROFILE(101,101),NCOUNT(11),RADSTORE(-180:180)
+      DIMENSION TITLE(20)
+      DIMENSION TITPLOT(20)
       DIMENSION COOR(3,MNY:MXY,MNY:MXY)
 C
       DIMENSION XERROR(MNY:MXY,MNY:MXY),YERROR(MNY:MXY,MNY:MXY)
       DIMENSION PEAK(MNY:MXY,MNY:MXY)
-        DIMENSION XC(MDC,MDR)           ! this should be (x,y)
-CHEN>
-        LOGICAL LREAL,LCOLOR
-        CHARACTER*1 CCOLOR
-CHEN<
-        CHARACTER*80 FILENAM
-        CHARACTER*80 NAME
-        EQUIVALENCE (TITLE,NAME)
-CTSH++
-CHENN        CHARACTER*1 IUSE
-CTSH--
-c       INTEGER*4 LIST(NDATA)
-C*** next statement necessary for compatibility with sgi machines
-        COMMON/BIG/ARRAY
+      DIMENSION XC(MDC,MDR)           ! this should be (x,y)
 C
-C       DATA FOR PROFIT
-        DATA NSTEP/5,1,1,1,1,1,1,1,1,1/
-        DATA NSTART/-10,-7,-5,-3,-3,-3,-3,-3,-3,-3/
-        DATA NFIN/10,7,5,3,3,3,3,3,3,3/
-        DATA NCOUNT/11*0/
-        DATA NPASSLIM/9/
+      PARAMETER (LPIC=16000)
+      PARAMETER (LMAX=20100)
+      DIMENSION APIC2(LPIC,LPIC)
+      DIMENSION ALINE(LMAX)
+      DIMENSION NXYZ(3),MXYZ(3),NXYZST(3)
+      DIMENSION NXYZ2(3),MXYZ2(3)
+      DIMENSION OUT(LMAX),OU2(LMAX)
+      DIMENSION LABELS(20,10),CELL(6),EXTRA(29)
+      DIMENSION DNCELL(6),MXYZN(3)
 C
-        DATA CORFAC/10.0/                                      
-        EQUIVALENCE (NCOL,NXYZ(1)),(NLINE,NXYZ(2))
+      REAL RFIELD(MNI:MXI,MNI:MXI)
+      REAL*8 DOUBLMEAN
+      INTEGER IFIEL1(MNI:MXI,MNI:MXI)
+      INTEGER IFIEL2(MFIELD,MFIELD)
+      LOGICAL LREAL,LCOLOR
+      CHARACTER*1 CCOLOR
+      INTEGER IOFFX,IOFFY
+      CHARACTER*200 FILE1
+      CHARACTER*200 FILE2
+      CHARACTER*200 cline
+      CHARACTER*80 FILENAM
+      CHARACTER*80 TEXT
+      CHARACTER*80 NAME
 C
-        XCOORD(I,J)=A1*I+B1*J+IC                           
-        YCOORD(I,J)=A2*I+B2*J+IR                           
+      EQUIVALENCE (TITPLOT,NAME)
+C
+      COMMON//NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+      COMMON/BIG/ARRAY,ARRA2
+      COMMON/PROFITC/PROFILE,XC
+C
+C     DATA FOR PROFIT
+      DATA NSTEP/5,1,1,1,1,1,1,1,1,1/
+      DATA NSTART/-10,-7,-5,-3,-3,-3,-3,-3,-3,-3/
+      DATA NFIN/10,7,5,3,3,3,3,3,3,3/
+      DATA NCOUNT/11*0/
+      DATA NPASSLIM/9/
+      DATA NXYZST/3*0/, CNV/57.29578/
+C
+      DATA CORFAC/10.0/                                      
+      EQUIVALENCE (NCOL,NXYZ(1)),(NLINE,NXYZ(2))
+C
+      XCOORD(I,J)=A1*I+B1*J+IC                           
+      YCOORD(I,J)=A2*I+B2*J+IR                           
 C
 C*** initialization added by JMS 06.03.96
         do k=mny,mxy
@@ -191,33 +225,61 @@ C
 1     FORMAT(/,' QUADSERCHK 5.0 (30.10.05), searches cross-correlation',
      . ' map one quadrant at a time, and fits profile to peaks',/,/)
       READ(5,*)IPASS,NRANGE
+      if(IPASS.gt.9)then
+        IPASS=IPASS-10
+        IALIGN=1
+      else
+        IALIGN=0
+      endif
       WRITE(6,39003)IPASS,NRANGE
 39003   FORMAT(' IPASS=',I2,' NRANGE=',I3,/)
       IF(IPASS.NE.1.AND.IPASS.NE.2.AND.IPASS.NE.3)IPASS=0
       WRITE(6,9003)
+C
 9003  FORMAT('$NAME OF CROSS-CORRELATION FILE TO BE SEARCHED? ')
-      READ(5,19006) TITLE
+      READ(5,19006) TITPLOT
 19006 FORMAT(20A4)
-      WRITE(6,9006) TITLE
+      WRITE(6,9006) TITPLOT
 9006  FORMAT(1X,20A4)
+      do i=1,20
+        TITLE(i)=TITPLOT(i)
+      enddo
+C
+      if(IALIGN.eq.1)then
+        write(6,'(''Give name of input image'')')
+        read(5,'(A)')FILE1
+        call shorten(FILE1,k)
+        write(6,'(''Read: '',A)')FILE1(1:k)
+C
+        write(6,'(''Give name of aligned output image'')')
+        read(5,'(A)')FILE2
+        call shorten(FILE2,k)
+        write(6,'(''Read: '',A)')FILE2(1:k)
+      endif
+C
+C-----Read in entire CC map into ARRAY
+C
+      write(6,'(''Reading CC map '',A)')NAME
       CALL IMOPEN(1,NAME,'RO')
       CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
-        IF(NCOL*NLINE.GT.IARRMXSIZ) STOP '::  IARRMXSIZ too small'
+      IF(NCOL*NLINE.GT.IARRMXSIZ) STOP '::  IARRMXSIZ too small'
       CALL IMPOSN(1,0,0)
       CALL IRDPAS(1,ARRAY,NCOL,NLINE,0,NCOL-1,0,NLINE-1,*9400)
       CALL IMCLOSE(1)
+      write(6,'(''CC map read.'')')
 C
-          WRITE(6,8007)
-8007      FORMAT('$ISIZEX,ISIZEY? ')
-          READ(5,*)ISIZEX,ISIZEY
-          WRITE(6,*)ISIZEX,ISIZEY
-                WRITE(6,9008)
-9008      FORMAT('$REAL/RECIPROCAL SPACE LATTICE PARAMETERS',
-     . ' ASTR1,ASTR2,BSTR1,BSTR2,LREAL? ')
-          READ(5,*) ASTR1,ASTR2,BSTR1,BSTR2,LREAL
-          WRITE(6,*) ASTR1,ASTR2,BSTR1,BSTR2,LREAL
+      WRITE(6,8007)
+8007  FORMAT('$ISIZEX,ISIZEY? ')
+      READ(5,*)ISIZEX,ISIZEY
+      WRITE(6,*)ISIZEX,ISIZEY
+      WRITE(6,9008)
+9008  FORMAT('$REAL/RECIPROCAL SPACE LATTICE PARAMETERS',
+     .  ' ASTR1,ASTR2,BSTR1,BSTR2,LREAL? ')
+      READ(5,*) ASTR1,ASTR2,BSTR1,BSTR2,LREAL
+      WRITE(6,*) ASTR1,ASTR2,BSTR1,BSTR2,LREAL
 
-C   LREAL canbe used to bypass the next few lines of code.
+C-----LREAL canbe used to bypass the next few lines of code.
+
       IF(LREAL) THEN    ! real space lattice parameters
         A1=ASTR1
         A2=ASTR2
@@ -276,46 +338,56 @@ C
 8005  FORMAT('$REAL SPACE LATTICE PARAMETERS CALCULATED or READ IN',
      . ' A1,A2,B1,B2')
       WRITE(6,*)A1,A2,B1,B2
-C      WRITE(6,*)ASTR,BSTR,ANGASTR,ANGBSTR,GAMMASTR,A,B
+C     WRITE(6,*)ASTR,BSTR,ANGASTR,ANGBSTR,GAMMASTR,A,B
 C
-310     WRITE(6,9014)
-9014    FORMAT('$NUMBER OF UNIT CELLS ALONG EACH AXIS TO',/,
-     . ' BE USED IN SEARCH, MINA,MAXA,MINB,MAXB? ')
-        READ(5,*) MINA,MAXA,MINB,MAXB
-        WRITE(6,*) MINA,MAXA,MINB,MAXB
-        IF(MINB.LT.MNY.OR.MINB.GT.MXY)GO TO 9310
-        IF(MAXB.LT.MNY.OR.MAXB.GT.MXY)GO TO 9310
-        IF(MINA.LT.MNY.OR.MINA.GT.MXY)GO TO 9310
-        IF(MAXA.LT.MNY.OR.MAXA.GT.MXY)GO TO 9310
+310   WRITE(6,9014)
+9014  FORMAT('$NUMBER OF UNIT CELLS ALONG EACH AXIS TO',/,
+     .   ' BE USED IN SEARCH, MINA,MAXA,MINB,MAXB? ')
+      READ(5,*) MINA,MAXA,MINB,MAXB
+      WRITE(6,*) MINA,MAXA,MINB,MAXB
+      IF(MINB.LT.MNY.OR.MINB.GT.MXY)GO TO 9310
+      IF(MAXB.LT.MNY.OR.MAXB.GT.MXY)GO TO 9310
+      IF(MINA.LT.MNY.OR.MINA.GT.MXY)GO TO 9310
+      IF(MAXA.LT.MNY.OR.MAXA.GT.MXY)GO TO 9310
       GO TO 9311
 9310    WRITE(6,9312)
 9312    FORMAT('::  NUMBER OF UNIT CELLS REQUIRED EXCEEDS DIMENSIONS')
       STOP
-9311    CONTINUE
-        MINX=0
-        MINY=0
-        MAXX=NCOL-1
-        MAXY=NLINE-1
-C       NC=0
-C       NR=0
+9311  CONTINUE
+      MINX=0
+      MINY=0
+      MAXX=NCOL-1
+      MAXY=NLINE-1
+C     NC=0
+C     NR=0
 C
-        NC=NXYZ(1)
-        NR=NXYZ(2)
-320     WRITE(6,9015)
-9015    FORMAT('$HALF-WIDTH OF CCOR SEARCH KDC,KDR: ')
+      NC=NXYZ(1)
+      NR=NXYZ(2)
+320   WRITE(6,9015)
+9015  FORMAT('$HALF-WIDTH OF CCOR SEARCH KDC,KDR, IOFFX,IOFFY: ')
+      if(IALIGN.eq.1)then
+        READ(5,*) KDC,KDR,IOFFX,IOFFY  !HALF-WIDTH OF XCOR SEARCH
+        WRITE(6,*) KDC,KDR,IOFFX,IOFFY
+        if(IOFFX.gt.MXI)IOFFX=MXI
+        if(IOFFY.gt.MXI)IOFFY=MXI
+      else
         READ(5,*) KDC,KDR  !HALF-WIDTH OF XCOR SEARCH
         WRITE(6,*) KDC,KDR
-        KDC1=KDC+1
-        KDR1=KDR+1
-        KDC21=2*KDC1+1
-        KDR21=2*KDR1+1
-        IF(KDC21.GT.MDC.OR.KDR21.GT.MDR)THEN
+        IOFFX=0
+        IOFFY=0
+      endif
+C
+      KDC1=KDC+1
+      KDR1=KDR+1
+      KDC21=2*KDC1+1
+      KDR21=2*KDR1+1
+      IF(KDC21.GT.MDC.OR.KDR21.GT.MDR)THEN
         imdc=((MDC-1)/2)-1
         imdr=((MDR-1)/2)-1
-      WRITE(6,19016) imdc,imdr
+        WRITE(6,19016) imdc,imdr
 19016   FORMAT(':: KDC,KDR TOO LARGE FOR CURRENT DIMENSIONS '
-     . ,2I4)
-      STOP
+     .   ,2I4)
+        STOP
       END IF
       WRITE(6,9016)
 9016  FORMAT('$POSITION OF STARTING ORIGIN FOR SEARCH',/,
@@ -327,7 +399,305 @@ C
       READ(5,9004)IPRNT
 9004  FORMAT(A1)
 C
+CHENN>
 C
+      if(IALIGN.eq.1)then
+C
+C-------Calculate autocorrelation pattern from central area of CC map
+C
+        if ( IOFFX.ne.0 .or. IOFFY.ne.0 ) then
+C
+          DARRAYMIN= 1e10
+          DARRAYMAX=-1e10
+          do IRO = 1,NLINE
+            do ICO = 1,NCOL
+              INDEXO=(IRO-1)*NCOL+ICO
+              if(DARRAYMIN.gt.ARRAY(INDEXO))DARRAYMIN=ARRAY(INDEXO)
+              if(DARRAYMAX.lt.ARRAY(INDEXO))DARRAYMAX=ARRAY(INDEXO)
+            enddo
+          enddo
+          write(6,'('' INPUT ARRAY MIN,MAX = '',2G15.3)')DARRAYMIN,DARRAYMAX
+C
+C---------Scale ARRAY between 0 and 100
+          do IRO = 1,NLINE
+            do ICO = 1,NCOL
+              INDEXO=(IRO-1)*NCOL+ICO
+              ARRAY(INDEXO)=(ARRAY(INDEXO)-DARRAYMIN)*100.0/(DARRAYMAX-DARRAYMIN)
+            enddo
+          enddo
+          DARRAYMIN= 1e10
+          DARRAYMAX=-1e10
+          DOUBLMEAN=0.0
+          do IRO = 1,NLINE
+            do ICO = 1,NCOL
+              INDEXO=(IRO-1)*NCOL+ICO
+              if(DARRAYMIN.gt.ARRAY(INDEXO))DARRAYMIN=ARRAY(INDEXO)
+              if(DARRAYMAX.lt.ARRAY(INDEXO))DARRAYMAX=ARRAY(INDEXO)
+              DOUBLMEAN=DOUBLMEAN+ARRAY(INDEXO)
+            enddo
+          enddo
+          DOUBLMEAN=DOUBLMEAN/NCOL
+          DOUBLMEAN=DOUBLMEAN/NLINE
+          DARRAYMEAN=DOUBLMEAN
+C          write(6,'(''::INPUT ARRAY now MIN,MAX,MEAN = '',3G15.3)')
+C     .      DARRAYMIN,DARRAYMAX,DARRAYMEAN
+C
+C---------Zero RFIELD
+          do j = MNI,MXI
+            do i = MNI,MXI
+              RFIELD(i,j)=0.0
+            enddo
+          enddo
+C
+          do ih = -2,2
+            do ik = -2,2
+C
+C-------------Calculate offset of sub-area to read
+              IX = int( ih * A1 + ik * B1 )
+              IY = int( ih * A2 + ik * B2 )
+              write(6,'('' Offset for '',2I6,
+     .          '' is '',2I6)')ih,ik,IX,IY
+C
+C-------------Add sub-areas into RFIELD
+              do j = MNI,MXI
+                do i = MNI,MXI
+                  JC=(NCOL /2+1)+i+IX
+                  JR=(NLINE/2+1)+j+IY
+                  INDEXO=(JR-1)*NCOL+JC
+                  if(INDEXO.lt.1 .or. INDEXO.gt.IARRMXSIZ) then
+                    write(6,'(''::ERROR: no averaging possible with this'',
+     .                '' dimension'',I16,6I8)')INDEXO,ih,ik,i,j,NCOL,NLINE
+                    stop
+                  endif
+                  RFIELD(i,j)=RFIELD(i,j)+ARRAY(INDEXO)/100.0
+                enddo
+              enddo
+C
+            enddo
+          enddo
+C
+C---------Write out accumulated RFIELD for verfication purposes
+          DMIN= 1.0e10
+          DMAX=-1.0e10
+          do i = MNI,MXI
+            do j = MNI,MXI
+              ix=i-MNI+1
+              iy=j-MNI+1
+              if(DMIN.gt.RFIELD(ix,iy))DMIN=RFIELD(ix,iy)
+              if(DMAX.lt.RFIELD(ix,iy))DMAX=RFIELD(ix,iy)
+            enddo
+          enddo
+          do i = MNI,MXI
+            do j = MNI,MXI
+              RFIELD(i,j)=(RFIELD(i,j)-DMIN)*255.0/(DMAX-DMIN)
+              IFIEL1(i,j)=int(RFIELD(i,j))+2
+              ix=i-MNI+1
+              iy=j-MNI+1
+              IFIEL2(ix,iy)=int(RFIELD(i,j))
+            enddo
+          enddo
+          IPICDIM=MXI-MNI+1
+          write(TEXT(1:80),'(''Averaged central peaks'')')
+          write(FILENAM(1:80),'(''TMP-quadserch3-autocor.mrc'')')
+          CALL PICWRI(IFIEL2,FILENAM,TEXT,IPICDIM,IPICDIM)
+C          write(6,'('': Written image, DMIN,DMAX = '',2G15.3)')
+C     .      DMIN,DMAX
+C
+C---------Find peak in area of 0.95 * lattice unit cell
+C
+C---------Calculate radius of unit cell
+C
+          ialen=int(sqrt(A1*A1+A2*A2))
+          iblen=int(sqrt(B1*B1+B2*B2))
+          iradi=ialen
+          if(iblen.gt.iradi)iradi=iblen
+C
+          iradi=iradi*0.95
+C
+          if(iradi.gt.IOFFX)iradi=IOFFX
+          if(iradi.gt.IOFFY)iradi=IOFFY
+C
+          if(iradi.gt.MXI)then
+            write(6,'(''ERROR: increase MNI,MXI '',
+     .              ''in 2dx_quadserchk-3.for'')')
+            stop
+          endif
+          RPEAK=-1e10
+          ICMAX=0
+          IRMAX=0
+C---------Find peak that is closest to origin, except if other peak is at least 10% higher
+          do IL = 0,iradi
+            IL2=IL*IL
+            do j = MNI,MXI
+              do i = MNI,MXI
+                ilen2=i*i+j*j
+                if(ilen2.le.IL2 .and. IFIEL1(i,j).ne.0)then
+                  IFIEL1(i,j)=0
+C-----------------How far is this pixel from the last peak?
+                  idist2=(ICMAX-i)**2+(IRMAX-j)**2
+                  if(RFIELD(i,j).gt.RPEAK)then
+C-------------------If this pixel is brighter than the previous peak,
+                    if(idist2.lt.50 .or. RFIELD(i,j).gt.RPEAK*1.10)then
+C---------------------and if this pixel is either close to the last peak, or distant but then 10% higher than the last peak:
+                      RPEAK=RFIELD(i,j)
+                      ICMAX=i
+                      IRMAX=j
+                    endif
+                  endif
+                endif
+              enddo
+            enddo
+          enddo
+C
+C---------Ignore minimal offset (which might stem from digit errors)
+          if(ICMAX.ge.-2 .and. ICMAX.le.2) ICMAX=0
+          if(IRMAX.ge.-2 .and. IRMAX.le.2) IRMAX=0
+C
+          if(ICMAX.ne.0 .or. IRMAX.ne.0)then
+            write(6,'('':: Shifting image by '',2I6,'' pixels.'')')
+     .        ICMAX,IRMAX
+C
+C-----------Shift Cross-Correlation Array by ICMAX,IRMAX pixels
+            do IRN = 1,NLINE
+              do ICN = 1,NCOL
+                IRO = IRN + IRMAX
+                ICO = ICN + ICMAX
+                INDEXO=(IRO-1)*NCOL+ICO
+                INDEXN=(IRN-1)*NCOL+ICN
+                if(IRO.lt.1 .or. IRO.gt.NLINE .or. 
+     .             ICO.lt.1 .or. ICO.gt.NCOL)then
+                  ARRA2(INDEXN)=DARRAYMIN
+                else
+                  ARRA2(INDEXN)=ARRAY(INDEXO)
+                endif
+              enddo
+            enddo
+            do IRO = 1,NCOL
+              do ICO = 1,NLINE
+                INDEXO=(IRO-1)*NCOL+ICO
+                ARRAY(INDEXO)=ARRA2(INDEXO)
+              enddo
+            enddo
+C
+C-----------Open input image
+C
+            CALL IMOPEN(11,FILE1,'RO')
+            CALL IRDHDR(11,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+C            CALL IRTLAB(11,LABELS,NL)
+C            CALL IRTEXT(11,EXTRA,1,29)
+C            CALL IRTCEL(11,CELL)
+            NX=NXYZ(1)
+            NY=NXYZ(2)
+            IF (MODE .GE. 3) then
+              write(6,'(''::ERROR: Wrong usage of program.'')')
+              STOP
+            endif
+C
+C-----------Read entire input file
+C
+            DMIN =  1.E10
+            DMAX = -1.E10
+            DMEAN = 0.0
+            DOUBLMEAN = 0.0
+C
+            do iy = 1,NY
+              CALL IRDLIN(11,ALINE,*999)
+              do ix = 1,NX
+                INDEXO=(iy-1)*NX+ix
+                VAL=ALINE(ix)
+                ARRA2(INDEXO)=VAL
+                IF (VAL .LT. DMIN) DMIN = VAL
+                IF (VAL .GT. DMAX) DMAX = VAL
+                DOUBLMEAN = DOUBLMEAN + VAL
+              enddo
+            enddo
+            DMEAN = DOUBLMEAN/(NX*NY)
+C            write(*,'('':: Dimensions of image are '',2I8)')
+C     .         NX,NY
+C            write(*,'('':: Min, Max, Mean of image file is '',3F12.3)')
+C     .         DMIN,DMAX,DMEAN
+C
+C-----------Shift Image by ICMAX,IRMAX pixels
+C
+            do iyn = 1,NY
+              do ixn = 1,NX
+                iyo = iyn + IRMAX
+                ixo = ixn + ICMAX
+                if(ixo.lt.1 .or. ixo.gt.NX .or. 
+     .             iyo.lt.1 .or. iyo.gt.NY)then
+                  APIC2(ixn,iyn)=DMEAN
+                else
+                  INDEXO=(iyo-1)*NX+ixo
+                  APIC2(ixn,iyn)=ARRA2(INDEXO)
+                endif
+              enddo
+            enddo
+C
+C-----------Open output file for aligned image
+C
+            call shorten(FILE2,k2)
+            write(cline,'(''\rm -f '',A)')FILE2(1:k2)
+            call shorten(cline,k3)
+            call system(cline(1:k3))
+C
+            CALL IMOPEN(12,FILE2,'NEW')
+            CALL ITRHDR(12,11)
+C
+C-----------Put title labels, new cell and extra information into header
+C
+            CALL ICRHDR(12,NXYZ,NXYZ,MODE,LABELS,NL)
+C            CALL IALEXT(12,EXTRA,1,29)
+C            CALL IALCEL(12,CELL)
+C            CALL IALMOD(12,MODE)
+            CALL IWRHDR(12,TITLE,1,DMIN,DMAX,DMEAN)
+C
+C-----------Write the file into the output file
+C
+            write(6,'('': Writing out aligned image '',A)')FILE2(1:k2)
+C
+            do iy = 1,NY
+              do ix = 1,NX
+                ALINE(ix)=APIC2(ix,iy)
+              enddo
+              CALL IWRLIN(12,ALINE)
+            enddo
+C
+            CALL IWRHDR(12,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+            CALL IMCLOSE(12)
+            CALL IMCLOSE(11)
+C
+          endif
+C
+        endif
+C
+        if (IOFFX.eq.0 .and. IOFFY.eq.0) then
+          ICMAX=0
+          IRMAX=0
+        endif
+C
+        if (ICMAX.eq.0 .and. IRMAX.eq.0) then
+C
+c---------Copy input to output file:
+C
+          call shorten(FILE1,k1)
+          call shorten(FILE2,k2)
+          write(6,'(/,/'' Moving image '',A,
+     .      '' onto output image '',A,/,/)')
+     .      FILE1(1:k1),FILE2(1:k2)
+          write(cline,'(''\rm -f '',A)')FILE2(1:k2)
+          call shorten(cline,k3)
+          call system(cline(1:k3))
+C
+          write(cline,'(''\mv -f '',A,'' '',A)')
+     .      FILE1(1:k1),FILE2(1:k2)
+          call shorten(cline,k3)
+          call system(cline(1:k3))
+C
+        endif
+      endif
+C
+CHENN<
 C
 C-----READ PROFILE DATA SET
 C
@@ -409,15 +779,21 @@ C
 9051  FORMAT(' NPASS=',I3,' NSTART=',I3,' NFIN=',I3,' NSTEP=',I3,/)
 C     
 C-----OPEN FILE FOR ERRORS; WRITE IF IPASS=1; READ IF IPASS=2; 
-      IF(IPASS.NE.0) CALL CCPDPN(4,'ERRORS','UNKNOWN','F',0,0)
+      IF(IPASS.NE.0)then
+        CALL CCPDPN(4,'ERRORS','UNKNOWN','F',0,0)
+      endif
 C-----OPEN FILE FOR ERRORS; WRITE IF IPASS=3;
-      IF(IPASS.EQ.3) CALL CCPDPN(8,'ERROUT','UNKNOWN','F',0,0)
+      IF(IPASS.EQ.3)then
+        CALL CCPDPN(8,'ERROUT','UNKNOWN','F',0,0)
+C        CALL CCPDPN(18,'ERROUTN','UNKNOWN','F',0,0)
+      endif
 C
       IF(IPASS.EQ.1)THEN
         WRITE(4,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
       ENDIF
       IF(IPASS.EQ.3)THEN
         WRITE(8,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
+C        WRITE(18,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
       ENDIF
 C-----SET CONTENTS OF XERROR,YERROR ARRAYS TO 9999.; PEAK ARRAY TO 0.0
       IF (IPASS.EQ.0)THEN
@@ -429,17 +805,37 @@ C-----SET CONTENTS OF XERROR,YERROR ARRAYS TO 9999.; PEAK ARRAY TO 0.0
 45004   CONTINUE
       END IF
 C
+C-----Read ERROR field in
+C
       IF(IPASS.EQ.2 .OR. IPASS.EQ.3)THEN
         READ(4,45000)(TITLE(J),J=1,10),MINA1,MAXA1,MINB1,MAXB1
 45000   FORMAT(10A4,4I5)
         WRITE(6,45002)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
 45002   FORMAT(/,/,' SECOND PASS; ERROR FILE READ FROM UNIT 4;',
      . ' TITLE AND RANGES',/,20X,10A4,4I5,/)
+C
         DO 45001 IA=MINA1,MAXA1
           DO 45001 IB=MINB1,MAXB1
             READ(4,39031,ERR=45009)
      .       XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)
 45001   CONTINUE
+C
+C-------New format of ERROR Field:
+C        DO IA=MINA1,MAXA1
+C          DO IB=MINB1,MAXB1
+C            XERROR(IA,IB)=0.0
+C            YERROR(IA,IB)-0.0
+C            PEAK(IA,IB)=0.0
+C          enddo
+C        enddo
+C
+C45002   continue
+C          READ(4,39031,END=45003,ERR=45009)IA,IB,RX,RY,RP
+C          XERROR(IA,IB)=RX
+C          YERROR(IA,IB)=RY
+C          PEAK(IA,IB)=RP
+C45003   continue
+C
       END IF
       goto 45010
 45009 continue
@@ -811,23 +1207,27 @@ C
       DENMAX=CORMAX*CORFAC
       WRITE(3,*)DENMAX
       DO 40 K=MINA,MAXA
-      DO 40 J=MINB,MAXB
-C       WRITE(6,9030) (COOR(I,J,K),I=1,3)
-        WRITE(3,9030) (COOR(I,J,K),I=1,3)
-        if(COOR(3,J,K).ne.0.0)then
-          write(13,'(I5,'' 3'',F13.2,F13.2,G13.4)')
-     .      ispidernum,COOR(1,J,K),COOR(2,J,K),COOR(3,J,K)/DENMAX
-          ispidernum = ispidernum + 1
-        endif
-        IF(IPASS.EQ.1)THEN
-          WRITE(4,39031)XERROR(K,J),YERROR(K,J),PEAK(K,J)
-        ENDIF
-        IF(IPASS.EQ.3)THEN
-          WRITE(8,39031)XERROR(K,J),YERROR(K,J),PEAK(K,J)
-        ENDIF
+        DO 40 J=MINB,MAXB
+C         WRITE(6,9030) (COOR(I,J,K),I=1,3)
+          WRITE(3,9030) (COOR(I,J,K),I=1,3)
+          if(COOR(3,J,K).ne.0.0)then
+            write(13,'(I5,'' 3'',F13.2,F13.2,G13.4)')
+     .        ispidernum,COOR(1,J,K),COOR(2,J,K),COOR(3,J,K)/DENMAX
+            ispidernum = ispidernum + 1
+C            IF(IPASS.EQ.3)THEN
+C              WRITE(18,39032)K,J,XERROR(K,J),YERROR(K,J),PEAK(K,J)
+C            endif
+          endif
+          IF(IPASS.EQ.1)THEN
+            WRITE(4,39031)XERROR(K,J),YERROR(K,J),PEAK(K,J)
+          ENDIF
+          IF(IPASS.EQ.3)THEN
+            WRITE(8,39031)XERROR(K,J),YERROR(K,J),PEAK(K,J)
+          ENDIF
 40    CONTINUE
       close(13)
 39031 FORMAT(3G15.5)      
+39032 FORMAT(2I6,3G15.5)      
 9030  FORMAT(2F10.3,F16.2)  ! increase PEAK size possibility
       WRITE(6,39020)NJUMP
 39020 FORMAT(' NUMBER OF HALF-LINES COMPLETELY OUTSIDE IMAGE',I10)
@@ -858,14 +1258,14 @@ C
 C
        write(*,'('' Entering PLOTLATT'')')
 C
-       CALL PLOTLATT(COOR,TITLE,NXYZ,MINA,MAXA,
+       CALL PLOTLATT(COOR,TITPLOT,NXYZ,MINA,MAXA,
      . MINB,MAXB,A1,A2,B1,B2,IC,IR,NC,NR,IPASS,RMAG,LCOLOR)
 C
 CHEN----Subroutine for image masking based on Cross-Correlation-Field COOR
 C
         if(IXCFPIC.ne.0)then
           write(*,'('' Entering MASKLATT'')')
-          CALL MASKLATT(COOR,TITLE,NXYZ,MINA,MAXA,
+          CALL MASKLATT(COOR,TITPLOT,NXYZ,MINA,MAXA,
      1      MINB,MAXB,A1,A2,B1,B2,IC,IR,NC,NR,IPASS)
         else
           write(*,'('' Not entering MASKLATT'')')
@@ -875,7 +1275,7 @@ CHEN----Subroutine for creation of manual masking info
 C
         if(IMASINF.ne.0)then
           write(*,'('' Entering MASKINF'')')
-          CALL MASKINF(COOR,TITLE,NXYZ,MINA,MAXA,
+          CALL MASKINF(COOR,TITPLOT,NXYZ,MINA,MAXA,
      1      MINB,MAXB,A1,A2,B1,B2,IC,IR,NC,NR,IPASS)
         else
           write(*,'('' Not entering MASKINF'')')
@@ -885,10 +1285,9 @@ C
 9400   WRITE(6,9013)
 9013   FORMAT(':: Error reading in the entire map at beginning')
        STOP
-C9500  WRITE(6,9012)IX,KDC,IY,KDR,MINX,MAXX,MINY,MAXY
-C9012  FORMAT(':: Error reading CCOR file with IRDPAS',/,
-C     . ' IX,KDC,IY,KDR,MINX,MAXX,MINY,MAXY =',8I6)
-C       STOP
+C
+999    STOP 'END-OF-FILE ERROR ON READING input image'
+C
        END
 C
 C******************************************************************************
@@ -911,7 +1310,7 @@ CTSH    DATA PROGTIT/'[QUA','DSER','CHK]','    '/
 CTSH++
         CHARACTER*16 TMPPROGTIT
         EQUIVALENCE (TMPPROGTIT,PROGTIT)
-        DATA TMPPROGTIT/'[QUADSERCHK]    '/
+        DATA TMPPROGTIT/'  [QUADSERCHK]  '/
 CTSH--
 CHEN>
         DIMENSION line(20)
@@ -937,7 +1336,7 @@ C
       WRITE(6,1502) DAT(5:24)
 1502  FORMAT('  Date from fdate ----  ',A20)
       WRITE(TITLEPLOT,1501)
-     . (TITLE(J),J=1,11),(PROGTIT(J),J=1,4),DAT(5:24)
+     . (TITLE(J),J=1,15),DAT(5:24)
 1501  FORMAT(15A4,A20)
 200   FORMAT('  ENTERING PLOTLATT')
 103   FORMAT(' TITLE FOR PLOT  ',A)
@@ -1175,7 +1574,6 @@ C
       PARAMETER (IPICDI2=1024)
 C
       PARAMETER (LMAX=20100)
-      PARAMETER (LCMX=10050)
 C
       COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
       DIMENSION ALINE(LMAX),TITLE(20),NXYZ(3),MXYZ(3)
@@ -1186,7 +1584,7 @@ C
       DIMENSION LABELS(20,10)
 C
       DIMENSION COOR(3,MNY:MXY,MNY:MXY)
-      DIMENSION TEXT(20),PROGTIT(4)
+      DIMENSION PROGTIT(4)
 C
       CHARACTER DAT*24
       CHARACTER*80 INFILE,OUTFILE
@@ -1372,22 +1770,31 @@ C======================================
       write(FILENAM(1:80),'(''TMP-quadserch-7.mrc'')')
       CALL IMOPEN(1,FILENAM,'RO')
       CALL IRDHDR(1,NXYZIPIC,MXYZIPIC,MODEIPIC,DMINIPIC,DMAXIPIC,DMEANIPIC)
-      print *,"MODEIPIC = ", MODEIPIC
-      print *,"DMINIPIC = ", DMINIPIC
-      print *,"DMAXIPIC = ", DMAXIPIC
-      print *,"DMEANIPIC = ", DMEANIPIC
-      print *,"DEBUG = ",  IPICT2(10,10)
+C      write(6,'(''::MODEIPIC = '',I4)')MODEIPIC
+C      write(6,'(''::DMINIPIC = '',G15.3)')DMINIPIC
+C      write(6,'(''::DMAXIPIC = '',G15.3)')DMAXIPIC
+C      write(6,'(''::DMEANPIC = '',G15.3)')DMEANPIC
+C      write(6,'(''::DEBUG    = '',I8)')IPICT2(10,10)
       CALL IMPOSN(1,0,0)
       NCOLPIC=NXYZIPIC(1)
       NLINEPIC=NXYZIPIC(2)
-      CALL IRDPAS(1,IPICT2,NCOLIPIC,NLINEIPIC,0,NCOLIPIC-1,0,NLINEIPIC-1,*9400)
-      
-      print *,"DEBUG2 = ",  IPICT2(10,10)
-      
+C-----IPICT2 is an INTEGER (i.e., 2Byte), while mode=0 means 1Byte
+      DO iy = 1,NLINEPIC
+        CALL IRDLIN(1,ALINE,*900)
+        DO ix= 1,NCOLPIC
+          VAL=ALINE(ix)
+          IPICT2(ix,iy)=VAL
+        enddo
+      enddo
+C     CALL IRDPAS(1,IPICT2,NCOLIPIC,NLINEIPIC,0,NCOLIPIC-1,0,NLINEIPIC-1,*9400)
+
+C      write(6,'(''::DEBUG2   = '',I8)')IPICT2(10,10)
+
       CALL IMCLOSE(1)
 556   continue
+C
 C======================================
-
+C
 C-----mask the original image with this pattern
 C
       CALL IMOPEN(1,INFILE,'RO')
@@ -1409,8 +1816,6 @@ C      write(TITLE,1954)
       DMEAN = 0.0
       DOUBLMEAN = 0.0
       CALL IWRHDR(2,NAME,1,DMIN,DMAX,DMEAN)
-C      CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
-C
 C
       NX=NXYZ(1)
       NY=NXYZ(2)
@@ -1431,7 +1836,9 @@ C
             ilj=(IX*IPICDI2)/NX
             if(ilj.lt.1)ilj=1
             if(ilj.gt.IPICDI2)ilj=IPICDI2
-                VAL=(ALINE(IX)-DOMEAN)*(IPICT2(ilj,ilk)/255.0)+DOMEAN
+C
+            VAL=(ALINE(IX)-DOMEAN)*(real(IPICT2(ilj,ilk))/255.0)+DOMEAN
+C
             if(VAL.lt.rmin)then
               iunder=iunder+1
               VAL=rmin
@@ -1452,7 +1859,6 @@ C
       write(6,'('' file written, DMIN,DMAX,DMEAN='',3G12.3)')
      1  DMIN,DMAX,DMEAN
       CALL IWRHDR(2,NAME,-1,DMIN,DMAX,DMEAN)
-C      CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
 C
       CALL IMCLOSE(2)
       CALL IMCLOSE(1)
@@ -1489,7 +1895,6 @@ C
       PARAMETER (IPICDI3=1024)
 C
       PARAMETER (LMAX=20100)
-      PARAMETER (LCMX=10050)
 C
       COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
       DIMENSION TITLE(20),NXYZ(3),MXYZ(3)
@@ -1497,7 +1902,7 @@ C
       DIMENSION LABELS(20,10)
 C
       DIMENSION COOR(3,MNY:MXY,MNY:MXY)
-      DIMENSION TEXT(20),PROGTIT(4)
+      DIMENSION PROGTIT(4)
 C
       CHARACTER DAT*24
       CHARACTER*80 OUTFILE1,OUTFILE2
@@ -1824,7 +2229,6 @@ C
       SUBROUTINE PICWRI(IPICTU,FILENAM,TEXT,IPICDIM,IPICSIZ)
 C
       PARAMETER (LMAX=20100)
-      PARAMETER (LCMX=10050)
 C
       INTEGER IPICTU(IPICDIM,IPICDIM)
 C
@@ -1837,6 +2241,7 @@ C
       DIMENSION TEXT(20),PROGTIT(4)
 C
       CHARACTER*80 FILENAM
+      CHARACTER*200 cline
 C
       DMIN =  0.0
       DMAX =  255.0
@@ -1856,13 +2261,16 @@ C
       write(6,'('' Size '',2I15)')IPICDIM,IPICSIZ
 C
       MODE=0
+      call shorten(FILENAM,k)
+      write(cline,'(''\rm -f '',A)')FILENAM(1:k)
+      call system(cline)
       CALL IMOPEN(2,FILENAM,'NEW')
       CALL ICRHDR(2,NXYZST,NXYZST,MODE,LABELS,0)
       CALL ITRLAB(2,1)
       CALL IWRHDR(2,TEXT,1,DMIN,DMAX,DMEAN)
 C
-      DMIN=100.0
-      DMAX=-100.0
+      DMIN= 1.0e10
+      DMAX=-1.0e10
       DOUBLMEAN=0.0
       DO K=1,IPICSIZ
         DO J=1,IPICSIZ
@@ -2227,8 +2635,19 @@ C       WRITE(6,20)IA,IB,XPREDICT,YPREDICT,SUMWT                ! for diagnostic
 C
       RETURN
       END
+C
 C*******************************************************************************
+C
       SUBROUTINE GETXC(ARRAY,NCOL,NLINE,XC,IX,IY,KDC1,KDR1)
+C
+C-----ARRAY: 1D input field with image
+C-----NCOL:  number of columns in input image
+C-----NLINE: number of lines   in input image
+C-----XC:    output array of exact dimensions
+C-----IX:    X-offset of sub-area to read
+C-----IY:    Y-offset of sub-area to read
+C-----KDC1:  numer of columnes to read: IX +/- KDC1
+C-----KDR1:  numer of rows     to read: IY +/- KDR1
 C
 C replacement subroutine to return region of correlation map of interest, after
 C reading in the entire array in one initial IRDPAS statement.
@@ -2481,4 +2900,28 @@ C
           RETURN
           END
          
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
 

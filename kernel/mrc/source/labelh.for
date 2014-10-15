@@ -90,7 +90,7 @@ C IMODE= 17: Read image statistics
 C
 C IMODE= 18: Transform into INTEGER*2 output format (16bit) with automatic scaling to [0 ; 16000] and swap unsigned/signed
 C
-C IMODE= 19: Transform into REAL output format with automatic scaling to [0 ; 16000]
+C IMODE= 19: Transform into REAL output format with automatic scaling to [0 ; 100]
 C
 C IMODE= 20: Produce thumbnail image
 C        card 4 : Enter X/Y dimensions of output image
@@ -186,7 +186,7 @@ C
      . ' 16: Transform [0;16000] INT*2 image',/,
      . ' 17: Read image statistics',/,
      . ' 18: Swap unsigned/signed, and Transform [0;16000] INT*2 image',/,
-     . ' 19: Transform [0;16000] REAL image',/,
+     . ' 19: Transform [0;100] REAL image',/,
      . ' 20: Produce thumbnail image',/,
      . ' 29: Interpolate into two times larger image',/,
      . ' 30: Pad into square image',/,
@@ -966,11 +966,11 @@ C
 C
 C=====================================================================
 C
-C  MODE 19 : Produce REAL output image with range [0;16000]
+C  MODE 19 : Produce REAL output image with range [0;100]
 C
 112     continue
         write(TITLE,'(''LABELH Mode 19: Produce REAL image '')')
-        write(6,'('' Producing REAL with Autoscaling [1;16000] '')')
+        write(6,'('' Producing REAL with Autoscaling [1;100] '')')
 C
         CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
         CALL IRTLAB(1,LABELS,NL)
@@ -1011,7 +1011,7 @@ C
 C-------Calculate offset and scaling factors
 C
 C        RTARGET=256.0
-        RTARGET=16000.0
+        RTARGET=100.0
         RTARGET=RTARGET-1.0
         ROFF = DMIN - 1.0
         if ( DVAL .gt. 0.00000001 ) then

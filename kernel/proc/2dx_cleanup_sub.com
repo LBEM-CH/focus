@@ -36,7 +36,7 @@ echo dummy > ${imagename}-tmp.tabl
 #
 if ( "${level}" == "radical" ) then
   #
-  ${proc_2dx}/linblock "Radical Cleanup"
+  ${proc_2dx}/lin "Radical Cleanup"
   #
   echo dummy > avrg.p7.hkl
   echo dummy > dummy.profile

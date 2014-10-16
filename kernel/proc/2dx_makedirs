@@ -101,7 +101,7 @@ endif
 #
 if ( ${SCRATCH_DISK} == "." || ${SCRATCH_DISK} == "" ) then
   if ( ! -d SCRATCH ) then
-    echo "::SCRATCH disk will be local."
+    echo ":SCRATCH disk will be local."
     \mkdir SCRATCH
   endif
 else
@@ -124,7 +124,7 @@ endif
 #
 if ( ${FFTIR_DISK} == "." || ${FFTIR_DISK} == "" ) then
   if ( ! -d FFTIR ) then
-    echo "::FFTIR disk will be local."
+    echo ":FFTIR disk will be local."
     \mkdir FFTIR
   endif
 else

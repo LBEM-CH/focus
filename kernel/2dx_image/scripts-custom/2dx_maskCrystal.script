@@ -82,9 +82,6 @@ echo date = ${date}
 #
 source ${proc_2dx}/2dx_makedirs 
 #
-# ATTENTION: mask_crop needs to remain on "n", because otherwise there is a conflict between the sizes of non-masked and maseked images after a CLEANUP.
-set mask_crop = "n"
-#
 set originalpolygon = selectionList.dat
 #
 set masktobig = `echo ${mask_fourmask} | awk '{ if ( $1 > 0.5 ) { s = 1 } else { s = 0 }} END { print s }'`
@@ -188,11 +185,7 @@ ${rfactor}
 ${iborder}
 eot
   #
-  if ( ${mask_crop} == 'y' ) then
-    cat SCRATCH/TMPmodifypolygon.dat
-  else
-    cat SCRATCH/TMPmodifypolygon.dat | sed 's/::/only if cropping= /g' | sed 's/:/only if cropping= /g'
-  endif
+  cat SCRATCH/TMPmodifypolygon.dat | sed 's/::/only if cropping= /g' | sed 's/:/only if cropping= /g'
   #
   \rm -f SCRATCH/TMPmodifypolygon.dat
   #
@@ -294,6 +287,7 @@ eot
   echo "<<@progress: 60>>"
   #
   #
+  \cp -f SCRATCH/TMPmask3.mrc ${nonmaskimagename}-masking-final.mrc
   #
   #############################################################################
   ${proc_2dx}/linblock "TWOFILE - to multiply image with masking-image"
@@ -316,7 +310,7 @@ eot
   endif
   echo "<<@progress: 90>>"
   #
-  if ( ${mask_reset_reflocation} == "y" && ${mask_crop} == "n" ) then
+  if ( ${mask_reset_reflocation} == "y" ) then
     ${proc_2dx}/linblock "Resetting reference location to center of masked area."
     set centerx = `cat boximage.tmp | awk '{ s = int ( $1 ) } END { print s }'`
     set centery = `cat boximage.tmp | awk '{ s = int ( $2 ) } END { print s }'`
@@ -344,176 +338,6 @@ eot
     echo "#WARNING: Warning: Spotlist ${imagename}.spt was already existing. Is it still good ?" >> LOGS/${scriptname}.results
   endif
   #
-  if ( ${mask_crop} == "y" ) then
-    #############################################################################
-    ${proc_2dx}/linblock "Safeguarding original image to ${nonmaskimagename}-original-big.mrc"
-    #############################################################################
-    #
-    if ( -e ${nonmaskimagename}-original-big.mrc ) then
-      \mv -f ${nonmaskimagename}-original-big.mrc ${nonmaskimagename}-original-big-old.mrc
-      echo "# IMAGE: ${nonmaskimagename}-original-big-old.mrc" >> LOGS/${scriptname}.results
-    endif
-    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}-original-big.mrc
-    echo "# IMAGE: ${nonmaskimagename}-original-big.mrc" >> LOGS/${scriptname}.results
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Crop image into new smaller dimensions"
-    #############################################################################
-    #
-    set IDIM = `cat ${coordinatefile}`
-    echo IDIM = ${IDIM}
-    ${proc_2dx}/linblock "Cropping coordinates are ${IDIM}"
-    #
-    \rm -f SCRATCH/TMPmask5.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
-m${nonmaskimagename}.mrc
-1
-SCRATCH/TMPmask5.mrc
-${IDIM}
-eot
-    #
-    # echo "# IMAGE: SCRATCH/TMPmask5.mrc" >> LOGS/${scriptname}.results
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Pad into image with same dimensions to get the header right"
-    #############################################################################
-    #
-    \rm -f m${nonmaskimagename}.mrc
-    set newimagesidelength = `cat ${newimagesidelengthfile}`
-    echo newimagesidelength = ${newimagesidelength}
-    #
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/TMPmask5.mrc
-30
-m${nonmaskimagename}.mrc
-${newimagesidelength}
-eot
-    #
-    ${proc_2dx}/lin "Padding done."
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Now cropping with the original image, without masking."
-    #############################################################################
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Crop image into new smaller dimensions"
-    #############################################################################
-    #
-    echo IDIM = ${IDIM}
-    #
-    \rm -f SCRATCH/TMPmask5.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
-${nonmaskimagename}.mrc
-1
-SCRATCH/TMPmask5.mrc
-${IDIM}
-eot
-    #
-    # echo "# IMAGE: SCRATCH/TMPmask5.mrc" >> LOGS/${scriptname}.results
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Pad into image with same dimensions to get the header right"
-    #############################################################################
-    #
-    \rm -f SCRATCH/TMPmask6.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/TMPmask5.mrc
-30
-${nonmaskimagename}.mrc
-${newimagesidelength}
-eot
-    #
-    \rm -f SCRATCH/TMPmask5.mrc
-    #
-    ${proc_2dx}/lin "Padding done."
-    #
-    set factor = `echo ${newimagesidelength} ${imagesidelength} | awk '{ s = $1 / $2 } END { print s }'`
-    echo factor = ${factor}
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "re-dimensioning all image-size dependent parameters by factor ${factor}"
-    #############################################################################
-    #
-    echo ":Now: imagesidelength = "${newimagesidelength}
-    echo "set imagesidelength = ${newimagesidelength}" >> LOGS/${scriptname}.results
-    #
-    set tmp1 = `echo ${lattice} | cut -d\, -f1`
-    set latx1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
-    set tmp1 = `echo ${lattice} | cut -d\, -f2`
-    set laty1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
-    set tmp1 = `echo ${lattice} | cut -d\, -f3`
-    set latx2 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
-    set tmp1 = `echo ${lattice} | cut -d\, -f4`
-    set laty2 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
-    set lattice = `echo ${latx1},${laty1},${latx2},${laty2}`
-    echo ":Now: lattice = "${lattice}
-    echo "set lattice = ${lattice}" >> LOGS/${scriptname}.results
-    #
-    set tmp1 = `echo ${secondlattice} | cut -d\, -f1`
-    set latx1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
-    set tmp1 = `echo ${secondlattice} | cut -d\, -f2`
-    set laty1 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
-    set tmp1 = `echo ${secondlattice} | cut -d\, -f3`
-    set latx2 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
-    set tmp1 = `echo ${secondlattice} | cut -d\, -f4`
-    set laty2 = `echo ${tmp1} ${factor} | awk '{ s = $1 * $2 } END { print s }'`
-    set secondlattice = `echo ${latx1},${laty1},${latx2},${laty2}`
-    echo ":Now: secondlattice = "${secondlattice}
-    echo "set secondlattice = ${secondlattice}" >> LOGS/${scriptname}.results
-    #
-    set maska   = `echo ${maska} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
-    set maskb01 = `echo ${maskb01} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
-    set maskb02 = `echo ${maskb02} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
-    set maskb03 = `echo ${maskb03} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
-    set maskb04 = `echo ${maskb04} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
-    set maskb05 = `echo ${maskb05} ${factor} | awk '{ s = int( $1 * $2 ) } END { print s }'`
-    echo ":Now: maska = ${maska}"
-    echo ":Now: maskb01 = ${maskb01}"
-    echo ":Now: maskb02 = ${maskb02}"
-    echo ":Now: maskb03 = ${maskb03}"
-    echo ":Now: maskb04 = ${maskb04}"
-    echo ":Now: maskb05 = ${maskb05}"
-    echo "set maska = ${maska}" >> LOGS/${scriptname}.results
-    echo "set maskb01 = ${maskb01}" >> LOGS/${scriptname}.results
-    echo "set maskb02 = ${maskb02}" >> LOGS/${scriptname}.results
-    echo "set maskb03 = ${maskb03}" >> LOGS/${scriptname}.results
-    echo "set maskb04 = ${maskb04}" >> LOGS/${scriptname}.results
-    echo "set maskb05 = ${maskb05}" >> LOGS/${scriptname}.results
-    #
-    if ( ${mask_reset_reflocation} == "y" ) then
-      ${proc_2dx}/linblock "Resetting reference location to center of masked area."
-      set reforix = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-      set reforiy = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-    else
-      ${proc_2dx}/linblock "Adapting current reference location to new image dimension." 
-      set reforix = `echo ${refori} | cut -d\, -f1`
-      set reforiy = `echo ${refori} | cut -d\, -f2`
-      set startx = `echo ${IDIM} | awk '{ s = $1 } END { print s }'`
-      set starty = `echo ${IDIM} | awk '{ s = $3 } END { print s }'`
-      set reforix = `echo ${reforix} ${startx} | awk '{ s = $1 - $2 } END { print s }'` 
-      set reforiy = `echo ${reforiy} ${starty} | awk '{ s = $1 - $2 } END { print s }'` 
-    endif
-    set refori = ${reforix},${reforiy}
-    echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-    ${proc_2dx}/linblock "reference center changed to ${refori}."
-    echo ":Now: refori = ${refori}"
-    echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
-    #
-    echo "::"
-    echo "::           All image-size dependent parameters were recalculated."
-    echo "::"
-    echo "::           SAVING of the Processing Data is HIGHLY RECOMMENDED."
-    echo "::"
-    echo "#WARNING: All image-size dependent parameters were recalculated." >> LOGS/${scriptname}.results
-    echo "#WARNING: SAVING of the Processing Data is HIGHLY RECOMMENDED." >> LOGS/${scriptname}.results
-    #
-    echo "set PHASEORI_done = n" >> LOGS/${scriptname}.results
-    echo "set PHASEORI_done = n" >> LOGS/${scriptname}.results
-    #
-  endif
   #
   \rm -f boximage.tmp
   #

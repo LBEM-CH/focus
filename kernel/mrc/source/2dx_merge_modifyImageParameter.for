@@ -52,22 +52,22 @@ C
         else
           write(cdir,'(''../'',A)')ctmpdir(1:k)
         endif
-        call shorten(cdir,k)
-        write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)
+        call shorten(cdir,k2)
+        write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k2)
         write(*,'(/,''opening '',A)')cname3
         open(12,FILE=cname3,STATUS='OLD',ERR=200)
         goto 210
  200    continue
-          call shorten(cname3,k)
-          write(*,'(''::WARNING: Could not open '',A)')cname3(1:k)
+          call shorten(cname3,k3)
+          write(*,'(''::WARNING: Could not open '',A)')cname3(1:k3)
           goto 100
  210    continue
 C
         imcount=imcount+1
 C
-        call shorten(cdir,k)
-        write(11,'(''<IMAGEDIR="'',A,''">'')')cdir(1:k)
-        write(6,'('':Working on '',A)')cdir(1:k)
+        call shorten(ctmpdir,k)
+        write(11,'(''<IMAGEDIR="'',A,''">'')')ctmpdir(1:k)
+        write(6,'('':Working on '',A)')ctmpdir(1:k)
 C
         call cgetline(cphaori,"phaori")
         read(cphaori,*,ERR=300)rpx,rpy

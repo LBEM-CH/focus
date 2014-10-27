@@ -1021,7 +1021,7 @@ bool confData::sync(const QString &reference, const QString &variable, const QRe
     if(l!=NULL)
       *l = *e;
     else
-      cout<<"Could not synchronize variable: "<<e->get("valuelabel").toStdString()<<endl;
+      cout<<"2dx_image.cfg did not (yet) contain variable: "<<e->get("valuelabel").toStdString()<<" (This message can be ignored)"<<endl;
   }
 
   return true;

@@ -290,6 +290,8 @@ eot
   #
 endif
 #
+echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
+#
 echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "Normal End."
 

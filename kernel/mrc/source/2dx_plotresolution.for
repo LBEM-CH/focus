@@ -25,7 +25,7 @@ C
       INTEGER IHISTBINS
 C
       PARAMETER (PLTSIZ = 300.0)
-      PARAMETER (IMAX = 100000)
+      PARAMETER (IMAX = 1000000)
       PARAMETER (IHISTBINS = 1000)
 C
       REAL TITLE(20)
@@ -51,7 +51,7 @@ C
       REAL YPOSN,XPOSN,RORIX,RORIY
       REAL RORIRESMAX
       REAL FONTSIZE
-      REAL RVAL
+      REAL RVAL,RTMP
       REAL RLINE1,RLINE2,RLINE3
 C
       REAL*8 AMP,PHASE,BCK,CTF
@@ -155,7 +155,8 @@ C
       READ (5,*)RESMAX
 C
       write(*,'('' Input number of bins in resolution plot'')')
-      READ (5,*)IMAXBINS
+      READ (5,*)RTMP
+      IMAXBINS=INT(RTMP)
       if(IMAXBINS.lt.10)IMAXBINS=10
       if(IMAXBINS.gt.IHISTBINS)IMAXBINS=IHISTBINS
       write(*,'('' Read: '',I8)')IMAXBINS
@@ -368,7 +369,7 @@ C
       INTEGER IMAXBINS
 C
       PARAMETER (IHISTBINS = 1000)
-      PARAMETER (IMAX = 100000)
+      PARAMETER (IMAX = 1000000)
 C
       REAL PLTSIZ
 C
@@ -436,6 +437,7 @@ C=====Plot initialization======================================================
 C==============================================================================
 C
       CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*4.0)
+      CALL P2K_COLOUR(0)
       if(IRUN.eq.1)then
         write(CTITLE,'(''FOM over 3D resolution '')')
       elseif (IRUN.eq.2)then
@@ -636,7 +638,10 @@ C        read(1,*,END=200,ERR=980)IHFIELD(i),IKFIELD(i),RZFIELD(i),
 C     .     RAMPFIELD(i),RPHAFIELD(i),RSIGFFIELD(i),RSIGPFIELD(i),RFOM(i)
 C
       do i = 1,icount
-        CALL P2K_COLOUR(0)
+        rgbr=0.0
+        rgbg=0.2
+        rgbb=1.0
+        CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
         if(IRUN.eq.1)then
           X=RORIX+RLENX*RecRESVAL(i)/RecRESMAX
           Y=RORIY+RLENY*RFOM(i)
@@ -670,7 +675,7 @@ C
           Y=RORIY+RLENY*RecRESVERT(i)/RecRESMAX
           RLEN=RFOM(i)*RFOM(i)
 C---------Calculate HSV Values:
-          rhue=RLEN*360
+          rhue=RLEN*300
           rsat=max(RLEN,0.5)
           RVAL=0.7
 C---------Calculate RGB Values:
@@ -685,7 +690,7 @@ C
           if(RLEN.gt.1.0)RLEN=1.0
           if(RLEN.lt.0.0)RLEN=0.1
 C---------Calculate HSV Values:
-          rhue=RLEN*360
+          rhue=RLEN*300
           rsat=max(RLEN,0.5)
           RVAL=0.7
 C---------Calculate RGB Values:
@@ -711,6 +716,8 @@ C        write(6,'('': '',7F12.3)')RecRESVAL(i),RecRESMAX,RLENX,RFOM(i),RLENY,X,
 C
 C-----Plot legend
 C
+      CALL P2K_COLOUR(0)
+C
       if(IRUN.eq.10)then
         X=RORIX+RLENX
         Y=RORIY+RLENY+20.0
@@ -721,6 +728,17 @@ C
 C      
         XTMP=X-12.0
         do i=10,0,-1
+C
+          RLEN=REAL(i)/10.0
+C---------Calculate HSV Values:
+          rhue=RLEN*300
+          rsat=max(RLEN,0.5)
+          RVAL=0.7
+C---------Calculate RGB Values:
+          call HSVTORGB(rhue,rsat,RVAL,rgbr,rgbg,rgbb)
+C---------Set RGB color:
+          CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
           X=XTMP
           Y=Y-10.0
           CALL P2K_MOVE(X,Y,0)
@@ -731,15 +749,6 @@ C
           X=XTMP+15.0
           Y=Y+2.0
 C
-          RLEN=REAL(i)/10.0
-C---------Calculate HSV Values:
-          rhue=RLEN*360
-          rsat=max(RLEN,0.5)
-          RVAL=0.7
-C---------Calculate RGB Values:
-          call HSVTORGB(rhue,rsat,RVAL,rgbr,rgbg,rgbb)
-C---------Set RGB color:
-          CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
           XN=X-RLEN
           XP=X+RLEN
           YN=Y-RLEN
@@ -753,15 +762,29 @@ C---------Set RGB color:
 C
       elseif(IRUN.eq.11)then
 C
-        X=RORIX+RLENX
+        X=RORIX+RLENX+8.0
         Y=RORIY+RLENY+20.0
         CALL P2K_MOVE(X,Y,0)
         WRITE(CTITLE,'(''SigP Symbol'')')
         call shorten(CTITLE,k)
         CALL P2K_CSTRING(RTITLE,k,0.)
 C      
-        XTMP=X-2.0
+        XTMP=X-5.0
         do i=0,9
+C
+          RLEN=(45.0 - REAL(i)*10.0)/45.0
+          if(RLEN.gt.1.0)RLEN=1.0
+          if(RLEN.lt.0.0)RLEN=0.1
+C
+C---------Calculate HSV Values:
+          rhue=RLEN*300
+          rsat=max(RLEN,0.5)
+          RVAL=0.7
+C---------Calculate RGB Values:
+          call HSVTORGB(rhue,rsat,RVAL,rgbr,rgbg,rgbb)
+C---------Set RGB color:
+          CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
           X=XTMP
           Y=Y-10.0
           CALL P2K_MOVE(X,Y,0)
@@ -771,19 +794,6 @@ C
 C
           X=XTMP+18.0
           Y=Y+2.0
-C
-          RLEN=(45.0 - REAL(i)*10.0)/45.0
-          if(RLEN.gt.1.0)RLEN=1.0
-          if(RLEN.lt.0.0)RLEN=0.1
-C
-C---------Calculate HSV Values:
-          rhue=RLEN*360
-          rsat=max(RLEN,0.5)
-          RVAL=0.7
-C---------Calculate RGB Values:
-          call HSVTORGB(rhue,rsat,RVAL,rgbr,rgbg,rgbb)
-C---------Set RGB color:
-          CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
           XN=X-RLEN
           XP=X+RLEN
           YN=Y-RLEN
@@ -795,6 +805,8 @@ C---------Set RGB color:
           Y=Y-2.0
         enddo
       endif
+C
+      CALL P2K_COLOUR(0)
 C
 C-----Plot average curves
 C

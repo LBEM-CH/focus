@@ -285,6 +285,34 @@ echo "<<@progress: +5>>"
 #
 #############################################################################
 #                                                                           #
+${proc_2dx}/linblock "2dx_plotresolution - Plotting resolution curves"
+#                                                                           #
+#############################################################################
+#
+\rm -f PLOTCUR.PS
+\rm -f SCRATCH/latfitteds_limit.dat
+#
+${bin_2dx}/2dx_plotresolution.exe << eot
+1
+${realcell},${ALAT},${realang}
+SCRATCH/latfitteds.dat
+SCRATCH/latfitteds_limit.dat
+${RESMAX}
+${zstarrange_real}
+${resolutionplot_RESMAX}
+${resolutionplot_bins}
+eot
+#
+if ( ! -e PLOTCUR.PS ) then
+  ${proc_2dx}/protest "ERROR in 2dx_plotresolution"
+else
+  \mv -f PLOTCUR.PS PS/2dx_plotresolution.ps
+  echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/latfitteds_limit.dat <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
+endif
+#
+#############################################################################
+#                                                                           #
 ${proc_2dx}/linblock "PREPMKLCF - Program to convert fitted data to CCP4 format"
 #                                                                           #
 #############################################################################
@@ -292,7 +320,7 @@ ${proc_2dx}/linblock "PREPMKLCF - Program to convert fitted data to CCP4 format"
 \rm -f APH/latfitted_nosym.hkl
 \rm -f 2dx_prepmklcf.statistics
 #
-setenv IN SCRATCH/latfitteds.dat
+setenv IN SCRATCH/latfitteds_limit.dat
 setenv OUT APH/latfitted_nosym.hkl
 setenv REFHKL APH/latfittedref_nosym.hkl
 #

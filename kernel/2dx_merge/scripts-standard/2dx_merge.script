@@ -65,6 +65,8 @@
 # DISPLAY: scalimamp3d_BZMINMAX
 # DISPLAY: scalimamp3d_BEXTRA
 # DISPLAY: latline_pdf
+# DISPLAY: resolutionplot_RESMAX
+# DISPLAY: resolutionplot_bins
 #
 #$end_local_vars
 #
@@ -127,6 +129,8 @@ set overall_phase_residual = ""
 set overall_weighted_R_factor = ""
 set overall_weighted_phase_residual = ""
 set latline_pdf = ""
+set resolutionplot_RESMAX = ""
+set resolutionplot_bins = ""
 #
 #$end_vars
 #

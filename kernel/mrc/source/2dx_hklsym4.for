@@ -396,7 +396,7 @@ C        -------------Output the values into the output channels
                           write(12,300) -H,-K,-L,AMP,-PHASE,FOM
                         endif
                       endif
-                      write(*,'('':H,K,L,AMP,PHASE,BACK,'',
+                      write(*,'(''H,K,L,AMP,PHASE,BACK,'',
      .                ''SIGA,FOM,FILL='',
      .                3I4,X,5G11.5,I8)') 
      .                H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL

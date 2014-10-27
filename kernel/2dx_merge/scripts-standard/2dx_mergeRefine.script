@@ -88,6 +88,8 @@
 # DISPLAY: scalimamp3d_BZMINMAX
 # DISPLAY: scalimamp3d_BEXTRA
 # DISPLAY: latline_pdf
+# DISPLAY: resolutionplot_RESMAX
+# DISPLAY: resolutionplot_bins
 #
 #$end_local_vars
 #
@@ -153,6 +155,8 @@ set scalimamp3d_BEXTRA = ""
 set num_reflections_fitted = ""
 set num_reflections_FOM50 = ""
 set latline_pdf = ""
+set resolutionplot_RESMAX = ""
+set resolutionplot_bins = ""
 #
 #$end_vars
 #

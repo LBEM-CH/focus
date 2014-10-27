@@ -2067,9 +2067,9 @@ C
       write(cline2,'(2F9.3)')HSHMIN,HSKMIN
       call inkomma(cline2,k2)
 C
-      write(*,'(''::'',I10,'' '',F8.3,''  '',A20,A20,F7.2)')
+      write(*,'('':'',I10,'' '',F8.3,''  '',A20,A20,F7.2)')
      . IFILM,SCALE,cline1,cline2,ERRMIN
-      write(21,'('':'',I10,'' '',F8.3,''  '',A20,A20,F7.2)')
+      write(21,'(I10,'' '',F8.3,''  '',A20,A20,F7.2)')
      . IFILM,SCALE,cline1,cline2,ERRMIN
 C
 C------------------------------------------------------------------------

@@ -287,7 +287,33 @@ eot
   echo "<<@progress: 60>>"
   #
   #
-  \cp -f SCRATCH/TMPmask3.mrc ${nonmaskimagename}-masking-final.mrc
+  #############################################################################
+  ${proc_2dx}/linblock "LABEL - to create final masking info as 1024x1024px file"
+  #############################################################################
+  #
+  \rm -f SCRATCH/TMPmask4.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMPmask3.mrc
+33
+SCRATCH/TMPmask4.mrc
+1024,1024
+eot
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "LABEL - to create final masking info as 1024x1024px file"
+  #############################################################################
+  #
+  \rm -f ${nonmaskimagename}-masking-final.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMPmask4.mrc
+-3
+${nonmaskimagename}-masking-final.mrc
+eot
+  #
+  echo "# IMAGE: ${nonmaskimagename}-masking-final.mrc <MRC: Final Making Info File>"  >> LOGS/${scriptname}.results
   #
   #############################################################################
   ${proc_2dx}/linblock "TWOFILE - to multiply image with masking-image"

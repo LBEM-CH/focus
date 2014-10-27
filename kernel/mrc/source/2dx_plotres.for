@@ -13,7 +13,7 @@ C
 C*******************************************************************************
 C
 C PLOTRES : is like PLOTALL, but uses IQ values from input of an expanded
-C	    single image and pltos spots in resolution bands
+C           single image and plots spots in resolution bands
 C  Modified 5/15/96 for options of A,B,GAMMA or AX,AY,BX,BY etc.  AC
 C  Modified 6/25/08 for variable number of rings, and 2dx environment. HS
 C
@@ -90,8 +90,8 @@ C
       COMMON //RESMAX,SCALE,RESTORE,NRES,NSPOTS,RES,RAD,CNAME
 C
 
-C	If IH=IK=0    the plot is initialised
-C	If IH=IK=999  the plot is terminated
+C       If IH=IK=0    the plot is initialised
+C       If IH=IK=999  the plot is terminated
 C
 C  Here for initialisation
 C
@@ -221,12 +221,12 @@ C
         CALL P2K_CSTRING(TEXT,1,0.)
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*1.0)
 C
-        DO 370 N=1,NRES			! NRES resoultion ranges
+        DO 370 N=1,NRES                 ! NRES resoultion ranges
           if(RESTORE(N).GE.RORIRESMAX)then
             RES=1.0/RESTORE(N)
             RAD=SCALE*RES
             CALL P2K_MOVE(RAD,0.,0.)
-            DO 360 I=1,360			! Resolution circles
+            DO 360 I=1,360                      ! Resolution circles
               ANG=I*3.1415962/180.0
               X=RAD*COS(ANG)
               Y=RAD*SIN(ANG)
@@ -252,7 +252,7 @@ C
 C
 C  Here for spot plots
 C
-      IF(IQ.GT.8) RETURN		! PLOTS SPOTS WITH IQ =8 OR LESS.
+      IF(IQ.GT.8) RETURN                ! PLOTS SPOTS WITH IQ =8 OR LESS.
 C     WRITE(6,21)IH,IK
 21    FORMAT(' SPOT PLOTTED & FRIEDEL PAIR',2I5)
       J=1
@@ -276,8 +276,8 @@ C
       CALL P2K_DRAW(XN,YP,0.)
       CALL P2K_DRAW(XN,YN,0.)
 C
-      X=X-0.1				! ADJUST CHARACTER TO BE CENTRAL IN X.
-      Y=Y-0.8				! ADJUST CHARACTER TO BE CENTRAL IN Y.
+      X=X-0.1                           ! ADJUST CHARACTER TO BE CENTRAL IN X.
+      Y=Y-0.8                           ! ADJUST CHARACTER TO BE CENTRAL IN Y.
       CALL P2K_MOVE(X,Y,0.)
 C
       write(TMPTXT,'('' '')')

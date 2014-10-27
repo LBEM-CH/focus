@@ -104,6 +104,8 @@ C IMODE= 31: Select region with change of header,
 C        card  4 : enter Limits (Xmin,max,Ymin,max) if NZ=1
 C     or card  4 : enter Limits (Xmin,max,Ymin,max,Zmin,max) if NZ>1
 C
+C IMODE= 32: Interpolate into new given dimensions
+C
 C -----------------------------------------------------------
 C IMODE= 50: goes to the single particle selection option, with input
 C            from a file of X,Y coordinates, and desired box size.
@@ -191,6 +193,7 @@ C
      . ' 29: Interpolate into two times larger image',/,
      . ' 30: Pad into square image',/,
      . ' 31: Select region (and change header)',/,
+     . ' 33: Interpolate into new given dimensions',/,
      . ' 50: create stack of small boxes centred on coords read',
      . ' in from list',/,
      .   ' 99: More options, mainly for display purposes')
@@ -224,7 +227,7 @@ C
      1      .and. IMODE.ne.15 .and. IMODE.ne.16 .and. IMODE.ne.17
      1      .and. IMODE.ne.18 .and. IMODE.ne.19
      1      .and. IMODE.ne.20 .and. IMODE.ne.29 .and. IMODE.ne.30
-     1      .and. IMODE.ne.31 .and. IMODE.ne.32)
+     1      .and. IMODE.ne.31 .and. IMODE.ne.32 .and. IMODE.ne.33)
      1      .AND. MODE .LT. 3) then
           write(*,'('' ERROR: Illegal mode for this file type'')')
           GOTO 1
@@ -256,6 +259,7 @@ C
         if ( IMODE.eq.31 ) goto 96
 C-------------------------------97 already taken for "13"
         if ( IMODE.eq.32 ) goto 109
+        if ( IMODE.eq.33 ) goto 114
         GOTO (113,3,5,10,20,30,40,45,50,60,70,80,90) IMODE+4
 C
 C=====================================================================
@@ -1358,6 +1362,110 @@ C
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
         GOTO 990
 C
+C
+C=====================================================================
+C
+C  MODE 33 :  Interpolate into new given dimensions
+C    
+114    continue
+C
+       WRITE(6,'(''MODE 33: Interpolate into new given dimensions'')')
+       IF (MODE .GT. 2) THEN
+         STOP '::Only works on real images'
+       ENDIF
+       
+       NINX = NX
+       NINY = NY
+       if(NZ.gt.1)then
+         write(6,'(''::ERROR: Only works on 2D images, '',
+     .     ''not on 3D stacks.'')')
+         goto 990
+       endif
+       WRITE(6,'(''Enter dimension of output image:'')')
+       READ(5,*) IOUTDIM
+       NOUTX = IOUTDIM
+       NOUTY = IOUTDIM
+       print *,'Label Mode 33: Interpolating into new dimension ',
+     .   NOUTX,NOUTY
+C
+C  Put title labels, new cell and extra information only into header
+       CALL IRTLAB(1,LABELS,NL)
+       CALL IRTEXT(1,EXTRA,1,29)
+       CALL IRTCEL(1,CELL)
+C
+       CALL IMPOSN(1,0,0)
+       DO IY = 1,NINY
+         CALL IRDLIN(1,ALINE,*999)
+         DO IX = 1,NINX
+           APIC(IX,IY)=ALINE(IX)
+         enddo
+       enddo
+C
+       RSCAX = REAL(NINX) / REAL(NOUTX)
+       RSCAY = REAL(NINY) / REAL(NOUTY)
+       if(NINX.ne.NINY .or. NOUTX.ne.NOUTY)then
+         write(6,'(''WARNING: NON-SQUARE image dimensions.'',
+     .     '' Using X-scale.'')')
+         RSCAY=RSCAX
+         NOUTY=NOUTX
+       endif
+       write(6,'('': Downscaling by '',F9.3,'' times.'')')RSCAX
+C
+       NX = NOUTX
+       NY = NOUTY
+C
+       CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+       CELL(1) = REAL(NOUTX)
+       CELL(2) = REAL(NOUTY)
+       CALL IALEXT(2,EXTRA,1,29)
+       CALL IALCEL(2,CELL)
+       CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+       DOUBLMEAN=0.0
+       DMIN= 1e30
+       DMAX=-1e30
+       DO IY=1,NOUTY
+         DO IX=1,NOUTX
+           IOX=IX*RSCAX
+           IOY=IY*RSCAY
+           if(RSCAX.gt.1.0)then
+C------------downscaling
+             IMINSCAX=IX*RSCAX-RSCAX/2
+             IMAXSCAX=IX*RSCAX+RSCAX/2
+             IMINSCAY=IY*RSCAY-RSCAY/2
+             IMAXSCAY=IY*RSCAY+RSCAY/2
+             ICOUNT=0
+             DOUBLTMP=0
+             do ILY=IMINSCAY,IMAXSCAY
+               do ILX=IMINSCAX,IMAXSCAX
+                 if(ILX.gt.1 .and. ILX.lt.NINX .and.
+     .              ILY.gt.1 .and. ILY.lt.NINY) then
+                   DOUBLTMP=DOUBLTMP+APIC(ILX,ILY)
+                   ICOUNT=ICOUNT+1
+                 endif
+               enddo
+             enddo
+             if(ICOUNT.lt.1)then
+               STOP '::ERROR in labelh'
+             endif
+             DOUBLTMP=DOUBLTMP/ICOUNT
+             OUT(IX)=DOUBLTMP
+           else
+C------------Upscaling
+             OUT(IX)=APIC(IOX,IOY) 
+           endif
+           if(OUT(IX).lt.DMIN)DMIN=OUT(IX)
+           if(OUT(IX).gt.DMAX)DMAX=OUT(IX)
+           DOUBLMEAN=DOUBLMEAN+OUT(IX)
+         enddo
+         CALL IWRLIN(2,OUT)
+       enddo
+       DOUBLMEAN=DOUBLMEAN/(NOUTX*NOUTY)
+       DMEAN=DOUBLMEAN
+C
+       CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+       GOTO 990
 C
 C=====================================================================
 C

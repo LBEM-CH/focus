@@ -78,12 +78,18 @@ C
 C
       REAL RSIGFFIELDMAX
       REAL RSIGPFIELDMAX
-      REAL RMEDIVAL
+      REAL RMEDIVAL,RMEDIVAL2
 C
       REAL*8 RBINSSIGF(0:IHISTBINS,3)
       REAL*8 RBINSSIGP(0:IHISTBINS,3)
       REAL*8 RBINSSIGPF(0:IHISTBINS,3)
       REAL*8 RBINSFOM(0:IHISTBINS,3)
+C
+      REAL*8 RBINSSIGF2(0:IHISTBINS,3)
+      REAL*8 RBINSSIGP2(0:IHISTBINS,3)
+      REAL*8 RBINSSIGPF2(0:IHISTBINS,3)
+      REAL*8 RBINSFOM2(0:IHISTBINS,3)
+C
       INTEGER IBINSSIGF(0:IHISTBINS,3)
       INTEGER IBINSSIGP(0:IHISTBINS,3)
       INTEGER IBINSSIGPF(0:IHISTBINS,3)
@@ -95,6 +101,7 @@ C
      .     RecRESHORI,RecRESVERT,RecRESVAL,
      .     RSIGFFIELDMAX,RSIGPFIELDMAX,
      .     RBINSSIGF,RBINSSIGP,RBINSSIGPF,RBINSFOM,
+     .     RBINSSIGF2,RBINSSIGP2,RBINSSIGPF2,RBINSFOM2,
      .     RLINE1,RLINE2,RLINE3,
      .     RESMAX3D,RESMAXVERT
 C
@@ -176,6 +183,12 @@ C
           RBINSSIGP(i,j)=0.0
           RBINSSIGPF(i,j)=0.0
           RBINSFOM(i,j)=0.0
+C
+          RBINSSIGF2(i,j)=0.0
+          RBINSSIGP2(i,j)=0.0
+          RBINSSIGPF2(i,j)=0.0
+          RBINSFOM2(i,j)=0.0
+C
           IBINSSIGF(i,j)=0
           IBINSSIGP(i,j)=0
           IBINSSIGPF(i,j)=0
@@ -286,24 +299,20 @@ C---------------endif
             enddo
 C-----------Find the median entry in this field:
             if(ibincount.gt.0)then
-              call FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL)
+              call FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL,RMEDIVAL2)
             else
               RMEDIVAL=0.0
             endif
 C-----------Store this median value into the curve:
             if(l.eq.1) RBINSSIGF(k,j)=RMEDIVAL
-C            if(l.eq.1 .and. j.eq.2)then
-C              write(6,'('':: Bin '',I3,'' has '',I6,
-C     .          '' entries, median is '',F12.3)')k,ibincount,RMEDIVAL
-C              if(k.eq.IMAXBINS)then
-C                do i2=1,ibincount
-C                  write(6,'('':: '',I6,F12.3,F12.3)')i2,RTMPFIELD(i2),RMEDIVAL
-C                enddo
-C              endif
-C            endif
             if(l.eq.2) RBINSSIGP(k,j)=RMEDIVAL
             if(l.eq.3) RBINSSIGPF(k,j)=RMEDIVAL
             if(l.eq.4) RBINSFOM(k,j)=RMEDIVAL
+C
+            if(l.eq.1) RBINSSIGF2(k,j)=RMEDIVAL2
+            if(l.eq.2) RBINSSIGP2(k,j)=RMEDIVAL2
+            if(l.eq.3) RBINSSIGPF2(k,j)=RMEDIVAL2
+            if(l.eq.4) RBINSFOM2(k,j)=RMEDIVAL2
           enddo
         enddo
       enddo
@@ -389,7 +398,7 @@ C==============================================================================
 C==============================================================================
 C==============================================================================
 C
-      SUBROUTINE FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL)
+      SUBROUTINE FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL,RMEDIVAL2)
 C
       IMPLICIT NONE
 C
@@ -398,13 +407,20 @@ C
 C
       REAL RTMPFIELD(IMAX)
       INTEGER ibincount
-      REAL RMEDIVAL
+      REAL RMEDIVAL,RMEDIVAL2
 C
       INTEGER i,j
       REAL RTMP
 C
+      if(ibincount.eq.0)then
+        RMEDIVAL=0.0
+        RMEDIVAL2=0.0
+        RETURN
+      endif
+C
       if(ibincount.eq.1)then
         RMEDIVAL=RTMPFIELD(1)
+        RMEDIVAL2=RTMPFIELD(1)
         RETURN
       endif
 C
@@ -420,7 +436,20 @@ C
         enddo
       enddo
 C
-      RMEDIVAL=(RTMPFIELD(ibincount/2)+RTMPFIELD(ibincount/2+1))/2.0
+      RMEDIVAL =(RTMPFIELD(ibincount/2)+RTMPFIELD(ibincount/2+1))/2.0
+      RMEDIVAL2=(RTMPFIELD(ibincount/4)+RTMPFIELD(ibincount/4+1))/2.0
+C
+      if(ibincount.le.2)then
+        RMEDIVAL=RTMPFIELD(1)
+        RMEDIVAL2=RTMPFIELD(1)
+        RETURN
+      endif
+C
+      if(ibincount.le.4)then
+        RMEDIVAL=RTMPFIELD(3)
+        RMEDIVAL2=RTMPFIELD(2)
+        RETURN
+      endif
 C
       RETURN
       END
@@ -495,12 +524,18 @@ C
       REAL*8 RBINSSIGPF(0:IHISTBINS,3)
       REAL*8 RBINSFOM(0:IHISTBINS,3)
 C
+      REAL*8 RBINSSIGF2(0:IHISTBINS,3)
+      REAL*8 RBINSSIGP2(0:IHISTBINS,3)
+      REAL*8 RBINSSIGPF2(0:IHISTBINS,3)
+      REAL*8 RBINSFOM2(0:IHISTBINS,3)
+C
       COMMON /DATA/ IHFIELD,IKFIELD,RZFIELD,
      .     RAMPFIELD,RPHAFIELD,RSIGFFIELD,RSIGPFIELD,RFOM,
      .     RecRESMAX,icount,RORIX,RORIY,
      .     RecRESHORI,RecRESVERT,RecRESVAL,
      .     RSIGFFIELDMAX,RSIGPFIELDMAX,
      .     RBINSSIGF,RBINSSIGP,RBINSSIGPF,RBINSFOM,
+     .     RBINSSIGF2,RBINSSIGP2,RBINSSIGPF2,RBINSFOM2,
      .     RLINE1,RLINE2,RLINE3,
      .     RESMAX3D,RESMAXVERT
 C
@@ -547,7 +582,7 @@ C
 C
       if(IRUN.lt.13)then
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
-        write(CTITLE,'(''Solid line is the median curve'')')
+        write(CTITLE,'(''Solid lines are 50% and 25% median curves'')')
         CALL P2K_MOVE(5.,YPOSN,0.)
         CALL P2K_STRING(RTITLE,60,0.)
       endif
@@ -945,9 +980,13 @@ C
 C
       CALL P2K_COLOUR(0)
 C
-C-----Plot average curves
+C-----Plot first average curves
 C
       call P2K_LWIDTH(RLINE3)
+      rgbr=0.0
+      rgbg=0.0
+      rgbb=0.0
+      CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
       if(IRUN.lt.13)then
         j=0
@@ -990,7 +1029,57 @@ C
         enddo
       endif
 C
+C-----Plot second average curves
+C
+      call P2K_LWIDTH(RLINE3)
+      rgbr=0.0
+      rgbg=0.7
+      rgbb=0.0
+      CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
+      if(IRUN.lt.13)then
+        j=0
+        do i = 0,IMAXBINS
+          X=RORIX+RLENX*REAL(i)/IMAXBINS
+          if(IRUN.eq.1)then
+            Y=RORIY+RBINSFOM2(i,1)*RLENY
+          elseif(IRUN.eq.2)then
+            Y=RORIY+RBINSFOM2(i,2)*RLENY
+          elseif(IRUN.eq.3)then
+            Y=RORIY+RBINSFOM2(i,3)*RLENY
+          elseif(IRUN.eq.4)then
+            Y=RORIY+RBINSSIGF2(i,1)*RLENY
+          elseif(IRUN.eq.5)then
+            Y=RORIY+RBINSSIGF2(i,2)*RLENY
+          elseif(IRUN.eq.6)then
+            Y=RORIY+RBINSSIGF2(i,3)*RLENY
+          elseif(IRUN.eq.7)then
+            Y=RORIY+RBINSSIGP2(i,1)*RLENY/90.0
+          elseif(IRUN.eq.8)then
+            Y=RORIY+RBINSSIGP2(i,2)*RLENY/90.0
+          elseif(IRUN.eq.9)then
+            Y=RORIY+RBINSSIGP2(i,3)*RLENY/90.0
+          elseif(IRUN.eq.10)then
+            Y=RORIY+RBINSSIGPF2(i,1)*RLENY/90.0
+          elseif(IRUN.eq.11)then
+            Y=RORIY+RBINSSIGPF2(i,2)*RLENY/90.0
+          elseif(IRUN.eq.12)then
+            Y=RORIY+RBINSSIGPF2(i,3)*RLENY/90.0
+          endif
+C
+          if(Y.gt.RORIY+0.01 .and. Y.le.RORIY+RLENY)then
+            if(j.eq.0)then
+              call P2K_MOVE(X,Y,0.)
+              j=1
+            else
+              call P2K_DRAW(X,Y,0.)
+            endif
+          endif
+        enddo
+      endif
+C
       call P2K_LWIDTH(RLINE1)
+      CALL P2K_COLOUR(0)
       call P2K_PAGE
 C
       RETURN

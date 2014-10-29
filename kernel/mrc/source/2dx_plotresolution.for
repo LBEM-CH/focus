@@ -78,7 +78,7 @@ C
 C
       REAL RSIGFFIELDMAX
       REAL RSIGPFIELDMAX
-      REAL RMEDIVAL,RMEDIVAL2
+      REAL RMEDIVAL,RMEDIVAL2,RMEDIVAL3
 C
       REAL*8 RBINSSIGF(0:IHISTBINS,3)
       REAL*8 RBINSSIGP(0:IHISTBINS,3)
@@ -299,9 +299,11 @@ C---------------endif
             enddo
 C-----------Find the median entry in this field:
             if(ibincount.gt.0)then
-              call FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL,RMEDIVAL2)
+              call FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL,RMEDIVAL2,RMEDIVAL3)
             else
               RMEDIVAL=0.0
+              RMEDIVAL2=0.0
+              RMEDIVAL3=0.0
             endif
 C-----------Store this median value into the curve:
             if(l.eq.1) RBINSSIGF(k,j)=RMEDIVAL
@@ -312,7 +314,7 @@ C
             if(l.eq.1) RBINSSIGF2(k,j)=RMEDIVAL2
             if(l.eq.2) RBINSSIGP2(k,j)=RMEDIVAL2
             if(l.eq.3) RBINSSIGPF2(k,j)=RMEDIVAL2
-            if(l.eq.4) RBINSFOM2(k,j)=RMEDIVAL2
+            if(l.eq.4) RBINSFOM2(k,j)=RMEDIVAL3
           enddo
         enddo
       enddo
@@ -398,7 +400,7 @@ C==============================================================================
 C==============================================================================
 C==============================================================================
 C
-      SUBROUTINE FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL,RMEDIVAL2)
+      SUBROUTINE FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL,RMEDIVAL2,RMEDIVAL3)
 C
       IMPLICIT NONE
 C
@@ -407,7 +409,7 @@ C
 C
       REAL RTMPFIELD(IMAX)
       INTEGER ibincount
-      REAL RMEDIVAL,RMEDIVAL2
+      REAL RMEDIVAL,RMEDIVAL2,RMEDIVAL3
 C
       INTEGER i,j
       REAL RTMP
@@ -415,12 +417,14 @@ C
       if(ibincount.eq.0)then
         RMEDIVAL=0.0
         RMEDIVAL2=0.0
+        RMEDIVAL3=0.0
         RETURN
       endif
 C
       if(ibincount.eq.1)then
         RMEDIVAL=RTMPFIELD(1)
         RMEDIVAL2=RTMPFIELD(1)
+        RMEDIVAL3=RTMPFIELD(1)
         RETURN
       endif
 C
@@ -438,16 +442,19 @@ C
 C
       RMEDIVAL =(RTMPFIELD(ibincount/2)+RTMPFIELD(ibincount/2+1))/2.0
       RMEDIVAL2=(RTMPFIELD(ibincount/4)+RTMPFIELD(ibincount/4+1))/2.0
+      RMEDIVAL3=(RTMPFIELD(ibincount*3/4)+RTMPFIELD(ibincount*3/4+1))/2.0
 C
       if(ibincount.le.2)then
         RMEDIVAL=RTMPFIELD(1)
         RMEDIVAL2=RTMPFIELD(1)
+        RMEDIVAL3=RTMPFIELD(1)
         RETURN
       endif
 C
       if(ibincount.le.4)then
         RMEDIVAL=RTMPFIELD(3)
         RMEDIVAL2=RTMPFIELD(2)
+        RMEDIVAL3=RTMPFIELD(3)
         RETURN
       endif
 C
@@ -582,7 +589,8 @@ C
 C
       if(IRUN.lt.13)then
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
-        write(CTITLE,'(''Solid lines are 50% and 25% median curves'')')
+        write(CTITLE,'(''Solid lines are 50% and better-25% '',
+     .    ''median curves'')')
         CALL P2K_MOVE(5.,YPOSN,0.)
         CALL P2K_STRING(RTITLE,60,0.)
       endif

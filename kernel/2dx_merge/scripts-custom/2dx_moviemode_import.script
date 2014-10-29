@@ -1,0 +1,141 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Import movie files                                                 #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/28/2014                                             #
+# Last Modification: 10/28/2014                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 7 
+#
+# MANUAL: This script allows to import dose-fractionated movies and their drift-corrected average images.
+#
+# DISPLAY: movie_import_dir
+# DISPLAY: movie_import_imagenumber
+# DISPLAY: movie_import_target_dir
+#
+#$end_local_vars
+#
+# This defines some variables that we might need:
+set proc_2dx = ""
+set bin_2dx = ""
+set app_2dx_image = ""
+set SCRATCH_DISK = ""
+set FFTIR_DISK = ""
+#
+set movie_import_dir = ""
+set movie_import_imagenumber = ""
+set movie_import_target_dir = ""
+#
+#$end_vars
+#
+# This sets the scriptname variable:
+set scriptname = 2dx_moviemode_import
+#
+# This removes the old logfile, so that a new fresh one can be created:
+\rm -f LOGS/${scriptname}.results
+#
+# This initializes the ccp4 environment, and other variables.
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+# This advances the progress bar to the 1% position:
+echo "<<@progress: 1>>"
+#
+# This creates all needed subdirectories in the current merge directory, in case they are missing:
+source ${proc_2dx}/2dx_makedirs 
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "<<@progress: 10>>"
+#
+set movie_average = ${movie_import_dir}/aligned_averages
+set movie_stack   = ${movie_import_dir}/aligned_stacks
+#
+if ( ! -d ${movie_average} ) then
+  ${proc_2dx}/protest "ERRROR: directory ${movie_average} not found."
+endif
+#
+if ( ! -d ${movie_stack} ) then
+  ${proc_2dx}/protest "ERRROR: directory ${movie_stack} not found."
+endif
+#
+cd ${movie_average}
+ls -1 *.mrc > ${olddir}/tmp.tmp
+cd ${olddir}
+set imagenum = `cat tmp.tmp | wc -l`
+echo ":: Importing ${imagenum} images"
+#
+cd ..
+if ( ! -d ${movie_import_target_dir} ) then
+  \mkdir ${movie_import_target_dir}
+  ${proc_2dx}/linblock "Creating ${movie_import_target_dir}"
+  cd ${movie_import_target_dir}
+  \ln -s ../2dx_master.cfg .
+endif
+cd ${olddir}
+#
+set irun = 1
+while ( ${irun} <= ${imagenum} )
+  set importimage = `sed -n "${irun}p" tmp.tmp`
+  set importimage_pattern = `echo ${importimage} | sed -e's/_aligned.mrc//g' -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g' | tr 'A-Z' 'a-z'`
+  #
+  if ( -e ${movie_average}/${importimage} ) then
+    if ( -e ${movie_stack}/${importimage} ) then
+      set testval = `echo ${movie_import_imagenumber} | wc -c`
+      set newimagenumber = `echo 0000000000 | cut -c${testval}-`${movie_import_imagenumber}
+      echo "::"
+      echo ":: Importing drift-corrected average image "
+      echo "::      ${movie_average}/${importimage}"
+      echo ":: and drift-corrected stack"
+      echo "::      ${movie_stack}/${importimage}"
+      echo ":: into folder"
+      echo "::      ../${movie_import_target_dir}/${importimage_pattern}"
+      echo ":: using image number ${newimagenumber}"
+      echo "::"
+      cd ${olddir}
+      cd ..
+      cd ${movie_import_target_dir}
+      if ( -d ${importimage_pattern} ) then
+        ${proc_2dx}/linblock "WARNING: ${importimage_pattern} already existing. Removing."
+        \rm -rf ${importimage_pattern}
+      endif
+      mkdir ${importimage_pattern}
+      cd ${importimage_pattern}
+      cp ${movie_average}/${importimage} ${importimage_pattern}_${newimagenumber}.mrc
+      cp ${movie_stack}/${importimage} ${importimage_pattern}_${newimagenumber}_stack.mrc
+      cp ${olddir}/2dx_merge.cfg 2dx_image.cfg
+      echo "set imagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
+      echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
+      echo "set imagename_original = ${movie_average}/${importimage}" >> 2dx_image.cfg
+      set fullpath = `pwd`
+      cd ${olddir}
+      ${app_2dx_image} ${fullpath} "2dx_initialize"
+      cd ${olddir}
+      #
+      @ movie_import_imagenumber++
+      set testval = `echo ${movie_import_imagenumber} | wc -c`
+      set newimagenumber = `echo 0000000000 | cut -c${testval}-`${movie_import_imagenumber}
+      echo "set movie_import_imagenumber = ${newimagenumber}"  >> LOGS/${scriptname}.results
+    else
+      ${proc_2dx}/protest "ERROR: ${movie_stack}/${importimage} not found."
+    endif
+  else
+    ${proc_2dx}/protest "ERROR: ${movie_average}/${importimage} not found."
+  endif
+  @ irun++
+end
+#
+\rm -f tmp.tmp
+#
+echo "<<@progress: 100>>"
+${proc_2dx}/linblock "Normal End."
+#
+echo "<<@evaluate>>"
+#

@@ -58,7 +58,7 @@ C
       INTEGER IOPTION,MDIM
       INTEGER IH,IK,IQ,IQLABEL
 C
-      INTEGER i,icount,k,j,ibin
+      INTEGER i,icount,k,j,ibin,ibincount,l,i2
       INTEGER IMAXBINS
       INTEGER IRUN
 C
@@ -73,8 +73,13 @@ C
       REAL RecRESHORI(IMAX)
       REAL RecRESVERT(IMAX)
       REAL RecRESVAL(IMAX)
+C
+      REAL RTMPFIELD(IMAX)
+C
       REAL RSIGFFIELDMAX
       REAL RSIGPFIELDMAX
+      REAL RMEDIVAL
+C
       REAL*8 RBINSSIGF(0:IHISTBINS,3)
       REAL*8 RBINSSIGP(0:IHISTBINS,3)
       REAL*8 RBINSSIGPF(0:IHISTBINS,3)
@@ -95,11 +100,9 @@ C
 C
       RLINE1=0.1
       RLINE2=0.5
-      RLINE3=1.0
+      RLINE3=1.3
 C
-C==============================================================================
 C=====Input of parameters======================================================
-C==============================================================================
 C
       FONTSIZE=2.0      ! SELECT 4MM CHAR HEIGHT FOR TEXT
       pi=3.1415926537
@@ -180,9 +183,7 @@ C
         enddo
       enddo
 C
-C==============================================================================
 C=====Read input file
-C==============================================================================
 C
       open(1,FILE=CNAME,STATUS='OLD',ERR=980)
       open(10,FILE=CNAME2,STATUS='NEW',ERR=980)
@@ -253,40 +254,93 @@ C
 C
       RORIRESMAX=1.0/RecRESMAX
 C
-C-----Fill Histogram Bins
+C-----Find median curve
 C
-      do i = 1,icount
+C-----For all types of data (SigF, SigP, SigP*FOM, FOM):
+      do l = 1,4
+C-------For all types of resolutions (3D, horizontal, vertical):
         do j = 1,3
-          if(j.eq.1) ibin=INT(REAL(IMAXBINS)*RecRESVAL(i)/RecRESMAX+0.5)
-          if(j.eq.2) ibin=INT(REAL(IMAXBINS)*RecRESHORI(i)/RecRESMAX+0.5)
-          if(j.eq.3) ibin=INT(REAL(IMAXBINS)*RecRESVERT(i)/RecRESMAX+0.5)
-          RBINSSIGF(ibin,j)=RBINSSIGF(ibin,j)+RSIGFFIELD(i)/RAMPFIELD(i)
-          IBINSSIGF(ibin,j)=IBINSSIGF(ibin,j)+1
-          RBINSSIGP(ibin,j)=RBINSSIGP(ibin,j)+RSIGPFIELD(i)
-          IBINSSIGP(ibin,j)=IBINSSIGP(ibin,j)+1
-          RBINSSIGPF(ibin,j)=RBINSSIGPF(ibin,j)+RSIGPFIELD(i)*RFOM(i)
-          IBINSSIGPF(ibin,j)=IBINSSIGPF(ibin,j)+1
-          RBINSFOM(ibin,j)=RBINSFOM(ibin,j)+RFOM(i)
-          IBINSFOM(ibin,j)=IBINSFOM(ibin,j)+1
+C---------Prepare all median values in the bins:
+          do k = 0,IMAXBINS
+            ibincount=0
+C-----------Find all entries for this bin, fill into RTMPFIELD:
+            do i = 1,icount
+              if(j.eq.1) ibin=INT(REAL(IMAXBINS)*RecRESVAL(i)/RecRESMAX+0.5)
+              if(j.eq.2) ibin=INT(REAL(IMAXBINS)*RecRESHORI(i)/RecRESMAX+0.5)
+              if(j.eq.3) ibin=INT(REAL(IMAXBINS)*RecRESVERT(i)/RecRESMAX+0.5)
+              if(ibin.eq.k)then
+C---------------if(RFOM(i).gt.0.5)then
+                  ibincount=ibincount+1
+                  if(l.eq.1) then
+                    if(abs(RAMPFIELD(i)).gt.1E-20)then
+                      RTMPFIELD(ibincount)=RSIGFFIELD(i)/RAMPFIELD(i)
+                    else
+                      RTMPFIELD(ibincount)=0.0
+                    endif
+                  endif
+                  if(l.eq.2) RTMPFIELD(ibincount)=RSIGPFIELD(i)
+                  if(l.eq.3) RTMPFIELD(ibincount)=RSIGPFIELD(i)*RFOM(i)
+                  if(l.eq.4) RTMPFIELD(ibincount)=RFOM(i)
+C---------------endif
+              endif
+            enddo
+C-----------Find the median entry in this field:
+            if(ibincount.gt.0)then
+              call FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL)
+            else
+              RMEDIVAL=0.0
+            endif
+C-----------Store this median value into the curve:
+            if(l.eq.1) RBINSSIGF(k,j)=RMEDIVAL
+C            if(l.eq.1 .and. j.eq.2)then
+C              write(6,'('':: Bin '',I3,'' has '',I6,
+C     .          '' entries, median is '',F12.3)')k,ibincount,RMEDIVAL
+C              if(k.eq.IMAXBINS)then
+C                do i2=1,ibincount
+C                  write(6,'('':: '',I6,F12.3,F12.3)')i2,RTMPFIELD(i2),RMEDIVAL
+C                enddo
+C              endif
+C            endif
+            if(l.eq.2) RBINSSIGP(k,j)=RMEDIVAL
+            if(l.eq.3) RBINSSIGPF(k,j)=RMEDIVAL
+            if(l.eq.4) RBINSFOM(k,j)=RMEDIVAL
+          enddo
         enddo
+      enddo
+C
+C
+C-----Fill Histogram Bins with AVERAGE values
+C
+C      do i = 1,icount
+C        do j = 1,3
+C          if(j.eq.1) ibin=INT(REAL(IMAXBINS)*RecRESVAL(i)/RecRESMAX+0.5)
+C          if(j.eq.2) ibin=INT(REAL(IMAXBINS)*RecRESHORI(i)/RecRESMAX+0.5)
+C          if(j.eq.3) ibin=INT(REAL(IMAXBINS)*RecRESVERT(i)/RecRESMAX+0.5)
+C          RBINSSIGF(ibin,j)=RBINSSIGF(ibin,j)+RSIGFFIELD(i)/RAMPFIELD(i)
+C          IBINSSIGF(ibin,j)=IBINSSIGF(ibin,j)+1
+C          RBINSSIGP(ibin,j)=RBINSSIGP(ibin,j)+RSIGPFIELD(i)
+C          IBINSSIGP(ibin,j)=IBINSSIGP(ibin,j)+1
+C          RBINSSIGPF(ibin,j)=RBINSSIGPF(ibin,j)+RSIGPFIELD(i)*RFOM(i)
+C          IBINSSIGPF(ibin,j)=IBINSSIGPF(ibin,j)+1
+C          RBINSFOM(ibin,j)=RBINSFOM(ibin,j)+RFOM(i)
+C          IBINSFOM(ibin,j)=IBINSFOM(ibin,j)+1
+C        enddo
 C        if(ibin.eq.1)then
 C          write(6,'('':ibin,RBINSFOM,IBINSFOM'',I6,F12.3,I6)')
 C     .      ibin,RBINSFOM(ibin,3),IBINSFOM(ibin,3)
 C        endif
-      enddo
+C      enddo
 C
-      do i = 0,IMAXBINS
-        do j = 1,3
-          if(IBINSSIGF(i,j).gt.0) RBINSSIGF(i,j)=RBINSSIGF(i,j)/IBINSSIGF(i,j)
-          if(IBINSSIGP(i,j).gt.0) RBINSSIGP(i,j)=RBINSSIGP(i,j)/IBINSSIGP(i,j)
-          if(IBINSSIGPF(i,j).gt.0) RBINSSIGPF(i,j)=RBINSSIGPF(i,j)/IBINSSIGPF(i,j)
-          if(IBINSFOM(i,j).gt.0) RBINSFOM(i,j)=RBINSFOM(i,j)/IBINSFOM(i,j)
-        enddo
-      enddo
+C      do i = 0,IMAXBINS
+C        do j = 1,3
+C          if(IBINSSIGF(i,j).gt.0) RBINSSIGF(i,j)=RBINSSIGF(i,j)/IBINSSIGF(i,j)
+C          if(IBINSSIGP(i,j).gt.0) RBINSSIGP(i,j)=RBINSSIGP(i,j)/IBINSSIGP(i,j)
+C          if(IBINSSIGPF(i,j).gt.0) RBINSSIGPF(i,j)=RBINSSIGPF(i,j)/IBINSSIGPF(i,j)
+C          if(IBINSFOM(i,j).gt.0) RBINSFOM(i,j)=RBINSFOM(i,j)/IBINSFOM(i,j)
+C        enddo
+C      enddo
 C
-C==============================================================================
 C=====Plot initialization======================================================
-C==============================================================================
 C
       WRITE(6,420)
 420   FORMAT(' PLOT INITIALISATION')
@@ -329,6 +383,46 @@ C
  999  continue
 C
       STOP
+      END
+C
+C==============================================================================
+C==============================================================================
+C==============================================================================
+C
+      SUBROUTINE FINDMEDIAN(RTMPFIELD,ibincount,RMEDIVAL)
+C
+      IMPLICIT NONE
+C
+      INTEGER IMAX
+      PARAMETER (IMAX = 1000000)
+C
+      REAL RTMPFIELD(IMAX)
+      INTEGER ibincount
+      REAL RMEDIVAL
+C
+      INTEGER i,j
+      REAL RTMP
+C
+      if(ibincount.eq.1)then
+        RMEDIVAL=RTMPFIELD(1)
+        RETURN
+      endif
+C
+C-----Bubblesort:
+C
+      do i=ibincount,2,-1
+        do j=1,i-1
+          if(RTMPFIELD(j).gt.RTMPFIELD(j+1))then
+            RTMP=RTMPFIELD(j)
+            RTMPFIELD(j)=RTMPFIELD(j+1)
+            RTMPFIELD(j+1)=RTMP
+          endif
+        enddo
+      enddo
+C
+      RMEDIVAL=(RTMPFIELD(ibincount/2)+RTMPFIELD(ibincount/2+1))/2.0
+C
+      RETURN
       END
 C
 C==============================================================================
@@ -410,9 +504,7 @@ C
      .     RLINE1,RLINE2,RLINE3,
      .     RESMAX3D,RESMAXVERT
 C
-C==============================================================================
-C=====Plot initialization======================================================
-C==============================================================================
+C-----Plot initialization
 C
       YPOSN=PLTSIZ+100.
 C
@@ -451,6 +543,14 @@ C
      .       ''is   '',F10.2,'' A'')')RORIRESMAX
       CALL P2K_MOVE(5.,YPOSN,0.)
       CALL P2K_STRING(RTITLE,60,0.)
+      YPOSN=YPOSN-10.0
+C
+      if(IRUN.lt.13)then
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
+        write(CTITLE,'(''Solid line is the median curve'')')
+        CALL P2K_MOVE(5.,YPOSN,0.)
+        CALL P2K_STRING(RTITLE,60,0.)
+      endif
 C
       RORIX=PLTSIZ/10.0
       RORIY=PLTSIZ/10.0
@@ -507,9 +607,7 @@ C
       Y=0.0
       CALL P2K_DRAW(X,Y,0.)
 C
-C==============================================================================
 C=====Plot horizontal and vertical axes
-C==============================================================================
 C
       call P2K_LWIDTH(RLINE2)
 C
@@ -925,14 +1023,11 @@ C
       RETURN
       END
 C
-
-C--------------------------------------------------------------
-C--------------------------------------------------------------
-C--------------------------------------------------------------
+c==========================================================
+c==========================================================
+c==========================================================
+C
       SUBROUTINE HSVTORGB(rhue,rsat,rval,rgbr,rgbg,rgbb)
-C--------------------------------------------------------------
-C--------------------------------------------------------------
-C--------------------------------------------------------------
 C
 C---------Calculate RGB Values:
           c=rval * rsat

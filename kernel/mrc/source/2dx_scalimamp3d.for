@@ -196,24 +196,25 @@ C  Create reference data, reinterpolating on to new 1/d**2 resolution steps.
         WRITE(6,49) (ATAB(J),J=1,400,50)
 49      FORMAT(' Refamps in 1/10 A**-1 steps', 10F5.1)
         DO 50 J=1,NSLOTS
-                SVALUE=(J-0.5)*IRESTEP
-                NFTAB=SQRT(SVALUE/10000.)/0.002
-                IF(NFTAB.GT.400) STOP ' FTAB dimensions too small'
-50      AVERREF(J)=ATAB(NFTAB)
+           SVALUE=(J-0.5)*IRESTEP
+           NFTAB=SQRT(SVALUE/10000.)/0.002
+           IF(NFTAB.GT.400) STOP ' FTAB dimensions too small'
+           AVERREF(J)=ATAB(NFTAB)
+ 50     continue
       ENDIF
       IF(IR.EQ.2) THEN
         DO 52 J=1,NSLOTS
-                SVALUE=(J-0.5)*IRESTEP
-                SAMPLING=SVALUE/BTSPACING
-                IF(SAMPLING.LT.1.0) SAMPLING=1.0
-                JS=SAMPLING
-                FS=SAMPLING-JS
-        IF(JS.LT.33) THEN 
-          AVERREF(J)=BTCRY3A(JS)*(1.0-FS) + BTCRY3A(JS+1)*FS ! linear interp
-        ELSE
-          WRITE(6,48)J
-48        FORMAT(' BT reference data limited, ISLOT=',I5)
-        ENDIF
+          SVALUE=(J-0.5)*IRESTEP
+          SAMPLING=SVALUE/BTSPACING
+          IF(SAMPLING.LT.1.0) SAMPLING=1.0
+          JS=SAMPLING
+          FS=SAMPLING-JS
+          IF(JS.LT.33) THEN 
+            AVERREF(J)=BTCRY3A(JS)*(1.0-FS) + BTCRY3A(JS+1)*FS ! linear interp
+          ELSE
+            WRITE(6,48)J
+48          FORMAT('::ERROR: BT reference data limited, ISLOT=',I5)
+          ENDIF
 52      CONTINUE
         INTERV=250/IRESTEP
         WRITE(6,53) ((0.1*AVERREF(J)),J=1,NSLOTS,INTERV)
@@ -284,7 +285,8 @@ C      OPEN(UNIT=11,FILE=FILIN,READONLY,STATUS='OLD')
         ENDIF
 150   CONTINUE
 CHEN>
-      write(6,'('':: ERROR: Too many reflections. Increase NMAX in SCALIMAMP3D.'')')
+      write(6,'('':: ERROR: Too many reflections.'',
+     .    '' Increase NMAX in SCALIMAMP3D.'')')
       stop
 CHEN<
 160   continue
@@ -546,14 +548,35 @@ C*SCALORIGTILT*****************************************************************
      .  XYSTARSQ(NMAX),IFP(NMAX)
       INTEGER*8 JFILM(NMAX),IFILM(NFILMS)
       DIMENSION BR3DT(INTERVALBR,INTERVALBR),AVERREF(NSLOTS)
-      DIMENSION A1(NFILMS),A2(NFILMS),A3(NFILMS),
+C
+      REAL*8 A1(NFILMS),A2(NFILMS),A3(NFILMS),
      .  B1(NFILMS),B2(NFILMS),B3(NFILMS),C1(NFILMS),C2(NFILMS),
-     .  C3(NFILMS),D1(NFILMS),D2(NFILMS),D3(NFILMS),
-     .  BXY(NFILMS),BZ(NFILMS),ASCALE(NFILMS)
-      DATA A1/NFILMS*0./,A2/NFILMS*0./,A3/NFILMS*0./,
-     .  B1/NFILMS*0./,B2/NFILMS*0./,B3/NFILMS*0./,
-     .  C1/NFILMS*0./,C2/NFILMS*0./,C3/NFILMS*0./,
-     .  D1/NFILMS*0./,D2/NFILMS*0./,D3/NFILMS*0./
+     .  C3(NFILMS),D1(NFILMS),D2(NFILMS),D3(NFILMS)
+C
+      REAL*8 P1,Q1,R1,P2,Q2,R2
+C
+      DIMENSION BXY(NFILMS),BZ(NFILMS),ASCALE(NFILMS)
+C
+C      DATA A1/NFILMS*0./,A2/NFILMS*0./,A3/NFILMS*0./,
+C     .  B1/NFILMS*0./,B2/NFILMS*0./,B3/NFILMS*0./,
+C     .  C1/NFILMS*0./,C2/NFILMS*0./,C3/NFILMS*0./,
+C     .  D1/NFILMS*0./,D2/NFILMS*0./,D3/NFILMS*0./
+C
+C
+      DO i=1,NFILMS
+        A1(i)=0.0
+        A2(i)=0.0
+        A3(i)=0.0
+        B1(i)=0.0
+        B2(i)=0.0
+        B3(i)=0.0
+        C1(i)=0.0
+        C2(i)=0.0
+        C3(i)=0.0
+        D1(i)=0.0
+        D2(i)=0.0
+        D3(i)=0.0
+      enddo
 C
 C  keep in same sorted order as in origtilt o/p - inefficient but simpler.
 C  first count the number of different films in list.
@@ -595,6 +618,9 @@ C       W = AMIN1((AMP(J)/BCK(J))**2,10.0)   ! not too much weight for big AMPs
         IF(IR.LE.3) THEN        ! i.e. not 3D-BR data
           ISLOT = 1 + DSTARSQ*10000./IRESTEP
           AREF = AVERREF(ISLOT)
+          if(AREF.eq.0.0)then
+            write(6,'(''::ERROR: AVERREF('',I8,'')=0.0'')')ISLOT
+          endif
         ELSE
 C  bilinear interpolation in BR3DT (IR.eq.4) beyond the first bin.
           NZ = ABS(ZSTAR(J)/BRSPAC)
@@ -647,13 +673,13 @@ C  calculate and write out sharpening factors
         Q2=C3(I)*B2(I)-B3(I)*C2(I)
         R2=C3(I)*D2(I)-D3(I)*C2(I)
         IF(P2*Q1-Q2*P1.EQ.0.0)  THEN
-          IF(P2*R1-R2*P1.NE.0.0) 
+          IF(REAL(P2*R1-R2*P1).NE.0.0) 
      .      STOP ' P2*R1-R2*P1 is not zero, but P2*Q1-Q2*P1 is zero'
           BZ(I)=0.0       ! does not matter because film is probably untilted
         ELSE
-          BZ(I)=(P2*R1-R2*P1)/(P2*Q1-Q2*P1)
+          BZ(I)=REAL((P2*R1-R2*P1)/(P2*Q1-Q2*P1))
         ENDIF
-        BXY(I)=(R1-Q1*BZ(I))/P1
+        BXY(I)=REAL((R1-Q1*BZ(I))/P1)
         IF(BZ(I).LT.BZMIN.OR.BZ(I).GT.BZMAX.OR.
      .    BXY(I).LT.BXYMIN.OR.BXY(I).GT.BXYMAX) THEN
           BXYOLD=BXY(I)
@@ -662,12 +688,12 @@ C  calculate and write out sharpening factors
           BZ(I)=AMIN1(BZ(I),BZMAX)
           BXY(I)=AMAX1(BXY(I),BXYMIN)
           BXY(I)=AMIN1(BXY(I),BXYMAX)
-          ASCALE(I)=EXP((D1(I)-BXY(I)*A1(I)-BZ(I)*B1(I))/C1(I))
+          ASCALE(I)=REAL(EXP((D1(I)-BXY(I)*A1(I)-BZ(I)*B1(I))/C1(I)))
           WRITE(6,392) IFILM(I),BXYOLD,BZOLD,BXY(I),BZ(I),ASCALE(I)
-392       FORMAT(I10,2F10.1,5X,2F10.1,F10.3)
-393       FORMAT(I10,2F10.1,25X,F10.3)
+392       FORMAT(I10,2G16.6,5X,2G16.6,G16.6)
+393       FORMAT(I10,2G16.6,25X,G16.6)
         ELSE
-          ASCALE(I)=EXP((D1(I)-BXY(I)*A1(I)-BZ(I)*B1(I))/C1(I))
+          ASCALE(I)=REAL(EXP((D1(I)-BXY(I)*A1(I)-BZ(I)*B1(I))/C1(I)))
           WRITE(6,393) IFILM(I),BXY(I),BZ(I),ASCALE(I)
         ENDIF
 400   CONTINUE

@@ -42,41 +42,48 @@ echo "<<@progress: 1>>"
 cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
 set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 #
-set olddir = $PWD
+set oldir = $PWD
 #
-foreach dirfile ( ${dirlist} ) 
+cd ..
+find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/2dx_merge_alldirs.dat
+cd ${oldir}
+#
+set dirnum = `cat 2dx_merge_alldirs.dat | wc -l`
+echo ": Will work on ${dirnum} image directories."
+set increment = `echo ${dirnum} | awk '{ s = 70.0 / ( $1 + 1 ) } END { print s }'`
+set curval = 20.0  
+#
+set dircounter = ${dirnum}
+while ( ${dircounter} > 0 )
+  #
+  ${bin_2dx}/2dx_getline.exe << eot >> TMP.tmp
+${oldir}/2dx_merge_alldirs.dat
+${dircounter}
+eot
+  #
+  set from_dir = `cat TMP.tmp`
+  \rm TMP.tmp
+  #
+  cd ${oldir}
   cd ..
-  cd ${dirfile}
-  set newdir = $PWD
-  cd ${olddir}
-  echo "::Working on ${newdir}"
+  cd ${from_dir}
   #
-  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
-  echo "set dummy = 1" >> LOGS/${scriptname}.results
-
-  # Use the following to invert the CTF in all directories, so that cryo setting is valid:
-  # echo "set ctfrev = y" >> LOGS/${scriptname}.results
-
-  echo "#unlock ctfplotresmax" >> LOGS/${scriptname}.results
-  echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
-
-  # Use the following to activate the synthetic unbending in all directories:
-  # echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
+  set fullpath = `pwd`
   #
-  # echo "set TLTAXIS = 0.0" >> LOGS/${scriptname}.results
-  # echo "set TLTAXA = 0.0" >> LOGS/${scriptname}.results
-  # echo "set TLTANG = 0.0" >> LOGS/${scriptname}.results
-  # echo "set TAXA = 0.0" >> LOGS/${scriptname}.results
-  # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
+  echo "::Working on ${from_dir}"
   #
-  # echo "#lock phaori" >> LOGS/${scriptname}.results
-  # echo "#lock phaoriFouFilter" >> LOGS/${scriptname}.results
-  # echo "#unlock phaori" >> LOGS/${scriptname}.results
-  # echo "#unlock phaoriFouFilter" >> LOGS/${scriptname}.results
-  # 
-  # ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
+  # source ${proc_2dx}/initialize
   #
-  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+  ${app_2dx_image} ${fullpath} "2dx_initialize"
+  #
+  cd ${oldir}
+  #
+  set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
+  set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
+  echo "<<@progress:${curprogress}>>"
+  #
+  @ dircounter -= 1
+  #
 end
 #
 echo "<<@progress: 100>>"

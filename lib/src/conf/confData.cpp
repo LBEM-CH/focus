@@ -1021,7 +1021,7 @@ bool confData::sync(const QString &reference, const QString &variable, const QRe
     if(l!=NULL)
       *l = *e;
     else
-      cout<<"2dx_image.cfg did not (yet) contain variable: "<<e->get("valuelabel").toStdString()<<" (This message can be ignored)"<<endl;
+      cout<<"Variable not found: "<<e->get("valuelabel").toStdString()<<"    (Run the custom script 'Refresh Databases' on all images to update 2dx_image.cfg files)"<<endl;
   }
 
   return true;

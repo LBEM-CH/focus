@@ -555,7 +555,8 @@ C---------Ignore minimal offset (which might stem from digit errors)
           if(IRMAX.ge.-2 .and. IRMAX.le.2) IRMAX=0
 C
           if(ICMAX.ne.0 .or. IRMAX.ne.0)then
-            write(6,'('':: Shifting image by '',2I6,'' pixels.'')')
+            write(6,'(''::'',30X,
+     .        ''Shifting image by '',2I6,'' pixels.'')')
      .        ICMAX,IRMAX
 C
 C-----------Shift Cross-Correlation Array by ICMAX,IRMAX pixels

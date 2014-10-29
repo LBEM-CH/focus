@@ -181,7 +181,7 @@ C-----Currently, only two lattices are determined.
 C
       IFOUND2 = 0
 C
-      do 850 LOOP=1,20
+      do 850 LOOP=1,5 
 C
         RMAXCOU=0.0
         IMAXPOS=0

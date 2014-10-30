@@ -35,6 +35,8 @@ if __name__ == "__main__":
         fat_num_from = int(nz / 4);
         fat_num_to   = int(nz / 2);
 
+	print "::Creating frame 0 from sub-frames ",fat_num_from," to ",fat_num_to,"."
+
 	for j in range(fat_num_from,fat_num_to):
 	
 		print "Creating frame 0 as", output_name, "by adding sub-frame", j

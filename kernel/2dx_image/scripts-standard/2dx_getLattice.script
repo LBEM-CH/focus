@@ -49,6 +49,8 @@
 # DISPLAY: TANGL
 # DISPLAY: lattice
 # DISPLAY: secondlattice
+# DISPLAY: secondlattice_exists
+# DISPLAY: secondlattice_is_this
 # DISPLAY: backuplattice
 # DISPLAY: defocus
 # DISPLAY: beamtilt
@@ -85,6 +87,7 @@ set SYN_Unbending = ""
 set PHASEORI_done = ""
 #
 set imagename = ""
+set nonmaskimagename = ""
 set imagenumber = ""
 set realcell = ""
 set lattice = ""
@@ -92,6 +95,8 @@ set TLTAXIS = ""
 set TLTANG = ""
 set imagesidelength = ""
 set secondlattice = ""
+set secondlattice_exists = ""
+set secondlattice_is_this = ""
 set magnification = ""
 set stepdigitizer = ""
 set tempkeep = ""
@@ -114,6 +119,7 @@ set laterror_abserror = ""
 set laterror_rmsderror = ""
 set laterror_peaksused = ""
 set laterror_nodepeakdensity = ""
+set MASKING_done = ""
 #
 #$end_vars
 #
@@ -137,6 +143,15 @@ if ( ${det_lattice}x == 'x' ) then
   set det_lattice = 'y'
   echo "set det_lattice = ${det_lattice}" >> LOGS/${scriptname}.results
   echo ":: det_lattice corrected to ${det_lattice}"
+endif
+#
+if ( ${MASKING_done} == "y" ) then
+  ${proc_2dx}/linblock "Skipping. Not determining lattice."
+  #
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  #
+  exit
 endif
 #
 if ( ${det_lattice} == 'n' && ${det_tilt} == 'n' ) then
@@ -374,23 +389,64 @@ eot
     echo ":Date: ${date}" >> History.dat
     echo "::Lattice is ${lattice}" >> History.dat
     #
-    set tmplat = `cat 2dx_findlat.out | head -n 3 | tail -n 1`
-    set secondscore  = `cat 2dx_findlat.out | head -n 4 | tail -n 1`
-    set newsecondlattice = `echo ${tmplat} | sed 's/ /,/g'`
-    set oldsecondlattice = `echo ${secondlattice}`
-    #
-    # \rm -f 2dx_findlat.out
-    #
-    echo "::  Old 2nd lattice is ${oldsecondlattice}"
-    set goodsecond = `echo ${secondscore} | awk '{ if ( $1 > 0.6 ) { s = 1 } else { s = 0 }} END { print s }'`
-    if ( ${goodsecond} == 1 ) then
-      set secondlattice = ${newsecondlattice}
-      echo "::  New 2nd lattice is ${secondlattice} (Score = ${secondscore})"
-      echo "set secondlattice = "\"${newsecondlattice}\" >> LOGS/${scriptname}.results
+    if ( ${secondlattice_is_this} == "n" ) then
+      set tmplat = `cat 2dx_findlat.out | head -n 3 | tail -n 1`
+      set secondscore  = `cat 2dx_findlat.out | head -n 4 | tail -n 1`
+      set newsecondlattice = `echo ${tmplat} | sed 's/ /,/g'`
+      set oldsecondlattice = `echo ${secondlattice}`
+      #
+      # \rm -f 2dx_findlat.out
+      #
+      echo "::  Old 2nd lattice is ${oldsecondlattice}"
+      set goodsecond = `echo ${secondscore} | awk '{ if ( $1 > 0.6 ) { s = 1 } else { s = 0 }} END { print s }'`
+      if ( ${goodsecond} == "1" ) then
+        set secondlattice = ${newsecondlattice}
+        echo "::  New 2nd lattice is ${secondlattice} (Score = ${secondscore})"
+        echo "set secondlattice = "\"${newsecondlattice}\" >> LOGS/${scriptname}.results
+        echo "set secondlattice_exists = y" >> LOGS/${scriptname}.results
+        #
+        #############################################################################
+        echo ":: "
+        ${proc_2dx}/linblock "Cloning this image directory to initiate processing of second lattice"
+        echo ":: "
+        #############################################################################
+        #
+        set olddir = `pwd`
+        set currentdir = `echo ${olddir} | rev | cut -d\/ -f1 | rev`
+        set newdir = `echo ${currentdir}_lat2`
+        cd ..
+        if ( ! -d ${newdir} ) then
+          \mkdir ${newdir}
+          cd ${newdir}
+          if ( -e  ../${currentdir}/${nonmaskimagename}.tif ) then
+            \cp -f ../${currentdir}/${nonmaskimagename}.tif .
+          endif
+          if ( -e  ../${currentdir}/${nonmaskimagename}.mrc ) then
+            \cp -f ../${currentdir}/${nonmaskimagename}.mrc .
+          endif
+          if ( -e  ../${currentdir}/${nonmaskimagename}_stack.mrc ) then
+            \cp -f ../${currentdir}/${nonmaskimagename}_stack.mrc .
+          endif
+          \cp -f ../${currentdir}/2dx_image.cfg .
+          set newimagenumber = `echo ${imagenumber} | awk '{ s = $1 + 1 } END { print s }'`
+          echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
+          echo "set det_lattice = n" >> 2dx_image.cfg
+          echo "set lattice = "\"${newsecondlattice}\" >> 2dx_image.cfg
+          echo "set secondlattice = "\"${lattice}\" >> 2dx_image.cfg
+          echo "set secondlattice_is_this = "\"y\" >> 2dx_image.cfg
+          echo "set secondlattice_exists = "\"y\" >> 2dx_image.cfg
+          ${proc_2dx}/linblock "Image cloned, new directory name is ${newdir}"
+          #
+          cd ${olddir}
+        endif
+        #
+      else
+        set secondlattice = "0.0,0.0,0.0,0.0"
+        echo "::  New 2nd lattice would have been ${newsecondlattice} (Score = ${secondscore}),"
+        echo "::  Due to the bad score it will not be used."
+      endif
     else
-      set secondlattice = "0.0,0.0,0.0,0.0"
-      echo "::  New 2nd lattice would have been ${newsecondlattice} (Score = ${secondscore}),"
-      echo "::  Due to the bad score it will not be used."
+      echo "set secondlattice_exists = y" >> LOGS/${scriptname}.results
     endif
     #
   else
@@ -403,7 +459,7 @@ eot
     set tltAn = ${TLTANG}
     #
     set lattice=`${bin_2dx}/2dx_getlat.exe ${docfile} | tail -n 1`
-    
+    #
     echo set lattice = \"${lattice}\" >> LOGS/${scriptname}.results
     #
     echo " " >> History.dat

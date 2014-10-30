@@ -101,6 +101,7 @@ set expected_tltang_uncertainty = ""
 set defocus_res_min = ""
 set defocus_res_max = ""
 set use_paralellized = ""
+set MASKING_done = ""
 #
 #$end_vars
 #
@@ -120,6 +121,19 @@ set old_defocus = ${defocus}
 #
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used"
+  ${proc_2dx}/linblock "Defocus should be determined already."
+  #
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  #
+  ##########################################################################
+  ${proc_2dx}/linblock "${scriptname} - normal end."
+  ##########################################################################
+  exit
+endif
+#
+if ( ${MASKING_done} == "y" ) then
+  ${proc_2dx}/linblock "Skipping. Image is masked."
   ${proc_2dx}/linblock "Defocus should be determined already."
   #
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results

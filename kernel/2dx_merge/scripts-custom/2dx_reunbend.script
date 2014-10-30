@@ -27,6 +27,7 @@
 # MANUAL: Now you can run this standard script "Re-Unbend", to re-unbend all selected images with the merged dataset as reference.  This should give better values than the Fourier filtered unbending. Otherwise, there is something wrong with either the merged reference, or the tilt geometry, or the phase origin, or still something else.
 #
 # DISPLAY: ReUnbend_All
+# DISPLAY: ReUnbend_All_MP
 #
 #$end_local_vars
 #
@@ -35,6 +36,7 @@ set proc_2dx = ""
 set app_2dx_image = ""
 #
 set ReUnbend_All = ""
+set ReUnbend_All_MP = ""
 #
 #$end_vars
 #
@@ -137,6 +139,61 @@ if ( ${ReUnbend_All} == "3" ) then
 endif
 #
 if ( ${ReUnbend_All} == "4" ) then
+  #
+  ############################################################################# 
+  ${proc_2dx}/linblock "Processing all directories in ${ReUnbend_All_MP} jobs"
+  ############################################################################# 
+  #
+  cd ${olddir} 
+  #
+  set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
+  echo ": Will work on ${dirnum} image directories."
+  #
+  # cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  # set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
+  set irun = 1
+  set sleeptime = 10
+  #
+  set dircounter = 1
+  while ( ${dircounter} <= ${dirnum} )
+    #
+    ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
+${olddir}/2dx_merge_dirfile.dat
+${dircounter}
+eot
+    #
+    set dirfile = `cat TMP.tmp`
+    \rm TMP.tmp
+    #
+    cd ${olddir}
+    cd ..
+    cd ${dirfile}
+    if ( -e 2dx_image.cfg ) then
+      echo ":: "
+      ${proc_2dx}/linblock "Working on ${dirfile}"
+      set curdir = ${PWD}
+      echo ":: ${app_2dx_image} ${curdir} "'"*"'
+      if( ${irun} < ${ReUnbend_All_MP} ) then
+        nohup sleep ${sleeptime} ; ${app_2dx_image} ${curdir} '"*"' &
+        @ sleeptime += 10
+        @ irun++
+      else
+        ${app_2dx_image} ${curdir} '"*"'
+        set irun = 1
+        set sleeptime = 10
+      endif
+      echo ":: Done."
+    else
+      echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
+    endif
+    # 
+    @ dircounter += 1
+    cd ${olddir}
+  end
+endif
+#
+if ( ${ReUnbend_All} == "5" ) then
   #
   ############################################################################# 
   ${proc_2dx}/linblock "Processing all directories"

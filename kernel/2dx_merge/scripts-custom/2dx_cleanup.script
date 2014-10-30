@@ -248,7 +248,7 @@ if ( ${cleanup_location} == "0" || ${cleanup_location} == "1" ) then
   set dircounter = ${dirnum}
   while ( ${dircounter} > 0 )
     #
-    ${bin_2dx}/2dx_getline.exe << eot >> TMP.tmp
+    ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
 ${oldir}/2dx_merge_alldirs.dat
 ${dircounter}
 eot

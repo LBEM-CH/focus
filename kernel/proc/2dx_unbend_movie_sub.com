@@ -331,23 +331,23 @@ eot
 
             if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
-                  ${ps2pdf} CCPLOT.PS
+                  ${ps2pdf} CCPLOT.PS 
                   \mv -f CCPLOT.pdf frame_quadserch.pdf
                 else
-                   ${ps2pdf} CCPLOT.PS frame_quadserch.pdf
+                   ${ps2pdf} CCPLOT.PS frame_quadserch.pdf 
                 endif
                 pdftk A=frame_quadserch.pdf cat A1 output out.pdf
                 \mv -f out.pdf frame_quadserch.pdf
             else
                 if ( ${ps2pdf} == "pstopdf" ) then
-                  ${ps2pdf} CCPLOT.PS 
+                  ${ps2pdf} CCPLOT.PS  
                 else
-                  ${ps2pdf} CCPLOT.PS CCPLOT.pdf
+                  ${ps2pdf} CCPLOT.PS CCPLOT.pdf 
                 endif
                 if ( ${iforward} == '1' ) then
-                  pdftk A=frame_quadserch.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf
+                  pdftk A=frame_quadserch.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
                 else
-                  pdftk A=CCPLOT.pdf B=frame_quadserch.pdf cat A1 B1-end output out.pdf
+                  pdftk A=CCPLOT.pdf B=frame_quadserch.pdf cat A1 B1-end output out.pdf 
                 endif
                 \mv -f out.pdf frame_quadserch.pdf
             endif
@@ -391,23 +391,23 @@ eot
             #
             if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
-                  ${ps2pdf} CCPLOT.PS
+                  ${ps2pdf} CCPLOT.PS  
                   \mv -f CCPLOT.pdf frame_unbending.pdf
                 else
-                   ${ps2pdf} CCPLOT.PS frame_unbending.pdf
+                   ${ps2pdf} CCPLOT.PS frame_unbending.pdf 
                 endif
-                pdftk A=frame_unbending.pdf cat A1 output out.pdf
+                pdftk A=frame_unbending.pdf cat A1 output out.pdf 
                 \mv -f out.pdf frame_unbending.pdf
             else
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS 
                 else
-                  ${ps2pdf} CCPLOT.PS CCPLOT.pdf
+                  ${ps2pdf} CCPLOT.PS CCPLOT.pdf 
                 endif
                 if ( ${iforward} == 1 ) then
-                  pdftk A=frame_unbending.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf
+                  pdftk A=frame_unbending.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
                 else
-                  pdftk A=CCPLOT.pdf B=frame_unbending.pdf cat A1 B1-end output out.pdf
+                  pdftk A=CCPLOT.pdf B=frame_unbending.pdf cat A1 B1-end output out.pdf 
                 endif
                 \mv -f out.pdf frame_unbending.pdf
             endif

@@ -84,17 +84,22 @@ cd ${olddir}
 set imagenum = `cat tmp.tmp | wc -l`
 echo ":: Importing ${imagenum} images"
 #
+set movie_import_dirname = `echo ${movie_import_dir} | rev | cut -d\/ -f1 | rev`
+set movie_import_target_dirname = `echo ${movie_import_target_dir}-${movie_import_dirname} | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' -e 's/+/_/g'`
 cd ..
-if ( ! -d ${movie_import_target_dir} ) then
-  \mkdir ${movie_import_target_dir}
-  ${proc_2dx}/linblock "Creating ${movie_import_target_dir}"
-  cd ${movie_import_target_dir}
+if ( ! -d ${movie_import_target_dirname} ) then
+  \mkdir ${movie_import_target_dirname}
+  ${proc_2dx}/linblock "Creating ${movie_import_target_dirname}"
+  cd ${movie_import_target_dirname}
   \ln -s ../2dx_master.cfg .
 endif
 cd ${olddir}
 #
 set irun = 1
 while ( ${irun} <= ${imagenum} )
+  set prog_num = `echo ${irun} ${imagenum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'` 
+  echo "<<@progress: ${prog_num}>>"
+  #
   set importimage = `sed -n "${irun}p" tmp.tmp`
   if ( ${movie_import_type} == 0 ) then
     set importimage_pattern = `echo ${importimage} | sed -e's/_aligned.mrc//g' -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g' | tr 'A-Z' 'a-z'`
@@ -104,22 +109,21 @@ while ( ${irun} <= ${imagenum} )
   #
   if ( -e ${movie_average}/${importimage} ) then
     if ( -e ${movie_stack}/${importimage} ) then
-      set testval = `echo ${movie_import_imagenumber} | wc -c`
-      set newimagenumber = `echo 0000000000 | cut -c${testval}-`${movie_import_imagenumber}
-      echo "::"
-      echo ":: Importing drift-corrected average image "
-      echo "::      ${movie_average}/${importimage}"
+      set newval = `echo ${movie_import_imagenumber} | awk '{ s = $1 * 100 } END { print s }'`
+      set testval = `echo ${newval} | wc -c`
+      set newimagenumber = `echo 0000000000 | cut -c${testval}-`${newval}
+      echo ":"
+      echo ": Importing drift-corrected average image "
+      echo ":      ${movie_average}/${importimage}"
       if ( ${movie_import_aligned_stack} == "y" ) then
-        echo ":: and drift-corrected stack"
-        echo "::      ${movie_stack}/${importimage}"
+        echo ": and drift-corrected stack"
+        echo ":      ${movie_stack}/${importimage}"
       endif
-      echo ":: into folder"
-      echo "::      ../${movie_import_target_dir}/${importimage_pattern}"
-      echo ":: using image number ${newimagenumber}"
-      echo "::"
+      echo ":: ${irun}: Creating ${movie_import_target_dirname}/${importimage_pattern} for image number ${newimagenumber}"
+      echo ":"
       cd ${olddir}
       cd ..
-      cd ${movie_import_target_dir}
+      cd ${movie_import_target_dirname}
       if ( -d ${importimage_pattern} ) then
         ${proc_2dx}/linblock "WARNING: ${importimage_pattern} already existing. Removing."
         \rm -rf ${importimage_pattern}
@@ -142,12 +146,10 @@ while ( ${irun} <= ${imagenum} )
       echo "set initialization_executable = y" >> 2dx_image.cfg
       set fullpath = `pwd`
       cd ${olddir}
-      # ${app_2dx_image} ${fullpath} "2dx_initialize"
+      ${app_2dx_image} ${fullpath} "2dx_initialize"
       cd ${olddir}
       #
       @ movie_import_imagenumber++
-      set testval = `echo ${movie_import_imagenumber} | wc -c`
-      set newimagenumber = `echo 0000000000 | cut -c${testval}-`${movie_import_imagenumber}
       echo "set movie_import_imagenumber = ${movie_import_imagenumber}"  >> LOGS/${scriptname}.results
     else
       ${proc_2dx}/protest "ERROR: ${movie_stack}/${importimage} not found."

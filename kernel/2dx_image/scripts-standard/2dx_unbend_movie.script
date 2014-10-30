@@ -187,7 +187,7 @@ if ( ${system} == "Darwin" ) then
   else
     set app_2dx_image = "${bin_2dx}/../../../bin/2dx_image"
   endif
-  echo "::Testing, if gostscript is installed and ps2pdf exists"
+  echo ":Testing, if gostscript is installed and ps2pdf exists"
   set ps2pdf_test = `which ps2pdf`x 
   if ( ${ps2pdf_test} == 'x' ) then
     set ps2pdf = pstopdf

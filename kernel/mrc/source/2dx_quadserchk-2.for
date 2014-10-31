@@ -419,11 +419,11 @@ C
           enddo
           write(6,'('' INPUT ARRAY MIN,MAX = '',2G15.3)')DARRAYMIN,DARRAYMAX
 C
-C---------Scale ARRAY between 0 and 100
+C---------Scale ARRAY between 0 and 10
           do IRO = 1,NLINE
             do ICO = 1,NCOL
               INDEXO=(IRO-1)*NCOL+ICO
-              ARRAY(INDEXO)=(ARRAY(INDEXO)-DARRAYMIN)*100.0/(DARRAYMAX-DARRAYMIN)
+              ARRAY(INDEXO)=(ARRAY(INDEXO)-DARRAYMIN)*10.0/(DARRAYMAX-DARRAYMIN)
             enddo
           enddo
           DARRAYMIN= 1e10
@@ -712,7 +712,7 @@ C
       CALL IMCLOSE(2)
 C
 C-----Normalise profile to reasonable numbers (max=100.0) - avoids overflow later.
-      IF(PROFILE(51,51).GT.1.0) THEN
+      IF(PROFILE(51,51).GT.0.001) THEN
         FACTOR = 100.0/PROFILE(51,51)
         DO 95 I=1,101
           DO 95 J=1,101
@@ -818,7 +818,7 @@ C
 C
         DO 45001 IA=MINA1,MAXA1
           DO 45001 IB=MINB1,MAXB1
-            READ(4,39031,ERR=45009)
+            READ(4,*,ERR=45009)
      .       XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)
 45001   CONTINUE
 C
@@ -879,7 +879,8 @@ C
       CORAVG=0
       NCOOR=0
       NFOUNDT=0
-      NOTUSED=0
+      NOTUSED0=0
+      NOTUSED2=0
       NDRIFT=0
       NOUT=0
       NJUMP=0
@@ -1045,7 +1046,7 @@ C-------------AND THE DENSITIES OF THE 4 NEAR NEIGHBOURS
                    IGR=IY+IIY
 9031             CONTINUE
 C              WRITE(6,20001)IGC,IGR,BIG        ! diagnostic
-20001          FORMAT(' HIGHEST PEAK',2I10,E12.4)
+20001          FORMAT(' HIGHEST PEAK X,Y, BIG',2I10,G16.6)
 C
 CHEN-----------IGC,IGR: Center of gravity of found actual peak position
 C--------------BIG: Cross-correlation peak height of that position
@@ -1064,15 +1065,15 @@ C              WRITE(6,20000)IX,IY,IIX,IIY
 C
               IF(IDRIFT.EQ.1)NDRIFT=NDRIFT+1
               IF(IDRIFT.EQ.1)WRITE(6,20011) BIGFACTR,IX,IY,IIX,IIY
-20011         FORMAT(' DRIFTED PEAK - BIGFACTR,X,Y,dX,dY',F6.1,4I8)
+20011         FORMAT(' DRIFTED PEAK - BIGFACTR,X,Y,dX,dY',G16.6,4I8)
               IF(JFLAG.EQ.1)WRITE(6,20010)IX,IY,IIX,IIY
 20010         FORMAT(' ? PROFILE FIT, IX,IY,IIX,IIY',4I10)
 C
               GC=IX+IIX+CGXADJST
               GR=IY+IIY+CGYADJST
               BIG=BIG*BIGFACTR
-CHEN          WRITE(6,20002)GC,GR,BIG
-20002         FORMAT(' PEAK AT',2F15.5,10X,F10.5)
+C              WRITE(6,20002)GC,GR,BIG
+C20002         FORMAT(' PEAK AT X,Y, BIG ',2G16.6,10X,G16.6)
 C
 CHEN
 C-------------GC,GR   : Actual center of gravity of peak position
@@ -1093,8 +1094,9 @@ C-------------PEAK(IA,IB)  : Peak height
 C
               IF(BIG.LT.CORMIN) CORMIN=BIG
               IF(BIG.GT.CORMAX) CORMAX=BIG
-C             WRITE(6,'('' GC,IX,RDC,GR,IY,KDR,BIG'',F,I,2F,2I,F)')
-C    1                     GC,IX,RDC,GR,IY,KDR,BIG
+C              WRITE(6,'('' GC,IX,RDC,GR,IY,KDR,BIG'',
+C     .          F12.6,I8,2F12.6,2I8,F16.6)')
+C     1                     GC,IX,RDC,GR,IY,KDR,BIG
               CORAVG=CORAVG+BIG
               NCOOR=NCOOR+1
 CHEN
@@ -1108,6 +1110,10 @@ C
 C
 C-------------DO NOT USE POINT IF IT IS AT EDGE OF SEARCH AREA(* MEANS IT IS TO BE USED).
               IF(INT(ABS(GC-IX)).GE.KDC.OR.INT(ABS(GR-IY)).GE.KDR)THEN
+C                WRITE(6,'('': Setting IUSE to 2:  '',
+C     .            ''GC,IX,KDC, GR,IY,KDR, BIG'',
+C     .            F12.6,2I8,'' /// '', F12.6,2I8,'' /// '',F16.6)')
+C     1                     GC,IX,KDC,GR,IY,KDR,BIG
                 IUSE=2
               ENDIF
 C
@@ -1125,24 +1131,27 @@ C
                 COOR(1,IB,IA)=XERROR(IA,IB)+XCOORD(IA,IB)
                 COOR(2,IB,IA)=YERROR(IA,IB)+YCOORD(IA,IB)
                 COOR(3,IB,IA)=PEAK(IA,IB)
-                WRITE(6,'('' XCOR,YCOR,XERR,YERR,PEAK'',15X,5F10.2)')
-     1            XCOORD(IA,IB),YCOORD(IA,IB),
-     2            XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)
+C                WRITE(6,'('' XCOR,YCOR,XERR,YERR,PEAK'',15X,5F10.2)')
+C     1            XCOORD(IA,IB),YCOORD(IA,IB),
+C     2            XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)
               ENDIF
 C
               IF((IUSE.EQ.2) .OR.
      1           (IUSE.EQ.0 .AND. IONELA.eq.0))THEN
-                NOTUSED=NOTUSED+1
+                if(IUSE.eq.0)NOTUSED0=NOTUSED0+1
+                if(IUSE.eq.2)NOTUSED2=NOTUSED2+1
                 COOR(1,IB,IA)=0
                 COOR(2,IB,IA)=0
                 COOR(3,IB,IA)=0
                 XERROR(IA,IB)=9999.
                 YERROR(IA,IB)=9999.
                 PEAK(IA,IB)=0.
-C               IF(BIG.EQ.0.0)WRITE(6,30003)IA,IB
-30003           FORMAT(' NOT FOUND; C=0.0; PROBABLY DRIFTED',2X,2I5)
-C               IF(BIG.NE.0.0)WRITE(6,30013)IA,IB
-30013           FORMAT(' NOT FOUND; AT EDGE OF SEARCH BOX',2X,2I5)
+C                IF(BIG.EQ.0.0)WRITE(6,30003)IA,IB,IUSE,NOTUSED0
+C30003           FORMAT(' Peak not found; C=0.0; PROBABLY DRIFTED ',
+C     .            2I5,' IUSE=',2I8)
+C                IF(BIG.NE.0.0)WRITE(6,30013)IA,IB,IUSE,NOTUSED2
+C30013           FORMAT(' Peak not found; AT EDGE OF SEARCH BOX   ',
+C     .            2I5,' IUSE=',2I8)
               ENDIF
 C
               IF(IUSE.EQ.1)THEN
@@ -1230,32 +1239,41 @@ C            endif
       close(13)
 39031 FORMAT(3G15.5)      
 39032 FORMAT(2I6,3G15.5)      
-9030  FORMAT(2F10.3,F16.2)  ! increase PEAK size possibility
+9030  FORMAT(2G16.6,G16.6)  ! increase PEAK size possibility
       WRITE(6,39020)NJUMP
-39020 FORMAT(' NUMBER OF HALF-LINES COMPLETELY OUTSIDE IMAGE',I10)
+39020 FORMAT(' NUMBER OF HALF-LINES COMPLETELY OUTSIDE IMAGE .......',
+     .  '....:',I10)
       WRITE(6,39019)NOUT
-39019 FORMAT(' NUMBER OR PEAKS OUTSIDE EDGE OF IMAGE',I10)
+39019 FORMAT(' NUMBER OR PEAKS OUTSIDE EDGE OF IMAGE ...............',
+     .  '....:',I10)
       WRITE(6,39030)NCALLPROF
-39030 FORMAT(' NUMBER OF CALLS TO PROFIT SUBROUTINE',I10)
+39030 FORMAT(' NUMBER OF CALLS TO PROFIT SUBROUTINE ................',
+     .  '....:',I10)
       WRITE(6,29019)NFOUNDT
-29019 FORMAT(' TOTAL NUMBER OF CORRELATION PEAKS FOUND',I10,/)
-      WRITE(6,29020)NOTUSED
-29020 FORMAT(' TOTAL NUMBER OF CORRELATION PEAKS NOT USED',I10,/)
-      WRITE(6,29021)NDRIFT
-29021 FORMAT(' NUMBER OF PEAKS THAT DRIFTED FROM ORIGINAL BEST',
-     . ' POSITION',I10,/)
+29019 FORMAT(': TOTAL NUMBER OF CORRELATION PEAKS FOUND .............',
+     .  '....:',I10,/)
+      WRITE(6,29020)NOTUSED0
+29020 FORMAT(': TOTAL NUMBER OF CORRELATION PEAKS DRIFTED ...........',
+     .  '....:',I10,'  (Data lost)',/)
+      WRITE(6,29021)NOTUSED2
+29021 FORMAT(': TOTAL NUMBER OF CORRELATION PEAKS AT EDGE OF BOX ....',
+     .  '....:',I10,'  (Data lost)',/)
+      WRITE(6,29022)NDRIFT
+29022 FORMAT(': NUMBER OF PEAKS THAT DRIFTED FROM ORIGINAL BEST POSIT',
+     .  'ION :',I10,/)
       WRITE(6,9019) CORMIN,CORMAX,CORAVG/NCOOR,NCOOR
-9019  FORMAT('$CORMIN,CORMAX,CORAVG ',3G18.4,' NCOOR',I10)
+9019  FORMAT(': CORMIN,CORMAX,CORAVG ',3G16.6,' NCOOR',I10)
       WRITE(6,9020) CORMIN*CORFAC,CORMAX*CORFAC,CORAVG/NCOOR*CORFAC
-9020  FORMAT('$THE SAME SCALED = ',3G18.3)
+9020  FORMAT(': THE SAME SCALED =    ',3G16.6)
       WRITE(6,39021)XMXDSCRP,YMXDSCRP
-39021 FORMAT(' MAXIMUM DIFFERENCE FOUND BETWEEN ACTUAL AND PREDICTED',
+39021 FORMAT(': MAXIMUM DIFFERENCE FOUND BETWEEN ACTUAL AND PREDICTED',
      . ' POSITION; IN X AND Y',2F10.3)
 C
       WRITE(6,9050)(NCOUNT(I),I=1,11)
-9050  FORMAT(' NUMBER OF PEAKS NEEDING N PASSES TO REACH FIT',/,
-     . ' NPASS=1',I5,', NPASS=2',I6,', NPASS=3',I6,', NPASS=4',I6,
-     . ', NPASS=5',I5,', NPASS=6',I5,/,' NPASS=7',I5,', NPASS=8',I5,
+9050  FORMAT(': NUMBER OF PEAKS NEEDING N PASSES TO REACH FIT',/,
+     . ': NPASS=1',I5,', NPASS=2',I6,', NPASS=3',I6,', NPASS=4',I6,
+     . ', NPASS=5',I5,', NPASS=6',I5,/,
+     . ': NPASS=7',I5,', NPASS=8',I5,
      . ', NPASS=9',I5,', NPASS=10',I5,', NPASS=11',I5)
 C
        write(*,'('' Entering PLOTLATT'')')
@@ -2411,8 +2429,8 @@ C
 C
 52      CONTINUE
         NCOUNT(NPASS)=NCOUNT(NPASS)+1
-C       WRITE(6,66)LXBEST,LYBEST,CCFBEST,NPASS
-66      FORMAT(' POSITION OF BEST CORRELATION',2I5,F8.3,I5)
+C        WRITE(6,66)LXBEST,LYBEST,CCFBEST,NPASS
+C66      FORMAT(' POSITION OF BEST CORRELATION',2I5,F8.3,I5)
 C
         CGXADJST=LXBEST/20.0
         CGYADJST=LYBEST/20.0
@@ -2437,6 +2455,8 @@ C
         IF(BIGFACTR.GT.10.0 .OR. BIGFACTR.LT.0.0 .OR.
      1     LXBEST  .GT.20   .OR. LXBEST  .LT.-20 .OR.
      2     LYBEST  .GT.20   .OR. LYBEST  .LT.-20    )THEN
+C          write(6,'(''BIGFACTR,LXBEST,LYBEST out of limits: '',
+C     .      G16.6,2I10)')BIGFACTR,LXBEST,LYBEST
           IF(IONELA.eq.0)THEN
             CGXADJST=0.0
             CGYADJST=0.0

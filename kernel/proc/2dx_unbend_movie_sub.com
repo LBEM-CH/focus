@@ -96,7 +96,7 @@ frames/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}.cor.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${movie_quadradbx},${movie_quadradby}         ! RADIUS OF CORR SEARCH, search offset in pixels
+${movie_quadradax},${movie_quadraday}         ! RADIUS OF CORR SEARCH, search offset in pixels
 ${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
@@ -122,7 +122,7 @@ frames/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}.cor.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${movie_quadradbx},${movie_quadradby}           ! RADIUS OF CORR SEARCH, search offset in pixels
+${movie_quadradax},${movie_quadraday}           ! RADIUS OF CORR SEARCH, search offset in pixels
 ${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
@@ -253,7 +253,7 @@ frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${movie_quadradbx},${movie_quadradby},500,500           ! RADIUS OF CORR SEARCH, search offset in pixels
+${movie_quadradax},${movie_quadraday},500,500           ! RADIUS OF CORR SEARCH, search offset in pixels
 ${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
@@ -263,7 +263,7 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 eot
         #
         if ( ! -e frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc ) then
-          ${proc_2dx}/protest "ERROR in 2dx_quadserchk-3" 
+          ${proc_2dx}/protest "ERROR in 2dx_quadserchk-2" 
         else
           \mv -f frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
         endif

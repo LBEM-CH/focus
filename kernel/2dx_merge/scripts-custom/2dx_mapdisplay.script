@@ -17,7 +17,6 @@
 #
 # MANUAL: ToDo: 2dx_merge has a bug when the file paths and names become too long. They are then not displayed any more.
 #
-# DISPLAY: imagename
 # DISPLAY: SYM
 #
 #$end_local_vars
@@ -61,7 +60,7 @@ source ${OUTRUNFILE}
 \rm -f ${OUTRUNFILE}
 #
 cat ${OUTPUTFILE}
-# cat ${OUTPUTFILE} >> LOGS/${scriptname}.results
+cat ${OUTPUTFILE} >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: LINK <LINK>" >> LOGS/${scriptname}.results
 #

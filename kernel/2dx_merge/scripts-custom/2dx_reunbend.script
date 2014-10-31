@@ -158,6 +158,18 @@ if ( ${ReUnbend_All} == "4" ) then
   set dircounter = 1
   while ( ${dircounter} <= ${dirnum} )
     #
+    set prog_num = `echo ${dircounter} ${dirnum} | awk '{ s = 5 + int( 90 * $1 / $2 ) } END { print s }'` 
+    echo "<<@progress: ${prog_num}>>"
+    #
+    # set ReUnbend_All_old = ${ReUnbend_All_MP}
+    # set ReUnbend_All_tmp = `cat 2dx_merge.cfg | grep "set ReUnbend_All_MP" | cut -d\" -f2`
+    # set ReUnbend_All_MP = `echo ${ReUnbend_All_tmp} | awk '{ if ( $1 < 1 ) { s = 1 } else { if ( $1 > 12 ) { s = 12 } else { s = $1 } } } END { print s }'`
+    # if ( ${ReUnbend_All_old} != ${ReUnbend_All_MP} ) then
+    #   echo ":: "
+    #   echo ":: Changing number of parallel processes to ${ReUnbend_All_MP}."
+    #   echo ":: "
+    # endif
+    #
     ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
 ${olddir}/2dx_merge_dirfile.dat
 ${dircounter}
@@ -170,10 +182,10 @@ eot
     cd ..
     cd ${dirfile}
     if ( -e 2dx_image.cfg ) then
-      echo ":: "
+      echo ": "
       ${proc_2dx}/linblock "Working on ${dirfile}"
       set curdir = ${PWD}
-      echo ":: ${app_2dx_image} ${curdir} "'"*"'
+      echo ": ${app_2dx_image} ${curdir} "'"*"'
       if( ${irun} < ${ReUnbend_All_MP} ) then
         nohup sleep ${sleeptime} ; ${app_2dx_image} ${curdir} '"*"' &
         @ sleeptime += 10
@@ -183,7 +195,7 @@ eot
         set irun = 1
         set sleeptime = 10
       endif
-      echo ":: Done."
+      echo ": Done with ${dirfile}"
     else
       echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
     endif

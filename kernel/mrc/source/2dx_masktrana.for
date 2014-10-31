@@ -202,7 +202,7 @@ C     Set scale factor to be 1.0 since this version uses grid units as input.
             IKS(NHOLE)=IK
             XC(NHOLE)=XPOS
             YC(NHOLE)=YPOS
-            WRITE(6,1800) IH,IK,XC(NHOLE),YC(NHOLE)
+C            WRITE(6,1800) IH,IK,XC(NHOLE),YC(NHOLE)
 1800        FORMAT(5X,2I6,3F14.4)
 120     CONTINUE
       ENDIF
@@ -220,15 +220,15 @@ C     Set scale factor to be 1.0 since this version uses grid units as input.
         XPOS=IH*AX+IK*BX
         YPOS=IH*AY+IK*BY
         IF(XPOS.LT.0.OR.(XPOS.EQ.0.0.AND.YPOS.LT.0.)) THEN
-        IH=-IH
-        IK=-IK
-        XPOS=-XPOS
-        YPOS=-YPOS
-        WRITE(6,1803)IH,IK,XPOS,YPOS
-1803    FORMAT(' THIS HOLE X,Y COORDS MOVED TO POSITIVE X',2I5,2F10.4)
-      ENDIF
+          IH=-IH
+          IK=-IK
+          XPOS=-XPOS
+          YPOS=-YPOS
+C          WRITE(6,1803)IH,IK,XPOS,YPOS
+C1803      FORMAT(' THIS HOLE X,Y COORDS MOVED TO POSITIVE X',2I5,2F10.4)
+        ENDIF
 C
-C      TEST FOR REPEAT SPECIFICATION OF INDICES and for spot within transform.
+C       TEST FOR REPEAT SPECIFICATION OF INDICES and for spot within transform.
         IF(NHOLE.EQ.0) GO TO 20131
         DO 20130 ITEST=1,NHOLE
           IF(XPOS.EQ.XC(ITEST).AND.YPOS.EQ.YC(ITEST))THEN
@@ -257,7 +257,7 @@ C      TEST FOR REPEAT SPECIFICATION OF INDICES and for spot within transform.
        IKS(NHOLE)=IK
        XC(NHOLE)=XPOS
        YC(NHOLE)=YPOS
-       WRITE(6,1800) IH,IK,XC(NHOLE),YC(NHOLE)
+C       WRITE(6,1800) IH,IK,XC(NHOLE),YC(NHOLE)
        GO TO 125
       ENDIF
 130   WRITE(6,1801)NHOLE
@@ -418,19 +418,20 @@ C  Calculate statistics of spot amplitude distribution on first pass only.
 600   CONTINUE
       AVAMP=AMPTOT/NSPOTS
       FACTORMAX=1.5
-      WRITE(6,601) AVAMP
-601   FORMAT(/,' MEAN AMPLITUDE INSIDE MASKS (OVERALL AVER',F12.2,')',/,
-     .  '   IH   IK               AMPMEAN     NIN         ',
+C      WRITE(6,601) AVAMP
+601   FORMAT(/,' MEAN AMPLITUDE INSIDE MASKS (OVERALL AVER',F12.2,')'
+     .   ,/,/,'   IH   IK               AMPMEAN     NIN         ',
      .  '   AMPREDUCED ')
       DO 610 NH=1,NHOLE
         IF(IAMPLIMIT.AND.ASUM(NH).GT.FACTORMAX*AVAMP) THEN
           SCALESPOT(NH)=FACTORMAX*AVAMP/ASUM(NH)
-          WRITE(6,602)IHS(NH),IKS(NH),ASUM(NH),NSUM(NH),
-     .    SCALESPOT(NH)*ASUM(NH)
+C          WRITE(6,602)IHS(NH),IKS(NH),ASUM(NH),NSUM(NH),
+C     .    SCALESPOT(NH)*ASUM(NH)
 602       FORMAT(2I5,F12.2,I8,F12.2)
        ELSE
          SCALESPOT(NH)=1.0
-         WRITE(6,602)IHS(NH),IKS(NH),ASUM(NH),NSUM(NH)
+C         WRITE(6,602)IHS(NH),IKS(NH),ASUM(NH),NSUM(NH),
+C     .    SCALESPOT(NH)*ASUM(NH)
        ENDIF
 610   CONTINUE
       IPASS2=.TRUE.

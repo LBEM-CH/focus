@@ -353,18 +353,19 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
               write(*,'(''::'',79(''#''))')
               write(*,'(''::'',79(''#''))')
               write(*,'(''::'',79(''#''))')
-              write(*,'(''::ERROR; Imagenumber '',I10,
+              write(*,'(''::ERROR: Imagenumber '',I10,
      .          '' appears twice.'')')imnum(i)
+              call shorten(CIMAGENAME,k)
+              write(*,'(''::This is for image '',A)')CIMAGENAME(1:k)
               write(*,'(''::'',79(''#''))')
               write(*,'(''::'',79(''#''))')
               write(*,'(''::'',79(''#''))')
-              stop
             endif
           enddo
         endif
 C
         call shorten(CIMAGENAME,k)
-        write(CTITLE(1:40),'('' Imagename = '',A)')CIMAGENAME(1:k)
+        write(CTITLE(1:80),'('' Imagename = '',A)')CIMAGENAME(1:k)
         call rgetline(RESMAX,"RESMAX")
         if(RESMAX.lt.RGRESMAX)RESMAX=RGRESMAX
         call rgetline(RESMIN,"RESMIN")
@@ -444,7 +445,10 @@ C---------RSCL=0.0 means scaling is automatic for following datasets
 C
         close(12)
 C
-        write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(1:40)
+        call shorten(CTITLE,k)
+        k1=1
+        if(k.gt.40)k1=41-k
+        write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(k1:k)
 C
         call shorten(cdir,k)
         call shortshrink(CIMAGENAME,k1)

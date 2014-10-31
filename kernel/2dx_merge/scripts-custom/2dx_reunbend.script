@@ -188,7 +188,8 @@ eot
       echo ": ${app_2dx_image} ${curdir} "'"*"'
       if( ${irun} < ${ReUnbend_MP} ) then
         nohup sleep ${sleeptime} ; ${app_2dx_image} ${curdir} '"*"' &
-        @ sleeptime += 10
+        @ sleeptime += ${ReUnbend_MP} 
+        @ sleeptime += ${ReUnbend_MP} 
         @ irun++
       else
         ${app_2dx_image} ${curdir} '"*"'

@@ -280,7 +280,10 @@ C---------RSCL=0.0 means scaling is automatic for following datasets
         call igetline(IREVXSGN,"revxsgn")
         close(12)
 C
-        write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(1:40)
+        call shorten(CTITLE,k)
+        k1=1
+        if(k.gt.40)k1=41-k
+        write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(k1:k)
         call shorten(cdir,k1)
         call shortshrink(CIMAGENAME,k2)
 C
@@ -302,7 +305,8 @@ C
         write(11,'(A40,26X,''! lattice'')')
      .     CLATTICE(1:k)
 C
-        write(11,'(2F10.3,'' 0.0 '',F10.3,'' 0 '',F9.5,6I2,'',${LPROTFOUFIL} '',
+        write(11,'(2F10.3,'' 0.0 '',F10.3,'' 0 '',F9.5,6I2,
+     .     '',${LPROTFOUFIL} '',
      .     '' ! OH,OK,STEP,WIN,SGNXCH,SCL,R180,RHK,'',
      .      ''CTFREV,ROT90,REVHND,REVSGN,LPROTFOUFIL'')')
      .     RPHAORIH,RPHAORIK,RZWIN,RSCL,IROT180,IREVHK,ICTFREV,IROT90,

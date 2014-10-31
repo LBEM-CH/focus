@@ -6,6 +6,8 @@
 # This file has to be sourced from another csh.
 #
 
+        set valspotscan = '1'
+
         ###############################################################
         ${proc_2dx}/linblock "Processing frame average #${i}"
         ###############################################################
@@ -73,7 +75,6 @@ eot
         setenv PROFDATA frames/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
         setenv ERRORS   SCRATCH/errout2${imagename}.dat
 
-        set valspotscan = '0'
         set createmask = '0'
         
         if ( ${movie_masking_mode} != '0' && ${i} != "0" ) then
@@ -285,7 +286,6 @@ eot
           setenv ERRORS   SCRATCH/errout2${imagename}.dat
           setenv ERROUT   SCRATCH/errout3${imagename}.dat
 
-          set valspotscan = '0'
           set createmask = '0'
           set IPASS = 3
 
@@ -360,6 +360,8 @@ eot
             set ITYPE = 0
             set ROFFSET = 50.0
             set NNUM = 6
+            \rm -f CCPLOT.PS
+
             ${bin_2dx}/2dx_ccunbendk.exe << eot
 frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
@@ -389,6 +391,8 @@ eot
               ${proc_2dx}/protest "ERROR: CCPLOT.PS missing"
             endif
             #
+            \cp -f CCPLOT.PS frames/frame_${i}/PS/${nonmaskimagename}-ccunbend.ps
+
             if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS  

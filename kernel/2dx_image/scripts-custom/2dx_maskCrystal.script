@@ -39,7 +39,6 @@
 # DISPLAY: refori
 # DISPLAY: comment
 # DISPLAY: mask_fourmask
-# DISPLAY: mask_reset_reflocation
 #
 #$end_local_vars
 #
@@ -65,12 +64,13 @@ set maskb05 = ""
 set tempkeep = ""
 set refori = ""
 set mask_fourmask = ""
-set mask_reset_reflocation = ""
 #
 #$end_vars
 #
 echo "<<@progress: 1>>"
 #
+set mask_reset_reflocation = "n"
+# 
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #

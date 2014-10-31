@@ -159,6 +159,7 @@ set movie_quadrada = ""
 set movie_quadradb = ""
 set movie_facthreshb = ""
 set movie_imagenumber_toave = ""
+set MASKING_done = ""
 #
 #$end_vars
 #
@@ -227,6 +228,14 @@ if ( -e ${movie_stackname}.mrc ) then
   echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
 endif
 #
+if ( ${MASKING_done} == "y" ) then
+  if ( ${movie_masking_mode} == "0" ) then
+    ${proc_2dx}/linblock "WARNING: Correcting Frame Masking Mode to 1=Masking based on UnbendII"
+    set movie_masking_mode = 1
+    echo "set movie_masking_mode = ${movie_masking_mode}" >> LOGS/${scriptname}.results
+  endif
+endif
+# 
 if ( ! -e ${movie_stackname}) then
   ${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
 else
@@ -378,6 +387,7 @@ set i = 0
   echo "# IMAGE: frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc <Frame ${i} CC Map A>" >> LOGS/${scriptname}.results
   echo "# IMAGE: frames/frame_${i}/SCRATCH/TMP-quadserch3-autocor.mrc <Frame ${i} averaged central area>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results 
   echo "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
 #
 # i counts the super-frames to process:
@@ -409,6 +419,7 @@ while ($i <= ${movie_imagenumber_touse})
   echo "# IMAGE: frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc <Frame ${i} CC Map B>" >> LOGS/${scriptname}.results
   echo "# IMAGE: frames/frame_${i}/SCRATCH/TMP-quadserch3-autocor.mrc <Frame ${i} averaged central area>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results
   echo "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
   #
   @ i += 1

@@ -225,10 +225,11 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
               write(*,'(''::'',79(''#''))')
               write(*,'(''::ERROR; Imagenumber '',I10,
      .          '' appears twice.'')')imnum(i)
+              call shorten(CIMAGENAME,k)
+              write(*,'(''::This is for image '',A)')CIMAGENAME(1:k)
               write(*,'(''::'',79(''#''))')
               write(*,'(''::'',79(''#''))')
               write(*,'(''::'',79(''#''))')
-              stop
             endif
           enddo
         endif

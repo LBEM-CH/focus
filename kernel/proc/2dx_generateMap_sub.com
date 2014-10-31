@@ -756,7 +756,7 @@ if ( ${SYM_sub} == 'p1' ) then
 endif
 
 if ( ${movie_enable}x == "nx" ) then
-  \cp -f ${prefix}${imagename}-p1.mrc u2_map.mrc
+  \cp -f ${prefix}${imagename}-p1.mrc final_map_unbend2.mrc
 endif
 
 #
@@ -843,7 +843,7 @@ echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-p1.ps <PS: ${prename}Non-sy
 echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-${SYM_sub}.ps <PS: ${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_enable}x == "nx" ) then
-  \cp -f PS/${prefix}${imagename}MAP-p1.ps u2_map.ps
+  \cp -f PS/${prefix}${imagename}MAP-p1.ps PS/${prefix}${imagename}MAP-p1_unbend2.ps
 endif
 #
 if ( ${scriptname} == "2dx_generateMAP" ) then

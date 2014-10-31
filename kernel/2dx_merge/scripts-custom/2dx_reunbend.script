@@ -27,7 +27,7 @@
 # MANUAL: Now you can run this standard script "Re-Unbend", to re-unbend all selected images with the merged dataset as reference.  This should give better values than the Fourier filtered unbending. Otherwise, there is something wrong with either the merged reference, or the tilt geometry, or the phase origin, or still something else.
 #
 # DISPLAY: ReUnbend_All
-# DISPLAY: ReUnbend_All_MP
+# DISPLAY: ReUnbend_MP
 #
 #$end_local_vars
 #
@@ -36,7 +36,7 @@ set proc_2dx = ""
 set app_2dx_image = ""
 #
 set ReUnbend_All = ""
-set ReUnbend_All_MP = ""
+set ReUnbend_MP = ""
 #
 #$end_vars
 #
@@ -141,7 +141,7 @@ endif
 if ( ${ReUnbend_All} == "4" ) then
   #
   ############################################################################# 
-  ${proc_2dx}/linblock "Processing all directories in ${ReUnbend_All_MP} jobs"
+  ${proc_2dx}/linblock "Processing all directories in ${ReUnbend_MP} jobs"
   ############################################################################# 
   #
   cd ${olddir} 
@@ -161,12 +161,12 @@ if ( ${ReUnbend_All} == "4" ) then
     set prog_num = `echo ${dircounter} ${dirnum} | awk '{ s = 5 + int( 90 * $1 / $2 ) } END { print s }'` 
     echo "<<@progress: ${prog_num}>>"
     #
-    # set ReUnbend_All_old = ${ReUnbend_All_MP}
-    # set ReUnbend_All_tmp = `cat 2dx_merge.cfg | grep "set ReUnbend_All_MP" | cut -d\" -f2`
-    # set ReUnbend_All_MP = `echo ${ReUnbend_All_tmp} | awk '{ if ( $1 < 1 ) { s = 1 } else { if ( $1 > 12 ) { s = 12 } else { s = $1 } } } END { print s }'`
-    # if ( ${ReUnbend_All_old} != ${ReUnbend_All_MP} ) then
+    # set ReUnbend_old = ${ReUnbend_MP}
+    # set ReUnbend_tmp = `cat 2dx_merge.cfg | grep "set ReUnbend_MP" | cut -d\" -f2`
+    # set ReUnbend_MP = `echo ${ReUnbend_tmp} | awk '{ if ( $1 < 1 ) { s = 1 } else { if ( $1 > 12 ) { s = 12 } else { s = $1 } } } END { print s }'`
+    # if ( ${ReUnbend_old} != ${ReUnbend_MP} ) then
     #   echo ":: "
-    #   echo ":: Changing number of parallel processes to ${ReUnbend_All_MP}."
+    #   echo ":: Changing number of parallel processes to ${ReUnbend_MP}."
     #   echo ":: "
     # endif
     #
@@ -186,7 +186,7 @@ eot
       ${proc_2dx}/linblock "Working on ${dirfile}"
       set curdir = ${PWD}
       echo ": ${app_2dx_image} ${curdir} "'"*"'
-      if( ${irun} < ${ReUnbend_All_MP} ) then
+      if( ${irun} < ${ReUnbend_MP} ) then
         nohup sleep ${sleeptime} ; ${app_2dx_image} ${curdir} '"*"' &
         @ sleeptime += 10
         @ irun++

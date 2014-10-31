@@ -144,6 +144,11 @@ if ( "${level}" == "radical" ) then
   \rm -f frame_quadserch.pdf
   \rm -f frame_unbending.pdf
   \rm -f 2dx_origtiltk-reflections.log
+  \rm -f frame_quadserch.ps
+  \rm -f frame_unbending.ps
+  \rm -f 2dx_peaksearch-amp_before_LHpass.mrc
+  \rm -f u2_map.mrc
+  \rm -f u2_map.ps
   #
 else
   #

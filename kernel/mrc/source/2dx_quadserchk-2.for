@@ -1674,7 +1674,7 @@ C
         ENDDO
       ENDDO
 C
-      RTHRESH = 0.35
+      RTHRESH = 0.33
 C
 C-----Prepare IFIELD with 0 and 1
 C

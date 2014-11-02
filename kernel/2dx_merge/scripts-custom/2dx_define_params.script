@@ -38,6 +38,7 @@
 # DISPLAY: df_end
 # DISPLAY: movie_enable
 # DISPLAY: domask
+# DISPLAY: movie_imagenumber_toave
 #
 #$end_local_vars
 #
@@ -71,6 +72,7 @@ set imageorigin = ""
 set df_end = ""
 set movie_enable = ""
 set domask = ""
+set movie_imagenumber_toave = ""
 #
 #$end_vars
 #
@@ -146,6 +148,7 @@ foreach dirfile ( ${dirlist} )
   echo "set df_end = ${df_end}" >> LOGS/${scriptname}.results
   echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results
   echo "set domask = ${domask}" >> LOGS/${scriptname}.results
+  echo "set movie_imagenumber_toave = ${movie_imagenumber_toave}" >> LOGS/${scriptname}.results
   #
   ################################################################################
   ######### Modify only the section above ########################################

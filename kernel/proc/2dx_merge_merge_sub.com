@@ -390,7 +390,7 @@ endif
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_plotreska - to plot the powerspectrum with resolution circles"
-${proc_2dx}/linblock "Using plotreska, contributed by Anchi Cheng."
+${proc_2dx}/lin "Using plotreska, contributed by Anchi Cheng."
 #############################################################################  
 #
 \rm -f PLOTRES.PS

@@ -2016,6 +2016,10 @@ C
         RETURN
       ENDIF
 C
+      RLINE1 = 0.3
+      RLINE2 = 0.5
+      RLINE3 = 0.7
+C
       ZMAG=600.
       FMAG=100.
       IF (INTEN) FMAG = 150.
@@ -2032,8 +2036,8 @@ ccc   IF (0.EQ.1) WRITE(6,*) 'xpltsix,ypltsiz=',xpltsiz,ypltsiz
       CALL P2K_OUTFILE('PLOT.PS',7)
 5     CALL P2K_HOME
 C  Scale the plotsize. (ZMIN=-0.1, ZMAX=0.1 uses PLTSIZ=136)
-      YPLTSIZ=136.0
-      XPLTSIZ=YPLTSIZ*ABS(ZMAX-ZMIN)/(0.2)
+      YPLTSIZ=140.0
+      XPLTSIZ=YPLTSIZ*ABS(ZMAX-ZMIN)/(0.2)+10.0
       FONTSIZE=6.5
       CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
       CALL P2K_GRID(0.5*XPLTSIZ,0.5*YPLTSIZ,1.0)
@@ -2063,9 +2067,9 @@ C
 C  DRAW AXES FOR AMPLITUDE BOX
 C
         CALL P2K_MOVE(0.,0.,0.)
-        CALL P2K_ORIGIN(5.0,30.0,0.)
+        CALL P2K_ORIGIN(20.0,33.0,0.)
+        CALL P2K_MOVE(0.,0.,0.)
         XP=0.05*ZMM
-C       CALL P2K_MOVE(10.,-15.,0.)
         CALL P2K_MOVE(XP,-12.7,0.)
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
         CALL P2K_STRING(TITLE,80,0.)
@@ -2128,13 +2132,25 @@ C
         rgbb = 0.0
         if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
+        CALL P2K_LWIDTH(RLINE3)
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_DRAW(0.,FMAG,0.)
         CALL P2K_DRAW(ZMM,FMAG,0.)
         CALL P2K_DRAW(ZMM,0.,0.)
         CALL P2K_DRAW(0.,0.,0.)
+        CALL P2K_LWIDTH(RLINE1)
+        rgbr = 0.2
+        rgbg = 0.2
+        rgbb = 1.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
         CALL P2K_MOVE(ZERO,0.,0.)
         CALL P2K_DRAW(ZERO,FMAG,0.)
+        rgbr = 0.0
+        rgbg = 0.0
+        rgbb = 0.0
+        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
 CHEN>
         POSN=ZRANG*ZMAG*0.85
         CALL P2K_MOVE(POSN,103.0,0.)
@@ -2146,14 +2162,14 @@ CHEN>
 C
 C-------Plot units on horizontal axis:
 C
-        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.5)
         DO 25 J=1,100
           ZPOS=-0.5+J*DELZ
-          IF((ZPOS.LT.ZMIN).OR.(ZPOS.GE.ZMAX))GO TO 25
-          XPOS=ZERO+ZPOS*ZMAG
+          IF((ZPOS.LT.ZMIN-0.001).OR.(ZPOS.GT.ZMAX+0.001))GO TO 25
+          XPOS=ZERO+ZPOS*ZMAG+2.0
           CALL P2K_MOVE(XPOS,0.,0.)
           CALL P2K_DRAW(XPOS,2.0,0.)
-          XPOS=XPOS-3.0
+          XPOS=XPOS-4.0
           CALL P2K_MOVE(XPOS,-3.5,0.)
           WRITE(LINE(1:6),26) ZPOS
           CALL P2K_STRING(LINE,6,0.)
@@ -2168,9 +2184,11 @@ C
         CALL P2K_STRING('RECIPROCAL',10,0.)
         CALL P2K_MOVE(POSN,-10.5,0.)
         CALL P2K_STRING('ANGSTROMS',9,0.)
-        POSY=FMAG+GAP+PMAG - 3.0
-C        POSX = -5.0
-        POSX=-0.05*ZMM
+C
+C-------Plot units on vertical axis:
+C
+        POSY=FMAG+GAP+PMAG - 5.0
+        POSX=-0.06*ZMM
         CALL P2K_MOVE(POSX,POSY,0.)
         CALL P2K_STRING('PHS',3,0.)
 
@@ -2181,16 +2199,18 @@ C        POSX = -5.0
         CALL P2K_ORIGIN(ZERO,0.0,0.)
         SCALE=FMAG/(1.05*FMAX)
         IA=ALOG10(1.05*FMAX)
-        B=10.0**IA
+        B=(10.0**IA)/2.0
         IC=FMAX*1.05/B
+        if(IC.gt.6)then
+          IC=IC/2
+          B=B*2.0
+        endif
 C
-C-------Plot units on vertical axis:
-C
-        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
-        XPOS = ZMIN*ZMAG - 0.11*ZMM
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.5)
+        XPOS = ZMIN*ZMAG - 0.15*ZMM
         DO 200 J=1,IC
           F=J*B
-          YPOS=F*SCALE-0.2
+          YPOS=F*SCALE-0.4
           ZA=ZMIN*ZMAG
           ZB=ZMAX*ZMAG
           CALL P2K_MOVE(ZA,YPOS,0.)
@@ -2200,14 +2220,29 @@ C
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
           CALL P2K_MOVE(XPOS,YPOS,0.)
-          if(F.gt.10000000)then
-            WRITE(LINE(1:11),'(G11.3)') F
+          if(FMAX.gt.100000.0)then
+            write(cline,'(11X,G11.2)')F
+          elseif(FMAX.gt.10.0)then
+            write(cline,'(11X,F11.0)')F
+          elseif(FMAX.gt.1.0)then
+            write(cline,'(11X,F11.1)')F
+          elseif(FMAX.gt.0.1)then
+            write(cline,'(11X,F11.2)')F
+          elseif(FMAX.gt.0.01)then
+            write(cline,'(11X,F11.3)')F
+          elseif(FMAX.gt.0.001)then
+            write(cline,'(11X,F11.4)')F
+          elseif(FMAX.gt.0.0001)then
+            write(cline,'(11X,F11.5)')F
           else
-            WRITE(LINE(1:11),'(F11.1)') F
+            write(cline,'(11X,G11.2)')F
           endif
+          call shorten(cline,k)
+          k1=k-10
+          write(LINE(1:11),'(A)')cline(k1:k)
           CALL P2K_STRING(LINE,11,0.)
 200     CONTINUE
-        CALL P2K_MOVE(XPOS,-0.2,0.)
+        CALL P2K_MOVE(XPOS,-0.4,0.)
         CALL P2K_STRING('        0.0',11,0.)
 201     FORMAT(G11.2)
 C
@@ -2297,6 +2332,7 @@ C
         rgbg = 0.0
         rgbb = 0.0
         if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+        CALL P2K_LWIDTH(RLINE3)
 C
         Z=ZCALC(1)-DELPLT
         DO 600 J=1,NPLT
@@ -2312,6 +2348,8 @@ C
           IF(J.EQ.1) CALL P2K_MOVE(XP,YP,0.)
           CALL P2K_DRAW(XP,YP,0.)
 600     CONTINUE
+C
+        CALL P2K_LWIDTH(RLINE1)
 C
         IF (INTEN) RETURN
 C
@@ -2349,17 +2387,19 @@ CHEN>
 C
 C-------Write PHASE Y-axis labels
 C
-        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.5)
+        XPOS = ZMIN*ZMAG - 0.15*ZMM
         DO 630 J=1,5
           IANG=-180+(J-1)*90
-          XPOS=ZA-0.04*ZMM
           YPOS=IANG*PMAG2-0.3
           CALL P2K_MOVE(XPOS,YPOS,0.)
-          WRITE(LINE(1:4),631) IANG
-          CALL P2K_STRING(LINE,4,0.)
+          write(cline,'(11X,I4)')IANG
+          call shorten(cline,k)
+          k1=k-10
+          write(LINE(1:11),'(A)')cline(k1:k)
+          CALL P2K_STRING(LINE,11,0.)
 CHEN<
 630     CONTINUE
-631     FORMAT(I4)
 C
 C  PLOT OBS PHASE POINTS
 C
@@ -2466,6 +2506,7 @@ C
         rgbg = 0.0
         rgbb = 0.0
         if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+        CALL P2K_LWIDTH(RLINE3)
 C
         Z=ZCALC(1)-DELPLT
         DO 660 J=1,NPLT
@@ -2481,6 +2522,7 @@ C
         rgbg = 0.0
         rgbb = 0.0
         if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+        CALL P2K_LWIDTH(RLINE1)
 C
 C
         RETURN

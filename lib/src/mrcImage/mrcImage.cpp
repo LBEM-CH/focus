@@ -371,8 +371,12 @@ void mrcImage::formatImage(mrcHeader *header, QImage::Format format)
       image = new QImage(imageData, header->nx(), header->ny(), format);
     }
   }
-  //cout<<"Image dimensions: "<<image->width()<<" "<<image->height()<<endl;
-  *image = image->mirrored(false,true);
+  cout<<"In mrcImage.cpp, line 374:  Image mode = "<<mode<<",  Image dimensions = "<<image->width()<<" "<<image->height()<<endl;
+  // *image = image->mirrored(false,true);
+  QImage mirrorimage = image->mirrored(false,true);
+  cout<<"In mrcImage.cpp, line 376:  Image now mirrored."<<endl;
+  *image = mirrorimage;
+  cout<<"In mrcImage.cpp, line 378:  Image now copied back."<<endl;
   if(format == QImage::Format_Indexed8)
   {
     image->setNumColors(256);

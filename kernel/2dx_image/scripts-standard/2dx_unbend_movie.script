@@ -309,10 +309,6 @@ foreach f  (`ls frames`)
   python ${proc_2dx}/movie/disable_movie.py  frames/$f/
 end
 #
-cd frames
-\ln -s ../2dx_image.cfg 2dx_master.cfg
-cd ..
-#
 echo "<<@progress: 15>>"
 #
 \rm -f frame_unbending.pdf

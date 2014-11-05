@@ -1706,12 +1706,12 @@ C.....WRITE TABLE OF RESIDUAL AS FUNCTION OF RESOLUTION
 C---------------------------------------------------------------------------
 C
       WRITE(6,10173)
-10173 FORMAT(/5X,'BEST PHASE RESIDUAL IN RESOLUTION RANGES'/
+10173 FORMAT(/,":",5X,'BEST PHASE RESIDUAL IN RESOLUTION RANGES'/
      .   5X,'BETWEEN NEW FILM AND OTHER FILMS (NO TREATMENT OF SPECIAL',
-     .   ' REFLECTIONS)'/)
+     .   ' REFLECTIONS)',/)
       WRITE(6,10171)
-10171 FORMAT(5X,' RANGE','     DMIN ','     DMAX ','   RESIDUAL',
-     .   '  NUMBER'/)
+10171 FORMAT(":",5X,' RANGE','     DMIN ','     DMAX ','   RESIDUAL',
+     .   '  NUMBER',/)
       NRESALL=0
       SERRESALL=0.0
       DO 10175 I=1,NSLOTS
@@ -1723,14 +1723,14 @@ C
         DMAX=SQRT(10000.0/(I*IRESTEP))
         WRITE(6,10172)I,DMIN,DMAX,ERRES(I),NRESO(I)
 10175 CONTINUE
-10172 FORMAT(5X,I6,3F10.3,I7)
+10172 FORMAT(":",5X,I6,3F10.3,I7)
       ERRESALL = 0.0
       IF(NRESALL.NE.0)THEN
         ERRESALL=SERRESALL/NRESALL
       ENDIF
       WRITE(6,10174)IFILM,ERRESALL,NRESALL
-10174 FORMAT(//5X,'OVERALL (',I10,')',10X,F10.3,I7//)
-C**
+10174 FORMAT(/,/,":",5X,'OVERALL (',I10,')',10X,F10.3,I7,/,/)
+C
 C
 CHEN>
       write(6,'('' Cross-Correlation Map for this image'',/,
@@ -1958,10 +1958,47 @@ C
         write(17,'(''set MergePhaseResidual = "'',A,''"'')')cline1(1:k)
       endif
       write(6,'(''new MergePhaseResidual = "'',A,''"'')')cline1(1:k)
-
+C
+C10171 FORMAT(":",5X,' RANGE','     DMIN ','     DMAX ','   RESIDUAL  NUMBER',/)
+C      NRESALL=0
+C      SERRESALL=0.0
+C      DO 10175 I=1,NSLOTS
+C        IF(NRESO(I).EQ.0)GO TO 10175
+C        NRESALL=NRESALL+NRESO(I)
+C        SERRESALL=SERRES(I)+SERRESALL
+C        ERRES(I)=SERRES(I)/NRESO(I)
+C        DMIN=SQRT(10000.0/((I-1)*IRESTEP + 1))
+C        DMAX=SQRT(10000.0/(I*IRESTEP))
+C        WRITE(6,10172)I,DMIN,DMAX,ERRES(I),NRESO(I)
+C10175 CONTINUE
+C10172 FORMAT(":",5X,I6,3F10.3,I7)
+C      ERRESALL = 0.0
+C      IF(NRESALL.NE.0)THEN
+C        ERRESALL=SERRESALL/NRESALL
+C      ENDIF
+C      WRITE(6,10174)IFILM,ERRESALL,NRESALL
+C10174 FORMAT(/,/,":",5X,'OVERALL (',I10,')',10X,F10.3,I7,/,/)
+C
+      do I=1,9
+        if(NRESO(I).GT.0)then
+          write(cline1,'(F15.2)')ERRES(I)
+          write(cline2,'(I10)')NRESO(I)
+        else
+          write(cline1,'(''99.0'')')
+          write(cline2,'(''0'')')
+        endif
+        call shorten(cline1,k1)
+        call shorten(cline2,k2)
+        if(LOGOUTPUT)then
+          write(17,'(''set MergePhaseRes_slot'',I1,'' = "'',A,''"'')')I,cline1(1:k1)
+          write(17,'(''set MergePhaseRes_numb'',I1,'' = "'',A,''"'')')I,cline2(1:k2)
+        endif
+        write(6,'(''new MergePhaseRes_slot'',I1,'' = "'',A,''"'')')I,cline1(1:k1)
+        write(6,'(''new MergePhaseRes_numb'',I1,'' = "'',A,''"'')')I,cline2(1:k2)
+      enddo
+C
       write(cline1,'(2F12.3)')HOHRIGSH,HOKRIGSH
       call inkomma(cline1,k)
-C
       if(ispcgrp.eq.1)then
         if(LOGOUTPUT) then
           write(17,'(''set phaori = "'',A,''"'')')cline1(1:k)

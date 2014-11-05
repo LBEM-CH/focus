@@ -13,18 +13,15 @@
         ###############################################################
                 
         set image_dir = `pwd`
-
-        if ( ! -e ../2dx_master.cfg ) then
-          cd ..
+ 
+        if ( ! -e frames/2dx_master.cfg ) then
+          cd frames
           \ln -s ../2dx_image.cfg 2dx_master.cfg
-          cd ${image_dir}
+          cd ..
         endif
         ${app_2dx_image} ${image_dir}/frames/frame_${i} "2dx_initialize"
         ${app_2dx_image} ${image_dir}/frames/frame_${i} "2dx_initialize_files"
-        cd ..
-        \rm 2dx_master.cfg
-        cd ${image_dir}
-
+        \rm -f frames/2dx_master.cfg
 
 
         set prog_num = `echo ${irunner} ${movie_imagenumber_touse} | awk '{ s = 30 + int( 50 * $1 / $2 ) } END { print s }'` 

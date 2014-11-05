@@ -137,7 +137,7 @@ else
   #
   ${bin_2dx}/2dx_origtiltk.exe << eot
 SCRATCH/2dx_origtilt-LOG1.dat
-${spcgrp},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
+${spcgrp},0,F,F,0,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
 10,0.7,10,0.5                                                              ! itaxastep,rtaxasize,itanglstep,rtanglsize
 ${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${ampweight}          !IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
 100,DUMMY

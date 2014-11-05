@@ -26,6 +26,7 @@ defocus (Defocus,mouseover="Defocus with underfocus=positive",nonlockable,sortab
 *phaoriFouFilter (PhaOri-FouFilter,mouseover="Phase Origin after Fourier-filtered and before Synthetical reference",nonlockable,sortable,"%.1f,%.1f")
 *phaori_last_change (PhaOri Change,mouseover="Last change to Phase Origin",nonlockable,sortable,"%.2f,%.2f")
 beamtilt (BeamTilt,mouseover="Beam Tilt",nonlockable,sortable)
+beamtilt_magnitude (BeamTilt,mouseover="Beam Tilt Magnitude",nonlockable,sortable)
 beamtilt_change (BeamTilt Change,mouseover="Last Beam Tilt Change",nonlockable,sortable)
 *realcell_local (LocRealCell,mouseover="Local Real Cell Vectors",nonlockable,sortable,"%.1f,%.1f")
 *realang_local (LocRealAng,mouseover="Local Real Cell Angle",nonlockable,sortable,"%.1f")

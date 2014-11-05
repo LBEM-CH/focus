@@ -113,6 +113,11 @@ C
           write(11,'(''set beamtilt = "'',A,''"'')')
      .      cbeamtilt(1:k)
         endif
+        rtmp=sqrt(rtx**2+rty**2)
+        write(cbeamtilt,'(F12.3)')rtmp
+        call inkomma(cbeamtilt,k)
+        write(11,'(''set beamtilt_magnitude = "'',A,''"'')')
+     .      cbeamtilt(1:k)
         goto 510
  500    continue
           call shorten(cname3,k)
@@ -255,6 +260,7 @@ C
         read(12,'(A)',END=900,ERR=900)cline
         if(cline(1:3).ne."set") goto 100
         if(cline(5:4+k).ne.cname(1:k)) goto 100
+        if(cline(5+k:5+k).ne." ") goto 100
 C
       call shorten(cline,l)
       write(*,'(''value for '',A,'' is '',A)')cname(1:k),cline(9+k:l-1)
@@ -300,6 +306,7 @@ C
         read(12,'(A)',END=900,ERR=900)cline
         if(cline(1:3).ne."set") goto 100
         if(cline(5:4+k).ne.cname(1:k)) goto 100
+        if(cline(5+k:5+k).ne." ") goto 100
 C
       call shorten(cline,l)
       write(*,'(''value for '',A,'' is '',A)')cname(1:k),cline(9+k:l-1)
@@ -337,6 +344,7 @@ C
         read(12,'(A)',END=900,ERR=900)cline
         if(cline(1:3).ne."set") goto 100
         if(cline(5:4+k).ne.cname(1:k)) goto 100
+        if(cline(5+k:5+k).ne." ") goto 100
 C
       call shorten(cline,l)
       ilen=l-k-9

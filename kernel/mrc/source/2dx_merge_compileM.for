@@ -134,8 +134,10 @@ C
         call dgetline(CMLMERGE,"ML_use_for_merging",iok)
         if(iok.eq.0)then
           write(CMLMERGE(1:1),'(''n'')')
-          write(*,'(''::WARNING: ML_use_for_merging not yet defined for this image.'')')
-          write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
+          write(*,'(''::WARNING: ML_use_for_merging not yet'',
+     .      '' defined for this image.'')')
+          write(*,'(''::To resolve, open 2dx_image on this image,'',
+     .      '' click on save, and close 2dx_image.'')')
         endif
 C
         write(11,'(''set ML_use_for_merging = "'',A1,''"'')')CMLMERGE(1:1)
@@ -143,11 +145,13 @@ C
         write(11,'(''echo ":: "'')')
         call shorten(cdir,k)
         if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
-          write(cline,'(''${proc_2dx}/linhash "Working on '',A,'' #### (FOURIER FILTERED RESULT)"'')')
-     .       cdir(1:k)
+          write(cline,'(''${proc_2dx}/linhash "Working on '',A,
+     .      '' #### (FOURIER FILTERED RESULT)"'')')
+     .      cdir(1:k)
         else
-          write(cline,'(''${proc_2dx}/linhash "Working on '',A,'' #### (SINGLE PARTICLE RESULT)"'')')
-     .       cdir(1:k)
+          write(cline,'(''${proc_2dx}/linhash "Working on '',A,
+     .      '' #### (SINGLE PARTICLE RESULT)"'')')
+     .      cdir(1:k)
         endif
         call shortshrink(cline,k)
         write(11,'(A)')cline(1:k)
@@ -204,12 +208,14 @@ C
         if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
           call cgetline(CPHORI,"phaori")
           read(CPHORI,*)RPHAORIH,RPHAORIK
-          write(*,'(''   using Fourier filtered results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
+          write(*,'(''   using Fourier filtered results,'',
+     .      '' PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
           call cgetline(cline,"phaori")
           call shorten(cline,k)
           write(11,'(''set phaori = "'',A,''"'')')cline(1:k)
         else
-          write(*,'(''   using Single Particle  results, PhaseOrigin = 0.0,0.0'')')
+          write(*,'(''   using Single Particle  results,'',
+     .      '' PhaseOrigin = 0.0,0.0'')')
           write(11,'(''set phaori = "0.0,0.0"'')')
         endif
 C

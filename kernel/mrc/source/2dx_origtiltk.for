@@ -1999,6 +1999,14 @@ C      if(ibeamtiltref.eq.1)then
         endif
         write(6,'(''new beamtilt = "'',A,''"'')')cline1(1:k)
 C
+        RTMP = SQRT(HTHLT**2+HTKLT**2)
+        write(cline1,'(F12.3)')RTMP
+        call inkomma(cline1,k)
+        if(LOGOUTPUT)then
+          write(17,'(''set beamtilt_magnitude = "'',A,''"'')')cline1(1:k)
+        endif
+        write(6,'(''new beamtilt_magnitude = "'',A,''"'')')cline1(1:k)
+C
         write(cline1,'(2F12.3)')HSHTHLT,HSHTKLT
         call inkomma(cline1,k)
         if(LOGOUTPUT)then

@@ -2205,6 +2205,14 @@ C
           IC=IC/2
           B=B*2.0
         endif
+        if(IC.lt.3)then
+          IC=IC*2
+          B=B/2.0
+        endif
+        if(IC.lt.3)then
+          IC=IC*2
+          B=B/2.0
+        endif
 C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.5)
         XPOS = ZMIN*ZMAG - 0.15*ZMM

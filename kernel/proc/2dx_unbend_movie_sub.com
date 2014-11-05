@@ -3,7 +3,7 @@
 #
 # Attention:
 # This is not an independent csh file.
-# This file has to be sourced from another csh.
+# This file has to be sourced from another csh script.
 #
 
         set valspotscan = '1'
@@ -14,9 +14,18 @@
                 
         set image_dir = `pwd`
 
+        if ( ! -e ../2dx_master.cfg ) then
+          cd ..
+          \ln -s ../2dx_image.cfg 2dx_master.cfg
+          cd ${image_dir}
+        endif
         ${app_2dx_image} ${image_dir}/frames/frame_${i} "2dx_initialize"
-
         ${app_2dx_image} ${image_dir}/frames/frame_${i} "2dx_initialize_files"
+        cd ..
+        \rm 2dx_master.cfg
+        cd ${image_dir}
+
+
 
         set prog_num = `echo ${irunner} ${movie_imagenumber_touse} | awk '{ s = 30 + int( 50 * $1 / $2 ) } END { print s }'` 
         echo "<<@progress: ${prog_num}>>"

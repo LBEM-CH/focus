@@ -160,6 +160,7 @@ set movie_quadradb = ""
 set movie_facthreshb = ""
 set movie_imagenumber_toave = ""
 set MASKING_done = ""
+set QVALS = ""
 #
 #$end_vars
 #

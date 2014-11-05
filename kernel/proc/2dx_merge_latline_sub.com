@@ -32,15 +32,18 @@ if ( ${mode} == 0 ) then
     #############################################################################
     #
     if ( ${scalimamp3d_rref} == "1" ) then 
-      set scalimamp3d_refdata = BT
+      set scalimamp3d_refdata = FF
     endif
     if ( ${scalimamp3d_rref} == "2" ) then 
+      set scalimamp3d_refdata = BT
+    endif
+    if ( ${scalimamp3d_rref} == "3" ) then 
       set scalimamp3d_refdata = LZ
       echo ":: "
       ${proc_2dx}/linblock "WARNING: SCALIMAMP3D option LZ is not yet working"
       echo ":: "
     endif
-    if ( ${scalimamp3d_rref} == "3" ) then 
+    if ( ${scalimamp3d_rref} == "4" ) then 
       set scalimamp3d_refdata = BR
     endif
     set bextra = 0.0

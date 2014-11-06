@@ -113,6 +113,7 @@ set MergeIQMAX = ""
 set map_without_ctf = ""
 set movie_enable = ""
 set ctfcor_imode = ""
+set RFACAMP = ""
 #
 #$end_vars
 #

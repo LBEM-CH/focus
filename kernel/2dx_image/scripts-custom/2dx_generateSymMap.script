@@ -114,6 +114,7 @@ set PHARES_SYM = ""
 set PHARES_NUM_SPOTS = ""
 set MergeIQMAX = ""
 set movie_enable = ""
+set RFACAMP = ""
 #
 #$end_vars
 #

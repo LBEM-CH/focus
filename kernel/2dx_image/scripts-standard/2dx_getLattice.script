@@ -74,6 +74,8 @@
 # DISPLAY: laterror_rmsderror
 # DISPLAY: laterror_peaksused
 # DISPLAY: laterror_nodepeakdensity
+# DISPLAY: MASKING_done
+# DISPLAY: LATTICE_done
 #
 #$end_local_vars
 #
@@ -120,6 +122,7 @@ set laterror_rmsderror = ""
 set laterror_peaksused = ""
 set laterror_nodepeakdensity = ""
 set MASKING_done = ""
+set LATTICE_done = ""
 #
 #$end_vars
 #

@@ -2216,40 +2216,9 @@ C
         if(J2.eq.8) IC=8
         B=RTMP/IC
 C
-C        XPOS = ZMIN*ZMAG + 0.15*ZMM
-C        YPOS=FMAX*SCALE-5.0
-C        write(cline,'(''FMAX='',G10.4)')FMAX
-C        call shorten(cline,k)
-C        CALL P2K_MOVE(XPOS,YPOS,0.)
-C        CALL P2K_STRING(cline,k,0.)
-C        YPOS=YPOS-7.0
-C        write(cline,'(''RA  ='',G10.4)')RA
-C        call shorten(cline,k)
-C        CALL P2K_MOVE(XPOS,YPOS,0.)
-C        CALL P2K_STRING(cline,k,0.)
-C        YPOS=YPOS-7.0
-C        write(cline,'(''RTMP='',G10.4)')RTMP
-C        call shorten(cline,k)
-C        CALL P2K_MOVE(XPOS,YPOS,0.)
-C        CALL P2K_STRING(cline,k,0.)
-C        YPOS=YPOS-7.0
-C        write(cline,'(''IC  ='',I10)')IC
-C        call shorten(cline,k)
-C        CALL P2K_MOVE(XPOS,YPOS,0.)
-C        CALL P2K_STRING(cline,k,0.)
-C        YPOS=YPOS-7.0
-C        write(cline,'(''B   ='',G10.4)')B
-C        call shorten(cline,k)
-C        CALL P2K_MOVE(XPOS,YPOS,0.)
-C        CALL P2K_STRING(cline,k,0.)
-C
-C        IA=ALOG10(1.05*FMAX)
-C        B=(10.0**IA)/2.0
-C        IC=FMAX*1.05/B
-C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.5)
         XPOS = ZMIN*ZMAG - 0.15*ZMM
-        DO 200 J=1,IC
+        DO 200 J=0,IC
           F=J*B
           if(F.lt.FMAX)then
             YPOS=F*SCALE-0.4
@@ -2285,9 +2254,6 @@ C
             CALL P2K_STRING(LINE,11,0.)
           endif
 200     CONTINUE
-        CALL P2K_MOVE(XPOS,-0.4,0.)
-        CALL P2K_STRING('        0.0',11,0.)
-201     FORMAT(G11.2)
 C
 C-------PLOT OBSERVED AMPLITUDES FIRST
 C

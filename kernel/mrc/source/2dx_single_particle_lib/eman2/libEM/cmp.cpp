@@ -1059,7 +1059,7 @@ float PhaseCmp::cmp(EMData * image, EMData *with) const
 
 	int snrweight = params.set_default("snrweight", 0);
 	int snrfn = params.set_default("snrfn",0);
-	int ampweight = params.set_default("ampweight",0);
+	int RFACAMP = params.set_default("RFACAMP",0);
 	int zeromask = params.set_default("zeromask",0);
 	float minres = params.set_default("minres",500.0f);
 	float maxres = params.set_default("maxres",2.0f);
@@ -1178,7 +1178,7 @@ float PhaseCmp::cmp(EMData * image, EMData *with) const
 			for (int y = 0; y < ny; y++) {
 				for (int x = 0; x < nx2; x ++) {
 					float a;
-					if (ampweight) a= (float)hypot(with_fft_data[i],with_fft_data[i+1]);
+					if (RFACAMP) a= (float)hypot(with_fft_data[i],with_fft_data[i+1]);
 					else a=1.0f;
 					sum += Util::angle_err_ri(image_fft_data[i],image_fft_data[i+1],with_fft_data[i],with_fft_data[i+1]) * a;
 					norm += a;
@@ -1195,7 +1195,7 @@ float PhaseCmp::cmp(EMData * image, EMData *with) const
 				if (r>=ny2) { i+=2; continue; }		// we only have snr values to the box radius
 				
 				float a;
-				if (ampweight) a= (float)hypot(with_fft_data[i],with_fft_data[i+1]);
+				if (RFACAMP) a= (float)hypot(with_fft_data[i],with_fft_data[i+1]);
 				else a=1.0f;
 				a*=snr[r];
 				sum += Util::angle_err_ri(image_fft_data[i],image_fft_data[i+1],with_fft_data[i],with_fft_data[i+1]) * a;
@@ -1212,7 +1212,7 @@ float PhaseCmp::cmp(EMData * image, EMData *with) const
 					if (r>=ny2) { i+=2; continue; }		// we only have snr values to the box radius
 					
 					float a;
-					if (ampweight) a= (float)hypot(with_fft_data[i],with_fft_data[i+1]);
+					if (RFACAMP) a= (float)hypot(with_fft_data[i],with_fft_data[i+1]);
 					else a=1.0f;
 					a*=snr[r];
 					sum += Util::angle_err_ri(image_fft_data[i],image_fft_data[i+1],with_fft_data[i],with_fft_data[i+1]) * a;
@@ -1248,7 +1248,7 @@ float FRCCmp::cmp(EMData * image, EMData * with) const
 	validate_input_args(image, with);
 
 	int snrweight = params.set_default("snrweight", 0);
-	int ampweight = params.set_default("ampweight", 0);
+	int RFACAMP = params.set_default("RFACAMP", 0);
 	int sweight = params.set_default("sweight", 1);
 	int nweight = params.set_default("nweight", 0);
 	int zeromask = params.set_default("zeromask",0);
@@ -1343,7 +1343,7 @@ float FRCCmp::cmp(EMData * image, EMData * with) const
 	}
 
 	vector<float> amp;
-	if (ampweight) amp=image->calc_radial_dist(ny/2,0,1,0);
+	if (RFACAMP) amp=image->calc_radial_dist(ny/2,0,1,0);
 
 	// Min/max modifications to weighting
 	float pmin,pmax;
@@ -1357,7 +1357,7 @@ float FRCCmp::cmp(EMData * image, EMData * with) const
 	for (int i=0; i<ny/2; i++) {
 		double weight=1.0;
 		if (sweight) weight*=fsc[(ny2)*2+i];
-		if (ampweight) weight*=amp[i];
+		if (RFACAMP) weight*=amp[i];
 		if (snrweight) weight*=snr[i];
 //		if (snrweight)  {
 //			if (snr[i]>0) weight*=sqrt(snr[i]);

@@ -51,7 +51,6 @@ if ( ${ILIST} == "n" ) then
 else
   set IVERBOSE = 9
 endif
-set RFACAMP = 1.0
 #
 ${bin_2dx}/2dx_merge_compileA.exe << eot
 LOGS/${scriptname}.results
@@ -137,7 +136,6 @@ if ( ${merge_modus} == "3D" ) then
   #
   set number = 1
   set IVERBOSE = 1
-  set RFACAMP = 1.0
   #
   set TANGLST = 15.0
   #

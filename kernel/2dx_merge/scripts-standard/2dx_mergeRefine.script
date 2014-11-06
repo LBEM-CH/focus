@@ -90,6 +90,7 @@
 # DISPLAY: latline_pdf
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
+# DISPLAY: RFACAMP
 #
 #$end_local_vars
 #
@@ -157,6 +158,7 @@ set num_reflections_FOM50 = ""
 set latline_pdf = ""
 set resolutionplot_RESMAX = ""
 set resolutionplot_bins = ""
+set RFACAMP = ""
 #
 #$end_vars
 #
@@ -173,7 +175,6 @@ if ( ${ILIST} == "n" ) then
 else
   set IVERBOSE = 6
 endif
-set RFACAMP = 1.0
 #
 set scriptname = 2dx_mergeRefine
 \rm -f LOGS/${scriptname}.results

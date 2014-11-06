@@ -58,7 +58,7 @@ using namespace EMAN;
 using std::reverse;
 
 const string SNREvalProcessor::NAME = "eval.maskedsnr";
-const string AmpweightFourierProcessor::NAME = "filter.ampweight";
+const string AmpweightFourierProcessor::NAME = "filter.RFACAMP";
 const string ConvolutionProcessor::NAME = "math.convolution";
 const string XGradientProcessor::NAME = "math.edge.xgradient";
 const string YGradientProcessor::NAME = "math.edge.ygradient";
@@ -908,7 +908,7 @@ EMData* KmeansSegmentProcessor::process(const EMData * const image)
 
 	int nseg = params.set_default("nseg",12);
 	float thr = params.set_default("thr",-1.0e30f);
-	int ampweight = params.set_default("ampweight",1);
+	int RFACAMP = params.set_default("RFACAMP",1);
 	float maxsegsize = params.set_default("maxsegsize",10000.0f);
 	float minsegsep = params.set_default("minsegsep",0.0f);
 	int maxiter = params.set_default("maxiter",100);
@@ -963,7 +963,7 @@ EMData* KmeansSegmentProcessor::process(const EMData * const image)
 					int cls = (int)result->get_value_at(x,y,z);
 					if (cls==-1) continue;
 					float w=1.0;
-					if (ampweight) w=image->get_value_at(x,y,z);
+					if (RFACAMP) w=image->get_value_at(x,y,z);
 
 					centers[cls*3]+=x*w;
 					centers[cls*3+1]+=y*w;

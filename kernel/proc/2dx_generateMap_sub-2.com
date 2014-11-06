@@ -115,8 +115,6 @@ endif
 set SCL = 1
 echo "SCL = ${SCL}"
 #
-set ampweight = 0.5
-#
 
 ##################################################### <+> Bryant (Mitsuoka Lab) ########################################################
 
@@ -154,7 +152,7 @@ if ( ${spcgrp} != "1" ) then
   #
 
 set origtiltkParameters ="${bin_2dx},${spcgrp},${realcell},${ALAT},${realang},${IAQP2},${IVERBOSE},${LOGOUTPUT},	\\
-${imagenumber},${phastepnum},${ampweight},						\\
+${imagenumber},${phastepnum},${RFACAMP},						\\
 ${aphdummy},										\\
 ${imagenumber},${imagename},${date},							\\
 ${aphfile},${TAXA},${TANGL},${lattice},							\\
@@ -250,7 +248,7 @@ echo dummy > fort.1
 # Parameter glob which must be delimited by "|" for use in the function. A bit cumbersome perhaps, but hopefully more flexible.
 #
 set origtiltkParameters = "${bin_2dx}|${spcgrp}|${realcell}|${ALAT}|${realang}|${IAQP2}|${IVERBOSE}|${LOGOUTPUT}|\
-${imagenumber}|${phastepnum}|${ampweight}|\
+${imagenumber}|${phastepnum}|${RFACAMP}|\
 ${aphdummy}|\
 ${imagename}|${date}|							\
 ${aphfile}|${TAXA}|${TANGL}|${lattice}|							\

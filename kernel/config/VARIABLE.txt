@@ -44,6 +44,6 @@ mkdir phaori
 mkdir rot90
 mkdir rot180
 mkdir revhk
-mkdir ampweight
+mkdir RFACAMP
 mkdir zstarwin
 mkdir refine

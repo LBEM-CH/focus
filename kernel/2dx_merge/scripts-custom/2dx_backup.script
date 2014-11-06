@@ -375,6 +375,14 @@ while ( ${dircounter} <= ${dirnum} )
               endif
             endif
           endif
+          if ( -e ${from_dirfile}/${loc_imagename}_stack.mrc ) then
+            if ( ! -e ${to_dirfile}/${loc_imagename}_stack.mrc ) then
+              echo ":New: ${to_dirfile}/${loc_imagename}_stack.mrc"
+              cp -f ${from_dirfile}/${loc_imagename}_stack.mrc ${to_dirfile}
+            else
+              echo ":Old: ${to_dirfile}/${loc_imagename}_stack.mrc"
+            endif
+          endif
         endif
         #
         if ( -e ${from_dirfile}/${loc_imagename}.spt ) then

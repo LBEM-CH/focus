@@ -63,7 +63,7 @@ C               - scaled up version of required data on  'OUT'  - unit 3
 C
 C****************************************************************************** 
       PARAMETER (NMAX=10000000)
-      PARAMETER (NSLOTS=2000)
+      PARAMETER (NSLOTS=100)
       PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)
       PARAMETER (NREF=4)
@@ -198,8 +198,20 @@ C  Create reference data, reinterpolating on to new 1/d**2 resolution steps.
         DO 50 J=1,NSLOTS
            SVALUE=(J-0.5)*IRESTEP
            NFTAB=SQRT(SVALUE/10000.)/0.002
-           IF(NFTAB.GT.400) STOP ' FTAB dimensions too small'
-           AVERREF(J)=ATAB(NFTAB)
+           if(NFTAB.GT.400)then
+             STOP ':: FTAB dimensions too small'
+C
+C------------Alternatively for debugging:
+C
+C             write(6,'(''::J, NSLOTS, IRESTEP, SVALUE, NFTAB ='',
+C     .         3I10,F16.6,I10)')
+C     .         J,NSLOTS,IRESTEP,SVALUE,NFTAB
+C
+C             AVERREF(J)=ATAB(400)
+C
+           else
+             AVERREF(J)=ATAB(NFTAB)
+           endif
  50     continue
       ENDIF
       IF(IR.EQ.2) THEN
@@ -540,7 +552,7 @@ C*SCALORIGTILT*****************************************************************
      .          BR3DT,BRSPAC,AVERREF,IR,IRESTEP,
      .          BXYMIN,BXYMAX,BZMIN,BZMAX,RESLIMXY,RESLIMZ,BEXTRA)
       PARAMETER (NMAX=10000000)
-      PARAMETER (NSLOTS=2000)
+      PARAMETER (NSLOTS=100)
       PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)
       DIMENSION IH(NMAX),IK(NMAX),ZSTAR(NMAX),AMP(NMAX),CTFS(NMAX),
@@ -618,6 +630,11 @@ C       W = AMIN1((AMP(J)/BCK(J))**2,10.0)   ! not too much weight for big AMPs
         IF(IR.LE.3) THEN        ! i.e. not 3D-BR data
           ISLOT = 1 + DSTARSQ*10000./IRESTEP
           AREF = AVERREF(ISLOT)
+CHEN>
+C          write(6,'(''::DSTARSQ,IRESTEP,ISLOT,AREF = '',
+C     .      F16.6,2I10,F16.6)')
+C     .      DSTARSQ,IRESTEP,ISLOT,AREF
+CHEN<
           if(AREF.eq.0.0)then
             write(6,'(''::ERROR: AVERREF('',I8,'')=0.0'')')ISLOT
           endif
@@ -662,9 +679,10 @@ C           STOP ' BR3DT data too low resolution for input data'
 300   CONTINUE
 C  calculate and write out sharpening factors
       WRITE(6,380)
-380   FORMAT('  FILMNO        BXY        BZ',
-     .  '  B-factors XY, B-factor Z, ASCALE',
+380   FORMAT('  FILMNO        BXY              BZ',
+     .  12X,'  B-factors XY,    B-factor Z,      ASCALE',
      .  ' truncated by input limits')
+C
       DO 400 I=1,NF
         P1=C2(I)*A1(I)-A2(I)*C1(I)
         Q1=C2(I)*B1(I)-B2(I)*C1(I)

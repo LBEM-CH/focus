@@ -51,6 +51,7 @@
 # DISPLAY: Merge_Reference_IQMAX
 # DISPLAY: MergeHKMAX
 # DISPLAY: Merge_Reference_HKMAX
+# DISPLAY: RFACAMP
 # DISPLAY: MergeAK
 # DISPLAY: MergeIWF
 # DISPLAY: AMP_Scale_Factor
@@ -106,6 +107,7 @@ set MergeIQMAX = ""
 set Merge_Reference_IQMAX = ""
 set MergeHKMAX = ""
 set Merge_Reference_HKMAX = ""
+set RFACAMP = ""
 set MergeAK = ""
 set MergeIWF = ""
 set MergeIWP = ""

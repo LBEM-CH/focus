@@ -55,6 +55,7 @@ set MergeHKMAX = ""
 set merge_res_limit = ""
 set create_PS = ""
 set merge_ML_data = ""
+set RFACAMP = ""
 #
 #$end_vars
 #
@@ -234,7 +235,6 @@ if ( ${make_reference} == "y" ) then
   set dirfile = "2dx_merge_dirfile.dat"
   set number = 1
   set IVERBOSE = 1
-  set RFACAMP = 1.0
   set NBM = F
   set NTL = F
   set ITAXASTEP = 10

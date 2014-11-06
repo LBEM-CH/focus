@@ -59,6 +59,7 @@
 # DISPLAY: merge_comment_9
 # DISPLAY: max_amp_correction
 # DISPLAY: merge_ML_data
+# DiSPLAY: RFACAMP
 #
 #$end_local_vars
 #
@@ -105,6 +106,7 @@ set overall_R_factor = ""
 set overall_phase_residual = ""
 set overall_weighted_R_factor = ""
 set overall_weighted_phase_residual = ""
+set RFACAMP = ""
 #
 #$end_vars
 #
@@ -121,7 +123,6 @@ if ( ${ILIST} == "n" ) then
 else
   set IVERBOSE = 6
 endif
-set RFACAMP = 1.0
 #
 set date = `date`
 echo date = ${date}

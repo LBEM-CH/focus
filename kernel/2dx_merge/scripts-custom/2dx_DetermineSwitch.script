@@ -64,6 +64,7 @@
 # DISPLAY: merge_comment_8
 # DISPLAY: merge_comment_9
 # DISPLAY: max_amp_correction
+# DISPLAY: RFACAMP
 #
 #$end_local_vars
 #
@@ -113,6 +114,7 @@ set overall_R_factor = ""
 set overall_phase_residual = ""
 set overall_weighted_R_factor = ""
 set overall_weighted_phase_residual = ""
+set RFACAMP = ""
 #
 #$end_vars
 #
@@ -125,7 +127,6 @@ set dirfile = "2dx_merge_dirfile.dat"
 #
 set number = 1
 set IVERBOSE = 9
-set RFACAMP = 1.0
 set refbeamtilt = "n"
 #
 set date = `date`

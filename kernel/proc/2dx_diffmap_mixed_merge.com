@@ -51,7 +51,6 @@ else
   set IVERBOSE = 9
   set ILIST_VAL = 1
 endif
-set RFACAMP = 1.0
 #
 ${bin_2dx}/2dx_merge_compileA.exe << eot
 LOGS/${scriptname}.results

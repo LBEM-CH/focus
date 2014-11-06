@@ -73,7 +73,7 @@ origtiltk()
   local LOGOUTPUT=`parse 8 $@`
   local imagenumber=`parse 9 $@`
   local phastepnum=`parse 10 $@`
-  local ampweight=`parse 11 $@`
+  local RFACAMP=`parse 11 $@`
   local aphdummy=`parse 12 $@`
   local imagename=`parse 13 $@`
   local date=`parse 14 $@`
@@ -105,7 +105,7 @@ origtiltk()
   echo :SCRATCH/2dx_origtilt-LOG1.dat
   echo :${spcgrp},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT}
   echo :10,0.7,10,0.5 
-  echo :${imagenumber},0,30,5,${phastepnum},T,F,${ampweight} 
+  echo :${imagenumber},0,30,5,${phastepnum},T,F,${RFACAMP} 
   echo :100,DUMMY
   echo :${aphdummy}
   echo :${imagenumber},${imagename},${date}
@@ -127,7 +127,7 @@ origtiltk()
 SCRATCH/2dx_origtilt-LOG1.dat
 ${spcgrp},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
 10,0.7,10,0.5                                                   ! itaxastep,rtaxasize,itanglstep,rtanglsize
-${imagenumber},0,30,5,${phastepnum},F,F,${ampweight}          	!IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
+${imagenumber},0,44,6,${phastepnum},F,F,${RFACAMP}          	!IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
 100,DUMMY
 ${aphdummy}
 ${imagenumber},${imagename},${date}

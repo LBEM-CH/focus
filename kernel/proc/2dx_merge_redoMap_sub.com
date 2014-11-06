@@ -1,3 +1,4 @@
+
 #
 
 #############################################################################
@@ -105,7 +106,6 @@ endif
 set SCL = 1
 echo "SCL = ${SCL}"
 #
-set ampweight = 0.5
 #
 set aphdummy = ${proc_2dx}/dummy.aph
 if ( ! -e ${aphdummy} ) then
@@ -139,7 +139,7 @@ else
 SCRATCH/2dx_origtilt-LOG1.dat
 ${spcgrp},0,F,F,0,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
 10,0.7,10,0.5                                                              ! itaxastep,rtaxasize,itanglstep,rtanglsize
-${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${ampweight}          !IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
+${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}          !IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
 100,DUMMY
 ${aphdummy}
 ${imagenumber},${imagename},${date}

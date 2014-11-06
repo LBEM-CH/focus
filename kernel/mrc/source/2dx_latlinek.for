@@ -2132,26 +2132,17 @@ C
         rgbb = 0.0
         if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
-        CALL P2K_LWIDTH(RLINE3)
+        CALL P2K_LWIDTH(RLINE1)
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_DRAW(0.,FMAG,0.)
         CALL P2K_DRAW(ZMM,FMAG,0.)
         CALL P2K_DRAW(ZMM,0.,0.)
         CALL P2K_DRAW(0.,0.,0.)
         CALL P2K_LWIDTH(RLINE1)
-        rgbr = 0.2
-        rgbg = 0.2
-        rgbb = 1.0
-        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
         CALL P2K_MOVE(ZERO,0.,0.)
         CALL P2K_DRAW(ZERO,FMAG,0.)
-        rgbr = 0.0
-        rgbg = 0.0
-        rgbb = 0.0
-        if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
-CHEN>
         POSN=ZRANG*ZMAG*0.85
         CALL P2K_MOVE(POSN,103.0,0.)
         WRITE(LINE(1:11),103) IHIN,IKIN
@@ -2166,10 +2157,10 @@ C
         DO 25 J=1,100
           ZPOS=-0.5+J*DELZ
           IF((ZPOS.LT.ZMIN-0.001).OR.(ZPOS.GT.ZMAX+0.001))GO TO 25
-          XPOS=ZERO+ZPOS*ZMAG+2.0
+          XPOS=ZERO+ZPOS*ZMAG
           CALL P2K_MOVE(XPOS,0.,0.)
           CALL P2K_DRAW(XPOS,2.0,0.)
-          XPOS=XPOS-4.0
+          XPOS=XPOS-5.0
           CALL P2K_MOVE(XPOS,-3.5,0.)
           WRITE(LINE(1:6),26) ZPOS
           CALL P2K_STRING(LINE,6,0.)
@@ -2195,60 +2186,104 @@ C
         POSY=FMAG - 1.0
         CALL P2K_MOVE(POSX,POSY,0.)
         CALL P2K_STRING('AMP',3,0.)
+C
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(ZERO,0.0,0.)
+        CALL P2K_MOVE(0.,0.,0.)
         SCALE=FMAG/(1.05*FMAX)
-        IA=ALOG10(1.05*FMAX)
-        B=(10.0**IA)/2.0
-        IC=FMAX*1.05/B
-        if(IC.gt.6)then
-          IC=IC/2
-          B=B*2.0
-        endif
-        if(IC.lt.3)then
-          IC=IC*2
-          B=B/2.0
-        endif
-        if(IC.lt.3)then
-          IC=IC*2
-          B=B/2.0
-        endif
+C
+        RA=FMAX
+        RB=1E-10
+        IA=0
+        do I=1,30
+          do J=1,8
+            RC=RB*REAL(J)
+            if(RC.gt.RA .and. IA.eq.0)then
+              RTMP=RC
+              J2=J
+              IA=1
+            endif
+          enddo
+          RB=RB*10.0
+        enddo
+        if(J2.eq.1) IC=5
+        if(J2.eq.2) IC=8
+        if(J2.eq.3) IC=6
+        if(J2.eq.4) IC=8
+        if(J2.eq.5) IC=5
+        if(J2.eq.6) IC=6
+        if(J2.eq.7) IC=7
+        if(J2.eq.8) IC=8
+        B=RTMP/IC
+C
+C        XPOS = ZMIN*ZMAG + 0.15*ZMM
+C        YPOS=FMAX*SCALE-5.0
+C        write(cline,'(''FMAX='',G10.4)')FMAX
+C        call shorten(cline,k)
+C        CALL P2K_MOVE(XPOS,YPOS,0.)
+C        CALL P2K_STRING(cline,k,0.)
+C        YPOS=YPOS-7.0
+C        write(cline,'(''RA  ='',G10.4)')RA
+C        call shorten(cline,k)
+C        CALL P2K_MOVE(XPOS,YPOS,0.)
+C        CALL P2K_STRING(cline,k,0.)
+C        YPOS=YPOS-7.0
+C        write(cline,'(''RTMP='',G10.4)')RTMP
+C        call shorten(cline,k)
+C        CALL P2K_MOVE(XPOS,YPOS,0.)
+C        CALL P2K_STRING(cline,k,0.)
+C        YPOS=YPOS-7.0
+C        write(cline,'(''IC  ='',I10)')IC
+C        call shorten(cline,k)
+C        CALL P2K_MOVE(XPOS,YPOS,0.)
+C        CALL P2K_STRING(cline,k,0.)
+C        YPOS=YPOS-7.0
+C        write(cline,'(''B   ='',G10.4)')B
+C        call shorten(cline,k)
+C        CALL P2K_MOVE(XPOS,YPOS,0.)
+C        CALL P2K_STRING(cline,k,0.)
+C
+C        IA=ALOG10(1.05*FMAX)
+C        B=(10.0**IA)/2.0
+C        IC=FMAX*1.05/B
 C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.5)
         XPOS = ZMIN*ZMAG - 0.15*ZMM
         DO 200 J=1,IC
           F=J*B
-          YPOS=F*SCALE-0.4
-          ZA=ZMIN*ZMAG
-          ZB=ZMAX*ZMAG
-          CALL P2K_MOVE(ZA,YPOS,0.)
-          ZD=ZA+1.0
-          CALL P2K_DRAW(ZD,YPOS,0.)
-          ZD=ZB-1.0
-          CALL P2K_MOVE(ZB,YPOS,0.)
-          CALL P2K_DRAW(ZD,YPOS,0.)
-          CALL P2K_MOVE(XPOS,YPOS,0.)
-          if(FMAX.gt.100000.0)then
-            write(cline,'(11X,G11.2)')F
-          elseif(FMAX.gt.10.0)then
-            write(cline,'(11X,F11.0)')F
-          elseif(FMAX.gt.1.0)then
-            write(cline,'(11X,F11.1)')F
-          elseif(FMAX.gt.0.1)then
-            write(cline,'(11X,F11.2)')F
-          elseif(FMAX.gt.0.01)then
-            write(cline,'(11X,F11.3)')F
-          elseif(FMAX.gt.0.001)then
-            write(cline,'(11X,F11.4)')F
-          elseif(FMAX.gt.0.0001)then
-            write(cline,'(11X,F11.5)')F
-          else
-            write(cline,'(11X,G11.2)')F
+          if(F.lt.FMAX)then
+            YPOS=F*SCALE-0.4
+            ZA=ZMIN*ZMAG
+            ZB=ZMAX*ZMAG
+            CALL P2K_MOVE(ZA,YPOS,0.)
+            ZD=ZA+1.0
+            CALL P2K_DRAW(ZD,YPOS,0.)
+            ZD=ZB-1.0
+            CALL P2K_MOVE(ZB,YPOS,0.)
+            CALL P2K_DRAW(ZD,YPOS,0.)
+            CALL P2K_MOVE(XPOS,YPOS,0.)
+            if(RTMP.gt.100000.0)then
+              write(cline,'(11X,G11.2)')F
+            elseif(RTMP.gt.10.0)then
+              write(cline,'(11X,F11.0)')F
+            elseif(RTMP.gt.1.0)then
+              write(cline,'(11X,F11.1)')F
+            elseif(RTMP.gt.0.1)then
+              write(cline,'(11X,F11.2)')F
+            elseif(RTMP.gt.0.01)then
+              write(cline,'(11X,F11.3)')F
+            elseif(RTMP.gt.0.001)then
+              write(cline,'(11X,F11.4)')F
+            elseif(RTMP.gt.0.0001)then
+              write(cline,'(11X,F11.5)')F
+            else
+              write(cline,'(11X,G11.2)')F
+            endif
+            call shorten(cline,k)
+            k1=k-10
+            write(LINE(1:11),'(A)')cline(k1:k)
+            CALL P2K_STRING(LINE,11,0.)
           endif
-          call shorten(cline,k)
-          k1=k-10
-          write(LINE(1:11),'(A)')cline(k1:k)
-          CALL P2K_STRING(LINE,11,0.)
 200     CONTINUE
         CALL P2K_MOVE(XPOS,-0.4,0.)
         CALL P2K_STRING('        0.0',11,0.)
@@ -2367,6 +2402,7 @@ C
         rgbg = 0.0
         rgbb = 0.0
         if(LCOLOR) CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+        CALL P2K_LWIDTH(RLINE1)
 C
         PMAG2 = PMAG/360.
         YPOS=FMAG+GAP+PMAG/2.0

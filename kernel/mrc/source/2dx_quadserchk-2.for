@@ -450,8 +450,11 @@ C---------Zero RFIELD
             enddo
           enddo
 C
-          do ih = -2,2
-            do ik = -2,2
+C---------Average the central 7x7 unit cells together, to have a high-contrast patch
+C---------that can be used to determine the overall offset of the lattice. 
+C
+          do ih = -3,3
+            do ik = -3,3
 C
 C-------------Calculate offset of sub-area to read
               IX = int( ih * A1 + ik * B1 )

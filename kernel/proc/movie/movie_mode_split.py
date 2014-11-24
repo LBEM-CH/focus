@@ -25,15 +25,15 @@ if __name__ == "__main__":
 
 
         #########################################
-        # create frames 0, which is a central high-contrast frame: The second quarter of frames.
+        # create frames 0, which is a central high-contrast frame of the first quarter of frames.
         #########################################
 
 	folder_name = "frames/frame_0" 
 	output_name = folder_name + "/" + image_name + "_0.mrc"
 	os.mkdir(folder_name)
 	
-        fat_num_from = int(nz / 4);
-        fat_num_to   = int(nz / 2);
+        fat_num_from = 1;
+        fat_num_to   = int(nz / 4);
 
 	print "::Creating frame 0 from sub-frames ",fat_num_from," to ",fat_num_to,"."
 

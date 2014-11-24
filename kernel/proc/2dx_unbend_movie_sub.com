@@ -38,26 +38,11 @@
         
         
         #########################################################################
-        ${proc_2dx}/lin "MASKTRAN - Masked FFT of raw frame average"
-        #########################################################################
-        set maskb = ${maskb02}
-        set rmax = 11000
-        \rm -f frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
-        setenv IN  frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
-        setenv OUT frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
-        setenv SPOTS ${imagename}.spt
-        ${bin_2dx}/2dx_masktrana.exe << eot
-        1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
-        ${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-        ${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
-eot
-        
-        #########################################################################
         ${proc_2dx}/lin "TWOFILE - Cross-correlate frame and reference in Fourier-space, with ref A"
         #########################################################################
         \rm -f frames/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}.fft.mrc
-        setenv IN1 frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
-        setenv IN2 SCRATCH/refam${imagename}.fft.mrc
+        setenv IN1 frames/frame_${i}/FFTIR/${nonmaskimagename}_${i}.fft.mrc
+        setenv IN2 SCRATCH/refam1${imagename}.fft.msk.mrc
         setenv OUT frames/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}.fft.mrc
         ${bin_2dx}/twofile.exe << eot
         2 ! ICOMB = 2
@@ -166,26 +151,8 @@ eot
 
         \rm -f frames/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}.cor.mrc
         \rm -f frames/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}.fft.mrc
-        \rm -f frames/frame_${i}/SCRATCH/${nonmaskimagename}.fft.msk.mrc
         \rm -f frames/frame_${i}/SCRATCH/${nonmaskimagename}.tmp.mrc
 
-
-        ######################################################
-        ${proc_2dx}/lin "Mask spots in FFT with radius ${maskb}"
-        ######################################################
-
-        set maskb = ${maskb02}
-        set rmax = 11000
-
-        setenv IN  frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc
-        setenv OUT frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
-        setenv SPOTS ${imagename}.spt
-
-        ${bin_2dx}/2dx_masktrana.exe << eot
-        1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
-        ${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-        ${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
-eot
 
         ###########################################################################
         ${proc_2dx}/lin "TWOFILE - Cross-correlation with references in Fourier-space"
@@ -193,8 +160,8 @@ eot
         set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
         set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
         \rm -f frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.fft.mrc
-        setenv IN1 frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
-        setenv IN2 SCRATCH/refam${imagename}.fft.mrc
+        setenv IN1 frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc
+        setenv IN2 SCRATCH/refam1${imagename}.fft.msk.mrc
         setenv OUT frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.fft.mrc
         ${bin_2dx}/twofile.exe << eot
         2 ! ICOMB = 2
@@ -204,8 +171,8 @@ eot
         if ( ${movie_refboxb} != "0" ) then
        
           \rm -f frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.fft.mrc
-          setenv IN1 frames/frame_${i}/SCRATCH/m${nonmaskimagename}.fft.msk.mrc
-          setenv IN2 SCRATCH/refbm${imagename}.fft.mrc
+          setenv IN1 frames/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc
+          setenv IN2 SCRATCH/refbm${imagename}.fft.msk.mrc
           setenv OUT frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.fft.mrc
           ${bin_2dx}/twofile.exe << eot
           2 ! ICOMB = 2
@@ -229,6 +196,126 @@ eot
         endif
    
 
+
+set rtempx1 = 2048
+set rtempy1 = 2048
+set rtempx2 = 2048
+set rtempy2 = 2048
+@ rtempx1 -= 200
+@ rtempx2 += 199
+@ rtempy1 -= 200
+@ rtempy2 += 199
+set boxlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
+echo boxlabel = ${boxlabel}
+\rm -f frames/CC-CE-frame_${i}.mrc
+${bin_2dx}/labelh.exe << eot
+frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
+1
+frames/CC-CE-frame_${i}.mrc
+${boxlabel}
+eot
+#
+${bin_2dx}/mrc2tif.exe << eot
+frames/CC-CE-frame_${i}.mrc
+frames/CC-CE-frame_${i}.tif
+eot
+#
+set rtempx1 = 500
+set rtempy1 = 500
+set rtempx2 = 500
+set rtempy2 = 500
+@ rtempx1 -= 200
+@ rtempx2 += 199
+@ rtempy1 -= 200
+@ rtempy2 += 199
+set boxlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
+echo boxlabel = ${boxlabel}
+\rm -f frames/CC-BL-frame_${i}.mrc
+${bin_2dx}/labelh.exe << eot
+frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
+1
+frames/CC-BL-frame_${i}.mrc
+${boxlabel}
+eot
+#
+${bin_2dx}/mrc2tif.exe << eot
+frames/CC-BL-frame_${i}.mrc
+frames/CC-BL-frame_${i}.tif
+eot
+#
+set rtempx1 = 500
+set rtempy1 = 3000
+set rtempx2 = 500
+set rtempy2 = 3000
+@ rtempx1 -= 200
+@ rtempx2 += 199
+@ rtempy1 -= 200
+@ rtempy2 += 199
+set boxlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
+echo boxlabel = ${boxlabel}
+\rm -f frames/CC-TL-frame_${i}.mrc
+${bin_2dx}/labelh.exe << eot
+frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
+1
+frames/CC-TL-frame_${i}.mrc
+${boxlabel}
+eot
+#
+${bin_2dx}/mrc2tif.exe << eot
+frames/CC-TL-frame_${i}.mrc
+frames/CC-TL-frame_${i}.tif
+eot
+#
+set rtempx1 = 3000
+set rtempy1 = 3000
+set rtempx2 = 3000
+set rtempy2 = 3000
+@ rtempx1 -= 200
+@ rtempx2 += 199
+@ rtempy1 -= 200
+@ rtempy2 += 199
+set boxlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
+echo boxlabel = ${boxlabel}
+\rm -f frames/CC-TR-frame_${i}.mrc
+${bin_2dx}/labelh.exe << eot
+frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
+1
+frames/CC-TR-frame_${i}.mrc
+${boxlabel}
+eot
+#
+${bin_2dx}/mrc2tif.exe << eot
+frames/CC-TR-frame_${i}.mrc
+frames/CC-TR-frame_${i}.tif
+eot
+#
+set rtempx1 = 3000
+set rtempy1 =  500
+set rtempx2 = 3000
+set rtempy2 =  500
+@ rtempx1 -= 200
+@ rtempx2 += 199
+@ rtempy1 -= 200
+@ rtempy2 += 199
+\rm -f frames/CC-BR-frame_${i}.mrc
+set boxlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
+echo boxlabel = ${boxlabel}
+${bin_2dx}/labelh.exe << eot
+frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
+1
+frames/CC-BR-frame_${i}.mrc
+${boxlabel}
+eot
+#
+${bin_2dx}/mrc2tif.exe << eot
+frames/CC-BR-frame_${i}.mrc
+frames/CC-BR-frame_${i}.tif
+eot
+#
+
+
+
+
         ###########################################################################
         ${proc_2dx}/lin "QUADSERCH - Search unbending profile with first reference (1nd round, IPASS=3)"
         ###########################################################################
@@ -248,10 +335,11 @@ eot
         set valspotscan = '0'
         set createmask = '0'
 
-        # IPASS = 13   ! same as IPASS=3, but align images also
-        set IPASS = 13
+        if ( 1 == 2 ) then
+          # IPASS = 13   ! same as IPASS=3, but align images also
+          set IPASS = 13
 
-        ${bin_2dx}/2dx_quadserchk-2.exe << eot
+          ${bin_2dx}/2dx_quadserchk-2.exe << eot
 ${IPASS},${quadpredb}                     ! IPASS,NRANGE
 frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
 frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
@@ -267,13 +355,33 @@ ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0
 ${createmask}                   ! create manual Masking information (0=n,1=y)
 0                               ! Do mask the image directly
 eot
-        #
-        if ( ! -e frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc ) then
-          ${proc_2dx}/protest "ERROR in 2dx_quadserchk-2" 
+          #
+          if ( ! -e frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc ) then
+            ${proc_2dx}/protest "ERROR in 2dx_quadserchk-2" 
+          else
+            \mv -f frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
+          endif
+          #
         else
-          \mv -f frames/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc frames/frame_${i}/m${nonmaskimagename}_${i}.mrc
+          #
+          set IPASS = 3
+          ${bin_2dx}/2dx_quadserchk-2.exe << eot
+${IPASS},${quadpredb}                     ! IPASS,NRANGE
+frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${movie_quadradax},${movie_quadraday}          ! RADIUS OF CORR SEARCH, search offset in pixels
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! create manual Masking information (0=n,1=y)
+0                               ! Do mask the image directly
+eot
+          #
         endif
-        
+        #
         
         if ( ${movie_refboxb} != "0" ) then
 

@@ -140,7 +140,7 @@ C     PARAMETER (LMAX=16384,LCMX=8192)
       DIMENSION LABELS(20,10),CELL(6),EXTRA(29)
       DIMENSION DNCELL(6),MXYZN(3)
       COMPLEX CLINE(LCMX),COUT(LCMX),CVAL
-      CHARACTER*60 INFILE,OUTFILE
+      CHARACTER*200 INFILE,OUTFILE
       character*80 TITLE
       character*200 cfile,cname
       REAL*8 DOUBLMEAN,DOUBLOMEAN,DOUBLTMP
@@ -236,7 +236,8 @@ C
         WRITE(6,1550)
 1550    FORMAT(10X)
 C
-        IF (IMODE .NE. 0 .and. IMODE.ne.17) THEN
+C        IF (IMODE .NE. 0 .and. IMODE.ne.17) THEN
+        IF (IMODE.ne.17) THEN
           WRITE(6,1600)
 1600      FORMAT('$Output filename:  ')
           READ(5,1200) OUTFILE
@@ -1622,13 +1623,25 @@ C=====================================================================
 C
 C  MODE 0 : CHANGE LABELS
 C
-10      CALL IRTLAB(1,LABELS,NL)
+10      continue
+        CALL IRTLAB(1,LABELS,NL)
+C
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        DO IZ = 1,NZ
+          DO IY = 1,NY
+            CALL IRDLIN(1,CLINE,*999)
+            CALL IWRLIN(2,CLINE)
+          enddo
+        enddo
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
         DO 150 J = 1,NL
           WRITE(6,1675) J,(LABELS(K,J),K=1,18)
 150     CONTINUE
 1675    FORMAT(I3,2X,18A4)
         WRITE(6,1680)
-1680    FORMAT(/,'$Number of labels to ADD ? ')
+1680    FORMAT(/,'$Number of labels to ADD (can also be negative) ? ')
         READ(5,*) NLA
         IF (NLA .GT. 0) THEN
           NL = MIN(10,NL+NLA)
@@ -1657,8 +1670,14 @@ C       Following statement changed for Alliant
 180       CONTINUE
           GOTO 12
         END IF
-15      CALL IALLAB(1,LABELS,NL)          
-        CALL IWRHDR(1,TITLE,-1,DMIN,DMAX,DMEAN)
+15      continue
+        write(*,'(''Updating labels'')')
+        CALL IALLAB(2,LABELS,NL)
+        write(*,'(''Writing new header. DMIN,DMAX,DMEAN = '',3G16.8)')
+     .     DMIN,DMAX,DMEAN
+        write(TITLE,'(''LABELH Mode 0: Changing labels'')')
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        write(*,'(''Done.'')')
         GOTO 995
 C
 C=====================================================================
@@ -2183,7 +2202,7 @@ c       DIMENSION LABELS(20,10),CELL(6)
         DIMENSION LABELS(20,10)
         COMPLEX CLINE(LCMX),COUT(LCMX)
         REAL*8 DOUBLMEAN
-        CHARACTER*60 INFILE,OUTFILE
+        CHARACTER*200 INFILE,OUTFILE
         character*80 TITLE
         EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
         EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
@@ -2612,7 +2631,7 @@ C
         REAL*8 DOUBLMEAN
         CHARACTER DAT*24
         character*80 TITLE
-        CHARACTER*60 INFILE,OUTFILE,DATAFILE,TITLELINE
+        CHARACTER*200 INFILE,OUTFILE,DATAFILE,TITLELINE
         EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
         DATA NXYZST/3*0/, CNV/57.29578/
 C

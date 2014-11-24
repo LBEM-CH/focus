@@ -50,13 +50,11 @@
 # DISPLAY: RESMIN
 # DISPLAY: ALAT
 # DISPLAY: radlim
-# DISPLAY: domask
 # DISPLAY: ctf_ttf
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
 # DISPLAY: refori
-# DISPLAY: createmaskinfo
 # DISPLAY: ISTEP
 # DISPLAY: ISTEP_h
 # DISPLAY: IMAXCOR
@@ -372,6 +370,32 @@ ${proc_2dx}/linblock "apply_filter.py - Applying pre-processing filters"
 echo "<<@progress: 22>>"
 #
 set i = 0
+while ($i <= ${movie_imagenumber_touse})
+  echo "# IMAGE: frames/CC-CE-frame_${i}.mrc <Frame ${i} CC CE>" >> LOGS/${scriptname}.results
+  @ i += 1
+end
+set i = 0
+while ($i <= ${movie_imagenumber_touse})
+  echo "# IMAGE: frames/CC-TL-frame_${i}.mrc <Frame ${i} CC TL>" >> LOGS/${scriptname}.results
+  @ i += 1
+end
+set i = 0
+while ($i <= ${movie_imagenumber_touse})
+  echo "# IMAGE: frames/CC-TR-frame_${i}.mrc <Frame ${i} CC TR>" >> LOGS/${scriptname}.results
+  @ i += 1
+end
+set i = 0
+while ($i <= ${movie_imagenumber_touse})
+  echo "# IMAGE: frames/CC-BR-frame_${i}.mrc <Frame ${i} CC BR>" >> LOGS/${scriptname}.results
+  @ i += 1
+end
+set i = 0
+while ($i <= ${movie_imagenumber_touse})
+  echo "# IMAGE: frames/CC-BL-frame_${i}.mrc <Frame ${i} CC BL>" >> LOGS/${scriptname}.results
+  @ i += 1
+end
+#
+set i = 0
   echo "# IMAGE: frames/frame_${i}/${nonmaskimagename}_${i}.raw.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
   echo "# IMAGE: frames/frame_${i}/PS/${nonmaskimagename}_${i}-histo.ps <Frame ${i} (Histogram)>" >> LOGS/${scriptname}.results
   echo "# IMAGE: frames/frame_${i}/${nonmaskimagename}_${i}.mrc <Frame ${i} filtered>" >> LOGS/${scriptname}.results
@@ -479,16 +503,30 @@ endif
 ${proc_2dx}/linblock "FFTRANS - Producing references in Fourier space"
 ###############################################################
 #
+\rm -f SCRATCH/refam${imagename}.flt.upscale.mrc
+${bin_2dx}/labelh.exe << eot
+SCRATCH/refam${imagename}.flt.mrc
+19
+SCRATCH/refam${imagename}.flt.upscale.mrc
+eot
+#
 \rm -f SCRATCH/refam${imagename}.fft.mrc
-setenv IN  SCRATCH/refam${imagename}.flt.mrc
+setenv IN  SCRATCH/refam${imagename}.flt.upscale.mrc
 setenv OUT SCRATCH/refam${imagename}.fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
 echo  "# IMAGE: SCRATCH/refam${imagename}.fft.mrc <Movie Mode Ref A (FFT)>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_refboxb} != 0 ) then
+  \rm -f SCRATCH/refbm${imagename}.flt.upscale.mrc
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/refbm${imagename}.flt.mrc
+19
+SCRATCH/refbm${imagename}.flt.upscale.mrc
+eot 
+  #
   \rm -f SCRATCH/refbm${imagename}.fft.mrc
-  setenv IN  SCRATCH/refbm${imagename}.flt.mrc
+  setenv IN  SCRATCH/refbm${imagename}.flt.upscale.mrc
   setenv OUT SCRATCH/refbm${imagename}.fft.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
@@ -504,12 +542,105 @@ if ( ${movie_masking_mode} == '1' ) then
   endif 
   echo  "# IMAGE: ${nonmaskimagename}-masking-final.mrc <Movie Mode Masking Info>" >> LOGS/${scriptname}.results
 endif
-
+#
+#########################################################################
+${proc_2dx}/lin "MASKTRAN - Masked FFT of boxed reference"
+#########################################################################
+set maskb = ${maskb01}
+set rmax = 11000
+#
+\rm -f SCRATCH/refam1${imagename}.fft.msk.mrc
+setenv IN  SCRATCH/refam${imagename}.fft.mrc
+setenv OUT SCRATCH/refam1${imagename}.fft.msk.mrc
+setenv SPOTS ${imagename}.spt
+${bin_2dx}/2dx_masktrana.exe << eot
+1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+echo  "# IMAGE: SCRATCH/refam1${imagename}.fft.msk.mrc <Masked boxed reference A>" >> LOGS/${scriptname}.results
+#
+if ( ${maskb02} != 0 ) then
+  set maskb = ${maskb02}
+  set rmax = 11000
+  \rm -f SCRATCH/refam2${imagename}.fft.msk.mrc
+  setenv IN  SCRATCH/refam${imagename}.fft.mrc
+  setenv OUT SCRATCH/refam2${imagename}.fft.msk.mrc
+  setenv SPOTS ${imagename}.spt
+${bin_2dx}/2dx_masktrana.exe << eot
+1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+  echo  "# IMAGE: SCRATCH/refam2${imagename}.fft.msk.mrc <Masked boxed reference A>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${maskb03} != 0 ) then
+  set maskb = ${maskb03}
+  set rmax = 11000
+  \rm -f SCRATCH/refam3${imagename}.fft.msk.mrc
+  setenv IN  SCRATCH/refam${imagename}.fft.mrc
+  setenv OUT SCRATCH/refam3${imagename}.fft.msk.mrc
+  setenv SPOTS ${imagename}.spt
+${bin_2dx}/2dx_masktrana.exe << eot
+1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+  echo  "# IMAGE: SCRATCH/refam3${imagename}.fft.msk.mrc <Masked boxed reference A>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${maskb04} != 0 ) then
+  set maskb = ${maskb04}
+  set rmax = 11000
+  \rm -f SCRATCH/refam4${imagename}.fft.msk.mrc
+  setenv IN  SCRATCH/refam${imagename}.fft.mrc
+  setenv OUT SCRATCH/refam4${imagename}.fft.msk.mrc
+  setenv SPOTS ${imagename}.spt
+${bin_2dx}/2dx_masktrana.exe << eot
+1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+  echo  "# IMAGE: SCRATCH/refam4${imagename}.fft.msk.mrc <Masked boxed reference A>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${maskb05} != 0 ) then
+  set maskb = ${maskb05}
+  set rmax = 11000
+  \rm -f SCRATCH/refam5${imagename}.fft.msk.mrc
+  setenv IN  SCRATCH/refam${imagename}.fft.mrc
+  setenv OUT SCRATCH/refam5${imagename}.fft.msk.mrc
+  setenv SPOTS ${imagename}.spt
+${bin_2dx}/2dx_masktrana.exe << eot
+1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+  echo  "# IMAGE: SCRATCH/refam5${imagename}.fft.msk.mrc <Masked boxed reference A>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${movie_refboxb} != 0 ) then
+  set maskb = ${maskb01}
+  \rm -f SCRATCH/refbm1${imagename}.fft.msk.mrc
+  setenv IN  SCRATCH/refbm${imagename}.fft.mrc
+  setenv OUT SCRATCH/refbm1${imagename}.fft.msk.mrc
+  setenv SPOTS ${imagename}.spt
+  ${bin_2dx}/2dx_masktrana.exe << eot
+1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
+${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
+${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+eot
+  #
+  echo  "# IMAGE: SCRATCH/refbm${imagename}.fft.msk.mrc <Masked boxed reference B>" >> LOGS/${scriptname}.results
+  #
+endif
+#
 # the variable ${prog_num} controls the progress bar in the subscript 2dx_unbend_movie_sub.com:
 set prog_num = 30
 echo "<<@progress: ${prog_num}>>"
 #
-# First calculate unbending pattern for high-contrast frame_0 (0.25-0.50 of all frames, middle is 0.375):
+# First calculate unbending pattern for high-contrast frame_0 (0.0 to 0.25, middle is 0.125):
 # i counts the super-frames to process:
 set irunner = 0
 set iforward = 1
@@ -523,7 +654,7 @@ set irunner = 1
 
 # Run from key frame downwards to 1:
 set iforward = 0
-set i = `echo ${movie_imagenumber_touse} | awk '{ s = int( $1 * 0.375 ) } END { print s }'`
+set i = `echo ${movie_imagenumber_touse} | awk '{ s = int( $1 * 0.125 ) } END { print s }'`
 while ($i >= 1)
         #============================================
         source ${proc_2dx}/2dx_unbend_movie_sub.com
@@ -536,7 +667,7 @@ end
 
 # Run from key frame upwards to end:
 set iforward = 1
-set i = `echo ${movie_imagenumber_touse} | awk '{ s = int( $1 * 0.375 ) + 1 } END { print s }'`
+set i = `echo ${movie_imagenumber_touse} | awk '{ s = int( $1 * 0.125 ) + 1 } END { print s }'`
 while ($i <= ${movie_imagenumber_touse})
         #============================================
         source ${proc_2dx}/2dx_unbend_movie_sub.com

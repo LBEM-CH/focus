@@ -442,7 +442,7 @@ C
       CALL IWRHDR(2,TITLE,-1,TMIN,TMAX,TMEAN)
       WRITE(6,1900) TMIN,TMAX,TMEAN
 1900  FORMAT(//,'   Overall min, max and mean masked transform 
-     1 values are:   ',3G13.5)
+     1 values are:   ',3G18.9)
       CALL IMCLOSE(1)
       CALL IMCLOSE(2)
       CALL EXIT

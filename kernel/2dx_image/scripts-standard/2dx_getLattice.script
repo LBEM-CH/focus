@@ -74,8 +74,6 @@
 # DISPLAY: laterror_rmsderror
 # DISPLAY: laterror_peaksused
 # DISPLAY: laterror_nodepeakdensity
-# DISPLAY: MASKING_done
-# DISPLAY: LATTICE_done
 #
 #$end_local_vars
 #
@@ -148,14 +146,14 @@ if ( ${det_lattice}x == 'x' ) then
   echo ":: det_lattice corrected to ${det_lattice}"
 endif
 #
-if ( ${MASKING_done} == "y" ) then
-  ${proc_2dx}/linblock "Skipping. Not determining lattice."
-  #
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-  #
-  exit
-endif
+# if ( ${MASKING_done} == "y" ) then
+#   ${proc_2dx}/linblock "Skipping. Not determining lattice."
+#   #
+#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#   #
+#   exit
+# endif
 #
 if ( ${det_lattice} == 'n' && ${det_tilt} == 'n' ) then
   ${proc_2dx}/linblock "Skipping. Not determining lattice."

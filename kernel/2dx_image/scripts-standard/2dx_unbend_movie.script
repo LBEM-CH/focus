@@ -352,8 +352,7 @@ echo "<<@progress: 20>>"
 #
 if ( 1 == 2 ) then
   #
-  ${bin_2dx}/2dx_quadserchk-2.exe << eot
-23,${quadpredb}                     ! IPASS,NRANGE
+  ${bin_2dx}/2dx_movie_refine.exe << eot
 frames/CCmap
 ${movie_imagenumber_touse}
 ${cormap}
@@ -362,11 +361,6 @@ ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
 ${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
-N                               ! YES/NO FOR DETAILED PRINTOUT
-${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
-${createmask}                   ! dont create manual Masking information
-0                               ! Mask the image directly
 eot
   #
   exit

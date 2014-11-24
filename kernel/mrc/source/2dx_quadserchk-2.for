@@ -93,10 +93,6 @@ C               -10 as for 0, but reading image and writing (aligned) image out
 C               -11 as for 0, but reading image and writing (aligned) image out
 C               -12 as for 0, but reading image and writing (aligned) image out
 C               -13 as for 0, but reading image and writing (aligned) image out
-C               -20 as for 0, but refining ERROR field for stack
-C               -21 as for 0, but refining ERROR field for stack
-C               -22 as for 0, but refining ERROR field for stack
-C               -23 as for 0, but refining ERROR field for stack
 C         NRANGE- range of previous peaks used in prediction of next peak posn.
 C         ISIZEX- size of transform in x-pixels (eg. 3000,3000)
 C         ISIZEY-                  and y-pixels
@@ -145,7 +141,7 @@ C                        XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)
 C
 C-----Max input image is 16000 x 16000, which is an array of 256'000'000
 C-----Max input image is 12000 x 12000, which is an array of 144'000'000
-      PARAMETER (IARRMXSIZ=144000000)
+      PARAMETER (IARRMXSIZ=256000000)
       PARAMETER (MDR=120)
       PARAMETER (MDC=120)
       PARAMETER (MNY=-240)
@@ -158,11 +154,8 @@ C
 C----------------MFIELD needs to be MXI-MNI
       PARAMETER (MFIELD=1001)
 C
-      PARAMETER (MAXFRAMES=100)
-C
       DIMENSION ARRAY(IARRMXSIZ)
       DIMENSION ARRA2(IARRMXSIZ)
-      DIMENSION ARRAM(MAXFRAMES,IARRMXSIZ)
       DIMENSION NASTOP(2)
       DIMENSION NSTART(10),NFIN(10),NSTEP(10)
       DIMENSION PROFILE(101,101),NCOUNT(11),RADSTORE(-180:180)
@@ -236,14 +229,8 @@ C
       if(IPASS.gt.9 .and. IPASS.lt.19)then
         IPASS=IPASS-10
         IALIGN=1
-        ISTACK=0
-      elseif(IPASS.gt.19 .and. IPASS.lt.29)then
-        IPASS=IPASS-20
-        IALIGN=0
-        ISTACK=1
       else
         IALIGN=0
-        ISTACK=0
       endif
       WRITE(6,39003)IPASS,NRANGE
 39003   FORMAT(' IPASS=',I2,' NRANGE=',I3,/)
@@ -269,48 +256,6 @@ C
         read(5,'(A)')FILE2
         call shorten(FILE2,k)
         write(6,'(''Read: '',A)')FILE2(1:k)
-      endif
-C
-      if(ISTACK.eq.1)then
-C-------Read Stacks of CCmaps into core
-        write(6,'(''Give name of CCmaps with frames without'',
-     .    '' -??.mrc ending'')')
-        read(5,'(A)')FILE1
-        call shorten(FILE1,k)
-        write(6,'(''Read: '',A)')FILE1(1:k)
-C
-        write(6,'(''Give number of frames to process'')')
-        read(5,'(A)')IFRAMES
-        write(6,'(''Read: '',I8)')IFRAMES
-        if(IFRAMES.gt.IMAXFRAMES)then
-          write(6,'(''::ERROR: too many frames for program'',
-     .      '' dimensions.'')')
-          STOP
-        endif
-C
-        write(6,'(''Reading all CC maps for frames'')')
-        do i = 1,IFRAMES
-          call shorten(FILE1,k)
-          if(i.lt.10)then
-            write(cline,'(A,''-'',I1)')FILE1(1:k),i
-          elseif(i.lt.100)then
-            write(cline,'(A,''-'',I2)')FILE1(1:k),i
-          elseif(i.lt.1000)then
-            write(cline,'(A,''-'',I3)')FILE1(1:k),i
-          else
-            write(6,'(''::ERROR: too many frames for program'',
-     .        '' dimensions.'')')
-            STOP
-          endif
-          CALL IMOPEN(1,cline,'RO')
-          CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
-          IF(NCOL*NLINE.GT.IARRMXSIZ) STOP '::  IARRMXSIZ too small'
-          CALL IMPOSN(1,0,0)
-          CALL IRDPAS(1,ARRAM(i,1),NCOL,NLINE,0,NCOL-1,0,NLINE-1,*9400)
-          CALL IMCLOSE(1)
-          write(6,'(''Read CC map '',I4)')i
-        enddo
-        write(6,'(''All '',I4,'' CC maps read into core.'')')i
       endif
 C
 C-----Read in entire CC map into ARRAY

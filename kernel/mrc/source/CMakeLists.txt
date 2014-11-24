@@ -33,6 +33,10 @@ if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")
 	set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}  -static-libgcc")
 	set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -static-libgcc")
+
+	set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}")
+	set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG}")
+
 	if(APPLE)
 		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -D_LARGEFILE_SOURCE")
 	endif(APPLE)

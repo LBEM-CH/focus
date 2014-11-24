@@ -194,7 +194,10 @@ eot
           setenv OUT frames/frame_${i}/SCRATCH/corel_b_m${nonmaskimagename}.cor.mrc
           ${bin_2dx}/2dx_fftrans.exe
         endif
-   
+
+
+        \cp -f frames/frame_${i}/SCRATCH/corel_a_m${nonmaskimagename}.cor.mrc frames/CCmap-${i}.mrc
+
 
 
 set rtempx1 = 2048

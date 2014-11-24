@@ -291,21 +291,23 @@ set num_dia = 100
 #
 # Generate subfolder for frame images
 set frame_folder = "frames"
-\rm -rf ${frame_folder}
-\mkdir ${frame_folder}
-#
-echo "<<@progress: 10>>"
-#
-###############################################################
-${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} frames, merging ${movie_imagenumber_toave} movie images into each"
-###############################################################
-#
-python ${proc_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
-#
-foreach f  (`ls frames`)
-  \cp 2dx_image.cfg frames/$f/
-  python ${proc_2dx}/movie/disable_movie.py  frames/$f/
-end
+# \rm -rf ${frame_folder}
+if ( ! -d ${frame_folder} ) then
+  \mkdir ${frame_folder}
+  #
+  echo "<<@progress: 10>>"
+  #
+  ###############################################################
+  ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} frames, merging ${movie_imagenumber_toave} movie images into each"
+  ############################################################### 
+  #
+  python ${proc_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave}
+  #
+  foreach f  (`ls frames`)
+    \cp 2dx_image.cfg frames/$f/
+    python ${proc_2dx}/movie/disable_movie.py  frames/$f/
+  end
+endif
 #
 echo "<<@progress: 15>>"
 #
@@ -348,8 +350,12 @@ ${proc_2dx}/linblock "QUADSERCH - Updating Initial Error Field"
 #
 echo "<<@progress: 20>>"
 #
-${bin_2dx}/2dx_quadserchk-2.exe << eot
-3,${quadpredb}                     ! IPASS,NRANGE
+if ( 1 == 2 ) then
+  #
+  ${bin_2dx}/2dx_quadserchk-2.exe << eot
+23,${quadpredb}                     ! IPASS,NRANGE
+frames/CCmap
+${movie_imagenumber_touse}
 ${cormap}
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
@@ -362,6 +368,28 @@ ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0
 ${createmask}                   ! dont create manual Masking information
 0                               ! Mask the image directly
 eot
+  #
+  exit
+  #
+else
+  #
+  ${bin_2dx}/2dx_quadserchk-2.exe << eot
+3,${quadpredb}                     ! IPASS,NRANGE
+${movie_imagenumber_touse}
+${cormap}
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
+${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! dont create manual Masking information
+0                               ! Mask the image directly
+eot
+  #
+endif
 #
 ###############################################################
 ${proc_2dx}/linblock "apply_filter.py - Applying pre-processing filters"

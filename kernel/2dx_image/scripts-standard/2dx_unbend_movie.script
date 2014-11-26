@@ -75,6 +75,7 @@
 # DISPLAY: movie_filter_type
 # DISPLAY: movie_filter_param
 # DISPLAY: movie_imagenumber_toave
+# DISPLAY: Thread_Number
 #
 #$end_local_vars
 #
@@ -159,6 +160,7 @@ set movie_facthreshb = ""
 set movie_imagenumber_toave = ""
 set MASKING_done = ""
 set QVALS = ""
+set Thread_Number = ""
 #
 #$end_vars
 #
@@ -350,18 +352,22 @@ ${proc_2dx}/linblock "QUADSERCH - Updating Initial Error Field"
 #
 echo "<<@progress: 20>>"
 #
-if ( 1 == 2 ) then
+echo "movie_imagenumber_touse = ${movie_imagenumber_touse}"
+#
+
+if ( 1 == 1 ) then
+  #
+  setenv NCPUS ${Thread_Number}
   #
   ${bin_2dx}/2dx_movie_refine.exe << eot
 frames/CCmap
 ${movie_imagenumber_touse}
-${cormap}
-${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
-${lattice},F                       ! Lattice vectors
--200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+SCRATCH/prof${imagename}.dat
 eot
+  #
+echo ":: "
+echo ":: Now look at file 2dx_movie_refine.dat "
+echo ":: "
   #
   exit
   #
@@ -369,7 +375,6 @@ else
   #
   ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${quadpredb}                     ! IPASS,NRANGE
-${movie_imagenumber_touse}
 ${cormap}
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors

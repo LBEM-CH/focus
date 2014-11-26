@@ -15,11 +15,13 @@ PEAKMAKE = cd ./peaksearch; make all; cd ..
 GETLATMAKE = cd ./2dx_getlat; make all; cd ..
 ENDIANMAKE = cd ./endianness; make all; cd ..
 CTFMAKE = cd ./ctf; make all; cd ..
+MOVIEMAKE = cd ./movie; make all; cd ..
 SPMAKE = cd ./single-particle; make all; cd ..
 PEAKMAKECLEAN = cd ./peaksearch; make clean; cd ..
 GETLATMAKECLEAN = cd ./2dx_getlat; make clean; cd ..
 ENDIANMAKECLEAN = cd ./endianness; make clean; cd ..
 CTFMAKECLEAN = cd ./ctf; make clean; cd ..
+MOVIEMAKECLEAN = cd ./movie; make clean; cd ..
 SPMAKECLEAN = cd ./single-particle; make clean; cd ..
 
 
@@ -46,6 +48,9 @@ $(ENDIAN):
 $(CTF):  
 	$(CTFMAKE)	
 
+$(MOVIE):  
+	$(MOVIEMAKE)	
+
 $(SP):  
 	$(SPMAKE)	
 clean:
@@ -54,6 +59,7 @@ clean:
 	$(GETLATMAKECLEAN)
 	$(ENDIANMAKECLEAN)
 	$(CTFMAKECLEAN)
+	$(MOVIEMAKECLEAN)
 
 # 	$(SPMAKECLEAN) 
 

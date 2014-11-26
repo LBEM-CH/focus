@@ -1,0 +1,44 @@
+F77 = @FC@
+GCC = @CC@
+FFLAGS = @FCFLAGS@ -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -w 
+# CFLAGS = -DPROTOTYPE -Dalliant -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+CFLAGS = -DPROTOTYPE -Dalliant -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE 
+# DO THIS FOR UNIX:
+#  -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+#
+# FOR OPENMP INCLUDE:
+#  -fopenmp -O3
+#
+
+BIN = ../../bin
+# LDIR = -L../../lib -L/opt/local/lib
+# LIBRARIES = ../../lib/libgen.a ../../lib/libmisc.a ../../lib/libim2k.a ../../lib/libplot2k.a ../../lib/libfft.a ../../lib/libconv.a ../../lib/lib2dx.a
+# LFLAG = -l2dx -lim2k -lmisc -lgen -lplot2k -lfft -lconv -lfftw3f @LIBS@
+
+
+all: $(BIN)/2dx_movie_refine.exe 
+
+$(BIN)/2dx_movie_refine.exe: 2dx_movie_refine.o iof.o ioc.o 
+	$(F77) $(FFLAGS) -fopenmp iof.o ioc.o -o $@ $<
+
+
+2dx_movie_refine.o: 2dx_movie_refine.f
+	$(F77) $(FFLAGS) -fopenmp -c $< 
+
+iof.o: iof.f
+        $(F77) $(CFLAGS) -c $<
+
+ioc.o: ioc.c
+        $(GCC) $(CFLAGS) -c $<
+
+2dx_plot2k.o: 2dx_plot2k.c
+        $(GCC) $(CFLAGS) -c $<
+
+
+
+
+
+clean:
+	\rm -f ../../bin/2dx_movie_refine.exe
+	\rm -f *.o
+

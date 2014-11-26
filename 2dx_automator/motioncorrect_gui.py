@@ -59,7 +59,7 @@ class Auto2dxGUI(Frame):
                         raise SystemExit("No averages output directory selected")
 
                 stack_dir = tkFileDialog.askdirectory(parent=self.parent, title="Output directory for aligned stacks, e.g. /mnt/cina-qnap01/.../DC_stacks")
-                if len(self.stack_dir)==0:
+                if len(stack_dir)==0:
                         raise SystemExit("No stack-output directory selected")
                 self.export_location_stack = stack_dir
 

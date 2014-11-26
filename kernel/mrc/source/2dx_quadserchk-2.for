@@ -141,7 +141,8 @@ C                        XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)
 C
 C-----Max input image is 16000 x 16000, which is an array of 256'000'000
 C-----Max input image is 12000 x 12000, which is an array of 144'000'000
-      PARAMETER (IARRMXSIZ=256000000)
+C      PARAMETER (IARRMXSIZ=256000000)
+      PARAMETER (IARRMXSIZ=144000000)
       PARAMETER (MDR=120)
       PARAMETER (MDC=120)
       PARAMETER (MNY=-240)

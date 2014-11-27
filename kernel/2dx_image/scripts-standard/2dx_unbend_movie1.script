@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Unbend Movie-Mode (Experimental)                                   #
+# Title: Unbend Movie-Mode (do not use)                                     #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -167,6 +167,9 @@ set Thread_Number = ""
 set scriptname = 2dx_unbend_movie
 \rm -f LOGS/${scriptname}.results
 #
+  ${proc_2dx}/linblock "Script deactivated."
+  exit
+
 echo "<<@evaluate>>"
 echo "<<@progress: 1>>"
 #

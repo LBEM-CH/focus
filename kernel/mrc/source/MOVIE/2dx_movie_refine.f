@@ -26,7 +26,7 @@ C
 C
       CHARACTER TITLE*1600
 C
-      INTEGER   NXYZ(3),IMXYZ(3),NXYZST(3)
+      INTEGER   NXYZ(3)
 C
       REAL*8    DOUBLMEAN,DARRAYMEAN,DARRAYMIN,DARRAYMAX
       INTEGER   I,J,K,L,IC,IR,NC,NR,H,IVAL
@@ -37,16 +37,19 @@ C
       INTEGER   ID
       INTEGER   iofflocx,iofflocy
       INTEGER   iframemin,iframemax
-      INTEGER   iminoffset,imaxoffset,ioffstep
+      INTEGER   iminoffset,imaxoffset
       INTEGER   istart,iend
       INTEGER   NX,NY,NZ,MODE
       INTEGER   iframe,IFRAMS,IPEAK
+      REAL      roffstep
       REAL      DMIN,DMAX,DMEAN
       REAL      RVAL
       REAL      DENMAX
       REAL      RX,RY
       INTEGER   IOFFMAX,IMAX
-      INTEGER   IOFFXMAX,IOFFYMAX,IMAXXMAX,IMAXYMAX
+      REAL      ROFFFIRSTX,ROFFFIRSTY
+      REAL      ROFFLASTX,ROFFLASTY
+      REAL      ROFFCENX,ROFFCENY
       INTEGER   imaxx,imaxy
       INTEGER   icount
 C
@@ -72,10 +75,10 @@ C
       REAL      YPOSIT(IMNY:IMXY,IMNY:IMXY)
       REAL      PEAK(IMNY:IMXY,IMNY:IMXY)
 C
-      REAL      ROFFSETX(IMNY:IMXY,IMNY:IMXY)
-      REAL      ROFFSETY(IMNY:IMXY,IMNY:IMXY)
-      REAL      RDRIFTX(IMNY:IMXY,IMNY:IMXY)
-      REAL      RDRIFTY(IMNY:IMXY,IMNY:IMXY)
+      REAL      ROFIRSTX(IMNY:IMXY,IMNY:IMXY)
+      REAL      ROFIRSTY(IMNY:IMXY,IMNY:IMXY)
+      REAL      ROLASTX(IMNY:IMXY,IMNY:IMXY)
+      REAL      ROLASTY(IMNY:IMXY,IMNY:IMXY)
 C 
 C      REAL      ARRAY(IARRMXSIZ)
 C      INTEGER*2 IARRAM(IARRMXSI2,IMAXFRAMES)
@@ -263,8 +266,7 @@ C
 C
 C-----Calculate lattice node CCmap averages with variing offsets among frames:
 C
-      imaxoffset = 30
-      ioffstep = 2
+      imaxoffset = 10
       iminoffset = -imaxoffset
 C
       iframemax = 5 
@@ -273,14 +275,15 @@ C
         STOP '::ERROR, iframemax too large'
       endif
 C
-      istart = imaxoffset + iframemax + 1
-      iend = NCO2 - imaxoffset - iframemax - 1
-C
       icount=0
       do K=IMINA,IMAXA
         do L=IMINB,IMAXB
 C
 C---------Check if this drifted patch would stay within the downsampled image:
+C
+          roffstep = 3.0
+          istart =      int(roffstep*imaxoffset) + iframemax + 1
+          iend = NCO2 - int(roffstep*imaxoffset) - iframemax - 1
 C
           ICO=INT(XPOSIT(K,L)/IAVE)
           IRO=INT(YPOSIT(K,L)/IAVE)
@@ -291,16 +294,16 @@ C
             icount=icount+1
 C
 C-----------Initiate offset position for last frame:
-C
             IOFFMAX = -30000
-            IOFFXMAX = 0
-            IOFFYMAX = 0
+            ROFFFIRSTX = 0.0
+            ROFFFIRSTY = 0.0
+            ROFFLASTX = 0.0
+            ROFFLASTY = 0.0
 C
-            do ioffx=iminoffset,imaxoffset,ioffstep
-              do ioffy=iminoffset,imaxoffset,ioffstep
+            do ioffx=iminoffset,imaxoffset
+              do ioffy=iminoffset,imaxoffset
 C
 C---------------Zero aligned patch
-C
                 do ix=iframemin,iframemax
                   do iy=iframemin,iframemax
                     IFIELD(ix,iy)=0
@@ -311,9 +314,15 @@ C---------------Add offset frames into IFIELD
 C
                 do iframe=1,IFRAMS
 C-----------------Calculate offset in pixels
-C
-                  iofflocx=INT(XPOSIT(K,L)/IAVE)+ioffx*(iframe-1)/(IFRAMS-1)
-                  iofflocy=INT(YPOSIT(K,L)/IAVE)+ioffy*(iframe-1)/(IFRAMS-1)
+C-----------------The offset should be so that the last frame N is offset by the desired amount,
+C-----------------and the frame N/4 is not offset at all.
+C-----------------That means that the first frame is offset into the opposite direction.
+C-----------------This means: RX=ioffx*roffstep*(iframe-IFRAMS/4)/(IFRAMS*3/4)
+C-----------------This is the same as below:
+                  RX=real(ioffx)*roffstep*real(4*iframe-IFRAMS)/real(3*IFRAMS)
+                  RY=real(ioffy)*roffstep*real(4*iframe-IFRAMS)/real(3*IFRAMS)
+                  iofflocx=INT(XPOSIT(K,L)/real(IAVE)+RX/real(IAVE))
+                  iofflocy=INT(YPOSIT(K,L)/real(IAVE)+RY/real(IAVE))
 C
                   do ix=iframemin,iframemax
                     do iy=iframemin,iframemax
@@ -333,36 +342,91 @@ C
                   do iy=iframemin,iframemax
                     if(IMAX.lt.IFIELD(ix,iy))then
                       IMAX=IFIELD(ix,iy)
-                      imaxx=ix
-                      imaxy=iy
+                      imaxx=ix*IAVE
+                      imaxy=iy*IAVE
                     endif
                   enddo
                 enddo
-C                write(6,'(''Offset '',2I6,'' gives max of '',I10,
-C   .              '' at position '',2I8)')ioffx,ioffy,IMAX,imaxx,imaxy
                 if(IMAX.gt.IOFFMAX)then
                   IOFFMAX=IMAX
-                  IOFFXMAX=ioffx
-                  IOFFYMAX=ioffy
-                  IMAXXMAX=imaxx
-                  IMAXYMAX=imaxy
-C                write(6,'(''Best Offset so far '',2I6,'' gives max of '',G12.6,
-C   .                '' at position '',2I8)')IOFFXMAX,IOFFYMAX,IOFFMAX,IMAXXMAX,IMAXYMAX
+                  ROFFCENX=imaxx
+                  ROFFCENY=imaxy
+                  ROFFLASTX=RX
+                  ROFFLASTY=RY
                 endif
 C
               enddo
             enddo
 C
-            ROFFSETX(K,L)=IMAXXMAX*IAVE
-            ROFFSETY(K,L)=IMAXYMAX*IAVE
-            RDRIFTX(K,L)= IOFFXMAX*IAVE
-            RDRIFTY(K,L)= IOFFYMAX*IAVE
+C-----------Repeat with 10x smaller step size:
+C
+            roffstep = 0.3
+            do ioffx=iminoffset,imaxoffset
+              do ioffy=iminoffset,imaxoffset
+C
+C---------------Zero aligned patch
+                do ix=iframemin,iframemax
+                  do iy=iframemin,iframemax
+                    IFIELD(ix,iy)=0
+                  enddo
+                enddo
+C
+C---------------Add offset frames into IFIELD
+                do iframe=1,IFRAMS
+                  RX=real(ioffx)*roffstep*real(4*iframe-IFRAMS)/real(3*IFRAMS)
+                  RY=real(ioffy)*roffstep*real(4*iframe-IFRAMS)/real(3*IFRAMS)
+                  RX=RX+ROFFLASTX
+                  RY=RY+ROFFLASTY
+                  iofflocx=INT(XPOSIT(K,L)/real(IAVE)+RX/real(IAVE))
+                  iofflocy=INT(YPOSIT(K,L)/real(IAVE)+RY/real(IAVE))
+                  do ix=iframemin,iframemax
+                    do iy=iframemin,iframemax
+                      ICO=iofflocx+ix
+                      IRO=iofflocy+iy
+                      ID=(IRO-1)*NCO2+ICO
+                      IS=ID+IARRMXSI2*(iframe-1)
+                      IFIELD(ix,iy)=IFIELD(ix,iy)+IARRAM(IS)
+                    enddo
+                  enddo
+                enddo
+C
+C---------------Find maximum peak in IFIELD, but only in inner 10x10 pixels
+                IMAX=-30000
+                do ix=iframemin,iframemax
+                  do iy=iframemin,iframemax
+                    if(IMAX.lt.IFIELD(ix,iy))then
+                      IMAX=IFIELD(ix,iy)
+                      imaxx=ix*IAVE
+                      imaxy=iy*IAVE
+                    endif
+                  enddo
+                enddo
+                if(IMAX.gt.IOFFMAX)then
+                  IOFFMAX=IMAX
+                  ROFFCENX=imaxx
+                  ROFFCENY=imaxy
+                  ROFFLASTX=RX
+                  ROFFLASTY=RY
+                endif
+C
+              enddo
+            enddo
+C
+C-----------Store optimal results:
+            ROFFFIRSTX=-ROFFLASTX/3.0
+            ROFFFIRSTY=-ROFFLASTY/3.0
+            ROFIRSTX(K,L)=ROFFFIRSTX+ROFFCENX
+            ROFIRSTY(K,L)=ROFFFIRSTY+ROFFCENY
+            ROLASTX(K,L) =ROFFLASTX+ROFFCENX
+            ROLASTY(K,L) =ROFFLASTY+ROFFCENY
             write(6,'(2I5,'': Node '',2I5,'' at '',2F10.2,
      .        '' gives max peak '',I10,
-     .        '' for offset '',2I5,'' at position '',2I5)')
+     .        '' for offset from '',2F8.1,'' to '',2F8.1)')
      .        icount,ipeak,K,L,XPOSIT(K,L),YPOSIT(K,L),IOFFMAX,
-     .        IOFFXMAX,IOFFYMAX,IMAXXMAX,IMAXYMAX
+     .        ROFIRSTX(K,L),ROFIRSTY(K,L),ROLASTX(K,L),ROLASTY(K,L)
 C
+          else
+            PEAK(K,L)=0.0
           endif
         enddo
       enddo
@@ -387,20 +451,18 @@ C
      .           ''(with QUADSERCH corrections)'')')
       write(11,'(''PEAK is the QUADSERCH peak height of this lattice '',
      .           ''node.'')')
-      write(11,'(''RFRAME1X/Y is the offset of the first frame'',
-     .           ''(this will be done more precise later)'')')
-      write(11,'(''RFRAMENX/Y is the offset of the last frame '',
-     .           ''(this will be done more precise later)'')')
+      write(11,'(''ROFIRSTX/Y is the offset of the first frame'')')
+      write(11,'(''ROLASTX/Y is the offset of the last frame '')')
       write(11,'(''  K,  L,  XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),''
-     .         ''RFRAME1X(K,L),RFRAME1Y(K,L),'',
-     .         ''RFRAMENX(K,L),RFRAMENY(K,L)'')')
+     .         ''ROFIRSTX(K,L),ROFIRSTY(K,L),'',
+     .         ''ROLASTX(K,L),ROLASTY(K,L)'')')
       do K=IMINA,IMAXA
         do L=IMINB,IMAXB
           if(PEAK(K,L).ne.0.0)then
-            write(11,'(2I6,7G13.6)')
+            write(11,'(2I6,3G13.6,4F10.2)')
      .         K,L,XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),
-     .         ROFFSETX(K,L),ROFFSETY(K,L),
-     .         ROFFSETX(K,L)+RDRIFTX(K,L),ROFFSETY(K,L)+RDRIFTY(K,L)
+     .         ROFIRSTX(K,L),ROFIRSTY(K,L),
+     .         ROLASTX(K,L),ROLASTY(K,L)
           endif
         enddo
       enddo
@@ -429,8 +491,8 @@ C
         do K=IMINA,IMAXA
           do L=IMINB,IMAXB
             if(PEAK(K,L).ne.0.0)then
-              RX=XPOSIT(K,L)+ROFFSETX(K,L)+REAL(iframe)/REAL(IFRAMS)*RDRIFTX(K,L)
-              RY=YPOSIT(K,L)+ROFFSETY(K,L)+REAL(iframe)/REAL(IFRAMS)*RDRIFTY(K,L)
+              RX=XPOSIT(K,L)+ROFIRSTX(K,L)+ROLASTX(K,L)*REAL(iframe)/REAL(IFRAMS)
+              RY=YPOSIT(K,L)+ROFIRSTY(K,L)+ROLASTY(K,L)*REAL(iframe)/REAL(IFRAMS)
             else
               RX=0.0
               RY=0.0

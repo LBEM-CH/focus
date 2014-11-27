@@ -284,6 +284,7 @@ if ( ${new_mrc_created} == 'y' ) then
   #################################################################################
   ### Treat histogram width, if needed ############################################
   ${proc_2dx}/linblock "Testing histogram width."
+  set loc_imagename = ${nonmaskimagename}
   source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
   #################################################################################  
   #

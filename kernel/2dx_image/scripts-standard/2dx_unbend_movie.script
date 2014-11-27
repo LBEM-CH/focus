@@ -88,6 +88,7 @@ set PHASEORI_done = ""
 set boxb1 = ""
 set boxb2 = ""
 set imagename = ""
+set imageorigin = ""
 set defocus = ""
 set nonmaskimagename = ""
 set imagenumber = ""
@@ -132,6 +133,9 @@ set RMAG = ""
 set LCOLOR = ""
 set ccunbend_program = ""
 set crop = ""
+set crop_histogram = ""
+set crop_histogram_percent = ""
+set crop_histogram_stdev = ""
 set RB_1 = ""
 set RB_2 = ""
 set RB_3 = ""
@@ -382,6 +386,7 @@ while ($i <= ${movie_imagenumber_touse})
   set new_mrc_created = y
   set loc_imagename = frames/frame_${i}
   source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
+  source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
   #
   set filtervalue = `python ${proc_2dx}/movie/getFilter.py ${i} ${movie_filter_type} ${filt_a} ${filt_b}`
   echo ":  Filter frame average #${i} with radius ${filtervalue}"

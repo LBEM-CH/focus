@@ -263,8 +263,8 @@ C
 C
 C-----Calculate lattice node CCmap averages with variing offsets among frames:
 C
-      imaxoffset = 10
-      ioffstep = 1
+      imaxoffset = 30
+      ioffstep = 2
       iminoffset = -imaxoffset
 C
       iframemax = 5 
@@ -355,8 +355,8 @@ C
 C
             ROFFSETX(K,L)=IMAXXMAX*IAVE
             ROFFSETY(K,L)=IMAXYMAX*IAVE
-            RDRIFTX(K,L)=-IOFFXMAX*IAVE
-            RDRIFTY(K,L)=-IOFFYMAX*IAVE
+            RDRIFTX(K,L)= IOFFXMAX*IAVE
+            RDRIFTY(K,L)= IOFFYMAX*IAVE
             write(6,'(2I5,'': Node '',2I5,'' at '',2F10.2,
      .        '' gives max peak '',I10,
      .        '' for offset '',2I5,'' at position '',2I5)')

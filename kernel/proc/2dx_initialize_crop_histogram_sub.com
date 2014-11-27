@@ -6,13 +6,13 @@
 #
 if ( ${new_mrc_created} == "y" ) then
   #############################################################################
-  ${proc_2dx}/linblock "labelh - to calculate image statistics"
+  ${proc_2dx}/lin "labelh - to calculate image statistics"
   #############################################################################
   #
-  set inimage = ${nonmaskimagename}.mrc
+  set inimage = ${loc_imagename}
   # 
   ${bin_2dx}/labelh.exe << eot
-${inimage}
+${inimage}.mrc
 17               ! Get statistics
 ${crop_histogram_percent}
 ${crop_histogram_stdev}
@@ -27,17 +27,17 @@ eot
   #
   if ( ${crop_histogram} == 'y' ) then
     #############################################################################
-    ${proc_2dx}/linblock "labelh - to cutoff over and underflows to ${goodmin} to ${goodmax}"
+    ${proc_2dx}/lin "labelh - to cutoff over and underflows to ${goodmin} to ${goodmax}"
     #############################################################################
     #
     #
-    \mv -f ${nonmaskimagename}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
+    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
     # 
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
 99               ! Cut off over and underflows
 3
-${nonmaskimagename}.mrc
+${inimage}.mrc
 ${goodmin},${goodmax}
 eot
     #
@@ -51,16 +51,16 @@ eot
   #
   if ( ${imageorigin} == '4' ) then
     #############################################################################
-    ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4."
-    ${proc_2dx}/linblock "LABEL - to reduce pixel amplitude by a factor of 4." >> History.dat
+    ${proc_2dx}/lin "LABEL - to reduce pixel amplitude by a factor of 4."
+    ${proc_2dx}/lin "LABEL - to reduce pixel amplitude by a factor of 4." >> History.dat
     #############################################################################  
     #
-    \mv -f ${nonmaskimagename}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
+    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
     #
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
 2               ! switch to REAL (floating point)
-${nonmaskimagename}.mrc
+${inimage}.mrc
 0.25,0
 1
 eot
@@ -71,16 +71,16 @@ eot
   #
   if ( ${imageorigin} == '5' ) then
     #############################################################################
-    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k."
-    ${proc_2dx}/linblock "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k." >> History.dat
+    ${proc_2dx}/lin "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k."
+    ${proc_2dx}/lin "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k." >> History.dat
     #############################################################################  
     #
-    \mv -f ${nonmaskimagename}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
+    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
     #
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
 16               ! switch to INTEGER*2 (MODE 1) with autoscaling 0…16000
-${nonmaskimagename}.mrc
+${inimage}.mrc
 eot
     #
     \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
@@ -89,16 +89,16 @@ eot
   #
   if ( ${imageorigin} == '6' ) then
     #############################################################################
-    ${proc_2dx}/linblock "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k."
-    ${proc_2dx}/linblock "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k." >> History.dat
+    ${proc_2dx}/lin "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k."
+    ${proc_2dx}/lin "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k." >> History.dat
     #############################################################################  
     #
-    \mv -f ${nonmaskimagename}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
+    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
     #
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
 18               ! switch to INTEGER*2 (MODE 1) with unsigned/signed swap and autoscaling 0…16000
-${nonmaskimagename}.mrc
+${inimage}.mrc
 eot
     #
     \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
@@ -107,11 +107,11 @@ eot
   #
     if ( ${imageorigin} == '7' ) then
     #############################################################################
-    ${proc_2dx}/linblock "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg."
-    ${proc_2dx}/linblock "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg." >> History.dat
+    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg."
+    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg." >> History.dat
     #############################################################################  
     #
-    \mv -f ${nonmaskimagename}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
+    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
     #
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
@@ -123,7 +123,7 @@ eot
 SCRATCH/${nonmaskimagename}.tmp.2.mrc
 99               ! further modes
 1		 ! various roations
-${nonmaskimagename}.mrc
+${inimage}.mrc
 1		 ! Z90 rotation
 eot
     #

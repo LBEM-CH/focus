@@ -427,8 +427,8 @@ C
         do K=IMINA,IMAXA
           do L=IMINB,IMAXB
             if(PEAK(K,L).ne.0.0)then
-              RX=XPOSIT(K,L)+ROFFSETX(K,L)+REAL(iframe/IFRAMS)*RDRIFTX(K,L)
-              RY=YPOSIT(K,L)+ROFFSETY(K,L)+REAL(iframe/IFRAMS)*RDRIFTY(K,L)
+              RX=XPOSIT(K,L)+ROFFSETX(K,L)+REAL(iframe)/REAL(IFRAMS)*RDRIFTX(K,L)
+              RY=YPOSIT(K,L)+ROFFSETY(K,L)+REAL(iframe)/REAL(IFRAMS)*RDRIFTY(K,L)
             else
               RX=0.0
               RY=0.0

@@ -13,7 +13,7 @@ import os
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 5:
-		sys.exit("Missuse detected (apply filter")
+		sys.exit("Missuse detected (apply filter)")
 
 	filename_in = sys.argv[1]
 	freq = float(sys.argv[2])

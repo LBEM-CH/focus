@@ -34,6 +34,31 @@
 #
 # SORTORDER: 52
 #
+#=============================================================================
+# SECTION: Verbosity
+#=============================================================================
+#
+# LABEL: Show raw frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frames = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frames = "n"
+#
+# LABEL: Show FFT of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_FFT = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_FFT = "n"
+#
+# LABEL: Show CCmaps of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_CCmap = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_CCmap = "n"
+#
 # DISPLAY: imagename
 # DISPLAY: SYN_Unbending
 # DISPLAY: RESMAX
@@ -362,7 +387,9 @@ while ($i <= ${movie_imagenumber_touse})
     python ${proc_2dx}/movie/getFilter.py ${i} ${movie_filter_type} ${filt_a} ${filt_b}
   endif
   #
-  echo "# IMAGE: frames/frame_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
+  if ( ${show_frames} == "y" ) then
+    echo "# IMAGE: frames/frame_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
+  endif
   #
   set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 22 + int( 20 * $1 / $2 ) } END { print s }'` 
   echo "<<@progress: ${prog_num}>>"       
@@ -457,7 +484,9 @@ while ($i <= ${movie_imagenumber_touse})
         setenv IN frames/frame_${i}.mrc
         setenv OUT frames/frame_${i}.fft.mrc
         ${bin_2dx}/2dx_fftrans.exe
-        echo  "# IMAGE: frames/frame_${i}.fft.mrc <FFT Frame ${i}>" >> LOGS/${scriptname}.results
+        if ( ${show_frame_FFT} == "y" ) then
+          echo  "# IMAGE: frames/frame_${i}.fft.mrc <FFT Frame ${i}>" >> LOGS/${scriptname}.results
+        endif
         
         
         #########################################################################
@@ -480,7 +509,9 @@ eot
         setenv IN frames/frame_${i}_corel.fft.mrc
         setenv OUT frames/CCmap_${i}.mrc
         ${bin_2dx}/2dx_fftrans.exe
-        echo  "# IMAGE: frames/CCmap_${i}.mrc <CCmap Frame ${i}>" >> LOGS/${scriptname}.results
+        if ( ${show_frame_CCmap} == "y" ) then
+          echo  "# IMAGE: frames/CCmap_${i}.mrc <CCmap Frame ${i}>" >> LOGS/${scriptname}.results
+        endif
 
         set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 50 + int( 20 * $1 / $2 ) } END { print s }'` 
         echo "<<@progress: ${prog_num}>>"
@@ -515,21 +546,39 @@ ${proc_2dx}/linblock "Unbending all frames"
 set i = 1
 while ($i <= ${movie_imagenumber_touse})
        ###########################################################################
+       ${proc_2dx}/lin "CCUNBEND - Unbend CCmap for frame ${i}"
+       ###########################################################################
+       setenv CCORDATA frames/PROFDATA_${i}.dat
+       setenv TABLEOUT frames/CCUNBEND_Table_${i}.dat
+       \rm -f frames/CCUNBEND_Table_${i}.dat
+       \rm -f CCPLOT.PS
+
+       ${bin_2dx}/2dx_ccunbendk.exe << eot
+frames/CCmap_${i}.mrc
+0,1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+${imagename}, Movie-Mode UNBEND, ${date}
+frames/CCmap_${i}_unbent.mrc
+CCUNBEND, frame_${i}.mrc, ${date}
+eot
+       if ( ${show_frame_CCmap} == "y" ) then
+         echo  "# IMAGE: frames/CCmap_${i}_unbent.mrc <CCmap Frame ${i} unbent>" >> LOGS/${scriptname}.results
+       endif
+
+       ###########################################################################
        ${proc_2dx}/lin "CCUNBEND - Unbend frame ${i}"
        ###########################################################################
        setenv CCORDATA frames/PROFDATA_${i}.dat
        setenv TABLEOUT frames/CCUNBEND_Table_${i}.dat
-       set ITYPE = 0
-       set ROFFSET = 50.0
-       set NNUM = 6
-       rm -f CCPLOT.PS
+       \rm -f frames/CCUNBEND_Table_${i}.dat
+       \rm -f CCPLOT.PS
 
        ${bin_2dx}/2dx_ccunbendk.exe << eot
 frames/frame_${i}.mrc
-${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+0,1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
-frames/CCUNBEND_frame_${i}.notap.mrc
+frames/CCUNBEND_frame_${i}_notap.mrc
 CCUNBEND, frame_${i}.mrc, ${date}
 eot
 
@@ -560,24 +609,6 @@ eot
           pdftk A=frame_unbending.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
           \mv -f out.pdf frame_unbending.pdf
        endif
-
-       ###########################################################################
-       ${proc_2dx}/lin "TAPEREDGE - correct unbent frame ${i} for taper edges"
-       ###########################################################################
-       \rm -f frames/CCUNBEND_frame_${i}.mrc
-       setenv IN  frames/CCUNBEND_frame_${i}.notap.mrc
-       setenv OUT frames/CCUNBEND_frame_${i}.mrc
-       ${bin_2dx}/2dx_taperedgek.exe << eot
-       30,30,100,30       ! IAVER,ISMOOTH,ITAPER
-eot
-
-       ###########################################################################
-       ${proc_2dx}/lin "FFTRANS - Obtain Fourier-transform of unbent and masked frame ${i}"
-       ###########################################################################
-       \rm -f frames/CCUNBEND_frame_${i}.fft.mrc
-       setenv IN  frames/CCUNBEND_frame_${i}.mrc
-       setenv OUT frames/CCUNBEND_frame_${i}.fft.mrc
-       ${bin_2dx}/2dx_fftrans.exe
      
        set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 70 + int( 10 * $1 / $2 ) } END { print s }'` 
        echo "<<@progress: ${prog_num}>>"
@@ -587,6 +618,13 @@ end
 #
 
 echo "<<@progress: 80>>"
+
+###########################################################################
+${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_touse}" 
+###########################################################################
+python ${proc_2dx}/movie/direct_sum2.py ${movie_imagenumber_touse}
+echo "# IMAGE: frames/CCmap_driftCorrected.mrc <CCmap drift-corrected>" >> LOGS/${scriptname}.results 
+
 
 ###########################################################################
 ${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_touse}" 
@@ -603,48 +641,18 @@ echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
 
 
-\rm -f frames/PROFDATA_1.dat
-\rm -f SPIDERCOORD.spi
-\rm -f CCPLOT.PS
 
-setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
-setenv PROFDATA frames/PROFDATA_1.dat
-setenv ERRORS   SCRATCH/errout2${imagename}.dat
-
-set createmask = '0'
-        
 if ( ${movie_masking_mode} != '0' ) then
-  #                
-  #########################################################################
-  ${proc_2dx}/lin "QUADSERCH - masking with external mask-info"
-  #########################################################################
-  #
-  if ( ! -e ${nonmaskimagename}-masking-final.mrc ) then
-    ${proc_2dx}/protest "ERROR: ${nonmaskimagename}-masking-final.mrc not found. First run UNBEND-II with masking option."
-  endif 
-  \mv -f frames/direct_sum_filt.mrc frames/direct_sum_filt_nonmasked.mrc
-  \cp -f ${nonmaskimagename}-masking-final.mrc TMP-quadserch-7.mrc
-  #
-  ${bin_2dx}/2dx_quadserchk-2.exe << eot
-2,${quadpredb}                     ! IPASS,NRANGE
-frames/CCmap_1.mrc
-${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
-${lattice},F                       ! Lattice vectors
--200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${quadradbx},${quadradby}         ! RADIUS OF CORR SEARCH, search offset in pixels
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
-N                               ! YES/NO FOR DETAILED PRINTOUT
-${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
-${createmask}                   ! dont create manual Masking information
-1                               ! Do mask the image directly
-frames/direct_sum_filt_nonmasked.mrc
-frames/direct_sum_filt.mrc
--1                              ! create output images (0=no, <0 = one, >0 =size)
-1                               ! use external masking template (0=no, 1=yes)
-TMP-quadserch-7.mrc
-eot
-  #
+  ###########################################################################
+  ${proc_2dx}/linblock "Masking drift-corrected CCmap with masking info"
+  ###########################################################################
+  python ${proc_2dx}/movie/mask.py frames/CCmap_driftCorrected.mrc frames/CCmap_driftCorrected_masked.mrc ${nonmaskimagename}-masking-final.mrc
+  echo "# IMAGE: frames/CCmap_driftCorrected_masked.mrc <CCmap drift-corrected, masked>" >> LOGS/${scriptname}.results 
+  ###########################################################################
+  ${proc_2dx}/linblock "Masking average with masking info"
+  ###########################################################################
+  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt.mrc frames/direct_sum_filt_masked.mrc ${nonmaskimagename}-masking-final.mrc
+  echo "# IMAGE: frames/direct_sum_filt_masked.mrc <Sum unbent images, filtered, masked>" >> LOGS/${scriptname}.results 
 else
   ######################################################
   ${proc_2dx}/lin "Not masking frame"
@@ -656,8 +664,11 @@ endif
 ###########################################################################
 ${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
 ###########################################################################
-
-setenv IN  frames/direct_sum_filt.mrc
+if ( ${movie_masking_mode} != '0' ) then
+  setenv IN  frames/direct_sum_filt_masked.mrc
+else
+  setenv IN  frames/direct_sum_filt.mrc
+endif
 setenv OUT frames/direct_sum_fixed.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER

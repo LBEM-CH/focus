@@ -79,6 +79,8 @@ C
       REAL      ROFIRSTY(IMNY:IMXY,IMNY:IMXY)
       REAL      ROLASTX(IMNY:IMXY,IMNY:IMXY)
       REAL      ROLASTY(IMNY:IMXY,IMNY:IMXY)
+      REAL      ROCENX(IMNY:IMXY,IMNY:IMXY)
+      REAL      ROCENY(IMNY:IMXY,IMNY:IMXY)
 C 
 C      REAL      ARRAY(IARRMXSIZ)
 C      INTEGER*2 IARRAM(IARRMXSI2,IMAXFRAMES)
@@ -269,7 +271,7 @@ C
       imaxoffset = 10
       iminoffset = -imaxoffset
 C
-      iframemax = 5 
+      iframemax = 10
       iframemin = -iframemax
       if(iframemax.gt.IMXI)then
         STOP '::ERROR, iframemax too large'
@@ -281,7 +283,10 @@ C
 C
 C---------Check if this drifted patch would stay within the downsampled image:
 C
-          roffstep = 3.0
+C=======================
+          roffstep = 5.0
+C=======================
+C
           istart =      int(roffstep*imaxoffset) + iframemax + 1
           iend = NCO2 - int(roffstep*imaxoffset) - iframemax - 1
 C
@@ -315,12 +320,17 @@ C
                 do iframe=1,IFRAMS
 C-----------------Calculate offset in pixels
 C-----------------The offset should be so that the last frame N is offset by the desired amount,
-C-----------------and the frame N/4 is not offset at all.
-C-----------------That means that the first frame is offset into the opposite direction.
-C-----------------This means: RX=ioffx*roffstep*(iframe-IFRAMS/4)/(IFRAMS*3/4)
-C-----------------This is the same as below:
-                  RX=real(ioffx)*roffstep*real(4*iframe-IFRAMS)/real(3*IFRAMS)
-                  RY=real(ioffy)*roffstep*real(4*iframe-IFRAMS)/real(3*IFRAMS)
+C                 RX(IFRAMS)=D
+C-----------------and the frame N/3 is not offset at all.
+C                 RX(IFRAMS/3)=0.0
+C-----------------and the first frame is offset into the opposite direction by 50% of the offset of the last frame..
+C                 RX(1)=-D/2
+C-----------------This gives:
+C                 RX(iframe)=-D/2 + D*(3/2) * (iframe-1)/(IFRAMS-1)
+C                           = D/2 * (-1 + 3 * (iframe-1)/(IFRAMS-1))
+C-----------------Or:
+                  RX=real(ioffx)*roffstep*0.5*real(-1.0 + 3.0*real(iframe-1)/real(IFRAMS-1))
+                  RY=real(ioffy)*roffstep*0.5*real(-1.0 + 3.0*real(iframe-1)/real(IFRAMS-1))
                   iofflocx=INT(XPOSIT(K,L)/real(IAVE)+RX/real(IAVE))
                   iofflocy=INT(YPOSIT(K,L)/real(IAVE)+RY/real(IAVE))
 C
@@ -359,8 +369,8 @@ C
             enddo
 C
 C-----------Repeat with 10x smaller step size:
+            roffstep = roffstep / imaxoffset
 C
-            roffstep = 0.3
             do ioffx=iminoffset,imaxoffset
               do ioffy=iminoffset,imaxoffset
 C
@@ -373,10 +383,8 @@ C---------------Zero aligned patch
 C
 C---------------Add offset frames into IFIELD
                 do iframe=1,IFRAMS
-                  RX=real(ioffx)*roffstep*real(4*iframe-IFRAMS)/real(3*IFRAMS)
-                  RY=real(ioffy)*roffstep*real(4*iframe-IFRAMS)/real(3*IFRAMS)
-                  RX=RX+ROFFLASTX
-                  RY=RY+ROFFLASTY
+                  RX=(ROFFLASTX+real(ioffx)*roffstep)*0.5*real(-1.0 + 3.0*real(iframe-1)/real(IFRAMS-1))
+                  RY=(ROFFLASTY+real(ioffy)*roffstep)*0.5*real(-1.0 + 3.0*real(iframe-1)/real(IFRAMS-1))
                   iofflocx=INT(XPOSIT(K,L)/real(IAVE)+RX/real(IAVE))
                   iofflocy=INT(YPOSIT(K,L)/real(IAVE)+RY/real(IAVE))
                   do ix=iframemin,iframemax
@@ -413,17 +421,19 @@ C
             enddo
 C
 C-----------Store optimal results:
-            ROFFFIRSTX=-ROFFLASTX/3.0
-            ROFFFIRSTY=-ROFFLASTY/3.0
-            ROFIRSTX(K,L)=ROFFFIRSTX+ROFFCENX
-            ROFIRSTY(K,L)=ROFFFIRSTY+ROFFCENY
-            ROLASTX(K,L) =ROFFLASTX+ROFFCENX
-            ROLASTY(K,L) =ROFFLASTY+ROFFCENY
+            ROLASTX(K,L)  =  ROFFLASTX
+            ROLASTY(K,L)  =  ROFFLASTY
+            ROFIRSTX(K,L) = -ROFFLASTX/2.0
+            ROFIRSTY(K,L) = -ROFFLASTY/2.0
+            ROCENX(K,L)   =  ROFFCENX
+            ROCENY(K,L)   =  ROFFCENY
             write(6,'(2I5,'': Node '',2I5,'' at '',2F10.2,
      .        '' gives max peak '',I10,
-     .        '' for offset from '',2F8.1,'' to '',2F8.1)')
+     .        '' for offset from '',2F8.1,'' to '',2F8.1,
+     .        '', center offset '',2F8.1)')
      .        icount,ipeak,K,L,XPOSIT(K,L),YPOSIT(K,L),IOFFMAX,
-     .        ROFIRSTX(K,L),ROFIRSTY(K,L),ROLASTX(K,L),ROLASTY(K,L)
+     .        ROFIRSTX(K,L),ROFIRSTY(K,L),ROLASTX(K,L),ROLASTY(K,L),
+     .        ROCENX(K,L),ROCENY(K,L)
 C
           else
             PEAK(K,L)=0.0
@@ -453,16 +463,18 @@ C
      .           ''node.'')')
       write(11,'(''ROFIRSTX/Y is the offset of the first frame'')')
       write(11,'(''ROLASTX/Y is the offset of the last frame '')')
-      write(11,'(''  K,  L,  XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),''
+      write(11,'(''  K,  L,  XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),'',
      .         ''ROFIRSTX(K,L),ROFIRSTY(K,L),'',
-     .         ''ROLASTX(K,L),ROLASTY(K,L)'')')
+     .         ''ROLASTX(K,L),ROLASTY(K,L),'',
+     .         ''ROCENX(K,L),ROCENY(K,L))'')')
       do K=IMINA,IMAXA
         do L=IMINB,IMAXB
           if(PEAK(K,L).ne.0.0)then
-            write(11,'(2I6,3G13.6,4F10.2)')
+            write(11,'(2I6,3G13.6,6F10.2)')
      .         K,L,XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),
      .         ROFIRSTX(K,L),ROFIRSTY(K,L),
-     .         ROLASTX(K,L),ROLASTY(K,L)
+     .         ROLASTX(K,L),ROLASTY(K,L),
+     .         ROCENX(K,L),ROCENY(K,L)
           endif
         enddo
       enddo
@@ -491,8 +503,12 @@ C
         do K=IMINA,IMAXA
           do L=IMINB,IMAXB
             if(PEAK(K,L).ne.0.0)then
-              RX=XPOSIT(K,L)+ROFIRSTX(K,L)+ROLASTX(K,L)*REAL(iframe)/REAL(IFRAMS)
-              RY=YPOSIT(K,L)+ROFIRSTY(K,L)+ROLASTY(K,L)*REAL(iframe)/REAL(IFRAMS)
+              RX=XPOSIT(K,L)+ROFIRSTX(K,L)*REAL(IFRAMS-iframe)/REAL(IFRAMS-1)
+     .                      +ROLASTX(K,L) *REAL(iframe-1)     /REAL(IFRAMS-1)
+     .                      +ROCENX(K,L)
+              RY=YPOSIT(K,L)+ROFIRSTY(K,L)*REAL(IFRAMS-iframe)/REAL(IFRAMS-1)
+     .                      +ROLASTY(K,L) *REAL(iframe-1)     /REAL(IFRAMS-1)
+     .                      +ROCENY(K,L)
             else
               RX=0.0
               RY=0.0

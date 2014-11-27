@@ -483,9 +483,9 @@ eot
 2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFT's.
 eot
     #
-    if ( ${locround} == '1' ) then
-      echo "# IMAGE: SCRATCH/corel2${imagename}.fft.mrc <XCF between Reference 2 and Image>" >> LOGS/${scriptname}.results 
-    endif
+    # if ( ${locround} == '1' ) then
+    #   echo "# IMAGE: SCRATCH/corel2${imagename}.fft.mrc <XCF between Reference 2 and Image>" >> LOGS/${scriptname}.results 
+    # endif
     #
   endif
   #
@@ -535,9 +535,9 @@ eot
   if ( ${tempkeep} == 'n' ) then
     \rm -f SCRATCH/corel1${imagename}.fft.mrc
   else
-    if ( ${locround} == '1' ) then
-      echo "# IMAGE: SCRATCH/corel1${imagename}.fft.mrc <XCF between Reference 1 and Image>" >> LOGS/${scriptname}.results 
-    endif
+    # if ( ${locround} == '1' ) then
+    #   echo "# IMAGE: SCRATCH/corel1${imagename}.fft.mrc <XCF between Reference 1 and Image>" >> LOGS/${scriptname}.results 
+    # endif
   endif
   #
   if ( ${treatspotscan} == 'y' ) then

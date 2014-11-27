@@ -25,7 +25,6 @@ if ( ${new_mrc_created} == "y" ) then
         #############################################################################
         if ( ${movie_verbose}x != "0x" ) then
           ${proc_2dx}/lin "Crop image into smaller square array"
-          ${proc_2dx}/lin "Crop image into smaller square array" >> History.dat
         endif
         #############################################################################
         #
@@ -34,7 +33,6 @@ if ( ${new_mrc_created} == "y" ) then
         #############################################################################
         if ( ${movie_verbose}x != "0x" ) then
           ${proc_2dx}/lin "Pad image into larger square array"
-          ${proc_2dx}/lin "Pad image into larger square array" >> History.dat
         endif
         #############################################################################
         #
@@ -42,7 +40,6 @@ if ( ${new_mrc_created} == "y" ) then
       endif
       if ( ${movie_verbose}x != "0x" ) then
         ${proc_2dx}/lin "New image size will be ${newsize}"
-        ${proc_2dx}/lin "New image size will be ${newsize}" >> History.dat
       endif
       \rm -f SCRATCH/TMPnewsize.mrc
       #
@@ -111,7 +108,6 @@ eot
       #############################################################################
       if ( ${movie_verbose}x != "0x" ) then
         ${proc_2dx}/lin "cutting image down into better smaller size of ${bettersize}"
-        ${proc_2dx}/lin "cutting image down into better smaller size of ${bettersize}" >> History.dat
       endif
       #############################################################################  
       #

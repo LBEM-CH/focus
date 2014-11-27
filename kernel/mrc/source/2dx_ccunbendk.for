@@ -252,14 +252,10 @@ C     .   .OR.DMIN.LT.1.0.OR.DMAX.LT.1.0) THEN
      . .OR.DMIN.LT.-10000.0.OR.DMAX.LT.1.0) THEN
 CHENN<
         WRITE(6,7500)
-7500    FORMAT(':: ',/,'::WARNING: Image values for DMIN,DMAX or',
-     .    ' DMEAN indicate possible error',/,
-     .    ':: check header values of the image',/,
-     .    ':: ')
-        write(6,'(''::DMIN = '',G15.3,/,
-     .            ''::DMAX = '',G15.3,/,
-     .            ''::DMEAN= '',G15.3,/,
-     .            '':: '')')DMIN,DMAX,DMEAN
+7500    FORMAT(' ',/,':WARNING: Image values for DMIN,DMAX or',
+     .    ' DMEAN are:')
+        write(6,'('':DMIN = '',G15.3,'', DMAX = '',G15.3,
+     .            '', DMEAN= '',G15.3)')DMIN,DMAX,DMEAN
 CHEN>
 C       STOP
 CHEN<

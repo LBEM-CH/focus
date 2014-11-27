@@ -52,7 +52,6 @@ eot
   if ( ${imageorigin} == '4' ) then
     #############################################################################
     ${proc_2dx}/lin "LABEL - to reduce pixel amplitude by a factor of 4."
-    ${proc_2dx}/lin "LABEL - to reduce pixel amplitude by a factor of 4." >> History.dat
     #############################################################################  
     #
     \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
@@ -72,7 +71,6 @@ eot
   if ( ${imageorigin} == '5' ) then
     #############################################################################
     ${proc_2dx}/lin "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k."
-    ${proc_2dx}/lin "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k." >> History.dat
     #############################################################################  
     #
     \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
@@ -90,7 +88,6 @@ eot
   if ( ${imageorigin} == '6' ) then
     #############################################################################
     ${proc_2dx}/lin "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k."
-    ${proc_2dx}/lin "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k." >> History.dat
     #############################################################################  
     #
     \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
@@ -108,7 +105,6 @@ eot
     if ( ${imageorigin} == '7' ) then
     #############################################################################
     ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg."
-    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg." >> History.dat
     #############################################################################  
     #
     \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc

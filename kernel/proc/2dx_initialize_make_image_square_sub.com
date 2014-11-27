@@ -10,24 +10,22 @@ set movie_verbose = 1
 #
 if ( ${new_mrc_created} == "y" ) then
   #
-  set loc_imagename = ${nonmaskimagename}
-  #
     setenv IN ${loc_imagename}.mrc
     set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
     set sizeX = `echo ${dimens} | cut -d\  -f1` 
     set sizeY = `echo ${dimens} | cut -d\  -f2` 
-    ${proc_2dx}/linblock "Image ${loc_imagename} has a size of ${sizeX},${sizeY}."
+    ${proc_2dx}/lin "Image ${loc_imagename} has a size of ${sizeX},${sizeY}."
     if ( ${sizeX} != ${sizeY} ) then
       if ( ${movie_verbose}x != "0x" ) then
-        ${proc_2dx}/linblock "ERROR: only square images are supported (${sizeX},${sizeY})."
-        echo "#WARNING: ERROR: only square images are supported."  >> LOGS/${scriptname}.results
+        ${proc_2dx}/lin "WARNINT: only square images are supported (${sizeX},${sizeY})."
+        echo "#WARNING: WARNING: only square images are supported."  >> LOGS/${scriptname}.results
       endif
       #
       if( ${crop} == "0" ) then
         #############################################################################
         if ( ${movie_verbose}x != "0x" ) then
-          ${proc_2dx}/linblock "Crop image into smaller square array"
-          ${proc_2dx}/linblock "Crop image into smaller square array" >> History.dat
+          ${proc_2dx}/lin "Crop image into smaller square array"
+          ${proc_2dx}/lin "Crop image into smaller square array" >> History.dat
         endif
         #############################################################################
         #
@@ -35,16 +33,16 @@ if ( ${new_mrc_created} == "y" ) then
       else
         #############################################################################
         if ( ${movie_verbose}x != "0x" ) then
-          ${proc_2dx}/linblock "Pad image into larger square array"
-          ${proc_2dx}/linblock "Pad image into larger square array" >> History.dat
+          ${proc_2dx}/lin "Pad image into larger square array"
+          ${proc_2dx}/lin "Pad image into larger square array" >> History.dat
         endif
         #############################################################################
         #
         set newsize = `echo ${sizeX} ${sizeY} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
       endif
       if ( ${movie_verbose}x != "0x" ) then
-        ${proc_2dx}/linblock "New image size will be ${newsize}"
-        ${proc_2dx}/linblock "New image size will be ${newsize}" >> History.dat
+        ${proc_2dx}/lin "New image size will be ${newsize}"
+        ${proc_2dx}/lin "New image size will be ${newsize}" >> History.dat
       endif
       \rm -f SCRATCH/TMPnewsize.mrc
       #
@@ -61,7 +59,7 @@ eot
       #
       #############################################################################
       if ( ${movie_verbose}x != "0x" ) then
-        ${proc_2dx}/linblock "Testing new image size of ${sizeX} for prime factors"
+        ${proc_2dx}/lin "Testing new image size of ${sizeX} for prime factors"
       endif
       #############################################################################
       #
@@ -112,8 +110,8 @@ eot
       #
       #############################################################################
       if ( ${movie_verbose}x != "0x" ) then
-        ${proc_2dx}/linblock "cutting image down into better smaller size of ${bettersize}"
-        ${proc_2dx}/linblock "cutting image down into better smaller size of ${bettersize}" >> History.dat
+        ${proc_2dx}/lin "cutting image down into better smaller size of ${bettersize}"
+        ${proc_2dx}/lin "cutting image down into better smaller size of ${bettersize}" >> History.dat
       endif
       #############################################################################  
       #
@@ -127,10 +125,10 @@ ${cropdimensions}
 eot
       #
       if ( ${movie_verbose}x != "0x" ) then
-        ${proc_2dx}/linblock "Cropping done."
+        ${proc_2dx}/lin "Cropping done."
         #
         #############################################################################
-        ${proc_2dx}/linblock "Pad into image with same dimensions to get the header right"
+        ${proc_2dx}/lin "Pad into image with same dimensions to get the header right"
         #############################################################################
       endif
       #
@@ -158,9 +156,7 @@ eot
     if ( ${newsize} != ${sizeX} ) then
       #
       #############################################################################
-      echo ":: "
-      echo "::WARNING: Interpolating image up to ${newsize}"
-      echo ":: "
+      ${proc_2dx}/linblock "WARNING: Interpolating image up to ${newsize}"
       echo "#WARNING: WARNING: Image was up-interpolated two times, to ${newsize} pixels" >> LOGS/${scriptname}.results
       #############################################################################  
       #
@@ -188,7 +184,7 @@ eot
       set oldval = ${imagesidelength}
       set imagesidelength = ${sizeX}
       if ( ${movie_verbose}x != "0x" ) then
-        ${proc_2dx}/linblock "WARNING: correcting imagesidelength from ${oldval} to ${imagesidelength}"
+        ${proc_2dx}/lin "WARNING: correcting imagesidelength from ${oldval} to ${imagesidelength}"
       endif
       echo "set imagesidelength = ${imagesidelength}"  >> LOGS/${scriptname}.results
     endif

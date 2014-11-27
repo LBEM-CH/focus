@@ -83,7 +83,7 @@ C
       irun=iwert
       itest=1
       ianf=13
-      write(czeil2,'(''::'',I8,'' = '')') iwert
+      write(czeil2,'('':'',I8,'' = '')') iwert
 C
 C-----First test, if the number iwert can be devided by 4. This should be, because
 C     the fft is also calculated of the reduced image.
@@ -115,7 +115,7 @@ C
          itest=itest+1
          if (itest .gt. 8) then
            if (ilog .eq. 1) 
-     1     write(*,'(''::Primefactor exceeds 19, rest = '',I8)') irun
+     1     write(*,'('':Primefactor exceeds 19, rest = '',I8)') irun
            write(czeil2(ianf:80),'('' (too big)'')') 
            iok = -1
            goto 990

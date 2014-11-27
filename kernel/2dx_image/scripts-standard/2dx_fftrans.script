@@ -179,6 +179,7 @@ echo "<<@progress: 5>>"
 #################################################################################
 ### Make input image square and correct size ####################################
 ${proc_2dx}/linblock "Testing correct size of input image."
+set loc_imagename = ${nonmaskimagename}
 source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
 #################################################################################
 #

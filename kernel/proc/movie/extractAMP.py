@@ -6,7 +6,7 @@ import os
 import sys
 
 def getResolution(h,k):
-        # This is really badly case specific here.....:
+        print "::WARNING: Using case specific parameters here ..... Needs to be generalized (ToDo)"
 	spacing = 39.1
 	xh = h * spacing
 	xk = k * spacing

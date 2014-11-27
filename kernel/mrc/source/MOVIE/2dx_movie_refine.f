@@ -2,21 +2,6 @@ C  2dx_movie_refine.for
 C
 C       VX1.0   HS     25.11.14  2dx - First version
 C
-C     INPUT FILES :
-C         ERRORS      - (Created if IPASS=1); Read if IPASS=2,3; Contains
-C                     - list of XERROR,YERROR,PEAK found when IPASS=1
-C                     - not written or read if IPASS=0
-C         ERROUT      - (Created if IPASS=3); Contains
-C                     - list of XERROR,YERROR,PEAK found when IPASS=3
-C                     - not written or read if IPASS=0v1
-C     OUTPUT FILES:
-C         PROFDATA    - File contains;
-C                     - Parameters to be transferred between programs,
-C                     - including data read in here, maximum value of 
-C                     - peak height, raw list of correlation peak positions
-C                     - and heights produced by this program and to be used
-C                     - by CCUNBENDA
-C
       IMPLICIT NONE
 C
       INTEGER IARRMXSIZ,IARRMXSI2,IMNY,IMXY,IMNI,IMXI
@@ -58,6 +43,8 @@ C
       INTEGER   iframe,IFRAMS,IPEAK
       REAL      DMIN,DMAX,DMEAN
       REAL      RVAL
+      REAL      DENMAX
+      REAL      RX,RY
       INTEGER   IOFFMAX,IMAX
       INTEGER   IOFFXMAX,IOFFYMAX,IMAXXMAX,IMAXYMAX
       INTEGER   imaxx,imaxy
@@ -68,11 +55,12 @@ C
       INTEGER   OMP_GET_NUM_PROCS
 C
       CHARACTER CFORM
-      INTEGER   IP,JXYZ(3),IAVE,IS,IERR
+      INTEGER   IP,IAVE,IS,IERR
       REAL      STEPR,DSTEP,R
 C
       CHARACTER*200 FILE1,FILE2
-      CHARACTER*200 cline
+      CHARACTER*200 cline,cline2
+      CHARACTER*200 comment(5)
 C
       LOGICAL   EX
 C
@@ -139,11 +127,11 @@ C
       do iframe = 1,IFRAMS
         call shorten(FILE1,k)
         if(iframe.lt.10)then
-          write(cline,'(A,''-'',I1,''.mrc'')')FILE1(1:k),iframe
+          write(cline,'(A,''_'',I1,''.mrc'')')FILE1(1:k),iframe
         elseif(iframe.lt.100)then
-          write(cline,'(A,''-'',I2,''.mrc'')')FILE1(1:k),iframe
+          write(cline,'(A,''_'',I2,''.mrc'')')FILE1(1:k),iframe
         elseif(iframe.lt.1000)then
-          write(cline,'(A,''-'',I3,''.mrc'')')FILE1(1:k),iframe
+          write(cline,'(A,''_'',I3,''.mrc'')')FILE1(1:k),iframe
         else
           write(6,'(''::ERROR: too many frames for program'',
      .      '' dimensions:'',I8)')iframe
@@ -153,13 +141,14 @@ C
         call shorten(cline,k)
         call GUESSF(cline,CFORM,EX)
         if(.not.EX)then
-          write(*,'(''::File not found: '',A)')cline(1:k)
+          write(*,'(''::ERROR: CCmap file not found: '',A)')cline(1:k)
           STOP
         ENDIF
         CALL IOPEN(cline,10,CFORM,MODE,NXYZ(1),NXYZ(2),
      +           NXYZ(3),'OLD',STEPR,TITLE)
 C
-        WRITE(*,'('':Reading image, NX,NY = '',2I10)')NXYZ(1),NXYZ(2)
+        WRITE(*,'('':Reading image '',A,'', NX,NY = '',2I10)')
+     .     cline(1:k),NXYZ(1),NXYZ(2)
 C
         IAVE=2
 C
@@ -253,12 +242,11 @@ C
       write(6,'(''Read: '',A)')FILE2(1:k)
 C
       open(13,FILE=FILE2,STATUS="OLD",ERR=990)
-      read(13,'(A)')cline
-      read(13,'(A)')cline
-      read(13,'(A)')cline
-      read(13,'(A)')cline
-      read(13,'(A)')cline
+      do i=1,5
+        read(13,'(A)')comment(i)
+      enddo
       read(13,*)NC,NR,IC,IR,A1,A2,B1,B2,IMINA,IMAXA,IMINB,IMAXB
+      read(13,*)DENMAX
 
       ipeak=0
       DO K=IMINA,IMAXA
@@ -367,8 +355,8 @@ C
 C
             ROFFSETX(K,L)=IMAXXMAX*IAVE
             ROFFSETY(K,L)=IMAXYMAX*IAVE
-            RDRIFTX(K,L)=IMAXXMAX-IOFFXMAX*IAVE
-            RDRIFTY(K,L)=IMAXYMAX-IOFFYMAX*IAVE
+            RDRIFTX(K,L)=-IOFFXMAX*IAVE
+            RDRIFTY(K,L)=-IOFFYMAX*IAVE
             write(6,'(2I5,'': Node '',2I5,'' at '',2F10.2,
      .        '' gives max peak '',I10,
      .        '' for offset '',2I5,'' at position '',2I5)')
@@ -393,9 +381,12 @@ C
       write(11,'(2I8)')
      .           IMNY,IMXY
 C
-      write(11,'(''K,L are the lattice nodes (only those with PEAK are listed)'')')
-      write(11,'(''X/YPOSIT is the position of the lattice node (with QUADSERCH corrections)'')')
-      write(11,'(''PEAK is the QUADSERCH peak height of this lattice node.'')')
+      write(11,'(''K,L are the lattice nodes (only those with PEAK '',
+     .           ''are listed)'')')
+      write(11,'(''X/YPOSIT is the position of the lattice node '',
+     .           ''(with QUADSERCH corrections)'')')
+      write(11,'(''PEAK is the QUADSERCH peak height of this lattice '',
+     .           ''node.'')')
       write(11,'(''RFRAME1X/Y is the offset of the first frame'')')
       write(11,'(''RFRAMENX/Y is the offset of the last frame'')')
       write(11,'(''  K,  L,  XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),''
@@ -406,12 +397,47 @@ C
           if(PEAK(K,L).ne.0.0)then
             write(11,'(2I6,7G13.6)')
      .         K,L,XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),
-     .         ROFFSETX(K,L),ROFFSETY(K,L),RDRIFTX(K,L),RDRIFTY(K,L)
+     .         ROFFSETX(K,L),ROFFSETY(K,L),
+     .         ROFFSETX(K,L)+RDRIFTX(K,L),ROFFSETY(K,L)+RDRIFTY(K,L)
           endif
         enddo
       enddo
-C
       close(11)
+C
+      do iframe = 1,IFRAMS
+        if(iframe.lt.10)then
+          write(cline,'(''frames/PROFDATA_'',I1,''.dat'')')iframe
+        elseif(iframe.lt.100)then
+          write(cline,'(''frames/PROFDATA_'',I2,''.dat'')')iframe
+        else
+          write(cline,'(''frames/PROFDATA_'',I3,''.dat'')')iframe
+        endif
+        call shorten(cline,k)
+        write(cline2,'(''\rm -f '',A)')cline(1:k)
+        call shorten(cline2,k)
+        call system(cline2(1:k))
+        call shorten(cline,k)
+        open(10,FILE=cline(1:k),STATUS='NEW',ERR=980)
+        do i=1,5
+          call shorten(comment(i),k)
+          write(10,'(A)')comment(i)(1:k)
+        enddo
+        write(10,*)NC,NR,IC,IR,A1,A2,B1,B2,IMINA,IMAXA,IMINB,IMAXB
+        WRITE(10,*)DENMAX
+        do K=IMINA,IMAXA
+          do L=IMINB,IMAXB
+            if(PEAK(K,L).ne.0.0)then
+              RX=XPOSIT(K,L)+ROFFSETX(K,L)+REAL(iframe/IFRAMS)*RDRIFTX(K,L)
+              RY=YPOSIT(K,L)+ROFFSETY(K,L)+REAL(iframe/IFRAMS)*RDRIFTY(K,L)
+            else
+              RX=0.0
+              RY=0.0
+            endif
+            WRITE(10,'(3G16.6)')RX,RY,PEAK(K,L)
+          enddo
+        enddo
+        close(10)
+      enddo
 C
       goto 999
 C

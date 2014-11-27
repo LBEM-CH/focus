@@ -387,8 +387,10 @@ C
      .           ''(with QUADSERCH corrections)'')')
       write(11,'(''PEAK is the QUADSERCH peak height of this lattice '',
      .           ''node.'')')
-      write(11,'(''RFRAME1X/Y is the offset of the first frame'')')
-      write(11,'(''RFRAMENX/Y is the offset of the last frame'')')
+      write(11,'(''RFRAME1X/Y is the offset of the first frame'',
+     .           ''(this will be done more precise later)'')')
+      write(11,'(''RFRAMENX/Y is the offset of the last frame '',
+     .           ''(this will be done more precise later)'')')
       write(11,'(''  K,  L,  XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),''
      .         ''RFRAME1X(K,L),RFRAME1Y(K,L),'',
      .         ''RFRAMENX(K,L),RFRAMENY(K,L)'')')

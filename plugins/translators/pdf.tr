@@ -2,5 +2,5 @@
 #
 set infile = $1
 #
-${psViewer_2dx_app} ${infile}
+${pdfViewer_2dx_app} ${infile}
 

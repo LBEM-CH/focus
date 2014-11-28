@@ -4,23 +4,32 @@ C       VX1.0   HS     25.11.14  2dx - First version
 C
       IMPLICIT NONE
 C
-      INTEGER IARRMXSIZ,IARRMXSI2,IMNY,IMXY,IMNI,IMXI
-      INTEGER IMAXFRAMES
-C-----Max input image is 16000 x 16000, which is an array of 256'000'000
-C-----Max input image is 12000 x 12000, which is an array of 144'000'000
-C-----Max input image is 4096 x 4096, which is an array of 16'777'216
-      PARAMETER (IARRMXSIZ=16777216)
-C-----Max input image 2xdownsampled is 6000 x 6000, which is an array of 36'000'000
-C-----Max input image 2xdownsampled is 2048 x 2048, which is an array of 4'194'304
-      PARAMETER (IARRMXSI2=4194304)
-C      PARAMETER (IARRMXSI2=1000)
+      INTEGER IARRMXSIZ,IARRMXSI2,IMNY,IMXY,IMNI,IMXI,IMNJ,IMXJ
+      INTEGER IMAXFRAMES,iinterpol,IAVE
+C
+C-----Downsampling ratio (use IAVE=2 for 2xbinning)
+      PARAMETER (IAVE=1)
+C
+C-----Max input image of 16000 x 16000 is an array of 256'000'000
+C-----Max input image of 12000 x 12000 is an array of 144'000'000
+C-----Max input image of 6000 x 6000 is an array of 36'000'000
+C-----Max input image of 4096 x 4096 is an array of 16'777'216
+C-----Max input image of 2048 x 2048 is an array of 4'194'304
+C-----The following has to be = (image size)**2 / IAVE
+      PARAMETER (IARRMXSI2=16777216)
+C      PARAMETER (IARRMXSI2=4194304)
 C
 C-----These have to be the same as in 2dx_quadserchk-2.for, currently 240
       PARAMETER (IMNY=-240)
       PARAMETER (IMXY= 240)
 C
-      PARAMETER (IMNI=-20)
-      PARAMETER (IMXI= 20)
+      PARAMETER (IMNI=-10)
+      PARAMETER (IMXI= 10)
+C
+      PARAMETER (iinterpol=2)
+C-----the following IMNJ,IMXJ have to be IMNI*iinterpol, IMXI*iinterpol
+      PARAMETER (IMNJ=-20)
+      PARAMETER (IMXJ= 20)
 C
       PARAMETER (IMAXFRAMES=40)
 C
@@ -30,13 +39,12 @@ C
 C
       REAL*8    DOUBLMEAN,DARRAYMEAN,DARRAYMIN,DARRAYMAX
       INTEGER   I,J,K,L,IC,IR,NC,NR,H,IVAL
-      INTEGER   ioffx,ioffy,ix,iy
+      INTEGER   ioffx,ioffy,ix,iy,ixx,iyy
       INTEGER   IRO,ICO,NROW,NCOL,NRO2,NCO2
       INTEGER   IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
       INTEGER   IMAXA,IMAXB,IMINA,IMINB
       INTEGER   ID
       INTEGER   iofflocx,iofflocy
-      INTEGER   iframemin,iframemax
       INTEGER   iminoffset,imaxoffset
       INTEGER   istart,iend
       INTEGER   NX,NY,NZ,MODE
@@ -50,7 +58,7 @@ C
       REAL      ROFFFIRSTX,ROFFFIRSTY
       REAL      ROFFLASTX,ROFFLASTY
       REAL      ROFFCENX,ROFFCENY
-      INTEGER   imaxx,imaxy
+      REAL      rmaxx,rmaxy
       INTEGER   icount
 C
       INTEGER   IMP
@@ -58,7 +66,7 @@ C
       INTEGER   OMP_GET_NUM_PROCS
 C
       CHARACTER CFORM
-      INTEGER   IP,IAVE,IS,IERR
+      INTEGER   IP,IS,IERR
       REAL      STEPR,DSTEP,R
 C
       CHARACTER*200 FILE1,FILE2
@@ -70,6 +78,8 @@ C
       REAL      A1,B1,A2,B2
 C
       INTEGER   IFIELD(IMNI:IMXI,IMNI:IMXI)
+      INTEGER   IFIEL2(IMNJ:IMXJ,IMNJ:IMXJ)
+      INTEGER   IFIEL3(IMNJ:IMXJ,IMNJ:IMXJ)
 C
       REAL      XPOSIT(IMNY:IMXY,IMNY:IMXY)
       REAL      YPOSIT(IMNY:IMXY,IMNY:IMXY)
@@ -81,6 +91,9 @@ C
       REAL      ROLASTY(IMNY:IMXY,IMNY:IMXY)
       REAL      ROCENX(IMNY:IMXY,IMNY:IMXY)
       REAL      ROCENY(IMNY:IMXY,IMNY:IMXY)
+C
+C      REAL,ALLOCATABLE :: ROCENX(:,:)
+C      REAL,ALLOCATABLE :: ROCENY(:,:)
 C 
 C      REAL      ARRAY(IARRMXSIZ)
 C      INTEGER*2 IARRAM(IARRMXSI2,IMAXFRAMES)
@@ -154,8 +167,6 @@ C
 C
         WRITE(*,'('':Reading image '',A,'', NX,NY = '',2I10)')
      .     cline(1:k),NXYZ(1),NXYZ(2)
-C
-        IAVE=2
 C
 C-------Allocate large arrays:
 C
@@ -271,12 +282,6 @@ C
       imaxoffset = 10
       iminoffset = -imaxoffset
 C
-      iframemax = 10
-      iframemin = -iframemax
-      if(iframemax.gt.IMXI)then
-        STOP '::ERROR, iframemax too large'
-      endif
-C
       icount=0
       do K=IMINA,IMAXA
         do L=IMINB,IMAXB
@@ -287,8 +292,8 @@ C=======================
           roffstep = 5.0
 C=======================
 C
-          istart =      int(roffstep*imaxoffset) + iframemax + 1
-          iend = NCO2 - int(roffstep*imaxoffset) - iframemax - 1
+          istart =      int(roffstep*imaxoffset) + IMXI + 1
+          iend = NCO2 - int(roffstep*imaxoffset) - IMXI - 1
 C
           ICO=INT(XPOSIT(K,L)/IAVE)
           IRO=INT(YPOSIT(K,L)/IAVE)
@@ -309,8 +314,8 @@ C
               do ioffy=iminoffset,imaxoffset
 C
 C---------------Zero aligned patch
-                do ix=iframemin,iframemax
-                  do iy=iframemin,iframemax
+                do ix=IMNI,IMXI
+                  do iy=IMNI,IMXI
                     IFIELD(ix,iy)=0
                   enddo
                 enddo
@@ -334,8 +339,8 @@ C-----------------Or:
                   iofflocx=INT(XPOSIT(K,L)/real(IAVE)+RX/real(IAVE))
                   iofflocy=INT(YPOSIT(K,L)/real(IAVE)+RY/real(IAVE))
 C
-                  do ix=iframemin,iframemax
-                    do iy=iframemin,iframemax
+                  do ix=IMNI,IMXI
+                    do iy=IMNI,IMXI
                       ICO=iofflocx+ix
                       IRO=iofflocy+iy
                       ID=(IRO-1)*NCO2+ICO
@@ -348,19 +353,19 @@ C
 C---------------Find maximum peak in IFIELD, but only in inner 10x10 pixels
 C
                 IMAX=-30000
-                do ix=iframemin,iframemax
-                  do iy=iframemin,iframemax
+                do ix=IMNI,IMXI
+                  do iy=IMNI,IMXI
                     if(IMAX.lt.IFIELD(ix,iy))then
                       IMAX=IFIELD(ix,iy)
-                      imaxx=ix*IAVE
-                      imaxy=iy*IAVE
+                      rmaxx=real(ix*IAVE)
+                      rmaxy=real(iy*IAVE)
                     endif
                   enddo
                 enddo
                 if(IMAX.gt.IOFFMAX)then
                   IOFFMAX=IMAX
-                  ROFFCENX=imaxx
-                  ROFFCENY=imaxy
+                  ROFFCENX=rmaxx
+                  ROFFCENY=rmaxy
                   ROFFLASTX=RX
                   ROFFLASTY=RY
                 endif
@@ -375,8 +380,8 @@ C
               do ioffy=iminoffset,imaxoffset
 C
 C---------------Zero aligned patch
-                do ix=iframemin,iframemax
-                  do iy=iframemin,iframemax
+                do ix=IMNI,IMXI
+                  do iy=IMNI,IMXI
                     IFIELD(ix,iy)=0
                   enddo
                 enddo
@@ -387,8 +392,8 @@ C---------------Add offset frames into IFIELD
                   RY=(ROFFLASTY+real(ioffy)*roffstep)*0.5*real(-1.0 + 3.0*real(iframe-1)/real(IFRAMS-1))
                   iofflocx=INT(XPOSIT(K,L)/real(IAVE)+RX/real(IAVE))
                   iofflocy=INT(YPOSIT(K,L)/real(IAVE)+RY/real(IAVE))
-                  do ix=iframemin,iframemax
-                    do iy=iframemin,iframemax
+                  do ix=IMNI,IMXI
+                    do iy=IMNI,IMXI
                       ICO=iofflocx+ix
                       IRO=iofflocy+iy
                       ID=(IRO-1)*NCO2+ICO
@@ -399,20 +404,64 @@ C---------------Add offset frames into IFIELD
                 enddo
 C
 C---------------Find maximum peak in IFIELD, but only in inner 10x10 pixels
+C---------------Interpolate IFIELD into IFIEL2 with 4x finer sampling
+C
+                do ix=IMNJ,IMXJ
+                  do iy=IMNJ,IMXJ
+                    ixx=NINT(real(ix)/real(iinterpol))
+                    iyy=NINT(real(iy)/real(iinterpol))
+                    if(ixx.gt.IMXI)ixx=IMXI
+                    if(ixx.lt.IMNI)ixx=IMNI
+                    if(iyy.gt.IMXI)iyy=IMXI
+                    if(iyy.lt.IMNI)iyy=IMNI
+                    IFIEL2(ix,iy)=IFIELD(ixx,iyy)
+                  enddo
+                enddo
+C
+C---------------Blurr IFIEL2 by adding 8 neighbors
+C
+                do ix=IMNJ+1,IMXJ-1
+                  do iy=IMNJ+1,IMXJ-1
+                    IFIEL3(ix,iy)=(IFIEL2(ix  ,iy  )
+     .                            +IFIEL2(ix-1,iy  )
+     .                            +IFIEL2(ix+1,iy  )
+     .                            +IFIEL2(ix  ,iy-1)
+     .                            +IFIEL2(ix  ,iy+1)
+     .                            +IFIEL2(ix-1,iy-1)
+     .                            +IFIEL2(ix-1,iy+1)
+     .                            +IFIEL2(ix+1,iy-1)
+     .                            +IFIEL2(ix+1,iy+1))
+                  enddo
+                enddo
+C
+                do ix=IMNJ+2,IMXJ-2
+                  do iy=IMNJ+2,IMXJ-2
+                    IFIEL2(ix,iy)=(IFIEL3(ix  ,iy  )
+     .                            +IFIEL3(ix-1,iy  )
+     .                            +IFIEL3(ix+1,iy  )
+     .                            +IFIEL3(ix  ,iy-1)
+     .                            +IFIEL3(ix  ,iy+1)
+     .                            +IFIEL3(ix-1,iy-1)
+     .                            +IFIEL3(ix-1,iy+1)
+     .                            +IFIEL3(ix+1,iy-1)
+     .                            +IFIEL3(ix+1,iy+1))
+                  enddo
+                enddo
+C
                 IMAX=-30000
-                do ix=iframemin,iframemax
-                  do iy=iframemin,iframemax
-                    if(IMAX.lt.IFIELD(ix,iy))then
-                      IMAX=IFIELD(ix,iy)
-                      imaxx=ix*IAVE
-                      imaxy=iy*IAVE
+                do ix=IMNJ+3,IMXJ-3
+                  do iy=IMNJ+3,IMXJ-3
+                    if(IMAX.lt.IFIEL2(ix,iy))then
+                      IMAX=IFIEL2(ix,iy)
+                      rmaxx=real(ix*IAVE)/real(iinterpol)
+                      rmaxy=real(iy*IAVE)/real(iinterpol)
                     endif
                   enddo
                 enddo
                 if(IMAX.gt.IOFFMAX)then
                   IOFFMAX=IMAX
-                  ROFFCENX=imaxx
-                  ROFFCENY=imaxy
+                  ROFFCENX=rmaxx
+                  ROFFCENY=rmaxy
                   ROFFLASTX=RX
                   ROFFLASTY=RY
                 endif
@@ -420,7 +469,10 @@ C
               enddo
             enddo
 C
-C-----------Store optimal results:
+C-----------Store optimal results 
+C-----------The last frame is twice as much offset in one direction, 
+C-----------as the first frame is in the other direction, so that the 
+C-----------frame N/3 is not offset at all (but all is offset by ROFFCEN)):
             ROLASTX(K,L)  =  ROFFLASTX
             ROLASTY(K,L)  =  ROFFLASTY
             ROFIRSTX(K,L) = -ROFFLASTX/2.0
@@ -470,10 +522,10 @@ C
       do K=IMINA,IMAXA
         do L=IMINB,IMAXB
           if(PEAK(K,L).ne.0.0)then
-            write(11,'(2I6,3G13.6,6F10.2)')
+            write(11,'(2I6,3G13.6,6F12.3)')
      .         K,L,XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),
      .         ROFIRSTX(K,L),ROFIRSTY(K,L),
-     .         ROLASTX(K,L),ROLASTY(K,L),
+     .         ROLASTX(K,L)+0.003,ROLASTY(K,L)+0.003,
      .         ROCENX(K,L),ROCENY(K,L)
           endif
         enddo

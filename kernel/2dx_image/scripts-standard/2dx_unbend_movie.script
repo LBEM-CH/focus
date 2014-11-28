@@ -283,6 +283,34 @@ endif
 #
 set num_dia = 100
 #
+setenv NCPUS ${Thread_Number}
+#
+
+
+
+if ( 1 == 2 ) then
+
+  echo ":: Running 2dx_movie_refine.exe for a test "
+
+  ${bin_2dx}/2dx_movie_refine.exe << eot
+frames/CCmap
+${movie_imagenumber_touse}
+SCRATCH/prof${imagename}.dat
+eot
+  #
+
+  echo ":: "
+  echo ":: Now plot the file 2dx_movie_refine.dat "
+  echo ":: "
+  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
+
+  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf
+  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
+
+  exit
+endif
+
+
 # Generate subfolder for frame images
 \rm -rf frames
 if ( ! -d frames ) then
@@ -426,7 +454,7 @@ eot
 echo  "# IMAGE: SCRATCH/refam${imagename}.flt.mrc <Movie Mode Reference A>" >> LOGS/${scriptname}.results
 #
 ###############################################################
-${proc_2dx}/linblock "FFTRANS - Producing references in Fourier space"
+${proc_2dx}/linblock "FFTRANS - Producing reference in Fourier space"
 ###############################################################
 #
 \rm -f SCRATCH/refam${imagename}.flt.upscale.mrc

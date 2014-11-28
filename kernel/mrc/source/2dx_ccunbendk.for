@@ -248,18 +248,18 @@ C  TOO LARGE FOR DECLARED MAXIMUM PROGRAM DIMENSIONS (IN PARAMETER STATEMENT).
 CHENN>
 C      IF(DMEAN.LT.0.0.OR.DMEAN.GT.5000.0
 C     .   .OR.DMIN.LT.1.0.OR.DMAX.LT.1.0) THEN
-      IF(DMEAN.LT.0.0.OR.DMEAN.GT.50000.0
-     . .OR.DMIN.LT.-10000.0.OR.DMAX.LT.1.0) THEN
+C      IF(DMEAN.LT.0.0.OR.DMEAN.GT.50000.0
+C     . .OR.DMIN.LT.-10000.0.OR.DMAX.LT.1.0) THEN
 CHENN<
-        WRITE(6,7500)
-7500    FORMAT(' ',/,':WARNING: Image values for DMIN,DMAX or',
-     .    ' DMEAN are:')
-        write(6,'('':DMIN = '',G15.3,'', DMAX = '',G15.3,
-     .            '', DMEAN= '',G15.3)')DMIN,DMAX,DMEAN
-CHEN>
+C        WRITE(6,7500)
+C7500    FORMAT(' ',/,':WARNING: Image values for DMIN,DMAX or',
+C     .    ' DMEAN are:')
+C        write(6,'('':DMIN = '',G15.3,'', DMAX = '',G15.3,
+C     .            '', DMEAN= '',G15.3)')DMIN,DMAX,DMEAN
+CCHEN>
 C       STOP
 CHEN<
-      ENDIF
+C      ENDIF
 C
 C  CHECK NOW THAT PROGRAM DIMENSIONS ARE ADEQUATE.
       IF(ISIZEX.LT.NXYZ(1)) THEN

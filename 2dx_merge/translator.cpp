@@ -62,6 +62,8 @@ void translator::open(const QString &fileName)
     proc->start(translators[ext],QStringList()<<fileName);
   else if(ext=="ps")
     proc->start(data->get("psViewer","value").trimmed() + " " + fileName);
+  else if(ext=="pdf")
+    proc->start(data->get("pdfViewer","value").trimmed() + " " + fileName);
   else if(ext=="mrc")
   {
     new imageNavigator(config,new mrcImage(fileName),NULL);

@@ -933,7 +933,7 @@ if ( ${ctfcor_imode}x == "0x" ) then
   echo "# IMAGE-IMPORTANT: APH/${imagename}.fou.movie.nolimit.aph <APH: APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
 else
   \mv -f APH/${imagename}.fou.movie.limit.aph APH/${imagename}_ctfcor.fou.movie.limit.aph
-  \mv -f APH/${imagename}.fou.movie.nolimit.aph APH/${imagename}_ctfcor.fou.movie.limit.aph
+  \mv -f APH/${imagename}.fou.movie.nolimit.aph APH/${imagename}_ctfcor.fou.movie.nolimit.aph
   echo "# IMAGE-IMPORTANT: APH/${imagename}_ctfcor.fou.movie.limit.aph <APH: APH file after movie-mode unbending with resolution limit>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: APH/${imagename}_ctfcor.fou.movie.nolimit.aph <APH: APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
 endif

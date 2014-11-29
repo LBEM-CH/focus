@@ -122,7 +122,7 @@ C
 C
 C******************************************************************************
 C
-      WRITE(6,'(/,/,'':CTFCORR: Program to apply CTF correction '',
+      WRITE(6,'(/,/,''CTFCORR: Program to apply CTF correction '',
      .      ''to an image'')')
 C
 C******************************************************************************
@@ -258,13 +258,13 @@ C
       write(6,'(''    Read: '',I3)')IMODE
 C
       if(IMODE.eq.1)then
-        write(6,'('':Applying CTF Phase flipping only'')')
+        write(6,'(''Applying CTF Phase flipping only'')')
       elseif(IMODE.eq.2)then
-        write(6,'('':Applying CTF multiplication'')')
+        write(6,'(''Applying CTF multiplication'')')
       elseif(IMODE.eq.3)then
-        write(6,'('':Applying Wiener filtration'')')
+        write(6,'(''Applying Wiener filtration'')')
       else
-        write(6,'('':No CTF correction done'')')
+        write(6,'(''No CTF correction done'')')
       endif
 C
       WRITE(6,'(''Debug Mode: y or n'')')
@@ -287,7 +287,7 @@ C******************************************************************************
 C
 C-----Calculate pixel size in image in Angstroems
       RPIXEL = STEPD * 10000.0 / RMAG
-      write(6,'('':Pixel size = '',F12.3,'' Angstroems'')')RPIXEL
+      write(6,'(''Pixel size = '',F12.3,'' Angstroems'')')RPIXEL
 C
 C-----Dimensions of image are NX,NY.
 C-----Dimensions of tiles are ITILEINNER**2 rsp. ITILEOUTER**2
@@ -319,7 +319,7 @@ C
       THETATR=WL/(RPIXEL*ITILEOUTER)
       AMPCON=SQRT(1.0-PHACON**2)
 C
-      write(*,'('':Opened file has dimensions '',2I6)')NX,NY
+      write(*,'(''Opened file has dimensions '',2I6)')NX,NY
 C
       if(NX.ne.NY)then
         write(6,'(''::ERROR: Only works for square images'')')
@@ -350,7 +350,7 @@ C
       DIMIN=DMIN
       DIMAX=DMAX
       DIMEAN=DMEAN
-      write(6,'('':Read input image. Min,Max,Mean = '',3F12.3)')
+      write(6,'(''Read input image. Min,Max,Mean = '',3F12.3)')
      .  DIMIN,DIMAX,DIMEAN
 C
 C-----Mark input image for debugging
@@ -386,7 +386,7 @@ C
 C-----Calculate number of inner tiles
 C
       IXTILENUM = (NX - (ITILEOUTER - ITILEINNER)) / ITILEINNER
-      write(6,'('':Will use '',I6,'' x '',I6,'' tiles.'')')IXTILENUM,IXTILENUM
+      write(6,'(''Will use '',I6,'' x '',I6,'' tiles.'')')IXTILENUM,IXTILENUM
 C
 C-----Tiles are centrally placed. Calculate lower left corner point of first inner tile.
 C-----This tile should have an edge so that the outer tile could be cropped.
@@ -716,7 +716,7 @@ C
       DOUBLMEAN=DOUBLMEAN / NX 
       DOUBLMEAN=DOUBLMEAN / NY 
       DOMEAN = DOUBLMEAN
-      write(*,'('':Min, Max, Mean of raw output file are '',3G12.3)')DOMIN,DOMAX,DOMEAN
+      write(*,'(''Min, Max, Mean of raw output file are '',3G12.3)')DOMIN,DOMAX,DOMEAN
       do ix=1,NX
         do iy=1,NY
           DVAL = BPIC(ix,iy)
@@ -733,7 +733,7 @@ C
           if(DOMAX.lt.BPIC(ix,iy))DOMAX=BPIC(ix,iy)
         enddo
       enddo
-      write(*,'('':Min, Max of raw output file are '',2G12.3)')DOMIN,DOMAX
+      write(*,'(''Min, Max of raw output file are '',2G12.3)')DOMIN,DOMAX
 C
       do ix=1,NX
         do iy=1,NY
@@ -743,7 +743,7 @@ C
           BPIC(ix,iy) = DVAL
         enddo
       enddo
-      write(*,'('':Min, Max of output file is '',2F12.3)')
+      write(*,'(''Min, Max of output file is '',2F12.3)')
      .  DIMIN,DIMAX
 C
 C-----Prepare image marked with tile positions:
@@ -822,7 +822,7 @@ C
       DOUBLMEAN = DOUBLMEAN/(NX*NY)
       DMEAN = DOUBLMEAN
 C
-      write(*,'('':Min, Max, Mean of output file is '',3F12.3)')
+      write(*,'(''Min, Max, Mean of output file is '',3F12.3)')
      .   DMIN,DMAX,DMEAN
 C
       CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)

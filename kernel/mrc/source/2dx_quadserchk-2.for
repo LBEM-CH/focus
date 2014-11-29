@@ -1224,8 +1224,9 @@ C
       DO 40 K=MINA,MAXA
         DO 40 J=MINB,MAXB
 C         WRITE(6,9030) (COOR(I,J,K),I=1,3)
-          WRITE(3,9030) (COOR(I,J,K),I=1,3)
+C          WRITE(3,9030) (COOR(I,J,K),I=1,3)
           if(COOR(3,J,K).ne.0.0)then
+            WRITE(3,'(2I8,3G16.6)') K,J,(COOR(I,J,K),I=1,3)
             write(13,'(I5,'' 3'',F13.2,F13.2,G13.4)')
      .        ispidernum,COOR(1,J,K),COOR(2,J,K),COOR(3,J,K)/DENMAX
             ispidernum = ispidernum + 1
@@ -1240,6 +1241,7 @@ C            endif
             WRITE(8,39031)XERROR(K,J),YERROR(K,J),PEAK(K,J)
           ENDIF
 40    CONTINUE
+      close(3)
       close(13)
 39031 FORMAT(3G15.5)      
 39032 FORMAT(2I6,3G15.5)      

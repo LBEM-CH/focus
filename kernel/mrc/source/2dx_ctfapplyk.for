@@ -427,7 +427,7 @@ C
 C--------- 1 = Original image has been Phase flipped. Here only CNTRST calculation.
 C
           IQ=IQIN
-          IF(ABS(CNTRST).LT.0.15) IQ=MAX(IQ,5)
+          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
           CNTRST = -1.0 * ABS(CNTRST)
 C
         else if(CTFCOR.eq.2)then
@@ -435,7 +435,7 @@ C
 C--------- 2 = Original image has been multiplied by CTF. Here only AMP correction (taking care of multiplied CTF).
 C
           IQ=IQIN
-          IF(ABS(CNTRST).LT.0.15) IQ=MAX(IQ,5)
+          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
           CNTRST = -1.0 * CNTRST*CNTRST
 C
         else if(CTFCOR.eq.3)then
@@ -443,7 +443,7 @@ C
 C--------- 3 = Original image has been Wiener filtered. Here nothing is to be done.
 C
           IQ=IQIN
-          IF(ABS(CNTRST).LT.0.15) IQ=MAX(IQ,5)
+          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
           CNTRST = -1.0
 C
         endif

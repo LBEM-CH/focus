@@ -1,15 +1,30 @@
 from pylab import *
 import os
 from numpy import array
+from EMAN2 import *
+from sparx import *
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 3:
-		sys.exit("Usage: drift_plotter.py <Data-File> <PDF-output>")
+		if len(sys.argv) != 4:
+			sys.exit("Usage: drift_plotter.py <Data-File> <PDF-output> [<background CCmap image>]")
 
 	infile = sys.argv[1]
 	outfile = sys.argv[2]
-	
+	width = 0
+	if len(sys.argv) == 4:
+		CCmap_file = sys.argv[3]
+		CCmap = get_image(CCmap_file)
+		print "Read CCmap "
+		s = info(CCmap)
+		width = s[4]
+		CCmapy = mirror(CCmap,"y")
+		CCmapy.write_image('tmp.png')
+		map = mpimg.imread('tmp.png')
+			
 	data_file = open(infile)
 	
 	# Skip header 
@@ -39,9 +54,17 @@ if __name__ == "__main__":
 	figure()
 	ax = subplot(1,1,1)
 	ax.set_aspect('equal')
-	ax.plot(np.array(x)+np.array(xstart),np.array(y)+np.array(ystart),'.',markersize=0.5,linewidth=0.5)
+	if len(sys.argv) == 4:
+		plt.imshow(map, cmap = cm.summer, interpolation='nearest', origin='upper')
+		plt.gca().invert_yaxis()
+		
+
+	ax.plot(np.array(x)+np.array(xstart),np.array(y)+np.array(ystart),'.',markersize=0.5,linewidth=0.5,markeredgecolor='white',markerfacecolor='white')
 
         plt.title('Drift profile of lattice nodes (10x exaggerated)')
+	if width != 0:
+		plt.xlim(1,width)
+		plt.ylim(1,width)
 	
 	factor = 10
 	for i in range(len(start_pos_x)):

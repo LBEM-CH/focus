@@ -38,7 +38,7 @@ C
       INTEGER   NXYZ(3)
 C
       REAL*8    DOUBLMEAN,DARRAYMEAN,DARRAYMIN,DARRAYMAX
-      INTEGER   I,J,K,L,IC,IR,NC,NR,H,IVAL
+      INTEGER   I,J,K,L,IC,IR,NC,NR,H,IVAL,IK,IL
       INTEGER   ioffx,ioffy,ix,iy,ixx,iyy
       INTEGER   IRO,ICO,NROW,NCOL,NRO2,NCO2
       INTEGER   IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
@@ -51,7 +51,7 @@ C
       INTEGER   iframe,IFRAMS,IPEAK
       REAL      roffstep
       REAL      DMIN,DMAX,DMEAN
-      REAL      RVAL
+      REAL      RVAL,RVAL1,RVAL2,RVAL3
       REAL      DENMAX
       REAL      RX,RY
       INTEGER   IOFFMAX,IMAX
@@ -264,15 +264,26 @@ C
       read(13,*)NC,NR,IC,IR,A1,A2,B1,B2,IMINA,IMAXA,IMINB,IMAXB
       read(13,*)DENMAX
 
+      do IK=IMINA,IMAXA
+        do IL=IMINB,IMAXB
+          XPOSIT(IK,IL)=0.0
+          YPOSIT(IK,IL)=0.0
+          PEAK(IK,IL)=0.0
+        enddo
+      enddo
       ipeak=0
-      DO K=IMINA,IMAXA
-        DO L=IMINB,IMAXB
-          read(13,*)XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L)
+      DO IK=IMINA,IMAXA
+        DO IL=IMINB,IMAXB
+          read(13,*,END=123)K,L,RVAL1,RVAL2,RVAL3
+          XPOSIT(K,L)=RVAL1
+          YPOSIT(K,L)=RVAL2
+          PEAK(K,L)=RVAL3
           if(PEAK(K,L).ne.0.0)then
             ipeak=ipeak+1
           endif
         enddo
       enddo
+ 123  continue
       close(13)
       write(*,'(''Read PROFDATA field, found '',I8,
      .   '' non-zero peaks'')')ipeak

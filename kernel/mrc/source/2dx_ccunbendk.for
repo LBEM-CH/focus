@@ -324,9 +324,12 @@ C
       YMIN = NXYZ(2)
       YMAX = 0.0
       DISTMAX = 0.0
-      DO 200 I=MINA,MAXA
-        DO 200 J=MINB,MAXB
-          READ(3,*) XCOOR,YCOOR,PEAK
+C      DO 200 I=MINA,MAXA
+C        DO 200 J=MINB,MAXB
+      DO 200 Itmp=MINA,MAXA
+        DO 200 Jtmp=MINB,MAXB
+C          READ(3,*) XCOOR,YCOOR,PEAK
+          READ(3,*,END=203) I,J,XCOOR,YCOOR,PEAK
           IF(XCOOR.EQ.0.0) GO TO 200
 C          write(*,'('' X/YCOOR = '',2F10.1,''  PEAK = '',F10.3)')
 C     .      XCOOR,YCOOR,PEAK
@@ -372,6 +375,7 @@ C ----------------------------------------------------------------
           DISTCORR = SQRT(DX(MDATA)**2 + DY(MDATA)**2)
           IF(DISTCORR.GT.DISTMAX) DISTMAX = DISTCORR
 200   CONTINUE
+203   continue
 C
 C  CALCULATE AT HOW MANY POSITIONS SMOOTHED DISTORTION WILL BE DETERMINED.
       MXDIM=(NXYZ(1)+ISTEP-1)/ISTEP

@@ -50,6 +50,7 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 
 
 	int    i,j, k,m,n;
+        int    ik,il;
 	float  resol, tmp, *FSC;
 
 	float  *unbend_image1,*unbend_image2;
@@ -180,18 +181,18 @@ int ML(char *filename, char *profile,  char *resultsfilename )
 	/* Read peaks into core */
 	for(i=0;i<dimension;i++)
 	{
-		if ( fscanf(input,"%f %f %f",&x,&y,&z) != EOF )
-		{
-			peak_x[i]=x+x_center;  
-			peak_y[i]=y+y_center;  
-			peak_z[i]=z;
-		}
-		else
-		{
-			perror ("Error fscan failed");
-		}
+			peak_z[i]=0.0;
+        }
+        i=0;
+	while ( fscanf(input,"%i %i %f %f %f",&ik,&il,&x,&y,&z) != EOF )
+	{
+		peak_x[i]=x+x_center;  
+		peak_y[i]=y+y_center;  
+		peak_z[i]=z;
+                i++;
 	}
 	fclose(input);
+        dimension = i;
 
 	/* sort peaks, here a simple bubble sort. Quicksort would be better (ToDo) */
 	for(i=0;i<dimension-2;i++)

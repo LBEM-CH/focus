@@ -35,19 +35,21 @@ int    doMLorCC,contrast;
 
 int main()
 { 
-	int dir,m,i,j,k,n,num_line, Symmetry1;
+	int dir,m,i,j,k,n,num_line, Symmetry1, SYM;
 	int num_images,  *pa,sx;   /*  Prepare for merge Nimages images together into a stack of num_images patches*/
 
 	FILE *input;
 	char oneline[100];
 	char *c; 
         char *tmpstring;
+        char *SYMname;
 	char  *imagename, *profilename, *resultsfilename, *imagenumber, *temp_imagename;
 	int oversizexy[2], realcellxy[2], realcellxy1[2];
 	float angle[3];
 
 
         tmpstring=(char *)calloc(200,sizeof(char));
+        SYMname=(char *)calloc(200,sizeof(char));
 	imagename=(char *)calloc(400,sizeof(char));
 	profilename=(char *)calloc(400,sizeof(char));
 	imagenumber=(char *)calloc(200,sizeof(char));
@@ -280,6 +282,17 @@ int main()
 		printf("A_factor....................... = %f \n",A); 
 	else printf("paramter A_factor does not exists \n");
 
+        strcpy(tmpstring,"SYM");      
+	SYMname=cgetline(input,tmpstring);
+	printf("Symmetry....................... = %s \n",SYMname);
+        SYM=0;
+        if(strncmp(SYMname,"p12",2) == 0) SYM=1;
+        if(strncmp(SYMname,"p22",2) == 0) SYM=1;
+        if(strncmp(SYMname,"p42",2) == 0) SYM=1;
+        if(strncmp(SYMname,"p31",2) == 0) SYM=1;
+        if(strncmp(SYMname,"p32",2) == 0) SYM=1;
+        if(strncmp(SYMname,"p62",2) == 0) SYM=1;
+
         strcpy(tmpstring,"ctfrev");         
 	if(*(cgetline(input,tmpstring))=='y')
 	{    contrast=-1;
@@ -292,7 +305,10 @@ int main()
 
         strcpy(tmpstring,"phaori");      
 	if(fgetline(input,tmpstring,phaori)==0)
-		printf("Phase Origin................... = %f %f\n",phaori[0],phaori[1]);
+	{	
+                printf("Phase Origin................... = %f %f\n",phaori[0],phaori[1]);
+                if(SYM==1) phaori[0]+=180.0;
+        }
         else
  		printf(":: ERROR in Phase Origin assignment.");
 

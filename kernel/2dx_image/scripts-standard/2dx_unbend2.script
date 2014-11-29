@@ -606,9 +606,9 @@ eot
 #############################################################################
 ${proc_2dx}/linblock "2dx_fftrans - to create a Fourier-filtered direct reconstruction"
 #############################################################################
-\rm -f SCRATCH/${iname}.unbent-filtered.mrc
+\rm -f SCRATCH/${iname}_unbent_filtered.mrc
 setenv IN SCRATCH/cor${iname}.msk.fft.mrc
-setenv OUT SCRATCH/${iname}.unbent-filtered.mrc
+setenv OUT SCRATCH/${iname}_unbent_filtered.mrc
 ${bin_2dx}/2dx_fftrans.exe 
 #
 if ( ${tempkeep} == 'y' ) then
@@ -617,7 +617,7 @@ else
   \rm -f SCRATCH/cor${iname}.msk.fft.mrc
 endif
 #
-echo "# IMAGE-IMPORTANT: SCRATCH/${iname}.unbent-filtered.mrc <Unbent and Fourier-filtered Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: SCRATCH/${iname}_unbent_filtered.mrc <Unbent and Fourier-filtered Image>" >> LOGS/${scriptname}.results
 #
 if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
   #############################################################################

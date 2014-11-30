@@ -81,7 +81,7 @@ foreach dirfile ( ${dirlist} )
 
   # Use the following to activate the synthetic unbending in all directories:
   # echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
-  # echo "set tempkeep = n" >> LOGS/${scriptname}.results
+  echo "set tempkeep = y" >> LOGS/${scriptname}.results
   
   # Use the following to set have the resolution of the Nyquist frequency automatically determined:
   # echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
@@ -125,6 +125,11 @@ foreach dirfile ( ${dirlist} )
   # echo "set det_tilt = y" >> LOGS/${scriptname}.results
   # echo "set det_tlt_alg = 0" >> LOGS/${scriptname}.results
 
+  echo "set spotlist_RESMAX = 15.0" >> LOGS/${scriptname}.results
+  echo "set movie_enable = y" >> LOGS/${scriptname}.results
+  echo "set movie_refboxa = 300" >> LOGS/${scriptname}.results
+  echo "set ctfcor_imode = 3" >> LOGS/${scriptname}.results
+
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
   # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
 
@@ -147,6 +152,8 @@ foreach dirfile ( ${dirlist} )
   # ${app_2dx_image} ${newdir} "2dx_refineLattice"
   # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
   # ${app_2dx_image} ${newdir} "2dx_getspots1"
+  # ${app_2dx_image} ${newdir} "2dx_fftrans"
+  # ${app_2dx_image} ${newdir} "2dx_ctfcor"
   # ${app_2dx_image} ${newdir} "2dx_unbend1"
   # ${app_2dx_image} ${newdir} "2dx_getspots"
   # ${app_2dx_image} ${newdir} "2dx_unbend2"
@@ -156,6 +163,17 @@ foreach dirfile ( ${dirlist} )
   # ${app_2dx_image} ${newdir} "2dx_max_likelihood"
   # ${app_2dx_image} ${newdir} "2dx_generateMAP"
   #------------------------------------------------------------------------
+
+  if ( 1 == 2 ) then
+   ${app_2dx_image} ${newdir} "2dx_fftrans"
+   ${app_2dx_image} ${newdir} "2dx_ctfcor"
+   ${app_2dx_image} ${newdir} "2dx_unbend1"
+   ${app_2dx_image} ${newdir} "2dx_getspots"
+   ${app_2dx_image} ${newdir} "2dx_unbend2"
+   ${app_2dx_image} ${newdir} "2dx_unbend_movie"
+   ${app_2dx_image} ${newdir} "2dx_applyCTF"
+   ${app_2dx_image} ${newdir} "2dx_generateMAP"
+  endif
 
   # Use the following to recalculate the TAXA and TANGL values for all selected images:
   # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"

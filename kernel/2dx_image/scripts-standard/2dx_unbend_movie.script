@@ -520,7 +520,7 @@ endif
 ${proc_2dx}/linblock "FFTRANS - Calculate FFT of unbent image"
 ###############################################################
 #
-if (${ctfcor_imode}x != "0x" ) then
+if (${ctfcor_imode}x == "0x" ) then
   set unbent_fil = SCRATCH/${imagename}_unbent_filtered.mrc
 else
   set unbent_fil = SCRATCH/${imagename}_unbent_filtered_ctfcor.mrc
@@ -1078,6 +1078,8 @@ else
   echo "# IMAGE-IMPORTANT: APH/${imagename}_ctfcor.fou.movie.limit.aph <APH: APH file after movie-mode unbending with resolution limit>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: APH/${imagename}_ctfcor.fou.movie.nolimit.aph <APH: APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
 endif
+
+\cp -f LOGS/${scriptname}.results LOGS/${scriptname}.results.backup
 
 if ( ${tempkeep} != "y" ) then
   ###########################################################################

@@ -164,7 +164,7 @@ set Thread_Number = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_unbend_movie
+set scriptname = 2dx_unbend_movie1
 \rm -f LOGS/${scriptname}.results
 #
   ${proc_2dx}/linblock "Script deactivated."

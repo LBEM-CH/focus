@@ -819,7 +819,7 @@ eot
 endif
 #
 # Prepare a copy for movie-mode unbending
-\cp -f SCRATCH/errout${imagename}.dat SCRATCH/errout_unbend2_${imagename}.dat
+\cp -f SCRATCH/errout${imagename}.dat SCRATCH/errout_unbend2_${ori_imagename}.dat
 #
 echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
 echo "set ML_done = n" >> LOGS/${scriptname}.results

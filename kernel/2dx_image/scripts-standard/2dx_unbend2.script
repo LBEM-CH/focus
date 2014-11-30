@@ -560,6 +560,7 @@ set locround = 1
 set final_round = "n"
 #
 # this is only done for 2dx_unbend2_sub.com, so that it can stay as before:
+set ori_imagename = ${imagename}
 set imagename = ${iname}
 #
 while ( ${locround} <= ${round} ) 
@@ -590,12 +591,16 @@ endif
 ${proc_2dx}/${lincommand} "MASKTRAN - to mask the FFT of the unbent image"
 #############################################################################
 #
+echo "# IMAGE-IMPORTANT: unbent.mrc <Unbent image>" >> LOGS/${scriptname}.results
+\cp -f FFTIR/cor${iname}.fft.mrc FFTIR/unbent_fft.mrc
+echo "# IMAGE-IMPORTANT: FFTIR/unbent_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
+#
 \rm -f SCRATCH/cor${iname}.msk.fft.mrc
 #
-setenv IN  FFTIR/cor${iname}.fft.mrc
+setenv IN  FFTIR/unbent_fft.mrc
 setenv OUT SCRATCH/cor${iname}.msk.fft.mrc
 # ITYPE=0 uses all spots (below). The following line is thereby probably not needed:
-setenv SPOTS ${iname}.spt
+setenv SPOTS ${ori_imagename}.spt
 #
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -616,8 +621,6 @@ if ( ${tempkeep} == 'y' ) then
 else
   \rm -f SCRATCH/cor${iname}.msk.fft.mrc
 endif
-#
-echo "# IMAGE-IMPORTANT: SCRATCH/${iname}_unbent_filtered.mrc <Unbent and Fourier-filtered Image>" >> LOGS/${scriptname}.results
 #
 if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
   #############################################################################

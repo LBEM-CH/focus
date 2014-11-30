@@ -862,6 +862,8 @@ C
       do iy = 1,NY
         do ix = 1,NX
           VAL=PSPIC(ix,iy)
+          if(VAL.gt.1.0)VAL=1.0
+          if(VAL.lt.0.0)VAL=0.0
           IF (VAL .LT. DMIN) DMIN = VAL
           IF (VAL .GT. DMAX) DMAX = VAL
           DOUBLMEAN = DOUBLMEAN + VAL

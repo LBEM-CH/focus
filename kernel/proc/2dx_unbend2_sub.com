@@ -1035,12 +1035,11 @@ eot
   #                                                                           #
   #############################################################################
   #
-  \rm -f     SCRATCH/cor${imagename}.mrc
+  \rm -f unbent.mrc
   #
   # UNBENDING
   setenv IN  SCRATCH/cor${imagename}.notap.mrc
-  #setenv IN  ${imagename}.mrc
-  setenv OUT SCRATCH/cor${imagename}.mrc
+  setenv OUT unbent.mrc
   ${bin_2dx}/2dx_taperedgek.exe << eot
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
@@ -1065,16 +1064,12 @@ eot
   #############################################################################
   #
   \rm -f FFTIR/cor${imagename}.fft.mrc
-  setenv IN  SCRATCH/cor${imagename}.mrc
+  setenv IN  unbent.mrc
   setenv OUT FFTIR/cor${imagename}.fft.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
-  if ( ${tempkeep} == 'n' ) then
-    \rm -f SCRATCH/cor${imagename}.mrc
-  else
-    if ( ${locround} == '1' ) then
-      echo "# IMAGE: SCRATCH/cor${imagename}.mrc <Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
-    endif
+  if ( ${locround} == '1' ) then
+    echo "# IMAGE: unbent.mrc <Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
   endif
   #
   if ( ${locround} == '1' ) then

@@ -154,11 +154,7 @@ if ( ${ctf_ttf} == 'TTF' ) then
 else
   #
   #############################################################################
-  #                                                                           #
   ${proc_2dx}/linblock "CTFAPPLY - to correct the microscope's CTF"
-  #                                                                           #
-  #                     ${iname}.limit.aph  =>  ${iname}-limit-ctf.ps #
-  #                                                                           #
   #############################################################################
   #
   \rm -f CTFPLOT.PS
@@ -202,6 +198,13 @@ else
   if ( ! -e APH/${infile_nolimit} ) then
     ${proc_2dx}/protest "ERROR: APH/${infile_nolimit} does not exist."
   endif
+
+  echo ":: "
+  echo ":: Using file APH/${infile_nolimit}"
+  echo ":: Output file APH/${outfile_nolimit}"
+  echo ":: Final file APH/${final_outfile}"
+  echo ":: "
+
   setenv IN  APH/${infile_nolimit}
   setenv OUT APH/${outfile_nolimit}
   echo "# IMAGE-IMPORTANT: APH/${infile_nolimit}  <APH: before CTF correction (No Res.Limit) [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results

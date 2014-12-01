@@ -17,7 +17,7 @@
 #
 # MANUAL: This script assists in manually masking the crystal. 
 #
-# MANUAL: Use the full-screen browser to manually define a polygon, which will then be saved as <I>selectionList.dat</I>. Input for the manual polygon selection can come from either the raw image itself, the ManualMasking-CCmap.mrc file, or the ManualMasking-UnbendPlot.mrc file.
+# MANUAL: Use the full-screen browser to manually define a polygon, which will then be saved as <I>selectionList.dat</I>. Input for the manual polygon selection can come from either the raw image itself, the ManualMasking_CCmap.mrc file, or the ManualMasking_UnbendPlot.mrc file.
 #
 # MANUAL: After having defined a polygon, run this script to mask the image. The area defined in the polygon will be masked with blurred edges. The parameter <I>Masking Fourier Radius</I> defines how blurred the edges are: A larger value means a sharper edge (0...0.5).
 #
@@ -97,15 +97,15 @@ if ( ${nonmaskimagename} != ${imagename} ) then
 endif
 #
 echo "# IMAGE: ${nonmaskimagename}.mrc" >> LOGS/${scriptname}.results
-echo "# IMAGE: ManualMasking-CCmap.mrc" >> LOGS/${scriptname}.results
-echo "# IMAGE: ManualMasking-UnbendPlot.mrc" >> LOGS/${scriptname}.results
+echo "# IMAGE: ManualMasking_CCmap.mrc" >> LOGS/${scriptname}.results
+echo "# IMAGE: ManualMasking_UnbendPlot.mrc" >> LOGS/${scriptname}.results
 echo "# IMAGE: ${originalpolygon} <TXT: Original Polygon File>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/TMPpolygon.dat <TXT: Polygon File>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/TMPcoordinate.dat <TXT: Coordinate File>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/TMPnewimagesidelength.dat <TXT: Polygon File>"  >> LOGS/${scriptname}.results
 #
 if ( ! -e ${originalpolygon} ) then
-  if ( -e ManualMasking-CCmap.mrc ) then
+  if ( -e ManualMasking_CCmap.mrc ) then
     #############################################################################
     ${proc_2dx}/linblock "${originalpolygon} does not exist."
     ${proc_2dx}/linblock "#"
@@ -120,10 +120,10 @@ if ( ! -e ${originalpolygon} ) then
     #############################################################################
   else
     ${proc_2dx}/linblock "${originalpolygon} does not exist."
-    if ( -e ManualMasking-UnbendPlot.mrc ) then
-      ${proc_2dx}/linblock "ManualMasking-CCmap.mrc does not exist."
+    if ( -e ManualMasking_UnbendPlot.mrc ) then
+      ${proc_2dx}/linblock "ManualMasking_CCmap.mrc does not exist."
     else
-      ${proc_2dx}/linblock "ManualMasking-CCmap.mrc and ManualMasking-UnbendPlot.mrc do not exist."
+      ${proc_2dx}/linblock "ManualMasking_CCmap.mrc and ManualMasking_UnbendPlot.mrc do not exist."
     endif
     ${proc_2dx}/linblock "#"
     echo ":: "
@@ -132,7 +132,7 @@ if ( ! -e ${originalpolygon} ) then
     echo "::          You can do that using the original image (see Images pane), "
     echo "::                or by (re-)running Unbend-II with the option to "
     echo "::        'Create information for manual masking' set to 'yes', and then"
-    echo "::   using the ManualMasking-CCmap.mrc or ManualMasking-UnbendPlot.mrc files."
+    echo "::   using the ManualMasking_CCmap.mrc or ManualMasking_UnbendPlot.mrc files."
     echo ":: "
     ${proc_2dx}/linblock "#"
     #
@@ -149,7 +149,7 @@ else
   #############################################################################
   #
   ${bin_2dx}/labelh.exe << eot
-${imagename}.mrc
+${nonmaskimagename}.mrc
 2               ! Linear OD stretch  ( y = mx + b )
 SCRATCH/TMPvalue1.mrc
 0.0 1.0

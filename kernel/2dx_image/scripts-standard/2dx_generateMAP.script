@@ -134,9 +134,9 @@ set date = `date`
 echo date = ${date}
 #
 if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
-  set iname = ${imagename}
+  set iname = image
 else
-  set iname = ${imagename}_ctfcor
+  set iname = image_ctfcor
 endif
 #
 if ( ${Calc_from_zstarrange} == "y" ) then
@@ -196,18 +196,18 @@ set phaori_local = ${phaori}
 #
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set aphfile = APH/${iname}_fou_cor.aph
+    set aphfile = APH/${imagename}_fou_cor.aph
     #
     # A check in case somebody just upgraded from an earlier version of 2dx:
     if ( ! -e ${aphfile} ) then
-      if ( -e APH/${iname}_cor.aph ) then
-        \cp APH/${iname}_cor.aph ${aphfile}
+      if ( -e APH/${imagename}_cor.aph ) then
+        \cp APH/${imagename}_cor.aph ${aphfile}
       endif
     endif
     #
 else
     # Synthetic Unbending result is used:
-    set aphfile = APH/${iname}_syn_cor.aph
+    set aphfile = APH/${imagename}_syn_cor.aph
 endif
 #
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
@@ -248,7 +248,7 @@ if ( ${map_without_ctf} == 'y' ) then
   echo ":: "
   ${proc_2dx}/linblock "Generating map without CTF correction"
   echo ":: "
-  set aphfile = APH/${iname}_fou_limit.aph
+  set aphfile = APH/${imagename}_fou_limit.aph
   echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase File without CTF correction>" >> LOGS/${scriptname}.results
   set prefix = "no_ctf_"
   set prename = "no ctf "

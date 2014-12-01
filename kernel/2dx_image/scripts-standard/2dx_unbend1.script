@@ -26,7 +26,6 @@
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
 # DISPLAY: SYN_Unbending
-# DISPLAY: holea
 # DISPLAY: maska
 # DISPLAY: boxa1
 # DISPLAY: boxa2	
@@ -66,7 +65,6 @@ set nonmaskimagename = ""
 set defocus = ""
 set imagenumber = ""
 set realcell = ""
-set holea = ""
 set maska = ""
 set imagesidelength = ""
 set magnification = ""
@@ -114,33 +112,6 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
     ${proc_2dx}/protest "ERROR: CTF correction before unbending and Synthetic unbending cannot (yet) be done on the same time. Aborting."
   endif
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used instead."
-  #
-  echo "# IMAGE: SCRATCH/${iname}_ref_msk_unbend1_fft.mrc <Tightly-masked Reference FFT>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${iname}_reference1.mrc <General Reference Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/box${iname}_flt_unbend1.mrc <Reference Patch>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/auto${iname}_cor.mrc <Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/auto${iname}_map.mrc <Central Peak of Autocorrelation Function of Reference Patch>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref1${iname}_flt_unbend1.mrc <Reference 1 for XCF>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref1${iname}_fft.mrc <FFT of Reference 1 for XCF>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref2${iname}_flt_unbend1.mrc <Reference 2 for XCF>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/ref2${iname}_fft.mrc <FFT of Reference 2 for XCF>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor1${iname}_unbend1_fft.mrc <XCF with Reference 1>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor2${iname}_unbend1_fft.mrc <XCF with Reference 2>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${iname}_msk_unbend1_fft.mrc <maska-Masked FFT of Image>"  >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${iname}_reference_unbend1.mrc <maska-Masked Reference Image for SNR calculation>"  >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/${iname}.mrc <tapered raw Image for SNR calculation>"  >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor1${iname}_unbend1_fft.mrc <FFT of XCF Map for Reference 1>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor2${iname}_cor.mrc <FFT of XCF Map for Reference 2>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${iname}_quadserch1a.ps <PS: Vector Plot for Distortions, Pass 1>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${iname}_quadserch1b.ps <PS: Vector Plot for Distortions, Pass 2>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor2${iname}_cor_unbend1.mrc <XCF Map for Reference 2>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${iname}_quadserch1c.ps <PS: Vector Plot for Distortions, Pass 3>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor1${iname}_cor_unbend1.mrc <XCF Map for Reference 1>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/${iname}_ccunbend1.ps <PS: Vector Plot for Unbending>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor${iname}_unbend1_notap.mrc <Raw Unbent Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/cor${iname}.mrc <Edge-Tapered Unbent Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/cor${iname}_unbend1_fft.mrc <FFT of Edge-Tapered and Unbent Image>" >> LOGS/${scriptname}.results
-  #
   exit
 endif
 #

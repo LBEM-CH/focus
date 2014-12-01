@@ -79,6 +79,7 @@ set show_frame_PROFDATA = "n"
 # DISPLAY: movie_refboxa
 # DISPLAY: movie_filter_type
 # DISPLAY: movie_filter_param
+# DISPLAY: movie_smoothing
 # DISPLAY: Thread_Number
 # DISPLAY: ctfcor_noise
 # DISPLAY: ctfcor_inner_tile
@@ -166,6 +167,7 @@ set app_2dx_image = ""
 set movie_masking_mode = ""
 set movie_refboxa = ""
 set movie_facthreshb = ""
+set movie_smoothing = ""
 set MASKING_done = ""
 set QVALS = ""
 set Thread_Number = ""
@@ -310,21 +312,6 @@ endif
 set num_dia = 100
 #
 #
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-
-
-set Smoother_nodes = 1
-
-
-
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#
-#
 #
 setenv NCPUS ${Thread_Number}
 #
@@ -370,7 +357,7 @@ if ( 1 == 2 ) then
 
   touch frames/PROFDATA_1.dat
   \rm frames/PROFDATA_*.dat
-  python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${Smoother_nodes} ${PROFDATA} ${movie_imagenumber_touse}
+  python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${movie_smoothing} ${PROFDATA} ${movie_imagenumber_touse}
   echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
   echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
   set i = 1
@@ -422,7 +409,7 @@ echo "<<@progress: 5>>"
 #
 set iname = image_ctfcor
 #
-set PROFDATA = ${iname}-profile.dat
+set PROFDATA = ${iname}_profile.dat
 if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif
@@ -718,7 +705,7 @@ eot
 #
 touch frames/PROFDATA_1.dat
 \rm frames/PROFDATA_*.dat
-python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${Smoother_nodes} ${PROFDATA} ${movie_imagenumber_touse}
+python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${movie_smoothing} ${PROFDATA} ${movie_imagenumber_touse}
 
 echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
 if ( ${show_frame_PROFDATA} == "y" ) then
@@ -731,18 +718,6 @@ endif
 #
 echo  "# IMAGE: 2dx_movie_refine.dat <Movie drift profiles (TXT)>" >> LOGS/${scriptname}.results
 echo  "# IMAGE: 2dx_movie_refine_smooth.dat <Movie drift profiles, smoothened (TXT)>" >> LOGS/${scriptname}.results
-#
-#
-###########################################################################
-${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
-###########################################################################
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
-#
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected.mrc
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-#
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_smooth.dat 2dx_movie_refine_smooth.pdf frames/CCmap_driftCorrected.mrc
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_smooth.pdf <PDF: 2dx_movie_refine_smooth.pdf>" >> LOGS/${scriptname}.results
 #
 #
 echo "<<@progress: 60>>"
@@ -871,6 +846,20 @@ else
   ${proc_2dx}/lin "Not masking frame"
   ######################################################
 endif
+
+
+###########################################################################
+${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
+###########################################################################
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
+#
+python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected.mrc
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
+#
+python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_smooth.dat 2dx_movie_refine_smooth.pdf frames/CCmap_driftCorrected_masked.mrc
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_smooth.pdf <PDF: 2dx_movie_refine_smooth.pdf>" >> LOGS/${scriptname}.results
+#
+#
 
 
 ###########################################################################

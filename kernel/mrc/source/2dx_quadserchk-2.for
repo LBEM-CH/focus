@@ -2048,13 +2048,13 @@ C-----Write out Masking Info Image
 C
       write(TEXT,1952)
 1952  FORMAT('QUADSERCHH: Masking Info')
-      write(FILENAM(1:80),'(''ManualMasking-CCmap.mrc'')')
+      write(FILENAM(1:80),'(''ManualMasking_CCmap.mrc'')')
       CALL PICWRI(IPICTU,FILENAM,TEXT,IPICDI3,IPICSIZ)
 C
 C-----Write out Masking Info Image of the Unbending Plot
 C
       write(TEXT,1952)
-      write(FILENAM(1:80),'(''ManualMasking-UnbendPlot.mrc'')')
+      write(FILENAM(1:80),'(''ManualMasking_UnbendPlot.mrc'')')
       CALL PICWRI(IPICT1,FILENAM,TEXT,IPICDI3,IPICSIZ)
 C
       goto 999

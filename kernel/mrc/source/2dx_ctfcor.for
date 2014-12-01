@@ -408,13 +408,6 @@ C---------Coordinates of inner tiles:
           iytileend = iytilestart + ITILEINNER - 1
           ixtilecen = (ixtilestart + ixtileend) / 2
           iytilecen = (iytilestart + iytileend) / 2
-C          write(6,'(''Tile '',2I6,'', X/Y from '',2I6,'' to '',2I6)')
-C     .      itilex,itiley,ixtilestart,iytilestart,ixtileend,iytileend
-          if(itilex.eq.1 .and. itiley.eq.1)then
-            write(6,'(''ixtilestart = '',I6)')ixtilestart
-            write(6,'(''ixtileend   = '',I6)')ixtileend
-            write(6,'(''ixtilecen   = '',I6)')ixtilecen
-          endif
 C
 C---------Cut outer tile
           do iy = 1,ITILEOUTER
@@ -458,10 +451,10 @@ C---------  rdist3 * tan(TLTANG)
           RLDEF1 = RDEF1 + rdist3 * tan(TLTANG*PI/180.0)
           RLDEF2 = RDEF2 + rdist3 * tan(TLTANG*PI/180.0)
           RLDEFM = (RLDEF1 + RLDEF2 ) / 2.0
-          write(6,'(''Tile '',2I4,'' at position '',2I6,
-     .      '' is at distance '',F12.3,'' px, or '',F12.3,
-     .      '' A. Def = '',F12.3)')
-     .      itilex,itiley,ixtilecen,iytilecen,rdist2,rdist3,RLDEFM
+C          write(6,'(''Tile '',2I4,'' at position '',2I6,
+C     .      '' is at distance '',F12.3,'' px, or '',F12.3,
+C     .      '' A. Def = '',F12.3)')
+C     .      itilex,itiley,ixtilecen,iytilecen,rdist2,rdist3,RLDEFM
 C
 C----------------------------------------
 C---------Calculate local CTF profile

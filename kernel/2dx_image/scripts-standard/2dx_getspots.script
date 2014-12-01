@@ -189,7 +189,7 @@ if ( ( ${spot_source_begin} == "FFT" ) || ( ! -e ${imagename}.spt )) then
   ${proc_2dx}/linblock "2dx_mmboxa: To get the spot list from the FFT of the image."
   #############################################################################
   #
-  set FFT_FILE = FFTIR/cor${iname}_unbend1_fft.mrc
+  set FFT_FILE = FFTIR/${iname}_unbend1_fft.mrc
   if ( ! -e ${FFT_FILE} ) then
     ${proc_2dx}/linblock "ERROR: ${FFT_FILE} does not exist."
     ${proc_2dx}/protest "First run Unbend I."

@@ -98,13 +98,13 @@ if ( "${level}" == "radical" ) then
   \rm -f ${imagename}-p*-scaled.tif
   \rm -f ${imagename}-p*-scaled-from_Spider.mrc
   #
-  if ( -e ${imagename}.raw.mrc ) then
+  if ( -e ${imagename}_raw.mrc ) then
     \rm -f ${imagename}.mrc
     \rm -f ${imagename}-original.mrc
     \rm -f ${imagename}-original-big.mrc
   endif
   #
-  if ( -e ${nonmaskimagename}.raw.mrc ) then
+  if ( -e ${nonmaskimagename}_raw.mrc ) then
     \rm -f ${nonmaskimagename}.mrc
     \rm -f ${nonmaskimagename}-original.mrc
     \rm -f ${nonmaskimagename}-original-big.mrc
@@ -119,7 +119,7 @@ if ( "${level}" == "radical" ) then
   #
   if ( -e ${nonmaskimagename}.tif ) then
     \rm -f ${nonmaskimagename}.mrc
-    \rm -f ${nonmaskimagename}.raw.mrc
+    \rm -f ${nonmaskimagename}_raw.mrc
     \rm -f ${nonmaskimagename}-original.mrc
     \rm -f ${nonmaskimagename}-original-big.mrc
   endif

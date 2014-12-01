@@ -302,9 +302,9 @@ endif
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: APH/${infile_nolimit} <APH: Image data for refinement>" >> LOGS/${scriptname}.results
 #
@@ -403,10 +403,10 @@ endif
 ######################################################################################
 #
 if ( -e WILSONCTF ) then
-  \mv -f WILSONCTF LOGS/${imagename}.ctfs.wilson.log
+  \mv -f WILSONCTF LOGS/${imagename}_ctfs_wilson.log
 endif
 if ( -e SUMMARY ) then
-  \mv -f SUMMARY LOGS/${imagename}.ctfs.summary.log
+  \mv -f SUMMARY LOGS/${imagename}_ctfs_summary.log
 endif
 #
 set olddef = ${defocus}

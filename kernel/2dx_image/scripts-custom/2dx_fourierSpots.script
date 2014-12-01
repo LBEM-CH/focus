@@ -80,8 +80,8 @@ ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
 set spotname = "SCRATCH/statistics.txt"
 
 \rm -f ${spotname}
-\rm -f SCRATCH/${imagename}.stat.txt
-\rm -f SCRATCH/${imagename}.stat.csv
+\rm -f SCRATCH/${imagename}_stat.txt
+\rm -f SCRATCH/${imagename}_stat.csv
 
 #
 set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
@@ -90,10 +90,10 @@ echo refposix = ${refposix}
 echo refposiy = ${refposiy}
 #
 
-if(-e FFTIR/${imagename}.fft.mrc) then
+if(-e FFTIR/${imagename}_fft.mrc) then
 
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${imagename}.fft.mrc
+FFTIR/${imagename}_fft.mrc
 ${imagenumber}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -105,21 +105,21 @@ ${RESMIN} ${RESMAX} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,
 ${lattice}                         ! Lattice vectors
 eot
 
-echo "Lattice Statistices For:,${imagename}" > SCRATCH/${imagename}.stat.txt
-echo "Reciprocal Lattice:,$lattice" >> SCRATCH/${imagename}.stat.txt
-echo "Real Cell:,${realcell}" >> SCRATCH/${imagename}.stat.txt
-echo "Real Cell Angle:,${realang}" >> SCRATCH/${imagename}.stat.txt
-echo "" >> SCRATCH/${imagename}.stat.txt
-echo "" >> SCRATCH/${imagename}.stat.txt
+echo "Lattice Statistices For:,${imagename}" > SCRATCH/${imagename}_stat.txt
+echo "Reciprocal Lattice:,$lattice" >> SCRATCH/${imagename}_stat.txt
+echo "Real Cell:,${realcell}" >> SCRATCH/${imagename}_stat.txt
+echo "Real Cell Angle:,${realang}" >> SCRATCH/${imagename}_stat.txt
+echo "" >> SCRATCH/${imagename}_stat.txt
+echo "" >> SCRATCH/${imagename}_stat.txt
 
-echo "h,k,Amplitude,Phase,RMS Background" >> SCRATCH/${imagename}.stat.txt
-cat ${spotname} | awk ' { if(NR>1) {print $1","$2","$3","$4","$6} } ' >> SCRATCH/${imagename}.stat.txt
-cp SCRATCH/${imagename}.stat.txt SCRATCH/${imagename}.stat.csv
+echo "h,k,Amplitude,Phase,RMS Background" >> SCRATCH/${imagename}_stat.txt
+cat ${spotname} | awk ' { if(NR>1) {print $1","$2","$3","$4","$6} } ' >> SCRATCH/${imagename}_stat.txt
+cp SCRATCH/${imagename}_stat.txt SCRATCH/${imagename}_stat.csv
 \rm ${spotname}
-echo "IMAGE-IMPORTANT: SCRATCH/${imagename}.stat.txt" "<Spot Statistics>" >> LOGS/${scriptname}.results
-echo "IMAGE-IMPORTANT: SCRATCH/${imagename}.stat.csv" "<Spot Statistics (Excel)>" >> LOGS/${scriptname}.results
+echo "IMAGE-IMPORTANT: SCRATCH/${imagename}_stat.txt" "<Spot Statistics>" >> LOGS/${scriptname}.results
+echo "IMAGE-IMPORTANT: SCRATCH/${imagename}_stat.csv" "<Spot Statistics (Excel)>" >> LOGS/${scriptname}.results
 else
-${proc_2dx}/linblock "Can't find FFTIR/${imagename}.fft.mrc"
+${proc_2dx}/linblock "Can't find FFTIR/${imagename}_fft.mrc"
 endif 
 echo "<<@progress: 100>>"
   

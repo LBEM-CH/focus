@@ -417,7 +417,7 @@ if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif
 #
-set cormap = SCRATCH/cor1${iname}_cor_unbend2.mrc
+set cormap = ${iname}_CCmap_unbend2.mrc
 #
 if ( ! -e ${cormap} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"

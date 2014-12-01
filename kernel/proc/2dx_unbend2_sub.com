@@ -712,6 +712,8 @@ eot
     endif
   endif
   #
+  \cp -f SCRATCH/${iname}_CCmap21.mrc ${iname}_CCmap_unbend2.mrc
+  #
   echo "<<@progress: 85>>"
   #
   #############################################################################

@@ -134,12 +134,12 @@ if ( ${addspots} == "1" ) then
   #
   ${proc_2dx}/linblock "using IQMAX of ${IQMAX}."
   #
-  set aphfile      = APH/${imagename}.cor.aph
+  set aphfile      = APH/${imagename}_cor.aph
   echo aphfile     = ${aphfile}
   #
   if ( ! -e ${aphfile} || ! -s ${aphfile} ) then
     set oldaphfile = ${aphfile}
-    set aphfile      = APH/${nonmaskimagename}.cor.aph
+    set aphfile      = APH/${nonmaskimagename}_cor.aph
     echo aphfile     = ${aphfile}
     ${proc_2dx}/linblock "WARNING: ${oldaphfile} not ok. Trying ${aphfile}."
     if ( ! -e ${aphfile} || ! -s ${aphfile} ) then  
@@ -167,15 +167,15 @@ eot
     ${proc_2dx}/protest "2dx_spotrefine: ERROR occured."
   endif
   #
-  \mv -f ${oldspotlist} SCRATCH/${imagename}.old.spt
+  \mv -f ${oldspotlist} SCRATCH/${imagename}_old.spt
   \mv -f ${newspotlist} ${oldspotlist}
   #
 else
   #
-  set inputname = FFTIR/cor${imagename}.fft.mrc
+  set inputname = FFTIR/cor${imagename}_fft.mrc
   if ( ! -e ${inputname} ) then
     ${proc_2dx}/linblock "${inputname} does not exist."
-    set inputname = FFTIR/cor${imagename}.unbend1.fft.mrc
+    set inputname = FFTIR/cor${imagename}_unbend1_fft.mrc
     if ( ! -e ${inputname} ) then
       ${proc_2dx}/linblock "${inputname} does not exist neither."
       ${proc_2dx}/protest "First run Unbend I and/or Unbend II."
@@ -273,8 +273,8 @@ echo ":Refine Spotlist: You now have ${spotnum} spots." >> History.dat
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.spt <TXT: Spotlist>" >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 echo "set SPOTS_done = y" >> LOGS/${scriptname}.results
 #

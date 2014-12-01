@@ -546,7 +546,7 @@ echo "<<@progress: 40>>"
 ${proc_2dx}/linblock "emtilt: To calculate the tilt geometry from lattice distortions."
 #############################################################################
 #
-\rm -f TMP.2dx_emtilt.1.out
+\rm -f TMP_2dx_emtilt_1.out
 #
 set oldTLTAXIS = ${TLTAXIS}
 set oldTLTANG  = ${TLTANG}
@@ -624,8 +624,8 @@ echo "set LATTICE_TLTAXA  = "\"${LATTICE_TLTAXA}\"  >> LOGS/${scriptname}.result
 echo "set LATTICE_TAXA    = "\"${LATTICE_TAXA}\"    >> LOGS/${scriptname}.results
 echo "set LATTICE_TANGL   = "\"${LATTICE_TANGL}\"   >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 #
 echo " "                              >> History.dat
@@ -722,9 +722,9 @@ if ( ${regenPL} == "y" ) then
   ${proc_2dx}/linblock "2dx_taperedge: To taper the edges to prevent stripes in the FFT"
   #############################################################################
   #
-  \rm -f     SCRATCH/${imagename}.taper.mrc
+  \rm -f     SCRATCH/${imagename}_taper.mrc
   setenv IN  ${imagename}.mrc
-  setenv OUT SCRATCH/${imagename}.taper.mrc
+  setenv OUT SCRATCH/${imagename}_taper.mrc
   ${bin_2dx}/2dx_taperedgek.exe << eot
 10,10,100,10       ! IAVER,ISMOOTH,ITAPER
 eot
@@ -737,7 +737,7 @@ eot
   #
   \rm -f ${docfile}
   #
-  ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}.taper.mrc 40 ${peakNum}
+  ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}_taper.mrc 40 ${peakNum}
   #
   if ( ${tempkeep} == 'y' ) then
     #
@@ -746,7 +746,7 @@ eot
     \mv -f 2dx_peaksearch-masked_image.mrc SCRATCH/pks-masked_image.mrc
     \rm -f 2dx_peaksearch-phase.mrc
     #
-    echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
@@ -756,7 +756,7 @@ eot
     \rm -f 2dx_peaksearch-masked_image.mrc
     \rm -f 2dx_peaksearch-amp_LHpass.mrc
     \rm -f 2dx_peaksearch-phase.mrc
-    \rm -f SCRATCH/${imagename}.taper.mrc
+    \rm -f SCRATCH/${imagename}_taper.mrc
   endif
   #
   \mv -f 2dx_peaksearch-average.mrc SCRATCH/pks-average.mrc

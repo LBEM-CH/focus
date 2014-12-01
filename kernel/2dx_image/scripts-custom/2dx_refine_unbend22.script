@@ -323,11 +323,11 @@ set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END {
 #                                                                           #
 #############################################################################
 #
-if ( ! -e FFTIR/cor${imagename}.unbend1.fft.mrc ) then
-  ${proc_2dx}/protest "ERROR: FFTIR/cor${imagename}.unbend1.fft.mrc not existing."
+if ( ! -e FFTIR/cor${imagename}_unbend1_fft.mrc ) then
+  ${proc_2dx}/protest "ERROR: FFTIR/cor${imagename}_unbend1_fft.mrc not existing."
 endif
 #
-\cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+\cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
 #
 echo "<<@progress: 5>>"
 #

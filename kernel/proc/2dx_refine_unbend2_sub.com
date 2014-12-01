@@ -25,7 +25,7 @@ if ( ${refine_now} == "maskb01" ) then
   #
   while ( ${loc_maskb01} <= ${loc_maskb01_end} )
      #
-     \cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+     \cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
      set maskb01 = ${loc_maskb01}
      source ${proc_2dx}/2dx_unbend2_sub.com
      #
@@ -66,7 +66,7 @@ if ( ${refine_now} == "maskb02" ) then
   #
   while ( ${loc_maskb02} <= ${loc_maskb02_end} )
      #
-     \cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+     \cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
      set maskb02 = ${loc_maskb02}
      source ${proc_2dx}/2dx_unbend2_sub.com
      #
@@ -107,7 +107,7 @@ if ( ${refine_now} == "maskb03" ) then
   #
   while ( ${loc_maskb03} <= ${loc_maskb03_end} )
      #
-     \cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+     \cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
      set maskb03 = ${loc_maskb03}
      source ${proc_2dx}/2dx_unbend2_sub.com
      #
@@ -148,7 +148,7 @@ if ( ${refine_now} == "maskb04" ) then
   #
   while ( ${loc_maskb04} <= ${loc_maskb04_end} )
      #
-     \cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+     \cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
      set maskb04 = ${loc_maskb04}
      source ${proc_2dx}/2dx_unbend2_sub.com
      #
@@ -189,7 +189,7 @@ if ( ${refine_now} == "maskb05" ) then
   #
   while ( ${loc_maskb05} <= ${loc_maskb05_end} )
      #
-     \cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+     \cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
      set maskb05 = ${loc_maskb05}
      source ${proc_2dx}/2dx_unbend2_sub.com
      #
@@ -231,7 +231,7 @@ if ( ${refine_now} == "boxb1" ) then
   #
   while ( ${loc_boxb1} <= ${loc_boxb1_end} )
      #
-     \cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+     \cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
      set boxb1 = ${loc_boxb1}
      source ${proc_2dx}/2dx_unbend2_sub.com
      #
@@ -273,7 +273,7 @@ if ( ${refine_now} == "boxb2" ) then
   #
   while ( ${loc_boxb2} <= ${loc_boxb2_end} )
      #
-     \cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+     \cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
      set boxb2 = ${loc_boxb2}
      source ${proc_2dx}/2dx_unbend2_sub.com
      #
@@ -335,7 +335,7 @@ if ( ${refine_now} == "maskb01_boxb1" ) then
     #
     while ( ${loc_boxb1} <= ${loc_boxb1_end} )
        #
-      \cp -f FFTIR/cor${imagename}.unbend1.fft.mrc FFTIR/cor${imagename}.fft.mrc
+      \cp -f FFTIR/cor${imagename}_unbend1_fft.mrc FFTIR/cor${imagename}_fft.mrc
        set boxb1 = ${loc_boxb1}
        source ${proc_2dx}/2dx_unbend2_sub.com
        #

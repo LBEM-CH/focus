@@ -623,14 +623,14 @@ if ( ${ttfcorfirst} == 'y' ) then
   #############################################################################
   #
   \rm -f CTFPLOT.PS
-  \rm -f PS/${imagename}.ttf.nolimit.ps
+  \rm -f PS/${imagename}_ttf_nolimit.ps
   #
-  setenv IN  APH/${imagename}.ttf.nolimit.aph
+  setenv IN  APH/${imagename}_ttf_nolimit.aph
   setenv OUT dummy.tmp
   ${bin_2dx}/2dx_ctfapplyk.exe << eot
 ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
 0.0,0.0,0.0,${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${imagename}.ttf.nolimit, ${date}, No Limit, Nyquist=${ctfplotresmax}
+${imagenumber} ${imagename}_ttf_nolimit, ${date}, No Limit, Nyquist=${ctfplotresmax}
 ${phacon}
 ${RESMIN},0.0
 ${ctfcor_imode}
@@ -639,8 +639,8 @@ eot
   if ( ! -e CTFPLOT.PS ) then
     ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
   else
-    \mv -f CTFPLOT.PS PS/${imagename}.ttf.nolimit.ps
-    echo "# IMAGE: PS/${imagename}.ttf.nolimit.ps <PS: IQ plot, no resolution limit>" >> LOGS/${scriptname}.results
+    \mv -f CTFPLOT.PS PS/${imagename}_ttf_nolimit.ps
+    echo "# IMAGE: PS/${imagename}_ttf_nolimit.ps <PS: IQ plot, no resolution limit>" >> LOGS/${scriptname}.results
   endif
   #
 endif

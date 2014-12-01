@@ -171,19 +171,19 @@ echo "<<@progress: 1>>"
 set imode = `echo ${mode} | cut -c1-1`
 #
 if ( ${imode} != "0" ) then
-  if ( ! -e FFTIR/cor${imagename}.fft.mrc ) then
+  if ( ! -e FFTIR/cor${imagename}_fft.mrc ) then
     if ( -e SCRATCH/cor${imagename}.mrc ) then
       ${proc_2dx}/linblock "="
-      ${proc_2dx}/linblock "ttrefine: SCRATCH/cor${imagename}.fft.mrc does not exist."
+      ${proc_2dx}/linblock "ttrefine: SCRATCH/cor${imagename}_fft.mrc does not exist."
       ${proc_2dx}/linblock "          recreating from SCRATCH/cor${imagename}.mrc ."
       ${proc_2dx}/linblock "="
-      \rm -f FFTIR/cor${imagename}.fft.mrc
+      \rm -f FFTIR/cor${imagename}_fft.mrc
       setenv IN SCRATCH/cor${imagename}.mrc
-      setenv OUT FFTIR/cor${imagename}.fft.mrc
+      setenv OUT FFTIR/cor${imagename}_fft.mrc
       ${bin_2dx}/2dx_fftrans.exe
     else
       ${proc_2dx}/linblock "="
-      ${proc_2dx}/linblock "ttrefine: ERROR: SCRATCH/cor${imagename}.fft.mrc nor"
+      ${proc_2dx}/linblock "ttrefine: ERROR: SCRATCH/cor${imagename}_fft.mrc nor"
       ${proc_2dx}/linblock "                 SCRATCH/cor${imagename}.mrc exist."
       ${proc_2dx}/protest "First run UNBEND scripts. Exiting."
       exit -1
@@ -202,7 +202,7 @@ if ( $reference == "(none)" ) then
   #
   echo "calling ${bin_2dx}/2dx_ttrefine.exe with:"
   echo "${imode} ${ncyc} 0.20 F F T F F 1         ! IMODE,NCYC,FSHIFT,LIST,MTZ,MAXIM,LISTS,ISHIFT,IREF"
-  echo "FFTIR/cor${imagename}.fft.mrc"
+  echo "FFTIR/cor${imagename}_fft.mrc"
   echo "${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV}  ! ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT"
   echo "0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT"
   echo "${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX"
@@ -214,7 +214,7 @@ if ( $reference == "(none)" ) then
   #
   ${bin_2dx}/2dx_ttrefine.exe << eot
 ${imode} ${ncyc} 0.20 F F T F F 1         ! IMODE,NCYC,FSHIFT,LIST,MTZ,MAXIM,LISTS,ISHIFT,IREF
-FFTIR/cor${imagename}.fft.mrc
+FFTIR/cor${imagename}_fft.mrc
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV}  ! ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT
 0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT
 ${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX
@@ -236,7 +236,7 @@ else
   #
   time ${MRC_LOCAL}/bin/2dx_ttrefine.exe << eot
 ${imode} ${ncyc} 0.20 F T F F F 1         ! IMODE,NCYC,FSHIFT,LIST,MTZ,MAXIM,LISTS,ISHIFT,IREF
-FFTIR/cor${imagename}.fft.mrc
+FFTIR/cor${imagename}_fft.mrc
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT
 0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT
 ${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX
@@ -301,7 +301,7 @@ if ( ${overwrite} == "y" ) then
   echo "set DEFOCUS_ACTIVE = 3"   >> LOGS/${scriptname}.results
 endif
 #
-echo "# IMAGE: FFTIR/cor${imagename}.fft.mrc <FFT of Unbent Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE: FFTIR/cor${imagename}_fft.mrc <FFT of Unbent Image>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

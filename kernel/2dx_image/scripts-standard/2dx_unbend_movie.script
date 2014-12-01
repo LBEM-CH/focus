@@ -311,6 +311,9 @@ endif
 #
 set num_dia = 100
 #
+if ( ${movie_smoothing}x == "x" ) then
+  set movie_smoothing = 1
+endif
 #
 #
 setenv NCPUS ${Thread_Number}

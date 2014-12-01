@@ -762,7 +762,7 @@ eot
   #############################################################################
   #
   \rm -f SCRATCH/${iname}_unbend2_notap.mrc
-  setenv CCORDATA SCRATCH/${iname}_profile.dat
+  setenv CCORDATA ${iname}_profile.dat
   \rm -f SCRATCH/ccunbend-table-${iname}.dat
   setenv TABLEOUT SCRATCH/ccunbend-table-${iname}.dat
   #

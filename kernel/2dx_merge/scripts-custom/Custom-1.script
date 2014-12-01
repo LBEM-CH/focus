@@ -164,7 +164,7 @@ foreach dirfile ( ${dirlist} )
   # ${app_2dx_image} ${newdir} "2dx_generateMAP"
   #------------------------------------------------------------------------
 
-  if ( 1 == 2 ) then
+  if ( 1 == 1 ) then
    ${app_2dx_image} ${newdir} "2dx_fftrans"
    ${app_2dx_image} ${newdir} "2dx_ctfcor"
    ${app_2dx_image} ${newdir} "2dx_unbend1"

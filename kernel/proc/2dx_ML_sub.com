@@ -59,7 +59,7 @@ else
   ${proc_2dx}/protest "First run UNBEND II to create the PROFILE."
 endif
 #
-echo "# IMAGE: APH/${imagename}.cor.aph <APH: Unbending Amp&Phase File>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/${imagename}_cor.aph <APH: Unbending Amp&Phase File>" >> LOGS/${scriptname}.results
 echo "# IMAGE: PS/${imagename}MAP-p1.ps <PS: Unbending MAP in p1>" >> LOGS/${scriptname}.results
 echo "# IMAGE: ${imagename}-p1.mrc <Unbending MAP in p1>" >> LOGS/${scriptname}.results
 #

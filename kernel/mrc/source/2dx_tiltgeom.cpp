@@ -358,9 +358,9 @@ int main()
                         if(good[ig1]>0)
                         { 
                                 rout << "# good: " << ig1 << " " << i << "," << j << " " << (*data[ig1])[0] <<  " " << (*data[ig1])[1] << " = " << (*data[ig1])[2] << endl;
-                                rout << "\\rm -f CUT/${nonmaskimagename}.marked." << i << "." << j << ".ps.mrc" << endl;
-                                rout << "\\cp -f CUT/${nonmaskimagename}." << i << "." << j << ".ps.mrc ";
-                                rout << "CUT/${nonmaskimagename}.marked." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "\\rm -f CUT/${nonmaskimagename}_marked_" << i << "_" << j << "_ps.mrc" << endl;
+                                rout << "\\cp -f CUT/${nonmaskimagename}_" << i << "_" << j << "_ps.mrc ";
+                                rout << "CUT/${nonmaskimagename}_marked_" << i << "_" << j << "_ps.mrc" << endl;
                                 rout << "#" << endl;
                                 rout << "${bin_2dx}/2dx_maintain_defocus_table.exe << eot" << endl;
                                 rout << "${defocus_pos_select_file}" << endl;
@@ -370,7 +370,7 @@ int main()
                                 rout << (*data[ig1])[2] << endl;
                                 rout << "eot" << endl;
                                 rout << "#" << endl;
-                                rout << "echo \"# IMAGE: CUT/${nonmaskimagename}.marked." << i << "." << j << ".ps.mrc <CUT-PS-Marked_" << i << "," << j << ">\" >> LOGS/${scriptname}.results" << endl;
+                                rout << "echo \"# IMAGE: CUT/${nonmaskimagename}_marked_" << i << "_" << j << "_ps.mrc <CUT-PS-Marked_" << i << "," << j << ">\" >> LOGS/${scriptname}.results" << endl;
                                 rout << "#" << endl;
                                 rout << "\\mv -f TMP.txt ${defocus_pos_select_file}" << endl;
                                 rout << "#" << endl;
@@ -378,11 +378,11 @@ int main()
                         else
                         {
                                 rout << "# bad:  " << ig1 << " " << i << "," << j << " " << (*data[ig1])[0] << " " << (*data[ig1])[1] << " = " << (*data[ig1])[2] << endl;
-                                rout << "\\rm -f CUT/${nonmaskimagename}.marked." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "\\rm -f CUT/${nonmaskimagename}_marked_" << i << "_" << j << "_ps.mrc" << endl;
                                 rout << "${bin_2dx}/labelh.exe << eot" << endl;
-                                rout << "CUT/${nonmaskimagename}." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "CUT/${nonmaskimagename}_" << i << "_" << j << "_ps.mrc" << endl;
                                 rout << "15" << endl;
-                                rout << "CUT/${nonmaskimagename}.marked." << i << "." << j << ".ps.mrc" << endl;
+                                rout << "CUT/${nonmaskimagename}_marked_" << i << "_" << j << "_ps.mrc" << endl;
                                 rout << "eot" << endl;
                                 rout << "#" << endl;
                                 rout << "${bin_2dx}/2dx_maintain_defocus_table.exe << eot" << endl;
@@ -393,7 +393,7 @@ int main()
                                 rout << "0.0" << endl;
                                 rout << "eot" << endl;
                                 rout << "#" << endl;
-                                rout << "echo \"# IMAGE: CUT/${nonmaskimagename}.marked." << i << "." << j << ".ps.mrc <CUT-PS-Marked_" << i << "," << j << ">\" >> LOGS/${scriptname}.results" << endl;
+                                rout << "echo \"# IMAGE: CUT/${nonmaskimagename}_marked_" << i << "_" << j << "_ps.mrc <CUT-PS-Marked_" << i << "," << j << ">\" >> LOGS/${scriptname}.results" << endl;
                                 rout << "#" << endl;
                                 rout << "\\mv -f TMP.txt ${defocus_pos_select_file}" << endl;
                                 rout << "#" << endl;

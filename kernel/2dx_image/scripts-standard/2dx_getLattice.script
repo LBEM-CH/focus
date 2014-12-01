@@ -149,8 +149,8 @@ endif
 # if ( ${MASKING_done} == "y" ) then
 #   ${proc_2dx}/linblock "Skipping. Not determining lattice."
 #   #
-#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #   #
 #   exit
 # endif
@@ -158,8 +158,8 @@ endif
 if ( ${det_lattice} == 'n' && ${det_tilt} == 'n' ) then
   ${proc_2dx}/linblock "Skipping. Not determining lattice."
   #
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
   #
   exit
 endif
@@ -168,13 +168,13 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") ) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used."
   ${proc_2dx}/linblock "Lattice should be determined already."
   #
-  echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>"  >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
   #
   exit
 endif
@@ -185,8 +185,8 @@ source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #
-echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 if ( ${det_lattice} == 'y' ) then
   #
@@ -246,18 +246,18 @@ if ( ${det_lattice} == 'y' ) then
     set largeimage = `echo ${imagesidelength} | awk '{ if ( $1 > 4097 ) { s = 1 } else { s = 0 } } END { print s }'`
     #
     if ( ${largeimage} == '1' ) then
-      if ( ! -e FFTIR/${imagename}.red.mrc ) then
+      if ( ! -e FFTIR/${imagename}_red.mrc ) then
         ${proc_2dx}/protest "::ERROR: Downsampled image does not exist. First run Calculate-FFT."
       endif
-      setenv IN FFTIR/${imagename}.red.mrc
+      setenv IN FFTIR/${imagename}_red.mrc
       ${proc_2dx}/lin "Doing peaksearch on downsampled image"
     else
       setenv IN ${imagename}.mrc
       ${proc_2dx}/lin "Doing peaksearch on full-sized image"
     endif
     # 
-    \rm -f     SCRATCH/${imagename}.taper.mrc
-    setenv OUT SCRATCH/${imagename}.taper.mrc
+    \rm -f     SCRATCH/${imagename}_taper.mrc
+    setenv OUT SCRATCH/${imagename}_taper.mrc
     ${bin_2dx}/2dx_taperedgek.exe << eot
 10,10,100,10       ! IAVER,ISMOOTH,ITAPER 
 eot
@@ -278,7 +278,7 @@ eot
     echo "FirstPeakNum = ${FirstPeakNum}"
     echo "peakNum = ${peakNum}"
     echo "InnerExclusionRadius = ${InnerExclusionRadius}"
-    ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}.taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength}
+    ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}_taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength}
   #endif
   #
   if ( ${tempkeep} == 'y' ) then
@@ -292,14 +292,14 @@ eot
     endif
     \mv -f 2dx_peaksearch-masked_image.mrc SCRATCH/pks-masked_image.mrc
     \rm -f 2dx_peaksearch-phase.mrc
-    echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-amp_before_LHpass.mrc <Pre Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Post Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
     #
   else
-    \rm -f SCRATCH/${imagename}.taper.mrc
+    \rm -f SCRATCH/${imagename}_taper.mrc
     \rm -f 2dx_peaksearch-non-masked_image.mrc
     \rm -f 2dx_peaksearch-amp_LHpass.mrc
     \rm -f 2dx_peaksearch-masked_image.mrc
@@ -313,7 +313,7 @@ eot
     #############################################################################
     ${proc_2dx}/linblock "2dx_peaksearch: Skipping"
     #############################################################################
-    echo "# IMAGE: SCRATCH/${imagename}.taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
@@ -687,8 +687,8 @@ echo "set LATTICE_TLTAXA  = "\"${LATTICE_TLTAXA}\"  >> LOGS/${scriptname}.result
 echo "set LATTICE_TAXA    = "\"${LATTICE_TAXA}\"    >> LOGS/${scriptname}.results
 echo "set LATTICE_TANGL   = "\"${LATTICE_TANGL}\"   >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 echo " " >> History.dat
 echo "::From Lattice:" >> History.dat

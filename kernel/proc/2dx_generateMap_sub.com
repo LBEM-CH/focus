@@ -174,7 +174,7 @@ ${RESMIN},${RESMAX}                                             ! resolution lim
 eot
   #
   \rm -f SUMMARY
-  \cp -f fort.3 APH/${prefix}${imagename}.cor.origtiltd.aph
+  \cp -f fort.3 APH/${prefix}${imagename}_cor_origtiltd.aph
   #
   if ( ${scriptname} == "2dx_generateMAP" ) then
     echo "<<@progress: 10>>"
@@ -207,13 +207,13 @@ eot
     echo ":: "
   endif
   #
-  \cp -f APH/${prefix}${imagename}.cor.origtiltd.aph fort.1
+  \cp -f APH/${prefix}${imagename}_cor_origtiltd.aph fort.1
   \rm -f fort.2
   \rm -f fort.3
   \rm -f fort.4
   \rm -f TMP444888.tmp
   \rm -f TMP444789.tmp
-  \rm -f LOGS/${prefix}avramphs.table.txt
+  \rm -f LOGS/${prefix}avramphs_table.txt
   #
   if ( ${scriptname} == "2dx_generateMAP" ) then
     echo "<<@progress: 15>>"
@@ -247,12 +247,12 @@ eot
   \rm -f fort.1
   \mv -f fort.2 ${prefix}avrg-1.hkl
   \mv -f fort.3 ${prefix}avrg-1.hk
-  \mv -f fort.4 APH/${prefix}ctfmerge.nolimit-1.aph
-  \mv -f TMP444789.tmp LOGS/${prefix}avramphs.table.txt
+  \mv -f fort.4 APH/${prefix}ctfmerge_nolimit-1.aph
+  \mv -f TMP444789.tmp LOGS/${prefix}avramphs_table.txt
   \rm -f TMP444888.tmp
-  if ( -e 2dx_avrgamphs.phares.txt ) then
-    set PHARES_SYM = `cat 2dx_avrgamphs.phares.txt | head -n 1 | tail -n 1`
-    set PHARES_NUM_SPOTS = `cat 2dx_avrgamphs.phares.txt | head -n 2 | tail -n 1`
+  if ( -e 2dx_avrgamphs_phares.txt ) then
+    set PHARES_SYM = `cat 2dx_avrgamphs_phares.txt | head -n 1 | tail -n 1`
+    set PHARES_NUM_SPOTS = `cat 2dx_avrgamphs_phares.txt | head -n 2 | tail -n 1`
     echo "set PHARES_SYM = ${PHARES_SYM}" >> LOGS/${scriptname}.results
     echo "set PHARES_NUM_SPOTS = ${PHARES_NUM_SPOTS}" >> LOGS/${scriptname}.results
     echo ":PHARES_SYM set to ${PHARES_SYM}"
@@ -260,18 +260,18 @@ eot
     echo "::PROBLEM IN AVRGAMPHS"
   endif
   #
-  cat LOGS/${prefix}avramphs.table.txt
-  cat LOGS/${prefix}avramphs.table.txt | sed 's/:://g' > LOGS/${prefix}phase-residuals.txt
+  cat LOGS/${prefix}avramphs_table.txt
+  cat LOGS/${prefix}avramphs_table.txt | sed 's/:://g' > LOGS/${prefix}phase-residuals.txt
   echo "# IMAGE: LOGS/${prefix}phase-residuals.txt <TXT: ${prename}Phase Residuals in Resolution Ranges>" >> LOGS/${scriptname}.results
   #
   ###########################################################################
 endif
 ###########################################################################
 #
-\rm -f LOGS/${prefix}avramphs.table.txt
+\rm -f LOGS/${prefix}avramphs_table.txt
 #
 #############################################################################
-${proc_2dx}/linblock "ORIGTILT - in p1 symmetry to transform the APH file into APH/${prefix}${imagename}.cor.origtiltd.aph"
+${proc_2dx}/linblock "ORIGTILT - in p1 symmetry to transform the APH file into APH/${prefix}${imagename}_cor_origtiltd.aph"
 #############################################################################
 #
 \rm -f SUMMARY
@@ -299,10 +299,10 @@ ${RESMIN},${RESMAX}                                                 ! resolution
 eot
 #
 \rm -f SUMMARY
-\cp -f fort.3 APH/${prefix}${imagename}.cor.origtiltd.aph
-# \cp -f ../../merge/APH/merge.aph APH/${prefix}${imagename}.cor.origtiltd.aph
+\cp -f fort.3 APH/${prefix}${imagename}_cor_origtiltd.aph
+# \cp -f ../../merge/APH/merge.aph APH/${prefix}${imagename}_cor_origtiltd.aph
 #
-echo "# IMAGE: APH/${prefix}${imagename}.cor.origtiltd.aph <APH: ${prename}Amp&Phs after ORIGTILT [H,K,Z,A,P(CTF Phase flipped, PhaOri),Num,IQ,WGHT,Back,CTF]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/${prefix}${imagename}_cor_origtiltd.aph <APH: ${prename}Amp&Phs after ORIGTILT [H,K,Z,A,P(CTF Phase flipped, PhaOri),Num,IQ,WGHT,Back,CTF]>" >> LOGS/${scriptname}.results
 #
 if ( ${scriptname} == "2dx_generateMAP" ) then
   echo "<<@progress: 20>>"
@@ -318,7 +318,7 @@ endif
 ${proc_2dx}/linblock "avrgamphs - to transform merge.aph into avrg.hkl"
 #############################################################################
 #
-\cp -f APH/${prefix}${imagename}.cor.origtiltd.aph fort.1
+\cp -f APH/${prefix}${imagename}_cor_origtiltd.aph fort.1
 \rm -f fort.2
 \rm -f fort.3
 \rm -f fort.4
@@ -346,7 +346,7 @@ eot
 \rm -f fort.1
 \mv -f fort.2 ${prefix}avrg.hkl
 \mv -f fort.3 ${prefix}avrg.hk
-\mv -f fort.4 APH/${prefix}ctfmerge.nolimit.aph
+\mv -f fort.4 APH/${prefix}ctfmerge_nolimit.aph
 \rm -f TMP444888.tmp
 #
 echo "# IMAGE: ${prefix}avrg.hkl <TXT: ${prename}APH file after AVRGAMPHS [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results

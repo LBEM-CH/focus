@@ -425,12 +425,12 @@ C
       CALL ICLOSE(10)
 C
 CHEN>
-      open(11,FILE='SCRATCH/2dx_ctffind3.result.tmp',STATUS='NEW',ERR=998)
+      open(11,FILE='SCRATCH/2dx_ctffind3_result.tmp',STATUS='NEW',ERR=998)
         write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
         write(11,'(G18.6)')DRMS1
       close(11)
       GOTO 9999
-998   stop ':: ERROR on file open of SCRATCH/2dx_ctffind3.result.tmp'
+998   stop ':: ERROR on file open of SCRATCH/2dx_ctffind3_result.tmp'
 9999  continue
 CHEN<
 C

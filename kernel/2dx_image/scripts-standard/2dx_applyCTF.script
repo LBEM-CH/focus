@@ -96,11 +96,7 @@ echo "<<@evaluate>>"
 set date = `date`
 echo date = ${date}
 #
-if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
-  set iname = ${imagename}
-else
-  set iname = ${imagename}_ctfcor
-endif
+set iname = ${imagename}
 #
 set istilt = `echo $TLTANG | awk '{if ( -25.0 < $1 && $1 < 25.0 ) {s = 0} else {s = 1}} END {print s}'`
 #
@@ -124,21 +120,21 @@ set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 
 echo "<<@progress: 1>>"
 source ${proc_2dx}/2dx_makedirs 
 #
-echo "# IMAGE-IMPORTANT: "FFTIR/${iname}.red.fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${iname}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 if ( ${ctf_ttf} == 'TTF' ) then
   ${proc_2dx}/linblock "No CTFAPPLY needed, since TTF correction is already done."
   #
   if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set outfile_nolimit = ${iname}.fou.ttf.nolimit.aph
-    set outfile_limit = ${iname}.fou.ttf.limit.aph
-    set final_outfile = ${iname}.fou.cor.aph
+    set outfile_nolimit = ${iname}_fou_ttf_nolimit.aph
+    set outfile_limit = ${iname}_fou_ttf_limit.aph
+    set final_outfile = ${iname}_fou_cor.aph
   else
     # Synthetical Unbending result is used:
-    set outfile_nolimit = ${iname}.syn.ttf.nolimit.aph
-    set outfile_limit = ${iname}.syn.ttf.limit.aph
-    set final_outfile = ${iname}.syn.cor.aph
+    set outfile_nolimit = ${iname}_syn_ttf_nolimit.aph
+    set outfile_limit = ${iname}_syn_ttf_limit.aph
+    set final_outfile = ${iname}_syn_cor.aph
   endif
   #
   if ( ! -e APH/${outfile_nolimit} ) then
@@ -148,8 +144,8 @@ if ( ${ctf_ttf} == 'TTF' ) then
   cd APH
   \rm -f ${final_outfile}
   \ln -s ${outfile_nolimit} ${final_outfile}
-  \rm -f ${iname}.cor.aph
-  \ln -s ${final_outfile} ${iname}.cor.aph
+  \rm -f ${iname}_cor.aph
+  \ln -s ${final_outfile} ${iname}_cor.aph
   cd ..
   echo "# IMAGE-IMPORTANT: APH/${outfile_nolimit} <APH File after TTF correction (No Res.Limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: APH/${outfile_limit} <APH File after TTF correction (Res.Limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
@@ -166,41 +162,41 @@ else
   #############################################################################
   #
   \rm -f CTFPLOT.PS
-  \rm -f PS/ctf${iname}.nolimit.ps
+  \rm -f PS/ctf${iname}_nolimit.ps
   #
   if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set infile_nolimit = ${iname}.fou.nolimit.aph
+    set infile_nolimit = ${iname}_fou_nolimit.aph
     #
     # A check in case somebody just upgraded from an earlier version of 2dx:
     cd APH
     if ( ! -e ${infile_nolimit} ) then
-      if ( -e ${iname}.nolimit.aph ) then
-        \cp ${iname}.nolimit.aph ${infile_nolimit}
+      if ( -e ${iname}_nolimit.aph ) then
+        \cp ${iname}_nolimit.aph ${infile_nolimit}
       endif
     endif
-    set infile_limit = ${iname}.fou.limit.aph
+    set infile_limit = ${iname}_fou_limit.aph
     if ( ! -e ${infile_limit} ) then
-      if ( -e ${iname}.limit.aph ) then
-        \cp ${iname}.limit.aph ${infile_limit}
+      if ( -e ${iname}_limit.aph ) then
+        \cp ${iname}_limit.aph ${infile_limit}
       endif
     endif
     if ( ${movie_enable} == "y" ) then
-	set infile_nolimit = ${iname}.fou.movie.nolimit.aph
-	set infile_limit = ${iname}.fou.movie.limit.aph
+	set infile_nolimit = ${iname}_fou_movie_nolimit.aph
+	set infile_limit = ${iname}_fou_movie_limit.aph
     endif
     cd ..
     #
-    set outfile_nolimit = ${iname}.fou.ctf.nolimit.aph
-    set outfile_limit = ${iname}.fou.ctf.limit.aph
-    set final_outfile = ${iname}.fou.cor.aph
+    set outfile_nolimit = ${iname}_fou_ctf_nolimit.aph
+    set outfile_limit = ${iname}_fou_ctf_limit.aph
+    set final_outfile = ${iname}_fou_cor.aph
   else
     # Synthetical Unbending result is used:
-    set infile_nolimit = ${iname}.syn.nolimit.aph
-    set infile_limit = ${iname}.syn.limit.aph
-    set outfile_nolimit = ${iname}.syn.ctf.nolimit.aph
-    set outfile_limit = ${iname}.syn.ctf.limit.aph
-    set final_outfile = ${iname}.syn.cor.aph
+    set infile_nolimit = ${iname}_syn_nolimit.aph
+    set infile_limit = ${iname}_syn_limit.aph
+    set outfile_nolimit = ${iname}_syn_ctf_nolimit.aph
+    set outfile_limit = ${iname}_syn_ctf_limit.aph
+    set final_outfile = ${iname}_syn_cor.aph
   endif
   #
   if ( ! -e APH/${infile_nolimit} ) then
@@ -221,11 +217,11 @@ eot
   echo "# IMAGE-IMPORTANT: APH/${outfile_nolimit} <APH File after CTF correction (No Res.Limit) [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
   #
   echo "<<@progress: 30>>"
-  \mv -f CTFPLOT.PS PS/${iname}.ctf.nolimit.ps
-  echo "# IMAGE-IMPORTANT: PS/${iname}.ctf.nolimit.ps <PS: IQ Plot after CTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results
+  \mv -f CTFPLOT.PS PS/${iname}_ctf_nolimit.ps
+  echo "# IMAGE-IMPORTANT: PS/${iname}_ctf_nolimit.ps <PS: IQ Plot after CTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results
   #
   \rm -f CTFPLOT.PS
-  \rm -f PS/ctf${iname}.limit.ps
+  \rm -f PS/ctf${iname}_limit.ps
   #
   if ( ! -e APH/${infile_limit} ) then
     ${proc_2dx}/protest "ERROR: APH/${infile_limit} does not exist."
@@ -245,22 +241,22 @@ eot
   echo "# IMAGE-IMPORTANT: APH/${outfile_limit} <APH File after CTF correction (Res.Limit) [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
   #
   echo "<<@progress: 60>>"
-  \mv -f CTFPLOT.PS PS/${iname}.ctf.limit.ps
-  echo "# IMAGE-IMPORTANT: PS/${iname}.ctf.limit.ps <PS: IQ Plot after CTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results
+  \mv -f CTFPLOT.PS PS/${iname}_ctf_limit.ps
+  echo "# IMAGE-IMPORTANT: PS/${iname}_ctf_limit.ps <PS: IQ Plot after CTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results
   #
   cd APH
-  \rm -f ${iname}.cor.aph
-  \ln -s ${outfile_nolimit} ${iname}.cor.aph
+  \rm -f ${iname}_cor.aph
+  \ln -s ${outfile_nolimit} ${iname}_cor.aph
   \rm -f ${final_outfile}
   \ln -s ${outfile_nolimit} ${final_outfile}
-  \rm -f ${iname}.cor.aph
-  \ln -s ${final_outfile} ${iname}.cor.aph
+  \rm -f ${iname}_cor.aph
+  \ln -s ${final_outfile} ${iname}_cor.aph
   cd ..
-  echo "# IMAGE-IMPORTANT: APH/${iname}.cor.aph <Link to Final APH File (No Res.Limit) [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: APH/${iname}_cor.aph <Link to Final APH File (No Res.Limit) [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
   #
 endif
 #
-set aphfile = APH/${iname}.cor.aph
+set aphfile = APH/${iname}_cor.aph
 #
 if ( ! -e ${aphfile} ) then
   ${proc_2dx}/protest "ERROR: ${aphfile} not found."

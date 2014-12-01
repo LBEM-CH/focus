@@ -530,7 +530,7 @@ C---------Open 7 input files
             write(*,'(78(''=''))')
             write(*,'('' Working on tile '',2I6)')i,j
             if((j.ne.1) .or. (i.ne.1))then
-              write(cname,'(A,''.'',I1,''.'',I1,''.ps.mrc'')')
+              write(cname,'(A,''_'',I1,''_'',I1,''_ps.mrc'')')
      .          cfile(1:ilen),i,j
               write(*,'('': Opening file '',A40)')cname
               CALL IMOPEN(1,cname,'RO')

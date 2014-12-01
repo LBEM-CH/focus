@@ -196,18 +196,18 @@ set phaori_local = ${phaori}
 #
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set aphfile = APH/${iname}.fou.cor.aph
+    set aphfile = APH/${iname}_fou_cor.aph
     #
     # A check in case somebody just upgraded from an earlier version of 2dx:
     if ( ! -e ${aphfile} ) then
-      if ( -e APH/${iname}.cor.aph ) then
-        \cp APH/${iname}.cor.aph ${aphfile}
+      if ( -e APH/${iname}_cor.aph ) then
+        \cp APH/${iname}_cor.aph ${aphfile}
       endif
     endif
     #
 else
     # Synthetic Unbending result is used:
-    set aphfile = APH/${iname}.syn.cor.aph
+    set aphfile = APH/${iname}_syn_cor.aph
 endif
 #
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
@@ -217,9 +217,9 @@ else
   echo "# IMAGE-IMPORTANT: PS/${iname}-quadserchSc.ps <PS: Vector Plot of distortions Sc>" >> LOGS/${scriptname}.results
 endif
 if ( ${ctf_ttf} == 'CTF' ) then
-  echo "# IMAGE-IMPORTANT: PS/${iname}.ctf.nolimit.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}_ctf_nolimit.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
 else
-  echo "# IMAGE-IMPORTANT: PS/${iname}.ttplot.nolimit.unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}_ttplot_nolimit_unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
 endif
 #
 echo "# IMAGE-IMPORTANT: frame_quadserch.ps <PS: QUADSERCH Movie Profiles>" >> LOGS/${scriptname}.results
@@ -248,7 +248,7 @@ if ( ${map_without_ctf} == 'y' ) then
   echo ":: "
   ${proc_2dx}/linblock "Generating map without CTF correction"
   echo ":: "
-  set aphfile = APH/${iname}.fou.limit.aph
+  set aphfile = APH/${iname}_fou_limit.aph
   echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase File without CTF correction>" >> LOGS/${scriptname}.results
   set prefix = "no_ctf_"
   set prename = "no ctf "

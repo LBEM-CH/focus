@@ -503,7 +503,7 @@ C---------Write out accumulated RFIELD for verfication purposes
           enddo
           IPICDIM=MXI-MNI+1
           write(TEXT(1:80),'(''Averaged central peaks'')')
-          write(FILENAM(1:80),'(''TMP-quadserch3-autocor.mrc'')')
+          write(FILENAM(1:80),'(''TMP_quadserch3_autocor.mrc'')')
           CALL PICWRI(IFIEL2,FILENAM,TEXT,IPICDIM,IPICDIM)
 C          write(6,'('': Written image, DMIN,DMAX = '',2G15.3)')
 C     .      DMIN,DMAX
@@ -1741,7 +1741,7 @@ C-----Write out test picture
 C
       write(TEXT,1952)
 1952  FORMAT('QUADSERCHH: Initial XCF')
-      write(FILENAM(1:80),'(''TMP-quadserch-1.mrc'')')
+      write(FILENAM(1:80),'(''TMP_quadserch_1.mrc'')')
       CALL PICWRI(IPICTU,FILENAM,TEXT,IPICDIM,IPICSIZ)
 C
 C-----Do morphological operations on test picture IPICTU:
@@ -1756,44 +1756,44 @@ C
 C.....Expand to get rid of holes
       CALL EXPAND(IPICTU,IPICT1,IPICDIM,IPICSIZ,isize1)
 C  
-      write(FILENAM(1:80),'(''TMP-quadserch-2.mrc'')')
+      write(FILENAM(1:80),'(''TMP_quadserch_2.mrc'')')
       if(icontrol.gt.0)CALL PICWRI(IPICT1,FILENAM,TEXT,IPICDIM,IPICSIZ)
 C
 C.....Contract to get the original size back
       CALL CONTRA(IPICT1,IPICTU,IPICDIM,IPICSIZ,isize2)
 C
-      write(FILENAM(1:80),'(''TMP-quadserch-3.mrc'')')
+      write(FILENAM(1:80),'(''TMP_quadserch_3.mrc'')')
       if(icontrol.gt.0)CALL PICWRI(IPICTU,FILENAM,TEXT,IPICDIM,IPICSIZ)
 C
 C.....Contract to get rid of islands
       CALL CONTRA(IPICTU,IPICT1,IPICDIM,IPICSIZ,isize2)
 C
-      write(FILENAM(1:80),'(''TMP-quadserch-4.mrc'')')
+      write(FILENAM(1:80),'(''TMP_quadserch_4.mrc'')')
       if(icontrol.gt.0)CALL PICWRI(IPICT1,FILENAM,TEXT,IPICDIM,IPICSIZ)
 C
 C.....Expand to get the original size back
       CALL EXPAND(IPICT1,IPICTU,IPICDIM,IPICSIZ,isize1)
 C
-      write(FILENAM(1:80),'(''TMP-quadserch-5.mrc'')')
+      write(FILENAM(1:80),'(''TMP_quadserch_5.mrc'')')
       if(icontrol.gt.0)CALL PICWRI(IPICTU,FILENAM,TEXT,IPICDIM,IPICSIZ)
 C
 C.....Taper edges
       CALL TAPER(IPICTU,IPICT1,IPICDIM,IPICSIZ,isize3)
 C
-      write(FILENAM(1:80),'(''TMP-quadserch-6.mrc'')')
+      write(FILENAM(1:80),'(''TMP_quadserch_6.mrc'')')
       if(icontrol.ne.0)CALL PICWRI(IPICT1,FILENAM,TEXT,IPICDIM,IPICSIZ)
 C
 C.....Smooth picture
       CALL SMOOTH(IPICT1,IPICTHACK,IPICT2,IPICDIM,IPICDI2,IPICSIZ,
      1 rsize4)
 C     
-      write(FILENAM(1:80),'(''TMP-quadserch-7.mrc'')')
+      write(FILENAM(1:80),'(''TMP_quadserch_7.mrc'')')
       if(icontrol.ne.0)CALL PICWRI(IPICT2,FILENAM,TEXT,IPICDI2,IPICDI2)
 C
 C======================================
       goto 556
 555   continue
-      write(FILENAM(1:80),'(''TMP-quadserch-7.mrc'')')
+      write(FILENAM(1:80),'(''TMP_quadserch_7.mrc'')')
       CALL IMOPEN(1,FILENAM,'RO')
       CALL IRDHDR(1,NXYZIPIC,MXYZIPIC,MODEIPIC,DMINIPIC,DMAXIPIC,DMEANIPIC)
 C      write(6,'(''::MODEIPIC = '',I4)')MODEIPIC
@@ -1906,7 +1906,7 @@ C
       RETURN
 C
 9400   WRITE(6,9013)
-9013   FORMAT(':: Error reading mask TMP-quadserch-7.mrc')
+9013   FORMAT(':: Error reading mask TMP_quadserch_7.mrc')
        STOP
 C
       END

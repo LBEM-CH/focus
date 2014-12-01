@@ -123,27 +123,14 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used"
   ${proc_2dx}/linblock "Defocus should be determined already."
   #
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
   #
   ##########################################################################
   ${proc_2dx}/linblock "${scriptname} - normal end."
   ##########################################################################
   exit
 endif
-#
-# if ( ${MASKING_done} == "y" ) then
-#   ${proc_2dx}/linblock "Skipping. Image is masked."
-#   ${proc_2dx}/linblock "Defocus should be determined already."
-#   #
-#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-#   #
-#   ##########################################################################
-#   ${proc_2dx}/linblock "${scriptname} - normal end."
-#   ##########################################################################
-#   exit
-# endif
 #
 if ( ${det_tilt}x == 'x' ) then
   set det_tilt = 'y'
@@ -154,8 +141,8 @@ endif
 if (( ${det_defocus} == 'n' ) && ( ${det_tilt} == 'n' )) then
   ${proc_2dx}/linblock "Skipping. Not determining any defocus or defocus gradient."
   #
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
   #
   ##########################################################################
   ${proc_2dx}/linblock "${scriptname} - normal end."
@@ -204,10 +191,10 @@ endif
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-Masked Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE: FFTIR/${imagename}.pg.mrc <Periodogram>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft_mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE: FFTIR/${imagename}_pg.mrc <Periodogram>" >> LOGS/${scriptname}.results
 #
 if ( ${magnification} == '' ) then
   ${proc_2dx}/protest "ERROR: Magnification is not defined."
@@ -252,19 +239,19 @@ if ( ${det_tilt} == 'n' ) then
     ${proc_2dx}/lin "Cropping out the central 4096x4096 image"
     ##############################################################################
     #
-    \rm -f SCRATCH/2dx_ctffind-cut.mrc
+    \rm -f SCRATCH/2dx_ctffind_cut.mrc
     #
     ${bin_2dx}/labelh.exe << eot
 ${inimage}
 1
-SCRATCH/2dx_ctffind-cut.mrc
+SCRATCH/2dx_ctffind_cut.mrc
   ${minx} ${maxx} ${miny} ${maxy}
 eot
     #
-    echo "# IMAGE: SCRATCH/2dx_ctffind-cut.mrc <Cropped central tile>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/2dx_ctffind_cut.mrc <Cropped central tile>" >> LOGS/${scriptname}.results
     #
   else
-    \cp -f ${inimage} SCRATCH/2dx_ctffind-cut.mrc
+    \cp -f ${inimage} SCRATCH/2dx_ctffind_cut.mrc
   endif
   #
   echo "<<@progress: 30>>"
@@ -273,16 +260,16 @@ eot
   ${proc_2dx}/lin "Downsampling by a factor of 2x2"
   ##############################################################################
   #
-  \rm -f SCRATCH/2dx_ctffind-cut-down.mrc
+  \rm -f SCRATCH/2dx_ctffind_cut_down.mrc
   #
   ${bin_2dx}/labelh.exe << eot
-SCRATCH/2dx_ctffind-cut.mrc
+SCRATCH/2dx_ctffind_cut.mrc
 4               ! average adjacent pixels
-SCRATCH/2dx_ctffind-cut-down.mrc
+SCRATCH/2dx_ctffind_cut_down.mrc
 2,2
 eot
   #
-  echo "# IMAGE: SCRATCH/2dx_ctffind-cut-down.mrc <Downsampled central tile>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/2dx_ctffind_cut_down.mrc <Downsampled central tile>" >> LOGS/${scriptname}.results
   #
   echo "<<@progress: 40>>"
   #
@@ -296,8 +283,8 @@ eot
   echo ":Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
   #
   #
-  \rm -f SCRATCH/2dx_ctffind3.result.tmp
-  set outimage = 'SCRATCH/2dx_ctffind3.out.mrc'
+  \rm -f SCRATCH/2dx_ctffind3_result.tmp
+  set outimage = 'SCRATCH/2dx_ctffind3_out.mrc'
   \rm -f ${outimage} 
   #
   # Dummy setting of parameters that are not used here, as long as inoast = 0
@@ -314,7 +301,7 @@ eot
     set progname = 2dx_ctffind3_noOMP.exe
   endif
   ${bin_2dx}/${progname} > LOGS/2dx_ctffind3.txt << eof
-SCRATCH/2dx_ctffind-cut-down.mrc
+SCRATCH/2dx_ctffind_cut_down.mrc
 ${outimage}
 ${CS},${KV},${ampcon},${magnification},${downstepdigitizer}
 ${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${df_dast}
@@ -327,13 +314,13 @@ eof
   #
   echo "<<@progress: 70>>"
   #
-  set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
-  set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
+  set newdef = `cat SCRATCH/2dx_ctffind3_result.tmp | head -1`
+  set drms1 = `cat SCRATCH/2dx_ctffind3_result.tmp | tail -1`
   set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
   set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
   set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
   #
-  \rm -f SCRATCH/2dx_ctffind3.result.tmp
+  \rm -f SCRATCH/2dx_ctffind3_result.tmp
   #
   echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
   #
@@ -343,8 +330,8 @@ eof
   set defocus = ${newdef}
   #
   if ( ${tempkeep} == "n" ) then
-    \rm -f SCRATCH/2dx_ctffind-cut.mrc
-    \rm -f SCRATCH/2dx_ctffind-cut-down.mrc
+    \rm -f SCRATCH/2dx_ctffind_cut.mrc
+    \rm -f SCRATCH/2dx_ctffind_cut_down.mrc
   endif
   #
   echo " " >> History.dat
@@ -371,7 +358,7 @@ else
     #                                                                           #
     ############################################################################# 
     #
-    set outimage = 'SCRATCH/2dx_ctftilt.out.mrc'
+    set outimage = 'SCRATCH/2dx_ctftilt_out.mrc'
     \rm -f ${outimage}  
     #
     set searchrange1 = 10000.0
@@ -448,7 +435,7 @@ else
     #                                                                           #
       #############################################################################
     #
-    \rm -f TMP-positions.txt TMP-runfile-windows.txt
+    \rm -f TMP_positions.txt TMP_runfile_windows.txt
     #
   ${bin_2dx}/2dx_calcpositions.exe << eot
 ${imagesidelength}
@@ -456,23 +443,23 @@ ${smallsize}
 ${defocus_tiles_count},${defocus_tiles_count}
 ${mode}
 ${nonmaskimagename}
-TMP-positions.txt
-TMP-runfile-windows.txt
+TMP_positions.txt
+TMP_runfile_windows.txt
 eot
     #
     echo "<<@progress: 30>>"
     #
-    chmod +x TMP-runfile-windows.txt 
+    chmod +x TMP_runfile_windows.txt 
     #
-    echo "# IMAGE: TMP-positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: TMP-runfile-windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: TMP_positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: TMP_runfile_windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
     #
     if ( ! -d CUT ) then
       \rm -fr CUT
       \mkdir CUT
     endif 
     #
-    source TMP-runfile-windows.txt
+    source TMP_runfile_windows.txt
     #
     echo "<<@progress: 50>>"
     #
@@ -589,19 +576,19 @@ eot
     ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
     #############################################################################
     #
-    \rm -f CUT/${nonmaskimagename}.merge.ps.mrc
+    \rm -f CUT/${nonmaskimagename}_merge_ps.mrc
     #
     ${bin_2dx}/labelh.exe << eot
-CUT/${nonmaskimagename}.1.1.ps.mrc
+CUT/${nonmaskimagename}_1_1_ps.mrc
 14
-CUT/${nonmaskimagename}.merge.ps.mrc
+CUT/${nonmaskimagename}_merge_ps.mrc
 CUT/${nonmaskimagename}
 eot
     #
-    echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}.merge.ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_merge_ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
     #
-    if ( ! -e CUT/${nonmaskimagename}.merge.ps.mrc ) then
-      ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}.merge.ps.mrc not produced."
+    if ( ! -e CUT/${nonmaskimagename}_merge_ps.mrc ) then
+      ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}_merge_ps.mrc not produced."
     endif
     #
     cat ${defocus_pos_file}
@@ -610,14 +597,14 @@ eot
     ${proc_2dx}/linblock "Now calculating tilt geometry from defocus values"
     #############################################################################
     #
-    echo "#" > TMP.2dx_deftilt.run.txt
-    echo "\rm -f TMP.2dx_deftilt.good.txt"   >> TMP.2dx_deftilt.run.txt
-    echo "${bin_2dx}/2dx_tiltgeom.exe << eot" >> TMP.2dx_deftilt.run.txt
-    echo "TMP.2dx_deftilt.good.txt"  >> TMP.2dx_deftilt.run.txt
-    echo ${stepdigitizer} >> TMP.2dx_deftilt.run.txt
-    echo ${magnification} >> TMP.2dx_deftilt.run.txt
-    echo ${defocus_tiles_count}  >> TMP.2dx_deftilt.run.txt
-    echo TMP-positions.txt >> TMP.2dx_deftilt.run.txt 
+    echo "#" > TMP_2dx_deftilt_run.txt
+    echo "\rm -f TMP_2dx_deftilt_good.txt"   >> TMP_2dx_deftilt_run.txt
+    echo "${bin_2dx}/2dx_tiltgeom.exe << eot" >> TMP_2dx_deftilt_run.txt
+    echo "TMP_2dx_deftilt_good.txt"  >> TMP_2dx_deftilt_run.txt
+    echo ${stepdigitizer} >> TMP_2dx_deftilt_run.txt
+    echo ${magnification} >> TMP_2dx_deftilt_run.txt
+    echo ${defocus_tiles_count}  >> TMP_2dx_deftilt_run.txt
+    echo TMP_positions.txt >> TMP_2dx_deftilt_run.txt 
     # The input order of columns and rows needs to be inverted here.
     \rm -f TMP.txt
     set refX = 1
@@ -639,33 +626,33 @@ eot
         set line = "${newline}"
         @ refY++
       end
-      echo ${line} | sed 's/ /,/g' >> TMP.2dx_deftilt.run.txt
+      echo ${line} | sed 's/ /,/g' >> TMP_2dx_deftilt_run.txt
       @ refX++
     end
     #
-    echo 0,0,0 >> TMP.2dx_deftilt.run.txt
-    echo eot >> TMP.2dx_deftilt.run.txt 
-    echo # >> TMP.2dx_deftilt.run.txt 
-    echo # The input order of columns and rows is inverted here. >> TMP.2dx_deftilt.run.txt 
+    echo 0,0,0 >> TMP_2dx_deftilt_run.txt
+    echo eot >> TMP_2dx_deftilt_run.txt 
+    echo # >> TMP_2dx_deftilt_run.txt 
+    echo # The input order of columns and rows is inverted here. >> TMP_2dx_deftilt_run.txt 
     #
-    chmod +x TMP.2dx_deftilt.run.txt
+    chmod +x TMP_2dx_deftilt_run.txt
     #
-    echo "# IMAGE: TMP.2dx_deftilt.run.txt <TXT: runfile for tiltgeom>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: TMP_2dx_deftilt_run.txt <TXT: runfile for tiltgeom>" >> LOGS/${scriptname}.results
     #
-    source TMP.2dx_deftilt.run.txt > TMP.2dx_deftilt.run.out.txt
+    source TMP_2dx_deftilt_run.txt > TMP_2dx_deftilt_run_out.txt
     #
-    cat TMP.2dx_deftilt.run.out.txt
-    echo "# IMAGE: TMP.2dx_deftilt.run.out.txt <TXT: result of runfile for tiltgeom>" >> LOGS/${scriptname}.results
+    cat TMP_2dx_deftilt_run_out.txt
+    echo "# IMAGE: TMP_2dx_deftilt_run_out.txt <TXT: result of runfile for tiltgeom>" >> LOGS/${scriptname}.results
     #
     #############################################################################
     ${proc_2dx}/linblock "Mark Thon-ring fit panels"
     #############################################################################
     #
-    chmod +x TMP.2dx_deftilt.good.txt
-    echo "# IMAGE: TMP.2dx_deftilt.good.txt <TXT: runfile for Thonring marking>" >> LOGS/${scriptname}.results
+    chmod +x TMP_2dx_deftilt_good.txt
+    echo "# IMAGE: TMP_2dx_deftilt_good.txt <TXT: runfile for Thonring marking>" >> LOGS/${scriptname}.results
     #
-    source TMP.2dx_deftilt.good.txt > TMP.2dx_deftilt.good.out.txt
-    echo "# IMAGE: TMP.2dx_deftilt.good.out.txt <TXT: result of runfile for Thonring marking>" >> LOGS/${scriptname}.results
+    source TMP_2dx_deftilt_good.txt > TMP_2dx_deftilt_good_out.txt
+    echo "# IMAGE: TMP_2dx_deftilt_good_out.txt <TXT: result of runfile for Thonring marking>" >> LOGS/${scriptname}.results
     echo "# IMAGE-IMPORTANT: ${defocus_pos_select_file} <TXT: Defocus Table (Selected values)>" >> LOGS/${scriptname}.results  
     #
     #############################################################################
@@ -674,23 +661,23 @@ eot
     #
     cat ${defocus_pos_select_file}
     #
-    \rm -f CUT/${nonmaskimagename}.marked.merge.ps.mrc
+    \rm -f CUT/${nonmaskimagename}_marked_merge_ps.mrc
     #
     ${bin_2dx}/labelh.exe << eot
-CUT/${nonmaskimagename}.marked.1.1.ps.mrc
+CUT/${nonmaskimagename}_marked_1_1_ps.mrc
 14
-CUT/${nonmaskimagename}.marked.merge.ps.mrc
-CUT/${nonmaskimagename}.marked
+CUT/${nonmaskimagename}_marked_merge_ps.mrc
+CUT/${nonmaskimagename}_marked
 eot
     #
-    echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}.marked.merge.ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_marked_merge_ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
     #
-    if ( ! -e CUT/${nonmaskimagename}.merge.ps.mrc ) then
-      ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}.merge.ps.mrc not produced."
+    if ( ! -e CUT/${nonmaskimagename}_merge_ps.mrc ) then
+      ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}_merge_ps.mrc not produced."
     endif
     #
-    tail -2 TMP.2dx_deftilt.run.out.txt
-    set line = `tail -1 TMP.2dx_deftilt.run.out.txt`
+    tail -2 TMP_2dx_deftilt_run_out.txt
+    set line = `tail -1 TMP_2dx_deftilt_run_out.txt`
     set TLTAXIS = `echo ${line} | cut -d\  -f6`
     set TLTANG  = `echo ${line} | cut -d\  -f3`
     #
@@ -708,7 +695,7 @@ eot
     #                                                                           #
     ############################################################################# 
     #
-    \rm -f SCRATCH/2dx_ctftilt.result.tmp
+    \rm -f SCRATCH/2dx_ctftilt_result.tmp
     echo imagesidelength = ${imagesidelength}
     set tilesize = 128
     echo tilesize = ${tilesize}
@@ -721,7 +708,7 @@ eot
     ${proc_2dx}/linblock "2dx_ctftilt - to get defocus and tilt."
     #############################################################################
     #
-    set outimage = 'SCRATCH/2dx_ctftilt.out.mrc'
+    set outimage = 'SCRATCH/2dx_ctftilt_out.mrc'
     \rm -f ${outimage}  
     #
     ${bin_2dx}/2dx_ctftilt.exe << eof
@@ -737,19 +724,19 @@ eof
     #
     echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
     #
-    set newdef = `cat SCRATCH/2dx_ctftilt.result.tmp | head -1`
+    set newdef = `cat SCRATCH/2dx_ctftilt_result.tmp | head -1`
     set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
     set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
     set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
     set defocus = `echo ${def1},${def2},${ang}`
     #
-    set newtilt = `cat SCRATCH/2dx_ctftilt.result.tmp | tail -1`
+    set newtilt = `cat SCRATCH/2dx_ctftilt_result.tmp | tail -1`
     set TLTAXIS = `echo $newtilt | awk '{s=$1} END {printf "%.3f", s}'`
     set TLTAXIS = `echo ${TLTAXIS} | awk '{ if ( $1 > 90.0 ) { s = $1 - 180.0 } else { s = $1 } } END { print s }'`
     set TLTANG = `echo $newtilt | awk '{s=$2} END {printf "%.3f", s}'`
     set RF  = `echo $newtilt | awk '{s=$3} END {print s}'`
     #
-    # \rm -f SCRATCH/2dx_ctftilt.result.tmp
+    # \rm -f SCRATCH/2dx_ctftilt_result.tmp
     #
   endif
   echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
@@ -819,19 +806,19 @@ eot
   #
   #
   if ( ${debugmode} == "n" ) then
-    echo dummy > CUT/${nonmaskimagename}.1.1.ps.mrc 
-    \rm -f CUT/${nonmaskimagename}.?.?.ps.mrc
-    echo dummy > CUT/${nonmaskimagename}.marked.1.1.ps.mrc 
-    \rm -f CUT/${nonmaskimagename}.marked.?.?.ps.mrc
+    echo dummy > CUT/${nonmaskimagename}_1_1_ps.mrc 
+    \rm -f CUT/${nonmaskimagename}_?_?_ps.mrc
+    echo dummy > CUT/${nonmaskimagename}_marked_1_1_ps.mrc 
+    \rm -f CUT/${nonmaskimagename}_marked_?_?_ps.mrc
   endif
   #
   if ( ${tempkeep} == "n" ) then
-    \rm -f TMP-positions.txt
-    \rm -f TMP-runfile-windows.txt
-    \rm -f CUT/${nonmaskimagename}.4.4.mrc
-    \rm -f TMP.2dx_deftilt.run.txt
-    \rm -f TMP.2dx_deftilt.run.out.txt
-    \rm -f TMP.2dx_deftilt.good.txt
+    \rm -f TMP_positions.txt
+    \rm -f TMP_runfile_windows.txt
+    \rm -f CUT/${nonmaskimagename}_4_4.mrc
+    \rm -f TMP_2dx_deftilt_run.txt
+    \rm -f TMP_2dx_deftilt_run_out.txt
+    \rm -f TMP_2dx_deftilt_good.txt
   endif
   #
   echo "set DEFOCUS_done = y" >> LOGS/${scriptname}.results

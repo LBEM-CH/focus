@@ -308,26 +308,35 @@ else
 endif
 #
 set num_dia = 100
+#
+#
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
 set Smoother_nodes = 1
+
+
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#
+#
 #
 setenv NCPUS ${Thread_Number}
 #
 if ( ${movie_masking_mode} == '1' ) then 
-  if ( ! -e ${nonmaskimagename}-masking-final.mrc ) then
-    ${proc_2dx}/protest "ERROR: ${nonmaskimagename}-masking-final.mrc not found. First run UNBEND-II with masking option."
+  if ( ! -e ${nonmaskimagename}_masking_final.mrc ) then
+    ${proc_2dx}/protest "ERROR: ${nonmaskimagename}_masking_final.mrc not found. First run UNBEND-II with masking option."
     # ${proc_2dx}/linblock "WARNING: Continuing withoug masking."
     # set movie_masking_mode = 0
     # echo "set movie_masking_mode = ${movie_masking_mode}" >> LOGS/${scriptname}.results
   endif 
-  echo  "# IMAGE: ${nonmaskimagename}-masking-final.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: ${nonmaskimagename}_masking_final.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
 endif
-#
-if ( ! -e SCRATCH/${imagename}_unbent_filtered.mrc ) then
-  if ( -e SCRATCH/${imagename}.unbent-filtered.mrc ) then
-    \mv -f SCRATCH/${imagename}.unbent-filtered.mrc SCRATCH/${imagename}_unbent_filtered.mrc
-  endif
-endif
-#
 
 
 
@@ -342,7 +351,7 @@ if ( 1 == 2 ) then
   ${bin_2dx}/2dx_movie_refine.exe << eot
 frames/CCmap
 ${movie_imagenumber_touse}
-SCRATCH/prof${imagename}.dat
+${PROFDATA}
 eot
   #
 endif
@@ -361,9 +370,9 @@ if ( 1 == 2 ) then
 
   touch frames/PROFDATA_1.dat
   \rm frames/PROFDATA_*.dat
-  python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${Smoother_nodes} SCRATCH/prof${imagename}.dat ${movie_imagenumber_touse}
+  python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${Smoother_nodes} ${PROFDATA} ${movie_imagenumber_touse}
   echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-  echo  "# IMAGE: SCRATCH/prof${imagename}.dat <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
   set i = 1
   while ($i <= ${movie_imagenumber_touse})
     echo  "# IMAGE: frames/PROFDATA_${i}.dat <PROFDATA ${i}>" >> LOGS/${scriptname}.results
@@ -411,110 +420,19 @@ endif
 #
 echo "<<@progress: 5>>"
 #
-if ( ! -e SCRATCH/errout_unbend2_${imagename}.dat ) then
+set iname = image_ctfcor
+#
+set PROFDATA = ${iname}-profile.dat
+if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif
 #
-\cp -f SCRATCH/errout_unbend2_${imagename}.dat SCRATCH/errout${imagename}.dat
-#
-setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
-setenv PROFDATA SCRATCH/prof${imagename}.dat
-setenv ERRORS   SCRATCH/errout${imagename}.dat
-setenv ERROUT   SCRATCH/errout2${imagename}.dat
-#
-set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
-set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-set valspotscan = '0'
-set createmask = '0'
-set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
-#
-\rm -f SCRATCH/errout2${imagename}.dat
-\rm -f SPIDERCOORD.spi
+set cormap = SCRATCH/cor1${iname}_cor_unbend2.mrc
 #
 if ( ! -e ${cormap} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"
 endif
 # 
-#
-###############################################################
-${proc_2dx}/linblock "QUADSERCH - Updating Initial Error Field" 
-###############################################################
-#
-echo "<<@progress: 20>>"
-#
-echo "movie_imagenumber_touse = ${movie_imagenumber_touse}"
-#
-${bin_2dx}/2dx_quadserchk-2.exe << eot
-3,${quadpredb}                     ! IPASS,NRANGE
-${cormap}
-${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
-${lattice},F                       ! Lattice vectors
--200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
-${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
-N                               ! YES/NO FOR DETAILED PRINTOUT
-${radlim}                       ! RADLIM IN PROFILE GRID UNITS
-${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
-${createmask}                   ! dont create manual Masking information
-0                               ! Mask the image directly
-eot
-#
-echo "<<@progress: 10>>"
-#
-#
-if ( "1" == "never" ) then
-  #  
-  #################################################################################
-  ${proc_2dx}/lin "2dx_ctfcor - to apply CTF correction to reference"
-  #################################################################################  
-  #
-  set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
-  set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
-  \rm -f SCRATCH/${imagename}.unbent-filtered_ctfcor.mrc
-  \rm -f ${ctfcor_tilefile}
-  \rm -f ${ctfcor_psfile} 
-  #
-  # For example:
-  # ${bin_2dx}/2dx_ctfcor.exe << eot
-  # ${imagename}.mrc
-  # ${imagename}_ctfcor.mrc
-  # ${ctfcor_tilefile}
-  # ${ctfcor_psfile}
-  # 10.0, 60.0
-  # 2.7, 300.0, 0.07, 39411.0, 5.0
-  # 51579.8, 8919.84, 68.0
-  # 0.1
-  # 256
-  # 512
-  # 50
-  # n
-  # 0.1
-  # eot
-  #
-  ${bin_2dx}/2dx_ctfcor.exe << eot
-SCRATCH/${imagename}_unbent_filtered.mrc
-SCRATCH/${imagename}_unbent_filtered_ctfcor.mrc
-${ctfcor_tilefile}
-${ctfcor_psfile}
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${ctfcor_noise}
-${ctfcor_inner_tile}
-${ctfcor_outer_tile}
-${ctfcor_taper}
-${ctfcor_imode}
-${ctfcor_debug}
-${ctfcor_maxamp_factor}
-eot
-  #
-  echo "# IMAGE: SCRATCH/${imagename}_unbent_filtered_ctfcor.mrc <Unbent image, CTF corrected>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
-endif
-#
 #
 ###############################################################
 ${proc_2dx}/linblock "FFTRANS - Calculate FFT of unbent image"
@@ -613,7 +531,7 @@ ${proc_2dx}/linblock "MASKTRAN - Masked FFT of boxed reference"
 set maskb = ${maskb01}
 set rmax = 11000
 #
-\rm -f SCRATCH/refam1${imagename}.fft.msk.mrc
+\rm -f SCRATCH/refam1${imagename}_fft_msk.mrc
 setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
 setenv SPOTS ${imagename}.spt
@@ -755,7 +673,7 @@ ${ctfcor_maxamp_factor}
 eot
     #
     if ( ${i} == "1" ) then
-      echo "# IMAGE: frames/frame_${i}_ctfcor.mrc <Frame ${i} CTF corrected>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: frames/frame_${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
       \cp -f ${ctfcor_tilefile} frames/frame_${i}_tiles.mrc
       echo "# IMAGE: frames/frame_${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
       \cp -f ${ctfcor_psfile} frames/frame_${i}_ps.mrc
@@ -794,15 +712,15 @@ setenv NCPUS ${Thread_Number}
 ${bin_2dx}/2dx_movie_refine.exe << eot
 frames/CCmap
 ${movie_imagenumber_touse}
-SCRATCH/prof${imagename}.dat
+${PROFDATA}
 eot
 #
 #
 touch frames/PROFDATA_1.dat
 \rm frames/PROFDATA_*.dat
-python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${Smoother_nodes} SCRATCH/prof${imagename}.dat ${movie_imagenumber_touse}
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-echo  "# IMAGE: SCRATCH/prof${imagename}.dat <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
+python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${Smoother_nodes} ${PROFDATA} ${movie_imagenumber_touse}
+
+echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
 if ( ${show_frame_PROFDATA} == "y" ) then
   set i = 1
   while ($i <= ${movie_imagenumber_touse})
@@ -813,6 +731,19 @@ endif
 #
 echo  "# IMAGE: 2dx_movie_refine.dat <Movie drift profiles (TXT)>" >> LOGS/${scriptname}.results
 echo  "# IMAGE: 2dx_movie_refine_smooth.dat <Movie drift profiles, smoothened (TXT)>" >> LOGS/${scriptname}.results
+#
+#
+###########################################################################
+${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
+###########################################################################
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
+#
+python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected.mrc
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
+#
+python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_smooth.dat 2dx_movie_refine_smooth.pdf frames/CCmap_driftCorrected.mrc
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_smooth.pdf <PDF: 2dx_movie_refine_smooth.pdf>" >> LOGS/${scriptname}.results
+#
 #
 echo "<<@progress: 60>>"
 #
@@ -942,22 +873,6 @@ else
 endif
 
 
-
-###########################################################################
-${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
-###########################################################################
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
-
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected.mrc
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_smooth.dat 2dx_movie_refine_smooth.pdf frames/CCmap_driftCorrected.mrc
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_smooth.pdf <PDF: 2dx_movie_refine_smooth.pdf>" >> LOGS/${scriptname}.results
-
-
-
-
-
 ###########################################################################
 ${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
 ###########################################################################
@@ -977,23 +892,26 @@ ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 ###########################################################################
 
 setenv IN "frames/direct_sum_fixed.mrc"
-setenv OUT "frames/direct_sum.fft.mrc"
+setenv OUT "frames/direct_sum_fft.mrc"
 ${bin_2dx}/2dx_fftrans.exe
-echo "# IMAGE: frames/direct_sum.fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
+echo "# IMAGE: frames/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
 
 
 ###########################################################################
 ${proc_2dx}/linblock "MMBOX - Evaluating APH values, without resolution limit"
 ###########################################################################
 
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+#
 ${bin_2dx}/2dx_mmboxa.exe << eot
-frames/direct_sum.fft.mrc
+frames/direct_sum_fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.fou.movie.nolimit.aph
+APH/${imagename}_fou_movie_nolimit.aph
 SCRATCH/TMP9873.dat
 U2
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -1010,13 +928,13 @@ ${proc_2dx}/linblock "MMBOX - Evaluating APH values, with resolution limit"
 ###########################################################################
 
 ${bin_2dx}/2dx_mmboxa.exe << eot
-frames/direct_sum.fft.mrc
+frames/direct_sum_fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.fou.movie.limit.aph
+APH/${imagename}_fou_movie_limit.aph
 SCRATCH/TMP9882.dat
 U2
 ${refposix},${refposiy}         ! XORIG,YORIG
@@ -1072,15 +990,9 @@ endif
 ${pdf2ps} frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
 
-if ( ${ctfcor_imode}x == "0x" ) then
-  echo "# IMAGE-IMPORTANT: APH/${imagename}.fou.movie.limit.aph <APH: APH file after movie-mode unbending with resolution limit>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: APH/${imagename}.fou.movie.nolimit.aph <APH: APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
-else
-  \mv -f APH/${imagename}.fou.movie.limit.aph APH/${imagename}_ctfcor.fou.movie.limit.aph
-  \mv -f APH/${imagename}.fou.movie.nolimit.aph APH/${imagename}_ctfcor.fou.movie.nolimit.aph
-  echo "# IMAGE-IMPORTANT: APH/${imagename}_ctfcor.fou.movie.limit.aph <APH: APH file after movie-mode unbending with resolution limit>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: APH/${imagename}_ctfcor.fou.movie.nolimit.aph <APH: APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
-endif
+echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_movie_limit.aph <APH file after movie-mode unbending with resolution limit>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_movie_nolimit.aph <APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
+
 
 if ( ${tempkeep} != "y" ) then
   ###########################################################################

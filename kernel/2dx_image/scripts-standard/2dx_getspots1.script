@@ -89,8 +89,8 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") ) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used."
   ${proc_2dx}/linblock "Spotlist should be determined already."
   #
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
   #
   exit
 endif
@@ -188,14 +188,14 @@ if ( ( ${spot_source_begin} == "FFT" ) || ( ! -e ${imagename}.spt )) then
   ${proc_2dx}/linblock "2dx_mmboxa: To get the spot list from the FFT of the image."
   #############################################################################
   #
-  if ( ! -e FFTIR/${imagename}.fft.mrc ) then
-    ${proc_2dx}/linblock "ERROR: FFTIR/${imagename}.fft.mrc does not exist."
+  if ( ! -e FFTIR/${imagename}_fft.mrc ) then
+    ${proc_2dx}/linblock "ERROR: FFTIR/${imagename}_fft.mrc does not exist."
     ${proc_2dx}/protest "First run Calculate FFT."
   endif 
   #
   \rm -f ${spotname}
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${imagename}.fft.mrc
+FFTIR/${imagename}_fft.mrc
 ${imagenumber}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -219,7 +219,7 @@ if ( ${spot_source_begin} == "Gen" ) then
   #
   \rm -f ${spotname}
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${imagename}.fft.mrc
+FFTIR/${imagename}_fft.mrc
 ${imagenumber}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -297,8 +297,8 @@ echo "<<@progress: 80>>"
 #
 echo "# IMAGE-IMPORTANT: ${spotname} <SPT: Fourier Spot List>" >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}.red.fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 cp ${spotname} ${spotname}.bak
 if ( ${ProtSpotList} == "y" ) then

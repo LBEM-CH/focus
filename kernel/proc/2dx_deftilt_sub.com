@@ -19,12 +19,12 @@ endif
 echo ${sub_tilesize}
 #
 if ( ${second} == '3' ) then
-  set inimage = CUT/${image}.red.center.mrc
-  set outimage = CUT/${image}.red.center.ps.mrc
+  set inimage = CUT/${image}_red_center.mrc
+  set outimage = CUT/${image}_red_center_ps.mrc
   set outlabel = "CUT-PS_Center"
 else
-  set inimage = CUT/${image}.${newX}.${newY}.mrc
-  set outimage = CUT/${image}.${newX}.${newY}.ps.mrc
+  set inimage = CUT/${image}_${newX}_${newY}.mrc
+  set outimage = CUT/${image}_${newX}_${newY}_ps.mrc
   set outlabel = "CUT-PS_${newX},${newY}"
 endif
 #
@@ -89,7 +89,7 @@ ${proc_2dx}/lin "2dx_ctffind3 - search the defocus"
 #                                                                           #
 #############################################################################
 #
-\rm -f SCRATCH/2dx_ctffind3.result.tmp
+\rm -f SCRATCH/2dx_ctffind3_result.tmp
 #
 \rm -f ${outimage}
 #
@@ -142,8 +142,8 @@ endif
 #
 #######################################################
 #
-  if ( ! -e SCRATCH/2dx_ctffind3.result.tmp ) then
-    ${proc_2dx}/linblock "WARNING: 2dx_deftilt_sub.com: ERROR: SCRATCH/2dx_ctffind3.result.tmp does not exist."
+  if ( ! -e SCRATCH/2dx_ctffind3_result.tmp ) then
+    ${proc_2dx}/linblock "WARNING: 2dx_deftilt_sub.com: ERROR: SCRATCH/2dx_ctffind3_result.tmp does not exist."
     if ( ${newX} == ${centerX} && ${newY} == ${centerY} ) then
        ${proc_2dx}/protest "ABORTING."
     endif
@@ -153,12 +153,12 @@ endif
     set def2 = ${dfref2}
     set ang  = ${astigang}
   else
-    set newdef = `cat SCRATCH/2dx_ctffind3.result.tmp | head -1`
-    set drms1 = `cat SCRATCH/2dx_ctffind3.result.tmp | tail -1`
+    set newdef = `cat SCRATCH/2dx_ctffind3_result.tmp | head -1`
+    set drms1 = `cat SCRATCH/2dx_ctffind3_result.tmp | tail -1`
     set def1 = `echo $newdef | awk '{ s = $1 } END { print s }'`
     set def2 = `echo $newdef | awk '{ s = $2 } END { print s }'`
     set ang  = `echo $newdef | awk '{ s = $3 } END { print s }'`
-    \rm SCRATCH/2dx_ctffind3.result.tmp
+    \rm SCRATCH/2dx_ctffind3_result.tmp
   endif
   #
   if ( ${newX} == ${centerX} && ${newY} == ${centerY}) then

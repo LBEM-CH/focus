@@ -106,6 +106,8 @@ echo proc_2dx = ${proc_2dx}
 #
 source ${proc_2dx}/2dx_makedirs
 #
+set iname = ${imagename}
+@
 echo "<<@progress: 20>>"
 #
 # Translate SYM into spcgroup_num:
@@ -145,10 +147,10 @@ endif
 #
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set aphfile = APH/${imagename}.fou.cor.aph
+    set aphfile = APH/${iname}_fou_cor.aph
 else
     # Synthetic Unbending result is used:
-    set aphfile = APH/${imagename}.syn.cor.aph
+    set aphfile = APH/${iname}_syn_cor.aph
 endif
 #
 setenv IN ${aphfile}

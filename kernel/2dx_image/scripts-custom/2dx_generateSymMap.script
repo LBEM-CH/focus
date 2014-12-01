@@ -190,18 +190,18 @@ set phaori_local = ${phaori}
 #
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set aphfile = APH/${imagename}.fou.cor.aph
+    set aphfile = APH/${imagename}_fou_cor.aph
     #
     # A check in case somebody just upgraded from an earlier version of 2dx:
     if ( ! -e ${aphfile} ) then
-      if ( -e APH/${imagename}.cor.aph ) then
-        \cp APH/${imagename}.cor.aph ${aphfile}
+      if ( -e APH/${imagename}_cor.aph ) then
+        \cp APH/${imagename}_cor.aph ${aphfile}
       endif
     endif
     #
 else
     # Synthetic Unbending result is used:
-    set aphfile = APH/${imagename}.syn.cor.aph
+    set aphfile = APH/${imagename}_syn_cor.aph
 endif
 #
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
@@ -259,11 +259,11 @@ ${proc_2dx}/linblock "Sourcing generateMap script for ${SYM} symmetry"
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
     set phaori_local = ${phaoriFouFilter}
-    set aphfile = APH/${imagename}.fou.cor.aph
+    set aphfile = APH/${imagename}_fou_cor.aph
 else
     # Synthetic Unbending result is used:
     set phaori_local = ${phaori}
-    set aphfile = APH/${imagename}.syn.cor.aph
+    set aphfile = APH/${imagename}_syn_cor.aph
 endif
 #
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results

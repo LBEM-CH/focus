@@ -34,6 +34,17 @@ endif
 echo dummy > LOGS/dummy.log
 echo dummy > ${imagename}-tmp.tabl
 #
+if ( -e ${imagename}.mrc ) then
+  if ( ${imagename} == m${nonmaskimagename} ) then
+    \rm -f ${imagename}.mrc
+  endif
+endif
+#
+if ( -e ${nonmaskimagename}-masking-final.mrc ) then
+  \mv -f ${nonmaskimagename}-masking-final.mrc ${nonmaskimagename}_mask.mrc 
+  echo "(Renaming ${nonmaskimagename}-masking-final.mrc to ${nonmaskimagename}_mask.mrc)"
+endif
+#
 if ( "${level}" == "radical" ) then
   #
   ${proc_2dx}/lin "Radical Cleanup"

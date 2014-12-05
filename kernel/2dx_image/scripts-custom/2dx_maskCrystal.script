@@ -305,15 +305,15 @@ eot
   ${proc_2dx}/linblock "LABEL - to create final masking info as 1024x1024px file"
   #############################################################################
   #
-  \rm -f ${nonmaskimagename}-masking-final.mrc
+  \rm -f ${nonmaskimagename}_mask.mrc
   #
   ${bin_2dx}/labelh.exe << eot
 SCRATCH/TMPmask4.mrc
 -3
-${nonmaskimagename}-masking-final.mrc
+${nonmaskimagename}_mask.mrc
 eot
   #
-  echo "# IMAGE: ${nonmaskimagename}-masking-final.mrc <MRC: Final Making Info File>"  >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${nonmaskimagename}_mask.mrc <MRC: Making Info File>"  >> LOGS/${scriptname}.results
   #
   #############################################################################
   ${proc_2dx}/linblock "TWOFILE - to multiply image with masking-image"

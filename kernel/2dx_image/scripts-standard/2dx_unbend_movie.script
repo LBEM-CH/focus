@@ -235,7 +235,7 @@ if ( ${pdf2ps}x == 'x' ) then
   echo ::
 endif
 #
-echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
+# echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_enable} == "n" ) then
   ${proc_2dx}/linblock "Skipping movie mode unbending."
@@ -319,13 +319,13 @@ endif
 setenv NCPUS ${Thread_Number}
 #
 if ( ${movie_masking_mode} == '1' ) then 
-  if ( ! -e ${nonmaskimagename}_masking_final.mrc ) then
-    ${proc_2dx}/protest "ERROR: ${nonmaskimagename}_masking_final.mrc not found. First run UNBEND-II with masking option."
+  if ( ! -e ${nonmaskimagename}_mask.mrc ) then
+    ${proc_2dx}/protest "ERROR: ${nonmaskimagename}_mask.mrc not found. First run UNBEND-II with masking option."
     # ${proc_2dx}/linblock "WARNING: Continuing withoug masking."
     # set movie_masking_mode = 0
     # echo "set movie_masking_mode = ${movie_masking_mode}" >> LOGS/${scriptname}.results
   endif 
-  echo  "# IMAGE: ${nonmaskimagename}_masking_final.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: ${nonmaskimagename}_mask.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
 endif
 
 
@@ -334,6 +334,8 @@ endif
 
 
 if ( 1 == 2 ) then
+  set PROFDATA = ${iname}_profile.dat
+
   # The following is for debugging only, not for the normal workflow.
 
   echo ":: Running 2dx_movie_refine.exe for a test "
@@ -347,6 +349,9 @@ eot
 endif
 
 if ( 1 == 2 ) then
+  set iname = image_ctfcor
+  set PROFDATA = ${iname}_profile.dat
+
   # The following is for debugging only, not for the normal workflow.
   echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
   echo  "# IMAGE-IMPORTANT: frames/CCmap_driftCorrected.mrc <CCmap_driftCorrected.mrc>" >> LOGS/${scriptname}.results
@@ -360,21 +365,27 @@ if ( 1 == 2 ) then
 
   touch frames/PROFDATA_1.dat
   \rm frames/PROFDATA_*.dat
-  python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${movie_smoothing} ${PROFDATA} ${movie_imagenumber_touse}
+
+  \rm -f {nonmaskimagename}_mask_mask.mrc
+  set movie_drift_threshold = 2.0
+  set lat_string = `echo ${lattice} | sed 's/,/ /g'`
+  python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
+
+  echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
+  echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask_mask.mrc <Masked crystal mask>" >> LOGS/${scriptname}.results
+
+
+
   echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
   echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
-  set i = 1
-  while ($i <= ${movie_imagenumber_touse})
-    echo  "# IMAGE: frames/PROFDATA_${i}.dat <PROFDATA ${i}>" >> LOGS/${scriptname}.results
-    @ i += 1
-  end
 
   if ( -e frames/CCmap_driftCorrected.mrc ) then
-    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_smooth.dat 2dx_movie_refine_smooth.pdf frames/CCmap_driftCorrected.mrc
+    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected frames/CCmap_driftCorrected.mrc
   else
-    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_smooth.dat 2dx_movie_refine_smooth.pdf
+    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected
   endif
-  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_smooth.pdf <PDF: 2dx_movie_refine_smooth.pdf>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected <PDF: 2dx_movie_refine_selected>" >> LOGS/${scriptname}.results
 
   exit
 endif
@@ -399,14 +410,6 @@ endif
 # Now preparing reference:
 ##########################################################################
 ##########################################################################
-#
-#
-#
-#
-#
-#
-#
-#
 #
 echo "<<@progress: 5>>"
 #
@@ -441,9 +444,9 @@ ${unbent_fil}
 SCRATCH/reference_flt_upscale.mrc
 eot
 #
-\rm -f SCRATCH/reference_flt_upscale_fft.mrc
 setenv IN  SCRATCH/reference_flt_upscale.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft.mrc
+\rm -f     SCRATCH/reference_flt_upscale_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
 echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
@@ -457,9 +460,9 @@ ${proc_2dx}/linblock "MASKTRAN - Lattice-mask FFT of unbent image, small holes"
 set maskb = ${maskb01}
 set rmax = 11000
 #
-\rm -f SCRATCH/reference_flt_upscale_fft_mask.mrc
 setenv IN  SCRATCH/reference_flt_upscale_fft.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask.mrc
+\rm -f     SCRATCH/reference_flt_upscale_fft_mask.mrc
 setenv SPOTS ${imagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -477,9 +480,9 @@ endif
 ${proc_2dx}/linblock "FFTRANS - Back to real space"
 ###############################################################
 #
-\rm -f SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
 setenv IN  SCRATCH/reference_flt_upscale_fft_mask.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
+\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
 echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft.mrc <Unbent image, Fourier-filtered>" >> LOGS/${scriptname}.results
@@ -507,9 +510,9 @@ endif
 ${proc_2dx}/linblock "FFTRANS - Producing reference in Fourier space"
 ###############################################################
 #
-\rm -f SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
 setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
+\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
 echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc <Reference (FFT)>" >> LOGS/${scriptname}.results
@@ -521,9 +524,9 @@ ${proc_2dx}/linblock "MASKTRAN - Masked FFT of boxed reference"
 set maskb = ${maskb01}
 set rmax = 11000
 #
-\rm -f SCRATCH/refam1${imagename}_fft_msk.mrc
 setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
+\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
 setenv SPOTS ${imagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -708,7 +711,16 @@ eot
 #
 touch frames/PROFDATA_1.dat
 \rm frames/PROFDATA_*.dat
-python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${movie_smoothing} ${PROFDATA} ${movie_imagenumber_touse}
+\rm -f {nonmaskimagename}_mask_mask.mrc
+set movie_drift_threshold = 2.0
+set lat_string = `echo ${lattice} | sed 's/,/ /g'`
+# python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${movie_smoothing} ${PROFDATA} ${movie_imagenumber_touse}
+python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
+
+echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
+echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
+echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask_mask.mrc <Masked crystal mask>" >> LOGS/${scriptname}.results
+
 
 echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
 if ( ${show_frame_PROFDATA} == "y" ) then
@@ -720,7 +732,7 @@ if ( ${show_frame_PROFDATA} == "y" ) then
 endif
 #
 echo  "# IMAGE: 2dx_movie_refine.dat <Movie drift profiles (TXT)>" >> LOGS/${scriptname}.results
-echo  "# IMAGE: 2dx_movie_refine_smooth.dat <Movie drift profiles, smoothened (TXT)>" >> LOGS/${scriptname}.results
+echo  "# IMAGE: 2dx_movie_refine_selected.dat <Movie drift profiles, selected (TXT)>" >> LOGS/${scriptname}.results
 #
 #
 echo "<<@progress: 60>>"
@@ -739,6 +751,7 @@ while ($i <= ${movie_imagenumber_touse})
        setenv TABLEOUT frames/CCUNBEND_Table_${i}.dat
        \rm -f frames/CCUNBEND_Table_${i}.dat
        \rm -f CCPLOT.PS
+       \rm -f frames/CCmap_${i}_unbent.mrc
 
        ${bin_2dx}/2dx_ccunbendk.exe << eot
 frames/CCmap_${i}.mrc
@@ -759,8 +772,9 @@ eot
        setenv TABLEOUT frames/CCUNBEND_Table_${i}.dat
        \rm -f frames/CCUNBEND_Table_${i}.dat
        \rm -f CCPLOT.PS
+       \rm -f frames/CCUNBEND_frame_${i}_notap.mrc
        if (${ctfcor_imode}x == "0x" ) then
-	    set infile = frames/frame_${i}.mrc
+	 set infile = frames/frame_${i}.mrc
        else
          set infile = frames/frame_${i}_ctfcor.mrc
        endif
@@ -814,6 +828,7 @@ echo "<<@progress: 80>>"
 ###########################################################################
 ${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_touse}" 
 ###########################################################################
+\rm -f frames/CCmap_driftCorrected.mrc
 python ${proc_2dx}/movie/direct_sum2.py ${movie_imagenumber_touse}
 echo "# IMAGE-IMPORTANT: frames/CCmap_driftCorrected.mrc <CCmap drift-corrected>" >> LOGS/${scriptname}.results 
 
@@ -821,6 +836,7 @@ echo "# IMAGE-IMPORTANT: frames/CCmap_driftCorrected.mrc <CCmap drift-corrected>
 ###########################################################################
 ${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_touse}" 
 ###########################################################################
+\rm -f frames/direct_sum.mrc
 python ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
 echo "# IMAGE: frames/direct_sum.mrc <Sum unbent images>" >> LOGS/${scriptname}.results 
 
@@ -828,6 +844,8 @@ echo "# IMAGE: frames/direct_sum.mrc <Sum unbent images>" >> LOGS/${scriptname}.
 ###########################################################################
 ${proc_2dx}/linblock "Filtering by resolution weights"
 ###########################################################################
+python ${proc_2dx}/movie/apply_filter_sum.py frames/CCmap_driftCorrected.mrc frames/CCmap_driftCorrected_filt.mrc
+echo "# IMAGE: frames/CCmap_driftCorrected_filt.mrc <CCmap drift-corrected, filtered>" >> LOGS/${scriptname}.results 
 python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc
 echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
@@ -837,12 +855,12 @@ if ( ${movie_masking_mode} != '0' ) then
   ###########################################################################
   ${proc_2dx}/linblock "Masking drift-corrected CCmap with masking info"
   ###########################################################################
-  python ${proc_2dx}/movie/mask.py frames/CCmap_driftCorrected.mrc frames/CCmap_driftCorrected_masked.mrc ${nonmaskimagename}-masking-final.mrc
-  echo "# IMAGE: frames/CCmap_driftCorrected_masked.mrc <CCmap drift-corrected, masked>" >> LOGS/${scriptname}.results 
+  python ${proc_2dx}/movie/mask.py frames/CCmap_driftCorrected_filt.mrc frames/CCmap_driftCorrected_filt_masked.mrc ${nonmaskimagename}_mask_mask.mrc
+  echo "# IMAGE: frames/CCmap_driftCorrected_filt_masked.mrc <CCmap drift-corrected, filtered, masked>" >> LOGS/${scriptname}.results 
   ###########################################################################
   ${proc_2dx}/linblock "Masking average with masking info"
   ###########################################################################
-  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt.mrc frames/direct_sum_filt_masked.mrc ${nonmaskimagename}-masking-final.mrc
+  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt.mrc frames/direct_sum_filt_masked.mrc ${nonmaskimagename}_mask_mask.mrc
   echo "# IMAGE: frames/direct_sum_filt_masked.mrc <Sum unbent images, filtered, masked>" >> LOGS/${scriptname}.results 
 else
   ######################################################
@@ -856,11 +874,13 @@ ${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
 ###########################################################################
 echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
 #
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected.mrc
+python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected_filt.mrc
 echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
 #
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_smooth.dat 2dx_movie_refine_smooth.pdf frames/CCmap_driftCorrected_masked.mrc
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_smooth.pdf <PDF: 2dx_movie_refine_smooth.pdf>" >> LOGS/${scriptname}.results
+if ( ${movie_masking_mode} != '0' ) then
+  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected_filt_masked.mrc
+  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected.pdf <PDF: 2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
+endif
 #
 #
 
@@ -874,6 +894,7 @@ else
   setenv IN  frames/direct_sum_filt.mrc
 endif
 setenv OUT frames/direct_sum_fixed.mrc
+\rm -f     frames/direct_sum_fixed.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
@@ -883,8 +904,9 @@ echo "# IMAGE: frames/direct_sum_fixed.mrc <Sum unbent images, edge-tapered>" >>
 ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 ###########################################################################
 
-setenv IN "frames/direct_sum_fixed.mrc"
-setenv OUT "frames/direct_sum_fft.mrc"
+setenv IN frames/direct_sum_fixed.mrc
+setenv OUT frames/direct_sum_fft.mrc
+\rm -f     frames/direct_sum_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 echo "# IMAGE: frames/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
 
@@ -895,6 +917,8 @@ ${proc_2dx}/linblock "MMBOX - Evaluating APH values, without resolution limit"
 
 set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
 set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+#
+\rm -f APH/${imagename}_fou_movie_nolimit.aph
 #
 ${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum_fft.mrc
@@ -918,7 +942,9 @@ echo "<<@progress: 85>>"
 ###########################################################################
 ${proc_2dx}/linblock "MMBOX - Evaluating APH values, with resolution limit"
 ###########################################################################
-
+#
+\rm -f APH/${imagename}_fou_movie_limit.aph
+#
 ${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum_fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}

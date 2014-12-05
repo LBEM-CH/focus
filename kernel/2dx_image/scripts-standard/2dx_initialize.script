@@ -66,6 +66,7 @@
 # DISPLAY: FFTIR_DISK
 # DISPLAY: SYN_Unbending
 # DISPLAY: initialization_reset
+# DISPLAY: use_masked_image
 #
 #$end_local_vars
 #
@@ -111,6 +112,7 @@ set initialization_corr_endian = ""
 set crop = ""
 set SYN_Unbending = ""
 set movie_inmovie = ""
+set use_masked_image = ""
 #
 #$end_vars
 #
@@ -125,6 +127,11 @@ source ${proc_2dx}/2dx_makedirs
 if ( ${movie_inmovie} == "n" ) then
   echo "<<@evaluate>>"
   echo "<<@progress: 1>>"
+endif
+#
+if ( -e ${nonmaskimagename}-masking-final.mrc ) then
+  \mv -f ${nonmaskimagename}-masking-final.mrc ${nonmaskimagename}_mask.mrc 
+  echo "(Renaming ${nonmaskimagename}-masking-final.mrc to ${nonmaskimagename}_mask.mrc)"
 endif
 #
 if ( ${initialization_executable} == "n" ) then

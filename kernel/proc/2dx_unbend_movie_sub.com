@@ -76,10 +76,10 @@ eot
                 ${proc_2dx}/lin "QUADSERCH - masking with external mask-info (IPASS=2)"
                 #########################################################################
                 #
-                if ( ! -e ${nonmaskimagename}-masking-final.mrc ) then
-                  ${proc_2dx}/protest "ERROR: ${nonmaskimagename}-masking-final.mrc not found. First run UNBEND-II with masking option."
+                if ( ! -e ${nonmaskimagename}_mask.mrc ) then
+                  ${proc_2dx}/protest "ERROR: ${nonmaskimagename}_mask.mrc not found. First run UNBEND-II with masking option."
                 endif 
-                \cp -f ${nonmaskimagename}-masking-final.mrc TMP-quadserch-7.mrc
+                \cp -f ${nonmaskimagename}_mask.mrc TMP-quadserch-7.mrc
                 #
                 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 2,${quadpredb}                     ! IPASS,NRANGE

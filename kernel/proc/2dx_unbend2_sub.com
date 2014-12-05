@@ -225,16 +225,7 @@ eot
     #
   endif
   #
-  if ( ${tempkeep} == 'y' ) then
-    if ( ${locround} == '1' ) then
-      echo "# IMAGE: SCRATCH/${iname}_unbend2_fft_msk_fft_box1.mrc <Reference 1>" >> LOGS/${scriptname}.results 
-    endif
-    if ( ${treatspotscan} == 'y' ) then
-      if ( ${locround} == '1' ) then
-        echo "# IMAGE: SCRATCH/${iname}_unbend2_fft_msk_fft_box2.mrc <Reference 2>" >> LOGS/${scriptname}.results 
-      endif
-    endif
-  else
+  if ( ${tempkeep} != 'y' ) then
     \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box1.mrc
     \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box2.mrc
   endif
@@ -529,7 +520,7 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 eot
     #
     if ( ${createmaskinfo} == 'y' ) then
-      echo "# IMAGE-IMPORTANT: ManualMasking_CCmap.mrc <XCF Map for Manual Masking>" >> LOGS/${scriptname}.results
+      echo "# IMAGE-IMPORTANT: ManualMasking_CCmap.mrc <CCmap for Manual Masking>" >> LOGS/${scriptname}.results
       echo "# IMAGE-IMPORTANT: ManualMasking_UnbendPlot.mrc <Distortion Plot for Manual Masking>" >> LOGS/${scriptname}.results
     endif
     #
@@ -784,6 +775,34 @@ eot
   #
   echo IMAXCOR = ${IMAXCOR}
   ${proc_2dx}/lin "Using IMAXCOR = ${IMAXCOR}"
+  #
+  \rm -f SCRATCH/${iname}_CCmap21_unbend2.mrc
+  if ( ${ccunbend_program} == "1" ) then
+    ${proc_2dx}/${lincommand} "2dx_ccunbendh - to unbend the CCmap (for verification only)"
+    ${bin_2dx}/2dx_ccunbendh.exe << eot
+SCRATCH/${iname}_CCmap21.mrc
+${IMAXCOR},${ISTEP_h},${NNUM},${ROFFSET}	 !IMAXCOR,ISTEP,NNUM,ROFFSET
+0.001,${facthresha},${RMAG} !EPS,FACTOR,RMAG
+SCRATCH/${iname}_CCmap21_unbend2.mrc
+UNBENT,PASS,2,${date}
+eot
+    #
+  else
+    #
+    ${proc_2dx}/${lincommand} "2dx_ccunbendk - to unbend the CCmap (for verification only)"
+    ${bin_2dx}/2dx_ccunbendk.exe << eot
+SCRATCH/${iname}_CCmap21.mrc
+${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T                !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+${iname}, UNBEND2, ${date}
+SCRATCH/${iname}_CCmap21_unbend2.mrc
+UNBENT,PASS,2,${date}
+eot
+    #
+  endif
+  echo "# IMAGE: SCRATCH/${iname}_CCmap21_unbend2.mrc <CCmap with Reference 1, unbent>" >> LOGS/${scriptname}.results 
+  #
+  \rm -f fort.17
   #
   if ( ${ttfcorfirst} == 'n' ) then
     #

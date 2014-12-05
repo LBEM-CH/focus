@@ -432,10 +432,10 @@ void fullScreenImage::drawRealLattice(float lattice[2][2])
 //  pen.setWidth(10.0);
   image_base->setPen(pen);
 
-    for(int i=-20;i<=20;i++)
+    for(int i=-40;i<=40;i++)
     {
-      image_base->drawLine(i*a-20*b,(i)*a+(20)*b);
-      image_base->drawLine((-20)*a+i*b,(20)*a+(i)*b);
+      image_base->drawLine(i*a-40*b,(i)*a+(40)*b);
+      image_base->drawLine((-40)*a+i*b,(40)*a+(i)*b);
     }
 }
 

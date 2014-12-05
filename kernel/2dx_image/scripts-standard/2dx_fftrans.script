@@ -52,6 +52,7 @@
 # DISPLAY: defocus
 # DISPLAY: defocusbackup
 # DISPLAY: ctfcor_imode
+# DISPLAY: use_masked_image
 #
 #$end_local_vars
 #
@@ -88,6 +89,7 @@ set crop_histogram = ""
 set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
 set ctfcor_imode = ""
+set use_masked_image = ""
 #
 #$end_vars
 #
@@ -141,6 +143,44 @@ if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc ) then
   source ${proc_2dx}/2dx_initialize_tiff_to_mrc_sub.com
   #################################################################################
   #
+endif
+#
+if ( ${use_masked_image} == "y"  && -e ${nonmaskimagename}_mask.mrc ) then
+  if ( ${imagename} != m${nonmaskimagename} ) then
+    set imagename = `echo m${nonmaskimagename}`
+    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
+    echo ":: "
+    ${proc_2dx}/linblock "correcting imagename to ${imagename}"
+    if ( -e ${nonmaskimagename}.mrc ) then
+      if ( -e m${nonmaskimagename}.mrc ) then
+        \rm -f m${nonmaskimagename}.mrc
+      endif 
+    endif
+    echo ":: "
+  endif
+  if ( ! -e ${imagename}.mrc ) then
+    ###########################################################################
+    echo ":: "
+    ${proc_2dx}/linblock "Masking image with masking info"
+    echo ":: "
+    ###########################################################################
+    python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_mask.mrc
+    echo "# IMAGE: ${nonmaskimagename}_mask.mrc <Masking Information Mask>" >> LOGS/${scriptname}.results   
+    echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
+    echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
+  endif
+  echo "# IMAGE: ${nonmaskimagename}_mask.mrc <Masking Information Mask>" >> LOGS/${scriptname}.results   
+  echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
+  echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
+else
+  if ( ${imagename} == m${nonmaskimagename} ) then
+    \cp -f ${nonmaskimagename}.mrc ${imagename}.mrc 
+    set imagename = `echo ${nonmaskimagename}`
+    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
+    echo ":: "
+    ${proc_2dx}/linblock "correcting imagename to ${imagename}"
+    echo ":: "
+  endif
 endif
 #
 if ( ! -e ${imagename}.mrc ) then

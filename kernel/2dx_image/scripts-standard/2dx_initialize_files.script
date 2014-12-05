@@ -71,6 +71,7 @@
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_imagenumber_touse
 # DISPLAY: movie_imagenumber_toave
+# DISPLAY: use_masked_image
 #
 #$end_local_vars
 #
@@ -131,6 +132,7 @@ set movie_stackname = ""
 set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 set movie_imagenumber_toave = ""
+set use_masked_image = ""
 #
 #$end_vars
 #
@@ -516,6 +518,48 @@ else
   #
   #
 endif
+#
+#
+if ( ${use_masked_image} == "y"  && -e ${nonmaskimagename}_mask.mrc ) then
+  if ( ${imagename} != m${nonmaskimagename} ) then
+    set imagename = `echo m${nonmaskimagename}`
+    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
+    echo ":: "
+    ${proc_2dx}/linblock "correcting imagename to ${imagename}"
+    if ( -e ${nonmaskimagename}.mrc ) then
+      if ( -e m${nonmaskimagename}.mrc ) then
+        \rm -f m${nonmaskimagename}.mrc
+      endif 
+    endif
+    echo ":: "
+  endif
+  if ( ! -e ${imagename}.mrc ) then
+    ###########################################################################
+    echo ":: "
+    ${proc_2dx}/linblock "Masking image with masking info"
+    echo ":: "
+    ###########################################################################
+    python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_mask.mrc
+    echo "# IMAGE: ${nonmaskimagename}_mask.mrc <Masking Information Mask>" >> LOGS/${scriptname}.results   
+    echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
+    echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
+  endif
+  echo "# IMAGE: ${nonmaskimagename}_mask.mrc <Masking Information Mask>" >> LOGS/${scriptname}.results   
+  echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
+  echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
+else
+  if ( ${imagename} == m${nonmaskimagename} ) then
+    \cp -f ${nonmaskimagename}.mrc ${imagename}.mrc 
+    set imagename = `echo ${nonmaskimagename}`
+    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
+    echo ":: "
+    ${proc_2dx}/linblock "correcting imagename to ${imagename}"
+    echo ":: "
+  endif
+endif
+#
+#
+#
 #############################################################################
 echo ":: "
 ${proc_2dx}/linblock "Done."

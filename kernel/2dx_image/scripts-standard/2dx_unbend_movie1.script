@@ -564,13 +564,13 @@ eot
 endif
 #
 if ( ${movie_masking_mode} == '1' ) then 
-  if ( ! -e ${nonmaskimagename}-masking-final.mrc ) then
-    ${proc_2dx}/linblock "ERROR: ${nonmaskimagename}-masking-final.mrc not found. First run UNBEND-II with masking option."
+  if ( ! -e ${nonmaskimagename}_mask.mrc ) then
+    ${proc_2dx}/linblock "ERROR: ${nonmaskimagename}_mask.mrc not found. First run UNBEND-II with masking option."
     ${proc_2dx}/linblock "WARNING: Continuing withoug masking."
     set movie_masking_mode = 0
     echo "set movie_masking_mode = ${movie_masking_mode}" >> LOGS/${scriptname}.results
   endif 
-  echo  "# IMAGE: ${nonmaskimagename}-masking-final.mrc <Movie Mode Masking Info>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: ${nonmaskimagename}_mask.mrc <Movie Mode Masking Info>" >> LOGS/${scriptname}.results
 endif
 #
 #########################################################################

@@ -977,13 +977,17 @@ echo "<<@evaluate>>"
 #echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
 
 echo "<<@progress: 90>>"
-if ( ${movie_filter_type} == '2' ) then
-        ${proc_2dx}/linblock "Plotting AMP-Decay"
-        python ${proc_2dx}/movie/extractAMP.py `ls frames/aph_*`
-        python ${proc_2dx}/movie/plotAMP.py frames/AMPs.txt ${movie_imagenumber}
-        ${pdf2ps} frames/AMPs.pdf frames/AMPs.ps 
-        echo  "# IMAGE: frames/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
-endif
+
+# Originally this block was used to measure the decay of the diffraction spots based
+# on frame-wise APH files. Somehow this did not survive the recent changes
+#
+#if ( ${movie_filter_type} == '2' ) then
+#        ${proc_2dx}/linblock "Plotting AMP-Decay"
+#        python ${proc_2dx}/movie/extractAMP.py `ls frames/aph_*`
+#        python ${proc_2dx}/movie/plotAMP.py frames/AMPs.txt ${movie_imagenumber}
+#        ${pdf2ps} frames/AMPs.pdf frames/AMPs.ps 
+#        echo  "# IMAGE: frames/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
+#endif
 
 \rm -f frame_unbending.ps
 ${pdf2ps} frame_unbending.pdf frame_unbending.ps

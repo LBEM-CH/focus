@@ -108,8 +108,17 @@ set increment = `echo ${dirnum} | awk '{ s = 80.0 / ( $1 + 1 ) } END { print s }
 set curval = 10.0
 #
 set dircounter = ${dirnum}
+set irun = 1
 while ( ${dircounter} > 0 )
-  set from_dir = `cat ${olddir}/SCRATCH/2dx_merge_alldirs.dat | tail -n ${dircounter} | head -n 1`
+  #
+  ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
+${olddir}/SCRATCH/2dx_merge_alldirs.dat
+${dircounter}
+eot
+  #
+  set from_dir = `cat TMP.tmp`
+  \rm TMP.tmp
+  #
   echo "::Working on ${from_dir}"
   cd ${rootdir}
   cd ${from_dir}
@@ -121,10 +130,10 @@ while ( ${dircounter} > 0 )
     ${proc_2dx}/linblock "WARNING: ${source} does not exist here."
   endif
   #
-  set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
-  set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
-  echo "<<@progress:${curprogress}>>"
+  set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'` 
+  echo "<<@progress:${progress}>>"
   #
+  @ irun += 1
   @ dircounter -= 1
   cd ${olddir}
 end

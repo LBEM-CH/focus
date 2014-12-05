@@ -15,6 +15,7 @@
 #
 # MANUAL: This script moves all choosen directories into a TRASH subdirectory. Use with extreme caution !!!
 #
+# DISPLAY: delete_in_out_trash
 # DISPLAY: delete_sure
 # DISPLAY: delete_trash
 #
@@ -28,6 +29,7 @@ set SCRATCH_DISK = ""
 set FFTIR_DISK = ""
 set delete_sure = ""
 set delete_trash = ""
+set delete_in_out_trash = ""
 #
 #$end_vars
 #
@@ -41,17 +43,22 @@ set scriptname = 2dx_deleteDir
 set ccp4_setup = 'n'
 source ${proc_2dx}/initialize
 #
+echo delete_in_out_trash = ${delete_in_out_trash}
 echo delete_sure = ${delete_sure}
 echo delete_trash = ${delete_trash}
 #
+echo "set delete_in_out_trash = 0" >> LOGS/${scriptname}.results
 echo "set delete_sure = no" >> LOGS/${scriptname}.results
 #
 # This advances the progress bar to the 1% position:
 echo "<<@progress: 1>>"
 #
-#if ( ${delete_sure} == "no" ) then
-#  ${proc_2dx}/protest "Not running (Are you sure is 'no')."
-#endif
+if ( ${delete_in_out_trash} == "0" ) then
+  ${proc_2dx}/protest "Not doing anything."
+endif
+if ( ${delete_sure} == "no" ) then
+  ${proc_2dx}/protest "Not running (Are you sure is 'no')."
+endif
 #
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
 source ${proc_2dx}/2dx_makedirs 
@@ -61,7 +68,9 @@ set olddir = $PWD
 cd ..
 set rootdir = $PWD
 #
-if ( ${delete_sure} == "yes" ) then
+
+if ( ${delete_in_out_trash} == "1" ) then
+  if ( ${delete_sure} == "yes" ) then
         cd ${olddir}
 	# This translates the list of directories to work on into one single long line:
 	cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
@@ -83,10 +92,7 @@ if ( ${delete_sure} == "yes" ) then
 	foreach dirfile ( ${dirlist} ) 
 	  echo "::Moving into TRASH: ${dirfile}"
 	  #
-         cd TRASH
-         if ( -d ${dirfile} ) then
-         endif
-         cd ${rootdir}
+          cd ${rootdir}
 	  \mv -f ${dirfile} TRASH 
 	  #
 	end
@@ -95,13 +101,51 @@ if ( ${delete_sure} == "yes" ) then
 	echo "::Done."
 	echo "::Images are now in ${PWD}/TRASH "
 	echo ":: "
-else
+  else
 	${proc_2dx}/linblock "Not moving selected directories to TRASH  (Are you sure is 'no')."
+  endif
 endif
 #
 #
+if ( ${delete_in_out_trash} == "2" ) then
+  if ( ${delete_sure} == "yes" ) then
+        cd ${olddir}
+	# This translates the list of directories to work on into one single long line:
+	cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+	set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+	#
+        cd ${rootdir}
+	if ( ! -d UNTRASH ) then
+	  \mkdir UNTRASH
+	endif
+	cd UNTRASH
+	if ( ! -l 2dx_master.cfg ) then
+	  \ln -s ../2dx_master.cfg .
+	endif
+	cd ..
+	#
+	echo ":: "
+	#
+	# This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
+	foreach dirfile ( ${dirlist} ) 
+	  echo "::Moving out of TRASH into UNTRASH: ${dirfile}"
+	  #
+          cd ${rootdir}
+          \mv -f ${dirfile} UNTRASH 
+	end
+	#
+	echo ":: "
+	echo "::Done."
+	echo "::Images are now in ${PWD}/UNTRASH "
+	echo ":: "
+  else
+	${proc_2dx}/linblock "Not moving selected directories out of TRASH and into UNTRASH  (Are you sure is 'no')."
+  endif
+endif
 #
-if ( ${delete_trash} == "yes" ) then
+#
+if ( ${delete_in_out_trash} != "0" ) then
+  if ( ${delete_trash} == "yes" ) then
 	if ( -d TRASH ) then
                 cd ${rootdir}
 		${proc_2dx}/linblock "emptying TRASH"
@@ -114,6 +158,7 @@ if ( ${delete_trash} == "yes" ) then
 		echo ":: TRASH is now empty"
 		echo ":: "
 	endif
+  endif
 endif
 #
 #

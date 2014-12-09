@@ -390,6 +390,16 @@ while ( ${dircounter} <= ${dirnum} )
           cp -f ${from_dirfile}/${loc_imagename}.spt ${to_dirfile}
         endif
         #
+        if ( -e ${from_dirfile}/${loc_imagename}_mask.mrc ) then
+          echo ":New: ${to_dirfile}/${loc_imagename}_mask.mrc"
+          cp -f ${from_dirfile}/${loc_imagename}_mask.mrc ${to_dirfile}
+        endif
+        #
+        if ( -e ${from_dirfile}/${loc_imagename}_mask_mask.mrc ) then
+          echo ":New: ${to_dirfile}/${loc_imagename}_mask_mask.mrc"
+          cp -f ${from_dirfile}/${loc_imagename}_mask_mask.mrc ${to_dirfile}
+        endif
+        #
         if ( -e ${from_dirfile}/${loc_imagename}.mtz ) then
           echo ":New: ${to_dirfile}/${loc_imagename}.mtz"
           cp -f ${from_dirfile}/${loc_imagename}.mtz ${to_dirfile}
@@ -397,12 +407,19 @@ while ( ${dircounter} <= ${dirnum} )
         #
         if ( ${loc_imagename} != ${loc_nonmaskimagename} ) then
           if ( ${alsobig} == "y" ) then
-            if ( -e ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ) then
-              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.raw.mrc ) then
-                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.raw.mrc"
-                cp -f ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ${to_dirfile}
+            if ( -e ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
+              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
+                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
+                cp -f ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ${to_dirfile}
               else
-                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.raw.mrc"
+                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
+              endif
+            else if ( -e ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ) then
+              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
+                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
+                cp -f ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc
+              else
+                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
               endif
             else if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
               if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.tif ) then
@@ -452,6 +469,11 @@ while ( ${dircounter} <= ${dirnum} )
           cp -f ${from_dirfile}/${loc_imagename}-profile.dat.gz ${to_dirfile}
         endif
         #
+        if ( -e ${from_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz ) then
+          echo ":New: ${to_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz"
+          cp -f ${from_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz ${to_dirfile}
+        endif
+        #
         if ( -e ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ) then
           echo ":New: ${to_dirfile}/${loc_imagename}-unitcells-spider.doc"
           cp -f ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ${to_dirfile}
@@ -468,16 +490,6 @@ while ( ${dircounter} <= ${dirnum} )
           \rm ${to_dirfile}/APH/dummy.tmp
         endif
 	#
-	if ( -d ${from_dirfile}/frames ) then
-          if ( ! -d ${to_dirfile}/frames ) then
-            \mkdir ${to_dirfile}/frames
-          endif
-          echo dummy > ${from_dirfile}/frames/dummy.tmp
-          echo ":New: ${to_dirfile}/frames/*"
-          cp -f ${from_dirfile}/frames/* ${to_dirfile}/frames
-          \rm ${from_dirfile}/frames/dummy.tmp
-          \rm ${to_dirfile}/frames/dummy.tmp
-        endif
         #
         # Make sure the config files are correctly linked:
         #

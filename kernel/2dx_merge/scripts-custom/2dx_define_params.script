@@ -16,14 +16,11 @@
 # MANUAL: This script allows to set certain parameters for all selected images.
 #
 # DISPLAY: tempkeep
-# DISPLAY: magnification
 # DISPLAY: crop_histogram
 # DISPLAY: crop_histogram_percent
 # DISPLAY: crop_histogram_stdev
-# DISPLAY: CS
-# DISPLAY: KV
 # DISPLAY: RESMAX
-# DISPLAY: stepdigitizer
+# DISPLAY: spotlist_RESMAX
 # DISPLAY: do_lattice_algorithm
 # DISPLAY: maska
 # DISPLAY: maskb01
@@ -34,12 +31,12 @@
 # DISPLAY: boxb2
 # DISPLAY: quadrada
 # DISPLAY: quadradb
-# DISPLAY: imageorigin
 # DISPLAY: df_end
 # DISPLAY: movie_enable
 # DISPLAY: domask
-# DISPLAY: movie_imagenumber_toave
 # DISPLAY: movie_masking_mode
+# DISPLAY: ctfcor_imode
+# DISPLAY: movie_enable
 #
 #$end_local_vars
 #
@@ -58,6 +55,7 @@ set crop_histogram_stdev = ""
 set CS = ""
 set KV = ""
 set RESMAX = ""
+set spotlist_RESMAX = ""
 set stepdigitizer = ""
 set maska = ""
 set do_lattice_algorithm = ""
@@ -75,8 +73,16 @@ set movie_enable = ""
 set domask = ""
 set movie_imagenumber_toave = ""
 set movie_masking_mode = ""
+set ctfcor_imode = ""
 #
 #$end_vars
+#
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: magnification
+# DISPLAY: imageorigin
+# DISPLAY: stepdigitizer
+# DISPLAY: movie_imagenumber_toave
 #
 # This sets the scriptname variable:
 set scriptname = 2dx_define_params
@@ -131,11 +137,12 @@ foreach dirfile ( ${dirlist} )
   echo "set crop_histogram = ${crop_histogram}" >> LOGS/${scriptname}.results
   echo "set crop_histogram_percent = ${crop_histogram_percent}" >> LOGS/${scriptname}.results
   echo "set crop_histogram_stdev = ${crop_histogram_stdev}" >> LOGS/${scriptname}.results
-  echo "set magnification = ${magnification}" >> LOGS/${scriptname}.results
-  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
-  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+  echo "set ctfcor_imode = ${ctfcor_imode}" >> LOGS/${scriptname}.results
+  # echo "set magnification = ${magnification}" >> LOGS/${scriptname}.results
+  # echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+  # echo "set KV = ${KV}" >> LOGS/${scriptname}.results
   echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
-  echo "set stepdigitizer = ${stepdigitizer}" >> LOGS/${scriptname}.results
+  # echo "set stepdigitizer = ${stepdigitizer}" >> LOGS/${scriptname}.results
   echo "set do_lattice_algorithm = ${do_lattice_algorithm}" >> LOGS/${scriptname}.results
   echo "set maska = ${maska}" >> LOGS/${scriptname}.results
   echo "set maskb01 = ${maskb01}" >> LOGS/${scriptname}.results
@@ -146,11 +153,12 @@ foreach dirfile ( ${dirlist} )
   echo "set boxb2 = ${boxb2}" >> LOGS/${scriptname}.results
   echo "set quadrada = ${quadrada}" >> LOGS/${scriptname}.results
   echo "set quadradb = ${quadradb}" >> LOGS/${scriptname}.results
-  echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
+  echo "set spotlist_RESMAX = ${spotlist_RESMAX}" >> LOGS/${scriptname}.results
+  # echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
   echo "set df_end = ${df_end}" >> LOGS/${scriptname}.results
   echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results
   echo "set domask = ${domask}" >> LOGS/${scriptname}.results
-  echo "set movie_imagenumber_toave = ${movie_imagenumber_toave}" >> LOGS/${scriptname}.results
+  # echo "set movie_imagenumber_toave = ${movie_imagenumber_toave}" >> LOGS/${scriptname}.results
   echo "set movie_masking_mode = ${movie_masking_mode}" >> LOGS/${scriptname}.results
   #
   ################################################################################

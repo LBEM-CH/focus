@@ -42,6 +42,7 @@ set automatic_target_dir = ""
 #
 #$end_vars
 #
+#
 set scriptname = 2dx_reunbend
 \rm -f LOGS/${scriptname}.results
 #
@@ -318,7 +319,112 @@ if ( ${ReUnbend_All} == "6" ) then
   end
 endif
 #
+if ( ${ReUnbend_All} == "7" ) then
+  #
+  ############################################################################# 
+  ${proc_2dx}/linblock "Processing specific scripts in directories ${automatic_target_dir}"
+  ${proc_2dx}/linblock "Running ${ReUnbend_MP} jobs in parallel."
+  ############################################################################# 
+  #
+  cd ${olddir} 
+  if ( ! -d ${automatic_target_dir} ) then
+    ${proc_2dx}/protest "ERROR: Directory not found: ${automatic_target_dir}"
+  endif
+  #
+  cd ${automatic_target_dir}
+  find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${olddir}/2dx_merge_special.dat
+  cd ${olddir}
+  #
+  set dirnum = `cat 2dx_merge_special.dat | wc -l`
+  echo ": Will work on ${dirnum} image directories."
+  #
+  set irun = 1
+  set sleeptime = 10
+  #
+  set dircounter = 1
+  while ( ${dircounter} <= ${dirnum} )
+    #
+    set prog_num = `echo ${dircounter} ${dirnum} | awk '{ s = 5 + int( 90 * $1 / $2 ) } END { print s }'` 
+    echo "<<@progress: ${prog_num}>>"
+    #
+    # set ReUnbend_old = ${ReUnbend_MP}
+    # set ReUnbend_tmp = `cat 2dx_merge.cfg | grep "set ReUnbend_MP" | cut -d\" -f2`
+    # echo "ReUnbend_tmp =" ${ReUnbend_tmp}
+    # set ReUnbend_MP = `echo ${ReUnbend_tmp} | awk '{ if ( $1 < 1 ) { s = 1 } else { if ( $1 > 12 ) { s = 12 } else { s = $1 } } } END { print s }'`
+    # if ( ${ReUnbend_old} != ${ReUnbend_MP} ) then
+    #   echo ":: "
+    #   echo ":: Changing number of parallel processes to ${ReUnbend_MP}."
+    #   echo ":: "
+    # endif
+    #
+    ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
+${olddir}/2dx_merge_special.dat
+${dircounter}
+eot
+    #
+    set dirfile = `cat TMP.tmp`
+    \rm TMP.tmp
+    #
+    cd ${automatic_target_dir}
+    cd ${dirfile}
+    if ( -e 2dx_image.cfg ) then
+      echo ": "
+      set curdir = ${PWD}
+      set QVALS_local = `cat 2dx_image.cfg | grep "set QVALS =" | cut -d\" -f2`
+      # echo ":: QVALS_local = ${QVALS_local}" 
+      if ( ${QVALS_local} == "."  ||  ${QVALS_local} == "0.00" ) then
+        echo "Working on " ${curdir}
+        if( ${irun} < ${ReUnbend_MP} ) then
+          ${proc_2dx}/linblock "${irun} of ${ReUnbend_MP} into background: Working on ${dirfile}"
+
+          ${app_2dx_image} ${curdir} "2dx_fftrans"
+          ${app_2dx_image} ${curdir} "2dx_ctfcor"
+          ${app_2dx_image} ${curdir} "2dx_unbend1"
+          ${app_2dx_image} ${curdir} "2dx_getspots"
+          ${app_2dx_image} ${curdir} "2dx_unbend2"
+
+          nohup sleep ${sleeptime}; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" &
+
+          @ sleeptime += ${ReUnbend_MP} 
+          @ irun++
+        else
+          ${proc_2dx}/linblock "${irun} of ${ReUnbend_MP} into foreground: Working on ${dirfile}"
+
+          ${app_2dx_image} ${curdir} "2dx_fftrans"
+          ${app_2dx_image} ${curdir} "2dx_ctfcor"
+          ${app_2dx_image} ${curdir} "2dx_unbend1"
+          ${app_2dx_image} ${curdir} "2dx_getspots"
+          ${app_2dx_image} ${curdir} "2dx_unbend2"
+
+          ${app_2dx_image} ${curdir} "2dx_fftrans"
+          ${app_2dx_image} ${curdir} "2dx_ctfcor"
+          ${app_2dx_image} ${curdir} "2dx_unbend1"
+          ${app_2dx_image} ${curdir} "2dx_getspots"
+          ${app_2dx_image} ${curdir} "2dx_unbend2"
+
+          ${app_2dx_image} ${curdir} "2dx_unbend_movie"
+
+          ${app_2dx_image} ${curdir} "2dx_applyCTF"
+          ${app_2dx_image} ${curdir} "2dx_generateMAP"
+          set irun = 1
+          set sleeptime = 10
+        endif
+        echo ": Done with ${dirfile}"
+      else
+        echo ": Skipping ${dirfile}"
+      endif
+    else
+      echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
+    endif
+    # 
+    @ dircounter += 1
+    cd ${olddir}
+  end
+endif
+#
+#
 echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
 #
 ############################################################################# 
 ${proc_2dx}/linblock "Done."

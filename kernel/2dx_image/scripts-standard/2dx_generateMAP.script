@@ -52,7 +52,6 @@
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
-# DISPLAY: map_without_ctf
 # DISPLAY: movie_enable
 #
 # REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
@@ -110,7 +109,6 @@ set ctf_ttf = ""
 set npo_cntrs_step = ""
 set npo_cntrs_below = ""
 set MergeIQMAX = ""
-set map_without_ctf = ""
 set movie_enable = ""
 set ctfcor_imode = ""
 set RFACAMP = ""
@@ -196,18 +194,18 @@ set phaori_local = ${phaori}
 #
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set aphfile = APH/${imagename}_fou_cor.aph
+    set aphfile = APH/${imagename}_fou_ctf.aph
     #
     # A check in case somebody just upgraded from an earlier version of 2dx:
     if ( ! -e ${aphfile} ) then
-      if ( -e APH/${imagename}_cor.aph ) then
-        \cp APH/${imagename}_cor.aph ${aphfile}
+      if ( -e APH/${imagename}_ctf.aph ) then
+        \cp APH/${imagename}_ctf.aph ${aphfile}
       endif
     endif
     #
 else
     # Synthetic Unbending result is used:
-    set aphfile = APH/${imagename}_syn_cor.aph
+    set aphfile = APH/${imagename}_syn_ctf.aph
 endif
 #
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
@@ -217,9 +215,9 @@ else
   echo "# IMAGE-IMPORTANT: PS/${iname}-quadserchSc.ps <PS: Vector Plot of distortions Sc>" >> LOGS/${scriptname}.results
 endif
 if ( ${ctf_ttf} == 'CTF' ) then
-  echo "# IMAGE-IMPORTANT: PS/${iname}_ctf_nolimit.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}_ctf.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
 else
-  echo "# IMAGE-IMPORTANT: PS/${iname}_ttplot_nolimit_unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/${iname}_ttplot_unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
 endif
 #
 echo "# IMAGE-IMPORTANT: frame_quadserch.ps <PS: QUADSERCH Movie Profiles>" >> LOGS/${scriptname}.results
@@ -244,18 +242,26 @@ if ( ${ML_doit} == 'y' ) then
   #
 endif
 #
-if ( ${map_without_ctf} == 'y' ) then
-  echo ":: "
-  ${proc_2dx}/linblock "Generating map without CTF correction"
-  echo ":: "
-  set aphfile = APH/${imagename}_fou_limit.aph
-  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase File without CTF correction>" >> LOGS/${scriptname}.results
-  set prefix = "no_ctf_"
-  set prename = "no ctf "
-  #
-  source ${proc_2dx}/2dx_generateMap_sub.com
+if ( ${movie_enable} == "y" ) then
+  set aphfile = APH/${imagename}_movie_fou_ctf.aph
+  if ( -e ${aphfile} ) then
+    echo ":: "
+    ${proc_2dx}/linblock "Generating map from MovieMode processing"
+    echo ":: "
+    echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase from MovieMode processing>" >> LOGS/${scriptname}.results
+    set prefix = "movie_"
+    set prename = "MovieMode "
+    #
+    source ${proc_2dx}/2dx_generateMap_sub.com
+  else
+    echo ":: "
+    ${proc_2dx}/linblock "Not generating map from MovieMode processing, file not found: ${aphfile}"
+    echo ":: "
+  endif
   #
 endif
+#
+echo "# IMAGE: ${imagename}_ref.mrc <Reference 3D Map Projection>"  >> LOGS/${scriptname}.results
 #
 #############################################################################
 #############################################################################

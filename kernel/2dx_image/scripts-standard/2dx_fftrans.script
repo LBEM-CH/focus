@@ -145,6 +145,14 @@ if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc ) then
   #
 endif
 #
+echo Testing: ${use_masked_image} ${nonmaskimagename}_mask.mrc
+if ( -e ${nonmaskimagename}_mask.mrc ) then
+  echo "${nonmaskimagename}_mask.mrc found: "
+  ls -l ${nonmaskimagename}_mask.mrc
+else
+  echo "${nonmaskimagename}_mask.mrc not found."
+endif
+#
 if ( ${use_masked_image} == "y"  && -e ${nonmaskimagename}_mask.mrc ) then
   if ( ${imagename} != m${nonmaskimagename} ) then
     set imagename = `echo m${nonmaskimagename}`

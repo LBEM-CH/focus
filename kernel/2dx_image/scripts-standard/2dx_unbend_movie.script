@@ -919,13 +919,13 @@ echo "# IMAGE: frames/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.resu
 
 
 ###########################################################################
-${proc_2dx}/linblock "MMBOX - Evaluating APH values, without resolution limit"
+${proc_2dx}/linblock "MMBOX - Evaluating APH values"
 ###########################################################################
 
 set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
 set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
 #
-\rm -f APH/${imagename}_fou_movie_nolimit.aph
+\rm -f APH/${imagename}_movie_fou.aph
 #
 ${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum_fft.mrc
@@ -934,7 +934,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_movie_nolimit.aph
+APH/${imagename}_movie_fou.aph
 SCRATCH/TMP9873.dat
 U2
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -942,32 +942,10 @@ ${refposix},${refposiy}           ! XORIG,YORIG
 ${lattice}                         ! Lattice vectors
 eot
 
-\rm -f SCRATCH/TMP9882.dat
+source SCRATCH/TMP9873.dat
 
 echo "<<@progress: 85>>"
 
-###########################################################################
-${proc_2dx}/linblock "MMBOX - Evaluating APH values, with resolution limit"
-###########################################################################
-#
-\rm -f APH/${imagename}_fou_movie_limit.aph
-#
-${bin_2dx}/2dx_mmboxa.exe << eot
-frames/direct_sum_fft.mrc
-${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_movie_limit.aph
-SCRATCH/TMP9882.dat
-U2
-${refposix},${refposiy}         ! XORIG,YORIG
-${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}                              ! Lattice vectors
-eot
-
-source SCRATCH/TMP9882.dat
 
 ###########################################################################
 ${proc_2dx}/linblock "Generate IQ-stat output"
@@ -996,31 +974,13 @@ echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
 
 echo "<<@evaluate>>"
 
-# Variation plot generation (no longer used)
-#python ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
-#pdf2ps frames/sd.pdf frames/sd.ps
-#convert frames/sd.ps frames/sd.jpg
-#echo "# IMAGE: frames/sd.ps <Variations>" >> LOGS/${scriptname}.results
-
 echo "<<@progress: 90>>"
-
-# Originally this block was used to measure the decay of the diffraction spots based
-# on frame-wise APH files. Somehow this did not survive the recent changes
-#
-#if ( ${movie_filter_type} == '2' ) then
-#        ${proc_2dx}/linblock "Plotting AMP-Decay"
-#        python ${proc_2dx}/movie/extractAMP.py `ls frames/aph_*`
-#        python ${proc_2dx}/movie/plotAMP.py frames/AMPs.txt ${movie_imagenumber}
-#        ${pdf2ps} frames/AMPs.pdf frames/AMPs.ps 
-#        echo  "# IMAGE: frames/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
-#endif
 
 \rm -f frame_unbending.ps
 ${pdf2ps} frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
 
-echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_movie_limit.aph <APH file after movie-mode unbending with resolution limit>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_movie_nolimit.aph <APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: APH/${imagename}_movie_fou.aph <APH file after movie-mode unbending>" >> LOGS/${scriptname}.results
 
 
 if ( ${tempkeep} != "y" ) then

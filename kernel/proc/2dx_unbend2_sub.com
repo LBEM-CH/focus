@@ -569,15 +569,14 @@ m${iname}.mrc
 eot
     #
     if ( -e TMP_quadserch_6.mrc ) then
-      \mv -f TMP_quadserch_6.mrc CUT/${nonmaskimagename}_masking.mrc
-      \mv -f TMP_quadserch_7.mrc CUT/${nonmaskimagename}_masking_final.mrc
-      \cp -f CUT/${nonmaskimagename}_masking_final.mrc ${nonmaskimagename}_masking_final.mrc
+      \mv -f TMP_quadserch_7.mrc ${nonmaskimagename}_mask.mrc
       if ( ${tempkeep} == 'y' ) then
         echo "# IMAGE-IMPORTANT: TMP_quadserch_1.mrc <Masking file 1>" >> LOGS/${scriptname}.results 
         echo "# IMAGE-IMPORTANT: TMP_quadserch_2.mrc <Masking file 2>" >> LOGS/${scriptname}.results 
         echo "# IMAGE-IMPORTANT: TMP_quadserch_3.mrc <Masking file 3>" >> LOGS/${scriptname}.results 
         echo "# IMAGE-IMPORTANT: TMP_quadserch_4.mrc <Masking file 4>" >> LOGS/${scriptname}.results 
         echo "# IMAGE-IMPORTANT: TMP_quadserch_5.mrc <Masking file 5>" >> LOGS/${scriptname}.results 
+        echo "# IMAGE-IMPORTANT: TMP_quadserch_6.mrc <Masking file 6>" >> LOGS/${scriptname}.results 
       else
         \rm -f TMP_quadserch_1.mrc
         \rm -f TMP_quadserch_2.mrc
@@ -585,8 +584,7 @@ eot
         \rm -f TMP_quadserch_4.mrc
         \rm -f TMP_quadserch_5.mrc
       endif
-      echo "# IMAGE-IMPORTANT: CUT/${nonmaskimagename}_masking.mrc <Masking Area from Automatic Masking>" >> LOGS/${scriptname}.results 
-      echo "# IMAGE-IMPORTANT: CUT/${nonmaskimagename}_masking_final.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
+      echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
     else
       ${proc_2dx}/protest "unbend2: ERROR: TMP_quadserch_6.mrc does not exist."
     endif
@@ -675,12 +673,9 @@ m${iname}.mrc
 eot
       #
       if ( -e TMP_quadserch_6.mrc ) then
-        \mv -f TMP_quadserch_6.mrc CUT/${nonmaskimagename}_masking.mrc
-        \mv -f TMP_quadserch_7.mrc CUT/${nonmaskimagename}_masking_final.mrc
-        \cp -f CUT/${nonmaskimagename}_masking_final.mrc ${nonmaskimagename}_masking_final.mrc
+        \mv -f TMP_quadserch_7.mrc ${nonmaskimagename}_mask.mrc
         if ( ${locround} == '1' ) then
-          echo "# IMAGE-IMPORTANT: CUT/${nonmaskimagename}_masking.mrc <Masking Area from Automatic Masking>" >> LOGS/${scriptname}.results 
-          echo "# IMAGE-IMPORTANT: CUT/${nonmaskimagename}_masking_final.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
+          echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
         endif
       else
         ${proc_2dx}/protest "unbend2: ERROR: TMP_quadserch_6.mrc does not exist."
@@ -913,7 +908,7 @@ eot
   echo "<<@progress: 93>>"
   #
   #############################################################################
-  #  MMBOX - no resolution limitation for merging                             #
+  #  MMBOX - evaluate data for  merging                             #
   #  TTBOX (T-JOBB) - to read out amplitudes and phases from 2nd unbent image #
   #############################################################################
   #
@@ -921,9 +916,9 @@ eot
   #
   if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
     #
-    \rm -f APH/${imagename}_nolimit.aph
+    \rm -f APH/${imagename}_fou.aph
     #
-    ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES, no resolution limit"
+    ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES"
     ${bin_2dx}/2dx_mmboxa.exe << eot
 FFTIR/${iname}_unbend2_fft.mrc
 ${imagenumber} ${iname}, Unbend2, ${date}
@@ -931,7 +926,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_nolimit.aph
+APH/${imagename}_fou.aph
 SCRATCH/TMP9873.dat
 U2
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -939,14 +934,14 @@ ${refposix},${refposiy}           ! XORIG,YORIG
 ${lattice}                         ! Lattice vectors
 eot
     #
-    echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_nolimit.aph <APH File (No Res_limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: APH/${imagename}_fou.aph <APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
     #
   else
     #############################################################################
     #
     if ( ${ttfcorfirst} == 'n' ) then
       #
-      \rm -f APH/${imagename}_fou_ttf_nolimit.aph
+      \rm -f APH/${imagename}_fou_ttf.aph
       #
       ${proc_2dx}/${lincommand} "TTBOXA - to read out AMPs and PHASES with TTF-correction"
       ${bin_2dx}/2dx_ttboxk.exe << eot
@@ -959,30 +954,30 @@ Y                        ! plot output
 ${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus},${TLTAXIS},${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 2,0,30,30,19,19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_ttf_nolimit.aph
+APH/${imagename}_fou_ttf.aph
 SCRATCH/TMP9873.dat
 U2
 200.0,3.0,${refposix},${refposiy},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
       #
-      echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf_nolimit.aph <APH File after TTF correction (No Res_limit) [H,K,A,P,IQ,Back,0])>" >> LOGS/${scriptname}.results
+      echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf.aph <APH File after TTF correction [H,K,A,P,IQ,Back,0])>" >> LOGS/${scriptname}.results
       #
       cd APH
       \rm -f ${imagename}_fou_cor.aph
-      \ln -s ${imagename}_fou_ttf_nolimit.aph ${imagename}_fou_cor.aph
+      \ln -s ${imagename}_fou_ttf.aph ${imagename}_fou_cor.aph
       cd ..
       #
-      \mv -f TTPLOT.PS PS/${iname}.ttplot_nolimit_unbend2.ps
+      \mv -f TTPLOT.PS PS/${iname}.ttplot_unbend2.ps
       if ( ${locround} == '1' ) then
-        echo "# IMAGE-IMPORTANT: PS/${iname}.ttplot_nolimit_unbend2.ps <PS: IQ Plot after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results 
+        echo "# IMAGE-IMPORTANT: PS/${iname}.ttplot_unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results 
       endif
       #
     else
       #
       #############################################################################
       #
-      \rm -f APH/${imagename}_fou_ttf_nolimit.aph
+      \rm -f APH/${imagename}_fou_ttf.aph
       #
       ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES without TTF-correction"
       ${proc_2dx}/${lincommand} "         (because image is already TTF corrected)"
@@ -993,7 +988,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_ttf_nolimit.aph
+APH/${imagename}_fou_ttf.aph
 SCRATCH/TMP9873.dat
 U2
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -1001,15 +996,15 @@ ${refposix},${refposiy}           ! XORIG,YORIG
 ${lattice}                         ! Lattice vectors
 eot
       #
-      echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf_nolimit.aph <APH File after TTF correction (No Res_limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
+      echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf.aph <APH File after TTF correction [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
       #
     endif
     #
     cd APH
     \rm -f ${imagename}_fou_cor.aph
-    \ln -s ${imagename}_fou_ttf_nolimit.aph ${imagename}_fou_cor.aph
-    \rm -f ${imagename}_ttf_nolimit.aph
-    \ln -s ${imagename}_fou_ttf_nolimit.aph ${imagename}_ttf_nolimit.aph
+    \ln -s ${imagename}_fou_ttf.aph ${imagename}_fou_cor.aph
+    \rm -f ${imagename}_ttf.aph
+    \ln -s ${imagename}_fou_ttf.aph ${imagename}_ttf.aph
     cd ..
     #
     echo "# IMAGE-IMPORTANT: APH/${imagename}_cor.aph <Link to Final APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
@@ -1018,123 +1013,13 @@ eot
   #
   echo "# MASKB: "${maskb}
   echo "# BOXB: "${boxb1}
-  echo "# IQSTAT-NORESLIM:"
+  echo "# IQSTAT:"
   cat SCRATCH/TMP9873.dat
   #
-  \rm -f SCRATCH/TMP9873.dat
-  #
-  #
-  #############################################################################
-  #  MMBOX - resolution limitation for output                                 #
-  #  TTBOX (T-JOBB) - to read out amplitudes and phases from 2nd unbent image #
-  #############################################################################  
-  #
-  \rm -f SCRATCH/TMP9882.dat
-  if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
-    #
-    \rm -f APH/${imagename}_fou_limit.aph
-    #
-    ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES, with resolution limit"
-    ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
-${imagenumber} ${iname}, Unbend2, ${date}
-Y				! Use grid units?
-Y				! Generate grid from lattice?
-N				! Generate points from lattice?
-2,2,0,50,50,19,19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_limit.aph
-SCRATCH/TMP9882.dat
-U2
-${refposix},${refposiy}		! XORIG,YORIG
-${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}				! Lattice vectors
-eot
-    #
-    echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_limit.aph <APH File (Res_limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
-    #
-  else
-    #
-    if ( ${ttfcorfirst} == 'n' ) then
-      #
-      \rm -f APH/${imagename}_fou_ttf_limit.aph
-      #
-      ${proc_2dx}/${lincommand} "TTBOXA - to read out AMPs and PHASES with TTF-correction"
-      #
-      echo       ${bin_2dx}/2dx_ttboxk.exe
-      echo  FFTIR/${iname}_unbend2_fft.mrc
-      echo  ${imagenumber} ${iname}, Unbend2, ${date}
-      echo  Y                        
-      echo  N                        
-      echo  N                        
-      echo  Y                        
-      echo  ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS},${KV}
-      echo  ${defocus} ${TLTAXIS} ${TLTANG}
-      echo  2 0 30 30 19 19          
-      echo  APH/${imagename}_fou_ttf_limit.aph
-      echo  SCRATCH/TMP9882.dat
-      echo  U2
-      echo  ${RESMIN} ${RESMAX} ${refposix} ${refposiy} 90.0 
-      echo  ${lattice}                  
-      echo  eot
-      echo "Starting now:"
-      #
-      ${bin_2dx}/2dx_ttboxk.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
-${imagenumber} ${iname}, Unbend2, ${date}
-Y                        ! generate grid from lattice
-N                        ! generate points from lattice
-N                        ! list points as calculated
-Y                        ! plot output
-${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV}
-${defocus} ${TLTAXIS} ${TLTANG}
-2 0 30 30 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_ttf_limit.aph
-SCRATCH/TMP9882.dat
-U2
-${RESMIN} ${RESMAX} ${refposix} ${refposiy} 90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
-${lattice}                  ! reciprocal lattice vectors in pixels
-eot
-      #
-      echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf_limit.aph <APH File after TTF correction (Res_limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
-      #
-      \mv -f TTPLOT.PS PS/${iname}.ttplot_limit_unbend2.ps
-      if ( ${locround} == '1' ) then
-        echo "# IMAGE-IMPORTANT: PS/${iname}.ttplot_limit_unbend2.ps <PS: IQ Plot after TTF correction (Resolution Limitation)>" >> LOGS/${scriptname}.results 
-      endif
-      #
-    else
-      #
-      \rm -f APH/${imagename}_fou_ttf_limit.aph
-      #
-      ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES without TTF-correction"
-      ${proc_2dx}/${lincommand} "         (because image is already TTF corrected)"
-      ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
-${imagenumber} ${iname}, Unbend2, ${date}
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_ttf_limit.aph
-SCRATCH/TMP9882.dat
-U2
-${refposix},${refposiy}           ! XORIG,YORIG
-${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}                         ! Lattice vectors
-eot
-      #
-      echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf_limit.aph <APH File after TTF correction (Res_limit) [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
-      #
-    endif
-    #
-  endif  
-  #
-  echo "# IQSTAT-RESLIM:"
-  cat SCRATCH/TMP9882.dat
   if ( ${final_round} == "y" ) then
-    cat SCRATCH/TMP9882.dat >> LOGS/${scriptname}.results 
+    cat SCRATCH/TMP9873.dat >> LOGS/${scriptname}.results 
   endif
-  source SCRATCH/TMP9882.dat
+  source SCRATCH/TMP9873.dat
   #
   set IQS = `echo ${U2_IQ1} ${U2_IQ2} ${U2_IQ3} ${U2_IQ4} ${U2_IQ5} ${U2_IQ6} ${U2_IQ7} ${U2_IQ8} ${U2_IQ9}`
   echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -1150,7 +1035,7 @@ eot
   echo "set U2_QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
   echo "set U2_IQs = ${IQS}" >> LOGS/${scriptname}.results
   #
-  \rm -f SCRATCH/TMP9882.dat  
+  \rm -f SCRATCH/TMP9873.dat  
   #
   echo "<<@progress: 96>>"  
   echo "<<@evaluate>>"

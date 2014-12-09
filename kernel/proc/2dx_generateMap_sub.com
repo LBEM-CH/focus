@@ -302,7 +302,7 @@ eot
 \cp -f fort.3 APH/${prefix}${imagename}_cor_origtiltd.aph
 # \cp -f ../../merge/APH/merge.aph APH/${prefix}${imagename}_cor_origtiltd.aph
 #
-echo "# IMAGE: APH/${prefix}${imagename}_cor_origtiltd.aph <APH: ${prename}Amp&Phs after ORIGTILT [H,K,Z,A,P(CTF Phase flipped, PhaOri),Num,IQ,WGHT,Back,CTF]>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: APH/${prefix}${imagename}_cor_origtiltd.aph <APH: ${prename}Amp&Phs after ORIGTILT [H,K,Z,A,P(CTF Phase flipped, PhaOri),Num,IQ,WGHT,Back,CTF]>" >> LOGS/${scriptname}.results
 #
 if ( ${scriptname} == "2dx_generateMAP" ) then
   echo "<<@progress: 20>>"
@@ -349,7 +349,7 @@ eot
 \mv -f fort.4 APH/${prefix}ctfmerge_nolimit.aph
 \rm -f TMP444888.tmp
 #
-echo "# IMAGE: ${prefix}avrg.hkl <TXT: ${prename}APH file after AVRGAMPHS [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: ${prefix}avrg.hkl <TXT: ${prename}APH file after AVRGAMPHS [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
 if ( ${scriptname} == "2dx_generateMAP" ) then
   echo "<<@progress: 38>>"
@@ -393,7 +393,7 @@ if ( ! -e ${prefix}centric.hkl ) then
   ${proc_2dx}/protest "ERROR occured. ${prefix}centric.hkl missing."
 endif
 #
-echo "# IMAGE: ${prefix}centric.hkl <TXT: ${prename}APH file after CENTRIC [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: ${prefix}centric.hkl <TXT: ${prename}APH file after CENTRIC [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "f2mtz - to translate avrg.hkl into ${imagename}.mtz"
@@ -440,7 +440,7 @@ eot
     ${proc_2dx}/protest "ERROR in 2dx_permutate_file.exe"
   endif
   #
-  echo "# IMAGE: ${outfile} <TXT: APH file after permutation>" >> LOGS/${scriptname}.results
+  # echo "# IMAGE: ${outfile} <TXT: APH file after permutation>" >> LOGS/${scriptname}.results
   #
   ${proc_2dx}/linblock "f2mtz - to transform into MTZ file"
   #
@@ -503,7 +503,7 @@ eot
     ${proc_2dx}/protest "ERROR in 2dx_permutate_file.exe"
   endif
   #
-  echo "# IMAGE: ${prefix}${imagename}_phase_zero-permutated.hkl <permutated HKL file>" >> LOGS/${scriptname}.results
+  # echo "# IMAGE: ${prefix}${imagename}_phase_zero-permutated.hkl <permutated HKL file>" >> LOGS/${scriptname}.results
   #
   ${proc_2dx}/linblock "f2mtz - to transform into MTZ file of phase zero"
   #
@@ -747,34 +747,16 @@ ${prefix}${imagename}-${SYM_sub}.mrc
 0
 eot
 #
-# cp -f SCRATCH/${prefix}${imagename}-${SYM_sub}.map ${prefix}${imagename}-${SYM_sub}.mrc
-#
 if ( ${SYM_sub} == 'p1' ) then
   \rm -f final_map.mrc
   \ln -s ${prefix}${imagename}-p1.mrc final_map.mrc
 endif
-
-if ( ${movie_enable}x == "nx" ) then
-  \cp -f ${prefix}${imagename}-p1.mrc final_map_unbend2.mrc
-endif
-
 #
-if ( ${SYN_Unbending} == "0" ) then
-  \cp -f final_map.mrc final_map_FouFilter.mrc
-else
-  \cp -f final_map.mrc final_map_SynRef.mrc
-endif
 #
 echo "# IMAGE: ${prefix}${imagename}_phase_zero-p1.mrc <PSF as map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc <PSF symmetrized as map>" >> LOGS/${scriptname}.results
-# echo "# IMAGE: SCRATCH/${prefix}${imagename}-p1.mrc <SCRATCH/${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-p1.mrc <${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
-# echo "# IMAGE: SCRATCH/${prefix}${imagename}-${SYM_sub}.map <SCRATCH/${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}.mrc <${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
-#
-echo "# IMAGE: final_map_FouFilter.mrc <${prename}Non-symmetrized Map Fourier Filter>"  >> LOGS/${scriptname}.results
-echo "# IMAGE: final_map_SynRef.mrc <${prename}Non-symmetrized Map Synthetic Reference>"  >> LOGS/${scriptname}.results
-echo "# IMAGE: ${imagename}_ref.mrc <Reference 3D Map Projection>"  >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "npo - to create a line plot ${imagename}-${SYM_sub}.plt"
@@ -836,14 +818,10 @@ ${bin_2dx}/laserplot.exe -outputfile=PS/${prefix}${imagename}MAP-${SYM_sub}.ps $
 #
 \rm -f ${imagename}-${SYM_sub}.plt
 #
-echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}PSF-p1.ps <PS: PSF>"  >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}PSF-${SYM_sub}.ps <PS: PSF symmetrized>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-p1.ps <PS: ${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: PS/${prefix}${imagename}MAP-${SYM_sub}.ps <PS: ${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
-#
-if ( ${movie_enable}x == "nx" ) then
-  \cp -f PS/${prefix}${imagename}MAP-p1.ps PS/${prefix}${imagename}MAP-p1_unbend2.ps
-endif
+# echo "# IMAGE: PS/${prefix}${imagename}PSF-p1.ps <PS: ${prename}PSF>"  >> LOGS/${scriptname}.results
+# echo "# IMAGE: PS/${prefix}${imagename}PSF-${SYM_sub}.ps <PS: ${prename}PSF symmetrized>" >> LOGS/${scriptname}.results
+echo "# IMAGE: PS/${prefix}${imagename}MAP-p1.ps <PS: ${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
+echo "# IMAGE: PS/${prefix}${imagename}MAP-${SYM_sub}.ps <PS: ${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 #
 if ( ${scriptname} == "2dx_generateMAP" ) then
   echo "<<@progress: 90>>"

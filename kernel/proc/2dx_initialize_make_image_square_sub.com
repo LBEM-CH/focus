@@ -17,8 +17,7 @@ if ( ${new_mrc_created} == "y" ) then
     ${proc_2dx}/lin "Image ${loc_imagename} has a size of ${sizeX},${sizeY}."
     if ( ${sizeX} != ${sizeY} ) then
       if ( ${movie_verbose}x != "0x" ) then
-        ${proc_2dx}/lin "WARNINT: only square images are supported (${sizeX},${sizeY})."
-        echo "#WARNING: WARNING: only square images are supported."  >> LOGS/${scriptname}.results
+        ${proc_2dx}/lin "Only square images are supported (${sizeX},${sizeY})."
       endif
       #
       if( ${crop} == "0" ) then

@@ -180,15 +180,19 @@ else
 
   set CTF_infile = APH/${iname}_fou.aph
   set CTF_outfile = APH/${iname}_fou_ctf.aph
+  #######################################
   source ${proc_2dx}/2dx_applyCTF_sub.com
+  #######################################
   echo "# IMAGE-IMPORTANT: APH/${CTF_infile} <APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: APH/${CTF_outfile} <APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-  \mv -f CTFPLOT.PS PS/${iname}_movie_ctf.ps
-  echo "# IMAGE-IMPORTANT: PS/${iname}_ctf.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
-  \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_canonical.ps
-  echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_measured.ps <PS: Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/POWERHISTO.txt <Histogram of Power in PS>" >> LOGS/${scriptname}.results
+  \mv -f CTFPLOT.PS PS/${iname}_unbend2_ctf.ps
+  echo "# IMAGE-IMPORTANT: PS/${iname}_unbend2_ctf.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+  \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_unbend2_canonical.ps
+  echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_unbend2_canonical.ps <PS: Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
+  \mv -f PS/2dx_plotreska_measured.ps PS/2dx_plotreska_unbend2_measured.ps
+  echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_unbend2_measured.ps <PS: Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
+  \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_unbend2.txt
+  echo "# IMAGE: SCRATCH/POWERHISTO_unbend2.txt <Histogram of Power in PS>" >> LOGS/${scriptname}.results
 
   echo "<<@progress: 30>>"
 
@@ -196,14 +200,18 @@ else
     set CTF_infile = APH/${iname}_movie_fou.aph
     if ( -e ${CTF_infile} ) then
       set CTF_outfile = APH/${iname}_movie_fou_ctf.aph
+      #######################################
       source ${proc_2dx}/2dx_applyCTF_sub.com
+      #######################################
       echo "# IMAGE-IMPORTANT: APH/${CTF_infile} <MovieMode APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
       echo "# IMAGE-IMPORTANT: APH/${CTF_outfile} <MovieMode APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
       \mv -f CTFPLOT.PS PS/${iname}_movie_ctf.ps
       echo "# IMAGE-IMPORTANT: PS/${iname}_movie_ctf.ps <PS: MovieMode IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
       \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_movie_canonical.ps
       echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_movie_canonical.ps <PS: MovieMode Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
+      \mv -f PS/2dx_plotreska_measured.ps PS/2dx_plotreska_movie_measured.ps
       echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_movie_measured.ps <PS: MovieMode Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
+      \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_movie.txt
       echo "# IMAGE: SCRATCH/POWERHISTO_movie.txt <MovieMode Histogram of Power in PS>" >> LOGS/${scriptname}.results
     endif
   endif
@@ -214,14 +222,18 @@ else
     set CTF_infile = APH/${iname}_syn.aph
     if ( -e ${CTF_infile} ) then
       set CTF_outfile = APH/${iname}_syn_ctf.aph
+      #######################################
       source ${proc_2dx}/2dx_applyCTF_sub.com
+      #######################################
       echo "# IMAGE-IMPORTANT: APH/${CTF_infile} <SynRef APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
       echo "# IMAGE-IMPORTANT: APH/${CTF_outfile} <SynRef APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
       \mv -f CTFPLOT.PS PS/${iname}_syn_ctf.ps
       echo "# IMAGE-IMPORTANT: PS/${iname}_syn_ctf.ps <PS: SynRef IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
       \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_syn_canonical.ps
       echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_syn_canonical.ps <PS: SynRef Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
+      \mv -f PS/2dx_plotreska_measured.ps PS/2dx_plotreska_syn_measured.ps
       echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_syn_measured.ps <PS: SynRef Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
+      \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_syn.txt
       echo "# IMAGE: SCRATCH/POWERHISTO_syn.txt <SynRef Histogram of Power in PS>" >> LOGS/${scriptname}.results
     endif
   endif

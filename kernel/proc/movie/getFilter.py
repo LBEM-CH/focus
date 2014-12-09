@@ -10,7 +10,8 @@ def w(n, t, a, b):
 		return a*exp(b*n)
 
 def getCutoff(n, t, a, b):
-	return min(0.5, w(n, t, a, b))
+	# return min(0.5, w(n, t, a, b))
+	return w(n, t, a, b)
 
 if __name__ == "__main__":
 	

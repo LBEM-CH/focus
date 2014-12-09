@@ -685,7 +685,7 @@ eot
   ${proc_2dx}/lin "cross_correlate.py - Cross-correlate reference with frame ${i}"
   ############################################################### 
   #
-  python ${proc_2dx}/movie/cross_correlate.py frames/frame_${i}.mrc SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc frames/CCmap_${i}.mrc
+  python ${proc_2dx}/movie/cross_correlate.py frames/frame_${i}_ctfcor.mrc SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc frames/CCmap_${i}.mrc
   if ( ${show_frame_CCmap} == "y" ) then
     echo  "# IMAGE: frames/CCmap_${i}.mrc <Frame ${i}, CCmap>" >> LOGS/${scriptname}.results
   endif
@@ -755,6 +755,8 @@ while ($i <= ${movie_imagenumber_touse})
        ${proc_2dx}/lin "CCUNBEND - Unbend CCmap for frame ${i}"
        ###########################################################################
        setenv CCORDATA frames/PROFDATA_${i}.dat
+       # setenv CCORDATA ${iname}_profile.dat
+
        setenv TABLEOUT frames/CCUNBEND_Table_${i}.dat
        \rm -f frames/CCUNBEND_Table_${i}.dat
        \rm -f CCPLOT.PS
@@ -763,7 +765,7 @@ while ($i <= ${movie_imagenumber_touse})
        ${bin_2dx}/2dx_ccunbendk.exe << eot
 frames/CCmap_${i}.mrc
 0,1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
 frames/CCmap_${i}_unbent.mrc
 CCUNBEND, frame_${i}.mrc, ${date}
@@ -775,8 +777,6 @@ eot
        ###########################################################################
        ${proc_2dx}/lin "CCUNBEND - Unbend frame ${i}"
        ###########################################################################
-       setenv CCORDATA frames/PROFDATA_${i}.dat
-       setenv TABLEOUT frames/CCUNBEND_Table_${i}.dat
        \rm -f frames/CCUNBEND_Table_${i}.dat
        \rm -f CCPLOT.PS
        \rm -f frames/CCUNBEND_frame_${i}_notap.mrc
@@ -789,7 +789,7 @@ eot
        ${bin_2dx}/2dx_ccunbendk.exe << eot
 ${infile}
 0,1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
 frames/CCUNBEND_frame_${i}_notap.mrc
 CCUNBEND, frame_${i}.mrc, ${date}

@@ -252,7 +252,7 @@ C
         write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(1:40)
         call shorten(cdir,k1)
         call shortshrink(CIMAGENAME,k2)
-        write(cname4,'(A,''/APH/'',A,''.cor.aph'')')
+        write(cname4,'(A,''/APH/'',A,''_ctf.aph'')')
      .    cdir(1:k1),CIMAGENAME(1:k2)
         call shortshrink(cname4,k1)
         write(11,'(A)')cname4(1:k1)

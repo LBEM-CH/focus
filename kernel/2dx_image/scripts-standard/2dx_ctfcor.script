@@ -98,6 +98,10 @@ echo "<<@evaluate>>"
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
 #
+if ( ! -e image_ctfcor.spt ) then
+  \cp -f ${imagename}.spt image_ctfcor.spt
+endif
+#
 if (${ctfcor_imode}x == "0x" ) then
   ${proc_2dx}/linblock "Not applying any CTF correction."
   \cp -f ${imagename}.mrc image_ctfcor.mrc

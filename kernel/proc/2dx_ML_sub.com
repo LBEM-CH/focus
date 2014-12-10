@@ -39,23 +39,23 @@ pwd
 set date = `date`
 echo date = ${date}
 #
-if ( -e ${imagename}-profile.dat.gz ) then
+if ( -e ${imagename}_profile.dat.gz ) then
   #############################################################################
   ${proc_2dx}/linblock "gunzip - to uncompress the profile"
   ############################################################################# 
   #
-  \cp -f ${imagename}-profile.dat.gz ${imagename}.tmp.gz
+  \cp -f ${imagename}_profile.dat.gz ${imagename}.tmp.gz
   \rm -f ${imagename}.tmp
   #
   gunzip ${imagename}.tmp.gz
   #
-  \cp -f ${imagename}.tmp ${imagename}-profile.dat
+  \cp -f ${imagename}.tmp ${imagename}_profile.dat
   \rm -f ${imagename}.tmp
   #
-  echo "# IMAGE: ${imagename}-profile.dat <TXT: UnitCell Particle Profile>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${imagename}_profile.dat <TXT: UnitCell Particle Profile>" >> LOGS/${scriptname}.results
   #
 else
-  ${proc_2dx}/linblock "${imagename}-profile.dat.gz not existing."
+  ${proc_2dx}/linblock "${imagename}_profile.dat.gz not existing."
   ${proc_2dx}/protest "First run UNBEND II to create the PROFILE."
 endif
 #

@@ -248,6 +248,9 @@ else
       ${proc_2dx}/linblock "Using Unbend2 (not MovieMode) unbent data, since these have the higher QVAL"
       set final_outfile = ${iname}_fou_ctf.aph
     endif
+  else
+    ${proc_2dx}/linblock "Using Unbend2 unbent data"
+    set final_outfile = ${iname}_fou_ctf.aph
   endif
 
   cd APH

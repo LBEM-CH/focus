@@ -289,7 +289,7 @@ C
         call shortshrink(CIMAGENAME,k2)
 C
         if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
-          write(cname4,'(A,''/APH/'',A,''.cor.aph'')')
+          write(cname4,'(A,''/APH/'',A,''_ctf.aph'')')
      .      cdir(1:k1),CIMAGENAME(1:k2)
         else
           write(cname4,'(A,''/APH/ML_result.aph'')')

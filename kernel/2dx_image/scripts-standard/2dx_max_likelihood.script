@@ -175,7 +175,7 @@ if ( ${SYM} == "p2" || ${SYM} == "p12_a" || ${SYM} == "p12_b" || ${SYM} == "p121
     echo ":: "
     echo ":: "
     ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "WARNING: You did not set the 2-fold symmetry. Is this an error?"
+    ${proc_2dx}/linblock "WARNING: You did not set the 2-fold rotational symmetry. Is this an error?"
     ${proc_2dx}/linblock "#"
   endif
 endif 
@@ -184,7 +184,7 @@ if ( ${SYM} == "p3" || ${SYM} == "p312" ) then
     echo ":: "
     echo ":: "
     ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "WARNING: You did not set the 3-fold symmetry. Is this an error?"
+    ${proc_2dx}/linblock "WARNING: You did not set the 3-fold rotational symmetry. Is this an error?"
     ${proc_2dx}/linblock "#"
   endif
 endif 
@@ -193,16 +193,16 @@ if ( ${SYM} == "p4" || ${SYM} == "p422" || ${SYM} == "p4212" ) then
     echo ":: "
     echo ":: "
     ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "WARNING: You did not set the 4-fold symmetry. Is this an error?"
+    ${proc_2dx}/linblock "WARNING: You did not set the 4-fold rotational symmetry. Is this an error?"
     ${proc_2dx}/linblock "#"
   endif
 endif 
 if ( ${SYM} == "p6" || ${SYM} == "p622" ) then
-  if ( ${ML_rotational_symmetry} != "4" ) then
+  if ( ${ML_rotational_symmetry} != "5" ) then
     echo ":: "
     echo ":: "
     ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "WARNING: You did not set the 6-fold symmetry. Is this an error?"
+    ${proc_2dx}/linblock "WARNING: You did not set the 6-fold rotational symmetry. Is this an error?"
     ${proc_2dx}/linblock "#"
   endif
 endif 
@@ -241,13 +241,6 @@ echo "set ML_done = y" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "::ML run finished."
-#
-#
-#############################################################################
-${proc_2dx}/linblock "removing uncompressed profile"
-############################################################################# 
-#
-\rm -f ${imagename}.profile
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

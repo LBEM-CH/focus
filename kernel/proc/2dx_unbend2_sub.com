@@ -964,8 +964,8 @@ eot
       echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf.aph <APH File after TTF correction [H,K,A,P,IQ,Back,0])>" >> LOGS/${scriptname}.results
       #
       cd APH
-      \rm -f ${imagename}_fou_cor.aph
-      \ln -s ${imagename}_fou_ttf.aph ${imagename}_fou_cor.aph
+      \rm -f ${imagename}_fou_ctf.aph
+      \ln -s ${imagename}_fou_ttf.aph ${imagename}_fou_ctf.aph
       cd ..
       #
       \mv -f TTPLOT.PS PS/${iname}.ttplot_unbend2.ps
@@ -1001,13 +1001,13 @@ eot
     endif
     #
     cd APH
-    \rm -f ${imagename}_fou_cor.aph
-    \ln -s ${imagename}_fou_ttf.aph ${imagename}_fou_cor.aph
+    \rm -f ${imagename}_fou_ctf.aph
+    \ln -s ${imagename}_fou_ttf.aph ${imagename}_fou_ctf.aph
     \rm -f ${imagename}_ttf.aph
     \ln -s ${imagename}_fou_ttf.aph ${imagename}_ttf.aph
     cd ..
     #
-    echo "# IMAGE-IMPORTANT: APH/${imagename}_cor.aph <Link to Final APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: APH/${imagename}_ctf.aph <Link to Final APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
     # 
   endif
   #

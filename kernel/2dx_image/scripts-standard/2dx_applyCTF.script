@@ -131,11 +131,11 @@ if ( ${ctf_ttf} == 'TTF' ) then
   if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
     set outfile = ${iname}_fou_ttf.aph
-    set final_outfile = ${iname}_fou_cor.aph
+    set final_outfile = ${iname}_fou_ctf.aph
   else
     # Synthetical Unbending result is used:
     set outfile = ${iname}_syn_ttf.aph
-    set final_outfile = ${iname}_syn_cor.aph
+    set final_outfile = ${iname}_syn_ctf.aph
   endif
   #
   if ( ! -e APH/${outfile} ) then
@@ -145,8 +145,8 @@ if ( ${ctf_ttf} == 'TTF' ) then
   cd APH
   \rm -f ${final_outfile}
   \ln -s ${outfile} ${final_outfile}
-  \rm -f ${iname}_cor.aph
-  \ln -s ${final_outfile} ${iname}_cor.aph
+  \rm -f ${iname}_ctf.aph
+  \ln -s ${final_outfile} ${iname}_ctf.aph
   cd ..
   echo "# IMAGE-IMPORTANT: APH/${outfile} <APH File after TTF correction [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: APH/${final_outfile}  <Link to Final APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results

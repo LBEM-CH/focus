@@ -108,6 +108,9 @@ if ( "${level}" == "radical" ) then
   \rm -f *.profile
   \rm -f ${imagename}-p*-scaled.tif
   \rm -f ${imagename}-p*-scaled-from_Spider.mrc
+  \rm -f image_ctfcor_CCmap_unbend2.mrc
+  \rm -f image_ctfcor.mrc
+  \rm -f unbent.mrc
   #
   if ( -e ${imagename}_raw.mrc ) then
     \rm -f ${imagename}.mrc

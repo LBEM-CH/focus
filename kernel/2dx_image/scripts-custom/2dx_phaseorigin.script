@@ -114,7 +114,7 @@ set scriptname = 2dx_phaseorigin
 #
 source ${proc_2dx}/2dx_makedirs 
 #
-set aphfile = APH/${imagename}.cor.aph
+set aphfile = APH/${imagename}_ctf.aph
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File>" >> LOGS/${scriptname}.results
 #
 ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
@@ -123,18 +123,18 @@ set phaori_local = ${phaori}
 #
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set aphfile = APH/${imagename}.fou.cor.aph
+    set aphfile = APH/${imagename}_fou_ctf.aph
     #
     # A check in case somebody just upgraded from an earlier version of 2dx:
     if ( ! -e ${aphfile} ) then
-      if ( -e APH/${imagename}.cor.aph ) then
-        \cp APH/${imagename}.cor.aph ${aphfile}
+      if ( -e APH/${imagename}_ctf.aph ) then
+        \cp APH/${imagename}_ctf.aph ${aphfile}
       endif
     endif
     #
 else
     # Synthetic Unbending result is used:
-    set aphfile = APH/${imagename}.syn.cor.aph
+    set aphfile = APH/${imagename}_syn_ctf.aph
 endif
 #
 set phaori_x = `echo ${phaori_local} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`

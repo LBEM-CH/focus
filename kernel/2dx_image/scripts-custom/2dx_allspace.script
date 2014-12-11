@@ -147,10 +147,10 @@ endif
 #
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
-    set aphfile = APH/${iname}_fou_cor.aph
+    set aphfile = APH/${iname}_fou_ctf.aph
 else
     # Synthetic Unbending result is used:
-    set aphfile = APH/${iname}_syn_cor.aph
+    set aphfile = APH/${iname}_syn_ctf.aph
 endif
 #
 setenv IN ${aphfile}

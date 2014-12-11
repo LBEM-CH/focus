@@ -39,27 +39,33 @@ pwd
 set date = `date`
 echo date = ${date}
 #
-if ( -e ${imagename}_profile.dat.gz ) then
-  #############################################################################
-  ${proc_2dx}/linblock "gunzip - to uncompress the profile"
-  ############################################################################# 
-  #
-  \cp -f ${imagename}_profile.dat.gz ${imagename}.tmp.gz
-  \rm -f ${imagename}.tmp
-  #
-  gunzip ${imagename}.tmp.gz
-  #
-  \cp -f ${imagename}.tmp ${imagename}_profile.dat
-  \rm -f ${imagename}.tmp
-  #
-  echo "# IMAGE: ${imagename}_profile.dat <TXT: UnitCell Particle Profile>" >> LOGS/${scriptname}.results
-  #
-else
-  ${proc_2dx}/linblock "${imagename}_profile.dat.gz not existing."
-  ${proc_2dx}/protest "First run UNBEND II to create the PROFILE."
+if ( ! -e image_ctfcor_profile.dat ) then
+  if ( -e ${imagename}_profile.dat.gz ) then
+    #############################################################################
+    ${proc_2dx}/linblock "gunzip - to uncompress the profile"
+    ############################################################################# 
+    #
+    \cp -f ${imagename}_profile.dat.gz ${imagename}.tmp.gz
+    \rm -f ${imagename}.tmp
+    #
+    gunzip ${imagename}.tmp.gz
+    #
+    \cp -f ${imagename}.tmp image_ctfcor_profile.dat
+    \rm -f ${imagename}.tmp
+    #
+    echo "# IMAGE: image_ctfcor_profile.dat <TXT: UnitCell Particle Profile>" >> LOGS/${scriptname}.results
+    #
+  endif
+  if ( -e ${nonmaskimagename}_profile.dat ) then
+    \mv -f ${nonmaskimagename}_profile.dat image_ctfcor_profile.dat
+  endif 
+  if ( ! -e image_ctfcor_profile.dat ) then
+    ${proc_2dx}/linblock "image_ctfcor_profile.dat not existing."
+    ${proc_2dx}/protest "First run UNBEND II to create the PROFILE."
+  endif
 endif
 #
-echo "# IMAGE: APH/${imagename}_cor.aph <APH: Unbending Amp&Phase File>" >> LOGS/${scriptname}.results
+echo "# IMAGE: APH/${imagename}_ctf.aph <APH: Unbending Amp&Phase File>" >> LOGS/${scriptname}.results
 echo "# IMAGE: PS/${imagename}MAP-p1.ps <PS: Unbending MAP in p1>" >> LOGS/${scriptname}.results
 echo "# IMAGE: ${imagename}-p1.mrc <Unbending MAP in p1>" >> LOGS/${scriptname}.results
 #

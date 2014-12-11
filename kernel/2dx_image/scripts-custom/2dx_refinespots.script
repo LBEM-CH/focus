@@ -134,12 +134,12 @@ if ( ${addspots} == "1" ) then
   #
   ${proc_2dx}/linblock "using IQMAX of ${IQMAX}."
   #
-  set aphfile      = APH/${imagename}_cor.aph
+  set aphfile      = APH/${imagename}_ctf.aph
   echo aphfile     = ${aphfile}
   #
   if ( ! -e ${aphfile} || ! -s ${aphfile} ) then
     set oldaphfile = ${aphfile}
-    set aphfile      = APH/${nonmaskimagename}_cor.aph
+    set aphfile      = APH/${nonmaskimagename}_ctf.aph
     echo aphfile     = ${aphfile}
     ${proc_2dx}/linblock "WARNING: ${oldaphfile} not ok. Trying ${aphfile}."
     if ( ! -e ${aphfile} || ! -s ${aphfile} ) then  

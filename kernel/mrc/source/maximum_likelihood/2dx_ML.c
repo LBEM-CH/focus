@@ -83,13 +83,7 @@ int main()
 	imagenumber=cgetline(input,tmpstring);
 	printf("Image Number................... = %s \n",imagenumber);
 
-	//strcpy(profilename,"SCRATCH/prof");
-	//strcat(profilename,temp_imagename);
-	//strcat(profilename,".dat");
-	//  strcpy(profilename,temp_imagename);
-	//   strcat(profilename,"-profile.dat");
-	strcpy(profilename,temp_imagename);
-	strcat(profilename,"-profile.dat");
+	strcpy(profilename,"image_ctfcor_profile.dat");
 	printf("Profile Name................... = %s \n",profilename);
 
 
@@ -235,8 +229,9 @@ int main()
 		else if(Symmetry1==1) Symmetry=2;
 		else if(Symmetry1==2) Symmetry=3;
 		else if(Symmetry1==3) Symmetry=4;
-		else if(Symmetry1==4) Symmetry=6;
-		printf("Symmetry....................... = %d \n",Symmetry); 
+		else if(Symmetry1==4) Symmetry=5;
+		else if(Symmetry1==5) Symmetry=6;
+		printf("Rotational Symmetry of Particle = %d \n",Symmetry); 
 	}
 	else printf("parameter Symmetry does not exists \n");  
 
@@ -284,14 +279,14 @@ int main()
 
         strcpy(tmpstring,"SYM");      
 	SYMname=cgetline(input,tmpstring);
-	printf("Symmetry....................... = %s \n",SYMname);
+	printf("Space Group.................... = %s \n",SYMname);
         SYM=0;
-        if(strncmp(SYMname,"p12",2) == 0) SYM=1;
-        if(strncmp(SYMname,"p22",2) == 0) SYM=1;
-        if(strncmp(SYMname,"p42",2) == 0) SYM=1;
-        if(strncmp(SYMname,"p31",2) == 0) SYM=1;
-        if(strncmp(SYMname,"p32",2) == 0) SYM=1;
-        if(strncmp(SYMname,"p62",2) == 0) SYM=1;
+        if(strncmp(SYMname,"p12",3) == 0) SYM=1;
+        if(strncmp(SYMname,"p22",3) == 0) SYM=1;
+        if(strncmp(SYMname,"p42",3) == 0) SYM=1;
+        if(strncmp(SYMname,"p31",3) == 0) SYM=1;
+        if(strncmp(SYMname,"p32",3) == 0) SYM=1;
+        if(strncmp(SYMname,"p62",3) == 0) SYM=1;
 
         strcpy(tmpstring,"ctfrev");         
 	if(*(cgetline(input,tmpstring))=='y')
@@ -307,7 +302,11 @@ int main()
 	if(fgetline(input,tmpstring,phaori)==0)
 	{	
                 printf("Phase Origin................... = %f %f\n",phaori[0],phaori[1]);
-                if(SYM==1) phaori[0]+=180.0;
+                if(SYM==1)
+                {       
+ 		        printf(":: Adding 180deg phaseshift to phase origin, due to screw axis symmetry.\n");
+                        phaori[0]+=180.0;
+                }
         }
         else
  		printf(":: ERROR in Phase Origin assignment.");

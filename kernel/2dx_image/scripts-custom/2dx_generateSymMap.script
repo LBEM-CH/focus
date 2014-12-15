@@ -186,8 +186,6 @@ ${proc_2dx}/linblock "Sourcing generateMap script for p1 symmetry"
 #############################################################################
 #############################################################################
 #
-set phaori_local = ${phaori}
-#
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
     set aphfile = APH/${imagename}_fou_ctf.aph
@@ -204,22 +202,37 @@ else
     set aphfile = APH/${imagename}_syn_ctf.aph
 endif
 #
-echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
 set prefix = ""
 set prename = ""
 #
+set phaori_local = ${phaori}
 source ${proc_2dx}/2dx_generateMap_sub.com
+#
+if ( ${movie_enable} == 'y' ) then
+  echo ":: "
+  ${proc_2dx}/linblock "Sourcing generateMap script for MovieMode reconstruction in ${SYM} symmetry"
+  echo ":: "
+  set aphfile = APH/${imagename}_movie_fou_ctf.aph
+  echo "# IMAGE: ${aphfile} <APH: MovieMode Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  set prefix = "movie_"
+  set prename = "Movie "
+  #
+  set phaori_local = ${phaori}
+  source ${proc_2dx}/2dx_generateMap_sub.com
+  #
+endif
 #
 if ( ${ML_doit} == 'y' ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
-  set phaori_local = "0.0,0.0"
   set aphfile = APH/ML_result.aph
-  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
   set prefix = "ML_"
   set prename = "ML "
   #
+  set phaori_local = "0.0,0.0"
   source ${proc_2dx}/2dx_generateMap_sub.com
   #
 endif
@@ -266,22 +279,42 @@ else
     set aphfile = APH/${imagename}_syn_ctf.aph
 endif
 #
-echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
 set prefix = ""
 set prename = ""
 #
+set phaori_local = ${phaori}
 source ${proc_2dx}/2dx_generateMap_sub.com
+#
+#
+#
+if ( ${movie_enable} == 'y' ) then
+  echo ":: "
+  ${proc_2dx}/linblock "Sourcing generateMap script for MovieMode reconstruction in ${SYM} symmetry"
+  echo ":: "
+  set aphfile = APH/${imagename}_movie_fou_ctf.aph
+  echo "# IMAGE: ${aphfile} <APH: MovieMode Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  set prefix = "movie_"
+  set prename = "Movie "
+  #
+  set phaori_local = ${phaori}
+  source ${proc_2dx}/2dx_generateMap_sub.com
+  #
+endif
+#
+#
+#
 #
 if ( ${ML_doit} == 'y' ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
-  set phaori_local = "180.0,180.0"
   set aphfile = APH/ML_result.aph
-  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
   set prefix = "ML_"
   set prename = "ML "
   #
+  set phaori_local = "0.0,0.0"
   source ${proc_2dx}/2dx_generateMap_sub.com
   #
 endif

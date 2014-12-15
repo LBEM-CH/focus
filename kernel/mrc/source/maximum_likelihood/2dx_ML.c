@@ -21,6 +21,7 @@ float  B_fac,A,lattice[4],phaori[2], defocus[3];
 int    mask_radius,Iteration, ref_ind, correct_CTF,Symmetry,threshold_method,lp_method;
 int    realcell_x1, realcell_y1, realcell_x, realcell_y, oversized_x,oversized_y,do_whiten, DS_ratio;
 int    doMLorCC,contrast;
+int    SYM;
 
 
 
@@ -35,7 +36,7 @@ int    doMLorCC,contrast;
 
 int main()
 { 
-	int dir,m,i,j,k,n,num_line, Symmetry1, SYM;
+	int dir,m,i,j,k,n,num_line, Symmetry1;
 	int num_images,  *pa,sx;   /*  Prepare for merge Nimages images together into a stack of num_images patches*/
 
 	FILE *input;

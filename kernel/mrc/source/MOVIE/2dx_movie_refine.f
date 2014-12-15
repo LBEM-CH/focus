@@ -165,7 +165,7 @@ C
         CALL IOPEN(cline,10,CFORM,MODE,NXYZ(1),NXYZ(2),
      +           NXYZ(3),'OLD',STEPR,TITLE)
 C
-        WRITE(*,'('':Reading image '',A,'', NX,NY = '',2I10)')
+        WRITE(*,'(''Reading image '',A,'', NX,NY = '',2I10)')
      .     cline(1:k),NXYZ(1),NXYZ(2)
 C
 C-------Allocate large arrays:
@@ -533,54 +533,63 @@ C
       do K=IMINA,IMAXA
         do L=IMINB,IMAXB
           if(PEAK(K,L).ne.0.0)then
+C-----------This is against ugly rounding errors, showing as 0.999 results
+            ROLASTX(K,L)=ROLASTX(K,L)+0.001
+            ROLASTY(K,L)=ROLASTY(K,L)+0.001
+C            ROFIRSTX(K,L)=0.0
+C            ROFIRSTY(K,L)=0.0
+C            ROLASTX(K,L)=0.0
+C            ROLASTY(K,L)=0.0
+C            ROCENX(K,L)=0.0
+C            ROCENY(K,L)=0.0
             write(11,'(2I6,3G13.6,6F12.3)')
      .         K,L,XPOSIT(K,L),YPOSIT(K,L),PEAK(K,L),
      .         ROFIRSTX(K,L),ROFIRSTY(K,L),
-     .         ROLASTX(K,L)+0.003,ROLASTY(K,L)+0.003,
+     .         ROLASTX(K,L),ROLASTY(K,L),
      .         ROCENX(K,L),ROCENY(K,L)
           endif
         enddo
       enddo
       close(11)
 C
-      do iframe = 1,IFRAMS
-        if(iframe.lt.10)then
-          write(cline,'(''frames/PROFDATA_'',I1,''.dat'')')iframe
-        elseif(iframe.lt.100)then
-          write(cline,'(''frames/PROFDATA_'',I2,''.dat'')')iframe
-        else
-          write(cline,'(''frames/PROFDATA_'',I3,''.dat'')')iframe
-        endif
-        call shorten(cline,k)
-        write(cline2,'(''\rm -f '',A)')cline(1:k)
-        call shorten(cline2,k)
-        call system(cline2(1:k))
-        call shorten(cline,k)
-        open(10,FILE=cline(1:k),STATUS='NEW',ERR=980)
-        do i=1,5
-          call shorten(comment(i),k)
-          write(10,'(A)')comment(i)(1:k)
-        enddo
-        write(10,*)NC,NR,IC,IR,A1,A2,B1,B2,IMINA,IMAXA,IMINB,IMAXB
-        WRITE(10,*)DENMAX
-        do K=IMINA,IMAXA
-          do L=IMINB,IMAXB
-            if(PEAK(K,L).ne.0.0)then
-              RX=XPOSIT(K,L)+ROFIRSTX(K,L)*REAL(IFRAMS-iframe)/REAL(IFRAMS-1)
-     .                      +ROLASTX(K,L) *REAL(iframe-1)     /REAL(IFRAMS-1)
-     .                      +ROCENX(K,L)
-              RY=YPOSIT(K,L)+ROFIRSTY(K,L)*REAL(IFRAMS-iframe)/REAL(IFRAMS-1)
-     .                      +ROLASTY(K,L) *REAL(iframe-1)     /REAL(IFRAMS-1)
-     .                      +ROCENY(K,L)
-            else
-              RX=0.0
-              RY=0.0
-            endif
-            WRITE(10,'(3G16.6)')RX,RY,PEAK(K,L)
-          enddo
-        enddo
-        close(10)
-      enddo
+C      do iframe = 1,IFRAMS
+C        if(iframe.lt.10)then
+C          write(cline,'(''frames/PROFDATA_'',I1,''.dat'')')iframe
+C        elseif(iframe.lt.100)then
+C          write(cline,'(''frames/PROFDATA_'',I2,''.dat'')')iframe
+C        else
+C          write(cline,'(''frames/PROFDATA_'',I3,''.dat'')')iframe
+C        endif
+C        call shorten(cline,k)
+C        write(cline2,'(''\rm -f '',A)')cline(1:k)
+C        call shorten(cline2,k)
+C        call system(cline2(1:k))
+C        call shorten(cline,k)
+C        open(10,FILE=cline(1:k),STATUS='NEW',ERR=980)
+C        do i=1,5
+C          call shorten(comment(i),k)
+C          write(10,'(A)')comment(i)(1:k)
+C        enddo
+C        write(10,*)NC,NR,IC,IR,A1,A2,B1,B2,IMINA,IMAXA,IMINB,IMAXB
+C        WRITE(10,*)DENMAX
+C        do K=IMINA,IMAXA
+C          do L=IMINB,IMAXB
+C            if(PEAK(K,L).gt.0.0)then
+C              RX=XPOSIT(K,L)+ROFIRSTX(K,L)*REAL(IFRAMS-iframe)/REAL(IFRAMS-1)
+C     .                      +ROLASTX(K,L) *REAL(iframe-1)     /REAL(IFRAMS-1)
+C     .                      +ROCENX(K,L)
+C              RY=YPOSIT(K,L)+ROFIRSTY(K,L)*REAL(IFRAMS-iframe)/REAL(IFRAMS-1)
+C     .                      +ROLASTY(K,L) *REAL(iframe-1)     /REAL(IFRAMS-1)
+C     .                      +ROCENY(K,L)
+C            else
+C              RX=0.0
+C              RY=0.0
+C            endif
+C            WRITE(10,'(3G16.6)')RX,RY,PEAK(K,L)
+C          enddo
+C        enddo
+C        close(10)
+C      enddo
 C
       goto 999
 C

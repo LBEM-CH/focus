@@ -20,6 +20,7 @@ if __name__ == "__main__":
 	B = frame_f.filter_by_image(1.0/(w+0.001))
 	
 
-	o = filt_tophatl(B, 0.48)
-	o.write_image(filename_out)
+	# o = filt_tophatl(B, 0.48)
+	# o.write_image(filename_out)
+	B.write_image(filename_out)
 	

@@ -101,6 +101,7 @@ void amp_ph(int nx, int ny, int sx, float *real_lat, float *image1,float *image2
            tmp_phase=phase[IDX(i,j,sx,sx)]*180.0/3.141592654; 
            tmp_phase+=180.0*i;
            tmp_phase+=180.0*j;
+           if(SYM==1)tmp_phase+=180.0*i;
            while(tmp_phase>360.0)tmp_phase-=360.0;
            if(tmp_phase<0)tmp_phase+=360.0;
            fprintf(output," %4d %4d %11.1e %11.1f %3d %11.1f %11.3f\n",i-sx/2,j-sx/2,amp[IDX(i,j,sx,sx)],tmp_phase,IQ,rback,ctf); 

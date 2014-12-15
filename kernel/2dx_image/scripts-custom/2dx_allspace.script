@@ -58,6 +58,7 @@ set test_spacegroups_val = "ALL"
 # DISPLAY: allspace_stepnum
 # DISPLAY: allspace_IQMAX
 # DISPLAY: allspace_RESMAX
+# DISPLAY: movie_enable
 #
 #$end_local_vars
 #
@@ -90,6 +91,7 @@ set allspace_step = ""
 set allspace_stepnum = ""
 set allspace_IQMAX = ""
 set allspace_RESMAX = ""
+set movie_enable = ""
 #
 #$end_vars
 #
@@ -145,12 +147,22 @@ if ( ${allspace_warn} == '1' ) then
   ${proc_2dx}/linblock "#"
 endif  
 #
-if ( ${SYN_Unbending} == "0" ) then
+if ( ${movie_enable} == "y" ) then
+  if ( ${SYN_Unbending} == "0" ) then
+    # FouFilter Unbending result is used:
+    set aphfile = APH/${iname}_movie_fou_ctf.aph
+  else
+    # Synthetic Unbending result is used:
+    set aphfile = APH/${iname}_movie_syn_ctf.aph
+  endif
+else
+  if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
     set aphfile = APH/${iname}_fou_ctf.aph
-else
+  else
     # Synthetic Unbending result is used:
     set aphfile = APH/${iname}_syn_ctf.aph
+  endif
 endif
 #
 setenv IN ${aphfile}

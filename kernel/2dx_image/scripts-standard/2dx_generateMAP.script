@@ -190,8 +190,6 @@ echo ":: "
 #############################################################################
 #############################################################################
 #
-set phaori_local = ${phaori}
-#
 if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:
     set aphfile = APH/${imagename}_fou_ctf.aph
@@ -226,18 +224,19 @@ echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: CCUNBEND Movie Profiles>" >> LO
 set prefix = ""
 set prename = ""
 #
+set phaori_local = ${phaori}
 source ${proc_2dx}/2dx_generateMap_sub.com
 #
 if ( ${ML_doit} == 'y' ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
-  set phaori_local = "0.0,0.0"
   set aphfile = APH/ML_result.aph
   echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
   set prefix = "ML_"
   set prename = "ML "
   #
+  set phaori_local = "0.0,0.0"
   source ${proc_2dx}/2dx_generateMap_sub.com
   #
 endif
@@ -252,6 +251,7 @@ if ( ${movie_enable} == "y" ) then
     set prefix = "movie_"
     set prename = "MovieMode "
     #
+    set phaori_local = ${phaori}
     source ${proc_2dx}/2dx_generateMap_sub.com
   else
     echo ":: "

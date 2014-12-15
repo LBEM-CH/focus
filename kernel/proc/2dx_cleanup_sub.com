@@ -24,6 +24,7 @@ echo dummy > 2dx_calcpositions.dummy
 echo dummy > REFdummy.hkl
 echo dummy > dummy.results
 echo dummy > results.spi.0
+echo dummy > TMP_1.txt
 echo dummy > dummy.plt
 echo dummy > dummy_phase_zero.mtz
 echo dummy > dummy-profile.dat
@@ -237,6 +238,9 @@ echo dummy > dummy.TMP
 \rm -f avrg.hnegkl
 \rm -f centric_phase_zero.hkl
 \rm -f *_phase_zero.mtz
+\rm -f TMP_*
+\rm -f fort.3
+
 #
 \rm *.results
 \rm -rf LOGS/*.log

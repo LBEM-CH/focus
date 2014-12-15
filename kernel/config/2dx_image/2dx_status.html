@@ -21,7 +21,7 @@ function load()
 {
   var tag;
   var values = document.getElementsByTagName("*");
-  re = /.*(U._IQ|R._.|PHARES_NUM_SPOTS).*/
+  re = /.*(U._IQ|U.._IQ|R._.|PHARES_NUM_SPOTS).*/
   for(i = 0; i < values.length; i++)
   {
     var key = values[i].id;
@@ -41,57 +41,83 @@ function load()
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TBODY>
 <TR>
-<TD colspan=2 align="left" height=19>Th.Mag=</TD>
+<TD colspan=2 align="left" height=19><B>Calc. Mag=</B></TD>
 <TD colspan=3 align="left"  height=19 ID="CALCULATEDMAG">---</TD>
-<TD colspan=2 align="right" height=19><B>QVAL=</B></TD>
-<TD colspan=2 align="right" height=19 ID="QVAL"><B>---</B></TD></TR>
+<TD colspan=3 align="right" height=19><B>Last QVAL=</B></TD>
+<TD colspan=1 align="right" height=19 ID="QVAL"><B>---</B></TD></TR>
+</TABLE>
+<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TBODY>
-<TR><TD colspan=4 align="left">IQs Unb.I</TD>
-<TD colspan=3 align="right">QVal1=</TD>
-<TD colspan=2 align="right" ID="QVAL1">---</TD></TR>
 <TR>
+<TD align="left"><B><U>Unbend</U></B></TD>
+<TD align="center" width="10%"><I>IQ1</I></TD>
+<TD align="center" width="10%"><I>IQ2</I></TD>
+<TD align="center" width="10%"><I>IQ3</I></TD>
+<TD align="center" width="10%"><I>IQ4</I></TD>
+<TD align="center" width="10%"><I>IQ5</I></TD>
+<TD align="center" width="10%"><I>IQ6</I></TD>
+<TD align="right" colspan=2>QVAL</TD>
+</TR>
+<TR>
+<TD align="left">Unb.I</TD>
 <TD align="center" ID="U1_IQ1"><I>-</I></TD>
 <TD align="center" ID="U1_IQ2"><I>-</I></TD>
 <TD align="center" ID="U1_IQ3"><I>-</I></TD>
 <TD align="center" ID="U1_IQ4"><I>-</I></TD>
 <TD align="center" ID="U1_IQ5"><I>-</I></TD>
 <TD align="center" ID="U1_IQ6"><I>-</I></TD>
-<TD align="center" ID="U1_IQ7"><I>-</I></TD>
-<TD align="center" ID="U1_IQ8"><I>-</I></TD>
-<TD align="center" ID="U1_IQ9"><I>-</I></TD>
+<TD align="right"> </TD>
+<TD align="right" ID="QVAL1">---</TD>
 </TR>
-<TBODY>
-<TR><TD colspan=4 align="left">IQs Unb.II</TD>
-<TD colspan=3 align="right">QVal2=</TD>
-<TD colspan=2 align="right" ID="QVAL2">---</TD></TR>
 <TR>
+<TD align="left">Unb.II</TD>
 <TD align="center" ID="U2_IQ1"><I>-</I></TD>
 <TD align="center" ID="U2_IQ2"><I>-</I></TD>
 <TD align="center" ID="U2_IQ3"><I>-</I></TD>
 <TD align="center" ID="U2_IQ4"><I>-</I></TD>
 <TD align="center" ID="U2_IQ5"><I>-</I></TD>
 <TD align="center" ID="U2_IQ6"><I>-</I></TD>
-<TD align="center" ID="U2_IQ7"><I>-</I></TD>
-<TD align="center" ID="U2_IQ8"><I>-</I></TD>
-<TD align="center" ID="U2_IQ9"><I>-</I></TD>
+<TD align="right"> </TD>
+<TD align="right" ID="QVAL2">---</TD>
 </TR>
-<TBODY>
-<TR><TD colspan=4 align="left">IQs Unb.Mov</TD>
-<TD colspan=3 align="right">QValM=</TD>
-<TD colspan=2 align="right" ID="QValS">---</TD></TR>
 <TR>
+<TD align="left">MovA</TD>
+<TD align="center" ID="UMA_IQ1"><I>-</I></TD>
+<TD align="center" ID="UMA_IQ2"><I>-</I></TD>
+<TD align="center" ID="UMA_IQ3"><I>-</I></TD>
+<TD align="center" ID="UMA_IQ4"><I>-</I></TD>
+<TD align="center" ID="UMA_IQ5"><I>-</I></TD>
+<TD align="center" ID="UMA_IQ6"><I>-</I></TD>
+<TD align="right"> </TD>
+<TD align="right" ID="QValMA">---</TD>
+</TR>
+<TR>
+<TD align="left">MovB</TD>
+<TD align="center" ID="UMB_IQ1"><I>-</I></TD>
+<TD align="center" ID="UMB_IQ2"><I>-</I></TD>
+<TD align="center" ID="UMB_IQ3"><I>-</I></TD>
+<TD align="center" ID="UMB_IQ4"><I>-</I></TD>
+<TD align="center" ID="UMB_IQ5"><I>-</I></TD>
+<TD align="center" ID="UMB_IQ6"><I>-</I></TD>
+<TD align="right"> </TD>
+<TD align="right" ID="QValMB">---</TD>
+</TR>
+<TR>
+<TD align="left">Syn</TD>
 <TD align="center" ID="US_IQ1"><I>-</I></TD>
 <TD align="center" ID="US_IQ2"><I>-</I></TD>
 <TD align="center" ID="US_IQ3"><I>-</I></TD>
 <TD align="center" ID="US_IQ4"><I>-</I></TD>
 <TD align="center" ID="US_IQ5"><I>-</I></TD>
 <TD align="center" ID="US_IQ6"><I>-</I></TD>
-<TD align="center" ID="US_IQ7"><I>-</I></TD>
-<TD align="center" ID="US_IQ8"><I>-</I></TD>
-<TD align="center" ID="US_IQ9"><I>-</I></TD>
+<TD align="right"> </TD>
+<TD align="right" ID="QValS">---</TD>
 </TR>
+</TABLE>
+<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TBODY>
-<TR><TD ROWSPAN=2 COLSPAN=2 height=24>PowerBins<BR>&nbsp;(noise=7)</TD>
+<TR>
+<TD ROWSPAN=2 COLSPAN=1 height=24><B><U>PowerBins</U></B><BR>&nbsp;(noise=7)</TD>
 <TD align="center">[A]</TD>
 <TD align="center" ID="RB_1"><I>-</I></TD>
 <TD align="center" ID="RB_2"><I>-</I></TD>
@@ -150,7 +176,7 @@ function load()
 </TABLE>
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TR>
-<TD align="left">Sym.PhaRes= </TD>
+<TD align="left"><B>Sym.PhaRes=</B></TD>
 <TD align="left" ID="PHARES_SYM">-</TD>
 <TD align="right"> Num.Spots= </TD>
 <TD align="right" ID="PHARES_NUM_SPOTS">-</TD>

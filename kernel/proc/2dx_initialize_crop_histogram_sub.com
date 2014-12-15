@@ -24,6 +24,7 @@ eot
   #
   set goodmin = `head -6 labelh.tmp | tail -1`
   set goodmax = `head -7 labelh.tmp | tail -1`
+  \rm -f labelh.tmp
   #
   if ( ${crop_histogram} == 'y' ) then
     #############################################################################

@@ -20,18 +20,32 @@ if __name__ == "__main__":
 	i = int(sys.argv[3])
         imagesidelength = int(sys.argv[4])
 	
-	print freq
+	sigma = imagesidelength/2.0 * freq
+	# print ":     Frequency = ", freq, "      Sigma = ", sigma
+
+	w = 100.0 * sigma * model_gauss(sigma, imagesidelength, imagesidelength)
+	cen = Util.window(w,5,5,1,0,0,0)
+	s = info(cen)
+	max = s[3]
+	if max > 0:
+		w /= max
 	
 	frame = get_image(filename_in)
-	frame = filt_tophatl(frame, freq)
+
+	frame_f = fft(frame)
+
+	frame = frame_f.filter_by_image(w)
+
+	# B = frame_f.filter_by_image(w)
+	# frame = filt_tophatl(B, 0.48)
+
 	frame.write_image(filename_in)
-	
-	if i != 1:
-		w = get_image("weight.mrc")
-		w += model_circle(imagesidelength*freq, imagesidelength, imagesidelength)
+		
+	if i == 1:
 		w.write_image("weight.mrc")
 	else:
-		w = model_circle(imagesidelength*freq, imagesidelength, imagesidelength)
-		w.write_image("weight.mrc")
+		g = get_image("weight.mrc")
+		g += w
+		g.write_image("weight.mrc")
 		
 	

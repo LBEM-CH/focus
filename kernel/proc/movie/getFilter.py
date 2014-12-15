@@ -5,9 +5,10 @@ import os
 
 def w(n, t, a, b):
 	if t == 2:
-		return 0.5
+		r = 1.0
 	else:
-		return a*exp(b*n)
+		r = a*exp(b*n)
+	return r
 
 def getCutoff(n, t, a, b):
 	# return min(0.5, w(n, t, a, b))

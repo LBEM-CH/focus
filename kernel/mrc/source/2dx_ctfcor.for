@@ -78,6 +78,7 @@ C
 C
       COMPLEX CFFT(LTPIC*LTPIC)
       COMPLEX CFFTTILE(LTPIC,LTPIC)
+      COMPLEX CFFTCTFC(LTPIC,LTPIC)
 C
       REAL ABOX(LTPIC*LTPIC)
       COMPLEX CBOX(LTPIC)
@@ -533,14 +534,16 @@ C
               if(IMODE.eq.1)then
 C                write(6,'('':Applying CTF Phase flipping only'')')
                 IF(CTFTILE(iox,ioy).gt.0.0)then
-                  CFFTTILE(iox,ioy) = -1.0*CFFTTILE(iox,ioy)
+                  CFFTCTFC(iox,ioy) = -1.0*CFFTTILE(iox,ioy)
+                else
+                  CFFTCTFC(iox,ioy) =  1.0*CFFTTILE(iox,ioy)
                 endif
               elseif(IMODE.eq.2)then
 C               write(6,'('':Applying CTF multiplication'')')
-                CFFTTILE(iox,ioy)=CFFTTILE(iox,ioy)*(-1.0*CTFTILE(iox,ioy))
+                CFFTCTFC(iox,ioy)=CFFTTILE(iox,ioy)*(-1.0*CTFTILE(iox,ioy))
               elseif(IMODE.eq.3)then
 C               write(6,'('':Applying Wiener filtration'')')
-                CFFTTILE(iox,ioy)=CFFTTILE(iox,ioy)*(-1.0*CTFTILE(iox,ioy))/(CTFTILE(iox,ioy)**2+RNOISE)
+                CFFTCTFC(iox,ioy)=CFFTTILE(iox,ioy)*(-1.0*CTFTILE(iox,ioy))/(CTFTILE(iox,ioy)**2+RNOISE)
               endif
               APOWERTILE(iox,ioy)=(AIMAG(CFFTTILE(iox,ioy))**2+REAL(CFFTTILE(iox,ioy))**2)*SCAL**2
             enddo
@@ -556,8 +559,8 @@ C
               iiy=iy+ITILEOUTER/2
               if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
               ID=(ix + ITILEOUTER/2*(iy-1))*2
-              ABOX(ID-1)= REAL(CFFTTILE(iix,iiy))
-              ABOX(ID  )=AIMAG(CFFTTILE(iix,iiy))
+              ABOX(ID-1)= REAL(CFFTCTFC(iix,iiy))
+              ABOX(ID  )=AIMAG(CFFTCTFC(iix,iiy))
             enddo
           enddo
 C
@@ -625,6 +628,7 @@ C               Left half of PS: Copy synthetic CTF
                 PSTILE(ix,iy)=CTFTILE(iox,ioy)**2
               else
 C               Right half of PS: Copy FFT of CTF-corrected tile
+C               Right half of PS: Copy FFT of original image tile
                 PSTILE(ix,iy)=MIN(APOWERTILE(iox,ioy)/DAMPMAX,1.0)
               endif
 C

@@ -221,33 +221,33 @@ C
 CHENN>
       IOUT2=0
       IF(IOUT.EQ.2) THEN
-      IOUT2=11
-      WRITE(*,'('' '')')
-      WRITE(*,'('' # type in second output file name'')')
-      WRITE(*,'('' '')')
-      READ(5,1005) FILOUT2
-      WRITE(6,'(A)') FILOUT2
-      WRITE(*,'('' '')')
-      WRITE(*,'('' # type in name pattern'')')
-      WRITE(*,'('' '')')
-      READ(5,1005) CNAMPAT
-      WRITE(6,'(A)') CNAMPAT
-      OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='UNKNOWN')
+        IOUT2=11
+        WRITE(*,'('' '')')
+        WRITE(*,'('' # type in second output file name'')')
+        WRITE(*,'('' '')')
+        READ(5,1005) FILOUT2
+        WRITE(6,'(A)') FILOUT2
+        WRITE(*,'('' '')')
+        WRITE(*,'('' # type in name pattern'')')
+        WRITE(*,'('' '')')
+        READ(5,1005) CNAMPAT
+        WRITE(6,'(A)') CNAMPAT
+        OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='UNKNOWN')
       END IF
 C
       IF(IOUT.EQ.3) THEN
-      IOUT2=11
-      WRITE(*,'('' '')')
-      WRITE(*,'('' # type in spotlist output file name'')')
-      WRITE(*,'('' '')')
-      READ(5,1005) FILOUT2
-      WRITE(6,'(A)') FILOUT2
-      OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='UNKNOWN')
-      WRITE(*,'('' '')')
-      WRITE(*,'('' # type IQ max value'')')
-      WRITE(*,'('' '')')
-      READ(5,*) IQMAX
-      WRITE(6,*) IQMAX
+        IOUT2=11
+        WRITE(*,'('' '')')
+        WRITE(*,'('' # type in spotlist output file name'')')
+        WRITE(*,'('' '')')
+        READ(5,1005) FILOUT2
+        WRITE(6,'(A)') FILOUT2
+        OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='UNKNOWN')
+        WRITE(*,'('' '')')
+        WRITE(*,'('' # type IQ max value'')')
+        WRITE(*,'('' '')')
+        READ(5,*) IQMAX
+        WRITE(6,*) IQMAX
       END IF
 CHENN<
 C
@@ -901,9 +901,11 @@ C
 C
           write(IOUT2,'(''set PSMAX = '',I12)')ICENTRE
 C
+          call shorten(CNAMPAT,k)
+          if(k.gt.3)k=3
           do J = 1,9
-            write(IOUT2,'(''set '',A2,''_IQ'',I1,'' = '',I4)')
-     1        CNAMPAT(1:2),J,NIQ(J)
+            write(IOUT2,'(''set '',A,''_IQ'',I1,'' = '',I4)')
+     1        CNAMPAT(1:k),J,NIQ(J)
           enddo
 C
 C        WRITE(IOUT2,1254)NEWMAX,(NIQ(J),J=1,9),ILSUM,RSCAMAX,RLMAX
@@ -1407,3 +1409,29 @@ C third calculate the overall rms background
       RMSBK=RMSBK/1.10          ! fudge factor to restore earlier scale of A/B
       RETURN
       END
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+
+

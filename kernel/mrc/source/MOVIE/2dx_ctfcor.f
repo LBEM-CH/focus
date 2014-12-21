@@ -89,7 +89,6 @@ C
       REAL CTFTILE(LTPIC*LTPIC)
       REAL PSTILE(LTPIC*LTPIC)
 C
-      COMPLEX CFFT(LTPIC*LTPIC)
       COMPLEX CFFTTILE(LTPIC*LTPIC)
       COMPLEX CFFTCTFC(LTPIC*LTPIC)
 C
@@ -122,6 +121,8 @@ C
       COMPLEX CVAL
 C
       LOGICAL LDEBUG
+      LOGICAL LTILEFILE
+      LOGICAL LCTFSUM
 C
       CHARACTER*200 INFILE,OUTFILE,TILEFILE,PSFILE,CTFFILE
       CHARACTER*20 CSTIN
@@ -232,14 +233,31 @@ C
       READ(5,'(A)') TILEFILE
       call shorten(TILEFILE,k)
       write(6,'(''   Read: '',A)')TILEFILE(1:k)
+      if(TILEFILE(1:1).eq."#")then
+        LTILEFILE = .false. 
+      else
+        LTILEFILE = .true. 
+      endif
 C
       READ(5,'(A)') PSFILE
       call shorten(PSFILE,k)
       write(6,'(''   Read: '',A)')PSFILE(1:k)
+      if(PSFILE(1:1).eq."#")then
+        LTILEFILE = .false. 
+      endif
+      if(.not. LTILEFILE)then
+        write(6,'('' Will skip calculation of Tile and PS images'')')
+      endif
 C
       READ(5,'(A)') CTFFILE
       call shorten(CTFFILE,k)
       write(6,'(''   Read: '',A)')CTFFILE(1:k)
+      if(ctffile(1:1).eq."#")then
+        LCTFSUM = .false. 
+        write(6,'('' Will skip calculation of summed CTF image'')')
+      else
+        LCTFSUM = .true. 
+      endif
 C
       WRITE(6,'(''TLTAXA,TLTANG'')')
       read(5,*)TLTAXA,TLTANG
@@ -479,9 +497,7 @@ C---------Cut outer tile
             do ix = 1,ITILEOUTER
               iix = ixtilestart - 1 - (ITILEOUTER-ITILEINNER)/2 + ix
               iiy = iytilestart - 1 - (ITILEOUTER-ITILEINNER)/2 + iy
-              VAL=APIC(ID(iix,iiy,NY))
-C              if(itilex.eq.1 .and. itiley.eq.1) VAL=100.0
-              AOUTERTILE(ID(ix,iy,LTPIC))=VAL
+              AOUTERTILE(ID(ix,iy,LTPIC))=APIC(ID(iix,iiy,NY))
             enddo
           enddo
 C
@@ -553,34 +569,50 @@ C
             enddo
           enddo
 C
+          if(LCTFSUM)then
 C----------------------------------------
-C---------Sum up the full-size CTFs with local defoci
+C-----------Sum up the full-size CTFs with local defoci
 C----------------------------------------
 C
-          THETATR=WL/(RPIXEL*NX)
-          DO ix=0,NX/2
-            DO iy=-NY/2,NY/2
-              if(ix.ne.0 .or. iy.ge.0)then
-                CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
-     +                ANGASTRAD,THETATR,ix,iy)
-                I=ix+NX/2+1
-                J=iy+NY/2+1
-                IR=ID(I,J,NY)
-                CTFPIC(IR)=CTFPIC(IR)+CTFV*CTFV
-                I=-ix+NX/2+1
-                J=-iy+NY/2+1
-                IS=ID(I,J,NY)
-                CTFPIC(IS)=CTFPIC(IR)
-              endif
+            THETATR=WL/(RPIXEL*NX)
+C
+C---This would be nice, but it leads to a "noisy" (???) CTF plot.
+C---Is this a memory collision?
+C-----------!$OMP PARALLEL DO
+            DO ix=0,NX/2
+              DO iy=-NY/2,NY/2
+                if(ix.ne.0 .or. iy.ge.0)then
+                  CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
+     +                  ANGASTRAD,THETATR,ix,iy)
+                  I=ix+NX/2+1
+                  J=iy+NY/2+1
+                  IR=ID(I,J,NY)
+                  CT2PIC(IR)=CTFV*CTFV
+                endif
+              enddo
             enddo
-          enddo
+C
+            DO ix=0,NX/2
+              DO iy=-NY/2,NY/2
+                if(ix.ne.0 .or. iy.ge.0)then
+                  I=ix+NX/2+1
+                  J=iy+NY/2+1
+                  IR=ID(I,J,NY)
+                  CTFPIC(IR)=CTFPIC(IR)+CT2PIC(IR)
+                  I=-ix+NX/2+1
+                  J=-iy+NY/2+1
+                  IS=ID(I,J,NY)
+                  CTFPIC(IS)=CTFPIC(IR)
+                endif
+              enddo
+            enddo
+          endif
 C
 C---------copy outer tile into ABOX array:
 C
           do iy = 1,ITILEOUTER 
             do ix = 1,ITILEOUTER 
-              IS=ix + ITILEOUTER*(iy-1)
-              ABOX(IS)=AOUTERTILE(ID(ix,iy,LTPIC))
+              ABOX(ID(ix,iy,ITILEOUTER))=AOUTERTILE(ID(ix,iy,LTPIC))
             enddo
           enddo
 C
@@ -590,23 +622,13 @@ C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
           call RLFT3(ABOX,CBOX,ITILEOUTER,ITILEOUTER,1,1)
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
-C---------Calculate Powerspectrum for verfication
-C
-          do iy = 1,ITILEOUTER 
-            do ix = 1,ITILEOUTER/2
-              IR=(ix + ITILEOUTER/2*(iy-1))*2
-              IS= ix + ITILEOUTER/2*(iy-1)
-              CFFT(IS)=CMPLX(REAL(ABOX(IR-1)),REAL(ABOX(IR)))
-            enddo
-          enddo
-C
           do iy = 1,ITILEOUTER
             do ix = 1,ITILEOUTER/2
-              IS=ix + ITILEOUTER/2*(iy-1)
+              IR=ID(ix,iy,ITILEOUTER/2)*2
               iix=ix+ITILEOUTER/2
               iiy=iy+ITILEOUTER/2
               if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
-              CFFTTILE(ID(iix,iiy,LTPIC))=CFFT(IS)
+              CFFTTILE(ID(iix,iiy,LTPIC))=CMPLX(REAL(ABOX(IR-1)),REAL(ABOX(IR)))
             enddo
           enddo
 C
@@ -618,25 +640,30 @@ C
             do ix = 1,ITILEOUTER/2
               iox=ix+ITILEOUTER/2
               ioy=iy
+              IR=ID(iox,ioy,LTPIC)
               if(IMODE.eq.1)then
 C                write(6,'('':Applying CTF Phase flipping only'')')
-                IF(CTFTILE(ID(iox,ioy,LTPIC)).gt.0.0)then
-                  CFFTCTFC(ID(iox,ioy,LTPIC)) = -1.0*CFFTTILE(ID(iox,ioy,LTPIC))
+                IF(CTFTILE(IR).gt.0.0)then
+                  CFFTCTFC(IR) = -1.0*CFFTTILE(IR)
                 else
-                  CFFTCTFC(ID(iox,ioy,LTPIC)) =  1.0*CFFTTILE(ID(iox,ioy,LTPIC))
+                  CFFTCTFC(IR) =  1.0*CFFTTILE(IR)
                 endif
               elseif(IMODE.eq.2)then
 C               write(6,'('':Applying CTF multiplication'')')
-                CFFTCTFC(ID(iox,ioy,LTPIC))=CFFTTILE(ID(iox,ioy,LTPIC))*(-1.0*CTFTILE(ID(iox,ioy,LTPIC)))
+                CFFTCTFC(IR)=CFFTTILE(IR)*(-1.0*CTFTILE(IR))
               elseif(IMODE.eq.3)then
 C               write(6,'('':Applying Wiener filtration'')')
-                CFFTCTFC(ID(iox,ioy,LTPIC))=CFFTTILE(ID(iox,ioy,LTPIC))*(-1.0*CTFTILE(ID(iox,ioy,LTPIC)))/(CTFTILE(ID(iox,ioy,LTPIC))**2+RNOISE)
+                CFFTCTFC(IR)=CFFTTILE(IR)*(-1.0*CTFTILE(IR))/(CTFTILE(IR)**2+RNOISE)
               endif
-              APOWERTILE(ID(iox,ioy,LTPIC))=(AIMAG(CFFTTILE(ID(iox,ioy,LTPIC)))**2+REAL(CFFTTILE(ID(iox,ioy,LTPIC)))**2)*SCAL**2
+              if(LTILEFILE)then
+                APOWERTILE(IR)=(AIMAG(CFFTTILE(IR))**2+REAL(CFFTTILE(IR))**2)*SCAL**2
+              endif
             enddo
           enddo
 C         Mask central pixel at origin
-          APOWERTILE(ID(ITILEOUTER/2+1,ITILEOUTER/2+1,LTPIC))=0.0
+          if(LTILEFILE)then
+            APOWERTILE(ID(ITILEOUTER/2+1,ITILEOUTER/2+1,LTPIC))=0.0
+          endif
 C
 C---------Calculate inverse in-place Fourier Transform from outer tile (AOUTERTILE)
 C
@@ -645,9 +672,10 @@ C
               iix=ix+ITILEOUTER/2
               iiy=iy+ITILEOUTER/2
               if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
-              IR=(ix + ITILEOUTER/2*(iy-1))*2
-              ABOX(IR-1)= REAL(CFFTCTFC(ID(iix,iiy,LTPIC)))
-              ABOX(IR  )=AIMAG(CFFTCTFC(ID(iix,iiy,LTPIC)))
+              IS=ID(iix,iiy,LTPIC)
+              IR=ID(ix,iy,ITILEOUTER/2)*2
+              ABOX(IR-1)= REAL(CFFTCTFC(IS))
+              ABOX(IR  )=AIMAG(CFFTCTFC(IS))
             enddo
           enddo
 C
@@ -657,48 +685,49 @@ C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
           do iy = 1,ITILEOUTER 
             do ix = 1,ITILEOUTER
-              IS= ix + ITILEOUTER*(iy-1)
-              AOUTERTILE(ID(ix,iy,LTPIC))=ABOX(IS)
+              AOUTERTILE(ID(ix,iy,LTPIC))=ABOX(ID(ix,iy,ITILEOUTER))
             enddo
           enddo
 C
-C---------Calculate DAMPMAX value, where 10% of pixels in POWER are above DAMPMAX
+          if(LTILEFILE)then
+C-----------Calculate DAMPMAX value, where 10% of pixels in POWER are above DAMPMAX
 C
-          DAMPMAX=-1.0E10
-          do iy = 1,ITILEINNER
-            do ix = 1,ITILEINNER/2
-              iox=ix+ITILEOUTER/2
-              ioy=iy+(ITILEOUTER-ITILEINNER)/2
-              if(DAMPMAX.lt.APOWERTILE(ID(iox,ioy,LTPIC)))DAMPMAX=APOWERTILE(ID(iox,ioy,LTPIC))
-            enddo
-          enddo
-C          write(6,'('':DAMPMAX = '',G12.3,'' APOWERTILE(100,100) = ''
-C     .      ,G12.3)')DAMPMAX,APOWERTILE(ID(ITILEOUTER/2+100,ITILEOUTER/2+100,LTPIC))
-C
-C         What fraction of pixels should be below 50% value?
-          IHISTOFRAC=INT(0.30 * REAL(ITILEINNER*ITILEINNER/2))
-          DAMPMAX=DAMPMAX/1000.0
-          icount=0
- 100      continue
-C            write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
-C     .        '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12)')
-C     .        SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
-            DAMPMAX=DAMPMAX*1.5
-            icount=icount+1
-            IABOVE = 0
+            DAMPMAX=-1.0E10
             do iy = 1,ITILEINNER
               do ix = 1,ITILEINNER/2
                 iox=ix+ITILEOUTER/2
                 ioy=iy+(ITILEOUTER-ITILEINNER)/2
-                if(APOWERTILE(ID(iox,ioy,LTPIC)).gt.DAMPMAX)IABOVE=IABOVE+1
-                if(IABOVE.gt.IHISTOFRAC .and. icount.lt.100)goto 100
+                if(DAMPMAX.lt.APOWERTILE(ID(iox,ioy,LTPIC)))DAMPMAX=APOWERTILE(ID(iox,ioy,LTPIC))
               enddo
             enddo
-          DAMPMAX=DAMPMAX*2.0*RMAXAMPFACTOR
-C          write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
-C     .      '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12,
-C     .      '' is final'')')
-C     .      SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
+C            write(6,'('':DAMPMAX = '',G12.3,'' APOWERTILE(100,100) = ''
+C     .        ,G12.3)')DAMPMAX,APOWERTILE(ID(ITILEOUTER/2+100,ITILEOUTER/2+100,LTPIC))
+C
+C           What fraction of pixels should be below 50% value?
+            IHISTOFRAC=INT(0.30 * REAL(ITILEINNER*ITILEINNER/2))
+            DAMPMAX=DAMPMAX/1000.0
+            icount=0
+ 100        continue
+C              write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
+C     .          '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12)')
+C     .          SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
+              DAMPMAX=DAMPMAX*1.5
+              icount=icount+1
+              IABOVE = 0
+              do iy = 1,ITILEINNER
+                do ix = 1,ITILEINNER/2
+                  iox=ix+ITILEOUTER/2
+                  ioy=iy+(ITILEOUTER-ITILEINNER)/2
+                  if(APOWERTILE(ID(iox,ioy,LTPIC)).gt.DAMPMAX)IABOVE=IABOVE+1
+                  if(IABOVE.gt.IHISTOFRAC .and. icount.lt.100)goto 100
+                enddo
+              enddo
+            DAMPMAX=DAMPMAX*2.0*RMAXAMPFACTOR
+C            write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
+C     .        '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12,
+C     .        '' is final'')')
+C     .        SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
+          endif
 C
 C---------Extract inner tile from outer tile
 C
@@ -827,9 +856,9 @@ C
       DOMAX=-1.0e30
       do ix=1,NX
         do iy=1,NY
-          IR=ID(ix,iy,NY)
-          if(DOMIN.gt.BPIC(IR))DOMIN=BPIC(IR)
-          if(DOMAX.lt.BPIC(IR))DOMAX=BPIC(IR)
+          DVAL=BPIC(ID(ix,iy,NY))
+          if(DOMIN.gt.DVAL)DOMIN=DVAL
+          if(DOMAX.lt.DVAL)DOMAX=DVAL
         enddo
       enddo
       write(*,'(''Min, Max of raw output file are '',2G12.3)')DOMIN,DOMAX
@@ -837,49 +866,49 @@ C
       do ix=1,NX
         do iy=1,NY
           IR=ID(ix,iy,NY)
-          DVAL = BPIC(IR)
-          DVAL = (DVAL - DOMIN) / (DOMAX - DOMIN)
-          DVAL = DVAL * (DIMAX-DIMIN) + DIMIN
+          DVAL = (BPIC(IR) - DOMIN) / (DOMAX - DOMIN) * (DIMAX-DIMIN) + DIMIN
           BPIC(IR) = DVAL
         enddo
       enddo
       write(*,'(''Min, Max of output file is '',2F12.3)')
      .  DIMIN,DIMAX
 C
-C-----Prepare image marked with tile positions:
+      if(LTILEFILE)then
+C-------Prepare image marked with tile positions:
 C
-      do itilex = 1,IXTILENUM
-        do itiley = 1,IXTILENUM
-C---------Draw a frame around the iiner tiles
-          ixtilestart = IINNERXSTART + (itilex - 1) * ITILEINNER
-          iytilestart = IINNERXSTART + (itiley - 1) * ITILEINNER
-          do iy = 1,ITILEINNER
-            do ix = 1,ITILEINNER
-              if(iy.eq.1 .or. iy.eq.ITILEINNER .or. 
-     .           ix.eq.1 .or. ix.eq.ITILEINNER)then
-                ixcor = ixtilestart - 1 + ix
-                iycor = iytilestart - 1 + iy
-                IR=ID(ixcor,iycor,NY)
-                TILEPIC(IR)=DIMAX
-              endif
+        do itilex = 1,IXTILENUM
+          do itiley = 1,IXTILENUM
+C-----------Draw a frame around the iiner tiles
+            ixtilestart = IINNERXSTART + (itilex - 1) * ITILEINNER
+            iytilestart = IINNERXSTART + (itiley - 1) * ITILEINNER
+            do iy = 1,ITILEINNER
+              do ix = 1,ITILEINNER
+                if(iy.eq.1 .or. iy.eq.ITILEINNER .or. 
+     .             ix.eq.1 .or. ix.eq.ITILEINNER)then
+                  ixcor = ixtilestart - 1 + ix
+                  iycor = iytilestart - 1 + iy
+                  IR=ID(ixcor,iycor,NY)
+                  TILEPIC(IR)=DIMAX
+                endif
+              enddo
             enddo
-          enddo
-C---------Draw a frame around the outer tiles
-          ixtilestart = IOUTERXSTART + (itilex - 1) * ITILEINNER
-          iytilestart = IOUTERXSTART + (itiley - 1) * ITILEINNER
-          do iy = 1,ITILEOUTER
-            do ix = 1,ITILEOUTER
-              if(iy.eq.1 .or. iy.eq.ITILEOUTER .or. 
-     .           ix.eq.1 .or. ix.eq.ITILEOUTER)then
-                ixcor = ixtilestart - 1 + ix
-                iycor = iytilestart - 1 + iy
-                IR=ID(ixcor,iycor,NY)
-                TILEPIC(IR)=DIMIN
-              endif
+C-----------Draw a frame around the outer tiles
+            ixtilestart = IOUTERXSTART + (itilex - 1) * ITILEINNER
+            iytilestart = IOUTERXSTART + (itiley - 1) * ITILEINNER
+            do iy = 1,ITILEOUTER
+              do ix = 1,ITILEOUTER
+                if(iy.eq.1 .or. iy.eq.ITILEOUTER .or. 
+     .             ix.eq.1 .or. ix.eq.ITILEOUTER)then
+                  ixcor = ixtilestart - 1 + ix
+                  iycor = iytilestart - 1 + iy
+                  IR=ID(ixcor,iycor,NY)
+                  TILEPIC(IR)=DIMIN
+                endif
+              enddo
             enddo
           enddo
         enddo
-      enddo
+      endif
 C
 C-----Write out output image
 C
@@ -916,113 +945,119 @@ C
 C
 C-----Output Tile image
 C
-      CALL IOPEN(TILEFILE,13,CFORM,MODE,NXYZ(1),NXYZ(2),
-     +         NXYZ(3),CSTIN,STEPR,TITLE)
+      if(LTILEFILE)then
+        CALL IOPEN(TILEFILE,13,CFORM,MODE,NXYZ(1),NXYZ(2),
+     +           NXYZ(3),CSTIN,STEPR,TITLE)
 C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
 C
-      do iy = 1,NY
-        do ix = 1,NX
-          IR=ID(ix,iy,NY)
-          VAL=TILEPIC(IR)
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-          ALINE(ix)=VAL
+        do iy = 1,NY
+          do ix = 1,NX
+            IR=ID(ix,iy,NY)
+            VAL=TILEPIC(IR)
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+            ALINE(ix)=VAL
+          enddo
+          call IWRITE(13,ALINE,iy)
         enddo
-        call IWRITE(13,ALINE,iy)
-      enddo
-      DOUBLMEAN = DOUBLMEAN/(NX*NY)
-      DMEAN = DOUBLMEAN
+        DOUBLMEAN = DOUBLMEAN/(NX*NY)
+        DMEAN = DOUBLMEAN
 C
-      write(*,'(''Min, Max, Mean of produced tile file is '',3F12.3)')
-     .   DMIN,DMAX,DMEAN
-      CALL ICLOSE(13)
+        write(*,'(''Min, Max, Mean of produced tile file is '',3F12.3)')
+     .     DMIN,DMAX,DMEAN
+        CALL ICLOSE(13)
+      endif
 C
 C-----Output PS image
 C
-      CALL IOPEN(PSFILE,14,CFORM,MODE,NXYZ(1),NXYZ(2),
+      if(LTILEFILE)then
+        CALL IOPEN(PSFILE,14,CFORM,MODE,NXYZ(1),NXYZ(2),
      +         NXYZ(3),CSTIN,STEPR,TITLE)
 C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
 C
-      do iy = 1,NY
-        do ix = 1,NX
-          IR=ID(ix,iy,NY)
-          VAL=PSPIC(IR)
-          if(VAL.gt.1.0)VAL=1.0
-          if(VAL.lt.0.0)VAL=0.0
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-          ALINE(ix)=VAL
+        do iy = 1,NY
+          do ix = 1,NX
+            IR=ID(ix,iy,NY)
+            VAL=PSPIC(IR)
+            if(VAL.gt.1.0)VAL=1.0
+            if(VAL.lt.0.0)VAL=0.0
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+            ALINE(ix)=VAL
+          enddo
+          call IWRITE(14,ALINE,iy)
         enddo
-        call IWRITE(14,ALINE,iy)
-      enddo
-      DOUBLMEAN = DOUBLMEAN/(NX*NY)
-      DMEAN = DOUBLMEAN
+        DOUBLMEAN = DOUBLMEAN/(NX*NY)
+        DMEAN = DOUBLMEAN
 C
-      write(*,'(''Min, Max, Mean of produced Powerspectra '',
-     .   ''file is '',3F12.3)')
-     .   DMIN,DMAX,DMEAN
-      CALL ICLOSE(14)
+        write(*,'(''Min, Max, Mean of produced Powerspectra '',
+     .     ''file is '',3F12.3)')
+     .     DMIN,DMAX,DMEAN
+        CALL ICLOSE(14)
+      endif
 C
-C-----Output CTF-sum image
+      if(LCTFSUM)then
+C-------Output CTF-sum image
 C
-C-----ATTENTION: The last row and last column aren't saved here:
-      IADDSIZE = 0
+C-------ATTENTION: The last row and last column aren't saved here:
+        IADDSIZE = 0
 C
-      NXYZ2(1)=NXYZ(1)+IADDSIZE
-      NXYZ2(2)=NXYZ(2)+IADDSIZE
-      NXYZ2(3)=NXYZ(3)
-      CALL IOPEN(CTFFILE,15,CFORM,MODE,NXYZ2(1),NXYZ2(2),
-     +         NXYZ2(3),CSTIN,STEPR,TITLE)
+        NXYZ2(1)=NXYZ(1)+IADDSIZE
+        NXYZ2(2)=NXYZ(2)+IADDSIZE
+        NXYZ2(3)=NXYZ(3)
+        CALL IOPEN(CTFFILE,15,CFORM,MODE,NXYZ2(1),NXYZ2(2),
+     +           NXYZ2(3),CSTIN,STEPR,TITLE)
 C
-C-----Normalize CTF-sum image between 0 and 1:
-      DMIN =  1.E10
-      DMAX = -1.E10
+C-------Normalize CTF-sum image between 0 and 1:
+        DMIN =  1.E10
+        DMAX = -1.E10
 C
-      do iy = 1,NY+IADDSIZE
-        do ix = 1,NX+IADDSIZE
-          IR=ID(ix,iy,NY)
-          VAL=CTFPIC(IR)
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
+        do iy = 1,NY+IADDSIZE
+          do ix = 1,NX+IADDSIZE
+            IR=ID(ix,iy,NY)
+            VAL=CTFPIC(IR)
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+          enddo
         enddo
-      enddo
-      DMAX=ABS(DMAX)
-      if(ABS(DMIN).gt.ABS(DMAX))DMAX=ABS(DMIN)
-      if(DMAX.lt.0.001)DMAX=0.001
-      D1MAX=DMAX
+        DMAX=ABS(DMAX)
+        if(ABS(DMIN).gt.ABS(DMAX))DMAX=ABS(DMIN)
+        if(DMAX.lt.0.001)DMAX=0.001
+        D1MAX=DMAX
 C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
-      do iy = 1,NY+IADDSIZE
-        do ix = 1,NX+IADDSIZE
-          IR=ID(ix,iy,NY)
-          VAL=CTFPIC(IR)/D1MAX
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-          ALINE(ix)=VAL
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+        do iy = 1,NY+IADDSIZE
+          do ix = 1,NX+IADDSIZE
+            IR=ID(ix,iy,NY)
+            VAL=CTFPIC(IR)/D1MAX
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+            ALINE(ix)=VAL
+          enddo
+          call IWRITE(15,ALINE,iy)
         enddo
-        call IWRITE(15,ALINE,iy)
-      enddo
-      DOUBLMEAN = DOUBLMEAN/((NX+1)*(NY+1))
-      DMEAN = DOUBLMEAN
+        DOUBLMEAN = DOUBLMEAN/((NX+1)*(NY+1))
+        DMEAN = DOUBLMEAN
 C
-      write(*,'(''Min, Max, Mean of produced CTF-sum '',
-     .   ''file is '',3F12.3)')
-     .   DMIN,DMAX,DMEAN
-      CALL ICLOSE(15)
+        write(*,'(''Min, Max, Mean of produced CTF-sum '',
+     .    ''file is '',3F12.3)')
+     .    DMIN,DMAX,DMEAN
+        CALL ICLOSE(15)
+      endif
 C
 C-----Done
 C
@@ -1066,7 +1101,7 @@ C**************************************************************************
 C
       INTEGER FUNCTION ID(ix,iy,iylen)
 C       this function calculates a 1D index for a 2D array of width iylen.
-      ID = (ix-1)*iylen+iy
+      ID = ix + iylen*(iy-1)
       RETURN
       END
 C

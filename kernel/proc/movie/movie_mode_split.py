@@ -17,8 +17,8 @@ if __name__ == "__main__":
 	ny = stack.get_ysize()
 	nz = stack.get_zsize()
 	
-	print "Doing splitting for:", stack_file
-	print "nz =", nz
+	print ":Doing splitting for:", stack_file
+	print ":nz =", nz
 	
 
 

@@ -52,6 +52,13 @@ set show_frames = "n"
 # TYPE: Bool "y;n"
 set show_frame_FFT = "n"
 #
+# LABEL: Calculate Tilefiles for frames (very slow)?
+# LEGEND: This switch decides, if these should be calculated.
+# EXAMPLE: calculate_tiles = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set calculate_tiles = "n"
+#
 # LABEL: Show CCmaps of frames?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
 # EXAMPLE: show_frame_CCmap = "y"
@@ -341,11 +348,26 @@ if ( ${movie_masking_mode} == '1' ) then
   endif 
   echo  "# IMAGE: ${nonmaskimagename}_mask.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
 endif
+#
+if ( ! -e SCRATCH/2dx_ctfcor_ctffile.mrc ) then
+  ${proc_2dx}/protest "ERROR:  SCRATCH/2dx_ctfcor_ctffile.mrc missing. First run script Correct CTF on tiles"
+endif
 
 
 
 
+if ( 1 == 2 ) then
+  python ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
 
+  echo "# IMAGE: frames/direct_sum.mrc <frames/direct_sum.mrc>" >> LOGS/${scriptname}.results 
+  python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc 0.001
+  
+  echo "# IMAGE: frames/direct_sum_filt.mrc <frames/direct_sum_filt.mrc>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <SCRATCH/2dx_ctfcor_ctffile.mrc>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: frames/direct_sum_filt.mrc <frames/direct_sum_filt.mrc>" >> LOGS/${scriptname}.results 
+  python ${proc_2dx}/movie/apply_filter_Fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc 0.4
+  exit
+endif
 
 
 if ( 1 == 2 ) then
@@ -629,11 +651,7 @@ while ($i <= ${movie_imagenumber_touse})
     ${proc_2dx}/lin "2dx_ctfcor - CTF correcting frame ${i}"
     #################################################################################  
     #
-    set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
-    set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
     \rm -f frames/frame_${i}_ctfcor.mrc
-    \rm -f ${ctfcor_tilefile}
-    \rm -f ${ctfcor_psfile} 
     #
     # For example:
     # ${bin_2dx}/2dx_ctfcor.exe << eot
@@ -652,11 +670,13 @@ while ($i <= ${movie_imagenumber_touse})
     # 0.1
     # eot
     #
-    ${bin_2dx}/2dx_ctfcor.exe << eot
+    if ( ${calculate_tiles} == "n" ) then
+      ${bin_2dx}/2dx_ctfcor.exe << eot
 frames/frame_${i}.mrc
 frames/frame_${i}_ctfcor.mrc
-${ctfcor_tilefile}
-${ctfcor_psfile}
+#
+#
+#
 ${TLTAXIS},${TLTANG}
 ${CS},${KV},${phacon},${magnification},${stepdigitizer}
 ${defocus}
@@ -668,14 +688,43 @@ ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
-    #
-    if ( ${i} == "1" ) then
+      #
+    else
+      #
+      set ctfcor_tilefile = "frames/2dx_ctfcor_tile.mrc"
+      set ctfcor_psfile = "frames/2dx_ctfcor_psfile.mrc"
+      set ctfcor_ctffile = "frames/2dx_ctfcor_ctffile.mrc"
+      \rm -f ${ctfcor_tilefile}
+      \rm -f ${ctfcor_psfile} 
+      \rm -f ${ctfcor_ctffile} 
+      #
+      ${bin_2dx}/2dx_ctfcor.exe << eot
+frames/frame_${i}.mrc
+frames/frame_${i}_ctfcor.mrc
+${ctfcor_tilefile}
+${ctfcor_psfile}
+${ctfcor_ctffile}
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${ctfcor_noise}
+${ctfcor_inner_tile}
+${ctfcor_outer_tile}
+${ctfcor_taper}
+${ctfcor_imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+      #
       echo "# IMAGE: frames/frame_${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
-      \cp -f ${ctfcor_tilefile} frames/frame_${i}_tiles.mrc
+      \mv -f ${ctfcor_tilefile} frames/frame_${i}_tiles.mrc
       echo "# IMAGE: frames/frame_${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
-      \cp -f ${ctfcor_psfile} frames/frame_${i}_ps.mrc
+      \mv -f ${ctfcor_psfile} frames/frame_${i}_ps.mrc
       echo "# IMAGE: frames/frame_${i}_ps.mrc <Frame ${i}, PowerSpectra>" >> LOGS/${scriptname}.results
+      \mv -f ${ctfcor_ctffile} frames/frame_${i}_ctffile.mrc
+      echo "# IMAGE: frames/frame_${i}_ctffile.mrc <Frame ${i}, CTF-sum>" >> LOGS/${scriptname}.results
     endif
+    #
   endif
   #
   ###############################################################
@@ -871,7 +920,7 @@ python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct
 echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 
 if ( ${ctfcor_imode} == "2" ) then
-  python ${proc_2dx}/movie/apply_filter_Fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc 0.4
+  python ${proc_2dx}/movie/apply_filter_fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc 0.4
   echo "# IMAGE: frames/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTF-corrected>" >> LOGS/${scriptname}.results 
 endif
 

@@ -1,925 +1,571 @@
-C*CTFCORR.FOR******************************************************************
-C                                                                             *
-C       Program to apply CTF correction to an image                           *
-C                                                                             *
-C       Version 1.00    30-SEP-14    HS         First version                 *
-C                                               Part of 2dx                   *
-C                                                                             *
-C******************************************************************************
+C*
+C* Copyright 2013 Howard Hughes Medical Institute.
+C* All rights reserved.
+C* Use is subject to Janelia Farm Research Campus Software Copyright 1.1
+C* license terms ( http://license.janelia.org/license/jfrc_copyright_1_1.html )
+C*
+C*****************************************************************************
 C
-C Input is a single file in mapformat, output is a single file in mapformat, plus debugging info maps.
+C	CTFFIND3 - determines defocus and astigmatism for images of
+C	arbitrary size (MRC format). Astigmatic angle is measured form
+C	x axis (same convetiones as in the MRC 2D image processing 
+C	programs).
 C
-C-----The image is cut into OUTER tiles (e.g. 256 wide), which are CTF corrected, and from which the 
-C-----INNER tiles (e.g. 128 wide) are then centrally windowed. The inner tiles are then placed back
-C-----into the large picture. 
+C	CARD 1: Input file name for image
+C	CARD 2: Output file name to check result
+C	CARD 3: CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
+C	CARD 4: Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A], FStep[A], dAst[A]
 C
-C      Card input, or online control
+C		The output image file to check the result of the fitting
+C		shows the filtered average power spectrum of the input
+C		image in one half, and the fitted CTF (squared) in the
+C		other half. The two halfs should agree very well for a
+C		sucessfull fit.
 C
-C        card  1 :  input filename
-C        card  2 :  output filename with CTF correction
-C        card  3 :  output filename for tile image
-C        card  4 :  output filename for PS image
-C        card  5 :  TLTAXA,TLTANG
-C        card  6 :  CS[mm],HT[kV],PHACON,MAGNIFICATION,STEPSIZE_DIGITIZER[um]
-C        card  7 :  DEF1,DEF2,ANGAST
-C        card  8 :  NOISE (for Wiener option, otherwise give 0.0)
-C        card  9 :  Inner tile size (use 100 pixels)
-C        card 10 :  Outer tile size (use 200 pixels)
-C        card 11 :  Taper edge around CTF corrected zone
-C        card 12 :  IMODE, describes which of the various simple manipulations
-C                   IMODE=0: Nothing
-C                   IMODE=1: PhaseFlip
-C                   IMODE=2: CTF multiplication
-C                   IMODE=3: Wiener Filter
-C        card 13 :  Debug mode: y=yes, n=no
+C		CS: Spherical aberration coefficient of the objective in mm
+C		HT: Electron beam voltage in kV
+C		AmpCnst: Amount of amplitude contrast (fraction). For ice
+C		         images 0.07, for negative stain about 0.15.
+C		XMAG: Magnification of original image
+C		DStep: Pixel size on scanner in microns
+C		Box: Tile size. The program devides the image into square
+C		     tiles and calculates the average power spectrum. Tiles
+C		     with a significatly higher or lower variance are 
+C		     excluded; these are parts of the image which are unlikely
+C		     to contain useful information (beam edge, film number 
+C		     etc). IMPORTANT: Box must have even pixel dimensions.
+C		ResMin: Low resolution end of data to be fitted.
+C		ResMaX: High resolution end of data to be fitted.
+C		dFMin: Starting defocus value for grid search in Angstrom. 
+C		       Positive values represent an underfocus. The program
+C		       performs a systematic grid search of defocus values 
+C		       and astigmatism before fitting a CTF to machine 
+C		       precision.
+C		dFMax: End defocus value for grid search in Angstrom.
+C		FStep: Step width for grid search in Angstrom.
+C		dAst: Expected amount of astigmatism in Angstrom.
 C
-C******************************************************************************
+C*****************************************************************************
+C	example command file (UNIX):
+C
+C	#!/bin/csh -x
+C	#
+C	#   ctffind3
+C	#
+C	time /public/image/bin/ctffind3.exe << eof
+C	image.mrc
+C	power.mrc
+C	2.6,200.0,0.07,60000.0,28.0
+C	128,100.0,15.0,30000.0,90000.0,5000.0,500.0,100.0
+C	eof
+C	#
+C*****************************************************************************
+C
+      PROGRAM CTFFIND3
+C
+C	NIKO, 21 SEPTEMBER 2002
 C
       IMPLICIT NONE
 C
-      INTEGER LMAX,LTPIC
-      REAL PI
+      INTEGER NXYZ(3),MODE,JXYZ(3),I,J,NX,NY,IX,IS,KXYZ(3)
+      INTEGER K,CNT,ID,L,M,LL,MM,ITEST,IP,NBIN,IMP,IERR
+      INTEGER OMP_GET_NUM_PROCS
+      PARAMETER (NBIN=100)
+      REAL DMAX,DMEAN,DRMS,RMS,WGH1,WGH2,RMSMIN
+      REAL SCAL,MEAN,WL,PI,MIN,MAX,ANGAST
+      REAL CS,KV,WGH,XMAG,DSTEP,RESMIN,RESMAX,DFMID1,DFMID2
+      REAL THETATR,STEPR,RMIN2,RMAX2,HW,RMSMAX,DAST
+      REAL RES2,CTF,CTFV,TMP,FLT,DFMIN,DFMAX,FSTEP,DRMS1,CMAX
+      REAL,ALLOCATABLE :: AIN(:),ABOX(:),POWER(:),OUT(:),BUF1(:)
+      REAL,ALLOCATABLE :: RMSA(:),BINS(:)
+      PARAMETER (FLT=-0.1,PI=3.1415926535898)
+      COMPLEX,ALLOCATABLE :: CBOXS(:)
+      CHARACTER FILEIN*200,FILEOUT*200,TITLE*1600,CFORM,NCPUS*10
+      LOGICAL EX
 C
-      PARAMETER (LMAX=12000)
-      PARAMETER (LTPIC=4100)
-      PARAMETER (PI=3.1415926535898)
+      WRITE(6,1000)
+1000  FORMAT(/' CTF DETERMINATION, V3.5 (9-Jun-2014)',
+     +      /'  Copyright 2013 Howard Hughes Medical Institute.',
+     +      /'  All rights reserved.',
+     +      /'  Use is subject to Janelia Farm Research Campus',
+     +       ' Software Copyright 1.1',
+     +      /'  license terms ( http://license.janelia.org/license',
+     +       '/jfrc_copyright_1_1.html )'/)
 C
-      INTEGER IXYZMIN(3),IXYZMAX(3),OUT(LMAX),OU2(LMAX)
-      INTEGER MXYZN(3)
-      INTEGER NCX,NCY
-      INTEGER ix,iy,iix,iiy,ixcor,iycor,iox,ioy,ilx,ily
-      INTEGER*4 iover,iunder,ilow
-      INTEGER MODE,IMODE
-      INTEGER NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,NL
-      INTEGER IXTILENUM,ixtilestart,iytilestart,ixtileend,iytileend
-      INTEGER ixtilecen,iytilecen
-      INTEGER ITILEINNER,ITILEOUTER,itilex,itiley
-      INTEGER IINNERXSTART,IOUTERXSTART
-      INTEGER KTILEINNER,KTILEOUTER
-      INTEGER IS,ID,I,J,K,L,M,LL,MM
-      INTEGER*8 IBELOW,IABOVE,IHISTOFRAC
-      INTEGER icount
-      INTEGER idist
+      IMP=0
+#ifdef _OPENMP
+      CALL GETENV('OMP_NUM_THREADS',NCPUS)
+      READ(NCPUS,*,ERR=111,END=111)IMP
+111   CONTINUE
+      IF (IMP.LE.0) THEN
+        CALL GETENV('NCPUS',NCPUS)
+        READ(NCPUS,*,ERR=112,END=112)IMP
+112     CONTINUE
+      ENDIF
+      IF (IMP.LE.0) THEN
+        IMP=OMP_GET_NUM_PROCS()
+      ENDIF
+      CALL OMP_SET_NUM_THREADS(IMP)
+#endif
+      IF (IMP.LE.0) IMP=1
 C
-      REAL CTF
+      IF (IMP.GT.1) THEN
+        WRITE(*,7000) IMP
+7000    FORMAT(/' Parallel processing: NCPUS =   ',I8)
+      ENDIF
 C
-      REAL APIC(LMAX,LMAX),BPIC(LMAX,LMAX)
-      REAL PSPIC(LMAX,LMAX),TILEPIC(LMAX,LMAX)
+      WRITE(6,1002)
+1002  FORMAT(/' Input image file name')
+      READ(5,1010)FILEIN
+1010  FORMAT(A)
+      WRITE(6,1010)FILEIN
+      WRITE(6,1060)
+1060  FORMAT(/' Output diagnostic file name')
+      READ(5,1010)FILEOUT
+      WRITE(6,1010)FILEOUT
+      WRITE(6,1020)
+1020  FORMAT(/' CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]')
+      READ(5,*)CS,KV,WGH,XMAG,DSTEP
+      WRITE(6,1031)CS,KV,WGH,XMAG,DSTEP
+1031  FORMAT(F5.1,F9.1,F8.2,F10.1,F9.3)
+      WRITE(6,1040)
+1040  FORMAT(/' Positive defocus values for underfocus',
+     +	     /' Box, ResMin[A], ResMax[A], dFMin[A], dFMax[A],',
+     +        ' FStep[A], dAst[A]')
+      READ(5,*,END=98)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,DAST
+      WRITE(6,1051)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,DAST
+1051  FORMAT(I4,2F11.1,2F10.1,2F7.1/)
+      GOTO 99
 C
-      REAL AINNERTILE(LTPIC,LTPIC)
-      REAL AOUTERTILE(LTPIC,LTPIC)
-      REAL TILETILE(LTPIC,LTPIC)
+98    CONTINUE
+      WRITE(6,*) ' ERROR reading CARD 4. Trying old CARD 4...'
+C      READ(5,*)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
+      WRITE(6,1052)JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP
+1052  FORMAT(I4,2F11.1,2F10.1,F7.1/)
+      WRITE(6,*) ' Setting DAST = 100.0'
+      DAST=100.0
 C
-      REAL POWER(LTPIC*LTPIC)
-      REAL APOWERTILE(LTPIC,LTPIC)
+99    CONTINUE
+      ITEST=JXYZ(1)/2
+      IF (2*ITEST.NE.JXYZ(1)) THEN
+      	WRITE(6,1090)
+1090	FORMAT(/' Box size must be even number')
+      	STOP
+      ENDIF
+      IF (DAST.LT.0.0) THEN
+        DAST=500.0
+        WRITE(6,1120)
+1120    FORMAT(/' Invalid dAst value; reset to 500.0')
+      ENDIF
+      JXYZ(2)=JXYZ(1)
+      JXYZ(3)=1
 C
-      REAL CTFTILE(LTPIC,LTPIC)
-      REAL PSTILE(LTPIC,LTPIC)
+C       Make sure RESMIN is larger than RESMAX
 C
-      COMPLEX CFFT(LTPIC*LTPIC)
-      COMPLEX CFFTTILE(LTPIC,LTPIC)
-      COMPLEX CFFTCTFC(LTPIC,LTPIC)
+      IF (RESMIN.LT.RESMAX) THEN
+      	TMP=RESMAX
+      	RESMAX=RESMIN
+      	RESMIN=TMP
+      ENDIF
 C
-      REAL ABOX(LTPIC*LTPIC)
-      COMPLEX CBOX(LTPIC)
+C       Same for DFMIN, DFMAX
 C
-      REAL ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
-      REAL LABELS(20,10),CELL(6),EXTRA(29)
-      REAL DNCELL(6)
-      REAL CNV,SCAL,CTFV
-      REAL RNORMX,RNORMY
-      REAL THETATR
+      IF (DFMAX.LT.DFMIN) THEN
+      	TMP=DFMAX
+      	DFMAX=DFMIN
+      	DFMIN=TMP
+      ENDIF
 C
-      REAL TLTAXA,TLTANG
-      REAL CS,HT,PHACON,RMAG,STEPD,AMPCON,WL
-      REAL VAL,DMIN,DMAX,DMEAN
-      REAL DIMIN,DIMAX,DIMEAN
-      REAL DOMIN,DOMAX,DOMEAN
-      REAL DAMPMAX
-      REAL RDEF1,RDEF2,ANGAST,ANGASTRAD
-      REAL RNOISE
-      REAL RPIXEL
-      REAL RMAXAMPFACTOR
-      REAL rgamma,rbeta
-      REAL rdist1,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM
+      CALL GUESSF(FILEIN,CFORM,EX)
+      IF  (.NOT.EX) THEN
+        WRITE(*,1001) FILEIN
+1001    FORMAT(' File not found ',A80)
+        STOP
+      ENDIF
+      CALL IOPEN(FILEIN,10,CFORM,MODE,NXYZ(1),NXYZ(2),
+     +           NXYZ(3),'OLD',STEPR,TITLE)
 C
-      REAL*8 DOUBLMEAN,DOUBLOMEAN,DVAL
+      WRITE(*,1110)NXYZ(1),NXYZ(2)
+1110  FORMAT(/,' READING IMAGE...'/' NX, NY= ',2I10)
 C
-      COMPLEX CVAL
+      NX=NXYZ(1)/JXYZ(1)
+      NY=NXYZ(2)/JXYZ(2)
 C
-      LOGICAL LDEBUG
+      ALLOCATE(AIN(NXYZ(1)*JXYZ(2)),ABOX(JXYZ(1)*JXYZ(2)),
+     +  OUT(JXYZ(1)*JXYZ(2)),
+     +  BUF1(JXYZ(1)*JXYZ(2)),RMSA(NX*NY),BINS(NBIN),
+     +  CBOXS(JXYZ(2)),STAT=IERR)
+      IF (IERR.NE.0) THEN
+        WRITE(*,*) ' ERROR: Memory allocation failed in MAIN'
+        STOP ' Try reducing the tile size'
+      ENDIF
 C
-      CHARACTER*60 INFILE,OUTFILE,TILEFILE,PSFILE
-      character*80 TITLE
-      character*200 cfile,cname
-      CHARACTER*1 CDEBUG
+      DRMS=0.0D0
+      CNT=0
+      DO 10 I=1,NY
+        IP=(I-1)*JXYZ(2)
+        DO 21 J=1,JXYZ(2)
+          ID=1+NXYZ(1)*(J-1)
+          CALL IREAD(10,AIN(ID),J+IP)
+21      CONTINUE
+        DO 10 J=1,NX
+          IX=(J-1)*JXYZ(1)+1
+          CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
+          DRMS=DRMS+RMS**2
+      	  CNT=CNT+1
+          IF (CNT.LE.50000) RMSA(CNT)=RMS
+10    CONTINUE
+      DRMS=SQRT(DRMS/CNT)
+      CALL HISTO(CNT,NBIN,RMSA,BINS,MIN,MAX)
+      RMSMIN=MIN
+      RMSMAX=MAX
+      CMAX=0
+      DO 70 I=1,NBIN
+        IF (BINS(I).GT.CMAX) THEN
+          CMAX=BINS(I)
+          J=I
+        ENDIF
+70    CONTINUE
+      IF (J.GT.1) THEN
+        DO 71 I=1,J-1
+          IF (BINS(I).GE.CMAX/20.0) THEN
+            RMSMIN=I*(MAX-MIN)/(NBIN-1)+MIN
+            GOTO 72
+          ENDIF
+71      CONTINUE
+      ENDIF
+72    CONTINUE
+      IF (J.LT.NBIN) THEN
+        DO 73 I=NBIN,J+1,-1
+          IF (BINS(I).GE.CMAX/20.0) THEN
+            RMSMAX=I*(MAX-MIN)/(NBIN-1)+MIN
+            GOTO 74
+          ENDIF
+73      CONTINUE
+      ENDIF
+74    CONTINUE
 C
-      EQUIVALENCE (NX,NXYZ)
-      EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
+      KXYZ(1)=JXYZ(1)/2
+      KXYZ(2)=JXYZ(2)
+      KXYZ(3)=JXYZ(3)
+      IF (2*(KXYZ(1)/2).NE.KXYZ(1)) KXYZ(1)=KXYZ(1)+1
+      ALLOCATE(POWER(KXYZ(1)*KXYZ(2)),STAT=IERR)
+      IF (IERR.NE.0) THEN
+        WRITE(*,*) ' ERROR: Memory allocation failed for POWER'
+        STOP ' Try reducing the tile size'
+      ENDIF
+      DO 30 K=1,KXYZ(1)*KXYZ(2)
+      	POWER(K)=0.0
+30    CONTINUE
+      SCAL=1.0/SQRT(REAL(JXYZ(1)*JXYZ(2)))
+      CNT=0
+      WRITE(*,1100)
+1100  FORMAT(/,' TILING IMAGE...'/)
 C
-      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,APIC,BPIC
+      DO 100 I=1,NY
+        IP=(I-1)*JXYZ(2)
+        DO 20 J=1,JXYZ(2)
+      	  ID=1+NXYZ(1)*(J-1)
+          CALL IREAD(10,AIN(ID),J+IP)
+20	CONTINUE
+      	DO 100 J=1,NX
+      	  IX=(J-1)*JXYZ(1)+1
+      	  CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
+      	  IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
+      	    CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+            DO 40 L=1,JXYZ(2)
+      	      DO 41 K=1,JXYZ(1)/2
+                ID=(K+JXYZ(1)/2*(L-1))*2
+                IS=K+KXYZ(1)*(L-1)
+                POWER(IS)=POWER(IS)
+     +            +(ABOX(ID-1)**2+ABOX(ID)**2)*SCAL**2
+41	      CONTINUE
+              IF (KXYZ(1).GT.JXYZ(1)/2)
+     +          POWER(IS+1)=POWER(IS+1)+CABS(CBOXS(L)*SCAL)**2
+40	    CONTINUE
+      	    CNT=CNT+1
+      	  ENDIF
+100   CONTINUE
+      WRITE(*,*)' Total tiles and number used',NX*NY,CNT
 C
-      DATA NXYZST/3*0/, CNV/57.29578/
+      SCAL=1.0/CNT
+      DO 60 K=1,KXYZ(1)*KXYZ(2)
+      	POWER(K)=SQRT(POWER(K)*SCAL)
+60    CONTINUE
 C
-C******************************************************************************
+C       Filter power spectrum to remove slowly varying background
+C       DMAX is maximum of filtered power spectrum (for later scaling)
 C
-      WRITE(6,'(/,/,''CTFCORR: Program to apply CTF correction '',
-     .      ''to an image'')')
+      STEPR=DSTEP*(10.0**4.0)/XMAG
+      RESMIN=STEPR/RESMIN
+      RESMAX=STEPR/RESMAX
+      IF (RESMIN.LT.STEPR/50.0) THEN
+        RESMIN=STEPR/50.0
+        WRITE(*,*)' Lower resolution limit reset to',
+     +            STEPR/RESMIN,' A'
+      ENDIF
+      IF (RESMIN.GE.RESMAX)
+     +  STOP ' RESMIN >= RESMAX; increase RESMAX'
 C
-C******************************************************************************
-C
-      WRITE(6,'(''Input filename:  '')')
-      READ(5,'(A)') INFILE
-      call shorten(INFILE,k)
-      write(6,'(''   Read: '',A)')INFILE(1:k)
-C
-      CALL IMOPEN(1,INFILE,'RO')
-      CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
-      IF (MODE .GE. 3) then
-        write(6,'(''::ERROR, only works on mode 0 to 2'')')
-        goto 900
-      endif
-      if(NX.gt.LMAX)then
-        write(6,'(''::ERROR, image too large.'',
-     .    '' Increase LMAX. Aborting.'')')
-        goto 900
-      endif
-C
-      READ(5,'(A)') OUTFILE
-      call shorten(OUTFILE,k)
-      write(6,'(''   Read: '',A)')OUTFILE(1:k)
-      CALL IMOPEN(2,OUTFILE,'NEW')
-      CALL ITRHDR(2,1)
-C
-      READ(5,'(A)') TILEFILE
-      call shorten(TILEFILE,k)
-      write(6,'(''   Read: '',A)')TILEFILE(1:k)
-      CALL IMOPEN(3,TILEFILE,'NEW')
-      CALL ITRHDR(3,1)
-C
-      READ(5,'(A)') PSFILE
-      call shorten(PSFILE,k)
-      write(6,'(''   Read: '',A)')PSFILE(1:k)
-      CALL IMOPEN(4,PSFILE,'NEW')
-      CALL ITRHDR(4,1)
-C
-C  Put title labels, new cell and extra information only into header
-      CALL IRTLAB(1,LABELS,NL)
-      CALL IRTEXT(1,EXTRA,1,29)
-      CALL IRTCEL(1,CELL)
-C
-      CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
-      CALL IALEXT(2,EXTRA,1,29)
-      CALL IALCEL(2,CELL)
-      CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
-C
-      CALL ICRHDR(3,NXYZ,NXYZ,MODE,LABELS,NL)
-      CALL IALEXT(3,EXTRA,1,29)
-      CALL IALCEL(3,CELL)
-      CALL IWRHDR(3,TITLE,1,DMIN,DMAX,DMEAN)
-C
-      CALL ICRHDR(4,NXYZ,NXYZ,MODE,LABELS,NL)
-      CALL IALEXT(4,EXTRA,1,29)
-      CALL IALCEL(4,CELL)
-      CALL IWRHDR(4,TITLE,1,DMIN,DMAX,DMEAN)
-C
-      WRITE(6,'(''TLTAXA,TLTANG'')')
-      read(5,*)TLTAXA,TLTANG
-      write(6,'(''    Read: '',2F12.3)')TLTAXA,TLTANG
-C
-      if(TLTAXA.gt.90.0 .or. TLTAXA.lt.-90.0) then
-        write(6,'(''::ERROR: TLTAXA should be between +-90.0'')')
-        goto 900
-      endif
-C-----check here if tilt axis happens to be +-90 deg.
-C-----if so, apply small offset to avoid degeneracy
-      IF (TLTAXA.GT. 89.9) TLTAXA= 89.9
-      IF (TLTAXA.LT.-89.9) TLTAXA=-89.9
-C
-      if(TLTANG.gt.90.0 .or. TLTANG.lt.-90.0) then
-        write(6,'(''::ERROR: TLTANG should be between +-90.0'')')
-        goto 900
-      endif
-      if(TLTANG.gt.88.0 .or. TLTANG.lt.-88.0) then
-        write(6,'(''::ERROR: TLTANG strangely high. Aborting.'')')
-        goto 900
-      endif
-C
-      WRITE(6,'(''CS,HT,PHACON,MAGNIFICATION,STEPDIGITIZER'')')
-      read(5,*)CS,HT,PHACON,RMAG,STEPD
-      write(6,'(''    Read: '',5F12.3)')CS,HT,PHACON,RMAG,STEPD
-C
-      WRITE(6,'(''DEF1,DEF2,ANGAST'')')
-      read(5,*)RDEF1,RDEF2,ANGAST
-      write(6,'(''    Read: '',3F12.3)')RDEF1,RDEF2,ANGAST
-C
-      WRITE(6,'(''NOISE'')')
-      read(5,*)RNOISE
-      write(6,'(''    Read: '',F12.3)')RNOISE
-C
-      WRITE(6,'(''Inner tile size'')')
-      read(5,*)ITILEINNER
-      write(6,'(''    Read: '',I6)')ITILEINNER
-      k=ITILEINNER/2
-      if(2*k.ne.ITILEINNER)then
-        ITILEINNER=ITILEINNER+1
-        write(6,'(''::WARNING: Inner tile size needs to be '',
-     .    ''even number. Corrected to '',I6)')ITILEINNER
-      endif
-      if(ITILEINNER.lt.64 .or. ITILEINNER.gt.1024 .or.
-     .   ITILEINNER.gt.LTPIC)then
-        write(6,'(''::ERROR, ITILEINNER not reasonable or too large.'')')
-        goto 900
-      endif
-C
-      WRITE(6,'(''Outer tile size'')')
-      read(5,*)ITILEOUTER
-      write(6,'(''    Read: '',I6)')ITILEOUTER
-      k=ITILEOUTER/2
-      if(2*k.ne.ITILEOUTER)then
-        ITILEOUTER=ITILEOUTER+1
-        write(6,'(''::WARNING: Outer tile size needs to be '',
-     .    ''even number. Corrected to '',I6)')ITILEOUTER
-      endif
-      if(ITILEINNER.gt.LTPIC)then
-        write(6,'(''::ERROR, ITILEOUTER is too large.'')')
-        goto 900
-      endif
-      if(ITILEOUTER.lt.1.0*ITILEINNER)then
-        write(6,'(''::ERROR, ITILEOUTER too small.'')')
-        goto 900
-      endif
-C
-      WRITE(6,'(''Width of edge taper'')')
-      read(5,*)idist
-      write(6,'(''    Read: '',I6)')idist
-C
-      WRITE(6,'(''MODE'')')
-      read(5,*)IMODE
-      write(6,'(''    Read: '',I3)')IMODE
-C
-      if(IMODE.eq.1)then
-        write(6,'(''Applying CTF Phase flipping only'')')
-      elseif(IMODE.eq.2)then
-        write(6,'(''Applying CTF multiplication'')')
-      elseif(IMODE.eq.3)then
-        write(6,'(''Applying Wiener filtration'')')
-      else
-        write(6,'(''No CTF correction done'')')
-      endif
-C
-      WRITE(6,'(''Debug Mode: y or n'')')
-      read(5,*)CDEBUG
-      write(6,'(''    Read: '',A1)')CDEBUG
-C
-      if(CDEBUG.eq.'y')then
-        LDEBUG=.true.
-      else
-        LDEBUG=.false.
-      endif
-C
-      WRITE(6,'(''MAXAMP Correction Factor for Display (use 1.0)'')')
-      read(5,*)RMAXAMPFACTOR
-      write(6,'(''    Read: '',F12.3)')RMAXAMPFACTOR
-C
-C******************************************************************************
-C******************************************************************************
-C******************************************************************************
-C
-C-----Calculate pixel size in image in Angstroems
-      RPIXEL = STEPD * 10000.0 / RMAG
-      write(6,'(''Pixel size = '',F12.3,'' Angstroems'')')RPIXEL
-C
-C-----Dimensions of image are NX,NY.
-C-----Dimensions of tiles are ITILEINNER**2 rsp. ITILEOUTER**2
-C-----Dimensions of FFT of tiles are
-      KTILEOUTER = ITILEOUTER/2
-C-----Make sure, the FFT tiles are large enough for odd-sized images
-      if(2*(KTILEOUTER/2).ne.KTILEOUTER)then
-        write(6,'(''::ERROR: Tile size has to be multiple of 2.'',
-     .   '' Aborting.'')')
-        goto 900
-      endif
-C
-C-----calculate center of image
-      NCX=NX/2
-      NCY=NY/2
-C
-      SCAL=1.0/SQRT(REAL(NX*NY))
-C
-C-----N is normal to tilt axis, indicates the direction
-C-----in which defocus varies most
-      RNORMX= SIN(TLTAXA*PI/180.0)
-      RNORMY=-COS(TLTAXA*PI/180.0)
-C
-C-----Parameters for CTF calculation
+      CALL FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS1,DMAX,
+     +            RESMIN)
 C
       CS=CS*(10.0**7.0)                          ! Angstroms
-      HT=HT*1000.0                               ! Volts
-      WL=12.26/SQRT(HT+0.9785*HT**2/(10.0**6.0)) ! Angstroms
-      THETATR=WL/(RPIXEL*ITILEOUTER)
-      AMPCON=SQRT(1.0-PHACON**2)
-C
-      write(*,'(''Opened file has dimensions '',2I6)')NX,NY
-C
-      if(NX.ne.NY)then
-        write(6,'(''::ERROR: Only works for square images'')')
-        goto 900
-      endif
-C
-C-----Read in entire input image
-C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
-C
-      do iy = 1,NY
-        CALL IRDLIN(1,ALINE,*999)
-        do ix = 1,NX
-          VAL=ALINE(ix)
-          APIC(ix,iy)=VAL
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-        enddo
-      enddo
-      CALL IMCLOSE(1)
-      DOUBLMEAN = DOUBLMEAN/(NX*NY)
-      DMEAN = DOUBLMEAN
-C
-      DIMIN=DMIN
-      DIMAX=DMAX
-      DIMEAN=DMEAN
-      write(6,'(''Read input image. Min,Max,Mean = '',3F12.3)')
-     .  DIMIN,DIMAX,DIMEAN
-C
-C-----Mark input image for debugging
-C
-      if (LDEBUG) then
-        do ix=1,NX
-          do iy=1,NY
-            if(((ix-900)**2+(iy-900)**2).lt.500**2)then
-              APIC(ix,iy)=3.0
-            endif
-          enddo
-        enddo
-C
-        do ix=1,NX
-          do iy=1,NY
-            if(((ix-900)**2+(iy-900)**2).lt.3**2)then
-              APIC(ix,iy)=DIMAX
-            endif
-          enddo
-        enddo
-      endif
-C
-C-----Prepare output image with DMEAN, to make sure edges are defined
-C
-      do iy = 1,NY
-        do ix = 1,NX
-          BPIC(ix,iy)=DMEAN
-        enddo
-      enddo
-C
-C-----Cut Tiles from input image APIC
-C
-C-----Calculate number of inner tiles
-C
-      IXTILENUM = (NX - (ITILEOUTER - ITILEINNER)) / ITILEINNER
-      write(6,'(''Will use '',I6,'' x '',I6,'' tiles.'')')IXTILENUM,IXTILENUM
-C
-C-----Tiles are centrally placed. Calculate lower left corner point of first inner tile.
-C-----This tile should have an edge so that the outer tile could be cropped.
-C
-      IINNERXSTART = (NX - IXTILENUM*ITILEINNER) / 2
-      write(6,'(''Inner Tile 1,1 bottom left corner is '',2I9)')IINNERXSTART,IINNERXSTART
-      IOUTERXSTART = IINNERXSTART - (ITILEOUTER - ITILEINNER) / 2
-      write(6,'(''Outer Tile 1,1 bottom left corner is '',2I9)')IOUTERXSTART,IOUTERXSTART
-C
-C-----Loop over all inner tiles
-C
-      do itilex = 1,IXTILENUM
-        do itiley = 1,IXTILENUM
-C
-C---------Coordinates of inner tiles:
-          ixtilestart = IINNERXSTART + (itilex - 1) * ITILEINNER
-          iytilestart = IINNERXSTART + (itiley - 1) * ITILEINNER
-          ixtileend = ixtilestart + ITILEINNER - 1
-          iytileend = iytilestart + ITILEINNER - 1
-          ixtilecen = (ixtilestart + ixtileend) / 2
-          iytilecen = (iytilestart + iytileend) / 2
-C
-C---------Cut outer tile
-          do iy = 1,ITILEOUTER
-            do ix = 1,ITILEOUTER
-              iix = ixtilestart - 1 - (ITILEOUTER-ITILEINNER)/2 + ix
-              iiy = iytilestart - 1 - (ITILEOUTER-ITILEINNER)/2 + iy
-              VAL=APIC(iix,iiy)
-C              if(itilex.eq.1 .and. itiley.eq.1) VAL=100.0
-              AOUTERTILE(ix,iy)=VAL
-            enddo
-          enddo
-C
-C---------Calculate local defocus for the center of the current tile
-C
-C---------Defocus is "defocus = RDEF1,RDEF2,ANGAST".  TLTAXIS, TLTANG.  Pixel size in Angstroems is RPIXEL
-C
-C---------Calculate distance from tilt axis for the center of this tile, in pixels
-C---------Center of image is NCX,NCY
-C---------Center of tile is ixtilecen,iytilecen (here called px,py)
-C---------distance between image center and tile center is
-C---------  sqrt((ncx-px)**2 + (ncy-py)**2)
-          rdist1 = sqrt(real(ixtilecen-NCX)**2 + real(iytilecen-NCY)**2)
-C
-C---------Angle "beta" between X-axis and line from image-center to tile-center is 
-C---------  arctan((py-ncy) / (px-ncx))
-          rbeta = atan2(real(iytilecen-NCY),real(ixtilecen-NCX))*180.0/PI
-C
-C---------Angle between tilt axis and line from image-center to tile-center is
-C---------  beta - TLTAXA
-          rgamma = rbeta - TLTAXA
-C
-C---------Distance between tile-center and closest point on tilt axis is
-C---------  sin(rgamma)*rdist1
-          rdist2 = sin(rgamma*PI/180.0) * rdist1
-C
-C---------Distance in Angstroems is
-          rdist3 = rdist2 * RPIXEL
-C
-C---------Defocus at local position is
-C---------  rdist3 * tan(TLTANG)
-          RLDEF1 = RDEF1 + rdist3 * tan(TLTANG*PI/180.0)
-          RLDEF2 = RDEF2 + rdist3 * tan(TLTANG*PI/180.0)
-          RLDEFM = (RLDEF1 + RLDEF2 ) / 2.0
-C          write(6,'(''Tile '',2I4,'' at position '',2I6,
-C     .      '' is at distance '',F12.3,'' px, or '',F12.3,
-C     .      '' A. Def = '',F12.3)')
-C     .      itilex,itiley,ixtilecen,iytilecen,rdist2,rdist3,RLDEFM
-C
-C----------------------------------------
-C---------Calculate local CTF profile
-C----------------------------------------
-C
-          do ix=1,ITILEOUTER
-            do iy=1,ITILEOUTER
-              CTFTILE(ix,iy)=0.0
-            enddo
-          enddo
-C
-          DO ix=1,ITILEOUTER/2
-            LL=ix-1
-            DO iy=1,ITILEOUTER
-              MM=iy-1
-              IF (MM.GT.ITILEOUTER/2) MM=MM-ITILEOUTER
-              I=ix+ITILEOUTER/2
-              J=iy+ITILEOUTER/2
-              IF (J.GT.ITILEOUTER) J=J-ITILEOUTER
-              ANGASTRAD=ANGAST*PI/180.0
-              CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
-     +                ANGASTRAD,THETATR,LL,MM)
-C
-              CTFTILE(I,J)=CTFV
-              I=ITILEOUTER/2-ix+1
-              J=ITILEOUTER-J+2
-              if(J.le.ITILEOUTER)then
-                CTFTILE(I,J)=CTFV
-              endif
-            enddo
-          enddo
-C
-C---------copy outer tile into ABOX array:
-C
-          do iy = 1,ITILEOUTER 
-            do ix = 1,ITILEOUTER 
-              ID=ix + ITILEOUTER*(iy-1)
-              ABOX(ID)=AOUTERTILE(ix,iy)
-            enddo
-          enddo
-C
-C---------Calculate in-place Fourier Transform from outer tile
-C
-C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-          call RLFT3(ABOX,CBOX,ITILEOUTER,ITILEOUTER,1,1)
-C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-C
-C---------Calculate Powerspectrum for verfication
-C
-          do iy = 1,ITILEOUTER 
-            do ix = 1,ITILEOUTER/2
-              ID=(ix + ITILEOUTER/2*(iy-1))*2
-              IS= ix + ITILEOUTER/2*(iy-1)
-              CFFT(IS)=CMPLX(REAL(ABOX(ID-1)),REAL(ABOX(ID)))
-            enddo
-          enddo
-C
-          do iy = 1,ITILEOUTER
-            do ix = 1,ITILEOUTER/2
-              IS=ix + ITILEOUTER/2*(iy-1)
-              iix=ix+ITILEOUTER/2
-              iiy=iy+ITILEOUTER/2
-              if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
-              CFFTTILE(iix,iiy)=CFFT(IS)
-            enddo
-          enddo
-C
-C--------------------------------------------------------------
-C---------Apply CTF correction
-C--------------------------------------------------------------
-C
-          do iy = 1,ITILEOUTER
-            do ix = 1,ITILEOUTER/2
-              iox=ix+ITILEOUTER/2
-              ioy=iy
-              if(IMODE.eq.1)then
-C                write(6,'('':Applying CTF Phase flipping only'')')
-                IF(CTFTILE(iox,ioy).gt.0.0)then
-                  CFFTCTFC(iox,ioy) = -1.0*CFFTTILE(iox,ioy)
-                else
-                  CFFTCTFC(iox,ioy) =  1.0*CFFTTILE(iox,ioy)
-                endif
-              elseif(IMODE.eq.2)then
-C               write(6,'('':Applying CTF multiplication'')')
-                CFFTCTFC(iox,ioy)=CFFTTILE(iox,ioy)*(-1.0*CTFTILE(iox,ioy))
-              elseif(IMODE.eq.3)then
-C               write(6,'('':Applying Wiener filtration'')')
-                CFFTCTFC(iox,ioy)=CFFTTILE(iox,ioy)*(-1.0*CTFTILE(iox,ioy))/(CTFTILE(iox,ioy)**2+RNOISE)
-              endif
-              APOWERTILE(iox,ioy)=(AIMAG(CFFTTILE(iox,ioy))**2+REAL(CFFTTILE(iox,ioy))**2)*SCAL**2
-            enddo
-          enddo
-C         Mask central pixel at origin
-          APOWERTILE(ITILEOUTER/2+1,ITILEOUTER/2+1)=0.0
-C
-C---------Calculate inverse in-place Fourier Transform from outer tile (AOUTERTILE)
-C
-          do iy = 1,ITILEOUTER 
-            do ix = 1,ITILEOUTER/2
-              iix=ix+ITILEOUTER/2
-              iiy=iy+ITILEOUTER/2
-              if(iiy.gt.ITILEOUTER)iiy=iiy-ITILEOUTER
-              ID=(ix + ITILEOUTER/2*(iy-1))*2
-              ABOX(ID-1)= REAL(CFFTCTFC(iix,iiy))
-              ABOX(ID  )=AIMAG(CFFTCTFC(iix,iiy))
-            enddo
-          enddo
-C
-C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-          call RLFT3(ABOX,CBOX,ITILEOUTER,ITILEOUTER,1,-1)
-C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-C
-          do iy = 1,ITILEOUTER 
-            do ix = 1,ITILEOUTER
-              IS= ix + ITILEOUTER*(iy-1)
-              AOUTERTILE(ix,iy)=ABOX(IS)
-            enddo
-          enddo
-C
-C---------Calculate DAMPMAX value, where 10% of pixels in POWER are above DAMPMAX
-C
-          DAMPMAX=-1.0E10
-          do iy = 1,ITILEINNER
-            do ix = 1,ITILEINNER/2
-              iox=ix+ITILEOUTER/2
-              ioy=iy+(ITILEOUTER-ITILEINNER)/2
-              if(DAMPMAX.lt.APOWERTILE(iox,ioy))DAMPMAX=APOWERTILE(iox,ioy)
-            enddo
-          enddo
-C          write(6,'('':DAMPMAX = '',G12.3,'' APOWERTILE(100,100) = ''
-C     .      ,G12.3)')DAMPMAX,APOWERTILE(ITILEOUTER/2+100,ITILEOUTER/2+100)
-C
-C         What fraction of pixels should be below 50% value?
-          IHISTOFRAC=INT(0.30 * REAL(ITILEINNER*ITILEINNER/2))
-          DAMPMAX=DAMPMAX/1000.0
-          icount=0
- 100      continue
-C            write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
-C     .        '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12)')
-C     .        SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
-            DAMPMAX=DAMPMAX*1.5
-            icount=icount+1
-            IABOVE = 0
-            do iy = 1,ITILEINNER
-              do ix = 1,ITILEINNER/2
-                iox=ix+ITILEOUTER/2
-                ioy=iy+(ITILEOUTER-ITILEINNER)/2
-                if(APOWERTILE(iox,ioy).gt.DAMPMAX)IABOVE=IABOVE+1
-                if(IABOVE.gt.IHISTOFRAC .and. icount.lt.100)goto 100
-              enddo
-            enddo
-          DAMPMAX=DAMPMAX*2.0*RMAXAMPFACTOR
-C          write(6,'('':SCAL='',G12.6,''   DAMPMAX = '',G12.6,
-C     .      '', IABOVE='',I9,'', icount='',I6,'', IHISTOFRAC='',I12,
-C     .      '' is final'')')
-C     .      SCAL,DAMPMAX,IABOVE,icount,IHISTOFRAC
-C
-C---------Extract inner tile from outer tile
-C
-          do iy = 1,ITILEINNER 
-            do ix = 1,ITILEINNER 
-C
-              iox=ix+(ITILEOUTER-ITILEINNER)/2
-              ioy=iy+(ITILEOUTER-ITILEINNER)/2
-C
-              AINNERTILE(ix,iy)=AOUTERTILE(iox,ioy)
-C
-              if(ix.le.ITILEINNER/2)then
-C               Left half of PS: Copy synthetic CTF
-                PSTILE(ix,iy)=CTFTILE(iox,ioy)**2
-              else
-C               Right half of PS: Copy FFT of CTF-corrected tile
-C               Right half of PS: Copy FFT of original image tile
-                PSTILE(ix,iy)=MIN(APOWERTILE(iox,ioy)/DAMPMAX,1.0)
-              endif
-C
-            enddo
-          enddo
-C
-C---------Place tile into output image
-          do iy = 1,ITILEINNER
-            do ix = 1,ITILEINNER
-              ixcor = ixtilestart - 1 + ix
-              iycor = iytilestart - 1 + iy
-              BPIC(ixcor,iycor) = AINNERTILE(ix,iy)
-              PSPIC(ixcor,iycor) = PSTILE(ix,iy)
-            enddo
-          enddo
-C
-        enddo
-      enddo
-C
-C-----Copy input image into output image
-      do ix=1,NX
-        do iy=1,NY
-          TILEPIC(ix,iy)=APIC(ix,iy)
-        enddo
-      enddo
-C
-C---------------------------------------------------
-C-----Taper edge to DIMEAN value
-C---------------------------------------------------
-C
-C
-C-----Reset edge to DIMEAN value
-C-----Edge width is IINNERXSTART
-C     IINNERXSTART = (NX - IXTILENUM*ITILEINNER) / 2
-      do ix = 1,NX
-        do iy = 1,NY
-          APIC(ix,iy)=1.0
-        enddo
-      enddo
-C
-      do ix = 1,NX
-        do iy = 1,idist
-C---------bottom edge
-          APIC(ix,iy+IINNERXSTART)=REAL(iy)/REAL(idist)
-C---------top edge
-          APIC(ix,NY-IINNERXSTART-iy+1)=REAL(iy)/REAL(idist)
-        enddo
-        do iy = 1,IINNERXSTART
-          APIC(ix,iy)=0.0
-          APIC(ix,NY-IINNERXSTART+iy)=0.0
-        enddo
-      enddo
-      do iy = 1,NY
-        do ix = 1,idist
-C---------Left edge
-          i=ix+IINNERXSTART
-C---------Right edge
-          j=NX-IINNERXSTART-ix+1
-          if(i.lt.iy .and. i.lt.NY-iy)then
-            APIC(i,iy)=REAL(ix)/REAL(idist)
-            APIC(j,iy)=REAL(ix)/REAL(idist)
-          endif
-        enddo
-        do ix = 1,IINNERXSTART
-          APIC(ix,iy)=0.0
-          APIC(NX-IINNERXSTART+ix,iy)=0.0
-        enddo
-      enddo
-C
-C-----Use APIC to modulate amplitude in BPIC
-C
-      DOMIN= 1.0e30
-      DOMAX=-1.0e30
-      DOUBLMEAN=0.0
-      do ix=1,NX
-        do iy=1,NY
-          if(DOMIN.gt.BPIC(ix,iy))DOMIN=BPIC(ix,iy)
-          if(DOMAX.lt.BPIC(ix,iy))DOMAX=BPIC(ix,iy)
-          DOUBLMEAN=DOUBLMEAN+BPIC(ix,iy)
-        enddo
-      enddo
-      DOUBLMEAN=DOUBLMEAN / NX 
-      DOUBLMEAN=DOUBLMEAN / NY 
-      DOMEAN = DOUBLMEAN
-      write(*,'(''Min, Max, Mean of raw output file are '',3G12.3)')DOMIN,DOMAX,DOMEAN
-      do ix=1,NX
-        do iy=1,NY
-          DVAL = BPIC(ix,iy)
-          DVAL = (DVAL - DOMEAN) / (DOMAX - DOMIN)
-          DVAL = DVAL * APIC(ix,iy) * (DIMAX-DIMIN) + DIMIN
-          BPIC(ix,iy) = DVAL
-        enddo
-      enddo
-      DOMIN= 1.0e30
-      DOMAX=-1.0e30
-      do ix=1,NX
-        do iy=1,NY
-          if(DOMIN.gt.BPIC(ix,iy))DOMIN=BPIC(ix,iy)
-          if(DOMAX.lt.BPIC(ix,iy))DOMAX=BPIC(ix,iy)
-        enddo
-      enddo
-      write(*,'(''Min, Max of raw output file are '',2G12.3)')DOMIN,DOMAX
-C
-      do ix=1,NX
-        do iy=1,NY
-          DVAL = BPIC(ix,iy) 
-          DVAL = (DVAL - DOMIN) / (DOMAX - DOMIN)
-          DVAL = DVAL * (DIMAX-DIMIN) + DIMIN
-          BPIC(ix,iy) = DVAL
-        enddo
-      enddo
-      write(*,'(''Min, Max of output file is '',2F12.3)')
-     .  DIMIN,DIMAX
-C
-C-----Prepare image marked with tile positions:
-C
-      do itilex = 1,IXTILENUM
-        do itiley = 1,IXTILENUM
-C---------Draw a frame around the iiner tiles
-          ixtilestart = IINNERXSTART + (itilex - 1) * ITILEINNER
-          iytilestart = IINNERXSTART + (itiley - 1) * ITILEINNER
-          do iy = 1,ITILEINNER
-            do ix = 1,ITILEINNER
-              if(iy.eq.1 .or. iy.eq.ITILEINNER .or. 
-     .           ix.eq.1 .or. ix.eq.ITILEINNER)then
-                ixcor = ixtilestart - 1 + ix
-                iycor = iytilestart - 1 + iy
-                TILEPIC(ixcor,iycor)=DIMAX
-              endif
-            enddo
-          enddo
-C---------Draw a frame around the outer tiles
-          ixtilestart = IOUTERXSTART + (itilex - 1) * ITILEINNER
-          iytilestart = IOUTERXSTART + (itiley - 1) * ITILEINNER
-          do iy = 1,ITILEOUTER
-            do ix = 1,ITILEOUTER
-              if(iy.eq.1 .or. iy.eq.ITILEOUTER .or. 
-     .           ix.eq.1 .or. ix.eq.ITILEOUTER)then
-                ixcor = ixtilestart - 1 + ix
-                iycor = iytilestart - 1 + iy
-                TILEPIC(ixcor,iycor)=DIMIN
-              endif
-            enddo
-          enddo
-        enddo
-      enddo
-C
-C-----Write out output image
-C
-      MODE = 2
-C
-      CELL(1) = REAL(NX)
-      CELL(2) = REAL(NY)
-      CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
-      CALL IALEXT(2,EXTRA,1,29)
-      CALL IALCEL(2,CELL)
-      CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
-C
-      CALL ICRHDR(3,NXYZ,NXYZ,MODE,LABELS,NL)
-      CALL IALEXT(3,EXTRA,1,29)
-      CALL IALCEL(3,CELL)
-      CALL IWRHDR(3,TITLE,1,DMIN,DMAX,DMEAN)
-C
-      CALL ICRHDR(4,NXYZ,NXYZ,MODE,LABELS,NL)
-      CALL IALEXT(4,EXTRA,1,29)
-      CALL IALCEL(4,CELL)
-      CALL IWRHDR(4,TITLE,1,DMIN,DMAX,DMEAN)
-C
-      write(*,'('' Output file has dimensions '',2I6)')NX,NY
-C
-C-----Output output image
-C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
-C
-      do iy = 1,NY
-        do ix = 1,NX
-          VAL=BPIC(ix,iy)
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-          ALINE(ix)=VAL
-        enddo
-        CALL IWRLIN(2,ALINE)
-      enddo
-      DOUBLMEAN = DOUBLMEAN/(NX*NY)
-      DMEAN = DOUBLMEAN
-C
-      write(*,'(''Min, Max, Mean of output file is '',3F12.3)')
-     .   DMIN,DMAX,DMEAN
-C
-      CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
-C
-C-----Output Tile image
-C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
-C
-      do iy = 1,NY
-        do ix = 1,NX
-          VAL=TILEPIC(ix,iy)
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-          ALINE(ix)=VAL
-        enddo
-        CALL IWRLIN(3,ALINE)
-      enddo
-      DOUBLMEAN = DOUBLMEAN/(NX*NY)
-      DMEAN = DOUBLMEAN
-C
-      write(*,'('' Min, Max, Mean of produced tile file is '',3F12.3)')
-     .   DMIN,DMAX,DMEAN
-C
-      CALL IWRHDR(3,TITLE,-1,DMIN,DMAX,DMEAN)
-C
-C-----Output PS image
-C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
-C
-      do iy = 1,NY
-        do ix = 1,NX
-          VAL=PSPIC(ix,iy)
-          if(VAL.gt.1.0)VAL=1.0
-          if(VAL.lt.0.0)VAL=0.0
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-          ALINE(ix)=VAL
-        enddo
-        CALL IWRLIN(4,ALINE)
-      enddo
-      DOUBLMEAN = DOUBLMEAN/(NX*NY)
-      DMEAN = DOUBLMEAN
-C
-      write(*,'('' Min, Max, Mean of produced Powerspectra '',
-     .   ''file is '',3F12.3)')
-     .   DMIN,DMAX,DMEAN
-C
-      CALL IWRHDR(4,TITLE,-1,DMIN,DMAX,DMEAN)
-C
-C-----Close files
-C
-      CALL IMCLOSE(1)
-      CALL IMCLOSE(2)
-      CALL IMCLOSE(3)
-      CALL IMCLOSE(4)
-C
-      goto 999
-C
- 900  continue
-      write(6,'(''::ABORTING'')')
-      CALL IMCLOSE(1)
-      CALL IMCLOSE(2)
-      CALL IMCLOSE(3)
-      CALL IMCLOSE(4)
-      stop
-C
- 999  continue
-      write(6,'('' Program normal end.'')')
-C
-      STOP
-      END
+      KV=KV*1000.0                               ! Volts
+      WL=12.26/SQRT(KV+0.9785*KV**2/(10.0**6.0)) ! Angstroms
+      WGH1=SQRT(1.0-WGH**2)
+      WGH2=WGH
+C
+      THETATR=WL/(STEPR*JXYZ(1))
+C
+      DFMID1=DFMIN
+      DFMID2=DFMAX
+      CALL SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RESMIN,RESMAX,
+     +		  POWER,JXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
+      RMIN2=RESMIN**2
+      RMAX2=RESMAX**2
+      HW=-1.0/RMAX2
+      hw=0.0
 
-c==========================================================
-c
-      SUBROUTINE shorten(czeile,k)
+      CALL REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,CS,WL,
+     +       WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,DAST)
 C
-C counts the number of actual characters not ' ' in czeile
-C and gives the result out in k.
+      DO 50 I=1,JXYZ(1)*JXYZ(2)
+      	OUT(I)=0.0
+50    CONTINUE
+      DO 200 L=1,JXYZ(1)/2
+        LL=L-1
+        DO 200 M=1,JXYZ(2)
+          MM=M-1
+          IF (MM.GT.JXYZ(2)/2) MM=MM-JXYZ(2)
+          ID=L+JXYZ(1)/2*(M-1)
+      	  I=L+JXYZ(1)/2
+      	  J=M+JXYZ(2)/2
+      	  IF (J.GT.JXYZ(2)) J=J-JXYZ(2)
+      	  IS=I+JXYZ(1)*(J-1)
+C      	  OUT(IS)=POWER(ID)/DRMS1*SQRT(2.0*PI)
+      	  OUT(IS)=POWER(ID)/DRMS1/2.0+0.5
+      	  IF (OUT(IS).GT.1.0) OUT(IS)=1.0
+      	  IF (OUT(IS).LT.-1.0) OUT(IS)=-1.0
+          RES2=(REAL(LL)/JXYZ(1))**2+(REAL(MM)/JXYZ(2))**2
+          IF ((RES2.LE.RMAX2).AND.(RES2.GE.RMIN2)) THEN
+            CTFV=CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,
+     +               ANGAST,THETATR,LL,MM)
+     	    I=JXYZ(1)/2-L+1
+      	    J=JXYZ(2)-J+2
+      	    IF (J.LE.JXYZ(2)) THEN
+      	      IS=I+JXYZ(1)*(J-1)
+              OUT(IS)=CTFV**2
+      	    ENDIF
+          ENDIF
+200   CONTINUE
 C
-      CHARACTER * (*) CZEILE
-      CHARACTER * 1 CTMP1
-      CHARACTER * 1 CTMP2
-      CTMP2=' '
+      CALL ICLOSE(10)
+      MODE=2
+      IF (STEPR.NE.0.0) STEPR=1.0/STEPR
+      CALL IOPEN(FILEOUT,10,CFORM,MODE,JXYZ(1),JXYZ(2),
+     +           JXYZ(3),'NEW',STEPR,TITLE)
+      DO 210 J=1,JXYZ(2)
+        ID=1+JXYZ(1)*(J-1)
+        CALL IWRITE(10,OUT(ID),J)
+210   CONTINUE
+      CALL ICLOSE(10)
 C
-      ilen=len(czeile)
-      DO 100 I=1,ilen
-         k=ilen+1-I
-         READ(CZEILE(k:k),'(A1)')CTMP1
-         IF(CTMP1.NE.CTMP2)GOTO 300
-  100 CONTINUE
-  300 CONTINUE
-      IF(k.LT.1)k=1
+      END
+C
+C**************************************************************************
+      SUBROUTINE HISTO(N,NBIN,DATA,BINS,MIN,MAX)
+C**************************************************************************
+      IMPLICIT NONE
+C
+      INTEGER I,J,N,NBIN  
+      REAL DATA(*),MIN,MAX,BINS(*)
+C
+      MIN=1.0E30
+      MAX=-1.0E30
+      DO 10 I=1,N
+        IF (DATA(I).GT.MAX) MAX=DATA(I)
+        IF (DATA(I).LT.MIN) MIN=DATA(I)
+10    CONTINUE
+      IF (MIN.EQ.MAX) MAX=MAX+1.0
+C
+      DO 20 I=1,NBIN
+        BINS(I)=0.0
+20    CONTINUE
+C
+      DO 30 I=1,N
+        J=INT((DATA(I)-MIN)/(MAX-MIN)*(NBIN-1)+0.5)+1
+        BINS(J)=BINS(J)+1.0
+30    CONTINUE
+C
+      RETURN
+      END
+C
+C**************************************************************************
+      SUBROUTINE FILTER(JXYZ,KXYZ,POWER,BUF1,DMEAN,DRMS,DMAX,
+     +                  RESMIN)
+C**************************************************************************
+C       Filters power spectrum by removing smooth background. This
+C       is necessary to obtain a good CTF fit. Also calculates
+C       mean, STD and maximum of filtered spectrum.
+C       Resizes the power spectrum to be exactly of dimension
+C       JXYZ(1) x JXYZ(2)
+C**************************************************************************
+      IMPLICIT NONE
+C
+      INTEGER I,J,JXYZ(*),KXYZ(*),IS,ID,NW
+      REAL SCAL,POWER(*),DRMS,DMEAN,DSQR,BUF1(*),DMAX
+      REAL RESMIN
+C
+      WRITE(*,1101)
+1101  FORMAT(/,' FILTERING POWER SPECTRUM...'/)
+C
+C      NW=INT(KXYZ(1)*DSTEP/20.0)
+      NW=INT(KXYZ(1)*RESMIN*SQRT(2.0))
+C
+C       subtract smooth background
+C
+      CALL MSMOOTH(POWER,KXYZ,NW,BUF1)
+C
+C       calculate mean, STD, resize power spectrum
+C
+      DMEAN=0.0
+      DSQR=0.0
+      DMAX=-1.0E30
+      DO 61 J=3,JXYZ(2)-2
+        DO 61 I=3,JXYZ(1)/2-2
+          ID=I+JXYZ(1)/2*(J-1)
+          IS=I+KXYZ(1)*(J-1)
+          POWER(ID)=POWER(IS)
+          DMEAN=DMEAN+POWER(ID)
+          DSQR=DSQR+POWER(ID)**2
+          IF (POWER(ID).GT.DMAX) DMAX=POWER(ID)
+61    CONTINUE
+      DMEAN=DMEAN/JXYZ(1)/JXYZ(2)*2
+      DSQR=DSQR/JXYZ(1)/JXYZ(2)*2
+      DRMS=SQRT(DSQR-DMEAN**2)
+      DO 62 J=1,JXYZ(2)
+        DO 62 I=1,JXYZ(1)/2
+          ID=I+JXYZ(1)/2*(J-1)
+          IF (POWER(ID).GT.DMAX) POWER(ID)=DMAX
+62    CONTINUE
+C
+      RETURN
+      END
+C
+C**************************************************************************
+      SUBROUTINE MSMOOTH(ABOX,NXYZ,NW,BUF)
+C**************************************************************************
+C       Calculates a smooth background in the power spectrum
+C       in ABOX using a box convolution with box size 2NW+1 x 2NW+1.
+C       Replaces input with background-subtracted power spectrum.
+C**************************************************************************
+      IMPLICIT NONE
+C
+      INTEGER NXYZ(*),NW,I,J,K,L,IX,IY,ID,CNT
+      REAL ABOX(*),SUM,BUF(*)
+C
+C       loop over X and Y
+C
+      DO 10 I=1,NXYZ(1)
+        DO 10 J=1,NXYZ(2)
+          SUM=0.0
+          CNT=0
+C
+C       loop over box to average
+C
+          DO 20 K=-NW,NW
+            DO 20 L=-NW,NW
+              IX=I+K
+              IY=J+L
+C       
+C       here reset IX to wrap around spectrum
+C
+              IF (IX.GT.NXYZ(1)) IX=IX-2*NXYZ(1)
+              IF (IX.LT.1) THEN
+                IX=1-IX
+                IY=1-IY
+              ENDIF
+C
+C       here reset IY to wrap around spectrum
+C       
+              IF (IY.GT.NXYZ(2)) IY=IY-NXYZ(2)
+              IF (IY.LE.-NXYZ(2)) IY=IY+NXYZ(2)
+              IF (IY.LT.1) IY=1-IY
+              ID=IX+NXYZ(1)*(IY-1)
+C              IF (ID.NE.1) THEN
+              IF ((IX.GT.1).AND.(IY.GT.1)) THEN
+                SUM=SUM+ABOX(ID)
+                CNT=CNT+1
+              ENDIF
+20        CONTINUE
+          SUM=SUM/CNT
+          ID=I+NXYZ(1)*(J-1)
+          IF (ID.NE.1) THEN
+            BUF(ID)=SUM
+          ELSE
+            BUF(ID)=ABOX(ID)
+          ENDIF
+10    CONTINUE
+C       
+C       replace input with background-subtracted spectrum
+C
+      DO 40 I=1,NXYZ(1)*NXYZ(2)
+        ABOX(I)=ABOX(I)**2-BUF(I)**2
+40    CONTINUE
+C
+      RETURN
+      END
+C
+C**************************************************************************
+      SUBROUTINE BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
+C**************************************************************************
+C	Cuts out an area of size JXYZ from array AIN. IX, IY are
+C	upper left corner of boxed area.
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER I,J,NXYZ(3),JXYZ(3),IX,IY,ID,IDB,II,JJ
+      REAL AIN(*),ABOX(*),MEAN,RMS,M1,M2,M3,M4
+      REAL*8 DRMS,DMEAN,DM1,DM2,DM3,DM4,DTMP
+C
+      DMEAN=0.0
+      DM1=0.0
+      DM2=0.0
+      DM3=0.0
+      DM4=0.0
+      DO 10 J=1,JXYZ(2)
+        DO 10 I=1,JXYZ(1)
+      	  II=I+IX-1
+      	  JJ=J+IY-1
+          ID=II+NXYZ(1)*(JJ-1)
+          IDB=I+JXYZ(1)*(J-1)
+          ABOX(IDB)=AIN(ID)
+      	  DMEAN=DMEAN+ABOX(IDB)
+      	  IF (I.EQ.1) DM1=DM1+ABOX(IDB)
+      	  IF (I.EQ.JXYZ(1)) DM2=DM2+ABOX(IDB)
+      	  IF (J.EQ.1) DM3=DM3+ABOX(IDB)
+      	  IF (J.EQ.JXYZ(2)) DM4=DM4+ABOX(IDB)
+10    CONTINUE
+      DMEAN=DMEAN/JXYZ(1)/JXYZ(2)
+      MEAN=DMEAN
+      DM1=DM1/JXYZ(2)
+      DM2=DM2/JXYZ(2)
+      DM3=DM3/JXYZ(1)
+      DM4=DM4/JXYZ(1)
+      DRMS=0.0
+      DO 20 I=1,JXYZ(1)*JXYZ(2)
+      	DRMS=DRMS+(ABOX(I)-DMEAN)**2
+20    CONTINUE
+      DRMS=SQRT(DRMS/JXYZ(1)/JXYZ(2))
+      RMS=DRMS
+      DO 30 J=1,JXYZ(2)
+        DO 30 I=1,JXYZ(1)
+          IDB=I+JXYZ(1)*(J-1)
+          ABOX(IDB)=ABOX(IDB)-(DM1+(DM2-DM1)/(JXYZ(1)-1)*(I-1))
+     +                 -(DM3+(DM4-DM3)/(JXYZ(2)-1)*(J-1))+DMEAN
+30    CONTINUE
 C
       RETURN
       END
@@ -951,25 +597,260 @@ C
       END
 C
 C**************************************************************************
+      SUBROUTINE SEARCH_CTF(CS,WL,WGH1,WGH2,THETATR,RMIN,RMAX,
+     +		AIN,NXYZ,DFMID1,DFMID2,ANGAST,FSTEP,DAST)
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER I,J,K,NXYZ(3),I1,I2,ID,IERR
+      REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
+      REAL RMIN2,RMAX2,RMIN,RMAX,AIN(*),SUMMAX,FSTEP
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF,DAST
+      REAL,ALLOCATABLE :: SUMS(:),DF1(:),DF2(:),ANG(:)
+      PARAMETER (PI=3.1415926535898)
+C
+      WRITE(*,1000)
+1000  FORMAT(/,' SEARCHING CTF PARAMETERS...'/,
+     +       /,'      DFMID1      DFMID2      ANGAST          CC'/)
+C
+      RMIN2=RMIN**2
+      RMAX2=RMAX**2
+      HW=-1.0/RMAX2
+      hw=0.0
+      SUMMAX=-1.0E20
+      I1=INT(DFMID1/FSTEP)
+      I2=INT(DFMID2/FSTEP)
+      ID=(I2-I1+1)*(I2-I1+1)
+      ALLOCATE(SUMS(ID),DF1(ID),DF2(ID),ANG(ID),STAT=IERR)
+      IF (IERR.NE.0) THEN
+        WRITE(*,*) ' ERROR: Memory allocation failed in SEARCH_CTF'
+        STOP ' Try reducing size of defocus search grid'
+      ENDIF
+C      DO 10 K=0,3
+      DO 10 K=0,17
+        DO 11 I=I1,I2
+!$OMP PARALLEL DO
+      	  DO 12 J=I1,I2
+            CALL SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+     +            RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,DAST,
+     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
+12        CONTINUE
+11      CONTINUE
+        DO 13 I=1,ID
+      	  IF (SUMS(I).GT.SUMMAX) THEN
+      	    WRITE(*,1100)DF1(I),DF2(I),ANG(I)/PI*180.0,SUMS(I)
+1100	    FORMAT(3F12.2,F12.5)
+      	    SUMMAX=SUMS(I)
+      	    DFMID1S=DF1(I)
+      	    DFMID2S=DF2(I)
+      	    ANGASTS=ANG(I)
+      	  ENDIF
+13      CONTINUE
+10    CONTINUE
+      DEALLOCATE(SUMS,DF1,DF2,ANG)
+C
+      DFMID1=DFMID1S
+      DFMID2=DFMID2S
+      ANGAST=ANGASTS
+C
+      RETURN
+      END      
+C
+C**************************************************************************
+      SUBROUTINE SEARCH_CTF_S(CS,WL,WGH1,WGH2,THETATR,RMIN2,
+     +		  RMAX2,AIN,NXYZ,DF1,DF2,ANG,FSTEP,SUMS,HW,DAST,
+     +            SUMMAX,DFMID1S,DFMID2S,ANGASTS,I,J,K,I1,I2)
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER I,J,K,NXYZ(3),I1,I2,ID
+      REAL CS,WL,WGH1,WGH2,THETATR,DF1(*),DF2(*),ANG(*)
+      REAL RMIN2,RMAX2,SUMS(*),AIN(*),SUMMAX,FSTEP
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,EVALCTF,DAST
+      PARAMETER (PI=3.1415926535898)
+C
+      ID=I-I1+1+(I2-I1+1)*(J-I1)
+      DF1(ID)=FSTEP*I
+      DF2(ID)=FSTEP*J
+C      ANG(ID)=22.5*K
+      ANG(ID)=5.0*K
+      ANG(ID)=ANG(ID)/180.0*PI
+      SUMS(ID)=EVALCTF(CS,WL,WGH1,WGH2,DF1(ID),DF2(ID),
+     +	ANG(ID),THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,DAST)
+C
+      RETURN
+      END      
+C
+C**************************************************************************
+      REAL FUNCTION EVALCTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
+     +			    THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,DAST)
+C**************************************************************************
+C     This part of the code was made more efficient by
+C
+C     Robert Sinkovits
+C     Department of Chemistry and Biochemistry
+C     San Diego Supercomputer Center
+C
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER L,LL,M,MM,NXYZ(3),ID,IS
+      REAL CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,THETATR,SUM1
+      REAL SUM,AIN(*),RES2,RMIN2,RMAX2,CTF,CTFV,HW,SUM2,DAST
+      real rad2, hangle2, angspt, c1, c2, angdif, ccos, df, chi
+      real expv, twopi_wli, ctfv2, dsum, ddif, rpart1, rpart2
+      real half_thetatrsq, recip_nxyz1, recip_nxyz2
+      real :: twopi=6.2831853071796
+
+      twopi_wli  = twopi/wl      
+      dsum = dfmid1 + dfmid2
+      ddif = dfmid1 - dfmid2
+      half_thetatrsq = 0.5*thetatr*thetatr
+      recip_nxyz1 = 1.0/nxyz(1)
+      recip_nxyz2 = 1.0/nxyz(2)
+
+      SUM  = 0.0
+      SUM1 = 0.0
+      SUM2 = 0.0
+      IS   = 0
+
+      DO M=1,NXYZ(2)
+         MM=M-1
+         IF (MM > NXYZ(2)/2) MM=MM-NXYZ(2)
+         rpart2 = real(mm) * recip_nxyz2
+         
+         DO L=1,NXYZ(1)/2
+            LL=L-1
+            rpart1 = real(ll) * recip_nxyz1
+            RES2 = rpart1*rpart1 + rpart2*rpart2
+            
+            IF (RES2 <= RMAX2 .AND. RES2 > RMIN2) THEN
+               RAD2 = LL*LL + MM*MM
+               IF (RAD2.NE.0.0) THEN
+                  ANGSPT = ATAN2(REAL(MM), REAL(LL))
+                  ANGDIF = ANGSPT - ANGAST
+                  CCOS   = COS(2.0*ANGDIF)
+                  DF     = 0.5*(DSUM + CCOS*DDIF)
+                  
+                  HANGLE2 = rad2 * half_thetatrsq
+                  C1      = twopi_wli*HANGLE2
+                  C2      = -C1*CS*HANGLE2
+                  CHI     = C1*DF + C2
+                  CTFV    = -WGH1*SIN(CHI)-WGH2*COS(CHI)
+               ELSE
+                  CTFV    = -WGH2
+               ENDIF
+               
+               ctfv2 = ctfv*ctfv
+               ID   = L+NXYZ(1)/2*(M-1)
+               IS   = IS + 1
+
+               if(hw == 0.0) then
+                  SUM  = SUM  + AIN(ID)*ctfv2
+                  SUM1 = SUM1 + ctfv2*ctfv2
+                  SUM2 = SUM2 + AIN(ID)*AIN(ID)
+               else
+                  expv = exp(hw*res2)
+                  SUM  = SUM  + AIN(ID)*ctfv2*expv
+                  SUM1 = SUM1 + ctfv2*ctfv2
+                  SUM2 = SUM2 + AIN(ID)*AIN(ID)*expv*expv
+               endif
+               
+            ENDIF
+
+         enddo
+      enddo
+
+      IF (IS.NE.0) THEN
+        SUM=SUM/SQRT(SUM1*SUM2)
+        IF (DAST.GT.0.0) SUM=SUM-DDIF**2/2.0/DAST**2/IS
+      ENDIF
+      EVALCTF=SUM
+      RETURN
+      END
+C
+C**************************************************************************
+      SUBROUTINE REFINE_CTF(DFMID1,DFMID2,ANGAST,POWER,
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER NCYCLS,NXYZ(3)
+      PARAMETER (NCYCLS=50)
+      REAL DFMID1,DFMID2,ANGAST,XPAR(3),EPAR(3),RF,ESCALE,PI
+      REAL POWER(*),CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,HW,DAST
+      PARAMETER (PI=3.1415926535898)
+      DATA EPAR/100.0,100.0,0.5/
+      DATA ESCALE/100.0/
+C
+      WRITE(*,1000)
+1000  FORMAT(/,' REFINING CTF PARAMETERS...'/,
+     +       /,'      DFMID1      DFMID2      ANGAST          CC'/)
+C
+      XPAR(1)=DFMID1
+      XPAR(2)=DFMID2
+      XPAR(3)=ANGAST
+      IF (XPAR(1).EQ.XPAR(2)) XPAR(1)=XPAR(1)+1.0
+      CALL VA04A(XPAR,EPAR,3,RF,ESCALE,0,1,NCYCLS,POWER,
+     +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+      DFMID1=XPAR(1)
+      DFMID2=XPAR(2)
+      ANGAST=XPAR(3)-PI*NINT(XPAR(3)/PI)
+      WRITE(*,1100)DFMID1,DFMID2,ANGAST/PI*180.0,-RF
+1100  FORMAT(3F12.2,F12.5,'  Final Values')
+C
+      RETURN
+      END
+C
+C******************************************************************************
+C
+      SUBROUTINE CALCFX(NX,XPAR,RF,AIN,
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+C
+C     CALCULATES NEW VALUE FOR F TO INPUT TO SUBROUTINE VA04A
+C
+C******************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER NXYZ(3),NX,IXBMX
+      PARAMETER (IXBMX=512)
+      REAL CS,WL,WGH1,WGH2,THETATR,DFMID1,DFMID2,ANGAST
+      REAL RMIN2,RMAX2,AIN(*),EVALCTF,DAST
+      REAL DFMID1S,DFMID2S,ANGASTS,HW,PI,XPAR(3),RF
+      PARAMETER (PI=3.1415926535898)
+C
+      RF=-EVALCTF(CS,WL,WGH1,WGH2,XPAR(1),XPAR(2),XPAR(3),
+     +		  THETATR,HW,AIN,NXYZ,RMIN2,RMAX2,DAST)
+C
+      RETURN
+      END
+C
+C**************************************************************************
+      SUBROUTINE SCLIMG(AIN,NXYZ,SCAL)
+C**************************************************************************
+C
+      IMPLICIT NONE
+C
+      INTEGER I,J,NXYZ(3),ID
+      REAL SCAL,AIN(*)
+C
+      DO 10 J=1,NXYZ(2)
+        DO 10 I=1,NXYZ(1)
+          ID=I+NXYZ(1)*(J-1)
+          AIN(ID)=AIN(ID)*SCAL
+10    CONTINUE
+C
+      RETURN
+      END
+C
+C**************************************************************************
 C
       SUBROUTINE rlft3(data,speq,nn1,nn2,nn3,isign)
-C
-C-----Calculate the FFT of an image.
-C
-C-----This is copied from Niko Grigorieffs CTFFIND3.f
-C
-C     data: input and also output dataset. 
-C        If input real image, use 2D real array.
-C        If input FFT, use complex 2D array.
-C
-C     speq: one-dimensional temporary vector. Only needed for odd-numbered image sizes.
-C
-C     nn1: dimensions in x. If FFT, then width is nn1/2
-C     nn2: dimensions in y
-C     nn3: dimensions in z. Use 1 here.
-C     isign: direction of FFT: 1=forward, -1=backward
-C
-C
 C
       INTEGER isign,nn1,nn2,nn3,istat,iw
       PARAMETER (iw=4096)
@@ -3121,3 +3002,286 @@ C
       RETURN
       END
 C**************************************************************************
+      SUBROUTINE VA04A(X,E,N,F,ESCALE,IPRINT,ICON,MAXIT,AIN,
+     +      CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+C**************************************************************************
+C  STANDARD FORTRAN 66 (A VERIFIED PFORT SUBROUTINE)
+      DIMENSION W(40),X(1),E(1),AIN(*),NXYZ(3)
+C	W[N*(N+3)]
+      DDMAG=0.1*ESCALE
+      SCER=0.05/ESCALE
+      JJ=N*N+N
+      JJJ=JJ+N
+      K=N+1
+      NFCC=1
+      IND=1
+      INN=1
+      DO 1 I=1,N
+      DO 2 J=1,N
+      W(K)=0.
+      IF(I-J)4,3,4
+    3 W(K)=ABS(E(I))
+      W(I)=ESCALE
+    4 K=K+1
+    2 CONTINUE
+    1 CONTINUE
+      ITERC=1
+      ISGRAD=2
+      CALL CALCFX(N,X,F,AIN,
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+      FKEEP=ABS(F)+ABS(F)
+    5 ITONE=1
+      FP=F
+      SUM=0.
+      IXP=JJ
+      DO 6 I=1,N
+      IXP=IXP+1
+      W(IXP)=X(I)
+    6 CONTINUE
+      IDIRN=N+1
+      ILINE=1
+    7 DMAX=W(ILINE)
+      DACC=DMAX*SCER
+      DMAG=AMIN1(DDMAG,0.1*DMAX)
+      DMAG=AMAX1(DMAG,20.*DACC)
+      DDMAX=10.*DMAG
+      GO TO (70,70,71),ITONE
+   70 DL=0.
+      D=DMAG
+      FPREV=F
+      IS=5
+      FA=F
+      DA=DL
+    8 DD=D-DL
+      DL=D
+   58 K=IDIRN
+      DO 9 I=1,N
+      X(I)=X(I)+DD*W(K)
+      K=K+1
+    9 CONTINUE
+      CALL CALCFX(N,X,F,AIN,
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+C
+      NFCC=NFCC+1
+      GO TO (10,11,12,13,14,96),IS
+   14 IF(F-FA)15,16,24
+   16 IF (ABS(D)-DMAX) 17,17,18
+   17 D=D+D
+      GO TO 8
+   18 WRITE(6,19)
+   19 FORMAT(5X,44HVA04A MAXIMUM CHANGE DOES NOT ALTER FUNCTION)
+      GO TO 20
+   15 FB=F
+      DB=D
+      GO TO 21
+   24 FB=FA
+      DB=DA
+      FA=F
+      DA=D
+   21 GO TO (83,23),ISGRAD
+   23 D=DB+DB-DA
+      IS=1
+      GO TO 8
+   83 D=0.5*(DA+DB-(FA-FB)/(DA-DB))
+      IS=4
+      IF((DA-D)*(D-DB))25,8,8
+   25 IS=1
+      IF(ABS(D-DB)-DDMAX)8,8,26
+   26 D=DB+SIGN(DDMAX,DB-DA)
+      IS=1
+      DDMAX=DDMAX+DDMAX
+      DDMAG=DDMAG+DDMAG
+      IF(DDMAX-DMAX)8,8,27
+   27 DDMAX=DMAX
+      GO TO 8
+   13 IF(F-FA)28,23,23
+   28 FC=FB
+      DC=DB
+   29 FB=F
+      DB=D
+      GO TO 30
+   12 IF(F-FB)28,28,31
+   31 FA=F
+      DA=D
+      GO TO 30
+   11 IF(F-FB)32,10,10
+   32 FA=FB
+      DA=DB
+      GO TO 29
+   71 DL=1.
+      DDMAX=5.
+      FA=FP
+      DA=-1.
+      FB=FHOLD
+      DB=0.
+      D=1.
+   10 FC=F
+      DC=D
+   30 A=(DB-DC)*(FA-FC)
+      B=(DC-DA)*(FB-FC)
+      IF((A+B)*(DA-DC))33,33,34
+   33 FA=FB
+      DA=DB
+      FB=FC
+      DB=DC
+      GO TO 26
+   34 D=0.5*(A*(DB+DC)+B*(DA+DC))/(A+B)
+      DI=DB
+      FI=FB
+      IF(FB-FC)44,44,43
+   43 DI=DC
+      FI=FC
+   44 GO TO (86,86,85),ITONE
+   85 ITONE=2
+      GO TO 45
+   86 IF (ABS(D-DI)-DACC) 41,41,93
+   93 IF (ABS(D-DI)-0.03*ABS(D)) 41,41,45
+   45 IF ((DA-DC)*(DC-D)) 47,46,46
+   46 FA=FB
+      DA=DB
+      FB=FC
+      DB=DC
+      GO TO 25
+   47 IS=2
+      IF ((DB-D)*(D-DC)) 48,8,8
+   48 IS=3
+      GO TO 8
+   41 F=FI
+      D=DI-DL
+      DD=SQRT((DC-DB)*(DC-DA)*(DA-DB)/(A+B))
+      DO 49 I=1,N
+      X(I)=X(I)+D*W(IDIRN)
+      W(IDIRN)=DD*W(IDIRN)
+      IDIRN=IDIRN+1
+   49 CONTINUE
+      IF (DD.EQ.0.0) DD=1E-10
+      W(ILINE)=W(ILINE)/DD
+      ILINE=ILINE+1
+      IF(IPRINT-1)51,50,51
+   50 WRITE(6,52) ITERC,NFCC,F,(X(I),I=1,N)
+   52 FORMAT (/1X,9HITERATION,I5,I15,16H FUNCTION VALUES,
+     110X,3HF =,E21.14/(5E24.14))
+      GO TO(51,53),IPRINT
+   51 GO TO (55,38),ITONE
+   55 IF (FPREV-F-SUM) 94,95,95
+   95 SUM=FPREV-F
+      JIL=ILINE
+   94 IF (IDIRN-JJ) 7,7,84
+   84 GO TO (92,72),IND
+   92 FHOLD=F
+      IS=6
+      IXP=JJ
+      DO 59 I=1,N
+      IXP=IXP+1
+      W(IXP)=X(I)-W(IXP)
+   59 CONTINUE
+      DD=1.
+      GO TO 58
+   96 GO TO (112,87),IND
+  112 IF (FP-F) 37,37,91
+   91 D=2.*(FP+F-2.*FHOLD)/(FP-F)**2
+      IF (D*(FP-FHOLD-SUM)**2-SUM) 87,37,37
+   87 J=JIL*N+1
+      IF (J-JJ) 60,60,61
+   60 DO 62 I=J,JJ
+      K=I-N
+      W(K)=W(I)
+   62 CONTINUE
+      DO 97 I=JIL,N
+      W(I-1)=W(I)
+   97 CONTINUE
+   61 IDIRN=IDIRN-N
+      ITONE=3
+      K=IDIRN
+      IXP=JJ
+      AAA=0.
+      DO 65 I=1,N
+      IXP=IXP+1
+      W(K)=W(IXP)
+      IF (AAA-ABS(W(K)/E(I))) 66,67,67
+   66 AAA=ABS(W(K)/E(I))
+   67 K=K+1
+   65 CONTINUE
+      DDMAG=1.
+      IF (AAA.EQ.0.0) AAA=1E-10
+      W(N)=ESCALE/AAA
+      ILINE=N
+      GO TO 7
+   37 IXP=JJ
+      AAA=0.
+      F=FHOLD
+      DO 99 I=1,N
+      IXP=IXP+1
+      X(I)=X(I)-W(IXP)
+      IF (AAA*ABS(E(I))-ABS(W(IXP))) 98,99,99
+   98 AAA=ABS(W(IXP)/E(I))
+   99 CONTINUE
+      GO TO 72
+   38 AAA=AAA*(1.+DI)
+      GO TO (72,106),IND
+   72 IF (IPRINT-2) 53,50,50
+   53 GO TO (109,88),IND
+  109 IF (AAA-0.1) 89,89,76
+   89 GO TO (20,116),ICON
+  116 IND=2
+      GO TO (100,101),INN
+  100 INN=2
+      K=JJJ
+      DO 102 I=1,N
+      K=K+1
+      W(K)=X(I)
+      X(I)=X(I)+10.*E(I)
+  102 CONTINUE
+      FKEEP=F
+      CALL CALCFX (N,X,F,AIN,
+     +  CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW,DAST)
+      NFCC=NFCC+1
+      DDMAG=0.
+      GO TO 108
+   76 IF (F-FP) 35,78,78
+   78 WRITE(6,80)
+   80 FORMAT (5X,37HVA04A ACCURACY LIMITED BY ERRORS IN F)
+      GO TO 20
+   88 IND=1
+   35 TMP=FP-F
+      IF (TMP.GT.0.0) THEN
+      DDMAG=0.4*SQRT(TMP)
+      ELSE
+      DDMAG=0.0
+      ENDIF
+      ISGRAD=1
+  108 ITERC=ITERC+1
+      IF (ITERC-MAXIT) 5,5,81
+81    CONTINUE
+C   81 WRITE(6,82) MAXIT
+   82 FORMAT(I5,30H ITERATIONS COMPLETED BY VA04A)
+      IF (F-FKEEP) 20,20,110
+  110 F=FKEEP
+      DO 111 I=1,N
+      JJJ=JJJ+1
+      X(I)=W(JJJ)
+  111 CONTINUE
+      GO TO 20
+  101 JIL=1
+      FP=FKEEP
+      IF (F-FKEEP) 105,78,104
+  104 JIL=2
+      FP=F
+      F=FKEEP
+  105 IXP=JJ
+      DO 113 I=1,N
+      IXP=IXP+1
+      K=IXP+N
+      GO TO (114,115),JIL
+  114 W(IXP)=W(K)
+      GO TO 113
+  115 W(IXP)=X(I)
+      X(I)=W(K)
+  113 CONTINUE
+      JIL=2
+      GO TO 92
+  106 IF (AAA-0.1) 20,20,107
+   20 RETURN
+  107 INN=1
+      GO TO 35
+      END

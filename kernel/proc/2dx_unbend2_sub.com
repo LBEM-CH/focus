@@ -866,8 +866,18 @@ eot
   endif
   #
   echo "<<@progress: 90>>"
-  echo "<<@evaluate>>"
   #
+  #
+  if ( ${ctfcor_imode} == "2"  &&  ${final_round} == "y" ) then
+    #############################################################################
+    ${proc_2dx}/${lincommand} "apply_filter_Fourier.py - to perform Weiner filtration on unbent image"
+    #############################################################################
+    #
+    python ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_unbend2_notap_ctf.mrc ${ctfcor_noise}
+    echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF file (for correction)>" >> LOGS/${scriptname}.results 
+    echo "# IMAGE: SCRATCH/${iname}_unbend2_notap_ctf.mrc <Unbent image, CTF-corrected>" >> LOGS/${scriptname}.results 
+    #
+  endif
   #
   #############################################################################
   ${proc_2dx}/${lincommand} "TAPEREDGE - to eliminate transform stripes"
@@ -875,8 +885,11 @@ eot
   #
   \rm -f unbent.mrc
   #
-  # UNBENDING
-  setenv IN  SCRATCH/${iname}_unbend2_notap.mrc
+  if ( ${ctfcor_imode} == "2"  &&  ${final_round} == "y" ) then
+    setenv IN  SCRATCH/${iname}_unbend2_notap_ctf.mrc
+  else
+    setenv IN  SCRATCH/${iname}_unbend2_notap.mrc
+  endif
   setenv OUT unbent.mrc
   ${bin_2dx}/2dx_taperedgek.exe << eot
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER
@@ -885,7 +898,6 @@ eot
   if ( ${tempkeep} == 'n' ) then
     \rm -f SCRATCH/${iname}_unbend2_notap.mrc
   endif
-  #
   #
   #
   #############################################################################
@@ -916,11 +928,13 @@ eot
   #
   if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
     #
+    set inimage = FFTIR/${iname}_unbend2_fft.mrc
+    #
     \rm -f APH/${imagename}_fou.aph
     #
     ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES"
     ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
+${inimage}
 ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?

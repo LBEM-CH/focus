@@ -353,7 +353,7 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
   float magnification = data->get("magnification","value").toFloat();
 
   // Quick fix to allow 2dx to be used on Cs-corrected mircoscopes
-  if (Cs < 0.001)
+  if (Cs > -0.001 && Cs < 0.001)
   {
 	  Cs = 0.001;
   }
@@ -367,14 +367,79 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
 
   kV*=1000.0;
   stepSize*=1.0e4;
-  float lambda = 12.3/sqrt(kV+kV*kV*1.0e-6);
+  float lambda = 12.26/sqrt(kV+0.9785*kV*kV*1.0e-6);
   Cs*=1.0e7;
+  float ampcon = sqrt(1.0-phacon*phacon);
   astigmatism*=pi/180.0;
 
   QPoint next;
   QPointF d;
 
   float u,v;
+  float jx;
+
+  /* 
+  Here, we will calculate the radius q=k0 of j-th zero crossing of the CTF, under angle theta:
+  The CTF equation is:
+  CTF(q) = phacon * sin(pi/2*( Cs * lambda**3 * q**4 - 2 * dz * lambda * q**2)) + 
+           ampcon * cos(pi/2*( Cs * lambda**3 * q**4 - 2 * dz * lambda * q**2)) 
+
+  with ampcon = sqrt( 1 - phacon**2 ) 
+
+  We set this to zero:    CTF(q) = 0
+
+  phacon*sin(pi/2*phi)+sqrt(1-phacon**2)*cos(pi/2*phi) = 0
+
+  Solution according to Wolfram Alpha:    
+
+  phi = 2*(j - atan(sqrt(1-phacon**2)/(phacon +/- 1))/pi)
+
+  Here, using:
+  phi = (jx)    
+            =================================================
+     with   jx := j - 2*atan(sqrt(1-phacon**2)/(phacon-1))/pi
+            =================================================
+          
+
+
+  That gives:  
+
+  Cs * lambda**3 * q**4 - 2 * dz * lambda * q**2 = 2 * jx
+ 
+  we need to solve this for q:
+  q**4 * Cs*lambda**3 - q**2 * 2*dz*lambda - 2*jx = 0
+
+  we substitute q2 for q**2:
+
+  q2**2 * Cs*lambda**3 - q2 * 2*dz*lambda - 2*jx = 0
+
+  q2**2 - q2 * 2*dz*lambda/(Cs*lambda**3) - 2*jx/(Cs*lambda**3) = 0
+
+  q2**2 - q2 * 2*dz/(Cs*lambda**2) - 2*jx/(Cs*lambda**3) = 0
+
+  gives:
+
+  q2 = dz/(Cs*lambda**2) +/- sqrt( (dz/(Cs*lambda**2))**2       + 2*jx/(Cs*lambda**3) ) 
+
+  q2 = dz/(Cs*lambda**2) +/- sqrt( (dz**2 /(Cs**2 * lambda**4)) + 2*jx/(Cs*lambda**3) ) 
+
+  q2 = dz/(Cs*lambda**2) +/- sqrt( (dz**2                       + 2*jx *Cs*lambda)    / (Cs**2 * lambda**4) ) 
+
+  q2 = dz/(Cs*lambda**2) +/- sqrt( (dz**2 + 2*jx*Cs*lambda) ) / ( Cs * lambda**2 ) 
+
+  q2 = ( dz +/- sqrt( (dz**2 + 2*jx*Cs*lambda) ))  / (Cs * lambda**2)
+
+  q = sqrt ( ( dz +/- sqrt(dz**2 + 2*jx*Cs*lambda) ) / (Cs * lambda**2) )
+
+  q = sqrt ( 1 / Cs * ( dz +/- sqrt(dz**2 + 2*jx*Cs*lambda) ) ) / lambda
+
+  ============================================================================
+  q = 1 / lambda * sqrt ( 1 / Cs * ( dz +/- sqrt(dz**2 + 2*lambda*Cs * jx) ) )
+  ============================================================================
+  jx := j - 2*atan(sqrt(1-phacon**2)/(phacon-1))/pi
+  ============================================================================
+
+  */
 
   for(float i=0;i<=N;i+=1.0)
   {
@@ -385,8 +450,22 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
     dz = 0.5*(defocusX+defocusY+cos(2.0*(theta-astigmatism))*(defocusX-defocusY));
     for(int j = 1; j < n + 1; j++)
     {
-      if(dz>0.0) k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi-(float)j))));
-      else       k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi+(float)j))));
+      // The following was in place between 2007 and Dec. 20, 2014:
+      // This lead to slightly wrong Thon rings for higher resolution:
+
+      // if(dz>0.0) k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi-(float)j))));
+      // else       k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi+(float)j))));
+
+      if ( phacon < 1.0 )
+        if(dz>0.0) jx = 2.0*atan(sqrt(1.0-phacon*phacon)/(phacon-1.0))/pi - float(j-1) ; 
+        else       jx = 2.0*atan(sqrt(1.0-phacon*phacon)/(phacon-1.0))/pi + float(j-1) ; 
+      else
+        if(dz>0.0) jx = - (float)j;
+        else       jx = + (float)j;
+
+      if(dz>0.0) k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lambda*Cs*jx)));
+      else       k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*jx)));
+
       u = k0*cost; v = k0*sint;
       if(u>0.0) u+=0.5; else u-=0.5;
       if(v>0.0) v+=0.5; else v-=0.5;

@@ -16,13 +16,19 @@ BIN = ../../bin
 # LFLAG = -l2dx -lim2k -lmisc -lgen -lplot2k -lfft -lconv -lfftw3f @LIBS@
 
 
-all: $(BIN)/2dx_movie_refine.exe 
+all: $(BIN)/2dx_movie_refine.exe $(BIN)/2dx_ctfcor.exe
 
 $(BIN)/2dx_movie_refine.exe: 2dx_movie_refine.o iof.o ioc.o 
 	$(F77) $(FFLAGS) -fopenmp iof.o ioc.o -o $@ $<
 
+$(BIN)/2dx_ctfcor.exe: 2dx_ctfcor.o iof.o ioc.o
+	$(F77) $(FFLAGS) -fopenmp iof.o ioc.o -o $@ $<
+
 
 2dx_movie_refine.o: 2dx_movie_refine.f
+	$(F77) $(FFLAGS) -fopenmp -c $< 
+
+2dx_ctfcor.o: 2dx_ctfcor.f
 	$(F77) $(FFLAGS) -fopenmp -c $< 
 
 iof.o: iof.f
@@ -40,5 +46,6 @@ ioc.o: ioc.c
 
 clean:
 	\rm -f ../../bin/2dx_movie_refine.exe
+	\rm -f ../../bin/2dx_ctfcor.exe
 	\rm -f *.o
 

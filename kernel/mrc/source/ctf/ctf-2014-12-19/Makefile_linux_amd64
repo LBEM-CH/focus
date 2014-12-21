@@ -1,0 +1,33 @@
+all: ctffind3.exe ctftilt.exe
+
+ctffind3.exe: ctffind3.o iof.o ioc.o
+	gfortran -static -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	ctffind3.o iof.o ioc.o -o ctffind3.exe
+
+ctftilt.exe: ctftilt.o iof.o ioc.o
+	gfortran -static -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	ctftilt.o iof.o ioc.o -o ctftilt.exe
+	\rm *.o
+
+ctffind3.o: ctffind3.f
+	gfortran -m64 -O3 -s -fomit-frame-pointer -Wall -falign-functions=4 \
+	-funroll-loops -fexpensive-optimizations -fschedule-insns2 \
+	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	-cpp -w -c ctffind3.f
+
+ctftilt.o: ctftilt.f
+	gfortran -m64 -O3 -s -fomit-frame-pointer -Wall -falign-functions=4 \
+	-funroll-loops -fexpensive-optimizations -fschedule-insns2 \
+	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	-cpp -w -c ctftilt.f
+
+iof.o: iof.f
+	gfortran -m64 -O3 -s -fomit-frame-pointer -Wall -falign-functions=4 \
+	-funroll-loops -fexpensive-optimizations -fschedule-insns2 \
+	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+	-w -c iof.f
+
+ioc.o: ioc.c
+	gcc -m64 -O3 -DPROTOTYPE -Dalliant -D_FILE_OFFSET_BITS=64 \
+	-D_LARGEFILE_SOURCE -w -c ioc.c
+#

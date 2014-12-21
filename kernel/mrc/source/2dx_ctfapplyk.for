@@ -390,7 +390,7 @@ C       CNTRST=-SIN(CHI)
           CHI=C1*DF+C2
           CNTRST=-SIN(CHI)*PHACON-COS(CHI)*AMPCON
         else
-          CNTRST=1.0
+          CNTRST=-AMPCON
         endif
 C
 C################################################################################
@@ -432,11 +432,13 @@ C
 C
         else if(CTFCOR.eq.2)then
 C
-C--------- 2 = Original image has been multiplied by CTF. Here only AMP correction (taking care of multiplied CTF).
+C--------- 2 = Original image has been multiplied by CTF and also already correctedy by CTF**2+Noise**2. 
+C--------- Here nothing is to be done.
 C
           IQ=IQIN
-          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
-          CNTRST = -1.0 * CNTRST*CNTRST
+C          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
+C          CNTRST = -1.0 * CNTRST*CNTRST
+          CNTRST = -1.0
 C
         else if(CTFCOR.eq.3)then
 C

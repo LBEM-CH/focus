@@ -167,9 +167,6 @@ set Thread_Number = ""
 set scriptname = 2dx_unbend_movie1
 \rm -f LOGS/${scriptname}.results
 #
-  ${proc_2dx}/linblock "Script deactivated."
-  exit
-
 echo "<<@evaluate>>"
 echo "<<@progress: 1>>"
 #
@@ -178,6 +175,32 @@ source ${proc_2dx}/initialize
 #
 set date = `date`
 echo date = ${date}
+#
+
+
+
+
+
+
+
+
+
+
+
+${proc_2dx}/protest "Script deactivated."
+
+
+
+
+
+
+
+
+
+
+
+
+
 #
 set system = `uname -s`
 echo system = ${system}
@@ -319,13 +342,23 @@ echo "<<@progress: 15>>"
 \rm -f frame_unbending.pdf
 \touch frame_unbending.pdf
 #
-if ( ! -e SCRATCH/errout_unbend2_${imagename}.dat ) then
+set iname = image_ctfcor
+#
+set PROFDATA = ${iname}_profile.dat
+if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif
 #
-\cp -f SCRATCH/errout_unbend2_${imagename}.dat SCRATCH/errout${imagename}.dat
+set cormap = ${iname}_CCmap_unbend2.mrc
 #
-setenv PROFILE  SCRATCH/auto${imagename}.map.mrc
+if ( ! -e ${cormap} ) then
+  ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"
+endif
+# 
+#
+\cp -f ${cormap} SCRATCH/errout${imagename}.dat
+#
+setenv PROFILE  SCRATCH/auto${imagename}_map.mrc
 setenv PROFDATA SCRATCH/prof${imagename}.dat
 setenv ERRORS   SCRATCH/errout${imagename}.dat
 setenv ERROUT   SCRATCH/errout2${imagename}.dat
@@ -340,14 +373,10 @@ set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { p
 set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
 set valspotscan = '0'
 set createmask = '0'
-set cormap = SCRATCH/cor1${imagename}.cor.unbend2.mrc
 #
 \rm -f SCRATCH/errout2${imagename}.dat
 \rm -f SPIDERCOORD.spi
 #
-if ( ! -e ${cormap} ) then
-  ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"
-endif
 # 
 ###############################################################
 ${proc_2dx}/linblock "QUADSERCH - Updating Initial Error Field" 
@@ -358,7 +387,7 @@ echo "<<@progress: 20>>"
 echo "movie_imagenumber_touse = ${movie_imagenumber_touse}"
 #
 
-if ( 1 == 1 ) then
+if ( 1 == 2 ) then
   #
   setenv NCPUS ${Thread_Number}
   #
@@ -439,7 +468,7 @@ set i = 0
   echo "# IMAGE: frames/frame_${i}/SCRATCH/TMP-quadserch3-autocor.mrc <Frame ${i} averaged central area>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
   echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}_notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
 #
 # i counts the super-frames to process:
 set i = 1
@@ -471,7 +500,7 @@ while ($i <= ${movie_imagenumber_touse})
   echo "# IMAGE: frames/frame_${i}/SCRATCH/TMP-quadserch3-autocor.mrc <Frame ${i} averaged central area>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
   echo "# IMAGE-IMPORTANT: frames/frame_${i}/PS/${nonmaskimagename}-ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}.notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: frames/frame_${i}/SCRATCH/corm${nonmaskimagename}_notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
   #
   @ i += 1
   @ n += ${movie_imagenumber_toave}
@@ -487,15 +516,15 @@ touch frames/peaks_dummy
 ${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxa}"
 ###############################################################
 #
-set unbent_fil = SCRATCH/${imagename}.unbent-filtered.mrc
+set unbent_fil = SCRATCH/${imagename}_unbent_filtered.mrc
 #
 if ( ! -e ${unbent_fil} ) then
   ${proc_2dx}/protest "ERROR: File missing: ${unbent_fil}"
 endif
 # 
-\rm -f SCRATCH/refam${imagename}.flt.mrc
+\rm -f SCRATCH/refam${imagename}_flt.mrc
 setenv IN  ${unbent_fil}
-setenv OUT SCRATCH/refam${imagename}.flt.mrc
+setenv OUT SCRATCH/refam${imagename}_flt.mrc
 ${bin_2dx}/2dx_boximage.exe << eot
 -1 0                        ! NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
 0 0                         ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
@@ -503,22 +532,22 @@ ${refposix} ${refposiy}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
 ${movie_refboxa}
 eot
 #
-echo  "# IMAGE: SCRATCH/refam${imagename}.flt.mrc <Movie Mode Reference A>" >> LOGS/${scriptname}.results
+echo  "# IMAGE: SCRATCH/refam${imagename}_flt.mrc <Movie Mode Reference A>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_refboxb} != 0 ) then
   ###############################################################
   ${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxb}"
   ###############################################################  
   #
-  set unbent_fil = SCRATCH/${imagename}.unbent-filtered.mrc
+  set unbent_fil = SCRATCH/${imagename}_unbent_filtered.mrc
   #
   if ( ! -e ${unbent_fil} ) then
     ${proc_2dx}/protest "ERROR: File missing: ${unbent_fil}"
   endif
   # 
-  \rm -f SCRATCH/refbm${imagename}.flt.mrc
+  \rm -f SCRATCH/refbm${imagename}_flt.mrc
   setenv IN  ${unbent_fil}
-  setenv OUT SCRATCH/refbm${imagename}.flt.mrc
+  setenv OUT SCRATCH/refbm${imagename}_flt.mrc
   ${bin_2dx}/2dx_boximage.exe << eot
   -1 0                        ! NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
   0 0                         ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
@@ -526,41 +555,41 @@ if ( ${movie_refboxb} != 0 ) then
   ${movie_refboxb}
 eot
   #
-  echo  "# IMAGE: SCRATCH/refbm${imagename}.flt.mrc <Movie Mode Reference B>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: SCRATCH/refbm${imagename}_flt.mrc <Movie Mode Reference B>" >> LOGS/${scriptname}.results
 endif
 #
 ###############################################################
 ${proc_2dx}/linblock "FFTRANS - Producing references in Fourier space"
 ###############################################################
 #
-\rm -f SCRATCH/refam${imagename}.flt.upscale.mrc
+\rm -f SCRATCH/refam${imagename}_flt_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
-SCRATCH/refam${imagename}.flt.mrc
+SCRATCH/refam${imagename}_flt.mrc
 19
-SCRATCH/refam${imagename}.flt.upscale.mrc
+SCRATCH/refam${imagename}_flt_upscale.mrc
 eot
 #
-\rm -f SCRATCH/refam${imagename}.fft.mrc
-setenv IN  SCRATCH/refam${imagename}.flt.upscale.mrc
-setenv OUT SCRATCH/refam${imagename}.fft.mrc
+\rm -f SCRATCH/refam${imagename}_fft.mrc
+setenv IN  SCRATCH/refam${imagename}_flt-upscale.mrc
+setenv OUT SCRATCH/refam${imagename}_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
-echo  "# IMAGE: SCRATCH/refam${imagename}.fft.mrc <Movie Mode Ref A (FFT)>" >> LOGS/${scriptname}.results
+echo  "# IMAGE: SCRATCH/refam${imagename}_fft.mrc <Movie Mode Ref A (FFT)>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_refboxb} != 0 ) then
-  \rm -f SCRATCH/refbm${imagename}.flt.upscale.mrc
+  \rm -f SCRATCH/refbm${imagename}_flt_upscale.mrc
   ${bin_2dx}/labelh.exe << eot
-SCRATCH/refbm${imagename}.flt.mrc
+SCRATCH/refbm${imagename}_flt.mrc
 19
-SCRATCH/refbm${imagename}.flt.upscale.mrc
+SCRATCH/refbm${imagename}_flt_upscale.mrc
 eot 
   #
-  \rm -f SCRATCH/refbm${imagename}.fft.mrc
-  setenv IN  SCRATCH/refbm${imagename}.flt.upscale.mrc
-  setenv OUT SCRATCH/refbm${imagename}.fft.mrc
+  \rm -f SCRATCH/refbm${imagename}_fft.mrc
+  setenv IN  SCRATCH/refbm${imagename}_flt_upscale.mrc
+  setenv OUT SCRATCH/refbm${imagename}_fft.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
-  echo  "# IMAGE: SCRATCH/refbm${imagename}.fft.mrc <Movie Mode Ref B (FFT)>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: SCRATCH/refbm${imagename}_fft.mrc <Movie Mode Ref B (FFT)>" >> LOGS/${scriptname}.results
 endif
 #
 if ( ${movie_masking_mode} == '1' ) then 
@@ -579,9 +608,9 @@ ${proc_2dx}/lin "MASKTRAN - Masked FFT of boxed reference"
 set maskb = ${maskb01}
 set rmax = 11000
 #
-\rm -f SCRATCH/refam1${imagename}.fft.msk.mrc
-setenv IN  SCRATCH/refam${imagename}.fft.mrc
-setenv OUT SCRATCH/refam1${imagename}.fft.msk.mrc
+\rm -f SCRATCH/refam1${imagename}_fft_msk.mrc
+setenv IN  SCRATCH/refam${imagename}_fft.mrc
+setenv OUT SCRATCH/refam1${imagename}_fft_msk.mrc
 setenv SPOTS ${imagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -593,9 +622,9 @@ echo  "# IMAGE: SCRATCH/refam1${imagename}.fft.msk.mrc <Masked boxed reference A
 if ( ${maskb02} != 0 ) then
   set maskb = ${maskb02}
   set rmax = 11000
-  \rm -f SCRATCH/refam2${imagename}.fft.msk.mrc
-  setenv IN  SCRATCH/refam${imagename}.fft.mrc
-  setenv OUT SCRATCH/refam2${imagename}.fft.msk.mrc
+  \rm -f SCRATCH/refam2${imagename}_fft_msk.mrc
+  setenv IN  SCRATCH/refam${imagename}_fft.mrc
+  setenv OUT SCRATCH/refam2${imagename}_fft_msk.mrc
   setenv SPOTS ${imagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -608,9 +637,9 @@ endif
 if ( ${maskb03} != 0 ) then
   set maskb = ${maskb03}
   set rmax = 11000
-  \rm -f SCRATCH/refam3${imagename}.fft.msk.mrc
-  setenv IN  SCRATCH/refam${imagename}.fft.mrc
-  setenv OUT SCRATCH/refam3${imagename}.fft.msk.mrc
+  \rm -f SCRATCH/refam3${imagename}_fft_msk.mrc
+  setenv IN  SCRATCH/refam${imagename}_fft.mrc
+  setenv OUT SCRATCH/refam3${imagename}_fft_msk.mrc
   setenv SPOTS ${imagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -623,9 +652,9 @@ endif
 if ( ${maskb04} != 0 ) then
   set maskb = ${maskb04}
   set rmax = 11000
-  \rm -f SCRATCH/refam4${imagename}.fft.msk.mrc
-  setenv IN  SCRATCH/refam${imagename}.fft.mrc
-  setenv OUT SCRATCH/refam4${imagename}.fft.msk.mrc
+  \rm -f SCRATCH/refam4${imagename}_fft_msk.mrc
+  setenv IN  SCRATCH/refam${imagename}_fft.mrc
+  setenv OUT SCRATCH/refam4${imagename}_fft_msk.mrc
   setenv SPOTS ${imagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -638,9 +667,9 @@ endif
 if ( ${maskb05} != 0 ) then
   set maskb = ${maskb05}
   set rmax = 11000
-  \rm -f SCRATCH/refam5${imagename}.fft.msk.mrc
-  setenv IN  SCRATCH/refam${imagename}.fft.mrc
-  setenv OUT SCRATCH/refam5${imagename}.fft.msk.mrc
+  \rm -f SCRATCH/refam5${imagename}_fft_msk.mrc
+  setenv IN  SCRATCH/refam${imagename}_fft.mrc
+  setenv OUT SCRATCH/refam5${imagename}_fft_msk.mrc
   setenv SPOTS ${imagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -652,9 +681,9 @@ endif
 #
 if ( ${movie_refboxb} != 0 ) then
   set maskb = ${maskb01}
-  \rm -f SCRATCH/refbm1${imagename}.fft.msk.mrc
-  setenv IN  SCRATCH/refbm${imagename}.fft.mrc
-  setenv OUT SCRATCH/refbm1${imagename}.fft.msk.mrc
+  \rm -f SCRATCH/refbm1${imagename}_fft_msk.mrc
+  setenv IN  SCRATCH/refbm${imagename}_fft.mrc
+  setenv OUT SCRATCH/refbm1${imagename}_fft_msk.mrc
   setenv SPOTS ${imagename}.spt
   ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -662,7 +691,7 @@ ${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
   #
-  echo  "# IMAGE: SCRATCH/refbm${imagename}.fft.msk.mrc <Masked boxed reference B>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: SCRATCH/refbm${imagename}_fft_msk.mrc <Masked boxed reference B>" >> LOGS/${scriptname}.results
   #
 endif
 #
@@ -744,8 +773,10 @@ echo "# IMAGE: frames/direct_sum.fft.mrc <Final FFT>" >> LOGS/${scriptname}.resu
 
 
 ###########################################################################
-${proc_2dx}/linblock "MMBOX - Evaluating APH values, without resolution limit"
+${proc_2dx}/linblock "MMBOX - Evaluating APH values"
 ###########################################################################
+
+\rm -f SCRATCH/TMP9873.dat
 
 ${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum.fft.mrc
@@ -756,51 +787,30 @@ N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 APH/${imagename}.fou.movie.nolimit.aph
 SCRATCH/TMP9873.dat
-U2
+UMB
 ${refposix},${refposiy}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
 
-\rm -f SCRATCH/TMP9882.dat
-
-###########################################################################
-${proc_2dx}/linblock "MMBOX - Evaluating APH values, with resolution limit"
-###########################################################################
-
-${bin_2dx}/2dx_mmboxa.exe << eot
-frames/direct_sum.fft.mrc
-${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.fou.movie.limit.aph
-SCRATCH/TMP9882.dat
-U2
-${refposix},${refposiy}         ! XORIG,YORIG
-${RESMIN},${RESMAX},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}                              ! Lattice vectors
-eot
-
-source SCRATCH/TMP9882.dat
+source SCRATCH/TMP9873.dat
 
 ###########################################################################
 ${proc_2dx}/linblock "Generate IQ-stat output"
 ###########################################################################
 
 echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
-echo "set QVALS = ${QVAL_local}" >> LOGS/${scriptname}.results
+echo "set QVALMB = ${QVAL_local}" >> LOGS/${scriptname}.results
 
-echo "set US_IQ1 = ${U2_IQ1}" >> LOGS/${scriptname}.results
-echo "set US_IQ2 = ${U2_IQ2}" >> LOGS/${scriptname}.results
-echo "set US_IQ3 = ${U2_IQ3}" >> LOGS/${scriptname}.results
-echo "set US_IQ4 = ${U2_IQ4}" >> LOGS/${scriptname}.results
-echo "set US_IQ5 = ${U2_IQ5}" >> LOGS/${scriptname}.results
-echo "set US_IQ6 = ${U2_IQ6}" >> LOGS/${scriptname}.results
-echo "set US_IQ7 = ${U2_IQ7}" >> LOGS/${scriptname}.results
-echo "set US_IQ8 = ${U2_IQ8}" >> LOGS/${scriptname}.results
-echo "set US_IQ9 = ${U2_IQ9}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ1 = ${UMB_IQ1}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ2 = ${UMB_IQ2}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ3 = ${UMB_IQ3}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ4 = ${UMB_IQ4}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ5 = ${UMB_IQ5}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ6 = ${UMB_IQ6}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ7 = ${UMB_IQ7}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ8 = ${UMB_IQ8}" >> LOGS/${scriptname}.results
+echo "set UMB_IQ9 = ${UMB_IQ9}" >> LOGS/${scriptname}.results
 
 set RP_6 = ${PSMAX}
 echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
@@ -855,8 +865,7 @@ ${pdf2ps} frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
 
 
-echo "# IMAGE-IMPORTANT: APH/${imagename}.fou.movie.limit.aph <APH: APH file after movie-mode unbending with resolution limit>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: APH/${imagename}.fou.movie.nolimit.aph <APH: APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: APH/${imagename}_movie_fou.aph <APH: APH file after movie-mode unbending, no limit>" >> LOGS/${scriptname}.results
 
 
 ###########################################################################

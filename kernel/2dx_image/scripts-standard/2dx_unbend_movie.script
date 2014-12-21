@@ -80,6 +80,7 @@ set show_frame_PROFDATA = "n"
 # DISPLAY: movie_filter_type
 # DISPLAY: movie_filter_param
 # DISPLAY: movie_smoothing
+# DISPLAY: movie_drift_threshold
 # DISPLAY: Thread_Number
 # DISPLAY: ctfcor_noise
 # DISPLAY: ctfcor_inner_tile
@@ -168,6 +169,7 @@ set movie_masking_mode = ""
 set movie_refboxa = ""
 set movie_facthreshb = ""
 set movie_smoothing = ""
+set movie_drift_threshold = ""
 set MASKING_done = ""
 set QVALS = ""
 set Thread_Number = ""
@@ -318,8 +320,13 @@ endif
 #
 set num_dia = 100
 #
+if ( 1 == 1 ) then
+  set movie_smoothing = 8
+  echo "set movie_smoothing = ${movie_smoothing}"  >> LOGS/${scriptname}.results
+endif
 if ( ${movie_smoothing}x == "x" ) then
-  set movie_smoothing = 1
+  set movie_smoothing = 8
+  echo "set movie_smoothing = ${movie_smoothing}"  >> LOGS/${scriptname}.results
 endif
 #
 #
@@ -379,9 +386,8 @@ if ( 1 == 2 ) then
   \rm frames/PROFDATA_*.dat
 
   \rm -f {nonmaskimagename}_mask_mask.mrc
-  set movie_drift_threshold = 2.0
   set lat_string = `echo ${lattice} | sed 's/,/ /g'`
-  python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
+  python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
 
   echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
   echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
@@ -393,12 +399,11 @@ if ( 1 == 2 ) then
   echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
 
   if ( -e frames/CCmap_driftCorrected.mrc ) then
-    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected frames/CCmap_driftCorrected.mrc
+    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected.mrc
   else
-    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected
+    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf
   endif
-  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected <PDF: 2dx_movie_refine_selected>" >> LOGS/${scriptname}.results
-
+  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected.pdf <PDF: 2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
   exit
 endif
 
@@ -710,10 +715,9 @@ eot
 touch frames/PROFDATA_1.dat
 \rm frames/PROFDATA_*.dat
 \rm -f {nonmaskimagename}_mask_mask.mrc
-set movie_drift_threshold = 2.0
 set lat_string = `echo ${lattice} | sed 's/,/ /g'`
 # python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${movie_smoothing} ${PROFDATA} ${movie_imagenumber_touse}
-python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
+python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
 
 echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
 echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
@@ -860,11 +864,16 @@ echo "# IMAGE: frames/direct_sum.mrc <Sum unbent images>" >> LOGS/${scriptname}.
 ###########################################################################
 ${proc_2dx}/linblock "Filtering by resolution weights"
 ###########################################################################
-python ${proc_2dx}/movie/apply_filter_sum.py frames/CCmap_driftCorrected.mrc frames/CCmap_driftCorrected_filt.mrc
+python ${proc_2dx}/movie/apply_filter_sum.py frames/CCmap_driftCorrected.mrc frames/CCmap_driftCorrected_filt.mrc 0.001
 echo "# IMAGE: frames/CCmap_driftCorrected_filt.mrc <CCmap drift-corrected, filtered>" >> LOGS/${scriptname}.results 
 
-python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc
+python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc 0.001
 echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
+
+if ( ${ctfcor_imode} == "2" ) then
+  python ${proc_2dx}/movie/apply_filter_Fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc 0.4
+  echo "# IMAGE: frames/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTF-corrected>" >> LOGS/${scriptname}.results 
+endif
 
 
 if ( ${movie_masking_mode} != '0' ) then

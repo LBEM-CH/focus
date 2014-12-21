@@ -52,6 +52,7 @@
 # DISPLAY: LCOLOR
 # DISPLAY: ccunbend_program
 # DISPLAY: ctfcor_imode
+# DISPLAY: ctfcor_noise
 #
 #$end_local_vars
 #
@@ -120,6 +121,7 @@ set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
 set ctfcor_imode = ""
+set ctfcor_noise = ""
 #
 #$end_vars
 #

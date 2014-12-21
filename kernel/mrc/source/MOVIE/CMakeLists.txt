@@ -26,12 +26,13 @@ set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-unders
 set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fopenmp")
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#gfortra
-	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -fopenmp -w")
+	set(CMAKE_Fortran_FLAGS_RELEASE "-g -fbounds-check -fcheck=all -fbacktrace -O0 -Wall -Wsurprising -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -fopenmp -w")
 	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -fopenmp -g")
         # set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}  -static-libgcc")
         # set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -static-libgcc")
 	if(APPLE)
-		#set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
+		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
+		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -g -fbounds-check -fcheck=all -fbacktrace ")
                 #	set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
                 #set(FORTRAN_FLAGS ${CMAKE_Fortran_FLAGS_RELEASE}  -dead_strip -static-libgcc)
                 #set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
@@ -62,6 +63,9 @@ else (Fortran_COMPILER_NAME STREQUAL "gfortran")
   	set (CMAKE_Fortran_FLAGS_RELEASE "-O2")
   	set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
 endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
+
+message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
+message ("compiler options: " ${CMAKE_Fortran_FLAGS_RELEASE})
 
 ################################################################################
 # C Compiler -------------------------------------------------------------------
@@ -104,8 +108,14 @@ set(2DXMOVIEREFINE 2dx_movie_refine)
 set(2DXMOVIEREFINE_SRC ${2DXMOVIEREFINE}.f)
 set(2DXMOVIEREFINE_EXE ${2DXMOVIEREFINE})
 add_executable(${2DXMOVIEREFINE_EXE} ${2DXMOVIEREFINE_SRC} ${IOF} ${IOC}) 
-
 set(EXECUTABLES  ${2DXMOVIEREFINE_EXE})
+
+set(2DXCTFCOR 2dx_ctfcor)
+set(2DXCTFCOR_SRC ${2DXCTFCOR}.f)
+set(2DXCTFCOR_EXE ${2DXCTFCOR})
+add_executable(${2DXCTFCOR_EXE} ${2DXCTFCOR_SRC} ${IOF} ${IOC}) 
+set(EXECUTABLES  ${2DXCTFCOR_EXE})
+
 ###############################################################################
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)

@@ -363,9 +363,9 @@ if ( 1 == 2 ) then
   python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc 0.001
   
   echo "# IMAGE: frames/direct_sum_filt.mrc <frames/direct_sum_filt.mrc>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <SCRATCH/2dx_ctfcor_ctffile.mrc>" >> LOGS/${scriptname}.results 
   echo "# IMAGE: frames/direct_sum_filt.mrc <frames/direct_sum_filt.mrc>" >> LOGS/${scriptname}.results 
-  python ${proc_2dx}/movie/apply_filter_Fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc 0.4
+  echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (N**2=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
+  python ${proc_2dx}/movie/apply_filter_Fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc ${ctfcor_noise}
   exit
 endif
 
@@ -920,8 +920,12 @@ python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct
 echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 
 if ( ${ctfcor_imode} == "2" ) then
-  python ${proc_2dx}/movie/apply_filter_fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc 0.4
+  python ${proc_2dx}/movie/apply_filter_fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc ${ctfcor_noise}
+  echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (N**2=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
   echo "# IMAGE: frames/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTF-corrected>" >> LOGS/${scriptname}.results 
+else
+  \rm -f frames/direct_sum_filt_ctf.mrc
+  \ln -s frames/direct_sum_filt.mrc frames/direct_sum_filt_ctf.mrc
 endif
 
 
@@ -934,7 +938,8 @@ if ( ${movie_masking_mode} != '0' ) then
   ###########################################################################
   ${proc_2dx}/linblock "Masking average with masking info"
   ###########################################################################
-  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt.mrc frames/direct_sum_filt_masked.mrc ${nonmaskimagename}_mask_mask.mrc
+  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt_ctf.mrc frames/direct_sum_filt_masked.mrc ${nonmaskimagename}_mask_mask.mrc
+  endif
   echo "# IMAGE: frames/direct_sum_filt_masked.mrc <Sum unbent images, filtered, masked>" >> LOGS/${scriptname}.results 
 else
   ######################################################
@@ -1049,7 +1054,16 @@ ${pdf2ps} frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
 
 echo "# IMAGE-IMPORTANT: APH/${imagename}_movie_fou.aph <APH file after movie-mode unbending>" >> LOGS/${scriptname}.results
+  
+set IQS = `echo ${UMA_IQ1} ${UMA_IQ2} ${UMA_IQ3} ${UMA_IQ4} ${UMA_IQ5} ${UMA_IQ6} ${UMA_IQ7} ${UMA_IQ8} ${UMA_IQ9}`
+echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMA= ${QVAL_local} ... IQ stat = ${IQS}"
+echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
+echo " " >> History.dat
+echo ":Date: ${date}" >> History.dat
+echo "::Unbend MovieA: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+#
 
 if ( ${tempkeep} != "y" ) then
   ###########################################################################

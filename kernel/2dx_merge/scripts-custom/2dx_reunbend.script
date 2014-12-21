@@ -370,18 +370,12 @@ eot
     if ( -e 2dx_image.cfg ) then
       echo ": "
       set curdir = ${PWD}
-      set QVALS_local = `cat 2dx_image.cfg | grep "set QVALS =" | cut -d\" -f2`
-      # echo ":: QVALS_local = ${QVALS_local}" 
-      if ( ${QVALS_local} == "."  ||  ${QVALS_local} == "0.00" ) then
+      set QVALMA_local = `cat 2dx_image.cfg | grep "set QVALMA =" | cut -d\" -f2`
+      # echo ":: QVALMA_local = ${QVALMA_local}" 
+      if ( ${QVALMA_local}x == "x"  || ${QVALMA_local}x == ".x" ||  ${QVALMA_local}x == "0.00x" ) then
         echo "Working on " ${curdir}
         if( ${irun} < ${ReUnbend_MP} ) then
           ${proc_2dx}/linblock "${irun} of ${ReUnbend_MP} into background: Working on ${dirfile}"
-
-          ${app_2dx_image} ${curdir} "2dx_fftrans"
-          ${app_2dx_image} ${curdir} "2dx_ctfcor"
-          ${app_2dx_image} ${curdir} "2dx_unbend1"
-          ${app_2dx_image} ${curdir} "2dx_getspots"
-          ${app_2dx_image} ${curdir} "2dx_unbend2"
 
           nohup sleep ${sleeptime}; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" &
 
@@ -389,12 +383,6 @@ eot
           @ irun++
         else
           ${proc_2dx}/linblock "${irun} of ${ReUnbend_MP} into foreground: Working on ${dirfile}"
-
-          ${app_2dx_image} ${curdir} "2dx_fftrans"
-          ${app_2dx_image} ${curdir} "2dx_ctfcor"
-          ${app_2dx_image} ${curdir} "2dx_unbend1"
-          ${app_2dx_image} ${curdir} "2dx_getspots"
-          ${app_2dx_image} ${curdir} "2dx_unbend2"
 
           ${app_2dx_image} ${curdir} "2dx_fftrans"
           ${app_2dx_image} ${curdir} "2dx_ctfcor"
@@ -411,7 +399,7 @@ eot
         endif
         echo ": Done with ${dirfile}"
       else
-        echo ": Skipping ${dirfile}"
+        echo ": Skipping ${dirfile}: QVALMA = ${QVALMA_local}"
       endif
     else
       echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."

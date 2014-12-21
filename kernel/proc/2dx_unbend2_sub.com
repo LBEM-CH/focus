@@ -788,7 +788,7 @@ eot
     ${bin_2dx}/2dx_ccunbendk.exe << eot
 SCRATCH/${iname}_CCmap21.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T                !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${iname}, UNBEND2, ${date}
 SCRATCH/${iname}_CCmap21_unbend2.mrc
 UNBENT,PASS,2,${date}
@@ -817,11 +817,31 @@ eot
       ${bin_2dx}/2dx_ccunbendk.exe << eot
 ${iname}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${iname}, UNBEND2, ${date}
 SCRATCH/${iname}_unbend2_notap.mrc
 UNBENT,PASS,2,${date}
 eot
+      #
+      \rm -f SCRATCH/${iname}_CCmap21_unbent.mrc
+      ${bin_2dx}/2dx_ccunbendk.exe << eot
+SCRATCH/${iname}_CCmap21.mrc
+${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+${iname}, UNBEND2, ${date}
+SCRATCH/${iname}_CCmap21_unbent.mrc
+CCmap unbent
+eot
+      #
+      echo "# IMAGE-IMPORTANT: SCRATCH/${iname}_CCmap21_unbent.mrc <CCmap, unbent>" >> LOGS/${scriptname}.results 
+      #
+      # \rm -f SCRATCH/${iname}_CCmap21_unbend2_fft.mrc
+      # setenv IN  SCRATCH/${iname}_CCmap21_unbend2.mrc
+      # setenv OUT SCRATCH/${iname}_CCmap21_unbend2_fft.mrc
+      # ${bin_2dx}/2dx_fftrans.exe
+      # if ( ${locround} == '1' ) then
+      #   echo "# IMAGE: SCRATCH/${iname}_CCmap21_unbend2_fft.mrc <CCmap, unbent (FFT)>" >> LOGS/${scriptname}.results 
+      # endif
       #
     endif
     #
@@ -844,7 +864,7 @@ eot
       ${bin_2dx}/2dx_ccunbendk.exe << eot
 SCRATCH/${iname}_ttf.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T                !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${iname}, UNBEND2, ${date}
 SCRATCH/${iname}_unbend2_notap.mrc
 UNBENT,PASS,2,${date}

@@ -341,10 +341,10 @@ void fullScreenImage::drawRefinementList()
 
 void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigmatism)
 {
-  int n = 50;
+  int n = 100;
   QPainterPath p;
   // QPainterPath q[n];
-  QPainterPath q[50];
+  QPainterPath q[100];
 
   float stepSize = data->get("stepdigitizer","value").toFloat();
   float phacon = data->get("phacon","value").toFloat();
@@ -505,16 +505,23 @@ void fullScreenImage::drawRealLattice(float lattice[2][2])
 
   QPointF a(ma*cos(ath),-ma*sin(ath)), b(mb*cos(bth),-mb*sin(bth));
 
+  // Why does this lattice not fit exactly?????  CHEN
+  // Why does this lattice not fit exactly?????  CHEN
+  // Why does this lattice not fit exactly?????  CHEN
+  // Why does this lattice not fit exactly?????  CHEN
+  // Why does this lattice not fit exactly?????  CHEN
+  // Why does this lattice not fit exactly?????  CHEN
+
   QPen pen(image_base->pen());
   //pen.setWidth(3);
-  pen.setColor(QColor(150,250,240));
-//  pen.setWidth(10.0);
+  pen.setColor(QColor(100,100,240));
+  //pen.setWidth(10.0);
   image_base->setPen(pen);
 
-    for(int i=-40;i<=40;i++)
+    for(int i=-60;i<=60;i++)
     {
-      image_base->drawLine(i*a-40*b,(i)*a+(40)*b);
-      image_base->drawLine((-40)*a+i*b,(40)*a+(i)*b);
+      image_base->drawLine(i*a-60*b,(i)*a+(60)*b);
+      image_base->drawLine((-60)*a+i*b,(60)*a+(i)*b);
     }
 }
 
@@ -970,6 +977,7 @@ void fullScreenImage::setRefinementCandidate(QPointF &candidate)
 
 void fullScreenImage::setLatticeEllipseSize(int size)
 {
+        if(size<1)size=1;
 	latticeEllipseSize = size;
 	update();
 }

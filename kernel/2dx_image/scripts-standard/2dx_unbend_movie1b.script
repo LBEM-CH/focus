@@ -364,20 +364,23 @@ frames/CCmap
 ${movie_imagenumber_touse}
 ${PROFDATA}
 eot
-#
+
+
+###########################################################################
+${proc_2dx}/linblock "drift_selector.py - Selecting and smoothing drift profiles" 
+###########################################################################
 #
 touch frames/PROFDATA_1.dat
 \rm frames/PROFDATA_*.dat
 \rm -f {nonmaskimagename}_mask_mask.mrc
 set lat_string = `echo ${lattice} | sed 's/,/ /g'`
-# python ${proc_2dx}/movie/drift_smoother.py 2dx_movie_refine.dat 2dx_movie_refine_smooth.dat ${movie_smoothing} ${PROFDATA} ${movie_imagenumber_touse}
 python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
-
+#
 echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
 echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
 echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask_mask.mrc <Masked crystal mask>" >> LOGS/${scriptname}.results
-
-
+#
+#
 echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
 if ( ${show_frame_PROFDATA} == "y" ) then
   set i = 1
@@ -389,11 +392,28 @@ endif
 #
 echo  "# IMAGE: 2dx_movie_refine.dat <Movie drift profiles (TXT)>" >> LOGS/${scriptname}.results
 echo  "# IMAGE: 2dx_movie_refine_selected.dat <Movie drift profiles, selected (TXT)>" >> LOGS/${scriptname}.results
+
+
+
+###########################################################################
+${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
+###########################################################################
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
 #
+python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected_filt.mrc
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
 #
+if ( ${movie_masking_mode} != '0' ) then
+  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected_filt_masked.mrc
+  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected.pdf <PDF: 2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
+endif
+\rm -f tmp.png
 echo "<<@progress: 10>>"
-#
-#
+
+
+
+
+
 ###########################################################################
 ${proc_2dx}/linblock "Unbending all frames" 
 ###########################################################################
@@ -562,23 +582,6 @@ else
   ${proc_2dx}/lin "Not masking frame"
   ######################################################
 endif
-
-
-###########################################################################
-${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
-###########################################################################
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
-#
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected_filt.mrc
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-#
-if ( ${movie_masking_mode} != '0' ) then
-  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected_filt_masked.mrc
-  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected.pdf <PDF: 2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
-endif
-#
-\rm -f tmp.png
-#
 
 
 ###########################################################################

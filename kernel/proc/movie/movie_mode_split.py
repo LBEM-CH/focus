@@ -31,9 +31,16 @@ if __name__ == "__main__":
 		output_name = "frames/frame_" + str(i+1) + ".mrc"
 				
 		print "Creating frame", i+1, "as", output_name
-				
-		image = stack.get_clip(Region(0,0,i,nx,ny,1))
-			
+		
+                ioffx = 0
+                ioffy = 0
+		
+		# The following is to test the drift correction performance:
+		# ioffx = i/2
+		# ioffy = i
+
+		image = stack.get_clip(Region(ioffx,ioffy,i,nx,ny,1))
+
 		image.write_image(output_name)
 	
 	

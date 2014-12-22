@@ -116,6 +116,12 @@ set(2DXCTFCOR_EXE ${2DXCTFCOR})
 add_executable(${2DXCTFCOR_EXE} ${2DXCTFCOR_SRC} ${IOF} ${IOC}) 
 set(EXECUTABLES  ${2DXCTFCOR_EXE})
 
+set(2DXMARKSPOTS 2dx_mark_spots)
+set(2DXMARKSPOTS_SRC ${2DXMARKSPOTS}.f)
+set(2DXMARKSPOTS_EXE ${2DXMARKSPOTS})
+add_executable(${2DXMARKSPOTS_EXE} ${2DXMARKSPOTS_SRC} ${IOF} ${IOC}) 
+set(EXECUTABLES  ${2DXMARKSPOTS_EXE})
+
 ###############################################################################
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)

@@ -81,14 +81,23 @@ C
       DIMENSION TITLE(15),NXYZ(3),MXYZ(3)
       DIMENSION XA(2000),YA(2000),IXC(2000),IYC(2000),IH(2000),IK(2000)
       DIMENSION IAMP(21,21),IPHI(21,21),IXGU(21),IYGU(21),PHANG(4)
-      DIMENSION WTS(4),ISUM(21,21),ISUMI(21,21),DELX(2),DELY(2),NIQ(9)
-      DIMENSION GRAD(4),BST(4,MAXCYC),SUMASQST(MAXCYC),NIQST(9,MAXCYC)
+      DIMENSION WTS(4),DELX(2),DELY(2),NIQ(9)
+      DIMENSION GRAD(4),BST(4,MAXCYC),NIQST(9,MAXCYC)
       DIMENSION RLATTICE(4,MAXCYC)
       REAL*8 A(4,4),B(4),E,W(80)
       INTEGER*8 IQMAX, IQVAL
       CHARACTER GU,GENGRID,GENPTS,YES
       LOGICAL TURN,FIRST
       CHARACTER*80 FILIN,FILOUT
+      INTEGER * 8 ISER
+      REAL*8 DAMPSQ,DAMPTOT
+      REAL*8 DASUM1,DASUM2,DBSUM1,DBSUM2
+      REAL*8 DADX,DADY,DBDX,DBDY
+      REAL*8 DENOM
+      REAL*8 DAMPSINC,DRMSBK
+      REAL*8 DSUMASQST(MAXCYC)
+      INTEGER*8 ISUM(21,21),ISUMI(21,21)
+C
       COMMON NOH,NOK,NSPOT,IX1,IX2,IY1,IY2,IHOR,IVERT,IXOUT1,IXOUT2,
      1       IXL,IYL,IX,IY,
      2       IH,IK,IAMP,IPHI,IXGU,IYGU,IXC,IYC,
@@ -96,10 +105,11 @@ C
      4       APART,BPART,AMP,PHASE,DELPX,DELPY,
      5       TURN,FIRST
       COMMON//NX,NY,NZ
+C
       EQUIVALENCE (NXYZ,NX)
+C
       DATA NMAX/2000/,YES/'Y'/
-      DATA NIQ/9*0/,SUMASQST/MAXCYC*0.0/,ISINCBOX/2/
-      INTEGER * 8 ISER
+      DATA NIQ/9*0/,DSUMASQST/MAXCYC*0.0/,ISINCBOX/2/
 C
       WRITE(6,1000)
  1000 FORMAT('0',' MMLATREF : prints M * M boxes of amps & phases',
@@ -201,9 +211,12 @@ C
       RINNER = RINNER * RINNER
 C USED TO BE SCAMP = 999./DMAX
       SCAMP = 1.0
+C      SCAMP = 10000./DMAX
+C      if(SCAMP.gt.1.0)SCAMP=1.0
+C      if(SCAMP.lt.0.1)SCAMP=0.1
       WRITE(6,1040) SCALE, SCAMP
- 1040 FORMAT(/,' Input coords scaled by',F10.5,/,/,
-     1 ' Amplitudes scaled by ',F15.5)
+ 1040 FORMAT(/,': Input coords scaled by',F10.5,/,/,
+     1 ': Amplitudes scaled by ',F15.5)
       NHOR = NHOR * SCALE + 0.5
       NVERT = NVERT * SCALE + 0.5
       IF(NHOR.GT.21) NHOR = 21
@@ -229,336 +242,336 @@ C   Outermost loop refinement cycle beginning
 C
       DO 9000 ICYCL=1,NCYCLES
 C
-C     point generation required
+C       point generation required
 C 
-      IF(GENGRID.EQ.YES.OR.GENPTS.EQ.YES) THEN
-      IF(GENPTS.EQ.YES) THEN
-      CALL  SPOTS(IPASS)
-      ELSE
+        IF(GENGRID.EQ.YES.OR.GENPTS.EQ.YES) THEN
+          IF(GENPTS.EQ.YES) THEN
+            CALL  SPOTS(IPASS)
+          ELSE
 C
-C     grid generation required
+C           grid generation required
 C
-      CALL  GRID(ILIST)
-      END IF
+            CALL  GRID(ILIST)
+          END IF
 C
-C     read in individual points
+C         read in individual points
 C
-      ELSE
-      WRITE(6,1060)
- 1060 FORMAT(/,' Coordinates read in    H    K       X         Y'
+        ELSE
+          WRITE(6,1060)
+ 1060     FORMAT(/,' Coordinates read in    H    K       X         Y'
      1        '    grid units:  X      Y',/,'0')  
-  110 I = I + 1
-      IF(NSPOT.GT.NMAX) GO TO 4550
-      IF(I.GT.100) GO TO 120
-      WRITE(6,*)' '
-      WRITE(6,*)' # type in IH,IK,XA,YA values'
-      WRITE(6,*)' '
-  115 READ(5,*,END=120) IH(I),IK(I),XA(I),YA(I)
-      IF(IH(I).EQ.100) GO TO 120
-      IXC(I) = XA(I) * SCALE + SIGN(0.5,XA(I))
-      IYC(I) = YA(I) * SCALE + SIGN(0.5,YA(I))
+  110     I = I + 1
+          IF(NSPOT.GT.NMAX) GO TO 4550
+          IF(I.GT.100) GO TO 120
+          WRITE(6,*)' '
+          WRITE(6,*)' # type in IH,IK,XA,YA values'
+          WRITE(6,*)' '
+  115     READ(5,*,END=120) IH(I),IK(I),XA(I),YA(I)
+          IF(IH(I).EQ.100) GO TO 120
+          IXC(I) = XA(I) * SCALE + SIGN(0.5,XA(I))
+          IYC(I) = YA(I) * SCALE + SIGN(0.5,YA(I))
 C     
-C     reject spot if outside boundary
+C         reject spot if outside boundary
 C
-      IF(IXC(I).GT.NXM2) GO TO 115
-      IF(IXC(I).LT.-NXM2) GO TO 115
-      IF(IYC(I).GT.NY2M2) GO TO 115
-      IF(IYC(I).LT.-NY2M2) GO TO 115
-      IF(ILIST.EQ.1)WRITE(6,1070) IH(I),IK(I),XA(I),YA(I),IXC(I),IYC(I)
- 1070 FORMAT(20X,2I5,2F10.1,12X,I5,2X,I5)
-      NSPOT = I
-      GO TO 110
-      END IF
+          IF(IXC(I).GT.NXM2) GO TO 115
+          IF(IXC(I).LT.-NXM2) GO TO 115
+          IF(IYC(I).GT.NY2M2) GO TO 115
+          IF(IYC(I).LT.-NY2M2) GO TO 115
+          IF(ILIST.EQ.1)WRITE(6,1070) IH(I),IK(I),XA(I),YA(I),IXC(I),IYC(I)
+ 1070     FORMAT(20X,2I5,2F10.1,12X,I5,2X,I5)
+          NSPOT = I
+          GO TO 110
+        END IF
 C
-C     data read in proceed
+C       data read in proceed
 C
-  120 IHOR2 = NHOR / 2
-      IVERT2 = NVERT / 2
-      ISINCBOX2 = ISINCBOX/2    ! See DATA statement above.
-      ISINCBOX = 2*ISINCBOX2    ! size of box to do sinc fit.
-                NUMOUT = 0
-                NGOOD=0
-                NBAD=0
-                DO 124 N=1,9
-124             NIQ(N)=0
-                DO 125 IM=1,4
-                B(IM)=0.0
-                DO 125 JM=1,4
-                A(IM,JM)=0.0
-125             CONTINUE
+  120   IHOR2 = NHOR / 2
+        IVERT2 = NVERT / 2
+        ISINCBOX2 = ISINCBOX/2    ! See DATA statement above.
+        ISINCBOX = 2*ISINCBOX2    ! size of box to do sinc fit.
+        NUMOUT = 0
+        NGOOD=0
+        NBAD=0
+        DO 124 N=1,9
+124     NIQ(N)=0
+        DO 125 IM=1,4
+          B(IM)=0.0
+          DO 125 JM=1,4
+            A(IM,JM)=0.0
+125     CONTINUE
 C
-C     make sure odd number of elements in box
+C       make sure odd number of elements in box
 C
-      NHOR = IHOR2 * 2 + 1
-      NVERT = IVERT2 * 2 + 1
-      WRITE(6,1080) NHOR,NVERT,ISINCBOX
- 1080 FORMAT(/,' Box size in transform grid units :',I3,' *',I3,/,
-     .  ' Output amplitude is sinc fit over square box size :',I3)
-      IF(IOUT.NE.0) WRITE(IOUT,1081)ISER,TITLE
-1081  FORMAT(I10,15A4)
-      DO 130 K=1,21
-      DO 130 J=1,21
-      ISUM(J,K) = 0
-      ISUMI(J,K) = 0
-  130 CONTINUE
-      DO 500 I=1,NSPOT
-      IHOR = NHOR
-      IVERT = NVERT
+        NHOR = IHOR2 * 2 + 1
+        NVERT = IVERT2 * 2 + 1
+        WRITE(6,1080) NHOR,NVERT,ISINCBOX
+ 1080   FORMAT(/,' Box size in transform grid units :',I3,' *',I3,/,
+     .    ' Output amplitude is sinc fit over square box size :',I3)
+        IF(IOUT.NE.0) WRITE(IOUT,1081)ISER,TITLE
+1081    FORMAT(I10,15A4)
+        DO 130 K=1,21
+          DO 130 J=1,21
+            ISUM(J,K) = 0
+            ISUMI(J,K) = 0
+  130   CONTINUE
+        DO 500 I=1,NSPOT
+          IHOR = NHOR
+          IVERT = NVERT
 C
-C     initialize arrays
+C         initialize arrays
 C
-      DO 150 K=1,21
-      DO 150 J=1,21
-      IAMP(J,K) = 0
-      IPHI(J,K) = 0
-  150 CONTINUE
-      IXL = IXC(I) - IHOR2 
-      IXR = IXC(I) + IHOR2 
-      IYL = IYC(I) - IVERT2 
-      IYU = IYC(I) + IVERT2 
+          DO 150 K=1,21
+            DO 150 J=1,21
+              IAMP(J,K) = 0
+              IPHI(J,K) = 0
+  150     CONTINUE
+          IXL = IXC(I) - IHOR2 
+          IXR = IXC(I) + IHOR2 
+          IYL = IYC(I) - IVERT2 
+          IYU = IYC(I) + IVERT2 
 C
-C     check edge spots
+C         check edge spots
 C
-  160 IF(IXL.LT.-NXM1) THEN
-      IXL = IXL + 1
-      IHOR = IHOR - 1
-      GO TO 160
-      END IF
-  170 IF(IXR.GT.NXM1) THEN
-      IXR = IXR - 1
-      IHOR = IHOR - 1
-      GO TO 170
-      END IF
-  180 IF(IYL.LT.-NY2M1) THEN
-      IYL = IYL + 1
-      IVERT = IVERT - 1
-      GO TO 180
-      END IF
-  190 IF(IYU.GT.NY2M1) THEN
-      IYU = IYU - 1
-      IVERT = IVERT - 1
-      GO TO 190
-      END IF
+  160     IF(IXL.LT.-NXM1) THEN
+            IXL = IXL + 1
+            IHOR = IHOR - 1
+            GO TO 160
+          END IF
+  170     IF(IXR.GT.NXM1) THEN
+            IXR = IXR - 1
+            IHOR = IHOR - 1
+            GO TO 170
+          END IF
+  180     IF(IYL.LT.-NY2M1) THEN
+            IYL = IYL + 1
+            IVERT = IVERT - 1
+            GO TO 180
+          END IF
+  190     IF(IYU.GT.NY2M1) THEN
+            IYU = IYU - 1
+            IVERT = IVERT - 1
+            GO TO 190
+          END IF
 C
-C     set up box edge coordinates
+C         set up box edge coordinates
 C
-C     simple case +ve quadrant
+C         simple case +ve quadrant
 C
-      IXOUT1 = 1
-      IXOUT2 = IHOR
-      IF(IXL.GE.0) THEN
-      IX1 = IXL 
-      IX2 = IX1 + IHOR - 1
-      IY1 = NY2 + IYL 
-      IY2 = IY1 + IVERT - 1
-      IX = IXL - 1
-      IY = IYL - 1
-      CALL  RDSECT
-      GO TO 280
+          IXOUT1 = 1
+          IXOUT2 = IHOR
+          IF(IXL.GE.0) THEN
+            IX1 = IXL 
+            IX2 = IX1 + IHOR - 1
+            IY1 = NY2 + IYL 
+            IY2 = IY1 + IVERT - 1
+            IX = IXL - 1
+            IY = IYL - 1
+            CALL  RDSECT
+            GO TO 280
 C
-C     simple case -ve quadrant
+C           simple case -ve quadrant
 C
-      ELSE IF(IXR.LT.0) THEN
-      IX1 = -IXR  
-      IX2 = IX1 + IHOR - 1
-      IY1 = NY2 - IYU 
-      IY2 = IY1 + IVERT - 1
-      IX = IXR + 1
-      IY = IYU + 1
-      TURN = .TRUE.
-      CALL  RDSECT
-      GO TO 280
-      END IF
+          ELSE IF(IXR.LT.0) THEN
+            IX1 = -IXR  
+            IX2 = IX1 + IHOR - 1
+            IY1 = NY2 - IYU 
+            IY2 = IY1 + IVERT - 1
+            IX = IXR + 1
+            IY = IYU + 1
+            TURN = .TRUE.
+            CALL  RDSECT
+            GO TO 280
+          END IF
 C
-C     complicated cases : spots split about Y axis
+C         complicated cases : spots split about Y axis
 C
-C     set up LHS of box
+C         set up LHS of box
 C
-      IX1 = 1
-      IX2 = -IXL 
-      IY1 = NY2 - IYU 
-      IY2 = IY1 + IVERT - 1
-      IXOUT2 = -IXL
-      IX = 0
-      IY = IYU + 1
-      TURN = .TRUE.
-      CALL  RDSECT
+          IX1 = 1
+          IX2 = -IXL 
+          IY1 = NY2 - IYU 
+          IY2 = IY1 + IVERT - 1
+          IXOUT2 = -IXL
+          IX = 0
+          IY = IYU + 1
+          TURN = .TRUE.
+          CALL  RDSECT
 C
-C     set up RHS of box
+C         set up RHS of box
 C
-      IXOUT1 = IXOUT2 + 1
-      IXOUT2 = IHOR
-      IX1 = 0
-      IX2 = IXR  
-      IY1 = NY2 + IYL 
-      IY2 = IY1 + IVERT - 1
-      IX = -1
-      IY = IYL - 1
-      FIRST = .FALSE.
-      CALL  RDSECT
+          IXOUT1 = IXOUT2 + 1
+          IXOUT2 = IHOR
+          IX1 = 0
+          IX2 = IXR  
+          IY1 = NY2 + IYL 
+          IY2 = IY1 + IVERT - 1
+          IX = -1
+          IY = IYL - 1
+          FIRST = .FALSE.
+          CALL  RDSECT
 c
-C     Arrays IAMP, IPHI now filled with correct numbers.
-C     Now calculate RMS background
+C         Arrays IAMP, IPHI now filled with correct numbers.
+C         Now calculate RMS background
 C
-  280 AMPSQ = 0.
-      KV = IVERT - 1
-      KH = IHOR - 1
-      DO 290 K=1,IVERT,KV
-      DO 290 J=1,IHOR
-      F = IAMP(J,K)
-      AMPSQ = AMPSQ + F * F
-  290 CONTINUE
-      DO 300 K=2,KV
-      DO 300 J=1,IHOR,KH
-      F = IAMP(J,K)
-      AMPSQ = AMPSQ + F * F
-  300 CONTINUE
-      AMPTOT = AMPSQ / (2*(IHOR + IVERT - 2))
-      RMSBK = SQRT(AMPTOT)
+  280     DAMPSQ = 0.
+          KV = IVERT - 1
+          KH = IHOR - 1
+          DO 290 K=1,IVERT,KV
+            DO 290 J=1,IHOR
+              F = IAMP(J,K)
+              DAMPSQ = DAMPSQ + F * F
+  290     CONTINUE
+          DO 300 K=2,KV
+            DO 300 J=1,IHOR,KH
+            F = IAMP(J,K)
+            DAMPSQ = DAMPSQ + F * F
+  300     CONTINUE
+          DAMPTOT = DAMPSQ / (2*(IHOR + IVERT - 2))
+          DRMSBK = SQRT(DAMPTOT)
 C
-C     Calculate integrated amplitude
+C         Calculate integrated amplitude
 C
-      J1 = IHOR / 2
-      J2 = J1 + 2
-      K1 = IVERT / 2
-      K2 = K1 + 2
-      AMPSQ = 0.
-      DO 310 K=K1,K2
-      DO 310 J=J1,J2
-      F = IAMP(J,K)
-      AMPSQ = AMPSQ + F * F
-  310 CONTINUE
-      AMPTOT = AMPTOT * 9.
-      IF(AMPSQ.GE.AMPTOT) THEN
-      AMPINT = SQRT(AMPSQ - AMPTOT)
-      ELSE
-      AMPINT = 0.
-      END IF
+          J1 = IHOR / 2
+          J2 = J1 + 2
+          K1 = IVERT / 2
+          K2 = K1 + 2
+          DAMPSQ = 0.
+          DO 310 K=K1,K2
+            DO 310 J=J1,J2
+              F = IAMP(J,K)
+              DAMPSQ = DAMPSQ + F * F
+  310     CONTINUE
+          DAMPTOT = DAMPTOT * 9.
+          IF(DAMPSQ.GE.DAMPTOT) THEN
+            AMPINT = SQRT(DAMPSQ - DAMPTOT)
+          ELSE
+            AMPINT = 0.
+          END IF
 C
-C     Calculate phase from vector sum of phase
-C     First find requested centre of output array
+C         Calculate phase from vector sum of phase
+C         First find requested centre of output array
 C
-      XSCALE = XA(I) * SCALE
-      INTXA = XSCALE
-      IF(XSCALE.LT.0.) INTXA = INTXA - 1
-      J1 = INTXA - IXL + 1
-      DELX(1) = XSCALE - INTXA
-      DELX(2) = DELX(1) - 1.    ! note this gives negative values for DELX(2)
-      YSCALE = YA(I) * SCALE
-      INTYA = YSCALE
-      IF(YSCALE.LT.0.) INTYA = INTYA - 1
-      DELY(1) = YSCALE - INTYA
-      DELY(2) = DELY(1) - 1.    ! note this gives negative values for DELY(2)
+          XSCALE = XA(I) * SCALE
+          INTXA = XSCALE
+          IF(XSCALE.LT.0.) INTXA = INTXA - 1
+          J1 = INTXA - IXL + 1
+          DELX(1) = XSCALE - INTXA
+          DELX(2) = DELX(1) - 1.    ! note this gives negative values for DELX(2)
+          YSCALE = YA(I) * SCALE
+          INTYA = YSCALE
+          IF(YSCALE.LT.0.) INTYA = INTYA - 1
+          DELY(1) = YSCALE - INTYA
+          DELY(2) = DELY(1) - 1.    ! note this gives negative values for DELY(2)
 C                               ! which invalidates the ANGAVE function
-      K1 = INTYA - IYL + 1
-      J2 = J1 + 1
-      K2 = K1 + 1
-      ASUM1 = 0.
-      BSUM1 = 0.
-      ASUM2 = 0.
-      BSUM2 = 0.
-      DENOM=0.
-      DADX=0.
-      DADY=0.
-      DBDX=0.
-      DBDY=0.
+          K1 = INTYA - IYL + 1
+          J2 = J1 + 1
+          K2 = K1 + 1
+          DASUM1 = 0.
+          DBSUM1 = 0.
+          DASUM2 = 0.
+          DBSUM2 = 0.
+          DENOM=0.
+          DADX=0.
+          DADY=0.
+          DBDX=0.
+          DBDY=0.
 C
-C  Calculate phases from vector sum over 2x2 points only.
+C        Calculate phases from vector sum over 2x2 points only.
 C
-      DO 320 L2 = 1,2   ! Vector phases over 2x2 points.
-        K = K1 + L2 - 1
-      DO 320 L1 = 1,2   !
-        J = J1 + L1 - 1
-        AMP = IAMP(J,K)
-        PHASE = IPHI(J,K) / 57.2958
-        ASUM1 = ASUM1 + AMP * COS(PHASE)
-        BSUM1 = BSUM1 + AMP * SIN(PHASE)
-  320 CONTINUE
+          DO 320 L2 = 1,2   ! Vector phases over 2x2 points.
+            K = K1 + L2 - 1
+            DO 320 L1 = 1,2   !
+              J = J1 + L1 - 1
+              AMP = IAMP(J,K)
+              PHASE = IPHI(J,K) / 57.2958
+              DASUM1 = DASUM1 + AMP * COS(PHASE)
+              DBSUM1 = DBSUM1 + AMP * SIN(PHASE)
+  320     CONTINUE
 C
-C  Calculated sinc function weighted phase
+C         Calculated sinc function weighted phase
 C
-      DO 330 L1=1,ISINCBOX      ! X
-        J=J1+L1-ISINCBOX2
-      DO 330 L2=1,ISINCBOX      ! Y
-        K=K1+L2-ISINCBOX2
-        AMP = IAMP(J,K)
-        PHASE = IPHI(J,K) / 57.2958
-                DELTAX = DELX(1)+ISINCBOX2-L1
-                DELTAY = DELY(1)+ISINCBOX2-L2
-        IF(DELTAX.EQ.0) GO TO 325
-        IF(DELTAY.EQ.0) THEN
-           SINC   = (SIN(PI * DELTAX)) / (PI * DELTAX)
-           GSINCX = COS(PI*DELTAX)/DELTAX-SIN(PI*DELTAX)/(PI*DELTAX**2)
-           GSINCY = 0.0
-        ELSE
-           SINC   = (SIN(PI * DELTAX) * SIN(PI * DELTAY)) /
-     .                          (PI**2 * DELTAX * DELTAY)
-           GSINCX = (SIN(PI*DELTAY)/(PI*DELTAY)) * 
-     .          (COS(PI*DELTAX)/DELTAX-SIN(PI*DELTAX)/(PI*DELTAX**2))
-           GSINCY = (SIN(PI*DELTAX)/(PI*DELTAX)) * 
-     .          (COS(PI*DELTAY)/DELTAY-SIN(PI*DELTAY)/(PI*DELTAY**2))
-        END IF
-        GO TO 328
+          DO 330 L1=1,ISINCBOX      ! X
+            J=J1+L1-ISINCBOX2
+            DO 330 L2=1,ISINCBOX      ! Y
+              K=K1+L2-ISINCBOX2
+              AMP = IAMP(J,K)
+              PHASE = IPHI(J,K) / 57.2958
+              DELTAX = DELX(1)+ISINCBOX2-L1
+              DELTAY = DELY(1)+ISINCBOX2-L2
+              IF(DELTAX.EQ.0) GO TO 325
+              IF(DELTAY.EQ.0) THEN
+                SINC   = (SIN(PI * DELTAX)) / (PI * DELTAX)
+                GSINCX = COS(PI*DELTAX)/DELTAX-SIN(PI*DELTAX)/(PI*DELTAX**2)
+                GSINCY = 0.0
+              ELSE
+                SINC   = (SIN(PI * DELTAX) * SIN(PI * DELTAY)) /
+     .            (PI**2 * DELTAX * DELTAY)
+                GSINCX = (SIN(PI*DELTAY)/(PI*DELTAY)) * 
+     .            (COS(PI*DELTAX)/DELTAX-SIN(PI*DELTAX)/(PI*DELTAX**2))
+                GSINCY = (SIN(PI*DELTAX)/(PI*DELTAX)) * 
+     .            (COS(PI*DELTAY)/DELTAY-SIN(PI*DELTAY)/(PI*DELTAY**2))
+              END IF
+              GO TO 328
 C
-325     IF(DELTAY.EQ.0) THEN
-           SINC   = 1.
-           GSINCX = 0.
-           GSINCY = 0.
-        ELSE
-           SINC   = (SIN(PI * DELTAY)) / (PI * DELTAY)
-           GSINCX = 0.
-           GSINCY = COS(PI*DELTAY)/DELTAY-SIN(PI*DELTAY)/(PI*DELTAY**2)
-        END IF
+325           IF(DELTAY.EQ.0) THEN
+                SINC   = 1.
+                GSINCX = 0.
+                GSINCY = 0.
+              ELSE
+                SINC   = (SIN(PI * DELTAY)) / (PI * DELTAY)
+                GSINCX = 0.
+                GSINCY = COS(PI*DELTAY)/DELTAY-SIN(PI*DELTAY)/(PI*DELTAY**2)
+              END IF
 C
-328     ASUM2 = ASUM2 + AMP * COS(PHASE) * SINC
-        BSUM2 = BSUM2 + AMP * SIN(PHASE) * SINC
-        DENOM = DENOM + SINC**2
-        DADX  = DADX  + AMP * COS(PHASE) * GSINCX
-        DADY  = DADY  + AMP * COS(PHASE) * GSINCY
-        DBDX  = DBDX  + AMP * SIN(PHASE) * GSINCX
-        DBDY  = DBDY  + AMP * SIN(PHASE) * GSINCY
-330   CONTINUE
+328           DASUM2 = DASUM2 + AMP * COS(PHASE) * SINC
+              DBSUM2 = DBSUM2 + AMP * SIN(PHASE) * SINC
+              DENOM = DENOM + SINC**2
+              DADX  = DADX  + AMP * COS(PHASE) * GSINCX
+              DADY  = DADY  + AMP * COS(PHASE) * GSINCY
+              DBDX  = DBDX  + AMP * SIN(PHASE) * GSINCX
+              DBDY  = DBDY  + AMP * SIN(PHASE) * GSINCY
+330       CONTINUE
 C
 C Now some final tidy up of amp and phase calculation.
-      IF(ASUM1.NE.0..OR.BSUM1.NE.0.) THEN 
-        VECPHA1 = ATAN2(BSUM1,ASUM1) * 57.2958
+      IF(DASUM1.NE.0..OR.DBSUM1.NE.0.) THEN 
+        VECPHA1 = ATAN2(DBSUM1,DASUM1) * 57.2958
         ELSE
         VECPHA1 = 0.
       END IF
       IF(VECPHA1.LT.0.) VECPHA1 = VECPHA1 + 360.
 C
-      IF(ASUM2.NE.0..OR.BSUM2.NE.0.) THEN 
-        VECPHA2 = ATAN2(BSUM2,ASUM2) * 57.2958
-        AMPSINC = SQRT(ASUM2**2 + BSUM2**2)/DENOM
-                SUMASQST(ICYCL) = SUMASQST(ICYCL) + AMPSINC**2
-                DAMPDX=(ASUM2*DADX+BSUM2*DBDX)/AMPSINC
-                DAMPDY=(ASUM2*DADY+BSUM2*DBDY)/AMPSINC
-                GRAD(1)=IH(I)*DAMPDX
-                GRAD(2)=IH(I)*DAMPDY
-                GRAD(3)=IK(I)*DAMPDX
-                GRAD(4)=IK(I)*DAMPDY
-                WGT=1.0/(RMSBK**2+AMPSINC**2)   ! EQUAL WGT ABOVE IQ=7
-                DO 340 IM=1,4
-                  B(IM)=B(IM)+AMPSINC*GRAD(IM)*WGT
-                DO 340 JM=1,4
-                  A(IM,JM)=A(IM,JM)+GRAD(IM)*GRAD(JM)*WGT
-340             CONTINUE
-        IF(AMPSINC.LE.RMSBK) THEN
-                AMPOUT = 0.00001
-              ELSE
-                AMPOUT = SQRT(AMPSINC**2 - RMSBK**2)
+      IF(DASUM2.NE.0..OR.DBSUM2.NE.0.) THEN 
+        VECPHA2 = ATAN2(DBSUM2,DASUM2) * 57.2958
+        DAMPSINC = SQRT(DASUM2**2 + DBSUM2**2)/DENOM
+        DSUMASQST(ICYCL) = DSUMASQST(ICYCL) + DAMPSINC**2
+        DAMPDX=(DASUM2*DADX+DBSUM2*DBDX)/DAMPSINC
+        DAMPDY=(DASUM2*DADY+DBSUM2*DBDY)/DAMPSINC
+        GRAD(1)=IH(I)*DAMPDX
+        GRAD(2)=IH(I)*DAMPDY
+        GRAD(3)=IK(I)*DAMPDX
+        GRAD(4)=IK(I)*DAMPDY
+        WGT=1.0/(DRMSBK**2+DAMPSINC**2)   ! EQUAL WGT ABOVE IQ=7
+        DO 340 IM=1,4
+          B(IM)=B(IM)+DAMPSINC*GRAD(IM)*WGT
+        DO 340 JM=1,4
+          A(IM,JM)=A(IM,JM)+GRAD(IM)*GRAD(JM)*WGT
+340     CONTINUE
+        IF(DAMPSINC.LE.DRMSBK) THEN
+          AMPOUT = 0.00001
+        ELSE
+          AMPOUT = SQRT(DAMPSINC**2 - DRMSBK**2)
         ENDIF
       ELSE
         VECPHA2 = 0.
-        AMPSINC = 0.
+        DAMPSINC = 0.
         AMPOUT = 0.00001
       END IF
       IF(VECPHA2.LT.0.) VECPHA2 = VECPHA2 + 360.
       PHSOUT=VECPHA2
-        PHSERR = (180.0/PI)*RMSBK/AMPOUT
-        IQ = 1 + (PHSERR/7.0)           ! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
-        IQ = MIN(IQ,8)                  !            IQ=7     AMP= 1x RMSBK
-        IF (AMPOUT.EQ.0.00001) IQ=9     ! THUS IQ=8 HAS AMPSINC .GE. RMSBK
+        PHSERR = (180.0/PI)*DRMSBK/AMPOUT
+        IQ = 1 + (PHSERR/7.0)           ! THIS MEANS IQ=1 HAS AMP= 8x DRMSBK
+        IQ = MIN(IQ,8)                  !            IQ=7     AMP= 1x DRMSBK
+        IF (AMPOUT.EQ.0.00001) IQ=9     ! THUS IQ=8 HAS DAMPSINC .GE. DRMSBK
 C
 C     sum squared amplitudes
 C
@@ -587,11 +600,11 @@ C
 C     write output to unit IOUT
 C
       IF(IOUT.NE.0)
-     .   WRITE(IOUT,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK
-1101    FORMAT(2I4,2F8.1,I3,F8.1)
-        IF(IQ.LE.7) NGOOD=NGOOD+1
-        IF(IQ.GT.7) NBAD=NBAD+1
-        NIQ(IQ) = NIQ(IQ)+1
+     .   WRITE(IOUT,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,DRMSBK
+1101  FORMAT(2I4,2F8.1,I3,F8.1)
+      IF(IQ.LE.7) NGOOD=NGOOD+1
+      IF(IQ.GT.7) NBAD=NBAD+1
+      NIQ(IQ) = NIQ(IQ)+1
 C
 C     set up pagination
 C
@@ -600,7 +613,7 @@ C
 1102      FORMAT(/,' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS',/,
      .     '   H   K  AMPOUT  PHSOUT IQ   RMSBK')
           IF(NUMOUT.GT.NUMSPOT.AND.ILIST.EQ.1)
-     .     WRITE(6,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK
+     .     WRITE(6,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,DRMSBK
       IF(NUMOUT.GT.NUMSPOT) GO TO 500
 C
 C     write up to NUMSPOT spots
@@ -617,7 +630,7 @@ C
      2       ' in grid units ',2F8.2)
       END IF
 C
-      WRITE(6,1110) RMSBK, AMPINT, VECPHA1, VECPHA2, PINTP, GDMEAN
+      WRITE(6,1110) DRMSBK, AMPINT, VECPHA1, VECPHA2, PINTP, GDMEAN
  1110 FORMAT(/,' RMS backgd =',F6.1,
      .  ' Integrated bgd-corr amp over 3x3 box =',F6.1,/,
      . '  Ampl-weighted vec. sum of phase =',F6.1, 
@@ -691,7 +704,7 @@ C
       L = NVERT
       DO 540 K=1,NVERT
       WRITE(6,1270) (ISUM(J,L),J=1,NHOR)
- 1270 FORMAT(/,15X,21I5)
+ 1270 FORMAT(/,10X,21I8)
       L = L - 1
   540 CONTINUE
       WRITE(6,1252)
@@ -703,8 +716,8 @@ C
      .  '    scale factor = ',F10.7,/,19X,40('-'))
       L = NVERT
       DO 545 K=1,NVERT
-      WRITE(6,1270) (ISUMI(J,L),J=1,NHOR)
-      L = L - 1
+        WRITE(6,1270) (ISUMI(J,L),J=1,NHOR)
+        L = L - 1
   545 CONTINUE
       WRITE(6,1252)
 1252  FORMAT(/,/)
@@ -754,7 +767,7 @@ C
       IBESTCYCL = 1
       WRITE(6,9502)
       DO 9500 ICYCL=1,NCYCLES
-        WRITE(6,9501)ICYCL,(BST(I,ICYCL),I=1,4),SUMASQST(ICYCL),
+        WRITE(6,9501)ICYCL,(BST(I,ICYCL),I=1,4),DSUMASQST(ICYCL),
      .                   (NIQST(I,ICYCL),I=1,9)
         IQVAL = 0
         do IIQN=1,9
@@ -768,7 +781,7 @@ C
 C
       WRITE(6,9504)
       ICYCL=IBESTCYCL
-      WRITE(6,9503)ICYCL,(BST(I,ICYCL),I=1,4),SUMASQST(ICYCL),
+      WRITE(6,9503)ICYCL,(BST(I,ICYCL),I=1,4),DSUMASQST(ICYCL),
      .                   (NIQST(I,ICYCL),I=1,9)
 C
 CHEN
@@ -783,11 +796,13 @@ CHEN
 C
 9501  FORMAT(':',I3,4F12.8,F15.0,9I4)
 9502  FORMAT(': Summary of refinement',/,
-     .': CYC              SHIFTS                                SUMINT ',
+     .': CYC              SHIFTS                                ',
+     .  'SUMINT ',
      .'  IQ 1   2   3   4   5   6   7   8   9',/)
 9503  FORMAT('::',I3,4F12.8,F15.0,9I4)
 9504  FORMAT('::',/,':: Best corrected lattice:',/,
-     .':: CYC              SHIFTS                                SUMINT ',
+     .':: CYC              SHIFTS                                ',
+     .  'SUMINT ',
      .'  IQ 1   2   3   4   5   6   7   8   9',/)
       STOP
 4550    WRITE(6,4551)NMAX
@@ -1010,42 +1025,42 @@ C
       KX = IX
       IF(.NOT.TURN) THEN
 C
-C     straightforward case, no turning
+C       straightforward case, no turning
 C
-      DO 100 K=1,IVERT
-      L = 1
-      IY = IY + 1
-      IX = KX
-      DO 100 J=IXOUT1,IXOUT2
-      APART = ARRAY(L,K)
-      BPART = ARRAY(L+1,K)
-      IX = IX + 1
-      CALL  AMPHA
-      IAMP(J,K) = AMP * SCAMP + 0.5
-      IPHI(J,K) = PHASE + 0.5
-      L = L + 2
-  100 CONTINUE
+        DO 100 K=1,IVERT
+          L = 1
+          IY = IY + 1
+          IX = KX
+          DO 100 J=IXOUT1,IXOUT2
+            APART = ARRAY(L,K)
+            BPART = ARRAY(L+1,K)
+            IX = IX + 1
+            CALL  AMPHA
+            IAMP(J,K) = AMP * SCAMP + 0.5
+            IPHI(J,K) = PHASE + 0.5
+            L = L + 2
+  100   CONTINUE
       ELSE
 C
-C     turn upside down & back to front
+C       turn upside down & back to front
 C
-      KK = IVERT + 1
-      DO 200 K=1,IVERT
-      KK = KK - 1
-      JJ = IXOUT2 + 1
-      L = 1
-      IY = IY - 1
-      IX = KX
-      DO 200 J=IXOUT1,IXOUT2
-      JJ = JJ - 1
-      APART = ARRAY(L,K)
-      BPART = ARRAY(L+1,K)
-      IX = IX - 1
-      CALL  AMPHA
-      IAMP(JJ,KK) = AMP * SCAMP + 0.5
-      IPHI(JJ,KK) = PHASE + 0.5
-      L = L + 2
-  200 CONTINUE
+        KK = IVERT + 1
+        DO 200 K=1,IVERT
+          KK = KK - 1
+          JJ = IXOUT2 + 1
+          L = 1
+          IY = IY - 1
+          IX = KX
+          DO 200 J=IXOUT1,IXOUT2
+            JJ = JJ - 1
+            APART = ARRAY(L,K)
+            BPART = ARRAY(L+1,K)
+            IX = IX - 1
+            CALL  AMPHA
+            IAMP(JJ,KK) = AMP * SCAMP + 0.5
+            IPHI(JJ,KK) = PHASE + 0.5
+            L = L + 2
+  200   CONTINUE
       END IF
 C
 C     set up array for X coordinates

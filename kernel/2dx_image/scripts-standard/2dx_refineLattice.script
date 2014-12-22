@@ -133,7 +133,7 @@ set newlat = `cat TMP456111.tmp`
 set lattice = `echo ${newlat} | sed 's/ /,/g' `
 #
 echo "set lattice = ${lattice}" >> LOGS/${scriptname}.results
-echo "set Refine_Lattice = 0" >> LOGS/${scriptname}.results
+# echo "set Refine_Lattice = 0" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_lencalc: To calculate some values for the tilt geometry determination."

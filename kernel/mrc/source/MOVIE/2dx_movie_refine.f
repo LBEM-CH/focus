@@ -488,8 +488,8 @@ C-----------frame N/3 is not offset at all (but all is offset by ROFFCEN)):
             ROLASTY(K,L)  =  ROFFLASTY
             ROFIRSTX(K,L) = -ROFFLASTX/2.0
             ROFIRSTY(K,L) = -ROFFLASTY/2.0
-            ROCENX(K,L)   =  ROFFCENX
-            ROCENY(K,L)   =  ROFFCENY
+            ROCENX(K,L)   = -ROFFCENX
+            ROCENY(K,L)   = -ROFFCENY
             write(6,'(2I5,'': Node '',2I5,'' at '',2F10.2,
      .        '' gives max peak '',I10,
      .        '' for offset from '',2F8.1,'' to '',2F8.1,

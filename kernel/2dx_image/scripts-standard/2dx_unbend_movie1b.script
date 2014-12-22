@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Unbend Drift Correction (Experimental)                             #
+# Title: Unbend Movie A2 (Experimental)                                     #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -32,32 +32,11 @@
 # MANUAL: Careful prevention of overfitting is crucial for successful movie-mode 3D reconstructions.
 #
 #
-# SORTORDER: 52
+# SORTORDER: 53
 #
 #=============================================================================
 # SECTION: Verbosity
 #=============================================================================
-#
-# LABEL: Show raw frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frames = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frames = "n"
-#
-# LABEL: Show FFT of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_FFT = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_FFT = "n"
-#
-# LABEL: Calculate Tilefiles for frames (very slow)?
-# LEGEND: This switch decides, if these should be calculated.
-# EXAMPLE: calculate_tiles = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set calculate_tiles = "n"
 #
 # LABEL: Show CCmaps of frames?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
@@ -190,7 +169,7 @@ set ctfcor_maxamp_factor = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_unbend_movie
+set scriptname = 2dx_unbend_movie1b
 \rm -f LOGS/${scriptname}.results
 #
 echo "<<@evaluate>>"
@@ -353,105 +332,6 @@ if ( ! -e SCRATCH/2dx_ctfcor_ctffile.mrc ) then
   ${proc_2dx}/protest "ERROR:  SCRATCH/2dx_ctfcor_ctffile.mrc missing. First run script Correct CTF on tiles"
 endif
 
-
-
-
-if ( 1 == 2 ) then
-  python ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
-
-  echo "# IMAGE: frames/direct_sum.mrc <frames/direct_sum.mrc>" >> LOGS/${scriptname}.results 
-  python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc 0.001
-  
-  echo "# IMAGE: frames/direct_sum_filt.mrc <frames/direct_sum_filt.mrc>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: frames/direct_sum_filt.mrc <frames/direct_sum_filt.mrc>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (N**2=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
-  python ${proc_2dx}/movie/apply_filter_Fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc ${ctfcor_noise}
-  exit
-endif
-
-
-if ( 1 == 2 ) then
-  set PROFDATA = ${iname}_profile.dat
-
-  # The following is for debugging only, not for the normal workflow.
-
-  echo ":: Running 2dx_movie_refine.exe for a test "
-
-  ${bin_2dx}/2dx_movie_refine.exe << eot
-frames/CCmap
-${movie_imagenumber_touse}
-${PROFDATA}
-eot
-  #
-endif
-
-
-
-
-
-if ( 1 == 2 ) then
-  set iname = image_ctfcor
-  set PROFDATA = ${iname}_profile.dat
-
-  # The following is for debugging only, not for the normal workflow.
-  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
-  echo  "# IMAGE-IMPORTANT: frames/CCmap_driftCorrected.mrc <CCmap_driftCorrected.mrc>" >> LOGS/${scriptname}.results
-
-  if ( -e frames/CCmap_driftCorrected.mrc ) then
-    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected.mrc
-  else
-    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf 
-  endif 
-  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-
-  touch frames/PROFDATA_1.dat
-  \rm frames/PROFDATA_*.dat
-
-  \rm -f {nonmaskimagename}_mask_mask.mrc
-  set lat_string = `echo ${lattice} | sed 's/,/ /g'`
-  python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
-
-  echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
-  echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
-  echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask_mask.mrc <Masked crystal mask>" >> LOGS/${scriptname}.results
-
-
-
-  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-  echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
-
-  if ( -e frames/CCmap_driftCorrected.mrc ) then
-    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected.mrc
-  else
-    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf
-  endif
-  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected.pdf <PDF: 2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
-  exit
-endif
-
-
-
-
-
-
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-##########################################################################
-##########################################################################
-# Now preparing reference:
-##########################################################################
-##########################################################################
-#
-echo "<<@progress: 5>>"
-#
 set iname = image_ctfcor
 #
 set PROFDATA = ${iname}_profile.dat
@@ -465,287 +345,12 @@ if ( ! -e ${cormap} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"
 endif
 # 
-#
-###############################################################
-${proc_2dx}/linblock "FFTRANS - Calculate FFT of unbent image"
-###############################################################
-#
 set unbent_fil = unbent.mrc
 #
-if ( ! -e ${unbent_fil} ) then
-  ${proc_2dx}/protest "ERROR: File missing: ${unbent_fil}"
-endif
-# 
-\rm -f SCRATCH/reference_flt_upscale.mrc
-${bin_2dx}/labelh.exe << eot
-${unbent_fil}
-19
-SCRATCH/reference_flt_upscale.mrc
-eot
-#
-setenv IN  SCRATCH/reference_flt_upscale.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft.mrc
-${bin_2dx}/2dx_fftrans.exe
-#
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
-#
-echo "<<@progress: 15>>"
-#
-#
-#########################################################################
-${proc_2dx}/linblock "MASKTRAN - Lattice-mask FFT of unbent image, small holes"
-#########################################################################
 set maskb = ${maskb01}
 set rmax = 11000
-#
-setenv IN  SCRATCH/reference_flt_upscale_fft.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft_mask.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft_mask.mrc
-setenv SPOTS ${imagename}.spt
-${bin_2dx}/2dx_masktrana.exe << eot
-1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
-1 ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
-eot
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask.mrc <Unbent image, Fourier-filtered (1px) (FFT)>" >> LOGS/${scriptname}.results
-#
-if ( ${tempkeep} != "y" ) then
-  \rm -f SCRATCH/reference_flt_upscale_fft.mrc
-endif
-#
-#
-###############################################################
-${proc_2dx}/linblock "FFTRANS - Back to real space"
-###############################################################
-#
-setenv IN  SCRATCH/reference_flt_upscale_fft_mask.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
-${bin_2dx}/2dx_fftrans.exe
-#
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft.mrc <Unbent image, Fourier-filtered>" >> LOGS/${scriptname}.results
-#
-if ( ${tempkeep} != "y" ) then
-  \rm -f SCRATCH/reference_flt_upscale_fft_mask.mrc
-endif
-#
-echo "<<@progress: 17>>"
-#
-#
-###############################################################
-${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxa}"
-###############################################################
-#
-python ${proc_2dx}/movie/box_reference.py SCRATCH/reference_flt_upscale_fft_mask_fft.mrc SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa}
-echo  "# IMAGE-IMPORTANT: SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc <Reference (${movie_refboxa}px)>" >> LOGS/${scriptname}.results
-#
-if ( ${tempkeep} != "y" ) then
-  \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
-endif
-#
-#
-###############################################################
-${proc_2dx}/linblock "FFTRANS - Producing reference in Fourier space"
-###############################################################
-#
-setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-${bin_2dx}/2dx_fftrans.exe
-#
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc <Reference (FFT)>" >> LOGS/${scriptname}.results
-#
-#
-#########################################################################
-${proc_2dx}/linblock "MASKTRAN - Masked FFT of boxed reference"
-#########################################################################
-set maskb = ${maskb01}
-set rmax = 11000
-#
-setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
-setenv SPOTS ${imagename}.spt
-${bin_2dx}/2dx_masktrana.exe << eot
-1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
-${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
-eot
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc <Reference, Fourier-filtered (${maskb}px) (FFT)>" >> LOGS/${scriptname}.results
-#
-echo "<<@progress: 20>>"
-#
-if ( ${tempkeep} != "y" ) then
-  \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-endif
-#
-#
-#
-#
-#
-#
-#
-##########################################################################
-##########################################################################
-# Now preparing frames:
-##########################################################################
-##########################################################################
-#
-#
-#
-#
-#
-#
-#
-#
-#
-# Generate subfolder for frame images
-\rm -rf frames
-if ( ! -d frames ) then
-  \mkdir frames
-  cd frames
-  if ( ! -d PS ) then
-    \mkdir PS
-  endif
-  cd ..
-  #
-  ###############################################################
-  ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} frames"
-  ############################################################### 
-  #
-  python ${proc_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename}
-  #
-endif
-#
-#
-###############################################################
-${proc_2dx}/linblock "Pre-processing all frames"
-###############################################################
-#
-set prog_num = 25
-echo "<<@progress: ${prog_num}>>"       
-#
-# i counts the super-frames to process:
-set i = 1
-while ($i <= ${movie_imagenumber_touse})
-  #
-  ${proc_2dx}/lin "Adapting size and limiting resolution for frame ${i}"
-  set new_mrc_created = y
-  set loc_imagename = frames/frame_${i}
-  source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
-  source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
-  #
-  if ( ${show_frames} == "y" ) then
-    echo "# IMAGE: frames/frame_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
-  endif
-  #
-  if (${ctfcor_imode}x == "0x" ) then
-    ${proc_2dx}/linblock "Not applying any CTF correction."
-    cd frames
-    \ln -s frame_${i}.mrc frame_${i}_ctfcor.mrc
-    cd ..
-  else
-    #  
-    #################################################################################
-    ${proc_2dx}/lin "2dx_ctfcor - CTF correcting frame ${i}"
-    #################################################################################  
-    #
-    \rm -f frames/frame_${i}_ctfcor.mrc
-    #
-    # For example:
-    # ${bin_2dx}/2dx_ctfcor.exe << eot
-    # ${imagename}.mrc
-    # ${imagename}_ctfcor.mrc
-    # ${ctfcor_tilefile}
-    # ${ctfcor_psfile}
-    # 10.0, 60.0
-    # 2.7, 300.0, 0.07, 39411.0, 5.0
-    # 51579.8, 8919.84, 68.0
-    # 0.1
-    # 256
-    # 512
-    # 50
-    # n
-    # 0.1
-    # eot
-    #
-    if ( ${calculate_tiles} == "n" ) then
-      ${bin_2dx}/2dx_ctfcor.exe << eot
-frames/frame_${i}.mrc
-frames/frame_${i}_ctfcor.mrc
-#
-#
-#
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${ctfcor_noise}
-${ctfcor_inner_tile}
-${ctfcor_outer_tile}
-${ctfcor_taper}
-${ctfcor_imode}
-${ctfcor_debug}
-${ctfcor_maxamp_factor}
-eot
-      #
-    else
-      #
-      set ctfcor_tilefile = "frames/2dx_ctfcor_tile.mrc"
-      set ctfcor_psfile = "frames/2dx_ctfcor_psfile.mrc"
-      set ctfcor_ctffile = "frames/2dx_ctfcor_ctffile.mrc"
-      \rm -f ${ctfcor_tilefile}
-      \rm -f ${ctfcor_psfile} 
-      \rm -f ${ctfcor_ctffile} 
-      #
-      ${bin_2dx}/2dx_ctfcor.exe << eot
-frames/frame_${i}.mrc
-frames/frame_${i}_ctfcor.mrc
-${ctfcor_tilefile}
-${ctfcor_psfile}
-${ctfcor_ctffile}
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${ctfcor_noise}
-${ctfcor_inner_tile}
-${ctfcor_outer_tile}
-${ctfcor_taper}
-${ctfcor_imode}
-${ctfcor_debug}
-${ctfcor_maxamp_factor}
-eot
-      #
-      echo "# IMAGE: frames/frame_${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
-      \mv -f ${ctfcor_tilefile} frames/frame_${i}_tiles.mrc
-      echo "# IMAGE: frames/frame_${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
-      \mv -f ${ctfcor_psfile} frames/frame_${i}_ps.mrc
-      echo "# IMAGE: frames/frame_${i}_ps.mrc <Frame ${i}, PowerSpectra>" >> LOGS/${scriptname}.results
-      \mv -f ${ctfcor_ctffile} frames/frame_${i}_ctffile.mrc
-      echo "# IMAGE: frames/frame_${i}_ctffile.mrc <Frame ${i}, CTF-sum>" >> LOGS/${scriptname}.results
-    endif
-    #
-  endif
-  #
-  ###############################################################
-  ${proc_2dx}/lin "cross_correlate.py - Cross-correlate reference with frame ${i}"
-  ############################################################### 
-  #
-  python ${proc_2dx}/movie/cross_correlate.py frames/frame_${i}_ctfcor.mrc SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc frames/CCmap_${i}.mrc
-  if ( ${show_frame_CCmap} == "y" ) then
-    echo  "# IMAGE: frames/CCmap_${i}.mrc <Frame ${i}, CCmap>" >> LOGS/${scriptname}.results
-  endif
-  #
-  set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 25 + int( 35 * $1 / $2 ) } END { print s }'` 
-  echo "<<@progress: ${prog_num}>>"       
-  #
-  #
-  @ i += 1
-end
-#
-# the variable ${prog_num} controls the progress bar in the subscript 2dx_unbend_movie_sub.com:
-set prog_num = 60
-echo "<<@progress: ${prog_num}>>"
+
+
 #
 #
 ###########################################################################
@@ -786,7 +391,7 @@ echo  "# IMAGE: 2dx_movie_refine.dat <Movie drift profiles (TXT)>" >> LOGS/${scr
 echo  "# IMAGE: 2dx_movie_refine_selected.dat <Movie drift profiles, selected (TXT)>" >> LOGS/${scriptname}.results
 #
 #
-echo "<<@progress: 60>>"
+echo "<<@progress: 10>>"
 #
 #
 ###########################################################################
@@ -798,7 +403,7 @@ echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" 
 set i = 1
 while ($i <= ${movie_imagenumber_touse})
        ###########################################################################
-       ${proc_2dx}/lin "CCUNBEND - Unbend CCmap for frame ${i}"
+       ${proc_2dx}/linblock "CCUNBEND - Unbend CCmap for frame ${i}"
        ###########################################################################
        setenv CCORDATA frames/PROFDATA_${i}.dat
        # setenv CCORDATA ${iname}_profile.dat
@@ -885,14 +490,14 @@ eot
        endif
        #
  
-       set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 60 + int( 20 * $1 / $2 ) } END { print s }'` 
+       set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 10 + int( 60 * $1 / $2 ) } END { print s }'` 
        echo "<<@progress: ${prog_num}>>"
          
        @ i += 1
 end
 #
 
-echo "<<@progress: 80>>"
+echo "<<@progress: 70>>"
 
 ###########################################################################
 ${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_touse}" 
@@ -1028,7 +633,7 @@ eot
 
 source SCRATCH/TMP9873.dat
 
-echo "<<@progress: 85>>"
+echo "<<@progress: 80>>"
 
 
 ###########################################################################

@@ -32,7 +32,7 @@
 # MANUAL: Careful prevention of overfitting is crucial for successful movie-mode 3D reconstructions.
 #
 #
-# SORTORDER: 53
+# SORTORDER: 54
 #
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 

@@ -379,6 +379,8 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
   float jx;
 
   /* 
+  CHEN: Updated on Dec. 21, 2014.
+
   Here, we will calculate the radius q=k0 of j-th zero crossing of the CTF, under angle theta:
   The CTF equation is:
   CTF(q) = phacon * sin(pi/2*( Cs * lambda**3 * q**4 - 2 * dz * lambda * q**2)) + 
@@ -466,6 +468,7 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
       if(dz>0.0) k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lambda*Cs*jx)));
       else       k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*jx)));
 
+
       u = k0*cost; v = k0*sint;
       if(u>0.0) u+=0.5; else u-=0.5;
       if(v>0.0) v+=0.5; else v-=0.5;
@@ -494,28 +497,60 @@ void fullScreenImage::drawCTF()
 void fullScreenImage::drawRealLattice(float lattice[2][2])
 {
 
+  // CHEN: updated on Dec. 22, 2014.
+
   float u1 = lattice[0][0], u2 = lattice[1][0], v1=lattice[0][1], v2 = lattice[1][1];
-  float mu = sqrt(u1*u1+u2*u2), mv=sqrt(v1*v1+v2*v2);
-  float uth = fmod(atan2(u2,u1)+2*pi,2*pi), vth = fmod(atan2(v2,v1)+2*pi,2*pi);
-  float phi = acos((u1*v1+u2*v2)/(mu*mv));
   float w = image->width();
 
-  float ma = w/mu*sin(phi), mb = w/mv*sin(phi);
-  float ath = uth + (phi-pi/2), bth = vth - (phi-pi/2);
+  float AA1,AA2,BB1,BB2;
 
-  QPointF a(ma*cos(ath),-ma*sin(ath)), b(mb*cos(bth),-mb*sin(bth));
+  float ASTR = sqrt(u1*u1+u2*u2);
+  float BSTR = sqrt(v1*v1+v2*v2);
+  float SINASTR=u2/ASTR;
+  float COSASTR=u1/ASTR;
+  float SINBSTR=v2/BSTR;
+  float COSBSTR=v1/BSTR;
 
-  // Why does this lattice not fit exactly?????  CHEN
-  // Why does this lattice not fit exactly?????  CHEN
-  // Why does this lattice not fit exactly?????  CHEN
-  // Why does this lattice not fit exactly?????  CHEN
-  // Why does this lattice not fit exactly?????  CHEN
-  // Why does this lattice not fit exactly?????  CHEN
+  float SINGMSTR=SINASTR*COSBSTR-COSASTR*SINBSTR;
+  float COSGMSTR=SINASTR*SINBSTR+COSASTR*COSBSTR;
+  float GAMMASTR=atan2(SINGMSTR,COSGMSTR);
+
+  if (GAMMASTR >= 0.0)
+  {
+     AA1 = -v2;
+     AA2 =  v1;
+     BB1 =  u2;
+     BB2 = -u1;
+  }
+  else
+  {
+     AA1 =  v2;
+     AA2 = -v1;
+     BB1 = -u2;
+     BB2 =  u1;
+  }
+  float SINA=AA2/BSTR;
+  float COSA=AA1/BSTR;
+  float SINB=BB2/ASTR;
+  float COSB=BB1/ASTR;
+
+  if (GAMMASTR < 0.0) GAMMASTR = -GAMMASTR;
+
+  float A=w/(ASTR*sin(GAMMASTR));
+  float B=w/(BSTR*sin(GAMMASTR));
+
+  float a1 =  A*COSA;
+  float a2 = -A*SINA;
+  float b1 =  B*COSB;
+  float b2 = -B*SINB;
+  
+  QPointF a(a1,a2), b(b1,b2);
+
+  std::cout << "Reci lattice is u = " << u1 << "," << u2 << "     v = " << v1 << "," << v2 << endl;
+  std::cout << "Real lattice is a = " << a1 << "," << a2 << "     b = " << b1 << "," << b2 << endl;
 
   QPen pen(image_base->pen());
-  //pen.setWidth(3);
   pen.setColor(QColor(100,100,240));
-  //pen.setWidth(10.0);
   image_base->setPen(pen);
 
     for(int i=-60;i<=60;i++)

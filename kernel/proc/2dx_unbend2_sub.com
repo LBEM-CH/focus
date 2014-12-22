@@ -843,6 +843,25 @@ eot
       #   echo "# IMAGE: SCRATCH/${iname}_CCmap21_unbend2_fft.mrc <CCmap, unbent (FFT)>" >> LOGS/${scriptname}.results 
       # endif
       #
+      \rm -f SCRATCH/${iname}_CCmap21_marked.mrc
+      ${bin_2dx}/2dx_mark_spots.exe << eot
+SCRATCH/${iname}_CCmap21.mrc
+SCRATCH/${iname}_CCmap21_marked.mrc
+${iname}_profile.dat
+2
+eot
+      echo "# IMAGE: SCRATCH/${iname}_CCmap21_marked.mrc <CCmap, marked>" >> LOGS/${scriptname}.results 
+      #
+      \rm -f SCRATCH/${iname}_CCmap21_unbent_marked.mrc
+      ${bin_2dx}/2dx_mark_spots.exe << eot
+SCRATCH/${iname}_CCmap21_unbent.mrc
+SCRATCH/${iname}_CCmap21_unbent_marked.mrc
+${iname}_profile.dat
+2
+eot
+      echo "# IMAGE: SCRATCH/${iname}_CCmap21_unbent_marked.mrc <CCmap, unbent, marked>" >> LOGS/${scriptname}.results 
+      #
+      #
     endif
     #
     \rm -f fort.17

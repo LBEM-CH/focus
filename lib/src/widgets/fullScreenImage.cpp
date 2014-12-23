@@ -396,6 +396,9 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
 
   phi = 2*(j - atan(sqrt(1-phacon**2)/(phacon +/- 1))/pi)
 
+  another exact solution:
+  phi = -acos(phacon)
+
   Here, using:
   phi = (jx)    
             =================================================
@@ -452,12 +455,8 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
     dz = 0.5*(defocusX+defocusY+cos(2.0*(theta-astigmatism))*(defocusX-defocusY));
     for(int j = 1; j < n + 1; j++)
     {
-      // The following was in place between 2007 and Dec. 20, 2014:
-      // This lead to slightly wrong Thon rings for higher resolution:
 
-      // if(dz>0.0) k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi-(float)j))));
-      // else       k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi+(float)j))));
-
+      /* 
       if ( phacon < 1.0 )
         if(dz>0.0) jx = 2.0*atan(sqrt(1.0-phacon*phacon)/(phacon-1.0))/pi - float(j-1) ; 
         else       jx = 2.0*atan(sqrt(1.0-phacon*phacon)/(phacon-1.0))/pi + float(j-1) ; 
@@ -467,7 +466,11 @@ void fullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
 
       if(dz>0.0) k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lambda*Cs*jx)));
       else       k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*jx)));
+      */
 
+      // The following gives the same result:
+      if(dz>0.0) k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz-sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi-(float)(j-1)))));
+      else       k0 = imageWidth/magnification*stepSize/(lambda)*sqrt(1.0/Cs*(dz+sqrt(dz*dz+2.0*lambda*Cs*(acos(phacon)/pi+(float)(j-1)))));
 
       u = k0*cost; v = k0*sint;
       if(u>0.0) u+=0.5; else u-=0.5;

@@ -100,10 +100,17 @@ C
       read(*,*)RGRESMAX
       write(*,'(F12.3)')RGRESMAX
 C
-      write(*,'(/,''input merge_ML_data switch'')')
+      write(*,'(/,''input merge_data_type switch'')')
       read(*,*)IMERGEML
       if(IMERGEML.eq.0)then
-        write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
+        write(*,'(I1,'' = Using Fourier filtered results with'',
+     .    '' later CTF correction '')')IMERGEML
+      else if(IMERGEML.eq.1)then
+        write(*,'(I1,'' = Using CTF-corrected and then Fourier'',
+     .    '' filtered results '')')IMERGEML
+      else if(IMERGEML.eq.2)then
+        write(*,'(I1,'' = Using CTF-corrected and then Movie-ModeA'',
+     .    '' unbent results '')')IMERGEML
       else
         write(*,'(I1,'' = Using Maximum Likelihood results '',
      .           ''where allowed'')')IMERGEML
@@ -256,7 +263,7 @@ C
           write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
         endif
 C
-        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
           call cgetline(CPHORI,"phaori")
           read(CPHORI,*)RPHAORIH,RPHAORIK
           write(*,'(''   using Fourier filtered results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
@@ -288,7 +295,7 @@ C
         call shorten(cdir,k1)
         call shortshrink(CIMAGENAME,k2)
 C
-        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
           write(cname4,'(A,''/APH/'',A,''_ctf.aph'')')
      .      cdir(1:k1),CIMAGENAME(1:k2)
         else

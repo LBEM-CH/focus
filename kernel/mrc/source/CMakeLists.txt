@@ -39,6 +39,7 @@ if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 
 	if(APPLE)
 		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -D_LARGEFILE_SOURCE -arch x86_64")
+		# set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -ffpe-trap=zero")
 	endif(APPLE)
 elseif(Fortran_COMPILER_NAME STREQUAL "f95")
 	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")

@@ -69,12 +69,7 @@ set show_frame_PROFDATA = "n"
 # DISPLAY: movie_drift_threshold
 # DISPLAY: Thread_Number
 # DISPLAY: ctfcor_noise
-# DISPLAY: ctfcor_inner_tile
-# DISPLAY: ctfcor_outer_tile
-# DISPLAY: ctfcor_taper
 # DISPLAY: ctfcor_imode
-# DISPLAY: ctfcor_debug
-# DISPLAY: ctfcor_maxamp_factor
 #
 #$end_local_vars
 #
@@ -147,7 +142,6 @@ set RP_6 = ""
 set movie_stackname = ""
 set movie_enable = ""
 set movie_imagenumber_total = ""
-set movie_imagenumber_touse = ""
 set movie_filter_type = ""
 set movie_filter_param = ""
 set app_2dx_image = ""
@@ -160,12 +154,7 @@ set MASKING_done = ""
 set QVALS = ""
 set Thread_Number = ""
 set ctfcor_noise = ""
-set ctfcor_inner_tile = ""
-set ctfcor_outer_tile = ""
-set ctfcor_taper = ""
 set ctfcor_imode = ""
-set ctfcor_debug = ""
-set ctfcor_maxamp_factor = ""
 #
 #$end_vars
 #
@@ -361,7 +350,7 @@ setenv NCPUS ${Thread_Number}
 #
 ${bin_2dx}/2dx_movie_refine.exe << eot
 frames/CCmap
-${movie_imagenumber_touse}
+${movie_imagenumber_total}
 ${PROFDATA}
 eot
 
@@ -374,7 +363,7 @@ touch frames/PROFDATA_1.dat
 \rm frames/PROFDATA_*.dat
 \rm -f {nonmaskimagename}_mask_mask.mrc
 set lat_string = `echo ${lattice} | sed 's/,/ /g'`
-python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
+python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
 #
 echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
 echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
@@ -384,7 +373,7 @@ echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask_mask.mrc <Masked crystal mask
 echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
 if ( ${show_frame_PROFDATA} == "y" ) then
   set i = 1
-  while ($i <= ${movie_imagenumber_touse})
+  while ($i <= ${movie_imagenumber_total})
     echo  "# IMAGE: frames/PROFDATA_${i}.dat <Unbending profile for frame ${i} (TXT)>" >> LOGS/${scriptname}.results
     @ i += 1
   end
@@ -396,32 +385,13 @@ echo  "# IMAGE: 2dx_movie_refine_selected.dat <Movie drift profiles, selected (T
 
 
 ###########################################################################
-${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
-###########################################################################
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
-#
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected_filt.mrc
-echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-#
-if ( ${movie_masking_mode} != '0' ) then
-  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected_filt_masked.mrc
-  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected.pdf <PDF: 2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
-endif
-\rm -f tmp.png
-echo "<<@progress: 10>>"
-
-
-
-
-
-###########################################################################
 ${proc_2dx}/linblock "Unbending all frames" 
 ###########################################################################
 #
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
 #
 set i = 1
-while ($i <= ${movie_imagenumber_touse})
+while ($i <= ${movie_imagenumber_total})
        ###########################################################################
        ${proc_2dx}/linblock "CCUNBEND - Unbend CCmap for frame ${i}"
        ###########################################################################
@@ -510,20 +480,22 @@ eot
        endif
        #
  
-       set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 10 + int( 60 * $1 / $2 ) } END { print s }'` 
+       set prog_num = `echo ${i} ${movie_imagenumber_total} | awk '{ s = 10 + int( 60 * $1 / $2 ) } END { print s }'` 
        echo "<<@progress: ${prog_num}>>"
          
        @ i += 1
 end
 #
 
+
+
 echo "<<@progress: 70>>"
 
 ###########################################################################
-${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_touse}" 
+${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_total}" 
 ###########################################################################
 \rm -f frames/CCmap_driftCorrected.mrc
-python ${proc_2dx}/movie/direct_sum2.py ${movie_imagenumber_touse}
+python ${proc_2dx}/movie/direct_sum2.py ${movie_imagenumber_total}
 echo "# IMAGE-IMPORTANT: frames/CCmap_driftCorrected.mrc <CCmap drift-corrected>" >> LOGS/${scriptname}.results 
 
 
@@ -539,10 +511,10 @@ echo "# IMAGE: frames/CCmap_driftCorrected_marked.mrc <CCmap drift-corrected, ma
 
 
 ###########################################################################
-${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_touse}" 
+${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_total}" 
 ###########################################################################
 \rm -f frames/direct_sum.mrc
-python ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename}
+python ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_total} ${nonmaskimagename} frames
 echo "# IMAGE: frames/direct_sum.mrc <Sum unbent images>" >> LOGS/${scriptname}.results 
 
 
@@ -556,13 +528,17 @@ python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct
 echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 
 if ( ${ctfcor_imode} == "2" ) then
+  \rm -f frames/direct_sum_filt_ctf.mrc
   python ${proc_2dx}/movie/apply_filter_fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc ${ctfcor_noise}
   echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (N**2=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
   echo "# IMAGE: frames/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTF-corrected>" >> LOGS/${scriptname}.results 
 else
   \rm -f frames/direct_sum_filt_ctf.mrc
-  \ln -s frames/direct_sum_filt.mrc frames/direct_sum_filt_ctf.mrc
+  \cp -f frames/direct_sum_filt.mrc frames/direct_sum_filt_ctf.mrc
 endif
+
+
+
 
 
 if ( ${movie_masking_mode} != '0' ) then
@@ -584,14 +560,44 @@ else
 endif
 
 
+
+###########################################################################
+${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
+###########################################################################
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
+#
+python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected_filt.mrc
+echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
+#
+if ( ${movie_masking_mode} != '0' ) then
+  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected_filt_masked.mrc
+  echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected.pdf <PDF: 2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
+endif
+\rm -f tmp.png
+echo "<<@progress: 10>>"
+
+
+
+
+
 ###########################################################################
 ${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
 ###########################################################################
+
 if ( ${movie_masking_mode} != '0' ) then
-  setenv IN  frames/direct_sum_filt_masked.mrc
+  set infile = frames/direct_sum_filt_masked.mrc
 else
-  setenv IN  frames/direct_sum_filt.mrc
+  set infile = frames/direct_sum_filt.mrc
 endif
+
+\rm -f frames/direct_sum_filt_upscale.mrc
+${bin_2dx}/labelh.exe << eot
+${infile}
+39
+frames/direct_sum_filt_upscale.mrc
+eot
+
+setenv IN  frames/direct_sum_filt_upscale.mrc
 setenv OUT frames/direct_sum_fixed.mrc
 \rm -f     frames/direct_sum_fixed.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot

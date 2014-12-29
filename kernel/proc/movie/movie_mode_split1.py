@@ -6,12 +6,13 @@ import os
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 4:
+	if len(sys.argv) != 5:
 		sys.exit("Missuse detected")
 
 	stack_file = sys.argv[1]
 	image_name = sys.argv[2]
 	ave_num = int(sys.argv[3])
+	frame_folder_name = sys.argv[4]
 	
 	stack = get_image(stack_file)
 	nx = stack.get_xsize()
@@ -28,7 +29,7 @@ if __name__ == "__main__":
         # create frames 0, which is a central high-contrast frame of the first quarter of frames.
         #########################################
 
-	folder_name = "frames/frame_0" 
+	folder_name = frame_folder_name + "/frame_0" 
 	output_name = folder_name + "/" + image_name + "_0.mrc"
 	os.mkdir(folder_name)
 	
@@ -57,7 +58,7 @@ if __name__ == "__main__":
 
 	for i in range(0,int(nz/ave_num)):
 		
-		folder_name = "frames/frame_" + str(i+1)
+		folder_name = frame_folder_name + "/frame_" + str(i+1)
 		output_name = folder_name + "/" + image_name + "_" + str(i+1) + ".mrc"
 		os.mkdir(folder_name)
 		

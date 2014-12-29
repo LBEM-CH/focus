@@ -125,18 +125,25 @@ foreach dirfile ( ${dirlist} )
   # echo "set det_tilt = y" >> LOGS/${scriptname}.results
   # echo "set det_tlt_alg = 0" >> LOGS/${scriptname}.results
   # echo "set QVALS = ." >> LOGS/${scriptname}.results
-  echo "set domask = y" >> LOGS/${scriptname}.results
+  # echo "set domask = y" >> LOGS/${scriptname}.results
 
-  # echo "set spotlist_RESMAX = 15.0" >> LOGS/${scriptname}.results
+  # echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
+  # echo "set IQMAX1 = 4.0" >> LOGS/${scriptname}.results
+  # echo "set IQMAX = 4.0" >> LOGS/${scriptname}.results
   # echo "set movie_enable = y" >> LOGS/${scriptname}.results
   # echo "set movie_refboxa = 300" >> LOGS/${scriptname}.results
+  # echo "set movie_smoothing = 8" >> LOGS/${scriptname}.results
+  # echo "set movie_drift_threshold = 5" >> LOGS/${scriptname}.results
   # echo "set ctfcor_imode = 2" >> LOGS/${scriptname}.results
+  # echo "set ML_doit = n" >> LOGS/${scriptname}.results
+
+  #------------------------------------------------------------------------
+  # Use the following to run all standard 2dx_image scripts on the selected images:
+  # ${app_2dx_image} ${newdir} '"*"'
+  #------------------------------------------------------------------------
 
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
   # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
-
-  # Use the following to run all standard 2dx_image scripts on the selected images:
-  # ${app_2dx_image} ${newdir} '"*"'
 
   # Use the following to apply the CTF to all selected images:
   # ${app_2dx_image} ${newdir} "2dx_applyCTF"
@@ -154,7 +161,7 @@ foreach dirfile ( ${dirlist} )
   # ${app_2dx_image} ${newdir} "2dx_refineLattice"
   # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
   # ${app_2dx_image} ${newdir} "2dx_getspots1"
-   ${app_2dx_image} ${newdir} "2dx_fftrans"
+  # ${app_2dx_image} ${newdir} "2dx_fftrans"
   # ${app_2dx_image} ${newdir} "2dx_ctfcor"
   # ${app_2dx_image} ${newdir} "2dx_unbend1"
   # ${app_2dx_image} ${newdir} "2dx_getspots"
@@ -179,7 +186,8 @@ foreach dirfile ( ${dirlist} )
    ${app_2dx_image} ${newdir} "2dx_getspots"
    ${app_2dx_image} ${newdir} "2dx_unbend2"
 
-   ${app_2dx_image} ${newdir} "2dx_unbend_movie"
+   ${app_2dx_image} ${newdir} "2dx_unbend_movie1a"
+   ${app_2dx_image} ${newdir} "2dx_unbend_movie1b"
 
    ${app_2dx_image} ${newdir} "2dx_applyCTF"
    ${app_2dx_image} ${newdir} "2dx_generateMAP"

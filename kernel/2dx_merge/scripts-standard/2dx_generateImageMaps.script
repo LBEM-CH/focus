@@ -29,7 +29,7 @@
 # DISPLAY: merge_modus
 # DISPLAY: merge_ref_num
 # DISPLAY: create_PS
-# DISPLAY: merge_ML_data
+# DISPLAY: merge_data_type
 # DISPLAY: merge_res_limit
 #
 #$end_local_vars
@@ -54,7 +54,7 @@ set zstarwin = ""
 set MergeHKMAX = ""
 set merge_res_limit = ""
 set create_PS = ""
-set merge_ML_data = ""
+set merge_data_type = ""
 set RFACAMP = ""
 #
 #$end_vars
@@ -273,7 +273,7 @@ ${MergeHKMAX}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
-${merge_ML_data}
+${merge_data_type}
 ${ILIST_VAL}
 0
 eot
@@ -331,7 +331,7 @@ ${scriptMfile}
 ${realcell}
 ${realang}
 ${ALAT}
-${merge_ML_data}
+${merge_data_type}
 eot
 #
 echo "<<@progress: 50>>"

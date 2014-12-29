@@ -1223,6 +1223,7 @@ C-------Determine highest amplitude
           if(AIN(I).gt.rmaxamp)rmaxamp=AIN(I)
         enddo
 C
+        if(abs(rmaxamp).lt.0.001)rmaxamp=0.001
         do I=1,IN1
           WGTIN(I)=1.0-RFACAMP+(RFACAMP*AIN(I)/RMAXAMP)
         enddo
@@ -1663,7 +1664,11 @@ C
         IF(RESPOT(IREFC).LT.DRESMIN.OR.RESPOT(IREFC).GT.DRESMAX) GOTO 1340
         JIN=IREFC+JREFL
 C       CALCULATE RESOLUTION OF SPOT 
-        DSTARSQ=(1.0/RESPOT(IREFC))**2
+        if(abs(RESPOT(IREFC)).gt.0.001)then
+          DSTARSQ=(1.0/RESPOT(IREFC))**2
+        else
+          DSTARSQ=(1.0/0.001)**2
+        endif
 C       DSTARSQ = (IIH(IREFC)*ASTAR)**2 + (IIK(IREFC)*BSTAR)**2 + 
 C     . 2.0*IIH(IREFC)*IIK(IREFC)*ASTAR*BSTAR*COS(DRAD*ABANG)
 C     .+ZSTAR(JIN)**2
@@ -1882,7 +1887,9 @@ C------------------------------------------------------------------------
       GO TO 270         ! BACK TO START TO REDO SCALING, ORIGIN AND TILT.
 C------------------------------------------------------------------------
 C
-400   IF(SCALE.LT.0.0001)SCALE=ASUM/ASUMI       ! JUMP HERE IF STEP = 0.
+400   continue
+      if(abs(ASUMI).lt.0.001)ASUMI=0.001
+      IF(SCALE.LT.0.0001)SCALE=ASUM/ASUMI       ! JUMP HERE IF STEP = 0.
       WRITE(6,170) SCALE,NCOMPI,NCOMP
 C
 CHEN>
@@ -2131,7 +2138,12 @@ C
 C      write(*,'(/,'' ANGA      = '',2F12.3)')ANGA
 C      write(*,'('' ANGB      = '',2F12.3)')ANGB
 C
-      TLTAXA = ATAN(TAN(TAXA*DRAD) / cos(TANGL*DRAD)) / DRAD
+      if(abs(cos(TANGL*DRAD)).gt.0.001)then
+        TLTAXA = ATAN(TAN(TAXA*DRAD) / cos(TANGL*DRAD)) / DRAD
+      else
+        write(6,'(''::TANGLE has an illegal value'')')
+        stop
+      endif
 C
 C      write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
 C

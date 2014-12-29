@@ -247,7 +247,7 @@ eot
   \rm -f fort.1
   \mv -f fort.2 ${prefix}avrg-1.hkl
   \mv -f fort.3 ${prefix}avrg-1.hk
-  \mv -f fort.4 APH/${prefix}ctfmerge_nolimit-1.aph
+  \mv -f fort.4 APH/${prefix}ctfmerge-1.aph
   \mv -f TMP444789.tmp LOGS/${prefix}avramphs_table.txt
   \rm -f TMP444888.tmp
   if ( -e 2dx_avrgamphs_phares.txt ) then
@@ -346,7 +346,7 @@ eot
 \rm -f fort.1
 \mv -f fort.2 ${prefix}avrg.hkl
 \mv -f fort.3 ${prefix}avrg.hk
-\mv -f fort.4 APH/${prefix}ctfmerge_nolimit.aph
+\mv -f fort.4 APH/${prefix}ctfmerge.aph
 \rm -f TMP444888.tmp
 #
 # echo "# IMAGE: ${prefix}avrg.hkl <TXT: ${prename}APH file after AVRGAMPHS [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results

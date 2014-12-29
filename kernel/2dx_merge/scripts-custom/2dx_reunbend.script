@@ -377,9 +377,15 @@ eot
         if( ${irun} < ${ReUnbend_MP} ) then
           ${proc_2dx}/linblock "${irun} of ${ReUnbend_MP} into background: Working on ${dirfile}"
 
-          nohup sleep ${sleeptime}; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" &
+          ${app_2dx_image} ${curdir} "2dx_fftrans"
+          ${app_2dx_image} ${curdir} "2dx_ctfcor"
+          ${app_2dx_image} ${curdir} "2dx_unbend1"
+          ${app_2dx_image} ${curdir} "2dx_getspots"
+          ${app_2dx_image} ${curdir} "2dx_unbend2"
 
-          @ sleeptime += ${ReUnbend_MP} 
+          nohup sleep ${sleeptime}; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" &
+
+          @ sleeptime += 10 
           @ irun++
         else
           ${proc_2dx}/linblock "${irun} of ${ReUnbend_MP} into foreground: Working on ${dirfile}"
@@ -390,7 +396,14 @@ eot
           ${app_2dx_image} ${curdir} "2dx_getspots"
           ${app_2dx_image} ${curdir} "2dx_unbend2"
 
-          ${app_2dx_image} ${curdir} "2dx_unbend_movie"
+          ${app_2dx_image} ${curdir} "2dx_fftrans"
+          ${app_2dx_image} ${curdir} "2dx_ctfcor"
+          ${app_2dx_image} ${curdir} "2dx_unbend1"
+          ${app_2dx_image} ${curdir} "2dx_getspots"
+          ${app_2dx_image} ${curdir} "2dx_unbend2"
+
+          ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"
+          ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"
 
           ${app_2dx_image} ${curdir} "2dx_applyCTF"
           ${app_2dx_image} ${curdir} "2dx_generateMAP"

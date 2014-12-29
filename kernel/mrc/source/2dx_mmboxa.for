@@ -118,13 +118,13 @@ C      PARAMETER (NMAX=2000)
 C
 C      DIMENSION TITLE(15),NXYZ(3),MXYZ(3),
 C     1          XA(NMAX),YA(NMAX),IXC(NMAX),IYC(NMAX),IH(NMAX),IK(NMAX),
-C     2          IAMP(21,21),IPHI(21,21),IXGU(21),IYGU(21),PHANG(4),
+C     2          RAMP(21,21),RPHI(21,21),IXGU(21),IYGU(21),PHANG(4),
 C     3          WTS(4),ISUM(21,21),ISUMI(21,21),DELX(2),DELY(2),NIQ(9)
 C      REAL*8 SUM(21,21)
 C
       DIMENSION TITLE(15),NXYZ(3),MXYZ(3),
      1          XA(NMAX),YA(NMAX),IXC(NMAX),IYC(NMAX),IH(NMAX),IK(NMAX),
-     2          IAMP(21,21),IPHI(21,21),IXGU(21),IYGU(21),PHANG(4),
+     2          RAMP(21,21),RPHI(21,21),IXGU(21),IYGU(21),PHANG(4),
      3          WTS(4),ISUM(21,21),ISUMI(21,21),RSUMI(21,21),DELX(2),
      4          DELY(2),NIQ(9)
       REAL*8 SUM(21,21),NEWMAX
@@ -139,7 +139,7 @@ C      CHARACTER*80 FILIN,FILOUT
 CHENN<
       COMMON NOH,NOK,NSPOT,IX1,IX2,IY1,IY2,IHOR,IVERT,IXOUT1,IXOUT2,
      1       IXL,IYL,IX,IY,
-     2       IH,IK,IAMP,IPHI,IXGU,IYGU,IXC,IYC,
+     2       IH,IK,RAMP,RPHI,IXGU,IYGU,IXC,IYC,
      3       XA,YA,AX,AY,BX,BY,RINNER,ROUTER,SCALE,SCAMP,
      4       APART,BPART,AMP,PHASE,DELPX,DELPY,
      5       TURN,FIRST,IRAD,ACELL,BCELL,WIDTH,ABANG,ihand
@@ -429,8 +429,8 @@ C     initialize arrays
 C
       DO 150 K=1,21
       DO 150 J=1,21
-      IAMP(J,K) = 0
-      IPHI(J,K) = 0
+      RAMP(J,K) = 0.0
+      RPHI(J,K) = 0.0
   150 CONTINUE
       IXL = IXC(I) - IHOR2 
       IXR = IXC(I) + IHOR2 
@@ -517,7 +517,7 @@ C
       FIRST = .FALSE.
       CALL  RDSECT
 c
-C     Arrays IAMP, IPHI now filled with correct numbers.
+C     Arrays RAMP, RPHI now filled with correct numbers.
 C     Move calculation of  RMS background below sinc calculation
 C
   280 CONTINUE
@@ -527,15 +527,19 @@ C
       KH = IHOR - 1
       DO 290 K=1,IVERT,KV
       DO 290 J=1,IHOR
-      F = IAMP(J,K)
+      F = RAMP(J,K)
       AMPSQ = AMPSQ + F * F
   290 CONTINUE
       DO 300 K=2,KV
       DO 300 J=1,IHOR,KH
-      F = IAMP(J,K)
+      F = RAMP(J,K)
       AMPSQ = AMPSQ + F * F
   300 CONTINUE
-      AMPTOT = AMPSQ / (2*(IHOR + IVERT - 2))
+      if(IHOR+IVERT-2.ne.0)then
+        AMPTOT = AMPSQ / (2*(IHOR + IVERT - 2))
+      else
+        AMPTOT = AMPSQ 
+      endif
       RMSBK = SQRT(AMPTOT)      ! this was old calculation of RMSBK
       RMSBKOLD=RMSBK            ! see below GET_RMSBK subroutine for new  RMSBK
 C
@@ -548,7 +552,7 @@ C
       AMPSQ = 0.
       DO 310 K=K1,K2
       DO 310 J=J1,J2
-      F = IAMP(J,K)
+      F = RAMP(J,K)
       AMPSQ = AMPSQ + F * F
   310 CONTINUE
       AMPTOT = AMPTOT * 9.
@@ -587,8 +591,8 @@ C
         K = K1 + L2 - 1
       DO 320 L1 = 1,2   !
         J = J1 + L1 - 1
-        AMP = IAMP(J,K)
-        PHASE = IPHI(J,K) / 57.2958
+        AMP = RAMP(J,K)
+        PHASE = RPHI(J,K) / 57.2958
         ASUM1 = ASUM1 + AMP * COS(PHASE)
         BSUM1 = BSUM1 + AMP * SIN(PHASE)
   320 CONTINUE
@@ -599,8 +603,8 @@ C
         J=J1+L1-ISINCBOX2
       DO 330 L2=1,ISINCBOX      ! Y
         K=K1+L2-ISINCBOX2
-        AMP = IAMP(J,K)
-        PHASE = IPHI(J,K) / 57.2958
+        AMP = RAMP(J,K)
+        PHASE = RPHI(J,K) / 57.2958
         IF (L1.LE.ISINCBOX2) THEN
                 DELTAX = DELX(1)+ISINCBOX2-L1
         ELSE
@@ -634,7 +638,7 @@ C
 C changes to calculate better background using same algorithm as peak
       DX=DELX(1)
       DY=DELY(1)
-      CALL GET_RMSBK(IAMP,IPHI,DX,DY,IVERT,IHOR,ISINCBOX,RMSBK)
+      CALL GET_RMSBK(RAMP,RPHI,DX,DY,IVERT,IHOR,ISINCBOX,RMSBK)
       SUMRMSBKOLD=SUMRMSBKOLD+RMSBKOLD
       SUMRMSBKNEW=SUMRMSBKNEW+RMSBK
 C
@@ -648,7 +652,11 @@ C Now some final tidy up of amp and phase calculation.
 C
       IF(ASUM2.NE.0..OR.BSUM2.NE.0.) THEN 
         VECPHA2 = ATAN2(BSUM2,ASUM2) * 57.2958
-        AMPSINC = SQRT(ASUM2**2 + BSUM2**2)/DENOM
+        if(abs(DENOM).gt.0.0001)then
+          AMPSINC = SQRT(ASUM2**2 + BSUM2**2)/DENOM
+        else  
+          AMPSINC = 0.0
+        endif
         IF(AMPSINC.LE.RMSBK) THEN
                 AMPOUT = 0.00001
               ELSE
@@ -660,31 +668,36 @@ C
         AMPOUT = 0.00001
       END IF
       IF(VECPHA2.LT.0.) VECPHA2 = VECPHA2 + 360.
-      PHSOUT=VECPHA2
+      if(abs(AMPOUT).gt.                        0.0001)then
+        PHSOUT=VECPHA2
         PHSERR = (180.0/PI)*RMSBK/AMPOUT
         IQ = 1 + (PHSERR/7.0)           ! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
         IQ = MIN(IQ,8)                  !            IQ=7     AMP= 1x RMSBK
-        IF (AMPOUT.EQ.0.00001) IQ=9     ! THUS IQ=8 HAS AMPSINC .GE. RMSBK
+      else
+        PHSOUT=VECPHA2
+        PHSERR = 360.0
+        IQ = 9
+      endif
 C
 C     sum squared amplitudes
 C
       DO 350 K=1,IVERT
       DO 350 J=1,IHOR
-      SUM(J,K) = SUM(J,K) + FLOAT(IAMP(J,K))**2
+      SUM(J,K) = SUM(J,K) + RAMP(J,K)**2
   350 CONTINUE
 C
 C     calculate phase & amplitude @ requested point by linear
 C     interpolation
 C     calculate weights for interpolated phase angle
 C
-      PHANG(1) = IPHI(J1,K1)
-      PHANG(2) = IPHI(J2,K1)
-      PHANG(3) = IPHI(J1,K2)
-      PHANG(4) = IPHI(J2,K2)
-      WTS(1) = DELX(2) * DELY(2) * IAMP(J1,K1)
-      WTS(2) = DELX(1) * DELY(2) * IAMP(J2,K1)
-      WTS(3) = DELX(2) * DELY(1) * IAMP(J1,K2)
-      WTS(4) = DELX(1) * DELY(1) * IAMP(J2,K2)
+      PHANG(1) = RPHI(J1,K1)
+      PHANG(2) = RPHI(J2,K1)
+      PHANG(3) = RPHI(J1,K2)
+      PHANG(4) = RPHI(J2,K2)
+      WTS(1) = DELX(2) * DELY(2) * RAMP(J1,K1)
+      WTS(2) = DELX(1) * DELY(2) * RAMP(J2,K1)
+      WTS(3) = DELX(2) * DELY(1) * RAMP(J1,K2)
+      WTS(4) = DELX(1) * DELY(1) * RAMP(J2,K2)
 C
       CALL  ANGAVE(NPHI,PHANG,WTS,PINTP,GDMEAN) 
 C
@@ -720,8 +733,9 @@ C                 IF(NUMOUT.GT.NUMSPOT)
 C      .           WRITE(6,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK
 C       IF(NUMOUT.GT.NUMSPOT) GO TO 500
 C
-1102      FORMAT(/' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS'/
-     . '   H   K  AMPOUT  PHSOUT IQ   RMSBK SQRT(H2+K2) IQ')
+1102      FORMAT(/' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS',/,
+     .    '   H   K   AMPOUT       PHSOUT     IQ   RMSBK',
+     .    '         SQRT(H2+K2) IQ')
           IF(NUMOUT.GT.NUMSPOT)THEN
 C1103    FORMAT(2I4,2F12.1,I4,1F12.1,1F12.1,'  ',A24)
 1103    FORMAT(2I4,2G12.3,I4,G12.3,F12.1,'  ',A24)
@@ -772,9 +786,9 @@ C
  1160 FORMAT(/'  Y(grid units)',53X,'Y(grid units)')
       L = IVERT
       DO 390 K=1,IVERT
-      WRITE(6,1170) IYGU(L),(IAMP(J,L),J=1,IHOR)
+      WRITE(6,1170) IYGU(L),(INT(RAMP(J,L)),J=1,IHOR)
  1170 FORMAT(/6X,I5,4X,21I5)
-      WRITE(6,1180) IYGU(L),(IPHI(J,L),J=1,IHOR)
+      WRITE(6,1180) IYGU(L),(INT(RPHI(J,L)),J=1,IHOR)
  1180 FORMAT('+',72X,I5,4X,10I5)
       L = L - 1
   390 CONTINUE
@@ -789,7 +803,7 @@ C
  1210 FORMAT(/'  Y(grid units)')
       L = IVERT
       DO 420 K=1,IVERT
-      WRITE(6,1170) IYGU(L),(IAMP(J,L),J=1,IHOR)
+      WRITE(6,1170) IYGU(L),(INT(RAMP(J,L)),J=1,IHOR)
       L = L - 1
   420 CONTINUE
       WRITE(6,1230)
@@ -798,7 +812,7 @@ C
       WRITE(6,1210)
       L = IVERT
       DO 440 K=1,IVERT
-      WRITE(6,1170) IYGU(L),(IPHI(J,L),J=1,IHOR)
+      WRITE(6,1170) IYGU(L),(INT(RPHI(J,L)),J=1,IHOR)
       L = L - 1
   440 CONTINUE
   500 CONTINUE
@@ -815,7 +829,11 @@ C
 530   PERIM=PERIM+SUM(1,K)+SUM(NHOR,K)
       DO 535 J=2,NHOR-1
 535   PERIM=PERIM+SUM(J,1)+SUM(J,NVERT)
-      PERIM=PERIM/(2.0*(NVERT+NHOR-2))
+      if(abs(NVERT+NHOR-2).gt.0)then
+        PERIM=PERIM/(2.0*(NVERT+NHOR-2))
+      else
+        PERIM=0.0
+      endif
 C
       DO 520 K=1,NVERT
       DO 520 J=1,NHOR
@@ -823,7 +841,11 @@ C
 CHENN>
       RSUMI(J,K)= SUM(J,K)*7.0/PERIM + 0.5
 CHENN<
-      ISUM(J,K) = SQRT(SUM(J,K)/NSPOT) + 0.5
+      if(NSPOT.gt.0)then
+        ISUM(J,K) = SQRT(SUM(J,K)/NSPOT) + 0.5
+      else
+        ISUM(J,K) = 0
+      endif
   520 CONTINUE
 C
       WRITE(6,1250)     ! Amplitude output
@@ -947,12 +969,12 @@ C      PARAMETER (NMAX=2000)
 CHENN<
       DIMENSION IH(NMAX),IK(NMAX),IXC(NMAX),IYC(NMAX),
      1          IXGU(21),IYGU(21),NXYZ(3),
-     2          IAMP(21,21),IPHI(21,21),
+     2          RAMP(21,21),RPHI(21,21),
      3          XA(NMAX),YA(NMAX)
       LOGICAL TURN,FIRST 
       COMMON NOH,NOK,NSPOT,IX1,IX2,IY1,IY2,IHOR,IVERT,IXOUT1,IXOUT2,
      1       IXL,IYL,IX,IY,
-     2       IH,IK,IAMP,IPHI,IXGU,IYGU,IXC,IYC,
+     2       IH,IK,RAMP,RPHI,IXGU,IYGU,IXC,IYC,
      3       XA,YA,AX,AY,BX,BY,RINNER,ROUTER,SCALE,SCAMP,
      4       APART,BPART,AMP,PHASE,DELPX,DELPY,
      5       TURN,FIRST,IRAD,ACELL,BCELL,WIDTH,ABANG,ihand
@@ -966,15 +988,31 @@ C
 CHEN>
       if(ihand.eq.1)then
 CHEN<
-        ASTAR=1.0/(ACELL*SIN(DRAD*ABANG))
-        BSTAR=1.0/(BCELL*SIN(DRAD*ABANG))
+        if((ACELL*SIN(DRAD*ABANG)).gt.0.0001)then
+          ASTAR=1.0/(ACELL*SIN(DRAD*ABANG))
+        else
+          ASTAR=1.0/0.001
+        endif
+        if((BCELL*SIN(DRAD*ABANG)).gt.0.0001)then
+          BSTAR=1.0/(BCELL*SIN(DRAD*ABANG))
+        else
+          BSTAR=1.0/0.001
+        endif
 CHEN>
         write(*,'('' Right-handed lattice'')')
       else
 C-------With a left-handed lattice of non-identical vector length, 
 C-------the resolution determination needs inverted reciprocal vectors.
-        ASTAR=1.0/(BCELL*SIN(DRAD*ABANG))
-        BSTAR=1.0/(ACELL*SIN(DRAD*ABANG))
+        if((BCELL*SIN(DRAD*ABANG)).gt.0.0001)then
+          ASTAR=1.0/(BCELL*SIN(DRAD*ABANG))
+        else
+          ASTAR=1.0/0.001
+        endif
+        if((ACELL*SIN(DRAD*ABANG)).gt.0.0001)then
+          BSTAR=1.0/(ACELL*SIN(DRAD*ABANG))
+        else
+          BSTAR=1.0/0.001
+        endif
         write(*,'('' Left-handed lattice'')')
       endif
 C
@@ -1053,6 +1091,10 @@ C
 C
 C     XA & YA in mm if 1,0 & 0,1 were in mm
 C
+          if(SCALE.eq.0.0)then
+            SCALE=1.0
+            write(6,'(''::ERROR: SCALE=0'')')
+          endif
           XA(NSPOT) = X / SCALE
           YA(NSPOT) = Y / SCALE
           IH(NSPOT) = JH
@@ -1093,12 +1135,12 @@ C      PARAMETER (NMAX=2000)
 CHENN<
       DIMENSION IH(NMAX),IK(NMAX),IXC(NMAX),IYC(NMAX),
      1          IXGU(21),IYGU(21),NXYZ(3),
-     2          IAMP(21,21),IPHI(21,21),
+     2          RAMP(21,21),RPHI(21,21),
      3          XA(NMAX),YA(NMAX)
       LOGICAL TURN,FIRST
       COMMON NOH,NOK,NSPOT,IX1,IX2,IY1,IY2,IHOR,IVERT,IXOUT1,IXOUT2,
      1       IXL,IYL,IX,IY,
-     2       IH,IK,IAMP,IPHI,IXGU,IYGU,IXC,IYC,
+     2       IH,IK,RAMP,RPHI,IXGU,IYGU,IXC,IYC,
      3       XA,YA,AX,AY,BX,BY,RINNER,ROUTER,SCALE,SCAMP,
      4       APART,BPART,AMP,PHASE,DELPX,DELPY,
      5       TURN,FIRST,IRAD,ACELL,BCELL,WIDTH,ABANG,ihand
@@ -1132,12 +1174,12 @@ C      PARAMETER (NMAX=2000)
 CHENN<
       DIMENSION IH(NMAX),IK(NMAX),IXC(NMAX),IYC(NMAX),
      1          IXGU(21),IYGU(21),NXYZ(3),
-     2          IAMP(21,21),IPHI(21,21),
+     2          RAMP(21,21),RPHI(21,21),
      3          XA(NMAX),YA(NMAX)
       LOGICAL TURN,FIRST 
       COMMON NOH,NOK,NSPOT,IX1,IX2,IY1,IY2,IHOR,IVERT,IXOUT1,IXOUT2,
      1       IXL,IYL,IX,IY,
-     2       IH,IK,IAMP,IPHI,IXGU,IYGU,IXC,IYC,
+     2       IH,IK,RAMP,RPHI,IXGU,IYGU,IXC,IYC,
      3       XA,YA,AX,AY,BX,BY,RINNER,ROUTER,SCALE,SCAMP,
      4       APART,BPART,AMP,PHASE,DELPX,DELPY,
      5       TURN,FIRST,IRAD,ACELL,BCELL,WIDTH,ABANG,ihand
@@ -1202,13 +1244,13 @@ C      PARAMETER (NMAX=2000)
 CHENN<
       DIMENSION IH(NMAX),IK(NMAX),IXC(NMAX),IYC(NMAX),
      1          IXGU(21),IYGU(21),NXYZ(3),
-     2          IAMP(21,21),IPHI(21,21),
+     2          RAMP(21,21),RPHI(21,21),
      3          XA(NMAX),YA(NMAX),
      4          ARRAY(42,21)
       LOGICAL TURN,FIRST
       COMMON NOH,NOK,NSPOT,IX1,IX2,IY1,IY2,IHOR,IVERT,IXOUT1,IXOUT2,
      1       IXL,IYL,IX,IY,
-     2       IH,IK,IAMP,IPHI,IXGU,IYGU,IXC,IYC,
+     2       IH,IK,RAMP,RPHI,IXGU,IYGU,IXC,IYC,
      3       XA,YA,AX,AY,BX,BY,RINNER,ROUTER,SCALE,SCAMP,
      4       APART,BPART,AMP,PHASE,DELPX,DELPY,
      5       TURN,FIRST,IRAD,ACELL,BCELL,WIDTH,ABANG,ihand
@@ -1230,8 +1272,8 @@ C
       BPART = ARRAY(L+1,K)
       IX = IX + 1
       CALL  AMPHA
-      IAMP(J,K) = AMP * SCAMP + 0.5
-      IPHI(J,K) = PHASE + 0.5
+      RAMP(J,K) = AMP * SCAMP + 0.5
+      RPHI(J,K) = PHASE + 0.5
       L = L + 2
   100 CONTINUE
       ELSE
@@ -1251,8 +1293,8 @@ C
       BPART = ARRAY(L+1,K)
       IX = IX - 1
       CALL  AMPHA
-      IAMP(JJ,KK) = AMP * SCAMP + 0.5
-      IPHI(JJ,KK) = PHASE + 0.5
+      RAMP(JJ,KK) = AMP * SCAMP + 0.5
+      RPHI(JJ,KK) = PHASE + 0.5
       L = L + 2
   200 CONTINUE
       END IF
@@ -1319,8 +1361,8 @@ C
 C
 C***************************************************************************
 C
-      SUBROUTINE GET_RMSBK(IAMP,IPHI,DX,DY,IVERT,IHOR,ISINCBOX,RMSBK)
-      DIMENSION IAMP(21,21),IPHI(21,21)
+      SUBROUTINE GET_RMSBK(RAMP,RPHI,DX,DY,IVERT,IHOR,ISINCBOX,RMSBK)
+      DIMENSION RAMP(21,21),RPHI(21,21)
 C this calculation to do same sinc function treatment of background as is used
 C for the peak in AMPOUT in main program
       PI = 3.141592654
@@ -1359,13 +1401,17 @@ C first do sums along left and right edges of box
                         SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
      . (PI**2 * DXC * DYC)
                 ENDIF
-                AMP   = IAMP(JBOX,KBOX)
-                PHASE = IPHI(JBOX,KBOX) / 57.2958
+                AMP   = RAMP(JBOX,KBOX)
+                PHASE = RPHI(JBOX,KBOX) / 57.2958
                 ASUM = ASUM + AMP * COS(PHASE) * SINC
                 BSUM = BSUM + AMP * SIN(PHASE) * SINC
                 DENOM = DENOM + SINC**2
 20      CONTINUE
-        AMPSINC = SQRT(ASUM**2 + BSUM**2)/DENOM
+        if(abs(DENOM).gt.0.0001)then
+          AMPSINC = SQRT(ASUM**2 + BSUM**2)/DENOM
+        else
+          AMPSINC = 0.0
+        endif
         NBK=NBK+1
         SUMBKSQ=SUMBKSQ+AMPSINC**2
 30    CONTINUE
@@ -1391,22 +1437,30 @@ C second do sums along bottom and top edges of box
                         SINC = (SIN(PI * DYC)) / (PI * DYC)
                 ELSE
                         SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
-     . (PI**2 * DXC * DYC)
+     .                         (PI**2 * DXC * DYC)
                 ENDIF
-                AMP   = IAMP(JBOX,KBOX)
-                PHASE = IPHI(JBOX,KBOX) / 57.2958
+                AMP   = RAMP(JBOX,KBOX)
+                PHASE = RPHI(JBOX,KBOX) / 57.2958
                 ASUM = ASUM + AMP * COS(PHASE) * SINC
                 BSUM = BSUM + AMP * SIN(PHASE) * SINC
                 DENOM = DENOM + SINC**2
 40      CONTINUE
-        AMPSINC = SQRT(ASUM**2 + BSUM**2)/DENOM
+        if(abs(DENOM).gt.0.0001)then
+          AMPSINC = SQRT(ASUM**2 + BSUM**2)/DENOM
+        else
+          AMPSINC = 0.0
+        endif
         NBK=NBK+1
         SUMBKSQ=SUMBKSQ+AMPSINC**2
 50    CONTINUE
 C third calculate the overall rms background
       IF(NBK.NE.(2*(IVERT-1)+2*(IHOR-3))) STOP ' Error in GET_RMSBK'
-      RMSBK=SQRT(SUMBKSQ/NBK)
-      RMSBK=RMSBK/1.10          ! fudge factor to restore earlier scale of A/B
+      if(NBK.ne.0)then
+        RMSBK=SQRT(SUMBKSQ/NBK)
+        RMSBK=RMSBK/1.10          ! fudge factor to restore earlier scale of A/B
+      else
+        RMSBK=999999.9
+      endif
       RETURN
       END
 C

@@ -58,7 +58,7 @@
 # DISPLAY: merge_comment_8
 # DISPLAY: merge_comment_9
 # DISPLAY: max_amp_correction
-# DISPLAY: merge_ML_data
+# DISPLAY: merge_data_type
 # DiSPLAY: RFACAMP
 #
 #$end_local_vars
@@ -92,7 +92,7 @@ set reftiltgeo = ""
 set merge_reference = ""
 set merge_ref_num = ""
 set max_amp_correction = ""
-set merge_ML_data = ""
+set merge_data_type = ""
 set ITAXASTEP = ""
 set RTAXASIZE = ""
 set ITANGLSTEP = ""
@@ -353,7 +353,7 @@ ${Merge_Reference_HKMAX}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
-${merge_ML_data}
+${merge_data_type}
 ${ILIST_VAL}
 0
 eot

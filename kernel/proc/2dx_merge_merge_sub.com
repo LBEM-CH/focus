@@ -31,6 +31,52 @@ else
 endif
 #
 #############################################################################
+${proc_2dx}/linblock "Setting APH file types to use"
+#############################################################################
+#
+foreach imagefile ( ${dirlist} ) 
+  cd ..
+  cd ${imagefile}
+  set imagename_local = `cat 2dx_image.cfg | grep 'set imagename =' | cut -d\" -f2`
+  cd APH
+  set APH_file = ${imagename_local}_fou_ctf.aph
+  # Already set:
+  # if ( ${merge_data_type} == '0' ) then
+  #   set APH_file = ${imagename_local}_fou_ctf.aph
+  # endif
+  if ( ${merge_data_type} == '1' ) then
+    if ( -e ${imagename_local}_movie_fou_ctf.aph ) then
+      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+    else
+      echo ":${imagename_local}_movie_fou_ctf.aph not found."
+    endif
+  endif
+  if ( ${merge_data_type} == '2' ) then 
+    if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then
+      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+    else
+      echo ":${imagename_local}_movieB_fou_ctf.aph not found."
+    endif
+  endif
+  if ( ${merge_data_type} == '3' ) then
+    if ( -e ML_result.aph ) then
+      set APH_file = ML_result.aph
+    else
+      echo ":ML_result.aph not found."
+    endif
+  endif
+  if ( ${merge_data_type} == '4' ) then
+    if ( ! -e ${imagename_local}_ctf.aph ) then
+      set APH_file = ${imagename_local}_syn_ctf.aph
+    endif
+  endif
+  echo ":In directory ${imagename_local}: Using APH file ${APH_file}. "
+  \rm -f ${imagename_local}_ctf.aph
+  \ln -s ${APH_file} ${imagename_local}_ctf.aph
+  cd ${olddir}
+end
+
+#############################################################################
 ${proc_2dx}/linblock "Compile merging script"
 #############################################################################
 #
@@ -71,7 +117,7 @@ ${RFACAMP}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
-${merge_ML_data}
+${merge_data_type}
 ${ILIST_VAL}
 eot
 #

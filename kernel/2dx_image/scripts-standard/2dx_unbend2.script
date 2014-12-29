@@ -260,12 +260,14 @@ if ( ${maskb05} > '0' ) then
 endif
 #
 set startname = `echo ${imagename} | cut -c1`
-# if ( $domask == 'y' ) then
-#   if ( ${startname} == 'm' ) then
-#     set domask = 'n'
-#     echo domask corrected to ${domask}
-#   endif
-# endif
+#
+if ( $domask == 'y' ) then
+  if ( -e ${imagename}_mask.mrc ) then
+    set domask = 'n'
+    echo "set domask = ${domask}" >> LOGS/${scriptname}.results
+    echo "Masking info exists. domask corrected to ${domask}."
+  endif
+endif
 #
 if ( ${createmaskinfo} == 'y' ) then
   if ( ${startname} == 'm' ) then

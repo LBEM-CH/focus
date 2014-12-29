@@ -259,6 +259,23 @@ if ( ${movie_enable} == "y" ) then
     echo ":: "
   endif
   #
+  set aphfile = APH/${imagename}_movieB_fou_ctf.aph
+  if ( -e ${aphfile} ) then
+    echo ":: "
+    ${proc_2dx}/linblock "Generating map from MovieModeB processing"
+    echo ":: "
+    echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase from MovieModeB processing>" >> LOGS/${scriptname}.results
+    set prefix = "movieB_"
+    set prename = "MovieModeB "
+    #
+    set phaori_local = ${phaori}
+    source ${proc_2dx}/2dx_generateMap_sub.com
+  else
+    echo ":: "
+    ${proc_2dx}/linblock "Not generating map from MovieModeB processing, file not found: ${aphfile}"
+    echo ":: "
+  endif
+  #
 endif
 #
 echo "# IMAGE: ${imagename}_ref.mrc <Reference 3D Map Projection>"  >> LOGS/${scriptname}.results

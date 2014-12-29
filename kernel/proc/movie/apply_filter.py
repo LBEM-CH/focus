@@ -40,7 +40,12 @@ if __name__ == "__main__":
 	# frame = filt_tophatl(B, 0.48)
 
 	frame.write_image(filename_in)
-		
+
+	# s = info(frame)
+	# nx = s[4]
+	# ny = s[5]	
+	# print ":: Size = ", nx, ",", ny
+
 	if i == 1:
 		w.write_image("weight.mrc")
 	else:

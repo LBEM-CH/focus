@@ -90,7 +90,7 @@ C IMODE= 17: Read image statistics
 C
 C IMODE= 18: Transform into INTEGER*2 output format (16bit) with automatic scaling to [0 ; 16000] and swap unsigned/signed
 C
-C IMODE= 19: Transform into REAL output format with automatic scaling to [0 ; 100]
+C IMODE= 19: Transform into REAL output format with automatic scaling to [1 ; 100]
 C
 C IMODE= 20: Produce thumbnail image
 C        card 4 : Enter X/Y dimensions of output image
@@ -105,6 +105,8 @@ C        card  4 : enter Limits (Xmin,max,Ymin,max) if NZ=1
 C     or card  4 : enter Limits (Xmin,max,Ymin,max,Zmin,max) if NZ>1
 C
 C IMODE= 32: Interpolate into new given dimensions
+C
+C IMODE= 39: Transform into REAL output format with automatic scaling to [-1000 ; 1000]
 C
 C -----------------------------------------------------------
 C IMODE= 50: goes to the single particle selection option, with input
@@ -188,12 +190,13 @@ C
      . ' 16: Transform [0;16000] INT*2 image',/,
      . ' 17: Read image statistics',/,
      . ' 18: Swap unsigned/signed, and Transform [0;16000] INT*2 image',/,
-     . ' 19: Transform [0;100] REAL image',/,
+     . ' 19: Transform [1;100] REAL image',/,
      . ' 20: Produce thumbnail image',/,
      . ' 29: Interpolate into two times larger image',/,
      . ' 30: Pad into square image',/,
      . ' 31: Select region (and change header)',/,
      . ' 33: Interpolate into new given dimensions',/,
+     . ' 39: Transform [-1000;1000] REAL image',/,
      . ' 50: create stack of small boxes centred on coords read',
      . ' in from list',/,
      .   ' 99: More options, mainly for display purposes')
@@ -225,7 +228,7 @@ C
         IF ((IMODE .GT. 4 .and. IMODE .ne. 10 .and. IMODE.ne.11 
      1      .and. IMODE.ne.12 .and. IMODE.ne.13 .and. IMODE.ne.14
      1      .and. IMODE.ne.15 .and. IMODE.ne.16 .and. IMODE.ne.17
-     1      .and. IMODE.ne.18 .and. IMODE.ne.19
+     1      .and. IMODE.ne.18 .and. IMODE.ne.19 .and. IMODE.ne.39
      1      .and. IMODE.ne.20 .and. IMODE.ne.29 .and. IMODE.ne.30
      1      .and. IMODE.ne.31 .and. IMODE.ne.32 .and. IMODE.ne.33)
      1      .AND. MODE .LT. 3) then
@@ -254,6 +257,7 @@ C        IF (IMODE .NE. 0 .and. IMODE.ne.17) THEN
         if ( IMODE.eq.17 ) goto 110
         if ( IMODE.eq.18 ) goto 111
         if ( IMODE.eq.19 ) goto 112
+        if ( IMODE.eq.39 ) goto 115
         if ( IMODE.eq.20 ) goto 94
         if ( IMODE.eq.29 ) goto 98
         if ( IMODE.eq.30 ) goto 95
@@ -971,7 +975,7 @@ C
 C
 C=====================================================================
 C
-C  MODE 19 : Produce REAL output image with range [0;100]
+C  MODE 19 : Produce REAL output image with range [1;100]
 C
 112     continue
         write(TITLE,'(''LABELH Mode 19: Produce REAL image '')')
@@ -1049,6 +1053,102 @@ C-------Write the file into the output file
           do ix = 1,NX
             DOUBLTMP = APIC(ix,iy)
             DOUBLTMP = (DOUBLTMP - ROFF) * RSCALE
+            VAL=DOUBLTMP
+            ALINE(ix)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+          CALL IWRLIN(2,ALINE)
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+     .     DMIN,DMAX,DMEAN
+C
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE 39 : Produce REAL output image with range [-1000;1000]
+C
+115     continue
+        write(TITLE,'(''LABELH Mode 39: Produce REAL image '')')
+        write(6,'('' Producing REAL with Autoscaling [-1000;1000] '')')
+C
+        CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        CALL IRTLAB(1,LABELS,NL)
+        CALL IRTEXT(1,EXTRA,1,29)
+        CALL IRTCEL(1,CELL)
+C
+        IF (MODE .GT. 2) THEN
+          STOP 'Only works on real images'
+        ENDIF
+C
+        write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Copy entire file into output picture
+        do iy = 1,NY
+          CALL IRDLIN(1,ALINE,*999)
+          do ix = 1,NX
+            VAL=ALINE(ix)
+            APIC(ix,iy)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Opened file has range MIN,MAX,MEAN: '',3G16.5)')
+     1     DMIN,DMAX,DMEAN
+C
+        DVAL = ABS(DMAX - DMIN)
+        write(*,'('' That is a dynamic range of: '',G16.5)')
+     1     DVAL
+C
+C-------Calculate offset and scaling factors
+C
+        RTARGET=1000.0
+        ROFF = DMIN 
+        if ( DVAL .gt. 0.00000001 ) then
+          RSCALE = RTARGET / DVAL
+        else
+          RSCALE = RTARGET  
+        endif
+C
+        write(*,'('' Calculated offset of '',G16.5)')ROFF
+        write(*,'('' Calculated scaling factor of '',G16.5)')RSCALE
+C
+C-------Output file is INT*2 (16 bit, Mode=1)
+C
+        MODE = 2
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Put title labels, new cell and extra information only into header
+C
+        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+        CALL IALEXT(2,EXTRA,1,29)
+        CALL IALCEL(2,CELL)
+        CALL IALMOD(2,MODE)
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+C-------Write the file into the output file
+        do iy = 1,NY
+          do ix = 1,NX
+            DOUBLTMP = APIC(ix,iy)
+            DOUBLTMP = ((DOUBLTMP - ROFF) * RSCALE * 2.0 ) - RTARGET
             VAL=DOUBLTMP
             ALINE(ix)=VAL
             IF (VAL .LT. DMIN) DMIN = VAL

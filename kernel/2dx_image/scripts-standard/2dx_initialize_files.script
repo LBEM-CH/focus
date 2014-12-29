@@ -190,8 +190,8 @@ if ( ${correct} == '1' && ${imagename} != "ScriptWillPutNameHere" ) then
 endif
 # 
 if ( -e ${nonmaskimagename}.mrc ) then
-  if ( ! -e ${nonmaskimagename}.raw.mrc ) then
-    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}.raw.mrc
+  if ( ! -e ${nonmaskimagename}_raw.mrc ) then
+    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc
   endif
 endif
 #
@@ -265,7 +265,7 @@ if ( ${initialization_executable} == "n" ) then
   if ( ${nonmaskimagename} != ${imagename} ) then
     echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
   endif
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
   #
 else
@@ -428,7 +428,7 @@ else
     echo "set quadradb = ${quadradb}"  >> LOGS/${scriptname}.results
   endif
   #
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
   if ( ${nonmaskimagename} != ${imagename} ) then
     echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>"  >> LOGS/${scriptname}.results
   endif

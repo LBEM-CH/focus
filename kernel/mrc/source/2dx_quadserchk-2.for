@@ -327,8 +327,13 @@ C               IF GAMMASTR IS +VE C IS ALONG -Z; IF -VE C IS ALONG +Z
         COSB=BB1/ASTR
 C
         IF(GAMMASTR.LT.0.0)GAMMASTR=-GAMMASTR
-        A=ISIZEX/(ASTR*SIN(GAMMASTR))
-        B=ISIZEX/(BSTR*SIN(GAMMASTR))
+        if(abs(sin(GAMMASTR)).gt.0.0001)then
+          A=ISIZEX/(ASTR*SIN(GAMMASTR))
+          B=ISIZEX/(BSTR*SIN(GAMMASTR))
+        else
+          A=ISIZEX/(ASTR*0.001)
+          B=ISIZEX/(BSTR*0.001)
+        endif
 C
         A1=A*COSA
         A2=A*SINA
@@ -492,15 +497,27 @@ C---------Write out accumulated RFIELD for verfication purposes
               if(DMAX.lt.RFIELD(ix,iy))DMAX=RFIELD(ix,iy)
             enddo
           enddo
-          do i = MNI,MXI
-            do j = MNI,MXI
-              RFIELD(i,j)=(RFIELD(i,j)-DMIN)*255.0/(DMAX-DMIN)
-              IFIEL1(i,j)=int(RFIELD(i,j))+2
-              ix=i-MNI+1
-              iy=j-MNI+1
-              IFIEL2(ix,iy)=int(RFIELD(i,j))
+          if(abs(DMAX-DMIN).gt.0.001)then
+            do i = MNI,MXI
+              do j = MNI,MXI
+                RFIELD(i,j)=(RFIELD(i,j)-DMIN)*255.0/(DMAX-DMIN)
+                IFIEL1(i,j)=int(RFIELD(i,j))+2
+                ix=i-MNI+1
+                iy=j-MNI+1
+                IFIEL2(ix,iy)=int(RFIELD(i,j))
+              enddo
             enddo
-          enddo
+          else
+            do i = MNI,MXI
+              do j = MNI,MXI
+                RFIELD(i,j)=(RFIELD(i,j)-DMIN)*255.0/0.001
+                IFIEL1(i,j)=int(RFIELD(i,j))+2
+                ix=i-MNI+1
+                iy=j-MNI+1
+                IFIEL2(ix,iy)=int(RFIELD(i,j))
+              enddo
+            enddo
+          endif
           IPICDIM=MXI-MNI+1
           write(TEXT(1:80),'(''Averaged central peaks'')')
           write(FILENAM(1:80),'(''TMP_quadserch3_autocor.mrc'')')
@@ -555,8 +572,8 @@ C---------------------and if this pixel is either close to the last peak, or dis
           enddo
 C
 C---------Ignore minimal offset (which might stem from digit errors)
-          if(ICMAX.ge.-2 .and. ICMAX.le.2) ICMAX=0
-          if(IRMAX.ge.-2 .and. IRMAX.le.2) IRMAX=0
+          if(abs(ICMAX).le.1) ICMAX=0
+          if(abs(IRMAX).le.1) IRMAX=0
 C
           if(ICMAX.ne.0 .or. IRMAX.ne.0)then
             write(6,'(''::'',30X,
@@ -1220,6 +1237,9 @@ C
 C
 C
       DENMAX=CORMAX*CORFAC
+      if(abs(DENMAX).lt.0.001)then
+        DENMAX=0.001
+      endif
       WRITE(3,*)DENMAX
       DO 40 K=MINA,MAXA
         DO 40 J=MINB,MAXB
@@ -1260,26 +1280,26 @@ C            endif
      .  '....:',I10,/)
       WRITE(6,29020)NOTUSED0
 29020 FORMAT(': TOTAL NUMBER OF CORRELATION PEAKS DRIFTED ...........',
-     .  '....:',I10,'  (Data lost)',/)
+     .  '....:',I10,'  (Data lost or no crystal here)',/)
       WRITE(6,29021)NOTUSED2
 29021 FORMAT(': TOTAL NUMBER OF CORRELATION PEAKS AT EDGE OF BOX ....',
-     .  '....:',I10,'  (Data lost)',/)
+     .  '....:',I10,'  (Data lost or no crystal here)',/)
       WRITE(6,29022)NDRIFT
-29022 FORMAT(': NUMBER OF PEAKS THAT DRIFTED FROM ORIGINAL BEST POSIT',
+29022 FORMAT(' NUMBER OF PEAKS THAT DRIFTED FROM ORIGINAL BEST POSIT',
      .  'ION :',I10,/)
       WRITE(6,9019) CORMIN,CORMAX,CORAVG/NCOOR,NCOOR
-9019  FORMAT(': CORMIN,CORMAX,CORAVG ',3G16.6,' NCOOR',I10)
+9019  FORMAT(' CORMIN,CORMAX,CORAVG ',3G16.6,' NCOOR',I10)
       WRITE(6,9020) CORMIN*CORFAC,CORMAX*CORFAC,CORAVG/NCOOR*CORFAC
-9020  FORMAT(': THE SAME SCALED =    ',3G16.6)
+9020  FORMAT(' THE SAME SCALED =    ',3G16.6)
       WRITE(6,39021)XMXDSCRP,YMXDSCRP
-39021 FORMAT(': MAXIMUM DIFFERENCE FOUND BETWEEN ACTUAL AND PREDICTED',
+39021 FORMAT(' MAXIMUM DIFFERENCE FOUND BETWEEN ACTUAL AND PREDICTED',
      . ' POSITION; IN X AND Y',2F10.3)
 C
       WRITE(6,9050)(NCOUNT(I),I=1,11)
-9050  FORMAT(': NUMBER OF PEAKS NEEDING N PASSES TO REACH FIT',/,
-     . ': NPASS=1',I5,', NPASS=2',I6,', NPASS=3',I6,', NPASS=4',I6,
+9050  FORMAT(' NUMBER OF PEAKS NEEDING N PASSES TO REACH FIT',/,
+     . ' NPASS=1',I5,', NPASS=2',I6,', NPASS=3',I6,', NPASS=4',I6,
      . ', NPASS=5',I5,', NPASS=6',I5,/,
-     . ': NPASS=7',I5,', NPASS=8',I5,
+     . ' NPASS=7',I5,', NPASS=8',I5,
      . ', NPASS=9',I5,', NPASS=10',I5,', NPASS=11',I5)
 C
        write(*,'('' Entering PLOTLATT'')')
@@ -1409,6 +1429,7 @@ CHEN>
 99    CONTINUE
 C-----Adjust maximal length to width/20
       rlenmax=rlenmax/20.0
+      if(rlenmax.lt.0.001)rlenmax=0.001
 C
       PEAKMAX=-1.0E30
       XPEAKMAX=-100.
@@ -1469,6 +1490,7 @@ C---------Set RGB color:
 100   CONTINUE
       CALL P2K_COLOUR(0)
 CHEN<
+      IF(abs(PEAKMAX).lt.0.001)PEAKMAX=0.001
       WRITE(*,9000)XPEAKMAX,YPEAKMAX
 9000  FORMAT(/,/,' POSITION OF MAXIMUM PEAK HEIGHT',2F10.2,/)
 C
@@ -1681,6 +1703,8 @@ C
       ENDDO
 C
       RTHRESH = 0.33
+C
+      if(abs(PEAKMAX).lt.0.0001)PEAKMAX=0.0001
 C
 C-----Prepare IFIELD with 0 and 1
 C
@@ -1970,7 +1994,11 @@ C
         ENDDO
       ENDDO
 C
-      RFACT = 255.0/PEAKMAX
+      if(PEAKMAX.gt.0.0001)then
+        RFACT = 255.0/PEAKMAX
+      else
+        RFACT = 255.0
+      endif
 C
 C-----Prepare output pictures
 C
@@ -2035,6 +2063,7 @@ C---------Calculate the length of the line in pixels
 C
 C---------Draw a line from (XPLOT,YPLOT) to (XERR,YERR)
           rlen = real(ilen)
+          if(rlen.lt.0.001)rlen=0.001
           do I=0,ILEN
             kx=int(XPLOT+(real(I)/rlen)*(XERR-XPLOT))
             ky=int(YPLOT+(real(I)/rlen)*(YERR-YPLOT))
@@ -2156,6 +2185,7 @@ C
 C
       print *,'SMOOTH called with ',rdist
 C
+      if(rdist.lt.0.001)rdist=0.001
       do K=IGAURA1,IGAURA2
        do J=IGAURA1,IGAURA2
           rrad=SQRT(1.0*K*K+1.0*J*J)
@@ -2455,7 +2485,11 @@ C
      .     LYBEST.GT.20 .OR. LYBEST.LT.-20)  THEN
           BIGFACTR=0.0
         ELSE
-          BIGFACTR=PROFILE(51,51)/PROFILE(ITXP,ITYP)
+          if(PROFILE(ITXP,ITYP).gt.0.0001)then
+            BIGFACTR=PROFILE(51,51)/PROFILE(ITXP,ITYP)
+          else
+            BIGFACTR=1000.0
+          endif
         endif
 C
         IF(BIGFACTR.GT.10.0 .OR. BIGFACTR.LT.0.0 .OR.

@@ -130,8 +130,8 @@ if ( ${imagesidelength} == "ScriptWillPutLengthHere" ) then
 endif
 #
 if ( -e ${nonmaskimagename}.mrc ) then
-  if ( ! -e ${nonmaskimagename}.raw.mrc ) then
-    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}.raw.mrc
+  if ( ! -e ${nonmaskimagename}_raw.mrc ) then
+    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc
   endif
 endif
 #

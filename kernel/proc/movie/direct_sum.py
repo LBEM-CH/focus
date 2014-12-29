@@ -6,25 +6,26 @@ import os
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 3:
+	if len(sys.argv) != 4:
 		sys.exit("Missuse detected (direct_sum.py)")
 
 	total_number = int(sys.argv[1])
 	image_name = sys.argv[2]
+	dir_frame_folder = sys.argv[3]
 	
-	file_name = "frames/CCUNBEND_frame_1_notap.mrc"
+	file_name = dir_frame_folder + "/CCUNBEND_frame_1_notap.mrc"
 	image = get_image(file_name)
 	
 	for i in range(2,total_number+1):		
 		
-		file_name = "frames/CCUNBEND_frame_" + str(i) + "_notap.mrc"
+		file_name = dir_frame_folder + "/CCUNBEND_frame_" + str(i) + "_notap.mrc"
 		print i, file_name
 		
 		image_tmp = get_image(file_name)
 		image += image_tmp
 			
 	
-	file_name_out = "frames/direct_sum.mrc"
+	file_name_out = dir_frame_folder + "/direct_sum.mrc"
 	print file_name_out
 	
 	image /= total_number

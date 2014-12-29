@@ -207,6 +207,7 @@ ${refposix} ${refposiy}         ! XORIG,YORIG
 ${RINNER} ${ROUTER} 0 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
+exit
   #
 endif
 #

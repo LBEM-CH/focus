@@ -85,6 +85,8 @@ set realang = ""
 set ctfcor_imode = ""
 set QVAL2 = ""
 set QVALS = ""
+set QVALMA = ""
+set QVALMB = ""
 #
 #$end_vars
 #
@@ -216,6 +218,26 @@ else
     else
       ${proc_2dx}/linblock "ERROR: ${CTF_infile} not found."
     endif
+
+    set CTF_infile = APH/${iname}_movieB_fou.aph
+    if ( -e ${CTF_infile} ) then
+      set CTF_outfile = APH/${iname}_movieB_fou_ctf.aph
+      #######################################
+      source ${proc_2dx}/2dx_applyCTF_sub.com
+      #######################################
+      echo "# IMAGE-IMPORTANT: ${CTF_infile} <MovieModeB APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
+      echo "# IMAGE-IMPORTANT: ${CTF_outfile} <MovieModeB APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+      \mv -f CTFPLOT.PS PS/${iname}_movieB_ctf.ps
+      echo "# IMAGE-IMPORTANT: PS/${iname}_movieB_ctf.ps <PS: MovieModeB IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+      \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_movieB_canonical.ps
+      echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_movieB_canonical.ps <PS: MovieModeB Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
+      \mv -f PS/2dx_plotreska_measured.ps PS/2dx_plotreska_movieB_measured.ps
+      echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_movieB_measured.ps <PS: MovieModeB Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
+      \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_movieB.txt
+      echo "# IMAGE: SCRATCH/POWERHISTO_movieB.txt <MovieModeB Histogram of Power in PS>" >> LOGS/${scriptname}.results
+    else
+      ${proc_2dx}/linblock "ERROR: ${CTF_infile} not found."
+    endif
   endif
   
   echo "<<@progress: 50>>"
@@ -242,15 +264,28 @@ else
     endif
   endif
  
+  echo ":: QVAL2, QVALMA, QVALMB, QVALS = "${QVAL2},${QVALMA},${QVALMB},${QVALS}
 
   if ( ${movie_enable} == "y" ) then
-    set movie_better = `echo ${QVALS} ${QVAL2} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+    set movie_better = `echo ${QVALMA} ${QVAL2} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
     if ( ${movie_better} == "1" ) then
-      ${proc_2dx}/linblock "Using MovieMode unbent data, since these have the higher QVAL"
-      set final_outfile = ${iname}_movie_fou_ctf.aph
+      set movie_better = `echo ${QVALMA} ${QVALMB} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+      if ( ${movie_better} == "1" ) then
+        ${proc_2dx}/linblock "Using MovieModeA unbent data, since these have the higher QVAL"
+        set final_outfile = ${iname}_movie_fou_ctf.aph
+      else
+        ${proc_2dx}/linblock "Using MovieModeB unbent data, since these have the higher QVAL"
+        set final_outfile = ${iname}_movieB_fou_ctf.aph
+      endif
     else
-      ${proc_2dx}/linblock "Using Unbend2 (not MovieMode) unbent data, since these have the higher QVAL"
-      set final_outfile = ${iname}_fou_ctf.aph
+      set movie_better = `echo ${QVALMB} ${QVAL2} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+      if ( ${movie_better} == "1" ) then
+        ${proc_2dx}/linblock "Using MovieModeB unbent data, since these have the higher QVAL"
+        set final_outfile = ${iname}_movieB_fou_ctf.aph
+      else
+        ${proc_2dx}/linblock "Using Unbend2 (not MovieMode) unbent data, since these have the higher QVAL"
+        set final_outfile = ${iname}_fou_ctf.aph
+      endif
     endif
   else
     ${proc_2dx}/linblock "Using Unbend2 unbent data"

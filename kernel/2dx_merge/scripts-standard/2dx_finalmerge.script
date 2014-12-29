@@ -55,7 +55,7 @@
 # DISPLAY: MergeLatLine_REDUCAC
 # DISPLAY: MergeLatLine_RFOMSCALE
 # DISPLAY: max_amp_correction
-# DISPLAY: merge_ML_data
+# DISPLAY: merge_data_type
 # DISPLAY: plotres_rings
 # DISPLAY: scalimamp3d_rref
 # DISPLAY: scalimamp3d_BXYMINMAX
@@ -112,7 +112,7 @@ set MergeLatLine_REDUCAC = ""
 set MergeLatLine_RFOMSCALE = ""
 set max_amp_correction = ""
 set AMP_Scale_Factor = ""
-set merge_ML_data = ""
+set merge_data_type = ""
 set plotres_rings = ""
 set lattice = ""
 set scalimamp3d_rref = ""

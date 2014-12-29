@@ -81,7 +81,7 @@
 # DISPLAY: max_amp_correction
 # DISPLAY: MergePray
 # DISPLAY: make_reference
-# DISPLAY: merge_ML_data
+# DISPLAY: merge_data_type
 # DISPLAY: plotres_rings
 # DISPLAY: scalimamp3d_rref
 # DISPLAY: scalimamp3d_BXYMINMAX
@@ -146,7 +146,7 @@ set MergeIWF = ""
 set MergeIWP = ""
 set merge_ref_num = ""
 set max_amp_correction = ""
-set merge_ML_data = ""
+set merge_data_type = ""
 set plotres_rings = ""
 set lattice = ""
 set scalimamp3d_rref = ""
@@ -432,7 +432,7 @@ ${Merge_Reference_HKMAX}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
-${merge_ML_data}
+${merge_data_type}
 ${ILIST_VAL}
 0
 eot

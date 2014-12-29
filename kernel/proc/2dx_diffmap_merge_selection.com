@@ -76,7 +76,7 @@ ${RFACAMP}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
-${merge_ML_data}
+${merge_data_type}
 ${ILIST_VAL}
 eot
 #

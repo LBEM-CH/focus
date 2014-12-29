@@ -18,12 +18,12 @@ C     Version  3.0      30-OCT-05    HS    2dx
 C
 C---------------------------------INPUT-------------------------------------
 C
-C	CARD 1:IAVER,ISMOOTH,ITAPER,IDIST
+C       CARD 1:IAVER,ISMOOTH,ITAPER,IDIST
 C
 C       IAVER:depths of strips parallel to x & y over which averaging
-C      		    takes place.
-C	ISMOOT:for each pixel running average calculated over area
-C		        defined by (-ISMOOTH to ISMOOTH) x (IAVER).
+C                   takes place.
+C       ISMOOT:for each pixel running average calculated over area
+C                       defined by (-ISMOOTH to ISMOOTH) x (IAVER).
 C       ITAPER:depth over which tapering takes place.
 C       IDIST:depth of constant exclusion border 
 C
@@ -56,21 +56,21 @@ C
       CALL  IMOPEN(2,'OUT','NEW')
       CALL  IRDHDR(1,NXYZR,MXYZR,MODE,DMIN,DMAX,DMEAN)
       IF(MODE.LT.0.OR.MODE.GT.2) THEN
-      	WRITE(6,998)
-998	FORMAT('  INPUT FILE IS NOT AN IMAGE, MODE.NE.0,1, or 2')
+        WRITE(6,998)
+998     FORMAT('  INPUT FILE IS NOT AN IMAGE, MODE.NE.0,1, or 2')
       ENDIF
       DMINO=DMIN
       DMAXO=DMAX
       DMEANO=DMEAN
       IF(NXYZR(1).GT.NMAX.OR.NXYZR(2).GT.NMAX) THEN
-      	WRITE(6,999) NMAX
-999	FORMAT(' ARRAY ALINE PROG DIMS TOO SMALL',I10)
-      	STOP
+        WRITE(6,999) NMAX
+999     FORMAT(' ARRAY ALINE PROG DIMS TOO SMALL',I10)
+        STOP
       ENDIF
 C
 C     read density values on old image
 C
-C     	
+C       
 C     read in parameters
 C
       READ(5,*) IAVER,ISMOOTH,ITAPER,IDIST
@@ -112,10 +112,10 @@ C
       CALL IRDPAS(1,ARRAY,NMAX,NDEEP,0,NX-1,IDIST,IDIST+IAVER-1,*9000)
 C
       DO 200 I=1,NX
-      	START(I)=0.0
-      	DO 210 J=1,IAVER
-      	  START(I)=START(I)+ARRAY(I,J)
-210   	continue
+        START(I)=0.0
+        DO 210 J=1,IAVER
+          START(I)=START(I)+ARRAY(I,J)
+210     continue
         START(I)=START(I)/IAVER
 200   continue
 C
@@ -126,8 +126,8 @@ C
      1            0,NX-1,NY-IAVER-IDIST,NY-IDIST-1,*9000)
 C
       DO 300 I=1,NX
-      	FINISH(I)=0.0
-      	DO 310 J=1,IAVER
+        FINISH(I)=0.0
+        DO 310 J=1,IAVER
           FINISH(I)=FINISH(I)+ARRAY(I,J)
  310    continue
         FINISH(I)=FINISH(I)/IAVER
@@ -140,16 +140,16 @@ C
 C-----Appply smoothing parallel to edge in the form of a running average.
 C
       DO 350 I=1,NX
-      	ARUNAV(I)=0.0
-      	IPTS=0
-      	DO J=-ISMOOTH,ISMOOTH
-      	  IN=I+J
-      	  IF(IN.GT.0 .and. IN.le.NX)then
-	    ARUNAV(I)=ARUNAV(I)+AVEDGE(IN)
-      	    IPTS=IPTS+1
+        ARUNAV(I)=0.0
+        IPTS=0
+        DO J=-ISMOOTH,ISMOOTH
+          IN=I+J
+          IF(IN.GT.0 .and. IN.le.NX)then
+            ARUNAV(I)=ARUNAV(I)+AVEDGE(IN)
+            IPTS=IPTS+1
           endif
         enddo
-      	ARUNAV(I)=ARUNAV(I)/IPTS
+        ARUNAV(I)=ARUNAV(I)/IPTS
  350  continue
 C
 C####################################################################
@@ -164,11 +164,11 @@ C
         CALL CALCAVOD(ALINE,NX,IY,AVOD)
       enddo
       do IX=1,NX
-	ALINE(IX)=ARUNAV(IX)
-	IF(MODE.EQ.0) THEN
-      	  IF(ALINE(IX).GT.255)ALINE(IX)=255.
-      	  IF(ALINE(IX).LT.0)  ALINE(IX)=0.
-      	ENDIF
+        ALINE(IX)=ARUNAV(IX)
+        IF(MODE.EQ.0) THEN
+          IF(ALINE(IX).GT.255)ALINE(IX)=255.
+          IF(ALINE(IX).LT.0)  ALINE(IX)=0.
+        ENDIF
       enddo
       do IY=1,IDIST
         CALL IWRLIN(2,ALINE)
@@ -180,9 +180,9 @@ C
         CALL CALCAVOD(ALINE,NX,IY,AVOD)
         rfrac=REAL(IPOS)/ITAPER
         DO IX=1,NX
-   	  ALINE(IX)=ARUNAV(IX)*(1.0-rfrac) + ALINE(IX)*rfrac
- 	  IF(MODE.EQ.0) THEN
-      	    IF(ALINE(IX).GT.255)ALINE(IX)=255.
+          ALINE(IX)=ARUNAV(IX)*(1.0-rfrac) + ALINE(IX)*rfrac
+          IF(MODE.EQ.0) THEN
+            IF(ALINE(IX).GT.255)ALINE(IX)=255.
             IF(ALINE(IX).LT.0)  ALINE(IX)=0.
           ENDIF
         enddo
@@ -201,12 +201,12 @@ C
         CALL IRDLIN(1,ALINE,*9000)
         CALL CALCAVOD(ALINE,NX,IY,AVOD)
         rfrac=REAL(IPOS)/ITAPER
-      	DO IX=1,NX
-   	  ALINE(IX)=ALINE(IX)*(1.0-rfrac) + ARUNAV(IX)*rfrac
-	  IF(MODE.EQ.0) THEN
-      	    IF(ALINE(IX).GT.255)ALINE(IX)=255.
-      	    IF(ALINE(IX).LT.0)  ALINE(IX)=0.
-      	  ENDIF
+        DO IX=1,NX
+          ALINE(IX)=ALINE(IX)*(1.0-rfrac) + ARUNAV(IX)*rfrac
+          IF(MODE.EQ.0) THEN
+            IF(ALINE(IX).GT.255)ALINE(IX)=255.
+            IF(ALINE(IX).LT.0)  ALINE(IX)=0.
+          ENDIF
         enddo
         CALL IWRLIN(2,ALINE)
         IPOS=IPOS+1
@@ -216,7 +216,7 @@ C
         CALL IWRLIN(2,ALINE)
       enddo
 C
-      CALL IMCLOSE(1)	! Don't need input file again.
+      CALL IMCLOSE(1)   ! Don't need input file again.
 C
 C#################################################################
 C-----Second read the strips parallel to Y.
@@ -228,9 +228,9 @@ C
       CALL IRDPAS(2,BRRAY,NDEEP,NMAX,0,IAVER-1,0,NY-1,*9000)
 C
       DO I=1,NY
-      	START(I)=0.0
-      	DO J=1,IAVER
-       	  START(I)=START(I)+BRRAY(J,I)
+        START(I)=0.0
+        DO J=1,IAVER
+          START(I)=START(I)+BRRAY(J,I)
         enddo
         START(I)=START(I)/IAVER
       enddo
@@ -241,9 +241,9 @@ C
       CALL IRDPAS(2,BRRAY,NDEEP,NMAX,NX-IAVER,NX-1,0,NY-1,*9000)
 C
       DO I=1,NY
-      	FINISH(I)=0.0
-      	DO J=1,IAVER
-       	  FINISH(I)=FINISH(I)+BRRAY(J,I)
+        FINISH(I)=0.0
+        DO J=1,IAVER
+          FINISH(I)=FINISH(I)+BRRAY(J,I)
         enddo
         FINISH(I)=FINISH(I)/IAVER
       enddo
@@ -255,16 +255,16 @@ C
 C-----Appply smoothing parallel to edge in the form of a running average.
 C
       DO I=1,NY
-      	ARUNAV(I)=0.0
-      	IPTS=0
-      	DO J=-ISMOOTH,ISMOOTH
-      	  IN=I+J
-      	  IF(IN.GT.0 .and. IN.le.NY)then
-      	    ARUNAV(I)=ARUNAV(I)+AVEDGE(IN)
-      	    IPTS=IPTS+1
+        ARUNAV(I)=0.0
+        IPTS=0
+        DO J=-ISMOOTH,ISMOOTH
+          IN=I+J
+          IF(IN.GT.0 .and. IN.le.NY)then
+            ARUNAV(I)=ARUNAV(I)+AVEDGE(IN)
+            IPTS=IPTS+1
           endif
-       	enddo
-       	ARUNAV(I)=ARUNAV(I)/IPTS
+        enddo
+        ARUNAV(I)=ARUNAV(I)/IPTS
       enddo
 C
 C#################################################################
@@ -282,37 +282,37 @@ C
 C
         CALL IRDLIN(2,ALINE,*9000)
 C
- 	do IX=1,IDIST
-    	  ALINE(IX)=ARUNAV(IY)
+        do IX=1,IDIST
+          ALINE(IX)=ARUNAV(IY)
         enddo
 C
-	IPOS=0
-      	DO IX=IDIST+1,ITAPER+IDIST+1
+        IPOS=0
+        DO IX=IDIST+1,ITAPER+IDIST+1
           rfrac=REAL(IPOS)/ITAPER
           ALINE(IX)=ALINE(IX)*rfrac+ARUNAV(IY)*(1.0-rfrac)
           IPOS=IPOS+1
         enddo
 C
-	IPOS=0
-      	DO IX=NX-ITAPER-IDIST-2,NX-IDIST-1
+        IPOS=0
+        DO IX=NX-ITAPER-IDIST-2,NX-IDIST-1
           rfrac=REAL(IPOS)/ITAPER
-       	  ALINE(IX)=ALINE(IX)*(1.0-rfrac)+ARUNAV(IY)*rfrac
-	  IPOS=IPOS+1
+          ALINE(IX)=ALINE(IX)*(1.0-rfrac)+ARUNAV(IY)*rfrac
+          IPOS=IPOS+1
         enddo
 C
-      	DO IX=NX-IDIST,NX
-       	  ALINE(IX)=ARUNAV(IY)
+        DO IX=NX-IDIST,NX
+          ALINE(IX)=ARUNAV(IY)
         enddo
 C
-      	DO IX=1,NX
-      	  AL = ALINE(IX)
-	  IF(MODE.EQ.0) THEN
-      	    IF(AL.GT.255) AL = 255.
-      	    IF(AL.LT.0)   AL = 0.
-      	    ALINE(IX) = AL
-      	  ENDIF
-      	  IF(AL.GT.DMAX) DMAX = AL
-      	  IF(AL.LT.DMIN) DMIN = AL
+        DO IX=1,NX
+          AL = ALINE(IX)
+          IF(MODE.EQ.0) THEN
+            IF(AL.GT.255) AL = 255.
+            IF(AL.LT.0)   AL = 0.
+            ALINE(IX) = AL
+          ENDIF
+          IF(AL.GT.DMAX) DMAX = AL
+          IF(AL.LT.DMIN) DMIN = AL
           DTOT = DTOT + AL
         enddo
 C

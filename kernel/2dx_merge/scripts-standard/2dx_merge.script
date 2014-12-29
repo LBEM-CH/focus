@@ -29,7 +29,7 @@
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: merge_res_limit
-# DISPLAY: merge_ML_data
+# DISPLAY: merge_data_type
 # DISPLAY: tempkeep
 # DISPLAY: realcell
 # DISPLAY: realang
@@ -83,7 +83,7 @@ set zstarrange_real = ""
 set RESMIN = ""
 set RESMAX = ""
 set merge_res_limit = ""
-set merge_ML_data = ""
+set merge_data_type = ""
 set tempkeep = ""
 set realcell = ""
 set realang = ""
@@ -151,6 +151,12 @@ echo "set initialization_executable = ${initialization_executable}" >> LOGS/${sc
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
+#
+if ( ${merge_data_type}x == 'x' ) then
+  set merge_data_type = "0"
+  echo "set merge_data_type = ${merge_data_type}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: merge_data_type corrected to ${merge_data_type}"
+endif
 #
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
@@ -229,6 +235,29 @@ if ( ${linkok} == 'n' ) then
   echo ":: "
 endif
 #
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set imagename_local = `cat 2dx_image.cfg | grep 'set imagename =' | cut -d\" -f2`
+  cd APH
+  if ( ! -e ${imagename_local}_ctf.aph && ! -l ${imagename_local}_ctf.aph ) then
+    echo ":Working on ${imagename_local}: ${imagename_local}_ctf.aph does not exist. "
+    if ( -e ${imagename_local}.cor.aph ) then
+      echo "::In ${dirfile}: Correcting ${imagename_local}.cor.aph to ${imagename_local}_ctf.aph" 
+      \ln -s ${imagename_local}.cor.aph ${imagename_local}_fou_ctf.aph 
+    else
+      echo "::Working on ${imagename_local}: ${imagename_local}.cor.aph does not exist. "
+    endif
+  else
+    echo "Working on ${imagename_local}: ${imagename_local}_ctf.aph exists. "
+  endif
+  cd ${olddir}
+end
+#
 if ( ${Calc_from_zstarrange} == "y" ) then
   set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
   echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
@@ -290,12 +319,6 @@ if ( ${MergeIWP}x == 'x' ) then
   set MergeIWP = "1"
   echo "set MergeIWP = ${MergeIWP}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: MergeIWP corrected to ${MergeIWP}"
-endif
-#
-if ( ${merge_ML_data}x == 'x' ) then
-  set merge_ML_data = "0"
-  echo "set merge_ML_data = ${merge_ML_data}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "WARNING: merge_ML_data corrected to ${merge_ML_data}"
 endif
 #
 if ( ${ILIST}x == 'x' ) then

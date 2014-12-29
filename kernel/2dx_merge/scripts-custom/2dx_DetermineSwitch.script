@@ -38,7 +38,7 @@
 # DISPLAY: SYM
 # DISPLAY: avrgamphsNUMBER
 # DISPLAY: avrgamphsRESOL
-# DISPLAY: merge_ML_data
+# DISPLAY: merge_data_type
 # DISPLAY: ILIST
 # DISPLAY: MergeIQMAX
 # DISPLAY: Merge_Reference_IQMAX
@@ -87,7 +87,7 @@ set IBOXPHS = ""
 set SYM = ""
 set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
-set merge_ML_data = ""
+set merge_data_type = ""
 set ILIST = ""
 set MergeIQMAX = ""
 set Merge_Reference_IQMAX = ""

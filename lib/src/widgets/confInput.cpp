@@ -272,7 +272,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
       lEdits << new QLineEdit(value,this);
       layout->setColumnStretch(2,1);
 
-      lEdits[0]->setFixedWidth(LINE_EDIT_WIDTH);
+      lEdits[0]->setFixedWidth(LINE_EDIT_WIDTH*3);
       lEdits[0]->setFixedHeight(LINE_EDIT_HEIGHT);
 
       lEdits[0]->setFont(labelFont);

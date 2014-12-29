@@ -32,7 +32,7 @@
 # DISPLAY: MergeIQMAX
 # DISPLAY: MergeHKMAX
 # DISPLAY: tempkeep
-# DISPLAY: merge_ML_data
+# DISPLAY: merge_data_type
 # DISPLAY: realcell
 # DISPLAY: realang
 # DISPLAY: ALAT
@@ -75,7 +75,7 @@ set RESMAX = ""
 set merge_res_limit = ""
 set MergeIQMAX = ""
 set MergeHKMAX = ""
-set merge_ML_data = ""
+set merge_data_type = ""
 set ILIST = ""
 set tempkeep = ""
 set realcell = ""

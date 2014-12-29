@@ -5,7 +5,7 @@ import os
 
 def w(n, t, a, b):
 	if t == 2:
-		r = 1.0
+		r = 1000000.0
 	else:
 		r = a*exp(b*n)
 	return r

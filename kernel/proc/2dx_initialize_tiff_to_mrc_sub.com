@@ -10,30 +10,30 @@ if ( ! -e ${nonmaskimagename}.mrc || ${correct} == 1 ) then
     ${proc_2dx}/linblock "Image ${nonmaskimagename}.mrc does not exist."
   endif
   #
-  if ( ! ( -e ${nonmaskimagename}.raw.mrc || -e ${nonmaskimagename}.tif || -e ${nonmaskimagename}.tiff ) ) then
+  if ( ! ( -e ${nonmaskimagename}_raw.mrc || -e ${nonmaskimagename}.tif || -e ${nonmaskimagename}.tiff ) ) then
     #############################################################################
     if ( ${nonmaskimagename} != "ScriptWillPutNameHere" ) then
-      ${proc_2dx}/linblock "Neither image ${nonmaskimagename}.tif nor ${nonmaskimagename}.raw.mrc do exist."
+      ${proc_2dx}/linblock "Neither image ${nonmaskimagename}.tif nor ${nonmaskimagename}_raw.mrc do exist."
     endif
     #############################################################################
     #
     #############################################################################
-    ### Testing for presence of *.raw.mrc
+    ### Testing for presence of *_raw.mrc
     #############################################################################
     \rm -f final_map.tif
-    echo "dummy" > zzzzz27765.raw.mrc
-    set filename = `ls -1 *.raw.mrc | sort | head -n 1`
-    \rm -f zzzzz27765.raw.mrc
-    if ( ${filename} != "zzzzz27765.raw.mrc" ) then
+    echo "dummy" > zzzzz27765_raw.mrc
+    set filename = `ls -1 *_raw.mrc | sort | head -n 1`
+    \rm -f zzzzz27765_raw.mrc
+    if ( ${filename} != "zzzzz27765_raw.mrc" ) then
       ${proc_2dx}/linblock "Found file ${filename}."
       set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
-      if ( ! -e ${nonmaskimagename}.raw.mrc ) then
-        ${proc_2dx}/linblock "Image ${nonmaskimagename}.raw.mrc not existing."
+      if ( ! -e ${nonmaskimagename}_raw.mrc ) then
+        ${proc_2dx}/linblock "Image ${nonmaskimagename}_raw.mrc not existing."
         ${proc_2dx}/linblock "You probably use more than one or two dots in the image name, which is not recommended."
-        echo "#WARNING: Image ${nonmaskimagename}.raw.mrc not existing."  >> LOGS/${scriptname}.results
+        echo "#WARNING: Image ${nonmaskimagename}_raw.mrc not existing."  >> LOGS/${scriptname}.results
         echo "#WARNING: You probably use more than one or two dots in the image name, which is not recommended."  >> LOGS/${scriptname}.results
       endif
-      cp -f ${nonmaskimagename}.raw.mrc ${nonmaskimagename}.mrc
+      cp -f ${nonmaskimagename}_raw.mrc ${nonmaskimagename}.mrc
       set new_mrc_created = 'y'
       #
     else  
@@ -53,7 +53,7 @@ if ( ! -e ${nonmaskimagename}.mrc || ${correct} == 1 ) then
           echo "#WARNING: Image ${nonmaskimagename}.mrc not existing."  >> LOGS/${scriptname}.results
           echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
         else
-          \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}.raw.mrc
+          \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc
           set new_mrc_created = 'y'
         endif
       else
@@ -120,11 +120,11 @@ eot
     endif
   else
     #############################################################################
-    ### Testing for presence of ${nonmaskimagename}.raw.mrc or ${nonmaskimagename}.tif
+    ### Testing for presence of ${nonmaskimagename}_raw.mrc or ${nonmaskimagename}.tif
     #############################################################################
-    if ( -e ${nonmaskimagename}.raw.mrc ) then
-      \cp -f ${nonmaskimagename}.raw.mrc ${nonmaskimagename}.mrc
-      ${proc_2dx}/linblock "Copying ${nonmaskimagename}.raw.mrc to ${nonmaskimagename}.mrc"
+    if ( -e ${nonmaskimagename}_raw.mrc ) then
+      \cp -f ${nonmaskimagename}_raw.mrc ${nonmaskimagename}.mrc
+      ${proc_2dx}/linblock "Copying ${nonmaskimagename}__aw.mrc to ${nonmaskimagename}.mrc"
       set new_mrc_created = 'y'
     else
       if ( -e ${nonmaskimagename}.tiff ) then
@@ -161,7 +161,7 @@ if ( ! -e ${nonmaskimagename}.mrc ) then
   echo ":: "
   echo "::     ERROR: ${nonmaskimagename}.mrc not existing."
   echo ":: "
-  echo "::     Use a filename like PROT0012345600.tif or PROT0012345600.raw.mrc"
+  echo "::     Use a filename like PROT0012345600.tif or PROT0012345600_raw.mrc"
   echo ":: "
   echo ":: "
   ${proc_2dx}/protest "ABORTING."

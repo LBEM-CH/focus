@@ -123,10 +123,15 @@ if ( "${level}" == "radical" ) then
     \rm -f ${nonmaskimagename}.mrc
     \rm -f ${nonmaskimagename}-original.mrc
     \rm -f ${nonmaskimagename}-original-big.mrc
+  else
+    if ( -e ${nonmaskimagename}.raw.mrc ) then
+      \mv -f ${nonmaskimagename}.raw.mrc ${nonmaskimagename}_raw.mrc
+    endif
   endif
   #
   if ( -e ${imagename}.tif ) then
     \rm -f ${imagename}.mrc
+    \rm -f ${imagename}_raw.mrc
     \rm -f ${imagename}.raw.mrc
     \rm -f ${imagename}-original.mrc
     \rm -f ${imagename}-original-big.mrc

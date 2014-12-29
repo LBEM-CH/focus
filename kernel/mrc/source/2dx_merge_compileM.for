@@ -45,15 +45,22 @@ C
       read(*,*)RALAT
       write(*,'(F12.3)')RALAT
 C
-      write(*,'(/,''input merge_ML_data switch'')')
+      write(*,'(/,''input merge_data_type switch'')')
       read(*,*)IMERGEML
       if(IMERGEML.eq.0)then
-        write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEML
+        write(*,'(I1,'' = Using Fourier filtered results with'',
+     .    '' later CTF correction '')')IMERGEML
+      else if(IMERGEML.eq.1)then
+        write(*,'(I1,'' = Using CTF-corrected and then Fourier'',
+     .    '' filtered results '')')IMERGEML
+      else if(IMERGEML.eq.2)then
+        write(*,'(I1,'' = Using CTF-corrected and then Movie-ModeA'',
+     .    '' unbent results '')')IMERGEML
       else
-        write(*,'(I1,'' = Using Maximum Likelihood results'',
-     .          '' where allowed'')')IMERGEML
+        write(*,'(I1,'' = Using Maximum Likelihood results '',
+     .           ''where allowed'')')IMERGEML
       endif
-
+C
       read(*,'(A)',iostat=stat)cgrid
       if(stat.ne.0)then
         write(*,'('': reached EOF '')')
@@ -144,13 +151,13 @@ C
 C
         write(11,'(''echo ":: "'')')
         call shorten(cdir,k)
-        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
-          write(cline,'(''${proc_2dx}/linhash "Working on '',A,
-     .      '' #### (FOURIER FILTERED RESULT)"'')')
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
+          write(cline,'(''${proc_2dx}/linhash "'',A,
+     .      '' (FOURIER FILTERED RESULT)"'')')
      .      cdir(1:k)
         else
-          write(cline,'(''${proc_2dx}/linhash "Working on '',A,
-     .      '' #### (SINGLE PARTICLE RESULT)"'')')
+          write(cline,'(''${proc_2dx}/linhash "'',A,
+     .      '' (SINGLE PARTICLE RESULT)"'')')
      .      cdir(1:k)
         endif
         call shortshrink(cline,k)
@@ -205,7 +212,7 @@ C
         call shorten(cline,k)
         write(11,'(''set realcell = "'',A,''"'')')cline(1:k)
 C
-        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.eq.0)then
+        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
           call cgetline(CPHORI,"phaori")
           read(CPHORI,*)RPHAORIH,RPHAORIK
           write(*,'(''   using Fourier filtered results,'',

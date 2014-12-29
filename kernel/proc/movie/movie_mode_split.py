@@ -6,11 +6,12 @@ import os
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 3:
+	if len(sys.argv) != 4:
 		sys.exit("Missuse detected")
 
 	stack_file = sys.argv[1]
 	image_name = sys.argv[2]
+	folder_name = sys.argv[3]
 	
 	stack = get_image(stack_file)
 	nx = stack.get_xsize()
@@ -27,8 +28,8 @@ if __name__ == "__main__":
         #########################################
 
 	for i in range(0,nz):
-		
-		output_name = "frames/frame_" + str(i+1) + ".mrc"
+						
+		output_name = folder_name + "/frame_" + str(i+1) + ".mrc"
 				
 		print "Creating frame", i+1, "as", output_name
 		

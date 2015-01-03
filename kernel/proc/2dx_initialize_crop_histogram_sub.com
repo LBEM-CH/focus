@@ -103,16 +103,16 @@ eot
     #
   endif
   #
-    if ( ${imageorigin} == '7' ) then
+  if ( ${imageorigin} == '7' ) then
     #############################################################################
-    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling 0...16k, and rotating 90deg."
+    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling, and rotating 90deg."
     #############################################################################  
     #
     \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
     #
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
-19               ! switch to REAL (MODE 2) with autoscaling 0…16000
+39               ! switch to REAL (MODE 2) with autoscaling -1000,1000
 SCRATCH/${nonmaskimagename}.tmp.2.mrc
 eot
     #
@@ -125,6 +125,21 @@ ${inimage}.mrc
 eot
     #
     \rm -f SCRATCH/${nonmaskimagename}.tmp.2.mrc
+  endif
+  #
+  if ( ${imageorigin} == '8' ) then
+    #############################################################################
+    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling."
+    #############################################################################  
+    #
+    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${nonmaskimagename}.tmp.mrc
+39               ! switch to REAL (MODE 2) with autoscaling -1000,1000
+${inimage}.mrc
+eot
+    #
   endif
   #
 endif

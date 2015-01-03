@@ -30,7 +30,7 @@ ${proc_2dx}/${lincommand} "2dx_unbend2_sub.com: Starting round ${locround}..."
     #
     setenv IN  FFTIR/${iname}_unbend2_fft.mrc
     setenv OUT SCRATCH/${iname}_unbend2_fft_msk.mrc
-    setenv SPOTS ${imagename}.spt
+    setenv SPOTS ${nonmaskimagename}.spt
     ${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT in order to create the reference map"
     #
     echo 2 T T F	
@@ -77,7 +77,7 @@ ${defocus},${TLTAXIS},${TLTANG}   	! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 ${holeb},${holeb}       		! radius hole if circular, X,Y half-edge-len if rect
 ${lattice},-50,50,-50,50,${rmax},1,8   	! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
 TMP234439.dat
-`cat ${imagename}.spt`
+`cat ${nonmaskimagename}.spt`
 eot
     #
     echo "<<@progress: 10>>"
@@ -255,7 +255,7 @@ eot
     \rm -f SCRATCH/${iname}_fft_msk.mrc
     setenv IN  FFTIR/${iname}_fft.mrc
     setenv OUT SCRATCH/${iname}_fft_msk.mrc
-    setenv SPOTS ${imagename}.spt
+    setenv SPOTS ${nonmaskimagename}.spt
     #
     ${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT of the image"
     ${bin_2dx}/2dx_masktrana.exe << eot
@@ -280,7 +280,7 @@ ${defocus},${TLTAXIS},${TLTANG}   	! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 ${maskb},${maskb} 			! radius hole if circular, X,Y half-edge-len if rect
 ${lattice},-50,50,-50,50,${rmax},1,8 	! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
 TMP234440.dat
-`cat ${imagename}.spt`
+`cat ${nonmaskimagename}.spt`
 eot
       #
     else
@@ -526,7 +526,7 @@ eot
     #
   else
     #
-    ${proc_2dx}/${lincommand} "attention, masking image"
+    ${proc_2dx}/${lincommand} "attention, masking image (1)"
     #
     \rm -f m${iname}.mrc
     \rm -f TMP_quadserch_1.mrc
@@ -547,6 +547,7 @@ eot
       set createmask = '0'
     endif
     #
+    \rm -f m${nonmaskimagename}.mrc
     \rm -f SPIDERCOORD.spi
     #
     ${bin_2dx}/2dx_quadserchk-2.exe << eot
@@ -562,14 +563,14 @@ ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}			! dont create manual Masking information
 1                               ! Mask the image directly
-${iname}.mrc
-m${iname}.mrc
+${nonmaskimagename}.mrc
+m${nonmaskimagename}.mrc
 256       
 0
 eot
     #
     if ( -e TMP_quadserch_6.mrc ) then
-      \mv -f TMP_quadserch_7.mrc ${nonmaskimagename}_mask.mrc
+      \mv -f TMP_quadserch_7.mrc ${nonmaskimagename}_automask.mrc
       if ( ${tempkeep} == 'y' ) then
         echo "# IMAGE-IMPORTANT: TMP_quadserch_1.mrc <Masking file 1>" >> LOGS/${scriptname}.results 
         echo "# IMAGE-IMPORTANT: TMP_quadserch_2.mrc <Masking file 2>" >> LOGS/${scriptname}.results 
@@ -584,7 +585,7 @@ eot
         \rm -f TMP_quadserch_4.mrc
         \rm -f TMP_quadserch_5.mrc
       endif
-      echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
+      echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_automask.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
     else
       ${proc_2dx}/protest "unbend2: ERROR: TMP_quadserch_6.mrc does not exist."
     endif
@@ -641,7 +642,7 @@ eot
       #
     else
       #
-      ${proc_2dx}/${lincommand} "attention, masking image"
+      ${proc_2dx}/${lincommand} "attention, masking image (2)"
       #
       \rm -f m${iname}.mrc  
       \rm -f TMP_quadserch_1.mrc
@@ -652,6 +653,7 @@ eot
       \rm -f TMP_quadserch_6.mrc
       \rm -f TMP_quadserch_7.mrc
       \rm -f SPIDERCOORD.spi
+      \rm -f m${nonmaskimagename}.mrc
       #
       ${bin_2dx}/2dx_quadserchk-2.exe << eot
 2,${quadpredb}                     ! IPASS,NRANGE
@@ -666,16 +668,16 @@ ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}                   ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}                   ! create manual Masking information (0=n,1=y)
 1                               ! Do mask the image directly
-${iname}.mrc
-m${iname}.mrc
+${nonmaskimagename}.mrc
+m${nonmaskimagename}.mrc
 -1
 0
 eot
       #
       if ( -e TMP_quadserch_6.mrc ) then
-        \mv -f TMP_quadserch_7.mrc ${nonmaskimagename}_mask.mrc
+        \mv -f TMP_quadserch_7.mrc ${nonmaskimagename}_automask.mrc
         if ( ${locround} == '1' ) then
-          echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
+          echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_automask.mrc <Masking Filter from Automatic Masking>" >> LOGS/${scriptname}.results 
         endif
       else
         ${proc_2dx}/protest "unbend2: ERROR: TMP_quadserch_6.mrc does not exist."
@@ -712,37 +714,83 @@ eot
   echo "# IMAGE: ${iname}_profile.dat <PROFILE with unit cell locations>" >> LOGS/${scriptname}.results
   #
   #
-  #############################################################################
-  # Exit if automatic masking was done.                                       #
-  #############################################################################
-  #
   if ( ${domask} == 'y' ) then
-    \rm -f m${nonmaskimagename}.spt
-    \ln -s ${nonmaskimagename}.spt m${nonmaskimagename}.spt
     echo "# IMAGE: ${nonmaskimagename}.mrc" >> LOGS/${scriptname}.results
     echo "# IMAGE: m${nonmaskimagename}.mrc" >> LOGS/${scriptname}.results
-    echo "set imagename = m${nonmaskimagename}" >> LOGS/${scriptname}.results
-    ${proc_2dx}/linblock "="
-    ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "Image now masked, name was changed to m${nonmaskimagename}"
-    ${proc_2dx}/linblock "SpotList link created: m${nonmaskimagename}.spt -> ${nonmaskimagename}.spt"
-    ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "Please relaunch the entire processing."
-    ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "Only the Defocus and Tilt Geometry determination is not needed again."
-    ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "#"
+    set imagename = m${nonmaskimagename}
+    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
     #
+    set locround = 1
+    set domask = n
     echo "set domask = n" >> LOGS/${scriptname}.results
     #
     echo "set MASKING_done = y" >> LOGS/${scriptname}.results
     #
-    echo "set FFT_done = n" >> LOGS/${scriptname}.results
+    # echo "set FFT_done = n" >> LOGS/${scriptname}.results
     echo "set UNBENDING_done = n" >> LOGS/${scriptname}.results
     #
-    echo "<<@progress: 100>>"
-    exit -1
+    if (${ctfcor_imode}x == "0x" ) then
+      ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
+      \cp -f ${imagename}.mrc image_ctfcor.mrc
+      echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
+    else
+      #  
+      #
+      #################################################################################
+      ${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image ${imagename}.mrc"
+      #################################################################################  
+      #
+      set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
+      set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
+      set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
+      \rm -f image_ctfcor.mrc
+      \rm -f ${ctfcor_tilefile}
+      \rm -f ${ctfcor_psfile}  
+      \rm -f ${ctfcor_ctffile}  
+      #
+      #
+      setenv NCPUS ${Thread_Number}
+      #
+      ${bin_2dx}/2dx_ctfcor.exe << eot
+${imagename}.mrc
+image_ctfcor.mrc
+${ctfcor_tilefile}
+${ctfcor_psfile}
+${ctfcor_ctffile}
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${ctfcor_noise}
+${ctfcor_inner_tile}
+${ctfcor_outer_tile}
+${ctfcor_taper}
+${ctfcor_imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+      #
+      echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+    endif
+    #
+    #
+    #################################################################################
+    ${proc_2dx}/linblock "Sourcing 2dx_fftrans_sub.com"
+    #################################################################################
+    #
+    set inimage = image_ctfcor
+    source ${proc_2dx}/2dx_fftrans_sub.com
+    #
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "Image now masked, name was changed to m${nonmaskimagename}"
+    ${proc_2dx}/linblock "The masked image was CTF corrected, and the FFTs calculated again."
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "#"
+    #
+    #
   endif
   #
   #############################################################################

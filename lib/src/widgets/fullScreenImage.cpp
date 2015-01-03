@@ -72,7 +72,7 @@ fullScreenImage::fullScreenImage(mrcImage *source_image, confData *conf, QWidget
   selectionVisible = false;
 
 
-  peakListFileName = conf->getDir("working") + conf->get("imagename","value") + ".spt";
+  peakListFileName = conf->getDir("working") + conf->get("nonmaskimagename","value") + ".spt";
   selectionListFileName  = conf->getDir("working") + "selectionList.dat";
   psPeakListFile = conf->getDir("working") + "peaks_xy.dat";
 

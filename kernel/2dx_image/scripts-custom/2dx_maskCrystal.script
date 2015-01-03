@@ -310,10 +310,10 @@ eot
   ${bin_2dx}/labelh.exe << eot
 SCRATCH/TMPmask4.mrc
 -3
-${nonmaskimagename}_mask.mrc
+${nonmaskimagename}_manualmask.mrc
 eot
   #
-  echo "# IMAGE: ${nonmaskimagename}_mask.mrc <MRC: Making Info File>"  >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${nonmaskimagename}_manualmask.mrc <MRC: Making Info File>"  >> LOGS/${scriptname}.results
   #
   #############################################################################
   ${proc_2dx}/linblock "TWOFILE - to multiply image with masking-image"
@@ -352,16 +352,6 @@ eot
     echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
     ${proc_2dx}/linblock "Imagename changed from ${oldname} to ${imagename}."
     echo "#WARNING: Imagename changed from ${oldname} to ${imagename}." >> LOGS/${scriptname}.results
-  endif
-  #
-  if ( ! -e ${imagename}.spt ) then
-    if ( -e ${nonmaskimagename}.spt ) then
-      \cp -f ${nonmaskimagename}.spt ${imagename}.spt
-      ${proc_2dx}/linblock "Spotlist ${nonmaskimagename}.spt copied to ${imagename}.spt."
-    endif
-  else
-    ${proc_2dx}/linblock "Spotlist ${imagename}.spt was already existing. Is it still good ?"
-    echo "#WARNING: Warning: Spotlist ${imagename}.spt was already existing. Is it still good ?" >> LOGS/${scriptname}.results
   endif
   #
   #

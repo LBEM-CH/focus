@@ -1077,7 +1077,8 @@ C  MODE 39 : Produce REAL output image with range [-1000;1000]
 C
 115     continue
         write(TITLE,'(''LABELH Mode 39: Produce REAL image '')')
-        write(6,'('' Producing REAL with Autoscaling [-1000;1000] '')')
+        write(6,'('' Producing REAL with Autoscaling Mean 0 '',
+     .    ''and STD 100'')')
 C
         CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
         CALL IRTLAB(1,LABELS,NL)
@@ -1094,7 +1095,7 @@ C
         DMEAN = 0.0
         DOUBLMEAN = 0.0
 C
-C-------Copy entire file into output picture
+C-------Find Mean
         do iy = 1,NY
           CALL IRDLIN(1,ALINE,*999)
           do ix = 1,NX
@@ -1111,16 +1112,32 @@ C
         write(*,'('' Opened file has range MIN,MAX,MEAN: '',3G16.5)')
      1     DMIN,DMAX,DMEAN
 C
+        DOUBLMEAN=0.0
+C-------Find STD
+        do iy = 1,NY
+          do ix = 1,NX
+            VAL=APIC(ix,iy)
+            DOUBLMEAN = DOUBLMEAN + (VAL-DMEAN)**2
+          enddo
+        enddo
+C
+        VAL = DOUBLMEAN/(NX*NY)
+        DSTD = SQRT(VAL)
+C
+        write(*,'('' Opened file has range MIN,MAX,MEAN,STDEV: '',
+     .     4G16.5)')
+     .     DMIN,DMAX,DMEAN,DSTD
+C
         DVAL = ABS(DMAX - DMIN)
         write(*,'('' That is a dynamic range of: '',G16.5)')
      1     DVAL
 C
 C-------Calculate offset and scaling factors
 C
-        RTARGET=1000.0
-        ROFF = DMIN 
-        if ( DVAL .gt. 0.00000001 ) then
-          RSCALE = RTARGET / DVAL
+        RTARGET=100.0
+        ROFF = DMEAN
+        if ( DSTD .gt. 0.00000001 ) then
+          RSCALE = RTARGET / DSTD
         else
           RSCALE = RTARGET  
         endif
@@ -1128,6 +1145,12 @@ C
         write(*,'('' Calculated offset of '',G16.5)')ROFF
         write(*,'('' Calculated scaling factor of '',G16.5)')RSCALE
 C
+C-------Rescale image to MEAN=0, STD=RTARGET
+        do iy = 1,NY
+          do ix = 1,NX
+            APIC(ix,iy)=(APIC(ix,iy)-ROFF)*RSCALE
+          enddo
+        enddo
 C-------Output file is INT*2 (16 bit, Mode=1)
 C
         MODE = 2
@@ -1147,13 +1170,11 @@ C
 C-------Write the file into the output file
         do iy = 1,NY
           do ix = 1,NX
-            DOUBLTMP = APIC(ix,iy)
-            DOUBLTMP = ((DOUBLTMP - ROFF) * RSCALE * 2.0 ) - RTARGET
-            VAL=DOUBLTMP
-            ALINE(ix)=VAL
+            VAL=APIC(ix,iy)
             IF (VAL .LT. DMIN) DMIN = VAL
             IF (VAL .GT. DMAX) DMAX = VAL
             DOUBLMEAN = DOUBLMEAN + VAL
+            ALINE(ix)=VAL
           enddo
           CALL IWRLIN(2,ALINE)
         enddo

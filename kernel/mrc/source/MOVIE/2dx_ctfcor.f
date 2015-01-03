@@ -7,8 +7,6 @@ C                                               Part of 2dx                   *
 C                                                                             *
 C******************************************************************************
 C
-C Input is a single file in mapformat, output is a single file in mapformat, plus debugging info maps.
-C
 C-----The image is cut into OUTER tiles (e.g. 256 wide), which are CTF corrected, and from which the 
 C-----INNER tiles (e.g. 128 wide) are then centrally windowed. The inner tiles are then placed back
 C-----into the large picture. 
@@ -48,7 +46,9 @@ C
       INTEGER   IMP
       CHARACTER NCPUS*10
       INTEGER   OMP_GET_NUM_PROCS
+      INTEGER   OMP_GET_THREAD_NUM
       LOGICAL   EX
+      INTEGER   ITNR
 C
       CHARACTER CFORM
       INTEGER   IP,IS,IERR
@@ -550,6 +550,7 @@ C
           enddo
 C
           THETATR=WL/(RPIXEL*ITILEOUTER)
+!$OMP PARALLEL DO PRIVATE (LL,iy,MM,I,J,CTFV,IS)
           DO ix=1,ITILEOUTER/2
             LL=ix-1
             DO iy=1,ITILEOUTER
@@ -560,14 +561,17 @@ C
               IF (J.GT.ITILEOUTER) J=J-ITILEOUTER
               CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
      +                ANGASTRAD,THETATR,LL,MM)
-              CTFTILE(ID(I,J,LTPIC))=CTFV
+              IS=ID(I,J,LTPIC) 
+              CTFTILE(IS)=CTFV
               I=ITILEOUTER/2+1-ix
               J=ITILEOUTER+2-J
               if(J.le.ITILEOUTER)then
-                CTFTILE(ID(I,J,LTPIC))=CTFV
+                IS=ID(I,J,LTPIC) 
+                CTFTILE(IS)=CTFV
               endif
             enddo
           enddo
+!$OMP END PARALLEL DO 
 C
           if(LCTFSUM)then
 C----------------------------------------
@@ -576,10 +580,10 @@ C----------------------------------------
 C
             THETATR=WL/(RPIXEL*NX)
 C
-C---This would be nice, but it leads to a "noisy" (???) CTF plot.
-C---Is this a memory collision?
-C-----------!$OMP PARALLEL DO
+!$OMP PARALLEL DO PRIVATE (iy,CTFV,I,J,IR) 
             DO ix=0,NX/2
+C              ITNR = OMP_GET_THREAD_NUM()  ! Aktuelle Threadnummer
+C              write(6,'(''Thread '',I6,'', ix = '',I6)') ITNR, ix
               DO iy=-NY/2,NY/2
                 if(ix.ne.0 .or. iy.ge.0)then
                   CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
@@ -591,6 +595,7 @@ C-----------!$OMP PARALLEL DO
                 endif
               enddo
             enddo
+!$OMP END PARALLEL DO 
 C
             DO ix=0,NX/2
               DO iy=-NY/2,NY/2

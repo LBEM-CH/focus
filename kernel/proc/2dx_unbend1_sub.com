@@ -32,7 +32,7 @@ ${proc_2dx}/${lincommand} "MASKTRAN - to mask the image according to the spotlis
 #
 setenv IN  FFTIR/${imagename}_fft.mrc
 setenv OUT SCRATCH/${imagename}_fft_msk1.mrc
-setenv SPOTS ${imagename}.spt
+setenv SPOTS ${nonmaskimagename}.spt
 #
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
@@ -64,7 +64,7 @@ ${proc_2dx}/${lincommand} "MASKTRAN - to mask a reference according to the spotl
 #
 setenv IN  FFTIR/${imagename}_fft.mrc
 setenv OUT SCRATCH/${imagename}_fft_msk2.mrc
-setenv SPOTS ${imagename}.spt
+setenv SPOTS ${nonmaskimagename}.spt
 set holea = 1
 #
 \rm -f SCRATCH/${imagename}_fft_msk2.mrc
@@ -481,12 +481,12 @@ ${createmask}                               ! do/dont create manual Masking info
 0                               ! Dont mask the image directly
 eot
   #
-  \rm -f SCRATCH/${imagename}_CCmap2.mrc 
+  # \rm -f SCRATCH/${imagename}_CCmap2.mrc 
   \mv -f CCPLOT.PS PS/${imagename}_quadserch1c.ps
   echo "# IMAGE-IMPORTANT: PS/${imagename}_quadserch1c.ps <PS: Vector Plot for Distortions, Pass 3>" >> LOGS/${scriptname}.results
   #
 endif
-\rm -f SCRATCH/${imagename}_CCmap1.mrc
+# \rm -f SCRATCH/${imagename}_CCmap1.mrc
 #
 echo "<<@progress: 68>"
 #

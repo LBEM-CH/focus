@@ -461,7 +461,7 @@ echo "<<@progress: 40>>"
 #                                                                           #
 ${proc_2dx}/linblock "MASKTRAN - a for the filtered TEM image."
 #                                                                           #
-#                   ${imagename}.fft.mrc  +  ${imagename}.spt  =>  ${imagename}.msk.mrc #
+#                   ${imagename}.fft.mrc  +  ${nonmaskimagename}.spt  =>  ${imagename}.msk.mrc #
 #                                                                           #
 #############################################################################
 #
@@ -474,7 +474,7 @@ if ( ${istilt} == "n" ) then
   if ( -e GOODSPOT.spt ) then
     setenv SPOTS GOODSPOT.spt
   else
-    setenv SPOTS ${imagename}.spt
+    setenv SPOTS ${nonmaskimagename}.spt
   endif
   setenv OUT SCRATCH/${imagename}.msk.mrc
   #
@@ -526,7 +526,7 @@ ${defocus} ${TLTAXIS} ${TLTANG}       ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 ${SYN_maska} ${SYN_maska} 	      ! radius hole if circular, X,Y half-edge-len if rect
 ${lattice} -30 30 -30 30 ${rmax} 0 0 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
 TMP234439.dat
-`cat ${imagename}.spt`
+`cat ${nonmaskimagename}.spt`
 eot-ttmask
     #
   endif

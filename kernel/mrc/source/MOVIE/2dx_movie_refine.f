@@ -72,6 +72,7 @@ C
       CHARACTER*200 FILE1,FILE2
       CHARACTER*200 cline,cline2
       CHARACTER*200 comment(5)
+      CHARACTER*20 CSTIN
 C
       LOGICAL   EX
 C
@@ -162,8 +163,9 @@ C
           write(*,'(''::ERROR: CCmap file not found: '',A)')cline(1:k)
           STOP
         ENDIF
+        write(CSTIN,'(''OLD'')')
         CALL IOPEN(cline,10,CFORM,MODE,NXYZ(1),NXYZ(2),
-     +           NXYZ(3),'OLD',STEPR,TITLE)
+     +           NXYZ(3),CSTIN,STEPR,TITLE)
 C
         WRITE(*,'(''Reading image '',A,'', NX,NY = '',2I10)')
      .     cline(1:k),NXYZ(1),NXYZ(2)
@@ -321,6 +323,7 @@ C-----------Initiate offset position for last frame:
             ROFFLASTX = 0.0
             ROFFLASTY = 0.0
 C
+!$OMP PARALLEL DO PRIVATE (ioffy,ix,iy,IFIELD,iframe,RX,RY,iofflocx,iofflocy,ICO,IRO,ID,IS,IMAX,rmaxx,rmaxy)
             do ioffx=iminoffset,imaxoffset
               do ioffy=iminoffset,imaxoffset
 C
@@ -373,6 +376,7 @@ C
                     endif
                   enddo
                 enddo
+!$OMP CRITICAL 
                 if(IMAX.gt.IOFFMAX)then
                   IOFFMAX=IMAX
                   ROFFCENX=rmaxx
@@ -380,13 +384,15 @@ C
                   ROFFLASTX=RX
                   ROFFLASTY=RY
                 endif
-C
+!$OMP END CRITICAL 
               enddo
             enddo
+!$OMP END PARALLEL DO 
 C
 C-----------Repeat with 10x smaller step size:
             roffstep = roffstep / imaxoffset
 C
+!$OMP PARALLEL DO PRIVATE (ioffy,ix,iy,IFIELD,iframe,RX,RY,iofflocx,iofflocy,ICO,IRO,ID,IS,ixx,iyy,IFIEL2,IFIEL3,IMAX,rmaxx,rmaxy)
             do ioffx=iminoffset,imaxoffset
               do ioffy=iminoffset,imaxoffset
 C
@@ -469,6 +475,7 @@ C
                     endif
                   enddo
                 enddo
+!$OMP CRITICAL 
                 if(IMAX.gt.IOFFMAX)then
                   IOFFMAX=IMAX
                   ROFFCENX=rmaxx
@@ -476,9 +483,11 @@ C
                   ROFFLASTX=RX
                   ROFFLASTY=RY
                 endif
+!$OMP END CRITICAL 
 C
               enddo
             enddo
+!$OMP END PARALLEL DO 
 C
 C-----------Store optimal results 
 C-----------The last frame is twice as much offset in one direction, 

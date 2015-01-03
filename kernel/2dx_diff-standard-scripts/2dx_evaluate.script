@@ -216,7 +216,7 @@ ${RESMAX}     ! MAX. RESOL. FOR PLOTFRAME (A)
 ${rscale}       !rscale
 eot
 #
-\mv -f plotdiffs.list ${imagename}.spt
+\mv -f plotdiffs.list ${nonmaskimagename}.spt
 #
 #-------------------------------------------------------------
 #

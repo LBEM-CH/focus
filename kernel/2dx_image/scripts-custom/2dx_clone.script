@@ -168,8 +168,8 @@ endif
 ${proc_2dx}/linblock "Links to old image files in cloned directory created."
 #
 if ( ${doswap} == "0" ) then
-  if ( -e  ../${old_imagedirectory}/${imagename}.spt ) then
-    cp -f ../${old_imagedirectory}/${imagename}.spt ${new_imagename}.spt
+  if ( -e  ../${old_imagedirectory}/${nonmaskimagename}.spt ) then
+    cp -f ../${old_imagedirectory}/${nonmaskimagename}.spt ${new_imagename}.spt
   endif
   ${proc_2dx}/linblock "Old spotlist copied to new spotlist file"
 endif

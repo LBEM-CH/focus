@@ -155,6 +155,7 @@ set QVALS = ""
 set Thread_Number = ""
 set ctfcor_noise = ""
 set ctfcor_imode = ""
+set use_masked_image = ""
 #
 #$end_vars
 #
@@ -215,6 +216,8 @@ if ( ${pdf2ps}x == 'x' ) then
 endif
 #
 # echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
+#
+set iname = image_ctfcor
 #
 if ( ${movie_enable} == "n" ) then
   ${proc_2dx}/linblock "Skipping movie mode unbending."
@@ -307,22 +310,36 @@ endif
 #
 setenv NCPUS ${Thread_Number}
 #
-if ( ${movie_masking_mode} == '1' ) then 
-  if ( ! -e ${nonmaskimagename}_mask.mrc ) then
-    ${proc_2dx}/protest "ERROR: ${nonmaskimagename}_mask.mrc not found. First run UNBEND-II with masking option."
-    # ${proc_2dx}/linblock "WARNING: Continuing withoug masking."
-    # set movie_masking_mode = 0
-    # echo "set movie_masking_mode = ${movie_masking_mode}" >> LOGS/${scriptname}.results
+if ( ${use_masked_image} == "y" ) then
+  if ( -e ${nonmaskimagename}_manualmask.mrc ) then
+    set maskfile = ${nonmaskimagename}_manualmask
+  else
+    if ( -e ${nonmaskimagename}_automask.mrc ) then
+      set maskfile = ${nonmaskimagename}_automask
+    else
+      if ( -e ${nonmaskimagename}_mask.mrc ) then
+        \mv ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_automask.mrc
+        set maskfile = ${nonmaskimagename}_automask
+      else
+        ${proc_2dx}/linblock "No Masking Info file found.  Not masking image."
+        set use_masked_image = "n"
+        echo "set use_masked_image = ${use_masked_image}"  >> LOGS/${scriptname}.results
+      endif 
+    endif 
   endif 
-  echo  "# IMAGE: ${nonmaskimagename}_mask.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
 endif
 #
-if ( ! -e SCRATCH/2dx_ctfcor_ctffile.mrc ) then
-  ${proc_2dx}/protest "ERROR:  SCRATCH/2dx_ctfcor_ctffile.mrc missing. First run script Correct CTF on tiles"
+if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then 
+  if ( ! -e ${maskfile}.mrc ) then
+    ${proc_2dx}/protest "ERROR: ${maskfile}.mrc not found. First run UNBEND-II with masking option."
+  endif 
+  echo  "# IMAGE: ${maskfile}.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ! -e ${iname}.mrc ) then
+  ${proc_2dx}/protest "ERROR:  ${iname}.mrc missing. First run script Correct CTF on tiles"
 endif
 
-set iname = image_ctfcor
-#
 set PROFDATA = ${iname}_profile.dat
 if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
@@ -361,13 +378,13 @@ ${proc_2dx}/linblock "drift_selector.py - Selecting and smoothing drift profiles
 #
 touch frames/PROFDATA_1.dat
 \rm frames/PROFDATA_*.dat
-\rm -f {nonmaskimagename}_mask_mask.mrc
+\rm -f ${maskfile}_mask.mrc
 set lat_string = `echo ${lattice} | sed 's/,/ /g'`
-python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
+python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${maskfile}.mrc ${maskfile}_mask.mrc ${lat_string}
 #
-echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
-echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
-echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask_mask.mrc <Masked crystal mask>" >> LOGS/${scriptname}.results
+echo ":: Done. Now saving ${maskfile}_mask.mrc"
+echo  "# IMAGE-IMPORTANT: ${maskfile}.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
+echo  "# IMAGE-IMPORTANT: ${maskfile}_mask.mrc <Masked crystal mask>" >> LOGS/${scriptname}.results
 #
 #
 echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
@@ -545,12 +562,12 @@ if ( ${movie_masking_mode} != '0' ) then
   ###########################################################################
   ${proc_2dx}/linblock "Masking drift-corrected CCmap with masking info"
   ###########################################################################
-  python ${proc_2dx}/movie/mask.py frames/CCmap_driftCorrected_filt.mrc frames/CCmap_driftCorrected_filt_masked.mrc ${nonmaskimagename}_mask_mask.mrc
+  python ${proc_2dx}/movie/mask.py frames/CCmap_driftCorrected_filt.mrc frames/CCmap_driftCorrected_filt_masked.mrc ${maskfile}_mask.mrc
   echo "# IMAGE: frames/CCmap_driftCorrected_filt_masked.mrc <CCmap drift-corrected, filtered, masked>" >> LOGS/${scriptname}.results 
   ###########################################################################
   ${proc_2dx}/linblock "Masking average with masking info"
   ###########################################################################
-  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt_ctf.mrc frames/direct_sum_filt_masked.mrc ${nonmaskimagename}_mask_mask.mrc
+  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt_ctf.mrc frames/direct_sum_filt_masked.mrc ${maskfile}_mask.mrc
   endif
   echo "# IMAGE: frames/direct_sum_filt_masked.mrc <Sum unbent images, filtered, masked>" >> LOGS/${scriptname}.results 
 else

@@ -102,6 +102,10 @@ set det_tilt = ""
 set ctf_ttf = ""
 set refori = ""
 set createmaskinfo = ""
+set taperBeforeFFT = ""
+set generatePeriodogram = ""
+set periodogramWindowsize = ""
+set periodogramNumsubsteps = ""
 set ISTEP = ""
 set ISTEP_h = ""
 set IMAXCOR = ""
@@ -120,8 +124,19 @@ set RP_3 = ""
 set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
+set crop = ""
+set crop_histogram = ""
+set crop_histogram_percent = ""
+set crop_histogram_stdev = ""
+set use_masked_image = ""
 set ctfcor_imode = ""
 set ctfcor_noise = ""
+set ctfcor_inner_tile = ""
+set ctfcor_outer_tile = ""
+set ctfcor_taper = ""
+set ctfcor_debug = ""
+set ctfcor_maxamp_factor = ""
+set Thread_Number = ""
 #
 #$end_vars
 #
@@ -261,13 +276,13 @@ endif
 #
 set startname = `echo ${imagename} | cut -c1`
 #
-if ( $domask == 'y' ) then
-  if ( -e ${imagename}_mask.mrc ) then
-    set domask = 'n'
-    echo "set domask = ${domask}" >> LOGS/${scriptname}.results
-    echo "Masking info exists. domask corrected to ${domask}."
-  endif
-endif
+# if ( $domask == 'y' ) then
+#   if ( -e ${imagename}_mask.mrc ) then
+#     set domask = 'n'
+#     echo "set domask = ${domask}" >> LOGS/${scriptname}.results
+#     ${proc_2dx}/linblock "Masking info exists. domask corrected to ${domask}."
+#   endif
+# endif
 #
 if ( ${createmaskinfo} == 'y' ) then
   if ( ${startname} == 'm' ) then
@@ -276,12 +291,12 @@ if ( ${createmaskinfo} == 'y' ) then
   endif
 endif
 #
-if ( ${domask} == 'y' ) then
-  set round = 1
-  ${proc_2dx}/lin "Doing only one round because of masking"
-else
-  ${proc_2dx}/lin "Doing ${round} rounds"
-endif
+# if ( ${domask} == 'y' ) then
+#   set round = 1
+#   ${proc_2dx}/lin "Doing only one round because of masking"
+# else
+#   ${proc_2dx}/lin "Doing ${round} rounds"
+# endif
 #
 set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
 set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
@@ -393,25 +408,10 @@ if ( ${latlenok} == '0' ) then
   ${proc_2dx}/protest "Determine lattice first. Aborting."
 endif
 #
-if ( ! -e ${imagename}.spt ) then
-  echo ":: "
-  ${proc_2dx}/linblock "Spotlist ${iname}.spt missing."
-  if ( -e ${nonmaskimagename}.spt ) then
-    ${proc_2dx}/linblock "WARNING: Copying ${nonmaskimagename}.spt to ${imagename}.spt"
-    \cp ${nonmaskimagename}.spt ${imagename}.spt
-  else
-    ${proc_2dx}/protest "Aborting."
-  endif
-endif
 if ( ! -e ${nonmaskimagename}.spt ) then
   echo ":: "
   ${proc_2dx}/linblock "Spotlist ${nonmaskimagename}.spt missing."
-  if ( -e ${imagename}.spt ) then
-    ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${nonmaskimagename}.spt"
-    \cp ${imagename}.spt ${nonmaskimagename}.spt
-  else
-    ${proc_2dx}/protest "Aborting."
-  endif
+  ${proc_2dx}/protest "Aborting."
 endif
 #
 #############################################################################

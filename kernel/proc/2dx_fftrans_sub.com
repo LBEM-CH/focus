@@ -69,12 +69,20 @@ ${proc_2dx}/${lincommand} "FFTRANS - to calculate Fourier transform of image"
 #                                                                           #
 #############################################################################
 #
-\rm -f FFTIR/${inimage}.fft.mrc
 if ( ${taperBeforeFFT} == "y" ) then
-  setenv IN SCRATCH/${inimage}_taper.mrc
+  set infile = SCRATCH/${inimage}_taper.mrc
 else
-  setenv IN ${inimage}.mrc
+  set infile = ${inimage}.mrc
 endif 
+\rm -f SCRATCH/upscaled.mrc
+${bin_2dx}/labelh.exe << eot
+${infile}
+39
+SCRATCH/upscaled.mrc
+eot
+#
+\rm -f FFTIR/${inimage}_fft.mrc
+setenv IN SCRATCH/upscaled.mrc
 setenv OUT FFTIR/${inimage}_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
@@ -89,27 +97,15 @@ ${proc_2dx}/${lincommand} "LABEL - to 2x down-interpolate original image, three 
 #                                                                           #
 #############################################################################
 #
-if ( ${taperBeforeFFT} == "y" ) then
-  #
-  \rm -f FFTIR/${inimage}_red.mrc
-  #
-  ${bin_2dx}/labelh.exe << eot
-SCRATCH/${inimage}_taper.mrc
+#
+\rm -f FFTIR/${inimage}_red.mrc
+#
+${bin_2dx}/labelh.exe << eot
+SCRATCH/upscaled.mrc
 4               ! average adjacent pixels
 FFTIR/${inimage}_red.mrc
 2,2
 eot
-else
-  #
-  \rm -f FFTIR/${inimage}_red.mrc
-  #
-  ${bin_2dx}/labelh.exe << eot
-${inimage}.mrc
-4               ! average adjacent pixels
-FFTIR/${inimage}_red.mrc
-2,2
-eot
-endif
 #
 \rm -f SCRATCH/${nonmaskimagename}_red2.mrc
 #

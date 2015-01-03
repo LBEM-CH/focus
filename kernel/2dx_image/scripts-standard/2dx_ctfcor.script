@@ -38,6 +38,7 @@
 # DISPLAY: ctfcor_debug
 # DISPLAY: ctfcor_maxamp_factor
 # DISPLAY: Thread_Number
+# DISPLAY: ctfcor_calculate_tiles
 #
 #$end_local_vars
 #
@@ -84,6 +85,7 @@ set ctfcor_imode = ""
 set ctfcor_debug = ""
 set ctfcor_maxamp_factor = ""
 set Thread_Number = ""
+set ctfcor_calculate_tiles = ""
 #
 #$end_vars
 #
@@ -100,32 +102,61 @@ echo "<<@evaluate>>"
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
 #
-if ( ! -e image_ctfcor.spt ) then
-  \cp -f ${imagename}.spt image_ctfcor.spt
-endif
-#
 if (${ctfcor_imode}x == "0x" ) then
-  ${proc_2dx}/linblock "Not applying any CTF correction."
+  ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
   \cp -f ${imagename}.mrc image_ctfcor.mrc
+  echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
 else
   #  
   #
   #################################################################################
-  ${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image"
+  ${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image ${imagename}.mrc"
   #################################################################################  
   #
-  set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
-  set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
-  set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
-  \rm -f image_ctfcor.mrc
-  \rm -f ${ctfcor_tilefile}
-  \rm -f ${ctfcor_psfile}  
-  \rm -f ${ctfcor_ctffile}  
   #
+  \rm -f image_ctfcor.mrc
   #
   setenv NCPUS ${Thread_Number}
   #
-  ${bin_2dx}/2dx_ctfcor.exe << eot
+  if ( ${ctfcor_calculate_tiles} == "n" ) then
+    set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
+    set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
+    set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
+    \rm -f ${ctfcor_tilefile}
+    \rm -f ${ctfcor_psfile}   
+    \rm -f ${ctfcor_ctffile}  
+    #
+    ${bin_2dx}/2dx_ctfcor.exe << eot
+${imagename}.mrc
+image_ctfcor.mrc
+#
+#
+${ctfcor_ctffile}
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${ctfcor_noise}
+${ctfcor_inner_tile}
+${ctfcor_outer_tile}
+${ctfcor_taper}
+${ctfcor_imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+    #
+    echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+    #
+  else
+    #
+    set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
+    set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
+    set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
+    \rm -f ${ctfcor_tilefile}
+    \rm -f ${ctfcor_psfile}   
+    \rm -f ${ctfcor_ctffile}  
+    #
+    ${bin_2dx}/2dx_ctfcor.exe << eot
 ${imagename}.mrc
 image_ctfcor.mrc
 ${ctfcor_tilefile}
@@ -142,11 +173,12 @@ ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
-  #
-  echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+    #
+    echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+  endif
 endif
 #
 echo "<<@progress: 10>>"

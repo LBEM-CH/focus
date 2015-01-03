@@ -34,15 +34,17 @@ if __name__ == "__main__":
 
         mask = resample(maskfile,r)
         maskinfo = info(mask)
+        maskmax  = maskinfo[3]
         masksize = maskinfo[4]
         print "New masking file ", maskinginfo, " has size = ", masksize
-
+	if maskmax < 1.0:
+		maskmax = 1.0
 
         s = info(frame,mask)
         average = s[0]
 
         frame -= average
-        frame *= mask
+        frame *= mask / maskmax
         frame += average
 
 	frame.write_image(filename_out)

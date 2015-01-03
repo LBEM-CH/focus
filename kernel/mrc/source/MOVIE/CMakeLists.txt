@@ -108,20 +108,18 @@ set(2DXMOVIEREFINE 2dx_movie_refine)
 set(2DXMOVIEREFINE_SRC ${2DXMOVIEREFINE}.f)
 set(2DXMOVIEREFINE_EXE ${2DXMOVIEREFINE})
 add_executable(${2DXMOVIEREFINE_EXE} ${2DXMOVIEREFINE_SRC} ${IOF} ${IOC}) 
-set(EXECUTABLES  ${2DXMOVIEREFINE_EXE})
 
 set(2DXCTFCOR 2dx_ctfcor)
 set(2DXCTFCOR_SRC ${2DXCTFCOR}.f)
 set(2DXCTFCOR_EXE ${2DXCTFCOR})
 add_executable(${2DXCTFCOR_EXE} ${2DXCTFCOR_SRC} ${IOF} ${IOC}) 
-set(EXECUTABLES  ${2DXCTFCOR_EXE})
 
 set(2DXMARKSPOTS 2dx_mark_spots)
 set(2DXMARKSPOTS_SRC ${2DXMARKSPOTS}.f)
 set(2DXMARKSPOTS_EXE ${2DXMARKSPOTS})
 add_executable(${2DXMARKSPOTS_EXE} ${2DXMARKSPOTS_SRC} ${IOF} ${IOC}) 
-set(EXECUTABLES  ${2DXMARKSPOTS_EXE})
 
+set(EXECUTABLES ${2DXCTFCOR_EXE} ${2DXMOVIEREFINE_EXE} ${2DXMARKSPOTS_EXE})
 ###############################################################################
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)

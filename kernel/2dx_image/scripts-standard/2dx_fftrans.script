@@ -145,51 +145,51 @@ if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc ) then
   #
 endif
 #
-echo Testing: ${use_masked_image} ${nonmaskimagename}_mask.mrc
-if ( -e ${nonmaskimagename}_mask.mrc ) then
-  echo "${nonmaskimagename}_mask.mrc found: "
-  ls -l ${nonmaskimagename}_mask.mrc
-else
-  echo "${nonmaskimagename}_mask.mrc not found."
-endif
 #
-if ( ${use_masked_image} == "y"  && -e ${nonmaskimagename}_mask.mrc ) then
+if ( ${use_masked_image} == "y" ) then
+  if ( -e ${nonmaskimagename}_manualmask.mrc ) then
+    set maskfile = ${nonmaskimagename}_manualmask.mrc
+  else
+    if ( -e ${nonmaskimagename}_automask.mrc ) then
+      set maskfile = ${nonmaskimagename}_automask.mrc
+    else
+      if ( -e ${nonmaskimagename}_mask.mrc ) then
+        \mv ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_automask.mrc
+        set maskfile = ${nonmaskimagename}_automask.mrc
+      else
+        ${proc_2dx}/linblock "No Masking Info file found.  Not masking image."
+        set use_masked_image = "n"
+        echo "set use_masked_image = ${use_masked_image}"  >> LOGS/${scriptname}.results
+      endif 
+    endif 
+  endif 
+endif
+if ( ${use_masked_image} == "y" ) then
   if ( ${imagename} != m${nonmaskimagename} ) then
     set imagename = `echo m${nonmaskimagename}`
     echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
-    echo ":: "
     ${proc_2dx}/linblock "correcting imagename to ${imagename}"
-    if ( -e ${nonmaskimagename}.mrc ) then
-      if ( -e m${nonmaskimagename}.mrc ) then
-        \rm -f m${nonmaskimagename}.mrc
-      endif 
-    endif
-    echo ":: "
   endif
   if ( ! -e ${imagename}.mrc ) then
     ###########################################################################
-    echo ":: "
     ${proc_2dx}/linblock "Masking image with masking info"
-    echo ":: "
     ###########################################################################
-    python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_mask.mrc
-    echo "# IMAGE: ${nonmaskimagename}_mask.mrc <Masking Information Mask>" >> LOGS/${scriptname}.results   
+    python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${maskfile}
+    echo "# IMAGE: ${maskfile} <Masking Information Mask>" >> LOGS/${scriptname}.results   
     echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
     echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
   endif
-  echo "# IMAGE: ${nonmaskimagename}_mask.mrc <Masking Information Mask>" >> LOGS/${scriptname}.results   
-  echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
-  echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
 else
   if ( ${imagename} == m${nonmaskimagename} ) then
     \cp -f ${nonmaskimagename}.mrc ${imagename}.mrc 
     set imagename = `echo ${nonmaskimagename}`
     echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
-    echo ":: "
     ${proc_2dx}/linblock "correcting imagename to ${imagename}"
-    echo ":: "
   endif
 endif
+
+#
+#
 #
 if ( ! -e ${imagename}.mrc ) then
   ${proc_2dx}/protest "ERROR: ${imagename}.mrc missing. Aborting."

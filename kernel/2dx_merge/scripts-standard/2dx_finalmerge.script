@@ -238,6 +238,15 @@ echo MergeAK = ${MergeAK}
 echo MergeIWF_VAL = ${MergeIWF_VAL}
 echo MergeIWP_VAL = ${MergeIWP_VAL}
 #
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "The current working directory is" ${olddir}
+#
 echo "<<@progress: 5>>"
 #
 #############################################################################

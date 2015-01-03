@@ -50,6 +50,7 @@
 # DISPLAY: lattice
 # DISPLAY: secondlattice
 # DISPLAY: secondlattice_exists
+# DISPLAY: secondlattice_clone
 # DISPLAY: secondlattice_is_this
 # DISPLAY: backuplattice
 # DISPLAY: defocus
@@ -97,6 +98,7 @@ set imagesidelength = ""
 set secondlattice = ""
 set secondlattice_exists = ""
 set secondlattice_is_this = ""
+set secondlattice_clone = ""
 set magnification = ""
 set stepdigitizer = ""
 set tempkeep = ""
@@ -406,39 +408,41 @@ eot
         echo "set secondlattice = "\"${newsecondlattice}\" >> LOGS/${scriptname}.results
         echo "set secondlattice_exists = y" >> LOGS/${scriptname}.results
         #
-        #############################################################################
-        echo ":: "
-        ${proc_2dx}/linblock "Cloning this image directory to initiate processing of second lattice"
-        echo ":: "
-        #############################################################################
-        #
-        set olddir = `pwd`
-        set currentdir = `echo ${olddir} | rev | cut -d\/ -f1 | rev`
-        set newdir = `echo ${currentdir}_lat2`
-        cd ..
-        if ( ! -d ${newdir} ) then
-          \mkdir ${newdir}
-          cd ${newdir}
-          if ( -e  ../${currentdir}/${nonmaskimagename}.tif ) then
-            \cp -f ../${currentdir}/${nonmaskimagename}.tif .
-          endif
-          if ( -e  ../${currentdir}/${nonmaskimagename}.mrc ) then
-            \cp -f ../${currentdir}/${nonmaskimagename}.mrc .
-          endif
-          if ( -e  ../${currentdir}/${nonmaskimagename}_stack.mrc ) then
-            \cp -f ../${currentdir}/${nonmaskimagename}_stack.mrc .
-          endif
-          \cp -f ../${currentdir}/2dx_image.cfg .
-          set newimagenumber = `echo ${imagenumber} | awk '{ s = $1 + 1 } END { print s }'`
-          echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
-          echo "set det_lattice = n" >> 2dx_image.cfg
-          echo "set lattice = "\"${newsecondlattice}\" >> 2dx_image.cfg
-          echo "set secondlattice = "\"${lattice}\" >> 2dx_image.cfg
-          echo "set secondlattice_is_this = "\"y\" >> 2dx_image.cfg
-          echo "set secondlattice_exists = "\"y\" >> 2dx_image.cfg
-          ${proc_2dx}/linblock "Image cloned, new directory name is ${newdir}"
+        if ( ${secondlattice_clone} == "y" ) then
+          #############################################################################
+          echo ":: "
+          ${proc_2dx}/linblock "Cloning this image directory to initiate processing of second lattice"
+          echo ":: "
+          #############################################################################
           #
-          cd ${olddir}
+          set olddir = `pwd`
+          set currentdir = `echo ${olddir} | rev | cut -d\/ -f1 | rev`
+          set newdir = `echo ${currentdir}_lat2`
+          cd ..
+          if ( ! -d ${newdir} ) then
+            \mkdir ${newdir}
+            cd ${newdir}
+            if ( -e  ../${currentdir}/${nonmaskimagename}.tif ) then
+              \cp -f ../${currentdir}/${nonmaskimagename}.tif .
+            endif
+            if ( -e  ../${currentdir}/${nonmaskimagename}.mrc ) then
+              \cp -f ../${currentdir}/${nonmaskimagename}.mrc .
+            endif
+            if ( -e  ../${currentdir}/${nonmaskimagename}_stack.mrc ) then
+              \cp -f ../${currentdir}/${nonmaskimagename}_stack.mrc .
+            endif
+            \cp -f ../${currentdir}/2dx_image.cfg .
+            set newimagenumber = `echo ${imagenumber} | awk '{ s = $1 + 1 } END { print s }'`
+            echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
+            echo "set det_lattice = n" >> 2dx_image.cfg
+            echo "set lattice = "\"${newsecondlattice}\" >> 2dx_image.cfg
+            echo "set secondlattice = "\"${lattice}\" >> 2dx_image.cfg
+            echo "set secondlattice_is_this = "\"y\" >> 2dx_image.cfg
+            echo "set secondlattice_exists = "\"y\" >> 2dx_image.cfg
+            ${proc_2dx}/linblock "Image cloned, new directory name is ${newdir}"
+            #
+            cd ${olddir}
+          endif
         endif
         #
       else
@@ -490,8 +494,8 @@ ${iradius}
 ${imaxrad}
 eot
   #
-  ${proc_2dx}/lin "cp 2dx_getspot.out ${imagename}.spt"
-  \cp -f 2dx_getspot.out ${imagename}.spt
+  ${proc_2dx}/lin "cp 2dx_getspot.out ${nonmaskimagename}.spt"
+  \cp -f 2dx_getspot.out ${nonmaskimagename}.spt
   \rm -f 2dx_getspot.out
   #
     #############################################################################

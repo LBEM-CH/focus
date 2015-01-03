@@ -52,13 +52,6 @@ set show_frames = "n"
 # TYPE: Bool "y;n"
 set show_frame_FFT = "n"
 #
-# LABEL: Calculate Tilefiles for frames (very slow)?
-# LEGEND: This switch decides, if these should be calculated.
-# EXAMPLE: calculate_tiles = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set calculate_tiles = "n"
-#
 # LABEL: Show CCmaps of frames?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
 # EXAMPLE: show_frame_CCmap = "y"
@@ -89,6 +82,7 @@ set show_frame_CCmap = "n"
 # DISPLAY: ctfcor_imode
 # DISPLAY: ctfcor_debug
 # DISPLAY: ctfcor_maxamp_factor
+# DISPLAY: calculate_tiles
 #
 #$end_local_vars
 #
@@ -179,6 +173,8 @@ set ctfcor_taper = ""
 set ctfcor_imode = ""
 set ctfcor_debug = ""
 set ctfcor_maxamp_factor = ""
+set calculate_tiles = ""
+set use_masked_image = ""
 #
 #$end_vars
 #
@@ -320,6 +316,8 @@ endif
 #
 set num_dia = 100
 #
+set iname = image_ctfcor
+#
 if ( 1 == 1 ) then
   set movie_smoothing = 8
   echo "set movie_smoothing = ${movie_smoothing}"  >> LOGS/${scriptname}.results
@@ -329,21 +327,39 @@ if ( ${movie_smoothing}x == "x" ) then
   echo "set movie_smoothing = ${movie_smoothing}"  >> LOGS/${scriptname}.results
 endif
 #
+if ( ${use_masked_image} == "y" ) then
+  if ( -e ${nonmaskimagename}_manualmask.mrc ) then
+    set maskfile = ${nonmaskimagename}_manualmask
+  else
+    if ( -e ${nonmaskimagename}_automask.mrc ) then
+      set maskfile = ${nonmaskimagename}_automask
+    else
+      if ( -e ${nonmaskimagename}_mask.mrc ) then
+        \mv ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_automask.mrc
+        set maskfile = ${nonmaskimagename}_automask
+      else
+        ${proc_2dx}/linblock "No Masking Info file found.  Not masking image."
+        set use_masked_image = "n"
+        echo "set use_masked_image = ${use_masked_image}"  >> LOGS/${scriptname}.results
+      endif 
+    endif 
+  endif 
+endif
 #
 setenv NCPUS ${Thread_Number}
 #
-if ( ${movie_masking_mode} == '1' ) then 
-  if ( ! -e ${nonmaskimagename}_mask.mrc ) then
-    ${proc_2dx}/protest "ERROR: ${nonmaskimagename}_mask.mrc not found. First run UNBEND-II with masking option."
+if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then 
+  if ( ! -e ${maskfile}.mrc ) then
+    ${proc_2dx}/protest "ERROR: ${maskfile}.mrc not found. First run UNBEND-II with masking option."
     # ${proc_2dx}/linblock "WARNING: Continuing withoug masking."
     # set movie_masking_mode = 0
     # echo "set movie_masking_mode = ${movie_masking_mode}" >> LOGS/${scriptname}.results
   endif 
-  echo  "# IMAGE: ${nonmaskimagename}_mask.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: ${maskfile}.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
 endif
 #
-if ( ! -e SCRATCH/2dx_ctfcor_ctffile.mrc ) then
-  ${proc_2dx}/protest "ERROR:  SCRATCH/2dx_ctfcor_ctffile.mrc missing. First run script Correct CTF on tiles"
+if ( ! -e ${iname}.mrc ) then
+  ${proc_2dx}/protest "ERROR:  ${iname}.mrc missing. First run script Correct CTF on tiles"
 endif
 
 
@@ -383,7 +399,6 @@ endif
 
 
 if ( 1 == 2 ) then
-  set iname = image_ctfcor
   set PROFDATA = ${iname}_profile.dat
 
   # The following is for debugging only, not for the normal workflow.
@@ -400,13 +415,13 @@ if ( 1 == 2 ) then
   touch frames/PROFDATA_1.dat
   \rm frames/PROFDATA_*.dat
 
-  \rm -f {nonmaskimagename}_mask_mask.mrc
+  \rm -f ${maskfile}_mask.mrc
   set lat_string = `echo ${lattice} | sed 's/,/ /g'`
-  python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_mask_mask.mrc ${lat_string}
+  python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${maskfile}.mrc ${maskfile}_mask.mrc ${lat_string}
 
-  echo ":: Done. Now saving ${nonmaskimagename}_mask.mrc and ${nonmaskimagename}_mask_mask.mrc"
-  echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
-  echo  "# IMAGE-IMPORTANT: ${nonmaskimagename}_mask_mask.mrc <Masked crystal mask>" >> LOGS/${scriptname}.results
+  echo ":: Done. Now saving ${maskfile}.mrc and ${maskfile}_mask.mrc"
+  echo  "# IMAGE-IMPORTANT: ${maskfile}.mrc <Original crystal mask>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE-IMPORTANT: ${maskfile}_mask.mrc <Masked crystal mask>" >> LOGS/${scriptname}.results
 
 
 
@@ -444,8 +459,6 @@ endif
 ##########################################################################
 #
 echo "<<@progress: 5>>"
-#
-set iname = image_ctfcor
 #
 set PROFDATA = ${iname}_profile.dat
 if ( ! -e ${PROFDATA} ) then
@@ -495,7 +508,7 @@ set rmax = 11000
 setenv IN  SCRATCH/reference_flt_upscale_fft.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask.mrc
 \rm -f     SCRATCH/reference_flt_upscale_fft_mask.mrc
-setenv SPOTS ${imagename}.spt
+setenv SPOTS ${nonmaskimagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 1 ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
@@ -566,7 +579,7 @@ set rmax = 11000
 setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
 \rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
-setenv SPOTS ${imagename}.spt
+setenv SPOTS ${nonmaskimagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
@@ -574,7 +587,7 @@ ${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
 echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc <Reference, Fourier-filtered (${maskb}px) (FFT)>" >> LOGS/${scriptname}.results
 #
-cat ${imagename}.spt
+cat ${nonmaskimagename}.spt
 echo "<<@progress: 20>>"
 #
 if ( ${tempkeep} != "y" ) then

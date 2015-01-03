@@ -50,6 +50,7 @@ set SYN_Unbending = ""
 set PHASEORI_done = ""
 #
 set imagename = ""
+set nonmaskimagename = ""
 set imagenumber = ""
 set realcell = ""
 set lattice = ""
@@ -143,7 +144,7 @@ echo "set CALCULATEDMAG = ${theormag}" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 5>>"
 #
-if ( ! -e ${imagename}.spt ) then
+if ( ! -e ${nonmaskimagename}.spt ) then
   set ProtSpotList = "n"
   echo "::SpotList will not be protected... because it does not yet exist."
 endif
@@ -157,7 +158,7 @@ if ( ${ProtSpotList} != "y" ) then
 endif
 #
 if ( ${ProtSpotList} == "n" ) then
-  set spotname = ${imagename}.spt
+  set spotname = ${nonmaskimagename}.spt
 else
   set spotname = TMPspotlist.spt
 endif
@@ -184,7 +185,7 @@ set ROUTER = `echo ${imagesidelength} ${stepdigitizer} ${magnification} ${spotli
 ${proc_2dx}/linblock "Outer radius = ${ROUTER}"
 #
 set spot_source_begin = `echo ${spot_source} | cut -c1-3`
-if ( ( ${spot_source_begin} == "FFT" ) || ( ! -e ${imagename}.spt )) then
+if ( ( ${spot_source_begin} == "FFT" ) || ( ! -e ${nonmaskimagename}.spt )) then
   #############################################################################
   ${proc_2dx}/linblock "2dx_mmboxa: To get the spot list from the FFT of the image."
   #############################################################################
@@ -195,6 +196,7 @@ if ( ( ${spot_source_begin} == "FFT" ) || ( ! -e ${imagename}.spt )) then
     ${proc_2dx}/protest "First run Unbend I."
   else
     ${proc_2dx}/linblock "Using the unbent data ${FFT_FILE} as source of spots."
+    echo "# IMAGE-IMPORTANT: ${FFT_FILE} <FFT source: ${FFT_FILE}>" >> LOGS/${scriptname}.results
   endif 
   #
   \rm -f ${spotname}

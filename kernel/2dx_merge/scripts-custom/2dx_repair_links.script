@@ -97,28 +97,32 @@ foreach dirfile ( * )
     if ( ${dirfile} == "merge" ) then
       echo "Not processing merge directory"
     else
-      cd ${dirfile}
-      set herelinkok = "y"
-      if ( ! -e 2dx_master.cfg ) then
-        ${proc_2dx}/linblock "WARNING: 2dx_master.cfg is missing in ${dirfile}."
-        set herelinkok = "n"
-        set linkok = "n"
+      if ( ${dirfile} == "TIFF" ) then
+        echo "Not processing TIFF directory"
       else
-        \ls -l 2dx_master.cfg
-        if ( ! -l 2dx_master.cfg ) then
-          ${proc_2dx}/linblock "::WARNING: 2dx_master.cfg is not a link in ${dirfile}."
+        cd ${dirfile}
+        set herelinkok = "y"
+        if ( ! -e 2dx_master.cfg ) then
+          ${proc_2dx}/linblock "WARNING: 2dx_master.cfg is missing in ${dirfile}."
           set herelinkok = "n"
           set linkok = "n"
+        else
+          \ls -l 2dx_master.cfg
+          if ( ! -l 2dx_master.cfg ) then
+           ${proc_2dx}/linblock "::WARNING: 2dx_master.cfg is not a link in ${dirfile}."
+            set herelinkok = "n"
+            set linkok = "n"
+          endif
         endif
+        if( ( ${herelinkok} != "y" ) && ( ${repair_links} == "yes" ) ) then
+          echo "::Creating 2dx_master.cfg link in ${dirfile}"
+          \rm -f 2dx_master.cfg
+          \ln -s ../2dx_master.cfg .
+        endif
+        cd ..
       endif
-      if( ( ${herelinkok} != "y" ) && ( ${repair_links} == "yes" ) ) then
-        echo "::Creating 2dx_master.cfg link in ${dirfile}"
-        \rm -f 2dx_master.cfg
-        \ln -s ../2dx_master.cfg .
-      endif
-      cd ..
+      cd ${olddir}/..
     endif
-    cd ${olddir}/..
   endif
 end
 #

@@ -328,35 +328,10 @@ ${proc_2dx}/linblock "Theoretical magnification is ${theormag}, given magnificat
 #
 echo "set CALCULATEDMAG = ${theormag}" >> LOGS/2dx_unbend1.results
 #
-if ( ! -e ${iname}.spt ) then
-  echo ":: "
-  ${proc_2dx}/linblock "Spotlist ${iname}.spt missing."
-  if ( -e ${iname}.spt ) then
-    ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${iname}.spt"
-    \cp ${imagename}.spt ${iname}.spt
-  else
-    if ( -e ${nonmaskimagename}.spt ) then
-      ${proc_2dx}/linblock "WARNING: Copying ${nonmaskimagename}.spt to ${iname}.spt"
-      \cp ${nonmaskimagename}.spt ${iname}.spt
-    else
-      ${proc_2dx}/protest "Aborting."
-    endif
-  endif
-endif
 if ( ! -e ${nonmaskimagename}.spt ) then
   echo ":: "
   ${proc_2dx}/linblock "Spotlist ${nonmaskimagename}.spt missing."
-  if ( -e ${imagename}.spt ) then
-    ${proc_2dx}/linblock "WARNING: Copying ${imagename}.spt to ${nonmaskimagename}.spt"
-    \cp ${imagename}.spt ${nonmaskimagename}.spt
-  else
-    if ( -e ${iname}.spt ) then
-      ${proc_2dx}/linblock "WARNING: Copying ${iname}.spt to ${nonmaskimagename}.spt"
-      \cp ${iname}.spt ${nonmaskimagename}.spt
-    else
-      ${proc_2dx}/protest "Aborting."
-    endif
-  endif
+  ${proc_2dx}/protest "Aborting."
 endif
 #
 if ( ! -e FFTIR/${iname}_fft.mrc ) then

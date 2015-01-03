@@ -120,7 +120,7 @@ eot
   #
   setenv IN  SCRATCH/TMPvalue1_fft.mrc
   setenv OUT SCRATCH/TMPvalue1_msk_fft.mrc
-  setenv SPOTS ${imagename}.spt
+  setenv SPOTS ${nonmaskimagename}.spt
   #
   \rm -f SCRATCH/TMPvalue1_msk_fft.mrc
   set rmax = 11000

@@ -119,7 +119,7 @@ endif
 #
 echo "<<@progress: 1>>"
 #
-set oldspotlist  = ${imagename}.spt
+set oldspotlist  = ${nonmaskimagename}.spt
 echo oldspotlist = ${oldspotlist}
 #
 if ( ${keepOld} == "n" ) then
@@ -167,7 +167,7 @@ eot
     ${proc_2dx}/protest "2dx_spotrefine: ERROR occured."
   endif
   #
-  \mv -f ${oldspotlist} SCRATCH/${imagename}_old.spt
+  \mv -f ${oldspotlist} SCRATCH/${nonmaskimagename}_old.spt
   \mv -f ${newspotlist} ${oldspotlist}
   #
 else
@@ -191,7 +191,7 @@ else
   # set IQMAX=4
   ${proc_2dx}/linblock "using IQMAX of ${IQMAX}."
   #
-  \rm -f ${imagename}.spt
+  \rm -f ${nonmaskimagename}.spt
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
 ${inputname}
@@ -200,7 +200,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2 3 0 50 50 12 12               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-${imagename}.spt
+${nonmaskimagename}.spt
 ${IQMAX}                              ! IQMAX
 ${refposix} ${refposiy}         ! XORIG,YORIG
 ${RESMIN} ${RESMAX} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
@@ -211,7 +211,7 @@ eot
   #
 endif
 #
-set spotname = ${imagename}.spt
+set spotname = ${nonmaskimagename}.spt
 #
 if ( ${spot_filter} == 'y' ) then
   #
@@ -267,11 +267,11 @@ else
   #
 endif
 #
-set spotnum = `cat ${imagename}.spt | wc -l`
+set spotnum = `cat ${nonmaskimagename}.spt | wc -l`
 echo " " >> History.dat
 echo ":Refine Spotlist: You now have ${spotnum} spots." >> History.dat
 #
-echo "# IMAGE-IMPORTANT: ${imagename}.spt <TXT: Spotlist>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.spt <TXT: Spotlist>" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results

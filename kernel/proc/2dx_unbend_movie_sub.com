@@ -20,10 +20,10 @@
         #########################################################################
         ${proc_2dx}/lin "TWOFILE - Cross-correlate frame and reference in Fourier-space, with ref A"
         #########################################################################
-        \rm -f ${frame_folder}/frame_${i}/SCRATCH/corel_a_${nonmaskimagename}_fft.mrc
-        setenv IN1 ${frame_folder}/frame_${i}/FFTIR/${nonmaskimagename}_${i}_fft.mrc
+        setenv IN1 ${frame_folder}/frame_${i}/${iname}_fft.mrc
         setenv IN2 SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
         setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
+        \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         ${bin_2dx}/twofile.exe << eot
         2 ! ICOMB = 2
         2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
@@ -32,18 +32,18 @@ eot
         #########################################################################
         ${proc_2dx}/lin "FFTRANS - Inverse FFT to obtain cross-correlation profile (raw frame with reference A)"
         #########################################################################
-        /bin/rm -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
         setenv IN ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
+        \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
         ${bin_2dx}/2dx_fftrans.exe
         
 
-        \rm -f ${frame_folder}/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
         \rm -f SPIDERCOORD.spi
         \rm -f CCPLOT.PS
 
         setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
         setenv PROFDATA ${frame_folder}/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
+        \rm -f          ${frame_folder}/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
         setenv ERRORS   SCRATCH/errout2${iname}.dat
 
         set createmask = '0'
@@ -56,10 +56,10 @@ eot
                 ${proc_2dx}/lin "QUADSERCH - masking with external mask-info (IPASS=2)"
                 #########################################################################
                 #
-                if ( ! -e ${nonmaskimagename}_mask.mrc ) then
-                  ${proc_2dx}/protest "ERROR: ${nonmaskimagename}_mask.mrc not found. First run UNBEND-II with masking option."
+                if ( ! -e ${maskfile}.mrc ) then
+                  ${proc_2dx}/protest "ERROR: ${maskfile}.mrc not found. First run UNBEND-II with masking option."
                 endif 
-                \cp -f ${nonmaskimagename}_mask.mrc TMP_quadserch_7.mrc
+                \cp -f ${maskfile}.mrc TMP_quadserch_7.mrc
                 #
                 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 2,${quadpredb}                     ! IPASS,NRANGE
@@ -74,8 +74,8 @@ ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}                   ! dont create manual Masking information
 1                               ! Do mask the image directly
-${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
-${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}.mrc
+${frame_folder}/frame_${i}/${iname}.mrc
+${frame_folder}/frame_${i}/${iname}_mask.mrc
 -1                              ! create output images (0=no, <0 = one, >0 =size)
 1                               ! use external masking template (0=no, 1=yes)
 TMP_quadserch_7.mrc
@@ -100,8 +100,8 @@ ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
 ${createmask}                   ! dont create manual Masking information
 1                               ! Do mask the image directly
-${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
-${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}.mrc
+${frame_folder}/frame_${i}/${iname}.mrc
+${frame_folder}/frame_${i}/${iname}_mask.mrc
 -1                              ! create output images (0=no, <0 = one, >0 =size)
 0                               ! use external masking template (0=no, 1=yes)
 eot
@@ -111,8 +111,9 @@ eot
            ######################################################
            ${proc_2dx}/lin "FFT of masked frame average"
            ######################################################
-           setenv IN ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}.mrc
-           setenv OUT ${frame_folder}/frame_${i}/FFTIR/m${nonmaskimagename}_${i}_fft.mrc
+           setenv IN ${frame_folder}/frame_${i}/${iname}_mask.mrc
+           setenv OUT ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc
+           \rm -f     ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc
            ${bin_2dx}/2dx_fftrans.exe
 
         else
@@ -120,12 +121,10 @@ eot
            ${proc_2dx}/lin "Not masking frame"
            ######################################################
            cd ${frame_folder}/frame_${i}
-           \rm -f m${nonmaskimagename}_${i}.mrc
-           \ln -s ${nonmaskimagename}_${i}.mrc m${nonmaskimagename}_${i}.mrc
-           cd FFTIR
-           \rm -f m${nonmaskimagename}_${i}_fft.mrc
-           \ln -s ${nonmaskimagename}_${i}_fft.mrc m${nonmaskimagename}_${i}_fft.mrc
-           cd ..
+           \rm -f              ${iname}_mask.mrc
+           \ln -s ${iname}.mrc ${iname}_mask.mrc
+           \rm -f                  ${iname}_mask_fft.mrc
+           \ln -s ${iname}_fft.mrc ${iname}_mask_fft.mrc
            cd ../.. 
         endif
 
@@ -135,10 +134,10 @@ eot
         ###########################################################################
         set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
         set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-        \rm -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
-        setenv IN1 ${frame_folder}/frame_${i}/FFTIR/m${nonmaskimagename}_${i}_fft.mrc
+        setenv IN1 ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc
         setenv IN2 SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
         setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
+        \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         ${bin_2dx}/twofile.exe << eot
         2 ! ICOMB = 2
         2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
@@ -146,10 +145,10 @@ eot
 
 
         if ( ${movie_refboxb} != "0" ) then       
-          \rm -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb_fft.mrc
-          setenv IN1 ${frame_folder}/frame_${i}/FFTIR/m${nonmaskimagename}_${i}_fft.mrc
+          setenv IN1 ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc
           setenv IN2 SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
           setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb_fft.mrc
+          \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb_fft.mrc
           ${bin_2dx}/twofile.exe << eot
           2 ! ICOMB = 2
           2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
@@ -159,15 +158,15 @@ eot
         ###########################################################################
         ${proc_2dx}/lin "FFTRANS - IFFT to obtain cross correlation profiles"
         ###########################################################################
-        /bin/rm -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
         setenv IN ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
+        \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
         ${bin_2dx}/2dx_fftrans.exe
         
         if ( ${movie_refboxb} != "0" ) then
-          /bin/rm -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb.mrc
           setenv IN ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb_fft.mrc
           setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb.mrc
+          \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb.mrc
           ${bin_2dx}/2dx_fftrans.exe
         endif
 
@@ -320,8 +319,8 @@ eot
           ${bin_2dx}/2dx_quadserchk-2.exe << eot
 ${IPASS},${quadpredb}                     ! IPASS,NRANGE
 ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
-${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}.mrc
-${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc
+${frame_folder}/frame_${i}/${iname}_mask.mrc
+${frame_folder}/frame_${i}/${iname}_mask_aligned.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
@@ -379,10 +378,10 @@ ${createmask}                   ! create manual Masking information (0=n,1=y)
 eot
           #
           #
-          if ( ! -e ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc ) then
+          if ( ! -e ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_aligned.mrc ) then
             ${proc_2dx}/protest "ERROR in 2dx_quadserchk-2" 
           else
-            \mv -f ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}.mrc
+            \mv -f ${frame_folder}/frame_${i}/${iname}_mask_aligned.mrc ${frame_folder}/frame_${i}/${iname}_mask.mrc
             \mv -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_aligned.mrc ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
             if ( ${movie_refboxb} != "0" ) then
               \mv -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb_aligned.mrc ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb.mrc
@@ -535,7 +534,7 @@ eot
             \rm -f CCPLOT.PS
 
             ${bin_2dx}/2dx_ccunbendk.exe << eot
-${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}.mrc
+${frame_folder}/frame_${i}/${iname}_mask.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}

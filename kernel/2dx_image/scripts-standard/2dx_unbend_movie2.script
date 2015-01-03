@@ -34,6 +34,27 @@
 #
 # SORTORDER: 54
 #
+# LABEL: Show raw frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frames = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frames = "n"
+#
+# LABEL: Show FFT of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_FFT = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_FFT = "n"
+#
+# LABEL: Show CCmaps of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_CCmap = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_CCmap = "n"
+#
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
 # DISPLAY: SYN_Unbending
@@ -76,6 +97,14 @@
 # DISPLAY: movie_filter_param
 # DISPLAY: movie_imagenumber_toave
 # DISPLAY: Thread_Number
+# DISPLAY: ctfcor_noise
+# DISPLAY: ctfcor_inner_tile
+# DISPLAY: ctfcor_outer_tile
+# DISPLAY: ctfcor_taper
+# DISPLAY: ctfcor_imode
+# DISPLAY: ctfcor_debug
+# DISPLAY: ctfcor_maxamp_factor
+# DISPLAY: calculate_tiles
 #
 #$end_local_vars
 #
@@ -161,6 +190,15 @@ set movie_imagenumber_toave = ""
 set MASKING_done = ""
 set QVALS = ""
 set Thread_Number = ""
+set ctfcor_noise = ""
+set ctfcor_inner_tile = ""
+set ctfcor_outer_tile = ""
+set ctfcor_taper = ""
+set ctfcor_imode = ""
+set ctfcor_debug = ""
+set ctfcor_maxamp_factor = ""
+set calculate_tiles = ""
+set use_masked_image = ""
 #
 #$end_vars
 #
@@ -217,6 +255,22 @@ endif
 ##########################################
 ##########################################
 #
+\rm -f frame_unbending.pdf
+\touch frame_unbending.pdf
+#
+set iname = image_ctfcor
+#
+set PROFDATA = ${iname}_profile.dat
+if ( ! -e ${PROFDATA} ) then
+  ${proc_2dx}/protest "ERROR: First run Unbend II."
+endif
+#
+set cormap = ${iname}_CCmap_unbend2.mrc
+#
+if ( ! -e ${cormap} ) then
+  ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"
+endif
+#
 set frame_folder = "framesB"
 #
 echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
@@ -240,6 +294,33 @@ if ( ${MASKING_done} == "y" ) then
   endif
 endif
 # 
+if ( ${use_masked_image} == "y" ) then
+  if ( -e ${nonmaskimagename}_manualmask.mrc ) then
+    set maskfile = ${nonmaskimagename}_manualmask
+  else
+    if ( -e ${nonmaskimagename}_automask.mrc ) then
+      set maskfile = ${nonmaskimagename}_automask
+    else
+      if ( -e ${nonmaskimagename}_mask.mrc ) then
+        \mv ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_automask.mrc
+        set maskfile = ${nonmaskimagename}_automask
+      else
+        ${proc_2dx}/linblock "No Masking Info file found.  Not masking image."
+        set use_masked_image = "n"
+        echo "set use_masked_image = ${use_masked_image}"  >> LOGS/${scriptname}.results
+      endif 
+    endif 
+  endif 
+endif
+#
+if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then 
+  if ( ! -e ${maskfile}.mrc ) then
+    ${proc_2dx}/protest "ERROR: ${maskfile}.mrc not found. First run UNBEND-II with masking option."
+  endif 
+  echo  "# IMAGE: ${maskfile}.mrc <Crystal Masking Pattern>" >> LOGS/${scriptname}.results
+endif
+#
+#
 if ( ! -e ${movie_stackname}) then
   ${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
 else
@@ -330,18 +411,20 @@ endif
 #
 set i = 0
 while ($i <= ${movie_imagenumber_touse})
-  echo "# IMAGE: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}_raw.mrc <Frame ${i} raw>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/PS/${nonmaskimagename}_${i}_histo.ps <Frame ${i} (Histogram)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/FFTIR/${nonmaskimagename}_${i}_fft.mrc <Frame ${i} (FFT)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}_ori.mrc <Frame ${i} masked original>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}.mrc <Frame ${i} masked >" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}_aligned.mrc <Frame ${i} masked aligned>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/CCunbend_frame_${i}_fft.mrc <Frame ${i}, unbent (fft)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/FFTIR/m${nonmaskimagename}_${i}.fft.mrc <Frame ${i} masked (FFT)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc <Frame ${i} CCMapMB>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb.mrc <Frame ${i} CCMapMBb>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}_CCmapMBb_unbent.mrc <Frame ${i} CCMapMB unbent>" >> LOGS/${scriptname}.results
+  if ( ${show_frames} == "y" ) then
+    echo "# IMAGE: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}_raw.mrc <Frame ${i} raw>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/frame_${i}/${iname}_mask.mrc <Frame ${i}, masked>" >> LOGS/${scriptname}.results
+  endif
+  if ( ${show_frame_FFT} == "y" ) then
+    echo "# IMAGE: ${frame_folder}/CCunbend_frame_${i}_fft.mrc <Frame ${i}, unbent (fft)>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc <Frame ${i}, masked (FFT)>" >> LOGS/${scriptname}.results
+  endif
+  if ( ${show_frame_CCmap} == "y" ) then
+    echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc <Frame ${i} CCMapMB>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb.mrc <Frame ${i} CCMapMBb>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/frame_${i}_CCmapMBb_unbent.mrc <Frame ${i} CCMapMB unbent>" >> LOGS/${scriptname}.results
+  endif
   echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/TMP-quadserch3-autocor.mrc <Frame ${i} averaged central area>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/PS/${nonmaskimagename}_quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
   echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/PS/${nonmaskimagename}_ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results
@@ -372,27 +455,6 @@ if ( ! -d ${frame_folder} ) then
 endif
 #
 echo "<<@progress: 15>>"
-#
-\rm -f frame_unbending.pdf
-\touch frame_unbending.pdf
-#
-set iname = image_ctfcor
-#
-set PROFDATA = ${iname}_profile.dat
-if ( ! -e ${PROFDATA} ) then
-  ${proc_2dx}/protest "ERROR: First run Unbend II."
-endif
-#
-set cormap = ${iname}_CCmap_unbend2.mrc
-#
-if ( ! -e ${cormap} ) then
-  ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"
-endif
-# 
-#
-# ????????????????  This is wrong. But what should be here????
-# \cp -f ${cormap} SCRATCH/errout${iname}.dat
-# ????????????????
 #
 setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
 setenv PROFDATA ${iname}_profile.dat
@@ -469,19 +531,69 @@ while ($i <= ${movie_imagenumber_touse})
   #
   python ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength}
   #
-  echo ${frame_folder}/frame_${i}/FFTIR/${nonmaskimagename}_${i}_fft.mrc
-        
+
+  set ctfcor_tilefile = "${frame_folder}/frame_${i}/2dx_ctfcor_tile.mrc"
+  set ctfcor_psfile = "${frame_folder}/frame_${i}/2dx_ctfcor_psfile.mrc"
+  set ctfcor_ctffile = "${frame_folder}/frame_${i}/2dx_ctfcor_ctffile.mrc"
+  \rm -f ${frame_folder}/frame_${i}/image_ctfcor.mrc
+  \rm -f ${ctfcor_tilefile}
+  \rm -f ${ctfcor_psfile}  
+  \rm -f ${ctfcor_ctffile}  
+  #
+  #
+  setenv NCPUS ${Thread_Number}
+  #
+  if ( ${calculate_tiles} == "n" ) then
+    ${bin_2dx}/2dx_ctfcor.exe << eot
+${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
+${frame_folder}/frame_${i}/image_ctfcor.mrc
+#
+#
+#
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${ctfcor_noise}
+${ctfcor_inner_tile}
+${ctfcor_outer_tile}
+${ctfcor_taper}
+${ctfcor_imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+    #
+  else
+    ${bin_2dx}/2dx_ctfcor.exe << eot
+${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
+${frame_folder}/frame_${i}/image_ctfcor.mrc
+${ctfcor_tilefile}
+${ctfcor_psfile}
+${ctfcor_ctffile}
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${ctfcor_noise}
+${ctfcor_inner_tile}
+${ctfcor_outer_tile}
+${ctfcor_taper}
+${ctfcor_imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+    #
+    echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+  endif
+  echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/image_ctfcor.mrc <Output Image Frame ${i} CTF corrected>" >> LOGS/${scriptname}.results
+
   #########################################################################
   ${proc_2dx}/lin "FFT of raw frame average"
   #########################################################################
-  setenv IN ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
-  setenv OUT ${frame_folder}/frame_${i}/FFTIR/${nonmaskimagename}_${i}_fft.mrc
+  setenv IN ${frame_folder}/frame_${i}/${iname}.mrc
+  setenv OUT ${frame_folder}/frame_${i}/${iname}_fft.mrc
   ${bin_2dx}/2dx_fftrans.exe      
 
-  ## This is to make sure the script shows up in the GUI:
-  if ( 1 == 2 ) then
-    python ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}
-  endif
   #
   if ( ${i} > 0 ) then
     @ n += ${movie_imagenumber_toave}
@@ -536,7 +648,7 @@ set rmax = 11000
 setenv IN  SCRATCH/reference_flt_upscale_fft.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask.mrc
 \rm -f     SCRATCH/reference_flt_upscale_fft_mask.mrc
-setenv SPOTS ${imagename}.spt
+setenv SPOTS ${nonmaskimagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 1 ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
@@ -607,7 +719,7 @@ set rmax = 11000
 setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
 setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
 \rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
-setenv SPOTS ${imagename}.spt
+setenv SPOTS ${nonmaskimagename}.spt
 ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
@@ -831,6 +943,7 @@ echo "<<@evaluate>>"
 exit
 #
 # To make sure these show up in the GUI:
+python ${proc_2dx}/movie/getFilter.py
 python ${proc_2dx}/movie/deleteZeros.py
 python ${proc_2dx}/movie/getClosestPeaks.py
 source ${proc_2dx}/../2dx_image/scripts-standard/2dx_initialize.script

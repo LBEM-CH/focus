@@ -547,20 +547,26 @@ void fullScreenImage::drawRealLattice(float lattice[2][2])
   float b1 =  B*COSB;
   float b2 = -B*SINB;
   
-  QPointF a(a1,a2), b(b1,b2);
+  QPointF a(a1,a2), b(b1,b2), o(0.5,0.5);
 
   std::cout << "Reci lattice is u = " << u1 << "," << u2 << "     v = " << v1 << "," << v2 << endl;
   std::cout << "Real lattice is a = " << a1 << "," << a2 << "     b = " << b1 << "," << b2 << endl;
 
   QPen pen(image_base->pen());
-  pen.setColor(QColor(100,100,240));
+  pen.setColor(QColor(0,0,0));
   image_base->setPen(pen);
-
-    for(int i=-60;i<=60;i++)
-    {
-      image_base->drawLine(i*a-60*b,(i)*a+(60)*b);
-      image_base->drawLine((-60)*a+i*b,(60)*a+(i)*b);
-    }
+  for(int i=-60;i<=60;i++)
+  {
+      image_base->drawLine(i*a-60*b+o,(i)*a+(60)*b+o);
+      image_base->drawLine((-60)*a+i*b+o,(60)*a+(i)*b+o);
+  }
+  pen.setColor(QColor(255,240,0));
+  image_base->setPen(pen);
+  for(int i=-60;i<=60;i++)
+  {
+     image_base->drawLine(i*a-60*b,(i)*a+(60)*b);
+     image_base->drawLine((-60)*a+i*b,(60)*a+(i)*b);
+  }
 }
 
 void fullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, bool realSpace, bool invertAngle)

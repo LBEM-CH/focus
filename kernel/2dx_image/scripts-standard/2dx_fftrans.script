@@ -169,6 +169,7 @@ if ( ${use_masked_image} == "y" ) then
     set imagename = `echo m${nonmaskimagename}`
     echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
     ${proc_2dx}/linblock "correcting imagename to ${imagename}"
+    \rm -f ${imagename}.mrc
   endif
   if ( ! -e ${imagename}.mrc ) then
     ###########################################################################

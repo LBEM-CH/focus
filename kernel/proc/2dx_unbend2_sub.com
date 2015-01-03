@@ -740,23 +740,16 @@ eot
       ${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image ${imagename}.mrc"
       #################################################################################  
       #
-      set ctfcor_tilefile = "SCRATCH/2dx_ctfcor_tile.mrc"
-      set ctfcor_psfile = "SCRATCH/2dx_ctfcor_psfile.mrc"
-      set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
       \rm -f image_ctfcor.mrc
-      \rm -f ${ctfcor_tilefile}
-      \rm -f ${ctfcor_psfile}  
-      \rm -f ${ctfcor_ctffile}  
-      #
       #
       setenv NCPUS ${Thread_Number}
       #
       ${bin_2dx}/2dx_ctfcor.exe << eot
 ${imagename}.mrc
 image_ctfcor.mrc
-${ctfcor_tilefile}
-${ctfcor_psfile}
-${ctfcor_ctffile}
+#
+#
+#
 ${TLTAXIS},${TLTANG}
 ${CS},${KV},${phacon},${magnification},${stepdigitizer}
 ${defocus}
@@ -770,9 +763,6 @@ ${ctfcor_maxamp_factor}
 eot
       #
       echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
-      echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
-      echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
-      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
     endif
     #
     #

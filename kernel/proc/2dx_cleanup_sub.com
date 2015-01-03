@@ -27,12 +27,15 @@ echo dummy > results.spi.0
 echo dummy > TMP_1.txt
 echo dummy > dummy.plt
 echo dummy > dummy_phase_zero.mtz
+echo dummy > dummy_phase_zero-p1.mtz
+echo dummy > dummy_phase_zero-p1.mrc
 echo dummy > dummy-profile.dat
 echo dummy > dummy-permutated.hkl
 if ( ! -d LOGS ) then
   \mkdir LOGS
 endif
 echo dummy > LOGS/dummy.log
+echo dummy > LOGS/dummy.results
 echo dummy > ${imagename}-tmp.tabl
 #
 if ( -e ${imagename}.mrc ) then
@@ -96,6 +99,9 @@ if ( "${level}" == "radical" ) then
     \rm -f 2dx_unbend_movie.com
     \rm -f 2dx_initialize_files.com
     \rm -f 2dx_ctfcor.com
+    \rm -f 2dx_unbend_movie1a.com
+    \rm -f 2dx_unbend_movie1b.com
+    \rm -f 2dx_unbend_movie2.com
     cd ..
   endif
   #
@@ -103,8 +109,18 @@ if ( "${level}" == "radical" ) then
   \rm -f ManualMasking-UnbendPlot.mrc
   \rm -f centric.hk
   \rm -f centric.hkl
+  \rm -f movie_centric.hk
+  \rm -f movie_centric.hkl
+  \rm -f movieB_centric.hk
+  \rm -f movieB_centric.hkl
   \rm -f avrg-1.hk
   \rm -f avrg-1.hkl
+  \rm -f movie_avrg.hk
+  \rm -f movie_avrg.hkl
+  \rm -f movieB_avrg.hk
+  \rm -f movieB_avrg.hkl
+  \rm -f movie_centric_phase_zero.hkl
+  \rm -f movieB_centric_phase_zero.hkl
   \rm -f avrg.*.hkl
   \rm -f *.profile
   \rm -f ${imagename}-p*-scaled.tif
@@ -169,6 +185,7 @@ if ( "${level}" == "radical" ) then
   \rm -f 2dx_peaksearch-amp_before_LHpass.mrc
   \rm -f u2_map.mrc
   \rm -f u2_map.ps
+  \rm -f tmp_mask.mrc
   #
 else
   #
@@ -179,6 +196,10 @@ endif
 #
 if ( -d frames ) then
   \rm -rf frames
+endif
+#
+if ( -d framesB ) then
+  \rm -rf framesB
 endif
 #
 cd SCRATCH
@@ -243,12 +264,14 @@ echo dummy > dummy.TMP
 \rm -f avrg.hnegkl
 \rm -f centric_phase_zero.hkl
 \rm -f *_phase_zero.mtz
+\rm -f *_phase_zero-p1.mtz
+\rm -f *_phase_zero-p1.mrc
 \rm -f TMP_*
 \rm -f fort.3
 
 #
-\rm *.results
-\rm -rf LOGS/*.log
+\rm LOGS/*.results
+\rm LOGS/*.log
 
 
 

@@ -102,6 +102,20 @@ echo "<<@evaluate>>"
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
 #
+set tmpval = `echo ${ctfcor_inner_tile} | awk '{ if ( $1 > 350 ) { s = 350 } else { s = $1 }} END { print s }'`
+if ( ${tmpval} != ${ctfcor_inner_tile} ) then
+  set ctfcor_inner_tile = ${tmpval}
+  echo "set ctfcor_inner_tile = ${ctfcor_inner_tile}" >> LOGS/${scriptname}.results
+  echo "::correcting ctfcor_inner_tile to ${ctfcor_inner_tile}"
+endif
+#
+set tmpval = `echo ${ctfcor_outer_tile} | awk '{ if ( $1 > 400 ) { s = 400 } else { s = $1 }} END { print s }'`
+if ( ${tmpval} != ${ctfcor_outer_tile} ) then
+  set ctfcor_outer_tile = ${tmpval}
+  echo "set ctfcor_outer_tile = ${ctfcor_outer_tile}" >> LOGS/${scriptname}.results
+  echo "::correcting ctfcor_outer_tile to ${ctfcor_outer_tile}"
+endif
+#
 if (${ctfcor_imode}x == "0x" ) then
   ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
   \cp -f ${imagename}.mrc image_ctfcor.mrc

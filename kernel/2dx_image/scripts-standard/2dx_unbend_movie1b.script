@@ -310,6 +310,7 @@ endif
 #
 setenv NCPUS ${Thread_Number}
 #
+set maskfile = tmp
 if ( ${use_masked_image} == "y" ) then
   if ( -e ${nonmaskimagename}_manualmask.mrc ) then
     set maskfile = ${nonmaskimagename}_manualmask
@@ -380,7 +381,11 @@ touch frames/PROFDATA_1.dat
 \rm frames/PROFDATA_*.dat
 \rm -f ${maskfile}_mask.mrc
 set lat_string = `echo ${lattice} | sed 's/,/ /g'`
-python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${maskfile}.mrc ${maskfile}_mask.mrc ${lat_string}
+if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then 
+  python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${maskfile}.mrc ${maskfile}_mask.mrc ${lat_string}
+else
+  python ${proc_2dx}/movie/drift_selector.py 2dx_movie_refine.dat 2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${maskfile}_mask.mrc ${lat_string}
+endif
 #
 echo ":: Done. Now saving ${maskfile}_mask.mrc"
 echo  "# IMAGE-IMPORTANT: ${maskfile}.mrc <Original crystal mask>" >> LOGS/${scriptname}.results

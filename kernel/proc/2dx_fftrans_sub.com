@@ -83,6 +83,7 @@ eot
 #
 \rm -f FFTIR/${inimage}_fft.mrc
 setenv IN SCRATCH/upscaled.mrc
+setenv IN ${infile}
 setenv OUT FFTIR/${inimage}_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #

@@ -27,7 +27,7 @@ if __name__ == "__main__":
 	
 	print "drift_selector.py"
 
-	if len(sys.argv) != 14:
+	if len(sys.argv) != 14 and len(sys.argv) != 13:
 		sys.exit("Usage: drift_selector.py <Data-File-IN> <Data-File-OUT> <drift_tolerance> <PROFDATA> <smoothing_number> <number_of_frames> <imagesidelength> <original_mask> <new_mask> <4 x lattice>")
 
 	infile = sys.argv[1]
@@ -37,20 +37,32 @@ if __name__ == "__main__":
 	N = int(sys.argv[5])
 	IFRAMS = int(sys.argv[6])
 	imagesidelength = int(sys.argv[7]) 
-	mask_infile = sys.argv[8]
-	mask_outfile = sys.argv[9]
-	lat_u1 = float(sys.argv[10])
-	lat_u2 = float(sys.argv[11])
-	lat_v1 = float(sys.argv[12])
-	lat_v2 = float(sys.argv[13])
+	if len(sys.argv) == 14:
+		mask_infile = sys.argv[8]
+		mask_outfile = sys.argv[9]
+		lat_u1 = float(sys.argv[10])
+		lat_u2 = float(sys.argv[11])
+		lat_v1 = float(sys.argv[12])
+		lat_v2 = float(sys.argv[13])
+	else:
+		mask_outfile = sys.argv[8]
+		lat_u1 = float(sys.argv[9])
+		lat_u2 = float(sys.argv[10])
+		lat_v1 = float(sys.argv[11])
+		lat_v2 = float(sys.argv[12])
+
 
 	print ":IFRAMS = ",IFRAMS
 	print ":Smoothing number of neighbors N = ",N
 
 	data_file = open(infile)
-	mask_image = get_image(mask_infile)
-	s = info(mask_image)
-	masksidelength = s[4]
+	if len(sys.argv) == 14:
+		mask_image = get_image(mask_infile)
+		s = info(mask_image)
+		masksidelength = s[4]
+	else:
+		masksidelength = imagesidelength
+
 	data_file_out = open(outfile,'w')
 	
 	# move header 
@@ -222,6 +234,7 @@ if __name__ == "__main__":
 		if p.peak != 0.0:
 			image	+= cyclic_shift(disk,p.pos_x+p.mean_rocenx+(imagesidelength/2)+1,p.pos_y+p.mean_roceny+(imagesidelength/2)+1)
 	image2 = threshold_maxval(image,1.0)
+
 	print "filtering mask image with Gaussian low-pass filter, using sigma = ", sigma
 	image = filt_gaussl(image2,sigma)
 	ratio = 1.0 * masksidelength / imagesidelength
@@ -230,12 +243,12 @@ if __name__ == "__main__":
 	s = info(image2)
 	newsize = s[4]
 	print "image2 size = ", newsize
-	s = info(mask_image)
-	newsize = s[4]
-	print "mask size = ", newsize
-	mask_image *= image2
-	mask_image.write_image(mask_outfile)
+	if len(sys.argv) == 14:
+		s = info(mask_image)
+		newsize = s[4]
+		print "mask size = ", newsize
+		image2 *= mask_image
+	image2.write_image(mask_outfile)
 	print "written mask_outfile as ",mask_outfile
-
 
 

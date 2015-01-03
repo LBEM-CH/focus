@@ -23,6 +23,27 @@
 #
 # MANUAL: A big <I><U>thank you</U></I> goes to Vinzenz Unger for debugging this script and providing most of the algorithm and usage here, and to Per Bullough, who gave us essential information and help in handling symmetries and systematic absences between MRC and CCP4 worlds.
 #
+# LABEL: Show HKL files?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_hkl = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_hkl = "n"
+#
+# LABEL: Show Phase Residual TXT files?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_phares = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_phares = "n"
+#
+# LABEL: Show Point Spread Function (PSF) files?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_PSF = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_PSF = "n"
+#
 # DISPLAY: SYN_Unbending
 # DISPLAY: ML_doit
 # DiSPLAY: ML_use_for_merging
@@ -202,7 +223,9 @@ else
     set aphfile = APH/${imagename}_syn_ctf.aph
 endif
 #
-echo "# IMAGE: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
+if ( ${show_hkl} == "y" ) then
+  echo "# IMAGE: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
+endif
 set prefix = ""
 set prename = ""
 #
@@ -214,7 +237,9 @@ if ( ${movie_enable} == 'y' ) then
   ${proc_2dx}/linblock "Sourcing generateMap script for MovieMode reconstruction in ${SYM} symmetry"
   echo ":: "
   set aphfile = APH/${imagename}_movie_fou_ctf.aph
-  echo "# IMAGE: ${aphfile} <APH: MovieMode Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  if ( ${show_hkl} == "y" ) then
+    echo "# IMAGE: ${aphfile} <APH: MovieMode Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  endif
   set prefix = "movie_"
   set prename = "Movie "
   #
@@ -228,7 +253,9 @@ if ( ${ML_doit} == 'y' ) then
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
   set aphfile = APH/ML_result.aph
-  echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  if ( ${show_hkl} == "y" ) then
+    echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  endif
   set prefix = "ML_"
   set prename = "ML "
   #
@@ -279,7 +306,9 @@ else
     set aphfile = APH/${imagename}_syn_ctf.aph
 endif
 #
-echo "# IMAGE: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
+if ( ${show_hkl} == "y" ) then
+  echo "# IMAGE: ${aphfile} <APH: Unbending Input Amp&Phase File>" >> LOGS/${scriptname}.results
+endif
 set prefix = ""
 set prename = ""
 #
@@ -293,12 +322,29 @@ if ( ${movie_enable} == 'y' ) then
   ${proc_2dx}/linblock "Sourcing generateMap script for MovieMode reconstruction in ${SYM} symmetry"
   echo ":: "
   set aphfile = APH/${imagename}_movie_fou_ctf.aph
-  echo "# IMAGE: ${aphfile} <APH: MovieMode Input Amp&Phase File>" >> LOGS/${scriptname}.results
-  set prefix = "movie_"
-  set prename = "Movie "
+  if ( -e ${aphfile} ) then
+    if ( ${show_hkl} == "y" ) then
+      echo "# IMAGE: ${aphfile} <APH: MovieMode Input Amp&Phase File>" >> LOGS/${scriptname}.results
+    endif
+    set prefix = "movie_"
+    set prename = "Movie "
+    set phaori_local = ${phaori}
+    source ${proc_2dx}/2dx_generateMap_sub.com
+  endif
   #
-  set phaori_local = ${phaori}
-  source ${proc_2dx}/2dx_generateMap_sub.com
+  echo ":: "
+  ${proc_2dx}/linblock "Sourcing generateMap script for MovieModeB reconstruction in ${SYM} symmetry"
+  echo ":: "
+  set aphfile = APH/${imagename}_movieB_fou_ctf.aph
+  if ( -e ${aphfile} ) then
+    if ( ${show_hkl} == "y" ) then
+      echo "# IMAGE: ${aphfile} <APH: MovieModeB Input Amp&Phase File>" >> LOGS/${scriptname}.results
+    endif
+    set prefix = "movieB_"
+    set prename = "MovieB "
+    set phaori_local = ${phaori}
+    source ${proc_2dx}/2dx_generateMap_sub.com
+  endif
   #
 endif
 #
@@ -310,7 +356,9 @@ if ( ${ML_doit} == 'y' ) then
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
   set aphfile = APH/ML_result.aph
-  echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  if ( ${show_hkl} == "y" ) then
+    echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  endif
   set prefix = "ML_"
   set prename = "ML "
   #

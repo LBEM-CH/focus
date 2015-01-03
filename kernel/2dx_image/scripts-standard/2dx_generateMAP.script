@@ -21,6 +21,28 @@
 # MANUAL: The PostScript output file is skewed according to any potential non-square non-rectangular lattice, while the MRC-format file has the skewing information stored in the header.
 #
 # REMARK: The following section defines variables that will be displayed in the GUI:
+#
+# LABEL: Show HKL files?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_hkl = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_hkl = "n"
+#
+# LABEL: Show Phase Residual TXT files?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_phares = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_phares = "n"
+#
+# LABEL: Show Point Spread Function (PSF) files?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_PSF = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_PSF = "n"
+#
 # DISPLAY: SYN_Unbending
 # DISPLAY: ML_doit
 # DiSPLAY: ML_use_for_merging

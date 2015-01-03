@@ -262,7 +262,9 @@ eot
   #
   cat LOGS/${prefix}avramphs_table.txt
   cat LOGS/${prefix}avramphs_table.txt | sed 's/:://g' > LOGS/${prefix}phase-residuals.txt
-  echo "# IMAGE: LOGS/${prefix}phase-residuals.txt <TXT: ${prename}Phase Residuals in Resolution Ranges>" >> LOGS/${scriptname}.results
+  if ( ${show_phares}x == "yx" ) then
+    echo "# IMAGE: LOGS/${prefix}phase-residuals.txt <TXT: ${prename}Phase Residuals in Resolution Ranges>" >> LOGS/${scriptname}.results
+  endif
   #
   ###########################################################################
 endif
@@ -301,8 +303,6 @@ eot
 \rm -f SUMMARY
 \cp -f fort.3 APH/${prefix}${imagename}_cor_origtiltd.aph
 # \cp -f ../../merge/APH/merge.aph APH/${prefix}${imagename}_cor_origtiltd.aph
-#
-# echo "# IMAGE: APH/${prefix}${imagename}_cor_origtiltd.aph <APH: ${prename}Amp&Phs after ORIGTILT [H,K,Z,A,P(CTF Phase flipped, PhaOri),Num,IQ,WGHT,Back,CTF]>" >> LOGS/${scriptname}.results
 #
 if ( ${scriptname} == "2dx_generateMAP" ) then
   echo "<<@progress: 20>>"
@@ -349,8 +349,6 @@ eot
 \mv -f fort.4 APH/${prefix}ctfmerge.aph
 \rm -f TMP444888.tmp
 #
-# echo "# IMAGE: ${prefix}avrg.hkl <TXT: ${prename}APH file after AVRGAMPHS [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
-#
 if ( ${scriptname} == "2dx_generateMAP" ) then
   echo "<<@progress: 38>>"
 else
@@ -393,15 +391,15 @@ if ( ! -e ${prefix}centric.hkl ) then
   ${proc_2dx}/protest "ERROR occured. ${prefix}centric.hkl missing."
 endif
 #
-# echo "# IMAGE: ${prefix}centric.hkl <TXT: ${prename}APH file after CENTRIC [H,K,L,A,P,FOM]>" >> LOGS/${scriptname}.results
-#
 #############################################################################
 ${proc_2dx}/linblock "f2mtz - to translate avrg.hkl into ${imagename}.mtz"
 #############################################################################
 #
 set infile = ${prefix}centric.hkl
 #
-echo "# IMAGE: ${infile} <TXT: HKL file>" >> LOGS/${scriptname}.results
+if ( ${show_hkl}x == "yx" ) then
+  echo "# IMAGE: ${infile} <TXT: HKL file>" >> LOGS/${scriptname}.results
+endif
 #
 echo "Calling now:"
 echo "${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}.mtz"
@@ -471,10 +469,14 @@ eof
   #
 endif
 #
-echo "# IMAGE: ${prefix}${imagename}.mtz <MTZ file of Amp&Phs>" >> LOGS/${scriptname}.results
+if ( ${show_hkl}x == "yx" ) then
+  echo "# IMAGE: ${prefix}${imagename}.mtz <MTZ file of Amp&Phs>" >> LOGS/${scriptname}.results
+endif
 #
 set infile = ${prefix}centric_phase_zero.hkl
-echo "# IMAGE: ${infile} <HKL file of phase zero>" >> LOGS/${scriptname}.results
+if ( ${show_hkl}x == "yx" ) then
+  echo "# IMAGE: ${infile} <HKL file of phase zero>" >> LOGS/${scriptname}.results
+endif
 #
 #
 if ( ${rotate_to_Z} == "yes" ) then
@@ -753,8 +755,10 @@ if ( ${SYM_sub} == 'p1' ) then
 endif
 #
 #
-echo "# IMAGE: ${prefix}${imagename}_phase_zero-p1.mrc <PSF as map>"  >> LOGS/${scriptname}.results
-echo "# IMAGE: ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc <PSF symmetrized as map>" >> LOGS/${scriptname}.results
+if ( ${show_PSF}x == "yx" ) then
+  echo "# IMAGE: ${prefix}${imagename}_phase_zero-p1.mrc <PSF as map>"  >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${prefix}${imagename}_phase_zero-${SYM_sub}.mrc <PSF symmetrized as map>" >> LOGS/${scriptname}.results
+endif
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-p1.mrc <${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${prefix}${imagename}-${SYM_sub}.mrc <${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 #
@@ -818,8 +822,6 @@ ${bin_2dx}/laserplot.exe -outputfile=PS/${prefix}${imagename}MAP-${SYM_sub}.ps $
 #
 \rm -f ${imagename}-${SYM_sub}.plt
 #
-# echo "# IMAGE: PS/${prefix}${imagename}PSF-p1.ps <PS: ${prename}PSF>"  >> LOGS/${scriptname}.results
-# echo "# IMAGE: PS/${prefix}${imagename}PSF-${SYM_sub}.ps <PS: ${prename}PSF symmetrized>" >> LOGS/${scriptname}.results
 echo "# IMAGE: PS/${prefix}${imagename}MAP-p1.ps <PS: ${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: PS/${prefix}${imagename}MAP-${SYM_sub}.ps <PS: ${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
 #
@@ -869,8 +871,6 @@ SCRATCH/${prefix}${imagename}-${SYM_sub}.mrc
 SCRATCH/${prefix}${imagename}-${SYM_sub}.tif
 Y
 eot
-  #
-  # echo "# IMAGE: "SCRATCH/${imagename}-${SYM_sub}.mrc  >> LOGS/${scriptname}.results
   #
   ### THIS NEEDS TO BE A VALID PATH TO SPIDER: For example:
   #/usr/local/spider/bin/spider.exe

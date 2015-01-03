@@ -67,6 +67,8 @@
 # DISPLAY: SYN_Unbending
 # DISPLAY: initialization_reset
 # DISPLAY: use_masked_image
+# DISPLAY: domask
+# DISPLAY: ctfcor_imode
 #
 #$end_local_vars
 #
@@ -115,6 +117,10 @@ set movie_inmovie = ""
 set use_masked_image = ""
 #
 #$end_vars
+#
+if ( ! -d LOGS ) then
+  \mkdir LOGS
+endif
 #
 set scriptname = 2dx_initialize
 \rm -f LOGS/${scriptname}.results

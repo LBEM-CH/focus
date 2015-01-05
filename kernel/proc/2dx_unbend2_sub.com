@@ -748,15 +748,11 @@ eot
 ${imagename}.mrc
 image_ctfcor.mrc
 #
-#
-#
 ${TLTAXIS},${TLTANG}
 ${CS},${KV},${phacon},${magnification},${stepdigitizer}
 ${defocus}
+${RESMAX}
 ${ctfcor_noise}
-${ctfcor_inner_tile}
-${ctfcor_outer_tile}
-${ctfcor_taper}
 ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
@@ -951,7 +947,7 @@ eot
     #############################################################################
     #
     python ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_unbend2_notap_ctf.mrc ${ctfcor_noise}
-    if ( ( ${ctfcor_imode} == "2" ) then
+    if ( ${ctfcor_imode} == "2" ) then
       echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF**2 file (for correction)>" >> LOGS/${scriptname}.results 
     else
       echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF file (for correction)>" >> LOGS/${scriptname}.results 

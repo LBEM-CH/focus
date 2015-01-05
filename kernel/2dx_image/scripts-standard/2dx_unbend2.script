@@ -276,13 +276,13 @@ endif
 #
 set startname = `echo ${imagename} | cut -c1`
 #
-# if ( $domask == 'y' ) then
-#   if ( -e ${imagename}_mask.mrc ) then
-#     set domask = 'n'
-#     echo "set domask = ${domask}" >> LOGS/${scriptname}.results
-#     ${proc_2dx}/linblock "Masking info exists. domask corrected to ${domask}."
-#   endif
-# endif
+if ( $domask == 'y' ) then
+  if ( -e ${imagename}_mask.mrc ) then
+    set domask = 'n'
+    echo "set domask = ${domask}" >> LOGS/${scriptname}.results
+    ${proc_2dx}/linblock "Masking info exists. domask corrected to ${domask}."
+  endif
+endif
 #
 if ( ${createmaskinfo} == 'y' ) then
   if ( ${startname} == 'm' ) then
@@ -290,13 +290,6 @@ if ( ${createmaskinfo} == 'y' ) then
     ${proc_2dx}/linblock "WARNING: creating another MASKINFO, but file already masked."
   endif
 endif
-#
-# if ( ${domask} == 'y' ) then
-#   set round = 1
-#   ${proc_2dx}/lin "Doing only one round because of masking"
-# else
-#   ${proc_2dx}/lin "Doing ${round} rounds"
-# endif
 #
 set quadradbx = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $1 ) } END { print s }'`
 set quadradby = `echo ${quadradb} | sed 's/,/ /g' | awk '{ s = int( $2 ) } END { print s }'`
@@ -519,15 +512,8 @@ while ( ${locround} <= ${round} )
   #
 end
 #
-#############################################################################
-#############################################################################
-##### END OF THE BIG WHILE LOOP OVER THE DIFFERENT MASKB VALUES #############
-#############################################################################
-#############################################################################
 #
-if ( ${domask} == 'y' ) then
-  exit -1
-endif
+#
 #
 #############################################################################
 ${proc_2dx}/${lincommand} "MASKTRAN - to mask the FFT of the unbent image"

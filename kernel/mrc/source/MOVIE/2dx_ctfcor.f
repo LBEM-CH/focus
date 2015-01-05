@@ -115,8 +115,8 @@ C
 C
 C******************************************************************************
 C
-      WRITE(6,'(/,/,''CTFCORR: Program to apply CTF correction '',
-     .      ''to an image'')')
+      WRITE(6,'(/,/,''CTFCOR: Program to apply CTF correction '',
+     .      ''to an image in stripes'')')
 C
 C******************************************************************************
 C
@@ -381,7 +381,15 @@ C
 C
 C-----Calculate in-place Fourier Transform from entire image
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      onevol = 1.0 / sqrt(REAL(NX*NY))
+      do ix=1,NX
+        do iy=1,NY
+          IR=ID(ix,iy,NX)
+          CFFTPIC(IR) = CFFTPIC(IR) * ONEVOL
+        enddo
+      enddo
       call RLFT3(CFFTPIC,CBOX,NX,NY,1,1)
+C
 C      call TDXFFT(CFFTPIC,NX,NY,IFOR)
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
@@ -420,7 +428,8 @@ C-----Loop over all stripes
 C
       ANGASTRAD=ANGAST*PI/180.0
 C
-!$OMP PARALLEL DO PRIVATE (rstripex,rstripey,rdist1,rbeta,rgamma,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM,ix,ilx,iy,ily,CTFV,iix,iiy,IS,IR,ABOX,CBOX,onevol,RVAL)
+C !$OMP PARALLEL DO PRIVATE (rstripex,rstripey,rdist1,rbeta,rgamma,rdist2,rdist3, &
+C !$OMP& RLDEF1,RLDEF2,RLDEFM,ix,ilx,iy,ily,CTFV,iix,iiy,IS,IR,ABOX,CBOX,onevol,RVAL)
       do istripe = 1,ISTRIPENUM
 C
 C-------Coordinates of center of stripe
@@ -478,33 +487,24 @@ C          write(6,'(''Thread '',I6,'', ix = '',I6)') ITNR, ix
             if(ix.ne.0 .or. iy.ge.0)then
               CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
      +              ANGASTRAD,THETATR,ilx,ily)
-              iix=ix+NX/2
-              iiy=iy+NY/2
-              if(iiy.gt.NY)iiy=iiy-NY
-              IS=ID(iix,iiy,NY)
 C-------------Sum up the full-size CTFs with local defoci
               if(LCTFSUM) then
                 if(IMODE.eq.1)then
                   RVAL = abs(CTFV)
-!$OMP CRITICAL
-                  ACTFPIC(IS)=ACTFPIC(IS)+RVAL
-!$OMP END CRITICAL
                 elseif(IMODE.eq.2)then
                   RVAL = CTFV**2
-!$OMP CRITICAL
-                  ACTFPIC(IS)=ACTFPIC(IS)+RVAL
-!$OMP END CRITICAL
                 elseif(IMODE.eq.3)then
                   RVAL = 1.0
-!$OMP CRITICAL
-                  ACTFPIC(IS)=ACTFPIC(IS)+RVAL
-!$OMP END CRITICAL
                 else
                   RVAL = CTFV
-!$OMP CRITICAL
-                  ACTFPIC(IS)=ACTFPIC(IS)+RVAL
-!$OMP END CRITICAL
                 endif
+                iix=ix+NX/2
+                iiy=iy+NY/2
+                if(iiy.gt.NY)iiy=iiy-NY
+                IS=ID(iix,iiy,NY)
+C !$OMP CRITICAL
+                ACTFPIC(IS)=ACTFPIC(IS)+RVAL
+C !$OMP END CRITICAL
               endif
               iix=ix
               iiy=iy
@@ -560,7 +560,6 @@ C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
           do iy=1,NY
             IR=ID(ix,iy,NX)
             ABOX(IR) = ABOX(IR) * ONEVOL
-C            ABOX(IR) = 1.0
           enddo
         enddo
 C
@@ -571,7 +570,7 @@ C------------------------------------------------------------
 C-------Copy Stripe into output FFT
 C------------------------------------------------------------
 C
-!$OMP CRITICAL
+C !$OMP CRITICAL
         DO ix=1,NX
           DO iy=1,NY
             rdist1 = sqrt((real(ix)-rstripex)**2 + (real(iy)-rstripey)**2)
@@ -588,10 +587,10 @@ C
             endif
           enddo
         enddo
-!$OMP END CRITICAL
+C !$OMP END CRITICAL
 C
       enddo
-!$OMP END PARALLEL DO 
+C !$OMP END PARALLEL DO 
 C
 C------------------------------------
 C-----Copy right half into left half of summed CTF

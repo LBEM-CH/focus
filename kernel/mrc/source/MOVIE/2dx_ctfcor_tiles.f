@@ -134,8 +134,8 @@ C
 C
 C******************************************************************************
 C
-      WRITE(6,'(/,/,''CTFCORR: Program to apply CTF correction '',
-     .      ''to an image'')')
+      WRITE(6,'(/,/,''CTFCORTILES: Program to apply CTF correction '',
+     .      ''to an image in tiles'')')
 C
 C******************************************************************************
 C

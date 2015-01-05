@@ -420,7 +420,7 @@ C-----Loop over all stripes
 C
       ANGASTRAD=ANGAST*PI/180.0
 C
-!$OMP PARALLEL DO PRIVATE (rstripex,rstripey,rdist1,rbeta,rgamma,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM,ix,ilx,iy,ily,CTFV,iix,iiy,IS,IR,ABOX,CBOX,onevol)
+!$OMP PARALLEL DO PRIVATE (rstripex,rstripey,rdist1,rbeta,rgamma,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM,ix,ilx,iy,ily,CTFV,iix,iiy,IS,IR,ABOX,CBOX,onevol,RVAL)
       do istripe = 1,ISTRIPENUM
 C
 C-------Coordinates of center of stripe

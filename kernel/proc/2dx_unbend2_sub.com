@@ -945,13 +945,17 @@ eot
   echo "<<@progress: 90>>"
   #
   #
-  if ( ${ctfcor_imode} == "2"  &&  ${final_round} == "y" ) then
+  if ( ( ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" ) &&  ${final_round} == "y" ) then
     #############################################################################
     ${proc_2dx}/${lincommand} "apply_filter_Fourier.py - to perform Weiner filtration on unbent image"
     #############################################################################
     #
     python ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_unbend2_notap_ctf.mrc ${ctfcor_noise}
-    echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF file (for correction)>" >> LOGS/${scriptname}.results 
+    if ( ( ${ctfcor_imode} == "2" ) then
+      echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF**2 file (for correction)>" >> LOGS/${scriptname}.results 
+    else
+      echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF file (for correction)>" >> LOGS/${scriptname}.results 
+    endif
     echo "# IMAGE: SCRATCH/${iname}_unbend2_notap_ctf.mrc <Unbent image, CTF-corrected>" >> LOGS/${scriptname}.results 
     #
   endif

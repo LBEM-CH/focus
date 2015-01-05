@@ -415,7 +415,7 @@ C-----Stripes are covering the image over a distance of NX*sqrt(2),
 C-----i.e. the length of the diagonal of the image
 C-----The width of a stripe is
 C
-      RSTRIPEWIDTH = NX*sqrt(2.0)/ISTRIPENUM
+      RSTRIPEWIDTH = NX*sqrt(2.0)/real(ISTRIPENUM-1)
 C
 C-----The taper-width connecting two stripes is 
 C
@@ -577,13 +577,17 @@ C !$OMP CRITICAL
             rbeta = atan2((real(iy)-rstripey),(real(ix)-rstripex))
             rgamma = rbeta - TLTAXA*PI/180.0
             rdist2 = sin(rgamma) * rdist1
-            if(abs(rdist2).lt.(RSTRIPEWIDTH-RSTRIPETAPER)/2.0)then
+C            if(abs(rdist2).lt.(RSTRIPEWIDTH-RSTRIPETAPER)/2.0)then
+C              IR=ID(ix,iy,NX)
+C              APIC(IR) = APIC(IR) + ABOX(IR) * 1.0
+C            elseif(abs(rdist2).lt.(RSTRIPEWIDTH+RSTRIPETAPER)/2.0)then
+C              IR=ID(ix,iy,NX)
+C              APIC(IR) = APIC(IR) + ABOX(IR) * ((RSTRIPEWIDTH+RSTRIPETAPER)/2.0-abs(rdist2)) 
+C     .                   / (RSTRIPETAPER+1.0)
+C            endif
+            if(abs(rdist2).le.(RSTRIPEWIDTH+1)/2.0)then
               IR=ID(ix,iy,NX)
-              APIC(IR) = APIC(IR) + ABOX(IR) * 1.0
-            elseif(abs(rdist2).lt.(RSTRIPEWIDTH+RSTRIPETAPER)/2.0)then
-              IR=ID(ix,iy,NX)
-              APIC(IR) = APIC(IR) + ABOX(IR) * ((RSTRIPEWIDTH+RSTRIPETAPER)/2.0-abs(rdist2)) 
-     .                   / (RSTRIPETAPER+1.0)
+              APIC(IR) = ABOX(IR)
             endif
           enddo
         enddo

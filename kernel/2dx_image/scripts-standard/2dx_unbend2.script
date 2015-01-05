@@ -768,6 +768,8 @@ echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
+exit
+python ${proc_2dx}/movie/apply_filter_Fourier.py
 #
 #
 

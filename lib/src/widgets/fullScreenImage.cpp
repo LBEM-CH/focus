@@ -546,27 +546,39 @@ void fullScreenImage::drawRealLattice(float lattice[2][2])
   float a2 = -A*SINA;
   float b1 =  B*COSB;
   float b2 = -B*SINB;
-  
-  QPointF a(a1,a2), b(b1,b2), o(0.5,0.5);
 
-  std::cout << "Reci lattice is u = " << u1 << "," << u2 << "     v = " << v1 << "," << v2 << endl;
-  std::cout << "Real lattice is a = " << a1 << "," << a2 << "     b = " << b1 << "," << b2 << endl;
+  QPointF a(a1,a2), b(b1,b2), o1(1.9,0.0), o2(0.0,1.9);
+  
+  QPointF r1,r2;
+  float rlx=image->width()/2.0;
+  float rly=image->height()/2.0;
+
+  // std::cout << "Reci lattice is u = " << u1 << "," << u2 << "     v = " << v1 << "," << v2 << endl;
+  // std::cout << "Real lattice is a = " << a1 << "," << a2 << "     b = " << b1 << "," << b2 << endl;
 
   QPen pen(image_base->pen());
-  pen.setColor(QColor(0,0,0));
-  image_base->setPen(pen);
-  for(int i=-60;i<=60;i++)
-  {
-      image_base->drawLine(i*a-60*b+o,(i)*a+(60)*b+o);
-      image_base->drawLine((-60)*a+i*b+o,(60)*a+(i)*b+o);
-  }
   pen.setColor(QColor(255,240,0));
+  pen.setWidth(2);
   image_base->setPen(pen);
   for(int i=-60;i<=60;i++)
-  {
-     image_base->drawLine(i*a-60*b,(i)*a+(60)*b);
-     image_base->drawLine((-60)*a+i*b,(60)*a+(i)*b);
-  }
+    for(int j=-60;j<=60;j++)
+    {
+      r1 = (i    )*a+(j+0.1)*b;
+      r2 = (i    )*a+(j+0.9)*b;
+      if(r1.x()>-rlx && r1.x()<rlx && r2.x()>-rlx && r2.x()<rlx && 
+         r1.y()>-rly && r1.y()<rly && r2.y()>-rly && r2.y()<rly) 
+        image_base->drawLine(r1,r2);
+      r1 = (i+0.1)*a+(j    )*b;
+      r2 = (i+0.9)*a+(j    )*b;
+      if(r1.x()>-rlx && r1.x()<rlx && r2.x()>-rlx && r2.x()<rlx && 
+         r1.y()>-rly && r1.y()<rly && r2.y()>-rly && r2.y()<rly) 
+        image_base->drawLine(r1,r2);
+
+      // image_base->drawLine(i*a-60*b,(i)*a+(60)*b);
+      // image_base->drawLine((-60)*a+i*b,(60)*a+(i)*b);
+    }
+  pen.setWidth(1);
+  image_base->setPen(pen);
 }
 
 void fullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, bool realSpace, bool invertAngle)

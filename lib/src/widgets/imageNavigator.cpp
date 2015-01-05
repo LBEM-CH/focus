@@ -78,8 +78,9 @@ void imageNavigator::Initialize_Actions()
   menu->addAction(toggleColorToolAction);
 
  // #ifdef Q_WS_MAC
-  if(imageType =="fft")
-  {
+  // CHEN: 4.1.2015
+  // if(imageType =="fft")
+  // {
     QMenu *brighterMenu = new QMenu("Quick-Adjust Brightness",this);
     menu->addMenu(brighterMenu);
     QAction *brighterAction = new QAction(tr("Brighter"),this);
@@ -93,8 +94,8 @@ void imageNavigator::Initialize_Actions()
     addAction(darkerAction);
     connect(darkerAction,SIGNAL(triggered()),this,SLOT(darker()));
     brighterMenu->addAction(darkerAction);
-  }
-  //#endif
+  // }
+  // #endif
 
   toggleMouseAssignAction = new QAction(tr("Show Mouse Button Assignment"),this);
   toggleMouseAssignAction->setShortcut(tr("M"));
@@ -1027,14 +1028,36 @@ void imageNavigator::zoomStandard()
 
 void imageNavigator::brighter()
 {
-  float max = image->imageMax()/2.0, min = image->imageMin();
-  image->rescale(min,max,false);
+  // CHEN: 4.1.2015
+  if(imageType =="fft")
+  {
+    float max = image->imageMax()/1.4142135;
+    float min = image->imageMin();
+    image->rescale(min,max,false);
+  }
+  else
+  {
+    double max = image->imageMax() + (image->imageMax() - image->imageMin()) * 0.1;
+    double min = image->imageMin() - (image->imageMax() - image->imageMin()) * 0.1;
+    image->rescale(min,max,false);
+  }
 }
 
 void imageNavigator::darker()
 {
-  float max = image->imageMax()*2.0, min = image->imageMin();
-  image->rescale(min,max,false);
+  // CHEN: 4.1.2015
+  if(imageType =="fft")
+  {
+    float max = image->imageMax()*1.4142135;
+    float min = image->imageMin();
+    image->rescale(min,max,false);
+  }
+  else
+  {
+    double max = image->imageMax() - (image->imageMax() - image->imageMin()) * 0.1;
+    double min = image->imageMin() + (image->imageMax() - image->imageMin()) * 0.1;
+    image->rescale(min,max,false);
+  }
 }
 
 void imageNavigator::setMouseDefaults()

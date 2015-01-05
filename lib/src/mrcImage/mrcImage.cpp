@@ -145,6 +145,11 @@ bool mrcImage::loadData(mrcHeader *header)
   //emit setProgress(10);
   if(mode != 0 && header->swapEndian())
     if(mode == 3 || mode == 4)
+      // CHEN: 4.1.2015
+      // image 512x512 gives FFT of 513x513 in display, but 2x256x512 in data ("2x" is for complex values). 
+      // This is 2 * nx/2 * ny
+      // Shouldn't this then be: ???
+      // for(quint32 i=0;i<header->nx()*header->ny()*cellSize/2;i++)
       #pragma omp parallel for shared(rawData);
       for(quint32 i=0;i<header->nx()*header->ny()*cellSize/2-cellSize/2;i++)
         byteSwap(&rawData[i*cellSize/2],cellSize/2);
@@ -275,9 +280,9 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format)
       for(int t=0;t<threadCount;t++)
       {
         if(t!=threadCount-1)
-					l[t] = new loadThread(rawData,imageData,nx,ny,imageMin,imageMax,mode,(nx-1)*ny/threadCount*t,(nx-1)*ny/threadCount*(t+1),format,loadThread::fft,showPhase);
+		l[t] = new loadThread(rawData,imageData,nx,ny,imageMin,imageMax,mode,(nx-1)*ny/threadCount*t,(nx-1)*ny/threadCount*(t+1),format,loadThread::fft,showPhase);
         else
-					l[t] = new loadThread(rawData,imageData,nx,ny,imageMin,imageMax,mode,(nx-1)*ny*5/threadCount,(nx-1)*ny,format,loadThread::fft,showPhase);
+		l[t] = new loadThread(rawData,imageData,nx,ny,imageMin,imageMax,mode,(nx-1)*ny*5/threadCount,(nx-1)*ny,format,loadThread::fft,showPhase);
         l[t]->start();
       }
 
@@ -299,9 +304,9 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format)
       for(int t=0;t<threadCount;t++)
       {
         if(t!=threadCount-1)
-					l[t] = new loadThread(rawData,imageData,nx,ny,imageMin,imageMax,mode,(dataSize*width)/threadCount*t,(dataSize*width)/threadCount*(t+1),format,loadThread::real,showPhase);
+		l[t] = new loadThread(rawData,imageData,nx,ny,imageMin,imageMax,mode,(dataSize*width)/threadCount*t,(dataSize*width)/threadCount*(t+1),format,loadThread::real,showPhase);
         else
-					l[t] = new loadThread(rawData,imageData,nx,ny,imageMin,imageMax,mode,(dataSize*width)*5/threadCount,dataSize*width,format,loadThread::real,showPhase);
+		l[t] = new loadThread(rawData,imageData,nx,ny,imageMin,imageMax,mode,(dataSize*width)*5/threadCount,dataSize*width,format,loadThread::real,showPhase);
         l[t]->start();
       }
 
@@ -358,6 +363,7 @@ void mrcImage::formatImage(mrcHeader *header, QImage::Format format)
   {
     image = new QImage(imageData, 1024, 1024, format);
     if(mode == 3 || mode == 4)
+      // *image = image->copy(0,0,(header->nx()-1)*2, header->ny());
       *image = image->copy(0,0,(header->nx()-1)*2, header->ny());
     else
       *image = image->copy(0, 0, header->nx(), header->ny());
@@ -371,12 +377,13 @@ void mrcImage::formatImage(mrcHeader *header, QImage::Format format)
       image = new QImage(imageData, header->nx(), header->ny(), format);
     }
   }
-  cout<<"In mrcImage.cpp, line 374:  Image mode = "<<mode<<",  Image dimensions = "<<image->width()<<" "<<image->height()<<endl;
+  // CHEN
+  // cout<<"In mrcImage.cpp, line 374:  Image mode = "<<mode<<",  Image dimensions = "<<image->width()<<" "<<image->height()<<endl;
   // *image = image->mirrored(false,true);
   QImage mirrorimage = image->mirrored(false,true);
-  cout<<"In mrcImage.cpp, line 376:  Image now mirrored."<<endl;
+  // cout<<"In mrcImage.cpp, line 376:  Image now mirrored."<<endl;
   *image = mirrorimage;
-  cout<<"In mrcImage.cpp, line 378:  Image now copied back."<<endl;
+  // cout<<"In mrcImage.cpp, line 378:  Image now copied back."<<endl;
   if(format == QImage::Format_Indexed8)
   {
     image->setNumColors(256);
@@ -403,7 +410,9 @@ bool mrcImage::loadImage(mrcHeader *header, QImage::Format format)
   if(header->mode()==3||header->mode()==4)
   {
     //rescale(header,header->min(),2.0*header->mean() /*+1.0*stdDev(header) */,format);	
-    rescale(header,header->min(), header->mean() + 1.1*stdDev(header), format);	
+    //rescale(header,header->min(), header->mean() + 1.1*stdDev(header), format);	
+    // CHEN: 4.1.2015
+    rescale(header,header->min(), 3.0 * header->mean() + 1.1*stdDev(header), format);	
   }
   else
     rescale(header,header->min(),header->max(),format);

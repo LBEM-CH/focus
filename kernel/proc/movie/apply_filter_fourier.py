@@ -12,8 +12,9 @@ if __name__ == "__main__":
 	filename_in = sys.argv[1]
 	filename_filter = sys.argv[2]
 	filename_out = sys.argv[3]
-	noise2 = float(sys.argv[4])
-		
+	noise = float(sys.argv[4])
+	noise2 = noise * noise
+
 	frame = get_image(filename_in)
 	
 	w = get_image(filename_filter)

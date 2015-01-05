@@ -101,7 +101,7 @@ C
             IF (H .GT. 1.) HISTO(J) = ALOG10(H)
             H = HISTO(J)
           ELSE
-             IF(HISTO(J).NE.0) WRITE(6,299) VAL,HISTO(J)
+C             IF(HISTO(J).NE.0) WRITE(6,299) VAL,HISTO(J)
 298             FORMAT(//'NUMBER OF DENSITIES IN EACH BIN'//)
 299             FORMAT(2F15.2)
           END IF

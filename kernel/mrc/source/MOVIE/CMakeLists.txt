@@ -92,9 +92,22 @@ file(GLOB DAT_FILES *.dat)
 file(GLOB BUILD_FILES Makefile.*)
 file(GLOB README README*)
 set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE} ${DAT_FILES} ${BUILD_FILES} ${README}) 
+
 ###############################################################################
 
 set(CMAKE_DEBUG_POSTFIX -dbg)
+
+
+set(USE_FFTWF TRUE)
+find_package(FFTW)
+if(FFTWF_FOUND)
+        message(STATUS "MOVIE: Found FFTW at ${FFTWF_LIB}")
+        list(APPEND LIBRARIES  ${FFTWF_LIB})
+        include_directories(${FFTW_INCLUDE_PATH})
+elseif(FFTWF_FOUND)
+        message(FATAL_ERROR "FFTWF not found!")
+endif(FFTWF_FOUND)
+
 
  
 ###############################################################################
@@ -103,23 +116,29 @@ set(CMAKE_DEBUG_POSTFIX -dbg)
 set(CMAKE_EXECUTABLE_SUFFIX ".exe")
 set(IOF iof.f)
 set(IOC ioc.c)
+set(FFT fftlib.cpp)
 
 set(2DXMOVIEREFINE 2dx_movie_refine)
 set(2DXMOVIEREFINE_SRC ${2DXMOVIEREFINE}.f)
 set(2DXMOVIEREFINE_EXE ${2DXMOVIEREFINE})
 add_executable(${2DXMOVIEREFINE_EXE} ${2DXMOVIEREFINE_SRC} ${IOF} ${IOC}) 
 
+set(2DXCTFCORTILES 2dx_ctfcor_tiles)
+set(2DXCTFCORTILES_SRC ${2DXCTFCORTILES}.f)
+set(2DXCTFCORTILES_EXE ${2DXCTFCORTILES})
+add_executable(${2DXCTFCORTILES_EXE} ${2DXCTFCORTILES_SRC} ${IOF} ${IOC}) 
+
 set(2DXCTFCOR 2dx_ctfcor)
 set(2DXCTFCOR_SRC ${2DXCTFCOR}.f)
 set(2DXCTFCOR_EXE ${2DXCTFCOR})
-add_executable(${2DXCTFCOR_EXE} ${2DXCTFCOR_SRC} ${IOF} ${IOC}) 
+add_executable(${2DXCTFCOR_EXE} ${2DXCTFCOR_SRC} ${IOF} ${IOC})
 
 set(2DXMARKSPOTS 2dx_mark_spots)
 set(2DXMARKSPOTS_SRC ${2DXMARKSPOTS}.f)
 set(2DXMARKSPOTS_EXE ${2DXMARKSPOTS})
 add_executable(${2DXMARKSPOTS_EXE} ${2DXMARKSPOTS_SRC} ${IOF} ${IOC}) 
 
-set(EXECUTABLES ${2DXCTFCOR_EXE} ${2DXMOVIEREFINE_EXE} ${2DXMARKSPOTS_EXE})
+set(EXECUTABLES ${2DXCTFCOR_EXE} ${2DXCTFCORTILES_EXE} ${2DXMOVIEREFINE_EXE} ${2DXMARKSPOTS_EXE})
 ###############################################################################
 # Installation  ---------------------------------------------------------------
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)

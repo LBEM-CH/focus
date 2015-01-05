@@ -241,6 +241,12 @@ if ( ${movie_enable} == "n" ) then
   exit
 endif
 #
+if ( ${calculate_tiles}x == "nx" || ${calculate_tiles}x == "x" ) then
+  set calculate_tiles = "0"
+  echo "set calculate_tiles = ${calculate_tiles}" >> LOGS/${scriptname}.results
+  echo ":: Correcting calculate_tiles to ${calculate_tiles}"
+endif
+#
 if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   ${proc_2dx}/linblock "Movie-file not found. Skipping script."
   set movie_enable = "n"
@@ -666,25 +672,32 @@ while ($i <= ${movie_imagenumber_total})
     #
     \rm -f frames/frame_${i}_ctfcor.mrc
     #
-    # For example:
-    # ${bin_2dx}/2dx_ctfcor.exe << eot
-    # ${imagename}.mrc
-    # ${imagename}_ctfcor.mrc
-    # ${ctfcor_tilefile}
-    # ${ctfcor_psfile}
-    # 10.0, 60.0
-    # 2.7, 300.0, 0.07, 39411.0, 5.0
-    # 51579.8, 8919.84, 68.0
-    # 0.1
-    # 256
-    # 512
-    # 50
-    # n
-    # 0.1
-    # eot
-    #
-    if ( ${calculate_tiles} == "n" ) then
+    if ( ${calculate_tiles} == "0" ) then
       ${bin_2dx}/2dx_ctfcor.exe << eot
+frames/frame_${i}.mrc
+frames/frame_${i}_ctfcor.mrc
+#
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${RESMAX}
+${ctfcor_noise}
+${ctfcor_imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+      #
+    else
+      if ( ${calculate_tiles} == "1" ) then
+        #
+        set ctfcor_tilefile = "frames/2dx_ctfcor_tile.mrc"
+        set ctfcor_psfile = "frames/2dx_ctfcor_psfile.mrc"
+        set ctfcor_ctffile = "frames/2dx_ctfcor_ctffile.mrc"
+        \rm -f ${ctfcor_tilefile}
+        \rm -f ${ctfcor_psfile} 
+        \rm -f ${ctfcor_ctffile} 
+        #
+        ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
 frames/frame_${i}.mrc
 frames/frame_${i}_ctfcor.mrc
 #
@@ -701,17 +714,19 @@ ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
-      #
-    else
-      #
-      set ctfcor_tilefile = "frames/2dx_ctfcor_tile.mrc"
-      set ctfcor_psfile = "frames/2dx_ctfcor_psfile.mrc"
-      set ctfcor_ctffile = "frames/2dx_ctfcor_ctffile.mrc"
-      \rm -f ${ctfcor_tilefile}
-      \rm -f ${ctfcor_psfile} 
-      \rm -f ${ctfcor_ctffile} 
-      #
-      ${bin_2dx}/2dx_ctfcor.exe << eot
+        #
+        echo "# IMAGE: frames/frame_${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
+        #
+      else
+        #
+        set ctfcor_tilefile = "frames/2dx_ctfcor_tile.mrc"
+        set ctfcor_psfile = "frames/2dx_ctfcor_psfile.mrc"
+        set ctfcor_ctffile = "frames/2dx_ctfcor_ctffile.mrc"
+        \rm -f ${ctfcor_tilefile}
+        \rm -f ${ctfcor_psfile} 
+        \rm -f ${ctfcor_ctffile} 
+        #
+        ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
 frames/frame_${i}.mrc
 frames/frame_${i}_ctfcor.mrc
 ${ctfcor_tilefile}
@@ -728,14 +743,15 @@ ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
-      #
-      echo "# IMAGE: frames/frame_${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
-      \mv -f ${ctfcor_tilefile} frames/frame_${i}_tiles.mrc
-      echo "# IMAGE: frames/frame_${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
-      \mv -f ${ctfcor_psfile} frames/frame_${i}_ps.mrc
-      echo "# IMAGE: frames/frame_${i}_ps.mrc <Frame ${i}, PowerSpectra>" >> LOGS/${scriptname}.results
-      \mv -f ${ctfcor_ctffile} frames/frame_${i}_ctffile.mrc
-      echo "# IMAGE: frames/frame_${i}_ctffile.mrc <Frame ${i}, CTF-sum>" >> LOGS/${scriptname}.results
+        #
+        echo "# IMAGE: frames/frame_${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
+        \mv -f ${ctfcor_tilefile} frames/frame_${i}_tiles.mrc
+        echo "# IMAGE: frames/frame_${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
+        \mv -f ${ctfcor_psfile} frames/frame_${i}_ps.mrc
+        echo "# IMAGE: frames/frame_${i}_ps.mrc <Frame ${i}, PowerSpectra>" >> LOGS/${scriptname}.results
+        \mv -f ${ctfcor_ctffile} frames/frame_${i}_ctffile.mrc
+        echo "# IMAGE: frames/frame_${i}_ctffile.mrc <Frame ${i}, CTF-sum>" >> LOGS/${scriptname}.results
+      endif
     endif
     #
   endif

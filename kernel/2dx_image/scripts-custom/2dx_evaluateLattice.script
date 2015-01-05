@@ -29,7 +29,7 @@
 # SORTORDER: 20
 #
 #=============================================================================
-# SECTION: Modify Current Lattice
+# SECTION: Permutate Current Lattice ------ these leave lattice nodes where they are and only change indexing
 #=============================================================================
 #
 # LABEL: Swap first and second lattice
@@ -66,6 +66,17 @@ set do3 = "0"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
 # TYPE: Drop_Down_Menu "0=nothing;1=change hand (h->k,k->h)"
 set do4 = "0"
+#
+#=============================================================================
+# SECTION: Modify Lattices ------ these alter lattice node coordinates
+#=============================================================================
+#
+# LABEL: Replace current and second lattice with one that...
+# LEGEND: This rotates and/or mirrors the current lattice. This will create a different lattice with different coordinates in the image.
+# EXAMPLE: dorotate = "nothing"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
+# TYPE: Drop_Down_Menu "0=nothing;1=... is rotated cw by 90deg;2=... is rotated cw by 90deg (also change defocus&tilt);3=... is rotated ccw by 90deg;4=... is rotated ccw by 90deg (also change defocus&tilt);5=... is mirrored upside down (y->-y);6=... is mirrored upside down (y->-y) (also change defocus&tilt)"
+set dorotate = "0"
 #
 #=============================================================================
 # SECTION: Overwrite existing values ? (careful !!!)
@@ -125,6 +136,7 @@ set peakNum = "140"
 # DISPLAY: magnification
 # DISPLAY: tempkeep
 # DISPLAY: comment
+# DISPLAY: defocus
 #
 #$end_local_vars
 #
@@ -152,6 +164,7 @@ set SYM = ""
 set det_tilt = ""
 set ctf_ttf = ""
 set tempkeep = ""
+set defocus = ""
 #
 #$end_vars
 #
@@ -172,6 +185,12 @@ if ( ${do1} != 0 || ${do2} != 0 || ${do3} != 0 ) then
   ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
 else
   echo ":Lattice is: ${lattice}"
+endif
+#
+if ( ${dorotate} != 0 ) then
+  ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
+  ${proc_2dx}/linblock "Second Lattice is currently: ${secondlattice}"
+  ${proc_2dx}/linblock "Backup Lattice is currently: ${backuplattice}"
 endif
 #
 if ( ${doswap} != 0 ) then
@@ -227,6 +246,16 @@ if ( ${doswap} == "5" ) then
   ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
 endif
 #
+set latu1 = `echo ${lattice} | cut -d, -f1`
+set latu2 = `echo ${lattice} | cut -d, -f2`
+set latv1 = `echo ${lattice} | cut -d, -f3`
+set latv2 = `echo ${lattice} | cut -d, -f4`
+#
+set slatu1 = `echo ${secondlattice} | cut -d, -f1`
+set slatu2 = `echo ${secondlattice} | cut -d, -f2`
+set slatv1 = `echo ${secondlattice} | cut -d, -f3`
+set slatv2 = `echo ${secondlattice} | cut -d, -f4`
+#
 #############################################################################
 if ( ${do1} != 0 ) then
   ${proc_2dx}/linblock "do1 - to scale the lattice"
@@ -234,11 +263,6 @@ endif
 #############################################################################
 #
 # TYPE: Drop_Down_Menu "0=nothing;1=double u;2=double v;3=double u&v;4=grow by 45deg (h->h+k,k->h-k);5=half u;6=half v;7=half u&v;8=shrink by 45deg (h->h/2+k/2,k->h/2-k/2)"
-#
-set latu1 = `echo ${lattice} | cut -d, -f1`
-set latu2 = `echo ${lattice} | cut -d, -f2`
-set latv1 = `echo ${lattice} | cut -d, -f3`
-set latv2 = `echo ${lattice} | cut -d, -f4`
 #
 if ( ${do1} == "1" ) then
   set latu1 = `echo ${latu1} | awk '{ s = 2 * $1 } END { print s}'`
@@ -296,8 +320,8 @@ if ( ${do1} == "8" ) then
   set latv2 = ${nlatv2}
 endif
 #
-set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
 if ( ${do1} != 0 ) then
+  set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
   echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
 endif
@@ -309,11 +333,6 @@ endif
 #############################################################################
 #
 # TYPE: Drop_Down_Menu "0=nothing;1=(h->h,k=h+k);2=(h->h,k=h-k)"
-#
-set nlatu1 = ${latu1}
-set nlatu2 = ${latu2}
-set nlatv1 = ${latv1}
-set nlatv2 = ${latv2}
 #
 if ( ${do2} == "1" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1      } END { print s}'`
@@ -329,13 +348,12 @@ if ( ${do2} == "2" ) then
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 - $4 } END { print s}'`
 endif
 #
-set latu1 = ${nlatu1}
-set latu2 = ${nlatu2}
-set latv1 = ${nlatv1}
-set latv2 = ${nlatv2}
-#
-set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
 if ( ${do2} != 0 ) then
+  set latu1 = ${nlatu1}
+  set latu2 = ${nlatu2}
+  set latv1 = ${nlatv1}
+  set latv2 = ${nlatv2}
+  set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
   echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
 endif
@@ -347,11 +365,6 @@ endif
 #############################################################################
 #
 # TYPE: Drop_Down_Menu "0=nothing;1=rot sq. ccw (h->k,k->-h);2=rot sq. cw (h->-k,k->h);3=rot hex ccw (hk->k,-h+k);4=rot hex cw (hk->-k+h,h)"
-#
-set nlatu1 = ${latu1}
-set nlatu2 = ${latu2}
-set nlatv1 = ${latv1}
-set nlatv2 = ${latv2}
 #
 if ( ${do3} == "1" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $3 } END { print s}'`
@@ -381,13 +394,12 @@ if ( ${do3} == "4" ) then
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2      } END { print s}'`
 endif
 #
-set latu1 = ${nlatu1}
-set latu2 = ${nlatu2}
-set latv1 = ${nlatv1}
-set latv2 = ${nlatv2}
-#
-set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
 if ( ${do3} != 0 ) then
+  set latu1 = ${nlatu1}
+  set latu2 = ${nlatu2}
+  set latv1 = ${nlatv1}
+  set latv2 = ${nlatv2}
+  set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
   echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
 endif
@@ -405,15 +417,122 @@ if ( ${do4} == "1" ) then
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 } END { print s}'`
 endif
 #
-set latu1 = ${nlatu1}
-set latu2 = ${nlatu2}
-set latv1 = ${nlatv1}
-set latv2 = ${nlatv2}
-#
-set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
 if ( ${do4} != 0 ) then
+  set latu1 = ${nlatu1}
+  set latu2 = ${nlatu2}
+  set latv1 = ${nlatv1}
+  set latv2 = ${nlatv2}
+  set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
   echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
+endif
+#
+#############################################################################
+if ( ${dorotate} != 0 ) then
+  ${proc_2dx}/linblock "dorotate - to rotate or mirror the lattices"
+endif
+#############################################################################
+#
+if ( ${dorotate} == "1" || ${dorotate} == "2" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $2 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$1 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $4 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$3 } END { print s}'`
+  set nslatu1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $2 } END { print s}'`
+  set nslatu2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$1 } END { print s}'`
+  set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $4 } END { print s}'`
+  set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$3 } END { print s}'`
+  if ( ${dorotate} == "2" ) then
+    echo "::old defocus = ${defocus}" 
+    set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$1} END {print s}'`
+    set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$2} END {print s}'`
+    set ang  = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$3 - 90.0} END {print s}' | awk '{ if ( $1 < -90.0 ) { s = $1 + 180.0 } else { s = $1 } } END { print s }'`
+    set defocus = `echo ${def1},${def2},${ang}`
+    echo "::new defocus = ${defocus}" 
+    echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+    #
+    echo "::old TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    set NTLTANG  = `echo ${TLTAXIS} ${TLTANG} | awk '{ if ( $1 < 0.0 ) { s= -$2 } else { s = $2 } } END {print s}'`
+    set NTLTAXIS = `echo ${TLTAXIS} ${TLTANG} | awk '{ if ( $1 < 0.0 ) { s= $1 + 90.0 } else { s = $1 - 90.0 } } END {print s}'`
+    set TLTANG = ${NTLTANG}
+    set TLTAXIS = ${NTLTAXIS}
+    echo "::new TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+    echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  endif
+endif
+#
+if ( ${dorotate} == "3" || ${dorotate} == "4" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$2 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $1 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$4 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $3 } END { print s}'`
+  set nslatu1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$2 } END { print s}'`
+  set nslatu2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $1 } END { print s}'`
+  set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$4 } END { print s}'`
+  set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $3 } END { print s}'`
+  if ( ${dorotate} == "4" ) then
+    echo "::old defocus = ${defocus}" 
+    set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$1} END {print s}'`
+    set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$2} END {print s}'`
+    set ang  = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$3 + 90.0} END {print s}' | awk '{ if ( $1 > 90.0 ) { s = $1 - 180.0 } else { s = $1 } } END { print s }'`
+    set defocus = `echo ${def1},${def2},${ang}`
+    echo "::new defocus = ${defocus}" 
+    echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+    #
+    echo "::old TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    set NTLTANG  = `echo ${TLTAXIS} ${TLTANG} | awk '{ if ( $1 < 0.0 ) { s= $2 } else { s = -$2 } } END {print s}'`
+    set NTLTAXIS = `echo ${TLTAXIS} ${TLTANG} | awk '{ if ( $1 < 0.0 ) { s= $1 + 90.0 } else { s = $1 - 90.0 } } END {print s}'`
+    set TLTANG = ${NTLTANG}
+    set TLTAXIS = ${NTLTAXIS}
+    echo "::new TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+    echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  endif
+endif
+#
+if ( ${dorotate} == "5" || ${dorotate} == "6" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $1 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$2 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $3 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$4 } END { print s}'`
+  set nslatu1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $1 } END { print s}'`
+  set nslatu2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$2 } END { print s}'`
+  set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $3 } END { print s}'`
+  set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$4 } END { print s}'`
+  if ( ${dorotate} == "6" ) then
+    echo "::old defocus = ${defocus}" 
+    set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END {print s}'`
+    set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END {print s}'`
+    set ang  = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = -$3 } END {print s}'`
+    set defocus = `echo ${def1},${def2},${ang}`
+    echo "::new defocus = ${defocus}" 
+    echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+    #
+    echo "::old TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    set NTLTAXIS = `echo ${TLTAXIS} | awk '{ s = - $1 } END {print s}'`
+    set TLTAXIS = ${NTLTAXIS}
+    echo "::new TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+    echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  endif
+endif
+#
+if ( ${dorotate} != 0 ) then
+  set latu1 = ${nlatu1}
+  set latu2 = ${nlatu2}
+  set latv1 = ${nlatv1}
+  set latv2 = ${nlatv2}
+  set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
+  set slatu1 = ${nslatu1}
+  set slatu2 = ${nslatu2}
+  set slatv1 = ${nslatv1}
+  set slatv2 = ${nslatv2}
+  set secondlattice = `echo ${slatu1},${slatu2},${slatv1},${slatv2}`
+  echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
+  echo "set secondlattice = "${secondlattice} >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "First  Lattice is now: ${lattice}"
+  ${proc_2dx}/linblock "Second Lattice is now: ${secondlattice}"
 endif
 #
 #############################################################################

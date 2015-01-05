@@ -37,17 +37,8 @@ endif
 echo dummy > LOGS/dummy.log
 echo dummy > LOGS/dummy.results
 echo dummy > ${imagename}-tmp.tabl
-#
-if ( -e ${imagename}.mrc ) then
-  if ( ${imagename} == m${nonmaskimagename} ) then
-    \rm -f ${imagename}.mrc
-  endif
-endif
-#
-if ( -e ${nonmaskimagename}-masking-final.mrc ) then
-  \mv -f ${nonmaskimagename}-masking-final.mrc ${nonmaskimagename}_mask.mrc 
-  echo "(Renaming ${nonmaskimagename}-masking-final.mrc to ${nonmaskimagename}_mask.mrc)"
-endif
+\rm LOGS/*.results
+\rm LOGS/*.log
 #
 if ( "${level}" == "radical" ) then
   #
@@ -128,6 +119,8 @@ if ( "${level}" == "radical" ) then
   \rm -f image_ctfcor_CCmap_unbend2.mrc
   \rm -f image_ctfcor.mrc
   \rm -f unbent.mrc
+  \rm -f ${imagename}_mask_mask.mrc
+  \rm -f ${nonmaskimagename}_mask_mask.mrc
   #
   if ( -e ${imagename}_raw.mrc ) then
     \rm -f ${imagename}.mrc
@@ -268,10 +261,18 @@ echo dummy > dummy.TMP
 \rm -f *_phase_zero-p1.mrc
 \rm -f TMP_*
 \rm -f fort.3
-
+if ( -e ${imagename}.mrc ) then
+  if ( ${imagename} == m${nonmaskimagename} ) then
+    \rm -f ${imagename}.mrc
+    echo "set imagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
+  endif
+endif
 #
-\rm LOGS/*.results
-\rm LOGS/*.log
+if ( -e ${nonmaskimagename}-masking-final.mrc ) then
+  \mv -f ${nonmaskimagename}-masking-final.mrc ${nonmaskimagename}_mask.mrc 
+  echo "(Renaming ${nonmaskimagename}-masking-final.mrc to ${nonmaskimagename}_mask.mrc)"
+endif
+#
 
 
 

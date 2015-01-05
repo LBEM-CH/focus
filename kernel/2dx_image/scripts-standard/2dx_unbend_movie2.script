@@ -514,7 +514,10 @@ set i = 0
 # n indicates the original frame position in the raw input movie stack: 
 set n = 1
 while ($i <= ${movie_imagenumber_touse})
- 
+  #########################################################################
+  ${proc_2dx}/lin "Working on frame ${i}"
+  #########################################################################
+
   if ( ! -e ${frame_folder}/2dx_master.cfg ) then
     cd ${frame_folder}
     \ln -s ../2dx_image.cfg 2dx_master.cfg  
@@ -543,8 +546,24 @@ while ($i <= ${movie_imagenumber_touse})
   #
   setenv NCPUS ${Thread_Number}
   #
-  if ( ${calculate_tiles} == "n" ) then
-    ${bin_2dx}/2dx_ctfcor.exe << eot
+  if ( ${calculate_tiles} == "0" ) then
+      ${bin_2dx}/2dx_ctfcor.exe << eot
+${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
+${frame_folder}/frame_${i}/image_ctfcor.mrc
+#
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${RESMAX}
+${ctfcor_noise}
+${ctfcor_imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+      #
+  else
+    if ( ${calculate_tiles} == "1" ) then
+      ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
 ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
 ${frame_folder}/frame_${i}/image_ctfcor.mrc
 #
@@ -561,9 +580,9 @@ ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
-    #
-  else
-    ${bin_2dx}/2dx_ctfcor.exe << eot
+      #
+    else
+      ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
 ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
 ${frame_folder}/frame_${i}/image_ctfcor.mrc
 ${ctfcor_tilefile}
@@ -580,15 +599,16 @@ ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
-    #
-    echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+      #
+      echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+    endif
   endif
   echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/image_ctfcor.mrc <Output Image Frame ${i} CTF corrected>" >> LOGS/${scriptname}.results
 
   #########################################################################
-  ${proc_2dx}/lin "FFT of raw frame average"
+  ${proc_2dx}/lin "FFT of raw frame average, frame ${i}"
   #########################################################################
   setenv IN ${frame_folder}/frame_${i}/${iname}.mrc
   setenv OUT ${frame_folder}/frame_${i}/${iname}_fft.mrc
@@ -786,10 +806,6 @@ echo "<<@progress: 80>>"
 
 
 
-
-
-
-
 ###########################################################################
 ${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_touse}" 
 ###########################################################################
@@ -804,23 +820,38 @@ python ${proc_2dx}/movie/apply_filter_sum.py ${frame_folder}/direct_sum.mrc ${fr
 echo "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
 
+if ( ${ctfcor_imode} == "2" ) then
+  \rm -f frames/direct_sum_filt_ctf.mrc
+  python ${proc_2dx}/movie/apply_filter_fourier.py ${frame_folder}/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc ${frame_folder}/direct_sum_filt_ctf.mrc ${ctfcor_noise}
+  echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (N**2=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: ${frame_folder}/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTF-corrected>" >> LOGS/${scriptname}.results 
+else
+  \rm -f ${frame_folder}/direct_sum_filt_ctf.mrc
+  \cp -f ${frame_folder}/direct_sum_filt.mrc ${frame_folder}/direct_sum_filt_ctf.mrc
+endif
+
+
 
 ###########################################################################
-${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
+${proc_2dx}/linblock "LABELH - Normalizing image to AVG=0, STDEV=100"
 ###########################################################################
 
 \rm -f ${frame_folder}/direct_sum_filt_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
-${frame_folder}/direct_sum_filt.mrc
+${frame_folder}/direct_sum_filt_ctf.mrc
 39
 ${frame_folder}/direct_sum_filt_upscale.mrc
 eot
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt_upscale.mrc <Sum unbent images, filtered, upscaled>" >> LOGS/${scriptname}.results
 
-\rm -f ${frame_folder}/direct_sum_filt_taper.mrc
+###########################################################################
+${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
+###########################################################################
+
 setenv IN  ${frame_folder}/direct_sum_filt_upscale.mrc
 setenv OUT ${frame_folder}/direct_sum_filt_taper.mrc
+\rm -f     ${frame_folder}/direct_sum_filt_taper.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
@@ -830,9 +861,9 @@ echo "# IMAGE: ${frame_folder}/direct_sum_filt_taper.mrc <Sum unbent images, edg
 ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 ###########################################################################
 
-\rm -f ${frame_folder}/direct_sum_fft.mrc
 setenv IN ${frame_folder}/direct_sum_filt_taper.mrc
 setenv OUT ${frame_folder}/direct_sum_fft.mrc
+\rm -f     ${frame_folder}/direct_sum_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 echo "# IMAGE: ${frame_folder}/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
 

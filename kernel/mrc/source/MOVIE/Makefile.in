@@ -12,16 +12,21 @@ CFLAGS = -DPROTOTYPE -Dalliant -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFIL
 
 BIN = ../../bin
 # LDIR = -L../../lib -L/opt/local/lib
+LDIR = -L/opt/local/lib
+LIB = -lfftw3f 
 # LIBRARIES = ../../lib/libgen.a ../../lib/libmisc.a ../../lib/libim2k.a ../../lib/libplot2k.a ../../lib/libfft.a ../../lib/libconv.a ../../lib/lib2dx.a
 # LFLAG = -l2dx -lim2k -lmisc -lgen -lplot2k -lfft -lconv -lfftw3f @LIBS@
 
 
-all: $(BIN)/2dx_movie_refine.exe $(BIN)/2dx_ctfcor.exe $(BIN)/2dx_mark_spots.exe
+all: $(BIN)/2dx_movie_refine.exe $(BIN)/2dx_ctfcor.exe $(BIN)/2dx_mark_spots.exe $(BIN)/2dx_ctcor_tiles.exe
 
 $(BIN)/2dx_movie_refine.exe: 2dx_movie_refine.o iof.o ioc.o 
 	$(F77) $(FFLAGS) -fopenmp iof.o ioc.o -o $@ $<
 
-$(BIN)/2dx_ctfcor.exe: 2dx_ctfcor.o iof.o ioc.o
+$(BIN)/2dx_ctfcor.exe: 2dx_ctfcor.o iof.o ioc.o fftlib.o 
+	$(F77) $(FFLAGS) -fopenmp iof.o ioc.o fftlib.o ${LDIR} ${LIB} -o $@ $<
+
+$(BIN)/2dx_ctfcor_tiles.exe: 2dx_ctfcor_tiles.o iof.o ioc.o
 	$(F77) $(FFLAGS) -fopenmp iof.o ioc.o -o $@ $<
 
 $(BIN)/2dx_mark_spots.exe: 2dx_mark_spots.o iof.o ioc.o
@@ -31,11 +36,17 @@ $(BIN)/2dx_mark_spots.exe: 2dx_mark_spots.o iof.o ioc.o
 2dx_movie_refine.o: 2dx_movie_refine.f
 	$(F77) $(FFLAGS) -fopenmp -c $< 
 
+2dx_ctfcor_tiles.o: 2dx_ctfcor_tiles.f
+	$(F77) $(FFLAGS) -fopenmp -c $< 
+
 2dx_ctfcor.o: 2dx_ctfcor.f
 	$(F77) $(FFLAGS) -fopenmp -c $< 
 
 2dx_mark_spots.o: 2dx_mark_spots.f
 	$(F77) $(FFLAGS) -fopenmp -c $< 
+
+fftlib.o: fftlib.cpp
+        $(GCC) $(CFLAGS) -c $<
 
 iof.o: iof.f
         $(F77) $(CFLAGS) -c $<
@@ -53,6 +64,7 @@ ioc.o: ioc.c
 clean:
 	\rm -f ../../bin/2dx_movie_refine.exe
 	\rm -f ../../bin/2dx_ctfcor.exe
+	\rm -f ../../bin/2dx_ctfcor_tiles.exe
 	\rm -f ../../bin/2dx_mark_spots.exe
 	\rm -f *.o
 

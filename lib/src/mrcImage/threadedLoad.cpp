@@ -8,12 +8,12 @@ float loadThread::fastMagnitude(float a, float b)
 loadThread::loadThread(char *data, uchar *iData, quint32 width, quint32 height, float min, float max, int m, quint32 l, quint32 r, QImage::Format f, loadThread::loadType t, bool p, QObject *parent)
            :QThread(parent)
 {
-	rawData = data;
+  rawData = data;
   imageData = iData;
-	mode = m;
-	leftI = l;
-	rightI = r;
-	showPhase = p;
+  mode = m;
+  leftI = l;
+  rightI = r;
+  showPhase = p;
   nx = width;
   ny = height;
   imageMin = min;
@@ -80,6 +80,12 @@ void loadThread::run()
 			}
 			else if(format == QImage::Format_Indexed8)
 			{
+                                /* CHEN:
+				imageData[((j)*(2*(nx-1))+i+(nx-1)-1)] = value;
+				if(j!=0) imageData[((ny-j)*(2*(nx-1))+(2*(nx-1)-1-i)-(nx-1))] = value;
+				else imageData[i]=0;
+				if(i==(nx-1)-1) imageData[((j)*(2*(nx-1))+(2*(nx-1)-1))]=0;
+                                */
 				imageData[((j)*(2*(nx-1))+i+(nx-1)-1)] = value;
 				if(j!=0) imageData[((ny-j)*(2*(nx-1))+(2*(nx-1)-1-i)-(nx-1))] = value;
 				else imageData[i]=0;
@@ -91,7 +97,7 @@ void loadThread::run()
   else if(type == loadThread::real)
 	{
 		int width;
-    int value = 0;
+                int value = 0;
 		if(format == QImage::Format_Indexed8) width = 1;
 		else if(format == QImage::Format_RGB32) width = 4;
 		else return;

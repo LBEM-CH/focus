@@ -166,7 +166,11 @@ ${ctfcor_maxamp_factor}
 eot
     #
     echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+    if ( ${ctfcor_imode} == "2" ) then
+      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+    else
+      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+    endif
     #
   else
     if ( ${ctfcor_calculate_tiles} == "1" ) then
@@ -228,7 +232,11 @@ eot
       echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
       echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
       echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
-      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+      if ( ${ctfcor_imode} == "2" ) then
+        echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+      else
+        echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+      endif
     endif
   endif
 endif

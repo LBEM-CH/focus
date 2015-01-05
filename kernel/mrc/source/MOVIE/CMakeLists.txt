@@ -97,6 +97,13 @@ set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE} ${DAT_FILES} ${BUILD_FIL
 
 set(CMAKE_DEBUG_POSTFIX -dbg)
 
+# Libraries --------------------------------------------------------------------i
+set(LOCAL_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/../lib)
+find_library(LIB2DX lib2dx.a PATH ${LOCAL_LIB_DIR})
+
+list(APPEND LOCAL_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a ${LOCAL_LIB_DIR}/libfft.a ${LOCAL_LIB_DIR}/libconv.a)
+list(APPEND LIBRARIES ${2DX_LIBRARIES})
+
 
 set(USE_FFTWF TRUE)
 find_package(FFTW)
@@ -132,6 +139,7 @@ set(2DXCTFCOR 2dx_ctfcor)
 set(2DXCTFCOR_SRC ${2DXCTFCOR}.f)
 set(2DXCTFCOR_EXE ${2DXCTFCOR})
 add_executable(${2DXCTFCOR_EXE} ${2DXCTFCOR_SRC} ${IOF} ${IOC})
+# add_executable(${2DXCTFCOR_EXE} ${2DXCTFCOR_SRC} ${IOF} ${IOC} ${FFT} ${FFTWF_LIB} ${LIBRARIES})
 
 set(2DXMARKSPOTS 2dx_mark_spots)
 set(2DXMARKSPOTS_SRC ${2DXMARKSPOTS}.f)

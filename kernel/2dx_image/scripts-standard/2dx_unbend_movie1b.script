@@ -549,10 +549,15 @@ echo "# IMAGE: frames/CCmap_driftCorrected_filt.mrc <CCmap drift-corrected, filt
 python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc 0.001
 echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 
-if ( ${ctfcor_imode} == "2" ) then
+if ( ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" ) then
   \rm -f frames/direct_sum_filt_ctf.mrc
   python ${proc_2dx}/movie/apply_filter_fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc ${ctfcor_noise}
-  echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (N**2=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
+
+  if ( ${ctfcor_imode} == "2" ) then
+    echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (Noise=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
+  else
+    echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF (Noise=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
+  endif
   echo "# IMAGE: frames/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTF-corrected>" >> LOGS/${scriptname}.results 
 else
   \rm -f frames/direct_sum_filt_ctf.mrc

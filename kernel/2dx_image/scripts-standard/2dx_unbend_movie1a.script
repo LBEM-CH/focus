@@ -749,8 +749,13 @@ eot
         echo "# IMAGE: frames/frame_${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
         \mv -f ${ctfcor_psfile} frames/frame_${i}_ps.mrc
         echo "# IMAGE: frames/frame_${i}_ps.mrc <Frame ${i}, PowerSpectra>" >> LOGS/${scriptname}.results
+        #
         \mv -f ${ctfcor_ctffile} frames/frame_${i}_ctffile.mrc
-        echo "# IMAGE: frames/frame_${i}_ctffile.mrc <Frame ${i}, CTF-sum>" >> LOGS/${scriptname}.results
+        if ( ${ctfcor_imode} == "2" ) then
+          echo "# IMAGE: frames/frame_${i}_ctffile.mrc <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+        else
+          echo "# IMAGE: frames/frame_${i}_ctffile.mrc <Summed CTF file>" >> LOGS/${scriptname}.results
+        endif
       endif
     endif
     #

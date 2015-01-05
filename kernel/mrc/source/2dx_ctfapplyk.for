@@ -24,7 +24,7 @@ C      CARD 3    ISER TITLE
 CHEN>
 C      CARD 4    PHACON
 C      CARD 5    RESHIG,RESLOW
-C      CARD 6    CTFCOR  
+C      CARD 6    CTFCOR_IMODE  
 CHEN<
 C
 C         AX,AY   - LATTICE PARAMETERS (FROM NNBOX) OF (1,0) AND (0,1)
@@ -424,11 +424,12 @@ C-------- This sets IQ to 5 for high resolution spots with ctf < 0.15.
 C
         else if(CTFCOR.eq.1)then
 C
-C--------- 1 = Original image has been Phase flipped. Here only CNTRST calculation.
+C--------- 1 = Original image has been Phase flipped, and also already corrected by CTF+Noise**2
 C
           IQ=IQIN
-          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
-          CNTRST = -1.0 * ABS(CNTRST)
+C          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
+C          CNTRST = -1.0 * ABS(CNTRST)
+          CNTRST = -1.0
 C
         else if(CTFCOR.eq.2)then
 C

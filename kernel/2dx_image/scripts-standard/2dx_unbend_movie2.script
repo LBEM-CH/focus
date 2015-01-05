@@ -602,7 +602,12 @@ eot
       #
       echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
       echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
-      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+      #
+      if ( ${ctfcor_imode} == "2" ) then
+        echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+      else
+        echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+      endif
     endif
   endif
   echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/image_ctfcor.mrc <Output Image Frame ${i} CTF corrected>" >> LOGS/${scriptname}.results
@@ -820,10 +825,16 @@ python ${proc_2dx}/movie/apply_filter_sum.py ${frame_folder}/direct_sum.mrc ${fr
 echo "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
 
-if ( ${ctfcor_imode} == "2" ) then
+if ( ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" ) then
   \rm -f frames/direct_sum_filt_ctf.mrc
   python ${proc_2dx}/movie/apply_filter_fourier.py ${frame_folder}/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc ${frame_folder}/direct_sum_filt_ctf.mrc ${ctfcor_noise}
-  echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (N**2=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
+
+  if ( ${ctfcor_imode} == "2" ) then
+    echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (Noise=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
+  else
+    echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF (Noise=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
+  endif
+
   echo "# IMAGE: ${frame_folder}/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTF-corrected>" >> LOGS/${scriptname}.results 
 else
   \rm -f ${frame_folder}/direct_sum_filt_ctf.mrc

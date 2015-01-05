@@ -73,6 +73,7 @@ C
       REAL CNV,SCAL,CTFV
       REAL RNORMX,RNORMY
       REAL THETATR
+      REAL RVAL
 C
       REAL TLTAXA,TLTANG
       REAL CS,HT,PHACON,RMAG,STEPD,AMPCON,WL
@@ -394,9 +395,10 @@ C-----This should be smaller than above limits. We obtain:
 C-----  RESMAX**2 / 2 / WL = NX * SQRT(2) / ISTRIPENUM * RPIXEL * tan(TLTANG)
 C-----  ISTRIPENUM = NX * SQRT(2) * RPIXEL * tan(TLTANG) * 2 * WL / RESMAX**2
 C
-      ISTRIPENUM = 1 + NX * sqrt(2.0) * RPIXEL * tan(TLTANG*PI/180.0) * 2.0 * WL / RESMAX**2
       RDEFTOL = RESMAX**2 / 2.0 / WL
-C      ISTRIPENUM = 11
+      ISTRIPENUM = 1 + NX * sqrt(2.0) * RPIXEL * tan(TLTANG*PI/180.0) * 2.0 * WL / RESMAX**2
+      IS=ISTRIPENUM/2
+      if(IS*2 .EQ. ISTRIPENUM) ISTRIPENUM = ISTRIPENUM+1
       write(6,'(/,'':Will use '',I6,'' stripes to garant '',F9.1,
      .  ''A defocus difference for '',F8.1,''A resolution.'',/)')
      .  ISTRIPENUM,RDEFTOL,RESMAX
@@ -422,10 +424,10 @@ C
       do istripe = 1,ISTRIPENUM
 C
 C-------Coordinates of center of stripe
-        rstripex = real(NCX) + (real(istripe) - (real(ISTRIPENUM)/2.0 + 1.0))
-     .              * sin(TLTAXA*PI/180.0) * NX*sqrt(2.0) / real(ISTRIPENUM)
-        rstripey = real(NCY) + (real(istripe) - (real(ISTRIPENUM)/2.0 + 1.0))
-     .              * cos(TLTAXA*PI/180.0) * NY*sqrt(2.0) / real(ISTRIPENUM)
+        rstripex = real(NCX) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
+     .              * sin(TLTAXA*PI/180.0) * NX*sqrt(2.0) / real(ISTRIPENUM - 1)
+        rstripey = real(NCY) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
+     .              * cos(TLTAXA*PI/180.0) * NY*sqrt(2.0) / real(ISTRIPENUM - 1)
 C
 C-------Calculate local defocus for the center of the current stripe
 C
@@ -482,9 +484,27 @@ C          write(6,'(''Thread '',I6,'', ix = '',I6)') ITNR, ix
               IS=ID(iix,iiy,NY)
 C-------------Sum up the full-size CTFs with local defoci
               if(LCTFSUM) then
+                if(IMODE.eq.1)then
+                  RVAL = abs(CTFV)
 !$OMP CRITICAL
-                ACTFPIC(IS)=ACTFPIC(IS)+CTFV**2
+                  ACTFPIC(IS)=ACTFPIC(IS)+RVAL
 !$OMP END CRITICAL
+                elseif(IMODE.eq.2)then
+                  RVAL = CTFV**2
+!$OMP CRITICAL
+                  ACTFPIC(IS)=ACTFPIC(IS)+RVAL
+!$OMP END CRITICAL
+                elseif(IMODE.eq.3)then
+                  RVAL = 1.0
+!$OMP CRITICAL
+                  ACTFPIC(IS)=ACTFPIC(IS)+RVAL
+!$OMP END CRITICAL
+                else
+                  RVAL = CTFV
+!$OMP CRITICAL
+                  ACTFPIC(IS)=ACTFPIC(IS)+RVAL
+!$OMP END CRITICAL
+                endif
               endif
               iix=ix
               iiy=iy
@@ -551,6 +571,7 @@ C------------------------------------------------------------
 C-------Copy Stripe into output FFT
 C------------------------------------------------------------
 C
+!$OMP CRITICAL
         DO ix=1,NX
           DO iy=1,NY
             rdist1 = sqrt((real(ix)-rstripex)**2 + (real(iy)-rstripey)**2)
@@ -559,18 +580,15 @@ C
             rdist2 = sin(rgamma) * rdist1
             if(abs(rdist2).lt.(RSTRIPEWIDTH-RSTRIPETAPER)/2.0)then
               IR=ID(ix,iy,NX)
-!$OMP CRITICAL
               APIC(IR) = APIC(IR) + ABOX(IR) * 1.0
-!$OMP END CRITICAL
             elseif(abs(rdist2).lt.(RSTRIPEWIDTH+RSTRIPETAPER)/2.0)then
               IR=ID(ix,iy,NX)
-!$OMP CRITICAL
               APIC(IR) = APIC(IR) + ABOX(IR) * ((RSTRIPEWIDTH+RSTRIPETAPER)/2.0-abs(rdist2)) 
      .                   / (RSTRIPETAPER+1.0)
-!$OMP END CRITICAL
             endif
           enddo
         enddo
+!$OMP END CRITICAL
 C
       enddo
 !$OMP END PARALLEL DO 

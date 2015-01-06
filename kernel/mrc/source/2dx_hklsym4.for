@@ -27,7 +27,7 @@ C
       INTEGER IFILL
       INTEGER IFAIL,JFAIL
       REAL AMP,PHASE,FOM,SIGA,BACK,PI,PX,PY,PHERR
-      REAL WGTSUM,AMPSUM
+      REAL WGTSUM,AMPSUM,FOMSUM
       REAL SIGMA,WT,R1,R2,SNRX,SNRY,FOM100SNR
       REAL*8 XARG,S18AEF,S18AFF
       REAL ROUTP(-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,-MAXSPOT:MAXSPOT,5)
@@ -312,11 +312,12 @@ C                       2 = sum of XARG-weighted os component of phase
 C                       3 = sum of XARG-weighted in component of phase
 C        
 C        -------------Calculate the average AMPlitude
-C        -------------Here, this is the linear average of AMPS, as 
-C        -------------Average_AMP=sum(AMP)/N
+C        -------------Here, this is the FOM-weighted average of AMPS, as 
+C        -------------Average_AMP=sum(AMP*FOM)/sum(FOM)
 C        
                       AMPSUM=ROUTP(H,K,L,1)
-                      AMP=AMPSUM/IFILL
+                      FOMSUM=ROUTP(H,K,L,5)
+                      AMP=AMPSUM/FOMSUM
 C        
 C        -------------Calculate the average PHASE
 C        -------------Here, this is the angle of the added phase vectors.
@@ -445,9 +446,7 @@ C
 C
 C==========================================================
 C
-C
       SUBROUTINE SYMMETRIZE(RFAMP,RFPHASE,RFFOM,ROUTP,IOUTP,ININDEX,ihmax,ikmax,ilmax,isymop,ISHIFT)
-C
 C 
 C-----Iterate over all possible reflection
 C
@@ -518,8 +517,8 @@ C and if so, if there should be a phase shift of 180 or not.
 C
 C This all ends up in the table ROUTP, whereby the positions for each H,K,L reflection mean:
 C  1 = sum of amplitudes
-C  2 = sum of XARG-weighted os component of phase
-C  3 = sum of XARG-weighted in component of phase
+C  2 = sum of XARG-weighted cos component of phase
+C  3 = sum of XARG-weighted sin component of phase
 C
 C The field IOUTP counts how many entries were added to each HKL spot
 C
@@ -576,7 +575,7 @@ C
       PY=sin(RPT)*XARG
 C
 C-----Store AMP and PHASE
-      ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + AMP
+      ROUTP( H, K, L,1) = ROUTP( H, K, L,1) + AMP * FOM
       ROUTP( H, K, L,2) = ROUTP( H, K, L,2) + PX
       ROUTP( H, K, L,3) = ROUTP( H, K, L,3) + PY
       ROUTP( H, K, L,4) = ROUTP( H, K, L,4) + PHASE
@@ -585,7 +584,7 @@ C
       IOUTP( H, K, L) = IOUTP( H, K, L) + 1
 C
 C-----Also fill Friedel symmetric spots:
-      ROUTP(-H,-K,-L,1) = ROUTP(-H,-K,-L,1) + AMP
+      ROUTP(-H,-K,-L,1) = ROUTP(-H,-K,-L,1) + AMP * FOM
       ROUTP(-H,-K,-L,2) = ROUTP(-H,-K,-L,2) + PX
       ROUTP(-H,-K,-L,3) = ROUTP(-H,-K,-L,3) - PY
       ROUTP(-H,-K,-L,4) = ROUTP(-H,-K,-L,4) - PHASE

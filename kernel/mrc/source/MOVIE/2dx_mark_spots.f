@@ -127,7 +127,10 @@ C
       call shorten(SPOTFILE,k)
       write(6,'(''   Read: '',A)')SPOTFILE(1:k)
 C
-      WRITE(6,'(''MODE'')')
+      WRITE(6,'(''Input MODE:'',/,
+     . '' 1=Horizontal white cross on lattice positions,'',/,
+     . '' 2=Diagonal black cross on supplied coordinates, '',/,
+     . '' 3=do both'')')
       read(5,*)IMODE
       write(6,'(''    Read: '',I3)')IMODE
 C
@@ -176,13 +179,13 @@ C
      .  ':LAST XCOR X,Y...................: ',4I5/
      .  ':MAX DENSITY IN CORRELATION MAP..: ',F12.1)
 C
-      if(IMODE.gt.1)then
+      if(IMODE.eq.1 .or. IMODE.eq.3)then
         do i=-200,200
           do j=-200,200
             XCOOR=i*A1+j*B1+NX/2+1
             YCOOR=i*A2+j*B2+NY/2+1
             PEAK=1.0
-            call mark(APIC,NX,NY,XCOOR,YCOOR,PEAK,RMIN,2)
+            call mark(APIC,NX,NY,XCOOR,YCOOR,PEAK,RMIN,1)
           enddo
         enddo
       endif
@@ -191,7 +194,9 @@ C
  100  continue
         READ(3,*,END=203) I,J,XCOOR,YCOOR,PEAK
         ilen=ilen+1
-        call mark(APIC,NX,NY,XCOOR,YCOOR,PEAK,RMAX,1)
+        if(IMODE.eq.2 .or. IMODE.eq.3)then
+          call mark(APIC,NX,NY,XCOOR,YCOOR,PEAK,RMAX,2)
+        endif
         goto 100
  203  continue
       close(3)
@@ -232,16 +237,16 @@ C
 C
 C==========================================================
 C
-      SUBROUTINE mark(APIC,NX,NY,XCOOR,YCOOR,PEAK,RMAX,IMODE)
+      SUBROUTINE mark(APIC,NX,NY,XCOOR,YCOOR,PEAK,RVAL,IMODE)
 C
       IMPLICIT NONE
       REAL APIC(*)
       INTEGER NX,NY
-      REAL XCOOR,YCOOR,PEAK,RMAX
+      REAL XCOOR,YCOOR,PEAK,RVAL
       INTEGER ilen,ix,iy,iix,iiy,IR,IMODE
       INTEGER ID
 C
-      if(IMODE.eq.1)then
+      if(IMODE.eq.2)then
         ilen=12
         iiy=int(YCOOR)
         do ix=-ilen,ilen
@@ -250,7 +255,7 @@ C
             if(iix.ge.1 .and. iix.le.NX .and. 
      .         iiy.ge.1 .and. iiy.le.NY ) then
               IR=ID(iix,iiy,NY)
-              APIC(IR)=RMAX
+              APIC(IR)=RVAL
             endif
           endif
         enddo
@@ -261,7 +266,7 @@ C
             if(iix.ge.1 .and. iix.le.NX .and. 
      .         iiy.ge.1 .and. iiy.le.NY ) then
               IR=ID(iix,iiy,NY)
-              APIC(IR)=RMAX
+              APIC(IR)=RVAL
             endif
           endif
         enddo
@@ -276,7 +281,7 @@ C
             if(iix.ge.1 .and. iix.le.NX .and. 
      .         iiy.ge.1 .and. iiy.le.NY ) then
               IR=ID(iix,iiy,NY)
-              APIC(IR)=RMAX
+              APIC(IR)=RVAL
             endif
           endif
         enddo
@@ -287,7 +292,7 @@ C
             if(iix.ge.1 .and. iix.le.NX .and. 
      .         iiy.ge.1 .and. iiy.le.NY ) then
               IR=ID(iix,iiy,NY)
-              APIC(IR)=RMAX
+              APIC(IR)=RVAL
             endif
           endif
         enddo

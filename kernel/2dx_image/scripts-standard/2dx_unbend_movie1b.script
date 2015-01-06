@@ -52,6 +52,13 @@ set show_frame_CCmap = "n"
 # TYPE: Bool "y;n"
 set show_frame_PROFDATA = "n"
 #
+# LABEL: Mark CCmaps with found coordinates?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_CCmap_marked = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_CCmap_marked = "n"
+#
 # DISPLAY: imagename
 # DISPLAY: SYN_Unbending
 # DISPLAY: RESMAX
@@ -414,6 +421,20 @@ echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" 
 #
 set i = 1
 while ($i <= ${movie_imagenumber_total})
+
+       if ( ${show_frame_CCmap_marked} == "y" ) then
+         \rm -f frames/CCmap_${i}_marked.mrc
+         ${bin_2dx}/2dx_mark_spots.exe << eot
+frames/CCmap_${i}.mrc
+frames/CCmap_${i}_marked.mrc
+frames/PROFDATA_${i}.dat
+2
+eot
+         echo "# IMAGE: SCRATCH/${iname}_CCmap21_marked.mrc <CCmap, marked>" >> LOGS/${scriptname}.results 
+         #
+       endif
+
+
        ###########################################################################
        ${proc_2dx}/linblock "CCUNBEND - Unbend CCmap for frame ${i}"
        ###########################################################################

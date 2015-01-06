@@ -469,6 +469,7 @@ eot
         #
         \cp -f CCPLOT.PS ${frame_folder}/frame_${i}/PS/${nonmaskimagename}-quadserch.ps
 
+
         # The high-contrast frame-0 is only used as refinement reference  
         if ( ${i} != "0" ) then
 
@@ -541,6 +542,20 @@ ${imagename}, Movie-Mode UNBEND, ${date}
 ${frame_folder}/CCunbend_frame_${i}_notap.mrc
 CCUNBEND, frame_${i}/m${nonmaskimagename}_${i}.mrc, ${date}
 eot
+
+
+
+            if ( ${show_frame_CCmap_marked}x == "yx" ) then
+              \rm -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_marked.mrc
+              ${bin_2dx}/2dx_mark_spots.exe << eot
+${CCmap}
+${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_marked.mrc
+${iname}_profile.dat
+2
+eot
+              echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_marked.mrc <CCmap, marked, frame ${i}>" >> LOGS/${scriptname}.results 
+              # 
+            endif
 
 
 

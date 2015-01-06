@@ -68,8 +68,8 @@ foreach dirfile ( ${dirlist} )
   # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
   echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
   echo "set dummy = 1" >> LOGS/${scriptname}.results
-  set images_progres = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
-  echo "<<@progres: ${images_progres}>>"
+  set images_progress = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
+  echo "<<@progress: ${images_progress}>>"
   set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
   #
   ################################################################################
@@ -119,21 +119,25 @@ foreach dirfile ( ${dirlist} )
   # echo "set ccunbend_program = 0" >> LOGS/${scriptname}.results
 
   # echo "set defocus_res_max = 5.0" >> LOGS/${scriptname}.results
-  # echo "set imageorigin = 8" >> LOGS/${scriptname}.results
+  # echo "set imageorigin = 7" >> LOGS/${scriptname}.results
   # echo "set df_end = 25000.0" >> LOGS/${scriptname}.results
   # echo "set det_defocus = y" >> LOGS/${scriptname}.results
   # echo "set det_tilt = y" >> LOGS/${scriptname}.results
   # echo "set det_tlt_alg = 0" >> LOGS/${scriptname}.results
   # echo "set QVALS = ." >> LOGS/${scriptname}.results
+  # echo "set QVALMA = ." >> LOGS/${scriptname}.results
+  # echo "set QVALMB = ." >> LOGS/${scriptname}.results
   # echo "set domask = y" >> LOGS/${scriptname}.results
 
   # echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
-  # echo "set IQMAX1 = 4.0" >> LOGS/${scriptname}.results
-  # echo "set IQMAX = 4.0" >> LOGS/${scriptname}.results
+  # echo "set -force IQMAX1 = 7.0" >> LOGS/${scriptname}.results
+  # echo "set -force IQMAX = 4.0" >> LOGS/${scriptname}.results
   # echo "set movie_enable = y" >> LOGS/${scriptname}.results
   # echo "set movie_refboxa = 300" >> LOGS/${scriptname}.results
   # echo "set movie_smoothing = 8" >> LOGS/${scriptname}.results
   # echo "set movie_drift_threshold = 5" >> LOGS/${scriptname}.results
+  # echo "set movie_imagenumber_toave = 8" >> LOGS/${scriptname}.results
+  # echo "set movie_quadradb = 8,8 = 8" >> LOGS/${scriptname}.results
   # echo "set ctfcor_imode = 2" >> LOGS/${scriptname}.results
   # echo "set ctfcor_calculate_tiles = 0" >> LOGS/${scriptname}.results
   # echo "set calculate_tiles = 0" >> LOGS/${scriptname}.results

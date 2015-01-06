@@ -332,7 +332,7 @@ if ( ${ReUnbend_All} == "7" ) then
   endif
   #
   cd ${automatic_target_dir}
-  find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${olddir}/2dx_merge_special.dat
+  find . -name 2dx_image.cfg -print | grep -v frames | sed 's/\/2dx_image.cfg//' > ${olddir}/2dx_merge_special.dat
   cd ${olddir}
   #
   set dirnum = `cat 2dx_merge_special.dat | wc -l`
@@ -371,48 +371,39 @@ eot
       echo ": "
       set curdir = ${PWD}
       set QVALMA_local = `cat 2dx_image.cfg | grep "set QVALMA =" | cut -d\" -f2`
+      set QVALMB_local = `cat 2dx_image.cfg | grep "set QVALMB =" | cut -d\" -f2`
       # echo ":: QVALMA_local = ${QVALMA_local}" 
-      if ( ${QVALMA_local}x == "x"  || ${QVALMA_local}x == ".x" ||  ${QVALMA_local}x == "0.00x" ) then
+      if ( ${QVALMA_local}x == "x"  || ${QVALMA_local}x == ".x" ||  ${QVALMA_local}x == "0.00x" ||  ${QVALMB_local}x == "x"  || ${QVALMB_local}x == ".x" ||  ${QVALMB_local}x == "0.00x" ) then
         echo "Working on " ${curdir}
         if( ${irun} < ${ReUnbend_MP} ) then
           ${proc_2dx}/linblock "${irun} of ${ReUnbend_MP} into background: Working on ${dirfile}"
 
-          ${app_2dx_image} ${curdir} "2dx_fftrans"
-          ${app_2dx_image} ${curdir} "2dx_ctfcor"
-          ${app_2dx_image} ${curdir} "2dx_unbend1"
-          ${app_2dx_image} ${curdir} "2dx_getspots"
-          ${app_2dx_image} ${curdir} "2dx_unbend2"
+          nohup sleep ${sleeptime}; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile}" &
 
-          nohup sleep ${sleeptime}; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" &
-
-          @ sleeptime += 10 
+          @ sleeptime += 20 
           @ irun++
         else
           ${proc_2dx}/linblock "${irun} of ${ReUnbend_MP} into foreground: Working on ${dirfile}"
 
           ${app_2dx_image} ${curdir} "2dx_fftrans"
           ${app_2dx_image} ${curdir} "2dx_ctfcor"
-          ${app_2dx_image} ${curdir} "2dx_unbend1"
-          ${app_2dx_image} ${curdir} "2dx_getspots"
-          ${app_2dx_image} ${curdir} "2dx_unbend2"
-
-          ${app_2dx_image} ${curdir} "2dx_fftrans"
-          ${app_2dx_image} ${curdir} "2dx_ctfcor"
+          ${app_2dx_image} ${curdir} "2dx_getspots1"
           ${app_2dx_image} ${curdir} "2dx_unbend1"
           ${app_2dx_image} ${curdir} "2dx_getspots"
           ${app_2dx_image} ${curdir} "2dx_unbend2"
 
           ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"
           ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"
+          ${app_2dx_image} ${curdir} "2dx_unbend_movie2"
 
           ${app_2dx_image} ${curdir} "2dx_applyCTF"
           ${app_2dx_image} ${curdir} "2dx_generateMAP"
+          echo ":: Foreground process finished with ${dirfile}"
           set irun = 1
           set sleeptime = 10
         endif
-        echo ": Done with ${dirfile}"
       else
-        echo ": Skipping ${dirfile}: QVALMA = ${QVALMA_local}"
+        echo ": Skipping ${dirfile}: QVALMA = ${QVALMA_local},  QVALMB = ${QVALMB_local}"
       endif
     else
       echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."

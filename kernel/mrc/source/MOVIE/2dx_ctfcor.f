@@ -189,10 +189,12 @@ C
 C-----Save output images as floating point
       MODE = 2
 C
+      WRITE(6,'(''Output filename:  '')')
       READ(5,'(A)') OUTFILE
       call shorten(OUTFILE,k)
       write(6,'(''   Read: '',A)')OUTFILE(1:k)
 C
+      WRITE(6,'(''CTFfile filename:  '')')
       READ(5,'(A)') CTFFILE
       call shorten(CTFFILE,k)
       write(6,'(''   Read: '',A)')CTFFILE(1:k)
@@ -415,7 +417,12 @@ C-----Stripes are covering the image over a distance of NX*sqrt(2),
 C-----i.e. the length of the diagonal of the image
 C-----The width of a stripe is
 C
-      RSTRIPEWIDTH = NX*sqrt(2.0)/real(ISTRIPENUM-1)
+      if(ISTRIPENUM.gt.1)then
+        RSTRIPEWIDTH = NX*sqrt(2.0)/real(ISTRIPENUM-1)
+      else
+        ISTRIPENUM=1
+        RSTRIPEWIDTH = NX*sqrt(2.0)*1.1
+      endif
 C
 C-----The taper-width connecting two stripes is 
 C
@@ -433,10 +440,15 @@ C !$OMP& RLDEF1,RLDEF2,RLDEFM,ix,ilx,iy,ily,CTFV,iix,iiy,IS,IR,ABOX,CBOX,onevol,
       do istripe = 1,ISTRIPENUM
 C
 C-------Coordinates of center of stripe
-        rstripex = real(NCX) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
-     .              * sin(TLTAXA*PI/180.0) * NX*sqrt(2.0) / real(ISTRIPENUM - 1)
-        rstripey = real(NCY) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
-     .              * cos(TLTAXA*PI/180.0) * NY*sqrt(2.0) / real(ISTRIPENUM - 1)
+        if(ISTRIPENUM.gt.1)then
+          rstripex = real(NCX) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
+     .                * sin(TLTAXA*PI/180.0) * NX*sqrt(2.0) / real(ISTRIPENUM - 1)
+          rstripey = real(NCY) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
+     .                * cos(TLTAXA*PI/180.0) * NY*sqrt(2.0) / real(ISTRIPENUM - 1)
+        else
+          rstripex = NCX
+          rstripey = NCY
+        endif
 C
 C-------Calculate local defocus for the center of the current stripe
 C
@@ -573,19 +585,24 @@ C
 C !$OMP CRITICAL
         DO ix=1,NX
           DO iy=1,NY
-            rdist1 = sqrt((real(ix)-rstripex)**2 + (real(iy)-rstripey)**2)
-            rbeta = atan2((real(iy)-rstripey),(real(ix)-rstripex))
-            rgamma = rbeta - TLTAXA*PI/180.0
-            rdist2 = sin(rgamma) * rdist1
-C            if(abs(rdist2).lt.(RSTRIPEWIDTH-RSTRIPETAPER)/2.0)then
-C              IR=ID(ix,iy,NX)
-C              APIC(IR) = APIC(IR) + ABOX(IR) * 1.0
-C            elseif(abs(rdist2).lt.(RSTRIPEWIDTH+RSTRIPETAPER)/2.0)then
-C              IR=ID(ix,iy,NX)
-C              APIC(IR) = APIC(IR) + ABOX(IR) * ((RSTRIPEWIDTH+RSTRIPETAPER)/2.0-abs(rdist2)) 
-C     .                   / (RSTRIPETAPER+1.0)
-C            endif
-            if(abs(rdist2).le.(RSTRIPEWIDTH+1)/2.0)then
+            if(ISTRIPENUM.gt.1)then
+              rdist1 = sqrt((real(ix)-rstripex)**2 + (real(iy)-rstripey)**2)
+              rbeta = atan2((real(iy)-rstripey),(real(ix)-rstripex))
+              rgamma = rbeta - TLTAXA*PI/180.0
+              rdist2 = sin(rgamma) * rdist1
+C              if(abs(rdist2).lt.(RSTRIPEWIDTH-RSTRIPETAPER)/2.0)then
+C                IR=ID(ix,iy,NX)
+C                APIC(IR) = APIC(IR) + ABOX(IR) * 1.0
+C              elseif(abs(rdist2).lt.(RSTRIPEWIDTH+RSTRIPETAPER)/2.0)then
+C                IR=ID(ix,iy,NX)
+C                APIC(IR) = APIC(IR) + ABOX(IR) * ((RSTRIPEWIDTH+RSTRIPETAPER)/2.0-abs(rdist2)) 
+C       .                   / (RSTRIPETAPER+1.0)
+C              endif
+              if(abs(rdist2).le.(RSTRIPEWIDTH+1)/2.0)then
+                IR=ID(ix,iy,NX)
+                APIC(IR) = ABOX(IR)
+              endif
+            else
               IR=ID(ix,iy,NX)
               APIC(IR) = ABOX(IR)
             endif

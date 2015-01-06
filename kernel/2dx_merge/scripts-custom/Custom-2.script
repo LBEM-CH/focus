@@ -34,7 +34,7 @@ set scriptname = Custom-2
 # This removes the old logfile, so that a new fresh one can be created:
 \rm -f LOGS/${scriptname}.results
 #
-# This initializes the CCP4 environment, and other variables.
+# This initializes the ccp4 environment, and other variables.
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
@@ -48,8 +48,15 @@ source ${proc_2dx}/2dx_makedirs
 cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
 set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 #
+set tmp = `wc -l 2dx_merge_dirfile.dat`
+set images_num = `echo ${tmp} | cut -d\  -f1`
+set images_increment = `echo ${images_num} | awk '{ s = 80.0 / $1 } END { print s }'`
+set images_current = 10.0
+#
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
+#
+echo "<<@progress: 10>>"
 #
 # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
 foreach dirfile ( ${dirlist} ) 
@@ -61,6 +68,9 @@ foreach dirfile ( ${dirlist} )
   # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
   echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
   echo "set dummy = 1" >> LOGS/${scriptname}.results
+  set images_progress = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
+  echo "<<@progress: ${images_progress}>>"
+  set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
   #
   ################################################################################
   ######### Modify only the section below ########################################
@@ -71,7 +81,7 @@ foreach dirfile ( ${dirlist} )
 
   # Use the following to activate the synthetic unbending in all directories:
   # echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
-  # echo "set tempkeep = n" >> LOGS/${scriptname}.results
+  # echo "set tempkeep = y" >> LOGS/${scriptname}.results
   
   # Use the following to set have the resolution of the Nyquist frequency automatically determined:
   # echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
@@ -81,7 +91,13 @@ foreach dirfile ( ${dirlist} )
   # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
   # echo "set phaori = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set phaoriFouFilter = 0.0,0.0" >> LOGS/${scriptname}.results
-  # echo "set stepdigitizer = 7.0" >> LOGS/${scriptname}.results
+  # echo "set beamtilt = 0.0,0.0" >> LOGS/${scriptname}.results
+  # echo "set beamtilt_change = 0.0,0.0" >> LOGS/${scriptname}.results
+
+  # echo "set CS = 2.0" >> LOGS/${scriptname}.results
+  # echo "set KV = 200.0" >> LOGS/${scriptname}.results
+  # echo "set stepdigitizer = 10.9" >> LOGS/${scriptname}.results
+
   # echo "set maska = 17.0" >> LOGS/${scriptname}.results
   # echo "set maskb01 = 18.0" >> LOGS/${scriptname}.results
   # echo "set maskb02 = 20.0" >> LOGS/${scriptname}.results
@@ -96,16 +112,42 @@ foreach dirfile ( ${dirlist} )
   # echo "set rot90 = n" >> LOGS/${scriptname}.results
   # echo "set rot180 = n" >> LOGS/${scriptname}.results
   # echo "set revhnd = n" >> LOGS/${scriptname}.results
+  # echo "set revhk = n" >> LOGS/${scriptname}.results
   # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
   # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
   # echo "set overwrite = y" >> LOGS/${scriptname}.results
   # echo "set ccunbend_program = 0" >> LOGS/${scriptname}.results
 
-  # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
-  # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
+  # echo "set defocus_res_max = 5.0" >> LOGS/${scriptname}.results
+  # echo "set imageorigin = 7" >> LOGS/${scriptname}.results
+  # echo "set df_end = 25000.0" >> LOGS/${scriptname}.results
+  # echo "set det_defocus = y" >> LOGS/${scriptname}.results
+  # echo "set det_tilt = y" >> LOGS/${scriptname}.results
+  # echo "set det_tlt_alg = 0" >> LOGS/${scriptname}.results
+  # echo "set QVALS = ." >> LOGS/${scriptname}.results
+  # echo "set QVALMA = ." >> LOGS/${scriptname}.results
+  # echo "set QVALMB = ." >> LOGS/${scriptname}.results
+  # echo "set domask = y" >> LOGS/${scriptname}.results
 
+  # echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
+  # echo "set IQMAX1 = 4.0" >> LOGS/${scriptname}.results
+  # echo "set IQMAX = 4.0" >> LOGS/${scriptname}.results
+  # echo "set movie_enable = y" >> LOGS/${scriptname}.results
+  # echo "set movie_refboxa = 300" >> LOGS/${scriptname}.results
+  # echo "set movie_smoothing = 8" >> LOGS/${scriptname}.results
+  # echo "set movie_drift_threshold = 5" >> LOGS/${scriptname}.results
+  # echo "set ctfcor_imode = 2" >> LOGS/${scriptname}.results
+  # echo "set ctfcor_calculate_tiles = 0" >> LOGS/${scriptname}.results
+  # echo "set calculate_tiles = 0" >> LOGS/${scriptname}.results
+  # echo "set ML_doit = n" >> LOGS/${scriptname}.results
+
+  #------------------------------------------------------------------------
   # Use the following to run all standard 2dx_image scripts on the selected images:
   # ${app_2dx_image} ${newdir} '"*"'
+  #------------------------------------------------------------------------
+
+  # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
+  # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
 
   # Use the following to apply the CTF to all selected images:
   # ${app_2dx_image} ${newdir} "2dx_applyCTF"
@@ -113,6 +155,7 @@ foreach dirfile ( ${dirlist} )
   # Use the following to run a few selected scripts on all selected images:
   # ${app_2dx_image} ${newdir} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
   
+  #------------------------------------------------------------------------
   # Use the following to run somme of the standard scripts again:
   # ${app_2dx_image} ${newdir} "2dx_initialize"
   # ${app_2dx_image} ${newdir} "2dx_initialize_files"
@@ -122,13 +165,37 @@ foreach dirfile ( ${dirlist} )
   # ${app_2dx_image} ${newdir} "2dx_refineLattice"
   # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
   # ${app_2dx_image} ${newdir} "2dx_getspots1"
+  # ${app_2dx_image} ${newdir} "2dx_fftrans"
+  # ${app_2dx_image} ${newdir} "2dx_ctfcor"
   # ${app_2dx_image} ${newdir} "2dx_unbend1"
   # ${app_2dx_image} ${newdir} "2dx_getspots"
   # ${app_2dx_image} ${newdir} "2dx_unbend2"
+  # ${app_2dx_image} ${newdir} "2dx_unbend_movie"
   # ${app_2dx_image} ${newdir} "2dx_unbendSyn"
   # ${app_2dx_image} ${newdir} "2dx_applyCTF"
   # ${app_2dx_image} ${newdir} "2dx_max_likelihood"
   # ${app_2dx_image} ${newdir} "2dx_generateMAP"
+  #------------------------------------------------------------------------
+
+  if ( 1 == 2 ) then
+   ${app_2dx_image} ${newdir} "2dx_fftrans"
+   ${app_2dx_image} ${newdir} "2dx_ctfcor"
+   ${app_2dx_image} ${newdir} "2dx_unbend1"
+   ${app_2dx_image} ${newdir} "2dx_getspots"
+   ${app_2dx_image} ${newdir} "2dx_unbend2"
+
+   ${app_2dx_image} ${newdir} "2dx_fftrans"
+   ${app_2dx_image} ${newdir} "2dx_ctfcor"
+   ${app_2dx_image} ${newdir} "2dx_unbend1"
+   ${app_2dx_image} ${newdir} "2dx_getspots"
+   ${app_2dx_image} ${newdir} "2dx_unbend2"
+
+   ${app_2dx_image} ${newdir} "2dx_unbend_movie1a"
+   ${app_2dx_image} ${newdir} "2dx_unbend_movie1b"
+
+   ${app_2dx_image} ${newdir} "2dx_applyCTF"
+   ${app_2dx_image} ${newdir} "2dx_generateMAP"
+  endif
 
   # Use the following to recalculate the TAXA and TANGL values for all selected images:
   # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
@@ -138,9 +205,18 @@ foreach dirfile ( ${dirlist} )
   
   # Use the following, to set the defocus refinement option to "phases alone", for each selected image:
   # echo "set ctfsearch_iphase = 2" >> LOGS/${scriptname}.results
+  # echo "set ctfsearch_ncyc = 10" >> LOGS/${scriptname}.results
+  # echo "set ctfsearch_df_step = 100" >> LOGS/${scriptname}.results
+  # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
+
+  # Use the following, to set the defocus refinement script to backup modus, for each selected image:
+  # echo "set defocus_direction = 1" >> LOGS/${scriptname}.results
+  # Then use the following, to backup the defocus values for each selected image:
+  # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
+
   # Use the following, to refine the defocus for each selected image:
   # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
-    
+  
   #
   ################################################################################
   ######### Modify only the section above ########################################

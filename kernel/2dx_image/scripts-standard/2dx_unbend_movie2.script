@@ -55,6 +55,13 @@ set show_frame_FFT = "n"
 # TYPE: Bool "y;n"
 set show_frame_CCmap = "n"
 #
+# LABEL: Mark CCmaps with found coordinates?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_CCmap_marked = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_CCmap_marked = "n"
+#
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
 # DISPLAY: SYN_Unbending

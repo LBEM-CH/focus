@@ -680,7 +680,7 @@ while ($i <= ${movie_imagenumber_total})
     \rm -f frames/frame_${i}_ctfcor.mrc
     #
     if ( ${calculate_tiles} == "0" ) then
-      ${bin_2dx}/2dx_ctfcor.exe << eot
+      ${bin_2dx}/2dx_ctfcor_fftw.exe << eot
 frames/frame_${i}.mrc
 frames/frame_${i}_ctfcor.mrc
 #

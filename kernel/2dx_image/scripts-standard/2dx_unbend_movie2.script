@@ -554,7 +554,7 @@ while ($i <= ${movie_imagenumber_touse})
   setenv NCPUS ${Thread_Number}
   #
   if ( ${calculate_tiles} == "0" ) then
-      ${bin_2dx}/2dx_ctfcor.exe << eot
+      ${bin_2dx}/2dx_ctfcor_fftw.exe << eot
 ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
 ${frame_folder}/frame_${i}/image_ctfcor.mrc
 #

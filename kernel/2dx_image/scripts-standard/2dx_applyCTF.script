@@ -104,6 +104,16 @@ set iname = ${imagename}
 #
 set istilt = `echo $TLTANG | awk '{if ( -25.0 < $1 && $1 < 25.0 ) {s = 0} else {s = 1}} END {print s}'`
 #
+if ( ${QVALMA}x == 'x' ) then
+  set QVALMA = '.'
+  echo "set QVALMA = ${QVALMA}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${QVALMB}x == 'x' ) then
+  set QVALMB = '.'
+  echo "set QVALMB = ${QVALMB}" >> LOGS/${scriptname}.results
+endif
+#
 if ( ${istilt} == '0' ) then
   if ( ${ctf_ttf} != "CTF" ) then
     set ctf_ttf = "CTF"

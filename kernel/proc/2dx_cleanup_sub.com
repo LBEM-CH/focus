@@ -268,6 +268,13 @@ if ( -e ${imagename}.mrc ) then
   endif
 endif
 #
+if ( 1 == 2 ) then
+  echo dummy > tmp_mask.mrc
+  \rm *_mask.mrc
+  echo dummy > tmp_automask.mrc
+  \rm *_automask.mrc
+endif
+#
 if ( -e ${nonmaskimagename}-masking-final.mrc ) then
   \mv -f ${nonmaskimagename}-masking-final.mrc ${nonmaskimagename}_mask.mrc 
   echo "(Renaming ${nonmaskimagename}-masking-final.mrc to ${nonmaskimagename}_mask.mrc)"

@@ -25,5 +25,6 @@ if __name__ == "__main__":
 
 	# o = filt_tophatl(B, 0.48)
 	# o.write_image(filename_out)
+
 	B.write_image(filename_out)
 	

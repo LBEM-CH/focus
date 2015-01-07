@@ -50,7 +50,7 @@ eot
         
         if ( ${movie_masking_mode} != '0' && ${i} != "0" ) then
                 
-           if ( ${movie_masking_mode} == '1' ) then
+           if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then
                 #
                 #########################################################################
                 ${proc_2dx}/lin "QUADSERCH - masking with external mask-info (IPASS=2)"
@@ -476,12 +476,12 @@ eot
             if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS 
-                  \mv -f CCPLOT.pdf frame_quadserch.pdf
+                  \mv -f CCPLOT.pdf ${frame_folder}_quadserch.pdf
                 else
-                   ${ps2pdf} CCPLOT.PS frame_quadserch.pdf 
+                   ${ps2pdf} CCPLOT.PS ${frame_folder}_quadserch.pdf 
                 endif
-                pdftk A=frame_quadserch.pdf cat A1 output out.pdf
-                \mv -f out.pdf frame_quadserch.pdf
+                pdftk A=${frame_folder}_quadserch.pdf cat A1 output out.pdf
+                \mv -f out.pdf ${frame_folder}_quadserch.pdf
             else
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS  
@@ -489,11 +489,11 @@ eot
                   ${ps2pdf} CCPLOT.PS CCPLOT.pdf 
                 endif
                 if ( ${iforward} == '1' ) then
-                  pdftk A=frame_quadserch.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
+                  pdftk A=${frame_folder}_quadserch.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
                 else
-                  pdftk A=CCPLOT.pdf B=frame_quadserch.pdf cat A1 B1-end output out.pdf 
+                  pdftk A=CCPLOT.pdf B=${frame_folder}_quadserch.pdf cat A1 B1-end output out.pdf 
                 endif
-                \mv -f out.pdf frame_quadserch.pdf
+                \mv -f out.pdf ${frame_folder}_quadserch.pdf
             endif
 
             ###########################################################################
@@ -585,12 +585,12 @@ eot
             if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS  
-                  \mv -f CCPLOT.pdf frame_unbending.pdf
+                  \mv -f CCPLOT.pdf ${frame_folder}_unbending.pdf
                 else
-                   ${ps2pdf} CCPLOT.PS frame_unbending.pdf 
+                   ${ps2pdf} CCPLOT.PS ${frame_folder}_unbending.pdf 
                 endif
-                pdftk A=frame_unbending.pdf cat A1 output out.pdf 
-                \mv -f out.pdf frame_unbending.pdf
+                pdftk A=${frame_folder}_unbending.pdf cat A1 output out.pdf 
+                \mv -f out.pdf ${frame_folder}_unbending.pdf
             else
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS 
@@ -598,19 +598,19 @@ eot
                   ${ps2pdf} CCPLOT.PS CCPLOT.pdf 
                 endif
                 if ( ${iforward} == 1 ) then
-                  pdftk A=frame_unbending.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
+                  pdftk A=${frame_folder}_unbending.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
                 else
-                  pdftk A=CCPLOT.pdf B=frame_unbending.pdf cat A1 B1-end output out.pdf 
+                  pdftk A=CCPLOT.pdf B=${frame_folder}_unbending.pdf cat A1 B1-end output out.pdf 
                 endif
-                \mv -f out.pdf frame_unbending.pdf
+                \mv -f out.pdf ${frame_folder}_unbending.pdf
             endif
         
             ###########################################################################
             ${proc_2dx}/lin "TAPEREDGE - correct unbent frame average for taper edges"
             ###########################################################################
-            \rm -f CCunbend_frame_${i}.mrc
             setenv IN  ${frame_folder}/CCunbend_frame_${i}_notap.mrc
             setenv OUT ${frame_folder}/CCunbend_frame_${i}.mrc
+            \rm -f     ${frame_folder}/CCunbend_frame_${i}.mrc
             ${bin_2dx}/2dx_taperedgek.exe << eot
             30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
@@ -618,9 +618,9 @@ eot
             ###########################################################################
             ${proc_2dx}/lin "FFTRANS - Obtain Fourier-transform of unbent and masked frame average"
             ###########################################################################
-            \rm -f CCunbend_frame_${i}_fft.mrc
             setenv IN  ${frame_folder}/CCunbend_frame_${i}.mrc
             setenv OUT ${frame_folder}/CCunbend_frame_${i}_fft.mrc
+            \rm -f     ${frame_folder}/CCunbend_frame_${i}_fft.mrc
             ${bin_2dx}/2dx_fftrans.exe
 
             ###########################################################################

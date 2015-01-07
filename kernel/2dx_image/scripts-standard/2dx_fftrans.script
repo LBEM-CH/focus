@@ -197,6 +197,9 @@ else
     echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
     ${proc_2dx}/linblock "correcting imagename to ${imagename}"
   endif
+  set domask = "y"
+  echo "set domask = ${domask}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "correcting domask to ${domask}"
 endif
 
 #

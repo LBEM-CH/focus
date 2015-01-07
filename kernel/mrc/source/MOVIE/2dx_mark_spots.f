@@ -128,8 +128,8 @@ C
       write(6,'(''   Read: '',A)')SPOTFILE(1:k)
 C
       WRITE(6,'(''Input MODE:'',/,
-     . '' 1=Horizontal white cross on lattice positions,'',/,
-     . '' 2=Diagonal black cross on supplied coordinates, '',/,
+     . '' 1=Diagonal black cross on lattice positions,'',/,
+     . '' 2=Horizontal white cross on supplied coordinates, '',/,
      . '' 3=do both'')')
       read(5,*)IMODE
       write(6,'(''    Read: '',I3)')IMODE

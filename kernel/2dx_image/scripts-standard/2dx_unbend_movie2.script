@@ -225,6 +225,8 @@ echo date = ${date}
 set system = `uname -s`
 echo system = ${system}
 #
+set frame_folder = "framesB"
+#
 ##########################################
 ##########################################
 if ( ${system} == "Darwin" ) then
@@ -262,8 +264,8 @@ endif
 ##########################################
 ##########################################
 #
-\rm -f frame_unbending.pdf
-\touch frame_unbending.pdf
+\rm -f ${frame_folder}_unbending.pdf
+\touch ${frame_folder}_unbending.pdf
 #
 set iname = image_ctfcor
 #
@@ -277,8 +279,6 @@ set cormap = ${iname}_CCmap_unbend2.mrc
 if ( ! -e ${cormap} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"
 endif
-#
-set frame_folder = "framesB"
 #
 echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
 #
@@ -828,12 +828,12 @@ echo "# IMAGE: ${frame_folder}/direct_sum.mrc <Sum unbent images>" >> LOGS/${scr
 ###########################################################################
 ${proc_2dx}/linblock "Filtering by resolution weights"
 ###########################################################################
-python ${proc_2dx}/movie/apply_filter_sum.py ${frame_folder}/direct_sum.mrc ${frame_folder}/direct_sum_filt.mrc 0.001
+python ${proc_2dx}/movie/apply_filter_sum.py ${frame_folder}/direct_sum.mrc ${frame_folder}/direct_sum_filt.mrc 0.033
 echo "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
 
 if ( ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" ) then
-  \rm -f frames/direct_sum_filt_ctf.mrc
+  \rm -f ${frame_folder}/direct_sum_filt_ctf.mrc
   python ${proc_2dx}/movie/apply_filter_fourier.py ${frame_folder}/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc ${frame_folder}/direct_sum_filt_ctf.mrc ${ctfcor_noise}
 
   if ( ${ctfcor_imode} == "2" ) then
@@ -937,6 +937,16 @@ echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
 
 echo "<<@evaluate>>"
 
+set IQS = `echo ${UMB_IQ1} ${UMB_IQ2} ${UMB_IQ3} ${UMB_IQ4} ${UMB_IQ5} ${UMB_IQ6} ${UMB_IQ7} ${UMB_IQ8} ${UMB_IQ9}`
+echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMB= ${QVAL_local} ... IQ stat = ${IQS}"
+echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+echo " " >> History.dat
+echo ":Date: ${date}" >> History.dat
+echo "::Unbend MovieB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+#
+
 # Variation plot generation (no longer used)
 #python ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
 #pdf2ps ${frame_folder}/sd.pdf ${frame_folder}/sd.ps
@@ -971,13 +981,13 @@ ${proc_2dx}/linblock "Finalizing output"
 ${pdf2ps} ${frame_folder}/drifts.pdf ${frame_folder}/drifts.ps
 echo  "# IMAGE: ${frame_folder}/drifts.ps <PS: Local drifts>" >> LOGS/${scriptname}.results
 
-\rm -f frame_quadserch.ps
-${pdf2ps} frame_quadserch.pdf frame_quadserch.ps
-echo "# IMAGE-IMPORTANT: frame_quadserch.ps <PS: Profiles QUADSERCH>" >> LOGS/${scriptname}.results
+\rm -f ${frame_folder}_quadserch.ps
+${pdf2ps} ${frame_folder}_quadserch.pdf ${frame_folder}_quadserch.ps
+echo "# IMAGE-IMPORTANT: ${frame_folder}_quadserch.ps <PS: Profiles QUADSERCH>" >> LOGS/${scriptname}.results
 
-\rm -f frame_unbending.ps
-${pdf2ps} frame_unbending.pdf frame_unbending.ps
-echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
+\rm -f ${frame_folder}_unbending.ps
+${pdf2ps} ${frame_folder}_unbending.pdf ${frame_folder}_unbending.ps
+echo "# IMAGE-IMPORTANT: ${frame_folder}_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
 
 
 echo "# IMAGE-IMPORTANT: APH/${imagename}_movieB_fou.aph <APH: APH file after movie-mode B unbending>" >> LOGS/${scriptname}.results

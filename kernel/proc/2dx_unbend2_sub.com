@@ -723,6 +723,8 @@ eot
     set locround = 1
     set domask = n
     echo "set domask = n" >> LOGS/${scriptname}.results
+    set use_masked_image = y
+    echo "set use_masked_image = ${use_masked_image}" >> LOGS/${scriptname}.results
     #
     echo "set MASKING_done = y" >> LOGS/${scriptname}.results
     #

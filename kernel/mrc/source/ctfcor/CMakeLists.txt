@@ -7,6 +7,55 @@
 #
 cmake_minimum_required(VERSION 2.6)
 
+################################################################################
+# Fortran Compiler -------------------------------------------------------------
+get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fopenmp")
+set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fopenmp")
+if(Fortran_COMPILER_NAME STREQUAL "gfortran")
+        #gfortra
+        set(CMAKE_Fortran_FLAGS_RELEASE "-g -fbounds-check -fcheck=all -fbacktrace -O0 -Wall -Wsurprising -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -fopenmp -w")
+        set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -fopenmp -g")
+        # set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}  -static-libgcc")
+        # set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -static-libgcc")
+        if(APPLE)
+                set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
+                set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -g -fbounds-check -fcheck=all -fbacktrace ")
+                #       set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
+                #set(FORTRAN_FLAGS ${CMAKE_Fortran_FLAGS_RELEASE}  -dead_strip -static-libgcc)
+                #set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
+        endif(APPLE)
+elseif(Fortran_COMPILER_NAME STREQUAL "f95")
+        #gfortra
+        set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fopenmp")
+        set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -fopenmp")
+        if(APPLE)
+                #set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
+                set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
+                set(FORTRAN_FLAGS ${CMAKE_Fortran_FLAGS_RELEASE}  -dead_strip -static-libgcc)
+                set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
+        endif(APPLE)
+elseif(Fortran_COMPILER_NAME STREQUAL "ifort")
+        #ifort
+        #LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
+        set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -w -132 -cxxlib")
+        #set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -axN -w -132 -cxxlib")
+elseif (Fortran_COMPILER_NAME STREQUAL "g77")
+        # g77
+        set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -m32")
+        set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
+else (Fortran_COMPILER_NAME STREQUAL "gfortran")
+        message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
+        message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
+        message ("No optimized Fortran compiler flags are known, we just try -O2...")
+        set (CMAKE_Fortran_FLAGS_RELEASE "-O2")
+        set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
+endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
+
+message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
+message ("compiler options: " ${CMAKE_Fortran_FLAGS_RELEASE})
+
+
 # Header files -----------------------------------------------------------------
 if(NOT KERNEL_INCLUDE_DIR)
 	set(KERNEL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)

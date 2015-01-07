@@ -53,7 +53,7 @@ C
       INTEGER ix,iy,iix,iiy,ixcor,iycor,iox,ioy,ilx,ily
       INTEGER*4 iover,iunder,ilow
       INTEGER MODE,IMODE
-      INTEGER NX,NY,NZ,NL
+      INTEGER NX,NY,NZ,NL,NRX,NXP2
       INTEGER I,J,K,L,M,LL,MM,I2,J2,IR
       INTEGER*8 IBELOW,IABOVE,IHISTOFRAC
       INTEGER icount
@@ -96,6 +96,7 @@ C
 C
       LOGICAL LDEBUG
       LOGICAL LCTFSUM
+      LOGICAL LFFTW
 C
       CHARACTER*200 INFILE,OUTFILE,CTFFILE
       CHARACTER*20 CSTIN
@@ -120,26 +121,29 @@ C
 C
 C******************************************************************************
 C
-#ifdef _OPENMP
-      IMP=0
-C      CALL GETENV('OMP_NUM_THREADS',NCPUS)
-C      READ(NCPUS,*,ERR=111,END=111)IMP
-C111   CONTINUE
-C      IF (IMP.LE.0) THEN
-C        CALL GETENV('NCPUS',NCPUS)
-C        READ(NCPUS,*,ERR=112,END=112)IMP
-C112     CONTINUE
-C      ENDIF
-C      IF (IMP.LE.0) THEN
-C        IMP=OMP_GET_NUM_PROCS()
-C      ENDIF
-C      CALL OMP_SET_NUM_THREADS(IMP)
-#endif
-      IF (IMP.LE.0) IMP=1
+      LFFTW = .true.
+C      LFFTW = .false.
 C
-      IF (IMP.GT.1) THEN
-        WRITE(*,'('': Parallel processing: NCPUS = '',I8)') IMP
-      ENDIF
+C #ifdef _OPENMP
+C       IMP=0
+C       CALL GETENV('OMP_NUM_THREADS',NCPUS)
+C       READ(NCPUS,*,ERR=111,END=111)IMP
+C 111   CONTINUE
+C       IF (IMP.LE.0) THEN
+C         CALL GETENV('NCPUS',NCPUS)
+C         READ(NCPUS,*,ERR=112,END=112)IMP
+C 112     CONTINUE
+C       ENDIF
+C       IF (IMP.LE.0) THEN
+C         IMP=OMP_GET_NUM_PROCS()
+C       ENDIF
+C       CALL OMP_SET_NUM_THREADS(IMP)
+C #endif
+C       IF (IMP.LE.0) IMP=1
+C
+C       IF (IMP.GT.1) THEN
+C         WRITE(*,'('': Parallel processing: NCPUS = '',I8)') IMP
+C       ENDIF
 C
       ALLOCATE(APIC(LMAX*LMAX),STAT=IERR)
       IF (IERR.NE.0) THEN
@@ -291,6 +295,7 @@ C-----Dimensions of image are NX,NY.
 C-----calculate center of image
       NCX=NX/2
       NCY=NY/2
+      NXP2 = NX + 2
 C
       SCAL=1.0/SQRT(REAL(NX*NY))
 C
@@ -323,13 +328,23 @@ C
 C
       do iy = 1,NY
         CALL IREAD(11,ALINE,iy)
-        do ix = 1,NX
-          VAL=ALINE(ix)
-          APIC(ID(ix,iy,NY))=VAL
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-        enddo
+        if(LFFTW)then
+          do ix = 1,NX
+            VAL=ALINE(ix)
+            APIC(ID(ix,iy,NXP2))=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+        else
+          do ix = 1,NX
+            VAL=ALINE(ix)
+            APIC(ID(ix,iy,NY))=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+        endif
       enddo
       DOUBLMEAN = DOUBLMEAN/(NX*NY)
       DMEAN = DOUBLMEAN
@@ -347,7 +362,11 @@ C
         do ix=1,NX
           do iy=1,NY
             if(((ix-900)**2+(iy-900)**2).lt.500**2)then
-              APIC(ID(ix,iy,NY))=3.0
+              if(LFFTW)then
+                APIC(ID(ix,iy,NXP2))=3.0
+              else
+                APIC(ID(ix,iy,NY))=3.0
+              endif
             endif
           enddo
         enddo
@@ -355,7 +374,11 @@ C
         do ix=1,NX
           do iy=1,NY
             if(((ix-900)**2+(iy-900)**2).lt.3**2)then
-              APIC(ID(ix,iy,NY))=DIMAX
+              if(LFFTW)then
+                APIC(ID(ix,iy,NXP2))=DIMAX
+              else
+                APIC(ID(ix,iy,NY))=DIMAX
+              endif
             endif
           enddo
         enddo
@@ -375,7 +398,11 @@ C-----copy image into ABOX, and zero APIC for later use
 C
       do iy = 1,NY
         do ix = 1,NX
-          IS=ID(ix,iy,NX)
+          if(LFFTW)then
+            IS=ID(ix,iy,NXP2)
+          else
+            IS=ID(ix,iy,NX)
+          endif
           CFFTPIC(IS)=APIC(IS)
           APIC(IS)=0.0
         enddo
@@ -383,16 +410,20 @@ C
 C
 C-----Calculate in-place Fourier Transform from entire image
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-C      onevol = 1.0 / sqrt(REAL(NX*NY))
-C      do ix=1,NX
-C        do iy=1,NY
-C          IR=ID(ix,iy,NX)
-C          CFFTPIC(IR) = CFFTPIC(IR) * ONEVOL
-C        enddo
-C      enddo
-C      call RLFT3(CFFTPIC,CBOX,NX,NY,1,1)
 C
-      call TDXFFT(CFFTPIC,NX,NY,IFOR)
+      if(LFFTW)then
+        call TDXFFT(CFFTPIC,NX,NY,IFOR)
+      else
+        onevol = 1.0 / sqrt(REAL(NX*NY))
+        do ix=1,NX
+          do iy=1,NY
+          IR=ID(ix,iy,NX)
+              CFFTPIC(IR) = CFFTPIC(IR) * ONEVOL
+          enddo
+        enddo
+        call RLFT3(CFFTPIC,CBOX,NX,NY,1,1)
+      endif
+C
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
 C-----Calculate number of stripes
@@ -407,6 +438,9 @@ C-----  ISTRIPENUM = NX * SQRT(2) * RPIXEL * tan(TLTANG) * 2 * WL / RESMAX**2
 C
       RDEFTOL = RESMAX**2 / 2.0 / WL
       ISTRIPENUM = 1 + NX * sqrt(2.0) * RPIXEL * tan(TLTANG*PI/180.0) * 2.0 * WL / RESMAX**2
+C
+C     ISTRIPENUM = 1
+C
       IS=ISTRIPENUM/2
       if(IS*2 .EQ. ISTRIPENUM) ISTRIPENUM = ISTRIPENUM+1
       write(6,'(/,'':Will use '',I6,'' stripes to garant '',F9.1,
@@ -435,8 +469,8 @@ C-----Loop over all stripes
 C
       ANGASTRAD=ANGAST*PI/180.0
 C
-C !$OMP PARALLEL DO PRIVATE (rstripex,rstripey,rdist1,rbeta,rgamma,rdist2,rdist3, &
-C !$OMP& RLDEF1,RLDEF2,RLDEFM,ix,ilx,iy,ily,CTFV,iix,iiy,IS,IR,ABOX,CBOX,onevol,RVAL)
+C !$OMP PARALLEL DO PRIVATE (rstripex,rstripey,rdist1,rbeta,rgamma,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM,ix,ilx,iy,ily,CTFV,iix,iiy,IS,IR,ABOX,RVAL)
+C !$OMP&  CBOX,onevol)
       do istripe = 1,ISTRIPENUM
 C
 C-------Coordinates of center of stripe
@@ -520,7 +554,11 @@ C !$OMP END CRITICAL
               endif
               iix=ix
               iiy=iy
-              IR=ID(iix,iiy,NX/2)*2
+              if(LFFTW)then
+                IR=ID(iix,iiy,NX/2+1)*2
+              else
+                IR=ID(iix,iiy,NX/2  )*2
+              endif
 C-------------Apply CTF correction
               if(IMODE.eq.1)then
 C                write(6,'('':Applying CTF Phase flipping only'')')
@@ -550,32 +588,51 @@ C               write(6,'('':Doing nothing (but in stripes)'')')
 C
 C-------Set last column to zero
         DO iy=1,NY
-          ix=NX/2
-          IR=ID(ix,iy,NX/2)*2
+          if(LFFTW)then
+            ix=NX/2
+            IR=ID(ix,iy,NX/2+1)*2
+            ix=NX/2+1
+            IR=ID(ix,iy,NX/2+1)*2
+          else
+            ix=NX/2
+            IR=ID(ix,iy,NX/2  )*2
+          endif
           ABOX(IR-1)=0.0
           ABOX(IR  )=0.0
         enddo
 C
 C-------Set last row to zero
         DO ix=1,NX/2
-          iy=NY/2
-          IR=ID(ix,iy,NX/2)*2
+          if(LFFTW)then
+            iy=NY/2
+            IR=ID(ix,iy,NX/2+1)*2
+            iy=NY/2+1
+            IR=ID(ix,iy,NX/2+1)*2
+          else
+            iy=NY/2
+            IR=ID(ix,iy,NX/2  )*2
+          endif
           ABOX(IR-1)=0.0
           ABOX(IR  )=0.0
         enddo
 C
 C-------Calculate inverse in-place Fourier Transform
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-C        call RLFT3(ABOX,CBOX,NX,NY,1,-1)
-C        onevol = 1.0 / sqrt(REAL(NX*NY))
-C        do ix=1,NX
-C          do iy=1,NY
-C            IR=ID(ix,iy,NX)
-C            ABOX(IR) = ABOX(IR) * ONEVOL
-C          enddo
-C        enddo
 C
-       call TDXFFT(ABOX,NX,NY,IBAK)
+        NRX = (NX - 1) * 2
+        if(LFFTW)then
+          call TDXFFT(ABOX,NX,NY,IBAK)
+        else
+          call RLFT3(ABOX,CBOX,NX,NY,1,-1)
+          onevol = 1.0 / sqrt(REAL(NX*NY))
+          do ix=1,NX
+            do iy=1,NY
+              IR=ID(ix,iy,NX)
+              ABOX(IR) = ABOX(IR) * ONEVOL
+            enddo
+          enddo
+        endif
+C
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
 C------------------------------------------------------------
@@ -599,12 +656,22 @@ C                APIC(IR) = APIC(IR) + ABOX(IR) * ((RSTRIPEWIDTH+RSTRIPETAPER)/2
 C       .                   / (RSTRIPETAPER+1.0)
 C              endif
               if(abs(rdist2).le.(RSTRIPEWIDTH+1)/2.0)then
-                IR=ID(ix,iy,NX)
-                APIC(IR) = ABOX(IR)
+                if(LFFTW)then
+                  IR=ID(ix,iy,NXP2)
+                else
+                  IR=ID(ix,iy,NX)
+                endif
+                IS=ID(ix,iy,NX)
+                APIC(IS) = ABOX(IR)
               endif
             else
-              IR=ID(ix,iy,NX)
-              APIC(IR) = ABOX(IR)
+              if(LFFTW)then
+                IR=ID(ix,iy,NXP2)
+              else
+                IR=ID(ix,iy,NX)
+              endif
+              IS=ID(ix,iy,NX)
+              APIC(IS) = ABOX(IR)
             endif
           enddo
         enddo

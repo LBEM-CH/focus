@@ -104,16 +104,15 @@ find_library(LIB2DX lib2dx.a PATH ${LOCAL_LIB_DIR})
 list(APPEND LOCAL_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a ${LOCAL_LIB_DIR}/libfft.a ${LOCAL_LIB_DIR}/libconv.a)
 list(APPEND LIBRARIES ${2DX_LIBRARIES})
 
-
-set(USE_FFTWF TRUE)
-find_package(FFTW)
 if(FFTWF_FOUND)
-        message(STATUS "MOVIE: Found FFTW at ${FFTWF_LIB}")
-        list(APPEND LIBRARIES  ${FFTWF_LIB})
+        list(APPEND PER_LIBRARIES  ${FFTWF_LIB})
         include_directories(${FFTW_INCLUDE_PATH})
 elseif(FFTWF_FOUND)
-        message(FATAL_ERROR "FFTWF not found!")
+        message(FATAL_ERROR "FFTW not found!")
 endif(FFTWF_FOUND)
+if(LOCAL_LIB_DIR)
+        list(APPEND PER_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a )
+endif(LOCAL_LIB_DIR)
 
 
  

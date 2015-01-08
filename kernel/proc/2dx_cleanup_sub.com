@@ -22,7 +22,6 @@ echo dummy > TMP-dummy
 echo dummy > TMP9871.dat
 echo dummy > 2dx_calcpositions.dummy
 echo dummy > REFdummy.hkl
-echo dummy > dummy.results
 echo dummy > results.spi.0
 echo dummy > TMP_1.txt
 echo dummy > dummy.plt
@@ -179,6 +178,11 @@ if ( "${level}" == "radical" ) then
   \rm -f u2_map.mrc
   \rm -f u2_map.ps
   \rm -f tmp_mask.mrc
+  \rm -f framesB_quadserch.pdf
+  \rm -f framesB_quadserch.ps
+  \rm -f framesB_unbending.pdf
+  \rm -f framesB_unbending.ps
+  \rm -f image_ctfcor.spt
   #
 else
   #
@@ -261,6 +265,7 @@ echo dummy > dummy.TMP
 \rm -f *_phase_zero-p1.mrc
 \rm -f TMP_*
 \rm -f fort.3
+\rm -f dummy.results
 if ( -e ${imagename}.mrc ) then
   if ( ${imagename} == m${nonmaskimagename} ) then
     \rm -f ${imagename}.mrc

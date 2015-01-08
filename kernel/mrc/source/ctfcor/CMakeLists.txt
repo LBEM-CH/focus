@@ -68,7 +68,7 @@ file(GLOB FORTRAN_SOURCE *.for *.f)
 file(GLOB C_SOURCE *.c *.h)
 file(GLOB CPP_SOURCE *.cc *.cpp)
 set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE}) 
-set(PER_F_TARGETS 2dx_ctfcor_fftw)
+set(PER_F_TARGETS 2dx_ctfcor_stripes 2dx_ctfcor_tiles)
 
 
 # Libraries --------------------------------------------------------------------i

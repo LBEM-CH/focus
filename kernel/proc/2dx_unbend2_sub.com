@@ -746,7 +746,7 @@ eot
       #
       setenv NCPUS ${Thread_Number}
       #
-      ${bin_2dx}/2dx_ctfcor_fftw.exe << eot
+      ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
 ${imagename}.mrc
 image_ctfcor.mrc
 #

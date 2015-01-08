@@ -422,6 +422,7 @@ eot
           if ( ! -d ${newdir} ) then
             \mkdir ${newdir}
             cd ${newdir}
+            set new_created_dir = $PWD
             if ( -e  ../${currentdir}/${nonmaskimagename}.tif ) then
               \cp -f ../${currentdir}/${nonmaskimagename}.tif .
             endif
@@ -430,6 +431,9 @@ eot
             endif
             if ( -e  ../${currentdir}/${nonmaskimagename}_stack.mrc ) then
               \cp -f ../${currentdir}/${nonmaskimagename}_stack.mrc .
+            endif
+            if ( -e  ../${currentdir}/${nonmaskimagename}_raw.mrc ) then
+              \cp -f ../${currentdir}/${nonmaskimagename}_raw.mrc .
             endif
             \cp -f ../${currentdir}/2dx_image.cfg .
             set newimagenumber = `echo ${imagenumber} | awk '{ s = $1 + 1 } END { print s }'`
@@ -440,6 +444,7 @@ eot
             echo "set secondlattice_is_this = "\"y\" >> 2dx_image.cfg
             echo "set secondlattice_exists = "\"y\" >> 2dx_image.cfg
             ${proc_2dx}/linblock "Image cloned, new directory name is ${newdir}"
+            ${app_2dx_image} ${new_created_dir} "2dx_initialize"
             #
             cd ${olddir}
           endif

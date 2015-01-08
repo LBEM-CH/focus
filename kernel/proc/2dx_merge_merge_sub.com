@@ -59,13 +59,40 @@ foreach imagefile ( ${dirlist} )
     endif
   endif
   if ( ${merge_data_type} == '3' ) then
+    set QVAL2_local =  `cat 2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
+    set QVALMA_local =  `cat 2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
+    set QVALMB_local =  `cat 2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
+    set QVAL_best = `echo ${QVAL2_local} ${QVALMA_local} ${QVALMB_local} | awk '{ if ( $1 > $2 && $1 > $3 ) { s = 1 } else if ( $2 > $1 && $2 > $3 ) { s = 2 } else { s = 3 } } END { print s }'`
+    if ( ${QVAL_best} == '3' ) then
+      if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then
+        set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+      else
+        set QVAL_best = "1"
+      endif
+    endif
+    if ( ${QVAL_best} == '2' ) then
+      if ( -e ${imagename_local}_movie_fou_ctf.aph ) then
+        set APH_file = ${imagename_local}_movie_fou_ctf.aph
+      else
+        set QVAL_best = "1"
+      endif
+    endif
+    if ( ${QVAL_best} == '1' ) then
+      if ( -e ${imagename_local}_fou_ctf.aph ) then
+        set APH_file = ${imagename_local}_fou_ctf.aph
+      else
+        echo "::${imagename_local}_movie_fou_ctf.aph not found."
+      endif
+    endif
+  endif
+  if ( ${merge_data_type} == '4' ) then
     if ( -e ML_result.aph ) then
       set APH_file = ML_result.aph
     else
       echo ":ML_result.aph not found."
     endif
   endif
-  if ( ${merge_data_type} == '4' ) then
+  if ( ${merge_data_type} == '5' ) then
     if ( ! -e ${imagename_local}_ctf.aph ) then
       set APH_file = ${imagename_local}_syn_ctf.aph
     endif

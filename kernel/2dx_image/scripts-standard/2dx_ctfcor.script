@@ -152,7 +152,7 @@ else
     \rm -f ${ctfcor_ctffile}  
     #
     # ${bin_2dx}/2dx_ctfcor.exe << eot
-    ${bin_2dx}/2dx_ctfcor_fftw.exe << eot
+    ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
 ${imagename}.mrc
 image_ctfcor.mrc
 ${ctfcor_ctffile}

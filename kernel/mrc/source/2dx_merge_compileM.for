@@ -126,14 +126,9 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
         if(imcount.gt.1)then
           do i=1,imcount-1
             if(imnum(i).eq.imnum(imcount))then
-              write(*,'(''::'',79(''#''))')
-              write(*,'(''::ERROR; Imagenumber '',I10,
-     .          '' appears twice.'')')imnum(i)
-              write(*,'(''::'',79(''#''))')
-              write(11,'(''#'')')
-              write(11,'(''echo ":: Script is aborting."'')')
-              write(11,'(''exit -1'')')
-              write(11,'(''#'')')
+              call shorten(CIMAGENAME,k)
+              write(*,'('':WARNING: Imagenumber '',I10,
+     .          '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
             endif
           enddo
         endif

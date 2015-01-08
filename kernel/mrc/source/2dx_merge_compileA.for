@@ -227,16 +227,9 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
         if(imcount.gt.1)then
           do i=1,imcount-1
             if(imnum(i).eq.imnum(imcount))then
-              write(*,'(''::'',79(''#''))')
-              write(*,'(''::'',79(''#''))')
-              write(*,'(''::'',79(''#''))')
-              write(*,'(''::ERROR; Imagenumber '',I10,
-     .          '' appears twice.'')')imnum(i)
               call shorten(CIMAGENAME,k)
-              write(*,'(''::This is for image '',A)')CIMAGENAME(1:k)
-              write(*,'(''::'',79(''#''))')
-              write(*,'(''::'',79(''#''))')
-              write(*,'(''::'',79(''#''))')
+              write(*,'('':WARNING: Imagenumber '',I10,
+     .          '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
             endif
           enddo
         endif

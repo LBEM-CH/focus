@@ -37,8 +37,8 @@ if __name__ == "__main__":
                 ioffy = 0
 		
 		# The following is to test the drift correction performance:
-		# ioffx = i/2
-		# ioffy = i
+		# ioffx = i/2-9
+		# ioffy = i-19
 
 		image = stack.get_clip(Region(ioffx,ioffy,i,nx,ny,1))
 

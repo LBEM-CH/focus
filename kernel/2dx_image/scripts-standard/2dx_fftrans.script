@@ -90,6 +90,7 @@ set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
 set ctfcor_imode = ""
 set use_masked_image = ""
+set movie_inmovie = ""
 #
 #$end_vars
 #
@@ -109,101 +110,22 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
+echo "# IMAGE: "${nonmaskimagename}_automask.mrc "<Masking info, automask>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "${nonmaskimagename}_manualmask.mrc "<Masking info, manualmask>" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "Sourcing 2dx_init_files_sub.com"
+#################################################################################
+#
+#
+#
+source ${proc_2dx}/2dx_init_files_sub.com
+#
+#
 #
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
-#
-set new_mrc_created = 'n'
-set correct = 0
-#
-set testname = `echo ${imagename} | cut -c2-`
-if (( ${nonmaskimagename} != ${imagename} ) && ( ${nonmaskimagename} != ${testname} )) then
-  set correct = 1
-endif
-if ( ${nonmaskimagename} == "ScriptWillPutNameHere" ) then
-  set correct = 1
-endif
-if ( ${imagesidelength} == "ScriptWillPutLengthHere" ) then
-  set correct = 1
-  set new_mrc_created = 'y'
-endif
-#
-if ( -e ${nonmaskimagename}.mrc ) then
-  if ( ! -e ${nonmaskimagename}_raw.mrc ) then
-    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc
-  endif
-endif
-#
-if ( ! -e ${imagename}.mrc || ! -e ${nonmaskimagename}.mrc ) then
-  #
-  set new_mrc_created = 'y'
-  #################################################################################
-  ### Transform ${imagename}.tif into ${imagename}.mrc ############################
-  ${proc_2dx}/linblock "Creating MRC format file."
-  source ${proc_2dx}/2dx_initialize_tiff_to_mrc_sub.com
-  #################################################################################
-  ### Test (and Correct) Endianess of ${nonmaskimagename}.mrc ############################
-  ${proc_2dx}/linblock "Testing Endianess."
-  source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
-  #################################################################################  
-  ### Make input image square, correct size, and potentially rotate for correct tilt axis:
-  ${proc_2dx}/linblock "Testing correct size of input image."
-  set loc_imagename = ${nonmaskimagename}
-  source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
-  #################################################################################
-  #
-endif
-#
-#
-if ( ${use_masked_image} == "y" ) then
-  if ( -e ${nonmaskimagename}_manualmask.mrc ) then
-    set maskfile = ${nonmaskimagename}_manualmask.mrc
-  else
-    if ( -e ${nonmaskimagename}_automask.mrc ) then
-      set maskfile = ${nonmaskimagename}_automask.mrc
-    else
-      if ( -e ${nonmaskimagename}_mask.mrc ) then
-        \mv ${nonmaskimagename}_mask.mrc ${nonmaskimagename}_automask.mrc
-        set maskfile = ${nonmaskimagename}_automask.mrc
-      else
-        ${proc_2dx}/linblock "No Masking Info file found.  Not masking image."
-        set use_masked_image = "n"
-        echo "set use_masked_image = ${use_masked_image}"  >> LOGS/${scriptname}.results
-      endif 
-    endif 
-  endif 
-endif
-if ( ${use_masked_image} == "y" ) then
-  if ( ${imagename} != m${nonmaskimagename} ) then
-    set imagename = `echo m${nonmaskimagename}`
-    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
-    ${proc_2dx}/linblock "correcting imagename to ${imagename}"
-    \rm -f ${imagename}.mrc
-  endif
-  if ( ! -e ${imagename}.mrc ) then
-    ###########################################################################
-    ${proc_2dx}/linblock "Masking image with masking info"
-    ###########################################################################
-    echo "# IMAGE: ${maskfile} <Masking Information Mask>" >> LOGS/${scriptname}.results   
-    echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
-    echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
-    python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${maskfile}
-  endif
-else
-  if ( ${imagename} == m${nonmaskimagename} ) then
-    \cp -f ${nonmaskimagename}.mrc ${imagename}.mrc 
-    set imagename = `echo ${nonmaskimagename}`
-    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
-    ${proc_2dx}/linblock "correcting imagename to ${imagename}"
-  endif
-  set domask = "y"
-  echo "set domask = ${domask}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "correcting domask to ${domask}"
-endif
-
-#
-#
 #
 if ( ! -e ${imagename}.mrc ) then
   ${proc_2dx}/protest "ERROR: ${imagename}.mrc missing. Aborting."
@@ -211,12 +133,6 @@ endif
 if ( ! -e ${nonmaskimagename}.mrc ) then
   ${proc_2dx}/protest "ERROR: ${nonmaskimagename}.mrc missing. Aborting."
 endif
-#
-#################################################################################
-### Test (and Correct) Endianess of ${imagename}.mrc ############################
-${proc_2dx}/linblock "Testing Endianess."
-source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
-#################################################################################
 #
 set testname = `echo ${imagename} | cut -c2-`
 if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
@@ -237,14 +153,6 @@ if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) t
 endif
 #
 echo "<<@progress: 5>>"
-#
-#################################################################################
-### Make input image square and correct size ####################################
-${proc_2dx}/linblock "Testing correct size of input image."
-set loc_imagename = ${nonmaskimagename}
-source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
-#################################################################################
-#
 #
 echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
 if ( ${imagename} != ${nonmaskimagename} ) then
@@ -338,28 +246,6 @@ endif
 echo "<<@progress: 5>>"
 #
 #############################################################################
-##### Now see, if new MRC was created, that needs to be adapted:
-#############################################################################
-#
-if ( ${new_mrc_created} == 'y' ) then
-  #
-  #################################################################################
-  ### Treat histogram width, if needed ############################################
-  ${proc_2dx}/linblock "Testing histogram width."
-  #
-  set loc_imagename = ${imagename}
-  source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
-  #
-  if ( ${imagename} == m${nonmaskimagename} ) then
-    set loc_imagename = ${nonmaskimagename}
-    source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
-  endif
-  #################################################################################  
-  #
-endif
-#
-#
-#############################################################################
 #############################################################################
 #######  Now Source 2dx_fftrans_sub.com  ####################################
 #############################################################################
@@ -385,4 +271,12 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 ##
 #
 echo "<<@progress: 100>>"
+exit
+#
+# These are listed here to make sure they appear in the 2dx_image GUI:
+source ${proc_2dx}/2dx_initialize_tiff_to_mrc_sub.com
+source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
+source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
+source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
+python ${proc_2dx}/movie/mask.py
 #

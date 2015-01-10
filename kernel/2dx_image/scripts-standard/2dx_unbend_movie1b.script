@@ -38,13 +38,6 @@
 # SECTION: Verbosity
 #=============================================================================
 #
-# LABEL: Show CCmaps of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_CCmap = "n"
-#
 # LABEL: Show PROFDATA (CCunbending files) of frames?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
 # EXAMPLE: show_frame_PROFDATA = "y"
@@ -58,6 +51,13 @@ set show_frame_PROFDATA = "n"
 # HELP: http://2dx.org/documentation/2dx-software/parameters
 # TYPE: Bool "y;n"
 set show_frame_CCmap_marked = "n"
+#
+# LABEL: Show unbent CCmaps of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_CCmap_unbent = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_CCmap_unbent = "n"
 #
 # DISPLAY: imagename
 # DISPLAY: SYN_Unbending
@@ -377,7 +377,6 @@ ${movie_imagenumber_total}
 ${PROFDATA}
 eot
 
-
 ###########################################################################
 ${proc_2dx}/linblock "drift_selector.py - Selecting and smoothing drift profiles" 
 ###########################################################################
@@ -443,7 +442,8 @@ eot
        \rm -f CCPLOT.PS
        \rm -f frames/CCmap_${i}_unbent.mrc
 
-       ${bin_2dx}/2dx_ccunbendk.exe << eot
+       if ( ${show_frame_CCmap_unbent} == "y" ) then
+         ${bin_2dx}/2dx_ccunbendk.exe << eot
 frames/CCmap_${i}.mrc
 0,1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
@@ -451,7 +451,6 @@ ${imagename}, Movie-Mode UNBEND, ${date}
 frames/CCmap_${i}_unbent.mrc
 CCUNBEND, frame_${i}.mrc, ${date}
 eot
-       if ( ${show_frame_CCmap} == "y" ) then
          echo  "# IMAGE: frames/CCmap_${i}_unbent.mrc <CCmap Frame ${i} unbent>" >> LOGS/${scriptname}.results
        endif
 
@@ -462,7 +461,7 @@ eot
        \rm -f CCPLOT.PS
        \rm -f frames/CCUNBEND_frame_${i}_notap.mrc
        if (${ctfcor_imode}x == "0x" ) then
-	 set infile = frames/frame_${i}.mrc
+	   set infile = frames/frame_${i}.mrc
        else
          set infile = frames/frame_${i}_ctfcor.mrc
        endif
@@ -512,8 +511,10 @@ eot
        echo ":     Filter unbent frame ${i} with radius ${filtervalue}"
        echo "python ${proc_2dx}/movie/getFilter.py ${i} ${movie_filter_type} ${filt_a} ${filt_b}"
        #
-       python ${proc_2dx}/movie/apply_filter.py frames/CCmap_${i}_unbent.mrc         ${filtervalue} ${i} ${imagesidelength}
-       python ${proc_2dx}/movie/apply_filter.py frames/CCUNBEND_frame_${i}_notap.mrc ${filtervalue} ${i} ${imagesidelength}
+       if ( ${show_frame_CCmap_unbent} == "y" ) then
+         python ${proc_2dx}/movie/apply_filter.py frames/CCmap_${i}_unbent.mrc         ${filtervalue} ${i} ${imagesidelength} frames/weight.mrc
+       endif
+       python ${proc_2dx}/movie/apply_filter.py frames/CCUNBEND_frame_${i}_notap.mrc ${filtervalue} ${i} ${imagesidelength} frames/weight.mrc
        #
        ## This is to make sure the script shows up in the GUI:
        if ( 1 == 2 ) then
@@ -532,23 +533,24 @@ end
 
 echo "<<@progress: 70>>"
 
-###########################################################################
-${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_total}" 
-###########################################################################
-\rm -f frames/CCmap_driftCorrected.mrc
-python ${proc_2dx}/movie/direct_sum2.py ${movie_imagenumber_total}
-echo "# IMAGE-IMPORTANT: frames/CCmap_driftCorrected.mrc <CCmap drift-corrected>" >> LOGS/${scriptname}.results 
+if ( ${show_frame_CCmap_unbent} == "y" ) then
+  ###########################################################################
+  ${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_total}" 
+  ###########################################################################
+  \rm -f frames/CCmap_driftCorrected.mrc
+  python ${proc_2dx}/movie/direct_sum2.py ${movie_imagenumber_total}
+  echo "# IMAGE-IMPORTANT: frames/CCmap_driftCorrected.mrc <CCmap drift-corrected>" >> LOGS/${scriptname}.results  
 
 
-\rm -f SCRATCH/${iname}_CCmap21_marked.mrc
-${bin_2dx}/2dx_mark_spots.exe << eot
+  \rm -f SCRATCH/${iname}_CCmap21_marked.mrc
+  ${bin_2dx}/2dx_mark_spots.exe << eot
 frames/CCmap_driftCorrected.mrc
 frames/CCmap_driftCorrected_marked.mrc
 ${iname}_profile.dat
 2
 eot
-echo "# IMAGE: frames/CCmap_driftCorrected_marked.mrc <CCmap drift-corrected, marked>" >> LOGS/${scriptname}.results 
-
+  echo "# IMAGE: frames/CCmap_driftCorrected_marked.mrc <CCmap drift-corrected, marked>" >> LOGS/${scriptname}.results 
+endif
 
 
 ###########################################################################
@@ -562,10 +564,12 @@ echo "# IMAGE: frames/direct_sum.mrc <Sum unbent images>" >> LOGS/${scriptname}.
 ###########################################################################
 ${proc_2dx}/linblock "Filtering by resolution weights"
 ###########################################################################
-python ${proc_2dx}/movie/apply_filter_sum.py frames/CCmap_driftCorrected.mrc frames/CCmap_driftCorrected_filt.mrc 0.001
-echo "# IMAGE: frames/CCmap_driftCorrected_filt.mrc <CCmap drift-corrected, filtered>" >> LOGS/${scriptname}.results 
+if ( ${show_frame_CCmap_unbent} == "y" ) then
+  python ${proc_2dx}/movie/apply_filter_sum.py frames/CCmap_driftCorrected.mrc frames/CCmap_driftCorrected_filt.mrc 0.001 frames/weight.mrc
+  echo "# IMAGE: frames/CCmap_driftCorrected_filt.mrc <CCmap drift-corrected, filtered>" >> LOGS/${scriptname}.results 
+endif
 
-python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc 0.001
+python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc 0.001 frames/weight.mrc
 echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 
 if ( ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" ) then
@@ -588,11 +592,13 @@ endif
 
 
 if ( ${movie_masking_mode} != '0' ) then
-  ###########################################################################
-  ${proc_2dx}/linblock "Masking drift-corrected CCmap with masking info"
-  ###########################################################################
-  python ${proc_2dx}/movie/mask.py frames/CCmap_driftCorrected_filt.mrc frames/CCmap_driftCorrected_filt_masked.mrc ${maskfile}_mask.mrc
-  echo "# IMAGE: frames/CCmap_driftCorrected_filt_masked.mrc <CCmap drift-corrected, filtered, masked>" >> LOGS/${scriptname}.results 
+  if ( ${show_frame_CCmap_unbent} == "y" ) then
+    ###########################################################################
+    ${proc_2dx}/linblock "Masking drift-corrected CCmap with masking info"
+    ###########################################################################
+    python ${proc_2dx}/movie/mask.py frames/CCmap_driftCorrected_filt.mrc frames/CCmap_driftCorrected_filt_masked.mrc ${maskfile}_mask.mrc
+    echo "# IMAGE: frames/CCmap_driftCorrected_filt_masked.mrc <CCmap drift-corrected, filtered, masked>" >> LOGS/${scriptname}.results 
+  endif
   ###########################################################################
   ${proc_2dx}/linblock "Masking average with masking info"
   ###########################################################################
@@ -612,11 +618,19 @@ ${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
 ###########################################################################
 echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
 #
-python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected_filt.mrc
+if ( ${show_frame_CCmap_unbent} == "y" ) then
+  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf frames/CCmap_driftCorrected_filt.mrc
+else
+  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine.dat 2dx_movie_refine.pdf ${cormap}
+endif
 echo  "# IMAGE-IMPORTANT: 2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_masking_mode} != '0' ) then
-  python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected_filt_masked.mrc
+  if ( ${show_frame_CCmap_unbent} == "y" ) then
+    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf frames/CCmap_driftCorrected_filt_masked.mrc
+  else
+    python ${proc_2dx}/movie/drift_plotter.py 2dx_movie_refine_selected.dat 2dx_movie_refine_selected.pdf ${cormap}
+  endif
   echo  "# IMAGE-IMPORTANT: 2dx_movie_refine_selected.pdf <PDF: 2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
 endif
 \rm -f tmp.png

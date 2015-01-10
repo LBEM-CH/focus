@@ -30,7 +30,7 @@ if __name__ == "__main__":
         #########################################
 
 	folder_name = frame_folder_name + "/frame_0" 
-	output_name = folder_name + "/" + image_name + "_0.mrc"
+	output_name = folder_name + "/" + image_name + "_0_raw.mrc"
 	os.mkdir(folder_name)
 	
         fat_num_from = 1;
@@ -59,15 +59,26 @@ if __name__ == "__main__":
 	for i in range(0,int(nz/ave_num)):
 		
 		folder_name = frame_folder_name + "/frame_" + str(i+1)
-		output_name = folder_name + "/" + image_name + "_" + str(i+1) + ".mrc"
+		output_name = folder_name + "/" + image_name + "_" + str(i+1) + "_raw.mrc"
 		os.mkdir(folder_name)
 		
 		for j in range(0,ave_num):
 		
 			print "Creating frame", i+1, "as", output_name, "by adding sub-frame", i*ave_num+j
 			
+			# The following is to test the drift correction performance:
+			# ioffx = 7*i/2-9
+			# ioffy = 7*i-19
+			#
+			# if j==0:
+			#	image1 = stack.get_clip(Region(0,0,i*ave_num+j,nx,ny,1))
+			#	image =  cyclic_shift(image1,ioffx,ioffy)
+			# else:
+			#	image1 = stack.get_clip(Region(0,0,i*ave_num+j,nx,ny,1))
+			#	image += cyclic_shift(image1,ioffx,ioffy)
+
 			if j==0:
-				image = stack.get_clip(Region(0,0,i*ave_num+j,nx,ny,1))
+				image =  stack.get_clip(Region(0,0,i*ave_num+j,nx,ny,1))
 			else:
 				image += stack.get_clip(Region(0,0,i*ave_num+j,nx,ny,1))
 			

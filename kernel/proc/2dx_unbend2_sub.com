@@ -103,10 +103,11 @@ eot
   #
   #
   #############################################################################
-  ${proc_2dx}/${lincommand} "LABEL - to cut out small box in center of reference image"
+  ${proc_2dx}/${lincommand} "LABEL - to cut out small box in center of reference image (1)"
   #############################################################################  
   #
   \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_cro.mrc
+  echo "patlabel = ${patlabel}"
   ${bin_2dx}/labelh.exe << eot
 SCRATCH/${iname}_unbend2_fft_msk_fft.mrc
 1
@@ -116,7 +117,7 @@ eot
   echo "<<@progress: 25>>"
   #
   #############################################################################
-  ${proc_2dx}/${lincommand} "AUTOCORRL - to calculate autocorrelation of reference center"
+  ${proc_2dx}/${lincommand} "AUTOCORRL - to calculate autocorrelation of reference center (1)"
   #############################################################################  
   #
   \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut.mrc
@@ -225,10 +226,6 @@ eot
     #
   endif
   #
-  if ( ${tempkeep} != 'y' ) then
-    \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box1.mrc
-    \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box2.mrc
-  endif
   echo "<<@progress: 45>>"
   #
   #############################################################################
@@ -730,6 +727,12 @@ eot
     #
     # echo "set FFT_done = n" >> LOGS/${scriptname}.results
     echo "set UNBENDING_done = n" >> LOGS/${scriptname}.results
+    #  
+    # Redo Masking, since QUADSERCH doesn't do it righ:
+    echo "# IMAGE: ${nonmaskimagename}.mrc <Nonmasked image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${nonmaskimagename}_automask.mrc <Masking info file>" >> LOGS/${scriptname}.results
+    python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc
     #
     if (${ctfcor_imode}x == "0x" ) then
       ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
@@ -768,6 +771,7 @@ eot
     ${proc_2dx}/linblock "Sourcing 2dx_fftrans_sub.com"
     #################################################################################
     #
+    set generatePeriodogram = "n"
     set inimage = image_ctfcor
     source ${proc_2dx}/2dx_fftrans_sub.com
     #
@@ -859,6 +863,15 @@ SCRATCH/${iname}_unbend2_notap.mrc
 UNBENT,PASS,2,${date}
 eot
       #
+      \rm -f SCRATCH/${iname}_CCmap21_marked.mrc
+      ${bin_2dx}/2dx_mark_spots.exe << eot
+SCRATCH/${iname}_CCmap21.mrc
+SCRATCH/${iname}_CCmap21_marked.mrc
+${iname}_profile.dat
+2
+eot
+      echo "# IMAGE: SCRATCH/${iname}_CCmap21_marked.mrc <CCmap, marked>" >> LOGS/${scriptname}.results 
+      #
       \rm -f SCRATCH/${iname}_CCmap21_unbent.mrc
       ${bin_2dx}/2dx_ccunbendk.exe << eot
 SCRATCH/${iname}_CCmap21.mrc
@@ -870,33 +883,6 @@ CCmap unbent
 eot
       #
       echo "# IMAGE-IMPORTANT: SCRATCH/${iname}_CCmap21_unbent.mrc <CCmap, unbent>" >> LOGS/${scriptname}.results 
-      #
-      # \rm -f SCRATCH/${iname}_CCmap21_unbend2_fft.mrc
-      # setenv IN  SCRATCH/${iname}_CCmap21_unbend2.mrc
-      # setenv OUT SCRATCH/${iname}_CCmap21_unbend2_fft.mrc
-      # ${bin_2dx}/2dx_fftrans.exe
-      # if ( ${locround} == '1' ) then
-      #   echo "# IMAGE: SCRATCH/${iname}_CCmap21_unbend2_fft.mrc <CCmap, unbent (FFT)>" >> LOGS/${scriptname}.results 
-      # endif
-      #
-      \rm -f SCRATCH/${iname}_CCmap21_marked.mrc
-      ${bin_2dx}/2dx_mark_spots.exe << eot
-SCRATCH/${iname}_CCmap21.mrc
-SCRATCH/${iname}_CCmap21_marked.mrc
-${iname}_profile.dat
-2
-eot
-      echo "# IMAGE: SCRATCH/${iname}_CCmap21_marked.mrc <CCmap, marked>" >> LOGS/${scriptname}.results 
-      #
-      \rm -f SCRATCH/${iname}_CCmap21_unbent_marked.mrc
-      ${bin_2dx}/2dx_mark_spots.exe << eot
-SCRATCH/${iname}_CCmap21_unbent.mrc
-SCRATCH/${iname}_CCmap21_unbent_marked.mrc
-${iname}_profile.dat
-2
-eot
-      echo "# IMAGE: SCRATCH/${iname}_CCmap21_unbent_marked.mrc <CCmap, unbent, marked>" >> LOGS/${scriptname}.results 
-      #
       #
     endif
     #

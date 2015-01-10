@@ -756,6 +756,11 @@ C
         X=RORIX+RLENX
         CALL P2K_DRAW(X,Y,0.)
         X=RORIX
+        Y=RORIY+60.0*RLENY/90.0
+        CALL P2K_MOVE(X,Y,0.)
+        X=RORIX+RLENX
+        CALL P2K_DRAW(X,Y,0.)
+        X=RORIX
         Y=RORIY+90.0*RLENY/90.0
         CALL P2K_MOVE(X,Y,0.)
         X=RORIX+RLENX

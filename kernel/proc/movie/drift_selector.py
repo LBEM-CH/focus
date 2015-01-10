@@ -5,7 +5,7 @@ from EMAN2 import *
 from sparx import *
 
 class peak:
-	def __init__(self, pos_x, pos_y, start_x, start_y, end_x, end_y, peak, h, k, rocenx, roceny):
+	def __init__(self, pos_x, pos_y, start_x, start_y, end_x, end_y, peak, h, k):
 		self.pos_x = pos_x
 		self.pos_y = pos_y
 		self.start_x = start_x
@@ -15,8 +15,6 @@ class peak:
 		self.peak = peak
 		self.h = h
 		self.k = k
-		self.rocenx = rocenx
-		self.roceny = roceny
 		
 def radial_sort(peak_list, peak):
 	x = peak.pos_x
@@ -76,8 +74,7 @@ if __name__ == "__main__":
 		
 		p = peak(float(data_split[2]), float(data_split[3]), float(data_split[5]), 
 		float(data_split[6]), float(data_split[7]), float(data_split[8]), 
-		float(data_split[4]), float(data_split[0]), float(data_split[1]), 
-		float(data_split[9]), float(data_split[10]))
+		float(data_split[4]), float(data_split[0]), float(data_split[1]))
 		
 		if p.peak > 0.0:
 			peaks.append(p)
@@ -97,9 +94,9 @@ if __name__ == "__main__":
 			x_lens = []
 			y_lens = []
 			for i in range(1,N):
-				x_lens.append(peaks_sorted[i].rocenx)
-				y_lens.append(peaks_sorted[i].roceny)
-			diff = sqrt((p.rocenx - np.mean(x_lens))**2 + (p.roceny - np.mean(y_lens))**2)
+				x_lens.append(peaks_sorted[i].start_x)
+				y_lens.append(peaks_sorted[i].start_y)
+			diff = sqrt((p.start_x - np.mean(x_lens))**2 + (p.start_y - np.mean(y_lens))**2)
 			if diff > diff_threshold:
 				print "deleting peak ",p.h, p.k
 				p.peak = 0.0
@@ -133,14 +130,6 @@ if __name__ == "__main__":
 				p.end_y = np.mean(y_lens)
 
 				x_lens = []
-				y_lens = []
-				for i in range(1,N):
-					x_lens.append(peaks_sorted[i].rocenx)
-					y_lens.append(peaks_sorted[i].roceny)
-				p.rocenx = np.mean(x_lens)
-				p.roceny = np.mean(y_lens)
-
-				x_lens = []
 				for i in range(1,N):
 					x_lens.append(peaks_sorted[i].peak)
 				p.peak = np.mean(x_lens)
@@ -170,19 +159,11 @@ if __name__ == "__main__":
 		del x_lens[:]
 		del y_lens[:]
 
-		x_lens = []
-		y_lens = []
-		for i in range(0,N):
-			x_lens.append(peaks_sorted[i].rocenx)
-			y_lens.append(peaks_sorted[i].roceny)
-		p.mean_rocenx = np.mean(x_lens)
-		p.mean_roceny = np.mean(y_lens)
-		del x_lens[:]
-		del y_lens[:]
 
-
+	icount = 0
 	for p in peaks:
 		if p.peak != 0.0:
+			icount = icount + 1
 			line = str(int(p.h)) + "\t"
 			line += str(int(p.k)) + "\t"
 			line += str(p.pos_x) + "\t"
@@ -191,10 +172,21 @@ if __name__ == "__main__":
 			line += str(p.mean_start_x) + "\t"
 			line += str(p.mean_start_y) + "\t"
 			line += str(p.mean_end_x) + "\t"
-			line += str(p.mean_end_y) + "\t"
-			line += str(p.mean_rocenx) + "\t"
-			line += str(p.mean_roceny) + "\n"
+			line += str(p.mean_end_y) + "\n"
 			data_file_out.write(line)
+	if icount < 10:
+		print ":: "
+		print ":: "
+		print ":: "
+		print ":: WARNING:  NOT ENOUGH PEAKS REMAINING! DRIFT CORRECTION PROBABLY FAILED."
+		print ":: "
+		print ":: "
+		print "::        Increase Movie-Mode drift smoothing threshold."
+		print ":: "
+		print ":: "
+		print ":: "
+	else:
+		print ":Kept ",icount," peaks."
 	
 	data_file.close()
 	data_file_out.close()
@@ -211,9 +203,9 @@ if __name__ == "__main__":
 			data_file_out.write(line)
 		for p in peaks:
 			if p.peak != 0.0:
-				# print "i,IFRAMS=",iframe,IFRAMS,"  mean_start=",p.mean_start_x,p.mean_start_y,"  mean_end=",p.mean_end_x,p.mean_end_y,"  mean_rocen=",p.mean_rocenx,p.mean_roceny
-				rx = p.pos_x + p.mean_start_x*(1.0*IFRAMS-iframe)/(IFRAMS-1.0) + p.mean_end_x*(1.0*iframe-1)/(IFRAMS-1.0) + p.mean_rocenx
-				ry = p.pos_y + p.mean_start_y*(1.0*IFRAMS-iframe)/(IFRAMS-1.0) + p.mean_end_y*(1.0*iframe-1)/(IFRAMS-1.0) + p.mean_roceny
+				# print "i,IFRAMS=",iframe,IFRAMS,"  mean_start=",p.mean_start_x,p.mean_start_y,"  mean_end=",p.mean_end_x,p.mean_end_y
+				rx = p.pos_x + p.mean_start_x*(1.0*IFRAMS-iframe)/(IFRAMS-1.0) + p.mean_end_x*(1.0*iframe-1)/(IFRAMS-1.0) 
+				ry = p.pos_y + p.mean_start_y*(1.0*IFRAMS-iframe)/(IFRAMS-1.0) + p.mean_end_y*(1.0*iframe-1)/(IFRAMS-1.0) 
 				line = str(int(p.h)) + "\t"
 				line += str(int(p.k)) + "\t"
 				line += str(rx) + "\t"
@@ -232,7 +224,7 @@ if __name__ == "__main__":
 	disk = model_circle(120.0, imagesidelength, imagesidelength,1)
 	for p in peaks:
 		if p.peak != 0.0:
-			image	+= cyclic_shift(disk,p.pos_x+p.mean_rocenx+(imagesidelength/2)+1,p.pos_y+p.mean_roceny+(imagesidelength/2)+1)
+			image	+= cyclic_shift(disk,p.pos_x+(imagesidelength/2)+1,p.pos_y+(imagesidelength/2)+1)
 	image2 = threshold_maxval(image,1.0)
 
 	print "filtering mask image with Gaussian low-pass filter, using sigma = ", sigma

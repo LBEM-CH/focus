@@ -10,7 +10,23 @@ if ( ! -e ${nonmaskimagename}.mrc || ${correct} == 1 ) then
     ${proc_2dx}/linblock "Image ${nonmaskimagename}.mrc does not exist."
   endif
   #
-  if ( ! ( -e ${nonmaskimagename}_raw.mrc || -e ${nonmaskimagename}.tif || -e ${nonmaskimagename}.tiff ) ) then
+  if ( -e ${nonmaskimagename}.tif || -e ${nonmaskimagename}.tiff ) then
+    if ( -e ${nonmaskimagename}.tif ) then
+      set tifftype = tif 
+    else
+      set tifftype = tiff
+    endif 
+    ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif found...converting (0)."
+    #
+    ${bin_2dx}/tif2mrc.exe << eot
+${nonmaskimagename}.${tifftype}
+${nonmaskimagename}.mrc
+y
+eot
+    #
+    set new_mrc_created = 'y'
+    #
+  else
     #############################################################################
     if ( ${nonmaskimagename} != "ScriptWillPutNameHere" ) then
       ${proc_2dx}/linblock "Neither image ${nonmaskimagename}.tif nor ${nonmaskimagename}_raw.mrc do exist."
@@ -18,122 +34,20 @@ if ( ! -e ${nonmaskimagename}.mrc || ${correct} == 1 ) then
     #############################################################################
     #
     #############################################################################
-    ### Testing for presence of *_raw.mrc
+    ### Testing for presence of *.tif
     #############################################################################
-    \rm -f final_map.tif
-    echo "dummy" > zzzzz27765_raw.mrc
-    set filename = `ls -1 *_raw.mrc | sort | head -n 1`
-    \rm -f zzzzz27765_raw.mrc
-    if ( ${filename} != "zzzzz27765_raw.mrc" ) then
-      ${proc_2dx}/linblock "Found file ${filename}."
+    #
+    echo "dummy" > zzzzz27765.tif
+    set filename = `ls -1 *.tif | sort | head -n 1`
+    if ( ${filename} != "zzzzz27765.tif" ) then
       set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
-      if ( ! -e ${nonmaskimagename}_raw.mrc ) then
-        ${proc_2dx}/linblock "Image ${nonmaskimagename}_raw.mrc not existing."
-        ${proc_2dx}/linblock "You probably use more than one or two dots in the image name, which is not recommended."
-        echo "#WARNING: Image ${nonmaskimagename}_raw.mrc not existing."  >> LOGS/${scriptname}.results
-        echo "#WARNING: You probably use more than one or two dots in the image name, which is not recommended."  >> LOGS/${scriptname}.results
-      endif
-      cp -f ${nonmaskimagename}_raw.mrc ${nonmaskimagename}.mrc
-      set new_mrc_created = 'y'
-      #
-    else  
-      #
-      #############################################################################
-      ### Testing for presence of *.mrc
-      #############################################################################
-      #
-      echo "dummy" > zzzzz27765.mrc
-      set filename = `ls -1 *.mrc | sort | head -n 1`
-      if ( ${filename} != "zzzzz27765.mrc" ) then
-        ${proc_2dx}/linblock "Found file ${filename}."
-        set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
-        if ( ! -e ${nonmaskimagename}.mrc ) then
-          ${proc_2dx}/linblock "Image ${nonmaskimagename}.mrc not existing."
-          ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
-          echo "#WARNING: Image ${nonmaskimagename}.mrc not existing."  >> LOGS/${scriptname}.results
-          echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
-        else
-          \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc
-          set new_mrc_created = 'y'
-        endif
+      if ( ! -e ${nonmaskimagename}.tif ) then
+        ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif not existing."
+        ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
+        echo "#WARNING: Image ${nonmaskimagename}.tif not existing."  >> LOGS/${scriptname}.results
+        echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
       else
-        #
-        #############################################################################
-        ### Testing for presence of *.tif
-        #############################################################################
-        #
-        echo "dummy" > zzzzz27765.tif
-        set filename = `ls -1 *.tif | sort | head -n 1`
-        if ( ${filename} != "zzzzz27765.tif" ) then
-          set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
-          if ( ! -e ${nonmaskimagename}.tif ) then
-            ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif not existing."
-            ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
-            echo "#WARNING: Image ${nonmaskimagename}.tif not existing."  >> LOGS/${scriptname}.results
-            echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
-          else
-            ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif found...converting (2)."
-            #
-            ${bin_2dx}/tif2mrc.exe << eot
-${nonmaskimagename}.tif
-${nonmaskimagename}.mrc
-y
-eot
-            #
-            set new_mrc_created = 'y'
-            #
-          endif
-        endif
-        \rm -f zzzzz27765.tif
-        #
-        #
-        #############################################################################
-        ### Testing for presence of *.tiff
-        #############################################################################
-        #
-        echo "dummy" > zzzzz27765.tiff
-        set filename = `ls -1 *.tiff | sort | head -n 1`
-        if ( ${filename} != "zzzzz27765.tiff" ) then
-          set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
-          if ( ! -e ${nonmaskimagename}.tiff ) then
-            ${proc_2dx}/linblock "Image ${nonmaskimagename}.tiff not existing."
-            ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
-            echo "#WARNING: Image ${nonmaskimagename}.tiff not existing."  >> LOGS/${scriptname}.results
-            echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
-          else
-            ${proc_2dx}/linblock "Image ${nonmaskimagename}.tiff found...converting (3)."
-            #
-            ${bin_2dx}/tif2mrc.exe << eot
-${nonmaskimagename}.tiff
-${nonmaskimagename}.mrc
-y
-eot
-            #
-            set new_mrc_created = 'y'
-            #
-          endif
-        endif
-        \rm -f zzzzz27765.tiff
-      endif
-      \rm -f zzzzz27765.mrc
-      #
-    endif
-  else
-    #############################################################################
-    ### Testing for presence of ${nonmaskimagename}_raw.mrc or ${nonmaskimagename}.tif
-    #############################################################################
-    if ( -e ${nonmaskimagename}_raw.mrc ) then
-      \cp -f ${nonmaskimagename}_raw.mrc ${nonmaskimagename}.mrc
-      ${proc_2dx}/linblock "Copying ${nonmaskimagename}__aw.mrc to ${nonmaskimagename}.mrc"
-      set new_mrc_created = 'y'
-    else
-      if ( -e ${nonmaskimagename}.tiff ) then
-        ${proc_2dx}/linblock "Renaming ${nonmaskimagename}.tiff into ${nonmaskimagename}.tif"
-        ${proc_2dx}/linblock "Renaming ${nonmaskimagename}.tiff into ${nonmaskimagename}.tif" >> History.dat
-        \mv -f ${nonmaskimagename}.tiff ${nonmaskimagename}.tif
-      endif
-      if ( -e ${nonmaskimagename}.tif ) then
-        ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif found...converting (6)."
+        ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif found...converting (1)."
         #
         ${bin_2dx}/tif2mrc.exe << eot
 ${nonmaskimagename}.tif
@@ -145,6 +59,36 @@ eot
         #
       endif
     endif
+    \rm -f zzzzz27765.tif
+    #
+    #
+    #############################################################################
+    ### Testing for presence of *.tiff
+    #############################################################################
+    #
+    echo "dummy" > zzzzz27765.tiff
+    set filename = `ls -1 *.tiff | sort | head -n 1`
+    if ( ${filename} != "zzzzz27765.tiff" ) then
+      set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
+      if ( ! -e ${nonmaskimagename}.tiff ) then
+        ${proc_2dx}/linblock "Image ${nonmaskimagename}.tiff not existing."
+        ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
+        echo "#WARNING: Image ${nonmaskimagename}.tiff not existing."  >> LOGS/${scriptname}.results
+        echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
+      else
+        ${proc_2dx}/linblock "Image ${nonmaskimagename}.tiff found...converting (2)."
+        #
+        ${bin_2dx}/tif2mrc.exe << eot
+${nonmaskimagename}.tiff
+${nonmaskimagename}.mrc
+y
+eot
+        #
+        set new_mrc_created = 'y'
+        #
+      endif
+    endif
+    \rm -f zzzzz27765.tiff
   endif
 endif
 #
@@ -167,9 +111,7 @@ if ( ! -e ${nonmaskimagename}.mrc ) then
   ${proc_2dx}/protest "ABORTING."
 endif
 #
-if ( ! -e ${imagename}.mrc ) then
-  set imagename = ${nonmaskimagename}
-  echo "set imagename = ${imagename}"  >> LOGS/${scriptname}.results
-endif
+set imagename = ${nonmaskimagename}
+echo "set imagename = ${imagename}"  >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results    
-
+#

@@ -137,6 +137,7 @@ set ctfcor_taper = ""
 set ctfcor_debug = ""
 set ctfcor_maxamp_factor = ""
 set Thread_Number = ""
+set movie_inmovie = ""
 #
 #$end_vars
 #
@@ -755,7 +756,9 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
 exit
+source ${proc_2dx}/2dx_fftrans_sub.com
 python ${proc_2dx}/movie/apply_filter_Fourier.py
+python ${proc_2dx}/movie/mask.py
 #
 #
 

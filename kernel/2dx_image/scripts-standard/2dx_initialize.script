@@ -135,6 +135,10 @@ if ( ${movie_inmovie} == "n" ) then
   echo "<<@progress: 1>>"
 endif
 #
+if ( -e ${nonmaskimagename}.raw.mrc ) then
+  \mv -f ${nonmaskimagename}.raw.mrc ${nonmaskimagename}_raw.mrc 
+  echo "(Renaming ${nonmaskimagename}.raw.mrc to ${nonmaskimagename}_raw.mrc)"
+endif
 if ( -e ${nonmaskimagename}-masking-final.mrc ) then
   \mv -f ${nonmaskimagename}-masking-final.mrc ${nonmaskimagename}_mask.mrc 
   echo "(Renaming ${nonmaskimagename}-masking-final.mrc to ${nonmaskimagename}_mask.mrc)"
@@ -295,6 +299,11 @@ echo ":: "
 if ( ${movie_inmovie} == "n" ) then
   echo "<<@progress: 100>>"
 endif
+#
+echo "set IQMAX1 = 7" >> LOGS/${scriptname}.results
+echo "set IQMAX = 4" >> LOGS/${scriptname}.results
+echo "set boxb1 = 300" >> LOGS/${scriptname}.results
+echo "set Thread_Number = 12" >> LOGS/${scriptname}.results
 #
 exit
 #

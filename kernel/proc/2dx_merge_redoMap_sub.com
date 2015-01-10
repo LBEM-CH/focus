@@ -112,7 +112,7 @@ endif
 #
 \rm -f SUMMARY
 #
-if ( ${merge_data_type} == "0" ||  ${merge_data_type} == "2" ||  ${merge_data_type} == "2" || ${ML_use_for_merging} == "n" ) then
+if ( ${merge_data_type} == "0" ||  ${merge_data_type} == "1" ||  ${merge_data_type} == "2" || ${ML_use_for_merging} == "n" ) then
   set aphfile = APH/${imagename}_ctf.aph
 else
   set aphfile = APH/ML_result.aph

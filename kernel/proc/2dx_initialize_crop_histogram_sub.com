@@ -4,7 +4,7 @@
 #
 # This sub-script will crop the histogram, if needed.
 #
-if ( ${new_mrc_created} == "y" ) then
+if ( ${new_mrc_created} == "y" || ${movie_inmovie}x == "yx" ) then
   #############################################################################
   ${proc_2dx}/lin "labelh - to calculate image statistics"
   #############################################################################

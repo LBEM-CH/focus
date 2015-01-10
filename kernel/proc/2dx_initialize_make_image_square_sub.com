@@ -76,6 +76,7 @@ eot
     else
       #############################################################################
       if ( ${movie_verbose}x != "0x" ) then
+        ${proc_2dx}/lin "Image is sqare."
         ${proc_2dx}/lin "Testing new image size of ${sizeX} for prime factors"
       endif
       #############################################################################

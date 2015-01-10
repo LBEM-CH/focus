@@ -455,7 +455,7 @@ if ( ! -d ${frame_folder} ) then
   #
   python ${proc_2dx}/movie/movie_mode_split1.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave} ${frame_folder}
   #
-  foreach f  (`ls ${frame_folder}`)
+  foreach f (`ls ${frame_folder}`)
     \cp 2dx_image.cfg ${frame_folder}/$f/
     python ${proc_2dx}/movie/disable_movie.py  ${frame_folder}/$f/
   end
@@ -530,16 +530,20 @@ while ($i <= ${movie_imagenumber_touse})
     \ln -s ../2dx_image.cfg 2dx_master.cfg  
     cd ..
   endif
+  echo "set imagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/frame_${i}/2dx_image.cfg
+  echo "set nonmaskimagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/frame_${i}/2dx_image.cfg
+
   ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize"
   ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize_files"
   \rm -f ${frame_folder}/2dx_master.cfg
 
   set filtervalue = `python ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
   echo ":  Filter frame average #${i} with radius ${filtervalue}"
-  echo "LP on: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc with filter radius ${filtervalue}"
-  echo "python ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}"
+  # echo "LP on: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc with filter radius ${filtervalue}"
+  # echo "python ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}"
   #
-  python ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength}
+  # echo "python ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
+  python ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc
   #
 
   set ctfcor_tilefile = "${frame_folder}/frame_${i}/2dx_ctfcor_tile.mrc"
@@ -553,7 +557,14 @@ while ($i <= ${movie_imagenumber_touse})
   #
   setenv NCPUS ${Thread_Number}
   #
-  if ( ${calculate_tiles} == "0" ) then
+  if ( ${ctfcor_imode}x == "0x" ) then
+    ${proc_2dx}/lin "Not applying any CTF correction now."
+    cd ${frame_folder}/frame_${i}
+    \rm -f image_ctfcor.mrc
+    \ln -s ${nonmaskimagename}_${i}.mrc image_ctfcor.mrc
+    cd ../..
+  else
+    if ( ${calculate_tiles} == "0" ) then
       ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
 ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
 ${frame_folder}/frame_${i}/image_ctfcor.mrc
@@ -568,9 +579,9 @@ ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
       #
-  else
-    if ( ${calculate_tiles} == "1" ) then
-      ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
+    else
+      if ( ${calculate_tiles} == "1" ) then
+        ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
 ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
 ${frame_folder}/frame_${i}/image_ctfcor.mrc
 #
@@ -587,9 +598,9 @@ ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
-      #
-    else
-      ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
+        #
+      else
+        ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
 ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
 ${frame_folder}/frame_${i}/image_ctfcor.mrc
 ${ctfcor_tilefile}
@@ -606,14 +617,15 @@ ${ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
-      #
-      echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
-      echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
-      #
-      if ( ${ctfcor_imode} == "2" ) then
-        echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
-      else
-        echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+        #
+        echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
+        echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
+        #
+        if ( ${ctfcor_imode} == "2" ) then
+          echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+        else
+          echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+        endif
       endif
     endif
   endif
@@ -828,7 +840,7 @@ echo "# IMAGE: ${frame_folder}/direct_sum.mrc <Sum unbent images>" >> LOGS/${scr
 ###########################################################################
 ${proc_2dx}/linblock "Filtering by resolution weights"
 ###########################################################################
-python ${proc_2dx}/movie/apply_filter_sum.py ${frame_folder}/direct_sum.mrc ${frame_folder}/direct_sum_filt.mrc 0.033
+python ${proc_2dx}/movie/apply_filter_sum.py ${frame_folder}/direct_sum.mrc ${frame_folder}/direct_sum_filt.mrc 0.033 ${frame_folder}/weight.mrc
 echo "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
 

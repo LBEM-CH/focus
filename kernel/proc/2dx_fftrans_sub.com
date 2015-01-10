@@ -41,7 +41,7 @@ eot
 #
 \mv -f HISTO.PS PS/${inimage}_histo.ps
 #
-echo "# IMAGE: "PS/${inimage}_histo.ps "<Histogram>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "PS/${inimage}_histo.ps "<Histogram ${inimage}>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 20>"
 #
@@ -57,7 +57,7 @@ if ( ${taperBeforeFFT} == "y" ) then
 10,10,100,10       ! IAVER,ISMOOTH,ITAPER
 eot
   #
-  echo "# IMAGE: "SCRATCH/${inimage}_taper.mrc "<Edge-Tapered Image>" >> LOGS/${scriptname}.results
+  # echo "# IMAGE: "SCRATCH/${inimage}_taper.mrc "<Edge-Tapered Image ${inimage}>" >> LOGS/${scriptname}.results
   #
 endif
 echo "<<@progress: 25>>"
@@ -87,7 +87,7 @@ setenv IN ${infile}
 setenv OUT FFTIR/${inimage}_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
-echo "# IMAGE-IMPORTANT: "FFTIR/${inimage}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${inimage}_fft.mrc "<FFT of Image ${inimage}>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 30>>"
 #
@@ -108,37 +108,40 @@ FFTIR/${inimage}_red.mrc
 2,2
 eot
 #
-\rm -f SCRATCH/${nonmaskimagename}_red2.mrc
+echo "# IMAGE: "FFTIR/${inimage}_red.mrc "<Downsampled Image ${inimage}>" >> LOGS/${scriptname}.results
 #
-${bin_2dx}/labelh.exe << eot
+if ( ${scriptname} == '2dx_fftrans' ) then
+  \rm -f SCRATCH/${nonmaskimagename}_red2.mrc
+  # 
+  ${bin_2dx}/labelh.exe << eot
 ${nonmaskimagename}.mrc
 4               ! average adjacent pixels
 SCRATCH/${nonmaskimagename}_red2.mrc
 2,2
 eot
-#
-\rm -f SCRATCH/${nonmaskimagename}_red4.mrc
-#
-${bin_2dx}/labelh.exe << eot
+  #
+  \rm -f SCRATCH/${nonmaskimagename}_red4.mrc   
+  #
+  ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}_red2.mrc
 4               ! average adjacent pixels
 SCRATCH/${nonmaskimagename}_red4.mrc
 2,2
 eot
-#
-\rm -f SCRATCH/${nonmaskimagename}_red8.mrc
-#
-${bin_2dx}/labelh.exe << eot
+  #
+  \rm -f SCRATCH/${nonmaskimagename}_red8.mrc 
+  #
+  ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}_red4.mrc
 4               ! average adjacent pixels
 SCRATCH/${nonmaskimagename}_red8.mrc
 2,2
 eot
-#
-echo "# IMAGE: "FFTIR/${inimage}_red.mrc "<Downsampled Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red2.mrc "<2x2 binned nonmasked Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red4.mrc "<4x4 binned nonmasked Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red8.mrc "<8x8 binned nonmasked Image>" >> LOGS/${scriptname}.results
+  #
+  echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red2.mrc "<2x2 binned nonmasked Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red4.mrc "<4x4 binned nonmasked Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red8.mrc "<8x8 binned nonmasked Image>" >> LOGS/${scriptname}.results
+endif
 #
 echo "<<@progress: 30>>"
 echo "<<@evaluate>>"
@@ -178,8 +181,8 @@ if ( ${bigimage} == '1' ) then
   set rtemp2 = ${rtemp1}
   @ rtemp2 += ${smallsize}
   @ rtemp1 += 1
-  set patlabel = ${rtemp1},${rtemp2},${rtemp1},${rtemp2}
-  echo "Center       : Xmin,Xmax,Ymin,Ymax = ${patlabel}"
+  set patlabel_local = ${rtemp1},${rtemp2},${rtemp1},${rtemp2}
+  echo "Center       : Xmin,Xmax,Ymin,Ymax = ${patlabel_local}"
   #
   \rm -f SCRATCH/${imagename}_tmp.mrc 
   #
@@ -187,7 +190,7 @@ if ( ${bigimage} == '1' ) then
 ${nonmaskimagename}.mrc
 1
 SCRATCH/${imagename}_tmp.mrc
-${patlabel}
+${patlabel_local}
 eot
   #
   echo "<<@progress: 60>>"
@@ -255,7 +258,7 @@ else
 endif
 #
 #
-if ( ${generatePeriodogram} == "y" ) then
+if ( ${scriptname} == '2dx_fftrans' && ${generatePeriodogram} == "y" ) then
   #############################################################################
   #                                                                           #
   ${proc_2dx}/${lincommand} "2dx_periodogram - to calculate the periodogram of the image"

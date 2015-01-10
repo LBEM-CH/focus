@@ -292,34 +292,33 @@
 #       SD CENTRIC special treatment required, applied only along diagonal (h=k)
 #       SP CENTRIC special treatment required, applied only along Plus (h,0) and (0,k)
 #                                        
-#   SPACEGROUP  H=-h +h -h +k +k -k -k +h -h +k -k -h +h -h +h  JSIMPL
-#               H=                                 -k +k -k +k     JSCREW   
-# In MRC progs                                                               CENTRIC
-# ALLSPACE/ORIGTILT                                                                 In CCP4
-# numb  # symb  K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180       numb symb    comment
-#               K=                     -k +k -k +k                         JK180
-#
-#  1    1   p1     -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   0  0   -   -   -    1   P1
-#  2    2   p2     -  -  1  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   C    3   P2     but dyad along Y. Use CCP4=1003 or reassign axis.
-#  3    3b  p12    1  -  -  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   SX   3   P2
-#  4    "a   "     -  1  -  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   -    ------     reassign axis, and use CCP4=3 above.
-#  5    4b  p121   K  -  -  -  -  -  -  -  -  -  -  -  -  -  -   0  1   -  180  SX   4  P21
-#  6    "a   "     -  H  -  -  -  -  -  -  -  -  -  -  -  -  -   0  1  180  -   -    ------     reassign axis, and use CCP4=4 above.
-#  7    5b  c12    1  -  -  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   SX   5   C2
-#  8    "a   "     -  1  -  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   -    ------     reassign axis, and use CCP4=5 above.
-#  9    6   p222   1  1  1  -  -  -  -  -  -  -  -  -  -  -  -   3  0   -   -   C    16  P222 
-# 10    7b  p2221  H  H  1  -  -  -  -  -  -  -  -  -  -  -  -   1  2  180  -   -    17  P2221  CCP4 P2221 has 2fold screw in Z. Reassign axis.
-# 11    "a    "    K  K  1  -  -  -  -  -  -  -  -  -  -  -  -   1  2   -  180  -    ------     reassign axis, and use CCP4=17 above.
-# 12    8   p22121 HK HK 1  -  -  -  -  -  -  -  -  -  -  -  -   1  2  180 180  C    18  P21212 
-# 13    9   c222   1  1  1  -  -  -  -  -  -  -  -  -  -  -  -   3  0   -   -   C    21  C222   Note: Systematic absences
-# 14    10  p4     -  -  1  -  1  1  -  -  -  -  -  -  -  -  -   3  0   -   -   C    75  P4
-# 15    11  p422   1  1  1  1  1  1  1  -  -  -  -  -  -  -  -   7  0   -   -   C    89  P422 
-# 16    12  p4212  HK HK 1  1  HK HK 1  -  -  -  -  -  -  -  -   3  4  180 180  -    90  P4212  Note: Systematic absences for (2n+1,0) and (0,2n+1). 
-# 17    13  p3     -  -  -  -  -  -  -  -  -  1  -  1  -  -  -   2  0   -   -   -    143 P3
-# 18    14  p312   -  -  -  -  -  -  1  -  1  1  -  1  -  -  1   5  0   -   -   SD   149 P312
-# 19    15  p321   -  -  -  1  -  -  -  1  -  1  -  1  -  1  -   5  0   -   -   SP   150 P321
-# 20    16  p6     -  -  1  -  -  -  -  -  -  1  1  1  1  -  -   5  0   -   -   C    168 P6
-# 21    17  p622   -  -  1  1  -  -  1  1  1  1  1  1  1  1  1   11 0   -   -   C    177 P622
+#   SPACEGROUP  H=-h +h -h +k +k -k -k +h -h +k -k -h +h -h +h -h +h -h +k +k -k -k +h -h +k -k -h +h -h +h  JSIMPL       CENTRIC
+#               H=                                 -k +k -k +k                                  -k +k -k +k     JSCREW          CCP4
+#               K=+k -k -k +h -h +h -h -h +h -h +h +h -h +k -k +k -k -k +h -h +h -h -h +h -h +h +h -h +k -k         JH180       numb symb    Name        comment
+#               K=                     -k +k -k +k                                  -k +k -k +k                         JK180
+#               L=+l +l +l +l +l +l +l +l +l +l +l +l +l +l +l -l -l -l -l -l -l -l -l -l -l -l -l -l -l -l 
+# L information added from: http://img.chem.ucl.ac.uk/sgp/large/sgp.htm
+#  1    1   p1     -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   0  0   -   -   -    1   P1     p1 
+#  2    2   p2     -  -  1  -  -  -  -  -  -  -  -  -  -  -  -  -  -  1  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   C    3   P2     p2          but dyad along Y. Use CCP4=1003 or reassign axis.
+#  3    3b  p12    1  -  -  -  -  -  -  -  -  -  -  -  -  -  -  1  -  -  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   SX   3   P2     pm (p1m1)
+#  4    "a   "     -  1  -  -  -  -  -  -  -  -  -  -  -  -  -  -  1  -  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   -    ------     ---------   reassign axis, and use CCP4=3 above.
+#  5    4b  p121   K  -  -  -  -  -  -  -  -  -  -  -  -  -  -  K  -  -  -  -  -  -  -  -  -  -  -  -  -  -   0  1   -  180  SX   4  P21     pg (p1g1) 
+#  6    "a   "     -  H  -  -  -  -  -  -  -  -  -  -  -  -  -  -  H  -  -  -  -  -  -  -  -  -  -  -  -  -   0  1  180  -   -    ------     ---------   reassign axis, and use CCP4=4 above.
+#  7    5b  c12    1  -  -  -  -  -  -  -  -  -  -  -  -  -  -  1  -  -  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   SX   5   C2     cm (c1m1)
+#  8    "a   "     -  1  -  -  -  -  -  -  -  -  -  -  -  -  -  -  1  -  -  -  -  -  -  -  -  -  -  -  -  -   1  0   -   -   -    ------     ---------   reassign axis, and use CCP4=5 above.
+#  9    6   p222   1  1  1  -  -  -  -  -  -  -  -  -  -  -  -  1  1  1  -  -  -  -  -  -  -  -  -  -  -  -   3  0   -   -   C    16  P222   pmm (p2mm)
+# 10    7b  p2221  H  H  1  -  -  -  -  -  -  -  -  -  -  -  -  H  H  1  -  -  -  -  -  -  -  -  -  -  -  -   1  2  180  -   -    17  P2221  pmg (p2mg)  CCP4 P2221 has 2fold screw in Z. Reassign axis.
+# 11    "a    "    K  K  1  -  -  -  -  -  -  -  -  -  -  -  -  K  K  1  -  -  -  -  -  -  -  -  -  -  -  -   1  2   -  180  -    ------     ---------   reassign axis, and use CCP4=17 above.
+# 12    8   p22121 HK HK 1  -  -  -  -  -  -  -  -  -  -  -  -  HK HK 1  -  -  -  -  -  -  -  -  -  -  -  -   1  2  180 180  C    18  P21212 pgg (p2gg)  
+# 13    9   c222   1  1  1  -  -  -  -  -  -  -  -  -  -  -  -  1  1  1  -  -  -  -  -  -  -  -  -  -  -  -   3  0   -   -   C    21  C222   cmm (c2mm)  Note: Systematic absences
+# 14    10  p4     -  -  1  -  1  1  -  -  -  -  -  -  -  -  -  -  -  1  -  1  1  -  -  -  -  -  -  -  -  -   3  0   -   -   C    75  P4     p4 
+# 15    11  p422   1  1  1  1  1  1  1  -  -  -  -  -  -  -  -  1  1  1  1  1  1  1  -  -  -  -  -  -  -  -   7  0   -   -   C    89  P422   p4m (p4mm)
+# 16    12  p4212  HK HK 1  1  HK HK 1  -  -  -  -  -  -  -  -  HK HK 1  1  HK HK 1  -  -  -  -  -  -  -  -   3  4  180 180  -    90  P4212  p4g (p4gm)  Note: Systematic absences for (2n+1,0) and (0,2n+1). 
+# 17    13  p3     -  -  -  -  -  -  -  -  -  1  -  1  -  -  -  -  -  -  -  -  -  -  -  -  1  -  1  -  -  -   2  0   -   -   -    143 P3     p3
+# 18    14  p312   -  -  -  -  -  -  1  -  1  1  -  1  -  -  1  -  -  -  -  -  -  1  -  1  1  -  1  -  -  1   5  0   -   -   SD   149 P312   p3m1 
+# 19    15  p321   -  -  -  1  -  -  -  1  -  1  -  1  -  1  -  -  -  -  1  -  -  -  1  -  1  -  1  -  1  -   5  0   -   -   SP   150 P321   p31m
+# 20    16  p6     -  -  1  -  -  -  -  -  -  1  1  1  1  -  -  -  -  1  -  -  -  -  -  -  1  1  1  1  -  -   5  0   -   -   C    168 P6     p6
+# 21    17  p622   -  -  1  1  -  -  1  1  1  1  1  1  1  1  1  -  -  1  1  -  -  1  1  1  1  1  1  1  1  1   11 0   -   -   C    177 P622   p6m (p6mm)
 #
 #******************************************************************************
 #******************************************************************************

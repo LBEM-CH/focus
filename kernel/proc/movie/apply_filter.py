@@ -12,16 +12,17 @@ import os
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 5:
+	if len(sys.argv) != 6:
 		sys.exit("Missuse detected (apply filter)")
 
 	filename_in = sys.argv[1]
 	freq = float(sys.argv[2])
 	i = int(sys.argv[3])
-        imagesidelength = int(sys.argv[4])
+	imagesidelength = int(sys.argv[4])
+	filename_weight = sys.argv[5]
 	
 	sigma = imagesidelength/2.0 * freq
-	# print ":     Frequency = ", freq, "      Sigma = ", sigma
+	# print ": imagesidelength", imagesidelength,"     Frequency = ", freq, "      Sigma = ", sigma
 
 	w = 100.0 * sigma * model_gauss(sigma, imagesidelength, imagesidelength)
 	cen = Util.window(w,5,5,1,0,0,0)
@@ -46,11 +47,12 @@ if __name__ == "__main__":
 	# ny = s[5]	
 	# print ":: Size = ", nx, ",", ny
 
-	if i == 1:
-		w.write_image("weight.mrc")
-	else:
-		g = get_image("weight.mrc")
-		g += w
-		g.write_image("weight.mrc")
-		
+	if i > 0:
+		if i == 1:
+			w.write_image(filename_weight)
+		else:
+			g = get_image(filename_weight)
+			g += w
+			g.write_image(filename_weight)
+			
 	

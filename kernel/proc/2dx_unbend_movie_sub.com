@@ -173,7 +173,7 @@ eot
 
         \cp -f ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc ${frame_folder}/CCmap-${i}.mrc
 
-
+if ( 1 == 2 ) then
 
 set rtempx1 = 2048
 set rtempy1 = 2048
@@ -291,7 +291,7 @@ ${frame_folder}/CC-BR-frame_${i}.tif
 eot
 #
 
-
+endif
 
 
         ###########################################################################

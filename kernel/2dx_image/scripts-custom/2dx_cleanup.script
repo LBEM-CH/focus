@@ -28,6 +28,13 @@
 # TYPE: Drop_Down_Menu "radical;a little bit"
 set cleanup_level = "radical"
 #
+# LABEL: Also delete Masking info?
+# LEGEND: Choose if the masking info files should also be deleted.
+# EXAMPLE: cleanup_mask = "n"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
+# TYPE: Bool "y;n"
+set cleanup_mask = "n"
+#
 # DISPLAY: comment
 # DISPLAY: reset_variables
 # DISPLAY: imagename
@@ -60,6 +67,11 @@ source ${proc_2dx}/2dx_cleanup_sub.com
 ############################################################################# 
 ############################################################################# 
 #
+if ( ${cleanup_mask} == "y" ) then
+  \rm -f ${nonmaskimagename}_mask.mrc
+  \rm -f ${nonmaskimagename}_automask.mrc
+  \rm -f ${nonmaskimagename}_automask_mask.mrc
+endif
 #
 echo "<<@progress: 100>>"
 #

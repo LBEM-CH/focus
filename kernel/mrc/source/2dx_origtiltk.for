@@ -2101,7 +2101,7 @@ C
      .    ,') and ',I5,' old spots.')
 C
       if ( ifirst .eq. 0 ) then
-        write(*,'(''::    Number    Scale  Phase Origin        '',
+        write(*,'('':    Number    Scale  Phase Origin        '',
      .    ''Change Phase Ori.     PhaRes'')')
         write(21,'(''    Number    Scale  Phase Origin        '',
      .    ''Change Phase Ori.     PhaRes'')')

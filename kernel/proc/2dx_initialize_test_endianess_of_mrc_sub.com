@@ -24,6 +24,8 @@
       else
         \rm SCRATCH/TMPconverted.mrc
       endif
+    else
+      ${proc_2dx}/linblock "Endedness is correct."
     endif
     #
     if ( ${correctend} == 'n' ) then

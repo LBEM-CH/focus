@@ -91,9 +91,11 @@
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
 # DISPLAY: RFACAMP
+# DISPLAY: Thread_Number
 #
 #$end_local_vars
 #
+set app_2dx_image = ""
 set bin_2dx = ""
 set proc_2dx = ""
 #
@@ -159,10 +161,11 @@ set latline_pdf = ""
 set resolutionplot_RESMAX = ""
 set resolutionplot_bins = ""
 set RFACAMP = ""
+set Thread_Number = ""
 #
 #$end_vars
 #
-setenv OMP_NUM_THREADS 8
+setenv OMP_NUM_THREADS ${Thread_Number}
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
@@ -375,14 +378,10 @@ endif
 ${proc_2dx}/linblock "Compile refinement script"
 #############################################################################
 #
-set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
-\rm -f ${scriptBfile}
-set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
-\rm -f ${postprocessingfile}
+set scriptBfile = "2dx_merge_scriptB.com"
+set postprocessingfile = "2dx_merge_postprocessing.com"
 #
 set genref = "0"
-#
-\rm -f LOGS/${scriptname}-tmp.results
 #
 if ( ${refbeamtilt} == 'y' ) then
   if ( ${merge_modus} == '3D' ) then
@@ -413,7 +412,9 @@ else
 endif
 #
 ${bin_2dx}/2dx_merge_compileB.exe << eot
-LOGS/${scriptname}-tmp.results
+${scriptname}-tmp.results
+${scriptname}-tmp.reflections
+${scriptname}-tmp.console
 ${proc_2dx}
 ${bin_2dx}
 ${dirfile}
@@ -442,6 +443,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_data_type}
+${Thread_Number}
 ${ILIST_VAL}
 0
 eot
@@ -452,29 +454,61 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "Launch refinement script"
 #############################################################################
 #
-echo "# IMAGE: ${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
-chmod +x ${scriptBfile}
-${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
-# cat SCRATCH/2dx_merge_scriptB.out
+echo "# IMAGE: SCRATCH/job_01_${scriptBfile} <CSH: First (01) refinement script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptB.com.log <LOG: First (01) origtilt B output>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_01_${postprocessingfile} <CSH: First (01) refinement postprocessing script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${Thread_Number}_${scriptBfile} <CSH: Last (${Thread_Number}) refinement script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${Thread_Number}_2dx_merge_scriptB.com.log <LOG: Last (${Thread_Number}) origtilt B output>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${Thread_Number}_${postprocessingfile} <CSH: Last (${Thread_Number}) refinement postprocessing script>" >> LOGS/${scriptname}.results
+
+foreach scriptB ( SCRATCH/job_??_${scriptBfile} )
+  if ( ${scriptB} != SCRATCH/job_${Thread_Number}_${scriptBfile} ) then
+    echo Background nohup ${scriptB} \> ${scriptB}.log \&
+    nohup ${scriptB} > ${scriptB}.log &
+  else
+    echo Forground ${scriptB} \> ${scriptB}.log
+    ${scriptB} > ${scriptB}.log
+  endif
+end
 #
 #
 echo "################################################"
 echo "################################################"
-echo "output in file LOGS/2dx_merge_scriptB.log"
+echo "output in file SCRATCH/job_XX_2dx_merge_scriptB.com.log"
 echo "################################################"
 echo "################################################"
 #
-cat 2dx_origtiltk-console.log
-#\rm -f 2dx_origtiltk-console.log
+foreach scriptBconsole ( SCRATCH/job_??_${scriptname}-tmp.console )
+  cat ${scriptBconsole}
+  #\rm -f ${scriptBconsole}
+end
 #
-cat LOGS/${scriptname}-tmp.results >> LOGS/${scriptname}.results
-# \rm -f LOGS/${scriptname}-tmp.results
+foreach scriptBresults ( SCRATCH/job_??_${scriptname}-tmp.results )
+  cat ${scriptBresults} >> LOGS/${scriptname}.results
+  # \rm -f ${scriptBresults}
+end
 #
+${bin_2dx}/2dx_execute_merge_results.exe << eot
+SCRATCH/${scriptname}.results
+SCRATCH/2dx_execute_merge_results.script
+eot
+echo "# IMAGE: SCRATCH/2dx_execute_merge_results.script <LOG: Refinement results (translated)>" >> LOGS/${scriptname}.results
+echo Sourcing SCRATCH/2dx_execute_merge_results.script
+source SCRATCH/2dx_execute_merge_results.script
+#
+echo "<<@progress: 70>"
+#
+echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
+#
+\rm -f SCRATCH/2dx_merge_scriptB_postprocessing.log
+foreach scriptBpostp ( SCRATCH/job_??_${postprocessingfile} )
+  echo Sourcing ${scriptBpostp} \>\> SCRATCH/2dx_merge_scriptB_postprocessing.log
+  source ${scriptBpostp} >> SCRATCH/2dx_merge_scriptB_postprocessing.log
+end
+# cat SCRATCH/2dx_merge_scriptB_postprocessing.log
 #
 # Issue evaluate here to reload the Ph-Ori-Change column
-echo "<<@evaluate>>"
+# echo "<<@evaluate>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_refine normal end."

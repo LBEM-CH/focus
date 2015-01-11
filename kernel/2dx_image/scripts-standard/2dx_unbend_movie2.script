@@ -264,6 +264,10 @@ endif
 ##########################################
 ##########################################
 #
+if ( ${show_frames} == "y" || ${show_frame_FFT} == "y" || ${show_frame_CCmap} == "y" || ${show_frame_CCmap_marked} == "y") then
+  set tempkeep = "y"
+endif
+#
 \rm -f ${frame_folder}_unbending.pdf
 \touch ${frame_folder}_unbending.pdf
 #

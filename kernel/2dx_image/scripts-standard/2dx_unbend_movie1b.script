@@ -220,6 +220,10 @@ if ( ${pdf2ps}x == 'x' ) then
   echo ::
 endif
 #
+if ( ${show_frame_PROFDATA} == "y" || ${show_frame_CCmap_marked} == "y" || ${show_frame_CCmap_unbent} == "y") then
+  set tempkeep = "y"
+endif
+#
 # echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
 #
 set iname = image_ctfcor

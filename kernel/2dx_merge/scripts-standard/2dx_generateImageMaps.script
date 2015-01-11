@@ -56,6 +56,7 @@ set merge_res_limit = ""
 set create_PS = ""
 set merge_data_type = ""
 set RFACAMP = ""
+set Thread_Number = ""
 #
 #$end_vars
 #
@@ -223,14 +224,10 @@ if ( ${make_reference} == "y" ) then
   ${proc_2dx}/linblock "Compile refinement script"
   #############################################################################
   #
-  set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
-  \rm -f ${scriptBfile}
-  set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
-  \rm -f ${postprocessingfile}
+  set scriptBfile = "2dx_merge_scriptB.com"
+  set postprocessingfile = "2dx_merge_postprocessing.com"
   #
   set genref = "1"
-  #
-  \rm -f LOGS/${scriptname}-tmp.results
   #
   set dirfile = "2dx_merge_dirfile.dat"
   set number = 1
@@ -243,9 +240,12 @@ if ( ${make_reference} == "y" ) then
   set RTANGLSIZE = 0.5
   set MergeStepSize = "0.001"
   set IBOXPHS = 5
+  set Thread_Number = 1
   #
   ${bin_2dx}/2dx_merge_compileB.exe << eot
-LOGS/${scriptname}-tmp.results
+${scriptname}-tmp.results
+${scriptname}-tmp.reflections
+${scriptname}-tmp.console
 ${proc_2dx}
 ${bin_2dx}
 ${dirfile}
@@ -274,6 +274,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_data_type}
+${Thread_Number}
 ${ILIST_VAL}
 0
 eot
@@ -281,14 +282,14 @@ eot
   echo "<<@progress: 20>>"
   #
   #############################################################################
-  ${proc_2dx}/linblock "Launch refinement script. CHECK OUTPUT in LOG: origtilt B output"
+  ${proc_2dx}/linblock "Launch refinement script to create reference projections."
+  ${proc_2dx}/linblock "CHECK OUTPUT in LOG: origtilt B output"
   #############################################################################
   #
-  echo "# IMAGE: ${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_01_${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_01_${postprocessingfile} <CSH: refinement postprocessing script>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
-  chmod +x ${scriptBfile}
-  ${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
+  SCRATCH/job_01_${scriptBfile} > SCRATCH/2dx_merge_scriptB.log
   # cat SCRATCH/2dx_merge_scriptB.out
   #
   #
@@ -296,8 +297,7 @@ eot
   ${proc_2dx}/linblock "Launch refinement postprocessing script"
   #############################################################################
   #
-  chmod +x ${postprocessingfile}
-  source ${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
+  source SCRATCH/job_01_${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
   #
   echo "################################################"
   echo "################################################"
@@ -305,12 +305,12 @@ eot
   echo "################################################"
   echo "################################################"
   #
-  cat 2dx_origtiltk-console.log
-  #\rm -f 2dx_origtiltk-console.log
+  echo "# IMAGE: SCRATCH/$[scriptname}.results <LOG: Refinement results file>" >> LOGS/${scriptname}.results
+  cat SCRATCH/job_01_${scriptname}-tmp.console > SCRATCH/${scriptname}.results
   #
   # Don't evaluate refinement results here:
-  # cat LOGS/${scriptname}-tmp.results >> LOGS/${scriptname}.results
-  \rm -f LOGS/${scriptname}-tmp.results
+  # cat SCRATCH/job_01_${scriptname}-tmp.results >> LOGS/${scriptname}.results
+  \rm -f SCRATCH/job_01_${scriptname}-tmp.results
   #
 endif
 #
@@ -342,8 +342,9 @@ ${proc_2dx}/linblock "Launch script"
 #
 echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}.mrc <Merged Map: ${imagename}-${SYM}.mrc>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${scriptMfile} <csh: scriptM to generate maps>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/${scriptname}.log <LOG: scriptM logfile>" >> LOGS/${scriptname}.results
 #
-source ${scriptMfile}
+source ${scriptMfile} > SCRATCH/${scriptname}.log
 #
 echo "<<@progress: 100>>"
 #

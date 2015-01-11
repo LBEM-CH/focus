@@ -537,7 +537,8 @@ C                           NSHFTIN=.T. SHIFTED INPUT DATA.
       CHARACTER*40 FNAME
       CHARACTER*1 CTMP
 C
-      CHARACTER*200 cfile1,cline1,cline2,cline3
+      CHARACTER*200 cfile1,cline1,cline2,cline3,cline
+      CHARACTER*200 cfileconsole,cfilereflections
 C
 C  DIMENSION STATEMENTS FOR OUTPUT SORTING.
       REAL PZ(MAXPLT),PAMP(MAXPLT),PPHS(MAXPLT)
@@ -673,6 +674,14 @@ C
       read(5,'(A)')cfile1
       write(6,'(A)')cfile1
 C
+      write(6,'(''Input name for reflections file'')')
+      read(5,'(A)')cfilereflections
+      write(6,'(A)')cfilereflections
+C
+      write(6,'(''Input name for console file'')')
+      read(5,'(A)')cfileconsole
+      write(6,'(A)')cfileconsole
+C
 C
 C        READ SPACE GROUP NUMBER, LIST PARAMETER, UNIT CELL AXES AND IF
 C              SPACE GROUP IS P1 OR P2, THE INTER AXIS ANGLE
@@ -732,9 +741,18 @@ C     THE FIRST DATASET IS A FULLY-FLEDGED MTZ FILE.
 C
 CHEN>
       OPEN(UNIT=17,FILE=cfile1,STATUS='UNKNOWN')
-      call system('\rm -f 2dx_origtiltk-reflections.log')
-      OPEN(UNIT=18,FILE='2dx_origtiltk-reflections.log',STATUS='NEW')
-      OPEN(UNIT=21,FILE='2dx_origtiltk-console.log',STATUS='NEW')
+      call shorten(cfilereflections,k)
+      write(cline,'(''\rm -f '',A)')cfilereflections(1:k)
+      call shorten(cline,k)
+      call system(cline(1:k))
+C      OPEN(UNIT=18,FILE='2dx_origtiltk-reflections.log',STATUS='NEW')
+      OPEN(UNIT=18,FILE=cfilereflections,STATUS='NEW')
+      call shorten(cfileconsole,k)
+      write(cline,'(''\rm -f '',A)')cfileconsole(1:k)
+      call shorten(cline,k)
+      call system(cline(1:k))
+C      OPEN(UNIT=21,FILE='2dx_origtiltk-console.log',STATUS='NEW')
+      OPEN(UNIT=21,FILE=cfileconsole,STATUS='NEW')
 CHEN<
 C
       IF(NPROG.GE.2) GO TO 207

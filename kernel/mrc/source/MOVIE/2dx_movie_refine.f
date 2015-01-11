@@ -402,10 +402,12 @@ C-------------------Loop through frames:
 
 C
 C-----------Store optimal results 
-            ROSTARTX(K,L) = IGOFFSTARTX
-            ROSTARTY(K,L) = IGOFFSTARTY
-            ROENDX(K,L)   = IGOFFENDX
-            ROENDY(K,L)   = IGOFFENDY
+C-----------The offset " - 1 " originates from some unknown error, 
+C-----------but it is needed here.
+            ROSTARTX(K,L) = IGOFFSTARTX - 1
+            ROSTARTY(K,L) = IGOFFSTARTY - 1
+            ROENDX(K,L)   = IGOFFENDX - 1
+            ROENDY(K,L)   = IGOFFENDY - 1
             write(6,'(2I5,'': Node '',2I5,'' at '',2F10.2,
      .        '' gives max peak '',I10,
      .        '' for offset from '',2F8.1,'' to '',2F8.1)')

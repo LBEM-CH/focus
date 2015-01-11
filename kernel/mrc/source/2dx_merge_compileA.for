@@ -15,6 +15,7 @@ C
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE,CMLMERGE
       character*200 CFILE1,cline
+      character*200 CFILEreflections,CFILEconsole
       character*1 CNREFOUT,CNSHFTIN
       integer*8 imnum(10000)
 C
@@ -23,6 +24,17 @@ C
 C
       write(*,'(/,''input name of results output file'')')
       read(*,'(A)')CFILE1
+      write(*,'(A)')CFILE1
+C
+      write(CFILEreflections,'(''2dx_origtiltk-reflections.log'')')
+C      write(*,'(/,''input name of reflections output file'')')
+C      read(*,'(A)')CFILEreflections
+C      write(*,'(A)')CFILEreflections
+C
+      write(CFILEconsole,'(''2dx_origtiltk-console.log'')')
+C      write(*,'(/,''input name of console output file'')')
+C      read(*,'(A)')CFILEconsole
+C      write(*,'(A)')CFILEconsole
 C
       write(*,'(/,''input name of directory with procs'')')
       read(*,'(A)')cprocdir
@@ -116,6 +128,12 @@ C
      .           ''where allowed'')')IMERGEML
       endif
 C
+      write(*,'(/,''input Thread Number'')')
+      read(*,*)ITHREAD
+      if(ITHREAD.lt.1)ITHREAD=1
+      if(ITHREAD.gt.99)ITHREAD=99
+      write(*,'(I3)')ITHREAD
+C
       write(*,'(/,''input ILIST switch'')')
       read(*,*)ILIST
       write(*,'(I3)')ILIST
@@ -126,6 +144,9 @@ C
 C
       write(11,'(''#!/bin/csh -ef'')')
       write(11,'(''#'')')
+C
+      write(14,'(''setenv NCPUS '',I3)')ITHREAD
+      write(14,'(''#'')')
 C
       if(igenref.eq.1)then
         write(11,'(''echo dummy > APH/REF1.hkl'')')
@@ -172,6 +193,16 @@ C
 C
       call shorten(CFILE1,k)
       write(11,'(A)')CFILE1(1:k)
+C
+        call shorten(CFILEreflections,k)
+        write(cline,'(A)')CFILEreflections(1:k)
+        call shorten(cline,k)
+        write(11,'(A)')cline(1:k)
+C
+        call shorten(CFILEconsole,k)
+        write(cline,'(A)')CFILEconsole(1:k)
+        call shorten(cline,k)
+        write(11,'(A)')cline(1:k)
 C
       write(11,'(''${spcgrp} 0 F F ${ILIST} ${realcell} ${ALAT} '',
      .   ''${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
@@ -228,7 +259,7 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
           do i=1,imcount-1
             if(imnum(i).eq.imnum(imcount))then
               call shorten(CIMAGENAME,k)
-              write(*,'('':WARNING: Imagenumber '',I10,
+              write(*,'(''WARNING: Imagenumber '',I10,
      .          '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
             endif
           enddo

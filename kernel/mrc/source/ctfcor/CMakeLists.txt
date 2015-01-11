@@ -64,7 +64,7 @@ include_directories(${KERNEL_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Source files -----------------------------------------------------------------
-file(GLOB FORTRAN_SOURCE *.for *.f)
+file(GLOB FORTRAN_SOURCE *.for *.f *.for)
 file(GLOB C_SOURCE *.c *.h)
 file(GLOB CPP_SOURCE *.cc *.cpp)
 set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE}) 

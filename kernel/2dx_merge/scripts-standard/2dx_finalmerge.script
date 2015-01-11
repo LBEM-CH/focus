@@ -66,6 +66,7 @@
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
 # DISPLAY: RFACAMP
+# DISPLAY: Thread_Number
 #
 #$end_local_vars
 #
@@ -132,6 +133,7 @@ set latline_pdf = ""
 set resolutionplot_RESMAX = ""
 set resolutionplot_bins = ""
 set RFACAMP = ""
+set Thread_Number = ""
 #
 #$end_vars
 #

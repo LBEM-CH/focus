@@ -303,6 +303,10 @@ if ( ${tmp} != ${quadradby} ) then
   echo "#WARNING: Warning: correcting quadradb to ${quadradb}." >> LOGS/${scriptname}.results
 endif
 #
+set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set refori = ${reforix},${reforix}
+echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
+#
 if ( ${ccunbend_program} != "0" && ${ccunbend_program} != "1" ) then
   set ccunbend_program = "0"
   echo "set ccunbend_program = ${ccunbend_program}" >> LOGS/${scriptname}.results

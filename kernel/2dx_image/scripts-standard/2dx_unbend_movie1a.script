@@ -235,6 +235,10 @@ if ( ${pdf2ps}x == 'x' ) then
   echo ::
 endif
 #
+if ( ${show_frames} == "y" || ${show_frame_FFT} == "y" || ${show_frame_CCmap} == "y") then
+  set tempkeep = "y"
+endif
+#
 # echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_enable} == "n" ) then
@@ -656,6 +660,9 @@ echo "<<@progress: ${prog_num}>>"
 # i counts the super-frames to process:
 set i = 1
 while ($i <= ${movie_imagenumber_total})
+  #
+  # The following line was for testing purposes:
+  # cp ${nonmaskimagename}_raw.mrc frames/frame_${i}.mrc
   #
   ${proc_2dx}/lin "Adapting size and limiting resolution for frame ${i}"
   set new_mrc_created = y

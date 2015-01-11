@@ -206,7 +206,7 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
           do i=1,imcount-1
             if(imnum(i).eq.imnum(imcount))then
               call shorten(CIMAGENAME,k)
-              write(*,'('':WARNING: Imagenumber '',I10,
+              write(*,'(''WARNING: Imagenumber '',I10,
      .          '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
             endif
           enddo

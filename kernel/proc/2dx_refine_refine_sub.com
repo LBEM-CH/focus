@@ -23,21 +23,16 @@ ${proc_2dx}/lin "revhnd_modus           = ${revhnd_modus}"
 ${proc_2dx}/lin "revxsgn_modus          = ${revxsgn_modus}"
 ${proc_2dx}/lin "invert_tiltangle_modus = ${invert_tiltangle_modus}"
 #
-set scriptBfile = "SCRATCH/2dx_refine_scriptB.com"
-\rm -f ${scriptBfile}
-#
 #############################################################################
 ${proc_2dx}/lin "Compile refinement script"
 #############################################################################
 #
-set scriptBfile = "SCRATCH/2dx_merge_scriptB.com"
-\rm -f ${scriptBfile}
-set postprocessingfile = "SCRATCH/2dx_merge_postprocessing.com"
-\rm -f ${postprocessingfile}
+set scriptBfile = "2dx_merge_scriptB.com"
+set postprocessingfile = "2dx_merge_postprocessing.com"
 #
 set genref = "1"
 #
-\rm -f LOGS/${scriptname}-tmp.results
+\rm -f SCRATCH/${scriptname}-tmp.results
 #
 set NBM = F
 if ( ${reftiltgeo} == 'y' ) then
@@ -59,8 +54,12 @@ set RTAXASIZE = 0.0001
 set ITANGLSTEP = 1
 set RTANGLSIZE = 0.0001
 #
+set Thread_Number = 1
+#
 ${bin_2dx}/2dx_merge_compileB.exe << eot
-LOGS/${scriptname}-tmp.results
+${scriptname}-tmp.results
+${scriptname}-tmp.reflections
+${scriptname}-tmp.console
 ${proc_2dx}
 ${bin_2dx}
 ${dirfile}
@@ -89,6 +88,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_data_type}
+${Thread_Number}
 ${ILIST_VAL}
 1
 ${revhk_modus}
@@ -104,11 +104,14 @@ eot
 ${proc_2dx}/lin "Launch refinement script"
 #############################################################################
 #
-echo "# IMAGE: ${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
-chmod +x ${scriptBfile}
+echo "# IMAGE: SCRATCH/job_01_${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptB.com.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
+
+# echo "# IMAGE: SCRATCH/${scriptBfile} <CSH: refinement script>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: SCRATCH/2dx_merge_scriptB.log <LOG: origtilt B output>" >> LOGS/${scriptname}.results
+
 set logfile = SCRATCH/2dx_merge_scriptB_${currentline}_${number}.log
-${scriptBfile} > ${logfile}
+SCRATCH/job_01_${scriptBfile} > ${logfile}
 # cat ${logfile}
 echo "# IMAGE: ${logfile} <LOG: Refinement Output ${currentline} ${number} >" >> LOGS/${scriptname}.results
 #
@@ -118,18 +121,18 @@ echo "output in file ${logfile}"
 echo "################################################"
 echo "################################################"
 #
-if ( -s LOGS/${scriptname}-tmp.results ) then
-  set MergePhaseResidual = `cat LOGS/${scriptname}-tmp.results | grep MergePhaseResidual | cut -d\" -f2` 
-  set phaori             = `cat LOGS/${scriptname}-tmp.results | grep "phaori "          | cut -d\" -f2` 
-  # set phaoriFouFilter    = `cat LOGS/${scriptname}-tmp.results | grep phaoriFouFilter    | cut -d\" -f2` 
-  set phaori_last_change = `cat LOGS/${scriptname}-tmp.results | grep phaori_last_change | cut -d\" -f2` 
-  set MERGE_TAXA         = `cat LOGS/${scriptname}-tmp.results | grep " MERGE_TAXA "     | cut -d\" -f2` 
-  set MERGE_TANGL        = `cat LOGS/${scriptname}-tmp.results | grep " MERGE_TANGL "    | cut -d\" -f2` 
-  set TAXA               = `cat LOGS/${scriptname}-tmp.results | grep " TAXA "           | cut -d\" -f2` 
-  set TANGL              = `cat LOGS/${scriptname}-tmp.results | grep " TANGL "          | cut -d\" -f2` 
+if ( -s SCRATCH/job_01_${scriptname}-tmp.results ) then
+  set MergePhaseResidual = `cat SCRATCH/job_01_${scriptname}-tmp.results | grep MergePhaseResidual | cut -d\" -f2` 
+  set phaori             = `cat SCRATCH/job_01_${scriptname}-tmp.results | grep "phaori "          | cut -d\" -f2` 
+  # set phaoriFouFilter    = `cat SCRATCH/job_01_${scriptname}-tmp.results | grep phaoriFouFilter    | cut -d\" -f2` 
+  set phaori_last_change = `cat SCRATCH/job_01_${scriptname}-tmp.results | grep phaori_last_change | cut -d\" -f2` 
+  set MERGE_TAXA         = `cat SCRATCH/job_01_${scriptname}-tmp.results | grep " MERGE_TAXA "     | cut -d\" -f2` 
+  set MERGE_TANGL        = `cat SCRATCH/job_01_${scriptname}-tmp.results | grep " MERGE_TANGL "    | cut -d\" -f2` 
+  set TAXA               = `cat SCRATCH/job_01_${scriptname}-tmp.results | grep " TAXA "           | cut -d\" -f2` 
+  set TANGL              = `cat SCRATCH/job_01_${scriptname}-tmp.results | grep " TANGL "          | cut -d\" -f2` 
   echo ":MergePhaseResidual = ${MergePhaseResidual}"
 else
-  ${proc_2dx}/lin "ERROR: LOGS/${scriptname}-tmp.results not existing or zero length."
+  ${proc_2dx}/lin "ERROR: SCRATCH/job_01_${scriptname}-tmp.results not existing or zero length."
   set MergePhaseResidual = "nan"
 endif
 #

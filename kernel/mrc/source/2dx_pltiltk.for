@@ -259,7 +259,8 @@ C
 148   FORMAT(/,/,':: ERROR: MORE THAN',I5,' REFLECTIONS FOR THIS IMAGE')
 149   FORMAT(/,/,':: TOTAL NUMBER OF REFLECTIONS IS MORE THAN',I5)
 151   FORMAT(':: REQUIRED FILM IDENTIFIER DOES NOT MATCH FILM SERIAL',
-     .       ' NUMBER AT',/,'::  HEAD OF DATALIST,  IFILM=',I10,'    ISER=',I10)
+     .       ' NUMBER AT',/,'::  HEAD OF DATALIST,  IFILM=',I10,
+     .       '    ISER=',I10)
 157   FORMAT('  INITIAL TAXA=',F8.3,' TANGL=',F8.3)
 158   FORMAT('    FINAL TAXA=',F8.3,' TANGL=',F8.3)
 163   FORMAT(' ISGNXCH=',I3,', ROT180=',I3,', IREVHK=',I3,', IROT90=',
@@ -381,20 +382,20 @@ C
         CALL P2K_ORIGIN(-0.5*PLTSIZ,-0.7*PLTSIZ,0.)
         CALL P2K_COLOUR(0)
 C
-        CALL P2K_MOVE(10.0,YPOSN,0.)		! Plot title
+        CALL P2K_MOVE(10.0,YPOSN,0.)            ! Plot title
         CALL P2K_STRING(TITLP,60,0.)
 C
         YTPOS=+30.0
-        CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
+        CALL P2K_MOVE(10.0,YTPOS,0.)            ! Plot legend
         CALL P2K_STRING('Image distribution by tilt angles, in asymmetric triangle.',57,0.0)
         YTPOS=YTPOS-10.0
-        CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
+        CALL P2K_MOVE(10.0,YTPOS,0.)            ! Plot legend
         CALL P2K_STRING('Symbol size represents significance of the image in the 3D dataset.',67,0.0)
         YTPOS=YTPOS-10.0
-        CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
+        CALL P2K_MOVE(10.0,YTPOS,0.)            ! Plot legend
         CALL P2K_STRING('Details in: Cheng & Yeager, Acta Cryst. A60(4), 351-354 (2004)',62,0.0)
         YTPOS=YTPOS-10.0
-        CALL P2K_MOVE(10.0,YTPOS,0.)		! Plot legend
+        CALL P2K_MOVE(10.0,YTPOS,0.)            ! Plot legend
         CALL P2K_STRING('http://dx.doi.org/10.1107/S0108767304010396',43,0.0)
 
         CALL P2K_MOVE(0.,0.,0.)

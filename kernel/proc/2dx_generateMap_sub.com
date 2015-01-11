@@ -153,10 +153,10 @@ if ( ${spcgrp} != "1" ) then
   echo "================================================================================="
   echo " "
   #
-  \rm -f 2dx_origtiltk-console.log
-  #
   ${bin_2dx}/2dx_origtiltk.exe << eot
 SCRATCH/2dx_origtilt-LOG1.dat
+SCRATCH/TMP.dummy1.tmp
+SCRATCH/TMP.dummy2.tmp
 ${spcgrp},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
 10,0.7,10,0.5                                                   ! itaxastep,rtaxasize,itanglstep,rtanglsize
 ${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}          	!IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
@@ -174,6 +174,8 @@ ${RESMIN},${RESMAX}                                             ! resolution lim
 eot
   #
   \rm -f SUMMARY
+  \rm -f SCRATCH/TMP.dummy1.tmp
+  \rm -f SCRATCH/TMP.dummy2.tmp
   \cp -f fort.3 APH/${prefix}${imagename}_cor_origtiltd.aph
   #
   if ( ${scriptname} == "2dx_generateMAP" ) then
@@ -280,10 +282,10 @@ ${proc_2dx}/linblock "ORIGTILT - in p1 symmetry to transform the APH file into A
 echo dummy > fort.1
 \rm -f fort.?
 #
-\rm -f 2dx_origtiltk-console.log
-#
 ${bin_2dx}/2dx_origtiltk.exe << eot
 SCRATCH/2dx_origtilt-LOG1.dat
+SCRATCH/TMP.dummy1.tmp
+SCRATCH/TMP.dummy2.tmp
 ${spcgrp_first},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT
 10,0.7,10,0.5                                                              ! itaxastep,rtaxasize,itanglstep,rtanglsize
 ${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}          !IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
@@ -301,6 +303,8 @@ ${RESMIN},${RESMAX}                                                 ! resolution
 eot
 #
 \rm -f SUMMARY
+\rm -f SCRATCH/TMP.dummy1.tmp
+\rm -f SCRATCH/TMP.dummy2.tmp
 \cp -f fort.3 APH/${prefix}${imagename}_cor_origtiltd.aph
 # \cp -f ../../merge/APH/merge.aph APH/${prefix}${imagename}_cor_origtiltd.aph
 #

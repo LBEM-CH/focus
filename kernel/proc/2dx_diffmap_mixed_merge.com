@@ -72,6 +72,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_data_type}
+${Thread_Number}
 ${ILIST_VAL}
 eot
 #
@@ -148,6 +149,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_data_type}
+${Thread_Number}
 ${ILIST_VAL}
 eot
 #

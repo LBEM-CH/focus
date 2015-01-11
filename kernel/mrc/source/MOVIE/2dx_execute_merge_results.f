@@ -8,7 +8,6 @@ C
 C
       write(6,'(''Input results file name'')')
       read(*,'(A)')CFILE1
-      write(*,'(''Read: '',A)')CFILE1(1:100)
       call shorten(CFILE1,k)
       write(*,'(''Read: '',A)')CFILE1(1:k)
 C

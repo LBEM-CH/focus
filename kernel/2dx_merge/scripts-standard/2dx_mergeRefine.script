@@ -478,14 +478,18 @@ echo "output in file SCRATCH/job_XX_2dx_merge_scriptB.com.log"
 echo "################################################"
 echo "################################################"
 #
-foreach scriptBconsole ( SCRATCH/job_??_${scriptname}-tmp.console )
-  cat ${scriptBconsole}
-  #\rm -f ${scriptBconsole}
+\rm -f SCRATCH/${scriptname}.console
+echo "# IMAGE: SCRATCH/${scriptname}.console <LOG: Console output from merging>" >> LOGS/${scriptname}.results
+foreach scriptBconsole ( SCRATCH/job_??_${scriptname}-tmp.console ) 
+  cat ${scriptBconsole} >> SCRATCH/${scriptname}.console
+  \rm -f ${scriptBconsole}
 end
 #
-foreach scriptBresults ( SCRATCH/job_??_${scriptname}-tmp.results )
-  cat ${scriptBresults} >> LOGS/${scriptname}.results
-  # \rm -f ${scriptBresults}
+\rm -f SCRATCH/${scriptname}.results
+echo "# IMAGE: SCRATCH/${scriptname}.results <LOG: Refinement results>" >> LOGS/${scriptname}.results
+foreach scriptBresults ( SCRATCH/job_??_${scriptname}-tmp.results ) 
+  cat ${scriptBresults} >> SCRATCH/${scriptname}.results
+  \rm -f ${scriptBresults}
 end
 #
 ${bin_2dx}/2dx_execute_merge_results.exe << eot

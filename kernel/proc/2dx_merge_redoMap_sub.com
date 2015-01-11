@@ -135,6 +135,8 @@ else
   #
   ${bin_2dx}/2dx_origtiltk.exe << eot
 SCRATCH/2dx_origtilt-LOG1.dat
+SCRATCH/TMP.tmp.reflections
+SCRATCH/TMP.tmp.console
 ${spcgrp},0,F,F,0,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
 10,0.7,10,0.5                                                              ! itaxastep,rtaxasize,itanglstep,rtanglsize
 ${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}          !IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
@@ -152,6 +154,8 @@ ${RESMIN},${RESMAX}                                                 ! resolution
 eot
   #
   \rm -f SUMMARY
+  \rm -f SCRATCH/TMP.tmp.reflections
+  \rm -f SCRATCH/TMP.tmp.console
   \cp -f fort.3 APH/${imagename}.cor.origtiltd.aph
   #
 #############################################################################

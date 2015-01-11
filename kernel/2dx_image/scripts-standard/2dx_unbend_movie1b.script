@@ -576,7 +576,12 @@ endif
 python ${proc_2dx}/movie/apply_filter_sum.py frames/direct_sum.mrc frames/direct_sum_filt.mrc 0.001 frames/weight.mrc
 echo "# IMAGE: frames/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 
+
+
 if ( ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" ) then
+  ###########################################################################
+  ${proc_2dx}/linblock "Filtering by CTF profile"
+  ###########################################################################
   \rm -f frames/direct_sum_filt_ctf.mrc
   python ${proc_2dx}/movie/apply_filter_fourier.py frames/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc frames/direct_sum_filt_ctf.mrc ${ctfcor_noise}
 
@@ -603,12 +608,15 @@ if ( ${movie_masking_mode} != '0' ) then
     python ${proc_2dx}/movie/mask.py frames/CCmap_driftCorrected_filt.mrc frames/CCmap_driftCorrected_filt_masked.mrc ${maskfile}_mask.mrc
     echo "# IMAGE: frames/CCmap_driftCorrected_filt_masked.mrc <CCmap drift-corrected, filtered, masked>" >> LOGS/${scriptname}.results 
   endif
+
   ###########################################################################
   ${proc_2dx}/linblock "Masking average with masking info"
   ###########################################################################
-  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt_ctf.mrc frames/direct_sum_filt_masked.mrc ${maskfile}_mask.mrc
-  endif
+  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt.mrc frames/direct_sum_filt_masked.mrc ${maskfile}_mask.mrc
   echo "# IMAGE: frames/direct_sum_filt_masked.mrc <Sum unbent images, filtered, masked>" >> LOGS/${scriptname}.results 
+
+  python ${proc_2dx}/movie/mask.py frames/direct_sum_filt_ctf.mrc frames/direct_sum_filt_ctf_masked.mrc ${maskfile}_mask.mrc
+  echo "# IMAGE: frames/direct_sum_filt_ctf_masked.mrc <Sum unbent images, filtered, CTFcor, masked>" >> LOGS/${scriptname}.results 
 else
   ######################################################
   ${proc_2dx}/lin "Not masking frame"
@@ -669,6 +677,29 @@ ${bin_2dx}/2dx_taperedgek.exe << eot
 eot
 echo "# IMAGE: frames/direct_sum_fixed.mrc <Sum unbent images, edge-tapered>" >> LOGS/${scriptname}.results 
 
+if ( ${movie_masking_mode} != '0' ) then
+  set infile = frames/direct_sum_filt_ctf_masked.mrc
+else
+  set infile = frames/direct_sum_filt_ctf.mrc
+endif
+
+\rm -f frames/direct_sum_filt_ctf_upscale.mrc
+${bin_2dx}/labelh.exe << eot
+${infile}
+39
+frames/direct_sum_filt_ctf_upscale.mrc
+eot
+
+setenv IN  frames/direct_sum_filt_ctf_upscale.mrc
+setenv OUT frames/direct_sum_ctf_fixed.mrc
+\rm -f     frames/direct_sum_ctf_fixed.mrc
+${bin_2dx}/2dx_taperedgek.exe << eot
+30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+eot
+echo "# IMAGE: frames/direct_sum_ctf_fixed.mrc <Sum unbent images, CTFcor, edge-tapered>" >> LOGS/${scriptname}.results 
+
+
+
 ###########################################################################
 ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 ###########################################################################
@@ -679,15 +710,21 @@ setenv OUT frames/direct_sum_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 echo "# IMAGE: frames/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
 
+setenv IN frames/direct_sum_ctf_fixed.mrc
+setenv OUT frames/direct_sum_ctf_fft.mrc
+\rm -f     frames/direct_sum_ctf_fft.mrc
+${bin_2dx}/2dx_fftrans.exe
+echo "# IMAGE: frames/direct_sum_ctf_fft.mrc <Final FFT (CTFcor)>" >> LOGS/${scriptname}.results
+
 
 ###########################################################################
-${proc_2dx}/linblock "MMBOX - Evaluating APH values"
+${proc_2dx}/linblock "MMBOX - Evaluating APH values (no CTFcor)"
 ###########################################################################
 
 set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
 set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
 #
-\rm -f APH/${imagename}_movie_fou.aph
+\rm -f dummy.aph
 #
 ${bin_2dx}/2dx_mmboxa.exe << eot
 frames/direct_sum_fft.mrc
@@ -696,13 +733,15 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_movie_fou.aph
+dummy.aph
 SCRATCH/TMP9873.dat
 UMA
 ${refposix},${refposiy}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
+
+\rm -f dummy.aph
 
 source SCRATCH/TMP9873.dat
 
@@ -742,8 +781,6 @@ echo "<<@progress: 90>>"
 ${pdf2ps} frame_unbending.pdf frame_unbending.ps
 echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
 
-echo "# IMAGE-IMPORTANT: APH/${imagename}_movie_fou.aph <APH file after movie-mode unbending>" >> LOGS/${scriptname}.results
-  
 set IQS = `echo ${UMA_IQ1} ${UMA_IQ2} ${UMA_IQ3} ${UMA_IQ4} ${UMA_IQ5} ${UMA_IQ6} ${UMA_IQ7} ${UMA_IQ8} ${UMA_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMA= ${QVAL_local} ... IQ stat = ${IQS}"
@@ -753,6 +790,37 @@ echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
 echo "::Unbend MovieA: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 #
+
+
+
+###########################################################################
+${proc_2dx}/linblock "MMBOX - Evaluating APH values (after CTF cor)"
+###########################################################################
+
+set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
+set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+#
+\rm -f APH/${imagename}_movie_fou.aph
+#
+${bin_2dx}/2dx_mmboxa.exe << eot
+frames/direct_sum_ctf_fft.mrc
+${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/${imagename}_movie_fou.aph
+SCRATCH/TMP9873.dat
+UMA
+${refposix},${refposiy}           ! XORIG,YORIG
+200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
+
+echo "# IMAGE-IMPORTANT: APH/${imagename}_movie_fou.aph <APH file after movie-mode unbending>" >> LOGS/${scriptname}.results
+  
+
+
 
 if ( ${tempkeep} != "y" ) then
   ###########################################################################

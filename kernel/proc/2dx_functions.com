@@ -125,6 +125,8 @@ origtiltk()
 
   ${bin_2dx}/2dx_origtiltk.exe << eot
 SCRATCH/2dx_origtilt-LOG1.dat
+SCRATCH/TMP.tmp.reflections
+SCRATCH/TMP.tmp.console
 ${spcgrp},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
 10,0.7,10,0.5                                                   ! itaxastep,rtaxasize,itanglstep,rtanglsize
 ${imagenumber},0,44,6,${phastepnum},F,F,${RFACAMP}          	!IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
@@ -142,6 +144,8 @@ ${RESMIN},${RESMAX}                                             ! resolution lim
 eot
 
   cat 2dx_origtiltk-console.log
+  \rm -f SCRATCH/TMP.tmp.reflections
+  \rm -f SCRATCH/TMP.tmp.console
 
 }
 

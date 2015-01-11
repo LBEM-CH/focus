@@ -443,7 +443,7 @@ C     ISTRIPENUM = 1
 C
       IS=ISTRIPENUM/2
       if(IS*2 .EQ. ISTRIPENUM) ISTRIPENUM = ISTRIPENUM+1
-      write(6,'(/,'':Will use '',I6,'' stripes to garant '',F9.1,
+      write(6,'(/,'':Will use '',I6,'' stripes to ensure less than '',F9.1,
      .  ''A defocus difference for '',F8.1,''A resolution.'',/)')
      .  ISTRIPENUM,RDEFTOL,RESMAX
 C
@@ -514,7 +514,7 @@ C-------  rdist3 * tan(TLTANG)
         RLDEF1 = RDEF1 + rdist3 * tan(TLTANG*PI/180.0)
         RLDEF2 = RDEF2 + rdist3 * tan(TLTANG*PI/180.0)
         RLDEFM = (RLDEF1 + RLDEF2 ) / 2.0
-        write(6,'('':Stripe '',I4,'' of '',I4,'': Center at position '',2F10.1,
+        write(6,'(''Stripe '',I4,'' of '',I4,'': Center at position '',2F10.1,
      .      '' is at distance '',F12.3,'' px, or '',F12.3,
      .      '' A. Def = '',F12.3)')
      .      istripe,ISTRIPENUM,rstripex,rstripey,rdist2,rdist3,RLDEFM

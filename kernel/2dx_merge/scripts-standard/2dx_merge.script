@@ -250,7 +250,7 @@ foreach dirfile ( ${dirlist} )
     echo ":Working on ${imagename_local}: ${imagename_local}_ctf.aph does not exist. "
     if ( -e ${imagename_local}.cor.aph ) then
       echo "::In ${dirfile}: Correcting ${imagename_local}.cor.aph to ${imagename_local}_ctf.aph" 
-      \ln -s ${imagename_local}.cor.aph ${imagename_local}_fou_ctf.aph 
+      \mv -f ${imagename_local}.cor.aph ${imagename_local}_fou_ctf.aph 
     else
       echo "::Working on ${imagename_local}: ${imagename_local}.cor.aph does not exist. "
     endif
@@ -379,7 +379,7 @@ source ${proc_2dx}/2dx_merge_makedirs
 echo "<<@progress: 10>"
 #
 #############################################################################
-${proc_2dx}/linblock "Sourcing 2dx_merge.sub"
+${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
 #############################################################################
 #
 source ${proc_2dx}/2dx_merge_merge_sub.com

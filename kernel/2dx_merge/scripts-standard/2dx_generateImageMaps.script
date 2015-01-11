@@ -297,15 +297,15 @@ eot
   ${proc_2dx}/linblock "Launch refinement postprocessing script"
   #############################################################################
   #
-  source SCRATCH/job_01_${postprocessingfile} >> LOGS/2dx_merge_scriptB.log
+  source SCRATCH/job_01_${postprocessingfile} >> SCRATCH/2dx_merge_scriptB.log
   #
   echo "################################################"
   echo "################################################"
-  echo "output in file LOGS/2dx_merge_scriptB.log"
+  echo "output in file SCRATCH/2dx_merge_scriptB.log"
   echo "################################################"
   echo "################################################"
   #
-  echo "# IMAGE: SCRATCH/$[scriptname}.results <LOG: Refinement results file>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${scriptname}.results <LOG: Refinement results file>" >> LOGS/${scriptname}.results
   cat SCRATCH/job_01_${scriptname}-tmp.console > SCRATCH/${scriptname}.results
   #
   # Don't evaluate refinement results here:

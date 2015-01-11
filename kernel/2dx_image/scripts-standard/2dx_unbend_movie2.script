@@ -872,12 +872,21 @@ ${proc_2dx}/linblock "LABELH - Normalizing image to AVG=0, STDEV=100"
 
 \rm -f ${frame_folder}/direct_sum_filt_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
-${frame_folder}/direct_sum_filt_ctf.mrc
+${frame_folder}/direct_sum_filt.mrc
 39
 ${frame_folder}/direct_sum_filt_upscale.mrc
 eot
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt_upscale.mrc <Sum unbent images, filtered, upscaled>" >> LOGS/${scriptname}.results
+
+\rm -f ${frame_folder}/direct_sum_filt_ctf_upscale.mrc
+${bin_2dx}/labelh.exe << eot
+${frame_folder}/direct_sum_filt_ctf.mrc
+39
+${frame_folder}/direct_sum_filt_ctf_upscale.mrc
+eot
+# echo  "# IMAGE: ${frame_folder}/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTFcor>" >> LOGS/${scriptname}.results
+# echo  "# IMAGE: ${frame_folder}/direct_sum_filt_ctf_upscale.mrc <Sum unbent images, filtered, CTFcor, upscaled>" >> LOGS/${scriptname}.results
 
 ###########################################################################
 ${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
@@ -891,6 +900,14 @@ ${bin_2dx}/2dx_taperedgek.exe << eot
 eot
 echo "# IMAGE: ${frame_folder}/direct_sum_filt_taper.mrc <Sum unbent images, edge-tapered>" >> LOGS/${scriptname}.results 
 
+setenv IN  ${frame_folder}/direct_sum_filt_ctf_upscale.mrc
+setenv OUT ${frame_folder}/direct_sum_filt_ctf_taper.mrc
+\rm -f     ${frame_folder}/direct_sum_filt_ctf_taper.mrc
+${bin_2dx}/2dx_taperedgek.exe << eot
+30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+eot
+echo "# IMAGE: ${frame_folder}/direct_sum_filt_ctf_taper.mrc <Sum unbent images, CTFcor, edge-tapered>" >> LOGS/${scriptname}.results 
+
 ###########################################################################
 ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 ###########################################################################
@@ -901,13 +918,19 @@ setenv OUT ${frame_folder}/direct_sum_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 echo "# IMAGE: ${frame_folder}/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
 
+setenv IN ${frame_folder}/direct_sum_filt_ctf_taper.mrc
+setenv OUT ${frame_folder}/direct_sum_ctf_fft.mrc
+\rm -f     ${frame_folder}/direct_sum_ctf_fft.mrc
+${bin_2dx}/2dx_fftrans.exe
+echo "# IMAGE: ${frame_folder}/direct_sum_ctf_fft.mrc <Final FFT (CTF cor)>" >> LOGS/${scriptname}.results
+
 
 ###########################################################################
 ${proc_2dx}/linblock "MMBOX - Evaluating APH values"
 ###########################################################################
 
 \rm -f SCRATCH/TMP9873.dat
-\rm -f APH/${imagename}_movieB_fou.aph
+\rm -f dummy.aph
 
 ${bin_2dx}/2dx_mmboxa.exe << eot
 ${frame_folder}/direct_sum_fft.mrc
@@ -916,13 +939,15 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_movieB_fou.aph
+dummy.aph
 SCRATCH/TMP9873.dat
 UMB
 ${refposix},${refposiy}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
+
+\rm -f dummy.aph
 
 source SCRATCH/TMP9873.dat
 
@@ -962,6 +987,30 @@ echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
 echo "::Unbend MovieB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 #
+
+
+###########################################################################
+${proc_2dx}/linblock "MMBOX - Evaluating APH values (CTF cor)"
+###########################################################################
+
+\rm -f SCRATCH/TMP9873.dat
+\rm -f APH/${imagename}_movieB_fou.aph
+
+${bin_2dx}/2dx_mmboxa.exe << eot
+${frame_folder}/direct_sum_ctf_fft.mrc
+${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/${imagename}_movieB_fou.aph
+SCRATCH/TMP9873.dat
+UMB
+${refposix},${refposiy}           ! XORIG,YORIG
+200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
+
 
 # Variation plot generation (no longer used)
 #python ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}

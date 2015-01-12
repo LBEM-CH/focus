@@ -138,7 +138,9 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${iname}_fft.mrc "<FFT of Image>" >> LOGS/${scri
 echo "# IMAGE-IMPORTANT: "FFTIR/${iname}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 if ( ${ctf_ttf} == 'TTF' ) then
+  #############################################################################
   ${proc_2dx}/linblock "No CTFAPPLY needed, since TTF correction is already done."
+  #############################################################################
   #
   if ( ${SYN_Unbending} == "0" ) then
     # FouFilter Unbending result is used:

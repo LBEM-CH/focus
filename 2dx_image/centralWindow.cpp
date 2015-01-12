@@ -157,7 +157,7 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
   connect(historyButton,SIGNAL(toggled(bool)),this,SLOT(toggleHistoryView(bool)));
 
   verbosityControl = new levelGroup(data, 4,
-      QStringList()<<"Logfile - Silent"<<"Logfile - Low Verbosity"<<"Logfile - Moderate Verbosity"<<"Logfile - Highest Verbosity",
+      QStringList()<<"Logfile - Silent   (Click for logbrowser)"<<"Logfile - Low Verbosity   (Click for logbrowser)"<<"Logfile - Moderate Verbosity   (Click for logbrowser)"<<"Logfile - Highest Verbosity   (Click for logbrowser)",
       QStringList()<<"Update only on script completion."<<"Low Verbosity Output"<<"Moderate Verbosity Output"<<"Highest Verbosity Output",
       QStringList()<<"gbAqua"<<"gbBlue"<<"gbOrange"<<"gbRed");
 
@@ -199,7 +199,7 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
   resultsSplitter->addWidget(resultsContainer);
 
 
-  viewContainer *imagesContainer = new viewContainer("Images", viewContainer::data);
+  viewContainer *imagesContainer = new viewContainer("Images   (Click here to open)", viewContainer::data);
   connect(imagesContainer,SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
 
   imageParser = new resultsParser(data,QStringList()<<"",resultsParser::images);

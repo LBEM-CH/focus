@@ -247,7 +247,10 @@ set prefix = ""
 set prename = ""
 #
 set phaori_local = ${phaori}
+#############################################################################
+# Unbend II
 source ${proc_2dx}/2dx_generateMap_sub.com
+#############################################################################
 #
 if ( ${ML_doit} == 'y' ) then
   echo ":: "
@@ -259,7 +262,10 @@ if ( ${ML_doit} == 'y' ) then
   set prename = "ML "
   #
   set phaori_local = "0.0,0.0"
+  #############################################################################
+  # ML
   source ${proc_2dx}/2dx_generateMap_sub.com
+  #############################################################################
   #
 endif
 #
@@ -274,7 +280,10 @@ if ( ${movie_enable} == "y" ) then
     set prename = "MovieMode "
     #
     set phaori_local = ${phaori}
+    #############################################################################
+    # Movie A
     source ${proc_2dx}/2dx_generateMap_sub.com
+    #############################################################################
   else
     echo ":: "
     ${proc_2dx}/linblock "Not generating map from MovieMode processing, file not found: ${aphfile}"
@@ -291,7 +300,10 @@ if ( ${movie_enable} == "y" ) then
     set prename = "MovieModeB "
     #
     set phaori_local = ${phaori}
+    #############################################################################
+    # Movie B
     source ${proc_2dx}/2dx_generateMap_sub.com
+    #############################################################################
   else
     echo ":: "
     ${proc_2dx}/linblock "Not generating map from MovieModeB processing, file not found: ${aphfile}"

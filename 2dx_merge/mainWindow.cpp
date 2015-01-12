@@ -197,7 +197,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   connect(singleParticleScripts,SIGNAL(scriptLaunched()),logViewer,SLOT(clear()));
 
   verbosityControl = new levelGroup(mainData, 4,
-      QStringList()<<"Logfile - Silent"<<"Logfile - Low Verbosity"<<"Logfile - Moderate Verbosity"<<"Logfile - Highest Verbosity",
+      QStringList()<<"Logfile - Silent   (Click here for logbrowser)"<<"Logfile - Low Verbosity (Click here for logbrowser)"<<"Logfile - Moderate Verbosity (Click here for logbrowser)"<<"Logfile - Highest Verbosity (Click here for logbrowser)",
       QStringList()<<"Update only on script completion."<<"Low Verbosity Output"<<"Moderate Verbosity Output"<<"Highest Verbosity Output",
       QStringList()<<"gbAqua"<<"gbBlue"<<"gbOrange"<<"gbRed");
 
@@ -291,7 +291,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   resultsContainer->addWidget(resultsView);
   resultsContainer->setMinimumSize(QSize(200,100));
 
-  viewContainer *imagesContainer = new viewContainer("Images",viewContainer::data,this,viewContainer::grey);
+  viewContainer *imagesContainer = new viewContainer("Images  (Click here to open)",viewContainer::data,this,viewContainer::grey);
   connect(imagesContainer,SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
   resultsModule *imagesView = new resultsModule(mainData,results, resultsModule::images, mainData->getDir("project"));
   imagesContainer->addWidget(imagesView);

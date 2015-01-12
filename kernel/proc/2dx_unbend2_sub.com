@@ -283,7 +283,7 @@ eot
     else
       #
       ${proc_2dx}/${lincommand} "TTMASK - to mask the FFT of the image with TTF-correction"
-      ${proc_2dx}/${lincommand} "-------- The hole image has to be treated in order not to loose data"
+      ${proc_2dx}/${lincommand} "-------- The entire image has to be treated in order not to loose data"
       #
       # ISHAPE = 4 is a new option, which uses the hard-edge circular mask, and automatically
       # calculates the maximally possible radius for the masking spots, so that almost no 
@@ -1032,7 +1032,7 @@ N                        ! list points as calculated
 Y                        ! plot output
 ${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus},${TLTAXIS},${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-2,0,30,30,19,19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+2,0,50,50,19,19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 APH/${imagename}_fou_ttf.aph
 SCRATCH/TMP9873.dat
 U2

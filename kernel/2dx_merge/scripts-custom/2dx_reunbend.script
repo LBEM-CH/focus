@@ -186,12 +186,15 @@ eot
       set QVALMA_local = `cat 2dx_image.cfg | grep "set QVALMA =" | cut -d\" -f2`
       set QVALMB_local = `cat 2dx_image.cfg | grep "set QVALMB =" | cut -d\" -f2`
       # echo ":: QVALMA_local = ${QVALMA_local}" 
-      if ( ${QVALMA_local}x == "x"  || ${QVALMA_local}x == ".x" ||  ${QVALMA_local}x == "0.00x" ||  ${QVALMB_local}x == "x"  || ${QVALMB_local}x == ".x" ||  ${QVALMB_local}x == "0.00x" ) then
+      # if ( ${QVALMA_local}x == "x"  || ${QVALMA_local}x == ".x" ||  ${QVALMA_local}x == "0.00x" ||  ${QVALMB_local}x == "x"  || ${QVALMB_local}x == ".x" ||  ${QVALMB_local}x == "0.00x" ) then
+      if ( 1 == 1 ) then 
         echo "Working on " ${curdir}
 
         ${proc_2dx}/linblock "At load ${loadaverage}/${ReUnbend_MP}, launching job ${dircounter} of ${dirnum} on ${dirfile}"
 
-        nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile}" &
+        nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile}" &
+
+        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile}" &
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getSampleTilt"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile}" &
 

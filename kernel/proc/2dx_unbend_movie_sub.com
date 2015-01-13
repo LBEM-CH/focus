@@ -635,7 +635,7 @@ N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 ${frame_folder}/aph_${i}.fou.nolimit.aph
 SCRATCH/TMP9873.dat
-U2
+UMB
 ${refposix},${refposiy}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors

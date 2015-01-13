@@ -25,6 +25,7 @@ C                   IMODE=0: Nothing
 C                   IMODE=1: PhaseFlip
 C                   IMODE=2: CTF multiplication
 C                   IMODE=3: Wiener Filter
+C                   IMODE>3: Nothing
 C        card  9 :  Debug mode: y=yes, n=no
 C
 C******************************************************************************
@@ -266,6 +267,7 @@ C
       elseif(IMODE.eq.3)then
         write(6,'('':Applying Wiener filtration'')')
       else
+        IMODE = 0
         write(6,'('':No CTF correction done'')')
       endif
 C

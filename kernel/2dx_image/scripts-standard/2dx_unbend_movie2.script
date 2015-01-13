@@ -561,8 +561,8 @@ while ($i <= ${movie_imagenumber_touse})
   #
   setenv NCPUS ${Thread_Number}
   #
-  if ( ${ctfcor_imode}x == "0x" ) then
-    ${proc_2dx}/lin "Not applying any CTF correction now."
+  if ( ${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == "4x" || ${ctfcor_imode}x == "5x" || ${ctfcor_imode}x == "6x" ) then
+    ${proc_2dx}/lin "Not applying any CTF correction before unbending."
     cd ${frame_folder}/frame_${i}
     \rm -f image_ctfcor.mrc
     \ln -s ${nonmaskimagename}_${i}.mrc image_ctfcor.mrc

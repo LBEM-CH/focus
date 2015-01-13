@@ -1,8 +1,8 @@
 C*******************************************************************************
 C
 C TTBOXK : prints out amplitudes & phases in N * N boxes from a 
-C	   Fourier transform, fully corrected for contrast transfer function
-C	   in tilted image.
+C          Fourier transform, fully corrected for contrast transfer function
+C          in tilted image.
 C
 C          Version  1.01    9 Dec 1985  RH
 C                   1.02   14 Feb 1986  RH  SEGMNT option.
@@ -61,44 +61,44 @@ C  7.  IOUT,NUMSPOT, NOH, NOK, NHOR, NVERT  (*)
 C
 C  8.  FILOUT only if IOUT.NE.0 -- full name of output file, formatted data.
 C
-C  9	RESMIN, RESMAX,  XORIG, YORIG, SEGMNT  (*)
+C  9    RESMIN, RESMAX,  XORIG, YORIG, SEGMNT  (*)
 C
-C  10.  if GENGRID or GENPTS :		AX, AY, BX, BY    (*)
+C  10.  if GENGRID or GENPTS :          AX, AY, BX, BY    (*)
 C
-C  11.  if GENPTS 		        : IH(I), IK(I)              (*)
-C	if .not.GENGRID and .not.GENPTS : IH(I), IK(I), X(I), Y(I)  (*)
+C  11.  if GENPTS                       : IH(I), IK(I)              (*)
+C       if .not.GENGRID and .not.GENPTS : IH(I), IK(I), X(I), Y(I)  (*)
 C
 C
 C     ISER        serial number for run to be printed & output on IOUT.
 C     TITLE       title to be printed & output on unit IOUT.
 C     GENGRID     if YES generate grid from lattice points (1,0) & (0,1).
 C     GENPTS      if YES individual spots requested & generated from grid
-C		  if NO all spots within RESMIN to RESMAX generated.
+C                 if NO all spots within RESMIN to RESMAX generated.
 C     LISTPTS     if YES list spots whose amps and phases will be output.
 C     PLOTPTS     if YES plot spots with IQ<8 using symbol size propnl to 8-IQ
-C     ISIZEX,Y	  size of image in x and y, checked against file-header.
-C     DSTEP	  densitometer stepsize in microns.
-C     XMAG	  magnification of micrograph.
-C     CS	  spherical aberration coefficient in mm.
-C     KVOLT	  microscope voltage in KV, used to calculate wavelength. 
-C     DFMID1	  defocus in one direction (underfocus +ve) 
-C     DFMID2	  defocus at 90-degs to above
-C     ANGAST	  direction for DFMID1 in degrees relative to x,y in transform.
-C     TLTAXIS	  direction of tiltaxis in degrees relative to x,y in transform,
-C		    should be between -90 and +90 degrees.
-C     TLTANGL	  magnitude of tiltangle.
-C			(+ve for less underfocus at start of scan(y=0)).
-C			if tiltaxis is precisely parallel to y, then TLTANGL
-C			should be positive for less underfocus at x=0.
+C     ISIZEX,Y    size of image in x and y, checked against file-header.
+C     DSTEP       densitometer stepsize in microns.
+C     XMAG        magnification of micrograph.
+C     CS          spherical aberration coefficient in mm.
+C     KVOLT       microscope voltage in KV, used to calculate wavelength. 
+C     DFMID1      defocus in one direction (underfocus +ve) 
+C     DFMID2      defocus at 90-degs to above
+C     ANGAST      direction for DFMID1 in degrees relative to x,y in transform.
+C     TLTAXIS     direction of tiltaxis in degrees relative to x,y in transform,
+C                   should be between -90 and +90 degrees.
+C     TLTANGL     magnitude of tiltangle.
+C                       (+ve for less underfocus at start of scan(y=0)).
+C                       if tiltaxis is precisely parallel to y, then TLTANGL
+C                       should be positive for less underfocus at x=0.
 C     IOUT        output unit number for serial number and title, followed by
-C    		   IH,IK,A,P,IQ terminated with IH=100.
+C                  IH,IK,A,P,IQ terminated with IH=100.
 C     NUMSPOT     number of spots to be printed.
 C     NOH, NOK    number of orders of spots in H & K directions to be generated.
 C     NHOR, NVERT box size in grid units in horizontal & vertical directions,
 C                 i.e. X & Y resp. ( up to 20 grid units in each
 C                 direction).
 C     RESMIN, RESMAX inner & outer resolution limits in Angstroms within which
-C			 spots(centre of box) must fall.
+C                        spots(centre of box) must fall.
 C     XORIG, YORIG X & Y phase origin shifts to be added to those
 C                  added to those read in on the transform.
 C     SEGMNT      segment of reciprocal space within which spots
@@ -175,7 +175,7 @@ C
       WRITE(6,1025) ISER,TITLE
  1025 FORMAT(/,' Serial number :',I10,/,' Title :',17A4)
  1028 FORMAT(A)
-1029	FORMAT(1X,20A1)
+1029    FORMAT(1X,20A1)
       READ(5,1028) GENGRID
       WRITE(6,1029) GENGRID
       READ(5,1028) GENPTS
@@ -190,17 +190,17 @@ C  Input of all c.t.f. and tilt data for image, calculation of all the needed
 C      preliminaries except for calculation of c.t.f. itself.
 C
       READ(5,*) ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT
-      	IF(ISIZEY.NE.NY)     GO TO 6001
-      	IF(ISIZEX.NE.NXP2-2) GO TO 6001
+        IF(ISIZEY.NE.NY)     GO TO 6001
+        IF(ISIZEX.NE.NXP2-2) GO TO 6001
       READ(5,*) DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-98     	IF(TLTAXIS.LE.-90.0) THEN
-      		TLTAXIS=TLTAXIS+180.0
-      		GO TO 98
-      	ENDIF
-99     	IF(TLTAXIS.GT.90.0) THEN
-      		TLTAXIS=TLTAXIS-180.0
-      		GO TO 99
-      	ENDIF
+98      IF(TLTAXIS.LE.-90.0) THEN
+                TLTAXIS=TLTAXIS+180.0
+                GO TO 98
+        ENDIF
+99      IF(TLTAXIS.GT.90.0) THEN
+                TLTAXIS=TLTAXIS-180.0
+                GO TO 99
+        ENDIF
 
       WRITE(6,101) ISIZEX,ISIZEY,DSTEP,XMAG,CS,KVOLT
       WRITE(6,102) DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
@@ -242,14 +242,14 @@ C  THETATR IS DIFFRACTION ANGLE OF FIRST GRID POINT IN X DIRECTION
 C   OF TRANSFORM.
 C
 C
-C	Calculate height difference across image
+C       Calculate height difference across image
 C
         PERP=ISIZEY*COST+ISIZEX*(ABS(SINT))
 C      WRITE(6,91701)STEPR,TANTILT,COST,SINT,ISIZEX,ISIZEY
-91701	FORMAT(4F10.5,2I10)
-	DELHEIGHT=ABS(STEPR*PERP*TANTILT)
+91701   FORMAT(4F10.5,2I10)
+        DELHEIGHT=ABS(STEPR*PERP*TANTILT)
       WRITE(6,91700)PERP,DELHEIGHT
-91700	FORMAT(' PERPENDICULAR DISTANCE FROM CORNER OF FILM TO TILT',
+91700   FORMAT(' PERPENDICULAR DISTANCE FROM CORNER OF FILM TO TILT',
      .' AXIS',F10.3,/,' DIFFERENCE IN HEIGHT OF FAR CORNERS OF IMAGE',
      .F10.3,/)
 C
@@ -276,9 +276,9 @@ CHEN
 C
       READ(5,*) RESMIN,RESMAX,XORIG,YORIG,SEGMNT
       IF(RESMIN.LT.RESMAX) THEN
-      	R=RESMIN	! Reverse if input in wrong order !
-      	RESMIN=RESMAX
-      	RESMAX=R
+        R=RESMIN        ! Reverse if input in wrong order !
+        RESMIN=RESMAX
+        RESMAX=R
       ENDIF
       RESMINSQ=RESMIN**2
       RESMAXSQ=RESMAX**2
@@ -305,57 +305,57 @@ C
       I = 0
 C
       IF(GENGRID.EQ.YES.OR.GENPTS.EQ.YES) THEN
-      	  READ(5,*) AX,AY,BX,BY
-      	  WRITE(6,1050) AX,AY,BX,BY
- 1050 	  FORMAT(/,' coordinates of 1,0 & 0,1 ',4F10.3)
+          READ(5,*) AX,AY,BX,BY
+          WRITE(6,1050) AX,AY,BX,BY
+ 1050     FORMAT(/,' coordinates of 1,0 & 0,1 ',4F10.3)
 C
-C     	  point generation required
+C         point generation required
 C
       SIZEX=ISIZEX
       RATIOXY=SIZEX/ISIZEY     
       ACY=AY*RATIOXY
       BCY=BY*RATIOXY
       WRITE(6,91050)AX,ACY,BX,BCY
-91050	FORMAT(' coordinates of 1,0 & 0,1 with y components scaled',
+91050   FORMAT(' coordinates of 1,0 & 0,1 with y components scaled',
      .' by factor ISIZEX/ISIZEY',/,26X,4F10.3,/)
 C 
-      	  IF(GENPTS.EQ.YES) THEN
-      	    CALL SPOTS(AX,AY,BX,BY,ACY,BCY,IXC,IYC,IH,IK,XA,YA,
+          IF(GENPTS.EQ.YES) THEN
+            CALL SPOTS(AX,AY,BX,BY,ACY,BCY,IXC,IYC,IH,IK,XA,YA,
      .  NXM2,NY2M2,NSPOT,LIST)
-      	  ELSE
+          ELSE
 C
-C     	    grid generation required
+C           grid generation required
 C
-      	    CALL GRID(AX,AY,BX,BY,ACY,BCY,IXC,IYC,
+            CALL GRID(AX,AY,BX,BY,ACY,BCY,IXC,IYC,
      .                   IH,IK,XA,YA,NOH,NOK,
      .   RESMINSQ,RESMAXSQ,
      .                   NXM2,NY2M2,NSPOT,LIST,
      .                   TLTAXIS,SEGMNT,TRNSTEPX)
-      	  END IF
+          END IF
 C
-C     	  read in individual points
+C         read in individual points
 C
       ELSE
-      	  WRITE(6,1060)
- 1060 	  FORMAT(/,' Coordinates read in    H    K       X         Y'
-     1    	    ,' nearest grid pt X      Y',/,'0')  
-  110 	  I = I + 1
-      	  IF(NSPOT.GE.NMAX) GO TO 4550
-  115 	  READ(5,*,END=120) IH(I),IK(I),XA(I),YA(I)
-      	  IF(IH(I).EQ.100) GO TO 120
-      	  IXC(I) = XA(I) + SIGN(0.5,XA(I))
-      	  IYC(I) = YA(I) + SIGN(0.5,YA(I))
+          WRITE(6,1060)
+ 1060     FORMAT(/,' Coordinates read in    H    K       X         Y'
+     1              ,' nearest grid pt X      Y',/,'0')  
+  110     I = I + 1
+          IF(NSPOT.GE.NMAX) GO TO 4550
+  115     READ(5,*,END=120) IH(I),IK(I),XA(I),YA(I)
+          IF(IH(I).EQ.100) GO TO 120
+          IXC(I) = XA(I) + SIGN(0.5,XA(I))
+          IYC(I) = YA(I) + SIGN(0.5,YA(I))
 C     
-C     	  reject spot if outside boundary
+C         reject spot if outside boundary
 C
-      	  IF(IXC(I).GT.NXM2) GO TO 115
-      	  IF(IXC(I).LT.-NXM2) GO TO 115
-      	  IF(IYC(I).GT.NY2M2) GO TO 115
-      	  IF(IYC(I).LT.-NY2M2) GO TO 115
-      	  WRITE(6,1070) IH(I),IK(I),XA(I),YA(I),IXC(I),IYC(I)
- 1070 	  FORMAT(20X,2I5,2F10.1,12X,I5,2X,I5)
-      	  NSPOT = I
-      	  GO TO 110
+          IF(IXC(I).GT.NXM2) GO TO 115
+          IF(IXC(I).LT.-NXM2) GO TO 115
+          IF(IYC(I).GT.NY2M2) GO TO 115
+          IF(IYC(I).LT.-NY2M2) GO TO 115
+          WRITE(6,1070) IH(I),IK(I),XA(I),YA(I),IXC(I),IYC(I)
+ 1070     FORMAT(20X,2I5,2F10.1,12X,I5,2X,I5)
+          NSPOT = I
+          GO TO 110
       END IF
 C
 C     data read in proceed
@@ -383,16 +383,16 @@ CHEN
       SUMRMSBKOLD=0.0
       SUMRMSBKNEW=0.0
 C
-      IF(PLOTPTS.EQ.YES) THEN		! Plot initialisation.
+      IF(PLOTPTS.EQ.YES) THEN           ! Plot initialisation.
 C        write(6,'('' Hier 1'')')
-      	CALL TTPLOT(0,0,IQ,AX,BX,AY,BY,
+        CALL TTPLOT(0,0,IQ,AX,BX,AY,BY,
      .    TLTAXIS,TRNSTEPX,RATIOXY,TITLE,RESMIN,RESMAX,
      .    NSPOTS,ORIANG,ORITAX,ORITAN,
      .    DSTEP,DFMID1,DFMID2,ANGAST,XMAG,NHOR,NVERT)
 C        write(6,'('' Hier 2'')')
       ENDIF
 C      write(6,'('' Hier 3'')')
-      WRITE(6,1103)		!  Asterisks to mark beginning of output.
+      WRITE(6,1103)             !  Asterisks to mark beginning of output.
 C
 C  Beginning of Do-loop over all required spots.
 C
@@ -410,8 +410,8 @@ C   calculated inside subroutine CTFGEN.
 C  INHOR,INVERT is then the necessary input box size from the transform needed
 C   to carry out the convolution multiplication successfully.
 c   It is always bigger than either ctf box or the output box.
-C		INHOR  = IHOR  + ICTFHOR  (- 1)
-C		INVERT = IVERT + ICTFVERT (- 1)
+C               INHOR  = IHOR  + ICTFHOR  (- 1)
+C               INVERT = IVERT + ICTFVERT (- 1)
 C
       CALL CTFGEN(IH(I),IK(I),XA(I),YA(I),RATIOXY,
      .    THETATR,DFMID1,DFMID2,ANGAST,
@@ -420,8 +420,8 @@ C
      .    ICTFHOR,ICTFVERT,ACTF,BCTF,
      .    ILIST,DFMID,DELCHI,CTFMID,FACTOR,ISENS)
 C
-      INHOR  = IHOR  + ICTFHOR 		! ODD = ODD +EVEN
-      INVERT = IVERT + ICTFVERT 	! ODD = ODD +EVEN
+      INHOR  = IHOR  + ICTFHOR          ! ODD = ODD +EVEN
+      INVERT = IVERT + ICTFVERT         ! ODD = ODD +EVEN
       INHOR2 = INHOR / 2
       INVERT2= INVERT/ 2
 C
@@ -437,9 +437,9 @@ C
       IF(IYL.LT.-NY2M1) GO TO 160
       IF(IYU.GT.NY2M1) GO TO 160
       GO TO 180
-160	WRITE(6,161) IH(I),IK(I)
-161	FORMAT(' SPOT TOO NEAR EDGE FOR CTF TILT CORRECTION',2I8)
-      	GO TO 500
+160     WRITE(6,161) IH(I),IK(I)
+161     FORMAT(' SPOT TOO NEAR EDGE FOR CTF TILT CORRECTION',2I8)
+        GO TO 500
 180   CONTINUE
 C
 C     set up box edge coordinates
@@ -472,7 +472,7 @@ C
         TURN = .TRUE.
 C        write(6,'(''-ve IX1,IX2,IY1,IY2,IXOUT1,IXOUT2,INVERT:'',7I10)')IX1,IX2,IY1,IY2,IXOUT1,IXOUT2,INVERT
         CALL  RDSECT(IX1,IX2,IY1,IY2,IXOUT1,IXOUT2,INVERT,
-     .  	IX,IY,AP,BP,DELPX,DELPY,TURN)
+     .          IX,IY,AP,BP,DELPX,DELPY,TURN)
         GO TO 280
       END IF
 C
@@ -602,9 +602,9 @@ C
       BSUM2 = 0.
       DENOM=0.
 C      write(6,'('' INTYA,IYL,I,YA(I)='',3I12.F12.3)')INTYA,IYL,I,YA(I)
-      DO L2 = 1,2	! Vector phases over 2x2 points only.
+      DO L2 = 1,2       ! Vector phases over 2x2 points only.
         K = K1 + L2 - 1
-        DO L1 = 1,2	!
+        DO L1 = 1,2     !
           J = J1 + L1 - 1
 C         write(6,'('' j,k,INTYA,IYL='',4I12)')j,k,INTYA,IYL
           AMP = AAMP(J,K)
@@ -643,32 +643,32 @@ C changes to calculate better background using same algorithm as peak
       SUMRMSBKNEW=SUMRMSBKNEW+RMSBK
 C
       IF(ASUM1.NE.0..OR.BSUM1.NE.0.) THEN 
-      	VECPHA1 = ATAN2(BSUM1,ASUM1) * 57.2958
-      	ELSE
-      	VECPHA1 = 0.
+        VECPHA1 = ATAN2(BSUM1,ASUM1) * 57.2958
+        ELSE
+        VECPHA1 = 0.
       END IF
       IF(VECPHA1.LT.0.) VECPHA1 = VECPHA1 + 360.
 C
       IF(ASUM2.NE.0..OR.BSUM2.NE.0.) THEN 
-      	VECPHA2 = ATAN2(BSUM2,ASUM2) * 57.2958
-      	AMPSINC = SQRT(ASUM2**2 + BSUM2**2)/DENOM
-      	IF(AMPSINC.LE.RMSBK) THEN
-   	  AMPOUT = 0.00001
-      	ELSE
-      	  AMPOUT = SQRT(AMPSINC**2 - RMSBK**2)
-      	ENDIF
+        VECPHA2 = ATAN2(BSUM2,ASUM2) * 57.2958
+        AMPSINC = SQRT(ASUM2**2 + BSUM2**2)/DENOM
+        IF(AMPSINC.LE.RMSBK) THEN
+          AMPOUT = 0.00001
+        ELSE
+          AMPOUT = SQRT(AMPSINC**2 - RMSBK**2)
+        ENDIF
       ELSE
-      	VECPHA2 = 0.
-      	AMPSINC = 0.
-      	AMPOUT = 0.00001
+        VECPHA2 = 0.
+        AMPSINC = 0.
+        AMPOUT = 0.00001
       END IF
       IF(VECPHA2.LT.0.) VECPHA2 = VECPHA2 + 360.
       PHSOUT=VECPHA2
-      	PHSERR = (180.0/PI)*RMSBK/AMPOUT
-      	IQ = 1 + (PHSERR/7.0)		! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
-      	IQ = MIN(IQ,8)			!            IQ=7     AMP= 1x RMSBK
-      	IF(AMPOUT.EQ.0.00001)IQ=9
-      	AMPTOTAL = AMPTOTAL + AMPOUT
+        PHSERR = (180.0/PI)*RMSBK/AMPOUT
+        IQ = 1 + (PHSERR/7.0)           ! THIS MEANS IQ=1 HAS AMP= 8x RMSBK
+        IQ = MIN(IQ,8)                  !            IQ=7     AMP= 1x RMSBK
+        IF(AMPOUT.EQ.0.00001)IQ=9
+        AMPTOTAL = AMPTOTAL + AMPOUT
 C
 C     sum squared amplitudes
 C
@@ -704,10 +704,10 @@ C
       IF(IOUT.NE.0) THEN
         WRITE(IOUT,1107)IH(I),IK(I),AMPOUT,PHSOUT,
      .    IQ,RMSBK,DUMMY
-1107	FORMAT(2I5,2F12.1,I5,2F12.1)
+1107    FORMAT(2I5,2F12.1,I5,2F12.1)
       ENDIF
-      IF(PLOTPTS.EQ.YES) THEN		! Plot spot
-      	CALL TTPLOT(IH(I),IK(I),IQ,AX,BX,AY,BY,
+      IF(PLOTPTS.EQ.YES) THEN           ! Plot spot
+        CALL TTPLOT(IH(I),IK(I),IQ,AX,BX,AY,BY,
      .    TLTAXIS,TRNSTEPX,RATIOXY,TITLE,RESMIN,RESMAX,
      .    NSPOTS,ORIANG,ORITAX,ORITAN,
      .    DSTEP,DFMID1,DFMID2,ANGAST,XMAG,NHOR,NVERT)
@@ -719,17 +719,17 @@ C
 C     set up pagination
 C
       NUMOUT = NUMOUT + 1
-      	  IF(NUMOUT.GE.NUMSPOT)	ILIST=.FALSE.
-      	  IF(NUMOUT.EQ.NUMSPOT+1) THEN
-      		WRITE(6,1103)
-      		WRITE(6,1102)
-      	  ENDIF
-1102	  FORMAT(/,' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS')
-1108	  FORMAT('    H    K       AMPOUT  PHSOUT IQ       RMSBK     DFMID    ',
+          IF(NUMOUT.GE.NUMSPOT) ILIST=.FALSE.
+          IF(NUMOUT.EQ.NUMSPOT+1) THEN
+                WRITE(6,1103)
+                WRITE(6,1102)
+          ENDIF
+1102      FORMAT(/,' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS')
+1108      FORMAT('    H    K       AMPOUT  PHSOUT IQ       RMSBK     DFMID    ',
      .     'NCTFSAMPLES    CTFINMIDDLE   RESCALING BY')
-       	  IF(NUMOUT.GT.NUMSPOT) THEN
-      	   NUMAFTER=NUMOUT-NUMSPOT-1	! Test for table heading output.
-      	   IF(60*((NUMAFTER)/60).EQ.NUMAFTER) WRITE(6,1108)
+          IF(NUMOUT.GT.NUMSPOT) THEN
+           NUMAFTER=NUMOUT-NUMSPOT-1    ! Test for table heading output.
+           IF(60*((NUMAFTER)/60).EQ.NUMAFTER) WRITE(6,1108)
 C
 CHEN
            CZEILE(1:24)='8877665544332211'
@@ -738,11 +738,11 @@ CHEN
            ITEMP=19-IQ-IQ-2
            IF(ITEMP.GE.1)CZEILE(1:ITEMP) = '------------------'
 C
-      	   WRITE(6,1101)IH(I),IK(I),ISENS,AMPOUT,PHSOUT,IQ,RMSBK,
+           WRITE(6,1101)IH(I),IK(I),ISENS,AMPOUT,PHSOUT,IQ,RMSBK,
      .     DFMID,DELCHI,ICTFHOR,CTFMID,FACTOR,CZEILE(1:17)
 CHEN
-      	  ENDIF
-1101	FORMAT(2I5,A1,F12.1,F8.1,I3,F12.1,F10.1,F11.2,
+          ENDIF
+1101    FORMAT(2I5,A1,F12.1,F8.1,I3,F12.1,F10.1,F11.2,
      .  '(',I3,')',F11.4,F9.3,'  ',A17)
       IF(NUMOUT.GT.NUMSPOT) GO TO 500
 C
@@ -781,7 +781,7 @@ C
  1180 FORMAT('+',72X,I5,4X,10I5)
       L = L - 1
   390 CONTINUE
-      IF(ILIST)WRITE(6,1103)	! Asterisks.
+      IF(ILIST)WRITE(6,1103)    ! Asterisks.
       GO TO 500
 C
 C     write amps first then phases
@@ -805,7 +805,7 @@ C
       WRITE(6,1170) IYGU(L),(IPHI(J,L),J=1,IHOR)
       L = L - 1
   440 CONTINUE
-      IF(ILIST)WRITE(6,1103)	!   Asterisks
+      IF(ILIST)WRITE(6,1103)    !   Asterisks
   500 CONTINUE
 C
       IF(SUMRMSBKOLD.GT.0.) WRITE(6,501) SUMRMSBKNEW/SUMRMSBKOLD
@@ -814,12 +814,12 @@ C
      .  'calculation was',F10.4,/,' It varies with inter-pixel ',
      .  'correlation which in turn depends on boxing of image')
 C
-      	IF(PLOTPTS.EQ.YES) THEN		! terminate plot
-      	CALL TTPLOT(999,999,IQ,AX,BX,AY,BY,
+        IF(PLOTPTS.EQ.YES) THEN         ! terminate plot
+        CALL TTPLOT(999,999,IQ,AX,BX,AY,BY,
      .    TLTAXIS,TRNSTEPX,RATIOXY,TITLE,RESMIN,RESMAX,
      .    NSPOTS,ORIANG,ORITAX,ORITAN,
      .    DSTEP,DFMID1,DFMID2,ANGAST,XMAG,NHOR,NVERT)
-      	ENDIF
+        ENDIF
 C
 C     write summed,squared amplitudes
 C
@@ -843,7 +843,7 @@ CHEN
           endif
   520 CONTINUE
 C
-      WRITE(6,1250)	! Amplitude output
+      WRITE(6,1250)     ! Amplitude output
  1250 FORMAT(/,/,132('*'),/,/,1X,'SQRT of summed,squared amplitudes',
      .  /,1X,33('-'),/)
 C
@@ -875,7 +875,7 @@ CHEN<
       WRITE(6,1252)
 C
       SCALEFAC = 7.0/PERIM
-      WRITE(6,1251) SCALEFAC		! Intensity output
+      WRITE(6,1251) SCALEFAC            ! Intensity output
  1251 FORMAT(/,/,132('*'),/,/,1X,'scaled intensities (perimeter',
      .  ' averaged to 7.0)',
      .  '   scale factor = ',F12.7,/,1X,40('-'))
@@ -886,10 +886,10 @@ C
       INEAR=ISUMI(IHOR2+1,IVERT2) + ISUMI(IHOR2+1,IVERT2+2) +
      .  ISUMI(IHOR2,IVERT2+1) + ISUMI(IHOR2+2,IVERT2+1)
       IF(INEAR.LE.28) THEN
-      	IF(ICENTRE.GT.7)PERCENT=100.0
-      	IF(ICENTRE.LE.7)PERCENT=0.0
+        IF(ICENTRE.GT.7)PERCENT=100.0
+        IF(ICENTRE.LE.7)PERCENT=0.0
       ELSE
-      	PERCENT=((ICENTRE-7)*100.0)/((INEAR-28)*2.5)
+        PERCENT=((ICENTRE-7)*100.0)/((INEAR-28)*2.5)
 C
 CHEN--- same is :
 C       PERCENT=((ICENTRE-7)*100.0)/(((INEAR/4.0)-7)*10.0)
@@ -939,9 +939,11 @@ C     1  +NIQ(6)*2+NIQ(7))*RSCAMAX/200
 CHEN>
           write(IOU2,'(''set QVAL_local = '',F16.1)')NEWMAX
 C
+          call shorten(CNAMPAT,k)
+          if(k.gt.3)k=3
           do J = 1,9
-            write(IOU2,'(''set '',A2,''_IQ'',I1,'' = '',I4)')
-     1        CNAMPAT(1:2),J,NIQ(J)
+            write(IOU2,'(''set '',A,''_IQ'',I1,'' = '',I4)')
+     1        CNAMPAT(1:k),J,NIQ(J)
           enddo
 
 C        WRITE(IOU2,1259)NEWMAX,(NIQ(J),J=1,9),ILSUM,RSCAMAX,RLMAX
@@ -962,11 +964,11 @@ C
 CHEN
 C
       STOP
-4550	WRITE(6,4551)NMAX
-4551	FORMAT(' Too many spots for current prog dimensions',I5)
+4550    WRITE(6,4551)NMAX
+4551    FORMAT(' Too many spots for current prog dimensions',I5)
       STOP
-6001	WRITE(6,6002)ISIZEX,ISIZEY,NX,NY
-6002	FORMAT(' Image is not of size ISIZEX by ISIZEY',4I8)
+6001    WRITE(6,6002)ISIZEX,ISIZEY,NX,NY
+6002    FORMAT(' Image is not of size ISIZEX by ISIZEY',4I8)
       STOP 
       END
 C
@@ -988,7 +990,7 @@ C
    10 FORMAT(/,' Lattice generated coordinates',/,8X,'H',9X,'K',
      1       7X,'X',9X,'Y',/,'0')
       WRITE(6,9001)TRNSTEPX
-9001	FORMAT(' STEP SIZE IN TRANSFORM IN X DIRECTION IN A-1',F12.8,/)
+9001    FORMAT(' STEP SIZE IN TRANSFORM IN X DIRECTION IN A-1',F12.8,/)
       TRNSTEPXSQ=TRNSTEPX**2
       NOHD = 2 * NOH + 1
       NOKD = 2 * NOK + 1
@@ -996,25 +998,25 @@ C
       NOUTSIDE=0
       DO 100 NH=1,NOHD
       DO 100 NK=1,NOKD
-      	JH = NH - NOH - 1
-      	JK = NK - NOK - 1
+        JH = NH - NOH - 1
+        JK = NK - NOK - 1
       IF(JH.EQ.0.AND.JK.EQ.0)GO TO 100
-      	X = JH * AX + JK * BX
-      	Y = JH * AY + JK * BY
+        X = JH * AX + JK * BX
+        Y = JH * AY + JK * BY
 C
 C   YC is Y coord on same scale as X, ie in undistorted transform space 
         YC = JH * ACY + JK * BCY
         ANGLE=ATAN2(YC,X)
-      	IF(Y.LT.0.) GO TO 100
+        IF(Y.LT.0.) GO TO 100
 C
-C	Resolution calculated from X and YC
+C       Resolution calculated from X and YC
       DSTARSQ=(X**2+YC**2)*TRNSTEPXSQ
       IF(DSTARSQ.EQ.0.0)GO TO 100
       DSQ=1.0/DSTARSQ
       IF(DSQ.LT.RESMAXSQ.OR.DSQ.GT.RESMINSQ)GO TO 100
 C
-C	
-C	Need angle that is in undistorted transform space
+C       
+C       Need angle that is in undistorted transform space
       ANGDIF=ABS(ANGLE-TLTAXIS)*57.29577
 50    IF(ANGDIF.GT.180.0) THEN
         ANGDIF=ANGDIF-180.0
@@ -1028,35 +1030,35 @@ C	Need angle that is in undistorted transform space
         IF(90.0-ANGDIF.GT.-SEGMNT) GO TO 100
       ENDIF
 C
-      	IF(ABS(NINT(X)).GT.NXM2.OR.ABS(NINT(Y)).GT.NY2M2)THEN
+        IF(ABS(NINT(X)).GT.NXM2.OR.ABS(NINT(Y)).GT.NY2M2)THEN
       NOUTSIDE=NOUTSIDE+1
        GO TO 100
       END IF
 C
 C     spot within radius criterion  and within box, and within required segment.
 C
-      	NSPOT = NSPOT + 1
-	IF (NSPOT.GT.NMAX) GO TO 4550
-      	IXC(NSPOT) = X + SIGN(0.5,X)
-      	IYC(NSPOT) = Y + SIGN(0.5,Y)
-      	XA(NSPOT) = X
-      	YA(NSPOT) = Y
+        NSPOT = NSPOT + 1
+        IF (NSPOT.GT.NMAX) GO TO 4550
+        IXC(NSPOT) = X + SIGN(0.5,X)
+        IYC(NSPOT) = Y + SIGN(0.5,Y)
+        XA(NSPOT) = X
+        YA(NSPOT) = Y
 C
-      	IH(NSPOT) = JH
-      	IK(NSPOT) = JK
-      	IF(LIST)WRITE(6,20) JH,JK,X,Y,NSPOT
+        IH(NSPOT) = JH
+        IK(NSPOT) = JK
+        IF(LIST)WRITE(6,20) JH,JK,X,Y,NSPOT
 C      WRITE(6,*)X,YC
-   20 	FORMAT(2I10,2F10.1,I12)
+   20   FORMAT(2I10,2F10.1,I12)
   100 CONTINUE
       WRITE(6,4552)NSPOT
 4552  FORMAT('  THERE WERE A TOTAL OF',I5,'  SPOTS GENERATED')
       WRITE(6,4553)NOUTSIDE
-4553	FORMAT(' Number in requested resolution range but outside',
+4553    FORMAT(' Number in requested resolution range but outside',
      .' area of transform',I5,/)
       RETURN
-4550	WRITE(6,4551) NMAX
-4551	FORMAT(' TOO MANY SPOTS FOR CURRENT PROG DIMENSION',I5)
-	STOP
+4550    WRITE(6,4551) NMAX
+4551    FORMAT(' TOO MANY SPOTS FOR CURRENT PROG DIMENSION',I5)
+        STOP
       END
 C
 C*******************************************************************************
@@ -1100,30 +1102,30 @@ C
      1       7X,'X',9X,'Y',/,'0')
       NSPOT = 0
       DO 100 I=1,NMAX
-      	READ(5,*,END=200) JH,JK
-      	IF(JH.EQ.100) GO TO 200 
-      	X = JH * AX + JK * BX
-      	Y = JH * AY + JK * BY
+        READ(5,*,END=200) JH,JK
+        IF(JH.EQ.100) GO TO 200 
+        X = JH * AX + JK * BX
+        Y = JH * AY + JK * BY
 C
 C  YC is Y coord on same scale as X; ie in undistorted transform space
 C
         YC = JH * ACY + JK * BCY
-      	IF(ABS(NINT(X)).GT.NXM2.OR.ABS(NINT(Y)).GT.NY2M2) THEN
-      		WRITE(6,23)JH,JK,X,Y,NXM2,NY2M2
-23		FORMAT(' Requested spot not inside box,',
+        IF(ABS(NINT(X)).GT.NXM2.OR.ABS(NINT(Y)).GT.NY2M2) THEN
+                WRITE(6,23)JH,JK,X,Y,NXM2,NY2M2
+23              FORMAT(' Requested spot not inside box,',
      .  ' JH,JK,X,Y,NXM2,NY2M2=',2I5,2F10.1,2I6)
-      		GO TO 100
-      	ENDIF
-      	NSPOT = NSPOT + 1
-      	IXC(NSPOT) = X + SIGN(0.5,X)
-      	IYC(NSPOT) = Y + SIGN(0.5,Y)
-      	XA(NSPOT) = X
-      	YA(NSPOT) = Y
+                GO TO 100
+        ENDIF
+        NSPOT = NSPOT + 1
+        IXC(NSPOT) = X + SIGN(0.5,X)
+        IYC(NSPOT) = Y + SIGN(0.5,Y)
+        XA(NSPOT) = X
+        YA(NSPOT) = Y
 C
-      	IH(NSPOT) = JH
-      	IK(NSPOT) = JK
-      	IF(LIST)WRITE(6,20) JH,JK,X,Y
-   20 	FORMAT(2I10,2F10.1)
+        IH(NSPOT) = JH
+        IK(NSPOT) = JK
+        IF(LIST)WRITE(6,20) JH,JK,X,Y
+   20   FORMAT(2I10,2F10.1)
   100 CONTINUE
       WRITE(6,22) NMAX
 22    FORMAT('  TOO MANY SPOTS FOR PROGRAM DIMENSIONS',I6)
@@ -1143,7 +1145,7 @@ C     for the ctf-dependent convolution, then store in array AP,BP for return
 C     to main program ---- phases are corrected to desired phase origin.
 C
       PARAMETER (INBOXMAX=361)
-      DIMENSION ARRAY(2*INBOXMAX,INBOXMAX)	! Square array of complex no's.
+      DIMENSION ARRAY(2*INBOXMAX,INBOXMAX)      ! Square array of complex no's.
       DIMENSION AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
       LOGICAL TURN
       CALL  IRDPAS(1,ARRAY,2*INBOXMAX,INBOXMAX,IX1,IX2,IY1,IY2,*900)
@@ -1200,37 +1202,37 @@ C
 C
 C*******************************************************************************
 C
-	SUBROUTINE ANGAVE(N, THETAS, WEIGHTS, THMEAN, THGOOD)
-C	Function: to average a set of angles in degrees
-C	Created: 27/7/84 by D.J.Thomas
-C	Modified:  by R.HENDERSON 20.5.85
-	INTEGER*4	N		!number of input angles
-	REAL*4   	THETAS(1)	!array of input angles
-	REAL*4   	THGOOD		!goodness of average (0 to 1)
-	REAL*4   	THMEAN		!weighted average of input angles
-	REAL     	COMEAN		!mean value of cosines
-	REAL     	SIMEAN		!mean value of sines
-	REAL		WEIGHT		!total input weight
-	REAL*4		WEIGHTS(1)	!weights on input angles
+        SUBROUTINE ANGAVE(N, THETAS, WEIGHTS, THMEAN, THGOOD)
+C       Function: to average a set of angles in degrees
+C       Created: 27/7/84 by D.J.Thomas
+C       Modified:  by R.HENDERSON 20.5.85
+        INTEGER*4       N               !number of input angles
+        REAL*4          THETAS(1)       !array of input angles
+        REAL*4          THGOOD          !goodness of average (0 to 1)
+        REAL*4          THMEAN          !weighted average of input angles
+        REAL            COMEAN          !mean value of cosines
+        REAL            SIMEAN          !mean value of sines
+        REAL            WEIGHT          !total input weight
+        REAL*4          WEIGHTS(1)      !weights on input angles
 C
-	IF (N .LE. 0) GO TO 20
-	WEIGHT = 0.0
-	COMEAN = 0.0
-	SIMEAN = 0.0
-	DO 10 I=1,N
-	WEIGHT = WEIGHT + WEIGHTS(I)
-	COMEAN = COMEAN + (COS(THETAS(I)*0.01745329252)*WEIGHTS(I))
-	SIMEAN = SIMEAN + (SIN(THETAS(I)*0.01745329252)*WEIGHTS(I))
-10	CONTINUE
-	IF ((SIMEAN .EQ. 0.0) .AND. (COMEAN .EQ. 0.0)) GO TO 20
-	THMEAN = 57.295779513*ATAN2(SIMEAN,COMEAN)
-      	IF(THMEAN.LT.0.0) THMEAN=THMEAN+360.0
-	IF (WEIGHT .EQ. 0.0) GO TO 20
-	THGOOD = SQRT((SIMEAN*SIMEAN) + (COMEAN*COMEAN))/WEIGHT
-	RETURN
-20	THGOOD = 0.0			!average is undefined
-	RETURN
-	END
+        IF (N .LE. 0) GO TO 20
+        WEIGHT = 0.0
+        COMEAN = 0.0
+        SIMEAN = 0.0
+        DO 10 I=1,N
+        WEIGHT = WEIGHT + WEIGHTS(I)
+        COMEAN = COMEAN + (COS(THETAS(I)*0.01745329252)*WEIGHTS(I))
+        SIMEAN = SIMEAN + (SIN(THETAS(I)*0.01745329252)*WEIGHTS(I))
+10      CONTINUE
+        IF ((SIMEAN .EQ. 0.0) .AND. (COMEAN .EQ. 0.0)) GO TO 20
+        THMEAN = 57.295779513*ATAN2(SIMEAN,COMEAN)
+        IF(THMEAN.LT.0.0) THMEAN=THMEAN+360.0
+        IF (WEIGHT .EQ. 0.0) GO TO 20
+        THGOOD = SQRT((SIMEAN*SIMEAN) + (COMEAN*COMEAN))/WEIGHT
+        RETURN
+20      THGOOD = 0.0                    !average is undefined
+        RETURN
+        END
 C
 C*******************************************************************************
 C
@@ -1249,7 +1251,7 @@ C--------------------------ICTFBXMAX must be 2*ICTFHALF+1
      .  ACTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
      .  BCTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
      .  AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
-c      DIMENSION AT(5,5),PT(5,5)		! TEST DIAGNOSTIC O/P
+c      DIMENSION AT(5,5),PT(5,5)                ! TEST DIAGNOSTIC O/P
 C
 C-----AP and BP are input transforms (cos and sin fractions)
 C-----ACTF and BCTF are FFT of CTF pattern (cos and sin fraction)
@@ -1258,14 +1260,14 @@ C
       ICTFVERT2 = ICTFVERT/2
       DO I=1,IHOR
         DO J=1,IVERT
-      	  A=0.
-      	  B=0.
-	  itmp1=I+ICTFHOR2
-	  itmp2=J+ICTFVERT2
-      	  DO ICTF=-ICTFHOR2,ICTFHOR2
-      	    DO JCTF=-ICTFVERT2,ICTFVERT2
-      	       K=itmp1-ICTF
-      	       L=itmp2-JCTF
+          A=0.
+          B=0.
+          itmp1=I+ICTFHOR2
+          itmp2=J+ICTFVERT2
+          DO ICTF=-ICTFHOR2,ICTFHOR2
+            DO JCTF=-ICTFVERT2,ICTFVERT2
+               K=itmp1-ICTF
+               L=itmp2-JCTF
 C
 C--------------A is real part: RE(pic1)*RE(pic2) + i*IM(pic1)*i*IM(pic2)
 C--------------               =RE(pic1)*RE(pic2) - IM(pic1)*IM(pic2)
@@ -1276,24 +1278,24 @@ C--------------K = I + ICTFHOR2 - ICTF
 C--------------K e {1...IHOR+2*ICTFHOR2} = { 1 ... IHOR+ICTFHOR }
 C--------------K is centered around (IHOR/2 + ICTFHOR2)
 C
-      	       A = A + AP(K,L)*ACTF(ICTF,JCTF) - BP(K,L)*BCTF(ICTF,JCTF)
-	       B = B + AP(K,L)*BCTF(ICTF,JCTF) + BP(K,L)*ACTF(ICTF,JCTF)
-	     enddo
-  	   enddo
+               A = A + AP(K,L)*ACTF(ICTF,JCTF) - BP(K,L)*BCTF(ICTF,JCTF)
+               B = B + AP(K,L)*BCTF(ICTF,JCTF) + BP(K,L)*ACTF(ICTF,JCTF)
+             enddo
+           enddo
 C
 C---------extract (RE,IM)=(cos,sin) into (AMP,PHASE)
 C
-      	  AMP = SQRT(A*A + B*B)
+          AMP = SQRT(A*A + B*B)
 C---------write(6,'(''AMP: '',F12.5)')AMP
-      	  IF(AMP.EQ.0.0) THEN
-      	    PHASE = 0.
-      	  ELSE
-      	    PHASE = ATAN2(B,A) * 57.2958
-      	  ENDIF
-      	  IF(PHASE.LT.0.0) PHASE = PHASE + 360.0	! Phase bet 0 and 360 deg.
-      	  AAMP(I,J) = AMP
-      	  PPHI(I,J) = PHASE
-	enddo
+          IF(AMP.EQ.0.0) THEN
+            PHASE = 0.
+          ELSE
+            PHASE = ATAN2(B,A) * 57.2958
+          ENDIF
+          IF(PHASE.LT.0.0) PHASE = PHASE + 360.0        ! Phase bet 0 and 360 deg.
+          AAMP(I,J) = AMP
+          PPHI(I,J) = PHASE
+        enddo
       enddo
       RETURN
       END
@@ -1369,20 +1371,20 @@ C                  y, incy, ldy, i1y0, ny1, i2y0, ny2,
 C                  alpha, beta)
 C
       DO I=1,IHOR
-      	DO J=1,IVERT
+        DO J=1,IVERT
           K = MOD(I,IHOR-ICTFHOR)+ICTFHOR
           L = MOD(J,IVERT-ICTFVERT)+ICTFVERT
-      	  AAMP(I,J) = CABS(OUTPUT(K,L))
-      	  IF(AAMP(I,J).EQ.0.0) THEN
-      	    PHASE = 0.
-      	  ELSE
-	          RIMA = AIMAG(OUTPUT(K,L))
+          AAMP(I,J) = CABS(OUTPUT(K,L))
+          IF(AAMP(I,J).EQ.0.0) THEN
+            PHASE = 0.
+          ELSE
+                  RIMA = AIMAG(OUTPUT(K,L))
             RREA = REAL (OUTPUT(K,L))
-      	    PHASE = ATAN2(RIMA,RREA) * 57.2958
-      	  ENDIF
-      	  IF(PHASE.LT.0.0) PHASE = PHASE + 360.0	! Phase bet 0 and 360 deg.
-      	  PPHI(I,J) = PHASE
-	enddo
+            PHASE = ATAN2(RIMA,RREA) * 57.2958
+          ENDIF
+          IF(PHASE.LT.0.0) PHASE = PHASE + 360.0        ! Phase bet 0 and 360 deg.
+          PPHI(I,J) = PHASE
+        enddo
       enddo
 C
       RETURN
@@ -1412,38 +1414,38 @@ C
       C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
       DELCHI=C1*DELHEIGHT
       SINEWAVES=DELCHI/TWOPI
-      	  ICTFHOR=MAX(10,INT(DELCHI))
-      	  ICTFHOR=(ICTFHOR/2)*2			    ! ensure ICTFHOR is even.
-      	  IF(ICTFHOR.GT.38) ICTFHOR=(ICTFHOR/8)*8   ! ensures prime factor < 19
-      	  IF(ICTFHOR.GT.ICTFBXMAX-1) THEN	    ! ensures storage ok.
-      		WRITE(6,101)ICTFHOR
-101		FORMAT(' Subroutine CTFGEN dimensions too small,',
+          ICTFHOR=MAX(10,INT(DELCHI))
+          ICTFHOR=(ICTFHOR/2)*2                     ! ensure ICTFHOR is even.
+          IF(ICTFHOR.GT.38) ICTFHOR=(ICTFHOR/8)*8   ! ensures prime factor < 19
+          IF(ICTFHOR.GT.ICTFBXMAX-1) THEN           ! ensures storage ok.
+                WRITE(6,101)ICTFHOR
+101             FORMAT(' Subroutine CTFGEN dimensions too small,',
      .  '  ICTFHOR needs',I8)
-      		STOP
-      	  ENDIF
-      	  ICTFVERT=ICTFHOR
-      	  ICTFHOR2=ICTFHOR/2
-      	  ICTFVERT2=ICTFVERT/2
+                STOP
+          ENDIF
+          ICTFVERT=ICTFHOR
+          ICTFHOR2=ICTFHOR/2
+          ICTFVERT2=ICTFVERT/2
       C2=-C1*CS*ANGLE*ANGLE/2.0
       ANGDIF=ANGSPT-ANGAST
-      	CCOS=COS(2.0*ANGDIF)
-      	CSIN=SIN(2.0*ANGDIF)
-      	DFMID=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-      	CTFMID=-SIN(C1*DFMID+C2)
-      	IF(DELCHI/2.GT.ASIN(ABS(CTFMID))) ISENS=ICHAR('*')  !Spot has a zero in ctf
-      	SUMC=0.0
+        CCOS=COS(2.0*ANGDIF)
+        CSIN=SIN(2.0*ANGDIF)
+        DFMID=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
+        CTFMID=-SIN(C1*DFMID+C2)
+        IF(DELCHI/2.GT.ASIN(ABS(CTFMID))) ISENS=ICHAR('*')  !Spot has a zero in ctf
+        SUMC=0.0
       rtmp1=(1.0/(ICTFHOR))*ISIZEX*STEPR
       rtmp2=(1.0/(ICTFVERT))*ISIZEY*STEPR
       DO 100 I=1,ICTFHOR
       DO 100 J=1,ICTFVERT
-      	ISTORE=I+(ICTFHOR+2)*(J-1)	! indexing for array CTF.
-C	  Calculate height of this element of image.
-      	XP=(I-0.5-ICTFHOR2)*rtmp1		! 0.5 rounding error
-      	YP=(J-0.5-ICTFVERT2)*rtmp2		! 0.5 rounding error
-      	DF = DFMID + TANTILT*(-XP*SINT+YP*COST)
-      	CHI=C1*DF+C2
-      	CNTRST=-SIN(CHI)
-      	SUMC=SUMC+ABS(CNTRST)
+        ISTORE=I+(ICTFHOR+2)*(J-1)      ! indexing for array CTF.
+C         Calculate height of this element of image.
+        XP=(I-0.5-ICTFHOR2)*rtmp1               ! 0.5 rounding error
+        YP=(J-0.5-ICTFVERT2)*rtmp2              ! 0.5 rounding error
+        DF = DFMID + TANTILT*(-XP*SINT+YP*COST)
+        CHI=C1*DF+C2
+        CNTRST=-SIN(CHI)
+        SUMC=SUMC+ABS(CNTRST)
 100   CTF(ISTORE)=CNTRST
 C
 C  Now rescale so that the same power is present in the spot after convolution.
@@ -1451,7 +1453,7 @@ C  Now rescale so that the same power is present in the spot after convolution.
       FACTOR =ICTFHOR*ICTFVERT/SUMC
       DO 120 I=1,ICTFHOR
       DO 120 J=1,ICTFVERT
-      	ISTORE=I+(ICTFHOR+2)*(J-1)	! indexing for array CTF.
+        ISTORE=I+(ICTFHOR+2)*(J-1)      ! indexing for array CTF.
 120   CTF(ISTORE)=RESCALE*CTF(ISTORE)
 C
 C-----CALL TODFFT(CTF,ICTFHOR,ICTFVERT,0)
@@ -1465,35 +1467,35 @@ C  Now calculate correct phase shift for slightly offset origin for the
 C     contrast distribution function.
       PHSHFT = -TWOPI*(ICTFHOR2-0.5)/ICTFHOR
 C
-      	DO 150 I=1,ICTFHOR2+1
-      	DO 150 J=1,ICTFVERT
-      	ISTORE = (2*I-1)+(ICTFHOR+2)*(J-1)
-      	IF(J.LE.1+ICTFVERT2) THEN
-      		IX=I-1
-      		IY=J-1
-      		C=COS((IX+IY)*PHSHFT)	! assumes ICTFHOR=ICTFVERT
-      		S=SIN((IX+IY)*PHSHFT)	! assumes ICTFHOR=ICTFVERT
-      		A = CTF(ISTORE)
-      		B = CTF(ISTORE+1)
-      		ACTF(IX,IY) = A*C-B*S
-      		BCTF(IX,IY) = A*S+B*C
-      	ENDIF
-      	IF(J.GE.1+ICTFVERT2) THEN
-      		IX=I-1
-      		IY=J-1-ICTFVERT
-      		C=COS((IX+IY)*PHSHFT)	! assumes ICTFHOR=ICTFVERT
-      		S=SIN((IX+IY)*PHSHFT)	! assumes ICTFHOR=ICTFVERT
-      		A = CTF(ISTORE)
-      		B = CTF(ISTORE+1)
-      		ACTF(IX,IY) = A*C-B*S
-      		BCTF(IX,IY) = A*S+B*C
-      	ENDIF
-150	CONTINUE
-      	DO 160 I= 1,ICTFHOR2
-      	DO 160 J=-ICTFVERT2,ICTFVERT2
-      		ACTF(-I,-J) =  ACTF(I,J)
-      		BCTF(-I,-J) = -BCTF(I,J)
-160	CONTINUE
+        DO 150 I=1,ICTFHOR2+1
+        DO 150 J=1,ICTFVERT
+        ISTORE = (2*I-1)+(ICTFHOR+2)*(J-1)
+        IF(J.LE.1+ICTFVERT2) THEN
+                IX=I-1
+                IY=J-1
+                C=COS((IX+IY)*PHSHFT)   ! assumes ICTFHOR=ICTFVERT
+                S=SIN((IX+IY)*PHSHFT)   ! assumes ICTFHOR=ICTFVERT
+                A = CTF(ISTORE)
+                B = CTF(ISTORE+1)
+                ACTF(IX,IY) = A*C-B*S
+                BCTF(IX,IY) = A*S+B*C
+        ENDIF
+        IF(J.GE.1+ICTFVERT2) THEN
+                IX=I-1
+                IY=J-1-ICTFVERT
+                C=COS((IX+IY)*PHSHFT)   ! assumes ICTFHOR=ICTFVERT
+                S=SIN((IX+IY)*PHSHFT)   ! assumes ICTFHOR=ICTFVERT
+                A = CTF(ISTORE)
+                B = CTF(ISTORE+1)
+                ACTF(IX,IY) = A*C-B*S
+                BCTF(IX,IY) = A*S+B*C
+        ENDIF
+150     CONTINUE
+        DO 160 I= 1,ICTFHOR2
+        DO 160 J=-ICTFVERT2,ICTFVERT2
+                ACTF(-I,-J) =  ACTF(I,J)
+                BCTF(-I,-J) = -BCTF(I,J)
+160     CONTINUE
 C
       IF(ILIST) WRITE(6,103)DELHEIGHT,DFMID,SINEWAVES,
      .  DELCHI,ICTFHOR,CTFMID,FACTOR
@@ -1522,18 +1524,18 @@ C
       CHARACTER*8 TEXT
 C
       DATA RESTORE/7.0,5.5,3.5/
-      SCALE=PLTSIZ/(2.0*RESMAX)		!MAXIMUM RESOLUTION, 0.3=3.33 ANGSTROMS
-C	If IH=IK=0    the plot is initialised
-C	If IH=IK=999  the plot is terminated
-C	For other values of IH and IK, a symbol of size increasing with 
-C		decreasing IQ is plotted in the appropriate position.
+      SCALE=PLTSIZ/(2.0*RESMAX)         !MAXIMUM RESOLUTION, 0.3=3.33 ANGSTROMS
+C       If IH=IK=0    the plot is initialised
+C       If IH=IK=999  the plot is terminated
+C       For other values of IH and IK, a symbol of size increasing with 
+C               decreasing IQ is plotted in the appropriate position.
 C
 C  Here for initialisation
 C
-      IF(IH.EQ.0.AND.IK.EQ.0) THEN 	! Initialisation of plot
-     	    WRITE(6,20)
-20	    FORMAT(' ENTERING TTPLOT INITIALISATION')
-      	    NSPOTS = 0
+      IF(IH.EQ.0.AND.IK.EQ.0) THEN      ! Initialisation of plot
+            WRITE(6,20)
+20          FORMAT(' ENTERING TTPLOT INITIALISATION')
+            NSPOTS = 0
 
             CALL P2K_OUTFILE('TTPLOT.PS',9)
             CALL P2K_HOME
@@ -1665,16 +1667,16 @@ C
 C      write(6,'('' Hier 2c'')')
 C  Here for spot plots
 C
-      IF(IQ.GT.8) RETURN		! PLOTS SPOTS WITH IQ =8 OR LESS.
-C      	WRITE(6,21)IH,IK
+      IF(IQ.GT.8) RETURN                ! PLOTS SPOTS WITH IQ =8 OR LESS.
+C       WRITE(6,21)IH,IK
 21      FORMAT(' SPOT PLOTTED & FRIEDEL PAIR ',2I5)
       DO 100 J=-1,1,2
         IHP=J*IH
         IKP=J*IK
         X=IHP*AX+IKP*BX
         Y=IHP*AY+IKP*BY
-        X=X*TRNSTEPX		! X-coordinate of spot in reciprocal angstroms
-        Y=Y*RATIOXY*TRNSTEPX	! Y-coordinate of spot in reciprocal angstroms
+        X=X*TRNSTEPX            ! X-coordinate of spot in reciprocal angstroms
+        Y=Y*RATIOXY*TRNSTEPX    ! Y-coordinate of spot in reciprocal angstroms
         IF(ABS(X).GE.RESMAX)GO TO 100
         IF(ABS(Y).GE.RESMAX)GO TO 100
         X=X*SCALE
@@ -1740,67 +1742,92 @@ C first do sums along left and right edges of box
         DENOM = 0.
         DO 20 I=1,IS
         DO 20 J=1,IS
-      		JBOX=IH+I-1
-      		KBOX=IV+J-1
-      		DXC=DX-I+1
-      		DYC=DY-J+1
-        	IF(DXC.EQ.0.0.AND.DYC.EQ.0.0) THEN
-      			SINC = 1.
-        	ELSEIF(DYC.EQ.0.0) THEN
-      			SINC = (SIN(PI * DXC)) / (PI * DXC)
-      		ELSEIF(DXC.EQ.0.0) THEN
-      			SINC = (SIN(PI * DYC)) / (PI * DYC)
-        	ELSE
-      			SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
+                JBOX=IH+I-1
+                KBOX=IV+J-1
+                DXC=DX-I+1
+                DYC=DY-J+1
+                IF(DXC.EQ.0.0.AND.DYC.EQ.0.0) THEN
+                        SINC = 1.
+                ELSEIF(DYC.EQ.0.0) THEN
+                        SINC = (SIN(PI * DXC)) / (PI * DXC)
+                ELSEIF(DXC.EQ.0.0) THEN
+                        SINC = (SIN(PI * DYC)) / (PI * DYC)
+                ELSE
+                        SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
      .  (PI**2 * DXC * DYC)
-      		ENDIF
-      		AMP   = AAMP(JBOX,KBOX)
-      		PHASE = PPHI(JBOX,KBOX) / 57.2958
-        	ASUM = ASUM + AMP * COS(PHASE) * SINC
-        	BSUM = BSUM + AMP * SIN(PHASE) * SINC
-        	DENOM = DENOM + SINC**2
-20	CONTINUE
+                ENDIF
+                AMP   = AAMP(JBOX,KBOX)
+                PHASE = PPHI(JBOX,KBOX) / 57.2958
+                ASUM = ASUM + AMP * COS(PHASE) * SINC
+                BSUM = BSUM + AMP * SIN(PHASE) * SINC
+                DENOM = DENOM + SINC**2
+20      CONTINUE
         AMPSINC = SQRT(ASUM**2 + BSUM**2)/DENOM
-      	NBK=NBK+1
-      	SUMBKSQ=SUMBKSQ+AMPSINC**2
+        NBK=NBK+1
+        SUMBKSQ=SUMBKSQ+AMPSINC**2
 30    CONTINUE
 C second do sums along bottom and top edges of box
       DO 50 NH=2,IHOR-2
       DO 50 IBOTT=1,2
-      	IH = NH
-      	IV = 1 + (IBOTT-1)*(IVERT-2)
-      	ASUM = 0.
-      	BSUM = 0.
-      	DENOM = 0.
-      	DO 40 I=1,IS
-      	DO 40 J=1,IS
-      		JBOX=IH+I-1
-      		KBOX=IV+J-1
-      		DXC=DX-I+1
-      		DYC=DY-J+1
-        	IF(DXC.EQ.0.0.AND.DYC.EQ.0.0) THEN
-      			SINC = 1.
-        	ELSEIF(DYC.EQ.0.0) THEN
-      			SINC = (SIN(PI * DXC)) / (PI * DXC)
-      		ELSEIF(DXC.EQ.0.0) THEN
-      			SINC = (SIN(PI * DYC)) / (PI * DYC)
-        	ELSE
-      			SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
+        IH = NH
+        IV = 1 + (IBOTT-1)*(IVERT-2)
+        ASUM = 0.
+        BSUM = 0.
+        DENOM = 0.
+        DO 40 I=1,IS
+        DO 40 J=1,IS
+                JBOX=IH+I-1
+                KBOX=IV+J-1
+                DXC=DX-I+1
+                DYC=DY-J+1
+                IF(DXC.EQ.0.0.AND.DYC.EQ.0.0) THEN
+                        SINC = 1.
+                ELSEIF(DYC.EQ.0.0) THEN
+                        SINC = (SIN(PI * DXC)) / (PI * DXC)
+                ELSEIF(DXC.EQ.0.0) THEN
+                        SINC = (SIN(PI * DYC)) / (PI * DYC)
+                ELSE
+                        SINC = (SIN(PI * DXC) * SIN(PI * DYC)) /
      .  (PI**2 * DXC * DYC)
-      		ENDIF
-      		AMP   = AAMP(JBOX,KBOX)
-      		PHASE = PPHI(JBOX,KBOX) / 57.2958
-        	ASUM = ASUM + AMP * COS(PHASE) * SINC
-        	BSUM = BSUM + AMP * SIN(PHASE) * SINC
-        	DENOM = DENOM + SINC**2
-40	CONTINUE
+                ENDIF
+                AMP   = AAMP(JBOX,KBOX)
+                PHASE = PPHI(JBOX,KBOX) / 57.2958
+                ASUM = ASUM + AMP * COS(PHASE) * SINC
+                BSUM = BSUM + AMP * SIN(PHASE) * SINC
+                DENOM = DENOM + SINC**2
+40      CONTINUE
         AMPSINC = SQRT(ASUM**2 + BSUM**2)/DENOM
-      	NBK=NBK+1
-      	SUMBKSQ=SUMBKSQ+AMPSINC**2
+        NBK=NBK+1
+        SUMBKSQ=SUMBKSQ+AMPSINC**2
 50    CONTINUE
 C third calculate the overall rms background
       IF(NBK.NE.(2*(IVERT-1)+2*(IHOR-3))) STOP ' Error in GET_RMSBK'
       RMSBK=SQRT(SUMBKSQ/NBK)
-      RMSBK=RMSBK/1.10		! fudge factor to restore earlier scale of A/B
+      RMSBK=RMSBK/1.10          ! fudge factor to restore earlier scale of A/B
       RETURN
       END
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+

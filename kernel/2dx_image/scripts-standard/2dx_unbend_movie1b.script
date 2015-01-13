@@ -464,7 +464,7 @@ eot
        \rm -f frames/CCUNBEND_Table_${i}.dat
        \rm -f CCPLOT.PS
        \rm -f frames/CCUNBEND_frame_${i}_notap.mrc
-       if (${ctfcor_imode}x == "0x" ) then
+       if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == "4x" || ${ctfcor_imode}x == "5x" || ${ctfcor_imode}x == "6x" ) then
 	   set infile = frames/frame_${i}.mrc
        else
          set infile = frames/frame_${i}_ctfcor.mrc

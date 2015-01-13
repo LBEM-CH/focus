@@ -24,7 +24,7 @@ if ( ${ctfcor_imode} == "4" ) then
     ${proc_2dx}/linblock "TTBOXA - to read out AMPs and PHASES with TTF-correction"
     ${bin_2dx}/2dx_ttboxk.exe << eot
 ${unbent_FFT}
-${imagenumber} ${unbent_FFT}, ${date}
+${imagenumber} CTFcor_Mode=${ctfcor_imode} (TTFcor), ${date}
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
 N                        ! list points as calculated

@@ -201,7 +201,7 @@ eot
         cd ${olddir}
         set load_too_high = 1
         while ( ${load_too_high} == 1 ) 
-          sleep 20
+          sleep 1
           # set loadaverage = `uptime | cut -d\: -f4 | cut -d\  -f2`
           set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
           set ReUnbend_MP = `cat TMP.ReUnbend_MP.tmp`

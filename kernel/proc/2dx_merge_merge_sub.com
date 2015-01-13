@@ -62,9 +62,17 @@ foreach imagefile ( ${dirlist} )
     endif
   endif
   if ( ${merge_data_type} == '3' ) then
-    set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
-    set QVALMA_local =  `cat ../2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
-    set QVALMB_local =  `cat ../2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
+    set QVAL2_local  =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
+    set QVALMA_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
+    if ( ${QVALMA_loctmp} == '.' ) then
+      set QVALMA_loctmp = 0
+    endif 
+    set QVALMB_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
+    if ( ${QVALMB_loctmp} == '.' ) then
+      set QVALMB_loctmp = 0
+    endif 
+    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
     set QVAL_best = `echo ${QVAL2_local} ${QVALMA_local} ${QVALMB_local} | awk '{ if ( $1 > $2 && $1 > $3 ) { s = 1 } else if ( $2 > $1 && $2 > $3 ) { s = 2 } else { s = 3 } } END { print s }'`
     if ( ${QVAL_best} == '3' ) then
       if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then

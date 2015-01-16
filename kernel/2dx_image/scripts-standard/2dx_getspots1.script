@@ -176,7 +176,8 @@ echo "<<@progress: 20>>"
 #   16 * 45000
 #
 #
-set local_RESMAX = `echo ${spotlist_RESMAX} | awk '{ if ( $1 < 8.0 ) { s = 8.0 } else { s = $1 } } END { print s }'`
+set tmp_RESMAX = `echo ${spotlist_RESMAX} | awk '{ if ( $1 < 7.0 ) { s = 7.0 } else { s = $1 } } END { print s }'`
+set local_RESMAX = `echo ${tmp_RESMAX} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = $2 } else { s = $1 } } END { print s }'`
 ${proc_2dx}/linblock "Using resolution limit of ${local_RESMAX} Angstroems"
 #
 set RINNER = 1

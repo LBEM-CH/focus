@@ -149,14 +149,10 @@ if ( ${ReUnbend_All} == "4" ) then
   #
   cd ${olddir} 
   #
-  echo ${ReUnbend_MP} > TMP.ReUnbend_MP.tmp
-  echo ":: "
-  echo ":: "
-  echo ":: Saving Target Load (${ReUnbend_MP}) into file TMP.ReUnbend_MP.tmp"
-  echo ":: "
-  echo ":: "
-  set loadaverage = `uptime | cut -d\: -f4 | cut -d\  -f2`
+  # set loadaverage = `uptime | cut -d\: -f4 | cut -d\  -f2`
   set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
+  set ReUnbend_MP = `cat 2dx_merge.cfg | grep "set ReUnbend_MP" | cut -d\" -f2`
+  \cp -f 2dx_merge.cfg TMP.2dx_merge.cfg.tmp
   #
   set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
   echo ": Will work on ${dirnum} image directories."
@@ -188,28 +184,34 @@ eot
       # echo ":: QVALMA_local = ${QVALMA_local}" 
       # if ( ${QVALMA_local}x == "x"  || ${QVALMA_local}x == ".x" ||  ${QVALMA_local}x == "0.00x" ||  ${QVALMB_local}x == "x"  || ${QVALMB_local}x == ".x" ||  ${QVALMB_local}x == "0.00x" ) then
       if ( 1 == 1 ) then 
-        echo "Working on " ${curdir}
+        echo "Working on ${curdir} ("`date`")"
 
         ${proc_2dx}/linblock "At load ${loadaverage}/${ReUnbend_MP}, launching job ${dircounter} of ${dirnum} on ${dirfile}"
 
-        nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile}" &
+        nohup ${app_2dx_image} ${curdir} '"*"' ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
-        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile}" &
+        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
-        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getSampleTilt"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile}" &
+        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
+
+        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getSampleTilt"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
         cd ${olddir}
         set load_too_high = 1
         while ( ${load_too_high} == 1 ) 
-          sleep 1
-          # set loadaverage = `uptime | cut -d\: -f4 | cut -d\  -f2`
+          if ( -e 2dx_merge.cfg ) then
+            \cp -f 2dx_merge.cfg TMP.2dx_merge.cfg.tmp
+          endif
+          set ReUnbend_MP = `cat TMP.2dx_merge.cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
           set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
-          set ReUnbend_MP = `cat TMP.ReUnbend_MP.tmp`
           set load_too_high = `echo ${loadaverage} ${ReUnbend_MP} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+          if ( ${load_too_high} == 1 ) then
+            sleep 5
+          endif
         end
 
       else
-        echo ": Skipping ${dirfile}: QVALMA = ${QVALMA_local},  QVALMB = ${QVALMB_local}"
+        echo ": Skipping ${dirfile}: QVALMA = ${QVALMA_local},  QVALMB = ${QVALMB_local} ("`date`")"
       endif
     else
       echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."

@@ -183,7 +183,7 @@ eot
 \rm -f fort.1
 \mv -f fort.2 avrg.hkl
 \mv -f fort.3 avrg.hk
-\mv -f fort.4 APH/ctfmerge.nolimit.aph
+\mv -f fort.4 APH/ctfmerge.aph
 #\mv -f TMP444888.tmp SCRATCH/avrg.phares
 \rm -f TMP444888.tmp
 #

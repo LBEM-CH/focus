@@ -445,7 +445,7 @@ eot
             echo "set secondlattice_is_this = "\"y\" >> 2dx_image.cfg
             echo "set secondlattice_exists = "\"y\" >> 2dx_image.cfg
             ${proc_2dx}/linblock "Image cloned, new directory name is ${newdir}"
-            ${app_2dx_image} ${new_created_dir} "2dx_initialize"
+            # ${app_2dx_image} ${new_created_dir} "2dx_initialize"
             #
             cd ${olddir}
           endif

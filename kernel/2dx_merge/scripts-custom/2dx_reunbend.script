@@ -188,25 +188,27 @@ eot
 
         ${proc_2dx}/linblock "At load ${loadaverage}/${ReUnbend_MP}, launching job ${dircounter} of ${dirnum} on ${dirfile}"
 
-        nohup ${app_2dx_image} ${curdir} '"*"' ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
+        # nohup ${app_2dx_image} ${curdir} '"*"' ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
+
+        nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getDefTilt"; ${app_2dx_image} ${curdir} "2dx_getSampleTilt"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getSampleTilt"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
         cd ${olddir}
         set load_too_high = 1
         while ( ${load_too_high} == 1 ) 
-          if ( -e 2dx_merge.cfg ) then
-            \cp -f 2dx_merge.cfg TMP.2dx_merge.cfg.tmp
-          endif
           set ReUnbend_MP = `cat TMP.2dx_merge.cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
           set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
           set load_too_high = `echo ${loadaverage} ${ReUnbend_MP} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
           if ( ${load_too_high} == 1 ) then
             sleep 5
+            if ( -e 2dx_merge.cfg ) then
+              \cp -f 2dx_merge.cfg TMP.2dx_merge.cfg.tmp
+            endif
           endif
         end
 

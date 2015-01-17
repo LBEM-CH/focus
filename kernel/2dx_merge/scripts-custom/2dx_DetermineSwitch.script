@@ -134,6 +134,7 @@ echo date = ${date}
 #
 set scriptname = 2dx_DetermineSwitch
 \rm -f LOGS/${scriptname}.results
+\rm -f SCRATCH/${scriptname}.results
 #
 echo "<<@progress: 1>>"
 #
@@ -398,7 +399,7 @@ while ( ${currentline} <= ${linenum} )
   set olddir = $PWD
   if ( ${found_better} == "y" ) then
     echo "::Found better setting, with PhaseResidual = ${best_phares}"
-    echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+    echo "<IMAGEDIR="\"${newdir}\"">" >> SCRATCH/${scriptname}.results
     cd ${newdir}
     #
     if ( ${best_revhk} == "invert" ) then
@@ -411,7 +412,7 @@ while ( ${currentline} <= ${linenum} )
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "Inverting revhk from ${revhk} to ${newrevhk}"
       ${proc_2dx}/linblock "#"
-      echo "set revhk = ${newrevhk}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set revhk = ${newrevhk}" >> ${olddir}/SCRATCH/${scriptname}.results
     endif
     #
     if ( ${best_rot90} == "invert" ) then
@@ -424,7 +425,7 @@ while ( ${currentline} <= ${linenum} )
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "Inverting rot90 from ${rot90} to ${newrot90}"
       ${proc_2dx}/linblock "#"
-      echo "set rot90 = ${newrot90}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set rot90 = ${newrot90}" >> ${olddir}/SCRATCH/${scriptname}.results
     endif
     #
     if ( ${best_rot180} == "invert" ) then
@@ -437,7 +438,7 @@ while ( ${currentline} <= ${linenum} )
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "Inverting rot180 from ${rot180} to ${newrot180}"
       ${proc_2dx}/linblock "#"
-      echo "set rot180 = ${newrot180}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set rot180 = ${newrot180}" >> ${olddir}/SCRATCH/${scriptname}.results
     endif
     #
     if ( ${best_sgnxch} == "invert" ) then
@@ -450,7 +451,7 @@ while ( ${currentline} <= ${linenum} )
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "Inverting sgnxch from ${sgnxch} to ${newsgnxch}"
       ${proc_2dx}/linblock "#"
-      echo "set sgnxch = ${newsgnxch}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set sgnxch = ${newsgnxch}" >> ${olddir}/SCRATCH/${scriptname}.results
     endif
     #
     if ( ${best_revhnd} == "invert" ) then
@@ -463,7 +464,7 @@ while ( ${currentline} <= ${linenum} )
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "Inverting revhnd from ${revhnd} to ${newrevhnd}"
       ${proc_2dx}/linblock "#"
-      echo "set revhnd = ${newrevhnd}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set revhnd = ${newrevhnd}" >> ${olddir}/SCRATCH/${scriptname}.results
     endif
     #
     if ( ${best_revxsgn} == "invert" ) then
@@ -476,7 +477,7 @@ while ( ${currentline} <= ${linenum} )
       ${proc_2dx}/linblock "#"
       ${proc_2dx}/linblock "Inverting revxsgn from ${revxsgn} to ${newrevxsgn}"
       ${proc_2dx}/linblock "#"
-      echo "set revxsgn = ${newrevxsgn}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set revxsgn = ${newrevxsgn}" >> ${olddir}/SCRATCH/${scriptname}.results
     endif
     #
     if ( ${best_invert_tiltangle} == "invert" ) then
@@ -488,24 +489,24 @@ while ( ${currentline} <= ${linenum} )
       ${proc_2dx}/linblock "Inverting TLTANG from ${TLTANG} to ${newTLTANG}"
       ${proc_2dx}/linblock "Inverting TANGL  from ${TANGL} to ${newTANGL}"
       ${proc_2dx}/linblock "#"
-      echo "set TLTANG = ${newTLTANG}" >> ${olddir}/LOGS/${scriptname}.results
-      echo "set TANGL = ${newTANGL}" >> ${olddir}/LOGS/${scriptname}.results
-      echo "set MERGE_TLTANG = ${newTLTANG}" >> ${olddir}/LOGS/${scriptname}.results
-      echo "set MERGE_TANGL = ${newTANGL}" >> ${olddir}/LOGS/${scriptname}.results
+      echo "set TLTANG = ${newTLTANG}" >> ${olddir}/SCRATCH/${scriptname}.results
+      echo "set TANGL = ${newTANGL}" >> ${olddir}/SCRATCH/${scriptname}.results
+      echo "set MERGE_TLTANG = ${newTLTANG}" >> ${olddir}/SCRATCH/${scriptname}.results
+      echo "set MERGE_TANGL = ${newTANGL}" >> ${olddir}/SCRATCH/${scriptname}.results
     endif
     #
     cd ${olddir}
-    echo "set phaori = ${best_phaori}" >> LOGS/${scriptname}.results
-    # echo "set phaoriFouFilter = ${best_phaoriFouFilter}" >> LOGS/${scriptname}.results
-    echo "set phaori_last_change = ${best_phaori_last_change}" >> LOGS/${scriptname}.results
-    echo "set MergePhaseResidual = ${best_phares}"             >> LOGS/${scriptname}.results
+    echo "set phaori = ${best_phaori}" >> SCRATCH/${scriptname}.results
+    # echo "set phaoriFouFilter = ${best_phaoriFouFilter}" >> SCRATCH/${scriptname}.results
+    echo "set phaori_last_change = ${best_phaori_last_change}" >> SCRATCH/${scriptname}.results
+    echo "set MergePhaseResidual = ${best_phares}"             >> SCRATCH/${scriptname}.results
     if ( ${best_invert_tiltangle} != "invert" ) then
-      echo "set MERGE_TAXA         = ${best_MERGE_TAXA}"         >> LOGS/${scriptname}.results
-      echo "set MERGE_TANGL        = ${best_MERGE_TANGL}"        >> LOGS/${scriptname}.results
-      echo "set TAXA               = ${best_TAXA}"               >> LOGS/${scriptname}.results
-      echo "set TANGL              = ${best_TANGL}"              >> LOGS/${scriptname}.results
+      echo "set MERGE_TAXA         = ${best_MERGE_TAXA}"         >> SCRATCH/${scriptname}.results
+      echo "set MERGE_TANGL        = ${best_MERGE_TANGL}"        >> SCRATCH/${scriptname}.results
+      echo "set TAXA               = ${best_TAXA}"               >> SCRATCH/${scriptname}.results
+      echo "set TANGL              = ${best_TANGL}"              >> SCRATCH/${scriptname}.results
     endif 
-    echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+    echo "</IMAGEDIR>" >> SCRATCH/${scriptname}.results
   else
     if ( ${MergePhaseResidual} != "nan" ) then
       echo "::Keeping settings. Phase Residual = ${best_phares}"
@@ -516,6 +517,15 @@ while ( ${currentline} <= ${linenum} )
   #
   @ currentline += 1
 end
+#
+#
+${bin_2dx}/2dx_execute_merge_results.exe << eot
+SCRATCH/${scriptname}.results
+SCRATCH/2dx_execute_merge_results.script
+eot
+echo "# IMAGE: SCRATCH/2dx_execute_merge_results.script <LOG: Refinement results (translated)>" >> LOGS/${scriptname}.results
+echo Sourcing SCRATCH/2dx_execute_merge_results.script
+source SCRATCH/2dx_execute_merge_results.script
 #
 echo "<<@progress: 100>>"
 #

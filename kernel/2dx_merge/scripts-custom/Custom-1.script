@@ -111,8 +111,9 @@ foreach dirfile ( ${dirlist} )
   # echo "set treatspotscan = y" >> LOGS/${scriptname}.results
   # echo "set rot90 = n" >> LOGS/${scriptname}.results
   # echo "set rot180 = n" >> LOGS/${scriptname}.results
-  # echo "set revhnd = n" >> LOGS/${scriptname}.results
+  # echo "set revhnd = y" >> LOGS/${scriptname}.results
   # echo "set revhk = n" >> LOGS/${scriptname}.results
+  # echo "set revxsgn = n" >> LOGS/${scriptname}.results
   # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
   # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
   # echo "set overwrite = y" >> LOGS/${scriptname}.results

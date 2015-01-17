@@ -112,10 +112,10 @@ void confData::setUserConf(confData *userConf)
 
 void confData::setSymLink(const QString fileName, const QString linkName)
 {
-  //qDebug()<<"dataFilename = " << dataFilename;
+  qDebug()<<"confData.cpp:  confData::setSymLink:   dataFilename = " << dataFilename;
   QFile data(dataFilename);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
-  //dele the file that lies where link should be
+  //delete the file that lies where link should be
   if(QFileInfo(linkName).exists())
     QFile(linkName).remove();
   data.link(fileName, linkName);
@@ -262,14 +262,14 @@ QString confData::printLookup()
 
 bool confData::parseDataFile()
 {
-  //qDebug()<<" parsed dataFilename = " << dataFilename;
+  qDebug()<<"confData.cpp:  confData::parseDataFile:  dataFilename =  " << dataFilename;
   QFile data(dataFilename);
   if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
   //data.setTextModeEnabled(true);
   //create symbolic link if lineName is set
   if(!linkName.isEmpty())
   {
-    //qDebug()<< "creating the symlink to " << data.fileName() << " with the name " << linkName;
+    qDebug()<< "confData.cpp:  confData::parseDataFile:  creating the symlink to " << data.fileName() << " with the name " << linkName;
     data.link(data.fileName(), linkName);
   }
   QString lineData;
@@ -375,6 +375,7 @@ bool confData::parseDataFile()
 void confData::updateConf(const QString &confFileName)
 {
   //qDebug()<<"updating configuration";
+  qDebug()<< "confData.cpp:  confData::updateConf:  creating QFile data(" << confFileName << ")";
   QFile data(confFileName);
   if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return;
   
@@ -559,7 +560,7 @@ void confData::save()
 
 void confData::saveAs(QString fileName)
 {
-  //qDebug()<<"[saveAS] fileName = " << fileName;
+  qDebug()<< "confData.cpp:  confData::saveAs:  creating QFile data(" << fileName << ")";
   QFile data(fileName);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   for(int i=0;i<header.size();i++)
@@ -599,7 +600,7 @@ void confData::saveAs(QString fileName)
 
 void confData::saveSynchronized(QString fileName)
 {
-  //qDebug()<<"[saveSynchornized] fileName = " << fileName;
+  qDebug()<< "confData.cpp:  confData::saveSynchronized:  creating QFile data(" << fileName << ")";
   QFile data(fileName);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   for(int i=0;i<header.size();i++)
@@ -628,6 +629,7 @@ void confData::saveSynchronized(QString fileName)
             data.write(("# " + valueSearch[k] + ": " + v + "\n").toAscii());
             if(valueSearch[k]=="SYNC_WITH_UPPER_LEVEL" && v.toLower() == "yes" )
             {
+              // CHEN: This is probably wrong: It should not be "saveInUpperLevel" but rather "GetFromUpperLevel".
                 if(saveInUpperLevel(e->get("valuelabel"),e->get("value")))
                     synchronized = true;
             }
@@ -641,8 +643,8 @@ void confData::saveSynchronized(QString fileName)
   setModified(false);
   emit saving();
   data.close();
-  if(synchronized)
-      parentConf->save();
+  // CHEN if(synchronized)
+  // CHEN     parentConf->save();
 }
 
 void confData::setSaveName(QString fileName)

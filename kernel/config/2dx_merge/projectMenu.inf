@@ -2,6 +2,7 @@
 imagename (Name,mouseover="Image Name",nonlockable,sortable)
 *imagenumber (Number,mouseover="Image Number",nonlockable,sortable,"%s")
 imagename_original (OriName,mouseover="Original Image Name",nonlockable,sortable)
+imageorigin (ImageSource,mouseover="Source of the Image",nonlockable,sortable)
 movie_enable(movie_enable,mouseover="Enable movie-mode",nonlockable,sortable)
 movie_imagenumber_total(movie_imagenumber_total,mouseover="Movie-mode total framenumber",nonlockable,sortable)
 movie_imagenumber_touse(movie_imagenumber_touse,mouseover="Movie-mode to use framenumber",nonlockable,sortable)

@@ -42,6 +42,13 @@ set cleanup_merge = "0"
 # TYPE: Drop_Down_Menu "0=radical;1=a little bit;2=only get disk usage;3=remove radical and final maps;4=remove radical and final maps and database backups"
 set cleanup_level = "4"
 #
+# LABEL: Also delete Masking info?
+# LEGEND: Choose if the masking info files should also be deleted.
+# EXAMPLE: cleanup_mask = "n"
+# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
+# TYPE: Bool "y;n"
+set cleanup_mask = "n"
+#
 #$end_local_vars
 #
 set bin_2dx = ""
@@ -278,6 +285,12 @@ eot
       #
       source ${proc_2dx}/initialize
       source ${proc_2dx}/2dx_cleanup_sub.com
+      #
+      if ( ${cleanup_mask} == "y" ) then
+        \rm -f ${nonmaskimagename}_mask.mrc
+        \rm -f ${nonmaskimagename}_automask.mrc
+        \rm -f ${nonmaskimagename}_automask_mask.mrc
+      endif
       #
       #${app_2dx_image} ${fullpath} "+2dx_cleanup"
       #

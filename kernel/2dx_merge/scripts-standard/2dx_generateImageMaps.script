@@ -234,12 +234,12 @@ if ( ${make_reference} == "y" ) then
   set IVERBOSE = 1
   set NBM = F
   set NTL = F
-  set ITAXASTEP = 10
+  set ITAXASTEP = 1
   set RTAXASIZE = 0.5
-  set ITANGLSTEP = 10
+  set ITANGLSTEP = 1
   set RTANGLSIZE = 0.5
   set MergeStepSize = "0.001"
-  set IBOXPHS = 5
+  set IBOXPHS = 3
   set Thread_Number = 1
   #
   ${bin_2dx}/2dx_merge_compileB.exe << eot

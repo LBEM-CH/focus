@@ -734,7 +734,7 @@ eot
     echo "# IMAGE: ${nonmaskimagename}_automask.mrc <Masking info file>" >> LOGS/${scriptname}.results
     python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc
     #
-    if (${ctfcor_imode}x == "0x" ) then
+    if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == 4x || ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x ) then
       ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
       \cp -f ${imagename}.mrc image_ctfcor.mrc
       echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results

@@ -112,7 +112,7 @@ void confData::setUserConf(confData *userConf)
 
 void confData::setSymLink(const QString fileName, const QString linkName)
 {
-  qDebug()<<"confData.cpp:  confData::setSymLink:   dataFilename = " << dataFilename;
+  // qDebug()<<"confData.cpp:  confData::setSymLink:   dataFilename = " << dataFilename;
   QFile data(dataFilename);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   //delete the file that lies where link should be
@@ -262,14 +262,14 @@ QString confData::printLookup()
 
 bool confData::parseDataFile()
 {
-  qDebug()<<"confData.cpp:  confData::parseDataFile:  dataFilename =  " << dataFilename;
+  // qDebug()<<"confData.cpp:  confData::parseDataFile:  dataFilename =  " << dataFilename;
   QFile data(dataFilename);
   if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
   //data.setTextModeEnabled(true);
   //create symbolic link if lineName is set
   if(!linkName.isEmpty())
   {
-    qDebug()<< "confData.cpp:  confData::parseDataFile:  creating the symlink to " << data.fileName() << " with the name " << linkName;
+    // qDebug()<< "confData.cpp:  confData::parseDataFile:  creating the symlink to " << data.fileName() << " with the name " << linkName;
     data.link(data.fileName(), linkName);
   }
   QString lineData;
@@ -375,7 +375,7 @@ bool confData::parseDataFile()
 void confData::updateConf(const QString &confFileName)
 {
   //qDebug()<<"updating configuration";
-  qDebug()<< "confData.cpp:  confData::updateConf:  creating QFile data(" << confFileName << ")";
+  // qDebug()<< "confData.cpp:  confData::updateConf:  creating QFile data(" << confFileName << ")";
   QFile data(confFileName);
   if(!data.open(QIODevice::ReadOnly | QIODevice::Text)) return;
   
@@ -554,13 +554,14 @@ void confData::loadDefaultConf(confData *conf, const QStringList &defaults)
 void confData::save()
 {
   //qDebug()<<"[save] dataFilename = " << dataFilename;
+  //CHEN> This QFile declaration here is duplicated and not needed ???
   QFile data(dataFilename);
   saveSynchronized(dataFilename);
 }
 
 void confData::saveAs(QString fileName)
 {
-  qDebug()<< "confData.cpp:  confData::saveAs:  creating QFile data(" << fileName << ")";
+  // qDebug()<< "confData.cpp:  confData::saveAs:  creating QFile data(" << fileName << ")";
   QFile data(fileName);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   for(int i=0;i<header.size();i++)
@@ -600,7 +601,7 @@ void confData::saveAs(QString fileName)
 
 void confData::saveSynchronized(QString fileName)
 {
-  qDebug()<< "confData.cpp:  confData::saveSynchronized:  creating QFile data(" << fileName << ")";
+  // qDebug()<< "confData.cpp:  confData::saveSynchronized:  creating QFile data(" << fileName << ")";
   QFile data(fileName);
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   for(int i=0;i<header.size();i++)

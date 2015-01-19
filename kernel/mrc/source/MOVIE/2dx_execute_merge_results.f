@@ -59,6 +59,7 @@ C
       STOP
       END
 C
+C
 C==========================================================
 C
       SUBROUTINE shorten(czeile,k)
@@ -82,4 +83,7 @@ C
 C
       RETURN
       END
+
+
+
 

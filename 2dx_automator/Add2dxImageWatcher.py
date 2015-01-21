@@ -101,6 +101,37 @@ class Add2dxImageWatcher(WatcherBase):
 		f_out.writelines(lines_out)
 		f_out.close()
 		
+	def set_image_name(self, folder, name):
+		f = open(folder + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if not l.startswith("set imagename ="):
+				lines_out.append(l)
+			else:
+				toadd = "set imagename = " + '"' + name + '"'
+				lines_out.append(toadd)
+				print toadd
+		f.close()
+		f_out = open(folder + "/2dx_image.cfg", "w")
+		f_out.writelines(lines_out)
+		f_out.close()
+		
+		f = open(folder + "/2dx_image.cfg", "r")
+		lines = f.readlines()
+		lines_out = []
+		for l in lines:
+			if not l.startswith("set nonmaskimagename ="):
+				lines_out.append(l)
+			else:
+				toadd = "set nonmaskimagename = " + '"' + name + '"'
+				lines_out.append(toadd)
+				print toadd
+		f.close()
+		f_out = open(folder + "/2dx_image.cfg", "w")
+		f_out.writelines(lines_out)
+		f_out.close()
+		
 	def set_orignal_filename(self, folder, name):
 		f = open(folder + "/2dx_image.cfg", "r")
 		lines = f.readlines()
@@ -147,10 +178,11 @@ class Add2dxImageWatcher(WatcherBase):
 			os.makedirs(self.outfolder + "/automatic" )
 			shutil.copyfile( self.outfolder + "/2dx_master.cfg", self.outfolder + "/automatic/2dx_master.cfg" )
 		image_count = self.getImageNumber(filename) + 1
+		print "IMAGE COUNT:", image_count
 		image_2dx_name = self.outfolder + "/automatic/" + self.protein_name + str(image_count)
 		os.makedirs(image_2dx_name)
 		#shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + filename )
-		shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + self.protein_name + str(image_count) + ".mrc" )
+		shutil.copyfile( self.infolder + "/" + filename, image_2dx_name + "/" + self.protein_name + str(image_count) + "_raw.mrc" )
 		shutil.copyfile( self.outfolder + "/2dx_master.cfg", image_2dx_name + "/2dx_image.cfg" )
 		
 		time.sleep(1)
@@ -166,6 +198,7 @@ class Add2dxImageWatcher(WatcherBase):
 		os.system(command_2dx_image)
 		
 		self.set_image_number(image_2dx_name, image_count)
+		self.set_image_name(image_2dx_name, self.protein_name + str(image_count))
 		self.set_orignal_filename(image_2dx_name, filename)
 		
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_initialize"' + "'" 
@@ -182,6 +215,8 @@ class Add2dxImageWatcher(WatcherBase):
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
 		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_ctfcor"' + "'" 
+		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots"' + "'" 
@@ -192,16 +227,16 @@ class Add2dxImageWatcher(WatcherBase):
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend2"' + "'" 
 		os.system(command_2dx_image)
 		
-		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_fftrans"' + "'" 
-		os.system(command_2dx_image)
-		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
-		os.system(command_2dx_image)
-		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
-		os.system(command_2dx_image)
-		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots"' + "'" 
-		os.system(command_2dx_image)
-		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend2"' + "'" 
-		os.system(command_2dx_image)
+#		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_fftrans"' + "'" 
+#		os.system(command_2dx_image)
+#		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots1"' + "'" 
+#		os.system(command_2dx_image)
+#		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend1"' + "'" 
+#		os.system(command_2dx_image)
+#		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_getspots"' + "'" 
+#		os.system(command_2dx_image)
+#		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_unbend2"' + "'" 
+#		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_applyCTF"' + "'" 
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " + image_2dx_name + " '" + '"2dx_generateMAP"' + "'" 
@@ -220,9 +255,9 @@ class Add2dxImageWatcher(WatcherBase):
 		filename_core = image_2dx_name.split("/")[-1]
 		dia_folder = image_2dx_name + "/automation_output"
 		os.makedirs(dia_folder)
-		self.copy_image_if_there(image_2dx_name + "/ManualMasking-CCmap.mrc", dia_folder + "/image.mrc")
-		self.copy_image_if_there(image_2dx_name + "/CUT/" + filename_core + ".marked.merge.ps.mrc", dia_folder + "/defoci.mrc")
-		self.copy_image_if_there(image_2dx_name + "/FFTIR/" + filename_core + ".red.fft.mrc", dia_folder + "/fft.mrc")
+		self.copy_image_if_there(image_2dx_name + "/ManualMasking_CCmap.mrc", dia_folder + "/image.mrc")
+		self.copy_image_if_there(image_2dx_name + "/CUT/" + filename_core + "_marked_merge_ps.mrc", dia_folder + "/defoci.mrc")
+		self.copy_image_if_there(image_2dx_name + "/FFTIR/" + filename_core + "_red_fft.mrc", dia_folder + "/fft.mrc")
 		self.copy_image_if_there(image_2dx_name + "/m" + filename_core + "-p1.mrc", dia_folder + "/map.mrc")
 		
 		self.lock_eman2.acquire()

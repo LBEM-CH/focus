@@ -8,6 +8,8 @@
 #ifndef MILLERINDEX_HPP
 #define	MILLERINDEX_HPP
 
+#include <iostream>
+
 class MillerIndex{
         
 public:

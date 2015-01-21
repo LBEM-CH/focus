@@ -124,9 +124,9 @@ eot
   echo "################################################"
   #
   if ( -e fort.3 ) then
-    \mv -f fort.3 SCRATCH/latlines.dat
+    \mv -f fort.3 APH/latlines.dat
     echo "# IMAGE: LOGS/latlinprescal.log <LOG: latlinprescal output>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/latlines.dat <Latline after prescal [H,K,Z,A,P,SAMP,SANG,IQ]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: APH/latlines.dat <Latline after prescal [H,K,Z,A,P,SAMP,SANG,IQ]>" >> LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: latlines.dat does not exist."
   endif
@@ -166,7 +166,7 @@ eot
   #
 endif
 #
-set Reflections_Unique = `wc -l SCRATCH/latlines.dat | cut -f1`
+set Reflections_Unique = `wc -l APH/latlines.dat | cut -f1`
 echo "set Reflections_Unique = ${Reflections_Unique}" >> LOGS/${scriptname}.results
 echo "::Unique Reflections = ${Reflections_Unique}"
 #
@@ -200,7 +200,7 @@ else
   set iverbose = 3
 endif
 #
-setenv  OBS   SCRATCH/latlines.dat
+setenv  OBS   APH/latlines.dat
 setenv  OUT   SCRATCH/latfitteds.dat
 setenv  GUESS SCRATCH/guess.dat
 #

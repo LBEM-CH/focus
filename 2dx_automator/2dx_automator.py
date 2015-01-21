@@ -639,6 +639,8 @@ class Auto2dxGUI(Frame):
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getSampleTilt"' + "'" 
 		os.system(command_2dx_image)
+		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_ctfcor"' + "'" 
+		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_getspots1"' + "'" 
 		os.system(command_2dx_image)
 		command_2dx_image = "2dx_image " +  image_2dx_name_new + " '" + '"2dx_unbend1"' + "'" 
@@ -781,7 +783,7 @@ class Auto2dxGUI(Frame):
 
 	def showIQ(self):
 		i = self.index_selected
-		command = "evince " + self.image_dirs[i] + "/PS/2dx_plotreska_canonical.ps"
+		command = "evince " + self.image_dirs[i] + "/PS/2dx_plotreska_unbend2_canonical.ps"
 		os.system(command)
 
 		

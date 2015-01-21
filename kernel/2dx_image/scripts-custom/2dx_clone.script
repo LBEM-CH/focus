@@ -158,8 +158,8 @@ endif
 if ( -e  ../${old_imagedirectory}/${imagename}.tif ) then
   \cp -f ../${old_imagedirectory}/${imagename}.tif ${new_imagename}.tif
 endif
-if ( -e  ../${old_imagedirectory}/${nonmaskimagename}.mrc ) then
-  \cp -f ../${old_imagedirectory}/${nonmaskimagename}.mrc ${new_nonmaskimagename}.mrc
+if ( -e  ../${old_imagedirectory}/${nonmaskimagename}_raw.mrc ) then
+  \cp -f ../${old_imagedirectory}/${nonmaskimagename}_raw.mrc ${new_nonmaskimagename}_raw.mrc
 endif
 if ( -e  ../${old_imagedirectory}/${imagename}.mrc ) then
   \cp -f ../${old_imagedirectory}/${imagename}.mrc ${new_imagename}.mrc

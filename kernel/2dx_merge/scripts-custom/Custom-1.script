@@ -67,7 +67,7 @@ foreach dirfile ( ${dirlist} )
   echo "::Working on ${newdir}"
   # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
   echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
-  echo "set dummy = 1" >> LOGS/${scriptname}.results
+  # echo "set dummy = 1" >> LOGS/${scriptname}.results
   set images_progress = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
   echo "<<@progress: ${images_progress}>>"
   set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`

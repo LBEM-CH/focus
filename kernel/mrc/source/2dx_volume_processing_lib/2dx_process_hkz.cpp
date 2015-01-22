@@ -40,11 +40,15 @@ int main(int argc, char** argv) {
     double max_resolution = std::atof(argv[7]);
     
     VolumeHKL inputVol = VolumeHKL(nx, ny, nz, symmetry, apix, max_resolution, 0.001);
+    std::cout << "::Reading in the hkz file from " << argv[1] << "\n";
     inputVol.addHKZData(hkzFile);
-    
+    std::cout << ":Created hkl volume\n";
     hkzFile.close();
     
+    std::cout << ":Symmetrizing with " << symmetry << "\n";
     inputVol.symmetrize();
+    
+    std::cout << "::Done processing hkz file \n";
     inputVol.writeHKL("output.hkl");
 
 }

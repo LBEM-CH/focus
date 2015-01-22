@@ -51,8 +51,7 @@ void VolumeHKL::addHKZData(std::ifstream& hkzFile){
     double zIn, ampIn, phaseIn, sampIn, sphaseIn;
     while (hkzFile >> hIn >> kIn >> zIn >> ampIn >> phaseIn >> sampIn >> sphaseIn >> iqIn)
     {
-        double dz = 1/(nz*apix);
-        lIn = round( (zIn/dz) );
+        lIn = round(zIn*nz);
         
         MillerIndex *indexIn = new MillerIndex(hIn, kIn, lIn);
         double resolution =  getResolution(*indexIn);
@@ -75,7 +74,27 @@ void VolumeHKL::addHKZData(std::ifstream& hkzFile){
     }
     
     this->reflections = averageOutReflections(refMultiMap);
+    
+    //Scale the amplitudes, so that maximum is 20,000
+    double currentMax = getMaximumAmplitude();
+    scaleAmplitudes(20000/currentMax);
 }
+
+double VolumeHKL::getMaximumAmplitude() {
+    double maxAmp = 0;
+    for(ReflectionMap::const_iterator ii=reflections.begin(); ii!=reflections.end(); ++ii){
+        double currentAmp = (*ii).second.getAmplitude();
+        maxAmp = (maxAmp<currentAmp)?currentAmp:maxAmp;
+    }
+    return maxAmp;
+}
+
+void VolumeHKL::scaleAmplitudes(double factor) {
+    for(ReflectionMap::iterator ii=reflections.begin(); ii!=reflections.end(); ++ii){
+        (*ii).second.setAmplitude(factor*(*ii).second.getAmplitude());
+    }
+}
+
 
 ReflectionMap VolumeHKL::averageOutReflections(ReflectionMultiMap refMultiMap) {
     ReflectionMap averagedMap;

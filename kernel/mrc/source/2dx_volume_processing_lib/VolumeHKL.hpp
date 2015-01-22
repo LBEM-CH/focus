@@ -44,6 +44,8 @@ public:
     Reflection getAveragefromList(ReflectionList reflections);
     
     double getResolution(const MillerIndex&);
+    double getMaximumAmplitude();
+    void scaleAmplitudes(double factor);
     
     void addHKZData(std::ifstream& hkzFile);
     void writeHKL(const char* fileName);

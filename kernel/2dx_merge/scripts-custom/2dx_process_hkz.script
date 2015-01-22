@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Process hkz                                                        #
+# Title: Process HKZ                                                        #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -51,6 +51,8 @@ echo "nz = ${ALAT}"
 set date = `date`
 echo date = ${date}
 #
+\rm -f LOGS/${scriptname}.results
+#
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
@@ -66,11 +68,20 @@ else
 	set hkzFile = "SCRATCH/latlines.dat"
 endif
 #
+########################################################################
+${proc_2dx}/linblock "Processing HKZ file from ${hkzFile}"
+########################################################################
 ${bin_2dx}/${scriptname}.exe ${hkzFile} ${SYM} ${nx} ${ny} ${ALAT} ${sample_pixel} ${RESMAX}
 #
 mv output.hkl APH/processed.hkl
 #
 echo "<<@progress: +70>>"
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "Done."
+#                                                                           #
+#############################################################################
 #
 #
 echo "# IMAGE: APH/processed.hkl <HKL: Generated HKL >" >> LOGS/${scriptname}.results
@@ -134,7 +145,24 @@ HKLMAX 199 199 199
 END
 eot
 #
-echo "# IMAGE: processed3D.map <MAP: Generated MAP >" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: processed3D.map <MAP: Generated MAP >" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: +5>>"
+#
+#############################################################################
+${proc_2dx}/linblock "mapmask - to extend the map"
+#############################################################################
+#
+\rm -f processed3D_extended.map
+${bin_ccp4}/mapmask mapin processed3D.map mapout processed3D_extended.map << eof
+AXIS X,Y,Z
+scale factor 1
+xyzlim -1.0 0.999 -1.0 0.999 0.0 1.0
+END
+eof
+#
+echo "# IMAGE-IMPORTANT: processed3D_extended.map <MAP: Extended MAP >" >> LOGS/${scriptname}.results
+#
 #
 echo "<<@progress: 100>>"
 #

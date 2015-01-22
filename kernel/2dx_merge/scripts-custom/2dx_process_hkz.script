@@ -24,6 +24,7 @@
 # DISPLAY: sample_pixel
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
+# DISPLAY: calculate_subvolume
 #
 #$end_local_vars
 #
@@ -37,16 +38,21 @@ set ALAT = ""
 set sample_pixel = ""
 set RESMIN = ""
 set RESMAX = ""
+set calculate_subvolume = ""
 #
 #$end_vars
 set scriptname = 2dx_process_hkz
 set split = ($realcell:as/,/ /)
-set nx = $split[1]
-set ny = $split[2]
+set cellx = $split[1]
+set celly = $split[2]
 #
-echo "nx = ${nx}"
-echo "ny = ${ny}"
-echo "nz = ${ALAT}"
+echo "cellx = ${cellx}"
+echo "celly = ${celly}"
+echo "cellz = ${ALAT}"
+#
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
 #
 set date = `date`
 echo date = ${date}
@@ -56,7 +62,7 @@ echo date = ${date}
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
-echo "<<@progress: 10>"
+echo "<<@progress: 5>"
 #
 #############################################################################
 # Calling the script
@@ -71,16 +77,14 @@ endif
 ########################################################################
 ${proc_2dx}/linblock "Processing HKZ file from ${hkzFile}"
 ########################################################################
-${bin_2dx}/${scriptname}.exe ${hkzFile} ${SYM} ${nx} ${ny} ${ALAT} ${sample_pixel} ${RESMAX}
+${bin_2dx}/${scriptname}.exe ${hkzFile} ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel} ${RESMAX}
 #
 mv output.hkl APH/processed.hkl
 #
-echo "<<@progress: +70>>"
+echo "<<@progress: +50>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "Done."
-#                                                                           #
 #############################################################################
 #
 #
@@ -104,8 +108,6 @@ SKIP 0
 END
 eof
 #
-echo "<<@progress: +5>>"
-#
 #
 #############################################################################
 ${proc_2dx}/linblock "cad - to create MTZ file for volume"
@@ -122,7 +124,7 @@ valm NaN NOOUTPUT
 end
 eof
 #
-echo "<<@progress: +5>>"
+echo "<<@progress: +10>>"
 #
 echo "# IMAGE: processed3D.mtz <MTZ: Generated MTZ >" >> LOGS/${scriptname}.results
 #
@@ -130,8 +132,8 @@ echo "# IMAGE: processed3D.mtz <MTZ: Generated MTZ >" >> LOGS/${scriptname}.resu
 ${proc_2dx}/linblock "fft - to calculate map with X,Y,Z orientation"
 #############################################################################
 #
-\rm -f processed3D.map
-${bin_ccp4}/fft hklin processed3D.mtz mapout processed3D.map  << eot
+\rm -f SCRATCH/processed_fft.map
+${bin_ccp4}/fft hklin processed3D.mtz mapout SCRATCH/processed_fft.map  << eot
 LABIN F1=F  PHI=PHI W=FOM ##
 AXIS X,Y,Z
 SCALE F1 1 0
@@ -145,9 +147,31 @@ HKLMAX 199 199 199
 END
 eot
 #
-echo "# IMAGE-IMPORTANT: processed3D.map <MAP: Generated MAP >" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/processed_fft.map <MAP: processed map with wrong handedness >" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
+#
+#
+#############################################################################
+${proc_2dx}/linblock "maprot - to invert the handedness"
+#############################################################################
+#
+\rm -f processed3D.map
+${bin_ccp4}/maprot mapin SCRATCH/processed_fft.map wrkout processed3D.map << eot
+MODE FROM
+CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
+GRID WORK ${cellx} ${celly} ${ALAT}
+XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
+SYMM WORK 1
+AVER
+ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
+TRANS  0.000 0.000 0.000
+eot
+#
+echo "# IMAGE: processed3D.map <MAP: processed map with correct hand>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: +5>>"
+#
 #
 #############################################################################
 ${proc_2dx}/linblock "mapmask - to extend the map"
@@ -163,6 +187,62 @@ eof
 #
 echo "# IMAGE-IMPORTANT: processed3D_extended.map <MAP: Extended MAP >" >> LOGS/${scriptname}.results
 #
+echo "<<@progress: +10>>"
+#
+#############################################################################
+# Create a subvolume if asked for!
+############################################################################
+if ( ${calculate_subvolume}x != "0x" ) then  
+  #############################################################################
+  ${proc_2dx}/linblock "maprot - to rotate volume for sub-volume preparation"
+  #############################################################################
+  #
+  \rm -f SCRATCH/processed_rot_volume.map
+  ${bin_ccp4}/maprot mapin processed3D.map wrkout SCRATCH/processed_rot_volume.map << eot
+MODE FROM
+CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
+GRID WORK ${cellx} ${celly} ${ALAT}
+XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
+SYMM WORK 1
+AVER
+ROTA POLAR 0.0 0.0 45.0
+TRANS  0.0 -20.0 0.00
+eot
+  #
+  #echo "# IMAGE: SCRATCH/processed_rot_volume.map <MAP: rotated 3D Volume>" >> LOGS/${scriptname}.results
+  #
+
+  #############################################################################
+  ${proc_2dx}/linblock "mapmask - to cut sub-volume"
+  #############################################################################
+  #   
+  # 0.7071 = 1/sqrt(2)
+  set middlex = "0.45"
+  set middley = "0.45"
+  set diam = "0.82"
+  #
+  set limxmin = `echo ${middlex} ${diam} | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
+  set limxmax = `echo ${middlex} ${diam} | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
+  set limymin = `echo ${middley} ${diam} | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
+  set limymax = `echo ${middley} ${diam} | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
+  #
+  echo ":Limits are ${limxmin} to ${limxmax}, ${limymin} to ${limymax}"
+  #
+  \rm -f processed_sub.map
+  ${bin_ccp4}/mapmask mapin SCRATCH/processed_rot_volume.map mapout processed_sub.map << eof
+AXIS X,Y,Z
+scale factor 1
+xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} 0.0 1.0
+pad -100
+SYMM 1
+END
+eof
+  #
+  echo "# IMAGE-IMPORTANT: processed_sub.map <MAP: Final 3D Volume (Sub Volume)>" >> LOGS/${scriptname}.results
+  #
+
+endif
+#############################################################################
 #
 echo "<<@progress: 100>>"
 #

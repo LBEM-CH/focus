@@ -60,9 +60,11 @@ set FFTIR_DISK = ""
 set SYN_Unbending = ""
 set movie_enable = ""
 set imagename = ""
+set nonmaskimagename = ""
 set defocus = ""
 set imagenumber = ""
 set lattice = ""
+set ALAT = ""
 set imagesidelength = ""
 set magnification = ""
 set stepdigitizer = ""
@@ -85,7 +87,14 @@ set tempkeep = ""
 set plotres_rings = ""
 set realcell = ""
 set realang = ""
+set Thread_Number = ""
+set ctfcor_noise = ""
+set ctfcor_inner_tile = ""
+set ctfcor_outer_tile = ""
+set ctfcor_taper = ""
 set ctfcor_imode = ""
+set ctfcor_debug = ""
+set ctfcor_maxamp_factor = ""
 set QVAL2 = ""
 set QVALS = ""
 set QVALMA = ""
@@ -137,10 +146,6 @@ if ( ${istilt} == '0' ) then
   endif
 endif
 #
-if ( ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x  ) then
-  ${proc_2dx}/protest "ERROR: This mode is not yet implemented for CTF correction."
-endif
-# 
 set ctfplotresmax_auto = `echo ${ctfplotresmax} | awk '{ if ( $1 < 0.0001 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${ctfplotresmax_auto} == '1' ) then
   set ctfplotresmax = `echo ${RESMAX} | awk '{ if ( $1 > 5.0 ) { s = int($1 * 0.90) } else { s = $1 * 0.90 } }  END { print s }'`
@@ -213,7 +218,7 @@ else
 
   set CTF_infile = APH/${iname}_fou.aph
   set CTF_outfile = APH/${iname}_fou_ctf.aph
-  set unbent_image = unbent.mrc
+  set unbent_image = unbent
   set unbent_FFT = FFTIR/image_ctfcor_unbent_fft.mrc
   set algo = U2
   #######################################
@@ -222,7 +227,7 @@ else
   #######################################
   echo "# IMAGE-IMPORTANT: ${CTF_infile} <APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${CTF_outfile} <APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-  if ( ${ctfcor_imode} != "4" ) then
+  if ( ${ctfcor_imode} == "0" || ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" || ${ctfcor_imode} == "3" ) then
     \mv -f CTFPLOT.PS PS/${iname}_unbend2_ctf.ps
     echo "# IMAGE-IMPORTANT: PS/${iname}_unbend2_ctf.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
   endif
@@ -239,7 +244,7 @@ else
     set CTF_infile = APH/${iname}_movie_fou.aph
     if ( -e ${CTF_infile} ) then
       set CTF_outfile = APH/${iname}_movie_fou_ctf.aph
-      set unbent_image = frames/direct_sum_filt_upscale.mrc
+      set unbent_image = frames/direct_sum_filt_upscale
       set unbent_FFT = frames/direct_sum_fft.mrc
       set algo = UMA
       #######################################
@@ -248,7 +253,7 @@ else
       #######################################
       echo "# IMAGE-IMPORTANT: ${CTF_infile} <MovieMode APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
       echo "# IMAGE-IMPORTANT: ${CTF_outfile} <MovieMode APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-      if ( ${ctfcor_imode} != "4" ) then
+      if ( ${ctfcor_imode} == "0" || ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" || ${ctfcor_imode} == "3" ) then
         \mv -f CTFPLOT.PS PS/${iname}_movie_ctf.ps
         echo "# IMAGE-IMPORTANT: PS/${iname}_movie_ctf.ps <PS: MovieMode IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
       endif
@@ -266,7 +271,7 @@ else
     if ( -e ${CTF_infile} ) then
       set frame_folder = framesB
       set CTF_outfile = APH/${iname}_movieB_fou_ctf.aph
-      set unbent_image = ${frame_folder}/direct_sum_filt_taper.mrc
+      set unbent_image = ${frame_folder}/direct_sum_filt_upscale
       set unbent_FFT = ${frame_folder}/direct_sum_fft.mrc
       set algo = UMB
       #######################################
@@ -275,7 +280,7 @@ else
       #######################################
       echo "# IMAGE-IMPORTANT: ${CTF_infile} <MovieModeB APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
       echo "# IMAGE-IMPORTANT: ${CTF_outfile} <MovieModeB APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-      if ( ${ctfcor_imode} != "4" ) then
+      if ( ${ctfcor_imode} == "0" || ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" || ${ctfcor_imode} == "3" ) then
         \mv -f CTFPLOT.PS PS/${iname}_movieB_ctf.ps
         echo "# IMAGE-IMPORTANT: PS/${iname}_movieB_ctf.ps <PS: MovieModeB IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
       endif

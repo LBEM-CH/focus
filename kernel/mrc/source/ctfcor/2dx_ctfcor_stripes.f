@@ -25,7 +25,10 @@ C                   IMODE=0: Nothing
 C                   IMODE=1: PhaseFlip
 C                   IMODE=2: CTF multiplication
 C                   IMODE=3: Wiener Filter
-C                   IMODE>3: Nothing
+C                   IMODE=4: Nothing
+C                   IMODE=5: PhaseFlip (inverted contrast)
+C                   IMODE=6: CTF multiplication (inverted contrast)
+C                   IMODE=7: Wiener Filter (inverted contrast)
 C        card  9 :  Debug mode: y=yes, n=no
 C
 C******************************************************************************
@@ -265,6 +268,15 @@ C
       elseif(IMODE.eq.2)then
         write(6,'('':Applying CTF multiplication'')')
       elseif(IMODE.eq.3)then
+        write(6,'('':Applying Wiener filtration'')')
+      elseif(IMODE.eq.4)then
+        IMODE = 0
+        write(6,'('':No CTF correction done'')')
+      elseif(IMODE.eq.5)then
+        write(6,'('':Applying CTF Phase flipping only'')')
+      elseif(IMODE.eq.6)then
+        write(6,'('':Applying CTF multiplication'')')
+      elseif(IMODE.eq.7)then
         write(6,'('':Applying Wiener filtration'')')
       else
         IMODE = 0
@@ -537,11 +549,11 @@ C          write(6,'(''Thread '',I6,'', ix = '',I6)') ITNR, ix
      +              ANGASTRAD,THETATR,ilx,ily)
 C-------------Sum up the full-size CTFs with local defoci
               if(LCTFSUM) then
-                if(IMODE.eq.1)then
+                if(IMODE.eq.1 .or. IMODE.eq.5)then
                   RVAL = abs(CTFV)
-                elseif(IMODE.eq.2)then
+                elseif(IMODE.eq.2 .or. IMODE.eq.6)then
                   RVAL = CTFV**2
-                elseif(IMODE.eq.3)then
+                elseif(IMODE.eq.3 .or. IMODE.eq.7)then
                   RVAL = 1.0
                 else
                   RVAL = CTFV
@@ -562,7 +574,7 @@ C !$OMP END CRITICAL
                 IR=ID(iix,iiy,NX/2  )*2
               endif
 C-------------Apply CTF correction
-              if(IMODE.eq.1)then
+              if(IMODE.eq.1 .or. IMODE.eq.5)then
 C                write(6,'('':Applying CTF Phase flipping only'')')
                 IF(CTFV.gt.0.0)then
                   ABOX(IR-1)=-1.0*CFFTPIC(IR-1)
@@ -571,11 +583,11 @@ C                write(6,'('':Applying CTF Phase flipping only'')')
                   ABOX(IR-1)= 1.0*CFFTPIC(IR-1)
                   ABOX(IR  )= 1.0*CFFTPIC(IR  )
                 endif
-              elseif(IMODE.eq.2)then
+              elseif(IMODE.eq.2 .or. IMODE.eq.6)then
 C               write(6,'('':Applying CTF multiplication'')')
                 ABOX(IR-1)=-1.0*CFFTPIC(IR-1)*CTFV
                 ABOX(IR  )=-1.0*CFFTPIC(IR  )*CTFV
-              elseif(IMODE.eq.3)then
+              elseif(IMODE.eq.3 .or. IMODE.eq.7)then
 C               write(6,'('':Applying Wiener filtration'')')
                 ABOX(IR-1)=-1.0*CFFTPIC(IR-1)*CTFV/(CTFV**2+RNOISE)
                 ABOX(IR  )=-1.0*CFFTPIC(IR  )*CTFV/(CTFV**2+RNOISE)
@@ -583,6 +595,10 @@ C               write(6,'('':Applying Wiener filtration'')')
 C               write(6,'('':Doing nothing (but in stripes)'')')
                 ABOX(IR-1)= 1.0*CFFTPIC(IR-1)
                 ABOX(IR  )= 1.0*CFFTPIC(IR  )
+              endif
+              if(IMODE.eq.5 .or. IMODE.eq.6 .or. IMODE.eq.7)then
+                ABOX(IR-1)=-1.0*ABOX(IR-1)
+                ABOX(IR  )=-1.0*ABOX(IR  )
               endif
             endif
           enddo

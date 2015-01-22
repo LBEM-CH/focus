@@ -49,10 +49,14 @@ void VolumeHKL::addHKZData(std::ifstream& hkzFile){
     ReflectionMultiMap refMultiMap;
     int hIn, kIn, lIn, iqIn;
     double zIn, ampIn, phaseIn, sampIn, sphaseIn;
+    double scale = 10000.0;
     while (hkzFile >> hIn >> kIn >> zIn >> ampIn >> phaseIn >> sampIn >> sphaseIn >> iqIn)
     {
-        double dz = 1/(nz*apix);
-        lIn = round( (zIn/dz) );
+        // double dz = apix/nz;
+        // double dz = 1.0/(nz*apix);
+        // double dz = 1.0/nz;
+        // lIn = round( (zIn/dz) );
+        lIn = round( zIn * nz );
         
         MillerIndex *indexIn = new MillerIndex(hIn, kIn, lIn);
         double resolution =  getResolution(*indexIn);
@@ -67,8 +71,8 @@ void VolumeHKL::addHKZData(std::ifstream& hkzFile){
         
         if(resolution > max_resolution){
             double weightIn = cos(sphaseIn);
-            double realIn = weightIn*ampIn*cos(phaseIn);
-            double imagIn = weightIn*ampIn*sin(phaseIn);
+            double realIn = scale*weightIn*ampIn*cos(phaseIn);
+            double imagIn = scale*weightIn*ampIn*sin(phaseIn);
             refMultiMap.insert(MI_Reflection_Pair(*indexIn, Reflection(Complex2dx(realIn, imagIn), weightIn)));
         }
             

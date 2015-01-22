@@ -160,9 +160,9 @@ foreach dirfile ( ${dirlist} )
   
   #------------------------------------------------------------------------
   # Use the following to run somme of the standard scripts again:
-  # ${app_2dx_image} ${newdir} "2dx_initialize"
-  # ${app_2dx_image} ${newdir} "2dx_initialize_files"
-  # ${app_2dx_image} ${newdir} "2dx_fftrans"
+   ${app_2dx_image} ${newdir} "2dx_initialize"
+   ${app_2dx_image} ${newdir} "2dx_initialize_files"
+   ${app_2dx_image} ${newdir} "2dx_fftrans"
   # ${app_2dx_image} ${newdir} "2dx_getDefTilt"
   # ${app_2dx_image} ${newdir} "2dx_getLattice"
   # ${app_2dx_image} ${newdir} "2dx_refineLattice"

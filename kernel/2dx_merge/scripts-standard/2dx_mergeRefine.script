@@ -412,7 +412,7 @@ else
 endif
 #
 ${bin_2dx}/2dx_merge_compileB.exe << eot
-${scriptname}-tmp.results
+${scriptname}-tmp.py
 ${scriptname}-tmp.reflections
 ${scriptname}-tmp.console
 ${proc_2dx}
@@ -485,30 +485,24 @@ foreach scriptBconsole ( SCRATCH/job_??_${scriptname}-tmp.console )
   \rm -f ${scriptBconsole}
 end
 #
-\rm -f SCRATCH/${scriptname}.results
-echo "# IMAGE: SCRATCH/${scriptname}.results <LOG: Refinement results>" >> LOGS/${scriptname}.results
-foreach scriptBresults ( SCRATCH/job_??_${scriptname}-tmp.results ) 
-  cat ${scriptBresults} >> SCRATCH/${scriptname}.results
+\rm -f SCRATCH/${scriptname}.py
+echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
+foreach scriptBresults ( SCRATCH/job_??_${scriptname}-tmp.py ) 
+  cat ${scriptBresults} >> SCRATCH/${scriptname}.py
   \rm -f ${scriptBresults}
 end
 #
-${bin_2dx}/2dx_execute_merge_results.exe << eot
-SCRATCH/${scriptname}.results
-SCRATCH/2dx_execute_merge_results.script
-eot
-echo "# IMAGE: SCRATCH/2dx_execute_merge_results.script <LOG: Refinement results (translated)>" >> LOGS/${scriptname}.results
-echo Sourcing SCRATCH/2dx_execute_merge_results.script
-source SCRATCH/2dx_execute_merge_results.script
+python SCRATCH/${scriptname}.py
 #
 echo "<<@progress: 70>"
 #
 echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
 #
-\rm -f SCRATCH/2dx_merge_scriptB_postprocessing.log
-foreach scriptBpostp ( SCRATCH/job_??_${postprocessingfile} )
-  echo Sourcing ${scriptBpostp} \>\> SCRATCH/2dx_merge_scriptB_postprocessing.log
-  source ${scriptBpostp} >> SCRATCH/2dx_merge_scriptB_postprocessing.log
-end
+# \rm -f SCRATCH/2dx_merge_scriptB_postprocessing.log
+# foreach scriptBpostp ( SCRATCH/job_??_${postprocessingfile} )
+#   echo Sourcing ${scriptBpostp} \>\> SCRATCH/2dx_merge_scriptB_postprocessing.log
+#   source ${scriptBpostp} >> SCRATCH/2dx_merge_scriptB_postprocessing.log
+# end
 # cat SCRATCH/2dx_merge_scriptB_postprocessing.log
 #
 # Issue evaluate here to reload the Ph-Ori-Change column

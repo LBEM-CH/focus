@@ -60,6 +60,8 @@ C
 C  7.  IOUT,NUMSPOT, NOH, NOK, NHOR, NVERT  (*)
 C
 C  8.  FILOUT only if IOUT.NE.0 -- full name of output file, formatted data.
+C  8b. FILOU2 only if IOUT.EQ.2 .or. IOUT.EQ.3 -- full name of second output file.
+C  8c. RESORMIN only if IOUT.EQ.3 -- Minimial resolution perpendicular to tilt axis.
 C
 C  9    RESMIN, RESMAX,  XORIG, YORIG, SEGMNT  (*)
 C
@@ -258,20 +260,27 @@ C
 C
       IF(IOUT.NE.0) THEN
       READ(5,1005) FILOUT
-      OPEN(UNIT=IOUT,FILE=FILOUT,STATUS='NEW')
+      OPEN(UNIT=2,FILE=FILOUT,STATUS='NEW')
       END IF
 C
 CHEN
-      IF(IOUT.EQ.2) THEN
-      IOU2=11
-      READ(5,1005) FILOU2
-      WRITE(*,'('' '')')
-      WRITE(*,'('' # type in name pattern'')')
-      WRITE(*,'('' '')')
-      READ(5,1005) CNAMPAT
-      WRITE(6,'(A)') CNAMPAT
-      OPEN(UNIT=IOU2,FILE=FILOU2,STATUS='NEW')
+      IF(IOUT.EQ.2 .or. IOUT.EQ.3) THEN
+        IOU2=11
+        READ(5,1005) FILOU2
+        WRITE(*,'('' '')')
+        WRITE(*,'('' # type in name pattern'')')
+        WRITE(*,'('' '')')
+        READ(5,1005) CNAMPAT
+        WRITE(6,'(A)') CNAMPAT
+        OPEN(UNIT=IOU2,FILE=FILOU2,STATUS='NEW')
       END IF
+C
+      if(IOUT.eq.3)then
+        write(6,'('' Input RESORMIN (minimal resolution '',
+     .    ''orthogonal to tilt axis)'')')
+        read(5,*) RESORMIN
+        write(6,'('' Read: '',F12.3)')RESORMIN
+      endif
 CHEN
 C
       READ(5,*) RESMIN,RESMAX,XORIG,YORIG,SEGMNT
@@ -328,7 +337,7 @@ C           grid generation required
 C
             CALL GRID(AX,AY,BX,BY,ACY,BCY,IXC,IYC,
      .                   IH,IK,XA,YA,NOH,NOK,
-     .   RESMINSQ,RESMAXSQ,
+     .                   RESMINSQ,RESMAXSQ,
      .                   NXM2,NY2M2,NSPOT,LIST,
      .                   TLTAXIS,SEGMNT,TRNSTEPX)
           END IF
@@ -369,15 +378,15 @@ C
       NVERT = IVERT2 * 2 + 1
       WRITE(6,1080) NHOR,NVERT
  1080 FORMAT(/,' Box size in transform grid units :',I3,' *',I3)
-      IF(IOUT.NE.0) WRITE(IOUT,1081)ISER,TITLE
+      IF(IOUT.NE.0) WRITE(2,1081)ISER,TITLE
 1081  FORMAT(I10,17A4)
       DO 130 K=1,IBOXMAX
-      DO 130 J=1,IBOXMAX
-      ISUM(J,K) = 0
-      RSUM(J,K) = 0.0
-      ISUMI(J,K) = 0
+        DO 130 J=1,IBOXMAX
+          ISUM(J,K) = 0
+          RSUM(J,K) = 0.0
+          ISUMI(J,K) = 0
 CHEN
-      RSUMI(J,K) = 0.0
+          RSUMI(J,K) = 0.0
 CHEN
   130 CONTINUE
       SUMRMSBKOLD=0.0
@@ -702,7 +711,7 @@ C
 C     write output to unit IOUT
 C
       IF(IOUT.NE.0) THEN
-        WRITE(IOUT,1107)IH(I),IK(I),AMPOUT,PHSOUT,
+        WRITE(2,1107)IH(I),IK(I),AMPOUT,PHSOUT,
      .    IQ,RMSBK,DUMMY
 1107    FORMAT(2I5,2F12.1,I5,2F12.1)
       ENDIF
@@ -724,9 +733,11 @@ C
                 WRITE(6,1103)
                 WRITE(6,1102)
           ENDIF
-1102      FORMAT(/,' OTHER SPOTS NOT PRINTED OUT WITH FULL DIAGNOSTICS')
-1108      FORMAT('    H    K       AMPOUT  PHSOUT IQ       RMSBK     DFMID    ',
-     .     'NCTFSAMPLES    CTFINMIDDLE   RESCALING BY')
+1102      FORMAT(/,' OTHER SPOTS NOT PRINTED OUT WITH FULL ',
+     .       'DIAGNOSTICS')
+1108      FORMAT('    H    K       AMPOUT  PHSOUT IQ       ',
+     .       'RMSBK     DFMID    ',
+     .       'NCTFSAMPLES    CTFINMIDDLE   RESCALING BY')
           IF(NUMOUT.GT.NUMSPOT) THEN
            NUMAFTER=NUMOUT-NUMSPOT-1    ! Test for table heading output.
            IF(60*((NUMAFTER)/60).EQ.NUMAFTER) WRITE(6,1108)
@@ -976,7 +987,7 @@ C*******************************************************************************
 C
       SUBROUTINE GRID(AX,AY,BX,BY,ACY,BCY,IXC,IYC,
      .                   IH,IK,XA,YA,NOH,NOK,
-     .   RESMINSQ,RESMAXSQ,
+     .                   RESMINSQ,RESMAXSQ,
      .                   NXM2,NY2M2,NSPOT,LIST,
      .                   TLTAXIS,SEGMNT,TRNSTEPX)
 C
@@ -997,58 +1008,58 @@ C
       NSPOT = 0
       NOUTSIDE=0
       DO 100 NH=1,NOHD
-      DO 100 NK=1,NOKD
-        JH = NH - NOH - 1
-        JK = NK - NOK - 1
-      IF(JH.EQ.0.AND.JK.EQ.0)GO TO 100
-        X = JH * AX + JK * BX
-        Y = JH * AY + JK * BY
+        DO 100 NK=1,NOKD
+          JH = NH - NOH - 1
+          JK = NK - NOK - 1
+          IF(JH.EQ.0.AND.JK.EQ.0)GO TO 100
+          X = JH * AX + JK * BX
+          Y = JH * AY + JK * BY
 C
-C   YC is Y coord on same scale as X, ie in undistorted transform space 
-        YC = JH * ACY + JK * BCY
-        ANGLE=ATAN2(YC,X)
-        IF(Y.LT.0.) GO TO 100
+C         YC is Y coord on same scale as X, ie in undistorted transform space 
+          YC = JH * ACY + JK * BCY
+          ANGLE=ATAN2(YC,X)
+          IF(Y.LT.0.) GO TO 100
 C
-C       Resolution calculated from X and YC
-      DSTARSQ=(X**2+YC**2)*TRNSTEPXSQ
-      IF(DSTARSQ.EQ.0.0)GO TO 100
-      DSQ=1.0/DSTARSQ
-      IF(DSQ.LT.RESMAXSQ.OR.DSQ.GT.RESMINSQ)GO TO 100
+C         Resolution calculated from X and YC
+          DSTARSQ=(X**2+YC**2)*TRNSTEPXSQ
+          IF(DSTARSQ.EQ.0.0)GO TO 100
+          DSQ=1.0/DSTARSQ
+          IF(DSQ.LT.RESMAXSQ.OR.DSQ.GT.RESMINSQ)GO TO 100
 C
 C       
-C       Need angle that is in undistorted transform space
-      ANGDIF=ABS(ANGLE-TLTAXIS)*57.29577
-50    IF(ANGDIF.GT.180.0) THEN
-        ANGDIF=ANGDIF-180.0
-        GO TO 50
-      ELSE
-        IF(ANGDIF.GT.90.0)ANGDIF=180.0-ANGDIF
-      ENDIF
-      IF(SEGMNT.GE.0.0) THEN
-        IF(ANGDIF.GT.SEGMNT) GO TO 100
-      ELSE
-        IF(90.0-ANGDIF.GT.-SEGMNT) GO TO 100
-      ENDIF
+C         Need angle that is in undistorted transform space
+          ANGDIF=ABS(ANGLE-TLTAXIS)*57.29577
+50        IF(ANGDIF.GT.180.0) THEN
+            ANGDIF=ANGDIF-180.0
+            GO TO 50
+          ELSE
+            IF(ANGDIF.GT.90.0)ANGDIF=180.0-ANGDIF
+          ENDIF
+          IF(SEGMNT.GE.0.0) THEN
+            IF(ANGDIF.GT.SEGMNT) GO TO 100
+          ELSE
+            IF(90.0-ANGDIF.GT.-SEGMNT) GO TO 100
+          ENDIF
 C
-        IF(ABS(NINT(X)).GT.NXM2.OR.ABS(NINT(Y)).GT.NY2M2)THEN
-      NOUTSIDE=NOUTSIDE+1
-       GO TO 100
-      END IF
+          IF(ABS(NINT(X)).GT.NXM2.OR.ABS(NINT(Y)).GT.NY2M2)THEN
+            NOUTSIDE=NOUTSIDE+1
+            GO TO 100
+          END IF
 C
 C     spot within radius criterion  and within box, and within required segment.
 C
-        NSPOT = NSPOT + 1
-        IF (NSPOT.GT.NMAX) GO TO 4550
-        IXC(NSPOT) = X + SIGN(0.5,X)
-        IYC(NSPOT) = Y + SIGN(0.5,Y)
-        XA(NSPOT) = X
-        YA(NSPOT) = Y
+          NSPOT = NSPOT + 1
+          IF (NSPOT.GT.NMAX) GO TO 4550
+          IXC(NSPOT) = X + SIGN(0.5,X)
+          IYC(NSPOT) = Y + SIGN(0.5,Y)
+          XA(NSPOT) = X
+          YA(NSPOT) = Y
 C
-        IH(NSPOT) = JH
-        IK(NSPOT) = JK
-        IF(LIST)WRITE(6,20) JH,JK,X,Y,NSPOT
-C      WRITE(6,*)X,YC
-   20   FORMAT(2I10,2F10.1,I12)
+          IH(NSPOT) = JH
+          IK(NSPOT) = JK
+          IF(LIST)WRITE(6,20) JH,JK,X,Y,NSPOT
+C        WRITE(6,*)X,YC
+   20     FORMAT(2I10,2F10.1,I12)
   100 CONTINUE
       WRITE(6,4552)NSPOT
 4552  FORMAT('  THERE WERE A TOTAL OF',I5,'  SPOTS GENERATED')

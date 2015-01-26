@@ -54,7 +54,7 @@ ${defocus},${TLTAXIS},${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 ${CTF_outfile}
 SCRATCH/TMP9873.dat
 ${algo}
-200.0,3.0,${refposix},${refposiy},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
+${RESMIN},${RESMAX},${refposix},${refposiy},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
       #

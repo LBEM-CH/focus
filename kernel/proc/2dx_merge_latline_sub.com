@@ -26,9 +26,7 @@ if ( ${mode} == 0 ) then
   if ( ${scalimamp3d_rref} != "0" ) then
     #
     #############################################################################
-    #                                                                           #
     ${proc_2dx}/linblock "SCALIMAMP3D - to scale image amplitudes to selected reference data"
-    #                                                                           #
     #############################################################################
     #
     if ( ${scalimamp3d_rref} == "1" ) then 
@@ -83,11 +81,7 @@ eot
   endif
   #
   #############################################################################
-  #                                                                           #
   ${proc_2dx}/linblock "LATLINPRESCAL - to apply CTF correction and weight calculation"
-  #                                                                           #
-  #                                          merge_3ds.aph  =>  latlines.dat  #
-  #                                                                           #
   #############################################################################
   #
   \rm -f fort.1
@@ -170,57 +164,54 @@ set Reflections_Unique = `wc -l APH/latlines.dat | cut -f1`
 echo "set Reflections_Unique = ${Reflections_Unique}" >> LOGS/${scriptname}.results
 echo "::Unique Reflections = ${Reflections_Unique}"
 #
-#############################################################################
-#                                                                           #
-${proc_2dx}/linblock "LATLINEK - to fit lattice lines to merged data (D.Agard's program)"
-#                                                                           #
-#                latlines.dat  =>  latfitteds.dat + LATLINE.PLT + guess.dat #
-#                                                                           #
-#############################################################################
+echo "<<@progress: +5>>"  
 #
-echo "<<@progress: +5>>"
-#
-\rm -f PLOT.PS
-\rm -f PS/latline.ps
-\rm -f SCRATCH/latfitteds.dat
-\rm -f SCRATCH/guess.dat
-\rm -f latline.statistics
-#
-set iplterr = 0
-set idoh = 0
-set idok = 0
-set IAQP2 = 0
-set iplterr = 1         
-set imaxIQplot = ${MergeIQMAX}
-set MergeIGUESS = 1
-#
-if ( ${tempkeep} == 'y' ) then
-  set iverbose = 1
-else
-  set iverbose = 3
-endif
-#
-setenv  OBS   APH/latlines.dat
-setenv  OUT   SCRATCH/latfitteds.dat
-setenv  GUESS SCRATCH/guess.dat
-#
-echo " "
-echo " Parameters for latline are:"
-echo " "
-echo "2dx_merge_latline_sub.com, ${date}"
-echo "${spcgrp}                            # IPG (Plane group number 1-17)"
-echo "${MergeIPAT}                             # IPAT, 0=F & Phase, 1=Intensity data"
-echo "${MergeAK},${MergeIWF_VAL},${MergeIWP_VAL}                      # AK,IWF,IWP - relative weights, + individual sigmas"
-echo "${ALAT},${zminmax},${MergeDELPLT}        # ALAT,ZMIN,ZMAX,DELPLT "
-echo "${MergeDELPRO},${MergeRminRmax},${MergeRCUT},${MergePFACT}        # DELPRO,RMIN,RMAX,RCUT,PFACT"
-echo "${MergeIGUESS},${MergeBINSIZ}                       # IGUESS,BINSIZ"
-echo "${MergeNCYCLS},${MergeMPRINT}                          # NCYCLS,MPRINT"
-echo "${idoh},${idok}		                          # H,K indices to plot. 0 0 = all."
-echo "${IAQP2},${iplterr},${imaxIQplot}                         # IAQP2: 1=y,0=n, iplterr=1:errbar in PHS, maxIQ for PSplot"
-echo "${RMAXAMP}"
-echo " "
-#
-${bin_2dx}/2dx_latlinek.exe << eot > LOGS/2dx_latlinek.log
+if ( ${latline_algo}x == "0x" ) then
+  #############################################################################
+  ${proc_2dx}/linblock "LATLINEK - to fit lattice lines to merged data (D.Agard's program)"
+  #############################################################################  
+  #
+  \rm -f PLOT.PS
+  \rm -f PS/latline.ps
+  \rm -f SCRATCH/latfitteds.dat
+  \rm -f SCRATCH/guess.dat
+  \rm -f latline.statistics
+  #
+  set iplterr = 0
+  set idoh = 0
+  set idok = 0
+  set IAQP2 = 0
+  set iplterr = 1         
+  set imaxIQplot = ${MergeIQMAX}
+  set MergeIGUESS = 1
+  #
+  if ( ${tempkeep} == 'y' ) then
+    set iverbose = 1
+  else
+    set iverbose = 3
+  endif
+  #
+  setenv  OBS   APH/latlines.dat
+  setenv  OUT   SCRATCH/latfitteds.dat
+  setenv  GUESS SCRATCH/guess.dat
+  #
+  echo " "
+  echo " Parameters for latline are:"
+  echo " "
+  echo "2dx_merge_latline_sub.com, ${date}"
+  echo "${spcgrp}                            # IPG (Plane group number 1-17)"
+  echo "${MergeIPAT}                             # IPAT, 0=F & Phase, 1=Intensity data"
+  echo "${MergeAK},${MergeIWF_VAL},${MergeIWP_VAL}                      # AK,IWF,IWP - relative weights, + individual sigmas"
+  echo "${ALAT},${zminmax},${MergeDELPLT}        # ALAT,ZMIN,ZMAX,DELPLT "
+  echo "${MergeDELPRO},${MergeRminRmax},${MergeRCUT},${MergePFACT}        # DELPRO,RMIN,RMAX,RCUT,PFACT"
+  echo "${MergeIGUESS},${MergeBINSIZ}                       # IGUESS,BINSIZ"
+  echo "${MergeNCYCLS},${MergeMPRINT}                          # NCYCLS,MPRINT"
+  echo "${idoh},${idok}		                          # H,K indices to plot. 0 0 = all."
+  echo "${IAQP2},${iplterr},${imaxIQplot}                         # IAQP2: 1=y,0=n, iplterr=1:errbar in PHS, maxIQ for PSplot"
+  echo "${RMAXAMP}"
+  echo " " 
+  #
+  ${bin_2dx}/2dx_latlinek.exe << eot > LOGS/2dx_latlinek.log
 2dx_merge_latline_sub.com, ${date}
 ${spcgrp}                                                    ! IPG (Plane group number 1-17)
 ${MergeIPAT}                                                            ! IPAT, 0=F & Phase, 1=Intensity data
@@ -233,69 +224,63 @@ ${idoh},${idok}                                              ! H,K indices to pl
 ${IAQP2},${iplterr},${imaxIQplot}                            ! IAQP2: 1=y,0=n, iplterr=1:errbar in PHS, maxIQ for PSplot
 ${RMAXAMP},${MergeLatLine_RFOMSCALE}                         ! RMAXAMP: maximum amplitude; RFOMSCALE: increase in FOM for symmetry-restricted lattice lines
 eot
-#
-echo "################################################"
-echo "################################################"
-echo "output in file LOGS/2dx_latlinek.log"
-echo "################################################"
-echo "################################################"
-#
-echo "# IMAGE: LOGS/2dx_latlinek.log <LOG: 2dx_latlinek output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/latline_stat.dat <Lattice line statistics>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/latfitteds.dat <Lattice line fit data [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
-if ( -e SCRATCH/guess.dat ) then
-  echo "# IMAGE: SCRATCH/guess.dat <Lattice line guess data>" >> LOGS/${scriptname}.results
-endif
-if ( ! -e latline.statistics ) then
-  ${proc_2dx}/linblock "#"
-  ${proc_2dx}/linhash "3D modus, but do you have 3D (i.e. tilted) data?"
-  ${proc_2dx}/protest "ERROR in latlinek. Check logfile."
-endif
-\mv -f latline.statistics SCRATCH/latline_stat.dat
-set num_amplitudes_observed = `cat SCRATCH/latline_stat.dat | grep "Number of amplitudes observed" | cut -c55-`
-set num_phases_observed = `cat SCRATCH/latline_stat.dat | grep "Number of phases observed" | cut -c55-`
-set num_reflections_fitted = `cat SCRATCH/latfitteds.dat | wc -l`
-set overall_R_factor =  `cat SCRATCH/latline_stat.dat | grep "Overall R-factor" | cut -c55-`
-set overall_phase_residual =  `cat SCRATCH/latline_stat.dat | grep "Overall phase residual" | cut -c55-`
-set overall_weighted_R_factor =  `cat SCRATCH/latline_stat.dat | grep "Overall weighted R-factor" | cut -c55-`
-set overall_weighted_phase_residual =  `cat SCRATCH/latline_stat.dat | grep "Overall weighted phase residual" | cut -c55-`
-echo "set num_amplitudes_observed = ${num_amplitudes_observed}" >> LOGS/${scriptname}.results
-echo "set num_phases_observed = ${num_phases_observed}" >> LOGS/${scriptname}.results
-echo "set num_reflections_fitted = ${num_reflections_fitted}" >> LOGS/${scriptname}.results 
-echo "set overall_R_factor = ${overall_R_factor}" >> LOGS/${scriptname}.results
-echo "set overall_phase_residual = ${overall_phase_residual}" >> LOGS/${scriptname}.results
-echo "set overall_weighted_R_factor = ${overall_weighted_R_factor}" >> LOGS/${scriptname}.results
-echo "set overall_weighted_phase_residual = ${overall_weighted_phase_residual}" >> LOGS/${scriptname}.results
-#
-if ( ! -e PLOT.PS ) then
-  ${proc_2dx}/protest "2dx_latlinek: ERROR occured."
-endif
-#
-\mv -f PLOT.PS PS/latline.ps 
-echo "# IMAGE-IMPORTANT: PS/latline.ps <PS: Lattice lines>" >> LOGS/${scriptname}.results
-#
-if ( ${latline_pdf} == 'y' ) then
-  \rm -f PS/latline.pdf
-  ps2pdf PS/latline.ps PS/latline.pdf
-  echo "# IMAGE-IMPORTANT: PS/latline.pdf <PDF: Lattice lines>" >> LOGS/${scriptname}.results
-endif
-#
-echo " "
-${proc_2dx}/lin "-"
-echo " "
-#
-echo "<<@progress: +5>>"
-#
-#############################################################################
-#                                                                           #
-${proc_2dx}/linblock "2dx_plotresolution - Plotting resolution curves"
-#                                                                           #
-#############################################################################
-#
-\rm -f PLOTCUR.PS
-\rm -f SCRATCH/latfitteds_limit.dat
-#
-${bin_2dx}/2dx_plotresolution.exe << eot
+  #
+  echo "################################################"
+  echo "################################################"
+  echo "output in file LOGS/2dx_latlinek.log"
+  echo "################################################"
+  echo "################################################"    
+  #
+  echo "# IMAGE: LOGS/2dx_latlinek.log <LOG: 2dx_latlinek output>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/latline_stat.dat <Lattice line statistics>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/latfitteds.dat <Lattice line fit data [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
+  if ( -e SCRATCH/guess.dat ) then
+    echo "# IMAGE: SCRATCH/guess.dat <Lattice line guess data>" >> LOGS/${scriptname}.results
+  endif
+  if ( ! -e latline.statistics ) then
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linhash "3D modus, but do you have 3D (i.e. tilted) data?"
+    ${proc_2dx}/protest "ERROR in latlinek. Check logfile."
+  endif
+  \mv -f latline.statistics SCRATCH/latline_stat.dat
+  set num_amplitudes_observed = `cat SCRATCH/latline_stat.dat | grep "Number of amplitudes observed" | cut -c55-`
+  set num_phases_observed = `cat SCRATCH/latline_stat.dat | grep "Number of phases observed" | cut -c55-`
+  set num_reflections_fitted = `cat SCRATCH/latfitteds.dat | wc -l`
+  set overall_R_factor =  `cat SCRATCH/latline_stat.dat | grep "Overall R-factor" | cut -c55-`
+  set overall_phase_residual =  `cat SCRATCH/latline_stat.dat | grep "Overall phase residual" | cut -c55-`
+  set overall_weighted_R_factor =  `cat SCRATCH/latline_stat.dat | grep "Overall weighted R-factor" | cut -c55-`
+  set overall_weighted_phase_residual =  `cat SCRATCH/latline_stat.dat | grep "Overall weighted phase residual" | cut -c55-`
+  echo "set num_amplitudes_observed = ${num_amplitudes_observed}" >> LOGS/${scriptname}.results
+  echo "set num_phases_observed = ${num_phases_observed}" >> LOGS/${scriptname}.results
+  echo "set num_reflections_fitted = ${num_reflections_fitted}" >> LOGS/${scriptname}.results 
+  echo "set overall_R_factor = ${overall_R_factor}" >> LOGS/${scriptname}.results
+  echo "set overall_phase_residual = ${overall_phase_residual}" >> LOGS/${scriptname}.results
+  echo "set overall_weighted_R_factor = ${overall_weighted_R_factor}" >> LOGS/${scriptname}.results
+  echo "set overall_weighted_phase_residual = ${overall_weighted_phase_residual}" >> LOGS/${scriptname}.results
+  #
+  if ( ! -e PLOT.PS ) then
+    ${proc_2dx}/protest "2dx_latlinek: ERROR occured."
+  endif 
+  #
+  \mv -f PLOT.PS PS/latline.ps 
+  echo "# IMAGE-IMPORTANT: PS/latline.ps <PS: Lattice lines>" >> LOGS/${scriptname}.results
+  #
+  if ( ${latline_pdf} == 'y' ) then
+    \rm -f PS/latline.pdf
+    ps2pdf PS/latline.ps PS/latline.pdf
+    echo "# IMAGE-IMPORTANT: PS/latline.pdf <PDF: Lattice lines>" >> LOGS/${scriptname}.results
+  endif  
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_plotresolution - Plotting resolution curves"
+  #############################################################################
+  #
+  \rm -f PLOTCUR.PS
+  if ( -e SCRATCH/latfitteds_limit.dat ) then   
+    \rm -f SCRATCH/latfitteds_limit.dat
+  endif
+  #
+  ${bin_2dx}/2dx_plotresolution.exe << eot
 1
 ${realcell},${ALAT},${realang}
 SCRATCH/latfitteds.dat
@@ -305,61 +290,119 @@ ${zstarrange_real}
 ${resolutionplot_RESMAX}
 ${resolutionplot_bins}
 eot
-#
-if ( ! -e PLOTCUR.PS ) then
-  ${proc_2dx}/protest "ERROR in 2dx_plotresolution"
-else
-  \mv -f PLOTCUR.PS PS/2dx_plotresolution.ps
-  echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/latfitteds_limit.dat <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
-endif
-#
-#############################################################################
-#                                                                           #
-${proc_2dx}/linblock "PREPMKLCF - Program to convert fitted data to CCP4 format"
-#                                                                           #
-#############################################################################
-#
-\rm -f APH/latfitted_nosym.hkl
-\rm -f 2dx_prepmklcf.statistics
-#
-setenv IN SCRATCH/latfitteds_limit.dat
-setenv OUT APH/latfitted_nosym.hkl
-setenv REFHKL APH/latfittedref_nosym.hkl
-#
-# (1.0 to leave FOM values as they are, or 1.5 = to add a 60deg phase error)
-set REDUCAC = ${MergeLatLine_REDUCAC}   
-echo REDUCAC = ${REDUCAC}
-#
-echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
-@
-${bin_2dx}/2dx_prepmklcf.exe << eot > LOGS/prepmklcf.log
+  #
+  if ( ! -e PLOTCUR.PS ) then
+    ${proc_2dx}/protest "ERROR in 2dx_plotresolution"
+  else
+    \mv -f PLOTCUR.PS PS/2dx_plotresolution.ps
+    echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/latfitteds_limit.dat <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
+  endif
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "PREPMKLCF - Program to convert fitted data to CCP4 format"
+  #############################################################################
+  #
+  \rm -f APH/latfitted_nosym.hkl
+  \rm -f 2dx_prepmklcf.statistics
+  #
+  setenv IN SCRATCH/latfitteds_limit.dat
+  setenv OUT APH/latfitted_nosym.hkl
+  setenv REFHKL APH/latfittedref_nosym.hkl
+  #
+  # (1.0 to leave FOM values as they are, or 1.5 = to add a 60deg phase error)
+  set REDUCAC = ${MergeLatLine_REDUCAC}   
+  echo REDUCAC = ${REDUCAC}
+  #
+  echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
+  #
+  ${bin_2dx}/2dx_prepmklcf.exe << eot > LOGS/prepmklcf.log
 ${RESMAX},${REDUCAC}                   ! RESOLUTION,REDUCAC
 ${realcell},${realang},${ALAT}         ! a,b,gamma,c
 0.0                                    ! SCALE (automatic scaling to max(AMP)=32000.0)
 1				       ! 1=Calculate FOM from SIGF and SIGP. 0=Calculate FOM only from SIGP (this was the original version) 
 eot
-#
-echo "################################################"
-echo "################################################"
-echo "output in file LOGS/prepmklcf.log"
-echo "################################################"
-echo "################################################"
-#
-if ( ! -e 2dx_prepmklcf.statistics ) then
-  ${proc_2dx}/linblock "ERROR: 2dx_prepmklcf.statistics file is missing."
+  #
+  echo "################################################"
+  echo "################################################"
+  echo "output in file LOGS/prepmklcf.log"
+  echo "################################################"
+  echo "################################################"
+  #
+  if ( ! -e 2dx_prepmklcf.statistics ) then
+    ${proc_2dx}/linblock "ERROR: 2dx_prepmklcf.statistics file is missing."
+  else
+    set num_reflections_FOM1 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM_over_1' | sed s'/_/ /g' | cut -d= -f2`
+    set num_reflections_FOM50 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM_over_50' | sed s'/_/ /g' | cut -d= -f2`
+    echo "::Number of phases with FOM>1% is ${num_reflections_FOM1}"
+    echo "::Number of phases with FOM>50% is ${num_reflections_FOM50}"
+    echo "set num_reflections_FOM1 = ${num_reflections_FOM1}" >> LOGS/${scriptname}.results
+    echo "set num_reflections_FOM50 = ${num_reflections_FOM50}" >> LOGS/${scriptname}.results
+    \mv -f 2dx_prepmklcf.statistics SCRATCH
+  endif
+  if ( ${tempkeep} == "y" ) then
+    echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Latline for vol after prepmklcf [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
+  endif  
+  #
+  set infile = APH/latfitted_nosym.hkl
+  set CCP4_SYM_local = ${CCP4_SYM}
+  #
 else
-  set num_reflections_FOM1 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM_over_1' | sed s'/_/ /g' | cut -d= -f2`
-  set num_reflections_FOM50 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM_over_50' | sed s'/_/ /g' | cut -d= -f2`
-  echo "::Number of phases with FOM>1% is ${num_reflections_FOM1}"
-  echo "::Number of phases with FOM>50% is ${num_reflections_FOM50}"
-  echo "set num_reflections_FOM1 = ${num_reflections_FOM1}" >> LOGS/${scriptname}.results
-  echo "set num_reflections_FOM50 = ${num_reflections_FOM50}" >> LOGS/${scriptname}.results
-  \mv -f 2dx_prepmklcf.statistics SCRATCH
-endif
-if ( ${tempkeep} == "y" ) then
-  echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Latline for vol after prepmklcf [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_process_hkz - creating FOM-weighted averaged HKL file"
+  #############################################################################  
+  #
+  \rm -f PLOT.PS
+  \rm -f PS/latline.ps
+  \rm -f PS/latline.pdf
+  \rm -f SCRATCH/latfitteds.dat
+  \rm -f SCRATCH/guess.dat
+  \rm -f latline.statistics
+  #
+  set split = ($realcell:as/,/ /)
+  set cellx = $split[1]
+  set celly = $split[2]
+  #
+  echo "cellx = ${cellx}"
+  echo "celly = ${celly}"
+  echo "cellz = ${ALAT}" 
+  #
+  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel} ${RESMAX}
+  #
+  mv -f output.hkl APH/latfitted.hkl
+  echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_plotresolution - Plotting resolution curves"
+  #############################################################################
+  #
+  \rm -f PLOTCUR.PS
+  \rm -f APH/latfitted_limit.hkl
+  #
+  ${bin_2dx}/2dx_plotresolution.exe << eot
+2
+${realcell},${ALAT},${realang}
+APH/latfitted.hkl
+APH/latfitted_limit.hkl
+${RESMAX}
+${zstarrange_real}
+${resolutionplot_RESMAX}
+${resolutionplot_bins}
+eot
+  #
+  if ( ! -e PLOTCUR.PS ) then
+    ${proc_2dx}/protest "ERROR in 2dx_plotresolution"
+  else
+    \mv -f PLOTCUR.PS PS/2dx_plotresolution.ps
+    echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: APH/latfitted_limit.hkl <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
+  endif
+  #
+  set infile = APH/latfitted.hkl
+  #
+  set CCP4_SYM_local = 1
+  #
 endif
 #
 echo "<<@progress: +5>>"
@@ -368,13 +411,12 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for volume"
 #############################################################################
 #
-set infile = APH/latfitted_nosym.hkl
 \rm -f SCRATCH/merge3D.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3D.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
+SYMMETRY ${CCP4_SYM_local}
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
 FILE ${infile}
@@ -395,13 +437,16 @@ set infile = APH/latfittedref_nosym.hkl
 ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3Dref.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
+SYMMETRY ${CCP4_SYM_local}
 LABOUT H K L F PHI FOM SIGF
 CTYPOUT H H H F P W Q
 FILE ${infile}
 SKIP 0
 END
 eof
+#
+echo "# IMAGE: SCRATCH/merge3D.mtz <MTZ: Latline data before CAD>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/merge3Dref.mtz <MTZ: Latline Ref data before CAD>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "cad - to create MTZ file for volume"

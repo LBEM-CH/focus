@@ -77,7 +77,7 @@ endif
 ########################################################################
 ${proc_2dx}/linblock "Processing HKZ file from ${hkzFile}"
 ########################################################################
-${bin_2dx}/${scriptname}.exe ${hkzFile} ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel} ${RESMAX}
+${bin_2dx}/2dx_process_hkz.exe ${hkzFile} ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel} ${RESMAX}
 #
 mv output.hkl APH/processed.hkl
 #

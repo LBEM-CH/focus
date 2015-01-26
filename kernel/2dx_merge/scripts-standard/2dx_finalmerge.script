@@ -63,10 +63,12 @@
 # DISPLAY: AMP_Scale_Factor
 # DISPLAY: scalimamp3d_BEXTRA
 # DISPLAY: latline_pdf
+# DISPLAY: latline_algo
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
 # DISPLAY: RFACAMP
 # DISPLAY: Thread_Number
+# DISPLAY: set sample_pixel
 #
 #$end_local_vars
 #
@@ -116,6 +118,8 @@ set AMP_Scale_Factor = ""
 set merge_data_type = ""
 set plotres_rings = ""
 set lattice = ""
+set latline_algo = ""
+set sample_pixel = ""
 set scalimamp3d_rref = ""
 set scalimamp3d_BXYMINMAX = ""
 set scalimamp3d_BZMINMAX = ""

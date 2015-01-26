@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# ITERATIONCOUNTER: MAX=100;DEFAULT=3
+# ITERATIONCOUNTER: MAX=100;DEFAULT=7
 #
 # SORTORDER: 40
 #
@@ -88,6 +88,7 @@
 # DISPLAY: scalimamp3d_BZMINMAX
 # DISPLAY: scalimamp3d_BEXTRA
 # DISPLAY: latline_pdf
+# DISPLAY: latline_algo
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
 # DISPLAY: RFACAMP
@@ -158,6 +159,7 @@ set scalimamp3d_BEXTRA = ""
 set num_reflections_fitted = ""
 set num_reflections_FOM50 = ""
 set latline_pdf = ""
+set latline_algo = ""
 set resolutionplot_RESMAX = ""
 set resolutionplot_bins = ""
 set RFACAMP = ""

@@ -64,6 +64,7 @@ C
 C
       INTEGER IHFIELD(IMAX)
       INTEGER IKFIELD(IMAX)
+      INTEGER ILFIELD(IMAX)
       REAL RZFIELD(IMAX)
       REAL RAMPFIELD(IMAX)
       REAL RPHAFIELD(IMAX)
@@ -95,7 +96,7 @@ C
       INTEGER IBINSSIGPF(0:IHISTBINS,3)
       INTEGER IBINSFOM(0:IHISTBINS,3)
 C
-      COMMON /DATA/ IHFIELD,IKFIELD,RZFIELD,
+      COMMON /DATA/ IHFIELD,IKFIELD,ILFIELD,RZFIELD,
      .     RAMPFIELD,RPHAFIELD,RSIGFFIELD,RSIGPFIELD,RFOM,
      .     RecRESMAX,icount,RORIX,RORIY,
      .     RecRESHORI,RecRESVERT,RecRESVAL,
@@ -118,7 +119,8 @@ C
       write(6,'('': 2dx_plotresolution - analyzing the merged 3D '',
      .      ''dataset in resolution terms.'')')
 C
-      write(*,'('' Input operation mode: (1) normal, (2) for later '')')
+      write(*,'('' Input operation mode: (1) latline output, '',
+     .  ''(2) 2dx_process_hkz output '')')
       READ(5,*)IOPTION
       write(6,'('' Read: '',I3)')IOPTION
 C
@@ -199,6 +201,10 @@ C
 C=====Read input file
 C
       open(1,FILE=CNAME,STATUS='OLD',ERR=980)
+      call shorten(CNAME2,k)
+      write(CLINE,'(''\rm -r '',A)')CNAME2(1:k)
+      call shorten(CLINE,k)
+      call system(CLINE(1:k))
       open(10,FILE=CNAME2,STATUS='NEW',ERR=980)
 C
       RecRESHORIMAX=0.0
@@ -210,8 +216,23 @@ C
  100  continue
         i = i + 1
 C
-        read(1,*,END=200,ERR=980)IHFIELD(i),IKFIELD(i),RZFIELD(i),
-     .     RAMPFIELD(i),RPHAFIELD(i),RSIGFFIELD(i),RSIGPFIELD(i),RFOM(i)
+        if(IOPTION.eq.1)then
+          read(1,*,END=200,ERR=970)IHFIELD(i),IKFIELD(i),RZFIELD(i),
+     .       RAMPFIELD(i),RPHAFIELD(i),RSIGFFIELD(i),RSIGPFIELD(i),
+     .       RFOM(i)
+          ILFIELD(i)=0
+        else
+          read(1,*,END=200,ERR=970)IHFIELD(i),IKFIELD(i),ILFIELD(i),
+     .       RAMPFIELD(i),RPHAFIELD(i),RFOM(i)
+          RFOM(i)=RFOM(i)/100.0
+          if(RFOM(i).lt.0.0)RFOM(i)=0.0
+          if(RFOM(i).gt.1.0)RFOM(i)=1.0
+C---------This is wrong:
+          RSIGFFIELD(i)=RAMPFIELD(i)/RFOM(i)
+C
+          RSIGPFIELD(i)=acos(RFOM(i))*180/3.141592654
+          RZFIELD(i)=REAL(ILFIELD(i))/ALAT
+        endif
 C
         if(RFOM(i).lt.0.001)then
           i=i-1
@@ -387,6 +408,10 @@ C      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,12,IMAXBINS)
 C
       goto 999
 C
+ 970  continue
+        write(6,'(''::ERRPOR during file read in 2dx_plotresolution'')')
+        goto 999
+C
  980  continue
         write(6,'(''::ERRPOR during file open in 2dx_plotresolution'')')
         goto 999
@@ -493,6 +518,7 @@ C
 C
       INTEGER IHFIELD(IMAX)
       INTEGER IKFIELD(IMAX)
+      INTEGER ILFIELD(IMAX)
       REAL RZFIELD(IMAX)
       REAL RAMPFIELD(IMAX)
       REAL RPHAFIELD(IMAX)
@@ -536,7 +562,7 @@ C
       REAL*8 RBINSSIGPF2(0:IHISTBINS,3)
       REAL*8 RBINSFOM2(0:IHISTBINS,3)
 C
-      COMMON /DATA/ IHFIELD,IKFIELD,RZFIELD,
+      COMMON /DATA/ IHFIELD,IKFIELD,ILFIELD,RZFIELD,
      .     RAMPFIELD,RPHAFIELD,RSIGFFIELD,RSIGPFIELD,RFOM,
      .     RecRESMAX,icount,RORIX,RORIY,
      .     RecRESHORI,RecRESVERT,RecRESVAL,
@@ -883,6 +909,27 @@ C---------Calculate RGB Values:
           call HSVTORGB(rhue,rsat,RVAL,rgbr,rgbg,rgbb)
 C---------Set RGB color:
           CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+          if(RSIGPFIELD(i).le.10.0)then
+            rgbr = 0.0
+            rgbg = 0.0
+            rgbb = 1.0
+          elseif(RSIGPFIELD(i).le.30.0)then
+            rgbr = 0.0
+            rgbg = 0.8
+            rgbb = 0.6
+          elseif(RSIGPFIELD(i).le.45.0)then
+            rgbr = 0.9
+            rgbg = 0.2
+            rgbb = 0.0
+          elseif(RSIGPFIELD(i).le.60.0)then
+            rgbr = 1.0
+            rgbg = 0.5
+            rgbb = 0.5
+          else
+            rgbr = 0.8
+            rgbg = 0.8
+            rgbb = 0.8
+          endif
         endif
 C
         if(X.lt.RORIX) X=RORIX
@@ -969,6 +1016,28 @@ C---------Calculate RGB Values:
           call HSVTORGB(rhue,rsat,RVAL,rgbr,rgbg,rgbb)
 C---------Set RGB color:
           CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
+C
+          if(REAL(i).le.1.0)then
+            rgbr = 0.0
+            rgbg = 0.0
+            rgbb = 1.0
+          elseif(REAL(i).le.3.0)then
+            rgbr = 0.0
+            rgbg = 0.8
+            rgbb = 0.6
+          elseif(REAL(i).le.4.5)then
+            rgbr = 0.9
+            rgbg = 0.2
+            rgbb = 0.0
+          elseif(REAL(i).le.6.0)then
+            rgbr = 1.0
+            rgbg = 0.5
+            rgbb = 0.5
+          else
+            rgbr = 0.8
+            rgbg = 0.8
+            rgbb = 0.8
+          endif
 C
           X=XTMP
           Y=Y-10.0

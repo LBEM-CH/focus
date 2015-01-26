@@ -148,21 +148,16 @@ echo SYN_facthresha = ${SYN_facthresha}
 #
 source ${proc_2dx}/2dx_makedirs
 #
-/bin/rm -f ${imagename}.int.mrc
+/bin/rm -f ${imagename}_int.mrc
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "MAKETRAN - create synthetical transform from MTZ data"
-#                                                                           #
 #    OX and OY should be negative of values in normal JOBB to make central  #
 #    deviation zero.                                                        #
-#                                                                           #
-#          $mergedat  =>  make${imagename}.spt + make${imagename}.fft.mrc   #
-#                                                                           #
 #############################################################################
 #
-\rm -f SCRATCH/make${imagename}.1.fft.mrc
-\rm -f SCRATCH/make${imagename}.2.fft.mrc
+\rm -f SCRATCH/${imagename}_syn_1_fft.mrc
+\rm -f SCRATCH/${imagename}_syn_2_fft.mrc
 setenv HKLIN $mergedat
 echo "HKLIN =" ${mergedat}
 setenv SPOTSOUT make${imagename}.spt
@@ -210,7 +205,7 @@ echo "$lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval}  ${ctfre
 echo "${oxoy} ${beamtilt} $TAXA $TANGL $realcell ${realang}   ! OX OY TX TY TAXA TANGL A B GAMMA"
 echo "$SYN_RefRESMIN $SYN_RefRESMAX                                ! RESMIN RESMAX, resolution limits (Angstroms)"
 echo "${locdef} ${CS} ${KV}           ! DFMID1 DFMID2 ANGAST CS KV"
-echo "SCRATCH/make${imagename}.1.fft.mrc"
+echo "SCRATCH/${imagename}_syn_1_fft.mrc"
 echo "${mergedat}                        ! projection used for reference"
 echo "${spcgrp_maketran} T ${locfactor} $SYN_Bfact1                              ! spacegroup,LFPZERO,scale+temp_factor"
 echo "LABIN AMP=F PHASE=PHI FOM=FOM "
@@ -230,22 +225,22 @@ $lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval} ${ctfrevval} $
 ${oxoy} ${beamtilt} $TAXA $TANGL $realcell ${realang}                ! OX OY TX TY TAXA TANGL A B GAMMA
 $SYN_RefRESMIN $SYN_RefRESMAX                                      ! RESMIN RESMAX, resolution limits (Angstroms)
 ${locdef} ${CS} ${KV}		                                   ! DFMID1 DFMID2 ANGAST CS KV
-SCRATCH/make${imagename}.1.fft.mrc
+SCRATCH/${imagename}_syn_1_fft.mrc
 ${mergedat}
 ${spcgrp_maketran} T ${locfactor} $SYN_Bfact1    
 LABIN AMP=F PHASE=PHI FOM=FOM 
 eot
 #
-if ( ! -e SCRATCH/make${imagename}.1.fft.mrc ) then
+if ( ! -e SCRATCH/${imagename}_syn_1_fft.mrc ) then
   ${proc_2dx}/linblock "#"
-  ${proc_2dx}/linblock "ERROR: SCRATCH/make${imagename}.1.fft.mrc not created."
+  ${proc_2dx}/linblock "ERROR: SCRATCH/${imagename}_syn_1_fft.mrc not created."
   ${proc_2dx}/linblock "Problem in 2dx_maketrana.exe"
   ${proc_2dx}/linblock "#"
   ${proc_2dx}/linblock "Are the parameter, e.g. real-space lattice, the same in the merged dataset as here?"
   ${proc_2dx}/protest "Aborting."
 endif
 #
-echo "# IMAGE: SCRATCH/make${imagename}.1.fft.mrc <FFT: First synthetic reference>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/${imagename}_syn_1_fft.mrc <FFT: First synthetic reference>" >> LOGS/${scriptname}.results
 #
 if ( $do3quadserch == 'y' )then
   ${proc_2dx}/linblock "MAKETRAN - another time for second reference"
@@ -257,132 +252,121 @@ $lattice $revhkval ${sgnxchval} $rot180val $rot90val ${revhndval} ${ctfrevval} $
 $oxoy ${beamtilt} $TAXA $TANGL $realcell ${realang}                ! OX OY TX TY TAXA TANGL A B GAMMA
 $SYN_RefRESMIN $SYN_RefRESMAX                                      ! RESMIN RESMAX, resolution limits (Angstroms)
 ${locdef} ${CS} ${KV}		                                   ! DFMID1 DFMID2 ANGAST CS KV
-SCRATCH/make${imagename}.2.fft.mrc
+SCRATCH/${imagename}_syn_2_fft.mrc
 ${mergedat}
 ${spcgrp_maketran} T ${locfactor} $SYN_Bfact2    
 LABIN AMP=F PHASE=PHI FOM=FOM 
 eot
   #
-  if ( ! -e SCRATCH/make${imagename}.2.fft.mrc ) then
+  if ( ! -e SCRATCH/${imagename}_syn_2_fft.mrc ) then
     ${proc_2dx}/linblock "#"
-    ${proc_2dx}/linblock "ERROR: SCRATCH/make${imagename}.2.fft.mrc not created."
+    ${proc_2dx}/linblock "ERROR: SCRATCH/${imagename}_syn_2_fft.mrc not created."
     ${proc_2dx}/linblock "Problem in 2dx_maketrana.exe"
     ${proc_2dx}/linblock "#"
     ${proc_2dx}/linblock "Are the parameter, e.g. real-space lattice, the same in the merged dataset as here?"
     ${proc_2dx}/protest "Aborting."
   endif
   #
-  echo "# IMAGE: SCRATCH/make${imagename}.2.fft.mrc <FFT: Second synthetic reference>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${imagename}_syn_2_fft.mrc <FFT: Second synthetic reference>" >> LOGS/${scriptname}.results
   #
 endif
 #
 echo "<<@progress: 15>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "FFTRANS - Fourier-Transform the created fft"
-#                                                                           #
-#                           make${imagename}.fft.mrc  =>  make${imagename}.flt.mrc #
-#                                                                           #
 #############################################################################
 #
-\rm -f SCRATCH/make${imagename}.1.flt.mrc
+\rm -f SCRATCH/${imagename}_syn_1_flt.mrc
 #
-setenv IN  SCRATCH/make${imagename}.1.fft.mrc
-setenv OUT SCRATCH/make${imagename}.1.flt.mrc
+setenv IN  SCRATCH/${imagename}_syn_1_fft.mrc
+setenv OUT SCRATCH/${imagename}_syn_1_flt.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
-echo "# IMAGE: SCRATCH/make${imagename}.1.flt.mrc <Image of first synthetic reference>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/${imagename}_syn_1_flt.mrc <Image of first synthetic reference>" >> LOGS/${scriptname}.results
 #
 if ( $do3quadserch == 'y' ) then
-  \rm -f SCRATCH/make${imagename}.2.flt.mrc
-  setenv IN  SCRATCH/make${imagename}.2.fft.mrc
-  setenv OUT SCRATCH/make${imagename}.2.flt.mrc
+  \rm -f SCRATCH/${imagename}_syn_2_flt.mrc
+  setenv IN  SCRATCH/${imagename}_syn_2_fft.mrc
+  setenv OUT SCRATCH/${imagename}_syn_2_flt.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
-  echo "# IMAGE: SCRATCH/make${imagename}.2.flt.mrc <Image of second synthetic reference>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${imagename}_syn_2_flt.mrc <Image of second synthetic reference>" >> LOGS/${scriptname}.results
   #
 endif
 #
 echo "<<@progress: 20>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "LABEL - to cut out a larger area from the centre of created reference"
 #  just for debugging.                                                      #                                                                           #
-#                      make${imagename}.flt.mrc  =>  make${imagename}.reference.mrc #
-#                                                                           #
 #############################################################################
 #
 echo boxlabel = ${boxlabel}
 #
-\rm -f SCRATCH/make${imagename}.1.reference.mrc
+\rm -f SCRATCH/${imagename}_1_ref.mrc
 #
 ${proc_2dx}/lin "labelh.exe"
 ${bin_2dx}/labelh.exe << eot
-SCRATCH/make${imagename}.1.flt.mrc
+SCRATCH/${imagename}_syn_1_flt.mrc
 1
-SCRATCH/make${imagename}.1.reference.mrc
+SCRATCH/${imagename}_1_ref.mrc
 ${boxlabel}
 eot
 #
-echo "# IMAGE-IMPORTANT: SCRATCH/make${imagename}.1.reference.mrc <Center of first reference image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: SCRATCH/${imagename}_1_ref.mrc <Center of first reference image>" >> LOGS/${scriptname}.results
 #
 if ( $do3quadserch == 'y' ) then
-  \rm -f SCRATCH/make${imagename}.2.reference.mrc
+  \rm -f SCRATCH/${imagename}_2_ref.mrc
   #
   ${proc_2dx}/lin "labelh.exe"
   ${bin_2dx}/labelh.exe << eot
-SCRATCH/make${imagename}.2.flt.mrc
+SCRATCH/${imagename}_syn_2_flt.mrc
 1
-SCRATCH/make${imagename}.2.reference.mrc
+SCRATCH/${imagename}_2_ref.mrc
 ${boxlabel}
 eot
   #
-  echo "# IMAGE-IMPORTANT: SCRATCH/make${imagename}.2.reference.mrc <Center of second reference image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: SCRATCH/${imagename}_2_ref.mrc <Center of second reference image>" >> LOGS/${scriptname}.results
   #
 endif
 #
 echo "<<@progress: 25>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "LABEL - to cut out a small box in the centre of the created reference"
-#                                                                           #
-#                        make${imagename}.flt.mrc  =>  make${imagename}.box.flt.mrc #
-#                                                                           #
 #############################################################################
 #
 echo patlabel = ${patlabel}
 #
-\rm -f SCRATCH/make${imagename}-b.1.flt.mrc
+\rm -f SCRATCH/${imagename}_1_flt_box.mrc
 #
 ${proc_2dx}/lin "labelh.exe"
 ${bin_2dx}/labelh.exe << eot
-SCRATCH/make${imagename}.1.flt.mrc
+SCRATCH/${imagename}_syn_1_flt.mrc
 1
-SCRATCH/make${imagename}-b.1.flt.mrc
+SCRATCH/${imagename}_1_flt_box.mrc
 ${patlabel}
 eot
 #
 if ( ${tempkeep} == 'n' ) then
-  \rm -f SCRATCH/make${imagename}.1.flt.mrc
+  \rm -f SCRATCH/${imagename}_syn_1_flt.mrc
 endif
 #
 if ( $do3quadserch == 'y' ) then
   #
-  \rm -f SCRATCH/make${imagename}-b.2.flt.mrc
+  \rm -f SCRATCH/${imagename}_2_flt_box.mrc
   #
   ${proc_2dx}/lin "labelh.exe"
   ${bin_2dx}/labelh.exe << eot
-SCRATCH/make${imagename}.2.flt.mrc
+SCRATCH/${imagename}_syn_2_flt.mrc
 1
-SCRATCH/make${imagename}-b.2.flt.mrc
+SCRATCH/${imagename}_2_flt_box.mrc
 ${patlabel}
 eot
   #
   if ( ${tempkeep} == 'n' ) then
-    \rm -f SCRATCH/make${imagename}.2.flt.mrc
+    \rm -f SCRATCH/${imagename}_syn_2_flt.mrc
   endif
   #
 endif
@@ -390,30 +374,26 @@ endif
 echo "<<@progress: 30>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "AUTOCORRL - to calculate the autocorrelation of the boxed reference."
 #               This 25x25 box is 20 times magnification., => 500x500              #
-#                                                                           #
-#                     make${imagename}-b.flt.mrc  =>  make${imagename}.auto.cor.mrc #
-#                                                                           #
 #############################################################################
 #
-\rm -f SCRATCH/make${imagename}.auto.1.cor.mrc
+\rm -f SCRATCH/${imagename}_1_flt_box_auto.mrc
 #
 ${proc_2dx}/lin "autocorrl.exe"
-setenv IN  SCRATCH/make${imagename}-b.1.flt.mrc
-setenv OUT SCRATCH/make${imagename}.auto.1.cor.mrc
+setenv IN  SCRATCH/${imagename}_1_flt_box.mrc
+setenv OUT SCRATCH/${imagename}_1_flt_box_auto.mrc
 ${bin_2dx}/autocorrl.exe << eot
 20
 eot
 #
 if ( $do3quadserch == 'y' ) then
   #
-  \rm -f SCRATCH/make${imagename}.auto.2.cor.mrc
+  \rm -f SCRATCH/${imagename}_2_flt_box_auto.mrc
   #
   ${proc_2dx}/lin "autocorrl.exe"
-  setenv IN  SCRATCH/make${imagename}-b.2.flt.mrc
-  setenv OUT SCRATCH/make${imagename}.auto.2.cor.mrc
+  setenv IN  SCRATCH/${imagename}_2_flt_box.mrc
+  setenv OUT SCRATCH/${imagename}_2_flt_box_auto.mrc
   ${bin_2dx}/autocorrl.exe << eot
 20
 eot
@@ -423,33 +403,29 @@ endif
 echo "<<@progress: 35>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "LABEL - to cut out a central region from the autocorrelation map"
 #           500x500 => 100x100                                              #
-#                                                                           #
-#                  make${imagename}.auto.cor.mrc  =>  make${imagename}.auto.map.mrc #
-#                                                                           #
 #############################################################################
 #
-\rm -f SCRATCH/make${imagename}.auto.1.map.mrc
+\rm -f SCRATCH/${imagename}_1_flt_box_auto_box.mrc
 #
 ${proc_2dx}/lin "labelh.exe"
 ${bin_2dx}/labelh.exe << eot
-SCRATCH/make${imagename}.auto.1.cor.mrc
+SCRATCH/${imagename}_1_flt_box_auto.mrc
 1
-SCRATCH/make${imagename}.auto.1.map.mrc
+SCRATCH/${imagename}_1_flt_box_auto_box.mrc
 210,310,210,310
 eot
 #
 if ( $do3quadserch == 'y' ) then
   #
-  \rm -f SCRATCH/make${imagename}.auto.2.map.mrc
+  \rm -f SCRATCH/${imagename}_2_flt_box_auto_box.mrc
   #
   ${proc_2dx}/lin "labelh.exe"
   ${bin_2dx}/labelh.exe << eot
-SCRATCH/make${imagename}.auto.2.cor.mrc
+SCRATCH/${imagename}_2_flt_box_auto.mrc
 1
-SCRATCH/make${imagename}.auto.2.map.mrc
+SCRATCH/${imagename}_2_flt_box_auto_box.mrc
 210,310,210,310
 eot
   #
@@ -458,27 +434,23 @@ endif
 echo "<<@progress: 40>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "MASKTRAN - a for the filtered TEM image."
-#                                                                           #
-#                   ${imagename}.fft.mrc  +  ${nonmaskimagename}.spt  =>  ${imagename}.msk.mrc #
-#                                                                           #
 #############################################################################
 #
 if ( ${istilt} == "n" ) then
   #
-  if ( ! -e FFTIR/${imagename}.fft.mrc ) then
+  if ( ! -e FFTIR/${imagename}_fft.mrc ) then
     ${proc_2dx}/protest "First calculate FFTs"
   endif
-  setenv IN  FFTIR/${imagename}.fft.mrc
+  setenv IN  FFTIR/${imagename}_fft.mrc
   if ( -e GOODSPOT.spt ) then
     setenv SPOTS GOODSPOT.spt
   else
     setenv SPOTS ${nonmaskimagename}.spt
   endif
-  setenv OUT SCRATCH/${imagename}.msk.mrc
+  setenv OUT SCRATCH/${imagename}_fft_msk.mrc
   #
-  \rm -f SCRATCH/${imagename}.msk.mrc
+  \rm -f SCRATCH/${imagename}_fft_msk.mrc
   #
   ${proc_2dx}/lin "2dx_masktrana.exe"
   ${bin_2dx}/2dx_masktrana.exe << eot
@@ -491,9 +463,9 @@ else
   #
   \rm -f TMP234439.dat
   #
-  cp FFTIR/${imagename}.fft.mrc SCRATCH/${imagename}.msk.mrc
+  cp FFTIR/${imagename}_fft.mrc SCRATCH/${imagename}_fft_msk.mrc
   #
-  setenv INOUT SCRATCH/${imagename}.msk.mrc
+  setenv INOUT SCRATCH/${imagename}_fft_msk.mrc
   #
   ${proc_2dx}/lin "="
   ${proc_2dx}/lin "parameter for ttmask.exe"
@@ -537,37 +509,29 @@ eot-ttmask
   #
 endif
 #
-# echo "# IMAGE: SCRATCH/${imagename}.msk.mrc <Fourier-filtered image before twofile>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: SCRATCH/${imagename}_fft_msk.mrc <Fourier-filtered image before twofile>" >> LOGS/${scriptname}.results
 echo "<<@progress: 45>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "FFTTRANS - to calculate filtered image from masked FFT"
 #              just for debugging.                                          #
-#                                                                           #
-#                                    ${imagename}.msk.mrc  =>  ${imagename}.flt.mrc #
-#                                                                           #
 #############################################################################
 #
 if ( $tempkeep == 'y' ) then
-  \rm -f SCRATCH/${imagename}.flt.mrc
+  \rm -f SCRATCH/${imagename}_fft_msk_fft.mrc
   ${proc_2dx}/lin "fftrans.exe"
-  setenv IN  SCRATCH/${imagename}.msk.mrc
-  setenv OUT SCRATCH/${imagename}.flt.mrc
+  setenv IN  SCRATCH/${imagename}_fft_msk.mrc
+  setenv OUT SCRATCH/${imagename}_fft_msk_fft.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
-  echo "# IMAGE: SCRATCH/${imagename}.flt.mrc <Fourier-filtered image before unbending>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${imagename}_fft_msk_fft.mrc <Fourier-filtered image before unbending>" >> LOGS/${scriptname}.results
 endif
 #
 echo "<<@progress: 50>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "LABEL - to cut out a larger area from the centre of the masked image"
 #   just for debugging.                                                     #
-#                                                                           #
-#                                 ${imagename}.flt.mrc  =>  ${imagename}.masked.mrc #
-#                                                                           #
 #############################################################################
 #
 if ( $tempkeep == 'y' ) then
@@ -578,7 +542,7 @@ if ( $tempkeep == 'y' ) then
   ${proc_2dx}/lin "labelh.exe"
   #
   ${bin_2dx}/labelh.exe << eot
-SCRATCH/${imagename}.flt.mrc
+SCRATCH/${imagename}_fft_msk_fft.mrc
 1
 SCRATCH/${imagename}.masked.mrc
 ${boxlabel}
@@ -590,20 +554,16 @@ endif
 echo "<<@progress: 53>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "TWOFILE - to calculate cross-correlation"
-#                                                                           #
-#      ${imagename}.msk.mrc   +  make${imagename}.fft.mrc   =>  cor${imagename}.fft.mrc #
-#                                                                           #
 #############################################################################
 #
 #  Multiply two files together    :    FILE1 * Complex Conjugate of FILE2
 #
-\rm -f FFTIR/cor${imagename}.1.fft.mrc
+\rm -f FFTIR/${imagename}_CCmap1_fft.mrc
 #
-setenv IN1 SCRATCH/${imagename}.msk.mrc
-setenv IN2 SCRATCH/make${imagename}.1.fft.mrc
-setenv OUT FFTIR/cor${imagename}.1.fft.mrc
+setenv IN1 SCRATCH/${imagename}_fft_msk.mrc
+setenv IN2 SCRATCH/${imagename}_syn_1_fft.mrc
+setenv OUT FFTIR/${imagename}_CCmap1_fft.mrc
 ${proc_2dx}/lin "twofile.exe"
 ${bin_2dx}/twofile.exe << eot
 2				! ICOMB = 2
@@ -611,11 +571,11 @@ ${bin_2dx}/twofile.exe << eot
 eot
 #
 if ( $do3quadserch == 'y' )then
-  \rm -f FFTIR/cor${imagename}.2.fft.mrc
+  \rm -f FFTIR/${imagename}_CCmap2_fft.mrc
   #
-  setenv IN1 SCRATCH/${imagename}.msk.mrc
-  setenv IN2 SCRATCH/make${imagename}.2.fft.mrc
-  setenv OUT FFTIR/cor${imagename}.2.fft.mrc
+  setenv IN1 SCRATCH/${imagename}_fft_msk.mrc
+  setenv IN2 SCRATCH/${imagename}_syn_2_fft.mrc
+  setenv OUT FFTIR/${imagename}_CCmap2_fft.mrc
   ${proc_2dx}/lin "twofile.exe"
   ${bin_2dx}/twofile.exe << eot
 2				! ICOMB = 2
@@ -625,56 +585,44 @@ eot
 endif
 #
 if ( ${tempkeep} == 'y' ) then
-  \mv -f SCRATCH/${imagename}.msk.mrc SCRATCH/${imagename}.msk.unbend.mrc
+  \mv -f SCRATCH/${imagename}_fft_msk.mrc SCRATCH/${imagename}.msk.unbend.mrc
   echo "# IMAGE: SCRATCH/${imagename}.msk.unbend.mrc <FFT: Spot-Masked FFT of image>" >> LOGS/${scriptname}.results
 else
-  \rm -f SCRATCH/${imagename}.msk.mrc
+  \rm -f SCRATCH/${imagename}_fft_msk.mrc
 endif
 #
 echo "<<@progress: 57>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "FFTTRANS - to calculate cross-correlation map"
-#                                                                           #
-#                              cor${imagename}.fft.mrc  =>  cor${imagename}.cor.mrc #
-#                                                                           #
 #############################################################################
 #
-/bin/rm -f SCRATCH/ref${imagename}.1.fft.mrc
-#
-\rm -f SCRATCH/cor${imagename}.1.cor.mrc
+\rm -f SCRATCH/${imagename}_CCmap1.mrc
 ${proc_2dx}/lin "fftrans.exe"
-setenv IN  FFTIR/cor${imagename}.1.fft.mrc
-setenv OUT SCRATCH/cor${imagename}.1.cor.mrc
+setenv IN  FFTIR/${imagename}_CCmap1_fft.mrc
+setenv OUT SCRATCH/${imagename}_CCmap1.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
-/bin/rm -f FFTIR/cor${imagename}.1.fft.mrc
+/bin/rm -f FFTIR/${imagename}_CCmap1_fft.mrc
 #
 if ( $do3quadserch == 'y' )then
   #
-  \rm -f SCRATCH/ref${imagename}.2.fft.mrc
-  #
-  \rm -f SCRATCH/cor${imagename}.2.cor.mrc
+  \rm -f SCRATCH/${imagename}_CCmap2.mrc
   ${proc_2dx}/lin "fftrans.exe"
-  setenv IN  FFTIR/cor${imagename}.2.fft.mrc
-  setenv OUT SCRATCH/cor${imagename}.2.cor.mrc
+  setenv IN  FFTIR/${imagename}_CCmap2_fft.mrc
+  setenv OUT SCRATCH/${imagename}_CCmap2.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
-  \rm -f FFTIR/cor${imagename}.2.fft.mrc
+  \rm -f FFTIR/${imagename}_CCmap2_fft.mrc
 endif
 #
 echo "<<@progress: 60>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "QUADSERCH - to search cross-correlation map for peaks, IPASS=1"
-#                                                                           #
-#    cor${imagename}.cor.mrc =>  make${imagename}.auto.map.mrc  +  prof${imagename}.dat #
-#                                                                           #
 #############################################################################
 #
-setenv PROFILE  SCRATCH/make${imagename}.auto.1.map.mrc
+setenv PROFILE  SCRATCH/${imagename}_1_flt_box_auto_box.mrc
 setenv PROFDATA SCRATCH/prof${imagename}.dat
 setenv ERRORS   SCRATCH/errors${imagename}.dat
 setenv ERROUT   SCRATCH/errout${imagename}.dat
@@ -685,7 +633,7 @@ setenv ERROUT   SCRATCH/errout${imagename}.dat
 ${proc_2dx}/lin "quadserchh.exe, IPASS=1"
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 1,${SYN_quadpreda}                    ! IPASS,NRANGE
-SCRATCH/cor${imagename}.1.cor.mrc
+SCRATCH/${imagename}_CCmap1.mrc
 $imagesidelength,$imagesidelength     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                          ! Lattice vectors
 -200,200,-200,200                     ! NUMBER UNIT CELLS TO SEARCH
@@ -706,9 +654,7 @@ echo "# IMAGE: PS/${imagename}-quadserchSa.ps <PS: Vector Plot of Distortion, Re
 #
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "QUADSERCH - to search cross-correlation map for peaks, IPASS=3"
-#                                                                           #
 #############################################################################
 #
 setenv ERRORS   SCRATCH/errors${imagename}.dat
@@ -720,7 +666,7 @@ ${proc_2dx}/lin "quadserchh.exe, IPASS=3"
 #
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
 3,${SYN_quadpreda}			! IPASS,NRANGE
-SCRATCH/cor${imagename}.1.cor.mrc
+SCRATCH/${imagename}_CCmap1.mrc
 ${imagesidelength},${imagesidelength}                     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F			      ! Lattice vectors
 -200,200,-200,200	      	      ! NUMBER UNIT CELLS TO SEARCH
@@ -734,10 +680,10 @@ ${valspotscan},${RMAG},${LCOLOR}                   ! prohibit fractures in cryst
 eot
 # 
 if ( ${tempkeep} == 'y' ) then
-  \mv -f SCRATCH/cor${imagename}.1.cor.mrc SCRATCH/cor${imagename}.1.cor.unbend.mrc
-  echo "# IMAGE: SCRATCH/cor${imagename}.1.cor.unbend.mrc <CC-Map between Reference 1 and Image>" >> LOGS/${scriptname}.results
+  \mv -f SCRATCH/${imagename}_CCmap1.mrc SCRATCH/${imagename}_syn_CCmap1.mrc
+  echo "# IMAGE: SCRATCH/${imagename}_syn_CCmap1.mrc <CC-Map between Reference 1 and Image>" >> LOGS/${scriptname}.results
 else
-  \rm -f SCRATCH/cor${imagename}.1.cor.mrc
+  \rm -f SCRATCH/${imagename}_CCmap1.mrc
 endif
 #
 \mv -f CCPLOT.PS PS/${imagename}-quadserchSb.ps
@@ -751,18 +697,13 @@ echo "<<@progress: 65>>"
 if ( ${do3quadserch} == 'y' ) then
   #
   #############################################################################
-  #                                                                           #
   ${proc_2dx}/linblock "QUADSERCH - to search cross-correlation map for peaks, IPASS=2"
-  #                                                                           #
   ${proc_2dx}/lin "with IPASS=2 to read in better ERROUT field and find cc-peaks this should find lattice within SpotScan spots."
-  #                                                                           #
-  #                 cor${imagename}.cor =>  auto${imagename}.map  +  prof${imagename}.dat #
-  #                                                                           #
   #############################################################################
   #
   \rm -f SCRATCH/prof${imagename}.dat
   #
-  setenv PROFILE  SCRATCH/make${imagename}.auto.2.map.mrc
+  setenv PROFILE  SCRATCH/${imagename}_2_flt_box_auto_box.mrc
   setenv PROFDATA SCRATCH/prof${imagename}.dat
   setenv ERRORS   SCRATCH/errout${imagename}.dat
   #
@@ -772,7 +713,7 @@ if ( ${do3quadserch} == 'y' ) then
   ${proc_2dx}/lin "quadserchh.exe, IPASS=2"
   ${bin_2dx}/2dx_quadserchk-2.exe << eot
 2,${SYN_quadpredb}                     ! IPASS,NRANGE
-SCRATCH/cor${imagename}.2.cor.mrc
+SCRATCH/${imagename}_CCmap2.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
@@ -792,23 +733,19 @@ eot
   echo "# IMAGE: ${imagename}-unitcells-spider.doc <SPIDER document with unit cell locations>" >> LOGS/${scriptname}.results
   #
   if ( ${tempkeep} == 'y' ) then
-    \mv -f SCRATCH/cor${imagename}.2.cor.mrc SCRATCH/cor${imagename}.2.cor.unbend.mrc
-    echo "# IMAGE: SCRATCH/cor${imagename}.2.cor.unbend.mrc <CC-Map between Reference 2 and Image>" >> LOGS/${scriptname}.results
+    \mv -f SCRATCH/${imagename}_CCmap2.mrc SCRATCH/${imagename}_syn_CCmap2.mrc
+    echo "# IMAGE: SCRATCH/${imagename}_syn_CCmap2.mrc <CC-Map between Reference 2 and Image>" >> LOGS/${scriptname}.results
   else
-    \rm -f SCRATCH/cor${imagename}.2.cor.mrc
+    \rm -f SCRATCH/${imagename}_CCmap2.mrc
   endif
   #
 endif
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "CCUNBEND - to unbend the original image"
-#                                                                           #
-#           prof${imagename}.dat  +  ${imagename}.mrc          =>  cor${imagename}.mrc #
-#                                                                           #
 #############################################################################
 #
-\rm -f SCRATCH/cor${imagename}.mrc
+\rm -f SCRATCH/${imagename}_syn_unbent.mrc
 setenv CCORDATA SCRATCH/prof${imagename}.dat
 \rm -f SCRATCH/ccunbend-table-${imagename}.dat
 setenv TABLEOUT SCRATCH/ccunbend-table-${imagename}.dat
@@ -826,7 +763,7 @@ ${imagename}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T 	 !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER 
 30,52,0.001,${SYN_facthresha},${TLTAXIS},${RMAG},${LCOLOR} !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, synthetical unbend, ${date}
-SCRATCH/cor${imagename}.mrc
+SCRATCH/${imagename}_syn_unbent.mrc
 UNBENT with synthetical reference, ${date}
 eot
 #
@@ -835,12 +772,10 @@ eot
 \mv -f CCPLOT.PS PS/${imagename}-ccunbend.ps
 echo "# IMAGE-IMPORTANT: PS/${imagename}-ccunbend.ps <PS: Vector Plot for Unbending>" >> LOGS/${scriptname}.results 
 #
-echo "# IMAGE: SCRATCH/cor${imagename}.mrc <Unbent image>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/${imagename}_syn_unbent.mrc <Unbent image>" >> LOGS/${scriptname}.results
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/${lincommand} "gzip - to compact profile to save space on the harddrive"
-#                                                                           #
 #############################################################################
 #
 \cp -f SCRATCH/prof${imagename}.dat ${imagename}-profile.dat
@@ -851,18 +786,12 @@ gzip ${imagename}-profile.dat
 echo "<<@progress: 70>>"
 #
 #############################################################################
-#                                                                           #
-${proc_2dx}/linblock "taperedge - for spotscan images to eliminate transform stripes."
-#   it also eliminates differences between opposite borders, which other-   #
-#   wise would lead to lines on the achses of the Fourier transforms.       #
-#                                                                           #
-#                          cor${imagename}.mrc  =>  SCRATCH/cor${imagename}.tap.mrc #
-#                                                                           #
+${proc_2dx}/linblock "taperedge - to smoothen edges before FFT."
 #############################################################################
 #
-\rm -f SCRATCH/cor${imagename}.tap.mrc
-setenv IN  SCRATCH/cor${imagename}.mrc
-setenv OUT SCRATCH/cor${imagename}.tap.mrc
+\rm -f SCRATCH/${imagename}_syn_unbent_taper.mrc
+setenv IN  SCRATCH/${imagename}_syn_unbent.mrc
+setenv OUT SCRATCH/${imagename}_syn_unbent_taper.mrc
 ${proc_2dx}/lin "2dx_taperedgek.exe"
 ${bin_2dx}/2dx_taperedgek.exe  << 'eot'
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER
@@ -872,28 +801,22 @@ ${bin_2dx}/2dx_taperedgek.exe  << 'eot'
 echo "<<@progress: 72>>"
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "FFTRANS - to calculate FFT from image after unbending"
-#                                                                           #
-#                                  cor${imagename}.mrc  =>  cor${imagename}.fft.mrc #
-#                                                                           #
 #############################################################################
 #
-\rm -f SCRATCH/cor${imagename}.fft.mrc
+\rm -f SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
 ${proc_2dx}/lin "fftrans.exe"
-setenv IN  SCRATCH/cor${imagename}.tap.mrc
-setenv OUT SCRATCH/cor${imagename}.fft.mrc
+setenv IN  SCRATCH/${imagename}_syn_unbent_taper.mrc
+setenv OUT SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe
 #
-echo "# IMAGE-IMPORTANT: SCRATCH/cor${imagename}.fft.mrc <FFT of Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: SCRATCH/${imagename}_syn_unbent_taper_fft.mrc <FFT of Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 74>>"
 #
 #############################################################################
-#                                                                           #
 #      MMBOX - resolution limitation for diagnostics                        #
 #  TTBOX - to read out amplitudes and phases after TTcorrection             #
-#                                                                           #
 #############################################################################
 #
 \rm -f SCRATCH/TMP9871.dat 
@@ -916,17 +839,17 @@ set res7 = 2.0
 #
 if ( ${istilt} == "n" ) then
   #
-  \rm -f APH/${imagename}.limit.tmp.aph
+  \rm -f APH/${imagename}_tmp.aph
   #
   ${proc_2dx}/linblock "MMBOX - resolution limitation for diagnostics"
   ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
   ${imagenumber}     ${imagename} ${date}, PASS 1
 Y				! Use grid units?
 Y				! Generate grid from lattice?
 N				! Generate points from lattice?
 2 2 0 50 50 19 19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.limit.tmp.aph
+APH/${imagename}_tmp.aph
 SCRATCH/TMP98711.dat
 US
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -934,16 +857,16 @@ ${res1},${res2},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABAN
 ${lattice}		 		! Lattice vectors
 eot
   #
-  \rm -f APH/${imagename}.limit.tmp.aph
+  \rm -f APH/${imagename}_tmp.aph
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
   ${imagenumber}     ${imagename} ${date}, PASS 1
 Y				! Use grid units?
 Y				! Generate grid from lattice?
 N				! Generate points from lattice?
 2 2 0 50 50 19 19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.limit.tmp.aph
+APH/${imagename}_tmp.aph
 SCRATCH/TMP98712.dat
 US
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -951,16 +874,16 @@ ${res2},${res3},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABAN
 ${lattice}		 		! Lattice vectors
 eot
   #
-  \rm -f APH/${imagename}.limit.tmp.aph
+  \rm -f APH/${imagename}_tmp.aph
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
   ${imagenumber}     ${imagename} ${date}, PASS 1
 Y				! Use grid units?
 Y				! Generate grid from lattice?
 N				! Generate points from lattice?
 2 2 0 50 50 19 19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.limit.tmp.aph
+APH/${imagename}_tmp.aph
 SCRATCH/TMP98713.dat
 US
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -968,16 +891,16 @@ ${res3} ${res4} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABAN
 ${lattice}		 		! Lattice vectors
 eot
   #
-  \rm -f APH/${imagename}.limit.tmp.aph
+  \rm -f APH/${imagename}_tmp.aph
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
   ${imagenumber}     ${imagename} ${date}, PASS 1
 Y				! Use grid units?
 Y				! Generate grid from lattice?
 N				! Generate points from lattice?
 2 2 0 50 50 19 19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.limit.tmp.aph
+APH/${imagename}_tmp.aph
 SCRATCH/TMP98714.dat
 US
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -985,16 +908,16 @@ ${res4} ${res5} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABAN
 ${lattice}		 		! Lattice vectors
 eot
   #
-  \rm -f APH/${imagename}.limit.tmp.aph
+  \rm -f APH/${imagename}_tmp.aph
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
   ${imagenumber}     ${imagename} ${date}, PASS 1
 Y				! Use grid units?
 Y				! Generate grid from lattice?
 N				! Generate points from lattice?
 2 2 0 50 50 19 19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.limit.tmp.aph
+APH/${imagename}_tmp.aph
 SCRATCH/TMP98715.dat
 US
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -1002,16 +925,16 @@ ${res5} ${res6} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABAN
 ${lattice}		 		! Lattice vectors
 eot
   #
-  \rm -f APH/${imagename}.limit.tmp.aph
+  \rm -f APH/${imagename}_tmp.aph
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
   ${imagenumber}     ${imagename} ${date}, PASS 1
 Y				! Use grid units?
 Y				! Generate grid from lattice?
 N				! Generate points from lattice?
 2 2 0 50 50 19 19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.limit.tmp.aph
+APH/${imagename}_tmp.aph
 SCRATCH/TMP98716.dat
 US
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -1019,35 +942,15 @@ ${res6} ${res7} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABAN
 ${lattice}		 		! Lattice vectors
 eot
   #
-  \rm -f APH/${imagename}.syn.limit.tmp.aph
-  #
-  ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
-  ${imagenumber}     ${imagename} ${date}, PASS 1
-Y				! Use grid units?
-Y				! Generate grid from lattice?
-N				! Generate points from lattice?
-2 2 0 50 50 19 19		! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.syn.limit.tmp.aph
-SCRATCH/TMP9871.dat
-US
-${refposix},${refposiy}           ! XORIG,YORIG
-${RESMIN} ${RESMAX} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}		 		! Lattice vectors
-eot
-  #
-  \rm -f APH/${imagename}.syn.limit.aph
-  \mv -f APH/${imagename}.syn.limit.tmp.aph APH/${imagename}.syn.limit.aph
-  #
   #####################################################################
 else
   #####################################################################
   #
-  \rm -f APH/${imagename}.ttf.limit.tmp.aph
+  \rm -f APH/${imagename}_syn_ttf_tmp.aph
   #
   ${proc_2dx}/linblock "TTBOX - to read out amplitudes and phases after TTcorrection"
   ${bin_2dx}/2dx_ttboxk.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
    ${imagenumber}     ${imagename} ${date}, CCUNBEND PASS 1
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
@@ -1056,17 +959,17 @@ Y                        ! plot output
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus} ${TLTAXIS} ${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 2 0 50 50 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.ttf.limit.tmp.aph
+APH/${imagename}_syn_ttf_tmp.aph
 SCRATCH/TMP98711.dat
 US
 ${res1} ${res2} ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
-  \rm -f APH/${imagename}.ttf.limit.tmp.aph
+  \rm -f APH/${imagename}_syn_ttf_tmp.aph
   #
   ${proc_2dx}/lin "2dx_ttboxk.exe"
   ${bin_2dx}/2dx_ttboxk.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
    ${imagenumber}     ${imagename} ${date}, CCUNBEND PASS 1
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
@@ -1075,17 +978,17 @@ Y                        ! plot output
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus} ${TLTAXIS} ${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 2 0 50 50 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.ttf.limit.tmp.aph
+APH/${imagename}_syn_ttf_tmp.aph
 SCRATCH/TMP98712.dat
 US
 ${res2} ${res3} ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
-  \rm -f APH/${imagename}.ttf.limit.tmp.aph
+  \rm -f APH/${imagename}_syn_ttf_tmp.aph
   #
   ${proc_2dx}/lin "2dx_ttboxk.exe"
   ${bin_2dx}/2dx_ttboxk.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
    ${imagenumber}     ${imagename} ${date}, CCUNBEND PASS 1
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
@@ -1094,17 +997,17 @@ Y                        ! plot output
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus} ${TLTAXIS} ${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 2 0 50 50 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.ttf.limit.tmp.aph
+APH/${imagename}_syn_ttf_tmp.aph
 SCRATCH/TMP98713.dat
 US
 ${res3} ${res4} ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
-  \rm -f APH/${imagename}.ttf.limit.tmp.aph
+  \rm -f APH/${imagename}_syn_ttf_tmp.aph
   #
   ${proc_2dx}/lin "2dx_ttboxk.exe"
   ${bin_2dx}/2dx_ttboxk.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
    ${imagenumber}     ${imagename} ${date}, CCUNBEND PASS 1
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
@@ -1113,17 +1016,17 @@ Y                        ! plot output
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus} ${TLTAXIS} ${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 2 0 50 50 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.ttf.limit.tmp.aph
+APH/${imagename}_syn_ttf_tmp.aph
 SCRATCH/TMP98714.dat
 US
 ${res4} ${res5} ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
-  \rm -f APH/${imagename}.ttf.limit.tmp.aph
+  \rm -f APH/${imagename}_syn_ttf_tmp.aph
   #
   ${proc_2dx}/lin "2dx_ttboxk.exe"
   ${bin_2dx}/2dx_ttboxk.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
    ${imagenumber}     ${imagename} ${date}, CCUNBEND PASS 1
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
@@ -1132,17 +1035,17 @@ Y                        ! plot output
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus} ${TLTAXIS} ${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 2 0 50 50 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.ttf.limit.tmp.aph
+APH/${imagename}_syn_ttf_tmp.aph
 SCRATCH/TMP98715.dat
 US
 ${res5} ${res6} ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
-  \rm -f APH/${imagename}.ttf.limit.tmp.aph
+  \rm -f APH/${imagename}_syn_ttf_tmp.aph
   #
   ${proc_2dx}/lin "2dx_ttboxk.exe"
   ${bin_2dx}/2dx_ttboxk.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
    ${imagenumber}     ${imagename} ${date}, CCUNBEND PASS 1
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
@@ -1151,7 +1054,7 @@ Y                        ! plot output
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus} ${TLTAXIS} ${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 2 0 50 50 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.ttf.limit.tmp.aph
+APH/${imagename}_syn_ttf_tmp.aph
 SCRATCH/TMP98716.dat
 US
 ${res6} ${res7} ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
@@ -1161,9 +1064,49 @@ eot
   #
   \rm -f TTPLOT.PS
   #
-  ${proc_2dx}/lin "2dx_ttboxk.exe"
+  #####################################################################
+endif
+#
+echo "<<@progress: 76>>"
+#
+#############################################################################
+#      MMBOX - no resolution limitation                                     #
+#  TTBOX - to read out amplitudes and phases after TTcorrection             #
+#############################################################################
+#
+\rm -f SCRATCH/TMP9871.dat
+#
+if ( ${istilt} == "n" ) then
+  #
+  \rm -f APH/${imagename}_syn_unbend_tmp.aph
+  #
+  ${proc_2dx}/linblock "MMBOX - no resolution limitation"
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
+  ${imagenumber}     ${imagename} ${date}, PASS 1
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2 2 0 50 50 19 19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+APH/${imagename}_syn_unbend_tmp.aph
+SCRATCH/TMP9871.dat
+US
+${refposix},${refposiy}           ! XORIG,YORIG
+${RESMIN} 1.5 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
+eot
+  #
+  \mv -f APH/${imagename}_syn_unbend_tmp.aph APH/${imagename}_syn_unbend.aph
+  #
+else
+  #
+  \rm -f APH/${imagename}_syn_ttf_unbend_tmp.aph
+  #
+  \rm -f TTPLOT.PS
+  #
+  ${proc_2dx}/linblock "TTBOX - to read out amplitudes and phases after TTcorrection"
   ${bin_2dx}/2dx_ttboxk.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
+SCRATCH/${imagename}_syn_unbent_taper_fft.mrc
    ${imagenumber}     ${imagename} ${date}, CCUNBEND PASS 1
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
@@ -1172,20 +1115,20 @@ Y                        ! plot output
 ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
 ${defocus} ${TLTAXIS} ${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 2 0 50 50 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.syn.ttf.limit.tmp.aph
+APH/${imagename}_syn_ttf_unbend_tmp.aph
 SCRATCH/TMP9871.dat
 US
-${RESMIN} ${RESMAX} ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
+${RESMIN} 1.5 ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
   #
-  \rm -f APH/${imagename}.syn.ttf.limit.aph
-  \mv -f APH/${imagename}.syn.ttf.limit.tmp.aph APH/${imagename}.syn.ttf.limit.aph
+  \rm -f APH/${imagename}_syn_ttf_unbend.aph
+  \mv -f APH/${imagename}_syn_ttf_unbend_tmp.aph APH/${imagename}_syn_ttf_unbend.aph
+  echo "# IMAGE: APH/${imagename}_syn_ttf_unbend.aph <APH: Final Syn TTF APH file>" >> LOGS/${scriptname}.results 
   #
-  \mv -f TTPLOT.PS PS/${imagename}.ttplot.limit.unbendS.ps
-  echo "# IMAGE: PS/${imagename}.ttplot.limit.unbendS.ps <PS: IQ Plot after TTF correction, resolution limited>" >> LOGS/${scriptname}.results 
+  \mv -f TTPLOT.PS PS/${imagename}_ttplot_nolimit_unbendS.ps
+  echo "# IMAGE: PS/${imagename}_ttplot_nolimit_unbendS.ps <PS: IQ Plot after TTF correction, no res. limit>" >> LOGS/${scriptname}.results 
   #
-  #####################################################################
 endif
 #
 echo "# IQSTAT-RESLIM:"
@@ -1223,82 +1166,10 @@ cat SCRATCH/SYN_unbend.dat
 #
 echo "# IMAGE: SCRATCH/SYN_unbend.dat <TXT: Q-Values in Resolution Ranges>" >> LOGS/${scriptname}.results 
 #
-echo "<<@progress: 76>>"
+echo "<<@progress: 100>>"
 #
 #############################################################################
-#                                                                           #
-#      MMBOX - no resolution limitation                                     #
-#  TTBOX - to read out amplitudes and phases after TTcorrection             #
-#                                                                           #
-#############################################################################
-#
-\rm -f SCRATCH/TMP9871.dat
-#
-if ( ${istilt} == "n" ) then
-  #
-  \rm -f APH/${imagename}.nolimit.tmp.aph
-  #
-  ${proc_2dx}/linblock "MMBOX - no resolution limitation"
-  ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
-  ${imagenumber}     ${imagename} ${date}, PASS 1
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2 2 0 50 50 19 19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.syn.nolimit.tmp.aph
-SCRATCH/TMP9871.dat
-US
-${refposix},${refposiy}           ! XORIG,YORIG
-${RESMIN} 1.5 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}                         ! Lattice vectors
-eot
-  #
-  \rm -f APH/${imagename}.syn.nolimit.aph
-  \mv -f APH/${imagename}.syn.nolimit.tmp.aph APH/${imagename}.syn.nolimit.aph
-  #
-else
-  #
-  \rm -f APH/${imagename}.syn.ttf.nolimit.tmp.aph
-  #
-  \rm -f TTPLOT.PS
-  #
-  ${proc_2dx}/linblock "TTBOX - to read out amplitudes and phases after TTcorrection"
-  ${bin_2dx}/2dx_ttboxk.exe << eot
-SCRATCH/cor${imagename}.fft.mrc
-   ${imagenumber}     ${imagename} ${date}, CCUNBEND PASS 1
-Y                        ! generate grid from lattice
-N                        ! generate points from lattice
-N                        ! list points as calculated
-Y                        ! plot output
-${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
-${defocus} ${TLTAXIS} ${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-2 0 50 50 19 19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}.syn.ttf.nolimit.tmp.aph
-SCRATCH/TMP9871.dat
-US
-${RESMIN} 1.5 ${refposix} ${refposiy} ${reciangle} !RSMN,RSMX,XORIG,YORIG,SEGMNT
-${lattice}                  ! reciprocal lattice vectors in pixels
-eot
-  #
-  \rm -f APH/${imagename}.syn.ttf.nolimit.aph
-  \mv -f APH/${imagename}.syn.ttf.nolimit.tmp.aph APH/${imagename}.syn.ttf.nolimit.aph
-  echo "# IMAGE: APH/${imagename}.syn.ttf.nolimit.aph <APH: Final Syn TTF APH file>" >> LOGS/${scriptname}.results 
-  #
-  \mv -f TTPLOT.PS PS/${imagename}.ttplot.nolimit.unbendS.ps
-  echo "# IMAGE: PS/${imagename}.ttplot.nolimit.unbendS.ps <PS: IQ Plot after TTF correction, no res. limit>" >> LOGS/${scriptname}.results 
-  #
-endif
-#
-echo dummy > SCRATCH/TMP9871.dat  
-\rm -f SCRATCH/TMP987*.dat  
-#
-echo "<<@progress: 78>>"
-#
-#############################################################################
-#                                                                           #
-#  Done with unbending.                                                     #
-#                                                                           #
+${proc_2dx}/linblock "${scriptname} finished correctly."
 #############################################################################
 #
 

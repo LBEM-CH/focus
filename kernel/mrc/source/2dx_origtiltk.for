@@ -525,6 +525,7 @@ C  DIMENSION STATEMENTS FOR BEAMTILT REFINEMENT -- includes COMMON block
 C            needed for VA04A minimisation subroutine.
       REAL*4 CS,KV,TILTH,TILTK
       LOGICAL NBEAM,NTILT,NREFOUT,NSHFTIN,NWGT,LOGOUTPUT,LPROTFOUFIL
+      LOGICAL USEPYTHON,PYTHONFIRST
       COMMON WORK(28),IN1,IIH(MAXRFL),IIK(MAXRFL),IQIN(MAXRFL),
      . PHSI(MAXRFL),PHSC(MAXRFL),WGT(MAXRFL),SHMIN,SKMIN,TILTH,TILTK,
      . BEAMSHFT(4),BSH(MAXRFL),IQMAX,NCALCFX,
@@ -561,6 +562,8 @@ C
                 LOGICAL icompare 
 C
 C
+      USEPYTHON = .TRUE.
+      PYTHONFIRST = .TRUE.
 C
       MAX1=MAXRFL+1
       ZMIN=0.0
@@ -673,6 +676,17 @@ C
       write(6,'(''Input name for results file'')')
       read(5,'(A)')cfile1
       write(6,'(A)')cfile1
+C
+C-----If this name ends with "py", then generate a Python script.
+C-----Else generate a results file for 2dx_merge.exe: 
+      call shorten(cfile1,k)
+      if(cfile1(k:k).eq.'y')then
+        write(6,'('':Generating a Python script'')')
+        USEPYTHON = .TRUE.
+      else
+        write(6,'('':Generating a data file for 2dx_merge'')')
+        USEPYTHON = .FALSE.
+      endif
 C
       write(6,'(''Input name for reflections file'')')
       read(5,'(A)')cfilereflections
@@ -1950,7 +1964,24 @@ C        write(6,'(''Calling system with '',A)')cline1(1:k)
      .       ''Could not open tmp.1'')')
  414  continue
       if(LOGOUTPUT)then
-        write(17,'(''<IMAGEDIR="'',A,''">'')')FILIN(1:ihen1)
+        if(USEPYTHON)then
+          if(PYTHONFIRST)then
+            write(17,'(''# This is a Python script. '')')
+            write(17,'(''# This updates the 2dx_image.cfg files'')')
+            write(17,'(''#'')')
+            write(17,'(''import os'')')
+            PYTHONFIRST = .FALSE.
+          endif
+          write(17,'('' '')')
+          write(17,'('' '')')
+          write(17,'(''print ":Updating 2dx_image.cfg in '',A,''"'')')FILIN(1:ihen1)
+          write(17,415)FILIN(1:ihen1)
+ 415      FORMAT('f = open("',A,'/2dx_image.cfg",''r'')')
+          write(17,'(''lines = []'')')
+          write(17,'(''for l in f:'')')
+        else
+          write(17,'(''<IMAGEDIR="'',A,''">'')')FILIN(1:ihen1)
+        endif
       endif
       write(6,'(/,/,/,'' Image Directory is '',A,/)')FILIN(1:ihen1)
 C
@@ -1978,11 +2009,18 @@ C
 C
       write(cline1,'(F15.2)')ERRMIN
       write(cline1,'(F15.2)')ERRESALL
-      call shorten(cline1,k)
-      if(LOGOUTPUT)then
-        write(17,'(''set MergePhaseResidual = "'',A,''"'')')cline1(1:k)
-      endif
+      call shortshrink(cline1,k)
       write(6,'(''new MergePhaseResidual = "'',A,''"'')')cline1(1:k)
+      if(LOGOUTPUT)then
+        if(USEPYTHON)then
+          write(17,'(T8,''if l.startswith("set MergePhaseResidual "'',
+     .      ''):'')')
+          write(17,'(T16,''lines.append(''''set MergePhaseResidual = "'',
+     .      A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set MergePhaseResidual = "'',A,''"'')')cline1(1:k)
+        endif
+      endif
 C
 C10171 FORMAT(":",5X,' RANGE','     DMIN ','     DMAX ','   RESIDUAL  NUMBER',/)
 C      NRESALL=0
@@ -2012,11 +2050,22 @@ C
           write(cline1,'(''99.0'')')
           write(cline2,'(''0'')')
         endif
-        call shorten(cline1,k1)
-        call shorten(cline2,k2)
+        call shortshrink(cline1,k1)
+        call shortshrink(cline2,k2)
         if(LOGOUTPUT)then
-          write(17,'(''set MergePhaseRes_slot'',I1,'' = "'',A,''"'')')I,cline1(1:k1)
-          write(17,'(''set MergePhaseRes_numb'',I1,'' = "'',A,''"'')')I,cline2(1:k2)
+          if(USEPYTHON)then
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set MergePhaseRes_slot'',I1,'' "):'')')I
+            write(17,'(T16,''lines.append('',
+     .        ''''''set MergePhaseRes_slot'',I1,'' = "'',A,''"\n'''')'')')I,cline1(1:k1)
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set MergePhaseRes_numb'',I1,'' "):'')')I
+            write(17,'(T16,''lines.append('',
+     .        ''''''set MergePhaseRes_numb'',I1,'' = "'',A,''"\n'''')'')')I,cline2(1:k2)
+          else
+            write(17,'(''set MergePhaseRes_slot'',I1,'' = "'',A,''"'')')I,cline1(1:k1)
+            write(17,'(''set MergePhaseRes_numb'',I1,'' = "'',A,''"'')')I,cline2(1:k2)
+          endif
         endif
         write(6,'(''new MergePhaseRes_slot'',I1,'' = "'',A,''"'')')I,cline1(1:k1)
         write(6,'(''new MergePhaseRes_numb'',I1,'' = "'',A,''"'')')I,cline2(1:k2)
@@ -2026,15 +2075,35 @@ C
       call inkomma(cline1,k)
       if(ispcgrp.eq.1)then
         if(LOGOUTPUT) then
-          write(17,'(''set phaori = "'',A,''"'')')cline1(1:k)
+          if(USEPYTHON)then
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set phaori "):'')')
+            write(17,'(T16,''lines.append('',
+     .        ''''''set phaori = "'',A,''"\n'''')'')')cline1(1:k)
+          else
+            write(17,'(''set phaori = "'',A,''"'')')cline1(1:k)
+          endif
         endif
         write(6,'(''new phaori = "'',A,''"'')')cline1(1:k)
       else
         if(LOGOUTPUT)then
-          write(17,'(''set phaori = "'',A,''"'')')cline1(1:k)
-          if(.not.LPROTFOUFIL)then
-            write(17,'(''set phaoriFouFilter = "'',A,''"'')')
-     .        cline1(1:k)
+          if(USEPYTHON)then
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set phaori "):'')')
+            write(17,'(T16,''lines.append('',
+     .        ''''''set phaori = "'',A,''"\n'''')'')')cline1(1:k)
+            if(.not.LPROTFOUFIL)then
+              write(17,'(T8,''elif l.startswith('',
+     .          ''"set phaoriFouFilter "):'')')
+              write(17,'(T16,''lines.append('',
+     .          ''''''set phaoriFouFilter = "'',A,''"\n'''')'')')cline1(1:k)
+            endif
+          else
+            write(17,'(''set phaori = "'',A,''"'')')cline1(1:k)
+            if(.not.LPROTFOUFIL)then
+              write(17,'(''set phaoriFouFilter = "'',A,''"'')')
+     .          cline1(1:k)
+            endif
           endif
         endif
         write(6,'(''new phaori = "'',A,''"'')')cline1(1:k)
@@ -2046,8 +2115,15 @@ C
       if(LOGOUTPUT) then
         write(cline1,'(2F12.3)')HSHMIN,HSKMIN
         call inkomma(cline1,k)
-        WRITE(17,'(''set phaori_last_change = "'',A,''"'')')
-     .    cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set phaori_last_change "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set phaori_last_change = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          WRITE(17,'(''set phaori_last_change = "'',A,''"'')')
+     .      cline1(1:k)
+        endif
         WRITE(6,'(''Last applied change to phaori = "'',A,''"'')')
      .    cline1(1:k)
        endif
@@ -2057,7 +2133,14 @@ C      if(ibeamtiltref.eq.1)then
         write(cline1,'(2F12.3)')HTHLT,HTKLT
         call inkomma(cline1,k)
         if(LOGOUTPUT)then
-          write(17,'(''set beamtilt = "'',A,''"'')')cline1(1:k)
+          if(USEPYTHON)then
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set beamtilt "):'')')
+            write(17,'(T16,''lines.append('',
+     .        ''''''set beamtilt = "'',A,''"\n'''')'')')cline1(1:k)
+          else
+            write(17,'(''set beamtilt = "'',A,''"'')')cline1(1:k)
+          endif
         endif
         write(6,'(''new beamtilt = "'',A,''"'')')cline1(1:k)
 C
@@ -2065,31 +2148,63 @@ C
         write(cline1,'(F12.3)')RTMP
         call inkomma(cline1,k)
         if(LOGOUTPUT)then
-          write(17,'(''set beamtilt_magnitude = "'',A,''"'')')cline1(1:k)
+          if(USEPYTHON)then
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set beamtilt_magnitude "):'')')
+            write(17,'(T16,''lines.append('',
+     .        ''''''set beamtilt_magnitude = "'',A,''"\n'''')'')')cline1(1:k)
+          else
+            write(17,'(''set beamtilt_magnitude = "'',A,''"'')')cline1(1:k)
+          endif
         endif
         write(6,'(''new beamtilt_magnitude = "'',A,''"'')')cline1(1:k)
 C
         write(cline1,'(2F12.3)')HSHTHLT,HSHTKLT
         call inkomma(cline1,k)
         if(LOGOUTPUT)then
-          write(17,'(''set beamtilt_change = "'',A,''"'')')cline1(1:k)
+          if(USEPYTHON)then
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set beamtilt_change "):'')')
+            write(17,'(T16,''lines.append('',
+     .        ''''''set beamtilt_change = "'',A,''"\n'''')'')')cline1(1:k)
+          else
+            write(17,'(''set beamtilt_change = "'',A,''"'')')cline1(1:k)
+          endif
         endif
         write(6,'(''new beamtilt_change = "'',A,''"'')')cline1(1:k)
       endif
 C
       if(itiltaxref.eq.1)then
         write(cline1,'(F12.3)')TAXA
-        call shorten(cline1,k)
+        call shortshrink(cline1,k)
         if(LOGOUTPUT)then
-          write(17,'(''set TAXA = "'',A,''"'')')cline1(1:k)
+          if(USEPYTHON)then
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set TAXA "):'')')
+            write(17,'(T16,''lines.append('',
+     .        ''''''set TAXA = "'',A,''"\n'''')'')')cline1(1:k)
+          else
+            write(17,'(''set TAXA = "'',A,''"'')')cline1(1:k)
+          endif
         endif
         write(6,'(''new TAXA = "'',A,''"'')')cline1(1:k)
 C
         write(cline1,'(F12.3)')TANGL
-        call shorten(cline1,k)
+        call shortshrink(cline1,k)
         if(LOGOUTPUT)then
-          write(17,'(''set TANGL = "'',A,''"'')')cline1(1:k)
-          write(17,'(''set DEFOCUS_ACTIVE = 4'')')
+          if(USEPYTHON)then
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set TAGNL "):'')')
+            write(17,'(T16,''lines.append('',
+     .        ''''''set TANGL = "'',A,''"\n'''')'')')cline1(1:k)
+            write(17,'(T8,''elif l.startswith('',
+     .        ''"set DEFOCUS_ACTIVE "):'')')
+            write(17,'(T16,''lines.append('',
+     .        ''''''set DEFOCUS_ACTIVE = "'',A,''"\n'''')'')')cline1(1:k)
+          else
+            write(17,'(''set TANGL = "'',A,''"'')')cline1(1:k)
+            write(17,'(''set DEFOCUS_ACTIVE = 4'')')
+          endif
         endif
         write(6,'(''new TANGL = "'',A,''"'')')cline1(1:k)
 C
@@ -2099,19 +2214,36 @@ C
       if(LOGOUTPUT)then
         write(cline1,'(F8.3)')SCALE
         call shortshrink(cline1,k)
-        write(17,'(''set MergeScaleFactor = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set MergeScaleFactor "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set MergeScaleFactor = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set MergeScaleFactor = "'',A,''"'')')cline1(1:k)
+        endif
 C
         write(cline1,'(I5)')NCOMPI
         call shortshrink(cline1,k)
-        write(17,'(''# set MergeNewSpots = "'',A,''"'')')cline1(1:k)
-C
-        write(cline1,'(I5)')NCOMP
-        call shortshrink(cline1,k)
-        write(17,'(''# Would be NewSpots = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(''#'',T8,''elif l.startswith('',
+     .      ''"set MergeNewSpots "):'')')
+          write(17,'(''#'',T16,''lines.append('',
+     .      ''''''set MergeNewSpots = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''# set MergeNewSpots = "'',A,''"'')')cline1(1:k)
+        endif
 C
         write(cline1,'(I5)')NCOMPT
         call shortshrink(cline1,k)
-        write(17,'(''# set MergeOldSpots = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(''#'',T8,''elif l.startswith('',
+     .      ''"set MergeOldSpots "):'')')
+          write(17,'(''#'',T16,''lines.append('',
+     .      ''''''set MergeOldSpots = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''# set MergeOldSpots = "'',A,''"'')')cline1(1:k)
+        endif
       endif
 C
       WRITE(6,174)SCALE,NCOMPI,IFILM,NCOMP
@@ -2245,98 +2377,177 @@ C
       TLTANG  = (AISABOVE * SIGNTLTAXA * HAND) * TANGL
 C
       if(LOGOUTPUT)then
-C        WRITE(17,'(''# '',2F15.2,30X,''HHORIORI,HKORIORI'')') 
-C     .     HHORIORI,HKORIORI
-C        WRITE(17,'(''# '',2F15.2,30X,''HSHMIN,HSKMIN'')') 
-C     .     HSHMIN,HSKMIN
-C        WRITE(17,'(''# '',2F15.2,30X,''HOHRIGSH,HOKRIGSH'')') 
-C     .     HOHRIGSH,HOKRIGSH
-C        WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
-C     .     HORITAXA,HORITANGL
-C        WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
-C     .     HSHTAXA,HSHTANGL
-C        WRITE(17,'(''# '',2F15.3,30X,''TAXA,TANGL'')')
-C     .     TAXA,TANGL
-C        WRITE(17,'(''# '',2F15.2,30X,''HORITLTH,HORITLTK'')')
-C     .     HORITLTH,HORITLTK
-C        WRITE(17,'(''# '',2F15.2,30X,''HSHTHLT,HSHTKLT'')')
-C     .     HSHTHLT,HSHTKLT
-C        WRITE(17,'(''# '',2F15.2,30X,''HTHLT,HTKLT'')')
-C     .     HTHLT,HTKLT
-C        WRITE(17,'(''# '',F15.3,I15,30X,''ERRMIN,NRESALL'')') 
-C     .     ERRMIN,NRESALL
-C  
+C          WRITE(17,'(''# '',2F15.2,30X,''HHORIORI,HKORIORI'')') 
+C     .       HHORIORI,HKORIORI
+C          WRITE(17,'(''# '',2F15.2,30X,''HSHMIN,HSKMIN'')') 
+C     .       HSHMIN,HSKMIN
+C          WRITE(17,'(''# '',2F15.2,30X,''HOHRIGSH,HOKRIGSH'')') 
+C     .       HOHRIGSH,HOKRIGSH
+C          WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
+C     .       HORITAXA,HORITANGL
+C          WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
+C     .       HSHTAXA,HSHTANGL
+C          WRITE(17,'(''# '',2F15.3,30X,''TAXA,TANGL'')')
+C     .       TAXA,TANGL
+C          WRITE(17,'(''# '',2F15.2,30X,''HORITLTH,HORITLTK'')')
+C     .       HORITLTH,HORITLTK
+C          WRITE(17,'(''# '',2F15.2,30X,''HSHTHLT,HSHTKLT'')')
+C     .       HSHTHLT,HSHTKLT
+C          WRITE(17,'(''# '',2F15.2,30X,''HTHLT,HTKLT'')')
+C     .       HTHLT,HTKLT
+C          WRITE(17,'(''# '',F15.3,I15,30X,''ERRMIN,NRESALL'')') 
+C     .       ERRMIN,NRESALL
+C          WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
+C     .       HORITAXA,HORITANGL
+C          WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
+C     .       HSHTAXA,HSHTANGL
+C
         write(cline1,'(F9.3)')TLTAXIS
-        call shorten(cline1,k)
-        write(17,'(''# not yet set MERGE_TLTAXIS = "'',A,''"'')')
-     .    cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new MERGE_TLTAXIS = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set MERGE_TLTAXIS "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set MERGE_TLTAXIS = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set MERGE_TLTAXIS = "'',A,''"'')')
+     .      cline1(1:k)
+        endif
 C
         write(cline1,'(F9.3)')TLTANG
-        call shorten(cline1,k)
-        write(17,'(''# not yet set MERGE_TLTANG  = "'',A,''"'')')
-     .    cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new MERGE_TLTANG  = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set MERGE_TLTANG "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set MERGE_TLTANG = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set MERGE_TLTANG  = "'',A,''"'')')
+     .      cline1(1:k)
+        endif
 C
         write(cline1,'(F9.3)')TLTAXA
-        call shorten(cline1,k)
-        write(17,'(''# not yet set MERGE_TLTAXA  = "'',A,''"'')')
-     .    cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new MERGE_TLTAXA  = "'',A,''"'')')cline1(1:k)
-C
-C        WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
-C     .     HORITAXA,HORITANGL
-C        WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
-C     .     HSHTAXA,HSHTANGL
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set MERGE_TLTAXA "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set MERGE_TLTAXA = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set MERGE_TLTAXA  = "'',A,''"'')')
+     .      cline1(1:k)
+        endif
 C
         write(cline1,'(F9.3)')HSHTAXA
-        call shorten(cline1,k)
-        write(17,'(''set TAXA_change    = "'',A,''"'')')cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new TAXA_change    = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set TAXA_change "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set TAXA_change = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set TAXA_change    = "'',A,''"'')')cline1(1:k)
+        endif
 C
         write(cline1,'(F9.3)')HSHTANGL
-        call shorten(cline1,k)
-        write(17,'(''set TANGL_change    = "'',A,''"'')')cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new TANGL_change    = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set TANGL_change "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set TANGL_change = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set TANGL_change    = "'',A,''"'')')cline1(1:k)
+        endif
 C
         write(cline1,'(F9.3)')TAXA
-        call shorten(cline1,k)
-        write(17,'(''set MERGE_TAXA    = "'',A,''"'')')cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new MERGE_TAXA    = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set MERGE_TAXA "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set MERGE_TAXA = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set MERGE_TAXA    = "'',A,''"'')')cline1(1:k)
+        endif
 C
         write(cline1,'(F9.3)')TANGL
-        call shorten(cline1,k)
-        write(17,'(''set MERGE_TANGL   = "'',A,''"'')')cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new MERGE_TANGL   = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set MERGE_TANGL "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set MERGE_TANGL = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set MERGE_TANGL   = "'',A,''"'')')cline1(1:k)
+        endif
 C
         write(cline1,'(F9.3)')TAXA
-        call shorten(cline1,k)
-        write(17,'(''set TAXA    = "'',A,''"'')')cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new TAXA    = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set TAXA "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set TAXA = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set TAXA    = "'',A,''"'')')cline1(1:k)
+        endif
 C
         write(cline1,'(F9.3)')TANGL
-        call shorten(cline1,k)
-        write(17,'(''set TANGL   = "'',A,''"'')')cline1(1:k)
+        call shortshrink(cline1,k)
         write(6,'(''new TANGL   = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set TANGL "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set TANGL = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set TANGL   = "'',A,''"'')')cline1(1:k)
+        endif
 C
-        write(17,'(''set PHASEORI_done = "y"'')')
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set PHASEORI_done "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set PHASEORI_done = "y"\n'''')'')')
+        else
+          write(17,'(''set PHASEORI_done = "y"'')')
+        endif
 C
-        write(17,'(''</IMAGEDIR>'')')
-        write(17,'(''#'')')
+        if(USEPYTHON)then
+          write(17,'(T8,''else:'')')
+          write(17,'(T16,''lines.append(l)'')')
+          write(17,'(''f.close()'')')
+          write(17,416)FILIN(1:ihen1)
+ 416      FORMAT('fout = open("',A,'/2dx_image.cfg",''w'')')
+          write(17,'(''fout.writelines(lines)'')')
+          write(17,'(''fout.close()'')')
+        else
+          write(17,'(''</IMAGEDIR>'')')
+          write(17,'(''#'')')
 C
-        write(6,'('' '')')
+          write(6,'('' '')')
+        endif
       endif
 C
-C------------------------------------------------------------------------
-C------------------------------------------------------------------------
-C------------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
 CHEN<
 C
       IF(LIST) WRITE(6,137)
 C
-C------------------------------------------------------------------------
+C-----------------------------------------------------------------------
 C  Here to create new file if output of origin shifted data is needed.
-C------------------------------------------------------------------------
+C-----------------------------------------------------------------------
 C
       IF(NSHFTIN) THEN
         write(FNAME,32)IFILM

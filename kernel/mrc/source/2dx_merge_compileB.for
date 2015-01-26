@@ -263,7 +263,9 @@ C-------This is to make sure the last thread takes a bit longer than the others:
         ITHRNUM = imnumber-1
       endif
 C
-      write(*,'(''::For '',I6,'' images to merge, creating '',
+      if(ITHRNUM.eq.0)ITHRNUM = 1
+C
+      write(*,'('':For '',I6,'' images to merge, creating '',
      .  I3,'' scripts for '',I5,'' images each.'')')
      .  imnumber,ITHRNUM,imperthread
 C

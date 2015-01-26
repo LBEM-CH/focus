@@ -147,7 +147,6 @@ HKLMAX 199 199 199
 END
 eot
 #
-echo "# IMAGE: SCRATCH/processed_fft.map <MAP: processed map with wrong handedness >" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #
@@ -156,8 +155,8 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "maprot - to invert the handedness"
 #############################################################################
 #
-\rm -f processed3D.map
-${bin_ccp4}/maprot mapin SCRATCH/processed_fft.map wrkout processed3D.map << eot
+\rm -f SCRATCH/processed_maprot.map
+${bin_ccp4}/maprot mapin SCRATCH/processed_fft.map wrkout SCRATCH/processed_maprot.map << eot
 MODE FROM
 CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
 GRID WORK ${cellx} ${celly} ${ALAT}
@@ -168,9 +167,21 @@ ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
 TRANS  0.000 0.000 0.000
 eot
 #
-echo "# IMAGE: processed3D.map <MAP: processed map with correct hand>" >> LOGS/${scriptname}.results
-#
 echo "<<@progress: +5>>"
+#
+#############################################################################
+${proc_2dx}/linblock "mapmask - to bring the protein to center"
+#############################################################################
+#
+\rm -f processed3D.map
+${bin_ccp4}/mapmask mapin SCRATCH/processed_maprot.map mapout processed3D.map << eof
+AXIS X,Y,Z
+scale factor 1
+xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
+END
+eof
+#
+echo "# IMAGE: processed3D.map <MAP: processed map with correct handedness >" >> LOGS/${scriptname}.results
 #
 #
 #############################################################################
@@ -181,7 +192,7 @@ ${proc_2dx}/linblock "mapmask - to extend the map"
 ${bin_ccp4}/mapmask mapin processed3D.map mapout processed3D_extended.map << eof
 AXIS X,Y,Z
 scale factor 1
-xyzlim -1.0 0.999 -1.0 0.999 0.0 1.0
+xyzlim -1.0 0.999 -1.0 0.999 -0.5 0.5
 END
 eof
 #
@@ -197,8 +208,10 @@ if ( ${calculate_subvolume}x != "0x" ) then
   ${proc_2dx}/linblock "maprot - to rotate volume for sub-volume preparation"
   #############################################################################
   #
+  set ALAT2 = `echo ${ALAT} | awk '{ s = $1 / 2.0 } END { print s }'`
+  #
   \rm -f SCRATCH/processed_rot_volume.map
-  ${bin_ccp4}/maprot mapin processed3D.map wrkout SCRATCH/processed_rot_volume.map << eot
+  ${bin_ccp4}/maprot mapin SCRATCH/processed_maprot.map wrkout SCRATCH/processed_rot_volume.map << eot
 MODE FROM
 CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
 GRID WORK ${cellx} ${celly} ${ALAT}
@@ -206,7 +219,7 @@ XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
 ROTA POLAR 0.0 0.0 45.0
-TRANS  0.0 -20.0 0.00
+TRANS  0.0 -20.0 ${ALAT2}
 eot
   #
   #echo "# IMAGE: SCRATCH/processed_rot_volume.map <MAP: rotated 3D Volume>" >> LOGS/${scriptname}.results
@@ -247,3 +260,4 @@ endif
 echo "<<@progress: 100>>"
 #
 #
+

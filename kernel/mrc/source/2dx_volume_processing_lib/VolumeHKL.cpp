@@ -57,7 +57,7 @@ void VolumeHKL::addHKZData(std::ifstream& hkzFile){
         double resolution =  getResolution(*indexIn);
         
         //Convert phase to radians and Shift the phase so that protein is in center of z
-        phaseIn += lIn*180;
+        //phaseIn += lIn*180;
         phaseIn *= (M_PI/180);
         
         //Covert also the sphaseIn to radians

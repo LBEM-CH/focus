@@ -228,7 +228,7 @@ C
           if(RFOM(i).lt.0.0)RFOM(i)=0.0
           if(RFOM(i).gt.1.0)RFOM(i)=1.0
 C---------This is wrong:
-          RSIGFFIELD(i)=RAMPFIELD(i)/RFOM(i)
+          RSIGFFIELD(i)=1.0
 C
           RSIGPFIELD(i)=acos(RFOM(i))*180/3.141592654
           RZFIELD(i)=REAL(ILFIELD(i))/ALAT

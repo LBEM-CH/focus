@@ -259,7 +259,7 @@ TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID 200 200 200
 XYZLIM 0 199 0 199 0 199
 RHOLIM 250.0
-HKLMAX 99 99 99
+HKLMAX 50 50 70
 END
 eot
   #
@@ -280,7 +280,7 @@ TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID 200 200 200
 XYZLIM 0 199 0 199 0 199
 RHOLIM 250.0
-HKLMAX 99 99 99
+HKLMAX 50 50 70 
 END
 eot
   #
@@ -301,7 +301,7 @@ TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID 220 220 220
 XYZLIM 0 220 0 220 0 220
 RHOLIM 250.0
-HKLMAX 100 100 100
+HKLMAX 50 50 70 
 END
 eot
   #
@@ -486,7 +486,7 @@ TITLE Sym=${SYM}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
 GRID 200 1 200
 XYZLIM 0 199 0 0 0 199
 RHOLIM 250.0
-HKLMAX 50 50 50
+HKLMAX 50 50 70
 END
 eot
   #
@@ -510,7 +510,7 @@ TITLE Sym=${SYM}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
 GRID 200 200 1
 XYZLIM 0 199 0 199 0 0
 RHOLIM 250.0
-HKLMAX 50 50 50
+HKLMAX 50 50 70
 END
 eot
   #

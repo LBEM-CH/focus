@@ -378,7 +378,6 @@ else
   #############################################################################
   #
   \rm -f PLOTCUR.PS
-  \rm -f APH/latfitted_limit.hkl
   #
   ${bin_2dx}/2dx_plotresolution.exe << eot
 2
@@ -479,17 +478,6 @@ labin file 1 all
 valm NaN NOOUTPUT
 end
 eof
-#
-#
-# \rm -f SCRATCH/merge3Dref.mtz
-# \rm -f SCRATCH/merge3Dref-clean.mtz
-# \rm -f SCRATCH/merge3Dref-clean-p1.mtz
-# 
-# \cp -f SCRATCH/merge3Dref.mtz merge3Dref.mtz
-#
-# echo "# IMAGE: SCRATCH/merge3Dref.mtz <MTZ: SCRATCH/merge3Dref.mtz>" >> LOGS/${scriptname}.results
-# echo "# IMAGE: SCRATCH/merge3Dref-clean.mtz <MTZ: SCRATCH/merge3Dref-clean.mtz>" >> LOGS/${scriptname}.results
-# echo "# IMAGE: SCRATCH/merge3Dref-clean-p1.mtz <MTZ: SCRATCH/merge3Dref-clean-p1.mtz>" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
 #

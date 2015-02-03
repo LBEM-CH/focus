@@ -221,15 +221,17 @@ eot
     @ dircounter++
     cd ${olddir}
   end
-        set load_too_high = 1
-        while ( ${load_too_high} == 1 ) 
-          set ReUnbend_MP = `cat TMP.2dx_merge.cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
-          set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
-          set load_too_high = `echo ${loadaverage} 3 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
-          if ( ${load_too_high} == 1 ) then
-            sleep 5
-          endif
-        end
+  echo "::Waiting for last jobs to finish"
+  set load_too_high = 1
+  while ( ${load_too_high} == 1 ) 
+    set ReUnbend_MP = `cat TMP.2dx_merge.cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
+    set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
+    set load_too_high = `echo ${loadaverage} 1 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+    if ( ${load_too_high} == 1 ) then
+      sleep 5
+    endif
+  end
+  echo "::Last jobs have finished."
 endif
 #
 if ( ${ReUnbend_All} == "5" ) then

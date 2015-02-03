@@ -185,6 +185,19 @@ eot
       echo "set imagesidelength = ${imagesidelength}"  >> LOGS/${scriptname}.results
     endif
     #
+else
+  setenv IN ${loc_imagename}.mrc
+  set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
+  set sizeX = `echo ${dimens} | cut -d\  -f1` 
+  set sizeY = `echo ${dimens} | cut -d\  -f2` 
+  if ( ${sizeX} != ${imagesidelength} ) then
+    set oldval = ${imagesidelength}
+    set imagesidelength = ${sizeX}
+    if ( ${movie_verbose}x != "0x" ) then
+      ${proc_2dx}/lin "WARNING: correcting imagesidelength from ${oldval} to ${imagesidelength}"
+    endif
+    echo "set imagesidelength = ${imagesidelength}"  >> LOGS/${scriptname}.results
+  endif
 endif
 #
 

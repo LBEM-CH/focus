@@ -130,7 +130,7 @@ while ( ${irun} <= ${imagenum} )
       endif
       mkdir ${importimage_pattern}
       cd ${importimage_pattern}
-      cp ${movie_average}/${importimage} ${importimage_pattern}_${newimagenumber}.${file_ending}
+      cp ${movie_average}/${importimage} ${importimage_pattern}_${newimagenumber}_raw.${file_ending}
       if ( ${movie_import_aligned_stack} == "y" ) then
         cp ${movie_stack}/${importimage} ${importimage_pattern}_${newimagenumber}_stack.${file_ending}
       endif

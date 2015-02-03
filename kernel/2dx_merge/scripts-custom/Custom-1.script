@@ -77,7 +77,7 @@ foreach dirfile ( ${dirlist} )
   ################################################################################
   #
   # Use the following to invert the CTF in all directories, so that cryo setting is valid:
-  # echo "set ctfrev = y" >> LOGS/${scriptname}.results
+  # echo "set ctfrev = n" >> LOGS/${scriptname}.results
 
   # Use the following to activate the synthetic unbending in all directories:
   # echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
@@ -130,7 +130,8 @@ foreach dirfile ( ${dirlist} )
   # echo "set QVALMB = ." >> LOGS/${scriptname}.results
   # echo "set domask = y" >> LOGS/${scriptname}.results
 
-  # echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
+  echo "set RESMAX = 5.0" >> LOGS/${scriptname}.results
+  echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
   # echo "set -force IQMAX1 = 7" >> LOGS/${scriptname}.results
   # echo "set -force IQMAX = 4" >> LOGS/${scriptname}.results
   # echo "set movie_enable = y" >> LOGS/${scriptname}.results
@@ -160,9 +161,9 @@ foreach dirfile ( ${dirlist} )
   
   #------------------------------------------------------------------------
   # Use the following to run somme of the standard scripts again:
-   ${app_2dx_image} ${newdir} "2dx_initialize"
-   ${app_2dx_image} ${newdir} "2dx_initialize_files"
-   ${app_2dx_image} ${newdir} "2dx_fftrans"
+  # ${app_2dx_image} ${newdir} "2dx_initialize"
+  # ${app_2dx_image} ${newdir} "2dx_initialize_files"
+  # ${app_2dx_image} ${newdir} "2dx_fftrans"
   # ${app_2dx_image} ${newdir} "2dx_getDefTilt"
   # ${app_2dx_image} ${newdir} "2dx_getLattice"
   # ${app_2dx_image} ${newdir} "2dx_refineLattice"

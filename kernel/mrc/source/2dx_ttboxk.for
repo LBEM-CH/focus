@@ -62,6 +62,7 @@ C
 C  8.  FILOUT only if IOUT.NE.0 -- full name of output file, formatted data.
 C  8b. FILOU2 only if IOUT.EQ.2 .or. IOUT.EQ.3 -- full name of second output file.
 C  8c. RESORMIN only if IOUT.EQ.3 -- Minimial resolution perpendicular to tilt axis.
+C      (This is not yet implemented.)
 C
 C  9    RESMIN, RESMAX,  XORIG, YORIG, SEGMNT  (*)
 C

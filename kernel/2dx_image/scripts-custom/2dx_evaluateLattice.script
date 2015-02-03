@@ -146,6 +146,7 @@ set proc_2dx = ""
 set SCRATCH_DISK = ""
 set FFTIR_DISK = ""
 set imagename = ""
+set nonmaskimagename = ""
 set imagenumber = ""
 set imagesidelength = ""
 set magnification = ""
@@ -743,8 +744,8 @@ echo "set LATTICE_TLTAXA  = "\"${LATTICE_TLTAXA}\"  >> LOGS/${scriptname}.result
 echo "set LATTICE_TAXA    = "\"${LATTICE_TAXA}\"    >> LOGS/${scriptname}.results
 echo "set LATTICE_TANGL   = "\"${LATTICE_TANGL}\"   >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_fft.mrc <FFT of Nonmasked Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_red_fft.mrc <FFT of Downsampled Nonmasked Image>" >> LOGS/${scriptname}.results
 #
 #
 echo " "                              >> History.dat

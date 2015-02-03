@@ -416,6 +416,9 @@ else
   ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."
 endif
 #
+echo "dummy" > SCRATCH/job_00_${scriptBfile}
+\rm -f SCRATCH/job_*_${scriptBfile}
+#
 ${bin_2dx}/2dx_merge_compileB.exe << eot
 ${scriptname}-tmp.py
 ${scriptname}-tmp.reflections
@@ -466,7 +469,7 @@ echo "# IMAGE: SCRATCH/job_${Thread_Number}_${scriptBfile} <CSH: Last (${Thread_
 echo "# IMAGE: SCRATCH/job_${Thread_Number}_2dx_merge_scriptB.com.log <LOG: Last (${Thread_Number}) origtilt B output>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/job_${Thread_Number}_${postprocessingfile} <CSH: Last (${Thread_Number}) refinement postprocessing script>" >> LOGS/${scriptname}.results
 
-foreach scriptB ( SCRATCH/job_??_${scriptBfile} )
+foreach scriptB ( SCRATCH/job_*_${scriptBfile} )
   if ( ${scriptB} != SCRATCH/job_${Thread_Number}_${scriptBfile} ) then
     echo Background nohup ${scriptB} \> ${scriptB}.log \&
     nohup ${scriptB} > ${scriptB}.log &
@@ -485,14 +488,14 @@ echo "################################################"
 #
 \rm -f SCRATCH/${scriptname}.console
 echo "# IMAGE: SCRATCH/${scriptname}.console <LOG: Console output from merging>" >> LOGS/${scriptname}.results
-foreach scriptBconsole ( SCRATCH/job_??_${scriptname}-tmp.console ) 
+foreach scriptBconsole ( SCRATCH/job_*_${scriptname}-tmp.console ) 
   cat ${scriptBconsole} >> SCRATCH/${scriptname}.console
   \rm -f ${scriptBconsole}
 end
 #
 \rm -f SCRATCH/${scriptname}.py
 echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
-foreach scriptBresults ( SCRATCH/job_??_${scriptname}-tmp.py ) 
+foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py ) 
   cat ${scriptBresults} >> SCRATCH/${scriptname}.py
   \rm -f ${scriptBresults}
 end

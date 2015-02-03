@@ -246,7 +246,9 @@ endif
 set prefix = ""
 set prename = ""
 #
-set phaori_local = ${phaori}
+set phaorix = `echo ${phaori} | cut -d\, -f1 | awk '{ s =  $1 } END { print s }'`
+set phaoriy = `echo ${phaori} | cut -d\, -f2 | awk '{ s =  $1 } END { print s }'`
+set phaori_local = `echo ${phaorix},${phaoriy}`
 #############################################################################
 # Unbend II
 source ${proc_2dx}/2dx_generateMap_sub.com

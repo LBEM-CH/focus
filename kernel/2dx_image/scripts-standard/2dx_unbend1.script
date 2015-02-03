@@ -166,6 +166,10 @@ endif
 set rmax = 11000
 echo rmax = ${rmax}
 #
+set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set refori = ${reforix},${reforix}
+echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
+#
 set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
 set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
 set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
@@ -289,10 +293,6 @@ if ( ${radlim} != ${radlimnew} ) then
   echo "set radlim = ${radlim}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: correcting RADLIM to ${radlim}."
 endif
-#
-set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-set refori = ${reforix},${reforix}
-echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
 #
 if ( ${ccunbend_program} != "0" && ${ccunbend_program} != "1" ) then
   set ccunbend_program = "0"

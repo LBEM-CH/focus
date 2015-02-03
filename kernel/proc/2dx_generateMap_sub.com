@@ -90,7 +90,7 @@ echo sgnxch = ${sgnxch}
 #
 if ( ${sgnxch} == "y" ) then
   set sgnxchval = 1
-  set phaorix = `echo ${phaori_local} | cut -d\, -f1 `
+  set phaorix = `echo ${phaori_local} | cut -d\, -f1 | awk '{ s =  $1 } END { print s }'`
   set phaoriy = `echo ${phaori_local} | cut -d\, -f2 | awk '{ s = -$1 } END { print s }'`
   set phaori_local = `echo ${phaorix},${phaoriy}`
 else
@@ -101,7 +101,7 @@ echo revxsgn = ${revxsgn}
 if ( ${revxsgn} == "y" ) then
   set revxsgnval = 1
   set phaorix = `echo ${phaori_local} | cut -d\, -f1 | awk '{ s = -$1 } END { print s }'`
-  set phaoriy = `echo ${phaori_local} | cut -d\, -f2 `
+  set phaoriy = `echo ${phaori_local} | cut -d\, -f2 | awk '{ s =  $1 } END { print s }'`
   set phaori_local = `echo ${phaorix},${phaoriy}`
 else
   set revxsgnval = 0

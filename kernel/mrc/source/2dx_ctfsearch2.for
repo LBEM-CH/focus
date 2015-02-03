@@ -90,7 +90,7 @@ C               where SIGMA = standard deviation of FIM**2
 C
 C*******************************************************************************
 C
-      PARAMETER (NIM=2000)
+      PARAMETER (NIM=20000)
       PARAMETER (ID=150)
       LOGICAL LIST,LISTW
       CHARACTER DAT*24

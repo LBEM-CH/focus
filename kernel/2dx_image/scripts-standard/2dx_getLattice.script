@@ -416,6 +416,9 @@ eot
           echo ":: "
           #############################################################################
           #
+          set secondlattice_clone = "n"
+          echo "set secondlattice_clone = ${secondlattice_clone}" >> LOGS/${scriptname}.results
+          #
           set olddir = `pwd`
           set currentdir = `echo ${olddir} | rev | cut -d\/ -f1 | rev`
           set newdir = `echo ${currentdir}_lat2`

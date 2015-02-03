@@ -3,12 +3,12 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Refine Defocus                                                     #
+# Title: Refine Defocus (Not Refommended)                                   #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 12/03/2007                                             #
-# Last Modification: 12/03/2007                                             #
+# Last Modification: 29/01/2015                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -278,42 +278,26 @@ endif
 #
 if ( ${SYN_Unbending} == "0" ) then
   # FouFilter Unbending result is used:
-  set infile_nolimit = ${imagename}.fou.nolimit.aph
-  #
-  # A check in case somebody just upgraded from an earlier version of 2dx:
-  cd APH
-  if ( ! -e ${infile_nolimit} ) then
-    if ( -e ${imagename}.nolimit.aph ) then
-      \cp ${imagename}.nolimit.aph ${infile_nolimit}
-    endif
-  endif
-  set infile_limit = ${imagename}.fou.limit.aph
-  if ( ! -e ${infile_limit} ) then
-    if ( -e ${imagename}.limit.aph ) then
-      \cp ${imagename}.limit.aph ${infile_limit}  
-    endif
-  endif
-  cd ..
-  #
+  set APH_infile = ${imagename}_MovieB_fou.aph
 else
   # Synthetical Unbending result is used:
-  set infile_nolimit = ${imagename}.syn.nolimit.aph
+  set APH_infile = ${imagename}_syn.aph
 endif
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: APH/${infile_nolimit} <APH: Image data for refinement>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: APH/${APH_infile} <APH: Image data for refinement>" >> LOGS/${scriptname}.results
 #
-if ( ! -e APH/${infile_nolimit} ) then
-  ${proc_2dx}/protest "ERROR: APH/${infile_nolimit} does not exist."
+if ( ! -e APH/${APH_infile} ) then
+  ${proc_2dx}/protest "ERROR: APH/${APH_infile} does not exist."
 endif
 #
-setenv INIMAGE APH/${infile_nolimit}
-echo "# IMAGE-IMPORTANT: APH/${infile_nolimit} <APH: Input data file>" >> LOGS/${scriptname}.results
+setenv INIMAGE APH/${APH_infile}
+echo "# IMAGE-IMPORTANT: APH/${APH_infile} <APH: Input data file>" >> LOGS/${scriptname}.results
 #
 set IAQP2 = 0
 set fittitle = "ctfsearch2 run"
@@ -403,10 +387,12 @@ endif
 ######################################################################################
 #
 if ( -e WILSONCTF ) then
-  \mv -f WILSONCTF LOGS/${imagename}_ctfs_wilson.log
+  \mv -f WILSONCTF LOGS/${imagename}_ctfs_wilson.txt
+  echo "# IMAGE-IMPORTANT: LOGS/${imagename}_ctfs_wilson.txt <LOG: Wilson>" >> LOGS/${scriptname}.results
 endif
 if ( -e SUMMARY ) then
-  \mv -f SUMMARY LOGS/${imagename}_ctfs_summary.log
+  \mv -f SUMMARY LOGS/${imagename}_ctfs_summary.txt
+  echo "# IMAGE-IMPORTANT: LOGS/${imagename}_ctfs_summary.txt <LOG: Summary>" >> LOGS/${scriptname}.results
 endif
 #
 set olddef = ${defocus}

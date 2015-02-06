@@ -21,6 +21,13 @@
 #
 # MANUAL: You could also use this script to create a backup for your project, for file safety.
 #
+# LABEL: Also copy APH files?
+# LEGEND: Choose if the APH files should also be copied.
+# EXAMPLE: also_APH = "1"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Drop_Down_Menu "0=also APH files;1=skip the APH files"
+set also_APH = "0"
+#
 # DISPLAY: backup_dir
 # DISPLAY: backup_merge
 # DISPLAY: backup_sure
@@ -59,6 +66,8 @@ echo backup_sure = ${backup_sure}
 echo "<<@progress: 1>>"
 #
 echo "set backup_sure = no" >> LOGS/${scriptname}.results
+#
+set copy_command = "cp -f"
 #
 if ( ! -d ${backup_dir} ) then
   #
@@ -124,22 +133,22 @@ if ( ${backup_merge} == "yes" ) then
   endif
   #
   echo "dummy" > ${from_dir}/SELECT-dummy.dat
-  \cp -f -p ${from_dir}/SELECT* ${to_dir}
+  ${copy_command} ${from_dir}/SELECT* ${to_dir}
   \rm -f ${from_dir}/SELECT-dummy.dat
   \rm -f ${to_dir}/SELECT-dummy.dat
   #
   echo "dummy" > ${from_dir}/volume-dummy.tmp
-  \cp -f -p ${from_dir}/volume* ${to_dir}
+  ${copy_command} ${from_dir}/volume* ${to_dir}
   \rm -f ${from_dir}/volume-dummy.tmp
   \rm -f ${to_dir}/volume-dummy.tmp
   #
   echo "dummy" > ${from_dir}/2dx_merge_dummy.tmp
-  \cp -f -p ${from_dir}/2dx_merge* ${to_dir}
+  ${copy_command} ${from_dir}/2dx_merge* ${to_dir}
   \rm -f ${from_dir}/2dx_merge_dummy.tmp
   \rm -f ${to_dir}/2dx_merge_dummy.tmp
   #
   echo ":New: ${to_dir}/2dx_merge.cfg"
-  \cp -f -p ${from_dir}/2dx_merge.cfg ${to_dir}
+  ${copy_command} ${from_dir}/2dx_merge.cfg ${to_dir}
   #
   if ( ${backup_all_files} == "0" ) then
     if ( ${backup_direction} == "0" ) then
@@ -159,32 +168,32 @@ if ( ${backup_merge} == "yes" ) then
   #
   if ( -d ${from_dir}/REGISTERS ) then
     echo ":New: ${to_dir}/REGISTERS"
-    \cp -f -p -r ${from_dir}/REGISTERS ${to_dir}
+    ${copy_command} -r ${from_dir}/REGISTERS ${to_dir}
   endif
   #
   if ( -e ${from_dir}/merge2D.mtz ) then
     echo ":New: ${to_dir}/merge2D.mtz"
-    \cp -f -p ${from_dir}/merge2D.mtz ${to_dir}
+    ${copy_command} ${from_dir}/merge2D.mtz ${to_dir}
   endif
   #
   if ( -e ${from_dir}/merge2Dref.mtz ) then
     echo ":New: ${to_dir}/merge2Dref.mtz"
-    \cp -f -p ${from_dir}/merge2Dref.mtz ${to_dir}
+    ${copy_command} ${from_dir}/merge2Dref.mtz ${to_dir}
   endif
   #
   if ( -e ${from_dir}/merge3D.mtz ) then
     echo ":New: ${to_dir}/merge3D.mtz"
-    \cp -f -p ${from_dir}/merge3D.mtz ${to_dir}
+    ${copy_command} ${from_dir}/merge3D.mtz ${to_dir}
   endif
   #
   if ( -e ${from_dir}/merge3Dref.mtz ) then
     echo ":New: ${to_dir}/merge3Dref.mtz"
-    \cp -f -p ${from_dir}/merge3Dref.mtz ${to_dir}
+    ${copy_command} ${from_dir}/merge3Dref.mtz ${to_dir}
   endif
   #
   if ( -e ${from_dir}/merge.aph ) then
     echo ":New: ${to_dir}/merge.aph"
-    \cp -f -p ${from_dir}/merge.aph ${to_dir}
+    ${copy_command} ${from_dir}/merge.aph ${to_dir}
   endif
   #
   if ( -d ${from_dir}/APH ) then
@@ -193,19 +202,19 @@ if ( ${backup_merge} == "yes" ) then
     endif
     echo dummy > ${from_dir}/APH/dummy.tmp
     echo ":New: ${to_dir}/APH/*"
-    \cp -f -p ${from_dir}/APH/* ${to_dir}/APH
+    ${copy_command} ${from_dir}/APH/* ${to_dir}/APH
     \rm ${from_dir}/APH/dummy.tmp
     \rm ${to_dir}/APH/dummy.tmp
   endif
   #
   if ( -e ${from_dir}/History.dat ) then
     echo ":New: ${to_dir}/History.dat"
-    \cp -f -p ${from_dir}/History.dat ${to_dir}
+    ${copy_command} ${from_dir}/History.dat ${to_dir}
   endif
   #
   if ( -e ${from_dir}/2dx_merge_dirfile.dat ) then
     echo ":New: ${to_dir}/2dx_merge_dirfile.dat"
-    \cp -f -p ${from_dir}/2dx_merge_dirfil*.dat ${to_dir}
+    ${copy_command} ${from_dir}/2dx_merge_dirfil*.dat ${to_dir}
   endif
   #
   cd ${to_dir}
@@ -256,7 +265,7 @@ if ( ${backup_direction} == "0" ) then
     find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/SCRATCH/2dx_merge_alldirs.dat
     cd ${oldir}
   else
-    cp 2dx_merge_dirfile.dat ${oldir}/SCRATCH/2dx_merge_alldirs.dat
+    ${copy_command} 2dx_merge_dirfile.dat ${oldir}/SCRATCH/2dx_merge_alldirs.dat
   endif
 else
   # Pull files
@@ -339,15 +348,15 @@ while ( ${dircounter} <= ${dirnum} )
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
           echo ":New: ${to_dirfile}/2dx_image.cfg"
-          \cp -f -p ${from_dirfile}/2dx_image.cfg ${to_dirfile}
+          ${copy_command} ${from_dirfile}/2dx_image.cfg ${to_dirfile}
           if ( -e ${from_dirfile}/2dx_image.cfg-backup1 ) then
-            \cp -f -p ${from_dirfile}/2dx_image.cfg-backup1 ${to_dirfile}
+            ${copy_command} ${from_dirfile}/2dx_image.cfg-backup1 ${to_dirfile}
           endif
           if ( -e ${from_dirfile}/2dx_image.cfg-backup2 ) then
-            \cp -f -p ${from_dirfile}/2dx_image.cfg-backup2 ${to_dirfile}
+            ${copy_command} ${from_dirfile}/2dx_image.cfg-backup2 ${to_dirfile}
           endif
           if ( -e ${from_dirfile}/2dx_image.cfg-backup3 ) then
-            \cp -f -p ${from_dirfile}/2dx_image.cfg-backup3 ${to_dirfile}
+            ${copy_command} ${from_dirfile}/2dx_image.cfg-backup3 ${to_dirfile}
           endif
         endif
         #
@@ -355,14 +364,14 @@ while ( ${dircounter} <= ${dirnum} )
           if ( -e ${from_dirfile}/${loc_imagename}.raw.mrc ) then
             if ( ! -e ${to_dirfile}/${loc_imagename}.raw.mrc ) then
               echo ":New: ${to_dirfile}/${loc_imagename}.raw.mrc"
-              \cp -f -p ${from_dirfile}/${loc_imagename}.raw.mrc ${to_dirfile}
+              ${copy_command} ${from_dirfile}/${loc_imagename}.raw.mrc ${to_dirfile}
             else
               echo ":Old: ${to_dirfile}/${loc_imagename}.raw.mrc"
             endif
           else if ( -e ${from_dirfile}/${loc_imagename}.tif ) then
             if ( ! -e ${to_dirfile}/${loc_imagename}.tif ) then
               echo ":New: ${to_dirfile}/${loc_imagename}.tif"
-              \cp -f -p ${from_dirfile}/${loc_imagename}.tif ${to_dirfile}
+              ${copy_command} ${from_dirfile}/${loc_imagename}.tif ${to_dirfile}
             else
               echo ":Old: ${to_dirfile}/${loc_imagename}.tif"
             endif
@@ -370,7 +379,7 @@ while ( ${dircounter} <= ${dirnum} )
             if ( -e ${from_dirfile}/${loc_imagename}.mrc ) then
               if ( ! -e ${to_dirfile}/${loc_imagename}.mrc ) then
                 echo ":New: ${to_dirfile}/${loc_imagename}.mrc"
-                \cp -f -p ${from_dirfile}/${loc_imagename}.mrc ${to_dirfile}
+                ${copy_command} ${from_dirfile}/${loc_imagename}.mrc ${to_dirfile}
               else
                 echo ":Old: ${to_dirfile}/${loc_imagename}.mrc"
               endif
@@ -379,7 +388,7 @@ while ( ${dircounter} <= ${dirnum} )
           if ( -e ${from_dirfile}/${loc_imagename}_stack.mrc ) then
             if ( ! -e ${to_dirfile}/${loc_imagename}_stack.mrc ) then
               echo ":New: ${to_dirfile}/${loc_imagename}_stack.mrc"
-              \cp -f -p ${from_dirfile}/${loc_imagename}_stack.mrc ${to_dirfile}
+              ${copy_command} ${from_dirfile}/${loc_imagename}_stack.mrc ${to_dirfile}
             else
               echo ":Old: ${to_dirfile}/${loc_imagename}_stack.mrc"
             endif
@@ -389,22 +398,22 @@ while ( ${dircounter} <= ${dirnum} )
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
           if ( -e ${from_dirfile}/${loc_imagename}.spt ) then
             echo ":New: ${to_dirfile}/${loc_imagename}.spt"
-            \cp -f -p ${from_dirfile}/${loc_imagename}.spt ${to_dirfile}
+            ${copy_command} ${from_dirfile}/${loc_imagename}.spt ${to_dirfile}
           endif
           #
           if ( -e ${from_dirfile}/${loc_imagename}_mask.mrc ) then
             echo ":New: ${to_dirfile}/${loc_imagename}_mask.mrc"
-            \cp -f -p ${from_dirfile}/${loc_imagename}_mask.mrc ${to_dirfile}
+            ${copy_command} ${from_dirfile}/${loc_imagename}_mask.mrc ${to_dirfile}
           endif
           #
           if ( -e ${from_dirfile}/${loc_imagename}_mask_mask.mrc ) then
             echo ":New: ${to_dirfile}/${loc_imagename}_mask_mask.mrc"
-            \cp -f -p ${from_dirfile}/${loc_imagename}_mask_mask.mrc ${to_dirfile}
+            ${copy_command} ${from_dirfile}/${loc_imagename}_mask_mask.mrc ${to_dirfile}
           endif
           #
           if ( -e ${from_dirfile}/${loc_imagename}.mtz ) then
             echo ":New: ${to_dirfile}/${loc_imagename}.mtz"
-            \cp -f -p ${from_dirfile}/${loc_imagename}.mtz ${to_dirfile}
+            ${copy_command} ${from_dirfile}/${loc_imagename}.mtz ${to_dirfile}
           endif
         endif
         #
@@ -413,21 +422,21 @@ while ( ${dircounter} <= ${dirnum} )
             if ( -e ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
               if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
                 echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
-                \cp -f -p ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ${to_dirfile}
+                ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ${to_dirfile}
               else
                 echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
               endif
             else if ( -e ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ) then
               if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
                 echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
-                \cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc
+                ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc
               else
                 echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
               endif
             else if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
               if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.tif ) then
                 echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.tif"
-                \cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.tif ${to_dirfile}
+                ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.tif ${to_dirfile}
               else
                 echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.tif"
               endif
@@ -435,7 +444,7 @@ while ( ${dircounter} <= ${dirnum} )
               if ( -e ${from_dirfile}/${loc_nonmaskimagename}.mrc ) then
                 if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.mrc ) then
                   echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.mrc"
-                  \cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.mrc ${to_dirfile}
+                  ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.mrc ${to_dirfile}
                 else
                   echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.mrc"
                 endif
@@ -444,7 +453,7 @@ while ( ${dircounter} <= ${dirnum} )
             if ( -e ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ) then
               if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc ) then
                 echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc"
-                \cp -f -p ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ${to_dirfile}
+                ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ${to_dirfile}
               else
                 echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc"
               endif
@@ -454,12 +463,12 @@ while ( ${dircounter} <= ${dirnum} )
           if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
             if ( -e ${from_dirfile}/${loc_nonmaskimagename}.spt ) then
               echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.spt"
-              \cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.spt ${to_dirfile}
+              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.spt ${to_dirfile}
             endif
             #
             if ( -e ${from_dirfile}/${loc_nonmaskimagename}.mtz ) then
               echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.mtz"
-              \cp -f -p ${from_dirfile}/${loc_nonmaskimagename}.mtz ${to_dirfile}
+              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.mtz ${to_dirfile}
             endif
           endif
         endif
@@ -467,33 +476,35 @@ while ( ${dircounter} <= ${dirnum} )
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
           if ( -e ${from_dirfile}/History.dat ) then
             echo ":New: ${to_dirfile}/History.dat"
-            \cp -f -p ${from_dirfile}/History.dat ${to_dirfile}
+            ${copy_command} ${from_dirfile}/History.dat ${to_dirfile}
           endif
           #
           if ( -e ${from_dirfile}/${loc_imagename}-profile.dat.gz ) then
             echo ":New: ${to_dirfile}/${loc_imagename}-profile.dat.gz"
-            \cp -f -p ${from_dirfile}/${loc_imagename}-profile.dat.gz ${to_dirfile}
+            ${copy_command} ${from_dirfile}/${loc_imagename}-profile.dat.gz ${to_dirfile}
           endif
           #
           if ( -e ${from_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz ) then
             echo ":New: ${to_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz"
-            \cp -f -p ${from_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz ${to_dirfile}
+            ${copy_command} ${from_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz ${to_dirfile}
           endif
           #
           if ( -e ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ) then
             echo ":New: ${to_dirfile}/${loc_imagename}-unitcells-spider.doc"
-            \cp -f -p ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ${to_dirfile}
+            ${copy_command} ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ${to_dirfile}
           endif
           #
-          if ( -d ${from_dirfile}/APH ) then
-            if ( ! -d ${to_dirfile}/APH ) then
-              \mkdir ${to_dirfile}/APH
+          if ( ${also_APH} == "0" ) then
+            if ( -d ${from_dirfile}/APH ) then
+              if ( ! -d ${to_dirfile}/APH ) then
+                \mkdir ${to_dirfile}/APH
+              endif
+              echo dummy > ${from_dirfile}/APH/dummy.tmp
+              echo ":New: ${to_dirfile}/APH/*"
+              ${copy_command} ${from_dirfile}/APH/* ${to_dirfile}/APH
+              \rm ${from_dirfile}/APH/dummy.tmp
+              \rm ${to_dirfile}/APH/dummy.tmp
             endif
-            echo dummy > ${from_dirfile}/APH/dummy.tmp
-            echo ":New: ${to_dirfile}/APH/*"
-            \cp -f -p ${from_dirfile}/APH/* ${to_dirfile}/APH
-            \rm ${from_dirfile}/APH/dummy.tmp
-            \rm ${to_dirfile}/APH/dummy.tmp
           endif
         endif
 	#

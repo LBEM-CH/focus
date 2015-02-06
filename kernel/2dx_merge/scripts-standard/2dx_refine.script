@@ -394,6 +394,10 @@ echo "output in file SCRATCH/job_XX_2dx_merge_scriptB.com.log"
 echo "################################################"
 echo "################################################"
 #
+echo "Refinement jobs produced the following outpuf files:"
+\ls -l SCRATCH/job_*_${scriptname}-tmp.console
+\ls -l SCRATCH/job_*_${scriptname}-tmp.py
+#
 \rm -f SCRATCH/${scriptname}.console
 echo "# IMAGE: SCRATCH/${scriptname}.console <LOG: Console output from merging>" >> LOGS/${scriptname}.results
 foreach scriptBconsole ( SCRATCH/job_*_${scriptname}-tmp.console ) 
@@ -414,12 +418,11 @@ echo "<<@progress: 70>"
 #
 echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
 #
-# \rm -f SCRATCH/2dx_merge_scriptB_postprocessing.log
-# foreach scriptBpostp ( SCRATCH/job_??_${postprocessingfile} ) 
-#   echo Sourcing ${scriptBpostp} \>\> SCRATCH/2dx_merge_scriptB_postprocessing.log
-#   source ${scriptBpostp} >> SCRATCH/2dx_merge_scriptB_postprocessing.log
-# end
-# cat SCRATCH/2dx_merge_scriptB_postprocessing.log
+#############################################################################
+${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
+#############################################################################
+#
+python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
 #
 echo "<<@progress: 90>"
 #

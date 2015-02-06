@@ -138,25 +138,14 @@ set olddir = $PWD
 cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
 set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 #
+#############################################################################
+${proc_2dx}/linblock "get_max_defocus.py - to extract defocus and TANGL maxima."
+#############################################################################
 #
-set tmp_TANGL_max = -999999999.9
-set tmp_defocus_min = 999999999.9
-set tmp_defocus_max = -999999999.9
-#
-foreach dirfile ( ${dirlist} ) 
-  cd ..
-  cd ${dirfile}
-  if ( -e 2dx_image.cfg ) then
-    set tmp_TANGL_now = `cat 2dx_image.cfg | grep 'set TANGL =' | cut -d\" -f2`
-    set tmp = `cat 2dx_image.cfg | grep 'set defocus =' | cut -d\" -f2`
-    set tmp_defocus_now = `echo ${tmp} | sed 's/,/ /g' | awk '{ s = ( $1 + $2 ) / 2.0 } END { printf ( "%16.0f", s ) }'`
-    echo "Image ${dirfile} has ${tmp}, therefore defocus = ${tmp_defocus_now}"
-    set tmp_TANGL_max = `echo ${tmp_TANGL_now} ${tmp_TANGL_max} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 } } END { printf ( "%10.1f", s ) }'`
-    set tmp_defocus_min = `echo ${tmp_defocus_now} ${tmp_defocus_min} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 } } END { printf ( "%16.0f", s ) }'`
-    set tmp_defocus_max = `echo ${tmp_defocus_now} ${tmp_defocus_max} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 } } END { printf ( "%16.0f", s ) }'`
-  endif
-  cd ${olddir}
-end
+python ${proc_2dx}/get_max_defocus.py 2dx_merge_dirfile.dat SCRATCH/get_max_defocus.out
+set tmp_defocus_min = `cat SCRATCH/get_max_defocus.out | awk '{ s = $1 } END { print s }'`
+set tmp_defocus_max = `cat SCRATCH/get_max_defocus.out | awk '{ s = $2 } END { print s }'`
+set tmp_TANGL_max = `cat SCRATCH/get_max_defocus.out | awk '{ s = $3 } END { print s }'`
 #
 set tmp_defocus_min = `echo ${tmp_defocus_min} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`
 set tmp_defocus_max = `echo ${tmp_defocus_max} | awk '{ s = $1 / 10000.0 } END { printf ( "%16.3f", s ) }'`

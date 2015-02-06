@@ -398,6 +398,52 @@ eot
     echo "# IMAGE: APH/latfitted_limit.hkl <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
   endif
   #
+  #############################################################################
+  ${proc_2dx}/linblock "PREPMKLCF - Program to convert fitted data to CCP4 format"
+  #############################################################################
+  #
+  \rm -f APH/latfitted_nosym.hkl
+  \rm -f 2dx_prepmklcf.statistics
+  #
+  setenv IN APH/latfitted_limit.hkl
+  setenv OUT APH/latfitted_nosym.hkl
+  setenv REFHKL APH/latfittedref_nosym.hkl
+  #
+  # (1.0 to leave FOM values as they are, or 1.5 = to add a 60deg phase error)
+  set REDUCAC = ${MergeLatLine_REDUCAC}   
+  echo REDUCAC = ${REDUCAC}
+  #
+  echo "# IMAGE: LOGS/prepmklcf.log <LOG: prepmklcf output>" >> LOGS/${scriptname}.results
+  #
+  ${bin_2dx}/2dx_prepmklcf.exe << eot > LOGS/prepmklcf.log
+${RESMAX},${REDUCAC}                   ! RESOLUTION,REDUCAC
+${realcell},${realang},${ALAT}         ! a,b,gamma,c
+0.0                                    ! SCALE (automatic scaling to max(AMP)=32000.0)
+1				       ! 1=Calculate FOM from SIGF and SIGP. 0=Calculate FOM only from SIGP (this was the original version) 
+eot
+  #
+  echo "################################################"
+  echo "################################################"
+  echo "output in file LOGS/prepmklcf.log"
+  echo "################################################"
+  echo "################################################"
+  #
+  if ( ! -e 2dx_prepmklcf.statistics ) then
+    ${proc_2dx}/linblock "ERROR: 2dx_prepmklcf.statistics file is missing."
+  else
+    set num_reflections_FOM1 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM_over_1' | sed s'/_/ /g' | cut -d= -f2`
+    set num_reflections_FOM50 = `cat 2dx_prepmklcf.statistics | sed 's/ /_/g' | grep 'Number_of_phases_with_FOM_over_50' | sed s'/_/ /g' | cut -d= -f2`
+    echo "::Number of phases with FOM>1% is ${num_reflections_FOM1}"
+    echo "::Number of phases with FOM>50% is ${num_reflections_FOM50}"
+    echo "set num_reflections_FOM1 = ${num_reflections_FOM1}" >> LOGS/${scriptname}.results
+    echo "set num_reflections_FOM50 = ${num_reflections_FOM50}" >> LOGS/${scriptname}.results
+    \mv -f 2dx_prepmklcf.statistics SCRATCH
+  endif
+  if ( ${tempkeep} == "y" ) then
+    echo "# IMAGE: APH/latfitted_nosym.hkl <APH: Latline for vol after prepmklcf [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
+  endif  
+  #
   set infile = APH/latfitted.hkl
   #
   set CCP4_SYM_local = 1

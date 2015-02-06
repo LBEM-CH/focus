@@ -277,7 +277,7 @@ C
       goto 999
 C
  800  continue
-        write(*,'(''::WARNING: no value vor '',A,
+        write(*,'(''::WARNING: no value for '',A,
      .    '', setting to zero.'')')cname(1:k)
         ival=0
         goto 999
@@ -315,7 +315,7 @@ C
       goto 999
 C
  800  continue
-        write(*,'(''::WARNING: no value vor '',A,
+        write(*,'(''::WARNING: no value for '',A,
      .    '', setting to zero.'')')cname(1:k)
         rval=0.0
         goto 999

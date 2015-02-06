@@ -506,12 +506,12 @@ echo "<<@progress: 70>"
 #
 echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
 #
-# \rm -f SCRATCH/2dx_merge_scriptB_postprocessing.log
-# foreach scriptBpostp ( SCRATCH/job_??_${postprocessingfile} )
-#   echo Sourcing ${scriptBpostp} \>\> SCRATCH/2dx_merge_scriptB_postprocessing.log
-#   source ${scriptBpostp} >> SCRATCH/2dx_merge_scriptB_postprocessing.log
-# end
-# cat SCRATCH/2dx_merge_scriptB_postprocessing.log
+#############################################################################
+${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
+#############################################################################
+#
+python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
+#
 #
 # Issue evaluate here to reload the Ph-Ori-Change column
 # echo "<<@evaluate>>"

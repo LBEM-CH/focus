@@ -430,7 +430,7 @@ C******************************************************************************
 C  
       PARAMETER (NMAXC=600000)
       INTEGER TOTRFL
-      PARAMETER (TOTRFL=3000000)
+      PARAMETER (TOTRFL=30000000)
       PARAMETER (MAXRFL=20000)
       PARAMETER (MAXPLT=1500)
       PARAMETER (MAXINDEX=60)

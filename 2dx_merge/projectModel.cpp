@@ -198,7 +198,9 @@ void projectModel::initDir(const QString &path, QStandardItem *parent)
       if(QFileInfo(configFile).exists())
       {
         //watcher.addPath(configFile);
+        qDebug()<<"localData(): "<<configFile;
         confData localData(configFile);
+        qDebug()<<"SyncWithUpper(): "<<configFile;
         localData.syncWithUpper();
         foreach(quint32 c, columns.keys())
         {

@@ -228,20 +228,20 @@ else
     set aphfile = APH/${imagename}_syn_ctf.aph
 endif
 #
-echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
 if ( ${SYN_Unbending} == "0" ) then
-  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserch2b.ps <PS: Vector Plot of distortions 2>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: PS/${iname}-quadserch2b.ps <PS: Vector Plot of distortions 2>" >> LOGS/${scriptname}.results
 else
-  echo "# IMAGE-IMPORTANT: PS/${iname}-quadserchSc.ps <PS: Vector Plot of distortions Sc>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: PS/${iname}-quadserchSc.ps <PS: Vector Plot of distortions Sc>" >> LOGS/${scriptname}.results
 endif
 if ( ${ctf_ttf} == 'CTF' ) then
-  echo "# IMAGE-IMPORTANT: PS/${iname}_ctf.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: PS/${iname}_ctf.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
 else
-  echo "# IMAGE-IMPORTANT: PS/${iname}_ttplot_unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: PS/${iname}_ttplot_unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results
 endif
 #
-# echo "# IMAGE-IMPORTANT: frame_quadserch.ps <PS: QUADSERCH Movie Profiles>" >> LOGS/${scriptname}.results
-# echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: CCUNBEND Movie Profiles>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: frame_quadserch.ps <PS: QUADSERCH Movie Profiles>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: frame_unbending.ps <PS: CCUNBEND Movie Profiles>" >> LOGS/${scriptname}.results
 
 set prefix = ""
 set prename = ""
@@ -259,7 +259,7 @@ if ( ${ML_doit} == 'y' ) then
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
   set aphfile = APH/ML_result.aph
-  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
   set prefix = "ML_"
   set prename = "ML "
   #
@@ -277,7 +277,7 @@ if ( ${movie_enable} == "y" ) then
     echo ":: "
     ${proc_2dx}/linblock "Generating map from MovieMode processing"
     echo ":: "
-    echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase from MovieMode processing>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieMode processing>" >> LOGS/${scriptname}.results
     set prefix = "movie_"
     set prename = "MovieMode "
     #
@@ -297,7 +297,7 @@ if ( ${movie_enable} == "y" ) then
     echo ":: "
     ${proc_2dx}/linblock "Generating map from MovieModeB processing"
     echo ":: "
-    echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Amp&Phase from MovieModeB processing>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieModeB processing>" >> LOGS/${scriptname}.results
     set prefix = "movieB_"
     set prename = "MovieModeB "
     #

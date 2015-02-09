@@ -34,7 +34,8 @@ endif
 ${proc_2dx}/linblock "Setting APH file types to use"
 #############################################################################
 #
-foreach imagefile ( ${dirlist} ) 
+if ( ${scriptname} == "2dx_merge" ) then
+ foreach imagefile ( ${dirlist} ) 
   cd ..
   cd ${imagefile}
   if ( ! -e 2dx_image.cfg ) then
@@ -112,8 +113,9 @@ foreach imagefile ( ${dirlist} )
   \rm -f ${imagename_local}_ctf.aph
   \ln -s ${APH_file} ${imagename_local}_ctf.aph
   cd ${olddir}
-end
-
+ end
+endif
+#
 #############################################################################
 ${proc_2dx}/linblock "Compile merging script"
 #############################################################################
@@ -136,7 +138,16 @@ else
   set IVERBOSE = 9
 endif
 #
-${bin_2dx}/2dx_merge_compileA.exe << eot
+if ( ${scriptname} == "2dx_finalmerge" ) then
+  echo ":: "
+  ${proc_2dx}/linblock "Using UNBENDII and MOVIEA and MOVIEB results simultaneously (this will take some time)."
+  echo ":: "
+  set merge_data_type_local = 9
+else
+  set merge_data_type_local = ${merge_data_type}
+endif
+#
+${bin_2dx}/2dx_merge_compileAM.exe << eot
 LOGS/${scriptname}.results
 ${proc_2dx}
 ${bin_2dx}
@@ -155,7 +166,7 @@ ${RFACAMP}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
-${merge_data_type}
+${merge_data_type_local}
 ${Thread_Number}
 ${ILIST_VAL}
 eot

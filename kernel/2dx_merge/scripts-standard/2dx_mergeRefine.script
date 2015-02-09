@@ -459,7 +459,7 @@ eot
 echo "<<@progress: +5>>"
 #
 #############################################################################
-${proc_2dx}/linblock "Launch refinement script"
+${proc_2dx}/linblock "Launching refinement script"
 #############################################################################
 #
 echo "# IMAGE: SCRATCH/job_01_${scriptBfile} <CSH: First (01) refinement script>" >> LOGS/${scriptname}.results

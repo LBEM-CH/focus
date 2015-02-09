@@ -324,8 +324,8 @@ C---------------Loop over target on fist frame:
 C-------------------Loop through frames:
                     IMAX = 0
                     do iframe = 1,IFRAMS
-                      ixc = int(XPOSIT(K,L)/IAVE) + ixstart + ((iframe-1)*(ixend-ixstart))/(IFRAMS-1)
-                      iyc = int(YPOSIT(K,L)/IAVE) + iystart + ((iframe-1)*(iyend-iystart))/(IFRAMS-1)
+                      ixc = nint(XPOSIT(K,L)/IAVE) + ixstart + nint((real(iframe-1)*(ixend-ixstart))/(IFRAMS-1))
+                      iyc = nint(YPOSIT(K,L)/IAVE) + iystart + nint((real(iframe-1)*(iyend-iystart))/(IFRAMS-1))
                       ID=(iyc-1)*NCO2+ixc
                       IS=ID+IARRMXSI2*(iframe-1)
                       IMAX = IMAX + IARRAM(IS)
@@ -372,8 +372,8 @@ C---------------Loop over target on fist frame:
 C-------------------Loop through frames:
                     IMAX = 0
                     do iframe = 1,IFRAMS
-                      ixc = int(XPOSIT(K,L)/IAVE) + ixstart + ((iframe-1)*(ixend-ixstart))/(IFRAMS-1)
-                      iyc = int(YPOSIT(K,L)/IAVE) + iystart + ((iframe-1)*(iyend-iystart))/(IFRAMS-1)
+                      ixc = nint(XPOSIT(K,L)/IAVE) + ixstart + nint((real(iframe-1)*(ixend-ixstart))/(IFRAMS-1))
+                      iyc = nint(YPOSIT(K,L)/IAVE) + iystart + nint((real(iframe-1)*(iyend-iystart))/(IFRAMS-1))
                       ID=(iyc-1)*NCO2+ixc
                       IS=ID+IARRMXSI2*(iframe-1)
                       IMAX = IMAX + IARRAM(IS)
@@ -402,12 +402,13 @@ C-------------------Loop through frames:
 
 C
 C-----------Store optimal results 
-C-----------The offset " - 1 " originates from some unknown error, 
-C-----------but it is needed here.
-            ROSTARTX(K,L) = IGOFFSTARTX - 1
-            ROSTARTY(K,L) = IGOFFSTARTY - 1
-            ROENDX(K,L)   = IGOFFENDX - 1
-            ROENDY(K,L)   = IGOFFENDY - 1
+C-----------The offset " - 1.0 " originates from some unknown error, 
+C-----------Probably an origin discrepancy between CCmaps and unbending
+C-----------coordinates. In any case, it is needed here. 
+            ROSTARTX(K,L) = real(IGOFFSTARTX) - 1.0
+            ROSTARTY(K,L) = real(IGOFFSTARTY) - 1.0
+            ROENDX(K,L)   = real(IGOFFENDX) - 1.0
+            ROENDY(K,L)   = real(IGOFFENDY) - 1.0
             write(6,'(2I5,'': Node '',2I5,'' at '',2F10.2,
      .        '' gives max peak '',I10,
      .        '' for offset from '',2F8.1,'' to '',2F8.1)')

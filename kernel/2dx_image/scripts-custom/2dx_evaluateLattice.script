@@ -75,7 +75,7 @@ set do4 = "0"
 # LEGEND: This rotates and/or mirrors the current lattice. This will create a different lattice with different coordinates in the image.
 # EXAMPLE: dorotate = "nothing"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=nothing;1=... is rotated cw by 90deg;2=... is rotated cw by 90deg (also change defocus&tilt);3=... is rotated ccw by 90deg;4=... is rotated ccw by 90deg (also change defocus&tilt);5=... is mirrored upside down (y->-y);6=... is mirrored upside down (y->-y) (also change defocus&tilt)"
+# TYPE: Drop_Down_Menu "0=nothing;1=... is rotated cw by 90deg;2=... is rotated cw by 90deg (also change defocus&tilt);3=... is rotated ccw by 90deg;4=... is rotated ccw by 90deg (also change defocus&tilt);5=... is mirrored upside down (y->-y);6=... is mirrored upside down (y->-y) (also change defocus&tilt);7=... is rotated cw by 90deg (also mirror defocus)"
 set dorotate = "0"
 #
 #=============================================================================
@@ -434,7 +434,7 @@ if ( ${dorotate} != 0 ) then
 endif
 #############################################################################
 #
-if ( ${dorotate} == "1" || ${dorotate} == "2" ) then
+if ( ${dorotate} == "1" || ${dorotate} == "2" || ${dorotate} == "7" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $2 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$1 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $4 } END { print s}'`
@@ -460,6 +460,15 @@ if ( ${dorotate} == "1" || ${dorotate} == "2" ) then
     echo "::new TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
     echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
     echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  endif
+  if ( ${dorotate} == "7" ) then
+    echo "::old defocus = ${defocus}" 
+    set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$2} END {print s}'`
+    set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$1} END {print s}'`
+    set ang  = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$3} END {print s}'`
+    set defocus = `echo ${def1},${def2},${ang}`
+    echo "::new defocus = ${defocus}" 
+    echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
   endif
 endif
 #

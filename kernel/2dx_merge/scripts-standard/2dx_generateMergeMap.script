@@ -190,6 +190,12 @@ echo "<<@progress: +10>>"
 set scale = 1
 echo "scale = ${scale}"
 #
+set voldim = 250
+set voldim_m1 = `echo ${voldim} | awk '{ s = $1 - 1 } END { print s }'`
+set voldim_t142 = `echo ${voldim} | awk '{ s = $1 * 1.42 } END { print s }'`
+set voldim_t2 = `echo ${voldim} | awk '{ s = $1 * 2 } END { print s }'`
+set voldim_t2m1 = `echo ${voldim} | awk '{ s = $1 * 2 - 1 } END { print s }'`
+#
 \rm -f SCRATCH/scratch1.map
 #
 if ( ${merge_modus} == "3D" ) then
@@ -256,9 +262,9 @@ SCALE F1 ${scale} ${tempfac}
 SYMMETRY P1
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID 200 200 200
-XYZLIM 0 199 0 199 0 199
-RHOLIM 250.0
+GRID ${voldim} ${voldim} ${voldim} 
+XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 ${voldim_m1}
+RHOLIM ${voldim_t142}
 HKLMAX 50 50 70
 END
 eot
@@ -277,9 +283,9 @@ SCALE F1 ${scale} ${tempfac}
 SYMMETRY P1
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID 200 200 200
-XYZLIM 0 199 0 199 0 199
-RHOLIM 250.0
+GRID ${voldim} ${voldim} ${voldim} 
+XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 ${voldim_m1}
+RHOLIM ${voldim_t142}
 HKLMAX 50 50 70 
 END
 eot
@@ -298,9 +304,9 @@ SCALE F1 ${scale} ${tempfac}
 SYMMETRY P1
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID 220 220 220
-XYZLIM 0 220 0 220 0 220
-RHOLIM 250.0
+GRID ${voldim} ${voldim} ${voldim} 
+XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 ${voldim_m1}
+RHOLIM ${voldim_t142}
 HKLMAX 50 50 70 
 END
 eot
@@ -483,9 +489,9 @@ SCALE F1 ${scale} ${tempfac}
 SYMMETRY ${CCP4_SYM}
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${SYM}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID 200 1 200
-XYZLIM 0 199 0 0 0 199
-RHOLIM 250.0
+GRID ${voldim} 1 ${voldim} 
+XYZLIM 0 ${voldim_m1}  0 0 0 ${voldim_m1}
+RHOLIM ${voldim_t142}
 HKLMAX 50 50 70
 END
 eot
@@ -507,9 +513,9 @@ SYMMETRY ${CCP4_SYM}
 #SYMMETRY 1 
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${SYM}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID 200 200 1
-XYZLIM 0 199 0 199 0 0
-RHOLIM 250.0
+GRID ${voldim} ${voldim} 1
+XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 0
+RHOLIM ${voldim_t142}
 HKLMAX 50 50 70
 END
 eot
@@ -533,7 +539,7 @@ if (${rotate_to_Z} == "yes" ) then
   \rm -f SCRATCH/TMP001.map
   #
 ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/TMP001.map << eof
-XYZLIM 0 399 0 0 0 399
+XYZLIM 0 ${voldim_t2m1} 0 0 0 ${voldim_t2m1}
 END
 eof
   #
@@ -556,7 +562,7 @@ else
   #############################################################################
   #
 ${bin_ccp4}/mapmask mapin SCRATCH/scratch1.map mapout SCRATCH/${imagename}-${SYM}.map << eof
-XYZLIM 0 399 0 399 0 0
+XYZLIM 0 ${voldim_t2m1} 0 ${voldim_t2m1} 0 0
 END
 eof
   #
@@ -664,7 +670,7 @@ else
 spi
 ;
 ; X70 is the size of the unit cell in the MRC output file from above.
-X70=200.0
+X70=${voldim}
 ;
 ; This attempts to get the CCP4 or MRC file into spider. There is an issue with MRC2000, which now
 ; can deal with X,Y and Z dimensions. Spider may not yet be able to read that.
@@ -675,13 +681,6 @@ X70=200.0
 ; If that file has a file size of 16,198, then those 198 byte are the header. If you skip the header,
 ; you then can read the rest of the TIFF file as RAW. If your TIFF file has a slightly different size, 
 ; for example 17,024, then adjust that number from "198" to "1024":
-;
-;cp from raw
-;RESULTS-TIFF/${imagename}-${SYM}.tif
-;8
-;400,400,1
-;198
-;TMP001
 ;
 ; or you can go through CCP4 directly, if that works better:
 ;

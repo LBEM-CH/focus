@@ -106,7 +106,7 @@ C     or card  4 : enter Limits (Xmin,max,Ymin,max,Zmin,max) if NZ>1
 C
 C IMODE= 32: Interpolate into new given dimensions
 C
-C IMODE= 39: Transform into REAL output format with automatic scaling to [-1000 ; 1000]
+C IMODE= 39: Transform into REAL output format with automatic scaling to STDEV=100
 C
 C -----------------------------------------------------------
 C IMODE= 50: goes to the single particle selection option, with input
@@ -196,7 +196,7 @@ C
      . ' 30: Pad into square image',/,
      . ' 31: Select region (and change header)',/,
      . ' 33: Interpolate into new given dimensions',/,
-     . ' 39: Transform [-1000;1000] REAL image',/,
+     . ' 39: Transform STDEV=100 REAL image',/,
      . ' 50: create stack of small boxes centred on coords read',
      . ' in from list',/,
      .   ' 99: More options, mainly for display purposes')

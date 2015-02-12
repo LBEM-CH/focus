@@ -175,9 +175,17 @@ C
 C
         ISGNTLTAN1=1
         ISGNTLTAN2=1
+        if(RDIST1.lt.-90.0)then
+          RDIST1=180.0+RDIST1
+          ISGNTLTAN1=-1
+        endif
         if(RDIST1.gt.90.0)then
           RDIST1=180.0-RDIST1
           ISGNTLTAN1=-1
+        endif
+        if(RDIST2.lt.-90.0)then
+          RDIST2=180.0+RDIST2
+          ISGNTLTAN2=-1
         endif
         if(RDIST2.gt.90.0)then
           RDIST2=180.0-RDIST2
@@ -190,13 +198,14 @@ C
         if(RDISTMIN.gt.30.0)then
           write(*,'('':: '')')
           write(*,'(''::'',78(''*''))')
-          write(*,'(''::WARNING: Strong deviation between current tilt axis and lattice-determined tilt axis.'')')
+          write(*,'(''::WARNING: Strong deviation between current tilt'',
+     .      '' axis and lattice-determined tilt axis.'')')
           write(*,'(''::'',78(''*''))')
           write(*,'('':: '')')
-          write(*,'('':: TLTAXIS distance for first  option is '',F15.5)')
-     1      RDIST1
-          write(*,'('':: TLTAXIS distance for second option is '',F15.5)')
-     1      RDIST2
+          write(*,'('':: TLTAXIS distance for first  option is '',
+     .      F15.5)') RDIST1
+          write(*,'('':: TLTAXIS distance for second option is '',
+     .      F15.5)') RDIST2
         else
           write(*,'('': TLTAXIS distance for first  option is '',F15.5)')
      1      RDIST1
@@ -251,7 +260,7 @@ C
         endif
         write(*,'('': ISIGNTLTAXA = '',I6)')ISGNTLTAXA
 C
-        TANGL = TLTANG * ISGNAISABOVE * ISGNTLTAXA * IHAND
+        TANGL = TLTANG * ISGNAISABOVE * ISGNTLTAXA * IHAND * ISGNTLTANG
         write(*,'('':: TANGL = '',F15.5)')TANGL
 C
         OPEN(UNIT=15,FILE=cname,STATUS='NEW')

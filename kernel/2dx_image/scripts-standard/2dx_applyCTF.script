@@ -215,6 +215,7 @@ else
     endif
   endif
 
+  echo "<<@progress: 20>>"
 
   set CTF_infile = APH/${iname}_fou.aph
   set CTF_outfile = APH/${iname}_fou_ctf.aph
@@ -238,7 +239,7 @@ else
   \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_unbend2.txt
   echo "# IMAGE: SCRATCH/POWERHISTO_unbend2.txt <Histogram of Power in PS>" >> LOGS/${scriptname}.results
 
-  echo "<<@progress: 30>>"
+  echo "<<@progress: 40>>"
 
   if ( ${movie_enable} == "y" ) then
     set CTF_infile = APH/${iname}_movie_fou.aph
@@ -266,6 +267,8 @@ else
     else
       ${proc_2dx}/linblock "ERROR: ${CTF_infile} not found."
     endif
+
+    echo "<<@progress: 60>>"
 
     set CTF_infile = APH/${iname}_movieB_fou.aph
     if ( -e ${CTF_infile} ) then
@@ -295,7 +298,7 @@ else
     endif
   endif
   
-  echo "<<@progress: 50>>"
+  echo "<<@progress: 80>>"
 
   if ( ${SYN_Unbending} != "0" ) then
     set CTF_infile = APH/${iname}_syn.aph

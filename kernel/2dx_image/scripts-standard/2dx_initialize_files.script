@@ -405,7 +405,7 @@ if ( ${movie_enable} == "y" ) then
     set movie_stackname = ${movie_stackname}.mrc
     echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
   endif
-  if ( ! -e ${movie_stackname}) then
+  if ( ! -e ${movie_stackname} ) then
 	${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
   else
 	# Get the number of frames
@@ -424,6 +424,7 @@ endif
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname} <Movie Stack>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_enable} == "n" ) then
   #

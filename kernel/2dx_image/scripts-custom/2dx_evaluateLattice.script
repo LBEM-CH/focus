@@ -95,7 +95,7 @@ set overwriteRealLattice = "n"
 # EXAMPLE: overwriteTiltgeometry = "y"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
 # TYPE: Bool "y;n"
-set overwriteTiltgeometry = "n"
+set overwriteTiltgeometry = "y"
 #
 #=============================================================================
 # SECTION: Peak Coordinates

@@ -130,8 +130,8 @@ foreach dirfile ( ${dirlist} )
   # echo "set QVALMB = ." >> LOGS/${scriptname}.results
   # echo "set domask = y" >> LOGS/${scriptname}.results
 
-  echo "set RESMAX = 5.0" >> LOGS/${scriptname}.results
-  echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
+  # echo "set RESMAX = 5.0" >> LOGS/${scriptname}.results
+  # echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
   # echo "set -force IQMAX1 = 7" >> LOGS/${scriptname}.results
   # echo "set -force IQMAX = 4" >> LOGS/${scriptname}.results
   # echo "set movie_enable = y" >> LOGS/${scriptname}.results
@@ -182,24 +182,35 @@ foreach dirfile ( ${dirlist} )
   #------------------------------------------------------------------------
 
   if ( 1 == 2 ) then
-   ${app_2dx_image} ${newdir} "2dx_fftrans"
-   ${app_2dx_image} ${newdir} "2dx_ctfcor"
-   ${app_2dx_image} ${newdir} "2dx_unbend1"
-   ${app_2dx_image} ${newdir} "2dx_getspots"
-   ${app_2dx_image} ${newdir} "2dx_unbend2"
+    ${app_2dx_image} ${newdir} "2dx_fftrans"
+    ${app_2dx_image} ${newdir} "2dx_ctfcor"
+    ${app_2dx_image} ${newdir} "2dx_unbend1"
+    ${app_2dx_image} ${newdir} "2dx_getspots"
+    ${app_2dx_image} ${newdir} "2dx_unbend2"
 
-   ${app_2dx_image} ${newdir} "2dx_fftrans"
-   ${app_2dx_image} ${newdir} "2dx_ctfcor"
-   ${app_2dx_image} ${newdir} "2dx_unbend1"
-   ${app_2dx_image} ${newdir} "2dx_getspots"
-   ${app_2dx_image} ${newdir} "2dx_unbend2"
+    ${app_2dx_image} ${newdir} "2dx_fftrans"
+    ${app_2dx_image} ${newdir} "2dx_ctfcor"
+    ${app_2dx_image} ${newdir} "2dx_unbend1"
+    ${app_2dx_image} ${newdir} "2dx_getspots"
+    ${app_2dx_image} ${newdir} "2dx_unbend2"
 
-   ${app_2dx_image} ${newdir} "2dx_unbend_movie1a"
-   ${app_2dx_image} ${newdir} "2dx_unbend_movie1b"
+    ${app_2dx_image} ${newdir} "2dx_unbend_movie1a"
+    ${app_2dx_image} ${newdir} "2dx_unbend_movie1b"
 
-   ${app_2dx_image} ${newdir} "2dx_applyCTF"
-   ${app_2dx_image} ${newdir} "2dx_generateMAP"
+    ${app_2dx_image} ${newdir} "2dx_applyCTF"
+    ${app_2dx_image} ${newdir} "2dx_generateMAP"
   endif
+
+  #------------------------------------------------------------------------
+
+  if ( 1 == 2 ) then
+    ${app_2dx_image} ${newdir} "2dx_getDefTilt"
+    ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
+    ${app_2dx_image} ${newdir} "2dx_applyCTF"
+    ${app_2dx_image} ${newdir} "2dx_generateMAP"
+  endif
+
+  #------------------------------------------------------------------------
 
   # Use the following to recalculate the TAXA and TANGL values for all selected images:
   # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"

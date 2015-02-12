@@ -198,10 +198,11 @@ void projectModel::initDir(const QString &path, QStandardItem *parent)
       if(QFileInfo(configFile).exists())
       {
         //watcher.addPath(configFile);
-        qDebug()<<"localData(): "<<configFile;
+        qDebug()<<"Reading config file "<<configFile;
         confData localData(configFile);
-        qDebug()<<"SyncWithUpper(): "<<configFile;
-        localData.syncWithUpper();
+        // CHEN: Not synching here, in order to save time. 
+        // qDebug()<<"SyncWithUpper(): "<<configFile;
+        // localData.syncWithUpper();
         foreach(quint32 c, columns.keys())
         {
           if(!columns[c]["uid"].toString().isEmpty() && c!=0 && c!=1)

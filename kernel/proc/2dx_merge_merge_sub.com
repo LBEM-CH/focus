@@ -72,8 +72,8 @@ if ( ${scriptname} == "2dx_merge" ) then
     if ( ${QVALMB_loctmp} == '.' ) then
       set QVALMB_loctmp = 0
     endif 
-    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.3 | awk '{ s = $1 * $2 } END { print s }'`
-    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.4 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
     set QVAL_best = `echo ${QVAL2_local} ${QVALMA_local} ${QVALMB_local} | awk '{ if ( $1 > $2 && $1 > $3 ) { s = 1 } else if ( $2 > $1 && $2 > $3 ) { s = 2 } else { s = 3 } } END { print s }'`
     if ( ${QVAL_best} == '3' ) then
       if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then
@@ -138,13 +138,18 @@ else
   set IVERBOSE = 9
 endif
 #
-if ( ${scriptname} == "2dx_finalmerge" ) then
-  echo ":: "
-  ${proc_2dx}/linblock "Using UNBENDII and MOVIEA and MOVIEB results simultaneously (this will take some time)."
-  echo ":: "
-  set merge_data_type_local = 9
-else
-  set merge_data_type_local = ${merge_data_type}
+set merge_data_type_local = ${merge_data_type}
+#
+if ( ${merge_data_type} == '9' ) then
+  if ( ${scriptname} == "2dx_finalmerge" ) then
+    echo ":: "
+    ${proc_2dx}/linblock "Using UNBENDII and MOVIEA and MOVIEB results simultaneously (this will take some time)."
+    echo ":: "
+    set merge_data_type_local = ${merge_data_type}
+  else
+    set merge_data_type_local = 3
+    ${proc_2dx}/linblock "Using the APH file with the best QVAL from UNBENDII, MOVIEA, or MOVIEB."
+  endif
 endif
 #
 ${bin_2dx}/2dx_merge_compileAM.exe << eot

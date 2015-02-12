@@ -1865,12 +1865,12 @@ C
      .              ''**************************************'')')
                 write(*,'('' This resulted in PHRESID, RMSRESID = '',
      .                  2F15.3)')PHRESID,RMSRESID
-                write(*,'('' Test values  : TAXA = '',F12.3,'' TANGL = ''
+               write(*,'('' Test values  : TAXA = '',F12.3,'' TANGL = ''
      .                 ,F12.3)')R1TAXA,R1TANGL
-                write(*,'('' Result values: TAXA = '',F12.3,'' TANGL = ''
+               write(*,'('' Result values: TAXA = '',F12.3,'' TANGL = ''
      .                 ,F12.3,''  Residual = '',F15.3)')
      1            TAXA,TANGL,PHRESID
-                write(*,'('' So far best  : TAXA = '',F12.3,'' TANGL = ''
+               write(*,'('' So far best  : TAXA = '',F12.3,'' TANGL = ''
      .                ,F12.3,''  Residual = '',F15.3)')
      1            RTAXAOPT,RTANGLOPT,PHSMIN
                 write(*,'(/,''***************************************'',
@@ -1883,7 +1883,7 @@ C
                 RTAXAOPT=TAXA
                 RTANGLOPT=TANGL
                 if(IVERBOSE.gt.1)then
-                  write(*,'(/,'' This is now the new record setter.'',/)')
+                 write(*,'(/,'' This is now the new record setter.'',/)')
                 endif
               endif
 C
@@ -2280,101 +2280,65 @@ C------------------------------------------------------------------------
 C
       DRAD = 3.14159265437 / 180.0
 C
-C  Calculate TAXA,TANGL from input values TLTAXIS,TLTANGL.
-      ANGA=ATAN2(rlattu1,rlattu2)/DRAD
-      ANGB=ATAN2(rlattv1,rlattv2)/DRAD
-      IF(ABS(ANGB-ANGA).GT.180.0) ANGB=ANGB-SIGN(360.0,ANGB-ANGA)
+C-----Calculate TLTAXIS,TLTANGL backwards from refined TAXA,TANGL:
+C
+      ANGA=ATAN2(rlattu2,rlattu1)/DRAD
+      ANGB=ATAN2(rlattv2,rlattv1)/DRAD
+      IF(ABS(ANGB-ANGA).GT.180.0)THEN
+        ANGB=ANGB-SIGN(360.0,ANGB-ANGA)
+      endif
+C
+      if(ANGA.lt.ANGB)then
+        HAND=1.0
+      else
+        HAND=-1.0
+      endif
 C
 C      write(*,'(/,'' ANGA      = '',2F12.3)')ANGA
 C      write(*,'('' ANGB      = '',2F12.3)')ANGB
 C
       if(abs(cos(TANGL*DRAD)).gt.0.001)then
-        TLTAXA = ATAN(TAN(TAXA*DRAD) / cos(TANGL*DRAD)) / DRAD
+        TLTAXA = ATAN2(TAN(TAXA*DRAD),cos(TANGL*DRAD)) / DRAD
       else
         write(6,'(''::TANGLE has an illegal value'')')
         stop
       endif
 C
-C      write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
-C
 C-----TLTAXA should have the same sign as TAXA
-      if(TLTAXA.lt.0)TLTAXA = -TLTAXA
-      if(TAXA  .lt.0)TLTAXA = -TLTAXA
+      TLTAXA = sign(TLTAXA,TAXA)
 C
-C      write(*,'('' TLTAXA = '',F12.3)')TLTAXA
+      TLTANG  = TANGL
 C
-C  angle between A and B now between -180 and +180 degs.
-C     TLTAXA=ANGA-TLTAXIS
-C     TLTAXB=ANGB-TLTAXIS
+C      write(*,'(''Initial TLTAXA,TANGL = '',2F12.3)')TLTAXA,TANGL
 C
-      TLTAXIS = ANGA-TLTAXA
+      if(HAND.gt.0.0)then
+        TLTAXIS = ANGA-TLTAXA
+      else
+        TLTAXIS = ANGA+TLTAXA
+      endif
 C
-C      write(*,'(/,'' TLTAXIS = '',F12.3)')TLTAXIS
+      if(HAND.lt.0.0)then
+        TLTANG = -TLTANG
+      endif
+C      
+      if(TLTAXIS.gt.90.0)then
+        TLTAXIS = TLTAXIS-180.0
+        TLTANG  = -TLTANG
+      endif
+      if(TLTAXIS.gt.90.0)then
+        TLTAXIS = TLTAXIS-180.0
+        TLTANG  = -TLTANG
+      endif
+      if(TLTAXIS.lt.-90.0)then
+        TLTAXIS = TLTAXIS+180.0
+        TLTANG  = -TLTANG
+      endif
+      if(TLTAXIS.lt.-90.0)then
+        TLTAXIS = TLTAXIS+180.0
+        TLTANG  = -TLTANG
+      endif
 C
-      if(TLTAXIS.le.-90.0)TLTAXIS=TLTAXIS+180.0
-      if(TLTAXIS.le.-90.0)TLTAXIS=TLTAXIS+180.0
-      if(TLTAXIS.gt. 90.0)TLTAXIS=TLTAXIS-180.0
-      if(TLTAXIS.gt. 90.0)TLTAXIS=TLTAXIS-180.0
-C
-C      write(*,'('' TLTAXIS = '',F12.3)')TLTAXIS
-C
-      TLTAXA  = ANGA-TLTAXIS
-      TLTAXB  = ANGB-TLTAXIS
-C
-C      write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
-C      write(*,'(/,'' TLTAXB = '',F12.3)')TLTAXB
-C
-      IF(TLTAXB-TLTAXA.GT.0.0) THEN             ! TLTAXB always greater than TLTAXA.
-        HAND = 1.0
-      ELSE
-        HAND = -1.0
-C
-C-------??? is this correct ??? :
-        TLTAXA=-TLTAXA
-        TLTAXB=-TLTAXB
-C
-      ENDIF
-C
-      write(*,'(/,'' HAND   = '',F12.3)')HAND
-C
-C     write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
-C     write(*,'('' TLTAXB = '',F12.3)')TLTAXB
-C
-96    IF(TLTAXA.GE.90.0) THEN
-        TLTAXA=TLTAXA-180.0             ! PUTS TLTAXA BETWEEN +/-90.
-        TLTAXB=TLTAXB-180.0
-        GO TO 96
-      ENDIF
-97    IF(TLTAXA.LE.-90.0) THEN
-        TLTAXA=TLTAXA+180.0             ! PUTS TLTAXA BETWEEN +/-90.
-        TLTAXB=TLTAXB+180.0
-        GO TO 97
-      ENDIF
-C
-C      write(*,'(/,'' TLTAXA = '',F12.3)')TLTAXA
-C      write(*,'('' TLTAXB = '',F12.3)')TLTAXB
-C
-C Now get sign of crystallographic tiltangle.
-C  by first calculating whether A_IS_ABOVE the original TLTAXIS on the film.
-C
-      TLTNORM = TLTAXIS + 90.0      ! TLTNORM now GE.0 and LT.180(see above)
-      ANGACOMP= ABS(ANGA-TLTNORM)   ! Should be between 0 and 360
-      IF((ANGACOMP.GT.90.0).AND.(ANGACOMP.LT.270.0)) THEN
-        AISABOVE = -1.0
-      ELSE
-        AISABOVE =  1.0
-      ENDIF
-      SIGNTLTAXA = SIGN(1.0,TLTAXA)
-C
-C      write(*,'(/,'' TLTAXIS   = '',F12.3)')TLTAXIS
-C      write(*,'('' ANGA      = '',F12.3)')ANGA
-C      write(*,'('' TLTNORM   = '',F12.3)')TLTNORM
-C      write(*,'('' ANGACOMP  = '',F12.3)')ANGACOMP
-C
-C      write(*,'(/,'' AISABOVE  = '',F12.3)')AISABOVE
-C      write(*,'('' SIGNTLTAXA= '',F12.3)')SIGNTLTAXA
-C
-      TLTANG  = (AISABOVE * SIGNTLTAXA * HAND) * TANGL
+C      write(*,'(''Final TLTAXA,TANGL = '',2F12.3)')TLTAXA,TANGL
 C
       if(LOGOUTPUT)then
 C          WRITE(17,'(''# '',2F15.2,30X,''HHORIORI,HKORIORI'')') 

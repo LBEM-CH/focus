@@ -197,7 +197,9 @@ eot
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
-        nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
+        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
+
+        nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_getDefTilt"; ${app_2dx_image} ${curdir} "+2dx_evaluateLattice"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getSampleTilt"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1a"; ${app_2dx_image} ${curdir} "2dx_unbend_movie1b"; ${app_2dx_image} ${curdir} "2dx_unbend_movie2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 

@@ -91,10 +91,14 @@ C
       REAL*8 RBINSSIGPF2(0:IHISTBINS,3)
       REAL*8 RBINSFOM2(0:IHISTBINS,3)
 C
+      REAL*8 RBINSFOM3(0:IHISTBINS,3)
+C
       INTEGER IBINSSIGF(0:IHISTBINS,3)
       INTEGER IBINSSIGP(0:IHISTBINS,3)
       INTEGER IBINSSIGPF(0:IHISTBINS,3)
       INTEGER IBINSFOM(0:IHISTBINS,3)
+C
+      INTEGER IBINSFOM3(0:IHISTBINS,3)
 C
       COMMON /DATA/ IHFIELD,IKFIELD,ILFIELD,RZFIELD,
      .     RAMPFIELD,RPHAFIELD,RSIGFFIELD,RSIGPFIELD,RFOM,
@@ -103,6 +107,7 @@ C
      .     RSIGFFIELDMAX,RSIGPFIELDMAX,
      .     RBINSSIGF,RBINSSIGP,RBINSSIGPF,RBINSFOM,
      .     RBINSSIGF2,RBINSSIGP2,RBINSSIGPF2,RBINSFOM2,
+     .     RBINSFOM3,
      .     RLINE1,RLINE2,RLINE3,
      .     RESMAX3D,RESMAXVERT
 C
@@ -191,10 +196,13 @@ C
           RBINSSIGPF2(i,j)=0.0
           RBINSFOM2(i,j)=0.0
 C
+          RBINSFOM3(i,j)=0.0
+C
           IBINSSIGF(i,j)=0
           IBINSSIGP(i,j)=0
           IBINSSIGPF(i,j)=0
           IBINSFOM(i,j)=0
+          IBINSFOM3(i,j)=0
         enddo
       enddo
 C
@@ -340,37 +348,31 @@ C
         enddo
       enddo
 C
+C-----Find average FOM curve
 C
-C-----Fill Histogram Bins with AVERAGE values
+      do i = 1,icount
+C-------For all types of resolutions (3D, horizontal, vertical):
+        do j = 1,3
+          if(j.eq.1) ibin=INT(REAL(IMAXBINS)*RecRESVAL(i)/RecRESMAX+0.5)
+          if(j.eq.2) ibin=INT(REAL(IMAXBINS)*RecRESHORI(i)/RecRESMAX+0.5)
+          if(j.eq.3) ibin=INT(REAL(IMAXBINS)*RecRESVERT(i)/RecRESMAX+0.5)
+          if(ibin.lt.0       )ibin=0
+          if(ibin.gt.IMAXBINS)ibin=IMAXBINS
+          RBINSFOM3(ibin,j)=RBINSFOM3(ibin,j) + RFOM(i)
+          IBINSFOM3(ibin,j)=IBINSFOM3(ibin,j) + 1
+        enddo
+      enddo
 C
-C      do i = 1,icount
-C        do j = 1,3
-C          if(j.eq.1) ibin=INT(REAL(IMAXBINS)*RecRESVAL(i)/RecRESMAX+0.5)
-C          if(j.eq.2) ibin=INT(REAL(IMAXBINS)*RecRESHORI(i)/RecRESMAX+0.5)
-C          if(j.eq.3) ibin=INT(REAL(IMAXBINS)*RecRESVERT(i)/RecRESMAX+0.5)
-C          RBINSSIGF(ibin,j)=RBINSSIGF(ibin,j)+RSIGFFIELD(i)/RAMPFIELD(i)
-C          IBINSSIGF(ibin,j)=IBINSSIGF(ibin,j)+1
-C          RBINSSIGP(ibin,j)=RBINSSIGP(ibin,j)+RSIGPFIELD(i)
-C          IBINSSIGP(ibin,j)=IBINSSIGP(ibin,j)+1
-C          RBINSSIGPF(ibin,j)=RBINSSIGPF(ibin,j)+RSIGPFIELD(i)*RFOM(i)
-C          IBINSSIGPF(ibin,j)=IBINSSIGPF(ibin,j)+1
-C          RBINSFOM(ibin,j)=RBINSFOM(ibin,j)+RFOM(i)
-C          IBINSFOM(ibin,j)=IBINSFOM(ibin,j)+1
-C        enddo
-C        if(ibin.eq.1)then
-C          write(6,'('':ibin,RBINSFOM,IBINSFOM'',I6,F12.3,I6)')
-C     .      ibin,RBINSFOM(ibin,3),IBINSFOM(ibin,3)
-C        endif
-C      enddo
-C
-C      do i = 0,IMAXBINS
-C        do j = 1,3
-C          if(IBINSSIGF(i,j).gt.0) RBINSSIGF(i,j)=RBINSSIGF(i,j)/IBINSSIGF(i,j)
-C          if(IBINSSIGP(i,j).gt.0) RBINSSIGP(i,j)=RBINSSIGP(i,j)/IBINSSIGP(i,j)
-C          if(IBINSSIGPF(i,j).gt.0) RBINSSIGPF(i,j)=RBINSSIGPF(i,j)/IBINSSIGPF(i,j)
-C          if(IBINSFOM(i,j).gt.0) RBINSFOM(i,j)=RBINSFOM(i,j)/IBINSFOM(i,j)
-C        enddo
-C      enddo
+C-----Prepare all values in the bins:
+      do k = 0,IMAXBINS
+        do j = 1,3
+          if(IBINSFOM3(k,j).gt.0)then
+            RBINSFOM3(k,j)=RBINSFOM3(k,j)/IBINSFOM3(k,j)
+          else
+            RBINSFOM3(k,j)=0.0
+          endif
+        enddo
+      enddo
 C
 C=====Plot initialization======================================================
 C
@@ -387,24 +389,34 @@ C
       CALL P2K_MOVE(0.,0.,0.)
       CALL P2K_ORIGIN(10.,0.,0.)
 C
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,14,IMAXBINS)
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,13,IMAXBINS)
+      if(IOPTION.eq.1)then
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,14,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,13,IMAXBINS)
 C
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,1,IMAXBINS)
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,4,IMAXBINS)
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,7,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,1,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,4,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,7,IMAXBINS)
 C
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,2,IMAXBINS)
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,5,IMAXBINS)
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,8,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,2,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,5,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,8,IMAXBINS)
 C
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,3,IMAXBINS)
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,6,IMAXBINS)
-      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,9,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,3,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,6,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,9,IMAXBINS)
 C
-C      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,10,IMAXBINS)
-C      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,11,IMAXBINS)
-C      Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,12,IMAXBINS)
+C       Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,10,IMAXBINS)
+C       Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,11,IMAXBINS)
+C       Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,12,IMAXBINS)
+      else
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,15,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,16,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,17,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,13,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,1,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,2,IMAXBINS)
+        Call PLOTIT(PLTSIZ,FONTSIZE,CNAME,3,IMAXBINS)
+      endif
 C
       goto 999
 C
@@ -562,6 +574,8 @@ C
       REAL*8 RBINSSIGPF2(0:IHISTBINS,3)
       REAL*8 RBINSFOM2(0:IHISTBINS,3)
 C
+      REAL*8 RBINSFOM3(0:IHISTBINS,3)
+C
       COMMON /DATA/ IHFIELD,IKFIELD,ILFIELD,RZFIELD,
      .     RAMPFIELD,RPHAFIELD,RSIGFFIELD,RSIGPFIELD,RFOM,
      .     RecRESMAX,icount,RORIX,RORIY,
@@ -569,6 +583,7 @@ C
      .     RSIGFFIELDMAX,RSIGPFIELDMAX,
      .     RBINSSIGF,RBINSSIGP,RBINSSIGPF,RBINSFOM,
      .     RBINSSIGF2,RBINSSIGP2,RBINSSIGPF2,RBINSFOM2,
+     .     RBINSFOM3,
      .     RLINE1,RLINE2,RLINE3,
      .     RESMAX3D,RESMAXVERT
 C
@@ -656,7 +671,17 @@ C
         write(CTITLE,'(''FOM in 3D Fourier space '')')
       elseif (IRUN.eq.14)then
         write(CTITLE,'(''SigP in 3D Fourier space '')')
+      elseif (IRUN.eq.15)then
+        write(CTITLE,'(''FSC in 3D Fourier space '')')
+      elseif (IRUN.eq.16)then
+        write(CTITLE,'(''FSC over horizontal resolution '')')
+      elseif (IRUN.eq.17)then
+        write(CTITLE,'(''FSC over vertical resolution '')')
       endif
+C
+      write(cline,'(I2,'': '',A)')IRUN,CTITLE
+      write(CTITLE,'(A)')cline(1:80)
+C
       X=5.
       Y=PLTSIZ+20.
       CALL P2K_MOVE(X,Y,0.)
@@ -715,11 +740,14 @@ C
       X=RORIX+RLENX-30.
       Y=RORIY-RLEN-15.
       CALL P2K_MOVE(X,Y,0)
-      if(IRUN.eq.1 .or. IRUN.eq.4 .or. IRUN.eq.7 .or. IRUN.eq.10) then
+      if(IRUN.eq.1 .or. IRUN.eq.4 .or. IRUN.eq.7 .or. IRUN.eq.10 .or. 
+     .   IRUN.eq.15) then
          WRITE(CTITLE,'(''Overall Resolution [A]'')')
-      elseif(IRUN.eq.2 .or. IRUN.eq.5 .or. IRUN.eq.8 .or. IRUN.eq.11 .or. IRUN.ge.13) then
+      elseif(IRUN.eq.2 .or. IRUN.eq.5 .or. IRUN.eq.8 .or. IRUN.eq.11 .or.
+     .       IRUN.ge.13 .or. IRUN.eq.16) then
          WRITE(CTITLE,'(''Horizontal Resolution [A]'')')
-      elseif(IRUN.eq.3 .or. IRUN.eq.6 .or. IRUN.eq.9 .or. IRUN.eq.12) then
+      elseif(IRUN.eq.3 .or. IRUN.eq.6 .or. IRUN.eq.9 .or. IRUN.eq.12 .or.
+     .       IRUN.eq.17) then
          WRITE(CTITLE,'(''Vertical Resolution [A]'')')
       endif
       call shorten(CTITLE,k)
@@ -745,6 +773,20 @@ C
           Y=Y-2.
           CALL P2K_MOVE(X,Y,0.)
           WRITE(TMPTEXT,'(I3)')i*10
+          call shorten(TMPTEXT,k)
+          CALL P2K_CSTRING(TEXT,k,0.)
+        enddo
+      elseif(IRUN.ge.15 .and. IRUN.le.17)then
+        do i=0,10
+          X=RORIX-RLEN
+          Y=RORIY+0.1*REAL(i)*RLENY
+          CALL P2K_MOVE(X,Y,0.)
+          X=RORIX+RLEN
+          CALL P2K_DRAW(X,Y,0.)
+          X=RORIX-RLEN-PLTSIZ/40.
+          Y=Y-2.
+          CALL P2K_MOVE(X,Y,0.)
+          WRITE(TMPTEXT,'(F4.1)')REAL(i)/10.0
           call shorten(TMPTEXT,k)
           CALL P2K_CSTRING(TEXT,k,0.)
         enddo
@@ -791,7 +833,7 @@ C
         CALL P2K_MOVE(X,Y,0.)
         X=RORIX+RLENX
         CALL P2K_DRAW(X,Y,0.)
-      elseif(IRUN.ge.13)then
+      elseif(IRUN.ge.13 .and. IRUN.le.14)then
         do i=0,5
           RVAL=i/5.0*RecRESMAX
           X=RORIX+0.0-RLEN
@@ -815,6 +857,8 @@ C
       Y=RORIY+RLENY+12.
       if(IRUN.ge.1 .and. IRUN.le.3)then
         WRITE(CTITLE,'(''FOM [%]'')')
+      elseif(IRUN.ge.15 .and. IRUN.le.17)then
+        WRITE(CTITLE,'(''FSC'')')
       elseif(IRUN.ge.4 .and. IRUN.le.6)then
         WRITE(CTITLE,'(''SigAMP / AMP'')')
       elseif(IRUN.ge.7 .and. IRUN.le.9)then
@@ -822,7 +866,7 @@ C
       elseif(IRUN.ge.10 .and. IRUN.le.12)then
         WRITE(CTITLE,'(''SigP*FOM [deg]'')')
         X=X+10.0
-      elseif(IRUN.ge.13)then
+      elseif(IRUN.ge.13 .and. IRUN.le.14)then
         WRITE(CTITLE,'(''Vertical Resolution [A]'')')
         X=X+20.0
       endif
@@ -932,18 +976,20 @@ C---------Set RGB color:
           endif
         endif
 C
-        if(X.lt.RORIX) X=RORIX
-        if(X.gt.RORIX+RLENX) X=RORIX+RLENX
-        if(Y.lt.RORIY) Y=RORIY
-        if(Y.gt.RORIY+RLENY) Y=RORIY+RLENY
-        XN=X-RLEN
-        XP=X+RLEN
-        YN=Y-RLEN
-        YP=Y+RLEN
-        CALL P2K_MOVE(XN,Y,0.)
-        CALL P2K_DRAW(XP,Y,0.)
-        CALL P2K_MOVE(X,YN,0.)
-        CALL P2K_DRAW(X,YP,0.)           ! small plus at each position
+        if(IRUN.lt.15)then
+          if(X.lt.RORIX) X=RORIX
+          if(X.gt.RORIX+RLENX) X=RORIX+RLENX
+          if(Y.lt.RORIY) Y=RORIY
+          if(Y.gt.RORIY+RLENY) Y=RORIY+RLENY
+          XN=X-RLEN
+          XP=X+RLEN
+          YN=Y-RLEN
+          YP=Y+RLEN
+          CALL P2K_MOVE(XN,Y,0.)
+          CALL P2K_DRAW(XP,Y,0.)
+          CALL P2K_MOVE(X,YN,0.)
+          CALL P2K_DRAW(X,YP,0.)           ! small plus at each position
+        endif
       enddo
 C
 C-----Plot legend
@@ -1070,7 +1116,7 @@ C
       rgbb=0.0
       CALL P2K_RGB_COLOUR(rgbr,rgbg,rgbb)
 C
-      if(IRUN.lt.13)then
+      if(IRUN.lt.13 .or. IRUN.ge.15)then
         j=0
         do i = 0,IMAXBINS
           X=RORIX+RLENX*REAL(i)/IMAXBINS
@@ -1098,9 +1144,15 @@ C
             Y=RORIY+RBINSSIGPF(i,2)*RLENY/90.0
           elseif(IRUN.eq.12)then
             Y=RORIY+RBINSSIGPF(i,3)*RLENY/90.0
+          elseif(IRUN.eq.15)then
+            Y=RORIY+RBINSFOM3(i,1)**2 * RLENY
+          elseif(IRUN.eq.16)then
+            Y=RORIY+RBINSFOM3(i,2)**2 * RLENY
+          elseif(IRUN.eq.17)then
+            Y=RORIY+RBINSFOM3(i,3)**2 * RLENY
           endif
 C
-          if(Y.gt.RORIY+0.01 .and. Y.le.RORIY+RLENY)then
+          if(Y.gt.RORIY-0.01 .and. Y.le.RORIY+RLENY+0.01)then
             if(j.eq.0)then
               call P2K_MOVE(X,Y,0.)
               j=1
@@ -1149,7 +1201,7 @@ C
             Y=RORIY+RBINSSIGPF2(i,3)*RLENY/90.0
           endif
 C
-          if(Y.gt.RORIY+0.01 .and. Y.le.RORIY+RLENY)then
+          if(Y.gt.RORIY-0.01 .and. Y.le.RORIY+RLENY+0.01)then
             if(j.eq.0)then
               call P2K_MOVE(X,Y,0.)
               j=1

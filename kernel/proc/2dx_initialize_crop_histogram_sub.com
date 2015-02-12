@@ -50,6 +50,21 @@ eot
     ${proc_2dx}/lin "Not cropping histogram (Advanced parameter)."
   endif
   #
+  if ( ${imageorigin} == '0' ) then
+    #############################################################################
+    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling."
+    #############################################################################  
+    #
+    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/${nonmaskimagename}.tmp.mrc
+39               ! switch to REAL (MODE 2) with autoscaling STDEV=100
+${inimage}.mrc
+eot
+    #
+  endif
+  #
   if ( ${imageorigin} == '4' ) then
     #############################################################################
     ${proc_2dx}/lin "LABEL - to reduce pixel amplitude by a factor of 4."
@@ -105,14 +120,14 @@ eot
   #
   if ( ${imageorigin} == '7' ) then
     #############################################################################
-    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling, and rotating 90deg."
+    ${proc_2dx}/protest "Image Source option 7 causes trouble. Do not use this."
     #############################################################################  
     #
     \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
     #
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
-39               ! switch to REAL (MODE 2) with autoscaling -1000,1000
+39               ! switch to REAL (MODE 2) with autoscaling STDEV=100
 SCRATCH/${nonmaskimagename}.tmp.2.mrc
 eot
     #
@@ -136,7 +151,7 @@ eot
     #
     ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
-39               ! switch to REAL (MODE 2) with autoscaling -1000,1000
+39               ! switch to REAL (MODE 2) with autoscaling STDEV=100
 ${inimage}.mrc
 eot
     #

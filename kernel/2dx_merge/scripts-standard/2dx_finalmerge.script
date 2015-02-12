@@ -303,9 +303,11 @@ if ( 1 == 2 ) then
 ${realcell},${ALAT},${realang}
 APH/latfitted.hkl
 APH/latfitted_limit.hkl
+APH/latlines.dat
 ${RESMAX}
 ${zstarrange_real}
 ${resolutionplot_RESMAX}
+${MergeLatLine_REDUCAC}
 ${resolutionplot_bins}
 eot
   #
@@ -315,6 +317,9 @@ eot
     \mv -f PLOTCUR.PS PS/2dx_plotresolution.ps
   endif
   #
+  #############################################################################
+  ${proc_2dx}/linblock "Done."
+  #############################################################################
   exit
 endif
 #

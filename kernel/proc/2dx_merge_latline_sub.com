@@ -285,9 +285,11 @@ eot
 ${realcell},${ALAT},${realang}
 SCRATCH/latfitteds.dat
 SCRATCH/latfitteds_limit.dat
+APH/latlines.dat
 ${RESMAX}
 ${zstarrange_real}
 ${resolutionplot_RESMAX}
+${MergeLatLine_REDUCAC}
 ${resolutionplot_bins}
 eot
   #
@@ -384,9 +386,11 @@ else
 ${realcell},${ALAT},${realang}
 APH/latfitted.hkl
 APH/latfitted_limit.hkl
+APH/latlines.dat
 ${RESMAX}
 ${zstarrange_real}
 ${resolutionplot_RESMAX}
+${MergeLatLine_REDUCAC}
 ${resolutionplot_bins}
 eot
   #

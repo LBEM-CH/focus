@@ -2284,6 +2284,36 @@ C-----Calculate TLTAXIS,TLTANGL backwards from refined TAXA,TANGL:
 C
       ANGA=ATAN2(rlattu2,rlattu1)/DRAD
       ANGB=ATAN2(rlattv2,rlattv1)/DRAD
+C
+      IF(REVHK.ne.0.0)then
+        RTMP=ANGA
+        ANGA=ANGB
+        ANGB=RTMP
+      endif
+C
+      IF(SGNXCH.ne.0.0)then
+        ANGB=-ANGB
+      endif
+C
+      IF(ROT90.ne.0.0)then
+        RTMP=ANGA
+        ANGA=ANGB+180
+        if(ANGA.gt.180.0)ANGA=ANGA-360.0
+        ANGB=RTMP
+      endif
+C
+      IF(ROT180.ne.0.0)then
+        ANGA=ANGA+180
+        if(ANGA.gt.180.0)ANGA=ANGA-360.0
+        ANGB=ANGB+180
+        if(ANGB.gt.180.0)ANGB=ANGB-360.0
+      endif
+C
+      IF(REVXSGN.ne.0.0)then
+        ANGA=ANGA+180
+        if(ANGA.gt.180.0)ANGA=ANGA-360.0
+      endif
+C
       IF(ABS(ANGB-ANGA).GT.180.0)THEN
         ANGB=ANGB-SIGN(360.0,ANGB-ANGA)
       endif
@@ -2292,6 +2322,14 @@ C
         HAND=1.0
       else
         HAND=-1.0
+      endif
+C
+      IF(SGNXCH.ne.0.0)then
+        HAND=-HAND
+      endif
+C
+      IF(REVHND.ne.0.0)then
+        HAND=-HAND
       endif
 C
 C      write(*,'(/,'' ANGA      = '',2F12.3)')ANGA
@@ -3838,28 +3876,29 @@ C  FIDDLING WITH THE INDEXING TO GET CORRECT MATCH TO INDEXING CONVENTION
 C  USEFUL IN A NUMBER OF SPACE GROUPS -- SEE WRITE-UP AT TOP OF PROGRAM.
       SUBROUTINE FIDDLE2(IH,IK,Z,REVHK,SGNXCH,ROT180,ROT90,REVHND,
      1  REVXSGN)
-      IF(REVHK.EQ.0.0) GO TO 225
+      if(REVHK.GT.0.1)then
         I=IH
         IH=IK
         IK=I
         Z=-Z
- 225  CONTINUE
-      IF(SGNXCH.EQ.0.0) GO TO 230
+      endif
+      if(SGNXCH.gt.0.01)then
         IK=-IK
         Z=-Z
- 230  IF(ROT180.EQ.0) GO TO 231
+      endif
+      if(ROT180.gt.0.01)then
         IH=-IH
         IK=-IK
- 231  CONTINUE
-      if(ROT90.ne.0)then
+      endif
+      if(ROT90.gt.0.01)then
         I=IH
         IH=-IK
         IK=I
       endif
-      if(REVHND.ne.0)then
+      if(REVHND.gt.0.01)then
         Z=-Z
       endif
-      if(REVXSGN.ne.0)then
+      if(REVXSGN.gt.0.01)then
         IH=-IH
       endif
       RETURN

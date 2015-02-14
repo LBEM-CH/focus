@@ -23,10 +23,12 @@ C
       REAL PLTSIZ
       INTEGER IMAX
       INTEGER IHISTBINS
+      INTEGER IHKMAX
 C
       PARAMETER (PLTSIZ = 300.0)
       PARAMETER (IMAX = 1000000)
-      PARAMETER (IHISTBINS = 1000)
+      PARAMETER (IHISTBINS = 100)
+      PARAMETER (IHKMAX = 100)
 C
       REAL TITLE(20)
       REAL RTITLE(80)
@@ -59,12 +61,14 @@ C
       INTEGER IH,IK,IQ,IQLABEL
       INTEGER ifound,IHD,IKD
       REAL RAMP,RPHA,RSIGF,RSIGP,RDIFF,RAVAM,RZ,RZD
-      REAL RAMPAVE,REDUCAC
+      REAL*8 RAMPAVE,RAMPSUM
+      REAL REDUCAC,R1,R2
 C
       INTEGER i,icount,k,j,ibin,ibincount,l,i2
       INTEGER IMAXBINS
       INTEGER IRUN
 C
+      INTEGER IPOINT(-IHKMAX:IHKMAX,-IHKMAX:IHKMAX,-IHKMAX:IHKMAX)
       INTEGER IHFIELD(IMAX)
       INTEGER IKFIELD(IMAX)
       INTEGER ILFIELD(IMAX)
@@ -78,12 +82,17 @@ C
       REAL RecRESHORI(IMAX)
       REAL RecRESVERT(IMAX)
       REAL RecRESVAL(IMAX)
+      REAL RPHARESSUM(IMAX)
+      REAL RPHARESDIV(IMAX)
 C
       REAL RTMPFIELD(IMAX)
 C
       REAL RSIGFFIELDMAX
       REAL RSIGPFIELDMAX
       REAL RMEDIVAL,RMEDIVAL2,RMEDIVAL3
+      REAL RMEDIVALF(0:IHISTBINS)
+      REAL RMEDIVAL2F(0:IHISTBINS)
+      REAL RMEDIVAL3F(0:IHISTBINS)
 C
       REAL*8 RBINSSIGF(0:IHISTBINS,3)
       REAL*8 RBINSSIGP(0:IHISTBINS,3)
@@ -105,6 +114,10 @@ C
       INTEGER IBINSFOM(0:IHISTBINS,3)
 C
       INTEGER IBINSFOM3(0:IHISTBINS,3)
+C
+      INTEGER   IMP
+      CHARACTER NCPUS*10
+      INTEGER   OMP_GET_NUM_PROCS
 C
       COMMON /DATA/ IHFIELD,IKFIELD,ILFIELD,RZFIELD,
      .     RAMPFIELD,RPHAFIELD,RSIGFFIELD,RSIGPFIELD,RFOM,
@@ -129,6 +142,27 @@ C
 
       write(6,'('': 2dx_plotresolution - analyzing the merged 3D '',
      .      ''dataset in resolution terms.'')')
+C
+C#ifdef _OPENMP
+C      IMP=0
+C      CALL GETENV('OMP_NUM_THREADS',NCPUS)
+C      READ(NCPUS,*,ERR=111,END=111)IMP
+C111   CONTINUE
+C      IF (IMP.LE.0) THEN
+C        CALL GETENV('NCPUS',NCPUS)
+C        READ(NCPUS,*,ERR=112,END=112)IMP
+C112     CONTINUE
+C      ENDIF
+C      IF (IMP.LE.0) THEN
+C        IMP=OMP_GET_NUM_PROCS()
+C      ENDIF
+C      CALL OMP_SET_NUM_THREADS(IMP)
+C#endif
+C      IF (IMP.LE.0) IMP=1
+CC
+C      IF (IMP.GT.1) THEN
+C        WRITE(*,'('': Parallel processing: NCPUS = '',I8)') IMP
+C      ENDIF
 C
       write(*,'('' Input operation mode: (1) latline output, '',
      .  ''(2) 2dx_process_hkz output '')')
@@ -195,8 +229,11 @@ C
       write(*,'('' Input number of bins in resolution plot'')')
       READ (5,*)RTMP
       IMAXBINS=INT(RTMP)
-      if(IMAXBINS.lt.10)IMAXBINS=10
-      if(IMAXBINS.gt.IHISTBINS)IMAXBINS=IHISTBINS
+      if(IMAXBINS.lt.15)IMAXBINS=15
+      if(IMAXBINS.gt.IHISTBINS)then
+        write(6,'('' WARNING: Number too high. Corrected.'')')
+        IMAXBINS=IHISTBINS
+      endif
       write(*,'('' Read: '',I8)')IMAXBINS
 C
 C-----Initialize Histogram Bins
@@ -222,6 +259,13 @@ C
           IBINSSIGPF(i,j)=0
           IBINSFOM(i,j)=0
           IBINSFOM3(i,j)=0
+        enddo
+      enddo
+      do i = -IHKMAX,IHKMAX
+        do j = -IHKMAX,IHKMAX
+          do k = -IHKMAX,IHKMAX
+            IPOINT(i,j,k) = 0
+          enddo
         enddo
       enddo
 C
@@ -250,7 +294,7 @@ C
           read(1,*,END=200,ERR=970)IHFIELD(i),IKFIELD(i),RZFIELD(i),
      .       RAMPFIELD(i),RPHAFIELD(i),RSIGFFIELD(i),RSIGPFIELD(i),
      .       RFOM(i)
-          ILFIELD(i)=0
+          ILFIELD(i)=INT(RZFIELD(i)*ALAT)
         else
           read(1,*,END=200,ERR=970)IHFIELD(i),IKFIELD(i),ILFIELD(i),
      .       RAMPFIELD(i),RPHAFIELD(i),RFOM(i)
@@ -264,11 +308,15 @@ C
           RZFIELD(i)=REAL(ILFIELD(i))/ALAT
         endif
         INFIELD(i)=0
+        RPHARESSUM(i)=0
+        RPHARESDIV(i)=0
 C
         if(RFOM(i).lt.0.001)then
           i=i-1
           goto 100
         endif
+C
+        IPOINT(IHFIELD(i),IKFIELD(i),ILFIELD(i))=i
 C
         RAMPAVE = RAMPAVE + RAMPFIELD(i)
 C
@@ -329,13 +377,14 @@ C----------------------------------------------------------------------
 C-----Find median curve
 C----------------------------------------------------------------------
 C
-      write(*,'('': Calculating Median curves for SigF, SigP, FOM'')')
+      write(*,'('' Calculating Median curves for SigF, SigP, FOM'')')
 C
 C-----For all types of data (SigF, SigP, SigP*FOM, FOM):
       do l = 1,4
 C-------For all types of resolutions (3D, horizontal, vertical):
         do j = 1,3
 C---------Prepare all median values in the bins:
+C!$OMP PARALLEL DO PRIVATE (ibincount,i,ibin,RTMPFIELD,RMEDIVALF,RMEDIVAL2F,RMEDIVAL3F)
           do k = 0,IMAXBINS
             ibincount=0
 C-----------Find all entries for this bin, fill into RTMPFIELD:
@@ -367,16 +416,22 @@ C-----------Find the median entry in this field:
               RMEDIVAL2=0.0
               RMEDIVAL3=0.0
             endif
+            RMEDIVALF(k)=RMEDIVAL
+            RMEDIVAL2F(k)=RMEDIVAL2
+            RMEDIVAL3F(k)=RMEDIVAL3
+          enddo
+C!$OMP END PARALLEL DO
 C-----------Store this median value into the curve:
-            if(l.eq.1) RBINSSIGF(k,j)=RMEDIVAL
-            if(l.eq.2) RBINSSIGP(k,j)=RMEDIVAL
-            if(l.eq.3) RBINSSIGPF(k,j)=RMEDIVAL
-            if(l.eq.4) RBINSFOM(k,j)=RMEDIVAL
+          do k = 0,IMAXBINS
+            if(l.eq.1) RBINSSIGF(k,j)=RMEDIVALF(k)
+            if(l.eq.2) RBINSSIGP(k,j)=RMEDIVALF(k)
+            if(l.eq.3) RBINSSIGPF(k,j)=RMEDIVALF(k)
+            if(l.eq.4) RBINSFOM(k,j)=RMEDIVALF(k)
 C
-            if(l.eq.1) RBINSSIGF2(k,j)=RMEDIVAL2
-            if(l.eq.2) RBINSSIGP2(k,j)=RMEDIVAL2
-            if(l.eq.3) RBINSSIGPF2(k,j)=RMEDIVAL2
-            if(l.eq.4) RBINSFOM2(k,j)=RMEDIVAL3
+            if(l.eq.1) RBINSSIGF2(k,j)=RMEDIVAL2F(k)
+            if(l.eq.2) RBINSSIGP2(k,j)=RMEDIVAL2F(k)
+            if(l.eq.3) RBINSSIGPF2(k,j)=RMEDIVAL2F(k)
+            if(l.eq.4) RBINSFOM2(k,j)=RMEDIVAL3F(k)
           enddo
         enddo
       enddo
@@ -385,7 +440,7 @@ C----------------------------------------------------------------------
 C-----Find average FOM curve
 C----------------------------------------------------------------------
 C
-      write(*,'('': Calculating average FOM curves'')')
+      write(*,'('' Calculating average FOM curves'')')
 C
       do i = 1,icount
 C-------For all types of resolutions (3D, horizontal, vertical):
@@ -417,101 +472,102 @@ C----------------------------------------------------------------------
 C
       if(IOPTION.ne.1)then
 C
-        write(*,'('': Calculating Phase Residual curves'')')
+        write(*,'('' Calculating Average Amplitude'')')
 C
         open(9,FILE=CNAME3,STATUS='OLD',ERR=980)
 C
         k = 0
+        RAMPSUM = 0.0
  121    continue
           k=k+1
           read(9,*,END=122,ERR=970)IH,IK,RZ,RAMP,RPHA,RSIGF,RSIGP,IQ
-          ifound = 0
-          do i = 1,icount
-            if(ifound.eq.0)then
-              IHD = abs(IHFIELD(i)-IH)
-              IKD = abs(IKFIELD(i)-IK)
-              RZD = abs(RZFIELD(i)-RZ)*ALAT
-              if(IHD.lt.1 .and. IKD.lt.1 .and. RZD.lt.1.0)then
-                ifound=1
-                INFIELD(i)=INFIELD(i)+1
-              endif
-            endif
-          enddo
+          RAMPSUM = RAMPSUM + RAMP
           goto 121
  122    continue
-C
+        RAMPSUM = RAMPSUM / k
         rewind(9)
 C
+        R1 = 1.0 / RAMPAVE
+        R2 = 1.0 / RAMPSUM
+C
+        write(*,'('' Calculating Phase Residual curves'')')
         k = 0
         l = 0
- 123    continue
-C
-C-------Read raw APH value:
+ 131    continue
           k=k+1
-          read(9,*,END=125,ERR=970)IH,IK,RZ,RAMP,RPHA,RSIGF,RSIGP,IQ
+          read(9,*,END=132,ERR=970)IH,IK,RZ,RAMP,RPHA,RSIGF,RSIGP,IQ
+          i = IPOINT(IH,IK,int(RZ*ALAT))
+          if(i.gt.0)then
+C            RPHA = RPHA + 180.0 * ( IH + IK )
+ 133        continue
+            if ( RPHA.gt.360.0 ) then
+              RPHA = RPHA - 360.0
+              goto 133
+            endif               
+            RDIFF = abs(RPHAFIELD(i)-RPHA)
+            if(RDIFF.gt. 360.0)RDIFF=abs(RDIFF-360.0)
+            if(RDIFF.gt. 360.0)RDIFF=abs(RDIFF-360.0)
+            if(RDIFF.gt. 180.0)RDIFF=360.0-RDIFF
+            RAVAM = (abs(RAMPFIELD(i)*R1)+abs(RAMP*R2))/2.0
+C            RAVAM = abs(RAMPFIELD(i)/RAMPAVE)
+            RWGT  = RSIGP*REDUCAC
+            if(RWGT.lt. 0.0)RWGT= 0.0
+            if(RWGT.gt.90.0)RWGT=90.0
+            RWGT  = cos(DRAD*RWGT)
 C
-C-------Calculate phase difference to average phase value from latfitted.hkl:
-C
-C          read(1,*,END=200,ERR=970)IHFIELD(i),IKFIELD(i),ILFIELD(i),
-C     .       RAMPFIELD(i),RPHAFIELD(i),RFOM(i)
-C
-          ifound = 0
-          do i = 1,icount
-            if(ifound.eq.0)then
-              IHD = abs(IHFIELD(i)-IH)
-              IKD = abs(IKFIELD(i)-IK)
-              RZD = abs(RZFIELD(i)-RZ)*ALAT
-              if(IHD.lt.1 .and. IKD.lt.1 .and. RZD.lt.1.0)then
-                ifound=1
-                RDIFF = abs(RPHAFIELD(i)-RPHA)
-                if(RDIFF.gt. 360.0)RDIFF=abs(RDIFF-360.0)
-                if(RDIFF.gt. 360.0)RDIFF=abs(RDIFF-360.0)
-                if(RDIFF.gt. 180.0)RDIFF=360.0-RDIFF
-C                RAVAM = (abs(RAMPFIELD(i)/RAMPAVE)+abs(RAMP))/2.0
-                RAVAM = abs(RAMPFIELD(i)/RAMPAVE)
-                RWGT  = RSIGP*REDUCAC
-                if(RWGT.lt. 0.0)RWGT= 0.0
-                if(RWGT.gt.90.0)RWGT=90.0
-                RWGT  = cos(DRAD*RWGT)
-C---    ------For all types of resolutions (3D, horizontal, vertical):
-                do j = 1,3
-                  if(j.eq.1) ibin=INT(REAL(IMAXBINS)*RecRESVAL(i)/RecRESMAX+0.5)
-                  if(j.eq.2) ibin=INT(REAL(IMAXBINS)*RecRESHORI(i)/RecRESMAX+0.5)
-                  if(j.eq.3) ibin=INT(REAL(IMAXBINS)*RecRESVERT(i)/RecRESMAX+0.5)
-                  if(ibin.lt.0       )ibin=0
-                  if(ibin.gt.IMAXBINS)ibin=IMAXBINS
-                  if(INFIELD(i).gt.0)then
-                    RBINSFOM4(ibin,j)=RBINSFOM4(ibin,j) + RDIFF*RDIFF*RAVAM*RWGT/INFIELD(i)
-                    RBINSFOM5(ibin,j)=RBINSFOM5(ibin,j) + RAVAM*RWGT
-                  endif
-                  if(j.eq.0)then
-                    write(6,'(''i,K,K,Z,Zo,RDIFF,RAVAM,RWGT,2xPhases '',
-     .                I9,2I4,5F12.3,'' ==> '',2F12.3)')
-     .                i,IH,IK,RZ*ALAT,RZFIELD(i)*ALAT,RDIFF,RAVAM,RWGT,RPHAFIELD(i),RPHA
-                  endif
-                enddo
-              endif
-            endif
-          enddo
-          if(ifound.eq.0)then
+            RPHARESSUM(i)=RPHARESSUM(i) + RDIFF*RDIFF*RAVAM*RWGT
+            RPHARESDIV(i)=RPHARESDIV(i) +             RAVAM*RWGT
+C            write(6,'('' H,K,Z, Pha1F,Pha2, RDIFF = '',2I8,4F15.3)')
+C     .        IH,IK,RZ,RPHAFIELD(i),RPHA,RDIFF
+          else
             l = l + 1
-C            write(6,'(''WARNING: Reflection not found in average: '',
-C     .         2I6,5F12.3,I3)')IH,IK,RZ,RAMP,RPHA,RSIGF,RSIGP,IQ
           endif
-          goto 123
- 125    continue
-        write(*,'(''Read      '',I8,'' reflections for raw data for '',
+          goto 131
+ 132    continue
+C
+        write(*,'('' Read      '',I8,'' reflections for raw data for '',
      .     ''DPR calculation.'')')k
-        write(*,'(''Of these, '',I8,'' reflections were not found '',
+        write(*,'('' Of these, '',I8,'' reflections were not found '',
      .     ''in perged reference dataset.'')')l
 C
-        CLOSE(9)
+        do i = 1,icount
+          if(RPHARESDIV(i).gt.0.0001)then
+            RPHARESSUM(i)=SQRT(RPHARESSUM(i)/RPHARESDIV(i))
+          else
+            RPHARESSUM(i)=0.0
+          endif
+        enddo
+C
+        close(9)
+C
+C!$OMP PARALLEL DO PRIVATE (j,ibin,k)
+        do i = 1,icount
+C---------For all types of resolutions (3D, horizontal, vertical):
+          do j = 1,3
+            if(j.eq.1) ibin=INT(REAL(IMAXBINS)*RecRESVAL(i)/RecRESMAX+0.5)
+            if(j.eq.2) ibin=INT(REAL(IMAXBINS)*RecRESHORI(i)/RecRESMAX+0.5)
+            if(j.eq.3) ibin=INT(REAL(IMAXBINS)*RecRESVERT(i)/RecRESMAX+0.5)
+            if(ibin.lt.0       )ibin=0
+            if(ibin.gt.IMAXBINS)ibin=IMAXBINS
+            if(RPHARESSUM(i).gt.0.001)then
+              RBINSFOM4(ibin,j)=RBINSFOM4(ibin,j) + RPHARESSUM(i)
+              RBINSFOM5(ibin,j)=RBINSFOM5(ibin,j) + 1.0
+            endif
+          enddo
+C          if(RPHARESSUM(i).gt.0.001)then
+C            write(6,'(2I8,'' RPHARES = '',3F15.3)')k,ibin,RPHARESSUM(i),RBINSFOM4(ibin,1),RBINSFOM5(ibin,1)
+C          endif
+        enddo
+C!$OMP END PARALLEL DO
 C
 C----  -Prepare all values in the bins:
         do k = 0,IMAXBINS
           do j = 1,3
             if(RBINSFOM5(k,j).gt.0.001)then
-              RBINSFOM4(k,j)=SQRT(RBINSFOM4(k,j)/RBINSFOM5(k,j))
+              RBINSFOM4(k,j)=RBINSFOM4(k,j)/RBINSFOM5(k,j)
+C              if(j.eq.1)then
+C                write(6,'(I8,'' nom,div = '',2F15.3)')k,RBINSFOM4(k,j),RBINSFOM5(k,j)
+C              endif
             else
               RBINSFOM4(k,j)=1000.0
             endif
@@ -659,8 +715,8 @@ C
       INTEGER IHISTBINS
       INTEGER IMAXBINS
 C
-      PARAMETER (IHISTBINS = 1000)
       PARAMETER (IMAX = 1000000)
+      PARAMETER (IHISTBINS = 100)
 C
       REAL PLTSIZ
 C
@@ -827,11 +883,11 @@ C
       elseif (IRUN.eq.17)then
         write(CTITLE,'(''FSC over vertical resolution '')')
       elseif (IRUN.eq.18)then
-        write(CTITLE,'(''DPR/SQRT(N) in 3D Fourier space '')')
+        write(CTITLE,'(''DPR in 3D Fourier space '')')
       elseif (IRUN.eq.19)then
-        write(CTITLE,'(''DPR/SQRT(N) over horizontal resolution '')')
+        write(CTITLE,'(''DPR over horizontal resolution '')')
       elseif (IRUN.eq.20)then
-        write(CTITLE,'(''DPR/SQRT(N) over vertical resolution '')')
+        write(CTITLE,'(''DPR over vertical resolution '')')
       endif
 C
 C      write(cline,'(I2,'': '',A)')IRUN,CTITLE
@@ -959,8 +1015,7 @@ C
           call shorten(TMPTEXT,k)
           CALL P2K_CSTRING(TEXT,k,0.)
         enddo
-      elseif((IRUN.ge. 7 .and. IRUN.le.12) .or. 
-     .       (IRUN.ge.18 .and. IRUN.le.20)      )then
+      elseif(IRUN.ge. 7 .and. IRUN.le.12)then
         do i=0,9 
           X=RORIX-RLEN
           Y=RORIY+REAL(i)*RLENY/9.0
@@ -1007,16 +1062,47 @@ C
             CALL P2K_CSTRING(TEXT,k,0.)
           endif
         enddo
+      elseif(IRUN.ge.18 .and. IRUN.le.20)then
+        do i=0,18
+          X=RORIX-RLEN
+          Y=RORIY+REAL(i)*RLENY/18.0
+          CALL P2K_MOVE(X,Y,0.)
+          X=RORIX+RLEN-2.
+          CALL P2K_DRAW(X,Y,0.)
+          X=RORIX-RLEN-PLTSIZ/40.
+          Y=Y-2.
+          CALL P2K_MOVE(X,Y,0.)
+          WRITE(TMPTEXT,'(I4)')i*10
+          call shorten(TMPTEXT,k)
+          CALL P2K_CSTRING(TEXT,k,0.)
+        enddo
+        X=RORIX
+        Y=RORIY+45.0*RLENY/180.0
+        CALL P2K_MOVE(X,Y,0.)
+        X=RORIX+RLENX
+        CALL P2K_DRAW(X,Y,0.)
+        X=RORIX
+        Y=RORIY+60.0*RLENY/180.0
+        CALL P2K_MOVE(X,Y,0.)
+        X=RORIX+RLENX
+        CALL P2K_DRAW(X,Y,0.)
+        X=RORIX
+        Y=RORIY+90.0*RLENY/180.0
+        CALL P2K_MOVE(X,Y,0.)
+        X=RORIX+RLENX
+        CALL P2K_DRAW(X,Y,0.)
+        X=RORIX
+        Y=RORIY+180.0*RLENY/180.0
+        CALL P2K_MOVE(X,Y,0.)
+        X=RORIX+RLENX
+        CALL P2K_DRAW(X,Y,0.)
+
       endif
 C
       X=RORIX+5.0
       Y=RORIY+RLENY+12.
       if(IRUN.ge.1 .and. IRUN.le.3)then
         WRITE(CTITLE,'(''FOM [%]'')')
-      elseif(IRUN.ge.15 .and. IRUN.le.17)then
-        WRITE(CTITLE,'(''FSC'')')
-      elseif(IRUN.ge.18 .and. IRUN.le.20)then
-        WRITE(CTITLE,'(''DPR [deg]'')')
       elseif(IRUN.ge.4 .and. IRUN.le.6)then
         WRITE(CTITLE,'(''SigAMP / AMP'')')
       elseif(IRUN.ge.7 .and. IRUN.le.9)then
@@ -1027,6 +1113,10 @@ C
       elseif(IRUN.ge.13 .and. IRUN.le.14)then
         WRITE(CTITLE,'(''Vertical Resolution [A]'')')
         X=X+20.0
+      elseif(IRUN.ge.15 .and. IRUN.le.17)then
+        WRITE(CTITLE,'(''FSC'')')
+      elseif(IRUN.ge.18 .and. IRUN.le.20)then
+        WRITE(CTITLE,'(''DPR [deg]'')')
       endif
       CALL P2K_MOVE(X,Y,0)
       call shorten(CTITLE,k)
@@ -1309,11 +1399,11 @@ C
           elseif(IRUN.eq.17)then
             Y=RORIY+RBINSFOM3(i,3)**2 * RLENY
           elseif(IRUN.eq.18)then
-            Y=RORIY+RBINSFOM4(i,1)*RLENY/90.0
+            Y=RORIY+RBINSFOM4(i,1)*RLENY/180.0
           elseif(IRUN.eq.19)then
-            Y=RORIY+RBINSFOM4(i,2)*RLENY/90.0
+            Y=RORIY+RBINSFOM4(i,2)*RLENY/180.0
           elseif(IRUN.eq.20)then
-            Y=RORIY+RBINSFOM4(i,3)*RLENY/90.0
+            Y=RORIY+RBINSFOM4(i,3)*RLENY/180.0
           endif
 C
           if(Y.gt.RORIY-0.01 .and. Y.le.RORIY+RLENY+0.01)then

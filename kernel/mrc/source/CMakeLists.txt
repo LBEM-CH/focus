@@ -68,6 +68,10 @@ else (Fortran_COMPILER_NAME STREQUAL "gfortran")
   	set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
 endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
 
+message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
+message ("compiler options in source: " ${CMAKE_Fortran_FLAGS_RELEASE})
+
+
 ################################################################################
 # C Compiler -------------------------------------------------------------------
 #add_definitions(-DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -c)

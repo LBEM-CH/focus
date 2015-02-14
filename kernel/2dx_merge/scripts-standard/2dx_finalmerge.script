@@ -286,7 +286,8 @@ if ( 1 == 2 ) then
   echo "cellz = ${ALAT}" 
   #
   echo "# IMAGE: APH/latlines.dat <HKL: APH/latlines.dat>" >> LOGS/${scriptname}.results
-  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel} ${RESMAX}
+  set sample_pixel_local = 1.0
+  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel_local} ${RESMAX}
   #
   mv -f output.hkl APH/latfitted.hkl
   #
@@ -297,6 +298,8 @@ if ( 1 == 2 ) then
   echo "# IMAGE: APH/latfitted.hkl <Lattice line data raw  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
   echo "# IMAGE: APH/latfitted_limit.hkl <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
   \rm -f PLOTCUR.PS
+  #
+  setenv NCPUS ${Thread_Number}
   #
   ${bin_2dx}/2dx_plotresolution.exe << eot
 2

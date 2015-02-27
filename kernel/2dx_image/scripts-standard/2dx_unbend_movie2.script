@@ -298,7 +298,7 @@ endif
 #
 set iname = image_ctfcor
 #
-set PROFDATA = ${iname}_profile.dat
+set PROFDATA = ${nonmaskimagename}_profile.dat
 if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif
@@ -499,7 +499,7 @@ endif
 echo "<<@progress: 15>>"
 #
 setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
-setenv PROFDATA ${iname}_profile.dat
+setenv PROFDATA ${nonmaskimagename}_profile.dat
 setenv ERRORS   SCRATCH/errout${iname}.dat
 setenv ERROUT   SCRATCH/errout2${iname}.dat
 #

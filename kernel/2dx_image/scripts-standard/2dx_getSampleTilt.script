@@ -139,6 +139,7 @@ eot
     ${proc_2dx}/lin "="
     cat 2dx_tiltgeom2.out
     source 2dx_tiltgeom2.out
+    \rm -f 2dx_tiltgeom2.out
     ${proc_2dx}/lin "="
     #
   else

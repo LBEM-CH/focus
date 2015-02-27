@@ -195,7 +195,7 @@ if ( ${merge_data_type} == '9' ) then
   endif
 endif
 #
-${bin_2dx}/2dx_merge_compileAM.exe << eot
+${bin_2dx}/2dx_merge_compileA.exe << eot
 LOGS/${scriptname}.results
 ${proc_2dx}
 ${bin_2dx}

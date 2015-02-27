@@ -528,7 +528,6 @@ eot
             ${proc_2dx}/lin "CCUNBEND - Unbend the frame average"
             ###########################################################################
             setenv CCORDATA ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
-            # setenv CCORDATA image_ctfcor_profile.dat
             setenv TABLEOUT ${frame_folder}/frame_${i}/SCRATCH/ccunbend-table-m${nonmaskimagename}.dat
             set ITYPE = 0
             set ROFFSET = 50.0
@@ -551,7 +550,7 @@ eot
               ${bin_2dx}/2dx_mark_spots.exe << eot
 ${CCmap}
 ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_marked.mrc
-${iname}_profile.dat
+${nonmaskimagename}_profile.dat
 2
 eot
               echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_marked.mrc <CCmap, marked, frame ${i}>" >> LOGS/${scriptname}.results 

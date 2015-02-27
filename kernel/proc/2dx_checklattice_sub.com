@@ -35,6 +35,8 @@ set alpha    = `head -n 6 ${docfile} | tail -n 1`
 set tilted   = `head -n 8 ${docfile} | tail -n 1`
 set realtlt  = `head -n 10 ${docfile} | tail -n 1`
 #
+\rm -f ${docfile}
+#
 set reallatu = `echo ${realtlt} | cut -d\  -f1`
 set reallatv = `echo ${realtlt} | cut -d\  -f2`
 set locrealcell = `echo ${reallatu},${reallatv}`

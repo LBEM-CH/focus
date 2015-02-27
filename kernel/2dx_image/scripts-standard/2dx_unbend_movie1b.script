@@ -361,7 +361,7 @@ if ( ! -e ${iname}.mrc ) then
   ${proc_2dx}/protest "ERROR:  ${iname}.mrc missing. First run script Correct CTF on tiles"
 endif
 
-set PROFDATA = ${iname}_profile.dat
+set PROFDATA = ${nonmaskimagename}_profile.dat
 if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif
@@ -456,7 +456,6 @@ eot
        ${proc_2dx}/linblock "CCUNBEND - Unbend CCmap for frame ${i}"
        ###########################################################################
        setenv CCORDATA ${frames_dir}/PROFDATA_${i}.dat
-       # setenv CCORDATA ${iname}_profile.dat
        setenv TABLEOUT ${frames_dir}/CCUNBEND_Table_${i}.dat
        \rm -f ${frames_dir}/CCUNBEND_Table_${i}.dat
        \rm -f CCPLOT.PS
@@ -566,7 +565,7 @@ if ( ${show_frame_CCmap_unbent} == "y" ) then
   ${bin_2dx}/2dx_mark_spots.exe << eot
 ${frames_dir}/CCmap_driftCorrected.mrc
 ${frames_dir}/CCmap_driftCorrected_marked.mrc
-${iname}_profile.dat
+${nonmaskimagename}_profile.dat
 2
 eot
   echo "# IMAGE: ${frames_dir}/CCmap_driftCorrected_marked.mrc <CCmap drift-corrected, marked>" >> LOGS/${scriptname}.results 

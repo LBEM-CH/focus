@@ -198,7 +198,7 @@ eot
 set refnamecore = "REF${imagenumber}"
 set refhklfile = "APH/${refnamecore}.hkl"
 set refmtzfile = "APH/${refnamecore}_MRClefthanded.mtz"
-set refmap = "${imagename}_ref.mrc"
+set refmap = "${nonmaskimagename}_ref.mrc"
 #
 \rm -f ${refmtzfile}
 \rm -f ${refmap}

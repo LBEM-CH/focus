@@ -22,7 +22,7 @@
 #
 # REMARK: The following section defines variables that will be displayed in the GUI:
 #
-# LABEL: Show HKL files?
+# LABEL: Show APH files?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
 # EXAMPLE: show_hkl = "y"
 # HELP: http://2dx.org/documentation/2dx-software/parameters
@@ -91,6 +91,7 @@ set mapscale = ""
 set unitcellnumber = ""
 set SYN_Unbending = ""
 set imagename = ""
+set nonmaskimagename = ""
 set imagenumber = ""
 set imagesidelength = ""
 set tempkeep = ""
@@ -215,7 +216,9 @@ if ( ! -e ${aphfile} ) then
   endif
 endif
 #
-echo "# IMAGE: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+if ( ${show_hkl}x == "yx" ) then
+  echo "# IMAGE: ${aphfile} <APH: Input Unbending Amp&Phase File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+endif
 echo "# IMAGE: PS/${iname}-quadserch2b.ps <PS: Vector Plot of distortions 2>" >> LOGS/${scriptname}.results
 echo "# IMAGE: PS/${iname}_ctf.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
 #
@@ -241,7 +244,9 @@ if ( -e ${aphfile} ) then
     echo ":: "
     ${proc_2dx}/linblock "Generating map from U2-Syn unbending"
     echo ":: "
-    echo "# IMAGE: ${aphfile} <APH: Amp&Phase from U2-Syn unbending>" >> LOGS/${scriptname}.results
+    if ( ${show_hkl}x == "yx" ) then
+      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from U2-Syn unbending>" >> LOGS/${scriptname}.results
+    endif
     set prefix = "U2-Syn_"
     set prename = "U2-Syn "
     #
@@ -264,7 +269,9 @@ if ( -e ${aphfile} ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "
-  echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  if ( ${show_hkl}x == "yx" ) then
+    echo "# IMAGE: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
+  endif
   set prefix = "ML_"
   set prename = "ML "
   #
@@ -283,7 +290,9 @@ if ( -e ${aphfile} ) then
     echo ":: "
     ${proc_2dx}/linblock "Generating map from MovieA processing"
     echo ":: "
-    echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieA processing>" >> LOGS/${scriptname}.results
+    if ( ${show_hkl}x == "yx" ) then
+      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieA processing>" >> LOGS/${scriptname}.results
+    endif
     set prefix = "movie_"
     set prename = "MovieA "
     #
@@ -304,7 +313,9 @@ if ( -e ${aphfile} ) then
       echo ":: "
       ${proc_2dx}/linblock "Generating map from MovieA U2-Syn processing"
       echo ":: "
-      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieA U2-Syn processing>" >> LOGS/${scriptname}.results
+      if ( ${show_hkl}x == "yx" ) then
+        echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieA U2-Syn processing>" >> LOGS/${scriptname}.results
+      endif
       set prefix = "movie_syn_"
       set prename = "MA_Syn "
       #
@@ -325,7 +336,9 @@ if ( -e ${aphfile} ) then
     echo ":: "
     ${proc_2dx}/linblock "Generating map from MovieB processing"
     echo ":: "
-    echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieB processing>" >> LOGS/${scriptname}.results
+    if ( ${show_hkl}x == "yx" ) then
+      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieB processing>" >> LOGS/${scriptname}.results
+    endif 
     set prefix = "movieB_"
     set prename = "MovieB "
     #
@@ -346,7 +359,9 @@ if ( -e ${aphfile} ) then
       echo ":: "
       ${proc_2dx}/linblock "Generating map from MovieB U2-Syn processing"
       echo ":: "
-      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieB U2-Syn processing>" >> LOGS/${scriptname}.results
+      if ( ${show_hkl}x == "yx" ) then
+        echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieB U2-Syn processing>" >> LOGS/${scriptname}.results
+      endif
       set prefix = "movieB_syn_"
       set prename = "MB_Syn "
       #
@@ -361,7 +376,13 @@ else
 endif
 #
 echo ":: "
-echo "# IMAGE: ${imagename}_ref.mrc <Reference 3D Map Projection>"  >> LOGS/${scriptname}.results
+#
+if ( ! -e ${nonmaskimagename}_ref.mrc ) then
+  if ( -e ${imagename}_ref.mrc ) then
+    \mv -f ${imagename}_ref.mrc ${nonmaskimagename}_ref.mrc 
+  endif
+endif
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_ref.mrc <Projected Reference>"  >> LOGS/${scriptname}.results
 #
 #############################################################################
 #############################################################################

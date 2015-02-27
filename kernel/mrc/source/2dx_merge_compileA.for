@@ -18,6 +18,7 @@ C
       character*200 CFILEreflections,CFILEconsole
       character*1 CNREFOUT,CNSHFTIN
       integer*8 imnum(10000)
+      logical lexist
 C
       write(*,'('':2dx_merge_compileA - '',
      .    ''compiling the merging script'')')
@@ -113,20 +114,8 @@ C
       write(*,'(F12.3)')RGRESMAX
 C
       write(*,'(/,''input merge_data_type switch'')')
-      read(*,*)IMERGEML
-      if(IMERGEML.eq.0)then
-        write(*,'(I1,'' = Using Fourier filtered results with'',
-     .    '' later CTF correction '')')IMERGEML
-      else if(IMERGEML.eq.1)then
-        write(*,'(I1,'' = Using CTF-corrected and then Fourier'',
-     .    '' filtered results '')')IMERGEML
-      else if(IMERGEML.eq.2)then
-        write(*,'(I1,'' = Using CTF-corrected and then Movie-ModeA'',
-     .    '' unbent results '')')IMERGEML
-      else
-        write(*,'(I1,'' = Using Maximum Likelihood results '',
-     .           ''where allowed'')')IMERGEML
-      endif
+      read(*,*)IMERGEDAT
+      write(*,'(I3)')IMERGEDAT
 C
       write(*,'(/,''input Thread Number'')')
       read(*,*)ITHREAD
@@ -246,8 +235,6 @@ C
         write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)
         write(*,'(''opening '',A)')cname3
 C
-        call system("pwd")
-C
         open(12,FILE=cname3,STATUS='OLD',ERR=910)
 C
         call cgetline(CIMAGENAME,"imagename")
@@ -287,15 +274,6 @@ C
           write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
         endif
 C
-        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
-          call cgetline(CPHORI,"phaori")
-          read(CPHORI,*)RPHAORIH,RPHAORIK
-          write(*,'(''   using Fourier filtered results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
-        else
-          RPHAORIH=0.0
-          RPHAORIK=0.0
-          write(*,'(''   using Single Particle  results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
-        endif
         call rgetline(RZWIN,"zstarwin")
         if(imcount.eq.1)then
 C---------First film is used as is, without rescaling
@@ -310,49 +288,97 @@ C---------RSCL=0.0 means scaling is automatic for following datasets
         call igetline(ICTFREV,"ctfrev")
         call igetline(IREVHND,"revhnd")
         call igetline(IREVXSGN,"revxsgn")
+        call shorten(CTITLE,k)
+C
+        if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+          RPHAORIH=0.0
+          RPHAORIK=0.0
+        else
+          call cgetline(CPHORI,"phaori")
+          read(CPHORI,*)RPHAORIH,RPHAORIK
+        endif
+C
         close(12)
 C
-        call shorten(CTITLE,k)
-        k1=1
-        if(k.gt.40)k1=41-k
-        write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(k1:k)
-        call shorten(cdir,k1)
-        call shortshrink(CIMAGENAME,k2)
-C
-        if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
-          write(cname4,'(A,''/APH/'',A,''_ctf.aph'')')
-     .      cdir(1:k1),CIMAGENAME(1:k2)
+C-------Loop over potentially all three unbending forms:
+        if (IMERGEDAT.eq.9) then
+          ilooend = 6
         else
-          write(cname4,'(A,''/APH/ML_result.aph'')')
-     .      cdir(1:k1)
+          ilooend = 1
         endif
-        call shortshrink(cname4,k1)
-         write(11,'(A)')cname4(1:k1)
+        do iloo = 1,ilooend
 C
-        write(11,'(''  F'')')
-        write(11,'(2F12.3,'' 0'',40X,''! TAXA,TANGL,IORIGT'')')
-     .     RTAXA,RTANGL
+          call shorten(cdir,k1)
+          call shortshrink(CIMAGENAME,k2)
 C
-        call shortshrink(CLATTICE,k)
-        write(11,'(A40,26X,''! lattice'')')
-     .     CLATTICE(1:k)
+          if(IMERGEDAT.ne.9)then
+            if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+              write(cname4,'(A,''/APH/ML_result.aph'')')
+     .          cdir(1:k1)
+            else
+              write(cname4,'(A,''/APH/image_ctfcor_ctf.aph'')')
+     .          cdir(1:k1)
+            endif
+            call shortshrink(cname4,k4)
+            lexist=.true.
+          else
+            if(iloo.eq.1)then
+              write(cname4,'(A,
+     .         ''/APH/image_ctfcor_fou_unbent_ctf.aph'')')cdir(1:k1)
+            elseif(iloo.eq.2)then
+              write(cname4,'(A,
+     .          ''/APH/image_ctfcor_U2-Syn_ctf.aph'')')cdir(1:k1)
+            elseif(iloo.eq.3)then
+              write(cname4,'(A,
+     .          ''/APH/image_ctfcor_movie_fou_ctf.aph'')')cdir(1:k1)
+            elseif(iloo.eq.4)then
+              write(cname4,'(A,
+     .          ''/APH/image_ctfcor_movie_syn_ctf.aph'')')cdir(1:k1)
+            elseif(iloo.eq.6)then
+              write(cname4,'(A,
+     .          ''/APH/image_ctfcor_movieB_fou_ctf.aph'')')cdir(1:k1)
+            elseif(iloo.eq.7)then
+              write(cname4,'(A,
+     .          ''/APH/image_ctfcor_movieB_syn_ctf.aph'')')cdir(1:k1)
+            endif
+            call shortshrink(cname4,k4)
+            inquire(file=cname4(1:k4),exist=lexist)
+          endif
+          if(.not.lexist)then
+            write(6,'('':File not found: '',A)')cname4(1:k4)
+          else
+            call shorten(CTITLE,k)
+            k1=1
+            if(k.gt.40)k1=41-k
 C
-        write(11,'(2F10.3,'' 0.0 '',F10.3,'' 0 '',F9.5,6I2,
-     .     '',${LPROTFOUFIL} '',
-     .     '' ! OH,OK,STEP,WIN,SGNXCH,SCL,R180,RHK,'',
-     .      ''CTFREV,ROT90,REVHND,REVSGN,LPROTFOUFIL'')')
-     .     RPHAORIH,RPHAORIK,RZWIN,RSCL,IROT180,IREVHK,ICTFREV,IROT90,
-     .    IREVHND,IREVXSGN
+            write(11,'(A10,A40)')CIMAGENUMBER(1:10),CTITLE(k1:k)
+            write(11,'(A)')cname4(1:k4)
 C
-        write(11,'(4F12.3,''                  ! cs,kv,tx,ty'')')
-     .    RCS,RKV,RTX,RTY
-        if(ISRESMAX.eq.0)then
-          write(11,'(2F12.3,42X,''! resolution limits'')')
-     .      RGRESMIN,RGRESMAX
-        else
-          write(11,'(2F12.3,42X,''! resolution limits'')')
-     .      RESMIN,RESMAX
-        endif
+            write(11,'(''  F'')')
+            write(11,'(2F12.3,'' 0'',40X,''! TAXA,TANGL,IORIGT'')')
+     .         RTAXA,RTANGL
+C
+            call shortshrink(CLATTICE,k)
+            write(11,'(A40,26X,''! lattice'')')CLATTICE(1:k)
+C
+            write(11,'(2F10.3,'' 0.0 '',F10.3,'' 0 '',F9.5,6I2,
+     .         '',${LPROTFOUFIL} ! OH,OK,STEP,WIN,SGNXCH,SCL,R180,RHK,'',
+     .          ''CTFREV,ROT90,REVHND,REVSGN,LPROTFOUFIL'')')
+     .         RPHAORIH,RPHAORIK,RZWIN,RSCL,IROT180,IREVHK,ICTFREV,IROT90,
+     .        IREVHND,IREVXSGN
+C
+            write(11,'(4F12.3,''                  ! cs,kv,tx,ty'')')
+     .        RCS,RKV,RTX,RTY
+            if(ISRESMAX.eq.0)then
+              write(11,'(2F12.3,42X,''! resolution limits'')')
+     .          RGRESMIN,RGRESMAX
+            else
+              write(11,'(2F12.3,42X,''! resolution limits'')')
+     .          RESMIN,RESMAX
+            endif
+          endif
+C
+        enddo
 C
         goto 100
 C

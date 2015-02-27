@@ -429,7 +429,7 @@ endif
 #
 echo "<<@progress: 5>>"
 #
-set PROFDATA = ${iname}_profile.dat
+set PROFDATA = ${nonmaskimagename}_profile.dat
 if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif

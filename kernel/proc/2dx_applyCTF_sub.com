@@ -11,7 +11,13 @@ endif
 echo ":: "
 echo ":: 2dx_applyCTF_sub.com : Working on ${algo} "
 echo ":: -------------------------------------"
-echo ":: Input file          = ${CTF_infile}"
+if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
+  if ( -e ${CTF_infile} ) then
+    echo ":: Input file          = ${CTF_infile}"
+  else
+    echo ":: Input file          = ${CTF_infile} (not found!!!)"
+  endif
+endif
 echo ":: Output file         = ${CTF_outfile}"
 echo ":: Unbent image        = ${unbent_image}"
 echo ":: Unbent image (FFT)  = ${unbent_FFT}"
@@ -41,6 +47,7 @@ if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "5" || ${local_ctf
   if ( ${local_ctfcor_imode} == "4" ) then
     if ( ! -e ${unbent_FFT} ) then
       ${proc_2dx}/linblock "WARNING: File not found: ${unbent_FFT}"
+      exit
     else
       #
       \rm -f ${CTF_outfile}
@@ -74,6 +81,7 @@ eot
     #
     if ( ! -e ${unbent_image}.mrc ) then
       ${proc_2dx}/linblock "WARNING: File not found: ${unbent_image}.mrc"
+      exit
     else
       #
       echo "# IMAGE: ${unbent_image}.mrc <Unbent Image>" >> LOGS/${scriptname}.results   

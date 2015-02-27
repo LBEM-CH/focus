@@ -39,28 +39,12 @@ pwd
 set date = `date`
 echo date = ${date}
 #
-if ( ! -e image_ctfcor_profile.dat ) then
-  if ( -e ${imagename}_profile.dat.gz ) then
-    #############################################################################
-    ${proc_2dx}/linblock "gunzip - to uncompress the profile"
-    ############################################################################# 
-    #
-    \cp -f ${imagename}_profile.dat.gz ${imagename}.tmp.gz
-    \rm -f ${imagename}.tmp
-    #
-    gunzip ${imagename}.tmp.gz
-    #
-    \cp -f ${imagename}.tmp image_ctfcor_profile.dat
-    \rm -f ${imagename}.tmp
-    #
-    echo "# IMAGE: image_ctfcor_profile.dat <TXT: UnitCell Particle Profile>" >> LOGS/${scriptname}.results
-    #
-  endif
-  if ( -e ${nonmaskimagename}_profile.dat ) then
-    \mv -f ${nonmaskimagename}_profile.dat image_ctfcor_profile.dat
+if ( ! -e ${nonmaskimagename}_profile.dat ) then
+  if ( -e image_ctfcor_profile.dat ) then
+    \mv -f image_ctfcor_profile.dat ${nonmaskimagename}_profile.dat
   endif 
-  if ( ! -e image_ctfcor_profile.dat ) then
-    ${proc_2dx}/linblock "image_ctfcor_profile.dat not existing."
+  if ( ! -e ${nonmaskimagename}_profile.dat ) then
+    ${proc_2dx}/linblock "${nonmaskimagename}_profile.dat not existing."
     ${proc_2dx}/protest "First run UNBEND II to create the PROFILE."
   endif
 endif

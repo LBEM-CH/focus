@@ -361,84 +361,27 @@ while ( ${dircounter} <= ${dirnum} )
         endif
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "1" ) then
-          if ( -e ${from_dirfile}/${loc_imagename}.raw.mrc ) then
-            if ( ! -e ${to_dirfile}/${loc_imagename}.raw.mrc ) then
-              echo ":New: ${to_dirfile}/${loc_imagename}.raw.mrc"
-              ${copy_command} ${from_dirfile}/${loc_imagename}.raw.mrc ${to_dirfile}
+#          if ( -e ${from_dirfile}/${loc_imagename}.raw.mrc ) then
+#            if ( ! -e ${to_dirfile}/${loc_imagename}.raw.mrc ) then
+#              echo ":New: ${to_dirfile}/${loc_imagename}.raw.mrc"
+#              ${copy_command} ${from_dirfile}/${loc_imagename}.raw.mrc ${to_dirfile}
+#            else
+#              echo ":Old: ${to_dirfile}/${loc_imagename}.raw.mrc"
+#            endif
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
+            if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.tif ) then
+              echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.tif"
+              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.tif ${to_dirfile}
             else
-              echo ":Old: ${to_dirfile}/${loc_imagename}.raw.mrc"
+              echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.tif"
             endif
-          else if ( -e ${from_dirfile}/${loc_imagename}.tif ) then
-            if ( ! -e ${to_dirfile}/${loc_imagename}.tif ) then
-              echo ":New: ${to_dirfile}/${loc_imagename}.tif"
-              ${copy_command} ${from_dirfile}/${loc_imagename}.tif ${to_dirfile}
-            else
-              echo ":Old: ${to_dirfile}/${loc_imagename}.tif"
-            endif
-          else
-            if ( -e ${from_dirfile}/${loc_imagename}.mrc ) then
-              if ( ! -e ${to_dirfile}/${loc_imagename}.mrc ) then
-                echo ":New: ${to_dirfile}/${loc_imagename}.mrc"
-                ${copy_command} ${from_dirfile}/${loc_imagename}.mrc ${to_dirfile}
-              else
-                echo ":Old: ${to_dirfile}/${loc_imagename}.mrc"
-              endif
-            endif
-          endif
-          if ( -e ${from_dirfile}/${loc_imagename}_stack.mrc ) then
-            if ( ! -e ${to_dirfile}/${loc_imagename}_stack.mrc ) then
-              echo ":New: ${to_dirfile}/${loc_imagename}_stack.mrc"
-              ${copy_command} ${from_dirfile}/${loc_imagename}_stack.mrc ${to_dirfile}
-            else
-              echo ":Old: ${to_dirfile}/${loc_imagename}_stack.mrc"
-            endif
-          endif
-        endif
-        #
-        if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
-          if ( -e ${from_dirfile}/${loc_imagename}.spt ) then
-            echo ":New: ${to_dirfile}/${loc_imagename}.spt"
-            ${copy_command} ${from_dirfile}/${loc_imagename}.spt ${to_dirfile}
-          endif
-          #
-          if ( -e ${from_dirfile}/${loc_imagename}_mask.mrc ) then
-            echo ":New: ${to_dirfile}/${loc_imagename}_mask.mrc"
-            ${copy_command} ${from_dirfile}/${loc_imagename}_mask.mrc ${to_dirfile}
-          endif
-          #
-          if ( -e ${from_dirfile}/${loc_imagename}_mask_mask.mrc ) then
-            echo ":New: ${to_dirfile}/${loc_imagename}_mask_mask.mrc"
-            ${copy_command} ${from_dirfile}/${loc_imagename}_mask_mask.mrc ${to_dirfile}
-          endif
-          #
-          if ( -e ${from_dirfile}/${loc_imagename}_MRClefthanded.mtz ) then
-            echo ":New: ${to_dirfile}/${loc_imagename}_MRClefthanded.mtz"
-            ${copy_command} ${from_dirfile}/${loc_imagename}_MRClefthanded.mtz ${to_dirfile}
-          endif
-        endif
-        #
-        if ( ${loc_imagename} != ${loc_nonmaskimagename} ) then
-          if ( ${backup_large_images} == "0" || ${backup_large_images} == "1" ) then
+          else 
             if ( -e ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
               if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
                 echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
                 ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ${to_dirfile}
               else
                 echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
-              endif
-            else if ( -e ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ) then
-              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
-                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
-                ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.raw.mrc ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc
-              else
-                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
-              endif
-            else if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
-              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.tif ) then
-                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.tif"
-                ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.tif ${to_dirfile}
-              else
-                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.tif"
               endif
             else
               if ( -e ${from_dirfile}/${loc_nonmaskimagename}.mrc ) then
@@ -450,27 +393,33 @@ while ( ${dircounter} <= ${dirnum} )
                 endif
               endif
             endif
-            if ( -e ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ) then
-              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc ) then
-                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc"
-                ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ${to_dirfile}
-              else
-                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc"
-              endif
+          endif
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ) then
+            if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc ) then
+              echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc"
+              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ${to_dirfile}
+            else
+              echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc"
             endif
+          endif
+        endif
+        #
+        if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}.spt ) then
+            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.spt"
+            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.spt ${to_dirfile}
           endif
           #
-          if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
-            if ( -e ${from_dirfile}/${loc_nonmaskimagename}.spt ) then
-              echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.spt"
-              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.spt ${to_dirfile}
-            endif
-            #
-            if ( -e ${from_dirfile}/${loc_nonmaskimagename}_MRClefthanded.mtz ) then
-              echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_MRClefthanded.mtz"
-              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_MRClefthanded.mtz ${to_dirfile}
-            endif
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_automask.mrc ) then
+            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_automask.mrc"
+            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_automask.mrc ${to_dirfile}
           endif
+          #
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_manualmask.mrc ) then
+            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_manualmask.mrc"
+            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_manualmask.mrc ${to_dirfile}
+          endif
+          #
         endif
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
@@ -479,19 +428,14 @@ while ( ${dircounter} <= ${dirnum} )
             ${copy_command} ${from_dirfile}/History.dat ${to_dirfile}
           endif
           #
-          if ( -e ${from_dirfile}/${loc_imagename}-profile.dat.gz ) then
-            echo ":New: ${to_dirfile}/${loc_imagename}-profile.dat.gz"
-            ${copy_command} ${from_dirfile}/${loc_imagename}-profile.dat.gz ${to_dirfile}
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_ctfcor-profile.dat ) then
+            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_ctfcor-profile.dat"
+            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_ctfcor-profile.dat ${to_dirfile}
           endif
           #
-          if ( -e ${from_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz ) then
-            echo ":New: ${to_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz"
-            ${copy_command} ${from_dirfile}/${loc_imagename}_ctfcor-profile.dat.gz ${to_dirfile}
-          endif
-          #
-          if ( -e ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ) then
-            echo ":New: ${to_dirfile}/${loc_imagename}-unitcells-spider.doc"
-            ${copy_command} ${from_dirfile}/${loc_imagename}-unitcells-spider.doc ${to_dirfile}
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ) then
+            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc"
+            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ${to_dirfile}
           endif
           #
           if ( ${also_APH} == "0" ) then

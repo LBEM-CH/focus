@@ -162,6 +162,10 @@ else
   set spotname = TMPspotlist.spt
 endif
 #
+if ( ${imagename} != ${nonmaskimagename} ) then
+  \rm -f ${imagename}.spt
+endif
+#
 echo "<<@progress: 20>>"
 #
 # Cutoff radius is:
@@ -319,6 +323,8 @@ echo "set UNBENDING_done = n" >> LOGS/${scriptname}.results
 echo "set ML_done = n" >> LOGS/${scriptname}.results
 echo "set CTF_done = n" >> LOGS/${scriptname}.results
 echo "set MERGING_done = n" >> LOGS/${scriptname}.results
+#
+\rm -f fort.3
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

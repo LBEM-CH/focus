@@ -545,7 +545,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
 ${refposix},${refposiy}         ! XORIG,YORIG
@@ -569,7 +569,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
 ${refposix},${refposiy}         ! XORIG,YORIG
@@ -593,7 +593,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
 ${refposix},${refposiy}         ! XORIG,YORIG
@@ -617,7 +617,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
 ${refposix},${refposiy}         ! XORIG,YORIG
@@ -641,7 +641,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
 ${refposix},${refposiy}         ! XORIG,YORIG
@@ -665,7 +665,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
 ${refposix},${refposiy}         ! XORIG,YORIG

@@ -250,15 +250,15 @@ foreach dirfile ( ${dirlist} )
   set imagename_local = `cat 2dx_image.cfg | grep 'set imagename =' | cut -d\" -f2`
   cd APH
   if ( ! -e ${imagename_local}_ctf.aph && ! -l ${imagename_local}_ctf.aph ) then
-    echo ":Working on ${imagename_local}: ${imagename_local}_ctf.aph does not exist. "
+    echo ":WARNING: ${imagename_local}_ctf.aph does not exist. "
     if ( -e ${imagename_local}.cor.aph ) then
       echo "::In ${dirfile}: Correcting ${imagename_local}.cor.aph to ${imagename_local}_ctf.aph" 
       \mv -f ${imagename_local}.cor.aph ${imagename_local}_fou_ctf.aph 
     else
-      echo "::Working on ${imagename_local}: ${imagename_local}.cor.aph does not exist. "
+      echo "::WARNING: ${imagename_local}.cor.aph does not exist. "
     endif
   else
-    echo "Working on ${imagename_local}: ${imagename_local}_ctf.aph exists. "
+    # echo "Working on ${imagename_local}: ${imagename_local}_ctf.aph exists. "
   endif
   cd ${olddir}
 end

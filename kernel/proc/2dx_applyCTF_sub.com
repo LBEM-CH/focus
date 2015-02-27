@@ -3,16 +3,22 @@
 # This is not an independent script.  This should rather be called from some other script.
 #
 #
+set local_ctfcor_imode = ${ctfcor_imode}
+if ( -e ${CTF_infile}_ctfcor_imode ) then
+  set local_ctfcor_imode = `cat ${CTF_infile}_ctfcor_imode`
+endif
 #
 echo ":: "
+echo ":: 2dx_applyCTF_sub.com : Working on ${algo} "
+echo ":: -------------------------------------"
 echo ":: Input file          = ${CTF_infile}"
 echo ":: Output file         = ${CTF_outfile}"
 echo ":: Unbent image        = ${unbent_image}"
 echo ":: Unbent image (FFT)  = ${unbent_FFT}"
-echo ":: CTF correction mode = ${ctfcor_imode}"
+echo ":: CTF correction mode = ${local_ctfcor_imode}"
 echo ":: "
 
-if ( ${ctfcor_imode} == "0" || ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" || ${ctfcor_imode} == "3" ) then
+if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
   ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction"
   setenv IN  ${CTF_infile}
   setenv OUT ${CTF_outfile}
@@ -21,18 +27,18 @@ if ( ${ctfcor_imode} == "0" || ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" 
   ${bin_2dx}/2dx_ctfapplyk.exe << eot
 ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
 ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${iname}, ${date}
+${imagenumber} ${imagename}, ${date}
 ${phacon}
 ${RESMIN},1.0
-${ctfcor_imode}  ! Define modus of CTF correction
+${local_ctfcor_imode}  ! Define modus of CTF correction
 eot
 endif
 
 
 
-if ( ${ctfcor_imode} == "4" || ${ctfcor_imode} == "5" || ${ctfcor_imode} == "6" || ${ctfcor_imode} == "7" ) then
+if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "5" || ${local_ctfcor_imode} == "6" || ${local_ctfcor_imode} == "7" ) then
   #
-  if ( ${ctfcor_imode} == "4" ) then
+  if ( ${local_ctfcor_imode} == "4" ) then
     if ( ! -e ${unbent_FFT} ) then
       ${proc_2dx}/linblock "WARNING: File not found: ${unbent_FFT}"
     else
@@ -43,7 +49,7 @@ if ( ${ctfcor_imode} == "4" || ${ctfcor_imode} == "5" || ${ctfcor_imode} == "6" 
       ${proc_2dx}/linblock "TTBOXA - to read out AMPs and PHASES with TTF-correction"
       ${bin_2dx}/2dx_ttboxk.exe << eot
 ${unbent_FFT}
-${imagenumber} CTFcor_Mode=${ctfcor_imode} (TTFcor), ${date}
+${imagenumber} CTFcor_Mode=${local_ctfcor_imode} (TTFcor), ${date}
 Y                        ! generate grid from lattice
 N                        ! generate points from lattice
 N                        ! list points as calculated
@@ -58,10 +64,10 @@ ${RESMIN},${RESMAX},${refposix},${refposiy},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
       #
-      echo "# IMAGE-IMPORTANT: ${CTF_outfile} <APH File after TTF correction [H,K,A,P,IQ,Back,0])>" >> LOGS/${scriptname}.results   
+      echo "# IMAGE: ${CTF_outfile} <APH File after TTF correction [H,K,A,P,IQ,Back,0])>" >> LOGS/${scriptname}.results   
       #
-      \mv -f TTPLOT.PS PS/${algo}_${iname}_ttplot_unbend2.ps
-      echo "# IMAGE-IMPORTANT: PS/${algo}_${iname}_ttplot_unbend2.ps <PS: IQ Plot ${algo} after TTF correction>" >> LOGS/${scriptname}.results 
+      \mv -f TTPLOT.PS PS/${algo}_${imagename}_ttplot_unbend2.ps
+      echo "# IMAGE-IMPORTANT: PS/${algo}_${imagename}_ttplot_unbend2.ps <PS: IQ Plot ${algo} after TTF correction>" >> LOGS/${scriptname}.results 
     endif
     #
   else
@@ -70,7 +76,7 @@ eot
       ${proc_2dx}/linblock "WARNING: File not found: ${unbent_image}.mrc"
     else
       #
-      echo "# IMAGE-IMPORTANT: ${unbent_image}.mrc <Unbent Image>" >> LOGS/${scriptname}.results   
+      echo "# IMAGE: ${unbent_image}.mrc <Unbent Image>" >> LOGS/${scriptname}.results   
       # 
       set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
       \rm -f ${ctfcor_ctffile}  
@@ -87,13 +93,13 @@ ${CS},${KV},${phacon},${magnification},${stepdigitizer}
 ${defocus}
 ${RESMAX}
 ${ctfcor_noise}
-${ctfcor_imode}
+${local_ctfcor_imode}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
       #
-      echo "# IMAGE-IMPORTANT: ${ctfcor_outfile} <Output Image CTF corrected>" >> LOGS/${scriptname}.results
-      if ( ${ctfcor_imode} == "2" ) then
+      echo "# IMAGE: ${ctfcor_outfile} <Output Image CTF corrected>" >> LOGS/${scriptname}.results
+      if ( ${local_ctfcor_imode} == "2" ) then
         echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
       else
         echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
@@ -268,7 +274,7 @@ if ( ! -e PLOTRES.PS ) then
   ${proc_2dx}/protest "ERROR: Problem in 2dx_plotreska."
 endif
 \mv -f PLOTRES.PS PS/2dx_plotreska_canonical.ps
-echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
+echo "# IMAGE: PS/2dx_plotreska_canonical.ps <PS: Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
 #
 # Plot as non-tilted projection 
 # 
@@ -287,24 +293,40 @@ if ( ! -e PLOTRES.PS ) then
   ${proc_2dx}/protest "ERROR: Problem in 2dx_plotreska."
 endif
 \mv -f PLOTRES.PS PS/2dx_plotreska_measured.ps
-echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_measured.ps <PS: Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
+echo "# IMAGE: PS/2dx_plotreska_measured.ps <PS: Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
 #
 #############################################################################
-#                                                                           #
 ${proc_2dx}/linblock "2dx_powerhisto - to prepare a histogram of the PS spot intensity"
-#                                                                           #
 #############################################################################
 #
-\rm -f SCRATCH/POWERHISTO.txt
+\rm -f SCRATCH/${algo}_POWERHISTO.txt
 #
 ${bin_2dx}/2dx_powerhisto.exe << eot
 ${CTF_outfile}
-SCRATCH/POWERHISTO.txt
+SCRATCH/${algo}_POWERHISTO.txt
 ${lattice}
 0.05
 eot
 #
-echo "# IMAGE: SCRATCH/POWERHISTO.txt <Histogram of Power in PS>" >> LOGS/${scriptname}.results
+#############################################################################
+${proc_2dx}/linblock "Producing output links"
+#############################################################################
 #
+echo "# IMAGE: SCRATCH/${algo}_POWERHISTO.txt <${nametag} Histogram of Power in PS>" >> LOGS/${scriptname}.results
 #
+echo "# IMAGE: ${CTF_infile} <${nametag} APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${CTF_outfile} <${nametag} APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+
+if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
+  \mv -f CTFPLOT.PS PS/${algo}_${imagename}_unbend2_ctf.ps
+  echo "# IMAGE-IMPORTANT: PS/${algo}_${imagename}_unbend2_ctf.ps <PS: ${nametag} IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+endif
+
+\mv -f PS/2dx_plotreska_canonical.ps PS/${algo}_2dx_plotreska_canonical.ps
+echo "# IMAGE: PS/${algo}_2dx_plotreska_canonical.ps <PS: ${nametag} Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
+
+\mv -f PS/2dx_plotreska_measured.ps PS/${algo}_2dx_plotreska_measured.ps
+echo "# IMAGE-IMPORTANT: PS/${algo}_2dx_plotreska_measured.ps <PS: ${nametag} Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
+
+
 

@@ -3,28 +3,26 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Synthetic Unbend (NOT RECOMMENDED)                                 #
+# Title: Synthetic Unbend (Be aware of reference bias!)                     #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 02/20/2006                                             #
-# Last Modification: 02/20/2006                                             #
+# Last Modification: 02/23/2015                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
 # MANUAL: This script will do the image unbending with a synthetically generated reference. 
 #
-# MANUAL: WE STRONGLY ADVISE AGAINST THIS, AS THIS WILL ONLY INTRODUCE REFERENCE BIAS, WHICH MAKES YOUR STATISTICS LOOK NICE, BUT PREVENTS AXESS TO HIGH-RESOLUTION DATA. PLEASE CONSULT WITH THE DEVELOPER TEAM IF YOU HAVE QUESTIONS.
+# MANUAL: WE STRONGLY ADVISE AGAINST THIS, AS THIS BEARS A STRONG RISK OF REFERENCE BIAS, WHICH MAKES YOUR STATISTICS LOOK NICE, BUT PREVENTS AXESS TO HIGH-RESOLUTION DATA. PLEASE CONSULT WITH THE DEVELOPER TEAM IF YOU HAVE QUESTIONS.
 #
 # MANUAL: You can only use this script, after the conventional image processing with lattice and defocus determination, and unbending with Unbending-I and Unbending-II has been done, and a phase origin for merging has been determined. Only then, the synthetical reference can be created with the correct defocus, tilt and phase origin.
 #
-# MANUAL: The reference should be the result of a merging process, and should be reachable for a 2D merge dataset under "../merge/merge2D.mtz" or "../../merge/merge2D.mtz" or for a 3D merge dataset under "../merge/merge3D.mtz" or "../../merge/merge3D.mtz".
-#
-# MANUAL: <B><i>This script is here provided in draft form, not yet fully tested. Please give us feedback about your user experiences with this script. We are working on improving the 2dx_merge program, which interacts with 2dx_image through this script. This part is still under development, and your experience and knowledge is most welcome for this project. </i></B>
+# MANUAL: The reference should be the result of a merging process, and should be reachable for a 2D merge dataset under "../merge/merge2D_MRClefthanded.mtz" or "../../merge/merge2D_MRClefthanded.mtz" or for a 3D merge dataset under "../merge/merge3D_MRClefthanded.mtz" or "../../merge/merge3D_MRClefthanded.mtz".
 #
 #
-# SORTORDER: 55
+# SORTORDER: 51
 #
 # DISPLAY: SYN_Unbending
 # DISPLAY: SYN_Bfact1
@@ -43,7 +41,6 @@
 # DISPLAY: TANGL
 # DISPLAY: radlim
 # DISPLAY: domask
-# DISPLAY: ttfcorfirst
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
@@ -52,7 +49,6 @@
 # DISPLAY: ISTEP
 # DISPLAY: IMAXCOR
 # DISPLAY: ctfrev
-# DISPLAY: ctf_ttf
 # DISPLAY: realang
 # DISPLAY: realcell
 # DISPLAY: rot90
@@ -75,73 +71,70 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
-set SYN_Unbending = ""
-set SYN_maska = ""
-set SYN_maskb = ""
+set ALAT = ""
+set CS = ""
+set IMAXCOR = ""
+set ISTEP = ""
+set KV = ""
+set LCOLOR = ""
+set PHASEORI_done = ""
+set RESMAX = ""
+set RESMIN = ""
+set RMAG = ""
+set SYM = ""
 set SYN_Bfact1 = ""
 set SYN_Bfact2 = ""
+set SYN_Unbending = ""
 set SYN_facthresha = ""
-set SYN_quadrada = ""
-set SYN_quadradb = ""
+set SYN_maska = ""
+set SYN_maskb = ""
 set SYN_quadpreda = ""
 set SYN_quadpredb = ""
-set PHASEORI_done = ""
+set SYN_quadrada = ""
+set SYN_quadradb = ""
+set TANGL = ""
+set TAXA = ""
+set TLTANG = ""
+set TLTAXA = ""
+set TLTAXIS = ""
+set beamtilt = ""
 set boxb1 = ""
 set boxb2 = ""
-set quadradb = ""
-set imagename = ""
-set defocus = ""
-set nonmaskimagename = ""
-set imagenumber = ""
-set realcell = ""
-set lattice = ""
-set imagesidelength = ""
-set magnification = ""
-set stepdigitizer = ""
-set tempkeep = ""
-set RESMIN = ""
-set RESMAX = ""
-set ALAT = ""
-set quadpredb = ""
-set radlim = ""
-set realang = ""
-set treatspotscan = ""
-set facthresha = ""
-set phacon = ""
-set ctfplotresmax = ""
-set stepdigitizer = ""
-set CS = ""
-set KV = ""
-set domask = ""
-set TLTAXIS = ""
-set TLTAXA = ""
-set TLTANG = ""
-set TAXA = ""
-set TANGL = ""
-set ttfcorfirst = ""
-set det_tilt = ""
-set ctf_ttf = ""
-set refori = ""
 set createmaskinfo = ""
-set ISTEP = ""
-set IMAXCOR = ""
-set rot180 = ""
-set revhk = ""
-set rot90 = ""
-set revhnd = ""
-set sgnxch = ""
-set revxsgn = ""
+set ctfcor_imode = ""
+set ctfplotresmax = ""
 set ctfrev = ""
-set beamtilt = ""
+set defocus = ""
+set det_tilt = ""
+set do3quadserch = ""
+set domask = ""
+set facthresha = ""
+set imagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set lattice = ""
+set magnification = ""
+set nonmaskimagename = ""
+set phacon = ""
 set phaori = ""
 set phaoriFouFilter = ""
-set do3quadserch = ""
-set SYM = ""
-set RMAG = ""
-set LCOLOR = ""
-set ctfcor_imode = ""
+set quadpredb = ""
+set quadradb = ""
+set radlim = ""
+set realang = ""
+set realcell = ""
+set refori = ""
+set revhk = ""
+set revhnd = ""
+set revxsgn = ""
+set rot180 = ""
+set rot90 = ""
+set sgnxch = ""
+set stepdigitizer = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set treatspotscan = ""
 #
 #$end_vars
 #
@@ -157,15 +150,6 @@ echo "<<@evaluate>>"
 #
 set date = `date`
 echo date = ${date}
-#
-if ( ${ctfcor_imode}x != "0x" ) then
-  ${proc_2dx}/protest "ERROR: CTF correction before unbending and Synthetic unbending cannot (yet) be done on the same time. Aborting."
-endif
-#
-if ( ${SYN_Unbending} == "0" ) then
-  ${proc_2dx}/linblock "Skipping. Fourier filtered reference was used instead."
-  exit
-endif
 #
 if ( ${PHASEORI_done} == "n" ) then
   ${proc_2dx}/linblock "Skipping. First determine the phase origin from the Fourier-filtered unbending."
@@ -259,25 +243,6 @@ endif
 set rmax = 11000
 echo rmax = ${rmax}
 #
-set reciangle = `echo ${realang} | awk '{ s = 180.0 - $1 } END { print s } '`
-echo reciangle = ${reciangle}
-#
-set imagecenter = ${imagesidelength}
-@ imagecenter /= 2
-set imagecenterx = ${imagecenter}
-set imagecentery = ${imagecenter}
-#
-set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-if ( ${tmp1} != ${refposix} ) then
-  set refori = ${refposix},${refposiy}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-  echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-endif
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
 #
 # set RESPLOTMAX = 0.3
 set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 } else { s = 0.3 } } END { print s }'`
@@ -285,19 +250,6 @@ set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 
 #
 if ( ! -d SCRATCH ) then
   ${proc_2dx}/protest "ERROR: SCRATCH does not exist."
-endif
-#
-set u1 = `echo ${lattice} | cut -d\, -f1`
-set u2 = `echo ${lattice} | cut -d\, -f2`
-set v1 = `echo ${lattice} | cut -d\, -f3`
-set v2 = `echo ${lattice} | cut -d\, -f4`
-set ulen = `echo ${u1} ${u2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
-set vlen = `echo ${v1} ${v2} | awk '{ s = sqrt ( $1 * $1 + $2 * $2 ) } END { print s }'`
-#
-set latlenok = `echo ${ulen} ${vlen} | awk '{ if ( $1 + $2 < 0.1 ) { s = 0 } else { s = 1 }} END { print s }'`
-if ( ${latlenok} == '0' ) then
-  ${proc_2dx}/linblock "ERROR: Lattice is ${lattice}"
-  ${proc_2dx}/protest "Determine lattice first. Aborting."
 endif
 #
 set istilt = `echo $TLTANG | awk '{if ( -25.0 < $1 && $1 < 25.0 ) {s = 0} else {s = 1}} END {print s}'`
@@ -311,17 +263,6 @@ endif
 #
 set issometilt = `echo $TLTANG | awk '{if ( -5.0 < $1 && $1 < 5.0 ) {s = 0} else {s = 1}} END {print s}'`
 echo issometilt = $issometilt
-#
-if (${ctf_ttf} == 'CTF') then
-  if ( ${ttfcorfirst} == 'y' ) then
-    ${proc_2dx}/linblock "Treating as Non-Tilted: Correcting TTFcorFirst to NO"
-    set ttfcorfirst = 'n'
-    echo "set ttfcorfirst = n" >> LOGS/${scriptname}.results
-  endif
-  set istilt = 'n'
-else
-  echo "# WARNING: Warning: You are using TTF correction. This requires a reliable tilt geometry." >> LOGS/${scriptname}.results
-endif
 #
 if ( ${issometilt} == '0' ) then
   set issometilt = 'n'
@@ -362,56 +303,6 @@ if ( $do3quadserch == 'y' )then
   ${proc_2dx}/linblock "Using SYN_maskb=${SYN_maskb} for lattice of length u=${ulen} and v=${vlen}"
 endif
 #
-if ( ${rot180} == 'y' ) then
-  set rot180val = '1'
-else
-  set rot180val = '0'
-endif
-#
-if ( ${rot90} == 'y' ) then
-  set rot90val = '1'
-else
-  set rot90val = '0'
-endif
-#
-if ( ${revhk} == 'y' ) then
-  set revhkval = '1'
-else
-  set revhkval = '0'
-endif
-#
-if ( ${revhnd} == 'y' ) then
-  set revhndval = '1'
-else
-  set revhndval = '0'
-endif
-#
-if ( ${ctfrev} == 'y' ) then
-  set ctfrevval = '1'
-else
-  set ctfrevval = '0'
-endif
-#
-echo sgnxch = ${sgnxch}
-if ( ${sgnxch} == "y" ) then
-  set sgnxchval = 1
-  set phaoriFouFilterx = `echo ${phaoriFouFilter} | cut -d\, -f1 `
-  set phaoriFouFiltery = `echo ${phaoriFouFilter} | cut -d\, -f2 | awk '{ s = -$1 } END { print s }'`
-  set phaoriFouFilter = `echo ${phaoriFouFilterx},${phaoriFouFiltery}`
-else
-  set sgnxchval = 0
-endif
-#
-echo revxsgn = ${revxsgn}
-if ( ${revxsgn} == "y" ) then
-  set revxsgnval = 1
-  set phaoriFouFilterx = `echo ${phaoriFouFilter} | cut -d\, -f1 | awk '{ s = -$1 } END { print s }'`
-  set phaoriFouFiltery = `echo ${phaoriFouFilter} | cut -d\, -f2 `
-  set phaoriFouFilter = `echo ${phaoriFouFilterx},${phaoriFouFiltery}`
-else
-  set revxsgnval = 0
-endif
-#
 echo "<<@progress: 5>>"
 #
 #############################################################################
@@ -432,46 +323,7 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 80>>"
 #
-if ( ${ttfcorfirst} == 'y' ) then
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/linblock "CTFAPPLY - to plot IQ plot without defocus and CTF application"
-  #                                                                           #
-  #############################################################################
-  #
-  \rm -f CTFPLOT.PS
-  \rm -f PS/${imagename}_ttf.ps
-  #
-  setenv IN  APH/${imagename}_ttf.aph
-  setenv OUT dummy.tmp
-  ${bin_2dx}/2dx_ctfapplyk.exe << eot
-${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
-0.0,0.0,0.0,${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${imagename}.ttf.nolimit, ${date}, No Limit, Nyquist=${ctfplotresmax}
-${phacon}
-${RESMIN},0.0
-${ctfcor_imode}
-eot
-  #
-  if ( ! -e CTFPLOT.PS ) then
-    ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
-  else
-    \mv -f CTFPLOT.PS PS/${imagename}_ttf.ps
-    echo "# IMAGE: PS/${imagename}_ttf.ps <PS: IQ plot, no resolution limit>" >> LOGS/${scriptname}.results
-  endif
-  #
-endif
-#
 echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
-echo "set ML_done = n" >> LOGS/${scriptname}.results
-#
-if ( ${ttfcorfirst} == 'y' || ${istilt} == 'y' ) then
-  echo "set CTF_done = y" >> LOGS/${scriptname}.results
-else
-  echo "set CTF_done = n" >> LOGS/${scriptname}.results
-endif
-#
-echo "set REPROCESSING_done = y" >> LOGS/${scriptname}.results
 #
 echo ":: Done."
 echo "<<@progress: 100>>"
@@ -480,6 +332,13 @@ echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
+exit
+#
+# This is listed here so that it shows up in the GUI of 2dx_image:
+#
+source ${proc_2dx}/2dx_make_SynRef_sub.com
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+source ${proc_2dx}/2dx_makedirs
 #
 #
 

@@ -57,7 +57,6 @@ set RESMAX = ""
 set phacon = ""
 set det_defocus = ""
 set det_tilt = ""
-set ctf_ttf = ""
 set TLTAXIS = ""
 set TLTAXA = ""
 set TLTANG = ""
@@ -96,7 +95,6 @@ echo RESMIN = ${RESMIN}
 echo RESMAX = ${RESMAX}
 echo phacon = ${phacon}
 echo det_tilt = ${det_tilt}
-echo ctf_ttf = ${ctf_ttf}
 #
 echo "<<@progress: 1>>"
 #

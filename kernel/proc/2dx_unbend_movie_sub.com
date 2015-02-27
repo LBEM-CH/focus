@@ -21,7 +21,7 @@
         ${proc_2dx}/lin "TWOFILE - Cross-correlate frame and reference in Fourier-space, with ref A"
         #########################################################################
         setenv IN1 ${frame_folder}/frame_${i}/${iname}_fft.mrc
-        setenv IN2 SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
+        setenv IN2 SCRATCH/reference_fft.mrc
         setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         ${bin_2dx}/twofile.exe << eot
@@ -41,7 +41,7 @@ eot
         \rm -f SPIDERCOORD.spi
         \rm -f CCPLOT.PS
 
-        setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+        setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
         setenv PROFDATA ${frame_folder}/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
         \rm -f          ${frame_folder}/frame_${i}/SCRATCH/prof${nonmaskimagename}.dat
         setenv ERRORS   SCRATCH/errout2${iname}.dat
@@ -120,12 +120,13 @@ eot
            ######################################################
            ${proc_2dx}/lin "Not masking frame"
            ######################################################
+           set olddir = $PWD
            cd ${frame_folder}/frame_${i}
            \rm -f              ${iname}_mask.mrc
            \ln -s ${iname}.mrc ${iname}_mask.mrc
            \rm -f                  ${iname}_mask_fft.mrc
            \ln -s ${iname}_fft.mrc ${iname}_mask_fft.mrc
-           cd ../.. 
+           cd ${olddir}
         endif
 
 
@@ -135,7 +136,7 @@ eot
         set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
         set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
         setenv IN1 ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc
-        setenv IN2 SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
+        setenv IN2 SCRATCH/reference_fft.mrc
         setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         ${bin_2dx}/twofile.exe << eot
@@ -146,7 +147,7 @@ eot
 
         if ( ${movie_refboxb} != "0" ) then       
           setenv IN1 ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc
-          setenv IN2 SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
+          setenv IN2 SCRATCH/reference_fft.mrc
           setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb_fft.mrc
           \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb_fft.mrc
           ${bin_2dx}/twofile.exe << eot
@@ -300,7 +301,7 @@ endif
 
         # \cp -f ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}.mrc ${frame_folder}/frame_${i}/m${nonmaskimagename}_${i}_ori.mrc
 
-        setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+        setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
         setenv PROFDATA ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
         setenv ERRORS   SCRATCH/errout2${iname}.dat
         setenv ERROUT   SCRATCH/errout3${iname}.dat
@@ -424,7 +425,7 @@ eot
           \rm -f SPIDERCOORD.spi
           \rm -f CCPLOT.PS
 
-          setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+          setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
           setenv PROFDATA ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
           setenv ERRORS   SCRATCH/errout2${iname}.dat
           setenv ERROUT   SCRATCH/errout3${iname}.dat
@@ -456,7 +457,7 @@ eot
           ${proc_2dx}/protest "ERROR: Problem in 2dx_quadserchk-2: SCRATCH/errout3${iname}.dat does not exist."
         endif
  
-        # The other ${frame_folder} are subsequently used as refinement reference:
+        # The other frames are subsequently used as refinement reference:
         \mv -f SCRATCH/errout3${iname}.dat SCRATCH/errout2${iname}.dat
 
 
@@ -476,12 +477,12 @@ eot
             if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS 
-                  \mv -f CCPLOT.pdf ${frame_folder}_quadserch.pdf
+                  \mv -f CCPLOT.pdf PS/MovieB_quadserch.pdf
                 else
-                   ${ps2pdf} CCPLOT.PS ${frame_folder}_quadserch.pdf 
+                   ${ps2pdf} CCPLOT.PS PS/MovieB_quadserch.pdf 
                 endif
-                pdftk A=${frame_folder}_quadserch.pdf cat A1 output out.pdf
-                \mv -f out.pdf ${frame_folder}_quadserch.pdf
+                pdftk A=PS/MovieB_quadserch.pdf cat A1 output out.pdf
+                \mv -f out.pdf PS/MovieB_quadserch.pdf
             else
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS  
@@ -489,11 +490,11 @@ eot
                   ${ps2pdf} CCPLOT.PS CCPLOT.pdf 
                 endif
                 if ( ${iforward} == '1' ) then
-                  pdftk A=${frame_folder}_quadserch.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
+                  pdftk A=PS/MovieB_quadserch.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
                 else
-                  pdftk A=CCPLOT.pdf B=${frame_folder}_quadserch.pdf cat A1 B1-end output out.pdf 
+                  pdftk A=CCPLOT.pdf B=PS/MovieB_quadserch.pdf cat A1 B1-end output out.pdf 
                 endif
-                \mv -f out.pdf ${frame_folder}_quadserch.pdf
+                \mv -f out.pdf PS/MovieB_quadserch.pdf
             endif
 
             ###########################################################################
@@ -568,10 +569,10 @@ eot
             set x_1_4 = `echo ${imagesidelength} | awk '{ s = int( $1 / 4 ) } END { print s }'`
             set x_3_4 = `echo ${imagesidelength} | awk '{ s = int( 3 * $1 / 4 ) } END { print s }'`
           
-            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_I.dat   ${x_1_4} ${x_1_4} ${num_dia} ${frame_folder}/peaks_I.dat
-            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_II.dat  ${x_3_4} ${x_1_4} ${num_dia} ${frame_folder}/peaks_II.dat
-            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} ${frame_folder}/peaks_III.dat
-            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} ${frame_folder}/peaks_IV.dat
+            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_I.dat   ${x_1_4} ${x_1_4} ${num_dia} MovieB/MovieB_peaks_I.dat
+            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_II.dat  ${x_3_4} ${x_1_4} ${num_dia} MovieB/MovieB_peaks_II.dat
+            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} MovieB/MovieB_peaks_III.dat
+            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} MovieB/MovieB_peaks_IV.dat
     
             ###########################################################################
             ${proc_2dx}/lin "Store distortion-vector-field for visual inspection"
@@ -585,12 +586,12 @@ eot
             if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS  
-                  \mv -f CCPLOT.pdf ${frame_folder}_unbending.pdf
+                  \mv -f CCPLOT.pdf PS/MovieB_unbending.pdf
                 else
-                   ${ps2pdf} CCPLOT.PS ${frame_folder}_unbending.pdf 
+                   ${ps2pdf} CCPLOT.PS PS/MovieB_unbending.pdf 
                 endif
-                pdftk A=${frame_folder}_unbending.pdf cat A1 output out.pdf 
-                \mv -f out.pdf ${frame_folder}_unbending.pdf
+                pdftk A=PS/MovieB_unbending.pdf cat A1 output out.pdf 
+                \mv -f out.pdf PS/MovieB_unbending.pdf
             else
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS 
@@ -598,11 +599,11 @@ eot
                   ${ps2pdf} CCPLOT.PS CCPLOT.pdf 
                 endif
                 if ( ${iforward} == 1 ) then
-                  pdftk A=${frame_folder}_unbending.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
+                  pdftk A=PS/MovieB_unbending.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
                 else
-                  pdftk A=CCPLOT.pdf B=${frame_folder}_unbending.pdf cat A1 B1-end output out.pdf 
+                  pdftk A=CCPLOT.pdf B=PS/MovieB_unbending.pdf cat A1 B1-end output out.pdf 
                 endif
-                \mv -f out.pdf ${frame_folder}_unbending.pdf
+                \mv -f out.pdf PS/MovieB_unbending.pdf
             endif
         
             ###########################################################################

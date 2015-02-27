@@ -171,24 +171,24 @@ if ( ${backup_merge} == "yes" ) then
     ${copy_command} -r ${from_dir}/REGISTERS ${to_dir}
   endif
   #
-  if ( -e ${from_dir}/merge2D.mtz ) then
-    echo ":New: ${to_dir}/merge2D.mtz"
-    ${copy_command} ${from_dir}/merge2D.mtz ${to_dir}
+  if ( -e ${from_dir}/merge2D_MRClefthanded.mtz ) then
+    echo ":New: ${to_dir}/merge2D_MRClefthanded.mtz"
+    ${copy_command} ${from_dir}/merge2D_MRClefthanded.mtz ${to_dir}
   endif
   #
-  if ( -e ${from_dir}/merge2Dref.mtz ) then
-    echo ":New: ${to_dir}/merge2Dref.mtz"
-    ${copy_command} ${from_dir}/merge2Dref.mtz ${to_dir}
+  if ( -e ${from_dir}/merge2Dref_MRClefthanded.mtz ) then
+    echo ":New: ${to_dir}/merge2Dref_MRClefthanded.mtz"
+    ${copy_command} ${from_dir}/merge2Dref_MRClefthanded.mtz ${to_dir}
   endif
   #
-  if ( -e ${from_dir}/merge3D.mtz ) then
-    echo ":New: ${to_dir}/merge3D.mtz"
-    ${copy_command} ${from_dir}/merge3D.mtz ${to_dir}
+  if ( -e ${from_dir}/merge3D_MRClefthanded.mtz ) then
+    echo ":New: ${to_dir}/merge3D_MRClefthanded.mtz"
+    ${copy_command} ${from_dir}/merge3D_MRClefthanded.mtz ${to_dir}
   endif
   #
-  if ( -e ${from_dir}/merge3Dref.mtz ) then
-    echo ":New: ${to_dir}/merge3Dref.mtz"
-    ${copy_command} ${from_dir}/merge3Dref.mtz ${to_dir}
+  if ( -e ${from_dir}/merge3Dref_MRClefthanded.mtz ) then
+    echo ":New: ${to_dir}/merge3Dref_MRClefthanded.mtz"
+    ${copy_command} ${from_dir}/merge3Dref_MRClefthanded.mtz ${to_dir}
   endif
   #
   if ( -e ${from_dir}/merge.aph ) then
@@ -411,9 +411,9 @@ while ( ${dircounter} <= ${dirnum} )
             ${copy_command} ${from_dirfile}/${loc_imagename}_mask_mask.mrc ${to_dirfile}
           endif
           #
-          if ( -e ${from_dirfile}/${loc_imagename}.mtz ) then
-            echo ":New: ${to_dirfile}/${loc_imagename}.mtz"
-            ${copy_command} ${from_dirfile}/${loc_imagename}.mtz ${to_dirfile}
+          if ( -e ${from_dirfile}/${loc_imagename}_MRClefthanded.mtz ) then
+            echo ":New: ${to_dirfile}/${loc_imagename}_MRClefthanded.mtz"
+            ${copy_command} ${from_dirfile}/${loc_imagename}_MRClefthanded.mtz ${to_dirfile}
           endif
         endif
         #
@@ -466,9 +466,9 @@ while ( ${dircounter} <= ${dirnum} )
               ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.spt ${to_dirfile}
             endif
             #
-            if ( -e ${from_dirfile}/${loc_nonmaskimagename}.mtz ) then
-              echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.mtz"
-              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.mtz ${to_dirfile}
+            if ( -e ${from_dirfile}/${loc_nonmaskimagename}_MRClefthanded.mtz ) then
+              echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_MRClefthanded.mtz"
+              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_MRClefthanded.mtz ${to_dirfile}
             endif
           endif
         endif

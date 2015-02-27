@@ -164,20 +164,20 @@ C
       read(*,*)RGRESMAX
       write(*,'(F12.2)')RGRESMAX
 C
-      write(*,'(/,''input merge_data_type switch'')')
-      read(*,*)IMERGEML
-      if(IMERGEML.eq.0)then
-        write(*,'(I1,'' = Using Fourier filtered results with'',
-     .    '' later CTF correction '')')IMERGEML
-      else if(IMERGEML.eq.1)then
-        write(*,'(I1,'' = Using CTF-corrected and then Fourier'',
-     .    '' filtered results '')')IMERGEML
-      else if(IMERGEML.eq.2)then
-        write(*,'(I1,'' = Using CTF-corrected and then Movie-ModeA'',
-     .    '' unbent results '')')IMERGEML
-      else
-        write(*,'(I1,'' = Using Maximum Likelihood results '',
-     .           ''where allowed'')')IMERGEML
+      write(*,'(/,''input refine_data_type switch'')')
+      read(*,*)IMERGDAT
+      if(IMERGDAT.eq.0 .or.
+     .   IMERGDAT.eq.2 .or.
+     .   IMERGDAT.eq.4 .or.
+     .   IMERGDAT.eq.6 .or.
+     .   IMERGDAT.eq.8     )then
+        write(*,'(I1,'' = Using Fourier filtered results'')')IMERGDAT
+C-------phaoriFouFilter should not be protected:
+        LPROTFOUFIL = .FALSE.
+      else 
+        write(*,'(I1,'' = Using SynRef unbent results '')')IMERGDAT
+C-------phaoriFouFilter should be protected:
+        LPROTFOUFIL = .TRUE.
       endif
 C
       write(*,'(/,''input Thread Number'')')
@@ -356,12 +356,11 @@ C
         write(11,'(''set HKMX = "'',A,''"'')')cline(1:k)
         write(11,'(''#'')')
         write(11,'(''set LOGOUTPUT = T'')')
-        write(11,'(''set LPROTFOUFIL = T'')')
         write(11,'(''#'')')
 C
         if(NPRG.eq.3)then
           write(11,'(''# 3D reference:'')')
-          write(11,'(''setenv HKLIN merge3Dref.mtz'')')
+          write(11,'(''setenv HKLIN merge3Dref_MRClefthanded.mtz'')')
           write(11,'(''setenv OMP_NUM_THREADS '',I4)')ITHRNUM
           write(11,'(''#'')')
         endif
@@ -469,13 +468,13 @@ C
           endif
 C
           call dgetline(CMLMERGE,"ML_use_for_merging",iok)
-          if(iok.eq.0)then
-            write(CMLMERGE(1:1),'(''n'')')
-            write(*,'(''::WARNING: ML_use_for_merging not yet defined for this image.'')')
-            write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
-          endif
 C
-          if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
+          if(CMLMERGE(1:1).eq."y" .and. IMERGDAT.eq.6)then
+            RPHAORIH=0.0
+            RPHAORIK=0.0
+            write(*,'(''   using Single Particle  results, '',
+     .        ''PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
+          else
             call cgetline(CPHORI,"phaori")
             read(CPHORI,*,ERR=901)RPHAORIH,RPHAORIK
             goto 902
@@ -483,19 +482,8 @@ C
             RPHAORIH=0.0
             RPHAORIK=0.0
  902        continue
-            write(*,'(''   using Fourier filtered results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
-          else
-            RPHAORIH=0.0
-            RPHAORIK=0.0
-            write(*,'(''   using Single Particle  results, PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
-          endif
-          call cgetline(CPHOPROT,"SYN_Unbending")
-          if(CPHOPROT(1:1).eq.'0')then
-C-----------FouFilter Reference
-            LPROTFOUFIL = .FALSE.
-          else
-C-----------Synthetic Reference
-            LPROTFOUFIL = .TRUE.
+            write(*,'(''   using Fourier filtered results, '',
+     .        ''PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
           endif
           if(imcount.eq.1)then
 C-----------First film is used as is, without rescaling
@@ -539,12 +527,12 @@ C
 C
           call shorten(cdir,k)
           call shortshrink(CIMAGENAME,k1)
-          if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
-            write(cname4,'(A,''/APH/'',A,''_ctf.aph'')')
-     .        cdir(1:k),CIMAGENAME(1:k1)
-          else
+          if(CMLMERGE(1:1).eq."y" .and. IMERGDAT.eq.6)then
             write(cname4,'(A,''/APH/ML_result.aph'')')
      .        cdir(1:k)
+          else
+            write(cname4,'(A,''/APH/'',A,''_ctf.aph'')')
+     .        cdir(1:k),CIMAGENAME(1:k1)
           endif
           call shortshrink(cname4,k1)
           write(11,'(A)')cname4(1:k1)

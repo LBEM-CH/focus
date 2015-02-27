@@ -2,7 +2,7 @@
 #
 # This is not an executable script. It is only sourced from other scripts.
 # The purpose of this script is to initiate the sub-directories, where all the different file types will be stored.
-# It also allows specifying in the variable names SCRATCH_DISK and FFTIR_DISK locations for the sub-directories 
+# It also allows specifying in the variable names SCRATCH_DISK locations for the sub-directories 
 # SCRATCH and FFTR, which can then lie on a different drive. If that different drive is a very fast drive, e.g. in form
 # of a RAM disk, then the overall processing performance for processing a larger number of images simultaneously 
 # in several instances of 2dx_image will strongly increase.
@@ -24,10 +24,6 @@ endif
 #
 # Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
 # if the variable is not set
-if ( $?FFTIR_DISK == 0 ) then
-  set FFTIR_DISK = "."
-endif
-#
 alias createLink 'eval " \\
 		  if (\! -e \!:1 ) then \\
     		    mkdir -p \!:1 \\
@@ -53,7 +49,6 @@ alias replaceWithLink 'eval " \\
 #
 set path_has_space = `echo "$PWD" | wc -w`
 set SCRATCH_has_space = `echo "$SCRATCH_DISK" | wc -w`
-set FFTIR_has_space = `echo "$FFTIR_DISK" | wc -w`
 #
 if ( ${path_has_space} != '1' ) then
   echo ":: "
@@ -75,18 +70,6 @@ if ( ${SCRATCH_has_space} != '1' ) then
   echo "::" $SCRATCH_DISK
   echo ":: has spaces in the pathname."
   echo ":: You must rename the SCRATCH disk name."
-  echo ":: "
-  ${proc_2dx}/protest "Aborting."
-endif
-#
-if ( ${FFTIR_has_space} != '1' ) then
-  echo ":: "
-  echo "::                           ERROR ERROR ERROR ERROR ERROR "
-  echo "::                           No SPACES in pathname allowed."
-  echo "::                           ERROR ERROR ERROR ERROR ERROR "
-  echo "::" $FFTIR_DISK
-  echo ":: has spaces in the pathname."
-  echo ":: You must rename the FFTIR disk name."
   echo ":: "
   ${proc_2dx}/protest "Aborting."
 endif
@@ -122,27 +105,8 @@ else
   endif
 endif
 #
-if ( ${FFTIR_DISK} == "." || ${FFTIR_DISK} == "" ) then
-  if ( ! -d FFTIR ) then
-    echo ":FFTIR disk will be local."
-    \mkdir FFTIR
-  endif
-else
-  set olddir = $PWD
-  set newfftir = ${FFTIR_DISK}${olddir}/FFTIR
-  if ( ! -l FFTIR ) then
-    if ( ! -e FFTIR ) then
-      createLink ${newfftir} FFTIR
-    else
-      replaceWithLink ${newfftir} FFTIR
-    endif
-  else
-    set target = `readlink FFTIR`
-    if ("$target" != "$newfftir") then
-	echo "::FFTIR target has changed."
-	replaceWithLink ${newfftir} FFTIR
-    endif
-  endif
+if ( ! -d FFTIR ) then
+  \mkdir FFTIR
 endif
 #
 if ( ! -d proc ) then

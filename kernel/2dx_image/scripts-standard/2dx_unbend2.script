@@ -21,7 +21,6 @@
 #
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
-# DISPLAY: SYN_Unbending
 # DISPLAY: holeb
 # DISPLAY: maskb01
 # DISPLAY: maskb02
@@ -38,7 +37,6 @@
 # DISPLAY: ALAT
 # DISPLAY: radlim
 # DISPLAY: domask
-# DISPLAY: ctf_ttf
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
@@ -60,7 +58,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
-set SYN_Unbending = ""
 set PHASEORI_done = ""
 set boxb1 = ""
 set boxb2 = ""
@@ -99,7 +96,6 @@ set TLTAXIS = ""
 set TLTANG = ""
 set TANGL = ""
 set det_tilt = ""
-set ctf_ttf = ""
 set refori = ""
 set createmaskinfo = ""
 set taperBeforeFFT = ""
@@ -142,8 +138,6 @@ set movie_inmovie = ""
 #$end_vars
 #
 
-set ttfcorfirst = "n"
-
 set scriptname = 2dx_unbend2
 \rm -f LOGS/${scriptname}.results
 #
@@ -155,14 +149,6 @@ set date = `date`
 echo date = ${date}
 #
 set iname = image_ctfcor
-#
-if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
-  if ( ${ctfcor_imode}x != "0x" ) then
-    ${proc_2dx}/protest "ERROR: CTF correction before unbending and Synthetic unbending cannot (yet) be done on the same time. Aborting."
-  endif
-  ${proc_2dx}/linblock "Skipping. Synthetical Reference is used instead."
-  exit
-endif
 #
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
@@ -422,20 +408,9 @@ if ( ! -e FFTIR/${iname}_unbend1_fft.mrc ) then
   ${proc_2dx}/protest "ERROR: FFTIR/${iname}_unbend1_fft.mrc not existing. First run Unbend I."
 endif
 #
-\cp -f FFTIR/${iname}_unbend1_fft.mrc FFTIR/${iname}_unbend2_fft.mrc
+\cp -f FFTIR/${iname}_unbend1_fft.mrc FFTIR/${iname}_fou_unbend2_fft.mrc
 #
 echo "<<@progress: 5>>"
-#
-if (${ctf_ttf} == 'CTF') then
-  if ( ${ttfcorfirst} == 'y' ) then
-    ${proc_2dx}/linblock "Treating as Non-Tilted: Correcting TTFcorFirst to NO"
-    set ttfcorfirst = 'n'
-    echo "set ttfcorfirst = n" >> LOGS/${scriptname}.results
-  endif
-else
-  ${proc_2dx}/linblock "Warning: You are using TTF correction. This requires a reliable tilt geometry."
-  echo "# WARNING: Warning: You are using TTF correction. This requires a reliable tilt geometry." >> LOGS/${scriptname}.results
-endif
 #
 set u1 = `echo ${lattice} | cut -d\, -f1`
 set u2 = `echo ${lattice} | cut -d\, -f2`
@@ -525,13 +500,13 @@ ${proc_2dx}/${lincommand} "MASKTRAN - to mask the FFT of the unbent image"
 #############################################################################
 #
 echo "# IMAGE-IMPORTANT: unbent.mrc <Unbent image>" >> LOGS/${scriptname}.results
-\cp -f FFTIR/${iname}_unbend2_fft.mrc FFTIR/${iname}_unbent_fft.mrc
-echo "# IMAGE-IMPORTANT: FFTIR/${iname}_unbent_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
+\cp -f FFTIR/${iname}_fou_unbend2_fft.mrc FFTIR/${iname}_fou_unbent_fft.mrc
+echo "# IMAGE-IMPORTANT: FFTIR/${iname}_fou_unbent_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
 #
-\rm -f SCRATCH/${iname}_unbent_fft_msk.mrc
+\rm -f SCRATCH/${iname}_fou_unbent_fft_msk.mrc
 #
-setenv IN  FFTIR/${iname}_unbent_fft.mrc
-setenv OUT SCRATCH/${iname}_unbent_fft_msk.mrc
+setenv IN  FFTIR/${iname}_fou_unbent_fft.mrc
+setenv OUT SCRATCH/${iname}_fou_unbent_fft_msk.mrc
 # ITYPE=0 uses all spots (below). The following line is thereby probably not needed:
 setenv SPOTS ${nonmaskimagename}.spt
 #
@@ -544,17 +519,16 @@ eot
 #############################################################################
 ${proc_2dx}/linblock "2dx_fftrans - to create a Fourier-filtered direct reconstruction"
 #############################################################################
-\rm -f SCRATCH/${iname}_unbent_fft_msk_fft.mrc
-setenv IN SCRATCH/${iname}_unbent_fft_msk.mrc
-setenv OUT SCRATCH/${iname}_unbent_fft_msk_fft.mrc
+\rm -f SCRATCH/${iname}_fou_unbent_fft_msk_fft.mrc
+setenv IN SCRATCH/${iname}_fou_unbent_fft_msk.mrc
+setenv OUT SCRATCH/${iname}_fou_unbent_fft_msk_fft.mrc
 ${bin_2dx}/2dx_fftrans.exe 
 #
-echo "# IMAGE: SCRATCH/${iname}_unbent_fft_msk_fft.mrc <Unbent image, Fourier filtered (1px)>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/${iname}_fou_unbent_fft_msk_fft.mrc <Unbent image, Fourier filtered (1px)>" >> LOGS/${scriptname}.results
 if ( ${tempkeep} != 'y' ) then
-  \rm -f SCRATCH/${iname}_unbent_fft_msk.mrc
+  \rm -f SCRATCH/${iname}_fou_unbent_fft_msk.mrc
 endif
 #
-if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
   #############################################################################
   ${proc_2dx}/linblock "Measuring signal in resolution bins"
   #############################################################################
@@ -565,7 +539,7 @@ if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
   set rlocmax = ${RB_1}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
+FFTIR/${iname}_fou_unbend2_fft.mrc
 ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -589,7 +563,7 @@ eot
   set rlocmax = ${RB_2}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
+FFTIR/${iname}_fou_unbend2_fft.mrc
 ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -613,7 +587,7 @@ eot
   set rlocmax = ${RB_3}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
+FFTIR/${iname}_fou_unbend2_fft.mrc
 ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -637,7 +611,7 @@ eot
   set rlocmax = ${RB_4}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
+FFTIR/${iname}_fou_unbend2_fft.mrc
 ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -661,7 +635,7 @@ eot
   set rlocmax = ${RB_5}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
+FFTIR/${iname}_fou_unbend2_fft.mrc
 ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -685,7 +659,7 @@ eot
   set rlocmax = ${RB_6}
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
+FFTIR/${iname}_fou_unbend2_fft.mrc
 ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -718,38 +692,6 @@ eot
   echo "set RP_5 = ${RP_5}" >> LOGS/${scriptname}.results
   echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
   #
-endif
-#
-if ( ${ttfcorfirst} == 'y' ) then
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/linblock "CTFAPPLY - to plot IQ plot without defocus and CTF application"
-  #                                                                           #
-  #############################################################################
-  #
-  \rm -f CTFPLOT.PS
-  \rm -f PS/${imagename}_ttf.ps
-  #
-  setenv IN  APH/${imagename}_ttf.aph
-  setenv OUT dummy.tmp
-  ${bin_2dx}/2dx_ctfapplyk.exe << eot
-${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
-0.0,0.0,0.0,${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${imagename}.ttf, ${date}, No Limit, Nyquist=${ctfplotresmax}
-${phacon}
-${RESMIN},0.0
-${ctfcor_imode} 
-eot
-  #
-  if ( ! -e CTFPLOT.PS ) then
-    ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
-  else
-    \mv -f CTFPLOT.PS PS/${imagename}_ttf.ps
-    echo "# IMAGE-IMPORTANT: PS/${imagename}_ttf.ps <PS: IQ Plot after TTF correction (No Resolution Limit)>" >> LOGS/${scriptname}.results
-  endif
-  #
-endif
-#
 echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
 echo "set ML_done = n" >> LOGS/${scriptname}.results
 #
@@ -760,6 +702,8 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
 exit
+#
+# These are listed here so that they show up in the GUI:
 source ${proc_2dx}/2dx_fftrans_sub.com
 python ${proc_2dx}/movie/apply_filter_Fourier.py
 python ${proc_2dx}/movie/mask.py

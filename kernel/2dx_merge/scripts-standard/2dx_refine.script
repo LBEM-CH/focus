@@ -59,6 +59,7 @@
 # DISPLAY: merge_comment_9
 # DISPLAY: max_amp_correction
 # DISPLAY: merge_data_type
+# DISPLAY: refine_data_type
 # DiSPLAY: RFACAMP
 # DISPLAY: Thread_Number
 #
@@ -95,6 +96,7 @@ set merge_reference = ""
 set merge_ref_num = ""
 set max_amp_correction = ""
 set merge_data_type = ""
+set refine_data_type = ""
 set ITAXASTEP = ""
 set RTAXASIZE = ""
 set ITANGLSTEP = ""
@@ -119,6 +121,11 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 set dirfile = "2dx_merge_dirfile.dat"
+set dirnum = `cat ${dirfile} | wc -l`
+set maxthread = `echo ${Thread_Number} ${dirnum} | awk '{if ($1<$2/2) { s = $1 } else { s = int($2 / 2) }} END { print s }'`
+if ( ${maxthread} == "0" ) then
+  set maxthread = 1
+endif
 #
 set number = 1
 if ( ${ILIST} == "n" ) then
@@ -156,6 +163,12 @@ echo "<<@progress: 1>>"
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
+#
+if ( ${refine_data_type}x == 'x' ) then
+  set refine_data_type = "0"
+  echo "set refine_data_type = ${refine_data_type}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: refine_data_type corrected to ${refine_data_type}"
+endif
 #
 if ( ${merge_res_limit}x == 'x' ) then
   echo ":: "
@@ -232,9 +245,9 @@ if ( ${merge_modus} == '3D' ) then
       ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
     endif
   else
-    # User interpolated lattice lines latlinesref.mtz
-    if ( ! -e merge3D.mtz ) then
-      ${proc_2dx}/linblock "ERROR: merge.mtz not found. No reference for refinement available."
+    # User interpolated lattice lines latlinesref_MRClefthanded.mtz
+    if ( ! -e merge3D_MRClefthanded.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge_MRClefthanded.mtz not found. No reference for refinement available."
       ${proc_2dx}/protest "Run Merging script first."
     endif
     set NPRG = 3
@@ -251,26 +264,26 @@ if ( ${merge_ref_num} != "0" ) then
      echo " "
     if ( ${NPRG} == "3" ) then
       # Use MTZ file
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge3D.mtz not existing in register ${merge_ref_num}."
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3D_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ."
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D.mtz .
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz ."
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz .
       endif
       #
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge3Dref.mtz not existing in register ${merge_ref_num}."
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3Dref_MRClefthanded.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3Dref_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ."
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz .
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3Dref_MRClefthanded.mtz ."
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3Dref_MRClefthanded.mtz .
       endif
     else
       # Use APH file
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge2D.mtz not existing in register ${merge_ref_num}."
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D_MRClefthanded.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge2D_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ." 
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge2D.mtz .
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge2D_MRClefthanded.mtz ." 
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge2D_MRClefthanded.mtz .
       endif
       if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge.aph ) then
         ${proc_2dx}/protest "ERROR: merge.aph not existing in register ${merge_ref_num}."
@@ -283,6 +296,173 @@ if ( ${merge_ref_num} != "0" ) then
     ${proc_2dx}/protest "ERROR: Register ${merge_ref_num} does not contain data."
   endif
   #
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "Setting APH file types to use"
+#############################################################################
+#
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+set olddir = $PWD
+#
+if ( ${scriptname} == "2dx_refine" ) then
+ foreach imagefile ( ${dirlist} ) 
+  cd ..
+  cd ${imagefile}
+  if ( ! -e 2dx_image.cfg ) then
+    ${proc_2dx}/protest "ERROR: 2dx_image.cfg not found in ${imagefile}"
+  endif
+  set imagename_local = `cat 2dx_image.cfg | grep 'set imagename =' | cut -d\" -f2`
+  cd APH
+  set APH_file = ${imagename_local}_fou_ctf.aph
+  # Already set:
+  # if ( ${refine_data_type} == '0' ) then
+  #   set APH_file = ${imagename_local}_fou_ctf.aph
+  # endif
+  if ( ${refine_data_type} == '1' ) then
+    if ( ! -e ${imagename_local}_ctf.aph ) then
+      set APH_file = ${imagename_local}_syn_ctf.aph
+    else
+      echo ":${imagename_local}_syn_ctf.aph not found."
+    endif
+  endif
+  if ( ${refine_data_type} == '2' ) then
+    if ( -e ${imagename_local}_movie_fou_ctf.aph ) then
+      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+    else
+      echo ":${imagename_local}_movie_fou_ctf.aph not found."
+    endif
+  endif
+  if ( ${refine_data_type} == '3' ) then
+    if ( -e ${imagename_local}_movie_syn_ctf.aph ) then
+      set APH_file = ${imagename_local}_movie_syn_ctf.aph
+    else
+      echo ":${imagename_local}_movie_syn_ctf.aph not found."
+    endif
+  endif
+  if ( ${refine_data_type} == '4' ) then 
+    if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then
+      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+    else
+      echo ":${imagename_local}_movieB_fou_ctf.aph not found."
+    endif
+  endif
+  if ( ${refine_data_type} == '5' ) then 
+    if ( -e ${imagename_local}_movieB_syn_ctf.aph ) then
+      set APH_file = ${imagename_local}_movieB_syn_ctf.aph
+    else
+      echo ":${imagename_local}_movieB_syn_ctf.aph not found."
+    endif
+  endif
+  if ( ${refine_data_type} == '6' ) then
+    if ( -e ML_result.aph ) then
+      set APH_file = ML_result.aph
+    else
+      echo ":ML_result.aph not found."
+    endif
+  endif
+  if ( ${refine_data_type} == '7' ) then
+    set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
+    set QVALS_local =  `cat ../2dx_image.cfg | grep 'set QVALS =' | cut -d\" -f2`
+    if ( ${QVALS_local} == '.' ) then
+      set QVALS_local = 0
+    endif 
+    set QVALMA_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
+    if ( ${QVALMA_loctmp} == '.' ) then
+      set QVALMA_loctmp = 0
+    endif 
+    set QVALAS_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALAS =' | cut -d\" -f2`
+    if ( ${QVALAS_loctmp} == '.' ) then
+      set QVALAS_loctmp = 0
+    endif 
+    set QVALMB_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
+    if ( ${QVALMB_loctmp} == '.' ) then
+      set QVALMB_loctmp = 0
+    endif 
+    set QVALBS_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALBS =' | cut -d\" -f2`
+    if ( ${QVALBS_loctmp} == '.' ) then
+      set QVALBS_loctmp = 0
+    endif 
+    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALAS_local  = `echo ${QVALAS_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALBS_local  = `echo ${QVALBS_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    echo ${QVAL2_local} > awk.dat
+    echo ${QVALS_local} >> awk.dat
+    echo ${QVALMA_local} >> awk.dat
+    echo ${QVALAS_local} >> awk.dat
+    echo ${QVALMB_local} >> awk.dat
+    echo ${QVALBS_local} >> awk.dat
+    #
+    # awk script to find max in CR-separated list:
+    #  {if(min=="")min=max=$1}; if($1>max) {max=$1}; if($1< min) {min=$1}; total+=$1; count+=1} END {print total/count, min, max}
+    #
+    set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
+    set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
+    \rm -f awk.dat
+    if ( ${QVAL_best} == '1' ) then
+      set APH_file = ${imagename_local}_fou_ctf.aph
+    endif
+    if ( ${QVAL_best} == '2' ) then
+      set APH_file = ${imagename_local}_syn_ctf.aph
+    endif
+    if ( ${QVAL_best} == '3' ) then
+      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+    endif
+    if ( ${QVAL_best} == '4' ) then
+      set APH_file = ${imagename_local}_movie_syn_ctf.aph
+    endif
+    if ( ${QVAL_best} == '5' ) then
+      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+    endif
+    if ( ${QVAL_best} == '6' ) then
+      set APH_file = ${imagename_local}_movieB_syn_ctf.aph
+    endif
+    if ( ! -e ${APH_file} ) then
+      set APH_file = ${imagename_local}_fou_ctf.aph
+      echo "::${APH_file} should be best, but was not found."
+    endif
+  endif
+  if ( ${refine_data_type} == '8' ) then
+    set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
+    set QVALMA_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
+    if ( ${QVALMA_loctmp} == '.' ) then
+      set QVALMA_loctmp = 0
+    endif 
+    set QVALMB_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
+    if ( ${QVALMB_loctmp} == '.' ) then
+      set QVALMB_loctmp = 0
+    endif 
+    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    echo ${QVAL2_local} > awk.dat
+    echo ${QVALMA_local} >> awk.dat
+    echo ${QVALMB_local} >> awk.dat
+    #
+    set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
+    set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
+    \rm -f awk.dat
+    if ( ${QVAL_best} == '1' ) then
+      set APH_file = ${imagename_local}_fou_ctf.aph
+    endif
+    if ( ${QVAL_best} == '2' ) then
+      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+    endif
+    if ( ${QVAL_best} == '3' ) then
+      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+    endif
+    if ( ! -e ${APH_file} ) then
+      set APH_file = ${imagename_local}_fou_ctf.aph
+      echo "::${APH_file} should be best, but was not found."
+    endif
+  endif
+  echo ":In directory ${imagename_local}: Using APH file ${APH_file}. "
+  \rm -f ${imagename_local}_ctf.aph
+  \ln -s ${APH_file} ${imagename_local}_ctf.aph
+  cd ${olddir}
+ end
 endif
 #
 #############################################################################
@@ -357,8 +537,8 @@ ${Merge_Reference_HKMAX}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
-${merge_data_type}
-${Thread_Number}
+${refine_data_type}
+${maxthread}
 ${ILIST_VAL}
 0
 eot
@@ -372,13 +552,13 @@ ${proc_2dx}/linblock "Launching refinement script. CHECK OUTPUT in LOG: origtilt
 echo "# IMAGE: SCRATCH/job_01_${scriptBfile} <CSH: First (01) refinement script>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptB.com.log <LOG: First (01) origtilt B output>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/job_01_${postprocessingfile} <CSH: First (01) refinement postprocessing script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${Thread_Number}_${scriptBfile} <CSH: Last (${Thread_Number}) refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${Thread_Number}_2dx_merge_scriptB.com.log <LOG: Last (${Thread_Number}) origtilt B output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${Thread_Number}_${postprocessingfile} <CSH: Last (${Thread_Number}) refinement postprocessing script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${maxthread}_${scriptBfile} <CSH: Last (${maxthread}) refinement script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${maxthread}_2dx_merge_scriptB.com.log <LOG: Last (${maxthread}) origtilt B output>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${maxthread}_${postprocessingfile} <CSH: Last (${maxthread}) refinement postprocessing script>" >> LOGS/${scriptname}.results
 #
 #
 foreach scriptB ( SCRATCH/job_*_${scriptBfile} ) 
-  if ( ${scriptB} != SCRATCH/job_${Thread_Number}_${scriptBfile} ) then
+  if ( ${scriptB} != SCRATCH/job_${maxthread}_${scriptBfile} ) then
     echo Background nohup ${scriptB} \> ${scriptB}.log \&
     nohup ${scriptB} > ${scriptB}.log &
   else

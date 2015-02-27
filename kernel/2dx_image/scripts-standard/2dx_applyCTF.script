@@ -19,8 +19,6 @@
 #
 # MANUAL: It uses 2dx_ctfapplyk.for, which applies CTF correction to the phases, but not the amplitudes. The correction value is added as last column to the output file, where the sign of that value shows if the phases have been inverted. The absolute value of that last column's entry shows the amplitude correction that should be applied to the amplitude - but it has not yet been applied.
 #
-# MANUAL: This makes only sense if the Amplitudes and Phases are not already CTF-corrected by some TTF correction. The script therefore automatically determines whether the data are from a TTF correction run (ttbox), or form a normal evaluation (mmbox).
-#
 # MANUAL: In order to use the movie-mode unbent APH-files, switch the "Enable movie-mode" option ON!
 #
 # DISPLAY: SYN_Unbending
@@ -41,7 +39,6 @@
 # DISPLAY: CS
 # DISPLAY: KV
 # DISPLAY: phacon
-# DISPLAY: ctf_ttf
 # DISPLAY: tempkeep
 # DISPLAY: comment
 # DISPLAY: plotres_rings
@@ -55,7 +52,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 set SYN_Unbending = ""
 set movie_enable = ""
@@ -82,7 +78,6 @@ set CS = ""
 set KV = ""
 set TLTANG = ""
 set det_tilt = ""
-set ctf_ttf = ""
 set tempkeep = ""
 set plotres_rings = ""
 set realcell = ""
@@ -112,8 +107,6 @@ echo "<<@evaluate>>"
 set date = `date`
 echo date = ${date}
 #
-set iname = ${imagename}
-#
 set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
 set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
 set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
@@ -138,14 +131,6 @@ endif
 #
 set istilt = `echo $TLTANG | awk '{if ( -15.0 < $1 && $1 < 15.0 ) {s = 0} else {s = 1}} END {print s}'`
 #
-if ( ${istilt} == '0' ) then
-  if ( ${ctf_ttf} != "CTF" ) then
-    set ctf_ttf = "CTF"
-    echo ":: WARNING: Correcting ctf_ttf to CTF."
-    echo "set ctf_ttf = ${ctf_ttf}" >> LOGS/${scriptname}.results
-  endif
-endif
-#
 set ctfplotresmax_auto = `echo ${ctfplotresmax} | awk '{ if ( $1 < 0.0001 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${ctfplotresmax_auto} == '1' ) then
   set ctfplotresmax = `echo ${RESMAX} | awk '{ if ( $1 > 5.0 ) { s = int($1 * 0.90) } else { s = $1 * 0.90 } }  END { print s }'`
@@ -158,38 +143,10 @@ set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 
 echo "<<@progress: 1>>"
 source ${proc_2dx}/2dx_makedirs 
 #
-echo "# IMAGE-IMPORTANT: "FFTIR/${iname}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: "FFTIR/${iname}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
-if ( ${ctf_ttf} == 'TTF' ) then
-  #############################################################################
-  ${proc_2dx}/linblock "No CTFAPPLY needed, since TTF correction is already done."
-  #############################################################################
-  #
-  if ( ${SYN_Unbending} == "0" ) then
-    # FouFilter Unbending result is used:
-    set outfile = ${iname}_fou_ttf.aph
-    set final_outfile = ${iname}_fou_ctf.aph
-  else
-    # Synthetical Unbending result is used:
-    set outfile = ${iname}_syn_ttf.aph
-    set final_outfile = ${iname}_syn_ctf.aph
-  endif
-  #
-  if ( ! -e APH/${outfile} ) then
-    ${proc_2dx}/protest "ERROR: APH/${outfile} does not exist."
-  endif
-  #
-  cd APH
-  \rm -f ${final_outfile}
-  \ln -s ${outfile} ${final_outfile}
-  \rm -f ${iname}_ctf.aph
-  \ln -s ${final_outfile} ${iname}_ctf.aph
-  cd ..
-  echo "# IMAGE-IMPORTANT: APH/${outfile} <APH File after TTF correction [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: APH/${final_outfile}  <Link to Final APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
-  #
-else
+
   #
   #############################################################################
   ${proc_2dx}/linblock "CTFAPPLY - to correct the microscope's CTF"
@@ -197,132 +154,120 @@ else
   #
   #
   #
-  if ( ! -e APH/${iname}_fou.aph ) then
-    if ( -e APH/${iname}.fou.nolimit.aph ) then
-      \mv -f APH/${iname}.fou.nolimit.aph  APH/${iname}_fou.aph
+  if ( ! -e APH/image_ctfcor_fou_unbent.aph ) then
+    if ( -e APH/${imagename}.fou.nolimit.aph ) then
+      \mv -f APH/${imagename}.fou.nolimit.aph  APH/image_ctfcor_fou_unbent.aph
     endif
-    if ( -e APH/${iname}_fou_nolimit.aph ) then
-      \mv -f APH/${iname}_fou_nolimit.aph  APH/${iname}_fou.aph
+    if ( -e APH/${imagename}_fou_nolimit.aph ) then
+      \mv -f APH/${imagename}_fou_nolimit.aph  APH/image_ctfcor_fou_unbent.aph
     endif
-    if ( ! -e APH/${iname}_fou.aph ) then
-      ${proc_2dx}/protest "ERROR: Neither APH/${iname}_fou.aph, nor APH/${iname}.fou.nolimit.aph, nor APH/${iname}_fou_nolimit.aph exist."
-    endif
-  endif
-
-  if ( ! -e APH/${iname}_movie_fou.aph ) then
-    if ( -e APH/${iname}_movie_fou_nolimit.aph ) then
-      \mv -f APH/${iname}_movie_fou_nolimit.aph APH/${iname}_movie_fou.aph
+    if ( ! -e APH/${imagename}_fou_unbent.aph ) then
+      ${proc_2dx}/protest "ERROR: Neither APH/image_ctfcor_fou_unbent.aph, nor APH/${imagename}.fou.nolimit.aph, nor APH/${imagename}_fou_nolimit.aph exist."
     endif
   endif
 
   echo "<<@progress: 20>>"
 
-  set CTF_infile = APH/${iname}_fou.aph
-  set CTF_outfile = APH/${iname}_fou_ctf.aph
-  set unbent_image = unbent
-  set unbent_FFT = FFTIR/image_ctfcor_unbent_fft.mrc
-  set algo = U2
-  #######################################
-  # UnbendII
-  source ${proc_2dx}/2dx_applyCTF_sub.com
-  #######################################
-  echo "# IMAGE-IMPORTANT: ${CTF_infile} <APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${CTF_outfile} <APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-  if ( ${ctfcor_imode} == "0" || ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" || ${ctfcor_imode} == "3" ) then
-    \mv -f CTFPLOT.PS PS/${iname}_unbend2_ctf.ps
-    echo "# IMAGE-IMPORTANT: PS/${iname}_unbend2_ctf.ps <PS: IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
+  set CTF_infile = APH/image_ctfcor_fou_unbent.aph
+  if ( -e ${CTF_infile} ) then
+    set CTF_outfile = APH/image_ctfcor_fou_unbent_ctf.aph
+    set unbent_image = unbent
+    set unbent_FFT = FFTIR/image_ctfcor_fou_unbent_fft.mrc
+    set algo = U2
+    set nametag = "Unb.II"
+    #######################################
+    # UnbendII
+    source ${proc_2dx}/2dx_applyCTF_sub.com
+    #######################################
+  else
+    ${proc_2dx}/protest "ERROR: ${CTF_infile} not found. First run unbending scripts."
   endif
-  \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_unbend2_canonical.ps
-  echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_unbend2_canonical.ps <PS: Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
-  \mv -f PS/2dx_plotreska_measured.ps PS/2dx_plotreska_unbend2_measured.ps
-  echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_unbend2_measured.ps <PS: Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
-  \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_unbend2.txt
-  echo "# IMAGE: SCRATCH/POWERHISTO_unbend2.txt <Histogram of Power in PS>" >> LOGS/${scriptname}.results
+
+  echo "<<@progress: 30>>"
+
+  set CTF_infile = APH/image_ctfcor_syn_unbend.aph
+  if ( -e ${CTF_infile} ) then
+    set CTF_outfile = APH/image_ctfcor_U2-Syn_ctf.aph
+    set unbent_image = SCRATCH/image_ctfcor_syn_unbent_taper
+    set unbent_FFT = SCRATCH/image_ctfcor_syn_unbent_taper_fft.mrc
+    set algo = US
+    set nametag = "U2-Syn"
+    #######################################
+    # Synthetic Reference Unbend
+    source ${proc_2dx}/2dx_applyCTF_sub.com
+    #######################################
+  else
+    ${proc_2dx}/linblock "${CTF_infile} not found."
+  endif
 
   echo "<<@progress: 40>>"
 
   if ( ${movie_enable} == "y" ) then
-    set CTF_infile = APH/${iname}_movie_fou.aph
+    set CTF_infile = APH/image_ctfcor_movie_fou.aph
     if ( -e ${CTF_infile} ) then
-      set CTF_outfile = APH/${iname}_movie_fou_ctf.aph
-      set unbent_image = frames/direct_sum_filt_upscale
-      set unbent_FFT = frames/direct_sum_fft.mrc
+      set CTF_outfile = APH/image_ctfcor_movie_fou_ctf.aph
+      set unbent_image = MovieA/direct_sum_filt_upscale
+      set unbent_FFT = MovieA/direct_sum_fft.mrc
       set algo = UMA
+      set nametag = "MovieA"
       #######################################
       # MovieA
       source ${proc_2dx}/2dx_applyCTF_sub.com
       #######################################
-      echo "# IMAGE-IMPORTANT: ${CTF_infile} <MovieMode APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
-      echo "# IMAGE-IMPORTANT: ${CTF_outfile} <MovieMode APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-      if ( ${ctfcor_imode} == "0" || ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" || ${ctfcor_imode} == "3" ) then
-        \mv -f CTFPLOT.PS PS/${iname}_movie_ctf.ps
-        echo "# IMAGE-IMPORTANT: PS/${iname}_movie_ctf.ps <PS: MovieMode IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
-      endif
-      \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_movie_canonical.ps
-      echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_movie_canonical.ps <PS: MovieMode Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
-      \mv -f PS/2dx_plotreska_measured.ps PS/2dx_plotreska_movie_measured.ps
-      echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_movie_measured.ps <PS: MovieMode Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
-      \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_movie.txt
-      echo "# IMAGE: SCRATCH/POWERHISTO_movie.txt <MovieMode Histogram of Power in PS>" >> LOGS/${scriptname}.results
     else
       ${proc_2dx}/linblock "ERROR: ${CTF_infile} not found."
     endif
 
+    set CTF_infile = APH/image_ctfcor_movie_syn.aph
+    if ( -e ${CTF_infile} ) then
+      set CTF_outfile = APH/image_ctfcor_movie_syn_ctf.aph
+      set unbent_image = MovieA/direct_sum_syn_filt_upscale
+      set unbent_FFT = MovieA/direct_sum_syn_fft.mrc
+      set algo = UMAS
+      set nametag = "MA_Syn"
+      #######################################
+      # MovieAS
+      source ${proc_2dx}/2dx_applyCTF_sub.com
+      #######################################
+    else
+      ${proc_2dx}/linblock "${CTF_infile} not found."
+    endif
+
     echo "<<@progress: 60>>"
 
-    set CTF_infile = APH/${iname}_movieB_fou.aph
+    set CTF_infile = APH/image_ctfcor_movieB_fou.aph
     if ( -e ${CTF_infile} ) then
-      set frame_folder = framesB
-      set CTF_outfile = APH/${iname}_movieB_fou_ctf.aph
-      set unbent_image = ${frame_folder}/direct_sum_filt_upscale
-      set unbent_FFT = ${frame_folder}/direct_sum_fft.mrc
+      set CTF_outfile = APH/image_ctfcor_movieB_fou_ctf.aph
+      set unbent_image = MovieB/direct_sum_filt_upscale
+      set unbent_FFT = MovieB/direct_sum_fft.mrc
       set algo = UMB
+      set nametag = "MovieB"
       #######################################
       # MovieB
       source ${proc_2dx}/2dx_applyCTF_sub.com
       #######################################
-      echo "# IMAGE-IMPORTANT: ${CTF_infile} <MovieModeB APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
-      echo "# IMAGE-IMPORTANT: ${CTF_outfile} <MovieModeB APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-      if ( ${ctfcor_imode} == "0" || ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" || ${ctfcor_imode} == "3" ) then
-        \mv -f CTFPLOT.PS PS/${iname}_movieB_ctf.ps
-        echo "# IMAGE-IMPORTANT: PS/${iname}_movieB_ctf.ps <PS: MovieModeB IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
-      endif
-      \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_movieB_canonical.ps
-      echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_movieB_canonical.ps <PS: MovieModeB Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
-      \mv -f PS/2dx_plotreska_measured.ps PS/2dx_plotreska_movieB_measured.ps
-      echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_movieB_measured.ps <PS: MovieModeB Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
-      \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_movieB.txt
-      echo "# IMAGE: SCRATCH/POWERHISTO_movieB.txt <MovieModeB Histogram of Power in PS>" >> LOGS/${scriptname}.results
     else
       ${proc_2dx}/linblock "ERROR: ${CTF_infile} not found."
+    endif
+
+    set CTF_infile = APH/image_ctfcor_movieB_syn.aph
+    if ( -e ${CTF_infile} ) then
+      set CTF_outfile = APH/image_ctfcor_movieB_syn_ctf.aph
+      set unbent_image = MovieB/direct_sum_syn_filt_upscale
+      set unbent_FFT = MovieB/direct_sum_syn_fft.mrc
+      set algo = UMBS
+      set nametag = "MB_Syn"
+      #######################################
+      # MovieBS
+      source ${proc_2dx}/2dx_applyCTF_sub.com
+      #######################################
+    else
+      ${proc_2dx}/linblock "${CTF_infile} not found."
     endif
   endif
   
   echo "<<@progress: 80>>"
 
-  if ( ${SYN_Unbending} != "0" ) then
-    set CTF_infile = APH/${iname}_syn.aph
-    if ( -e ${CTF_infile} ) then
-      set CTF_outfile = APH/${iname}_syn_ctf.aph
-      #######################################
-      # SynRef
-      source ${proc_2dx}/2dx_applyCTF_sub.com
-      #######################################
-      echo "# IMAGE-IMPORTANT: ${CTF_infile} <SynRef APH File before CTF correction [H,K,A,P,IQ,Back]>" >> LOGS/${scriptname}.results
-      echo "# IMAGE-IMPORTANT: ${CTF_outfile} <SynRef APH File after CTF correction [H,K,A,P(CTF phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
-      \mv -f CTFPLOT.PS PS/${iname}_syn_ctf.ps
-      echo "# IMAGE-IMPORTANT: PS/${iname}_syn_ctf.ps <PS: SynRef IQ Plot after CTF correction>" >> LOGS/${scriptname}.results
-      \mv -f PS/2dx_plotreska_canonical.ps PS/2dx_plotreska_syn_canonical.ps
-      echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_syn_canonical.ps <PS: SynRef Resolution Circle Plot from canonical lattice>" >> LOGS/${scriptname}.results
-      \mv -f PS/2dx_plotreska_measured.ps PS/2dx_plotreska_syn_measured.ps
-      echo "# IMAGE-IMPORTANT: PS/2dx_plotreska_syn_measured.ps <PS: SynRef Resolution Circle Plot from measured lattice>" >> LOGS/${scriptname}.results
-      \mv SCRATCH/POWERHISTO.txt SCRATCH/POWERHISTO_syn.txt
-      echo "# IMAGE: SCRATCH/POWERHISTO_syn.txt <SynRef Histogram of Power in PS>" >> LOGS/${scriptname}.results
-    else
-      ${proc_2dx}/linblock "ERROR: ${CTF_infile} not found."
-    endif
-  endif
- 
   echo ":: QVAL2, QVALMA, QVALMB, QVALS = "${QVAL2},${QVALMA},${QVALMB},${QVALS}
 
   if ( ${movie_enable} == "y" ) then
@@ -330,34 +275,33 @@ else
     if ( ${movie_better} == "1" ) then
       set movie_better = `echo ${QVALMA} ${QVALMB} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
       if ( ${movie_better} == "1" ) then
-        ${proc_2dx}/linblock "Using MovieModeA unbent data, since these have the higher QVAL"
-        set final_outfile = ${iname}_movie_fou_ctf.aph
+        ${proc_2dx}/linblock "Using MovieA unbent data, since these have the higher QVAL"
+        set final_outfile = image_ctfcor_movie_fou_ctf.aph
       else
-        ${proc_2dx}/linblock "Using MovieModeB unbent data, since these have the higher QVAL"
-        set final_outfile = ${iname}_movieB_fou_ctf.aph
+        ${proc_2dx}/linblock "Using MovieB unbent data, since these have the higher QVAL"
+        set final_outfile = image_ctfcor_movieB_fou_ctf.aph
       endif
     else
       set movie_better = `echo ${QVALMB} ${QVAL2} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
       if ( ${movie_better} == "1" ) then
-        ${proc_2dx}/linblock "Using MovieModeB unbent data, since these have the higher QVAL"
-        set final_outfile = ${iname}_movieB_fou_ctf.aph
+        ${proc_2dx}/linblock "Using MovieB unbent data, since these have the higher QVAL"
+        set final_outfile = image_ctfcor_movieB_fou_ctf.aph
       else
-        ${proc_2dx}/linblock "Using Unbend2 (not MovieMode) unbent data, since these have the higher QVAL"
-        set final_outfile = ${iname}_fou_ctf.aph
+        ${proc_2dx}/linblock "Using Unbend2 (not Movie) unbent data, since these have the higher QVAL"
+        set final_outfile = image_ctfcor_fou_ctf.aph
       endif
     endif
   else
     ${proc_2dx}/linblock "Using Unbend2 unbent data"
-    set final_outfile = ${iname}_fou_ctf.aph
+    set final_outfile = image_ctfcor_fou_ctf.aph
   endif
 
   cd APH
-  \rm -f ${iname}_ctf.aph
-  \ln -s ${final_outfile} ${iname}_ctf.aph
+  \rm -f image_ctfcor_ctf.aph
+  \ln -s ${final_outfile} image_ctfcor_ctf.aph
   cd ..
-  echo "# IMAGE-IMPORTANT: APH/${iname}_ctf.aph <Link to Final APH File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: APH/image_ctfcor_ctf.aph <Link to best APH File [H,K,A,P(CTF Phase flipped),IQ,Back,CTF]>" >> LOGS/${scriptname}.results
   #
-endif
 #
 #
 echo "set CTF_done = y" >> LOGS/${scriptname}.results

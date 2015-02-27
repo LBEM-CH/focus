@@ -359,13 +359,13 @@ endif
 echo "# IMAGE: ${prefix}centric.hkl <TXT: ${prename}APH file after CENTRIC>" >> LOGS/${scriptname}.results
 #
 #############################################################################
-${proc_2dx}/linblock "f2mtz - to translate avrg.hkl into ${imagename}.mtz"
+${proc_2dx}/linblock "f2mtz - to translate avrg.hkl into ${imagename}_MRClefthanded.mtz"
 #############################################################################
 #
 set infile = ${prefix}centric.hkl
 #
 echo "Calling now:"
-echo "${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}.mtz"
+echo "${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}_MRClefthanded.mtz"
 echo "TITLE  P1 map ${imagename}, ${date}"
 echo "CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}"
 echo "SYMMETRY ${CCP4_SYM}"
@@ -391,7 +391,7 @@ if ( ${rotate_to_Z} == "yes" ) then
   ${bin_2dx}/2dx_permutate.exe < ${infile} > ${prefix}${imagename}-permutated.hkl
   echo "# IMAGE: ${prefix}${imagename}-permutated.hkl <TXT: APH file after permutation>" >> LOGS/${scriptname}.results
   #
-  ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}-permutated.hkl hklout ${prefix}${imagename}.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}-permutated.hkl hklout ${prefix}${imagename}_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
 CELL ${celly} ${ALAT} ${cellx} 90.0 90.0 90.0
 SYMMETRY ${CCP4_SYM}
@@ -404,7 +404,7 @@ eof
   # \rm -f ${prefix}${imagename}-permutated.hkl
   #
 else
-  ${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -428,16 +428,16 @@ else
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "mtzdump - to look at ${prefix}${imagename}.mtz"
+${proc_2dx}/linblock "mtzdump - to look at ${prefix}${imagename}_MRClefthanded.mtz"
 #############################################################################
 #
-${bin_ccp4}/mtzdump hklin ${prefix}${imagename}.mtz << eot
+${bin_ccp4}/mtzdump hklin ${prefix}${imagename}_MRClefthanded.mtz << eot
 NREF 100
 END
 eot
 #
 #############################################################################
-${proc_2dx}/linblock "fft - to transform ${prefix}${imagename}.mtz into SCRATCH/scratch1.map"
+${proc_2dx}/linblock "fft - to transform ${prefix}${imagename}_MRClefthanded.mtz into SCRATCH/scratch1.map"
 #############################################################################
 #
 # contrast for grey plot
@@ -450,7 +450,7 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   set AXIS = "Z,X,Y"
   #
-  ${bin_ccp4}/fft hklin ${prefix}${imagename}.mtz mapout SCRATCH/scratch1.map  << eot
+  ${bin_ccp4}/fft hklin ${prefix}${imagename}_MRClefthanded.mtz mapout SCRATCH/scratch1.map  << eot
 LABIN F1=F PHI=PHI ##
 PROJECTION
 AXIS ${AXIS}
@@ -468,7 +468,7 @@ else
   #
   set AXIS = "X,Y,Z"
   #
-  ${bin_ccp4}/fft hklin ${prefix}${imagename}.mtz mapout SCRATCH/scratch1.map  << eot
+  ${bin_ccp4}/fft hklin ${prefix}${imagename}_MRClefthanded.mtz mapout SCRATCH/scratch1.map  << eot
 LABIN F1=F PHI=PHI ##
 PROJECTION
 AXIS ${AXIS}

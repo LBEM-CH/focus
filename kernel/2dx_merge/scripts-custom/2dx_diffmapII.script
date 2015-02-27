@@ -585,8 +585,8 @@ set CTYPOUTval = "H H H F P W"
 #
 # map1
 set infile = APH/sym2D_${map1}.hkl
-set outfile = SCRATCH/${map1}.mtz
-\rm -f SCRATCH/${map1}.mtz
+set outfile = SCRATCH/${map1}_MRClefthanded.mtz
+\rm -f SCRATCH/${map1}_MRClefthanded.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${map1} , ${date}
@@ -600,29 +600,29 @@ SKIP 0
 END
 eof
 #
-\rm -f ${map1}.mtz 
+\rm -f ${map1}_MRClefthanded.mtz 
 ${bin_ccp4}/sftools << eot
 read ${outfile} 
 merge
 expand
-write ${map1}.mtz
+write ${map1}_MRClefthanded.mtz
 end
 eot
 #TODO: This is still just a test
 #${bin_ccp4}/sftools << eot
-#read ${map1}.mtz
+#read ${map1}_MRClefthanded.mtz
 #calc P col PHI = col 2 3.14159 +
 #delete col 2
-#write ${map1}_shifted.mtz
+#write ${map1}_shifted_MRClefthanded.mtz
 #END
 #eot
 #
-#\rm -f ${map1}.mtz 
-#cp ${map1}_shifted.mtz ${map1}.mtz
+#\rm -f ${map1}_MRClefthanded.mtz 
+#cp ${map1}_shifted_MRClefthanded.mtz ${map1}_MRClefthanded.mtz
 # sigmap1
 set infile = APH/sym2D_${map1}_sig.hkl
-set outfile = SCRATCH/${map1}_sig.mtz
-\rm -f SCRATCH/${map1}_sig.mtz
+set outfile = SCRATCH/${map1}_sig_MRClefthanded.mtz
+\rm -f SCRATCH/${map1}_sig_MRClefthanded.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map1_name} , ${date}
@@ -636,19 +636,19 @@ SKIP 0
 END
 eof
 #
-\rm -f ${map1}_sig.mtz 
+\rm -f ${map1}_sig_MRClefthanded.mtz 
 ${bin_ccp4}/sftools << eot
 read ${outfile} 
 merge
 expand
-write ${map1}_sig.mtz
+write ${map1}_sig_MRClefthanded.mtz
 end
 eot
 #
 # sigmap2
 set infile = APH/sym2D_${map2}_sig.hkl
-set outfile = SCRATCH/${map2}_sig.mtz
-\rm -f SCRATCH/${map2}_sig.mtz
+set outfile = SCRATCH/${map2}_sig_MRClefthanded.mtz
+\rm -f SCRATCH/${map2}_sig_MRClefthanded.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${diff_map2_name} , ${date}
@@ -662,17 +662,17 @@ SKIP 0
 END
 eof
 #
-\rm -f ${map2}_sig.mtz 
+\rm -f ${map2}_sig_MRClefthanded.mtz 
 ${bin_ccp4}/sftools << eot
 read ${outfile} 
 merge
 expand
-write ${map2}_sig.mtz
+write ${map2}_sig_MRClefthanded.mtz
 end
 eot
 #
-echo "# IMAGE: ${map1}_sig.mtz <MTZ: map 1 merged full 2D data>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${map2}_sig.mtz <MTZ: map 2 merged full 2D data>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${map1}_sig_MRClefthanded.mtz <MTZ: map 1 merged full 2D data>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${map2}_sig_MRClefthanded.mtz <MTZ: map 2 merged full 2D data>" >> LOGS/${scriptname}.results
 #
 ##############################################################################
 ${proc_2dx}/linblock  "Inverse fft to get map" 
@@ -709,7 +709,7 @@ set ylim_2x = `echo ${grid_min_b} | awk '{ s = 2*$1 - 1} END { print s }'`
 # map1
 \rm -f ${map1}.map
 #
-${bin_ccp4}/fft HKLIN  ${map1}.mtz MAPOUT  ${map1}.map \
+${bin_ccp4}/fft HKLIN  ${map1}_MRClefthanded.mtz MAPOUT  ${map1}.map \
     << eot
 LABIN F1=F PHI=PHI W=FOM
 TITLE "${RESMAX} EM map for ${map1}"
@@ -726,7 +726,7 @@ eot
 # sigmap1
 \rm -f ${map1}_sig.map
 #
-${bin_ccp4}/fft HKLIN  ${map1}_sig.mtz MAPOUT  ${map1}_sig.map \
+${bin_ccp4}/fft HKLIN  ${map1}_sig_MRClefthanded.mtz MAPOUT  ${map1}_sig.map \
     << eot
 LABIN F1=F PHI=PHI W=FOM
 TITLE "${RESMAX} EM map for ${diff_map1_name}"
@@ -743,7 +743,7 @@ eot
 # sigmap2
 \rm -f ${map2}_sig.map
 #
-${bin_ccp4}/fft HKLIN  ${map2}_sig.mtz MAPOUT  ${map2}_sig.map \
+${bin_ccp4}/fft HKLIN  ${map2}_sig_MRClefthanded.mtz MAPOUT  ${map2}_sig.map \
     << eot
 LABIN F1=F PHI=PHI W=FOM
 TITLE "${RESMAX} EM map for ${diff_map2_name}"
@@ -771,12 +771,12 @@ if( "${diffmap_sig_class}" == "empirical" ) then
             set postfix = ` echo ${merge_aph} | awk -F /  '{print $NF}' | sed s/.aph//`
             source ${proc_2dx}/2dx_from_merge2map.com
             set map_postfix = "${merge2map_output_dir}/map_${postfix}"
-            if ( ! -e ${map_postfix}.mtz ) then
-                ${proc_2dx}/protest "${map_postfix}.mtz does not exist."
+            if ( ! -e ${map_postfix}_MRClefthanded.mtz ) then
+                ${proc_2dx}/protest "${map_postfix}_MRClefthanded.mtz does not exist."
             endif
             \rm -f ${map_postfix}.map 
             #
-            ${bin_ccp4}/fft HKLIN ${map_postfix}.mtz  MAPOUT ${map_postfix}.map << eot
+            ${bin_ccp4}/fft HKLIN ${map_postfix}_MRClefthanded.mtz  MAPOUT ${map_postfix}.map << eot
             LABIN F1=F PHI=PHI W=FOM
             TITLE "${RESMAX} EM map for ${postfix}"
             PROJECTION

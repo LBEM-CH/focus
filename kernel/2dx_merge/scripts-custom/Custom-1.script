@@ -24,7 +24,6 @@ set proc_2dx = ""
 set bin_2dx = ""
 set app_2dx_image = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 #$end_vars
 #
@@ -118,6 +117,10 @@ foreach dirfile ( ${dirlist} )
   # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
   # echo "set overwrite = y" >> LOGS/${scriptname}.results
   # echo "set ccunbend_program = 0" >> LOGS/${scriptname}.results
+
+  # echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
+  # echo "set SYN_maska = 20" >> LOGS/${scriptname}.results
+  # echo "set do3quadserch = n" >> LOGS/${scriptname}.results
 
   # echo "set defocus_res_max = 5.0" >> LOGS/${scriptname}.results
   # echo "set imageorigin = 7" >> LOGS/${scriptname}.results

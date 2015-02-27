@@ -49,64 +49,107 @@ if ( ${scriptname} == "2dx_merge" ) then
   #   set APH_file = ${imagename_local}_fou_ctf.aph
   # endif
   if ( ${merge_data_type} == '1' ) then
+    if ( ! -e ${imagename_local}_ctf.aph ) then
+      set APH_file = ${imagename_local}_syn_ctf.aph
+    else
+      echo ":${imagename_local}_syn_ctf.aph not found."
+    endif
+  endif
+  if ( ${merge_data_type} == '2' ) then
     if ( -e ${imagename_local}_movie_fou_ctf.aph ) then
       set APH_file = ${imagename_local}_movie_fou_ctf.aph
     else
       echo ":${imagename_local}_movie_fou_ctf.aph not found."
     endif
   endif
-  if ( ${merge_data_type} == '2' ) then 
+  if ( ${merge_data_type} == '3' ) then
+    if ( -e ${imagename_local}_movie_syn_ctf.aph ) then
+      set APH_file = ${imagename_local}_movie_syn_ctf.aph
+    else
+      echo ":${imagename_local}_movie_syn_ctf.aph not found."
+    endif
+  endif
+  if ( ${merge_data_type} == '4' ) then 
     if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then
       set APH_file = ${imagename_local}_movieB_fou_ctf.aph
     else
       echo ":${imagename_local}_movieB_fou_ctf.aph not found."
     endif
   endif
-  if ( ${merge_data_type} == '3' ) then
-    set QVAL2_local  =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
-    set QVALMA_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
-    if ( ${QVALMA_loctmp} == '.' ) then
-      set QVALMA_loctmp = 0
-    endif 
-    set QVALMB_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
-    if ( ${QVALMB_loctmp} == '.' ) then
-      set QVALMB_loctmp = 0
-    endif 
-    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    set QVAL_best = `echo ${QVAL2_local} ${QVALMA_local} ${QVALMB_local} | awk '{ if ( $1 > $2 && $1 > $3 ) { s = 1 } else if ( $2 > $1 && $2 > $3 ) { s = 2 } else { s = 3 } } END { print s }'`
-    if ( ${QVAL_best} == '3' ) then
-      if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then
-        set APH_file = ${imagename_local}_movieB_fou_ctf.aph
-      else
-        set QVAL_best = "1"
-      endif
-    endif
-    if ( ${QVAL_best} == '2' ) then
-      if ( -e ${imagename_local}_movie_fou_ctf.aph ) then
-        set APH_file = ${imagename_local}_movie_fou_ctf.aph
-      else
-        set QVAL_best = "1"
-      endif
-    endif
-    if ( ${QVAL_best} == '1' ) then
-      if ( -e ${imagename_local}_fou_ctf.aph ) then
-        set APH_file = ${imagename_local}_fou_ctf.aph
-      else
-        echo "::${imagename_local}_movie_fou_ctf.aph not found."
-      endif
+  if ( ${merge_data_type} == '5' ) then 
+    if ( -e ${imagename_local}_movieB_syn_ctf.aph ) then
+      set APH_file = ${imagename_local}_movieB_syn_ctf.aph
+    else
+      echo ":${imagename_local}_movieB_syn_ctf.aph not found."
     endif
   endif
-  if ( ${merge_data_type} == '4' ) then
+  if ( ${merge_data_type} == '6' ) then
     if ( -e ML_result.aph ) then
       set APH_file = ML_result.aph
     else
       echo ":ML_result.aph not found."
     endif
   endif
-  if ( ${merge_data_type} == '5' ) then
-    if ( ! -e ${imagename_local}_ctf.aph ) then
+  if ( ${merge_data_type} == '7' || ${merge_data_type} == '9' ) then
+    set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
+    set QVALS_local =  `cat ../2dx_image.cfg | grep 'set QVALS =' | cut -d\" -f2`
+    if ( ${QVALS_local} == '.' ) then
+      set QVALS_local = 0
+    endif 
+    set QVALMA_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
+    if ( ${QVALMA_loctmp} == '.' ) then
+      set QVALMA_loctmp = 0
+    endif 
+    set QVALAS_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALAS =' | cut -d\" -f2`
+    if ( ${QVALAS_loctmp} == '.' ) then
+      set QVALAS_loctmp = 0
+    endif 
+    set QVALMB_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
+    if ( ${QVALMB_loctmp} == '.' ) then
+      set QVALMB_loctmp = 0
+    endif 
+    set QVALBS_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALBS =' | cut -d\" -f2`
+    if ( ${QVALBS_loctmp} == '.' ) then
+      set QVALBS_loctmp = 0
+    endif 
+    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALAS_local  = `echo ${QVALAS_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    set QVALBS_local  = `echo ${QVALBS_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
+    echo ${QVAL2_local} > awk.dat
+    echo ${QVALS_local} >> awk.dat
+    echo ${QVALMA_local} >> awk.dat
+    echo ${QVALAS_local} >> awk.dat
+    echo ${QVALMB_local} >> awk.dat
+    echo ${QVALBS_local} >> awk.dat
+    #
+    # awk script to find max in CR-separated list:
+    #  {if(min=="")min=max=$1}; if($1>max) {max=$1}; if($1< min) {min=$1}; total+=$1; count+=1} END {print total/count, min, max}
+    #
+    set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
+    set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
+    \rm -f awk.dat
+    if ( ${QVAL_best} == '1' ) then
+      set APH_file = ${imagename_local}_fou_ctf.aph
+    endif
+    if ( ${QVAL_best} == '2' ) then
       set APH_file = ${imagename_local}_syn_ctf.aph
+    endif
+    if ( ${QVAL_best} == '3' ) then
+      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+    endif
+    if ( ${QVAL_best} == '4' ) then
+      set APH_file = ${imagename_local}_movie_syn_ctf.aph
+    endif
+    if ( ${QVAL_best} == '5' ) then
+      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+    endif
+    if ( ${QVAL_best} == '6' ) then
+      set APH_file = ${imagename_local}_movieB_syn_ctf.aph
+    endif
+    if ( ! -e ${APH_file} ) then
+      set APH_file = ${imagename_local}_fou_ctf.aph
+      echo "::${APH_file} should be best, but was not found."
     endif
   endif
   echo ":In directory ${imagename_local}: Using APH file ${APH_file}. "
@@ -143,12 +186,12 @@ set merge_data_type_local = ${merge_data_type}
 if ( ${merge_data_type} == '9' ) then
   if ( ${scriptname} == "2dx_finalmerge" ) then
     echo ":: "
-    ${proc_2dx}/linblock "Using UNBENDII and MOVIEA and MOVIEB results simultaneously (this will take some time)."
+    ${proc_2dx}/linblock "Using all APH files simultaneously (this will take some time)."
     echo ":: "
     set merge_data_type_local = ${merge_data_type}
   else
     set merge_data_type_local = 3
-    ${proc_2dx}/linblock "Using the APH file with the best QVAL from UNBENDII, MOVIEA, or MOVIEB."
+    ${proc_2dx}/linblock "Using the APH file with the best QVAL."
   endif
 endif
 #
@@ -531,11 +574,11 @@ ${proc_2dx}/linblock "f2mtz - to transform APH file into MTZ file for 2D run"
 #############################################################################  
 #
 set infile = APH/sym2D.hkl
-\rm -f merge2D.mtz
+\rm -f merge2D_MRClefthanded.mtz
 #
 # SYMMETRY ${CCP4_SYM}
 #
-${bin_ccp4}/f2mtz hklin ${infile} hklout merge2D.mtz << eof
+${bin_ccp4}/f2mtz hklin ${infile} hklout merge2D_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${savedir}, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY 1
@@ -546,10 +589,10 @@ SKIP 0
 END
 eof
 #
-cp -f merge2D.mtz merge2Dref.mtz
+cp -f merge2D_MRClefthanded.mtz merge2Dref_MRClefthanded.mtz
 #
-echo "# IMAGE-IMPORTANT: merge2D.mtz <MTZ: Merged full reciproc. space 2D data>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: merge2Dref.mtz <MTZ: Merged full reciproc. space 2D data (copy for ref)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge2D_MRClefthanded.mtz <MTZ: Merged full reciproc. space 2D data>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge2Dref_MRClefthanded.mtz <MTZ: Merged full reciproc. space 2D data (copy for ref)>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 #

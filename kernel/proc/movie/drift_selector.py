@@ -25,8 +25,8 @@ if __name__ == "__main__":
 	
 	print "drift_selector.py"
 
-	if len(sys.argv) != 14 and len(sys.argv) != 13:
-		sys.exit("Usage: drift_selector.py <Data-File-IN> <Data-File-OUT> <drift_tolerance> <PROFDATA> <smoothing_number> <number_of_frames> <imagesidelength> <original_mask> <new_mask> <4 x lattice>")
+	if len(sys.argv) != 15 and len(sys.argv) != 14:
+		sys.exit("Usage: drift_selector.py <Data-File-IN> <Data-File-OUT> <drift_tolerance> <PROFDATA> <smoothing_number> <number_of_frames> <imagesidelength> <original_mask> <new_mask> <4 x lattice> <frames_folder>")
 
 	infile = sys.argv[1]
 	outfile = sys.argv[2]
@@ -35,19 +35,21 @@ if __name__ == "__main__":
 	N = int(sys.argv[5])
 	IFRAMS = int(sys.argv[6])
 	imagesidelength = int(sys.argv[7]) 
-	if len(sys.argv) == 14:
+	if len(sys.argv) == 15:
 		mask_infile = sys.argv[8]
 		mask_outfile = sys.argv[9]
 		lat_u1 = float(sys.argv[10])
 		lat_u2 = float(sys.argv[11])
 		lat_v1 = float(sys.argv[12])
 		lat_v2 = float(sys.argv[13])
+		frames_dir = sys.argv[14]
 	else:
 		mask_outfile = sys.argv[8]
 		lat_u1 = float(sys.argv[9])
 		lat_u2 = float(sys.argv[10])
 		lat_v1 = float(sys.argv[11])
 		lat_v2 = float(sys.argv[12])
+		frames_dir = sys.argv[13]
 
 
 	print ":IFRAMS = ",IFRAMS
@@ -196,7 +198,7 @@ if __name__ == "__main__":
 	oldPROF.close()
 
 	for iframe in range(1,IFRAMS+1):
-		proffile = 'frames/PROFDATA_' + str(int(iframe)) + '.dat'
+		proffile = frames_dir + '/PROFDATA_' + str(int(iframe)) + '.dat'
 		print "Opening ", proffile
 		data_file_out = open(proffile,'w')
 		for line in oldlines[0:7]:

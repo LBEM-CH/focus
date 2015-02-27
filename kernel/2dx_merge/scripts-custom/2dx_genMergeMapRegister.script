@@ -64,7 +64,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 set tempkeep = ""
 set RESMIN = ""
@@ -248,15 +247,15 @@ if ( ${merge_ref_num} != "0" ) then
   endif
   if ( -d REGISTERS/Reg_${merge_ref_num} ) then
     if ( ${merge_modus} == "2D" ) then
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge2D.mtz not existing in register ${merge_ref_num}."
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D_MRClefthanded.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge2D_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       endif
-      set infile = REGISTERS/Reg_${merge_ref_num}/merge2D.mtz
+      set infile = REGISTERS/Reg_${merge_ref_num}/merge2D_MRClefthanded.mtz
     else
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge3D.mtz not existing in register ${merge_ref_num}."
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3D_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       endif
-      set infile = REGISTERS/Reg_${merge_ref_num}/merge3D.mtz
+      set infile = REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz
     endif
   else
     ${proc_2dx}/protest "ERROR: Register ${merge_ref_num} does not contain data."
@@ -266,9 +265,9 @@ if ( ${merge_ref_num} != "0" ) then
 else
   ${proc_2dx}/linblock "Using the most recent merged dataset (from register 0)."
   if ( ${merge_modus} == "2D" ) then
-    set infile = merge2D.mtz
+    set infile = merge2D_MRClefthanded.mtz
   else
-    set infile = merge3D.mtz
+    set infile = merge3D_MRClefthanded.mtz
   endif
 endif
 #
@@ -285,7 +284,7 @@ echo spcgrp = ${spcgrp}
 echo CCP4_SYM = ${CCP4_SYM}
 #
 #############################################################################
-${proc_2dx}/linblock "mtzdump - to look at ${imagename}.mtz"
+${proc_2dx}/linblock "mtzdump - to look at ${imagename}_MRClefthanded.mtz"
 #############################################################################
 #
 ${bin_ccp4}/mtzdump hklin ${infile} << eot

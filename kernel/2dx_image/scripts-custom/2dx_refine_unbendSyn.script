@@ -17,7 +17,7 @@
 #
 # MANUAL: You can only use this script, after the conventional image processing with lattice and defocus determination, and unbending with Unbending-I and Unbending-II has been done, and a phase origin for merging has been determined. Only then, the synthetical reference can be created with the correct defocus, tilt and phase origin.
 #
-# MANUAL: The reference should be the result of a merging process, and should be reachable for a 2D merge dataset under "../merge/merge2D.mtz" or "../../merge/merge2D.mtz" or for a 3D merge dataset under "../merge/merge3D.mtz" or "../../merge/merge3D.mtz".
+# MANUAL: The reference should be the result of a merging process, and should be reachable for a 2D merge dataset under "../merge/merge2D_MRClefthanded.mtz" or "../../merge/merge2D_MRClefthanded.mtz" or for a 3D merge dataset under "../merge/merge3D_MRClefthanded.mtz" or "../../merge/merge3D_MRClefthanded.mtz".
 #
 # MANUAL: <B><i>This script is here provided in draft form, not yet fully tested. Please give us feedback about your user experiences with this script. We are working on improving the 2dx_merge program, which interacts with 2dx_image through this script. This part is still under development, and your experience and knowledge is most welcome for this project. </i></B>
 #
@@ -86,7 +86,6 @@ set refine_SYN_maskb_val = "5,40,2,1"
 # DISPLAY: TANGL
 # DISPLAY: radlim
 # DISPLAY: domask
-# DISPLAY: ttfcorfirst
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
@@ -94,7 +93,6 @@ set refine_SYN_maskb_val = "5,40,2,1"
 # DISPLAY: ISTEP
 # DISPLAY: IMAXCOR
 # DISPLAY: ctfrev
-# DISPLAY: ctf_ttf
 # DISPLAY: realang
 # DISPLAY: realcell
 # DISPLAY: rot90
@@ -119,7 +117,6 @@ set refine_SYN_maskb_val = "5,40,2,1"
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 set SYN_Unbending = ""
 set SYN_maska = ""
@@ -164,9 +161,7 @@ set TLTAXA = ""
 set TLTANG = ""
 set TAXA = ""
 set TANGL = ""
-set ttfcorfirst = ""
 set det_tilt = ""
-set ctf_ttf = ""
 set refori = ""
 set ISTEP = ""
 set IMAXCOR = ""
@@ -356,17 +351,6 @@ if ( ${issometilt} == '0' ) then
 else
   set issometilt = 'y'
   echo ":: Tilted."
-endif
-#
-if (${ctf_ttf} == 'CTF') then
-  if ( ${ttfcorfirst} == 'y' ) then
-    ${proc_2dx}/linblock "Treating as Non-Tilted: Correcting TTFcorFirst to NO"
-    set ttfcorfirst = 'n'
-    echo "set ttfcorfirst = n" >> LOGS/${scriptname}.results
-  endif
-  set istilt = 'n'
-else
-  echo "# WARNING: Warning: You are using TTF correction. This requires a reliable tilt geometry." >> LOGS/${scriptname}.results
 endif
 #
 set u1 = `echo ${lattice} | cut -d\, -f1`
@@ -615,45 +599,7 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 80>>"
 #
-if ( ${ttfcorfirst} == 'y' ) then
-  #############################################################################
-  #                                                                           #
-  ${proc_2dx}/linblock "CTFAPPLY - to plot IQ plot without defocus and CTF application"
-  #                                                                           #
-  #############################################################################
-  #
-  \rm -f CTFPLOT.PS
-  \rm -f PS/${imagename}_ttf_nolimit.ps
-  #
-  setenv IN  APH/${imagename}_ttf_nolimit.aph
-  setenv OUT dummy.tmp
-  ${bin_2dx}/2dx_ctfapplyk.exe << eot
-${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
-0.0,0.0,0.0,${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${imagename}_ttf_nolimit, ${date}, No Limit, Nyquist=${ctfplotresmax}
-${phacon}
-${RESMIN},0.0
-${ctfcor_imode}
-eot
-  #
-  if ( ! -e CTFPLOT.PS ) then
-    ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
-  else
-    \mv -f CTFPLOT.PS PS/${imagename}_ttf_nolimit.ps
-    echo "# IMAGE: PS/${imagename}_ttf_nolimit.ps <PS: IQ plot, no resolution limit>" >> LOGS/${scriptname}.results
-  endif
-  #
-endif
-#
 echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
-echo "set ML_done = n" >> LOGS/${scriptname}.results
-#
-if ( ${ttfcorfirst} == 'y' || ${istilt} == 'y' ) then
-  echo "set CTF_done = y" >> LOGS/${scriptname}.results
-else
-  echo "set CTF_done = n" >> LOGS/${scriptname}.results
-endif
-#
 echo "set REPROCESSING_done = y" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"

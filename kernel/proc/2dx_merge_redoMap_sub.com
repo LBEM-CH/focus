@@ -197,7 +197,7 @@ eot
 #
 set refnamecore = "REF${imagenumber}"
 set refhklfile = "APH/${refnamecore}.hkl"
-set refmtzfile = "APH/${refnamecore}.mtz"
+set refmtzfile = "APH/${refnamecore}_MRClefthanded.mtz"
 set refmap = "${imagename}_ref.mrc"
 #
 \rm -f ${refmtzfile}
@@ -340,12 +340,12 @@ endif
 #############################################################################
 #
 #############################################################################
-${proc_2dx}/lin "f2mtz - to translate avrg.hkl into ${imagename}.mtz"
+${proc_2dx}/lin "f2mtz - to translate avrg.hkl into ${imagename}_MRClefthanded.mtz"
 #############################################################################
 #
 set infile = avrg.hkl
 echo "Calling now:"
-echo "${bin_ccp4}/f2mtz hklin ${infile} hklout ${imagename}.mtz"
+echo "${bin_ccp4}/f2mtz hklin ${infile} hklout ${imagename}_MRClefthanded.mtz"
 echo "TITLE  P1 map ${imagename}, ${date}"
 echo "CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}"
 echo "SYMMETRY ${CCP4_SYM}"
@@ -354,7 +354,7 @@ echo "CTYPOUT H H H F P W"
 echo "FILE ${infile}"
 echo "END"
 #
-${bin_ccp4}/f2mtz hklin ${infile} hklout ${imagename}.mtz << eof
+${bin_ccp4}/f2mtz hklin ${infile} hklout ${imagename}_MRClefthanded.mtz << eof
 TITLE  P1 map ${imagename}, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -366,7 +366,7 @@ END
 eof
 #
 #############################################################################
-${proc_2dx}/lin "fft - to transform ${imagename}.mtz into SCRATCH/scratch1.map"
+${proc_2dx}/lin "fft - to transform ${imagename}_MRClefthanded.mtz into SCRATCH/scratch1.map"
 #############################################################################
 #
 set AXIS = "X,Y,Z"
@@ -376,7 +376,7 @@ set scale = 1
 echo "scale = ${scale}"
 #
 \rm -f SCRATCH/scratch1.map.mrc
-${bin_ccp4}/fft hklin ${imagename}.mtz mapout SCRATCH/scratch1.map  << eot
+${bin_ccp4}/fft hklin ${imagename}_MRClefthanded.mtz mapout SCRATCH/scratch1.map  << eot
 LABIN F1=F PHI=PHI ##
 PROJECTION
 AXIS ${AXIS}

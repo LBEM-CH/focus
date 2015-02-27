@@ -25,7 +25,6 @@
 #
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
-# DISPLAY: SYN_Unbending
 # DISPLAY: maska
 # DISPLAY: boxa1
 # DISPLAY: boxa2	
@@ -54,7 +53,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
-set SYN_Unbending = ""
 set PHASEORI_done = ""
 set boxa1 = ""
 set boxa2 = ""
@@ -89,7 +87,6 @@ set ISTEP = ""
 set ISTEP_h = ""
 set IMAXCOR = ""
 set det_tilt = ""
-set ctf_ttf = ""
 set RMAG = ""
 set LCOLOR = ""
 set ccunbend_program = ""
@@ -106,14 +103,6 @@ echo "<<@evaluate>>"
 source ${proc_2dx}/initialize
 #
 set iname = image_ctfcor
-#
-if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
-  if ( ${ctfcor_imode}x != "0x" ) then
-    ${proc_2dx}/protest "ERROR: CTF correction before unbending and Synthetic unbending cannot (yet) be done on the same time. Aborting."
-  endif
-  ${proc_2dx}/linblock "Skipping. Synthetical Reference is used instead."
-  exit
-endif
 #
 echo "<<@progress: 1>>"
 #

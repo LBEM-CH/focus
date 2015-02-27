@@ -420,7 +420,7 @@ C--------- 0 = conventional way: CTF correction done here.
 C
           IQ=IQIN
 C-------- This sets IQ to 5 for high resolution spots with ctf < 0.15.
-          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
+C          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
 C
         else if(CTFCOR.eq.1)then
 C
@@ -446,7 +446,7 @@ C
 C--------- 3 = Original image has been Wiener filtered. Here nothing is to be done.
 C
           IQ=IQIN
-          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
+C          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
           CNTRST = -1.0
 C
         endif

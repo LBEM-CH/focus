@@ -68,7 +68,12 @@ C
         BX = C2 + 2.0*C2*(C1/C3)*((C1-C4)/C3) - C1
         CX = C2*((C1-C4)/C3)*((C1-C4)/C3)
         DISC = BX*BX - 4.0*AX*CX
-        IF (DISC .LT. 0.0) GO TO 200
+        IF (DISC .LT. 0.0) then
+          write(*,'(''C1,C2,C3,C4 = '',4F12.3)')C1,C2,C3,C4
+          write(*,'(''AX,BX,CX    = '',3F12.3)')AX,BX,CX
+          write(*,'(''DISC        = '',F12.3)')DISC
+          GO TO 200
+        endif
         PSQ1 = (-BX + DSQRT(DISC))/(2.0*AX)
         PSQ2 = (-BX - DSQRT(DISC))/(2.0*AX)
         IF (PSQ1 .LT. 0.0 .AND. PSQ2 .LT. 0.0) GO TO 210
@@ -228,16 +233,8 @@ C
           write(*,'('':: Left-handed lattice, revertings sign of TLTAXA'')')
           TLTAXA=-TLTAXA
         endif
-        write(*,'('': Sign of TLTANG is '',I6)')ISGNTLTANG
         write(*,'('': TLTAXIS = '',F15.5)')TLTAXIS
         write(*,'('': TLTAXA = '',F15.5)')TLTAXA
-C
-        if(OLDTLTAXIS.ge.0.0)THEN
-          ISGNTLTAXIS = 1
-        else
-          ISGNTLTAXIS = -1
-        endif
-        write(*,'('': Sign of OLDTLTAXIS is '',I6)')ISGNTLTAXIS
 C
         TAXA = abs(PHI)
         if(TLTAXA.lt.0.0)TAXA=-TAXA
@@ -250,18 +247,22 @@ C
         else
           ISGNAISABOVE = 1
         endif
-        write(*,'('': ISIGNAISABOVE is if A is above TLTAXIS = '',I6)')
-     1    ISGNAISABOVE
 C
         if(TLTAXA.ge.0.0)then
           ISGNTLTAXA = 1
         else
           ISGNTLTAXA = -1
         endif
-        write(*,'('': ISIGNTLTAXA = '',I6)')ISGNTLTAXA
 C
-        TANGL = TLTANG * ISGNAISABOVE * ISGNTLTAXA * IHAND * ISGNTLTANG
-        write(*,'('':: TANGL = '',F15.5)')TANGL
+        write(*,'('': Sign change of TLTANG needed  = '',I6)')ISGNTLTANG
+        write(*,'('': AISABOVE (A is above TLTAXIS) = '',I6)')ISGNAISABOVE
+        write(*,'('': ISIGNTLTAXA                   = '',I6)')ISGNTLTAXA
+        write(*,'('': IHAND (given in input params) = '',I6)')IHAND
+C
+        TLTANG = TLTANG * ISGNTLTANG
+        TANGL = TLTANG * ISGNAISABOVE * ISGNTLTAXA * IHAND
+        write(*,'('': TLTANG = '',F15.5)')TLTANG
+        write(*,'('': TANGL  = '',F15.5)')TANGL
 C
         OPEN(UNIT=15,FILE=cname,STATUS='NEW')
         write(15,'('' TLTAXIS = '',/,F15.5)')TLTAXIS
@@ -271,13 +272,20 @@ C
         write(15,'('' TANGL   = '',/,F15.5)')TANGL
         CLOSE(15)
 C
+        GO TO 900
 C       GO TO 103
+C
 CHENN<
 200     WRITE (6,201)
-201     FORMAT (' DISCRIMINANT LESS THAN ZERO')
+201     FORMAT (/,/,'::ERROR in 2dx_emtilt: DISCRIMINANT LESS THAN ',
+     .     'ZERO',/,/)
         STOP
 210     WRITE (6,211)
-211     FORMAT(' TWO NEGATIVE ROOTS - SOMETHING WRONG')
+211     FORMAT(/,/,'::ERROR in 2dx_emtilt: TWO NEGATIVE ROOTS - ',
+     .     'SOMETHING WRONG',/,/)
         STOP
+C
+ 900    continue
+        stop
         END
 

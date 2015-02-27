@@ -20,83 +20,48 @@ endif
 ${proc_2dx}/${lincommand} "2dx_unbend2_sub.com: Starting round ${locround}..."  
 #
 #############################################################################
-#   MASKTRANA - to mask the FFT in order to create the reference map.       #
-#   TTMASK    - same, but with TTF-convolution.                             #
+${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT in order to create the reference map"
 #############################################################################  
-  #
-  if ( ${ctf_ttf} == 'CTF' ) then
-    #
-    \rm -f SCRATCH/${iname}_unbend2_fft_msk.mrc
-    #
-    setenv IN  FFTIR/${iname}_unbend2_fft.mrc
-    setenv OUT SCRATCH/${iname}_unbend2_fft_msk.mrc
-    setenv SPOTS ${nonmaskimagename}.spt
-    ${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT in order to create the reference map"
-    #
-    echo 2 T T F	
-    echo 1	
-    echo ${lattice},-50,50,-50,50,${rmax},1 
-    #
-    ${bin_2dx}/2dx_masktrana.exe << eot
+#
+#
+\rm -f SCRATCH/${iname}_fou_unbend2_fft_msk.mrc
+#
+setenv IN  FFTIR/${iname}_fou_unbend2_fft.mrc
+setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk.mrc
+setenv SPOTS ${nonmaskimagename}.spt
+#
+echo 2 T T F	
+echo 1	
+echo ${lattice},-50,50,-50,50,${rmax},1 
+#
+${bin_2dx}/2dx_masktrana.exe << eot
 2 T T F				! ISHAPE= 1(CIRC),2(GAUSS CIRC),OR 3(RECT) HOLE, IAMPLIMIT(T or F)
 ${holeb}			! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice},-50,50,-50,50,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
-    #
-    echo "<<@progress: 10>>"
-    echo "2dx_masktrana.exe finished."
-    #
-    if ( ${locround} == '1' ) then
-      echo "# IMAGE-IMPORTANT: FFTIR/${iname}_unbend2_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
-    endif
-    #
-  else
-    #
-    ${proc_2dx}/${lincommand} "using holeb of ${holeb}"
-    #
-    \cp -f FFTIR/${iname}_unbend2_fft.mrc SCRATCH/${iname}_unbend2_fft_msk.mrc
-    #
-    \rm -f TMP234439.dat
-    #
-    setenv INOUT  SCRATCH/${iname}_unbend2_fft_msk.mrc
-    #
-    ${proc_2dx}/${lincommand} "TTMASK - to mask the FFT with TTFcor for reference"
-    #
-    echo "Using parameters:"
-    echo ${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${KV}
-    echo ${defocus},${TLTAXIS},${TLTANG}
-    echo 1                          
-    echo ${holeb},${holeb}       
-    echo ${lattice},-50,50,-50,50,${rmax},1,8 
-    echo TMP234439.dat
-    #
-    ${bin_2dx}/2dx_ttmask.exe << eot
-${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${KV}
-${defocus},${TLTAXIS},${TLTANG}   	! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-1                          		! ISHAPE= 1(circ),2(gauss circ),3(rect)
-${holeb},${holeb}       		! radius hole if circular, X,Y half-edge-len if rect
-${lattice},-50,50,-50,50,${rmax},1,8   	! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
-TMP234439.dat
-`cat ${nonmaskimagename}.spt`
-eot
-    #
-    echo "<<@progress: 10>>"
-  endif
+#
+echo "<<@progress: 10>>"
+echo "2dx_masktrana.exe finished."
+#
+if ( ${locround} == '1' ) then
+  echo "# IMAGE-IMPORTANT: FFTIR/${iname}_fou_unbend2_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
+endif
+  #
   #
   #############################################################################
   ${proc_2dx}/${lincommand} "FFTTRANS - to calculate real-space image of masked FFT"     
   ############################################################################# 
   #
-  \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft.mrc
-  setenv IN  SCRATCH/${iname}_unbend2_fft_msk.mrc
-  setenv OUT SCRATCH/${iname}_unbend2_fft_msk_fft.mrc
+  \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft.mrc
+  setenv IN  SCRATCH/${iname}_fou_unbend2_fft_msk.mrc
+  setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk_fft.mrc
   ${bin_2dx}/2dx_fftrans.exe 
   #
   if ( ${locround} == '1' ) then
-    echo "# IMAGE: SCRATCH/${iname}_unbend2_fft_msk_fft.mrc <Unbent image, Fourier filtered>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/${iname}_fou_unbend2_fft_msk_fft.mrc <Unbent image, Fourier filtered>" >> LOGS/${scriptname}.results
   endif
   if ( ${tempkeep} != 'y' ) then
-    \rm -f SCRATCH/${iname}_unbend2_fft_msk.mrc
+    \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk.mrc
   endif
   #
   echo "<<@progress: 15>>"
@@ -106,12 +71,12 @@ eot
   ${proc_2dx}/${lincommand} "LABEL - to cut out small box in center of reference image (1)"
   #############################################################################  
   #
-  \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_cro.mrc
+  \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro.mrc
   echo "patlabel = ${patlabel}"
   ${bin_2dx}/labelh.exe << eot
-SCRATCH/${iname}_unbend2_fft_msk_fft.mrc
+SCRATCH/${iname}_fou_unbend2_fft_msk_fft.mrc
 1
-SCRATCH/${iname}_unbend2_fft_msk_fft_cro.mrc
+SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro.mrc
 ${patlabel}
 eot
   echo "<<@progress: 25>>"
@@ -120,19 +85,19 @@ eot
   ${proc_2dx}/${lincommand} "AUTOCORRL - to calculate autocorrelation of reference center (1)"
   #############################################################################  
   #
-  \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut.mrc
-  setenv IN  SCRATCH/${iname}_unbend2_fft_msk_fft_cro.mrc
-  setenv OUT SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut.mrc
+  \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut.mrc
+  setenv IN  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro.mrc
+  setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut.mrc
   ${bin_2dx}/autocorrl.exe << eot
 20
 eot
   #
   if ( ${locround} == '1' ) then
-    echo "# IMAGE: SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut.mrc <Autocorrelation Function of Reference>" >> LOGS/${scriptname}.results 
+    echo "# IMAGE: SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut.mrc <Autocorrelation Function of Reference>" >> LOGS/${scriptname}.results 
   endif
   #
   if ( ${tempkeep} != 'y' ) then
-    \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_cro.mrc
+    \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro.mrc
   endif
   #
   #
@@ -140,27 +105,27 @@ eot
   ${proc_2dx}/${lincommand} "LABEL - to extract autocorrelation peak"
   #############################################################################
   #
-  \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+  \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
   ${bin_2dx}/labelh.exe << eot
-SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut.mrc
+SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut.mrc
 1
-SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
 210,310,210,310
 eot
   #
   echo "<<@progress: 30>>"
   if ( ${locround} == '1' ) then
-    echo "# IMAGE: SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut.mrc <Autocorrelation of Reference>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc <Autocorrelation of Reference, center>" >> LOGS/${scriptname}.results 
+    echo "# IMAGE: SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut.mrc <Autocorrelation of Reference>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc <Autocorrelation of Reference, center>" >> LOGS/${scriptname}.results 
   endif
   #
   #############################################################################
   ${proc_2dx}/${lincommand} "BOXIMAGE - to box out reference for cross-correlation"
   #############################################################################
   #
-  \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box1.mrc
-  setenv IN  SCRATCH/${iname}_unbend2_fft_msk_fft.mrc
-  setenv OUT SCRATCH/${iname}_unbend2_fft_msk_fft_box1.mrc
+  \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box1.mrc
+  setenv IN  SCRATCH/${iname}_fou_unbend2_fft_msk_fft.mrc
+  setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box1.mrc
   ${bin_2dx}/2dx_boximage.exe << eot
 -1 0		!  NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
 0 0		! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
@@ -176,14 +141,14 @@ eot
   \rm boximage.tmp
   #
   if ( ${locround} == '1' ) then
-    echo "# IMAGE: SCRATCH/${iname}_unbend2_fft_msk_fft_box1.mrc <Reference 1>" >> LOGS/${scriptname}.results 
+    echo "# IMAGE: SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box1.mrc <Reference 1>" >> LOGS/${scriptname}.results 
   endif
   #
   if ( ${treatspotscan} == 'y' ) then
     #
-    \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box2.mrc
-    setenv IN  SCRATCH/${iname}_unbend2_fft_msk_fft.mrc
-    setenv OUT SCRATCH/${iname}_unbend2_fft_msk_fft_box2.mrc
+    \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box2.mrc
+    setenv IN  SCRATCH/${iname}_fou_unbend2_fft_msk_fft.mrc
+    setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box2.mrc
     ${proc_2dx}/${lincommand} "BOXIMAGE - again, here for SpotScan treatment"
     ${bin_2dx}/2dx_boximage.exe << eot
 -1 0             !  NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
@@ -198,30 +163,30 @@ eot
     \rm boximage.tmp
     #
     if ( ${locround} == '1' ) then
-      echo "# IMAGE: SCRATCH/${iname}_unbend2_fft_msk_fft_box2.mrc <Reference 2>" >> LOGS/${scriptname}.results 
+      echo "# IMAGE: SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box2.mrc <Reference 2>" >> LOGS/${scriptname}.results 
     endif
     #
   endif
   echo "<<@progress: 40>>"
   #
   if ( ${tempkeep} != 'y' ) then
-    \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft.mrc
+    \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft.mrc
   endif
   #
   #############################################################################
   ${proc_2dx}/${lincommand} "FFTRANS - to calculate FFT from reference patch"
   #############################################################################  
   #
-  \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box1_fft.mrc
-  setenv IN  SCRATCH/${iname}_unbend2_fft_msk_fft_box1.mrc
-  setenv OUT SCRATCH/${iname}_unbend2_fft_msk_fft_box1_fft.mrc
+  \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box1_fft.mrc
+  setenv IN  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box1.mrc
+  setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box1_fft.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
   if ( ${treatspotscan} == 'y' ) then
     #
-    \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box2_fft.mrc
-    setenv IN  SCRATCH/${iname}_unbend2_fft_msk_fft_box2.mrc
-    setenv OUT SCRATCH/${iname}_unbend2_fft_msk_fft_box2_fft.mrc
+    \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box2_fft.mrc
+    setenv IN  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box2.mrc
+    setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box2_fft.mrc
     ${bin_2dx}/2dx_fftrans.exe
     #
   endif
@@ -247,90 +212,21 @@ eot
   #
   ${proc_2dx}/${lincommand} "using maskb of ${maskb} in round ${locround}"
   #
-  if ( ${ctf_ttf} == 'CTF' ) then
-    \rm -f FFTIR/${iname}_fft_msk.mrc
-    \rm -f SCRATCH/${iname}_fft_msk.mrc
-    setenv IN  FFTIR/${iname}_fft.mrc
-    setenv OUT SCRATCH/${iname}_fft_msk.mrc
-    setenv SPOTS ${nonmaskimagename}.spt
-    #
-    ${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT of the image"
-    ${bin_2dx}/2dx_masktrana.exe << eot
+  \rm -f FFTIR/${iname}_fft_msk.mrc
+  \rm -f SCRATCH/${iname}_fft_msk.mrc
+  setenv IN  FFTIR/${iname}_fft.mrc
+  setenv OUT SCRATCH/${iname}_fft_msk.mrc
+  setenv SPOTS ${nonmaskimagename}.spt
+  #
+  ${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT of the image"
+  ${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${maskb}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice},-50,50,-50,50,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
-    #
-  else
-    #
-    \cp -f FFTIR/${iname}_fft.mrc SCRATCH/${iname}_fft_msk.mrc
-    \rm -f TMP234440.dat 
-    setenv INOUT  SCRATCH/${iname}_fft_msk.mrc
-    #
-    if ( ${ttfcorfirst} == 'n' ) then
-      ${proc_2dx}/${lincommand} "TTMASK - to mask the FFT of the image with TTF-correction"
-      ${proc_2dx}/${lincommand} "-------- only the spots of the SpotList are treated"
-      ${bin_2dx}/2dx_ttmask.exe << eot
-${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${KV}
-${defocus},${TLTAXIS},${TLTANG}   	! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-1       				! ISHAPE= 1(circ),2(gauss circ),3(rect),4(circ,maxrad)
-${maskb},${maskb} 			! radius hole if circular, X,Y half-edge-len if rect
-${lattice},-50,50,-50,50,${rmax},1,8 	! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
-TMP234440.dat
-`cat ${nonmaskimagename}.spt`
-eot
-      #
-    else
-      #
-      ${proc_2dx}/${lincommand} "TTMASK - to mask the FFT of the image with TTF-correction"
-      ${proc_2dx}/${lincommand} "-------- The entire image has to be treated in order not to loose data"
-      #
-      # ISHAPE = 4 is a new option, which uses the hard-edge circular mask, and automatically
-      # calculates the maximally possible radius for the masking spots, so that almost no 
-      # spot masking occurs. This is used to TTF correct the entire image, before the unbending.
-      #
-      ${bin_2dx}/2dx_ttmask.exe << eot
-${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${KV}
-${defocus},${TLTAXIS},${TLTANG}         ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-4                                       ! ISHAPE= 1(circ),2(gauss circ),3(rect),4(circ,maxrad)
-${maskb},${maskb}                       ! radius hole if circular, X,Y half-edge-len if rect
-${lattice},-50,50,-50,50,${rmax},0,8       ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE,NUMSPOT
-TMP234440.dat
-eot
-      #
-    endif
-    #
-  endif
   #
   if ( ${locround} == '1' ) then
     echo "# IMAGE: SCRATCH/${iname}_fft_msk.mrc <maskb-Masked FFT of Image>" >> LOGS/${scriptname}.results 
-  endif
-  echo "<<@progress: 55>>"
-  #
-  #############################################################################
-  #  FFTRANS - to calculate image after TTF correction                        #
-  #############################################################################
-  #
-  if ( ${ttfcorfirst} == 'y' ) then
-    ${proc_2dx}/${lincommand} "FFTRANS - to calculate image after TTF correction"
-    \rm -f     SCRATCH/${iname}_fft_msk_fft.mrc
-    setenv IN  SCRATCH/${iname}_fft_msk.mrc
-    setenv OUT SCRATCH/${iname}_fft_msk_fft.mrc
-    ${bin_2dx}/2dx_fftrans.exe
-    #
-    ${proc_2dx}/${lincommand} "LABEL - to produce BYTE format of TTF corrected image"
-    \rm -f     SCRATCH/${iname}_ttf.mrc
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/${iname}_fft_msk_fft.mrc
--3
-SCRATCH/${iname}_ttf.mrc
-eot
-    \rm -f SCRATCH/${iname}_fft_msk_fft.mrc
-    # 
-    if ( ${locround} == '1' ) then
-      echo "# IMAGE: SCRATCH/${iname}_ttf.mrc <Image after TTF correction>" >> LOGS/${scriptname}.results 
-    endif
-    #
   endif
   #
   echo "<<@progress: 60>>"
@@ -343,7 +239,7 @@ eot
   #
   \rm -f SCRATCH/${iname}_CCmap21_fft.mrc
   setenv IN1 SCRATCH/${iname}_fft_msk.mrc
-  setenv IN2 SCRATCH/${iname}_unbend2_fft_msk_fft_box1_fft.mrc
+  setenv IN2 SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box1_fft.mrc
   setenv OUT SCRATCH/${iname}_CCmap21_fft.mrc
   ${bin_2dx}/twofile.exe << eot
 2		! ICOMB = 2
@@ -354,7 +250,7 @@ eot
     #
     \rm -f SCRATCH/${iname}_CCmap22_fft.mrc
     setenv IN1 SCRATCH/${iname}_fft_msk.mrc
-    setenv IN2 SCRATCH/${iname}_unbend2_fft_msk_fft_box2_fft.mrc
+    setenv IN2 SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box2_fft.mrc
     setenv OUT SCRATCH/${iname}_CCmap22_fft.mrc
     ${proc_2dx}/${lincommand} "TWOFILE - again, second for SpotScan treatment"
     ${bin_2dx}/twofile.exe << eot
@@ -373,8 +269,8 @@ eot
   endif
   #
   \rm -f SCRATCH/${iname}_fft_msk.mrc
-  \rm SCRATCH/${iname}_unbend2_fft_msk_fft_box1_fft.mrc
-  \rm -f SCRATCH/${iname}_unbend2_fft_msk_fft_box2_fft.mrc
+  \rm SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box1_fft.mrc
+  \rm -f SCRATCH/${iname}_fou_unbend2_fft_msk_fft_box2_fft.mrc
   echo "<<@progress: 65>>"
   #
   #############################################################################
@@ -418,7 +314,7 @@ eot
   #
   \rm -f SCRATCH/errors${iname}.dat
   \rm -f ${iname}_profile.dat
-  setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+  setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
   setenv PROFDATA ${iname}_profile.dat
   setenv ERRORS   SCRATCH/errors${iname}.dat
   #
@@ -478,7 +374,7 @@ eot
   #
   \rm -f SCRATCH/errout${iname}.dat
   \rm -f ${iname}_profile.dat
-  setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+  setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
   setenv PROFDATA ${iname}_profile.dat
   setenv ERRORS   SCRATCH/errors${iname}.dat
   setenv ERROUT   SCRATCH/errout${iname}.dat
@@ -603,7 +499,7 @@ eot
     #
     #
     \rm -f ${iname}_profile.dat
-    setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+    setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
     setenv PROFDATA ${iname}_profile.dat
     setenv ERRORS   SCRATCH/errout${iname}.dat
     #
@@ -789,7 +685,7 @@ eot
   # CCUNBEND - to unbend the image                                            #
   #############################################################################
   #
-  \rm -f SCRATCH/${iname}_unbend2_notap.mrc
+  \rm -f SCRATCH/${iname}_fou_unbend2_notap.mrc
   setenv CCORDATA ${iname}_profile.dat
   \rm -f SCRATCH/ccunbend-table-${iname}.dat
   setenv TABLEOUT SCRATCH/ccunbend-table-${iname}.dat
@@ -839,19 +735,18 @@ eot
   #
   \rm -f fort.17
   #
-  if ( ${ttfcorfirst} == 'n' ) then
-    #
-    if ( ${ccunbend_program} == "1" ) then
+  #
+  if ( ${ccunbend_program} == "1" ) then
       ${proc_2dx}/${lincommand} "2dx_ccunbendh - to unbend the original image"
       ${bin_2dx}/2dx_ccunbendh.exe << eot
 ${iname}.mrc
 ${IMAXCOR},${ISTEP_h},${NNUM},${ROFFSET}	 !IMAXCOR,ISTEP,NNUM,ROFFSET
 0.001,${facthresha},${RMAG} !EPS,FACTOR,RMAG
-SCRATCH/${iname}_unbend2_notap.mrc
+SCRATCH/${iname}_fou_unbend2_notap.mrc
 UNBENT,PASS,2,${date}
 eot
       #
-    else
+  else
       #
       ${proc_2dx}/${lincommand} "2dx_ccunbendk - to unbend the original image"
       ${bin_2dx}/2dx_ccunbendk.exe << eot
@@ -859,7 +754,7 @@ ${iname}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${iname}, UNBEND2, ${date}
-SCRATCH/${iname}_unbend2_notap.mrc
+SCRATCH/${iname}_fou_unbend2_notap.mrc
 UNBENT,PASS,2,${date}
 eot
       #
@@ -884,43 +779,9 @@ eot
       #
       echo "# IMAGE-IMPORTANT: SCRATCH/${iname}_CCmap21_unbent.mrc <CCmap, unbent>" >> LOGS/${scriptname}.results 
       #
-    endif
-    #
-    \rm -f fort.17
-    #
-  else
-    #
-    if ( ${ccunbend_program} == "1" ) then
-      ${proc_2dx}/${lincommand} "2dx_ccunbendh - to unbend the TTF-corrected image"
-      ${bin_2dx}/2dx_ccunbendh.exe << eot
-SCRATCH/${iname}_ttf.mrc
-${IMAXCOR},${ISTEP_h},${NNUM},${ROFFSET}	 !IMAXCOR,ISTEP,NNUM,ROFFSET
-0.001,${facthresha},${RMAG} !EPS,FACTOR,RMAG
-SCRATCH/${iname}_unbend2_notap.mrc
-UNBENT,PASS,2,${date}
-eot
-      #
-    else
-      #
-      ${bin_2dx}/2dx_ccunbendk.exe << eot
-SCRATCH/${iname}_ttf.mrc
-${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T                !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}        !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
-${iname}, UNBEND2, ${date}
-SCRATCH/${iname}_unbend2_notap.mrc
-UNBENT,PASS,2,${date}
-eot
-      #
-    endif
-    #
-    \rm -f fort.17
-    #
-    if ( ${tempkeep} == 'n' ) then
-      \rm SCRATCH/${iname}_ttf.mrc
-    endif
-    #
   endif
   #
+  \rm -f fort.17
   \mv -f CCPLOT.PS PS/${iname}_ccunbend2.ps
   if ( ${locround} == '1' ) then
     echo "# IMAGE-IMPORTANT: PS/${iname}_ccunbend2.ps <PS: Vector Plot for Unbending>"  >> LOGS/${scriptname}.results 
@@ -934,13 +795,13 @@ eot
     ${proc_2dx}/${lincommand} "apply_filter_Fourier.py - to perform Weiner filtration on unbent image"
     #############################################################################
     #
-    python ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_unbend2_notap_ctf.mrc ${ctfcor_noise}
+    python ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_fou_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc ${ctfcor_noise}
     if ( ${ctfcor_imode} == "2" ) then
       echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF**2 file (for correction)>" >> LOGS/${scriptname}.results 
     else
       echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF file (for correction)>" >> LOGS/${scriptname}.results 
     endif
-    echo "# IMAGE: SCRATCH/${iname}_unbend2_notap_ctf.mrc <Unbent image, CTF-corrected>" >> LOGS/${scriptname}.results 
+    echo "# IMAGE: SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc <Unbent image, CTF-corrected>" >> LOGS/${scriptname}.results 
     #
   endif
   #
@@ -951,9 +812,9 @@ eot
   \rm -f unbent.mrc
   #
   if ( ${ctfcor_imode} == "2"  &&  ${final_round} == "y" ) then
-    setenv IN  SCRATCH/${iname}_unbend2_notap_ctf.mrc
+    setenv IN  SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc
   else
-    setenv IN  SCRATCH/${iname}_unbend2_notap.mrc
+    setenv IN  SCRATCH/${iname}_fou_unbend2_notap.mrc
   endif
   setenv OUT unbent.mrc
   ${bin_2dx}/2dx_taperedgek.exe << eot
@@ -961,7 +822,7 @@ eot
 eot
   #
   if ( ${tempkeep} == 'n' ) then
-    \rm -f SCRATCH/${iname}_unbend2_notap.mrc
+    \rm -f SCRATCH/${iname}_fou_unbend2_notap.mrc
   endif
   #
   #
@@ -969,9 +830,9 @@ eot
   ${proc_2dx}/${lincommand} "FFTRANS - to calculate FFT from image after unbending"
   #############################################################################
   #
-  \rm -f FFTIR/${iname}_unbend2_fft.mrc
+  \rm -f FFTIR/${iname}_fou_unbend2_fft.mrc
   setenv IN  unbent.mrc
-  setenv OUT FFTIR/${iname}_unbend2_fft.mrc
+  setenv OUT FFTIR/${iname}_fou_unbend2_fft.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
   if ( ${locround} == '1' ) then
@@ -979,116 +840,36 @@ eot
   endif
   #
   if ( ${locround} == '1' ) then
-    echo "# IMAGE-IMPORTANT: FFTIR/${iname}_unbend2_fft.mrc <FFT of Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
+    echo "# IMAGE-IMPORTANT: FFTIR/${iname}_fou_unbend2_fft.mrc <FFT of Unbent and Edge-Tapered Image>" >> LOGS/${scriptname}.results 
   endif
   #
   echo "<<@progress: 93>>"
   #
-  #############################################################################
-  #  MMBOX - evaluate data for  merging                             #
-  #  TTBOX (T-JOBB) - to read out amplitudes and phases from 2nd unbent image #
-  #############################################################################
   #
+  #############################################################################
+  ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES"
+  #############################################################################
   \rm -f SCRATCH/TMP9873.dat
+  set inimage = FFTIR/${iname}_fou_unbend2_fft.mrc
+  \rm -f APH/${iname}_fou_unbent.aph
   #
-  if ( ${ctf_ttf} == 'CTF' && ${ttfcorfirst} == 'n' ) then
-    #
-    set inimage = FFTIR/${iname}_unbend2_fft.mrc
-    #
-    \rm -f APH/${imagename}_fou.aph
-    #
-    ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES"
-    ${bin_2dx}/2dx_mmboxa.exe << eot
+  ${bin_2dx}/2dx_mmboxa.exe << eot
 ${inimage}
 ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou.aph
+APH/${iname}_fou_unbent.aph
 SCRATCH/TMP9873.dat
 U2
 ${refposix},${refposiy}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
-    #
-    echo "# IMAGE-IMPORTANT: APH/${imagename}_fou.aph <APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
-    #
-  else
-    #############################################################################
-    #
-    if ( ${ttfcorfirst} == 'n' ) then
-      #
-      \rm -f APH/${imagename}_fou_ttf.aph
-      #
-      ${proc_2dx}/${lincommand} "TTBOXA - to read out AMPs and PHASES with TTF-correction"
-      ${bin_2dx}/2dx_ttboxk.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
-${imagenumber} ${iname}, Unbend2, ${date}
-Y                        ! generate grid from lattice
-N                        ! generate points from lattice
-N                        ! list points as calculated
-Y                        ! plot output
-${imagesidelength},${imagesidelength},${stepdigitizer},${magnification},${CS},${KV} ! ISIZEX,ISIZEY,DSTEP,MAG,CS,KV
-${defocus},${TLTAXIS},${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
-2,0,50,50,19,19          ! IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_ttf.aph
-SCRATCH/TMP9873.dat
-U2
-200.0,3.0,${refposix},${refposiy},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
-${lattice}                  ! reciprocal lattice vectors in pixels
-eot
-      #
-      echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf.aph <APH File after TTF correction [H,K,A,P,IQ,Back,0])>" >> LOGS/${scriptname}.results
-      #
-      cd APH
-      \rm -f ${imagename}_fou_ctf.aph
-      \ln -s ${imagename}_fou_ttf.aph ${imagename}_fou_ctf.aph
-      cd ..
-      #
-      \mv -f TTPLOT.PS PS/${iname}.ttplot_unbend2.ps
-      if ( ${locround} == '1' ) then
-        echo "# IMAGE-IMPORTANT: PS/${iname}.ttplot_unbend2.ps <PS: IQ Plot after TTF correction>" >> LOGS/${scriptname}.results 
-      endif
-      #
-    else
-      #
-      #############################################################################
-      #
-      \rm -f APH/${imagename}_fou_ttf.aph
-      #
-      ${proc_2dx}/${lincommand} "MMBOXA - to read out AMPs and PHASES without TTF-correction"
-      ${proc_2dx}/${lincommand} "         (because image is already TTF corrected)"
-      ${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${iname}_unbend2_fft.mrc
-${imagenumber} ${iname}, Unbend2, ${date}
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_fou_ttf.aph
-SCRATCH/TMP9873.dat
-U2
-${refposix},${refposiy}           ! XORIG,YORIG
-200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}                         ! Lattice vectors
-eot
-      #
-      echo "# IMAGE-IMPORTANT: APH/${imagename}_fou_ttf.aph <APH File after TTF correction [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
-      #
-    endif
-    #
-    cd APH
-    \rm -f ${imagename}_fou_ctf.aph
-    \ln -s ${imagename}_fou_ttf.aph ${imagename}_fou_ctf.aph
-    \rm -f ${imagename}_ttf.aph
-    \ln -s ${imagename}_fou_ttf.aph ${imagename}_ttf.aph
-    cd ..
-    #
-    echo "# IMAGE-IMPORTANT: APH/${imagename}_ctf.aph <Link to Final APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
-    # 
-  endif
+  #
+  echo "# IMAGE-IMPORTANT: APH/${iname}_fou_unbent.aph <APH File [H,K,A,P,IQ,Back,0]>" >> LOGS/${scriptname}.results
+  echo ${ctfcor_imode} > APH/${iname}_fou_unbent.aph_ctfcor_imode
   #
   echo "# MASKB: "${maskb}
   echo "# BOXB: "${boxb1}

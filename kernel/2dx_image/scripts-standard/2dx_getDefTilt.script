@@ -90,7 +90,6 @@ set phacon = ""
 set det_defocus = ""
 set det_tilt = ""
 set det_tlt_alg = ""
-set ctf_ttf = ""
 set TLTAXIS = ""
 set TLTAXA = ""
 set TLTANG = ""
@@ -161,7 +160,6 @@ echo RESMIN = ${RESMIN}
 echo RESMAX = ${RESMAX}
 echo phacon = ${phacon}
 echo det_tilt = ${det_tilt}
-echo ctf_ttf = ${ctf_ttf}
 #
 # set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
 # set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
@@ -454,10 +452,17 @@ eot
     echo "# IMAGE: TMP_positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
     echo "# IMAGE: TMP_runfile_windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
     #
+    if ( ! -l CUT ) then
+      \rm -rf CUT
+    endif
+    set olddir = $PWD
+    cd SCRATCH
     if ( ! -d CUT ) then
       \rm -fr CUT
       \mkdir CUT
-    endif 
+    endif
+    cd ${olddir}
+    \ln -s SCRATCH/CUT CUT 
     #
     source TMP_runfile_windows.txt
     #

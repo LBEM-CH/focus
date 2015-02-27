@@ -1912,6 +1912,7 @@ C
 401      FORMAT(//'  WARNING !!! - crystal tilt cannot be refined',
      .    ' unless 3D-data with NPROG = 2 or 3 is available'//)
       ENDIF
+C
       IF (IFINSH.EQ.1.OR.ICALL.GT.4.OR.NPROG.LT.2.) GO TO 400
       IF (.NOT.NTILT) GO TO 400
 C
@@ -1920,6 +1921,24 @@ C------------------------------------------------------------------------
 C------------------------------------------------------------------------
 C
 400   continue
+C
+      if(TAXA.gt.90.0)then
+        TAXA=TAXA-180.0
+        TANGL=-TANGL
+      endif
+      if(TAXA.gt.90.0)then
+        TAXA=TAXA-180.0
+        TANGL=-TANGL
+      endif
+      if(TAXA.lt.-90.0)then
+        TAXA=TAXA+180.0
+        TANGL=-TANGL
+      endif
+      if(TAXA.lt.-90.0)then
+        TAXA=TAXA+180.0
+        TANGL=-TANGL
+      endif
+C
       if(abs(ASUMI).lt.0.001)ASUMI=0.001
       IF(SCALE.LT.0.0001)SCALE=ASUM/ASUMI       ! JUMP HERE IF STEP = 0.
       WRITE(6,170) SCALE,NCOMPI,NCOMP
@@ -1963,28 +1982,6 @@ C        write(6,'(''Calling system with '',A)')cline1(1:k)
           write(6,'(''::ERROR: in 2dx_origtiltk.exe: '',
      .       ''Could not open tmp.1'')')
  414  continue
-      if(LOGOUTPUT)then
-        if(USEPYTHON)then
-          if(PYTHONFIRST)then
-            write(17,'(''# This is a Python script. '')')
-            write(17,'(''# This updates the 2dx_image.cfg files'')')
-            write(17,'(''#'')')
-            write(17,'(''import os'')')
-            PYTHONFIRST = .FALSE.
-          endif
-          write(17,'('' '')')
-          write(17,'('' '')')
-          write(17,'(''print ":Updating 2dx_image.cfg in '',A,''"'')')FILIN(1:ihen1)
-          write(17,415)FILIN(1:ihen1)
- 415      FORMAT('f = open("',A,'/2dx_image.cfg",''r'')')
-          write(17,'(''lines = []'')')
-          write(17,'(''for l in f:'')')
-        else
-          write(17,'(''<IMAGEDIR="'',A,''">'')')FILIN(1:ihen1)
-        endif
-      endif
-      write(6,'(/,/,/,'' Image Directory is '',A,/)')FILIN(1:ihen1)
-C
 C
       if (HOHRIGSH.LT.-180.0) HOHRIGSH=HOHRIGSH+360.0
       if (HOHRIGSH.GT. 180.0) HOHRIGSH=HOHRIGSH-360.0
@@ -2006,6 +2003,39 @@ C
 C
       HSHTAXA=TAXA-HORITAXA
       HSHTANGL=TANGL-HORITANGL
+C
+      if(LOGOUTPUT)then
+        if(USEPYTHON)then
+          if(PYTHONFIRST)then
+            write(17,'(''# This is a Python script. '')')
+            write(17,'(''# This updates the 2dx_image.cfg files'')')
+            write(17,'(''#'')')
+            write(17,'(''import os'')')
+            PYTHONFIRST = .FALSE.
+          endif
+          write(17,'('' '')')
+          write(17,'('' '')')
+          write(17,'(''print ":Updating 2dx_image.cfg in '',A,''"'')')FILIN(1:ihen1)
+C
+          write(cline1,'(2F12.3)')HSHMIN,HSKMIN
+          call inkomma(cline1,k1)
+          write(cline2,'(F9.3)')HSHTAXA
+          call shortshrink(cline2,k2)
+          write(cline3,'(F9.3)')HSHTANGL
+          call shortshrink(cline3,k3)
+          write(17,'(''print ":PhoriChange='',A,'', TAXA-Change='',A,
+     .     '', TANGL-Change='',A,
+     .     ''"'')')cline1(1:k1),cline2(1:k2),cline3(1:k3)
+C
+          write(17,415)FILIN(1:ihen1)
+ 415      FORMAT('f = open("',A,'/2dx_image.cfg",''r'')')
+          write(17,'(''lines = []'')')
+          write(17,'(''for l in f:'')')
+        else
+          write(17,'(''<IMAGEDIR="'',A,''">'')')FILIN(1:ihen1)
+        endif
+      endif
+      write(6,'(/,/,/,'' Image Directory is '',A,/)')FILIN(1:ihen1)
 C
       write(cline1,'(F15.2)')ERRMIN
       write(cline1,'(F15.2)')ERRESALL
@@ -2282,127 +2312,125 @@ C
 C
 C-----Calculate TLTAXIS,TLTANGL backwards from refined TAXA,TANGL:
 C
+C-----TLTANG is the tilt angle measured from the image.
+C-----TANGL  is the tilt angle of the crystal. 
+C-----These two have the same magnitude, but their sign may be different.
+C
+C-----TAXA is defined as TILTAX -> A on crystal, but in direction of A->B
+C----- "-TAXA" is defined as A -> TILTAX on crystal, but in direction of A->B
+C
+C-----TLTAXA is defined as TILTAX -> A on image, but in direction of A->B
+C-----   This is related to TAXA by cos(TANGL)
+C
+C-----ANGA is defined as X -> A on image
+C-----ANGB is defined as X -> B on image
+C
+C-----TLTAXIS is defined as X -> TILTAX on image
+C
+C
+C-----Calculate angles of vectors:
+C
       ANGA=ATAN2(rlattu2,rlattu1)/DRAD
       ANGB=ATAN2(rlattv2,rlattv1)/DRAD
 C
-      IF(REVHK.ne.0.0)then
-        RTMP=ANGA
-        ANGA=ANGB
-        ANGB=RTMP
-      endif
-C
-      IF(SGNXCH.ne.0.0)then
-        ANGB=-ANGB
-      endif
-C
-      IF(ROT90.ne.0.0)then
-        RTMP=ANGA
-        ANGA=ANGB+180
-        if(ANGA.gt.180.0)ANGA=ANGA-360.0
-        ANGB=RTMP
-      endif
-C
-      IF(ROT180.ne.0.0)then
-        ANGA=ANGA+180
-        if(ANGA.gt.180.0)ANGA=ANGA-360.0
-        ANGB=ANGB+180
-        if(ANGB.gt.180.0)ANGB=ANGB-360.0
-      endif
-C
-      IF(REVXSGN.ne.0.0)then
-        ANGA=ANGA+180
-        if(ANGA.gt.180.0)ANGA=ANGA-360.0
-      endif
+      if(ANGA.gt. 180.0)ANGA=ANGA-360.0
+      if(ANGB.gt. 180.0)ANGB=ANGB-360.0
+      if(ANGA.lt.-180.0)ANGA=ANGA+360.0
+      if(ANGB.lt.-180.0)ANGB=ANGB+360.0
 C
       IF(ABS(ANGB-ANGA).GT.180.0)THEN
         ANGB=ANGB-SIGN(360.0,ANGB-ANGA)
       endif
-C
-      if(ANGA.lt.ANGB)then
-        HAND=1.0
-      else
-        HAND=-1.0
-      endif
-C
-      IF(SGNXCH.ne.0.0)then
-        HAND=-HAND
-      endif
-C
-      IF(REVHND.ne.0.0)then
-        HAND=-HAND
-      endif
+C-----Angle between A and B is now between -180 and +180 degs.
 C
 C      write(*,'(/,'' ANGA      = '',2F12.3)')ANGA
 C      write(*,'('' ANGB      = '',2F12.3)')ANGB
 C
+C-----TTREFINE calculates TAXA from TLTAXA in the following way:
+C      DENOM = SQRT(1.0-(SIN(TLTAXA*DRAD)*SIN(TLTANGL*DRAD))**2)
+C      TAXA = RDEG*ACOS((COS(TLTAXA*DRAD))/DENOM)
+C      TAXA = SIGN(TAXA,TLTAXA)
+C
+C-----This is a mathematical solution:
       if(abs(cos(TANGL*DRAD)).gt.0.001)then
-        TLTAXA = ATAN2(TAN(TAXA*DRAD),cos(TANGL*DRAD)) / DRAD
-      else
-        write(6,'(''::TANGLE has an illegal value'')')
-        stop
+        TLTAXA = ATAN(TAN(TAXA*DRAD) / cos(TANGL*DRAD)) / DRAD
+        TLTAXA = SIGN(TLTAXA,TAXA)
+C        write(*,'(/,''1 TAXA   = '',F15.9)')TAXA
+C        write(*,'(''1 TLTAXA = '',F15.9)')TLTAXA
       endif
 C
-C-----TLTAXA should have the same sign as TAXA
-      TLTAXA = sign(TLTAXA,TAXA)
+C-----Here, we invert that numerically:
 C
-      TLTANG  = TANGL
+C      TLTAXA = CALTLTAXA(TAXA,TANGL)
+C      TLTAXA = SIGN(TLTAXA,TAXA)
 C
-C      write(*,'(''Initial TLTAXA,TANGL = '',2F12.3)')TLTAXA,TANGL
+C-----Both should get to the same result:
+C      write(*,'(''2 TLTAXA = '',F15.9)')TLTAXA
 C
-      if(HAND.gt.0.0)then
+C-----Determine direction of A->B:
+C
+      if(ANGB-ANGA.gt.0.0)then
         TLTAXIS = ANGA-TLTAXA
       else
         TLTAXIS = ANGA+TLTAXA
       endif
 C
-      if(HAND.lt.0.0)then
-        TLTANG = -TLTANG
+      write(*,'(/,'' TLTAXIS = '',F12.3)')TLTAXIS
+C
+      if(TLTAXIS.le.-90.0)then
+        TLTAXIS=TLTAXIS+180.0
       endif
-C      
-      if(TLTAXIS.gt.90.0)then
-        TLTAXIS = TLTAXIS-180.0
-        TLTANG  = -TLTANG
+      if(TLTAXIS.le.-90.0)then
+        TLTAXIS=TLTAXIS+180.0
       endif
-      if(TLTAXIS.gt.90.0)then
-        TLTAXIS = TLTAXIS-180.0
-        TLTANG  = -TLTANG
+      if(TLTAXIS.ge. 90.0)then
+        TLTAXIS=TLTAXIS-180.0
       endif
-      if(TLTAXIS.lt.-90.0)then
-        TLTAXIS = TLTAXIS+180.0
-        TLTANG  = -TLTANG
-      endif
-      if(TLTAXIS.lt.-90.0)then
-        TLTAXIS = TLTAXIS+180.0
-        TLTANG  = -TLTANG
+      if(TLTAXIS.ge. 90.0)then
+        TLTAXIS=TLTAXIS-180.0
       endif
 C
-C      write(*,'(''Final TLTAXA,TANGL = '',2F12.3)')TLTAXA,TANGL
+      write(*,'('' TLTAXIS = '',F12.3)')TLTAXIS
+C
+      IF(ANGB-ANGA.GT.0.0) THEN           
+        HAND =  1.0
+      ELSE
+        HAND = -1.0
+      ENDIF
+C
+C
+C Now get sign of crystallographic tiltangle.
+C  by first calculating whether A_IS_ABOVE the original TLTAXIS on the film.
+C
+C-----TLTAXIS is between -90.0 and 90.0
+C-----ANGA is between -180.0 and 180.0
+C
+      TLTNORM = TLTAXIS + 90.0      ! TLTNORM now GE.0 and LT.180(see above)
+      ANGACOMP= ABS(ANGA-TLTNORM)   ! Should be between 0 and 360
+      IF((ANGACOMP.GT.90.0).AND.(ANGACOMP.LT.270.0)) THEN
+        AISABOVE = -1.0
+      ELSE
+        AISABOVE =  1.0
+      ENDIF
+C
+      SIGNTLTAXA = SIGN(1.0,TLTAXA)
+C
+      TLTANG  = (AISABOVE * SIGNTLTAXA * HAND) * TANGL
+C
+      write(*,'(/'' AISABOVE   = '',F12.3)')AISABOVE
+      write(*,'('' SIGNTLTAXA = '',F12.3)')SIGNTLTAXA
+      write(*,'('' HAND       = '',F12.3)')HAND
+      write(*,'('' TLTAXIS    = '',F12.3)')TLTAXIS
+      write(*,'('' TLTNORM    = '',F12.3)')TLTNORM
+      write(*,'('' ANGA       = '',F12.3)')ANGA
+      write(*,'('' ANGACOMP   = '',F12.3)')ANGACOMP
+      write(*,'('' TLTANG     = '',F12.3)')TLTANG
+      write(*,'('' TAXA       = '',F12.3)')TAXA
+      write(*,'('' TANGL      = '',F12.3)')TANGL
+C
+C      write(*,'(''Final TLTAXIS,TLTANG = '',2F12.3)')TLTAXIS,TLTANG
 C
       if(LOGOUTPUT)then
-C          WRITE(17,'(''# '',2F15.2,30X,''HHORIORI,HKORIORI'')') 
-C     .       HHORIORI,HKORIORI
-C          WRITE(17,'(''# '',2F15.2,30X,''HSHMIN,HSKMIN'')') 
-C     .       HSHMIN,HSKMIN
-C          WRITE(17,'(''# '',2F15.2,30X,''HOHRIGSH,HOKRIGSH'')') 
-C     .       HOHRIGSH,HOKRIGSH
-C          WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
-C     .       HORITAXA,HORITANGL
-C          WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
-C     .       HSHTAXA,HSHTANGL
-C          WRITE(17,'(''# '',2F15.3,30X,''TAXA,TANGL'')')
-C     .       TAXA,TANGL
-C          WRITE(17,'(''# '',2F15.2,30X,''HORITLTH,HORITLTK'')')
-C     .       HORITLTH,HORITLTK
-C          WRITE(17,'(''# '',2F15.2,30X,''HSHTHLT,HSHTKLT'')')
-C     .       HSHTHLT,HSHTKLT
-C          WRITE(17,'(''# '',2F15.2,30X,''HTHLT,HTKLT'')')
-C     .       HTHLT,HTKLT
-C          WRITE(17,'(''# '',F15.3,I15,30X,''ERRMIN,NRESALL'')') 
-C     .       ERRMIN,NRESALL
-C          WRITE(17,'(''# '',2F15.3,30X,''HORITAXA,HORITANGL'')') 
-C     .       HORITAXA,HORITANGL
-C          WRITE(17,'(''# '',2F15.3,30X,''HSHTAXA,HSHTANGL'')') 
-C     .       HSHTAXA,HSHTANGL
 C
         write(cline1,'(F9.3)')TLTAXIS
         call shortshrink(cline1,k)
@@ -2427,19 +2455,6 @@ C
      .      ''''''set MERGE_TLTANG = "'',A,''"\n'''')'')')cline1(1:k)
         else
           write(17,'(''set MERGE_TLTANG  = "'',A,''"'')')
-     .      cline1(1:k)
-        endif
-C
-        write(cline1,'(F9.3)')TLTAXA
-        call shortshrink(cline1,k)
-        write(6,'(''new MERGE_TLTAXA  = "'',A,''"'')')cline1(1:k)
-        if(USEPYTHON)then
-          write(17,'(T8,''elif l.startswith('',
-     .      ''"set MERGE_TLTAXA "):'')')
-          write(17,'(T16,''lines.append('',
-     .      ''''''set MERGE_TLTAXA = "'',A,''"\n'''')'')')cline1(1:k)
-        else
-          write(17,'(''set MERGE_TLTAXA  = "'',A,''"'')')
      .      cline1(1:k)
         endif
 C
@@ -2489,6 +2504,32 @@ C
      .      ''''''set MERGE_TANGL = "'',A,''"\n'''')'')')cline1(1:k)
         else
           write(17,'(''set MERGE_TANGL   = "'',A,''"'')')cline1(1:k)
+        endif
+C
+        write(cline1,'(F9.3)')TLTAXIS
+        call shortshrink(cline1,k)
+        write(6,'(''new TLTAXIS = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set TLTAXIS "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set TLTAXIS = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set TLTAXIS = "'',A,''"'')')
+     .      cline1(1:k)
+        endif
+C
+        write(cline1,'(F9.3)')TLTANG
+        call shortshrink(cline1,k)
+        write(6,'(''new TLTANG  = "'',A,''"'')')cline1(1:k)
+        if(USEPYTHON)then
+          write(17,'(T8,''elif l.startswith('',
+     .      ''"set TLTANG "):'')')
+          write(17,'(T16,''lines.append('',
+     .      ''''''set TLTANG = "'',A,''"\n'''')'')')cline1(1:k)
+        else
+          write(17,'(''set TLTANG  = "'',A,''"'')')
+     .      cline1(1:k)
         endif
 C
         write(cline1,'(F9.3)')TAXA
@@ -4450,3 +4491,76 @@ C
 C
 c==========================================================
 
+      function CALTLTAXA(TAXA,TANGL)
+C
+      implicit none
+      real CALTLTAXA
+      real TAXA,TANGL
+      real DRAD,RDEG
+      real TLTAXA,TLTANGL,RTAXA
+      real RMIN,RNBEST,RBEST,RDIST
+      integer i0,i1,ISTEP
+C
+      real CALTAXA
+C
+      DRAD = 3.141592654 / 180.0
+      RDEG = 180.0 / 3.141592654
+C
+C
+C-----TTREFINE calculates TAXA from TLTAXA in the following way:
+C      DENOM = SQRT(1.0-(SIN(TLTAXA*DRAD)*SIN(TLTANGL*DRAD))**2)
+C      TAXA = RDEG*ACOS((COS(TLTAXA*DRAD))/DENOM)
+C      TAXA = SIGN(TAXA,TLTAXA)
+C
+C-----Here, we invert that function
+C
+      RMIN=1e10
+      RNBEST=1e10
+C
+      RDIST = 90.0
+      RBEST = 0.0
+      ISTEP = 10
+      do i0 = 1,8
+        do i1 = -ISTEP,ISTEP
+          TLTAXA = RBEST + i1 * RDIST / ISTEP
+          RTAXA = CALTAXA(TLTAXA,TANGL)
+          if(abs(RTAXA-TAXA).lt.RMIN)then
+            RMIN=abs(RTAXA-TAXA)
+            RNBEST=TLTAXA
+          endif
+        enddo
+        RDIST = RDIST / ISTEP
+        RBEST = RNBEST
+      enddo
+C   
+      CALTLTAXA = RBEST
+C
+      return 
+      end
+C
+C==============================================================
+C
+      function CALTAXA(TLTAXA,TLTANGL)
+C
+      implicit none
+      real CALTAXA
+      real TLTAXA,TLTANGL
+      real DENOM,DRAD,RDEG,TAXA
+C
+      DRAD = 3.141592654 / 180.0
+      RDEG = 180.0 / 3.141592654
+C
+C-----TTREFINE calculates TAXA from TLTAXA in the following way:
+C      DENOM = SQRT(1.0-(SIN(TLTAXA*DRAD)*SIN(TLTANGL*DRAD))**2)
+C      TAXA = RDEG*ACOS((COS(TLTAXA*DRAD))/DENOM)
+C      TAXA = SIGN(TAXA,TLTAXA)
+C
+      DENOM = SQRT(1.0-(SIN(TLTAXA*DRAD)*SIN(TLTANGL*DRAD))**2)
+      TAXA = RDEG*ACOS((COS(TLTAXA*DRAD))/DENOM)
+      TAXA = SIGN(TAXA,TLTAXA)
+C
+      CALTAXA = TAXA
+C
+      return 
+      end
+C

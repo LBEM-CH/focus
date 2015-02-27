@@ -61,7 +61,6 @@
 set proc_2dx = ""
 set bin_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 set refine = ""
 set refine_cyc = ""
@@ -250,13 +249,13 @@ eot
     ${proc_2dx}/linblock "2dx_ttrefine - To refine parameters."
     #############################################################################
     #
-    set INFILE = '../merge/merge3Dref.mtz'
+    set INFILE = '../merge/merge3Dref_MRClefthanded.mtz'
     if ( ! -e ${INFILE} ) then
-      set INFILE1 = '../../merge/merge3Dref.mtz'
+      set INFILE1 = '../../merge/merge3Dref_MRClefthanded.mtz'
       if ( ! -e ${INFILE1} ) then
-        set INFILE2 = '../merge/merge2Dref.mtz'
+        set INFILE2 = '../merge/merge2Dref_MRClefthanded.mtz'
         if ( ! -e ${INFILE2} ) then
-          set INFILE3 = '../../merge/merge2Dref.mtz'
+          set INFILE3 = '../../merge/merge2Dref_MRClefthanded.mtz'
           if ( ! -e ${INFILE3} ) then
             ${proc_2dx}/linblock "ERROR: Neither ${INFILE} nor ${INFILE1}"
             ${proc_2dx}/linblock "           nor ${INFILE2} nor ${INFILE3} found"

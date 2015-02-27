@@ -60,7 +60,6 @@ set refine_maska_boxa1_doit = "y"
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 set maska = ""
 set boxa1 = ""

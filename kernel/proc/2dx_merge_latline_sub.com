@@ -460,9 +460,9 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for volume"
 #############################################################################
 #
-\rm -f SCRATCH/merge3D.mtz
+\rm -f SCRATCH/merge3D_MRClefthanded.mtz
 #
-${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3D.mtz << eof
+${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3D_MRClefthanded.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM_local}
@@ -481,9 +481,9 @@ ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for r
 #############################################################################
 #
 set infile = APH/latfittedref_nosym.hkl
-\rm -f SCRATCH/merge3Dref.mtz
+\rm -f SCRATCH/merge3Dref_MRClefthanded.mtz
 #
-${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3Dref.mtz << eof
+${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3Dref_MRClefthanded.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM_local}
@@ -494,16 +494,16 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE: SCRATCH/merge3D.mtz <MTZ: Latline data before CAD>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/merge3Dref.mtz <MTZ: Latline Ref data before CAD>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/merge3D_MRClefthanded.mtz <MTZ: Latline data before CAD>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/merge3Dref_MRClefthanded.mtz <MTZ: Latline Ref data before CAD>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "cad - to create MTZ file for volume"
 #############################################################################  
 #
-\rm -f merge3D.mtz
+\rm -f merge3D_MRClefthanded.mtz
 #
-${bin_ccp4}/cad hklin1 SCRATCH/merge3D.mtz hklout merge3D.mtz << eof
+${bin_ccp4}/cad hklin1 SCRATCH/merge3D_MRClefthanded.mtz hklout merge3D_MRClefthanded.mtz << eof
 sort h k l
 resolution overall ${RESMAX} ${RESMIN}
 outlim spacegroup 1
@@ -512,15 +512,15 @@ valm NaN NOOUTPUT
 end
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Latline data for volume [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3D_MRClefthanded.mtz <MTZ: Final MRC MTZ file for volume [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "cad - to create MTZ file for reference"
 #############################################################################  
 #
-\rm -f merge3Dref.mtz
+\rm -f merge3Dref_MRClefthanded.mtz
 #
-${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref.mtz hklout merge3Dref.mtz << eof
+${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref_MRClefthanded.mtz hklout merge3Dref_MRClefthanded.mtz << eof
 sort h k l 
 resolution overall ${MergeResolution} ${RESMIN}
 outlim spacegroup 1
@@ -529,9 +529,23 @@ valm NaN NOOUTPUT
 end
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Latline data for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: merge3Dref_MRClefthanded.mtz <MTZ: Final MRC MTZ file for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
+#
+#############################################################################
+${proc_2dx}/linblock "reindex - to flip hand of MTZ file for further work with CCP4"
+#############################################################################  
+#
+\rm -f merge3D.mtz
+#
+${bin_ccp4}/reindex hklin merge3D_MRClefthanded.mtz hklout merge3D.mtz << eof
+reindex HKL k,h,l
+lefthand
+end
+eof
+#
+echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Final CCP4 MTZ file for volume [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
 #
 #
 

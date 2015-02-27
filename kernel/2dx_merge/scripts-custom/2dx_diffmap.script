@@ -39,7 +39,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 #
 set imagename = ""
@@ -91,17 +90,17 @@ ${proc_2dx}/linblock  "Scaling amplitudes"
 ##############################################################################
 if ( -e ${diff_map1} ) then
 	echo "scaling amplitudes of  ${diff_map1} "
-	\rm -f  ${filename1}_scaled.mtz  
-	${proc_2dx}/2dx_scaleamp_ccp4.com ${diff_map1} ${filename1}_scaled.mtz
-	echo "# IMAGE: ${filename1}_scaled.mtz <MTZ: Map 1 with scaled amplitudes >" >> LOGS/${scriptname}.results
+	\rm -f  ${filename1}_scaled_MRClefthanded.mtz  
+	${proc_2dx}/2dx_scaleamp_ccp4.com ${diff_map1} ${filename1}_scaled_MRClefthanded.mtz
+	echo "# IMAGE: ${filename1}_scaled_MRClefthanded.mtz <MTZ: Map 1 with scaled amplitudes >" >> LOGS/${scriptname}.results
 else
 	${proc_2dx}/protest "Could not find ${diff_map2}"
 endif
 if ( -e ${diff_map2} ) then
 	echo "scaling amplitudes of  ${diff_map2} "
-	\rm -f  ${filename2}_scaled.mtz  
-	${proc_2dx}/2dx_scaleamp_ccp4.com ${diff_map2} ${filename2}_scaled.mtz
-	echo "# IMAGE: ${filename2}_scaled.mtz <MTZ: Map 2 with scaled amplitudes >" >> LOGS/${scriptname}.results
+	\rm -f  ${filename2}_scaled_MRClefthanded.mtz  
+	${proc_2dx}/2dx_scaleamp_ccp4.com ${diff_map2} ${filename2}_scaled_MRClefthanded.mtz
+	echo "# IMAGE: ${filename2}_scaled_MRClefthanded.mtz <MTZ: Map 2 with scaled amplitudes >" >> LOGS/${scriptname}.results
 else
 	${proc_2dx}/protest "Could not find ${diff_map2}"
 endif
@@ -109,27 +108,27 @@ echo "<<@progress: 10>>"
 ##############################################################################
 ${proc_2dx}/linblock  "Limiting the resolution to ${RESMAX}" 
 ##############################################################################
-\rm -f  ${filename1}_res.mtz  
+\rm -f  ${filename1}_res_MRClefthanded.mtz  
 ${bin_ccp4}/sftools << eot
-read ${filename1}_scaled.mtz
+read ${filename1}_scaled_MRClefthanded.mtz
 select resolution >= ${RESMAX}
 checkhkl
-write ${filename1}_res.mtz
+write ${filename1}_res_MRClefthanded.mtz
 end
 eot
 #
-echo "# IMAGE: ${filename1}_res.mtz <MTZ: Map 1 (resolution limited) >" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${filename1}_res_MRClefthanded.mtz <MTZ: Map 1 (resolution limited) >" >> LOGS/${scriptname}.results
 #
-\rm -f  ${filename2}_res.mtz  
+\rm -f  ${filename2}_res_MRClefthanded.mtz  
 ${bin_ccp4}/sftools << eot
-read ${filename2}_scaled.mtz
+read ${filename2}_scaled_MRClefthanded.mtz
 select resolution >= ${RESMAX}
 checkhkl
-write ${filename2}_res.mtz
+write ${filename2}_res_MRClefthanded.mtz
 end
 eot
 #
-echo "# IMAGE: ${filename2}_res.mtz <MTZ: Map 2 (resolution limited) >" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${filename2}_res_MRClefthanded.mtz <MTZ: Map 2 (resolution limited) >" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 20>>"
 #
@@ -148,7 +147,7 @@ endif
 #
 \rm -f ${filename1}.map
 #
-${bin_ccp4}/fft HKLIN   ${filename1}_res.mtz MAPOUT  ${filename1}.map \
+${bin_ccp4}/fft HKLIN   ${filename1}_res_MRClefthanded.mtz MAPOUT  ${filename1}.map \
     << eot
 resol 80 ${RESMAX}
 ! Fo
@@ -162,7 +161,7 @@ eot
 #
 \rm -f ${filename2}.map
 #
-${bin_ccp4}/fft HKLIN   ${filename2}_res.mtz MAPOUT  ${filename2}.map \
+${bin_ccp4}/fft HKLIN   ${filename2}_res_MRClefthanded.mtz MAPOUT  ${filename2}.map \
     << eot
 resol 200 ${RESMAX}
 ! Fo

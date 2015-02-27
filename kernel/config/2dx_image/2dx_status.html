@@ -37,81 +37,99 @@ function load()
 
 </script>
 
+<head>
+<style type"text/css">
+<!--
+TD{font-family: Courier; font-size: 10pt; line-height: 1.4em}
+--->
+</style>
+
 <BODY onLoad="load()" BGCOLOR="WHITE" MARGINHEIGHT="0" MARGINWIDTH="0">
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TBODY>
 <TR>
-<TD colspan=2 align="left" height=19><B>Calc. Mag=</B></TD>
-<TD colspan=3 align="left"  height=19 ID="CALCULATEDMAG">---</TD>
-<TD colspan=3 align="right" height=19><B>Last QVAL=</B></TD>
-<TD colspan=1 align="right" height=19 ID="QVAL"><B>---</B></TD></TR>
+<TD colspan=2 align="left" height=17><B>Calc. Mag=</B></TD>
+<TD colspan=3 align="left"  height=17 ID="CALCULATEDMAG">---</TD>
+<TD colspan=3 align="right" height=17><B>Last QVAL=</B></TD>
+<TD colspan=1 align="right" height=17 ID="QVAL"><B>---</B></TD></TR>
 </TABLE>
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TBODY>
 <TR>
 <TD align="left"><B><U>Unbend</U></B></TD>
-<TD align="center" width="10%"><I>IQ1</I></TD>
-<TD align="center" width="10%"><I>IQ2</I></TD>
-<TD align="center" width="10%"><I>IQ3</I></TD>
-<TD align="center" width="10%"><I>IQ4</I></TD>
-<TD align="center" width="10%"><I>IQ5</I></TD>
-<TD align="center" width="10%"><I>IQ6</I></TD>
+<TD align="right" width="10%"><I>IQ1</I></TD>
+<TD align="right" width="10%"><I>IQ2</I></TD>
+<TD align="right" width="10%"><I>IQ3</I></TD>
+<TD align="right" width="10%"><I>IQ4</I></TD>
+<TD align="right" width="10%"><I>IQ5</I></TD>
+<TD align="right" width="10%"><I>IQ6</I></TD>
 <TD align="right" colspan=2>QVAL</TD>
 </TR>
 <TR>
-<TD align="left">Unb.I</TD>
-<TD align="center" ID="U1_IQ1"><I>-</I></TD>
-<TD align="center" ID="U1_IQ2"><I>-</I></TD>
-<TD align="center" ID="U1_IQ3"><I>-</I></TD>
-<TD align="center" ID="U1_IQ4"><I>-</I></TD>
-<TD align="center" ID="U1_IQ5"><I>-</I></TD>
-<TD align="center" ID="U1_IQ6"><I>-</I></TD>
-<TD align="right"> </TD>
-<TD align="right" ID="QVAL1">---</TD>
-</TR>
-<TR>
 <TD align="left">Unb.II</TD>
-<TD align="center" ID="U2_IQ1"><I>-</I></TD>
-<TD align="center" ID="U2_IQ2"><I>-</I></TD>
-<TD align="center" ID="U2_IQ3"><I>-</I></TD>
-<TD align="center" ID="U2_IQ4"><I>-</I></TD>
-<TD align="center" ID="U2_IQ5"><I>-</I></TD>
-<TD align="center" ID="U2_IQ6"><I>-</I></TD>
+<TD align="right" ID="U2_IQ1"><I>-</I></TD>
+<TD align="right" ID="U2_IQ2"><I>-</I></TD>
+<TD align="right" ID="U2_IQ3"><I>-</I></TD>
+<TD align="right" ID="U2_IQ4"><I>-</I></TD>
+<TD align="right" ID="U2_IQ5"><I>-</I></TD>
+<TD align="right" ID="U2_IQ6"><I>-</I></TD>
 <TD align="right"> </TD>
 <TD align="right" ID="QVAL2">---</TD>
 </TR>
 <TR>
-<TD align="left">MovA</TD>
-<TD align="center" ID="UMA_IQ1"><I>-</I></TD>
-<TD align="center" ID="UMA_IQ2"><I>-</I></TD>
-<TD align="center" ID="UMA_IQ3"><I>-</I></TD>
-<TD align="center" ID="UMA_IQ4"><I>-</I></TD>
-<TD align="center" ID="UMA_IQ5"><I>-</I></TD>
-<TD align="center" ID="UMA_IQ6"><I>-</I></TD>
+<TD align="left">U2-Syn</TD>
+<TD align="right" ID="US_IQ1"><I>-</I></TD>
+<TD align="right" ID="US_IQ2"><I>-</I></TD>
+<TD align="right" ID="US_IQ3"><I>-</I></TD>
+<TD align="right" ID="US_IQ4"><I>-</I></TD>
+<TD align="right" ID="US_IQ5"><I>-</I></TD>
+<TD align="right" ID="US_IQ6"><I>-</I></TD>
+<TD align="right"> </TD>
+<TD align="right" ID="QValS">---</TD>
+</TR>
+<TR>
+<TD align="left">MovieA</TD>
+<TD align="right" ID="UMA_IQ1"><I>-</I></TD>
+<TD align="right" ID="UMA_IQ2"><I>-</I></TD>
+<TD align="right" ID="UMA_IQ3"><I>-</I></TD>
+<TD align="right" ID="UMA_IQ4"><I>-</I></TD>
+<TD align="right" ID="UMA_IQ5"><I>-</I></TD>
+<TD align="right" ID="UMA_IQ6"><I>-</I></TD>
 <TD align="right"> </TD>
 <TD align="right" ID="QValMA">---</TD>
 </TR>
 <TR>
-<TD align="left">MovB</TD>
-<TD align="center" ID="UMB_IQ1"><I>-</I></TD>
-<TD align="center" ID="UMB_IQ2"><I>-</I></TD>
-<TD align="center" ID="UMB_IQ3"><I>-</I></TD>
-<TD align="center" ID="UMB_IQ4"><I>-</I></TD>
-<TD align="center" ID="UMB_IQ5"><I>-</I></TD>
-<TD align="center" ID="UMB_IQ6"><I>-</I></TD>
+<TD align="left">MA-Syn</TD>
+<TD align="right" ID="UAS_IQ1"><I>-</I></TD>
+<TD align="right" ID="UAS_IQ2"><I>-</I></TD>
+<TD align="right" ID="UAS_IQ3"><I>-</I></TD>
+<TD align="right" ID="UAS_IQ4"><I>-</I></TD>
+<TD align="right" ID="UAS_IQ5"><I>-</I></TD>
+<TD align="right" ID="UAS_IQ6"><I>-</I></TD>
+<TD align="right"> </TD>
+<TD align="right" ID="QValAS">---</TD>
+</TR>
+<TR>
+<TD align="left">MovieB</TD>
+<TD align="right" ID="UMB_IQ1"><I>-</I></TD>
+<TD align="right" ID="UMB_IQ2"><I>-</I></TD>
+<TD align="right" ID="UMB_IQ3"><I>-</I></TD>
+<TD align="right" ID="UMB_IQ4"><I>-</I></TD>
+<TD align="right" ID="UMB_IQ5"><I>-</I></TD>
+<TD align="right" ID="UMB_IQ6"><I>-</I></TD>
 <TD align="right"> </TD>
 <TD align="right" ID="QValMB">---</TD>
 </TR>
 <TR>
-<TD align="left">Syn</TD>
-<TD align="center" ID="US_IQ1"><I>-</I></TD>
-<TD align="center" ID="US_IQ2"><I>-</I></TD>
-<TD align="center" ID="US_IQ3"><I>-</I></TD>
-<TD align="center" ID="US_IQ4"><I>-</I></TD>
-<TD align="center" ID="US_IQ5"><I>-</I></TD>
-<TD align="center" ID="US_IQ6"><I>-</I></TD>
+<TD align="left">MB-Syn</TD>
+<TD align="right" ID="UBS_IQ1"><I>-</I></TD>
+<TD align="right" ID="UBS_IQ2"><I>-</I></TD>
+<TD align="right" ID="UBS_IQ3"><I>-</I></TD>
+<TD align="right" ID="UBS_IQ4"><I>-</I></TD>
+<TD align="right" ID="UBS_IQ5"><I>-</I></TD>
+<TD align="right" ID="UBS_IQ6"><I>-</I></TD>
 <TD align="right"> </TD>
-<TD align="right" ID="QValS">---</TD>
+<TD align="right" ID="QValBS">---</TD>
 </TR>
 </TABLE>
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
@@ -140,46 +158,46 @@ function load()
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TR>
 <TD align="left"  ><B><U>Tilt Info</U></B> </TD>
-<TD align="center">Defoc. </TD>
-<TD align="center">Latt.  </TD>
-<TD align="center">SpSplit</TD>
-<TD align="center">Merge  </TD>
+<TD align="right">Defoc. </TD>
+<TD align="right">Latt.  </TD>
+<TD align="right">SpSplit</TD>
+<TD align="right">Merge  </TD>
 </TR>
 <TR>
-<TD align="left">Grd.TAxis</TD>
-<TD align="center" ID="DEFOCUS_TLTAXIS">-</TD>
-<TD align="center" ID="LATTICE_TLTAXIS">-</TD>
-<TD align="center" ID="TTREFINE_TLTAXIS">-</TD>
-<TD align="center" ID="MERGE_TLTAXIS">-</TD>
+<TD align="left">Grid TAxis</TD>
+<TD align="right" ID="DEFOCUS_TLTAXIS">---&nbsp;</TD>
+<TD align="right" ID="LATTICE_TLTAXIS">---&nbsp;</TD>
+<TD align="right" ID="TTREFINE_TLTAXIS">---&nbsp;</TD>
+<TD align="right" ID="MERGE_TLTAXIS">---&nbsp;</TD>
 </TR>
 <TR>
-<TD align="left">Grd.TAng</TD>
-<TD align="center" ID="DEFOCUS_TLTANG">-</TD>
-<TD align="center" ID="LATTICE_TLTANG">-</TD>
-<TD align="center" ID="TTREFINE_TLTANG">-</TD>
-<TD align="center" ID="MERGE_TLTANG">-</TD>
+<TD align="left">Grid TAngle</TD>
+<TD align="right" ID="DEFOCUS_TLTANG">---&nbsp;</TD>
+<TD align="right" ID="LATTICE_TLTANG">---&nbsp;</TD>
+<TD align="right" ID="TTREFINE_TLTANG">---&nbsp;</TD>
+<TD align="right" ID="MERGE_TLTANG">---&nbsp;</TD>
 </TR>
 <TR>
-<TD align="left">Xst.TAxis</TD>
-<TD align="center" ID="DEFOCUS_TAXA">-</TD>
-<TD align="center" ID="LATTICE_TAXA">-</TD>
-<TD align="center" ID="TTREFINE_TAXA">-</TD>
-<TD align="center" ID="MERGE_TAXA">-</TD>
+<TD align="left">Xst. TAxis</TD>
+<TD align="right" ID="DEFOCUS_TAXA">---&nbsp;</TD>
+<TD align="right" ID="LATTICE_TAXA">---&nbsp;</TD>
+<TD align="right" ID="TTREFINE_TAXA">---&nbsp;</TD>
+<TD align="right" ID="MERGE_TAXA">---&nbsp;</TD>
 </TR>
 <TR>
-<TD align="left">Xst.TAng</TD>
-<TD align="center" ID="DEFOCUS_TANGL">-</TD>
-<TD align="center" ID="LATTICE_TANGL">-</TD>
-<TD align="center" ID="TTREFINE_TANGL">-</TD>
-<TD align="center" ID="MERGE_TANGL">-</TD>
+<TD align="left">Xst. TAngle</TD>
+<TD align="right" ID="DEFOCUS_TANGL">---&nbsp;</TD>
+<TD align="right" ID="LATTICE_TANGL">---&nbsp;</TD>
+<TD align="right" ID="TTREFINE_TANGL">---&nbsp;</TD>
+<TD align="right" ID="MERGE_TANGL">---&nbsp;</TD>
 </TR>
 </TABLE>
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TR>
 <TD align="left"><B>Sym.PhaRes=</B></TD>
-<TD align="left" ID="PHARES_SYM">-</TD>
+<TD align="left" ID="PHARES_SYM">--- </TD>
 <TD align="right"> Num.Spots= </TD>
-<TD align="right" ID="PHARES_NUM_SPOTS">-</TD>
+<TD align="right" ID="PHARES_NUM_SPOTS">--- </TD>
 </TR>
 </TABLE>
 </BODY>

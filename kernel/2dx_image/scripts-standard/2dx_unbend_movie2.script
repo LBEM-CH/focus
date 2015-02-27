@@ -65,6 +65,8 @@ set show_frame_CCmap_marked = "n"
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
 # DISPLAY: SYN_Unbending
+# DISPLAY: SYN_Bfact1
+# DISPLAY: SYN_maska
 # DISPLAY: holeb
 # DISPLAY: maskb01
 # DISPLAY: maskb02
@@ -78,7 +80,6 @@ set show_frame_CCmap_marked = "n"
 # DISPLAY: RESMIN
 # DISPLAY: ALAT
 # DISPLAY: radlim
-# DISPLAY: ctf_ttf
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
@@ -119,95 +120,111 @@ set show_frame_CCmap_marked = "n"
 set app_2dx_image = ""
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
 #
-set SYN_Unbending = ""
-set PHASEORI_done = ""
-set boxb1 = ""
-set boxb2 = ""
-set imagename = ""
-set defocus = ""
-set nonmaskimagename = ""
-set imagenumber = ""
-set realcell = ""
-set lattice = ""
-set holeb = ""
-set maskb01 = ""
-set maskb02 = ""
-set maskb03 = ""
-set maskb04 = ""
-set maskb05 = ""
-set imagesidelength = ""
-set magnification = ""
-set stepdigitizer = ""
-set tempkeep = ""
-set RESMIN = ""
-set RESMAX = ""
 set ALAT = ""
-set quadpredb = ""
-set quadradb = ""
-set radlim = ""
-set realang = ""
-set treatspotscan = ""
-set facthresha = ""
-set phacon = ""
-set ctfplotresmax = ""
-set stepdigitizer = ""
 set CS = ""
-set KV = ""
-set domask = ""
-set TLTAXIS = ""
-set TLTANG = ""
-set TANGL = ""
-set det_tilt = ""
-set ctf_ttf = ""
-set refori = ""
-set createmaskinfo = ""
+set IMAXCOR = ""
 set ISTEP = ""
 set ISTEP_h = ""
-set IMAXCOR = ""
-set RMAG = ""
+set KV = ""
 set LCOLOR = ""
-set ccunbend_program = ""
+set MASKING_done = ""
+set PHASEORI_done = ""
+set QVALS = ""
 set RB_1 = ""
 set RB_2 = ""
 set RB_3 = ""
 set RB_4 = ""
 set RB_5 = ""
 set RB_6 = ""
+set RESMAX = ""
+set RESMIN = ""
+set RMAG = ""
 set RP_1 = ""
 set RP_2 = ""
 set RP_3 = ""
 set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
-set movie_stackname = ""
-set movie_enable = ""
-set movie_imagenumber_total = ""
-set movie_imagenumber_touse = ""
-set movie_filter_type = ""
-set movie_filter_param = ""
-set app_2dx_image = ""
-set movie_masking_mode = ""
-set movie_refboxa = ""
-set movie_refboxb = ""
-set movie_quadrada = ""
-set movie_quadradb = ""
-set movie_facthreshb = ""
-set movie_imagenumber_toave = ""
-set MASKING_done = ""
-set QVALS = ""
+set SYM = ""
+set SYN_Bfact1 = ""
+set SYN_Unbending = ""
+set SYN_maska = ""
+set TANGL = ""
+set TAXA = ""
+set TLTANG = ""
+set TLTAXIS = ""
 set Thread_Number = ""
-set ctfcor_noise = ""
+set app_2dx_image = ""
+set beamtilt = ""
+set boxb1 = ""
+set boxb2 = ""
+set calculate_tiles = ""
+set ccunbend_program = ""
+set createmaskinfo = ""
+set ctfcor_debug = ""
+set ctfcor_imode = ""
 set ctfcor_inner_tile = ""
+set ctfcor_maxamp_factor = ""
+set ctfcor_noise = ""
 set ctfcor_outer_tile = ""
 set ctfcor_taper = ""
-set ctfcor_imode = ""
-set ctfcor_debug = ""
-set ctfcor_maxamp_factor = ""
-set calculate_tiles = ""
+set ctfplotresmax = ""
+set ctfrev = ""
+set defocus = ""
+set det_tilt = ""
+set domask = ""
+set facthresha = ""
+set holeb = ""
+set imagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set lattice = ""
+set magnification = ""
+set maskb01 = ""
+set maskb02 = ""
+set maskb03 = ""
+set maskb04 = ""
+set maskb05 = ""
+set movie_enable = ""
+set movie_facthreshb = ""
+set movie_filter_param = ""
+set movie_filter_type = ""
+set movie_imagenumber_toave = ""
+set movie_imagenumber_total = ""
+set movie_imagenumber_touse = ""
+set movie_masking_mode = ""
+set movie_quadrada = ""
+set movie_quadradb = ""
+set movie_refboxa = ""
+set movie_refboxb = ""
+set movie_stackname = ""
+set nonmaskimagename = ""
+set phacon = ""
+set phaori = ""
+set phaoriFouFilter = ""
+set quadpredb = ""
+set quadradb = ""
+set radlim = ""
+set realang = ""
+set realcell = ""
+set refori = ""
+set revhk = ""
+set revhnd = ""
+set revxsgn = ""
+set rot180 = ""
+set rot90 = ""
+set sgnxch = ""
+set stepdigitizer = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set treatspotscan = ""
 set use_masked_image = ""
 #
 #$end_vars
+#
+source ${proc_2dx}/2dx_makedirs
 #
 set scriptname = 2dx_unbend_movie2
 \rm -f LOGS/${scriptname}.results
@@ -225,7 +242,15 @@ echo date = ${date}
 set system = `uname -s`
 echo system = ${system}
 #
-set frame_folder = "framesB"
+set frame_folder = "SCRATCH/MovieB"
+#
+if ( ! -e ${frame_folder} ) then
+  \mkdir ${frame_folder}
+endif
+#
+if ( ! -d MovieB ) then
+  \mkdir MovieB
+endif
 #
 ##########################################
 ##########################################
@@ -268,8 +293,8 @@ if ( ${show_frames} == "y" || ${show_frame_FFT} == "y" || ${show_frame_CCmap} ==
   set tempkeep = "y"
 endif
 #
-\rm -f ${frame_folder}_unbending.pdf
-\touch ${frame_folder}_unbending.pdf
+\rm -f MovieB_unbending.pdf
+\touch MovieB_unbending.pdf
 #
 set iname = image_ctfcor
 #
@@ -338,7 +363,7 @@ else
   # Get the number of frames
   e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
   set movie_imagenumber_total = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
-  ${proc_2dx}/linblock "Stack contains ${movie_imagenumber_total} ${frame_folder}"
+  ${proc_2dx}/linblock "Stack contains ${movie_imagenumber_total} frames"
   echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
   set movie_imagenumber_touse = `echo ${movie_imagenumber_total} ${movie_imagenumber_toave} | awk '{s = int($1/$2) } END { print s }'`
   echo "set movie_imagenumber_touse = ${movie_imagenumber_touse}"  >> LOGS/${scriptname}.results
@@ -391,6 +416,12 @@ if ( ${movie_filter_type} == "2" ) then
 endif
 #
 set num_dia = 100
+#
+if ( 1 == 2 ) then
+  ${proc_2dx}/linblock "Plotting local drift"
+  python ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
+  exit
+endif
 #
 if ( 1 == 2 ) then
   set i = 0
@@ -454,7 +485,7 @@ if ( ! -d ${frame_folder} ) then
   echo "<<@progress: 10>>"
   #
   ###############################################################
-  ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} ${frame_folder}, merging ${movie_imagenumber_toave} movie images into each"
+  ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} super-frames, merging ${movie_imagenumber_toave} movie sub-frames into each"
   ############################################################### 
   #
   python ${proc_2dx}/movie/movie_mode_split1.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave} ${frame_folder}
@@ -467,7 +498,7 @@ endif
 #
 echo "<<@progress: 15>>"
 #
-setenv PROFILE  SCRATCH/${iname}_unbend2_fft_msk_fft_cro_aut_cro.mrc
+setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
 setenv PROFDATA ${iname}_profile.dat
 setenv ERRORS   SCRATCH/errout${iname}.dat
 setenv ERROUT   SCRATCH/errout2${iname}.dat
@@ -530,15 +561,21 @@ while ($i <= ${movie_imagenumber_touse})
   #########################################################################
 
   if ( ! -e ${frame_folder}/2dx_master.cfg ) then
+    set olddir = $PWD
     cd ${frame_folder}
     \ln -s ../2dx_image.cfg 2dx_master.cfg  
-    cd ..
+    cd ${olddir}
   endif
   echo "set imagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/frame_${i}/2dx_image.cfg
   echo "set nonmaskimagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/frame_${i}/2dx_image.cfg
 
-  ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize"
-  ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize_files"
+  if ( -d ${image_dir}/${frame_folder} ) then
+    ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize"
+    ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize_files"
+  else
+    ${app_2dx_image} ${frame_folder}/frame_${i} "2dx_initialize"
+    ${app_2dx_image} ${frame_folder}/frame_${i} "2dx_initialize_files"
+  endif
   \rm -f ${frame_folder}/2dx_master.cfg
 
   set filtervalue = `python ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
@@ -563,10 +600,11 @@ while ($i <= ${movie_imagenumber_touse})
   #
   if ( ${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == "4x" || ${ctfcor_imode}x == "5x" || ${ctfcor_imode}x == "6x" ) then
     ${proc_2dx}/lin "Not applying any CTF correction before unbending."
+    set olddir = $PWD
     cd ${frame_folder}/frame_${i}
     \rm -f image_ctfcor.mrc
     \ln -s ${nonmaskimagename}_${i}.mrc image_ctfcor.mrc
-    cd ../..
+    cd ${olddir}
   else
     if ( ${calculate_tiles} == "0" ) then
       ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
@@ -580,7 +618,6 @@ ${RESMAX}
 ${ctfcor_noise}
 ${ctfcor_imode}
 ${ctfcor_debug}
-${ctfcor_maxamp_factor}
 eot
       #
     else
@@ -659,135 +696,183 @@ echo "<<@evaluate>>"
 
 
 
-
-###############################################################
-${proc_2dx}/linblock "FFTRANS - Calculate FFT of unbent image"
-###############################################################
 #
-set unbent_fil = unbent.mrc
 #
-if ( ! -e ${unbent_fil} ) then
-  ${proc_2dx}/protest "ERROR: File missing: ${unbent_fil}"
-endif
-# 
-\rm -f SCRATCH/reference_flt_upscale.mrc
-${bin_2dx}/labelh.exe << eot
+##########################################################################
+##########################################################################
+# Now preparing reference:
+##########################################################################
+##########################################################################
+#
+set maskb = ${maskb01}
+#
+if ( ${SYN_Unbending} == "0" ) then
+  #
+  ###############################################################
+  ###############################################################
+  ###############################################################
+  ${proc_2dx}/linblock "Preparing reference from Fourier-filtered UNBEND-II result"
+  ###############################################################
+  ###############################################################
+  ###############################################################
+  #
+  ###############################################################
+  ${proc_2dx}/linblock "FFTRANS - Calculate FFT of unbent image"
+  ###############################################################
+  #
+  set unbent_fil = unbent.mrc  
+  #
+  if ( ! -e ${unbent_fil} ) then
+    ${proc_2dx}/protest "ERROR: File missing: ${unbent_fil}"
+  endif
+  # 
+  \rm -f SCRATCH/reference_flt_upscale.mrc
+  ${bin_2dx}/labelh.exe << eot
 ${unbent_fil}
 39
 SCRATCH/reference_flt_upscale.mrc
 eot
-#
-setenv IN  SCRATCH/reference_flt_upscale.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft.mrc
-${bin_2dx}/2dx_fftrans.exe
-#
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
-#
-echo "<<@progress: 15>>"
-#
-#
-#########################################################################
-${proc_2dx}/linblock "MASKTRAN - Lattice-mask FFT of unbent image, small holes"
-#########################################################################
-set maskb = ${maskb01}
-set rmax = 11000
-#
-setenv IN  SCRATCH/reference_flt_upscale_fft.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft_mask.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft_mask.mrc
-setenv SPOTS ${nonmaskimagename}.spt
-${bin_2dx}/2dx_masktrana.exe << eot
+  #
+  setenv IN  SCRATCH/reference_flt_upscale.mrc
+  setenv OUT SCRATCH/reference_flt_upscale_fft.mrc
+  \rm -f     SCRATCH/reference_flt_upscale_fft.mrc
+  ${bin_2dx}/2dx_fftrans.exe 
+  #
+  echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results  
+  #
+  echo "<<@progress: 15>>"
+  #
+  # 
+  #########################################################################
+  ${proc_2dx}/linblock "MASKTRAN - Lattice-mask FFT of unbent image, small holes"
+  #########################################################################
+  set rmax = 11000
+  #
+  setenv IN  SCRATCH/reference_flt_upscale_fft.mrc
+  setenv OUT SCRATCH/reference_flt_upscale_fft_mask.mrc
+  \rm -f     SCRATCH/reference_flt_upscale_fft_mask.mrc
+  setenv SPOTS ${nonmaskimagename}.spt
+  ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 1 ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask.mrc <Unbent image, Fourier-filtered (1px) (FFT)>" >> LOGS/${scriptname}.results
-#
-if ( ${tempkeep} != "y" ) then
-  \rm -f SCRATCH/reference_flt_upscale_fft.mrc
-endif
-#
-#
-###############################################################
-${proc_2dx}/linblock "FFTRANS - Back to real space"
-###############################################################
-#
-setenv IN  SCRATCH/reference_flt_upscale_fft_mask.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
-${bin_2dx}/2dx_fftrans.exe
-#
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft.mrc <Unbent image, Fourier-filtered>" >> LOGS/${scriptname}.results
-#
-if ( ${tempkeep} != "y" ) then
-  \rm -f SCRATCH/reference_flt_upscale_fft_mask.mrc
-endif
-#
-echo "<<@progress: 17>>"
-#
-#
-###############################################################
-${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxa}"
-###############################################################
-#
-python ${proc_2dx}/movie/box_reference.py SCRATCH/reference_flt_upscale_fft_mask_fft.mrc SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa}
-#
-if ( ${tempkeep} != "y" ) then
-  \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
-endif
-#
-\rm -f SCRATCH/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
-${bin_2dx}/labelh.exe << eot
+  echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask.mrc <Unbent image, Fourier-filtered (1px) (FFT)>" >> LOGS/${scriptname}.results 
+  #
+  if ( ${tempkeep} != "y" ) then
+    \rm -f SCRATCH/reference_flt_upscale_fft.mrc
+  endif
+  #  
+  #
+  ###############################################################
+  ${proc_2dx}/linblock "FFTRANS - Back to real space"
+  ###############################################################
+  #
+  setenv IN  SCRATCH/reference_flt_upscale_fft_mask.mrc
+  setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
+  \rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
+  ${bin_2dx}/2dx_fftrans.exe
+  #
+  echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft.mrc <Unbent image, Fourier-filtered>" >> LOGS/${scriptname}.results
+  #
+  if ( ${tempkeep} != "y" ) then
+    \rm -f SCRATCH/reference_flt_upscale_fft_mask.mrc
+  endif
+  #
+  echo "<<@progress: 17>>" 
+  #
+  #
+  ###############################################################
+  ${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxa}"
+  ###############################################################
+  #
+  python ${proc_2dx}/movie/box_reference.py SCRATCH/reference_flt_upscale_fft_mask_fft.mrc SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa} 
+  #
+  if ( ${tempkeep} != "y" ) then
+    \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
+  endif
+  #
+  \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
+  ${bin_2dx}/labelh.exe << eot
 SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc
 39
 SCRATCH/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
 eot
-echo  "# IMAGE-IMPORTANT: SCRATCH/reference_flt_upscale_fft_mask_fft_box_upscale.mrc <Reference (${movie_refboxa}px)>" >> LOGS/${scriptname}.results
-#
-#
-###############################################################
-${proc_2dx}/linblock "FFTRANS - Producing reference in Fourier space"
-###############################################################
-#
-setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-${bin_2dx}/2dx_fftrans.exe
-#
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc <Reference (FFT)>" >> LOGS/${scriptname}.results
-#
-#
-#########################################################################
-${proc_2dx}/linblock "MASKTRAN - Masked FFT of boxed reference"
-#########################################################################
-set maskb = ${maskb01}
-set rmax = 11000
-#
-setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
-\rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc
-setenv SPOTS ${nonmaskimagename}.spt
-${bin_2dx}/2dx_masktrana.exe << eot
+  echo  "# IMAGE-IMPORTANT: SCRATCH/reference_flt_upscale_fft_mask_fft_box_upscale.mrc <Reference (${movie_refboxa}px)>" >> LOGS/${scriptname}.results
+  #
+  #
+  ###############################################################
+  ${proc_2dx}/linblock "FFTRANS - Producing reference in Fourier space"
+  ###############################################################
+  #
+  setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
+  setenv OUT SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
+  \rm -f     SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
+  ${bin_2dx}/2dx_fftrans.exe 
+  #
+  # echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc <Reference (FFT)>" >> LOGS/${scriptname}.results  
+  #
+  #
+  #########################################################################
+  ${proc_2dx}/linblock "MASKTRAN - Masked FFT of boxed reference"
+  #########################################################################
+  set rmax = 11000  
+  #  
+  setenv IN  SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
+  setenv OUT SCRATCH/reference_fft.mrc
+  \rm -f     SCRATCH/reference_fft.mrc
+  setenv SPOTS ${nonmaskimagename}.spt
+  ${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
-echo  "# IMAGE: SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft_mask.mrc <Reference, Fourier-filtered (${maskb}px) (FFT)>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE: SCRATCH/reference.mrc <Reference, Fourier-filtered (${maskb}px) (FFT)>" >> LOGS/${scriptname}.results  
+  #
+  if ( ${tempkeep} != "y" ) then
+    \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
+  endif
+  #
+  #
+  #
+  #
+  #
+else
+  #
+  ###############################################################
+  ###############################################################
+  ###############################################################
+  ${proc_2dx}/linblock "Preparing reference from merged MTZ file"
+  ###############################################################
+  ###############################################################
+  ###############################################################
+  #
+  set tmp1 = `echo ${SYN_maska} | awk '{s = int( $1 ) } END { print s }'`
+  if ( ${tmp1} == ${SYN_maska} ) then
+    echo SYN_maska = ${SYN_maska}
+  else
+    set SYN_maska = ${tmp1}
+    echo SYN_maska = ${SYN_maska}
+    echo "set SYN_maska = ${SYN_maska}" >> LOGS/${scriptname}.results
+    ${proc_2dx}/linblock "Warning: SYN_maska needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+    echo "#WARNING: Warning: SYN_maska needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+  endif
+  #
+  set loc_SYN_mask = ${SYN_maska}
+  set loc_SYN_Bfact = ${SYN_Bfact1}
+  set locfactor = '1.0'
+  #
+  source ${proc_2dx}/2dx_make_SynRef_sub.com
+  #
+  echo "# IMAGE: SCRATCH/reference_fft.mrc <Synthetic Reference (FFT)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/reference.mrc <Synthetic Reference>" >> LOGS/${scriptname}.results
+  #
+  #
+  #
+endif
 #
 echo "<<@progress: 20>>"
 #
-if ( ${tempkeep} != "y" ) then
-  \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-endif
-#
-#
-
-
-
-
-
-
 #
 # the variable ${prog_num} controls the progress bar in the subscript 2dx_unbend_movie_sub.com:
 set prog_num = 30
@@ -870,29 +955,29 @@ endif
 ${proc_2dx}/linblock "LABELH - Normalizing image to AVG=0, STDEV=100"
 ###########################################################################
 
-\rm -f ${frame_folder}/direct_sum_filt_upscale.mrc
+\rm -f MovieB/direct_sum_filt_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
 ${frame_folder}/direct_sum_filt.mrc
 39
-${frame_folder}/direct_sum_filt_upscale.mrc
+MovieB/direct_sum_filt_upscale.mrc
 eot
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results
-# echo  "# IMAGE: ${frame_folder}/direct_sum_filt_upscale.mrc <Sum unbent images, filtered, upscaled>" >> LOGS/${scriptname}.results
+# echo  "# IMAGE: MovieB/direct_sum_filt_upscale.mrc <Sum unbent images, filtered, upscaled>" >> LOGS/${scriptname}.results
 
-\rm -f ${frame_folder}/direct_sum_filt_ctf_upscale.mrc
+\rm -f MovieB/direct_sum_filt_ctf_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
 ${frame_folder}/direct_sum_filt_ctf.mrc
 39
-${frame_folder}/direct_sum_filt_ctf_upscale.mrc
+MovieB/direct_sum_filt_ctf_upscale.mrc
 eot
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTFcor>" >> LOGS/${scriptname}.results
-# echo  "# IMAGE: ${frame_folder}/direct_sum_filt_ctf_upscale.mrc <Sum unbent images, filtered, CTFcor, upscaled>" >> LOGS/${scriptname}.results
+# echo  "# IMAGE: MovieB/direct_sum_filt_ctf_upscale.mrc <Sum unbent images, filtered, CTFcor, upscaled>" >> LOGS/${scriptname}.results
 
 ###########################################################################
 ${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
 ###########################################################################
 
-setenv IN  ${frame_folder}/direct_sum_filt_upscale.mrc
+setenv IN  MovieB/direct_sum_filt_upscale.mrc
 setenv OUT ${frame_folder}/direct_sum_filt_taper.mrc
 \rm -f     ${frame_folder}/direct_sum_filt_taper.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
@@ -900,7 +985,7 @@ ${bin_2dx}/2dx_taperedgek.exe << eot
 eot
 echo "# IMAGE: ${frame_folder}/direct_sum_filt_taper.mrc <Sum unbent images, edge-tapered>" >> LOGS/${scriptname}.results 
 
-setenv IN  ${frame_folder}/direct_sum_filt_ctf_upscale.mrc
+setenv IN  MovieB/direct_sum_filt_ctf_upscale.mrc
 setenv OUT ${frame_folder}/direct_sum_filt_ctf_taper.mrc
 \rm -f     ${frame_folder}/direct_sum_filt_ctf_taper.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
@@ -912,15 +997,28 @@ echo "# IMAGE: ${frame_folder}/direct_sum_filt_ctf_taper.mrc <Sum unbent images,
 ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 ###########################################################################
 
+if ( ${SYN_Unbending}x == "0x" ) then
+  set outfile = APH/${iname}_movieB_fou.aph
+  echo ${ctfcor_imode} > APH/${iname}_movieB_fou.aph_ctfcor_imode
+  set outfft = MovieB/direct_sum_ctf_fft.mrc
+  set outfft_noctf = MovieB/direct_sum_fft.mrc
+else
+  set outfile = APH/${iname}_movieB_syn.aph
+  echo ${ctfcor_imode} > APH/${iname}_movieB_syn.aph_ctfcor_imode
+  set outfft = MovieB/direct_sum_syn_ctf_fft.mrc
+  set outfft_noctf = MovieB/direct_sum_syn_fft.mrc
+endif
+
+
 setenv IN ${frame_folder}/direct_sum_filt_taper.mrc
-setenv OUT ${frame_folder}/direct_sum_fft.mrc
-\rm -f     ${frame_folder}/direct_sum_fft.mrc
+setenv OUT ${outfft_noctf}
+\rm -f     ${outfft_noctf}
 ${bin_2dx}/2dx_fftrans.exe
-echo "# IMAGE: ${frame_folder}/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
+echo "# IMAGE: MovieB/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
 
 setenv IN ${frame_folder}/direct_sum_filt_ctf_taper.mrc
-setenv OUT ${frame_folder}/direct_sum_ctf_fft.mrc
-\rm -f     ${frame_folder}/direct_sum_ctf_fft.mrc
+setenv OUT ${outfft}
+\rm -f     ${outfft}
 ${bin_2dx}/2dx_fftrans.exe
 echo "# IMAGE: ${frame_folder}/direct_sum_ctf_fft.mrc <Final FFT (CTF cor)>" >> LOGS/${scriptname}.results
 
@@ -933,7 +1031,7 @@ ${proc_2dx}/linblock "MMBOX - Evaluating APH values"
 \rm -f dummy.aph
 
 ${bin_2dx}/2dx_mmboxa.exe << eot
-${frame_folder}/direct_sum_fft.mrc
+${outfft_noctf}
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -956,17 +1054,30 @@ ${proc_2dx}/linblock "Generate IQ-stat output"
 ###########################################################################
 
 echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
-echo "set QVALMB = ${QVAL_local}" >> LOGS/${scriptname}.results
 
-echo "set UMB_IQ1 = ${UMB_IQ1}" >> LOGS/${scriptname}.results
-echo "set UMB_IQ2 = ${UMB_IQ2}" >> LOGS/${scriptname}.results
-echo "set UMB_IQ3 = ${UMB_IQ3}" >> LOGS/${scriptname}.results
-echo "set UMB_IQ4 = ${UMB_IQ4}" >> LOGS/${scriptname}.results
-echo "set UMB_IQ5 = ${UMB_IQ5}" >> LOGS/${scriptname}.results
-echo "set UMB_IQ6 = ${UMB_IQ6}" >> LOGS/${scriptname}.results
-echo "set UMB_IQ7 = ${UMB_IQ7}" >> LOGS/${scriptname}.results
-echo "set UMB_IQ8 = ${UMB_IQ8}" >> LOGS/${scriptname}.results
-echo "set UMB_IQ9 = ${UMB_IQ9}" >> LOGS/${scriptname}.results
+if ( ${SYN_Unbending}x == "0x" ) then
+  echo "set UMB_IQ1 = ${UMB_IQ1}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ2 = ${UMB_IQ2}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ3 = ${UMB_IQ3}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ4 = ${UMB_IQ4}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ5 = ${UMB_IQ5}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ6 = ${UMB_IQ6}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ7 = ${UMB_IQ7}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ8 = ${UMB_IQ8}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ9 = ${UMB_IQ9}" >> LOGS/${scriptname}.results
+  echo "set QVALMB = ${QVAL_local}" >> LOGS/${scriptname}.results
+else
+  echo "set UBS_IQ1 = ${UMB_IQ1}" >> LOGS/${scriptname}.results
+  echo "set UBS_IQ2 = ${UMB_IQ2}" >> LOGS/${scriptname}.results
+  echo "set UBS_IQ3 = ${UMB_IQ3}" >> LOGS/${scriptname}.results
+  echo "set UBS_IQ4 = ${UMB_IQ4}" >> LOGS/${scriptname}.results
+  echo "set UBS_IQ5 = ${UMB_IQ5}" >> LOGS/${scriptname}.results
+  echo "set UBS_IQ6 = ${UMB_IQ6}" >> LOGS/${scriptname}.results
+  echo "set UBS_IQ7 = ${UMB_IQ7}" >> LOGS/${scriptname}.results
+  echo "set UBS_IQ8 = ${UMB_IQ8}" >> LOGS/${scriptname}.results
+  echo "set UBS_IQ9 = ${UMB_IQ9}" >> LOGS/${scriptname}.results
+  echo "set QVALBS = ${QVAL_local}" >> LOGS/${scriptname}.results
+endif
 
 set RP_6 = ${PSMAX}
 echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
@@ -980,12 +1091,20 @@ echo "<<@evaluate>>"
 
 set IQS = `echo ${UMB_IQ1} ${UMB_IQ2} ${UMB_IQ3} ${UMB_IQ4} ${UMB_IQ5} ${UMB_IQ6} ${UMB_IQ7} ${UMB_IQ8} ${UMB_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMB= ${QVAL_local} ... IQ stat = ${IQS}"
+if ( ${SYN_Unbending}x == "0x" ) then
+  echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMB= ${QVAL_local} ... IQ stat = ${IQS}"
+else
+  echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValBS= ${QVAL_local} ... IQ stat = ${IQS}"
+endif
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
-echo "::Unbend MovieB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+if ( ${SYN_Unbending}x == "0x" ) then
+  echo "::Unbend MovieB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+else
+  echo "::Unbend MB-Syn: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+endif
 #
 
 
@@ -994,16 +1113,16 @@ ${proc_2dx}/linblock "MMBOX - Evaluating APH values (CTF cor)"
 ###########################################################################
 
 \rm -f SCRATCH/TMP9873.dat
-\rm -f APH/${imagename}_movieB_fou.aph
+\rm -f ${outfile}
 
 ${bin_2dx}/2dx_mmboxa.exe << eot
-${frame_folder}/direct_sum_ctf_fft.mrc
-${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+${outfft}
+${imagenumber} ${nonmaskimagename}, MovieB, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_movieB_fou.aph
+${outfile}
 SCRATCH/TMP9873.dat
 UMB
 ${refposix},${refposiy}           ! XORIG,YORIG
@@ -1011,6 +1130,7 @@ ${refposix},${refposiy}           ! XORIG,YORIG
 ${lattice}                         ! Lattice vectors
 eot
 
+\rm -f SCRATCH/TMP9873.dat
 
 # Variation plot generation (no longer used)
 #python ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
@@ -1031,31 +1151,32 @@ if ( ${tempkeep} != "y" ) then
   ###########################################################################
   ${proc_2dx}/linblock "Deleting frame averages temporay files"
   ###########################################################################
+  set olddir = $PWD
   cd ${frame_folder}
   \rm -rf frame*
-  cd ..
+  cd ${olddir}
 endif
 
 # Prevent the "${frame_folder}" directory from showing up in 2dx_merge:
 \rm -f ${frame_folder}/2dx_master.cfg
 
 ${proc_2dx}/linblock "Plotting local drift"
-python ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} ${frame_folder}/drifts.pdf ${num_dia}
+python ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
 
 ${proc_2dx}/linblock "Finalizing output"
-${pdf2ps} ${frame_folder}/drifts.pdf ${frame_folder}/drifts.ps
-echo  "# IMAGE: ${frame_folder}/drifts.ps <PS: Local drifts>" >> LOGS/${scriptname}.results
+${pdf2ps} PS/MovieB_drifts.pdf PS/MovieB_drifts.ps
+echo  "# IMAGE: PS/MovieB_drifts.ps <PS: Local drifts>" >> LOGS/${scriptname}.results
 
-\rm -f ${frame_folder}_quadserch.ps
-${pdf2ps} ${frame_folder}_quadserch.pdf ${frame_folder}_quadserch.ps
-echo "# IMAGE-IMPORTANT: ${frame_folder}_quadserch.ps <PS: Profiles QUADSERCH>" >> LOGS/${scriptname}.results
+\rm -f PS/MovieB_quadserch.ps
+${pdf2ps} PS/MovieB_quadserch.pdf PS/MovieB_quadserch.ps
+echo "# IMAGE-IMPORTANT: PS/MovieB_quadserch.ps <PS: Profiles QUADSERCH>" >> LOGS/${scriptname}.results
 
-\rm -f ${frame_folder}_unbending.ps
-${pdf2ps} ${frame_folder}_unbending.pdf ${frame_folder}_unbending.ps
-echo "# IMAGE-IMPORTANT: ${frame_folder}_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
+\rm -f PS/MovieB_unbending.ps
+${pdf2ps} PS/MovieB_unbending.pdf PS/MovieB_unbending.ps
+echo "# IMAGE-IMPORTANT: PS/MovieB_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
 
 
-echo "# IMAGE-IMPORTANT: APH/${imagename}_movieB_fou.aph <APH: APH file after movie-mode B unbending>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${outfile} <APH: APH file after movie-mode B unbending>" >> LOGS/${scriptname}.results
 
 
 ###########################################################################

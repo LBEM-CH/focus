@@ -584,7 +584,7 @@ echo "<<@evaluate>>"
 ${proc_2dx}/${lincommand} "MMBOX - no resolution limitation for data extraction"
 #############################################################################
 #
-\rm -f SCRATCH/TMP9871.dat APH/${imagename}_nolimit.aph
+\rm -f SCRATCH/TMP9871.dat APH/${imagename}_fou_unbend1.aph
 #
 ${bin_2dx}/2dx_mmboxa.exe << eot
 FFTIR/${imagename}_unbend1_fft.mrc
@@ -593,7 +593,7 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2 2 0 50 50 19 19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_nolimit.aph
+APH/${imagename}_fou_unbend1.aph
 SCRATCH/TMP9871.dat
 U1
 ${refposix} ${refposiy}           ! XORIG,YORIG
@@ -601,37 +601,14 @@ ${RESMIN} 1.5 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
 #
-\rm -f SCRATCH/TMP9871.dat
-#
 echo "<<@progress: 82>"
 #
-#############################################################################
-${proc_2dx}/${lincommand} "MMBOX - resolution limitation for diagnostics"
-#############################################################################
-#
-\rm -f SCRATCH/TMP9872.dat APH/${imagename}_limit.aph
-#
-${bin_2dx}/2dx_mmboxa.exe << eot
-FFTIR/${imagename}_unbend1_fft.mrc
-  ${imagenumber}     ${imagename} ${date}, PASS 1
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2 2 0 50 50 19 19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/${imagename}_limit.aph
-SCRATCH/TMP9872.dat
-U1
-${refposix} ${refposiy}           ! XORIG,YORIG
-${RESMIN} ${RESMAX} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${lattice}                         ! Lattice vectors
-eot
-#
 echo "# IQSTAT-RESLIM:"
-cat SCRATCH/TMP9872.dat  
+cat SCRATCH/TMP9871.dat  
 if ( ${final_round} == "y" ) then
-  cat SCRATCH/TMP9872.dat >> LOGS/${scriptname}.results 
+  cat SCRATCH/TMP9871.dat >> LOGS/${scriptname}.results 
 endif
-source SCRATCH/TMP9872.dat
+source SCRATCH/TMP9871.dat
 #
 set IQS = `echo ${U1_IQ1} ${U1_IQ2} ${U1_IQ3} ${U1_IQ4} ${U1_IQ5} ${U1_IQ6} ${U1_IQ7} ${U1_IQ8} ${U1_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -647,7 +624,7 @@ echo "set QVal1 = ${QVAL_local}" >> LOGS/${scriptname}.results
 echo "set U1_QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
 echo "set U1_IQs = ${IQS}" >> LOGS/${scriptname}.results
 #
-\rm -f SCRATCH/TMP9872.dat
+\rm -f SCRATCH/TMP9871.dat
 #
 echo "<<@progress: 85>"
 echo "<<@evaluate>>"

@@ -1,5 +1,6 @@
 #
 #
+#
 # ... This is not an independent script.
 #
 #     This should only be called from a superior calling script.
@@ -25,6 +26,8 @@ echo dummy > REFdummy.hkl
 echo dummy > results.spi.0
 echo dummy > TMP_1.txt
 echo dummy > dummy.plt
+echo dummy > dummy_phase_zero_MRClefthanded.mtz
+echo dummy > dummy_phase_zero-p1_MRClefthanded.mtz
 echo dummy > dummy_phase_zero.mtz
 echo dummy > dummy_phase_zero-p1.mtz
 echo dummy > dummy_phase_zero-p1.mrc
@@ -202,6 +205,10 @@ endif
 cd SCRATCH
 echo dummy > tmp.1
 \rm -rf *
+cd ..
+if ( -d SCRATCH ) then
+  \rm -rf SCRATCH
+endif
 cd ${dir}
 \rm -rf SCRATCH
 #
@@ -260,12 +267,29 @@ echo dummy > dummy.TMP
 \rm -f avrgwork.mtz
 \rm -f avrg.hnegkl
 \rm -f centric_phase_zero.hkl
+\rm -f *_phase_zero_MRClefthanded.mtz
+\rm -f *_phase_zero-p1_MRClefthanded.mtz
 \rm -f *_phase_zero.mtz
 \rm -f *_phase_zero-p1.mtz
 \rm -f *_phase_zero-p1.mrc
 \rm -f TMP_*
 \rm -f fort.3
 \rm -f dummy.results
+#
+\rm -f movieB_syn_avrg.hkl
+\rm -f movieB_syn_centric.hk
+\rm -f movieB_syn_centric.hkl
+\rm -f movieB_syn_centric_phase_zero.hkl
+\rm -f movie_syn_avrg.hk
+\rm -f movie_syn_avrg.hkl
+\rm -f movie_syn_centric.hk
+\rm -f movie_syn_centric.hkl
+\rm -f 2dx_movie_refine_selected.dat
+\rm -f MovieB_peaks_I.dat
+\rm -f MovieB_peaks_II.dat
+\rm -f MovieB_peaks_III.dat
+\rm -f MovieB_peaks_IV.dat
+#
 if ( -e ${imagename}.mrc ) then
   if ( ${imagename} == m${nonmaskimagename} ) then
     \rm -f ${imagename}.mrc

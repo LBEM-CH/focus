@@ -24,7 +24,6 @@ set proc_2dx = ""
 set bin_2dx = ""
 set app_2dx_image = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 #$end_vars
 #

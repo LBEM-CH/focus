@@ -58,7 +58,6 @@
 # DISPLAY: initialization_corr_endian
 # DISPLAY: det_defocus
 # DISPLAY: det_tilt
-# DISPLAY: ctf_ttf
 # DISPLAY: crop
 # DISPLAY: comment
 # DISPLAY: imagesidelength
@@ -83,7 +82,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 # Variables to be available from the config file are:
 set imageorigin = ""
@@ -103,7 +101,6 @@ set RESMIN = ""
 set RESMAX = ""
 set RADLIM = ""
 set det_tilt = ""
-set ctf_ttf = ""
 set maska = ""
 set maskb01 = ""
 set maskb02 = ""
@@ -406,7 +403,9 @@ if ( ${movie_enable} == "y" ) then
     echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
   endif
   if ( ! -e ${movie_stackname} ) then
-	${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
+	${proc_2dx}/linblock "ERROR: ${movie_stackname} missing. Not processing in movie mode."
+        set movie_enable = "n"
+        echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results
   else
 	# Get the number of frames
 	e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt

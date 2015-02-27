@@ -41,8 +41,8 @@ set ncyc = "10"
 # LEGEND: Define, if a MTZ file is available as refinement reference.
 # EXAMPLE: reference = "(none)"
 # HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
-# The reference should be something like: '../merge/merge3D.mtz'
-# TYPE: Drop_Down_Menu "(none);../merge/merge3D.mtz"
+# The reference should be something like: '../merge/merge3D_MRClefthanded.mtz'
+# TYPE: Drop_Down_Menu "(none);../merge/merge3D_MRClefthanded.mtz"
 set reference = "(none)"
 #
 # LABEL: Overwrite data
@@ -76,7 +76,6 @@ set overwrite = "n"
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 set imagename = ""
 set imagesidelength = ""
 set imagenumber = ""

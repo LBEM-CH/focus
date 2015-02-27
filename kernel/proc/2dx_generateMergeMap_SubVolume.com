@@ -9,13 +9,6 @@
 #
 # This calculates sub-volumes from the raw volume SCRATCH/scratch1.map.
 #
-# Please note that the raw volume mentioned above still has the wrong handedness. 
-# This script therefore needs to flip the Z-axis down, which in example 1 below is done
-# wiht the last entry for the ROTA MATRIX, which is (0,0,-1) instead of (0,0,1).
-#
-# If you edit your own version into one of the templates below, make sure to include the 
-# Z-axis flipping somewhere, to get a volume with the correct handedness.
-#
 #
 #
 #
@@ -27,7 +20,7 @@ ${proc_2dx}/linblock "SubVolume generation Script called, with option ${calculat
 if ( ${calculate_subvolume}x == "1x" ) then  
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  ${proc_2dx}/linblock "maprot - to adjust dimensions"
   #############################################################################
   #
   set ALAT2 = `echo ${ALAT} | awk '{ s = $1 / 2.0 } END { print s }'`
@@ -40,7 +33,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
+ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
 TRANS  0.0 -20.0 ${ALAT2}
 eot
   #
@@ -141,7 +134,7 @@ TRANS  18.0 0.0 0.0
 eot
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  ${proc_2dx}/linblock "maprot - to adjust dimensions"
   #############################################################################
   #
   \rm -f SCRATCH/rot_volume.map
@@ -152,7 +145,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0
+ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0
 TRANS  0.0 0.0 0.0
 eot
   #
@@ -216,7 +209,7 @@ TRANS  18.0 0.0 0.0
 eot
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  ${proc_2dx}/linblock "maprot - to adjust dimensions"
   #############################################################################
   #
   \rm -f SCRATCH/rot_volume.map
@@ -227,7 +220,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0
+ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0
 TRANS  0.0 0.0 0.0
 eot
   #
@@ -287,7 +280,7 @@ TRANS  0.0 0.0 0.0
 eot
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  ${proc_2dx}/linblock "maprot - to adjust dimensions"
   #############################################################################
   #
   \rm -f SCRATCH/rot_volume.map
@@ -298,7 +291,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0
+ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0
 TRANS  0.0 0.0 0.0
 eot
   #
@@ -357,7 +350,7 @@ TRANS  70.0 -10.0 0.0
 eot
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  ${proc_2dx}/linblock "maprot - to adjust dimensions"
   #############################################################################
   #
   \rm -f SCRATCH/rot_volume.map
@@ -368,7 +361,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0
+ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0
 TRANS  0.0 0.0 0.0
 eot
   #
@@ -413,7 +406,7 @@ if ( ${calculate_subvolume}x == "6x" ) then
   #
   #
   #############################################################################
-  ${proc_2dx}/linblock "maprot - to flip Z-axis down, for correct handedness"
+  ${proc_2dx}/linblock "maprot - to adjust dimensions"
   #############################################################################
   #
   \rm -f SCRATCH/scratch2.map
@@ -424,7 +417,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0
+ROTA MATRIX 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0
 TRANS  0.0 0.0 0.0
 eot
   #

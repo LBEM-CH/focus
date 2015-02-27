@@ -269,9 +269,9 @@ if ( ${merge_modus} == '3D' ) then
       ${proc_2dx}/protest "Run Merging script first."
     endif
   else
-    # User interpolated lattice lines latlinesref.mtz
-    if ( ! -e merge3D.mtz ) then
-      ${proc_2dx}/linblock "ERROR: merge.mtz not found. No reference for refinement available."
+    # User interpolated lattice lines latlinesref_MRClefthanded.mtz
+    if ( ! -e merge3D_MRClefthanded.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge_MRClefthanded.mtz not found. No reference for refinement available."
       ${proc_2dx}/protest "Run Merging script first."
     endif
     set NPRG = 3
@@ -288,26 +288,26 @@ if ( ${merge_ref_num} != "0" ) then
      echo " "
     if ( ${NPRG} == "3" ) then
       # Use MTZ file
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge3D.mtz not existing in register ${merge_ref_num}."
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3D_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D.mtz ."
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D.mtz .
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz ."
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz .
       endif
       #
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge3Dref.mtz not existing in register ${merge_ref_num}."
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3Dref_MRClefthanded.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge3Dref_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz ."
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3Dref.mtz .
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3Dref_MRClefthanded.mtz ."
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge3Dref_MRClefthanded.mtz .
       endif
     else
       # Use APH file
-      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge2D.mtz not existing in register ${merge_ref_num}."
+      if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge2D_MRClefthanded.mtz ) then
+        ${proc_2dx}/protest "ERROR: merge2D_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       else
-        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge2D.mtz ." 
-        \cp -f REGISTERS/Reg_${merge_ref_num}/merge2D.mtz .
+        echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge2D_MRClefthanded.mtz ." 
+        \cp -f REGISTERS/Reg_${merge_ref_num}/merge2D_MRClefthanded.mtz .
       endif
       if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge.aph ) then
         ${proc_2dx}/protest "ERROR: merge.aph not existing in register ${merge_ref_num}."

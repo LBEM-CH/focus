@@ -176,6 +176,11 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 set dirfile = "2dx_merge_dirfile.dat"
+set dirnum = `cat ${dirfile} | wc -l`
+set maxthread = `echo ${Thread_Number} ${dirnum} | awk '{if ($1<$2/2) { s = $1 } else { s = int($2 / 2) }} END { print s }'`
+if ( ${maxthread} == "0" ) then
+  set maxthread = 1
+endif
 #
 set number = 1
 if ( ${ILIST} == "n" ) then
@@ -343,14 +348,14 @@ if ( ${merge_modus} == '2D' ) then
   set NPRG = 1
 endif
 if ( ${merge_modus} == '3D' ) then
-  if ( ( ! -e  merge3D.mtz ) || ( ! -e merge3Dref.mtz ) ) then
+  if ( ( ! -e  merge3D_MRClefthanded.mtz ) || ( ! -e merge3Dref_MRClefthanded.mtz ) ) then
     set create_merged_dataset = "y"
   endif
   if ( ${merge_reference} == '0' ) then
     # Use merge.aph files
     set NPRG = 1
   else
-    # User interpolated lattice lines latlinesref.mtz
+    # User interpolated lattice lines latlinesref_MRClefthanded.mtz
     set NPRG = 3
   endif
 endif
@@ -451,7 +456,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_data_type}
-${Thread_Number}
+${maxthread}
 ${ILIST_VAL}
 0
 eot
@@ -465,12 +470,12 @@ ${proc_2dx}/linblock "Launching refinement script"
 echo "# IMAGE: SCRATCH/job_01_${scriptBfile} <CSH: First (01) refinement script>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptB.com.log <LOG: First (01) origtilt B output>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/job_01_${postprocessingfile} <CSH: First (01) refinement postprocessing script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${Thread_Number}_${scriptBfile} <CSH: Last (${Thread_Number}) refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${Thread_Number}_2dx_merge_scriptB.com.log <LOG: Last (${Thread_Number}) origtilt B output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${Thread_Number}_${postprocessingfile} <CSH: Last (${Thread_Number}) refinement postprocessing script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${maxthread}_${scriptBfile} <CSH: Last (${maxthread}) refinement script>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${maxthread}_2dx_merge_scriptB.com.log <LOG: Last (${maxthread}) origtilt B output>" >> LOGS/${scriptname}.results
+echo "# IMAGE: SCRATCH/job_${maxthread}_${postprocessingfile} <CSH: Last (${maxthread}) refinement postprocessing script>" >> LOGS/${scriptname}.results
 
 foreach scriptB ( SCRATCH/job_*_${scriptBfile} )
-  if ( ${scriptB} != SCRATCH/job_${Thread_Number}_${scriptBfile} ) then
+  if ( ${scriptB} != SCRATCH/job_${maxthread}_${scriptBfile} ) then
     echo Background nohup ${scriptB} \> ${scriptB}.log \&
     nohup ${scriptB} > ${scriptB}.log &
   else

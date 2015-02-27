@@ -13,7 +13,7 @@
 #
 # SORTORDER: 37
 #
-# MANUAL: This script applies CTF correction to the raw image
+# MANUAL: This script applies CTF correction to the raw image. Even if you don't use this feature, you need to run this script.
 #
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
@@ -46,7 +46,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 set SYN_Unbending = ""
 set PHASEORI_done = ""
@@ -163,7 +162,6 @@ ${RESMAX}
 ${ctfcor_noise}
 ${ctfcor_imode}
 ${ctfcor_debug}
-${ctfcor_maxamp_factor}
 eot
     #
     echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results

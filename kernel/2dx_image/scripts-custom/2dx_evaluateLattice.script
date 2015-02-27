@@ -130,7 +130,6 @@ set peakNum = "140"
 # DISPLAY: TAXA
 # DISPLAY: TANGL
 # DISPLAY: det_tilt
-# DISPLAY: ctf_ttf
 # DISPLAY: imagesidelength
 # DISPLAY: stepdigitizer
 # DISPLAY: magnification
@@ -144,7 +143,6 @@ set bin_2dx = ""
 set proc_2dx = ""
 #
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 set imagename = ""
 set nonmaskimagename = ""
 set imagenumber = ""
@@ -163,7 +161,6 @@ set TLTANG = ""
 set TLTAXIS = ""
 set SYM = ""
 set det_tilt = ""
-set ctf_ttf = ""
 set tempkeep = ""
 set defocus = ""
 #

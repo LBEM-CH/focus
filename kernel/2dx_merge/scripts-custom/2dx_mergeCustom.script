@@ -283,9 +283,9 @@ eot
   #############################################################################
   #
   set infile = APH/latfitted.hkl
-  \rm -f merge3D.mtz
+  \rm -f merge3D_MRClefthanded.mtz
   #
-  ${bin_ccp4}/f2mtz hklin ${infile} hklout merge3D.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout merge3D_MRClefthanded.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -296,7 +296,7 @@ SKIP 1
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Full fitted lattice line data for volume>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: merge3D_MRClefthanded.mtz <MTZ: Full fitted lattice line data for volume>" >> LOGS/${scriptname}.results
   echo "<<@progress: +5>>"
   #
   #
@@ -305,9 +305,9 @@ eof
   #############################################################################
   #
   set infile = APH/latfittedref.hkl
-  \rm -f merge3Dref.mtz
+  \rm -f merge3Dref_MRClefthanded.mtz
  #
-  ${bin_ccp4}/f2mtz hklin ${infile} hklout merge3Dref.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout merge3Dref_MRClefthanded.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -318,7 +318,7 @@ SKIP 1
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: merge3Dref.mtz <MTZ: Full fitted lattice line data for reference>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: merge3Dref_MRClefthanded.mtz <MTZ: Full fitted lattice line data for reference>" >> LOGS/${scriptname}.results
   echo "<<@progress: +5>>"
   #
   #

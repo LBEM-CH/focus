@@ -52,7 +52,6 @@ set overwrite = "y"
 # DISPLAY: ctfrev
 # DISPLAY: IQMAX
 # DISPLAY: comment
-# DISPLAY: ctf_ttf
 # DISPLAY: ctfsearch_df_step
 # DISPLAY: ctfsearch_df_range
 # DISPLAY: ctfsearch_ncyc
@@ -68,7 +67,6 @@ set overwrite = "y"
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 set imagename = ""
 set nonmaskimagename = ""
 set imagesidelength = ""
@@ -103,7 +101,6 @@ set CS = ""
 set KV = ""
 set RMAG = ""
 set LCOLOR = ""
-set ctf_ttf = ""
 set ctfsearch_df_step = ""
 set ctfsearch_df_range = ""
 set ctfsearch_ncyc = ""
@@ -228,9 +225,9 @@ endif
 #
 if ( ${refine_def_reference} == "2" ) then
   set iref=2
-  set mergedat = ../../merge/merge2Dref.mtz
+  set mergedat = ../../merge/merge2Dref_MRClefthanded.mtz
   if ( ! -e ${mergedat} ) then
-    set mergedat = ../merge/merge2Dref.mtz
+    set mergedat = ../merge/merge2Dref_MRClefthanded.mtz
     if ( ! -e ${mergedat} ) then
       ${proc_2dx}/protest "ERROR: no suitable reference file found."
     endif
@@ -252,9 +249,9 @@ endif
 #
 if ( ${refine_def_reference} == "4" ) then
   set iref=2
-  set mergedat = ../../merge/merge3Dref.mtz
+  set mergedat = ../../merge/merge3Dref_MRClefthanded.mtz
   if ( ! -e ${mergedat} ) then
-    set mergedat = ../merge/merge3Dref.mtz
+    set mergedat = ../merge/merge3Dref_MRClefthanded.mtz
     if ( ! -e ${mergedat} ) then
       ${proc_2dx}/protest "ERROR: no suitable reference file found."
     endif
@@ -271,10 +268,6 @@ else
 endif
 #
 echo "<<@progress: 10>>"
-#
-if ( ${ctf_ttf} != 'CTF' ) then
-  ${proc_2dx}/protest "ERROR: You cannot run ctfsearch with TTF-corrected data."
-endif
 #
 if ( ${SYN_Unbending} == "0" ) then
   # FouFilter Unbending result is used:

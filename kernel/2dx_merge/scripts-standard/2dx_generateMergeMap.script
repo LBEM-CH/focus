@@ -46,7 +46,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set FFTIR_DISK = ""
 #
 set tempkeep = ""
 set RESMIN = ""
@@ -216,9 +215,9 @@ if ( ${merge_modus} == "3D" ) then
   ${proc_2dx}/linblock "cad - to set spacegroup info to p1 for PSF"
   #############################################################################  
   #
-  \rm -f SCRATCH/merge3Dref-p1.mtz
+  \rm -f SCRATCH/merge3D-p1.mtz
   #
-  ${bin_ccp4}/cad hklin1 merge3Dref.mtz hklout SCRATCH/merge3Dref-p1.mtz << eof
+  ${bin_ccp4}/cad hklin1 merge3D.mtz hklout SCRATCH/merge3D-p1.mtz << eof
 symmetry p1
 labin file 1 all
 end
@@ -231,7 +230,7 @@ eof
   \rm -f SCRATCH/merge3D_phase_zero.mtz
   #
   ${bin_ccp4}/sftools << eof
-read SCRATCH/merge3Dref-p1.mtz
+read SCRATCH/merge3D-p1.mtz
 calc COL PHI = 0
 write SCRATCH/merge3D_phase_zero.mtz
 quit
@@ -337,8 +336,6 @@ eof
   set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
   echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
   #
-  ${proc_2dx}/linblock "WARNING: Correct handedness is now achieved, but MTZ data are inverted."
-  #
   \rm -f SCRATCH/scratch2_phase_zero.map
   ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero.map wrkout SCRATCH/scratch2_phase_zero.map << eot
 MODE FROM
@@ -347,7 +344,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
+ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
 TRANS  0.000 0.000 0.000
 eot
   #
@@ -363,7 +360,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
+ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
 TRANS  0.000 0.000 0.000
 eot
   #
@@ -423,39 +420,9 @@ eof
   #############################################################################
   #############################################################################
   #
-  #############################################################################
-  ${proc_2dx}/linblock "maprot - to calculate 3D volume with inverted hand"
-  #############################################################################
-  #
-  \rm -f SCRATCH/scratch2_inverted.map
-  ${bin_ccp4}/maprot mapin SCRATCH/scratch1.map wrkout SCRATCH/scratch2_inverted.map << eot
-MODE FROM
-CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
-GRID WORK ${cellx} ${celly} ${ALAT}
-XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
-SYMM WORK 1
-AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
-TRANS  0.000 0.000 0.000
-eot
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "mapmask - to set units to 2x2x1 for 3D volume with inverted hand"
-  #############################################################################
-  #
-  \rm -f volume_inverted.map
-  ${bin_ccp4}/mapmask mapin SCRATCH/scratch2_inverted.map mapout volume_inverted.map << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim -1.0 0.999 -1.0 0.999 -0.5 0.499
-END
-eof
-  #
-  \rm -f SCRATCH/scratch2_inverted.map
-  echo "# IMAGE: volume_inverted.map <MAP: inverted-handedness (wrong) 3D Volume, for checking only>" >> LOGS/${scriptname}.results
   #
 else
-  set infile = merge2D.mtz
+  set infile = merge2D_MRClefthanded.mtz
 endif
 #
 #############################################################################

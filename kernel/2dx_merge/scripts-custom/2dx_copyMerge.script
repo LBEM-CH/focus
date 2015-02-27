@@ -152,23 +152,23 @@ else
     \rm -rf Reg_${merge_copy_onto}
     \mkdir Reg_${merge_copy_onto}
     cd ..
-    if ( -e merge2D.mtz ) then
-      \cp -f merge2D.mtz REGISTERS/Reg_${merge_copy_onto}
-      ${proc_2dx}/linblock "merge2D.mtz copied."
+    if ( -e merge2D_MRClefthanded.mtz ) then
+      \cp -f merge2D_MRClefthanded.mtz REGISTERS/Reg_${merge_copy_onto}
+      ${proc_2dx}/linblock "merge2D_MRClefthanded.mtz copied."
     else
-      ${proc_2dx}/linblock "WARNING: merge2D.mtz not found."
+      ${proc_2dx}/linblock "WARNING: merge2D_MRClefthanded.mtz not found."
     endif
-    if ( -e merge3D.mtz ) then
-      \cp -f merge3D.mtz REGISTERS/Reg_${merge_copy_onto}
-      ${proc_2dx}/linblock "merge3D.mtz copied."
+    if ( -e merge3D_MRClefthanded.mtz ) then
+      \cp -f merge3D_MRClefthanded.mtz REGISTERS/Reg_${merge_copy_onto}
+      ${proc_2dx}/linblock "merge3D_MRClefthanded.mtz copied."
     else
-      ${proc_2dx}/linblock "WARNING: merge3D.mtz not found."
+      ${proc_2dx}/linblock "WARNING: merge3D_MRClefthanded.mtz not found."
     endif
-    if ( -e merge3Dref.mtz ) then
-      \cp -f merge3Dref.mtz REGISTERS/Reg_${merge_copy_onto}
-      ${proc_2dx}/linblock "merge3Dref.mtz copied."
+    if ( -e merge3Dref_MRClefthanded.mtz ) then
+      \cp -f merge3Dref_MRClefthanded.mtz REGISTERS/Reg_${merge_copy_onto}
+      ${proc_2dx}/linblock "merge3Dref_MRClefthanded.mtz copied."
     else
-      ${proc_2dx}/linblock "WARNING: merge3Dref.mtz not found."
+      ${proc_2dx}/linblock "WARNING: merge3Dref_MRClefthanded.mtz not found."
     endif
     if ( -e APH/merge.aph ) then
       \cp -f APH/merge.aph REGISTERS/Reg_${merge_copy_onto}

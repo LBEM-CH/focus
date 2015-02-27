@@ -150,8 +150,8 @@ set LABOUTval = "H K L F PHI FOM"
 set CTYPOUTval = "H H H F P W"
 #
 set infile = ${merge2map_output_dir}/APH/sym2D_${postfix}.hkl
-set outfile = ${merge2map_output_dir}/SCRATCH/map_${postfix}.mtz
-\rm -f ${merge2map_output_dir}/SCRATCH/${postfix}.mtz
+set outfile = ${merge2map_output_dir}/SCRATCH/map_${postfix}_MRClefthanded.mtz
+\rm -f ${merge2map_output_dir}/SCRATCH/${postfix}_MRClefthanded.mtz
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${outfile} << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${postfix} , ${date}
@@ -164,16 +164,16 @@ SKIP 0
 END
 eof
 #
-\rm -f ${merge2map_output_dir}/map_${postfix}.mtz 
+\rm -f ${merge2map_output_dir}/map_${postfix}_MRClefthanded.mtz 
 ${bin_ccp4}/sftools << eot
 read ${outfile} 
 merge
 expand
-write ${merge2map_output_dir}/map_${postfix}.mtz
+write ${merge2map_output_dir}/map_${postfix}_MRClefthanded.mtz
 end
 eot
 #
 if( ${debug} ) then
-    echo "# IMAGE-IMPORTANT: ${merge2map_output_dir}/map_${postfix}.mtz <MTZ: map_${postfix}.mtz>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${merge2map_output_dir}/map_${postfix}_MRClefthanded.mtz <MTZ: map_${postfix}_MRClefthanded.mtz>" >> LOGS/${scriptname}.results
 endif
 #

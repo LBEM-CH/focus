@@ -462,6 +462,7 @@ eot
       \mkdir CUT
     endif
     cd ${olddir}
+    \rm -f CUT
     \ln -s SCRATCH/CUT CUT 
     #
     source TMP_runfile_windows.txt

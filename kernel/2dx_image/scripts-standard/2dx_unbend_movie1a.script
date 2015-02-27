@@ -431,6 +431,11 @@ echo "<<@progress: 5>>"
 #
 set PROFDATA = ${nonmaskimagename}_profile.dat
 if ( ! -e ${PROFDATA} ) then
+  if ( -e image_ctfcor_profile.dat ) then
+    \mv -f image_ctfcor_profile.dat ${PROFDATA}
+  endif
+endif
+if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif
 #

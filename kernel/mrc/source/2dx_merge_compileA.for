@@ -243,11 +243,15 @@ C
         read(CIMAGENUMBER,*)imnum(imcount)
 C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
         if(imcount.gt.1)then
+          ifound=0
           do i=1,imcount-1
             if(imnum(i).eq.imnum(imcount))then
-              call shorten(CIMAGENAME,k)
-              write(*,'(''WARNING: Imagenumber '',I10,
-     .          '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
+              if(ifound.eq.0)then
+                call shorten(CIMAGENAME,k)
+                write(*,'(''WARNING: Imagenumber '',I10,
+     .            '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
+                ifound=1
+              endif
             endif
           enddo
         endif

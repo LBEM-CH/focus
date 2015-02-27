@@ -247,7 +247,7 @@ C
         call shorten(cdir,k1)
         call shortshrink(CIMAGENAME,k2)
         write(cname4,'(A,''/APH/image_ctfcor_ctf.aph'')')
-     .    cdir(1:k1),CIMAGENAME(1:k2)
+     .    cdir(1:k1)
         call shortshrink(cname4,k1)
         write(11,'(A)')cname4(1:k1)
         write(11,'(''  F'')')

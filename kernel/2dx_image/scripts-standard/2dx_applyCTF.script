@@ -71,7 +71,6 @@ set TAXA = ""
 set TANGL = ""
 set TLTAXIS = ""
 set TLTANG = ""
-set refori = ""
 set phacon = ""
 set ctfplotresmax = ""
 set CS = ""
@@ -106,18 +105,6 @@ echo "<<@evaluate>>"
 #
 set date = `date`
 echo date = ${date}
-#
-set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-if ( ${tmp1} != ${refposix} ) then
-  set refori = ${refposix},${refposiy}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected."
-  echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-endif
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
 #
 if ( ${QVALMA}x == 'x' ) then
   set QVALMA = '.'

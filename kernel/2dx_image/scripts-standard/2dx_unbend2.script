@@ -40,7 +40,6 @@
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
-# DISPLAY: refori
 # DISPLAY: createmaskinfo
 # DISPLAY: ISTEP
 # DISPLAY: ISTEP_h
@@ -96,7 +95,6 @@ set TLTAXIS = ""
 set TLTANG = ""
 set TANGL = ""
 set det_tilt = ""
-set refori = ""
 set createmaskinfo = ""
 set taperBeforeFFT = ""
 set generatePeriodogram = ""
@@ -289,9 +287,9 @@ if ( ${tmp} != ${quadradby} ) then
   echo "#WARNING: Warning: correcting quadradb to ${quadradb}." >> LOGS/${scriptname}.results
 endif
 #
-set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-set refori = ${reforix},${reforix}
-echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
+#
 #
 if ( ${ccunbend_program} != "0" && ${ccunbend_program} != "1" ) then
   set ccunbend_program = "0"
@@ -335,22 +333,10 @@ endif
 set reciangle = `echo ${realang} | awk '{ s = 180.0 - $1 } END { print s } '`
 echo reciangle = ${reciangle}
 #
-set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-if ( ${tmp1} != ${refposix} ) then
-  set refori = ${refposix},${refposiy}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected."
-  echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-endif
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
-#
-set rtempx1 = ${refposix}
-set rtempy1 = ${refposiy}
-set rtempx2 = ${refposix}
-set rtempy2 = ${refposiy}
+set rtempx1 = ${imagecenterx}
+set rtempy1 = ${imagecentery}
+set rtempx2 = ${imagecenterx}
+set rtempy2 = ${imagecentery}
 @ rtempx1 -= 13
 @ rtempx2 += 12
 @ rtempy1 -= 13
@@ -359,10 +345,10 @@ set rtempy2 = ${refposiy}
 set patlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
 echo patlabel = ${patlabel}
 #
-set rtempx1 = ${refposix}
-set rtempy1 = ${refposiy}
-set rtempx2 = ${refposix}
-set rtempy2 = ${refposiy}
+set rtempx1 = ${imagecenterx}
+set rtempy1 = ${imagecentery}
+set rtempx2 = ${imagecenterx}
+set rtempy2 = ${imagecentery}
 @ rtempx1 -= 400
 @ rtempx2 += 399
 @ rtempy1 -= 400
@@ -548,7 +534,7 @@ N                               ! Generate points from lattice?
 SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -572,7 +558,7 @@ N                               ! Generate points from lattice?
 SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -596,7 +582,7 @@ N                               ! Generate points from lattice?
 SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -620,7 +606,7 @@ N                               ! Generate points from lattice?
 SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -644,7 +630,7 @@ N                               ! Generate points from lattice?
 SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -668,7 +654,7 @@ N                               ! Generate points from lattice?
 SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot

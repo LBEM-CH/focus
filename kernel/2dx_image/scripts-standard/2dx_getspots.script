@@ -34,7 +34,6 @@
 # DISPLAY: spot_exclusion_radius
 # DISPLAY: ProtSpotList
 # DISPLAY: spotrefine_IHKmax
-# DISPLAY: refori
 # DISPLAY: comment
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG
@@ -73,7 +72,6 @@ set spot_filter = ""
 set spot_exclusion_radius = ""
 set ProtSpotList = ""
 set spotrefine_IHKmax = ""
-set refori = ""
 set ctfcor_imode = ""
 #
 #$end_vars
@@ -101,10 +99,6 @@ endif
 set date = `date`
 echo date = ${date}
 #
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
 #
 source ${proc_2dx}/2dx_makedirs
 #
@@ -113,6 +107,9 @@ echo "<<@progress: 1>>"
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
+#
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
 #
 set outputfile = findspots.tmp
 \rm -f ${outputfile}
@@ -212,7 +209,7 @@ N                               ! Generate points from lattice?
 2 3 0 50 50 12 12               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 ${spotname}
 ${IQMAX}                              ! IQMAX
-${refposix} ${refposiy}         ! XORIG,YORIG
+${imagecenterx} ${imagecentery}         ! XORIG,YORIG
 ${RINNER} ${ROUTER} 0 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
@@ -236,7 +233,7 @@ N                               ! Generate points from lattice?
 2 3 0 50 50 12 12               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 ${spotname}
 9                              ! IQMAX
-${refposix} ${refposiy}         ! XORIG,YORIG
+${imagecenterx} ${imagecentery}         ! XORIG,YORIG
 ${RINNER} ${ROUTER} 0 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot

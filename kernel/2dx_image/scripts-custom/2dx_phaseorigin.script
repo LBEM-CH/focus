@@ -50,7 +50,6 @@ set show_PSF = "n"
 # DISPLAY: realang
 # DISPLAY: TAXA
 # DISPLAY: TANGL
-# DISPLAY: refori
 # DISPLAY: comment
 # DISPLAY: phaori
 # DISPLAY: phaoriFouFilter
@@ -94,7 +93,6 @@ set phaoriFouFilter = ""
 set phaori_change = ""
 set realang = ""
 set realcell = ""
-set refori = ""
 set revhk = ""
 set revhnd = ""
 set phaori_manual_target = ""

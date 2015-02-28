@@ -36,7 +36,6 @@
 # DISPLAY: maskb04
 # DISPLAY: maskb05
 # DISPLAY: tempkeep
-# DISPLAY: refori
 # DISPLAY: comment
 # DISPLAY: mask_fourmask
 #
@@ -61,7 +60,6 @@ set maskb03 = ""
 set maskb04 = ""
 set maskb05 = ""
 set tempkeep = ""
-set refori = ""
 set mask_fourmask = ""
 #
 #$end_vars
@@ -334,15 +332,6 @@ eot
     \rm SCRATCH/TMPmask3.mrc
   endif
   echo "<<@progress: 90>>"
-  #
-  if ( ${mask_reset_reflocation} == "y" ) then
-    ${proc_2dx}/linblock "Resetting reference location to center of masked area."
-    set centerx = `cat boximage.tmp | awk '{ s = int ( $1 ) } END { print s }'`
-    set centery = `cat boximage.tmp | awk '{ s = int ( $2 ) } END { print s }'`
-    set refori = ${centerx},${centery}
-    echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-    ${proc_2dx}/linblock "reference center changed to ${refori}."
-  endif
   #
   echo "# IMAGE: "m${nonmaskimagename}.mrc  >> LOGS/${scriptname}.results
   set oldname = `echo ${imagename}`

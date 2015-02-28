@@ -1,0 +1,330 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Unbend MovieB Syn                                                  #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 02/20/2006                                             #
+# Last Modification: 02/20/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# MANUAL: Movie mode unbending script
+#
+# MANUAL: Prerequisite I: Installed eman2/sparx package. Ensure that the eman2.bashrc is sourced (optimally in your bash.rc or .profile file) before starting 2dx. 
+#
+# MANUAL: Prerequisite II: Python-2.7 (or higher) including matplotlib and numpy. If you have installed eman2, this should be available on your system.
+#
+# MANUAL: Prerequisite III: PDFtk. You can get it from "https://www.pdflabs.com/tools/pdftk-server/".   Or, try on OSX:  port install pdftk
+#
+# MANUAL: Prerequisite IV: ps2pdf (Linux) or pstopdf (OSX). These should be already present.
+#
+# MANUAL: Prerequisite IV: pdf2ps. This is part of ghostscript. You can get it with:  port install <B>ghostscript</b>.
+#
+# MANUAL: Before using movie-mode unbending, switch movie-mode processing on and rerun "InitFilesAndParams" to preset the used batch size dependening on the number of available movie-frames.
+#
+# MANUAL: Using the movie-mode unbent APH-file requires selecting the movie-mode option in "Correct CTF" and rerunning of "Generate Map".
+#
+# MANUAL: Careful prevention of overfitting is crucial for successful movie-mode 3D reconstructions.
+#
+#
+# SORTORDER: 59
+#
+# LABEL: Show raw frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frames = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frames = "n"
+#
+# LABEL: Show FFT of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_FFT = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_FFT = "n"
+#
+# LABEL: Show CCmaps of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_CCmap = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_CCmap = "n"
+#
+# LABEL: Mark CCmaps with found coordinates?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_CCmap_marked = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_CCmap_marked = "n"
+#
+# DISPLAY: imagename
+# DISPLAY: imagesidelength 
+# DISPLAY: SYN_Unbending
+# DISPLAY: SYN_Bfact1
+# DISPLAY: SYN_maska
+# DISPLAY: holeb
+# DISPLAY: maskb01
+# DISPLAY: maskb02
+# DISPLAY: maskb03
+# DISPLAY: maskb04
+# DISPLAY: maskb05
+# DISPLAY: boxb1
+# DISPLAY: boxb2
+# DISPLAY: quadpredb
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: ALAT
+# DISPLAY: radlim
+# DISPLAY: treatspotscan
+# DISPLAY: ctfplotresmax
+# DISPLAY: tempkeep
+# DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
+# DISPLAY: IMAXCOR
+# DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: LCOLOR
+# DISPLAY: ccunbend_program
+# DISPLAY: plotres_rings
+# DISPLAY: movie_stackname
+# DISPLAY: movie_enable
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: movie_masking_mode
+# DISPLAY: movie_refboxa
+# DISPLAY: movie_refboxb
+# DISPLAY: movie_quadrada
+# DISPLAY: movie_quadradb
+# DISPLAY: movie_facthreshb
+# DISPLAY: movie_filter_type
+# DISPLAY: movie_filter_param
+# DISPLAY: movie_imagenumber_toave
+# DISPLAY: Thread_Number
+# DISPLAY: ctfcor_noise
+# DISPLAY: ctfcor_inner_tile
+# DISPLAY: ctfcor_outer_tile
+# DISPLAY: ctfcor_taper
+# DISPLAY: ctfcor_imode
+# DISPLAY: ctfcor_debug
+# DISPLAY: ctfcor_maxamp_factor
+# DISPLAY: calculate_tiles
+#
+#$end_local_vars
+#
+#
+set app_2dx_image = ""
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+#
+set ALAT = ""
+set CS = ""
+set IMAXCOR = ""
+set ISTEP = ""
+set ISTEP_h = ""
+set KV = ""
+set LCOLOR = ""
+set MASKING_done = ""
+set PHASEORI_done = ""
+set QVALS = ""
+set RB_1 = ""
+set RB_2 = ""
+set RB_3 = ""
+set RB_4 = ""
+set RB_5 = ""
+set RB_6 = ""
+set RESMAX = ""
+set RESMIN = ""
+set RMAG = ""
+set RP_1 = ""
+set RP_2 = ""
+set RP_3 = ""
+set RP_4 = ""
+set RP_5 = ""
+set RP_6 = ""
+set SYM = ""
+set SYN_Bfact1 = ""
+set SYN_Unbending = ""
+set SYN_maska = ""
+set TANGL = ""
+set TAXA = ""
+set TLTANG = ""
+set TLTAXIS = ""
+set Thread_Number = ""
+set app_2dx_image = ""
+set beamtilt = ""
+set boxb1 = ""
+set boxb2 = ""
+set calculate_tiles = ""
+set ccunbend_program = ""
+set createmaskinfo = ""
+set ctfcor_debug = ""
+set ctfcor_imode = ""
+set ctfcor_inner_tile = ""
+set ctfcor_maxamp_factor = ""
+set ctfcor_noise = ""
+set ctfcor_outer_tile = ""
+set ctfcor_taper = ""
+set ctfplotresmax = ""
+set ctfrev = ""
+set defocus = ""
+set det_tilt = ""
+set domask = ""
+set facthresha = ""
+set holeb = ""
+set imagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set lattice = ""
+set magnification = ""
+set maskb01 = ""
+set maskb02 = ""
+set maskb03 = ""
+set maskb04 = ""
+set maskb05 = ""
+set movie_enable = ""
+set movie_facthreshb = ""
+set movie_filter_param = ""
+set movie_filter_type = ""
+set movie_imagenumber_toave = ""
+set movie_imagenumber_total = ""
+set movie_imagenumber_touse = ""
+set movie_masking_mode = ""
+set movie_quadrada = ""
+set movie_quadradb = ""
+set movie_refboxa = ""
+set movie_refboxb = ""
+set movie_stackname = ""
+set nonmaskimagename = ""
+set phacon = ""
+set phaori = ""
+set phaoriFouFilter = ""
+set quadpredb = ""
+set quadradb = ""
+set radlim = ""
+set realang = ""
+set realcell = ""
+set revhk = ""
+set revhnd = ""
+set revxsgn = ""
+set rot180 = ""
+set rot90 = ""
+set sgnxch = ""
+set stepdigitizer = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set treatspotscan = ""
+set use_masked_image = ""
+#
+#$end_vars
+#
+source ${proc_2dx}/2dx_makedirs
+#
+set scriptname = 2dx_unbend_movieBS
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+echo "<<@progress: 1>>"
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set date = `date`
+echo date = ${date}
+#
+if ( ${phaoriFouFilter} == "0.0,0.0" ) then
+  set ${PHASEORI_done} = "n"
+  echo "PHASEORI_done = ${PHASEORI_done}" >> LOGS/${scriptname}.results
+endif
+if ( ${PHASEORI_done} == "n" ) then
+  ${proc_2dx}/linblock "Skipping. First determine the phase origin from the Fourier-filtered unbending."
+  exit
+endif
+#
+set frame_folder = "SCRATCH/MovieB"
+#
+if ( ! -e ${frame_folder} ) then
+  \mkdir ${frame_folder}
+endif
+#
+if ( ! -d MovieB ) then
+  \mkdir MovieB
+endif
+#
+##########################################
+##########################################
+#
+set system = `uname -s`
+echo system = ${system}
+#
+if ( ${system} == "Darwin" ) then
+  set S2 = "henning"
+  set S3 = "sthennin"
+  if (( "$USER" == "$S2" ) || ( "$USER" == "$S3" )) then
+    set app_2dx_image = "~/2dx/bin/2dx_image"
+  else
+    set app_2dx_image = "${bin_2dx}/../../../bin/2dx_image"
+  endif
+  echo ":Testing, if gostscript is installed and ps2pdf exists"
+  set ps2pdf_test = `which ps2pdf`x 
+  if ( ${ps2pdf_test} == 'x' ) then
+    set ps2pdf = pstopdf
+    echo "::"
+    echo "::ERROR: Install gostscript first."
+    echo "::"
+  else
+    set ps2pdf = `which ps2pdf` 
+    set pdf2ps = `which pdf2ps`
+  endif
+else
+  set app_2dx_image = "2dx_image"
+  set ps2pdf = ps2pdf
+  set pdf2ps = pdf2ps
+endif
+echo ":pdf2ps is ${pdf2ps}"
+echo ":ps2pdf is ${ps2pdf}"
+if ( ${pdf2ps}x == 'x' ) then
+  set pdf2ps = "echo ::ERROR: pdf2ps not found. Install gostscript."
+  echo ::
+  echo ::ERROR: pdf2ps not found. Install gostscript.
+  echo ::
+endif
+##########################################
+##########################################
+
+set SYN_Unbending = "1"
+
+source ${proc_2dx}/2dx_unbend_movieB_sub.com
+
+
+###########################################################################
+${proc_2dx}/linblock "Script finished correctly."
+###########################################################################
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+exit
+#
+# To make sure these show up in the GUI:
+python ${proc_2dx}/movie/getFilter.py
+python ${proc_2dx}/movie/deleteZeros.py
+python ${proc_2dx}/movie/getClosestPeaks.py
+source ${proc_2dx}/../2dx_image/scripts-standard/2dx_initialize.script
+source ${proc_2dx}/../2dx_image/scripts-standard/2dx_initialize_files.script
+source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
+source ${proc_2dx}/2dx_make_SynRef_sub.com
+source ${proc_2dx}/2dx_unbend_movie_sub.com
+python ${proc_2dx}/movie/apply_filter.py
+python ${proc_2dx}/movie/box_reference.py
+python ${proc_2dx}/movie/plotLocalDrift.py
+python ${proc_2dx}/movie/direct_sum.py
+python ${proc_2dx}/movie/apply_filter_fourier.py
+python ${proc_2dx}/movie/extractAMP.py 
+python ${proc_2dx}/movie/plotAMP.py
+python ${proc_2dx}/movie/plotLocalDrift.py
+
+

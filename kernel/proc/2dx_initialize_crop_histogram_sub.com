@@ -155,6 +155,9 @@ SCRATCH/${nonmaskimagename}.tmp.mrc
 ${inimage}.mrc
 eot
     #
+    # Only mode 0 should be used in the future:
+    set imageorigin = 0
+    echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
   endif
   #
 endif

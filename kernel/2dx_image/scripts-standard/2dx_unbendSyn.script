@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Synthetic Unbend (Be aware of reference bias!)                     #
+# Title: Unbend Syn                                                         #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -44,7 +44,6 @@
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
-# DISPLAY: refori
 # DISPLAY: createmaskinfo
 # DISPLAY: ISTEP
 # DISPLAY: IMAXCOR
@@ -124,7 +123,6 @@ set quadradb = ""
 set radlim = ""
 set realang = ""
 set realcell = ""
-set refori = ""
 set revhk = ""
 set revhnd = ""
 set revxsgn = ""
@@ -151,6 +149,10 @@ echo "<<@evaluate>>"
 set date = `date`
 echo date = ${date}
 #
+if ( ${phaoriFouFilter} == "0.0,0.0" ) then
+  set ${PHASEORI_done} = "n"
+  echo "PHASEORI_done = ${PHASEORI_done}" >> LOGS/${scriptname}.results
+endif
 if ( ${PHASEORI_done} == "n" ) then
   ${proc_2dx}/linblock "Skipping. First determine the phase origin from the Fourier-filtered unbending."
   exit

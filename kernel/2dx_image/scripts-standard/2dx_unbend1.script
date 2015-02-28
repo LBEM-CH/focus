@@ -38,7 +38,6 @@
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
-# DISPLAY: refori
 # DISPLAY: ISTEP
 # DISPLAY: ISTEP_h
 # DISPLAY: IMAXCOR
@@ -82,7 +81,6 @@ set KV = ""
 set TLTAXIS = ""
 set TLTANG = ""
 set ctfplotresmax = ""
-set refori = ""
 set ISTEP = ""
 set ISTEP_h = ""
 set IMAXCOR = ""
@@ -155,61 +153,14 @@ endif
 set rmax = 11000
 echo rmax = ${rmax}
 #
-set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-set refori = ${reforix},${reforix}
-echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
 #
-set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-if ( ${tmp1} != ${refposix} ) then
-  set refori = ${refposix},${refposiy}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected."
-  echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-endif
-set xtoosmall = `echo ${refposix} 400 | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 2 } } END { print s }'`
-set ytoosmall = `echo ${refposiy} 400 | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 2 } } END { print s }'`
-set ok = 1
-if ( ${xtoosmall} == '1' ) then
-  set refposix = 400
-  set ok = 2
-endif
-if ( ${ytoosmall} == '1' ) then
-  set refposiy = 400
-  set ok = 2
-endif
-if ( ${ok} == '2' ) then
-  set refori = ${refposix},${refposiy}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Warning: refori needs to be larger than 400,400. Now corrected."
-  echo "#WARNING: Warning: refori needs to be larger than 400,400. Now corrected." >> LOGS/${scriptname}.results
-endif
-set rightend = `echo ${imagesidelength} 401 | awk '{ s = $1 - $2 } END { print s }'`
-set xtoobig = `echo ${refposix} ${rightend} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 2 } } END { print s }'`
-set ytoobig = `echo ${refposiy} ${rightend} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 2 } } END { print s }'`
-set ok = 1
-if ( ${xtoobig} == '1' ) then
-  set refposix = ${rightend}
-  set ok = 2
-endif
-if ( ${ytoobig} == '1' ) then
-  set refposiy = ${rightend}
-  set ok = 2
-endif
-if ( ${ok} == '2' ) then
-  set refori = ${refposix},${refposiy}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Warning: refori needs to be smaller than ${rightend},${rightend}. Now corrected."
-  echo "#WARNING: Warning: refori needs to be smaller than ${rightend},${rightend}. Now corrected." >> LOGS/${scriptname}.results
-endif
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
 #
-set rtempx1 = ${refposix}
-set rtempy1 = ${refposiy}
-set rtempx2 = ${refposix}
-set rtempy2 = ${refposiy}
+set rtempx1 = ${imagecenterx}
+set rtempy1 = ${imagecentery}
+set rtempx2 = ${imagecenterx}
+set rtempy2 = ${imagecentery}
 @ rtempx1 -= 200
 @ rtempx2 += 199
 @ rtempy1 -= 200
@@ -218,10 +169,10 @@ set rtempy2 = ${refposiy}
 set boxlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
 echo boxlabel = ${boxlabel}
 #
-set rtempx1 = ${refposix}
-set rtempy1 = ${refposiy}
-set rtempx2 = ${refposix}
-set rtempy2 = ${refposiy}
+set rtempx1 = ${imagecenterx}
+set rtempy1 = ${imagecentery}
+set rtempx2 = ${imagecenterx}
+set rtempy2 = ${imagecentery}
 @ rtempx1 -= 13
 @ rtempx2 += 12
 @ rtempy1 -= 13

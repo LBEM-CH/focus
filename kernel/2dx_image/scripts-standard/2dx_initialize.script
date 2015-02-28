@@ -101,7 +101,6 @@ set boxa1 = ""
 set boxa2 = ""
 set boxb1 = ""
 set boxb2 = ""
-set refori = ""
 set quadrada = ""
 set quadradb = ""
 set initialization_reset = ""
@@ -164,7 +163,6 @@ if ( ${initialization_reset} == "y" ) then
   set reset_var = phaori_last_change ; set reset_val = "0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = MergePhaseResidual ; set reset_val = "999.90" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = comment            ; set reset_val = "-"      ; source ${proc_2dx}/2dx_initialize_reset_sub.com
-  set reset_var = refori             ; set reset_val = "0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com 
   #
   set reset_val = "."
   #

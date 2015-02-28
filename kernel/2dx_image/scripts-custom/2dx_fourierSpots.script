@@ -31,7 +31,6 @@
 # DISPLAY: stepdigitizer
 # DISPLAY: magnification
 # DISPLAY: tempkeep
-# DISPLAY: refori
 # DISPLAY: comment
 #
 #$end_local_vars
@@ -48,7 +47,6 @@ set stepdigitizer = ""
 set RESMAX = ""
 set RESMIN = ""
 set ALAT = ""
-set refori = ""
 set realang = ""
 set realcell = ""
 set lattice = ""
@@ -83,10 +81,8 @@ set spotname = "SCRATCH/statistics.txt"
 \rm -f SCRATCH/${imagename}_stat.csv
 
 #
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
 #
 
 if(-e FFTIR/${imagename}_fft.mrc) then
@@ -99,7 +95,7 @@ Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2 1 250 15 15 12 12               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 ${spotname} 
-${refposix} ${refposiy}         ! XORIG,YORIG
+${imagecenterx} ${imagecentery}         ! XORIG,YORIG
 ${RESMIN} ${RESMAX} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot

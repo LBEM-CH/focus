@@ -309,9 +309,13 @@ echo "set ML_done = n" >> LOGS/${scriptname}.results
 echo "set CTF_done = n" >> LOGS/${scriptname}.results
 echo "set MERGING_done = n" >> LOGS/${scriptname}.results
 #
+echo ":: Done."
+echo "<<@progress: 100>>"
+#
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
-echo "<<@progress: 100>>"
+exit
+#
 #

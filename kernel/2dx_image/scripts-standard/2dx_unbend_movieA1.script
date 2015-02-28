@@ -260,14 +260,16 @@ source ${proc_2dx}/2dx_unbend_movieA1_sub.com
 #
 #
 #
-#
-###########################################################################
-${proc_2dx}/linblock "Script finished correctly."
-###########################################################################
+echo ":: Done."
 echo "<<@progress: 100>>"
-echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
 #
 exit
+#
+#
 #
 # These are listed here, so that they show up in the GUI:
 source ${proc_2dx}/2dx_make_SynRef_sub.com

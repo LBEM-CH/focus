@@ -291,14 +291,15 @@ set SYN_Unbending = "0"
 
 source ${proc_2dx}/2dx_unbend_movieB_sub.com
 
-
-###########################################################################
-${proc_2dx}/linblock "Script finished correctly."
-###########################################################################
+echo ":: Done."
 echo "<<@progress: 100>>"
-echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
 #
 exit
+#
 #
 # To make sure these show up in the GUI:
 python ${proc_2dx}/movie/getFilter.py

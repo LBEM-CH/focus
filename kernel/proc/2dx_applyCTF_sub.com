@@ -24,6 +24,11 @@ echo ":: Unbent image (FFT)  = ${unbent_FFT}"
 echo ":: CTF correction mode = ${local_ctfcor_imode}"
 echo ":: "
 
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
+#
+
+
 if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
   ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction"
   setenv IN  ${CTF_infile}
@@ -67,7 +72,7 @@ ${defocus},${TLTAXIS},${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 ${CTF_outfile}
 SCRATCH/TMP9873.dat
 ${algo}
-${RESMIN},${RESMAX},${refposix},${refposiy},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
+${RESMIN},${RESMAX},${imagecenterx},${imagecentery},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
       #
@@ -163,7 +168,7 @@ N                               ! Generate points from lattice?
 ${CTF_outfile}
 SCRATCH/TMP9873.dat
 ${algo}
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot

@@ -280,11 +280,14 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
 #
 echo "set CTF_done = y" >> LOGS/${scriptname}.results
 #
+echo ":: Done."
 echo "<<@progress: 100>>"
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
+#
+exit
 #
 #
 #

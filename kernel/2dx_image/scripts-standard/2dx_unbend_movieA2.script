@@ -236,15 +236,15 @@ source ${proc_2dx}/2dx_unbend_movieA2_sub.com
 #
 #
 #
-#
-#
-###########################################################################
-${proc_2dx}/linblock "Script finished correctly."
-###########################################################################
+echo ":: Done."
 echo "<<@progress: 100>>"
-echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
 #
 exit
+#
 #
 # These are listed here, so they show up in the GUI:
 python ${proc_2dx}/movie/drift_selector.py

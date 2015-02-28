@@ -17,7 +17,7 @@
 #
 # MANUAL: <B>Welcome to 2dx_image</B>
 #
-# MANUAL: This program assists you in the processing of one 2D crystal image. Help is available <A HREF="http://2dx.org/documentation/2dx-software">here</A>. Try the right mouse click on the various fields or variable names, to get more information. See also the introductory <A HREF="http://2dx.org/documentation/2dx-software/tutorial"><B>Movie</B></A> tutorials.
+# MANUAL: This program assists you in the processing of one 2D crystal image. Help is available <A HREF="http://2dx.org/documentation/2dx-software">here</A>. Try the right mouse click on the various fields or variable names, to get more information. See also the introductory <A HREF="http://2dx.org/documentation/2dx-software/tutorial"><B>online video tutorials</B></A>.
 #
 # MANUAL: 2dx_image uses external programs to display certain files. These can be defined in the 2dx configuration file, which you can find (and edit) in your home directory under .2dx/2dx.cfg . Use this file to define your prefered editor, web browser, etc..
 #

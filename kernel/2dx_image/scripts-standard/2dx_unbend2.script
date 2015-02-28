@@ -681,6 +681,7 @@ eot
 echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
 echo "set ML_done = n" >> LOGS/${scriptname}.results
 #
+echo ":: Done."
 echo "<<@progress: 100>>"
 #
 ##########################################################################
@@ -688,6 +689,7 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
 exit
+#
 #
 # These are listed here so that they show up in the GUI:
 source ${proc_2dx}/2dx_fftrans_sub.com

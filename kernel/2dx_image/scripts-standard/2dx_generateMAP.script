@@ -388,6 +388,7 @@ echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_ref.mrc <Projected Reference>"  >> 
 #############################################################################
 #############################################################################
 #
+echo ":: Done."
 echo "<<@progress: 100>>"
 #
 ##########################################################################
@@ -395,7 +396,7 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
 exit
-#
+##
 # Just to make sure it is displayed in the 2dx GUI:
 source ${proc_2dx}/2dx_checklattice_sub.com 
 #

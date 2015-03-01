@@ -17,123 +17,35 @@
 #
 # MANUAL: This script allows to launch several jobs in parallel.  Choose below, which 2dx_image scripts to include.
 #
-#=============================================================================
-# SECTION: Which standard scripts should be run?
-#=============================================================================
 #
-# LABEL: 2dx_initialize_files
-# TYPE: Bool "y;n"
-set script_2dx_initialize_files = "y"
+# DISPLAY: script_2dx_initialize_files
+# DISPLAY: script_2dx_fftrans
+# DISPLAY: script_2dx_getDefTilt
+# DISPLAY: script_2dx_getLattice
+# DISPLAY: script_2dx_refineLattice
+# DISPLAY: script_2dx_getSampleTilt
+# DISPLAY: script_2dx_getspots1
+# DISPLAY: script_2dx_ctfcor
+# DISPLAY: script_2dx_getspots
+# DISPLAY: script_2dx_unbend1
+# DISPLAY: script_2dx_getspots
+# DISPLAY: script_2dx_unbend2
+# DISPLAY: script_2dx_unbendSyn
+# DISPLAY: script_2dx_unbend_movieA1
+# DISPLAY: script_2dx_unbend_movieA2
+# DISPLAY: script_2dx_unbend_movieAS1
+# DISPLAY: script_2dx_unbend_movieAS2
+# DISPLAY: script_2dx_unbend_movieB
+# DISPLAY: script_2dx_unbend_movieBS
+# DISPLAY: script_2dx_applyCTF
+# DISPLAY: script_2dx_max_likelihood
+# DISPLAY: script_2dx_generateMAP
+# DISPLAY: script_2dx_initialize
+# DISPLAY: script_2dx_initialize
+# DISPLAY: script_2dx_initialize
+# DISPLAY: script_2dx_evaluateLattice
+# DISPLAY: script_2dx_cleanup
 #
-# LABEL: 2dx_fftrans
-# TYPE: Bool "y;n"
-set script_2dx_fftrans = "y"
-#
-# LABEL: 2dx_getDefTilt
-# TYPE: Bool "y;n"
-set script_2dx_getDefTilt = "n"
-#
-# LABEL: 2dx_getLattice
-# TYPE: Bool "y;n"
-set script_2dx_getLattice = "n"
-#
-# LABEL: 2dx_refineLattice
-# TYPE: Bool "y;n"
-set script_2dx_refineLattice = "n"
-#
-# LABEL: 2dx_getSampleTilt
-# TYPE: Bool "y;n"
-set script_2dx_getSampleTilt = "n"
-#
-# LABEL: 2dx_getspots1
-# TYPE: Bool "y;n"
-set script_2dx_getspots1 = "n"
-#
-# LABEL: 2dx_ctfcor
-# TYPE: Bool "y;n"
-set script_2dx_ctfcor = "y"
-#
-# LABEL: 2dx_getspots
-# TYPE: Bool "y;n"
-set script_2dx_getspots = "n"
-#
-# LABEL: 2dx_unbend1
-# TYPE: Bool "y;n"
-set script_2dx_unbend1 = "n"
-#
-# LABEL: 2dx_getspots
-# TYPE: Bool "y;n"
-set script_2dx_getspots = "n"
-#
-# LABEL: 2dx_unbend2
-# TYPE: Bool "y;n"
-set script_2dx_unbend2 = "n"
-#
-# LABEL: 2dx_unbendSyn
-# TYPE: Bool "y;n"
-set script_2dx_unbendSyn = "n"
-#
-# LABEL: 2dx_unbend_movieA1
-# TYPE: Bool "y;n"
-set script_2dx_unbend_movieA1 = "n"
-#
-# LABEL: 2dx_unbend_movieA2
-# TYPE: Bool "y;n"
-set script_2dx_unbend_movieA2 = "n"
-#
-# LABEL: 2dx_unbend_movieAS1
-# TYPE: Bool "y;n"
-set script_2dx_unbend_movieAS1 = "n"
-#
-# LABEL: 2dx_unbend_movieAS2
-# TYPE: Bool "y;n"
-set script_2dx_unbend_movieAS2 = "n"
-#
-# LABEL: 2dx_unbend_movieB
-# TYPE: Bool "y;n"
-set script_2dx_unbend_movieB = "n"
-#
-# LABEL: 2dx_unbend_movieBS
-# TYPE: Bool "y;n"
-set script_2dx_unbend_movieBS = "n"
-#
-# LABEL: 2dx_applyCTF
-# TYPE: Bool "y;n"
-set script_2dx_applyCTF = "n"
-#
-# LABEL: 2dx_max_likelihood
-# TYPE: Bool "y;n"
-set script_2dx_max_likelihood = "n"
-#
-# LABEL: 2dx_generateMAP
-# TYPE: Bool "y;n"
-set script_2dx_generateMAP = "n"
-#
-# LABEL: 2dx_initialize
-# TYPE: Bool "y;n"
-set script_2dx_initialize = "n"
-#
-# LABEL: 2dx_initialize
-# TYPE: Bool "y;n"
-set script_2dx_initialize = "n"
-#
-# LABEL: 2dx_initialize
-# TYPE: Bool "y;n"
-set script_2dx_initialize = "n"
-#
-#=============================================================================
-# SECTION: Which custom scripts should be run?
-#=============================================================================
-#
-# LABEL: 2dx_evaluateLattice
-# TYPE: Bool "y;n"
-set script_2dx_evaluateLattice = "n"
-#
-# LABEL: 2dx_cleanup
-# TYPE: Bool "y;n"
-set script_2dx_cleanup = "n"
-#
-
 # DISPLAY: ReUnbend_MP
 #
 #$end_local_vars
@@ -144,7 +56,35 @@ set app_2dx_image = ""
 #
 set ReUnbend_MP = ""
 #
-#$end_vars
+set script_2dx_initialize_files = ""
+set script_2dx_fftrans = ""
+set script_2dx_getDefTilt = ""
+set script_2dx_getLattice = ""
+set script_2dx_refineLattice = ""
+set script_2dx_getSampleTilt = ""
+set script_2dx_getspots1 = ""
+set script_2dx_ctfcor = ""
+set script_2dx_getspots = ""
+set script_2dx_unbend1 = ""
+set script_2dx_getspots = ""
+set script_2dx_unbend2 = ""
+set script_2dx_unbendSyn = ""
+set script_2dx_unbend_movieA1 = ""
+set script_2dx_unbend_movieA2 = ""
+set script_2dx_unbend_movieAS1 = ""
+set script_2dx_unbend_movieAS2 = ""
+set script_2dx_unbend_movieB = ""
+set script_2dx_unbend_movieBS = ""
+set script_2dx_applyCTF = ""
+set script_2dx_max_likelihood = ""
+set script_2dx_generateMAP = ""
+set script_2dx_initialize = ""
+set script_2dx_initialize = ""
+set script_2dx_initialize = ""
+set script_2dx_evaluateLattice = ""
+set script_2dx_cleanup = ""
+#
+#$end_vars 
 #
 #
 set scriptname = 2dx_reunbend3
@@ -291,7 +231,7 @@ eot
         ${proc_2dx}/linblock "At load ${loadaverage}/${ReUnbend_MP}, launching job ${dircounter} of ${dirnum} on ${dirfile}"
 
         ###########################################################################################################################
-        source SCRATCH/${scriptname}_tmp_runjob.com
+        source ${olddir}/SCRATCH/${scriptname}_tmp_runjob.com
         ###########################################################################################################################
 
         cd ${olddir}

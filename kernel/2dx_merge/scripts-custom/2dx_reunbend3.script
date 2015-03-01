@@ -1,0 +1,342 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Parallel processing                                                #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 20/09/2007                                             #
+# Last Modification: 20/09/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 9
+#
+# MANUAL: This script allows to launch several jobs in parallel.  Choose below, which 2dx_image scripts to include.
+#
+#=============================================================================
+# SECTION: Which standard scripts should be run?
+#=============================================================================
+#
+# LABEL: 2dx_initialize_files
+# TYPE: Bool "y;n"
+set script_2dx_initialize_files = "y"
+#
+# LABEL: 2dx_fftrans
+# TYPE: Bool "y;n"
+set script_2dx_fftrans = "y"
+#
+# LABEL: 2dx_getDefTilt
+# TYPE: Bool "y;n"
+set script_2dx_getDefTilt = "n"
+#
+# LABEL: 2dx_getLattice
+# TYPE: Bool "y;n"
+set script_2dx_getLattice = "n"
+#
+# LABEL: 2dx_refineLattice
+# TYPE: Bool "y;n"
+set script_2dx_refineLattice = "n"
+#
+# LABEL: 2dx_getSampleTilt
+# TYPE: Bool "y;n"
+set script_2dx_getSampleTilt = "n"
+#
+# LABEL: 2dx_getspots1
+# TYPE: Bool "y;n"
+set script_2dx_getspots1 = "n"
+#
+# LABEL: 2dx_ctfcor
+# TYPE: Bool "y;n"
+set script_2dx_ctfcor = "y"
+#
+# LABEL: 2dx_getspots
+# TYPE: Bool "y;n"
+set script_2dx_getspots = "n"
+#
+# LABEL: 2dx_unbend1
+# TYPE: Bool "y;n"
+set script_2dx_unbend1 = "n"
+#
+# LABEL: 2dx_getspots
+# TYPE: Bool "y;n"
+set script_2dx_getspots = "n"
+#
+# LABEL: 2dx_unbend2
+# TYPE: Bool "y;n"
+set script_2dx_unbend2 = "n"
+#
+# LABEL: 2dx_unbendSyn
+# TYPE: Bool "y;n"
+set script_2dx_unbendSyn = "n"
+#
+# LABEL: 2dx_unbend_movieA1
+# TYPE: Bool "y;n"
+set script_2dx_unbend_movieA1 = "n"
+#
+# LABEL: 2dx_unbend_movieA2
+# TYPE: Bool "y;n"
+set script_2dx_unbend_movieA2 = "n"
+#
+# LABEL: 2dx_unbend_movieAS1
+# TYPE: Bool "y;n"
+set script_2dx_unbend_movieAS1 = "n"
+#
+# LABEL: 2dx_unbend_movieAS2
+# TYPE: Bool "y;n"
+set script_2dx_unbend_movieAS2 = "n"
+#
+# LABEL: 2dx_unbend_movieB
+# TYPE: Bool "y;n"
+set script_2dx_unbend_movieB = "n"
+#
+# LABEL: 2dx_unbend_movieBS
+# TYPE: Bool "y;n"
+set script_2dx_unbend_movieBS = "n"
+#
+# LABEL: 2dx_applyCTF
+# TYPE: Bool "y;n"
+set script_2dx_applyCTF = "n"
+#
+# LABEL: 2dx_max_likelihood
+# TYPE: Bool "y;n"
+set script_2dx_max_likelihood = "n"
+#
+# LABEL: 2dx_generateMAP
+# TYPE: Bool "y;n"
+set script_2dx_generateMAP = "n"
+#
+# LABEL: 2dx_initialize
+# TYPE: Bool "y;n"
+set script_2dx_initialize = "n"
+#
+# LABEL: 2dx_initialize
+# TYPE: Bool "y;n"
+set script_2dx_initialize = "n"
+#
+# LABEL: 2dx_initialize
+# TYPE: Bool "y;n"
+set script_2dx_initialize = "n"
+#
+#=============================================================================
+# SECTION: Which custom scripts should be run?
+#=============================================================================
+#
+# LABEL: 2dx_evaluateLattice
+# TYPE: Bool "y;n"
+set script_2dx_evaluateLattice = "n"
+#
+# LABEL: 2dx_cleanup
+# TYPE: Bool "y;n"
+set script_2dx_cleanup = "n"
+#
+
+# DISPLAY: ReUnbend_MP
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_image = ""
+#
+set ReUnbend_MP = ""
+#
+#$end_vars
+#
+#
+set scriptname = 2dx_reunbend3
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+source ${proc_2dx}/2dx_merge_makedirs 
+#
+echo "<<@progress: 1>>"
+#
+echo 'nohup \' > SCRATCH/${scriptname}_tmp_runjob.com 
+echo '${app_2dx_image} ${curdir} "2dx_initialize"; \' >> SCRATCH/${scriptname}_tmp_runjob.com
+if ( ${script_2dx_initialize} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_initialize_files"; \' >> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_fftrans} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_fftrans"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_getDefTilt} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_getDefTilt"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_getLattice} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_getLattice"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_refineLattice} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_refineLattice"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_getSampleTilt} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_getSampleTilt"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_getspots1} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_getspots1"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_ctfcor} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_ctfcor"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_getspots} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_getspots"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbend1} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbend1"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_getspots} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_getspots"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbend2} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbend2"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbendSyn} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbendSyn"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbend_movieA1} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieA1"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbend_movieA2} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieA2"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbend_movieAS1} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieAS1"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbend_movieAS2} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieAS2"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbend_movieB} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieB"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_unbend_movieBS} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieBS"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_applyCTF} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_applyCTF"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_max_likelihood} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_max_likelihood"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_generateMAP} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_generateMAP"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_evaluateLattice} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "+2dx_evaluateLattice"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_cleanup} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "+2dx_cleanup"; \'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+echo 'echo ":: Background process finished with ${dirfile} ("`date`")" &' >> SCRATCH/${scriptname}_tmp_runjob.com
+#
+echo " "
+echo " "
+echo " "
+echo "Preparing to launch the following job in parallel:"
+cat SCRATCH/${scriptname}_tmp_runjob.com
+echo " "
+echo " "
+echo " "
+#
+set olddir = ${PWD}
+cd ..
+set rootdir = ${PWD}
+#
+############################################################################# 
+${proc_2dx}/linblock "Processing custom scripts in all selected directories in ${ReUnbend_MP} jobs"
+############################################################################# 
+#
+cd ${olddir} 
+#
+# set loadaverage = `uptime | cut -d\: -f4 | cut -d\  -f2`
+set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
+set ReUnbend_MP = `cat 2dx_merge.cfg | grep "set ReUnbend_MP" | cut -d\" -f2`
+\cp -f 2dx_merge.cfg SCRATCH/${scriptname}_2dx_merge_cfg.tmp
+#
+set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
+echo ": Will work on ${dirnum} image directories."
+#
+sort 2dx_merge_dirfile.dat > SCRATCH/${scriptname}_2dx_merge_dirfile_runfile.dat
+#
+set dircounter = 1
+while ( ${dircounter} <= ${dirnum} )
+    #
+    set prog_num = `echo ${dircounter} ${dirnum} | awk '{ s = 5 + int( 90 * $1 / $2 ) } END { print s }'` 
+    echo "<<@progress: ${prog_num}>>"
+    #
+    cd ${olddir}
+    ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
+SCRATCH/${scriptname}_2dx_merge_dirfile_runfile.dat
+${dircounter}
+eot
+    #
+    set dirfile = `cat TMP.tmp`
+    \rm TMP.tmp
+    #
+    cd ..
+    cd ${dirfile}
+    if ( -e 2dx_image.cfg ) then
+      echo ": "
+      set curdir = ${PWD}
+      # set QVALMA_local = `cat 2dx_image.cfg | grep "set QVALMA =" | cut -d\" -f2`
+      # set QVALMB_local = `cat 2dx_image.cfg | grep "set QVALMB =" | cut -d\" -f2`
+      # echo ":: QVALMA_local = ${QVALMA_local}" 
+      # if ( ${QVALMA_local}x == "x"  || ${QVALMA_local}x == ".x" ||  ${QVALMA_local}x == "0.00x" ||  ${QVALMB_local}x == "x"  || ${QVALMB_local}x == ".x" ||  ${QVALMB_local}x == "0.00x" ) then
+      if ( 1 == 1 ) then 
+        echo "Working on ${curdir} ("`date`")"
+
+        ${proc_2dx}/linblock "At load ${loadaverage}/${ReUnbend_MP}, launching job ${dircounter} of ${dirnum} on ${dirfile}"
+
+        ###########################################################################################################################
+        source SCRATCH/${scriptname}_tmp_runjob.com
+        ###########################################################################################################################
+
+        cd ${olddir}
+        set load_too_high = 1
+        while ( ${load_too_high} == 1 ) 
+          set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
+          set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
+          set load_too_high = `echo ${loadaverage} ${ReUnbend_MP} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+          if ( ${load_too_high} == 1 ) then
+            sleep 2
+          endif
+        end
+
+      else
+        echo ": Skipping ${dirfile}: QVALMA = ${QVALMA_local},  QVALMB = ${QVALMB_local} ("`date`")"
+      endif
+    else
+      echo "::ERROR for ${dirfile}: No 2dx_image.cfg found."
+    endif
+    # 
+    # 
+    @ dircounter++
+    cd ${olddir}
+  end
+  echo "::Waiting for last jobs to finish"
+  set load_too_high = 1
+  while ( ${load_too_high} == 1 ) 
+    set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
+    set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
+    set load_too_high = `echo ${loadaverage} 3 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+    if ( ${load_too_high} == 1 ) then
+      sleep 5
+      # ps -af | grep ${scriptname}.com
+    endif
+  end
+  echo "::Last jobs have finished."
+#
+#
+echo ":: Done."
+echo "<<@progress: 100>>"
+#
+############################################################################# 
+${proc_2dx}/linblock "${scriptname} - normal end."
+#############################################################################
+#
+exit
+#
+#

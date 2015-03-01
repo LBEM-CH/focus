@@ -309,7 +309,7 @@ source ${proc_2dx}/../2dx_image/scripts-standard/2dx_initialize.script
 source ${proc_2dx}/../2dx_image/scripts-standard/2dx_initialize_files.script
 source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
 source ${proc_2dx}/2dx_make_SynRef_sub.com
-source ${proc_2dx}/2dx_unbend_movie_sub.com
+source ${proc_2dx}/2dx_unbend_movieB_sub_sub.com
 python ${proc_2dx}/movie/apply_filter.py
 python ${proc_2dx}/movie/box_reference.py
 python ${proc_2dx}/movie/plotLocalDrift.py

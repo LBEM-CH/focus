@@ -18,6 +18,9 @@ endif
 #
 set iname = image_ctfcor
 #
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
+#
 set PROFDATA = ${nonmaskimagename}_profile.dat
 if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
@@ -592,7 +595,7 @@ endif
 echo "<<@progress: 20>>"
 #
 #
-# the variable ${prog_num} controls the progress bar in the subscript 2dx_unbend_movie_sub.com:
+# the variable ${prog_num} controls the progress bar in the subscript 2dx_unbend_movieB_sub_sub.com:
 set prog_num = 30
 echo "<<@progress: ${prog_num}>>"
 #
@@ -602,7 +605,7 @@ set irunner = 0
 set iforward = 1
 set i = 0
 #============================================
-source ${proc_2dx}/2dx_unbend_movie_sub.com
+source ${proc_2dx}/2dx_unbend_movieB_sub_sub.com
 #============================================
 #
 \cp -f SCRATCH/errout2${iname}.dat SCRATCH/errout_keyframe${iname}.dat
@@ -613,7 +616,7 @@ set iforward = 0
 set i = `echo ${movie_imagenumber_touse} | awk '{ s = int( $1 * 0.125 ) } END { print s }'`
 while ($i >= 1)
         #============================================
-        source ${proc_2dx}/2dx_unbend_movie_sub.com
+        source ${proc_2dx}/2dx_unbend_movieB_sub_sub.com
         #============================================
         @ i -= 1
 	@ irunner += 1
@@ -626,7 +629,7 @@ set iforward = 1
 set i = `echo ${movie_imagenumber_touse} | awk '{ s = int( $1 * 0.125 ) + 1 } END { print s }'`
 while ($i <= ${movie_imagenumber_touse})
         #============================================
-        source ${proc_2dx}/2dx_unbend_movie_sub.com
+        source ${proc_2dx}/2dx_unbend_movieB_sub_sub.com
         #============================================
         @ i += 1
 	@ irunner += 1

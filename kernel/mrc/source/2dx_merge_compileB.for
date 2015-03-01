@@ -531,8 +531,8 @@ C
             write(cname4,'(A,''/APH/ML_result.aph'')')
      .        cdir(1:k)
           else
-            write(cname4,'(A,''/APH/'',A,''_ctf.aph'')')
-     .        cdir(1:k),CIMAGENAME(1:k1)
+            write(cname4,'(A,''/APH/image_ctfcor_ctf.aph'')')
+     .        cdir(1:k)
           endif
           call shortshrink(cname4,k1)
           write(11,'(A)')cname4(1:k1)

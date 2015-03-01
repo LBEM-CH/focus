@@ -99,7 +99,7 @@ eot
 
         # nohup ${app_2dx_image} ${curdir} "+2dx_evaluateLattice"; echo ":: Background process finished with ${dirfile} ("`date`")" &
 
-        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbendSyn"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
+        # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_unbend_movieA1"; ${app_2dx_image} ${curdir} "2dx_unbend_movieA2"; ${app_2dx_image} ${curdir} "2dx_unbend_movieB"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; echo ":: Background process finished with ${dirfile} ("`date`")" &
 
@@ -107,7 +107,15 @@ eot
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_fftrans"; ${app_2dx_image} ${curdir} "2dx_getspots1"; ${app_2dx_image} ${curdir} "2dx_ctfcor"; ${app_2dx_image} ${curdir} "2dx_unbend1"; ${app_2dx_image} ${curdir} "2dx_getspots"; ${app_2dx_image} ${curdir} "2dx_unbend2"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 
-        nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbendSyn"; ${app_2dx_image} ${curdir} "2dx_unbend_movieAS1"; ${app_2dx_image} ${curdir} "2dx_unbend_movieAS2"; ${app_2dx_image} ${curdir} "2dx_unbend_movieBS"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
+        nohup ${app_2dx_image} ${curdir} "2dx_initialize"; \
+              ${app_2dx_image} ${curdir} "2dx_unbendSyn"; \
+              ${app_2dx_image} ${curdir} "2dx_unbend_movieAS1"; \
+              ${app_2dx_image} ${curdir} "2dx_unbend_movieAS2"; \
+              ${app_2dx_image} ${curdir} "2dx_unbend_movieB"; \
+              ${app_2dx_image} ${curdir} "2dx_unbend_movieBS"; \
+              ${app_2dx_image} ${curdir} "2dx_applyCTF"; \
+              ${app_2dx_image} ${curdir} "2dx_generateMAP" ; \
+              echo ":: Background process finished with ${dirfile} ("`date`")" &
 
         # nohup ${app_2dx_image} ${curdir} "2dx_initialize"; ${app_2dx_image} ${curdir} "2dx_unbend_movieA1"; ${app_2dx_image} ${curdir} "2dx_unbend_movieA2"; ${app_2dx_image} ${curdir} "2dx_unbend_movieAS1"; ${app_2dx_image} ${curdir} "2dx_unbend_movieAS2"; ${app_2dx_image} ${curdir} "2dx_unbend_movieB"; ${app_2dx_image} ${curdir} "2dx_unbend_movieBS"; ${app_2dx_image} ${curdir} "2dx_applyCTF"; ${app_2dx_image} ${curdir} "2dx_generateMAP" ;  echo ":: Background process finished with ${dirfile} ("`date`")" &
 

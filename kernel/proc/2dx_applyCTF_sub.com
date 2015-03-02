@@ -15,7 +15,8 @@ if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctf
   if ( -e ${CTF_infile} ) then
     echo ":: Input file          = ${CTF_infile}"
   else
-    echo ":: Input file          = ${CTF_infile} (not found!!!)"
+    echo ":: Input file          = ${CTF_infile} (not found)"
+    exit
   endif
 endif
 echo ":: Output file         = ${CTF_outfile}"

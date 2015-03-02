@@ -125,10 +125,6 @@ if ( ! -d PS ) then
   \mkdir PS
 endif
 #
-if ( ! -d CUT ) then
-  \mkdir CUT
-endif
-#
 if ( ! -d PRJ ) then
   \mkdir PRJ
 endif

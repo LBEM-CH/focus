@@ -199,7 +199,7 @@ set ReUnbend_MP = `cat 2dx_merge.cfg | grep "set ReUnbend_MP" | cut -d\" -f2`
 set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
 echo ": Will work on ${dirnum} image directories."
 #
-sort 2dx_merge_dirfile.dat > SCRATCH/${scriptname}_2dx_merge_dirfile_runfile.dat
+\cp -f 2dx_merge_dirfile.dat SCRATCH/${scriptname}_2dx_merge_dirfile_runfile.dat
 #
 set dircounter = 1
 while ( ${dircounter} <= ${dirnum} )
@@ -239,7 +239,7 @@ eot
         while ( ${load_too_high} == 1 ) 
           set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
           set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
-          set load_too_high = `echo ${loadaverage} ${ReUnbend_MP} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+          set load_too_high = `echo ${loadaverage} ${ReUnbend_MP} | awk '{ if ( ( $1 - 2 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
           if ( ${load_too_high} == 1 ) then
             sleep 2
           endif
@@ -261,7 +261,7 @@ eot
   while ( ${load_too_high} == 1 ) 
     set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
     set loadaverage = `ps -af | grep ${scriptname}.com | wc -l`
-    set load_too_high = `echo ${loadaverage} 3 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+    set load_too_high = `echo ${loadaverage} 1 | awk '{ if ( ( $1 - 2 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
     if ( ${load_too_high} == 1 ) then
       sleep 5
       # ps -af | grep ${scriptname}.com

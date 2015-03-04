@@ -561,6 +561,17 @@ foreach scriptB ( SCRATCH/job_*_${scriptBfile} )
   endif
 end
 #
+# Check, if background jobs have finished:
+set need_wait = 1
+while ( ${need_wait} == 1 ) 
+   set loadaverage = `ps -af | grep _2dx_merge_scriptB.com | wc -l`
+   set need_wait = `echo ${loadaverage} | awk '{ if ( $1 > 1 ) { s = 1 } else { s = 0 } } END { print s }'`
+   if ( ${need_wait} == 1 ) then
+      sleep 2
+   endif
+end
+
+#
 #
 echo "################################################"
 echo "################################################"

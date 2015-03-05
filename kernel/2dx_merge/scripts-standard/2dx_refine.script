@@ -357,7 +357,7 @@ if ( ${scriptname} == "2dx_refine" ) then
       echo ":ML_result.aph not found."
     endif
   endif
-  if ( ${refine_data_type} == '7' ) then
+  if ( ${refine_data_type} == '7' ||  ${refine_data_type} == '9' ) then
     set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
     set QVALS_local =  `cat ../2dx_image.cfg | grep 'set QVALS =' | cut -d\" -f2`
     if ( ${QVALS_local} == '.' ) then
@@ -389,6 +389,7 @@ if ( ${scriptname} == "2dx_refine" ) then
     echo ${QVALAS_local} >> awk.dat
     echo ${QVALMB_local} >> awk.dat
     echo ${QVALBS_local} >> awk.dat
+    # cat awk.dat
     #
     # awk script to find max in CR-separated list:
     #  {if(min=="")min=max=$1}; if($1>max) {max=$1}; if($1< min) {min=$1}; total+=$1; count+=1} END {print total/count, min, max}
@@ -435,6 +436,7 @@ if ( ${scriptname} == "2dx_refine" ) then
     echo ${QVALMA_local} >> awk.dat
     echo ${QVALMB_local} >> awk.dat
     #
+    # cat awk.dat
     set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
     set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
     \rm -f awk.dat
@@ -452,7 +454,7 @@ if ( ${scriptname} == "2dx_refine" ) then
       echo "::${APH_file} should be best, but was not found."
     endif
   endif
-  echo ":In directory image_ctfcor: Using APH file ${APH_file}. "
+  echo ":In directory ${imagefile}: Using APH file ${APH_file}. "
   \rm -f image_ctfcor_ctf.aph
   \ln -s ${APH_file} image_ctfcor_ctf.aph
   cd ${olddir}

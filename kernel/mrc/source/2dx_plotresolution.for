@@ -955,12 +955,14 @@ C
      .   IRUN.eq.15 .or. IRUN.eq.18) then
          WRITE(CTITLE,'(''Overall Resolution [A]'')')
       elseif(IRUN.eq.2 .or. IRUN.eq.5 .or. IRUN.eq.8 .or. IRUN.eq.11 .or.
-     .       IRUN.ge.13 .or. IRUN.eq.16 .or. IRUN.eq.19) then
+     .       IRUN.eq.13 .or. IRUN.eq.16 .or. IRUN.eq.19) then
          WRITE(CTITLE,'(''Horizontal Resolution [A]'')')
       elseif(IRUN.eq.3 .or. IRUN.eq.6 .or. IRUN.eq.9 .or. IRUN.eq.12 .or.
      .       IRUN.eq.17 .or. IRUN.eq.20) then
          WRITE(CTITLE,'(''Vertical Resolution [A]'')')
       endif
+C      write(cline,'(I2,'': '',A)')IRUN,CTITLE
+C      write(CTITLE,'(A)')cline(1:80)
       call shorten(CTITLE,k)
       CALL P2K_CSTRING(RTITLE,k,0.)
 C

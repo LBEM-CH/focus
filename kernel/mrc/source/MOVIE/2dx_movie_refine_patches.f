@@ -31,7 +31,7 @@ C-----the following IMNJ,IMXJ have to be IMNI*iinterpol, IMXI*iinterpol
       PARAMETER (IMNJ=-20)
       PARAMETER (IMXJ= 20)
 C
-      PARAMETER (IMAXFRAMES=40)
+      PARAMETER (IMAXFRAMES=90)
 C
       CHARACTER TITLE*1600
 C

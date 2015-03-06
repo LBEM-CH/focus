@@ -182,7 +182,7 @@ while ($i <= ${movie_imagenumber_touse})
     echo "# IMAGE: ${frame_folder}/frame_${i}/${iname}_mask.mrc <Frame ${i}, masked>" >> LOGS/${scriptname}.results
   endif
   if ( ${show_frame_FFT} == "y" ) then
-    echo "# IMAGE: ${frame_folder}/CCunbend_frame_${i}_fft.mrc <Frame ${i}, unbent (fft)>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/CCUNBEND_frame_${i}_fft.mrc <Frame ${i}, unbent (fft)>" >> LOGS/${scriptname}.results
     echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc <Frame ${i}, masked (FFT)>" >> LOGS/${scriptname}.results
   endif
   if ( ${show_frame_CCmap} == "y" ) then
@@ -191,9 +191,9 @@ while ($i <= ${movie_imagenumber_touse})
     echo "# IMAGE: ${frame_folder}/frame_${i}_CCmapMBb_unbent.mrc <Frame ${i} CCMapMB unbent>" >> LOGS/${scriptname}.results
   endif
   echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/TMP-quadserch3-autocor.mrc <Frame ${i} averaged central area>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/PS/${nonmaskimagename}_quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/PS/${nonmaskimagename}_ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/corm${nonmaskimagename}_notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: ${frame_folder}/SCRATCH/MovieB/frame_${i}/PS/${nonmaskimagename}_quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: ${frame_folder}/SCRATCH/MovieB/frame_${i}/PS/${nonmaskimagename}_ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${frame_folder}/CCUNBEND_frame_${i}_notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
   #
   @ i += 1
 end

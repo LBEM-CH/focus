@@ -546,7 +546,7 @@ ${frame_folder}/frame_${i}/${iname}_mask.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
-${frame_folder}/CCunbend_frame_${i}_notap.mrc
+${frame_folder}/CCUNBEND_frame_${i}_notap.mrc
 CCUNBEND, frame_${i}/m${nonmaskimagename}_${i}.mrc, ${date}
 eot
 
@@ -615,9 +615,9 @@ eot
             ###########################################################################
             ${proc_2dx}/lin "TAPEREDGE - correct unbent frame average for taper edges"
             ###########################################################################
-            setenv IN  ${frame_folder}/CCunbend_frame_${i}_notap.mrc
-            setenv OUT ${frame_folder}/CCunbend_frame_${i}.mrc
-            \rm -f     ${frame_folder}/CCunbend_frame_${i}.mrc
+            setenv IN  ${frame_folder}/CCUNBEND_frame_${i}_notap.mrc
+            setenv OUT ${frame_folder}/CCUNBEND_frame_${i}.mrc
+            \rm -f     ${frame_folder}/CCUNBEND_frame_${i}.mrc
             ${bin_2dx}/2dx_taperedgek.exe << eot
             30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
@@ -625,16 +625,16 @@ eot
             ###########################################################################
             ${proc_2dx}/lin "FFTRANS - Obtain Fourier-transform of unbent and masked frame average"
             ###########################################################################
-            setenv IN  ${frame_folder}/CCunbend_frame_${i}.mrc
-            setenv OUT ${frame_folder}/CCunbend_frame_${i}_fft.mrc
-            \rm -f     ${frame_folder}/CCunbend_frame_${i}_fft.mrc
+            setenv IN  ${frame_folder}/CCUNBEND_frame_${i}.mrc
+            setenv OUT ${frame_folder}/CCUNBEND_frame_${i}_fft.mrc
+            \rm -f     ${frame_folder}/CCUNBEND_frame_${i}_fft.mrc
             ${bin_2dx}/2dx_fftrans.exe
 
             ###########################################################################
             ${proc_2dx}/lin "MMBOX - evaluate AMPlitudes and PHAses from unbent movie"
             ###########################################################################
             ${bin_2dx}/2dx_mmboxa.exe << eot
-${frame_folder}/CCunbend_frame_${i}_fft.mrc
+${frame_folder}/CCUNBEND_frame_${i}_fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?

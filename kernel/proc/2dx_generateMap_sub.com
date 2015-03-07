@@ -433,7 +433,7 @@ eot
   #
   ${proc_2dx}/linblock "f2mtz - to transform into MTZ file"
   #
-  ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}-permutated.hkl hklout SCRATCH/${prefix}${imagename}_MRClefthanded.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${outfile} hklout SCRATCH/${prefix}${imagename}_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
 CELL ${celly} ${ALAT} ${cellx} 90.0  ${realang} 90.0 
 SYMMETRY ${CCP4_SYM}
@@ -500,7 +500,7 @@ eot
   #
   ${proc_2dx}/linblock "f2mtz - to transform into MTZ file of phase zero"
   #
-  ${bin_ccp4}/f2mtz hklin SCRATCH/${prefix}${imagename}_phase_zero-permutated.hkl hklout SCRATCH/${prefix}${imagename}_phase_zero_MRClefthanded.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${outfile} hklout SCRATCH/${prefix}${imagename}_phase_zero_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}_phase_zero, ${date}
 CELL ${celly} ${ALAT} ${cellx} 90.0 ${realang} 90.0 
 SYMMETRY ${CCP4_SYM}

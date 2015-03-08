@@ -163,6 +163,12 @@ else
   echo "#WARNING: Warning: boxb1 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
 endif
 #
+if ( ${boxb1} == "0" ) then
+  set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 13 ) } END { print s }'`
+  echo "set boxb1 = ${boxb1}"  >> LOGS/${scriptname}.results
+  echo ":Initializing boxb1 as ${boxb1}"
+endif
+#
 set tmp1 = `echo ${boxb2} | awk '{s = int( $1 ) } END { print s }'`
 if ( ${tmp1} == ${boxb2} ) then
   echo boxb2 = ${boxb2}

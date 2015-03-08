@@ -273,12 +273,9 @@ C----------------------------------------------------------------------
 C=====Read input file
 C----------------------------------------------------------------------
 C
-      open(1,FILE=CNAME,STATUS='OLD',ERR=980)
+      open(1,FILE=CNAME,STATUS='OLD',ERR=981)
       call shorten(CNAME2,k)
-      write(CLINE,'(''\rm -r '',A)')CNAME2(1:k)
-      call shorten(CLINE,k)
-      call system(CLINE(1:k))
-      open(10,FILE=CNAME2,STATUS='NEW',ERR=980)
+      open(10,FILE=CNAME2,STATUS='NEW',ERR=982)
 C
       RecRESHORIMAX=0.0
       RecRESVERTMAX=0.0
@@ -474,7 +471,7 @@ C
 C
         write(*,'('' Calculating Average Amplitude'')')
 C
-        open(9,FILE=CNAME3,STATUS='OLD',ERR=980)
+        open(9,FILE=CNAME3,STATUS='OLD',ERR=983)
 C
         k = 0
         RAMPSUM = 0.0
@@ -628,8 +625,22 @@ C
         write(6,'(''::ERRPOR during file read in 2dx_plotresolution'')')
         goto 999
 C
- 980  continue
+ 981  continue
         write(6,'(''::ERRPOR during file open in 2dx_plotresolution'')')
+        call shorten(CNAME,k)
+        write(6,'(''::for file '',A)')CNAME(1:k)
+        goto 999
+C
+ 982  continue
+        write(6,'(''::ERRPOR during file open in 2dx_plotresolution'')')
+        call shorten(CNAME2,k)
+        write(6,'(''::for file '',A)')CNAME2(1:k)
+        goto 999
+C
+ 983  continue
+        write(6,'(''::ERRPOR during file open in 2dx_plotresolution'')')
+        call shorten(CNAME3,k)
+        write(6,'(''::for file '',A)')CNAME3(1:k)
         goto 999
 C
  999  continue

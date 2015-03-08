@@ -125,7 +125,13 @@ else
   ${proc_2dx}/linblock "Warning: boxa1 needs to be an integer number. Now corrected." 
   echo "#WARNING: Warning: boxa1 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
 endif
-#
+
+if ( ${boxa1} == "0" ) then
+  set boxa1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 10 ) } END { print s }'`
+  echo "set boxa1 = ${boxa1}"  >> LOGS/${scriptname}.results
+  echo ":Initializing boxa1 as ${boxa1}"
+endif
+
 set tmp1 = `echo ${boxa2} | awk '{s = int( $1 ) } END { print s }'`
 if ( ${tmp1} == ${boxa2} ) then
   echo boxa2 = ${boxa2}
@@ -136,7 +142,14 @@ else
   ${proc_2dx}/linblock "Warning: boxa2 needs to be an integer number. Now corrected."
   echo "#WARNING: Warning: boxa2 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
 endif
-#
+
+if ( ${boxa2} == "0" ) then
+  set boxa2 = `echo ${imagesidelength} | awk '{ s = int( $1 / 11 ) } END { print s }'`
+  echo "set boxa2 = ${boxa2}"  >> LOGS/${scriptname}.results
+  echo ":Initializing boxa2 as ${boxa2}"
+endif
+
+
 set tmp1 = `echo ${boxa1} ${boxa2} | awk '{if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${tmp1} == 1 ) then
   set tmp1 = ${boxa2}
@@ -150,6 +163,7 @@ if ( ${tmp1} == 1 ) then
   echo "#WARNING: Warning: boxa2 should be larger than boxa1. Now exchanged." >> LOGS/${scriptname}.results
 endif
 #
+
 set rmax = 11000
 echo rmax = ${rmax}
 #

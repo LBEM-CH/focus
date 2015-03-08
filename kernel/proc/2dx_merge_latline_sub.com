@@ -370,7 +370,7 @@ else
   echo "celly = ${celly}"
   echo "cellz = ${ALAT}" 
   #
-  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel} ${RESMAX}
+  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${sample_pixel} ${RESMAX}
   #
   mv -f output.hkl APH/latfitted.hkl
   echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
@@ -385,7 +385,7 @@ else
 2
 ${realcell},${ALAT},${realang}
 APH/latfitted.hkl
-APH/latfitted_limit.hkl
+APH/latfitteds_limit.dat
 APH/latlines.dat
 ${RESMAX}
 ${zstarrange_real}
@@ -399,7 +399,7 @@ eot
   else
     \mv -f PLOTCUR.PS PS/2dx_plotresolution.ps
     echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: APH/latfitted_limit.hkl <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: APH/latfitteds_limit.dat <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
   endif
   #
   #############################################################################
@@ -409,7 +409,7 @@ eot
   \rm -f APH/latfitted_nosym.hkl
   \rm -f 2dx_prepmklcf.statistics
   #
-  setenv IN APH/latfitted_limit.hkl
+  setenv IN APH/latfitteds_limit.dat
   setenv OUT APH/latfitted_nosym.hkl
   setenv REFHKL APH/latfittedref_nosym.hkl
   #

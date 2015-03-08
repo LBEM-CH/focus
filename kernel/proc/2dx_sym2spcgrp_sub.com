@@ -338,6 +338,7 @@ if ( ${SYM} == 'p1' ) then
   set CCP4_SYM = "1"
   set ML_sym_val = "1"
   set rotate_to_Z = "no"
+  set SYM_NAME = p1
   set verified = "yes"
 
 else if ( ${SYM} == 'p2' ) then
@@ -346,6 +347,7 @@ else if ( ${SYM} == 'p2' ) then
   set CCP4_SYM = "1003"
   set ML_sym_val = "2"
   set rotate_to_Z = "no"
+  set SYM_NAME = p2
   set verified = "yes"
 
 else if ( ${SYM} == 'p12_a' ) then
@@ -354,6 +356,7 @@ else if ( ${SYM} == 'p12_a' ) then
   set CCP4_SYM = "3"
   set ML_sym_val = "1"
   set rotate_to_Z = "no"
+  set SYM_NAME = p12_a
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
   ${proc_2dx}/linblock "#" 
   ${proc_2dx}/linblock "WARNING symmetry p12_a needs reassignment of axis for CCP4, not yet implemented." 
@@ -365,6 +368,7 @@ else if ( ${SYM} == 'p12_b' ) then
   set spcgroup_num = "3"
   set CCP4_SYM = "3"
   set ML_sym_val = "1"
+  set SYM_NAME = p12
   set rotate_to_Z = "no"
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
 
@@ -373,6 +377,7 @@ else if ( ${SYM} == 'p121_a' ) then
   set spcgroup_num = "6"
   set CCP4_SYM = "4"
   set ML_sym_val = "1"
+  set SYM_NAME = p121_a
   set rotate_to_Z = "no"
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
   ${proc_2dx}/linblock "#" 
@@ -386,6 +391,7 @@ else if ( ${SYM} == 'p121_b' ) then
   set CCP4_SYM = "4"
   set ML_sym_val = "1"
   set rotate_to_Z = "no"
+  set SYM_NAME = p121
   set verified = "yes"
 
 else if ( ${SYM} == 'c12_a' ) then
@@ -394,6 +400,7 @@ else if ( ${SYM} == 'c12_a' ) then
   set CCP4_SYM = "5"
   set ML_sym_val = "1"
   set rotate_to_Z = "no"
+  set SYM_NAME = c12_a
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
   ${proc_2dx}/linblock "#" 
   ${proc_2dx}/linblock "WARNING: symmetry c12_a needs reassignment of axis for CCP4, not yet implemented." 
@@ -406,6 +413,7 @@ else if ( ${SYM} == 'c12_b' ) then
   set CCP4_SYM = "5"
   set ML_sym_val = "1"
   set rotate_to_Z = "no"
+  set SYM_NAME = c12
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
 
 else if ( ${SYM} == 'p222' ) then
@@ -413,6 +421,7 @@ else if ( ${SYM} == 'p222' ) then
   set spcgroup_num = "9"
   set ML_sym_val = "2"
   set CCP4_SYM = "16"
+  set SYM_NAME = p222
   set rotate_to_Z = "no"
 
 else if ( ${SYM} == 'p2221a' ) then
@@ -422,6 +431,7 @@ else if ( ${SYM} == 'p2221a' ) then
   set ML_sym_val = "2"
   set rotate_to_Z = "yes"
   set TWOFOLD = "T"
+  set SYM_NAME = p2221a
   echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
   ${proc_2dx}/linblock "#" 
   ${proc_2dx}/linblock "WARNING: symmetry p2221_a needs reassignment of axis for CCP4, not yet implemented." 
@@ -435,7 +445,8 @@ else if ( ${SYM} == 'p2221b' ) then
   set ML_sym_val = "2"
   set rotate_to_Z = "yes"
   set TWOFOLD = "T"
-  echo "::WARNING from proc/2dx_sym2spcgrp-sub.com: Using CCP4_SYM = ${CCP4_SYM}." 
+  set SYM_NAME = p2221
+  set verified = "yes"
 
 else if ( ${SYM} == 'p22121' ) then
   set spcgrp = "8"
@@ -445,6 +456,7 @@ else if ( ${SYM} == 'p22121' ) then
   set CCP4_SYM = "18"
   set rotate_to_Z = "no"
   set TWOFOLD = "T"
+  set SYM_NAME = p22121
   set verified = "yes"
 
 else if ( ${SYM} == 'c222' ) then
@@ -454,6 +466,7 @@ else if ( ${SYM} == 'c222' ) then
   set ML_sym_val = "2"
   set rotate_to_Z = "no"
   set TWOFOLD = "T"
+  set SYM_NAME = c222
 
 else if ( ${SYM} == 'p4' ) then
   set spcgrp = "10"
@@ -464,6 +477,7 @@ else if ( ${SYM} == 'p4' ) then
   set verified = "yes"
   set set_to_90 = "yes"
   set TWOFOLD = "T"
+  set SYM_NAME = p4
 
 else if ( ${SYM} == 'p422' ) then
   set spcgrp = "11"
@@ -474,6 +488,7 @@ else if ( ${SYM} == 'p422' ) then
   set verified = "yes"
   set set_to_90 = "yes"
   set TWOFOLD = "T"
+  set SYM_NAME = p422
 
 else if ( ${SYM} == 'p4212' ) then
   set spcgrp = "12"
@@ -484,6 +499,7 @@ else if ( ${SYM} == 'p4212' ) then
   set verified = "yes"
   set set_to_90 = "yes"
   set TWOFOLD = "T"
+  set SYM_NAME = p4212
 
 else if ( ${SYM} == 'p3' ) then
   set spcgrp = "13"
@@ -493,6 +509,7 @@ else if ( ${SYM} == 'p3' ) then
   set rotate_to_Z = "no"
   set verified = "yes"
   set set_to_120 = "yes"
+  set SYM_NAME = p3
 
 else if ( ${SYM} == 'p312' ) then
   set spcgrp = "14"
@@ -501,6 +518,7 @@ else if ( ${SYM} == 'p312' ) then
   set ML_sym_val = "3"
   set rotate_to_Z = "no"
   set set_to_120 = "yes"
+  set SYM_NAME = p312
 
 else if ( ${SYM} == 'p321' ) then
   set spcgrp = "15"
@@ -509,6 +527,7 @@ else if ( ${SYM} == 'p321' ) then
   set ML_sym_val = "3"
   set rotate_to_Z = "no"
   set set_to_120 = "yes"
+  set SYM_NAME = p321
 
 else if ( ${SYM} == 'p6' ) then
   set spcgrp = "16"
@@ -519,6 +538,7 @@ else if ( ${SYM} == 'p6' ) then
   set verified = "yes"
   set set_to_120 = "yes"
   set TWOFOLD = "T"
+  set SYM_NAME = p6
 
 else if ( ${SYM} == 'p622' ) then
   set spcgrp = "17"
@@ -528,6 +548,7 @@ else if ( ${SYM} == 'p622' ) then
   set rotate_to_Z = "no"
   set set_to_120 = "yes"
   set TWOFOLD = "T"
+  set SYM_NAME = p622
 
 else
   ${proc_2dx}/protest "ERROR: sym2spcgrp: SYM of ${SYM} not supported"

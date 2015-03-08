@@ -45,7 +45,6 @@
 # DISPLAY: script_2dx_initialize
 # DISPLAY: script_2dx_evaluateLattice
 # DISPLAY: script_2dx_cleanup
-#
 # DISPLAY: ReUnbend_MP
 #
 #$end_local_vars
@@ -95,6 +94,8 @@ source ${proc_2dx}/initialize
 source ${proc_2dx}/2dx_merge_makedirs 
 #
 echo "<<@progress: 1>>"
+#
+# An alternative is to give scriptnames separated by comma in one string to one run of 2dx_image.
 #
 echo 'nohup \' > SCRATCH/${scriptname}_tmp_runjob.com 
 echo '${app_2dx_image} ${curdir} "2dx_initialize"; \' >> SCRATCH/${scriptname}_tmp_runjob.com

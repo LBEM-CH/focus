@@ -361,13 +361,6 @@ while ( ${dircounter} <= ${dirnum} )
         endif
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "1" ) then
-#          if ( -e ${from_dirfile}/${loc_imagename}.raw.mrc ) then
-#            if ( ! -e ${to_dirfile}/${loc_imagename}.raw.mrc ) then
-#              echo ":New: ${to_dirfile}/${loc_imagename}.raw.mrc"
-#              ${copy_command} ${from_dirfile}/${loc_imagename}.raw.mrc ${to_dirfile}
-#            else
-#              echo ":Old: ${to_dirfile}/${loc_imagename}.raw.mrc"
-#            endif
           if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
             if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.tif ) then
               echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.tif"
@@ -445,7 +438,8 @@ while ( ${dircounter} <= ${dirnum} )
               endif
               echo dummy > ${from_dirfile}/APH/dummy.tmp
               echo ":New: ${to_dirfile}/APH/*"
-              ${copy_command} ${from_dirfile}/APH/* ${to_dirfile}/APH
+              cd ${from_dirfile} ; tar -cf - . | (cd ${to_dirfile} ; tar -xpf -)
+              # ${copy_command} ${from_dirfile}/APH/* ${to_dirfile}/APH
               \rm ${from_dirfile}/APH/dummy.tmp
               \rm ${to_dirfile}/APH/dummy.tmp
             endif

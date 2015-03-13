@@ -18,6 +18,7 @@ SET(MAPHIST_EXE "maphist")
 SET(PROJ_SOURCES ${CPP_SOURCES})
 SET(PROJ_HEADERS ${HPP_HEADERS})
 set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11")
+set(CMAKE_C_FLAGS_RELEASE "-lm")
 
 #=============================#
 # Create Executables          # 

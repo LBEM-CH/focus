@@ -41,46 +41,46 @@ if ( ${scriptname} == "2dx_merge" ) then
   if ( ! -e 2dx_image.cfg ) then
     ${proc_2dx}/protest "ERROR: 2dx_image.cfg not found in ${imagefile}"
   endif
-  set imagename_local = `cat 2dx_image.cfg | grep 'set imagename =' | cut -d\" -f2`
+  set imagename_local = `cat 2dx_image.cfg | grep 'set nonmaskimagename =' | cut -d\" -f2`
   cd APH
-  set APH_file = ${imagename_local}_fou_ctf.aph
+  set APH_file = image_ctfcor_fou_unbent_ctf.aph
   # Already set:
   # if ( ${merge_data_type} == '0' ) then
-  #   set APH_file = ${imagename_local}_fou_ctf.aph
+  #   set APH_file = image_ctfcor_fou_unbent_ctf.aph
   # endif
   if ( ${merge_data_type} == '1' ) then
-    if ( ! -e ${imagename_local}_ctf.aph ) then
-      set APH_file = ${imagename_local}_syn_ctf.aph
+    if ( -e image_ctfcor_U2-Syn_ctf.aph ) then
+      set APH_file = image_ctfcor_U2-Syn_ctf.aph
     else
-      echo ":${imagename_local}_syn_ctf.aph not found."
+      echo ":image_ctfcor_U2-Syn_ctf.aph not found."
     endif
   endif
   if ( ${merge_data_type} == '2' ) then
-    if ( -e ${imagename_local}_movie_fou_ctf.aph ) then
-      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+    if ( -e image_ctfcor_movie_fou_ctf.aph ) then
+      set APH_file = image_ctfcor_movie_fou_ctf.aph
     else
-      echo ":${imagename_local}_movie_fou_ctf.aph not found."
+      echo ":image_ctfcor_movie_fou_ctf.aph not found."
     endif
   endif
   if ( ${merge_data_type} == '3' ) then
-    if ( -e ${imagename_local}_movie_syn_ctf.aph ) then
-      set APH_file = ${imagename_local}_movie_syn_ctf.aph
+    if ( -e image_ctfcor_movie_syn_ctf.aph ) then
+      set APH_file = image_ctfcor_movie_syn_ctf.aph
     else
-      echo ":${imagename_local}_movie_syn_ctf.aph not found."
+      echo ":image_ctfcor_movie_syn_ctf.aph not found."
     endif
   endif
   if ( ${merge_data_type} == '4' ) then 
-    if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then
-      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+    if ( -e image_ctfcor_movieB_fou_ctf.aph ) then
+      set APH_file = image_ctfcor_movieB_fou_ctf.aph
     else
-      echo ":${imagename_local}_movieB_fou_ctf.aph not found."
+      echo ":image_ctfcor_movieB_fou_ctf.aph not found."
     endif
   endif
   if ( ${merge_data_type} == '5' ) then 
-    if ( -e ${imagename_local}_movieB_syn_ctf.aph ) then
-      set APH_file = ${imagename_local}_movieB_syn_ctf.aph
+    if ( -e image_ctfcor_movieB_syn_ctf.aph ) then
+      set APH_file = image_ctfcor_movieB_syn_ctf.aph
     else
-      echo ":${imagename_local}_movieB_syn_ctf.aph not found."
+      echo ":image_ctfcor_movieB_syn_ctf.aph not found."
     endif
   endif
   if ( ${merge_data_type} == '6' ) then
@@ -130,31 +130,31 @@ if ( ${scriptname} == "2dx_merge" ) then
     set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
     \rm -f awk.dat
     if ( ${QVAL_best} == '1' ) then
-      set APH_file = ${imagename_local}_fou_ctf.aph
+      set APH_file = image_ctfcor_fou_unbent_ctf.aph
     endif
     if ( ${QVAL_best} == '2' ) then
-      set APH_file = ${imagename_local}_syn_ctf.aph
+      set APH_file = image_ctfcor_U2-Syn_ctf.aph
     endif
     if ( ${QVAL_best} == '3' ) then
-      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+      set APH_file = image_ctfcor_movie_fou_ctf.aph
     endif
     if ( ${QVAL_best} == '4' ) then
-      set APH_file = ${imagename_local}_movie_syn_ctf.aph
+      set APH_file = image_ctfcor_movie_syn_ctf.aph
     endif
     if ( ${QVAL_best} == '5' ) then
-      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+      set APH_file = image_ctfcor_movieB_fou_ctf.aph
     endif
     if ( ${QVAL_best} == '6' ) then
-      set APH_file = ${imagename_local}_movieB_syn_ctf.aph
+      set APH_file = image_ctfcor_movieB_syn_ctf.aph
     endif
     if ( ! -e ${APH_file} ) then
-      set APH_file = ${imagename_local}_fou_ctf.aph
       echo "::${APH_file} should be best, but was not found."
+      set APH_file = image_ctfcor_fou_unbent_ctf.aph
     endif
   endif
   echo ":In directory ${imagename_local}: Using APH file ${APH_file}. "
-  \rm -f ${imagename_local}_ctf.aph
-  \ln -s ${APH_file} ${imagename_local}_ctf.aph
+  \rm -f image_ctfcor_ctf.aph
+  \ln -s ${APH_file} image_ctfcor_ctf.aph
   cd ${olddir}
  end
 endif
@@ -195,7 +195,7 @@ if ( ${merge_data_type} == '9' ) then
   endif
 endif
 #
-${bin_2dx}/2dx_merge_compileAM.exe << eot
+${bin_2dx}/2dx_merge_compileA.exe << eot
 LOGS/${scriptname}.results
 ${proc_2dx}
 ${bin_2dx}

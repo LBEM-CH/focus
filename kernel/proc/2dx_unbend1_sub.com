@@ -23,6 +23,8 @@ endif
 #
 source ${proc_2dx}/2dx_makedirs
 #
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
 #
 #############################################################################
 ${proc_2dx}/${lincommand} "MASKTRAN - to mask the image according to the spotlist"
@@ -173,12 +175,12 @@ ${proc_2dx}/${lincommand} "BOXIMAGE - to box out reference for cross-correlation
 #
 setenv IN  SCRATCH/${imagename}_fft_msk2_fft.mrc
 setenv OUT SCRATCH/${imagename}_fft_msk2_fft_box1.mrc
-echo refposi = ${refposix} ${refposiy}
+echo imagecenter = ${imagecenterx} ${imagecentery}
 echo boxa1 = ${boxa1}
 ${bin_2dx}/2dx_boximage.exe << eot
 -1 0 		!  NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
 0 0		! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
-${refposix} ${refposiy}  ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
+${imagecenterx} ${imagecentery}  ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
 ${boxa1}
 eot
 #
@@ -192,7 +194,7 @@ if ( ${treatspotscan} == 'y' ) then
   ${bin_2dx}/2dx_boximage.exe << eot
 -1 0             !  NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
 0 0             ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
-${refposix} ${refposiy}  ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
+${imagecenterx} ${imagecentery}  ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
 ${boxa2}
 eot
   #
@@ -259,7 +261,7 @@ setenv IN2 SCRATCH/${imagename}_fft_msk2_fft_box1_fft.mrc
 setenv OUT SCRATCH/${imagename}_CCmap1_fft.mrc
 ${bin_2dx}/twofile.exe << eot
 2		! ICOMB = 2
-2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFT's.
+2 0 0 ${imagecenterx} ${imagecentery} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFT's.
 eot
 #
 echo "<<@progress: 40>"
@@ -273,7 +275,7 @@ if ( ${treatspotscan} == 'y' ) then
   ${proc_2dx}/${lincommand} "TWOFILE - a second time for SpotScan"
   ${bin_2dx}/twofile.exe << eot
 2               ! ICOMB = 2
-2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFT's.
+2 0 0 ${imagecenterx} ${imagecentery} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFT's.
 eot
   #
 endif
@@ -349,7 +351,7 @@ echo "${imagesidelength},${imagesidelength}"
 echo "${lattice},F"
 echo "-200,200,-200,200"
 echo "${quadradax},${quadraday}"
-echo "${refposix},${refposiy}"
+echo "${imagecenterx},${imagecentery}"
 echo "N		"
 echo "${radlim} "
 echo "${valspotscan},${RMAG},${LCOLOR}"
@@ -366,7 +368,7 @@ ${imagesidelength},${imagesidelength}         ! SIZE OF TRANSFORM (ISIZEX, ISIZE
 ${lattice},F			! Lattice vectors
 -200,200,-200,200		! NUMBER UNIT CELLS TO SEARCH
 ${quadradax},${quadraday}	! RADIUS OF CORR SEARCH
-${refposix},${refposiy} 	! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery} 	! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N				! YES/NO FOR DETAILED PRINTOUT
 ${radlim}         		! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}	! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -421,7 +423,7 @@ ${imagesidelength},${imagesidelength}         ! SIZE OF TRANSFORM (ISIZEX, ISIZE
 ${lattice},F                    ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${quadradax},${quadraday}         ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}	! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -473,7 +475,7 @@ ${imagesidelength},${imagesidelength}         ! SIZE OF TRANSFORM (ISIZEX, ISIZE
 ${lattice},F                    ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${quadradax},${quadraday}         ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}		! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -596,7 +598,7 @@ N                               ! Generate points from lattice?
 APH/${imagename}_fou_unbend1.aph
 SCRATCH/TMP9871.dat
 U1
-${refposix} ${refposiy}           ! XORIG,YORIG
+${imagecenterx} ${imagecentery}           ! XORIG,YORIG
 ${RESMIN} 1.5 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot

@@ -40,7 +40,6 @@
 # DISPLAY: treatspotscan
 # DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
-# DISPLAY: refori
 # DISPLAY: createmaskinfo
 # DISPLAY: ISTEP
 # DISPLAY: ISTEP_h
@@ -96,7 +95,6 @@ set TLTAXIS = ""
 set TLTANG = ""
 set TANGL = ""
 set det_tilt = ""
-set refori = ""
 set createmaskinfo = ""
 set taperBeforeFFT = ""
 set generatePeriodogram = ""
@@ -163,6 +161,12 @@ else
   echo "set boxb1 = ${boxb1}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Warning: boxb1 needs to be an integer number. Now corrected."
   echo "#WARNING: Warning: boxb1 needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
+endif
+#
+if ( ${boxb1} == "0" ) then
+  set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 13 ) } END { print s }'`
+  echo "set boxb1 = ${boxb1}"  >> LOGS/${scriptname}.results
+  echo ":Initializing boxb1 as ${boxb1}"
 endif
 #
 set tmp1 = `echo ${boxb2} | awk '{s = int( $1 ) } END { print s }'`
@@ -289,9 +293,9 @@ if ( ${tmp} != ${quadradby} ) then
   echo "#WARNING: Warning: correcting quadradb to ${quadradb}." >> LOGS/${scriptname}.results
 endif
 #
-set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-set refori = ${reforix},${reforix}
-echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
+#
 #
 if ( ${ccunbend_program} != "0" && ${ccunbend_program} != "1" ) then
   set ccunbend_program = "0"
@@ -335,22 +339,10 @@ endif
 set reciangle = `echo ${realang} | awk '{ s = 180.0 - $1 } END { print s } '`
 echo reciangle = ${reciangle}
 #
-set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-if ( ${tmp1} != ${refposix} ) then
-  set refori = ${refposix},${refposiy}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected."
-  echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-endif
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
-#
-set rtempx1 = ${refposix}
-set rtempy1 = ${refposiy}
-set rtempx2 = ${refposix}
-set rtempy2 = ${refposiy}
+set rtempx1 = ${imagecenterx}
+set rtempy1 = ${imagecentery}
+set rtempx2 = ${imagecenterx}
+set rtempy2 = ${imagecentery}
 @ rtempx1 -= 13
 @ rtempx2 += 12
 @ rtempy1 -= 13
@@ -359,10 +351,10 @@ set rtempy2 = ${refposiy}
 set patlabel = ${rtempx1},${rtempx2},${rtempy1},${rtempy2}
 echo patlabel = ${patlabel}
 #
-set rtempx1 = ${refposix}
-set rtempy1 = ${refposiy}
-set rtempx2 = ${refposix}
-set rtempy2 = ${refposiy}
+set rtempx1 = ${imagecenterx}
+set rtempy1 = ${imagecentery}
+set rtempx2 = ${imagecenterx}
+set rtempy2 = ${imagecentery}
 @ rtempx1 -= 400
 @ rtempx2 += 399
 @ rtempy1 -= 400
@@ -545,10 +537,10 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -569,10 +561,10 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -593,10 +585,10 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -617,10 +609,10 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -641,10 +633,10 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -665,10 +657,10 @@ Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
 2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-APH/dummy.aph
+SCRATCH/dummy.aph
 SCRATCH/TMP9882.dat
 U2
-${refposix},${refposiy}         ! XORIG,YORIG
+${imagecenterx},${imagecentery}         ! XORIG,YORIG
 ${rlocmin},${rlocmax},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                              ! Lattice vectors
 eot
@@ -695,6 +687,7 @@ eot
 echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
 echo "set ML_done = n" >> LOGS/${scriptname}.results
 #
+echo ":: Done."
 echo "<<@progress: 100>>"
 #
 ##########################################################################
@@ -702,6 +695,7 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
 exit
+#
 #
 # These are listed here so that they show up in the GUI:
 source ${proc_2dx}/2dx_fftrans_sub.com

@@ -635,8 +635,8 @@ C
      1TIONS'/'  AND ,',I5,' OF THE REFLECTIONS FROM PREVIOUS FILMS. ',/,
      2 3X,I5,' REFLECTIONS HAVE PHASES CONSTRAINED BY SYMMETRY.')
 169   FORMAT(': THIS IS A TOTAL OF ',I5,' COMPARISONS.')
-170   FORMAT(/' SCALE FAC ',F10.5,' BETWEEN',I5,' NEW REFLECTIONS',
-     . ' AND',I5,' FROM PREVIOUS FILMS')
+170   FORMAT(/' SCALE FAC ',F10.5,' BETWEEN',I6,' NEW REFLECTIONS',
+     . ' AND',I9,' FROM PREVIOUS FILMS')
 171   FORMAT(': BEST PHASE RESIDUAL WAS ',F10.3,' DEGREES AT POSITION',
      1 I3,',',I3,' BELOW.')
 173   FORMAT(': PHASE SHIFT IS ',F7.2,',',F7.2,' DEGS; NEW ORIGIN IS',
@@ -2040,7 +2040,7 @@ C
       write(cline1,'(F15.2)')ERRMIN
       write(cline1,'(F15.2)')ERRESALL
       call shortshrink(cline1,k)
-      write(6,'(''new MergePhaseResidual = "'',A,''"'')')cline1(1:k)
+C      write(6,'(''new MergePhaseResidual = "'',A,''"'')')cline1(1:k)
       if(LOGOUTPUT)then
         if(USEPYTHON)then
           write(17,'(T8,''if l.startswith("set MergePhaseResidual "'',
@@ -2277,8 +2277,8 @@ C
       endif
 C
       WRITE(6,174)SCALE,NCOMPI,IFILM,NCOMP
-174   FORMAT('Scale factor ',F10.5,' between ',I5,' new (',I10
-     .    ,') and ',I5,' old spots.')
+174   FORMAT('Scale factor ',F10.5,' between ',I6,' new (',I10
+     .    ,') and ',I9,' old spots.')
 C
       if ( ifirst .eq. 0 ) then
         write(*,'('':    Number    Scale  Phase Origin        '',

@@ -176,7 +176,7 @@ eot
   \rm -f SUMMARY
   \rm -f SCRATCH/TMP.dummy1.tmp
   \rm -f SCRATCH/TMP.dummy2.tmp
-  \cp -f fort.3 APH/${prefix}${imagename}_cor_origtiltd.aph
+  \mv -f fort.3 TMP_origtiltd.aph
   #
   if ( ${scriptname} != "2dx_generateMAP" ) then
     if ( ${SYM_sub} == "p1" ) then
@@ -207,7 +207,7 @@ eot
     echo ":: "
   endif
   #
-  \cp -f APH/${prefix}${imagename}_cor_origtiltd.aph fort.1
+  \mv -f TMP_origtiltd.aph fort.1
   \rm -f fort.2
   \rm -f fort.3
   \rm -f fort.4
@@ -245,7 +245,7 @@ eot
   \rm -f fort.1
   \mv -f fort.2 ${prefix}avrg-1.hkl
   \mv -f fort.3 ${prefix}avrg-1.hk
-  \mv -f fort.4 APH/${prefix}ctfmerge-1.aph
+  \mv -f fort.4 SCRATCH/TMP_ctfmerge-1.aph
   \mv -f TMP444789.tmp LOGS/${prefix}avramphs_table.txt
   \rm -f TMP444888.tmp
   if ( -e 2dx_avrgamphs_phares.txt ) then
@@ -271,7 +271,7 @@ endif
 \rm -f LOGS/${prefix}avramphs_table.txt
 #
 #############################################################################
-${proc_2dx}/linblock "ORIGTILT - in p1 symmetry to transform the APH file into APH/${prefix}${imagename}_cor_origtiltd.aph"
+${proc_2dx}/linblock "ORIGTILT - in p1 symmetry to transform the APH file"
 #############################################################################
 #
 \rm -f SUMMARY
@@ -301,8 +301,7 @@ eot
 \rm -f SUMMARY
 \rm -f SCRATCH/TMP.dummy1.tmp
 \rm -f SCRATCH/TMP.dummy2.tmp
-\cp -f fort.3 APH/${prefix}${imagename}_cor_origtiltd.aph
-# \cp -f ../../merge/APH/merge.aph APH/${prefix}${imagename}_cor_origtiltd.aph
+\mv -f fort.3 TMP_origtiltd.aph
 #
 if ( ${scriptname} != "2dx_generateMAP" ) then
   if ( ${SYM_sub} == "p1" ) then
@@ -316,7 +315,7 @@ endif
 ${proc_2dx}/linblock "avrgamphs - to transform merge.aph into avrg.hkl"
 #############################################################################
 #
-\cp -f APH/${prefix}${imagename}_cor_origtiltd.aph fort.1
+\mv -f TMP_origtiltd.aph fort.1
 \rm -f fort.2
 \rm -f fort.3
 \rm -f fort.4
@@ -342,7 +341,7 @@ eot
 \rm -f fort.1
 \mv -f fort.2 ${prefix}avrg.hkl
 \mv -f fort.3 ${prefix}avrg.hk
-\mv -f fort.4 APH/${prefix}ctfmerge.aph
+\mv -f fort.4 SCRATCH/TMP_ctfmerge.aph
 \rm -f TMP444888.tmp
 #
 if ( ${scriptname} != "2dx_generateMAP" ) then
@@ -434,7 +433,7 @@ eot
   #
   ${proc_2dx}/linblock "f2mtz - to transform into MTZ file"
   #
-  ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}-permutated.hkl hklout ${prefix}${imagename}_MRClefthanded.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${outfile} hklout SCRATCH/${prefix}${imagename}_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
 CELL ${celly} ${ALAT} ${cellx} 90.0  ${realang} 90.0 
 SYMMETRY ${CCP4_SYM}
@@ -448,7 +447,7 @@ eof
   #
 else
 #
-  ${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}_MRClefthanded.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/${prefix}${imagename}_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -462,7 +461,7 @@ eof
 endif
 #
 if ( ${show_hkl}x == "yx" ) then
-  echo "# IMAGE: ${prefix}${imagename}_MRClefthanded.mtz <MTZ file of Amp&Phs>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${prefix}${imagename}_MRClefthanded.mtz <MTZ file of Amp&Phs>" >> LOGS/${scriptname}.results
 endif
 #
 set infile = ${prefix}centric_phase_zero.hkl
@@ -501,7 +500,7 @@ eot
   #
   ${proc_2dx}/linblock "f2mtz - to transform into MTZ file of phase zero"
   #
-  ${bin_ccp4}/f2mtz hklin ${prefix}${imagename}_phase_zero-permutated.hkl hklout ${prefix}${imagename}_phase_zero_MRClefthanded.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${outfile} hklout SCRATCH/${prefix}${imagename}_phase_zero_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}_phase_zero, ${date}
 CELL ${celly} ${ALAT} ${cellx} 90.0 ${realang} 90.0 
 SYMMETRY ${CCP4_SYM}
@@ -515,7 +514,7 @@ eof
   #
 else
 #
-  ${bin_ccp4}/f2mtz hklin ${infile} hklout ${prefix}${imagename}_phase_zero_MRClefthanded.mtz << eof
+  ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/${prefix}${imagename}_phase_zero_MRClefthanded.mtz << eof
 TITLE  Map, Symmetry=${CCP4_SYM}, ${prename}${imagename}_phase_zero, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
@@ -540,11 +539,11 @@ endif
 ${proc_2dx}/linblock "mtzdump - to look at ${prefix}${imagename}_MRClefthanded.mtz"
 #############################################################################
 #
-${bin_ccp4}/mtzdump hklin ${prefix}${imagename}_MRClefthanded.mtz << eot > mtzdump.txt
+${bin_ccp4}/mtzdump hklin SCRATCH/${prefix}${imagename}_MRClefthanded.mtz << eot > SCRATCH/mtzdump.txt
 NREF 100
 END
 eot
-# echo "# IMAGE: mtzdump.txt <TXT form of MTZ file of Amp&Phs>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: SCRATCH/mtzdump.txt <TXT form of MTZ file of Amp&Phs>" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "fft - to transform ${prefix}${imagename}_MRClefthanded.mtz into SCRATCH/scratch1.map"
@@ -560,7 +559,7 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   set AXIS = "Z,X,Y"
   #
-  ${bin_ccp4}/fft hklin ${prefix}${imagename}_phase_zero_MRClefthanded.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
+  ${bin_ccp4}/fft hklin SCRATCH/${prefix}${imagename}_phase_zero_MRClefthanded.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
 LABIN F1=F PHI=PHI ##
 PROJECTION
 AXIS ${AXIS}
@@ -578,7 +577,7 @@ else
   #
   set AXIS = "X,Y,Z"
   #
-  ${bin_ccp4}/fft hklin ${prefix}${imagename}_phase_zero_MRClefthanded.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
+  ${bin_ccp4}/fft hklin SCRATCH/${prefix}${imagename}_phase_zero_MRClefthanded.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
 LABIN F1=F PHI=PHI ##
 PROJECTION
 AXIS ${AXIS}
@@ -600,7 +599,7 @@ if ( ${rotate_to_Z} == "yes" ) then
   #
   set AXIS = "Z,X,Y"
   #
-  ${bin_ccp4}/fft hklin ${prefix}${imagename}_MRClefthanded.mtz mapout SCRATCH/scratch1.map  << eot
+  ${bin_ccp4}/fft hklin SCRATCH/${prefix}${imagename}_MRClefthanded.mtz mapout SCRATCH/scratch1.map  << eot
 LABIN F1=F PHI=PHI ##
 PROJECTION
 AXIS ${AXIS}
@@ -618,7 +617,7 @@ else
   #
   set AXIS = "X,Y,Z"
   #
-  ${bin_ccp4}/fft hklin ${prefix}${imagename}_MRClefthanded.mtz mapout SCRATCH/scratch1.map  << eot
+  ${bin_ccp4}/fft hklin SCRATCH/${prefix}${imagename}_MRClefthanded.mtz mapout SCRATCH/scratch1.map  << eot
 LABIN F1=F PHI=PHI ##
 PROJECTION
 AXIS ${AXIS}
@@ -760,8 +759,9 @@ else
   set title_map = "TITLE Symmetry: ${SYM_sub}. Filename: ${prename} ${imagename}"
 endif
 \rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.plt
+\rm -f SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.plt
 #
-${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map  PLOT  ${prefix}${imagename}_phase_zero-${SYM_sub}.plt  << eof
+${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.map  PLOT  SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.plt  << eof
 ${title_phase_zero}
 MAP SCALE 2.0
 CONTRS 0 TO 250 BY 125
@@ -773,8 +773,9 @@ END
 eof
 #
 \rm -f ${prefix}${imagename}-${SYM_sub}.plt
+\rm -f SCRATCH/${prefix}${imagename}-${SYM_sub}.plt
 #
-${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}-${SYM_sub}.map  PLOT  ${prefix}${imagename}-${SYM_sub}.plt  << eof
+${bin_ccp4}/npo  MAPIN  SCRATCH/${prefix}${imagename}-${SYM_sub}.map  PLOT  SCRATCH/${prefix}${imagename}-${SYM_sub}.plt  << eof
 ${title_map}
 MAP SCALE 0.4
 CONTRS SIG -3.0 TO 3.0 BY ${npo_cntrs_step} 
@@ -797,14 +798,16 @@ ${proc_2dx}/linblock "laserplot - to create PS/${prefix}${imagename}MAP-${SYM_su
 #############################################################################
 #
 \rm -f PS/${prefix}${imagename}PSF-${SYM_sub}.ps
-${bin_2dx}/laserplot.exe -outputfile=PS/${prefix}${imagename}PSF-${SYM_sub}.ps ${prefix}${imagename}_phase_zero-${SYM_sub}.plt
+${bin_2dx}/laserplot.exe -outputfile=PS/${prefix}${imagename}PSF-${SYM_sub}.ps SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.plt
 #
-\rm -f ${imagename}_phase_zero-${SYM_sub}.plt
+\rm -f SCRATCH/${prefix}${imagename}_phase_zero-${SYM_sub}.plt
+\rm -f ${prefix}${imagename}_phase_zero-${SYM_sub}.plt
 #
 \rm -f PS/${prefix}${imagename}MAP-${SYM_sub}.ps
-${bin_2dx}/laserplot.exe -outputfile=PS/${prefix}${imagename}MAP-${SYM_sub}.ps ${prefix}${imagename}-${SYM_sub}.plt
+${bin_2dx}/laserplot.exe -outputfile=PS/${prefix}${imagename}MAP-${SYM_sub}.ps SCRATCH/${prefix}${imagename}-${SYM_sub}.plt
 #
-\rm -f ${imagename}-${SYM_sub}.plt
+\rm -f SCRATCH/${prefix}${imagename}-${SYM_sub}.plt
+\rm -f ${prefix}${imagename}-${SYM_sub}.plt
 #
 echo "# IMAGE: PS/${prefix}${imagename}MAP-p1.ps <PS: ${prename}Non-symmetrized Map>"  >> LOGS/${scriptname}.results
 echo "# IMAGE: PS/${prefix}${imagename}MAP-${SYM_sub}.ps <PS: ${prename}${SYM_sub}-symmetrized Map>" >> LOGS/${scriptname}.results
@@ -816,6 +819,26 @@ if ( ${scriptname} != "2dx_generateMAP" ) then
     echo "<<@progress: 90>>"
   endif
 endif
+#
+
+
+#############################################################################
+${proc_2dx}/linblock "Cleaning up"
+#############################################################################
+#
+\rm -f ${prefix}avrg.hkl
+\rm -f ${prefix}avrg.hk
+\rm -f ${prefix}centric.hk
+\rm -f ${prefix}centric.hkl
+\rm -f ${prefix}centric_phase_zero.hkl
+\rm -f TMP_ctfmerge.aph
+\rm -f TMP234439.dat
+\rm -f mtzdump.txt
+\rm -f 2dx_tiltgeom.out
+\rm -f 2dx_tiltgeom2.out
+\rm -f APH/dummy.aph
+#
+#
 #
 if ( ${produceSpiderMapLocal} == 'n' ) then
   if ( ${scriptname} != "2dx_generateMAP" ) then

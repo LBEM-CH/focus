@@ -3,12 +3,12 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Apply CTF correction (if needed)                                   #
+# Title: CTF correction (Part 2)                                            #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 02/20/2006                                             #
-# Last Modification: 12/20/2014                                             #
+# Last Modification: 03/08/2015                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -71,7 +71,6 @@ set TAXA = ""
 set TANGL = ""
 set TLTAXIS = ""
 set TLTANG = ""
-set refori = ""
 set phacon = ""
 set ctfplotresmax = ""
 set CS = ""
@@ -106,18 +105,6 @@ echo "<<@evaluate>>"
 #
 set date = `date`
 echo date = ${date}
-#
-set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-if ( ${tmp1} != ${refposix} ) then
-  set refori = ${refposix},${refposiy}
-  echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected."
-  echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-endif
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
 #
 if ( ${QVALMA}x == 'x' ) then
   set QVALMA = '.'
@@ -156,12 +143,15 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
   #
   if ( ! -e APH/image_ctfcor_fou_unbent.aph ) then
     if ( -e APH/${imagename}.fou.nolimit.aph ) then
-      \mv -f APH/${imagename}.fou.nolimit.aph  APH/image_ctfcor_fou_unbent.aph
+      \mv -f APH/${imagename}.fou.nolimit.aph APH/image_ctfcor_fou_unbent.aph
     endif
     if ( -e APH/${imagename}_fou_nolimit.aph ) then
-      \mv -f APH/${imagename}_fou_nolimit.aph  APH/image_ctfcor_fou_unbent.aph
+      \mv -f APH/${imagename}_fou_nolimit.aph APH/image_ctfcor_fou_unbent.aph
     endif
-    if ( ! -e APH/${imagename}_fou_unbent.aph ) then
+    if ( -e APH/${imagename}_fou.aph ) then
+      \mv -f APH/${imagename}_fou.aph APH/image_ctfcor_fou_unbent.aph
+    endif
+    if ( ! -e APH/image_ctfcor_fou_unbent.aph ) then
       ${proc_2dx}/protest "ERROR: Neither APH/image_ctfcor_fou_unbent.aph, nor APH/${imagename}.fou.nolimit.aph, nor APH/${imagename}_fou_nolimit.aph exist."
     endif
   endif
@@ -186,84 +176,68 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
   echo "<<@progress: 30>>"
 
   set CTF_infile = APH/image_ctfcor_syn_unbend.aph
-  if ( -e ${CTF_infile} ) then
-    set CTF_outfile = APH/image_ctfcor_U2-Syn_ctf.aph
-    set unbent_image = SCRATCH/image_ctfcor_syn_unbent_taper
-    set unbent_FFT = SCRATCH/image_ctfcor_syn_unbent_taper_fft.mrc
-    set algo = US
-    set nametag = "U2-Syn"
-    #######################################
-    # Synthetic Reference Unbend
-    source ${proc_2dx}/2dx_applyCTF_sub.com
-    #######################################
-  else
-    ${proc_2dx}/linblock "${CTF_infile} not found."
-  endif
+  set CTF_outfile = APH/image_ctfcor_U2-Syn_ctf.aph
+  set unbent_image = SCRATCH/image_ctfcor_syn_unbent_taper
+  set unbent_FFT = SCRATCH/image_ctfcor_syn_unbent_taper_fft.mrc
+  set algo = US
+  set nametag = "U2-Syn"
+  #######################################
+  # Synthetic Reference Unbend
+  source ${proc_2dx}/2dx_applyCTF_sub.com
+  #######################################
 
   echo "<<@progress: 40>>"
 
   if ( ${movie_enable} == "y" ) then
     set CTF_infile = APH/image_ctfcor_movie_fou.aph
-    if ( -e ${CTF_infile} ) then
-      set CTF_outfile = APH/image_ctfcor_movie_fou_ctf.aph
-      set unbent_image = MovieA/direct_sum_filt_upscale
-      set unbent_FFT = MovieA/direct_sum_fft.mrc
-      set algo = UMA
-      set nametag = "MovieA"
-      #######################################
-      # MovieA
-      source ${proc_2dx}/2dx_applyCTF_sub.com
-      #######################################
-    else
-      ${proc_2dx}/linblock "ERROR: ${CTF_infile} not found."
-    endif
+    set CTF_outfile = APH/image_ctfcor_movie_fou_ctf.aph
+    set unbent_image = MovieA/direct_sum_filt_upscale
+    set unbent_FFT = MovieA/direct_sum_fft.mrc
+    set algo = UMA
+    set nametag = "MovieA"
+    #######################################
+    # MovieA
+    source ${proc_2dx}/2dx_applyCTF_sub.com
+    #######################################
+
+    echo "<<@progress: 50>>"
 
     set CTF_infile = APH/image_ctfcor_movie_syn.aph
-    if ( -e ${CTF_infile} ) then
-      set CTF_outfile = APH/image_ctfcor_movie_syn_ctf.aph
-      set unbent_image = MovieA/direct_sum_syn_filt_upscale
-      set unbent_FFT = MovieA/direct_sum_syn_fft.mrc
-      set algo = UMAS
-      set nametag = "MA_Syn"
-      #######################################
-      # MovieAS
-      source ${proc_2dx}/2dx_applyCTF_sub.com
-      #######################################
-    else
-      ${proc_2dx}/linblock "${CTF_infile} not found."
-    endif
+    set CTF_outfile = APH/image_ctfcor_movie_syn_ctf.aph
+    set unbent_image = MovieA/direct_sum_syn_filt_upscale
+    set unbent_FFT = MovieA/direct_sum_syn_fft.mrc
+    set algo = UMAS
+    set nametag = "MA_Syn"
+    #######################################
+    # MovieAS
+    source ${proc_2dx}/2dx_applyCTF_sub.com
+    #######################################
 
     echo "<<@progress: 60>>"
 
     set CTF_infile = APH/image_ctfcor_movieB_fou.aph
-    if ( -e ${CTF_infile} ) then
-      set CTF_outfile = APH/image_ctfcor_movieB_fou_ctf.aph
-      set unbent_image = MovieB/direct_sum_filt_upscale
-      set unbent_FFT = MovieB/direct_sum_fft.mrc
-      set algo = UMB
-      set nametag = "MovieB"
-      #######################################
-      # MovieB
-      source ${proc_2dx}/2dx_applyCTF_sub.com
-      #######################################
-    else
-      ${proc_2dx}/linblock "ERROR: ${CTF_infile} not found."
-    endif
+    set CTF_outfile = APH/image_ctfcor_movieB_fou_ctf.aph
+    set unbent_image = MovieB/direct_sum_filt_upscale
+    set unbent_FFT = MovieB/direct_sum_fft.mrc
+    set algo = UMB
+    set nametag = "MovieB"
+    #######################################
+    # MovieB
+    source ${proc_2dx}/2dx_applyCTF_sub.com
+    #######################################
+
+    echo "<<@progress: 70>>"
 
     set CTF_infile = APH/image_ctfcor_movieB_syn.aph
-    if ( -e ${CTF_infile} ) then
-      set CTF_outfile = APH/image_ctfcor_movieB_syn_ctf.aph
-      set unbent_image = MovieB/direct_sum_syn_filt_upscale
-      set unbent_FFT = MovieB/direct_sum_syn_fft.mrc
-      set algo = UMBS
-      set nametag = "MB_Syn"
-      #######################################
-      # MovieBS
-      source ${proc_2dx}/2dx_applyCTF_sub.com
-      #######################################
-    else
-      ${proc_2dx}/linblock "${CTF_infile} not found."
-    endif
+    set CTF_outfile = APH/image_ctfcor_movieB_syn_ctf.aph
+    set unbent_image = MovieB/direct_sum_syn_filt_upscale
+    set unbent_FFT = MovieB/direct_sum_syn_fft.mrc
+    set algo = UMBS
+    set nametag = "MB_Syn"
+    #######################################
+    # MovieBS
+    source ${proc_2dx}/2dx_applyCTF_sub.com
+    #######################################
   endif
   
   echo "<<@progress: 80>>"
@@ -306,11 +280,14 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
 #
 echo "set CTF_done = y" >> LOGS/${scriptname}.results
 #
+echo ":: Done."
 echo "<<@progress: 100>>"
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
+#
+exit
 #
 #
 #

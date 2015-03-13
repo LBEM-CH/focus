@@ -39,7 +39,6 @@ set test_spacegroups_doit = "y"
 # TYPE: Drop_Down_Menu "ALL;HEXA;SQUA;RECT;OPLI;TWO;THRE;SIX;FOUR"
 set test_spacegroups_val = "ALL"
 #
-# DISPLAY: SYN_Unbending
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: SYM
@@ -66,7 +65,6 @@ set bin_2dx = ""
 set proc_2dx = ""
 #
 set SCRATCH_DISK = ""
-set SYN_Unbending = ""
 set imagename = ""
 set defocus = ""
 set realang = ""
@@ -146,23 +144,7 @@ if ( ${allspace_warn} == '1' ) then
   ${proc_2dx}/linblock "#"
 endif  
 #
-if ( ${movie_enable} == "y" ) then
-  if ( ${SYN_Unbending} == "0" ) then
-    # FouFilter Unbending result is used:
-    set aphfile = APH/${iname}_movie_fou_ctf.aph
-  else
-    # Synthetic Unbending result is used:
-    set aphfile = APH/${iname}_movie_syn_ctf.aph
-  endif
-else
-  if ( ${SYN_Unbending} == "0" ) then
-    # FouFilter Unbending result is used:
-    set aphfile = APH/${iname}_fou_ctf.aph
-  else
-    # Synthetic Unbending result is used:
-    set aphfile = APH/${iname}_syn_ctf.aph
-  endif
-endif
+set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
 #
 setenv IN ${aphfile}
 #
@@ -241,14 +223,9 @@ ${proc_2dx}/lin "with: ${SPCGRPTXT}"
 #
 echo "<<@progress: 80>>"
 #
-if ( ${SYN_Unbending} == "0" ) then
-  # FouFilter Unbending result is used:
-  echo "set phaoriFouFilter = ${phaori_local}" >> LOGS/${scriptname}.results
-  echo "set phaori = ${phaori_local}" >> LOGS/${scriptname}.results
-else
-  # Synthetic Unbending result is used:
-  echo "set phaori = ${phaori_local}" >> LOGS/${scriptname}.results
-endif
+# FouFilter Unbending result is used:
+echo "set phaoriFouFilter = ${phaori_local}" >> LOGS/${scriptname}.results
+echo "set phaori = ${phaori_local}" >> LOGS/${scriptname}.results
 #
 if ( ${test_spacegroups_val} != "SPEC" ) then
   #

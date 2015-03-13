@@ -49,10 +49,6 @@ if ( "${level}" == "radical" ) then
   echo dummy > avrg.p7.hkl
   echo dummy > dummy.profile
   echo dummy > TMP001.spi
-  cd FFTIR
-  echo dummy > tmp.1
-  \rm -rf *
-  cd ${dir}
   \rm -rf FFTIR
   \rm -rf PS
   \rm -rf PRJ
@@ -202,14 +198,13 @@ if ( -d framesB ) then
   \rm -rf framesB
 endif
 #
-cd SCRATCH
-echo dummy > tmp.1
-\rm -rf *
-cd ..
-if ( -d SCRATCH ) then
-  \rm -rf SCRATCH
+if ( -l SCRATCH ) then
+  set target = ` ls -l SCRATCH | awk '{ print $11}'`
+  if ( -e ${target} ) then
+    \rm -rf target
+  endif
 endif
-cd ${dir}
+#
 \rm -rf SCRATCH
 #
 \rm -f SUMMARY
@@ -295,13 +290,6 @@ if ( -e ${imagename}.mrc ) then
     \rm -f ${imagename}.mrc
     echo "set imagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
   endif
-endif
-#
-if ( 1 == 2 ) then
-  echo dummy > tmp_mask.mrc
-  \rm *_mask.mrc
-  echo dummy > tmp_automask.mrc
-  \rm *_automask.mrc
 endif
 #
 if ( -e ${nonmaskimagename}-masking-final.mrc ) then

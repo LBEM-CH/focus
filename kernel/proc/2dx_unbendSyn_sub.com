@@ -45,6 +45,11 @@ echo SYN_facthresha = ${SYN_facthresha}
 #
 source ${proc_2dx}/2dx_makedirs
 #
+  set imagecenter = ${imagesidelength}
+  @ imagecenter /= 2
+  set imagecenterx = ${imagecenter}
+  set imagecentery = ${imagecenter}
+
 #############################################################################
 # create synthetical transform from MTZ data
 #    OX and OY should be negative of values in normal JOBB to make central  #
@@ -406,7 +411,7 @@ $imagesidelength,$imagesidelength     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                          ! Lattice vectors
 -200,200,-200,200                     ! NUMBER UNIT CELLS TO SEARCH
 ${SYN_quadrada},${SYN_quadrada}       ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}               ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecentery}       ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                                     ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                             ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}                             ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -439,7 +444,7 @@ ${imagesidelength},${imagesidelength}                     ! SIZE OF TRANSFORM (I
 ${lattice},F			      ! Lattice vectors
 -200,200,-200,200	      	      ! NUMBER UNIT CELLS TO SEARCH
 ${SYN_quadrada},${SYN_quadrada}       ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy} 	      ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecenterx} 	      ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N				      ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}         		      ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}                   ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -479,7 +484,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${SYN_quadradb},${SYN_quadradb}           ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}             ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -634,7 +639,7 @@ N				! Generate points from lattice?
 APH/${iname}_tmp.aph
 SCRATCH/TMP98711.dat
 US
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${res1},${res2},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}		 		! Lattice vectors
 eot
@@ -651,7 +656,7 @@ N				! Generate points from lattice?
 APH/${iname}_tmp.aph
 SCRATCH/TMP98712.dat
 US
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${res2},${res3},1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}		 		! Lattice vectors
 eot
@@ -668,7 +673,7 @@ N				! Generate points from lattice?
 APH/${iname}_tmp.aph
 SCRATCH/TMP98713.dat
 US
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${res3} ${res4} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}		 		! Lattice vectors
 eot
@@ -685,7 +690,7 @@ N				! Generate points from lattice?
 APH/${iname}_tmp.aph
 SCRATCH/TMP98714.dat
 US
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${res4} ${res5} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}		 		! Lattice vectors
 eot
@@ -702,7 +707,7 @@ N				! Generate points from lattice?
 APH/${iname}_tmp.aph
 SCRATCH/TMP98715.dat
 US
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${res5} ${res6} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}		 		! Lattice vectors
 eot
@@ -719,7 +724,7 @@ N				! Generate points from lattice?
 APH/${iname}_tmp.aph
 SCRATCH/TMP98716.dat
 US
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${res6} ${res7} 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}		 		! Lattice vectors
 eot
@@ -748,7 +753,7 @@ N                               ! Generate points from lattice?
 APH/${iname}_syn_unbend_tmp.aph
 SCRATCH/TMP9871.dat
 US
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${RESMIN} 1.5 1 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot

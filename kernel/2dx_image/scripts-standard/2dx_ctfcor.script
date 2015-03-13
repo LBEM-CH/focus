@@ -1,12 +1,12 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Correct CTF before unbending (if active)                           #
+# Title: CTF Correction (Part 1)                                            #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 30/09/2014                                             #
-# Last Modification: 30/09/2014	                                         #
+# Created..........: 09/39/2014                                             #
+# Last Modification: 03/08/2015	                                            #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################

@@ -111,7 +111,6 @@ set boxa1 = ""
 set boxa2 = ""
 set boxb1 = ""
 set boxb2 = ""
-set refori = ""
 set quadrada = ""
 set quadradb = ""
 set initialization_executable = ""
@@ -354,12 +353,6 @@ else
     set boxb2 = `echo ${imagesidelength} | awk '{ s = int( $1 / 4 )  } END { print s }'`
     echo "set boxb2 = ${boxb2}"  >> LOGS/${scriptname}.results
     echo ":Initializing boxb2 as ${boxb2}"
-  endif
-  #
-  if ( ${refori} == "0,0" || ${refori} == "0.0,0.0" ) then
-    set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-    set refori = ${reforix},${reforix}
-    echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
   endif
   #
   set quadraday = `echo ${quadrada}noval | cut -d\, -f2`

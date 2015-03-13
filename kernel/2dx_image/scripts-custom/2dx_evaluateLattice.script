@@ -603,6 +603,8 @@ echo "::Alpha = ${alpha}       (Angle between X-Axis and A-star lattice vector"
 set tilted   = `head -n 8 ${docfile} | tail -n 1`
 set realtlt  = `head -n 10 ${docfile} | tail -n 1`
 #
+\rm -f ${docfile}
+#
 # set reallatu = `echo ${realtlt} | cut -d\  -f1`
 # set reallatv = `echo ${realtlt} | cut -d\  -f2`
 # set tiltrealcell = `echo ${reallatu},${reallatv}`
@@ -704,6 +706,7 @@ set LATTICE_TLTANG  = `head -n 4  ${docfile} | tail -n 1`
 set LATTICE_TLTAXA  = `head -n 6  ${docfile} | tail -n 1`
 set LATTICE_TAXA    = `head -n 8  ${docfile} | tail -n 1`
 set LATTICE_TANGL   = `head -n 10 ${docfile} | tail -n 1`
+\rm -f ${docfile}
 #
 echo "<<@progress: 55>>"
 #

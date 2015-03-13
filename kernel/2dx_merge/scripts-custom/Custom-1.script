@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Custom Script 1                                                    #
+# Title: Custom Script                                                      #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -93,6 +93,8 @@ foreach dirfile ( ${dirlist} )
   # echo "set beamtilt = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set beamtilt_change = 0.0,0.0" >> LOGS/${scriptname}.results
 
+  # echo "set do_lattice_algorithm = 1" >> LOGS/${scriptname}.results
+
   # echo "set CS = 2.0" >> LOGS/${scriptname}.results
   # echo "set KV = 200.0" >> LOGS/${scriptname}.results
   # echo "set stepdigitizer = 10.9" >> LOGS/${scriptname}.results
@@ -106,7 +108,6 @@ foreach dirfile ( ${dirlist} )
   # echo "set boxb2 = 1200.0" >> LOGS/${scriptname}.results
   # echo "set quadrada = 9,9" >> LOGS/${scriptname}.results
   # echo "set quadradb = 9,9" >> LOGS/${scriptname}.results
-  # echo "set ctf_ttf = TTF" >> LOGS/${scriptname}.results
   # echo "set treatspotscan = y" >> LOGS/${scriptname}.results
   # echo "set rot90 = n" >> LOGS/${scriptname}.results
   # echo "set rot180 = n" >> LOGS/${scriptname}.results
@@ -148,92 +149,11 @@ foreach dirfile ( ${dirlist} )
   # echo "set calculate_tiles = 0" >> LOGS/${scriptname}.results
   # echo "set ML_doit = n" >> LOGS/${scriptname}.results
 
-  #------------------------------------------------------------------------
-  # Use the following to run all standard 2dx_image scripts on the selected images:
-  # ${app_2dx_image} ${newdir} '"*"'
-  #------------------------------------------------------------------------
-
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
   # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
 
-  # Use the following to apply the CTF to all selected images:
-  # ${app_2dx_image} ${newdir} "2dx_applyCTF"
-
   # Use the following to run a few selected scripts on all selected images:
   # ${app_2dx_image} ${newdir} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
-  
-  #------------------------------------------------------------------------
-  # Use the following to run somme of the standard scripts again:
-  # ${app_2dx_image} ${newdir} "2dx_initialize"
-  # ${app_2dx_image} ${newdir} "2dx_initialize_files"
-  # ${app_2dx_image} ${newdir} "2dx_fftrans"
-  # ${app_2dx_image} ${newdir} "2dx_getDefTilt"
-  # ${app_2dx_image} ${newdir} "2dx_getLattice"
-  # ${app_2dx_image} ${newdir} "2dx_refineLattice"
-  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
-  # ${app_2dx_image} ${newdir} "2dx_getspots1"
-  # ${app_2dx_image} ${newdir} "2dx_fftrans"
-  # ${app_2dx_image} ${newdir} "2dx_ctfcor"
-  # ${app_2dx_image} ${newdir} "2dx_unbend1"
-  # ${app_2dx_image} ${newdir} "2dx_getspots"
-  # ${app_2dx_image} ${newdir} "2dx_unbend2"
-  # ${app_2dx_image} ${newdir} "2dx_unbend_movie"
-  # ${app_2dx_image} ${newdir} "2dx_unbendSyn"
-  # ${app_2dx_image} ${newdir} "2dx_applyCTF"
-  # ${app_2dx_image} ${newdir} "2dx_max_likelihood"
-  # ${app_2dx_image} ${newdir} "2dx_generateMAP"
-  #------------------------------------------------------------------------
-
-  if ( 1 == 2 ) then
-    ${app_2dx_image} ${newdir} "2dx_fftrans"
-    ${app_2dx_image} ${newdir} "2dx_ctfcor"
-    ${app_2dx_image} ${newdir} "2dx_unbend1"
-    ${app_2dx_image} ${newdir} "2dx_getspots"
-    ${app_2dx_image} ${newdir} "2dx_unbend2"
-
-    ${app_2dx_image} ${newdir} "2dx_fftrans"
-    ${app_2dx_image} ${newdir} "2dx_ctfcor"
-    ${app_2dx_image} ${newdir} "2dx_unbend1"
-    ${app_2dx_image} ${newdir} "2dx_getspots"
-    ${app_2dx_image} ${newdir} "2dx_unbend2"
-
-    ${app_2dx_image} ${newdir} "2dx_unbend_movie1a"
-    ${app_2dx_image} ${newdir} "2dx_unbend_movie1b"
-
-    ${app_2dx_image} ${newdir} "2dx_applyCTF"
-    ${app_2dx_image} ${newdir} "2dx_generateMAP"
-  endif
-
-  #------------------------------------------------------------------------
-
-  if ( 1 == 2 ) then
-    ${app_2dx_image} ${newdir} "2dx_getDefTilt"
-    ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
-    ${app_2dx_image} ${newdir} "2dx_applyCTF"
-    ${app_2dx_image} ${newdir} "2dx_generateMAP"
-  endif
-
-  #------------------------------------------------------------------------
-
-  # Use the following to recalculate the TAXA and TANGL values for all selected images:
-  # ${app_2dx_image} ${newdir} "2dx_getSampleTilt"
- 
-  # Use the following to calculate the local real-space lattice for each selected image:
-  # ${app_2dx_image} ${newdir} "+2dx_evaluateLattice"
-  
-  # Use the following, to set the defocus refinement option to "phases alone", for each selected image:
-  # echo "set ctfsearch_iphase = 2" >> LOGS/${scriptname}.results
-  # echo "set ctfsearch_ncyc = 10" >> LOGS/${scriptname}.results
-  # echo "set ctfsearch_df_step = 100" >> LOGS/${scriptname}.results
-  # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
-
-  # Use the following, to set the defocus refinement script to backup modus, for each selected image:
-  # echo "set defocus_direction = 1" >> LOGS/${scriptname}.results
-  # Then use the following, to backup the defocus values for each selected image:
-  # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
-
-  # Use the following, to refine the defocus for each selected image:
-  # ${app_2dx_image} ${newdir} "+2dx_refinedefocus"
   
   #
   ################################################################################

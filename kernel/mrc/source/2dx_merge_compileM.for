@@ -172,6 +172,10 @@ C
         call shorten(cline,k)
         write(11,'(''set imagename = "'',A,''"'')')cline(1:k)
 C
+        call cgetline(cline,"nonmaskimagename")
+        call shorten(cline,k)
+        write(11,'(''set nonmaskimagename = "'',A,''"'')')cline(1:k)
+C
         call shorten(CIMAGENUMBER,k)
         write(11,'(''set imagenumber =  "'',A,''"'')')CIMAGENUMBER(1:k)
 C

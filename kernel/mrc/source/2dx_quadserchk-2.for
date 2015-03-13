@@ -209,8 +209,8 @@ C
       DATA CORFAC/10.0/                                      
       EQUIVALENCE (NCOL,NXYZ(1)),(NLINE,NXYZ(2))
 C
-      XCOORD(I,J)=A1*I+B1*J+IC                           
-      YCOORD(I,J)=A2*I+B2*J+IR                           
+      XCOORD(I,J)=A1*I+B1*J+IC+1.0
+      YCOORD(I,J)=A2*I+B2*J+IR+1.0
 C
 C*** initialization added by JMS 06.03.96
         do k=mny,mxy
@@ -1363,8 +1363,8 @@ CHEN>
         CHARACTER*80 TMPline
         EQUIVALENCE (TMPline,line)
 CHEN<
-        XCOORD(J,I)=A1*J+B1*I+IC
-        YCOORD(J,I)=A2*J+B2*I+IR
+        XCOORD(J,I)=A1*J+B1*I+IC+1.0
+        YCOORD(J,I)=A2*J+B2*I+IR+1.0
 C
 CHEN>
 C-------Magnification (Exaggeration) factor 10 times:
@@ -1963,8 +1963,8 @@ C
       INTEGER IPICTU(IPICDI3,IPICDI3)
       INTEGER IPICT1(IPICDI3,IPICDI3)
 C
-      XCOORD(J,I)=A1*J+B1*I+IC
-      YCOORD(J,I)=A2*J+B2*I+IR
+      XCOORD(J,I)=A1*J+B1*I+IC+1.0
+      YCOORD(J,I)=A2*J+B2*I+IR+1.0
 C
       write(6,'(/,/,'' in MASKINF '',/,/,/)')
       print *,' MINA,MAXA,MINB,MAXB = ',MINA,MAXA,MINB,MAXB

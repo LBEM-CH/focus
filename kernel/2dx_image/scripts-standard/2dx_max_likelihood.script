@@ -238,10 +238,13 @@ endif
 #
 echo "set ML_done = y" >> LOGS/${scriptname}.results
 #
+echo ":: Done."
 echo "<<@progress: 100>>"
-echo "::ML run finished."
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
+#
+exit
+#
 #

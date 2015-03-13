@@ -165,17 +165,17 @@ C
       write(*,'(F12.2)')RGRESMAX
 C
       write(*,'(/,''input refine_data_type switch'')')
-      read(*,*)IMERGDAT
-      if(IMERGDAT.eq.0 .or.
-     .   IMERGDAT.eq.2 .or.
-     .   IMERGDAT.eq.4 .or.
-     .   IMERGDAT.eq.6 .or.
-     .   IMERGDAT.eq.8     )then
-        write(*,'(I1,'' = Using Fourier filtered results'')')IMERGDAT
+      read(*,*)IMERGEDAT
+      if(IMERGEDAT.eq.0 .or.
+     .   IMERGEDAT.eq.2 .or.
+     .   IMERGEDAT.eq.4 .or.
+     .   IMERGEDAT.eq.6 .or.
+     .   IMERGEDAT.eq.8     )then
+        write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEDAT
 C-------phaoriFouFilter should not be protected:
         LPROTFOUFIL = .FALSE.
       else 
-        write(*,'(I1,'' = Using SynRef unbent results '')')IMERGDAT
+        write(*,'(I1,'' = Using SynRef unbent results '')')IMERGEDAT
 C-------phaoriFouFilter should be protected:
         LPROTFOUFIL = .TRUE.
       endif
@@ -469,7 +469,7 @@ C
 C
           call dgetline(CMLMERGE,"ML_use_for_merging",iok)
 C
-          if(CMLMERGE(1:1).eq."y" .and. IMERGDAT.eq.6)then
+          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
             RPHAORIH=0.0
             RPHAORIK=0.0
             write(*,'(''   using Single Particle  results, '',
@@ -527,12 +527,12 @@ C
 C
           call shorten(cdir,k)
           call shortshrink(CIMAGENAME,k1)
-          if(CMLMERGE(1:1).eq."y" .and. IMERGDAT.eq.6)then
+          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
             write(cname4,'(A,''/APH/ML_result.aph'')')
      .        cdir(1:k)
           else
-            write(cname4,'(A,''/APH/'',A,''_ctf.aph'')')
-     .        cdir(1:k),CIMAGENAME(1:k1)
+            write(cname4,'(A,''/APH/image_ctfcor_ctf.aph'')')
+     .        cdir(1:k)
           endif
           call shortshrink(cname4,k1)
           write(11,'(A)')cname4(1:k1)

@@ -11,12 +11,24 @@ endif
 echo ":: "
 echo ":: 2dx_applyCTF_sub.com : Working on ${algo} "
 echo ":: -------------------------------------"
-echo ":: Input file          = ${CTF_infile}"
+if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
+  if ( -e ${CTF_infile} ) then
+    echo ":: Input file          = ${CTF_infile}"
+  else
+    echo ":: Input file          = ${CTF_infile} (not found)"
+    exit
+  endif
+endif
 echo ":: Output file         = ${CTF_outfile}"
 echo ":: Unbent image        = ${unbent_image}"
 echo ":: Unbent image (FFT)  = ${unbent_FFT}"
 echo ":: CTF correction mode = ${local_ctfcor_imode}"
 echo ":: "
+
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
+#
+
 
 if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
   ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction"
@@ -41,6 +53,7 @@ if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "5" || ${local_ctf
   if ( ${local_ctfcor_imode} == "4" ) then
     if ( ! -e ${unbent_FFT} ) then
       ${proc_2dx}/linblock "WARNING: File not found: ${unbent_FFT}"
+      exit
     else
       #
       \rm -f ${CTF_outfile}
@@ -60,7 +73,7 @@ ${defocus},${TLTAXIS},${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 ${CTF_outfile}
 SCRATCH/TMP9873.dat
 ${algo}
-${RESMIN},${RESMAX},${refposix},${refposiy},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
+${RESMIN},${RESMAX},${imagecenterx},${imagecentery},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
       #
@@ -74,6 +87,7 @@ eot
     #
     if ( ! -e ${unbent_image}.mrc ) then
       ${proc_2dx}/linblock "WARNING: File not found: ${unbent_image}.mrc"
+      exit
     else
       #
       echo "# IMAGE: ${unbent_image}.mrc <Unbent Image>" >> LOGS/${scriptname}.results   
@@ -155,7 +169,7 @@ N                               ! Generate points from lattice?
 ${CTF_outfile}
 SCRATCH/TMP9873.dat
 ${algo}
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot

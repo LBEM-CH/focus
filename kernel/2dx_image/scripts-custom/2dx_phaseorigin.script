@@ -42,7 +42,6 @@ set show_phares = "n"
 # TYPE: Bool "y;n"
 set show_PSF = "n"
 #
-# DISPLAY: SYN_Unbending
 # DISPLAY: SYM
 # DISPLAY: lattice
 # DISPLAY: secondlattice
@@ -50,7 +49,6 @@ set show_PSF = "n"
 # DISPLAY: realang
 # DISPLAY: TAXA
 # DISPLAY: TANGL
-# DISPLAY: refori
 # DISPLAY: comment
 # DISPLAY: phaori
 # DISPLAY: phaoriFouFilter
@@ -94,7 +92,6 @@ set phaoriFouFilter = ""
 set phaori_change = ""
 set realang = ""
 set realcell = ""
-set refori = ""
 set revhk = ""
 set revhnd = ""
 set phaori_manual_target = ""
@@ -134,28 +131,12 @@ set scriptname = 2dx_phaseorigin
 #
 source ${proc_2dx}/2dx_makedirs 
 #
-set aphfile = APH/${imagename}_ctf.aph
+set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File>" >> LOGS/${scriptname}.results
 #
 ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
 #
 set phaori_local = ${phaori}
-#
-if ( ${SYN_Unbending} == "0" ) then
-    # FouFilter Unbending result is used:
-    set aphfile = APH/${imagename}_fou_ctf.aph
-    #
-    # A check in case somebody just upgraded from an earlier version of 2dx:
-    if ( ! -e ${aphfile} ) then
-      if ( -e APH/${imagename}_ctf.aph ) then
-        \cp APH/${imagename}_ctf.aph ${aphfile}
-      endif
-    endif
-    #
-else
-    # Synthetic Unbending result is used:
-    set aphfile = APH/${imagename}_syn_ctf.aph
-endif
 #
 set phaori_x = `echo ${phaori_local} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
 set phaori_y = `echo ${phaori_local} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
@@ -185,14 +166,9 @@ set phaori_y = `echo ${phaori_y} | awk '{ if ( $1 <= -180.0) { s = $1 + 360.0 } 
 #
 set phaori_local = `echo ${phaori_x},${phaori_y}`
 #
-if ( ${SYN_Unbending} == "0" ) then
-  # FouFilter Unbending result is used:
-  echo "set phaoriFouFilter = ${phaori_local}" >> LOGS/${scriptname}.results
-  echo "set phaori = ${phaori_local}" >> LOGS/${scriptname}.results
-else
-  # Synthetic Unbending result is used:
-  echo "set phaori = ${phaori_local}" >> LOGS/${scriptname}.results
-endif
+# FouFilter Unbending result is used:
+echo "set phaoriFouFilter = ${phaori_local}" >> LOGS/${scriptname}.results
+echo "set phaori = ${phaori_local}" >> LOGS/${scriptname}.results
 #
 if ( ${phaori_change} == "0.0,0.0" ) then
   echo ":: "
@@ -259,19 +235,6 @@ set prefix = ""
 set prename = ""
 #
 source ${proc_2dx}/2dx_generateMap_sub.com
-#
-if ( ${ML_doit} == 'y' ) then
-  echo ":: "
-  ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
-  echo ":: "
-  set aphfile = APH/ML_result.aph
-  echo "# IMAGE-IMPORTANT: ${aphfile} <APH: ML Input Amp&Phase File>" >> LOGS/${scriptname}.results
-  set prefix = "ML_"
-  set prename = "ML "
-  #
-  source ${proc_2dx}/2dx_generateMap_sub.com
-  #
-endif
 #
 #############################################################################
 #############################################################################

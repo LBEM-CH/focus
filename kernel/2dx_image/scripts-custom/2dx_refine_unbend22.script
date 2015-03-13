@@ -53,7 +53,6 @@ set refine_maskb02_doit_1 = "y"
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: radlim
-# DISPLAY: refori
 # DISPLAY: IMAXCOR
 # DISPLAY: ISTEP
 # DISPLAY: ISTEP_h
@@ -105,7 +104,6 @@ set TLTAXIS = ""
 set TLTANG = ""
 set TANGL = ""
 set det_tilt = ""
-set refori = ""
 set IMAXCOR = ""
 set ISTEP = ""
 set ISTEP_h = ""
@@ -285,10 +283,8 @@ echo stea   = ${stea}
 set steb   = ${stea}
 echo steb = ${steb}
 #
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
 #
 set rtemp1 = ${imagesidelength}
 @ rtemp1 /= 2

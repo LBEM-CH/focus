@@ -273,12 +273,9 @@ C----------------------------------------------------------------------
 C=====Read input file
 C----------------------------------------------------------------------
 C
-      open(1,FILE=CNAME,STATUS='OLD',ERR=980)
+      open(1,FILE=CNAME,STATUS='OLD',ERR=981)
       call shorten(CNAME2,k)
-      write(CLINE,'(''\rm -r '',A)')CNAME2(1:k)
-      call shorten(CLINE,k)
-      call system(CLINE(1:k))
-      open(10,FILE=CNAME2,STATUS='NEW',ERR=980)
+      open(10,FILE=CNAME2,STATUS='NEW',ERR=982)
 C
       RecRESHORIMAX=0.0
       RecRESVERTMAX=0.0
@@ -474,7 +471,7 @@ C
 C
         write(*,'('' Calculating Average Amplitude'')')
 C
-        open(9,FILE=CNAME3,STATUS='OLD',ERR=980)
+        open(9,FILE=CNAME3,STATUS='OLD',ERR=983)
 C
         k = 0
         RAMPSUM = 0.0
@@ -628,8 +625,22 @@ C
         write(6,'(''::ERRPOR during file read in 2dx_plotresolution'')')
         goto 999
 C
- 980  continue
+ 981  continue
         write(6,'(''::ERRPOR during file open in 2dx_plotresolution'')')
+        call shorten(CNAME,k)
+        write(6,'(''::for file '',A)')CNAME(1:k)
+        goto 999
+C
+ 982  continue
+        write(6,'(''::ERRPOR during file open in 2dx_plotresolution'')')
+        call shorten(CNAME2,k)
+        write(6,'(''::for file '',A)')CNAME2(1:k)
+        goto 999
+C
+ 983  continue
+        write(6,'(''::ERRPOR during file open in 2dx_plotresolution'')')
+        call shorten(CNAME3,k)
+        write(6,'(''::for file '',A)')CNAME3(1:k)
         goto 999
 C
  999  continue
@@ -955,12 +966,14 @@ C
      .   IRUN.eq.15 .or. IRUN.eq.18) then
          WRITE(CTITLE,'(''Overall Resolution [A]'')')
       elseif(IRUN.eq.2 .or. IRUN.eq.5 .or. IRUN.eq.8 .or. IRUN.eq.11 .or.
-     .       IRUN.ge.13 .or. IRUN.eq.16 .or. IRUN.eq.19) then
+     .       IRUN.eq.13 .or. IRUN.eq.16 .or. IRUN.eq.19) then
          WRITE(CTITLE,'(''Horizontal Resolution [A]'')')
       elseif(IRUN.eq.3 .or. IRUN.eq.6 .or. IRUN.eq.9 .or. IRUN.eq.12 .or.
      .       IRUN.eq.17 .or. IRUN.eq.20) then
          WRITE(CTITLE,'(''Vertical Resolution [A]'')')
       endif
+C      write(cline,'(I2,'': '',A)')IRUN,CTITLE
+C      write(CTITLE,'(A)')cline(1:80)
       call shorten(CTITLE,k)
       CALL P2K_CSTRING(RTITLE,k,0.)
 C

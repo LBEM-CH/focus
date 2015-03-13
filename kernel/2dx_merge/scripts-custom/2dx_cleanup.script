@@ -283,7 +283,6 @@ eot
       set imagename = `cat 2dx_image.cfg | grep "set imagename =" | cut -d\" -f2`
       set nonmaskimagename = `cat 2dx_image.cfg | grep "set nonmaskimagename =" | cut -d\" -f2`
       #
-      source ${proc_2dx}/initialize
       source ${proc_2dx}/2dx_cleanup_sub.com
       #
       if ( ${cleanup_mask} == "y" ) then
@@ -291,8 +290,6 @@ eot
         \rm -f ${nonmaskimagename}_automask.mrc
         \rm -f ${nonmaskimagename}_automask_mask.mrc
       endif
-      #
-      #${app_2dx_image} ${fullpath} "+2dx_cleanup"
       #
       if ( "${cleanup_level}" == "3" || "${cleanup_level}" == "4" ) then
         \rm -f final_map.mrc

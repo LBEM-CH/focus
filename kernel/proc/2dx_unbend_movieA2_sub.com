@@ -1,223 +1,18 @@
-#!/bin/csh -ef
-####
-#
-#############################################################################
-#                                                                           #
-# Title: Unbend Movie A2 (Experimental)                                     #
-#                                                                           #
-# (C) 2dx.org, GNU Plublic License.                                         #
-#                                                                           #
-# Created..........: 02/20/2006                                             #
-# Last Modification: 02/20/2006                                             #
-# Author...........: 2dx.org                                                #
-#                                                                           #
-#############################################################################
-#
-# MANUAL: Movie mode unbending script
-#
-# MANUAL: Prerequisite I: Installed eman2/sparx package. Ensure that the eman2.bashrc is sourced (optimally in your bash.rc or .profile file) before starting 2dx. 
-#
-# MANUAL: Prerequisite II: Python-2.7 (or higher) including matplotlib and numpy. If you have installed eman2, this should be available on your system.
-#
-# MANUAL: Prerequisite III: PDFtk. You can get it from "https://www.pdflabs.com/tools/pdftk-server/".   Or, try on OSX:  port install pdftk
-#
-# MANUAL: Prerequisite IV: ps2pdf (Linux) or pstopdf (OSX). These should be already present.
-#
-# MANUAL: Prerequisite IV: pdf2ps. This is part of ghostscript. You can get it with:  port install <B>ghostscript</b>.
-#
-# MANUAL: Before using movie-mode unbending, switch movie-mode processing on and rerun "InitFilesAndParams" to preset the used batch size dependening on the number of available movie-frames.
-#
-# MANUAL: Using the movie-mode unbent APH-file requires selecting the movie-mode option in "Correct CTF" and rerunning of "Generate Map".
-#
-# MANUAL: Careful prevention of overfitting is crucial for successful movie-mode 3D reconstructions.
 #
 #
-# SORTORDER: 53
-#
-#=============================================================================
-# SECTION: Verbosity
-#=============================================================================
-#
-# LABEL: Show PROFDATA (CCunbending files) of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_PROFDATA = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_PROFDATA = "n"
-#
-# LABEL: Mark CCmaps with found coordinates?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap_marked = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_CCmap_marked = "n"
-#
-# LABEL: Show unbent CCmaps of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap_unbent = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_CCmap_unbent = "n"
-#
-# DISPLAY: imagename
-# DISPLAY: SYN_Unbending
-# DISPLAY: RESMAX
-# DISPLAY: RESMIN
-# DISPLAY: tempkeep
-# DISPLAY: comment
-# DISPLAY: movie_stackname
-# DISPLAY: movie_enable
-# DISPLAY: movie_imagenumber_total
-# DISPLAY: movie_masking_mode
-# DISPLAY: movie_refboxa
-# DISPLAY: movie_filter_type
-# DISPLAY: movie_filter_param
-# DISPLAY: movie_smoothing
-# DISPLAY: movie_drift_threshold
-# DISPLAY: Thread_Number
-# DISPLAY: ctfcor_noise
-# DISPLAY: ctfcor_imode
-#
-#$end_local_vars
 #
 #
-set app_2dx_image = ""
-set bin_2dx = ""
-set proc_2dx = ""
 #
-set SYN_Unbending = ""
-set PHASEORI_done = ""
-set boxb1 = ""
-set boxb2 = ""
-set imagename = ""
-set imageorigin = ""
-set defocus = ""
-set nonmaskimagename = ""
-set imagenumber = ""
-set realcell = ""
-set lattice = ""
-set holeb = ""
-set maskb01 = ""
-set imagesidelength = ""
-set magnification = ""
-set stepdigitizer = ""
-set tempkeep = ""
-set RESMIN = ""
-set RESMAX = ""
-set ALAT = ""
-set quadpredb = ""
-set quadradb = ""
-set radlim = ""
-set realang = ""
-set treatspotscan = ""
-set facthresha = ""
-set phacon = ""
-set ctfplotresmax = ""
-set stepdigitizer = ""
-set CS = ""
-set KV = ""
-set domask = ""
-set TLTAXIS = ""
-set TLTANG = ""
-set TANGL = ""
-set det_tilt = ""
-set refori = ""
-set createmaskinfo = ""
-set ISTEP = ""
-set ISTEP_h = ""
-set IMAXCOR = ""
-set RMAG = ""
-set LCOLOR = ""
-set ccunbend_program = ""
-set crop = ""
-set crop_histogram = ""
-set crop_histogram_percent = ""
-set crop_histogram_stdev = ""
-set RB_1 = ""
-set RB_2 = ""
-set RB_3 = ""
-set RB_4 = ""
-set RB_5 = ""
-set RB_6 = ""
-set RP_1 = ""
-set RP_2 = ""
-set RP_3 = ""
-set RP_4 = ""
-set RP_5 = ""
-set RP_6 = ""
-set movie_stackname = ""
-set movie_enable = ""
-set movie_imagenumber_total = ""
-set movie_filter_type = ""
-set movie_filter_param = ""
-set app_2dx_image = ""
-set movie_masking_mode = ""
-set movie_refboxa = ""
-set movie_facthreshb = ""
-set movie_smoothing = ""
-set movie_drift_threshold = ""
-set MASKING_done = ""
-set QVALS = ""
-set Thread_Number = ""
-set ctfcor_noise = ""
-set ctfcor_imode = ""
-set use_masked_image = ""
+# This is not an independent script.
+# This should only be called from another script.
 #
-#$end_vars
 #
-set scriptname = 2dx_unbend_movie1b
-\rm -f LOGS/${scriptname}.results
 #
-echo "<<@evaluate>>"
-echo "<<@progress: 1>>"
 #
-set ccp4_setup = 'y'
-source ${proc_2dx}/initialize
 #
-set date = `date`
-echo date = ${date}
 #
-set system = `uname -s`
-echo system = ${system}
 #
-##########################################################################
-##########################################################################
-# Setting parameters:
-##########################################################################
-##########################################################################
 #
-if ( ${system} == "Darwin" ) then
-  set S2 = "henning"
-  set S3 = "sthennin"
-  if (( "$USER" == "$S2" ) || ( "$USER" == "$S3" )) then
-    set app_2dx_image = "~/2dx/bin/2dx_image"
-  else
-    set app_2dx_image = "${bin_2dx}/../../../bin/2dx_image"
-  endif
-  echo ":Testing, if gostscript is installed and ps2pdf exists"
-  set ps2pdf_test = `which ps2pdf`x 
-  if ( ${ps2pdf_test} == 'x' ) then
-    set ps2pdf = pstopdf
-    echo "::"
-    echo "::ERROR: Install gostscript first."
-    echo "::"
-  else
-    set ps2pdf = `which ps2pdf` 
-    set pdf2ps = `which pdf2ps`
-  endif
-else
-  set app_2dx_image = "2dx_image"
-  set ps2pdf = ps2pdf
-  set pdf2ps = pdf2ps
-endif
-echo ":pdf2ps is ${pdf2ps}"
-echo ":ps2pdf is ${ps2pdf}"
-if ( ${pdf2ps}x == 'x' ) then
-  set pdf2ps = "echo ::ERROR: pdf2ps not found. Install gostscript."
-  echo ::
-  echo ::ERROR: pdf2ps not found. Install gostscript.
-  echo ::
-endif
 #
 set frames_dir = SCRATCH/MovieA
 #
@@ -361,7 +156,7 @@ if ( ! -e ${iname}.mrc ) then
   ${proc_2dx}/protest "ERROR:  ${iname}.mrc missing. First run script Correct CTF on tiles"
 endif
 
-set PROFDATA = ${iname}_profile.dat
+set PROFDATA = ${nonmaskimagename}_profile.dat
 if ( ! -e ${PROFDATA} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend II."
 endif
@@ -456,7 +251,6 @@ eot
        ${proc_2dx}/linblock "CCUNBEND - Unbend CCmap for frame ${i}"
        ###########################################################################
        setenv CCORDATA ${frames_dir}/PROFDATA_${i}.dat
-       # setenv CCORDATA ${iname}_profile.dat
        setenv TABLEOUT ${frames_dir}/CCUNBEND_Table_${i}.dat
        \rm -f ${frames_dir}/CCUNBEND_Table_${i}.dat
        \rm -f CCPLOT.PS
@@ -566,7 +360,7 @@ if ( ${show_frame_CCmap_unbent} == "y" ) then
   ${bin_2dx}/2dx_mark_spots.exe << eot
 ${frames_dir}/CCmap_driftCorrected.mrc
 ${frames_dir}/CCmap_driftCorrected_marked.mrc
-${iname}_profile.dat
+${nonmaskimagename}_profile.dat
 2
 eot
   echo "# IMAGE: ${frames_dir}/CCmap_driftCorrected_marked.mrc <CCmap drift-corrected, marked>" >> LOGS/${scriptname}.results 
@@ -752,8 +546,8 @@ echo "# IMAGE: ${outfft} <Final FFT (CTFcor)>" >> LOGS/${scriptname}.results
 ${proc_2dx}/linblock "MMBOX - Evaluating APH values (no CTFcor)"
 ###########################################################################
 
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
 #
 \rm -f dummy.aph
 #
@@ -767,7 +561,7 @@ N                               ! Generate points from lattice?
 dummy.aph
 SCRATCH/TMP9873.dat
 UMA
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
@@ -849,9 +643,6 @@ endif
 ###########################################################################
 ${proc_2dx}/linblock "MMBOX - Evaluating APH values (after CTF cor)"
 ###########################################################################
-
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
 #
 \rm -f SCRATCH/TMP9873.dat
 \rm -f ${outfile}
@@ -866,7 +657,7 @@ N                               ! Generate points from lattice?
 ${outfile}
 SCRATCH/TMP9873.dat
 UMA
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
@@ -887,11 +678,3 @@ if ( ${tempkeep} != "y" ) then
 endif
 
 
-###########################################################################
-${proc_2dx}/linblock "Script finished correctly."
-###########################################################################
-echo "<<@progress: 100>>"
-echo "<<@evaluate>>"
-#
-exit
-#

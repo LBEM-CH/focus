@@ -5,6 +5,15 @@
 # This is not an independent csh file.
 # This file has to be sourced from another csh script.
 #
+#
+#
+#
+#
+#
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
+#
+
 
         set valspotscan = '1'
 
@@ -26,7 +35,7 @@
         \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         ${bin_2dx}/twofile.exe << eot
         2 ! ICOMB = 2
-        2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+        2 0 0 ${imagecenterx} ${imagecentery} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
 
         #########################################################################
@@ -68,7 +77,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${movie_quadradax},${movie_quadraday}         ! RADIUS OF CORR SEARCH, search offset in pixels
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -94,7 +103,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${movie_quadradax},${movie_quadraday}           ! RADIUS OF CORR SEARCH, search offset in pixels
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -133,15 +142,13 @@ eot
         ###########################################################################
         ${proc_2dx}/lin "TWOFILE - Cross-correlation with references in Fourier-space"
         ###########################################################################
-        set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-        set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
         setenv IN1 ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc
         setenv IN2 SCRATCH/reference_fft.mrc
         setenv OUT ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_fft.mrc
         ${bin_2dx}/twofile.exe << eot
         2 ! ICOMB = 2
-        2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+        2 0 0 ${imagecenterx} ${imagecentery} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
 
 
@@ -152,7 +159,7 @@ eot
           \rm -f     ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb_fft.mrc
           ${bin_2dx}/twofile.exe << eot
           2 ! ICOMB = 2
-          2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+          2 0 0 ${imagecenterx} ${imagecentery} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
         endif 
 
@@ -326,7 +333,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${movie_quadradax},${movie_quadraday},500,500           ! RADIUS OF CORR SEARCH, search offset in pixels
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -348,7 +355,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${movie_quadradax},${movie_quadraday},500,500           ! RADIUS OF CORR SEARCH, search offset in pixels
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -370,7 +377,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${movie_quadradax},${movie_quadraday},500,500           ! RADIUS OF CORR SEARCH, search offset in pixels
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -404,7 +411,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${movie_quadradax},${movie_quadraday}          ! RADIUS OF CORR SEARCH, search offset in pixels
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -440,7 +447,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${movie_quadradbx},${movie_quadradby}           ! RADIUS OF CORR SEARCH, search offset in pixels
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -528,7 +535,6 @@ eot
             ${proc_2dx}/lin "CCUNBEND - Unbend the frame average"
             ###########################################################################
             setenv CCORDATA ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat
-            # setenv CCORDATA image_ctfcor_profile.dat
             setenv TABLEOUT ${frame_folder}/frame_${i}/SCRATCH/ccunbend-table-m${nonmaskimagename}.dat
             set ITYPE = 0
             set ROFFSET = 50.0
@@ -540,7 +546,7 @@ ${frame_folder}/frame_${i}/${iname}_mask.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
-${frame_folder}/CCunbend_frame_${i}_notap.mrc
+${frame_folder}/CCUNBEND_frame_${i}_notap.mrc
 CCUNBEND, frame_${i}/m${nonmaskimagename}_${i}.mrc, ${date}
 eot
 
@@ -551,7 +557,7 @@ eot
               ${bin_2dx}/2dx_mark_spots.exe << eot
 ${CCmap}
 ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_marked.mrc
-${iname}_profile.dat
+${nonmaskimagename}_profile.dat
 2
 eot
               echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB_marked.mrc <CCmap, marked, frame ${i}>" >> LOGS/${scriptname}.results 
@@ -609,9 +615,9 @@ eot
             ###########################################################################
             ${proc_2dx}/lin "TAPEREDGE - correct unbent frame average for taper edges"
             ###########################################################################
-            setenv IN  ${frame_folder}/CCunbend_frame_${i}_notap.mrc
-            setenv OUT ${frame_folder}/CCunbend_frame_${i}.mrc
-            \rm -f     ${frame_folder}/CCunbend_frame_${i}.mrc
+            setenv IN  ${frame_folder}/CCUNBEND_frame_${i}_notap.mrc
+            setenv OUT ${frame_folder}/CCUNBEND_frame_${i}.mrc
+            \rm -f     ${frame_folder}/CCUNBEND_frame_${i}.mrc
             ${bin_2dx}/2dx_taperedgek.exe << eot
             30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
@@ -619,16 +625,16 @@ eot
             ###########################################################################
             ${proc_2dx}/lin "FFTRANS - Obtain Fourier-transform of unbent and masked frame average"
             ###########################################################################
-            setenv IN  ${frame_folder}/CCunbend_frame_${i}.mrc
-            setenv OUT ${frame_folder}/CCunbend_frame_${i}_fft.mrc
-            \rm -f     ${frame_folder}/CCunbend_frame_${i}_fft.mrc
+            setenv IN  ${frame_folder}/CCUNBEND_frame_${i}.mrc
+            setenv OUT ${frame_folder}/CCUNBEND_frame_${i}_fft.mrc
+            \rm -f     ${frame_folder}/CCUNBEND_frame_${i}_fft.mrc
             ${bin_2dx}/2dx_fftrans.exe
 
             ###########################################################################
             ${proc_2dx}/lin "MMBOX - evaluate AMPlitudes and PHAses from unbent movie"
             ###########################################################################
             ${bin_2dx}/2dx_mmboxa.exe << eot
-${frame_folder}/CCunbend_frame_${i}_fft.mrc
+${frame_folder}/CCUNBEND_frame_${i}_fft.mrc
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
@@ -637,7 +643,7 @@ N                               ! Generate points from lattice?
 ${frame_folder}/aph_${i}.fou.nolimit.aph
 SCRATCH/TMP9873.dat
 UMB
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot

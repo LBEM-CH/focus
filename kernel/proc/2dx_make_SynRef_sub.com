@@ -11,23 +11,8 @@
   echo ":: "
   echo "::        Making synthetic reference: Mask ${loc_SYN_mask} and Bfactor ${loc_SYN_Bfact}"
   #  
-  #
-  set imagecenter = ${imagesidelength}
-  @ imagecenter /= 2
-  set imagecenterx = ${imagecenter}
-  set imagecentery = ${imagecenter}
-  #
-  set tmp1 = `echo ${refori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-  set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-  set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-  if ( ${tmp1} != ${refposix} ) then
-    set refori = ${refposix},${refposiy}
-    echo "set refori = ${refori}" >> LOGS/${scriptname}.results
-    ${proc_2dx}/linblock "Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-    echo "#WARNING: Warning: refori needs to be integer numbers. Now corrected." >> LOGS/${scriptname}.results
-  endif
-  echo refposix = ${refposix}
-  echo refposiy = ${refposiy}
+  set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+  set imagecentery = ${imagecenterx}
   #
   # set RESPLOTMAX = 0.3
   set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 } else { s = 0.3 } } END { print s }'`

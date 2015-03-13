@@ -19,6 +19,9 @@ endif
 #
 ${proc_2dx}/${lincommand} "2dx_unbend2_sub.com: Starting round ${locround}..."  
 #
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
+#
 #############################################################################
 ${proc_2dx}/${lincommand} "MASKTRANA - to mask the FFT in order to create the reference map"
 #############################################################################  
@@ -129,7 +132,7 @@ eot
   ${bin_2dx}/2dx_boximage.exe << eot
 -1 0		!  NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
 0 0		! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
-${refposix} ${refposiy}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
+${imagecenterx} ${imagecentery}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
 ${boxb1}
 eot
   #
@@ -153,7 +156,7 @@ eot
     ${bin_2dx}/2dx_boximage.exe << eot
 -1 0             !  NOVERT, VERTEX COORDS GIVEN IN GRID UNITS RELATIVE TO (0,0) ORIGIN.
 0 0             ! ORIGIN FOR LATER USE (E.G. IN FOURIER TRANSFORM)
-${refposix} ${refposiy}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
+${imagecenterx} ${imagecentery}     ! VERTEX COORDINATES IN GRID STEPS WRT CORNER (0,0)
 ${boxb2}
 eot
     #
@@ -243,7 +246,7 @@ eot
   setenv OUT SCRATCH/${iname}_CCmap21_fft.mrc
   ${bin_2dx}/twofile.exe << eot
 2		! ICOMB = 2
-2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+2 0 0 ${imagecenterx} ${imagecentery} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
   #
   if ( ${treatspotscan} == 'y' ) then
@@ -255,7 +258,7 @@ eot
     ${proc_2dx}/${lincommand} "TWOFILE - again, second for SpotScan treatment"
     ${bin_2dx}/twofile.exe << eot
 2               ! ICOMB = 2
-2 0 0 ${refposix} ${refposiy} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFT's.
+2 0 0 ${imagecenterx} ${imagecentery} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFT's.
 eot
     #
     if ( ${locround} == '1' ) then
@@ -313,9 +316,9 @@ eot
   #############################################################################
   #
   \rm -f SCRATCH/errors${iname}.dat
-  \rm -f ${iname}_profile.dat
+  \rm -f ${nonmaskimagename}_profile.dat
   setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
-  setenv PROFDATA ${iname}_profile.dat
+  setenv PROFDATA ${nonmaskimagename}_profile.dat
   setenv ERRORS   SCRATCH/errors${iname}.dat
   #
   if ( ${treatspotscan} == 'n' ) then
@@ -338,7 +341,7 @@ eot
   echo lattice=${lattice}
   echo quadradbx=${quadradbx}
   echo quadradby=${quadradby}
-  echo refposi=${refposix},${refposiy}
+  echo imagecenter=${imagecenterx},${imagecentery}
   echo radlim=${radlim}
   echo treatspotscan=${treatspotscan}
   #
@@ -352,7 +355,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F			! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${quadradbx},${quadradby}	! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}		! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecentery}		! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N				! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -373,9 +376,9 @@ eot
   #############################################################################
   #
   \rm -f SCRATCH/errout${iname}.dat
-  \rm -f ${iname}_profile.dat
+  \rm -f ${nonmaskimagename}_profile.dat
   setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
-  setenv PROFDATA ${iname}_profile.dat
+  setenv PROFDATA ${nonmaskimagename}_profile.dat
   setenv ERRORS   SCRATCH/errors${iname}.dat
   setenv ERROUT   SCRATCH/errout${iname}.dat
   #
@@ -404,7 +407,7 @@ ${imagesidelength},${imagesidelength}     		! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -450,7 +453,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
-${refposix},${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -498,9 +501,9 @@ eot
     #############################################################################
     #
     #
-    \rm -f ${iname}_profile.dat
+    \rm -f ${nonmaskimagename}_profile.dat
     setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
-    setenv PROFDATA ${iname}_profile.dat
+    setenv PROFDATA ${nonmaskimagename}_profile.dat
     setenv ERRORS   SCRATCH/errout${iname}.dat
     #
     \rm -f CCPLOT.PS
@@ -525,7 +528,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -555,7 +558,7 @@ ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
 ${lattice},F                       ! Lattice vectors
 -200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
 ${quadradbx},${quadradby}           ! RADIUS OF CORR SEARCH
-${refposix} ${refposiy}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+${imagecenterx} ${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
 N                               ! YES/NO FOR DETAILED PRINTOUT
 ${radlim}                       ! RADLIM IN PROFILE GRID UNITS
 ${valspotscan},${RMAG},${LCOLOR}                   ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
@@ -604,7 +607,7 @@ eot
   \mv -f SPIDERCOORD.spi ${nonmaskimagename}-unitcells-spider.doc
   echo "# IMAGE: ${nonmaskimagename}-unitcells-spider.doc <SPIDER document with unit cell locations>" >> LOGS/${scriptname}.results
   #
-  echo "# IMAGE: ${iname}_profile.dat <PROFILE with unit cell locations>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${nonmaskimagename}_profile.dat <PROFILE with unit cell locations>" >> LOGS/${scriptname}.results
   #
   #
   if ( ${domask} == 'y' ) then
@@ -686,7 +689,7 @@ eot
   #############################################################################
   #
   \rm -f SCRATCH/${iname}_fou_unbend2_notap.mrc
-  setenv CCORDATA ${iname}_profile.dat
+  setenv CCORDATA ${nonmaskimagename}_profile.dat
   \rm -f SCRATCH/ccunbend-table-${iname}.dat
   setenv TABLEOUT SCRATCH/ccunbend-table-${iname}.dat
   #
@@ -762,7 +765,7 @@ eot
       ${bin_2dx}/2dx_mark_spots.exe << eot
 SCRATCH/${iname}_CCmap21.mrc
 SCRATCH/${iname}_CCmap21_marked.mrc
-${iname}_profile.dat
+${nonmaskimagename}_profile.dat
 2
 eot
       echo "# IMAGE: SCRATCH/${iname}_CCmap21_marked.mrc <CCmap, marked>" >> LOGS/${scriptname}.results 
@@ -863,7 +866,7 @@ N                               ! Generate points from lattice?
 APH/${iname}_fou_unbent.aph
 SCRATCH/TMP9873.dat
 U2
-${refposix},${refposiy}           ! XORIG,YORIG
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot

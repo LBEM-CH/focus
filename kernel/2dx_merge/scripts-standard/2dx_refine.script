@@ -311,49 +311,43 @@ if ( ${scriptname} == "2dx_refine" ) then
  foreach imagefile ( ${dirlist} ) 
   cd ..
   cd ${imagefile}
-  if ( ! -e 2dx_image.cfg ) then
-    ${proc_2dx}/protest "ERROR: 2dx_image.cfg not found in ${imagefile}"
-  endif
-  set imagename_local = `cat 2dx_image.cfg | grep 'set imagename =' | cut -d\" -f2`
   cd APH
-  set APH_file = ${imagename_local}_fou_ctf.aph
-  # Already set:
-  # if ( ${refine_data_type} == '0' ) then
-  #   set APH_file = ${imagename_local}_fou_ctf.aph
-  # endif
+  #
+  set APH_file = image_ctfcor_fou_unbent_ctf.aph
+  #
   if ( ${refine_data_type} == '1' ) then
-    if ( ! -e ${imagename_local}_ctf.aph ) then
-      set APH_file = ${imagename_local}_syn_ctf.aph
+    if ( ! -e image_ctfcor_U2-Syn_ctf.aph ) then
+      set APH_file = image_ctfcor_U2-Syn_ctf.aph
     else
-      echo ":${imagename_local}_syn_ctf.aph not found."
+      echo ":image_ctfcor_U2-Syn_ctf.aph not found."
     endif
   endif
   if ( ${refine_data_type} == '2' ) then
-    if ( -e ${imagename_local}_movie_fou_ctf.aph ) then
-      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+    if ( -e image_ctfcor_movie_fou_ctf.aph ) then
+      set APH_file = image_ctfcor_movie_fou_ctf.aph
     else
-      echo ":${imagename_local}_movie_fou_ctf.aph not found."
+      echo ":image_ctfcor_movie_fou_ctf.aph not found."
     endif
   endif
   if ( ${refine_data_type} == '3' ) then
-    if ( -e ${imagename_local}_movie_syn_ctf.aph ) then
-      set APH_file = ${imagename_local}_movie_syn_ctf.aph
+    if ( -e image_ctfcor_movie_syn_ctf.aph ) then
+      set APH_file = image_ctfcor_movie_syn_ctf.aph
     else
-      echo ":${imagename_local}_movie_syn_ctf.aph not found."
+      echo ":image_ctfcor_movie_syn_ctf.aph not found."
     endif
   endif
   if ( ${refine_data_type} == '4' ) then 
-    if ( -e ${imagename_local}_movieB_fou_ctf.aph ) then
-      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+    if ( -e image_ctfcor_movieB_fou_ctf.aph ) then
+      set APH_file = image_ctfcor_movieB_fou_ctf.aph
     else
-      echo ":${imagename_local}_movieB_fou_ctf.aph not found."
+      echo ":image_ctfcor_movieB_fou_ctf.aph not found."
     endif
   endif
   if ( ${refine_data_type} == '5' ) then 
-    if ( -e ${imagename_local}_movieB_syn_ctf.aph ) then
-      set APH_file = ${imagename_local}_movieB_syn_ctf.aph
+    if ( -e image_ctfcor_movieB_syn_ctf.aph ) then
+      set APH_file = image_ctfcor_movieB_syn_ctf.aph
     else
-      echo ":${imagename_local}_movieB_syn_ctf.aph not found."
+      echo ":image_ctfcor_movieB_syn_ctf.aph not found."
     endif
   endif
   if ( ${refine_data_type} == '6' ) then
@@ -363,7 +357,7 @@ if ( ${scriptname} == "2dx_refine" ) then
       echo ":ML_result.aph not found."
     endif
   endif
-  if ( ${refine_data_type} == '7' ) then
+  if ( ${refine_data_type} == '7' ||  ${refine_data_type} == '9' ) then
     set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
     set QVALS_local =  `cat ../2dx_image.cfg | grep 'set QVALS =' | cut -d\" -f2`
     if ( ${QVALS_local} == '.' ) then
@@ -395,6 +389,7 @@ if ( ${scriptname} == "2dx_refine" ) then
     echo ${QVALAS_local} >> awk.dat
     echo ${QVALMB_local} >> awk.dat
     echo ${QVALBS_local} >> awk.dat
+    # cat awk.dat
     #
     # awk script to find max in CR-separated list:
     #  {if(min=="")min=max=$1}; if($1>max) {max=$1}; if($1< min) {min=$1}; total+=$1; count+=1} END {print total/count, min, max}
@@ -403,25 +398,25 @@ if ( ${scriptname} == "2dx_refine" ) then
     set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
     \rm -f awk.dat
     if ( ${QVAL_best} == '1' ) then
-      set APH_file = ${imagename_local}_fou_ctf.aph
+      set APH_file = image_ctfcor_fou_ctf.aph
     endif
     if ( ${QVAL_best} == '2' ) then
-      set APH_file = ${imagename_local}_syn_ctf.aph
+      set APH_file = image_ctfcor_syn_ctf.aph
     endif
     if ( ${QVAL_best} == '3' ) then
-      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+      set APH_file = image_ctfcor_movie_fou_ctf.aph
     endif
     if ( ${QVAL_best} == '4' ) then
-      set APH_file = ${imagename_local}_movie_syn_ctf.aph
+      set APH_file = image_ctfcor_movie_syn_ctf.aph
     endif
     if ( ${QVAL_best} == '5' ) then
-      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+      set APH_file = image_ctfcor_movieB_fou_ctf.aph
     endif
     if ( ${QVAL_best} == '6' ) then
-      set APH_file = ${imagename_local}_movieB_syn_ctf.aph
+      set APH_file = image_ctfcor_movieB_syn_ctf.aph
     endif
     if ( ! -e ${APH_file} ) then
-      set APH_file = ${imagename_local}_fou_ctf.aph
+      set APH_file = image_ctfcor_fou_ctf.aph
       echo "::${APH_file} should be best, but was not found."
     endif
   endif
@@ -441,26 +436,27 @@ if ( ${scriptname} == "2dx_refine" ) then
     echo ${QVALMA_local} >> awk.dat
     echo ${QVALMB_local} >> awk.dat
     #
+    # cat awk.dat
     set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
     set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
     \rm -f awk.dat
     if ( ${QVAL_best} == '1' ) then
-      set APH_file = ${imagename_local}_fou_ctf.aph
+      set APH_file = image_ctfcor_fou_unbent_ctf.aph
     endif
     if ( ${QVAL_best} == '2' ) then
-      set APH_file = ${imagename_local}_movie_fou_ctf.aph
+      set APH_file = image_ctfcor_movie_fou_ctf.aph
     endif
     if ( ${QVAL_best} == '3' ) then
-      set APH_file = ${imagename_local}_movieB_fou_ctf.aph
+      set APH_file = image_ctfcor_movieB_fou_ctf.aph
     endif
     if ( ! -e ${APH_file} ) then
-      set APH_file = ${imagename_local}_fou_ctf.aph
+      set APH_file = image_ctfcor_fou_unbent_ctf.aph
       echo "::${APH_file} should be best, but was not found."
     endif
   endif
-  echo ":In directory ${imagename_local}: Using APH file ${APH_file}. "
-  \rm -f ${imagename_local}_ctf.aph
-  \ln -s ${APH_file} ${imagename_local}_ctf.aph
+  echo ":In directory ${imagefile}: Using APH file ${APH_file}. "
+  \rm -f image_ctfcor_ctf.aph
+  \ln -s ${APH_file} image_ctfcor_ctf.aph
   cd ${olddir}
  end
 endif
@@ -566,6 +562,17 @@ foreach scriptB ( SCRATCH/job_*_${scriptBfile} )
     ${scriptB} > ${scriptB}.log
   endif
 end
+#
+# Check, if background jobs have finished:
+set need_wait = 1
+while ( ${need_wait} == 1 ) 
+   set loadaverage = `ps -af | grep _2dx_merge_scriptB.com | wc -l`
+   set need_wait = `echo ${loadaverage} | awk '{ if ( $1 > 1 ) { s = 1 } else { s = 0 } } END { print s }'`
+   if ( ${need_wait} == 1 ) then
+      sleep 2
+   endif
+end
+
 #
 #
 echo "################################################"

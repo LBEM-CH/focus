@@ -112,17 +112,7 @@ endif
 #
 \rm -f SUMMARY
 #
-if ( ${merge_data_type} == "0" ||  ${merge_data_type} == "1" ||  ${merge_data_type} == "2" || ${ML_use_for_merging} == "n" ) then
-  set aphfile = APH/${imagename}_ctf.aph
-else
-  set aphfile = APH/ML_result.aph
-  if ( ! -e ${aphfile} ) then
-    set aphfile = APH/${imagename}_ctf.aph
-    ${proc_2dx}/linblock "WARNING: ML result not found. using ${aphfile}."
-  else
-    set phaori = "0.0,0.0"
-  endif
-endif
+set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
 #
 ${proc_2dx}/lin "Using APH files ${aphfile}"
 #
@@ -198,7 +188,7 @@ eot
 set refnamecore = "REF${imagenumber}"
 set refhklfile = "APH/${refnamecore}.hkl"
 set refmtzfile = "APH/${refnamecore}_MRClefthanded.mtz"
-set refmap = "${imagename}_ref.mrc"
+set refmap = "${nonmaskimagename}_ref.mrc"
 #
 \rm -f ${refmtzfile}
 \rm -f ${refmap}

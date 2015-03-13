@@ -84,7 +84,6 @@ set refine_boxa1_doit_3 = "n"
 # DISPLAY: quadpreda
 # DISPLAY: quadrada
 # DISPLAY: radlim
-# DISPLAY: refori
 # DISPLAY: IMAXCOR
 # DISPLAY: ISTEP
 # DISPLAY: ISTEP_h
@@ -125,7 +124,6 @@ set facthresha = ""
 set phacon = ""
 set CS = ""
 set KV = ""
-set refori = ""
 set IMAXCOR = ""
 set ISTEP = ""
 set ISTEP_h = ""
@@ -154,10 +152,8 @@ set halimsid = ${imagesidelength}
 @ halimsid /= 1
 echo halimsid = ${halimsid}
 #
-set refposix = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $1 ) } END { print s }'`
-set refposiy = `echo ${refori} | sed 's/,/ /g' | awk '{ s = int ( $2 ) } END { print s }'`
-echo refposix = ${refposix}
-echo refposiy = ${refposiy}
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
 #
 set rtemp1 = ${imagesidelength}
 @ rtemp1 /= 2

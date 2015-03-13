@@ -35,10 +35,8 @@ set(USE_FFTWD TRUE)
 find_package(FFTW REQUIRED)
 
 target_link_libraries(${PROJ_NAME} ${FFTWD_LIB})
-
-if(UNIX)
-    link_libraries(m)
-endif(UNIX)
+target_link_libraries(${BEADGEN_EXE} m)
+target_link_libraries(${MAPHIST_EXE} m)
 
 #==============================#
 # Installation                 #

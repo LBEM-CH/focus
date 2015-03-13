@@ -9,12 +9,11 @@
 #define	NUMERICALUTILS_HPP
 
 #include <math.h>
-
-#include "CommonDefinitions.hpp"
+#include <iostream>
 
 int sign(int value);
 
-Reflection averageReflectionsFromList(ReflectionList reflections);
+double correctPhase(double phase_in_radians);
 
 double fomToXarg(double fom);
 double i0(double value);

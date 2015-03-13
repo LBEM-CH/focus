@@ -11,10 +11,8 @@
 #include <iostream>
 #include <string>
 
-#include "CommonDefinitions.hpp"
 #include "Symmetry2dx.hpp"
 #include "MillerIndex.hpp"
-#include "VolumeHKL.hpp"
 
 class SymmetryOperations{
 private:
@@ -56,7 +54,7 @@ public:
     SymmetryOperations(int opIndex, Symmetry2dx symmetry);
     ~SymmetryOperations(){};
     
-    MillerIndex* getNewMiller(const MillerIndex& oldIndex);
+    MillerIndex getNewMiller(MillerIndex& oldIndex);
     double getPhaseChange(double phase, const MillerIndex& index);
     bool skipOperation();
 };

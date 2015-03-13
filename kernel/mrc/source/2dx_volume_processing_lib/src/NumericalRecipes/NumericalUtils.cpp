@@ -1,5 +1,4 @@
-#include "NumericalUtils.hpp"
-#include <iostream>
+#include "../../include/NumericalUtils.hpp"
 
 int sign(int x){
     if (x > 0) return 1;
@@ -7,26 +6,16 @@ int sign(int x){
     return 0;
 }
 
-Reflection averageReflectionsFromList(ReflectionList reflections){
-    Reflection sumReflections;
-    Complex2dx sumValues = Complex2dx(0,0);
-    double sumWeight = 0.0;
-    double sumXarg = 0.0;
-    for(ReflectionList::iterator i=reflections.begin(); i != reflections.end(); ++i){
-        //std::cout << (*i).value << " "<< (*i) << " | ";
-        sumWeight += (*i).weight;
-        sumXarg += fomToXarg((*i).weight);
-        sumValues += (*i).value;
+double  correctPhase(double phase_in_radians){
+    double newphase = phase_in_radians;
+    if(newphase < -1*M_PI/2){
+        newphase = correctPhase(phase_in_radians+M_PI);
+    }
+    else if(phase_in_radians > M_PI/2){
+        newphase = correctPhase(phase_in_radians-M_PI);
     }
     
-    if(sumXarg > 54) sumXarg = 54;
-    double xargAvg = i1(sumXarg)/i0(sumXarg);
-    
-    if(sumWeight!=0 && reflections.size()!=0){
-        sumReflections = Reflection(sumValues*(xargAvg/sumWeight), xargAvg);
-    }
-    //std::cout << " -> " << (sumReflections/reflections.size()).value << " " << sumReflections/reflections.size() << "\n";
-    return sumReflections;  
+    return newphase;
 }
 
 double fomToXarg(double fom){

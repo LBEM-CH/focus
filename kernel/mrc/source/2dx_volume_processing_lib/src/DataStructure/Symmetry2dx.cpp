@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "Symmetry2dx.hpp"
+#include "../../include/Symmetry2dx.hpp"
 
 Symmetry2dx::Symmetry2dx(std::string symmetry) {
     symmetry[0] = std::toupper(symmetry[0]);

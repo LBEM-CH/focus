@@ -10,8 +10,6 @@
 
 #include <string>
 
-#include "CommonDefinitions.hpp"
-
 class Symmetry2dx{
 private:
     enum SymmetryName{ 

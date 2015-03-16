@@ -322,8 +322,8 @@ if ( ${ctfcor_imode}x == "x" || ${ctfcor_imode}x == "0x" ) then
   #############################################################################
   #
   \rm -f CTFPLOT.PS
-  setenv IN  APH/${iname}_nolimit.aph
-  setenv OUT APH/${iname}_unbend1_ctf_nolimit.aph
+  setenv IN  APH/${iname}_fou_unbend1.aph
+  setenv OUT APH/${iname}_fou_unbend1_ctf.aph
   ${bin_2dx}/2dx_ctfapplyk.exe << eot
 ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
 ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESPLOTMAX
@@ -335,30 +335,12 @@ eot
   if ( ! -e CTFPLOT.PS ) then
     ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
   else
-    \mv -f CTFPLOT.PS PS/${iname}_unbend1_nolimit.ps
-    echo "# IMAGE-IMPORTANT: PS/${iname}_unbend1_nolimit.ps <PS: IQ Plot (No Resolution Limit)>"  >> LOGS/${scriptname}.results
+    \mv -f CTFPLOT.PS PS/${iname}_fou_unbend1_ctf.ps
+    echo "# IMAGE-IMPORTANT: PS/${iname}_fou_unbend1_ctf.ps <PS: IQ Plot>"  >> LOGS/${scriptname}.results
   endif
   #
   echo "<<@progress: 90>"
   #
-  \rm -f CTFPLOT.PS
-  setenv IN  APH/${iname}_limit.aph
-  setenv OUT APH/${iname}_unbend1_ctf_limit.aph
-  ${bin_2dx}/2dx_ctfapplyk.exe << eot
-${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
-${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESPLOTMAX
-${imagenumber} ${iname}.u1, Lim=${RESMAX}, Nyq=${ctfplotresmax}, ${date}
-${phacon}
-${RESMIN},${RESMAX}
-${ctfcor_imode}  !  Mode of CTF correction
-eot
-  #
-  if ( ! -e CTFPLOT.PS ) then
-    ${proc_2dx}/protest "ERROR in ctfapplyk.exe"
-  else
-    \mv -f CTFPLOT.PS PS/${iname}_unbend1_limit.ps
-    echo "# IMAGE-IMPORTANT: PS/${iname}_unbend1_limit.ps <PS: IQ Plot (Resolution Limited)>" >> LOGS/${scriptname}.results
-  endif
 #
 endif
 #

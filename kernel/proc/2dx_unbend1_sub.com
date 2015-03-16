@@ -583,7 +583,7 @@ echo "<<@progress: 79>"
 echo "<<@evaluate>>"
 #
 #############################################################################
-${proc_2dx}/${lincommand} "MMBOX - no resolution limitation for data extraction"
+${proc_2dx}/${lincommand} "MMBOX - for data extraction"
 #############################################################################
 #
 \rm -f SCRATCH/TMP9871.dat APH/${imagename}_fou_unbend1.aph

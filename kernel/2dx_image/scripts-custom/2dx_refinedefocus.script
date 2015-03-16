@@ -269,28 +269,20 @@ endif
 #
 echo "<<@progress: 10>>"
 #
-if ( ${SYN_Unbending} == "0" ) then
-  # FouFilter Unbending result is used:
-  set APH_infile = ${imagename}_MovieB_fou.aph
-else
-  # Synthetical Unbending result is used:
-  set APH_infile = ${imagename}_syn.aph
-endif
-#
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Raw Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
-echo "# IMAGE-IMPORTANT: APH/${APH_infile} <APH: Image data for refinement>" >> LOGS/${scriptname}.results
+set APH_infile = image_ctfcor_fou_unbent.aph
 #
 if ( ! -e APH/${APH_infile} ) then
   ${proc_2dx}/protest "ERROR: APH/${APH_infile} does not exist."
 endif
+echo "# IMAGE-IMPORTANT: APH/${APH_infile} <APH: Image data for refinement>" >> LOGS/${scriptname}.results
 #
 setenv INIMAGE APH/${APH_infile}
-echo "# IMAGE-IMPORTANT: APH/${APH_infile} <APH: Input data file>" >> LOGS/${scriptname}.results
 #
 set IAQP2 = 0
 set fittitle = "ctfsearch2 run"
@@ -358,7 +350,6 @@ eot
 else if ( $iref == '-1' ) then
   ######################################################################################
   #
-  setenv INIMAGE APH/${imagename}.nolimit.aph
   if ( ! -e ${averagedat} ) then
     ${proc_2dx}/protest "ERROR: ${averagedat} not found."
   endif

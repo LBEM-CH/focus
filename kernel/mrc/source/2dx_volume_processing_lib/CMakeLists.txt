@@ -15,6 +15,7 @@ file(GLOB HPP_HEADERS ./include/*.hpp)
 SET(PROJ_NAME      "2dx_process_hkz" )
 SET(BEADGEN_EXE "beadgen_comp")
 SET(MAPHIST_EXE "maphist")
+SET(MAPSIZE_EXE "map_size")
 SET(PROJ_SOURCES ${CPP_SOURCES})
 SET(PROJ_HEADERS ${HPP_HEADERS})
 set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11")
@@ -25,6 +26,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11")
 add_executable(${PROJ_NAME} ${PROJ_SOURCES})
 add_executable(${BEADGEN_EXE} ./gunnar/${BEADGEN_EXE}.c)
 add_executable(${MAPHIST_EXE} ./gunnar/${MAPHIST_EXE}.c)
+add_executable(${MAPSIZE_EXE} ./gunnar/${MAPSIZE_EXE}.c)
 
 #=============================#
 # Link Libraries          # 
@@ -37,6 +39,7 @@ find_package(FFTW REQUIRED)
 target_link_libraries(${PROJ_NAME} ${FFTWD_LIB})
 target_link_libraries(${BEADGEN_EXE} m)
 target_link_libraries(${MAPHIST_EXE} m)
+target_link_libraries(${MAPSIZE_EXE} m)
 
 #==============================#
 # Installation                 #
@@ -56,3 +59,4 @@ install(FILES ${PROJ_SOURCES} DESTINATION ${INSTALL_SRC_DIR})
 install(TARGETS ${PROJ_NAME} DESTINATION ${INSTALL_BIN_DIR})
 install(TARGETS ${BEADGEN_EXE} DESTINATION ${INSTALL_BIN_DIR})
 install(TARGETS ${MAPHIST_EXE} DESTINATION ${INSTALL_BIN_DIR})
+install(TARGETS ${MAPSIZE_EXE} DESTINATION ${INSTALL_BIN_DIR})

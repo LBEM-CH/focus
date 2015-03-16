@@ -346,8 +346,8 @@ void read_mrc1( char *vol_file )
         header_ok *= read_float(&zorigin,fin,swap);
         for (i=0; i<204; ++i) header_ok *= read_float(&junk,fin,swap);
 
-
-
+        
+        
        if (header_ok == 0) {
                 exit(1);
         }
@@ -403,9 +403,8 @@ void read_mrc1( char *vol_file )
         map_angle2= beta;
         map_angle3= gamma;
 
-
-
-        if ( map_dim3 == nfloat-256 ) {
+        
+        if ( map_dim3 <= nfloat-256 ) {
 
           if ( (map1 = (double *) calloc( map_dim3 , sizeof( double ) )) == NULL ) {
              fprintf(stderr,"ERROR: could not allocate memory \n");
@@ -423,6 +422,7 @@ void read_mrc1( char *vol_file )
                 fprintf(stderr,"error reading map values\n");
                 exit(1);
              }
+             //printf("%i", count);
              map1[count]=(double) ftmp;
         }
         fclose (fin);
@@ -787,7 +787,7 @@ if (argc != 7) {
   exit(1);
 }
 
-strcpy(map2fname,argv[1]);
+strcpy(map1fname,argv[1]);
 strcpy(outfname,argv[2]);
 sscanf(argv[3],"%i",&nbeads);
 sscanf(argv[4],"%lf",&threshold);
@@ -801,10 +801,10 @@ sscanf(argv[6],"%i",&seed);
 
 
 // READ MAP 1
-//read_mrc1 (map1fname);
+read_mrc1 (map1fname);
 
 // READ MAP 2
-read_mrc2 (map2fname);
+//read_mrc2 (map2fname);
 
 
 min=999999.9;
@@ -825,6 +825,8 @@ mean1/=(double) map_dim3;
 
 fp=fopen(outfname,"w");
 
+fprintf(fp, "CRYST1%9.3f%9.3f%9.3f%7.2f%7.2f%7.2f %11s   1\n", map_dnx, map_dny, map_dnz, map_angle1, map_angle2, map_angle3, "P1");
+
 for(i=0;i<nbeads;i++) {
    do {
       ind1= rand() % map_extent[0];
@@ -833,9 +835,9 @@ for(i=0;i<nbeads;i++) {
       ind= (ind3 * map_dim2 + ind2 * map_dim + ind1);   
    } while ( map1[ind] < threshold );
   
-  x=(map_dist[0] * ind1) + map_min[0] ;
-  y=(map_dist[1] * ind2) + map_min[1] ;
-  z=(map_dist[2] * ind3) + map_min[2] ;
+  x=(map_dist[0] * ind1) + map_min[0];
+  y=(map_dist[1] * ind2) + map_min[1];
+  z=(map_dist[2] * ind3) + map_min[2];
   //fprintf(stderr," rand %f\n",rand()/(float)RAND_MAX ); 
 
   rnd_number= rand()/(float)RAND_MAX; 

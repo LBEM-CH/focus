@@ -139,6 +139,7 @@ if( fin == NULL ) {
 	} 
 
         map_dim3= nx * ny * nz;
+        printf("Main map: %i %i %i\n", nx, ny, nz);
 
         if ( map_dim3 == nfloat-256 ) {
           if ( (map_vals = (float *) calloc( 2*map_dim3 , sizeof( float ) )) == NULL ) {
@@ -209,6 +210,7 @@ if( fin == NULL ) {
                 exit(1);
 	} 
 
+        printf("Ref map: %i %i %i\n", nx, ny, nz);
         if (map_dim3 != nx * ny * nz) { 
            fprintf(stderr,"ERROR: number of elements different in main map and reference map.\n");
            exit(1);

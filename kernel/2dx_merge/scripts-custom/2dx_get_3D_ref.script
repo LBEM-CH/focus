@@ -24,6 +24,8 @@
 # DISPLAY: sample_pixel
 # DISPLAY: number_of_beads
 # DISPLAY: density_threshold_bead
+# DISPLAY: noise_level_bead
+# DISPLAY: number_sf_hist_iterations
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
@@ -43,6 +45,8 @@ set RESMAX = ""
 set calculate_subvolume = ""
 set number_of_beads = ""
 set density_threshold_bead = ""
+set noise_level_bead = ""
+set number_sf_hist_iterations = ""
 #
 #$end_vars
 set scriptname = 2dx_get_3D_ref
@@ -260,59 +264,89 @@ eof
 
 endif
 #############################################################################
-
-
+#
+set final_map = "processed_sub.map"
+#
 ##############################################################################
-#${proc_2dx}/linblock "Generating the bead model"
+${proc_2dx}/linblock "Generating the bead model"
 ##############################################################################
 #
-#\rm -f SCRATCH/bead_model.pdb
+\rm -f SCRATCH/bead_model.pdb
 #
-#${bin_2dx}/beadgen_comp.exe processed_sub.map SCRATCH/bead_model.pdb ${number_of_beads} ${density_threshold_bead} 1.0 7243
+${bin_2dx}/beadgen_comp.exe ${final_map} SCRATCH/bead_model.pdb ${number_of_beads} ${density_threshold_bead} ${noise_level_bead} 7243
 #
-#
-#
-#############################################################################
-#${proc_2dx}/linblock "Converting bead model pdb to mrc"
-#############################################################################
-#
-#\rm -f bead_model.mrc
-#
-#source /Applications/EMAN2/eman2.bashrc
-#e2pdb2mrc.py --res 2.0 --box ${cellx},${celly},${ALAT} SCRATCH/bead_model.pdb bead_model.mrc
-#
-#
-#echo "# IMAGE: bead_model.mrc <MRC: Bead Model>" >> LOGS/${scriptname}.results
 #
 #
 #############################################################################
-#${proc_2dx}/linblock "Setting the structure factors from bead model"
+${proc_2dx}/linblock "Converting bead model pdb to mrc"
 #############################################################################
 #
-#\rm -f SCRATCH/sf_bead_model.dat
+\rm -f SCRATCH/bead_model_e2pdb2mrc.marc
 #
-#${bin_ccp4}/e2proc3d.py bead_model.mrc SCRATCH/junk.mrc --calcsf=SCRATCH/sf_bead_model.dat
-#
-#\rm -f SCRATCH/junk.mrc
-#
-#
-#\rm -f SCRATCH/ref_sf.mrc
-#
-#e2proc3d.py processed_sub.map SCRATCH/ref_sf.mrc --setsf=SCRATCH/sf_bead_model.dat
-#
-#echo "# IMAGE: SCRATCH/ref_sf.mrc <MRC: Structure factor applied from bead model>" >> LOGS/${scriptname}.results
+e2pdb2mrc.py -R ${RESMAX} -A 1.0 -B ${ALAT} SCRATCH/bead_model.pdb SCRATCH/bead_model_e2pdb2mrc.mrc
 #
 #
 #############################################################################
-#${proc_2dx}/linblock "Matching real space histogram from bead model"
+${proc_2dx}/linblock "Setting the correct size for bead model map"
 #############################################################################
 #
-#\rm -f ref_sf_hist.mrc
+\rm -f bead_model.map
+\rm -f bead_model.mrc
 #
-#${bin_2dx}/maphist.exe SCRATCH/ref_sf.mrc bead_model.mrc ref_sf_hist.mrc
+set input_size = `${bin_2dx}/map_size.exe ${final_map}`
+#set cellx_int = `printf "%.0f" ${cellx}`
+#set celly_int = `printf "%.0f" ${celly}`
+#set cellz_int = `printf "%.0f" ${ALAT}`
 #
-#echo "# IMAGE-IMPORTANT: ref_sf_hist.mrc <MRC: Final processed MRC with sf and hist matcing applied>" >> LOGS/${scriptname}.results
+# Add 1 to the z dimetions for correct matching
+#set cellz_int_p1 = `echo ${cellz_int} | awk '{ s = $1 + 1 } END {print s}'`
 #
+echo "Chopping bead model to size: ${input_size}"
+e2proc3d.py --clip ${input_size} SCRATCH/bead_model_e2pdb2mrc.mrc bead_model.mrc
+#
+cp -f bead_model.mrc bead_model.map
+#
+echo "# IMAGE: bead_model.map <MAP: Density map of Bead Model>" >> LOGS/${scriptname}.results
+#
+
+############# START SF-HIST ITERATIONS ######################################
+#
+\rm -f SCRATCH/sf_bead_model.dat
+#
+e2proc3d.py bead_model.mrc SCRATCH/junk.mrc --calcsf=SCRATCH/sf_bead_model.dat
+#
+\rm -f SCRATCH/junk.mrc
+#
+set sf_in_map = "${final_map}"
+#
+set i = 1
+while ($i <= ${number_sf_hist_iterations})
+    #############################################################################
+    ${proc_2dx}/linblock "Setting the structure factors for iteration ${i}"
+    #############################################################################
+    #
+    \rm -f SCRATCH/ref_sf_${i}.mrc
+    #
+    e2proc3d.py ${sf_in_map} SCRATCH/ref_sf_${i}.mrc --setsf=SCRATCH/sf_bead_model.dat
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Matching real space histogram for iteration ${i}"
+    #############################################################################
+    #
+    \rm -f SCRATCH/ref_sf_hist_${i}.mrc
+    #
+    ${bin_2dx}/maphist.exe SCRATCH/ref_sf_${i}.mrc bead_model.mrc SCRATCH/ref_sf_hist_${i}.mrc
+    #
+    set sf_in_map = "SCRATCH/ref_sf_hist_${i}.mrc"
+    @ i = $i + 1
+    #
+end
+############################################################################
+#
+@ i = $i - 1
+cp -f SCRATCH/ref_sf_${i}.mrc ref_final.map
+#
+echo "# IMAGE-IMPORTANT: ref_final.map <MAP: Final processed reference MAP>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 #

@@ -14,7 +14,7 @@
  * Subclass of Triplet.
  * Has additional methods to use it as Miller Index
  */
-class MillerIndex : Triplet2dx{
+class MillerIndex : public Triplet2dx{
         
 public:
     /*===================

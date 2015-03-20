@@ -10,11 +10,12 @@
 
 #include <iostream>
 
+#include "Complex2dx.hpp"
+
 /*
- * A class to store a value with a weight.
+ * A class to store a complex value with a weight.
  */
-template<class T>
-class WeightedValue{
+class WeightedComplex{
     
 public:
     /*===================
@@ -23,15 +24,15 @@ public:
     /*
      * Default constructor
      */
-    WeightedValue(){
+    WeightedComplex(){
         //std::cout << "In default initializer\n";
-        initialize(T(), 1.0);
+        initialize(Complex2dx(), 1.0);
     };
     
     /*
      * Constructor initializing a value and a weight
      */
-    WeightedValue(T value, double weight){
+    WeightedComplex(Complex2dx value, double weight){
         //std::cout << "In initializer\n";
         initialize(value, weight);
     };
@@ -44,7 +45,7 @@ public:
      * Operator overloading of = 
      * Equates the members of the class with those of rhs
      */
-    WeightedValue<T>& operator=(const WeightedValue<T>& rhs){
+    WeightedComplex& operator=(const WeightedComplex& rhs){
         this->setValue(rhs.getValue());
         this->setWeight(rhs.getWeight());
         return *this;
@@ -54,24 +55,24 @@ public:
      * Operator overloading of +
      * Sums the values and averages the weights
      */
-    WeightedValue<T> operator+(const WeightedValue<T>& rhs){
-        return WeightedValue<T>(this->getValue()+rhs.getValue(), (this->getWeight()+rhs.getWeight())/2);
+    WeightedComplex operator+(const WeightedComplex& rhs){
+        return WeightedComplex(this->getValue()+rhs.getValue(), (this->getWeight()+rhs.getWeight())/2);
     };
     
     /*
      * Operator overloading of / with a double factor
      * Divides the value with factor and does nothing for weight
      */
-    WeightedValue<T> operator*(const double factor){
-        return WeightedValue<T>(this->getValue()/factor, this->getWeight());
+    WeightedComplex operator*(const double factor){
+        return WeightedComplex(this->getValue()*(1/factor), this->getWeight());
     };
     
     /*
      * Operator overloading of ==
      * Checks for an equal value with equal weight
      */
-    bool operator==(const WeightedValue<T>& rhs) const{
-        return ( (this.getValue() == rhs.getValue()) && (this->getWeight() == rhs.getWeight()) );
+    bool operator==(const WeightedComplex& rhs) const{
+        return ( (this->getValue() == rhs.getValue()) && (this->getWeight() == rhs.getWeight()) );
     };
     
     /*
@@ -79,7 +80,7 @@ public:
      * Solves the sorting purpose.
      * First compares the values followed by weights
      */
-    bool operator<(const WeightedValue<T>& rhs) const{
+    bool operator<(const WeightedComplex& rhs) const{
         return (this->getValue() < rhs.getValue());
     };
     
@@ -87,12 +88,12 @@ public:
      * Operator overloading of <<
      * Outputs the members in following style:
      * value (weight) 
-     */
+     
     std::ostream& operator<<(std::ostream& os){
         os << this->getValue() << " (" << this->getWeight() << ")";
         return os;
     };
-    
+    */
     
     /*===================
      * Getters and setters
@@ -100,7 +101,7 @@ public:
     /*
      * Default setter for the value
      */
-    void setValue(T value){this->_value = value;};
+    void setValue(Complex2dx value){this->_value = value;};
     
     /*
      * Default setter for the weight
@@ -110,7 +111,7 @@ public:
     /*
      * Default getter of the value
      */
-    T getValue() const {return _value;};
+    Complex2dx getValue() const {return _value;};
     
     /*
      * Default getter of weight
@@ -119,7 +120,7 @@ public:
     
 private:
             
-    void initialize(T value, double weight){
+    void initialize(Complex2dx value, double weight){
         this->_value = value;
         this->_weight = weight;
     };
@@ -127,7 +128,7 @@ private:
     /*===================
      * Members
      ====================*/
-    T _value;
+    Complex2dx _value;
     double _weight;
         
 };

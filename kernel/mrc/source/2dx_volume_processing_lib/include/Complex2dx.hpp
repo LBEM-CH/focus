@@ -65,9 +65,14 @@ public:
     bool operator<(const Complex2dx&) const;
     
     /*
+     * Operator overloading of ==
+     */
+    bool operator==(const Complex2dx&) const;
+    
+    /*
      * Operator overloading of << for output purposes
      */
-    std::ostream& operator<<(std::ostream&);
+    std::ostream& operator<<(std::ostream& os);
     
     /*=====================
      * Additional Methods *

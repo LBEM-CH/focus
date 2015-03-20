@@ -4,34 +4,31 @@
 
 #include "../../include/Symmetry2dx.hpp"
 
-Symmetry2dx::Symmetry2dx(std::string symmetry) {
-    symmetry[0] = std::toupper(symmetry[0]);
-     
-    if( symmetry == "P1")  name = P1;
-    else if( symmetry == "P2") name = P2;
-    else if( symmetry == "P12") name = P12;
-    else if( symmetry == "P121") name = P121;
-    else if( symmetry == "C12") name = C12;
-    else if( symmetry == "P222") name =  P222;
-    else if( symmetry == "P2221") name =  P2221;
-    else if( symmetry == "P22121") name =  P22121;
-    else if( symmetry == "C222") name = C222;
-    else if( symmetry == "P4") name = P4;
-    else if( symmetry == "P422") name = P422;
-    else if( symmetry == "P4212") name = P4212;
-    else if( symmetry == "P3") name = P3;
-    else if( symmetry == "P312") name = P312;
-    else if( symmetry == "P321") name = P321;
-    else if( symmetry == "P6") name = P6;
-    else if( symmetry == "P622") name = P622;
-    else throw std::out_of_range ( "Invalid value for symmetry: "+symmetry );
-    
+Symmetry2dx::Symmetry2dx() {
+    initialize("P1");
 }
 
-std::ostream& operator>>(std::ostream& os, Symmetry2dx& symmetry) {
+Symmetry2dx::Symmetry2dx(std::string symmetry) {
+    initialize(symmetry);
+}
+
+std::ostream& operator<<(std::ostream& os, Symmetry2dx& symmetry) {
+    os << symmetry.getSymmetryString();
+    return os;
+}
+
+void Symmetry2dx::setSymmetry(std::string symmetry) {
+    initialize(symmetry);
+}
+
+int Symmetry2dx::getSymmetryIndex() const {
+    return name;
+}
+
+std::string Symmetry2dx::getSymmetryString() const {
     std::string symName;
     
-    switch(symmetry.name){
+    switch(name){
         case 0: 
             symName = "P1";
             break;
@@ -85,11 +82,11 @@ std::ostream& operator>>(std::ostream& os, Symmetry2dx& symmetry) {
             break;
     }
     
-    os << symName;
-    return os;
+    return symName;
 }
 
-int Symmetry2dx::getCCP4Index() {
+
+int Symmetry2dx::getCCP4Index() const{
     int index;
     
     switch(this->name){
@@ -147,4 +144,28 @@ int Symmetry2dx::getCCP4Index() {
     }
 
     return index;
+}
+
+void Symmetry2dx::initialize(std::string symmetry) {
+    symmetry[0] = std::toupper(symmetry[0]);
+     
+    if( symmetry == "P1")  name = P1;
+    else if( symmetry == "P2") name = P2;
+    else if( symmetry == "P12") name = P12;
+    else if( symmetry == "P121") name = P121;
+    else if( symmetry == "C12") name = C12;
+    else if( symmetry == "P222") name =  P222;
+    else if( symmetry == "P2221") name =  P2221;
+    else if( symmetry == "P22121") name =  P22121;
+    else if( symmetry == "C222") name = C222;
+    else if( symmetry == "P4") name = P4;
+    else if( symmetry == "P422") name = P422;
+    else if( symmetry == "P4212") name = P4212;
+    else if( symmetry == "P3") name = P3;
+    else if( symmetry == "P312") name = P312;
+    else if( symmetry == "P321") name = P321;
+    else if( symmetry == "P6") name = P6;
+    else if( symmetry == "P622") name = P622;
+    else throw std::out_of_range ( "Invalid value for symmetry: "+symmetry );
+    
 }

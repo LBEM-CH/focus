@@ -4,7 +4,7 @@
 #include "../../include/SymmetryOperations.hpp"
 #include "../../include/NumericalUtils.hpp"
 
-SymmetryOperations::SymmetryOperations(int opIndex, Symmetry2dx symmetry) {
+SymmetryOperations::SymmetryOperations(int opIndex, int symCode) {
     if(opIndex > 29){
         std::out_of_range ( "Invalid value for symmetry operation: "+ std::to_string(opIndex));
     }
@@ -13,8 +13,7 @@ SymmetryOperations::SymmetryOperations(int opIndex, Symmetry2dx symmetry) {
     this->kChange = kChanges[index];
     this->lChange = lChanges[index];
 
-    int symValue = symmetry.name;
-    this->phaseChange = phaseChanges[symValue][index];
+    this->phaseChange = phaseChanges[symCode][index];
 }
 
 MillerIndex SymmetryOperations::getNewMiller(MillerIndex& oldIndex) {
@@ -36,8 +35,10 @@ MillerIndex SymmetryOperations::getNewMiller(MillerIndex& oldIndex) {
 }
 
 bool SymmetryOperations::skipOperation() {
-    if(phaseChange == 0) return true;
-    else return false;
+    bool result;
+    if(phaseChange == 0) result = true;
+    else result = false;
+    return result;
 }
 
 double SymmetryOperations::getPhaseChange(double phase, const MillerIndex& index) {

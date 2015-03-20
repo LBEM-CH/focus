@@ -193,3 +193,11 @@ double i1( double x)
    }
    return x < 0.0 ? -ans : ans;
 }
+
+double degree_to_radian(double value_in_degrees){
+    return value_in_degrees*M_PI/180;
+}
+
+double radian_to_degree(double value_in_radians){
+    return value_in_radians*180/M_PI;
+}

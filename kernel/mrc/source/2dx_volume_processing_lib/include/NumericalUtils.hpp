@@ -13,6 +13,9 @@
 
 int sign(int value);
 
+double degree_to_radian(double value_in_degrees);
+double radian_to_degree(double value_in_radians);
+
 double correctPhase(double phase_in_radians);
 
 double fomToXarg(double fom);

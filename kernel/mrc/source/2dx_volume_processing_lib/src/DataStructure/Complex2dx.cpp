@@ -39,8 +39,13 @@ bool Complex2dx::operator<(const Complex2dx& rhs) const {
     return result;
 }
 
+bool Complex2dx::operator==(const Complex2dx& rhs) const {
+    return(real()==rhs.real() && imag()==rhs.imag());
+}
+
+
 std::ostream& Complex2dx::operator<<(std::ostream& os) {
-    os << "(" << this->real() << ", " << this->imag() << ")";
+    os << "(" << real() << ", " << imag() << ")";
     return os;
 }
 

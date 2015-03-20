@@ -10,8 +10,7 @@
 #include <fstream>
 #include <string>
 
-#include "../../include/VolumeFourier.hpp"
-#include "../../include/VolumeReal.hpp"
+#include "../../include/Volume2dx.hpp"
 #include "../../include/VolumeHeader.hpp"
 #include "../../include/FourierTransform.hpp"
 
@@ -44,25 +43,20 @@ int main(int argc, char** argv) {
     double apix = std::atof(argv[7]);
     double max_resolution = std::atof(argv[8]);
     
-    //Set the header
-    VolumeHeader header;
-    header.nx = nx;
-    header.ny = ny;
-    header.nz = nz;
-    header.symmetry = symmetry;
-    header.apix = apix;
-    header.max_resolution = max_resolution;
+    //Assign Volume
+    Volume2dx volume = Volume2dx(nx, ny, nz);
+    std::cout <<"Volume assigned\n";
+    volume.symmetry(symmetry);
+    volume.apix(apix);
+    volume.max_resolution(max_resolution);
     
-    
-    //Assign the volume
-    VolumeFourier inputVol = VolumeFourier(header);
     std::cout << "::Reading in the hkz file from " << argv[1] << "\n";
-    inputVol.read_volume(hkzFileName);
+    volume.read_volume(hkzFileName, "hkz");
     std::cout << ":Created hkl volume\n";
     
     std::cout << ":Symmetrizing with " << symmetry << "\n";
-    inputVol.symmetrize();
-    inputVol.write_volume("output.hkl");
+    volume.symmetrize();
+    volume.write_volume("output.hkl");
     
     /*
     FourierTransform transform;
@@ -76,6 +70,6 @@ int main(int argc, char** argv) {
     
     std::cout << "::Done processing hkz file \n";
     
-
+    return 0;
 }
 

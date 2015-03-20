@@ -18,7 +18,7 @@ SET(MAPHIST_EXE "maphist")
 SET(MAPSIZE_EXE "map_size")
 SET(PROJ_SOURCES ${CPP_SOURCES})
 SET(PROJ_HEADERS ${HPP_HEADERS})
-set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11")
+set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -g")
 
 #=============================#
 # Create Executables          # 
@@ -36,7 +36,15 @@ set(USE_FFTWF FALSE)
 set(USE_FFTWD TRUE)
 find_package(FFTW REQUIRED)
 
+#if(APPLE)
+#set(Boost_USE_STATIC_LIBS true)
+#endif(APPLE)
+
+#find_package(Boost COMPONENTS system filesystem REQUIRED)
+
 target_link_libraries(${PROJ_NAME} ${FFTWD_LIB})
+#target_link_libraries(${PROJ_NAME} ${Boost_LIBRARIES})
+
 target_link_libraries(${BEADGEN_EXE} m)
 target_link_libraries(${MAPHIST_EXE} m)
 target_link_libraries(${MAPSIZE_EXE} m)

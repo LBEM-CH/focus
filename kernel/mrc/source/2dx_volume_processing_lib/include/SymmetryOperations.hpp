@@ -11,7 +11,6 @@
 #include <iostream>
 #include <string>
 
-#include "Symmetry2dx.hpp"
 #include "MillerIndex.hpp"
 
 class SymmetryOperations{
@@ -51,7 +50,7 @@ public:
     
 public:
     //Constructors
-    SymmetryOperations(int opIndex, Symmetry2dx symmetry);
+    SymmetryOperations(int opIndex, int symmetryCode);
     ~SymmetryOperations(){};
     
     MillerIndex getNewMiller(MillerIndex& oldIndex);

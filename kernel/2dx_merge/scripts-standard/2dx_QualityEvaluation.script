@@ -82,6 +82,7 @@ set overall_weighted_phase_residual = ""
 set overall_phase_residual_2D = ""
 set overall_weighted_phase_residual_2D = ""
 set zstarrange_real = ""
+set latline_algo = ""
 #
 #$end_vars
 #
@@ -258,11 +259,13 @@ eot
   echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
   echo "counting reflections with FOM > 50%:# ${completeness50}%" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  # echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
-  echo "Overall weighted phase residual [deg]:# ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt
-  # echo "Overall R-factor:# ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
-  echo "Overall weighted R-factor:# ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
-  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  if ( ${latline_algo}x == "0x" ) then
+    # echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
+    echo "Overall weighted phase residual [deg]:# ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt
+    # echo "Overall R-factor:# ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt
+    echo "Overall weighted R-factor:# ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
+    echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+  endif
   cat SCRATCH/2dx_statistics_file.dat >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   #

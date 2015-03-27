@@ -1,26 +1,59 @@
-#include "../../include/NumericalUtils.hpp"
+/* 
+ * @license GNU Public License
+ * @author Nikhil Biyani (nikhilbiyani@gmail.com)
+ * 
+ */
 
-int sign(int x){
-    if (x > 0) return 1;
-    if (x < 0) return -1;
-    return 0;
-}
+#ifndef FOMMANIPULATOR_HPP
+#define	FOMMANIPULATOR_HPP
 
-double  correctPhase(double phase_in_radians){
-    double newphase = phase_in_radians;
-    if(newphase < -1*M_PI/2){
-        newphase = correctPhase(phase_in_radians+M_PI);
-    }
-    else if(phase_in_radians > M_PI/2){
-        newphase = correctPhase(phase_in_radians-M_PI);
-    }
-    
-    return newphase;
-}
+#include <math.h>
+#include <list>
 
-double fomToXarg(double fom){
-    
-    double lookup[101][2] = {
+namespace volume_processing_2dx
+{
+    namespace utilities
+    {
+        namespace fom_utilities
+        {
+            /**
+             * Converts the FOM to XARG.
+             * Gets the XARG value from the pre-calculated reference table and 
+             * interpolates (linear) it according to the input value. 
+             * @param fom in fraction
+             * @return XARG value
+             */
+            double FomToXarg(double fom);
+            
+            /**
+             * Converts the XARG value to FOM value
+             * FOM values are defined as the ratio of the 0th and 1st order 
+             * of modified Bessel functions of the first kind.
+             * @param input XARG value
+             * @return FOM value in fraction
+             */
+            double XargToFom(double xarg);
+            
+            /**
+             * Averages FOMs from a list. Averaging weight is not straight 
+             * forward. First XARG values are calculated using the FOM values.
+             * This sum of XARG is converted back to FOM to get the averaged
+             * weight. NOTE, that sum of XARG is converted back to FOM and not
+             * the average of XARG. 
+             * @param foms: list of FOM values in fractions
+             * @return averaged weight
+             */
+            double AverageFOMs(const std::list<double> foms);
+            
+            /**
+             * Lookup table of FOM values and XARG values.
+             * The data was generated using a function which increased  XARG
+             * from 0 to 54.8 in 100 steps and calculated the corresponding FOM
+             * values. Now, these FOM values can be used to get corresponding
+             * XARG values. 
+             * NOTE: the FOM values are in percentage
+             */
+            const double LOOKUP_FOM_TO_XARG[101][2] = {
                 {  0.000000,  0.000000}, 
 		{  1.049942,  0.021000}, 
 		{  2.152001,  0.043050}, 
@@ -123,81 +156,13 @@ double fomToXarg(double fom){
 		{ 99.037102, 52.180313}, 
 		{ 99.083527, 54.810326}
 
-    };
+                };
+            
+        } //namespace fom_manipulator
+        
+    } //namespace utilities
     
-    double xarg = 0.0;
-    
-    fom = fom*100;
-    
-    if(fom > 99.0800) fom = 99.0800;
-    if(fom < 1.045) return xarg;
-    
-    int i=100;
-    double fomIn = lookup[i][0];
-    while (fomIn > fom){
-        fomIn = lookup[i][0];
-        i--;
-    }
-    
-    xarg =  (lookup[i][1]) + (lookup[i+1][1]-lookup[i][1]) * ((fom-lookup[i][0])/(lookup[i+1][0]-lookup[i][0]));
-    
-    return xarg;
-}
+} //namespace volume_processing_2dx
 
+#endif	/* FOMMANIPULATOR_HPP */
 
-double i0( double value )
-/*------------------------------------------------------------------------*/
-/* PURPOSE: Evaluate modified Bessel function In(x) and n=0.              */
-/* SOURCE: http://www.atnf.csiro.au/computing/software/gipsy/sub/bessel.c */
-/*------------------------------------------------------------------------*/
-{
-   double ax,ans;
-   double y;
-
-
-   if ((ax=fabs(value)) < 3.75) {
-      y=value/3.75,y=y*y;
-      ans=1.0+y*(3.5156229+y*(3.0899424+y*(1.2067492
-         +y*(0.2659732+y*(0.360768e-1+y*0.45813e-2)))));
-   } else {
-      y=3.75/ax;
-      ans=(exp(ax)/sqrt(ax))*(0.39894228+y*(0.1328592e-1
-         +y*(0.225319e-2+y*(-0.157565e-2+y*(0.916281e-2
-         +y*(-0.2057706e-1+y*(0.2635537e-1+y*(-0.1647633e-1
-         +y*0.392377e-2))))))));
-   }
-   return ans;
-}
-
-double i1( double x)
-/*------------------------------------------------------------------------*/
-/* PURPOSE: Evaluate modified Bessel function In(x) and n=1.              */
-/* SOURCE: http://www.atnf.csiro.au/computing/software/gipsy/sub/bessel.c */
-/*------------------------------------------------------------------------*/
-{
-   double ax,ans;
-   double y;
-
-
-   if ((ax=fabs(x)) < 3.75) {
-      y=x/3.75,y=y*y;
-      ans=ax*(0.5+y*(0.87890594+y*(0.51498869+y*(0.15084934
-         +y*(0.2658733e-1+y*(0.301532e-2+y*0.32411e-3))))));
-   } else {
-      y=3.75/ax;
-      ans=0.2282967e-1+y*(-0.2895312e-1+y*(0.1787654e-1
-         -y*0.420059e-2));
-      ans=0.39894228+y*(-0.3988024e-1+y*(-0.362018e-2
-         +y*(0.163801e-2+y*(-0.1031555e-1+y*ans))));
-      ans *= (exp(ax)/sqrt(ax));
-   }
-   return x < 0.0 ? -ans : ans;
-}
-
-double degree_to_radian(double value_in_degrees){
-    return value_in_degrees*M_PI/180;
-}
-
-double radian_to_degree(double value_in_radians){
-    return value_in_radians*180/M_PI;
-}

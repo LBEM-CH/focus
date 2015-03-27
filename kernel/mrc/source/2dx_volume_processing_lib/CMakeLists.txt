@@ -10,44 +10,50 @@ cmake_minimum_required(VERSION 2.6)
 #==============================#
 # Set Environment              #
 #==============================#
-file(GLOB CPP_SOURCES ./src/Main/*.cpp ./src/DataStructure/*.cpp ./src/NumericalRecipes/*.cpp)
-file(GLOB HPP_HEADERS ./include/*.hpp)
-SET(PROJ_NAME      "2dx_process_hkz" )
-SET(BEADGEN_EXE "beadgen_comp")
-SET(MAPHIST_EXE "maphist")
-SET(MAPSIZE_EXE "map_size")
-SET(PROJ_SOURCES ${CPP_SOURCES})
-SET(PROJ_HEADERS ${HPP_HEADERS})
+
+# Executables
+file(GLOB EXAMPLES_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp)
+file(GLOB EXEC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/executables/*.cpp)
+
+file(GLOB_RECURSE CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE HPP_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+
+set(PROJECT_SOURCES ${CPP_SOURCES})
+set(PROJECT_HEADERS ${HPP_HEADERS})
+
 set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -g")
-
-#=============================#
-# Create Executables          # 
-#=============================#
-add_executable(${PROJ_NAME} ${PROJ_SOURCES})
-add_executable(${BEADGEN_EXE} ./gunnar/${BEADGEN_EXE}.c)
-add_executable(${MAPHIST_EXE} ./gunnar/${MAPHIST_EXE}.c)
-add_executable(${MAPSIZE_EXE} ./gunnar/${MAPSIZE_EXE}.c)
-
-#=============================#
-# Link Libraries          # 
-#=============================#
 
 set(USE_FFTWF FALSE)
 set(USE_FFTWD TRUE)
 find_package(FFTW REQUIRED)
 
-#if(APPLE)
-#set(Boost_USE_STATIC_LIBS true)
-#endif(APPLE)
+#==============================#
+# Include directories          #
+#==============================#
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-#find_package(Boost COMPONENTS system filesystem REQUIRED)
+if(APPLE)
+	include_directories(/opt/local/include)
+endif(APPLE)
 
-target_link_libraries(${PROJ_NAME} ${FFTWD_LIB})
-#target_link_libraries(${PROJ_NAME} ${Boost_LIBRARIES})
+#=============================#
+# Create Executables          # 
+#=============================#
+# For Executables
+foreach(i ${EXAMPLES_SOURCE})
+    get_filename_component(EXECUTABLE ${i}  NAME_WE)
+    add_executable(${EXECUTABLE} ${i};${PROJECT_SOURCES})
+    target_link_libraries(${EXECUTABLE} ${FFTWD_LIB})
 
-target_link_libraries(${BEADGEN_EXE} m)
-target_link_libraries(${MAPHIST_EXE} m)
-target_link_libraries(${MAPSIZE_EXE} m)
+    list(APPEND EXECUTABLES_SP ${EXECUTABLE})
+endforeach(i ${EXAMPLES_SOURCE})
+
+
+
+#==============================#
+# Add subdirectories           #
+#==============================#
+add_subdirectory(gunnar)
 
 #==============================#
 # Installation                 #
@@ -63,8 +69,5 @@ if(NOT INSTALL_BIN_DIR)
 	set(INSTALL_BIN_DIR kernel/mrc/bin)
 endif(NOT INSTALL_BIN_DIR)
 
-install(FILES ${PROJ_SOURCES} DESTINATION ${INSTALL_SRC_DIR})
-install(TARGETS ${PROJ_NAME} DESTINATION ${INSTALL_BIN_DIR})
-install(TARGETS ${BEADGEN_EXE} DESTINATION ${INSTALL_BIN_DIR})
-install(TARGETS ${MAPHIST_EXE} DESTINATION ${INSTALL_BIN_DIR})
-install(TARGETS ${MAPSIZE_EXE} DESTINATION ${INSTALL_BIN_DIR})
+# executables
+install(TARGETS ${EXECUTABLES_SP} DESTINATION ${INSTALL_BIN_DIR})

@@ -18,6 +18,7 @@ file(GLOB EXEC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/executables/*.cpp)
 file(GLOB_RECURSE CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE HPP_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
 
+set(RUNNER_SOURCES ${EXAMPLES_SOURCE};${EXEC_SOURCES})
 set(PROJECT_SOURCES ${CPP_SOURCES})
 set(PROJECT_HEADERS ${HPP_HEADERS})
 
@@ -40,13 +41,13 @@ endif(APPLE)
 # Create Executables          # 
 #=============================#
 # For Executables
-foreach(i ${EXAMPLES_SOURCE})
+foreach(i ${RUNNER_SOURCES})
     get_filename_component(EXECUTABLE ${i}  NAME_WE)
     add_executable(${EXECUTABLE} ${i};${PROJECT_SOURCES})
     target_link_libraries(${EXECUTABLE} ${FFTWD_LIB})
 
     list(APPEND EXECUTABLES_SP ${EXECUTABLE})
-endforeach(i ${EXAMPLES_SOURCE})
+endforeach(i ${RUNNER_SOURCES})
 
 
 

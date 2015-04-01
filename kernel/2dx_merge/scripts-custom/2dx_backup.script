@@ -438,7 +438,7 @@ while ( ${dircounter} <= ${dirnum} )
               endif
               echo dummy > ${from_dirfile}/APH/dummy.tmp
               echo ":New: ${to_dirfile}/APH/*"
-              cd ${from_dirfile} ; tar -cf - . | (cd ${to_dirfile} ; tar -xpf -)
+              cd ${from_dirfile}/APH ; tar -cf - . | (cd ${to_dirfile}/APH ; tar -xpf -)
               # ${copy_command} ${from_dirfile}/APH/* ${to_dirfile}/APH
               \rm ${from_dirfile}/APH/dummy.tmp
               \rm ${to_dirfile}/APH/dummy.tmp

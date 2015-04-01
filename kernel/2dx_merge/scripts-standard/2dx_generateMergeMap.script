@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 90
+# SORTORDER: 85
 #
 # MANUAL: This script makes use of MRC and CCP4 commands to generate the final projection map.
 #

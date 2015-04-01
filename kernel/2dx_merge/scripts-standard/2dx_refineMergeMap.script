@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Generate 3D reference map                                          #
+# Title: Refine Merged Map (3D only)                                        #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 22
+# SORTORDER: 89
 #
 # MANUAL: This script takes the unevenly spaced hkz file and generates a 3D reference map using backprojection.
 #
@@ -47,9 +47,12 @@ set number_of_beads = ""
 set density_threshold_bead = ""
 set noise_level_bead = ""
 set number_sf_hist_iterations = ""
+set merge_modus = ""
 #
 #$end_vars
-set scriptname = 2dx_get_3D_ref
+#
+set scriptname = 2dx_refineMergeMap
+#
 set split = ($realcell:as/,/ /)
 set cellx = $split[1]
 set celly = $split[2]
@@ -70,16 +73,18 @@ echo date = ${date}
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
+if ( ${merge_modus} != "3D" ) then
+  ${proc_2dx}/protest "Skipping: Only in 3D mode."
+endif
+#
 echo "<<@progress: 5>"
 #
 #############################################################################
-# Calling the script
-#############################################################################
 #
-if ( -e APH/latlines.dat ) then
-	set hkzFile = "APH/latlines.dat"
-else
-	set hkzFile = "SCRATCH/latlines.dat"
+set hkzFile = "APH/latlines.dat"
+#
+if ( ! -e ${hkzFile} ) then
+   ${proc_2dx}/protest "ERROR: ${hkzFile} not found." 
 endif
 #
 ########################################################################
@@ -265,7 +270,7 @@ eof
 endif
 #############################################################################
 #
-set final_map = "processed_sub.map"
+set final_map = "processed_sub"
 #
 ##############################################################################
 ${proc_2dx}/linblock "Generating the bead model"
@@ -273,7 +278,7 @@ ${proc_2dx}/linblock "Generating the bead model"
 #
 \rm -f SCRATCH/bead_model.pdb
 #
-${bin_2dx}/beadgen_comp.exe ${final_map} SCRATCH/bead_model.pdb ${number_of_beads} ${density_threshold_bead} ${noise_level_bead} 7243
+${bin_2dx}/beadgen_comp.exe ${final_map}.map SCRATCH/bead_model.pdb ${number_of_beads} ${density_threshold_bead} ${noise_level_bead} 7243
 #
 #
 #
@@ -293,7 +298,7 @@ ${proc_2dx}/linblock "Setting the correct size for bead model map"
 \rm -f bead_model.map
 \rm -f bead_model.mrc
 #
-set input_size = `${bin_2dx}/map_size.exe ${final_map}`
+set input_size = `${bin_2dx}/map_size.exe ${final_map}.map`
 #set cellx_int = `printf "%.0f" ${cellx}`
 #set celly_int = `printf "%.0f" ${celly}`
 #set cellz_int = `printf "%.0f" ${ALAT}`
@@ -318,6 +323,7 @@ e2proc3d.py bead_model.mrc SCRATCH/junk.mrc --calcsf=SCRATCH/sf_bead_model.dat
 \rm -f SCRATCH/junk.mrc
 #
 set sf_in_map = "${final_map}"
+echo "# IMAGE: ${sf_in_map}.map <MAP: ${sf_in_map}>" >> LOGS/${scriptname}.results
 #
 set i = 1
 while ($i <= ${number_sf_hist_iterations})
@@ -325,28 +331,45 @@ while ($i <= ${number_sf_hist_iterations})
     ${proc_2dx}/linblock "Setting the structure factors for iteration ${i}"
     #############################################################################
     #
-    \rm -f SCRATCH/ref_sf_${i}.mrc
+    \rm -f ${sf_in_map}_sf.mrc
     #
-    e2proc3d.py ${sf_in_map} SCRATCH/ref_sf_${i}.mrc --setsf=SCRATCH/sf_bead_model.dat
+    e2proc3d.py ${sf_in_map}.map ${sf_in_map}_sf.mrc --setsf=SCRATCH/sf_bead_model.dat
+    #
+    \mv -f ${sf_in_map}_sf.mrc ${sf_in_map}_sf.map
+    echo "# IMAGE: ${sf_in_map}_sf.map <MAP: ${sf_in_map}_sf>" >> LOGS/${scriptname}.results
     #
     #############################################################################
     ${proc_2dx}/linblock "Matching real space histogram for iteration ${i}"
     #############################################################################
     #
-    \rm -f SCRATCH/ref_sf_hist_${i}.mrc
+    \rm -f ${sf_in_map}_sf_hist.map
     #
-    ${bin_2dx}/maphist.exe SCRATCH/ref_sf_${i}.mrc bead_model.mrc SCRATCH/ref_sf_hist_${i}.mrc
+    ${bin_2dx}/maphist.exe ${sf_in_map}_sf.map bead_model.mrc ${sf_in_map}_sf_hist.map
     #
-    set sf_in_map = "SCRATCH/ref_sf_hist_${i}.mrc"
+    echo "# IMAGE: ${sf_in_map}_sf_hist.map <MAP: ${sf_in_map}_sf_hist>" >> LOGS/${scriptname}.results
+    #
+    set sf_in_map = "${sf_in_map}_sf_hist"
     @ i = $i + 1
     #
 end
 ############################################################################
 #
-@ i = $i - 1
-cp -f SCRATCH/ref_sf_${i}.mrc ref_final.map
+#############################################################################
+${proc_2dx}/linblock "Setting the structure factors for iteration ${i}"
+#############################################################################
 #
-echo "# IMAGE-IMPORTANT: ref_final.map <MAP: Final processed reference MAP>" >> LOGS/${scriptname}.results
+\rm -f ${sf_in_map}_sf.mrc
+#
+e2proc3d.py ${sf_in_map}.map ${sf_in_map}_sf.mrc --setsf=SCRATCH/sf_bead_model.dat
+#
+@ i = $i - 1
+\mv -f  ${sf_in_map}_sf.mrc ${sf_in_map}_sf.map
+#
+echo "# IMAGE-IMPORTANT: ${sf_in_map}_sf.map <MAP: ${sf_in_map}_sf - Final processed map>" >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "${scriptname} normal end."
+#############################################################################
 #
 echo "<<@progress: 100>>"
 #

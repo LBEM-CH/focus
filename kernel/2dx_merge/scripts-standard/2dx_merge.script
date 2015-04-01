@@ -400,7 +400,7 @@ if ( ${merge_modus} == "3D" ) then
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_merge normal end."
+${proc_2dx}/linblock "${scriptname} normal end."
 #############################################################################
 #
 echo "<<@progress: 100>>"

@@ -90,7 +90,7 @@ if ( ${scriptname} == "2dx_merge" ) then
       echo ":ML_result.aph not found."
     endif
   endif
-  if ( ${merge_data_type} == '7' || ${merge_data_type} == '9' ) then
+  if ( ${merge_data_type} == '7' || ${merge_data_type} == '8' || ${merge_data_type} == '9' ) then
     set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
     set QVALS_local =  `cat ../2dx_image.cfg | grep 'set QVALS =' | cut -d\" -f2`
     if ( ${QVALS_local} == '.' ) then
@@ -116,12 +116,18 @@ if ( ${scriptname} == "2dx_merge" ) then
     set QVALAS_local  = `echo ${QVALAS_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
     set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
     set QVALBS_local  = `echo ${QVALBS_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    echo ${QVAL2_local} > awk.dat
-    echo ${QVALS_local} >> awk.dat
-    echo ${QVALMA_local} >> awk.dat
-    echo ${QVALAS_local} >> awk.dat
-    echo ${QVALMB_local} >> awk.dat
-    echo ${QVALBS_local} >> awk.dat
+    if ( ${merge_data_type} == '8' ) then
+      echo ${QVAL2_local} > awk.dat
+      echo ${QVALMA_local} >> awk.dat
+      echo ${QVALMB_local} >> awk.dat
+    else
+      echo ${QVAL2_local} > awk.dat
+      echo ${QVALS_local} >> awk.dat
+      echo ${QVALMA_local} >> awk.dat
+      echo ${QVALAS_local} >> awk.dat
+      echo ${QVALMB_local} >> awk.dat
+      echo ${QVALBS_local} >> awk.dat
+    endif
     #
     # awk script to find max in CR-separated list:
     #  {if(min=="")min=max=$1}; if($1>max) {max=$1}; if($1< min) {min=$1}; total+=$1; count+=1} END {print total/count, min, max}
@@ -129,23 +135,35 @@ if ( ${scriptname} == "2dx_merge" ) then
     set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
     set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
     \rm -f awk.dat
-    if ( ${QVAL_best} == '1' ) then
-      set APH_file = image_ctfcor_fou_unbent_ctf.aph
-    endif
-    if ( ${QVAL_best} == '2' ) then
-      set APH_file = image_ctfcor_U2-Syn_ctf.aph
-    endif
-    if ( ${QVAL_best} == '3' ) then
-      set APH_file = image_ctfcor_movie_fou_ctf.aph
-    endif
-    if ( ${QVAL_best} == '4' ) then
-      set APH_file = image_ctfcor_movie_syn_ctf.aph
-    endif
-    if ( ${QVAL_best} == '5' ) then
-      set APH_file = image_ctfcor_movieB_fou_ctf.aph
-    endif
-    if ( ${QVAL_best} == '6' ) then
-      set APH_file = image_ctfcor_movieB_syn_ctf.aph
+    if ( ${merge_data_type} == '8' ) then
+      if ( ${QVAL_best} == '1' ) then
+        set APH_file = image_ctfcor_fou_unbent_ctf.aph
+      endif
+      if ( ${QVAL_best} == '2' ) then
+        set APH_file = image_ctfcor_movie_fou_ctf.aph
+      endif
+      if ( ${QVAL_best} == '3' ) then
+        set APH_file = image_ctfcor_movieB_fou_ctf.aph
+      endif
+    else
+      if ( ${QVAL_best} == '1' ) then
+        set APH_file = image_ctfcor_fou_unbent_ctf.aph
+      endif
+      if ( ${QVAL_best} == '2' ) then
+        set APH_file = image_ctfcor_U2-Syn_ctf.aph
+      endif
+      if ( ${QVAL_best} == '3' ) then
+        set APH_file = image_ctfcor_movie_fou_ctf.aph
+      endif
+      if ( ${QVAL_best} == '4' ) then
+        set APH_file = image_ctfcor_movie_syn_ctf.aph
+      endif
+      if ( ${QVAL_best} == '5' ) then
+        set APH_file = image_ctfcor_movieB_fou_ctf.aph
+      endif
+      if ( ${QVAL_best} == '6' ) then
+        set APH_file = image_ctfcor_movieB_syn_ctf.aph
+      endif
     endif
     if ( ! -e ${APH_file} ) then
       echo "::${APH_file} should be best, but was not found."

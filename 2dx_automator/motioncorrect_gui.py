@@ -661,7 +661,7 @@ class Auto2dxGUI(Frame):
 		self.image_label = Label(self.centralrightframe2, image=self.default_tkimage)
 		self.image_label.pack(side=LEFT, padx=5, pady=5)
 		
-		self.info_label = Label(self.centralrightframe3, text="Image Staticstics:\n", height=28, width=50)
+		self.info_label = Label(self.centralrightframe3, text="Image Statistics:\n", height=28, width=50)
 		self.info_label.pack()
 		
 		self.default_image_small = Image.new("RGB", (n_small,n_small), "white")

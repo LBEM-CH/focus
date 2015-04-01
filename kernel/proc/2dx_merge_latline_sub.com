@@ -370,7 +370,8 @@ else
   echo "celly = ${celly}"
   echo "cellz = ${ALAT}" 
   #
-  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${sample_pixel} ${RESMAX}
+  echo ":Launching ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${realang} ${sample_pixel} ${RESMAX}"
+  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${realang} ${sample_pixel} ${RESMAX}
   #
   mv -f output.hkl APH/latfitted.hkl
   echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
@@ -380,6 +381,9 @@ else
   #############################################################################
   #
   \rm -f PLOTCUR.PS
+  if ( -e APH/latfitteds_limit.dat ) then   
+    \rm -f APH/latfitteds_limit.dat
+  endif
   #
   ${bin_2dx}/2dx_plotresolution.exe << eot
 2

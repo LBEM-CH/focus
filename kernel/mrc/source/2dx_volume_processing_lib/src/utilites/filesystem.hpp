@@ -7,7 +7,7 @@
 #ifndef FILESYSTEM_HPP
 #define	FILESYSTEM_HPP
 
-#include <sys/stat.h>
+#include <iostream>
 #include <string>
 
 namespace volume_processing_2dx

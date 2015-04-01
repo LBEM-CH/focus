@@ -7,6 +7,7 @@
 #ifndef FOURIER_TRANSFORM_FFTW_HPP
 #define	FOURIER_TRANSFORM_FFTW_HPP
 
+#include <iostream>
 #include <fftw3.h>
 #include <math.h>
 
@@ -14,8 +15,6 @@ namespace volume_processing_2dx
 {
     namespace transforms
     {
-        namespace fourier_transform_fftw
-        {
             /**
              * A class used for FFTW3 wisdom and Fourier Transforms.
              * Objective: Class which can provide methods for doing Fourier 
@@ -138,8 +137,6 @@ namespace volume_processing_2dx
                 
                 
             }; // class FourierTransformFFTW
-            
-        } // namespace fourier_transform_fftw
         
     } // namespace transforms
     

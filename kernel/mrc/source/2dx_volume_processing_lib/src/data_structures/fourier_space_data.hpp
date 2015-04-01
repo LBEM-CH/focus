@@ -9,6 +9,7 @@
 
 #include <map>
 #include <list>
+#include <fftw3.h>
 
 #include "miller_index.hpp"
 #include "diffraction_spot.hpp"
@@ -49,6 +50,11 @@ namespace volume_processing_2dx
              * @param spot_multimap: A multi-map with miller indices mapped to multiple complexes
              */
             FourierSpaceData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap);
+            
+            /**
+             * Resets the data.
+             */
+            void reset();
             
             /**
              * Returns the beginning of the data for iterating
@@ -102,11 +108,33 @@ namespace volume_processing_2dx
              */
             bool exists(int h, int k, int l) const ;
             
-        private:      
+            /**
+             * Converts the data into fftw format
+             * @param fx : x size of the half Fourier volume
+             * @param fy : y size of the half Fourier volume
+             * @param fz : z size of the half Fourier volume
+             * @return fftw_complex 
+             */
+            fftw_complex* fftw_data(int fx, int fy, int fz) const;
+            
+            /**
+             * Resets the data from the fftw format
+             * @param fx : x size of the half Fourier volume
+             * @param fy : y size of the half Fourier volume
+             * @param fz : z size of the half Fourier volume
+             * @param complex_data
+             */
+            void reset_data_from_fftw(int fx, int fy, int fz, fftw_complex* complex_data);
+            
+        private:
+            
+            /**
+             * Data stored as a map of Miller Index and it's value
+             */
             std::map<MillerIndex, DiffractionSpot>* _data;
             
             
-        }; // class FourierSpace
+        }; // class FourierSpaceData
         
     } // namespace data_structures
     

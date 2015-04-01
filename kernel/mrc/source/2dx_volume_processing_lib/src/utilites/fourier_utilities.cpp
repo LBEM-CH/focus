@@ -10,6 +10,13 @@
 double volume_processing_2dx::utilities::fourier_utilities::GetResolution
     (const volume_processing_2dx::data_structures::MillerIndex& index, double gamma, double a, double b, double c)
 {
+    
+    if(a==0 || b==0 || c==0 || gamma==0)
+    {
+        std::cerr << "ERROR! Encountered 0 in cell dimensions while calculating resolution.";
+        return 0;
+    }
+    
     //Calculate the reciprocal lattice
     double ux = 2 * M_PI/a;
     double vy = 2 * M_PI/b;

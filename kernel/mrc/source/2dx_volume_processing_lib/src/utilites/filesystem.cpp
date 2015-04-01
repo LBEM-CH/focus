@@ -4,7 +4,8 @@
  * 
  */
 
-#include <iostream>
+#include <sys/stat.h>
+
 #include "filesystem.hpp"
 
 bool volume_processing_2dx::utilities::filesystem::FileExists(const std::string file_path)

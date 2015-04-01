@@ -1,0 +1,29 @@
+/* 
+ * @license GNU Public License
+ * @author Nikhil Biyani (nikhilbiyani@gmail.com)
+ * 
+ */
+
+#include <iostream>
+#include <string.h>
+
+#include "../src/data_structures/volume2dx.hpp"
+
+int main(int argc, char** argv)
+{
+    
+    if(argc < 2)
+    {
+        std::cout << "Program Options\n\t<mrc file> <hkl file>\n";
+    }
+    
+    std::cout <<"Starting the program..\n";
+    
+    std::string mrcFileName = argv[1];
+    std::string hklFile = argv[2];
+    
+    volume_processing_2dx::data_structures::Volume2dx volume;
+    volume.read_volume(mrcFileName, "mrc");
+    volume.write_volume(hklFile, "hkl");
+    
+}

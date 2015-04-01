@@ -1,6 +1,8 @@
 
 #include "volume_header.hpp"
 
+#include "../utilites/angle_utilities.hpp"
+
 namespace ds = volume_processing_2dx::data_structures;
 
 ds::VolumeHeader2dx::VolumeHeader2dx()
@@ -18,16 +20,10 @@ void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
     _nx = nx;
     _ny = ny;
     _nz = nz;
-    _mx = nx;
-    _my = ny;
-    _mz = nz;
-    _nxstart = 0;
-    _nystart = 0;
-    _nzstart = 0;
     _xlen = (double) nx;
     _ylen = (double) ny;
     _zlen = (double) nz;
-    set_gamma(90);
+    set_gamma(volume_processing_2dx::utilities::angle_utilities::DegreeToRadian(90));
     set_symmetry("P1");
     set_max_resolution(2.0);
     set_membrane_height(1.0);
@@ -47,6 +43,21 @@ void ds::VolumeHeader2dx::set_ny(int ny)
 void ds::VolumeHeader2dx::set_nz(int nz)
 {
     this->_nz = nz;
+}
+
+void ds::VolumeHeader2dx::set_xlen(double xlen)
+{
+    this->_xlen = xlen;
+}
+
+void ds::VolumeHeader2dx::set_ylen(double ylen)
+{
+    this->_ylen = ylen;
+}
+
+void ds::VolumeHeader2dx::set_zlen(double zlen)
+{
+    this->_zlen = zlen;
 }
 
 void ds::VolumeHeader2dx::set_symmetry(std::string symmetry)
@@ -91,36 +102,6 @@ int ds::VolumeHeader2dx::nz() const
     return _nz;
 }
 
-int ds::VolumeHeader2dx::mx() const
-{
-    return _mx;
-}
-
-int ds::VolumeHeader2dx::my() const
-{
-    return _my;
-}
-
-int ds::VolumeHeader2dx::mz() const
-{
-    return _mz;
-}
-
-int ds::VolumeHeader2dx::nxstart() const
-{
-    return _nxstart;
-}
-
-int ds::VolumeHeader2dx::nystart() const
-{
-    return _nystart;
-}
-
-int ds::VolumeHeader2dx::nzstart() const
-{
-    return _nzstart;
-}
-
 double ds::VolumeHeader2dx::xlen() const
 {
     return _xlen;
@@ -134,16 +115,6 @@ double ds::VolumeHeader2dx::ylen() const
 double ds::VolumeHeader2dx::zlen() const
 {
     return _zlen;
-}
-
-double ds::VolumeHeader2dx::alpha() const
-{
-    return M_PI/2;
-}
-
-double ds::VolumeHeader2dx::beta() const
-{
-    return M_PI/2;
 }
 
 double ds::VolumeHeader2dx::gamma() const

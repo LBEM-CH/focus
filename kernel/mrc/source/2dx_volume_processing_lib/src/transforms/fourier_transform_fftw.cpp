@@ -6,7 +6,7 @@
 
 #include "fourier_transform_fftw.hpp"
 
-namespace ft = volume_processing_2dx::transforms::fourier_transform_fftw;
+namespace ft = volume_processing_2dx::transforms;
 
 ft::FourierTransformFFTW::FourierTransformFFTW()
 {
@@ -32,28 +32,37 @@ double ft::FourierTransformFFTW::NormalizationFactor()
 
 void ft::FourierTransformFFTW::Replan(double* real_data, fftw_complex* complex_data, int nx, int ny, int nz)
 {
+    std::cout << "Re-planning\n";
     _nx = nx;
     _ny = ny;
     _nz = nz;
     _plan_r2c = fftw_plan_dft_r2c_3d(nz, ny, nx, real_data, complex_data, FFTW_ESTIMATE);
     _plan_c2r = fftw_plan_dft_c2r_3d(nz, ny, nx, complex_data, real_data, FFTW_ESTIMATE);
+    std::cout << "Created new plans\n";
 }
 
 void ft::FourierTransformFFTW::RealToComplex(int nx, int ny, int nz, double* real_data, fftw_complex* complex_data)
 {   
+    std::cout << "Converting Real to complex.. with "<< nx << " " << ny << " " << nz <<"\n";
+    std::cout << "Current class size: " << _nx << " " << _ny << " " << _nz <<"\n";
     //Re-plan if required
-    if(_nx != nx || _ny != ny || _nz != nz) this->Replan(real_data, complex_data, nx, ny, nz);
+    if(_nx != nx || _ny != ny || _nz != nz){
+        std::cout << "Should recreate plans..\n";
+        this->Replan(real_data, complex_data, nx, ny, nz);
+    }
 
     //Execute the plan
     fftw_execute_dft_r2c(_plan_r2c, real_data, complex_data );
 
     //Normalize
+    std::cout << "Normalizing.. \n";
     double factor = this->NormalizationFactor();
     for(int i=0; i<this->FourierSize(); i++) 
     { 
       ((fftw_complex*)complex_data)[i][0] *= factor; 
       ((fftw_complex*)complex_data)[i][1] *= -1*factor;
     }
+    std::cout << "Done with transforming real to complex.\n";
 
 }
 

@@ -58,44 +58,6 @@ namespace volume_processing_2dx
             int nz() const ;
             
             /**
-             * Returns the x-size of the input data
-             * @return mx
-             */
-            int mx() const ;
-            
-            /**
-             * Returns the y-size of the input data
-             * @return my
-             */
-            int my() const ;
-            
-            /**
-             * Returns the z-size of the input data
-             * @return 
-             */
-            int mz() const ;
-            
-            /**
-             * Returns the x-position of the subimage 
-             * @return nxstart
-             */
-            int nxstart() const ;
-            
-            
-            /**
-             * Returns the y-position of the subimage
-             * @return nystart
-             */
-            int nystart() const ;
-            
-            
-            /**
-             * Retruns the z-position of the subimage
-             * @return nzstart
-             */
-            int nzstart() const ;
-            
-            /**
              * Returns the x-length of the cell (a)
              * @return xlen
              */
@@ -112,18 +74,6 @@ namespace volume_processing_2dx
              * @return zlen
              */
             double zlen() const ;
-            
-            /**
-             * Returns the cell angle alpha
-             * @return alpha
-             */
-            double alpha() const ;
-            
-            /**
-             * Returns the cell angle beta
-             * @return beta
-             */
-            double beta() const ;
             
             /**
              * Returns the cell angle gamma
@@ -181,6 +131,24 @@ namespace volume_processing_2dx
             void set_nz(int nz);
             
             /**
+             * Assigner function of xlen
+             * @param xlen
+             */
+            void set_xlen(double xlen);
+            
+            /**
+             * Assigner function of ylen
+             * @param ylen
+             */
+            void set_ylen(double ylen);
+            
+            /**
+             * Assigner function of zlen
+             * @param zlen
+             */
+            void set_zlen(double zlen);
+            
+            /**
              * Sets the gamma of the cell
              * @param gamma in radians
              */
@@ -220,21 +188,6 @@ namespace volume_processing_2dx
             * **Compulsory
             */
            int _nx, _ny, _nz;
-
-           /**
-            * Size of the data present in the volume.
-            * Example: 131, 131, 400
-            * Default: nx, ny, nz
-            */
-           int _mx, _my, _mz;
-
-           /**
-            * Starting point of sub/super image. The rest of image is constructed using periodicity
-            * Example: -131, -131, 5
-            * Example: 5, 5, 0
-            * Default: 0, 0, 0
-            */
-           int _nxstart, _nystart, _nzstart;
 
            /**
             * Cell size

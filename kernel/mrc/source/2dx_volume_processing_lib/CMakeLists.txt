@@ -67,7 +67,7 @@ else(INSTALL_SRC_DIR)
 endif(INSTALL_SRC_DIR)
 
 if(NOT INSTALL_BIN_DIR)
-	set(INSTALL_BIN_DIR kernel/mrc/bin)
+	set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/kernel/mrc/bin/2dx_volume_processing)
 endif(NOT INSTALL_BIN_DIR)
 
 # executables

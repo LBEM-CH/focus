@@ -113,10 +113,22 @@ namespace volume_processing_2dx
             double xlen() const;
             
             /**
+             * Sets the cell length a 
+             * @param xlen
+             */
+            void set_xlen(double xlen);
+            
+            /**
              * Returns the cell length b
              * @return ylen
              */
             double ylen() const;
+            
+            /**
+             * Sets the cell length b
+             * @param ylen
+             */
+            void set_ylen(double ylen);
             
             /**
              * Returns the cell length c
@@ -125,16 +137,46 @@ namespace volume_processing_2dx
             double zlen() const;
             
             /**
+             * Sets the cell length c
+             * @param zlen
+             */
+            void set_zlen(double zlen);
+            
+            /**
              * Returns the cell angle gamma
              * @return gamma
              */
             double gamma() const;
             
             /**
+             * Assigns the cell angle gamma in radians
+             * @param gamma
+             */
+            void set_gamma(double gamma);
+            
+            /**
+             * Gets the string of the assigned 2dx symmetry
+             * @return symmetry
+             */
+            std::string symmetry() const;
+            
+            /**
+             * Sets the symmetry of the map
+             * @param symmetry : one of the 17 2dx symmetries of the volume
+             */
+            void set_symmetry(std::string symmetry);
+            
+            /**
              * Returns the max resolution supplied by the user
              * @return max_resolution
              */
             double max_resolution() const;
+            
+            /**
+             * Assigns the maximum resolution of the volume
+             * @param max resolution
+             */
+            void set_max_resolution(double resolution);
             
             /**
              * Evaluates the resolution at a miller index h, k, l

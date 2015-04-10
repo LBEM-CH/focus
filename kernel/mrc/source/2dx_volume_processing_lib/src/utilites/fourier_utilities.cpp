@@ -18,14 +18,26 @@ double volume_processing_2dx::utilities::fourier_utilities::GetResolution
     }
     
     //Calculate the reciprocal lattice
-    double ux = 2 * M_PI/a;
-    double vy = 2 * M_PI/b;
-    double vz = 2 * M_PI*cos(gamma)/(sin(gamma)*b);
-    double wz = 2 * M_PI/(c*sin(gamma));
+    double factor = 1;
+    //double factor = 2*M_PI;
+    double ux = factor/a;
+    double vy = factor/b;
+    double vz = factor*cos(gamma)/(sin(gamma)*b);
+    double wz = factor/(c*sin(gamma));
     
     double resolution_x = index.h() * ux;
     double resolution_y = index.k() * vy;
     double resolution_z = index.k() * vz + index.l() * wz;
+     
+    double final_resolution = sqrt(resolution_x*resolution_x + resolution_y*resolution_y + resolution_z*resolution_z);
     
-    return sqrt(resolution_x*resolution_x + resolution_y*resolution_y + resolution_z*resolution_z);
+    //Default resolution
+    double result = 1000;
+    if(final_resolution != 0)
+    {
+        result = 1/final_resolution;
+    }
+    //std::cout << "Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << result << "\n";
+    
+    return result;
 }

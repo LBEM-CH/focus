@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
     
-    if(argc < 2)
+    if(argc < 3)
     {
         std::cout << "Program Options\n\t<mrc file> <hkl file>\n";
     }

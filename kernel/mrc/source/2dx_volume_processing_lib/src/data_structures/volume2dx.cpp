@@ -29,23 +29,27 @@ ds::Volume2dx::Volume2dx()
 
 ds::Volume2dx::Volume2dx(int nx, int ny, int nz)
 {
+    std::cout << "Initializing volume.. ";
     this->initialize(nx, ny, nz);
+    std::cout << "Done.\n";
+    
 }
 
 void ds::Volume2dx::initialize(int nx, int ny, int nz)
 {
-    
+    std::cout << "Creating blank volume with size (" << nx << ", " << ny << ", " << nz << ") \n";
     _header = ds::VolumeHeader2dx(nx, ny, nz);
     _real = ds::RealSpaceData(nx, ny, nz);
     _fourier = ds::FourierSpaceData();
     _transform = volume_processing_2dx::transforms::FourierTransformFFTW();
     _type = NONE;
-    
 }
 
 void ds::Volume2dx::reset(int nx, int ny, int nz)
 {
-    _header = ds::VolumeHeader2dx(nx, ny, nz);
+    std::cout << "Reseting the volume with size (" << nx << ", " << ny << ", " << nz << ") \n";
+    std::cout << "NOTE: The data of the volume is also cleared!!!!\n";
+    _header.reset_size(nx, ny, nz);
     _real.reset(nx, ny, nz);
     _fourier.reset();
     _type = NONE;
@@ -53,7 +57,7 @@ void ds::Volume2dx::reset(int nx, int ny, int nz)
 
 void ds::Volume2dx::read_volume(std::string file_name, std::string format)
 {
-    std::cout << "Reading volume triggered with format "<< format << std::endl;
+    std::cout << "Reading volume with format: "<< format << std::endl;
     if(format == "hkz")
     {
        _fourier = volume_processing_2dx::io::hkz_reader::read(file_name, _header);
@@ -84,6 +88,7 @@ void ds::Volume2dx::read_volume(std::string file_name)
 
 void ds::Volume2dx::write_volume(std::string file_name, std::string format)
 {
+    std::cout << "Writing volume with format: "<< format << std::endl;
     if(format == "hkl")
     {
         volume_processing_2dx::io::hkl_writer::write(file_name, get_fourier());
@@ -112,6 +117,7 @@ double ds::Volume2dx::resolution_at(int h, int k, int l) const
 
 void ds::Volume2dx::symmetrize()
 {
+    std::cout << "Symmetrizing with symmetry: " << symmetry() << std::endl;
     volume_processing_2dx::symmetrization::Symmetry2dx sym(_header.symmetry());
     volume_processing_2dx::symmetrization::fourier_symmetrization::symmetrize(_fourier, sym);
 }
@@ -136,7 +142,6 @@ ds::RealSpaceData ds::Volume2dx::get_real()
 
 ds::FourierSpaceData ds::Volume2dx::get_fourier()
 {
-    std::cout << "Getting the Fourier data.. \n";
     if(!has_fourier()) fourier_from_real();
     return _fourier;
 }
@@ -155,7 +160,7 @@ void ds::Volume2dx::set_real(RealSpaceData& real)
 
 void ds::Volume2dx::fourier_from_real()
 {
-    std::cout << "Initializing the Fourier data from real data.. \n";
+    std::cout << "Converting the real data to Fourier data.. \n";
     if(_type == REAL){
         _fourier.reset();
         fftw_complex* complex_data = (fftw_complex*) malloc(fx()*fy()*fz()*sizeof(fftw_complex));
@@ -166,20 +171,23 @@ void ds::Volume2dx::fourier_from_real()
         _type = BOTH;
     }
     else if(_type == NONE) {
-        throw("Hey, Fourier data cannot be set! Real data not in memory. Did you forget to set the data?");
+        std::cerr << "Hey, Fourier data cannot be set! Real data not in memory. Did you forget to set the data?";
     }
 }
 
 void ds::Volume2dx::real_from_fourier()
 {
+    std::cout << "Converting the Fourier data to real. \n";
     if(_type == FOURIER){
         double* real_data = (double*) malloc(nx()*ny()*nz()*sizeof(double));
+        std::cout << "Calling FFTW libraries..\n";
         _transform.ComplexToReal(nx(), ny(), nz(), _fourier.fftw_data(fx(), fy(), fz()), real_data);
+        std::cout << "Done.\n";
         _type = BOTH;
         _real.reset_data(real_data);
     }
     else if(_type == NONE) {
-        throw("Hey, Real data cannot be set! Fourier data not in memory. Did you forget to set the data?");
+        std::cerr << "Hey, Real data cannot be set! Fourier data not in memory. Did you forget to set the data?";
     }
 }
 
@@ -227,14 +235,54 @@ double ds::Volume2dx::xlen() const {
     return _header.xlen();
 }
 
+void ds::Volume2dx::set_xlen(double xlen)
+{
+    _header.set_xlen(xlen);
+}
+
 double ds::Volume2dx::ylen() const {
     return _header.ylen();
+}
+
+void ds::Volume2dx::set_ylen(double ylen)
+{
+    _header.set_ylen(ylen);
 }
 
 double ds::Volume2dx::zlen() const {
     return _header.zlen();
 }
 
+void ds::Volume2dx::set_zlen(double zlen)
+{
+    _header.set_zlen(zlen);
+}
+
+double ds::Volume2dx::gamma() const
+{
+    return _header.gamma();
+}
+
+void ds::Volume2dx::set_gamma(double gamma)
+{
+    _header.set_gamma(gamma);
+}
+
+std::string ds::Volume2dx::symmetry() const
+{
+    return _header.symmetry();
+}
+
+void ds::Volume2dx::set_symmetry(std::string symmetry)
+{
+    _header.set_symmetry(symmetry);
+}
+
 double ds::Volume2dx::max_resolution() const {
     return _header.max_resolution();
+}
+
+void ds::Volume2dx::set_max_resolution(double resolution)
+{
+    _header.set_max_resolution(resolution);
 }

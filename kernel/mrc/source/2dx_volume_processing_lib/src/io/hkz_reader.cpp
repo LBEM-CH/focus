@@ -35,8 +35,10 @@ volume_processing_2dx::data_structures::FourierSpaceData volume_processing_2dx::
     {
         while (hkzFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> sig_amplitude_in >> sig_phase_in >> iq_in)
         {
-            //std::cout << "Reading line: " << h_in << " " << k_in << " " << z_in << " " << amplitude_in << " " << phase_in << "\n"; 
             l_in = round(z_in * header.nz());
+            
+            //std::cout << "Reading line: " << h_in << " " << k_in << " " << l_in << "(" << z_in << ")" << " " << amplitude_in << " " << phase_in << "\n"; 
+            
             ds::MillerIndex index_in(h_in, k_in, l_in);
             double resolution =  volume_processing_2dx::utilities::fourier_utilities::GetResolution(
                                         index_in, header.gamma(), header.xlen(), header.ylen(), header.zlen());

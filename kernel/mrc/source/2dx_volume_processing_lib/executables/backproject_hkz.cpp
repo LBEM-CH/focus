@@ -6,12 +6,9 @@
 
 
 #include <iostream>
-#include "../src/data_structures/volume_header.hpp"
-#include "../src/data_structures/fourier_space_data.hpp"
-#include "../src/symmetization/symmetry2dx.hpp"
-#include "../src/symmetization/fourier_symmetrization.hpp"
-#include "../src/io/hkz_reader.hpp"
-#include "../src/io/hkl_writer.hpp"
+#include <string.h>
+
+#include "../src/data_structures/volume2dx.hpp"
 #include "../src/utilites/angle_utilities.hpp"
 
 /**
@@ -31,6 +28,8 @@ int main(int argc, char** argv)
         std::cin.get();
     }
     
+    std::cout << "Starting the program\n";
+    
     std::string hkzFileName = argv[1];
     
     std::string symmetry = argv[2];
@@ -41,23 +40,21 @@ int main(int argc, char** argv)
     
     double gamma = std::atof(argv[6]);
     double max_resolution = std::atof(argv[7]);
-      
-    //Prepare the header
-    volume_processing_2dx::data_structures::VolumeHeader2dx header(nx, ny, nz);
-    header.set_gamma(volume_processing_2dx::utilities::angle_utilities::DegreeToRadian(gamma));
-    header.set_max_resolution(max_resolution);
-    header.set_symmetry(symmetry);
     
-    //Read in data
-    volume_processing_2dx::data_structures::FourierSpaceData fourier_data = 
-        volume_processing_2dx::io::hkz_reader::read(hkzFileName, header);
+    std::cout << "Reading of arguments done.. \n";
+    
+    volume_processing_2dx::data_structures::Volume2dx volume(nx, ny, nz);
+    volume.read_volume(hkzFileName, "hkz");
+    
+    volume.set_gamma(volume_processing_2dx::utilities::angle_utilities::DegreeToRadian(gamma));
+    volume.set_max_resolution(max_resolution);
+    volume.set_symmetry(symmetry);
     
     //Symmetrize
-    volume_processing_2dx::symmetrization::Symmetry2dx sym(symmetry);
-    volume_processing_2dx::symmetrization::fourier_symmetrization::symmetrize(fourier_data, sym);
+    volume.symmetrize();
     
     //Write out data
-    volume_processing_2dx::io::hkl_writer::write("output.hkl", fourier_data);
+    volume.write_volume("output.hkl");
     
 }
 

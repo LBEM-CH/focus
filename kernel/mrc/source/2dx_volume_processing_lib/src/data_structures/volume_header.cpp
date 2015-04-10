@@ -30,6 +30,16 @@ void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
 
 }
 
+void ds::VolumeHeader2dx::reset_size(int nx, int ny, int nz)
+{
+    _nx = nx;
+    _ny = ny;
+    _nz = nz;
+    if((int)_xlen == _nx) _xlen = (double) nx;
+    if((int)_ylen == _ny) _ylen = (double) ny;
+    if((int)_zlen == _nz) _zlen = (double) nz;
+} 
+
 void ds::VolumeHeader2dx::set_nx(int nx)
 {
     this->_nx = nx;

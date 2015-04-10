@@ -11,10 +11,10 @@ double volume_processing_2dx::utilities::angle_utilities::CorrectRadianPhase(dou
 {   
     double new_phase = phase_in_radians;
     
-    if (new_phase < -1 * M_PI/2) {
+    if (new_phase < -1 * M_PI) {
         new_phase = CorrectRadianPhase(phase_in_radians + M_PI);
     }
-    else if (phase_in_radians >= M_PI/2) {
+    else if (phase_in_radians >= M_PI) {
         new_phase = CorrectRadianPhase(phase_in_radians - M_PI);
     }
     

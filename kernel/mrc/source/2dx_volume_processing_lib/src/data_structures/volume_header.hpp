@@ -40,6 +40,15 @@ namespace volume_processing_2dx
             VolumeHeader2dx(int nx, int ny, int nz);
             
             /**
+             * Resets the size of the header. In turn  changes the cell lengths,
+             * it they are equal to nx, ny, and nz respectively.
+             * @param nx
+             * @param ny
+             * @param nz
+             */
+            void reset_size(int nx, int ny, int nz);
+            
+            /**
              * Returns the size of the x-dimension
              * @return nx
              */

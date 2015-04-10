@@ -21,6 +21,7 @@ int    map_extent[3];
 double map_dist[3];
 double map_dist_1[3];
 double map_min[3];
+double *map_vals_with_id;
 float *map_vals;
 float *ref_vals;
 int *id;
@@ -38,6 +39,12 @@ int compare_floats (const float *a, const float *b)
 }
 
 int compare_floats_2 (const float *a, const float *b)
+{
+  if ( a[0] > b[0] )  return 1 ;
+  else return -1;
+}
+
+int compare_double (const double *a, const double *b)
 {
   if ( a[0] > b[0] )  return 1 ;
   else return -1;
@@ -142,7 +149,7 @@ if( fin == NULL ) {
         printf("Main map: %i %i %i\n", nx, ny, nz);
 
         if ( map_dim3 == nfloat-256 ) {
-          if ( (map_vals = (float *) calloc( 2*map_dim3 , sizeof( float ) )) == NULL ) {
+          if ( (map_vals_with_id = (double *) calloc( 2*map_dim3 , sizeof( double ) )) == NULL ) {
              fprintf(stderr,"ERROR: could not allocate memory \n");
              exit(1);
           }
@@ -155,8 +162,8 @@ if( fin == NULL ) {
                 fprintf(stderr,"error reading map values\n");
                 exit(1);    
              }
-             map_vals[2*count]=   (float) ftmp; 
-             map_vals[2*count+1]= (float) count; 
+             map_vals_with_id[2*count]=   (double) ftmp; 
+             map_vals_with_id[2*count+1]= (double) count;
 	} 
 
 	fclose (fin);
@@ -216,7 +223,7 @@ if( fin == NULL ) {
            exit(1);
         }
 
-        if ( map_dim3 == nfloat-256 ) {
+        if ( map_dim3 <= nfloat-256 ) {
           if ( (ref_vals = (float *) calloc( map_dim3 , sizeof( float ) )) == NULL ) {
              fprintf(stderr,"ERROR: could not allocate memory \n");
              exit(1);
@@ -244,14 +251,19 @@ if( fin == NULL ) {
 
 printf("Sorting main map values ...\n");
 fflush(stdout);
-qsort(map_vals,map_dim3,2*sizeof(float),compare_floats_2);
+qsort(map_vals_with_id,map_dim3,2*sizeof(double),compare_double);
 
 if ( (id = (int *) calloc( map_dim3 , sizeof( int ) )) == NULL ) {
              fprintf(stderr,"ERROR: could not allocate memory \n");
              exit(1);
 }
-for (i=0;i<map_dim3;i++)  id[i]=(int) map_vals[2*i+1];
-free(map_vals);
+
+for (i=0;i<map_dim3;i++) 
+{
+    id[i]=(int) map_vals_with_id[2*i+1];
+}
+
+free(map_vals_with_id);
 
 
 printf("Sorting reference map values ...\n");
@@ -313,7 +325,7 @@ if( fin == NULL ) {
         } else {
            fprintf(stderr,"ERROR: number of elements found different from header specification.\n");
         }
-
+        
 	for (count=0; count<map_dim3; count++) { 
              if (read_float(&ftmp,fin,swap)==0) {
                 fprintf(stderr,"error reading map values\n");
@@ -327,10 +339,11 @@ if( fin == NULL ) {
 
 
 for (i=0;i<map_dim3;i++) {
+    //printf("%i %i \n", i, id[i]);
     map_vals[id[i]]= (float) ref_vals[i];
 }
 
-
+printf("Done.. Writing output\n");
 /*********************/
 /**  WRITE NEW MAP  **/
 /*********************/

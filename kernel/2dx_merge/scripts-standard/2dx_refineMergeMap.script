@@ -177,7 +177,8 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "FFT : to convert mtz to map.."
 #------------------------------------------------------------------------
 #
-set back_projected_fft_map = "SCRATCH/back_projected_fft.map"
+set back_projected_fft = "SCRATCH/back_projected_fft"
+set back_projected_fft_map = "${back_projected_fft}.map"
 #
 \rm -f ${back_projected_fft_map}
 #
@@ -195,6 +196,36 @@ HKLMAX 199 199 199
 END
 eot
 #
+# Generate a readable map
+#
+#############################################################################
+${proc_2dx}/linblock "sourcing 2dx_refine_raw_ccp4_map.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_refine_raw_ccp4_map.com  ${back_projected_fft_map}
+#
+set back_projected_extended_map = "back_projected_extended.map"
+#
+\rm -f ${back_projected_extended_map}
+#
+\mv -f ${back_projected_fft}_extended.map ${back_projected_extended_map}
+#
+echo "# IMAGE: ${back_projected_extended_map} <MAP: Back projected extended map >" >> LOGS/${scriptname}.results
+#
+if ( ${calculate_subvolume}x != "0x" ) then  
+	#
+	set back_projected_sub_map = "back_projected_sub.map"
+	#
+	\rm -f ${back_projected_sub_map}
+	#
+	\mv -f ${back_projected_fft}_sub.map ${back_projected_sub_map}
+	#
+	echo "# IMAGE: ${back_projected_sub_map} <MAP: Back projected sub map >" >> LOGS/${scriptname}.results
+	#
+endif
+#
+echo "<<@progress: +5>>"
+#
 #------------------------------------------------------------------------
 ${proc_2dx}/linblock "MAPROT : to correct the size of map"
 #------------------------------------------------------------------------
@@ -210,7 +241,7 @@ GRID WORK ${cellx} ${celly} ${ALAT}
 XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
 SYMM WORK 1
 AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
+ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
 TRANS  0.000 0.000 0.000
 eot
 #
@@ -237,11 +268,45 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "Genrating bead model pdb .. "
 #------------------------------------------------------------------------
 #
-set bead_model_pdb = "SCRATCH/bead_model.pdb"
+set bead_model = "SCRATCH/bead_model"
+set bead_model_pdb = "${bead_model}.pdb"
 #
 \rm -f ${bead_model_pdb}
 #
 ${bin_2dx}/beadgen_comp.exe ${back_projected_map} ${bead_model_pdb} ${number_of_beads} ${density_threshold_bead} ${noise_level_bead} 7243
+#
+#############################################################################
+${proc_2dx}/linblock "sourcing 2dx_pdb2map_ccp4.com"
+#############################################################################
+#
+set bead_model_ccp4 = "${bead_model}_ccp4"
+#
+source ${proc_2dx}/2dx_pdb2map_ccp4.com ${bead_model_pdb}
+#
+source ${proc_2dx}/2dx_refine_raw_ccp4_map.com  ${bead_model_ccp4}.map
+#
+set bead_model_extended_map = "bead_model_extended.map"
+#
+\rm -f ${bead_model_extended_map}
+#
+\mv -f ${bead_model_ccp4}_extended.map ${bead_model_extended_map}
+#
+echo "# IMAGE: ${bead_model_extended_map} <MAP: Bead model extended map >" >> LOGS/${scriptname}.results
+#
+if ( ${calculate_subvolume}x != "0x" ) then  
+	#
+	set bead_model_sub_map = "bead_model_sub.map"
+	#
+	\rm -f ${bead_model_sub_map}
+	#
+	\mv -f ${bead_model_ccp4}_sub.map ${bead_model_sub_map}
+	#
+	echo "# IMAGE: ${bead_model_sub_map} <MAP: Bead model sub map >" >> LOGS/${scriptname}.results
+	#
+endif
+#
+echo "<<@progress: +5>>"
+#
 #
 #------------------------------------------------------------------------
 ${proc_2dx}/linblock "E2PDB2MRC.PY: Converting bead model pdb to mrc"
@@ -409,7 +474,8 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "FFT: to convert processed mtz to map.."
 #------------------------------------------------------------------------
 #
-set processed_fft_map = "SCRATCH/processed_fft.map"
+set processed_fft = "SCRATCH/processed_fft"
+set processed_fft_map = "${processed_fft}.map"
 #
 \rm -f ${processed_fft_map}
 #
@@ -429,142 +495,34 @@ eot
 #
 echo "<<@progress: +5>>"
 #
-########################################################################
-# STEP 9: Invert the handedness
-########################################################################
+#############################################################################
+${proc_2dx}/linblock "sourcing 2dx_refine_raw_ccp4_map.com"
+#############################################################################
 #
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "MAPROT: to invert to correct handedness and correct size.."
-#------------------------------------------------------------------------
-#
-set processed_correct_hand_map = "SCRATCH/processed_correct_hand.map"
-#
-\rm -f ${processed_correct_hand_map}
-#
-${bin_ccp4}/maprot mapin ${processed_fft_map} wrkout ${processed_correct_hand_map} << eot
-MODE FROM
-CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
-GRID WORK ${cellx} ${celly} ${ALAT}
-XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
-SYMM WORK 1
-AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
-TRANS  0.000 0.000 0.000
-eot
-#
-echo "<<@progress: +5>>"
-#
-#
-########################################################################
-# STEP 10: Bring the protein to center
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "MAPMASK: to bring protein to center of volume.."
-#------------------------------------------------------------------------
-#
-set processed_centered_map = "processed_centered.map"
-#
-\rm -f ${processed_centered_map}
-#
-${bin_ccp4}/mapmask mapin ${processed_correct_hand_map} mapout ${processed_centered_map} << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
-END
-eof
-#
-#
-echo "# IMAGE: ${processed_centered_map} <MAP: Processed map with correct handedness >" >> LOGS/${scriptname}.results
-#
-echo "<<@progress: +5>>"
-#
-#
-########################################################################
-# STEP 11: Extend the map
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "MAPMASK: to extend the map.."
-#------------------------------------------------------------------------
+source ${proc_2dx}/2dx_refine_raw_ccp4_map.com  ${processed_fft_map}
 #
 set processed_extended_map = "processed_extended.map"
 #
-rm -f ${processed_extended_map}
+\rm -f ${processed_extended_map}
 #
-${bin_ccp4}/mapmask mapin ${processed_centered_map} mapout ${processed_extended_map} << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim -1.0 0.999 -1.0 0.999 -0.5 0.5
-END
-eof
+\mv -f ${processed_fft}_extended.map ${processed_extended_map}
 #
 echo "# IMAGE-IMPORTANT: ${processed_extended_map} <MAP: Processed extended map >" >> LOGS/${scriptname}.results
 #
+if ( ${calculate_subvolume}x != "0x" ) then  
+	#
+	set processed_sub_map = "processed_sub.map"
+	#
+	\rm -f ${processed_sub_map}
+	#
+	\mv -f ${processed_fft}_sub.map ${processed_sub_map}
+	#
+	echo "# IMAGE-IMPORTANT: ${processed_sub_map} <MAP: Processed sub map >" >> LOGS/${scriptname}.results
+	#
+endif
+#
 echo "<<@progress: +5>>"
 #
-#
-########################################################################
-# STEP 12: Create sub-volume if required
-########################################################################
-#
-if ( ${calculate_subvolume}x != "0x" ) then  
-  #------------------------------------------------------------------------
-  ${proc_2dx}/linblock "MAPROT - to rotate volume for sub-volume preparation"
-  #------------------------------------------------------------------------
-  #
-  set processed_rot_map = "SCRATCH/processed_rot.map"
-  #
-  \rm -f ${processed_rot_map}
-  #
-  set ALAT2 = `echo ${ALAT} | awk '{ s = $1 / 2.0 } END { print s }'`
-  #
-  ${bin_ccp4}/maprot mapin ${processed_correct_hand_map} wrkout ${processed_rot_map} << eot
-MODE FROM
-CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
-GRID WORK ${cellx} ${celly} ${ALAT}
-XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
-SYMM WORK 1
-AVER
-ROTA POLAR 0.0 0.0 45.0
-TRANS  0.0 -20.0 ${ALAT2}
-eot
-  #
-  #
-  #------------------------------------------------------------------------
-  ${proc_2dx}/linblock "MAPAMSK - to cut sub-volume"
-  #------------------------------------------------------------------------
-  #   
-  # 0.7071 = 1/sqrt(2)
-  set middlex = "0.45"
-  set middley = "0.45"
-  set diam = "0.82"
-  #
-  set limxmin = `echo ${middlex} ${diam} | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
-  set limxmax = `echo ${middlex} ${diam} | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
-  set limymin = `echo ${middley} ${diam} | awk '{ s = $1 - ( $2 / 2.0 ) } END { print s }'`
-  set limymax = `echo ${middley} ${diam} | awk '{ s = $1 + ( $2 / 2.0 ) } END { print s }'`
-  #
-  echo ":Limits are ${limxmin} to ${limxmax}, ${limymin} to ${limymax}"
-  #
-  set processed_sub_map = "processed_sub.map"
-  #
-  \rm -f ${processed_sub_map}
-  #
-  #
-  ${bin_ccp4}/mapmask mapin ${processed_rot_map} mapout ${processed_sub_map} << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim ${limxmin} ${limxmax} ${limymin} ${limymax} 0.0 1.0
-pad -100
-SYMM 1
-END
-eof
-  #
-  echo "# IMAGE-IMPORTANT: ${processed_sub_map} <MAP: Processed sub-volume map>" >> LOGS/${scriptname}.results
-  #
-
-endif
 #############################################################################
 #
 #############################################################################

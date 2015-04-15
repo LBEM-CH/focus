@@ -8,8 +8,8 @@
 
 #include "mrc_writer.hpp"
 
-#include "../utilites/filesystem.hpp"
-#include "../utilites/angle_utilities.hpp"
+#include "../utilities/filesystem.hpp"
+#include "../utilities/angle_utilities.hpp"
 
 namespace ds = volume_processing_2dx::data_structures;
 

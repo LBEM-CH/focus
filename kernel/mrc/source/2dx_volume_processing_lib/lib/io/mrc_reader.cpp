@@ -6,8 +6,8 @@
 
 #include "mrc_reader.hpp"
 
-#include "../utilites/binary_file_utilities.hpp"
-#include "../utilites/angle_utilities.hpp"
+#include "../utilities/binary_file_utilities.hpp"
+#include "../utilities/angle_utilities.hpp"
 
 namespace io = volume_processing_2dx::io;
 

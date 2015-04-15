@@ -97,7 +97,7 @@ endif
 ${proc_2dx}/linblock "Back projecting reflections from hkz file ${hkzFile}"
 #------------------------------------------------------------------------
 #
-${bin_2dx}/backproject_hkz.exe ${hkzFile} ${SYM} ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX}
+${bin_2dx}/2dx_volume_processing/backproject_hkz.exe ${hkzFile} ${SYM} ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX}
 #
 #
 #------------------------------------------------------------------------
@@ -407,7 +407,7 @@ set processed_hkl = "SCRATCH/processed.hkl"
 #
 \rm -f ${processed_hkl}
 #
-${bin_2dx}/mrc_to_hkl.exe ${processed_mrc} ${processed_hkl}
+${bin_2dx}/2dx_volume_processing/mrc_to_hkl.exe ${processed_mrc} ${processed_hkl}
 #
 echo "<<@progress: +5>>"
 #

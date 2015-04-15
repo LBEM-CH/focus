@@ -5,7 +5,7 @@
  */
 
 #include "symmetry_operations.hpp"
-#include "../utilites/number_utilities.hpp"
+#include "../utilities/number_utilities.hpp"
 
 
 namespace sym = volume_processing_2dx::symmetrization;

@@ -5,9 +5,9 @@
  */
 
 #include "hkz_reader.hpp"
-#include "../utilites/filesystem.hpp"
-#include "../utilites/angle_utilities.hpp"
-#include "../utilites/fourier_utilities.hpp"
+#include "../utilities/filesystem.hpp"
+#include "../utilities/angle_utilities.hpp"
+#include "../utilities/fourier_utilities.hpp"
 
 volume_processing_2dx::data_structures::FourierSpaceData volume_processing_2dx::io::hkz_reader::read(std::string file_path, 
         const volume_processing_2dx::data_structures::VolumeHeader2dx& header)

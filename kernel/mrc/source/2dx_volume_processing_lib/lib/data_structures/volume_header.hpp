@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <math.h>
 
-#include "../symmetization/symmetry2dx.hpp"
+#include "../symmetrization/symmetry2dx.hpp"
 
 namespace volume_processing_2dx
 {

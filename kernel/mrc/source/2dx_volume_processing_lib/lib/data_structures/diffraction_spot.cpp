@@ -6,7 +6,7 @@
 
 #include "diffraction_spot.hpp"
 #include "common_definitions.hpp"
-#include "../utilites/fom_utilities.hpp"
+#include "../utilities/fom_utilities.hpp"
 
 
 namespace ds = volume_processing_2dx::data_structures;

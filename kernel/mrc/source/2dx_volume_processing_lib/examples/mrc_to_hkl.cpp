@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string.h>
 
-#include "../src/data_structures/volume2dx.hpp"
+#include "../include/2dx_volume_processing.h"
 
 int main(int argc, char** argv)
 {

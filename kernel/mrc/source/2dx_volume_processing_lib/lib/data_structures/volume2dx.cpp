@@ -12,11 +12,11 @@
 #include "../io/mrc_writer.hpp"
 #include "../io/hkl_writer.hpp"
 
-#include "../symmetization/symmetry2dx.hpp"
-#include "../symmetization/fourier_symmetrization.hpp"
+#include "../symmetrization/symmetry2dx.hpp"
+#include "../symmetrization/fourier_symmetrization.hpp"
 
-#include "../utilites/filesystem.hpp"
-#include "../utilites/fourier_utilities.hpp"
+#include "../utilities/filesystem.hpp"
+#include "../utilities/fourier_utilities.hpp"
 
 namespace ds = volume_processing_2dx::data_structures;
 

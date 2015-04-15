@@ -8,8 +8,7 @@
 #include <iostream>
 #include <string.h>
 
-#include "../src/data_structures/volume2dx.hpp"
-#include "../src/utilites/angle_utilities.hpp"
+#include "../include/2dx_volume_processing.h"
 
 /**
  * A function to backproject HKZ data and convert it to equally spaced fourier

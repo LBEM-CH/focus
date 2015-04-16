@@ -13,9 +13,9 @@
 
 #include "../symmetrization/symmetry2dx.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
-    namespace data_structures
+    namespace data
     {
         
         /**
@@ -219,7 +219,7 @@ namespace volume_processing_2dx
             * P1, P2, P12, P121, C12, P222, P2221, P22121, C222, P4, P422, P4212, P3, P312, P321, P6, P622
             * Default: P1
             */
-           volume_processing_2dx::symmetrization::Symmetry2dx _symmetry;
+           volume::symmetrization::Symmetry2dx _symmetry;
 
            /**
             * Maximum resolution of the volume in Angstroem

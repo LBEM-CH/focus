@@ -14,9 +14,9 @@
 
 #include "complex2dx.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
-    namespace data_structures
+    namespace data
     {
         /**
          * A class used to store the data of a diffraction spot. 

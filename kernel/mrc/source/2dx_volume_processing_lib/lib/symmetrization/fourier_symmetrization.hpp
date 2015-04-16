@@ -14,7 +14,7 @@
 #include "../data_structures/fourier_space_data.hpp"
 
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace symmetrization
     {
@@ -27,8 +27,8 @@ namespace volume_processing_2dx
              * @param[in/out] fourier_data
              * @param symmetry
              */
-            void symmetrize(volume_processing_2dx::data_structures::FourierSpaceData& fourier_data, 
-                            const volume_processing_2dx::symmetrization::Symmetry2dx& symmetry);
+            void symmetrize(volume::data::FourierSpaceData& fourier_data, 
+                            const volume::symmetrization::Symmetry2dx& symmetry);
             
         }
         

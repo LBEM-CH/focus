@@ -9,13 +9,13 @@
 #include "../utilities/angle_utilities.hpp"
 #include "../utilities/fourier_utilities.hpp"
 
-volume_processing_2dx::data_structures::FourierSpaceData volume_processing_2dx::io::hkz_reader::read(std::string file_path, 
-        const volume_processing_2dx::data_structures::VolumeHeader2dx& header)
+volume::data::FourierSpaceData volume::io::hkz_reader::read(std::string file_path, 
+        const volume::data::VolumeHeader2dx& header)
 {
-    namespace ds = volume_processing_2dx::data_structures;
+    namespace ds = volume::data;
     
     //Check for the presence of file
-    if (!volume_processing_2dx::utilities::filesystem::FileExists(file_path)){
+    if (!volume::utilities::filesystem::FileExists(file_path)){
         std::cerr << "File not found: " << file_path << std::endl;
     }
     
@@ -40,15 +40,15 @@ volume_processing_2dx::data_structures::FourierSpaceData volume_processing_2dx::
             //std::cout << "Reading line: " << h_in << " " << k_in << " " << l_in << "(" << z_in << ")" << " " << amplitude_in << " " << phase_in << "\n"; 
             
             ds::MillerIndex index_in(h_in, k_in, l_in);
-            double resolution =  volume_processing_2dx::utilities::fourier_utilities::GetResolution(
+            double resolution =  volume::utilities::fourier_utilities::GetResolution(
                                         index_in, header.gamma(), header.xlen(), header.ylen(), header.zlen());
 
             //Convert phase to radians
-            phase_in = volume_processing_2dx::utilities::angle_utilities::DegreeToRadian(phase_in);
+            phase_in = volume::utilities::angle_utilities::DegreeToRadian(phase_in);
 
             //Covert also the sphaseIn to radians
             if(sig_phase_in>90) sig_phase_in = 0;
-            sig_phase_in = volume_processing_2dx::utilities::angle_utilities::DegreeToRadian(sig_phase_in);
+            sig_phase_in = volume::utilities::angle_utilities::DegreeToRadian(sig_phase_in);
 
             if(resolution > header.max_resolution())
             {

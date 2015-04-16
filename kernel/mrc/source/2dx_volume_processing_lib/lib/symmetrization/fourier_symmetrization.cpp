@@ -8,11 +8,11 @@
 #include "symmetry_operations.hpp"
 
 
-void volume_processing_2dx::symmetrization::fourier_symmetrization::symmetrize
-        (volume_processing_2dx::data_structures::FourierSpaceData& fourier_data, 
-        const volume_processing_2dx::symmetrization::Symmetry2dx& symmetry)
+void volume::symmetrization::fourier_symmetrization::symmetrize
+        (volume::data::FourierSpaceData& fourier_data, 
+        const volume::symmetrization::Symmetry2dx& symmetry)
 {
-    namespace ds = volume_processing_2dx::data_structures;
+    namespace ds = volume::data;
     ds::DiffractionSpotMultiMap spot_multimap;
     
     for(ds::FourierSpaceData::const_iterator data_iterator= fourier_data.begin(); data_iterator != fourier_data.end(); ++data_iterator)
@@ -31,8 +31,8 @@ void volume_processing_2dx::symmetrization::fourier_symmetrization::symmetrize
             //Loop over all possible symmetry operations
             for(int op_index=0; op_index<30; op_index++)
             {
-                volume_processing_2dx::symmetrization::SymmetryOperations operation = 
-                        volume_processing_2dx::symmetrization::SymmetryOperations(op_index, symmetry.symmetry_code());
+                volume::symmetrization::SymmetryOperations operation = 
+                        volume::symmetrization::SymmetryOperations(op_index, symmetry.symmetry_code());
                 
                 if(!operation.SkipOperation())
                 {

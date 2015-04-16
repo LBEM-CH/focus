@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     std::string mrcFileName = argv[1];
     std::string hklFile = argv[2];
     
-    volume_processing_2dx::data_structures::Volume2dx volume;
+    Volume2dx volume;
     volume.read_volume(mrcFileName, "mrc");
     volume.write_volume(hklFile, "hkl");
     

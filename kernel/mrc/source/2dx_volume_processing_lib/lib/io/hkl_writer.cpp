@@ -8,7 +8,7 @@
 
 
 
-void volume_processing_2dx::io::hkl_writer::write(const std::string& file_path, const volume_processing_2dx::data_structures::FourierSpaceData& data)
+void volume::io::hkl_writer::write(const std::string& file_path, const volume::data::FourierSpaceData& data)
 {
     const int INT_WIDTH = 5;
     const int FLOAT_WIDTH = 13;
@@ -18,7 +18,7 @@ void volume_processing_2dx::io::hkl_writer::write(const std::string& file_path, 
 
     std::cout << "Writing the hkl file.. " << file_path << std::endl;
 
-    for(volume_processing_2dx::data_structures::FourierSpaceData::const_iterator ii=data.begin(); ii!=data.end(); ++ii){
+    for(volume::data::FourierSpaceData::const_iterator ii=data.begin(); ii!=data.end(); ++ii){
         int h = (*ii).first.h();
         int k = (*ii).first.k();
         int l = (*ii).first.l();

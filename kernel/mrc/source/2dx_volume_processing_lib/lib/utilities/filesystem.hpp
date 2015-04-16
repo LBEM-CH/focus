@@ -10,7 +10,7 @@
 #include <iostream>
 #include <string>
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace utilities
     {

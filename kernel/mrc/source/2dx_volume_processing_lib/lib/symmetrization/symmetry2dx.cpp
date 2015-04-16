@@ -6,7 +6,7 @@
 
 #include "symmetry2dx.hpp"
 
-namespace sym = volume_processing_2dx::symmetrization;
+namespace sym = volume::symmetrization;
 
 sym::Symmetry2dx::Symmetry2dx()
 {

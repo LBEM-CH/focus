@@ -7,7 +7,7 @@
 #ifndef NUMBER_UTILS_HPP
 #define	NUMBER_UTILS_HPP
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace utilities
     {

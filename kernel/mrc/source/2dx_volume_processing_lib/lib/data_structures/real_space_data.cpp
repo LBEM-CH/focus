@@ -11,7 +11,7 @@
 #include "real_space_data.hpp"
 
 
-namespace ds = volume_processing_2dx::data_structures;
+namespace ds = volume::data;
 
 ds::RealSpaceData::RealSpaceData()
 {

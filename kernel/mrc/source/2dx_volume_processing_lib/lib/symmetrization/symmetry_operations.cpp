@@ -8,7 +8,7 @@
 #include "../utilities/number_utilities.hpp"
 
 
-namespace sym = volume_processing_2dx::symmetrization;
+namespace sym = volume::symmetrization;
 
 sym::SymmetryOperations::SymmetryOperations(int operator_index, int symmetry_code) 
 {
@@ -37,7 +37,7 @@ void sym::SymmetryOperations::initialize(int operator_index, int symmetry_code)
 void sym::SymmetryOperations::SymmetricMillerIndex(int* h, int* k, int* l) const
 {
     //for sign
-    namespace nu = volume_processing_2dx::utilities::number_utilities;
+    namespace nu = volume::utilities::number_utilities;
     
     int h_old = *h;
     int k_old = *k;

@@ -8,14 +8,14 @@
 
 #include "filesystem.hpp"
 
-bool volume_processing_2dx::utilities::filesystem::FileExists(const std::string file_path)
+bool volume::utilities::filesystem::FileExists(const std::string file_path)
 {
     struct stat buffer;   
     bool result = (stat (file_path.c_str(), &buffer) == 0);
     return result;
 }
 
-std::string volume_processing_2dx::utilities::filesystem::FileExtension(const std::string file_path)
+std::string volume::utilities::filesystem::FileExtension(const std::string file_path)
 {
     std::string extension = "";
     

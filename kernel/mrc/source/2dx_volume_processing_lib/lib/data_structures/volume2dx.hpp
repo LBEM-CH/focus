@@ -15,9 +15,9 @@
 #include "fourier_space_data.hpp"
 #include "../transforms/fourier_transform_fftw.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
-    namespace data_structures
+    namespace data
     {
         /**
          * A class to represent 2D crystallography volume.
@@ -309,7 +309,7 @@ namespace volume_processing_2dx
             /**
              * Transforming between real and Fourier data. To be used for wisdom
              */
-            volume_processing_2dx::transforms::FourierTransformFFTW _transform;
+            volume::transforms::FourierTransformFFTW _transform;
             
             /**
              * Type of data being hold in the volume

@@ -11,7 +11,7 @@
 #include "../data_structures/volume_header.hpp"
 #include "../data_structures/real_space_data.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace io
     {
@@ -24,8 +24,8 @@ namespace volume_processing_2dx
              * @param data
              */
             void write_real(const std::string file_name,
-                            const volume_processing_2dx::data_structures::VolumeHeader2dx& header,
-                            const volume_processing_2dx::data_structures::RealSpaceData& data);
+                            const volume::data::VolumeHeader2dx& header,
+                            const volume::data::RealSpaceData& data);
             
         }
         

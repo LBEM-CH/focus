@@ -7,7 +7,7 @@
 #include "bessel_functions.hpp"
 
 
-double volume_processing_2dx::utilities::bessel_functions::i0(double value)
+double volume::utilities::bessel_functions::i0(double value)
 {
     /*
      * SOURCE: http://www.atnf.csiro.au/computing/software/gipsy/sub/bessel.c
@@ -30,7 +30,7 @@ double volume_processing_2dx::utilities::bessel_functions::i0(double value)
 }
 
 
-double volume_processing_2dx::utilities::bessel_functions::i1(double value)
+double volume::utilities::bessel_functions::i1(double value)
 {
    /*
     * SOURCE: http://www.atnf.csiro.au/computing/software/gipsy/sub/bessel.c

@@ -15,7 +15,7 @@
 
 #include "../data_structures/fourier_space_data.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace io
     {
@@ -27,7 +27,7 @@ namespace volume_processing_2dx
              * @param file_path
              * @param data - input data
              */
-            void write(const std::string& file_path, const volume_processing_2dx::data_structures::FourierSpaceData& data);
+            void write(const std::string& file_path, const volume::data::FourierSpaceData& data);
             
         }
         

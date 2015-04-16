@@ -10,7 +10,7 @@
 #include <math.h>
 #include <list>
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace utilities
     {

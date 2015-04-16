@@ -7,7 +7,7 @@
 #include "complex2dx.hpp"
 
 
-namespace ds = volume_processing_2dx::data_structures;
+namespace ds = volume::data;
 
 ds::Complex2dx::Complex2dx()
 {

@@ -9,7 +9,7 @@
 #include "../utilities/fom_utilities.hpp"
 
 
-namespace ds = volume_processing_2dx::data_structures;
+namespace ds = volume::data;
 
 ds::DiffractionSpot::DiffractionSpot()
 {
@@ -36,7 +36,7 @@ ds::DiffractionSpot::DiffractionSpot(const std::list<DiffractionSpot> spots)
     }
     
     //Get the averaged weight
-    double avg_weight = volume_processing_2dx::utilities::fom_utilities::AverageFOMs(foms);
+    double avg_weight = volume::utilities::fom_utilities::AverageFOMs(foms);
     
     //The averaged value
     ds::Complex2dx avg_value = sum_values*(avg_weight/sum_foms);
@@ -65,7 +65,7 @@ ds::DiffractionSpot ds::DiffractionSpot::operator +(const DiffractionSpot& rhs)
 {
     std::list<double> weights = {this->weight(), rhs.weight()};
     return DiffractionSpot(this->value()+rhs.value(), 
-                           volume_processing_2dx::utilities::fom_utilities::AverageFOMs(weights) 
+                           volume::utilities::fom_utilities::AverageFOMs(weights) 
                           );
 }
 

@@ -9,9 +9,9 @@
 
 #include <iostream>
 
-namespace volume_processing_2dx
+namespace volume
 {
-    namespace data_structures
+    namespace data
     {
         /**
          * A class to store and use Miller Index operations.

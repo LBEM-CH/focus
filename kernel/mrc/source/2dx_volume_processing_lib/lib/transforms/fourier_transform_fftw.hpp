@@ -11,7 +11,7 @@
 #include <fftw3.h>
 #include <math.h>
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace transforms
     {

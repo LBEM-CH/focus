@@ -11,17 +11,17 @@
 #include "../utilities/filesystem.hpp"
 #include "../utilities/angle_utilities.hpp"
 
-namespace ds = volume_processing_2dx::data_structures;
+namespace ds = volume::data;
 
-void volume_processing_2dx::io::mrc_writer::write_real
+void volume::io::mrc_writer::write_real
         (const std::string file_name, 
-        const volume_processing_2dx::data_structures::VolumeHeader2dx& header, 
-        const volume_processing_2dx::data_structures::RealSpaceData& data)
+        const volume::data::VolumeHeader2dx& header, 
+        const volume::data::RealSpaceData& data)
 {
     std::cout << "Writing MRC file to " << file_name << std::endl;
     
     //Check for the existence of the file
-    if(volume_processing_2dx::utilities::filesystem::FileExists(file_name))
+    if(volume::utilities::filesystem::FileExists(file_name))
     {
         std::cout << "WARNING: File.. " << file_name << " already exists. Overwriting!\n";
     }
@@ -36,7 +36,7 @@ void volume_processing_2dx::io::mrc_writer::write_real
     float xlen = (float) header.xlen();
     float ylen = (float) header.ylen();
     float zlen = (float) header.zlen();
-    float gamma = (float) volume_processing_2dx::utilities::angle_utilities::RadianToDegree(header.gamma());
+    float gamma = (float) volume::utilities::angle_utilities::RadianToDegree(header.gamma());
     int zero = 0;
     int mode = 2;
     float ninty = 90.0;

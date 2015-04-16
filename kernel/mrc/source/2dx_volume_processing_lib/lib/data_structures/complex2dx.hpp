@@ -10,9 +10,9 @@
 #include <iostream>
 #include <complex>
 
-namespace volume_processing_2dx
+namespace volume
 {
-    namespace data_structures
+    namespace data
     {
         /**
          * A class used to store complex data in 2dx.

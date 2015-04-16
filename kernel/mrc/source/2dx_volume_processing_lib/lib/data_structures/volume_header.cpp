@@ -3,7 +3,7 @@
 
 #include "../utilities/angle_utilities.hpp"
 
-namespace ds = volume_processing_2dx::data_structures;
+namespace ds = volume::data;
 
 ds::VolumeHeader2dx::VolumeHeader2dx()
 {
@@ -23,7 +23,7 @@ void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
     _xlen = (double) nx;
     _ylen = (double) ny;
     _zlen = (double) nz;
-    set_gamma(volume_processing_2dx::utilities::angle_utilities::DegreeToRadian(90));
+    set_gamma(volume::utilities::angle_utilities::DegreeToRadian(90));
     set_symmetry("P1");
     set_max_resolution(2.0);
     set_membrane_height(1.0);
@@ -72,7 +72,7 @@ void ds::VolumeHeader2dx::set_zlen(double zlen)
 
 void ds::VolumeHeader2dx::set_symmetry(std::string symmetry)
 {
-    _symmetry = volume_processing_2dx::symmetrization::Symmetry2dx(symmetry);
+    _symmetry = volume::symmetrization::Symmetry2dx(symmetry);
 }
 
 void ds::VolumeHeader2dx::set_gamma(double gamma)

@@ -42,10 +42,10 @@ int main(int argc, char** argv)
     
     std::cout << "Reading of arguments done.. \n";
     
-    volume_processing_2dx::data_structures::Volume2dx volume(nx, ny, nz);
+    Volume2dx volume(nx, ny, nz);
     volume.read_volume(hkzFileName, "hkz");
     
-    volume.set_gamma(volume_processing_2dx::utilities::angle_utilities::DegreeToRadian(gamma));
+    volume.set_gamma(volume::utilities::angle_utilities::DegreeToRadian(gamma));
     volume.set_max_resolution(max_resolution);
     volume.set_symmetry(symmetry);
     

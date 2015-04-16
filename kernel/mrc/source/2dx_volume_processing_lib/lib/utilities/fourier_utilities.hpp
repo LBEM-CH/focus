@@ -12,7 +12,7 @@
 
 #include "../data_structures/common_definitions.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace utilities
     {
@@ -29,7 +29,7 @@ namespace volume_processing_2dx
              * @param c cell length c
              * @return resolution
              */
-            double GetResolution(const volume_processing_2dx::data_structures::MillerIndex& index, 
+            double GetResolution(const volume::data::MillerIndex& index, 
                     double gamma, double a, double b, double c);
             
         } // namespace fourier_space

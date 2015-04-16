@@ -13,9 +13,9 @@
 #include "miller_index.hpp"
 #include "diffraction_spot.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
-    namespace data_structures
+    namespace data
     {
         /**
          * A map of Miller Index and diffraction spot. Stores sorted values 

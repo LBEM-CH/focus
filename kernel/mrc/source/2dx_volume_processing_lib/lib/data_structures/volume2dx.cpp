@@ -18,7 +18,7 @@
 #include "../utilities/filesystem.hpp"
 #include "../utilities/fourier_utilities.hpp"
 
-namespace ds = volume_processing_2dx::data_structures;
+namespace ds = volume::data;
 
 ds::Volume2dx::Volume2dx()
 {
@@ -41,7 +41,7 @@ void ds::Volume2dx::initialize(int nx, int ny, int nz)
     _header = ds::VolumeHeader2dx(nx, ny, nz);
     _real = ds::RealSpaceData(nx, ny, nz);
     _fourier = ds::FourierSpaceData();
-    _transform = volume_processing_2dx::transforms::FourierTransformFFTW();
+    _transform = volume::transforms::FourierTransformFFTW();
     _type = NONE;
 }
 
@@ -60,12 +60,12 @@ void ds::Volume2dx::read_volume(std::string file_name, std::string format)
     std::cout << "Reading volume with format: "<< format << std::endl;
     if(format == "hkz")
     {
-       _fourier = volume_processing_2dx::io::hkz_reader::read(file_name, _header);
+       _fourier = volume::io::hkz_reader::read(file_name, _header);
        _type = FOURIER;
     }
     else if (format == "mrc")
     {
-        if(volume_processing_2dx::io::MrcReader(file_name).mrc_to_real(_header, _real))
+        if(volume::io::MrcReader(file_name).mrc_to_real(_header, _real))
         {
             _type = REAL;
         }
@@ -81,7 +81,7 @@ void ds::Volume2dx::read_volume(std::string file_name, std::string format)
 
 void ds::Volume2dx::read_volume(std::string file_name)
 {
-    std::string format = volume_processing_2dx::utilities::filesystem::FileExtension(file_name);
+    std::string format = volume::utilities::filesystem::FileExtension(file_name);
     
     read_volume(file_name, format);
 }
@@ -91,11 +91,11 @@ void ds::Volume2dx::write_volume(std::string file_name, std::string format)
     std::cout << "Writing volume with format: "<< format << std::endl;
     if(format == "hkl")
     {
-        volume_processing_2dx::io::hkl_writer::write(file_name, get_fourier());
+        volume::io::hkl_writer::write(file_name, get_fourier());
     }
     else if (format == "mrc")
     {
-        volume_processing_2dx::io::mrc_writer::write_real(file_name, _header, get_real());
+        volume::io::mrc_writer::write_real(file_name, _header, get_real());
     }
     else
     {
@@ -105,21 +105,21 @@ void ds::Volume2dx::write_volume(std::string file_name, std::string format)
 
 void ds::Volume2dx::write_volume(std::string file_name)
 {
-    std::string format = volume_processing_2dx::utilities::filesystem::FileExtension(file_name);
+    std::string format = volume::utilities::filesystem::FileExtension(file_name);
     write_volume(file_name, format);
 }
 
 double ds::Volume2dx::resolution_at(int h, int k, int l) const
 {
     ds::MillerIndex index(h, k, l);
-    return volume_processing_2dx::utilities::fourier_utilities::GetResolution(index, _header.gamma(), _header.xlen(), _header.ylen(), _header.zlen());
+    return volume::utilities::fourier_utilities::GetResolution(index, _header.gamma(), _header.xlen(), _header.ylen(), _header.zlen());
 }
 
 void ds::Volume2dx::symmetrize()
 {
     std::cout << "Symmetrizing with symmetry: " << symmetry() << std::endl;
-    volume_processing_2dx::symmetrization::Symmetry2dx sym(_header.symmetry());
-    volume_processing_2dx::symmetrization::fourier_symmetrization::symmetrize(_fourier, sym);
+    volume::symmetrization::Symmetry2dx sym(_header.symmetry());
+    volume::symmetrization::fourier_symmetrization::symmetrize(_fourier, sym);
 }
 
 bool ds::Volume2dx::has_fourier() const

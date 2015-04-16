@@ -9,7 +9,7 @@
 #include "../utilities/binary_file_utilities.hpp"
 #include "../utilities/angle_utilities.hpp"
 
-namespace io = volume_processing_2dx::io;
+namespace io = volume::io;
 
 io::MrcReader::MrcReader(std::string file_name)
 {
@@ -28,8 +28,8 @@ bool io::MrcReader::initialize(std::string file_name)
 }
 
 bool io::MrcReader::mrc_to_real(
-            volume_processing_2dx::data_structures::VolumeHeader2dx& header, 
-            volume_processing_2dx::data_structures::RealSpaceData& data)
+            volume::data::VolumeHeader2dx& header, 
+            volume::data::RealSpaceData& data)
 {
     
     
@@ -47,7 +47,7 @@ bool io::MrcReader::mrc_to_real(
     header.set_xlen((double)xlen);
     header.set_ylen((double)ylen);
     header.set_zlen((double)zlen);
-    header.set_gamma(volume_processing_2dx::utilities::angle_utilities::DegreeToRadian(
+    header.set_gamma(volume::utilities::angle_utilities::DegreeToRadian(
                       (double)gamma));
     
     
@@ -71,7 +71,7 @@ bool io::MrcReader::read_header(std::string file_name)
     file.seekg (0, std::ios::beg);
     try
     {
-        namespace bf = volume_processing_2dx::utilities::binary_file_utilities;
+        namespace bf = volume::utilities::binary_file_utilities;
         //Read the header
         nx = bf::read_int(file);
         std::cout << "nx = " << nx << std::endl;
@@ -137,7 +137,7 @@ bool io::MrcReader::read_data(std::string file_name)
     std::ifstream file(file_name, std::ios::in|std::ios::binary);
     
     long input_size = mx*my*mz;
-    long file_size = volume_processing_2dx::utilities::binary_file_utilities::file_size(file_name);
+    long file_size = volume::utilities::binary_file_utilities::file_size(file_name);
     long memory_size = (int)(file_size - 1024)/4;
     
     std::cout << "Sizes (in number of floats):\n";
@@ -154,7 +154,7 @@ bool io::MrcReader::read_data(std::string file_name)
     _data = (float*) malloc(input_size*sizeof(float));
     for(int itr_memory=0; itr_memory < input_size; ++itr_memory)
     {
-        _data[itr_memory] = volume_processing_2dx::utilities::binary_file_utilities::read_float(file);
+        _data[itr_memory] = volume::utilities::binary_file_utilities::read_float(file);
     }
     
     std::cout << "Data reading done.\n";

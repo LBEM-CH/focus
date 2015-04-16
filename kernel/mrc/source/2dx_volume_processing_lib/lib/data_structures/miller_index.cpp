@@ -7,7 +7,7 @@
 #include "miller_index.hpp"
 
 
-namespace ds = volume_processing_2dx::data_structures;
+namespace ds = volume::data;
 
 ds::MillerIndex::MillerIndex()
 {

@@ -15,7 +15,7 @@
 #include "../data_structures/volume_header.hpp"
 #include "../data_structures/fourier_space_data.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace io
     {
@@ -29,8 +29,8 @@ namespace volume_processing_2dx
              * @param[in] header
              * @return fourier_data
              */
-            volume_processing_2dx::data_structures::FourierSpaceData read(std::string file_path,
-                    const volume_processing_2dx::data_structures::VolumeHeader2dx& header);
+            volume::data::FourierSpaceData read(std::string file_path,
+                    const volume::data::VolumeHeader2dx& header);
             
             
         }

@@ -14,7 +14,7 @@
 #include "../data_structures/volume_header.hpp"
 #include "../data_structures/real_space_data.hpp"
 
-namespace volume_processing_2dx
+namespace volume
 {
     namespace io
     {
@@ -34,8 +34,8 @@ namespace volume_processing_2dx
              * @param data
              * @return 
              */
-            bool mrc_to_real(volume_processing_2dx::data_structures::VolumeHeader2dx& header,
-                             volume_processing_2dx::data_structures::RealSpaceData& data);
+            bool mrc_to_real(volume::data::VolumeHeader2dx& header,
+                             volume::data::RealSpaceData& data);
             
         private:
             

@@ -8,9 +8,9 @@
 #ifndef REAL_SPACE_DATA_HPP
 #define	REAL_SPACE_DATA_HPP
 
-namespace volume_processing_2dx
+namespace volume
 {
-    namespace data_structures
+    namespace data
     {
         /**
          * A class to sore real space data in a double array format.

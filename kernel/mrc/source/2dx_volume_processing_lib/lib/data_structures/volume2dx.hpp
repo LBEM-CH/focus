@@ -221,6 +221,24 @@ namespace volume
              * Symmetrizes the volume.
              */
             void symmetrize();
+            
+            /**
+             * Fetches the real valued density at (x,y,z) from the volume
+             * @param x
+             * @param y
+             * @param z
+             * @return real valued density
+             */
+            double density_at(int x, int y, int z);
+            
+            /**
+             * Generates a bead model of the current volume and writes it in a PDB file
+             * @param no_of_beads
+             * @param density_threshold
+             * @param noise_level
+             * @param pdb_file
+             */
+            void write_bead_model_pdb(int no_of_beads, double density_threshold, double noise_level, std::string pdb_file);
 
         private:
             

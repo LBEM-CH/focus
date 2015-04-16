@@ -17,6 +17,7 @@
 
 #include "../utilities/filesystem.hpp"
 #include "../utilities/fourier_utilities.hpp"
+#include "../utilities/bead_model_generator.hpp"
 
 namespace ds = volume::data;
 
@@ -189,6 +190,17 @@ void ds::Volume2dx::real_from_fourier()
     else if(_type == NONE) {
         std::cerr << "Hey, Real data cannot be set! Fourier data not in memory. Did you forget to set the data?";
     }
+}
+
+void ds::Volume2dx::write_bead_model_pdb(int no_of_beads, double density_threshold, double noise_level, std::string pdb_file)
+{
+    volume::utilities::BeadModelGenerator generator(no_of_beads, density_threshold, noise_level);
+    generator.generate_bead_model_coordinates(*this, pdb_file);
+}
+
+double ds::Volume2dx::density_at(int x, int y, int z)
+{
+    return get_real().get_value_at(x,y,z);
 }
 
 int ds::Volume2dx::nx() const

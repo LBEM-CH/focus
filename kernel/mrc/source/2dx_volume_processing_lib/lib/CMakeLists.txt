@@ -28,8 +28,6 @@ find_package(FFTW REQUIRED)
 #==============================#
 add_library(2dx_volume_processing ${PROJECT_SOURCES})
 
-target_include_directories (2dx_volume_processing PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
 
 #==============================#
 # Installation                 #

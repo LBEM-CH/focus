@@ -25,9 +25,6 @@ find_package(FFTW REQUIRED)
 # Include Directories          #
 #==============================#
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
-if(APPLE)
-	include_directories(/opt/local/include)
-endif(APPLE)
 
 #=============================#
 # Create Executables          # 

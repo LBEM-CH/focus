@@ -62,7 +62,7 @@ void volume::io::mrc_writer::write_real
     file.seekp(1024);
     for(int id=0; id < data.size(); id++ )
     {
-        long write_id = data.size() - id;
+        long write_id = data.size() - id - 1;
         float value = (float)data.get_value_at(write_id);
         file.write((char*)&value, sizeof(float));
     }

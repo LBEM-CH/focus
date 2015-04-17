@@ -100,7 +100,18 @@ namespace volume
              */
             int memory_id(int x, int y, int z) const ;
             
+            /**
+             * Sorts the real space data and returns the sorted id's
+             * @return the sorted id's
+             */
+            int* density_sorted_ids();
             
+            /**
+             * Sorts the real space data according to density values
+             * and returns the values
+             * @return 
+             */
+            double* density_sorted_values();
             
         private:
             /**

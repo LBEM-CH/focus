@@ -239,6 +239,32 @@ namespace volume
              * @param pdb_file
              */
             void write_bead_model_pdb(int no_of_beads, double density_threshold, double noise_level, std::string pdb_file);
+            
+            /**
+             * Generates the density histogram from the reference and applies 
+             * it fractionally/partially to the current volume.
+             * Internally, the highest value of density of the volume is partially set to 
+             * the highest value from reference volume and same is done for all
+             * other densities. With partial it is meant that:
+             * new_density = fraction*reference_density + (1-fraction)*(old_density)
+             * fraction = 1.0 will completely change the map
+             * 
+             * @param reference - Reference volume to be used to get density histogram
+             * @param fraction - The fraction (between 0 and 1) with which the density values
+             *                   from reference map is to be applied.
+             */
+            void apply_density_histogram(Volume2dx reference, double fraction);
+            
+            /**
+             * Generates the density histogram from the reference and applies 
+             * it the current volume.
+             * Internally, the highest value of density of the volume is set to 
+             * the highest value from reference volume and same is done for all
+             * other densities.
+             * 
+             * @param reference - Reference volume to be used to get density histogram
+             */
+            void apply_density_histogram(Volume2dx reference);
 
         private:
             

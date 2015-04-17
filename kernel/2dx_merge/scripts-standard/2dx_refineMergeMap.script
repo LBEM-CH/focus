@@ -374,7 +374,7 @@ while ($i <= ${number_sf_hist_iterations})
     #
     \rm -f ${output_prefix}_sf_hist.mrc
     #
-    ${bin_2dx}/maphist.exe ${output_prefix}_sf.mrc ${bead_model_mrc} ${output_prefix}_sf_hist.mrc
+    ${bin_2dx}/2dx_volume_processing/match_density_histogram.exe ${output_prefix}_sf.mrc ${bead_model_mrc} ${output_prefix}_sf_hist.mrc
     #
     set output_prefix = "${output_prefix}_sf_hist"
     @ i = $i + 1

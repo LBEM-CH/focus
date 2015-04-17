@@ -198,6 +198,49 @@ void ds::Volume2dx::write_bead_model_pdb(int no_of_beads, double density_thresho
     generator.generate_bead_model_coordinates(*this, pdb_file);
 }
 
+void ds::Volume2dx::apply_density_histogram(Volume2dx reference)
+{
+    apply_density_histogram(reference, 1.0);
+}
+
+void ds::Volume2dx::apply_density_histogram(Volume2dx reference, double fraction)
+{
+    //Check the fraction
+    if(fraction < 0.0 || fraction > 1.0)
+    {
+        std::cerr << "ERROR! The density histogram fraction can only be between 0 and 1";
+        return;
+    }
+    
+    RealSpaceData ref_real = reference.get_real();
+    RealSpaceData this_real = this->get_real();
+    
+    //Check the size of reference
+    if(ref_real.size() != this_real.size())
+    {
+        std::cerr << "ERROR! The size of reference volume " << ref_real.size() 
+                  << " does not match to this volume's size " << this_real.size()
+                  << std::endl;
+        return;
+    }
+    
+    
+    double* sorted_ref_values = ref_real.density_sorted_values();
+    int* sorted_ids = this_real.density_sorted_ids();
+    
+    RealSpaceData new_data(nx(), ny(), nz());
+    for(int id=0; id<this_real.size(); id++)
+    {
+        int sorted_id = sorted_ids[id];
+        double old_density = this_real.get_value_at(sorted_id);
+        double new_density = sorted_ref_values[id]*fraction + old_density*(1-fraction);
+        new_data.set_value_at(sorted_id, new_density);
+    }
+    
+    this->set_real(new_data);
+    
+}
+
 double ds::Volume2dx::density_at(int x, int y, int z)
 {
     return get_real().get_value_at(x,y,z);

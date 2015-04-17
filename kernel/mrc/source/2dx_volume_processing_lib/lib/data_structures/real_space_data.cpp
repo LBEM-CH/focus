@@ -9,6 +9,7 @@
 #include <string>
 
 #include "real_space_data.hpp"
+#include "../utilities/density_value_sorter.hpp"
 
 
 namespace ds = volume::data;
@@ -60,7 +61,7 @@ double ds::RealSpaceData::get_value_at(int x, int y, int z) const
     }
     else
     {
-        throw new std::out_of_range
+        throw std::out_of_range
                 ("ERROR! Fetching value got out of bound indices: " + std::to_string(x) + ", " + 
                   std::to_string(y) + ", " + std::to_string(z) + "\n");
     }
@@ -74,7 +75,7 @@ double ds::RealSpaceData::get_value_at(int id) const
     }
     else
     {
-        throw new std::out_of_range
+        throw std::out_of_range
                 ("ERROR! Fetching value got out of bound indices: " + std::to_string(id) + "\n");
     }
 }
@@ -87,7 +88,7 @@ void ds::RealSpaceData::set_value_at(int x, int y, int z, double value)
     }
     else
     {
-        throw new std::out_of_range
+        throw std::out_of_range
                 ("ERROR! Setting value got out of bound indices: " + std::to_string(x) + ", " + 
                   std::to_string(y) + ", " + std::to_string(z) + "\n");
     }
@@ -101,7 +102,7 @@ void ds::RealSpaceData::set_value_at(int id, double value)
     }
     else
     {
-        throw new std::out_of_range
+        throw std::out_of_range
                 ("ERROR! Setting value got out of bound indices: " + std::to_string(id) + "\n");
     }
 }
@@ -126,4 +127,16 @@ int ds::RealSpaceData::memory_id(int x, int y, int z) const
 long ds::RealSpaceData::size() const
 {
     return _nx*_ny*_nz;
+}
+
+int* ds::RealSpaceData::density_sorted_ids()
+{
+    volume::utilities::DensityValueSorter sorter(size(), _data);
+    return sorter.get_sorted_ids();
+}
+
+double* ds::RealSpaceData::density_sorted_values()
+{
+    volume::utilities::DensityValueSorter sorter(size(), _data);
+    return sorter.get_sorted_values();
 }

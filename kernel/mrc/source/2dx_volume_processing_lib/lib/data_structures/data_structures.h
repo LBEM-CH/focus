@@ -3,5 +3,6 @@
 #include "fourier_space_data.hpp"
 #include "miller_index.hpp"
 #include "real_space_data.hpp"
+#include "structure_factor.hpp"
 #include "volume_header.hpp"
 #include "volume2dx.hpp"

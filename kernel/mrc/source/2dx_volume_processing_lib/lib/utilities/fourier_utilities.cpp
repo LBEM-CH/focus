@@ -25,19 +25,31 @@ double volume::utilities::fourier_utilities::GetResolution
     double vz = factor*cos(gamma)/(sin(gamma)*b);
     double wz = factor/(c*sin(gamma));
     
-    double resolution_x = index.h() * ux;
-    double resolution_y = index.k() * vy;
-    double resolution_z = index.k() * vz + index.l() * wz;
-     
+    double resolution_x_f = index.h() * ux;
+    double resolution_y_f = index.k() * vy;
+    double resolution_z_f = index.k() * vz + index.l() * wz;
+    
+    //Infinite resolution
+    double resolution_x = 10000;
+    double resolution_y = 10000;
+    double resolution_z = 10000;
+    
+    if(resolution_x_f != 0 ) resolution_x = 1/resolution_x_f;
+    if(resolution_y_f != 0 ) resolution_y = 1/resolution_y_f;
+    if(resolution_z_f != 0 ) resolution_z = 1/resolution_z_f;
+    
     double final_resolution = sqrt(resolution_x*resolution_x + resolution_y*resolution_y + resolution_z*resolution_z);
     
     //Default resolution
-    double result = 1000;
-    if(final_resolution != 0)
-    {
-        result = 1/final_resolution;
-    }
-    //std::cout << "Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << result << "\n";
+    double result = final_resolution;
     
+    /*
+    //Sanity Check
+    if(result < 2.0)
+    {
+        std::cout << "Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << result << "\n";
+        std::cout << resolution_x << " " << resolution_y << " " << resolution_z << "\n";
+    }
+    */
     return result;
 }

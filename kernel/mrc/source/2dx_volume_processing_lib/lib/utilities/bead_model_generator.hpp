@@ -12,6 +12,7 @@
 #include <fstream>
 
 #include "../data_structures/volume2dx.hpp"
+#include "../data_structures/real_space_data.hpp"
 
 namespace volume 
 {
@@ -33,6 +34,13 @@ namespace volume
              */
             BeadModelGenerator(int number_of_beads, double density_threshold, double noise_level);
 
+            /**
+             * Generate the bead model from volume.
+             * @param input volume
+             * @return output real space data
+             */
+            volume::data::RealSpaceData generate_bead_model_volume(volume::data::Volume2dx volume);
+            
             /**
              * Generate the bead model from volume and write the output pdb.
              * @param volume

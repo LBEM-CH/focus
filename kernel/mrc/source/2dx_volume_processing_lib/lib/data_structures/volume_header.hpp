@@ -7,6 +7,7 @@
 #ifndef VOLUME_HEADER_HPP
 #define	VOLUME_HEADER_HPP
 
+#include <iostream>
 #include <string>
 #include <stdexcept>
 #include <math.h>
@@ -47,6 +48,12 @@ namespace volume
              * @param nz
              */
             void reset_size(int nx, int ny, int nz);
+            
+            /**
+             * Returns an output-able string of the header
+             * @return 
+             */
+            std::string to_string() const;
             
             /**
              * Returns the size of the x-dimension

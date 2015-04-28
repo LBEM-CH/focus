@@ -11,24 +11,24 @@ namespace ds = volume::data;
 
 ds::MillerIndex::MillerIndex()
 {
-    this->initialize(0, 0, 0);
+    initialize(0, 0, 0);
 }
 
 ds::MillerIndex::MillerIndex(int h, int k, int l)
 {
-    this->initialize(h, k, l);
+    initialize(h, k, l);
 }
 
 ds::MillerIndex::MillerIndex(const MillerIndex& copy)
 {
-    this->initialize(copy.h(), copy.k(), copy.l());
+    initialize(copy.h(), copy.k(), copy.l());
 }
 
 void ds::MillerIndex::initialize(int h, int k, int l)
 {
-    this->_h = h;
-    this->_k = k;
-    this->_l = l;
+    _h = h;
+    _k = k;
+    _l = l;
 }
 
 ds::MillerIndex& ds::MillerIndex::operator =(const MillerIndex& rhs)
@@ -73,6 +73,12 @@ int ds::MillerIndex::k() const
 int ds::MillerIndex::l() const
 {
     return _l;
+}
+
+std::string ds::MillerIndex::to_string() const
+{
+    std::string result = "(" + std::to_string(h()) + ", " + std::to_string(k()) + ", " + std::to_string(l()) +")";
+    return result;
 }
 
 ds::MillerIndex ds::MillerIndex::FriedelSpot() const

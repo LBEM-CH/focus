@@ -16,8 +16,6 @@ void volume::io::hkl_writer::write(const std::string& file_path, const volume::d
 
     std::ofstream hklFile(file_path);
 
-    std::cout << "Writing the hkl file.. " << file_path << std::endl;
-
     for(volume::data::FourierSpaceData::const_iterator ii=data.begin(); ii!=data.end(); ++ii){
         int h = (*ii).first.h();
         int k = (*ii).first.k();

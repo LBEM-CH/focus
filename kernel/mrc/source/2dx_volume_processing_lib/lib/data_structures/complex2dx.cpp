@@ -11,28 +11,23 @@ namespace ds = volume::data;
 
 ds::Complex2dx::Complex2dx()
 {
-    this->initialize(0, 0);
+    initialize(0, 0);
 }
 
 ds::Complex2dx::Complex2dx(double real, double imag)
 {
-    this->initialize(real, imag);
-}
-
-ds::Complex2dx::Complex2dx(const Complex2dx& copy)
-{
-    this->initialize(copy.real(), copy.imag());
+    initialize(real, imag);
 }
 
 void ds::Complex2dx::initialize(double real, double imag)
 {
-    this->set_real(real);
-    this->set_imag(imag);
+    set_real(real);
+    set_imag(imag);
 }
 
 ds::Complex2dx& ds::Complex2dx::operator =(const ds::Complex2dx& rhs)
 {
-    this->initialize(rhs.real(), rhs.imag());
+    initialize(rhs.real(), rhs.imag());
     return *this;
 }
 
@@ -76,6 +71,11 @@ double ds::Complex2dx::phase() const
     return std::arg(std::complex<double>(real(), imag()));
 }
 
+double ds::Complex2dx::intensity() const
+{
+    return amplitude()*amplitude();
+}
+
 void ds::Complex2dx::set_real(double real)
 {
     this->_real = real;
@@ -89,8 +89,12 @@ void ds::Complex2dx::set_imag(double imag)
 void ds::Complex2dx::set_amplitude(double amplitude)
 {
     double current_amplitude = this->amplitude();
-    this->set_real(amplitude/current_amplitude);
-    this->set_imag(amplitude/current_amplitude);
+    double current_real = this->real();
+    double current_imag = this->imag();
+    double scale = 0.0;
+    if(current_amplitude != 0.0) scale = amplitude/current_amplitude;
+    this->set_real(current_real*(scale));
+    this->set_imag(current_imag*(scale));
 }
 
 void ds::Complex2dx::set_phase(double phase)

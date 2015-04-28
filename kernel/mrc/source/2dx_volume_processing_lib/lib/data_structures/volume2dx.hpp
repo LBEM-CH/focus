@@ -13,6 +13,7 @@
 #include "volume_header.hpp"
 #include "real_space_data.hpp"
 #include "fourier_space_data.hpp"
+#include "structure_factor.hpp"
 #include "../transforms/fourier_transform_fftw.hpp"
 
 namespace volume
@@ -28,10 +29,6 @@ namespace volume
         class Volume2dx
         {
         public:
-            /**
-             * Default constructor. Generates an empty volume.
-             */
-            Volume2dx();
             
             /**
              * Generates an empty volume with given size
@@ -39,7 +36,7 @@ namespace volume
              * @param ny
              * @param nz
              */
-            Volume2dx(int nx, int ny, int nz);
+            Volume2dx(int nx=0, int ny=0, int nz=0);
             
             /**
              * Resets the volume with given size and empty data
@@ -48,6 +45,12 @@ namespace volume
              * @param nz
              */
             void reset(int nx, int ny, int nz);
+            
+            /**
+             * Returns a output-able version of the volume
+             * @return string converted volume
+             */
+            std::string to_string() const;
             
             /**
              * Gets the real space x dimension of the volume
@@ -232,6 +235,55 @@ namespace volume
             double density_at(int x, int y, int z);
             
             /**
+             * Returns the Fourier data.
+             * Checks if the data is initialized, if not then does initialization
+             * @return Fourier Space data
+             */
+            FourierSpaceData get_fourier();
+            
+            /**
+             * Returns the Real space data.
+             * Checks if the data is initialized, if not then does initialization
+             * @return Real space data
+             */
+            RealSpaceData get_real();
+            
+            /**
+             * Prepares the Fourier data, and brings it to memory. Call this
+             * function if you know before-hand that Fourier space data will be required.
+             */
+            void prepare_fourier();
+            
+            /**
+             * Prepares the real space and brings it to memory. Call this
+             * function if you know before-hand that real space data will be required.
+             */
+            void prepare_real();
+            
+            /**
+             * Calculates the structure factors. 
+             * Structure factors are given as the sum of the intensities of all
+             * the spots lying in that resolution range. Internally, the Fourier
+             * space is divided in the number of bins and the intensity of a
+             * particular spot is added to the correct bin.
+             * 
+             * @param resolution_bins - number of bins.
+             * @return instance of class Structure Factors.
+             */
+            StructureFactors calculate_structure_factors(int resolution_bins);
+            
+            /**
+             * Apply the structure factors. The factors are applied partially with the
+             * fraction provided. the highest intensity in the radial distribution 
+             * is kept intact.
+             * 
+             * @param structure_factors
+             * @param fraction
+             * @see calculate_structure_factors
+             */
+            void apply_structure_factors(StructureFactors structure_factors, double fraction);
+            
+            /**
              * Generates a bead model of the current volume and writes it in a PDB file
              * @param no_of_beads
              * @param density_threshold
@@ -239,6 +291,21 @@ namespace volume
              * @param pdb_file
              */
             void write_bead_model_pdb(int no_of_beads, double density_threshold, double noise_level, std::string pdb_file);
+            
+            /**
+             * Generates a bead model of the current volume
+             * @param no_of_beads
+             * @param density_threshold
+             * @param noise_level
+             * @return volume
+             */
+            Volume2dx generate_bead_model(int no_of_beads, double density_threshold, double noise_level);
+            
+            /**
+             * Centers the density along the z axis. Internally adds PI*miller_index_l 
+             * to the phase
+             */
+            void centerize_density_along_z();
             
             /**
              * Generates the density histogram from the reference and applies 
@@ -300,20 +367,6 @@ namespace volume
             bool has_real() const;
             
             /**
-             * Returns the Fourier data.
-             * Checks if the data is initialized, if not then does initialization
-             * @return Fourier Space data
-             */
-            FourierSpaceData get_fourier();
-            
-            /**
-             * Returns the Real space data.
-             * Checks if the data is initialized, if not then does initialization
-             * @return Real space data
-             */
-            RealSpaceData get_real();
-            
-            /**
              * Sets the Fourier data
              * @param fourier
              */
@@ -338,22 +391,22 @@ namespace volume
             /**
              * Information of the volume
              */
-            VolumeHeader2dx _header;
+            VolumeHeader2dx* _header;
             
             /**
              * Real space data
              */
-            RealSpaceData _real;
+            RealSpaceData* _real;
             
             /**
              * Fourier space data
              */
-            FourierSpaceData _fourier;
+            FourierSpaceData* _fourier;
             
             /**
              * Transforming between real and Fourier data. To be used for wisdom
              */
-            volume::transforms::FourierTransformFFTW _transform;
+            volume::transforms::FourierTransformFFTW* _transform;
             
             /**
              * Type of data being hold in the volume

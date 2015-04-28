@@ -13,12 +13,12 @@ namespace ds = volume::data;
 
 ds::DiffractionSpot::DiffractionSpot()
 {
-    this->initialize(Complex2dx(0.0, 0.0), 0.0);
+    initialize(Complex2dx(0.0, 0.0), 0.0);
 }
 
 ds::DiffractionSpot::DiffractionSpot(Complex2dx value, double weight)
 {
-    this->initialize(value, weight);
+    initialize(value, weight);
 }
 
 ds::DiffractionSpot::DiffractionSpot(const std::list<DiffractionSpot> spots)
@@ -44,15 +44,10 @@ ds::DiffractionSpot::DiffractionSpot(const std::list<DiffractionSpot> spots)
     this->initialize(avg_value, avg_weight);
 }
 
-ds::DiffractionSpot::DiffractionSpot(const DiffractionSpot& copy)
-{
-    this->initialize(copy.value(), copy.weight());
-}
-
 void ds::DiffractionSpot::initialize(Complex2dx value, double weight)
 {
-    this->set_value(value);
-    this->set_weight(weight);
+    set_value(value);
+    set_weight(weight);
 }
 
 ds::DiffractionSpot& ds::DiffractionSpot::operator =(const DiffractionSpot& rhs)
@@ -63,7 +58,9 @@ ds::DiffractionSpot& ds::DiffractionSpot::operator =(const DiffractionSpot& rhs)
 
 ds::DiffractionSpot ds::DiffractionSpot::operator +(const DiffractionSpot& rhs)
 {
-    std::list<double> weights = {this->weight(), rhs.weight()};
+    std::list<double> weights;
+    weights.push_back(this->weight());
+    weights.push_back(rhs.weight());
     return DiffractionSpot(this->value()+rhs.value(), 
                            volume::utilities::fom_utilities::AverageFOMs(weights) 
                           );
@@ -89,6 +86,21 @@ ds::Complex2dx ds::DiffractionSpot::value() const
 double ds::DiffractionSpot::weight() const
 {
     return _weight;
+}
+
+double ds::DiffractionSpot::amplitude() const
+{
+    return value().amplitude();
+}
+
+double ds::DiffractionSpot::phase() const
+{
+    return value().phase();
+}
+
+double ds::DiffractionSpot::intensity() const
+{
+    return value().intensity();
 }
 
 void ds::DiffractionSpot::set_value(Complex2dx value)

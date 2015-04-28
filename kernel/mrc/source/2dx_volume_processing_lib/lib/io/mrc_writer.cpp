@@ -18,8 +18,6 @@ void volume::io::mrc_writer::write_real
         const volume::data::VolumeHeader2dx& header, 
         const volume::data::RealSpaceData& data)
 {
-    std::cout << "Writing MRC file to " << file_name << std::endl;
-    
     //Check for the existence of the file
     if(volume::utilities::filesystem::FileExists(file_name))
     {
@@ -39,6 +37,9 @@ void volume::io::mrc_writer::write_real
     float gamma = (float) volume::utilities::angle_utilities::RadianToDegree(header.gamma());
     int zero = 0;
     int mode = 2;
+    int mapc = 1;
+    int maps = 2;
+    int mapr = 3;
     float ninty = 90.0;
     file.write((char*)&nx, sizeof(int));
     file.write((char*)&ny, sizeof(int));
@@ -56,7 +57,12 @@ void volume::io::mrc_writer::write_real
     file.write((char*)&ninty, sizeof(float));
     file.write((char*)&ninty, sizeof(float));
     file.write((char*)&gamma, sizeof(float));
-    for(int i=0; i<240; i++) file.write((char*)&zero, sizeof(float));
+    file.write((char*)&mapc, sizeof(int));
+    file.write((char*)&mapr, sizeof(int));
+    file.write((char*)&maps, sizeof(int));
+    
+    //Fill the rest of data with zeros
+    for(int i=0; i<237; i++) file.write((char*)&zero, sizeof(float));
     
     //Write the data
     file.seekp(1024);
@@ -68,6 +74,4 @@ void volume::io::mrc_writer::write_real
     }
     
     file.close();
-    
-    std::cout << "File written.\n";
 }

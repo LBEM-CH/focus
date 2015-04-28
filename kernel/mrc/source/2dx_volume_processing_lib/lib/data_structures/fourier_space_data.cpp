@@ -80,6 +80,22 @@ bool ds::FourierSpaceData::exists(int h, int k, int l) const
 
 }
 
+double ds::FourierSpaceData::intensity_sum() const
+{
+    double sum = 0.0;
+    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
+    {
+        sum += (*ref).second.intensity();
+    }
+    
+    return sum;
+}
+
+int ds::FourierSpaceData::spots() const
+{
+    return _data->size();
+}
+
 void ds::FourierSpaceData::set_value_at(int h, int k, int l, Complex2dx value, double weight)
 {
     MillerIndex index = MillerIndex(h, k, l);

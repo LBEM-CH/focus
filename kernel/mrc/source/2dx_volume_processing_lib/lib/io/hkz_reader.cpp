@@ -19,8 +19,6 @@ volume::data::FourierSpaceData volume::io::hkz_reader::read(std::string file_pat
         std::cerr << "File not found: " << file_path << std::endl;
     }
     
-    std::cout << "Reading HKZ file: " << file_path << std::endl;
-    
     //Multi-map to put all the possible diffraction spots
     ds::DiffractionSpotMultiMap spot_multimap;
 
@@ -72,8 +70,6 @@ volume::data::FourierSpaceData volume::io::hkz_reader::read(std::string file_pat
 
     //Assign the data to fourier_space
     ds::FourierSpaceData fourier_data(spot_multimap);
-    
-    std::cout << "Data read complete.\n";
     
     return fourier_data;
 }

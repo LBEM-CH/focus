@@ -32,7 +32,7 @@ double ft::FourierTransformFFTW::NormalizationFactor()
 
 void ft::FourierTransformFFTW::Replan(double* real_data, fftw_complex* complex_data, int nx, int ny, int nz)
 {
-    std::cout << "Re-planning\n";
+    std::cout << "Re-planning.. ";
     _nx = nx;
     _ny = ny;
     _nz = nz;
@@ -43,11 +43,8 @@ void ft::FourierTransformFFTW::Replan(double* real_data, fftw_complex* complex_d
 
 void ft::FourierTransformFFTW::RealToComplex(int nx, int ny, int nz, double* real_data, fftw_complex* complex_data)
 {   
-    std::cout << "Converting Real to complex.. with "<< nx << " " << ny << " " << nz <<"\n";
-    std::cout << "Current class size: " << _nx << " " << _ny << " " << _nz <<"\n";
     //Re-plan if required
     if(_nx != nx || _ny != ny || _nz != nz){
-        std::cout << "Should recreate plans..\n";
         this->Replan(real_data, complex_data, nx, ny, nz);
     }
 
@@ -55,14 +52,12 @@ void ft::FourierTransformFFTW::RealToComplex(int nx, int ny, int nz, double* rea
     fftw_execute_dft_r2c(_plan_r2c, real_data, complex_data );
 
     //Normalize
-    std::cout << "Normalizing.. \n";
     double factor = this->NormalizationFactor();
     for(int i=0; i<this->FourierSize(); i++) 
     { 
       ((fftw_complex*)complex_data)[i][0] *= factor; 
       ((fftw_complex*)complex_data)[i][1] *= -1*factor;
     }
-    std::cout << "Done with transforming real to complex.\n";
 
 }
 

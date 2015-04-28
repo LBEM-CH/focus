@@ -32,13 +32,13 @@ namespace volume
              * Returns the sorted array id's
              * @return ids of the sorted array
              */
-            int* get_sorted_ids() const;
+            int* get_sorted_ids();
             
             /**
              * Returns the sorted values
              * @return sorted values
              */
-            double* get_sorted_values() const;
+            double* get_sorted_values();
             
         private:
             /**

@@ -6,8 +6,11 @@
 
 #include <iomanip> 
 
+#include "../data_structures/real_space_data.hpp"
+
 #include "bead_model_generator.hpp"
 #include "angle_utilities.hpp"
+#include "density_generator.hpp"
 
 volume::utilities::BeadModelGenerator::BeadModelGenerator(int number_of_beads, double density_threshold, double noise_level)
 {
@@ -57,6 +60,50 @@ void volume::utilities::BeadModelGenerator::generate_bead_model_coordinates(volu
         }
 
     }
+
+}
+
+volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead_model_volume(volume::data::Volume2dx input_volume)
+{   
+    volume::data::RealSpaceData output_real(input_volume.nx(), input_volume.ny(), input_volume.nz());
+    volume::data::RealSpaceData oxygen = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 8.0);
+    volume::data::RealSpaceData carbon = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 6.0);
+    volume::data::RealSpaceData nitrogen = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 7.0);
+    volume::data::RealSpaceData sulphur = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 16.0);
+    
+    int x, y, z = 0;
+    for ( int bead = 0; bead < number_of_beads; bead++ ) 
+    {
+        do 
+        {
+            x = rand() % input_volume.nx();
+            y = rand() % input_volume.ny();
+            z = rand() % input_volume.nz();
+        } while ( input_volume.density_at(x, y, z) < density_threshold );
+
+
+        double random_number = rand() / (double) RAND_MAX;        
+        
+        if( random_number < PDB_CARBON_FRACTION ) 
+        {
+            output_real.merge_data(carbon, x, y, z);
+        }
+        else if( random_number < PDB_CARBON_FRACTION + PDB_NITROGEN_FRACTION ) 
+        {
+            output_real.merge_data(nitrogen, x, y, z);
+        }
+        else if( random_number < PDB_CARBON_FRACTION + PDB_NITROGEN_FRACTION + PDB_OXYGEN_FRACTION)
+        {
+            output_real.merge_data(oxygen, x, y, z);
+        }
+        else
+        {
+            output_real.merge_data(sulphur, x, y, z);
+        }
+
+    }
+    
+    return output_real;
 
 }
 

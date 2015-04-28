@@ -13,12 +13,12 @@ namespace io = volume::io;
 
 io::MrcReader::MrcReader(std::string file_name)
 {
-    this->initialize(file_name);
+    initialize(file_name);
 }
 
 bool io::MrcReader::initialize(std::string file_name)
 {
-    if(!(this->read_header(file_name)) || !(this->read_data(file_name)))
+    if(!(read_header(file_name)) || !(read_data(file_name)))
     {
         std::cerr << "Error in parsing MRC file\n";
         return false;
@@ -65,7 +65,6 @@ bool io::MrcReader::mrc_to_real(
 
 bool io::MrcReader::read_header(std::string file_name)
 {
-    std::cout << "Reading MRC file header from: " << file_name << std::endl;
     std::ifstream file(file_name, std::ios::in|std::ios::binary);;
     
     file.seekg (0, std::ios::beg);
@@ -74,51 +73,49 @@ bool io::MrcReader::read_header(std::string file_name)
         namespace bf = volume::utilities::binary_file_utilities;
         //Read the header
         nx = bf::read_int(file);
-        std::cout << "nx = " << nx << std::endl;
+        //std::cout << "nx = " << nx << std::endl;
         ny = bf::read_int(file);
-        std::cout << "ny = " << ny << std::endl;
+        //std::cout << "ny = " << ny << std::endl;
         nz = bf::read_int(file);
-        std::cout << "nz = " << nz << std::endl;
+        //std::cout << "nz = " << nz << std::endl;
         
         mode = bf::read_int(file);
-        std::cout << "mode = " << mode << std::endl;
+        //std::cout << "mode = " << mode << std::endl;
         
         nxstart = bf::read_int(file);
-        std::cout << "nxstart = " << nxstart << std::endl;
+        //std::cout << "nxstart = " << nxstart << std::endl;
         nystart = bf::read_int(file);
-        std::cout << "nystart = " << nystart << std::endl;
+        //std::cout << "nystart = " << nystart << std::endl;
         nzstart = bf::read_int(file);
-        std::cout << "nzstart = " << nzstart << std::endl;
+        //std::cout << "nzstart = " << nzstart << std::endl;
         
         mx = bf::read_int(file);
-        std::cout << "mx = " << mx << std::endl;
+        //std::cout << "mx = " << mx << std::endl;
         my = bf::read_int(file);
-        std::cout << "my = " << my << std::endl;
+        //std::cout << "my = " << my << std::endl;
         mz = bf::read_int(file);
-        std::cout << "mz = " << mz << std::endl;
+        //std::cout << "mz = " << mz << std::endl;
         
         xlen = bf::read_float(file);
-        std::cout << "xlen = " << xlen << std::endl;
+        //std::cout << "xlen = " << xlen << std::endl;
         ylen = bf::read_float(file);
-        std::cout << "ylen = " << ylen << std::endl;
+        //std::cout << "ylen = " << ylen << std::endl;
         zlen = bf::read_float(file);
-        std::cout << "zlen = " << zlen << std::endl;
+        //std::cout << "zlen = " << zlen << std::endl;
         
         alpha = bf::read_float(file);
-        std::cout << "alpha = " << alpha << " degrees" << std::endl;
+        //std::cout << "alpha = " << alpha << " degrees" << std::endl;
         beta = bf::read_float(file);
-        std::cout << "beta = " << beta << " degrees" << std::endl;
+        //std::cout << "beta = " << beta << " degrees" << std::endl;
         gamma = bf::read_float(file);
-        std::cout << "gamma = " << gamma << " degrees" << std::endl;
+        //std::cout << "gamma = " << gamma << " degrees" << std::endl;
         
         mapc = bf::read_int(file);
-        std::cout << "mapc = " << mapc << std::endl;
+        //std::cout << "mapc = " << mapc << std::endl;
         mapr = bf::read_int(file);
-        std::cout << "mapr = " << mapr << std::endl;
+        //std::cout << "mapr = " << mapr << std::endl;
         maps = bf::read_int(file);
-        std::cout << "maps = " << maps << std::endl;
-        
-        std::cout << "Header reading done.\n";
+        //std::cout << "maps = " << maps << std::endl;
         
     }
     catch(const std::exception& e)
@@ -133,15 +130,11 @@ bool io::MrcReader::read_header(std::string file_name)
 
 bool io::MrcReader::read_data(std::string file_name)
 {
-    std::cout << "Reading MRC file data from: " << file_name << std::endl;
     std::ifstream file(file_name, std::ios::in|std::ios::binary);
     
     long input_size = mx*my*mz;
     long file_size = volume::utilities::binary_file_utilities::file_size(file_name);
     long memory_size = (int)(file_size - 1024)/4;
-    
-    std::cout << "Sizes (in number of floats):\n";
-    std::cout << "Memory size: " << memory_size << " Input size: " << input_size << std::endl;
     
     if(memory_size < input_size)
     {
@@ -156,8 +149,6 @@ bool io::MrcReader::read_data(std::string file_name)
     {
         _data[itr_memory] = volume::utilities::binary_file_utilities::read_float(file);
     }
-    
-    std::cout << "Data reading done.\n";
             
     return true;
     

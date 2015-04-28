@@ -48,12 +48,6 @@ namespace volume
             DiffractionSpot(const std::list<DiffractionSpot> spots);
             
             /**
-             * Copy constructor
-             * @param spot
-             */
-            DiffractionSpot(const DiffractionSpot& copy);
-            
-            /**
              * Define = oeprator. Equates the weights and the values
              * @param rhs
              * @return this instance equated to rhs
@@ -97,6 +91,24 @@ namespace volume
              * @return FOM weight in fractions
              */
             double weight() const ;
+            
+            /**
+             * Gets the amplitude of the spot
+             * @return amplitude
+             */
+            double amplitude() const;
+            
+            /**
+             * Gets the intensity of the spot
+             * @return intensity
+             */
+            double intensity() const;
+            
+            /**
+             * Gets the phase of the spot
+             * @return phase
+             */
+            double phase() const;
             
             /**
              * Assigner function of the value

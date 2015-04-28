@@ -8,6 +8,7 @@
 #define	MILLER_INDEX_HPP
 
 #include <iostream>
+#include <string.h>
 
 namespace volume
 {
@@ -97,6 +98,13 @@ namespace volume
              * @param l
              */
             void set_values(int h, int k, int l);
+            
+            /**
+             * Returns a string demonstrating current miller index
+             * which can be used for output purpose
+             * @return 
+             */
+            std::string to_string() const;
             
             /**
              * Fetches the miller index of Friedel spot.

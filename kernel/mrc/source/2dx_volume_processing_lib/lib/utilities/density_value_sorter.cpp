@@ -13,8 +13,6 @@ volume::utilities::DensityValueSorter::DensityValueSorter(int max_size, double* 
 {
     this->data = data;
     this->max_size = max_size;
-    
-    this->sort_data_with_id();
 }
 
 void volume::utilities::DensityValueSorter::sort_data_with_id()
@@ -25,8 +23,6 @@ void volume::utilities::DensityValueSorter::sort_data_with_id()
     {
         pairs.push_back(DensityValueSorter::DensityIdPair(data[id], id));
     }
-    
-    std::cout << "Sorting the density values.. ";
     
     //Sort the pairs
     pairs.sort();
@@ -42,16 +38,16 @@ void volume::utilities::DensityValueSorter::sort_data_with_id()
         id++;
     }
     
-    std::cout << "Done.\n";
-    
 }
 
-int* volume::utilities::DensityValueSorter::get_sorted_ids() const
+int* volume::utilities::DensityValueSorter::get_sorted_ids()
 {
+    sort_data_with_id();
     return sorted_ids;
 }
 
-double* volume::utilities::DensityValueSorter::get_sorted_values() const
+double* volume::utilities::DensityValueSorter::get_sorted_values()
 {
+    sort_data_with_id();
     return sorted_data;
 }

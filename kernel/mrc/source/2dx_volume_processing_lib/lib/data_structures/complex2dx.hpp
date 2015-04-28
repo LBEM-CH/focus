@@ -37,12 +37,6 @@ namespace volume
             Complex2dx(double real, double imag);
             
             /**
-             * Copy constructor
-             * @param copy: to be copied from!
-             */
-            Complex2dx(const Complex2dx& copy);
-            
-            /**
              * Operator overloading of = operator.
              * Equates the real and imag part of rhs to this object
              * @param rhs
@@ -104,6 +98,12 @@ namespace volume
              * @return phase in radians
              */
             double phase() const;
+            
+            /**
+             * Evaluates the intensity of the complex
+             * @return intensity
+             */
+            double intensity() const;
             
             /**
              * Changes/Sets the real part of the complex

@@ -10,11 +10,11 @@ namespace sym = volume::symmetrization;
 
 sym::Symmetry2dx::Symmetry2dx()
 {
-    this->initialize("P1");
+    initialize("P1");
 }
 
 sym::Symmetry2dx::Symmetry2dx(std::string symmetry) {
-    this->initialize(symmetry);
+    initialize(symmetry);
 }
 
 std::ostream& sym::Symmetry2dx::operator<<(std::ostream& os) {

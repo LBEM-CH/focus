@@ -109,6 +109,18 @@ namespace volume
             bool exists(int h, int k, int l) const ;
             
             /**
+             * Evaluates the sum of intensities and returns it
+             * @return sum of intensities
+             */
+            double intensity_sum() const;
+            
+            /**
+             * Evaluates and returns the number of spots in the Fourier space
+             * @return number of spots
+             */
+            int spots() const;
+            
+            /**
              * Converts the data into fftw format
              * @param fx : x size of the half Fourier volume
              * @param fy : y size of the half Fourier volume

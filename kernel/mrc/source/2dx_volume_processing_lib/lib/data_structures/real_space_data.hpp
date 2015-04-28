@@ -86,6 +86,42 @@ namespace volume
             void set_value_at(int id, double value);
             
             /**
+             * x-size of the data
+             * @return x-size of the data
+             */
+            int nx() const;
+            
+            /**
+             * y-size of the data
+             * @return y-size of the data
+             */
+            int ny() const;
+            
+            /**
+             * z-size of the data
+             * @return z-size of the data
+             */
+            int nz() const;
+            
+            /**
+             * Evaluates minimum density value
+             * @return minimum density value
+             */
+            double min() const;
+            
+            /**
+             * Evaluates maximum density value
+             * @return maximum density value
+             */
+            double max() const;
+            
+            /**
+             * Evaluates mean density value
+             * @return mean density value
+             */
+            double mean() const;
+            
+            /**
              * The the current size of the array
              * @return size
              */
@@ -99,6 +135,16 @@ namespace volume
              * @return 
              */
             int memory_id(int x, int y, int z) const ;
+            
+            /**
+             * Merges the data from other real spaced data. The input data's 
+             * center will be placed at the location x, y, z in the current data
+             * @param to_be_merged : Real space data to be merged
+             * @param x - Location x where the input map's x-center will be merged
+             * @param y - Location y where the input map's y-center will be merged
+             * @param z - Location z where the input map's z-center will be merged
+             */
+            void merge_data(const RealSpaceData& to_be_merged, int x, int y, int z);
             
             /**
              * Sorts the real space data and returns the sorted id's

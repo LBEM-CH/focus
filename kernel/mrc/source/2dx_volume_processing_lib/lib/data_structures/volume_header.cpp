@@ -7,12 +7,12 @@ namespace ds = volume::data;
 
 ds::VolumeHeader2dx::VolumeHeader2dx()
 {
-    this->initialize(0, 0, 0);
+    initialize(0, 0, 0);
 }
 
 ds::VolumeHeader2dx::VolumeHeader2dx(int nx, int ny, int nz)
 {
-    this->initialize(nx, ny, nz);
+    initialize(nx, ny, nz);
 }
 
 void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
@@ -39,6 +39,24 @@ void ds::VolumeHeader2dx::reset_size(int nx, int ny, int nz)
     if((int)_ylen == _ny) _ylen = (double) ny;
     if((int)_zlen == _nz) _zlen = (double) nz;
 } 
+
+std::string ds::VolumeHeader2dx::to_string() const
+{
+    std::string output = "";
+    double ninty = 90.0;
+    output += "Volume Information:\n";
+    output += "\t|Size: " + std::to_string(nx()) + " X " + 
+               std::to_string(ny()) + " X " + std::to_string(nz()) + "\n";
+    output += "\t|Cell lengths: " + std::to_string(xlen()) + ", " + 
+               std::to_string(ylen()) + ", " + std::to_string(zlen()) + "\n";
+    output += "\t|Cell angles: " + std::to_string(ninty) + ", " + 
+               std::to_string(ninty) + ", " + 
+               std::to_string(volume::utilities::angle_utilities::RadianToDegree(gamma())) + "\n";
+    output += "\t|Symmetry: " + symmetry() + "\n";
+    output += "\t|Maximum Resolution: " + std::to_string(max_resolution()) + "\n";
+    
+    return output;
+}
 
 void ds::VolumeHeader2dx::set_nx(int nx)
 {

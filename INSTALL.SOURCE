@@ -1,0 +1,142 @@
+Acquiring 2dx
+=============
+The latest source for 2dx along with associated help files and up to the minute installation instructions
+are available at http://www.2dx.org.
+
+Download: 2dx-{version}.tar.bz2
+Extract: tar -xvjf 2dx-{version}.tar.bz2
+
+A detailed installation instruction can be found in the PDF manual, at
+http://www.2dx.unibas.ch/documentation/2dx-software
+
+On OSX: 
+
+FFTW: Download from 
+http://www.fftw.org/download.html
+Then install with:
+./configure --enable-single --enable-fast-install
+make
+sudo make install
+
+Qt requires version 4.x, not newer.
+Currently, this can be found at:
+http://download.qt.io/archive/qt/
+
+MacPorts:
+http://guide.macports.org/#installing
+
+BOOST:
+sudo port install cmake
+sudo port install boost
+
+SPIDER:
+Download from:
+http://spider.wadsworth.org/spider_doc/spider/docs/spi-download.html
+Install via
+sudo tar -C /usr/local -xvf spiderweb.22.03.tar
+
+GCC and GFORTRAN:  
+Download from:
+http://hpc.sourceforge.net
+Install via
+sudo tar -xvf gcc-4.9-bin.tar -C /
+sudo tar -xvf gfortran-4.9-bin.tar -C /
+
+Compilation
+-----------
+Launch
+./build_all
+
+
+
+
+
+Execution
+---------
+CCP4 5.0.2 or later (CCP4 6 Recommended) (http://www.ccp4.ac.uk/main.html)
+********************************************************************************************************* 
+CCP4 should be installed completely from the installers provided. However,
+a few potentially non-standard features must be present. Insure there exists
+a link called ccp4 to ccp4-{version} in /usr/local/. You can create one via:
+
+cd /usr/local/
+ln -s /path/to/ccp4-{version} ccp4
+
+Also, insure that ccp4.setup-csh exists in /usr/local/ccp4/bin. If you have another setup script that 
+you use or ccp4-setup.csh exists in another location, be sure to create a link to the appropriate script 
+as above:
+
+cd /usr/local/ccp4/bin
+ln -s /path/to/script/ccp4.setup-csh ccp4.setup-csh
+********************************************************************************************************* 
+
+Recommended:
+Web Browser (Firefox: http://www.mozilla.com/firefox/)
+PS Viewer (GhostScript/GhostView: http://www.cs.wisc.edu/~ghost/)
+Text Editor (Kate: http://kate.kde.org/, Nedit: http://sourceforge.net/projects/nedit/)
+
+
+Installation
+============
+
+Important: If installing to the same directory, any previous versions of 2dx will be over-written with
+the current release. Be sure to back up any custom scripts/programs prior to install.
+
+Installation should be the same regardless of system, though SGI-IRIX and Windows 
+remain unsupported at present.
+
+To install 2dx, just run:
+./configure
+make
+sudo make install
+
+This will compile and install 2dx to /usr/local/2dx by default.
+If you do not have root privileges, or would rather install to another directory, replace the 
+above with:
+
+make
+sudo make install prefix=/path/to/install/dir/2dx
+
+2dx will then be installed to /path/to/install/dir/2dx.
+
+If you wish to use the web browser/ps viewer/editor integration be sure to edit 2dx/config/2dx.cfg.
+Simply change each of the values after the appropriate editor/viewer to the desired program. On OS X 
+"open" opens the default editor for a given mime type, but any program can be used instead via:
+
+open -a /path/to/program.app
+
+RPM Install:
+
+rpm -Uvh 2dx-{version}.rpm 
+
+should be sufficient. 
+
+However, users wishing to install 2dx to a user-defined installation directory may use:
+
+rpm -Uvh --prefix /path/to/install/dir/2dx 2dx-{version}.rpm 
+
+In the rare case that rpm complains about bin/sh dependencies, etc, use the following:
+
+rpm -Uvh --force --nodeps --prefix /path/to/install/dir 2dx-{version}.rpm
+
+Execution
+=========
+Running any of the programs in the 2dx package should require no modification to the system
+environment. On Linux, however, users may wish to add the bin directory to their path. 
+
+BASH: echo export PATH=/usr/local/2dx/bin:$PATH >> ~/.profile
+CSH:  echo setenv PATH /usr/local/2dx/bin:$PATH >> ~/.cshrc
+(Note: The above may vary from system to system.)
+
+On OS-X (Both PPC and Intel) the binaries are wrapped in {program}.app/ directories. For quick access to 
+any of these, simply drag any of the program links found in 2dx/bin to the Dock. To run such a program
+from a terminal use:
+
+open /usr/local/2dx/bin/{program}.app 
+
+Documentation & Community Support
+=================================
+Up to the minute documentation for 2dx is available at http://www.2dx.org/documentation. The site
+contains installation instructions, tutorials and a full description of program parameters, all of which
+allow for user comments/questions. The goal of this site being part static documentation/part forum for
+discussion. 

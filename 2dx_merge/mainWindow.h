@@ -63,6 +63,7 @@
 #include <updateWindow.h>
 #include <autoImportTool.h>
 #include <confEditor.h>
+#include <scriptTab.h>
 
 class mainWindow : public QMainWindow
 {
@@ -96,7 +97,7 @@ class mainWindow : public QMainWindow
   void reduceSelection();
   void copyImage();
 
-  void maximizeWindow(int option);
+  void maximizeSelection(int option);
 
   void import();
   void autoImport();
@@ -116,8 +117,7 @@ class mainWindow : public QMainWindow
   void launchEuler();
   void launchReproject();
   void launchFileBrowser();
-  void showManual(bool show);
-
+  void hideManual(bool hide);
   void saveDirectorySelection();
   void loadDirectorySelection();
   void showSelected(bool enable);
@@ -134,9 +134,7 @@ class mainWindow : public QMainWindow
 
   QProcess importProcess;
 
-  confInterface *parameters;
-  viewContainer *container;
-  viewContainer *parameterContainer;
+  viewContainer *selectionContainer;
 
   imagePreview *preview;
 
@@ -144,16 +142,12 @@ class mainWindow : public QMainWindow
 
   QGridLayout *layout;
   QHash<QString,QByteArray> splitterStates;
-  QSplitter *centerRightSplitter;
-
-  resizeableStackedWidget *localParameters;
-  QStackedWidget *manuals;
 
   projectModel *dirModel;
   QTreeView *dirView;
 
-  updateWindow *updates; 
-	aboutWindow *about;
+  updateWindow *updates;
+  aboutWindow *about;
 
   QString installedVersion;
 
@@ -164,6 +158,10 @@ class mainWindow : public QMainWindow
   scriptModule *standardScripts;
   scriptModule *customScripts;
   scriptModule *singleParticleScripts;
+  
+  scriptTab *standardScriptsTab;
+  scriptTab *customScriptsTab;
+  scriptTab *singleParticleScriptsTab;
 
   resultsModule *resultsView;
   QSortFilterProxyModel *sortModel;
@@ -176,7 +174,6 @@ class mainWindow : public QMainWindow
   graphicalButton *updateButton;
   graphicalButton *manualButton;
 
-  levelGroup *userLevelButtons;
   levelGroup *verbosityControl;
 
   QHash<uint,int> localIndex;
@@ -188,7 +185,6 @@ class mainWindow : public QMainWindow
   QTimer *timer;
   int timer_refresh;
 
-  QWidget *setupScriptContainer(QWidget *widget, const QString &title = "");
   QWidget *setupHeader();
   QWidget *setupFooter();
   QWidget *setupDirectoryView(const QDir &dir, const QString &savePath = "");

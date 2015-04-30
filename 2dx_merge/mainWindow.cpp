@@ -25,11 +25,14 @@
 //#include <stdlib.h>
 
 #include "mainWindow.h"
+#include "scriptTab.h"
 #include <QDebug>
 #include <QDesktopServices>
 #include <QModelIndexList>
 #include <QItemSelectionModel>
+#include <QTabwidget>
 #include <iostream>
+
 using namespace std;
 
 mainWindow::mainWindow(const QString &directory, QWidget *parent)
@@ -129,13 +132,18 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   updates = new updateWindow(mainData,this);
   updates->hide();
 
+  /**
+   * Prepare the header Widget
+   */
   QWidget *headerWidget = setupHeader();
 
+  /**
+   * Prepare the Scripts view container
+   */
   standardScripts = new scriptModule(mainData,mainData->getDir("standardScripts"),scriptModule::standard);
   connect(standardScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(standardScriptCompleted(QModelIndex)));
   connect(standardScripts,SIGNAL(reload()),this,SLOT(updateModel()));
   connect(this,SIGNAL(execute(bool)),standardScripts,SLOT(execute(bool)));
-  QWidget *standardScriptWidget = setupScriptContainer(standardScripts, "Standard Scripts");
   connect(standardScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
   connect(standardScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
 
@@ -143,7 +151,6 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   connect(customScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(customScriptCompleted(QModelIndex)));
   connect(customScripts,SIGNAL(reload()),this,SLOT(reload()));
   connect(this,SIGNAL(execute(bool)),customScripts,SLOT(execute(bool)));
-  QWidget *customScriptWidget = setupScriptContainer(customScripts, "Custom Scripts");
   connect(customScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
   connect(customScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
 
@@ -151,31 +158,13 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   connect(singleParticleScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(singleParticleScriptCompleted(QModelIndex)));
   connect(singleParticleScripts,SIGNAL(reload()),this,SLOT(reload()));
   connect(this,SIGNAL(execute(bool)),singleParticleScripts,SLOT(execute(bool)));
-  QWidget *singleParticleScriptWidget = setupScriptContainer(singleParticleScripts, "SP Scripts (NOT READY YET)");
   connect(singleParticleScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
   connect(singleParticleScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
 
-
-  standardScripts->extendSelectionTo(customScripts);
-  standardScripts->extendSelectionTo(singleParticleScripts);
-  
-  customScripts->extendSelectionTo(standardScripts);
-  customScripts->extendSelectionTo(singleParticleScripts);
-  
-  singleParticleScripts->extendSelectionTo(standardScripts);
-  singleParticleScripts->extendSelectionTo(customScripts);
-
   int minWidth = int(QApplication::desktop()->width()/5.00);
   if(minWidth>235) minWidth = 235;  
-
-  standardScripts->setMaximumWidth(minWidth);
-  customScripts->setMaximumWidth(minWidth);
-  singleParticleScripts->setMaximumWidth(minWidth);
   
   int minHeight = int(QApplication::desktop()->height()/10.00);
-  standardScripts->setMinimumHeight(minHeight);
-  customScripts->setMinimumHeight(minHeight);
-  singleParticleScripts->setMinimumHeight(minHeight);
 
   results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
 
@@ -212,42 +201,19 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   connect(verbosityControl, SIGNAL(levelChanged(int)), standardScripts, SLOT(setVerbosity(int)));
   connect(verbosityControl, SIGNAL(levelChanged(int)), customScripts, SLOT(setVerbosity(int)));
   connect(verbosityControl, SIGNAL(levelChanged(int)), singleParticleScripts, SLOT(setVerbosity(int)));
-
-  parameterContainer = new viewContainer("Processing Data -- Standard", viewContainer::data);
-
-  localParameters = new resizeableStackedWidget(parameterContainer);
-  manuals = new QStackedWidget;
-  manuals->hide();
-  parameters = new confInterface(mainData,"");
-  connect(results,SIGNAL(saved(bool)),parameters,SLOT(load()));
-
-  QWidget *parametersWidget = new QWidget;
-  QVBoxLayout *parameterLayout = new QVBoxLayout;
-  parameterLayout->setMargin(0);
-  parameterLayout->setSpacing(0);
-  parametersWidget->setLayout(parameterLayout);
-  parameterLayout->addWidget(localParameters);
-  parameterLayout->addWidget(parameters);
-  parameterLayout->setStretchFactor(localParameters,1);
-  parameterLayout->setStretchFactor(parameters,100);
   
-
-  parameterContainer->addSplitterWidget(manuals);
-  parameterContainer->addScrollWidget(parametersWidget,true);
-//  parameterContainer->addScrollWidget(parameters);
-
-  userLevelButtons = new levelGroup(mainData,2,QStringList()<<"Processing Data -- Standard"<<"Processing Data -- Advanced",
-                                                           QStringList()<<"Simplified Parameter List"<<"Full Parameter List",
-                                                           QStringList()<<"gbAqua"<<"gbRed");
-  parameterContainer->setHeaderWidget(userLevelButtons);
-  connect(userLevelButtons,SIGNAL(titleChanged(const QString &)),parameterContainer,SLOT(setText(const QString &)));
-  connect(userLevelButtons,SIGNAL(levelChanged(int)),parameters,SLOT(setSelectionUserLevel(int)));
+  standardScriptsTab = new scriptTab(standardScripts, mainData, this);
+  customScriptsTab = new scriptTab(customScripts, mainData, this);
+  singleParticleScriptsTab = new scriptTab(singleParticleScripts, mainData, this);
+  
+  connect(results,SIGNAL(saved(bool)),standardScriptsTab,SLOT(load()));
+  connect(results,SIGNAL(saved(bool)),customScriptsTab,SLOT(load()));
+  connect(results,SIGNAL(saved(bool)),singleParticleScriptsTab,SLOT(load()));
 
   connect(standardScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(standardScriptChanged(QModelIndex)));
   connect(customScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(customScriptChanged(QModelIndex)));
   connect(singleParticleScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(singleParticleScriptChanged(QModelIndex)));
 
-  //userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg");
   userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg", mainData->getDir("config") + "/" + "2dx_merge-user.cfg");
   userData->save();
   mainData->setUserConf(userData);
@@ -269,33 +235,19 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     updateFontInfo();
   }
 
-  container = new viewContainer(mainData->getDir("working"),viewContainer::data,this,viewContainer::grey);
-  container->addSplitterWidget(dirWidget);
-  container->addWidget(parameterContainer,true);
-//  container->addSplitterWidget(confWidget);
-  container->addWidget(logWindow,true);
-  container->setMinimumWidth(0);
-//  container->setMaximumWidth(1024);
-  levelGroup *maximizeControl = new levelGroup(mainData, 4,
-                                                           QStringList()<<"Restore"<<"Maximize Project View"<<"Maximize Parameters View"<<"Maximize LogBrowser View",
-                                                           QStringList()<<"Restore"<<"Maximize Project Window"<<"Maximize Parameters Window"<<"Maximize Log Browser",
-                                                           QStringList()<<"gbAqua"<<"gbBlue"<<"gbGreen"<<"gbOrange");
-
-
-  container->setHeaderWidget(maximizeControl, Qt::AlignRight);
-  container->saveSplitterState();
-  connect(maximizeControl,SIGNAL(levelChanged(int)),this,SLOT(maximizeWindow(int)));
+  viewContainer* dirContainer = new viewContainer(mainData->getDir("working"),viewContainer::data,this,viewContainer::grey);
+  dirContainer->addWidget(dirWidget);
 
   viewContainer *resultsContainer = new viewContainer("Results",viewContainer::data,this,viewContainer::grey);
   resultsView = new resultsModule(mainData,results, resultsModule::results, mainData->getDir("project"));
   resultsContainer->addWidget(resultsView);
-  resultsContainer->setMinimumSize(QSize(200,100));
+  resultsContainer->setMinimumSize(QSize(200,200));
 
   viewContainer *imagesContainer = new viewContainer("Images  (Click here to open)",viewContainer::data,this,viewContainer::grey);
   connect(imagesContainer,SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
   resultsModule *imagesView = new resultsModule(mainData,results, resultsModule::images, mainData->getDir("project"));
   imagesContainer->addWidget(imagesView);
-  imagesContainer->setMinimumSize(QSize(200,100));
+  imagesContainer->setMinimumSize(QSize(200,200));
 
   levelGroup *imageLevelButtons = new levelGroup(mainData,2,QStringList()<<"All Images"<<"Important Images", QStringList()<<"Show all images"<<"Show only important images",QStringList()<<"gbAqua"<<"gbRed");
   levelGroup *imageNamesButtons = new levelGroup(mainData,2,QStringList()<<"Nicknames"<<"Filenames", QStringList()<<"Show Nicknames"<<"Show File Names",QStringList()<<"gbOrange"<<"gbPurple");
@@ -305,42 +257,84 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   connect(imageNamesButtons,SIGNAL(levelChanged(int)),imagesView,SLOT(setShowFilenames(int)));
   
   
-  QSplitter *resultsSplitter = new QSplitter(Qt::Vertical,this);
+  QSplitter *resultsSplitter = new QSplitter(Qt::Horizontal,this);
   resultsSplitter->addWidget(resultsContainer);
   resultsSplitter->addWidget(imagesContainer);
 
   viewContainer *previewContainer = new viewContainer("Image Preview",viewContainer::image,this,viewContainer::grey);
+ 
   previewContainer->setMaximumWidth(minWidth);
   preview = new imagePreview(mainData,"",false,menuBar(),previewContainer);
   previewContainer->addWidget(preview);
-//  preview->toggleInfo();
-
-  connect(imagesView,SIGNAL(resultChanged(const QString &)),preview,SLOT(setImage(const QString &)));
+  
+  levelGroup *previewLevelButtons = new levelGroup(mainData,1,QStringList()<<"Image Preview/Header", QStringList()<<"Toggle image's preview/header",QStringList()<<"gbRed");
+  previewContainer->setHeaderWidget(previewLevelButtons, Qt::AlignLeft);
+  connect(previewLevelButtons,SIGNAL(levelChanged(int)),preview,SLOT(toggleInfo()));
+  
+  //connect(imagesView,SIGNAL(resultChanged(const QString &)),preview,SLOT(setImage(const QString &)));
   connect(dirModel,SIGNAL(currentImage(const QString&)),preview,SLOT(setImage(const QString&)));
   connect(dirModel,SIGNAL(reloading()),this,SLOT(reload()));
 
   QWidget *footerWidget = setupFooter();
 
-  centerRightSplitter = new QSplitter(this);
-  centerRightSplitter->setOrientation(Qt::Horizontal);
-  centerRightSplitter->setHandleWidth(4);
-  centerRightSplitter->addWidget(container);
-  centerRightSplitter->addWidget(resultsSplitter);
+  QTabWidget* scriptsWidget = new QTabWidget(this);
+  scriptsWidget->addTab(standardScriptsTab, "Standard Scripts");
+  scriptsWidget->addTab(customScriptsTab, "Custom Scripts");
+  scriptsWidget->addTab(singleParticleScriptsTab, "Single Particle Scripts");
+  //scriptsWidget->setMaximumWidth(500);
+  
+  QWidget *processWidget = new QWidget(this);
+  QGridLayout* processLayout = new QGridLayout(processWidget);
+  processWidget->setLayout(processLayout);
+  processLayout->setMargin(6);
+  processLayout->setSpacing(6);
+  processLayout->addWidget(scriptsWidget, 0, 0, 1, 1);
+  
+  viewContainer* scriptsContainer = new viewContainer("PROCESS", viewContainer::data, this, viewContainer::black);
+  scriptsContainer->addWidget(processWidget);
+  scriptsContainer->setMinimumHeight(250);
+  
+  
+  QWidget* selectionWidget = new QWidget(this);
+  QGridLayout* selectionLayout = new QGridLayout(selectionWidget);
+  selectionLayout->setMargin(6);
+  selectionLayout->setSpacing(6);
+  selectionWidget->setLayout(selectionLayout);
+  selectionLayout->addWidget(dirContainer, 0, 0, 1, 1);
+  selectionLayout->addWidget(previewContainer, 0, 1, 1, 1);
+  
+  selectionContainer = new viewContainer("SELECT", viewContainer::data, this, viewContainer::black);
+  selectionContainer->addSplitterWidget(selectionWidget);
+  selectionContainer->saveSplitterState();
+  //selectionContainer->setMinimumHeight(minWidth);
+  
+  //levelGroup *maximizeControl = new levelGroup(mainData, 2,QStringList()<<"Restore"<<"Maximize Project View",QStringList()<<"Restore"<<"Maximize Project Window",
+  //                                                         QStringList()<<"gbAqua"<<"gbBlue");
 
 
-  layout->addWidget(headerWidget,0,0,1,2);
-  layout->addWidget(standardScriptWidget,1,0,1,1);
-  layout->addWidget(customScriptWidget,2,0,1,1);
-  layout->addWidget(singleParticleScriptWidget,3,0,1,1);
-  layout->addWidget(previewContainer,4,0,1,1);
+  //selectionContainer->setHeaderWidget(maximizeControl, Qt::AlignRight);
 
-  layout->addWidget(centerRightSplitter,1,1,4,1);
-  layout->addWidget(footerWidget,5,0,1,2);
-  layout->setColumnStretch(1,3);
-  layout->setRowStretch(1,3);
-  layout->setRowStretch(2,3);
-//  layout->setColumnStretch(2,1);
-//  resize(1024,743);
+  //connect(maximizeControl,SIGNAL(levelChanged(int)),this,SLOT(maximizeSelection(int)));
+  
+  
+  QWidget *evaluateWidget = new QWidget(this);
+  QGridLayout* evaluateLayout = new QGridLayout(evaluateWidget);
+  evaluateWidget->setLayout(evaluateLayout);
+  evaluateLayout->setMargin(6);
+  evaluateLayout->setSpacing(6);
+  evaluateLayout->addWidget(logWindow, 0, 0, 1, 1);
+  evaluateLayout->addWidget(resultsSplitter, 0, 1, 1, 1);
+  
+  viewContainer* evaluateContainer = new viewContainer("EVALUATE", viewContainer::data, this, viewContainer::black);
+  evaluateContainer->addWidget(evaluateWidget);
+  evaluateContainer->setMinimumHeight(250);
+  
+  
+  layout->addWidget(headerWidget, 0, 0, 1, 1);
+  layout->addWidget(selectionContainer, 1, 0, 1, 1);
+  layout->addWidget(scriptsContainer, 2, 0, 1, 1);
+  layout->addWidget(evaluateContainer, 3, 0, 1, 1);
+  layout->addWidget(footerWidget, 4, 0, 1, 1);
 
   about = new aboutWindow(mainData,this,true);
   about->hide();
@@ -357,16 +351,6 @@ reproject = NULL;
 
 }
 
-QWidget *mainWindow::setupScriptContainer(QWidget *widget, const QString &title)
-{
-  viewContainer *container = new viewContainer(title,this,viewContainer::grey);
-
-  container->addWidget(widget);
-  container->resize(200,20);
-  container->setMinimumWidth(200);
-//  container->setMaximumWidth(200);
-  return container;
-}
 
 QWidget *mainWindow::setupHeader()
 {
@@ -412,14 +396,13 @@ QWidget *mainWindow::setupHeader()
   updateButton->setToolTip("Refresh directory view");
   updateButton->setCheckable(false);
   connect(updateButton,SIGNAL(clicked(bool)),this,SLOT(reload()));
-
+  
   manualButton = new graphicalButton(mainData->getIcon("help"));
   manualButton->setToolTip("Show/Hide script manual");
   manualButton->setCheckable(true);
   manualButton->setChecked(false);
-  connect(manualButton,SIGNAL(toggled(bool)),this,SLOT(showManual(bool)));
+  connect(manualButton,SIGNAL(toggled(bool)),this,SLOT(hideManual(bool)));
   
-
   layout->insertStretch(0,16);
   layout->addWidget(saveButton);
   layout->insertStretch(2,10);
@@ -730,25 +713,58 @@ void mainWindow::scriptChanged(scriptModule *module, QModelIndex index)
   if(localIndex[uid] == 0 && module->conf(index)->size()!=0)
   {
     confInterface *local = new confInterface(module->conf(index), "");
-    localIndex[uid] = localParameters->addWidget(local) + 1;
-    if(localParameters->widget(localIndex[uid] - 1) == NULL) cerr<<"Something's very wrong here."<<endl;
+    localIndex[uid] = standardScriptsTab->addParameterWidget(local) + 1;
+    localIndex[uid] = customScriptsTab->addParameterWidget(local) + 1;
+    localIndex[uid] = singleParticleScriptsTab->addParameterWidget(local) + 1;
+//    if(localParameters->widget(localIndex[uid] - 1) == NULL) cerr<<"Something's very wrong here."<<endl;
 //    connect(userLevelButtons,SIGNAL(levelChanged(int)),local,SLOT(setSelectionUserLevel(int)));
   }
 
   if(manualIndex[uid] == 0 && !module->conf(index)->manual().isEmpty())
-    manualIndex[uid] = manuals->addWidget(new confManual(mainData, module->conf(index))) + 1;
-
-  if(localIndex[uid] - 1 < 0)
-    localParameters->hide();
-  else
   {
-    localParameters->show();
-    localParameters->setCurrentIndex(localIndex[uid] - 1);
+      manualIndex[uid] = standardScriptsTab->addManualWidget(new confManual(mainData, module->conf(index))) + 1;
+      manualIndex[uid] = customScriptsTab->addManualWidget(new confManual(mainData, module->conf(index))) + 1;
+      manualIndex[uid] = singleParticleScriptsTab->addManualWidget(new confManual(mainData, module->conf(index))) + 1;
   }
-
-  manuals->setCurrentIndex(manualIndex[uid] - 1);
-
-  parameters->select(module->displayedVariables(index));
+  
+  if(localIndex[uid] - 1 < 0)
+  {
+    standardScriptsTab->hideLocalParameters();
+    customScriptsTab->hideLocalParameters();
+    singleParticleScriptsTab->hideLocalParameters();
+  }
+  else if(module->type() == scriptModule::standard)
+  {
+    standardScriptsTab->showLocalParameters();
+    standardScriptsTab->setParameterIndex(localIndex[uid] - 1);
+  }
+  else if(module->type() == scriptModule::custom)
+  {
+    customScriptsTab->showLocalParameters();
+    customScriptsTab->setParameterIndex(localIndex[uid] - 1);
+  }
+  else if(module->type() == scriptModule::singleparticle)
+  {
+    singleParticleScriptsTab->showLocalParameters();
+    singleParticleScriptsTab->setParameterIndex(localIndex[uid] - 1);
+  }
+  
+  if(module->type() == scriptModule::standard)
+  {
+      standardScriptsTab->setManualIndex(manualIndex[uid] - 1);
+      standardScriptsTab->selectPrameters(module->displayedVariables(index));
+  }
+  if(module->type() == scriptModule::custom)
+  {
+      customScriptsTab->setManualIndex(manualIndex[uid] - 1);
+      customScriptsTab->selectPrameters(module->displayedVariables(index));
+  }
+  if(module->type() == scriptModule::singleparticle)
+  {
+      singleParticleScriptsTab->setManualIndex(manualIndex[uid] - 1);
+      singleParticleScriptsTab->selectPrameters(module->displayedVariables(index));
+  }
+  
   if(verbosityControl->level() != 0)
 		logViewer->loadLogFile(module->logFile(index));
   else
@@ -784,11 +800,15 @@ QWidget *mainWindow::setupFooter()
   QHBoxLayout *layout = new QHBoxLayout;
   footer->setLayout(layout);
 
-  graphicalButton *infoButton = new graphicalButton(mainData->getIcon("info"),this);
-  infoButton->setCheckable(true);
-  infoButton->setToolTip("Show/Hide image header information");
+  QLabel* copyrightLabel = new QLabel(tr("Copyright: C-CINA, University of Basel."));
+  copyrightLabel->setContentsMargins(3, 1, 3, 1);
+  copyrightLabel->setAutoFillBackground(true);
+  copyrightLabel->setBackgroundRole(QPalette::Light);
+  //graphicalButton *infoButton = new graphicalButton(mainData->getIcon("info"),this);
+  //infoButton->setCheckable(true);
+  //infoButton->setToolTip("Show/Hide image header information");
 //  infoButton->setChecked(true);
-  connect(infoButton,SIGNAL(clicked(bool)),preview,SLOT(toggleInfo()));
+  //connect(infoButton,SIGNAL(clicked(bool)),preview,SLOT(toggleInfo()));
 
   graphicalButton *dryRunButton = new graphicalButton(mainData->getIcon("dryRun"),this);
   dryRunButton->setCheckable(true);
@@ -812,7 +832,7 @@ QWidget *mainWindow::setupFooter()
 
   connect(mapper,SIGNAL(mapped(const QString &)),this,SLOT(openURL(const QString &)));
 
-  layout->addWidget(infoButton);
+  layout->addWidget(copyrightLabel);
   layout->addStretch(2);
   layout->addWidget(webHelp);
   layout->addWidget(bugReport);
@@ -974,16 +994,16 @@ void mainWindow::singleParticleScriptCompleted(QModelIndex index)
   scriptCompleted(singleParticleScripts,index);
 }
 
-void mainWindow::maximizeWindow(int option)
+void mainWindow::maximizeSelection(int option)
 {
-  container->maximizeWindow(option - 1);
+  selectionContainer->maximizeWindow(option - 1);
   if(option==0) 
   {
-    centerRightSplitter->setSizes(QList<int>()<<1<<1);
+    //centerRightSplitter->setSizes(QList<int>()<<1<<1);
 
   }
-  else 
-    centerRightSplitter->setSizes(QList<int>()<<1<<0);  
+  //else 
+  //  centerRightSplitter->setSizes(QList<int>()<<1<<0);  
 }
 
 void mainWindow::initializeDirectory()
@@ -1221,10 +1241,20 @@ void mainWindow::openURL(const QString &url)
   QProcess::startDetached(mainData->getApp("webBrowser") + " " + url);
 }
 
-void mainWindow::showManual(bool show)
+void mainWindow::hideManual(bool hide)
 {
-  if(show) {parameterContainer->restoreSplitterState(0); manuals->show();}
-  else {parameterContainer->saveSplitterState(0); parameterContainer->maximizeWindow(1); manuals->hide();}
+  if(!hide) 
+  {
+      standardScriptsTab->showManual();
+      customScriptsTab->showManual();
+      singleParticleScriptsTab->showManual();
+  }
+  else 
+  {
+      standardScriptsTab->hideManual();
+      customScriptsTab->hideManual();
+      singleParticleScriptsTab->hideManual();
+  }
 }
 
 void mainWindow::increaseFontSize()
@@ -1265,7 +1295,9 @@ void mainWindow::toggleAutoSave()
 
 void mainWindow::updateFontInfo()
 {
-  parameters->updateFontInfo();
+  standardScriptsTab->updateFontInfo();
+  customScriptsTab->updateFontInfo();
+  singleParticleScriptsTab->updateFontInfo();
   logViewer->updateFontInfo();
   //  emit fontInfoUpdated();
 }

@@ -112,6 +112,13 @@ QTreeView *scriptModule::setupModule()
       item->setIcon(*data->getIcon("spScriptIcon"));
 
     item->setTextAlignment(Qt::AlignVCenter);
+    
+    QFont itemFont;
+    itemFont.setBold(true);
+    itemFont.setKerning(true);
+    itemFont.setStretch(QFont::SemiExpanded);
+    item->setFont(itemFont);
+    
 
     if(!scriptData->property("ITERATIONCOUNTER").isEmpty())
     {
@@ -171,6 +178,7 @@ QTreeView *scriptModule::setupModule()
   selection = view->selectionModel();
 
   view->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  view->setAlternatingRowColors(true);
   view->resizeColumnToContents(0);
   view->resizeColumnToContents(1);
   if(!counterPresent)
@@ -562,5 +570,10 @@ bool scriptModule::isRunning()
 void scriptModule::setVerbosity(int value)
 {
 	verbosity = value;
+}
+
+scriptModule::moduleType scriptModule::type()
+{
+    return scriptType;
 }
 

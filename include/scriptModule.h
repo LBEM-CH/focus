@@ -108,6 +108,7 @@ class scriptModule : public QWidget
   QString resultsFile(QModelIndex index);
   QString resultsFile();
   QString title(QModelIndex index);
+  moduleType type();
   uint uid();
   confData *conf(QModelIndex index);
   bool isRunning();

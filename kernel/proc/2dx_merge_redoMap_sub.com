@@ -188,7 +188,7 @@ eot
 set refnamecore = "REF${imagenumber}"
 set refhklfile = "APH/${refnamecore}.hkl"
 set refmtzfile = "APH/${refnamecore}_MRClefthanded.mtz"
-set refmap = "${nonmaskimagename}_ref.mrc"
+set refmap = "${nonmaskimagename}_reference.mrc"
 #
 \rm -f ${refmtzfile}
 \rm -f ${refmap}
@@ -309,10 +309,8 @@ eot
   \rm -f SCRATCH/scratch2.map
   #
   cd ${mergedir}/RESULTS-MRC
-  # \rm -f ${imagename}-${imagenumber}_ref.hkl
-  # \ln -s ${rootdir}/${refhklfile} ${imagename}-${imagenumber}_ref.hkl
-  \rm -f ${imagename}-${imagenumber}-ref.mrc
-  \ln -s ${rootdir}/${refmap} ${imagename}-${imagenumber}-ref.mrc
+  \rm -f ${imagename}-${imagenumber}_reference.mrc
+  \ln -s ${rootdir}/${refmap} ${imagename}-${imagenumber}_reference.mrc
   cd ${rootdir}
   #
 else
@@ -456,6 +454,25 @@ if ( ${RESULTSMRC} != "y" ) then
   set RESULTSMRC = "y"
 endif
 #
+#
+if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
+  #############################################################################
+  ${proc_2dx}/lin "LABEL - to merge two output files into one"
+  #############################################################################
+  #
+  \rm -f ${imagename}-${symmetry}_ref2.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+${imagename}-${symmetry}.mrc
+21
+${imagename}-${symmetry}_ref2.mrc
+${refmap}
+eot
+  #
+  # \mv -f ${imagename}-${symmetry}_ref2.mrc ${imagename}-${symmetry}.mrc
+  #
+endif
+#
 #############################################################################
 ${proc_2dx}/lin "MRC2TIF - to create TIFF file of final map"
 #############################################################################
@@ -472,13 +489,9 @@ eot
 \ln -s ${imagename}-${symmetry}.tif final_map.tif
 #
 cd ${mergedir}/RESULTS-MRC
-# \rm -f ${imagename}-${imagenumber}_d.hkl
-# \ln -s ${rootdir}/${infile} ${imagename}-${imagenumber}_d.hkl
 \rm -f ${imagename}-${imagenumber}.mrc
 \ln -s ${rootdir}/final_map.mrc ${imagename}-${imagenumber}.mrc
 cd ${mergedir}/RESULTS-TIFF
-# \rm -f ${imagename}-${imagenumber}.tif
-# \ln -s ${rootdir}/final_map.tif ${imagename}-${imagenumber}.tif
 set filenum = `cat filenum.tmp`
 \cp ${rootdir}/final_map.tif TIFF${filenum}.tif
 @ filenum += 1

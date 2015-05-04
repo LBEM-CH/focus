@@ -32,6 +32,7 @@
 #include <QItemSelectionModel>
 #include <QTabwidget>
 #include <iostream>
+#include "blockContainer.h"
 
 using namespace std;
 
@@ -71,9 +72,9 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
   if(!QFileInfo(mainData->getDir("working") + "/" + "2dx_merge.cfg").exists()) mainData->save();
 
-  QWidget *centralWidget = new QWidget;
+  QSplitter *centralWidget = new QSplitter(Qt::Vertical, this);
   setCentralWidget(centralWidget);
-  layout = new QGridLayout(centralWidget);
+  QGridLayout*  layout = new QGridLayout(centralWidget);
   layout->setMargin(0);
   layout->setSpacing(0);
   centralWidget->setLayout(layout);
@@ -161,6 +162,15 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   connect(singleParticleScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
   connect(singleParticleScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
 
+  standardScripts->extendSelectionTo(customScripts);
+  standardScripts->extendSelectionTo(singleParticleScripts);
+  
+  customScripts->extendSelectionTo(standardScripts);
+  customScripts->extendSelectionTo(singleParticleScripts);
+  
+  singleParticleScripts->extendSelectionTo(standardScripts);
+  singleParticleScripts->extendSelectionTo(customScripts);
+  
   int minWidth = int(QApplication::desktop()->width()/5.00);
   if(minWidth>235) minWidth = 235;  
   
@@ -206,9 +216,9 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   customScriptsTab = new scriptTab(customScripts, mainData, this);
   singleParticleScriptsTab = new scriptTab(singleParticleScripts, mainData, this);
   
-  connect(results,SIGNAL(saved(bool)),standardScriptsTab,SLOT(load()));
-  connect(results,SIGNAL(saved(bool)),customScriptsTab,SLOT(load()));
-  connect(results,SIGNAL(saved(bool)),singleParticleScriptsTab,SLOT(load()));
+  connect(results,SIGNAL(saved(bool)),standardScriptsTab,SLOT(loadParameters()));
+  connect(results,SIGNAL(saved(bool)),customScriptsTab,SLOT(loadParameters()));
+  connect(results,SIGNAL(saved(bool)),singleParticleScriptsTab,SLOT(loadParameters()));
 
   connect(standardScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(standardScriptChanged(QModelIndex)));
   connect(customScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(customScriptChanged(QModelIndex)));
@@ -277,72 +287,40 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
   QWidget *footerWidget = setupFooter();
 
-  QTabWidget* scriptsWidget = new QTabWidget(this);
+  scriptsWidget = new QTabWidget(this);
   scriptsWidget->addTab(standardScriptsTab, "Standard Scripts");
   scriptsWidget->addTab(customScriptsTab, "Custom Scripts");
   scriptsWidget->addTab(singleParticleScriptsTab, "Single Particle Scripts");
-  //scriptsWidget->setMaximumWidth(500);
+  connect(scriptsWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)) );
   
-  QWidget *processWidget = new QWidget(this);
-  QGridLayout* processLayout = new QGridLayout(processWidget);
-  processWidget->setLayout(processLayout);
-  processLayout->setMargin(6);
-  processLayout->setSpacing(6);
-  processLayout->addWidget(scriptsWidget, 0, 0, 1, 1);
+  blockContainer* processContainer = new blockContainer("PROCESS", this);
+  processContainer->addWidget(scriptsWidget);
   
-  viewContainer* scriptsContainer = new viewContainer("PROCESS", viewContainer::data, this, viewContainer::black);
-  scriptsContainer->addWidget(processWidget);
-  scriptsContainer->setMinimumHeight(250);
+  blockContainer* selectionContainer = new blockContainer("SELECT", this);
+  selectionContainer->addWidget(dirContainer);
+  selectionContainer->addWidget(previewContainer);
   
-  
-  QWidget* selectionWidget = new QWidget(this);
-  QGridLayout* selectionLayout = new QGridLayout(selectionWidget);
-  selectionLayout->setMargin(6);
-  selectionLayout->setSpacing(6);
-  selectionWidget->setLayout(selectionLayout);
-  selectionLayout->addWidget(dirContainer, 0, 0, 1, 1);
-  selectionLayout->addWidget(previewContainer, 0, 1, 1, 1);
-  
-  selectionContainer = new viewContainer("SELECT", viewContainer::data, this, viewContainer::black);
-  selectionContainer->addSplitterWidget(selectionWidget);
-  selectionContainer->saveSplitterState();
-  //selectionContainer->setMinimumHeight(minWidth);
-  
-  //levelGroup *maximizeControl = new levelGroup(mainData, 2,QStringList()<<"Restore"<<"Maximize Project View",QStringList()<<"Restore"<<"Maximize Project Window",
-  //                                                         QStringList()<<"gbAqua"<<"gbBlue");
-
-
-  //selectionContainer->setHeaderWidget(maximizeControl, Qt::AlignRight);
-
-  //connect(maximizeControl,SIGNAL(levelChanged(int)),this,SLOT(maximizeSelection(int)));
+  blockContainer* evaluateContainer = new blockContainer("EVALUATE", this);
+  evaluateContainer->addWidget(logWindow);
+  evaluateContainer->addWidget(resultsSplitter);
   
   
-  QWidget *evaluateWidget = new QWidget(this);
-  QGridLayout* evaluateLayout = new QGridLayout(evaluateWidget);
-  evaluateWidget->setLayout(evaluateLayout);
-  evaluateLayout->setMargin(6);
-  evaluateLayout->setSpacing(6);
-  evaluateLayout->addWidget(logWindow, 0, 0, 1, 1);
-  evaluateLayout->addWidget(resultsSplitter, 0, 1, 1, 1);
-  
-  viewContainer* evaluateContainer = new viewContainer("EVALUATE", viewContainer::data, this, viewContainer::black);
-  evaluateContainer->addWidget(evaluateWidget);
-  evaluateContainer->setMinimumHeight(250);
-  
+  QSplitter* container = new QSplitter(Qt::Vertical,this);
+  container->addWidget(selectionContainer);
+  container->addWidget(processContainer);
+  container->addWidget(evaluateContainer);
   
   layout->addWidget(headerWidget, 0, 0, 1, 1);
-  layout->addWidget(selectionContainer, 1, 0, 1, 1);
-  layout->addWidget(scriptsContainer, 2, 0, 1, 1);
-  layout->addWidget(evaluateContainer, 3, 0, 1, 1);
-  layout->addWidget(footerWidget, 4, 0, 1, 1);
+  layout->addWidget(container, 1, 0, 1, 1);
+  layout->addWidget(footerWidget, 2, 0, 1, 1);
 
   about = new aboutWindow(mainData,this,true);
   about->hide();
 
-	setupActions();
+  setupActions();
   album = NULL;
   euler = NULL;
-reproject = NULL;
+  reproject = NULL;
   
   importCount = 0;
 
@@ -994,17 +972,13 @@ void mainWindow::singleParticleScriptCompleted(QModelIndex index)
   scriptCompleted(singleParticleScripts,index);
 }
 
-void mainWindow::maximizeSelection(int option)
+void mainWindow::tabChanged(int currentIndex)
 {
-  selectionContainer->maximizeWindow(option - 1);
-  if(option==0) 
-  {
-    //centerRightSplitter->setSizes(QList<int>()<<1<<1);
-
-  }
-  //else 
-  //  centerRightSplitter->setSizes(QList<int>()<<1<<0);  
+    scriptTab* currentTab = (scriptTab*) scriptsWidget->currentWidget();
+    scriptModule* module = currentTab->getModule();
+    module->select(module->getSelection()->selection());
 }
+
 
 void mainWindow::initializeDirectory()
 {

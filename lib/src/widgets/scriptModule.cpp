@@ -198,6 +198,11 @@ const QVariant & scriptModule::getScriptProperty(quint32 uid, const QString &pro
   return scriptData[uid][property.toLower()];
 }
 
+QItemSelectionModel* scriptModule::getSelection()
+{
+    return selection;
+}
+
 void scriptModule::clearSelection()
 {
   if(selection->hasSelection())
@@ -550,10 +555,16 @@ void scriptModule::select(QModelIndex index)
 	emit currentScriptChanged(index);
 }
 
+void scriptModule::select(const QItemSelection& selected)
+{
+    if(selected.indexes().isEmpty()) return;
+    select(selected.indexes().first());
+}
+
+
 void scriptModule::select(const QItemSelection &selected, const QItemSelection &deselected)
 {
-  if(selected.indexes().isEmpty()) return;
-  select(selected.indexes().first());
+    select(selected);
 }
 
 void scriptModule::selectAll()

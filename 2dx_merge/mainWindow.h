@@ -71,6 +71,8 @@ class mainWindow : public QMainWindow
 
   public slots:
 
+  void tabChanged(int currentIndex);
+      
   void scriptChanged(scriptModule *module, QModelIndex index);
   void standardScriptChanged(QModelIndex index);
   void customScriptChanged(QModelIndex index);
@@ -96,8 +98,6 @@ class mainWindow : public QMainWindow
   void extendSelection();
   void reduceSelection();
   void copyImage();
-
-  void maximizeSelection(int option);
 
   void import();
   void autoImport();
@@ -134,14 +134,9 @@ class mainWindow : public QMainWindow
 
   QProcess importProcess;
 
-  viewContainer *selectionContainer;
-
   imagePreview *preview;
 
   QPointer<autoImportTool> autoImportMonitor;
-
-  QGridLayout *layout;
-  QHash<QString,QByteArray> splitterStates;
 
   projectModel *dirModel;
   QTreeView *dirView;
@@ -162,6 +157,8 @@ class mainWindow : public QMainWindow
   scriptTab *standardScriptsTab;
   scriptTab *customScriptsTab;
   scriptTab *singleParticleScriptsTab;
+  
+  QTabWidget* scriptsWidget;
 
   resultsModule *resultsView;
   QSortFilterProxyModel *sortModel;

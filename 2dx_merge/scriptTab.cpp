@@ -113,3 +113,8 @@ void scriptTab::updateFontInfo()
 {
     parameters->updateFontInfo();
 }
+
+scriptModule* scriptTab::getModule()
+{
+    return module;
+}

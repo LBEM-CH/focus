@@ -41,7 +41,8 @@ class scriptModule : public QWidget
 
   void selectAll();
   void select(QModelIndex index);
-	void select(const QItemSelection &selected, const QItemSelection &deselected);
+  void select(const QItemSelection &selected);
+  void select(const QItemSelection &selected, const QItemSelection &deselected);
   void initialize();
 
   void setVerbosity(int value);
@@ -112,6 +113,8 @@ class scriptModule : public QWidget
   uint uid();
   confData *conf(QModelIndex index);
   bool isRunning();
+  QItemSelectionModel* getSelection();
+  
 };
 
 #endif

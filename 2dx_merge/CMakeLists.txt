@@ -98,6 +98,7 @@ set(MOC_HDRS
 	resultsModule.h  
 	translator.h
         scriptTab.h
+        blockContainer.h
 	)
 ###############################################################################
 set(CMAKE_DEBUG_POSTFIX -dbg)

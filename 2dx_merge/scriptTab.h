@@ -40,6 +40,8 @@ class scriptTab : public QWidget
         void showLocalParameters();
 
         void selectPrameters(const QStringList &selectionList);
+        
+        scriptModule* getModule();
 
     
     private:

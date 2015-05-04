@@ -469,7 +469,7 @@ ${imagename}-${symmetry}_ref2.mrc
 ${refmap}
 eot
   #
-  # \mv -f ${imagename}-${symmetry}_ref2.mrc ${imagename}-${symmetry}.mrc
+  \mv -f ${imagename}-${symmetry}_ref2.mrc ${imagename}-${symmetry}.mrc
   #
 endif
 #

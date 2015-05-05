@@ -95,6 +95,9 @@ C
 C IMODE= 20: Produce thumbnail image
 C        card 4 : Enter X/Y dimensions of output image
 C
+C IMODE= 21: Merge two images into one output image
+C        card 4 : Name of second image
+C
 C IMODE= 29: Interpolate into two times larger image
 C
 C IMODE= 30: Pad into new larger dimensions
@@ -192,6 +195,7 @@ C
      . ' 18: Swap unsigned/signed, and Transform [0;16000] INT*2 image',/,
      . ' 19: Transform [1;100] REAL image',/,
      . ' 20: Produce thumbnail image',/,
+     . ' 21: Merge two images into one',/,
      . ' 29: Interpolate into two times larger image',/,
      . ' 30: Pad into square image',/,
      . ' 31: Select region (and change header)',/,
@@ -228,9 +232,10 @@ C
         IF ((IMODE .GT. 4 .and. IMODE .ne. 10 .and. IMODE.ne.11 
      1      .and. IMODE.ne.12 .and. IMODE.ne.13 .and. IMODE.ne.14
      1      .and. IMODE.ne.15 .and. IMODE.ne.16 .and. IMODE.ne.17
-     1      .and. IMODE.ne.18 .and. IMODE.ne.19 .and. IMODE.ne.39
-     1      .and. IMODE.ne.20 .and. IMODE.ne.29 .and. IMODE.ne.30
-     1      .and. IMODE.ne.31 .and. IMODE.ne.32 .and. IMODE.ne.33)
+     1      .and. IMODE.ne.18 .and. IMODE.ne.19 .and. IMODE.ne.20
+     1      .and. IMODE.ne.21 .and. IMODE.ne.29 .and. IMODE.ne.30
+     1      .and. IMODE.ne.31 .and. IMODE.ne.32 .and. IMODE.ne.33
+     1      .and. IMODE.ne.39)
      1      .AND. MODE .LT. 3) then
           write(*,'('' ERROR: Illegal mode for this file type'')')
           GOTO 1
@@ -257,14 +262,15 @@ C        IF (IMODE .NE. 0 .and. IMODE.ne.17) THEN
         if ( IMODE.eq.17 ) goto 110
         if ( IMODE.eq.18 ) goto 111
         if ( IMODE.eq.19 ) goto 112
-        if ( IMODE.eq.39 ) goto 115
         if ( IMODE.eq.20 ) goto 94
+        if ( IMODE.eq.21 ) goto 116
         if ( IMODE.eq.29 ) goto 98
         if ( IMODE.eq.30 ) goto 95
         if ( IMODE.eq.31 ) goto 96
 C-------------------------------97 already taken for "13"
         if ( IMODE.eq.32 ) goto 109
         if ( IMODE.eq.33 ) goto 114
+        if ( IMODE.eq.39 ) goto 115
         GOTO (113,3,5,10,20,30,40,45,50,60,70,80,90) IMODE+4
 C
 C=====================================================================
@@ -1268,6 +1274,207 @@ C
         enddo
         DMEAN = DOUBLMEAN/(NX*NY*NZ)
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+        GOTO 990
+C
+C=====================================================================
+C
+C  MODE 21 : Merge two images into one
+C
+116      continue
+        write(TITLE,'(''LABELH Mode 21: Merge 2 images into one ''
+     1     '' image '')')
+        write(6,'('' Merging two images into one'')')
+C
+        CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        CALL IRTLAB(1,LABELS,NL)
+        CALL IRTEXT(1,EXTRA,1,29)
+        CALL IRTCEL(1,CELL)
+C
+        write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Copy first file into output picture, while scaling to AVG=0,STD=1
+C
+        do iy = 1,NY
+          CALL IRDLIN(1,ALINE,*999)
+          do ix = 1,NX
+            VAL=ALINE(ix)
+            APIC(ix,iy)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+        enddo
+        CALL IMCLOSE(1)
+C
+        DOUBLMEAN = DOUBLMEAN/(NX*NY)
+        DMEAN = DOUBLMEAN
+C
+        DOUBLMEAN=0.0
+C-------Find STD
+        do iy = 1,NY
+          do ix = 1,NX
+            VAL=APIC(ix,iy)
+            DOUBLMEAN = DOUBLMEAN + (VAL-DMEAN)**2
+          enddo
+        enddo
+C
+        VAL = DOUBLMEAN/(NX*NY)
+        DSTD = SQRT(VAL)
+C
+        write(*,'('' Opened first file has range MIN,MAX,MEAN,STDEV: '',
+     .     4G16.5)')
+     .     DMIN,DMAX,DMEAN,DSTD
+C
+        DVAL = ABS(DMAX - DMIN)
+        write(*,'('' That is a dynamic range of: '',G16.5)')
+     1     DVAL
+C
+C-------Calculate offset and scaling factors
+C
+        RTARGET=100.0
+        ROFF = DMEAN
+        if ( DSTD .gt. 0.00000001 ) then
+          RSCALE = RTARGET / DSTD
+        else
+          RSCALE = RTARGET
+        endif
+C
+        write(*,'('' Calculated offset of '',G16.5)')ROFF
+        write(*,'('' Calculated scaling factor of '',G16.5)')RSCALE
+C
+C-------Rescale image to MEAN=0, STD=RTARGET
+
+        do iy = 1,NY
+          do ix = 1,NX
+            APIC(ix,iy)=(APIC(ix,iy)-ROFF)*RSCALE
+          enddo
+        enddo
+C
+C-------Now read the second image
+
+        read(*,'(A)')cfile
+        call shorten(cfile,ilen)
+        write(6,'('' Opening second file: '',A)')cfile(1:ilen)
+C
+        NOX=NX
+        NOY=NY
+        CALL IMOPEN(1,cfile,'RO')
+        CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        if(NOX.ne.NX .or. NOY.ne.NY)then
+          write(6,'('':: labelh.for: ERROR, both files need to have the same'',
+     .      ''dimensions. Aborting. '')')
+          goto 999
+        endif
+C
+C-------Calculate offset for first corner of output image
+        IOFFSX=NX/2
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Copy the right half of the second file onto the output picture
+        do iy = 1,NY
+          CALL IRDLIN(1,ALINE,*999)
+          do ix = IOFFSX,NX
+            VAL=ALINE(ix)
+            APIC(ix,iy)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+        enddo
+C
+        CALL IMCLOSE(1)
+C
+        DOUBLMEAN = DOUBLMEAN/(NX*NY)
+        DMEAN = DOUBLMEAN
+C
+        DOUBLMEAN=0.0
+C-------Find STD
+        do iy = 1,NY
+          do ix = IOFFSX,NX
+            VAL=APIC(ix,iy)
+            DOUBLMEAN = DOUBLMEAN + (VAL-DMEAN)**2
+          enddo
+        enddo
+C
+        VAL = DOUBLMEAN/((NX/2)*NY)
+        DSTD = SQRT(VAL)
+C
+        write(*,'('' Opened second file has range MIN,MAX,MEAN,STDEV: '',
+     .     4G16.5)')
+     .     DMIN,DMAX,DMEAN,DSTD
+C
+        DVAL = ABS(DMAX - DMIN)
+        write(*,'('' That is a dynamic range of: '',G16.5)')
+     1     DVAL
+C
+C-------Calculate offset and scaling factors
+C
+        RTARGET=100.0
+        ROFF = DMEAN
+        if ( DSTD .gt. 0.00000001 ) then
+          RSCALE = RTARGET / DSTD
+        else
+          RSCALE = RTARGET
+        endif
+C
+        write(*,'('' Calculated offset of '',G16.5)')ROFF
+        write(*,'('' Calculated scaling factor of '',G16.5)')RSCALE
+C
+C-------Rescale image to MEAN=0, STD=RTARGET
+
+        do iy = 1,NY
+          do ix = IOFFSX,NX
+            APIC(ix,iy)=(APIC(ix,iy)-ROFF)*RSCALE
+          enddo
+        enddo
+C
+C-------Put title labels, new cell and extra information only into header
+C
+        NXYZ(1)=NX
+        NXYZ(2)=NY
+        MODE = 2
+C
+        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+        CELL(1) = REAL(NX)
+        CELL(2) = REAL(NY)
+        CALL IALEXT(2,EXTRA,1,29)
+        CALL IALCEL(2,CELL)
+        CALL IALMOD(2,MODE)
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+        write(*,'('' Output file has dimensions '',2I6)')NX,NY
+C
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Write the file into the output file
+        do iy = 1,NY
+          do ix = 1,NX
+            VAL=APIC(ix,iy)
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+            ALINE(ix)=VAL
+          enddo
+          CALL IWRLIN(2,ALINE)
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+
+        write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+     .     DMIN,DMAX,DMEAN
+C
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
         GOTO 990
 C
 C=====================================================================

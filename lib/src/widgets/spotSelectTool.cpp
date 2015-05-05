@@ -106,14 +106,20 @@ spotSelectTool::spotSelectTool(confData *conf, fullScreenImage *fsImage, mrcImag
     layout->addWidget(resolution,k,1,1,1);
     k++;
 
+    layout->addWidget(new QLabel("Amplitude: "),k,0,1,1);
+    layout->addWidget(value,k,1,1,1);
+    k++;
+
     layout->addWidget(new QLabel("Phase [deg]: "),k,0,1,1);
     layout->addWidget(phase,k,1,1,1);
     k++;
   }
-
-  layout->addWidget(new QLabel("Pixel Value: "),k,0,1,1);
-  layout->addWidget(value,k,1,1,1);
-  k++;
+  else
+  {
+    layout->addWidget(new QLabel("Pixel Value: "),k,0,1,1);
+    layout->addWidget(value,k,1,1,1);
+    k++;
+  }
 
   if(!imageHeader->isFFT())
   {

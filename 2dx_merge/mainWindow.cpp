@@ -684,7 +684,6 @@ bool mainWindow::setupIcons(confData *data, const QDir &directory)
 
 void mainWindow::scriptChanged(scriptModule *module, QModelIndex index)
 {
-//  container->saveSplitterState(1);
   int uid = index.data(Qt::UserRole).toUInt();
   progressBar->setText(module->title(index));
 

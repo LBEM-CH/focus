@@ -61,7 +61,10 @@ QWidget* blockContainer::getTitleBar()
     bar->setFixedHeight(25);
     
     //Set Font
-    QFont font("Times", 15, QFont::Bold);
+    QFont font;
+    font.setBold(true);
+    font.setPixelSize(14);
+    font.setStretch(QFont::SemiExpanded);
     
     //Set Text
     QLabel* titleText = new QLabel(titleLabel, this);

@@ -74,7 +74,10 @@ viewContainer::titleBar::titleBar(QString title, viewContainer::type viewType, Q
 		}
 	layout->addItem(new QSpacerItem(3,3),0,6,1,1);
 
-	QFont font("Times", 12, QFont::Light);
+	QFont font;
+        font.setPixelSize(12);
+        font.setWeight(QFont::Light);
+        font.setStyleHint(QFont::Times);
 	//if(gradientStyle == viewContainer::grey) font = QFont
 	//if(gradientStyle == viewContainer::black) font = QFont("Times", 12, QFont::Bold);
 

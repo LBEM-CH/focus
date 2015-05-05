@@ -18,7 +18,11 @@ confEditor::confEditor(confData *conf, QWidget *parent)
   layout->addLayout(middle);
   layout->addLayout(bottom);
 
-  QFont font("Times New Roman",14,QFont::Bold);
+  QFont font;
+  font.setStyleHint(QFont::Times);
+  font.setBold(true);
+  font.setPixelSize(14);
+  
   QLabel *title = new QLabel("Program Preferences (Double Click to Edit)",this);
   title->setFont(font);
   title->setTextFormat(Qt::RichText);

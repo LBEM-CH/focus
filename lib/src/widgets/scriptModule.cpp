@@ -117,6 +117,7 @@ QTreeView *scriptModule::setupModule()
     itemFont.setBold(true);
     itemFont.setKerning(true);
     itemFont.setStretch(QFont::SemiExpanded);
+    itemFont.setStyleHint(QFont::SansSerif);
     item->setFont(itemFont);
     
 
@@ -538,7 +539,7 @@ QString scriptModule::title(QModelIndex index)
 }
 
 void scriptModule::initialize()
-{
+{       
 	setVerbosity(1);
 	select(model->item(0)->index());
 	if(model->item(0,1)!=NULL)

@@ -72,6 +72,9 @@ void LogViewer::insertText(const QString &text)
 
 void LogViewer::setStandardFont()
 {
+  QFont font;
+  font.setStyleHint(QFont::TypeWriter);
+  text_area_ptr->setFont(font);
   text_area_ptr->setTextColor(Qt::black);
   text_area_ptr->setFontItalic(false);
 }

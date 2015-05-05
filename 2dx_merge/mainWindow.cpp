@@ -72,7 +72,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
   if(!QFileInfo(mainData->getDir("working") + "/" + "2dx_merge.cfg").exists()) mainData->save();
 
-  QSplitter *centralWidget = new QSplitter(Qt::Vertical, this);
+  QWidget *centralWidget = new QWidget(this);
   setCentralWidget(centralWidget);
   QGridLayout*  layout = new QGridLayout(centralWidget);
   layout->setMargin(0);
@@ -144,21 +144,18 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   standardScripts = new scriptModule(mainData,mainData->getDir("standardScripts"),scriptModule::standard);
   connect(standardScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(standardScriptCompleted(QModelIndex)));
   connect(standardScripts,SIGNAL(reload()),this,SLOT(updateModel()));
-  connect(this,SIGNAL(execute(bool)),standardScripts,SLOT(execute(bool)));
   connect(standardScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
   connect(standardScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
 
   customScripts = new scriptModule(mainData,mainData->getDir("customScripts"),scriptModule::custom);
   connect(customScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(customScriptCompleted(QModelIndex)));
   connect(customScripts,SIGNAL(reload()),this,SLOT(reload()));
-  connect(this,SIGNAL(execute(bool)),customScripts,SLOT(execute(bool)));
   connect(customScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
   connect(customScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
 
   singleParticleScripts = new scriptModule(mainData,mainData->getDir("singleParticleScripts"),scriptModule::singleparticle);
   connect(singleParticleScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(singleParticleScriptCompleted(QModelIndex)));
   connect(singleParticleScripts,SIGNAL(reload()),this,SLOT(reload()));
-  connect(this,SIGNAL(execute(bool)),singleParticleScripts,SLOT(execute(bool)));
   connect(singleParticleScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
   connect(singleParticleScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
 
@@ -362,7 +359,7 @@ QWidget *mainWindow::setupHeader()
   playButton = new graphicalButton(mainData->getIcon("play"),this);
   playButton->setToolTip("Run current script");
   playButton->setCheckable(true);
-  connect(playButton,SIGNAL(clicked(bool)),this,SIGNAL(execute(bool)));
+  connect(playButton,SIGNAL(clicked(bool)),this,SLOT(execute(bool)));
 
   saveButton = new graphicalButton(mainData->getIcon("saveDark"),this);
   saveButton->setToolTip("Save");
@@ -395,6 +392,25 @@ QWidget *mainWindow::setupHeader()
    
   layout->setAlignment(Qt::AlignCenter);
   return header;
+}
+
+void mainWindow::execute(bool halt)
+{
+    scriptTab* currWidget = (scriptTab*) scriptsWidget->currentWidget();
+    scriptModule* module = currWidget->getModule();
+    if(module->type() == scriptModule::standard)
+    {
+        standardScripts->execute(halt);
+    }
+    if(module->type() == scriptModule::custom)
+    {
+      customScripts->execute(halt);
+    }
+    if(module->type() == scriptModule::singleparticle)
+    {
+      singleParticleScripts->execute(halt);
+    }
+    
 }
 
 QWidget *mainWindow::setupDirectoryView(const QDir &dir, const QString &savePath)

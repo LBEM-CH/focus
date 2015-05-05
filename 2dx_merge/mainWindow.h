@@ -121,9 +121,9 @@ class mainWindow : public QMainWindow
   void saveDirectorySelection();
   void loadDirectorySelection();
   void showSelected(bool enable);
+  void execute(bool halt);
 
   signals:
-  void execute(bool halt);
   void saveConfig();
 
   private:

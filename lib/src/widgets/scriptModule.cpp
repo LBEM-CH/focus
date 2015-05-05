@@ -70,7 +70,7 @@ QTreeView *scriptModule::setupModule()
   view->setItemDelegate(new SpinBoxDelegate);
 
   QString entry;
-  QStandardItem *item, *itItem;
+  QStandardItem *item;
   QMap<int, QList<QStandardItem *> > map;
   quint32 sortOrder, uid;
   bool counterPresent = false;
@@ -115,31 +115,11 @@ QTreeView *scriptModule::setupModule()
     
     QFont itemFont;
     itemFont.setBold(true);
-    itemFont.setKerning(true);
     itemFont.setStretch(QFont::SemiExpanded);
-    itemFont.setStyleHint(QFont::SansSerif);
+    itemFont.setStyleHint(QFont::Times);
+    itemFont.setPixelSize(13);
     item->setFont(itemFont);
     
-
-    if(!scriptData->property("ITERATIONCOUNTER").isEmpty())
-    {
-      QString iterationData = scriptData->property("ITERATIONCOUNTER");
-      itItem = new QStandardItem(iterationData.section(';',-1,-1).section('=',-1,-1).trimmed());
-      itItem->setData(iterationData.section(';',0,0).section('=',-1,-1).trimmed().toInt(),Qt::UserRole+3);
-      itItem->setEditable(true);
-      addScriptProperty(uid,"iterations",itItem->text().toInt());
-      counterPresent = true;
-    }
-    else
-    {
-      itItem = new QStandardItem;
-      itItem->setEditable(false);
-      itItem->setSizeHint(QSize(0,0));
-    }
-    itItem->setData(uid,Qt::UserRole);
-    itItem->setData(scriptDir.canonicalPath() + "/" + entry,Qt::UserRole + 5);
-    itemList<<itItem;
-
     QSetIterator<QString> it(scriptData->subScripts());
     QString subScriptTitle;
     QStandardItem *subItem;
@@ -148,18 +128,15 @@ QTreeView *scriptModule::setupModule()
       subScriptTitle = it.next();
       subItem = new QStandardItem(subScriptTitle);
       subItem->setIcon(*data->getIcon("subScript"));
-      itItem = new QStandardItem;
 
       subItem->setData(data->getDir("procDir") + "/" + subScriptTitle,Qt::UserRole + 5);
       if(!QFileInfo(data->getDir("procDir") + "/" + subScriptTitle).exists())
         subItem->setForeground(QColor(255,0,0));
-      itItem->setData(data->getDir("procDir") + "/" + subScriptTitle,Qt::UserRole + 5);
-      itItem->setEditable(false);
-      itItem->setData(item->data(Qt::UserRole), Qt::UserRole);
+      
       subItem->setEditable(false);
       subItem->setData(item->data(Qt::UserRole), Qt::UserRole);
       QList<QStandardItem*> subItems;
-      subItems<<subItem<<itItem;
+      subItems<<subItem;
       item->appendRow(subItems);
     }
 
@@ -240,17 +217,13 @@ bool scriptModule::initializeExecution()
     {
       if(!index.parent().isValid())
       {
-        //model->itemFromIndex(index)
-        for(int k=0;k<2;k++)
-          model->item(index.row(),k)->setForeground(QColor(0,186,0));
+        model->item(index.row())->setForeground(QColor(0,186,0));
         s.insert(index.row(),0);
       }
       else
       {
         selection->select(index.parent(), QItemSelectionModel::Current);
-         for(int k=0;k<2;k++)
-          model->item(index.parent().row(),k)->setForeground(QColor(0,186,0));
-        //model->itemFromIndex(index.parent())->setForeground(QColor(0,186,0));
+        model->item(index.parent().row())->setForeground(QColor(0,186,0));
         s.insert(index.parent().row(),0);
       }
     }
@@ -275,6 +248,7 @@ bool scriptModule::initializeExecution()
     select(runningScript->index());
   else
     emit runningScriptChanged(runningScript->index());
+  
   return true;
 }
 
@@ -282,8 +256,7 @@ void scriptModule::cleanupExecution()
 {
   foreach(int i, executionList)
   {
-    for(int j=0;j<2;j++)
-      model->item(i,j)->setForeground(Qt::black);
+    model->item(i)->setForeground(Qt::black);
   }
   executionList.clear();
   runningScript = NULL;
@@ -298,12 +271,13 @@ void scriptModule::execute(bool run)
     QStandardItem *it;
 
     currentlyRunning = initializeExecution();
-    if(!currentlyRunning) return;
-
+    if(!currentlyRunning)
+    {
+        return;
+    }
     it = runningScript;
 
     it->setForeground(QColor(0,0,186));
-    model->item(it->row(),1)->setForeground(QColor(0,0,186));
     currentUid = it->data(Qt::UserRole).toUInt();
     scriptName = getScriptProperty(currentUid,"fileName").toString();
     scriptPath = getScriptProperty(currentUid,"path").toString();
@@ -311,10 +285,7 @@ void scriptModule::execute(bool run)
 
     scriptParser parser(QList<confData *>()<<localConf[currentUid]<<data);
 
-    int runCount = model->item(runningScript->row(),1)->text().toInt();
-    int maxIt = getScriptProperty(runningScript->data(Qt::UserRole).toUInt(),"iterations").toInt();
-    if(runCount==maxIt)
-      if(!clean(currentUid)) cerr<<"Error removing "<<getScriptProperty(currentUid,"logFile").toString().toStdString()<<endl;
+    if(!clean(currentUid)) cerr<<"Error removing "<<getScriptProperty(currentUid,"logFile").toString().toStdString()<<endl;
 
     if(runningScriptSelected()) emit scriptLaunched();
 
@@ -464,31 +435,18 @@ void scriptModule::scriptFinished(int exitCode)
 	if(runningScriptSelected()) emit standardOut(QStringList()<<scriptHeader);
 	writeToLog(scriptHeader);
 
-	int runCount = -1;
-
 	if(runningScript == NULL)
 		cerr<<"Running script is NULL and should not be!"<<endl;
 	else
 	{
-		runCount = model->item(runningScript->row(),1)->text().toInt();
 		if(runningScript->row() == 0) emit initialized();
 	}
 
-	if(runCount>1 && exitCode == 0)
-	{
-		runCount--;
-		model->item(runningScript->row(),1)->setText(QString::number(runCount));
-		emit scriptCompleted(runningScript->index());
-		execute(true);
-	}
-	else
-	{
-		int it = getScriptProperty(runningScript->data(Qt::UserRole).toUInt(),"iterations").toInt();
-		if(it>0)
-			model->item(runningScript->row(),1)->setText(QString::number(it));
+	
+	
+		
 		runningScript->setForeground(Qt::black);
-		if(model->item(runningScript->row(),1)!=NULL)
-			model->item(runningScript->row(),1)->setForeground(Qt::black);
+		
 		if(executionList.isEmpty())
 		{
 			currentlyRunning = false;
@@ -512,7 +470,6 @@ void scriptModule::scriptFinished(int exitCode)
 				execute(true);
 			}
 		}
-	}
 }
 
 uint scriptModule::uid()
@@ -542,8 +499,6 @@ void scriptModule::initialize()
 {       
 	setVerbosity(1);
 	select(model->item(0)->index());
-	if(model->item(0,1)!=NULL)
-		select(model->item(0,1)->index());
 	execute(true);
 }
 

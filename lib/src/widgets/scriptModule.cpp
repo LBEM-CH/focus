@@ -117,7 +117,6 @@ QTreeView *scriptModule::setupModule()
     itemFont.setBold(true);
     itemFont.setStretch(QFont::SemiExpanded);
     itemFont.setStyleHint(QFont::Times);
-    itemFont.setPixelSize(13);
     item->setFont(itemFont);
     
     QSetIterator<QString> it(scriptData->subScripts());

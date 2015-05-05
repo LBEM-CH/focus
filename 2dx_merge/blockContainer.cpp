@@ -47,23 +47,15 @@ blockContainer::blockContainer(QString title, QWidget* parent)
 QWidget* blockContainer::getTitleBar()
 {
     QWidget* bar = new QWidget(this);
-    
-    //Set Color
-    QPalette pal(palette());
-    QLinearGradient grad(QPoint(0,0),QPoint(0,height()));
-    grad.setColorAt(1,QColor(123,122,122));
-    grad.setColorAt(0,QColor(227,227,227));
-    pal.setBrush(QPalette::Background,QBrush(grad));
     bar->setAutoFillBackground(true);
-    bar->setPalette(pal);
     
     //Set Height
-    bar->setFixedHeight(25);
+    bar->setFixedHeight(20);
     
     //Set Font
     QFont font;
     font.setBold(true);
-    font.setPixelSize(14);
+    font.setPixelSize(13);
     font.setStretch(QFont::SemiExpanded);
     
     //Set Text

@@ -143,6 +143,7 @@ void resultsModule::load()
       }
     }
   view->expandAll();
+  resetColumnSize();
 }
 
 void resultsModule::itemSelected(QTreeWidgetItem *item)
@@ -169,4 +170,12 @@ void resultsModule::setShowFilenames(int value)
 {
 	showFileNames = (bool)value;
 	load();
+}
+
+void resultsModule::resetColumnSize()
+{
+  for(int col=0; col<view->columnCount(); col++)
+  {
+      view->resizeColumnToContents(col);
+  }
 }

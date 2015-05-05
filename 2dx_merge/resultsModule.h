@@ -44,6 +44,7 @@ class resultsModule : public QWidget
   void itemActivated(QTreeWidgetItem *item);
   void setImportant(int);
   void setShowFilenames(int);
+  void resetColumnSize();
 
   signals:
   void resultChanged(const QString &result);

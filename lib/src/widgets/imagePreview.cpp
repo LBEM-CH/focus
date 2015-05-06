@@ -136,7 +136,10 @@ void imagePreview::clearNavigator()
 void imagePreview::setImage(const QString &imageName)
 {
 	result = imageName;
-	if(!QFileInfo(result).exists()) result = "";
+	if(!QFileInfo(result).exists()){
+            if(result.endsWith("final_map.mrc")) result = "NP";
+            else result = "";
+        }
 	resetInfo();
 	if(!isHidden()) resetImage();
 }
@@ -238,6 +241,24 @@ void imagePreview::resetImage(bool ignore_size)
 		imageLabel->setAutoFillBackground(true);
 		imageLabel->setPalette(pal);
 	}
+        
+        if(result == "NP")
+        {
+                clearImage();
+		QFont labelFont("Apple Chancery", 15, QFont::Normal);
+		QString msg = "Image not processed<br>(Double click to start processing)";
+		QPalette pal(palette());
+		int color = 255-(int)(0.80*255);
+		pal.setColor(QPalette::WindowText,QColor(color,color,color));
+		pal.setColor(QPalette::Text,QColor(color,color,color));
+		pal.setBrush(QPalette::Background,Qt::white);
+		imageLabel->setText(msg);
+		imageLabel->setAlignment(Qt::AlignCenter);
+		imageLabel->setFont(labelFont);
+		imageLabel->setAutoFillBackground(true);
+		imageLabel->setPalette(pal);
+        }
+        
 	update();
 }
 

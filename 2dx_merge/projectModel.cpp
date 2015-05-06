@@ -747,6 +747,10 @@ void projectModel::currentRowChanged(const QModelIndex&i,const QModelIndex&)
 	if(!i.sibling(i.row(),1).isValid()) return;
 	//QString image = pathFromIndex(i) + "/" + i.sibling(i.row(),1).data().toString() + "-p1.mrc";
 	QString image = pathFromIndex(i) + "/final_map.mrc";
+        
+        //if selected row is a directory of images then:
+        if(QFileInfo(pathFromIndex(i)+"/2dx_master.cfg").exists()) image = "";
+        
 	emit currentImage(image);
 }
 

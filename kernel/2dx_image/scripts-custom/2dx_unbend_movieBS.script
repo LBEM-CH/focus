@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Unbend MovieA2 Syn                                                 #
+# Title: Unbend MovieB Syn                                                  #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -32,18 +32,28 @@
 # MANUAL: Careful prevention of overfitting is crucial for successful movie-mode 3D reconstructions.
 #
 #
-# SORTORDER: 57
+# SORTORDER: 104
 #
-#=============================================================================
-# SECTION: Verbosity
-#=============================================================================
-#
-# LABEL: Show PROFDATA (CCunbending files) of frames?
+# LABEL: Show raw frames?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_PROFDATA = "y"
+# EXAMPLE: show_frames = "y"
 # HELP: http://2dx.org/documentation/2dx-software/parameters
 # TYPE: Bool "y;n"
-set show_frame_PROFDATA = "n"
+set show_frames = "n"
+#
+# LABEL: Show FFT of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_FFT = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_FFT = "n"
+#
+# LABEL: Show CCmaps of frames?
+# LEGEND: This switch decides, if this should be listed in the Images pane.
+# EXAMPLE: show_frame_CCmap = "y"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Bool "y;n"
+set show_frame_CCmap = "n"
 #
 # LABEL: Mark CCmaps with found coordinates?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
@@ -52,31 +62,56 @@ set show_frame_PROFDATA = "n"
 # TYPE: Bool "y;n"
 set show_frame_CCmap_marked = "n"
 #
-# LABEL: Show unbent CCmaps of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap_unbent = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_CCmap_unbent = "n"
-#
 # DISPLAY: imagename
+# DISPLAY: imagesidelength 
 # DISPLAY: SYN_Unbending
+# DISPLAY: SYN_Bfact1
+# DISPLAY: SYN_maska
+# DISPLAY: holeb
+# DISPLAY: maskb01
+# DISPLAY: maskb02
+# DISPLAY: maskb03
+# DISPLAY: maskb04
+# DISPLAY: maskb05
+# DISPLAY: boxb1
+# DISPLAY: boxb2
+# DISPLAY: quadpredb
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
+# DISPLAY: ALAT
+# DISPLAY: radlim
+# DISPLAY: treatspotscan
+# DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
+# DISPLAY: ISTEP
+# DISPLAY: ISTEP_h
+# DISPLAY: IMAXCOR
 # DISPLAY: comment
+# DISPLAY: RMAG
+# DISPLAY: LCOLOR
+# DISPLAY: ccunbend_program
+# DISPLAY: plotres_rings
 # DISPLAY: movie_stackname
 # DISPLAY: movie_enable
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_masking_mode
 # DISPLAY: movie_refboxa
+# DISPLAY: movie_refboxb
+# DISPLAY: movie_quadrada
+# DISPLAY: movie_quadradb
+# DISPLAY: movie_facthreshb
 # DISPLAY: movie_filter_type
 # DISPLAY: movie_filter_param
-# DISPLAY: movie_smoothing
-# DISPLAY: movie_drift_threshold
+# DISPLAY: movie_imagenumber_toave
 # DISPLAY: Thread_Number
 # DISPLAY: ctfcor_noise
+# DISPLAY: ctfcor_inner_tile
+# DISPLAY: ctfcor_outer_tile
+# DISPLAY: ctfcor_taper
 # DISPLAY: ctfcor_imode
+# DISPLAY: ctfcor_debug
+# DISPLAY: ctfcor_maxamp_factor
+# DISPLAY: calculate_tiles
 #
 #$end_local_vars
 #
@@ -84,88 +119,112 @@ set show_frame_CCmap_unbent = "n"
 set app_2dx_image = ""
 set bin_2dx = ""
 set proc_2dx = ""
+set SCRATCH_DISK = ""
 #
-set SYN_Unbending = ""
-set PHASEORI_done = ""
-set boxb1 = ""
-set boxb2 = ""
-set imagename = ""
-set imageorigin = ""
-set defocus = ""
-set nonmaskimagename = ""
-set phaoriFouFilter = ""
-set imagenumber = ""
-set realcell = ""
-set lattice = ""
-set holeb = ""
-set maskb01 = ""
-set imagesidelength = ""
-set magnification = ""
-set stepdigitizer = ""
-set tempkeep = ""
-set RESMIN = ""
-set RESMAX = ""
 set ALAT = ""
-set quadpredb = ""
-set quadradb = ""
-set radlim = ""
-set realang = ""
-set treatspotscan = ""
-set facthresha = ""
-set phacon = ""
-set ctfplotresmax = ""
-set stepdigitizer = ""
 set CS = ""
-set KV = ""
-set domask = ""
-set TLTAXIS = ""
-set TLTANG = ""
-set TANGL = ""
-set det_tilt = ""
-set createmaskinfo = ""
+set IMAXCOR = ""
 set ISTEP = ""
 set ISTEP_h = ""
-set IMAXCOR = ""
-set RMAG = ""
+set KV = ""
 set LCOLOR = ""
-set ccunbend_program = ""
-set crop = ""
-set crop_histogram = ""
-set crop_histogram_percent = ""
-set crop_histogram_stdev = ""
+set MASKING_done = ""
+set PHASEORI_done = ""
+set QVALS = ""
 set RB_1 = ""
 set RB_2 = ""
 set RB_3 = ""
 set RB_4 = ""
 set RB_5 = ""
 set RB_6 = ""
+set RESMAX = ""
+set RESMIN = ""
+set RMAG = ""
 set RP_1 = ""
 set RP_2 = ""
 set RP_3 = ""
 set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
-set movie_stackname = ""
-set movie_enable = ""
-set movie_imagenumber_total = ""
-set movie_filter_type = ""
-set movie_filter_param = ""
-set app_2dx_image = ""
-set movie_masking_mode = ""
-set movie_refboxa = ""
-set movie_facthreshb = ""
-set movie_smoothing = ""
-set movie_drift_threshold = ""
-set MASKING_done = ""
-set QVALS = ""
+set SYM = ""
+set SYN_Bfact1 = ""
+set SYN_Unbending = ""
+set SYN_maska = ""
+set TANGL = ""
+set TAXA = ""
+set TLTANG = ""
+set TLTAXIS = ""
 set Thread_Number = ""
-set ctfcor_noise = ""
+set app_2dx_image = ""
+set beamtilt = ""
+set boxb1 = ""
+set boxb2 = ""
+set calculate_tiles = ""
+set ccunbend_program = ""
+set createmaskinfo = ""
+set ctfcor_debug = ""
 set ctfcor_imode = ""
+set ctfcor_inner_tile = ""
+set ctfcor_maxamp_factor = ""
+set ctfcor_noise = ""
+set ctfcor_outer_tile = ""
+set ctfcor_taper = ""
+set ctfplotresmax = ""
+set ctfrev = ""
+set defocus = ""
+set det_tilt = ""
+set domask = ""
+set facthresha = ""
+set holeb = ""
+set imagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set lattice = ""
+set magnification = ""
+set maskb01 = ""
+set maskb02 = ""
+set maskb03 = ""
+set maskb04 = ""
+set maskb05 = ""
+set movie_enable = ""
+set movie_facthreshb = ""
+set movie_filter_param = ""
+set movie_filter_type = ""
+set movie_imagenumber_toave = ""
+set movie_imagenumber_total = ""
+set movie_imagenumber_touse = ""
+set movie_masking_mode = ""
+set movie_quadrada = ""
+set movie_quadradb = ""
+set movie_refboxa = ""
+set movie_refboxb = ""
+set movie_stackname = ""
+set nonmaskimagename = ""
+set phacon = ""
+set phaori = ""
+set phaoriFouFilter = ""
+set quadpredb = ""
+set quadradb = ""
+set radlim = ""
+set realang = ""
+set realcell = ""
+set revhk = ""
+set revhnd = ""
+set revxsgn = ""
+set rot180 = ""
+set rot90 = ""
+set sgnxch = ""
+set stepdigitizer = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set treatspotscan = ""
 set use_masked_image = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_unbend_movieAS2
+source ${proc_2dx}/2dx_makedirs
+#
+set scriptname = 2dx_unbend_movieBS
 \rm -f LOGS/${scriptname}.results
 #
 echo "<<@evaluate>>"
@@ -177,9 +236,6 @@ source ${proc_2dx}/initialize
 set date = `date`
 echo date = ${date}
 #
-set system = `uname -s`
-echo system = ${system}
-#
 if ( ${phaoriFouFilter} == "0.0,0.0" ) then
   set ${PHASEORI_done} = "n"
   echo "PHASEORI_done = ${PHASEORI_done}" >> LOGS/${scriptname}.results
@@ -189,11 +245,24 @@ if ( ${PHASEORI_done} == "n" ) then
   exit
 endif
 #
-##########################################################################
-##########################################################################
-# Setting parameters:
-##########################################################################
-##########################################################################
+set frame_folder = "SCRATCH/MovieB"
+#
+if ( ! -e ${frame_folder} ) then
+  \mkdir ${frame_folder}
+endif
+#
+if ( ! -d MovieB ) then
+  \mkdir MovieB
+endif
+#
+set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+set imagecentery = ${imagecenterx}
+#
+##########################################
+##########################################
+#
+set system = `uname -s`
+echo system = ${system}
 #
 if ( ${system} == "Darwin" ) then
   set S2 = "henning"
@@ -227,24 +296,14 @@ if ( ${pdf2ps}x == 'x' ) then
   echo ::ERROR: pdf2ps not found. Install gostscript.
   echo ::
 endif
-#
-#
-#
-#
-#
-#
-#
-#
-set SYN_Unbending = 1
-#
-source ${proc_2dx}/2dx_unbend_movieA2_sub.com
-#
-#
-#
-#
-#
-#
-#
+##########################################
+##########################################
+
+set SYN_Unbending = "1"
+
+source ${proc_2dx}/2dx_unbend_movieB_sub.com
+
+
 echo ":: Done."
 echo "<<@progress: 100>>"
 #
@@ -255,15 +314,21 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 exit
 #
 #
-#
-# These are listed here, so they show up in the GUI:
-python ${proc_2dx}/movie/drift_selector.py
+# To make sure these show up in the GUI:
 python ${proc_2dx}/movie/getFilter.py
+python ${proc_2dx}/movie/deleteZeros.py
+python ${proc_2dx}/movie/getClosestPeaks.py
+source ${proc_2dx}/../2dx_image/scripts-standard/2dx_initialize.script
+source ${proc_2dx}/../2dx_image/scripts-standard/2dx_initialize_files.script
+source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
+source ${proc_2dx}/2dx_make_SynRef_sub.com
 python ${proc_2dx}/movie/apply_filter.py
-python ${proc_2dx}/movie/direct_sum2.py
+python ${proc_2dx}/movie/box_reference.py
+python ${proc_2dx}/movie/plotLocalDrift.py
 python ${proc_2dx}/movie/direct_sum.py
-python ${proc_2dx}/movie/apply_filter_sum.py
 python ${proc_2dx}/movie/apply_filter_fourier.py
-python ${proc_2dx}/movie/mask.py 
-python ${proc_2dx}/movie/drift_plotter.py
+python ${proc_2dx}/movie/extractAMP.py 
+python ${proc_2dx}/movie/plotAMP.py
+python ${proc_2dx}/movie/plotLocalDrift.py
+
 

@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 88
+# SORTORDER: 83
 #
 # MANUAL: This script will create a copy of the current image directory on the same level, and copy the current database file 2dx_image.cfg into that new cloned directory. 
 #

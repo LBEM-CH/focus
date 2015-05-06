@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Unbend MovieA1 Syn                                                 #
+# Title: Unbend MovieA2 Syn                                                 #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -32,37 +32,35 @@
 # MANUAL: Careful prevention of overfitting is crucial for successful movie-mode 3D reconstructions.
 #
 #
-# SORTORDER: 55
+# SORTORDER: 103
 #
 #=============================================================================
 # SECTION: Verbosity
 #=============================================================================
 #
-# LABEL: Show raw frames?
+# LABEL: Show PROFDATA (CCunbending files) of frames?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frames = "y"
+# EXAMPLE: show_frame_PROFDATA = "y"
 # HELP: http://2dx.org/documentation/2dx-software/parameters
 # TYPE: Bool "y;n"
-set show_frames = "n"
+set show_frame_PROFDATA = "n"
 #
-# LABEL: Show FFT of frames?
+# LABEL: Mark CCmaps with found coordinates?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_FFT = "y"
+# EXAMPLE: show_frame_CCmap_marked = "y"
 # HELP: http://2dx.org/documentation/2dx-software/parameters
 # TYPE: Bool "y;n"
-set show_frame_FFT = "n"
+set show_frame_CCmap_marked = "n"
 #
-# LABEL: Show CCmaps of frames?
+# LABEL: Show unbent CCmaps of frames?
 # LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap = "y"
+# EXAMPLE: show_frame_CCmap_unbent = "y"
 # HELP: http://2dx.org/documentation/2dx-software/parameters
 # TYPE: Bool "y;n"
-set show_frame_CCmap = "n"
+set show_frame_CCmap_unbent = "n"
 #
 # DISPLAY: imagename
 # DISPLAY: SYN_Unbending
-# DISPLAY: SYN_Bfact1
-# DISPLAY: SYN_maska
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
 # DISPLAY: tempkeep
@@ -78,13 +76,7 @@ set show_frame_CCmap = "n"
 # DISPLAY: movie_drift_threshold
 # DISPLAY: Thread_Number
 # DISPLAY: ctfcor_noise
-# DISPLAY: ctfcor_inner_tile
-# DISPLAY: ctfcor_outer_tile
-# DISPLAY: ctfcor_taper
 # DISPLAY: ctfcor_imode
-# DISPLAY: ctfcor_debug
-# DISPLAY: ctfcor_maxamp_factor
-# DISPLAY: calculate_tiles
 #
 #$end_local_vars
 #
@@ -92,110 +84,88 @@ set show_frame_CCmap = "n"
 set app_2dx_image = ""
 set bin_2dx = ""
 set proc_2dx = ""
-set SCRATCH_DISK = ""
 #
+set SYN_Unbending = ""
+set PHASEORI_done = ""
+set boxb1 = ""
+set boxb2 = ""
+set imagename = ""
+set imageorigin = ""
+set defocus = ""
+set nonmaskimagename = ""
+set phaoriFouFilter = ""
+set imagenumber = ""
+set realcell = ""
+set lattice = ""
+set holeb = ""
+set maskb01 = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set tempkeep = ""
+set RESMIN = ""
+set RESMAX = ""
 set ALAT = ""
+set quadpredb = ""
+set quadradb = ""
+set radlim = ""
+set realang = ""
+set treatspotscan = ""
+set facthresha = ""
+set phacon = ""
+set ctfplotresmax = ""
+set stepdigitizer = ""
 set CS = ""
-set IMAXCOR = ""
+set KV = ""
+set domask = ""
+set TLTAXIS = ""
+set TLTANG = ""
+set TANGL = ""
+set det_tilt = ""
+set createmaskinfo = ""
 set ISTEP = ""
 set ISTEP_h = ""
-set KV = ""
+set IMAXCOR = ""
+set RMAG = ""
 set LCOLOR = ""
-set MASKING_done = ""
-set PHASEORI_done = ""
-set QVALS = ""
+set ccunbend_program = ""
+set crop = ""
+set crop_histogram = ""
+set crop_histogram_percent = ""
+set crop_histogram_stdev = ""
 set RB_1 = ""
 set RB_2 = ""
 set RB_3 = ""
 set RB_4 = ""
 set RB_5 = ""
 set RB_6 = ""
-set RESMAX = ""
-set RESMIN = ""
-set RMAG = ""
 set RP_1 = ""
 set RP_2 = ""
 set RP_3 = ""
 set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
-set SYM = ""
-set SYN_Bfact1 = ""
-set SYN_Unbending = ""
-set SYN_maska = ""
-set TANGL = ""
-set TAXA = ""
-set TLTANG = ""
-set TLTAXIS = ""
-set Thread_Number = ""
-set app_2dx_image = ""
-set beamtilt = ""
-set boxb1 = ""
-set boxb2 = ""
-set calculate_tiles = ""
-set ccunbend_program = ""
-set createmaskinfo = ""
-set crop = ""
-set crop_histogram = ""
-set crop_histogram_percent = ""
-set crop_histogram_stdev = ""
-set ctfcor_debug = ""
-set ctfcor_imode = ""
-set ctfcor_inner_tile = ""
-set ctfcor_maxamp_factor = ""
-set ctfcor_noise = ""
-set ctfcor_outer_tile = ""
-set ctfcor_taper = ""
-set ctfplotresmax = ""
-set ctfrev = ""
-set defocus = ""
-set det_tilt = ""
-set domask = ""
-set facthresha = ""
-set holeb = ""
-set imagename = ""
-set imagenumber = ""
-set imageorigin = ""
-set imagesidelength = ""
-set lattice = ""
-set magnification = ""
-set maskb01 = ""
-set movie_drift_threshold = ""
+set movie_stackname = ""
 set movie_enable = ""
-set movie_facthreshb = ""
-set movie_filter_param = ""
-set movie_filter_type = ""
 set movie_imagenumber_total = ""
-set movie_inmovie = ""
+set movie_filter_type = ""
+set movie_filter_param = ""
+set app_2dx_image = ""
 set movie_masking_mode = ""
 set movie_refboxa = ""
+set movie_facthreshb = ""
 set movie_smoothing = ""
-set movie_stackname = ""
-set nonmaskimagename = ""
-set phacon = ""
-set phaori = ""
-set phaoriFouFilter = ""
-set quadpredb = ""
-set quadradb = ""
-set radlim = ""
-set realang = ""
-set realcell = ""
-set revhk = ""
-set revhnd = ""
-set revxsgn = ""
-set rot180 = ""
-set rot90 = ""
-set sgnxch = ""
-set stepdigitizer = ""
-set tempkeep = ""
-set treatspotscan = ""
+set movie_drift_threshold = ""
+set MASKING_done = ""
+set QVALS = ""
+set Thread_Number = ""
+set ctfcor_noise = ""
+set ctfcor_imode = ""
 set use_masked_image = ""
 #
 #$end_vars
 #
-source ${proc_2dx}/2dx_makedirs
-#
-set scriptname = 2dx_unbend_movieAS1
+set scriptname = 2dx_unbend_movieAS2
 \rm -f LOGS/${scriptname}.results
 #
 echo "<<@evaluate>>"
@@ -263,9 +233,15 @@ endif
 #
 #
 #
+#
+#
 set SYN_Unbending = 1
 #
-source ${proc_2dx}/2dx_unbend_movieA1_sub.com
+source ${proc_2dx}/2dx_unbend_movieA2_sub.com
+#
+#
+#
+#
 #
 #
 #
@@ -277,11 +253,17 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
 exit
-##
-# These are listed here, so that they show up in the GUI:
-source ${proc_2dx}/2dx_make_SynRef_sub.com
-source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
-source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
-python ${proc_2dx}/movie/box_reference.py 
-python ${proc_2dx}/movie/movie_mode_split.py
-python ${proc_2dx}/movie/cross_correlate.py
+#
+#
+#
+# These are listed here, so they show up in the GUI:
+python ${proc_2dx}/movie/drift_selector.py
+python ${proc_2dx}/movie/getFilter.py
+python ${proc_2dx}/movie/apply_filter.py
+python ${proc_2dx}/movie/direct_sum2.py
+python ${proc_2dx}/movie/direct_sum.py
+python ${proc_2dx}/movie/apply_filter_sum.py
+python ${proc_2dx}/movie/apply_filter_fourier.py
+python ${proc_2dx}/movie/mask.py 
+python ${proc_2dx}/movie/drift_plotter.py
+

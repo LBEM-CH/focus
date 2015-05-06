@@ -185,7 +185,8 @@ if ( ! -e ${dirfile} ) then
   ${proc_2dx}/protest "ERROR: 2dx_merge did not provide the directory list."
 endif
 #
-if ( -z ${dirfile} ) then
+set num_selected = `cat ${dirfile} | wc -l`
+if ( ${num_selected} == '0' ) then
   ${proc_2dx}/linblock "ERROR: Directory list is empty."
   ${proc_2dx}/protest "ERROR: Did you select directories?"
 endif

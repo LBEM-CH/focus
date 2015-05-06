@@ -22,7 +22,7 @@
 # MANUAL: The reference should be the result of a merging process, and should be reachable for a 2D merge dataset under "../merge/merge2D_MRClefthanded.mtz" or "../../merge/merge2D_MRClefthanded.mtz" or for a 3D merge dataset under "../merge/merge3D_MRClefthanded.mtz" or "../../merge/merge3D_MRClefthanded.mtz".
 #
 #
-# SORTORDER: 51
+# SORTORDER: 101
 #
 # DISPLAY: SYN_Unbending
 # DISPLAY: SYN_Bfact1

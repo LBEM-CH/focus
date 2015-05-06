@@ -39,7 +39,7 @@ eot
     #
     echo "dummy" > zzzzz27765.tif
     set filename = `ls -1 *.tif | sort | head -n 1`
-    if ( ${filename} != "zzzzz27765.tif" ) then
+    if ( ${filename} != "zzzzz27765.tif" && ${filename} != "final_map.tif" ) then
       set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
       if ( ! -e ${nonmaskimagename}.tif ) then
         ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif not existing."

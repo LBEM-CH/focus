@@ -21,16 +21,12 @@
 #
 # MANUAL: You could also use this script to create a backup for your project, for file safety.
 #
-# LABEL: Also copy APH files?
-# LEGEND: Choose if the APH files should also be copied.
-# EXAMPLE: also_APH = "1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Drop_Down_Menu "0=also APH files;1=skip the APH files"
-set also_APH = "0"
-#
+# DISPLAY: backup_also_APH
+# DISPLAY: backup_also_Movie
 # DISPLAY: backup_dir
 # DISPLAY: backup_merge
 # DISPLAY: backup_sure
+# DISPLAY: backup_sync_deletions
 # DISPLAY: backup_all_files
 # DISPLAY: backup_large_images
 # DISPLAY: backup_direction
@@ -41,12 +37,16 @@ set bin_2dx = ""
 set proc_2dx = ""
 set app_2dx_image = ""
 #
+#
+set backup_also_APH = ""
+set backup_also_Movie = ""
 set backup_dir = ""
 set backup_merge = ""
 set backup_sure = ""
 set backup_direction = ""
 set backup_all_files = ""
 set backup_large_images = ""
+set backup_sync_deletions = ""
 #
 #$end_vars
 #
@@ -421,17 +421,22 @@ while ( ${dircounter} <= ${dirnum} )
             ${copy_command} ${from_dirfile}/History.dat ${to_dirfile}
           endif
           #
-          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_ctfcor-profile.dat ) then
-            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_ctfcor-profile.dat"
-            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_ctfcor-profile.dat ${to_dirfile}
+          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_profile.dat ) then
+            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_profile.dat"
+            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_profile.dat ${to_dirfile}
           endif
           #
-          if ( -e ${from_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ) then
-            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc"
-            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ${to_dirfile}
+          # if ( -e ${from_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ) then
+          #   echo ":New: ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc"
+          #   ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ${to_dirfile}
+          # endif
+          #
+          if ( -e ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ) then
+            echo ":Removing: ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc"
+            \rm ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc
           endif
           #
-          if ( ${also_APH} == "0" ) then
+          if ( ${backup_also_APH} == "0" ) then
             if ( -d ${from_dirfile}/APH ) then
               if ( ! -d ${to_dirfile}/APH ) then
                 \mkdir ${to_dirfile}/APH
@@ -445,7 +450,51 @@ while ( ${dircounter} <= ${dirnum} )
             endif
           endif
         endif
+
+        if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
+          if ( ${backup_also_Movie} == "0" ) then
+            if ( -d ${from_dirfile}/MovieA ) then
+              if ( ! -d ${to_dirfile}/MovieA ) then
+                \mkdir ${to_dirfile}/MovieA
+              endif
+              echo dummy > ${from_dirfile}/MovieA/dummy.tmp
+              echo ":New: ${to_dirfile}/MovieA/*"
+              cd ${from_dirfile}/MovieA ; tar -cf - . | (cd ${to_dirfile}/MovieA ; tar -xpf -)
+              # ${copy_command} ${from_dirfile}/MovieA/* ${to_dirfile}/MovieA
+              \rm ${from_dirfile}/MovieA/dummy.tmp
+              \rm ${to_dirfile}/MovieA/dummy.tmp
+            endif
+            if ( -d ${from_dirfile}/MovieB ) then
+              if ( ! -d ${to_dirfile}/MovieB ) then
+                \mkdir ${to_dirfile}/MovieB
+              endif
+              echo dummy > ${from_dirfile}/MovieB/dummy.tmp
+              echo ":New: ${to_dirfile}/MovieB/*"
+              cd ${from_dirfile}/MovieB ; tar -cf - . | (cd ${to_dirfile}/MovieB ; tar -xpf -)
+              # ${copy_command} ${from_dirfile}/MovieB/* ${to_dirfile}/MovieB
+              \rm ${from_dirfile}/MovieB/dummy.tmp
+              \rm ${to_dirfile}/MovieB/dummy.tmp
+            endif
+          endif
+        endif
 	#
+        if ( -e ${to_dirfile}/m${loc_nonmaskimagename}-profile.dat.gz ) then
+          echo ":Removing: ${to_dirfile}/m${loc_nonmaskimagename}-profile.dat.gz"
+          \rm ${to_dirfile}/m${loc_nonmaskimagename}-profile.dat.gz
+        endif
+        if ( -e ${to_dirfile}/m${loc_nonmaskimagename}-unitcells-spider.doc ) then
+          echo ":Removing: ${to_dirfile}/m${loc_nonmaskimagename}-unitcells-spider.doc"
+          \rm ${to_dirfile}/m${loc_nonmaskimagename}-unitcells-spider.doc
+        endif
+        if ( -e ${to_dirfile}/m${loc_nonmaskimagename}.mtz ) then
+          echo ":Removing: ${to_dirfile}/m${loc_nonmaskimagename}.mtz"
+          \rm ${to_dirfile}/m${loc_nonmaskimagename}.mtz
+        endif
+        if ( -e ${to_dirfile}/m${loc_nonmaskimagename}.spt ) then
+          echo ":Removing: ${to_dirfile}/m${loc_nonmaskimagename}.spt"
+          \rm ${to_dirfile}/m${loc_nonmaskimagename}.spt
+        endif
+        #
       endif
       #
     endif
@@ -453,8 +502,54 @@ while ( ${dircounter} <= ${dirnum} )
   endif
   @ dircounter++ 
   cd ${oldir}
+  #
+  #
 end
 #
+  if ( ${backup_sync_deletions} == "yes" ) then
+    ############################################################################# 
+    ${proc_2dx}/linblock "#"
+    ${proc_2dx}/linblock "Synchronizing deletion of image directories:"
+    ${proc_2dx}/linblock "#"
+    #############################################################################
+    echo ":Copy ${from_dir}"
+    echo ": to  ${to_dir}"
+    cd ${to_dir}
+    echo "::Gathering directory list ..."
+    find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' | grep -v TRASH | grep -v merge | sort > ${to_dir}/to_dirfile_list.dat
+    set dirnum = `cat ${to_dir}/to_dirfile_list.dat | wc -l`
+    echo ": Will check for deletions for ${dirnum} image directories."
+    set dircounter = ${dirnum}
+    while ( ${dircounter} > 0 )
+      #
+      ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
+${to_dir}/to_dirfile_list.dat
+${dircounter}
+eot
+      #
+      set dir_name = `cat TMP.tmp`
+      \rm TMP.tmp
+      #
+      set to_dirfile = `echo ${to_dir}/${dir_name}`
+      set from_dirfile = `echo ${from_dir}/${dir_name}`
+      if ( ! -d ${from_dirfile} ) then
+         echo "::Moving ${to_dirfile} to TRASH on target destination"
+         cd ${to_dir}
+         if ( ! -d TRASH ) then
+           \mkdir TRASH
+         endif
+         \mv -f ${to_dirfile} TRASH
+         cd ${to_dir}
+      else
+         # echo "Both exist: ${to_dirfile}  ${from_dirfile}"
+      endif
+      @ dircounter -= 1
+      cd ${to_dir}
+    end
+    \rm ${to_dir}/to_dirfile_list.dat
+    #
+  endif
+
 echo "<<@progress:100>>"
 #
 ############################################################################# 

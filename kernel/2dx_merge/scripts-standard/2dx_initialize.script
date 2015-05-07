@@ -67,7 +67,9 @@ set scriptname = 2dx_initialize
 #
 \rm -f LOGS/${scriptname}.results
 #
+echo Launching initialization:
 source ${proc_2dx}/initialize
+echo Done with initialization.
 source ${proc_2dx}/2dx_merge_makedirs 
 #
 # The following is to make sure that for the next "Import Images", the default is correctly initialized.

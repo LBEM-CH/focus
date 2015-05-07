@@ -71,8 +71,12 @@ if ( $?ccp4_setup ) then
       endif
       if ( -e ${ccp4_setup} ) then
         # This is sourcing a script within a sourced script. Hopefully, this will work...
-        echo ":proc/initialize: Sourcing ${ccp4_setup}"
+        echo "::   Sourcing ${ccp4_setup}"
+        if ( ${ccp4_setup} == "/Applications/ccp4-6.4.0/bin/ccp4.setup-csh" ) then
+          echo ":: If this script doesn’t continue, then the CCP4 initalization crashes. That could be caused by a bug in the CCP4 script (arpwarp call in sh instead of csh syntax)"
+        endif
         source ${ccp4_setup}
+        echo "::   Finished with ${ccp4_setup}"
       else
         ${proc_2dx}/linblock "WARNING: ${ccp4_setup} does not exists."
         ${proc_2dx}/linblock "CCP4 setup file not found. Is CCP4 correctly installed ???"

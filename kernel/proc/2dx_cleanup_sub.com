@@ -284,6 +284,7 @@ echo dummy > dummy.TMP
 \rm -f MovieB_peaks_II.dat
 \rm -f MovieB_peaks_III.dat
 \rm -f MovieB_peaks_IV.dat
+\rm -f SPIDERCOORD.spi
 #
 if ( -e ${imagename}.mrc ) then
   if ( ${imagename} == m${nonmaskimagename} ) then
@@ -297,6 +298,19 @@ if ( -e ${nonmaskimagename}-masking-final.mrc ) then
   echo "(Renaming ${nonmaskimagename}-masking-final.mrc to ${nonmaskimagename}_mask.mrc)"
 endif
 #
-
-
-
+if ( -d MovieA ) then
+  \rm -f MovieA/direct_sum_ctf_fft.mrc
+  \rm -f MovieA/direct_sum_filt_ctf_upscale.mrc
+  \rm -f MovieA/direct_sum_syn_ctf_fft.mrc
+endif
+#
+if ( -d MovieB ) then
+  \rm -f MovieB/direct_sum_ctf_fft.mrc
+  \rm -f MovieB/direct_sum_filt_ctf_upscale.mrc
+  \rm -f MovieB/direct_sum_syn_ctf_fft.mrc
+  \rm -f MovieB/MovieB_peaks_I.dat
+  \rm -f MovieB/MovieB_peaks_II.dat
+  \rm -f MovieB/MovieB_peaks_III.dat
+  \rm -f MovieB/MovieB_peaks_IV.dat
+endif
+#

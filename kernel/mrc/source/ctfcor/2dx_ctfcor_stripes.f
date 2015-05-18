@@ -5,7 +5,7 @@ C                                                                             *
 C                                               Part of 2dx                   *
 C                                                                             *
 C       Version 1.00    30-SEP-14    HS         First version, using tiles    *
-C       Version 1.10    04-JAN-15    HS         Changed or stripes            *
+C       Version 1.10    04-JAN-15    HS         Changed to stripes            *
 C                                                                             *
 C******************************************************************************
 C

@@ -30,7 +30,7 @@
 #include <QDesktopServices>
 #include <QModelIndexList>
 #include <QItemSelectionModel>
-#include <QTabwidget>
+#include <QTabWidget>
 #include <iostream>
 #include "blockContainer.h"
 

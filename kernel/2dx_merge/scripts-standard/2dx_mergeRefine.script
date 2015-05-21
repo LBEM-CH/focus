@@ -381,6 +381,13 @@ endif
 set itnum = 0
 
 while ( ${itnum} < ${merge_refine_iterations} ) 
+  #
+  set itnum_p1 = ${itnum}
+  @ itnum_p1 += 1
+  echo ":: "
+  echo "::         ITERATION ${itnum_p1} of ${merge_refine_iterations}"
+  echo ":: "
+  #
   if ( ${merge_ref_num} == "0" && ${create_merged_dataset} == "y" ) then
     #
     #############################################################################

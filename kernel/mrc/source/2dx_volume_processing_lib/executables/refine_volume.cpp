@@ -78,6 +78,9 @@ int main(int argc, char** argv)
     
     std::cout << "\nDone with the iterations.\n";
     
+    //Symmetrize
+    output_volume.symmetrize();
+    
     //Write the output volume to a file
     output_volume.write_volume(output_mrc, "mrc");
     

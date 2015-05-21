@@ -342,7 +342,7 @@ ${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
 #
 source ${proc_2dx}/2dx_merge_merge_sub.com
 #
-# cp /Volumes/THUN10TB/Proteins/MloK1/cAMP/merge/APH/latlines.dat APH
+#CHEN cp /Volumes/THUN10TB/Proteins/MloK1/cAMP/merge/APH/latlines.dat APH
 if ( ${merge_modus} == "3D" ) then
   #
   echo "<<@progress: 70>>"

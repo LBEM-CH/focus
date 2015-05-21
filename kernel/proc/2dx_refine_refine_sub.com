@@ -76,6 +76,7 @@ ${MergeStepSize}
 ${RFACAMP}
 ${IBOXPHS}
 ${NPRG}
+${merge_reference}
 ${NBM}
 ${NTL}
 ${ITAXASTEP}

@@ -116,6 +116,10 @@ C
       read(*,*)NPRG
       write(*,'(I8)')NPRG
 C
+      write(*,'(/,''input merge_reference'')')
+      read(*,*)IMERGREF
+      write(*,'(I8)')IMERGREF
+C
       write(*,'(/,''input NBM'')')
       read(*,*)cNBM
       write(*,'(A1)')cNBM
@@ -360,7 +364,13 @@ C
 C
         if(NPRG.eq.3)then
           write(11,'(''# 3D reference:'')')
-          write(11,'(''setenv HKLIN merge3Dref_MRClefthanded.mtz'')')
+          if ( IMERGREF.eq.1 ) then
+            write(11,'(''setenv HKLIN merge3Dref_MRClefthanded.mtz'')')
+          elseif ( IMERGREF.eq.2 ) then
+            write(11,'(''setenv HKLIN merge3Dref_BackProject_MRClefthanded.mtz'')')
+          elseif ( IMERGREF.eq.3 ) then
+            write(11,'(''setenv HKLIN merge3Dref_Refined_MRClefthanded.mtz'')')
+          endif  
           write(11,'(''setenv OMP_NUM_THREADS '',I4)')ITHRNUM
           write(11,'(''#'')')
         endif

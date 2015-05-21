@@ -124,7 +124,7 @@ eot
   #
   if ( -e ${source} ) then
     echo "::                                              Copy ${source} to ${target}"
-    echo \cp -f ${source} ${target}
+    \cp -f ${source} ${target}
   else
     ${proc_2dx}/linblock "WARNING: ${source} does not exist here."
   endif

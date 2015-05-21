@@ -90,7 +90,7 @@ foreach dirfile ( ${dirlist} )
   # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
   # echo "set phaori = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set phaoriFouFilter = 0.0,0.0" >> LOGS/${scriptname}.results
-  # echo "set beamtilt = 0.0,0.0" >> LOGS/${scriptname}.results
+  echo "set beamtilt = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set beamtilt_change = 0.0,0.0" >> LOGS/${scriptname}.results
 
   # echo "set do_lattice_algorithm = 1" >> LOGS/${scriptname}.results

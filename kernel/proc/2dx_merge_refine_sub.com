@@ -73,6 +73,7 @@ ${MergeStepSize}
 ${RFACAMP}
 ${IBOXPHS}
 ${NPRG}
+${merge_reference}
 ${NBM}
 ${NTL}
 ${ITAXASTEP}
@@ -83,7 +84,7 @@ ${Merge_Reference_IQMAX}
 ${Merge_Reference_HKMAX}
 ${merge_res_limit}
 ${RESMIN}
-${RESMAX}
+${MergeResolution}
 ${merge_data_type}
 ${maxthread}
 ${ILIST_VAL}

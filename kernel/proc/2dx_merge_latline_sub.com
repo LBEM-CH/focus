@@ -360,7 +360,9 @@ eot
   set nk_max = ${MergeHKMAX}
   set nl_max = 400
   #
-  ${bin_2dx}/2dx_volume_processing/2dx_symmetrize.exe ${infile} ${SYM_NAME} ${outfile} ${nh_max} ${nk_max} ${nl_max}
+  ${bin_2dx}/2dx_volume_processing/2dx_symmetrize.exe ${infile} ${SYM_NAME} ${nh_max} ${nk_max} ${nl_max} ${outfile} 
+  echo "# IMAGE: ${infile} <HKL: HKL file before symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${outfile} <HKL: HKL file after symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
 else
   #############################################################################
@@ -531,9 +533,14 @@ echo "# IMAGE-IMPORTANT: merge3D_MRClefthanded.mtz <MTZ: Final MRC MTZ file for 
 ${proc_2dx}/linblock "cad - to create MTZ file for reference"
 #############################################################################  
 #
-\rm -f merge3Dref_MRClefthanded.mtz
+if ( ${latline_algo}x == "0x" ) then
+  set outfile = merge3Dref_MRClefthanded.mtz
+else
+  set outfile = merge3Dref_BackProject_MRClefthanded.mtz
+endif
+\rm -f ${outfile}
 #
-${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref_MRClefthanded.mtz hklout merge3Dref_MRClefthanded.mtz << eof
+${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref_MRClefthanded.mtz hklout ${outfile} << eof
 sort h k l 
 resolution overall ${MergeResolution} ${RESMIN}
 outlim spacegroup 1
@@ -542,7 +549,7 @@ valm NaN NOOUTPUT
 end
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3Dref_MRClefthanded.mtz <MTZ: Final MRC MTZ file for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${outfile} <MTZ: Final MRC MTZ file for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #

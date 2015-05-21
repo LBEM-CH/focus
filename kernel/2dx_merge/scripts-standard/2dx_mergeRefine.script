@@ -167,6 +167,11 @@ set Thread_Number = ""
 set zstarrange = ""
 set zstarrange_real = ""
 set zstarwin = ""
+set calculate_subvolume = ""
+set number_of_beads = ""
+set density_threshold_bead = ""
+set noise_level_bead = ""
+set number_sf_hist_iterations = ""
 #
 #$end_vars
 #
@@ -174,6 +179,18 @@ setenv OMP_NUM_THREADS ${Thread_Number}
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
+#
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+#
+echo "cellx = ${cellx}"
+echo "celly = ${celly}"
+echo "cellz = ${ALAT}"
+#
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
 #
 set dirfile = "2dx_merge_dirfile.dat"
 set dirnum = `cat ${dirfile} | wc -l`
@@ -380,6 +397,24 @@ while ( ${itnum} < ${merge_refine_iterations} )
       #############################################################################
       #
       source ${proc_2dx}/2dx_merge_latline_sub.com
+      #
+      set voldim = 250
+      set voldim_m1 = `echo ${voldim} | awk '{ s = $1 - 1 } END { print s }'`
+      set voldim_t142 = `echo ${voldim} | awk '{ s = $1 * 1.42 } END { print s }'`
+      set voldim_t2 = `echo ${voldim} | awk '{ s = $1 * 2 } END { print s }'`
+      set voldim_t2m1 = `echo ${voldim} | awk '{ s = $1 * 2 - 1 } END { print s }'`
+      #
+      if ( ${merge_reference} == "3" ) then
+        #
+        if ( ! -e SCRATCH/back_projected.map ) then
+          source ${proc_2dx}/2dx_refineMergedMap_BackProject.com
+        endif
+        if ( ! -e SCRATCH/bead_model.mrc ) then
+          source ${proc_2dx}/2dx_refineMergedMap_MakeBeadModel.com
+        endif
+        #
+        source ${proc_2dx}/2dx_refineMergedMap_sub.com
+      endif
       #
     endif
     #

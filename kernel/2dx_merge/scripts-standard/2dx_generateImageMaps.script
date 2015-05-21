@@ -55,6 +55,7 @@ set MergeHKMAX = ""
 set merge_res_limit = ""
 set create_PS = ""
 set merge_data_type = ""
+set merge_reference = ""
 set RFACAMP = ""
 set Thread_Number = ""
 #
@@ -262,6 +263,7 @@ ${MergeStepSize}
 ${RFACAMP}
 ${IBOXPHS}
 ${NPRG}
+${merge_reference}
 ${NBM}
 ${NTL}
 ${ITAXASTEP}

@@ -120,6 +120,18 @@ setenv OMP_NUM_THREADS 8
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+#
+echo "cellx = ${cellx}"
+echo "celly = ${celly}"
+echo "cellz = ${ALAT}"
+#
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
+#
 set dirfile = "2dx_merge_dirfile.dat"
 set dirnum = `cat ${dirfile} | wc -l`
 set maxthread = `echo ${Thread_Number} ${dirnum} | awk '{if ($1<$2/2) { s = $1 } else { s = int($2 / 2) }} END { print s }'`
@@ -244,11 +256,28 @@ if ( ${merge_modus} == '3D' ) then
       ${proc_2dx}/linblock "ERROR: Conflict between parameter USE MERGED DATA... and REFINE TILTGEOMETRY..."
       ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
     endif
-  else
-    # User interpolated lattice lines merge3Dref_MRClefthanded.mtz
+  endif 
+  if ( ${merge_reference} == '1' ) then
+    # Use interpolated lattice lines merge3Dref_MRClefthanded.mtz
     if ( ! -e merge3Dref_MRClefthanded.mtz ) then
       ${proc_2dx}/linblock "ERROR: merge3Dref_MRClefthanded.mtz not found. No reference for refinement available."
       ${proc_2dx}/protest "Run Merging script first."
+    endif
+    set NPRG = 3
+  endif
+  if ( ${merge_reference} == '2' ) then
+    # Use BackProjected MTZ file merge3Dref_BackProject_MRClefthanded.mtz
+    if ( ! -e merge3Dref_BackProject_MRClefthanded.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge3Dref_BackProject_MRClefthanded.mtz not found. No reference for refinement available."
+      ${proc_2dx}/protest "Run Merging script first with Backprojection algorithm."
+    endif
+    set NPRG = 3
+  endif
+  if ( ${merge_reference} == '3' ) then
+    # Use BackProjected and Refined MTZ file
+    if ( ! -e merge3Dref_Refined_MRClefthanded.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge3Dref_Refined_MRClefthanded.mtz not found. No reference for refinement available."
+      ${proc_2dx}/protest "Run Merging and Refinement script first."
     endif
     set NPRG = 3
   endif

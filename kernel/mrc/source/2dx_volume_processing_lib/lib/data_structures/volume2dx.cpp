@@ -88,7 +88,7 @@ void ds::Volume2dx::read_volume(std::string file_name, std::string format)
        *_fourier = volume::io::hkl_reader::read(file_name, *_header);
        _type = FOURIER;
     }
-    if(format == "hkz")
+    else if(format == "hkz")
     {
        *_fourier = volume::io::hkz_reader::read(file_name, *_header);
        _type = FOURIER;

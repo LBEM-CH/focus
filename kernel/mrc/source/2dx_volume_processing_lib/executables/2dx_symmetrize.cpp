@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     volume.symmetrize();
     
     //Write out data
-    volume.write_volume(outputFileName);
+    volume.write_volume(outputFileName, "hkl");
     
 }
 

@@ -42,8 +42,8 @@ volume::data::FourierSpaceData volume::io::hkl_reader::read(std::string file_pat
             //Covert also the sphaseIn to radians
             
                 double weight_in = fom_in/100;
-                double real_in = weight_in*amplitude_in*cos(phase_in);
-                double imag_in = weight_in*amplitude_in*sin(phase_in);
+                double real_in = amplitude_in*cos(phase_in);
+                double imag_in = amplitude_in*sin(phase_in);
 
                 ds::Complex2dx complex_in(real_in, imag_in);
                 ds::DiffractionSpot value_in(complex_in, weight_in);

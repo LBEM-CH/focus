@@ -13,6 +13,7 @@
 
 #include "../io/mrc_reader.hpp"
 #include "../io/hkz_reader.hpp"
+#include "../io/hkl_reader.hpp"
 #include "../io/mrc_writer.hpp"
 #include "../io/hkl_writer.hpp"
 
@@ -82,6 +83,11 @@ std::string ds::Volume2dx::to_string() const
 void ds::Volume2dx::read_volume(std::string file_name, std::string format)
 {
     std::cout << "Reading volume with format <"<< format << "> from file:\n\t" << file_name << "\n\n";
+    if(format == "hkl")
+    {
+       *_fourier = volume::io::hkl_reader::read(file_name, *_header);
+       _type = FOURIER;
+    }
     if(format == "hkz")
     {
        *_fourier = volume::io::hkz_reader::read(file_name, *_header);

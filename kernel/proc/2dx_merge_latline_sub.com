@@ -322,7 +322,7 @@ eot
 ${RESMAX},${REDUCAC}                   ! RESOLUTION,REDUCAC
 ${realcell},${realang},${ALAT}         ! a,b,gamma,c
 0.0                                    ! SCALE (automatic scaling to max(AMP)=32000.0)
-1				       ! 1=Calculate FOM from SIGF and SIGP. 0=Calculate FOM only from SIGP (this was the original version) 
+1				           ! 1=Calculate FOM from SIGF and SIGP. 0=Calculate FOM only from SIGP (this was the original version) 
 eot
   #
   echo "################################################"
@@ -347,12 +347,24 @@ eot
     echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
   endif  
   #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_symmetrize - to expand symmetry to full P1 space"
+  #############################################################################  
+  #
   set infile = APH/latfitted_nosym.hkl
-  set CCP4_SYM_local = ${CCP4_SYM}
+  set outfile = APH/latfitted.hkl
+  #
+  \rm -f ${outfile}
+  #
+  set nh_max = ${MergeHKMAX}
+  set nk_max = ${MergeHKMAX}
+  set nl_max = 400
+  #
+  ${bin_2dx}/2dx_volume_processing/2dx_symmetrize.exe ${infile} ${SYM_NAME} ${outfile} ${nh_max} ${nk_max} ${nl_max}
   #
 else
   #############################################################################
-  ${proc_2dx}/linblock "2dx_process_hkz - creating FOM-weighted averaged HKL file"
+  ${proc_2dx}/linblock "backproject_hkz - creating FOM-weighted averaged HKL file"
   #############################################################################  
   #
   \rm -f PLOT.PS
@@ -370,8 +382,8 @@ else
   echo "celly = ${celly}"
   echo "cellz = ${ALAT}" 
   #
-  echo ":Launching ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${realang} ${sample_pixel} ${RESMAX}"
-  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${realang} ${sample_pixel} ${RESMAX}
+  echo ":Launching ${bin_2dx}/2dx_volume_processing/backproject_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX}"
+  ${bin_2dx}/2dx_volume_processing/backproject_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX}
   #
   mv -f output.hkl APH/latfitted.hkl
   echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
@@ -452,10 +464,6 @@ eot
     echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
   endif  
   #
-  set infile = APH/latfitted.hkl
-  #
-  set CCP4_SYM_local = 1
-  #
 endif
 #
 echo "<<@progress: +5>>"
@@ -465,11 +473,12 @@ ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for v
 #############################################################################
 #
 \rm -f SCRATCH/merge3D_MRClefthanded.mtz
+set infile = APH/latfitted.hkl
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3D_MRClefthanded.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM_local}
+SYMMETRY 1
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
 FILE ${infile}
@@ -490,7 +499,7 @@ set infile = APH/latfittedref_nosym.hkl
 ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3Dref_MRClefthanded.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM_local}
+SYMMETRY 1
 LABOUT H K L F PHI FOM SIGF
 CTYPOUT H H H F P W Q
 FILE ${infile}

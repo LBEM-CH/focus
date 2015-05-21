@@ -21,7 +21,6 @@
 # DISPLAY: realcell
 # DISPLAY: realang
 # DISPLAY: ALAT
-# DISPLAY: sample_pixel
 # DISPLAY: number_of_beads
 # DISPLAY: density_threshold_bead
 # DISPLAY: noise_level_bead
@@ -39,7 +38,6 @@ set SYM = ""
 set realcell = ""
 set realang = ""
 set ALAT = ""
-set sample_pixel = ""
 set RESMIN = ""
 set RESMAX = ""
 set calculate_subvolume = ""
@@ -121,7 +119,7 @@ echo "<<@progress: +10>>"
 ${proc_2dx}/linblock "F2MTZ : to convert back projected hkl to mtz.."
 #------------------------------------------------------------------------
 #
-set back_projected_f2mtz_mtz = "SCRATCH/back_projected_f2mtz.mtz"
+set back_projected_f2mtz_mtz = "SCRATCH/back_projected_f2mtz_MRClefthanded.mtz"
 #
 \rm -f ${back_projected_f2mtz_mtz}
 #
@@ -140,7 +138,7 @@ eof
 ${proc_2dx}/linblock "CAD : to finalize back projected mtz file.."
 #------------------------------------------------------------------------
 #
-set back_projected_cad_mtz = "SCRATCH/back_projected_cad.mtz"
+set back_projected_cad_mtz = "SCRATCH/back_projected_cad_MRClefthanded.mtz"
 #
 \rm -f ${back_projected_cad_mtz}
 #
@@ -158,15 +156,30 @@ eof
 ${proc_2dx}/linblock "Writing the back projected mtz file"
 #------------------------------------------------------------------------
 #
-set back_projected_mtz = "APH/back_projected.mtz"
+set back_projected_mtz = "APH/back_projected_MRClefthanded.mtz"
 #
 \rm -f ${back_projected_mtz}
 #
 mv ${back_projected_cad_mtz} ${back_projected_mtz}
 #
-echo "# IMAGE: ${back_projected_mtz} <MTZ: Back projected MTZ >" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${back_projected_mtz} <MTZ: Back projected MTZ (MRC lefthanded)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
+#
+#------------------------------------------------------------------------
+${proc_2dx}/linblock "reindex - to flip hand of MTZ file for further work with CCP4"
+#------------------------------------------------------------------------
+#
+set back_projected_mtz_righthanded = "APH/back_projected.mtz"
+\rm -f ${back_projected_mtz_righthanded}
+#
+${bin_ccp4}/reindex hklin ${back_projected_mtz} hklout ${back_projected_mtz_righthanded} << eof
+reindex HKL k,h,l
+lefthand
+end
+eof
+#
+echo "# IMAGE-IMPORTANT: ${back_projected_mtz_righthanded} <MTZ: Back projected CCP4 MTZ file (righthanded) [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
 #
 #
 ########################################################################
@@ -423,7 +436,7 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "F2MTZ: to convert processed hkl to mtz.."
 #------------------------------------------------------------------------
 #
-set processed_f2mtz_mtz = "SCRATCH/processed_f2mtz.mtz"
+set processed_f2mtz_mtz = "SCRATCH/processed_f2mtz_MRClefthanded.mtz"
 #
 \rm -f ${processed_f2mtz_mtz}
 #
@@ -442,7 +455,7 @@ eof
 ${proc_2dx}/linblock "CAD: to finalize processed mtz file.."
 #------------------------------------------------------------------------
 #
-set processed_cad_mtz = "SCRATCH/processed_cad.mtz"
+set processed_cad_mtz = "SCRATCH/processed_cad_MRClefthanded.mtz"
 #
 \rm -f ${processed_cad_mtz}
 #
@@ -459,15 +472,44 @@ eof
 ${proc_2dx}/linblock "Writing the processed mtz file"
 #------------------------------------------------------------------------
 #
-set processed_mtz = "APH/processed.mtz"
+set processed_mtz = "APH/processed_MRClefthanded.mtz"
 #
 \rm -f ${processed_mtz}
 #
 mv ${processed_cad_mtz} ${processed_mtz}
 #
-echo "# IMAGE: ${processed_mtz} <MTZ: Processed SF-HIST MTZ >" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${processed_mtz} <MTZ: Processed SF-HIST MTZ (MRC lefthanded) >" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
+#
+#------------------------------------------------------------------------
+${proc_2dx}/linblock "sftools - to create MTZ file for reference with SIGF column"
+#------------------------------------------------------------------------
+#
+\rm -f merge3Dref_MRClefthanded.mtz
+${bin_ccp4}/sftools << eof
+read ${processed_mtz}
+calc COL SIGF = 1.0
+write merge3Dref_MRClefthanded.mtz
+quit
+eof
+#
+echo "# IMAGE-IMPORTANT: merge3Dref_MRClefthanded.mtz <MTZ: Reference 3D MTZ file (MRC lefthanded) [H,K,L,F,P,FOM,SIGF] >" >> LOGS/${scriptname}.results
+#
+#------------------------------------------------------------------------
+${proc_2dx}/linblock "reindex - to flip hand of MTZ file for further work with CCP4"
+#------------------------------------------------------------------------
+#
+set processed_mtz_righthanded = "APH/processed.mtz"
+\rm -f ${processed_mtz_righthanded}
+#
+${bin_ccp4}/reindex hklin ${processed_mtz} hklout ${processed_mtz_righthanded} << eof
+reindex HKL k,h,l
+lefthand
+end
+eof
+#
+echo "# IMAGE-IMPORTANT: ${processed_mtz_righthanded} <MTZ: Processed SF-HIST CCP4 MTZ file [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
 #
 #
 ########################################################################

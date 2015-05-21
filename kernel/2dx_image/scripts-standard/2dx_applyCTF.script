@@ -21,7 +21,6 @@
 #
 # MANUAL: In order to use the movie-mode unbent APH-files, switch the "Enable movie-mode" option ON!
 #
-# DISPLAY: SYN_Unbending
 # DISPLAY: movie_enable
 # DISPLAY: imagesidelength
 # DISPLAY: magnification
@@ -90,7 +89,6 @@ set ctfcor_imode = ""
 set ctfcor_debug = ""
 set ctfcor_maxamp_factor = ""
 set QVAL2 = ""
-set QVALS = ""
 set QVALMA = ""
 set QVALMB = ""
 #
@@ -175,15 +173,15 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
 
   echo "<<@progress: 30>>"
 
-  set CTF_infile = APH/image_ctfcor_syn_unbend.aph
-  set CTF_outfile = APH/image_ctfcor_U2-Syn_ctf.aph
-  set unbent_image = SCRATCH/image_ctfcor_syn_unbent_taper
-  set unbent_FFT = SCRATCH/image_ctfcor_syn_unbent_taper_fft.mrc
-  set algo = US
-  set nametag = "U2-Syn"
+  # set CTF_infile = APH/image_ctfcor_syn_unbend.aph
+  # set CTF_outfile = APH/image_ctfcor_U2-Syn_ctf.aph
+  # set unbent_image = SCRATCH/image_ctfcor_syn_unbent_taper
+  # set unbent_FFT = SCRATCH/image_ctfcor_syn_unbent_taper_fft.mrc
+  # set algo = US
+  # set nametag = "U2-Syn"
   #######################################
   # Synthetic Reference Unbend
-  source ${proc_2dx}/2dx_applyCTF_sub.com
+  # source ${proc_2dx}/2dx_applyCTF_sub.com
   #######################################
 
   echo "<<@progress: 40>>"
@@ -202,15 +200,15 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
 
     echo "<<@progress: 50>>"
 
-    set CTF_infile = APH/image_ctfcor_movie_syn.aph
-    set CTF_outfile = APH/image_ctfcor_movie_syn_ctf.aph
-    set unbent_image = MovieA/direct_sum_syn_filt_upscale
-    set unbent_FFT = MovieA/direct_sum_syn_fft.mrc
-    set algo = UMAS
-    set nametag = "MA_Syn"
+    # set CTF_infile = APH/image_ctfcor_movie_syn.aph
+    # set CTF_outfile = APH/image_ctfcor_movie_syn_ctf.aph
+    # set unbent_image = MovieA/direct_sum_syn_filt_upscale
+    # set unbent_FFT = MovieA/direct_sum_syn_fft.mrc
+    # set algo = UMAS
+    # set nametag = "MA_Syn"
     #######################################
     # MovieAS
-    source ${proc_2dx}/2dx_applyCTF_sub.com
+    # source ${proc_2dx}/2dx_applyCTF_sub.com
     #######################################
 
     echo "<<@progress: 60>>"
@@ -228,21 +226,21 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
 
     echo "<<@progress: 70>>"
 
-    set CTF_infile = APH/image_ctfcor_movieB_syn.aph
-    set CTF_outfile = APH/image_ctfcor_movieB_syn_ctf.aph
-    set unbent_image = MovieB/direct_sum_syn_filt_upscale
-    set unbent_FFT = MovieB/direct_sum_syn_fft.mrc
-    set algo = UMBS
-    set nametag = "MB_Syn"
+    # set CTF_infile = APH/image_ctfcor_movieB_syn.aph
+    # set CTF_outfile = APH/image_ctfcor_movieB_syn_ctf.aph
+    # set unbent_image = MovieB/direct_sum_syn_filt_upscale
+    # set unbent_FFT = MovieB/direct_sum_syn_fft.mrc
+    # set algo = UMBS
+    # set nametag = "MB_Syn"
     #######################################
     # MovieBS
-    source ${proc_2dx}/2dx_applyCTF_sub.com
+    # source ${proc_2dx}/2dx_applyCTF_sub.com
     #######################################
   endif
   
   echo "<<@progress: 80>>"
 
-  echo ":: QVAL2, QVALMA, QVALMB, QVALS = "${QVAL2},${QVALMA},${QVALMB},${QVALS}
+  echo ":: QVAL2, QVALMA, QVALMB = "${QVAL2},${QVALMA},${QVALMB}
 
   if ( ${movie_enable} == "y" ) then
     set movie_better = `echo ${QVALMA} ${QVAL2} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
@@ -262,12 +260,12 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
         set final_outfile = image_ctfcor_movieB_fou_ctf.aph
       else
         ${proc_2dx}/linblock "Using Unbend2 (not Movie) unbent data, since these have the higher QVAL"
-        set final_outfile = image_ctfcor_fou_ctf.aph
+        set final_outfile = image_ctfcor_fou_unbent_ctf.aph
       endif
     endif
   else
     ${proc_2dx}/linblock "Using Unbend2 unbent data"
-    set final_outfile = image_ctfcor_fou_ctf.aph
+    set final_outfile = image_ctfcor_fou_unbent_ctf.aph
   endif
 
   cd APH

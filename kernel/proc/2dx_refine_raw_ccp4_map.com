@@ -12,7 +12,7 @@
 # MAPMASK: to bring protein to center of volume.
 # MAPMASK: to extend the map.
 # MAPROT - to rotate volume for sub-volume preparation.
-# MAPAMSK - to cut sub-volume if asked for!
+# MAPAMSK - to cut sub-volume if asked for.
 #
 # The output maps are suffixed by the name of the functions.
 # Example:
@@ -20,7 +20,7 @@
 # processed_correct_hand.map
 # processed_centered.map
 # processed_extended.map
-# processed_sub.map (only if asked for!)
+# processed_sub.map (only if asked for)
 #
 ########################################################################
 # Prepare input and parameters
@@ -29,7 +29,7 @@
 set input_map = "${1}"
 #
 #------------------------------------------------------------------------
-${proc_2dx}/linblock "Refining ccp4 map ${input_map}.."
+${proc_2dx}/linblock "Refining ccp4 map ${input_map}."
 #------------------------------------------------------------------------
 #
 set input_name = "`echo ${input_map} | cut -d'.' -f1`"
@@ -39,7 +39,7 @@ set input_name = "`echo ${input_map} | cut -d'.' -f1`"
 ########################################################################
 #
 #------------------------------------------------------------------------
-${proc_2dx}/linblock "MAPROT: to invert to correct handedness and correct size.."
+${proc_2dx}/linblock "MAPROT: to invert to correct handedness and correct size."
 #------------------------------------------------------------------------
 #
 set processed_correct_hand_map = "${input_name}_correct_hand.map"
@@ -63,7 +63,7 @@ eot
 ########################################################################
 #
 #------------------------------------------------------------------------
-${proc_2dx}/linblock "MAPMASK: to bring protein to center of volume.."
+${proc_2dx}/linblock "MAPMASK: to bring protein to center of volume."
 #------------------------------------------------------------------------
 #
 set processed_centered_map = "${input_name}_centered.map"
@@ -84,7 +84,7 @@ eof
 ########################################################################
 #
 #------------------------------------------------------------------------
-${proc_2dx}/linblock "MAPMASK: to extend the map.."
+${proc_2dx}/linblock "MAPMASK: to extend the map."
 #------------------------------------------------------------------------
 #
 set processed_extended_map = "${input_name}_extended.map"

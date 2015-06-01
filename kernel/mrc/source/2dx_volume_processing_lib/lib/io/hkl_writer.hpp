@@ -26,8 +26,9 @@ namespace volume
              * h    k   l   amp phase   fom
              * @param file_path
              * @param data - input data
+             * @param for_ccp4 - if the output would be used by CCP4? (will invert the hand and sift the phase)
              */
-            void write(const std::string& file_path, const volume::data::FourierSpaceData& data);
+            void write(const std::string& file_path, const volume::data::FourierSpaceData& data, bool for_ccp4 = true);
             
         }
         

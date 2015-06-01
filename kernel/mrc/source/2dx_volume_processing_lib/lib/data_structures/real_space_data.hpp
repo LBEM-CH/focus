@@ -159,6 +159,24 @@ namespace volume
              */
             double* density_sorted_values();
             
+            /**
+             * Applies a density slab in the vertical direction (z-axis) with the
+             * fractional height. The new densities are changed only with the 
+             * fraction provided. fraction = 1.0 will completely change the map
+             * @param height: height in fraction of z height
+             * @param fraction: fraction, by which the densities are changed
+             * @param centered: Is the density centered along z-axis?
+             */
+            void vertical_slab(double height, double fraction, bool centered);
+            
+            /**
+             * Apply a density threshold. fraction = 1.0 will completely remove
+             * densities below the limit
+             * @param limit
+             * @param fraction
+             */
+            void threshold(double limit = 0.0, double fraction=1.0);
+            
         private:
             /**
              * A member initializer function with the size integers

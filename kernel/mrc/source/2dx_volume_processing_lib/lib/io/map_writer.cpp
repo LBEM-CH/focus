@@ -7,14 +7,14 @@
 #include <fstream>
 #include <string.h>
 
-#include "mrc_writer.hpp"
+#include "map_writer.hpp"
 
 #include "../utilities/filesystem.hpp"
 #include "../utilities/angle_utilities.hpp"
 
 namespace ds = volume::data;
 
-void volume::io::mrc_writer::write_real
+void volume::io::map_writer::write_real
         (const std::string file_name, 
         const volume::data::VolumeHeader2dx& header, 
         const volume::data::RealSpaceData& data)
@@ -42,8 +42,12 @@ void volume::io::mrc_writer::write_real
     float amin = (float) data.min();
     float amax = (float) data.max();
     float amean = (float) data.mean();
+    float ccp4_skwmat = 0.0101;
     int spcgrp = 1;
-
+    int machine_stamp = 16708;
+    
+    int zeroi = 0;
+    float zerof = 0.0;
     int mode = 2;
     int mapc = 1;
     int mapr = 2;
@@ -53,12 +57,12 @@ void volume::io::mrc_writer::write_real
     file.write((char*)&ny, sizeof(int));
     file.write((char*)&nz, sizeof(int));
     file.write((char*)&mode, sizeof(int));
-    file.write((char*)&nxstart, sizeof(int));   //nxstart
-    file.write((char*)&nystart, sizeof(int));   //nystart
-    file.write((char*)&nzstart, sizeof(int));   //nzstart
-    file.write((char*)&nx, sizeof(int));        //mx
-    file.write((char*)&ny, sizeof(int));        //my
-    file.write((char*)&nz, sizeof(int));        //mz
+    file.write((char*)&nxstart, sizeof(int));  //nxstart
+    file.write((char*)&nystart, sizeof(int));  //nystart
+    file.write((char*)&nzstart, sizeof(int));  //nzstart
+    file.write((char*)&nx, sizeof(int));    //mx
+    file.write((char*)&ny, sizeof(int));    //my
+    file.write((char*)&nz, sizeof(int));    //mz
     file.write((char*)&xlen, sizeof(float));
     file.write((char*)&ylen, sizeof(float));
     file.write((char*)&zlen, sizeof(float));
@@ -72,9 +76,27 @@ void volume::io::mrc_writer::write_real
     file.write((char*)&amax, sizeof(float));
     file.write((char*)&amean, sizeof(float));
     file.write((char*)&spcgrp, sizeof(int));
+    file.write((char*)&zeroi, sizeof(int));
+    file.write((char*)&zeroi, sizeof(int));
+    file.write((char*)&ccp4_skwmat, sizeof(float));
+    file.write((char*)&zerof, sizeof(float));
+    file.write((char*)&zerof, sizeof(float));
+    file.write((char*)&zerof, sizeof(float));
+    file.write((char*)&ccp4_skwmat, sizeof(float));
+    file.write((char*)&zerof, sizeof(float));
+    file.write((char*)&zerof, sizeof(float));
+    file.write((char*)&zerof, sizeof(float));
+    file.write((char*)&ccp4_skwmat, sizeof(float));
+    
+    for(int i=0; i<18; i++) file.write((char*)&zerof, sizeof(float));
+    
+    file.write("MAP ", sizeof(int));
+    file.write((char*)&machine_stamp, sizeof(int));
+    file.write((char*)&zeroi, sizeof(int));
+    file.write((char*)&zeroi, sizeof(int));
     
     //Fill the rest of data with zeros
-    for(int i=0; i<231; i++) file.write("    ", sizeof(float));
+    for(int i=0; i<200; i++) file.write("    ", sizeof(float));
     
     //Write the data
     file.seekp(1024);

@@ -10,7 +10,7 @@
 #include "../utilities/fourier_utilities.hpp"
 
 volume::data::FourierSpaceData volume::io::hkz_reader::read(std::string file_path, 
-        const volume::data::VolumeHeader2dx& header)
+        const volume::data::VolumeHeader2dx& header, bool raw_ccp4)
 {
     namespace ds = volume::data;
     
@@ -35,14 +35,21 @@ volume::data::FourierSpaceData volume::io::hkz_reader::read(std::string file_pat
         {
             l_in = round(z_in * header.nz());
             
+            //Set the correct hand for ccp4 generated raw hkz data
+            if(raw_ccp4) l_in = -1 * l_in;
+            
             //std::cout << "Reading line: " << h_in << " " << k_in << " " << l_in << "(" << z_in << ")" << " " << amplitude_in << " " << phase_in << "\n"; 
             
             ds::MillerIndex index_in(h_in, k_in, l_in);
             double resolution =  volume::utilities::fourier_utilities::GetResolution(
                                         index_in, header.gamma(), header.xlen(), header.ylen(), header.zlen());
 
+            //Set the density to center if is ccp4 generated raw data 
+            phase_in = phase_in + 180*(l_in);
+            
             //Convert phase to radians
             phase_in = volume::utilities::angle_utilities::DegreeToRadian(phase_in);
+            
 
             //Covert also the sphaseIn to radians
             if(sig_phase_in>90) sig_phase_in = 0;

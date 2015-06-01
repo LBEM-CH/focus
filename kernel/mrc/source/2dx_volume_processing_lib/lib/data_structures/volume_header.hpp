@@ -92,6 +92,24 @@ namespace volume
             double zlen() const ;
             
             /**
+             * Returns the nxstart of the volume
+             * @return nxstart
+             */
+            int nxstart() const;
+            
+            /**
+             * Returns the nystart of the volume
+             * @return nystart
+             */
+            int nystart() const;
+            
+            /**
+             * Returns the nzstart of the volume
+             * @return nzstart
+             */
+            int nzstart() const;
+            
+            /**
              * Returns the cell angle gamma
              * @return gamma
              */
@@ -121,12 +139,7 @@ namespace volume
              */
             double max_resolution() const ;
             
-            /**
-             * Returns the membrane height in fraction of nz
-             * @return membrane_height 
-             * @see nz
-             */
-            double membrane_height() const ;
+            
             
             /**
              * Assigner function of nx
@@ -145,6 +158,24 @@ namespace volume
              * @param nz
              */
             void set_nz(int nz);
+            
+            /**
+             * Assigner function of nxstart
+             * @param nxstart
+             */
+            void set_nxstart(int nxstart);
+            
+            /**
+             * Assigner function of nystart
+             * @param nystart
+             */
+            void set_nystart(int nystart);
+            
+            /**
+             * Assigner function of nzstart
+             * @param nzstart
+             */
+            void set_nzstart(int nzstart);
             
             /**
              * Assigner function of xlen
@@ -181,12 +212,7 @@ namespace volume
              * @param resolution in Angstroems
              */
             void set_max_resolution(double resolution);
-            
-            /**
-             * Sets the membrane height
-             * @param membrane_height as a fraction of nz
-             */
-            void set_membrane_height(double membrane_height);
+           
             
         private:
             
@@ -211,6 +237,14 @@ namespace volume
             * Default: nx, ny, nz
             */
            double _xlen, _ylen, _zlen;
+           
+           /**
+            * Start of volume in MRC files
+            * (Important when reading from MRC files)
+            * Example: -10, -10, 0
+            * Default: 0, 0, 0
+            */
+           int _nxstart, _nystart, _nzstart;
 
            /**
             * Cell angle beta in degrees;
@@ -235,12 +269,7 @@ namespace volume
             */
            double _max_resolution;
 
-           /**
-            * Expected Membrane height in fraction of the Z-spacing
-            * Example: 0.7
-            * Default: 1.0
-            */
-           double _membrane_height;
+           
 
         };
         

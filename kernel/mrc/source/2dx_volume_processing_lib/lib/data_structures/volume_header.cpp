@@ -23,10 +23,12 @@ void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
     _xlen = (double) nx;
     _ylen = (double) ny;
     _zlen = (double) nz;
+    _nxstart = 0;
+    _nystart = 0;
+    _nzstart = 0;
     set_gamma(volume::utilities::angle_utilities::DegreeToRadian(90));
     set_symmetry("P1");
     set_max_resolution(2.0);
-    set_membrane_height(1.0);
 
 }
 
@@ -53,6 +55,8 @@ std::string ds::VolumeHeader2dx::to_string() const
                std::to_string(ninty) + ", " + 
                std::to_string(volume::utilities::angle_utilities::RadianToDegree(gamma())) + "\n";
     output += "\t|Symmetry: " + symmetry() + "\n";
+    output += "\t|Volume start indices: " + std::to_string(nxstart()) + " , " + 
+               std::to_string(nystart()) + " , " + std::to_string(nzstart()) + "\n";
     output += "\t|Maximum Resolution: " + std::to_string(max_resolution()) + "\n";
     
     return output;
@@ -71,6 +75,21 @@ void ds::VolumeHeader2dx::set_ny(int ny)
 void ds::VolumeHeader2dx::set_nz(int nz)
 {
     this->_nz = nz;
+}
+
+void ds::VolumeHeader2dx::set_nxstart(int nxstart)
+{
+    this->_nxstart = nxstart;
+}
+
+void ds::VolumeHeader2dx::set_nystart(int nystart)
+{
+    this->_nystart = nystart;
+}
+
+void ds::VolumeHeader2dx::set_nzstart(int nzstart)
+{
+    this->_nzstart = nzstart;
 }
 
 void ds::VolumeHeader2dx::set_xlen(double xlen)
@@ -103,18 +122,6 @@ void ds::VolumeHeader2dx::set_max_resolution(double resolution)
     _max_resolution = resolution;
 }
 
-void ds::VolumeHeader2dx::set_membrane_height(double membrane_height)
-{
-    if(membrane_height > 0.0 && membrane_height <= 1.0)
-    {
-        _membrane_height = membrane_height;
-    }
-    else
-    {
-        throw new std::invalid_argument("Membrane height expected in fractions, found: " + std::to_string(membrane_height));
-    }
-}
-
 int ds::VolumeHeader2dx::nx() const
 {
     return _nx;
@@ -128,6 +135,21 @@ int ds::VolumeHeader2dx::ny() const
 int ds::VolumeHeader2dx::nz() const
 {
     return _nz;
+}
+
+int ds::VolumeHeader2dx::nxstart() const
+{
+    return _nxstart;
+}
+
+int ds::VolumeHeader2dx::nystart() const
+{
+    return _nystart;
+}
+
+int ds::VolumeHeader2dx::nzstart() const
+{
+    return _nzstart;
 }
 
 double ds::VolumeHeader2dx::xlen() const
@@ -168,9 +190,4 @@ int ds::VolumeHeader2dx::symmetry_ccp4_code() const
 double ds::VolumeHeader2dx::max_resolution() const
 {
     return _max_resolution;
-}
-
-double ds::VolumeHeader2dx::membrane_height() const
-{
-    return _membrane_height;
 }

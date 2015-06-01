@@ -49,7 +49,7 @@ void volume::symmetrization::fourier_symmetrization::symmetrize
                                                                 current_index.k(), current_index.l());
                     
                     //For the negative h, get the Friedel spot and change phase
-                    if(sym_h < 0)
+                    if(sym_index.h() < 0)
                     {
                         sym_index = sym_index.FriedelSpot();
                         sym_phase = -1 * sym_phase;

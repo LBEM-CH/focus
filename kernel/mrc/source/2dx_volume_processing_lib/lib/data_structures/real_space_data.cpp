@@ -6,6 +6,7 @@
 
 #include <stdexcept>
 #include <string.h>
+#include <math.h>
 
 #include "real_space_data.hpp"
 #include "../utilities/density_value_sorter.hpp"
@@ -227,4 +228,72 @@ double* ds::RealSpaceData::density_sorted_values()
 {
     volume::utilities::DensityValueSorter sorter(size(), _data);
     return sorter.get_sorted_values();
+}
+
+void ds::RealSpaceData::vertical_slab(double height, double fraction, bool centered)
+{
+    if(height > 1.0)
+    {
+        std::cerr << "ERROR: Applying vertical density slab with slab height greater than volume z-length!";
+        return;
+    }
+    
+    //Check the fraction
+    if(fraction < 0.0 || fraction > 1.0)
+    {
+        std::cerr << "ERROR! The density slab fraction can only be between 0 and 1";
+        return;
+    }
+    
+    int membrane_height = floor(height*nz());
+    
+    int density_start = (int) (nz()-membrane_height)/2;
+    int density_end = density_start + membrane_height;
+    int mid = (int) (nz()/2);
+    
+    if(centered) mid = 0;
+    
+    for ( int iz = 0; iz < nz(); ++iz ) 
+    {
+        int centered_iz = (iz + mid) % nz();
+        if(centered_iz < density_start || centered_iz > density_end)
+        {    
+            /*
+             * This is the region where density should be zero.
+             * If the density is not centered, calculate the appropriate centered_iz
+             */
+            for ( int ix = 0; ix < nx(); ++ix ) 
+            {
+                for ( int iy = 0; iy < ny(); ++iy ) 
+                {
+                    
+                    double new_density = get_value_at(ix, iy, centered_iz)*(1 - fraction);
+                    set_value_at(ix, iy, centered_iz, new_density);
+
+                }
+            }
+        }
+    }
+    
+    
+}
+
+void ds::RealSpaceData::threshold(double limit, double fraction)
+{
+    std::cout << "Thresholding density with limit = " << limit << "\n";
+    for(int ix=0; ix < nx(); ix++)
+    {
+        for(int iy=0; iy < ny(); iy++)
+        {
+            for(int iz=0; iz < nz(); iz++)
+            {
+                double density = get_value_at(ix, iy, iz);
+                if(density < limit)
+                {
+                    set_value_at(ix, iy, iz, density*(1-fraction));
+                }
+            }
+        }
+    }
+    
 }

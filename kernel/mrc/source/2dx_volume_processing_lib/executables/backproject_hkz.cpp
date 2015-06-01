@@ -54,6 +54,7 @@ int main(int argc, char** argv)
     
     //Write out data
     volume.write_volume("output.hkl");
+    volume.write_volume("output.mrc");
     
 }
 

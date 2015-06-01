@@ -47,6 +47,9 @@ bool io::MrcReader::mrc_to_real(
     header.set_xlen((double)xlen);
     header.set_ylen((double)ylen);
     header.set_zlen((double)zlen);
+    header.set_nxstart(nxstart);
+    header.set_nystart(nystart);
+    header.set_nzstart(nzstart);
     header.set_gamma(volume::utilities::angle_utilities::DegreeToRadian(
                       (double)gamma));
     

@@ -72,14 +72,22 @@ volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead
     volume::data::RealSpaceData sulphur = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 16.0);
     
     int x, y, z = 0;
+    int max_trials = number_of_beads;
     for ( int bead = 0; bead < number_of_beads; bead++ ) 
     {
+        int trial = 0;
         do 
         {
             x = rand() % input_volume.nx();
             y = rand() % input_volume.ny();
             z = rand() % input_volume.nz();
-        } while ( input_volume.density_at(x, y, z) < density_threshold );
+            trial ++;
+            if(trial > max_trials)
+            {
+                std::cerr << "Too many trials while generating bead model. May be density threshold too much or too many beads!!\n";
+                exit(1);
+            }
+        } while ( input_volume.density_at(x, y, z) < density_threshold);
 
 
         double random_number = rand() / (double) RAND_MAX;        

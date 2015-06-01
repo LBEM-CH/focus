@@ -26,11 +26,12 @@ namespace volume
              * following format:
              * h    k   l   amplitude   phase   sig_amp sig_phase   iq_value
              * @param file_path
+             * @param raw_ccp4 : If the map is wrong handed and the density is on top and bottom (as from raw ccp4)?
              * @param[in] header
              * @return fourier_data
              */
             volume::data::FourierSpaceData read(std::string file_path,
-                    const volume::data::VolumeHeader2dx& header);
+                    const volume::data::VolumeHeader2dx& header, bool raw_ccp4 = true);
             
             
         }

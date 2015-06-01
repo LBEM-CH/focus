@@ -19,7 +19,8 @@ ds::StructureFactors::StructureFactors(double min_resolution, double max_resolut
 void ds::StructureFactors::initialize_intensities(const volume::data::Volume2dx& volume)
 {
     
-    Volume2dx copied_volume(volume);
+    Volume2dx copied_volume(volume.header());
+    copied_volume.set_data(volume);
     
     //Get the Fourier data
     FourierSpaceData fourier_data = copied_volume.get_fourier();

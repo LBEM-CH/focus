@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     
     if (argc < 7) 
     {
-        std::cout << "Program Options\n\t<input_mrc_file> <reference_mrc_file> <symmetry> <max_resolution> <iterations> <output_mrc_file>\n";
+        std::cout << "Program Options\n\t<input_mrc_file> <reference_mrc_file> <symmetry> <max_resolution> <iterations> <output_hkl_file> <output_mrc_file>\n";
         return(1);
     }
     
@@ -33,8 +33,9 @@ int main(int argc, char** argv)
     std::string symmetry = argv[3];
     double max_resolution = std::atof(argv[4]);
     int iterations = std::atoi(argv[5]);
-    std::string output_mrc = argv[6];
-    
+    std::string output_hkl = argv[6];
+    std::string output_mrc = argv[7];
+     
     std::cout << "\n-----------------------------------\n";
     std::cout << "Preparing the input volume:\n";
     std::cout << "-----------------------------------\n\n";
@@ -42,6 +43,7 @@ int main(int argc, char** argv)
     input_volume.set_symmetry(symmetry);
     input_volume.set_max_resolution(max_resolution);
     input_volume.read_volume(input_volume_file, "mrc");
+    input_volume.prepare_fourier();
     std::cout << input_volume.to_string();
     
     std::cout << "\n-----------------------------------\n";
@@ -65,15 +67,23 @@ int main(int argc, char** argv)
         std::cout << "\tIteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
+        //Apply density histogram
+        output_volume.apply_density_histogram(ref_volume, 0.5);
+        
+        //Apply membrane slab
+        output_volume.apply_density_slab(0.5, 0.5, false);
+        
         //Apply structure factors
-        std::cout << "\nCurrent structure factor profile:\n";
-        output_volume.calculate_structure_factors(100).plot_profile();
         output_volume.apply_structure_factors(structure_factors, 0.5);
         std::cout << "\nNew structure factor profile:\n";
         std::cout << output_volume.calculate_structure_factors(100).plot_profile();
         
-        //Apply density histogram
-        output_volume.apply_density_histogram(ref_volume, 1.0);
+        //std::cout << "Replace the reflections..\n";
+       // output_volume.replace_reflections(input_volume.get_fourier(), 1.0);
+        
+        //Apply low pass filter
+        output_volume.low_pass(max_resolution);
+               
     }
     
     std::cout << "\nDone with the iterations.\n";
@@ -81,7 +91,11 @@ int main(int argc, char** argv)
     //Symmetrize
     output_volume.symmetrize();
     
-    //Write the output volume to a file
+    //Write output in HKL format
+    output_volume.write_volume(output_hkl, "hkl");
+    
+    //Write output in MRC format
+    output_volume.centerize_density_along_z();
     output_volume.write_volume(output_mrc, "mrc");
     
     

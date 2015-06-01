@@ -39,6 +39,12 @@ namespace volume
             Volume2dx(int nx=0, int ny=0, int nz=0);
             
             /**
+             * Generates a volume with the given header
+             * @param header
+             */
+            Volume2dx(const VolumeHeader2dx& header);
+            
+            /**
              * Resets the volume with given size and empty data
              * @param nx
              * @param ny
@@ -51,6 +57,12 @@ namespace volume
              * @return string converted volume
              */
             std::string to_string() const;
+            
+            /**
+             * Returns the header of the volume
+             * @return header
+             */
+            VolumeHeader2dx header() const;
             
             /**
              * Gets the real space x dimension of the volume
@@ -221,6 +233,12 @@ namespace volume
             void write_volume(std::string file_name);
             
             /**
+             * Scales the amplitudes such that the max amplitude is set to given value
+             * @param max_amplitude
+             */
+            void rescale_to_max_amplitude(double max_amplitude);
+            
+            /**
              * Symmetrizes the volume.
              */
             void symmetrize();
@@ -261,6 +279,12 @@ namespace volume
             void prepare_real();
             
             /**
+             * Sets the data from a volume
+             * @param volume
+             */
+            void set_data(const Volume2dx& volume);
+            
+            /**
              * Calculates the structure factors. 
              * Structure factors are given as the sum of the intensities of all
              * the spots lying in that resolution range. Internally, the Fourier
@@ -270,7 +294,7 @@ namespace volume
              * @param resolution_bins - number of bins.
              * @return instance of class Structure Factors.
              */
-            StructureFactors calculate_structure_factors(int resolution_bins);
+            StructureFactors calculate_structure_factors(int resolution_bins) const;
             
             /**
              * Apply the structure factors. The factors are applied partially with the
@@ -296,10 +320,10 @@ namespace volume
              * Generates a bead model of the current volume
              * @param no_of_beads
              * @param density_threshold
-             * @param noise_level
+             * @param bead_model_resolution
              * @return volume
              */
-            Volume2dx generate_bead_model(int no_of_beads, double density_threshold, double noise_level);
+            Volume2dx generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution = 2.0);
             
             /**
              * Centers the density along the z axis. Internally adds PI*miller_index_l 
@@ -332,6 +356,55 @@ namespace volume
              * @param reference - Reference volume to be used to get density histogram
              */
             void apply_density_histogram(Volume2dx reference);
+            
+            /**
+             * Applies a density slab in the vertical direction (z-axis) with the
+             * fractional height. The new densities are changed only with the 
+             * fraction provided. fraction = 1.0 will completely change the map
+             * @param height: height in fraction of z height
+             * @param fraction: fraction, by which the densities are changed
+             * @param centered: Is the density centered along z-axis?
+             */
+            void apply_density_slab(double height, double fraction, bool centered);
+            
+            /**
+             * Applies a density threshold. Fraction = 1.0 will completely remove 
+             * the densities below limit
+             * @param limit
+             * @param fraction
+             */
+            void apply_density_threshold(double limit=0.0, double fraction=1.0);
+            
+            /**
+             * Apply a band pass filter to the volume.
+             * @param low_resolution - Resolution in A (e.g. 100.0)
+             * @param high_resolution - Resolution in A (e.g. 4.0)
+             */
+            void band_pass(double low_resolution, double high_resolution);
+            
+            /**
+             * Apply a low pass filter to the volume.
+             * @param high_resolution - Resolution in A (e.g. 4.0)
+             */
+            void low_pass(double high_resolution);
+            
+            /**
+             * Partially replace the reflections from a Fourier volume.
+             * fraction = 1.0 will completely change the map.
+             * @param fourier_data
+             * @param fraction
+             */
+            void replace_reflections(const FourierSpaceData& fourier_data, double fraction);
+            
+            /**
+             * NOT WORKING!!
+             * Extends the volume to cells provided and returns it 
+             * 0 means no extension, 1 means one cell extended.
+             * @param x_cells
+             * @param y_cells
+             * @param z_cells
+             */
+            Volume2dx extended_volume(int x_cells, int y_cells=0, int z_cells=0);
 
         private:
             

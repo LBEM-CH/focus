@@ -121,6 +121,18 @@ namespace volume
             int spots() const;
             
             /**
+             * Fetches the max_amplitude value
+             * @return max_amplitude
+             */
+            double max_amplitude() const;
+            
+            /**
+             * Scales the amplitudes by a factor
+             * @param factor
+             */
+            void scale_amplitudes(double factor);
+            
+            /**
              * Converts the data into fftw format
              * @param fx : x size of the half Fourier volume
              * @param fy : y size of the half Fourier volume
@@ -137,6 +149,20 @@ namespace volume
              * @param complex_data
              */
             void reset_data_from_fftw(int fx, int fy, int fz, fftw_complex* complex_data);
+            
+            /**
+             * Replaces the reflections from the input Fourier space data to the current one.
+             * The original reflection can be also be kep and the new reflection can be 
+             * applied using only a fraction. fraction=1 will completely change the reflections.
+             * @param input
+             * @param fraction
+             */
+            void replace_reflections(const FourierSpaceData& input, double fraction);
+            
+            /**
+             * Returns the inverted hand Fourier data
+             */
+            FourierSpaceData invert_hand() const;
             
         private:
             

@@ -21,9 +21,9 @@ int main(int argc, char** argv)
     //Read the program inputs:
     //<prog_name> hkz_file symmetry nx ny nz gamma max_resolution output_file
     
-    if (argc < 14) 
+    if (argc < 15) 
     {
-        std::cout << "Program Options\n\t<input_hkz_file> <nx> <ny> <nz> <symmetry> <gamma> <max_amplitude> <max_resolution> <refinement_iterations> <no_of_beads> <density_threshold> <bead_model_resolution> <membrane_height_fraction>\n";
+        std::cout << "Program Options\n\t<input_hkz_file> <nx> <ny> <nz> <symmetry> <gamma> <max_amplitude> <max_resolution> <refinement_iterations> <density_threshold_refinement> <no_of_beads> <density_threshold_baed> <bead_model_resolution> <membrane_height_fraction>\n";
         return(1);
     }
     
@@ -37,14 +37,15 @@ int main(int argc, char** argv)
     double max_amplitude = std::atof(argv[7]);
     double max_resolution = std::atof(argv[8]);
     int iterations = std::atoi(argv[9]);
-    int no_of_beads = std::atoi(argv[10]);
-    double density_threshold = std::atof(argv[11]);
-    double bead_model_resolution = std::atof(argv[12]);
-    double membrane_slab = std::atof(argv[13]);
+    double density_threshold_refinement = std::atof(argv[10]);
+    int no_of_beads = std::atoi(argv[11]);
+    double density_threshold_bead = std::atof(argv[12]);
+    double bead_model_resolution = std::atof(argv[13]);
+    double membrane_slab = std::atof(argv[14]);
     
      
     std::cout << "\n-----------------------------------\n";
-    std::cout << "Preparing the input volume:\n";
+    std::cout << "::Preparing the input volume:\n";
     std::cout << "-----------------------------------\n\n";
     Volume2dx input_volume(nx, ny, nz);
     input_volume.set_gamma(volume::utilities::angle_utilities::DegreeToRadian(gamma));
@@ -62,9 +63,9 @@ int main(int argc, char** argv)
     
     
     std::cout << "\n-----------------------------------\n";
-    std::cout << "Preparing the bead model volume: \n";
+    std::cout << "::Preparing the bead model volume: \n";
     std::cout << "-----------------------------------\n\n";
-    Volume2dx bead_model_volume = input_volume.generate_bead_model(no_of_beads, density_threshold, bead_model_resolution);
+    Volume2dx bead_model_volume = input_volume.generate_bead_model(no_of_beads, density_threshold_bead, bead_model_resolution);
     std ::cout << bead_model_volume.to_string();
     
     //Write out the bead model
@@ -82,7 +83,7 @@ int main(int argc, char** argv)
     for(int iteration=0; iteration<iterations; ++iteration)
     {
         std::cout << "\n-----------------------------------\n";
-        std::cout << "\tIteration: " << iteration+1 << std::endl;
+        std::cout << "::Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
         //Replace the reflection from that of input
@@ -98,7 +99,7 @@ int main(int argc, char** argv)
         output_volume.apply_density_slab(membrane_slab, 0.5, true);
         
         //Apply density threshold
-        output_volume.apply_density_threshold(density_threshold, 0.5);
+        output_volume.apply_density_threshold(density_threshold_refinement, 0.5);
         
         //Apply density histogram
         output_volume.apply_density_histogram(bead_model_volume, 0.5);
@@ -118,7 +119,7 @@ int main(int argc, char** argv)
                
     }
     
-    std::cout << "\nDone with the iterations.\n";
+    std::cout << "\n::Done with the iterations.\n";
     
     //Symmetrize
     output_volume.symmetrize();
@@ -128,7 +129,7 @@ int main(int argc, char** argv)
     output_volume.prepare_real();
     
     std::cout << "\n-----------------------------------\n";
-    std::cout << "\tFinal results:\n";
+    std::cout << "Final results:\n";
     std::cout << "-----------------------------------\n";
     std::cout << output_volume.to_string();
     std::cout << "\nNew structure factor profile:\n";

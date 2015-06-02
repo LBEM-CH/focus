@@ -72,8 +72,13 @@
 # DISPLAY: Thread_Number
 # DISPLAY: number_of_beads
 # DISPLAY: density_threshold_bead
-# DISPLAY: noise_level_bead
-# DISPLAY: number_sf_hist_iterations
+# DISPLAY: maximum_resolution_bead
+# DISPLAY: number_refinement_iterations
+# DISPLAY: membrane_height
+# DISPLAY: maximum_amplitude_refinement
+# DISPLAY: density_threshold_refinement
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
 #
 #$end_local_vars
@@ -146,8 +151,11 @@ set zstarwin  = ""
 set calculate_subvolume = ""
 set number_of_beads = ""
 set density_threshold_bead = ""
-set noise_level_bead = ""
-set number_sf_hist_iterations = ""
+set maximum_resolution_bead = ""
+set number_refinement_iterations = ""
+set membrane_height = ""
+set maximum_amplitude_refinement = ""
+set density_threshold_refinement = ""
 #
 #$end_vars
 #
@@ -419,33 +427,10 @@ if ( ${merge_modus} == "3D" ) then
   #
   source ${proc_2dx}/2dx_merge_latline_sub.com
   #
-  set voldim = 250
-  set voldim_m1 = `echo ${voldim} | awk '{ s = $1 - 1 } END { print s }'`
-  set voldim_t142 = `echo ${voldim} | awk '{ s = $1 * 1.42 } END { print s }'`
-  set voldim_t2 = `echo ${voldim} | awk '{ s = $1 * 2 } END { print s }'`
-  set voldim_t2m1 = `echo ${voldim} | awk '{ s = $1 * 2 - 1 } END { print s }'`
-  #
   if ( ${latline_algo} == "2" ) then
-    #
-    ########################################################################
-    # STEP 1: Back project and create HKL file
-    ########################################################################
-    #
-    source ${proc_2dx}/2dx_refineMergedMap_BackProject.com
-    #
-    ########################################################################
-    # STEP 4: Generate bead model from back projected map
-    ########################################################################
-    #
-    source ${proc_2dx}/2dx_refineMergedMap_MakeBeadModel.com
-    #
-    ########################################################################
-    # STEP 5: Start SF-HIST iterations
-    ########################################################################
     #
     source ${proc_2dx}/2dx_refineMergedMap_sub.com
     #
-    #############################################################################
   endif
   #
 endif

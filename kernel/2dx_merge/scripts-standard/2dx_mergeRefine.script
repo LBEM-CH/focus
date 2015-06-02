@@ -93,6 +93,16 @@
 # DISPLAY: RFACAMP
 # DISPLAY: Thread_Number
 # DISPLAY: sample_pixel
+DISPLAY: number_of_beads
+# DISPLAY: density_threshold_bead
+# DISPLAY: maximum_resolution_bead
+# DISPLAY: number_refinement_iterations
+# DISPLAY: membrane_height
+# DISPLAY: maximum_amplitude_refinement
+# DISPLAY: density_threshold_refinement
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: calculate_subvolume
 #
 #$end_local_vars
 #
@@ -170,8 +180,11 @@ set zstarwin = ""
 set calculate_subvolume = ""
 set number_of_beads = ""
 set density_threshold_bead = ""
-set noise_level_bead = ""
-set number_sf_hist_iterations = ""
+set maximum_resolution_bead = ""
+set number_refinement_iterations = ""
+set membrane_height = ""
+set maximum_amplitude_refinement = ""
+set density_threshold_refinement = ""
 #
 #$end_vars
 #
@@ -405,21 +418,7 @@ while ( ${itnum} < ${merge_refine_iterations} )
       #
       source ${proc_2dx}/2dx_merge_latline_sub.com
       #
-      set voldim = 250
-      set voldim_m1 = `echo ${voldim} | awk '{ s = $1 - 1 } END { print s }'`
-      set voldim_t142 = `echo ${voldim} | awk '{ s = $1 * 1.42 } END { print s }'`
-      set voldim_t2 = `echo ${voldim} | awk '{ s = $1 * 2 } END { print s }'`
-      set voldim_t2m1 = `echo ${voldim} | awk '{ s = $1 * 2 - 1 } END { print s }'`
-      #
       if ( ${merge_reference} == "3" ) then
-        #
-        if ( ! -e SCRATCH/back_projected.map ) then
-          source ${proc_2dx}/2dx_refineMergedMap_BackProject.com
-        endif
-        if ( ! -e SCRATCH/bead_model.mrc ) then
-          source ${proc_2dx}/2dx_refineMergedMap_MakeBeadModel.com
-        endif
-        #
         source ${proc_2dx}/2dx_refineMergedMap_sub.com
       endif
       #

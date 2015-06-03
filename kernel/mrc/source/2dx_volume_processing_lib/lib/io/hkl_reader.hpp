@@ -30,7 +30,7 @@ namespace volume
              * @return fourier_data
              */
             volume::data::FourierSpaceData read(std::string file_path,
-                    const volume::data::VolumeHeader2dx& header);
+                    const volume::data::VolumeHeader2dx& header, bool raw_ccp4 = true);
             
             
         }

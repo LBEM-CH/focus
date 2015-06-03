@@ -36,7 +36,7 @@ volume::data::FourierSpaceData volume::io::hkz_reader::read(std::string file_pat
             l_in = round(z_in * header.nz());
             
             //Set the correct hand for ccp4 generated raw hkz data
-            if(raw_ccp4) l_in = -1 * l_in;
+            //if(raw_ccp4) l_in = -1 * l_in;
             
             //std::cout << "Reading line: " << h_in << " " << k_in << " " << l_in << "(" << z_in << ")" << " " << amplitude_in << " " << phase_in << "\n"; 
             
@@ -45,7 +45,7 @@ volume::data::FourierSpaceData volume::io::hkz_reader::read(std::string file_pat
                                         index_in, header.gamma(), header.xlen(), header.ylen(), header.zlen());
 
             //Set the density to center if is ccp4 generated raw data 
-            phase_in = phase_in + 180*(l_in);
+            if(raw_ccp4) phase_in = phase_in + 180*(l_in);
             
             //Convert phase to radians
             phase_in = volume::utilities::angle_utilities::DegreeToRadian(phase_in);

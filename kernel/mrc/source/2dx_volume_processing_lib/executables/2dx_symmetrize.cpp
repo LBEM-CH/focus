@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     //<prog_name> hkz_file symmetry nx ny nz gamma max_resolution
     
     if (argc < 7) {
-        std::cout << "Program Options\n\t<hkzfile> <symmetry> <nx> <ny> <nz> <outfile>\n";
+        std::cout << "Program Options\n\t<hklfile> <symmetry> <nx> <ny> <nz> <outfile>\n";
         std::cin.get();
     }
     
@@ -43,6 +43,7 @@ int main(int argc, char** argv)
     
     Volume2dx volume(nx, ny, nz);
     volume.read_volume(hkzFileName, "hkl");
+    volume.rescale_to_max_amplitude(20000);
     
     volume.set_symmetry(symmetry);
     

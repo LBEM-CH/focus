@@ -160,6 +160,17 @@ namespace volume
             void replace_reflections(const FourierSpaceData& input, double fraction);
             
             /**
+             * Spreads the current data and tries to fill in the missing spots.
+             */
+            void spread_data();
+            
+            /**
+             * Returns the full Fourier space with negative h as well
+             * @return Fourier Space Data
+             */
+            FourierSpaceData get_full_fourier() const;
+            
+            /**
              * Returns the inverted hand Fourier data
              */
             FourierSpaceData invert_hand() const;

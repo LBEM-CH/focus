@@ -11,11 +11,11 @@ double volume::utilities::angle_utilities::CorrectRadianPhase(double phase_in_ra
 {   
     double new_phase = phase_in_radians;
     
-    if (new_phase < -1 * M_PI) {
-        new_phase = CorrectRadianPhase(phase_in_radians + M_PI);
+    if (new_phase <= -1 * M_PI) {
+        new_phase = CorrectRadianPhase(phase_in_radians + 2*M_PI);
     }
-    else if (phase_in_radians >= M_PI) {
-        new_phase = CorrectRadianPhase(phase_in_radians - M_PI);
+    else if (phase_in_radians > M_PI) {
+        new_phase = CorrectRadianPhase(phase_in_radians - 2*M_PI);
     }
     
     return new_phase;

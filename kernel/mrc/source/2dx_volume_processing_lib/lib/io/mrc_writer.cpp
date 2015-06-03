@@ -49,6 +49,7 @@ void volume::io::mrc_writer::write_real
     int mapr = 2;
     int maps = 3;
     float ninty = 90.0;
+    int zero = 0;
     file.write((char*)&nx, sizeof(int));
     file.write((char*)&ny, sizeof(int));
     file.write((char*)&nz, sizeof(int));
@@ -74,7 +75,7 @@ void volume::io::mrc_writer::write_real
     file.write((char*)&spcgrp, sizeof(int));
     
     //Fill the rest of data with zeros
-    for(int i=0; i<231; i++) file.write("    ", sizeof(float));
+    for(int i=0; i<231; i++) file.write((char*)&zero, sizeof(float));
     
     //Write the data
     file.seekp(1024);

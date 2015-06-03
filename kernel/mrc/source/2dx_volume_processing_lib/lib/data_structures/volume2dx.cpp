@@ -512,6 +512,14 @@ ds::Volume2dx ds::Volume2dx::extended_volume(int x_cells, int y_cells, int z_cel
     return new_volume;
 }
 
+void ds::Volume2dx::extend_to_full_fourier() 
+{
+    FourierSpaceData data = get_fourier();
+    FourierSpaceData new_data = data.get_full_fourier();
+    set_fourier(new_data);
+}
+
+
 double ds::Volume2dx::density_at(int x, int y, int z)
 {
     return get_real().get_value_at(x,y,z);

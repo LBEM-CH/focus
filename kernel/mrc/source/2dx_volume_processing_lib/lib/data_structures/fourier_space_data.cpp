@@ -5,6 +5,8 @@
  */
 
 #include <iostream>
+#include <math.h>
+
 #include "fourier_space_data.hpp"
 
 
@@ -128,7 +130,7 @@ void ds::FourierSpaceData::scale_amplitudes(double factor)
 void ds::FourierSpaceData::set_value_at(int h, int k, int l, Complex2dx value, double weight)
 {
     MillerIndex index = MillerIndex(h, k, l);
-    if(h < 0) std::cerr << "\nWARNING: Encountered negative h value, there is a problem somewhere!\n\n";
+    //if(h < 0) std::cerr << "\nWARNING: Encountered negative h value, there is a problem somewhere!\n\n";
     if(exists(h,k,l)) _data->erase(index);
     if(value.amplitude() > 0.0001) _data->insert(std::pair<MillerIndex, DiffractionSpot>(index, DiffractionSpot(value, weight)));
 }
@@ -263,4 +265,32 @@ ds::FourierSpaceData ds::FourierSpaceData::invert_hand() const
     }
     
     return new_data;
+}
+
+void ds::FourierSpaceData::spread_data()
+{
+    //TODO
+    
+}
+
+ds::FourierSpaceData ds::FourierSpaceData::get_full_fourier() const
+{
+    
+    FourierSpaceData full_data;
+    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
+    {
+        //Assign the current Miller Index to the array
+        ds::MillerIndex currentHKL = (*ref).first;
+        ds::Complex2dx currentComplex = (*ref).second.value();
+        
+        ds::MillerIndex friedelHKL = currentHKL.FriedelSpot();
+        ds::Complex2dx friedelComplex = currentComplex;
+        friedelComplex.set_phase(-1*currentComplex.phase());
+        
+        full_data.set_value_at(currentHKL.h(), currentHKL.k(), currentHKL.l(), currentComplex, (*ref).second.weight());
+        full_data.set_value_at(friedelHKL.h(), friedelHKL.k(), friedelHKL.l(), friedelComplex, (*ref).second.weight());
+    }
+    
+    return full_data;
+    
 }

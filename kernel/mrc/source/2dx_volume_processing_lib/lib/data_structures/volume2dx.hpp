@@ -405,6 +405,13 @@ namespace volume
              * @param z_cells
              */
             Volume2dx extended_volume(int x_cells, int y_cells=0, int z_cells=0);
+            
+            /**
+             * Expands the data to include negative h as well, so that full
+             * fourier space is in the memory!
+             * @return 
+             */
+            void extend_to_full_fourier();
 
         private:
             

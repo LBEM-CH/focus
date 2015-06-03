@@ -26,7 +26,7 @@ void volume::io::hkl_writer::write(const std::string& file_path, const volume::d
     volume::data::FourierSpaceData data_to_write = data;
     
     //If is being generated for CCP4 invert the handedness
-    if(for_ccp4) data_to_write = data.invert_hand();
+    //if(for_ccp4) data_to_write = data.invert_hand();
     
     for(volume::data::FourierSpaceData::const_iterator ii=data_to_write.begin(); ii!=data_to_write.end(); ++ii){
         int h = (*ii).first.h();

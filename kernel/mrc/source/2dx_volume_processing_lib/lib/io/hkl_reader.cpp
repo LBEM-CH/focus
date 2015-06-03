@@ -10,7 +10,7 @@
 #include "../utilities/fourier_utilities.hpp"
 
 volume::data::FourierSpaceData volume::io::hkl_reader::read(std::string file_path, 
-        const volume::data::VolumeHeader2dx& header)
+        const volume::data::VolumeHeader2dx& header, bool raw_ccp4)
 {
     namespace ds = volume::data;
     
@@ -36,20 +36,19 @@ volume::data::FourierSpaceData volume::io::hkl_reader::read(std::string file_pat
             
             ds::MillerIndex index_in(h_in, k_in, l_in);
            
+            //Set the density to center if is ccp4 generated raw data 
+            if(raw_ccp4) phase_in = phase_in + 180*(l_in);
+            
             //Convert phase to radians
             phase_in = volume::utilities::angle_utilities::DegreeToRadian(phase_in);
-
-            //Covert also the sphaseIn to radians
             
-                double weight_in = fom_in/100;
-                double real_in = amplitude_in*cos(phase_in);
-                double imag_in = amplitude_in*sin(phase_in);
+            double weight_in = fom_in/100;
+            double real_in = amplitude_in*cos(phase_in);
+            double imag_in = amplitude_in*sin(phase_in);
 
-                ds::Complex2dx complex_in(real_in, imag_in);
-                ds::DiffractionSpot value_in(complex_in, weight_in);
-                spot_multimap.insert(ds::MillerIndexDiffSpotPair(index_in, value_in));
-            
-
+            ds::Complex2dx complex_in(real_in, imag_in);
+            ds::DiffractionSpot value_in(complex_in, weight_in);
+            spot_multimap.insert(ds::MillerIndexDiffSpotPair(index_in, value_in));
         }
     }
     catch(const std::exception& e)

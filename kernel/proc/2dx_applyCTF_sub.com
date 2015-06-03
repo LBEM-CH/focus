@@ -31,7 +31,8 @@ set imagecentery = ${imagecenterx}
 
 
 if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
-  ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction"
+
+  ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction to data"
   setenv IN  ${CTF_infile}
   setenv OUT ${CTF_outfile}
   \rm -f ${CTF_outfile}
@@ -44,6 +45,23 @@ ${phacon}
 ${RESMIN},1.0
 ${local_ctfcor_imode}  ! Define modus of CTF correction
 eot
+
+  ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction for PS plot"
+  setenv IN  ${CTF_infile}
+  setenv OUT dummy.tmp
+  \rm -f dummy.tmp
+  \rm -f CTFPLOT.PS
+  ${bin_2dx}/2dx_ctfapplyk.exe << eot
+${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
+${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
+${imagenumber} ${imagename}, ${date}
+${phacon}
+${RESMIN},${RESMAX}
+${local_ctfcor_imode}  ! Define modus of CTF correction
+eot
+  \rm -f dummy.tmp
+
+
 endif
 
 

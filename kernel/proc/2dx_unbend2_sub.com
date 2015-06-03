@@ -33,14 +33,10 @@ setenv IN  FFTIR/${iname}_fou_unbend2_fft.mrc
 setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk.mrc
 setenv SPOTS ${nonmaskimagename}.spt
 #
-echo 2 T T F	
-echo 1	
-echo ${lattice},-50,50,-50,50,${rmax},1 
-#
 ${bin_2dx}/2dx_masktrana.exe << eot
 2 T T F				! ISHAPE= 1(CIRC),2(GAUSS CIRC),OR 3(RECT) HOLE, IAMPLIMIT(T or F)
 ${holeb}			! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice},-50,50,-50,50,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+${lattice},-100,100,-100,100,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
 #
 echo "<<@progress: 10>>"
@@ -225,7 +221,7 @@ eot
   ${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${maskb}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice},-50,50,-50,50,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+${lattice},-100,100,-100,100,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
   #
   if ( ${locround} == '1' ) then
@@ -862,7 +858,7 @@ ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+2,2,0,100,100,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 APH/${iname}_fou_unbent.aph
 SCRATCH/TMP9873.dat
 U2

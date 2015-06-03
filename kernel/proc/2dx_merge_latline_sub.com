@@ -350,7 +350,7 @@ eot
   endif  
   #
   #############################################################################
-  ${proc_2dx}/linblock "2dx_symmetrize - to expand symmetry to full P1 space"
+  ${proc_2dx}/linblock "2dx_extend_fourier.exe - to expand symmetry to full P1 space"
   #############################################################################  
   #
   set infile = APH/latfitted_nosym.hkl
@@ -362,7 +362,7 @@ eot
   set nk_max = ${MergeHKMAX}
   set nl_max = 400
   #
-  ${bin_2dx}/2dx_volume_processing/2dx_symmetrize.exe ${infile} ${SYM_NAME} ${nh_max} ${nk_max} ${nl_max} ${outfile} 
+  ${bin_2dx}/2dx_volume_processing/2dx_extend_fourier.exe ${infile} ${SYM_NAME} ${nh_max} ${nk_max} ${nl_max} ${outfile} 
   echo "# IMAGE: ${infile} <HKL: HKL file before symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   echo "# IMAGE: ${outfile} <HKL: HKL file after symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #

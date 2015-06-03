@@ -258,22 +258,6 @@ eof
   #
   echo "# IMAGE: PSF.map <MAP: PSF>"  >> LOGS/${scriptname}.results
   #
-
-
-
-exit
-
-
-
-
-
-
-
-
-
-
-
-
   #############################################################################
   ${proc_2dx}/linblock "cad - to set spacegroup info to p1 for PSF"
   #############################################################################  

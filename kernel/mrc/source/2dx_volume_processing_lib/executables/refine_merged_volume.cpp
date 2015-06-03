@@ -87,7 +87,7 @@ int main(int argc, char** argv)
         std::cout << "-----------------------------------\n";
         
         //Replace the reflection from that of input
-        output_volume.replace_reflections(input_volume.get_fourier(), 0.8);
+        output_volume.replace_reflections(input_volume.get_fourier(), 0.33);
         
         //Apply structure factors
         output_volume.apply_structure_factors(ref_structure_factors, 0.5);
@@ -96,10 +96,10 @@ int main(int argc, char** argv)
         output_volume.low_pass(max_resolution);
         
         //Apply membrane slab
-        output_volume.apply_density_slab(membrane_slab, 0.5, true);
+        output_volume.apply_density_slab(membrane_slab, 0.1, true);
         
         //Apply density threshold
-        output_volume.apply_density_threshold(density_threshold_refinement, 0.5);
+        output_volume.apply_density_threshold(density_threshold_refinement, 0.1);
         
         //Apply density histogram
         output_volume.apply_density_histogram(bead_model_volume, 0.5);

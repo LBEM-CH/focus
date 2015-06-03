@@ -332,6 +332,12 @@ namespace volume
             void centerize_density_along_z();
             
             /**
+             * Centers the density along the x, y, and z axis. Internally adds PI*miller_index_l 
+             * to the phase
+             */
+            void centerize_density_along_xyz();
+            
+            /**
              * Generates the density histogram from the reference and applies 
              * it fractionally/partially to the current volume.
              * Internally, the highest value of density of the volume is partially set to 
@@ -387,6 +393,17 @@ namespace volume
              * @param high_resolution - Resolution in A (e.g. 4.0)
              */
             void low_pass(double high_resolution);
+            
+            /**
+             * Sets all phases to zero, for PSF calculation
+             */
+            Volume2dx zero_phases();
+            
+            
+            /**
+             * Inverts the hand
+             */
+            void invert_hand();
             
             /**
              * Partially replace the reflections from a Fourier volume.

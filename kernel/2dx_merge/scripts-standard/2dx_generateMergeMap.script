@@ -195,6 +195,17 @@ set voldim_t142 = `echo ${voldim} | awk '{ s = $1 * 1.42 } END { print s }'`
 set voldim_t2 = `echo ${voldim} | awk '{ s = $1 * 2 } END { print s }'`
 set voldim_t2m1 = `echo ${voldim} | awk '{ s = $1 * 2 - 1 } END { print s }'`
 #
+set cellx = `echo ${realcell} | cut -d\, -f1`
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+echo ":cellx = ${cellx},    cellxm1 = ${cellxm1}"
+#
+set celly = `echo ${realcell} | cut -d\, -f2`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+echo ":celly = ${celly},    cellym1 = ${cellym1}"
+#
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
+echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
+#
 \rm -f SCRATCH/scratch1.map
 #
 if ( ${merge_modus} == "3D" ) then
@@ -211,6 +222,58 @@ if ( ${merge_modus} == "3D" ) then
   echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
   echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
   #
+  #############################################################################
+  ${proc_2dx}/linblock "mtz2various - to translate MTZ file into HKL file"
+  #############################################################################  
+  #
+  ${bin_ccp4}/mtz2various hklin merge3D.mtz hklout merge3D.hkl << eof
+LABIN FP=F SIGFP=PHI W=FOM
+OUTPUT USER '(3I8,4G16.8)'
+end
+eof
+  #
+  echo "# IMAGE: merge3D.hkl <HKL: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "hkl_to_mrc.exe - to transform HKL file into volume"
+  #############################################################################  
+  #
+  ${bin_2dx}/2dx_volume_processing/hkl_to_mrc.exe merge3D.hkl volume.map ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX} ${SYM_NAME}
+  #
+  echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "extend the map to 2x2x1 unit cells"
+  #############################################################################  
+  #
+  source ${proc_2dx}/2dx_extend_map.com volume.map extended.map
+  #
+  echo "# IMAGE: extended.map <MAP: final map 3D, 2x2 unit cells>"  >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "hkl_to_PSFmrc.exe - to transform HKL file into volume for PSF"
+  #############################################################################  
+  #
+  ${bin_2dx}/2dx_volume_processing/hkl_to_PSFmrc.exe merge3D.hkl PSF.map ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX} ${SYM_NAME}
+  #
+  echo "# IMAGE: PSF.map <MAP: PSF>"  >> LOGS/${scriptname}.results
+  #
+
+
+
+exit
+
+
+
+
+
+
+
+
+
+
+
+
   #############################################################################
   ${proc_2dx}/linblock "cad - to set spacegroup info to p1 for PSF"
   #############################################################################  
@@ -318,23 +381,12 @@ xyzlim 0.0 0.999 0.0 0.999 -0.5 0.499
 END
 eof
   #
-  echo "# IMAGE: volume_crude.map <MAP: crude volume (126x126x126 grid points)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: volume_crude.map <MAP: crude volume (${voldim}x${voldim}x${voldim} grid points)>" >> LOGS/${scriptname}.results
   echo "<<@progress: +10>>"
   #
   #############################################################################
   ${proc_2dx}/linblock "maprot - to rescale map into correct dimensions for PSF"
   #############################################################################
-  #
-  set cellx = `echo ${realcell} | cut -d\, -f1`
-  set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
-  echo ":cellx = ${cellx},    cellxm1 = ${cellxm1}"
-  #
-  set celly = `echo ${realcell} | cut -d\, -f2`
-  set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
-  echo ":celly = ${celly},    cellym1 = ${cellym1}"
-  #
-  set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
-  echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
   #
   \rm -f SCRATCH/scratch2_phase_zero.map
   ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero.map wrkout SCRATCH/scratch2_phase_zero.map << eot
@@ -347,6 +399,8 @@ AVER
 ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
 TRANS  0.000 0.000 0.000
 eot
+  # 
+  echo "# IMAGE: SCRATCH/scratch2_phase_zero.map <MAP: SCRATCH/scratch2_phase_zero.map>" >> LOGS/${scriptname}.results
   #
   #############################################################################
   ${proc_2dx}/linblock "maprot - to rescale map into correct dimensions for Volume"
@@ -364,7 +418,7 @@ ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
 TRANS  0.000 0.000 0.000
 eot
   #
-  # echo "# IMAGE: SCRATCH/scratch2_phase_zero.map <MAP: PSF scratch2>" >> LOGS/${scriptname}.results
+  # echo "# IMAGE: SCRATCH/scratch2.map <MAP: SCRATCH/scratch2.map>" >> LOGS/${scriptname}.results
   #
   echo "<<@progress: +10>>"
   #
@@ -380,7 +434,7 @@ xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
 END
 eof
   #
-  echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function (display at level 128)>" >> LOGS/${scriptname}.results
+  # echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function (display at level 128)>" >> LOGS/${scriptname}.results
   #
   #############################################################################
   ${proc_2dx}/linblock "mapmask - to set units to 1x1x1 for 3D Volume"

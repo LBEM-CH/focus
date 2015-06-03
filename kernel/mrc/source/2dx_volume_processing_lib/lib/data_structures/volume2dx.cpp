@@ -62,22 +62,22 @@ std::string ds::Volume2dx::to_string() const
     
     output += _header->to_string();
     
-    output += "\nData Information:\n";
+    output += ":\nData Information:\n";
     if(has_real())
     {
-        output += "\tReal data in memory.\n" ;
-        output += "\t|Minimum density: " + std::to_string(_real->min()) + "\n";
-        output += "\t|Maximum density: " + std::to_string(_real->max()) + "\n";
-        output += "\t|Mean density: " + std::to_string(_real->mean()) + "\n";
-        output += "\n";
+        output += ":\tReal data in memory.\n" ;
+        output += ":\t|Minimum density: " + std::to_string(_real->min()) + "\n";
+        output += ":\t|Maximum density: " + std::to_string(_real->max()) + "\n";
+        output += ":\t|Mean density: " + std::to_string(_real->mean()) + "\n";
+        output += ":\n";
     }
     
     if(has_fourier())
     {
-        output += "\tFourier data in memory.\n" ;
-        output += "\t|Number of spots: " + std::to_string(_fourier->spots()) + "\n";
-        output += "\t|Intensity sum: " + std::to_string(_fourier->intensity_sum()) + "\n";
-        output += "\n";
+        output += ":\tFourier data in memory.\n" ;
+        output += ":\t|Number of spots: " + std::to_string(_fourier->spots()) + "\n";
+        output += ":\t|Intensity sum: " + std::to_string(_fourier->intensity_sum()) + "\n";
+        output += ":\n";
     }
     
     if(_type == NONE)
@@ -353,6 +353,14 @@ ds::Volume2dx ds::Volume2dx::generate_bead_model(int no_of_beads, double density
     return bead_model;
 }
 
+
+void ds::Volume2dx::invert_hand()
+{
+    FourierSpaceData data = get_fourier();
+    FourierSpaceData new_data = data.invert_hand();
+    set_fourier(new_data);
+}
+
 void ds::Volume2dx::centerize_density_along_z()
 {
     std::cout <<"Centering the density..\n";
@@ -365,6 +373,28 @@ void ds::Volume2dx::centerize_density_along_z()
         
         Complex2dx new_value = spot.value();
         new_value.set_phase(spot.phase()+M_PI*index.l());
+        
+        new_data.set_value_at(index.h(), index.k(), index.l(), new_value, spot.weight());
+    }
+    
+    set_fourier(new_data);
+    
+}
+
+
+
+void ds::Volume2dx::centerize_density_along_xyz()
+{
+    std::cout <<"Centering the density in x,y,z..\n";
+    FourierSpaceData data = get_fourier();
+    FourierSpaceData new_data;
+    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    {
+        MillerIndex index = (*itr).first;
+        DiffractionSpot spot = (*itr).second;
+        
+        Complex2dx new_value = spot.value();
+        new_value.set_phase(spot.phase()+M_PI*index.h()+M_PI*index.k()+M_PI*index.l());
         
         new_data.set_value_at(index.h(), index.k(), index.l(), new_value, spot.weight());
     }
@@ -507,7 +537,29 @@ ds::Volume2dx ds::Volume2dx::extended_volume(int x_cells, int y_cells, int z_cel
         }
     }
     
-    new_volume.set_fourier(data);
+    new_volume.set_fourier(new_data);
+    
+    return new_volume;
+}
+
+ds::Volume2dx ds::Volume2dx::zero_phases()
+{
+    std::cout << "Zeroing phases in volume \n";
+    
+    Volume2dx new_volume(header());
+    
+    FourierSpaceData data = get_fourier();
+    FourierSpaceData new_data;
+    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    {
+        //Get the data for current reflection
+        MillerIndex index = (*itr).first;
+        Complex2dx value = (*itr).second.value();
+        value.set_phase(0);
+        new_data.set_value_at(index.h(), index.k(), index.l(), value, (*itr).second.weight());
+    }
+    
+    new_volume.set_fourier(new_data);
     
     return new_volume;
 }

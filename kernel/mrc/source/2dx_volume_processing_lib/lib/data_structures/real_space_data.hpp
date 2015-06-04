@@ -177,6 +177,19 @@ namespace volume
              */
             void threshold(double limit = 0.0, double fraction=1.0);
             
+            /**
+             * Scale the densities such that the values of densities are between
+             * min and max values provided.
+             * @param min
+             * @param max
+             */
+            void scale(double min, double max);
+            
+            /**
+             * Generate a grey scaled volume. The densities are scaled form 0 to 255
+             */
+            void grey_scale();
+            
         private:
             /**
              * A member initializer function with the size integers

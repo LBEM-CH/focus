@@ -297,3 +297,31 @@ void ds::RealSpaceData::threshold(double limit, double fraction)
     }
     
 }
+
+void ds::RealSpaceData::scale(double min, double max)
+{
+    double current_min = this->min();
+    double current_max = this->max();
+    
+    std::cout << "Scaling densities in range (" << min << ", " << max << ")\n";
+    
+    double grad = (max-min)/(current_max-current_min);
+    for(int ix=0; ix < nx(); ix++)
+    {
+        for(int iy=0; iy < ny(); iy++)
+        {
+            for(int iz=0; iz < nz(); iz++)
+            {
+                double density = get_value_at(ix, iy, iz);
+                double new_density = (density - current_min)*grad + min;
+                set_value_at(ix, iy, iz, new_density);
+            }
+        }
+    }
+    
+}
+
+void ds::RealSpaceData::grey_scale()
+{
+    scale(0, 255);
+}

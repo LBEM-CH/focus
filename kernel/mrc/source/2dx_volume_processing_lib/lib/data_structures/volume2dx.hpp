@@ -239,6 +239,18 @@ namespace volume
             void rescale_to_max_amplitude(double max_amplitude);
             
             /**
+             * Re-scales the densities to the new range provided
+             * @param min
+             * @param max
+             */
+            void rescale_densities(double min, double max);
+            
+            /**
+             * Scales the densities between (0, 255)
+             */
+            void grey_scale_densities();
+            
+            /**
              * Symmetrizes the volume.
              */
             void symmetrize();

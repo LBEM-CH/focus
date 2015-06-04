@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     volume.invert_hand();
     Volume2dx new_volume = volume.zero_phases();
     new_volume.centerize_density_along_xyz();
-    
+    new_volume.grey_scale_densities();
     new_volume.write_volume(mrcFileName, "map");
     
 }

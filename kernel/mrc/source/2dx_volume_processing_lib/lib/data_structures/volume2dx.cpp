@@ -172,6 +172,20 @@ void ds::Volume2dx::rescale_to_max_amplitude(double max_amplitude)
     set_fourier(data);
 }
 
+void ds::Volume2dx::rescale_densities(double min, double max)
+{
+    RealSpaceData data = get_real();
+    data.scale(min, max);
+    this->set_real(data);
+}
+
+void ds::Volume2dx::grey_scale_densities()
+{
+    RealSpaceData data = get_real();
+    data.grey_scale();
+    this->set_real(data);
+}
+
 void ds::Volume2dx::symmetrize()
 {
     std::cout << "Symmetrizing with symmetry: " << symmetry() << std::endl;

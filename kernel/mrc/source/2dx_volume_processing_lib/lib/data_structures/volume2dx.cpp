@@ -523,35 +523,30 @@ ds::Volume2dx ds::Volume2dx::extended_volume(int x_cells, int y_cells, int z_cel
 {
     std::cout << "Extending volume to " << x_cells+1 << " X " << y_cells+1 << " X " << z_cells+1 << " unit cells \n";
     
-    int xlen = _header->xlen();
-    int ylen = _header->ylen();
-    int zlen = _header->zlen();
+    int new_nx = (x_cells+1)*nx();
+    int new_ny = (y_cells+1)*ny();
+    int new_nz = (z_cells+1)*nz();
     
     Volume2dx new_volume(header());
-    new_volume.reset((x_cells+1)*nx(), (y_cells+1)*ny(), (z_cells+1)*nz());
+    new_volume.reset(new_nx, new_ny, new_nz);
     
-    FourierSpaceData data = get_fourier();
-    FourierSpaceData new_data;
-    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    RealSpaceData data = get_real();
+    RealSpaceData new_data(new_nx, new_ny, new_nz);
+    for(int ix=0; ix<new_nx; ix++)
     {
-        //Get the data for current reflection
-        MillerIndex index = (*itr).first;
-        for(int xc=0; xc <= x_cells; xc++)
+        for(int iy=0; iy<new_ny; iy++)
         {
-            int new_h = index.h() + xc*xlen;
-            for(int yc=0; yc <= y_cells; yc++)
-            {
-                int new_k = index.k() + yc*ylen;
-                for(int zc=0; zc <= z_cells; zc++)
-                {
-                    int new_l = index.l() + zc*zlen;
-                    new_data.set_value_at(new_h, new_k, new_l, (*itr).second.value(), (*itr).second.weight());
-                }
+            for(int iz=0; iz<new_nz; iz++)
+            {   
+                int data_x = ix % nx();
+                int data_y = iy % ny();
+                int data_z = iz % nz();
+                new_data.set_value_at(ix, iy, iz, data.get_value_at(data_x, data_y, data_z));
             }
         }
     }
     
-    new_volume.set_fourier(new_data);
+    new_volume.set_real(new_data);
     
     return new_volume;
 }

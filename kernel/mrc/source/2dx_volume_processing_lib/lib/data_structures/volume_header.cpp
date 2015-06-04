@@ -37,9 +37,9 @@ void ds::VolumeHeader2dx::reset_size(int nx, int ny, int nz)
     _nx = nx;
     _ny = ny;
     _nz = nz;
-    if((int)_xlen == _nx) _xlen = (double) nx;
-    if((int)_ylen == _ny) _ylen = (double) ny;
-    if((int)_zlen == _nz) _zlen = (double) nz;
+    _xlen = (double) nx;
+    _ylen = (double) ny;
+    _zlen = (double) nz;
 } 
 
 std::string ds::VolumeHeader2dx::to_string() const

@@ -40,7 +40,7 @@ if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctf
   ${bin_2dx}/2dx_ctfapplyk.exe << eot
 ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
 ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${imagename}, ${date}
+${imagenumber} ${imagename}, CTFcor_Mode=${local_ctfcor_imode}, ${date}
 ${phacon}
 ${RESMIN},1.0
 ${local_ctfcor_imode}  ! Define modus of CTF correction
@@ -54,7 +54,7 @@ eot
   ${bin_2dx}/2dx_ctfapplyk.exe << eot
 ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
 ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${imagename}, ${date}
+${imagenumber} ${imagename}, CTFcor_Mode=${local_ctfcor_imode}, ${date}
 ${phacon}
 ${RESMIN},${RESMAX}
 ${local_ctfcor_imode}  ! Define modus of CTF correction
@@ -66,9 +66,9 @@ endif
 
 
 
-if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "5" || ${local_ctfcor_imode} == "6" || ${local_ctfcor_imode} == "7" ) then
+if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "5" || ${local_ctfcor_imode} == "6" || ${local_ctfcor_imode} == "7" || ${local_ctfcor_imode} == "8" ) then
   #
-  if ( ${local_ctfcor_imode} == "4" ) then
+  if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "8" ) then
     if ( ! -e ${unbent_FFT} ) then
       ${proc_2dx}/linblock "WARNING: File not found: ${unbent_FFT}"
       exit
@@ -91,7 +91,7 @@ ${defocus},${TLTAXIS},${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 ${CTF_outfile}
 SCRATCH/TMP9873.dat
 ${algo}
-${RESMIN},${RESMAX},${imagecenterx},${imagecentery},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
+${RESMIN},1.0,${imagecenterx},${imagecentery},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
       #
@@ -179,7 +179,7 @@ eot
 
       ${bin_2dx}/2dx_mmboxa.exe << eot
 SCRATCH/image_ctf_upscale_taper_fft.mrc
-${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+${imagenumber} ${imagename}, CTFcor_Mode=${local_ctfcor_imode}, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?

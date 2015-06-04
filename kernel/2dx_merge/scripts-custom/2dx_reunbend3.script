@@ -30,18 +30,12 @@
 # DISPLAY: script_2dx_unbend1
 # DISPLAY: script_2dx_getspots
 # DISPLAY: script_2dx_unbend2
-# DISPLAY: script_2dx_unbendSyn
 # DISPLAY: script_2dx_unbend_movieA1
 # DISPLAY: script_2dx_unbend_movieA2
-# DISPLAY: script_2dx_unbend_movieAS1
-# DISPLAY: script_2dx_unbend_movieAS2
 # DISPLAY: script_2dx_unbend_movieB
-# DISPLAY: script_2dx_unbend_movieBS
 # DISPLAY: script_2dx_applyCTF
 # DISPLAY: script_2dx_max_likelihood
 # DISPLAY: script_2dx_generateMAP
-# DISPLAY: script_2dx_initialize
-# DISPLAY: script_2dx_initialize
 # DISPLAY: script_2dx_initialize
 # DISPLAY: script_2dx_evaluateLattice
 # DISPLAY: script_2dx_cleanup
@@ -67,18 +61,12 @@ set script_2dx_getspots = ""
 set script_2dx_unbend1 = ""
 set script_2dx_getspots = ""
 set script_2dx_unbend2 = ""
-set script_2dx_unbendSyn = ""
 set script_2dx_unbend_movieA1 = ""
 set script_2dx_unbend_movieA2 = ""
-set script_2dx_unbend_movieAS1 = ""
-set script_2dx_unbend_movieAS2 = ""
 set script_2dx_unbend_movieB = ""
-set script_2dx_unbend_movieBS = ""
 set script_2dx_applyCTF = ""
 set script_2dx_max_likelihood = ""
 set script_2dx_generateMAP = ""
-set script_2dx_initialize = ""
-set script_2dx_initialize = ""
 set script_2dx_initialize = ""
 set script_2dx_evaluateLattice = ""
 set script_2dx_cleanup = ""
@@ -138,26 +126,14 @@ endif
 if ( ${script_2dx_unbend2} == "y" ) then
   echo '${app_2dx_image} ${curdir} "2dx_unbend2"'>> SCRATCH/${scriptname}_tmp_runjob.com
 endif
-if ( ${script_2dx_unbendSyn} == "y" ) then
-  echo '${app_2dx_image} ${curdir} "2dx_unbendSyn"'>> SCRATCH/${scriptname}_tmp_runjob.com
-endif
 if ( ${script_2dx_unbend_movieA1} == "y" ) then
   echo '${app_2dx_image} ${curdir} "2dx_unbend_movieA1"'>> SCRATCH/${scriptname}_tmp_runjob.com
 endif
 if ( ${script_2dx_unbend_movieA2} == "y" ) then
   echo '${app_2dx_image} ${curdir} "2dx_unbend_movieA2"'>> SCRATCH/${scriptname}_tmp_runjob.com
 endif
-if ( ${script_2dx_unbend_movieAS1} == "y" ) then
-  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieAS1"'>> SCRATCH/${scriptname}_tmp_runjob.com
-endif
-if ( ${script_2dx_unbend_movieAS2} == "y" ) then
-  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieAS2"'>> SCRATCH/${scriptname}_tmp_runjob.com
-endif
 if ( ${script_2dx_unbend_movieB} == "y" ) then
   echo '${app_2dx_image} ${curdir} "2dx_unbend_movieB"'>> SCRATCH/${scriptname}_tmp_runjob.com
-endif
-if ( ${script_2dx_unbend_movieBS} == "y" ) then
-  echo '${app_2dx_image} ${curdir} "2dx_unbend_movieBS"'>> SCRATCH/${scriptname}_tmp_runjob.com
 endif
 if ( ${script_2dx_applyCTF} == "y" ) then
   echo '${app_2dx_image} ${curdir} "2dx_applyCTF"'>> SCRATCH/${scriptname}_tmp_runjob.com

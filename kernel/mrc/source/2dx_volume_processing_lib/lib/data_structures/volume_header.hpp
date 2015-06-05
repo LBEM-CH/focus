@@ -36,13 +36,13 @@ namespace volume
              * Constructor setting the size
              * @param nx : size of x-dimension
              * @param ny : size of y-dimension
-             * @param nz : size of z-dimention
+             * @param nz : size of z-dimension
              */
             VolumeHeader2dx(int nx, int ny, int nz);
             
             /**
-             * Resets the size of the header. In turn  changes the cell lengths,
-             * it they are equal to nx, ny, and nz respectively.
+             * Resets the size of the header. Also, changes the cell lengths if they are zero. 
+             * Changes rows, columns, sections, (and optionally xlen, ylen, zlen, mx, my, mz)
              * @param nx
              * @param ny
              * @param nz
@@ -56,22 +56,40 @@ namespace volume
             std::string to_string() const;
             
             /**
-             * Returns the size of the x-dimension
-             * @return nx
+             * Returns the size of rows
+             * @return rows
              */
-            int nx() const ;
+            int rows() const ;
             
             /**
-             * Returns the size of the y-dimension
-             * @return ny
+             * Returns the size of columns
+             * @return columns
              */
-            int ny() const ;
+            int columns() const ;
             
             /**
-             * Returns the size of the z-dimension
-             * @return nz
+             * Returns the size of sections
+             * @return sections
              */
-            int nz() const ;
+            int sections() const ;
+            
+            /**
+             * Returns the length in x-direction
+             * @return mx
+             */
+            int mx() const;
+            
+            /**
+             * Returns the length in y-direction
+             * @return my
+             */
+            int my() const;
+            
+            /**
+             * Returns the length in z-direction
+             * @return mz
+             */
+            int mz() const;
             
             /**
              * Returns the x-length of the cell (a)
@@ -138,26 +156,42 @@ namespace volume
              * @return max_resolution
              */
             double max_resolution() const ;
-            
-            
+                      
+            /**
+             * Assigner function of rows
+             * @param rows
+             */
+            void set_rows(int rows);
             
             /**
-             * Assigner function of nx
-             * @param nx
+             * Assigner function of columns
+             * @param columns
              */
-            void set_nx(int nx);
+            void set_columns(int columns);
             
             /**
-             * Assigner function of ny
-             * @param ny
+             * Assigner function of sections
+             * @param sections
              */
-            void set_ny(int ny);
+            void set_sections(int sections);
             
             /**
-             * Assigner function of nz
-             * @param nz
+             * Assigner function of mx
+             * @param mx
              */
-            void set_nz(int nz);
+            void set_mx(int mx);
+            
+            /**
+             * Assigner function of my
+             * @param my
+             */
+            void set_my(int my);
+            
+            /**
+             * Assigner function of mz
+             * @param mz
+             */
+            void set_mz(int mz);
             
             /**
              * Assigner function of nxstart
@@ -218,18 +252,25 @@ namespace volume
             
             /**
              * Member initializer function with nx, ny, nz. Sets rest to default.
-             * @param nx
-             * @param ny
-             * @param nz
+             * @param nx : x grid size
+             * @param ny : y grid size
+             * @param nz : z grid size
              */
             void initialize(int nx, int ny, int nz);
             
            /**
             * Number of rows, columns and sections of the volume
             * Example: 108, 108, 401
-            * **Compulsory
+            * Default: nx, ny, nz
             */
-           int _nx, _ny, _nz;
+           int _rows, _columns, _sections;
+           
+           /**
+            * The grid size
+            * Example: 131, 131, 400
+            * Default: nx, ny, nz
+            */
+           int _mx, _my, _mz;
 
            /**
             * Cell size

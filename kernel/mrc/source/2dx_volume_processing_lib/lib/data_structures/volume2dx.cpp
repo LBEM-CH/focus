@@ -11,12 +11,8 @@
 #include "miller_index.hpp"
 #include "diffraction_spot.hpp"
 
-#include "../io/mrc_reader.hpp"
-#include "../io/hkz_reader.hpp"
-#include "../io/hkl_reader.hpp"
-#include "../io/mrc_writer.hpp"
-#include "../io/map_writer.hpp"
-#include "../io/hkl_writer.hpp"
+#include "../io/mrc_io.hpp"
+#include "../io/reflection_io.hpp"
 
 #include "../symmetrization/symmetry2dx.hpp"
 #include "../symmetrization/fourier_symmetrization.hpp"
@@ -40,7 +36,7 @@ ds::Volume2dx::Volume2dx(int nx, int ny, int nz)
 ds::Volume2dx::Volume2dx(const VolumeHeader2dx& header)
 {
     _header = new ds::VolumeHeader2dx(header);
-    _real = new ds::RealSpaceData(header.nx(), header.ny(), header.nz());
+    _real = new ds::RealSpaceData(header.rows(), header.columns(), header.sections());
     _fourier = new ds::FourierSpaceData();
     _transform = new volume::transforms::FourierTransformFFTW();
     _type = NONE;
@@ -61,6 +57,14 @@ std::string ds::Volume2dx::to_string() const
     std::string output = "";
     
     output += _header->to_string();
+    output += data_string();
+    
+    return output;
+}
+
+std::string ds::Volume2dx::data_string() const
+{
+    std::string output = "";
     
     output += ":\nData Information:\n";
     if(has_real())
@@ -82,8 +86,8 @@ std::string ds::Volume2dx::to_string() const
     
     if(_type == NONE)
     {
-        output += "\tNo data in memory\n";
-        output += "\n";
+        output += ":\tNo data in memory\n";
+        output += ":\n";
     }
     
     return output;
@@ -99,20 +103,18 @@ void ds::Volume2dx::read_volume(std::string file_name, std::string format)
     std::cout << "Reading volume with format <"<< format << "> from file:\n\t" << file_name << "\n\n";
     if(format == "hkl")
     {
-       *_fourier = volume::io::hkl_reader::read(file_name, *_header);
-       _type = FOURIER;
+       set_fourier(volume::io::reflection::read(file_name, 1));
+       low_pass(max_resolution());
     }
     else if(format == "hkz")
     {
-       *_fourier = volume::io::hkz_reader::read(file_name, *_header);
-       _type = FOURIER;
+       set_fourier(volume::io::reflection::read(file_name, nz()));
+       low_pass(max_resolution());
     }
-    else if (format == "mrc")
+    else if (format == "mrc" || format == "map")
     {
-        if(volume::io::MrcReader(file_name).mrc_to_real(*_header, *_real))
-        {
-            _type = REAL;
-        }
+        *_header = volume::io::mrc::get_header(file_name, format);
+        set_real(volume::io::mrc::get_data(file_name, nx(), ny(), nz()));
     }
     else
     {
@@ -135,15 +137,11 @@ void ds::Volume2dx::write_volume(std::string file_name, std::string format)
     std::cout << "\nWriting volume with format <"<< format << "> to file:\n\t" << file_name << "\n\n";
     if(format == "hkl")
     {
-        volume::io::hkl_writer::write(file_name, get_fourier());
+        volume::io::reflection::write(file_name, get_fourier());
     }
-    else if (format == "mrc")
+    else if (format == "mrc" || format == "map")
     {
-        volume::io::mrc_writer::write_real(file_name, header(), get_real());
-    }
-    else if(format == "map")
-    {
-        volume::io::map_writer::write_real(file_name, header(), get_real());
+        volume::io::mrc::write_mrc_mode_2(file_name, header(), get_real(), format);
     }
     else
     {
@@ -236,13 +234,13 @@ void ds::Volume2dx::set_data(const Volume2dx& volume)
     _type = volume._type;
 }
 
-void ds::Volume2dx::set_fourier(FourierSpaceData& fourier)
+void ds::Volume2dx::set_fourier(FourierSpaceData fourier)
 {
     *_fourier = fourier;
     _type = FOURIER;
 }
 
-void ds::Volume2dx::set_real(RealSpaceData& real)
+void ds::Volume2dx::set_real(RealSpaceData real)
 {
     if(real.nx() == nx() && real.ny() == ny() && real.nz() == nz())
     {   
@@ -588,17 +586,17 @@ double ds::Volume2dx::density_at(int x, int y, int z)
 
 int ds::Volume2dx::nx() const
 {
-    return _header->nx();   
+    return _header->rows();   
 }
 
 int ds::Volume2dx::ny() const
 {
-    return _header->ny();
+    return _header->columns();
 }
 
 int ds::Volume2dx::nz() const
 {
-    return _header->nz();
+    return _header->sections();
 }
 
 int ds::Volume2dx::fx() const{

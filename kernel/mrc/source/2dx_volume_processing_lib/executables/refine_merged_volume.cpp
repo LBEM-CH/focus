@@ -62,7 +62,7 @@ int main(int argc, char** argv)
     input_volume.write_volume("back_projected.map", "map");
     
     //Write back projected extended map
-    //input_volume.extended_volume(1,1,0).write_volume("back_projected_extended.map", "map");
+    input_volume.extended_volume(1,1,0).write_volume("back_projected_extended.map", "map");
     
     std::cout << "\n-----------------------------------\n";
     std::cout << "::Preparing the bead model volume: \n";
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     bead_model_volume.write_volume("bead_model.map", "map");
     
     //Write bead model extended map
-    //bead_model_volume.extended_volume(1,1,0).write_volume("bead_model_extended.map", "map");
+    bead_model_volume.extended_volume(1,1,0).write_volume("bead_model_extended.map", "map");
     
     //Calculate the sf from ref volume
     volume::data::StructureFactors ref_structure_factors = bead_model_volume.calculate_structure_factors(100);
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
     output_volume.write_volume("refined_final.map", "map");
     
     //Write extended map
-    //output_volume.extended_volume(1,1,0).write_volume("refined_final_extended.map", "map");
+    output_volume.extended_volume(1,1,0).write_volume("refined_final_extended.map", "map");
     
 }
 

@@ -59,6 +59,13 @@ namespace volume
             std::string to_string() const;
             
             /**
+             * Returns a string containing summary of the data
+             * present in the volume
+             * @return string with summary of data
+             */
+            std::string data_string() const;
+            
+            /**
              * Returns the header of the volume
              * @return header
              */
@@ -479,13 +486,13 @@ namespace volume
              * Sets the Fourier data
              * @param fourier
              */
-            void set_fourier(FourierSpaceData& fourier);
+            void set_fourier(FourierSpaceData fourier);
             
             /**
              * Sets the real data
              * @param real
              */
-            void set_real(RealSpaceData& real);
+            void set_real(RealSpaceData real);
             
             /**
              * Sets the Fourier data from the real data. Does FFT internally

@@ -17,9 +17,12 @@ ds::VolumeHeader2dx::VolumeHeader2dx(int nx, int ny, int nz)
 
 void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
 {
-    _nx = nx;
-    _ny = ny;
-    _nz = nz;
+    _rows = nx;
+    _columns = ny;
+    _sections = nz;
+    _mx = nx;
+    _my = ny;
+    _mz = nz;
     _xlen = (double) nx;
     _ylen = (double) ny;
     _zlen = (double) nz;
@@ -34,12 +37,15 @@ void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
 
 void ds::VolumeHeader2dx::reset_size(int nx, int ny, int nz)
 {
-    _nx = nx;
-    _ny = ny;
-    _nz = nz;
-    _xlen = (double) nx;
-    _ylen = (double) ny;
-    _zlen = (double) nz;
+    _rows = nx;
+    _columns = ny;
+    _sections = nz;
+    if(_mx == 0) _mx = nx;
+    if(_my == 0) _my = ny;
+    if(_mz == 0) _mz = nz;
+    if(_xlen == 0.0) _xlen = (double) nx;
+    if(_ylen == 0.0) _ylen = (double) ny;
+    if(_zlen == 0.0) _zlen = (double) nz;
 } 
 
 std::string ds::VolumeHeader2dx::to_string() const
@@ -47,34 +53,51 @@ std::string ds::VolumeHeader2dx::to_string() const
     std::string output = "";
     double ninty = 90.0;
     output += "Volume Information:\n";
-    output += "\t|Size: " + std::to_string(nx()) + " X " + 
-               std::to_string(ny()) + " X " + std::to_string(nz()) + "\n";
+    output += "\t|Size (rows, columns, sections): " + std::to_string(rows()) + " X " + 
+               std::to_string(columns()) + " X " + std::to_string(sections()) + "\n";
+    output += "\t|Grid size (x, y, z): " + std::to_string(mx()) + " X " + 
+               std::to_string(my()) + " X " + std::to_string(mz()) + "\n";
     output += "\t|Cell lengths: " + std::to_string(xlen()) + ", " + 
                std::to_string(ylen()) + ", " + std::to_string(zlen()) + "\n";
     output += "\t|Cell angles: " + std::to_string(ninty) + ", " + 
                std::to_string(ninty) + ", " + 
                std::to_string(volume::utilities::angle_utilities::RadianToDegree(gamma())) + "\n";
     output += "\t|Symmetry: " + symmetry() + "\n";
-    output += "\t|Volume start indices: " + std::to_string(nxstart()) + " , " + 
+    output += "\t|Start indices: " + std::to_string(nxstart()) + " , " + 
                std::to_string(nystart()) + " , " + std::to_string(nzstart()) + "\n";
     output += "\t|Maximum Resolution: " + std::to_string(max_resolution()) + "\n";
     
     return output;
 }
 
-void ds::VolumeHeader2dx::set_nx(int nx)
+void ds::VolumeHeader2dx::set_rows(int rows)
 {
-    this->_nx = nx;
+    this->_rows = rows;
 }
 
-void ds::VolumeHeader2dx::set_ny(int ny)
+void ds::VolumeHeader2dx::set_columns(int columns)
 {
-    this->_ny = ny;
+    this->_columns = columns;
 }
 
-void ds::VolumeHeader2dx::set_nz(int nz)
+void ds::VolumeHeader2dx::set_sections(int sections)
 {
-    this->_nz = nz;
+    this->_sections = sections;
+}
+
+void ds::VolumeHeader2dx::set_mx(int mx)
+{
+    this->_mx = mx;
+}
+
+void ds::VolumeHeader2dx::set_my(int my)
+{
+    this->_my = my;
+}
+
+void ds::VolumeHeader2dx::set_mz(int mz)
+{
+    this->_mz = mz;
 }
 
 void ds::VolumeHeader2dx::set_nxstart(int nxstart)
@@ -122,19 +145,34 @@ void ds::VolumeHeader2dx::set_max_resolution(double resolution)
     _max_resolution = resolution;
 }
 
-int ds::VolumeHeader2dx::nx() const
+int ds::VolumeHeader2dx::rows() const
 {
-    return _nx;
+    return _rows;
 }
 
-int ds::VolumeHeader2dx::ny() const
+int ds::VolumeHeader2dx::columns() const
 {
-    return _ny;
+    return _columns;
 }
 
-int ds::VolumeHeader2dx::nz() const
+int ds::VolumeHeader2dx::sections() const
 {
-    return _nz;
+    return _sections;
+}
+
+int ds::VolumeHeader2dx::mx() const
+{
+    return _mx;
+}
+
+int ds::VolumeHeader2dx::my() const
+{
+    return _my;
+}
+
+int ds::VolumeHeader2dx::mz() const
+{
+    return _mz;
 }
 
 int ds::VolumeHeader2dx::nxstart() const

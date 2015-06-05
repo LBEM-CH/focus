@@ -32,6 +32,13 @@ namespace volume
              */
             std::string FileExtension(const std::string file_path);
             
+            /**
+             * Returns the number of columns in a file
+             * @param file_name
+             * @return number of columns in the file
+             */
+            int NumberOfColumns(const std::string file_name);
+            
         }
         
     }

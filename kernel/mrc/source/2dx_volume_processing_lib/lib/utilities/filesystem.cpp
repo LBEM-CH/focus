@@ -5,6 +5,8 @@
  */
 
 #include <sys/stat.h>
+#include <sstream>
+#include <fstream>
 
 #include "filesystem.hpp"
 
@@ -24,4 +26,28 @@ std::string volume::utilities::filesystem::FileExtension(const std::string file_
     }
     
     return extension; 
+}
+
+int volume::utilities::filesystem::NumberOfColumns(const std::string file_name)
+{
+    std::ifstream infile(file_name);
+
+    std::string sLine;
+    int n=0;
+    
+    if (infile.good())
+    {
+        std::getline(infile, sLine);
+        std::stringstream is(sLine);
+        
+        float temp;
+        while (is >> temp)
+        {
+            n++;
+        }
+    }
+    
+    infile.close();
+    
+    return n;
 }

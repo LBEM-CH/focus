@@ -1,6 +1,2 @@
-#include "hkl_writer.hpp"
-#include "hkz_reader.hpp"
-#include "mrc_reader.hpp"
-#include "mrc_writer.hpp"
-#include "hkl_reader.hpp"
-#include "map_writer.hpp"
+#include "reflection_io.hpp"
+#include "mrc_io.hpp"

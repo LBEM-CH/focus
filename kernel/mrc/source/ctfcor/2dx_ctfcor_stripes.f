@@ -447,9 +447,7 @@ C-----  RESMAX**2 / 2 / WL = NX * SQRT(2) / ISTRIPENUM * RPIXEL * tan(TLTANG)
 C-----  ISTRIPENUM = NX * SQRT(2) * RPIXEL * tan(TLTANG) * 2 * WL / RESMAX**2
 C
       RDEFTOL = RESMAX**2 / 2.0 / WL
-      ISTRIPENUM = 1 + NX * sqrt(2.0) * RPIXEL * tan(TLTANG*PI/180.0) * 2.0 * WL / RESMAX**2
-C
-C     ISTRIPENUM = 1
+      ISTRIPENUM = 1 + abs(NX * sqrt(2.0) * RPIXEL * tan(TLTANG*PI/180.0) * 2.0 * WL / RESMAX**2)
 C
       IS=ISTRIPENUM/2
       if(IS*2 .EQ. ISTRIPENUM) ISTRIPENUM = ISTRIPENUM+1

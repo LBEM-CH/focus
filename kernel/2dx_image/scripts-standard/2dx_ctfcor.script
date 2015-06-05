@@ -130,7 +130,7 @@ if ( ${calculate_tiles}x == "nx" || ${calculate_tiles}x == "x" ) then
   echo ":: Correcting calculate_tiles to ${calculate_tiles}"
 endif
 #
-if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == 4x || ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x ) then
+if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == 4x || ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x || ${ctfcor_imode}x == 7x ) then
   ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
   \cp -f ${imagename}.mrc image_ctfcor.mrc
   echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
@@ -141,6 +141,11 @@ else
   ${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image ${imagename}.mrc"
   #################################################################################  
   #
+  if ( ${ctfcor_imode}x == 8x ) then
+    set ctfcor_imode_local = 2
+  else
+    set ctfcor_imode_local = ${ctfcor_imode}
+  endif
   #
   \rm -f image_ctfcor.mrc
   #
@@ -160,12 +165,12 @@ ${CS},${KV},${phacon},${magnification},${stepdigitizer}
 ${defocus}
 ${RESMAX}
 ${ctfcor_noise}
-${ctfcor_imode}
+${ctfcor_imode_local}
 ${ctfcor_debug}
 eot
     #
     echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
-    if ( ${ctfcor_imode} == "2" ) then
+    if ( ${ctfcor_imode_local} == "2" ) then
       echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
     else
       echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
@@ -194,7 +199,7 @@ ${ctfcor_noise}
 ${ctfcor_inner_tile}
 ${ctfcor_outer_tile}
 ${ctfcor_taper}
-${ctfcor_imode}
+${ctfcor_imode_local}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
@@ -223,7 +228,7 @@ ${ctfcor_noise}
 ${ctfcor_inner_tile}
 ${ctfcor_outer_tile}
 ${ctfcor_taper}
-${ctfcor_imode}
+${ctfcor_imode_local}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
@@ -231,7 +236,7 @@ eot
       echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
       echo "# IMAGE: ${ctfcor_tilefile} <Images of tiles>" >> LOGS/${scriptname}.results
       echo "# IMAGE: ${ctfcor_psfile} <PowerSpectra of tiles>" >> LOGS/${scriptname}.results
-      if ( ${ctfcor_imode} == "2" ) then
+      if ( ${ctfcor_imode_local} == "2" ) then
         echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
       else
         echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results

@@ -65,6 +65,7 @@ set proc_2dx = ""
 set SCRATCH_DISK = ""
 #
 set imagename = ""
+set nonmaskimagename = ""
 set imagenumber = ""
 set defocus = ""
 set imagenumber = ""

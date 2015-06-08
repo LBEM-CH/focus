@@ -189,6 +189,8 @@ C                LOGOUTPUT - T for output of Logfile data
 C                            F otherwise
 C                LPROTFOUFIL - T if the FouFiltered phase origin should be protected
 C                              F otherwise
+C                LUSEML - T if the output of ML processing should be used
+C                         F otherwise
 C                IRUN   - RUN NUMBER, USED AS AN IDENTIFIER ON UNIT 3 O/P
 C                LHMIN  - MINIMUM H INDEX TO BE PLOTTED
 C                LHMAX  - MAXIMUM H INDEX TO BE PLOTTED
@@ -525,7 +527,7 @@ C  DIMENSION STATEMENTS FOR BEAMTILT REFINEMENT -- includes COMMON block
 C            needed for VA04A minimisation subroutine.
       REAL*4 CS,KV,TILTH,TILTK
       LOGICAL NBEAM,NTILT,NREFOUT,NSHFTIN,NWGT,LOGOUTPUT,LPROTFOUFIL
-      LOGICAL USEPYTHON,PYTHONFIRST
+      LOGICAL USEPYTHON,PYTHONFIRST,LUSEML
       COMMON WORK(28),IN1,IIH(MAXRFL),IIK(MAXRFL),IQIN(MAXRFL),
      . PHSI(MAXRFL),PHSC(MAXRFL),WGT(MAXRFL),SHMIN,SKMIN,TILTH,TILTK,
      . BEAMSHFT(4),BSH(MAXRFL),IQMAX,NCALCFX,
@@ -538,7 +540,7 @@ C                           NSHFTIN=.T. SHIFTED INPUT DATA.
       CHARACTER*40 FNAME
       CHARACTER*1 CTMP
 C
-      CHARACTER*200 cfile1,cline1,cline2,cline3,cline
+      CHARACTER*200 cfile1,cline1,cline2,cline3,cline,CPHAORI
       CHARACTER*200 cfileconsole,cfilereflections
 C
 C  DIMENSION STATEMENTS FOR OUTPUT SORTING.
@@ -621,8 +623,10 @@ C
      2' SCALING AND ORIGIN REFINEMENT',
      3' USED REFLECTIONS CLOSER THAN ',F8.5,' IN ZSTAR'//)
 163   FORMAT(' SCALE =',F10.5,/,' SGNXCH=',F10.5,/,' ROT180=',
-     1F10.5,/,' REVHK =',F10.5,/,' CTFREV=',F10.5,/,' ROT90 =',F10.5,/
-     2' REVHND =',F10.5,/,' REVXSNG = ',F10.5,/,' LPROTFOUFIL = ',L1)
+     1F10.5,/,' REVHK =',F10.5,/,' CTFREV=',F10.5,/,' ROT90 =',F10.5,/,
+     2' REVHND =',F10.5,/,' REVXSNG = ',F10.5,
+     2      /,' LPROTFOUFIL=',L1,
+     3      /,' LUSEML =',L1)
 164   FORMAT('  AFTER APPLYING PHASE SHIFT, DATA WILL BE FLIPPED 
      .   ABOUT THE 1HE A AXIS  ')
 165   FORMAT(/'  BEAMTILT INPUT PARAMETERS',/,
@@ -1130,7 +1134,7 @@ CHEN
       WRITE(6,195)IORIGT
       READ(5,*)ORIGH,ORIGK,STEP,WIN,
      1         SGNXCH,SCALE,ROT180,REVHK,CTFREV,ROT90,REVHND,REVXSGN,
-     2         LPROTFOUFIL
+     .          LPROTFOUFIL,LUSEML
 CHEN
       HHORIORI=ORIGH
       HKORIORI=ORIGK
@@ -1146,7 +1150,8 @@ CHEN
       IF(WIN.GT.0.0) WSTAR=WIN
       WRITE(6,162)ORIGH,ORIGK,STEP,WSTAR
       WRITE(6,163)SCALE,SGNXCH,ROT180,REVHK,CTFREV,ROT90,REVHND,
-     .     REVXSGN,LPROTFOUFIL
+     .          REVXSGN,
+     .          LPROTFOUFIL,LUSEML
       WRITE(6,165)CS,KV,TLTH,TLTK
       KV=KV*1000.0
       WL=12.3/SQRT(KV+KV**2/(10.0**6.0))
@@ -2103,25 +2108,31 @@ C
 C
       write(cline1,'(2F12.3)')HOHRIGSH,HOKRIGSH
       call inkomma(cline1,k)
+      if(LUSEML)then
+        write(CPHAORI,'(''phaori_ML'')')
+      else
+        write(CPHAORI,'(''phaori'')')
+      endif
+      call shorten(CPHAORI,k2)
       if(ispcgrp.eq.1)then
         if(LOGOUTPUT) then
           if(USEPYTHON)then
             write(17,'(T8,''elif l.startswith('',
-     .        ''"set phaori "):'')')
+     .        ''"set '',A,'' "):'')')CPHAORI(1:k2)
             write(17,'(T16,''lines.append('',
-     .        ''''''set phaori = "'',A,''"\n'''')'')')cline1(1:k)
+     .        ''''''set '',A,'' = "'',A,''"\n'''')'')')CPHAORI(1:k2),cline1(1:k)
           else
-            write(17,'(''set phaori = "'',A,''"'')')cline1(1:k)
+            write(17,'(''set '',A,'' = "'',A,''"'')')CPHAORI(1:k2),cline1(1:k)
           endif
         endif
-        write(6,'(''new phaori = "'',A,''"'')')cline1(1:k)
+        write(6,'(''new '',A,'' = "'',A,''"'')')CPHAORI(1:k2),cline1(1:k)
       else
         if(LOGOUTPUT)then
           if(USEPYTHON)then
             write(17,'(T8,''elif l.startswith('',
-     .        ''"set phaori "):'')')
+     .        ''"set '',A,'' "):'')')CPHAORI(1:k2)
             write(17,'(T16,''lines.append('',
-     .        ''''''set phaori = "'',A,''"\n'''')'')')cline1(1:k)
+     .        ''''''set '',A,'' = "'',A,''"\n'''')'')')CPHAORI(1:k2),cline1(1:k)
             if(.not.LPROTFOUFIL)then
               write(17,'(T8,''elif l.startswith('',
      .          ''"set phaoriFouFilter "):'')')
@@ -2129,14 +2140,14 @@ C
      .          ''''''set phaoriFouFilter = "'',A,''"\n'''')'')')cline1(1:k)
             endif
           else
-            write(17,'(''set phaori = "'',A,''"'')')cline1(1:k)
+            write(17,'(''set '',A,'' = "'',A,''"'')')CPHAORI(1:k2),cline1(1:k)
             if(.not.LPROTFOUFIL)then
               write(17,'(''set phaoriFouFilter = "'',A,''"'')')
      .          cline1(1:k)
             endif
           endif
         endif
-        write(6,'(''new phaori = "'',A,''"'')')cline1(1:k)
+        write(6,'(''new '',A,'' = "'',A,''"'')')CPHAORI(1:k2),cline1(1:k)
         if(.not.LPROTFOUFIL)then
           write(6,'(''new phaoriFouFilter = "'',A,''"'')')cline1(1:k)
         endif

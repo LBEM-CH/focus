@@ -54,6 +54,7 @@ set show_PSF = "n"
 # DISPLAY: SYM
 # DISPLAY: phaori
 # DISPLAY: phaoriFouFilter
+# DISPLAY: phaori_ML
 # DISPLAY: zstarrange
 # DISPLAY: zstarrange_real
 # DISPLAY: Calc_from_zstarrange
@@ -170,6 +171,7 @@ set IAQP2 = 0
 set IVERBOSE = 1
 set LOGOUTPUT = F
 set LPROTFOUFIL = T
+set LUSEML = F
 set phastepnum = 1
 set phastep = 0.1
 #

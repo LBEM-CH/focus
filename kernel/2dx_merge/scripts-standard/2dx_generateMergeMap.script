@@ -306,11 +306,11 @@ LABIN F1=F  PHI=PHI  W=FOM ##
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 SYMMETRY P1
-RESOLUTION ${RESMIN} ${RESMAX}
+# RESOLUTION ${RESMIN} ${RESMAX}
 TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID ${voldim} ${voldim} ${voldim} 
 XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 ${voldim_m1}
-RHOLIM ${voldim_t142}
+RHOLIM 256.0
 HKLMAX 50 50 70
 END
 eot
@@ -348,11 +348,11 @@ LABIN F1=F  PHI=PHI  W=FOM ##
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
 SYMMETRY P1
-RESOLUTION ${RESMIN} ${RESMAX}
+# RESOLUTION ${RESMIN} ${RESMAX}
 TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
 GRID ${voldim} ${voldim} ${voldim} 
 XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 ${voldim_m1}
-RHOLIM ${voldim_t142}
+RHOLIM 256.0
 HKLMAX 50 50 70 
 END
 eot
@@ -473,10 +473,11 @@ ${proc_2dx}/linblock "Now for 2D processing:"
 #
 echo "# IMAGE: ${infile} <MTZ: input data for 2D (from last merging)>"  >> LOGS/${scriptname}.results
 #
-# in 2D there is no ratation
+# in 2D there is no rotation
 if ( ${merge_modus} == "2D" ) then
   set rotate_to_Z = "no"
 endif
+#
 #
 if ( ${rotate_to_Z} == "yes" ) then
   #
@@ -491,19 +492,21 @@ LABIN F1=F  PHI=PHI W=FOM ##
 PROJECTION
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
-SYMMETRY ${CCP4_SYM}
+# SYMMETRY ${CCP4_SYM}
+SYMMETRY 1
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${SYM}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID ${voldim} 1 ${voldim} 
-XYZLIM 0 ${voldim_m1}  0 0 0 ${voldim_m1}
-RHOLIM ${voldim_t142}
+GRID ${voldim} ${voldim} ${voldim} 
+XYZLIM 0 ${voldim_m1} 0 ${voldim_m1} 0 ${voldim_m1}
+RHOLIM 256.0
 HKLMAX 50 50 70
 END
 eot
   #
 else
   #
-  set AXIS = "X,Y,Z"
+  # set AXIS = "X,Y,Z"
+  set AXIS = "Z,X,Y"
   #
   #############################################################################
   ${proc_2dx}/linblock "fft - to calculate map with ${AXIS} orientation"
@@ -514,13 +517,13 @@ LABIN F1=F  PHI=PHI W=FOM ##
 PROJECTION
 AXIS ${AXIS}
 SCALE F1 ${scale} ${tempfac}
-SYMMETRY ${CCP4_SYM}
-#SYMMETRY 1 
+# SYMMETRY ${CCP4_SYM}
+SYMMETRY 1 
 RESOLUTION ${RESMIN} ${RESMAX}
 TITLE Sym=${SYM}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID ${voldim} ${voldim} 1
-XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 0
-RHOLIM ${voldim_t142}
+GRID ${voldim} ${voldim} ${voldim}
+XYZLIM 0 ${voldim_m1} 0 ${voldim_m1} 0 ${voldim_m1}
+RHOLIM 256.0
 HKLMAX 50 50 70
 END
 eot
@@ -535,7 +538,7 @@ echo "<<@progress: +10>>"
 #
 \rm -f SCRATCH/${imagename}-${SYM}.map
 #
-if (${rotate_to_Z} == "yes" ) then
+if (${rotate_to_Z} == "no" ) then
   #
   #############################################################################
   ${proc_2dx}/linblock "mapmask - to extend SCRATCH/scratch1.map into ${imagename}-${SYM}.mrc"

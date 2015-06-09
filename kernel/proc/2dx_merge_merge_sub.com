@@ -135,7 +135,7 @@ if ( ${scriptname} == "2dx_merge" ) then
     set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
     set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
     \rm -f awk.dat
-    if ( ${merge_data_type} == '8' ) then
+    if ( ${merge_data_type} == '8' || ${merge_data_type} == '9' ) then
       if ( ${QVAL_best} == '1' ) then
         set APH_file = image_ctfcor_fou_unbent_ctf.aph
       endif

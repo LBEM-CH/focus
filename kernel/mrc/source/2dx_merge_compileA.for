@@ -322,7 +322,7 @@ C
 C
 C-------Loop over potentially all three unbending forms:
         if (IMERGEDAT.eq.9) then
-          ilooend = 6
+          ilooend = 3
         else
           ilooend = 1
         endif
@@ -349,19 +349,10 @@ C
      .         ''/APH/image_ctfcor_fou_unbent_ctf.aph'')')cdir(1:k1)
             elseif(iloo.eq.2)then
               write(cname4,'(A,
-     .          ''/APH/image_ctfcor_U2-Syn_ctf.aph'')')cdir(1:k1)
+     .          ''/APH/image_ctfcor_movie_fou_ctf.aph'')')cdir(1:k1)
             elseif(iloo.eq.3)then
               write(cname4,'(A,
-     .          ''/APH/image_ctfcor_movie_fou_ctf.aph'')')cdir(1:k1)
-            elseif(iloo.eq.4)then
-              write(cname4,'(A,
-     .          ''/APH/image_ctfcor_movie_syn_ctf.aph'')')cdir(1:k1)
-            elseif(iloo.eq.6)then
-              write(cname4,'(A,
      .          ''/APH/image_ctfcor_movieB_fou_ctf.aph'')')cdir(1:k1)
-            elseif(iloo.eq.7)then
-              write(cname4,'(A,
-     .          ''/APH/image_ctfcor_movieB_syn_ctf.aph'')')cdir(1:k1)
             endif
             call shortshrink(cname4,k4)
             inquire(file=cname4(1:k4),exist=lexist)

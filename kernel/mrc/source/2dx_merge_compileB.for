@@ -173,7 +173,8 @@ C
       if(IMERGEDAT.eq.0 .or.
      .   IMERGEDAT.eq.2 .or.
      .   IMERGEDAT.eq.4 .or.
-     .   IMERGEDAT.eq.8     )then
+     .   IMERGEDAT.eq.8 .or.
+     .   IMERGEDAT.eq.9     )then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEDAT
 C-------phaoriFouFilter should not be protected:
         LPROTFOUFIL = .FALSE.

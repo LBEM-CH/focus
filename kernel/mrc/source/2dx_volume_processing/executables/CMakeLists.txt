@@ -20,13 +20,13 @@ set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -g")
 set(USE_FFTWF FALSE)
 set(USE_FFTWD TRUE)
 find_package(FFTW REQUIRED)
-
+find_package(Boost COMPONENTS program_options REQUIRED)
 
 #==============================#
 # Include Directories          #
 #==============================#
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
-
+include_directories(${Boost_INCLUDE_DIR})
 
 #=============================#
 # Create Executables          # 
@@ -40,6 +40,7 @@ foreach(i ${RUNNER_SOURCES})
     #Link to the library created in step above
     target_link_libraries(${EXECUTABLE} LINK_PUBLIC 2dx_volume_processing)
     target_link_libraries(${EXECUTABLE} ${FFTWD_LIB})
+    target_link_libraries(${EXECUTABLE} ${Boost_LIBRARIES})
 
     list(APPEND EXECUTABLES_VP ${EXECUTABLE})
 endforeach(i ${RUNNER_SOURCES})

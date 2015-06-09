@@ -172,9 +172,15 @@ namespace volume
             
             /**
              * Assigns the cell angle gamma in radians
-             * @param gamma
+             * @param gamma in radians
              */
-            void set_gamma(double gamma);
+            void set_gamma_radians(double gamma);
+            
+            /**
+             * Assigns the cell angle gamma in radians
+             * @param gamma in degrees
+             */
+            void set_gamma_degrees(double gamma);
             
             /**
              * Gets the string of the assigned 2dx symmetry

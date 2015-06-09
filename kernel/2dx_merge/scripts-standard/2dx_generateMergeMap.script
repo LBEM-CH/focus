@@ -238,7 +238,7 @@ eof
   ${proc_2dx}/linblock "hkl_to_mrc.exe - to transform HKL file into volume"
   #############################################################################  
   #
-  ${bin_2dx}/2dx_volume_processing/hkl_to_mrc.exe merge3D.hkl volume.map ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX} ${SYM_NAME}
+  ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hklin merge3D.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
   #
   echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results
   #
@@ -254,7 +254,7 @@ eof
   ${proc_2dx}/linblock "hkl_to_PSFmrc.exe - to transform HKL file into volume for PSF"
   #############################################################################  
   #
-  ${bin_2dx}/2dx_volume_processing/hkl_to_PSFmrc.exe merge3D.hkl PSF.map ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX} ${SYM_NAME}
+  ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hklin merge3D.hkl --mrcout PSF.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME} --psf
   #
   echo "# IMAGE: PSF.map <MAP: PSF>"  >> LOGS/${scriptname}.results
   #

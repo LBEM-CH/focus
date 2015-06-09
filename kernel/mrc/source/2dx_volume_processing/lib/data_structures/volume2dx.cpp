@@ -17,6 +17,7 @@
 #include "../symmetrization/symmetry2dx.hpp"
 #include "../symmetrization/fourier_symmetrization.hpp"
 
+#include "../utilities/angle_utilities.hpp"
 #include "../utilities/filesystem.hpp"
 #include "../utilities/fourier_utilities.hpp"
 #include "../utilities/bead_model_generator.hpp"
@@ -656,9 +657,14 @@ double ds::Volume2dx::gamma() const
     return _header->gamma();
 }
 
-void ds::Volume2dx::set_gamma(double gamma)
+void ds::Volume2dx::set_gamma_radians(double gamma)
 {
     _header->set_gamma(gamma);
+}
+
+void ds::Volume2dx::set_gamma_degrees(double gamma)
+{
+    _header->set_gamma(volume::utilities::angle_utilities::DegreeToRadian(gamma));
 }
 
 std::string ds::Volume2dx::symmetry() const

@@ -113,14 +113,14 @@ void volume::io::reflection::write(const std::string& file_path, const volume::d
     const int FLOAT_WIDTH = 13;
     const int FLOAT_PRECISION = 7;
 
-    std::ofstream hklFile(file_path);
-    
     //Check for the existence of the file
     if(volume::utilities::filesystem::FileExists(file_path))
     {
         std::cout << "WARNING: File.. " << file_path << " already exists. Overwriting!\n";
     }
-
+    
+    std::ofstream hklFile(file_path);
+    
     volume::data::FourierSpaceData data_to_write = data;
     
     //If is being generated for CCP4 invert the handedness

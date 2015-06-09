@@ -79,7 +79,7 @@ volume::data::VolumeHeader2dx io::mrc::get_header(const std::string file_name, c
             exit(1);
         }
         
-        header.set_gamma(bf::read_float(file));
+        header.set_gamma(volume::utilities::angle_utilities::DegreeToRadian(bf::read_float(file)));
         
         int mapc = bf::read_int(file);
         int mapr = bf::read_int(file);

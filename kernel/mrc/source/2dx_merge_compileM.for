@@ -219,10 +219,16 @@ C
           call cgetline(cline,"phaori")
           call shorten(cline,k)
           write(11,'(''set phaori = "'',A,''"'')')cline(1:k)
+          write(11,'(''set LUSEML = "F"'')')
         else
+          call cgetline(CPHORI,"phaori_ML")
+          read(CPHORI,*)RPHAORIH,RPHAORIK
+          call cgetline(cline,"phaori_ML")
+          call shorten(cline,k)
           write(*,'(''   using Single Particle  results,'',
-     .      '' PhaseOrigin = 0.0,0.0'')')
-          write(11,'(''set phaori = "0.0,0.0"'')')
+     .      '' PhaseOrigin_ML = '',2F12.3)')RPHAORIH,RPHAORIK
+          write(11,'(''set phaori = "'',A,''"'')')cline(1:k)
+          write(11,'(''set LUSEML = "T"'')')
         endif
 C
         call cgetline(cline,"rot90")

@@ -146,7 +146,7 @@ if ( ${spcgrp} != "1" ) then
   echo F
   echo ${TAXA},${TANGL},0 
   echo ${lattice}
-  echo ${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL}
+  echo ${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML}
   echo ${CS},${KV},${beamtilt}                                                
   echo ${RESMIN},${RESMAX}                                                
   echo -1
@@ -157,7 +157,7 @@ if ( ${spcgrp} != "1" ) then
 SCRATCH/2dx_origtilt-LOG1.dat
 SCRATCH/TMP.dummy1.tmp
 SCRATCH/TMP.dummy2.tmp
-${spcgrp},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
+${spcgrp},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT
 10,0.7,10,0.5                                                   ! itaxastep,rtaxasize,itanglstep,rtanglsize
 ${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}          	!IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
 0000000100 DUMMY
@@ -167,7 +167,7 @@ ${aphfile}
 F
 ${TAXA},${TANGL},0                                              ! TAXA,TANGL,IORIGT
 ${lattice} 							! Reciprocal lattice
-${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT,REV,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL
+${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT,REV,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL,LUSEML
 ${CS},${KV},${beamtilt}                                         ! cs,kv,tx,ty
 ${RESMIN},${RESMAX}                                             ! resolution limits
 -1
@@ -292,7 +292,7 @@ ${aphfile}
 F
 ${TAXA},${TANGL},0                                                  ! TAXA,TANGL,IORIGT
 ${lattice} 					! Reciprocal lattice
-${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT,REV,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL
+${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT,REV,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL,LUSEML
 ${CS},${KV},${beamtilt}                                                ! cs,kv,tx,ty
 ${RESMIN},${RESMAX}                                                 ! resolution limits
 -1

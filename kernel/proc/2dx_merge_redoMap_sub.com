@@ -112,7 +112,11 @@ endif
 #
 \rm -f SUMMARY
 #
-set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
+if ( ${LUSEML} == "T" ) then
+  set aphfile = APH/ML_result.aph
+else
+  set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
+endif
 #
 ${proc_2dx}/lin "Using APH files ${aphfile}"
 #
@@ -127,7 +131,7 @@ else
 SCRATCH/2dx_origtilt-LOG1.dat
 SCRATCH/TMP.tmp.reflections
 SCRATCH/TMP.tmp.console
-${spcgrp},0,F,F,0,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT,LPROTFOUFIL
+${spcgrp},0,F,F,0,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT
 10,0.7,10,0.5                                                              ! itaxastep,rtaxasize,itanglstep,rtanglsize
 ${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}          !IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
 100,DUMMY
@@ -137,7 +141,7 @@ ${aphfile}
 F
 ${TAXA},${TANGL},0                                                  ! TAXA,TANGL,IORIGT
 ${lattice}							! reciprocal lattice
-${phaori},${phastep},${zwin},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT180,REVHK,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL
+${phaori},${phastep},${zwin},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT180,REVHK,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL,LUSEML
 ${CS},${KV},${beamtilt}                                                ! cs,kv,tx,ty
 ${RESMIN},${RESMAX}                                                 ! resolution limits
 -1

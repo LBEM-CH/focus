@@ -20,7 +20,7 @@ C
       character*200 CFILEreflections,CFILEconsole
       character*80 CCURRENTREF,CMODUS
       integer*8 imnum(10000)
-      logical LPROTFOUFIL
+      logical LPROTFOUFIL,LUSEML
 C
       write(*,'('':2dx_merge_compileB - '',
      .    ''compiling the refinement script'')')
@@ -173,15 +173,22 @@ C
       if(IMERGEDAT.eq.0 .or.
      .   IMERGEDAT.eq.2 .or.
      .   IMERGEDAT.eq.4 .or.
-     .   IMERGEDAT.eq.6 .or.
-     .   IMERGEDAT.eq.8     )then
+     .   IMERGEDAT.eq.8 .or.
+     .   IMERGEDAT.eq.9     )then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEDAT
 C-------phaoriFouFilter should not be protected:
         LPROTFOUFIL = .FALSE.
+        LUSEML = .FALSE.
+      elseif(IMERGEDAT.eq.6) then
+        write(*,'(I1,'' = Using ML results'')')IMERGEDAT
+C-------phaoriFouFilter should be protected:
+        LPROTFOUFIL = .TRUE.
+        LUSEML = .TRUE.
       else 
         write(*,'(I1,'' = Using SynRef unbent results '')')IMERGEDAT
 C-------phaoriFouFilter should be protected:
         LPROTFOUFIL = .TRUE.
+        LUSEML = .FALSE.
       endif
 C
       write(*,'(/,''input Thread Number'')')
@@ -396,9 +403,12 @@ C
         write(11,'(A)')cline(1:k)
 C
         write(11,'(''${spcgrp} ${NPRG} ${NTL} ${NBM} ${ILIST}'',
-     .    '' ${realcell} ${ALAT} ${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
-     .    ''! ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT'')')
-        write(11,'(''${ITAXASTEP} ${RTAXASIZE} ${ITANGLSTEP} ${RTANGLSIZE}'',10X,
+     .    '' ${realcell} ${ALAT} ${realang} 0 15 ${IAQP2} ${IVERBOSE} '',
+     .    ''${LOGOUTPUT} '',
+     .    '' ! ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,'',
+     .    ''IVERBOSE,LOGOUTPUT'')')
+        write(11,'(''${ITAXASTEP} ${RTAXASIZE} ${ITANGLSTEP}'',
+     .    '' ${RTANGLSIZE}'',10X,
      .    ''! itaxastep,rtaxasize,itanglstep,rtanglsize'')')
 C
         write(11,'(''1001 0 ${HKMX} ${IQMX} ${IBOXPHS} '',A1,
@@ -480,18 +490,23 @@ C
           call dgetline(CMLMERGE,"ML_use_for_merging",iok)
 C
           if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
-            RPHAORIH=0.0
-            RPHAORIK=0.0
-            write(*,'(''   using Single Particle  results, '',
-     .        ''PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
-          else
-            call cgetline(CPHORI,"phaori")
+            call cgetline(CPHORI,"phaori_ML")
             read(CPHORI,*,ERR=901)RPHAORIH,RPHAORIK
             goto 902
  901        continue
             RPHAORIH=0.0
             RPHAORIK=0.0
  902        continue
+            write(*,'(''   using Single Particle  results, '',
+     .        ''PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
+          else
+            call cgetline(CPHORI,"phaori")
+            read(CPHORI,*,ERR=903)RPHAORIH,RPHAORIK
+            goto 904
+ 903        continue
+            RPHAORIH=0.0
+            RPHAORIK=0.0
+ 904        continue
             write(*,'(''   using Fourier filtered results, '',
      .        ''PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
           endif
@@ -554,11 +569,12 @@ C
           write(11,'(A40,25X,''! lattice'')')
      .       CLATTICE(1:k)
 C
-          write(11,'(4F10.3,I3,F9.5,6I2,L2,
+          write(11,'(4F10.3,I3,F9.5,6I2,L2,L2,
      .       '' ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT,REV,'',
-     .       ''CTFREV,ROT90,REVHND,REVSGN,LPROTFOUFIL'')')
+     .       ''CTFREV,ROT90,REVHND,REVSGN,LPROTFOUFIL,LUSEML'')')
      .       RPHAORIH,RPHAORIK,RPHSTEP,RZWIN,ISGNXCH,RSCL,IROT180,IREVHK,ICTFREV,
-     .       IROT90,IREVHND,IREVXSGN,LPROTFOUFIL
+     .       IROT90,IREVHND,IREVXSGN,
+     .       LPROTFOUFIL,LUSEML
 C
           write(11,'(4F12.3,''                 ! cs,kv,tx,ty'')')
      .      RCS,RKV,RTX,RTY

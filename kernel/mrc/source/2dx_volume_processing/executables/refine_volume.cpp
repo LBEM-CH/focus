@@ -64,7 +64,7 @@ int main(int argc, char** argv)
     }
     
     std::cout << "\n-----------------------------------\n";
-    std::cout << "Preparing the input volume:\n";
+    std::cout << ":Preparing the input volume:\n";
     std::cout << "-----------------------------------\n\n";
     Volume2dx input_volume;
     input_volume.set_symmetry(symmetry);
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
     std::cout << input_volume.to_string();
     
     std::cout << "\n-----------------------------------\n";
-    std::cout << "Preparing the reference volume: \n";
+    std::cout << ":Preparing the reference volume: \n";
     std::cout << "-----------------------------------\n\n";
     Volume2dx ref_volume;
     ref_volume.read_volume(refin);
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
     output_volume.prepare_real();
     
     std::cout << "\n-----------------------------------\n";
-    std::cout << "Final results:\n";
+    std::cout << ":Final results:\n";
     std::cout << "-----------------------------------\n";
     std::cout << output_volume.to_string();
     std::cout << "\nNew structure factor profile:\n";

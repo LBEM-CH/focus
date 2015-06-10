@@ -15,18 +15,12 @@ endif
 ${proc_2dx}/linblock "Back projecting reflections from hkz file ${hkzFile}"
 #------------------------------------------------------------------------
 #
-${bin_2dx}/2dx_volume_processing/backproject_hkz.exe ${hkzFile} ${SYM} ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX}
-#
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Writing the equally spaced back projected hkl file"
-#------------------------------------------------------------------------
-#
 set back_projected_hkl = "SCRATCH/back_projected.hkl"
 #
 \rm -f ${back_projected_hkl}
 #
-mv output.hkl ${back_projected_hkl}
+${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin ${hkzFile} -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout ${back_projected_hkl}
+#
 #
 echo "<<@progress: +10>>"
 #

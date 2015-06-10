@@ -1,0 +1,65 @@
+############################################################################
+# CMakeLists.txt for executable in 2dx_volume_processing                   #
+############################################################################
+# Author:                                                                  #
+# Nikhil Biyani  01/2015                                                   #
+############################################################################
+#
+cmake_minimum_required(VERSION 2.6)
+
+#==============================#
+# Set Environment              #
+#==============================#
+
+# Executables
+file(GLOB EXEC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+set(RUNNER_SOURCES ${EXEC_SOURCES})
+
+set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -g")
+
+set(USE_FFTWF FALSE)
+set(USE_FFTWD TRUE)
+find_package(FFTW REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
+
+#==============================#
+# Include Directories          #
+#==============================#
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
+include_directories(${Boost_INCLUDE_DIR})
+
+#=============================#
+# Create Executables          # 
+#=============================#
+# For Executables
+foreach(i ${RUNNER_SOURCES})
+    get_filename_component(EXECUTABLE ${i}  NAME_WE)
+    
+    add_executable(${EXECUTABLE} ${i})
+    
+    #Link to the library created in step above
+    target_link_libraries(${EXECUTABLE} LINK_PUBLIC 2dx_volume_processing)
+    target_link_libraries(${EXECUTABLE} ${FFTWD_LIB})
+    target_link_libraries(${EXECUTABLE} ${Boost_LIBRARIES})
+
+    list(APPEND EXECUTABLES_VP ${EXECUTABLE})
+endforeach(i ${RUNNER_SOURCES})
+
+#==============================#
+# Installation                 #
+#==============================#
+get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+if(INSTALL_SRC_DIR)
+	set(INSTALL_SRC_DIR ${INSTALL_SRC_DIR}/${DIRECTORY})
+else(INSTALL_SRC_DIR)
+	set(INSTALL_SRC_DIR kernel/mrc/source/2dx_volume_processing_lib/${DIRECTORY})
+endif(INSTALL_SRC_DIR)
+
+if(INSTALL_BIN_DIR)
+	set(INSTALL_VOLPROCESS_DIR ${INSTALL_BIN_DIR}/2dx_volume_processing)
+else(INSTALL_BIN_DIR)
+	set(INSTALL_VOLPROCESS_DIR kernel/mrc/bin/2dx_volume_processing)
+endif(INSTALL_BIN_DIR)
+
+install(FILES ${RUNNER_SOURCES} DESTINATION ${INSTALL_SRC_DIR})
+install(TARGETS ${EXECUTABLES_VP} DESTINATION ${INSTALL_VOLPROCESS_DIR})

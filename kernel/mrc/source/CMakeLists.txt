@@ -209,7 +209,7 @@ install(TARGETS ${EXECUTABLES} DESTINATION ${INSTALL_BIN_DIR})
 ###############################################################################
 # sub directories -------------------------------------------------------------
 #add_subdirectory(2dx_single_particle_lib)
-add_subdirectory(2dx_volume_processing_lib)
+add_subdirectory(2dx_volume_processing)
 add_subdirectory(periodogram)
 add_subdirectory(peaksearch)
 add_subdirectory(2dx_getlat)

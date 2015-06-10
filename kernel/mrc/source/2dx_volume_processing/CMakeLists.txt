@@ -7,6 +7,12 @@
 #
 cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -g")
+
+set(USE_FFTWF FALSE)
+set(USE_FFTWD TRUE)
+find_package(FFTW REQUIRED)
+
 #==============================#
 # Add subdirectories           #
 #==============================#

@@ -16,13 +16,6 @@ file(GLOB_RECURSE HPP_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 set(PROJECT_SOURCES ${CPP_SOURCES})
 set(PROJECT_HEADERS ${HPP_HEADERS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -g")
-
-set(USE_FFTWF FALSE)
-set(USE_FFTWD TRUE)
-find_package(FFTW REQUIRED)
-
-
 #==============================#
 # Add library		           #
 #==============================#

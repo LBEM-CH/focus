@@ -12,11 +12,12 @@
 #include "angle_utilities.hpp"
 #include "density_generator.hpp"
 
-volume::utilities::BeadModelGenerator::BeadModelGenerator(int number_of_beads, double density_threshold, double noise_level)
+volume::utilities::BeadModelGenerator::BeadModelGenerator(int number_of_beads, double density_threshold, double noise_level, double max_resolution)
 {
     this->number_of_beads = number_of_beads;
     this->density_threshold = density_threshold;
     this->noise_level = noise_level;
+    this->max_resolution = max_resolution;
 }
 
 void volume::utilities::BeadModelGenerator::generate_bead_model_coordinates(volume::data::Volume2dx volume, std::string output_pdb_file)
@@ -66,10 +67,10 @@ void volume::utilities::BeadModelGenerator::generate_bead_model_coordinates(volu
 volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead_model_volume(volume::data::Volume2dx input_volume)
 {   
     volume::data::RealSpaceData output_real(input_volume.nx(), input_volume.ny(), input_volume.nz());
-    volume::data::RealSpaceData oxygen = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 8.0);
-    volume::data::RealSpaceData carbon = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 6.0);
-    volume::data::RealSpaceData nitrogen = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 7.0);
-    volume::data::RealSpaceData sulphur = volume::utilities::density_generator::create_density(7, input_volume.max_resolution(), 16.0);
+    volume::data::RealSpaceData oxygen = volume::utilities::density_generator::create_density(7, max_resolution, 8.0);
+    volume::data::RealSpaceData carbon = volume::utilities::density_generator::create_density(7, max_resolution, 6.0);
+    volume::data::RealSpaceData nitrogen = volume::utilities::density_generator::create_density(7, max_resolution, 7.0);
+    volume::data::RealSpaceData sulphur = volume::utilities::density_generator::create_density(7, max_resolution, 16.0);
     
     int x, y, z = 0;
     int max_trials = number_of_beads;

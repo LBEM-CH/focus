@@ -105,12 +105,10 @@ void ds::Volume2dx::read_volume(std::string file_name, std::string format)
     if(format == "hkl")
     {
        set_fourier(volume::io::reflection::read(file_name, 1));
-       low_pass(max_resolution());
     }
     else if(format == "hkz")
     {
        set_fourier(volume::io::reflection::read(file_name, nz()));
-       low_pass(max_resolution());
     }
     else if (format == "mrc" || format == "map")
     {
@@ -286,10 +284,9 @@ void ds::Volume2dx::real_from_fourier()
     }
 }
 
-ds::StructureFactors ds::Volume2dx::calculate_structure_factors(int resolution_bins) const
+ds::StructureFactors ds::Volume2dx::calculate_structure_factors(int resolution_bins, double max_resolution) const
 {
     double min_resolution = 0;
-    double max_resolution = 1/this->max_resolution();
     
     ds::StructureFactors sf(min_resolution, max_resolution, resolution_bins);
     sf.initialize_intensities(*this);
@@ -357,8 +354,7 @@ void ds::Volume2dx::write_bead_model_pdb(int no_of_beads, double density_thresho
 ds::Volume2dx ds::Volume2dx::generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution)
 {
     ds::Volume2dx bead_model(header());
-    bead_model.set_max_resolution(bead_model_resolution);
-    volume::utilities::BeadModelGenerator generator(no_of_beads, density_threshold, 1.0);
+    volume::utilities::BeadModelGenerator generator(no_of_beads, density_threshold, 1.0, bead_model_resolution);
     
     ds::RealSpaceData bead_model_real_data = generator.generate_bead_model_volume(*this);
     bead_model.set_real(bead_model_real_data);
@@ -481,6 +477,7 @@ void ds::Volume2dx::band_pass(double low_resolution, double high_resolution)
     if(low_resolution <= 0) low_resolution = resolution_at(0, 0, 0);
     if(high_resolution <= 0 ) high_resolution = 0.0;
     
+    std::cout << "Band passing the resolution in range (" << low_resolution << ", " << high_resolution << ")\n";
     if(low_resolution <= high_resolution)
     {
         std::cerr << "ERROR: Cannot apply band pass filter with low_resolution > high_resolution!!";
@@ -495,7 +492,7 @@ void ds::Volume2dx::band_pass(double low_resolution, double high_resolution)
         MillerIndex index = (*itr).first;
         DiffractionSpot spot = (*itr).second;
         double resolution = resolution_at(index.h(), index.k(), index.l());
-        if(resolution > high_resolution && resolution < low_resolution)
+        if(resolution >= high_resolution && resolution <= low_resolution)
         {
             new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
@@ -675,13 +672,4 @@ std::string ds::Volume2dx::symmetry() const
 void ds::Volume2dx::set_symmetry(std::string symmetry)
 {
     _header->set_symmetry(symmetry);
-}
-
-double ds::Volume2dx::max_resolution() const {
-    return _header->max_resolution();
-}
-
-void ds::Volume2dx::set_max_resolution(double resolution)
-{
-    _header->set_max_resolution(resolution);
 }

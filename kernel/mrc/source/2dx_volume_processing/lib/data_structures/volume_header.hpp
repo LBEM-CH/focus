@@ -152,12 +152,6 @@ namespace volume
             int symmetry_ccp4_code() const ;
             
             /**
-             * Returns the maximum resolution set
-             * @return max_resolution
-             */
-            double max_resolution() const ;
-                      
-            /**
              * Assigner function of rows
              * @param rows
              */
@@ -241,13 +235,6 @@ namespace volume
              */
             void set_symmetry(std::string symmetry);
             
-            /**
-             * Sets the maximum resolution
-             * @param resolution in Angstroems
-             */
-            void set_max_resolution(double resolution);
-           
-            
         private:
             
             /**
@@ -302,15 +289,6 @@ namespace volume
             * Default: P1
             */
            volume::symmetrization::Symmetry2dx _symmetry;
-
-           /**
-            * Maximum resolution of the volume in Angstroem
-            * Example: 3.0
-            * Default: 2.0
-            */
-           double _max_resolution;
-
-           
 
         };
         

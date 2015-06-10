@@ -76,11 +76,13 @@ int main(int argc, char* argv[])
     //Prepare the input
     Volume2dx input(args::templates::NX.getValue(), args::templates::NY.getValue(), args::templates::NZ.getValue());
     if(args::templates::GAMMA.isSet()) input.set_gamma_degrees(args::templates::GAMMA.getValue());
-    if(args::templates::MAXRES.isSet()) input.set_max_resolution(args::templates::MAXRES.getValue());
     
     input.read_volume(infile, informat);
     
+    //Would need to overwrite gamma from mrc header
     if(args::templates::GAMMA.isSet()) input.set_gamma_degrees(args::templates::GAMMA.getValue());
+    
+    if(args::templates::MAXRES.isSet()) input.low_pass(args::templates::MAXRES.getValue());
     if(args::templates::SYMMETRY.isSet())
     {
         input.set_symmetry(args::templates::SYMMETRY.getValue());

@@ -34,22 +34,22 @@ double volume::utilities::fourier_utilities::GetResolution
     double resolution_y = 10000;
     double resolution_z = 10000;
     
-    if(resolution_x_f != 0 ) resolution_x = 1/resolution_x_f;
-    if(resolution_y_f != 0 ) resolution_y = 1/resolution_y_f;
-    if(resolution_z_f != 0 ) resolution_z = 1/resolution_z_f;
+    if(resolution_x_f > 0.00001 || resolution_x_f < -0.00001 ) resolution_x = 1/resolution_x_f;
+    if(resolution_y_f > 0.00001 || resolution_y_f < -0.00001 ) resolution_y = 1/resolution_y_f;
+    if(resolution_z_f > 0.00001 || resolution_z_f < -0.00001 ) resolution_z = 1/resolution_z_f;
     
     double final_resolution = sqrt(resolution_x*resolution_x + resolution_y*resolution_y + resolution_z*resolution_z);
     
     //Default resolution
     double result = final_resolution;
     
-    /*
+    
     //Sanity Check
-    if(result < 2.0)
+    if(result > 100000 || result < 2)
     {
-        std::cout << "Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << result << "\n";
-        std::cout << resolution_x << " " << resolution_y << " " << resolution_z << "\n";
+        std::cerr << "WARNING: Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << result << " exceeds limits\n";
+        //std::cout << resolution_x << " " << resolution_y << " " << resolution_z << "\n";
     }
-    */
+    
     return result;
 }

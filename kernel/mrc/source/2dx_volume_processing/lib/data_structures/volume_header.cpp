@@ -31,7 +31,6 @@ void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
     _nzstart = 0;
     set_gamma(volume::utilities::angle_utilities::DegreeToRadian(90));
     set_symmetry("P1");
-    set_max_resolution(2.0);
 
 }
 
@@ -65,7 +64,6 @@ std::string ds::VolumeHeader2dx::to_string() const
     output += "\t|Symmetry: " + symmetry() + "\n";
     output += "\t|Start indices: " + std::to_string(nxstart()) + " , " + 
                std::to_string(nystart()) + " , " + std::to_string(nzstart()) + "\n";
-    output += "\t|Maximum Resolution: " + std::to_string(max_resolution()) + "\n";
     
     return output;
 }
@@ -138,11 +136,6 @@ void ds::VolumeHeader2dx::set_symmetry(std::string symmetry)
 void ds::VolumeHeader2dx::set_gamma(double gamma)
 {
     _gamma = gamma;
-}
-
-void ds::VolumeHeader2dx::set_max_resolution(double resolution)
-{
-    _max_resolution = resolution;
 }
 
 int ds::VolumeHeader2dx::rows() const
@@ -223,9 +216,4 @@ int ds::VolumeHeader2dx::symmetry_2dx_code() const
 int ds::VolumeHeader2dx::symmetry_ccp4_code() const
 {
     return _symmetry.ccp4_index();
-}
-
-double ds::VolumeHeader2dx::max_resolution() const
-{
-    return _max_resolution;
 }

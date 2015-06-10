@@ -32,7 +32,7 @@ namespace volume
              * @param density_threshold
              * @param noise_level
              */
-            BeadModelGenerator(int number_of_beads, double density_threshold, double noise_level);
+            BeadModelGenerator(int number_of_beads, double density_threshold, double noise_level, double max_resolution = 2.0);
 
             /**
              * Generate the bead model from volume.
@@ -95,6 +95,11 @@ namespace volume
              * Number of beads to be put up in the model
              */
             int number_of_beads;
+            
+            /**
+             * Maximum resolution to reach
+             */
+            double max_resolution;
 
             /**
              * Average percentage of oxygen in PDB

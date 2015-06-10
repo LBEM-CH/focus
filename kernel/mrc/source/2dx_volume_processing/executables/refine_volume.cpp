@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     std::cout << "-----------------------------------\n\n";
     Volume2dx input_volume;
     input_volume.set_symmetry(symmetry);
-    input_volume.set_max_resolution(max_resolution);
+    if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue());  
     input_volume.read_volume(mrcin);
     input_volume.prepare_fourier();
     std::cout << input_volume.to_string();
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
     std ::cout << ref_volume.to_string();
     
     //Calculate the SF from ref volume
-    volume::data::StructureFactors ref_structure_factors = ref_volume.calculate_structure_factors(100);
+    volume::data::StructureFactors ref_structure_factors = ref_volume.calculate_structure_factors(100, max_resolution);
     if(temp_loc != "")
     {
         std::ofstream ref_sf_file(temp_loc+"/ref_sf.dat");
@@ -138,6 +138,7 @@ int main(int argc, char** argv)
     std::cout << "\n::Done with the iterations.\n";
     
     //Symmetrize
+    output_volume.low_pass(max_resolution);
     output_volume.symmetrize();
 
     //Prepare real/Fourier volumes
@@ -149,7 +150,7 @@ int main(int argc, char** argv)
     std::cout << "-----------------------------------\n";
     std::cout << output_volume.to_string();
     std::cout << "\nNew structure factor profile:\n";
-    std::cout << output_volume.calculate_structure_factors(100).plot_profile();
+    std::cout << output_volume.calculate_structure_factors(100, max_resolution).plot_profile();
     
 
     //Write output in HKL format

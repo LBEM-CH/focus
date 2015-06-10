@@ -195,18 +195,6 @@ namespace volume
             void set_symmetry(std::string symmetry);
             
             /**
-             * Returns the max resolution supplied by the user
-             * @return max_resolution
-             */
-            double max_resolution() const;
-            
-            /**
-             * Assigns the maximum resolution of the volume
-             * @param max resolution
-             */
-            void set_max_resolution(double resolution);
-            
-            /**
              * Evaluates the resolution at a miller index h, k, l
              * @param h
              * @param k
@@ -317,9 +305,10 @@ namespace volume
              * particular spot is added to the correct bin.
              * 
              * @param resolution_bins - number of bins.
+             * @param max_resolution 
              * @return instance of class Structure Factors.
              */
-            StructureFactors calculate_structure_factors(int resolution_bins) const;
+            StructureFactors calculate_structure_factors(int resolution_bins, double max_resolution) const;
             
             /**
              * Apply the structure factors. The factors are applied partially with the

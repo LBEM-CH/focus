@@ -105,12 +105,12 @@ void ds::Volume2dx::read_volume(std::string file_name, std::string format)
     if(format == "hkl")
     {
        set_fourier(volume::io::reflection::read(file_name, 1));
-       low_pass(max_resolution());
+       //low_pass(max_resolution());
     }
     else if(format == "hkz")
     {
        set_fourier(volume::io::reflection::read(file_name, nz()));
-       low_pass(max_resolution());
+       //low_pass(max_resolution());
     }
     else if (format == "mrc" || format == "map")
     {
@@ -516,6 +516,42 @@ void ds::Volume2dx::replace_reflections(const FourierSpaceData& fourier_data, do
 void ds::Volume2dx::low_pass(double high_resolution)
 {
     band_pass(-1, high_resolution);
+}
+
+ds::Volume2dx ds::Volume2dx::subsample(int factor)
+{
+    std::cout << "Subsampling volume by" << factor << "times.\n";
+    
+    int new_nx = factor*nx();
+    int new_ny = factor*ny();
+    int new_nz = factor*nz();
+    
+    VolumeHeader2dx head = header();
+    head.set_mx(new_nx);
+    head.set_my(new_ny);
+    head.set_mz(new_nz);
+    Volume2dx new_volume(head);
+    new_volume.reset(new_nx, new_ny, new_nz);
+    
+    RealSpaceData data = get_real();
+    RealSpaceData new_data(new_nx, new_ny, new_nz);
+    for(int ix=0; ix<new_nx; ix++)
+    {
+        for(int iy=0; iy<new_ny; iy++)
+        {
+            for(int iz=0; iz<new_nz; iz++)
+            {   
+                int data_x = ix % nx();
+                int data_y = iy % ny();
+                int data_z = iz % nz();
+                new_data.set_value_at(ix, iy, iz, data.get_value_at(data_x, data_y, data_z));
+            }
+        }
+    }
+    
+    new_volume.set_real(new_data);
+    
+    return new_volume;
 }
 
 ds::Volume2dx ds::Volume2dx::extended_volume(int x_cells, int y_cells, int z_cells)

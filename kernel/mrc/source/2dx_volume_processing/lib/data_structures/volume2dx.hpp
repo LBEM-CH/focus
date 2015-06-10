@@ -449,6 +449,14 @@ namespace volume
             Volume2dx extended_volume(int x_cells, int y_cells=0, int z_cells=0);
             
             /**
+             * Subsamples to factor.
+             * @param factor
+             * @return 
+             */
+            Volume2dx subsample(int factor);
+            
+            
+            /**
              * Expands the data to include negative h as well, so that full
              * fourier space is in the memory!
              * @return 

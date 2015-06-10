@@ -47,25 +47,28 @@ if ( ${calculate_subvolume}x != "0x" ) then
 endif
 #
 echo "<<@progress: +10>"
-#--------------------------------------------------------------------------
+#
+###########################################################################
 ${proc_2dx}/linblock "Preparing appropriate files for bead-model map"
-#--------------------------------------------------------------------------
+###########################################################################
+#
 set bead_model_init_map = "SCRATCH/bead_model_init.map"
 #
 \rm -f ${bead_model_init_map}
 #
 #---------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_init_map} -b ${number_of_beads} --thresh ${density_threshold_bead} --res ${maximum_resolution_bead}"
+echo ":Launching ${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_init_map} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}"
 #---------------------------------------------------------------------------
-${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_init_map} -b ${number_of_beads} --thresh ${density_threshold_bead} --res ${maximum_resolution_bead}
+${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_init_map} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}
 #
 set bead_model_map = "bead_model.map"
 #
 \rm -f ${bead_model_map}
 #
 #
-echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_init_map} --mrcout ${bead_model_map} --amp ${maximum_amplitude_refinement}"
-${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_init_map} --mrcout ${bead_model_map} --amp ${maximum_amplitude_refinement}
+echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_init_map} --mrcout ${bead_model_map} --amp ${maximum_amplitude_refinement} --subsample 2"
+${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_init_map} --mrcout ${bead_model_map} --amp ${maximum_amplitude_refinement} --subsample 2
+# \cp -f ${bead_model_init_map} ${bead_model_map}
 #
 echo "# IMAGE: ${bead_model_map} <Bead model map>" >> LOGS/${scriptname}.results
 #
@@ -87,18 +90,20 @@ if ( ${calculate_subvolume}x != "0x" ) then
 endif
 #
 echo "<<@progress: +10>"
-#--------------------------------------------------------------------------
+#
+###########################################################################
 ${proc_2dx}/linblock "Preparing appropriate files for refined map"
-#--------------------------------------------------------------------------
+###########################################################################
+#
 set refined_hkl = "processed_LeftHanded.hkl"
 set refined_map = "processed.map"
 \rm -f ${refined_hkl}
 \rm -f ${refined_map}
 #
 #------------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --thresh ${density_threshold_refinement} --it ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}"
+echo ":Launching ${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}"
 #------------------------------------------------------------------------------
-${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --thresh ${density_threshold_refinement} --it ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}
+${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}
 #
 echo "# IMAGE: ${refined_hkl} <Refined HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results
 echo "# IMAGE: ${refined_map} <Refined map>" >> LOGS/${scriptname}.results
@@ -115,12 +120,15 @@ set refined_sub_map = "processed_sub.map"
 #
 source ${proc_2dx}/2dx_extend_map.com ${refined_map} ${refined_extended_map}
 #
+${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_extended_map} --mrcout ${refined_extended_map} --subsample 2
+#
 echo "# IMAGE-IMPORTANT: ${refined_extended_map} <Refined extended map 2X2X1 unit cells>" >> LOGS/${scriptname}.results
 #
 \rm -f ${refined_sub_map}
 #
 if ( ${calculate_subvolume}x != "0x" ) then 
     source ${proc_2dx}/2dx_create_subvolume.com ${refined_extended_map} ${realcell} ${ALAT} ${refined_sub_map}
+    ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_sub_map} --mrcout ${refined_sub_map} --subsample 2
     #
     echo "# IMAGE-IMPORTANT: ${refined_sub_map} <Refined sub map>" >> LOGS/${scriptname}.results
 endif

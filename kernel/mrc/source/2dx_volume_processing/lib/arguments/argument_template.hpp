@@ -26,14 +26,15 @@ namespace volume
             static TCLAP::ValueArg<std::string> HKLOUT("", "hklout", "output reflections file in hkl format(H K L AMP PHASE FOM)", false, "", "FILE");
             static TCLAP::ValueArg<std::string> MRCOUT("", "mrcout", "output mrc/map file", false, "","FILE");
 
-            static TCLAP::ValueArg<int> NX("X", "nx", "number of points in X (required with hklin/hkzin)", false, 0,"INT");
-            static TCLAP::ValueArg<int> NY("Y", "ny", "number of points in Y (required with hklin/hkzin)", false, 0,"INT");
-            static TCLAP::ValueArg<int> NZ("Z", "nz", "number of points in Z (required with hklin/hkzin)", false, 0,"INT");
-            static TCLAP::ValueArg<double> GAMMA("g", "gamma", "cell angle gamma in degrees (default 90, recommended with hklin/hkzin) ", false, 90.0, "FLOAT");
+            static TCLAP::ValueArg<double> NX("X", "nx", "number of points in X (required with hklin/hkzin)", false, 0,"FLOAT");
+            static TCLAP::ValueArg<double> NY("Y", "ny", "number of points in Y (required with hklin/hkzin)", false, 0,"FLOAT");
+            static TCLAP::ValueArg<double> NZ("Z", "nz", "number of points in Z (required with hklin/hkzin)", false, 0,"FLOAT");
+            static TCLAP::ValueArg<double> GAMMA("g", "gamma", "real space cell angle gamma in degrees (range 90...180, default 90, recommended with hklin/hkzin) ", false, 90.0, "FLOAT");
             static TCLAP::ValueArg<std::string> SYMMETRY("s", "symmetry", "crystallographic symmetry (2D) present if any (default P1)", false, "P1", "STRING");
             static TCLAP::ValueArg<double> MAXRES("R", "res", "maximum expected resolution of the map (default 2.0)", false, 2.0, "FLOAT");
             static TCLAP::ValueArg<double> MAXAMP("a", "amp", "desired maximum amplitude value in the volume (a scaling will be done accordingly)", false, -1.0,"FLOAT");
             static TCLAP::ValueArg<double> THRESHOLD("t", "threshold", "desired density threshold (partially thresholded if used with refinement)", false, -1.0,"FLOAT");
+            static TCLAP::ValueArg<int> SUBSAMPLE("", "subsample", "subsample to factor", false, 0,"INT");
 
             static TCLAP::ValueArg<int> BEADS("b", "beads", "number of beads to be used", false, 0,"INT");
 

@@ -324,7 +324,7 @@ eot
 ${RESMAX},${REDUCAC}                   ! RESOLUTION,REDUCAC
 ${realcell},${realang},${ALAT}         ! a,b,gamma,c
 0.0                                    ! SCALE (automatic scaling to max(AMP)=32000.0)
-1				           ! 1=Calculate FOM from SIGF and SIGP. 0=Calculate FOM only from SIGP (this was the original version) 
+1				       ! 1=Calculate FOM from SIGF and SIGP. 0=Calculate FOM only from SIGP (this was the original version) 
 eot
   #
   echo "################################################"

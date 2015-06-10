@@ -33,6 +33,7 @@ int main(int argc, char* argv[])
     exe.add(args::templates::NZ);
     exe.add(args::templates::NY);
     exe.add(args::templates::NX);
+    exe.add(args::templates::SUBSAMPLE);
     
     std::vector<args::Arg*> infileArgs = {&args::templates::HKZIN, &args::templates::HKLIN, &args::templates::MRCIN};
     exe.xorAdd(infileArgs);
@@ -74,7 +75,7 @@ int main(int argc, char* argv[])
     }
     
     //Prepare the input
-    Volume2dx input(args::templates::NX.getValue(), args::templates::NY.getValue(), args::templates::NZ.getValue());
+    Volume2dx input((int)args::templates::NX.getValue(), (int)args::templates::NY.getValue(), (int)args::templates::NZ.getValue());
     if(args::templates::GAMMA.isSet()) input.set_gamma_degrees(args::templates::GAMMA.getValue());
     
     input.read_volume(infile, informat);
@@ -102,6 +103,8 @@ int main(int argc, char* argv[])
         input.centerize_density_along_xyz();
         input.grey_scale_densities();
     }
+    
+    if(args::templates::SUBSAMPLE.isSet()) input.subsample(args::templates::SUBSAMPLE.getValue());
     
     if(args::templates::FULL_FOURIER.getValue()) input.extend_to_full_fourier();
     

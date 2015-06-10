@@ -517,7 +517,7 @@ void ds::Volume2dx::low_pass(double high_resolution)
 
 ds::Volume2dx ds::Volume2dx::subsample(int factor)
 {
-    std::cout << "Subsampling volume by" << factor << "times.\n";
+    std::cout << "Sub-sampling volume by " << factor << " times.\n";
     
     int new_nx = factor*nx();
     int new_ny = factor*ny();
@@ -538,9 +538,9 @@ ds::Volume2dx ds::Volume2dx::subsample(int factor)
         {
             for(int iz=0; iz<new_nz; iz++)
             {   
-                int data_x = ix % nx();
-                int data_y = iy % ny();
-                int data_z = iz % nz();
+                int data_x = (int) ix/factor;
+                int data_y = (int) iy/factor;
+                int data_z = (int) iz/factor;
                 new_data.set_value_at(ix, iy, iz, data.get_value_at(data_x, data_y, data_z));
             }
         }

@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
         input.grey_scale_densities();
     }
     
-    if(args::templates::SUBSAMPLE.isSet()) input.subsample(args::templates::SUBSAMPLE.getValue());
+    if(args::templates::SUBSAMPLE.isSet()) input = input.subsample(args::templates::SUBSAMPLE.getValue());
     
     if(args::templates::FULL_FOURIER.getValue()) input.extend_to_full_fourier();
     

@@ -66,8 +66,8 @@ set bead_model_map = "bead_model.map"
 \rm -f ${bead_model_map}
 #
 #
-echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_init_map} --mrcout ${bead_model_map} --amp ${maximum_amplitude_refinement} --subsample 2"
-${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_init_map} --mrcout ${bead_model_map} --amp ${maximum_amplitude_refinement} --subsample 2
+echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_init_map} --mrcout ${bead_model_map} --amp ${maximum_amplitude_refinement}"
+${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_init_map} --mrcout ${bead_model_map} --amp ${maximum_amplitude_refinement}
 # \cp -f ${bead_model_init_map} ${bead_model_map}
 #
 echo "# IMAGE: ${bead_model_map} <Bead model map>" >> LOGS/${scriptname}.results
@@ -120,7 +120,7 @@ set refined_sub_map = "processed_sub.map"
 #
 source ${proc_2dx}/2dx_extend_map.com ${refined_map} ${refined_extended_map}
 #
-${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_extended_map} --mrcout ${refined_extended_map} --subsample 2
+${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_extended_map} --mrcout ${refined_extended_map}
 #
 echo "# IMAGE-IMPORTANT: ${refined_extended_map} <Refined extended map 2X2X1 unit cells>" >> LOGS/${scriptname}.results
 #
@@ -128,7 +128,7 @@ echo "# IMAGE-IMPORTANT: ${refined_extended_map} <Refined extended map 2X2X1 uni
 #
 if ( ${calculate_subvolume}x != "0x" ) then 
     source ${proc_2dx}/2dx_create_subvolume.com ${refined_extended_map} ${realcell} ${ALAT} ${refined_sub_map}
-    ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_sub_map} --mrcout ${refined_sub_map} --subsample 2
+    ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_sub_map} --mrcout ${refined_sub_map}
     #
     echo "# IMAGE-IMPORTANT: ${refined_sub_map} <Refined sub map>" >> LOGS/${scriptname}.results
 endif

@@ -68,8 +68,8 @@ int main(int argc, char** argv)
     std::cout << "-----------------------------------\n\n";
     Volume2dx input_volume;
     input_volume.set_symmetry(symmetry);
-    if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue());  
     input_volume.read_volume(mrcin);
+    if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue());  
     input_volume.prepare_fourier();
     std::cout << input_volume.to_string();
     

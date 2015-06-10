@@ -19,35 +19,47 @@
  */
 int main(int argc, char** argv)
 {
-    std::string prog_help = "A program to refine input map/mrc volume.";
+    
+    args::Executable exe("A program to refine input map/mrc volume.", ' ', "1.0" );
+    
+    //Select required arguments
+    args::templates::MRCIN.forceRequired();
+    args::templates::REFIN.forceRequired();
+    args::templates::THRESHOLD.forceRequired();
+    args::templates::ITERATIONS.forceRequired();
+    args::templates::SLAB.forceRequired();
+    
+    //Add arguments  
+    exe.add(args::templates::MRCOUT);
+    exe.add(args::templates::HKLOUT);
+    exe.add(args::templates::SLAB);
+    exe.add(args::templates::THRESHOLD);
+    exe.add(args::templates::ITERATIONS);
+    exe.add(args::templates::MAXRES);
+    exe.add(args::templates::SYMMETRY);
+    exe.add(args::templates::TEMP_LOC);
+    exe.add(args::templates::REFIN);
+    exe.add(args::templates::MRCIN);
     
     //Parse the arguments
-    std::vector<args::Argument> program_args = 
-        {args::Argument::mrcin, args::Argument::refin, args::Argument::temp_loc, args::Argument::symmetry, args::Argument::max_resolution, args::Argument::density_threshold,
-         args::Argument::number_of_iterations, args::Argument::membrane_slab,
-         args::Argument::hklout, args::Argument::mrcout};
-    args::ArgumentParser parser(program_args, argc, argv, prog_help);
+    exe.parse(argc, argv);
     
     //Get and check the variables
-    std::cout << "::Reading arguments from command line:\n";
-    std::string mrcin = parser.get(args::Argument::mrcin, true);
-    std::string refin = parser.get(args::Argument::refin, true);
-    std::string temp_loc = parser.get(args::Argument::temp_loc);
+    std::string mrcin = args::templates::MRCIN.getValue();
+    std::string refin = args::templates::REFIN.getValue();
+    std::string temp_loc = args::templates::TEMP_LOC.getValue();  
+    std::string symmetry = args::templates::SYMMETRY.getValue();
+    double max_resolution = args::templates::MAXRES.getValue();
+    double density_threshold = args::templates::THRESHOLD.getValue();   
+    int number_of_iterations = args::templates::ITERATIONS.getValue();
+    double membrane_slab = args::templates::SLAB.getValue();  
+    std::string hklout = args::templates::HKLOUT.getValue();
+    std::string mrcout = args::templates::MRCOUT.getValue();
     
-    std::string symmetry = parser.get(args::Argument::symmetry);
-    double max_resolution = parser.get_double(args::Argument::max_resolution);
-    double density_threshold = parser.get_double(args::Argument::density_threshold, true);
-    
-    int number_of_iterations = parser.get_int(args::Argument::number_of_iterations, true);
-    double membrane_slab = parser.get_double(args::Argument::membrane_slab, true);
-    
-    std::string hklout = parser.get(args::Argument::hklout);
-    std::string mrcout = parser.get(args::Argument::mrcout);
-    
-    if(hklout == "" && mrcout == "")
+    if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()))
     {
         std::cerr << "\n\nERROR: Please specify at least one output with hklout or mrcout!\n";
-        std::cerr << parser;
+        std::cerr << "\nFor full details type:\n\t" << exe.getProgramName() << " --help \n\n\n";
         exit(1);
     }
     

@@ -11,39 +11,40 @@
 
 int main(int argc, char* argv[])
 {
-    std::string prog_help = "A program to generate bead model of the input map/mrc.";
+    args::Executable exe("A program to generate bead model of the input MAP/MRC.", ' ', "1.0" );
+    
+    //Select required arguments
+    args::templates::MRCIN.forceRequired();
+    args::templates::BEADS.forceRequired();
+    args::templates::THRESHOLD.forceRequired();
+    args::templates::MAXRES.forceRequired();
+    
+    //Add arguments  
+    exe.add(args::templates::MRCOUT);
+    exe.add(args::templates::HKLOUT);
+    exe.add(args::templates::THRESHOLD);
+    exe.add(args::templates::BEADS);
+    exe.add(args::templates::MAXRES);
+    exe.add(args::templates::MRCIN);
     
     //Parse the arguments
-    std::vector<args::Argument> program_args = 
-        {args::Argument::mrcin, args::Argument::max_resolution, args::Argument::number_of_beads, args::Argument::density_threshold,
-         args::Argument::hklout, args::Argument::mrcout};
-    args::ArgumentParser parser(program_args, argc, argv, prog_help);
+    exe.parse(argc, argv);
     
-    //Get and check the variables
-    std::cout << "::Reading arguments from command line:\n";
-    std::string mrcin = parser.get(args::Argument::mrcin, true);
-    double max_resolution = parser.get_double(args::Argument::max_resolution, true);
-    int no_of_beads = parser.get_int(args::Argument::number_of_beads, true);
-    double density_threshold = parser.get_double(args::Argument::density_threshold, true);
-    
-    std::string hklout = parser.get(args::Argument::hklout);
-    std::string mrcout = parser.get(args::Argument::mrcout);
-    
-    if(hklout == "" && mrcout == "")
+    if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()))
     {
         std::cerr << "\n\nERROR: Please specify at least one output with hklout or mrcout!\n";
-        std::cerr << parser;
+        std::cerr << "\nFor full details type:\n\t" << exe.getProgramName() << " --help \n\n\n";
         exit(1);
     }
     
     //Prepare the input
     Volume2dx input;
-    input.read_volume(mrcin);
+    input.read_volume(args::templates::MRCIN.getValue());
     
-    Volume2dx bead_model = input.generate_bead_model(no_of_beads, density_threshold, max_resolution);
+    Volume2dx bead_model = input.generate_bead_model(args::templates::BEADS.getValue(), args::templates::THRESHOLD.getValue(), args::templates::MAXRES.getValue());
     
-    if(hklout != "") bead_model.write_volume(hklout, "hkl");
-    if(mrcout != "") bead_model.write_volume(mrcout);
+    if(args::templates::HKLOUT.getValue() != "") bead_model.write_volume(args::templates::HKLOUT.getValue(), "hkl");
+    if(args::templates::MRCOUT.getValue() != "") bead_model.write_volume(args::templates::MRCOUT.getValue());
     
     return 0;
     

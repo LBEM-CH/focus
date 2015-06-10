@@ -12,20 +12,20 @@
 int main(int argc, char* argv[])
 {
     
-    std::string prog_help = "Program to produce the information of mrc/map.";
+    args::Executable exe("Program to produce the information of mrc/map.", ' ', "1.0" );
+    
+    //Select required arguments
+    args::templates::MRCIN.forceRequired();
+    
+    //Add arguments
+    exe.add(args::templates::MRCIN);
     
     //Parse the arguments
-    std::vector<args::Argument> program_args = 
-        {args::Argument::mrcin};
-    args::ArgumentParser parser(program_args, argc, argv, prog_help);
-    
-    //Get and check the variables
-    std::cout << "::Reading arguments from command line:\n";
-    std::string mrcin = parser.get(args::Argument::mrcin, true);
+    exe.parse(argc, argv);
     
     //Prepare the input
     Volume2dx input;
-    input.read_volume(mrcin);
+    input.read_volume(args::templates::MRCIN.getValue());
     std::cout << input.to_string();
     
     return 0;

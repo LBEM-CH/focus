@@ -9,7 +9,6 @@
 #define	ARGUMENTS_H
 
 #include "argument_template.hpp"
-#include "argument_parser.hpp"
 
 namespace args = volume::arguments;
 

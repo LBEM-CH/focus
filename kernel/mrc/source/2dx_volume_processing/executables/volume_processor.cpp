@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     }
     
     //Prepare the input
-    Volume2dx input(args::templates::NX.getValue(), args::templates::NY.getValue(), args::templates::NZ.getValue());
+    Volume2dx input((int)args::templates::NX.getValue(), (int)args::templates::NY.getValue(), (int)args::templates::NZ.getValue());
     if(args::templates::GAMMA.isSet()) input.set_gamma_degrees(args::templates::GAMMA.getValue());
     if(args::templates::MAXRES.isSet()) input.set_max_resolution(args::templates::MAXRES.getValue());
     

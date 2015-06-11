@@ -71,6 +71,7 @@ int main(int argc, char** argv)
     input_volume.set_symmetry(symmetry);
     if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue());  
     input_volume.prepare_fourier();
+    input_volume.prepare_real();
     std::cout << input_volume.to_string();
     
     std::cout << "\n-----------------------------------\n";
@@ -105,7 +106,7 @@ int main(int argc, char** argv)
         output_volume.apply_density_slab(membrane_slab, 0.1, true);
         
         //Apply density threshold
-        output_volume.apply_density_threshold(density_threshold, 0.1);
+        output_volume.apply_density_threshold(density_threshold, 0.5);
         
         //Apply density histogram
         output_volume.apply_density_histogram(ref_volume, 0.5);
@@ -114,7 +115,7 @@ int main(int argc, char** argv)
         output_volume.replace_reflections(input_volume.get_fourier(), 0.6);
         
         //Apply structure factors
-        output_volume.apply_structure_factors(ref_structure_factors, 0.5);
+        output_volume.apply_structure_factors(ref_structure_factors, 0.1);
         
         //Apply low pass filter
         output_volume.low_pass(max_resolution);

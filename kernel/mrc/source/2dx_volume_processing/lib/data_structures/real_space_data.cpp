@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string.h>
 #include <math.h>
+#include <cstring>
 
 #include "real_space_data.hpp"
 #include "../utilities/density_value_sorter.hpp"
@@ -22,6 +23,15 @@ ds::RealSpaceData::RealSpaceData()
 ds::RealSpaceData::RealSpaceData(int nx, int ny, int nz)
 {
     initialize(nx, ny, nz);
+}
+
+ds::RealSpaceData::RealSpaceData(const RealSpaceData& other)
+{
+    _nx = other._nx;
+    _ny = other._ny;
+    _nz = other._nz;
+    _data = (double*) calloc(_nx*_ny*_nz, sizeof(double));
+    std::memcpy(_data, other._data, _nx*_ny*_nz*sizeof(double));
 }
 
 void ds::RealSpaceData::reset(int nx, int ny, int nz)

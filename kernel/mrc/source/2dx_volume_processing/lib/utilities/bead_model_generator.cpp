@@ -26,6 +26,8 @@ void volume::utilities::BeadModelGenerator::generate_bead_model_coordinates(volu
     //Prepare the output stream
     std::ofstream out_file_stream;
     
+    volume::data::RealSpaceData real = volume.get_real();
+    
     out_file_stream.open(output_pdb_file);
     write_pdb_header(out_file_stream, volume.xlen(), volume.ylen(), volume.zlen(),
                       90, 90, volume::utilities::angle_utilities::RadianToDegree(volume.gamma()), volume.symmetry());
@@ -38,7 +40,7 @@ void volume::utilities::BeadModelGenerator::generate_bead_model_coordinates(volu
             x = rand() % volume.nx();
             y = rand() % volume.ny();
             z = rand() % volume.nz();
-        } while ( volume.density_at(x, y, z) < density_threshold );
+        } while ( real.get_value_at(x, y, z) < density_threshold );
 
 
         double random_number = rand() / (double) RAND_MAX;        
@@ -72,6 +74,8 @@ volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead
     volume::data::RealSpaceData nitrogen = volume::utilities::density_generator::create_density(11, max_resolution, 7.0);
     volume::data::RealSpaceData sulphur = volume::utilities::density_generator::create_density(11, max_resolution, 16.0);
     
+    volume::data::RealSpaceData input_real = input_volume.get_real();
+    
     int x, y, z = 0;
     int max_trials = number_of_beads;
     int car = 0 ; 
@@ -92,7 +96,7 @@ volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead
                 std::cerr << "Too many trials while generating bead model. May be density threshold too much or too many beads!!\n";
                 exit(1);
             }
-        } while ( input_volume.density_at(x, y, z) < density_threshold);
+        } while ( input_real.get_value_at(x, y, z) < density_threshold);
 
 
         double random_number = rand() / (double) RAND_MAX;        

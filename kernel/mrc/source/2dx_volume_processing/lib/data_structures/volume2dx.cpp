@@ -113,6 +113,7 @@ void ds::Volume2dx::read_volume(std::string file_name, std::string format)
     else if (format == "mrc" || format == "map")
     {
         *_header = volume::io::mrc::get_header(file_name, format);
+        _real->reset(nx(), ny(), nz());
         set_real(volume::io::mrc::get_data(file_name, nx(), ny(), nz()));
     }
     else
@@ -242,8 +243,8 @@ void ds::Volume2dx::set_fourier(FourierSpaceData fourier)
 void ds::Volume2dx::set_real(RealSpaceData real)
 {
     if(real.nx() == nx() && real.ny() == ny() && real.nz() == nz())
-    {   
-        *_real = real;
+    {
+        _real->reset_data(real.get_data());
         _type = REAL;
     }
     else
@@ -428,32 +429,35 @@ void ds::Volume2dx::apply_density_histogram(Volume2dx reference, double fraction
         return;
     }
     
-    RealSpaceData ref_real = reference.get_real();
-    RealSpaceData this_real = this->get_real();
+    RealSpaceData* ref_real = new RealSpaceData(reference.get_real());
+    this->prepare_real();
     
     //Check the size of reference
-    if(ref_real.size() != this_real.size())
+    if(ref_real->size() != _real->size())
     {
-        std::cerr << "ERROR! The size of reference volume " << ref_real.size() 
-                  << " does not match to this volume's size " << this_real.size()
+        std::cerr << "ERROR! The size of reference volume " << ref_real->size() 
+                  << " does not match to this volume's size " << _real->size()
                   << std::endl;
         return;
     }
     
     
-    double* sorted_ref_values = ref_real.density_sorted_values();
-    int* sorted_ids = this_real.density_sorted_ids();
+    double* sorted_ref_values = ref_real->density_sorted_values();
+    int* sorted_ids = _real->density_sorted_ids();
     
-    RealSpaceData new_data(nx(), ny(), nz());
-    for(int id=0; id<this_real.size(); id++)
+    delete ref_real;
+    
+    RealSpaceData* new_data = new RealSpaceData(nx(), ny(), nz());
+    for(int id=0; id<new_data->size(); id++)
     {
         int sorted_id = sorted_ids[id];
-        double old_density = this_real.get_value_at(sorted_id);
+        double old_density = _real->get_value_at(sorted_id);
         double new_density = sorted_ref_values[id]*fraction + old_density*(1-fraction);
-        new_data.set_value_at(sorted_id, new_density);
+        new_data->set_value_at(sorted_id, new_density);
     }
     
-    this->set_real(new_data);
+    new_data->scale(_real->min(), _real->max());
+    this->set_real(*new_data);
     
 }
 

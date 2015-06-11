@@ -33,6 +33,11 @@ namespace volume
             RealSpaceData(int nx, int ny, int nz);
             
             /**
+             * Copy constructor
+             */
+            RealSpaceData(const RealSpaceData& other);
+            
+            /**
              * Resets the data with the given size
              * @param nx
              * @param nx

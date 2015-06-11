@@ -20,6 +20,7 @@ int main(int argc, char* argv[])
     args::templates::MAXRES.forceRequired();
     
     //Add arguments  
+    exe.add(args::templates::PDBOUT);
     exe.add(args::templates::MRCOUT);
     exe.add(args::templates::HKLOUT);
     exe.add(args::templates::THRESHOLD);
@@ -30,9 +31,9 @@ int main(int argc, char* argv[])
     //Parse the arguments
     exe.parse(argc, argv);
     
-    if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()))
+    if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()) && !(args::templates::PDBOUT.isSet()))
     {
-        std::cerr << "\n\nERROR: Please specify at least one output with hklout or mrcout!\n";
+        std::cerr << "\n\nERROR: Please specify at least one output with hklout or mrcout or pdbout!\n";
         std::cerr << "\nFor full details type:\n\t" << exe.getProgramName() << " --help \n\n\n";
         exit(1);
     }
@@ -41,10 +42,16 @@ int main(int argc, char* argv[])
     Volume2dx input;
     input.read_volume(args::templates::MRCIN.getValue());
     
-    Volume2dx bead_model = input.generate_bead_model(args::templates::BEADS.getValue(), args::templates::THRESHOLD.getValue(), args::templates::MAXRES.getValue());
-    
-    if(args::templates::HKLOUT.getValue() != "") bead_model.write_volume(args::templates::HKLOUT.getValue(), "hkl");
-    if(args::templates::MRCOUT.getValue() != "") bead_model.write_volume(args::templates::MRCOUT.getValue());
+    if(args::templates::HKLOUT.isSet() || args::templates::MRCOUT.isSet())
+    {    
+        Volume2dx bead_model = input.generate_bead_model(args::templates::BEADS.getValue(), args::templates::THRESHOLD.getValue(), args::templates::MAXRES.getValue());
+        if(args::templates::HKLOUT.getValue() != "") bead_model.write_volume(args::templates::HKLOUT.getValue(), "hkl");
+        if(args::templates::MRCOUT.getValue() != "") bead_model.write_volume(args::templates::MRCOUT.getValue());
+    }
+    else if(args::templates::PDBOUT.isSet())
+    {
+        input.write_bead_model_pdb(args::templates::BEADS.getValue(),  args::templates::THRESHOLD.getValue(), 0.05, args::templates::PDBOUT.getValue());
+    }
     
     return 0;
     

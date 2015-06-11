@@ -25,6 +25,7 @@ namespace volume
             static TCLAP::ValueArg<std::string> MRCIN("", "mrcin", "input mrc/map file", false, "", "FILE");
             static TCLAP::ValueArg<std::string> HKLOUT("", "hklout", "output reflections file in hkl format(H K L AMP PHASE FOM)", false, "", "FILE");
             static TCLAP::ValueArg<std::string> MRCOUT("", "mrcout", "output mrc/map file", false, "","FILE");
+            static TCLAP::ValueArg<std::string> PDBOUT("", "pdbout", "output file in pdb format", false, "", "FILE");
 
             static TCLAP::ValueArg<double> NX("X", "nx", "number of points in X (required with hklin/hkzin)", false, 0,"FLOAT");
             static TCLAP::ValueArg<double> NY("Y", "ny", "number of points in Y (required with hklin/hkzin)", false, 0,"FLOAT");

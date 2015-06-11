@@ -489,6 +489,7 @@ SKIP 0
 END
 eof
 #
+echo "# IMAGE: SCRATCH/merge3D_MRClefthanded.mtz <MTZ: Latline data before CAD>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #
@@ -510,7 +511,6 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE: SCRATCH/merge3D_MRClefthanded.mtz <MTZ: Latline data before CAD>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/merge3Dref_MRClefthanded.mtz <MTZ: Latline Ref data before CAD>" >> LOGS/${scriptname}.results
 #
 #############################################################################

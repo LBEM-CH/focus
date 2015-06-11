@@ -67,13 +67,17 @@ void volume::utilities::BeadModelGenerator::generate_bead_model_coordinates(volu
 volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead_model_volume(volume::data::Volume2dx input_volume)
 {   
     volume::data::RealSpaceData output_real(input_volume.nx(), input_volume.ny(), input_volume.nz());
-    volume::data::RealSpaceData oxygen = volume::utilities::density_generator::create_density(7, max_resolution, 8.0);
-    volume::data::RealSpaceData carbon = volume::utilities::density_generator::create_density(7, max_resolution, 6.0);
-    volume::data::RealSpaceData nitrogen = volume::utilities::density_generator::create_density(7, max_resolution, 7.0);
-    volume::data::RealSpaceData sulphur = volume::utilities::density_generator::create_density(7, max_resolution, 16.0);
+    volume::data::RealSpaceData oxygen = volume::utilities::density_generator::create_density(11, max_resolution, 8.0);
+    volume::data::RealSpaceData carbon = volume::utilities::density_generator::create_density(11, max_resolution, 6.0);
+    volume::data::RealSpaceData nitrogen = volume::utilities::density_generator::create_density(11, max_resolution, 7.0);
+    volume::data::RealSpaceData sulphur = volume::utilities::density_generator::create_density(11, max_resolution, 16.0);
     
     int x, y, z = 0;
     int max_trials = number_of_beads;
+    int car = 0 ; 
+    int nit = 0; 
+    int oxy = 0; 
+    int sul = 0;
     for ( int bead = 0; bead < number_of_beads; bead++ ) 
     {
         int trial = 0;
@@ -96,21 +100,31 @@ volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead
         if( random_number < PDB_CARBON_FRACTION ) 
         {
             output_real.merge_data(carbon, x, y, z);
+            car++;
         }
         else if( random_number < PDB_CARBON_FRACTION + PDB_NITROGEN_FRACTION ) 
         {
             output_real.merge_data(nitrogen, x, y, z);
+            nit++;
         }
         else if( random_number < PDB_CARBON_FRACTION + PDB_NITROGEN_FRACTION + PDB_OXYGEN_FRACTION)
         {
             output_real.merge_data(oxygen, x, y, z);
+            oxy++;
         }
         else
         {
             output_real.merge_data(sulphur, x, y, z);
+            sul++;
         }
 
     }
+    
+    std::cout << "\nNumber of beads\t:\t" << number_of_beads << "\n";
+    std::cout << "Placed carbon\t:\t" << car << "\n";
+    std::cout << "Placed nitrogen\t:\t" << nit << "\n";
+    std::cout << "Placed oxygen\t:\t" << oxy << "\n";
+    std::cout << "Placed sulphur\t:\t" << sul << "\n\n\n";
     
     return output_real;
 

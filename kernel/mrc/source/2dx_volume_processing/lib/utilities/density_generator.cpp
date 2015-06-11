@@ -36,6 +36,7 @@ volume::data::RealSpaceData volume::utilities::density_generator::create_density
     if ( gbox <= 0 )
         gbox = 1;
 
+    std::cout << "Spreading the charge to " << 2*gbox << " points\n";
     double xc = box_size / 2;
     double yc = box_size / 2;
     double zc = box_size / 2;

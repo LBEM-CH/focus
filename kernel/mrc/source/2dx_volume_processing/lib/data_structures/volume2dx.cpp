@@ -288,7 +288,7 @@ ds::StructureFactors ds::Volume2dx::calculate_structure_factors(int resolution_b
 {
     double min_resolution = 0;
     
-    ds::StructureFactors sf(min_resolution, max_resolution, resolution_bins);
+    ds::StructureFactors sf(min_resolution, 1/max_resolution, resolution_bins);
     sf.initialize_intensities(*this);
     
     return sf;

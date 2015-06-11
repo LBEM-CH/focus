@@ -29,27 +29,21 @@ double volume::utilities::fourier_utilities::GetResolution
     double resolution_y_f = index.k() * vy;
     double resolution_z_f = index.k() * vz + index.l() * wz;
     
+    double resolution_f = sqrt(resolution_x_f*resolution_x_f + resolution_y_f*resolution_y_f + resolution_z_f*resolution_z_f);
+    
     //Infinite resolution
-    double resolution_x = 10000;
-    double resolution_y = 10000;
-    double resolution_z = 10000;
-    
-    if(resolution_x_f > 0.00001 || resolution_x_f < -0.00001 ) resolution_x = 1/resolution_x_f;
-    if(resolution_y_f > 0.00001 || resolution_y_f < -0.00001 ) resolution_y = 1/resolution_y_f;
-    if(resolution_z_f > 0.00001 || resolution_z_f < -0.00001 ) resolution_z = 1/resolution_z_f;
-    
-    double final_resolution = sqrt(resolution_x*resolution_x + resolution_y*resolution_y + resolution_z*resolution_z);
-    
-    //Default resolution
-    double result = final_resolution;
-    
-    
-    //Sanity Check
-    if(result > 100000 || result < 2)
+    double final_resolution = 100000;
+    if(resolution_f != 0)
     {
-        std::cerr << "WARNING: Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << result << " exceeds limits\n";
-        //std::cout << resolution_x << " " << resolution_y << " " << resolution_z << "\n";
+        final_resolution = 1/resolution_f;
     }
     
-    return result;
+    //Sanity Check
+    //if(final_resolution < 12.0 || final_resolution > 100000)
+    //{
+    //    std::cerr << "WARNING: Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << final_resolution << " exceeds limits\n";
+    //    std::cout << resolution_x_f << " " << resolution_y_f << " " << resolution_z_f << "\n";
+    //}
+    
+    return final_resolution;
 }

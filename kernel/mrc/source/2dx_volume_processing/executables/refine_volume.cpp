@@ -67,8 +67,8 @@ int main(int argc, char** argv)
     std::cout << ":Preparing the input volume:\n";
     std::cout << "-----------------------------------\n\n";
     Volume2dx input_volume;
-    input_volume.set_symmetry(symmetry);
     input_volume.read_volume(mrcin);
+    input_volume.set_symmetry(symmetry);
     if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue());  
     input_volume.prepare_fourier();
     std::cout << input_volume.to_string();
@@ -101,15 +101,6 @@ int main(int argc, char** argv)
         std::cout << "::Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
-        //Replace the reflection from that of input
-        output_volume.replace_reflections(input_volume.get_fourier(), 0.5);
-        
-        //Apply structure factors
-        output_volume.apply_structure_factors(ref_structure_factors, 0.5);
-        
-        //Apply low pass filter
-        output_volume.low_pass(max_resolution);
-        
         //Apply membrane slab
         output_volume.apply_density_slab(membrane_slab, 0.1, true);
         
@@ -118,6 +109,15 @@ int main(int argc, char** argv)
         
         //Apply density histogram
         output_volume.apply_density_histogram(ref_volume, 0.5);
+        
+        //Replace the reflection from that of input
+        output_volume.replace_reflections(input_volume.get_fourier(), 0.6);
+        
+        //Apply structure factors
+        output_volume.apply_structure_factors(ref_structure_factors, 0.5);
+        
+        //Apply low pass filter
+        output_volume.low_pass(max_resolution);
         
         //Done with this iteration.
         //Prepare to write output

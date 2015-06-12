@@ -501,13 +501,13 @@ namespace volume
              * Sets the Fourier data
              * @param fourier
              */
-            void set_fourier(FourierSpaceData fourier);
+            void set_fourier(const FourierSpaceData& fourier);
             
             /**
              * Sets the real data
              * @param real
              */
-            void set_real(RealSpaceData real);
+            void set_real(const RealSpaceData& real);
             
             /**
              * Sets the Fourier data from the real data. Does FFT internally

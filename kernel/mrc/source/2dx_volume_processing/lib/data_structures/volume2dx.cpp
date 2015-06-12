@@ -266,13 +266,13 @@ void ds::Volume2dx::set_data(const Volume2dx& volume)
     _type = volume._type;
 }
 
-void ds::Volume2dx::set_fourier(FourierSpaceData fourier)
+void ds::Volume2dx::set_fourier(const FourierSpaceData& fourier)
 {
-    *_fourier = fourier;
+    _fourier->reset(fourier);
     _type = FOURIER;
 }
 
-void ds::Volume2dx::set_real(RealSpaceData real)
+void ds::Volume2dx::set_real(const RealSpaceData& real)
 {
     if(real.nx() == nx() && real.ny() == ny() && real.nz() == nz())
     {

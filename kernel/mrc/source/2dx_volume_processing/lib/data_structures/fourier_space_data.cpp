@@ -60,6 +60,12 @@ void ds::FourierSpaceData::reset()
     _data->clear();
 }
 
+void ds::FourierSpaceData::reset(const FourierSpaceData& data)
+{
+    _data->clear();
+    _data->insert(data.begin(), data.end());
+}
+
 ds::FourierSpaceData::const_iterator ds::FourierSpaceData::begin() const
 {
     return _data->begin();

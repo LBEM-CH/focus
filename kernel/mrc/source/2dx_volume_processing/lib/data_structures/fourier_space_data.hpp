@@ -57,6 +57,12 @@ namespace volume
             void reset();
             
             /**
+             * Resets the data with another one
+             * @param data
+             */
+            void reset(const FourierSpaceData& data);
+            
+            /**
              * Returns the beginning of the data for iterating
              * @return const_iterator
              */

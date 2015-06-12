@@ -56,7 +56,7 @@ set bead_model_map = "bead_model.map"
 #
 \rm -f ${bead_model_map}
 #---------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --pdbout ${bead_model_map} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}"
+echo ":Launching ${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_map} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}"
 #---------------------------------------------------------------------------
 ${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_map} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}
 #

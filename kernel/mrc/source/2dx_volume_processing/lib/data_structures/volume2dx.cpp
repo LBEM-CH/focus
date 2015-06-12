@@ -164,7 +164,7 @@ double ds::Volume2dx::resolution_at(int h, int k, int l) const
 
 ds::MillerIndex ds::Volume2dx::max_resolution_spot() const
 {
-    if(_type == FOURIER)
+    if(has_fourier())
     {
         FourierSpaceData::const_iterator itr = _fourier->end();
         itr--;
@@ -179,7 +179,7 @@ ds::MillerIndex ds::Volume2dx::max_resolution_spot() const
 
 double ds::Volume2dx::max_resolution() const
 {
-    if(_type == FOURIER)
+    if(has_fourier())
     {
         FourierSpaceData::const_iterator itr = _fourier->end();
         itr--;

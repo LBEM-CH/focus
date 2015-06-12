@@ -204,6 +204,18 @@ namespace volume
             double resolution_at(int h, int k, int l) const;
             
             /**
+             * Fetches the spot with maximum resolution
+             * @return MillerIndex which has the maximum resolution in map
+             */
+            MillerIndex max_resolution_spot() const;
+            
+            /**
+             * Fetches the resolution value of the spot which has maximum resolution
+             * @return resolution of spot with maximum resolution (in A)
+             */
+            double max_resolution() const;
+            
+            /**
              * Reads the volume from a file and sets the data.
              * Supported formats: hkz, mrc 
              * @param file_name

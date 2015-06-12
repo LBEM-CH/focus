@@ -17,32 +17,32 @@ double volume::utilities::fourier_utilities::GetResolution
         return 0;
     }
     
-    //Calculate the reciprocal lattice
-    double factor = 1;
-    //double factor = 2*M_PI;
-    double ux = factor/a;
-    double vy = factor/b;
-    double vz = factor*cos(gamma)/(sin(gamma)*b);
-    double wz = factor/(c*sin(gamma));
-    
-    double resolution_x_f = index.h() * ux;
-    double resolution_y_f = index.k() * vy;
-    double resolution_z_f = index.k() * vz + index.l() * wz;
-    
-    double resolution_f = sqrt(resolution_x_f*resolution_x_f + resolution_y_f*resolution_y_f + resolution_z_f*resolution_z_f);
-    
-    //Infinite resolution
-    double final_resolution = 100000;
-    if(resolution_f != 0)
+    //Return infinite resolution if all three h,k,l are 0
+    if(index.h() == 0 && index.k() == 0 && index.l() == 0)
     {
-        final_resolution = 1/resolution_f;
+        return 100000.0;
     }
     
+    //Calculate the reciprocal lattice
+    // gamma already in radians
+    double astar = 1.0 / ( a * sin(gamma));
+    double bstar = 1.0 / ( b * sin(gamma));
+    double cstar = 1.0 / c;
+    
+    double recgamma = M_PI - gamma;
+    
+    double dstar_sq = ( pow(index.h()*astar,2) 
+                      + 2*index.h()*index.k()*astar*bstar*cos(recgamma)
+                      + pow(index.k()*bstar,2)
+                      + pow(index.l()*cstar,2) );
+    
+
+    double final_resolution = 1/sqrt(dstar_sq);
+    
     //Sanity Check
-    //if(final_resolution < 12.0 || final_resolution > 100000)
+    //if(final_resolution < 1.0 || final_resolution > 100000)
     //{
-    //    std::cerr << "WARNING: Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << final_resolution << " exceeds limits\n";
-    //    std::cout << resolution_x_f << " " << resolution_y_f << " " << resolution_z_f << "\n";
+    //    std::cerr << "WARNING: Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << "gamma= " << gamma <<" ) = " << final_resolution << " exceeds limits\n";
     //}
     
     return final_resolution;

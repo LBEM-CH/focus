@@ -82,6 +82,7 @@ std::string ds::Volume2dx::data_string() const
         output += ":\tFourier data in memory.\n" ;
         output += ":\t|Number of spots: " + std::to_string(_fourier->spots()) + "\n";
         output += ":\t|Intensity sum: " + std::to_string(_fourier->intensity_sum()) + "\n";
+        output += ":\t|Spot with maximum resolution: " + max_resolution_spot().to_string() + " - " + std::to_string(max_resolution()) + " A\n";
         output += ":\n";
     }
     
@@ -159,6 +160,37 @@ double ds::Volume2dx::resolution_at(int h, int k, int l) const
 {
     ds::MillerIndex index(h, k, l);
     return volume::utilities::fourier_utilities::GetResolution(index, _header->gamma(), _header->xlen(), _header->ylen(), _header->zlen());
+}
+
+ds::MillerIndex ds::Volume2dx::max_resolution_spot() const
+{
+    if(_type == FOURIER)
+    {
+        FourierSpaceData::const_iterator itr = _fourier->end();
+        itr--;
+        return (*itr).first;
+    }
+    else
+    {
+        std::cerr << "WARNING: Can't calculate max resolution spot, Fourier data not in memory!!\n";
+        return MillerIndex(0,0,0);
+    }
+}
+
+double ds::Volume2dx::max_resolution() const
+{
+    if(_type == FOURIER)
+    {
+        FourierSpaceData::const_iterator itr = _fourier->end();
+        itr--;
+        MillerIndex index  = (*itr).first;
+        return resolution_at(index.h(), index.k(), index.l());
+    }
+    else
+    {
+        std::cerr << "WARNING: Can't calculate max resolution, Fourier data not in memory!!\n";
+        return resolution_at(0,0,0);
+    }
 }
 
 void ds::Volume2dx::rescale_to_max_amplitude(double max_amplitude)
@@ -516,7 +548,10 @@ void ds::Volume2dx::replace_reflections(const FourierSpaceData& fourier_data, do
 
 void ds::Volume2dx::low_pass(double high_resolution)
 {
+    prepare_fourier();
+    std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
     band_pass(-1, high_resolution);
+    std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
 }
 
 ds::Volume2dx ds::Volume2dx::subsample(int factor)

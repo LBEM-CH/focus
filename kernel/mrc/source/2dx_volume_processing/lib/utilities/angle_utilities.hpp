@@ -37,7 +37,7 @@ namespace volume
              * @return corrected phase in radians
              */
             double  CorrectRadianPhase(double phase_in_radians);
-            
+              
         } // namespace angle_utilities
     
     } // namespace utilities

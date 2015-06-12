@@ -19,15 +19,15 @@ namespace volume
         namespace fourier_utilities
         {   
             /**
-             * Calculates the resolution of a miller index. 
+             * Calculates the resolution of a miller index, in Angstroems. 
              * First the size of the reciprocal lattice is calculated, which is
              * then used to calculate the resolution
              * @param index 
-             * @param gamma
-             * @param a cell length a
-             * @param b cell length b
-             * @param c cell length c
-             * @return resolution
+             * @param gamma real space angle in radians
+             * @param a cell length a, in Angstroems
+             * @param b cell length b, in Angstroems
+             * @param c cell length c, in Angstroems
+             * @return resolution, in Angstroems
              */
             double GetResolution(const volume::data::MillerIndex& index, 
                     double gamma, double a, double b, double c);

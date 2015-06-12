@@ -16,7 +16,8 @@ double volume::utilities::fourier_utilities::GetResolution
         std::cerr << "ERROR! Encountered 0 in cell dimensions while calculating resolution.";
         return 0;
     }
-    
+     
+    //std::cerr << "::GetResolution: a,b,c,gamma = "<<a<<","<<b<<","<<c<<",  "<<gamma<<"\n";
     //Return infinite resolution if all three h,k,l are 0
     if(index.h() == 0 && index.k() == 0 && index.l() == 0)
     {
@@ -28,7 +29,7 @@ double volume::utilities::fourier_utilities::GetResolution
     double astar = 1.0 / ( a * sin(gamma));
     double bstar = 1.0 / ( b * sin(gamma));
     double cstar = 1.0 / c;
-    
+
     double recgamma = M_PI - gamma;
     
     double dstar_sq = ( pow(index.h()*astar,2) 

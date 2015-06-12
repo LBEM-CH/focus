@@ -488,7 +488,7 @@ void ds::Volume2dx::apply_density_histogram(Volume2dx reference, double fraction
         new_data->set_value_at(sorted_id, new_density);
     }
     
-    new_data->scale(_real->min(), _real->max());
+    new_data->scale(new_data->min(), _real->max());
     this->set_real(*new_data);
     
 }

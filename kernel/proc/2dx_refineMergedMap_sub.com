@@ -52,43 +52,13 @@ echo "<<@progress: +10>"
 ${proc_2dx}/linblock "Preparing appropriate files for bead-model map"
 ###########################################################################
 #
-set bead_model_pdb = "SCRATCH/bead_model.pdb"
-#
-\rm -f ${bead_model_pdb}
-#---------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --pdbout ${bead_model_pdb} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}"
-#---------------------------------------------------------------------------
-${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --pdbout ${bead_model_pdb} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}
-#
-set bead_model_e2pdb2mrc = "SCRATCH/bead_model_e2pdb2mrc.mrc"
-#
-\rm -f ${bead_model_e2pdb2mrc}
-#
-e2pdb2mrc.py -R ${maximum_resolution_bead} -A 1.0 -B ${ALAT} ${bead_model_pdb} ${bead_model_e2pdb2mrc}
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "E2PROC3D.PY: Correcting the size of bead model mrc"
-#------------------------------------------------------------------------
-#
-set bead_model_mrc = "SCRATCH/bead_model.mrc"
-#
-\rm -f ${bead_model_mrc}
-#
-set size_x = `printf %.0f ${cellx}`
-set size_y = `printf %.0f ${celly}`
-set size_z = `printf %.0f ${ALAT}`
-set input_size = "${size_x},${size_y},${size_z}"
-echo "Chopping to ${input_size}"
-#
-e2proc3d.py --clip ${input_size} ${bead_model_e2pdb2mrc} ${bead_model_mrc}
-#
 set bead_model_map = "bead_model.map"
 #
 \rm -f ${bead_model_map}
-#
-echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_mrc} --mrcout ${bead_model_map}"
-${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${bead_model_mrc} --mrcout ${bead_model_map} 
-#
+#---------------------------------------------------------------------------
+echo ":Launching ${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --pdbout ${bead_model_map} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}"
+#---------------------------------------------------------------------------
+${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_map} -b ${number_of_beads} --threshold ${density_threshold_bead} --res ${maximum_resolution_bead}
 #
 echo "# IMAGE: ${bead_model_map} <Bead model map>" >> LOGS/${scriptname}.results
 #

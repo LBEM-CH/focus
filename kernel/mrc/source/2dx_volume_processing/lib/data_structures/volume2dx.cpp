@@ -79,10 +79,11 @@ std::string ds::Volume2dx::data_string() const
     
     if(has_fourier())
     {
+        MillerIndex max_index = max_resolution_spot();
         output += ":\tFourier data in memory.\n" ;
         output += ":\t|Number of spots: " + std::to_string(_fourier->spots()) + "\n";
         output += ":\t|Intensity sum: " + std::to_string(_fourier->intensity_sum()) + "\n";
-        output += ":\t|Spot with maximum resolution: " + max_resolution_spot().to_string() + " - " + std::to_string(max_resolution()) + " A\n";
+        output += ":\t|Spot with maximum resolution: " + max_index.to_string() + " - " + std::to_string(resolution_at(max_index.h(), max_index.k(), max_index.l())) + " A\n";
         output += ":\n";
     }
     
@@ -166,9 +167,18 @@ ds::MillerIndex ds::Volume2dx::max_resolution_spot() const
 {
     if(has_fourier())
     {
-        FourierSpaceData::const_iterator itr = _fourier->end();
-        itr--;
-        return (*itr).first;
+        MillerIndex spot;
+        double maxres = 10000;
+        for(FourierSpaceData::const_iterator itr=_fourier->begin(); itr!=_fourier->end(); ++itr)
+        {
+            MillerIndex index = (*itr).first;
+            double res = resolution_at(index.h(), index.k(), index.l());
+            if(res < maxres)
+            {
+                spot = index;
+            }
+        }
+        return spot;
     }
     else
     {
@@ -179,18 +189,8 @@ ds::MillerIndex ds::Volume2dx::max_resolution_spot() const
 
 double ds::Volume2dx::max_resolution() const
 {
-    if(has_fourier())
-    {
-        FourierSpaceData::const_iterator itr = _fourier->end();
-        itr--;
-        MillerIndex index  = (*itr).first;
-        return resolution_at(index.h(), index.k(), index.l());
-    }
-    else
-    {
-        std::cerr << "WARNING: Can't calculate max resolution, Fourier data not in memory!!\n";
-        return resolution_at(0,0,0);
-    }
+    MillerIndex index = max_resolution_spot();
+    return resolution_at(index.h(), index.k(), index.l());
 }
 
 void ds::Volume2dx::rescale_to_max_amplitude(double max_amplitude)

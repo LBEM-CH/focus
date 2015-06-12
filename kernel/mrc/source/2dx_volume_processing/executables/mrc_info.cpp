@@ -26,6 +26,9 @@ int main(int argc, char* argv[])
     //Prepare the input
     Volume2dx input;
     input.read_volume(args::templates::MRCIN.getValue());
+    
+    input.prepare_real();
+    input.prepare_fourier();
     std::cout << input.to_string();
     
     return 0;

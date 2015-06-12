@@ -34,14 +34,7 @@ double volume::utilities::fourier_utilities::GetResolution
           + pow(index.l()*cstar,2) );
         
     double final_resolution = 1.0 / sqrt(dstar_sq);
-     
-    //Sanity Check
-    //if(final_resolution < 12.0 || final_resolution > 100000)
-    //{
-    //    std::cerr << "WARNING: Resolution of spot (" << index.h() << ", " << index.k() << ", " << index.l() << ") = " << final_resolution << " exceeds limits\n";
-    //    std::cout << resolution_x_f << " " << resolution_y_f << " " << resolution_z_f << "\n";
-    //}
-    
+        
     //std::cout << ":: h,k,l = " << index.h() <<","<< index.k()<<","<<index.l()<<", RES=" << final_resolution << "\n";
     
     return final_resolution;

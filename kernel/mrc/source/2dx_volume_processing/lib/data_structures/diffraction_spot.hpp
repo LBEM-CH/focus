@@ -64,6 +64,13 @@ namespace volume
             DiffractionSpot operator+(const DiffractionSpot& rhs);
             
             /**
+             * Declaration of multiplication of a double with Diffraction spot
+             * @param factor
+             * @return 
+             */
+            DiffractionSpot operator*( double factor);
+            
+            /**
              * Definition of == operator.
              * Checks for the equality of both value and weight
              * @param rhs

@@ -118,7 +118,7 @@ int main(int argc, char** argv)
         output_volume.apply_structure_factors(ref_structure_factors, 0.1);
         
         //Apply low pass filter
-        output_volume.low_pass(max_resolution);
+        //output_volume.low_pass(max_resolution);
         
         //Done with this iteration.
         //Prepare to write output

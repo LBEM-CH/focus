@@ -7,6 +7,7 @@
 #include <iostream>
 #include <math.h>
 
+#include "common_definitions.hpp"
 #include "fourier_space_data.hpp"
 
 
@@ -14,13 +15,20 @@ namespace ds = volume::data;
 
 ds::FourierSpaceData::FourierSpaceData()
 {
-    _data = new std::map<MillerIndex, DiffractionSpot>;
+    _data = new std::map<MillerIndex, DiffractionSpot>();
 }
 
 ds::FourierSpaceData::FourierSpaceData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap)
 {
-    _data = new std::map<MillerIndex, DiffractionSpot>;
+    _data = new std::map<MillerIndex, DiffractionSpot>();
+    std::map<MillerIndex, DiffractionSpot> back_projected_map = backproject(spot_multimap);
+    _data->insert(back_projected_map.begin(), back_projected_map.end());
     
+}
+
+std::map<ds::MillerIndex, ds::DiffractionSpot> ds::FourierSpaceData::backproject(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap) const
+{
+    std::map<MillerIndex, DiffractionSpot> map;
     bool initialized = false;
     
     ds::MillerIndex current_index;
@@ -40,7 +48,7 @@ ds::FourierSpaceData::FourierSpaceData(const std::multimap<MillerIndex, Diffract
         if(!(current_index == (*spot_itr).first))
         {
             ds::DiffractionSpot avg_spot(current_spots);
-            this->set_value_at(current_index.h(), current_index.k(), current_index.l(), avg_spot.value(), avg_spot.weight());
+            map.insert(std::pair<MillerIndex, DiffractionSpot>(current_index, avg_spot));
             current_spots.clear();
         }
         
@@ -52,7 +60,9 @@ ds::FourierSpaceData::FourierSpaceData(const std::multimap<MillerIndex, Diffract
     
     //insert the final reflection
     ds::DiffractionSpot avg_spot(current_spots);
-    this->set_value_at(current_index.h(), current_index.k(), current_index.l(), avg_spot.value(), avg_spot.weight());
+    map.insert(std::pair<MillerIndex, DiffractionSpot>(current_index, avg_spot));
+    
+    return map;
 }
 
 void ds::FourierSpaceData::reset()
@@ -275,7 +285,45 @@ ds::FourierSpaceData ds::FourierSpaceData::invert_hand() const
 
 void ds::FourierSpaceData::spread_data()
 {
-    //TODO
+    std::cout << "Spreading the data in Fourier space.. \n";
+    std::cout << "Current spots: " << spots() << "\n";
+    std::multimap<MillerIndex, DiffractionSpot> spreaded_raw;
+    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
+    {
+        MillerIndex index_in = (*ref).first;
+        DiffractionSpot spot_in = (*ref).second;
+        
+        //Insert this spot
+        spreaded_raw.insert(MillerIndexDiffSpotPair(index_in, spot_in));
+        
+        //Spread this spot to neighbors if not present
+        for(int ih=-2; ih<=2; ih++)
+        {
+            for(int ik=-2; ik<=2; ik++)
+            {
+                for(int il=-2; il<=2; il++)
+                {
+                    MillerIndex new_index = MillerIndex(index_in.h()+ih, index_in.k()+ik, index_in.l()+il);
+                    if(!exists(new_index.h(), new_index.k(), new_index.l()))
+                    {
+                        double distance_square = il*il + ik*ik + ih*ih;
+                        
+                        //1.6 is to make the integral of exponential 1
+                        double weight = exp(-1.6*distance_square);
+                        spreaded_raw.insert(MillerIndexDiffSpotPair(new_index, spot_in*weight));
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    std::map<MillerIndex, DiffractionSpot> spreaded_map = backproject(spreaded_raw);
+    
+    _data->clear();
+    _data->insert(spreaded_map.begin(), spreaded_map.end());
+    
+    std::cout << "Spots after spread: " << spots() << "\n";
     
 }
 

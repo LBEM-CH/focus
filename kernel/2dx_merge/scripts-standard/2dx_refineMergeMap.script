@@ -26,7 +26,6 @@
 # DISPLAY: maximum_resolution_bead
 # DISPLAY: number_refinement_iterations
 # DISPLAY: membrane_height
-# DISPLAY: maximum_amplitude_refinement
 # DISPLAY: density_threshold_refinement
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX

@@ -456,6 +456,11 @@ namespace volume
              */
             Volume2dx subsample(int factor);
             
+            /**
+             * Spreads the data in the Fourier space and tries to fill in the missing spots.
+             * @return new volume with spreaded data
+             */
+            Volume2dx spread_fourier_data();
             
             /**
              * Expands the data to include negative h as well, so that full

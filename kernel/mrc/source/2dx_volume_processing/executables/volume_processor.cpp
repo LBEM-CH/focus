@@ -21,7 +21,10 @@ int main(int argc, char* argv[])
     //Add arguments  
     exe.add(args::templates::MRCOUT);
     exe.add(args::templates::HKLOUT);
+    exe.add(args::templates::NORMALIZE_GREY);
+    exe.add(args::templates::SPREAD_FOURIER);
     exe.add(args::templates::FULL_FOURIER);
+    exe.add(args::templates::SUBSAMPLE);
     exe.add(args::templates::PSF);
     exe.add(args::templates::INVERTED);
     exe.add(args::templates::EXTENDED);
@@ -33,7 +36,7 @@ int main(int argc, char* argv[])
     exe.add(args::templates::NZ);
     exe.add(args::templates::NY);
     exe.add(args::templates::NX);
-    exe.add(args::templates::SUBSAMPLE);
+    
     
     std::vector<args::Arg*> infileArgs = {&args::templates::HKZIN, &args::templates::HKLIN, &args::templates::MRCIN};
     exe.xorAdd(infileArgs);
@@ -83,6 +86,8 @@ int main(int argc, char* argv[])
     //Would need to overwrite gamma from mrc header
     if(args::templates::GAMMA.isSet()) input.set_gamma_degrees(args::templates::GAMMA.getValue());
     
+    if(args::templates::SPREAD_FOURIER.getValue()) input = input.spread_fourier_data();
+    
     if(args::templates::MAXRES.isSet()) input.low_pass(args::templates::MAXRES.getValue());
     if(args::templates::SYMMETRY.isSet())
     {
@@ -107,6 +112,8 @@ int main(int argc, char* argv[])
     if(args::templates::SUBSAMPLE.isSet()) input = input.subsample(args::templates::SUBSAMPLE.getValue());
     
     if(args::templates::FULL_FOURIER.getValue()) input.extend_to_full_fourier();
+    
+    if(args::templates::NORMALIZE_GREY.getValue()) input.grey_scale_densities();
     
     if(args::templates::HKLOUT.isSet()) input.write_volume(args::templates::HKLOUT.getValue(), "hkl");
     if(args::templates::MRCOUT.isSet()) input.write_volume(args::templates::MRCOUT.getValue());

@@ -66,6 +66,11 @@ ds::DiffractionSpot ds::DiffractionSpot::operator +(const DiffractionSpot& rhs)
                           );
 }
 
+ds::DiffractionSpot ds::DiffractionSpot::operator *(double factor)
+{
+    return ds::DiffractionSpot(value()*factor, weight());
+}
+
 bool ds::DiffractionSpot::operator ==(const DiffractionSpot& rhs) const
 {
     return (this->value() == rhs.value() && this->weight() == rhs.weight());

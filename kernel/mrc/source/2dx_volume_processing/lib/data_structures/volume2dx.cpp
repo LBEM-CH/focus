@@ -644,6 +644,16 @@ ds::Volume2dx ds::Volume2dx::zero_phases()
     return new_volume;
 }
 
+ds::Volume2dx ds::Volume2dx::spread_fourier_data()
+{
+    FourierSpaceData data = get_fourier();
+    data.spread_data();
+    
+    Volume2dx new_volume(header());
+    new_volume.set_fourier(data);
+    return new_volume;
+}
+
 void ds::Volume2dx::extend_to_full_fourier() 
 {
     FourierSpaceData data = get_fourier();

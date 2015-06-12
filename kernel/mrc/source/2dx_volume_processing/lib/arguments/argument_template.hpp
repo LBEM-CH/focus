@@ -48,6 +48,8 @@ namespace volume
             static TCLAP::SwitchArg INVERTED("", "inverted", "Produce an output map with inverted hand", false);
             static TCLAP::SwitchArg PSF("", "psf", "Produce an Point Spread Function(PSF) output map (works only with mrcout)", false);
             static TCLAP::SwitchArg FULL_FOURIER("", "full-fourier", "Produce a full P1 Fourier space in output (noticeable only with hklout)", false);
+            static TCLAP::SwitchArg SPREAD_FOURIER("", "spread-fourier", "Spread the data in Fourier space to fill some missing spots", false);
+            static TCLAP::SwitchArg NORMALIZE_GREY("", "normalize-grey", "Normalizes the grey scale between 0 and 100", false);
             
         }
     }

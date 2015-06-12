@@ -15,9 +15,9 @@ set back_projected_map = "back_projected.map"
 \rm -f ${back_projected_map}
 #
 #-----------------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout ${back_projected_hkl} --mrcout ${back_projected_map}"
+echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --spread-fourier --normalize-grey --threshold 0 --hklout ${back_projected_hkl} --mrcout ${back_projected_map}"
 #-----------------------------------------------------------------------------------
-${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --amp ${maximum_amplitude_refinement} --hklout ${back_projected_hkl} --mrcout ${back_projected_map}
+${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --spread-fourier --normalize-grey --threshold 0 --hklout ${back_projected_hkl} --mrcout ${back_projected_map}
 #
 #
 echo "# IMAGE: ${back_projected_hkl} <Back-Projected HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results
@@ -93,6 +93,9 @@ set refined_map = "processed.map"
 #------------------------------------------------------------------------------
 echo ":Launching ${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}"
 #------------------------------------------------------------------------------
+touch SCRATCH/refined_dummy
+\rm -f SCRATCH/refined_*
+#
 ${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}
 #
 echo "# IMAGE: ${refined_hkl} <Refined HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results

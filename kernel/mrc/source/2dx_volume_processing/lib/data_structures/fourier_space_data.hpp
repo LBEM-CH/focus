@@ -184,6 +184,18 @@ namespace volume
         private:
             
             /**
+             * Back projects the multi-map of miller index and diffraction spot.
+             * Internally converts a multi-map of miller index to diffraction spots
+             * to a map of miller index to diffraction spot. In the input
+             * multi-map, there can exist multiple diffraction spots assigned to
+             * one miller index, which will be converted to a map where only
+             * one diffraction spot is assigned to a miller index.
+             * @param spot_multimap
+             * @return map of MillerIndex and DiffractionSport
+             */
+            std::map<MillerIndex, DiffractionSpot> backproject(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap) const;
+            
+            /**
              * Data stored as a map of Miller Index and it's value
              */
             std::map<MillerIndex, DiffractionSpot>* _data;

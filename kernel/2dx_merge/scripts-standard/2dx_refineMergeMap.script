@@ -95,3 +95,10 @@ ${proc_2dx}/linblock "${scriptname} normal end."
 #
 echo "<<@progress: 100>>"
 #
+exit
+#
+# These are here only to make sure they show up in the GUI:
+source ${proc_2dx}/2dx_hkl_to_mtz.com
+source ${proc_2dx}/2dx_extend_map.com
+source ${proc_2dx}/2dx_create_subvolume.com
+#

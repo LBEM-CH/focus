@@ -51,11 +51,12 @@ if ( ${mode} == 0 ) then
     setenv OUT ${scalimamp_out}
     \rm -f ${scalimamp_out}
     #
+    set RESMAX_local = 2.0
     echo ": "
     echo ": calling 2dx_scalimamp3d.exe with the following parameters:"
     echo ": ${scalimamp3d_refdata}"
     echo ": 0,F,${scalimamp3d_BXYMINMAX},${scalimamp3d_BZMINMAX} ! NPROG,TWOFOLD,BXYMIN,BXYMAX,BZMIN,BZMAX"
-    echo ": ${RESMAX}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA"
+    echo ": ${RESMAX_local}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA"
     echo ": APH/merge.aph"
     echo ": ${realcell}, ${realang}, ${RESMAX} !  A,B,GAMMA,RESOL"
     echo ":  "
@@ -63,9 +64,9 @@ if ( ${mode} == 0 ) then
     ${bin_2dx}/2dx_scalimamp3d.exe << eot 
 ${scalimamp3d_refdata}
 0,F,${scalimamp3d_BXYMINMAX},${scalimamp3d_BZMINMAX} ! NPROG,TWOFOLD,BXYMIN,BXYMAX,BZMIN,BZMAX
-${RESMAX}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA
+${RESMAX_local}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA
 APH/merge.aph
-${realcell}, ${realang}, ${RESMAX} !  A,B,GAMMA,RESOL
+${realcell}, ${realang}, ${RESMAX_local} !  A,B,GAMMA,RESOL
 eot
     #
     if ( ! -e ${scalimamp_out} ) then
@@ -386,8 +387,8 @@ else
   echo "celly = ${celly}"
   echo "cellz = ${ALAT}" 
   #
-  echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl"
-  ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl
+  echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey"
+  ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey
   #
   echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #

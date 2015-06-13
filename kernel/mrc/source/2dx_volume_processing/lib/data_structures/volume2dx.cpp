@@ -353,8 +353,14 @@ void ds::Volume2dx::apply_structure_factors(ds::StructureFactors sf_ref, double 
             double resolution = 1 / resolution_at(index.h(), index.k(), index.l());
 
             //Find the appropriate intensity
-
-            double sf_ref_intensity = sf_ref.intensity_at(resolution);
+            double sf_ref_intensity;
+            if ( resolution < 0.1415 )
+            {    sf_ref_intensity = sf_ref.intensity_at(resolution);
+            }
+            else  
+            {    sf_ref_intensity = sf_ref.intensity_at(0.1415);
+            }
+            
             double sf_curr_intensity = sf_current.intensity_at(resolution);
 
             if ( sf_ref_intensity != -1 && sf_curr_intensity != -1 ) {

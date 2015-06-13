@@ -85,7 +85,7 @@ volume::data::FourierSpaceData volume::io::reflection::read(std::string file_pat
         std::cout << "----------------------------------------------\n\n";
         while (hkzFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> dummy >> wt_in >> dummy)
         {
-            if(wt_in>90) wt_in = 0;
+            if(wt_in>90) wt_in = 90;
             wt_in = volume::utilities::angle_utilities::DegreeToRadian(wt_in);
             add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, cos(wt_in), z_scale, raw_ccp4);
         }

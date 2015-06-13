@@ -5,6 +5,11 @@
 # This file has to be sourced from another csh.
 #
 #
+#
+#
+echo "# IMAGE-IMPORTANT: APH/latlines.dat <APH: latlines.dat input file from last merging [H,K,Z,A,P,SigA,SigP,IQ]>" >> LOGS/${scriptname}.results
+#
+#
 #--------------------------------------------------------------------------
 ${proc_2dx}/linblock "Preparing appropriate files for back-projected map"
 #--------------------------------------------------------------------------

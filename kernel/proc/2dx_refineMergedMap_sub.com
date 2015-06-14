@@ -100,7 +100,8 @@ touch SCRATCH/refined_dummy
 #
 set num = 1
 while ( ${num} <= ${number_refinement_iterations} ) 
-  echo "# IMAGE: SCRATCH/refined_${num}.map <MAP: Refined scratch map ${num}>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/refined_${num}.map <MAP: Refinement scratch map, iteration ${num}>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/mask_iteration_${num}.map <MAP: Refinement mask map, iteration ${num}>" >> LOGS/${scriptname}.results
   @ num += 1
 end  
 #

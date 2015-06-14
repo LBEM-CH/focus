@@ -115,7 +115,7 @@ int main(int argc, char** argv)
         output_volume.replace_reflections(input_volume.get_fourier(), 0.6);
         
         //Apply structure factors
-        output_volume.apply_structure_factors(ref_structure_factors, 0.1);
+        output_volume.apply_structure_factors(ref_structure_factors, 0.3);
         
         //Apply low pass filter
         //output_volume.low_pass(max_resolution);
@@ -138,8 +138,11 @@ int main(int argc, char** argv)
     
     std::cout << "\n::Done with the iterations.\n";
     
-    //Symmetrize
+    //Resolution limit
+    //output_volume.low_pass_butterworth(max_resolution);
     output_volume.low_pass(max_resolution);
+
+    //Symmetrize
     output_volume.symmetrize();
 
     //Prepare real/Fourier volumes

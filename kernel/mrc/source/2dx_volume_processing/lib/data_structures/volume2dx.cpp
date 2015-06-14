@@ -353,20 +353,39 @@ void ds::Volume2dx::apply_structure_factors(ds::StructureFactors sf_ref, double 
             double resolution = 1 / resolution_at(index.h(), index.k(), index.l());
 
             //Find the appropriate intensity
+            double resconstant = 7.0;
+            double rec_resconstant = 1.0 / resconstant;
+            
             double sf_ref_intensity;
-            if ( resolution < 0.1415 )
+            if ( resolution < rec_resconstant )
             {    sf_ref_intensity = sf_ref.intensity_at(resolution);
             }
             else  
-            {    sf_ref_intensity = sf_ref.intensity_at(0.1415);
+            {    sf_ref_intensity = sf_ref.intensity_at(rec_resconstant);
             }
             
             double sf_curr_intensity = sf_current.intensity_at(resolution);
-
+            
+            /* 
+            double rec_falloff = 0.04;
+            double maxres = 3.5;  // <===== This should be the max_resolution parameter.
+            double rec_maxres = 1.0 / maxres;
+            */
+            
             if ( sf_ref_intensity != -1 && sf_curr_intensity != -1 ) {
                 double amplitude_scale = 0.0;
                 if ( sf_curr_intensity != 0.0 ) amplitude_scale = sqrt(max_scale * sf_ref_intensity / sf_curr_intensity);
-
+ 
+                /* 
+                // This doesn't work:
+                if ( resolution > rec_maxres ) {    
+                    double factor = (rec_maxres + rec_falloff - resolution) / rec_falloff;
+                    if ( factor > 1.0 ) factor = 1.0;
+                    if ( factor < 0.0 ) factor = 0.0;
+                    amplitude_scale = amplitude_scale * factor;
+                } 
+                */   
+                 
                 double current_amplitude = spot.amplitude();
                 double new_amplitude = amplitude_scale*current_amplitude;
 

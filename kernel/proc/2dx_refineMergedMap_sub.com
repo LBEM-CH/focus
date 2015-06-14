@@ -95,12 +95,18 @@ set refined_map = "processed.map"
 \rm -f ${refined_hkl}
 \rm -f ${refined_map}
 #
-#------------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}"
-#------------------------------------------------------------------------------
 touch SCRATCH/refined_dummy
 \rm -f SCRATCH/refined_*
 #
+set num = 1
+while ( ${num} <= ${number_refinement_iterations} ) 
+  echo "# IMAGE: SCRATCH/refined_${num}.map <MAP: Refined scratch map ${num}>" >> LOGS/${scriptname}.results
+  @ num += 1
+end  
+#
+#------------------------------------------------------------------------------
+echo ":Launching ${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}"
+#------------------------------------------------------------------------------
 ${bin_2dx}/2dx_volume_processing/refine_volume.exe --mrcin ${back_projected_map} --refin ${bead_model_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}
 #
 echo "# IMAGE: ${refined_hkl} <Refined HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results

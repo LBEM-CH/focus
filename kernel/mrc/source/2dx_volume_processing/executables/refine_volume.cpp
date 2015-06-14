@@ -106,7 +106,11 @@ int main(int argc, char** argv)
         output_volume.apply_density_slab(membrane_slab, 0.1, true);
         
         //Apply density threshold
-        output_volume.apply_density_threshold(density_threshold, 0.5);
+        //output_volume.apply_density_threshold(density_threshold, 0.5);
+        
+        //Apply shrinkwrap
+        Volume2dx mask = output_volume.apply_shrinkwrap(density_threshold, 15, 0.5);
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_iteration_" + std::to_string(iteration+1) + ".map", "map");
         
         //Apply density histogram
         output_volume.apply_density_histogram(ref_volume, 0.5);

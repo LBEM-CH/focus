@@ -525,6 +525,25 @@ void ds::Volume2dx::apply_density_threshold(double limit, double fraction)
    set_real(data);
 }
 
+ds::Volume2dx ds::Volume2dx::apply_shrinkwrap(double threshold, double mask_resolution, double fraction)
+{
+    
+    Volume2dx mask(header());
+    mask.set_fourier(get_fourier());
+    mask.low_pass(mask_resolution);
+    
+    RealSpaceData mask_real = mask.get_real().binary_mask(threshold);
+    mask.set_real(mask_real);
+    
+    RealSpaceData new_data = get_real();
+    new_data.apply_mask(mask_real, fraction);
+    
+    set_real(new_data);
+    
+    //return mask for debug purposes
+    return mask;
+}
+
 void ds::Volume2dx::apply_density_slab(double height, double fraction, bool centered)
 {
     std::cout << "Applying density slab along vertical direction to the volume.. \n";

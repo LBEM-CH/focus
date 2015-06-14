@@ -335,3 +335,56 @@ void ds::RealSpaceData::grey_scale()
 {
     scale(0, 255);
 }
+
+ds::RealSpaceData ds::RealSpaceData::binary_mask(double threshold)
+{
+    std::cout << "Creating binary mask with limit = " << threshold << "\n";
+    
+    RealSpaceData mask(nx(), ny(), nz());
+    for(int ix=0; ix < nx(); ix++)
+    {
+        for(int iy=0; iy < ny(); iy++)
+        {
+            for(int iz=0; iz < nz(); iz++)
+            {
+                double density = get_value_at(ix, iy, iz);
+                if(density < threshold)
+                {
+                    mask.set_value_at(ix, iy, iz, 0.0);
+                }
+                else
+                {
+                    mask.set_value_at(ix, iy, iz, 1.0);
+                }
+            }
+        }
+    }
+    
+    return mask;
+}
+
+void ds::RealSpaceData::apply_mask(const RealSpaceData& mask, double fraction)
+{
+    if(mask.nx() != nx() || mask.ny() != ny() || mask.nz() != nz())
+    {
+        std::cerr << "WARNING: Found different sizes for mask and volume. NOT MASKING!!!\n";
+        return;   
+    }
+    
+    std::cout << "Applying mask with fraction = " << fraction << "\n";
+    for(int ix=0; ix < nx(); ix++)
+    {
+        for(int iy=0; iy < ny(); iy++)
+        {
+            for(int iz=0; iz < nz(); iz++)
+            {
+                double density = get_value_at(ix, iy, iz);
+                double mask_density = mask.get_value_at(ix, iy, iz);
+                if(mask_density <= 0.0)
+                {
+                    set_value_at(ix, iy, iz, density*(1-fraction));
+                }
+            }
+        }
+    }
+}

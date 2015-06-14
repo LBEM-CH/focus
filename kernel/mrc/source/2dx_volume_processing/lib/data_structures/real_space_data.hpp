@@ -195,6 +195,22 @@ namespace volume
              */
             void grey_scale();
             
+            /**
+             * Thresholds the volume, and returns a binary mask.
+             * @param threshold - value of density threshold
+             * @return mask
+             */
+            RealSpaceData binary_mask(double threshold);
+            
+            /**
+             * Mask the real space data with a mask. It will fractionally delete all densities 
+             * where the mask is <=0. Fraction=0.0 will not change at all, and fraction = 1.0
+             * will do a complete masking.
+             * @param mask
+             * @param fraction
+             */
+            void apply_mask(const RealSpaceData& mask, double fraction = 1.0);
+            
         private:
             /**
              * A member initializer function with the size integers

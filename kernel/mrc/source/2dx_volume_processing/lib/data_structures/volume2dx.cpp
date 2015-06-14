@@ -560,6 +560,71 @@ void ds::Volume2dx::low_pass(double high_resolution)
     std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
 }
 
+void ds::Volume2dx::low_pass_butterworth(double high_resolution)
+{
+    prepare_fourier();
+    std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
+    
+    double low_resolution = std::max(std::max(nx(), ny()), nz());
+    
+    double omegaL = 1.0/low_resolution;
+    double omegaH = 1.0/high_resolution;
+    double eps = 0.882;
+    double aa = 10.624;
+    double order = 2.0f*log10(eps/sqrt(aa*aa-1.0f))/log10(omegaL/omegaH);
+    omegaL = omegaL/pow(eps,2.0f/order); 
+    
+    std::cout << "Low passing using Butterworth filter with expected maximum resolution: " << high_resolution << " A\n";
+    
+    ds::FourierSpaceData current_data = get_fourier();
+    FourierSpaceData new_data;
+    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    {
+        //Get the data for current reflection
+        MillerIndex index = (*itr).first;
+        DiffractionSpot spot = (*itr).second;
+        double resolution = 1/resolution_at(index.h(), index.k(), index.l());
+        double weight = sqrt(1.0/(1.0+pow(resolution/omegaL, order)));
+        new_data.set_value_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
+        std::cout << index.to_string() << "(" << 1/resolution << " A)" << " had weight of: " << weight << "\n";
+        
+    }
+    
+    set_fourier(new_data);
+    
+    std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
+    
+}
+
+void ds::Volume2dx::low_pass_gaussian(double high_resolution)
+{
+    prepare_fourier();
+    std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
+    
+    std::cout << "Gaussian low pass with expected highest resolution = " << high_resolution << " A\n";
+    
+    double omega_square = 4*high_resolution*high_resolution;
+    
+    ds::FourierSpaceData current_data = get_fourier();
+    FourierSpaceData new_data;
+    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    {
+        //Get the data for current reflection
+        MillerIndex index = (*itr).first;
+        DiffractionSpot spot = (*itr).second;
+        double resolution = 1/resolution_at(index.h(), index.k(), index.l());
+        double weight = exp(-1*resolution*resolution*omega_square);
+        new_data.set_value_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
+        //std::cout << index.to_string() << "(" << 1/resolution << " A)" << " had weight of: " << weight << "\n";
+        
+    }
+    
+    set_fourier(new_data);
+    
+    std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
+    
+}
+
 ds::Volume2dx ds::Volume2dx::subsample(int factor)
 {
     std::cout << "Sub-sampling volume by " << factor << " times.\n";

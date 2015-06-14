@@ -408,17 +408,29 @@ namespace volume
             void apply_density_threshold(double limit=0.0, double fraction=1.0);
             
             /**
-             * Apply a band pass filter to the volume.
+             * Apply a top-hat band pass filter to the volume.
              * @param low_resolution - Resolution in A (e.g. 100.0)
              * @param high_resolution - Resolution in A (e.g. 4.0)
              */
             void band_pass(double low_resolution, double high_resolution);
             
             /**
-             * Apply a low pass filter to the volume.
+             * Apply a top-hat low pass filter to the volume.
              * @param high_resolution - Resolution in A (e.g. 4.0)
              */
             void low_pass(double high_resolution);
+            
+            /**
+             * Applies a Butterworth low pass filter
+             * @param high_resolution - highest expected resolution (in A)
+             */
+            void low_pass_butterworth(double high_resolution);
+            
+            /**
+             * Applies a Gaussian low pass filter
+             * @param high_resolution - highest expected resolution (in A)
+             */
+            void low_pass_gaussian(double high_resolution);
             
             /**
              * Sets all phases to zero, for PSF calculation

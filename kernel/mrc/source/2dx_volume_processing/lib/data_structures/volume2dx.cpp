@@ -586,7 +586,7 @@ void ds::Volume2dx::low_pass_butterworth(double high_resolution)
         double resolution = 1/resolution_at(index.h(), index.k(), index.l());
         double weight = sqrt(1.0/(1.0+pow(resolution/omegaL, order)));
         new_data.set_value_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
-        std::cout << index.to_string() << "(" << 1/resolution << " A)" << " had weight of: " << weight << "\n";
+        //std::cout << index.to_string() << "(" << 1/resolution << " A)" << " had weight of: " << weight << "\n";
         
     }
     

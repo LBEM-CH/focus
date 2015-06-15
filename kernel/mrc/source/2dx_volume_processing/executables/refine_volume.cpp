@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     for(int iteration=0; iteration<number_of_iterations; ++iteration)
     {
         std::cout << "\n-----------------------------------\n";
-        std::cout << "::Iteration: " << iteration+1 << std::endl;
+        std::cout << "::Iteration 1st part: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
         //Apply membrane slab
@@ -109,18 +109,15 @@ int main(int argc, char** argv)
         //output_volume.apply_density_threshold(density_threshold, 0.5);
         
         //Apply shrinkwrap
-        Volume2dx mask = output_volume.apply_shrinkwrap(density_threshold, 15, 0.5);
-        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_iteration_" + std::to_string(iteration+1) + ".map", "map");
-        
-        //Apply density histogram
-        output_volume.apply_density_histogram(ref_volume, 0.5);
+        Volume2dx mask = output_volume.apply_shrinkwrap(density_threshold, 15, 0.3);
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_iteration_" + std::to_string(iteration+1) + ".map", "map");
+        volume::data::RealSpaceData mask_real = mask.get_real().binary_mask(density_threshold);
+        mask.set_real(mask_real);
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_iteration_" + std::to_string(iteration+1) + ".map", "map");
         
         //Replace the reflection from that of input
         output_volume.replace_reflections(input_volume.get_fourier(), 0.6);
-        
-        //Apply structure factors
-        output_volume.apply_structure_factors(ref_structure_factors, 0.3);
-        
+      
         //Apply low pass filter
         //output_volume.low_pass(max_resolution);
         
@@ -134,10 +131,36 @@ int main(int argc, char** argv)
         
         if(temp_loc != "")
         {   
-            std::string out_file_name = temp_loc + "/refined_" + std::to_string(iteration+1) +".map";
+            std::string out_file_name = temp_loc + "/refined_1_" + std::to_string(iteration+1) +".map";
             output_volume.write_volume(out_file_name, "map");
         }
-               
+    }
+    
+    for(int iteration=0; iteration<3; ++iteration)
+    {
+        std::cout << "\n-----------------------------------\n";
+        std::cout << "::Iteration 2nd part: " << iteration+1 << std::endl;
+        std::cout << "-----------------------------------\n";
+     
+        //Apply density histogram
+        output_volume.apply_density_histogram(ref_volume, 1.0);
+        
+        //Apply structure factors
+        output_volume.apply_structure_factors(ref_structure_factors, 1.0);
+        
+        //Done with this iteration.
+        //Prepare to write output
+        output_volume.prepare_fourier();
+        output_volume.prepare_real();
+
+        std::cout << "\nIteration result:\n";
+        std::cout << output_volume.data_string();
+        
+        if(temp_loc != "")
+        {   
+            std::string out_file_name = temp_loc + "/refined_2_" + std::to_string(iteration+1) +".map";
+            output_volume.write_volume(out_file_name, "map");
+        }
     }
     
     std::cout << "\n::Done with the iterations.\n";

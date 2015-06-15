@@ -292,6 +292,18 @@ namespace volume
             RealSpaceData get_real();
             
             /**
+             * Sets the Fourier data
+             * @param fourier
+             */
+            void set_fourier(const FourierSpaceData& fourier);
+            
+            /**
+             * Sets the real data
+             * @param real
+             */
+            void set_real(const RealSpaceData& real);
+            
+            /**
              * Prepares the Fourier data, and brings it to memory. Call this
              * function if you know before-hand that Fourier space data will be required.
              */
@@ -524,18 +536,6 @@ namespace volume
              * @return true if real data initialized/ False otherwise
              */
             bool has_real() const;
-            
-            /**
-             * Sets the Fourier data
-             * @param fourier
-             */
-            void set_fourier(const FourierSpaceData& fourier);
-            
-            /**
-             * Sets the real data
-             * @param real
-             */
-            void set_real(const RealSpaceData& real);
             
             /**
              * Sets the Fourier data from the real data. Does FFT internally

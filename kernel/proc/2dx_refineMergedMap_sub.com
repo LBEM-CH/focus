@@ -98,10 +98,22 @@ set refined_map = "processed.map"
 touch SCRATCH/refined_dummy
 \rm -f SCRATCH/refined_*
 #
+touch SCRATCH/mask_volume_dummy
+\rm -f SCRATCH/mask_volume_*
+#
+touch SCRATCH/mask_binary_dummy
+\rm -f SCRATCH/mask_binary_*
+#
 set num = 1
 while ( ${num} <= ${number_refinement_iterations} ) 
-  echo "# IMAGE: SCRATCH/refined_${num}.map <MAP: Refinement scratch map, iteration ${num}>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/mask_iteration_${num}.map <MAP: Refinement mask map, iteration ${num}>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/mask_volume_iteration_${num}.map <MAP: Refinement mask volume map, iteration ${num}>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/mask_binary_iteration_${num}.map <MAP: Refinement mask binary map, iteration ${num}>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/refined_1_${num}.map <MAP: Refinement 1 scratch map, iteration ${num}>" >> LOGS/${scriptname}.results
+  @ num += 1
+end  
+set num = 1
+while ( ${num} <= ${number_refinement_iterations} ) 
+  echo "# IMAGE: SCRATCH/refined_2_${num}.map <MAP: Refinement 2 scratch map, iteration ${num}>" >> LOGS/${scriptname}.results
   @ num += 1
 end  
 #

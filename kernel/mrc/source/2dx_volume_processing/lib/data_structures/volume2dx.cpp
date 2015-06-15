@@ -533,7 +533,7 @@ ds::Volume2dx ds::Volume2dx::apply_shrinkwrap(double threshold, double mask_reso
     mask.low_pass(mask_resolution);
     
     RealSpaceData mask_real = mask.get_real().binary_mask(threshold);
-    mask.set_real(mask_real);
+    //mask.set_real(mask_real);
     
     RealSpaceData new_data = get_real();
     new_data.apply_mask(mask_real, fraction);

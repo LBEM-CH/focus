@@ -353,39 +353,14 @@ void ds::Volume2dx::apply_structure_factors(ds::StructureFactors sf_ref, double 
             double resolution = 1 / resolution_at(index.h(), index.k(), index.l());
 
             //Find the appropriate intensity
-            double resconstant = 7.0;
-            double rec_resconstant = 1.0 / resconstant;
-            
-            double sf_ref_intensity;
-            if ( resolution < rec_resconstant )
-            {    sf_ref_intensity = sf_ref.intensity_at(resolution);
-            }
-            else  
-            {    sf_ref_intensity = sf_ref.intensity_at(rec_resconstant);
-            }
-            
+
+            double sf_ref_intensity = sf_ref.intensity_at(resolution);
             double sf_curr_intensity = sf_current.intensity_at(resolution);
-            
-            /* 
-            double rec_falloff = 0.04;
-            double maxres = 3.5;  // <===== This should be the max_resolution parameter.
-            double rec_maxres = 1.0 / maxres;
-            */
-            
+
             if ( sf_ref_intensity != -1 && sf_curr_intensity != -1 ) {
                 double amplitude_scale = 0.0;
                 if ( sf_curr_intensity != 0.0 ) amplitude_scale = sqrt(max_scale * sf_ref_intensity / sf_curr_intensity);
- 
-                /* 
-                // This doesn't work:
-                if ( resolution > rec_maxres ) {    
-                    double factor = (rec_maxres + rec_falloff - resolution) / rec_falloff;
-                    if ( factor > 1.0 ) factor = 1.0;
-                    if ( factor < 0.0 ) factor = 0.0;
-                    amplitude_scale = amplitude_scale * factor;
-                } 
-                */   
-                 
+
                 double current_amplitude = spot.amplitude();
                 double new_amplitude = amplitude_scale*current_amplitude;
 
@@ -513,7 +488,7 @@ void ds::Volume2dx::apply_density_histogram(Volume2dx reference, double fraction
         new_data->set_value_at(sorted_id, new_density);
     }
     
-    new_data->scale(new_data->min(), _real->max());
+    //new_data->scale(new_data->min(), _real->max());
     this->set_real(*new_data);
     
 }
@@ -525,23 +500,11 @@ void ds::Volume2dx::apply_density_threshold(double limit, double fraction)
    set_real(data);
 }
 
-ds::Volume2dx ds::Volume2dx::apply_shrinkwrap(double threshold, double mask_resolution, double fraction)
+void ds::Volume2dx::apply_real_mask(const RealSpaceData& mask, double fraction)
 {
-    
-    Volume2dx mask(header());
-    mask.set_fourier(get_fourier());
-    mask.low_pass(mask_resolution);
-    
-    RealSpaceData mask_real = mask.get_real().binary_mask(threshold);
-    //mask.set_real(mask_real);
-    
     RealSpaceData new_data = get_real();
-    new_data.apply_mask(mask_real, fraction);
-    
-    set_real(new_data);
-    
-    //return mask for debug purposes
-    return mask;
+    new_data.apply_mask(mask, fraction);   
+    set_real(new_data);   
 }
 
 void ds::Volume2dx::apply_density_slab(double height, double fraction, bool centered)

@@ -420,15 +420,15 @@ namespace volume
             void apply_density_threshold(double limit=0.0, double fraction=1.0);
             
             /**
-             * Applies a shrinkwrap mask to denoise the map. First creates a binary
-             * mask limited to mask_resolution and then applies that fractionally to the
-             * volume. fraction = 1.0 will completely change the mask.
-             * @param threshold
-             * @param mask_resolution
+             * Applies a real mask to volume. Takes as input a binary
+             * mask and then applies that fractionally to the
+             * volume. It will fractionally delete all densities 
+             * where the mask is <=0. Fraction=0.0 will not change at all, and fraction = 1.0
+             * will do a complete masking.
+             * @param mask 
              * @param fraction
-             * @return mask used to apply shrinkwrap
              */
-            Volume2dx apply_shrinkwrap(double threshold=0.0, double mask_resolution=15.0, double fraction=1.0);
+            void apply_real_mask(const RealSpaceData& mask, double fraction=1.0);
             
             /**
              * Apply a top-hat band pass filter to the volume.

@@ -21,9 +21,6 @@
 # DISPLAY: realcell
 # DISPLAY: realang
 # DISPLAY: ALAT
-# DISPLAY: number_of_beads
-# DISPLAY: density_threshold_bead
-# DISPLAY: maximum_resolution_bead
 # DISPLAY: number_refinement_iterations
 # DISPLAY: membrane_height
 # DISPLAY: density_threshold_refinement
@@ -43,9 +40,6 @@ set ALAT = ""
 set RESMIN = ""
 set RESMAX = ""
 set calculate_subvolume = ""
-set number_of_beads = ""
-set density_threshold_bead = ""
-set maximum_resolution_bead = ""
 set number_refinement_iterations = ""
 set membrane_height = ""
 set maximum_amplitude_refinement = ""

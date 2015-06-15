@@ -200,7 +200,7 @@ namespace volume
              * @param threshold - value of density threshold
              * @return mask
              */
-            RealSpaceData binary_mask(double threshold);
+            RealSpaceData binary_mask(double threshold) const;
             
             /**
              * Mask the real space data with a mask. It will fractionally delete all densities 

@@ -336,7 +336,7 @@ void ds::RealSpaceData::grey_scale()
     scale(0, 255);
 }
 
-ds::RealSpaceData ds::RealSpaceData::binary_mask(double threshold)
+ds::RealSpaceData ds::RealSpaceData::binary_mask(double threshold) const
 {
     std::cout << "Creating binary mask with limit = " << threshold << "\n";
     

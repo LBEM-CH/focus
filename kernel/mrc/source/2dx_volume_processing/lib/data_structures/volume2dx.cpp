@@ -747,7 +747,7 @@ ds::Volume2dx ds::Volume2dx::apply_bfactor(double negative_temp_factor)
         MillerIndex index = (*itr).first;
         Complex2dx value = (*itr).second.value();
         double resolution = resolution_at(index.h(), index.k(), index.l());
-        double weight = exp(negative_temp_factor/(4*resolution*resolution));
+        double weight = exp(-1*negative_temp_factor/(4*resolution*resolution));
         new_data.set_value_at(index.h(), index.k(), index.l(), value*weight, (*itr).second.weight());
     }
     

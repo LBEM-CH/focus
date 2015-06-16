@@ -31,6 +31,7 @@
 # DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
 # DISPLAY: bfactor_sharpening
+# DISPLAY: if_bfactor_sharpen
 #
 #$end_local_vars
 #
@@ -51,6 +52,7 @@ set sharpening_algo = ""
 set number_sharpening_iterations = ""
 set sharpening_reference_PDB_file = ""
 set bfactor_sharpening = ""
+set if_bfactor_sharpen = ""
 #
 #$end_vars
 #
@@ -83,7 +85,7 @@ endif
 #
 echo "<<@progress: 5>"
 #
-if(${sharpening_algo} == "0") then
+if(${sharpening_algo} == "1") then
     ###########################################################################
     ${proc_2dx}/linblock "Preparing appropriate files for bead-model map"
     ###########################################################################
@@ -118,7 +120,7 @@ if(${sharpening_algo} == "0") then
     set reference_map = ${bead_model_map}
 endif
 #
-if(${sharpening_algo} == "1") then
+if(${sharpening_algo} == "2") then
     #------------------------------------------------------------------------
     ${proc_2dx}/linblock "E2PDB2MRC.PY: Converting pdb to mrc"
     #------------------------------------------------------------------------
@@ -171,13 +173,7 @@ touch SCRATCH/sharpened_dummy
 \rm -f SCRATCH/sharpened_*
 #
 #
-if(${sharpening_algo} == "2") then
-    #------------------------------------------------------------------------------
-    echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}"
-    #------------------------------------------------------------------------------
-    ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}
-    #
-else
+if(${sharpening_algo} != "0") then
     #------------------------------------------------------------------------------
     echo ":Launching ${bin_2dx}/2dx_volume_processing/sharpen_volume.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}"
     #------------------------------------------------------------------------------
@@ -194,34 +190,48 @@ else
     #------------------------------------------------------------------------------
     #${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}
     #
+else if(${if_bfactor_sharpen} == "y") then
+    cp ${refined_map} ${sharpened_map}
 endif
 #
-echo "# IMAGE: ${sharpened_hkl} <Sharpened HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${sharpened_map} <Sharpened map>" >> LOGS/${scriptname}.results
 #
-#
-set sharpened_mtz = "merge3Dref_Sharpened_MRClefthanded.mtz"
-\rm -f ${sharpened_mtz}
-source ${proc_2dx}/2dx_hkl_to_mtz.com ${sharpened_hkl} ${realcell} ${ALAT} ${realang} ${RESMIN} ${RESMAX} ${sharpened_mtz}
-echo "# IMAGE-IMPORTANT: ${sharpened_mtz} <MTZ: Sharpened Reference 3D MTZ file (MRC lefthanded) [H,K,L,F,P,FOM,SIGF] >" >> LOGS/${scriptname}.results
-#
-set sharpened_extended_map = "sharpened_extended.map"
-set sharpened_sub_map = "sharpened_sub.map"
-#
-\rm -f ${sharpened_extended_map}
-#
-source ${proc_2dx}/2dx_extend_map.com ${sharpened_map} ${sharpened_extended_map}
-#
-echo "# IMAGE-IMPORTANT: ${sharpened_extended_map} <Sharpened extended map 2X2X1 unit cells>" >> LOGS/${scriptname}.results
-#
-\rm -f ${sharpened_sub_map}
-#
-if ( ${calculate_subvolume}x != "0x" ) then 
-    source ${proc_2dx}/2dx_create_subvolume.com ${sharpened_extended_map} ${realcell} ${ALAT} ${sharpened_sub_map}
+if(${if_bfactor_sharpen} == "y") then
+    #------------------------------------------------------------------------------
+    echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${sharpened_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}"
+    #------------------------------------------------------------------------------
+    ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${sharpened_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}
     #
-    echo "# IMAGE-IMPORTANT: ${sharpened_sub_map} <Sharpened sub map>" >> LOGS/${scriptname}.results
 endif
 #
+#
+if(${sharpening_algo} != "0" || ${if_bfactor_sharpen} == "y") then
+    echo "# IMAGE: ${sharpened_hkl} <Sharpened HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${sharpened_map} <Sharpened map>" >> LOGS/${scriptname}.results
+    #
+    #
+    set sharpened_mtz = "merge3Dref_Sharpened_MRClefthanded.mtz"
+    \rm -f ${sharpened_mtz}
+    source ${proc_2dx}/2dx_hkl_to_mtz.com ${sharpened_hkl} ${realcell} ${ALAT} ${realang} ${RESMIN} ${RESMAX} ${sharpened_mtz}
+    echo "# IMAGE-IMPORTANT: ${sharpened_mtz} <MTZ: Sharpened Reference 3D MTZ file (MRC lefthanded) [H,K,L,F,P,FOM,SIGF] >" >> LOGS/${scriptname}.results
+    #
+    set sharpened_extended_map = "sharpened_extended.map"
+    set sharpened_sub_map = "sharpened_sub.map"
+    #
+    \rm -f ${sharpened_extended_map}
+    #
+    source ${proc_2dx}/2dx_extend_map.com ${sharpened_map} ${sharpened_extended_map}
+    #
+    echo "# IMAGE-IMPORTANT: ${sharpened_extended_map} <Sharpened extended map 2X2X1 unit cells>" >> LOGS/${scriptname}.results
+    #
+    \rm -f ${sharpened_sub_map}
+    #
+    if ( ${calculate_subvolume}x != "0x" ) then 
+        source ${proc_2dx}/2dx_create_subvolume.com ${sharpened_extended_map} ${realcell} ${ALAT} ${sharpened_sub_map}
+        #
+        echo "# IMAGE-IMPORTANT: ${sharpened_sub_map} <Sharpened sub map>" >> LOGS/${scriptname}.results
+    endif
+    #
+endif
 echo "<<@progress: +20>"
 #
 #

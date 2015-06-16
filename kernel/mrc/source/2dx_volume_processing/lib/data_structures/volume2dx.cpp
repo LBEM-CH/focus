@@ -733,6 +733,28 @@ void ds::Volume2dx::extend_to_full_fourier()
     set_fourier(new_data);
 }
 
+ds::Volume2dx ds::Volume2dx::apply_bfactor(double negative_temp_factor)
+{
+    std::cout << "Applying a negative B-factor of: " << negative_temp_factor << "\n";
+    
+    Volume2dx new_volume(header());
+    
+    FourierSpaceData data = get_fourier();
+    FourierSpaceData new_data;
+    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    {
+        //Get the data for current reflection
+        MillerIndex index = (*itr).first;
+        Complex2dx value = (*itr).second.value();
+        double resolution = resolution_at(index.h(), index.k(), index.l());
+        double weight = exp(negative_temp_factor/(4*resolution*resolution));
+        new_data.set_value_at(index.h(), index.k(), index.l(), value*weight, (*itr).second.weight());
+    }
+    
+    new_volume.set_fourier(new_data);
+    
+    return new_volume;
+}
 
 double ds::Volume2dx::density_at(int x, int y, int z)
 {

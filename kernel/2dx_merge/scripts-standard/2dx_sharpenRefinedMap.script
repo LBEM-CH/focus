@@ -30,6 +30,7 @@
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
+# DISPLAY: bfactor_sharpening
 #
 #$end_local_vars
 #
@@ -49,6 +50,7 @@ set maximum_resolution_reference_sharpening = ""
 set sharpening_algo = ""
 set number_sharpening_iterations = ""
 set sharpening_reference_PDB_file = ""
+set bfactor_sharpening = ""
 #
 #$end_vars
 #
@@ -169,22 +171,30 @@ touch SCRATCH/sharpened_dummy
 \rm -f SCRATCH/sharpened_*
 #
 #
-#------------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/2dx_volume_processing/sharpen_volume.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}"
-#------------------------------------------------------------------------------
-#
-${bin_2dx}/2dx_volume_processing/sharpen_volume.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}
-#
-set num = 1
-while ( ${num} <= ${number_sharpening_iterations} ) 
-  echo "# IMAGE: SCRATCH/sharpened_${num}.map <MAP: Sharpened scratch map, iteration ${num}>" >> LOGS/${scriptname}.results
-  @ num += 1
-end
-#------------------------------------------------------------------------------
-#echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}"
-#------------------------------------------------------------------------------
-#${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}
-#
+if(${sharpening_algo} == "2") then
+    #------------------------------------------------------------------------------
+    echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}"
+    #------------------------------------------------------------------------------
+    ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${refined_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}
+    #
+else
+    #------------------------------------------------------------------------------
+    echo ":Launching ${bin_2dx}/2dx_volume_processing/sharpen_volume.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}"
+    #------------------------------------------------------------------------------
+    #
+    ${bin_2dx}/2dx_volume_processing/sharpen_volume.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}
+    #
+    set num = 1
+    while ( ${num} <= ${number_sharpening_iterations} ) 
+      echo "# IMAGE: SCRATCH/sharpened_${num}.map <MAP: Sharpened scratch map, iteration ${num}>" >> LOGS/${scriptname}.results
+      @ num += 1
+    end
+    #------------------------------------------------------------------------------
+    #echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}"
+    #------------------------------------------------------------------------------
+    #${bin_2dx}/2dx_volume_processing/volume_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}
+    #
+endif
 #
 echo "# IMAGE: ${sharpened_hkl} <Sharpened HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results
 echo "# IMAGE: ${sharpened_map} <Sharpened map>" >> LOGS/${scriptname}.results

@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
     exe.add(args::templates::SPREAD_FOURIER);
     exe.add(args::templates::FULL_FOURIER);
     exe.add(args::templates::SUBSAMPLE);
+    exe.add(args::templates::BFACTOR);
     exe.add(args::templates::PSF);
     exe.add(args::templates::INVERTED);
     exe.add(args::templates::EXTENDED);
@@ -97,6 +98,8 @@ int main(int argc, char* argv[])
     
     if(args::templates::MAXAMP.isSet()) input.rescale_to_max_amplitude(args::templates::MAXAMP.getValue());
     if(args::templates::THRESHOLD.isSet()) input.apply_density_threshold(args::templates::THRESHOLD.getValue());
+    
+    if(args::templates::BFACTOR.isSet()) input = input.apply_bfactor(args::templates::BFACTOR.getValue());
     
     if(args::templates::EXTENDED.getValue()) input = input.extended_volume(1,1,0);
     if(args::templates::INVERTED.getValue()) input.invert_hand();

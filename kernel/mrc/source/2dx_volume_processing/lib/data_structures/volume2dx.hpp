@@ -503,6 +503,14 @@ namespace volume
              * @return 
              */
             void extend_to_full_fourier();
+            
+            /**
+             * Applies a negative b-factor sharpening to the volume. 
+             * Mathematically multiplies all the amplitudes by 
+             * exp(B/4/resolution**2) 
+             * @param negative_temp_factor
+             */
+            Volume2dx apply_bfactor(double negative_temp_factor);
 
         private:
             

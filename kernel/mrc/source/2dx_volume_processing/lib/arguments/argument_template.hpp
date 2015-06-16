@@ -35,6 +35,7 @@ namespace volume
             static TCLAP::ValueArg<double> MAXRES("R", "res", "maximum expected resolution of the map (default 2.0)", false, 2.0, "FLOAT");
             static TCLAP::ValueArg<double> MAXAMP("a", "amp", "desired maximum amplitude value in the volume (a scaling will be done accordingly)", false, -1.0,"FLOAT");
             static TCLAP::ValueArg<double> THRESHOLD("t", "threshold", "desired density threshold (partially thresholded if used with refinement)", false, -1.0,"FLOAT");
+            static TCLAP::ValueArg<double> BFACTOR("", "bfactor", "Apply a negative b-factor to the volume", false, 0,"FLOAT");
             static TCLAP::ValueArg<int> SUBSAMPLE("", "subsample", "subsample to factor", false, 0,"INT");
 
             static TCLAP::ValueArg<int> BEADS("b", "beads", "number of beads to be used", false, 0,"INT");

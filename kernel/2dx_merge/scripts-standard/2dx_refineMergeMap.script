@@ -27,6 +27,7 @@
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
+# DISPLAY: refinement_mask_resolution
 #
 #$end_local_vars
 #
@@ -44,6 +45,7 @@ set number_refinement_iterations = ""
 set membrane_height = ""
 set maximum_amplitude_refinement = ""
 set density_threshold_refinement = ""
+set refinement_mask_resolution = ""
 set merge_modus = ""
 #
 #$end_vars

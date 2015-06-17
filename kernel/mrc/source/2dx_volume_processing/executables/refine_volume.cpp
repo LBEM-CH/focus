@@ -32,6 +32,7 @@ int main(int argc, char** argv)
     exe.add(args::templates::MRCOUT);
     exe.add(args::templates::HKLOUT);
     exe.add(args::templates::SLAB);
+    exe.add(args::templates::MASK_RES);
     exe.add(args::templates::THRESHOLD);
     exe.add(args::templates::ITERATIONS);
     exe.add(args::templates::MAXRES);
@@ -53,6 +54,9 @@ int main(int argc, char** argv)
     std::string hklout = args::templates::HKLOUT.getValue();
     std::string mrcout = args::templates::MRCOUT.getValue();
     
+    double mask_resolution = 15.0;
+    if(args::templates::MASK_RES.isSet())  mask_resolution = args::templates::MASK_RES.getValue();
+    
     if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()))
     {
         std::cerr << "\n\nERROR: Please specify at least one output with hklout or mrcout!\n";
@@ -67,6 +71,10 @@ int main(int argc, char** argv)
     input_volume.read_volume(mrcin);
     input_volume.set_symmetry(symmetry);
     if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue());  
+    
+    input_volume.rescale_to_max_amplitude(10000);
+    input_volume.apply_density_threshold(0);
+    input_volume.grey_scale_densities();
     input_volume.prepare_fourier();
     input_volume.prepare_real();
     std::cout << input_volume.to_string();
@@ -84,21 +92,24 @@ int main(int argc, char** argv)
         output_volume.replace_reflections(input_volume.get_fourier(), 0.6);
         
         //Apply membrane slab
-        output_volume.apply_density_slab(membrane_slab, 0.1, true);
+        output_volume.apply_density_slab(membrane_slab, 0.5, true);
         
         //Apply shrinkwrap
         Volume2dx mask(output_volume.header());
         mask.set_fourier(output_volume.get_fourier());
-        mask.low_pass(15.0);
+        mask.low_pass(mask_resolution);
         if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_iteration_" + std::to_string(iteration+1) + ".map", "map");
-            
-        volume::data::RealSpaceData mask_real = mask.get_real().binary_mask(density_threshold);
+        
+        double itr_threshold = density_threshold - iteration*density_threshold*(1/number_of_iterations);
+        if(itr_threshold < 0) itr_threshold = 0;
+        volume::data::RealSpaceData mask_real = mask.get_real().binary_mask(itr_threshold);
         mask.set_real(mask_real);
         if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_iteration_" + std::to_string(iteration+1) + ".map", "map");
         
-        output_volume.apply_real_mask(mask_real, 0.3);
+        output_volume.apply_real_mask(mask_real, 0.2);
         
-        //Rescale the densities
+        //Rescale the densities/amplitudes
+        output_volume.rescale_to_max_amplitude(10000);
         output_volume.apply_density_threshold(0);
         output_volume.grey_scale_densities();
       

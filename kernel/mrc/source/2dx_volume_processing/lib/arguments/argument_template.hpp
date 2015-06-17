@@ -44,7 +44,8 @@ namespace volume
             static TCLAP::ValueArg<int> ITERATIONS("i", "iterations", "Number of iterations", false, 0,"INT");
             static TCLAP::ValueArg<double> SLAB("", "slab", "The membrane height in ratio of the Z length of the volume", false, 1.0,"FLOAT");
             static TCLAP::ValueArg<std::string> TEMP_LOC("", "temp", "Folder to keep temporary files for each iteration (if not specified temp files will not be written)", false, "","FOLDER");
-
+            static TCLAP::ValueArg<double> MASK_RES("", "mask-res", "The volume in each iteration will be lowpassed with this resolution, before generating a thresholded mask.", false, 15.0,"FLOAT");
+            
             static TCLAP::SwitchArg EXTENDED("", "extended", "Produce an output with 2X2X1 unit cells", false);
             static TCLAP::SwitchArg INVERTED("", "inverted", "Produce an output map with inverted hand", false);
             static TCLAP::SwitchArg PSF("", "psf", "Produce an Point Spread Function(PSF) output map (works only with mrcout)", false);

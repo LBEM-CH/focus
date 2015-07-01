@@ -52,16 +52,30 @@ else
 	fi
 fi
 
-if [ -f /opt/local/lib/libfftw3f_threads.3.dylib ]; then
-	FFTW_LIB_THREAD=/opt/local/lib/libfftw3f_threads.3.dylib
+if [ -f /opt/local/lib/libfftw3_threads.3.dylib ]; then
+	FFTW_LIB_THREAD=/opt/local/lib/libfftw3_threads.3.dylib
 	echo "Found FFTW-threaded in $FFTW_LIB_THREAD"
 else
-       if [ -f /usr/local/lib/libfftw3f_threads.3.dylib ]; then
-		FFTW_LIB_THREAD=/usr/local/lib/libfftw3f_threads.3.dylib
+       if [ -f /usr/local/lib/libfftw3_threads.3.dylib ]; then
+		FFTW_LIB_THREAD=/usr/local/lib/libfftw3_threads.3.dylib
 		echo "Found FFTW-threaded in $FFTW_LIB_THREAD"
 	else
 		FFTW_LIB_THREAD=NOT_FOUND
 		echo "FFTW-threaded not FOUND!"
+	       	exit 2
+	fi
+fi
+
+if [ -f /opt/local/lib/libfftw3f_threads.3.dylib ]; then
+	FFTWF_LIB_THREAD=/opt/local/lib/libfftw3f_threads.3.dylib
+	echo "Found FFTWF-threaded in $FFTWF_LIB_THREAD"
+else
+       if [ -f /usr/local/lib/libfftw3f_threads.3.dylib ]; then
+		FFTWF_LIB_THREAD=/usr/local/lib/libfftw3f_threads.3.dylib
+		echo "Found FFTWF-threaded in $FFTWF_LIB_THREAD"
+	else
+		FFTWF_LIB_THREAD=NOT_FOUND
+		echo "FFTWF-threaded not FOUND!"
 	       	exit 2
 	fi
 fi
@@ -153,7 +167,9 @@ do
     echo "cp $FFTWF_LIB  $build_dir/$loop"
     cp $FFTWF_LIB $build_dir/$loop
     echo "cp $FFTW_LIB_THREAD  $build_dir/$loop"
-    cp $FFTW_LIB_THREAD $build_dir/$loop	
+    cp $FFTW_LIB_THREAD $build_dir/$loop
+    echo "cp $FFTWF_LIB_THREAD  $build_dir/$loop"
+    cp $FFTWF_LIB_THREAD $build_dir/$loop	
     echo "cp $GFORTRAN_LIB $build_dir/$loop"
     cp $GFORTRAN_LIB $build_dir/$loop
     echo "cp $QUADMATH_LIB $build_dir/$loop"
@@ -209,7 +225,8 @@ do
 	echo "changed otool command:"
         install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3.3.dylib $file
 	install_name_tool -change $FFTWF_LIB @executable_path/../lib/libfftw3f.3.dylib $file
-	install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $file
+        install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3_threads.3.dylib $file
+	install_name_tool -change $FFTWF_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $file
 	install_name_tool -change $GFORTRAN_LIB  @executable_path/../lib/libgfortran.3.dylib $file 
 	install_name_tool -change $QUADMATH_LIB @executable_path/../lib/libquadmath.0.dylib  $file
 	install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $file
@@ -229,7 +246,8 @@ do
 	echo "changed otool command:"
         install_name_tool -change $FFTW_LIB @executable_path/../../lib/libfftw3.3.dylib $file
 	install_name_tool -change $FFTWF_LIB @executable_path/../../lib/libfftw3f.3.dylib $file
-	install_name_tool -change $FFTW_LIB_THREAD @executable_path/../../lib/libfftw3f_threads.3.dylib $file
+        install_name_tool -change $FFTW_LIB_THREAD @executable_path/../../lib/libfftw3_threads.3.dylib $file
+	install_name_tool -change $FFTWF_LIB_THREAD @executable_path/../../lib/libfftw3f_threads.3.dylib $file
 	install_name_tool -change $GFORTRAN_LIB  @executable_path/../../lib/libgfortran.3.dylib $file 
 	install_name_tool -change $QUADMATH_LIB @executable_path/../../lib/libquadmath.0.dylib  $file
 	install_name_tool -change $CPP_LIB @executable_path/../../lib/libstdc++.6.dylib  $file
@@ -243,7 +261,8 @@ for loop in $build_dir/$binaries/*.dylib
 do
 install_name_tool -change $FFTW_LIB @executable_path/../lib/libfftw3.3.dylib $loop
 install_name_tool -change $FFTWF_LIB @executable_path/../lib/libfftw3f.3.dylib $loop
-install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $loop
+install_name_tool -change $FFTW_LIB_THREAD @executable_path/../lib/libfftw3_threads.3.dylib $loop
+install_name_tool -change $FFTWF_LIB_THREAD @executable_path/../lib/libfftw3f_threads.3.dylib $loop
 install_name_tool -change $GFORTRAN_LIB  @executable_path/../lib/libgfortran.3.dylib $loop
 install_name_tool -change $QUADMATH_LIB @executable_path/../lib/libquadmath.0.dylib  $loop
 install_name_tool -change $CPP_LIB @executable_path/../lib/libstdc++.6.dylib  $loop

@@ -19,7 +19,7 @@ set back_projected_hkl = "SCRATCH/back_projected.hkl"
 #
 \rm -f ${back_projected_hkl}
 #
-${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin ${hkzFile} -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout ${back_projected_hkl}
+${bin_2dx}/volume_processor.exe --hkzin ${hkzFile} -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout ${back_projected_hkl}
 #
 #
 echo "<<@progress: +10>>"

@@ -367,7 +367,7 @@ eot
   set nk_max = ${MergeHKMAX}
   set nl_max = ${ALAT}
   #
-  ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hklin ${infile} -s ${SYM_NAME} -X ${nh_max} -Y ${nk_max} -Z ${nl_max} --hklout ${outfile} --full-fourier
+  ${bin_2dx}/volume_processor.exe --hklin ${infile} -s ${SYM_NAME} -X ${nh_max} -Y ${nk_max} -Z ${nl_max} --hklout ${outfile} --full-fourier
   echo "# IMAGE: ${infile} <HKL: HKL file before symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   echo "# IMAGE: ${outfile} <HKL: HKL file after symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
@@ -396,8 +396,8 @@ else
   echo "celly = ${celly}"
   echo "cellz = ${ALAT}" 
   #
-  echo ":Launching ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey"
-  ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey
+  echo ":Launching ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey"
+  ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey
   #
   echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #

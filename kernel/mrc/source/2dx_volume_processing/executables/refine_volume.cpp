@@ -79,6 +79,7 @@ int main(int argc, char** argv)
     input_volume.prepare_real();
     std::cout << input_volume.to_string();
  
+    //Start from an input volume
     Volume2dx output_volume(input_volume.header());
     output_volume.set_data(input_volume);
     
@@ -88,8 +89,11 @@ int main(int argc, char** argv)
         std::cout << "::Refinement Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
+        //Symmetrize to reduce the dimensionality of problem
+        output_volume.symmetrize();
+        
         //Replace the reflection from that of input
-        output_volume.replace_reflections(input_volume.get_fourier(), 0.6);
+        output_volume.replace_reflections(input_volume.get_fourier(), 1.0);
         
         //Apply membrane slab
         output_volume.apply_density_slab(membrane_slab, 0.5, true);

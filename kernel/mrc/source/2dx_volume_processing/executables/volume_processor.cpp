@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     
     if(args::templates::SPREAD_FOURIER.getValue()) input = input.spread_fourier_data();
     
-    if(args::templates::MAXRES.isSet()) input.low_pass(args::templates::MAXRES.getValue());
+    if(args::templates::MAXRES.isSet()) input.low_pass_butterworth(args::templates::MAXRES.getValue());
     if(args::templates::SYMMETRY.isSet())
     {
         input.set_symmetry(args::templates::SYMMETRY.getValue());

@@ -203,6 +203,13 @@ namespace volume
             RealSpaceData binary_mask(double threshold) const;
             
             /**
+             * Dilates a binary (threshold 0.5) volume by radius pixels.
+             * @param radius - radius of pixels around each px>0.5 to become 1
+             * @return dilated_volume
+             */
+            RealSpaceData dilate(double radius) const;
+            
+            /**
              * Mask the real space data with a mask. It will fractionally delete all densities 
              * where the mask is <=0. Fraction=0.0 will not change at all, and fraction = 1.0
              * will do a complete masking.

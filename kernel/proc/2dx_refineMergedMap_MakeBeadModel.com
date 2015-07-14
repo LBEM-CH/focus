@@ -16,7 +16,7 @@ set bead_model_mrc = "SCRATCH/bead_model.mrc"
 \rm -f ${bead_model_mrc}
 #
 #
-${bin_2dx}/2dx_volume_processing/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_mrc} -b ${number_of_beads} --thresh ${density_threshold_bead} --res 2.0
+${bin_2dx}/create_bead_model.exe --mrcin ${back_projected_map} --mrcout ${bead_model_mrc} -b ${number_of_beads} --thresh ${density_threshold_bead} --res 2.0
 #
 echo "<<@progress: +5>>"
 

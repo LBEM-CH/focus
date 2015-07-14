@@ -363,6 +363,38 @@ ds::RealSpaceData ds::RealSpaceData::binary_mask(double threshold) const
     return mask;
 }
 
+ds::RealSpaceData ds::RealSpaceData::dilate(double radius) const
+{
+    std::cout << "Dilating binary volume by radius " << radius << "\n";
+    
+    double rad2=radius * radius;
+    RealSpaceData mask(nx(), ny(), nz());
+    for(int ix=0; ix < nx(); ix++)
+    {
+        for(int iy=0; iy < ny(); iy++)
+        {
+            for(int iz=0; iz < nz(); iz++)
+            {
+                double density = get_value_at(ix, iy, iz);
+                if(density > 0.5)
+                {
+                    for (int jx = ix-radius; jx<ix+radius+1; jx++) {
+                        for (int jy = iy-radius; jy<iy+radius+1; jy++) {
+                            for (int jz = iz-radius; jz<iz+radius+1; jz++) {
+                                double lrad2 = (ix-jx)*(ix-jx) + (iy-jy)*(iy-jy) + (jz-iz)*(jz-iz);
+                                if ( lrad2 < rad2 ) {
+                                    mask.set_value_at(jx, jy, jz, 1.0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return mask;
+}
+
 void ds::RealSpaceData::apply_mask(const RealSpaceData& mask, double fraction)
 {
     if(mask.nx() != nx() || mask.ny() != ny() || mask.nz() != nz())

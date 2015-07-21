@@ -34,6 +34,34 @@ ds::RealSpaceData::RealSpaceData(const RealSpaceData& other)
     std::memcpy(_data, other._data, _nx*_ny*_nz*sizeof(double));
 }
 
+ds::RealSpaceData& ds::RealSpaceData::operator+(const RealSpaceData& rhs)
+{
+    RealSpaceData* added =  new RealSpaceData(nx(), ny(), nz());
+    if( (rhs.nx() != nx()) || (rhs.ny() != ny()) || (rhs.nz() != nz()) )
+    {
+        std::cerr << "ERROR: Can't add real space data with different sizes\n\n";
+        std::cerr << "Size(" << rhs.nx() << ", " << rhs.ny() << ", " << rhs.nz() << ") does not match (" << nx() << ", " << ny() << ", " << nz() << ")\n";
+        return *this;
+    }
+    
+    for(int id=0; id < size(); id++)
+    {
+        added->set_value_at(id, get_value_at(id)+rhs.get_value_at(id));
+    }
+    
+    return *added;
+}
+
+ds::RealSpaceData& ds::RealSpaceData::operator*(double factor)
+{
+    for(int id=0; id < size(); id++)
+    {
+        this->set_value_at(id, get_value_at(id)*factor);
+    }
+    
+    return *this;
+}
+
 void ds::RealSpaceData::reset(int nx, int ny, int nz)
 {
     _nx = nx;
@@ -189,6 +217,19 @@ long ds::RealSpaceData::size() const
     return _nx*_ny*_nz;
 }
 
+double ds::RealSpaceData::squared_sum() const
+{
+    double sum = 0.0;
+    for(int i=1; i<size(); i++)
+    {
+        double density = get_value_at(i);
+        sum += density*density;
+    }
+    
+    return sum;
+}
+
+
 void ds::RealSpaceData::merge_data(const RealSpaceData& to_be_merged, int x, int y, int z)
 {
     //Check the inputs
@@ -240,19 +281,14 @@ double* ds::RealSpaceData::density_sorted_values()
     return sorter.get_sorted_values();
 }
 
-void ds::RealSpaceData::vertical_slab(double height, double fraction, bool centered)
+ds::RealSpaceData ds::RealSpaceData::vertical_slab_mask(double height, bool centered)
 {
+    RealSpaceData mask(nx(), ny(), nz());
+    
     if(height > 1.0)
     {
         std::cerr << "ERROR: Applying vertical density slab with slab height greater than volume z-length!";
-        return;
-    }
-    
-    //Check the fraction
-    if(fraction < 0.0 || fraction > 1.0)
-    {
-        std::cerr << "ERROR! The density slab fraction can only be between 0 and 1";
-        return;
+        return mask;
     }
     
     int membrane_height = floor(height*nz());
@@ -276,36 +312,36 @@ void ds::RealSpaceData::vertical_slab(double height, double fraction, bool cente
             {
                 for ( int iy = 0; iy < ny(); ++iy ) 
                 {
-                    
-                    double new_density = get_value_at(ix, iy, centered_iz)*(1 - fraction);
-                    set_value_at(ix, iy, centered_iz, new_density);
-
+                    mask.set_value_at(ix, iy, centered_iz, 0.0);
+                }
+            }
+        }
+        else
+        {
+            for ( int ix = 0; ix < nx(); ++ix ) 
+            {
+                for ( int iy = 0; iy < ny(); ++iy ) 
+                {
+                    mask.set_value_at(ix, iy, centered_iz, 1.0);
                 }
             }
         }
     }
     
-    
+    return mask;
 }
 
-void ds::RealSpaceData::threshold(double limit, double fraction)
-{
-    std::cout << "Thresholding density with limit = " << limit << "\n";
-    for(int ix=0; ix < nx(); ix++)
+void ds::RealSpaceData::vertical_slab(double height, double fraction, bool centered)
+{   
+    //Check the fraction
+    if(fraction < 0.0 || fraction > 1.0)
     {
-        for(int iy=0; iy < ny(); iy++)
-        {
-            for(int iz=0; iz < nz(); iz++)
-            {
-                double density = get_value_at(ix, iy, iz);
-                if(density < limit)
-                {
-                    set_value_at(ix, iy, iz, density*(1-fraction));
-                }
-            }
-        }
+        std::cerr << "ERROR! The density slab fraction can only be between 0 and 1";
+        return;
     }
     
+    RealSpaceData mask = vertical_slab_mask(height, centered);
+    apply_mask(mask, fraction);
 }
 
 void ds::RealSpaceData::scale(double min, double max)
@@ -313,20 +349,14 @@ void ds::RealSpaceData::scale(double min, double max)
     double current_min = this->min();
     double current_max = this->max();
     
-    std::cout << "Scaling densities in range (" << min << ", " << max << ")\n";
+    std::cout << "Scaling densities to (" << min << ", " << max << ")\n";
     
     double grad = (max-min)/(current_max-current_min);
-    for(int ix=0; ix < nx(); ix++)
+    for(int id=0; id < size(); id++)
     {
-        for(int iy=0; iy < ny(); iy++)
-        {
-            for(int iz=0; iz < nz(); iz++)
-            {
-                double density = get_value_at(ix, iy, iz);
-                double new_density = (density - current_min)*grad + min;
-                set_value_at(ix, iy, iz, new_density);
-            }
-        }
+        double density = get_value_at(id);
+        double new_density = (density - current_min)*grad + min;
+        set_value_at(id, new_density);
     }
     
 }
@@ -336,31 +366,51 @@ void ds::RealSpaceData::grey_scale()
     scale(0, 255);
 }
 
-ds::RealSpaceData ds::RealSpaceData::binary_mask(double threshold) const
+ds::RealSpaceData ds::RealSpaceData::threshold_mask(double threshold) const
 {
-    std::cout << "Creating binary mask with limit = " << threshold << "\n";
+    std::cout << "Creating threshold mask with limit = " << threshold << "\n";
     
     RealSpaceData mask(nx(), ny(), nz());
-    for(int ix=0; ix < nx(); ix++)
+    for(int id=0; id < size(); id++)
     {
-        for(int iy=0; iy < ny(); iy++)
+        if(get_value_at(id) >= threshold)
         {
-            for(int iz=0; iz < nz(); iz++)
-            {
-                double density = get_value_at(ix, iy, iz);
-                if(density < threshold)
-                {
-                    mask.set_value_at(ix, iy, iz, 0.0);
-                }
-                else
-                {
-                    mask.set_value_at(ix, iy, iz, 1.0);
-                }
-            }
+            mask.set_value_at(id, 1.0);
+        }
+        else
+        {
+            mask.set_value_at(id, 0.0);
         }
     }
     
     return mask;
+}
+
+ds::RealSpaceData ds::RealSpaceData::threshold_below_mask(double threshold) const
+{
+    std::cout << "Creating threshold below mask with limit = " << threshold << "\n";
+    
+    RealSpaceData mask(nx(), ny(), nz());
+    for(int id=0; id < size(); id++)
+    {
+        if(get_value_at(id) <= threshold)
+        {
+            mask.set_value_at(id, 1.0);
+        }
+        else
+        {
+            mask.set_value_at(id, 0.0);
+        }
+    }
+    
+    return mask;
+}
+
+void ds::RealSpaceData::threshold(double limit, double fraction)
+{
+    std::cout << "Thresholding density with limit = " << limit << "\n";
+    RealSpaceData mask = threshold_mask(limit);
+    apply_mask(mask, fraction);  
 }
 
 ds::RealSpaceData ds::RealSpaceData::dilate(double radius) const
@@ -404,19 +454,41 @@ void ds::RealSpaceData::apply_mask(const RealSpaceData& mask, double fraction)
     }
     
     std::cout << "Applying mask with fraction = " << fraction << "\n";
-    for(int ix=0; ix < nx(); ix++)
+    for(int id=0; id < size(); id++)
     {
-        for(int iy=0; iy < ny(); iy++)
+        double density = get_value_at(id);
+        double mask_density = mask.get_value_at(id);
+        if(mask_density <= 0.0)
         {
-            for(int iz=0; iz < nz(); iz++)
-            {
-                double density = get_value_at(ix, iy, iz);
-                double mask_density = mask.get_value_at(ix, iy, iz);
-                if(mask_density <= 0.0)
-                {
-                    set_value_at(ix, iy, iz, density*(1-fraction));
-                }
-            }
+            set_value_at(id, density*(1-fraction));
         }
     }
+}
+
+ds::RealSpaceData ds::RealSpaceData::mask_applied_data(const RealSpaceData& mask, double fraction)
+{
+    if(mask.nx() != nx() || mask.ny() != ny() || mask.nz() != nz())
+    {
+        std::cerr << "WARNING: Found different sizes for mask and volume. NOT MASKING!!!\n";
+        return *this;   
+    }
+    
+    std::cout << "Applying mask with fraction = " << fraction << "\n";
+    
+    RealSpaceData masked(nx(), ny(), nz());
+    for(int id=0; id < size(); id++)
+    {
+        double density = get_value_at(id);
+        double mask_density = mask.get_value_at(id);
+        if(mask_density <= 0.0)
+        {
+            masked.set_value_at(id, density*(1-fraction));
+        }
+        else
+        {
+            masked.set_value_at(id, density);
+        }
+    }
+    
+    return masked;
 }

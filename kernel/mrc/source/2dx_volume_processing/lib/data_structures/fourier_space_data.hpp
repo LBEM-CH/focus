@@ -52,6 +52,18 @@ namespace volume
             FourierSpaceData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap);
             
             /**
+             * Operator definition of +
+             */
+            FourierSpaceData& operator+(const FourierSpaceData& rhs);
+            
+            /**
+             * Operator definition of * with double factor.
+             * Multiplies all amplitudes by the factor
+             * @param factor
+             */
+            FourierSpaceData& operator*(double factor);
+            
+            /**
              * Resets the data.
              */
             void reset();
@@ -162,8 +174,9 @@ namespace volume
              * applied using only a fraction. fraction=1 will completely change the reflections.
              * @param input
              * @param fraction
+             * @return new replaced Fourier Space Data
              */
-            void replace_reflections(const FourierSpaceData& input, double fraction);
+            FourierSpaceData replace_reflections(const FourierSpaceData& input, double fraction) const;
             
             /**
              * Spreads the current data and tries to fill in the missing spots.

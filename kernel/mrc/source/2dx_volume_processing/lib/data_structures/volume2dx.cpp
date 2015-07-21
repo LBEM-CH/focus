@@ -43,6 +43,44 @@ ds::Volume2dx::Volume2dx(const VolumeHeader2dx& header)
     _type = NONE;
 }
 
+ds::Volume2dx& ds::Volume2dx::operator+(const Volume2dx& rhs)
+{
+    if(rhs.has_real())
+    {
+        RealSpaceData* rhs_real = rhs._real;
+        set_real(get_real()+ (*rhs_real));
+    }
+    else if(rhs.has_fourier())
+    {
+        FourierSpaceData* rhs_fourier = rhs._fourier;
+        set_fourier(get_fourier() + (*rhs_fourier));
+    }
+    else
+    {
+        std::cerr << "Hey, Volumes cannot be added! No data in memory. Did you forget to set the data?";
+    }
+    
+    return *this;
+}
+
+ds::Volume2dx& ds::Volume2dx::operator*(double factor)
+{
+    if(has_real())
+    {
+        set_real(get_real()*factor);
+    }
+    else if(has_fourier())
+    {
+        set_fourier(get_fourier()*factor);
+    }
+    else
+    {
+        std::cerr << "Hey, No factor can be multiplied to volume! No data in memory. Did you forget to set the data?";
+    }
+    
+    return *this;
+}
+
 void ds::Volume2dx::reset(int nx, int ny, int nz)
 {
     std::cout << "Reseting the volume with size (" << nx << ", " << ny << ", " << nz << ") \n";
@@ -157,6 +195,21 @@ void ds::Volume2dx::write_volume(std::string file_name)
     write_volume(file_name, format);
 }
 
+void ds::Volume2dx::generate_random_densities(double fraction_to_fill)
+{
+    ds::RealSpaceData data(nx(), ny(), nz());
+    int x, y, z = 0;
+    int attempts = fraction_to_fill * data.size();
+    for ( int attempt = 0; attempt < attempts; attempt++ ) 
+    {
+        int id = rand() % data.size();
+        double density = rand() % 255;
+        data.set_value_at(id, density);
+    }
+    
+    set_real(data);
+}
+
 double ds::Volume2dx::resolution_at(int h, int k, int l) const
 {
     ds::MillerIndex index(h, k, l);
@@ -191,6 +244,15 @@ double ds::Volume2dx::max_resolution() const
 {
     MillerIndex index = max_resolution_spot();
     return resolution_at(index.h(), index.k(), index.l());
+}
+
+void ds::Volume2dx::rescale_energy(double energy)
+{
+    FourierSpaceData data = get_fourier();
+    double curr_energy = data.intensity_sum();
+    double factor = sqrt(energy/curr_energy);
+    data.scale_amplitudes(factor);
+    set_fourier(data);
 }
 
 void ds::Volume2dx::rescale_to_max_amplitude(double max_amplitude)
@@ -549,8 +611,8 @@ void ds::Volume2dx::band_pass(double low_resolution, double high_resolution)
 void ds::Volume2dx::replace_reflections(const FourierSpaceData& fourier_data, double fraction)
 {
     FourierSpaceData current = get_fourier();
-    current.replace_reflections(fourier_data, fraction);
-    set_fourier(current);
+    FourierSpaceData new_fourier = current.replace_reflections(fourier_data, fraction);
+    set_fourier(new_fourier);
 }
 
 void ds::Volume2dx::low_pass(double high_resolution)
@@ -577,7 +639,6 @@ void ds::Volume2dx::low_pass_butterworth(double high_resolution)
     double order = 16;
     
     std::cout << "Low passing using Butterworth filter (order = " << order << ") with expected maximum resolution: " << high_resolution << " A\n";
-    std::cout << "using order of Butterworth = " << order << "\n";
     
     ds::FourierSpaceData current_data = get_fourier();
     FourierSpaceData new_data;

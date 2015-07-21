@@ -21,17 +21,18 @@
 int main(int argc, char** argv)
 {
     
-    args::Executable exe("A program to refine input map/mrc volume using error reduction algorithm.", ' ', "1.0" );
+    args::Executable exe("A program to refine input map/mrc volume using shrinkwrap algorithm.", ' ', "1.0" );
     
     //Select required arguments
     args::templates::MRCIN.forceRequired();
+    args::templates::THRESHOLD.forceRequired();
     args::templates::ITERATIONS.forceRequired();
-    args::templates::SLAB.forceRequired();
     
     //Add arguments  
     exe.add(args::templates::MRCOUT);
     exe.add(args::templates::HKLOUT);
-    exe.add(args::templates::SLAB);
+    exe.add(args::templates::MASK_RES);
+    exe.add(args::templates::THRESHOLD);
     exe.add(args::templates::ITERATIONS);
     exe.add(args::templates::MAXRES);
     exe.add(args::templates::SYMMETRY);
@@ -45,11 +46,14 @@ int main(int argc, char** argv)
     std::string mrcin = args::templates::MRCIN.getValue();
     std::string temp_loc = args::templates::TEMP_LOC.getValue();  
     std::string symmetry = args::templates::SYMMETRY.getValue();
-    double max_resolution = args::templates::MAXRES.getValue();   
-    int number_of_iterations = args::templates::ITERATIONS.getValue();
-    double membrane_slab = args::templates::SLAB.getValue();  
+    double max_resolution = args::templates::MAXRES.getValue();
+    double density_threshold = args::templates::THRESHOLD.getValue();   
+    int number_of_iterations = args::templates::ITERATIONS.getValue();  
     std::string hklout = args::templates::HKLOUT.getValue();
     std::string mrcout = args::templates::MRCOUT.getValue();
+    
+    double mask_resolution = 15.0;
+    if(args::templates::MASK_RES.isSet())  mask_resolution = args::templates::MASK_RES.getValue();
     
     if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()))
     {
@@ -72,38 +76,36 @@ int main(int argc, char** argv)
     
     double input_energy = input_volume.get_fourier().intensity_sum();
  
-    //Start from a random volume
+    //Prepare the lowpassed binary mask for the shrinkwrap algorithm
     std::cout << "\n-----------------------------------\n";
-    std::cout << ":Preparing the initial output volume:\n";
+    std::cout << ":Preparing the shrinkwrap mask:\n";
     std::cout << "-----------------------------------\n\n";
+    Volume2dx mask(input_volume.header());
+    mask.set_fourier(input_volume.get_fourier());
+    mask.low_pass(mask_resolution);
+    volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_mask(density_threshold*input_volume.get_real().max()/100);
+    
+    //Just to write output of mask to file
+    mask.set_real(mask_shrinkwrap);
+    if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_shrinkwrap.map");
+    
+    //Prepare the output volume
     Volume2dx output_volume(input_volume.header());
-    output_volume.generate_random_densities(0.4);
-    
-    //Low pass filter to use whatever is required
-    output_volume.low_pass(max_resolution);
-    output_volume.symmetrize();
-        
-    output_volume.rescale_energy(input_energy);
-    
-    if(temp_loc != "")
-    {   
-        std::string out_file_name = temp_loc + "/starting_random_volume.map";
-        output_volume.write_volume(out_file_name, "map");
-    }
+    output_volume.set_fourier(input_volume.get_fourier());
     
     double error = 1.0;
     for(int iteration=0; iteration<number_of_iterations; ++iteration)
     {
         std::cout << "\n-----------------------------------\n";
-        std::cout << "::Refinement Iteration: " << iteration+1 << std::endl;
+        std::cout << "::Shrinkwrap Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
         //Replace the reflection from that of input
-        output_volume.replace_reflections(input_volume.get_fourier(), 1.0);
+        output_volume.replace_reflections(input_volume.get_fourier(), 0.6);
         
         if(temp_loc != "")
         {   
-            std::string out_file_name = temp_loc + "/refinement_initial_volume_" + std::to_string(iteration+1) +".map";
+            std::string out_file_name = temp_loc + "/shrinkwrap_initial_volume_" + std::to_string(iteration+1) +".map";
             output_volume.write_volume(out_file_name, "map");
         }
         
@@ -113,14 +115,8 @@ int main(int argc, char** argv)
         //Get the sum of densities for error calculation
         double sum_initial = real_before.squared_sum();
         
-        //Generate mask/support
-        volume::data::RealSpaceData mask_threshold = real_before.threshold_mask(0);
-        volume::data::RealSpaceData mask_slab = real_before.vertical_slab_mask(membrane_slab, true);
-        
-        //Keep voxels only if all the masks are 1 or their addition is 2
-        volume::data::RealSpaceData mask_real = (mask_slab +  mask_threshold).threshold_mask(1.9);
-
-        volume::data::RealSpaceData real_after = real_before.mask_applied_data(mask_real);
+        //Mask the volume
+        volume::data::RealSpaceData real_after = real_before.mask_applied_data(mask_shrinkwrap, 0.4);
         
         //Get the sum of densities for error calculation
         double sum_final = real_after.squared_sum();
@@ -132,35 +128,41 @@ int main(int argc, char** argv)
         else std::cout << "\n\n";
         
         //Check for convergence
-        if( (error - itr_error < 0.00001) || itr_error < 0.01)
+        if( (error - itr_error < 0.0000000001) || itr_error < 0.01)
+        //if(itr_error < 0.01)
         {
             std::cout << ":\n\nConvergence criterion found after iteration: " << iteration+1 <<"\n";
             std::cout << "Stopping iterations\n\n\n";
             break;
         }
         
-        //Change the output volume for next iteration
         output_volume.set_real(real_after);
         
         //Low pass filter to use whatever is required
         output_volume.low_pass(max_resolution);
+
         
         if(temp_loc != "")
         {   
-            std::string out_file_name = temp_loc + "/refinement_final_volume_" + std::to_string(iteration+1) +".map";
+            std::string out_file_name = temp_loc + "/shrinkwrap_refined_volume_" + std::to_string(iteration+1) +".map";
             output_volume.write_volume(out_file_name, "map");
         }
+        
         
         //Done with this iteration.
         //Prepare to write output
         output_volume.prepare_fourier();
         output_volume.prepare_real();
         std::cout << output_volume.data_string();
-
+        
+        
         error = itr_error;
     }
     
     std::cout << "\n::Done with the iterations.\n";
+    
+    //Resolution limit
+    //output_volume.low_pass(max_resolution);
 
     //Symmetrize
     output_volume.symmetrize();

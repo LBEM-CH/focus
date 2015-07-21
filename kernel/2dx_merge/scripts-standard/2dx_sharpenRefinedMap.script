@@ -75,7 +75,7 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 #
-set refined_map = "refined.map"
+set refined_map = "sw.map"
 #
 if (! -f ${refined_map} ) then
   ${proc_2dx}/protest "Refined map not found! First, do a round of RefineMergedMap"

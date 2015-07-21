@@ -45,6 +45,16 @@ namespace volume
             Volume2dx(const VolumeHeader2dx& header);
             
             /**
+             * Operator + definition
+             */
+            Volume2dx& operator+(const Volume2dx& rhs);
+            
+            /**
+             * Multiplication by a factor
+             */
+            Volume2dx& operator*(double factor);
+            
+            /**
              * Resets the volume with given size and empty data
              * @param nx
              * @param ny
@@ -246,10 +256,22 @@ namespace volume
             void write_volume(std::string file_name);
             
             /**
+             * Generates random Gaussian densities in the volume
+             * @param fraction_to_fill - fraction of volume to be filled with data
+             */
+            void generate_random_densities(double fraction_to_fill);
+            
+            /**
              * Scales the amplitudes such that the max amplitude is set to given value
              * @param max_amplitude
              */
             void rescale_to_max_amplitude(double max_amplitude);
+            
+            /**
+             * Scales the amplitudes such that the energy (sum of all squared amplitudes) is set to given value
+             * @param energy
+             */
+            void rescale_energy(double energy);
             
             /**
              * Re-scales the densities to the new range provided

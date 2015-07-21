@@ -38,6 +38,16 @@ namespace volume
             RealSpaceData(const RealSpaceData& other);
             
             /**
+             * Addition operator definition
+             */
+            RealSpaceData& operator+(const RealSpaceData& rhs);
+            
+            /**
+             * Multiplication of all the densities by a factor
+             */
+            RealSpaceData& operator*(double factor);
+            
+            /**
              * Resets the data with the given size
              * @param nx
              * @param nx
@@ -142,6 +152,11 @@ namespace volume
             int memory_id(int x, int y, int z) const ;
             
             /**
+             * Returns the sum of the squared densities of all voxels
+             */
+            double squared_sum() const;
+            
+            /**
              * Merges the data from other real spaced data. The input data's 
              * center will be placed at the location x, y, z in the current data
              * @param to_be_merged : Real space data to be merged
@@ -163,6 +178,16 @@ namespace volume
              * @return 
              */
             double* density_sorted_values();
+            
+            
+            /**
+             * Returns a mask of density slab in the vertical direction (z-axis) with the
+             * fractional height.
+             * @param height: height in fraction of z height
+             * @param centered: Is the density centered along z-axis?
+             * @return mask
+             */
+            RealSpaceData vertical_slab_mask(double height, bool centered);
             
             /**
              * Applies a density slab in the vertical direction (z-axis) with the
@@ -200,7 +225,13 @@ namespace volume
              * @param threshold - value of density threshold
              * @return mask
              */
-            RealSpaceData binary_mask(double threshold) const;
+            RealSpaceData threshold_mask(double threshold) const;
+            
+            /**
+             * Thresholds the volume and returns a mask with all values below the
+             * the threshold set to 1.0 and above set to 0.0
+             */
+            RealSpaceData threshold_below_mask(double thershold) const;
             
             /**
              * Dilates a binary (threshold 0.5) volume by radius pixels.
@@ -217,6 +248,17 @@ namespace volume
              * @param fraction
              */
             void apply_mask(const RealSpaceData& mask, double fraction = 1.0);
+            
+            /**
+             * Mask the real space data with a mask. It will fractionally delete all densities 
+             * where the mask is <=0. Fraction=0.0 will not change at all, and fraction = 1.0
+             * will do a complete masking.
+             * @param mask
+             * @param fraction
+             * @return mask applied real space data
+             * @see apply_mask
+             */
+            RealSpaceData mask_applied_data(const RealSpaceData& mask, double fraction = 1.0);
             
         private:
             /**

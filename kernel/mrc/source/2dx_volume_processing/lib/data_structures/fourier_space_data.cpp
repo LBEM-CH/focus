@@ -65,6 +65,55 @@ std::map<ds::MillerIndex, ds::DiffractionSpot> ds::FourierSpaceData::backproject
     return map;
 }
 
+ds::FourierSpaceData& ds::FourierSpaceData::operator+(const FourierSpaceData& rhs)
+{
+    FourierSpaceData* new_data;
+    
+    //Iterate over all possible miller indices h, k, l in current data
+    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
+    {
+        ds::MillerIndex index = (*ref).first;
+        ds::Complex2dx current_complex = (*ref).second.value();
+        ds::Complex2dx new_complex(current_complex.real(), current_complex.imag());
+        
+        if(rhs.exists(index.h(), index.k(), index.l()))
+        {
+            Complex2dx rhs_complex = rhs.complex_at(index.h(), index.k(), index.l());
+            new_complex = rhs_complex + current_complex;
+        }     
+        new_data->set_value_at(index.h(), index.k(), index.l(), new_complex, weight_at(index.h(), index.k(), index.l()) );
+    }
+    
+    //Iterate over all possible miller indices h, k, l in rhs data
+    for(const_iterator ref=rhs.begin(); ref!=rhs.end(); ++ref)
+    {
+        //Assign the current Miller Index to the array
+        ds::MillerIndex index = (*ref).first;
+        ds::Complex2dx current_complex = (*ref).second.value();
+
+        if( !(new_data->exists(index.h(), index.k(), index.l())) )
+        {
+            new_data->set_value_at(index.h(), index.k(), index.l(), current_complex, (*ref).second.weight() );
+        }
+    }
+    
+    return *new_data;
+}
+
+ds::FourierSpaceData& ds::FourierSpaceData::operator*(double factor)
+{
+    FourierSpaceData* data = new FourierSpaceData();
+    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
+    {
+        ds::MillerIndex index = (*ref).first;
+        Complex2dx currentComplex = (*ref).second.value();
+        double current_amp = currentComplex.amplitude();
+        currentComplex.set_amplitude(current_amp*factor);
+        data->set_value_at(index.h(), index.k(), index.l(), currentComplex, (*ref).second.weight());
+    }
+    return *data;
+}
+
 void ds::FourierSpaceData::reset()
 {
     _data->clear();
@@ -130,17 +179,7 @@ double ds::FourierSpaceData::max_amplitude() const
 void ds::FourierSpaceData::scale_amplitudes(double factor)
 {
     std::cout << "Scaling the amplitude by a factor of: " << factor << "\n";
-    FourierSpaceData* data = new FourierSpaceData();
-    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
-    {
-        ds::MillerIndex index = (*ref).first;
-        Complex2dx currentComplex = (*ref).second.value();
-        double current_amp = currentComplex.amplitude();
-        currentComplex.set_amplitude(current_amp*factor);
-        data->set_value_at(index.h(), index.k(), index.l(), currentComplex, (*ref).second.weight());
-    }
-    this->reset();
-    this->_data = data->_data;
+    *this = (*this)*factor;
 }
 
 void ds::FourierSpaceData::set_value_at(int h, int k, int l, Complex2dx value, double weight)
@@ -241,12 +280,15 @@ void ds::FourierSpaceData::reset_data_from_fftw(int fx, int fy, int fz, fftw_com
     }
 }
 
-void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, double fraction)
+ds::FourierSpaceData ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, double fraction) const
 {
     std::cout << "Replacing the reflections from a known set..\n";
+    std::cout << "Input size: " << input.spots() << " and current size " << this->spots() << "\n";
+    
     FourierSpaceData new_data;
     
-    //Iterate over all possible miller indices h, k, l
+    int replaced = 0;
+    //Iterate over all possible miller indices h, k, l in current data
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
     {
 
@@ -259,13 +301,33 @@ void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, do
         {
             Complex2dx input_complex = input.complex_at(index.h(), index.k(), index.l());
             new_complex = input_complex*fraction + current_complex*(1-fraction);
+            replaced++;
         }
         
         new_data.set_value_at(index.h(), index.k(), index.l(), new_complex, weight_at(index.h(), index.k(), index.l()) );
     }
     
-    this->reset();
-    this->_data = new_data._data;
+    std::cout << "Replaced " << replaced << " reflections which were already present, now adding new.\n";
+    
+    //Iterate over all possible miller indices h, k, l in input data
+    for(const_iterator ref=input.begin(); ref!=input.end(); ++ref)
+    {
+        //Assign the current Miller Index to the array
+        ds::MillerIndex index = (*ref).first;
+        ds::Complex2dx current_complex = (*ref).second.value();
+
+        if( !(new_data.exists(index.h(), index.k(), index.l())) && current_complex.amplitude() > 0.0001)
+        {
+            current_complex = current_complex*fraction;
+            new_data.set_value_at(index.h(), index.k(), index.l(), current_complex, (*ref).second.weight() );
+            replaced++;
+        }
+    }
+    
+    std::cout << "Replaced " << replaced << " reflections in total\n";
+    std::cout << "New size: " << new_data.spots() << "\n";
+    
+    return new_data;
     
 }
 

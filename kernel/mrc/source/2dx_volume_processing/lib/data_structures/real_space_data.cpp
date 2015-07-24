@@ -7,7 +7,8 @@
 #include <stdexcept>
 #include <string.h>
 #include <math.h>
-#include <cstring>
+#include <algorithm>
+#include <fftw3.h>
 
 #include "real_space_data.hpp"
 #include "../utilities/density_value_sorter.hpp"
@@ -15,14 +16,14 @@
 
 namespace ds = volume::data;
 
-ds::RealSpaceData::RealSpaceData()
-{
-    initialize(0, 0, 0);
-}
+ds::RealSpaceData::RealSpaceData() : _data(NULL) {}
 
 ds::RealSpaceData::RealSpaceData(int nx, int ny, int nz)
 {
-    initialize(nx, ny, nz);
+    _nx = nx;
+    _ny = ny;
+    _nz = nz;
+    _data = new double[_nx*_ny*_nz]();
 }
 
 ds::RealSpaceData::RealSpaceData(const RealSpaceData& other)
@@ -30,8 +31,59 @@ ds::RealSpaceData::RealSpaceData(const RealSpaceData& other)
     _nx = other._nx;
     _ny = other._ny;
     _nz = other._nz;
-    _data = (double*) calloc(_nx*_ny*_nz, sizeof(double));
-    std::memcpy(_data, other._data, _nx*_ny*_nz*sizeof(double));
+    _data = new double[_nx*_ny*_nz]();
+    if(other._data != NULL) std::copy(other._data, other._data+(_nx*_ny*_nz), _data);
+}
+
+ds::RealSpaceData::~RealSpaceData()
+{
+    if(_data != NULL ) delete[] _data;
+}
+
+void ds::RealSpaceData::reset(const RealSpaceData& other)
+{
+    if( _data != NULL ) delete[] _data;
+    _nx = other._nx;
+    _ny = other._ny;
+    _nz = other._nz;
+    _data = new double[_nx*_ny*_nz]();
+    if(other._data != NULL) std::copy(other._data, other._data+(_nx*_ny*_nz), _data);
+}
+
+void ds::RealSpaceData::clear()
+{
+    if(_data != NULL) delete _data;
+    _data = new double[size()]();
+}
+
+void ds::RealSpaceData::set_from_fftw(double* fftw_data)
+{
+    for(int id=0; id<size(); ++id)
+    {
+        try
+        {
+            set_value_at(id, fftw_data[id]);
+        }
+        catch(std::exception e)
+        {
+            std::cerr << "Error while setting the element " << id << " from FFTW data\n";
+            std::cerr << e.what();
+            exit(1);
+        }
+    }
+}
+
+double* ds::RealSpaceData::get_data_for_fftw()
+{
+    double* fftw_data = fftw_alloc_real(size());
+    for(int id=0; id<size(); ++id) fftw_data[id] = get_value_at(id); 
+    return fftw_data;
+}
+
+ds::RealSpaceData& ds::RealSpaceData::operator=(const RealSpaceData& rhs)
+{
+    reset(rhs);
+    return *this;
 }
 
 ds::RealSpaceData& ds::RealSpaceData::operator+(const RealSpaceData& rhs)
@@ -40,7 +92,7 @@ ds::RealSpaceData& ds::RealSpaceData::operator+(const RealSpaceData& rhs)
     if( (rhs.nx() != nx()) || (rhs.ny() != ny()) || (rhs.nz() != nz()) )
     {
         std::cerr << "ERROR: Can't add real space data with different sizes\n\n";
-        std::cerr << "Size(" << rhs.nx() << ", " << rhs.ny() << ", " << rhs.nz() << ") does not match (" << nx() << ", " << ny() << ", " << nz() << ")\n";
+        std::cerr << "RHS Size(" << rhs.nx() << ", " << rhs.ny() << ", " << rhs.nz() << ") does not match (" << nx() << ", " << ny() << ", " << nz() << ")\n";
         return *this;
     }
     
@@ -54,41 +106,13 @@ ds::RealSpaceData& ds::RealSpaceData::operator+(const RealSpaceData& rhs)
 
 ds::RealSpaceData& ds::RealSpaceData::operator*(double factor)
 {
+    RealSpaceData* new_data =  new RealSpaceData(nx(), ny(), nz());
     for(int id=0; id < size(); id++)
     {
-        this->set_value_at(id, get_value_at(id)*factor);
+        new_data->set_value_at(id, get_value_at(id)*factor);
     }
     
-    return *this;
-}
-
-void ds::RealSpaceData::reset(int nx, int ny, int nz)
-{
-    _nx = nx;
-    _ny = ny;
-    _nz = nz;
-    if(_data != NULL) delete[] _data;
-    _data = (double*) calloc(nx*ny*nz, sizeof(double));
-}
-
-void ds::RealSpaceData::reset_data(double* data)
-{
-    if(_data != NULL) delete[] _data;
-    _data = data;
-}
-
-double* ds::RealSpaceData::get_data() const
-{
-    return _data;
-}
-
-void ds::RealSpaceData::initialize(int nx, int ny, int nz)
-{
-    _nx = nx;
-    _ny = ny;
-    _nz = nz;
-   // if(_data != NULL) delete[] _data;
-    _data = (double*) calloc(nx*ny*nz, sizeof(double));
+    return *new_data;
 }
 
 double ds::RealSpaceData::get_value_at(int x, int y, int z) const
@@ -271,14 +295,28 @@ void ds::RealSpaceData::merge_data(const RealSpaceData& to_be_merged, int x, int
 
 int* ds::RealSpaceData::density_sorted_ids()
 {
-    volume::utilities::DensityValueSorter sorter(size(), _data);
+    volume::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()));
     return sorter.get_sorted_ids();
 }
 
 double* ds::RealSpaceData::density_sorted_values()
 {
-    volume::utilities::DensityValueSorter sorter(size(), _data);
+    volume::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()));
     return sorter.get_sorted_values();
+}
+
+double* ds::RealSpaceData::get_data_copy(int start, int end) const
+{
+    //Check for inputs
+    if(start<0 || end >= size())
+    {
+        throw std::out_of_range("ERROR! Error while getting RealSpaceData - Indices provided are out of range!!\n");
+    }
+    
+    double* data_copy = new double[size()];
+    std::copy(_data+start, _data+(end-start), data_copy);
+    
+    return data_copy;
 }
 
 ds::RealSpaceData ds::RealSpaceData::vertical_slab_mask(double height, bool centered)
@@ -465,7 +503,7 @@ void ds::RealSpaceData::apply_mask(const RealSpaceData& mask, double fraction)
     }
 }
 
-ds::RealSpaceData ds::RealSpaceData::mask_applied_data(const RealSpaceData& mask, double fraction)
+ds::RealSpaceData ds::RealSpaceData::mask_applied_data(const RealSpaceData& mask, double fraction) const
 {
     if(mask.nx() != nx() || mask.ny() != ny() || mask.nz() != nz())
     {

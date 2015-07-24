@@ -20,15 +20,15 @@ namespace volume
         public:
             
             /**
-             * Default constructor initializing a 0 size data
+             * Default constructor setting the data to null
              */
             RealSpaceData();
             
             /**
              * Constructor initializing the data with given size
-             * @param nx
-             * @param ny
-             * @param nz
+             * @param nx (Default=1)
+             * @param ny (Default=1)
+             * @param nz (Default=1)
              */
             RealSpaceData(int nx, int ny, int nz);
             
@@ -36,6 +36,13 @@ namespace volume
              * Copy constructor
              */
             RealSpaceData(const RealSpaceData& other);
+            
+            /**
+             * Destructor
+             */
+            ~RealSpaceData();
+            
+            RealSpaceData& operator=(const RealSpaceData& rhs);
             
             /**
              * Addition operator definition
@@ -48,25 +55,24 @@ namespace volume
             RealSpaceData& operator*(double factor);
             
             /**
-             * Resets the data with the given size
-             * @param nx
-             * @param nx
-             * @param nz
+             * Resets the data with the other data
              */
-            void reset(int nx, int ny, int nz);
+            void reset(const RealSpaceData& other);
             
             /**
-             * Resets the data. make sure that the size of the data is equals
-             * the size of the class
-             * @param data
+             * Clears the data
              */
-            void reset_data(double* data);
+            void clear();
             
             /**
-             * Returns the pointer to the data
-             * @return pointer to the data
+             * Sets the data from the fftw transformed real data
              */
-            double* get_data() const;
+            void set_from_fftw(double* fftw_real);
+            
+            /**
+             * Returns the FFTW allocated data
+             */
+            double* get_data_for_fftw();
             
             /**
              * Fetches the value at the given index
@@ -258,17 +264,17 @@ namespace volume
              * @return mask applied real space data
              * @see apply_mask
              */
-            RealSpaceData mask_applied_data(const RealSpaceData& mask, double fraction = 1.0);
+            RealSpaceData mask_applied_data(const RealSpaceData& mask, double fraction = 1.0) const;
             
         private:
-            /**
-             * A member initializer function with the size integers
-             * @param nx
-             * @param ny
-             * @param nz
-             */
-            void initialize(int nx, int ny, int nz);
             
+            /**
+             * Generates a copy of elements required and returns it.
+             * @param start - starting index of the element required
+             * @param end - end index of the element required
+             * @return copy of data
+             */
+            double* get_data_copy(int start, int end) const;
             
             /**
              * Checks if the indices are correct with the given data!

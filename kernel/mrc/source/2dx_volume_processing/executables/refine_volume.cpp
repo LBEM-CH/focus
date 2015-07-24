@@ -99,7 +99,7 @@ int main(int argc, char** argv)
         std::cout << "-----------------------------------\n";
         
         //Replace the reflection from that of input
-        output_volume.replace_reflections(input_volume.get_fourier(), 1.0);
+        output_volume.replace_reflections(input_volume.get_fourier());
         
         if(temp_loc != "")
         {   

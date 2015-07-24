@@ -34,9 +34,24 @@ namespace volume
                 FourierTransformFFTW();
                 
                 /**
+                 * Copy constructor
+                 */
+                FourierTransformFFTW(const FourierTransformFFTW& copy);
+                
+                /**
                  * Default destructor
                  */
                 ~FourierTransformFFTW();
+                
+                /**
+                 * Resets the instance with the other
+                 */
+                void reset(const FourierTransformFFTW& other);
+                
+                /**
+                 * Definition of operator =
+                 */
+                FourierTransformFFTW& operator=(const FourierTransformFFTW& rhs);
                 
                 /**
                  * Transform the input real data to complex data.
@@ -122,12 +137,12 @@ namespace volume
                 /**
                  * Holds the plan for real to complex conversion
                  */
-                fftw_plan _plan_r2c;
+                fftw_plan* _plan_r2c;
 
                 /**
                  * Holds the plan for complex to real conversion
                  */
-                fftw_plan _plan_c2r;
+                fftw_plan* _plan_c2r;
 
                 /**
                  * Holds the size of the transform

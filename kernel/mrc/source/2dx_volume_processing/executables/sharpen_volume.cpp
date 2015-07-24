@@ -87,8 +87,7 @@ int main(int argc, char** argv)
     std::cout << "\nReference Structure factors:\n";
     std::cout << ref_structure_factors.plot_profile();
     
-    Volume2dx output_volume(input_volume.header());
-    output_volume.set_data(input_volume);
+    Volume2dx output_volume = input_volume;
     
     for(int iteration=0; iteration<number_of_iterations; ++iteration)
     {

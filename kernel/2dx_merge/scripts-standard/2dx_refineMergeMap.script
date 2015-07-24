@@ -22,6 +22,7 @@
 # DISPLAY: realang
 # DISPLAY: ALAT
 # DISPLAY: number_refinement_iterations
+# DISPLAY: number_shrinkwrap_iterations
 # DISPLAY: membrane_height
 # DISPLAY: density_threshold_refinement
 # DISPLAY: RESMIN
@@ -42,6 +43,7 @@ set RESMIN = ""
 set RESMAX = ""
 set calculate_subvolume = ""
 set number_refinement_iterations = ""
+set number_shrinkwrap_iterations = ""
 set membrane_height = ""
 set maximum_amplitude_refinement = ""
 set density_threshold_refinement = ""

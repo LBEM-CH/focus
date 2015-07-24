@@ -45,6 +45,22 @@ namespace volume
             Volume2dx(const VolumeHeader2dx& header);
             
             /**
+             * Copy constructor
+             * @param copy
+             */
+            Volume2dx(const Volume2dx& copy);
+            
+            /**
+             * Default destructor
+             */
+            ~Volume2dx();
+            
+            /**
+             * Definition of operator =
+             */
+            Volume2dx& operator=(const Volume2dx& rhs);
+            
+            /**
              * Operator + definition
              */
             Volume2dx& operator+(const Volume2dx& rhs);
@@ -55,12 +71,14 @@ namespace volume
             Volume2dx& operator*(double factor);
             
             /**
-             * Resets the volume with given size and empty data
-             * @param nx
-             * @param ny
-             * @param nz
+             * Resets the volume with other volume
              */
-            void reset(int nx, int ny, int nz);
+            void reset(const Volume2dx& other);
+            
+            /**
+             * Clears all the data present
+             */
+            void clear();
             
             /**
              * Returns a output-able version of the volume
@@ -489,12 +507,10 @@ namespace volume
             void invert_hand();
             
             /**
-             * Partially replace the reflections from a Fourier volume.
-             * fraction = 1.0 will completely change the map.
+             * Replace the reflections from a Fourier volume.
              * @param fourier_data
-             * @param fraction
              */
-            void replace_reflections(const FourierSpaceData& fourier_data, double fraction);
+            void replace_reflections(const FourierSpaceData& fourier_data);
             
             /**
              * NOT WORKING!!
@@ -580,22 +596,22 @@ namespace volume
             /**
              * Information of the volume
              */
-            VolumeHeader2dx* _header;
+            VolumeHeader2dx _header;
             
             /**
              * Real space data
              */
-            RealSpaceData* _real;
+            RealSpaceData _real;
             
             /**
              * Fourier space data
              */
-            FourierSpaceData* _fourier;
+            FourierSpaceData _fourier;
             
             /**
              * Transforming between real and Fourier data. To be used for wisdom
              */
-            volume::transforms::FourierTransformFFTW* _transform;
+            volume::transforms::FourierTransformFFTW _transform;
             
             /**
              * Type of data being hold in the volume

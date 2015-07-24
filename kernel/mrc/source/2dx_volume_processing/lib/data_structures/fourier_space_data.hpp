@@ -41,6 +41,12 @@ namespace volume
             FourierSpaceData();
             
             /**
+             * Copy constructor
+             * @param copy - Instance to be copied from.
+             */
+            FourierSpaceData(const FourierSpaceData& copy);
+            
+            /**
              * Constructor using a multi-map of miller index and diffraction spot
              * Internally converts a multi-map of miller index to diffraction spots
              * to a map of miller index to diffraction spot. In the input
@@ -52,24 +58,39 @@ namespace volume
             FourierSpaceData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap);
             
             /**
+             * Destructor
+             */
+            ~FourierSpaceData();
+            
+            /**
+             * Operator definition of =
+             * Copies the data from rhs and changes the current instance. 
+             * Behavior similar to copy constructor
+             * @param rhs
+             */
+            FourierSpaceData& operator=(const FourierSpaceData& rhs);
+            
+            /**
              * Operator definition of +
+             * Joins the reflections from both rhs and current instance. For the
+             * intersection set (reflections present in both) adds the reflections.
              */
             FourierSpaceData& operator+(const FourierSpaceData& rhs);
             
             /**
              * Operator definition of * with double factor.
-             * Multiplies all amplitudes by the factor
+             * Multiplies the amplitudes of all reflections by the factor.
              * @param factor
              */
             FourierSpaceData& operator*(double factor);
             
             /**
-             * Resets the data.
+             * Clears the current data
              */
-            void reset();
+            void clear();
             
             /**
-             * Resets the data with another one
+             * Resets (Copies) the data with another one
              * @param data
              */
             void reset(const FourierSpaceData& data);
@@ -169,14 +190,14 @@ namespace volume
             void reset_data_from_fftw(int fx, int fy, int fz, fftw_complex* complex_data);
             
             /**
-             * Replaces the reflections from the input Fourier space data to the current one.
-             * The original reflection can be also be kep and the new reflection can be 
-             * applied using only a fraction. fraction=1 will completely change the reflections.
-             * @param input
-             * @param fraction
+             * Replaces the reflections present in input data. The amplitudes which are not
+             * present in the input data will not be replaced. If one wants to replace the reflections
+             * only with a certain minimum amplitude, this can also be set.
+             * @param input - input reflections
+             * @param replacement_amplitude_cutoff - Reflections in input with this amplitude value or more will only be changed
              * @return new replaced Fourier Space Data
              */
-            FourierSpaceData replace_reflections(const FourierSpaceData& input, double fraction) const;
+            void replace_reflections(const FourierSpaceData& input, double replacement_amplitude_cutoff = 0.0);
             
             /**
              * Spreads the current data and tries to fill in the missing spots.
@@ -190,9 +211,11 @@ namespace volume
             FourierSpaceData get_full_fourier() const;
             
             /**
-             * Returns the inverted hand Fourier data
+             * Returns the inverted Fourier data in a specific direction
+             * @param direction = 1 for x axis invert, 2 for y axis invert, 3 for z axis invert, 
+             * @return Data with inverted hand
              */
-            FourierSpaceData invert_hand() const;
+            FourierSpaceData inverted_data(int direction) const;
             
         private:
             
@@ -211,7 +234,7 @@ namespace volume
             /**
              * Data stored as a map of Miller Index and it's value
              */
-            std::map<MillerIndex, DiffractionSpot>* _data;
+            std::map<MillerIndex, DiffractionSpot> _data;
             
             
         }; // class FourierSpaceData

@@ -115,20 +115,21 @@ set sw_map = "sw.map"
 \rm -f ${sw_hkl}
 \rm -f ${sw_map}
 #
-rm -f SCRATCH/mask_binary_shrinkwrap.map
+touch SCRATCH/mask_binary_shrinkwrap_dummy
+rm -f SCRATCH/mask_binary_shrinkwrap_*
 #
 touch SCRATCH/shrinkwrap_dummy
 \rm -f SCRATCH/shrinkwrap_*
 #
 #------------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --mask-res ${refinement_mask_resolution} --iterations ${number_refinement_iterations} --hklout ${sw_hkl} --mrcout ${sw_map}"
+echo ":Launching ${bin_2dx}/apply_shrinkwrap.exe --mrcin ${refined_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --mask-res ${refinement_mask_resolution} --iterations ${number_shrinkwrap_iterations} --hklout ${sw_hkl} --mrcout ${sw_map}"
 #------------------------------------------------------------------------------
-${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --mask-res ${refinement_mask_resolution} --iterations ${number_refinement_iterations} --hklout ${sw_hkl} --mrcout ${sw_map}
+${bin_2dx}/apply_shrinkwrap.exe --mrcin ${refined_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --mask-res ${refinement_mask_resolution} --iterations ${number_shrinkwrap_iterations} --hklout ${sw_hkl} --mrcout ${sw_map}
 #
-echo "# IMAGE: SCRATCH/mask_binary_shrinkwrap.map <MAP: Binary mask for shrinkwrap>" >> LOGS/${scriptname}.results
 set num = 1
-while ( ${num} <= ${number_refinement_iterations} )
+while ( ${num} <= ${number_shrinkwrap_iterations} )
   echo "# IMAGE: SCRATCH/shrinkwrap_initial_volume_${num}.map <MAP: Iteration initial volume map, iteration ${num}>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/mask_binary_shrinkwrap_${num}.map <MAP: Iteration Binary mask for shrinkwrap, iteration ${num}>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/shrinkwrap_final_volume_${num}.map <MAP: Iteration refined volume map, iteration ${num}>" >> LOGS/${scriptname}.results
   @ num += 1
 end

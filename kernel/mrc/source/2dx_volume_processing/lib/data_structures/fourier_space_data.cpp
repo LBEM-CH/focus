@@ -15,59 +15,43 @@ namespace ds = volume::data;
 
 ds::FourierSpaceData::FourierSpaceData()
 {
-    _data = new std::map<MillerIndex, DiffractionSpot>();
+    _data = std::map<MillerIndex, DiffractionSpot>();
 }
+
+ds::FourierSpaceData::FourierSpaceData(const FourierSpaceData& copy)
+{
+    reset(copy);
+}
+
+ds::FourierSpaceData::~FourierSpaceData(){}
 
 ds::FourierSpaceData::FourierSpaceData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap)
 {
-    _data = new std::map<MillerIndex, DiffractionSpot>();
+    _data = std::map<MillerIndex, DiffractionSpot>();
     std::map<MillerIndex, DiffractionSpot> back_projected_map = backproject(spot_multimap);
-    _data->insert(back_projected_map.begin(), back_projected_map.end());
-    
+    _data.insert(back_projected_map.begin(), back_projected_map.end());    
 }
 
-std::map<ds::MillerIndex, ds::DiffractionSpot> ds::FourierSpaceData::backproject(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap) const
+void ds::FourierSpaceData::clear()
 {
-    std::map<MillerIndex, DiffractionSpot> map;
-    bool initialized = false;
-    
-    ds::MillerIndex current_index;
-    std::list<ds::DiffractionSpot> current_spots;
-    
-    for(std::map<ds::MillerIndex, ds::DiffractionSpot>::const_iterator spot_itr=spot_multimap.begin(); 
-            spot_itr!=spot_multimap.end(); ++spot_itr)
-    {
-        // Initialize for the start
-        if(!(initialized))
-        {
-            current_index = (*spot_itr).first;
-            initialized = true;
-        }
-        
-        // Average and insert accumulated spots
-        if(!(current_index == (*spot_itr).first))
-        {
-            ds::DiffractionSpot avg_spot(current_spots);
-            map.insert(std::pair<MillerIndex, DiffractionSpot>(current_index, avg_spot));
-            current_spots.clear();
-        }
-        
-        //Accumulate the spots in a list
-        current_spots.push_back((*spot_itr).second);
-        current_index = (*spot_itr).first;
-        
-    }
-    
-    //insert the final reflection
-    ds::DiffractionSpot avg_spot(current_spots);
-    map.insert(std::pair<MillerIndex, DiffractionSpot>(current_index, avg_spot));
-    
-    return map;
+    _data.clear();
+}
+
+void ds::FourierSpaceData::reset(const FourierSpaceData& data)
+{
+    _data.clear();
+    _data.insert(data.begin(), data.end());
+}
+
+ds::FourierSpaceData& ds::FourierSpaceData::operator=(const FourierSpaceData& rhs)
+{
+    reset(rhs);
+    return *this;
 }
 
 ds::FourierSpaceData& ds::FourierSpaceData::operator+(const FourierSpaceData& rhs)
 {
-    FourierSpaceData* new_data;
+    FourierSpaceData* new_data = new FourierSpaceData();
     
     //Iterate over all possible miller indices h, k, l in current data
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
@@ -114,37 +98,53 @@ ds::FourierSpaceData& ds::FourierSpaceData::operator*(double factor)
     return *data;
 }
 
-void ds::FourierSpaceData::reset()
-{
-    _data->clear();
-}
-
-void ds::FourierSpaceData::reset(const FourierSpaceData& data)
-{
-    _data->clear();
-    _data->insert(data.begin(), data.end());
-}
-
 ds::FourierSpaceData::const_iterator ds::FourierSpaceData::begin() const
 {
-    return _data->begin();
+    return _data.begin();
 }
 
 ds::FourierSpaceData::const_iterator ds::FourierSpaceData::end() const
 {
-    return _data->end();
+    return _data.end();
 }
 
 bool ds::FourierSpaceData::exists(int h, int k, int l) const
 {
     bool result = true;
-    if ( _data->find(MillerIndex(h, k, l)) == _data->end() )
+    if ( _data.find(MillerIndex(h, k, l)) == _data.end() )
     {
         result = false;
     }
     
     return result; 
 
+}
+
+void ds::FourierSpaceData::set_value_at(int h, int k, int l, Complex2dx value, double weight)
+{
+    MillerIndex index = MillerIndex(h, k, l);
+    //if(h < 0) std::cerr << "\nWARNING: Encountered negative h value, there is a problem somewhere!\n\n";
+    _data[index] = DiffractionSpot(value, weight);
+}
+
+ds::Complex2dx ds::FourierSpaceData::complex_at(int h, int k, int l) const
+{
+    ds::Complex2dx value(0.0, 0.0);
+    if(exists(h,k,l))
+    {
+        value = _data.at(MillerIndex(h, k, l)).value();
+    }
+    return value;
+}
+
+double ds::FourierSpaceData::weight_at(int h, int k, int l) const
+{
+    double weight = 0.0;
+    if(exists(h,k,l))
+    {
+        weight = _data.at(MillerIndex(h, k, l)).weight();
+    }
+    return weight;
 }
 
 double ds::FourierSpaceData::intensity_sum() const
@@ -160,7 +160,7 @@ double ds::FourierSpaceData::intensity_sum() const
 
 int ds::FourierSpaceData::spots() const
 {
-    return _data->size();
+    return _data.size();
 }
 
 double ds::FourierSpaceData::max_amplitude() const
@@ -169,52 +169,67 @@ double ds::FourierSpaceData::max_amplitude() const
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
     {
         //Assign the current Miller Index to the array
-        double amplitude = (*ref).second.value().amplitude();
+        double amplitude = (*ref).second.amplitude();
         if(max < amplitude) max = amplitude;
     }
     
     return max;
 }
 
+std::map<ds::MillerIndex, ds::DiffractionSpot> ds::FourierSpaceData::backproject(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap) const
+{
+    std::map<MillerIndex, DiffractionSpot> map;
+    bool initialized = false;
+    
+    ds::MillerIndex current_index;
+    std::list<ds::DiffractionSpot> current_spots;
+    
+    for(std::map<ds::MillerIndex, ds::DiffractionSpot>::const_iterator spot_itr=spot_multimap.begin(); 
+            spot_itr!=spot_multimap.end(); ++spot_itr)
+    {
+        // Initialize for the start
+        if(!(initialized))
+        {
+            current_index = (*spot_itr).first;
+            initialized = true;
+        }
+        
+        // Average and insert accumulated spots
+        if(!(current_index == (*spot_itr).first))
+        {
+            ds::DiffractionSpot avg_spot(current_spots);
+            map.insert(std::pair<MillerIndex, DiffractionSpot>(current_index, avg_spot));
+            current_spots.clear();
+        }
+        
+        //Accumulate the spots in a list
+        current_spots.push_back((*spot_itr).second);
+        current_index = (*spot_itr).first;
+        
+    }
+    
+    //insert the final reflection
+    ds::DiffractionSpot avg_spot(current_spots);
+    map.insert(std::pair<MillerIndex, DiffractionSpot>(current_index, avg_spot));
+    
+    return map;
+}
+
 void ds::FourierSpaceData::scale_amplitudes(double factor)
 {
-    std::cout << "Scaling the amplitude by a factor of: " << factor << "\n";
     *this = (*this)*factor;
-}
-
-void ds::FourierSpaceData::set_value_at(int h, int k, int l, Complex2dx value, double weight)
-{
-    MillerIndex index = MillerIndex(h, k, l);
-    //if(h < 0) std::cerr << "\nWARNING: Encountered negative h value, there is a problem somewhere!\n\n";
-    if(exists(h,k,l)) _data->erase(index);
-    if(value.amplitude() > 0.0001) _data->insert(std::pair<MillerIndex, DiffractionSpot>(index, DiffractionSpot(value, weight)));
-}
-
-ds::Complex2dx ds::FourierSpaceData::complex_at(int h, int k, int l) const
-{
-    ds::Complex2dx value(0.0, 0.0);
-    if(exists(h,k,l))
-    {
-        value = _data->at(MillerIndex(h, k, l)).value();
-    }
-    return value;
-}
-
-double ds::FourierSpaceData::weight_at(int h, int k, int l) const
-{
-    double weight = 0.0;
-    if(exists(h,k,l))
-    {
-        weight = _data->at(MillerIndex(h, k, l)).weight();
-    }
-    return weight;
 }
 
 fftw_complex* ds::FourierSpaceData::fftw_data(int fx, int fy, int fz) const
 {
-    fftw_complex* fftw_data;
-    fftw_data = (fftw_complex*) calloc(fx*fy*fz, sizeof(fftw_complex));
+    fftw_complex* fftw_data = fftw_alloc_complex(fx*fy*fz);
 
+    //Zero initialization
+    for(int i=0; i<fx*fy*fz; i++)
+    {
+        ((fftw_complex*)fftw_data)[i][0] = 0.0;
+        ((fftw_complex*)fftw_data)[i][1] = 0.0;
+    }
     
     //Iterate over all possible miller indices h, k, l
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
@@ -245,7 +260,7 @@ fftw_complex* ds::FourierSpaceData::fftw_data(int fx, int fy, int fz) const
 
 void ds::FourierSpaceData::reset_data_from_fftw(int fx, int fy, int fz, fftw_complex* complex_data)
 {
-    this->reset();
+    this->clear();
     
     int h_max = fx - 1;
     int k_max = (int) fy/2;
@@ -280,35 +295,8 @@ void ds::FourierSpaceData::reset_data_from_fftw(int fx, int fy, int fz, fftw_com
     }
 }
 
-ds::FourierSpaceData ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, double fraction) const
-{
-    std::cout << "Replacing the reflections from a known set..\n";
-    std::cout << "Input size: " << input.spots() << " and current size " << this->spots() << "\n";
-    
-    FourierSpaceData new_data;
-    
-    int replaced = 0;
-    //Iterate over all possible miller indices h, k, l in current data
-    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
-    {
-
-        //Assign the current Miller Index to the array
-        ds::MillerIndex index = (*ref).first;
-        ds::Complex2dx current_complex = (*ref).second.value();
-        ds::Complex2dx new_complex(current_complex.real(), current_complex.imag());
-        
-        if(input.complex_at(index.h(), index.k(), index.l()).amplitude() > 0.0001)
-        {
-            Complex2dx input_complex = input.complex_at(index.h(), index.k(), index.l());
-            new_complex = input_complex*fraction + current_complex*(1-fraction);
-            replaced++;
-        }
-        
-        new_data.set_value_at(index.h(), index.k(), index.l(), new_complex, weight_at(index.h(), index.k(), index.l()) );
-    }
-    
-    std::cout << "Replaced " << replaced << " reflections which were already present, now adding new.\n";
-    
+void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, double replacement_amplitude_cutoff)
+{   
     //Iterate over all possible miller indices h, k, l in input data
     for(const_iterator ref=input.begin(); ref!=input.end(); ++ref)
     {
@@ -316,33 +304,41 @@ ds::FourierSpaceData ds::FourierSpaceData::replace_reflections(const FourierSpac
         ds::MillerIndex index = (*ref).first;
         ds::Complex2dx current_complex = (*ref).second.value();
 
-        if( !(new_data.exists(index.h(), index.k(), index.l())) && current_complex.amplitude() > 0.0001)
+        if(current_complex.amplitude() > replacement_amplitude_cutoff)
         {
-            current_complex = current_complex*fraction;
-            new_data.set_value_at(index.h(), index.k(), index.l(), current_complex, (*ref).second.weight() );
-            replaced++;
+            set_value_at(index.h(), index.k(), index.l(), current_complex, (*ref).second.weight() );
         }
-    }
-    
-    std::cout << "Replaced " << replaced << " reflections in total\n";
-    std::cout << "New size: " << new_data.spots() << "\n";
-    
-    return new_data;
-    
+    } 
 }
 
-ds::FourierSpaceData ds::FourierSpaceData::invert_hand() const
+ds::FourierSpaceData ds::FourierSpaceData::inverted_data(int direction) const
 {
-    //Iterate over all possible miller indices h, k, l
-    FourierSpaceData new_data;
-    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
+    if(direction == 1  || direction == 2 || direction ==3)
     {
-        //Assign the current Miller Index to the array
-        ds::MillerIndex currentHKL = (*ref).first;
-        new_data.set_value_at(currentHKL.h(), currentHKL.k(), -1*currentHKL.l(), (*ref).second.value(), (*ref).second.weight());
+        //Iterate over all possible miller indices h, k, l
+        FourierSpaceData new_data;
+        for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
+        {
+            //Assign the current Miller Index to the array
+            ds::MillerIndex currentHKL = (*ref).first;
+            int h = currentHKL.h();
+            int k = currentHKL.k();
+            int l = currentHKL.l();
+            if(direction == 1) h = -1*h;
+            if(direction == 2) k = -1*k;
+            if(direction == 3) l = -1*l;
+                
+            new_data.set_value_at(h, k, l, (*ref).second.value(), (*ref).second.weight());
+        }
+        
+        return new_data;
     }
-    
-    return new_data;
+    else
+    {
+        std::cerr << "ERROR: Encountered bad value of direction (" << direction << ") while inverting data in Fourier space (Possible values 1(for x), 2(for y), 3(for z))\n";
+        std::cerr << "ERROR: NOT INVERTING\n";
+        return *this;
+    }
 }
 
 void ds::FourierSpaceData::spread_data()
@@ -382,8 +378,8 @@ void ds::FourierSpaceData::spread_data()
     
     std::map<MillerIndex, DiffractionSpot> spreaded_map = backproject(spreaded_raw);
     
-    _data->clear();
-    _data->insert(spreaded_map.begin(), spreaded_map.end());
+    _data.clear();
+    _data.insert(spreaded_map.begin(), spreaded_map.end());
     
     std::cout << "Spots after spread: " << spots() << "\n";
     

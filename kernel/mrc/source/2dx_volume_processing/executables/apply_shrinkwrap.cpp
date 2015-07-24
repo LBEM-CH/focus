@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     input_volume.read_volume(mrcin);
     input_volume.set_symmetry(symmetry);
     if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue()); 
-    input_volume.rescale_to_max_amplitude(10000);
+    //input_volume.rescale_to_max_amplitude(10000);
     input_volume.prepare_fourier();
     input_volume.prepare_real();
     std::cout << input_volume.to_string();
@@ -81,8 +81,11 @@ int main(int argc, char** argv)
     std::cout << ":Preparing the shrinkwrap mask:\n";
     std::cout << "-----------------------------------\n\n";
     Volume2dx mask(input_volume.header());
-    mask.set_fourier(input_volume.get_fourier());
+    volume::data::RealSpaceData mask_data(input_volume.get_real());
+    mask.set_real(mask_data);
     mask.low_pass(mask_resolution);
+    if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_shrinkwrap.map");
+    
     volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_mask(density_threshold*input_volume.get_real().max()/100);
     
     //Just to write output of mask to file
@@ -100,8 +103,8 @@ int main(int argc, char** argv)
         std::cout << "::Shrinkwrap Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
-        //Replace the reflection from that of input
-        output_volume.replace_reflections(input_volume.get_fourier(), 0.6);
+        //Replace the amplitudes from that of input
+        output_volume.replace_reflections(input_volume.get_fourier());
         
         if(temp_loc != "")
         {   
@@ -116,7 +119,7 @@ int main(int argc, char** argv)
         double sum_initial = real_before.squared_sum();
         
         //Mask the volume
-        volume::data::RealSpaceData real_after = real_before.mask_applied_data(mask_shrinkwrap, 0.4);
+        volume::data::RealSpaceData real_after = real_before.mask_applied_data(mask_shrinkwrap, 1.0);
         
         //Get the sum of densities for error calculation
         double sum_final = real_after.squared_sum();
@@ -144,7 +147,7 @@ int main(int argc, char** argv)
         
         if(temp_loc != "")
         {   
-            std::string out_file_name = temp_loc + "/shrinkwrap_refined_volume_" + std::to_string(iteration+1) +".map";
+            std::string out_file_name = temp_loc + "/shrinkwrap_final_volume_" + std::to_string(iteration+1) +".map";
             output_volume.write_volume(out_file_name, "map");
         }
         
@@ -162,7 +165,7 @@ int main(int argc, char** argv)
     std::cout << "\n::Done with the iterations.\n";
     
     //Resolution limit
-    //output_volume.low_pass(max_resolution);
+    output_volume.low_pass(max_resolution);
 
     //Symmetrize
     output_volume.symmetrize();

@@ -513,6 +513,12 @@ namespace volume
             void replace_reflections(const FourierSpaceData& fourier_data);
             
             /**
+             * Replace the reflections from a Fourier volume.
+             * @param fourier_data
+             */
+            void change_amplitudes(const FourierSpaceData& fourier_data);
+            
+            /**
              * NOT WORKING!!
              * Extends the volume to cells provided and returns it 
              * 0 means no extension, 1 means one cell extended.

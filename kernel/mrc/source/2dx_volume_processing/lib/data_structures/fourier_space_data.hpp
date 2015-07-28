@@ -190,7 +190,7 @@ namespace volume
             void reset_data_from_fftw(int fx, int fy, int fz, fftw_complex* complex_data);
             
             /**
-             * Replaces the reflections present in input data. The amplitudes which are not
+             * Replaces the reflections present in input data. The reflections which are not
              * present in the input data will not be replaced. If one wants to replace the reflections
              * only with a certain minimum amplitude, this can also be set.
              * @param input - input reflections
@@ -198,6 +198,16 @@ namespace volume
              * @return new replaced Fourier Space Data
              */
             void replace_reflections(const FourierSpaceData& input, double replacement_amplitude_cutoff = 0.0);
+            
+            /**
+             * Replaces the amplitudes present in input data. The amplitudes which are not
+             * present in the input data will not be replaced. If one wants to replace the amplitude
+             * only with a certain minimum amplitude, this can also be set.
+             * @param input - input reflections
+             * @param replacement_amplitude_cutoff - Reflections in input with this amplitude value or more will only be changed
+             * @return new replaced Fourier Space Data
+             */
+            void change_amplitudes(const FourierSpaceData& input, double replacement_amplitude_cutoff = 0.0);
             
             /**
              * Spreads the current data and tries to fill in the missing spots.

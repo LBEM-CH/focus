@@ -22,8 +22,6 @@
 # DISPLAY: realang
 # DISPLAY: ALAT
 # DISPLAY: number_refinement_iterations
-# DISPLAY: number_shrinkwrap_iterations
-# DISPLAY: membrane_height
 # DISPLAY: density_threshold_refinement
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX

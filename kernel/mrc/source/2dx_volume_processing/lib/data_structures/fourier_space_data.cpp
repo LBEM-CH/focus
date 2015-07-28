@@ -311,6 +311,25 @@ void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, do
     } 
 }
 
+void ds::FourierSpaceData::change_amplitudes(const FourierSpaceData& input, double replacement_amplitude_cutoff)
+{   
+    //Iterate over all possible miller indices h, k, l in input data
+    for(const_iterator ref=input.begin(); ref!=input.end(); ++ref)
+    {
+        //Assign the current Miller Index to the array
+        ds::MillerIndex index = (*ref).first;
+        double current_amp = (*ref).second.value().amplitude();
+
+        if( exists(index.h(), index.k(), index.l()) && current_amp > replacement_amplitude_cutoff)
+        {
+            ds::Complex2dx current_complex = complex_at(index.h(), index.k(), index.l());
+            current_complex.set_amplitude(current_amp);
+            double current_weight = weight_at(index.h(), index.k(), index.l());
+            set_value_at(index.h(), index.k(), index.l(), current_complex, current_weight );
+        }
+    } 
+}
+
 ds::FourierSpaceData ds::FourierSpaceData::inverted_data(int direction) const
 {
     if(direction == 1  || direction == 2 || direction ==3)

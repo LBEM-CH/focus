@@ -637,6 +637,13 @@ void ds::Volume2dx::replace_reflections(const FourierSpaceData& fourier_data)
     set_fourier(current);
 }
 
+void ds::Volume2dx::change_amplitudes(const FourierSpaceData& fourier_data)
+{
+    FourierSpaceData current = get_fourier();
+    current.change_amplitudes(fourier_data, 0.00001);
+    set_fourier(current);
+}
+
 void ds::Volume2dx::low_pass(double high_resolution)
 {
     prepare_fourier();

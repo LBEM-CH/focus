@@ -69,32 +69,17 @@ int main(int argc, char** argv)
     input_volume.read_volume(mrcin);
     input_volume.set_symmetry(symmetry);
     if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue()); 
-    //input_volume.rescale_to_max_amplitude(10000);
+    input_volume.rescale_to_max_amplitude(10000);
     input_volume.prepare_fourier();
     input_volume.prepare_real();
     std::cout << input_volume.to_string();
-    
-    double input_energy = input_volume.get_fourier().intensity_sum();
  
     //Prepare the lowpassed binary mask for the shrinkwrap algorithm
-    std::cout << "\n-----------------------------------\n";
-    std::cout << ":Preparing the shrinkwrap mask:\n";
-    std::cout << "-----------------------------------\n\n";
-    Volume2dx mask(input_volume.header());
-    volume::data::RealSpaceData mask_data(input_volume.get_real());
-    mask.set_real(mask_data);
-    mask.low_pass(mask_resolution);
-    if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_shrinkwrap.map");
-    
-    volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_mask(density_threshold*input_volume.get_real().max()/100);
-    
-    //Just to write output of mask to file
-    mask.set_real(mask_shrinkwrap);
-    if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_shrinkwrap.map");
+    Volume2dx mask(input_volume);
     
     //Prepare the output volume
-    Volume2dx output_volume(input_volume.header());
-    output_volume.set_fourier(input_volume.get_fourier());
+    Volume2dx output_volume(input_volume);
+    volume::data::RealSpaceData real_after = output_volume.get_real();
     
     double error = 1.0;
     for(int iteration=0; iteration<number_of_iterations; ++iteration)
@@ -103,7 +88,7 @@ int main(int argc, char** argv)
         std::cout << "::Shrinkwrap Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
-        //Replace the amplitudes from that of input
+        //Replace the reflections from that of input
         output_volume.replace_reflections(input_volume.get_fourier());
         
         if(temp_loc != "")
@@ -118,15 +103,35 @@ int main(int argc, char** argv)
         //Get the sum of densities for error calculation
         double sum_initial = real_before.squared_sum();
         
+        volume::data::RealSpaceData mask_threshold = real_before.threshold_mask(0);
+        
+        real_before.apply_mask(mask_threshold);
+        
+        mask.set_real(real_before);
+        mask.low_pass_butterworth(mask_resolution);
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_shrinkwrap_" + std::to_string(iteration+1) +".map");
+    
+        volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_mask(density_threshold*real_before.max()/100);
+    
+        //Just to write output of mask to file
+        mask.set_real(mask_shrinkwrap);
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_shrinkwrap_" + std::to_string(iteration+1) +".map");
+        
         //Mask the volume
-        volume::data::RealSpaceData real_after = real_before.mask_applied_data(mask_shrinkwrap, 1.0);
+        real_after = real_before.mask_applied_data(mask_shrinkwrap, 1.0);
         
         //Get the sum of densities for error calculation
         double sum_final = real_after.squared_sum();
-        double itr_error = sqrt((sum_initial-sum_final)/sum_initial);
+        double itr_error = ((sum_initial-sum_final)/sum_initial);
+        
+        //Begin with setting a real space volume
+        output_volume.set_real(real_after);
+        
+        //Low pass filter to use whatever is required
+        output_volume.low_pass(max_resolution);
         
         std::cout << "\nIteration result:\n";
-        std::cout << "\n:Error = " << itr_error;
+        std::cout << "\n:Squared Error = " << itr_error;
         if(iteration != 0) std::cout << " (Change = " << error-itr_error << ")\n\n";
         else std::cout << "\n\n";
         
@@ -139,12 +144,6 @@ int main(int argc, char** argv)
             break;
         }
         
-        output_volume.set_real(real_after);
-        
-        //Low pass filter to use whatever is required
-        output_volume.low_pass(max_resolution);
-
-        
         if(temp_loc != "")
         {   
             std::string out_file_name = temp_loc + "/shrinkwrap_final_volume_" + std::to_string(iteration+1) +".map";
@@ -154,9 +153,9 @@ int main(int argc, char** argv)
         
         //Done with this iteration.
         //Prepare to write output
-        output_volume.prepare_fourier();
-        output_volume.prepare_real();
-        std::cout << output_volume.data_string();
+        //output_volume.prepare_fourier();
+        //output_volume.prepare_real();
+        //std::cout << output_volume.data_string();
         
         
         error = itr_error;

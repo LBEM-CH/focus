@@ -75,14 +75,14 @@ namespace volume
              * Joins the reflections from both rhs and current instance. For the
              * intersection set (reflections present in both) adds the reflections.
              */
-            FourierSpaceData& operator+(const FourierSpaceData& rhs);
+            FourierSpaceData operator+(const FourierSpaceData& rhs);
             
             /**
              * Operator definition of * with double factor.
              * Multiplies the amplitudes of all reflections by the factor.
              * @param factor
              */
-            FourierSpaceData& operator*(double factor);
+            FourierSpaceData operator*(double factor);
             
             /**
              * Clears the current data

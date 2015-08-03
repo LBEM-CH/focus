@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include <fftw3.h>
+#include <random>
 
 #include "volume2dx.hpp"
 
@@ -77,42 +78,40 @@ ds::Volume2dx& ds::Volume2dx::operator=(const Volume2dx& rhs)
     return *this;
 }
 
-ds::Volume2dx& ds::Volume2dx::operator+(const Volume2dx& rhs)
+ds::Volume2dx ds::Volume2dx::operator+(const Volume2dx& rhs)
 {
+    Volume2dx added(header());
     if(rhs.has_real())
     {
         RealSpaceData rhs_real = rhs._real;
-        set_real(get_real()+ rhs_real);
-    }
-    else if(rhs.has_fourier())
-    {
-        FourierSpaceData rhs_fourier = rhs._fourier;
-        set_fourier(get_fourier() + rhs_fourier);
+        RealSpaceData sum = get_real()+ rhs_real;
+        added.set_real(sum);
     }
     else
     {
-        std::cerr << "Hey, Volumes cannot be added! No data in memory. Did you forget to set the data?";
+        std::cerr << "Hey, Volumes cannot be added! No real data in memory. Please set the data?";
     }
     
-    return *this;
+    return added;
 }
 
-ds::Volume2dx& ds::Volume2dx::operator*(double factor)
+ds::Volume2dx ds::Volume2dx::operator*(double factor)
 {
+    Volume2dx modified;
     if(has_real())
     {
-        set_real(get_real()*factor);
+        modified.set_real(get_real()*factor);
     }
     else if(has_fourier())
     {
-        set_fourier(get_fourier()*factor);
+        modified.set_fourier(get_fourier()*factor);
     }
     else
     {
         std::cerr << "Hey, No factor can be multiplied to volume! No data in memory. Did you forget to set the data?";
     }
     
-    return *this;
+    return modified;
 }
 
 bool ds::Volume2dx::has_fourier() const
@@ -270,7 +269,8 @@ void ds::Volume2dx::read_volume(std::string file_name, std::string format)
     else if (format == "mrc" || format == "map")
     {
         _header = VolumeHeader2dx(volume::io::mrc::get_header(file_name, format));
-        set_real(volume::io::mrc::get_data(file_name, nx(), ny(), nz()));
+        RealSpaceData read_data = volume::io::mrc::get_data(file_name, nx(), ny(), nz());
+        set_real(read_data);
     }
     else
     {
@@ -314,7 +314,6 @@ void ds::Volume2dx::write_volume(std::string file_name)
 void ds::Volume2dx::generate_random_densities(double fraction_to_fill)
 {
     ds::RealSpaceData data(nx(), ny(), nz());
-    int x, y, z = 0;
     int attempts = fraction_to_fill * data.size();
     for ( int attempt = 0; attempt < attempts; attempt++ ) 
     {
@@ -322,6 +321,23 @@ void ds::Volume2dx::generate_random_densities(double fraction_to_fill)
         double density = rand() % 255;
         data.set_value_at(id, density);
     }
+    
+    set_real(data);
+}
+
+void ds::Volume2dx::generate_poisson_densities(double mean_density)
+{
+    std::cout << "Generating Poisson noise with expected mean: " << mean_density << "\n";
+    std::default_random_engine generator;
+    std::poisson_distribution<int> distribution(mean_density);
+    
+    ds::RealSpaceData data(nx(), ny(), nz());
+    for(int id=0; id<data.size(); id++)
+    {
+        data.set_value_at(id, distribution(generator));
+    }
+    
+    data.grey_scale();
     
     set_real(data);
 }

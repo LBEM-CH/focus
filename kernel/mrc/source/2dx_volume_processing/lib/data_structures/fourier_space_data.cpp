@@ -49,7 +49,7 @@ ds::FourierSpaceData& ds::FourierSpaceData::operator=(const FourierSpaceData& rh
     return *this;
 }
 
-ds::FourierSpaceData& ds::FourierSpaceData::operator+(const FourierSpaceData& rhs)
+ds::FourierSpaceData ds::FourierSpaceData::operator+(const FourierSpaceData& rhs)
 {
     FourierSpaceData* new_data = new FourierSpaceData();
     
@@ -84,7 +84,7 @@ ds::FourierSpaceData& ds::FourierSpaceData::operator+(const FourierSpaceData& rh
     return *new_data;
 }
 
-ds::FourierSpaceData& ds::FourierSpaceData::operator*(double factor)
+ds::FourierSpaceData ds::FourierSpaceData::operator*(double factor)
 {
     FourierSpaceData* data = new FourierSpaceData();
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
@@ -224,6 +224,8 @@ fftw_complex* ds::FourierSpaceData::fftw_data(int fx, int fy, int fz) const
 {
     fftw_complex* fftw_data = fftw_alloc_complex(fx*fy*fz);
 
+    int size = fx*fy*fz;
+
     //Zero initialization
     for(int i=0; i<fx*fy*fz; i++)
     {
@@ -248,9 +250,16 @@ fftw_complex* ds::FourierSpaceData::fftw_data(int fx, int fy, int fz) const
             if(idz < 0) idz = idz + fz;
             
             int memory_id = idx + (idy*fx) + (idz*fy*fx);  
-
-            ((fftw_complex*)fftw_data)[memory_id][0] = currentComplex.real();
-            ((fftw_complex*)fftw_data)[memory_id][1] = currentComplex.imag();
+            if(memory_id >= size)
+            {
+                std::cerr << "Oops! This reflection exceeds limits!! Leaving it!\n";
+                std::cerr << "Miller index found: " << currentHKL.to_string() << " and HKL Limit: +/-(" << fx-1 << ", " << fy/2 << ", " << fz/2 << ")\n";
+            }
+            else
+            {
+                ((fftw_complex*)fftw_data)[memory_id][0] = currentComplex.real();
+                ((fftw_complex*)fftw_data)[memory_id][1] = currentComplex.imag();
+            }
         }
     }
     

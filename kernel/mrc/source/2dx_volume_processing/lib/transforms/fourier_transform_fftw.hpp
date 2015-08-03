@@ -137,17 +137,19 @@ namespace volume
                 /**
                  * Holds the plan for real to complex conversion
                  */
-                fftw_plan* _plan_r2c;
+                fftw_plan *_plan_r2c;
 
                 /**
                  * Holds the plan for complex to real conversion
                  */
-                fftw_plan* _plan_c2r;
+                fftw_plan *_plan_c2r;
 
                 /**
                  * Holds the size of the transform
                  */
                 int _nx, _ny, _nz;
+                
+                bool _plans_initialized;
                 
                 
                 

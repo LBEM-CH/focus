@@ -145,6 +145,7 @@ volume::data::RealSpaceData io::mrc::get_data(const std::string file_name, const
         data.set_value_at(data.size()-id-1, (double)_data[id]);     
     }
     
+    free(_data);
     return data;
     
 }

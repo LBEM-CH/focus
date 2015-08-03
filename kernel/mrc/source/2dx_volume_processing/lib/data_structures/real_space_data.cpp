@@ -86,9 +86,9 @@ ds::RealSpaceData& ds::RealSpaceData::operator=(const RealSpaceData& rhs)
     return *this;
 }
 
-ds::RealSpaceData& ds::RealSpaceData::operator+(const RealSpaceData& rhs)
+ds::RealSpaceData ds::RealSpaceData::operator+(const RealSpaceData& rhs) const
 {
-    RealSpaceData* added =  new RealSpaceData(nx(), ny(), nz());
+    RealSpaceData added =  RealSpaceData(nx(), ny(), nz());
     if( (rhs.nx() != nx()) || (rhs.ny() != ny()) || (rhs.nz() != nz()) )
     {
         std::cerr << "ERROR: Can't add real space data with different sizes\n\n";
@@ -98,21 +98,21 @@ ds::RealSpaceData& ds::RealSpaceData::operator+(const RealSpaceData& rhs)
     
     for(int id=0; id < size(); id++)
     {
-        added->set_value_at(id, get_value_at(id)+rhs.get_value_at(id));
+        added.set_value_at(id, get_value_at(id)+rhs.get_value_at(id));
     }
     
-    return *added;
+    return added;
 }
 
-ds::RealSpaceData& ds::RealSpaceData::operator*(double factor)
+ds::RealSpaceData ds::RealSpaceData::operator*(double factor) const
 {
-    RealSpaceData* new_data =  new RealSpaceData(nx(), ny(), nz());
+    RealSpaceData new_data =  RealSpaceData(nx(), ny(), nz());
     for(int id=0; id < size(); id++)
     {
-        new_data->set_value_at(id, get_value_at(id)*factor);
+        new_data.set_value_at(id, get_value_at(id)*factor);
     }
     
-    return *new_data;
+    return new_data;
 }
 
 double ds::RealSpaceData::get_value_at(int x, int y, int z) const

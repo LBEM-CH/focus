@@ -11,8 +11,9 @@ namespace ft = volume::transforms;
 ft::FourierTransformFFTW::FourierTransformFFTW()
 {
     _nx = _ny = _nz = 0;
-    _plan_r2c = new fftw_plan();
-    _plan_c2r = new fftw_plan();
+    _plan_r2c = NULL;
+    _plan_c2r = NULL;
+    _plans_initialized = false;
 }
 
 ft::FourierTransformFFTW::FourierTransformFFTW(const FourierTransformFFTW& copy)
@@ -20,34 +21,53 @@ ft::FourierTransformFFTW::FourierTransformFFTW(const FourierTransformFFTW& copy)
     _nx = copy._nx;
     _ny = copy._ny;
     _nz = copy._nz;
-    if(copy._plan_r2c != NULL) _plan_r2c = new fftw_plan(*(copy._plan_r2c));
-    if(copy._plan_c2r != NULL) _plan_c2r = new fftw_plan(*(copy._plan_c2r));
+    _plans_initialized = copy._plans_initialized;
+    if(_plans_initialized)
+    {   
+        _plan_r2c = new fftw_plan(*(copy._plan_r2c));
+        _plan_c2r = new fftw_plan(*(copy._plan_c2r));
+    }
+    else
+    {
+        _plan_r2c = NULL;
+        _plan_c2r = NULL;
+    }
 }
 
 ft::FourierTransformFFTW::~FourierTransformFFTW()
 {
-    //fftw_destroy_plan(*_plan_r2c);
-    //fftw_destroy_plan(*_plan_c2r);
-    if(_plan_r2c != NULL) delete _plan_r2c;
-    if(_plan_c2r != NULL) delete _plan_c2r;
+    if(_plans_initialized)
+    {
+        //fftw_destroy_plan(*_plan_r2c);
+        //fftw_destroy_plan(*_plan_c2r);
+        delete _plan_r2c;
+        delete _plan_c2r;
+    }
 }
 
-void ft::FourierTransformFFTW::reset(const FourierTransformFFTW& other)
+void ft::FourierTransformFFTW::reset(const FourierTransformFFTW& copy)
 {
-    _nx = other._nx;
-    _ny = other._ny;
-    _nz = other._nz;
-    
-    if(other._plan_r2c != NULL)
+    _nx = copy._nx;
+    _ny = copy._ny;
+    _nz = copy._nz;
+    if(_plans_initialized)
     {
-        if(_plan_r2c != NULL) delete _plan_r2c;
-        _plan_r2c = new fftw_plan(*(other._plan_r2c));
+        //fftw_destroy_plan(*_plan_r2c);
+        //fftw_destroy_plan(*_plan_c2r);
+        delete _plan_r2c;
+        delete _plan_c2r;
     }
     
-    if(other._plan_c2r != NULL)
+    _plans_initialized = copy._plans_initialized;
+    if(_plans_initialized)
+    {   
+        _plan_r2c = new fftw_plan(*(copy._plan_r2c));
+        _plan_c2r = new fftw_plan(*(copy._plan_c2r));
+    }
+    else
     {
-        if(_plan_c2r != NULL) delete _plan_c2r;
-        _plan_c2r = new fftw_plan(*(other._plan_c2r));
+        _plan_r2c = NULL;
+        _plan_c2r = NULL;
     }
 }
 
@@ -74,10 +94,9 @@ void ft::FourierTransformFFTW::Replan(double* real_data, fftw_complex* complex_d
     _nx = nx;
     _ny = ny;
     _nz = nz;
-    if(_plan_r2c != NULL) delete[] _plan_r2c;
-    if(_plan_c2r != NULL) delete[] _plan_c2r;
     _plan_r2c = new fftw_plan(fftw_plan_dft_r2c_3d(nz, ny, nx, real_data, complex_data, FFTW_ESTIMATE));
     _plan_c2r = new fftw_plan(fftw_plan_dft_c2r_3d(nz, ny, nx, complex_data, real_data, FFTW_ESTIMATE));
+    _plans_initialized = true;
     std::cout << "Created new plans\n";
 }
 
@@ -87,8 +106,6 @@ void ft::FourierTransformFFTW::RealToComplex(int nx, int ny, int nz, double* rea
     if(_nx != nx || _ny != ny || _nz != nz){
         this->Replan(real_data, complex_data, nx, ny, nz);
     }
-    
-    if(_plan_r2c == NULL || _plan_c2r == NULL) Replan(real_data, complex_data, nx, ny, nz);
 
     //Execute the plan
     fftw_execute_dft_r2c(*_plan_r2c, real_data, complex_data );

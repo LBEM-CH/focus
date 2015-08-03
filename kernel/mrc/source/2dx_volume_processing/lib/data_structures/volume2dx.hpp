@@ -63,12 +63,12 @@ namespace volume
             /**
              * Operator + definition
              */
-            Volume2dx& operator+(const Volume2dx& rhs);
+            Volume2dx operator+(const Volume2dx& rhs);
             
             /**
              * Multiplication by a factor
              */
-            Volume2dx& operator*(double factor);
+            Volume2dx operator*(double factor);
             
             /**
              * Resets the volume with other volume
@@ -278,6 +278,12 @@ namespace volume
              * @param fraction_to_fill - fraction of volume to be filled with data
              */
             void generate_random_densities(double fraction_to_fill);
+            
+            /**
+             * Generates random Gaussian densities in the volume
+             * @param expected_density_sum - The expected value of density sum
+             */
+            void generate_poisson_densities(double expected_density_sum);
             
             /**
              * Scales the amplitudes such that the max amplitude is set to given value

@@ -47,12 +47,12 @@ namespace volume
             /**
              * Addition operator definition
              */
-            RealSpaceData& operator+(const RealSpaceData& rhs);
+            RealSpaceData operator+(const RealSpaceData& rhs) const;
             
             /**
              * Multiplication of all the densities by a factor
              */
-            RealSpaceData& operator*(double factor);
+            RealSpaceData operator*(double factor) const;
             
             /**
              * Resets the data with the other data

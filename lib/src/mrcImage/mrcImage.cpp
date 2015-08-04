@@ -127,18 +127,19 @@ void mrcImage::determineCellSize(mrcHeader *header)
 }
 
 bool mrcImage::loadData(mrcHeader *header)
-{
+{ 
   if(!imageFile.open(QIODevice::ReadOnly)) return false;
   imageFile.seek(header->dataOffset());
   quint32 mode = headers[0]->mode();
   qint64 dataSize;
-  if(mode == 3 || mode == 4)
+  if(mode >=0 && mode <=4)
   {
     dataSize = header->nx()*header->ny()*cellSize;
   }
   else
   {
-    dataSize = header->nx()*header->ny()*cellSize;
+      std::cerr << "The MRC mode of image " << imageFile.fileName().toStdString() << " (mode = " << mode << ") is not a supported MRC mode.\n";
+      return false;
   }
   rawData = new char[dataSize];
   imageFile.read(rawData,dataSize);
@@ -158,10 +159,10 @@ bool mrcImage::loadData(mrcHeader *header)
       #pragma omp parallel for shared(rawData);
       for(quint32 i=0;i<header->nx()*header->ny()-1;i++)
         byteSwap(&rawData[i*cellSize],cellSize);
-	  }
+	  } 
 
 
-  imageFile.close();
+  imageFile.close();  
   return true;
 }
 

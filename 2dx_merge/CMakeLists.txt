@@ -168,7 +168,7 @@ target_link_libraries(${EXETITLE} conf widgets mrcImage extentions ${2DX_MERGE_L
 #target_link_libraries(${EXETITLE} ${PNG_LIBRARY})
 #target_link_libraries(${EXETITLE} ${JPEG_LIBRARY})
 target_link_libraries(${EXETITLE} ${Boost_LIBRARIES})
-
+include_directories(${Boost_INCLUDE_DIR})
 
  
 #--------------------------------------------------------------------------------

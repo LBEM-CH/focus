@@ -62,7 +62,7 @@ C               - output for CURVY on 'SCALIMAMP3D.DAT'         - unit 2
 C               - scaled up version of required data on  'OUT'  - unit 3
 C
 C****************************************************************************** 
-      PARAMETER (NMAX=10000000)
+      PARAMETER (NMAX=20000000)
       PARAMETER (NSLOTS=100)
       PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)
@@ -629,14 +629,19 @@ C       W = AMIN1((AMP(J)/BCK(J))**2,10.0)   ! not too much weight for big AMPs
         IF(XYST.GT.RESLIMXY.OR.ZSTAR(J).GT.RESLIMZ) GO TO 300
         IF(IR.LE.3) THEN        ! i.e. not 3D-BR data
           ISLOT = 1 + DSTARSQ*10000./IRESTEP
-          AREF = AVERREF(ISLOT)
+          if(ISLOT.le.NSLOTS)then
+            AREF = AVERREF(ISLOT)
+          else
 CHEN>
-C          write(6,'(''::DSTARSQ,IRESTEP,ISLOT,AREF = '',
-C     .      F16.6,2I10,F16.6)')
-C     .      DSTARSQ,IRESTEP,ISLOT,AREF
+C           write(6,'(''::DSTARSQ,IRESTEP,ISLOT,AREF = '',
+C     .       F16.6,2I10,F16.6)')
+C     .       DSTARSQ,IRESTEP,ISLOT,AREF
 CHEN<
-          if(AREF.eq.0.0)then
             write(6,'(''::ERROR: AVERREF('',I8,'')=0.0'')')ISLOT
+            write(6,'(''::ERROR: Too high resolution'',
+     .        '' for type of reference?'')')
+            write(6,'(''IRESTEP,ISLOT,NSLOTS = '',3I10)')IRESTEP,ISLOT,NSLOTS
+            AREF = AVERREF(NSLOTS)
           endif
         ELSE
 C  bilinear interpolation in BR3DT (IR.eq.4) beyond the first bin.

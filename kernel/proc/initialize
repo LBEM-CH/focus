@@ -12,6 +12,15 @@ echo date = ${date}
 set system = `uname -s`
 echo system = ${system}
 #
+##################################################
+# CCP4 SETUP CHECK:
+# ------------------------------
+# Set the CCP4 Directory:
+# Find if the variable ${CCP4} is already set!
+# If not try to guess the paths: e.g. /usr/local/ccp4
+##################################################
+
+echo "Finding CCP4 setup directory.. "
 if ($?CCP4) then
   set ccp4_dir = $CCP4
 else
@@ -36,15 +45,48 @@ else
 	set bin_ccp4 = "NOT_FOUND"
   endif 
 endif
+
+#
+#################################################
+# EMAN2 SETUP CHECK:
+# ------------------------------
+# Set the EMAN2 Directory:
+# Find if the variable ${EMAN2DIR} is already set!
+# If not try to guess the paths:
+# FOr OSX it can be: /Applications/EMAN2
+# Other search path: ~/EMAN2
+##################################################
+
+echo "Finding EMAN2 setup directory.. "
+if ($?EMAN2DIR) then
+  set EMAN2_dir = ${EMAN2DIR}
+else
+  set EMAN2_dir = /Applications/EMAN2
+  if ( ! -d ${EMAN2_dir} ) then
+    set EMAN2_dir = ~/EMAN2
+  endif
+endif
+
+if ( -d ${EMAN2_dir} ) then
+  set eman2 = ${EMAN2_dir}
+else
+  set eman2 = "NOT_FOUND"
+endif
+#
 #
 echo bin_2dx = ${bin_2dx}
 echo proc_2dx = ${proc_2dx}
 echo ccp4 = ${ccp4}
 echo bin_ccp4 = ${bin_ccp4}
+echo EMAN2 = ${eman2}
 if ($?app_2dx_image) then
   echo app_2dx_image = ${app_2dx_image}
 endif
 #
+
+####################################################
+# Find CCP4 CSH setup file and source it!
+###################################################
 if ( $?ccp4_setup ) then
   if ( ${ccp4_setup} == 'y' ) then
     if ( ( ! -d ${ccp4} ) || ( ! -d ${bin_ccp4} ) ) then
@@ -59,24 +101,21 @@ if ( $?ccp4_setup ) then
       ${proc_2dx}/linblock "Install CCP4 from http://www.ccp4.ac.uk/download"
       echo ":: "
     else
+      # Set the CCP4 CSH setup script
+      echo "Finding CSH setup script from CCP4 installation.. "
       set ccp4_setup = ${bin_ccp4}/ccp4.setup-csh
       if ( ! -e ${ccp4_setup} ) then
         set ccp4_setup = ${ccp4}/include/ccp4.setup-csh
         if ( ! -e ${ccp4_setup} ) then
+	  echo ":: WARNING: CSH setup script from CCP4 installation not found. Trying other setup scripts."
           set ccp4_setup = ${ccp4}/include/ccp4.setup
-          if ( ! -e ${ccp4_setup} ) then
-            set ccp4_setup = ${bin_ccp4}/ccp4.setup-csh
-          endif
         endif
       endif
       if ( -e ${ccp4_setup} ) then
         # This is sourcing a script within a sourced script. Hopefully, this will work...
-        echo "::   Sourcing ${ccp4_setup}"
-        if ( ${ccp4_setup} == "/Applications/ccp4-6.4.0/bin/ccp4.setup-csh" ) then
-          echo ":: If this script doesn’t continue, then the CCP4 initalization crashes. That could be caused by a bug in the CCP4 script (arpwarp call in sh instead of csh syntax)"
-        endif
+        echo ":   Sourcing ${ccp4_setup}"
         source ${ccp4_setup}
-        echo "::   Finished with ${ccp4_setup}"
+        echo ":   Finished with ${ccp4_setup}"
       else
         ${proc_2dx}/linblock "WARNING: ${ccp4_setup} does not exists."
         ${proc_2dx}/linblock "CCP4 setup file not found. Is CCP4 correctly installed ???"
@@ -92,27 +131,42 @@ if ( $?ccp4_setup ) then
     endif
   endif
 endif
-#
-set EMAN2_dir = /Applications/EMAN2
-if ( ! -d ${EMAN2_dir} ) then
-  set EMAN2_dir = ~/EMAN2
-endif
-set EMAN2_setup = ${EMAN2_dir}/eman2.cshrc
-if ( -e ${EMAN2_setup} ) then
-  echo ":proc/initialize: Sourcing ${EMAN2_setup}"
-  source ${EMAN2_setup}
+
+####################################################
+# Find EMAN2 CSH setup file and source it!
+###################################################
+if ( ! -d ${eman2} ) then
+  echo ":: "
+  ${proc_2dx}/linblock "EMAN2 not found. Is it installed ???"
+  ${proc_2dx}/linblock "The location of EMAN2 is defined in ${proc_2dx}/initialize."
+  ${proc_2dx}/linblock "You can edit it here."
+  ${proc_2dx}/linblock "EMAN2 could for example be installed in /Applications/EMAN2"
+  echo ":: "
+  ${proc_2dx}/linblock "You will not be able to use scripts such as Movie Mode Processing without EMAN2."
+  echo ":: "
+  ${proc_2dx}/linblock "Install EMAN2 from http://blake.bcm.edu/emanwiki/EMAN2"
+  echo ":: "
 else
-   echo ":: "
-   echo ":: "
-   echo ":: "
-   ${proc_2dx}/linblock "EMAN2 setup file not found." 
-   ${proc_2dx}/linblock "EMAN2 setup file has to be identified in ${proc_2dx}/initialize." 
-   ${proc_2dx}/linblock "You can edit it there."
-   ${proc_2dx}/linblock "EMAN2 could for example be installed in /Applications/EMAN2"
-   echo ":: "
-   echo ":: "
-   echo ":: "
+  # Set the EMAN2 CSH setup script
+  echo "Finding CSH setup script from EMAN2 installation.. "
+  set EMAN2_setup = ${eman2}/eman2.cshrc
+  if ( -e ${EMAN2_setup} ) then
+    # This is sourcing a script within a sourced script. Hopefully, this will work...
+    echo ":   Sourcing ${EMAN2_setup}"
+    source ${EMAN2_setup}
+    echo ":   Finished with ${EMAN2_setup}"
+  else
+    ${proc_2dx}/linblock "WARNING: ${EMAN2_setup} does not exists."
+    ${proc_2dx}/linblock "EMAN2 setup file not found. Is EMAN2 correctly installed ???"
+    ${proc_2dx}/linblock "Does the EMAN2 installation have a eman2.cshrc file??" 
+    ${proc_2dx}/linblock "If not download and set it up in ${eman2}"
+    echo ":: "
+    ${proc_2dx}/linblock "You will not be able to use scripts such as Movie Mode Processing without EMAN2."
+    echo ":: "
+    echo ":: "
+  endif
 endif
+
 #
 source ${proc_2dx}/2dx_makedirs
 #

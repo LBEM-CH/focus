@@ -138,6 +138,12 @@ if ( -e ${nonmaskimagename}-masking-final.mrc ) then
   \mv -f ${nonmaskimagename}-masking-final.mrc ${nonmaskimagename}_mask.mrc 
   echo "(Renaming ${nonmaskimagename}-masking-final.mrc to ${nonmaskimagename}_mask.mrc)"
 endif
+if ( ! -e ${nonmaskimagename}_raw.mrc ) then
+  if ( -e ${nonmaskimagename}.mrc ) then
+    \mv -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc 
+    echo "(Renaming ${nonmaskimagename}.mrc to ${nonmaskimagename}_raw.mrc)"
+  endif
+endif
 #
 if ( ${initialization_executable} == "n" ) then
   set initialization_reset = "n"

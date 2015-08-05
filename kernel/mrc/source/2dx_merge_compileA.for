@@ -19,6 +19,9 @@ C
       character*1 CNREFOUT,CNSHFTIN
       integer*8 imnum(10000)
       logical lexist
+      logical LPROTFOUFIL,LUSEML
+C
+      LPROTFOUFIL = .FALSE.
 C
       write(*,'('':2dx_merge_compileA - '',
      .    ''compiling the merging script'')')
@@ -171,7 +174,6 @@ C
       write(11,'(''set RFACAMP = "'',A,''"'')')cline(1:k)
       write(11,'(''#'')')
       write(11,'(''set LOGOUTPUT = F'')')
-      write(11,'(''set LPROTFOUFIL = F'')')
       write(11,'(''set ILIST = '',I3)')ILIST
       write(11,'(''setenv OMP_NUM_THREADS 4'')')
       write(11,'(''#'')')
@@ -196,7 +198,7 @@ C
       write(11,'(''${spcgrp} 0 F F ${ILIST} ${realcell} ${ALAT} '',
      .   ''${realang} 0 15 ${IAQP2} ${IVERBOSE} ${LOGOUTPUT} '',
      .   ''!ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE'',
-     ,   '',LOGOUTPUT'')')
+     .   '',LOGOUTPUT '')')
       write(11,'(''10,0.7,10,0.5'',28X,
      .   ''!itaxastep,rtaxasize,itanglstep,rtanglsize'')')
 C
@@ -295,18 +297,32 @@ C---------RSCL=0.0 means scaling is automatic for following datasets
         call shorten(CTITLE,k)
 C
         if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+          call cgetline(CPHORI,"phaori_ML")
+          read(CPHORI,*,ERR=901)RPHAORIH,RPHAORIK
+          goto 902
+ 901      continue
           RPHAORIH=0.0
           RPHAORIK=0.0
+ 902      continue
+          write(*,'(''   using Single Particle  results, '',
+     .      ''PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
         else
           call cgetline(CPHORI,"phaori")
-          read(CPHORI,*)RPHAORIH,RPHAORIK
+          read(CPHORI,*,ERR=903)RPHAORIH,RPHAORIK
+          goto 904
+ 903      continue
+          RPHAORIH=0.0
+          RPHAORIK=0.0
+ 904      continue
+          write(*,'(''   using Fourier filtered results, '',
+     .      ''PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
         endif
 C
         close(12)
 C
 C-------Loop over potentially all three unbending forms:
         if (IMERGEDAT.eq.9) then
-          ilooend = 6
+          ilooend = 3
         else
           ilooend = 1
         endif
@@ -319,9 +335,11 @@ C
             if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
               write(cname4,'(A,''/APH/ML_result.aph'')')
      .          cdir(1:k1)
+              LUSEML = .TRUE.
             else
               write(cname4,'(A,''/APH/image_ctfcor_ctf.aph'')')
      .          cdir(1:k1)
+              LUSEML = .FALSE.
             endif
             call shortshrink(cname4,k4)
             lexist=.true.
@@ -331,19 +349,10 @@ C
      .         ''/APH/image_ctfcor_fou_unbent_ctf.aph'')')cdir(1:k1)
             elseif(iloo.eq.2)then
               write(cname4,'(A,
-     .          ''/APH/image_ctfcor_U2-Syn_ctf.aph'')')cdir(1:k1)
+     .          ''/APH/image_ctfcor_movie_fou_ctf.aph'')')cdir(1:k1)
             elseif(iloo.eq.3)then
               write(cname4,'(A,
-     .          ''/APH/image_ctfcor_movie_fou_ctf.aph'')')cdir(1:k1)
-            elseif(iloo.eq.4)then
-              write(cname4,'(A,
-     .          ''/APH/image_ctfcor_movie_syn_ctf.aph'')')cdir(1:k1)
-            elseif(iloo.eq.6)then
-              write(cname4,'(A,
      .          ''/APH/image_ctfcor_movieB_fou_ctf.aph'')')cdir(1:k1)
-            elseif(iloo.eq.7)then
-              write(cname4,'(A,
-     .          ''/APH/image_ctfcor_movieB_syn_ctf.aph'')')cdir(1:k1)
             endif
             call shortshrink(cname4,k4)
             inquire(file=cname4(1:k4),exist=lexist)
@@ -365,11 +374,12 @@ C
             call shortshrink(CLATTICE,k)
             write(11,'(A40,26X,''! lattice'')')CLATTICE(1:k)
 C
-            write(11,'(2F10.3,'' 0.0 '',F10.3,'' 0 '',F9.5,6I2,
-     .         '',${LPROTFOUFIL} ! OH,OK,STEP,WIN,SGNXCH,SCL,R180,RHK,'',
-     .          ''CTFREV,ROT90,REVHND,REVSGN,LPROTFOUFIL'')')
+            write(11,'(2F10.3,'' 0.0 '',F10.3,'' 0 '',F9.5,6I2,2L2,
+     .         '' ! OH,OK,STEP,WIN,SGNXCH,SCL,R180,RHK,'',
+     .          ''CTFREV,ROT90,REVHND,REVSGN,LPROTFOUFIL,LUSEML'')')
      .         RPHAORIH,RPHAORIK,RZWIN,RSCL,IROT180,IREVHK,ICTFREV,IROT90,
-     .        IREVHND,IREVXSGN
+     .         IREVHND,IREVXSGN,
+     .         LPROTFOUFIL,LUSEML
 C
             write(11,'(4F12.3,''                  ! cs,kv,tx,ty'')')
      .        RCS,RKV,RTX,RTY

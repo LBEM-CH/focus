@@ -33,14 +33,10 @@ setenv IN  FFTIR/${iname}_fou_unbend2_fft.mrc
 setenv OUT SCRATCH/${iname}_fou_unbend2_fft_msk.mrc
 setenv SPOTS ${nonmaskimagename}.spt
 #
-echo 2 T T F	
-echo 1	
-echo ${lattice},-50,50,-50,50,${rmax},1 
-#
 ${bin_2dx}/2dx_masktrana.exe << eot
 2 T T F				! ISHAPE= 1(CIRC),2(GAUSS CIRC),OR 3(RECT) HOLE, IAMPLIMIT(T or F)
 ${holeb}			! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice},-50,50,-50,50,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+${lattice},-100,100,-100,100,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
 #
 echo "<<@progress: 10>>"
@@ -225,7 +221,7 @@ eot
   ${bin_2dx}/2dx_masktrana.exe << eot
 1 T T F	! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${maskb}       ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
-${lattice},-50,50,-50,50,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
+${lattice},-100,100,-100,100,${rmax},1 !A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
   #
   if ( ${locround} == '1' ) then
@@ -633,12 +629,17 @@ eot
     echo "# IMAGE: ${nonmaskimagename}_automask.mrc <Masking info file>" >> LOGS/${scriptname}.results
     python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc
     #
-    if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == 4x || ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x ) then
+    if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == 4x || ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x || ${ctfcor_imode}x == 7x ) then
       ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
       \cp -f ${imagename}.mrc image_ctfcor.mrc
       echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
     else
-      #  
+      #
+      if ( ${ctfcor_imode}x == 8x ) then
+        set ctfcor_imode_local = 2
+      else
+        set ctfcor_imode_local = ${ctfcor_imode}
+      endif
       #
       #################################################################################
       ${proc_2dx}/linblock "2dx_ctfcor - to apply CTF correction to the image ${imagename}.mrc"
@@ -657,7 +658,7 @@ ${CS},${KV},${phacon},${magnification},${stepdigitizer}
 ${defocus}
 ${RESMAX}
 ${ctfcor_noise}
-${ctfcor_imode}
+${ctfcor_imode_local}
 ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
@@ -733,6 +734,15 @@ SCRATCH/${iname}_CCmap21_unbend2.mrc
 UNBENT,PASS,2,${date}
 eot
     #
+    \rm -f SCRATCH/${iname}_CCmap21_marked.mrc
+    ${bin_2dx}/2dx_mark_spots.exe << eot
+SCRATCH/${iname}_CCmap21.mrc
+SCRATCH/${iname}_CCmap21_marked.mrc
+${nonmaskimagename}_profile.dat
+2
+eot
+    echo "# IMAGE: SCRATCH/${iname}_CCmap21_marked.mrc <CCmap, marked>" >> LOGS/${scriptname}.results 
+    #
   endif
   echo "# IMAGE: SCRATCH/${iname}_CCmap21_unbend2.mrc <CCmap with Reference 1, unbent>" >> LOGS/${scriptname}.results 
   #
@@ -761,33 +771,50 @@ SCRATCH/${iname}_fou_unbend2_notap.mrc
 UNBENT,PASS,2,${date}
 eot
       #
-      \rm -f SCRATCH/${iname}_CCmap21_marked.mrc
-      ${bin_2dx}/2dx_mark_spots.exe << eot
-SCRATCH/${iname}_CCmap21.mrc
-SCRATCH/${iname}_CCmap21_marked.mrc
-${nonmaskimagename}_profile.dat
-2
-eot
-      echo "# IMAGE: SCRATCH/${iname}_CCmap21_marked.mrc <CCmap, marked>" >> LOGS/${scriptname}.results 
-      #
-      \rm -f SCRATCH/${iname}_CCmap21_unbent.mrc
-      ${bin_2dx}/2dx_ccunbendk.exe << eot
-SCRATCH/${iname}_CCmap21.mrc
-${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
-50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
-${iname}, UNBEND2, ${date}
-SCRATCH/${iname}_CCmap21_unbent.mrc
-CCmap unbent
-eot
-      #
-      echo "# IMAGE-IMPORTANT: SCRATCH/${iname}_CCmap21_unbent.mrc <CCmap, unbent>" >> LOGS/${scriptname}.results 
-      #
   endif
   #
   \rm -f fort.17
   \mv -f CCPLOT.PS PS/${iname}_ccunbend2.ps
   if ( ${locround} == '1' ) then
     echo "# IMAGE-IMPORTANT: PS/${iname}_ccunbend2.ps <PS: Vector Plot for Unbending>"  >> LOGS/${scriptname}.results 
+  endif
+  #
+  if ( ${ctfcor_imode} == "8" &&  ${final_round} == "y" ) then
+    #############################################################################
+    ${proc_2dx}/${lincommand} "unbend also the original image"
+    #############################################################################
+    #
+    \rm -f SCRATCH/${iname}_fou_unbend2_notap.mrc
+    #
+    if ( ${ccunbend_program} == "1" ) then
+      ${proc_2dx}/${lincommand} "2dx_ccunbendh - to unbend the original image"
+      ${bin_2dx}/2dx_ccunbendh.exe << eot
+${imagename}.mrc
+${IMAXCOR},${ISTEP_h},${NNUM},${ROFFSET}	 !IMAXCOR,ISTEP,NNUM,ROFFSET
+0.001,${facthresha},${RMAG} !EPS,FACTOR,RMAG
+SCRATCH/${iname}_fou_unbend2_notap.mrc
+UNBENT,PASS,2,${date}
+eot
+      #
+    else
+      #
+      ${proc_2dx}/${lincommand} "2dx_ccunbendk - to unbend the original image"
+      ${bin_2dx}/2dx_ccunbendk.exe << eot
+${imagename}.mrc
+${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+${iname}, UNBEND2, ${date}
+SCRATCH/${iname}_fou_unbend2_notap.mrc
+UNBENT,PASS,2,${date}
+eot
+      #
+      echo "# IMAGE-IMPORTANT: SCRATCH/${iname}_fou_unbend2_notap.mrc <Original image, unbent>" >> LOGS/${scriptname}.results 
+      #
+    endif
+    #
+    \rm -f fort.17
+    \rm -f CCPLOT.PS
+    #
   endif
   #
   echo "<<@progress: 90>>"
@@ -862,7 +889,7 @@ ${imagenumber} ${iname}, Unbend2, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+2,2,0,100,100,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 APH/${iname}_fou_unbent.aph
 SCRATCH/TMP9873.dat
 U2

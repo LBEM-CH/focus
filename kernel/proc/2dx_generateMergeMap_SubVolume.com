@@ -62,10 +62,15 @@ eot
     ${proc_2dx}/linblock "mapmask - to mask with PDB file"
     #############################################################################
     #
-    \cp -f ${mask_subvolume_PDB_file} SCRATCH/PDB-tmp.pdb
-    ${bin_ccp4}/mapmask mapin SCRATCH/rot_volume.map mapout XYZIN SCRATCH/PDB-tmp.pdb SCRATCH/rot_volume_tmp.map << eot
-MODE MAPIN
-BORDER ${mask_subvolume_PDB_radius}
+    \rm -f NCSMask.map
+    ${bin_ccp4}/ncsmask xyzin ${mask_subvolume_PDB_file} mskout NCSMask.map << eof
+RADIUS 3.0
+END
+eof
+    echo "# IMAGE: NCSMask.map <MAP: Mask map from PDB file>" >> LOGS/${scriptname}.results
+    #
+    ${bin_ccp4}/mapmask mapin SCRATCH/rot_volume.map mapout MSKIN2 NCSMask.map MAPOUT SCRATCH/rot_volume_tmp.map << eot
+MODE MAPIN MSKIN2
 END
 eot
     #

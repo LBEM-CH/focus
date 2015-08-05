@@ -31,7 +31,8 @@ set imagecentery = ${imagecenterx}
 
 
 if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
-  ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction"
+
+  ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction to data"
   setenv IN  ${CTF_infile}
   setenv OUT ${CTF_outfile}
   \rm -f ${CTF_outfile}
@@ -39,18 +40,35 @@ if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctf
   ${bin_2dx}/2dx_ctfapplyk.exe << eot
 ${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
 ${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
-${imagenumber} ${imagename}, ${date}
+${imagenumber} ${imagename}, CTFcor_Mode=${local_ctfcor_imode}, ${date}
 ${phacon}
 ${RESMIN},1.0
 ${local_ctfcor_imode}  ! Define modus of CTF correction
 eot
+
+  ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction for PS plot"
+  setenv IN  ${CTF_infile}
+  setenv OUT dummy.tmp
+  \rm -f dummy.tmp
+  \rm -f CTFPLOT.PS
+  ${bin_2dx}/2dx_ctfapplyk.exe << eot
+${lattice},${imagesidelength},${stepdigitizer},${magnification} ! AX,AY,BX,BY,ISIZE,DSTEP,XMAG
+${defocus},${CS},${KV},${RESPLOTMAX} ! DFMID1,DFMID2,ANGAST,CS,KV,RESMAX
+${imagenumber} ${imagename}, CTFcor_Mode=${local_ctfcor_imode}, ${date}
+${phacon}
+${RESMIN},${RESMAX}
+${local_ctfcor_imode}  ! Define modus of CTF correction
+eot
+  \rm -f dummy.tmp
+
+
 endif
 
 
 
-if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "5" || ${local_ctfcor_imode} == "6" || ${local_ctfcor_imode} == "7" ) then
+if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "5" || ${local_ctfcor_imode} == "6" || ${local_ctfcor_imode} == "7" || ${local_ctfcor_imode} == "8" ) then
   #
-  if ( ${local_ctfcor_imode} == "4" ) then
+  if ( ${local_ctfcor_imode} == "4" || ${local_ctfcor_imode} == "8" ) then
     if ( ! -e ${unbent_FFT} ) then
       ${proc_2dx}/linblock "WARNING: File not found: ${unbent_FFT}"
       exit
@@ -73,7 +91,7 @@ ${defocus},${TLTAXIS},${TLTANG} ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 ${CTF_outfile}
 SCRATCH/TMP9873.dat
 ${algo}
-${RESMIN},${RESMAX},${imagecenterx},${imagecentery},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
+${RESMIN},1.0,${imagecenterx},${imagecentery},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${lattice}                  ! reciprocal lattice vectors in pixels
 eot
       #
@@ -161,7 +179,7 @@ eot
 
       ${bin_2dx}/2dx_mmboxa.exe << eot
 SCRATCH/image_ctf_upscale_taper_fft.mrc
-${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
+${imagenumber} ${imagename}, CTFcor_Mode=${local_ctfcor_imode}, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -180,6 +198,18 @@ eot
   source SCRATCH/TMP9873.dat
   #
   if ( ${algo} == "U2" ) then
+    echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
+    echo "set QVal2 = ${QVAL_local}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ1 = ${U2_IQ1}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ2 = ${U2_IQ2}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ3 = ${U2_IQ3}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ4 = ${U2_IQ4}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ5 = ${U2_IQ5}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ6 = ${U2_IQ6}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ7 = ${U2_IQ7}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ8 = ${U2_IQ8}" >> LOGS/${scriptname}.results
+    echo "set U2_IQ9 = ${U2_IQ9}" >> LOGS/${scriptname}.results
+
     set IQ2 = `echo ${U2_IQ1} ${U2_IQ2} ${U2_IQ3} ${U2_IQ4} ${U2_IQ5} ${U2_IQ6} ${U2_IQ7} ${U2_IQ8} ${U2_IQ9}`
     echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
     echo "::QVal2= ${QVAL_local} ... IQ stat = ${IQ2}"
@@ -188,11 +218,6 @@ eot
     echo " " >> History.dat
     echo ":Date: ${date}" >> History.dat
     echo "::Unbend 2: QVal= ${QVAL_local} ... IQ stat = ${IQ2}" >> History.dat
-    #
-    echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
-    echo "set QVal2 = ${QVAL_local}" >> LOGS/${scriptname}.results
-    echo "set U2_QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
-    echo "set U2_IQs = ${IQ2}" >> LOGS/${scriptname}.results
   endif
   
   if ( ${algo} == "UMA" ) then

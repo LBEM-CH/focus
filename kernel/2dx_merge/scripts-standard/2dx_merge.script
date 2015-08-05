@@ -70,6 +70,16 @@
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
 # DISPLAY: Thread_Number
+# DISPLAY: number_of_beads
+# DISPLAY: density_threshold_bead
+# DISPLAY: maximum_resolution_bead
+# DISPLAY: number_refinement_iterations
+# DISPLAY: membrane_height
+# DISPLAY: maximum_amplitude_refinement
+# DISPLAY: density_threshold_refinement
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: calculate_subvolume
 #
 #$end_local_vars
 #
@@ -138,6 +148,14 @@ set Thread_Number = ""
 set zstarrange  = ""
 set zstarrange_real = ""
 set zstarwin  = ""
+set calculate_subvolume = ""
+set number_of_beads = ""
+set density_threshold_bead = ""
+set maximum_resolution_bead = ""
+set number_refinement_iterations = ""
+set membrane_height = ""
+set maximum_amplitude_refinement = ""
+set density_threshold_refinement = ""
 #
 #$end_vars
 #
@@ -146,6 +164,18 @@ set scriptname = 2dx_merge
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
+#
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+#
+echo "cellx = ${cellx}"
+echo "celly = ${celly}"
+echo "cellz = ${ALAT}"
+#
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
 #
 # The following is to make sure that for the next "Import Images", the default is correctly initialized.
 set initialization_reset = "y"
@@ -389,13 +419,19 @@ source ${proc_2dx}/2dx_merge_merge_sub.com
 #
 if ( ${merge_modus} == "3D" ) then
   #
-  echo "<<@progress: 70>>"
+  echo "<<@progress: 45>>"
   #
   #############################################################################
   ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
   #############################################################################
   #
   source ${proc_2dx}/2dx_merge_latline_sub.com
+  #
+  if ( ${latline_algo} == "2" ) then
+    #
+    source ${proc_2dx}/2dx_refineMergedMap_sub.com
+    #
+  endif
   #
 endif
 #

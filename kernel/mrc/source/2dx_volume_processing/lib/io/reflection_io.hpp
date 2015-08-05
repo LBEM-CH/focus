@@ -1,0 +1,65 @@
+/* 
+ * @license GNU Public License
+ * @author Nikhil Biyani (nikhilbiyani@gmail.com)
+ * 
+ */
+
+#ifndef REFLECTION_IO_HPP
+#define	REFLECTION_IO_HPP
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <math.h>
+
+#include "../data_structures/common_definitions.hpp"
+#include "../data_structures/volume_header.hpp"
+#include "../data_structures/fourier_space_data.hpp"
+
+namespace volume
+{
+    namespace io
+    {
+        namespace reflection
+        {
+            /**
+             * Function to read in HKZ/L data. The data is expected to be in the
+             * following format:
+             * h    k   l/z*   amplitude   phase   sig_amp sig_phase   iq_value
+             * @param file_path
+             * @param z_scale: the scale which will be used to convert z* data to l (for HKL files z_scale = 1)  
+             * @param raw_ccp4 :  Correct for density on top and bottom (as from raw ccp4)?
+             * @return fourier_data
+             */
+            volume::data::FourierSpaceData read(std::string file_path, int z_scale, bool raw_ccp4 = true);
+            
+            /**
+             * A HKL file writer. Writes the HKL File in the following format:
+             * h    k   l   amp phase   fom
+             * @param file_path
+             * @param data - input data
+             * @param for_ccp4 - if the output would be used by CCP4? (will invert the hand and sift the phase)
+             */
+            void write(const std::string& file_path, const volume::data::FourierSpaceData& data, bool for_ccp4 = true);
+            
+            /**
+             * Method to add a spot with raw parameters read from file.
+             * @param map
+             * @param h_in
+             * @param k_in
+             * @param z_in
+             * @param amp_in
+             * @param phase_in
+             * @param weight_in
+             * @param z_scale
+             * @param raw_ccp4
+             */
+            void add_spot(volume::data::DiffractionSpotMultiMap& map, int h_in, int k_in, double z_in, double amp_in, double phase_in, double weight_in, int z_scale, bool raw_ccp4);
+        }
+        
+    }
+    
+}
+
+#endif	/* REFLECTION_IO_HPP */
+

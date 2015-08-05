@@ -5,7 +5,7 @@ C                                                                             *
 C                                               Part of 2dx                   *
 C                                                                             *
 C       Version 1.00    30-SEP-14    HS         First version, using tiles    *
-C       Version 1.10    04-JAN-15    HS         Changed or stripes            *
+C       Version 1.10    04-JAN-15    HS         Changed to stripes            *
 C                                                                             *
 C******************************************************************************
 C
@@ -16,7 +16,7 @@ C
 C        card  1 :  input filename
 C        card  2 :  output filename with CTF correction
 C        card  3 :  output filename for summed CTF image
-C        card  4 :  TLTAXA,TLTANG
+C        card  4 :  TLTAXIS,TLTANG
 C        card  5 :  CS[mm],HT[kV],PHACON,MAGNIFICATION,STEPSIZE_DIGITIZER[um]
 C        card  6 :  DEF1,DEF2,ANGAST
 C        card  7 :  NOISE (for Wiener option, otherwise give 0.0)
@@ -79,7 +79,7 @@ C
       REAL THETATR
       REAL RVAL
 C
-      REAL TLTAXA,TLTANG
+      REAL TLTAXIS,TLTANG
       REAL CS,HT,PHACON,RMAG,STEPD,AMPCON,WL
       REAL VAL,DMIN,DMAX,DMEAN,D1MAX
       REAL DIMIN,DIMAX,DIMEAN
@@ -221,18 +221,18 @@ C
         ENDIF
       endif
 C
-      WRITE(6,'(''TLTAXA,TLTANG'')')
-      read(5,*)TLTAXA,TLTANG
-      write(6,'(''    Read: '',2F12.3)')TLTAXA,TLTANG
+      WRITE(6,'(''TLTAXIS,TLTANG'')')
+      read(5,*)TLTAXIS,TLTANG
+      write(6,'(''    Read: '',2F12.3)')TLTAXIS,TLTANG
 C
-      if(TLTAXA.gt.90.0 .or. TLTAXA.lt.-90.0) then
-        write(6,'(''::ERROR: TLTAXA should be between +-90.0'')')
+      if(TLTAXIS.gt.90.0 .or. TLTAXIS.lt.-90.0) then
+        write(6,'(''::ERROR: TLTAXIS should be between +-90.0'')')
         goto 900
       endif
 C-----check here if tilt axis happens to be +-90 deg.
 C-----if so, apply small offset to avoid degeneracy
-      IF (TLTAXA.GT. 89.9) TLTAXA= 89.9
-      IF (TLTAXA.LT.-89.9) TLTAXA=-89.9
+      IF (TLTAXIS.GT. 89.9) TLTAXIS= 89.9
+      IF (TLTAXIS.LT.-89.9) TLTAXIS=-89.9
 C
       if(TLTANG.gt.90.0 .or. TLTANG.lt.-90.0) then
         write(6,'(''::ERROR: TLTANG should be between +-90.0'')')
@@ -311,8 +311,8 @@ C
 C
 C-----N is normal to tilt axis, indicates the direction
 C-----in which defocus varies most
-C     RNORMX= SIN(TLTAXA*PI/180.0)
-C     RNORMY=-COS(TLTAXA*PI/180.0)
+C     RNORMX= SIN(TLTAXIS*PI/180.0)
+C     RNORMY=-COS(TLTAXIS*PI/180.0)
 C
 C-----Parameters for CTF calculation
 C
@@ -447,9 +447,7 @@ C-----  RESMAX**2 / 2 / WL = NX * SQRT(2) / ISTRIPENUM * RPIXEL * tan(TLTANG)
 C-----  ISTRIPENUM = NX * SQRT(2) * RPIXEL * tan(TLTANG) * 2 * WL / RESMAX**2
 C
       RDEFTOL = RESMAX**2 / 2.0 / WL
-      ISTRIPENUM = 1 + NX * sqrt(2.0) * RPIXEL * tan(TLTANG*PI/180.0) * 2.0 * WL / RESMAX**2
-C
-C     ISTRIPENUM = 1
+      ISTRIPENUM = 1 + abs(NX * sqrt(2.0) * RPIXEL * tan(TLTANG*PI/180.0) * 2.0 * WL / RESMAX**2)
 C
       IS=ISTRIPENUM/2
       if(IS*2 .EQ. ISTRIPENUM) ISTRIPENUM = ISTRIPENUM+1
@@ -486,9 +484,9 @@ C
 C-------Coordinates of center of stripe
         if(ISTRIPENUM.gt.1)then
           rstripex = real(NCX) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
-     .                * sin(TLTAXA*PI/180.0) * NX*sqrt(2.0) / real(ISTRIPENUM - 1)
+     .                * sin(TLTAXIS*PI/180.0) * NX*sqrt(2.0) / real(ISTRIPENUM - 1)
           rstripey = real(NCY) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
-     .                * cos(TLTAXA*PI/180.0) * NY*sqrt(2.0) / real(ISTRIPENUM - 1)
+     .                * cos(TLTAXIS*PI/180.0) * NY*sqrt(2.0) / real(ISTRIPENUM - 1)
         else
           rstripex = NCX
           rstripey = NCY
@@ -496,7 +494,7 @@ C-------Coordinates of center of stripe
 C
 C-------Calculate local defocus for the center of the current stripe
 C
-C-------Defocus is "defocus = RDEF1,RDEF2,ANGAST".  TLTAXA, TLTANG.  Pixel size in Angstroems is RPIXEL
+C-------Defocus is "defocus = RDEF1,RDEF2,ANGAST".  TLTAXIS, TLTANG.  Pixel size in Angstroems is RPIXEL
 C
 C-------Calculate distance from tilt axis for the center of this stripe, in pixels
 C-------Center of image is NCX,NCY
@@ -510,8 +508,8 @@ C-------  arctan((py-ncy) / (px-ncx))
         rbeta = atan2(real(rstripey-NCY),real(rstripex-NCX))
 C
 C-------Angle between tilt axis and line from image-center to stripe-center is
-C-------  beta - TLTAXA
-        rgamma = rbeta - TLTAXA*PI/180.0
+C-------  beta - TLTAXIS
+        rgamma = rbeta - TLTAXIS*PI/180.0
 C
 C-------Distance between stripe-center and closest point on tilt axis is
         rdist2 = sin(rgamma) * rdist1
@@ -659,7 +657,7 @@ C !$OMP CRITICAL
             if(ISTRIPENUM.gt.1)then
               rdist1 = sqrt((real(ix)-rstripex)**2 + (real(iy)-rstripey)**2)
               rbeta = atan2((real(iy)-rstripey),(real(ix)-rstripex))
-              rgamma = rbeta - TLTAXA*PI/180.0
+              rgamma = rbeta - TLTAXIS*PI/180.0
               rdist2 = sin(rgamma) * rdist1
 C              if(abs(rdist2).lt.(RSTRIPEWIDTH-RSTRIPETAPER)/2.0)then
 C                IR=ID(ix,iy,NX)

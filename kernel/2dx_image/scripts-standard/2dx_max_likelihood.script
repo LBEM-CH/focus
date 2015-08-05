@@ -39,6 +39,7 @@
 # DISPLAY: realang
 # DISPLAY: realcell
 # DISPLAY: phaori
+# DISPLAY: phaori_ML
 # DISPLAY: lattice
 # DISPLAY: ML_realcellxy_outer
 # DISPLAY: ML_mask_radius
@@ -65,6 +66,7 @@ set proc_2dx = ""
 set SCRATCH_DISK = ""
 #
 set imagename = ""
+set nonmaskimagename = ""
 set imagenumber = ""
 set defocus = ""
 set imagenumber = ""
@@ -83,6 +85,7 @@ set realang = ""
 set realcell = ""
 set ctfrev = ""
 set phaori = ""
+set phaori_ML = ""
 set lattice = ""
 set SYN_Unbending = ""
 set ML_doit = ""

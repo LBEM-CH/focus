@@ -47,13 +47,16 @@ if ( ${mode} == 0 ) then
     set bextra = 0.0
     #
     \rm -f SCALIMAMP3D.DAT
-    \rm -f OUT
+    set scalimamp_out = APH/merge_after_scalimamp3d.aph
+    setenv OUT ${scalimamp_out}
+    \rm -f ${scalimamp_out}
     #
+    set RESMAX_local = 2.0
     echo ": "
     echo ": calling 2dx_scalimamp3d.exe with the following parameters:"
     echo ": ${scalimamp3d_refdata}"
     echo ": 0,F,${scalimamp3d_BXYMINMAX},${scalimamp3d_BZMINMAX} ! NPROG,TWOFOLD,BXYMIN,BXYMAX,BZMIN,BZMAX"
-    echo ": ${RESMAX}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA"
+    echo ": ${RESMAX_local}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA"
     echo ": APH/merge.aph"
     echo ": ${realcell}, ${realang}, ${RESMAX} !  A,B,GAMMA,RESOL"
     echo ":  "
@@ -61,16 +64,16 @@ if ( ${mode} == 0 ) then
     ${bin_2dx}/2dx_scalimamp3d.exe << eot 
 ${scalimamp3d_refdata}
 0,F,${scalimamp3d_BXYMINMAX},${scalimamp3d_BZMINMAX} ! NPROG,TWOFOLD,BXYMIN,BXYMAX,BZMIN,BZMAX
-${RESMAX}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA
+${RESMAX_local}, ${zstarrange_real}, ${scalimamp3d_BEXTRA} ! RESLIMXY, RESLIMZ, BEXTRA
 APH/merge.aph
-${realcell}, ${realang}, ${RESMAX} !  A,B,GAMMA,RESOL
+${realcell}, ${realang}, ${RESMAX_local} !  A,B,GAMMA,RESOL
 eot
     #
-    if ( ! -e OUT ) then
+    if ( ! -e ${scalimamp_out} ) then
       ${proc_2dx}/protest "ERROR: Problem in scalimamp3d.exe."
     else    
       \mv -f APH/merge.aph APH/merge_before_scalimamp3d.aph
-      \mv -f OUT APH/merge.aph
+      \mv -f ${scalimamp_out} APH/merge.aph
       echo "# IMAGE: APH/merge.aph <APH: merge.aph after scalimamp3d>" >> LOGS/${scriptname}.results
     endif
     #
@@ -120,7 +123,7 @@ eot
   if ( -e fort.3 ) then
     \mv -f fort.3 APH/latlines.dat
     echo "# IMAGE: LOGS/latlinprescal.log <LOG: latlinprescal output>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: APH/latlines.dat <Latline after prescal [H,K,Z,A,P,SAMP,SANG,IQ]>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: APH/latlines.dat <Latline after prescal [H,K,Z,A,P,SigA,SigP,IQ]>" >> LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: latlines.dat does not exist."
   endif
@@ -166,6 +169,10 @@ echo "::Unique Reflections = ${Reflections_Unique}"
 #
 echo "<<@progress: +5>>"  
 #
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
 if ( ${latline_algo}x == "0x" ) then
   #############################################################################
   ${proc_2dx}/linblock "LATLINEK - to fit lattice lines to merged data (D.Agard's program)"
@@ -347,12 +354,31 @@ eot
     echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
   endif  
   #
-  set infile = APH/latfitted_nosym.hkl
-  set CCP4_SYM_local = ${CCP4_SYM}
-  #
-else
   #############################################################################
-  ${proc_2dx}/linblock "2dx_process_hkz - creating FOM-weighted averaged HKL file"
+  ${proc_2dx}/linblock "2dx_extend_fourier.exe - to expand symmetry to full P1 space"
+  #############################################################################  
+  #
+  set infile = APH/latfitted_nosym.hkl
+  set outfile = APH/latfitted.hkl
+  #
+  \rm -f ${outfile}
+  #
+  set nh_max = ${MergeHKMAX}
+  set nk_max = ${MergeHKMAX}
+  set nl_max = ${ALAT}
+  #
+  ${bin_2dx}/volume_processor.exe --hklin ${infile} -s ${SYM_NAME} -X ${nh_max} -Y ${nk_max} -Z ${nl_max} --hklout ${outfile} --full-fourier
+  echo "# IMAGE: ${infile} <HKL: HKL file before symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${outfile} <HKL: HKL file after symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
+  #
+  ##########################################################################################################################################################
+  ##########################################################################################################################################################
+  ##########################################################################################################################################################
+  ##########################################################################################################################################################
+else
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "backproject_hkz - creating FOM-weighted averaged HKL file"
   #############################################################################  
   #
   \rm -f PLOT.PS
@@ -370,10 +396,9 @@ else
   echo "celly = ${celly}"
   echo "cellz = ${ALAT}" 
   #
-  echo ":Launching ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${realang} ${sample_pixel} ${RESMAX}"
-  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM_NAME} ${cellx} ${celly} ${ALAT} ${realang} ${sample_pixel} ${RESMAX}
+  echo ":Launching ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey"
+  ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey
   #
-  mv -f output.hkl APH/latfitted.hkl
   echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
   #############################################################################
@@ -452,11 +477,11 @@ eot
     echo "# IMAGE: APH/latfittedref_nosym.hkl <APH: Latline for ref after prepmklcf [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
   endif  
   #
-  set infile = APH/latfitted.hkl
-  #
-  set CCP4_SYM_local = 1
-  #
 endif
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
 #
 echo "<<@progress: +5>>"
 #
@@ -465,11 +490,12 @@ ${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for v
 #############################################################################
 #
 \rm -f SCRATCH/merge3D_MRClefthanded.mtz
+set infile = APH/latfitted.hkl
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3D_MRClefthanded.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM_local}
+SYMMETRY 1
 LABOUT H K L F PHI FOM
 CTYPOUT H H H F P W
 FILE ${infile}
@@ -477,6 +503,7 @@ SKIP 0
 END
 eof
 #
+echo "# IMAGE: SCRATCH/merge3D_MRClefthanded.mtz <MTZ: Latline data before CAD>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #
@@ -490,7 +517,7 @@ set infile = APH/latfittedref_nosym.hkl
 ${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3Dref_MRClefthanded.mtz << eof
 TITLE  P1 map, ${date}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM_local}
+SYMMETRY 1
 LABOUT H K L F PHI FOM SIGF
 CTYPOUT H H H F P W Q
 FILE ${infile}
@@ -498,7 +525,6 @@ SKIP 0
 END
 eof
 #
-echo "# IMAGE: SCRATCH/merge3D_MRClefthanded.mtz <MTZ: Latline data before CAD>" >> LOGS/${scriptname}.results
 echo "# IMAGE: SCRATCH/merge3Dref_MRClefthanded.mtz <MTZ: Latline Ref data before CAD>" >> LOGS/${scriptname}.results
 #
 #############################################################################
@@ -522,9 +548,14 @@ echo "# IMAGE-IMPORTANT: merge3D_MRClefthanded.mtz <MTZ: Final MRC MTZ file for 
 ${proc_2dx}/linblock "cad - to create MTZ file for reference"
 #############################################################################  
 #
-\rm -f merge3Dref_MRClefthanded.mtz
+if ( ${latline_algo}x == "0x" ) then
+  set outfile = merge3Dref_MRClefthanded.mtz
+else
+  set outfile = merge3Dref_BackProject_MRClefthanded.mtz
+endif
+\rm -f ${outfile}
 #
-${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref_MRClefthanded.mtz hklout merge3Dref_MRClefthanded.mtz << eof
+${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref_MRClefthanded.mtz hklout ${outfile} << eof
 sort h k l 
 resolution overall ${MergeResolution} ${RESMIN}
 outlim spacegroup 1
@@ -533,7 +564,7 @@ valm NaN NOOUTPUT
 end
 eof
 #
-echo "# IMAGE-IMPORTANT: merge3Dref_MRClefthanded.mtz <MTZ: Final MRC MTZ file for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${outfile} <MTZ: Final MRC MTZ file for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: +5>>"
 #

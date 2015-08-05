@@ -21,14 +21,12 @@
 # DISPLAY: realcell
 # DISPLAY: realang
 # DISPLAY: ALAT
-# DISPLAY: sample_pixel
-# DISPLAY: number_of_beads
-# DISPLAY: density_threshold_bead
-# DISPLAY: noise_level_bead
-# DISPLAY: number_sf_hist_iterations
+# DISPLAY: number_refinement_iterations
+# DISPLAY: density_threshold_refinement
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
+# DISPLAY: refinement_mask_resolution
 #
 #$end_local_vars
 #
@@ -39,14 +37,15 @@ set SYM = ""
 set realcell = ""
 set realang = ""
 set ALAT = ""
-set sample_pixel = ""
 set RESMIN = ""
 set RESMAX = ""
 set calculate_subvolume = ""
-set number_of_beads = ""
-set density_threshold_bead = ""
-set noise_level_bead = ""
-set number_sf_hist_iterations = ""
+set number_refinement_iterations = ""
+set number_shrinkwrap_iterations = ""
+set membrane_height = ""
+set maximum_amplitude_refinement = ""
+set density_threshold_refinement = ""
+set refinement_mask_resolution = ""
 set merge_modus = ""
 #
 #$end_vars
@@ -79,459 +78,22 @@ endif
 #
 echo "<<@progress: 5>"
 #
-#
-#
-#
-#
-########################################################################
-# STEP 1: Back project and create HKL file
-########################################################################
-#
-set hkzFile = "APH/latlines.dat"
-#
-if ( ! -e ${hkzFile} ) then
-   ${proc_2dx}/protest "ERROR: ${hkzFile} not found." 
-endif
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Back projecting reflections from hkz file ${hkzFile}"
-#------------------------------------------------------------------------
-#
-${bin_2dx}/2dx_volume_processing/backproject_hkz.exe ${hkzFile} ${SYM} ${cellx} ${celly} ${ALAT} ${realang} ${RESMAX}
-#
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Writing the equally spaced back projected hkl file"
-#------------------------------------------------------------------------
-#
-set back_projected_hkl = "SCRATCH/back_projected.hkl"
-#
-\rm -f ${back_projected_hkl}
-#
-mv output.hkl ${back_projected_hkl}
-#
-echo "<<@progress: +10>>"
-#
-#
-########################################################################
-# STEP 2: Convert back projected hkl to mtz
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "F2MTZ : to convert back projected hkl to mtz.."
-#------------------------------------------------------------------------
-#
-set back_projected_f2mtz_mtz = "SCRATCH/back_projected_f2mtz.mtz"
-#
-\rm -f ${back_projected_f2mtz_mtz}
-#
-${bin_ccp4}/f2mtz hklin ${back_projected_hkl} hklout ${back_projected_f2mtz_mtz} << eof
-TITLE  P1 map, ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY 1
-LABOUT H K L F PHI FOM
-CTYPOUT H H H F P W
-FILE ${back_projected_hkl}
-SKIP 0
-END
-eof
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "CAD : to finalize back projected mtz file.."
-#------------------------------------------------------------------------
-#
-set back_projected_cad_mtz = "SCRATCH/back_projected_cad.mtz"
-#
-\rm -f ${back_projected_cad_mtz}
-#
-#
-${bin_ccp4}/cad hklin1 ${back_projected_f2mtz_mtz} hklout ${back_projected_cad_mtz} << eof
-sort h k l
-resolution overall ${RESMAX} ${RESMIN}	
-outlim spacegroup 1
-labin file 1 all
-valm NaN NOOUTPUT
-end
-eof
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Writing the back projected mtz file"
-#------------------------------------------------------------------------
-#
-set back_projected_mtz = "APH/back_projected.mtz"
-#
-\rm -f ${back_projected_mtz}
-#
-mv ${back_projected_cad_mtz} ${back_projected_mtz}
-#
-echo "# IMAGE: ${back_projected_mtz} <MTZ: Back projected MTZ >" >> LOGS/${scriptname}.results
-#
-echo "<<@progress: +5>>"
-#
-#
-########################################################################
-# STEP 3: Convert back projected mtz to map
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "FFT : to convert mtz to map.."
-#------------------------------------------------------------------------
-#
-set back_projected_fft = "SCRATCH/back_projected_fft"
-set back_projected_fft_map = "${back_projected_fft}.map"
-#
-\rm -f ${back_projected_fft_map}
-#
-${bin_ccp4}/fft hklin ${back_projected_mtz} mapout ${back_projected_fft_map}  << eot
-LABIN F1=F  PHI=PHI W=FOM ##
-AXIS X,Y,Z
-SCALE F1 1 0
-SYMMETRY 1
-RESOLUTION ${RESMIN} ${RESMAX}
-TITLE Sym=${SYM}, res=${RESMAX}, T=0
-GRID 400 400 400
-XYZLIM 0 399 0 399 0 399
-RHOLIM 250.0
-HKLMAX 199 199 199
-END
-eot
-#
-# Generate a readable map
-#
 #############################################################################
-${proc_2dx}/linblock "sourcing 2dx_refine_raw_ccp4_map.com"
+${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_refineMergedMap_sub.com"
 #############################################################################
 #
-source ${proc_2dx}/2dx_refine_raw_ccp4_map.com  ${back_projected_fft_map}
-#
-set back_projected_extended_map = "back_projected_extended.map"
-#
-\rm -f ${back_projected_extended_map}
-#
-\mv -f ${back_projected_fft}_extended.map ${back_projected_extended_map}
-#
-echo "# IMAGE: ${back_projected_extended_map} <MAP: Back projected extended map >" >> LOGS/${scriptname}.results
-#
-if ( ${calculate_subvolume}x != "0x" ) then  
-	#
-	set back_projected_sub_map = "back_projected_sub.map"
-	#
-	\rm -f ${back_projected_sub_map}
-	#
-	\mv -f ${back_projected_fft}_sub.map ${back_projected_sub_map}
-	#
-	echo "# IMAGE: ${back_projected_sub_map} <MAP: Back projected sub map >" >> LOGS/${scriptname}.results
-	#
-endif
-#
-echo "<<@progress: +5>>"
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "MAPROT : to correct the size of map"
-#------------------------------------------------------------------------
-#
-set back_projected_maprot = "SCRATCH/back_projected_maprot.map"
-#
-\rm -f ${back_projected_maprot}
-#
-${bin_ccp4}/maprot mapin ${back_projected_fft_map} wrkout ${back_projected_maprot} << eot
-MODE FROM
-CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
-GRID WORK ${cellx} ${celly} ${ALAT}
-XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
-SYMM WORK 1
-AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 -1.000
-TRANS  0.000 0.000 0.000
-eot
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "MAPMASK : to correct the axis of map"
-#------------------------------------------------------------------------
-#
-set back_projected_map = "SCRATCH/back_projected.map"
-#
-\rm -f ${back_projected_map}
-#
-${bin_ccp4}/mapmask mapin ${back_projected_maprot} mapout ${back_projected_map} << eof
-AXIS X,Y,Z
-END
-eof
-#
-echo "<<@progress: +5>>"
-#
-########################################################################
-# STEP 4: Generate bead model from back projected map
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Genrating bead model pdb .. "
-#------------------------------------------------------------------------
-#
-set bead_model = "SCRATCH/bead_model"
-set bead_model_pdb = "${bead_model}.pdb"
-#
-\rm -f ${bead_model_pdb}
-#
-${bin_2dx}/2dx_volume_processing/create_bead_model_pdb.exe ${back_projected_map} ${bead_model_pdb} ${number_of_beads} ${density_threshold_bead} ${noise_level_bead}
-#
-#############################################################################
-${proc_2dx}/linblock "sourcing 2dx_pdb2map_ccp4.com"
-#############################################################################
-#
-set bead_model_ccp4 = "${bead_model}_ccp4"
-#
-source ${proc_2dx}/2dx_pdb2map_ccp4.com ${bead_model_pdb}
-#
-source ${proc_2dx}/2dx_refine_raw_ccp4_map.com  ${bead_model_ccp4}.map
-#
-set bead_model_extended_map = "bead_model_extended.map"
-#
-\rm -f ${bead_model_extended_map}
-#
-\mv -f ${bead_model_ccp4}_extended.map ${bead_model_extended_map}
-#
-echo "# IMAGE: ${bead_model_extended_map} <MAP: Bead model extended map >" >> LOGS/${scriptname}.results
-#
-if ( ${calculate_subvolume}x != "0x" ) then  
-	#
-	set bead_model_sub_map = "bead_model_sub.map"
-	#
-	\rm -f ${bead_model_sub_map}
-	#
-	\mv -f ${bead_model_ccp4}_sub.map ${bead_model_sub_map}
-	#
-	echo "# IMAGE: ${bead_model_sub_map} <MAP: Bead model sub map >" >> LOGS/${scriptname}.results
-	#
-endif
-#
-echo "<<@progress: +5>>"
-#
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "E2PDB2MRC.PY: Converting bead model pdb to mrc"
-#------------------------------------------------------------------------
-#
-set bead_model_e2pdb2mrc = "SCRATCH/bead_model_e2pdb2mrc.mrc"
-#
-\rm -f ${bead_model_e2pdb2mrc}
-#
-e2pdb2mrc.py -R ${RESMAX} -A 1.0 -B ${ALAT} ${bead_model_pdb} ${bead_model_e2pdb2mrc}
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "E2PROC3D.PY: Correcting the size of bead model mrc"
-#------------------------------------------------------------------------
-#
-set bead_model_mrc = "SCRATCH/bead_model.mrc"
-#
-\rm -f ${bead_model_mrc}
-#
-set size_x = `printf %.0f ${cellx}`
-set size_y = `printf %.0f ${celly}`
-set size_z = `printf %.0f ${ALAT}`
-set input_size = "${size_x},${size_y},${size_z}"
-echo "Chopping to ${input_size}"
-#
-e2proc3d.py --clip ${input_size} ${bead_model_e2pdb2mrc} ${bead_model_mrc}
-#
-echo "<<@progress: +5>>"
-#
-########################################################################
-# STEP 5: Start SF-HIST iterations
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Processing the SF-Hist Iterations"
-#------------------------------------------------------------------------
-#
-set bead_model_sf = "SCRATCH/sf_bead_model.dat"
-#
-\rm -f ${bead_model_sf}
-#
-e2proc3d.py ${bead_model_mrc} SCRATCH/junk.mrc --calcsf=${bead_model_sf} --apix=1.0
-#
-\rm -f SCRATCH/junk.mrc
-#
-set output_prefix = "SCRATCH/backproj"
-#
-\rm -f ${output_prefix}.mrc
-#
-\cp -f ${back_projected_map} ${output_prefix}.mrc
-#
-set i = 1
-while ($i <= ${number_sf_hist_iterations})
-    #------------------------------------------------------------------------
-    ${proc_2dx}/linblock "Setting the structure factors for iteration ${i}"
-    #------------------------------------------------------------------------
-    #
-    \rm -f ${output_prefix}_sf.mrc
-    #
-    e2proc3d.py ${output_prefix}.mrc ${output_prefix}_sf.mrc --setsf=${bead_model_sf} --apix=1.0
-	#
-    #------------------------------------------------------------------------
-    ${proc_2dx}/linblock "Matching real space histogram for iteration ${i}"
-    #------------------------------------------------------------------------
-    #
-    \rm -f ${output_prefix}_sf_hist.mrc
-    #
-    ${bin_2dx}/2dx_volume_processing/match_density_histogram.exe ${output_prefix}_sf.mrc ${bead_model_mrc} ${output_prefix}_sf_hist.mrc
-    #
-    set output_prefix = "${output_prefix}_sf_hist"
-    @ i = $i + 1
-    #
-end
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Setting the structure factors for one last time"
-#------------------------------------------------------------------------
-#
-\rm -f ${output_prefix}_sf.mrc
-#
-e2proc3d.py ${output_prefix}.mrc ${output_prefix}_sf.mrc --setsf=SCRATCH/sf_bead_model.dat
-#
-#------------------------------------------------------------------------
-#
-set processed_mrc = "SCRATCH/processed_${number_sf_hist_iterations}_iterations.mrc"
-#
-\rm -f ${processed_mrc}
-#
-\mv -f ${output_prefix}_sf.mrc ${processed_mrc}
-#
-echo "<<@progress: +10>>"
-#
-########################################################################
-# STEP 6: Generate processed hkl
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Converting the processed mrc to hkl"
-#------------------------------------------------------------------------
-#
-set processed_hkl = "SCRATCH/processed.hkl"
-#
-\rm -f ${processed_hkl}
-#
-${bin_2dx}/2dx_volume_processing/mrc_to_hkl.exe ${processed_mrc} ${processed_hkl}
-#
-echo "<<@progress: +5>>"
-#
-########################################################################
-# STEP 7: Generate processed mtz
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "F2MTZ: to convert processed hkl to mtz.."
-#------------------------------------------------------------------------
-#
-set processed_f2mtz_mtz = "SCRATCH/processed_f2mtz.mtz"
-#
-\rm -f ${processed_f2mtz_mtz}
-#
-${bin_ccp4}/f2mtz hklin ${processed_hkl} hklout ${processed_f2mtz_mtz} << eof
-TITLE  P1 map, ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY 1
-LABOUT H K L F PHI FOM
-CTYPOUT H H H F P W
-FILE ${processed_hkl}
-SKIP 0
-END
-eof
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "CAD: to finalize processed mtz file.."
-#------------------------------------------------------------------------
-#
-set processed_cad_mtz = "SCRATCH/processed_cad.mtz"
-#
-\rm -f ${processed_cad_mtz}
-#
-${bin_ccp4}/cad hklin1 ${processed_f2mtz_mtz} hklout ${processed_cad_mtz} << eof
-sort h k l
-resolution overall ${RESMAX} ${RESMIN}
-outlim spacegroup 1
-labin file 1 all
-valm NaN NOOUTPUT
-end
-eof
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "Writing the processed mtz file"
-#------------------------------------------------------------------------
-#
-set processed_mtz = "APH/processed.mtz"
-#
-\rm -f ${processed_mtz}
-#
-mv ${processed_cad_mtz} ${processed_mtz}
-#
-echo "# IMAGE: ${processed_mtz} <MTZ: Processed SF-HIST MTZ >" >> LOGS/${scriptname}.results
-#
-echo "<<@progress: +5>>"
-#
-#
-########################################################################
-# STEP 8: Convert processed mtz to map
-########################################################################
-#
-#------------------------------------------------------------------------
-${proc_2dx}/linblock "FFT: to convert processed mtz to map.."
-#------------------------------------------------------------------------
-#
-set processed_fft = "SCRATCH/processed_fft"
-set processed_fft_map = "${processed_fft}.map"
-#
-\rm -f ${processed_fft_map}
-#
-${bin_ccp4}/fft hklin ${processed_mtz} mapout ${processed_fft_map}  << eot
-LABIN F1=F  PHI=PHI W=FOM ##
-AXIS X,Y,Z
-SCALE F1 1 0
-SYMMETRY 1
-RESOLUTION ${RESMIN} ${RESMAX}
-TITLE Sym=${SYM}, res=${RESMAX}, T=0
-GRID 400 400 400
-XYZLIM 0 399 0 399 0 399
-RHOLIM 250.0
-HKLMAX 199 199 199
-END
-eot
-#
-echo "<<@progress: +5>>"
-#
-#############################################################################
-${proc_2dx}/linblock "sourcing 2dx_refine_raw_ccp4_map.com"
-#############################################################################
-#
-source ${proc_2dx}/2dx_refine_raw_ccp4_map.com  ${processed_fft_map}
-#
-set processed_extended_map = "processed_extended.map"
-#
-\rm -f ${processed_extended_map}
-#
-\mv -f ${processed_fft}_extended.map ${processed_extended_map}
-#
-echo "# IMAGE-IMPORTANT: ${processed_extended_map} <MAP: Processed extended map >" >> LOGS/${scriptname}.results
-#
-if ( ${calculate_subvolume}x != "0x" ) then  
-	#
-	set processed_sub_map = "processed_sub.map"
-	#
-	\rm -f ${processed_sub_map}
-	#
-	\mv -f ${processed_fft}_sub.map ${processed_sub_map}
-	#
-	echo "# IMAGE-IMPORTANT: ${processed_sub_map} <MAP: Processed sub map >" >> LOGS/${scriptname}.results
-	#
-endif
-#
-echo "<<@progress: +5>>"
-#
-#############################################################################
+source ${proc_2dx}/2dx_refineMergedMap_sub.com
 #
 #############################################################################
 ${proc_2dx}/linblock "${scriptname} normal end."
 #############################################################################
 #
 echo "<<@progress: 100>>"
+#
+exit
+#
+# These are here only to make sure they show up in the GUI:
+source ${proc_2dx}/2dx_hkl_to_mtz.com
+source ${proc_2dx}/2dx_extend_map.com
+source ${proc_2dx}/2dx_create_subvolume.com
 #

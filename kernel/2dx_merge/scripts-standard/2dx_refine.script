@@ -120,6 +120,18 @@ setenv OMP_NUM_THREADS 8
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+#
+echo "cellx = ${cellx}"
+echo "celly = ${celly}"
+echo "cellz = ${ALAT}"
+#
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
+#
 set dirfile = "2dx_merge_dirfile.dat"
 set dirnum = `cat ${dirfile} | wc -l`
 set maxthread = `echo ${Thread_Number} ${dirnum} | awk '{if ($1<$2/2) { s = $1 } else { s = int($2 / 2) }} END { print s }'`
@@ -244,11 +256,28 @@ if ( ${merge_modus} == '3D' ) then
       ${proc_2dx}/linblock "ERROR: Conflict between parameter USE MERGED DATA... and REFINE TILTGEOMETRY..."
       ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
     endif
-  else
-    # User interpolated lattice lines latlinesref_MRClefthanded.mtz
-    if ( ! -e merge3D_MRClefthanded.mtz ) then
-      ${proc_2dx}/linblock "ERROR: merge_MRClefthanded.mtz not found. No reference for refinement available."
+  endif 
+  if ( ${merge_reference} == '1' ) then
+    # Use interpolated lattice lines merge3Dref_MRClefthanded.mtz
+    if ( ! -e merge3Dref_MRClefthanded.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge3Dref_MRClefthanded.mtz not found. No reference for refinement available."
       ${proc_2dx}/protest "Run Merging script first."
+    endif
+    set NPRG = 3
+  endif
+  if ( ${merge_reference} == '2' ) then
+    # Use BackProjected MTZ file merge3Dref_BackProject_MRClefthanded.mtz
+    if ( ! -e merge3Dref_BackProject_MRClefthanded.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge3Dref_BackProject_MRClefthanded.mtz not found. No reference for refinement available."
+      ${proc_2dx}/protest "Run Merging script first with Backprojection algorithm."
+    endif
+    set NPRG = 3
+  endif
+  if ( ${merge_reference} == '3' ) then
+    # Use BackProjected and Refined MTZ file
+    if ( ! -e merge3Dref_Refined_MRClefthanded.mtz ) then
+      ${proc_2dx}/linblock "ERROR: merge3Dref_Refined_MRClefthanded.mtz not found. No reference for refinement available."
+      ${proc_2dx}/protest "Run Merging and Refinement script first."
     endif
     set NPRG = 3
   endif
@@ -265,7 +294,7 @@ if ( ${merge_ref_num} != "0" ) then
     if ( ${NPRG} == "3" ) then
       # Use MTZ file
       if ( ! -e REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz ) then
-        ${proc_2dx}/protest "ERROR: merge3D_MRClefthanded.mtz not existing in register ${merge_ref_num}."
+        ${proc_2dx}/protest "ERROR: merge3Dref_MRClefthanded.mtz not existing in register ${merge_ref_num}."
       else
         echo ":Copying REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz ."
         \cp -f REGISTERS/Reg_${merge_ref_num}/merge3D_MRClefthanded.mtz .
@@ -462,154 +491,21 @@ if ( ${scriptname} == "2dx_refine" ) then
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "Compile refinement script"
+${proc_2dx}/linblock "Sourcing 2dx_merge_refine_sub.com"
 #############################################################################
 #
-set scriptBfile = "2dx_merge_scriptB.com"
-set postprocessingfile = "2dx_merge_postprocessing.com"
+source ${proc_2dx}/2dx_merge_refine_sub.com
 #
-# reference HKL files are generated directly in the "Generate Image Maps" script, not here:
-set genref = "0"
 #
-if ( ${refbeamtilt} == 'y' ) then
-  if ( ${merge_modus} == '3D' ) then
-    set NBM = T
-    ${proc_2dx}/linblock "NBM=T, doing beam tilt refinement."
-  else
-    ${proc_2dx}/linblock "ERROR: Beamtilt Refinement only in 3D modus possible."
-    set NBM = F
-    ${proc_2dx}/linblock "NBM=F, no beam tilt refinement."
-  endif
-else
-  set NBM = F
-  ${proc_2dx}/linblock "NBM=F, no beam tilt refinement."
+#
+if ( ${reftiltgeo} == "y" ) then
+  #############################################################################
+  ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
+  #############################################################################
+  #
+  python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
+  #
 endif
-#
-if ( ${reftiltgeo} == 'y' ) then
-  if ( ${merge_modus} == '3D' ) then
-    set NTL = T
-    ${proc_2dx}/linblock "NTL=T, doing crystal tiltangle and tiltaxis refinement."
-  else
-    ${proc_2dx}/linblock "ERROR: Tilt Geometry Refinement only in 3D modus possible."
-    set NTL = F
-    ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."
-  endif
-else
-  set NTL = F
-  ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."
-endif
-#
-echo "dummy" > SCRATCH/job_00_${scriptBfile}
-\rm -f SCRATCH/job_*_${scriptBfile}
-#
-${bin_2dx}/2dx_merge_compileB.exe << eot
-${scriptname}-tmp.py
-${scriptname}-tmp.reflections
-${scriptname}-tmp.console
-${proc_2dx}
-${bin_2dx}
-${dirfile}
-${scriptBfile}
-${postprocessingfile}
-${genref}
-${spcgrp}
-${realcell}
-${realang}
-${zstarwin}
-${ALAT}
-${IVERBOSE}
-${MergeStepSize}
-${RFACAMP}
-${IBOXPHS}
-${NPRG}
-${NBM}
-${NTL}
-${ITAXASTEP}
-${RTAXASIZE}
-${ITANGLSTEP}
-${RTANGLSIZE}
-${Merge_Reference_IQMAX}
-${Merge_Reference_HKMAX}
-${merge_res_limit}
-${RESMIN}
-${RESMAX}
-${refine_data_type}
-${maxthread}
-${ILIST_VAL}
-0
-eot
-#
-echo "<<@progress: +5>>"
-#
-#############################################################################
-${proc_2dx}/linblock "Launching refinement script. CHECK OUTPUT in LOG: origtilt B output"
-#############################################################################
-#
-echo "# IMAGE: SCRATCH/job_01_${scriptBfile} <CSH: First (01) refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptB.com.log <LOG: First (01) origtilt B output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_01_${postprocessingfile} <CSH: First (01) refinement postprocessing script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${maxthread}_${scriptBfile} <CSH: Last (${maxthread}) refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${maxthread}_2dx_merge_scriptB.com.log <LOG: Last (${maxthread}) origtilt B output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${maxthread}_${postprocessingfile} <CSH: Last (${maxthread}) refinement postprocessing script>" >> LOGS/${scriptname}.results
-#
-#
-foreach scriptB ( SCRATCH/job_*_${scriptBfile} ) 
-  if ( ${scriptB} != SCRATCH/job_${maxthread}_${scriptBfile} ) then
-    echo Background nohup ${scriptB} \> ${scriptB}.log \&
-    nohup ${scriptB} > ${scriptB}.log &
-  else
-    echo Forground ${scriptB} \> ${scriptB}.log
-    ${scriptB} > ${scriptB}.log
-  endif
-end
-#
-# Check, if background jobs have finished:
-set need_wait = 1
-while ( ${need_wait} == 1 ) 
-   set loadaverage = `ps -af | grep _2dx_merge_scriptB.com | wc -l`
-   set need_wait = `echo ${loadaverage} | awk '{ if ( $1 > 1 ) { s = 1 } else { s = 0 } } END { print s }'`
-   if ( ${need_wait} == 1 ) then
-      sleep 2
-   endif
-end
-
-#
-#
-echo "################################################"
-echo "################################################"
-echo "output in file SCRATCH/job_XX_2dx_merge_scriptB.com.log"
-echo "################################################"
-echo "################################################"
-#
-echo "Refinement jobs produced the following outpuf files:"
-\ls -l SCRATCH/job_*_${scriptname}-tmp.console
-\ls -l SCRATCH/job_*_${scriptname}-tmp.py
-#
-\rm -f SCRATCH/${scriptname}.console
-echo "# IMAGE: SCRATCH/${scriptname}.console <LOG: Console output from merging>" >> LOGS/${scriptname}.results
-foreach scriptBconsole ( SCRATCH/job_*_${scriptname}-tmp.console ) 
-  cat ${scriptBconsole} >> SCRATCH/${scriptname}.console
-  \rm -f ${scriptBconsole}
-end
-#
-\rm -f SCRATCH/${scriptname}.py
-echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
-foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py ) 
-  cat ${scriptBresults} >> SCRATCH/${scriptname}.py
-  \rm -f ${scriptBresults}
-end
-#
-python SCRATCH/${scriptname}.py
-#
-echo "<<@progress: 70>"
-#
-echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
-#
-#############################################################################
-${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
-#############################################################################
-#
-python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
 #
 echo "<<@progress: 90>"
 #

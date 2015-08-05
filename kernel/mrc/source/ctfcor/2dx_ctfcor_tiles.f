@@ -18,7 +18,7 @@ C        card  2 :  output filename with CTF correction
 C        card  3 :  output filename for tile image
 C        card  4 :  output filename for PS image
 C        card  5 :  output filename for summed CTF image
-C        card  6 :  TLTAXA,TLTANG
+C        card  6 :  TLTAXIS,TLTANG
 C        card  7 :  CS[mm],HT[kV],PHACON,MAGNIFICATION,STEPSIZE_DIGITIZER[um]
 C        card  8 :  DEF1,DEF2,ANGAST
 C        card  9 :  NOISE (for Wiener option, otherwise give 0.0)
@@ -104,7 +104,7 @@ C
       REAL RNORMX,RNORMY
       REAL THETATR
 C
-      REAL TLTAXA,TLTANG
+      REAL TLTAXIS,TLTANG
       REAL CS,HT,PHACON,RMAG,STEPD,AMPCON,WL
       REAL VAL,DMIN,DMAX,DMEAN,D1MAX
       REAL DIMIN,DIMAX,DIMEAN
@@ -260,18 +260,18 @@ C
         LCTFSUM = .true. 
       endif
 C
-      WRITE(6,'(''TLTAXA,TLTANG'')')
-      read(5,*)TLTAXA,TLTANG
-      write(6,'(''    Read: '',2F12.3)')TLTAXA,TLTANG
+      WRITE(6,'(''TLTAXIS,TLTANG'')')
+      read(5,*)TLTAXIS,TLTANG
+      write(6,'(''    Read: '',2F12.3)')TLTAXIS,TLTANG
 C
-      if(TLTAXA.gt.90.0 .or. TLTAXA.lt.-90.0) then
-        write(6,'(''::ERROR: TLTAXA should be between +-90.0'')')
+      if(TLTAXIS.gt.90.0 .or. TLTAXIS.lt.-90.0) then
+        write(6,'(''::ERROR: TLTAXIS should be between +-90.0'')')
         goto 900
       endif
 C-----check here if tilt axis happens to be +-90 deg.
 C-----if so, apply small offset to avoid degeneracy
-      IF (TLTAXA.GT. 89.9) TLTAXA= 89.9
-      IF (TLTAXA.LT.-89.9) TLTAXA=-89.9
+      IF (TLTAXIS.GT. 89.9) TLTAXIS= 89.9
+      IF (TLTAXIS.LT.-89.9) TLTAXIS=-89.9
 C
       if(TLTANG.gt.90.0 .or. TLTANG.lt.-90.0) then
         write(6,'(''::ERROR: TLTANG should be between +-90.0'')')
@@ -385,8 +385,8 @@ C
 C
 C-----N is normal to tilt axis, indicates the direction
 C-----in which defocus varies most
-      RNORMX= SIN(TLTAXA*PI/180.0)
-      RNORMY=-COS(TLTAXA*PI/180.0)
+      RNORMX= SIN(TLTAXIS*PI/180.0)
+      RNORMY=-COS(TLTAXIS*PI/180.0)
 C
 C-----Parameters for CTF calculation
 C
@@ -519,8 +519,8 @@ C---------  arctan((py-ncy) / (px-ncx))
           rbeta = atan2(real(iytilecen-NCY),real(ixtilecen-NCX))*180.0/PI
 C
 C---------Angle between tilt axis and line from image-center to tile-center is
-C---------  beta - TLTAXA
-          rgamma = rbeta - TLTAXA
+C---------  beta - TLTAXIS
+          rgamma = rbeta - TLTAXIS
 C
 C---------Distance between tile-center and closest point on tilt axis is
 C---------  sin(rgamma)*rdist1

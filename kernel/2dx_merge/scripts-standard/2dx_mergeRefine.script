@@ -13,8 +13,6 @@
 #                                                                           #
 #############################################################################
 #
-# ITERATIONCOUNTER: MAX=100;DEFAULT=7
-#
 # SORTORDER: 40
 #
 # MANUAL: This script allows refining the data of the selected images.
@@ -78,6 +76,7 @@
 # DISPLAY: merge_comment_7
 # DISPLAY: merge_comment_8
 # DISPLAY: merge_comment_9
+# DISPLAY: merge_refine_iterations
 # DISPLAY: max_amp_correction
 # DISPLAY: MergePray
 # DISPLAY: make_reference
@@ -94,6 +93,16 @@
 # DISPLAY: RFACAMP
 # DISPLAY: Thread_Number
 # DISPLAY: sample_pixel
+DISPLAY: number_of_beads
+# DISPLAY: density_threshold_bead
+# DISPLAY: maximum_resolution_bead
+# DISPLAY: number_refinement_iterations
+# DISPLAY: membrane_height
+# DISPLAY: maximum_amplitude_refinement
+# DISPLAY: density_threshold_refinement
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: calculate_subvolume
 #
 #$end_local_vars
 #
@@ -122,6 +131,7 @@ set merge_ref_num = ""
 set merge_reference = ""
 set Merge_Reference_HKMAX = ""
 set Merge_Reference_IQMAX = ""
+set merge_refine_iterations = ""
 set merge_res_limit = ""
 set MergeAK = ""
 set MergeBINSIZ = ""
@@ -167,6 +177,14 @@ set Thread_Number = ""
 set zstarrange = ""
 set zstarrange_real = ""
 set zstarwin = ""
+set calculate_subvolume = ""
+set number_of_beads = ""
+set density_threshold_bead = ""
+set maximum_resolution_bead = ""
+set number_refinement_iterations = ""
+set membrane_height = ""
+set maximum_amplitude_refinement = ""
+set density_threshold_refinement = ""
 #
 #$end_vars
 #
@@ -174,6 +192,18 @@ setenv OMP_NUM_THREADS ${Thread_Number}
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
+#
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+#
+echo "cellx = ${cellx}"
+echo "celly = ${celly}"
+echo "cellz = ${ALAT}"
+#
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
 #
 set dirfile = "2dx_merge_dirfile.dat"
 set dirnum = `cat ${dirfile} | wc -l`
@@ -360,166 +390,64 @@ if ( ${merge_modus} == '3D' ) then
   endif
 endif
 #
-if ( ${merge_ref_num} == "0" && ${create_merged_dataset} == "y" ) then
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Overwriting old merged dataset"
-  #############################################################################  
-  #############################################################################
-  ${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
-  #############################################################################  
-  #
-  #
-  source ${proc_2dx}/2dx_merge_merge_sub.com
-  #
-  if ( ${merge_modus} == "3D" ) then
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
-    #############################################################################
-    #
-    source ${proc_2dx}/2dx_merge_latline_sub.com
-    #
-  endif
-  #
-endif
-#
-#############################################################################
-${proc_2dx}/linblock "Compile refinement script"
-#############################################################################
-#
-set scriptBfile = "2dx_merge_scriptB.com"
-set postprocessingfile = "2dx_merge_postprocessing.com"
-#
-set genref = "0"
-#
-if ( ${refbeamtilt} == 'y' ) then
-  if ( ${merge_modus} == '3D' ) then
-    set NBM = T
-    ${proc_2dx}/linblock "NBM=T, doing beam tilt refinement."
-  else
-    ${proc_2dx}/linblock "ERROR: Beamtilt Refinement only in 3D modus possible."
-    set NBM = F
-    ${proc_2dx}/linblock "NBM=F, no beam tilt refinement."
-  endif
-else
-  set NBM = F
-  ${proc_2dx}/linblock "NBM=F, no beam tilt refinement."
-endif
-#
-if ( ${reftiltgeo} == 'y' ) then
-  if ( ${merge_modus} == '3D' ) then
-    set NTL = T
-    ${proc_2dx}/linblock "NTL=T, doing crystal tiltangle and tiltaxis refinement."
-  else
-    ${proc_2dx}/linblock "ERROR: Tilt Geometry Refinement only in 3D modus possible."
-    set NTL = F
-    ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."
-  endif
-else
-  set NTL = F
-  ${proc_2dx}/linblock "NTL=F, no crystal tiltangle or tiltaxis refinement."
-endif
-#
-echo "dummy" > SCRATCH/job_00_${scriptBfile}
-\rm -f SCRATCH/job_*_${scriptBfile}
-#
-${bin_2dx}/2dx_merge_compileB.exe << eot
-${scriptname}-tmp.py
-${scriptname}-tmp.reflections
-${scriptname}-tmp.console
-${proc_2dx}
-${bin_2dx}
-${dirfile}
-${scriptBfile}
-${postprocessingfile}
-${genref}
-${spcgrp}
-${realcell}
-${realang}
-${zstarwin}
-${ALAT}
-${IVERBOSE}
-${MergeStepSize}
-${RFACAMP}
-${IBOXPHS}
-${NPRG}
-${NBM}
-${NTL}
-${ITAXASTEP}
-${RTAXASIZE}
-${ITANGLSTEP}
-${RTANGLSIZE}
-${Merge_Reference_IQMAX}
-${Merge_Reference_HKMAX}
-${merge_res_limit}
-${RESMIN}
-${RESMAX}
-${merge_data_type}
-${maxthread}
-${ILIST_VAL}
-0
-eot
-#
-echo "<<@progress: +5>>"
-#
-#############################################################################
-${proc_2dx}/linblock "Launching refinement script"
-#############################################################################
-#
-echo "# IMAGE: SCRATCH/job_01_${scriptBfile} <CSH: First (01) refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptB.com.log <LOG: First (01) origtilt B output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_01_${postprocessingfile} <CSH: First (01) refinement postprocessing script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${maxthread}_${scriptBfile} <CSH: Last (${maxthread}) refinement script>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${maxthread}_2dx_merge_scriptB.com.log <LOG: Last (${maxthread}) origtilt B output>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/job_${maxthread}_${postprocessingfile} <CSH: Last (${maxthread}) refinement postprocessing script>" >> LOGS/${scriptname}.results
 
-foreach scriptB ( SCRATCH/job_*_${scriptBfile} )
-  if ( ${scriptB} != SCRATCH/job_${maxthread}_${scriptBfile} ) then
-    echo Background nohup ${scriptB} \> ${scriptB}.log \&
-    nohup ${scriptB} > ${scriptB}.log &
-  else
-    echo Forground ${scriptB} \> ${scriptB}.log
-    ${scriptB} > ${scriptB}.log
+set itnum = 0
+
+while ( ${itnum} < ${merge_refine_iterations} ) 
+  #
+  set itnum_p1 = ${itnum}
+  @ itnum_p1 += 1
+  echo ":: "
+  echo "::         ITERATION ${itnum_p1} of ${merge_refine_iterations}"
+  echo ":: "
+  #
+  if ( ${merge_ref_num} == "0" && ${create_merged_dataset} == "y" ) then
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
+    #############################################################################  
+    #
+    #
+    source ${proc_2dx}/2dx_merge_merge_sub.com
+    #
+    if ( ${merge_modus} == "3D" ) then
+      #
+      #############################################################################
+      ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
+      #############################################################################
+      #
+      source ${proc_2dx}/2dx_merge_latline_sub.com
+      #
+      if ( ${merge_reference} == "3" ) then
+        source ${proc_2dx}/2dx_refineMergedMap_sub.com
+      endif
+      #
+    endif
+    #
   endif
+  #
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_merge_refine_sub.com"
+  #############################################################################  
+  #
+  source ${proc_2dx}/2dx_merge_refine_sub.com
+  #
+  #
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
+  #############################################################################  
+  #
+  python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
+  #
+  #
+  # Issue evaluate here to reload the Ph-Ori-Change column
+  # echo "<<@evaluate>>"
+  #
+  @ itnum += 1
 end
-#
-#
-echo "################################################"
-echo "################################################"
-echo "output in file SCRATCH/job_XX_2dx_merge_scriptB.com.log"
-echo "################################################"
-echo "################################################"
-#
-\rm -f SCRATCH/${scriptname}.console
-echo "# IMAGE: SCRATCH/${scriptname}.console <LOG: Console output from merging>" >> LOGS/${scriptname}.results
-foreach scriptBconsole ( SCRATCH/job_*_${scriptname}-tmp.console ) 
-  cat ${scriptBconsole} >> SCRATCH/${scriptname}.console
-  \rm -f ${scriptBconsole}
-end
-#
-\rm -f SCRATCH/${scriptname}.py
-echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
-foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py ) 
-  cat ${scriptBresults} >> SCRATCH/${scriptname}.py
-  \rm -f ${scriptBresults}
-end
-#
-python SCRATCH/${scriptname}.py
-#
-echo "<<@progress: 70>"
-#
-echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
-#
-#############################################################################
-${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
-#############################################################################
-#
-python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
-#
-#
-# Issue evaluate here to reload the Ph-Ori-Change column
-# echo "<<@evaluate>>"
 #
 ${proc_2dx}/linblock "Now, presse the REFRESH DISPLAY VIEW button top right to update the central table."
 #############################################################################

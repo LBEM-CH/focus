@@ -209,20 +209,20 @@ add_library(${PLOT2K} STATIC ${PLOT2KC})
 add_dependencies(${PLOT2K} ${IM2k} misc gen)
 
 # lib2dx -----------------------------------------------------------------------
-  
-find_package(Qt4 REQUIRED)
-if(QT4_FOUND)
-	message(STATUS "KERNEL/LIB: Found QT4 at ${QT_LIBRARY_DIR}")
-	  SET(QT_INCLUDES  ${QT_QTCORE_INCLUDE_DIR}  ${QT_INCLUDES})
-	  include(${QT_USE_FILE})
-   	  INCLUDE_DIRECTORIES(${QT_INCLUDES})
-	  set(2DX_LIBRARIES   ${QT_LIBRARIES} ${2DX_LIBRARIES})
-else(QT4_FOUND)
-	message(STATUS "KERNEL/LIB: Qt4 not Found!")
-endif(QT4_FOUND)
+FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED)
+
+IF(Qt5_FOUND)
+    MESSAGE(STATUS "KERNEL/LIB: Found QT5 Widgets (Version: ${Qt5Widgets_VERSION_STRING})")
+    INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
+    ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
+    set(2DX_LIBRARIES Qt5::Widgets ${2DX_LIBRARIES})
+ELSE()
+    MESSAGE(STATUS "KERNEL/LIB: QT5 not Found!")
+ENDIF()
  
 set(2DX 2dx) 
 add_library(${2DX} STATIC 2dx_func.for mrcImage.cpp)
+qt5_use_modules(${2DX} Widgets)
 target_link_libraries(${2DX} ${2DX_LIBRARIES})
 add_dependencies(${2DX} ${PLOT2K})
 

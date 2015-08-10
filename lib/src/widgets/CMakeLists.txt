@@ -1,46 +1,60 @@
 ############################################################################
-# A 2dx CMakeLists.txt                                                  #
+# CMAKE FILE FOR 2dx/lib/extensions
+# Contributed by: Marcel Arheit, Nikhil Biyani
 ############################################################################
-# The author was:                                                          #
-# 2010 Marcel Arheit                                                       #
-############################################################################
+#
+cmake_minimum_required(VERSION 2.8.11)
 #
 set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 ################################################################################
 #
 
-# A 2dx library
+############################################################################
+# A 2dx library "widgets"
+############################################################################
 set(LIBTITLE widgets)
 SET(LIBVERSION 1)
 project(${LIBTITLE})
-
-cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -W -Waddress -Wchar-subscripts -Wcomment -Wformat -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized  -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wvolatile-register-var -Wno-long-long -Wextra")
 
 include(GetPropagateDeps)
 include(SetPropagateDeps)
+
 #------------------------------------------------------------------------------
-# Configure Config file and include it.
-# The dependencies are defined in the Config.cmake file
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake
-  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake
-  @ONLY)
+# Find the dependency of FFTW
+set(USE_FFTWF TRUE)
+find_package(FFTW)
+if(FFTWF_FOUND)
+    message(STATUS "@LIBTITLE@: Found FFTW at ${FFTWF_LIB}")
+    SET(@LIBTITLE@_LIBRARIES  ${FFTWF_LIB} ${@LIBTITLE@_LIBRARIES})
+elseif(FFTWF_FOUND)
+    message(FATAL_ERROR "FFTW not found!")
+endif(FFTWF_FOUND)
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake
-  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}ConfigVersion.cmake
-  @ONLY)
+#------------------------------------------------------------------------------
+# Find the dependency of QT5
+FIND_PACKAGE(Qt5 COMPONENTS Widgets WebKitWidgets Network Script OpenGL REQUIRED)
 
-include(${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake)
+IF(Qt5_FOUND)
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 Widgets (Version: ${Qt5Widgets_VERSION_STRING})")
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 Network (Version: ${Qt5Network_VERSION_STRING})")
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 Script (Version: ${Qt5Script_VERSION_STRING})")
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 OpenGL (Version: ${Qt5OpenGL_VERSION_STRING})")
+    INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Qt5Network_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Qt5Script_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Qt5OpenGL_INCLUDE_DIRS})
+    ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5Network_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5Script_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5OepnGL_DEFINITIONS})
+ELSE()
+    MESSAGE(STATUS "@EXETITLE@: QT5 not Found!")
+ENDIF()
 
 # Header files -----------------------------------------------------------------
-if(NOT DEFINED 2DX_INCLUDE_DIR)
-	set(2DX_INCLUDE_DIR ../../../include CACHE INTERNAL "the 2dx include dir")
-	message(STATUS "2DX_INCLUDE_DIR is not set. Setting it to: ${2DX_INCLUDE_DIR}" )
-endif(NOT DEFINED 2DX_INCLUDE_DIR)
 include_directories(${2DX_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_BINARY_DIR}/include)
@@ -49,7 +63,7 @@ include_directories(${CMAKE_BINARY_DIR}/include)
 # Source files -----------------------------------------------------------------
 file(GLOB SRC *.cpp)
 
-# Moc files --------------------------------------------------------------------
+# Moc files 
 # these are all the headers containing Q_OBJECT
 set(MOC_HDRS
 	${2DX_INCLUDE_DIR}/scriptProgress.h
@@ -89,24 +103,20 @@ set(MOC_HDRS
 	${2DX_INCLUDE_DIR}/colorTool.h
 	${2DX_INCLUDE_DIR}/noScrollComboBox.h
 )
-  
-if(QT4_FOUND)
-	# generate moc files
-	#QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS} OPTIONS "-I${2DX_INCLUDE_DIR} -p${CMAKE_CURRENT_SOURCE_DIR}")
-	QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS}) 
-endif(QT4_FOUND)
 
+QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
+
+#------------------------------------------------------------------------------
+# Debug Config
+set(CMAKE_DEBUG_POSTFIX -dbg)
+
+
+#------------------------------------------------------------------------------
+# Add Library
 add_library(${LIBTITLE} STATIC ${SRC} ${MOC_SRCS}) 
 
-set_target_properties(${LIBTITLE} PROPERTIES
-  VERSION ${LIBVERSION}
-  SOVERSION ${LIBVERSION})
+qt5_use_modules(${LIBTITLE} Widgets Network Script OpenGL)
+TARGET_LINK_LIBRARIES(${LIBTITLE} Qt5::Widgets Qt5::Network Qt5::Script Qt5::OpenGL)
 
 set_propagate_deps(${LIBTITLE})
-# Includes and libraries
-#target_link_libraries(${LIBTITLE}
-#  ${2DX_LIBRARIES})
-
-# Installation
-#install(TARGETS ${LIBTITLE} DESTINATION lib)
 

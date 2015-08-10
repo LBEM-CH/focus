@@ -22,8 +22,8 @@ void fileWatcher::setupPaths()
   if(QFileInfo(file).exists() && !files().contains(file))
   {
     if(!files().isEmpty()) removePaths(files());
-		addPath(file);
-    emit fileChanged(file);
+    addPath(file);
+    //emit fileChanged(file);
   }
 }
 

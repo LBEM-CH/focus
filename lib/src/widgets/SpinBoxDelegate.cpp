@@ -28,7 +28,7 @@
     using a spin box widget.
 */
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "SpinBoxDelegate.h"
 #include <iostream>

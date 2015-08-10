@@ -566,14 +566,14 @@ void confData::saveAs(QString fileName)
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   for(int i=0;i<header.size();i++)
   {
-    data.write((header[i] + '\n').toAscii());
+    data.write((header[i] + '\n').toLatin1());
   }
 
 
   for(int i=0;i<sections.size();i++)
   {
     data.write("#=============================================================================\n",79);
-    data.write(("# SECTION:" + sections[i]->title() + "\n").toAscii());
+    data.write(("# SECTION:" + sections[i]->title() + "\n").toLatin1());
     data.write("#=============================================================================\n",79);
     data.putChar('#'); data.putChar('\n');
 	
@@ -586,10 +586,10 @@ void confData::saveAs(QString fileName)
         if(!v.isEmpty())
         {
             v = v.trimmed();
-            data.write(("# " + valueSearch[k] + ": " + v + "\n").toAscii());
+            data.write(("# " + valueSearch[k] + ": " + v + "\n").toLatin1());
         }
 	  }
-	  data.write(("set " + e->get("valuelabel") + " = " + '"' + e->get("value") + '"' + "\n#\n").toAscii());
+	  data.write(("set " + e->get("valuelabel") + " = " + '"' + e->get("value") + '"' + "\n#\n").toLatin1());
 	}
   }
 
@@ -606,7 +606,7 @@ void confData::saveSynchronized(QString fileName)
   if(!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
   for(int i=0;i<header.size();i++)
   {
-    data.write((header[i] + '\n').toAscii());
+    data.write((header[i] + '\n').toLatin1());
   }
 
   bool synchronized = false;
@@ -614,7 +614,7 @@ void confData::saveSynchronized(QString fileName)
   for(int i=0;i<sections.size();i++)
   {
     data.write("#=============================================================================\n",79);
-    data.write(("# SECTION:" + sections[i]->title() + "\n").toAscii());
+    data.write(("# SECTION:" + sections[i]->title() + "\n").toLatin1());
     data.write("#=============================================================================\n",79);
     data.putChar('#'); data.putChar('\n');
 
@@ -627,7 +627,7 @@ void confData::saveSynchronized(QString fileName)
         if(!v.isEmpty())
         {
             v = v.trimmed();
-            data.write(("# " + valueSearch[k] + ": " + v + "\n").toAscii());
+            data.write(("# " + valueSearch[k] + ": " + v + "\n").toLatin1());
             if(valueSearch[k]=="SYNC_WITH_UPPER_LEVEL" && v.toLower() == "yes" )
             {
               // CHEN: This is probably wrong: It should not be "saveInUpperLevel" but rather "GetFromUpperLevel".
@@ -636,7 +636,7 @@ void confData::saveSynchronized(QString fileName)
             }
         }
 	  }
-	  data.write(("set " + e->get("valuelabel") + " = " + '"' + e->get("value") + '"' + "\n#\n").toAscii());
+	  data.write(("set " + e->get("valuelabel") + " = " + '"' + e->get("value") + '"' + "\n#\n").toLatin1());
 	}
   }
 

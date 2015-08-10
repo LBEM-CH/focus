@@ -1,11 +1,9 @@
 ############################################################################
-# A 2dx CMakeLists.txt                                                  #
+# CMAKE FILE FOR 2dx/lib
+# Contributed by: Marcel Arheit, Nikhil Biyani
 ############################################################################
-# The author was:                                                          #
-# 2010 Marcel Arheit                                                       #
-############################################################################
-#
-cmake_minimum_required(VERSION 2.6)
+
+cmake_minimum_required(VERSION 2.8.11)
 add_subdirectory(src)
 
 

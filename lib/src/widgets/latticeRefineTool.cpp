@@ -292,7 +292,7 @@ bool latticeRefineTool::saveRefinementList(const QString &fileName)
   while(i.hasNext())
   {
     i.next();
-    list.write((QString::number(i.key().x()) + ',' + QString::number(i.key().y()) + ',' + QString::number(i.value().x()) + ',' + QString::number(i.value().y()) + '\n').toAscii());
+    list.write((QString::number(i.key().x()) + ',' + QString::number(i.key().y()) + ',' + QString::number(i.value().x()) + ',' + QString::number(i.value().y()) + '\n').toLatin1());
   }
   list.close();
   return true;

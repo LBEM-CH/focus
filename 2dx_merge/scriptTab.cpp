@@ -49,8 +49,11 @@ scriptTab::scriptTab(scriptModule* mod, confData* mainData, QWidget *parent)
     layout->setSpacing(0);
     this->setLayout(layout);
   
-    module->setMaximumWidth(250);
-    manual->setMaximumWidth(200);
+    module->setMinimumWidth(270);
+    module->setMaximumWidth(270);
+    manual->setMinimumWidth(230);
+    manual->setMaximumWidth(300);
+    parameterContainer->setMinimumWidth(600);
     
     layout->addWidget(module, 0, 0, 1, 1);
     layout->addWidget(parameterContainer, 0, 1, 1, 1);

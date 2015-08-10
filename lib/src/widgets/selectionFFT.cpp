@@ -91,7 +91,7 @@ void selectionFFT::calculateFFT()
   fftwf_plan p = fftwf_plan_dft_2d(w, h, (fftwf_complex*)fft, (fftwf_complex*)fft, FFTW_FORWARD, FFTW_ESTIMATE);
   fftwf_execute(p);
   fftwf_destroy_plan(p);
-#ifdef DEBUG
+#ifdef DEBUGsetColorCount
   int finishFFT = timer.elapsed();
   cout<<"FFT Time: "<<finishFFT-startFFT<<endl;
   int startLoad = timer.elapsed();
@@ -116,7 +116,7 @@ void selectionFFT::calculateFFT()
   }
 
   tempImage = QImage(normalizedFinal,w,h,QImage::Format_Indexed8);
-  tempImage.setNumColors(256);
+  tempImage.setColorCount(256);
   for(int i=0;i<256;i++)
     tempImage.setColor(i,QColor(i,i,i).rgb());
 

@@ -111,13 +111,13 @@ void importTool::updateParsedView(const QString &regExp)
       pattern.setPattern(pI);
       index = pattern.indexIn(name);      
       //qDebug()<<"Index: "<<index;
-      if(index!=-1 && pattern.numCaptures()>max) {max = pattern.numCaptures(); bestPattern=p;}
+      if(index!=-1 && pattern.captureCount()>max) {max = pattern.captureCount(); bestPattern=p;}
     }
     
     if(!regExp.isEmpty())
     {
       pattern.setPattern(regExp);
-      if(pattern.indexIn(name)==-1 || pattern.numCaptures()<max)
+      if(pattern.indexIn(name)==-1 || pattern.captureCount()<max)
       {
         pattern.setPattern(ui.patternInput->itemText(bestPattern));
         pattern.indexIn(name);
@@ -258,10 +258,10 @@ bool importTool::savePatternList(const QString &path)
   QFile file(path);
   if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) return false;
   foreach(QString line, patternFileHeader)
-    file.write((line + '\n').toAscii());
-  file.write(QString('\n').toAscii());
+    file.write((line + '\n').toLatin1());
+  file.write(QString('\n').toLatin1());
   for(int i=0;i<ui.patternInput->count();i++)
-    file.write((ui.patternInput->itemText(i) + '\n').toAscii());
+    file.write((ui.patternInput->itemText(i) + '\n').toLatin1());
   file.close();
   return true;
 }

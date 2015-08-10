@@ -13,6 +13,7 @@
 #include <math.h>
 #include <fftw3.h>
 #include <iostream>
+#include <QtGui/qimage.h>
 
 #include "mrcImage.h"
 
@@ -387,7 +388,7 @@ void mrcImage::formatImage(mrcHeader *header, QImage::Format format)
   // cout<<"In mrcImage.cpp, line 378:  Image now copied back."<<endl;
   if(format == QImage::Format_Indexed8)
   {
-    image->setNumColors(256);
+    image->setColorCount(256);
     int i;
     for(i=0;i<256;i++)
     {
@@ -722,7 +723,7 @@ void printMatrix(QMatrix m)
   cout<<m.m11()<<" "<<m.m12()<<endl;
   cout<<m.m21()<<" "<<m.m22()<<endl;
   cout<<"---"<<endl;
-  cout<<m.det()<<endl;
+  cout<<m.determinant()<<endl;
   cout<<endl;
 }
 

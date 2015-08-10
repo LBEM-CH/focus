@@ -35,7 +35,7 @@ bool projectModel::saveColumns(const QString &columnsFile)
   foreach(QString line, columnsFileHeader)
   {
     line+='\n';
-    modelInfo.write(line.toAscii());
+    modelInfo.write(line.toLatin1());
   }
     
   for(int i=2;i<columns.size();i++)
@@ -60,7 +60,7 @@ bool projectModel::saveColumns(const QString &columnsFile)
     }
     line+=')';
     line+='\n';
-    modelInfo.write(line.toAscii());
+    modelInfo.write(line.toLatin1());
   }
   modelInfo.close();
   return true;
@@ -230,9 +230,9 @@ void projectModel::initDir(const QString &path, QStandardItem *parent)
                     {                      
                       format = formats[k];
                       if(format.contains(QRegExp("[diouxX]$")))
-                        entryString += QString().sprintf(format.toAscii(),entry.toInt());
+                        entryString += QString().sprintf(format.toLatin1(),entry.toInt());
                       else if(fwpl.contains(QRegExp("[eEfgG]$")))                    
-                        entryString += QString().sprintf(format.toAscii(),entry.toDouble());                    
+                        entryString += QString().sprintf(format.toLatin1(),entry.toDouble());                    
                       else
                         entryString += entry;
                       k++;                    
@@ -248,12 +248,12 @@ void projectModel::initDir(const QString &path, QStandardItem *parent)
                 }
                 else if(fwpl.contains(QRegExp("[diouxX]$")))
                 {
-                  entryString = QString().sprintf(columns[c]["format"].toString().toAscii(),localData.get(columns[c]["uid"].toString(),"value").toInt());
+                  entryString = QString().sprintf(columns[c]["format"].toString().toLatin1(),localData.get(columns[c]["uid"].toString(),"value").toInt());
                   entryItem->setData(localData.get(columns[c]["uid"].toString(),"value").toInt(),SortRole);
                 }
                 else if(fwpl.contains(QRegExp("[eEfgG]$")))
                 {
-                  entryString = QString().sprintf(columns[c]["format"].toString().toAscii(),localData.get(columns[c]["uid"].toString(),"value").toDouble());
+                  entryString = QString().sprintf(columns[c]["format"].toString().toLatin1(),localData.get(columns[c]["uid"].toString(),"value").toDouble());
                   entryItem->setData(localData.get(columns[c]["uid"].toString(),"value").toDouble(),SortRole);
                 }
                 else
@@ -485,7 +485,7 @@ bool projectModel::save(QStandardItem *currentItem, int itemCount, QFile &saveFi
             }
             else
             {
-                saveFile.write((relativePathFromIndex(i) + '\n').toAscii());
+                saveFile.write((relativePathFromIndex(i) + '\n').toLatin1());
             }
     }
   }

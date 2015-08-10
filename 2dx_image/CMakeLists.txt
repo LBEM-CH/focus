@@ -10,7 +10,7 @@
 set(EXETITLE 2dx_image)
 #project( ${EXETITLE} )
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.11)
 
 set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -W -Waddress -Wchar-subscripts -Wcomment -Wformat -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized  -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wvolatile-register-var -Wno-long-long -Wextra")
 
@@ -40,14 +40,32 @@ if(FFTWF_FOUND)
 else(FFTWF_FOUND)
 	message(FATAL_ERROR "@EXETITLE@: FFTW not found!")
 endif(FFTWF_FOUND)
- 
-find_package(Qt4 COMPONENTS QtCore QtGui QtWebKit QtNetwork QtScript QtOpenGL REQUIRED)
-if(QT4_FOUND)
-	message(STATUS "@EXETITLE@: Found QT4 at ${QT_LIBRARY_DIR}")
-	include(${QT_USE_FILE})
-        SET(2DX_IMAGE_LIBRARIES ${2DX_IMAGE_LIBRARIES} ${QT_LIBRARIES})
-        #message(STATUS "2DX_IMAGE_LIBRARIES ${2DX_IMAGE_LIBRARIES}")
-endif(QT4_FOUND)
+
+
+FIND_PACKAGE(Qt5 COMPONENTS Widgets WebKitWidgets Network Script OpenGL REQUIRED)
+
+IF(Qt5_FOUND)
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 Widgets (Version: ${Qt5Widgets_VERSION_STRING})")
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 WebKitWidgets (Version: ${Qt5WebKitWidgets_VERSION_STRING})")
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 Network (Version: ${Qt5Network_VERSION_STRING})")
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 Script (Version: ${Qt5Script_VERSION_STRING})")
+    MESSAGE(STATUS "@EXETITLE@: Found QT5 OpenGL (Version: ${Qt5OpenGL_VERSION_STRING})")
+    INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Qt5WebKitWidgets_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Qt5Network_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Qt5Script_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Qt5OpenGL_INCLUDE_DIRS})
+    ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5WebKitWidgets_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5Network_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5Script_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5OepnGL_DEFINITIONS})
+ELSE()
+    MESSAGE(STATUS "@EXETITLE@: QT5 not Found!")
+ENDIF()
+
+set(2DX_IMAGE_LIBRARIES ${2DX_IMAGE_LIBRARIES} Qt5::Widgets Qt5::WebKitWidgets Qt5::Network Qt5::Script Qt5::OpenGL)
+
 find_package(OpenGL)
 if(OPENGL_FOUND)
         message(STATUS "@EXETITLE@: Found OpenGL at ${OPENGL_LIBRARIES}")
@@ -60,6 +78,7 @@ if(NOT DEFINED 2DX_INCLUDE_DIR)
         set(2DX_INCLUDE_DIR ../include CACHE INTERNAL "the 2dx include dir")
         message(STATUS "2DX_INCLUDE_DIR is not set. Setting it to: ${2DX_INCLUDE_DIR}" )
 endif(NOT DEFINED 2DX_INCLUDE_DIR)
+
 include_directories(${2DX_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_BINARY_DIR}/include)
@@ -84,16 +103,12 @@ set(MOC_HDRS
 	warningBox.h
 	)
 ###############################################################################
-cmake_minimum_required(VERSION 2.6)
+
 set(CMAKE_DEBUG_POSTFIX -dbg)
 
 
 # generate moc files
-QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
-
-
-
- 
+QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
 
 message(STATUS "Creating: ${EXETITLE}")
 if(APPLE)
@@ -120,9 +135,10 @@ if(APPLE)
   #set_source_files_properties( ${ProjectName_RESOURCES} ${ProjectName_TRANSLATIONS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
 else(APPLE)
   add_executable(${EXETITLE} ${SRC} ${MOC_SRCS})
+#  add_executable(${EXETITLE} ${SRC})
 endif(APPLE)
 
-
+qt5_use_modules(${EXETITLE} Widgets WebKitWidgets Network Script OpenGL)
 
 #add the libraries that were built before
 get_propagate_deps(conf widgets mrcImage extentions)

@@ -19,17 +19,18 @@ IF( APPLE )
 ENDIF( APPLE )
 
 # Libraries to use ------------------------------------------------------------
-find_package(Qt4 REQUIRED)
-  if(QT4_FOUND)
-    message(STATUS "@EXETITLE@: Found QT4 at ${QT_LIBRARY_DIR}")
-    SET(QT_INCLUDES  ${QT_QTCORE_INCLUDE_DIR}  ${QT_INCLUDES})
-    include(${QT_USE_FILE})
-    INCLUDE_DIRECTORIES(${QT_INCLUDES})
-    SET(2DX_LOG_LIBRARIES   ${QT_LIBRARIES})
-  else(QT4_FOUND)
-    message(STATUS "@EXETITLE@: Qt4 not Found!")
-  endif(QT4_FOUND)
-  
+FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED)
+
+IF(Qt5_FOUND)
+    MESSAGE(STATUS "@LIBTITLE@: Found QT5 Widgets (Version: ${Qt5Widgets_VERSION_STRING})")
+    INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
+    ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
+ELSE()
+    MESSAGE(STATUS "@LIBTITLE@: QT5 not Found!")
+ENDIF()
+
+SET(2DX_LOG_LIBRARIES   Qt5::Widgets) 
+
 
 # Header files -----------------------------------------------------------------
 set(HEADERS
@@ -57,7 +58,7 @@ set(MOC_HDRS
 
 ###############################################################################
 # generate moc files
-QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
+QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
 
 
 message(STATUS "Creating: ${EXETITLE}")
@@ -84,6 +85,8 @@ if(APPLE)
 else(APPLE)
   add_executable( ${EXETITLE} ${SOURCES} ${MOC_SRCS})
 endif(APPLE)
+
+qt5_use_modules(${EXETITLE} Widgets)
 
 # Linking
 target_link_libraries(${EXETITLE} ${2DX_LOG_LIBRARIES}) 

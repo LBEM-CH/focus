@@ -139,7 +139,7 @@ void pMatrix(QMatrix m)
   cout<<m.m11()<<" "<<m.m12()<<endl;
   cout<<m.m21()<<" "<<m.m22()<<endl;
   cout<<"---"<<endl;
-  cout<<m.det()<<endl;
+  cout<<m.determinant()<<endl;
   cout<<endl;
   cout<<" ########################## "<<endl;
 }

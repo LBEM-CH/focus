@@ -46,7 +46,7 @@ int scriptParser::parse(const QString &source, const QString &destination)
   if(!d.open(QIODevice::WriteOnly | QIODevice::Text)) {qDebug()<<"Script write failed for "<<destination; return -2;}    
     
   foreach(line,scriptData)
-    d.write(line.toAscii());
+    d.write(line.toLatin1());
     
   d.setPermissions(QFile::ExeOwner | QFile::ReadOwner | QFile::WriteOwner);
   d.close();

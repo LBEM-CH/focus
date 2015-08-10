@@ -1,58 +1,45 @@
 ############################################################################
-# A 2dx CMakeLists.txt                                                  #
+# CMAKE FILE FOR 2dx/lib/conf
+# Contributed by: Marcel Arheit, Nikhil Biyani
 ############################################################################
-# The author was:                                                          #
-# 2010 Marcel Arheit                                                       #
-############################################################################
+cmake_minimum_required(VERSION 2.8.11)
 #
-set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake ${CMAKE_MODULE_PATH})
-################################################################################
+SET(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake ${CMAKE_MODULE_PATH})
 #
 
-# A 2dx library
-set(LIBTITLE conf)
+############################################################################
+# A 2dx library "conf"
+############################################################################
+SET(LIBTITLE conf)
 SET(LIBVERSION 1)
-project(${LIBTITLE})
+PROJECT(${LIBTITLE})
 
-set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -W -Waddress -Wchar-subscripts -Wcomment -Wformat -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized  -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wvolatile-register-var -Wno-long-long -Wextra")
+SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -funroll-loops -W -Waddress -Wchar-subscripts -Wcomment -Wformat -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized  -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wvolatile-register-var -Wno-long-long -Wextra")
 
-include(GetPropagateDeps)
-include(SetPropagateDeps)
+INCLUDE(GetPropagateDeps)
+INCLUDE(SetPropagateDeps)
+
 #------------------------------------------------------------------------------
-# Configure Config file and include it.
-# The dependencies are defined in the Config.cmake file
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake
-  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake
-  @ONLY)
+# Find the dependency of QT5
+FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED)
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake
-  ${CMAKE_BINARY_DIR}/share/${LIBTITLE}ConfigVersion.cmake
-  @ONLY)
+IF(Qt5_FOUND)
+    MESSAGE(STATUS "@LIBTITLE@: Found QT5 Widgets (Version: ${Qt5Widgets_VERSION_STRING})")
+    INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
+    ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
+ELSE()
+    MESSAGE(STATUS "@LIBTITLE@: QT5 not Found!")
+ENDIF()
 
-include(${CMAKE_BINARY_DIR}/share/${LIBTITLE}Config.cmake)
 
-#install(
-#  FILES       
-#    ${CMAKE_CURRENT_SOURCE_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}Config.cmake
-#    ${CMAKE_CURRENT_SOURCE_DIR}/share/${LIBTITLE}-${LIBVERSION}/${LIBTITLE}ConfigVersion.cmake
-#  DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${LIBTITLE}-${LIBVERSION}/)
+#------------------------------------------------------------------------------
+# Header files 
+INCLUDE_DIRECTORIES(${2DX_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/include)
 
-# Header files -----------------------------------------------------------------
-if(NOT DEFINED 2DX_INCLUDE_DIR)
-	set(2DX_INCLUDE_DIR ../../../include CACHE INTERNAL "the 2dx include dir")
-	message(STATUS "2DX_INCLUDE_DIR is not set. Setting it to: ${2DX_INCLUDE_DIR}" )
-endif(NOT DEFINED 2DX_INCLUDE_DIR)
-include_directories(${2DX_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_BINARY_DIR}/include)
-
-# Source files -----------------------------------------------------------------
-file(GLOB SRC *.cpp)
-
-# Moc files --------------------------------------------------------------------
-# these are all the headers containing Q_OBJECT
+#------------------------------------------------------------------------------
+# Source files
 set(MOC_HDRS
 	${2DX_INCLUDE_DIR}/confData.h	
 	${2DX_INCLUDE_DIR}/confDelegate.h
@@ -65,30 +52,26 @@ set(MOC_HDRS
 	${2DX_INCLUDE_DIR}/confSection.h
 	${2DX_INCLUDE_DIR}/confSectionHeader.h
 	${2DX_INCLUDE_DIR}/confValidator.h
-)
+    )
 
-cmake_minimum_required(VERSION 2.6)
+QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
 
+FILE(GLOB SRC *.cpp)
+
+#------------------------------------------------------------------------------
+# Debug Config
 set(CMAKE_DEBUG_POSTFIX -dbg)
 
-if(QT4_FOUND)
-	# generate moc files
-	QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS}) 
-endif(QT4_FOUND)
+#------------------------------------------------------------------------------
+# Add Library
+ADD_LIBRARY(${LIBTITLE} STATIC ${SRC} ${MOC_SRCS})
 
+qt5_use_modules(${LIBTITLE} Widgets)
 
-add_library(${LIBTITLE} STATIC ${SRC} ${MOC_SRCS})
-
-set_target_properties(${LIBTITLE} PROPERTIES
-  VERSION ${LIBVERSION}
-  SOVERSION ${LIBVERSION})
-
+TARGET_LINK_LIBRARIES(${LIBTITLE} Qt5::Widgets)
 
 set_propagate_deps(${LIBTITLE})
-# Includes and libraries
-#target_link_libraries(${LIBTITLE}
-# ${2DX_LIBRARIES})
 
 # Installation
-#install(TARGETS ${LIBTITLE} DESTINATION lib)
+INSTALL(TARGETS ${LIBTITLE} DESTINATION lib)
 

@@ -307,7 +307,7 @@ void scriptModule::execute(bool run)
     scriptHeader.replace((scriptHeader.size()-scriptTitle.size())/2,scriptTitle.size(),scriptTitle);
     scriptHeader = scriptHeader + "\n";
 
-    if(runningScriptSelected())  emit standardError(scriptHeader.toAscii());
+    if(runningScriptSelected())  emit standardError(scriptHeader.toLatin1());
     writeToLog("<error>" + scriptHeader + "</error>" + '\n');
 
     disconnect(&process,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(scriptFinished(int)));
@@ -367,7 +367,7 @@ void scriptModule::readStdErr()
 {
 	QString text = process.readAllStandardError();
 
-	if(runningScriptSelected() && verbosity != 0) emit standardError(text.toAscii());
+	if(runningScriptSelected() && verbosity != 0) emit standardError(text.toLatin1());
 
 	writeToLog("<error>" + text + "</error>");
 }
@@ -420,7 +420,7 @@ bool scriptModule::writeToLog(const QString &logText)
 	QFile log(logFilename);
 	if(!log.open(QIODevice::Append | QIODevice::Text))
             {cerr<<"Failed to write to "<<getScriptProperty(currentUid,"logFile").toString().toStdString()<<endl; return false;}
-	log.write(logText.toAscii());
+	log.write(logText.toLatin1());
 	log.close();
 	return true;
 }

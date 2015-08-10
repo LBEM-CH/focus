@@ -10,18 +10,20 @@ else(@LIBTITLE@_FOUND)
   INCLUDE_DIRECTORIES(@CMAKE_INSTALL_PREFIX@/include/@LIBTITLE@-@LIBVERSION@/ )
 
   #------------------------------------------------------------------------------
-  find_package(Qt4 REQUIRED)
-  if(QT4_FOUND)
-    message(STATUS "@LIBTITLE@: Found QT4 at ${QT_LIBRARY_DIR}")
-    SET(QT_INCLUDES  ${QT_QTCORE_INCLUDE_DIR}  ${QT_INCLUDES})
-    include(${QT_USE_FILE})
-    INCLUDE_DIRECTORIES(${QT_INCLUDES})
-    #SET(2DX_LIBRARIES   ${QT_LIBRARY_DIR}/libQtOpenGL.so ${QT_LIBRARY_DIR}/libQtNetwork.so  ${QT_LIBRARIES} ${2DX_LIBRARIES})
-    SET(2DX_LIBRARIES   ${QT_LIBRARIES} ${2DX_LIBRARIES})
-    add_definitions(-D__2DX__QT4__)
-  else(QT4_FOUND)
-    message(STATUS "@LIBTITLE@: Qt4 not Found!")
-  endif(QT4_FOUND)
+  
+
+  #find_package(Qt4 REQUIRED)
+  #if(QT4_FOUND)
+  #  message(STATUS "@LIBTITLE@: Found QT4 at ${QT_LIBRARY_DIR}")
+  #  SET(QT_INCLUDES  ${QT_QTCORE_INCLUDE_DIR}  ${QT_INCLUDES})
+  #  include(${QT_USE_FILE})
+  #  INCLUDE_DIRECTORIES(${QT_INCLUDES})
+  #  #SET(2DX_LIBRARIES   ${QT_LIBRARY_DIR}/libQtOpenGL.so ${QT_LIBRARY_DIR}/libQtNetwork.so  ${QT_LIBRARIES} ${2DX_LIBRARIES})
+  #  SET(2DX_LIBRARIES   ${QT_LIBRARIES} ${2DX_LIBRARIES})
+  #  add_definitions(-D__2DX__QT4__)
+  #else(QT4_FOUND)
+  #  message(STATUS "@LIBTITLE@: Qt4 not Found!")
+  #endif(QT4_FOUND)
   
 
   

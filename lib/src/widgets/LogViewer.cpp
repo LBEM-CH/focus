@@ -117,7 +117,7 @@ void LogViewer::insertText(const QStringList &text)
   text_cursor_ptr->movePosition(QTextCursor::EndOfBlock);
   text_area_ptr->setTextCursor(*text_cursor_ptr);
 
-  if(!errorString.isEmpty()) insertError(errorString.toAscii());
+  if(!errorString.isEmpty()) insertError(errorString.toLatin1());
 
   update();
 }

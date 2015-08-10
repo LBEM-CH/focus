@@ -151,7 +151,7 @@ int fullScreenImage::savePeakList()
 
   foreach(QPoint p, spots)
   {
-    f.write(("\t"  + QString::number(p.x()) + ",\t" + QString::number(p.y()) + "\n").toAscii());
+    f.write(("\t"  + QString::number(p.x()) + ",\t" + QString::number(p.y()) + "\n").toLatin1());
   }
 
   f.close();
@@ -1207,10 +1207,10 @@ int fullScreenImage::saveSelectionList()
 	if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) return 0;
 
 	f.write((QString::number(imageWidth) + ", " + QString::number(imageWidth) +
-				"    ! X,Y dimensions of the original image, origin bottom left (0,0)" + '\n').toAscii());
+				"    ! X,Y dimensions of the original image, origin bottom left (0,0)" + '\n').toLatin1());
 
 	for(int i=0;i<selectionList.size();i++)
-		f.write((QString::number(selectionList[i].x()) + ", " + QString::number(selectionList[i].y()) + '\n').toAscii());
+		f.write((QString::number(selectionList[i].x()) + ", " + QString::number(selectionList[i].y()) + '\n').toLatin1());
 
 	f.close();
 

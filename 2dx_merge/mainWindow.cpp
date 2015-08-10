@@ -50,7 +50,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   #else
   applicationDir = QDir(QApplication::applicationDirPath());
   #endif
-
+  
   configDir = QDir(applicationDir.canonicalPath() + "/../" + "config/");
 
   QString mergeConfigLocation = directory + "/merge/" + "2dx_merge.cfg";

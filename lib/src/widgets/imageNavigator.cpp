@@ -48,7 +48,7 @@ void imageNavigator::Initialize_Actions()
   connect(toggleInfoToolAction,SIGNAL(triggered()),this,SLOT(toggleInfoTool()));
   menu->addAction(toggleInfoToolAction);
 
- // #ifdef Q_WS_MAC
+ // #ifdef Q_OS_MAC
     QMenu *zoomMenu = new QMenu("Zoom",this);
     menu->addMenu(zoomMenu);
     QAction *zoomInAction = new QAction(tr("Zoom In"),this);
@@ -77,7 +77,7 @@ void imageNavigator::Initialize_Actions()
   connect(toggleColorToolAction,SIGNAL(triggered()),this,SLOT(toggleColorTool()));
   menu->addAction(toggleColorToolAction);
 
- // #ifdef Q_WS_MAC
+ // #ifdef Q_OS_MAC
   // CHEN: 4.1.2015
   // if(imageType =="fft")
   // {
@@ -354,7 +354,7 @@ void imageNavigator::Initialize_Tools()
   if(imageType =="fft")
   {
     latticeTool = new latticeRefineTool(data,image,mainWin);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
     latticeTool->showNormal();
   #endif
     latticeTool->raise();
@@ -363,7 +363,7 @@ void imageNavigator::Initialize_Tools()
     latticeTool->hide();
 
     ctfEditor = new ctfTool(data,image, mainWin);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
     ctfEditor->showNormal();
   #endif
     ctfEditor->raise();
@@ -377,7 +377,7 @@ void imageNavigator::Initialize_Tools()
     connect(ctfEditor,SIGNAL(defocusChanged(float,float,float)),image,SLOT(calculateCTF(float,float,float)));
 
     parameterEditor = new displayParametersTool(mainWin);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
     parameterEditor->showNormal();
   #endif
     parameterEditor->move(0,screenHeight-parameterEditor->height()-35);
@@ -411,7 +411,7 @@ void imageNavigator::Initialize_Tools()
   }
 
   spotSelect = new spotSelectTool(data, image, image->getSourceImage(), QPoint(image->width(), image->height()), mainWin);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   spotSelect->showNormal();
   #endif
   spotSelect->move((screenWidth-spotSelect->width())/2,screenHeight-spotSelect->height()-35);
@@ -420,7 +420,7 @@ void imageNavigator::Initialize_Tools()
 
   zoomWin = new zoomWindow(image,mainWin);
   zoomWin->resize(256,256);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   zoomWin->showNormal();
   #endif
   zoomWin->hide();
@@ -430,7 +430,7 @@ void imageNavigator::Initialize_Tools()
   connect(zoomWin,SIGNAL(zoomMove(const QPoint &)),this,SLOT(zoomMove(const QPoint&)));
 
   colorLookupTool = new colorTool(image, imageHeader, mainWin);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   colorLookupTool->showNormal();
   #endif
   colorLookupTool->move(screenWidth-colorLookupTool->width()-20,20);
@@ -438,7 +438,7 @@ void imageNavigator::Initialize_Tools()
   colorLookupTool->hide();
 
   phaseView *phaseTool = new phaseView(mainWin);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   phaseTool->showNormal();
   #endif
   phaseTool->move(screenWidth - phaseTool->width()-20, colorLookupTool->y() + colorLookupTool->height() + 20);
@@ -641,7 +641,7 @@ void imageNavigator::mouseMoveEvent(QMouseEvent *event)
   currentMousePos = point;
   image->setCurrentMousePos(point);
 
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
     point -= QPoint(image->width()/2,image->height()/2);
   #else
     point -= QPoint(image->width()/2-1,image->height()/2-1);
@@ -703,7 +703,7 @@ void imageNavigator::mouseDoubleClickEvent(QMouseEvent *event)
   bool flipped = false;
   if(imageType == "fft")
   {
-    #ifdef Q_WS_MAC
+    #ifdef Q_OS_MAC
       pos -= QPoint(image->width()/2,image->height()/2);
     #else
       pos -= QPoint(image->width()/2-1,image->height()/2-1);
@@ -723,7 +723,7 @@ void imageNavigator::mouseDoubleClickEvent(QMouseEvent *event)
     if(flipped) pos*=-1;
     pos*=scale;
     pos.setY(-pos.y());
-    #ifdef Q_WS_MAC
+    #ifdef Q_OS_MAC
       pos += QPoint(image->width()/2,image->height()/2);
     #else
       pos += QPoint(image->width()/2-1,image->height()/2-1);
@@ -792,7 +792,7 @@ void imageNavigator::showZoomWindow(const QPoint &pos, const QSize &size)
 {
   QPoint point = image->mapFrom(this,pos);
 
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
     point -= QPoint(image->width()/2,image->height()/2);
   #else
     point -= QPoint(image->width()/2-1,image->height()/2-1);
@@ -818,7 +818,7 @@ void imageNavigator::moveLatticePoint(const QPoint &pos)
 {
 
   QPointF point = image->mapFrom(this,pos);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
     point -= QPointF((float)image->width()/2.0,(float)image->height()/2.0);
   #else
     point -= QPointF(image->width()/2.0-1.0,image->height()/2.0-1.0);
@@ -909,7 +909,7 @@ void imageNavigator::toggleCTFView()
 void imageNavigator::zoomClick(const QPoint &pos)
 {
   QPoint p = image->mapTo(this,pos);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   p+=QPoint(1,1);
   #else
   p+=QPoint(-1,-1);
@@ -921,7 +921,7 @@ void imageNavigator::zoomClick(const QPoint &pos)
 void imageNavigator::zoomDoubleClick(const QPoint &pos)
 {
   QPoint p = image->mapTo(this,pos);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   p+=QPoint(1,1);
   #else
   p+=QPoint(-1,-1);
@@ -933,7 +933,7 @@ void imageNavigator::zoomDoubleClick(const QPoint &pos)
 void imageNavigator::zoomMove(const QPoint &position)
 {
   QPoint p = image->mapTo(this,position);
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   p+=QPoint(1,1);
   #else
   p+=QPoint(-1,-1);

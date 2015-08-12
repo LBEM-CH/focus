@@ -33,7 +33,7 @@ imageViewer::imageViewer(const QString &fileName, confData *conf, QWidget *paren
   scene = new QGraphicsScene(this);
   view = new QGraphicsView(scene,this);
   view->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
-#ifndef Q_WS_MAC 
+#ifndef Q_OS_MAC 
   view->setViewport(new glWidget(view));
 #endif
   view->setRenderHint(QPainter::Antialiasing,false);

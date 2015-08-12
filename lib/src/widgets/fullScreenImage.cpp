@@ -880,7 +880,7 @@ void fullScreenImage::paintEvent(QPaintEvent *event)
 	if(imageHeader->mode()==3 || imageHeader->mode()==4)
 		image_base->fillRect(QRect(0,0,width(),height()),QBrush(QColor(0,0,0,255)));
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 	image_base->translate(QPointF(float(width())/2.0-0.5,float(height())/2.0-0.5));
 #else
 	image_base->translate(QPointF(float(width())/2.0,float(height())/2.0));
@@ -896,7 +896,7 @@ void fullScreenImage::paintEvent(QPaintEvent *event)
 	if(overlayVisible) drawOverlay();
 	image_base->resetTransform();
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 	image_base->translate(QPointF(float(width())/2.0-0.5,float(height())/2.0-0.5));
 #else
 	image_base->translate(QPointF(float(width())/2.0,float(height())/2.0));

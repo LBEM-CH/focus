@@ -33,7 +33,7 @@ mainWindow::mainWindow(char *dirArg)
   
  QDir applicationDir, configDir;
 
- #ifdef Q_WS_MAC
+ #ifdef Q_OS_MAC
   applicationDir = QDir(QApplication::applicationDirPath() + "/../../../");
  #else
   applicationDir = QDir(QApplication::applicationDirPath());

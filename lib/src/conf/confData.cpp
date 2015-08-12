@@ -927,7 +927,7 @@ void confData::setDefaults(const QString &workingDirName)
 {
   QString appDir = QApplication::applicationDirPath();
   QString sep = "/../";
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
   appDir+="/../../../";
 #endif
   int tries = 0;

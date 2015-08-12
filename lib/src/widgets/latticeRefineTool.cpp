@@ -75,7 +75,7 @@ latticeRefineTool::latticeRefineTool(confData *conf, fullScreenImage *sourceImag
   layout->addWidget(commit_second,4,2,1,1);
   layout->addLayout(subLayout2,5,0,1,3);
 
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   QFontMetrics metric(font());
   commit_first->setMinimumWidth(metric.width(commit_first->text())+60);
   commit_second->setMinimumWidth(metric.width(commit_second->text())+60);

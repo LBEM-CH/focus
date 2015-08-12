@@ -45,7 +45,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   
   m_do_autosave = true;
 
-  #ifdef Q_WS_MAC
+  #ifdef Q_OS_MAC
   applicationDir = QDir(QApplication::applicationDirPath() + "/../../../");
   #else
   applicationDir = QDir(QApplication::applicationDirPath());

@@ -29,7 +29,7 @@ blockContainer::blockContainer(QString title, QWidget* parent)
     mainLayout->setSpacing(0);
     
     //Add title bar
-    mainLayout->addWidget(getTitleBar(), 0, 0, 1, 1);
+    //mainLayout->addWidget(getTitleBar(), 0, 0, 1, 1);
     
     //Add widget Container
     QWidget* widgetContainer = new QWidget(this);
@@ -38,7 +38,7 @@ blockContainer::blockContainer(QString title, QWidget* parent)
     columnLayout->setSpacing(2);
     widgetContainer->setLayout(columnLayout);
     
-    mainLayout->addWidget(widgetContainer, 1, 0, 1, 1);
+    mainLayout->addWidget(widgetContainer, 0, 0, 1, 1);
     
     
 }

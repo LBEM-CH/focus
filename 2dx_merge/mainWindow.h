@@ -38,6 +38,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QModelIndexList>
+#include <QStatusBar>
 #include <confData.h>
 #include <confManual.h>
 #include <scriptProgress.h>
@@ -122,6 +123,9 @@ class mainWindow : public QMainWindow
   void loadDirectorySelection();
   void showSelected(bool enable);
   void execute(bool halt);
+  void updateStatusMessage(const QString& message);
+  void increaseScriptProgress(int increament);
+  void setScriptProgress(int progress);
 
   signals:
   void saveConfig();
@@ -164,12 +168,22 @@ class mainWindow : public QMainWindow
   QSortFilterProxyModel *sortModel;
 
   LogViewer *logViewer;
-
-  graphicalButton *saveButton;
-  graphicalButton *playButton;
-  scriptProgress *progressBar;
-  graphicalButton *updateButton;
-  graphicalButton *manualButton;
+  
+  QStatusBar* statusBar;
+  QProgressBar* progressBar;
+  
+  /**
+   * Standard actions
+   */
+  QAction* openAction;
+  QAction* saveAction;
+  QAction* importAction;
+  QAction* showSelectedAction;
+  QAction* viewAlbum;
+  QAction* playAction;
+  QAction* refreshAction;
+  QAction* manualAction;
+  QAction* dryRun;
 
   levelGroup *verbosityControl;
 
@@ -182,12 +196,13 @@ class mainWindow : public QMainWindow
   QTimer *timer;
   int timer_refresh;
 
-  QWidget *setupHeader();
-  QWidget *setupFooter();
   QWidget *setupDirectoryView(const QDir &dir, const QString &savePath = "");
   QWidget *setupConfView(confData *data);
   bool setupIcons(confData *data, const QDir &directory);
   void setupActions();
+  void setupToolBar();
+  void setupMenuBar();
+  void setupStatusBar();
   
   void initializeDirectory();
   bool createDir(const QString &dir);

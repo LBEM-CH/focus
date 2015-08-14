@@ -31,6 +31,7 @@
 #include <QModelIndexList>
 #include <QItemSelectionModel>
 #include <QTabWidget>
+#include <QToolBar>
 #include <iostream>
 #include "blockContainer.h"
 
@@ -97,8 +98,9 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
 
   installedVersion = mainData->version();
-  setWindowTitle("2dx_merge, Version 2dx-" + installedVersion);
-
+  setWindowTitle("2dx (" + installedVersion + ")");
+  setUnifiedTitleAndToolBarOnMac(true);
+  
   mainData->setAppConf(cfg);
   
   mainData->setDir("home_2dx",userPath);
@@ -133,31 +135,28 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   updates = new updateWindow(mainData,this);
   updates->hide();
 
-  /**
-   * Prepare the header Widget
-   */
-  QWidget *headerWidget = setupHeader();
-
+  setupStatusBar();
+  
   /**
    * Prepare the Scripts view container
    */
   standardScripts = new scriptModule(mainData,mainData->getDir("standardScripts"),scriptModule::standard);
   connect(standardScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(standardScriptCompleted(QModelIndex)));
   connect(standardScripts,SIGNAL(reload()),this,SLOT(updateModel()));
-  connect(standardScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
-  connect(standardScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
+  connect(standardScripts,SIGNAL(progress(int)),this,SLOT(setScriptProgress(int)));
+  connect(standardScripts,SIGNAL(incrementProgress(int)),this,SLOT(increaseScriptProgress(int)));
 
   customScripts = new scriptModule(mainData,mainData->getDir("customScripts"),scriptModule::custom);
   connect(customScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(customScriptCompleted(QModelIndex)));
   connect(customScripts,SIGNAL(reload()),this,SLOT(reload()));
-  connect(customScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
-  connect(customScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
+  connect(customScripts,SIGNAL(progress(int)),this,SLOT(setScriptProgress(int)));
+  connect(customScripts,SIGNAL(incrementProgress(int)),this,SLOT(increaseScriptProgress(int)));
 
   singleParticleScripts = new scriptModule(mainData,mainData->getDir("singleParticleScripts"),scriptModule::singleparticle);
   connect(singleParticleScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(singleParticleScriptCompleted(QModelIndex)));
   connect(singleParticleScripts,SIGNAL(reload()),this,SLOT(reload()));
-  connect(singleParticleScripts,SIGNAL(progress(int)),progressBar,SLOT(setValue(int)));
-  connect(singleParticleScripts,SIGNAL(incrementProgress(int)),progressBar,SLOT(incrementValue(int)));
+  connect(singleParticleScripts,SIGNAL(progress(int)),this,SLOT(setScriptProgress(int)));
+  connect(singleParticleScripts,SIGNAL(incrementProgress(int)),this,SLOT(increaseScriptProgress(int)));
 
   standardScripts->extendSelectionTo(customScripts);
   standardScripts->extendSelectionTo(singleParticleScripts);
@@ -278,17 +277,23 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   previewContainer->setHeaderWidget(previewLevelButtons, Qt::AlignLeft);
   connect(previewLevelButtons,SIGNAL(levelChanged(int)),preview,SLOT(toggleInfo()));
   
-  //connect(imagesView,SIGNAL(resultChanged(const QString &)),preview,SLOT(setImage(const QString &)));
+  //connect(imagesView,SIGNAL(resultChanged(const QString &)),preview,SLOT(setImage(const QString &)))
   connect(dirModel,SIGNAL(currentImage(const QString&)),preview,SLOT(setImage(const QString&)));
   connect(dirModel,SIGNAL(reloading()),this,SLOT(reload()));
 
-  QWidget *footerWidget = setupFooter();
-
   scriptsWidget = new QTabWidget(this);
-  scriptsWidget->addTab(standardScriptsTab, "Standard Scripts");
-  scriptsWidget->addTab(customScriptsTab, "Custom Scripts");
-  scriptsWidget->addTab(singleParticleScriptsTab, "Single Particle Scripts");
+  scriptsWidget->setDocumentMode(true);
+  scriptsWidget->setTabPosition(QTabWidget::West);
+  scriptsWidget->setStyleSheet(
+    "QTabBar::tab {color: white;}"
+    "QTabBar::tab:selected {color: black;}"
+  );
+  scriptsWidget->addTab(standardScriptsTab, "Standard");
+  scriptsWidget->addTab(customScriptsTab, "Custom");
+  scriptsWidget->addTab(singleParticleScriptsTab, "Single Particle");
   connect(scriptsWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)) );
+  
+  
   
   blockContainer* processContainer = new blockContainer("PROCESS", this);
   processContainer->addWidget(scriptsWidget);
@@ -307,14 +312,17 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   container->addWidget(processContainer);
   container->addWidget(evaluateContainer);
   
-  layout->addWidget(headerWidget, 0, 0, 1, 1);
-  layout->addWidget(container, 1, 0, 1, 1);
-  layout->addWidget(footerWidget, 2, 0, 1, 1);
+  //layout->addWidget(headerWidget, 0, 0, 1, 1);
+  layout->addWidget(container, 0, 0, 1, 1);
+  //layout->addWidget(footerWidget, 1, 0, 1, 1);
 
   about = new aboutWindow(mainData,this,true);
   about->hide();
 
   setupActions();
+  setupToolBar();
+  setupMenuBar();
+  
   album = NULL;
   euler = NULL;
   reproject = NULL;
@@ -326,72 +334,34 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
 }
 
-
-QWidget *mainWindow::setupHeader()
+void mainWindow::setupStatusBar()
 {
-  QWidget *header = new QWidget(this);
-  header->setFixedHeight(93);
-  QHBoxLayout *layout = new QHBoxLayout;
-  header->setLayout(layout);
+    progressBar = new QProgressBar(this);
+    progressBar->setMaximum(100);
+    
+    statusBar = new QStatusBar(this);
+    statusBar->addPermanentWidget(progressBar);
+    setStatusBar(statusBar);
+    updateStatusMessage("2dx Ready");
+}
 
-  header->setAutoFillBackground(true);
-  QPalette pal(palette());
-  QLinearGradient grad(QPoint(0,0),QPoint(0,header->height()));
-//  grad.setColorAt(1,QColor(113,113,114));
-//  grad.setColorAt(0,QColor(172,172,171));
+void mainWindow::updateStatusMessage(const QString& message)
+{
+    progressBar->update();
+    statusBar->showMessage(message);
+}
 
-  int l = 0;
-  
-  grad.setColorAt(0.0,QColor(69+l,79+l,79+l));
-  grad.setColorAt(0.333,QColor(45+l,45+l,35+l));
-  grad.setColorAt(0.55,QColor(20+l,23+l,20+l));
-  grad.setColorAt(1.0,QColor(33+l,30+l,33+l));
+void mainWindow::increaseScriptProgress(int increament)
+{
+    if(progressBar->value()+increament <= progressBar->maximum())
+	progressBar->setValue(progressBar->value()+increament);
+    else
+        progressBar->setValue(progressBar->maximum());
+}
 
-
-  pal.setBrush(QPalette::Background,QBrush(grad));
-  header->setPalette(pal);
-
-  progressBar = new scriptProgress(this);
-  progressBar->setText("2dx_Merge");
-  progressBar->setMaximum(100);
-  progressBar->setProgressType(scriptProgress::ticks);
-
-  playButton = new graphicalButton(mainData->getIcon("play"),this);
-  playButton->setToolTip("Run current script");
-  playButton->setCheckable(true);
-  connect(playButton,SIGNAL(clicked(bool)),this,SLOT(execute(bool)));
-
-  saveButton = new graphicalButton(mainData->getIcon("saveDark"),this);
-  saveButton->setToolTip("Save");
-  saveButton->setChecked(false);
-  saveButton->setCheckable(false);
-  connect(saveButton,SIGNAL(clicked(bool)),mainData,SLOT(save()));
-
-  updateButton = new graphicalButton(mainData->getIcon("refresh"));
-  updateButton->setToolTip("Refresh directory view");
-  updateButton->setCheckable(false);
-  connect(updateButton,SIGNAL(clicked(bool)),this,SLOT(reload()));
-  
-  manualButton = new graphicalButton(mainData->getIcon("help"));
-  manualButton->setToolTip("Show/Hide script manual");
-  manualButton->setCheckable(true);
-  manualButton->setChecked(false);
-  connect(manualButton,SIGNAL(toggled(bool)),this,SLOT(hideManual(bool)));
-  
-  layout->insertStretch(0,16);
-  layout->addWidget(saveButton);
-  layout->insertStretch(2,10);
-  layout->addWidget(playButton);
-  layout->insertStretch(4,16);
-  layout->addWidget(progressBar);
-  layout->insertStretch(6,16);
-  layout->addWidget(manualButton);
-  layout->insertStretch(8,10);
-  layout->addWidget(updateButton);
-  layout->insertStretch(10,16);
-   
-  layout->setAlignment(Qt::AlignCenter);
-  return header;
+void mainWindow::setScriptProgress(int progress)
+{
+    progressBar->setValue(progress);
 }
 
 void mainWindow::execute(bool halt)
@@ -515,47 +485,88 @@ QWidget *mainWindow::setupDirectoryView(const QDir &dir, const QString &savePath
 
 void mainWindow::setupActions()
 {
-  QMenu *fileMenu = new QMenu("File");
-
-  QAction *openAction = new QAction("Open",this);
+  openAction = new QAction(*(mainData->getIcon("open")), tr("&New"), this);
   openAction->setShortcut(tr("Ctrl+O"));
   connect(openAction,SIGNAL(triggered()),this,SLOT(open()));
-  fileMenu->addAction(openAction);
   
-  QAction *saveAction = new QAction("Save",this);
+  saveAction = new QAction(*(mainData->getIcon("save")), tr("&Save"), this);
   saveAction->setShortcut(tr("Ctrl+S"));
   connect(saveAction,SIGNAL(triggered()),mainData,SLOT(save()));
-  fileMenu->addAction(saveAction);
+
+  importAction = new QAction(*(mainData->getIcon("import")), tr("&Import Images"), this);
+  connect(importAction,SIGNAL(triggered()),this,SLOT(import()));
+  
+  showSelectedAction = new QAction(*(mainData->getIcon("selected")), tr("&Show only selected dirs"), this);
+  showSelectedAction->setShortcut(tr("Ctrl+D"));
+  showSelectedAction->setCheckable(true);
+  connect(showSelectedAction,SIGNAL(toggled(bool)),this,SLOT(showSelected(bool)));
+  
+  viewAlbum = new QAction(*(mainData->getIcon("album")), tr("&Reconstruction album"), this);
+  viewAlbum->setShortcut(tr("Ctrl+Shift+A"));
+  connect(viewAlbum,SIGNAL(triggered()),this,SLOT(showAlbum()));
+  
+  playAction = new QAction(*(mainData->getIcon("play")), tr("&Run selected script(s)"), this);
+  playAction->setCheckable(true);
+  connect(playAction,SIGNAL(toggled(bool)),this,SLOT(execute(bool)));
+  
+  dryRun = new QAction(*(mainData->getIcon("dryRun")), tr("&Dry Run (No changes in config files)"), this);
+  dryRun->setCheckable(true);
+  dryRun->setChecked(false);
+  connect(dryRun,SIGNAL(toggled(bool)),results,SLOT(setDryRunMode(bool)));
   
   timer_refresh = 10000;
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), mainData, SLOT(save()));
   timer->start(timer_refresh);
-
-  QAction *refreshAction = new QAction("Refresh Results",this);
+  
+  refreshAction = new QAction(*(mainData->getIcon("refresh")), tr("&Refresh Results"), this);
   refreshAction->setShortcut(tr("Ctrl+Shift+r"));
   connect(refreshAction,SIGNAL(triggered()),this,SLOT(reload()));
-  fileMenu->addAction(refreshAction);
+  
+  manualAction = new QAction(*(mainData->getIcon("help")), tr("Hide Manual"), this);
+  manualAction->setCheckable(true);
+  connect(manualAction,SIGNAL(triggered(bool)),this,SLOT(hideManual(bool)));
+  
+}
 
-  QAction *importAction = new QAction("Import Images...",this);
-  connect(importAction,SIGNAL(triggered()),this,SLOT(import()));
+void mainWindow::setupToolBar()
+{
+  QToolBar* fileToolBar = addToolBar(tr("File"));
+  fileToolBar->addAction(openAction);
+  fileToolBar->addAction(importAction);
+  fileToolBar->addAction(saveAction);  
+    
+  QToolBar* viewToolBar = addToolBar(tr("View"));
+  viewToolBar->addAction(showSelectedAction);
+  viewToolBar->addAction(viewAlbum);  
+    
+  QToolBar* actionToolBar = addToolBar(tr("Action"));
+  actionToolBar->addAction(playAction);
+  actionToolBar->addAction(refreshAction);
+  actionToolBar->addAction(dryRun);
+  
+  QToolBar* helpToolBar = addToolBar(tr("Help"));
+  helpToolBar->addAction(manualAction);
+}
+
+void mainWindow::setupMenuBar()
+{
+    /**
+     * Setup File menu
+     */
+  QMenu *fileMenu = new QMenu("File");
+  fileMenu->addAction(openAction);
+  fileMenu->addAction(saveAction);
   fileMenu->addAction(importAction);
   
-/*
-  QAction *autoImportAction = new QAction("Auto Import... (in development)",this);
-  connect(autoImportAction,SIGNAL(triggered()),this,SLOT(autoImport()));
-  fileMenu->addAction(autoImportAction);
-*/
-
-/*  QAction *removeImagesAction = new QAction("Remove Selected (Experimental/Unstable ****Careful****)...",this);
-  connect(removeImagesAction,SIGNAL(triggered()),dirModel,SLOT(removeSelected()));
-  fileMenu->addAction(removeImagesAction);
-*/
   QAction *closeAction = new QAction("Quit",this);
   closeAction->setShortcut(tr("Ctrl+Q"));
   connect(closeAction,SIGNAL(triggered()),qApp,SLOT(closeAllWindows()));
   fileMenu->addAction(closeAction);
 
+  /**
+   * Setup Edit menu
+   */
   QMenu *editMenu = new QMenu("Edit");
  
   QAction *increaseFontAction = new QAction("Increase Font Size",this);
@@ -568,52 +579,44 @@ void mainWindow::setupActions()
   connect(decreaseFontAction,SIGNAL(triggered()),this,SLOT(decreaseFontSize()));
   editMenu->addAction(decreaseFontAction);
 
-  QMenu *optionMenu = new QMenu("Options");
-
-  QAction *openPreferencesAction = new QAction("Preferences",this);
-  connect(openPreferencesAction,SIGNAL(triggered()),this,SLOT(editHelperConf()));
-  optionMenu->addAction(openPreferencesAction);
-
-  QAction *showUpdatesAction = new QAction("Update...",this);
-  connect(showUpdatesAction,SIGNAL(triggered()),updates,SLOT(show()));
-  optionMenu->addAction(showUpdatesAction);
-  
-  QAction *showAutoSaveAction = new QAction("Autosave On/Off",this);
-  connect(showAutoSaveAction,SIGNAL(triggered()),this,SLOT(toggleAutoSave()));
-  optionMenu->addAction(showAutoSaveAction);
-  
-  QAction *showAboutAction = new QAction("About",this);
-  connect(showAboutAction,SIGNAL(triggered()),about,SLOT(show()));
-  optionMenu->addAction(showAboutAction);
-
-  QMenu *viewMenu = new QMenu("View");
-  
-  QAction *showSelectedAction = new QAction("Show Only Selected Directories",this);
-  showSelectedAction->setShortcut(tr("Ctrl+D"));
-  showSelectedAction->setCheckable(true);
-  connect(showSelectedAction,SIGNAL(toggled(bool)),this,SLOT(showSelected(bool)));
+  /**
+   * setup View Menu
+   */
+  QMenu* viewMenu = new QMenu("View");
   viewMenu->addAction(showSelectedAction);
-  
-  QAction *viewAlbum = new QAction("Show Reconstruction Album",this);
-  viewAlbum->setShortcut(tr("Ctrl+Shift+A"));
-  connect(viewAlbum,SIGNAL(triggered()),this,SLOT(showAlbum()));
   viewMenu->addAction(viewAlbum);
-
-  QAction *viewEuler = new QAction("Show Single Particle Orienter (Euler)",this);
-  viewEuler->setShortcut(tr("Ctrl+Shift+E"));
-  connect(viewEuler,SIGNAL(triggered()),this,SLOT(showEuler()));
-  viewMenu->addAction(viewEuler);
-
+  
   QAction *viewReproject = new QAction("Show Reproject GUI",this);
   viewReproject->setShortcut(tr("Ctrl+Shift+P"));
   connect(viewReproject,SIGNAL(triggered()),this,SLOT(showReproject()));
   viewMenu->addAction(viewReproject);
 
-
-//  QMenu *projectMenu = new QMenu("Project");
   
+  /**
+   * Setup Options menu
+   */
+  QMenu *optionMenu = new QMenu("Options");
+
+  QAction *openPreferencesAction = new QAction("Preferences",this);
+  connect(openPreferencesAction,SIGNAL(triggered()),this,SLOT(editHelperConf()));
+  optionMenu->addAction(openPreferencesAction);
+  
+  QAction *showAutoSaveAction = new QAction("Autosave On/Off",this);
+  connect(showAutoSaveAction,SIGNAL(triggered()),this,SLOT(toggleAutoSave()));
+  optionMenu->addAction(showAutoSaveAction);
+
+  /**
+   * Setup Actions menu 
+   */
+  QMenu *actionMenu = new QMenu("Action");
+  actionMenu->addAction(playAction);
+  actionMenu->addAction(refreshAction);
+  actionMenu->addAction(dryRun);
+  
+  /**
+   * Setup select menu
+   */
   QMenu *selectMenu = new QMenu("Select");
-//  projectMenu->addMenu(selectMenu);
   
   QAction *selectAllAction = new QAction("Select All",this);
   selectAllAction->setShortcut(tr("Ctrl+A"));
@@ -631,13 +634,46 @@ void mainWindow::setupActions()
   
   QAction *loadDirectorySelectionAction = new QAction("Load Selection...",this);
   connect(loadDirectorySelectionAction,SIGNAL(triggered()),this,SLOT(loadDirectorySelection()));
-  selectMenu->addAction(loadDirectorySelectionAction);  
+  selectMenu->addAction(loadDirectorySelectionAction);
+  
+  /**
+   * Setup Help menu
+   */
+  QMenu *helpMenu = new QMenu("Help");
+  
+  QSignalMapper *mapper = new QSignalMapper(this);
+  
+  QAction *viewOnlineHelp = new QAction(*(mainData->getIcon("manual")), tr("&View Online Help"), this);
+  viewOnlineHelp->setCheckable(false);
+  connect(viewOnlineHelp, SIGNAL(triggered()), mapper, SLOT(map()));
+  mapper->setMapping(viewOnlineHelp, mainData->getURL("help"));
+  helpMenu->addAction(viewOnlineHelp);
+  
+  QAction* bugReport = new QAction(*(mainData->getIcon("Bug")), tr("&Report Issue/Bug"), this);
+  bugReport->setCheckable(false);
+  connect(bugReport,SIGNAL(triggered()),mapper,SLOT(map()));
+  mapper->setMapping(bugReport,mainData->getURL("bugReport"));
+  helpMenu->addAction(bugReport);
+  
+  helpMenu->addAction(manualAction);
+
+  connect(mapper,SIGNAL(mapped(const QString &)),this,SLOT(openURL(const QString &)));
+  
+  QAction *showUpdatesAction = new QAction("Update...",this);
+  connect(showUpdatesAction,SIGNAL(triggered()),updates,SLOT(show()));
+  helpMenu->addAction(showUpdatesAction);
+  
+  QAction *showAboutAction = new QAction("About",this);
+  connect(showAboutAction,SIGNAL(triggered()),about,SLOT(show()));
+  helpMenu->addAction(showAboutAction);
  
   menuBar()->addMenu(fileMenu);
   menuBar()->addMenu(editMenu);
-  menuBar()->addMenu(optionMenu);
   menuBar()->addMenu(viewMenu);
+  menuBar()->addMenu(actionMenu);
+  menuBar()->addMenu(optionMenu);
   menuBar()->addMenu(selectMenu);
+  menuBar()->addMenu(helpMenu);
 }
 
 QWidget *mainWindow::setupConfView(confData *data)
@@ -701,7 +737,7 @@ bool mainWindow::setupIcons(confData *data, const QDir &directory)
 void mainWindow::scriptChanged(scriptModule *module, QModelIndex index)
 {
   int uid = index.data(Qt::UserRole).toUInt();
-  progressBar->setText(module->title(index));
+  updateStatusMessage(module->title(index));
 
   if(localIndex[uid] == 0 && module->conf(index)->size()!=0)
   {
@@ -786,80 +822,17 @@ void mainWindow::scriptLaunched(scriptModule * /*module*/, QModelIndex /*index*/
 
 }
 
-QWidget *mainWindow::setupFooter()
-{
-  QWidget *footer = new QWidget(this);
-  footer->setFixedHeight(41);
-  QHBoxLayout *layout = new QHBoxLayout;
-  footer->setLayout(layout);
-
-  QLabel* copyrightLabel = new QLabel(tr("Copyright: C-CINA, University of Basel."));
-  copyrightLabel->setContentsMargins(3, 1, 3, 1);
-  copyrightLabel->setAutoFillBackground(true);
-  copyrightLabel->setBackgroundRole(QPalette::Light);
-  //graphicalButton *infoButton = new graphicalButton(mainData->getIcon("info"),this);
-  //infoButton->setCheckable(true);
-  //infoButton->setToolTip("Show/Hide image header information");
-//  infoButton->setChecked(true);
-  //connect(infoButton,SIGNAL(clicked(bool)),preview,SLOT(toggleInfo()));
-
-  graphicalButton *dryRunButton = new graphicalButton(mainData->getIcon("dryRun"),this);
-  dryRunButton->setCheckable(true);
-  dryRunButton->setChecked(false);
-  dryRunButton->setToolTip("Perform \"Dry Run\" without commiting changes to configuration files.");
-  connect(dryRunButton,SIGNAL(clicked(bool)),results,SLOT(setDryRunMode(bool)));
-
-  QSignalMapper *mapper = new QSignalMapper(this);
-
-  graphicalButton *webHelp = new graphicalButton(mainData->getIcon("manual"),this);
-  webHelp->setToolTip("View online help");
-  webHelp->setCheckable(false);
-  connect(webHelp,SIGNAL(clicked()),mapper,SLOT(map()));
-  mapper->setMapping(webHelp,mainData->getURL("help"));
-
-  graphicalButton *bugReport = new graphicalButton(mainData->getIcon("Bug"),this);
-  bugReport->setToolTip("Report Issue/Bug");
-  bugReport->setCheckable(false);
-  connect(bugReport,SIGNAL(clicked()),mapper,SLOT(map()));
-  mapper->setMapping(bugReport,mainData->getURL("bugReport"));
-
-  connect(mapper,SIGNAL(mapped(const QString &)),this,SLOT(openURL(const QString &)));
-
-  layout->addWidget(copyrightLabel);
-  layout->addStretch(2);
-  layout->addWidget(webHelp);
-  layout->addWidget(bugReport);
-  layout->addWidget(dryRunButton);
-
-  footer->setAutoFillBackground(true);
-  QPalette pal(palette());
-  QLinearGradient grad(QPoint(0,0),QPoint(0,footer->height()));
-//  grad.setColorAt(1,QColor(113,113,114));
-//  grad.setColorAt(0,QColor(172,172,171));
-
-  int l = 0;
-  
-  grad.setColorAt(0.0,QColor(69+l,79+l,79+l));
-  grad.setColorAt(0.333,QColor(45+l,45+l,35+l));
-  grad.setColorAt(0.55,QColor(20+l,23+l,20+l));
-  grad.setColorAt(1.0,QColor(33+l,30+l,33+l));
-  
-  pal.setBrush(QPalette::Background,QBrush(grad));
-  footer->setPalette(pal);
-  return footer;
-}
-
 void mainWindow::setSaveState(bool state)
 {
   if(state == false)
   {
-    saveButton->setChecked(false);
-    saveButton->setCheckable(false);
+    saveAction->setChecked(false);
+    saveAction->setCheckable(false);
   }
   else
   {
-    saveButton->setCheckable(true);
-    saveButton->setChecked(true);
+    saveAction->setCheckable(true);
+    saveAction->setChecked(true);
   }
 }
 
@@ -955,7 +928,7 @@ void mainWindow::scriptCompleted(scriptModule *module, QModelIndex index)
   dirModel->maskResults();
   results->save();
   resultsView->load();
-  playButton->setChecked(false);
+  playAction->setChecked(false);
 }
 
 void mainWindow::reload()

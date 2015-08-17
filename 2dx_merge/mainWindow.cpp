@@ -40,8 +40,6 @@ using namespace std;
 mainWindow::mainWindow(const QString &directory, QWidget *parent)
           :QMainWindow(parent)
 {
-  QTime time;
-  time.start();
   QDir applicationDir, configDir;
   
   m_do_autosave = true;
@@ -135,7 +133,13 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   updates = new updateWindow(mainData,this);
   updates->hide();
 
-  setupStatusBar();
+  
+  progressBar = new QProgressBar(this);
+  progressBar->setMaximum(100);
+  progressBar->setFixedWidth(300);
+  progressBar->setFixedHeight(10);
+  progressBar->setValue(0);
+  progressBar->setTextVisible(false);
   
   /**
    * Prepare the Scripts view container
@@ -284,10 +288,14 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   scriptsWidget = new QTabWidget(this);
   scriptsWidget->setDocumentMode(true);
   scriptsWidget->setTabPosition(QTabWidget::West);
+  
+#ifdef Q_OS_MAC  
   scriptsWidget->setStyleSheet(
     "QTabBar::tab {color: white;}"
     "QTabBar::tab:selected {color: black;}"
   );
+#endif
+  
   scriptsWidget->addTab(standardScriptsTab, "Standard");
   scriptsWidget->addTab(customScriptsTab, "Custom");
   scriptsWidget->addTab(singleParticleScriptsTab, "Single Particle");
@@ -322,6 +330,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
   setupActions();
   setupToolBar();
   setupMenuBar();
+  setupStatusBar();
   
   album = NULL;
   euler = NULL;
@@ -335,14 +344,11 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 }
 
 void mainWindow::setupStatusBar()
-{
-    progressBar = new QProgressBar(this);
-    progressBar->setMaximum(100);
-    
+{   
     statusBar = new QStatusBar(this);
     statusBar->addPermanentWidget(progressBar);
     setStatusBar(statusBar);
-    updateStatusMessage("2dx Ready");
+    updateStatusMessage("Ready");
 }
 
 void mainWindow::updateStatusMessage(const QString& message)

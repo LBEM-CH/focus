@@ -73,7 +73,7 @@ QTreeView *scriptModule::setupModule()
   QStandardItem *item;
   QMap<int, QList<QStandardItem *> > map;
   quint32 sortOrder, uid;
-  bool counterPresent = false;
+
   foreach(entry, scriptDir.entryList(QStringList() << "*.script", QDir::Files | QDir::NoDotAndDotDot, QDir::Unsorted))
   {
     QList<QStandardItem *> itemList;
@@ -134,9 +134,7 @@ QTreeView *scriptModule::setupModule()
       
       subItem->setEditable(false);
       subItem->setData(item->data(Qt::UserRole), Qt::UserRole);
-      QList<QStandardItem*> subItems;
-      subItems<<subItem;
-      item->appendRow(subItems);
+      item->appendRow(subItem);
     }
 
     map.insert(sortOrder,itemList);
@@ -146,7 +144,6 @@ QTreeView *scriptModule::setupModule()
   while(it.hasNext())
   {
     it.next();
-//    view->addTopLevelItem(it.value());
     model->appendRow(it.value());
   }
 
@@ -154,12 +151,9 @@ QTreeView *scriptModule::setupModule()
 
   selection = view->selectionModel();
 
-  view->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-  view->setAlternatingRowColors(true);
+  view->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+  //view->setAlternatingRowColors(true);
   view->resizeColumnToContents(0);
-  view->resizeColumnToContents(1);
-  if(!counterPresent)
-    view->setColumnHidden(1,true);
 
   clearSelection();
   return view;

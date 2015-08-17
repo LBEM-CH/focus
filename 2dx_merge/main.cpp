@@ -322,7 +322,7 @@ int main(int argc, char **argv)
       win->show();
       win->raise(); // raises the window on top of the parent widget stack
       win->activateWindow(); // activates the window an thereby putting it on top-level
-
+      
       return app.exec();
     }
 }

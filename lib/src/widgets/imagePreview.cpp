@@ -25,23 +25,20 @@ using namespace std;
 
 //#define OLD_VIEWER
 
-imagePreview::imagePreview(confData *data, QString resultValue, bool info, QMenuBar *menuBar, QWidget *parent)
+imagePreview::imagePreview(confData *data, QString resultValue, bool info, QWidget *parent)
                             :QFrame(parent)
 {
   conf = data;
   result = resultValue;
-  mainMenuBar = menuBar;
-
-  parentContainer = static_cast<viewContainer*>(parent);
 
   minWidth = int(QApplication::desktop()->width()/5.00);
   if(minWidth>235) minWidth = 235;
   showInfo = info;
   useOldViewer = true;
 
-  setAutoFillBackground(true);
+  //setAutoFillBackground(true);
   setFixedSize(QSize(minWidth,minWidth));
-  setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  //setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
   if(!result.isEmpty())
   {
@@ -72,12 +69,35 @@ imagePreview::imagePreview(confData *data, QString resultValue, bool info, QMenu
 
   preview->addWidget(imageLabel);
   preview->addWidget(headerWidget);
-  layout->addWidget(preview);
+  
+  layout->addWidget(setupWidgetHeader(), 0, 0);
+  layout->addWidget(preview, 1, 0);
 
   QPalette pal(palette());
   pal.setBrush(QPalette::Background,QBrush(QColor(255,255,255),conf->getIcon("nullPreview")->pixmap(minWidth,minWidth).scaledToWidth(minWidth)));
   setPalette(pal);
   setLayout(layout);
+}
+
+QWidget* imagePreview::setupWidgetHeader() 
+{
+    QWidget* widgetHeader = new QWidget(this);
+    //widgetHeader->setFixedHeight(12);
+    
+    QHBoxLayout* layout = new QHBoxLayout();
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    widgetHeader->setLayout(layout);
+    
+    QCheckBox* showHeaderOption = new QCheckBox(tr("Show Header"), widgetHeader);
+    showHeaderOption->setCheckable(true);
+    showHeaderOption->setChecked(false);
+    
+    connect(showHeaderOption, SIGNAL(toggled(bool)), this, SLOT(showImageHeader(bool)));
+    
+    layout->addWidget(showHeaderOption, 0, Qt::AlignRight);
+    
+    return widgetHeader;
 }
 
 void imagePreview::mouseDoubleClickEvent(QMouseEvent *event)
@@ -98,7 +118,7 @@ void imagePreview::launchNavigator()
 
 				if(!navImage->isEmpty())
 				{
-					nav = new imageNavigator(conf,navImage,mainMenuBar,this);
+					nav = new imageNavigator(conf,navImage,this);
 					connect(nav,SIGNAL(closed()),this,SLOT(clearNavigator()));
 				}
 				else
@@ -141,7 +161,7 @@ void imagePreview::setImage(const QString &imageName)
             else result = "";
         }
 	resetInfo();
-	if(!isHidden()) resetImage();
+	if(!isHidden()) resetImage(true);
 }
 
 void imagePreview::resetInfo()
@@ -176,7 +196,7 @@ void imagePreview::resetImage(bool ignore_size)
 	if(!showInfo)
 	{
 		QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-		parentContainer->setText("Image Preview");
+		//parentContainer->setText("Image Preview");
 		preview->setCurrentWidget(imageLabel);
 		if(!result.isEmpty() && (result.contains(".mrc")))
 		{
@@ -202,7 +222,7 @@ void imagePreview::resetImage(bool ignore_size)
 	}
 	else if(!result.isEmpty())
 	{
-		parentContainer->setText("Image Header");
+		//parentContainer->setText("Image Header");
 		if(result.toLower().endsWith(".mrc") || result.toLower().endsWith(".map")) preview->setCurrentWidget(headerWidget);
 		else preview->setCurrentWidget(imageLabel);
 	}
@@ -278,6 +298,13 @@ void imagePreview::toggleInfo()
 	showInfo = showInfo ^ true;
 	resetImage(true);
 }
+
+void imagePreview::showImageHeader(bool show) 
+{
+    showInfo = show;
+    resetImage(true);
+}
+
 
 void imagePreview::progressDialog()
 {

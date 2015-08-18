@@ -99,7 +99,7 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
   layout->setColumnStretch(1,1);
 
   viewContainer *previewContainer = new viewContainer("Image Preview",viewContainer::image,this);
-  preview = new imagePreview(data, "",true, mainWin->menuBar(), previewContainer);
+  preview = new imagePreview(data, "",true, previewContainer);
   connect(preview,SIGNAL(load()),this,SLOT(refresh()));
   previewContainer->addWidget(preview);
   layout->addWidget(previewContainer,3,0,1,1);

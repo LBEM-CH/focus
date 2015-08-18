@@ -23,6 +23,7 @@
 #include <QProcess>
 #include <QMainWindow>
 #include <QTime>
+#include <QCheckBox>
 #include <confData.h>
 #include <mrcHeaderDisplay.h>
 #include "imageNavigator.h"
@@ -39,10 +40,11 @@ class imagePreview : public QFrame
   void clearNavigator();
   void shade();
   void toggleInfo();
+  void showImageHeader(bool show);
   void progressDialog();
   void launchNavigator();
   void enableNewViewer(bool enable);
-
+  
   signals:
   void setProgress(int value);
   void load();
@@ -57,23 +59,21 @@ class imagePreview : public QFrame
   mrcImage *image;
   mrcImage *navImage;
   QMainWindow *navWindow;
-  viewContainer *parentContainer;
 
   imageNavigator *nav;
-
-  QMenuBar *mainMenuBar;
 
   bool useOldViewer;
 
   int minWidth;
   bool showInfo;
 
+  QWidget* setupWidgetHeader();
   void resetInfo();
   void resetImage(bool ignore_size=false);
   void clearImage();
 
   public:
-  imagePreview(confData *data, QString result, bool showInfo, QMenuBar *menuBar, QWidget *parent = NULL);
+  imagePreview(confData *data, QString result, bool showInfo, QWidget *parent = NULL);
 
   protected:
   void mouseDoubleClickEvent(QMouseEvent *event);

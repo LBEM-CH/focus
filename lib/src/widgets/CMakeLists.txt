@@ -35,13 +35,9 @@ endif(FFTWF_FOUND)
 
 #------------------------------------------------------------------------------
 # Find the dependency of QT5
-FIND_PACKAGE(Qt5 COMPONENTS Widgets WebKitWidgets Network Script OpenGL REQUIRED)
+FIND_PACKAGE(Qt5 COMPONENTS Widgets Network Script OpenGL REQUIRED)
 
 IF(Qt5_FOUND)
-    MESSAGE(STATUS "@EXETITLE@: Found QT5 Widgets (Version: ${Qt5Widgets_VERSION_STRING})")
-    MESSAGE(STATUS "@EXETITLE@: Found QT5 Network (Version: ${Qt5Network_VERSION_STRING})")
-    MESSAGE(STATUS "@EXETITLE@: Found QT5 Script (Version: ${Qt5Script_VERSION_STRING})")
-    MESSAGE(STATUS "@EXETITLE@: Found QT5 OpenGL (Version: ${Qt5OpenGL_VERSION_STRING})")
     INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
     INCLUDE_DIRECTORIES(${Qt5Network_INCLUDE_DIRS})
     INCLUDE_DIRECTORIES(${Qt5Script_INCLUDE_DIRS})

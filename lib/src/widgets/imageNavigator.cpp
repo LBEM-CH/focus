@@ -510,7 +510,7 @@ imageNavigator::imageNavigator(QWidget *parent)
   Initialize();
 }
 
-imageNavigator::imageNavigator(confData *conf, mrcImage *source_image, QMenuBar * /*menuBar*/, QWidget *parent)
+imageNavigator::imageNavigator(confData *conf, mrcImage *source_image, QWidget *parent)
                                       :QScrollArea(parent)
 {
   QTime timer;

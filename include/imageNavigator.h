@@ -112,7 +112,7 @@ class imageNavigator: public QScrollArea
   public:
 
   imageNavigator(QWidget *parent = NULL);
-  imageNavigator(confData *conf, mrcImage *image, QMenuBar *menuBar, QWidget *parent = NULL);
+  imageNavigator(confData *conf, mrcImage *image, QWidget *parent = NULL);
   ~imageNavigator();
 
   void setType(const QString &type);

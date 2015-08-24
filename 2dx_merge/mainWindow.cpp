@@ -52,11 +52,6 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     centralWidget->setLayout(layout);
 
     connect(&importProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(importFinished()));
-
-    progressBar = setupProgressBar();
-    statusBar = new QStatusBar(this);
-    setStatusBar(statusBar);
-    statusBar->addPermanentWidget(progressBar);
     
     updates = new updateWindow(mainData, this);
     updates->hide();
@@ -64,11 +59,8 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
     albumCont = new albumContainer(mainData, results, this);
     executionCont = new executionContainer(mainData, results, this);
-    
-    connect(executionCont, SIGNAL(scriptChangedSignal(const QString&)), this, SLOT(updateStatusMessage(const QString&)));
-    connect(executionCont, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(executionCont, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-    connect(executionCont, SIGNAL(scriptCompletedSignal()), albumCont, SLOT(maskResults));
+
+    connect(executionCont, SIGNAL(scriptCompletedSignal()), albumCont, SLOT(maskResults()));
     connect(executionCont, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
 
     QSplitter* container = new QSplitter(Qt::Vertical, this);
@@ -184,34 +176,6 @@ confData* mainWindow::setupMainConfiguration(const QString &directory)
     connect(mainData, SIGNAL(dataModified(bool)), this, SLOT(setSaveState(bool)));
     
     return mainData;
-}
-
-QProgressBar* mainWindow::setupProgressBar() 
-{
-    QProgressBar* progressBar = new QProgressBar(this);
-    progressBar->setMaximum(100);
-    progressBar->setFixedWidth(300);
-    progressBar->setFixedHeight(10);
-    progressBar->setValue(0);
-    progressBar->setTextVisible(false);
-    
-    return progressBar;
-}
-
-void mainWindow::updateStatusMessage(const QString& message) {
-    progressBar->update();
-    statusBar->showMessage(message);
-}
-
-void mainWindow::increaseScriptProgress(int increament) {
-    if (progressBar->value() + increament <= progressBar->maximum())
-        progressBar->setValue(progressBar->value() + increament);
-    else
-        progressBar->setValue(progressBar->maximum());
-}
-
-void mainWindow::setScriptProgress(int progress) {
-    progressBar->setValue(progress);
 }
 
 void mainWindow::setupActions() {

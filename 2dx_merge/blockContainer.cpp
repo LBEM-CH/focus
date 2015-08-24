@@ -38,7 +38,7 @@ void blockContainer::setHeaderWidget(QWidget* widget)
 {
     headerLayout->removeWidget(headerWidget);
     headerWidget = widget;
-    headerLayout->addWidget(headerWidget, 0, 3, 1, 1, Qt::AlignRight);
+    headerLayout->addWidget(headerWidget, 0, 3, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
 }
 
 void blockContainer::setMainWidget(QWidget* widget)
@@ -53,10 +53,18 @@ QWidget* blockContainer::setupHeader(const QString& title)
     QWidget* bar = new QWidget(this);
     bar->setAutoFillBackground(true);
     
-    //Set color of bar
-    
     //Set Height
     bar->setFixedHeight(20);
+    
+    //Set color of bar
+    QPalette pal(bar->palette());
+    QLinearGradient linearGradient(QPoint(0,0),QPoint(0,bar->height()));
+    linearGradient.setColorAt(0.0, Qt::white);
+    linearGradient.setColorAt(0.2, Qt::lightGray);
+    linearGradient.setColorAt(1.0, Qt::gray);
+    pal.setBrush(QPalette::Window, linearGradient);
+    //pal.setColor(QPalette::WindowText, QColor(255, 255, 255));
+    bar->setPalette(pal);
     
     //Setup Label
     headerTitle = new QLabel(title, this);
@@ -82,9 +90,9 @@ QWidget* blockContainer::setupHeader(const QString& title)
     
     //Add widgets
     headerLayout->addItem(new QSpacerItem(3,3),0,0,1,1);
-    headerLayout->addWidget(headerTitle, 0, 1, 1, 1, Qt::AlignLeft);
+    headerLayout->addWidget(headerTitle, 0, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     headerLayout->addItem(spacer, 0, 2, 1, 1);
-    headerLayout->addWidget(headerWidget, 0, 3, 1, 1, Qt::AlignRight);
+    headerLayout->addWidget(headerWidget, 0, 3, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
     
     return bar;
     

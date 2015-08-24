@@ -23,6 +23,8 @@
 #include <QToolButton>
 #include <QSpacerItem>
 #include <QScrollArea>
+#include <QStatusBar>
+#include <QProgressBar>
 #include <QToolBar>
 #include <confData.h>
 #include <confManual.h>
@@ -78,12 +80,13 @@ public slots:
     void updateFontInfo();
     
     void execute(bool halt);
+    
+    void updateStatusMessage(const QString& message);
+    void increaseScriptProgress(int increament);
+    void setScriptProgress(int progress);
 
 signals:
-    void scriptChangedSignal(const QString& scriptTitle);
     void scriptCompletedSignal();
-    void progress(int progress);
-    void incrementProgress(int);
 
 private:
     
@@ -124,6 +127,10 @@ private:
 
     QHash<uint, int> localIndex;
     QHash<uint, int> manualIndex;
+    
+    
+    QStatusBar* statusBar;
+    QProgressBar* progressBar;
 
 };
 

@@ -1,34 +1,44 @@
 #include "albumContainer.h"
-#include "levelGroup.h"
 
 albumContainer::albumContainer(confData *dat, resultsData* results, QWidget* parent) 
     : QWidget(parent)
 {
     this->data = dat;
     
-    //viewContainer* previewContainer = setupPreviewContainer();
     preview = new imagePreview(data, "", false,this);
-    //levelGroup *previewLevelButtons = new levelGroup(data, 1, QStringList() << "Image Preview/Header", QStringList() << "Toggle image's preview/header", QStringList() << "gbRed");
-    //previewContainer->setHeaderWidget(previewLevelButtons, Qt::AlignLeft);
-    //connect(previewLevelButtons, SIGNAL(levelChanged(int)), preview, SLOT(toggleInfo()));
     
     setupDirectoryContainer(data);
     dirModel->setResultsFile(results);
     
-    QGroupBox* widgetBox = new QGroupBox("Project Library", this);
-    
-    QGridLayout* layout = new QGridLayout();
+    QWidget* widget = new QWidget(this);
+    QGridLayout* layout = new QGridLayout(widget);
     layout->setMargin(0);
     layout->setSpacing(0);
+    widget->setLayout(layout);
+    
     layout->addWidget(dirView, 0, 0);
     layout->addWidget(preview, 0, 1, Qt::AlignTop);
     
-    widgetBox->setLayout(layout);
+    blockContainer* container = new blockContainer("Project Library");
+    container->setMainWidget(widget);
+    
+    QToolButton* showHeaderButton = new QToolButton();
+    showHeaderButton->setIcon(*(data->getIcon("info")));
+    showHeaderButton->setToolTip("Show Image Header");
+    showHeaderButton->setAutoRaise(false);
+    showHeaderButton->setCheckable(true);
+    connect(showHeaderButton, SIGNAL(toggled(bool)), preview, SLOT(showImageHeader(bool)));
+    
+    container->setHeaderWidget(showHeaderButton);
     
     QGridLayout* mainLayout = new QGridLayout(this);
-    mainLayout->addWidget(widgetBox);
-    
+    mainLayout->setSpacing(0);
+    mainLayout->setMargin(0);
+    mainLayout->addWidget(container);
     this->setLayout(mainLayout);
+    
+    
+    
 }
 
 void albumContainer::showContents(bool show) 

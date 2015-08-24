@@ -70,7 +70,7 @@ imagePreview::imagePreview(confData *data, QString resultValue, bool info, QWidg
   preview->addWidget(imageLabel);
   preview->addWidget(headerWidget);
   
-  layout->addWidget(setupWidgetHeader(), 0, 0);
+  //layout->addWidget(setupWidgetHeader(), 0, 0);
   layout->addWidget(preview, 1, 0);
 
   QPalette pal(palette());

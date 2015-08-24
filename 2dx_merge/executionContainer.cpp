@@ -17,24 +17,24 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     connect(standardScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(standardScriptCompleted(QModelIndex)));
     connect(standardScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(standardScriptChanged(QModelIndex)));
     connect(standardScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(standardScripts, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
-    connect(standardScripts, SIGNAL(incrementProgress(int)), this, SIGNAL(incrementProgress(int)));
+    connect(standardScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+    connect(standardScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
     addToScriptsWidget(standardScripts);
 
     customScripts = new scriptModule(mainData, mainData->getDir("customScripts"), scriptModule::custom);
     connect(customScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(customScriptCompleted(QModelIndex)));
     connect(customScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(customScriptChanged(QModelIndex)));
     connect(customScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(customScripts, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
-    connect(customScripts, SIGNAL(incrementProgress(int)), this, SIGNAL(incrementProgress(int)));
+    connect(customScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+    connect(customScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
     addToScriptsWidget(customScripts);
 
     singleParticleScripts = new scriptModule(mainData, mainData->getDir("singleParticleScripts"), scriptModule::singleparticle);
     connect(singleParticleScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(singleParticleScriptCompleted(QModelIndex)));
     connect(singleParticleScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(singleParticleScriptChanged(QModelIndex)));
     connect(singleParticleScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(singleParticleScripts, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
-    connect(singleParticleScripts, SIGNAL(incrementProgress(int)), this, SIGNAL(incrementProgress(int)));
+    connect(singleParticleScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+    connect(singleParticleScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
     addToScriptsWidget(singleParticleScripts);
     
     manuals = new QStackedWidget();
@@ -85,16 +85,28 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     centerRightSplitter->addWidget(centralContainer);
     centerRightSplitter->addWidget(resultsSplitter);
 
-
+    //Setup status Bar
+    progressBar = new QProgressBar(this);
+    progressBar->setMaximum(100);
+    progressBar->setFixedWidth(300);
+    progressBar->setFixedHeight(10);
+    progressBar->setValue(0);
+    progressBar->setTextVisible(false);
+    
+    statusBar = new QStatusBar(this);
+    statusBar->addPermanentWidget(progressBar);
+    
+    
     //Setup the layout and add widgets
     QGridLayout* layout = new QGridLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);
     
-    layout->addWidget(setupToolbar(), 0, 0);
-    layout->addWidget(scriptsContainer, 0, 1);
-    layout->addWidget(centerRightSplitter, 0, 2);
+    layout->addWidget(setupToolbar(), 0, 0, 2, 1);
+    layout->addWidget(scriptsContainer, 0, 1, 1, 1);
+    layout->addWidget(centerRightSplitter, 0, 2, 1, 1);
+    layout->addWidget(statusBar, 1, 1, 1, 2);
 
     verbosityControl->setCurrentIndex(1);
     standardScripts->initialize();
@@ -167,6 +179,7 @@ blockContainer* executionContainer::setupLogWindow()
     
     //Setup Maximize tool button
     QToolButton* maximizeLogWindow = new QToolButton();
+    maximizeLogWindow->setFixedSize(QSize(20,20));
     maximizeLogWindow->setIcon(*(mainData->getIcon("maximize")));
     maximizeLogWindow->setToolTip("Maximize output view");
     maximizeLogWindow->setAutoRaise(false);
@@ -181,7 +194,7 @@ blockContainer* executionContainer::setupLogWindow()
     verbosityControlWidget->setLayout(verbosityControlLayout);
     
     verbosityControlLayout->addWidget(new QLabel("Verbosity Level: "), 0, 0);
-    verbosityControlLayout->addWidget(verbosityControl, 0, 1);
+    verbosityControlLayout->addWidget(verbosityControl, 0, 1, 1, 1 , Qt::AlignVCenter);
     verbosityControlLayout->addItem(new QSpacerItem(3,3), 0, 2);
     verbosityControlLayout->addWidget(maximizeLogWindow, 0, 3);
     
@@ -225,6 +238,7 @@ blockContainer* executionContainer::setupParameterWindow()
     
     //Setup Maximize tool button
     QToolButton* maximizeParameterWin = new QToolButton();
+    maximizeParameterWin->setFixedSize(QSize(20,20));
     maximizeParameterWin->setIcon(*(mainData->getIcon("maximize")));
     maximizeParameterWin->setToolTip("Maximize parameter view");
     maximizeParameterWin->setAutoRaise(false);
@@ -239,7 +253,7 @@ blockContainer* executionContainer::setupParameterWindow()
     parameterLevelWidget->setLayout(parameterLevelLayout);
     
     parameterLevelLayout->addWidget(new QLabel("Level: "), 0, 0);
-    parameterLevelLayout->addWidget(userLevelButtons, 0, 1);
+    parameterLevelLayout->addWidget(userLevelButtons, 0, 1, 1, 1 , Qt::AlignVCenter);
     parameterLevelLayout->addItem(new QSpacerItem(3,3), 0, 2);
     parameterLevelLayout->addWidget(maximizeParameterWin, 0, 3);
     
@@ -277,6 +291,22 @@ void executionContainer::execute(bool halt) {
 
 }
 
+void executionContainer::updateStatusMessage(const QString& message) {
+    progressBar->update();
+    statusBar->showMessage(message);
+}
+
+void executionContainer::increaseScriptProgress(int increament) {
+    if (progressBar->value() + increament <= progressBar->maximum())
+        progressBar->setValue(progressBar->value() + increament);
+    else
+        progressBar->setValue(progressBar->maximum());
+}
+
+void executionContainer::setScriptProgress(int progress) {
+    progressBar->setValue(progress);
+}
+
 void executionContainer::setStandardMode() {
     showStandardScripts->setChecked(true);
     showCustomScripts->setChecked(false);
@@ -300,6 +330,8 @@ void executionContainer::setSPMode() {
 
 
 void executionContainer::scriptChanged(scriptModule *module, QModelIndex index) {
+    updateStatusMessage(module->title(index));
+    
     //  container->saveSplitterState(1);
     int uid = index.data(Qt::UserRole).toUInt();
 
@@ -329,8 +361,6 @@ void executionContainer::scriptChanged(scriptModule *module, QModelIndex index) 
         logViewer->clear();
     results->load(module->resultsFile(index));
     //  container->restoreSplitterState(1);
-    
-    emit scriptChangedSignal(module->title(index));
 }
 
 void executionContainer::standardScriptChanged(QModelIndex index) {

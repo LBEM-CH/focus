@@ -104,10 +104,6 @@ public slots:
     void launchReproject();
     void saveDirectorySelection();
     void loadDirectorySelection();
-
-    void updateStatusMessage(const QString& message);
-    void increaseScriptProgress(int increament);
-    void setScriptProgress(int progress);
     
     void stopPlay();
 
@@ -123,7 +119,6 @@ private:
     void setupActions();
     void setupToolBar();
     void setupMenuBar();
-    QProgressBar* setupProgressBar();
     confData* setupMainConfiguration(const QString &directory);
     
     bool createDir(const QString &dir);
@@ -148,9 +143,6 @@ private:
     imageAlbum *album;
     eulerWindow *euler;
     reprojectWindow *reproject;
-
-    QStatusBar* statusBar;
-    QProgressBar* progressBar;
     
     albumContainer* albumCont;
     executionContainer* executionCont;

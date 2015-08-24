@@ -20,8 +20,9 @@
 #include <QModelIndex>
 #include <QModelIndexList>
 #include <QGroupBox>
+#include <QToolButton>
 
-#include "viewContainer.h"
+#include "blockContainer.h"
 #include "projectModel.h"
 #include "imagePreview.h"
 #include "confData.h"

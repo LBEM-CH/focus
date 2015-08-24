@@ -166,6 +166,12 @@ void resultsModule::setImportant(int value)
 	load();
 }
 
+void resultsModule::setImportant(bool value)
+{
+	showImportant = value;
+	load();
+}
+
 void resultsModule::setShowFilenames(int value)
 {
 	showFileNames = (bool)value;

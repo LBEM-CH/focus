@@ -119,6 +119,7 @@ set(MOC_HDRS
         scriptTab.h
         blockContainer.h
         albumContainer.h
+        executionContainer.h
 	)
 
 QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})

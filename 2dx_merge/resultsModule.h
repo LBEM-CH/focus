@@ -43,6 +43,7 @@ class resultsModule : public QWidget
   void itemSelected(QTreeWidgetItem *item);
   void itemActivated(QTreeWidgetItem *item);
   void setImportant(int);
+  void setImportant(bool);
   void setShowFilenames(int);
   void resetColumnSize();
 

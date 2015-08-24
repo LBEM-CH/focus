@@ -46,7 +46,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
 
   setAutoFillBackground(true);
 
-  const int LINE_EDIT_WIDTH=150;
+  const int LINE_EDIT_WIDTH=120;
   const int LINE_EDIT_HEIGHT=20;
 
   data = conf;
@@ -272,7 +272,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
       lEdits << new QLineEdit(value,this);
       layout->setColumnStretch(2,1);
 
-      lEdits[0]->setFixedWidth(LINE_EDIT_WIDTH*3);
+      lEdits[0]->setFixedWidth(LINE_EDIT_WIDTH*2);
       lEdits[0]->setFixedHeight(LINE_EDIT_HEIGHT);
 
       lEdits[0]->setFont(labelFont);

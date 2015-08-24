@@ -61,128 +61,22 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     updates = new updateWindow(mainData, this);
     updates->hide();
 
-
-    setupScriptModules();
-
     results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
-
     albumCont = new albumContainer(mainData, results, this);
-
-    logViewer = new LogViewer("Standard Output", NULL);
-
-    connect(standardScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
-    connect(standardScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
-
-    connect(customScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
-    connect(customScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
-
-    connect(singleParticleScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
-    connect(singleParticleScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
-
-    connect(standardScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-    connect(customScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-    connect(singleParticleScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-
-    verbosityControl = new levelGroup(mainData, 4,
-            QStringList() << "Logfile - Silent   (Click here for logbrowser)" << "Logfile - Low Verbosity (Click here for logbrowser)" << "Logfile - Moderate Verbosity (Click here for logbrowser)" << "Logfile - Highest Verbosity (Click here for logbrowser)",
-            QStringList() << "Update only on script completion." << "Low Verbosity Output" << "Moderate Verbosity Output" << "Highest Verbosity Output",
-            QStringList() << "gbAqua" << "gbBlue" << "gbOrange" << "gbRed");
-
-    verbosityControl->setLevel(1);
-
-    viewContainer *logWindow = new viewContainer("Logfile - Low Verbosity", viewContainer::data, NULL, viewContainer::grey);
-    connect(logWindow, SIGNAL(doubleClicked()), this, SLOT(launchLogBrowser()));
-    logWindow->setHeaderWidget(verbosityControl);
-    logWindow->addWidget(logViewer);
-    connect(verbosityControl, SIGNAL(titleChanged(const QString &)), logWindow, SLOT(setText(const QString &)));
-    connect(verbosityControl, SIGNAL(levelChanged(int)), logViewer, SLOT(load(int)));
-    connect(verbosityControl, SIGNAL(levelChanged(int)), standardScripts, SLOT(setVerbosity(int)));
-    connect(verbosityControl, SIGNAL(levelChanged(int)), customScripts, SLOT(setVerbosity(int)));
-    connect(verbosityControl, SIGNAL(levelChanged(int)), singleParticleScripts, SLOT(setVerbosity(int)));
-
-    standardScriptsTab = new scriptTab(standardScripts, mainData, this);
-    customScriptsTab = new scriptTab(customScripts, mainData, this);
-    singleParticleScriptsTab = new scriptTab(singleParticleScripts, mainData, this);
-
-    connect(results, SIGNAL(saved(bool)), standardScriptsTab, SLOT(loadParameters()));
-    connect(results, SIGNAL(saved(bool)), customScriptsTab, SLOT(loadParameters()));
-    connect(results, SIGNAL(saved(bool)), singleParticleScriptsTab, SLOT(loadParameters()));
-
-    connect(standardScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(standardScriptChanged(QModelIndex)));
-    connect(customScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(customScriptChanged(QModelIndex)));
-    connect(singleParticleScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(singleParticleScriptChanged(QModelIndex)));
-
+    executionCont = new executionContainer(mainData, results, this);
     
-
-    int fontSize = mainData->userConf()->get("fontSize", "value").toInt();
-    if (fontSize != 0) {
-        QFont mainFont(QApplication::font());
-        mainFont.setPointSize(fontSize);
-        QApplication::setFont(mainFont);
-        updateFontInfo();
-    } else {
-        QFont font = QApplication::font();
-        mainData->userConf()->set("fontSize", QString::number(font.pointSize()));
-        mainData->userConf()->save();
-        QApplication::setFont(font);
-        updateFontInfo();
-    }
-
-    viewContainer *resultsContainer = new viewContainer("Results", viewContainer::data, this, viewContainer::grey);
-    resultsView = new resultsModule(mainData, results, resultsModule::results, mainData->getDir("project"));
-    resultsContainer->addWidget(resultsView);
-    resultsContainer->setMinimumSize(QSize(200, 200));
-
-    viewContainer *imagesContainer = new viewContainer("Images  (Click here to open)", viewContainer::data, this, viewContainer::grey);
-    connect(imagesContainer, SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
-    resultsModule *imagesView = new resultsModule(mainData, results, resultsModule::images, mainData->getDir("project"));
-    imagesContainer->addWidget(imagesView);
-    imagesContainer->setMinimumSize(QSize(200, 200));
-
-    levelGroup *imageLevelButtons = new levelGroup(mainData, 2, QStringList() << "All Images" << "Important Images", QStringList() << "Show all images" << "Show only important images", QStringList() << "gbAqua" << "gbRed");
-    levelGroup *imageNamesButtons = new levelGroup(mainData, 2, QStringList() << "Nicknames" << "Filenames", QStringList() << "Show Nicknames" << "Show File Names", QStringList() << "gbOrange" << "gbPurple");
-    imagesContainer->setHeaderWidget(imageLevelButtons, Qt::AlignLeft);
-    imagesContainer->setHeaderWidget(imageNamesButtons, Qt::AlignRight);
-    connect(imageLevelButtons, SIGNAL(levelChanged(int)), imagesView, SLOT(setImportant(int)));
-    connect(imageNamesButtons, SIGNAL(levelChanged(int)), imagesView, SLOT(setShowFilenames(int)));
-
-
-    QSplitter *resultsSplitter = new QSplitter(Qt::Horizontal, this);
-    resultsSplitter->addWidget(resultsContainer);
-    resultsSplitter->addWidget(imagesContainer);
-
-    scriptsWidget = new QTabWidget(this);
-    scriptsWidget->setDocumentMode(true);
-    scriptsWidget->setTabPosition(QTabWidget::West);
-
-#ifdef Q_OS_MAC  
-    scriptsWidget->setStyleSheet(
-            "QTabBar::tab {color: white;}"
-            "QTabBar::tab:selected {color: black;}"
-            );
-#endif
-
-    scriptsWidget->addTab(standardScriptsTab, "Standard");
-    scriptsWidget->addTab(customScriptsTab, "Custom");
-    scriptsWidget->addTab(singleParticleScriptsTab, "Single Particle");
-    connect(scriptsWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
-
-    blockContainer* processContainer = new blockContainer("PROCESS", this);
-    processContainer->addWidget(scriptsWidget);
-
-    blockContainer* evaluateContainer = new blockContainer("EVALUATE", this);
-    evaluateContainer->addWidget(logWindow);
-    evaluateContainer->addWidget(resultsSplitter);
-
+    connect(executionCont, SIGNAL(scriptChangedSignal(const QString&)), this, SLOT(updateStatusMessage(const QString&)));
+    connect(executionCont, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+    connect(executionCont, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
+    connect(executionCont, SIGNAL(scriptCompletedSignal()), albumCont, SLOT(maskResults));
+    connect(executionCont, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
 
     QSplitter* container = new QSplitter(Qt::Vertical, this);
+    
     container->addWidget(albumCont);
-    container->addWidget(processContainer);
-    container->addWidget(evaluateContainer);
+    container->addWidget(executionCont);
 
-    //layout->addWidget(headerWidget, 0, 0, 1, 1);
-    layout->addWidget(container, 0, 0, 1, 1);
-    //layout->addWidget(footerWidget, 1, 0, 1, 1);
+    layout->addWidget(container);
 
     about = new aboutWindow(mainData, this, true);
     about->hide();
@@ -191,14 +85,24 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     setupToolBar();
     setupMenuBar();
     
+    int fontSize = mainData->userConf()->get("fontSize", "value").toInt();
+    if (fontSize != 0) {
+        QFont mainFont(QApplication::font());
+        mainFont.setPointSize(fontSize);
+        QApplication::setFont(mainFont);
+    } else {
+        QFont font = QApplication::font();
+        mainData->userConf()->set("fontSize", QString::number(font.pointSize()));
+        mainData->userConf()->save();
+        QApplication::setFont(font);
+    }
+    updateFontInfo();
+    
     album = NULL;
     euler = NULL;
     reproject = NULL;
 
     importCount = 0;
-
-    verbosityControl->setLevel(1);
-    standardScripts->initialize();
 
 }
 
@@ -282,40 +186,6 @@ confData* mainWindow::setupMainConfiguration(const QString &directory)
     return mainData;
 }
 
-void mainWindow::setupScriptModules() 
-{
-    /**
-     * Prepare the Scripts view container
-     */
-    standardScripts = new scriptModule(mainData, mainData->getDir("standardScripts"), scriptModule::standard);
-    connect(standardScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(standardScriptCompleted(QModelIndex)));
-    connect(standardScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(standardScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(standardScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-
-    customScripts = new scriptModule(mainData, mainData->getDir("customScripts"), scriptModule::custom);
-    connect(customScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(customScriptCompleted(QModelIndex)));
-    connect(customScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(customScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(customScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-
-    singleParticleScripts = new scriptModule(mainData, mainData->getDir("singleParticleScripts"), scriptModule::singleparticle);
-    connect(singleParticleScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(singleParticleScriptCompleted(QModelIndex)));
-    connect(singleParticleScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(singleParticleScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(singleParticleScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-
-    standardScripts->extendSelectionTo(customScripts);
-    standardScripts->extendSelectionTo(singleParticleScripts);
-
-    customScripts->extendSelectionTo(standardScripts);
-    customScripts->extendSelectionTo(singleParticleScripts);
-
-    singleParticleScripts->extendSelectionTo(standardScripts);
-    singleParticleScripts->extendSelectionTo(customScripts);
-}
-
-
 QProgressBar* mainWindow::setupProgressBar() 
 {
     QProgressBar* progressBar = new QProgressBar(this);
@@ -344,21 +214,6 @@ void mainWindow::setScriptProgress(int progress) {
     progressBar->setValue(progress);
 }
 
-void mainWindow::execute(bool halt) {
-    scriptTab* currWidget = (scriptTab*) scriptsWidget->currentWidget();
-    scriptModule* module = currWidget->getModule();
-    if (module->type() == scriptModule::standard) {
-        standardScripts->execute(halt);
-    }
-    if (module->type() == scriptModule::custom) {
-        customScripts->execute(halt);
-    }
-    if (module->type() == scriptModule::singleparticle) {
-        singleParticleScripts->execute(halt);
-    }
-
-}
-
 void mainWindow::setupActions() {
     openAction = new QAction(*(mainData->getIcon("open")), tr("&New"), this);
     openAction->setShortcut(tr("Ctrl+O"));
@@ -371,7 +226,7 @@ void mainWindow::setupActions() {
     importAction = new QAction(*(mainData->getIcon("import")), tr("&Import Images"), this);
     connect(importAction, SIGNAL(triggered()), this, SLOT(import()));
 
-    showImageLibraryAction = new QAction(*(mainData->getIcon("selected")), tr("&Show Image Library"), this);
+    showImageLibraryAction = new QAction(*(mainData->getIcon("library")), tr("&Show Image Library"), this);
     showImageLibraryAction->setShortcut(tr("Ctrl+D"));
     showImageLibraryAction->setCheckable(true);
     showImageLibraryAction->setChecked(true);
@@ -383,7 +238,7 @@ void mainWindow::setupActions() {
 
     playAction = new QAction(*(mainData->getIcon("play")), tr("&Run selected script(s)"), this);
     playAction->setCheckable(true);
-    connect(playAction, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
+    connect(playAction, SIGNAL(toggled(bool)), executionCont, SLOT(execute(bool)));
 
     dryRun = new QAction(*(mainData->getIcon("dryRun")), tr("&Dry Run (No changes in config files)"), this);
     dryRun->setCheckable(true);
@@ -401,7 +256,7 @@ void mainWindow::setupActions() {
 
     manualAction = new QAction(*(mainData->getIcon("help")), tr("Hide Manual"), this);
     manualAction->setCheckable(true);
-    connect(manualAction, SIGNAL(triggered(bool)), this, SLOT(hideManual(bool)));
+    connect(manualAction, SIGNAL(triggered(bool)), executionCont, SLOT(showManual(bool)));
 
 }
 
@@ -459,7 +314,7 @@ void mainWindow::setupMenuBar() {
     QMenu* viewMenu = new QMenu("View");
     viewMenu->addAction(showImageLibraryAction);
     
-    QAction* showSelectedAction = new QAction(tr("&Show checked images only"), this);
+    QAction* showSelectedAction = new QAction(*(mainData->getIcon("selected")), tr("&Show checked images only"), this);
     showSelectedAction->setCheckable(true);
     connect(showSelectedAction, SIGNAL(toggled(bool)), albumCont, SLOT(showSelected(bool)));
     viewMenu->addAction(showSelectedAction);
@@ -556,27 +411,6 @@ void mainWindow::setupMenuBar() {
     menuBar()->addMenu(helpMenu);
 }
 
-QWidget *mainWindow::setupConfView(confData *data) {
-    confModel *model = new confModel(data, this);
-
-    QTableView *confView = new QTableView;
-    confView->setModel(model);
-    confView->setItemDelegate(new confDelegate(data));
-    confView->setGridStyle(Qt::NoPen);
-    confView->resizeRowsToContents();
-    confView->setAlternatingRowColors(true);
-    confView->horizontalHeader()->hide();
-    confView->verticalHeader()->hide();
-    confView->setSelectionMode(QAbstractItemView::NoSelection);
-    int width = 0;
-    for (int i = 0; i < confView->model()->columnCount(); i++) {
-        confView->resizeColumnToContents(i);
-        width += confView->columnWidth(i);
-    }
-    confView->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    return confView;
-}
-
 bool mainWindow::setupIcons(confData *data, const QDir &directory) {
     if (!directory.exists()) return false;
     QString entry, label, type;
@@ -606,76 +440,6 @@ bool mainWindow::setupIcons(confData *data, const QDir &directory) {
     return true;
 }
 
-void mainWindow::scriptChanged(scriptModule *module, QModelIndex index) {
-    int uid = index.data(Qt::UserRole).toUInt();
-    updateStatusMessage(module->title(index));
-
-    if (localIndex[uid] == 0 && module->conf(index)->size() != 0) {
-        confInterface *local = new confInterface(module->conf(index), "");
-        localIndex[uid] = standardScriptsTab->addParameterWidget(local) + 1;
-        localIndex[uid] = customScriptsTab->addParameterWidget(local) + 1;
-        localIndex[uid] = singleParticleScriptsTab->addParameterWidget(local) + 1;
-        //    if(localParameters->widget(localIndex[uid] - 1) == NULL) cerr<<"Something's very wrong here."<<endl;
-        //    connect(userLevelButtons,SIGNAL(levelChanged(int)),local,SLOT(setSelectionUserLevel(int)));
-    }
-
-    if (manualIndex[uid] == 0 && !module->conf(index)->manual().isEmpty()) {
-        manualIndex[uid] = standardScriptsTab->addManualWidget(new confManual(mainData, module->conf(index))) + 1;
-        manualIndex[uid] = customScriptsTab->addManualWidget(new confManual(mainData, module->conf(index))) + 1;
-        manualIndex[uid] = singleParticleScriptsTab->addManualWidget(new confManual(mainData, module->conf(index))) + 1;
-    }
-
-    if (localIndex[uid] - 1 < 0) {
-        standardScriptsTab->hideLocalParameters();
-        customScriptsTab->hideLocalParameters();
-        singleParticleScriptsTab->hideLocalParameters();
-    } else if (module->type() == scriptModule::standard) {
-        standardScriptsTab->showLocalParameters();
-        standardScriptsTab->setParameterIndex(localIndex[uid] - 1);
-    } else if (module->type() == scriptModule::custom) {
-        customScriptsTab->showLocalParameters();
-        customScriptsTab->setParameterIndex(localIndex[uid] - 1);
-    } else if (module->type() == scriptModule::singleparticle) {
-        singleParticleScriptsTab->showLocalParameters();
-        singleParticleScriptsTab->setParameterIndex(localIndex[uid] - 1);
-    }
-
-    if (module->type() == scriptModule::standard) {
-        standardScriptsTab->setManualIndex(manualIndex[uid] - 1);
-        standardScriptsTab->selectPrameters(module->displayedVariables(index));
-    }
-    if (module->type() == scriptModule::custom) {
-        customScriptsTab->setManualIndex(manualIndex[uid] - 1);
-        customScriptsTab->selectPrameters(module->displayedVariables(index));
-    }
-    if (module->type() == scriptModule::singleparticle) {
-        singleParticleScriptsTab->setManualIndex(manualIndex[uid] - 1);
-        singleParticleScriptsTab->selectPrameters(module->displayedVariables(index));
-    }
-
-    if (verbosityControl->level() != 0)
-        logViewer->loadLogFile(module->logFile(index));
-    else
-        logViewer->clear();
-    results->load(module->resultsFile(index));
-    //  container->restoreSplitterState(1);
-}
-
-void mainWindow::standardScriptChanged(QModelIndex index) {
-    scriptChanged(standardScripts, index);
-}
-
-void mainWindow::customScriptChanged(QModelIndex index) {
-    scriptChanged(customScripts, index);
-}
-
-void mainWindow::singleParticleScriptChanged(QModelIndex index) {
-    scriptChanged(singleParticleScripts, index);
-}
-
-void mainWindow::scriptLaunched(scriptModule * /*module*/, QModelIndex /*index*/) {
-
-}
 
 void mainWindow::setSaveState(bool state) {
     if (state == false) {
@@ -687,12 +451,8 @@ void mainWindow::setSaveState(bool state) {
     }
 }
 
-void mainWindow::scriptCompleted(scriptModule *module, QModelIndex index) {
-    //  cerr<<"Script completed"<<endl;
-    results->load(module->resultsFile(index));
-    albumCont->maskResults();
-    results->save();
-    resultsView->load();
+void mainWindow::stopPlay() 
+{;
     playAction->setChecked(false);
 }
 
@@ -703,27 +463,6 @@ void mainWindow::reload() {
     {
         album->reload();
     }
-}
-
-void mainWindow::standardScriptCompleted(QModelIndex index) {
-    //  cerr<<"Standard ";
-    scriptCompleted(standardScripts, index);
-}
-
-void mainWindow::customScriptCompleted(QModelIndex index) {
-    //  cerr<<"Custom ";
-    scriptCompleted(customScripts, index);
-}
-
-void mainWindow::singleParticleScriptCompleted(QModelIndex index) {
-    //  cerr<<"Single Particle ";
-    scriptCompleted(singleParticleScripts, index);
-}
-
-void mainWindow::tabChanged(int currentIndex) {
-    scriptTab* currentTab = (scriptTab*) scriptsWidget->currentWidget();
-    scriptModule* module = currentTab->getModule();
-    module->select(module->getSelection()->selection());
 }
 
 bool mainWindow::createDir(const QString &dir) {
@@ -769,11 +508,6 @@ void mainWindow::closeEvent(QCloseEvent *event) {
         else if (choice == 2)
             event->ignore();
     }
-}
-
-void mainWindow::launchFileBrowser() {
-    QString path = QDir::toNativeSeparators(mainData->getDir("working"));
-    QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
 void mainWindow::importFiles(const QHash<QString, QHash<QString, QString> > &imageList) {
@@ -903,18 +637,6 @@ void mainWindow::openURL(const QString &url) {
     QProcess::startDetached(mainData->getApp("webBrowser") + " " + url);
 }
 
-void mainWindow::hideManual(bool hide) {
-    if (!hide) {
-        standardScriptsTab->showManual();
-        customScriptsTab->showManual();
-        singleParticleScriptsTab->showManual();
-    } else {
-        standardScriptsTab->hideManual();
-        customScriptsTab->hideManual();
-        singleParticleScriptsTab->hideManual();
-    }
-}
-
 void mainWindow::increaseFontSize() {
     QFont font = QApplication::font();
     font.setPointSize(font.pointSize() + 1);
@@ -946,11 +668,7 @@ void mainWindow::toggleAutoSave() {
 }
 
 void mainWindow::updateFontInfo() {
-    standardScriptsTab->updateFontInfo();
-    customScriptsTab->updateFontInfo();
-    singleParticleScriptsTab->updateFontInfo();
-    logViewer->updateFontInfo();
-    //  emit fontInfoUpdated();
+    executionCont->updateFontInfo();
 }
 
 void mainWindow::saveDirectorySelection() {
@@ -987,8 +705,4 @@ void mainWindow::showReproject(bool show) {
 
 void mainWindow::editHelperConf() {
     new confEditor(mainData->getSubConf("appConf"));
-}
-
-void mainWindow::launchLogBrowser() {
-    QProcess::startDetached(mainData->getApp("logBrowser") + " " + logViewer->getLogFile());
 }

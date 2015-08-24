@@ -68,6 +68,7 @@
 #include <scriptTab.h>
 
 #include "albumContainer.h"
+#include "executionContainer.h"
 
 class mainWindow : public QMainWindow
 {
@@ -77,19 +78,7 @@ public:
 
 public slots:
 
-    void tabChanged(int currentIndex);
-
-    void scriptChanged(scriptModule *module, QModelIndex index);
-    void standardScriptChanged(QModelIndex index);
-    void customScriptChanged(QModelIndex index);
-    void singleParticleScriptChanged(QModelIndex index);
-    void scriptLaunched(scriptModule *module, QModelIndex index);
-    void scriptCompleted(scriptModule *module, QModelIndex index);
-    void standardScriptCompleted(QModelIndex index);
-    void customScriptCompleted(QModelIndex index);
-    void singleParticleScriptCompleted(QModelIndex index);
     void editHelperConf();
-    void launchLogBrowser();
 
     void setSaveState(bool state);
 
@@ -113,15 +102,14 @@ public slots:
     void launchAlbum(const QString &path);
     void launchEuler();
     void launchReproject();
-    void launchFileBrowser();
-    void hideManual(bool hide);
     void saveDirectorySelection();
     void loadDirectorySelection();
-    
-    void execute(bool halt);
+
     void updateStatusMessage(const QString& message);
     void increaseScriptProgress(int increament);
     void setScriptProgress(int progress);
+    
+    void stopPlay();
 
 signals:
     void saveConfig();
@@ -137,7 +125,6 @@ private:
     void setupMenuBar();
     QProgressBar* setupProgressBar();
     confData* setupMainConfiguration(const QString &directory);
-    void setupScriptModules();
     
     bool createDir(const QString &dir);
     
@@ -162,24 +149,11 @@ private:
     eulerWindow *euler;
     reprojectWindow *reproject;
 
-    scriptModule *standardScripts;
-    scriptModule *customScripts;
-    scriptModule *singleParticleScripts;
-
-    scriptTab *standardScriptsTab;
-    scriptTab *customScriptsTab;
-    scriptTab *singleParticleScriptsTab;
-
-    QTabWidget* scriptsWidget;
-
-    resultsModule *resultsView;
-
-    LogViewer *logViewer;
-
     QStatusBar* statusBar;
     QProgressBar* progressBar;
     
     albumContainer* albumCont;
+    executionContainer* executionCont;
 
     /**
      * Standard actions
@@ -193,11 +167,6 @@ private:
     QAction* refreshAction;
     QAction* manualAction;
     QAction* dryRun;
-
-    levelGroup *verbosityControl;
-
-    QHash<uint, int> localIndex;
-    QHash<uint, int> manualIndex;
 
     int importCount;
 

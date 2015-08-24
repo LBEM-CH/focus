@@ -15,13 +15,20 @@ albumContainer::albumContainer(confData *dat, resultsData* results, QWidget* par
     setupDirectoryContainer(data);
     dirModel->setResultsFile(results);
     
+    QGroupBox* widgetBox = new QGroupBox("Project Library", this);
+    
     QGridLayout* layout = new QGridLayout();
     layout->setMargin(0);
     layout->setSpacing(0);
-    this->setLayout(layout);
-    
     layout->addWidget(dirView, 0, 0);
     layout->addWidget(preview, 0, 1, Qt::AlignTop);
+    
+    widgetBox->setLayout(layout);
+    
+    QGridLayout* mainLayout = new QGridLayout(this);
+    mainLayout->addWidget(widgetBox);
+    
+    this->setLayout(mainLayout);
 }
 
 void albumContainer::showContents(bool show) 

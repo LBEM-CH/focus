@@ -8,28 +8,46 @@
 #ifndef BLOCKCONTAINER_H
 #define	BLOCKCONTAINER_H
 
-#include <QWidget>
-#include <QGridLayout>
+#include <QFrame>
 #include <QString>
 #include <QPalette>
 #include <QColor>
+#include <QLinearGradient>
+#include <QPoint>
+#include <QFont>
+#include <QVBoxLayout>
+#include <QGridLayout>
+#include <QLabel>
+#include <QSpacerItem>
 
-class blockContainer : public QWidget
+class blockContainer : public QFrame
 {
     Q_OBJECT
            
     public:
-        blockContainer(QString title, QWidget* parent);
+        blockContainer(const QString& title="", QWidget* parent=NULL);
         
-        void addWidget(QWidget* widget);
+        void setMainWidget(QWidget* widget);
+        void setHeaderWidget(QWidget* widget);
+        
+    public slots:
+        void setHeaderTitle(const QString& titleLabel);
+        
+    signals:
+        void doubleClicked();
+    
+    protected:
+        void mouseDoubleClickEvent(QMouseEvent *event);
     
     private:
-        QWidget* getTitleBar();
+        QWidget* setupHeader(const QString& title);
         
-        QGridLayout* columnLayout;
-        QString titleLabel;
+        QVBoxLayout* mainLayout;
+        QWidget* mainWidget;
         
-        int columnCounter;
+        QGridLayout* headerLayout;
+        QLabel* headerTitle;      
+        QWidget* headerWidget;
         
 };
 

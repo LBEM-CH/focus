@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "mainWindow.h"
-#include "scriptTab.h"
 #include <QDebug>
 #include <QDesktopServices>
 #include <QModelIndexList>
@@ -27,6 +25,8 @@
 #include <QTabWidget>
 #include <QToolBar>
 #include <iostream>
+
+#include "mainWindow.h"
 #include "blockContainer.h"
 
 using namespace std;
@@ -218,7 +218,7 @@ void mainWindow::setupActions() {
     refreshAction->setShortcut(tr("Ctrl+Shift+r"));
     connect(refreshAction, SIGNAL(triggered()), this, SLOT(reload()));
 
-    manualAction = new QAction(*(mainData->getIcon("help")), tr("Hide Manual"), this);
+    manualAction = new QAction(*(mainData->getIcon("help")), tr("Show Manual"), this);
     manualAction->setCheckable(true);
     connect(manualAction, SIGNAL(triggered(bool)), executionCont, SLOT(showManual(bool)));
 

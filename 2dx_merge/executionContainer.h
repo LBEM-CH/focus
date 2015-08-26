@@ -26,6 +26,7 @@
 #include <QStatusBar>
 #include <QProgressBar>
 #include <QToolBar>
+
 #include <confData.h>
 #include <confManual.h>
 #include <scriptProgress.h>

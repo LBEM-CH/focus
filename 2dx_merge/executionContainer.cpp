@@ -312,6 +312,7 @@ void executionContainer::setStandardMode() {
     showCustomScripts->setChecked(false);
     showSPScripts->setChecked(false);
     scriptsWidget->setCurrentWidget(standardScripts);
+    standardScripts->focusWidget();
 }
 
 void executionContainer::setCustomMode() {
@@ -319,6 +320,7 @@ void executionContainer::setCustomMode() {
     showCustomScripts->setChecked(true);
     showSPScripts->setChecked(false);
     scriptsWidget->setCurrentWidget(customScripts);
+    customScripts->focusWidget();
 }
 
 void executionContainer::setSPMode() {
@@ -326,6 +328,7 @@ void executionContainer::setSPMode() {
     showCustomScripts->setChecked(false);
     showSPScripts->setChecked(true);
     scriptsWidget->setCurrentWidget(singleParticleScripts);
+    singleParticleScripts->focusWidget();
 }
 
 
@@ -430,16 +433,7 @@ void executionContainer::maximizeParameterWindow(bool maximize)
         centerRightSplitter->setSizes(QList<int>() << 1 << 1);
     }
 }
-/*
-void executionContainer::maximizeWindow(int option) {
-    container->maximizeWindow(option - 1);
-    if (option == 0) {
-        centerRightSplitter->setSizes(QList<int>() << 1 << 1);
 
-    } else
-        centerRightSplitter->setSizes(QList<int>() << 1 << 0);
-}
-*/
 void executionContainer::launchFileBrowser() {
     QString path = QDir::toNativeSeparators(mainData->getDir("working"));
     QDesktopServices::openUrl(QUrl("file:///" + path));
@@ -447,7 +441,7 @@ void executionContainer::launchFileBrowser() {
 
 void executionContainer::launchLogBrowser()
 {
-  QProcess::startDetached(mainData->getApp("logBrowser") + " " +logViewer->getLogFile());
+    QProcess::startDetached(mainData->getApp("logBrowser") + " " +logViewer->getLogFile());
 }
 
 void executionContainer::showManual(bool show) {

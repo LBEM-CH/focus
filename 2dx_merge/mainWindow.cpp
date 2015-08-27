@@ -67,6 +67,8 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     
     container->addWidget(albumCont);
     container->addWidget(executionCont);
+    container->setStretchFactor(0, 2);
+    container->setStretchFactor(1, 3);
 
     layout->addWidget(container);
 

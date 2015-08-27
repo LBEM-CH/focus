@@ -5,8 +5,8 @@ void statusViewer::initialize()
   int minWidth = int(QApplication::desktop()->width()/5.00);
   if(minWidth > 235) minWidth = 235;
   setMinimumWidth(minWidth);
-  setFixedHeight(minWidth);
-  setTextSizeMultiplier(0.72);
+  //setFixedHeight(minWidth);
+  setTextSizeMultiplier(1.0);
   timer.setSingleShot(true);
   data = NULL;
   connect(&watcher,SIGNAL(fileChanged(const QString &)),this,SLOT(timedLoad()));

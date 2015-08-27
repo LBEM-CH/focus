@@ -267,6 +267,12 @@ void resultsParser::setImportant(int value)
 	load();
 }
 
+void resultsParser::setImportant(bool value)
+{
+	important = value;
+	load();
+}
+
 void resultsParser::setShowFilenames(int value)
 {
 	showFilenames = (bool)value;

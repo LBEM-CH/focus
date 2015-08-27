@@ -27,9 +27,7 @@ mainWindow::mainWindow(char *dirArg)
   bool initialize = false;
   QString workingDir;
 
-  
   m_do_autosave = true;
-
   
  QDir applicationDir, configDir;
 
@@ -144,10 +142,7 @@ mainWindow::mainWindow(char *dirArg)
   setCentralWidget(centerWin);
   setWindowTitle(data->getDir("working"));
 
-
-  //userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_image-user.cfg", data->getDir("config") + "/" + "2dx_image-user.cfg");
-  //userData->save();
-  //data->setUserConf(userData);
+    connect(centerWin, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
 
   int fontSize = data->userConf()->get("fontSize","value").toInt();
   if(fontSize!=0)
@@ -172,19 +167,18 @@ mainWindow::mainWindow(char *dirArg)
   about = new aboutWindow(data,this);
   about->hide();
 
-  createActions();
-  createMenus();
+  setupActions();
+  setupToolBar();
+  setupMenuBar();
   resize(1024,743);
 }
 
-void mainWindow::createActions()
+void mainWindow::setupActions()
 {
-  openAction = new QAction("Open",this);
-  openAction->setShortcut(tr("Ctrl+O"));
+  openAction = new QAction(*(data->getIcon("open")), tr("&Open"), this);
   connect(openAction,SIGNAL(triggered()),this,SLOT(open()));
 
-  saveAction = new QAction("Save Config",this);
-  saveAction->setShortcut(tr("Ctrl+S"));
+  saveAction = new QAction(*(data->getIcon("save")), tr("&Save"), this);
   connect(saveAction,SIGNAL(triggered()),this,SLOT(save()));
   
   timer_refresh = 10000;
@@ -230,21 +224,44 @@ void mainWindow::createActions()
   showAboutAction = new QAction("About",this);
   connect(showAboutAction,SIGNAL(triggered()),about,SLOT(show()));
   
+  playAction = new QAction(*(data->getIcon("play")), tr("&Run selected script(s)"), this);
+  playAction->setCheckable(true);
+  connect(playAction, SIGNAL(toggled(bool)), centerWin, SLOT(execute(bool)));
+  
+  refreshAction = new QAction(*(data->getIcon("refresh")), tr("&Refresh Results"), this);
+  connect(refreshAction, SIGNAL(triggered()), centerWin, SLOT(reload()));
+  
+  manualAction = new QAction(*(data->getIcon("help")), tr("Show Manual"), this);
+  manualAction->setCheckable(true);
+  connect(manualAction, SIGNAL(triggered(bool)), centerWin, SLOT(showManual(bool)));
+  
   actionList.insert("useNewViewerAction",new QAction("Enable Threaded Viewer (Experimental)...",this));
   actionList["useNewViewerAction"]->setCheckable(true);
   actionList["useNewViewerAction"]->setChecked(false);
   connect(actionList["useNewViewerAction"],SIGNAL(toggled(bool)),centerWin,SLOT(useNewViewer(bool)));
-
-
+  
   actionList.insert("openPreferencesAction",new QAction("Preferences",this));
   connect(actionList["openPreferencesAction"],SIGNAL(triggered()),this,SLOT(editHelperConf()));
 
 }
 
-void mainWindow::createMenus()
+void mainWindow::setupToolBar() 
 {
-  QMenuBar *m = menuBar();
-  QMenu *fileMenu = m->addMenu("File");
+    QToolBar* fileToolBar = addToolBar(tr("File"));
+    fileToolBar->addAction(openAction);
+    fileToolBar->addAction(saveAction);
+
+    QToolBar* actionToolBar = addToolBar(tr("Action"));
+    actionToolBar->addAction(playAction);
+    actionToolBar->addAction(refreshAction);
+
+    QToolBar* helpToolBar = addToolBar(tr("Help"));
+    helpToolBar->addAction(manualAction);
+}
+
+void mainWindow::setupMenuBar()
+{
+  QMenu *fileMenu = new QMenu("File");
   fileMenu->addAction(openAction);
   fileMenu->addAction(saveAction);
   fileMenu->addAction(saveAsDefaultAction);
@@ -254,10 +271,15 @@ void mainWindow::createMenus()
   fileMenu->addAction(revertAction);
   fileMenu->addAction(closeAction);
 
-  QMenu *editMenu = m->addMenu("Edit");
+  QMenu *editMenu =new QMenu("Edit");
   editMenu->addAction(increaseFontAction);
   editMenu->addAction(decreaseFontAction);
-  QMenu *optionsMenu = m->addMenu("Options");
+  
+  QMenu *actionMenu = new QMenu("Action");
+  actionMenu->addAction(playAction);
+  actionMenu->addAction(refreshAction);
+  
+  QMenu *optionsMenu = new QMenu("Options");
   optionsMenu->addAction(actionList["openPreferencesAction"]);
   optionsMenu->addAction(showUpdatesAction);
   optionsMenu->addAction(showAboutAction);
@@ -266,7 +288,34 @@ void mainWindow::createMenus()
   QAction *showAutoSaveAction = new QAction("Autosave On/Off",this);
   connect(showAutoSaveAction,SIGNAL(triggered()),this,SLOT(toggleAutoSave()));
   optionsMenu->addAction(showAutoSaveAction);
-//  setMenuBar(menuBar);
+  
+    QMenu *helpMenu = new QMenu("Help");
+
+    QSignalMapper *mapper = new QSignalMapper(this);
+
+    QAction *viewOnlineHelp = new QAction(*(data->getIcon("manual")), tr("&View Online Help"), this);
+    viewOnlineHelp->setCheckable(false);
+    connect(viewOnlineHelp, SIGNAL(triggered()), mapper, SLOT(map()));
+    mapper->setMapping(viewOnlineHelp, data->getURL("help"));
+    helpMenu->addAction(viewOnlineHelp);
+
+    QAction* bugReport = new QAction(*(data->getIcon("Bug")), tr("&Report Issue/Bug"), this);
+    bugReport->setCheckable(false);
+    connect(bugReport, SIGNAL(triggered()), mapper, SLOT(map()));
+    mapper->setMapping(bugReport, data->getURL("bugReport"));
+    helpMenu->addAction(bugReport);
+
+    helpMenu->addAction(manualAction);
+
+    connect(mapper, SIGNAL(mapped(const QString &)), this, SLOT(openURL(const QString &)));
+    helpMenu->addAction(showUpdatesAction);
+    helpMenu->addAction(showAboutAction);
+
+    menuBar()->addMenu(fileMenu);
+    menuBar()->addMenu(editMenu);
+    menuBar()->addMenu(actionMenu);
+    menuBar()->addMenu(optionsMenu);
+    menuBar()->addMenu(helpMenu);
 }
 
 void mainWindow::open()
@@ -383,6 +432,11 @@ void mainWindow::showUpdates()
   updates->show();
 }
 
+void mainWindow::stopPlay() 
+{
+    playAction->setChecked(false);
+}
+
 void mainWindow::editHelperConf()
 {
   new confEditor(data->getSubConf("appConf")); 
@@ -445,4 +499,8 @@ bool mainWindow::createDir(const QString &dir)
   if(!directory.exists())
     return directory.mkdir(dir);
   return false;
+}
+
+void mainWindow::openURL(const QString &url) {
+    QProcess::startDetached(data->getApp("webBrowser") + " " + url);
 }

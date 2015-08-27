@@ -28,6 +28,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QProcess>
+#include <QToolBar>
 #include <confData.h>
 #include <centralWindow.h>
 #include <updateWindow.h>
@@ -51,6 +52,8 @@ class mainWindow : public QMainWindow
   void showUpdates();
   void editHelperConf();
   void toggleAutoSave();
+  void openURL(const QString &url);
+  void stopPlay();
 
   private:
 
@@ -71,9 +74,13 @@ class mainWindow : public QMainWindow
   QAction *revertAction;
   QAction *showUpdatesAction;
   QAction *showAboutAction;
+  QAction* playAction;
+  QAction* refreshAction;
+  QAction* manualAction;
 
-  void createActions();
-  void createMenus();
+  void setupActions();
+  void setupToolBar();
+  void setupMenuBar();
 
   confData *data;
   confData *userData;

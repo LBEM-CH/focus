@@ -67,8 +67,8 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "2dx -Allows interactive processing of sin
 
 set(CPACK_PACKAGE_NAME 2dx)
 
-set (2dx_VERSION_MAJOR 4)
-set (2dx_VERSION_MINOR 0)
+set (2dx_VERSION_MAJOR 3)
+set (2dx_VERSION_MINOR 5)
 set (2dx_VERSION_PATCH 0)
 
 set(CPACK_PACKAGE_VERSION_MAJOR ${2dx_VERSION_MAJOR})

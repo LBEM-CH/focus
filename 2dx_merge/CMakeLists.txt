@@ -117,7 +117,6 @@ set(MOC_HDRS
 	resultsModule.h  
 	translator.h
         scriptTab.h
-        blockContainer.h
         albumContainer.h
         executionContainer.h
 	)

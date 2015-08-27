@@ -98,6 +98,7 @@ set(MOC_HDRS
 	${2DX_INCLUDE_DIR}/confEditor.h
 	${2DX_INCLUDE_DIR}/colorTool.h
 	${2DX_INCLUDE_DIR}/noScrollComboBox.h
+        ${2DX_INCLUDE_DIR}/blockContainer.h
 )
 
 QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})

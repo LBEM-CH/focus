@@ -46,6 +46,7 @@ class resultsParser : public QTableWidget
   void openFile();
   void resizeContents();
   void setImportant(int value);
+  void setImportant(bool value);
   void setShowFilenames(int value);
   void setResult(const QString &results);
   void refreshWatcher();

@@ -24,8 +24,13 @@
 #include <QWidget>
 #include <QWebView>
 #include <QGridLayout>
+#include <QStackedWidget>
+#include <QComboBox>
+#include <QToolButton>
+#include <QToolBar>
+#include <QStatusBar>
 #include <confData.h>
-#include <viewContainer.h>
+#include <blockContainer.h>
 #include <confInterface.h>
 #include <scriptModule.h>
 #include <controlActionsGroup.h>
@@ -56,6 +61,9 @@ class centralWindow : public QWidget
   void runningScriptChanged(scriptModule *module, QModelIndex index);
   void customRunningScriptChanged(QModelIndex index);
   void standardRunningScriptChanged(QModelIndex index);
+  
+      void setStandardMode();
+    void setCustomMode();
 
   bool parseResults(confData *conf, const QString &results);
   bool parseResults();
@@ -66,58 +74,77 @@ class centralWindow : public QWidget
   
   void useNewViewer(bool enable);
 
+  void execute(bool halt);
   void reload();
   void refresh();
   void revert();
 
-  void viewHelp();
-  void reportBug();
   void launchLogBrowser();
   void launchFileBrowser();
 
   void updateFontInfo();
   
   void toggleHistoryView(bool show);
+  
+      void updateStatusMessage(const QString& message);
+    void increaseScriptProgress(int increament);
+    void setScriptProgress(int progress);
+    
+        void maximizeLogWindow(bool maximize);
+    void maximizeParameterWindow(bool maximize);
 
   signals:
-
+    void scriptCompletedSignal();
   void fontInfoUpdated();
 
   private:
+          blockContainer* setupLogWindow();
+    blockContainer* setupParameterWindow();
+    QToolBar* setupToolbar();
+      
   QString workingDir;
   confData *data;
-
-  QList<controlActionsGroup *> headers;
 
   QHash<uint,int> localIndex;
   QHash<uint,int> manualIndex;
 
+  QStackedWidget* scriptsWidget;
   scriptModule *standardScripts;
   scriptModule *customScripts;
 
+  QToolButton* showStandardScripts;
+  QToolButton* showCustomScripts;
+  
   imagePreview *preview;
 
+  blockContainer *logWindow;
   LogViewer *logViewer;
 
   resultsParser *results;
   resultsParser *imageParser;
-  warningBox *warningWindow;
+  //warningBox *warningWindow;
   QString currentResults;
   QString currentLog;
   
-  levelGroup *verbosityControl;
+  QComboBox* verbosityControl;
 
   statusViewer *statusParser;
 
   confInterface *parameters;
   resizeableStackedWidget *localParameters;
   QStackedWidget *manuals;
-  levelGroup *userLevelButtons;
+  QComboBox* userLevelButtons;
 
   QWidget *parametersWidget;
-  viewContainer *parameterContainer;
+  blockContainer *parameterContainer;
+  
+  QSplitter* centralSplitter;
+  QSplitter *centerRightSplitter;
   
   QHash<QString,bool> visible;
+  
+  QStatusBar* statusBar;
+  QProgressBar* progressBar;
 
   public:
   centralWindow(confData *data, QWidget *parent = NULL);

@@ -1,22 +1,22 @@
 /***************************************************************************
-*   Copyright (C) 2006 by UC Davis Stahlberg Laboratory                   *
-*   HStahlberg@ucdavis.edu                                                *
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-*   This program is distributed in the hope that it will be useful,       *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-*   GNU General Public License for more details.                          *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the                         *
-*   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-***************************************************************************/
+ *   Copyright (C) 2006 by UC Davis Stahlberg Laboratory                   *
+ *   HStahlberg@ucdavis.edu                                                *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 #include "centralWindow.h"
 #include "progressStamps.h"
@@ -25,135 +25,140 @@
 using namespace std;
 
 centralWindow::centralWindow(confData *conf, QWidget *parent)
-              :QWidget(parent)
-{
-  data = conf;
-  
- //Setup Leftmost container
-  scriptsWidget = new QStackedWidget(this);
-  scriptsWidget->setMinimumWidth(250);
-  scriptsWidget->setMaximumWidth(300);
+: QWidget(parent) {
+    data = conf;
 
-  standardScripts = new scriptModule(data, data->getDir("standardScripts"), scriptModule::standard);
-  scriptsWidget->addWidget(standardScripts);
-  connect(standardScripts,SIGNAL(initialized()),data,SLOT(save()));
-  connect(standardScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(standardScriptChanged(QModelIndex)));
-  connect(standardScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(standardScriptCompleted(QModelIndex)));
-  connect(standardScripts,SIGNAL(runningScriptChanged(QModelIndex)),this,SLOT(standardRunningScriptChanged(QModelIndex)));
-  connect(standardScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-  connect(standardScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-  connect(standardScripts,SIGNAL(reload()),this,SLOT(reload()));
+    //Setup Leftmost container
+    scriptsWidget = new QStackedWidget(this);
+    scriptsWidget->setMinimumWidth(250);
+    scriptsWidget->setMaximumWidth(300);
 
-  customScripts = new scriptModule(data, data->getDir("customScripts"), scriptModule::custom);
-  scriptsWidget->addWidget(customScripts);
-  connect(customScripts,SIGNAL(currentScriptChanged(QModelIndex)),this,SLOT(customScriptChanged(QModelIndex)));
-  connect(customScripts,SIGNAL(scriptCompleted(QModelIndex)),this,SLOT(customScriptCompleted(QModelIndex)));
-  connect(customScripts,SIGNAL(runningScriptChanged(QModelIndex)),this,SLOT(customRunningScriptChanged(QModelIndex)));
-  connect(customScripts,SIGNAL(progress(int)),this, SLOT(setScriptProgress(int)));
-  connect(customScripts,SIGNAL(incrementProgress(int)),this, SLOT(increaseScriptProgress(int)));    
-  connect(customScripts,SIGNAL(reload()),this,SLOT(reload()));
+    standardScripts = new scriptModule(data, data->getDir("standardScripts"), scriptModule::standard);
+    scriptsWidget->addWidget(standardScripts);
+    connect(standardScripts, SIGNAL(initialized()), data, SLOT(save()));
+    connect(standardScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(standardScriptChanged(QModelIndex)));
+    connect(standardScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(standardScriptCompleted(QModelIndex)));
+    connect(standardScripts, SIGNAL(runningScriptChanged(QModelIndex)), this, SLOT(standardRunningScriptChanged(QModelIndex)));
+    connect(standardScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+    connect(standardScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
+    connect(standardScripts, SIGNAL(reload()), this, SLOT(reload()));
 
-  blockContainer *previewContainer = new blockContainer("Preview");
-  preview = new imagePreview(data, "",false, previewContainer);
-  connect(preview,SIGNAL(load()),this,SLOT(refresh()));
-  previewContainer->setMainWidget(preview);
-  
-  QToolButton* showHeaderButton = new QToolButton();
-  showHeaderButton->setIcon(*(data->getIcon("info")));
-  showHeaderButton->setToolTip("Show Image Header");
-  showHeaderButton->setAutoRaise(false);
-  showHeaderButton->setCheckable(true);
-  showHeaderButton->setChecked(false);
-  connect(showHeaderButton, SIGNAL(toggled(bool)), preview, SLOT(showImageHeader(bool)));
-  previewContainer->setHeaderWidget(showHeaderButton);
+    customScripts = new scriptModule(data, data->getDir("customScripts"), scriptModule::custom);
+    scriptsWidget->addWidget(customScripts);
+    connect(customScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(customScriptChanged(QModelIndex)));
+    connect(customScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(customScriptCompleted(QModelIndex)));
+    connect(customScripts, SIGNAL(runningScriptChanged(QModelIndex)), this, SLOT(customRunningScriptChanged(QModelIndex)));
+    connect(customScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+    connect(customScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
+    connect(customScripts, SIGNAL(reload()), this, SLOT(reload()));
 
-  manuals = new QStackedWidget();
-  manuals->hide();
-  
-  QSplitter* scriptsContainer = new QSplitter(Qt::Vertical);
-  scriptsContainer->addWidget(scriptsWidget);
-  scriptsContainer->addWidget(manuals);
-  
-  QWidget* leftContainer = new QWidget(this);
-  QVBoxLayout* leftLayout = new QVBoxLayout(leftContainer);
-  leftLayout->setSpacing(0);
-  leftLayout->setMargin(0);
-  leftContainer->setLayout(leftLayout);
-  leftLayout->addWidget(scriptsContainer);
-  leftLayout->addWidget(previewContainer);
-  leftLayout->setStretchFactor(scriptsContainer,1);
-  leftLayout->setStretchFactor(previewContainer,0);
-  
-  parameterContainer = setupParameterWindow();
+    blockContainer *previewContainer = new blockContainer("Preview");
+    preview = new imagePreview(data, "", false, previewContainer);
+    connect(preview, SIGNAL(load()), this, SLOT(refresh()));
+    previewContainer->setMainWidget(preview);
 
-  logWindow = setupLogWindow();
-  //warningWindow = new warningBox;
-  //logWindow->addWidget(warningWindow);
+    QToolButton* showHeaderButton = new QToolButton();
+    showHeaderButton->setIcon(*(data->getIcon("info")));
+    showHeaderButton->setToolTip("Show Image Header");
+    showHeaderButton->setAutoRaise(false);
+    showHeaderButton->setCheckable(true);
+    showHeaderButton->setChecked(false);
+    connect(showHeaderButton, SIGNAL(toggled(bool)), preview, SLOT(showImageHeader(bool)));
+    previewContainer->setHeaderWidget(showHeaderButton);
 
-  centralSplitter = new QSplitter(this);
-  centralSplitter->setOrientation(Qt::Vertical);
+    manuals = new QStackedWidget();
+    manuals->hide();
 
-  centralSplitter->addWidget(parameterContainer);
-  centralSplitter->addWidget(logWindow);
-  
-  /*           Results View Information               */
+    QSplitter* scriptsContainer = new QSplitter(Qt::Vertical);
+    scriptsContainer->addWidget(scriptsWidget);
+    scriptsContainer->addWidget(manuals);
+    scriptsContainer->setStretchFactor(0, 2);
+    scriptsContainer->setStretchFactor(1, 1);
 
-  QSplitter *resultsSplitter = new QSplitter(Qt::Vertical);
+    QWidget* leftContainer = new QWidget(this);
+    QVBoxLayout* leftLayout = new QVBoxLayout(leftContainer);
+    leftLayout->setSpacing(0);
+    leftLayout->setMargin(0);
+    leftContainer->setLayout(leftLayout);
+    leftLayout->addWidget(scriptsContainer);
+    leftLayout->addWidget(previewContainer);
+    leftLayout->setStretchFactor(scriptsContainer, 1);
+    leftLayout->setStretchFactor(previewContainer, 0);
 
-  blockContainer *resultsContainer = new blockContainer("Results");
-  results = new resultsParser(data,QStringList()<<"",resultsParser::results);
-  results->setContextMenuPolicy(Qt::ActionsContextMenu);
+    parameterContainer = setupParameterWindow();
 
-  QAction *resultsLoadAction = new QAction("Re-Evaluate Results",results);
-  results->addAction(resultsLoadAction);
-  connect(resultsLoadAction,SIGNAL(triggered()),this,SLOT(reload()));
+    logWindow = setupLogWindow();
+    //warningWindow = new warningBox;
+    //logWindow->addWidget(warningWindow);
 
-  resultsContainer->setMainWidget(results);
+    centralSplitter = new QSplitter(this);
+    centralSplitter->setOrientation(Qt::Vertical);
 
-  resultsSplitter->addWidget(resultsContainer);
+    centralSplitter->addWidget(parameterContainer);
+    centralSplitter->addWidget(logWindow);
+    centralSplitter->setStretchFactor(0, 1);
+    centralSplitter->setStretchFactor(1, 1);
 
+    /*           Results View Information               */
 
-  blockContainer *imagesContainer = new blockContainer("Images");
-  connect(imagesContainer,SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
+    QSplitter *resultsSplitter = new QSplitter(Qt::Vertical);
 
-  imageParser = new resultsParser(data,QStringList()<<"",resultsParser::images);
-  connect(imageParser,SIGNAL(imageSelected(const QString &)), preview, SLOT(setImage(const QString&)));
-  connect(imageParser,SIGNAL(cellActivated(int,int)), preview, SLOT(launchNavigator()));
+    blockContainer *resultsContainer = new blockContainer("Results");
+    results = new resultsParser(data, QStringList() << "", resultsParser::results);
+    results->setContextMenuPolicy(Qt::ActionsContextMenu);
+
+    QAction *resultsLoadAction = new QAction("Re-Evaluate Results", results);
+    results->addAction(resultsLoadAction);
+    connect(resultsLoadAction, SIGNAL(triggered()), this, SLOT(reload()));
+
+    resultsContainer->setMainWidget(results);
+
+    resultsSplitter->addWidget(resultsContainer);
 
 
-  imagesContainer->setMainWidget(imageParser);
+    blockContainer *imagesContainer = new blockContainer("Images");
+    connect(imagesContainer, SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
 
-  QToolButton* importantSwitch = new QToolButton();
-  importantSwitch->setIcon(*(data->getIcon("important")));
-  importantSwitch->setToolTip("Important images only");
-  importantSwitch->setAutoRaise(false);
-  importantSwitch->setCheckable(true);
-  connect(importantSwitch, SIGNAL(toggled(bool)), imageParser, SLOT(setImportant(bool)));
-  resultsSplitter->addWidget(imagesContainer);
-  
-  imagesContainer->setHeaderWidget(importantSwitch);
+    imageParser = new resultsParser(data, QStringList() << "", resultsParser::images);
+    connect(imageParser, SIGNAL(imageSelected(const QString &)), preview, SLOT(setImage(const QString&)));
+    connect(imageParser, SIGNAL(cellActivated(int, int)), preview, SLOT(launchNavigator()));
 
-  blockContainer *statusContainer = new blockContainer("Status");
-  statusParser = new statusViewer(data->getDir("config") + "/2dx_image/2dx_status.html");
-  statusParser->setConf(data);
-  statusParser->load();
-  statusContainer->setMainWidget(statusParser);
 
-  QWidget *rightContainer = new QWidget;
-  QVBoxLayout *rightLayout = new QVBoxLayout;
-  rightLayout->setMargin(0);
-  rightLayout->setSpacing(0);
-  rightContainer->setLayout(rightLayout);
-  rightLayout->addWidget(resultsSplitter);
-  rightLayout->addWidget(statusContainer);
-  rightLayout->setStretchFactor(resultsSplitter,1);
-  rightLayout->setStretchFactor(statusContainer,0);
+    imagesContainer->setMainWidget(imageParser);
+
+    QToolButton* importantSwitch = new QToolButton();
+    importantSwitch->setIcon(*(data->getIcon("important")));
+    importantSwitch->setToolTip("Important images only");
+    importantSwitch->setAutoRaise(false);
+    importantSwitch->setCheckable(true);
+    connect(importantSwitch, SIGNAL(toggled(bool)), imageParser, SLOT(setImportant(bool)));
+    resultsSplitter->addWidget(imagesContainer);
+
+    imagesContainer->setHeaderWidget(importantSwitch);
+
+    blockContainer *statusContainer = new blockContainer("Status");
+    statusParser = new statusViewer(data->getDir("config") + "/2dx_image/2dx_status.html");
+    statusParser->setConf(data);
+    statusParser->load();
+    statusContainer->setMainWidget(statusParser);
+
+    QWidget *rightContainer = new QWidget;
+    QVBoxLayout *rightLayout = new QVBoxLayout;
+    rightLayout->setMargin(0);
+    rightLayout->setSpacing(0);
+    rightContainer->setLayout(rightLayout);
+    rightLayout->addWidget(resultsSplitter);
+    rightLayout->addWidget(statusContainer);
+    rightLayout->setStretchFactor(resultsSplitter, 1);
+    rightLayout->setStretchFactor(statusContainer, 0);
 
     centerRightSplitter = new QSplitter(this);
     centerRightSplitter->setOrientation(Qt::Horizontal);
     centerRightSplitter->setHandleWidth(4);
     centerRightSplitter->addWidget(centralSplitter);
     centerRightSplitter->addWidget(rightContainer);
+    centerRightSplitter->setStretchFactor(0, 3);
+    centerRightSplitter->setStretchFactor(1, 1);
 
     //Setup status Bar
     progressBar = new QProgressBar(this);
@@ -162,116 +167,111 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     progressBar->setFixedHeight(10);
     progressBar->setValue(0);
     progressBar->setTextVisible(false);
-    
+
     statusBar = new QStatusBar(this);
     statusBar->addPermanentWidget(progressBar);
-    
+
     //Progress Stamps
     progressStamps *processingProgress = new progressStamps(data, this);
-    
+
     //Setup the layout and add widgets
     QGridLayout* layout = new QGridLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);
-    
+
     layout->addWidget(setupToolbar(), 0, 0, 3, 1);
     layout->addWidget(leftContainer, 0, 1, 1, 1);
     layout->addWidget(centerRightSplitter, 0, 2, 1, 1);
     layout->addWidget(processingProgress, 1, 1, 1, 2, Qt::AlignHCenter);
     layout->addWidget(statusBar, 2, 1, 1, 2);
 
-  manuals->hide();
-  verbosityControl->setCurrentIndex(1);
+    manuals->hide();
+    verbosityControl->setCurrentIndex(1);
+    update();
 }
 
-void centralWindow::bridgeScriptLogConnection(bool bridge)
-{
-  if(bridge)
-  {
-    connect(standardScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
-    connect(standardScripts,SIGNAL(standardError(const QByteArray &)),logViewer,SLOT(insertError(const QByteArray &)));
-    connect(customScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
-    connect(customScripts,SIGNAL(standardError(const QByteArray &)),logViewer,SLOT(insertError(const QByteArray &)));
-    connect(standardScripts,SIGNAL(scriptLaunched()),logViewer,SLOT(clear()));
-    connect(customScripts,SIGNAL(scriptLaunched()),logViewer,SLOT(clear()));
-  }
-  else
-  {
-    disconnect(standardScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
-    disconnect(standardScripts,SIGNAL(standardError(const QByteArray &)),logViewer,SLOT(insertError(const QByteArray &)));
-    disconnect(customScripts,SIGNAL(standardOut(const QStringList &)),logViewer,SLOT(insertText(const QStringList &)));
-    disconnect(customScripts,SIGNAL(standardError(const QByteArray &)),logViewer,SLOT(insertError(const QByteArray &)));
-    disconnect(standardScripts,SIGNAL(scriptLaunched()),logViewer,SLOT(clear()));
-    disconnect(customScripts,SIGNAL(scriptLaunched()),logViewer,SLOT(clear()));
-  }
+void centralWindow::bridgeScriptLogConnection(bool bridge) {
+    if (bridge) {
+        connect(standardScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
+        connect(standardScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
+        connect(customScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
+        connect(customScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
+        connect(standardScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
+        connect(customScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
+    } else {
+        disconnect(standardScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
+        disconnect(standardScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
+        disconnect(customScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
+        disconnect(customScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
+        disconnect(standardScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
+        disconnect(customScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
+    }
 }
 
-blockContainer* centralWindow::setupLogWindow() 
-{   
+blockContainer* centralWindow::setupLogWindow() {
     blockContainer *logWindow = new blockContainer("Output (Double click for logbrowser)", this);
-    logWindow->setMinimumWidth(600);
-    logWindow->setMinimumHeight(250);
-    
+    logWindow->setMinimumWidth(400);
+    logWindow->setMinimumHeight(100);
+
     //Setup Log Viewer
     logViewer = new LogViewer("Standard Output", NULL);
     bridgeScriptLogConnection(true);
-    
+
     //Setup Verbosity control combo box
     verbosityControl = new QComboBox(this);
     verbosityControl->addItems(QStringList() << "Silent" << "Low" << "Moderate" << "Highest");
-    
+
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), logViewer, SLOT(load(int)));
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), standardScripts, SLOT(setVerbosity(int)));
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), customScripts, SLOT(setVerbosity(int)));
-    
+
     //Setup History View
     QToolButton* historyButton = new QToolButton();
-    historyButton->setFixedSize(QSize(20,20));
+    historyButton->setFixedSize(QSize(20, 20));
     historyButton->setIcon(*(data->getIcon("info")));
     historyButton->setToolTip("Processing history toggle");
     historyButton->setAutoRaise(false);
     historyButton->setCheckable(true);
-    connect(historyButton,SIGNAL(toggled(bool)),this,SLOT(toggleHistoryView(bool)));
-    
+    connect(historyButton, SIGNAL(toggled(bool)), this, SLOT(toggleHistoryView(bool)));
+
     //Setup Maximize tool button
     QToolButton* maximizeLogWindow = new QToolButton();
-    maximizeLogWindow->setFixedSize(QSize(20,20));
+    maximizeLogWindow->setFixedSize(QSize(20, 20));
     maximizeLogWindow->setIcon(*(data->getIcon("maximize")));
     maximizeLogWindow->setToolTip("Maximize output view");
     maximizeLogWindow->setAutoRaise(false);
     maximizeLogWindow->setCheckable(true);
-    
+
     connect(maximizeLogWindow, SIGNAL(toggled(bool)), this, SLOT(maximizeLogWindow(bool)));
-    
+
     QWidget* verbosityControlWidget = new QWidget();
     QGridLayout* verbosityControlLayout = new QGridLayout(verbosityControlWidget);
     verbosityControlLayout->setMargin(0);
     verbosityControlLayout->setSpacing(0);
     verbosityControlWidget->setLayout(verbosityControlLayout);
-    
+
     verbosityControlLayout->addWidget(new QLabel("Verbosity Level: "), 0, 0);
-    verbosityControlLayout->addWidget(verbosityControl, 0, 1, 1, 1 , Qt::AlignVCenter);
-    verbosityControlLayout->addItem(new QSpacerItem(3,3), 0, 2);
+    verbosityControlLayout->addWidget(verbosityControl, 0, 1, 1, 1, Qt::AlignVCenter);
+    verbosityControlLayout->addItem(new QSpacerItem(3, 3), 0, 2);
     verbosityControlLayout->addWidget(historyButton, 0, 3);
-    verbosityControlLayout->addItem(new QSpacerItem(3,3), 0, 4);
+    verbosityControlLayout->addItem(new QSpacerItem(3, 3), 0, 4);
     verbosityControlLayout->addWidget(maximizeLogWindow, 0, 5);
-    
+
     //Setup the window and add widgets
-    
+
     logWindow->setMainWidget(logViewer);
     logWindow->setHeaderWidget(verbosityControlWidget);
-    
+
     connect(logWindow, SIGNAL(doubleClicked()), this, SLOT(launchLogBrowser()));
-    
+
     return logWindow;
 
 }
 
-blockContainer* centralWindow::setupParameterWindow() 
-{ 
+blockContainer* centralWindow::setupParameterWindow() {
     localParameters = new resizeableStackedWidget(this);
-    
+
     parameters = new confInterface(data, "");
 
     parametersWidget = new QWidget();
@@ -281,171 +281,157 @@ blockContainer* centralWindow::setupParameterWindow()
     parametersWidget->setLayout(parameterLayout);
     parameterLayout->addWidget(localParameters);
     parameterLayout->addWidget(parameters);
-    parameterLayout->setStretchFactor(localParameters,1);
-    parameterLayout->setStretchFactor(parameters,100);
+    parameterLayout->setStretchFactor(localParameters, 1);
+    parameterLayout->setStretchFactor(parameters, 100);
 
     QScrollArea *window = new QScrollArea(this);
     window->setWidgetResizable(true);
     window->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     window->setWidget(parametersWidget);
-    
-    
+
+
     //Setup Verbosity control combo box
     userLevelButtons = new QComboBox(this);
     userLevelButtons->addItems(QStringList() << "Simplified" << "Advanced");
     connect(userLevelButtons, SIGNAL(currentIndexChanged(int)), parameters, SLOT(setSelectionUserLevel(int)));
-    
+
     //Setup Maximize tool button
     QToolButton* maximizeParameterWin = new QToolButton();
-    maximizeParameterWin->setFixedSize(QSize(20,20));
+    maximizeParameterWin->setFixedSize(QSize(20, 20));
     maximizeParameterWin->setIcon(*(data->getIcon("maximize")));
     maximizeParameterWin->setToolTip("Maximize parameter view");
     maximizeParameterWin->setAutoRaise(false);
     maximizeParameterWin->setCheckable(true);
-    
+
     connect(maximizeParameterWin, SIGNAL(toggled(bool)), this, SLOT(maximizeParameterWindow(bool)));
-    
+
     QWidget* parameterLevelWidget = new QWidget();
     QGridLayout* parameterLevelLayout = new QGridLayout(parameterLevelWidget);
     parameterLevelLayout->setMargin(0);
     parameterLevelLayout->setSpacing(0);
     parameterLevelWidget->setLayout(parameterLevelLayout);
-    
+
     parameterLevelLayout->addWidget(new QLabel("Level: "), 0, 0);
-    parameterLevelLayout->addWidget(userLevelButtons, 0, 1, 1, 1 , Qt::AlignVCenter);
-    parameterLevelLayout->addItem(new QSpacerItem(3,3), 0, 2);
+    parameterLevelLayout->addWidget(userLevelButtons, 0, 1, 1, 1, Qt::AlignVCenter);
+    parameterLevelLayout->addItem(new QSpacerItem(3, 3), 0, 2);
     parameterLevelLayout->addWidget(maximizeParameterWin, 0, 3);
-    
+
     //Setup the window and add widgets
     blockContainer* parameterContainer = new blockContainer("Setup");
-    parameterContainer->setMinimumWidth(600);
-    parameterContainer->setMinimumHeight(250);
+    parameterContainer->setMinimumWidth(400);
+    parameterContainer->setMinimumHeight(100);
     parameterContainer->setMainWidget(window);
     parameterContainer->setHeaderWidget(parameterLevelWidget);
-    
+
     return parameterContainer;
 }
 
-QToolBar* centralWindow::setupToolbar() 
-{
+QToolBar* centralWindow::setupToolbar() {
     QToolBar* scriptsToolBar = new QToolBar("Choose Mode", this);
     scriptsToolBar->setOrientation(Qt::Vertical);
-    
+
     showStandardScripts = new QToolButton(scriptsToolBar);
     showStandardScripts->setIcon(*(data->getIcon("standard")));
-    showStandardScripts->setFixedSize(QSize(64,64));
+    showStandardScripts->setFixedSize(QSize(64, 64));
     showStandardScripts->setText("Standard");
     showStandardScripts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     showStandardScripts->setCheckable(true);
     connect(showStandardScripts, SIGNAL(clicked()), this, SLOT(setStandardMode()));
-    
+
     showCustomScripts = new QToolButton(scriptsToolBar);
     showCustomScripts->setIcon(*(data->getIcon("custom")));
-    showCustomScripts->setFixedSize(QSize(64,64));
+    showCustomScripts->setFixedSize(QSize(64, 64));
     showCustomScripts->setText("Custom");
     showCustomScripts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     showCustomScripts->setCheckable(true);
     connect(showCustomScripts, SIGNAL(clicked()), this, SLOT(setCustomMode()));
-    
+
     scriptsToolBar->addWidget(showStandardScripts);
     scriptsToolBar->addWidget(showCustomScripts);
-    
+
     return scriptsToolBar;
 
 }
 
-void centralWindow::scriptChanged(scriptModule *module, QModelIndex index)
-{
-  int uid = index.data(Qt::UserRole).toUInt();
-  currentResults = module->resultsFile(index);
+void centralWindow::scriptChanged(scriptModule *module, QModelIndex index) {
+    int uid = index.data(Qt::UserRole).toUInt();
+    currentResults = module->resultsFile(index);
 
-  if((module == customScripts && !standardScripts->isRunning()) || (module == standardScripts && !customScripts->isRunning())) updateStatusMessage(module->title(index));
+    if ((module == customScripts && !standardScripts->isRunning()) || (module == standardScripts && !customScripts->isRunning())) updateStatusMessage(module->title(index));
 
-  if(localIndex[uid] == 0 && module->conf(index)->size()!=0)
-  {
-    confInterface *local = new confInterface(module->conf(index), "");
-    connect(this,SIGNAL(fontInfoUpdated()),local,SLOT(updateFontInfo()));
-    localIndex[uid] = localParameters->addWidget(local) + 1;
-  }
+    if (localIndex[uid] == 0 && module->conf(index)->size() != 0) {
+        confInterface *local = new confInterface(module->conf(index), "");
+        connect(this, SIGNAL(fontInfoUpdated()), local, SLOT(updateFontInfo()));
+        localIndex[uid] = localParameters->addWidget(local) + 1;
+    }
 
-  if(manualIndex[uid] == 0 && !module->conf(index)->manual().isEmpty())
-    manualIndex[uid] = manuals->addWidget(new confManual(data, module->conf(index))) + 1;
+    if (manualIndex[uid] == 0 && !module->conf(index)->manual().isEmpty())
+        manualIndex[uid] = manuals->addWidget(new confManual(data, module->conf(index))) + 1;
 
-  if(localIndex[uid] - 1 < 0)
-    localParameters->hide();
-  else
-  {
-    localParameters->show();
-    localParameters->setCurrentIndex(localIndex[uid] - 1);
-  }
+    if (localIndex[uid] - 1 < 0)
+        localParameters->hide();
+    else {
+        localParameters->show();
+        localParameters->setCurrentIndex(localIndex[uid] - 1);
+    }
 
-  manuals->setCurrentIndex(manualIndex[uid] - 1);
+    manuals->setCurrentIndex(manualIndex[uid] - 1);
 
-  parameters->select(module->displayedVariables(index));
-  currentLog = module->logFile(index);
-  if(!visible["historyview"]) logViewer->loadLogFile(currentLog);
-  results->setResult(module->resultsFile(index));
-  imageParser->setResult(module->resultsFile(index));
-  //warningWindow->load(module->resultsFile(index));
-  parametersWidget->update();
+    parameters->select(module->displayedVariables(index));
+    currentLog = module->logFile(index);
+    if (!visible["historyview"]) logViewer->loadLogFile(currentLog);
+    results->setResult(module->resultsFile(index));
+    imageParser->setResult(module->resultsFile(index));
+    //warningWindow->load(module->resultsFile(index));
+    parametersWidget->update();
 }
 
-void centralWindow::standardScriptChanged(QModelIndex index)
-{
-  scriptChanged(standardScripts, index);
+void centralWindow::standardScriptChanged(QModelIndex index) {
+    scriptChanged(standardScripts, index);
 }
 
-void centralWindow::customScriptChanged(QModelIndex index)
-{
-  scriptChanged(customScripts, index);
+void centralWindow::customScriptChanged(QModelIndex index) {
+    scriptChanged(customScripts, index);
 }
 
-bool centralWindow::parseResults(confData *conf, const QString &results)
-{
-  currentResults = results;
-  return scriptParser::parseResults(conf,results);
+bool centralWindow::parseResults(confData *conf, const QString &results) {
+    currentResults = results;
+    return scriptParser::parseResults(conf, results);
 }
 
-bool centralWindow::parseResults()
-{
-  return parseResults(data, currentResults);
+bool centralWindow::parseResults() {
+    return parseResults(data, currentResults);
 }
 
-void centralWindow::scriptCompleted(scriptModule *module, QModelIndex index)
-{
-  if(!module->isRunning())
-  parseResults(data,module->resultsFile(index));
-//  results->setResult(module->resultsFile(index));
-  imageParser->setResult(module->resultsFile(index));
-  parameters->load();
-  //statusParser->load();
-  
-  emit scriptCompletedSignal();
+void centralWindow::scriptCompleted(scriptModule *module, QModelIndex index) {
+    if (!module->isRunning())
+        parseResults(data, module->resultsFile(index));
+    //  results->setResult(module->resultsFile(index));
+    imageParser->setResult(module->resultsFile(index));
+    parameters->load();
+    //statusParser->load();
+
+    emit scriptCompletedSignal();
 }
 
-void centralWindow::standardScriptCompleted(QModelIndex index)
-{
-  scriptCompleted(standardScripts,index);
+void centralWindow::standardScriptCompleted(QModelIndex index) {
+    scriptCompleted(standardScripts, index);
 }
 
-void centralWindow::customScriptCompleted(QModelIndex index)
-{
-  scriptCompleted(customScripts,index);
+void centralWindow::customScriptCompleted(QModelIndex index) {
+    scriptCompleted(customScripts, index);
 }
 
-void centralWindow::runningScriptChanged(scriptModule *module, QModelIndex index)
-{
-  updateStatusMessage(module->title(index));
+void centralWindow::runningScriptChanged(scriptModule *module, QModelIndex index) {
+    updateStatusMessage(module->title(index));
 }
 
-void centralWindow::customRunningScriptChanged(QModelIndex index)
-{
-  runningScriptChanged(customScripts,index);
+void centralWindow::customRunningScriptChanged(QModelIndex index) {
+    runningScriptChanged(customScripts, index);
 }
 
-void centralWindow::standardRunningScriptChanged(QModelIndex index)
-{
-  runningScriptChanged(standardScripts,index);
+void centralWindow::standardRunningScriptChanged(QModelIndex index) {
+    runningScriptChanged(standardScripts, index);
 }
 
 void centralWindow::setStandardMode() {
@@ -462,29 +448,21 @@ void centralWindow::setCustomMode() {
     customScripts->focusWidget();
 }
 
-void centralWindow::maximizeLogWindow(bool maximize) 
-{
-    if(maximize) 
-    {
+void centralWindow::maximizeLogWindow(bool maximize) {
+    if (maximize) {
         centralSplitter->setSizes(QList<int>() << 0 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
-    }
-    else
-    {
+    } else {
         centralSplitter->setSizes(QList<int>() << 1 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 1);
     }
 }
 
-void centralWindow::maximizeParameterWindow(bool maximize) 
-{
-    if(maximize) 
-    {
+void centralWindow::maximizeParameterWindow(bool maximize) {
+    if (maximize) {
         centralSplitter->setSizes(QList<int>() << 1 << 0);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
-    }
-    else
-    {
+    } else {
         centralSplitter->setSizes(QList<int>() << 1 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 1);
     }
@@ -500,19 +478,17 @@ void centralWindow::execute(bool halt) {
     }
 }
 
-void centralWindow::reload()
-{
-  parseResults();
-  refresh();
+void centralWindow::reload() {
+    parseResults();
+    refresh();
 }
 
-void centralWindow::refresh()
-{
-  parameters->load();
-  //statusParser->load();
-  results->load();
-  imageParser->load();
-  //statusParser->load();
+void centralWindow::refresh() {
+    parameters->load();
+    //statusParser->load();
+    results->load();
+    imageParser->load();
+    //statusParser->load();
 }
 
 void centralWindow::updateStatusMessage(const QString& message) {
@@ -520,75 +496,63 @@ void centralWindow::updateStatusMessage(const QString& message) {
     statusBar->showMessage(message);
 }
 
-void centralWindow::increaseScriptProgress(int increament) 
-{
+void centralWindow::increaseScriptProgress(int increament) {
     if (progressBar->value() + increament <= progressBar->maximum())
         progressBar->setValue(progressBar->value() + increament);
     else
         progressBar->setValue(progressBar->maximum());
 }
 
-void centralWindow::setScriptProgress(int progress) 
-{
+void centralWindow::setScriptProgress(int progress) {
     progressBar->setValue(progress);
 }
 
-void centralWindow::showManual(bool show)
-{
-  if (show) {
+void centralWindow::showManual(bool show) {
+    if (show) {
         manuals->show();
     } else {
         manuals->hide();
     }
 }
 
-void centralWindow::revert()
-{
-  data->reload();
-  parameters->load();
-  //statusParser->load();
+void centralWindow::revert() {
+    data->reload();
+    parameters->load();
+    //statusParser->load();
 }
 
-void centralWindow::updateFontInfo()
-{
-  parameters->updateFontInfo();
-  logViewer->updateFontInfo();
-  results->updateFontInfo();
-  imageParser->updateFontInfo(); 
-  emit fontInfoUpdated();
+void centralWindow::updateFontInfo() {
+    parameters->updateFontInfo();
+    logViewer->updateFontInfo();
+    results->updateFontInfo();
+    imageParser->updateFontInfo();
+    emit fontInfoUpdated();
 }
 
-void centralWindow::launchLogBrowser()
-{
-  QProcess::startDetached(data->getApp("logBrowser") + " " + logViewer->getLogFile());
+void centralWindow::launchLogBrowser() {
+    QProcess::startDetached(data->getApp("logBrowser") + " " + logViewer->getLogFile());
 }
 
-void centralWindow::launchFileBrowser()
-{
-    QString path = QDir::toNativeSeparators( data->getDir("working"));
+void centralWindow::launchFileBrowser() {
+    QString path = QDir::toNativeSeparators(data->getDir("working"));
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
-void centralWindow::toggleHistoryView(bool show)
-{
-  visible["historyview"] = show;
-  if(show)
-  {
-    bridgeScriptLogConnection(false);
-    logViewer->loadLogFile(data->getDir("working") + "/" + "History.dat");
-    logWindow->setHeaderTitle("Processing history");
-  }
-  else
-  {
-    logViewer->loadLogFile(currentLog);	
-    bridgeScriptLogConnection(true);
-    logWindow->setHeaderTitle("Output (Double click for logbrowser)");
-  }
-  verbosityControl->setCurrentIndex(verbosityControl->currentIndex());
+void centralWindow::toggleHistoryView(bool show) {
+    visible["historyview"] = show;
+    if (show) {
+        bridgeScriptLogConnection(false);
+        logViewer->loadLogFile(data->getDir("working") + "/" + "History.dat");
+        logWindow->setHeaderTitle("Processing history");
+    } else {
+        logViewer->loadLogFile(currentLog);
+        bridgeScriptLogConnection(true);
+        logWindow->setHeaderTitle("Output (Double click for logbrowser)");
+    }
+    verbosityControl->setCurrentIndex(verbosityControl->currentIndex());
 }
 
-void centralWindow::useNewViewer(bool enable)
-{
-  preview->enableNewViewer(enable);
+void centralWindow::useNewViewer(bool enable) {
+    preview->enableNewViewer(enable);
 }
 

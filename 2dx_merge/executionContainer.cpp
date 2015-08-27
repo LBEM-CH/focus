@@ -43,6 +43,8 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     QSplitter* scriptsContainer = new QSplitter(Qt::Vertical);
     scriptsContainer->addWidget(scriptsWidget);
     scriptsContainer->addWidget(manuals);
+    scriptsContainer->setStretchFactor(0, 2);
+    scriptsContainer->setStretchFactor(1, 1);
 
     //Setup center container
     blockContainer* logWindow = setupLogWindow();
@@ -51,6 +53,8 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     centralContainer = new QSplitter(Qt::Vertical);
     centralContainer->addWidget(parameterContainer);
     centralContainer->addWidget(logWindow);
+    centralContainer->setStretchFactor(0, 1);
+    centralContainer->setStretchFactor(1, 1);
 
     //Setup rightmost container
     blockContainer *resultsContainer = new blockContainer("Results");
@@ -84,6 +88,8 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     centerRightSplitter->setHandleWidth(4);
     centerRightSplitter->addWidget(centralContainer);
     centerRightSplitter->addWidget(resultsSplitter);
+    centerRightSplitter->setStretchFactor(0, 3);
+    centerRightSplitter->setStretchFactor(1, 1);
 
     //Setup status Bar
     progressBar = new QProgressBar(this);
@@ -200,8 +206,8 @@ blockContainer* executionContainer::setupLogWindow()
     
     //Setup the window and add widgets
     blockContainer *logWindow = new blockContainer("Output (Double click for logbrowser)", this);
-    logWindow->setMinimumWidth(600);
-    logWindow->setMinimumHeight(250);
+    logWindow->setMinimumWidth(400);
+    logWindow->setMinimumHeight(100);
     logWindow->setMainWidget(logViewer);
     logWindow->setHeaderWidget(verbosityControlWidget);
     
@@ -259,8 +265,8 @@ blockContainer* executionContainer::setupParameterWindow()
     
     //Setup the window and add widgets
     blockContainer* parameterContainer = new blockContainer("Setup");
-    parameterContainer->setMinimumWidth(600);
-    parameterContainer->setMinimumHeight(250);
+    parameterContainer->setMinimumWidth(400);
+    parameterContainer->setMinimumHeight(100);
     parameterContainer->setMainWidget(window);
     parameterContainer->setHeaderWidget(parameterLevelWidget);
     

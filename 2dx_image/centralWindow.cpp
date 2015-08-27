@@ -163,9 +163,6 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
 
     statusBar = new QStatusBar(this);
     statusBar->addPermanentWidget(progressBar);
-
-    //Progress Stamps
-    progressStamps *processingProgress = new progressStamps(data, this);
     
     //Setup the layout and add widgets
     QGridLayout* layout = new QGridLayout(this);
@@ -173,11 +170,10 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     layout->setSpacing(0);
     setLayout(layout);
 
-    layout->addWidget(setupToolbar(), 0, 0, 3, 1);
+    layout->addWidget(setupToolbar(), 0, 0, 2, 1);
     layout->addWidget(scriptsContainer, 0, 1, 1, 1);
     layout->addWidget(centerRightSplitter, 0, 2, 1, 1);
-    layout->addWidget(processingProgress, 1, 1, 1, 2, Qt::AlignHCenter);
-    layout->addWidget(statusBar, 2, 1, 1, 2);
+    layout->addWidget(statusBar, 1, 1, 1, 2);
 
     manuals->hide();
     verbosityControl->setCurrentIndex(1);

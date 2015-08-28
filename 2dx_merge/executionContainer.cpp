@@ -61,9 +61,11 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     resultsView = new resultsModule(mainData, results, resultsModule::results, mainData->getDir("project"));
     resultsContainer->setMainWidget(resultsView);
     resultsContainer->setMinimumSize(QSize(250, 100));
+    resultsContainer->setMaximumWidth(400);
 
     blockContainer *imagesContainer = new blockContainer("Images");
     imagesContainer->setMinimumSize(QSize(250, 100));
+    imagesContainer->setMaximumWidth(400);
     
     connect(imagesContainer, SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
     resultsModule *imagesView = new resultsModule(mainData, results, resultsModule::images, mainData->getDir("project"));
@@ -116,7 +118,13 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
 
     verbosityControl->setCurrentIndex(1);
     standardScripts->initialize();
+    
     setStandardMode();
+    
+    //Just to get the correct stretches of log and parameter windows
+    maximizeLogWindow(false);
+    maximizeParameterWindow(false);
+    
 }
 
 QToolBar* executionContainer::setupToolbar() 
@@ -207,7 +215,7 @@ blockContainer* executionContainer::setupLogWindow()
     //Setup the window and add widgets
     blockContainer *logWindow = new blockContainer("Output (Double click for logbrowser)", this);
     logWindow->setMinimumWidth(400);
-    logWindow->setMinimumHeight(100);
+    logWindow->setMinimumHeight(200);
     logWindow->setMainWidget(logViewer);
     logWindow->setHeaderWidget(verbosityControlWidget);
     
@@ -266,7 +274,7 @@ blockContainer* executionContainer::setupParameterWindow()
     //Setup the window and add widgets
     blockContainer* parameterContainer = new blockContainer("Setup");
     parameterContainer->setMinimumWidth(400);
-    parameterContainer->setMinimumHeight(100);
+    parameterContainer->setMinimumHeight(200);
     parameterContainer->setMainWidget(window);
     parameterContainer->setHeaderWidget(parameterLevelWidget);
     
@@ -422,7 +430,7 @@ void executionContainer::maximizeLogWindow(bool maximize)
     else
     {
         centralContainer->setSizes(QList<int>() << 1 << 1);
-        centerRightSplitter->setSizes(QList<int>() << 1 << 1);
+        centerRightSplitter->setSizes(QList<int>() << 5 << 2);
     }
 }
 
@@ -436,7 +444,7 @@ void executionContainer::maximizeParameterWindow(bool maximize)
     else
     {
         centralContainer->setSizes(QList<int>() << 1 << 1);
-        centerRightSplitter->setSizes(QList<int>() << 1 << 1);
+        centerRightSplitter->setSizes(QList<int>() << 5 << 2);
     }
 }
 

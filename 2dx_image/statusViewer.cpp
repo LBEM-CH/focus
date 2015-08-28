@@ -2,10 +2,7 @@
 
 void statusViewer::initialize()
 {
-  int minWidth = int(QApplication::desktop()->width()/5.00);
-  if(minWidth > 235) minWidth = 235;
-  setMinimumWidth(minWidth);
-  //setFixedHeight(minWidth);
+  setFixedHeight(126);
   setTextSizeMultiplier(0.8);
   timer.setSingleShot(true);
   data = NULL;

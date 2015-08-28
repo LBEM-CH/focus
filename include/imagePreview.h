@@ -67,7 +67,6 @@ class imagePreview : public QFrame
   int minWidth;
   bool showInfo;
 
-  QWidget* setupWidgetHeader();
   void resetInfo();
   void resetImage(bool ignore_size=false);
   void clearImage();

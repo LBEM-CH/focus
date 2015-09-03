@@ -24,19 +24,31 @@ fi
 ls
 ls $ROOT/Resource
 
-packagemaker \
---title "2dx Nightly Build" \
---version  DATE=`date "+%d_%b_%Y"` \
---filter "\.DS_Store" \
---resources $DIR/Resources/ \
---scripts $DIR/Resources/scripts/ \
---root-volume-only \
---domain system \
---verbose \
---no-relocate \
---install-to "/opt/2dx" \
---id org.2dx.pkg \
---root $ROOT \
---out $OUTFILE \
---discard-forks \
---verbose
+#packagemaker \
+#--title "2dx Nightly Build" \
+#--version  DATE=`date "+%d_%b_%Y"` \
+#--filter "\.DS_Store" \
+#--resources $DIR/Resources/ \
+#--scripts $DIR/Resources/scripts/ \
+#--root-volume-only \
+#--domain system \
+#--verbose \
+#--no-relocate \
+#--install-to "/opt/2dx" \
+#--id org.2dx.pkg \
+#--root $ROOT \
+#--out $OUTFILE \
+#--discard-forks \
+#--verbose
+
+pkgbuild \
+    --root ${ROOT} \
+    --scripts $DIR/Resources/scripts/ \
+    --identifier "org.2dx.pkg" \
+    --version DATE=`date "+%d_%b_%Y"` \
+    --install-location "/opt/2dx" \
+    --filter "\.DS_Store" \
+    ${OUTFILE}
+
+#TODO: productbuild
+    

@@ -36,9 +36,9 @@ imagePreview::imagePreview(confData *data, QString resultValue, bool info, QWidg
   showInfo = info;
   useOldViewer = true;
 
-  //setAutoFillBackground(true);
-  setFixedSize(QSize(minWidth,minWidth));
-  //setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+  setAutoFillBackground(true);
+  setMaximumSize(QSize(minWidth,minWidth));
+  setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
   if(!result.isEmpty())
   {
@@ -70,34 +70,12 @@ imagePreview::imagePreview(confData *data, QString resultValue, bool info, QWidg
   preview->addWidget(imageLabel);
   preview->addWidget(headerWidget);
   
-  //layout->addWidget(setupWidgetHeader(), 0, 0);
   layout->addWidget(preview, 1, 0);
 
   QPalette pal(palette());
   pal.setBrush(QPalette::Background,QBrush(QColor(255,255,255),conf->getIcon("nullPreview")->pixmap(minWidth,minWidth).scaledToWidth(minWidth)));
   setPalette(pal);
   setLayout(layout);
-}
-
-QWidget* imagePreview::setupWidgetHeader() 
-{
-    QWidget* widgetHeader = new QWidget(this);
-    //widgetHeader->setFixedHeight(12);
-    
-    QHBoxLayout* layout = new QHBoxLayout();
-    layout->setMargin(0);
-    layout->setSpacing(0);
-    widgetHeader->setLayout(layout);
-    
-    QCheckBox* showHeaderOption = new QCheckBox(tr("Show Header"), widgetHeader);
-    showHeaderOption->setCheckable(true);
-    showHeaderOption->setChecked(false);
-    
-    connect(showHeaderOption, SIGNAL(toggled(bool)), this, SLOT(showImageHeader(bool)));
-    
-    layout->addWidget(showHeaderOption, 0, Qt::AlignRight);
-    
-    return widgetHeader;
 }
 
 void imagePreview::mouseDoubleClickEvent(QMouseEvent *event)

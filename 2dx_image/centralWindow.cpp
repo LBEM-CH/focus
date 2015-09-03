@@ -30,7 +30,7 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
 
     //Setup Leftmost container
     scriptsWidget = new QStackedWidget(this);
-    scriptsWidget->setMinimumWidth(250);
+    scriptsWidget->setMinimumWidth(180);
     scriptsWidget->setMaximumWidth(300);
 
     standardScripts = new scriptModule(data, data->getDir("standardScripts"), scriptModule::standard);
@@ -72,22 +72,14 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     logWindow = setupLogWindow();
     //warningWindow = new warningBox;
     //logWindow->addWidget(warningWindow);
-
-    blockContainer *statusContainer = new blockContainer("Status");
-    statusParser = new statusViewer(data->getDir("config") + "/2dx_image/2dx_status.html");
-    statusParser->setConf(data);
-    statusParser->load();
-    statusContainer->setMainWidget(statusParser);
     
     centralSplitter = new QSplitter(this);
     centralSplitter->setOrientation(Qt::Vertical);
 
     centralSplitter->addWidget(parameterContainer);
     centralSplitter->addWidget(logWindow);
-    centralSplitter->addWidget(statusContainer);
-    centralSplitter->setStretchFactor(0, 1);
+    centralSplitter->setStretchFactor(0, 2);
     centralSplitter->setStretchFactor(1, 1);
-    centralSplitter->setStretchFactor(2, 1);
 
     /*           Results View Information               */
 
@@ -169,11 +161,37 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);
+    
+    //blockContainer *statusContainer = new blockContainer("Status");
+    statusParser = new statusViewer(data->getDir("config") + "/2dx_image/2dx_status.html");
+    statusParser->setConf(data);
+    statusParser->load();
+    //statusContainer->setMainWidget(statusParser);
+    
+    
+    /*LAYOUT
+    * -----------------------------------------------------------
+     * | TOOL   | SCRIPTS       | CENTRAL RIGHT SPLITTER
+     * | BAR    | WIDGET        | (0, 2, 1 , 1)
+     * |(0,0,   | (0,1,2,1)     |
+     * |   3,1) |               |
+     * |        |               |
+     * |        |               |
+     * |        |               |
+     * |        |               |
+     * |        |               |
+     * |        |               |__________________________________
+     * |        |               | STATUS PARSER (1, 2, 1, 1)
+     * |        |_______________|__________________________________
+     * |        | STATUSBAR (2, 1, 1,2)
+     * -----------------------------------------------------------
+     */
 
-    layout->addWidget(setupToolbar(), 0, 0, 2, 1);
-    layout->addWidget(scriptsContainer, 0, 1, 1, 1);
+    layout->addWidget(setupToolbar(), 0, 0, 3, 1);
+    layout->addWidget(scriptsContainer, 0, 1, 2, 1);
     layout->addWidget(centerRightSplitter, 0, 2, 1, 1);
-    layout->addWidget(statusBar, 1, 1, 1, 2);
+    layout->addWidget(statusParser, 1, 2, 1, 1);
+    layout->addWidget(statusBar, 2, 1, 1, 2);
 
     manuals->hide();
     verbosityControl->setCurrentIndex(1);
@@ -439,20 +457,20 @@ void centralWindow::setCustomMode() {
 
 void centralWindow::maximizeLogWindow(bool maximize) {
     if (maximize) {
-        centralSplitter->setSizes(QList<int>() << 0 << 1 << 0);
+        centralSplitter->setSizes(QList<int>() << 0 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
     } else {
-        centralSplitter->setSizes(QList<int>() << 1 << 1 << 1);
+        centralSplitter->setSizes(QList<int>() << 1 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 1);
     }
 }
 
 void centralWindow::maximizeParameterWindow(bool maximize) {
     if (maximize) {
-        centralSplitter->setSizes(QList<int>() << 1 << 0 << 0);
+        centralSplitter->setSizes(QList<int>() << 1 << 0);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
     } else {
-        centralSplitter->setSizes(QList<int>() << 1 << 1 << 1);
+        centralSplitter->setSizes(QList<int>() << 1 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 1);
     }
 }

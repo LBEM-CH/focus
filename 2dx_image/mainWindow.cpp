@@ -170,6 +170,8 @@ mainWindow::mainWindow(char *dirArg)
   setupActions();
   setupToolBar();
   setupMenuBar();
+  
+  resize(1000, 720);
 }
 
 void mainWindow::setupActions()

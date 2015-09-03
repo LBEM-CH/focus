@@ -12,8 +12,8 @@
 #   Qt5_CMAKE_DIR
 #   
 ################################################################
-IF(CMAKE_VERSION VERSION_LESS 2.8.11)
-    MESSAGE(FATAL_ERROR "Qt5 requires at least CMake version 2.8.11")
+IF(CMAKE_VERSION VERSION_LESS 2.8.10)
+    MESSAGE(FATAL_ERROR "Qt5 requires at least CMake version 2.8.10")
 ENDIF()
 
 IF(NOT DEFINED Qt5_FIND_COMPONENTS)

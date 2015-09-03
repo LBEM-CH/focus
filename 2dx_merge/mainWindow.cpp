@@ -43,13 +43,6 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     installedVersion = mainData->version();
     setWindowTitle("2dx (" + installedVersion + ")");
     setUnifiedTitleAndToolBarOnMac(true);
-    
-    QWidget *centralWidget = new QWidget(this);
-    setCentralWidget(centralWidget);
-    QGridLayout* layout = new QGridLayout(centralWidget);
-    layout->setMargin(0);
-    layout->setSpacing(0);
-    centralWidget->setLayout(layout);
 
     connect(&importProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(importFinished()));
     
@@ -67,10 +60,20 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     
     container->addWidget(albumCont);
     container->addWidget(executionCont);
-    container->setStretchFactor(0, 2);
-    container->setStretchFactor(1, 3);
+    container->setStretchFactor(0, 1);
+    container->setStretchFactor(1, 2);
 
+    QWidget *centralWidget = new QWidget(this);
+    QGridLayout* layout = new QGridLayout(centralWidget);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    centralWidget->setLayout(layout);
     layout->addWidget(container);
+    
+    QTabWidget* centralTabs = new QTabWidget(this);
+    centralTabs->addTab(centralWidget, "MERGE TOOL");
+    
+    setCentralWidget(centralTabs);
 
     about = new aboutWindow(mainData, this, true);
     about->hide();
@@ -97,6 +100,8 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     reproject = NULL;
 
     importCount = 0;
+    
+    resize(1040, 720);
 
 }
 

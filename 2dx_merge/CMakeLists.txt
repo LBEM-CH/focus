@@ -238,6 +238,10 @@ INSTALL(CODE "
 
 # directories to look for dependencies
 SET(DIRS ${Qt5_LIB_DIR})
+
+file(GLOB Qt5Libs ${DIRS}/libQt5Gui*)
+install(FILES ${Qt5Libs} DESTINATION lib)
+
 # Now the work of copying dependencies into the bundle/package
 # The quotes are escaped and variables to use at install time have their $ escaped
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).

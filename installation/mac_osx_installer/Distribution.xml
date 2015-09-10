@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <options customize="never" hostArchitectures="i386" rootVolumeOnly="true"/>
+    <title>2dx</title>
+    <welcome file="Welcome.html"/>
+    <license file="license.rtf" />
+    <background file="background.jpg" alignment="bottomleft" scaling="proportional"/>
+    
+    <options customize="never" />
+    <choices-outline>
+        <line choice="install"/>
+    </choices-outline>
+    <choice id="install" title="2dx">
+        <pkg-ref id="2dx_main">#2dx_main.pkg</pkg-ref>
+        <pkg-ref id="2dx_merge" auth="Root">#2dx_merge.pkg</pkg-ref>
+        <pkg-ref id="2dx_image" auth="Root">#2dx_image.pkg</pkg-ref>
+        <pkg-ref id="2dx_logbrowser" auth="Root">#2dx_logbrowser.pkg</pkg-ref>
+    </choice>
+</installer-gui-script>

@@ -133,7 +133,7 @@ add_subdirectory(2dx_automator)
 add_subdirectory(plugins)
 add_subdirectory(bin)
 
-install(FILES LICENSE INSTALL.SOURCE DESTINATION ${CMAKE_BINARY_DIR} )
+install(FILES LICENSE INSTALL.SOURCE DESTINATION Resource/.. )
 
 configure_file("changes.htm.in" "changes.htm")
 configure_file("kernel/config/2dx_image/about.htm.in" "about.htm")
@@ -192,12 +192,10 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "tcsh (>=6.17.00)")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>=2.14.00)")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "fftw3")
 
-
 #set(CPACK_RPM_PACKAGE_REQUIRES "tcsh >= 6.17.0, fftw-libs >= 3.3")
 
 set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/redhat/postinst.sh")
 set(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/redhat/preinst.sh")
-
 set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/redhat/postrm.sh")
 
 

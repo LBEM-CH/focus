@@ -281,7 +281,7 @@ if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }}
   echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
 endif
 #
-if ( ${AMP_Scale_Factor}x == ‘x’ ) then
+if ( ${AMP_Scale_Factor}x == 'x' ) then
   set AMP_Scale_Factor = 0.001
   echo "set AMP_Scale_Factor = ${AMP_Scale_Factor}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: AMP_Scale_Factor corrected to ${AMP_Scale_Factor}"

@@ -4,25 +4,36 @@
 #
 # Marcel Arheit  21.01.2011
 
-if [ $# -lt 2 ]
+if [ $# -lt 3 ]
 then
 	echo "Not enough arguments specified"
-	echo "Usage: `basename $0:` <root_dir> <out_file>" >&2
+	echo "Usage: `basename $0:` <root_dir> <package_dir> <version>" >&2
 	echo 'Aborting!'
 	exit 1
 fi
 DIR=`dirname $0`
-echo "DIR=$DIR"
+echo "MAC OSX INSALLATION FILES DIR=$DIR"
 ROOT=$1
-OUTFILE=$2
-if [ -f $OUTFILE ]
+PACKAGE_DIR=$2
+VERSION=$3
+
+PACKAGE_2dx=`echo "${PACKAGE_DIR}/2dx-${VERSION}.pkg"`
+PACKAGE_2dx_main=${PACKAGE_DIR}/2dx_main.pkg
+PACKAGE_2dx_merge=${PACKAGE_DIR}/2dx_merge.pkg
+PACKAGE_2dx_image=${PACKAGE_DIR}/2dx_image.pkg
+PACKAGE_2dx_logbrowser=${PACKAGE_DIR}/2dx_logbrowser.pkg
+
+if [ -d $PACKAGE_DIR ]
 then
-	echo "removing previous version of $OUTFILE" 
-	rm $OUTFILE
+	echo "removing previous version in $PACKAGE_DIR" 
+	rm -r $PACKAGE_DIR
+        mkdir $PACKAGE_DIR
+else
+        mkdir -p $PACKAGE_DIR
 fi
 
-ls
-ls $ROOT/Resource
+echo "The contents are:"
+ls $ROOT
 
 #packagemaker \
 #--title "2dx Nightly Build" \
@@ -43,12 +54,36 @@ ls $ROOT/Resource
 
 pkgbuild \
     --root ${ROOT} \
-    --scripts $DIR/Resources/scripts/ \
-    --identifier "org.2dx.pkg" \
-    --version DATE=`date "+%d_%b_%Y"` \
+    --identifier "org.cina.pkg.2dx_main" \
+    --version ${VERSION} \
     --install-location "/opt/2dx" \
     --filter "\.DS_Store" \
-    ${OUTFILE}
+    ${PACKAGE_2dx_main}
 
-#TODO: productbuild
+pkgbuild \
+    --root ${ROOT}/2dx_merge \
+    --identifier "org.cina.pkg.2dx_merge" \
+    --version ${VERSION} \
+    --install-location "/opt/2dx" \
+    ${PACKAGE_2dx_merge}
+
+pkgbuild \
+    --root ${ROOT}/2dx_image \
+    --identifier "org.cina.pkg.2dx_image" \
+    --version ${VERSION} \
+    --install-location "/opt/2dx" \
+    ${PACKAGE_2dx_image}
+
+pkgbuild \
+    --root ${ROOT}/2dx_logbrowser \
+    --identifier "org.cina.pkg.2dx_logbrowser" \
+    --version ${VERSION} \
+    --install-location "/opt/2dx" \
+    ${PACKAGE_2dx_logbrowser}
+
+productbuild \
+    --distribution ${DIR}/Distribution.xml \
+    --package-path ${PACKAGE_DIR} \
+    --resources $DIR/Resources/ \
+    ${PACKAGE_2dx}
     

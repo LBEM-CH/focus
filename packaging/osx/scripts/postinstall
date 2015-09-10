@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-export INSTALL_DIR=$2
+export INSTALL_DIR=/Applications/2dx
 #
 cd ${INSTALL_DIR}/bin
 \rm -f 2dx_image.app
@@ -14,8 +14,6 @@ chown -RP root:wheel ${INSTALL_DIR}
 chmod -R 777 ${INSTALL_DIR}/kernel
 #chown -RP $USER:wheel ${INSTALL_DIR}/kernel   
 #
-\rm -f /Applications/2dx
-ln -sf ${INSTALL_DIR}/bin/2dx_merge.app /Applications/2dx
 open /Applications
 #
 exit 0

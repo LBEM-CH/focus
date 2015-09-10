@@ -35,7 +35,6 @@ install(FILES ${CONF} DESTINATION ${INSTALL_DIR})
 install(SCRIPT install_symlink.cmake)
 
 set(CONF_2DX_IMAGE
-        2dx_image/about.htm
         2dx_image/navigator_help.htm
         2dx_image/2dx_status.html
 )

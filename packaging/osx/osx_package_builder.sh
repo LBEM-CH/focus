@@ -54,9 +54,10 @@ ls $ROOT
 
 pkgbuild \
     --root ${ROOT} \
+    --scripts $DIR/Resources/scripts/ \
     --identifier "org.cina.pkg.2dx_main" \
     --version ${VERSION} \
-    --install-location "/opt/2dx" \
+    --install-location "/Applications/2dx" \
     --filter "\.DS_Store" \
     ${PACKAGE_2dx_main}
 
@@ -64,21 +65,21 @@ pkgbuild \
     --root ${ROOT}/2dx_merge \
     --identifier "org.cina.pkg.2dx_merge" \
     --version ${VERSION} \
-    --install-location "/opt/2dx" \
+    --install-location "/Applications/2dx" \
     ${PACKAGE_2dx_merge}
 
 pkgbuild \
     --root ${ROOT}/2dx_image \
     --identifier "org.cina.pkg.2dx_image" \
     --version ${VERSION} \
-    --install-location "/opt/2dx" \
+    --install-location "/Applications/2dx" \
     ${PACKAGE_2dx_image}
 
 pkgbuild \
     --root ${ROOT}/2dx_logbrowser \
     --identifier "org.cina.pkg.2dx_logbrowser" \
     --version ${VERSION} \
-    --install-location "/opt/2dx" \
+    --install-location "/Applications/2dx" \
     ${PACKAGE_2dx_logbrowser}
 
 productbuild \

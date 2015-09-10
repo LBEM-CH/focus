@@ -1,3 +1,0 @@
-cp /local0/hudson/2dx_nightly_source.tar.gz /local0/hudson/2dx-@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@-Source.tar.gz
-
-./build_scripts/upload_nightly_build.sh /local0/hudson/2dx-@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@-Source.tar.gz http://www.2dx.unibas.ch/download/2dx-software/2dx-source-code

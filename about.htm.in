@@ -2,7 +2,8 @@
 
 <body>
 <H1> 2dx </H1>
-<b>Version:</b> 3.4.1<br>
+<b>Version: </b>@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@<br>
+<b>Revision-Number: </b>@GIT_COMMIT_HASH@<br>
 <p></p>
 <b>License and Availability:</b><br>
  2dx is released under the <a href="http://www.gnu.org/copyleft/gpl.html">GNU-GPL</a>, and is available on <a href="http://2dx.org/download/2dx-software">2dx.org</a>. <BR>
@@ -30,6 +31,7 @@ It runs natively on Mac OSX and Linux/X11 (Linux, and other Unix variants).
 <tr><td> 3.2.0 </td><td> </td><td> Jul. 06, 2010 </td><td> </td><td> Build system changed to CMake.</td></tr>
 <tr><td> 3.3.0 </td><td> </td><td> Jan. 03, 2011 </td><td> </td><td> Various improvements, including more robust 3D merging. </td></tr>
 <tr><td> 3.4.1 </td><td> </td><td> Apr. 09, 2012 </td><td> </td><td> Various improvements. </td></tr>
+<tr><td> 3.4.2 </td><td> </td><td> Feb. 26, 2014 </td><td> </td><td> Various improvements, including Diffmaps and 2dx_automator </td></tr>
 </table>
 <p></p>
 <b>Source:</b><br>

@@ -16,7 +16,7 @@ configure_file("resources/Welcome.html.in" "${CMAKE_CURRENT_BINARY_DIR}/resource
 file(COPY "resources/License.rtf" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/resources")
 file(COPY "upload_to_server.sh" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if(APPLE)
     file(COPY "resources/background.jpg" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/resources")
     file(COPY "osx/Distribution.xml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
     file(COPY "osx/change_dylibs.sh" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

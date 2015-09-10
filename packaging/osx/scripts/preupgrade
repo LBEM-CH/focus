@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-export INSTALL_DIR=/Applications/2dx
+export INSTALL_DIR=$2
 #
 rm -rf /usr/local/2dx
 rm -rf /Applications/2dx

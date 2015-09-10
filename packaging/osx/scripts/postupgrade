@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-export INSTALL_DIR=/Applications/2dx
+export INSTALL_DIR=$2
 #
 cd ${INSTALL_DIR}/bin
 \rm -f 2dx_image.app

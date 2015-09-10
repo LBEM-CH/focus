@@ -1,7 +1,8 @@
 #!/bin/sh
 #
-export INSTALL_DIR=/Applications/2dx
+export INSTALL_DIR=$2
 #
+echo "PROCESSING PREINSTALL"
 rm -rf /usr/local/2dx
 rm -rf /Applications/2dx
 rm -rf /opt/2dx

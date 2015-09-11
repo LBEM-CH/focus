@@ -119,6 +119,7 @@ C
         write(*,'(''opening '',A)')cname3
         open(12,FILE=cname3,STATUS='OLD',ERR=910)
 C
+        call cgetline(CIMAGENAME,"imagename")
         call cgetline(CIMAGENUMBER,"imagenumber")
         imcount=imcount+1
         read(CIMAGENUMBER,*)imnum(imcount)

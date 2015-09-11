@@ -63,7 +63,7 @@ C               - scaled up version of required data on  'OUT'  - unit 3
 C
 C****************************************************************************** 
       PARAMETER (NMAX=20000000)
-      PARAMETER (NSLOTS=100)
+      PARAMETER (NSLOTS=200)
       PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)
       PARAMETER (NREF=4)
@@ -552,7 +552,7 @@ C*SCALORIGTILT*****************************************************************
      .          BR3DT,BRSPAC,AVERREF,IR,IRESTEP,
      .          BXYMIN,BXYMAX,BZMIN,BZMAX,RESLIMXY,RESLIMZ,BEXTRA)
       PARAMETER (NMAX=10000000)
-      PARAMETER (NSLOTS=100)
+      PARAMETER (NSLOTS=200)
       PARAMETER (NFILMS=2000)
       PARAMETER (INTERVALBR=25)
       DIMENSION IH(NMAX),IK(NMAX),ZSTAR(NMAX),AMP(NMAX),CTFS(NMAX),
@@ -639,8 +639,8 @@ C     .       DSTARSQ,IRESTEP,ISLOT,AREF
 CHEN<
             write(6,'(''::ERROR: AVERREF('',I8,'')=0.0'')')ISLOT
             write(6,'(''::ERROR: Too high resolution'',
-     .        '' for type of reference?'')')
-            write(6,'(''IRESTEP,ISLOT,NSLOTS = '',3I10)')IRESTEP,ISLOT,NSLOTS
+     .        '' for type of reference? INCREASE NSLOTS?'')')
+            write(6,'(''::IRESTEP,ISLOT,NSLOTS = '',3I10)')IRESTEP,ISLOT,NSLOTS
             AREF = AVERREF(NSLOTS)
           endif
         ELSE

@@ -140,13 +140,8 @@ ${imagenumber},${imagename},${date}
 ${aphfile}
 F
 ${TAXA},${TANGL},0                                                  ! TAXA,TANGL,IORIGT
-<<<<<<< HEAD
-${lattice}                                                      ! reciprocal lattice
-${phaori},${phastep},${zwin},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT180,REVHK,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL
-=======
 ${lattice}							! reciprocal lattice
 ${phaori},${phastep},${zwin},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT180,REVHK,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL,LUSEML
->>>>>>> master
 ${CS},${KV},${beamtilt}                                                ! cs,kv,tx,ty
 ${RESMIN},${RESMAX}                                                 ! resolution limits
 -1

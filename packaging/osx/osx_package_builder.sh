@@ -63,11 +63,38 @@ echo ''
 
 
 echo '*############################################################################*'
+echo '| Getting and reapiring component list                                       |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+pkgbuild \
+    --analyze \
+    --root ${ROOT} \
+    ${PACKAGE_DIR}/2dx.plist 
+
+echo "Making pacages non relocatable"
+
+for i in `fgrep -n "<key>BundleIsRelocatable</key>" ${PACKAGE_DIR}/2dx.plist | cut -d':' -f 1`
+do
+    i=$((i + 1))
+    echo changing line $i
+    sed -i -e "${i}s|<true/>|<false/>|" ${PACKAGE_DIR}/2dx.plist
+done
+
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+
+echo '*############################################################################*'
 echo '| Building the dependent packages                                            |'
 echo '*============================================================================*'
 echo '|                                                                            |'
 pkgbuild \
     --root ${ROOT} \
+    --component-plist ${PACKAGE_DIR}/2dx.plist \
     --scripts $PARENT_DIR/scripts/ \
     --identifier "org.cina.pkg.2dx" \
     --version ${VERSION} \

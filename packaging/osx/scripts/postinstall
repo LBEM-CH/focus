@@ -1,7 +1,8 @@
 #!/bin/sh
 #
-export INSTALL_DIR=/Applications/2dx
+export INSTALL_DIR=$2
 #
+echo "PROCESSING POSTINSTALL"
 cd ${INSTALL_DIR}/bin
 \rm -f 2dx_image.app
 ln -sf ../2dx_image/2dx_image.app ./

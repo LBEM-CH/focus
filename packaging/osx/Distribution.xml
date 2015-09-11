@@ -9,7 +9,7 @@
         <line choice="install"/>
     </choices-outline>
     <choice id="install" title="2dx">
-        <pkg-ref id="org.cina.pkg.2dx_main">#2dx_main.pkg<must-close>
+        <pkg-ref id="org.cina.pkg.2dx">#2dx.pkg<must-close>
                 <app id="org.cina.2dx"/>
             </must-close>
         </pkg-ref>

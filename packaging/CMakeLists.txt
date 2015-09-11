@@ -22,9 +22,7 @@ if(APPLE)
     file(COPY "osx/change_dylibs.sh" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
     file(COPY "osx/osx_package_builder.sh" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
     file(COPY "osx/scripts/preinstall" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/scripts")
-    file(COPY "osx/scripts/preupgrade" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/scripts")
     file(COPY "osx/scripts/postinstall" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/scripts")
-    file(COPY "osx/scripts/postupgrade" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/scripts")
 endif()
 #------------------------------------------------------------------------------
 

@@ -1,5 +1,0 @@
-TOP_SRCDIR = @abs_top_srcdir@
-CXXFLAGS = @CXXFLAGS@ 
-CFLAGS = @CFLAGS@
-INSTALL_ROOT = @prefix@
-LIBS = "-L/usr/local/ccp4/lib"

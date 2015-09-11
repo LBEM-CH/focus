@@ -18,6 +18,7 @@ PACKAGE_DIR=$2
 VERSION=$3
 
 PRODUCT_FOLDER=`echo "${PACKAGE_DIR}/2dx-${VERSION}"`
+PRODUCT_PKG=`echo "2dx-${VERSION}.pkg"`
 PRODUCT_DMG=`echo "2dx-${VERSION}.dmg"`
 PRODUCT_VOLNAME=`echo "2dx-${VERSION}"`
 
@@ -62,12 +63,48 @@ echo ''
 
 
 echo '*############################################################################*'
+echo '| Building the dependent packages                                            |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+pkgbuild \
+    --root ${ROOT} \
+    --scripts $PARENT_DIR/scripts/ \
+    --identifier "org.cina.pkg.2dx" \
+    --version ${VERSION} \
+    --install-location "/Applications/2dx" \
+    --filter "\.DS_Store" \
+    ${PACKAGE_DIR}/2dx.pkg
+
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+echo '*############################################################################*'
+echo '| Building the main product package                                          |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+productbuild \
+    --distribution ${PARENT_DIR}/Distribution.xml \
+    --package-path ${PACKAGE_DIR} \
+    --resources $PARENT_DIR/resources/ \
+    ${PACKAGE_DIR}/${PRODUCT_PKG}
+    
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+echo '*############################################################################*'
 echo '| Compressing to disk Image                                                  |'
 echo '*============================================================================*'
 echo '|                                                                            |'
-mkdir -p "${PRODUCT_FOLDER}/2dx/${VERSION}"
-cp -r "${ROOT}" "${PRODUCT_FOLDER}/2dx/${VERSION}"
-ln -s /Applications "${PRODUCT_FOLDER}/"
+mkdir $PRODUCT_FOLDER
+cp ${PACKAGE_DIR}/${PRODUCT_PKG} ${PRODUCT_FOLDER}
 hdiutil create \
   -volname ${PRODUCT_VOLNAME} \
   -srcfolder ${PRODUCT_FOLDER} \

@@ -449,7 +449,7 @@ while ( ${itnum} < ${merge_refine_iterations} )
   @ itnum += 1
 end
 #
-${proc_2dx}/linblock "Now, press the REFRESH DISPLAY VIEW button top menu to update the project library."
+${proc_2dx}/linblock "Now, press the REFRESH DISPLAY VIEW button in top menu to update the project library."
 #############################################################################
 ${proc_2dx}/linblock "2dx_refine normal end."
 #############################################################################

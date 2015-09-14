@@ -511,7 +511,7 @@ echo "<<@progress: 90>"
 #
 # Issue evaluate here to reload the Ph-Ori-Change column
 # echo "<<@evaluate>>"
-${proc_2dx}/linblock "Now, presse the REFRESH DISPLAY VIEW button top right to update the central table."
+${proc_2dx}/linblock "Now, press the REFRESH DISPLAY VIEW button in top menu to update the project library."
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_refine normal end."

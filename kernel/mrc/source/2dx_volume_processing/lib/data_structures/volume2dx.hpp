@@ -315,6 +315,12 @@ namespace volume
             void symmetrize();
             
             /**
+             * Returns a projection in the direction of axis
+             * @param axis: x/y/z
+             */
+            Volume2dx project2D(char axis);
+            
+            /**
              * Fetches the real valued density at (x,y,z) from the volume
              * @param x
              * @param y

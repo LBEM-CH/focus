@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Generate Merged Map                                                #
+# Title: Generate 3D Merged Map                                                #
 #                                                                           #
 # 2dx.org, GNU Plublic License.                                             #
 #                                                                           #
@@ -26,8 +26,6 @@
 # DISPLAY: avrgamphsRESOL
 # DISPLAY: realang
 # DISPLAY: realcell
-# DISPLAY: merge_modus
-# DISPLAY: merge_modus
 # DISPLAY: diffmap_doit
 # DISPLAY: diffmap_source
 # DISPLAY: diffmap_weight
@@ -131,7 +129,7 @@ echo diffmap_weight = ${diffmap_weight}
 echo npo_line1 = ${npo_line1}
 echo npo_line2 = ${npo_line2}
 #
-set scriptname = 2dx_generateMergeMap
+set scriptname = 2dx_generate3DMergeMap
 #
 source ${proc_2dx}/2dx_merge_makedirs 
 #
@@ -206,263 +204,75 @@ echo ":celly = ${celly},    cellym1 = ${cellym1}"
 set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
 echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
 #
+if ( ${merge_modus} == "2D" ) then
+  ${proc_2dx}/protest "Skipping: This script works only in 3D mode."
+endif
+#
 \rm -f SCRATCH/scratch1.map
 #
-if ( ${merge_modus} == "3D" ) then
-  #############################################################################
-  #############################################################################
-  #############################################################################
-  # Here for 3D volume generation:
-  #############################################################################
-  #############################################################################
-  #############################################################################
-  #
-  set infile = merge3D.mtz
-  #
-  echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "mtz2various - to translate MTZ file into HKL file"
-  #############################################################################  
-  #
-  ${bin_ccp4}/mtz2various hklin merge3D.mtz hklout merge3D.hkl << eof
+#############################################################################
+#############################################################################
+#############################################################################
+# Here for 3D volume generation:
+#############################################################################
+#############################################################################
+#############################################################################
+#
+set infile = merge3D.mtz
+#
+echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "mtz2various - to translate MTZ file into HKL file"
+#############################################################################  
+#
+${bin_ccp4}/mtz2various hklin merge3D.mtz hklout merge3D.hkl << eof
 LABIN FP=F SIGFP=PHI W=FOM
 OUTPUT USER '(3I8,4G16.8)'
 end
 eof
-  #
-  echo "# IMAGE: merge3D.hkl <HKL: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "hkl_to_mrc.exe - to transform HKL file into volume"
-  #############################################################################  
-  #
-  ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hklin merge3D.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
-  #
-  echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "extend the map to 2x2x1 unit cells"
-  #############################################################################  
-  #
-  source ${proc_2dx}/2dx_extend_map.com volume.map extended.map
-  #
-  echo "# IMAGE: extended.map <MAP: final map 3D, 2x2 unit cells>"  >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "hkl_to_PSFmrc.exe - to transform HKL file into volume for PSF"
-  #############################################################################  
-  #
-  ${bin_2dx}/2dx_volume_processing/volume_processor.exe --hklin merge3D.hkl --mrcout PSF.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME} --psf
-  #
-  echo "# IMAGE: PSF.map <MAP: PSF>"  >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "cad - to set spacegroup info to p1 for PSF"
-  #############################################################################  
-  #
-  \rm -f SCRATCH/merge3D-p1.mtz
-  #
-  ${bin_ccp4}/cad hklin1 merge3D.mtz hklout SCRATCH/merge3D-p1.mtz << eof
+#
+set hkl_infile = merge3D.hkl
+#
+echo "# IMAGE: merge3D.hkl <HKL: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "volume_processor.exe - to transform HKL file into volume"
+#############################################################################  
+#
+${bin_2dx}/volume_processor.exe --hklin merge3D.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
+#
+echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "extend the map to 2x2x1 unit cells"
+#############################################################################  
+#
+source ${proc_2dx}/2dx_extend_map.com volume.map extended.map
+#
+echo "# IMAGE: extended.map <MAP: final map 3D, 2x2 unit cells>"  >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "hkl_to_PSFmrc.exe - to transform HKL file into volume for PSF"
+#############################################################################  
+#
+${bin_2dx}/volume_processor.exe --hklin merge3D.hkl --mrcout PSF.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME} --psf
+#
+echo "# IMAGE: PSF.map <MAP: PSF>"  >> LOGS/${scriptname}.results
+#
+#############################################################################
+${proc_2dx}/linblock "cad - to set spacegroup info to p1 for PSF"
+#############################################################################  
+#
+\rm -f SCRATCH/merge3D-p1.mtz
+#
+${bin_ccp4}/cad hklin1 merge3D.mtz hklout SCRATCH/merge3D-p1.mtz << eof
 symmetry p1
 labin file 1 all
 end
 eof
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "sftools - to set amps to 1 and phases to 0 for PSF"
-  #############################################################################  
-  #
-  \rm -f SCRATCH/merge3D_phase_zero.mtz
-  #
-  ${bin_ccp4}/sftools << eof
-read SCRATCH/merge3D-p1.mtz
-calc COL PHI = 0
-write SCRATCH/merge3D_phase_zero.mtz
-quit
-eof
-  #
-  # Not to be used, because this would eliminate the (bad) effect 
-  # of B-factor on high resolution reflections:
-  # calc COL F = 1
-  #
-  echo "# IMAGE: SCRATCH/merge3D_phase_zero.mtz <MTZ: Phase Zero volume>" >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "fft - to transform SCRATCH/merge3D_phase_zero.mtz into SCRATCH/scratch1_phase_zero.map for PSF"
-  #############################################################################  
-  #
-  ${proc_2dx}/lin "rotate_to_Z = ${rotate_to_Z}" 
-  if (  ${rotate_to_Z} == "yes" ) then
-    set AXIS = "Z,X,Y"
-  else
-    set AXIS = "X,Y,Z"
-  endif
-  #
-  \rm -f SCRATCH/scratch1_phase_zero.map
-  ${bin_ccp4}/fft hklin SCRATCH/merge3D_phase_zero.mtz mapout SCRATCH/scratch1_phase_zero.map  << eot
-LABIN F1=F  PHI=PHI  W=FOM ##
-AXIS ${AXIS}
-SCALE F1 ${scale} ${tempfac}
-SYMMETRY P1
-# RESOLUTION ${RESMIN} ${RESMAX}
-TITLE PSF ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID ${voldim} ${voldim} ${voldim} 
-XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 ${voldim_m1}
-RHOLIM 256.0
-HKLMAX 50 50 70
-END
-eot
-  #
-  # echo "# IMAGE: SCRATCH/scratch1_phase_zero.map <MAP: PSF scratch1>" >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "fft - to transform ${infile} into SCRATCH/scratch1.map for Volume"
-  #############################################################################  
-  #
-  \rm -f SCRATCH/scratch1.map
-  ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1.map  << eot
-LABIN F1=F  PHI=PHI   W=FOM ##
-AXIS ${AXIS}
-SCALE F1 ${scale} ${tempfac}
-SYMMETRY P1
-RESOLUTION ${RESMIN} ${RESMAX}
-TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID ${voldim} ${voldim} ${voldim} 
-XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 ${voldim_m1}
-RHOLIM ${voldim_t142}
-HKLMAX 50 50 70 
-END
-eot
-  #
-  echo "<<@progress: +10>>"
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "fft - to transform ${infile} into volume_crude.map"
-  #############################################################################  
-  #
-  \rm -f SCRATCH/scratch1b.map
-  ${bin_ccp4}/fft hklin ${infile} mapout SCRATCH/scratch1b.map  << eot
-LABIN F1=F  PHI=PHI  W=FOM ##
-AXIS ${AXIS}
-SCALE F1 ${scale} ${tempfac}
-SYMMETRY P1
-# RESOLUTION ${RESMIN} ${RESMAX}
-TITLE ${imagename}, ${SYM}, res=${RESMAX}, T=${tempfac}, ${date}
-GRID ${voldim} ${voldim} ${voldim} 
-XYZLIM 0 ${voldim_m1}  0 ${voldim_m1} 0 ${voldim_m1}
-RHOLIM 256.0
-HKLMAX 50 50 70 
-END
-eot
-  #
-  \rm -f volume_crude.map
-  ${bin_ccp4}/mapmask mapin SCRATCH/scratch1b.map mapout volume_crude.map << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim 0.0 0.999 0.0 0.999 -0.5 0.499
-END
-eof
-  #
-  echo "# IMAGE: volume_crude.map <MAP: crude volume (${voldim}x${voldim}x${voldim} grid points)>" >> LOGS/${scriptname}.results
-  echo "<<@progress: +10>>"
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "maprot - to rescale map into correct dimensions for PSF"
-  #############################################################################
-  #
-  \rm -f SCRATCH/scratch2_phase_zero.map
-  ${bin_ccp4}/maprot mapin SCRATCH/scratch1_phase_zero.map wrkout SCRATCH/scratch2_phase_zero.map << eot
-MODE FROM
-CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
-GRID WORK ${cellx} ${celly} ${ALAT}
-XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
-SYMM WORK 1
-AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
-TRANS  0.000 0.000 0.000
-eot
-  # 
-  echo "# IMAGE: SCRATCH/scratch2_phase_zero.map <MAP: SCRATCH/scratch2_phase_zero.map>" >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "maprot - to rescale map into correct dimensions for Volume"
-  #############################################################################
-  #
-  \rm -f SCRATCH/scratch2.map
-  ${bin_ccp4}/maprot mapin SCRATCH/scratch1.map wrkout SCRATCH/scratch2.map << eot
-MODE FROM
-CELL WORK ${realcell} ${ALAT} 90.0 90.0 ${realang}
-GRID WORK ${cellx} ${celly} ${ALAT}
-XYZLIM 0 ${cellxm1} 0 ${cellym1} 0 ${ALATm1}
-SYMM WORK 1
-AVER
-ROTA MATRIX   1.000 0.000 0.000      0.000 1.000 0.000    0.000 0.000 1.000
-TRANS  0.000 0.000 0.000
-eot
-  #
-  # echo "# IMAGE: SCRATCH/scratch2.map <MAP: SCRATCH/scratch2.map>" >> LOGS/${scriptname}.results
-  #
-  echo "<<@progress: +10>>"
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "mapmask - to set units to 1x1x1 for PSF"
-  #############################################################################
-  #
-  \rm -f volume-PSF.map
-  ${bin_ccp4}/mapmask mapin SCRATCH/scratch2_phase_zero.map mapout volume-PSF.map << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim -0.5 0.5 -0.5 0.5 -0.5 0.5
-END
-eof
-  #
-  # echo "# IMAGE-IMPORTANT: volume-PSF.map <MAP: Point Spread Function (display at level 128)>" >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "mapmask - to set units to 1x1x1 for 3D Volume"
-  #############################################################################
-  #
-  \rm -f volume.map
-  ${bin_ccp4}/mapmask mapin SCRATCH/scratch2.map mapout volume_1unit.map << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim 0.0 0.999 0.0 0.999 -0.5 0.499
-END
-eof
-  #
-  echo "# IMAGE-IMPORTANT: volume_1unit.map <MAP: Final 3D Volume (1 unit cell)>" >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "mapmask - to set units to 2x2x1 for 3D Volume"
-  #############################################################################
-  #
-  \rm -f volume.map
-  ${bin_ccp4}/mapmask mapin SCRATCH/scratch2.map mapout volume.map << eof
-AXIS X,Y,Z
-scale factor 1
-xyzlim -1.0 0.999 -1.0 0.999 -0.5 0.499
-END
-eof
-  #
-  echo "# IMAGE-IMPORTANT: volume.map <MAP: Final 3D Volume (2x2 unit cells)>" >> LOGS/${scriptname}.results
-  #
-  #############################################################################
-  #############################################################################
-  #############################################################################
-  if ( ${calculate_subvolume}x != "0x" ) then  
-    source ${proc_2dx}/2dx_generateMergeMap_SubVolume.com
-  endif
-  #############################################################################
-  #############################################################################
-  #############################################################################
-  #
-  #
-else
-  set infile = merge2D_MRClefthanded.mtz
-  set hkl_infile = APH/sym2D.hkl
-endif
+#
 #
 #############################################################################
 #############################################################################
@@ -472,17 +282,8 @@ ${proc_2dx}/linblock "Now for 2D processing:"
 #############################################################################
 #############################################################################
 #
-echo "# IMAGE: ${hkl_infile} <HKL: input data for 2D (from last merging)>"  >> LOGS/${scriptname}.results
-echo "# IMAGE: ${infile} <MTZ: input data for 2D (from last merging)>"  >> LOGS/${scriptname}.results
 #
-# in 2D there is no rotation
-if ( ${merge_modus} == "2D" ) then
-   set rotate_to_Z = "no"
-endif
-#
-echo "::Rotate_to_Z is set to ${rotate_to_Z}"
-#
-${bin_2dx}/volume_processor.exe --hklin ${hkl_infile} --mrcout ${imagename}-${SYM}.mrc --nx ${cellx} --ny ${celly} --nz 1 -s ${SYM}
+${bin_2dx}/project2D.exe --mrcin extended.map --mrcout ${imagename}-${SYM}.mrc --axis z
 #
 echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}.mrc <${SYM}-symmetrized final 2D map>" >> LOGS/${scriptname}.results
 #

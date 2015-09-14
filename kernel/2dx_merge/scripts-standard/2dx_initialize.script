@@ -85,7 +85,7 @@ echo ":: "
 echo "::                            *************************"
 echo "::                              Welcome to 2dx_merge"
 echo "::                            *************************"
-echo "::                 (activate the MANUAL button top right for help)"
+echo "::                 (activate the MANUAL button top menu for help)"
 echo ":: "
 #############################################################################
 #

@@ -326,7 +326,7 @@ endif
 #
 echo "<<@progress: 5>>"
 #
-if ( ${AMP_Scale_Factor}x == ‘x’ ) then
+if ( ${AMP_Scale_Factor}x == 'x' ) then
   set AMP_Scale_Factor = 0.001
   echo "set AMP_Scale_Factor = ${AMP_Scale_Factor}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: AMP_Scale_Factor corrected to ${AMP_Scale_Factor}"

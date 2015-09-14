@@ -234,10 +234,13 @@ blockContainer* executionContainer::setupParameterWindow()
 
     QWidget *parametersWidget = new QWidget();
     QVBoxLayout *parameterLayout = new QVBoxLayout();
+    parametersWidget->setLayout(parameterLayout);
     parameterLayout->setMargin(0);
     parameterLayout->setSpacing(0);
-    parametersWidget->setLayout(parameterLayout);
+    parameterLayout->addWidget(localParameters);
     parameterLayout->addWidget(parameters);
+    parameterLayout->setStretchFactor(localParameters, 1);
+    parameterLayout->setStretchFactor(parameters, 100);
 
     QScrollArea *window = new QScrollArea(this);
     window->setWidgetResizable(true);

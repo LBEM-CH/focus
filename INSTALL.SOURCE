@@ -1,46 +1,76 @@
 Acquiring 2dx
 =============
-The latest source for 2dx along with associated help files and up to the minute installation instructions
-are available at http://www.2dx.org.
+The latest source for 2dx is available at our GITHUB repository  
+https://github.com/C-CINA/2dx.
 
 Download: 2dx-{version}.tar.bz2
 Extract: tar -xvjf 2dx-{version}.tar.bz2
 
-A detailed installation instruction can be found in the PDF manual, at
-http://www.2dx.unibas.ch/documentation/2dx-software
+*******************************************************************************
+ INSTALLATION REQUIREMENTS 
+*******************************************************************************
+---------------------------
+    GCC and GFORTRAN:
+---------------------------
+Download from:
+http://hpc.sourceforge.net
+Install via
+sudo tar -xvf gcc-4.9-bin.tar -C /
+sudo tar -xvf gfortran-4.9-bin.tar -C /
 
-On OSX: 
+----------------------------
+    CMAKE:
+---------------------------
 
-FFTW: Download from 
-http://www.fftw.org/download.html
-Then install with:
-./configure --enable-single --enable-fast-install
-make
-sudo make install
 
-Qt requires version 4.x, not newer.
-Currently, this can be found at:
-http://download.qt.io/archive/qt/
+----------------------------
+    FFTW3: 
+----------------------------
+We need the fftw-3.0.0 or later (http://www.fftw.org) to be installed on your 
+system. We use both single precision and double precision libraries from FFTW3.
 
-MacPorts:
-http://guide.macports.org/#installing
+Download from http://www.fftw.org/download.html
+To compile for OSX/Linux systems download the latest libraries and use the 
+following commands:
 
-BOOST:
-sudo port install cmake
-sudo port install boost
+./configure --enable-shared --enable-single; 
+make; 
+sudo make install; 
+make clean; 
+./configure --enable-shared; 
+make; 
+sudo make install;
+
+-------------------
+    Qt5:
+-------------------
+The application is based on Qt5 which can be downloaded and installed from:
+
+http://www.qt.io/download-open-source/
+
+Make sure that after the installation you add Qt5 bin directory to the 
+environment variable $PATH, and that:
+
+qmake -query
+
+gives you correct path to installed Qt libraries.
+
+------------------------------
+    BOOST:
+------------------------------
+Boost C++ libraries can be downloaded from http://www.boost.org/users/download/
+
+
+
+*******************************************************************************
+ ADDITIONAL REQUIREMENTS 
+*******************************************************************************
 
 SPIDER:
 Download from:
 http://spider.wadsworth.org/spider_doc/spider/docs/spi-download.html
 Install via
 sudo tar -C /usr/local -xvf spiderweb.22.03.tar
-
-GCC and GFORTRAN:  
-Download from:
-http://hpc.sourceforge.net
-Install via
-sudo tar -xvf gcc-4.9-bin.tar -C /
-sudo tar -xvf gfortran-4.9-bin.tar -C /
 
 Compilation
 -----------
@@ -50,9 +80,9 @@ Launch
 
 
 
-
-Execution
----------
+******************************************************************************
+ Execution
+*****************************************************************************
 CCP4 5.0.2 or later (CCP4 6 Recommended) (http://www.ccp4.ac.uk/main.html)
 ********************************************************************************************************* 
 CCP4 should be installed completely from the installers provided. However,

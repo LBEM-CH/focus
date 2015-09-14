@@ -475,9 +475,10 @@ echo "# IMAGE: ${infile} <MTZ: input data for 2D (from last merging)>"  >> LOGS/
 #
 # in 2D there is no rotation
 if ( ${merge_modus} == "2D" ) then
-  set rotate_to_Z = "no"
+   set rotate_to_Z = "no"
 endif
 #
+echo "::Rotate_to_Z is set to ${rotate_to_Z}"
 #
 if ( ${rotate_to_Z} == "yes" ) then
   #
@@ -505,7 +506,7 @@ eot
   #
 else
   #
-  # set AXIS = "X,Y,Z"
+  set AXIS = "X,Y,Z"
   set AXIS = "Z,X,Y"
   #
   #############################################################################

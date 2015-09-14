@@ -37,7 +37,7 @@ imagePreview::imagePreview(confData *data, QString resultValue, bool info, QWidg
   useOldViewer = true;
 
   setAutoFillBackground(true);
-  setMaximumSize(QSize(minWidth,minWidth));
+  setFixedSize(QSize(minWidth,minWidth));
   setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
   if(!result.isEmpty())

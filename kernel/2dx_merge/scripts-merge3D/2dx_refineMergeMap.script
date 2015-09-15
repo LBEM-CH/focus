@@ -1,0 +1,99 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Refine Merged Map (3D only)                                        #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 21/01/2015                                             #
+# Last Modification: 21/01/2015                                             #
+# Author...........: Nikhil Biyani                                          #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 89
+#
+# MANUAL: This script takes the unevenly spaced hkz file and generates a 3D reference map using backprojection.
+#
+# DISPLAY: SYM
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: number_refinement_iterations
+# DISPLAY: density_threshold_refinement
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: calculate_subvolume
+# DISPLAY: refinement_mask_resolution
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SYM = ""
+set realcell = ""
+set realang = ""
+set ALAT = ""
+set RESMIN = ""
+set RESMAX = ""
+set calculate_subvolume = ""
+set number_refinement_iterations = ""
+set number_shrinkwrap_iterations = ""
+set membrane_height = ""
+set maximum_amplitude_refinement = ""
+set density_threshold_refinement = ""
+set refinement_mask_resolution = ""
+set merge_modus = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_refineMergeMap
+#
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+#
+echo "cellx = ${cellx}"
+echo "celly = ${celly}"
+echo "cellz = ${ALAT}"
+#
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
+#
+set date = `date`
+echo date = ${date}
+#
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+if ( ${merge_modus} != "3D" ) then
+  ${proc_2dx}/protest "Skipping: Only in 3D mode."
+endif
+#
+echo "<<@progress: 5>"
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_refineMergedMap_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_refineMergedMap_sub.com
+#
+#############################################################################
+${proc_2dx}/linblock "${scriptname} normal end."
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#
+exit
+#
+# These are here only to make sure they show up in the GUI:
+source ${proc_2dx}/2dx_hkl_to_mtz.com
+source ${proc_2dx}/2dx_extend_map.com
+source ${proc_2dx}/2dx_create_subvolume.com
+#

@@ -1,0 +1,443 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Merge Once                                                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/03/2007                                             #
+# Last Modification: 01/03/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 20
+#
+# MANUAL: This script allows merging the selected image data into one merge dataset.
+#
+# MANUAL: Select only the one best non-tilted image and run this script with that one image.
+#
+# MANUAL: Then align the other images to it (using Refine Once), starting with non-tilted images, and slowly add more and more tilted images. After each call of "Refine Once" you should run "Merge Once" again, to merge those aligned images into a new reference. 
+#
+# DISPLAY: MergeResolution
+# DISPLAY: merge_modus
+# DISPLAY: zstarrange
+# DISPLAY: Calc_from_zstarrange
+# DISPLAY: zstarrange_real
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: merge_res_limit
+# DISPLAY: merge_data_type
+# DISPLAY: tempkeep
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: ALAT
+# DISPLAY: SYM
+# DISPLAY: avrgamphsNUMBER
+# DISPLAY: avrgamphsRESOL
+# DISPLAY: ILIST
+# DISPLAY: MergeIPAT
+# DISPLAY: MergeDELPLT
+# DISPLAY: MergeDELPRO
+# DISPLAY: MergeRminRmax
+# DISPLAY: MergeRCUT
+# DISPLAY: MergePFACT
+# DISPLAY: MergeBINSIZ
+# DISPLAY: MergeNCYCLS
+# DISPLAY: MergeMPRINT
+# DISPLAY: MergeIQMAX
+# DISPLAY: Merge_Reference_IQMAX
+# DISPLAY: MergeHKMAX
+# DISPLAY: Merge_Reference_HKMAX
+# DISPLAY: RFACAMP
+# DISPLAY: MergeAK
+# DISPLAY: MergeIWF
+# DISPLAY: AMP_Scale_Factor
+# DISPLAY: MergeIWP
+# DISPLAY: MergeLatLine_MaxAmpFactor
+# DISPLAY: MergeLatLine_REDUCAC
+# DISPLAY: MergeLatLine_RFOMSCALE
+# DISPLAY: max_amp_correction
+# DISPLAY: plotres_rings
+# DISPLAY: scalimamp3d_rref
+# DISPLAY: scalimamp3d_BXYMINMAX
+# DISPLAY: scalimamp3d_BZMINMAX
+# DISPLAY: scalimamp3d_BEXTRA
+# DISPLAY: latline_pdf
+# DISPLAY: latline_algo
+# DISPLAY: resolutionplot_RESMAX
+# DISPLAY: resolutionplot_bins
+# DISPLAY: Thread_Number
+# DISPLAY: number_of_beads
+# DISPLAY: density_threshold_bead
+# DISPLAY: maximum_resolution_bead
+# DISPLAY: number_refinement_iterations
+# DISPLAY: membrane_height
+# DISPLAY: maximum_amplitude_refinement
+# DISPLAY: density_threshold_refinement
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+# DISPLAY: calculate_subvolume
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set ALAT = ""
+set AMP_Scale_Factor = ""
+set avrgamphsNUMBER = ""
+set avrgamphsRESOL = ""
+set Calc_from_zstarrange = ""
+set ILIST = ""
+set latline_algo = ""
+set latline_pdf = ""
+set lattice = ""
+set max_amp_correction = ""
+set merge_data_type = ""
+set merge_modus = ""
+set merge_ref_num = ""
+set Merge_Reference_HKMAX = ""
+set Merge_Reference_IQMAX = ""
+set merge_res_limit = ""
+set MergeAK = ""
+set MergeBINSIZ = ""
+set MergeDELPLT = ""
+set MergeDELPRO = ""
+set MergeHKMAX = ""
+set MergeIPAT = ""
+set MergeIQMAX = ""
+set MergeIWF = ""
+set MergeIWP = ""
+set MergeLatLine_MaxAmpFactor = ""
+set MergeLatLine_REDUCAC = ""
+set MergeLatLine_RFOMSCALE = ""
+set MergeMPRINT = ""
+set MergeNCYCLS = ""
+set MergePFACT = ""
+set MergeRCUT = ""
+set MergeResolution = ""
+set MergeRminRmax = ""
+set num_amplitudes_observed = ""
+set num_phases_observed = ""
+set num_reflections_fitted = ""
+set num_reflections_FOM50 = ""
+set overall_phase_residual = ""
+set overall_R_factor = ""
+set overall_weighted_phase_residual = ""
+set overall_weighted_R_factor = ""
+set plotres_rings = ""
+set realang = ""
+set realcell = ""
+set Reflections_Unique = ""
+set RESMAX = ""
+set RESMIN = ""
+set resolutionplot_bins = ""
+set resolutionplot_RESMAX = ""
+set RFACAMP = ""
+set sample_pixel = ""
+set scalimamp3d_BEXTRA = ""
+set scalimamp3d_BXYMINMAX = ""
+set scalimamp3d_BZMINMAX = ""
+set scalimamp3d_rref = ""
+set SYM = ""
+set tempkeep = ""
+set Thread_Number = ""
+set zstarrange  = ""
+set zstarrange_real = ""
+set zstarwin  = ""
+set calculate_subvolume = ""
+set number_of_beads = ""
+set density_threshold_bead = ""
+set maximum_resolution_bead = ""
+set number_refinement_iterations = ""
+set membrane_height = ""
+set maximum_amplitude_refinement = ""
+set density_threshold_refinement = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_merge
+\rm -f LOGS/${scriptname}.results
+#
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+#
+echo "cellx = ${cellx}"
+echo "celly = ${celly}"
+echo "cellz = ${ALAT}"
+#
+set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
+set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
+set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
+#
+# The following is to make sure that for the next "Import Images", the default is correctly initialized.
+set initialization_reset = "y"
+set initialization_executable = "y"
+echo "set initialization_reset = ${initialization_reset}" >> LOGS/${scriptname}.results
+echo "set initialization_executable = ${initialization_executable}" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+if ( ${merge_data_type}x == 'x' ) then
+  set merge_data_type = "0"
+  echo "set merge_data_type = ${merge_data_type}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: merge_data_type corrected to ${merge_data_type}"
+endif
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "The current working directory is" ${olddir}
+#
+set linkok = "y"
+cd ..
+echo "Checking link in project root director ${PWD}:"
+if ( ! -e 2dx_master.cfg ) then
+  echo ":: "
+  echo "::WARNING: 2dx_master.cfg in project root directory is missing."
+  echo ":: "
+  set linkok = "n"
+else
+  \ls -l 2dx_master.cfg
+  if ( ! -l 2dx_master.cfg ) then
+    echo ":: "
+    echo "::WARNING: 2dx_master.cfg is not a link in ${PWD}."
+    echo ":: "
+    set linkok = "n"
+  endif
+endif
+cd ${olddir}
+#
+set dirlistfile = "${olddir}/2dx_merge_dirfile.dat"
+#
+if ( -s ${dirlistfile} ) then
+  set coutfile = 'SCRATCH/2dx_getdirectories_tmp.dat'
+  \rm -f ${coutfile}
+  #
+  ${bin_2dx}/2dx_getdirectories.exe << eot
+${olddir}/2dx_merge_dirfile.dat
+${olddir}
+${coutfile}
+eot
+  #
+  cat ${coutfile} | tr "\n" " " > SCRATCH/2dx_getdirectories_tmp2.dat
+  set dirlist = "`cat SCRATCH/2dx_getdirectories_tmp2.dat`"
+  #
+  foreach dirfile ( ${dirlist} ) 
+    echo "Checking link in ${dirfile}"
+    cd ${olddir}
+    cd ..
+    if ( -d ${dirfile} ) then
+      cd ${dirfile}
+      if ( ! -e 2dx_master.cfg ) then
+        echo ":: "
+        echo "::WARNING: 2dx_master.cfg is missing in ${PWD}."
+        echo ":: "
+        set linkok = "n"
+      else
+        \ls -l 2dx_master.cfg
+        if ( ! -l 2dx_master.cfg ) then
+          echo ":: "
+          echo "::WARNING: 2dx_master.cfg is not a link in ${PWD}."
+          echo ":: "
+          set linkok = "n"
+        endif
+      endif
+      cd ${olddir}
+    else
+      set linkok = "n"
+    endif
+  end
+endif
+#
+if ( ${linkok} == 'n' ) then
+  echo ":: "
+  echo ":: WARNING: Your project has not the correct file system structure."
+  echo ":: The files 2dx_master.cfg in the tilt-range directories should be links"
+  echo ":: to the one-level higher version, which should be a link to the one in the"
+  echo ":: merge directory."
+  echo ":: "
+  echo ":: Run the Custom Script Repair Project Links to repair this."
+  echo ":: "
+endif
+#
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set imagename_local = `cat 2dx_image.cfg | grep 'set imagename =' | cut -d\" -f2`
+  cd APH
+  if ( ! -e image_ctfcor_fou_unbent_ctf.aph ) then
+    if ( -e ${imagename_local}.cor.aph ) then
+      echo "::In ${dirfile}: Correcting ${imagename_local}.cor.aph to image_ctfcor_fou_unbent_ctf.aph" 
+      \mv -f ${imagename_local}.cor.aph image_ctfcor_fou_unbent_ctf.aph 
+    else
+      echo "::WARNING: ${dirfile}/APH/image_ctfcor_fou_unbent_ctf.aph does not exist. "
+    endif
+  else
+    # echo "Working on ${dirfile}/APH/image_ctfcor_fou_unbent_ctf.aph exists. "
+  endif
+  cd ${olddir}
+end
+#
+if ( ${Calc_from_zstarrange}x == "yx" ) then
+  echo ::zstarrange_real = ${zstarrange_real} 
+  set zstarrange_real = `echo ${zstarrange} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
+else
+  set zstarrange = `echo ${zstarrange_real} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
+  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
+endif
+#
+set zmin = `echo ${zstarrange} | awk '{s = -$1} END {print s}'`
+set zminmax = `echo ${zmin},${zstarrange}`
+echo zminmax = ${zminmax}
+#
+echo "<<@progress: 1>>"
+#
+if ( ${MergeHKMAX}x == 'x' ) then
+  set MergeHKMAX = '20'
+  ${proc_2dx}/linblock "ERROR: correcting MergeHKMAX to ${MergeHKMAX}"
+  echo "set MergeHKMAX = ${MergeHKMAX}" >> LOGS/${scriptname}.results
+endif
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 5>>"
+#
+if ( ${AMP_Scale_Factor}x == 'x' ) then
+  set AMP_Scale_Factor = 0.001
+  echo "set AMP_Scale_Factor = ${AMP_Scale_Factor}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: AMP_Scale_Factor corrected to ${AMP_Scale_Factor}"
+endif
+# 
+if ( ${MergeAK}x == 'x' ) then
+  set MergeAK = "10"
+  echo "set MergeAK = ${MergeAK}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeAK corrected to ${MergeAK}"
+endif
+#
+if ( ${merge_res_limit}x == 'x' ) then
+  set merge_res_limit = "0"
+  echo "set merge_res_limit = ${merge_res_limit}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: merge_res_limit corrected to ${merge_res_limit}"
+endif
+#
+if ( ${MergeIWF}x == 'x' ) then
+  set MergeIWF = "0"
+  echo "set MergeIWF = ${MergeIWF}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeIWF corrected to ${MergeIWF}"
+endif
+#
+if ( ${MergeIWP}x == 'x' ) then
+  set MergeIWP = "1"
+  echo "set MergeIWP = ${MergeIWP}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: MergeIWP corrected to ${MergeIWP}"
+endif
+#
+if ( ${ILIST}x == 'x' ) then
+  set ILIST = "n"
+  echo "set ILIST = ${ILIST}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "WARNING: ILIST corrected to ${ILIST}"
+endif
+#
+if ( ${ILIST} == "n" ) then
+  set ILIST_VAL = 0
+else
+  set ILIST_VAL = 1
+endif
+#
+if(${MergeIWF} == "0")then
+  set MergeIWF_VAL = -1
+endif
+if(${MergeIWF} == "1")then
+  set MergeIWF_VAL = 0
+endif
+if(${MergeIWF} == "2")then
+  set MergeIWF_VAL = 1
+endif
+if(${MergeIWP} == "0")then
+  set MergeIWP_VAL = -2
+endif
+if(${MergeIWP} == "1")then
+  set MergeIWP_VAL = -1
+endif
+if(${MergeIWP} == "2")then
+  set MergeIWP_VAL = 0
+endif
+if(${MergeIWP} == "3")then
+  set MergeIWP_VAL = 1
+endif
+echo MergeAK = ${MergeAK}
+echo MergeIWF_VAL = ${MergeIWF_VAL}
+echo MergeIWP_VAL = ${MergeIWP_VAL}
+#
+#############################################################################
+${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_sym2spcgrp_sub.com
+#
+echo SYM = ${SYM}
+echo spcgrp = ${spcgrp}
+echo CCP4_SYM = ${CCP4_SYM}
+#
+############################################################################# 
+${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
+#############################################################################
+#
+source ${proc_2dx}/2dx_merge_makedirs
+#
+echo "<<@progress: 10>"
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_merge_merge_sub.com
+#
+if ( ${merge_modus} == "3D" ) then
+  #
+  echo "<<@progress: 45>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
+  #############################################################################
+  #
+  source ${proc_2dx}/2dx_merge_latline_sub.com
+  #
+  if ( ${latline_algo} == "2" ) then
+    #
+    source ${proc_2dx}/2dx_refineMergedMap_sub.com
+    #
+  endif
+  #
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "${scriptname} normal end."
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

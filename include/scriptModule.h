@@ -26,7 +26,7 @@ class scriptModule : public QWidget
   Q_OBJECT
 
   public:
-  enum moduleType {standard, custom, singleparticle};
+  enum moduleType {standard, custom, singleparticle, merge2D, merge3D};
 
   public slots:
   void execute(bool run);

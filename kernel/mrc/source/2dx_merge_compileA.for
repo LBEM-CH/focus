@@ -296,7 +296,7 @@ C---------RSCL=0.0 means scaling is automatic for following datasets
         call igetline(IREVXSGN,"revxsgn")
         call shorten(CTITLE,k)
 C
-        if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+        if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.3)then
           call cgetline(CPHORI,"phaori_ML")
           read(CPHORI,*,ERR=901)RPHAORIH,RPHAORIK
           goto 902
@@ -321,7 +321,7 @@ C
         close(12)
 C
 C-------Loop over potentially all three unbending forms:
-        if (IMERGEDAT.eq.9) then
+        if (IMERGEDAT.eq.5) then
           ilooend = 3
         else
           ilooend = 1
@@ -331,8 +331,8 @@ C
           call shorten(cdir,k1)
           call shortshrink(CIMAGENAME,k2)
 C
-          if(IMERGEDAT.ne.9)then
-            if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+          if(IMERGEDAT.ne.5)then
+            if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.3)then
               write(cname4,'(A,''/APH/ML_result.aph'')')
      .          cdir(1:k1)
               LUSEML = .TRUE.

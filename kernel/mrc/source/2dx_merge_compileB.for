@@ -171,15 +171,15 @@ C
       write(*,'(/,''input refine_data_type switch'')')
       read(*,*)IMERGEDAT
       if(IMERGEDAT.eq.0 .or.
+     .   IMERGEDAT.eq.1 .or.
      .   IMERGEDAT.eq.2 .or.
      .   IMERGEDAT.eq.4 .or.
-     .   IMERGEDAT.eq.8 .or.
-     .   IMERGEDAT.eq.9     )then
+     .   IMERGEDAT.eq.5     )then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEDAT
 C-------phaoriFouFilter should not be protected:
         LPROTFOUFIL = .FALSE.
         LUSEML = .FALSE.
-      elseif(IMERGEDAT.eq.6) then
+      elseif(IMERGEDAT.eq.3) then
         write(*,'(I1,'' = Using ML results'')')IMERGEDAT
 C-------phaoriFouFilter should be protected:
         LPROTFOUFIL = .TRUE.
@@ -489,7 +489,7 @@ C
 C
           call dgetline(CMLMERGE,"ML_use_for_merging",iok)
 C
-          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.3)then
             call cgetline(CPHORI,"phaori_ML")
             read(CPHORI,*,ERR=901)RPHAORIH,RPHAORIK
             goto 902
@@ -552,7 +552,7 @@ C
 C
           call shorten(cdir,k)
           call shortshrink(CIMAGENAME,k1)
-          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.3)then
             write(cname4,'(A,''/APH/ML_result.aph'')')
      .        cdir(1:k)
           else

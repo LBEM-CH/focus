@@ -21,11 +21,7 @@
 # 
 # DISPLAY: create_merged_dataset
 # DISPLAY: MergeResolution
-# DISPLAY: merge_modus
 # DISPLAY: zstarwin
-# DISPLAY: zstarrange
-# DISPLAY: Calc_from_zstarrange
-# DISPLAY: zstarrange_real
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: merge_res_limit
@@ -42,19 +38,8 @@
 # DISPLAY: Merge_Reference_IQMAX
 # DISPLAY: MergeHKMAX
 # DISPLAY: Merge_Reference_HKMAX
-# DISPLAY: MergeLatLine_REDUCAC
-# DISPLAY: MergeLatLine_RFOMSCALE
 # DISPLAY: AMP_Scale_Factor
 # DISPLAY: ILIST
-# DISPLAY: MergeIPAT
-# DISPLAY: MergeDELPLT
-# DISPLAY: MergeDELPRO
-# DISPLAY: MergeRminRmax
-# DISPLAY: MergeRCUT
-# DISPLAY: MergePFACT
-# DISPLAY: MergeBINSIZ
-# DISPLAY: MergeNCYCLS
-# DISPLAY: MergeMPRINT
 # DISPLAY: refbeamtilt
 # DISPLAY: reftiltgeo
 # DISPLAY: ITAXASTEP
@@ -65,7 +50,6 @@
 # DISPLAY: MergeAK
 # DISPLAY: MergeIWF
 # DISPLAY: MergeIWP
-# DISPLAY: MergeLatLine_MaxAmpFactor
 # DISPLAY: merge_ref_num
 # DISPLAY: merge_comment_1
 # DISPLAY: merge_comment_2
@@ -78,31 +62,16 @@
 # DISPLAY: merge_comment_9
 # DISPLAY: merge_refine_iterations
 # DISPLAY: max_amp_correction
-# DISPLAY: MergePray
 # DISPLAY: make_reference
 # DISPLAY: merge_data_type
 # DISPLAY: plotres_rings
-# DISPLAY: scalimamp3d_rref
-# DISPLAY: scalimamp3d_BXYMINMAX
-# DISPLAY: scalimamp3d_BZMINMAX
-# DISPLAY: scalimamp3d_BEXTRA
-# DISPLAY: latline_pdf
-# DISPLAY: latline_algo
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
 # DISPLAY: RFACAMP
 # DISPLAY: Thread_Number
 # DISPLAY: sample_pixel
-DISPLAY: number_of_beads
-# DISPLAY: density_threshold_bead
-# DISPLAY: maximum_resolution_bead
-# DISPLAY: number_refinement_iterations
-# DISPLAY: membrane_height
-# DISPLAY: maximum_amplitude_refinement
-# DISPLAY: density_threshold_refinement
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
-# DISPLAY: calculate_subvolume
 #
 #$end_local_vars
 #
@@ -121,8 +90,6 @@ set IBOXPHS = ""
 set ILIST = ""
 set ITANGLSTEP = ""
 set ITAXASTEP = ""
-set latline_algo = ""
-set latline_pdf = ""
 set lattice = ""
 set max_amp_correction = ""
 set merge_data_type = ""
@@ -134,23 +101,11 @@ set Merge_Reference_IQMAX = ""
 set merge_refine_iterations = ""
 set merge_res_limit = ""
 set MergeAK = ""
-set MergeBINSIZ = ""
-set MergeDELPLT = ""
-set MergeDELPRO = ""
 set MergeHKMAX = ""
-set MergeIPAT = ""
 set MergeIQMAX = ""
 set MergeIWF = ""
 set MergeIWP = ""
-set MergeLatLine_MaxAmpFactor = ""
-set MergeLatLine_REDUCAC = ""
-set MergeLatLine_RFOMSCALE = ""
-set MergeMPRINT = ""
-set MergeNCYCLS = ""
-set MergePFACT = ""
-set MergeRCUT = ""
 set MergeResolution = ""
-set MergeRminRmax = ""
 set MergeStepSize = ""
 set num_reflections_fitted = ""
 set num_reflections_FOM50 = ""
@@ -167,43 +122,23 @@ set RFACAMP = ""
 set RTANGLSIZE = ""
 set RTAXASIZE = ""
 set sample_pixel = ""
-set scalimamp3d_BEXTRA = ""
-set scalimamp3d_BXYMINMAX = ""
-set scalimamp3d_BZMINMAX = ""
-set scalimamp3d_rref = ""
 set SYM = ""
 set tempkeep = ""
 set Thread_Number = ""
-set zstarrange = ""
-set zstarrange_real = ""
 set zstarwin = ""
-set calculate_subvolume = ""
-set number_of_beads = ""
-set density_threshold_bead = ""
-set maximum_resolution_bead = ""
-set number_refinement_iterations = ""
-set membrane_height = ""
-set maximum_amplitude_refinement = ""
-set density_threshold_refinement = ""
 #
 #$end_vars
 #
 setenv OMP_NUM_THREADS ${Thread_Number}
 #
+#
+set scriptname = 2dx_mergeRefine2D
+\rm -f LOGS/${scriptname}.results
+#
+set merge_modus="2D"
+#
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
-#
-set split = ($realcell:as/,/ /)
-set cellx = $split[1]
-set celly = $split[2]
-#
-echo "cellx = ${cellx}"
-echo "celly = ${celly}"
-echo "cellz = ${ALAT}"
-#
-set cellxm1 = `echo ${cellx} | awk '{ s = $1 - 1 } END {print s}'`
-set cellym1 = `echo ${celly} | awk '{ s = $1 - 1 } END {print s}'`
-set ALATm1 = `echo ${ALAT} | awk '{ s = $1 - 1 } END {print s}'`
 #
 set dirfile = "2dx_merge_dirfile.dat"
 set dirnum = `cat ${dirfile} | wc -l`
@@ -219,8 +154,6 @@ else
   set IVERBOSE = 6
 endif
 #
-set scriptname = 2dx_mergeRefine2D
-\rm -f LOGS/${scriptname}.results
 #
 # The following is to make sure that for the next "Import Images", the default is correctly initialized.
 set initialization_reset = "y"
@@ -236,29 +169,9 @@ if ( ${merge_ref_num} != "0" ) then
   ${proc_2dx}/protest "Aborting."
 endif
 #
-if ( ${Calc_from_zstarrange} == "y" ) then
-  set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
-  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
-else
-  set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
-  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
-endif
-#
-set zmin = `echo ${zstarrange} | awk '{s = -$1} END {print s}'`
-set zminmax = `echo ${zmin},${zstarrange}`
-echo zminmax = ${zminmax}
 echo MergeAK = ${MergeAK}
 echo MergeIWF = ${MergeIWF}
 echo MergeIWP = ${MergeIWP}
-# 
-set zstarwintmp = `echo ${ALAT} | awk '{ s = 1.0 / ( 2.0 * $1 ) } END { print s }'`
-set zstarwinbad = `echo ${zstarwin} ${zstarwintmp} | awk '{ if ( abs ( $1 - $2 ) > 0.001 ) { s = 1 } else { s = 0 } } END { print s }'`
-if ( ( ${zstarwinbad} == 1 ) && ( ${merge_modus} == '3D' ) ) then
-  echo "#WARNING: Warning: zstarwin is ${zstarwin}, but reasonable would be ${zstarwintmp}" >> LOGS/${scriptname}.results
-  echo "::WARNING: zstarwin is ${zstarwin}, but reasonable would be ${zstarwintmp}"
-endif
 #
 echo "<<@progress: 1>>"
 #
@@ -371,25 +284,10 @@ source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
 #
-if ( ${merge_modus} == '2D' ) then
-  if ( ! -e APH/merge.aph ) then
+if ( ! -e APH/merge.aph ) then
     set create_merged_dataset = "y"
-  endif
-  set NPRG = 1
 endif
-if ( ${merge_modus} == '3D' ) then
-  if ( ( ! -e  merge3D_MRClefthanded.mtz ) || ( ! -e merge3Dref_MRClefthanded.mtz ) ) then
-    set create_merged_dataset = "y"
-  endif
-  if ( ${merge_reference} == '0' ) then
-    # Use merge.aph files
-    set NPRG = 1
-  else
-    # User interpolated lattice lines latlinesref_MRClefthanded.mtz
-    set NPRG = 3
-  endif
-endif
-#
+set NPRG = 1
 
 set itnum = 0
 
@@ -404,37 +302,18 @@ while ( ${itnum} < ${merge_refine_iterations} )
   if ( ${merge_ref_num} == "0" && ${create_merged_dataset} == "y" ) then
     #
     #############################################################################
-    ${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
+    ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
     #############################################################################  
     #
-    #
-    source ${proc_2dx}/2dx_merge_merge_sub.com
-    #
-    if ( ${merge_modus} == "3D" ) then
-      #
-      #############################################################################
-      ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
-      #############################################################################
-      #
-      source ${proc_2dx}/2dx_merge_latline_sub.com
-      #
-      if ( ${merge_reference} == "3" ) then
-        source ${proc_2dx}/2dx_refineMergedMap_sub.com
-      endif
-      #
-    endif
+    source ${proc_2dx}/2dx_origtilt_merge.com
     #
   endif
   #
-  #
-  #
   #############################################################################
-  ${proc_2dx}/linblock "Sourcing 2dx_merge_refine_sub.com"
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
   #############################################################################  
   #
-  source ${proc_2dx}/2dx_merge_refine_sub.com
-  #
-  #
+  source ${proc_2dx}/2dx_origtilt_refine.com
   #
   #############################################################################
   ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."

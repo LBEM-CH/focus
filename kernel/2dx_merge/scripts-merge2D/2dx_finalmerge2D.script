@@ -20,13 +20,10 @@
 # MANUAL: Now merge all images together into a merged final dataset.
 #
 # DISPLAY: MergeResolution
-# DISPLAY: merge_modus
-# DISPLAY: zstarrange
-# DISPLAY: Calc_from_zstarrange
-# DISPLAY: zstarrange_real
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: merge_res_limit
+# DISPLAY: merge_data_type
 # DISPLAY: tempkeep
 # DISPLAY: realcell
 # DISPLAY: realang
@@ -34,41 +31,23 @@
 # DISPLAY: SYM
 # DISPLAY: avrgamphsNUMBER
 # DISPLAY: avrgamphsRESOL
-# DISPLAY: MergeIPAT
-# DISPLAY: MergeDELPLT
-# DISPLAY: MergeDELPRO
 # DISPLAY: ILIST
 # DISPLAY: MergeIQMAX
 # DISPLAY: Merge_Reference_IQMAX
 # DISPLAY: MergeHKMAX
 # DISPLAY: Merge_Reference_HKMAX
-# DISPLAY: MergeRminRmax
-# DISPLAY: MergeRCUT
-# DISPLAY: MergePFACT
-# DISPLAY: MergeBINSIZ
-# DISPLAY: MergeNCYCLS
-# DISPLAY: MergeMPRINT
+# DISPLAY: RFACAMP
 # DISPLAY: MergeAK
 # DISPLAY: MergeIWF
-# DISPLAY: MergeIWP
-# DISPLAY: MergeLatLine_MaxAmpFactor
-# DISPLAY: MergeLatLine_REDUCAC
-# DISPLAY: MergeLatLine_RFOMSCALE
-# DISPLAY: max_amp_correction
-# DISPLAY: merge_data_type
-# DISPLAY: plotres_rings
-# DISPLAY: scalimamp3d_rref
-# DISPLAY: scalimamp3d_BXYMINMAX
-# DISPLAY: scalimamp3d_BZMINMAX
 # DISPLAY: AMP_Scale_Factor
-# DISPLAY: scalimamp3d_BEXTRA
-# DISPLAY: latline_pdf
-# DISPLAY: latline_algo
+# DISPLAY: MergeIWP
+# DISPLAY: max_amp_correction
+# DISPLAY: plotres_rings
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
-# DISPLAY: RFACAMP
 # DISPLAY: Thread_Number
-# DISPLAY: sample_pixel
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
 #
 #$end_local_vars
 #
@@ -79,10 +58,7 @@ set ALAT = ""
 set AMP_Scale_Factor = ""
 set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
-set Calc_from_zstarrange = ""
 set ILIST = ""
-set latline_algo = ""
-set latline_pdf = ""
 set lattice = ""
 set max_amp_correction = ""
 set merge_data_type = ""
@@ -92,23 +68,11 @@ set Merge_Reference_HKMAX = ""
 set Merge_Reference_IQMAX = ""
 set merge_res_limit = ""
 set MergeAK = ""
-set MergeBINSIZ = ""
-set MergeDELPLT = ""
-set MergeDELPRO = ""
 set MergeHKMAX = ""
-set MergeIPAT = ""
 set MergeIQMAX = ""
 set MergeIWF = ""
 set MergeIWP = ""
-set MergeLatLine_MaxAmpFactor = ""
-set MergeLatLine_REDUCAC = ""
-set MergeLatLine_RFOMSCALE = ""
-set MergeMPRINT = ""
-set MergeNCYCLS = ""
-set MergePFACT = ""
-set MergeRCUT = ""
 set MergeResolution = ""
-set MergeRminRmax = ""
 set num_amplitudes_observed = ""
 set num_phases_observed = ""
 set num_reflections_fitted = ""
@@ -127,16 +91,9 @@ set resolutionplot_bins = ""
 set resolutionplot_RESMAX = ""
 set RFACAMP = ""
 set sample_pixel = ""
-set scalimamp3d_BEXTRA = ""
-set scalimamp3d_BXYMINMAX = ""
-set scalimamp3d_BZMINMAX = ""
-set scalimamp3d_rref = ""
 set SYM = ""
 set tempkeep = ""
 set Thread_Number = ""
-set zstarrange  = ""
-set zstarrange_real = ""
-set zstarwin  = ""
 #
 #$end_vars
 #
@@ -152,20 +109,6 @@ set initialization_reset = "y"
 set initialization_executable = "y"
 echo "set initialization_reset = ${initialization_reset}" >> LOGS/${scriptname}.results
 echo "set initialization_executable = ${initialization_executable}" >> LOGS/${scriptname}.results
-#
-if ( ${Calc_from_zstarrange} == "y" ) then
-  set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
-  echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Calculating vertical resolution as ${zstarrange_real} Angstroems."
-else
-  set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
-  echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
-endif
-#
-set zmin = `echo ${zstarrange} | awk '{s = -$1} END {print s}'`
-set zminmax = `echo ${zmin},${zstarrange}`
-echo zminmax = ${zminmax}
 #
 echo "<<@progress: 1>>"
 #
@@ -264,70 +207,6 @@ echo SYM = ${SYM}
 echo spcgrp = ${spcgrp}
 echo CCP4_SYM = ${CCP4_SYM}
 #
-# This is only for debugging purposes:
-if ( 1 == 2 ) then
-  #############################################################################
-  ${proc_2dx}/linblock "2dx_process_hkz - creating FOM-weighted averaged HKL file"
-  #############################################################################  
-
-  \rm -f PLOT.PS
-  \rm -f PS/latline.ps
-  \rm -f PS/latline.pdf
-  \rm -f SCRATCH/latfitteds.dat
-  \rm -f SCRATCH/guess.dat
-  \rm -f latline.statistics
-  #
-  set split = ($realcell:as/,/ /)
-  set cellx = $split[1]
-  set celly = $split[2]
-  #
-  echo "cellx = ${cellx}"
-  echo "celly = ${celly}"
-  echo "cellz = ${ALAT}" 
-  #
-  echo "# IMAGE: APH/latlines.dat <HKL: APH/latlines.dat>" >> LOGS/${scriptname}.results
-  set sample_pixel_local = 1.0
-  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel_local} ${RESMAX}
-  #
-  mv -f output.hkl APH/latfitted.hkl
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "2dx_plotresolution - Plotting resolution curves"
-  #############################################################################
-  echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: APH/latfitted.hkl <Lattice line data raw  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: APH/latfitted_limit.hkl <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
-  \rm -f PLOTCUR.PS
-  #
-  setenv NCPUS ${Thread_Number}
-  #
-  ${bin_2dx}/2dx_plotresolution.exe << eot
-2
-${realcell},${ALAT},${realang}
-APH/latfitted.hkl
-APH/latfitted_limit.hkl
-APH/latlines.dat
-${RESMAX}
-${zstarrange_real}
-${resolutionplot_RESMAX}
-${MergeLatLine_REDUCAC}
-${resolutionplot_bins}
-eot
-  #
-  if ( ! -e PLOTCUR.PS ) then
-    ${proc_2dx}/protest "ERROR in 2dx_plotresolution"
-  else
-    \mv -f PLOTCUR.PS PS/2dx_plotresolution.ps
-  endif
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Done."
-  #############################################################################
-  exit
-endif
-#
-#
-#
 ############################################################################# 
 ${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
 #############################################################################
@@ -336,24 +215,32 @@ source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
 #
-#############################################################################
-${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
+#----------------------------------------------------------------------
+${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com "
+#----------------------------------------------------------------------
+#
+source ${proc_2dx}/2dx_origtilt_merge.com
+#
+source ${proc_2dx}/2dx_origtilt_aph_to_mtz.com
+#
+############################################################################
+${proc_2dx}/linblock "volume_processor.exe - to create a MRC file from HKL"
 #############################################################################
 #
-source ${proc_2dx}/2dx_merge_merge_sub.com
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
 #
-#CHEN cp /Volumes/THUN10TB/Proteins/MloK1/cAMP/merge/APH/latlines.dat APH
-if ( ${merge_modus} == "3D" ) then
-  #
-  echo "<<@progress: 70>>"
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
-  #############################################################################
-  #
-  source ${proc_2dx}/2dx_merge_latline_sub.com
-  #
-endif
+set hkl_infile = APH/sym2D.hkl
+#
+echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${hkl_infile} --mrcout merge2D-${SYM}.mrc --nx ${cellx} --ny ${celly} --nz 1 -s ${SYM}"
+#
+rm -f merge2D-${SYM}.mrc
+#
+${bin_2dx}/volume_processor.exe --hklin ${hkl_infile} --mrcout merge2D-${SYM}.mrc --nx ${cellx} --ny ${celly} --nz 1 -s ${SYM}
+#
+echo "# IMAGE-IMPORTANT: merge2D-${SYM}.mrc <MRC: FINAL ${SYM} symmetrized 2D map>" >> LOGS/${scriptname}.results
+#
 echo "<<@progress: 100>>"
 #
 #############################################################################

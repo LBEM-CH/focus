@@ -53,17 +53,20 @@ public:
 
 public slots:
 
-    void setStandardMode();
+    void setMerge2DMode();
+    void setMerge3DMode();
     void setCustomMode();
     void setSPMode();
     
     void scriptChanged(scriptModule *module, QModelIndex index);
-    void standardScriptChanged(QModelIndex index);
+    void merge2DScriptChanged(QModelIndex index);
+    void merge3DScriptChanged(QModelIndex index);
     void customScriptChanged(QModelIndex index);
     void singleParticleScriptChanged(QModelIndex index);
 
     void scriptCompleted(scriptModule *module, QModelIndex index);
-    void standardScriptCompleted(QModelIndex index);
+    void merge2DScriptCompleted(QModelIndex index);
+    void merge3DScriptCompleted(QModelIndex index);
     void customScriptCompleted(QModelIndex index);
     void singleParticleScriptCompleted(QModelIndex index);
 
@@ -99,13 +102,15 @@ private:
     
     confData *mainData;
 
-    scriptModule *standardScripts;
+    scriptModule *merge2DScripts;
+    scriptModule *merge3DScripts;
     scriptModule *customScripts;
     scriptModule *singleParticleScripts;
 
     QStackedWidget* scriptsWidget;
 
-    QToolButton* showStandardScripts;
+    QToolButton* showMerge2DScripts;
+    QToolButton* showMerge3DScripts;
     QToolButton* showCustomScripts;
     QToolButton* showSPScripts;
     

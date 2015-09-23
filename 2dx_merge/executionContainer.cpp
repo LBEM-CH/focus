@@ -12,14 +12,22 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     scriptsWidget = new QStackedWidget(this);
     scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
-
-    standardScripts = new scriptModule(mainData, mainData->getDir("standardScripts"), scriptModule::standard);
-    connect(standardScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(standardScriptCompleted(QModelIndex)));
-    connect(standardScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(standardScriptChanged(QModelIndex)));
-    connect(standardScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(standardScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(standardScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-    addToScriptsWidget(standardScripts);
+    
+    merge2DScripts = new scriptModule(mainData, mainData->getDir("merge2DScripts"), scriptModule::merge2D);
+    connect(merge2DScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(merge2DScriptCompleted(QModelIndex)));
+    connect(merge2DScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(merge2DScriptChanged(QModelIndex)));
+    connect(merge2DScripts, SIGNAL(reload()), this, SLOT(reload()));
+    connect(merge2DScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+    connect(merge2DScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
+    addToScriptsWidget(merge2DScripts);
+    
+    merge3DScripts = new scriptModule(mainData, mainData->getDir("merge3DScripts"), scriptModule::merge3D);
+    connect(merge3DScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(merge3DScriptCompleted(QModelIndex)));
+    connect(merge3DScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(merge3DScriptChanged(QModelIndex)));
+    connect(merge3DScripts, SIGNAL(reload()), this, SLOT(reload()));
+    connect(merge3DScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+    connect(merge3DScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
+    addToScriptsWidget(merge3DScripts);
 
     customScripts = new scriptModule(mainData, mainData->getDir("customScripts"), scriptModule::custom);
     connect(customScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(customScriptCompleted(QModelIndex)));
@@ -117,14 +125,13 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     layout->addWidget(statusBar, 1, 1, 1, 2);
 
     verbosityControl->setCurrentIndex(1);
-    standardScripts->initialize();
+    merge2DScripts->initialize();
     
-    setStandardMode();
+    setMerge2DMode();
     
     //Just to get the correct stretches of log and parameter windows
     maximizeLogWindow(false);
     maximizeParameterWindow(false);
-    
 }
 
 QToolBar* executionContainer::setupToolbar() 
@@ -132,13 +139,21 @@ QToolBar* executionContainer::setupToolbar()
     QToolBar* scriptsToolBar = new QToolBar("Choose Mode", this);
     scriptsToolBar->setOrientation(Qt::Vertical);
     
-    showStandardScripts = new QToolButton(scriptsToolBar);
-    showStandardScripts->setIcon(*(mainData->getIcon("standard")));
-    showStandardScripts->setFixedSize(QSize(64,64));
-    showStandardScripts->setText("Standard");
-    showStandardScripts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    showStandardScripts->setCheckable(true);
-    connect(showStandardScripts, SIGNAL(clicked()), this, SLOT(setStandardMode()));
+    showMerge2DScripts = new QToolButton(scriptsToolBar);
+    showMerge2DScripts->setIcon(*(mainData->getIcon("merge2D")));
+    showMerge2DScripts->setFixedSize(QSize(64,64));
+    showMerge2DScripts->setText("Merge");
+    showMerge2DScripts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    showMerge2DScripts->setCheckable(true);
+    connect(showMerge2DScripts, SIGNAL(clicked()), this, SLOT(setMerge2DMode()));
+    
+    showMerge3DScripts = new QToolButton(scriptsToolBar);
+    showMerge3DScripts->setIcon(*(mainData->getIcon("merge3D")));
+    showMerge3DScripts->setFixedSize(QSize(64,64));
+    showMerge3DScripts->setText("Merge");
+    showMerge3DScripts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    showMerge3DScripts->setCheckable(true);
+    connect(showMerge3DScripts, SIGNAL(clicked()), this, SLOT(setMerge3DMode()));
     
     showCustomScripts = new QToolButton(scriptsToolBar);
     showCustomScripts->setIcon(*(mainData->getIcon("custom")));
@@ -156,7 +171,8 @@ QToolBar* executionContainer::setupToolbar()
     showSPScripts->setCheckable(true);
     connect(showSPScripts, SIGNAL(clicked()), this, SLOT(setSPMode()));
     
-    scriptsToolBar->addWidget(showStandardScripts);
+    scriptsToolBar->addWidget(showMerge2DScripts);
+    scriptsToolBar->addWidget(showMerge3DScripts);
     scriptsToolBar->addWidget(showCustomScripts);
     scriptsToolBar->addWidget(showSPScripts);
     
@@ -169,8 +185,11 @@ blockContainer* executionContainer::setupLogWindow()
     //Setup Log Viewer
     logViewer = new LogViewer("Standard Output", NULL);
 
-    connect(standardScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
-    connect(standardScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
+    connect(merge2DScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
+    connect(merge2DScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
+    
+    connect(merge3DScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
+    connect(merge3DScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
 
     connect(customScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
     connect(customScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
@@ -178,7 +197,8 @@ blockContainer* executionContainer::setupLogWindow()
     connect(singleParticleScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
     connect(singleParticleScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
 
-    connect(standardScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
+    connect(merge2DScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
+    connect(merge3DScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
     connect(customScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
     connect(singleParticleScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
     
@@ -187,7 +207,8 @@ blockContainer* executionContainer::setupLogWindow()
     verbosityControl->addItems(QStringList() << "Silent" << "Low" << "Moderate" << "Highest");
     
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), logViewer, SLOT(load(int)));
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), standardScripts, SLOT(setVerbosity(int)));
+    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), merge2DScripts, SLOT(setVerbosity(int)));
+    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), merge3DScripts, SLOT(setVerbosity(int)));
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), customScripts, SLOT(setVerbosity(int)));
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), singleParticleScripts, SLOT(setVerbosity(int)));
     
@@ -296,8 +317,11 @@ void executionContainer::addToScriptsWidget(QWidget *widget)
 
 void executionContainer::execute(bool halt) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
-    if (module->type() == scriptModule::standard) {
-        standardScripts->execute(halt);
+    if (module->type() == scriptModule::merge2D) {
+        merge2DScripts->execute(halt);
+    }
+    if (module->type() == scriptModule::merge3D) {
+        merge3DScripts->execute(halt);
     }
     if (module->type() == scriptModule::custom) {
         customScripts->execute(halt);
@@ -324,16 +348,27 @@ void executionContainer::setScriptProgress(int progress) {
     progressBar->setValue(progress);
 }
 
-void executionContainer::setStandardMode() {
-    showStandardScripts->setChecked(true);
+void executionContainer::setMerge2DMode() {
+    showMerge2DScripts->setChecked(true);
+    showMerge3DScripts->setChecked(false);
     showCustomScripts->setChecked(false);
     showSPScripts->setChecked(false);
-    scriptsWidget->setCurrentWidget(standardScripts);
-    standardScripts->focusWidget();
+    scriptsWidget->setCurrentWidget(merge2DScripts);
+    merge2DScripts->focusWidget();
+}
+
+void executionContainer::setMerge3DMode() {
+    showMerge2DScripts->setChecked(false);
+    showMerge3DScripts->setChecked(true);
+    showCustomScripts->setChecked(false);
+    showSPScripts->setChecked(false);
+    scriptsWidget->setCurrentWidget(merge3DScripts);
+    merge3DScripts->focusWidget();
 }
 
 void executionContainer::setCustomMode() {
-    showStandardScripts->setChecked(false);
+    showMerge2DScripts->setChecked(false);
+    showMerge3DScripts->setChecked(false);
     showCustomScripts->setChecked(true);
     showSPScripts->setChecked(false);
     scriptsWidget->setCurrentWidget(customScripts);
@@ -341,7 +376,8 @@ void executionContainer::setCustomMode() {
 }
 
 void executionContainer::setSPMode() {
-    showStandardScripts->setChecked(false);
+    showMerge2DScripts->setChecked(false);
+    showMerge3DScripts->setChecked(false);
     showCustomScripts->setChecked(false);
     showSPScripts->setChecked(true);
     scriptsWidget->setCurrentWidget(singleParticleScripts);
@@ -383,8 +419,12 @@ void executionContainer::scriptChanged(scriptModule *module, QModelIndex index) 
     //  container->restoreSplitterState(1);
 }
 
-void executionContainer::standardScriptChanged(QModelIndex index) {
-    scriptChanged(standardScripts, index);
+void executionContainer::merge2DScriptChanged(QModelIndex index) {
+    scriptChanged(merge2DScripts, index);
+}
+
+void executionContainer::merge3DScriptChanged(QModelIndex index) {
+    scriptChanged(merge3DScripts, index);
 }
 
 void executionContainer::customScriptChanged(QModelIndex index) {
@@ -408,9 +448,14 @@ void executionContainer::reload() {
     results->load();
 }
 
-void executionContainer::standardScriptCompleted(QModelIndex index) {
+void executionContainer::merge2DScriptCompleted(QModelIndex index) {
     //  cerr<<"Standard ";
-    scriptCompleted(standardScripts, index);
+    scriptCompleted(merge2DScripts, index);
+}
+
+void executionContainer::merge3DScriptCompleted(QModelIndex index) {
+    //  cerr<<"Standard ";
+    scriptCompleted(merge3DScripts, index);
 }
 
 void executionContainer::customScriptCompleted(QModelIndex index) {

@@ -734,6 +734,59 @@ void ds::Volume2dx::low_pass_gaussian(double high_resolution)
     
 }
 
+ds::Volume2dx ds::Volume2dx::project2D(char axis)
+{
+    VolumeHeader2dx head = header();
+    FourierSpaceData current_data = get_fourier();
+    FourierSpaceData new_data;
+    if(axis == 'x' || axis == 'X')
+    {
+        head.set_mx(1);
+        head.set_rows(1);
+        for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+        {
+            //Get the data for current reflection
+            MillerIndex index = (*itr).first;
+            DiffractionSpot spot = (*itr).second;
+            if(index.h() == 0) new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+        }
+    }
+    else if(axis == 'y' || axis == 'Y')
+    {
+        head.set_my(1);
+        head.set_columns(1);
+        for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+        {
+            //Get the data for current reflection
+            MillerIndex index = (*itr).first;
+            DiffractionSpot spot = (*itr).second;
+            if(index.k() == 0) new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+        }
+    }
+    else if(axis == 'z' || axis == 'Z')
+    {
+        head.set_mz(1);
+        head.set_sections(1);
+        for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+        {
+            //Get the data for current reflection
+            MillerIndex index = (*itr).first;
+            DiffractionSpot spot = (*itr).second;
+            if(index.l() == 0) new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+        }
+    }
+    else
+    {
+        std::cerr << "ERROR: Bad value provided for axis: " << axis << " should be (x ,or, y ,or, z)\n";
+        exit(1);
+    }
+    
+    Volume2dx projection(head);
+    projection.set_fourier(new_data);
+    
+    return projection;
+}
+
 ds::Volume2dx ds::Volume2dx::subsample(int factor)
 {
     std::cout << "Sub-sampling volume by " << factor << " times.\n";

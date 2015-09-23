@@ -16,7 +16,7 @@ C
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE,CPHOPROT,CMLMERGE
       character*1 cNBM,cNTL,CNREFOUT
-      character*200 CFILE1,cerrmes,cline,clin2
+      character*200 CREF,CFILE1,cerrmes,cline,clin2
       character*200 CFILEreflections,CFILEconsole
       character*80 CCURRENTREF,CMODUS
       integer*8 imnum(10000)
@@ -24,6 +24,11 @@ C
 C
       write(*,'('':2dx_merge_compileB - '',
      .    ''compiling the refinement script'')')
+C
+      write(*,'(/,''input name of reference file'')')
+      read(*,'(A)')CREF
+      call shorten(CREF,k)
+      write(*,'(A)')CREF(1:k)
 C
       write(*,'(/,''input name of results output file'')')
       read(*,'(A)')CFILE1
@@ -171,15 +176,15 @@ C
       write(*,'(/,''input refine_data_type switch'')')
       read(*,*)IMERGEDAT
       if(IMERGEDAT.eq.0 .or.
+     .   IMERGEDAT.eq.1 .or.
      .   IMERGEDAT.eq.2 .or.
      .   IMERGEDAT.eq.4 .or.
-     .   IMERGEDAT.eq.8 .or.
-     .   IMERGEDAT.eq.9     )then
+     .   IMERGEDAT.eq.5     )then
         write(*,'(I1,'' = Using Fourier filtered results'')')IMERGEDAT
 C-------phaoriFouFilter should not be protected:
         LPROTFOUFIL = .FALSE.
         LUSEML = .FALSE.
-      elseif(IMERGEDAT.eq.6) then
+      elseif(IMERGEDAT.eq.3) then
         write(*,'(I1,'' = Using ML results'')')IMERGEDAT
 C-------phaoriFouFilter should be protected:
         LPROTFOUFIL = .TRUE.
@@ -372,11 +377,8 @@ C
         if(NPRG.eq.3)then
           write(11,'(''# 3D reference:'')')
           if ( IMERGREF.eq.1 ) then
-            write(11,'(''setenv HKLIN merge3Dref_MRClefthanded.mtz'')')
-          elseif ( IMERGREF.eq.2 ) then
-            write(11,'(''setenv HKLIN merge3Dref_BackProject_MRClefthanded.mtz'')')
-          elseif ( IMERGREF.eq.3 ) then
-            write(11,'(''setenv HKLIN merge3Dref_Refined_MRClefthanded.mtz'')')
+            call shorten(CREF,k)
+            write(11,'(''setenv HKLIN '',A)')CREF(1:k)
           endif  
           write(11,'(''setenv OMP_NUM_THREADS '',I4)')ITHRNUM
           write(11,'(''#'')')
@@ -418,7 +420,8 @@ C
 C
         if(NPRG.eq.1)then
           write(11,'(''0000001001 Merge'')')
-          write(11,'(''APH/merge.aph'')')
+          call shorten(CREF,k)
+          write(11,'(A)')CREF(1:k)
         else if(NPRG.eq.3)then
           write(11,'(''LABIN AMP=F SIG=SIGF PHASE=PHI FOM=FOM'')')
         else
@@ -489,7 +492,7 @@ C
 C
           call dgetline(CMLMERGE,"ML_use_for_merging",iok)
 C
-          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.3)then
             call cgetline(CPHORI,"phaori_ML")
             read(CPHORI,*,ERR=901)RPHAORIH,RPHAORIK
             goto 902
@@ -552,7 +555,7 @@ C
 C
           call shorten(cdir,k)
           call shortshrink(CIMAGENAME,k1)
-          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.6)then
+          if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.3)then
             write(cname4,'(A,''/APH/ML_result.aph'')')
      .        cdir(1:k)
           else

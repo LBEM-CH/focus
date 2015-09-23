@@ -172,7 +172,8 @@ confData* mainWindow::setupMainConfiguration(const QString &directory)
     mainData->setDir("remoteProc", mainData->getDir("working") + "/proc/");
     createDir(mainData->getDir("working") + "/LOGS");
     mainData->setDir("logs", mainData->getDir("working") + "/LOGS");
-    mainData->setDir("standardScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-standard/"));
+    mainData->setDir("merge2DScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-merge2D/"));
+    mainData->setDir("merge3DScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-merge3D/"));
     mainData->setDir("customScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-custom/"));
     mainData->setDir("singleParticleScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-singleparticle/"));
     mainData->addImage("appImage", new QImage("resource/icon.png"));

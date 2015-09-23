@@ -129,6 +129,7 @@ set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 set movie_imagenumber_toave = ""
 set use_masked_image = ""
+set backup_large_images = ""
 #
 #$end_vars
 #
@@ -159,6 +160,10 @@ endif
 #
 set new_mrc_created = 'n'
 set correct = 0
+if ( ${set backup_large_images} == "yes" ) then
+  set backup_large_images = "0"
+  echo "set backup_large_images = ${backup_large_images}" >> LOGS/${scriptname}.results
+endif
 #
 set testname = `echo ${imagename} | cut -c2-`
 if (( ${nonmaskimagename} != ${imagename} ) && ( ${nonmaskimagename} != ${testname} )) then

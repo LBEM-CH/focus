@@ -64,7 +64,6 @@ set proc_2dx = ""
 #
 set create_merged_dataset = ""
 set MergeResolution = ""
-set merge_modus = ""
 set zstarwin = ""
 set RESMIN = ""
 set RESMAX = ""

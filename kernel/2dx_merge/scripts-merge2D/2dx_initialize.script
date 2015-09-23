@@ -24,7 +24,6 @@
 # DISPLAY: MergeIQMAX
 # DISPLAY: MergeResolution
 # DISPLAY: MergeStepSize
-# DISPLAY: merge_modus
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
 # DISPLAY: SYM
@@ -39,7 +38,6 @@
 # DISPLAY: tempkeep
 # DISPLAY: zstarwin
 # DISPLAY: zstarrange
-# DISPLAY: merge_modus
 # DISPLAY: imageorigin
 # DISPLAY: SCRATCH_DISK
 # DISPLAY: Thread_Number

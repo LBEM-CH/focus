@@ -46,7 +46,6 @@ set membrane_height = ""
 set maximum_amplitude_refinement = ""
 set density_threshold_refinement = ""
 set refinement_mask_resolution = ""
-set merge_modus = ""
 #
 #$end_vars
 #
@@ -71,10 +70,6 @@ echo date = ${date}
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
-#
-if ( ${merge_modus} != "3D" ) then
-  ${proc_2dx}/protest "Skipping: Only in 3D mode."
-endif
 #
 echo "<<@progress: 5>"
 #

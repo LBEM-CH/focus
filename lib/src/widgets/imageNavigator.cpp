@@ -107,7 +107,7 @@ void imageNavigator::Initialize_Actions()
   QAction *screenshot = new QAction(tr("Screen Shot"),this);
   screenshot->setShortcut(tr("G"));
   addAction(screenshot);
-  connect(screenshot,SIGNAL(triggered()),image,SLOT(grab()));
+  connect(screenshot,SIGNAL(triggered()),image,SLOT(grabScreen()));
   menu->addAction(screenshot);
 
 

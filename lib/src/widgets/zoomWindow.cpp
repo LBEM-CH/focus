@@ -47,7 +47,7 @@ void zoomWindow::zoom(const QPoint &pos)
 
   int x = pos.x()-zoomX/2, y=pos.y()-zoomY/2;
   
-  image = QPixmap::grabWidget(widget,x,y,zoomX,zoomY);
+  image = widget->grab(QRect(x,y,zoomX,zoomY));
   repaint();
 }
 

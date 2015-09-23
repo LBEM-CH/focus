@@ -304,9 +304,10 @@ void fullScreenImage::drawLattice(float lattice[2][2], bool primary)
 		}
 }
 
-void fullScreenImage::grab()
+void fullScreenImage::grabScreen()
 { 
-   QPixmap::grabWidget(this,QRect(0,0,width(),height())).save(data->getDir("working") + "/screenShot.png");
+   this->grab(QRect(0,0,width(),height())).save(data->getDir("working") + "/screenShot.png");
+   std::cout << "Screenshot written at: " << data->getDir("working") + "/screenShot.png" << std::endl;
 } 
 
 void fullScreenImage::drawRefinementList()

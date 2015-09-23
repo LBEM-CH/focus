@@ -176,7 +176,7 @@ class fullScreenImage : public QWidget
   void setMaxSearchMethod(mrcImage::maxValueMethod method);
   void createProfile();
 
-	void grab(); 
+  void grabScreen(); 
 
   void rescale(float min, float max, bool invert);
 

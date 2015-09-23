@@ -52,7 +52,7 @@ void selectionFFT::fft(QWidget *widget, const QRect &view)
     float x = round(view.topLeft().x()/2.0), y = round(view.topLeft().y()/2.0);
     window.moveTopLeft(QPoint(x,y));
   }
-  image = QPixmap::grabWidget(widget,window);
+  image = widget->grab(window);
 //  display->setPixmap(image);
 //  setGeometry(view);
   setFixedSize(view.size());

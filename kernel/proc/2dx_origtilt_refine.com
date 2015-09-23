@@ -69,6 +69,7 @@ echo "dummy" > SCRATCH/job_00_${scriptBfile}.log
 \rm -f SCRATCH/job_*_${scriptBfile}.log
 #
 ${bin_2dx}/2dx_merge_compileB.exe << eot
+${reference_file}
 ${scriptname}-tmp.py
 ${scriptname}-tmp.reflections
 ${scriptname}-tmp.console
@@ -172,7 +173,7 @@ end
 #
 python SCRATCH/${scriptname}.py
 #
-echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
+#echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
 #
 #
 #############################################################################

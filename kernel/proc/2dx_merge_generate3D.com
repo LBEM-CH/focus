@@ -173,7 +173,7 @@ echo "<<@progress: +5>>"
 ##########################################################################################################################################################
 ##########################################################################################################################################################
 ##########################################################################################################################################################
-if ( ${latline_algo}x == "0x" ) then
+if ( ${merge3D_algo}x == "0x" ) then
   #############################################################################
   ${proc_2dx}/linblock "LATLINEK - to fit lattice lines to merged data (D.Agard's program)"
   #############################################################################  
@@ -219,7 +219,7 @@ if ( ${latline_algo}x == "0x" ) then
   echo " " 
   #
   ${bin_2dx}/2dx_latlinek.exe << eot > LOGS/2dx_latlinek.log
-2dx_merge_latline_sub.com, ${date}
+2dx_merge_generate3D.com, ${date}
 ${spcgrp}                                                    ! IPG (Plane group number 1-17)
 ${MergeIPAT}                                                            ! IPAT, 0=F & Phase, 1=Intensity data
 ${MergeAK},${MergeIWF_VAL},${MergeIWP_VAL}                   ! AK,IWF,IWP - relative weights, + individual sigmas
@@ -378,7 +378,7 @@ eot
 else
   #
   #############################################################################
-  ${proc_2dx}/linblock "backproject_hkz - creating FOM-weighted averaged HKL file"
+  ${proc_2dx}/linblock "2dx Volume Processor : creating FOM-weighted averaged HKL file"
   #############################################################################  
   #
   \rm -f PLOT.PS
@@ -396,8 +396,8 @@ else
   echo "celly = ${celly}"
   echo "cellz = ${ALAT}" 
   #
-  echo ":Launching ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey"
-  ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --spread-fourier --threshold 0 --normalize-grey
+  echo ":Launching ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey"
+  ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey
   #
   echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
@@ -486,87 +486,15 @@ endif
 echo "<<@progress: +5>>"
 #
 #############################################################################
-${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for volume"
-#############################################################################
-#
-\rm -f SCRATCH/merge3D_MRClefthanded.mtz
-set infile = APH/latfitted.hkl
-#
-${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3D_MRClefthanded.mtz << eof
-TITLE  P1 map, ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY 1
-LABOUT H K L F PHI FOM
-CTYPOUT H H H F P W
-FILE ${infile}
-SKIP 0
-END
-eof
-#
-echo "# IMAGE: SCRATCH/merge3D_MRClefthanded.mtz <MTZ: Latline data before CAD>" >> LOGS/${scriptname}.results
-echo "<<@progress: +5>>"
-#
-#
-#############################################################################
-${proc_2dx}/linblock "f2mtz - Program to convert hkl data into MTZ format, for reference"
-#############################################################################
-#
-set infile = APH/latfittedref_nosym.hkl
-\rm -f SCRATCH/merge3Dref_MRClefthanded.mtz
-#
-${bin_ccp4}/f2mtz hklin ${infile} hklout SCRATCH/merge3Dref_MRClefthanded.mtz << eof
-TITLE  P1 map, ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY 1
-LABOUT H K L F PHI FOM SIGF
-CTYPOUT H H H F P W Q
-FILE ${infile}
-SKIP 0
-END
-eof
-#
-echo "# IMAGE: SCRATCH/merge3Dref_MRClefthanded.mtz <MTZ: Latline Ref data before CAD>" >> LOGS/${scriptname}.results
-#
-#############################################################################
-${proc_2dx}/linblock "cad - to create MTZ file for volume"
+${proc_2dx}/linblock "Sourcing 2dx_hkl_to_mtz.com to create reference mtz file"
 #############################################################################  
 #
-\rm -f merge3D_MRClefthanded.mtz
-#
-${bin_ccp4}/cad hklin1 SCRATCH/merge3D_MRClefthanded.mtz hklout merge3D_MRClefthanded.mtz << eof
-sort h k l
-resolution overall ${RESMAX} ${RESMIN}
-outlim spacegroup 1
-labin file 1 all
-valm NaN NOOUTPUT
-end
-eof
-#
-echo "# IMAGE-IMPORTANT: merge3D_MRClefthanded.mtz <MTZ: Final MRC MTZ file for volume [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
-#
-#############################################################################
-${proc_2dx}/linblock "cad - to create MTZ file for reference"
-#############################################################################  
-#
-if ( ${latline_algo}x == "0x" ) then
-  set outfile = merge3Dref_MRClefthanded.mtz
-else
-  set outfile = merge3Dref_BackProject_MRClefthanded.mtz
-endif
+set outfile = merge3Dref_MRClefthanded.mtz
 \rm -f ${outfile}
 #
-${bin_ccp4}/cad hklin1 SCRATCH/merge3Dref_MRClefthanded.mtz hklout ${outfile} << eof
-sort h k l 
-resolution overall ${MergeResolution} ${RESMIN}
-outlim spacegroup 1
-labin file 1 all
-valm NaN NOOUTPUT
-end
-eof
+source ${proc_2dx}/2dx_hkl_to_mtz.com APH/latfitted.hkl ${realcell} ${ALAT} ${realang} ${RESMIN} ${RESMAX} ${outfile}
 #
-echo "# IMAGE-IMPORTANT: ${outfile} <MTZ: Final MRC MTZ file for reference [H,K,L,F,P,FOM,SIGF]>" >> LOGS/${scriptname}.results
-#
-echo "<<@progress: +5>>"
+echo "# IMAGE-IMPORTANT: ${outfile} <MTZ: Reference 3D MTZ file (MRC lefthanded) [H,K,L,F,P,FOM,SIGF] >" >> LOGS/${scriptname}.results
 #
 #############################################################################
 ${proc_2dx}/linblock "reindex - to flip hand of MTZ file for further work with CCP4"
@@ -574,7 +502,7 @@ ${proc_2dx}/linblock "reindex - to flip hand of MTZ file for further work with C
 #
 \rm -f merge3D.mtz
 #
-${bin_ccp4}/reindex hklin merge3D_MRClefthanded.mtz hklout merge3D.mtz << eof
+${bin_ccp4}/reindex hklin ${outfile} hklout merge3D.mtz << eof
 reindex HKL k,h,l
 lefthand
 end

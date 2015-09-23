@@ -287,10 +287,28 @@ echo "<<@progress: 10>"
 if ( ! -e APH/merge.aph ) then
     set create_merged_dataset = "y"
 endif
+#
 set NPRG = 1
-
+if ( ${merge_reference} == '0' ) then
+  # Use merge.aph files
+  if ( ! -e APH/merge.aph ) then
+    ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+    ${proc_2dx}/protest "Run Merging script first."
+  endif
+  set reference_file="APH/merge.aph"
+endif 
+if ( ${merge_reference} == '1' ) then
+  # Use interpolated lattice lines merge2Dref_MRClefthanded.mtz
+  if ( ! -e merge2Dref_MRClefthanded.mtz ) then
+    ${proc_2dx}/linblock "ERROR: merge2Dref_MRClefthanded.mtz not found. No reference for refinement available."
+    ${proc_2dx}/protest "Run Merging script first."
+  endif
+  set reference_file="merge2Dref_MRClefthanded.mtz"
+  set NPRG = 3
+endif
+#
 set itnum = 0
-
+#
 while ( ${itnum} < ${merge_refine_iterations} ) 
   #
   set itnum_p1 = ${itnum}

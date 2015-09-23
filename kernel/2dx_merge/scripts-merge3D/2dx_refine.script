@@ -20,7 +20,6 @@
 # MANUAL: This does one single alignment step of the selected images against the available reference.
 #
 # DISPLAY: MergeResolution
-# DISPLAY: merge_modus
 # DISPLAY: zstarwin
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
@@ -150,6 +149,8 @@ set date = `date`
 echo date = ${date}
 #
 set scriptname = 2dx_refine
+set merge_modus="3D"
+#
 \rm -f LOGS/${scriptname}.results
 #
 if ( ${ILIST}x == 'x' ) then
@@ -233,54 +234,28 @@ source ${proc_2dx}/2dx_merge_makedirs
 echo "<<@progress: 10>"
 #
 set NPRG = 1
-if ( ${merge_modus} == '2D' ) then
+if ( ${merge_reference} == '0' ) then
+  # Use merge.aph files
   if ( ! -e APH/merge.aph ) then
     ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
     ${proc_2dx}/protest "Run Merging script first."
   endif
   if ( ${reftiltgeo} == "y" ) then
-    # tilt geometry refinement only in 3D.
-    ${proc_2dx}/protest "ERROR: tilt geometry refinement only possible in 3D mode."
+    # tilt geometry refinement only possible with refined lattice lines in MTZ data, not with APH data.
+    ${proc_2dx}/linblock "ERROR: tilt geometry refinement only possible with refined lattice lines in MTZ file."
+    ${proc_2dx}/linblock "ERROR: Conflict between parameter USE MERGED DATA... and REFINE TILTGEOMETRY..."
+    ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
   endif
-endif
-if ( ${merge_modus} == '3D' ) then
-  if ( ${merge_reference} == '0' ) then
-    # Use merge.aph files
-    if ( ! -e APH/merge.aph ) then
-      ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
-      ${proc_2dx}/protest "Run Merging script first."
-    endif
-    if ( ${reftiltgeo} == "y" ) then
-      # tilt geometry refinement only possible with refined lattice lines in MTZ data, not with APH data.
-      ${proc_2dx}/linblock "ERROR: tilt geometry refinement only possible with refined lattice lines in MTZ file."
-      ${proc_2dx}/linblock "ERROR: Conflict between parameter USE MERGED DATA... and REFINE TILTGEOMETRY..."
-      ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
-    endif
-  endif 
-  if ( ${merge_reference} == '1' ) then
-    # Use interpolated lattice lines merge3Dref_MRClefthanded.mtz
-    if ( ! -e merge3Dref_MRClefthanded.mtz ) then
-      ${proc_2dx}/linblock "ERROR: merge3Dref_MRClefthanded.mtz not found. No reference for refinement available."
-      ${proc_2dx}/protest "Run Merging script first."
-    endif
-    set NPRG = 3
+  set reference_file="APH/merge.aph"
+endif 
+if ( ${merge_reference} == '1' ) then
+  # Use interpolated lattice lines merge3Dref_MRClefthanded.mtz
+  if ( ! -e merge3Dref_MRClefthanded.mtz ) then
+    ${proc_2dx}/linblock "ERROR: merge3Dref_MRClefthanded.mtz not found. No reference for refinement available."
+    ${proc_2dx}/protest "Run Merging script first."
   endif
-  if ( ${merge_reference} == '2' ) then
-    # Use BackProjected MTZ file merge3Dref_BackProject_MRClefthanded.mtz
-    if ( ! -e merge3Dref_BackProject_MRClefthanded.mtz ) then
-      ${proc_2dx}/linblock "ERROR: merge3Dref_BackProject_MRClefthanded.mtz not found. No reference for refinement available."
-      ${proc_2dx}/protest "Run Merging script first with Backprojection algorithm."
-    endif
-    set NPRG = 3
-  endif
-  if ( ${merge_reference} == '3' ) then
-    # Use BackProjected and Refined MTZ file
-    if ( ! -e merge3Dref_Refined_MRClefthanded.mtz ) then
-      ${proc_2dx}/linblock "ERROR: merge3Dref_Refined_MRClefthanded.mtz not found. No reference for refinement available."
-      ${proc_2dx}/protest "Run Merging and Refinement script first."
-    endif
-    set NPRG = 3
-  endif
+  set reference_file="merge3Dref_MRClefthanded.mtz"
+  set NPRG = 3
 endif
 #
 if ( ${merge_ref_num} != "0" ) then
@@ -327,175 +302,25 @@ if ( ${merge_ref_num} != "0" ) then
   #
 endif
 #
-#############################################################################
+#------------------------------------------------------------------------------
 ${proc_2dx}/linblock "Setting APH file types to use"
-#############################################################################
+#------------------------------------------------------------------------------
 #
 # This translates the list of directories to work on into one single long line:
 cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
 set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 set olddir = $PWD
 #
-if ( ${scriptname} == "2dx_refine" ) then
- foreach imagefile ( ${dirlist} ) 
-  cd ..
-  cd ${imagefile}
-  cd APH
-  #
-  set APH_file = image_ctfcor_fou_unbent_ctf.aph
-  #
-  if ( ${refine_data_type} == '1' ) then
-    if ( ! -e image_ctfcor_U2-Syn_ctf.aph ) then
-      set APH_file = image_ctfcor_U2-Syn_ctf.aph
-    else
-      echo ":image_ctfcor_U2-Syn_ctf.aph not found."
-    endif
-  endif
-  if ( ${refine_data_type} == '2' ) then
-    if ( -e image_ctfcor_movie_fou_ctf.aph ) then
-      set APH_file = image_ctfcor_movie_fou_ctf.aph
-    else
-      echo ":image_ctfcor_movie_fou_ctf.aph not found."
-    endif
-  endif
-  if ( ${refine_data_type} == '3' ) then
-    if ( -e image_ctfcor_movie_syn_ctf.aph ) then
-      set APH_file = image_ctfcor_movie_syn_ctf.aph
-    else
-      echo ":image_ctfcor_movie_syn_ctf.aph not found."
-    endif
-  endif
-  if ( ${refine_data_type} == '4' ) then 
-    if ( -e image_ctfcor_movieB_fou_ctf.aph ) then
-      set APH_file = image_ctfcor_movieB_fou_ctf.aph
-    else
-      echo ":image_ctfcor_movieB_fou_ctf.aph not found."
-    endif
-  endif
-  if ( ${refine_data_type} == '5' ) then 
-    if ( -e image_ctfcor_movieB_syn_ctf.aph ) then
-      set APH_file = image_ctfcor_movieB_syn_ctf.aph
-    else
-      echo ":image_ctfcor_movieB_syn_ctf.aph not found."
-    endif
-  endif
-  if ( ${refine_data_type} == '6' ) then
-    if ( -e ML_result.aph ) then
-      set APH_file = ML_result.aph
-    else
-      echo ":ML_result.aph not found."
-    endif
-  endif
-  if ( ${refine_data_type} == '7' ||  ${refine_data_type} == '9' ) then
-    set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
-    set QVALS_local =  `cat ../2dx_image.cfg | grep 'set QVALS =' | cut -d\" -f2`
-    if ( ${QVALS_local} == '.' ) then
-      set QVALS_local = 0
-    endif 
-    set QVALMA_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
-    if ( ${QVALMA_loctmp} == '.' ) then
-      set QVALMA_loctmp = 0
-    endif 
-    set QVALAS_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALAS =' | cut -d\" -f2`
-    if ( ${QVALAS_loctmp} == '.' ) then
-      set QVALAS_loctmp = 0
-    endif 
-    set QVALMB_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
-    if ( ${QVALMB_loctmp} == '.' ) then
-      set QVALMB_loctmp = 0
-    endif 
-    set QVALBS_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALBS =' | cut -d\" -f2`
-    if ( ${QVALBS_loctmp} == '.' ) then
-      set QVALBS_loctmp = 0
-    endif 
-    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    set QVALAS_local  = `echo ${QVALAS_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    set QVALBS_local  = `echo ${QVALBS_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    echo ${QVAL2_local} > awk.dat
-    echo ${QVALS_local} >> awk.dat
-    echo ${QVALMA_local} >> awk.dat
-    echo ${QVALAS_local} >> awk.dat
-    echo ${QVALMB_local} >> awk.dat
-    echo ${QVALBS_local} >> awk.dat
-    # cat awk.dat
-    #
-    # awk script to find max in CR-separated list:
-    #  {if(min=="")min=max=$1}; if($1>max) {max=$1}; if($1< min) {min=$1}; total+=$1; count+=1} END {print total/count, min, max}
-    #
-    set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
-    set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
-    \rm -f awk.dat
-    if ( ${QVAL_best} == '1' ) then
-      set APH_file = image_ctfcor_fou_ctf.aph
-    endif
-    if ( ${QVAL_best} == '2' ) then
-      set APH_file = image_ctfcor_syn_ctf.aph
-    endif
-    if ( ${QVAL_best} == '3' ) then
-      set APH_file = image_ctfcor_movie_fou_ctf.aph
-    endif
-    if ( ${QVAL_best} == '4' ) then
-      set APH_file = image_ctfcor_movie_syn_ctf.aph
-    endif
-    if ( ${QVAL_best} == '5' ) then
-      set APH_file = image_ctfcor_movieB_fou_ctf.aph
-    endif
-    if ( ${QVAL_best} == '6' ) then
-      set APH_file = image_ctfcor_movieB_syn_ctf.aph
-    endif
-    if ( ! -e ${APH_file} ) then
-      set APH_file = image_ctfcor_fou_ctf.aph
-      echo "::${APH_file} should be best, but was not found."
-    endif
-  endif
-  if ( ${refine_data_type} == '8' ) then
-    set QVAL2_local =  `cat ../2dx_image.cfg | grep 'set QVAL2 =' | cut -d\" -f2`
-    set QVALMA_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMA =' | cut -d\" -f2`
-    if ( ${QVALMA_loctmp} == '.' ) then
-      set QVALMA_loctmp = 0
-    endif 
-    set QVALMB_loctmp =  `cat ../2dx_image.cfg | grep 'set QVALMB =' | cut -d\" -f2`
-    if ( ${QVALMB_loctmp} == '.' ) then
-      set QVALMB_loctmp = 0
-    endif 
-    set QVALMA_local  = `echo ${QVALMA_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    set QVALMB_local  = `echo ${QVALMB_loctmp} 1.1 | awk '{ s = $1 * $2 } END { print s }'`
-    echo ${QVAL2_local} > awk.dat
-    echo ${QVALMA_local} >> awk.dat
-    echo ${QVALMB_local} >> awk.dat
-    #
-    # cat awk.dat
-    set QVAL_max = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print max}' awk.dat`
-    set QVAL_best = `awk '{if(max==""){max=$1;best=1;count=1}; if($1>max) {max=$1;best=count}; count += 1} END {print best}' awk.dat`
-    \rm -f awk.dat
-    if ( ${QVAL_best} == '1' ) then
-      set APH_file = image_ctfcor_fou_unbent_ctf.aph
-    endif
-    if ( ${QVAL_best} == '2' ) then
-      set APH_file = image_ctfcor_movie_fou_ctf.aph
-    endif
-    if ( ${QVAL_best} == '3' ) then
-      set APH_file = image_ctfcor_movieB_fou_ctf.aph
-    endif
-    if ( ! -e ${APH_file} ) then
-      set APH_file = image_ctfcor_fou_unbent_ctf.aph
-      echo "::${APH_file} should be best, but was not found."
-    endif
-  endif
-  echo ":In directory ${imagefile}: Using APH file ${APH_file}. "
-  \rm -f image_ctfcor_ctf.aph
-  \ln -s ${APH_file} image_ctfcor_ctf.aph
-  cd ${olddir}
- end
-endif
+#---------------------------------------------------------------------------------------------------
+${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_select_APH.com  ${olddir} ${dirlist} ${refine_data_type}"
+#----------------------------------------------------------------------------------------------------
+source ${proc_2dx}/2dx_select_APH.com  ${olddir} ${dirlist} ${refine_data_type}
 #
-#############################################################################
-${proc_2dx}/linblock "Sourcing 2dx_merge_refine_sub.com"
-#############################################################################
+#------------------------------------------------------------------------------
+${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
+#------------------------------------------------------------------------------
 #
-source ${proc_2dx}/2dx_merge_refine_sub.com
-#
+source ${proc_2dx}/2dx_origtilt_refine.com
 #
 #
 if ( ${reftiltgeo} == "y" ) then

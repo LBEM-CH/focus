@@ -21,7 +21,6 @@
 # 
 # DISPLAY: create_merged_dataset
 # DISPLAY: MergeResolution
-# DISPLAY: merge_modus
 # DISPLAY: zstarwin
 # DISPLAY: zstarrange
 # DISPLAY: Calc_from_zstarrange
@@ -220,6 +219,8 @@ else
 endif
 #
 set scriptname = 2dx_mergeRefine
+set merge_modus="3D"
+#
 \rm -f LOGS/${scriptname}.results
 #
 # The following is to make sure that for the next "Import Images", the default is correctly initialized.
@@ -255,7 +256,7 @@ echo MergeIWP = ${MergeIWP}
 # 
 set zstarwintmp = `echo ${ALAT} | awk '{ s = 1.0 / ( 2.0 * $1 ) } END { print s }'`
 set zstarwinbad = `echo ${zstarwin} ${zstarwintmp} | awk '{ if ( abs ( $1 - $2 ) > 0.001 ) { s = 1 } else { s = 0 } } END { print s }'`
-if ( ( ${zstarwinbad} == 1 ) && ( ${merge_modus} == '3D' ) ) then
+if ( ${zstarwinbad} == 1 ) then
   echo "#WARNING: Warning: zstarwin is ${zstarwin}, but reasonable would be ${zstarwintmp}" >> LOGS/${scriptname}.results
   echo "::WARNING: zstarwin is ${zstarwin}, but reasonable would be ${zstarwintmp}"
 endif
@@ -371,25 +372,34 @@ source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
 #
-if ( ${merge_modus} == '2D' ) then
-  if ( ! -e APH/merge.aph ) then
-    set create_merged_dataset = "y"
-  endif
-  set NPRG = 1
-endif
-if ( ${merge_modus} == '3D' ) then
-  if ( ( ! -e  merge3D_MRClefthanded.mtz ) || ( ! -e merge3Dref_MRClefthanded.mtz ) ) then
-    set create_merged_dataset = "y"
-  endif
-  if ( ${merge_reference} == '0' ) then
-    # Use merge.aph files
-    set NPRG = 1
-  else
-    # User interpolated lattice lines latlinesref_MRClefthanded.mtz
-    set NPRG = 3
-  endif
+if ( ( ! -e  merge3D_MRClefthanded.mtz ) || ( ! -e merge3Dref_MRClefthanded.mtz ) ) then
+  set create_merged_dataset = "y"
 endif
 #
+set NPRG = 1
+if ( ${merge_reference} == '0' ) then
+  # Use merge.aph files
+  if ( ! -e APH/merge.aph ) then
+    ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
+    ${proc_2dx}/protest "Run Merging script first."
+  endif
+  if ( ${reftiltgeo} == "y" ) then
+    # tilt geometry refinement only possible with refined lattice lines in MTZ data, not with APH data.
+    ${proc_2dx}/linblock "ERROR: tilt geometry refinement only possible with refined lattice lines in MTZ file."
+    ${proc_2dx}/linblock "ERROR: Conflict between parameter USE MERGED DATA... and REFINE TILTGEOMETRY..."
+    ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
+  endif
+  set reference_file="APH/merge.aph"
+endif 
+if ( ${merge_reference} == '1' ) then
+  # Use interpolated lattice lines merge3Dref_MRClefthanded.mtz
+  if ( ! -e merge3Dref_MRClefthanded.mtz ) then
+    ${proc_2dx}/linblock "ERROR: merge3Dref_MRClefthanded.mtz not found. No reference for refinement available."
+    ${proc_2dx}/protest "Run Merging script first."
+  endif
+  set reference_file="merge3Dref_MRClefthanded.mtz"
+  set NPRG = 3
+endif
 
 set itnum = 0
 
@@ -404,35 +414,34 @@ while ( ${itnum} < ${merge_refine_iterations} )
   if ( ${merge_ref_num} == "0" && ${create_merged_dataset} == "y" ) then
     #
     #############################################################################
-    ${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
-    #############################################################################  
+    ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
+    #############################################################################
     #
+    source ${proc_2dx}/2dx_origtilt_merge.com
     #
-    source ${proc_2dx}/2dx_merge_merge_sub.com
+    echo "<<@progress: 45>>"
     #
-    if ( ${merge_modus} == "3D" ) then
-      #
-      #############################################################################
-      ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
-      #############################################################################
-      #
-      source ${proc_2dx}/2dx_merge_latline_sub.com
-      #
-      if ( ${merge_reference} == "3" ) then
-        source ${proc_2dx}/2dx_refineMergedMap_sub.com
-      endif
-      #
-    endif
+    #############################################################################
+    ${proc_2dx}/linblock "Sourcing 2dx_plttilt.com"
+    #############################################################################
+    #
+    source ${proc_2dx}/2dx_plttilt.com
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+    ############################################################################# 
+    #
+    source ${proc_2dx}/2dx_merge_generate3D.com
     #
   endif
   #
   #
   #
   #############################################################################
-  ${proc_2dx}/linblock "Sourcing 2dx_merge_refine_sub.com"
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
   #############################################################################  
   #
-  source ${proc_2dx}/2dx_merge_refine_sub.com
+  source ${proc_2dx}/2dx_origtilt_refine.com
   #
   #
   #

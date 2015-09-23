@@ -162,18 +162,13 @@ echo "<<@progress: 10>"
 if ( ${make_reference} == "y" ) then
   #
   set NPRG = 1
-  if ( ${merge_modus} == '2D' ) then
-    if ( ! -e APH/merge.aph ) then
-      ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
-      ${proc_2dx}/linblock "Run Merging script first."
-    endif
-  endif
   if ( ${merge_modus} == '3D' ) then
     # User interpolated lattice lines latlinesref_MRClefthanded.mtz
     if ( ! -e merge3D_MRClefthanded.mtz ) then
       ${proc_2dx}/linblock "ERROR: merge_MRClefthanded.mtz not found. No reference for refinement available."
       ${proc_2dx}/linblock "Run Merging script first."
     endif
+    set reference_file="merge_MRClefthanded.mtz"
     set NPRG = 3
   endif
   #

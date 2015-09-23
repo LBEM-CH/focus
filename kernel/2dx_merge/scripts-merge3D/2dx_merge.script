@@ -22,7 +22,6 @@
 # MANUAL: Then align the other images to it (using Refine Once), starting with non-tilted images, and slowly add more and more tilted images. After each call of "Refine Once" you should run "Merge Once" again, to merge those aligned images into a new reference. 
 #
 # DISPLAY: MergeResolution
-# DISPLAY: merge_modus
 # DISPLAY: zstarrange
 # DISPLAY: Calc_from_zstarrange
 # DISPLAY: zstarrange_real
@@ -66,17 +65,10 @@
 # DISPLAY: scalimamp3d_BZMINMAX
 # DISPLAY: scalimamp3d_BEXTRA
 # DISPLAY: latline_pdf
-# DISPLAY: latline_algo
+# DISPLAY: merge3D_algo
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
 # DISPLAY: Thread_Number
-# DISPLAY: number_of_beads
-# DISPLAY: density_threshold_bead
-# DISPLAY: maximum_resolution_bead
-# DISPLAY: number_refinement_iterations
-# DISPLAY: membrane_height
-# DISPLAY: maximum_amplitude_refinement
-# DISPLAY: density_threshold_refinement
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
@@ -92,7 +84,7 @@ set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
 set Calc_from_zstarrange = ""
 set ILIST = ""
-set latline_algo = ""
+set merge3D_algo = ""
 set latline_pdf = ""
 set lattice = ""
 set max_amp_correction = ""
@@ -149,17 +141,11 @@ set zstarrange  = ""
 set zstarrange_real = ""
 set zstarwin  = ""
 set calculate_subvolume = ""
-set number_of_beads = ""
-set density_threshold_bead = ""
-set maximum_resolution_bead = ""
-set number_refinement_iterations = ""
-set membrane_height = ""
-set maximum_amplitude_refinement = ""
-set density_threshold_refinement = ""
 #
 #$end_vars
 #
 set scriptname = 2dx_merge
+set merge_modus="3D"
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'
@@ -393,6 +379,27 @@ echo MergeAK = ${MergeAK}
 echo MergeIWF_VAL = ${MergeIWF_VAL}
 echo MergeIWP_VAL = ${MergeIWP_VAL}
 #
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "The current working directory is" ${olddir}
+#
+#----------------------------------------------------------------------
+${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_check_links.com ${olddir}"
+#----------------------------------------------------------------------
+source ${proc_2dx}/2dx_check_links.com ${olddir}
+#
+#
+#This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+#
+#---------------------------------------------------------------------------------------------------
+${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_select_APH.com  ${olddir} ${dirlist} ${merge_data_type}"
+#----------------------------------------------------------------------------------------------------
+source ${proc_2dx}/2dx_select_APH.com  ${olddir} ${dirlist} ${merge_data_type}
+#
 #############################################################################
 ${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"
 #############################################################################
@@ -412,34 +419,33 @@ source ${proc_2dx}/2dx_merge_makedirs
 echo "<<@progress: 10>"
 #
 #############################################################################
-${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
+${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
 #############################################################################
 #
-source ${proc_2dx}/2dx_merge_merge_sub.com
+source ${proc_2dx}/2dx_origtilt_merge.com
 #
-if ( ${merge_modus} == "3D" ) then
-  #
-  echo "<<@progress: 45>>"
-  #
-  source ${proc_2dx}/2dx_plttilt.com
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
-  #############################################################################
-  #
-  source ${proc_2dx}/2dx_merge_latline_sub.com
-  #
-  if ( ${latline_algo} == "2" ) then
-    #
-    source ${proc_2dx}/2dx_refineMergedMap_sub.com
-    #
-  endif
-  #
-endif
+echo "<<@progress: 45>>"
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing 2dx_plttilt.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_plttilt.com
+#
+#############################################################################
+${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+############################################################################# 
+#
+source ${proc_2dx}/2dx_merge_generate3D.com
+#
 #
 #############################################################################
 ${proc_2dx}/linblock "${scriptname} normal end."
 #############################################################################
 #
 echo "<<@progress: 100>>"
+#
+exit
+#Just to show the following scripts in the GUI as subscripts:
+source ${proc_2dx}/2dx_hkl_to_mtz.com
 #

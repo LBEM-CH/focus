@@ -20,7 +20,6 @@
 # MANUAL: Now merge all images together into a merged final dataset.
 #
 # DISPLAY: MergeResolution
-# DISPLAY: merge_modus
 # DISPLAY: zstarrange
 # DISPLAY: Calc_from_zstarrange
 # DISPLAY: zstarrange_real
@@ -141,6 +140,7 @@ set zstarwin  = ""
 #$end_vars
 #
 set scriptname = 2dx_finalmerge
+set merge_modus="3D"
 #
 \rm -f LOGS/${scriptname}.results
 #
@@ -264,70 +264,6 @@ echo SYM = ${SYM}
 echo spcgrp = ${spcgrp}
 echo CCP4_SYM = ${CCP4_SYM}
 #
-# This is only for debugging purposes:
-if ( 1 == 2 ) then
-  #############################################################################
-  ${proc_2dx}/linblock "2dx_process_hkz - creating FOM-weighted averaged HKL file"
-  #############################################################################  
-
-  \rm -f PLOT.PS
-  \rm -f PS/latline.ps
-  \rm -f PS/latline.pdf
-  \rm -f SCRATCH/latfitteds.dat
-  \rm -f SCRATCH/guess.dat
-  \rm -f latline.statistics
-  #
-  set split = ($realcell:as/,/ /)
-  set cellx = $split[1]
-  set celly = $split[2]
-  #
-  echo "cellx = ${cellx}"
-  echo "celly = ${celly}"
-  echo "cellz = ${ALAT}" 
-  #
-  echo "# IMAGE: APH/latlines.dat <HKL: APH/latlines.dat>" >> LOGS/${scriptname}.results
-  set sample_pixel_local = 1.0
-  ${bin_2dx}/2dx_process_hkz.exe APH/latlines.dat ${SYM} ${cellx} ${celly} ${ALAT} ${sample_pixel_local} ${RESMAX}
-  #
-  mv -f output.hkl APH/latfitted.hkl
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "2dx_plotresolution - Plotting resolution curves"
-  #############################################################################
-  echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: APH/latfitted.hkl <Lattice line data raw  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: APH/latfitted_limit.hkl <Lattice line limited  [H,K,Z,A,PHI,SIGF,SIGP,FOM]>" >> LOGS/${scriptname}.results
-  \rm -f PLOTCUR.PS
-  #
-  setenv NCPUS ${Thread_Number}
-  #
-  ${bin_2dx}/2dx_plotresolution.exe << eot
-2
-${realcell},${ALAT},${realang}
-APH/latfitted.hkl
-APH/latfitted_limit.hkl
-APH/latlines.dat
-${RESMAX}
-${zstarrange_real}
-${resolutionplot_RESMAX}
-${MergeLatLine_REDUCAC}
-${resolutionplot_bins}
-eot
-  #
-  if ( ! -e PLOTCUR.PS ) then
-    ${proc_2dx}/protest "ERROR in 2dx_plotresolution"
-  else
-    \mv -f PLOTCUR.PS PS/2dx_plotresolution.ps
-  endif
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Done."
-  #############################################################################
-  exit
-endif
-#
-#
-#
 ############################################################################# 
 ${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
 #############################################################################
@@ -335,29 +271,30 @@ ${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
 source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
+#############################################################################
+${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
+#############################################################################
+#
+source ${proc_2dx}/2dx_origtilt_merge.com
+#
+echo "<<@progress: 45>>"
 #
 #############################################################################
-${proc_2dx}/linblock "Sourcing 2dx_merge_merge_sub.com"
+${proc_2dx}/linblock "Sourcing 2dx_plttilt.com"
 #############################################################################
 #
-source ${proc_2dx}/2dx_merge_merge_sub.com
+source ${proc_2dx}/2dx_plttilt.com
 #
-#CHEN cp /Volumes/THUN10TB/Proteins/MloK1/cAMP/merge/APH/latlines.dat APH
-if ( ${merge_modus} == "3D" ) then
-  #
-  echo "<<@progress: 70>>"
-  #
-  #############################################################################
-  ${proc_2dx}/linblock "Sourcing 2dx_merge_latline.sub"
-  #############################################################################
-  #
-  source ${proc_2dx}/2dx_merge_latline_sub.com
-  #
-endif
+#############################################################################
+${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+############################################################################# 
+#
+source ${proc_2dx}/2dx_merge_generate3D.com
+#
+#############################################################################
+${proc_2dx}/linblock "${scriptname} normal end."
+#############################################################################
+#
 echo "<<@progress: 100>>"
-#
-#############################################################################
-${proc_2dx}/linblock "2dx_merge normal end."
-#############################################################################
 #
 #

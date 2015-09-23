@@ -78,7 +78,7 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
 
     centralSplitter->addWidget(parameterContainer);
     centralSplitter->addWidget(logWindow);
-    centralSplitter->setStretchFactor(0, 2);
+    centralSplitter->setStretchFactor(0, 1);
     centralSplitter->setStretchFactor(1, 1);
 
     /*           Results View Information               */
@@ -128,12 +128,14 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     previewContainer->setHeaderWidget(showHeaderButton);
     
     QWidget *rightContainer = new QWidget;
+    rightContainer->setFixedWidth(235);
+    
     QVBoxLayout *rightLayout = new QVBoxLayout;
     rightLayout->setMargin(0);
     rightLayout->setSpacing(0);
     rightContainer->setLayout(rightLayout);
     rightLayout->addWidget(resultsSplitter);
-    rightLayout->addWidget(previewContainer);
+    rightLayout->addWidget(previewContainer, 0 , Qt::AlignHCenter | Qt::AlignVCenter);
     rightLayout->setStretchFactor(resultsSplitter, 1);
     rightLayout->setStretchFactor(previewContainer, 0);
 
@@ -154,6 +156,7 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     progressBar->setTextVisible(false);
 
     statusBar = new QStatusBar(this);
+    statusBar->setFixedHeight(20);
     statusBar->addPermanentWidget(progressBar);
     
     //Setup the layout and add widgets
@@ -195,7 +198,12 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
 
     manuals->hide();
     verbosityControl->setCurrentIndex(1);
-    update();
+    
+    //Just to set correct siezs
+    maximizeLogWindow(false);
+    maximizeParameterWindow(false);
+    
+    setStandardMode();
 }
 
 void centralWindow::bridgeScriptLogConnection(bool bridge) {

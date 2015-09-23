@@ -102,6 +102,10 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     importCount = 0;
     
     resize(1040, 720);
+    
+    
+    //Just to have the correct sizes on startup
+    container->setSizes(QList<int>() << 1 << 2);
 
 }
 

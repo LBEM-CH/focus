@@ -433,7 +433,7 @@ void executionContainer::maximizeLogWindow(bool maximize)
     else
     {
         centralContainer->setSizes(QList<int>() << 1 << 1);
-        centerRightSplitter->setSizes(QList<int>() << 5 << 2);
+        centerRightSplitter->setSizes(QList<int>() << 3 << 1);
     }
 }
 
@@ -447,7 +447,7 @@ void executionContainer::maximizeParameterWindow(bool maximize)
     else
     {
         centralContainer->setSizes(QList<int>() << 1 << 1);
-        centerRightSplitter->setSizes(QList<int>() << 5 << 2);
+        centerRightSplitter->setSizes(QList<int>() << 3 << 1);
     }
 }
 

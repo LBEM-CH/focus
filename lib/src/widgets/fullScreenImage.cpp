@@ -307,7 +307,7 @@ void fullScreenImage::drawLattice(float lattice[2][2], bool primary)
 void fullScreenImage::grabScreen()
 { 
    this->grab(QRect(0,0,width(),height())).save(data->getDir("working") + "/screenShot.png");
-   std::cout << "Screenshot written at: " << data->getDir("working") + "/screenShot.png" << std::endl;
+   std::cout << "Screenshot written at: " << data->getDir("working").toStdString() + "/screenShot.png" << std::endl;
 } 
 
 void fullScreenImage::drawRefinementList()

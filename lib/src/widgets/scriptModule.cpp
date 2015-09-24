@@ -63,6 +63,11 @@ QTreeView *scriptModule::setupModule()
   if(!scriptDir.exists() || data->isEmpty()) return NULL;
 
   QTreeView *view = new QTreeView;
+  view->setContentsMargins(2,5,2,5);
+  view->setAnimated(true);
+  view->setRootIsDecorated(true);
+  view->setUniformRowHeights(true);
+  
   model = new QStandardItemModel;
 
   view->header()->hide();

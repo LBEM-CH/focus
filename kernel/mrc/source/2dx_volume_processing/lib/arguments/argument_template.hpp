@@ -37,6 +37,7 @@ namespace volume
             static TCLAP::ValueArg<double> THRESHOLD("t", "threshold", "desired density threshold (partially thresholded if used with refinement)", false, -1.0,"FLOAT");
             static TCLAP::ValueArg<double> BFACTOR("", "bfactor", "Apply a negative b-factor to the volume", false, 0,"FLOAT");
             static TCLAP::ValueArg<int> SUBSAMPLE("", "subsample", "subsample to factor", false, 0,"INT");
+            static TCLAP::ValueArg<int> EXTENDED("", "extended", "Produce an output with n X n X 1 unit cells", false, 1, "INT");
 
             static TCLAP::ValueArg<int> BEADS("b", "beads", "number of beads to be used", false, 0,"INT");
 
@@ -46,7 +47,6 @@ namespace volume
             static TCLAP::ValueArg<std::string> TEMP_LOC("", "temp", "Folder to keep temporary files for each iteration (if not specified temp files will not be written)", false, "","FOLDER");
             static TCLAP::ValueArg<double> MASK_RES("", "mask-res", "The volume in each iteration will be lowpassed with this resolution, before generating a thresholded mask.", false, 15.0,"FLOAT");
             
-            static TCLAP::SwitchArg EXTENDED("", "extended", "Produce an output with 2X2X1 unit cells", false);
             static TCLAP::SwitchArg INVERTED("", "inverted", "Produce an output map with inverted hand", false);
             static TCLAP::SwitchArg PSF("", "psf", "Produce an Point Spread Function(PSF) output map (works only with mrcout)", false);
             static TCLAP::SwitchArg FULL_FOURIER("", "full-fourier", "Produce a full P1 Fourier space in output (noticeable only with hklout)", false);

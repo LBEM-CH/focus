@@ -100,8 +100,8 @@ int main(int argc, char* argv[])
     if(args::templates::THRESHOLD.isSet()) input.apply_density_threshold(args::templates::THRESHOLD.getValue());
     
     if(args::templates::BFACTOR.isSet()) input = input.apply_bfactor(args::templates::BFACTOR.getValue());
-    
-    if(args::templates::EXTENDED.getValue()) input = input.extended_volume(1,1,0);
+  
+    if(args::templates::EXTENDED.isSet()) input = input.extended_volume(args::templates::EXTENDED.getValue()-1,args::templates::EXTENDED.getValue()-1,0);
     if(args::templates::INVERTED.getValue()) input.invert_hand();
     
     if(args::templates::PSF.getValue())

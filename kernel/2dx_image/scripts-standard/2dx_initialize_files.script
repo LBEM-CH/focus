@@ -160,7 +160,7 @@ endif
 #
 set new_mrc_created = 'n'
 set correct = 0
-if ( ${set backup_large_images} == "yes" ) then
+if ( ${backup_large_images}x == "yesx" ) then
   set backup_large_images = "0"
   echo "set backup_large_images = ${backup_large_images}" >> LOGS/${scriptname}.results
 endif

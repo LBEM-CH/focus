@@ -47,7 +47,6 @@
 # DISPLAY: comment
 # DISPLAY: RMAG
 # DISPLAY: LCOLOR
-# DISPLAY: ccunbend_program
 # DISPLAY: ctfcor_imode
 # DISPLAY: ctfcor_noise
 #
@@ -105,7 +104,6 @@ set ISTEP_h = ""
 set IMAXCOR = ""
 set RMAG = ""
 set LCOLOR = ""
-set ccunbend_program = ""
 set RB_1 = ""
 set RB_2 = ""
 set RB_3 = ""
@@ -296,11 +294,6 @@ endif
 set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
 set imagecentery = ${imagecenterx}
 #
-#
-if ( ${ccunbend_program} != "0" && ${ccunbend_program} != "1" ) then
-  set ccunbend_program = "0"
-  echo "set ccunbend_program = ${ccunbend_program}" >> LOGS/${scriptname}.results
-endif
 #
 #################################################################################
 #

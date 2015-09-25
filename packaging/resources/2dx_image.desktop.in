@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=2dx Image
+GenericName=2dx_image @2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@
+Version=@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@
+Comment=Image Processor for 2dx
+Exec=@CMAKE_INSTALL_PREFIX@/2dx_image/2dx_image
+Icon=@CMAKE_INSTALL_PREFIX@/Resource/2dx_image/icon.png
+Type=Application
+Categories=Application;Education;Science;

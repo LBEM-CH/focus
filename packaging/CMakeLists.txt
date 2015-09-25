@@ -30,8 +30,16 @@ endif()
 #
 # These will copy the files directly to installation location
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    file(GLOB DES resources/*.desktop)
-    install(FILES ${DES} DESTINATION Resource)
+    configure_file("resources/2dx.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/resources/2dx.desktop")
+    configure_file("resources/2dx_image.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/resources/2dx_image.desktop")
+    configure_file("resources/2dx_logbrowser.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/resources/2dx_logbrowser.desktop")
+
+    file(GLOB DES ${CMAKE_CURRENT_BINARY_DIR}/resources/*.desktop)
+
+    install(FILES ${DES} DESTINATION "~/.local/share/applications"
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+            GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
 endif()
 #------------------------------------------------------------------------------
 

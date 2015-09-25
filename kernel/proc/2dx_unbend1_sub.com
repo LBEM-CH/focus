@@ -508,28 +508,12 @@ ${proc_2dx}/lin "Using IMAXCOR = ${IMAXCOR}"
 echo " "
 echo "Starting now:"
 #
-if ( ${ccunbend_program} == "1" ) then
-  set ROFFSET = 50.0
-  set NNUM = 6
-  ${proc_2dx}/${lincommand} "   Using 2dx_ccunbendh"
-  #
-  \rm -f SCRATCH/${imagename}_unbend1_notap.mrc
-  setenv CCORDATA SCRATCH/prof${imagename}.dat
-  ${bin_2dx}/2dx_ccunbendh.exe << eot
-${imagename}.mrc
-${IMAXCOR},${ISTEP_h},${NNUM},${ROFFSET}	 !IMAXCOR,ISTEP,NNUM,ROFFSET
-0.001,${facthresha},${RMAG} !EPS,FACTOR,RMAG
-SCRATCH/${imagename}_unbend1_notap.mrc
-UNBEND1,${date}
-eot
-  #
-else
-  #
-  ${proc_2dx}/${lincommand} "   Using 2dx_ccunbendk"
-  #
-  \rm -f SCRATCH/${imagename}_unbend1_notap.mrc
-  setenv CCORDATA SCRATCH/prof${imagename}.dat
-  ${bin_2dx}/2dx_ccunbendk.exe << eot
+#
+${proc_2dx}/${lincommand} "   Using 2dx_ccunbendk"
+#
+\rm -f SCRATCH/${imagename}_unbend1_notap.mrc
+setenv CCORDATA SCRATCH/prof${imagename}.dat
+${bin_2dx}/2dx_ccunbendk.exe << eot
 ${imagename}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,F	 !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${facthresha},46,${RMAG},${LCOLOR} !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
@@ -537,8 +521,6 @@ ${imagename},UNBEND1,${date},${imagename} PASS 1
 SCRATCH/${imagename}_unbend1_notap.mrc
 UNBEND1,${date}
 eot
-  #
-endif
 #
 cp -f SCRATCH/prof${imagename}.dat SCRATCH/prof${imagename}_unbend1.dat
 echo "# IMAGE: SCRATCH/prof${imagename}_unbend1.dat <TXT: Distortion Profile Unbend1>" >> LOGS/${scriptname}.results

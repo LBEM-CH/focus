@@ -44,7 +44,6 @@
 # DISPLAY: comment
 # DISPLAY: RMAG
 # DISPLAY: LCOLOR
-# DISPLAY: ccunbend_program
 # DISPLAY: createmaskinfo
 #
 #$end_local_vars
@@ -87,7 +86,6 @@ set IMAXCOR = ""
 set det_tilt = ""
 set RMAG = ""
 set LCOLOR = ""
-set ccunbend_program = ""
 set createmaskinfo = ""
 set ctfcor_imode = ""
 #
@@ -246,11 +244,6 @@ if ( ${radlim} != ${radlimnew} ) then
   set radlim = ${radlimnew}
   echo "set radlim = ${radlim}" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "WARNING: correcting RADLIM to ${radlim}."
-endif
-#
-if ( ${ccunbend_program} != "0" && ${ccunbend_program} != "1" ) then
-  set ccunbend_program = "0"
-  echo "set ccunbend_program = ${ccunbend_program}" >> LOGS/${scriptname}.results
 endif
 #
 echo "# IMAGE-IMPORTANT: "FFTIR/${iname}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results

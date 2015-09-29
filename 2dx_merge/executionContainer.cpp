@@ -110,6 +110,7 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     progressBar->setTextVisible(false);
     
     statusBar = new QStatusBar(this);
+    statusBar->setFixedHeight(20);
     statusBar->addPermanentWidget(progressBar);
     
     

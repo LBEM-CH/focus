@@ -9,14 +9,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
 ################################################################################
 # Application Name
 set(EXETITLE 2dx_logbrowser)
-#project( ${EXETITLE} )
-
-# OS specific project properties ----------------------------------------------
-IF( APPLE )
-	# for 64bit us the follwing line
-	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386;ppc64;x86_64) 
-	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386) 
-ENDIF( APPLE )
 
 # Libraries to use ------------------------------------------------------------
 FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED)

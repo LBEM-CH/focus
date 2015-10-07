@@ -10,15 +10,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
 ################################################################################
 # Application Name
 set(EXETITLE 2dx_merge)
-#project( ${EXETITLE} )
-
-## OS specific project properties ----------------------------------------------
-IF( APPLE )
-	# for 64bit us the follwing line
-	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386;ppc64;x86_64) 
-	#to be able to use the QT Carbon 32 bit
-	#SET( CMAKE_OSX_ARCHITECTURES ppc;i386)
-ENDIF( APPLE )
 
 # C++ Compiler -----------------------------------------------------------------
 if(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")
@@ -161,38 +152,8 @@ qt5_use_modules(${EXETITLE} Widgets WebKitWidgets Network Script OpenGL)
 include_directories(${CMAKE_BINARY_DIR}/include)
 
 get_propagate_deps(conf widgets mrcImage extentions)
-#
-# last thing we have to do is to tell CMake what olibraries our executable
-# needs,
-#
-# luckily FIND_PACKAGE prepared 2DX_MERGE_LIBRARIES variable for us:
-#
-
-#find_package(Boost COMPONENTS serialization system filesystem program_options REQUIRED)
-
-find_package(Boost COMPONENTS system filesystem REQUIRED)
-
 
 target_link_libraries(${EXETITLE} conf widgets mrcImage extentions ${2DX_MERGE_LIBRARIES})
-
-#target_link_libraries(${EXETITLE} ${CMAKE_CURRENT_BINARY_DIR}/../kernel/mrc/source/2dx_single_particle_lib/libSingleParticle2dx.a)
-#target_link_libraries(${EXETITLE} ${CMAKE_CURRENT_BINARY_DIR}/../kernel/mrc/source/2dx_single_particle_lib/eman2/libEM/libEM2.a)
-
-#if (ENABLE_CUDA)
-#	target_link_libraries(${EXETITLE} ${CMAKE_CURRENT_BINARY_DIR}/../kernel/mrc/source/2dx_single_particle_lib/libSingleParticleCUDA2dx.a)
-#	target_link_libraries(${EXETITLE} /usr/local/cuda/lib64/libcudart.so.5.5)
-#	target_link_libraries(${EXETITLE} /usr/local/cuda/lib64/libcufft.so)
-#endif(ENABLE_CUDA)
-
-#target_link_libraries(${EXETITLE} ${GSL_LIBRARY})
-#target_link_libraries(${EXETITLE} ${GSL_CBLAS_LIBRARY})
-#target_link_libraries(${EXETITLE} ${TIFF_LIBRARY})
-#target_link_libraries(${EXETITLE} ${HDF5_LIBRARY})
-#target_link_libraries(${EXETITLE} ${PNG_LIBRARY})
-#target_link_libraries(${EXETITLE} ${JPEG_LIBRARY})
-target_link_libraries(${EXETITLE} ${Boost_LIBRARIES})
-include_directories(${Boost_INCLUDE_DIR})
-
  
 #--------------------------------------------------------------------------------
 # Now the installation stuff below

@@ -125,6 +125,8 @@ endif
 # For the map generation, there should not be any data cutoff:
 set zwinlocal = 0.5
 #
+set LUSEML = F
+#
 ###########################################################################
 if ( ${spcgrp} != "1" ) then
   ###########################################################################

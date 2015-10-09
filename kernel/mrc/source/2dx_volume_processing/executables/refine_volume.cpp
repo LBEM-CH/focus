@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     std::cout << ":Preparing the initial output volume:\n";
     std::cout << "-----------------------------------\n\n";
     Volume2dx output_volume(input_volume.header());
-    output_volume.generate_random_densities(0.4);
+    //output_volume.generate_random_densities(0.4);
     
     //Low pass filter to use whatever is required
     output_volume.low_pass(max_resolution);

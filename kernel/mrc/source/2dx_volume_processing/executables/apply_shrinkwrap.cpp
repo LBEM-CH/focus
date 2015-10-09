@@ -27,12 +27,14 @@ int main(int argc, char** argv)
     args::templates::MRCIN.forceRequired();
     args::templates::THRESHOLD.forceRequired();
     args::templates::ITERATIONS.forceRequired();
+    args::templates::SLAB.forceRequired();
     
     //Add arguments  
     exe.add(args::templates::MRCOUT);
     exe.add(args::templates::HKLOUT);
     exe.add(args::templates::MASK_RES);
     exe.add(args::templates::THRESHOLD);
+    exe.add(args::templates::SLAB);
     exe.add(args::templates::ITERATIONS);
     exe.add(args::templates::MAXRES);
     exe.add(args::templates::SYMMETRY);
@@ -47,7 +49,8 @@ int main(int argc, char** argv)
     std::string temp_loc = args::templates::TEMP_LOC.getValue();  
     std::string symmetry = args::templates::SYMMETRY.getValue();
     double max_resolution = args::templates::MAXRES.getValue();
-    double density_threshold = args::templates::THRESHOLD.getValue();   
+    double density_threshold = args::templates::THRESHOLD.getValue();
+    double membrane_slab = args::templates::SLAB.getValue();
     int number_of_iterations = args::templates::ITERATIONS.getValue();  
     std::string hklout = args::templates::HKLOUT.getValue();
     std::string mrcout = args::templates::MRCOUT.getValue();
@@ -79,11 +82,19 @@ int main(int argc, char** argv)
     
     //Prepare the output volume
     Volume2dx output_volume(input_volume);
-    volume::data::RealSpaceData real_after = output_volume.get_real();
     
     double error = 1.0;
     for(int iteration=0; iteration<number_of_iterations; ++iteration)
     {
+        
+        std::string iteration_str = std::to_string(iteration+1);
+        
+        //Put leading zeros in front of iteration number
+        for(int i=0; i<6-iteration_str.length(); i++)
+        {
+            iteration_str = "0" + iteration_str;
+        }
+        
         std::cout << "\n-----------------------------------\n";
         std::cout << "::Shrinkwrap Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
@@ -93,7 +104,7 @@ int main(int argc, char** argv)
         
         if(temp_loc != "")
         {   
-            std::string out_file_name = temp_loc + "/shrinkwrap_initial_volume_" + std::to_string(iteration+1) +".map";
+            std::string out_file_name = temp_loc + "/shrinkwrap_initial_volume_" + iteration_str +".map";
             output_volume.write_volume(out_file_name, "map");
         }
         
@@ -104,21 +115,23 @@ int main(int argc, char** argv)
         double sum_initial = real_before.squared_sum();
         
         volume::data::RealSpaceData mask_threshold = real_before.threshold_mask(0);
-        
         real_before.apply_mask(mask_threshold);
         
+        //volume::data::RealSpaceData mask_slab = real_before.vertical_slab_mask(membrane_slab, true);
+        //real_before.apply_mask(mask_slab);
+        
         mask.set_real(real_before);
-        mask.low_pass_butterworth(mask_resolution);
-        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_shrinkwrap_" + std::to_string(iteration+1) +".map");
+        mask.low_pass(mask_resolution);
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_shrinkwrap_" + iteration_str +".map");
     
         volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_mask(density_threshold*real_before.max()/100);
     
         //Just to write output of mask to file
         mask.set_real(mask_shrinkwrap);
-        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_shrinkwrap_" + std::to_string(iteration+1) +".map");
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_shrinkwrap_" + iteration_str +".map");
         
         //Mask the volume
-        real_after = real_before.mask_applied_data(mask_shrinkwrap, 1.0);
+        volume::data::RealSpaceData real_after = real_before.mask_applied_data(mask_shrinkwrap, 1.0);
         
         //Get the sum of densities for error calculation
         double sum_final = real_after.squared_sum();
@@ -146,7 +159,7 @@ int main(int argc, char** argv)
         
         if(temp_loc != "")
         {   
-            std::string out_file_name = temp_loc + "/shrinkwrap_final_volume_" + std::to_string(iteration+1) +".map";
+            std::string out_file_name = temp_loc + "/shrinkwrap_final_volume_" + iteration_str +".map";
             output_volume.write_volume(out_file_name, "map");
         }
         

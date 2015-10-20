@@ -27,14 +27,12 @@ int main(int argc, char** argv)
     args::templates::MRCIN.forceRequired();
     args::templates::THRESHOLD.forceRequired();
     args::templates::ITERATIONS.forceRequired();
-    args::templates::SLAB.forceRequired();
     
     //Add arguments  
     exe.add(args::templates::MRCOUT);
     exe.add(args::templates::HKLOUT);
     exe.add(args::templates::MASK_RES);
     exe.add(args::templates::THRESHOLD);
-    exe.add(args::templates::SLAB);
     exe.add(args::templates::ITERATIONS);
     exe.add(args::templates::MAXRES);
     exe.add(args::templates::SYMMETRY);
@@ -50,7 +48,6 @@ int main(int argc, char** argv)
     std::string symmetry = args::templates::SYMMETRY.getValue();
     double max_resolution = args::templates::MAXRES.getValue();
     double density_threshold = args::templates::THRESHOLD.getValue();
-    double membrane_slab = args::templates::SLAB.getValue();
     int number_of_iterations = args::templates::ITERATIONS.getValue();  
     std::string hklout = args::templates::HKLOUT.getValue();
     std::string mrcout = args::templates::MRCOUT.getValue();

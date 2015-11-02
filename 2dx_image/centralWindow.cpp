@@ -60,12 +60,6 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     scriptsContainer->addWidget(manuals);
     scriptsContainer->setStretchFactor(0, 2);
     scriptsContainer->setStretchFactor(1, 1);
-
-    
-    blockContainer *previewContainer = new blockContainer("Preview");
-    preview = new imagePreview(data, "", false, previewContainer);
-    connect(preview, SIGNAL(load()), this, SLOT(refresh()));
-    previewContainer->setMainWidget(preview);
     
     
     parameterContainer = setupParameterWindow();
@@ -96,11 +90,18 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     resultsContainer->setMainWidget(results);
 
     resultsSplitter->addWidget(resultsContainer);
-
+    resultsSplitter->setMinimumWidth(235);
 
     blockContainer *imagesContainer = new blockContainer("Images");
     connect(imagesContainer, SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
 
+    blockContainer *previewContainer = new blockContainer("Preview");
+    previewContainer->setFixedWidth(235);
+    preview = new imagePreview(data, "", false, previewContainer);
+    connect(preview, SIGNAL(load()), this, SLOT(refresh()));
+    previewContainer->setMainWidget(preview);
+    
+    
     imageParser = new resultsParser(data, QStringList() << "", resultsParser::images);
     connect(imageParser, SIGNAL(imageSelected(const QString &)), preview, SLOT(setImage(const QString&)));
     connect(imageParser, SIGNAL(cellActivated(int, int)), preview, SLOT(launchNavigator()));
@@ -128,24 +129,20 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     previewContainer->setHeaderWidget(showHeaderButton);
     
     QWidget *rightContainer = new QWidget;
-    rightContainer->setFixedWidth(235);
     
     QVBoxLayout *rightLayout = new QVBoxLayout;
     rightLayout->setMargin(0);
     rightLayout->setSpacing(0);
     rightContainer->setLayout(rightLayout);
     rightLayout->addWidget(resultsSplitter);
-    rightLayout->addWidget(previewContainer, 0 , Qt::AlignHCenter | Qt::AlignVCenter);
-    rightLayout->setStretchFactor(resultsSplitter, 1);
-    rightLayout->setStretchFactor(previewContainer, 0);
 
     centerRightSplitter = new QSplitter(this);
     centerRightSplitter->setOrientation(Qt::Horizontal);
     centerRightSplitter->setHandleWidth(4);
     centerRightSplitter->addWidget(centralSplitter);
     centerRightSplitter->addWidget(rightContainer);
-    centerRightSplitter->setStretchFactor(0, 3);
-    centerRightSplitter->setStretchFactor(1, 1);
+    centerRightSplitter->setStretchFactor(0, 5);
+    centerRightSplitter->setStretchFactor(1, 2);
 
     //Setup status Bar
     progressBar = new QProgressBar(this);
@@ -165,12 +162,21 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     layout->setSpacing(0);
     setLayout(layout);
     
-    //blockContainer *statusContainer = new blockContainer("Status");
+    blockContainer* statusParserCont = new blockContainer("Status");
     statusParser = new statusViewer(data->getDir("config") + "/2dx_image/2dx_status.html");
     statusParser->setConf(data);
     statusParser->load();
-    //statusContainer->setMainWidget(statusParser);
+    statusParserCont->setMainWidget(statusParser);
     
+    QWidget *statusContainer = new QWidget();
+    statusContainer->setFixedHeight(235);
+    
+    QHBoxLayout *statusLayout = new QHBoxLayout();
+    statusLayout->setMargin(0);
+    statusLayout->setSpacing(0);
+    statusContainer->setLayout(statusLayout);
+    statusLayout->addWidget(statusParserCont, 1);
+    statusLayout->addWidget(previewContainer, 0 , Qt::AlignHCenter | Qt::AlignVCenter);
     
     /*LAYOUT
     * -----------------------------------------------------------
@@ -193,11 +199,13 @@ centralWindow::centralWindow(confData *conf, QWidget *parent)
     layout->addWidget(setupToolbar(), 0, 0, 3, 1);
     layout->addWidget(scriptsContainer, 0, 1, 2, 1);
     layout->addWidget(centerRightSplitter, 0, 2, 1, 1);
-    layout->addWidget(statusParser, 1, 2, 1, 1);
+    layout->addWidget(statusContainer, 1, 2, 1, 1);
     layout->addWidget(statusBar, 2, 1, 1, 2);
-
+    
     manuals->hide();
     verbosityControl->setCurrentIndex(1);
+    
+    
     
     //Just to set correct siezs
     maximizeLogWindow(false);
@@ -469,17 +477,19 @@ void centralWindow::maximizeLogWindow(bool maximize) {
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
     } else {
         centralSplitter->setSizes(QList<int>() << 1 << 1);
-        centerRightSplitter->setSizes(QList<int>() << 1 << 1);
+        centerRightSplitter->setSizes(QList<int>() << 5 << 2);
     }
 }
 
 void centralWindow::maximizeParameterWindow(bool maximize) {
+    
     if (maximize) {
         centralSplitter->setSizes(QList<int>() << 1 << 0);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
     } else {
         centralSplitter->setSizes(QList<int>() << 1 << 1);
-        centerRightSplitter->setSizes(QList<int>() << 1 << 1);
+        
+        centerRightSplitter->setSizes(QList<int>() << 5 << 2);
     }
 }
 

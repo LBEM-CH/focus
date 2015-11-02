@@ -2,8 +2,8 @@
 
 void statusViewer::initialize()
 {
-  setFixedHeight(126);
-  setTextSizeMultiplier(0.8);
+  setFixedHeight(235);
+  setTextSizeMultiplier(0.9);
   timer.setSingleShot(true);
   data = NULL;
   connect(&watcher,SIGNAL(fileChanged(const QString &)),this,SLOT(timedLoad()));

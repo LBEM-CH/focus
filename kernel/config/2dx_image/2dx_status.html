@@ -1,14 +1,12 @@
 <HTML>
 
 <script type="text/javascript">
-
 function set(key)
 {
 	var value  = confData.get(key,"value");
 	if(value!="")
 		document.getElementById(key).innerText = value;
 }
-
 function setFloat(key)
 {
 	var value  = confData.get(key,"value");
@@ -16,7 +14,6 @@ function setFloat(key)
 	if(value!="" && !isNaN(floatValue))
 		document.getElementById(key).innerText = floatValue;
 }
-
 function load()
 {
   var tag;
@@ -34,7 +31,6 @@ function load()
     }
   }
 }
-
 </script>
 
 <head>
@@ -45,15 +41,12 @@ TD{font-family: Courier; font-size: 10pt; line-height: 1.4em}
 </style>
 
 <BODY onLoad="load()" BGCOLOR="WHITE" MARGINHEIGHT="0" MARGINWIDTH="0">
-<table width="100%" border="1" cellspacing="1"> 
-  <tr> 
-    <td valign="top">
-        <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TBODY>
 <TR>
-<TD colspan=2 align="left" height=17><B>Calculated Mag:</B></TD>
+<TD colspan=2 align="left" height=17><B>Calc. Mag=</B></TD>
 <TD colspan=3 align="left"  height=17 ID="CALCULATEDMAG">---</TD>
-<TD colspan=3 align="right" height=17><B>Last QVAL:</B></TD>
+<TD colspan=3 align="right" height=17><B>Last QVAL=</B></TD>
 <TD colspan=1 align="right" height=17 ID="QVAL"><B>---</B></TD></TR>
 </TABLE>
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
@@ -114,7 +107,7 @@ TD{font-family: Courier; font-size: 10pt; line-height: 1.4em}
 <TD align="right" ID="QValMB">---</TD>
 </TR>
 </TABLE>
-    <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TBODY>
 <TR>
 <TD ROWSPAN=2 COLSPAN=1 height=24><B><U>PowerBins</U></B><BR>&nbsp;(noise=7)</TD>
@@ -137,8 +130,6 @@ TD{font-family: Courier; font-size: 10pt; line-height: 1.4em}
 </TR>
 <TBODY>
 </TABLE>
-    </td>
-    <td valign="top">
 <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
 <TR>
 <TD align="left"  ><B><U>Tilt Info</U></B> </TD>
@@ -184,8 +175,5 @@ TD{font-family: Courier; font-size: 10pt; line-height: 1.4em}
 <TD align="right" ID="PHARES_NUM_SPOTS">--- </TD>
 </TR>
 </TABLE>
-    </td>
-  </tr>
-</table>
 </BODY>
 </HTML>

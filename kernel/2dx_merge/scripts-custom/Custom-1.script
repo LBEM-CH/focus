@@ -142,7 +142,7 @@ foreach dirfile ( ${dirlist} )
   # echo "set movie_refboxa = 300" >> LOGS/${scriptname}.results
   # echo "set movie_smoothing = 8" >> LOGS/${scriptname}.results
   # echo "set movie_drift_threshold = 5" >> LOGS/${scriptname}.results
-  # echo "set movie_imagenumber_toave = 7" >> LOGS/${scriptname}.results
+  # echo "set movie_imagenumber_toave = 5" >> LOGS/${scriptname}.results
   # echo "set movie_quadradb = 8,8 = 8" >> LOGS/${scriptname}.results
   # echo "set ctfcor_imode = 4" >> LOGS/${scriptname}.results
   # echo "set ctfcor_calculate_tiles = 0" >> LOGS/${scriptname}.results

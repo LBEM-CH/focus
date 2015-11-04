@@ -20,6 +20,8 @@
 # DISPLAY: movie_import_target_dir
 # DISPLAY: movie_import_type
 # DISPLAY: movie_import_aligned_stack
+# DISPLAY: movie_import_DC_averages
+# DISPLAY: movie_import_DC_stacks
 #
 #$end_local_vars
 #
@@ -34,6 +36,8 @@ set movie_import_imagenumber = ""
 set movie_import_target_dir = ""
 set movie_import_type = ""
 set movie_import_aligned_stack = ""
+set movie_import_DC_averages = ""
+set movie_import_DC_stacks = ""
 #
 #$end_vars
 #
@@ -64,8 +68,8 @@ endif
 #
 echo "<<@progress: 10>>"
 #
-set movie_average = ${movie_import_dir}/aligned_averages
-set movie_stack   = ${movie_import_dir}/aligned_stacks
+set movie_average = ${movie_import_dir}/${movie_import_DC_averages}
+set movie_stack   = ${movie_import_dir}/${movie_import_DC_stacks}
 #
 if ( ! -d ${movie_average} ) then
   ${proc_2dx}/protest "ERRROR: directory ${movie_average} not found."

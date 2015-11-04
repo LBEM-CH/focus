@@ -122,7 +122,7 @@ void imageNavigator::Initialize_Actions()
 
     toggleCTFViewAction = new QAction(tr("View CTF"),this);
     toggleCTFViewAction->setShortcut(tr("C"));
-    toggleCTFViewAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    // toggleCTFViewAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     toggleCTFViewAction->setCheckable(true);
     addAction(toggleCTFViewAction);
     connect(toggleCTFViewAction,SIGNAL(triggered()),this,SLOT(toggleCTFView()));
@@ -136,7 +136,6 @@ void imageNavigator::Initialize_Actions()
     connect(displayMillerIndicesAction,SIGNAL(triggered()),signalMap,SLOT(map()));
     signalMap->setMapping(displayMillerIndicesAction,"millerindices");
     menu->addAction(displayMillerIndicesAction);
-
 
     QAction *viewPSPeaksAction = new QAction(tr("View Peak List"),this);
     viewPSPeaksAction->setShortcut(tr("Shift+P"));

@@ -20,7 +20,6 @@
 # MANUAL: This does one single alignment step of the selected images against the available reference.
 #
 # DISPLAY: MergeResolution
-# DISPLAY: zstarwin
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: merge_res_limit
@@ -64,7 +63,6 @@ set proc_2dx = ""
 #
 set create_merged_dataset = ""
 set MergeResolution = ""
-set zstarwin = ""
 set RESMIN = ""
 set RESMAX = ""
 set merge_res_limit = ""
@@ -104,6 +102,7 @@ set overall_weighted_R_factor = ""
 set overall_weighted_phase_residual = ""
 set RFACAMP = ""
 set Thread_Number = ""
+set zstarwin = ""
 #
 #$end_vars
 #

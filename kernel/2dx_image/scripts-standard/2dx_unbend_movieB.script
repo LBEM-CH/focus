@@ -257,7 +257,7 @@ if ( ${system} == "Darwin" ) then
   if (( "$USER" == "$S2" ) || ( "$USER" == "$S3" )) then
     set app_2dx_image = "~/2dx/bin/2dx_image"
   else
-    set app_2dx_image = "${bin_2dx}/../../../bin/2dx_image"
+    set app_2dx_image = "${bin_2dx}../../../bin/2dx_image"
   endif
   echo ":Testing, if gostscript is installed and ps2pdf exists"
   set ps2pdf_test = `which ps2pdf`x 

@@ -38,7 +38,7 @@ It runs natively on Mac OSX and Linux/X11 (Linux, and other Unix variants).
 2dx is written entirely in C++ and based on <a href="http://www.trolltech.com">Qt-4</a>
 <p></p>
 <b>Written by: </b><br>
-Nikhil Biyani, Marcel Arheit, Sebastian Scherer, Bryant Gipson, Xiangyan Zeng, Zi Yan Zhang, Henning Stahlberg<br>
+Ricardo Righetto, Nikhil Biyani, Marcel Arheit, Sebastian Scherer, Bryant Gipson, Xiangyan Zeng, Zi Yan Zhang, Henning Stahlberg<br>
 Center for Cellular Imaging and Nano Analytics (C-CINA), Biozentrum, University Basel, Switzerland<BR>
 <b>with contributions from</b><br>
 Remco Wouts<br>

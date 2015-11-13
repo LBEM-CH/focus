@@ -250,8 +250,8 @@ endif
 if ( ! -f ${merge_aph2} ) then
     ${proc_2dx}/protest "The merged aph file ${merge_aph2} does not exist!"
 endif
-python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph1} 
-python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph2} 
+${app_python} ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph1} 
+${app_python} ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph2} 
 #############################################################################
 ${proc_2dx}/linblock "2dx_avrgamphs - only to calculate FOM"
 #############################################################################
@@ -279,7 +279,7 @@ echo "# IMAGE-IMPORTANT: APH/merge.aph <merge.aph [H,K,Z,A,P,#,IQ,W,Bk,CTF]>" >>
 #TODO: check if dir exist clean up
 \cp -f APH/merge.aph APH/merge1.aph 
  
-python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+${app_python} ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
 ${bin_2dx}/2dx_avrgamphs.exe << eot > LOGS/2dx_avrgamphs2D_{map1}.log
 T
 1001,${zminmaxlocal}
@@ -351,16 +351,16 @@ if ( "${diffmap_det_significance}" == "y" ) then
     if( "${diffmap_domain}" == "fourier"  && ${unitcell_equal} == 1 ) then
         #Welch's t-test
         rm -rf APH/avrg2D_{map1}.hkl 
-        python ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+        ${app_python} ${bin_2dx}/diffmap/2dx_diffmap_fourier.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     else #real space
         if ( "${diffmap_sig_class}" == "empirical" ) then
             set diffmap_selections_dir = "${diffmap_dir}/selections"
             rm -f ${diffmap_selections_dir}/*.dat
             set diffmap_selection_filebase = "diffmap_split_selection" 
             if( "${diffmap_sig_algorithm}" == "Mixed Merge" ) then
-                python ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode mix -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
+                ${app_python} ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode mix -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
             else
-                python ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode classic -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
+                ${app_python} ${bin_2dx}/diffmap/2dx_merge_split_selections.py --mode classic -n ${diffmap_nsplits} -o ${diffmap_selection_filebase} 2dx_merge_dirfile.dat ${diff_map2_dir}/merge/2dx_merge_dirfile.dat 
             endif
             set diffmap_selections = `find ${diffmap_selections_dir} -name ${diffmap_selection_filebase}*.dat`
             echo "${diffmap_selections}"
@@ -391,7 +391,7 @@ if ( "${diffmap_det_significance}" == "y" ) then
             set basedir = ${diff_map2_dir}
             set diffmap_t_test_selection = "${diff_map2_dir}/merge/2dx_merge_dirfile.dat"
             source  ${bin_2dx}/diffmap/2dx_diffmap_t-test.com
-            python ${bin_2dx}/diffmap/2dx_diffmap_t-test.py --confidence ${diff_map_confidence} -o ${varmap} ${diffmap_maps_dir1} ${diffmap_maps_dir2}
+            ${app_python} ${bin_2dx}/diffmap/2dx_diffmap_t-test.py --confidence ${diff_map_confidence} -o ${varmap} ${diffmap_maps_dir1} ${diffmap_maps_dir2}
             #redo merge
             ${proc_2dx}/linblock "remerging map 1"
             set diffmap_split_selection = "2dx_merge_dirfile.dat"
@@ -408,10 +408,10 @@ if ( "${diffmap_det_significance}" == "y" ) then
             source ${proc_2dx}/2dx_diffmap_merge_selection.com
             cd ${olddir}
         endif 
-        python ${bin_2dx}/diffmap/2dx_diffmap_real.py  APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+        ${app_python} ${bin_2dx}/diffmap/2dx_diffmap_real.py  APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     endif
 else
-    python ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
+    ${app_python} ${bin_2dx}/diffmap/2dx_diffmap_real.py APH/merge.aph  ${diff_map2_dir}/merge/APH/merge.aph ${zmaxlocal} ${MergeIQMAX} ${max_amp_correction} ${SYM} ${diff_map_confidence}
     #TODO: change all the image names for the non significant case
 endif
 #
@@ -767,7 +767,7 @@ if( "${diffmap_sig_class}" == "empirical" ) then
             #############################################################################
             ${proc_2dx}/linblock "Scaling amplitudes of ${merge_aph}"
             #############################################################################
-            python ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph} 
+            ${app_python} ${bin_2dx}/diffmap/2dx_scale_amplitudes.py ${merge_aph} 
             set postfix = ` echo ${merge_aph} | awk -F /  '{print $NF}' | sed s/.aph//`
             source ${proc_2dx}/2dx_from_merge2map.com
             set map_postfix = "${merge2map_output_dir}/map_${postfix}"
@@ -817,7 +817,7 @@ if( "${diffmap_det_significance}" == "y" && "${diffmap_sig_class}" == "empirical
     if( "${diffmap_threshold_global}" == "y" ) then
         set variationmap_options = "${variationmap_options} -g" 
     endif
-    python ${bin_2dx}/diffmap/2dx_variationmap.py ${diffmap_selections_dir} ${variationmap_options} 
+    ${app_python} ${bin_2dx}/diffmap/2dx_variationmap.py ${diffmap_selections_dir} ${variationmap_options} 
 endif
 #
 #
@@ -997,7 +997,7 @@ endif
 if ( ${diffmap_plot_scalebar} == "y" ) then
     set diffmap_plot_options = "${diffmap_plot_options} --plot-scalebar "
 endif
-python ${bin_2dx}/diffmap/2dx_plot_diffmap.py ${diffmap_plot_options}  ${map1}_sig.mrc ${map2}_sig.mrc  
+${app_python} ${bin_2dx}/diffmap/2dx_plot_diffmap.py ${diffmap_plot_options}  ${map1}_sig.mrc ${map2}_sig.mrc  
 #
 # Get the diffmape name
 set diffmap_name = `find diffmap -d 1 -name "diffmap*.pdf" | head -1`

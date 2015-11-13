@@ -570,15 +570,15 @@ eot
             ###########################################################################
             ${proc_2dx}/lin "Extract trajectory for region drift plotting"
             ###########################################################################
-            python ${proc_2dx}/movie/deleteZeros.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
+            ${app_python} ${proc_2dx}/movie/deleteZeros.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat
                   
             set x_1_4 = `echo ${imagesidelength} | awk '{ s = int( $1 / 4 ) } END { print s }'`
             set x_3_4 = `echo ${imagesidelength} | awk '{ s = int( 3 * $1 / 4 ) } END { print s }'`
           
-            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_I.dat   ${x_1_4} ${x_1_4} ${num_dia} MovieB/MovieB_peaks_I.dat
-            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_II.dat  ${x_3_4} ${x_1_4} ${num_dia} MovieB/MovieB_peaks_II.dat
-            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} MovieB/MovieB_peaks_III.dat
-            python ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} MovieB/MovieB_peaks_IV.dat
+            ${app_python} ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_I.dat   ${x_1_4} ${x_1_4} ${num_dia} MovieB/MovieB_peaks_I.dat
+            ${app_python} ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_II.dat  ${x_3_4} ${x_1_4} ${num_dia} MovieB/MovieB_peaks_II.dat
+            ${app_python} ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_III.dat ${x_1_4} ${x_3_4} ${num_dia} MovieB/MovieB_peaks_III.dat
+            ${app_python} ${proc_2dx}/movie/getClosestPeaks.py ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_nz.dat ${frame_folder}/frame_${i}/SCRATCH/profm${nonmaskimagename}_closest_IV.dat  ${x_3_4} ${x_3_4} ${num_dia} MovieB/MovieB_peaks_IV.dat
     
             ###########################################################################
             ${proc_2dx}/lin "Store distortion-vector-field for visual inspection"

@@ -124,11 +124,11 @@ if ( ${spot_source} == "0" || ${spot_source} == "1" || ${spot_source} == "2" ) t
   #
   if ( ${FFT_FILE} == "none" ) then
     ${proc_2dx}/linblock "ERROR: ${FFT_FILE} does not exist."
-    ${proc_2dx}/protest "First run Unbend I."
+    ${proc_2dx}/protest "First run previous scripts."
   endif
   if ( ! -e ${FFT_FILE} ) then
     ${proc_2dx}/linblock "ERROR: ${FFT_FILE} does not exist."
-    ${proc_2dx}/protest "First run Unbend I."
+    ${proc_2dx}/protest "First run previous scripts."
   endif 
   #
   ${proc_2dx}/linblock "Using the unbent data ${FFT_FILE} as source of spots."

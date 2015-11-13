@@ -143,7 +143,7 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 ${proc_2dx}/linblock "get_max_defocus.py - to extract defocus and TANGL maxima."
 #############################################################################
 #
-python ${proc_2dx}/get_max_defocus.py 2dx_merge_dirfile.dat SCRATCH/get_max_defocus.out
+${app_python} ${proc_2dx}/get_max_defocus.py 2dx_merge_dirfile.dat SCRATCH/get_max_defocus.out
 set tmp_defocus_min = `cat SCRATCH/get_max_defocus.out | awk '{ s = $1 } END { print s }'`
 set tmp_defocus_max = `cat SCRATCH/get_max_defocus.out | awk '{ s = $2 } END { print s }'`
 set tmp_TANGL_max = `cat SCRATCH/get_max_defocus.out | awk '{ s = $3 } END { print s }'`
@@ -286,5 +286,9 @@ echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS
 #
 echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "Normal End."
-
+#
+exit
+#
+#only to show up in the GUI:
+python ${proc_2dx}/get_max_defocus.py 2dx_merge_dirfile.dat SCRATCH/get_max_defocus.out
 #

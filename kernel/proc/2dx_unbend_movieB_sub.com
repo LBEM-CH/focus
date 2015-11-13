@@ -93,8 +93,8 @@ else
   \rm tmp_stack_header.txt
 endif
 #
-#python ${proc_2dx}/movie/extractAMP.py `ls ${frame_folder}/aph_*`
-#python ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${movie_imagenumber_toave}
+#${app_python} ${proc_2dx}/movie/extractAMP.py `ls ${frame_folder}/aph_*`
+#${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${movie_imagenumber_toave}
 #exit 
 #
 if ( ${movie_filter_type} == "0" ) then
@@ -142,7 +142,7 @@ set num_dia = 100
 #
 if ( 1 == 2 ) then
   ${proc_2dx}/linblock "Plotting local drift"
-  python ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
+  ${app_python} ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
   exit
 endif
 #
@@ -211,11 +211,11 @@ if ( ! -d ${frame_folder} ) then
   ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} super-frames, merging ${movie_imagenumber_toave} movie sub-frames into each"
   ############################################################### 
   #
-  python ${proc_2dx}/movie/movie_mode_split1.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave} ${frame_folder}
+  ${app_python} ${proc_2dx}/movie/movie_mode_split1.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave} ${frame_folder}
   #
   foreach f (`ls ${frame_folder}`)
     \cp 2dx_image.cfg ${frame_folder}/$f/
-    python ${proc_2dx}/movie/disable_movie.py  ${frame_folder}/$f/
+    ${app_python} ${proc_2dx}/movie/disable_movie.py  ${frame_folder}/$f/
   end
 endif
 #
@@ -299,13 +299,13 @@ while ($i <= ${movie_imagenumber_touse})
   endif
   \rm -f ${frame_folder}/2dx_master.cfg
 
-  set filtervalue = `python ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
+  set filtervalue = `${app_python} ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
   echo ":  Filter frame average #${i} with radius ${filtervalue}"
   # echo "LP on: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc with filter radius ${filtervalue}"
-  # echo "python ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}"
+  # echo "${app_python} ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}"
   #
-  # echo "python ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
-  python ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc
+  # echo "${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
+  ${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc
   #
 
   set ctfcor_tilefile = "${frame_folder}/frame_${i}/2dx_ctfcor_tile.mrc"
@@ -507,7 +507,7 @@ eot
   ${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxa}"
   ###############################################################
   #
-  python ${proc_2dx}/movie/box_reference.py SCRATCH/reference_flt_upscale_fft_mask_fft.mrc SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa} 
+  ${app_python} ${proc_2dx}/movie/box_reference.py SCRATCH/reference_flt_upscale_fft_mask_fft.mrc SCRATCH/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa} 
   #
   if ( ${tempkeep} != "y" ) then
     \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft.mrc
@@ -643,20 +643,20 @@ echo "<<@progress: 80>>"
 ###########################################################################
 ${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_touse}" 
 ###########################################################################
-python ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename} ${frame_folder}
+${app_python} ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename} ${frame_folder}
 echo "# IMAGE: ${frame_folder}/direct_sum.mrc <Sum unbent images>" >> LOGS/${scriptname}.results 
 
 
 ###########################################################################
 ${proc_2dx}/linblock "Filtering by resolution weights"
 ###########################################################################
-python ${proc_2dx}/movie/apply_filter_sum.py ${frame_folder}/direct_sum.mrc ${frame_folder}/direct_sum_filt.mrc 0.033 ${frame_folder}/weight.mrc
+${app_python} ${proc_2dx}/movie/apply_filter_sum.py ${frame_folder}/direct_sum.mrc ${frame_folder}/direct_sum_filt.mrc 0.033 ${frame_folder}/weight.mrc
 echo "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results 
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
 
 if ( ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" ) then
   \rm -f ${frame_folder}/direct_sum_filt_ctf.mrc
-  python ${proc_2dx}/movie/apply_filter_fourier.py ${frame_folder}/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc ${frame_folder}/direct_sum_filt_ctf.mrc ${ctfcor_noise}
+  ${app_python} ${proc_2dx}/movie/apply_filter_fourier.py ${frame_folder}/direct_sum_filt.mrc SCRATCH/2dx_ctfcor_ctffile.mrc ${frame_folder}/direct_sum_filt_ctf.mrc ${ctfcor_noise}
 
   if ( ${ctfcor_imode} == "2" ) then
     echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed-CTF**2 (Noise=${ctfcor_noise})>" >> LOGS/${scriptname}.results 
@@ -854,7 +854,7 @@ eot
 \rm -f SCRATCH/TMP9873.dat
 
 # Variation plot generation (no longer used)
-#python ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
+#${app_python} ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
 #pdf2ps ${frame_folder}/sd.pdf ${frame_folder}/sd.ps
 #convert ${frame_folder}/sd.ps ${frame_folder}/sd.jpg
 #echo "# IMAGE: ${frame_folder}/sd.ps <Variations>" >> LOGS/${scriptname}.results
@@ -862,8 +862,8 @@ eot
 echo "<<@progress: 90>>"
 if ( ${movie_filter_type} == '2' ) then
         ${proc_2dx}/linblock "Plotting AMP-Decay"
-        python ${proc_2dx}/movie/extractAMP.py `ls ${frame_folder}/aph_*`
-        python ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${movie_imagenumber_toave}
+        ${app_python} ${proc_2dx}/movie/extractAMP.py `ls ${frame_folder}/aph_*`
+        ${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${movie_imagenumber_toave}
         ${pdf2ps} ${frame_folder}/AMPs.pdf ${frame_folder}/AMPs.ps 
         echo  "# IMAGE: ${frame_folder}/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
 endif
@@ -882,7 +882,7 @@ endif
 \rm -f ${frame_folder}/2dx_master.cfg
 
 ${proc_2dx}/linblock "Plotting local drift"
-python ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
+${app_python} ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
 
 ${proc_2dx}/linblock "Finalizing output"
 ${pdf2ps} PS/MovieB_drifts.pdf PS/MovieB_drifts.ps

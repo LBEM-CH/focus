@@ -358,6 +358,7 @@ bool confData::parseDataFile()
 
   QRegExp sep1("^\\s*python\\s+\\$\\{proc_2dx\\}\\/(\\S+\\.py).+");
   QRegExp sep2("^\\s*source\\s+\\$\\{proc_2dx\\}\\/(\\S+)");
+  QRegExp sep3("^\\s*\\$\\{app_python\\}\\s+\\$\\{proc_2dx\\}\\/(\\S+\\.py).+");
   QString seplineData;
   while(!data.atEnd())
   {
@@ -366,6 +367,8 @@ bool confData::parseDataFile()
       subScript<<sep1.cap(1);
     if(sep2.indexIn(seplineData) != -1)
       subScript<<sep2.cap(1);
+    if(sep3.indexIn(seplineData) != -1)
+      subScript<<sep3.cap(1);
   }
 
   data.close();

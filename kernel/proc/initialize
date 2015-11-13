@@ -12,6 +12,19 @@ echo date = ${date}
 set system = `uname -s`
 echo system = ${system}
 #
+set app_python = "not_found"
+
+if ( -e /usr/bin/python ) then
+  set app_python = /usr/bin/python
+endif
+if ( -e /usr/bin/python2.7 ) then
+  set app_python = /usr/bin/python2.7
+endif
+if ( ${app_python} == "not_found" ) then
+  ${proc_2dx}/protest "python not found in the initialize script."
+endif
+echo app_python = ${app_python}
+#
 ##################################################
 # CCP4 SETUP CHECK:
 # ------------------------------

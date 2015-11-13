@@ -627,7 +627,9 @@ eot
     echo "# IMAGE: ${nonmaskimagename}.mrc <Nonmasked image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: ${nonmaskimagename}_automask.mrc <Masking info file>" >> LOGS/${scriptname}.results
-    python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc
+    echo "Starting ${app_python} ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc" 
+    ${app_python} ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc
+    echo "Finished with ${app_python} ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc" 
     #
     if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == 4x || ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x || ${ctfcor_imode}x == 7x ) then
       ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
@@ -799,7 +801,7 @@ eot
     ${proc_2dx}/${lincommand} "apply_filter_Fourier.py - to perform Weiner filtration on unbent image"
     #############################################################################
     #
-    python ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_fou_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc ${ctfcor_noise}
+    ${app_python} ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_fou_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc ${ctfcor_noise}
     if ( ${ctfcor_imode} == "2" ) then
       echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF**2 file (for correction)>" >> LOGS/${scriptname}.results 
     else

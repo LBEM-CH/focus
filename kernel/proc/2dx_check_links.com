@@ -55,7 +55,7 @@ ${coutfile}
 eot
     #
     cat ${coutfile} | tr "\n" " " > ${merge_dir}/SCRATCH/2dx_getdirectories_tmp.dat
-    set dirlist = "`cat ${merge_dir}/SCRATCH/2dx_getdirectories_tmp2.dat`"
+    set dirlist = "`cat ${merge_dir}/SCRATCH/2dx_getdirectories_tmp.dat`"
     #
     foreach dirfile ( ${dirlist} ) 
         echo "Checking link in ${dirfile}"

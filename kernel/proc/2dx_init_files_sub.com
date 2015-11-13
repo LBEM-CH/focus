@@ -129,7 +129,7 @@ if ( ${use_masked_image} == "y" ) then
     echo "# IMAGE: ${maskfile} <Masking Information Mask>" >> LOGS/${scriptname}.results   
     echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
     echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
-    python ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${maskfile}
+    ${app_python} ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${maskfile}
   endif
 else
   if ( ${imagename} == m${nonmaskimagename} ) then

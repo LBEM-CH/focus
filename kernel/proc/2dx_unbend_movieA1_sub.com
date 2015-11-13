@@ -284,7 +284,7 @@ eot
   ${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxa}"
   ###############################################################
   #
-  python ${proc_2dx}/movie/box_reference.py ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc ${frames_dir}/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa}
+  ${app_python} ${proc_2dx}/movie/box_reference.py ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc ${frames_dir}/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa}
   #
   if ( ${tempkeep} != "y" ) then
     \rm -f ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc
@@ -403,7 +403,7 @@ echo "<<@progress: 20>>"
 ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_total} frames"
 ############################################################### 
 #
-python ${proc_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${frames_dir}
+${app_python} ${proc_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${frames_dir}
 #
 #
 #
@@ -538,7 +538,7 @@ eot
   ${proc_2dx}/linblock "cross_correlate.py - Cross-correlate reference with frame ${i}"
   ############################################################### 
   #
-  python ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/frame_${i}_ctfcor.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
+  ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/frame_${i}_ctfcor.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
   if ( ${show_frame_CCmap} == "y" ) then
     echo  "# IMAGE: ${frames_dir}/CCmap_${i}.mrc <Frame ${i}, CCmap>" >> LOGS/${scriptname}.results
   endif

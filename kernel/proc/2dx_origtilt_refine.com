@@ -171,7 +171,7 @@ foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py )
   \rm -f ${scriptBresults}
 end
 #
-python SCRATCH/${scriptname}.py
+${app_python} SCRATCH/${scriptname}.py
 #
 #echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
 #

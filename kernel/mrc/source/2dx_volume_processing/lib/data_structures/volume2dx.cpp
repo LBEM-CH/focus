@@ -311,6 +311,107 @@ void ds::Volume2dx::write_volume(std::string file_name)
     write_volume(file_name, format);
 }
 
+void ds::Volume2dx::cut_xy_plane(Volume2dx& xy_plane, Volume2dx& missing_plane, int plane_number)
+{
+    std::cout << "Cutting the XY plane from volume.. \n";
+    
+    FourierSpaceData new_data;
+    FourierSpaceData cut_data;
+    FourierSpaceData current_data = get_fourier();
+    
+    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    {
+        //Get the data for current reflection
+        MillerIndex index = (*itr).first;
+        DiffractionSpot spot = (*itr).second;
+        
+        if ( index.l() == plane_number ) 
+        {
+            //Insert into cut_data
+            cut_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+        }
+        else
+        {
+            //Insert into new_data
+            new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+        }
+    }
+    
+    xy_plane = Volume2dx(nx(), ny(), 1);
+    xy_plane.set_fourier(cut_data);
+    
+    missing_plane = Volume2dx(nx(), ny(), nz());
+    missing_plane.set_fourier(new_data);
+}
+
+void ds::Volume2dx::cut_cone(Volume2dx& cone, Volume2dx& missing_cone, double cone_angle)
+{
+    std::cout << "Cutting the cone of " << cone_angle << " degrees from volume.. \n";
+    
+    double cone_angle_rad = double(cone_angle)*M_PI/180;
+    
+    FourierSpaceData new_data;
+    FourierSpaceData cut_data;
+    FourierSpaceData current_data = get_fourier();
+    
+    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    {
+        //Get the data for current reflection
+        MillerIndex index = (*itr).first;
+        DiffractionSpot spot = (*itr).second;
+        double radius = std::abs(index.l()*tan(cone_angle_rad));
+        double distance = sqrt(index.h()*index.h() + index.k()*index.k());
+        
+        if ( distance < radius ) 
+        {
+            //Insert into cut_data
+            cut_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+        }
+        else
+        {
+            //Insert into new_data
+            new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+        }
+    }
+    
+    cone = Volume2dx(nx(), ny(), nz());
+    cone.set_fourier(cut_data);
+    
+    missing_cone = Volume2dx(nx(), ny(), nz());
+    missing_cone.set_fourier(new_data);
+}
+
+void ds::Volume2dx::generate_fourier_noise(double fraction_to_change)
+{   
+    std::cout << "Randomly changing  " << fraction_to_change << " fraction of phases in Fourier space.. \n";
+    
+    ds::FourierSpaceData data = get_fourier();
+    ds::FourierSpaceData new_data;
+    int changes = 0;
+    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    {
+        MillerIndex index = (*itr).first;
+        DiffractionSpot spot = (*itr).second;
+        
+        double rand_number = ((double) rand() / (RAND_MAX));
+        if(rand_number < fraction_to_change)
+        {
+            double new_phase = ((double) rand() / (RAND_MAX)) * M_PI;
+            Complex2dx new_value = spot.value();
+            new_value.set_phase(new_phase);
+            new_data.set_value_at(index.h(), index.k(), index.l(), new_value, spot.weight());
+            changes++;
+        }
+        else
+        {
+            new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+        }
+    }
+    
+    std::cout << "Changed " << changes << " of " << data.spots() << "\n";
+    set_fourier(new_data);
+}
+
 void ds::Volume2dx::generate_random_densities(double fraction_to_fill)
 {
     ds::RealSpaceData data(nx(), ny(), nz());
@@ -319,9 +420,10 @@ void ds::Volume2dx::generate_random_densities(double fraction_to_fill)
     {
         int id = rand() % data.size();
         double density = rand() % 255;
-        data.set_value_at(id, density);
+        data.set_value_at(id, density+data.get_value_at(id));
     }
     
+    data.scale(0, 255);
     set_real(data);
 }
 

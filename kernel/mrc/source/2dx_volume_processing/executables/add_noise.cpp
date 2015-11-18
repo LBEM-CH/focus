@@ -15,7 +15,6 @@ int main(int argc, char* argv[])
     args::Executable exe("(NOT READY YET)Program to add Gaussian noise to mrc/map.", ' ', "1.0" );
     
     TCLAP::ValueArg<double> NOISE_AMOUNT("", "amount", "Amount of noise to be added (0, 1). Default is set to 0.2", false, 0.2,"FLOAT");
-    TCLAP::SwitchArg POISSON("", "poisson", "Produce poisson noise(default gaussian)", false);
     
     //Select required arguments
     args::templates::MRCIN.forceRequired();
@@ -48,17 +47,19 @@ int main(int argc, char* argv[])
     input.grey_scale_densities();
     
     Volume2dx random_noise(input);
-    random_noise.generate_random_densities(amount);
+    random_noise.generate_fourier_noise(amount);
     //random_noise.generate_poisson_densities(input.get_real().squared_sum()*10);
     
     //input.grey_scale_densities();
     //random_noise.grey_scale_densities();
     
-    Volume2dx output = input + random_noise;
+    //Volume2dx output = input + random_noise;
+    
+    std::cout << "SNR of output: " << input.get_fourier().intensity_sum() / random_noise.get_fourier().intensity_sum() << std::endl;
     
     //Write output in HKL format
-    if(hklout != "") output.write_volume(hklout, "hkl");
-    if(mrcout != "") output.write_volume(mrcout);
+    if(hklout != "") random_noise.write_volume(hklout, "hkl");
+    if(mrcout != "") random_noise.write_volume(mrcout);
     
     return 0;
 }

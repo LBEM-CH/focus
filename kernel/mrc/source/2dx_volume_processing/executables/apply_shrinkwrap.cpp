@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     input_volume.read_volume(mrcin);
     input_volume.set_symmetry(symmetry);
     if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue()); 
-    input_volume.rescale_to_max_amplitude(10000);
+    //input_volume.rescale_to_max_amplitude(10000);
     input_volume.prepare_fourier();
     input_volume.prepare_real();
     std::cout << input_volume.to_string();
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
         //real_before.apply_mask(mask_slab);
         
         mask.set_real(real_before);
-        mask.low_pass(mask_resolution);
+        mask.low_pass_butterworth(mask_resolution);
         if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_shrinkwrap_" + iteration_str +".map");
     
         volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_mask(density_threshold*real_before.max()/100);
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
         else std::cout << "\n\n";
         
         //Check for convergence
-        if( (error - itr_error < 0.0000000001) || itr_error < 0.01)
+        if( (error - itr_error < 1E-4) || itr_error < 1E-3)
         //if(itr_error < 0.01)
         {
             std::cout << ":\n\nConvergence criterion found after iteration: " << iteration+1 <<"\n";

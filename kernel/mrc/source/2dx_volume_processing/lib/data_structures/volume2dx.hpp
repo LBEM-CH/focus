@@ -274,10 +274,32 @@ namespace volume
             void write_volume(std::string file_name);
             
             /**
+             * Cuts the specified XY plane from Fourier space
+             * @param xy_plane: Write out the xy_plane in this volume
+             * @param missing_plane: Write the volume with missing plane
+             * @param plane_number: which plane to cut (int)
+             */
+            void cut_xy_plane(Volume2dx& xy_plane, Volume2dx& missing_plane, int plane_number=0);
+            
+            /**
+             * Cuts a cone in Fourier space with specified degree
+             * @param cone: Write out the cut cone in this volume
+             * @param missing_cone: Write the result in this volume
+             * @param cone_angle: Angle in degrees of cone to cut
+             */
+            void cut_cone(Volume2dx& cone, Volume2dx& missing_cone, double cone_angle=30);
+            
+            /**
              * Generates random Gaussian densities in the volume
              * @param fraction_to_fill - fraction of volume to be filled with data
              */
             void generate_random_densities(double fraction_to_fill);
+            
+            /**
+             * Changes phases randomly in Fourier space
+             * @param fraction_to_change - fraction of phases to be changed
+             */
+            void generate_fourier_noise(double fraction_to_change);
             
             /**
              * Generates random Gaussian densities in the volume

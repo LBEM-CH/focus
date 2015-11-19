@@ -101,6 +101,11 @@ set olddir = $PWD
 cd ..
 set basedir = $PWD
 cd ${olddir}
+####
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+####
 #
 if ( ${ALAT} == "0" || ${ALAT} == "0.0" ) then
   ${proc_2dx}/protest "ALAT is not defined."

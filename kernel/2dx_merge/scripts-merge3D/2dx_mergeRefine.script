@@ -86,7 +86,7 @@
 # DISPLAY: scalimamp3d_BZMINMAX
 # DISPLAY: scalimamp3d_BEXTRA
 # DISPLAY: latline_pdf
-# DISPLAY: latline_algo
+# DISPLAY: merge3D_algo
 # DISPLAY: resolutionplot_RESMAX
 # DISPLAY: resolutionplot_bins
 # DISPLAY: RFACAMP
@@ -120,7 +120,7 @@ set IBOXPHS = ""
 set ILIST = ""
 set ITANGLSTEP = ""
 set ITAXASTEP = ""
-set latline_algo = ""
+set merge3D_algo = ""
 set latline_pdf = ""
 set lattice = ""
 set max_amp_correction = ""

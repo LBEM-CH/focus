@@ -65,6 +65,11 @@ echo "<<@progress: 1>>"
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
+#
+set split = ($realcell:as/,/ /)
+set cellx = $split[1]
+set celly = $split[2]
+#
 echo tempkeep = ${tempkeep}
 echo RESMIN = ${RESMIN}
 echo RESMAX = ${RESMAX}
@@ -157,12 +162,6 @@ if ( ${make_reference} == "y" ) then
     if ( ! -e APH/merge.aph ) then
       ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
       ${proc_2dx}/protest "Run Merging script first."
-    endif
-    if ( ${reftiltgeo} == "y" ) then
-      # tilt geometry refinement only possible with refined lattice lines in MTZ data, not with APH data.
-      ${proc_2dx}/linblock "ERROR: tilt geometry refinement only possible with refined lattice lines in MTZ file."
-      ${proc_2dx}/linblock "ERROR: Conflict between parameter USE MERGED DATA... and REFINE TILTGEOMETRY..."
-      ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
     endif
     set reference_file="APH/merge.aph"
   endif 

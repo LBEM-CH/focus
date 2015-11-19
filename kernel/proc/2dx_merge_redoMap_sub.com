@@ -250,71 +250,17 @@ CTYPOUT H H H F P W
 SKIP 1
 END
 eof
-  #FILE ${refhklfile}
   #
   #############################################################################
-  ${proc_2dx}/lin "fft - to transform ${refmtzfile} into SCRATCH/scratch1.map"
-  #############################################################################
+  ${proc_2dx}/lin "volume_processor.exe to create map file"
+  ############################################################################# 
   #
-  set AXIS = "X,Y,Z"
-  #
-  # contrast for grey plot
-  set scale = 1
-  echo "scale = ${scale}"
-  #
-  \rm -f SCRATCH/scratch1.map.mrc
-  ${bin_ccp4}/fft hklin ${refmtzfile} mapout SCRATCH/scratch1.map  << eot
-LABIN F1=F PHI=PHI ##
-PROJECTION
-AXIS ${AXIS}
-SCALE F1 ${scale} ${tempfac}
-RESOLUTION ${RESMIN} ${RESMAX}
-TITLE Reference map for ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID ${local_gridsize}
-XYZLIM ${xyzlim}
-RHOLIM 250.0
-HKLMAX 50 50 50
-END
-eot
-#
-if( ${extends} == "y" ) then
-  #
-  #############################################################################
-  ${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/scratch2.map"
-  #############################################################################
-  #
-  \rm -f SCRATCH/scratch2.map
-  ${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/scratch2.map << eof
-XYZLIM 0 399 0 399 0 0
-KEEP
-END
-eof
-  #
-  \rm -f SCRATCH/scratch1.map
-  #
-else
-  \cp SCRATCH/scratch1.map SCRATCH/scratch2.map
-  \rm -f SCRATCH/scratch1.map
-endif
-  ############################################################################
-  ${proc_2dx}/lin "LABEL - to create a clean MRC file format ${refmap}"
-  #############################################################################
-  #
-  \rm -f ${refmap}
-  #
-  ${bin_2dx}/labelh.exe << eot
-SCRATCH/scratch2.map
-2
-${refmap}
-1,0
-0
-eot
-  #
-  \rm -f SCRATCH/scratch2.map
-  #
+  echo "Calling now:"
+  echo "${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} --extended 2"
+  ${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} --extended 2
   cd ${mergedir}/RESULTS-MRC
   \rm -f ${imagename}-${imagenumber}_reference.mrc
-  \ln -s ${rootdir}/${refmap} ${imagename}-${imagenumber}_reference.mrc
+  \cp ${rootdir}/${refmap} ${imagename}-${imagenumber}_reference.mrc
   cd ${rootdir}
   #
 else
@@ -357,44 +303,15 @@ Skip 1
 END
 eof
 #
-#############################################################################
-${proc_2dx}/lin "fft - to transform ${imagename}_MRClefthanded.mtz into SCRATCH/scratch1.map"
-#############################################################################
+echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang}"
 #
-set AXIS = "X,Y,Z"
+\rm -f SCRATCH/${imagename}-${symmetry}.map
 #
-# contrast for grey plot
-set scale = 1
-echo "scale = ${scale}"
-#
-\rm -f SCRATCH/scratch1.map.mrc
-${bin_ccp4}/fft hklin ${imagename}_MRClefthanded.mtz mapout SCRATCH/scratch1.map  << eot
-LABIN F1=F PHI=PHI ##
-PROJECTION
-AXIS ${AXIS}
-SCALE F1 ${scale} ${tempfac}
-RESOLUTION ${RESMIN} ${RESMAX}
-TITLE Sym=${symmetry}, ${imagename}, ${date}, res=${RESMAX}, T=${tempfac}
-GRID ${local_gridsize}
-XYZLIM ${xyzlim}
-RHOLIM 250.0
-HKLMAX 50 50 50
-END
-eot
-#
+${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang}
 if( ${extends} == "y" ) then
-    #############################################################################
-    ${proc_2dx}/lin "extend - to extend SCRATCH/scratch1.map into SCRATCH/${imagename}-${symmetry}.map"
-    #############################################################################
+    echo "Running: ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2"
     #
-    \rm -f SCRATCH/${imagename}-${symmetry}.map
-    ${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/${imagename}-${symmetry}.map << eof
-XYZLIM 0 399 0 399 0 0
-KEEP
-END
-eof
-else
-    \cp SCRATCH/scratch1.map SCRATCH/${imagename}-${symmetry}.map
+    ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2
 endif
 
 if ( ${create_PS} == "y" ) then

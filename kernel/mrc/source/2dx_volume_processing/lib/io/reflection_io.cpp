@@ -27,11 +27,10 @@ volume::data::FourierSpaceData volume::io::reflection::read(std::string file_pat
     //Temp read variables
     int h_in, k_in;
     double z_in, amplitude_in, phase_in, wt_in, dummy;
-
-    std::ifstream hkzFile(file_path);
     
     //Count number of columns in file
-    int number_columns = volume::utilities::filesystem::NumberOfColumns(file_path);
+    int number_columns;
+    int header_lines = volume::utilities::filesystem::NumberOfColumns(file_path, number_columns);
     
     if(number_columns < 5 )
     {
@@ -39,6 +38,18 @@ volume::data::FourierSpaceData volume::io::reflection::read(std::string file_pat
                   << "\t" << file_path << "\n"
                   << "Minimum expected number of columns is 5, found: " << number_columns << "\n";
         exit(1);
+    }
+    
+    std::ifstream hkzFile(file_path);
+    
+    if(header_lines != 0)
+    {
+        std::cout << "WARNING: Found " << header_lines << " header lines while reading reflections file " << file_path << "\n\n";
+    }
+    for(int header_line=0; header_line<header_lines; header_line++)
+    {
+        std::string sLine;
+        std::getline(hkzFile, sLine);
     }
     
     if(number_columns == 5)

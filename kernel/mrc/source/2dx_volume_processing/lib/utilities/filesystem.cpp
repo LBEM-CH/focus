@@ -28,26 +28,41 @@ std::string volume::utilities::filesystem::FileExtension(const std::string file_
     return extension; 
 }
 
-int volume::utilities::filesystem::NumberOfColumns(const std::string file_name)
+int volume::utilities::filesystem::NumberOfColumns(const std::string file_name, int& number_columns)
 {
     std::ifstream infile(file_name);
 
     std::string sLine;
-    int n=0;
+    number_columns = 0;
+    int cols_current = 0;
+    int cols_previous=0;
+    int header_lines=-1;
     
     if (infile.good())
     {
-        std::getline(infile, sLine);
-        std::stringstream is(sLine);
-        
-        float temp;
-        while (is >> temp)
+        //Check for the same number of columns in two consecutive rows
+        while(! infile.eof())
         {
-            n++;
+            std::getline(infile, sLine);
+            std::stringstream is(sLine);
+        
+            float temp;
+            cols_previous = cols_current;
+            cols_current = 0;
+            while (is >> temp)
+            {
+                cols_current++;
+            }
+            if(cols_current == cols_previous)
+            {
+                number_columns = cols_current;
+                break;
+            }
+            header_lines++;
         }
     }
     
     infile.close();
     
-    return n;
+    return header_lines;
 }

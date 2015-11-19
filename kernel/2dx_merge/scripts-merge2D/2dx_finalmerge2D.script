@@ -234,11 +234,11 @@ set celly = $split[2]
 #
 set hkl_infile = APH/sym2D.hkl
 #
-echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${hkl_infile} --mrcout merge2D-${SYM}.mrc --nx ${cellx} --ny ${celly} --nz 1 -s ${SYM}"
+echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${hkl_infile} --mrcout merge2D-${SYM}.mrc --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} -s ${SYM} --extended 2"
 #
 rm -f merge2D-${SYM}.mrc
 #
-${bin_2dx}/volume_processor.exe --hklin ${hkl_infile} --mrcout merge2D-${SYM}.mrc --nx ${cellx} --ny ${celly} --nz 1 -s ${SYM}
+${bin_2dx}/volume_processor.exe --hklin ${hkl_infile} --mrcout merge2D-${SYM}.mrc --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} -s ${SYM} --extended 2
 #
 echo "# IMAGE-IMPORTANT: merge2D-${SYM}.mrc <MRC: FINAL ${SYM} symmetrized 2D map>" >> LOGS/${scriptname}.results
 #

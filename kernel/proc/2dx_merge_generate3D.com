@@ -489,26 +489,12 @@ echo "<<@progress: +5>>"
 ${proc_2dx}/linblock "Sourcing 2dx_hkl_to_mtz.com to create reference mtz file"
 #############################################################################  
 #
-set outfile = merge3Dref_MRClefthanded.mtz
-\rm -f ${outfile}
+set outfile_ref = merge3Dref_MRClefthanded.mtz
+\rm -f ${outfile_ref}
 #
-source ${proc_2dx}/2dx_hkl_to_mtz.com APH/latfitted.hkl ${realcell} ${ALAT} ${realang} ${RESMIN} ${RESMAX} ${outfile}
+source ${proc_2dx}/2dx_hkl_to_mtz.com APH/latfitted.hkl ${realcell} ${ALAT} ${realang} ${RESMIN} ${MergeResolution} ${outfile_ref}
 #
-echo "# IMAGE-IMPORTANT: ${outfile} <MTZ: Reference 3D MTZ file (MRC lefthanded) [H,K,L,F,P,FOM,SIGF] >" >> LOGS/${scriptname}.results
-#
-#############################################################################
-${proc_2dx}/linblock "reindex - to flip hand of MTZ file for further work with CCP4"
-#############################################################################  
-#
-\rm -f merge3D.mtz
-#
-${bin_ccp4}/reindex hklin ${outfile} hklout merge3D.mtz << eof
-reindex HKL k,h,l
-lefthand
-end
-eof
-#
-echo "# IMAGE-IMPORTANT: merge3D.mtz <MTZ: Final CCP4 MTZ file for volume [H,K,L,F,P,FOM]>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${outfile_ref} <MTZ: Reference 3D MTZ file (MRC lefthanded) [H,K,L,F,P,FOM,SIGF] >" >> LOGS/${scriptname}.results
 #
 #
 

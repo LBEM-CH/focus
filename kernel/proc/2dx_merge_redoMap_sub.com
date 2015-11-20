@@ -256,8 +256,13 @@ eof
   ############################################################################# 
   #
   echo "Calling now:"
-  echo "${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} --extended 2"
-  ${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} --extended 2
+  echo "${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2"
+  ${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2
+  #
+  echo "Calling now:"
+  echo "${bin_2dx}/mrc_header_modifier.exe --mrcin ${refmap} --mrcout ${refmap} --cellx ${cellx} --celly ${celly}"
+  ${bin_2dx}/mrc_header_modifier.exe --mrcin ${refmap} --mrcout ${refmap} --cellx ${cellx} --celly ${celly}
+  #
   cd ${mergedir}/RESULTS-MRC
   \rm -f ${imagename}-${imagenumber}_reference.mrc
   \cp ${rootdir}/${refmap} ${imagename}-${imagenumber}_reference.mrc
@@ -303,11 +308,16 @@ Skip 1
 END
 eof
 #
-echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang}"
+echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang}"
 #
 \rm -f SCRATCH/${imagename}-${symmetry}.map
 #
-${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang}
+${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang}
+#
+  echo "Calling now:"
+  echo "${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}"
+  ${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}
+  #
 if( ${extends} == "y" ) then
     echo "Running: ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2"
     #
@@ -390,7 +400,8 @@ ${imagename}-${symmetry}_ref2.mrc
 ${refmap}
 eot
   #
-  # \mv -f ${imagename}-${symmetry}_ref2.mrc ${imagename}-${symmetry}.mrc
+  \rm -f half_half.mrc
+  \ln -s ${imagename}-${symmetry}_ref2.mrc half_half.mrc
   #
 endif
 #

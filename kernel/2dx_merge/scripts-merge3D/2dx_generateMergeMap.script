@@ -211,30 +211,11 @@ echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
 #############################################################################
 #############################################################################
 #
-set infile = merge3D.mtz
-#
-echo "# IMAGE: PS/latline.ps <PS: Lattice lines (from last merging)>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${infile} <MTZ: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
-#
-#############################################################################
-${proc_2dx}/linblock "mtz2various - to translate MTZ file into HKL file"
-#############################################################################  
-#
-${bin_ccp4}/mtz2various hklin merge3D.mtz hklout merge3D.hkl << eof
-LABIN FP=F SIGFP=PHI W=FOM
-OUTPUT USER '(3I8,4G16.8)'
-end
-eof
-#
-set hkl_infile = merge3D.hkl
-#
-echo "# IMAGE: merge3D.hkl <HKL: input data for 3D (from last merging)>"  >> LOGS/${scriptname}.results
-#
 #############################################################################
 ${proc_2dx}/linblock "volume_processor.exe - to transform HKL file into volume"
 #############################################################################  
 #
-${bin_2dx}/volume_processor.exe --hklin merge3D.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
+${bin_2dx}/volume_processor.exe --hklin APH/latfitted.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
 #
 echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results
 #
@@ -245,6 +226,13 @@ ${proc_2dx}/linblock "extend the map to 2x2x1 unit cells"
 source ${proc_2dx}/2dx_extend_map.com volume.map extended.map
 #
 echo "# IMAGE: extended.map <MAP: final map 3D, 2x2 unit cells>"  >> LOGS/${scriptname}.results
+#
+if ( ${calculate_subvolume}x != "0x" ) then 
+    source ${proc_2dx}/2dx_create_subvolume.com extended.map ${realcell} ${ALAT} 3D_sub.map
+    #
+    echo "# IMAGE-IMPORTANT: 3D_sub.map <MAP: 3D sub map>" >> LOGS/${scriptname}.results
+    #
+endif
 #
 #############################################################################
 ${proc_2dx}/linblock "hkl_to_PSFmrc.exe - to transform HKL file into volume for PSF"

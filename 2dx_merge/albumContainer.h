@@ -56,7 +56,11 @@ class albumContainer : public QWidget
         
         void saveProjectState();
         void loadProjectState();
-            
+        
+        void setPreviewImages(const QString&);
+        void autoSwitch(bool);
+        void updatePreview();
+                   
     private:
         void setupDirectoryContainer(confData*);
         void modifySelection(bool select = true);
@@ -67,7 +71,15 @@ class albumContainer : public QWidget
         projectModel* dirModel;
         QSortFilterProxyModel *sortModel;
         
-        imagePreview* preview;
+        imagePreview* mapPreview;
+        imagePreview* refPreview;
+        imagePreview* dualPreview;
+        
+        QStackedWidget* previews;
+        
+        QTimer* previewTimer;
+        
+        QComboBox* viewControl;
     
 };
 

@@ -136,6 +136,8 @@ void imagePreview::setImage(const QString &imageName)
 	result = imageName;
 	if(!QFileInfo(result).exists()){
             if(result.endsWith("final_map.mrc")) result = "NP";
+            else if(result.endsWith("reference_map.mrc")) result = "NR";
+            else if(result.endsWith("half_half.mrc")) result = "NH";
             else result = "";
         }
 	resetInfo();
@@ -240,11 +242,15 @@ void imagePreview::resetImage(bool ignore_size)
 		imageLabel->setPalette(pal);
 	}
         
-        if(result == "NP")
+        QString msg;
+        if(result == "NP") msg = "Image not processed<br>(Double click to start processing)";
+        else if (result == "NR") msg = "No reference available";
+        else if (result == "NH") msg = "Half-Half map<br>not available";
+        
+        if(result == "NP" || result == "NR" || result == "NH")
         {
                 clearImage();
-		QFont labelFont("Apple Chancery", 15, QFont::Normal);
-		QString msg = "Image not processed<br>(Double click to start processing)";
+		QFont labelFont("Apple Chancery", 15, QFont::Normal); 
 		QPalette pal(palette());
 		int color = 255-(int)(0.80*255);
 		pal.setColor(QPalette::WindowText,QColor(color,color,color));

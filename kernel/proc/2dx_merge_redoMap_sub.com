@@ -263,6 +263,9 @@ eof
   echo "${bin_2dx}/mrc_header_modifier.exe --mrcin ${refmap} --mrcout ${refmap} --cellx ${cellx} --celly ${celly}"
   ${bin_2dx}/mrc_header_modifier.exe --mrcin ${refmap} --mrcout ${refmap} --cellx ${cellx} --celly ${celly}
   #
+  \rm -f reference_map.mrc
+  \cp -f ${refmap} reference_map.mrc
+  #
   cd ${mergedir}/RESULTS-MRC
   \rm -f ${imagename}-${imagenumber}_reference.mrc
   \cp ${rootdir}/${refmap} ${imagename}-${imagenumber}_reference.mrc

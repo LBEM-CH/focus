@@ -5,7 +5,16 @@ albumContainer::albumContainer(confData *dat, resultsData* results, QWidget* par
 {
     this->data = dat;
     
-    preview = new imagePreview(data, "", false,this);
+    previews = new QStackedWidget(this);
+    previews->setFixedWidth(235);
+    
+    mapPreview = new imagePreview(data, "", false, previews);
+    refPreview = new imagePreview(data, "", false, previews);
+    dualPreview = new imagePreview(data, "", false, previews);
+    
+    previews->addWidget(mapPreview);
+    previews->addWidget(refPreview);
+    previews->addWidget(dualPreview);
     
     setupDirectoryContainer(data);
     dirModel->setResultsFile(results);
@@ -17,27 +26,56 @@ albumContainer::albumContainer(confData *dat, resultsData* results, QWidget* par
     widget->setLayout(layout);
     
     layout->addWidget(dirView, 0, 0);
-    layout->addWidget(preview, 0, 1, Qt::AlignTop);
+    layout->addWidget(previews, 0, 1, Qt::AlignTop);
+    
+    previewTimer = new QTimer(this);
+    connect(previewTimer, SIGNAL(timeout()), this, SLOT(updatePreview()));
     
     blockContainer* container = new blockContainer("Project Library");
     container->setMainWidget(widget);
+    
     
     QToolButton* showHeaderButton = new QToolButton();
     showHeaderButton->setIcon(*(data->getIcon("info")));
     showHeaderButton->setToolTip("Show Image Header");
     showHeaderButton->setAutoRaise(false);
     showHeaderButton->setCheckable(true);
-    connect(showHeaderButton, SIGNAL(toggled(bool)), preview, SLOT(showImageHeader(bool)));
+    connect(showHeaderButton, SIGNAL(toggled(bool)), mapPreview, SLOT(showImageHeader(bool)));
+    connect(showHeaderButton, SIGNAL(toggled(bool)), refPreview, SLOT(showImageHeader(bool)));
+    connect(showHeaderButton, SIGNAL(toggled(bool)), dualPreview, SLOT(showImageHeader(bool)));
     
-    container->setHeaderWidget(showHeaderButton);
+    QToolButton* autoPreviewsButton = new QToolButton();
+    autoPreviewsButton->setIcon(*(data->getIcon("timer")));
+    autoPreviewsButton->setToolTip("Auto switch previews");
+    autoPreviewsButton->setAutoRaise(false);
+    autoPreviewsButton->setCheckable(true);
+    connect(autoPreviewsButton, SIGNAL(toggled(bool)), this, SLOT(autoSwitch(bool)));
+    
+    //Setup preview control combo box
+    viewControl = new QComboBox(this);
+    viewControl->addItems(QStringList() << "Map Preview" << "Reference Preview" << "Half-Half Preview");
+    connect(viewControl, SIGNAL(currentIndexChanged(int)), previews, SLOT(setCurrentIndex(int)));
+    
+    QWidget* headerWidget = new QWidget();
+    QGridLayout* headerWidgetLayout = new QGridLayout(headerWidget);
+    headerWidgetLayout->setMargin(0);
+    headerWidgetLayout->setSpacing(0);
+    headerWidget->setLayout(headerWidgetLayout);
+    
+    headerWidgetLayout->addWidget(new QLabel("Switch Preview: "), 0, 0);
+    headerWidgetLayout->addWidget(viewControl, 0, 1, 1, 1 , Qt::AlignVCenter);
+    headerWidgetLayout->addItem(new QSpacerItem(3,3), 0, 2);
+    headerWidgetLayout->addWidget(showHeaderButton, 0, 3);
+    headerWidgetLayout->addItem(new QSpacerItem(3,3), 0, 4);
+    headerWidgetLayout->addWidget(autoPreviewsButton, 0, 5);
+    
+    container->setHeaderWidget(headerWidget);
     
     QGridLayout* mainLayout = new QGridLayout(this);
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
     mainLayout->addWidget(container);
     this->setLayout(mainLayout);
-    
-    
     
 }
 
@@ -66,7 +104,7 @@ void albumContainer::setupDirectoryContainer(confData* data)
         dirModel->loadSelection();
     }
     
-    connect(dirModel, SIGNAL(currentImage(const QString&)), preview, SLOT(setImage(const QString&)));
+    connect(dirModel, SIGNAL(currentImage(const QString&)), this, SLOT(setPreviewImages(const QString&)));
     connect(dirModel, SIGNAL(reloading()), this, SLOT(reload()));
 
     sortModel = new QSortFilterProxyModel(this);
@@ -309,4 +347,24 @@ void albumContainer::modifySelection(bool select)
             dirModel->itemDeselected(sortModel->mapToSource(i));
         }
     }
+}
+
+void albumContainer::setPreviewImages(const QString& imagePath)
+{
+    mapPreview->setImage(imagePath + "/final_map.mrc");
+    refPreview->setImage(imagePath + "/reference_map.mrc");
+    dualPreview->setImage(imagePath + "/half_half.mrc");
+}
+
+void albumContainer::autoSwitch(bool play)
+{
+    if(play) previewTimer->start(1000);
+    else previewTimer->stop();
+}
+
+void albumContainer::updatePreview()
+{
+    int id = (previews->currentIndex()+1)%3;
+    previews->setCurrentIndex(id);
+    viewControl->setCurrentIndex(id);
 }

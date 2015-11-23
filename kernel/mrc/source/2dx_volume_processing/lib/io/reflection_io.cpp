@@ -72,7 +72,8 @@ volume::data::FourierSpaceData volume::io::reflection::read(std::string file_pat
         std::cout << "----------------------------------------------\n\n";
         while (hkzFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> wt_in)
         {
-            add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, wt_in*0.01, z_scale, raw_ccp4);
+            if(wt_in > 1.0) wt_in = wt_in*0.01;
+            add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, wt_in, z_scale, raw_ccp4);
         }
     }
     
@@ -84,7 +85,8 @@ volume::data::FourierSpaceData volume::io::reflection::read(std::string file_pat
         std::cout << "----------------------------------------------\n\n";
         while (hkzFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> wt_in >> dummy)
         {
-            add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, wt_in*0.01, z_scale, raw_ccp4);
+            if(wt_in > 1.0) wt_in = wt_in*0.01;
+            add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, wt_in, z_scale, raw_ccp4);
         }
     }
     
@@ -185,10 +187,11 @@ void volume::io::reflection::add_spot(volume::data::DiffractionSpotMultiMap& map
     //Convert phase to radians
     phase_in = volume::utilities::angle_utilities::DegreeToRadian(phase_in);
     
-    double real_in = weight_in*amp_in*cos(phase_in);
-    double imag_in = weight_in*amp_in*sin(phase_in);
+    double real_in = amp_in*cos(phase_in);
+    double imag_in = amp_in*sin(phase_in);
 
     ds::Complex2dx complex_in(real_in, imag_in);
     ds::DiffractionSpot value_in(complex_in, weight_in);
+    
     map.insert(ds::MillerIndexDiffSpotPair(index_in, value_in));
 }

@@ -8,9 +8,9 @@ albumContainer::albumContainer(confData *dat, resultsData* results, QWidget* par
     previews = new QStackedWidget(this);
     previews->setFixedWidth(235);
     
-    mapPreview = new imagePreview(data, "", false, previews);
-    refPreview = new imagePreview(data, "", false, previews);
-    dualPreview = new imagePreview(data, "", false, previews);
+    mapPreview = new imagePreview(data, "NP", false, previews);
+    refPreview = new imagePreview(data, "NR", false, previews);
+    dualPreview = new imagePreview(data, "NH", false, previews);
     
     previews->addWidget(mapPreview);
     previews->addWidget(refPreview);
@@ -365,6 +365,5 @@ void albumContainer::autoSwitch(bool play)
 void albumContainer::updatePreview()
 {
     int id = (previews->currentIndex()+1)%3;
-    previews->setCurrentIndex(id);
     viewControl->setCurrentIndex(id);
 }

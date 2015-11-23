@@ -40,7 +40,7 @@ imagePreview::imagePreview(confData *data, QString resultValue, bool info, QWidg
   setFixedSize(QSize(minWidth,minWidth));
   setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
-  if(!result.isEmpty())
+  if(!result.isEmpty() && QFileInfo(result).exists())
   {
     image = new mrcImage(result,true);
     if(image->isEmpty())
@@ -76,6 +76,8 @@ imagePreview::imagePreview(confData *data, QString resultValue, bool info, QWidg
   pal.setBrush(QPalette::Background,QBrush(QColor(255,255,255),conf->getIcon("nullPreview")->pixmap(minWidth,minWidth).scaledToWidth(minWidth)));
   setPalette(pal);
   setLayout(layout);
+  
+  resetImage(true);
 }
 
 void imagePreview::mouseDoubleClickEvent(QMouseEvent *event)

@@ -264,7 +264,7 @@ eof
   ${bin_2dx}/mrc_header_modifier.exe --mrcin ${refmap} --mrcout ${refmap} --cellx ${cellx} --celly ${celly}
   #
   \rm -f reference_map.mrc
-  \ln -s ${refmap} reference_map.mrc
+  \cp -f ${refmap} reference_map.mrc
   #
   cd ${mergedir}/RESULTS-MRC
   \rm -f ${imagename}-${imagenumber}_reference.mrc
@@ -356,7 +356,7 @@ eof
   #
   cd ${mergedir}/RESULTS-PS
   \rm -f ${imagename}-${imagenumber}.ps
-  \ln -s ${rootdir}/PS/${imagename}MAP-${symmetry}.ps ${imagename}-${imagenumber}.ps
+  \cp -f ${rootdir}/PS/${imagename}MAP-${symmetry}.ps ${imagename}-${imagenumber}.ps
   cd ${rootdir}
   #
   if ( ${RESULTSPS} != "y" ) then
@@ -381,7 +381,7 @@ ${imagename}-${symmetry}.mrc
 eot
 #
 \rm -f final_map.mrc
-\ln -s ${imagename}-${symmetry}.mrc final_map.mrc
+\cp -f ${imagename}-${symmetry}.mrc final_map.mrc
 #
 if ( ${RESULTSMRC} != "y" ) then
   echo "# IMAGE: RESULTS-MRC" >> ${mergedir}/LOGS/${scriptname}.results
@@ -404,7 +404,7 @@ ${refmap}
 eot
   #
   \rm -f half_half.mrc
-  \ln -s ${imagename}-${symmetry}_ref2.mrc half_half.mrc
+  \cp -f ${imagename}-${symmetry}_ref2.mrc half_half.mrc
   #
 endif
 #
@@ -421,11 +421,11 @@ ${imagename}-${symmetry}.tif
 eot
 #
 \rm -f final_map.tif
-\ln -s ${imagename}-${symmetry}.tif final_map.tif
+\cp -f ${imagename}-${symmetry}.tif final_map.tif
 #
 cd ${mergedir}/RESULTS-MRC
 \rm -f ${imagename}-${imagenumber}.mrc
-\ln -s ${rootdir}/final_map.mrc ${imagename}-${imagenumber}.mrc
+\cp -f ${rootdir}/final_map.mrc ${imagename}-${imagenumber}.mrc
 cd ${mergedir}/RESULTS-TIFF
 set filenum = `cat filenum.tmp`
 \cp ${rootdir}/final_map.tif TIFF${filenum}.tif

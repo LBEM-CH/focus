@@ -351,7 +351,6 @@ void albumContainer::modifySelection(bool select)
 
 void albumContainer::setPreviewImages(const QString& imagePath)
 {
-    std::cout << "Setting images\n";
     mapPreview->setImage(imagePath + "/final_map.mrc");
     refPreview->setImage(imagePath + "/reference_map.mrc");
     dualPreview->setImage(imagePath + "/half_half.mrc");

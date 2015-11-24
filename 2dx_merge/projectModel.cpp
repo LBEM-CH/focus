@@ -266,9 +266,9 @@ void projectModel::initDir(const QString &path, QStandardItem *parent)
               {
                 entryString.clear();
                 if(localData.get(columns[c]["uid"].toString(),"value").trimmed().contains(QRegExp("^[yY]")))
-                  entryItem->setIcon(*data->getIcon("gbRed"));
+                  entryItem->setIcon(*data->getIcon("tick"));
                 else
-                  entryItem->setIcon(*data->getIcon("gbBlue"));
+                  entryItem->setIcon(*data->getIcon("cross"));
               }
               else
                 entryString = localData.get(columns[c]["uid"].toString(),"value");

@@ -195,6 +195,7 @@ if ( ${doswap} != 0 ) then
   ${proc_2dx}/linblock "Second Lattice is currently: ${secondlattice}"
 endif
 #
+# set dorotate = 4
 #############################################################################
 if ( ${doswap} != 0 ) then
   ${proc_2dx}/linblock "doswap - swapping lattices"

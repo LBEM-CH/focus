@@ -492,9 +492,9 @@ ${proc_2dx}/linblock "Sourcing 2dx_hkl_to_mtz.com to create reference mtz file"
 set outfile_ref = merge3Dref_MRClefthanded.mtz
 \rm -f ${outfile_ref}
 #
+# echo "::Calling:" source ${proc_2dx}/2dx_hkl_to_mtz.com APH/latfitted.hkl ${realcell} ${ALAT} ${realang} ${RESMIN} ${MergeResolution} ${outfile_ref}
 source ${proc_2dx}/2dx_hkl_to_mtz.com APH/latfitted.hkl ${realcell} ${ALAT} ${realang} ${RESMIN} ${MergeResolution} ${outfile_ref}
 #
 echo "# IMAGE-IMPORTANT: ${outfile_ref} <MTZ: Reference 3D MTZ file (MRC lefthanded) [H,K,L,F,P,FOM,SIGF] >" >> LOGS/${scriptname}.results
-#
 #
 

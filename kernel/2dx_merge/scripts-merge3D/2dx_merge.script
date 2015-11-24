@@ -153,6 +153,8 @@ source ${proc_2dx}/initialize
 set split = ($realcell:as/,/ /)
 set cellx = $split[1]
 set celly = $split[2]
+set realcell = ${cellx},${celly}
+echo "set realcell = ${realcell}" >> LOGS/${scriptname}.results
 #
 echo "cellx = ${cellx}"
 echo "celly = ${celly}"

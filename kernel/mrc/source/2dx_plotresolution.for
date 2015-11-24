@@ -28,7 +28,7 @@ C
       PARAMETER (PLTSIZ = 300.0)
       PARAMETER (IMAX = 1000000)
       PARAMETER (IHISTBINS = 100)
-      PARAMETER (IHKMAX = 100)
+      PARAMETER (IHKMAX = 400)
 C
       REAL TITLE(20)
       REAL RTITLE(80)
@@ -313,6 +313,13 @@ C
           goto 100
         endif
 C
+        if(IHFIELD(i).ge.IHKMAX .or. IHFIELD(i).le.-IHKMAX .or.
+     .     IKFIELD(i).ge.IHKMAX .or. IKFIELD(i).le.-IHKMAX .or.
+     .     ILFIELD(i).ge.IHKMAX .or. ILFIELD(i).le.-IHKMAX) then
+          write(6,'('':: ERROR in 2dx_plotresolution: i='',I8,
+     .    '' IH,IK,IL = '',3I12)')i,IHFIELD(i),IKFIELD(i),ILFIELD(i)
+          stop
+        endif
         IPOINT(IHFIELD(i),IKFIELD(i),ILFIELD(i))=i
 C
         RAMPAVE = RAMPAVE + RAMPFIELD(i)
@@ -339,7 +346,11 @@ C
         if(RecRESVERTMAX.lt.RecRESVERT(i)) RecRESVERTMAX=RecRESVERT(i)
         if(RecRESVALMAX.lt.RecRESVAL(i)) RecRESVALMAX=RecRESVAL(i)
 C
-        goto 100
+        if(i.lt.IMAX-2)then
+          goto 100
+        else
+          write(6,'('':: ERROR in 2dx_plotresolution:  increase IMAX'')')
+        endif
 C
  200  continue
 C

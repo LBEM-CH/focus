@@ -68,6 +68,15 @@ ${proc_2dx}/linblock "sftools - to create MTZ file for reference with SIGF colum
 #
 \rm -f ${output_mtz}
 #
+echo "calling sftools with:"
+echo ${bin_ccp4}/sftools \<\< eof
+echo read ${cad_mtz}
+echo calc COL SIGF = 1.0
+echo write ${output_mtz}
+echo quit
+echo eof
+echo 
+
 ${bin_ccp4}/sftools << eof
 read ${cad_mtz}
 calc COL SIGF = 1.0

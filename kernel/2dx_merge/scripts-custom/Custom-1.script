@@ -76,7 +76,7 @@ foreach dirfile ( ${dirlist} )
   ################################################################################
   #
   # Use the following to invert the CTF in all directories, so that cryo setting is valid:
-  # echo "set ctfrev = n" >> LOGS/${scriptname}.results
+  echo "set ctfrev = n" >> LOGS/${scriptname}.results
 
   # Use the following to activate the synthetic unbending in all directories:
   # echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
@@ -93,15 +93,18 @@ foreach dirfile ( ${dirlist} )
   # echo "set beamtilt = 0.0,0.0" >> LOGS/${scriptname}.results
   # echo "set beamtilt_change = 0.0,0.0" >> LOGS/${scriptname}.results
 
-  # echo "set do_lattice_algorithm = 1" >> LOGS/${scriptname}.results
+  echo "set do_lattice_algorithm = 0" >> LOGS/${scriptname}.results
+  echo "set FirstPeakNum = 60" >> LOGS/${scriptname}.results
+  echo "set peakNum = 50" >> LOGS/${scriptname}.results
 
-  # echo "set CS = 2.0" >> LOGS/${scriptname}.results
-  # echo "set KV = 200.0" >> LOGS/${scriptname}.results
-  # echo "set stepdigitizer = 10.9" >> LOGS/${scriptname}.results
+  echo "set CS = 4.2" >> LOGS/${scriptname}.results
+  echo "set KV = 300.0" >> LOGS/${scriptname}.results
+  # echo "set stepdigitizer = 5.0" >> LOGS/${scriptname}.results
+  echo "set magnification = 43859.0" >> LOGS/${scriptname}.results
 
-  # echo "set maska = 17.0" >> LOGS/${scriptname}.results
-  # echo "set maskb01 = 18.0" >> LOGS/${scriptname}.results
-  # echo "set maskb02 = 20.0" >> LOGS/${scriptname}.results
+  echo "set maska = 17.0" >> LOGS/${scriptname}.results
+  echo "set maskb01 = 13.0" >> LOGS/${scriptname}.results
+  echo "set maskb02 = 15.0" >> LOGS/${scriptname}.results
   # echo "set boxa1 = 400.0" >> LOGS/${scriptname}.results
   # echo "set boxa2 = 1200.0" >> LOGS/${scriptname}.results
   # echo "set boxb1 = 350.0" >> LOGS/${scriptname}.results
@@ -124,21 +127,22 @@ foreach dirfile ( ${dirlist} )
   # echo "set do3quadserch = n" >> LOGS/${scriptname}.results
 
   # echo "set defocus_res_max = 5.0" >> LOGS/${scriptname}.results
-  # echo "set imageorigin = 7" >> LOGS/${scriptname}.results
+  echo "set imageorigin = 0" >> LOGS/${scriptname}.results
   # echo "set df_end = 25000.0" >> LOGS/${scriptname}.results
   # echo "set det_defocus = y" >> LOGS/${scriptname}.results
-  # echo "set det_tilt = y" >> LOGS/${scriptname}.results
+  echo "set det_tilt = y" >> LOGS/${scriptname}.results
   # echo "set det_tlt_alg = 0" >> LOGS/${scriptname}.results
   # echo "set QVALS = ." >> LOGS/${scriptname}.results
   # echo "set QVALMA = ." >> LOGS/${scriptname}.results
   # echo "set QVALMB = ." >> LOGS/${scriptname}.results
   # echo "set domask = y" >> LOGS/${scriptname}.results
 
-  # echo "set RESMAX = 5.0" >> LOGS/${scriptname}.results
+  echo "set RESMAX = 5.0" >> LOGS/${scriptname}.results
   # echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
   # echo "set -force IQMAX1 = 7" >> LOGS/${scriptname}.results
   # echo "set -force IQMAX = 4" >> LOGS/${scriptname}.results
-  # echo "set movie_enable = y" >> LOGS/${scriptname}.results
+
+  echo "set movie_enable = y" >> LOGS/${scriptname}.results
   # echo "set movie_refboxa = 300" >> LOGS/${scriptname}.results
   # echo "set movie_smoothing = 8" >> LOGS/${scriptname}.results
   # echo "set movie_drift_threshold = 5" >> LOGS/${scriptname}.results

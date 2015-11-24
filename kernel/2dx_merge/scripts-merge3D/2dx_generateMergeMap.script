@@ -242,17 +242,6 @@ ${bin_2dx}/volume_processor.exe --hklin APH/latfitted.hkl --mrcout PSF.map -X ${
 #
 echo "# IMAGE: PSF.map <MAP: PSF>"  >> LOGS/${scriptname}.results
 #
-# #############################################################################
-# ${proc_2dx}/linblock "cad - to set spacegroup info to p1 for PSF"
-# #############################################################################  # 
-# ##
-# \rm -f SCRATCH/merge3D-p1.mtz
-# #
-# ${bin_ccp4}/cad hklin1 merge3D.mtz hklout SCRATCH/merge3D-p1.mtz << eof
-# symmetry p1
-# labin file 1 all
-# end
-# eof
 #
 #
 #############################################################################

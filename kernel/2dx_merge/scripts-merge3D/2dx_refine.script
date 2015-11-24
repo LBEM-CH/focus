@@ -327,7 +327,7 @@ if ( ${reftiltgeo} == "y" ) then
   ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
   #############################################################################
   #
-  python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
+  ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
   #
 endif
 #

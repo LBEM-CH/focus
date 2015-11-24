@@ -41,6 +41,8 @@
 # DISPLAY: imageorigin
 # DISPLAY: SCRATCH_DISK
 # DISPLAY: Thread_Number
+# DISPLAY: CS
+# DISPLAY: KV
 #
 #$end_local_vars
 #

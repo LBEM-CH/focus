@@ -364,6 +364,6 @@ void albumContainer::autoSwitch(bool play)
 
 void albumContainer::updatePreview()
 {
-    int id = (previews->currentIndex()+1)%3;
+    int id = (previews->currentIndex()+1)%2;
     viewControl->setCurrentIndex(id);
 }

@@ -121,9 +121,16 @@ if ( ${do} == "4" || ${do} == "5" ) then
   ls -1 *.mtz | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
   \rm -f 111Adummy.mtz
   if ( -d APH ) then
+    echo "::Doing APH"
     echo dummy > APH/111Adummy.mtz
-    ls -1 APH/*.mtz | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+    ls -1 APH/*.mtz | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
     \rm -f APH/111Adummy.mtz
+  endif
+  if ( -d SCRATCH ) then
+    echo "::Doing SCRATCH"
+    echo dummy > SCRATCH/111Adummy.mtz
+    ls -1 SCRATCH/*.mtz | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
+    \rm -f SCRATCH/111Adummy.mtz
   endif
 endif
 

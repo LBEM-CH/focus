@@ -85,6 +85,6 @@ quit
 eof
 #
 #
-\rm -f ${f2mtz_mtz}
-\rm -f ${cad_mtz}
+# \rm -f ${f2mtz_mtz}
+# \rm -f ${cad_mtz}
 #

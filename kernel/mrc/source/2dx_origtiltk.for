@@ -430,7 +430,7 @@ C                                K>=H                (H,H,Z)
 C
 C******************************************************************************
 C  
-      PARAMETER (NMAXC=600000)
+      PARAMETER (NMAXC=6000000)
       INTEGER TOTRFL
       PARAMETER (TOTRFL=30000000)
       PARAMETER (MAXRFL=20000)
@@ -462,7 +462,7 @@ C
       PARAMETER (MCOLS=300)
       PARAMETER (NPAR=300)
 C
-      DIMENSION CELL(6),RSYMX(4,4,96)
+      DIMENSION CELL(6),RSYMX(4,4,96) 
       LOGICAL EOF
 C
 C     .. Local Arrays ..

@@ -191,10 +191,8 @@ eot
 #
 set refnamecore = "REF${imagenumber}"
 set refhklfile = "APH/${refnamecore}.hkl"
-set refmtzfile = "APH/${refnamecore}_MRClefthanded.mtz"
 set refmap = "${nonmaskimagename}_reference.mrc"
 #
-\rm -f ${refmtzfile}
 \rm -f ${refmap}
 #
 if ( -e ${refhklfile} ) then
@@ -206,58 +204,13 @@ if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   #
   ${proc_2dx}/lin "Creating reference projection map ${refhklfile}"
   #
-  set linenum = `wc -l ${refhklfile} | awk '{ s = $1 - 1 } END { print s }'`
-  head -n 1 ${refhklfile} > TMP.tmp
-  tail -n ${linenum} ${refhklfile} | sort >> TMP.tmp
-  #
-  #############################################################################
-  ${proc_2dx}/lin "2dx_hklclean - to eliminated duplicates from APH file, for volume"
-  #############################################################################      
-  #
-  \rm -f ${refhklfile}
-  \rm -f APH/syn_nosort2D-plot.hkl
-  #
-  ${bin_2dx}/2dx_hklclean.exe << eot
-TMP.tmp
-${refhklfile}
-1     ! header line
-0     ! no sigma column
-eot
-  #
-  \rm -f TMP.tmp
-  #
-  #############################################################################
-  ${proc_2dx}/lin "f2mtz - to translate ${refhklfile} into ${refmtzfile}"
-  ############################################################################# 
-  #
-  echo "Calling now:"
-  echo "${bin_ccp4}/f2mtz hklin ${refhklfile} hklout ${refmtzfile}"
-  echo "TITLE  Reference map for ${imagename}, ${date}"
-  echo "CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}"
-  echo "SYMMETRY ${CCP4_SYM}"
-  echo "LABOUT H K L F PHI FOM"
-  echo "CTYPOUT H H H F P W"
-  echo "SKIP 1"
-  echo "FILE ${refhklfile}"
-  echo "END"
-  #
-  ${bin_ccp4}/f2mtz hklin ${refhklfile} hklout ${refmtzfile} << eof
-TITLE  Reference map for ${imagename}, ${date}
-CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
-SYMMETRY ${CCP4_SYM}
-LABOUT H K L F PHI FOM
-CTYPOUT H H H F P W
-SKIP 1
-END
-eof
-  #
   #############################################################################
   ${proc_2dx}/lin "volume_processor.exe to create map file"
   ############################################################################# 
   #
   echo "Calling now:"
   echo "${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2"
-  ${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2
+  ${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2 
   #
   echo "Calling now:"
   echo "${bin_2dx}/mrc_header_modifier.exe --mrcin ${refmap} --mrcout ${refmap} --cellx ${cellx} --celly ${celly}"
@@ -324,7 +277,7 @@ ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-
 if( ${extends} == "y" ) then
     echo "Running: ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2"
     #
-    ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2
+    ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2 
 endif
 
 if ( ${create_PS} == "y" ) then

@@ -184,6 +184,13 @@ void volume::io::reflection::add_spot(volume::data::DiffractionSpotMultiMap& map
     //Set the density to center if is CCP4 generated raw data 
     if(raw_ccp4) phase_in = phase_in + 180*(l_in);
     
+    //Get to positive H
+    if(h_in < 0)
+    {
+        index_in = index_in.FriedelSpot();
+        phase_in *= -1;
+    }
+    
     //Convert phase to radians
     phase_in = volume::utilities::angle_utilities::DegreeToRadian(phase_in);
     

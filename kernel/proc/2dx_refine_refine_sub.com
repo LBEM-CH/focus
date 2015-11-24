@@ -57,6 +57,7 @@ set RTANGLSIZE = 0.0001
 set Thread_Number = 1
 #
 ${bin_2dx}/2dx_merge_compileB.exe << eot
+${reference_file}
 ${scriptname}-tmp.results
 ${scriptname}-tmp.reflections
 ${scriptname}-tmp.console

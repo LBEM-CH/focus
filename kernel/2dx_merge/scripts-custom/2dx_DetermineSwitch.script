@@ -255,27 +255,39 @@ source ${proc_2dx}/2dx_merge_makedirs
 echo "<<@progress: 5>"
 #
 set NPRG = 1
-if ( ${merge_modus} == '2D' ) then
+if ( ${merge_reference} == '0' ) then
+  # Use merge.aph files
   if ( ! -e APH/merge.aph ) then
     ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
     ${proc_2dx}/protest "Run Merging script first."
   endif
-endif
-if ( ${merge_modus} == '3D' ) then
-  if ( ${merge_reference} == '0' ) then
-    # Use merge.aph files
-    if ( ! -e APH/merge.aph ) then
-      ${proc_2dx}/linblock "ERROR: APH/merge.aph not found. No reference for refinement available."
-      ${proc_2dx}/protest "Run Merging script first."
+  if ( ${reftiltgeo} == "y" ) then
+    # tilt geometry refinement only possible with refined lattice lines in MTZ data, not with APH data.
+    ${proc_2dx}/linblock "ERROR: tilt geometry refinement only possible with refined lattice lines in MTZ file."
+    ${proc_2dx}/linblock "ERROR: Conflict between parameter USE MERGED DATA... and REFINE TILTGEOMETRY..."
+    ${proc_2dx}/protest "If you want to refine the tilt geometry, switch to MTZ data first."
+  endif
+  set reference_file="APH/merge.aph"
+endif 
+if ( ${merge_reference} == '1' ) then
+  if ( ${merge_modus} == '2D' ) then
+    # Use interpolated lattice lines merge2Dref_MRClefthanded.mtz
+    if ( ! -e merge2Dref_MRClefthanded.mtz ) then
+        ${proc_2dx}/linblock "ERROR: merge2Dref_MRClefthanded.mtz not found. No reference for refinement available."
+        ${proc_2dx}/protest "Run Merging script first."
     endif
-  else
-    # User interpolated lattice lines latlinesref_MRClefthanded.mtz
-    if ( ! -e merge3D_MRClefthanded.mtz ) then
-      ${proc_2dx}/linblock "ERROR: merge_MRClefthanded.mtz not found. No reference for refinement available."
-      ${proc_2dx}/protest "Run Merging script first."
-    endif
+    set reference_file="merge2Dref_MRClefthanded.mtz"
     set NPRG = 3
   endif
+  if ( ${merge_modus} == '3D' ) then
+    # Use interpolated lattice lines merge3Dref_MRClefthanded.mtz
+    if ( ! -e merge3Dref_MRClefthanded.mtz ) then
+        ${proc_2dx}/linblock "ERROR: merge3Dref_MRClefthanded.mtz not found. No reference for refinement available."
+        ${proc_2dx}/protest "Run Merging script first."
+    endif
+    set reference_file="merge3Dref_MRClefthanded.mtz"
+    set NPRG = 3
+    endif
 endif
 #
 if ( ${merge_ref_num} != "0" ) then
@@ -403,7 +415,7 @@ while ( ${currentline} <= ${linenum} )
     cd ${newdir}
     #
     if ( ${best_revhk} == "invert" ) then
-      set revhk = `cat 2dx_image.cfg | grep "set revhk" | cut -d\" -f2`
+      set revhk = `cat 2dx_image.cfg | grep "set revhk" | awk -F'"' '{print $2}'`
       if ( ${revhk} == 'y' ) then
         set newrevhk = 'n'
       else
@@ -416,7 +428,7 @@ while ( ${currentline} <= ${linenum} )
     endif
     #
     if ( ${best_rot90} == "invert" ) then
-      set rot90 = `cat 2dx_image.cfg | grep "set rot90" | cut -d\" -f2`
+      set rot90 = `cat 2dx_image.cfg | grep "set rot90" | awk -F'"' '{print $2}'`
       if ( ${rot90} == 'y' ) then
         set newrot90 = 'n'
       else
@@ -429,7 +441,7 @@ while ( ${currentline} <= ${linenum} )
     endif
     #
     if ( ${best_rot180} == "invert" ) then
-      set rot180 = `cat 2dx_image.cfg | grep "set rot180" | cut -d\" -f2`
+      set rot180 = `cat 2dx_image.cfg | grep "set rot180" | awk -F'"' '{print $2}'`
       if ( ${rot180} == 'y' ) then
         set newrot180 = 'n'
       else
@@ -442,7 +454,7 @@ while ( ${currentline} <= ${linenum} )
     endif
     #
     if ( ${best_sgnxch} == "invert" ) then
-      set sgnxch = `cat 2dx_image.cfg | grep "set sgnxch" | cut -d\" -f2`
+      set sgnxch = `cat 2dx_image.cfg | grep "set sgnxch" | awk -F'"' '{print $2}'`
       if ( ${sgnxch} == 'y' ) then
         set newsgnxch = 'n'
       else
@@ -455,7 +467,7 @@ while ( ${currentline} <= ${linenum} )
     endif
     #
     if ( ${best_revhnd} == "invert" ) then
-      set revhnd = `cat 2dx_image.cfg | grep "set revhnd" | cut -d\" -f2`
+      set revhnd = `cat 2dx_image.cfg | grep "set revhnd" | awk -F'"' '{print $2}'`
       if ( ${revhnd} == 'y' ) then
         set newrevhnd = 'n'
       else
@@ -468,7 +480,7 @@ while ( ${currentline} <= ${linenum} )
     endif
     #
     if ( ${best_revxsgn} == "invert" ) then
-      set revxsgn = `cat 2dx_image.cfg | grep "set revxsgn" | cut -d\" -f2`
+      set revxsgn = `cat 2dx_image.cfg | grep "set revxsgn" | awk -F'"' '{print $2}'`
       if ( ${revxsgn} == 'y' ) then
         set newrevxsgn = 'n'
       else
@@ -481,8 +493,8 @@ while ( ${currentline} <= ${linenum} )
     endif
     #
     if ( ${best_invert_tiltangle} == "invert" ) then
-      set TLTANG = `cat 2dx_image.cfg | grep "set TLTANG" | cut -d\" -f2`
-      set TANGL  = `cat 2dx_image.cfg | grep "set TANGL" | cut -d\" -f2`
+      set TLTANG = `cat 2dx_image.cfg | grep "set TLTANG" | awk -F'"' '{print $2}'`
+      set TANGL  = `cat 2dx_image.cfg | grep "set TANGL" | awk -F'"' '{print $2}'`
       set newTANGL  = `echo ${TANGL}  | awk '{ s = - $1 } END { print s }'`
       set newTLTANG = `echo ${TLTANG} | awk '{ s = - $1 } END { print s }'`
       ${proc_2dx}/linblock "#"

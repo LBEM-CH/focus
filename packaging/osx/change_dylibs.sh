@@ -187,11 +187,11 @@ done
 fortran_bin="kernel/mrc/bin"
 path="$install_dir/$fortran_bin"
 lib_path="$install_dir/kernel/mrc/lib"
-target_lib_path="/opt/2dx/kernel/mrc/lib"
+#target_lib_path="/Applications/2dx/kernel/mrc/lib"
 
 
-echo "install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
-install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
+#echo "install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
+#install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
 
 echo "chaning binaries in $path" 
 for exe in `ls $path`

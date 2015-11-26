@@ -16,6 +16,7 @@ C
       character*200 CFILE1,cline
       character*1 CNREFOUT,CNSHFTIN
       integer*8 imnum(10000)
+      LOGICAL THERE1,THERE2
 C
       write(*,'('':2dx_merge_compilePLT - '',
      .    ''compiling the plotting script'')')
@@ -194,6 +195,23 @@ C
         endif
         call shorten(cdir,k)
         write(cname3,'(A,''/2dx_image.cfg'')')cdir(1:k)
+        call shortshrink(cname3,k)
+        INQUIRE( FILE=cname3, EXIST=THERE1 ) 
+        if (.not.THERE1)then
+          write(6,'(''::WARNING: File '',A,'' does not exist'')')cname3(1:k)
+          goto 100
+        endif
+C
+        call shorten(cdir,k)
+        write(cname4,'(A,''/APH/image_ctfcor_ctf.aph'')')
+     .    cdir(1:k)
+        call shortshrink(cname4,k)
+        INQUIRE( FILE=cname4, EXIST=THERE2 ) 
+        if (.not.THERE2)then
+          write(6,'(''::WARNING: File '',A,'' does not exist'')')cname4(1:k)
+          goto 100
+        endif
+C
         write(*,'(''opening '',A)')cname3
         open(12,FILE=cname3,STATUS='OLD',ERR=910)
 C
@@ -208,6 +226,8 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
               call shorten(CIMAGENAME,k)
               write(*,'(''WARNING: Imagenumber '',I10,
      .          '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
+                write(*,'(''::You should run the Custom Script named '',
+     .            ''RENUMBER IMAGENUMBERS to fix this.'')')
             endif
           enddo
         endif

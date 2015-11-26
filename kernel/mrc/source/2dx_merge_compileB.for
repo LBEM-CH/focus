@@ -467,8 +467,10 @@ C         write(*,'(''::imagenumber read = '',I10)')imnum(imtotalcountcount)
             do i=1,imtotalcountcount-1
               if(imnum(i).eq.imnum(imtotalcountcount))then
                 call shorten(CIMAGENAME,k)
-                write(*,'(''WARNING: Imagenumber '',I10,
+                write(*,'(''::WARNING: Imagenumber '',I10,
      .            '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
+                write(*,'(''::You should run the Custom Script named '',
+     .            ''RENUMBER IMAGENUMBERS to fix this.'')')
               endif
             enddo
           endif

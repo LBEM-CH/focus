@@ -143,7 +143,7 @@ void imagePreview::setImage(const QString &imageName)
             else result = "";
         }
 	resetInfo();
-	if(!isHidden()) resetImage(true);
+	resetImage(true);
 }
 
 void imagePreview::resetInfo()
@@ -151,7 +151,7 @@ void imagePreview::resetInfo()
 	if(!QFileInfo(result).exists()) return;
 	mrcHeader header(result);
 	if(!result.isEmpty())
-		headerWidget->setHeader(result,header);
+	headerWidget->setHeader(result,header);
 }
 
 void imagePreview::resetImage(bool ignore_size)

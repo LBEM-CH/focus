@@ -250,8 +250,10 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
             if(imnum(i).eq.imnum(imcount))then
               if(ifound.eq.0)then
                 call shorten(CIMAGENAME,k)
-                write(*,'(''WARNING: Imagenumber '',I10,
+                write(*,'(''::WARNING: Imagenumber '',I10,
      .            '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
+                write(*,'(''::You should run the Custom Script named '',
+     .            ''RENUMBER IMAGENUMBERS to fix this.'')')
                 ifound=1
               endif
             endif
@@ -342,7 +344,7 @@ C
               LUSEML = .FALSE.
             endif
             call shortshrink(cname4,k4)
-            lexist=.true.
+            inquire(file=cname4(1:k4),exist=lexist)
           else
             if(iloo.eq.1)then
               write(cname4,'(A,
@@ -358,7 +360,7 @@ C
             inquire(file=cname4(1:k4),exist=lexist)
           endif
           if(.not.lexist)then
-            write(6,'('':File not found: '',A)')cname4(1:k4)
+            write(6,'(''::File not found: '',A)')cname4(1:k4)
           else
             call shorten(CTITLE,k)
             k1=1

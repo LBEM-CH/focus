@@ -496,7 +496,7 @@ C
 C
           if(CMLMERGE(1:1).eq."y" .and. IMERGEDAT.eq.3)then
             call cgetline(CPHORI,"phaori_ML")
-            read(CPHORI,*,ERR=901)RPHAORIH,RPHAORIK
+            read(CPHORI,*,ERR=901,END=901)RPHAORIH,RPHAORIK
             goto 902
  901        continue
             RPHAORIH=0.0
@@ -506,7 +506,7 @@ C
      .        ''PhaseOrigin = '',2F12.3)')RPHAORIH,RPHAORIK
           else
             call cgetline(CPHORI,"phaori")
-            read(CPHORI,*,ERR=903)RPHAORIH,RPHAORIK
+            read(CPHORI,*,ERR=903,END=903)RPHAORIH,RPHAORIK
             goto 904
  903        continue
             RPHAORIH=0.0

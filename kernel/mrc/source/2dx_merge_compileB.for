@@ -592,24 +592,25 @@ C
           endif
 C
           write(14,'(''#'')')
-          write(14,'(''if ( -e APH/REF'',A10,''.hkl ) then'')')
-     .      CIMAGENUMBER(1:10)
+          call shorten(CIMAGENUMBER(1:10),k)
+          write(14,'(''if ( -e APH/REF'',A,''.hkl ) then'')')
+     .      CIMAGENUMBER(1:k)
           call shorten(cdir,k1)
           write(14,'(''  if ( ! -d '',A,''/APH ) then'')')cdir(1:k1)
           write(14,'(''    \mkdir '',A,''/APH'')')cdir(1:k1)
           write(14,'(''  endif'')')
-          write(14,'(''  \cp -f APH/REF'',A10,''.hkl '',A,
+          write(14,'(''  \cp -f APH/REF'',A,''.hkl '',A,
      .      ''/APH'')')
-     .      CIMAGENUMBER(1:10),cdir(1:k1)
+     .      CIMAGENUMBER(1:k),cdir(1:k1)
 C
 C          write(14,'(''  echo "# IMAGE: APH/REF'',A10,''.hkl <APH: REF'',A10''.hkl>" >> LOGS/${scriptname}.results'')')
 C     .      CIMAGENUMBER(1:10),CIMAGENUMBER(1:10)
 C
-          write(14,'(''  echo REF'',A10,''.hkl done.'')') 
-     .      CIMAGENUMBER(1:10)
+          write(14,'(''  echo REF'',A,''.hkl done.'')') 
+     .      CIMAGENUMBER(1:k)
           write(14,'(''else'')')
-          write(14,'(''  echo "::WARNING: APH/REF'',A10,
-     .      ''.hkl not existing."'')')CIMAGENUMBER(1:10)
+          write(14,'(''  echo "::WARNING: APH/REF'',A,
+     .      ''.hkl not existing."'')')CIMAGENUMBER(1:k)
           write(14,'(''endif'')')
 C
           goto 100

@@ -2014,7 +2014,8 @@ C
           if(PYTHONFIRST)then
             write(17,'(''# This is a Python script. '')')
             write(17,'(''# This updates the 2dx_image.cfg files'')')
-            write(17,'(''#'')')
+            write(17,'('' '')')
+            write(17,'('' '')')
             write(17,'(''import os'')')
             PYTHONFIRST = .FALSE.
           endif

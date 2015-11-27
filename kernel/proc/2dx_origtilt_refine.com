@@ -166,8 +166,9 @@ end
 #
 \rm -f SCRATCH/${scriptname}.py
 echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
-foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py ) 
-  cat ${scriptBresults} >> SCRATCH/${scriptname}.py
+foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py )
+  echo "import os" > SCRATCH/${scriptname}.py
+  cat ${scriptBresults} | grep -v "import os" >> SCRATCH/${scriptname}.py
   \rm -f ${scriptBresults}
 end
 #

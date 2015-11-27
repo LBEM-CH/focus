@@ -183,7 +183,7 @@ void projectModel::initDir(const QString &path, QStandardItem *parent)
   }
   else if(dir.relativeFilePath(projectPath) == "../")
   { 
-    loadDialog->setValue(++loadProgress);
+    loadDialog->setValue(loadProgress++);
   }
   
   QString entry, entryString, name;
@@ -386,7 +386,9 @@ void projectModel::load()
     saveColumns(columnsDataFile);
   loadHidden(columnsDataFile);
   
+  loadDialog->reset();
   initDir(projectPath);
+  loadDialog->reset();
   
   quint32 var;
   QStandardItem *item;
@@ -401,9 +403,11 @@ void projectModel::load()
 void projectModel::reload()
 {
   clear();
+  
   loadDialog->reset();
   initDir(projectPath);
-
+  loadDialog->reset();
+  
   quint32 var;
   QStandardItem *item;
   foreach(var, columns.keys())

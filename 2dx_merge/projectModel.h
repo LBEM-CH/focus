@@ -31,6 +31,7 @@
 #include <QStyle>
 #include <QDebug>
 #include <QModelIndexList>
+#include <QProgressDialog>
 //#include <imageItem.h>
 #include <confData.h>
 #include <resultsData.h>
@@ -76,7 +77,10 @@ class projectModel : public QStandardItemModel
   confData *data;
   resultsData *resultData;
   QFileSystemWatcher watcher;
-
+  
+  QProgressDialog* loadDialog;
+  int loadProgress;
+  
   QHash<quint32,QString> paths;
   QMap<quint32, QHash<QString,QVariant> > columns;
   QHash<quint32, QHash<QString,QStandardItem*> >items;

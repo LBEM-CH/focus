@@ -167,8 +167,25 @@ bool projectModel::loadHidden(const QString &columnsFile)
 void projectModel::initDir(const QString &path, QStandardItem *parent)
 {
   QDir dir(path);
+  QDir projectDir(projectPath);
   dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-
+  
+  //For Progress dialog
+  QApplication::processEvents();
+  if(path == projectPath)
+  {
+    loadDialog->setMinimum(0);
+    int dirCount = dir.entryList().count() -1; // -1 because a merge dir is present in project folder!!
+    loadDialog->setMaximum(dirCount);
+    loadDialog->setLabelText("Reading image config files..");
+    loadDialog->show();
+    loadProgress = 0;
+  }
+  else if(dir.relativeFilePath(projectPath) == "../")
+  { 
+    loadDialog->setValue(++loadProgress);
+  }
+  
   QString entry, entryString, name;
   QStandardItem *entryItem;
   QStringList names, labels;
@@ -199,6 +216,7 @@ void projectModel::initDir(const QString &path, QStandardItem *parent)
       {
         //watcher.addPath(configFile);
         qDebug()<<"Reading config file "<<configFile;
+        loadDialog->setLabelText("Reading config file:\n" + projectDir.relativeFilePath(configFile));
         confData localData(configFile);
         // CHEN: Not synching here, in order to save time. 
         // qDebug()<<"SyncWithUpper(): "<<configFile;
@@ -343,6 +361,12 @@ projectModel::projectModel(confData *conf, const QString &path, const QString &c
   data = conf;
   resultData = NULL;
 
+  loadDialog = new QProgressDialog();
+  loadDialog->setWindowModality(Qt::WindowModal);
+  loadDialog->setCancelButton(0);
+  
+  connect(loadDialog, SIGNAL(canceled()), this, SLOT(loadCanceled()));
+  
   QDir dir(path);
   projectPath = dir.canonicalPath();
   columnsDataFile = columnsFile;
@@ -363,7 +387,7 @@ void projectModel::load()
   loadHidden(columnsDataFile);
   
   initDir(projectPath);
-
+  
   quint32 var;
   QStandardItem *item;
   foreach(var, columns.keys())
@@ -377,6 +401,7 @@ void projectModel::load()
 void projectModel::reload()
 {
   clear();
+  loadDialog->reset();
   initDir(projectPath);
 
   quint32 var;

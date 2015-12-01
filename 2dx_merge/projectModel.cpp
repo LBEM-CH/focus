@@ -365,8 +365,6 @@ projectModel::projectModel(confData *conf, const QString &path, const QString &c
   loadDialog->setWindowModality(Qt::WindowModal);
   loadDialog->setCancelButton(0);
   
-  connect(loadDialog, SIGNAL(canceled()), this, SLOT(loadCanceled()));
-  
   QDir dir(path);
   projectPath = dir.canonicalPath();
   columnsDataFile = columnsFile;

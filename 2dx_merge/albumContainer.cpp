@@ -318,6 +318,7 @@ void albumContainer::columnActivated(int i)
     dirModel->setColumnProperty(i, "visible", dirModel->getColumnProperty(i, "visible").toBool()^true);
     dirModel->saveColumns();
     dirView->setColumnHidden(i, !dirModel->getColumnProperty(i, "visible").toBool());
+    dirView->resizeColumnToContents(i);
 }
 
 void albumContainer::extendSelection() 

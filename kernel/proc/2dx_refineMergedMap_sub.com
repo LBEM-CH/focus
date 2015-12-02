@@ -60,33 +60,17 @@ set refined_map = "refined.map"
 \rm -f ${refined_hkl}
 \rm -f ${refined_map}
 #
-touch SCRATCH/shrinkwrap_dummy
-\rm -f SCRATCH/shrinkwrap_*
-#
-touch SCRATCH/mask_dummy
-\rm -f SCRATCH/mask_*
+if ( -d SHRINKWRAP ) then
+    rm -rf SHRINKWRAP
+endif
+mkdir SHRINKWRAP
 #
 #------------------------------------------------------------------------------
 echo ":Launching ${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}"
 #------------------------------------------------------------------------------
-${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --mask-res ${refinement_mask_resolution} --iterations ${number_refinement_iterations} --hklout ${refined_hkl} --mrcout ${refined_map}
+${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SHRINKWRAP/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --mask-res ${refinement_mask_resolution} --iterations ${number_refinement_iterations} --hklout ${refined_hkl} --mrcout ${refined_map}
 #
-set num = 1
-while ( ${num} <= ${number_refinement_iterations} )
-  if( -f SCRATCH/shrinkwrap_initial_volume_${num}.map ) then
-    echo "# IMAGE: SCRATCH/shrinkwrap_initial_volume_${num}.map <MAP: Iteration ${num}, initial volume map, >" >> LOGS/${scriptname}.results
-  endif
-  if( -f SCRATCH/mask_volume_shrinkwrap_${num}.map ) then
-    echo "# IMAGE: SCRATCH/mask_volume_shrinkwrap_${num}.map <MAP: Iteration ${num}, shrinkwrap volume mask>" >> LOGS/${scriptname}.results
-  endif
-  if ( -f SCRATCH/mask_binary_shrinkwrap_${num}.map ) then 
-    echo "# IMAGE: SCRATCH/mask_binary_shrinkwrap_${num}.map <MAP: Iteration ${num}, shrinkwrap binary mask>" >> LOGS/${scriptname}.results
-  endif
-  if( -f SCRATCH/shrinkwrap_final_volume_${num}.map ) then
-    echo "# IMAGE: SCRATCH/shrinkwrap_final_volume_${num}.map <MAP: Iteration ${num}, refined volume map>" >> LOGS/${scriptname}.results
-  endif    
-  @ num += 1
-end
+echo "# IMAGE: SHRINKWRAP" >> LOGS/${scriptname}.results
 #
 #
 echo "# IMAGE: ${refined_hkl} <Refined HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results

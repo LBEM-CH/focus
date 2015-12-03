@@ -467,10 +467,12 @@ void albumContainer::moveToFolder()
                                         "Unable to move folder: " + sourcePath + " to:\n"
                                             + targetImageDir.absolutePath() 
                                     );
+                targetImageDir.removeRecursively();
             }
             else
             {
-                qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.absolutePath();
+                qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.absolutePath();         
+                dirModel->itemDeselected(sortModel->mapToSource(i));
                 QDir(sourcePath).removeRecursively();
             }
 

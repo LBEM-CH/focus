@@ -521,6 +521,7 @@ bool projectModel::save(QStandardItem *currentItem, int itemCount, QFile &saveFi
 
 bool projectModel::submit()
 {
+  emit submitting();
   if(saveFileName.isEmpty()) return false;
   QFile saveFile(saveFileName);
   if(!saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) return false;

@@ -329,21 +329,21 @@ void mainWindow::setupMenuBar() {
      */
     QMenu *selectMenu = new QMenu("Select");
 
-    QAction *selectAllAction = new QAction("Select All", this);
+    QAction *selectAllAction = new QAction("Check all images", this);
     selectAllAction->setShortcut(tr("Ctrl+A"));
     selectMenu->addAction(selectAllAction);
     connect(selectAllAction, SIGNAL(triggered()), albumCont->getDirModel(), SLOT(selectAll()));
 
-    QAction *invertSelectedAction = new QAction("Invert Selection", this);
+    QAction *invertSelectedAction = new QAction("Invert check", this);
     invertSelectedAction->setShortcut(tr("Ctrl+I"));
     selectMenu->addAction(invertSelectedAction);
     connect(invertSelectedAction, SIGNAL(triggered()), albumCont->getDirModel(), SLOT(invertSelection()));
 
-    QAction *saveDirectorySelectionAction = new QAction("Save Selection As...", this);
+    QAction *saveDirectorySelectionAction = new QAction("Save checked list", this);
     connect(saveDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(saveDirectorySelection()));
     selectMenu->addAction(saveDirectorySelectionAction);
 
-    QAction *loadDirectorySelectionAction = new QAction("Load Selection...", this);
+    QAction *loadDirectorySelectionAction = new QAction("Load checked list", this);
     connect(loadDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(loadDirectorySelection()));
     selectMenu->addAction(loadDirectorySelectionAction);
 

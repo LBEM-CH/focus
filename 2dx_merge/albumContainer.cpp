@@ -17,6 +17,7 @@ albumContainer::albumContainer(confData *dat, resultsData* results, QWidget* par
     previews->addWidget(dualPreview);
     
     setupDirectoryContainer(data);
+    QToolBar* headerToolBar = setupContextAndMenu();
     dirModel->setResultsFile(results);
     
     QWidget* widget = new QWidget(this);
@@ -25,15 +26,23 @@ albumContainer::albumContainer(confData *dat, resultsData* results, QWidget* par
     layout->setSpacing(0);
     widget->setLayout(layout);
     
-    layout->addWidget(dirView, 0, 0);
-    layout->addWidget(previews, 0, 1, Qt::AlignTop);
+    layout->addWidget(headerToolBar, 0, 0, 1, 1);
+    layout->addWidget(dirView, 0, 1, 1, 1);
     
     previewTimer = new QTimer(this);
     connect(previewTimer, SIGNAL(timeout()), this, SLOT(updatePreview()));
     
-    blockContainer* container = new blockContainer("Project Library");
-    container->setMainWidget(widget);
+    blockContainer* libraryContainer = new blockContainer("Project Library");
+    libraryContainer->setMainWidget(widget);
     
+    selectionState = new QLabel(" ");
+    QFont* font = new QFont();
+    font->setItalic(true);
+    font->setPixelSize(10);
+    selectionState->setFont(*font);
+    resetSelectionState();
+    
+    libraryContainer->setHeaderWidget(selectionState);
     
     QToolButton* showHeaderButton = new QToolButton();
     showHeaderButton->setIcon(*(data->getIcon("info")));
@@ -62,19 +71,22 @@ albumContainer::albumContainer(confData *dat, resultsData* results, QWidget* par
     headerWidgetLayout->setSpacing(0);
     headerWidget->setLayout(headerWidgetLayout);
     
-    headerWidgetLayout->addWidget(new QLabel("Switch Preview: "), 0, 0);
-    headerWidgetLayout->addWidget(viewControl, 0, 1, 1, 1 , Qt::AlignVCenter);
-    headerWidgetLayout->addItem(new QSpacerItem(3,3), 0, 2);
-    headerWidgetLayout->addWidget(showHeaderButton, 0, 3);
-    headerWidgetLayout->addItem(new QSpacerItem(3,3), 0, 4);
-    headerWidgetLayout->addWidget(autoPreviewsButton, 0, 5);
+    headerWidgetLayout->addWidget(viewControl, 0, 0, 1, 1 , Qt::AlignVCenter);
+    headerWidgetLayout->addItem(new QSpacerItem(3,3), 0, 1);
+    headerWidgetLayout->addWidget(showHeaderButton, 0, 2);
+    headerWidgetLayout->addItem(new QSpacerItem(3,3), 0, 3);
+    headerWidgetLayout->addWidget(autoPreviewsButton, 0, 4);
     
-    container->setHeaderWidget(headerWidget);
+    blockContainer* previewContainer = new blockContainer("", this);
+    previewContainer->setFixedWidth(235);
+    previewContainer->setMainWidget(previews);
+    previewContainer->setHeaderWidget(headerWidget);
     
     QGridLayout* mainLayout = new QGridLayout(this);
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
-    mainLayout->addWidget(container);
+    mainLayout->addWidget(libraryContainer, 0, 0);
+    mainLayout->addWidget(previewContainer, 0, 1, Qt::AlignTop);
     this->setLayout(mainLayout);
     
 }
@@ -106,6 +118,7 @@ void albumContainer::setupDirectoryContainer(confData* data)
     
     connect(dirModel, SIGNAL(currentImage(const QString&)), this, SLOT(setPreviewImages(const QString&)));
     connect(dirModel, SIGNAL(reloading()), this, SLOT(reload()));
+    connect(dirModel, SIGNAL(submitting()), this, SLOT(resetSelectionState()));
 
     sortModel = new QSortFilterProxyModel(this);
     sortModel->setSourceModel(dirModel);
@@ -122,8 +135,9 @@ void albumContainer::setupDirectoryContainer(confData* data)
     connect(dirView->header(), SIGNAL(sectionResized(int, int, int)), this, SLOT(saveProjectState()));
     connect(dirView->header(), SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)), this, SLOT(saveProjectState()));
 
+    connect(dirView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(resetSelectionState()));
     connect(dirView->selectionModel(), SIGNAL(currentRowChanged(const QModelIndex&, const QModelIndex&)), dirModel, SLOT(currentRowChanged(const QModelIndex&, const QModelIndex&)));
-
+    
     projectDelegate *delegate = new projectDelegate(data);
 
     //  dirView->setItemDelegate(new projectDelegate(mainData));
@@ -137,24 +151,7 @@ void albumContainer::setupDirectoryContainer(confData* data)
         dirView->setItemDelegateForColumn(i, delegate);
 
 
-    //Right-Click Menu
-    QAction *addSelectionAction;
-    addSelectionAction = new QAction("add to selection", dirView);
-    dirView->addAction(addSelectionAction);
-    connect(addSelectionAction, SIGNAL(triggered(bool)), this, SLOT(extendSelection()));
-
-    QAction *removeSelectionAction;
-    removeSelectionAction = new QAction("remove from selection", dirView);
-    dirView->addAction(removeSelectionAction);
-    connect(removeSelectionAction, SIGNAL(triggered(bool)), this, SLOT(reduceSelection()));
-    dirView->setContextMenuPolicy(Qt::ActionsContextMenu);
-
-    QAction *copyImageAction;
-    copyImageAction = new QAction("copy image to second project", dirView);
-    dirView->addAction(copyImageAction);
-    connect(copyImageAction, SIGNAL(triggered(bool)), this, SLOT(copyImage()));
-
-
+    //Add context menu of possible columns in the header
     QAction *action;
 
     QSignalMapper *mapper = new QSignalMapper(this);
@@ -185,6 +182,51 @@ void albumContainer::setupDirectoryContainer(confData* data)
     //  dirView->resize((int)width*(1.05),300);
     connect(dirView, SIGNAL(doubleClicked(const QModelIndex&)), dirModel, SLOT(itemActivated(const QModelIndex&)));
     //  container->resize(width,dirView->height());
+}
+
+QToolBar* albumContainer::setupContextAndMenu() 
+{
+    //Setup Actions
+    QAction *addSelectionAction;
+    addSelectionAction = new QAction(*(data->getIcon("add_selection")), "Add check to selected", dirView);
+    connect(addSelectionAction, SIGNAL(triggered()), this, SLOT(extendSelection()));
+
+    QAction *removeSelectionAction;
+    removeSelectionAction = new QAction(*(data->getIcon("remove_selection")), "Remove check from selected", dirView);
+    connect(removeSelectionAction, SIGNAL(triggered()), this, SLOT(reduceSelection()));
+
+    QAction *copyImageAction;
+    copyImageAction = new QAction(*(data->getIcon("copy_selection")), "Copy selected to second project", dirView);
+    connect(copyImageAction, SIGNAL(triggered()), this, SLOT(copyImage()));
+    
+    QAction *moveImageAction;
+    moveImageAction = new QAction(*(data->getIcon("move_selection")), "Move selected to another folder", dirView);
+    connect(moveImageAction, SIGNAL(triggered()), this, SLOT(moveToFolder()));
+    
+    QAction *addFolderAction;
+    addFolderAction = new QAction(*(data->getIcon("add_folder")),"Add image folder", dirView);
+    connect(addFolderAction, SIGNAL(triggered()), this, SLOT(addImageFolder()));
+    
+    //Right-Click Menu
+    dirView->setContextMenuPolicy(Qt::ActionsContextMenu);
+    dirView->addAction(addSelectionAction);
+    dirView->addAction(removeSelectionAction);
+    dirView->addAction(addFolderAction);
+    dirView->addAction(moveImageAction);
+    dirView->addAction(copyImageAction);
+    
+    
+    //Setup tool bar
+    QToolBar* toolBar = new QToolBar("Library Actions");
+    toolBar->setIconSize(QSize(16, 16));
+    toolBar->setOrientation(Qt::Vertical);
+    toolBar->addAction(addSelectionAction);
+    toolBar->addAction(removeSelectionAction);
+    toolBar->addAction(addFolderAction);
+    toolBar->addAction(moveImageAction);
+    toolBar->addAction(copyImageAction);
+    
+    return toolBar;
 }
 
 
@@ -285,7 +327,7 @@ void albumContainer::copyImage()
     }
 
     QModelIndex i;
-    QModelIndexList selection = dirView->selectionModel()->selectedIndexes();
+    QModelIndexList selection = dirView->selectionModel()->selectedRows();
 
     foreach(i, selection) {
         QString sourcePath = dirModel->pathFromIndex(i);
@@ -313,6 +355,162 @@ void albumContainer::copyImage()
     }
 }
 
+void albumContainer::addImageFolder()
+{
+    QString projectFolder = data->getDir("project");
+    QDir projectDir(projectFolder);
+    
+    bool ok;
+    QString folder = QInputDialog::getText(this, tr("Add image folder"),
+                                         tr("Enter the folder name to be created"), QLineEdit::Normal,
+                                         "image_folder", &ok);
+    
+    if(ok && !folder.isEmpty())
+    {
+        QFile newDirCfg(projectFolder + "/" + folder + "/2dx_master.cfg");
+        if(newDirCfg.exists())
+        {
+            QMessageBox::warning( 
+                                    this, 
+                                    tr("Add image folder"), 
+                                    "The image folder: <" + folder + "> already exists and is linked!"
+                                );
+        }
+        else
+        {
+            if(!QDir(projectFolder + "/" + folder).exists())
+            {
+                projectDir.mkdir(folder);
+            }
+            QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
+        }
+        
+        reload();
+    }
+    
+}
+
+void albumContainer::moveToFolder() 
+{
+    QModelIndexList selection = dirView->selectionModel()->selectedRows();
+    QString projectFolder = data->getDir("project");    
+    
+    //Get the list of current folders
+    QStringList imageFolders = QDir(projectFolder).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
+    
+    //Remove non-linked folders
+    QString imageFolder;
+    foreach(imageFolder, imageFolders)
+    {
+        if(!QFile(projectFolder + "/" + imageFolder + "/2dx_master.cfg").exists()) imageFolders.removeAll(imageFolder);
+    }
+    
+    //Ask for the folder to move to!
+    bool ok;
+    QString folder = QInputDialog::getItem(this, tr("Folder selection"),
+                                         tr("Select one of the following available folder to be moved to:"), imageFolders, 0, false, &ok);
+    
+    if(ok && !folder.isEmpty())
+    {
+        int numFiles = selection.count();
+        int count = 0;
+        QProgressDialog progress("Moving files...", "Abort Move", 0, numFiles, this);
+        progress.setWindowModality(Qt::WindowModal);
+
+        QString targetPath = projectFolder + "/" + folder;
+        QModelIndex i;
+        foreach(i, selection) 
+        {
+            progress.setValue(count++);
+            if (progress.wasCanceled()) break;
+            
+            QString sourcePath = dirModel->pathFromIndex(i);
+            QString sourceImage =  QFileInfo(sourcePath).fileName();
+
+            if(!QFile(sourcePath + "/2dx_image.cfg").exists())
+            {
+                qDebug() << "2dx_image.cfg does not exist";
+                continue;
+            }
+            
+            QDir targetImageDir = QDir(targetPath + "/" + sourceImage);
+            
+            if(targetImageDir.absolutePath() == QDir(sourcePath).absolutePath()) 
+            {
+                qDebug() << "Target same as source";
+                continue;
+            }
+            
+            bool target_exist = false;
+            while(targetImageDir.exists())
+            {
+                targetImageDir.setPath(targetImageDir.absolutePath()+"_1");
+                target_exist = true;
+            }
+
+            if(target_exist)
+            {
+                    QMessageBox::warning( 
+                                            this, 
+                                            tr("Move warning"), 
+                                            "The target folder: " + targetPath + "/" + sourceImage + " already exists!\n"
+                                                + "Renaming it to: " + targetImageDir.absolutePath()
+                                        );
+            }
+
+            bool moved = copyRecursively(sourcePath, targetImageDir.absolutePath());
+            if(!moved)
+            {
+                QMessageBox::warning( 
+                                        this, 
+                                        tr("Warning: Unable to copy"), 
+                                        "Unable to move folder: " + sourcePath + " to:\n"
+                                            + targetImageDir.absolutePath() 
+                                    );
+            }
+            else
+            {
+                qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.absolutePath();
+                QDir(sourcePath).removeRecursively();
+            }
+
+        }
+        
+        progress.setValue(numFiles);
+        reload();
+    }
+    
+}
+
+bool albumContainer::copyRecursively(const QString& srcFilePath, const QString& tgtFilePath)
+{
+    QFileInfo srcFileInfo(srcFilePath);
+    if (srcFileInfo.isDir()) 
+    {
+        QDir targetDir(tgtFilePath);
+        targetDir.cdUp();
+        if (!targetDir.mkdir(QFileInfo(tgtFilePath).fileName()))
+            return false;
+        QDir sourceDir(srcFilePath);
+        QStringList fileNames = sourceDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
+        foreach (const QString &fileName, fileNames) 
+        {
+            const QString newSrcFilePath
+                    = srcFilePath + QLatin1Char('/') + fileName;
+            const QString newTgtFilePath
+                    = tgtFilePath + QLatin1Char('/') + fileName;
+            if (!copyRecursively(newSrcFilePath, newTgtFilePath))
+                return false;
+        }
+    } 
+    else 
+    {
+        if (!QFile::copy(srcFilePath, tgtFilePath))
+            return false;
+    }
+    return true;
+}
+
 void albumContainer::columnActivated(int i) 
 {
     dirModel->setColumnProperty(i, "visible", dirModel->getColumnProperty(i, "visible").toBool()^true);
@@ -334,7 +532,7 @@ void albumContainer::reduceSelection()
 void albumContainer::modifySelection(bool select) 
 {
     QModelIndex i;
-    QModelIndexList selection = dirView->selectionModel()->selectedIndexes();
+    QModelIndexList selection = dirView->selectionModel()->selectedRows();
 
     if (select) {
 
@@ -367,4 +565,11 @@ void albumContainer::updatePreview()
 {
     int id = (previews->currentIndex()+1)%2;
     viewControl->setCurrentIndex(id);
+}
+
+void albumContainer::resetSelectionState()
+{
+    QString checked =  QString::number(dirModel->getSelectionNames().count());
+    QString selected = QString::number(dirView->selectionModel()->selectedRows().count());
+    selectionState->setText(checked + " checked and " + selected + " selected ");
 }

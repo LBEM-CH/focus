@@ -11,9 +11,12 @@
 #include <QWidget>
 #include <QTreeView>
 #include <QString>
+#include <QStringList>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QInputDialog>
+#include <QToolBar>
 #include <QSortFilterProxyModel>
 #include <QHeaderView>
 #include <QGridLayout>
@@ -53,6 +56,9 @@ class albumContainer : public QWidget
         
         void extendSelection();
         void reduceSelection();
+        void addImageFolder();
+        void moveToFolder();
+        bool copyRecursively(const QString &srcFilePath, const QString &tgtFilePath);
         
         void saveProjectState();
         void loadProjectState();
@@ -60,9 +66,12 @@ class albumContainer : public QWidget
         void setPreviewImages(const QString&);
         void autoSwitch(bool);
         void updatePreview();
+        
+        void resetSelectionState();
                    
     private:
         void setupDirectoryContainer(confData*);
+        QToolBar* setupContextAndMenu();
         void modifySelection(bool select = true);
 
         confData* data;
@@ -71,6 +80,8 @@ class albumContainer : public QWidget
         projectModel* dirModel;
         QSortFilterProxyModel *sortModel;
         
+        QLabel* selectionState;
+               
         imagePreview* mapPreview;
         imagePreview* refPreview;
         imagePreview* dualPreview;

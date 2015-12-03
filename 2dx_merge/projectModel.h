@@ -71,6 +71,7 @@ class projectModel : public QStandardItemModel
   signals:
   void currentImage(const QString&);
   void reloading();
+  void submitting();
   
   private:
 

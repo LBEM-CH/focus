@@ -201,7 +201,11 @@ QToolBar* albumContainer::setupContextAndMenu()
     
     QAction *moveImageAction;
     moveImageAction = new QAction(*(data->getIcon("move_selection")), "Move selected to another folder", dirView);
-    connect(moveImageAction, SIGNAL(triggered()), this, SLOT(moveToFolder()));
+    connect(moveImageAction, SIGNAL(triggered()), this, SLOT(moveSelectiontoFolder()));
+    
+    QAction *trashImageAction;
+    trashImageAction = new QAction(*(data->getIcon("trash_selection")), "Trash selected images", dirView);
+    connect(trashImageAction, SIGNAL(triggered()), this, SLOT(trashSelection()));
     
     QAction *addFolderAction;
     addFolderAction = new QAction(*(data->getIcon("add_folder")),"Add image folder", dirView);
@@ -213,17 +217,19 @@ QToolBar* albumContainer::setupContextAndMenu()
     dirView->addAction(removeSelectionAction);
     dirView->addAction(addFolderAction);
     dirView->addAction(moveImageAction);
+    dirView->addAction(trashImageAction);
     dirView->addAction(copyImageAction);
     
     
     //Setup tool bar
     QToolBar* toolBar = new QToolBar("Library Actions");
-    toolBar->setIconSize(QSize(16, 16));
+    toolBar->setIconSize(QSize(24, 24));
     toolBar->setOrientation(Qt::Vertical);
     toolBar->addAction(addSelectionAction);
     toolBar->addAction(removeSelectionAction);
     toolBar->addAction(addFolderAction);
     toolBar->addAction(moveImageAction);
+    toolBar->addAction(trashImageAction);
     toolBar->addAction(copyImageAction);
     
     return toolBar;
@@ -355,11 +361,35 @@ void albumContainer::copyImage()
     }
 }
 
-void albumContainer::addImageFolder()
+void albumContainer::addImageFolder(const QString& folder) 
 {
     QString projectFolder = data->getDir("project");
     QDir projectDir(projectFolder);
-    
+    QFile newDirCfg(projectFolder + "/" + folder + "/2dx_master.cfg");
+    if(newDirCfg.exists())
+    {
+            QMessageBox::warning( 
+                                    this, 
+                                    tr("Add image folder"), 
+                                    "The image folder: <" + folder + "> already exists and is linked!"
+                                );
+    }
+    else
+    {
+        if(!QDir(projectFolder + "/" + folder).exists())
+        {
+            projectDir.mkdir(folder);
+        }
+        QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
+    }
+
+    reload();
+
+}
+
+
+void albumContainer::addImageFolder()
+{
     bool ok;
     QString folder = QInputDialog::getText(this, tr("Add image folder"),
                                          tr("Enter the folder name to be created"), QLineEdit::Normal,
@@ -367,32 +397,101 @@ void albumContainer::addImageFolder()
     
     if(ok && !folder.isEmpty())
     {
-        QFile newDirCfg(projectFolder + "/" + folder + "/2dx_master.cfg");
-        if(newDirCfg.exists())
+        addImageFolder(folder);
+    } 
+}
+
+void albumContainer::moveSelectionToFolder(const QString& targetPath) 
+{
+    QModelIndexList selection = dirView->selectionModel()->selectedRows();
+    int numFiles = selection.count();
+    int count = 0;
+    QProgressDialog progress("Moving files...", "Abort Move", 0, numFiles, this);
+    progress.setWindowModality(Qt::WindowModal);
+
+    QModelIndex i;
+    foreach(i, selection) 
+    {
+        progress.setValue(count++);
+        if (progress.wasCanceled()) break;
+
+        QString sourcePath = dirModel->pathFromIndex(i);
+        QString sourceImage =  QFileInfo(sourcePath).fileName();
+
+        if(!QFile(sourcePath + "/2dx_image.cfg").exists())
+        {
+            qDebug() << "2dx_image.cfg does not exist";
+            continue;
+        }
+
+        QDir targetImageDir = QDir(targetPath + "/" + sourceImage);
+
+        if(targetImageDir.absolutePath() == QDir(sourcePath).absolutePath()) 
+        {
+            qDebug() << "Target same as source";
+            continue;
+        }
+
+        bool target_exist = false;
+        while(targetImageDir.exists())
+        {
+            targetImageDir.setPath(targetImageDir.absolutePath()+"_1");
+            target_exist = true;
+        }
+
+        if(target_exist)
+        {
+                QMessageBox::warning( 
+                                        this, 
+                                        tr("Move warning"), 
+                                        "The target folder: " + targetPath + "/" + sourceImage + " already exists!\n"
+                                            + "Renaming it to: " + targetImageDir.absolutePath()
+                                    );
+        }
+
+        bool moved = copyRecursively(sourcePath, targetImageDir.absolutePath());
+        if(!moved)
         {
             QMessageBox::warning( 
                                     this, 
-                                    tr("Add image folder"), 
-                                    "The image folder: <" + folder + "> already exists and is linked!"
+                                    tr("Warning: Unable to copy"), 
+                                    "Unable to move folder: " + sourcePath + " to:\n"
+                                        + targetImageDir.absolutePath() 
                                 );
+            targetImageDir.removeRecursively();
         }
         else
         {
-            if(!QDir(projectFolder + "/" + folder).exists())
-            {
-                projectDir.mkdir(folder);
-            }
-            QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
+            qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.absolutePath();         
+            dirModel->itemDeselected(sortModel->mapToSource(i));
+            QDir(sourcePath).removeRecursively();
         }
-        
-        reload();
+
     }
-    
+
+    progress.setValue(numFiles);
+    reload();
+
 }
 
-void albumContainer::moveToFolder() 
+void albumContainer::trashSelection() 
 {
-    QModelIndexList selection = dirView->selectionModel()->selectedRows();
+    QString projectFolder = data->getDir("project");
+    QDir projectDir(projectFolder);
+    QString folder = "TRASH";
+    if(!QFile(data->getDir("project") + "/" + folder + "/2dx_master.cfg").exists())
+    {
+        if(!QDir(projectFolder + "/" + folder).exists())
+        {
+            projectDir.mkdir(folder);
+        }
+        QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
+    }
+    moveSelectionToFolder(data->getDir("project") + "/" + folder);
+}
+
+void albumContainer::moveSelectiontoFolder() 
+{
     QString projectFolder = data->getDir("project");    
     
     //Get the list of current folders
@@ -412,74 +511,8 @@ void albumContainer::moveToFolder()
     
     if(ok && !folder.isEmpty())
     {
-        int numFiles = selection.count();
-        int count = 0;
-        QProgressDialog progress("Moving files...", "Abort Move", 0, numFiles, this);
-        progress.setWindowModality(Qt::WindowModal);
-
         QString targetPath = projectFolder + "/" + folder;
-        QModelIndex i;
-        foreach(i, selection) 
-        {
-            progress.setValue(count++);
-            if (progress.wasCanceled()) break;
-            
-            QString sourcePath = dirModel->pathFromIndex(i);
-            QString sourceImage =  QFileInfo(sourcePath).fileName();
-
-            if(!QFile(sourcePath + "/2dx_image.cfg").exists())
-            {
-                qDebug() << "2dx_image.cfg does not exist";
-                continue;
-            }
-            
-            QDir targetImageDir = QDir(targetPath + "/" + sourceImage);
-            
-            if(targetImageDir.absolutePath() == QDir(sourcePath).absolutePath()) 
-            {
-                qDebug() << "Target same as source";
-                continue;
-            }
-            
-            bool target_exist = false;
-            while(targetImageDir.exists())
-            {
-                targetImageDir.setPath(targetImageDir.absolutePath()+"_1");
-                target_exist = true;
-            }
-
-            if(target_exist)
-            {
-                    QMessageBox::warning( 
-                                            this, 
-                                            tr("Move warning"), 
-                                            "The target folder: " + targetPath + "/" + sourceImage + " already exists!\n"
-                                                + "Renaming it to: " + targetImageDir.absolutePath()
-                                        );
-            }
-
-            bool moved = copyRecursively(sourcePath, targetImageDir.absolutePath());
-            if(!moved)
-            {
-                QMessageBox::warning( 
-                                        this, 
-                                        tr("Warning: Unable to copy"), 
-                                        "Unable to move folder: " + sourcePath + " to:\n"
-                                            + targetImageDir.absolutePath() 
-                                    );
-                targetImageDir.removeRecursively();
-            }
-            else
-            {
-                qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.absolutePath();         
-                dirModel->itemDeselected(sortModel->mapToSource(i));
-                QDir(sourcePath).removeRecursively();
-            }
-
-        }
-        
-        progress.setValue(numFiles);
-        reload();
+        moveSelectionToFolder(targetPath);
     }
     
 }
@@ -492,7 +525,10 @@ bool albumContainer::copyRecursively(const QString& srcFilePath, const QString& 
         QDir targetDir(tgtFilePath);
         targetDir.cdUp();
         if (!targetDir.mkdir(QFileInfo(tgtFilePath).fileName()))
+        {
+            qDebug() << "Error in mkdir: " + QFileInfo(tgtFilePath).fileName();
             return false;
+        }
         QDir sourceDir(srcFilePath);
         QStringList fileNames = sourceDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
         foreach (const QString &fileName, fileNames) 
@@ -508,7 +544,10 @@ bool albumContainer::copyRecursively(const QString& srcFilePath, const QString& 
     else 
     {
         if (!QFile::copy(srcFilePath, tgtFilePath))
+        {
+            qDebug() << "Error in copying file: "  + srcFilePath + " to: " + tgtFilePath;
             return false;
+        }
     }
     return true;
 }

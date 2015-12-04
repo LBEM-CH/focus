@@ -57,7 +57,10 @@ class albumContainer : public QWidget
         void extendSelection();
         void reduceSelection();
         void addImageFolder();
-        void moveToFolder();
+        void addImageFolder(const QString& folder);
+        void moveSelectiontoFolder();
+        void moveSelectionToFolder(const QString& targetPath);
+        void trashSelection();
         bool copyRecursively(const QString &srcFilePath, const QString &tgtFilePath);
         
         void saveProjectState();
@@ -73,6 +76,7 @@ class albumContainer : public QWidget
         void setupDirectoryContainer(confData*);
         QToolBar* setupContextAndMenu();
         void modifySelection(bool select = true);
+        
 
         confData* data;
         

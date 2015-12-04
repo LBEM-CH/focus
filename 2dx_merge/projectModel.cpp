@@ -736,7 +736,10 @@ void projectModel::changeSelection(QStandardItem *currentItem, int itemCount, co
 QStringList projectModel::getSelectionNames()
 {
   QStringList selectedFiles;
-  getSelection(item(0),rowCount(),selectedFiles);
+  if(rowCount() != 0)
+  {
+    getSelection(item(0),rowCount(),selectedFiles);
+  }
   return selectedFiles;
 }
 void projectModel::getSelection(QStandardItem *currentItem, int itemCount, QStringList & selected)

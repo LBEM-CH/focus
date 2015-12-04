@@ -380,7 +380,7 @@ void albumContainer::addImageFolder(const QString& folder)
         {
             projectDir.mkdir(folder);
         }
-        QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
+        QFile(projectFolder + "/2dx_master.cfg").link(QString("../2dx_master.cfg"), projectFolder + "/" + folder + "/2dx_master.cfg");
     }
 
     reload();

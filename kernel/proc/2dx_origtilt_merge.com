@@ -56,15 +56,9 @@ endif
 set merge_data_type_local = ${merge_data_type}
 #
 if ( ${merge_data_type} == '5' ) then
-    if ( ${scriptname} == "2dx_finalmerge" ) then
-        echo ":: "
-        ${proc_2dx}/linblock "Using all APH files simultaneously (this will take some time)."
-        echo ":: "
-        set merge_data_type_local = ${merge_data_type}
-    else
-        set merge_data_type_local = 4
-        ${proc_2dx}/linblock "Using the APH file with the best QVAL."
-    endif
+  echo ":: "
+  ${proc_2dx}/linblock "Using all APH files simultaneously (this will take some time)."
+  echo ":: "
 endif
 #
 ${bin_2dx}/2dx_merge_compileA.exe << eot

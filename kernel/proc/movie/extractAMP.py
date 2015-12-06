@@ -23,10 +23,11 @@ def getKey(item):
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) < 3:
+	if len(sys.argv) < 4:
 		sys.exit("Missuse detected, usage exe mode stating ending")
 
-	image_names = sys.argv[1:]
+	amp_filename = sys.argv[1]
+	image_names = sys.argv[2:]
 	
 	print "doing AMP extraction on", image_names
 	
@@ -72,6 +73,6 @@ if __name__ == "__main__":
 	for f in amp_files:
 		f.close()
 				
-	out_file = open("frames/AMPs.txt", "w")
+	out_file = open(amp_filename, "w")
 	out_file.writelines(sorted(results, key=getKey))
 	out_file.close()

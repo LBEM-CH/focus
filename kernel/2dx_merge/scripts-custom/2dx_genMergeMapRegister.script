@@ -64,6 +64,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set app_2dx_image = ""
 #
 set tempkeep = ""
 set RESMIN = ""

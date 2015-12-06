@@ -93,6 +93,7 @@ set show_frame_CCmap_marked = "n"
 # DISPLAY: plotres_rings
 # DISPLAY: movie_stackname
 # DISPLAY: movie_enable
+# DISPLAY: movie_imagenumber_toskip
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_masking_mode
 # DISPLAY: movie_refboxa
@@ -189,6 +190,7 @@ set movie_enable = ""
 set movie_facthreshb = ""
 set movie_filter_param = ""
 set movie_filter_type = ""
+set movie_imagenumber_toskip = ""
 set movie_imagenumber_toave = ""
 set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
@@ -317,5 +319,10 @@ python ${proc_2dx}/movie/apply_filter_fourier.py
 python ${proc_2dx}/movie/extractAMP.py 
 python ${proc_2dx}/movie/plotAMP.py
 python ${proc_2dx}/movie/plotLocalDrift.py
+python ${proc_2dx}/movie/movie_mode_split2.py
+python ${proc_2dx}/movie/disable_movie.py 
+
+
+  
 
 

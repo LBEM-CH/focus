@@ -23,6 +23,7 @@
 #
 set proc_2dx = ""
 set bin_2dx = ""
+set app_2dx_image = ""
 #
 set imagename = ""
 set SYM = ""

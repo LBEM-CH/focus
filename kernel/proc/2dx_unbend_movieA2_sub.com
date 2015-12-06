@@ -66,8 +66,9 @@ else
   # Get the number of frames
   e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
   set movie_imagenumber = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
-  ${proc_2dx}/linblock "Stack contains ${movie_imagenumber} frames"
   echo "set movie_imagenumber_total = ${movie_imagenumber}"  >> LOGS/${scriptname}.results
+  set movie_imagenumber_touse = `echo ${movie_imagenumber_total} ${movie_imagenumber_toskip} | awk '{ s = $1 - $2 } END { print s }'`
+  echo "set movie_imagenumber_touse = ${movie_imagenumber_touse}"  >> LOGS/${scriptname}.results
   \rm tmp_stack_header.txt
 endif
 #
@@ -97,7 +98,7 @@ if ( ${movie_filter_type} == "0" ) then
   # A = 0.5 / 0.5 = 1.0
   #
   set filt_a = 1.0
-  set filt_b = `echo ${movie_imagenumber_total} | awk '{ s =  -1.38629 / $1 } END { print s }'`
+  set filt_b = `echo ${movie_imagenumber_touse} | awk '{ s =  -1.38629 / $1 } END { print s }'`
   echo ":Automatic filters: filt_a = ${filt_a},  filt_b = ${filt_b}"
   echo "set filt_a = ${filt_a}"  >> LOGS/${scriptname}.results
   echo "set filt_b = ${filt_b}"  >> LOGS/${scriptname}.results
@@ -182,7 +183,7 @@ setenv NCPUS ${Thread_Number}
 #
 ${bin_2dx}/2dx_movie_refine.exe << eot
 ${frames_dir}/CCmap
-${movie_imagenumber_total}
+${movie_imagenumber_touse}
 ${PROFDATA}
 eot
 #
@@ -200,9 +201,9 @@ touch ${frames_dir}/PROFDATA_1.dat
 \rm -f ${maskfile}_mask.mrc
 set lat_string = `echo ${lattice} | sed 's/,/ /g'`
 if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then 
-  ${app_python} ${proc_2dx}/movie/drift_selector.py MovieA/2dx_movie_refine.dat MovieA/2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${maskfile}.mrc ${maskfile}_mask.mrc ${lat_string} ${frames_dir}
+  ${app_python} ${proc_2dx}/movie/drift_selector.py MovieA/2dx_movie_refine.dat MovieA/2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${maskfile}.mrc ${maskfile}_mask.mrc ${lat_string} ${frames_dir}
 else
-  ${app_python} ${proc_2dx}/movie/drift_selector.py MovieA/2dx_movie_refine.dat MovieA/2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_total} ${imagesidelength} ${maskfile}_mask.mrc ${lat_string} ${frames_dir}
+  ${app_python} ${proc_2dx}/movie/drift_selector.py MovieA/2dx_movie_refine.dat MovieA/2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${maskfile}_mask.mrc ${lat_string} ${frames_dir}
 endif
 #
 echo ":: Done. Now saving ${maskfile}_mask.mrc"
@@ -213,7 +214,7 @@ echo  "# IMAGE-IMPORTANT: ${maskfile}_mask.mrc <Masked crystal mask>" >> LOGS/${
 echo  "# IMAGE: ${PROFDATA} <Unbending profile for average image (TXT)>" >> LOGS/${scriptname}.results
 if ( ${show_frame_PROFDATA} == "y" ) then
   set i = 1
-  while ($i <= ${movie_imagenumber_total})
+  while ($i <= ${movie_imagenumber_touse})
     echo  "# IMAGE: ${frames_dir}/PROFDATA_${i}.dat <Unbending profile for frame ${i} (TXT)>" >> LOGS/${scriptname}.results
     @ i += 1
   end
@@ -232,7 +233,7 @@ ${proc_2dx}/linblock "Unbending all frames"
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
 #
 set i = 1
-while ($i <= ${movie_imagenumber_total})
+while ($i <= ${movie_imagenumber_touse})
 
        if ( ${show_frame_CCmap_marked} == "y" ) then
          \rm -f ${frames_dir}/CCmap_${i}_marked.mrc
@@ -336,7 +337,7 @@ eot
        endif
        #
  
-       set prog_num = `echo ${i} ${movie_imagenumber_total} | awk '{ s = 20 + int( 50 * $1 / $2 ) } END { print s }'` 
+       set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 20 + int( 50 * $1 / $2 ) } END { print s }'` 
        echo "<<@progress: ${prog_num}>>"
          
        @ i += 1
@@ -349,10 +350,10 @@ echo "<<@progress: 70>>"
 
 if ( ${show_frame_CCmap_unbent} == "y" ) then
   ###########################################################################
-  ${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_total}" 
+  ${proc_2dx}/linblock "Averaging unbent CCmaps from frames 1 to ${movie_imagenumber_touse}" 
   ###########################################################################
   \rm -f ${frames_dir}/CCmap_driftCorrected.mrc
-  ${app_python} ${proc_2dx}/movie/direct_sum2.py ${movie_imagenumber_total} ${frames_dir}
+  ${app_python} ${proc_2dx}/movie/direct_sum2.py ${movie_imagenumber_touse} ${frames_dir}
   echo "# IMAGE-IMPORTANT: ${frames_dir}/CCmap_driftCorrected.mrc <CCmap drift-corrected>" >> LOGS/${scriptname}.results  
 
 
@@ -368,10 +369,10 @@ endif
 
 
 ###########################################################################
-${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_total}" 
+${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_touse}" 
 ###########################################################################
 \rm -f ${frames_dir}/direct_sum.mrc
-${app_python} ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_total} ${nonmaskimagename} ${frames_dir}
+${app_python} ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename} ${frames_dir}
 echo "# IMAGE: ${frames_dir}/direct_sum.mrc <Sum unbent images>" >> LOGS/${scriptname}.results 
 
 

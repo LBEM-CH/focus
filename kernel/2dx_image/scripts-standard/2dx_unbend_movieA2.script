@@ -67,6 +67,7 @@ set show_frame_CCmap_unbent = "n"
 # DISPLAY: comment
 # DISPLAY: movie_stackname
 # DISPLAY: movie_enable
+# DISPLAY: movie_imagenumber_toskip
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: movie_masking_mode
 # DISPLAY: movie_refboxa
@@ -146,7 +147,9 @@ set RP_5 = ""
 set RP_6 = ""
 set movie_stackname = ""
 set movie_enable = ""
+set movie_imagenumber_toskip = ""
 set movie_imagenumber_total = ""
+set movie_imagenumber_touse = ""
 set movie_filter_type = ""
 set movie_filter_param = ""
 set app_2dx_image = ""

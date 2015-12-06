@@ -46,6 +46,7 @@ set addBeamTilt = "0.0,0.0"
 #
 set proc_2dx = ""
 set bin_2dx = ""
+set app_2dx_image = ""
 #
 #$end_vars
 #

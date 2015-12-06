@@ -68,6 +68,8 @@ else
   ${proc_2dx}/linblock "Stack contains ${movie_imagenumber} frames"
   set movie_imagenumber_total = ${movie_imagenumber}
   echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
+  set movie_imagenumber_touse = `echo ${movie_imagenumber_total} ${movie_imagenumber_toskip} | awk '{ s = $1 - $2 } END { print s }'`
+  echo "set movie_imagenumber_touse = ${movie_imagenumber_touse}"  >> LOGS/${scriptname}.results
   \rm tmp_stack_header.txt
 endif
 #
@@ -97,7 +99,7 @@ if ( ${movie_filter_type} == "0" ) then
   # A = 0.5 / 0.5 = 1.0
   #
   set filt_a = 1.0
-  set filt_b = `echo ${movie_imagenumber_total} | awk '{ s =  -1.38629 / $1 } END { print s }'`
+  set filt_b = `echo ${movie_imagenumber_touse} | awk '{ s =  -1.38629 / $1 } END { print s }'`
   echo ":Automatic filters: filt_a = ${filt_a},  filt_b = ${filt_b}"
   echo "set filt_a = ${filt_a}"  >> LOGS/${scriptname}.results
   echo "set filt_b = ${filt_b}"  >> LOGS/${scriptname}.results
@@ -400,10 +402,10 @@ echo "<<@progress: 20>>"
 #
 #
 ###############################################################
-${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_total} frames"
+${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} frames, skipping ${movie_imagenumber_toskip}"
 ############################################################### 
 #
-${app_python} ${proc_2dx}/movie/movie_mode_split.py ${movie_stackname} ${nonmaskimagename} ${frames_dir}
+${app_python} ${proc_2dx}/movie/movie_mode_split3.py ${movie_stackname} ${nonmaskimagename} ${frames_dir} ${movie_imagenumber_toskip}
 #
 #
 #
@@ -417,7 +419,7 @@ echo "<<@progress: ${prog_num}>>"
 #
 # i counts the super-frames to process:
 set i = 1
-while ($i <= ${movie_imagenumber_total})
+while ($i <= ${movie_imagenumber_touse})
   #
   # The following line was for testing purposes:
   # cp ${nonmaskimagename}_raw.mrc ${frames_dir}/frame_${i}.mrc
@@ -543,7 +545,7 @@ eot
     echo  "# IMAGE: ${frames_dir}/CCmap_${i}.mrc <Frame ${i}, CCmap>" >> LOGS/${scriptname}.results
   endif
   #
-  set prog_num = `echo ${i} ${movie_imagenumber_total} | awk '{ s = 25 + int( 75 * $1 / $2 ) } END { print s }'` 
+  set prog_num = `echo ${i} ${movie_imagenumber_touse} | awk '{ s = 25 + int( 75 * $1 / $2 ) } END { print s }'` 
   echo "<<@progress: ${prog_num}>>"       
   #
   #

@@ -188,23 +188,23 @@ QToolBar* albumContainer::setupContextAndMenu()
 {
     //Setup Actions
     QAction *addSelectionAction;
-    addSelectionAction = new QAction(*(data->getIcon("add_selection")), "Add check to selected", dirView);
+    addSelectionAction = new QAction(*(data->getIcon("add_selection")), "Check highlighted", dirView);
     connect(addSelectionAction, SIGNAL(triggered()), this, SLOT(extendSelection()));
 
     QAction *removeSelectionAction;
-    removeSelectionAction = new QAction(*(data->getIcon("remove_selection")), "Remove check from selected", dirView);
+    removeSelectionAction = new QAction(*(data->getIcon("remove_selection")), "Uncheck highlighted", dirView);
     connect(removeSelectionAction, SIGNAL(triggered()), this, SLOT(reduceSelection()));
 
     QAction *copyImageAction;
-    copyImageAction = new QAction(*(data->getIcon("copy_selection")), "Copy selected to second project", dirView);
+    copyImageAction = new QAction(*(data->getIcon("copy_selection")), "Copy highlighted to second project", dirView);
     connect(copyImageAction, SIGNAL(triggered()), this, SLOT(copyImage()));
     
     QAction *moveImageAction;
-    moveImageAction = new QAction(*(data->getIcon("move_selection")), "Move selected to another folder", dirView);
+    moveImageAction = new QAction(*(data->getIcon("move_selection")), "Move highlighted to another folder", dirView);
     connect(moveImageAction, SIGNAL(triggered()), this, SLOT(moveSelectiontoFolder()));
     
     QAction *trashImageAction;
-    trashImageAction = new QAction(*(data->getIcon("trash_selection")), "Trash selected images", dirView);
+    trashImageAction = new QAction(*(data->getIcon("trash_selection")), "Trash highlighted images", dirView);
     connect(trashImageAction, SIGNAL(triggered()), this, SLOT(trashSelection()));
     
     QAction *addFolderAction;
@@ -612,5 +612,5 @@ void albumContainer::resetSelectionState()
 {
     QString checked =  QString::number(dirModel->getSelectionNames().count());
     QString selected = QString::number(dirView->selectionModel()->selectedRows().count());
-    selectionState->setText(checked + " checked and " + selected + " selected ");
+    selectionState->setText(checked + " checked and " + selected + " highlighted ");
 }

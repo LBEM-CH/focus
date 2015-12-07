@@ -51,6 +51,7 @@
 #
 set proc_2dx = ""
 set bin_2dx = ""
+set app_2dx_image = ""
 set merge_copy_onto = ""
 set merge_comment_1 = ""
 set merge_comment_2 = ""

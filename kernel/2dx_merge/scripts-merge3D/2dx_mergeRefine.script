@@ -19,7 +19,6 @@
 #
 # MANUAL: All selected images are merged together, and subsequently aligned against the merged average. This can be done iteratively a preset number of times. Double-click onto the iteration counter after the script name, to adjust that number, if needed.
 # 
-# DISPLAY: create_merged_dataset
 # DISPLAY: MergeResolution
 # DISPLAY: zstarwin
 # DISPLAY: zstarrange_real
@@ -86,7 +85,6 @@ set AMP_Scale_Factor = ""
 set avrgamphsNUMBER = ""
 set avrgamphsRESOL = ""
 set Calc_from_zstarrange = ""
-set create_merged_dataset = ""
 set IBOXPHS = ""
 set ILIST = ""
 set ITANGLSTEP = ""
@@ -193,7 +191,7 @@ endif
 #
 set zstarrange = `echo ${zstarrange_real} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
 echo "set zstarrange = ${zstarrange}" >> LOGS/${scriptname}.results
-${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} (with 0.5 = Nyquist resolution)."
+${proc_2dx}/linblock "Calculating zstarrange as ${zstarrange} reciprocal Angstroems."
 #
 set zmin = `echo ${zstarrange} | awk '{s = -$1} END {print s}'`
 set zminmax = `echo ${zmin},${zstarrange}`
@@ -268,9 +266,7 @@ source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
 #
-if ( ( ! -e  merge3D_MRClefthanded.mtz ) || ( ! -e merge3Dref_MRClefthanded.mtz ) ) then
-  set create_merged_dataset = "y"
-endif
+set create_merged_dataset = "y"
 #
 set NPRG = 1
 if ( ${merge_reference} == '0' ) then
@@ -307,31 +303,26 @@ while ( ${itnum} < ${merge_refine_iterations} )
   echo "::         ITERATION ${itnum_p1} of ${merge_refine_iterations}"
   echo ":: "
   #
-  if ( ${merge_ref_num} == "0" && ${create_merged_dataset} == "y" ) then
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
-    #############################################################################
-    #
-    source ${proc_2dx}/2dx_origtilt_merge.com
-    #
-    echo "<<@progress: 45>>"
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Sourcing 2dx_plttilt.com"
-    #############################################################################
-    #
-    source ${proc_2dx}/2dx_plttilt.com
-    #
-    #############################################################################
-    ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
-    ############################################################################# 
-    #
-    source ${proc_2dx}/2dx_merge_generate3D.com
-    #
-  endif
+  set prog_num = `echo ${itnum} ${merge_refine_iterations} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'` 
+  echo "<<@progress: ${prog_num}>>"
   #
+  #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
+  #############################################################################
   #
+  source ${proc_2dx}/2dx_origtilt_merge.com
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_plttilt.com"
+  #############################################################################
+  #
+  source ${proc_2dx}/2dx_plttilt.com
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+  ############################################################################# 
+  #
+  source ${proc_2dx}/2dx_merge_generate3D.com
   #
   #############################################################################
   ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"

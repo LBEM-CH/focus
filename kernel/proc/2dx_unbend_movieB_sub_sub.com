@@ -22,7 +22,7 @@ set imagecentery = ${imagecenterx}
         ###############################################################
                 
 
-        set prog_num = `echo ${irunner} ${movie_imagenumber_touse} | awk '{ s = 30 + int( 50 * $1 / $2 ) } END { print s }'` 
+        set prog_num = `echo ${irunner} ${movie_imagenumber_superframes} | awk '{ s = 30 + int( 50 * $1 / $2 ) } END { print s }'` 
         echo "<<@progress: ${prog_num}>>"
         
         

@@ -38,11 +38,12 @@ def getAverages(data):
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 3:
+	if len(sys.argv) != 4:
 		sys.exit("Missuseage detected, usage exe mode stating ending")
 
 	amp_file = sys.argv[1]
-	batch_size = int(sys.argv[2])
+	amp_pdf_file = sys.argv[2]
+	batch_size = int(sys.argv[3])
 	
 	print "plotting amps for", amp_file, "with batch size", batch_size
 	
@@ -79,4 +80,4 @@ if __name__ == "__main__":
 	plt.xlabel('Frame Number')
 	plt.ylabel('Normalized Amplitude')
 	
-	plt.savefig("frames/AMPs.pdf")
+	plt.savefig(amp_pdf_file)

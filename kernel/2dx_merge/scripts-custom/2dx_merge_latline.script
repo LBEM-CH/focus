@@ -77,6 +77,7 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set app_2dx_image = ""
 #
 set ALAT = ""
 set AMP_Scale_Factor = ""

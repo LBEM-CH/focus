@@ -88,13 +88,15 @@ else
   set movie_imagenumber_total = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
   ${proc_2dx}/linblock "Stack contains ${movie_imagenumber_total} frames"
   echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
-  set movie_imagenumber_touse = `echo ${movie_imagenumber_total} ${movie_imagenumber_toave} | awk '{s = int($1/$2) } END { print s }'`
+  set movie_imagenumber_touse = `echo ${movie_imagenumber_total} ${movie_imagenumber_toskip} | awk '{s = int($1-$2) } END { print s }'`
   echo "set movie_imagenumber_touse = ${movie_imagenumber_touse}"  >> LOGS/${scriptname}.results
+  set movie_imagenumber_superframes = `echo ${movie_imagenumber_touse} ${movie_imagenumber_toave} | awk '{s = int($1/$2) } END { print s }'`
+  echo "set movie_imagenumber_superframes = ${movie_imagenumber_superframes}"  >> LOGS/${scriptname}.results
   \rm tmp_stack_header.txt
 endif
 #
 #${app_python} ${proc_2dx}/movie/extractAMP.py `ls ${frame_folder}/aph_*`
-#${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${movie_imagenumber_toave}
+#${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${frame_folder}/AMPs.pdf ${movie_imagenumber_toave}
 #exit 
 #
 if ( ${movie_filter_type} == "0" ) then
@@ -123,7 +125,7 @@ if ( ${movie_filter_type} == "0" ) then
   # A = 0.5 / 0.5 = 1.0
   #
   set filt_a = 1.0
-  set filt_b = `echo ${movie_imagenumber_total} | awk '{ s =  -1.38629 / $1 } END { print s }'`
+  set filt_b = `echo ${movie_imagenumber_touse} | awk '{ s =  -1.38629 / $1 } END { print s }'`
   echo ":Automatic filters: filt_a = ${filt_a},  filt_b = ${filt_b}"
   echo "set filt_a = ${filt_a}"  >> LOGS/${scriptname}.results
   echo "set filt_b = ${filt_b}"  >> LOGS/${scriptname}.results
@@ -148,34 +150,34 @@ endif
 #
 if ( 1 == 2 ) then
   set i = 0
-  while ($i <= ${movie_imagenumber_touse})
+  while ($i <= ${movie_imagenumber_superframes})
     echo "# IMAGE: ${frame_folder}/CC-CE-frame_${i}.mrc <Frame ${i} CC CE>" >> LOGS/${scriptname}.results
     @ i += 1
   end
   set i = 0
-  while ($i <= ${movie_imagenumber_touse})
+  while ($i <= ${movie_imagenumber_superframes})
     echo "# IMAGE: ${frame_folder}/CC-TL-frame_${i}.mrc <Frame ${i} CC TL>" >> LOGS/${scriptname}.results
     @ i += 1
   end
   set i = 0
-  while ($i <= ${movie_imagenumber_touse})
+  while ($i <= ${movie_imagenumber_superframes})
     echo "# IMAGE: ${frame_folder}/CC-TR-frame_${i}.mrc <Frame ${i} CC TR>" >> LOGS/${scriptname}.results
     @ i += 1
   end
   set i = 0
-  while ($i <= ${movie_imagenumber_touse})
+  while ($i <= ${movie_imagenumber_superframes})
     echo "# IMAGE: ${frame_folder}/CC-BR-frame_${i}.mrc <Frame ${i} CC BR>" >> LOGS/${scriptname}.results
     @ i += 1
   end
   set i = 0
-  while ($i <= ${movie_imagenumber_touse})
+  while ($i <= ${movie_imagenumber_superframes})
     echo "# IMAGE: ${frame_folder}/CC-BL-frame_${i}.mrc <Frame ${i} CC BL>" >> LOGS/${scriptname}.results
     @ i += 1
   end
 endif
 #
 set i = 0
-while ($i <= ${movie_imagenumber_touse})
+while ($i <= ${movie_imagenumber_superframes})
   if ( ${show_frames} == "y" ) then
     echo "# IMAGE: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}_raw.mrc <Frame ${i} raw>" >> LOGS/${scriptname}.results
     echo "# IMAGE: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
@@ -208,10 +210,10 @@ if ( ! -d ${frame_folder} ) then
   echo "<<@progress: 10>>"
   #
   ###############################################################
-  ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} super-frames, merging ${movie_imagenumber_toave} movie sub-frames into each"
+  ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_superframes} super-frames, merging ${movie_imagenumber_toave} movie sub-frames into each"
   ############################################################### 
   #
-  ${app_python} ${proc_2dx}/movie/movie_mode_split1.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toave} ${frame_folder}
+  ${app_python} ${proc_2dx}/movie/movie_mode_split2.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toskip} ${movie_imagenumber_toave} ${frame_folder}
   #
   foreach f (`ls ${frame_folder}`)
     \cp 2dx_image.cfg ${frame_folder}/$f/
@@ -245,7 +247,7 @@ ${proc_2dx}/linblock "QUADSERCH - Updating Initial Error Field"
 #
 echo "<<@progress: 20>>"
 #
-echo "movie_imagenumber_touse = ${movie_imagenumber_touse}"
+echo "movie_imagenumber_superframes = ${movie_imagenumber_superframes}"
 #
 #
 ${bin_2dx}/2dx_quadserchk-2.exe << eot
@@ -276,7 +278,7 @@ set image_dir = `pwd`
 set i = 0
 # n indicates the original frame position in the raw input movie stack: 
 set n = 1
-while ($i <= ${movie_imagenumber_touse})
+while ($i <= ${movie_imagenumber_superframes})
   #########################################################################
   ${proc_2dx}/lin "Working on frame ${i}"
   #########################################################################
@@ -613,7 +615,7 @@ set irunner = 1
 
 # Run from key frame downwards to 1:
 set iforward = 0
-set i = `echo ${movie_imagenumber_touse} | awk '{ s = int( $1 * 0.125 ) } END { print s }'`
+set i = `echo ${movie_imagenumber_superframes} | awk '{ s = int( $1 * 0.125 ) } END { print s }'`
 while ($i >= 1)
         #============================================
         source ${proc_2dx}/2dx_unbend_movieB_sub_sub.com
@@ -626,8 +628,8 @@ end
 
 # Run from key frame upwards to end:
 set iforward = 1
-set i = `echo ${movie_imagenumber_touse} | awk '{ s = int( $1 * 0.125 ) + 1 } END { print s }'`
-while ($i <= ${movie_imagenumber_touse})
+set i = `echo ${movie_imagenumber_superframes} | awk '{ s = int( $1 * 0.125 ) + 1 } END { print s }'`
+while ($i <= ${movie_imagenumber_superframes})
         #============================================
         source ${proc_2dx}/2dx_unbend_movieB_sub_sub.com
         #============================================
@@ -641,9 +643,9 @@ echo "<<@progress: 80>>"
 
 
 ###########################################################################
-${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_touse}" 
+${proc_2dx}/linblock "Averaging unbent images from frames 1 to ${movie_imagenumber_superframes}" 
 ###########################################################################
-${app_python} ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_touse} ${nonmaskimagename} ${frame_folder}
+${app_python} ${proc_2dx}/movie/direct_sum.py ${movie_imagenumber_superframes} ${nonmaskimagename} ${frame_folder}
 echo "# IMAGE: ${frame_folder}/direct_sum.mrc <Sum unbent images>" >> LOGS/${scriptname}.results 
 
 
@@ -854,7 +856,7 @@ eot
 \rm -f SCRATCH/TMP9873.dat
 
 # Variation plot generation (no longer used)
-#${app_python} ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_touse} ${nonmaskimagename}
+#${app_python} ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_superframes} ${nonmaskimagename}
 #pdf2ps ${frame_folder}/sd.pdf ${frame_folder}/sd.ps
 #convert ${frame_folder}/sd.ps ${frame_folder}/sd.jpg
 #echo "# IMAGE: ${frame_folder}/sd.ps <Variations>" >> LOGS/${scriptname}.results
@@ -862,8 +864,8 @@ eot
 echo "<<@progress: 90>>"
 if ( ${movie_filter_type} == '2' ) then
         ${proc_2dx}/linblock "Plotting AMP-Decay"
-        ${app_python} ${proc_2dx}/movie/extractAMP.py `ls ${frame_folder}/aph_*`
-        ${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${movie_imagenumber_toave}
+        ${app_python} ${proc_2dx}/movie/extractAMP.py ${frame_folder}/AMPs.txt `ls ${frame_folder}/aph_*`
+        ${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${frame_folder}/AMPs.pdf ${movie_imagenumber_toave}
         ${pdf2ps} ${frame_folder}/AMPs.pdf ${frame_folder}/AMPs.ps 
         echo  "# IMAGE: ${frame_folder}/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
 endif

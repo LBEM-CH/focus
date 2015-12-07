@@ -318,7 +318,12 @@ void albumContainer::copyImage()
     
     if(secondDir == "-" || secondDir == "")
     {
-        std::cerr << "Error in copying images! Second project not set!\n";
+        QMessageBox::critical( 
+                                        this, 
+                                        tr("Copy Error"), 
+                                        QString("Second project not set!\n")
+                                      + QString("Use <Preapre second Project> script from custom scripts to change it!")
+                                    );
         return;
     }
             
@@ -335,28 +340,45 @@ void albumContainer::copyImage()
     QModelIndex i;
     QModelIndexList selection = dirView->selectionModel()->selectedRows();
 
-    foreach(i, selection) {
+    foreach(i, selection) 
+    {
         QString sourcePath = dirModel->pathFromIndex(i);
         QFileInfo fi(sourcePath);
         QString imageDirName = fi.fileName();
         
-        QDir sourceDir = QDir(sourcePath);
         QDir targetImageDir = QDir(targetDir.absolutePath() + "/" + imageDirName);
         
-        dirModel->itemDeselected(sortModel->mapToSource(i));
-
-        QStringList toBeCopied = sourceDir.entryList(QDir::Files);
-        if(!targetImageDir.exists())
+        bool target_exist = false;
+        while(targetImageDir.exists())
         {
-            targetDir.mkdir(imageDirName);
-            foreach(const QString& sourceFileName, toBeCopied)
-            {
-                QFile sourceFile(sourceDir.absolutePath() + "/" + sourceFileName);
-                QString targetFileName = targetImageDir.absolutePath() + "/" + sourceFileName;
-                if(!sourceFile.copy(targetFileName))
-                    std::cerr << "Failed copying file" << sourceFile.fileName().toStdString() << " to " << targetFileName.toStdString() << "\n";
-            
-            }
+            targetImageDir.setPath(targetImageDir.absolutePath()+"_1");
+            target_exist = true;
+        }
+
+        if(target_exist)
+        {
+                QMessageBox::warning( 
+                                        this, 
+                                        tr("Move warning"), 
+                                        "The target folder: " + targetDirPath + "/" + imageDirName + " already exists!\n"
+                                            + "Renaming it to: " + targetImageDir.absolutePath()
+                                    );
+        }
+
+        bool moved = copyRecursively(sourcePath, targetImageDir.absolutePath());
+        if(!moved)
+        {
+            QMessageBox::warning( 
+                                    this, 
+                                    tr("Warning: Unable to copy"), 
+                                    "Unable to move folder: " + sourcePath + " to:\n"
+                                        + targetImageDir.absolutePath() 
+                                );
+            targetImageDir.removeRecursively();
+        }
+        else
+        {
+            qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.absolutePath();
         }
     }
 }

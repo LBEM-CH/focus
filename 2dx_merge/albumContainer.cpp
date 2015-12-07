@@ -322,7 +322,7 @@ void albumContainer::copyImage()
                                         this, 
                                         tr("Copy Error"), 
                                         QString("Second project not set!\n")
-                                      + QString("Use <Preapre second Project> script from custom scripts to change it!")
+                                      + QString("Use <Prepare second Project> script from custom scripts to change it!")
                                     );
         return;
     }

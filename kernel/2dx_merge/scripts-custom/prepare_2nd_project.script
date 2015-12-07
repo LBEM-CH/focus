@@ -34,16 +34,24 @@ set scriptname = prepare_2nd_project
 # This removes the old logfile, so that a new fresh one can be created:
 \rm -f LOGS/${scriptname}.results
 #
-
-if( -e ${second_dir} ) then 
-    \rm -rf ${second_dir}
+# if( -e ${second_dir} ) then 
+#     \rm -rf ${second_dir}
+# endif
+# 
+if ( ! -d ${second_dir} ) then  
+  \mkdir ${second_dir}
 endif
 
-\mkdir ${second_dir}
+if ( ! -d ${second_dir}/merge ) then
+  echo "::Copying this merge directory to ${second_dir}/merge"
+  \mkdir ${second_dir}/merge
+  \cp -r * ${second_dir}/merge
+else
+  echo "::${second_dir}/merge already exists."
+endif
 
-\cp -r ../merge ${second_dir}
-
-
+echo "<<@progress: 100>>"
+echo "::Done."
 
 # Leave a message on the logfile that the script finished:
 ${proc_2dx}/linblock "${scriptname} finished correctly."

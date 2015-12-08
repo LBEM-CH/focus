@@ -582,19 +582,22 @@ void mainWindow::importFinished() {
 }
 
 void mainWindow::import() {
-    QStringList fileList = QFileDialog::getOpenFileNames(NULL, "Choose image files to add", mainData->getDir("project"), "Images (*.tif *.mrc)");
-    if (fileList.isEmpty()) return;
-    QStringList importList;
-    //  foreach(file, fileList)
-    //  {
-    //    if(QFileInfo(file).isDir()) 
-    //      importList<<subDirFiles(file);
-    //    else
-    //      importList<<file;
-
-    //  }
-    importTool *import = new importTool(mainData, fileList);
-    connect(import, SIGNAL(acceptedImages(const QHash< QString, QHash < QString, QString > >&)), this, SLOT(importFiles(const QHash<QString, QHash<QString, QString> > &)));
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, 
+                                    "Import Images", 
+                                    QString("A new and improved tool to import images is available in Custom Tab called as <Import Images and Movies>\n")
+                                    +"Are you sure you want to continue using the old import tool?",
+                                    QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) 
+    {
+        QStringList fileList = QFileDialog::getOpenFileNames(NULL, "Choose image files to add", mainData->getDir("project"), "Images (*.tif *.mrc)");
+        if (fileList.isEmpty()) 
+        {
+            return;
+        }
+        importTool *import = new importTool(mainData, fileList);
+        connect(import, SIGNAL(acceptedImages(const QHash< QString, QHash < QString, QString > >&)), this, SLOT(importFiles(const QHash<QString, QHash<QString, QString> > &)));
+    }
 }
 
 void mainWindow::autoImport() {

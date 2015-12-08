@@ -40,6 +40,8 @@
 #include <QModelIndexList>
 #include <QStatusBar>
 #include <QProgressBar>
+#include <QMessageBox>
+
 #include <confData.h>
 #include <confManual.h>
 #include <scriptProgress.h>

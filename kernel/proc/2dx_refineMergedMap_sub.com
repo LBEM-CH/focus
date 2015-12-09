@@ -68,7 +68,7 @@ mkdir SHRINKWRAP
 #------------------------------------------------------------------------------
 echo ":Launching ${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SCRATCH/ -s ${SYM} --res ${RESMAX} --iterations ${number_refinement_iterations} --slab ${membrane_height} --hklout ${refined_hkl} --mrcout ${refined_map}"
 #------------------------------------------------------------------------------
-${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SHRINKWRAP/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --mask-res ${refinement_mask_resolution} --iterations ${number_refinement_iterations} --hklout ${refined_hkl} --mrcout ${refined_map}
+${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SHRINKWRAP/ -s ${SYM} --res ${RESMAX} --threshold ${density_threshold_refinement} --mask-res ${refinement_mask_resolution} --iterations ${number_refinement_iterations} --cone ${refinement_cone_angle} --amp_cutoff ${refinement_amplitude_cutoff} --hklout ${refined_hkl} --mrcout ${refined_map}
 #
 echo "# IMAGE: SHRINKWRAP" >> LOGS/${scriptname}.results
 #

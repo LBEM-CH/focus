@@ -27,6 +27,8 @@
 # DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
 # DISPLAY: refinement_mask_resolution
+# DISPLAY: refinement_amplitude_cutoff
+# DISPLAY: refinement_cone_angle
 #
 #$end_local_vars
 #
@@ -46,6 +48,8 @@ set membrane_height = ""
 set maximum_amplitude_refinement = ""
 set density_threshold_refinement = ""
 set refinement_mask_resolution = ""
+set refinement_amplitude_cutoff = ""
+set refinement_cone_angle = ""
 #
 #$end_vars
 #

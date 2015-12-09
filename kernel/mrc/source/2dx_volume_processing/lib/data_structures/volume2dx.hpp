@@ -543,8 +543,11 @@ namespace volume
             /**
              * Replace the reflections from a Fourier volume.
              * @param fourier_data
+             * @param cone_angle (in degrees) - (Default 90 degrees), if provided would keep the input reflections and would
+             *                                   change other reflections in the conical region provided
+             * @param replacement_amplitude_cutoff - Reflections in input with this amplitude value or more will only be changed
              */
-            void replace_reflections(const FourierSpaceData& fourier_data);
+            void replace_reflections(const FourierSpaceData& fourier_data, double cone_angle = 90, double replacement_amplitude_cutoff = 0.0);
             
             /**
              * Replace the reflections from a Fourier volume.

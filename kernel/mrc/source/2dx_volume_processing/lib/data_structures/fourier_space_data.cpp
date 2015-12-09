@@ -304,9 +304,21 @@ void ds::FourierSpaceData::reset_data_from_fftw(int fx, int fy, int fz, fftw_com
     }
 }
 
-void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, double replacement_amplitude_cutoff)
+void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, double cone_angle, double replacement_amplitude_cutoff)
 {   
-    //Iterate over all possible miller indices h, k, l in input data
+    std::cout << "Replacing reflection and keeping the new ones in a cone of angle: " << cone_angle <<"\n";
+    
+    FourierSpaceData new_data;
+    
+    if(cone_angle < 0.0 || cone_angle > 90)
+    {
+        std::cerr << "Error: Bad value encountered in cone_angle: " << std::to_string(cone_angle) << " (min 0 and max 90)\n";
+        return;
+    }
+    
+    double cone_angle_rad = double(cone_angle)*M_PI/180;
+
+    //Iterate over all possible miller indices h, k, l in input data 
     for(const_iterator ref=input.begin(); ref!=input.end(); ++ref)
     {
         //Assign the current Miller Index to the array
@@ -315,9 +327,26 @@ void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, do
 
         if(current_complex.amplitude() > replacement_amplitude_cutoff)
         {
-            set_value_at(index.h(), index.k(), index.l(), current_complex, (*ref).second.weight() );
+            new_data.set_value_at(index.h(), index.k(), index.l(), current_complex, (*ref).second.weight() );
         }
-    } 
+    }
+    
+    //Iterate over all the current reflections
+    for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
+    {
+        //Assign the current Miller Index to the array
+        ds::MillerIndex index = (*ref).first;
+        ds::Complex2dx current_complex = (*ref).second.value();
+        double radius = std::abs(index.l()*tan(cone_angle_rad));
+        double distance = sqrt(index.h()*index.h() + index.k()*index.k());
+        if(current_complex.amplitude() > replacement_amplitude_cutoff && !new_data.exists(index.h(), index.k(), index.l()) && distance < radius)
+        {
+            new_data.set_value_at(index.h(), index.k(), index.l(), current_complex, (*ref).second.weight() );
+        }
+    }
+    
+    std::cout << "Current spots " << spots() << " were replaced with: " << new_data.spots() << " (Input had " << input.spots() << " spots)\n";
+    reset(new_data);
 }
 
 void ds::FourierSpaceData::change_amplitudes(const FourierSpaceData& input, double replacement_amplitude_cutoff)

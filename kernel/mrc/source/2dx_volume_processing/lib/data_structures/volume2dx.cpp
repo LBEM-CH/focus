@@ -748,10 +748,10 @@ void ds::Volume2dx::band_pass(double low_resolution, double high_resolution)
     
 }
 
-void ds::Volume2dx::replace_reflections(const FourierSpaceData& fourier_data)
+void ds::Volume2dx::replace_reflections(const FourierSpaceData& fourier_data, double cone_angle, double replacement_amplitude_cutoff)
 {
     FourierSpaceData current = get_fourier();
-    current.replace_reflections(fourier_data, 0.00001);
+    current.replace_reflections(fourier_data, cone_angle, replacement_amplitude_cutoff);
     set_fourier(current);
 }
 

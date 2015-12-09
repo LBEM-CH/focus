@@ -194,10 +194,12 @@ namespace volume
              * present in the input data will not be replaced. If one wants to replace the reflections
              * only with a certain minimum amplitude, this can also be set.
              * @param input - input reflections
+             * @param cone_angle (in degrees) - (Default 90 degrees), if provided would keep the input reflections and would
+             *                                   change other reflections in the conical region provided
              * @param replacement_amplitude_cutoff - Reflections in input with this amplitude value or more will only be changed
              * @return new replaced Fourier Space Data
              */
-            void replace_reflections(const FourierSpaceData& input, double replacement_amplitude_cutoff = 0.0);
+            void replace_reflections(const FourierSpaceData& input, double cone_angle = 90, double replacement_amplitude_cutoff = 0.0);
             
             /**
              * Replaces the amplitudes present in input data. The amplitudes which are not

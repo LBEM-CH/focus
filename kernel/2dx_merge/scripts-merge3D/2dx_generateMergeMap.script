@@ -228,7 +228,7 @@ source ${proc_2dx}/2dx_extend_map.com volume.map extended.map
 echo "# IMAGE: extended.map <MAP: final map 3D, 2x2 unit cells>"  >> LOGS/${scriptname}.results
 #
 if ( ${calculate_subvolume}x != "0x" ) then 
-    source ${proc_2dx}/2dx_create_subvolume.com extended.map ${realcell} ${ALAT} 3D_sub.map
+    source ${proc_2dx}/2dx_create_subvolume.com ${calculate_subvolume} extended.map ${realcell} ${ALAT} 3D_sub.map
     #
     echo "# IMAGE-IMPORTANT: 3D_sub.map <MAP: 3D sub map>" >> LOGS/${scriptname}.results
     #

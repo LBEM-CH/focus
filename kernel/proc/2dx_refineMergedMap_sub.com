@@ -43,7 +43,7 @@ echo "# IMAGE-IMPORTANT: ${back_projected_extended_map} <Back-Projected extended
 \rm -f ${back_projected_sub_map}
 #
 if ( ${calculate_subvolume}x != "0x" ) then 
-    source ${proc_2dx}/2dx_create_subvolume.com ${back_projected_extended_map} ${realcell} ${ALAT} ${back_projected_sub_map}
+    source ${proc_2dx}/2dx_create_subvolume.com ${calculate_subvolume} ${back_projected_extended_map} ${realcell} ${ALAT} ${back_projected_sub_map}
     #
     echo "# IMAGE-IMPORTANT: ${back_projected_sub_map} <Back-Projected sub map>" >> LOGS/${scriptname}.results
     #

@@ -112,7 +112,7 @@ if(${sharpening_algo} == "1") then
     \rm -f ${bead_model_sub_map}
     #
     if ( ${calculate_subvolume}x != "0x" ) then 
-        source ${proc_2dx}/2dx_create_subvolume.com ${bead_model_extended_map} ${realcell} ${ALAT} ${bead_model_sub_map}
+        source ${proc_2dx}/2dx_create_subvolume.com ${calculate_subvolume} ${bead_model_extended_map} ${realcell} ${ALAT} ${bead_model_sub_map}
         #
         echo "# IMAGE-IMPORTANT: ${bead_model_sub_map} <Bead model sub map>" >> LOGS/${scriptname}.results
     endif
@@ -226,7 +226,7 @@ if(${sharpening_algo} != "0" || ${if_bfactor_sharpen} == "y") then
     \rm -f ${sharpened_sub_map}
     #
     if ( ${calculate_subvolume}x != "0x" ) then 
-        source ${proc_2dx}/2dx_create_subvolume.com ${sharpened_extended_map} ${realcell} ${ALAT} ${sharpened_sub_map}
+        source ${proc_2dx}/2dx_create_subvolume.com ${calculate_subvolume} ${sharpened_extended_map} ${realcell} ${ALAT} ${sharpened_sub_map}
         #
         echo "# IMAGE-IMPORTANT: ${sharpened_sub_map} <Sharpened sub map>" >> LOGS/${scriptname}.results
     endif

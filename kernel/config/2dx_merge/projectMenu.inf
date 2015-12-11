@@ -55,6 +55,7 @@ beamtilt_change (BeamTilt Change,mouseover="Last Beam Tilt Change",nonlockable,s
 realcell (RealCell,mouseover="Global Real Cell Vectors",nonlockable,sortable,"%.1f,%.1f")
 realang (RealAngle,mouseover="Global Real Cell Angle",nonlockable,sortable,"%.1f")
 lattice (Lattice,mouseover="Reciprocal Lattice",nonlockable,sortable)
+flag_lefthanded_lattice (LeftHand,mouseover="Lattice is lefthanded",nonlockable,sortable,checkbox)
 ML_use_for_merging (UseML,mouseover="Use Single Particle result",nonlockable,sortable,checkbox)
 ctfrev (rCTF,mouseover="Revert contrast",nonlockable,sortable,checkbox)
 rot90 (R90,mouseover="Rot90",nonlockable,sortable,checkbox)

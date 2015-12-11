@@ -136,6 +136,7 @@ set peakNum = "140"
 # DISPLAY: tempkeep
 # DISPLAY: comment
 # DISPLAY: defocus
+# DISPLAY: flag_lefthanded_lattice
 #
 #$end_local_vars
 #
@@ -163,6 +164,7 @@ set SYM = ""
 set det_tilt = ""
 set tempkeep = ""
 set defocus = ""
+set flag_lefthanded_lattice = ""
 #
 #$end_vars
 #
@@ -753,6 +755,11 @@ echo "set LATTICE_TLTANG  = "\"${LATTICE_TLTANG}\"  >> LOGS/${scriptname}.result
 echo "set LATTICE_TLTAXA  = "\"${LATTICE_TLTAXA}\"  >> LOGS/${scriptname}.results
 echo "set LATTICE_TAXA    = "\"${LATTICE_TAXA}\"    >> LOGS/${scriptname}.results
 echo "set LATTICE_TANGL   = "\"${LATTICE_TANGL}\"   >> LOGS/${scriptname}.results
+if ( ${hand} == "1" ) then
+  echo "set flag_lefthanded_lattice = "\"n\"        >> LOGS/${scriptname}.results
+else
+  echo "set flag_lefthanded_lattice = "\"y\"        >> LOGS/${scriptname}.results
+endif
 #
 echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_fft.mrc <FFT of Nonmasked Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_red_fft.mrc <FFT of Downsampled Nonmasked Image>" >> LOGS/${scriptname}.results

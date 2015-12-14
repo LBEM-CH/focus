@@ -25,7 +25,7 @@ include(SetPropagateDeps)
 PROJECT(2dx)
 set (2dx_VERSION_MAJOR 3)
 set (2dx_VERSION_MINOR 5)
-set (2dx_VERSION_PATCH 0)
+set (2dx_VERSION_PATCH 1)
 #------------------------------------------------------------------------------
 
 

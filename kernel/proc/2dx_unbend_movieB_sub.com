@@ -13,8 +13,8 @@ if ( ${show_frames} == "y" || ${show_frame_FFT} == "y" || ${show_frame_CCmap} ==
   set tempkeep = "y"
 endif
 #
-\rm -f MovieB_unbending.pdf
-\touch MovieB_unbending.pdf
+\rm -f MB_unbending.pdf
+\touch MB_unbending.pdf
 #
 set iname = image_ctfcor
 #
@@ -144,34 +144,34 @@ set num_dia = 100
 #
 if ( 1 == 2 ) then
   ${proc_2dx}/linblock "Plotting local drift"
-  ${app_python} ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
+  ${app_python} ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MB_drifts.pdf ${num_dia}
   exit
 endif
 #
 if ( 1 == 2 ) then
   set i = 0
   while ($i <= ${movie_imagenumber_superframes})
-    echo "# IMAGE: ${frame_folder}/CC-CE-frame_${i}.mrc <Frame ${i} CC CE>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/CC-CE-f${i}.mrc <Frame ${i} CC CE>" >> LOGS/${scriptname}.results
     @ i += 1
   end
   set i = 0
   while ($i <= ${movie_imagenumber_superframes})
-    echo "# IMAGE: ${frame_folder}/CC-TL-frame_${i}.mrc <Frame ${i} CC TL>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/CC-TL-f${i}.mrc <Frame ${i} CC TL>" >> LOGS/${scriptname}.results
     @ i += 1
   end
   set i = 0
   while ($i <= ${movie_imagenumber_superframes})
-    echo "# IMAGE: ${frame_folder}/CC-TR-frame_${i}.mrc <Frame ${i} CC TR>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/CC-TR-f${i}.mrc <Frame ${i} CC TR>" >> LOGS/${scriptname}.results
     @ i += 1
   end
   set i = 0
   while ($i <= ${movie_imagenumber_superframes})
-    echo "# IMAGE: ${frame_folder}/CC-BR-frame_${i}.mrc <Frame ${i} CC BR>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/CC-BR-f${i}.mrc <Frame ${i} CC BR>" >> LOGS/${scriptname}.results
     @ i += 1
   end
   set i = 0
   while ($i <= ${movie_imagenumber_superframes})
-    echo "# IMAGE: ${frame_folder}/CC-BL-frame_${i}.mrc <Frame ${i} CC BL>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/CC-BL-f${i}.mrc <Frame ${i} CC BL>" >> LOGS/${scriptname}.results
     @ i += 1
   end
 endif
@@ -179,23 +179,23 @@ endif
 set i = 0
 while ($i <= ${movie_imagenumber_superframes})
   if ( ${show_frames} == "y" ) then
-    echo "# IMAGE: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}_raw.mrc <Frame ${i} raw>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: ${frame_folder}/frame_${i}/${iname}_mask.mrc <Frame ${i}, masked>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/f${i}/${nonmaskimagename}_${i}_raw.mrc <Frame ${i} raw>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/f${i}/${iname}_mask.mrc <Frame ${i}, masked>" >> LOGS/${scriptname}.results
   endif
   if ( ${show_frame_FFT} == "y" ) then
-    echo "# IMAGE: ${frame_folder}/CCUNBEND_frame_${i}_fft.mrc <Frame ${i}, unbent (fft)>" >> LOGS/${scriptname}.results
-    echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/${iname}_mask_fft.mrc <Frame ${i}, masked (FFT)>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/CCUNBEND_f${i}_fft.mrc <Frame ${i}, unbent (fft)>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${frame_folder}/f${i}/${iname}_mask_fft.mrc <Frame ${i}, masked (FFT)>" >> LOGS/${scriptname}.results
   endif
   if ( ${show_frame_CCmap} == "y" ) then
-    echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc <Frame ${i} CCMapMB>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/${nonmaskimagename}_CCmapMBb.mrc <Frame ${i} CCMapMBb>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: ${frame_folder}/frame_${i}_CCmapMBb_unbent.mrc <Frame ${i} CCMapMB unbent>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/f${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc <Frame ${i} CCMapMB>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/f${i}/SCRATCH/${nonmaskimagename}_CCmapMBb.mrc <Frame ${i} CCMapMBb>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frame_folder}/f${i}_CCmapMBb_unbent.mrc <Frame ${i} CCMapMB unbent>" >> LOGS/${scriptname}.results
   endif
-  echo "# IMAGE: ${frame_folder}/frame_${i}/SCRATCH/TMP-quadserch3-autocor.mrc <Frame ${i} averaged central area>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${frame_folder}/SCRATCH/MovieB/frame_${i}/PS/${nonmaskimagename}_quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
-  echo "# IMAGE-IMPORTANT: ${frame_folder}/SCRATCH/MovieB/frame_${i}/PS/${nonmaskimagename}_ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${frame_folder}/CCUNBEND_frame_${i}_notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE: ${frame_folder}/f${i}/SCRATCH/TMP-quadserch3-autocor.mrc <Frame ${i} averaged central area>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${frame_folder}/SCRATCH/MB/f${i}/PS/${nonmaskimagename}_quadserch.ps <Frame ${i} PS QUADSERCH Plot>" >> LOGS/${scriptname}.results 
+  echo "# IMAGE-IMPORTANT: ${frame_folder}/SCRATCH/MB/f${i}/PS/${nonmaskimagename}_ccunbend.ps <Frame ${i} PS CCUNBEND Plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${frame_folder}/CCUNBEND_f${i}_notap.mrc <Frame ${i} Unbent image>" >> LOGS/${scriptname}.results 
   #
   @ i += 1
 end
@@ -292,22 +292,22 @@ while ($i <= ${movie_imagenumber_superframes})
     \ln -s ../2dx_image.cfg 2dx_master.cfg  
     cd ${olddir}
   endif
-  echo "set imagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/frame_${i}/2dx_image.cfg
-  echo "set nonmaskimagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/frame_${i}/2dx_image.cfg
+  echo "set imagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/f${i}/2dx_image.cfg
+  echo "set nonmaskimagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/f${i}/2dx_image.cfg
 
   if ( -d ${image_dir}/${frame_folder} ) then
-    ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize"
-    ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize_files"
-    cd ${image_dir}/${frame_folder}/frame_${i}
+    ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize"
+    ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize_files"
+    cd ${image_dir}/${frame_folder}/f${i}
     if ( -l SCRATCH ) then 
       \rm -rf SCRATCH
       \mkdir SCRATCH
     endif
     cd ${olddir}
   else
-    ${app_2dx_image} ${frame_folder}/frame_${i} "2dx_initialize"
-    ${app_2dx_image} ${frame_folder}/frame_${i} "2dx_initialize_files"
-    cd ${frame_folder}/frame_${i}
+    ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize"
+    ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize_files"
+    cd ${frame_folder}/f${i}
     if ( -l SCRATCH ) then
       \rm -rf SCRATCH
       \mkdir SCRATCH
@@ -318,17 +318,17 @@ while ($i <= ${movie_imagenumber_superframes})
 
   set filtervalue = `${app_python} ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
   echo ":  Filter frame average #${i} with radius ${filtervalue}"
-  # echo "LP on: ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc with filter radius ${filtervalue}"
+  # echo "LP on: ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc with filter radius ${filtervalue}"
   # echo "${app_python} ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}"
   #
-  # echo "${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
-  ${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc
+  # echo "${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
+  ${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc
   #
 
-  set ctfcor_tilefile = "${frame_folder}/frame_${i}/2dx_ctfcor_tile.mrc"
-  set ctfcor_psfile = "${frame_folder}/frame_${i}/2dx_ctfcor_psfile.mrc"
-  set ctfcor_ctffile = "${frame_folder}/frame_${i}/2dx_ctfcor_ctffile.mrc"
-  \rm -f ${frame_folder}/frame_${i}/image_ctfcor.mrc
+  set ctfcor_tilefile = "${frame_folder}/f${i}/2dx_ctfcor_tile.mrc"
+  set ctfcor_psfile = "${frame_folder}/f${i}/2dx_ctfcor_psfile.mrc"
+  set ctfcor_ctffile = "${frame_folder}/f${i}/2dx_ctfcor_ctffile.mrc"
+  \rm -f ${frame_folder}/f${i}/image_ctfcor.mrc
   \rm -f ${ctfcor_tilefile}
   \rm -f ${ctfcor_psfile}  
   \rm -f ${ctfcor_ctffile}  
@@ -339,15 +339,15 @@ while ($i <= ${movie_imagenumber_superframes})
   if ( ${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == "4x" || ${ctfcor_imode}x == "5x" || ${ctfcor_imode}x == "6x" ) then
     ${proc_2dx}/lin "Not applying any CTF correction before unbending."
     set olddir = $PWD
-    cd ${frame_folder}/frame_${i}
+    cd ${frame_folder}/f${i}
     \rm -f image_ctfcor.mrc
     \ln -s ${nonmaskimagename}_${i}.mrc image_ctfcor.mrc
     cd ${olddir}
   else
     if ( ${calculate_tiles} == "0" ) then
       ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
-${frame_folder}/frame_${i}/image_ctfcor.mrc
+${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc
+${frame_folder}/f${i}/image_ctfcor.mrc
 #
 ${TLTAXIS},${TLTANG}
 ${CS},${KV},${phacon},${magnification},${stepdigitizer}
@@ -361,8 +361,8 @@ eot
     else
       if ( ${calculate_tiles} == "1" ) then
         ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
-${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
-${frame_folder}/frame_${i}/image_ctfcor.mrc
+${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc
+${frame_folder}/f${i}/image_ctfcor.mrc
 #
 #
 #
@@ -380,8 +380,8 @@ eot
         #
       else
         ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
-${frame_folder}/frame_${i}/${nonmaskimagename}_${i}.mrc
-${frame_folder}/frame_${i}/image_ctfcor.mrc
+${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc
+${frame_folder}/f${i}/image_ctfcor.mrc
 ${ctfcor_tilefile}
 ${ctfcor_psfile}
 ${ctfcor_ctffile}
@@ -408,13 +408,13 @@ eot
       endif
     endif
   endif
-  echo "# IMAGE-IMPORTANT: ${frame_folder}/frame_${i}/image_ctfcor.mrc <Output Image Frame ${i} CTF corrected>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${frame_folder}/f${i}/image_ctfcor.mrc <Output Image Frame ${i} CTF corrected>" >> LOGS/${scriptname}.results
 
   #########################################################################
   ${proc_2dx}/lin "FFT of raw frame average, frame ${i}"
   #########################################################################
-  setenv IN ${frame_folder}/frame_${i}/${iname}.mrc
-  setenv OUT ${frame_folder}/frame_${i}/${iname}_fft.mrc
+  setenv IN ${frame_folder}/f${i}/${iname}.mrc
+  setenv OUT ${frame_folder}/f${i}/${iname}_fft.mrc
   ${bin_2dx}/2dx_fftrans.exe      
 
   #
@@ -627,7 +627,7 @@ source ${proc_2dx}/2dx_unbend_movieB_sub_sub.com
 #
 \cp -f SCRATCH/errout2${iname}.dat SCRATCH/errout_keyframe${iname}.dat
 set irunner = 1
-
+:
 # Run from key frame downwards to 1:
 set iforward = 0
 set i = `echo ${movie_imagenumber_superframes} | awk '{ s = int( $1 * 0.125 ) } END { print s }'`
@@ -693,29 +693,29 @@ endif
 ${proc_2dx}/linblock "LABELH - Normalizing image to AVG=0, STDEV=100"
 ###########################################################################
 
-\rm -f MovieB/direct_sum_filt_upscale.mrc
+\rm -f MB/direct_sum_filt_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
 ${frame_folder}/direct_sum_filt.mrc
 39
-MovieB/direct_sum_filt_upscale.mrc
+MB/direct_sum_filt_upscale.mrc
 eot
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt.mrc <Sum unbent images, filtered>" >> LOGS/${scriptname}.results
-# echo  "# IMAGE: MovieB/direct_sum_filt_upscale.mrc <Sum unbent images, filtered, upscaled>" >> LOGS/${scriptname}.results
+# echo  "# IMAGE: MB/direct_sum_filt_upscale.mrc <Sum unbent images, filtered, upscaled>" >> LOGS/${scriptname}.results
 
-\rm -f MovieB/direct_sum_filt_ctf_upscale.mrc
+\rm -f MB/direct_sum_filt_ctf_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
 ${frame_folder}/direct_sum_filt_ctf.mrc
 39
-MovieB/direct_sum_filt_ctf_upscale.mrc
+MB/direct_sum_filt_ctf_upscale.mrc
 eot
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTFcor>" >> LOGS/${scriptname}.results
-# echo  "# IMAGE: MovieB/direct_sum_filt_ctf_upscale.mrc <Sum unbent images, filtered, CTFcor, upscaled>" >> LOGS/${scriptname}.results
+# echo  "# IMAGE: MB/direct_sum_filt_ctf_upscale.mrc <Sum unbent images, filtered, CTFcor, upscaled>" >> LOGS/${scriptname}.results
 
 ###########################################################################
 ${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
 ###########################################################################
 
-setenv IN  MovieB/direct_sum_filt_upscale.mrc
+setenv IN  MB/direct_sum_filt_upscale.mrc
 setenv OUT ${frame_folder}/direct_sum_filt_taper.mrc
 \rm -f     ${frame_folder}/direct_sum_filt_taper.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
@@ -723,7 +723,7 @@ ${bin_2dx}/2dx_taperedgek.exe << eot
 eot
 echo "# IMAGE: ${frame_folder}/direct_sum_filt_taper.mrc <Sum unbent images, edge-tapered>" >> LOGS/${scriptname}.results 
 
-setenv IN  MovieB/direct_sum_filt_ctf_upscale.mrc
+setenv IN  MB/direct_sum_filt_ctf_upscale.mrc
 setenv OUT ${frame_folder}/direct_sum_filt_ctf_taper.mrc
 \rm -f     ${frame_folder}/direct_sum_filt_ctf_taper.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
@@ -738,13 +738,13 @@ ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 if ( ${SYN_Unbending}x == "0x" ) then
   set outfile = APH/${iname}_movieB_fou.aph
   echo ${ctfcor_imode} > APH/${iname}_movieB_fou.aph_ctfcor_imode
-  set outfft = MovieB/direct_sum_ctf_fft.mrc
-  set outfft_noctf = MovieB/direct_sum_fft.mrc
+  set outfft = MB/direct_sum_ctf_fft.mrc
+  set outfft_noctf = MB/direct_sum_fft.mrc
 else
   set outfile = APH/${iname}_movieB_syn.aph
   echo ${ctfcor_imode} > APH/${iname}_movieB_syn.aph_ctfcor_imode
-  set outfft = MovieB/direct_sum_syn_ctf_fft.mrc
-  set outfft_noctf = MovieB/direct_sum_syn_fft.mrc
+  set outfft = MB/direct_sum_syn_ctf_fft.mrc
+  set outfft_noctf = MB/direct_sum_syn_fft.mrc
 endif
 
 
@@ -752,7 +752,7 @@ setenv IN ${frame_folder}/direct_sum_filt_taper.mrc
 setenv OUT ${outfft_noctf}
 \rm -f     ${outfft_noctf}
 ${bin_2dx}/2dx_fftrans.exe
-echo "# IMAGE: MovieB/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
+echo "# IMAGE: MB/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
 
 setenv IN ${frame_folder}/direct_sum_filt_ctf_taper.mrc
 setenv OUT ${outfft}
@@ -839,7 +839,7 @@ echo ":+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
 if ( ${SYN_Unbending}x == "0x" ) then
-  echo "::Unbend MovieB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+  echo "::Unbend MB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 else
   echo "::Unbend MB-Syn: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 endif
@@ -855,7 +855,7 @@ ${proc_2dx}/linblock "MMBOX - Evaluating APH values (CTF cor)"
 
 ${bin_2dx}/2dx_mmboxa.exe << eot
 ${outfft}
-${imagenumber} ${nonmaskimagename}, MovieB, ${date}
+${imagenumber} ${nonmaskimagename}, MB, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -901,20 +901,20 @@ endif
 \rm -f ${frame_folder}/2dx_master.cfg
 
 ${proc_2dx}/linblock "Plotting local drift"
-${app_python} ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
+${app_python} ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MB_drifts.pdf ${num_dia}
 
 if ( ${movie_ghostscript_installed} == "y" ) then
   ${proc_2dx}/linblock "Finalizing output"
-  ${pdf2ps} PS/MovieB_drifts.pdf PS/MovieB_drifts.ps
-  echo  "# IMAGE: PS/MovieB_drifts.ps <PS: Local drifts>" >> LOGS/${scriptname}.results
+  ${pdf2ps} PS/MB_drifts.pdf PS/MB_drifts.ps
+  echo  "# IMAGE: PS/MB_drifts.ps <PS: Local drifts>" >> LOGS/${scriptname}.results
 
-  \rm -f PS/MovieB_quadserch.ps
-  ${pdf2ps} PS/MovieB_quadserch.pdf PS/MovieB_quadserch.ps
-  echo "# IMAGE-IMPORTANT: PS/MovieB_quadserch.ps <PS: Profiles QUADSERCH>" >> LOGS/${scriptname}.results
+  \rm -f PS/MB_quadserch.ps
+  ${pdf2ps} PS/MB_quadserch.pdf PS/MB_quadserch.ps
+  echo "# IMAGE-IMPORTANT: PS/MB_quadserch.ps <PS: Profiles QUADSERCH>" >> LOGS/${scriptname}.results
 
-  \rm -f PS/MovieB_unbending.ps
-  ${pdf2ps} PS/MovieB_unbending.pdf PS/MovieB_unbending.ps
-  echo "# IMAGE-IMPORTANT: PS/MovieB_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
+  \rm -f PS/MB_unbending.ps
+  ${pdf2ps} PS/MB_unbending.pdf PS/MB_unbending.ps
+  echo "# IMAGE-IMPORTANT: PS/MB_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
 endif
 
 echo "# IMAGE-IMPORTANT: ${outfile} <APH: APH file after movie-mode B unbending>" >> LOGS/${scriptname}.results

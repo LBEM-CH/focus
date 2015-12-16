@@ -245,14 +245,14 @@ if ( ${PHASEORI_done} == "n" ) then
   exit
 endif
 #
-set frame_folder = "SCRATCH/MovieB"
+set frame_folder = "SCRATCH/MB"
 #
 if ( ! -e ${frame_folder} ) then
   \mkdir ${frame_folder}
 endif
 #
-if ( ! -d MovieB ) then
-  \mkdir MovieB
+if ( ! -d MB ) then
+  \mkdir MB
 endif
 #
 set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`

@@ -29,7 +29,7 @@ if __name__ == "__main__":
         # create frames 0, which is a central high-contrast frame of the first quarter of frames.
         #########################################
 
-	folder_name = frame_folder_name + "/frame_0" 
+	folder_name = frame_folder_name + "/f0" 
 	output_name = folder_name + "/" + image_name + "_0_raw.mrc"
 	os.mkdir(folder_name)
 	
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
 	for i in range(0,int(nz/ave_num)):
 		
-		folder_name = frame_folder_name + "/frame_" + str(i+1)
+		folder_name = frame_folder_name + "/f" + str(i+1)
 		output_name = folder_name + "/" + image_name + "_" + str(i+1) + "_raw.mrc"
 		os.mkdir(folder_name)
 		

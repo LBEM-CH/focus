@@ -26,7 +26,7 @@ if __name__ == "__main__":
 		
 		#image = get_image()
 		
-		file_name = "frames/frame_" + str(i) + "/SCRATCH/corm" + image_name + ".mrc"
+		file_name = "frames/f" + str(i) + "/SCRATCH/corm" + image_name + ".mrc"
 		print i, file_name
 		
 		image = get_image(file_name)
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 		#for j in range(i-offset+1, i):
 		for j in range(1, i):
 				
-			file_name = "frames/frame_" + str(j) + "/SCRATCH/corm" + image_name + ".mrc"
+			file_name = "frames/f" + str(j) + "/SCRATCH/corm" + image_name + ".mrc"
 			print "\t", j, file_name
 			
 			image_tmp = get_image(file_name)

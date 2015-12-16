@@ -192,7 +192,9 @@ C
       CHARACTER*80 FILENAM
       CHARACTER*80 TEXT
       CHARACTER*80 NAME
+      CHARACTER*80 NAMETITLE
 C
+      EQUIVALENCE (TITLE,NAMETITLE)
       EQUIVALENCE (TITPLOT,NAME)
 C
       COMMON//NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
@@ -247,9 +249,10 @@ C      WRITE(6,9006) TITPLOT
 C9006  FORMAT(1X,20A4)
       call shorten(FILE3,k)
       write(6,'(''Read: '',A)')FILE3(1:k)
-      do i=1,20
-        TITLE(i)=TITPLOT(i)
-      enddo
+      write(NAMETITLE,'('' '')') 
+C      do i=1,20
+C        TITLE(i)=TITPLOT(i)
+C      enddo
 C
       if(IALIGN.eq.1)then
         write(6,'(''Give name of input image'')')
@@ -829,23 +832,23 @@ C
       write(6,'(''IPASS = '',I6)')IPASS
 C-----OPEN FILE FOR ERRORS; WRITE IF IPASS=1; READ IF IPASS=2; 
       IF(IPASS.NE.0)then
-        write(6,'(''Opening ERRORS...'')')
+C        write(6,'(''Opening ERRORS...'')')
         CALL CCPDPN(4,'ERRORS','UNKNOWN','F',0,0)
-        write(6,'(''ERRORS opened on channel 4.'')')
+        write(6,'(''File ERRORS opened on channel 4.'')')
       endif
 C-----OPEN FILE FOR ERRORS; WRITE IF IPASS=3;
       IF(IPASS.EQ.3)then
-        write(6,'(''Opening ERROUT...'')')
+C        write(6,'(''Opening ERROUT...'')')
         CALL CCPDPN(8,'ERROUT','UNKNOWN','F',0,0)
 C        CALL CCPDPN(18,'ERROUTN','UNKNOWN','F',0,0)
       endif
 C
       IF(IPASS.EQ.1)THEN
-        write(6,'(''Writing TITLE into channel 4'')')
+C        write(6,'(''Writing TITLE into channel 4'')')
         WRITE(4,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
       ENDIF
       IF(IPASS.EQ.3)THEN
-        write(6,'(''Writing TITLE into channel 8'')')
+C        write(6,'(''Writing TITLE into channel 8'')')
         WRITE(8,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
 C        WRITE(18,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
       ENDIF
@@ -865,11 +868,14 @@ C
         write(6,'(''Reading TITLE from channel 4'')')
         READ(4,45000)(TITLE(J),J=1,10),MINA1,MAXA1,MINB1,MAXB1
 45000   FORMAT(10A4,4I5)
+C        write(6,'(''Read: '',4I5)')MINA1,MAXA1,MINB1,MAXB1
         WRITE(6,45002)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
 45002   FORMAT(/,/,' SECOND PASS; ERROR FILE READ FROM UNIT 4;',
      . ' TITLE AND RANGES',/,20X,10A4,4I5,/)
 C
+C        write(6,'(''Running IA from '',I6,'' to '',I6)')MINA1,MAXA1
         DO 45001 IA=MINA1,MAXA1
+C          write(6,'(''IA='',I8,'' Running IB from '',I6,'' to '',I6)')IA, MINB1,MAXB1
           DO 45001 IB=MINB1,MAXB1
             READ(4,*,ERR=45009)
      .       XERROR(IA,IB),YERROR(IA,IB),PEAK(IA,IB)

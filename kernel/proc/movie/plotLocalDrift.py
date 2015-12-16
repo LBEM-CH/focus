@@ -89,19 +89,19 @@ if __name__ == "__main__":
 	ax = fig.add_subplot(1,1,1,aspect='equal')
 	
 	
-	x,y = getTraj("MovieB/MovieB_peaks_I.dat", n)
+	x,y = getTraj("MB/MB_peaks_I.dat", n)
 	#ax.plot(x, y, '-8', c='gray', label="Region SW")
 	ax.plot(x, y, '-o', label="Region SW")
 	
-	x,y = getTraj("MovieB/MovieB_peaks_II.dat", n)
+	x,y = getTraj("MB/MB_peaks_II.dat", n)
 	#ax.plot(x, y, '-^', c='gray', label="Region SE")
 	ax.plot(x, y, '-o', label="Region SE")
 	
-	x,y = getTraj("MovieB/MovieB_peaks_III.dat", n)
+	x,y = getTraj("MB/MB_peaks_III.dat", n)
 	#ax.plot(x, y, '-v', c='gray', label="Region NW")
 	ax.plot(x, y, '-o', label="Region NW")
 	
-	x,y = getTraj("MovieB/MovieB_peaks_IV.dat", n)
+	x,y = getTraj("MB/MB_peaks_IV.dat", n)
 	#plt.plot(x, y, '->', c='gray', label="Region NE")
 	plt.plot(x, y, '-o', label="Region NE")
 	

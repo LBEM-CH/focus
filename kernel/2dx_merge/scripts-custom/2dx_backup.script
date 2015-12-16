@@ -465,15 +465,26 @@ while ( ${dircounter} <= ${dirnum} )
               \rm ${to_dirfile}/MovieA/dummy.tmp
             endif
             if ( -d ${from_dirfile}/MovieB ) then
-              if ( ! -d ${to_dirfile}/MovieB ) then
-                \mkdir ${to_dirfile}/MovieB
+              if ( ! -d ${to_dirfile}/MB ) then
+                \mkdir ${to_dirfile}/MB
               endif
               echo dummy > ${from_dirfile}/MovieB/dummy.tmp
-              echo ":New: ${to_dirfile}/MovieB/*"
-              cd ${from_dirfile}/MovieB ; tar -cf - . | (cd ${to_dirfile}/MovieB ; tar -xpf -)
-              # ${copy_command} ${from_dirfile}/MovieB/* ${to_dirfile}/MovieB
+              echo ":New: ${to_dirfile}/MB/*"
+              cd ${from_dirfile}/MovieB ; tar -cf - . | (cd ${to_dirfile}/MB ; tar -xpf -)
+              # ${copy_command} ${from_dirfile}/MovieB/* ${to_dirfile}/MB
               \rm ${from_dirfile}/MovieB/dummy.tmp
-              \rm ${to_dirfile}/MovieB/dummy.tmp
+              \rm ${to_dirfile}/MB/dummy.tmp
+            endif
+            if ( -d ${from_dirfile}/MB ) then
+              if ( ! -d ${to_dirfile}/MB ) then
+                \mkdir ${to_dirfile}/MB
+              endif
+              echo dummy > ${from_dirfile}/MB/dummy.tmp
+              echo ":New: ${to_dirfile}/MB/*"
+              cd ${from_dirfile}/MB ; tar -cf - . | (cd ${to_dirfile}/MB ; tar -xpf -)
+              # ${copy_command} ${from_dirfile}/MB/* ${to_dirfile}/MB
+              \rm ${from_dirfile}/MB/dummy.tmp
+              \rm ${to_dirfile}/MB/dummy.tmp
             endif
           endif
         endif

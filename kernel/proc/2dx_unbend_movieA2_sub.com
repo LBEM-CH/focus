@@ -14,14 +14,14 @@
 #
 #
 #
-set frames_dir = SCRATCH/MovieA
+set frames_dir = SCRATCH/MA
 #
 if ( ! -e ${frames_dir} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend Movie A1. Aborting."
 endif
 #
-if ( ! -d MovieA ) then
-  \mkdir MovieA
+if ( ! -d MA ) then
+  \mkdir MA
 endif
 #
 if ( ${show_frame_PROFDATA} == "y" || ${show_frame_CCmap_marked} == "y" || ${show_frame_CCmap_unbent} == "y") then
@@ -187,7 +187,7 @@ ${movie_imagenumber_touse}
 ${PROFDATA}
 eot
 #
-\mv -f 2dx_movie_refine.dat MovieA/2dx_movie_refine.dat
+\mv -f 2dx_movie_refine.dat MA/2dx_movie_refine.dat
 echo "<<@progress: 15>>"
 #
 
@@ -201,9 +201,9 @@ touch ${frames_dir}/PROFDATA_1.dat
 \rm -f ${maskfile}_mask.mrc
 set lat_string = `echo ${lattice} | sed 's/,/ /g'`
 if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then 
-  ${app_python} ${proc_2dx}/movie/drift_selector.py MovieA/2dx_movie_refine.dat MovieA/2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${maskfile}.mrc ${maskfile}_mask.mrc ${lat_string} ${frames_dir}
+  ${app_python} ${proc_2dx}/movie/drift_selector.py MA/2dx_movie_refine.dat MA/2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${maskfile}.mrc ${maskfile}_mask.mrc ${lat_string} ${frames_dir}
 else
-  ${app_python} ${proc_2dx}/movie/drift_selector.py MovieA/2dx_movie_refine.dat MovieA/2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${maskfile}_mask.mrc ${lat_string} ${frames_dir}
+  ${app_python} ${proc_2dx}/movie/drift_selector.py MA/2dx_movie_refine.dat MA/2dx_movie_refine_selected.dat ${movie_drift_threshold} ${PROFDATA} ${movie_smoothing} ${movie_imagenumber_touse} ${imagesidelength} ${maskfile}_mask.mrc ${lat_string} ${frames_dir}
 endif
 #
 echo ":: Done. Now saving ${maskfile}_mask.mrc"
@@ -220,8 +220,8 @@ if ( ${show_frame_PROFDATA} == "y" ) then
   end
 endif
 #
-echo  "# IMAGE: MovieA/2dx_movie_refine.dat <Movie drift profiles (TXT)>" >> LOGS/${scriptname}.results
-echo  "# IMAGE: MovieA/2dx_movie_refine_selected.dat <Movie drift profiles, selected (TXT)>" >> LOGS/${scriptname}.results
+echo  "# IMAGE: MA/2dx_movie_refine.dat <Movie drift profiles (TXT)>" >> LOGS/${scriptname}.results
+echo  "# IMAGE: MA/2dx_movie_refine_selected.dat <Movie drift profiles, selected (TXT)>" >> LOGS/${scriptname}.results
 echo "<<@progress: 20>>"
 
 
@@ -264,7 +264,7 @@ ${frames_dir}/CCmap_${i}.mrc
 30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
 ${frames_dir}/CCmap_${i}_unbent.mrc
-CCUNBEND, frame_${i}.mrc, ${date}
+CCUNBEND, f${i}.mrc, ${date}
 eot
          echo  "# IMAGE: ${frames_dir}/CCmap_${i}_unbent.mrc <CCmap Frame ${i} unbent>" >> LOGS/${scriptname}.results
        endif
@@ -274,11 +274,11 @@ eot
        ###########################################################################
        \rm -f ${frames_dir}/CCUNBEND_Table_${i}.dat
        \rm -f CCPLOT.PS
-       \rm -f ${frames_dir}/CCUNBEND_frame_${i}_notap.mrc
+       \rm -f ${frames_dir}/CCUNBEND_f${i}_notap.mrc
        if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == "4x" || ${ctfcor_imode}x == "5x" || ${ctfcor_imode}x == "6x" ) then
-	   set infile = ${frames_dir}/frame_${i}.mrc
+	   set infile = ${frames_dir}/f${i}.mrc
        else
-         set infile = ${frames_dir}/frame_${i}_ctfcor.mrc
+         set infile = ${frames_dir}/f${i}_ctfcor.mrc
        endif
 
        ${bin_2dx}/2dx_ccunbendk.exe << eot
@@ -286,8 +286,8 @@ ${infile}
 0,1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
-${frames_dir}/CCUNBEND_frame_${i}_notap.mrc
-CCUNBEND, frame_${i}.mrc, ${date}
+${frames_dir}/CCUNBEND_f${i}_notap.mrc
+CCUNBEND, f${i}.mrc, ${date}
 eot
 
        ###########################################################################
@@ -329,7 +329,7 @@ eot
        if ( ${show_frame_CCmap_unbent} == "y" ) then
          ${app_python} ${proc_2dx}/movie/apply_filter.py ${frames_dir}/CCmap_${i}_unbent.mrc         ${filtervalue} ${i} ${imagesidelength} ${frames_dir}/weight.mrc
        endif
-       ${app_python} ${proc_2dx}/movie/apply_filter.py ${frames_dir}/CCUNBEND_frame_${i}_notap.mrc ${filtervalue} ${i} ${imagesidelength} ${frames_dir}/weight.mrc
+       ${app_python} ${proc_2dx}/movie/apply_filter.py ${frames_dir}/CCUNBEND_f${i}_notap.mrc ${filtervalue} ${i} ${imagesidelength} ${frames_dir}/weight.mrc
        #
        ## This is to make sure the script shows up in the GUI:
        if ( 1 == 2 ) then
@@ -439,22 +439,22 @@ endif
 ###########################################################################
 ${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
 ###########################################################################
-echo  "# IMAGE-IMPORTANT: MovieA/2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
+echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
 #
 if ( ${show_frame_CCmap_unbent} == "y" ) then
-  ${app_python} ${proc_2dx}/movie/drift_plotter.py MovieA/2dx_movie_refine.dat MovieA/2dx_movie_refine.pdf ${frames_dir}/CCmap_driftCorrected_filt.mrc
+  ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine.dat MA/2dx_movie_refine.pdf ${frames_dir}/CCmap_driftCorrected_filt.mrc
 else
-  ${app_python} ${proc_2dx}/movie/drift_plotter.py MovieA/2dx_movie_refine.dat MovieA/2dx_movie_refine.pdf ${cormap}
+  ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine.dat MA/2dx_movie_refine.pdf ${cormap}
 endif
-echo  "# IMAGE-IMPORTANT: MovieA/2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
+echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_masking_mode} != '0' ) then
   if ( ${show_frame_CCmap_unbent} == "y" ) then
-    ${app_python} ${proc_2dx}/movie/drift_plotter.py MovieA/2dx_movie_refine_selected.dat MovieA/2dx_movie_refine_selected.pdf ${frames_dir}/CCmap_driftCorrected_filt_masked.mrc
+    ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine_selected.dat MA/2dx_movie_refine_selected.pdf ${frames_dir}/CCmap_driftCorrected_filt_masked.mrc
   else
-    ${app_python} ${proc_2dx}/movie/drift_plotter.py MovieA/2dx_movie_refine_selected.dat MovieA/2dx_movie_refine_selected.pdf ${cormap}
+    ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine_selected.dat MA/2dx_movie_refine_selected.pdf ${cormap}
   endif
-  echo  "# IMAGE-IMPORTANT: MovieA/2dx_movie_refine_selected.pdf <PDF: MovieA/2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine_selected.pdf <PDF: MA/2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
 endif
 \rm -f tmp.png
 echo "<<@progress: 10>>"
@@ -473,14 +473,14 @@ else
   set infile = ${frames_dir}/direct_sum_filt.mrc
 endif
 
-\rm -f MovieA/direct_sum_filt_upscale.mrc
+\rm -f MA/direct_sum_filt_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
 ${infile}
 39
-MovieA/direct_sum_filt_upscale.mrc
+MA/direct_sum_filt_upscale.mrc
 eot
 
-setenv IN  MovieA/direct_sum_filt_upscale.mrc
+setenv IN  MA/direct_sum_filt_upscale.mrc
 setenv OUT ${frames_dir}/direct_sum_fixed.mrc
 \rm -f     ${frames_dir}/direct_sum_fixed.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
@@ -494,14 +494,14 @@ else
   set infile = ${frames_dir}/direct_sum_filt_ctf.mrc
 endif
 
-\rm -f MovieA/direct_sum_filt_ctf_upscale.mrc
+\rm -f MA/direct_sum_filt_ctf_upscale.mrc
 ${bin_2dx}/labelh.exe << eot
 ${infile}
 39
-MovieA/direct_sum_filt_ctf_upscale.mrc
+MA/direct_sum_filt_ctf_upscale.mrc
 eot
 
-setenv IN  MovieA/direct_sum_filt_ctf_upscale.mrc
+setenv IN  MA/direct_sum_filt_ctf_upscale.mrc
 setenv OUT ${frames_dir}/direct_sum_ctf_fixed.mrc
 \rm -f     ${frames_dir}/direct_sum_ctf_fixed.mrc
 ${bin_2dx}/2dx_taperedgek.exe << eot
@@ -519,13 +519,13 @@ ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 if ( ${SYN_Unbending}x == "0x" ) then
   set outfile = APH/${iname}_movie_fou.aph
   echo ${ctfcor_imode} > APH/${iname}_movie_fou.aph_ctfcor_imode
-  set outfft = MovieA/direct_sum_ctf_fft.mrc
-  set outfft_noctf = MovieA/direct_sum_fft.mrc
+  set outfft = MA/direct_sum_ctf_fft.mrc
+  set outfft_noctf = MA/direct_sum_fft.mrc
 else
   set outfile = APH/${iname}_movie_syn.aph
   echo ${ctfcor_imode} > APH/${iname}_movie_syn.aph_ctfcor_imode
-  set outfft = MovieA/direct_sum_syn_ctf_fft.mrc
-  set outfft_noctf = MovieA/direct_sum_syn_fft.mrc
+  set outfft = MA/direct_sum_syn_ctf_fft.mrc
+  set outfft_noctf = MA/direct_sum_syn_fft.mrc
 endif
 
 
@@ -534,7 +534,7 @@ setenv IN ${frames_dir}/direct_sum_fixed.mrc
 setenv OUT ${outfft_noctf}
 \rm -f     ${outfft_noctf}
 ${bin_2dx}/2dx_fftrans.exe
-echo "# IMAGE: MovieA/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
+echo "# IMAGE: MA/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
 
 setenv IN ${frames_dir}/direct_sum_ctf_fixed.mrc
 setenv OUT ${outfft}
@@ -554,7 +554,7 @@ set imagecentery = ${imagecenterx}
 #
 ${bin_2dx}/2dx_mmboxa.exe << eot
 ${outfft_noctf}
-${imagenumber} ${nonmaskimagename}, MovieA, ${date}
+${imagenumber} ${nonmaskimagename}, MA, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -633,7 +633,7 @@ echo ":+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
 if ( ${SYN_Unbending}x == "0x" ) then
-  echo "::Unbend MovieA: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+  echo "::Unbend MA: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 else
   echo "::Unbend MA-Syn: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 endif
@@ -650,7 +650,7 @@ ${proc_2dx}/linblock "MMBOX - Evaluating APH values (after CTF cor)"
 #
 ${bin_2dx}/2dx_mmboxa.exe << eot
 ${outfft}
-${imagenumber} ${nonmaskimagename}, MovieA, ${date}
+${imagenumber} ${nonmaskimagename}, MA, ${date}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
@@ -663,7 +663,7 @@ ${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${lattice}                         ! Lattice vectors
 eot
 
-echo "# IMAGE-IMPORTANT: ${outfile} <APH file after MovieA unbending>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${outfile} <APH file after MA unbending>" >> LOGS/${scriptname}.results
   
 
 

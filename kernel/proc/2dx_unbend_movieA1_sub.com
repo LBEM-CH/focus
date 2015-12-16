@@ -8,7 +8,7 @@
 #
 #
 #
-set frames_dir = SCRATCH/MovieA
+set frames_dir = SCRATCH/MA
 #
 if ( ! -e ${frames_dir} ) then
   \mkdir ${frames_dir}
@@ -422,23 +422,23 @@ set i = 1
 while ($i <= ${movie_imagenumber_touse})
   #
   # The following line was for testing purposes:
-  # cp ${nonmaskimagename}_raw.mrc ${frames_dir}/frame_${i}.mrc
+  # cp ${nonmaskimagename}_raw.mrc ${frames_dir}/f${i}.mrc
   #
   ${proc_2dx}/lin "Adapting size and limiting resolution for frame ${i}"
   set new_mrc_created = y
-  set loc_imagename = ${frames_dir}/frame_${i}
+  set loc_imagename = ${frames_dir}/f${i}
   source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
   source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
   #
   if ( ${show_frames} == "y" ) then
-    echo "# IMAGE: ${frames_dir}/frame_${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${frames_dir}/f${i}.mrc <Frame ${i}>" >> LOGS/${scriptname}.results
   endif
   #
   if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == "4x" || ${ctfcor_imode}x == "5x" || ${ctfcor_imode}x == "6x" ) then
     ${proc_2dx}/linblock "Not applying any CTF correction before unbending."
     set olddir = $PWD
     cd ${frames_dir}
-    \ln -s frame_${i}.mrc frame_${i}_ctfcor.mrc
+    \ln -s f${i}.mrc f${i}_ctfcor.mrc
     cd olddir
   else
     #  
@@ -446,12 +446,12 @@ while ($i <= ${movie_imagenumber_touse})
     ${proc_2dx}/linblock "2dx_ctfcor - CTF correcting frame ${i}"
     #################################################################################  
     #
-    \rm -f ${frames_dir}/frame_${i}_ctfcor.mrc
+    \rm -f ${frames_dir}/f${i}_ctfcor.mrc
     #
     if ( ${calculate_tiles} == "0" ) then
       ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${frames_dir}/frame_${i}.mrc
-${frames_dir}/frame_${i}_ctfcor.mrc
+${frames_dir}/f${i}.mrc
+${frames_dir}/f${i}_ctfcor.mrc
 #
 ${TLTAXIS},${TLTANG}
 ${CS},${KV},${phacon},${magnification},${stepdigitizer}
@@ -473,8 +473,8 @@ eot
         \rm -f ${ctfcor_ctffile} 
         #
         ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
-${frames_dir}/frame_${i}.mrc
-${frames_dir}/frame_${i}_ctfcor.mrc
+${frames_dir}/f${i}.mrc
+${frames_dir}/f${i}_ctfcor.mrc
 #
 #
 #
@@ -490,7 +490,7 @@ ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
         #
-        echo "# IMAGE: ${frames_dir}/frame_${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
+        echo "# IMAGE: ${frames_dir}/f${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
         #
       else
         #
@@ -502,8 +502,8 @@ eot
         \rm -f ${ctfcor_ctffile} 
         #
         ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
-${frames_dir}/frame_${i}.mrc
-${frames_dir}/frame_${i}_ctfcor.mrc
+${frames_dir}/f${i}.mrc
+${frames_dir}/f${i}_ctfcor.mrc
 ${ctfcor_tilefile}
 ${ctfcor_psfile}
 ${ctfcor_ctffile}
@@ -519,17 +519,17 @@ ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
         #
-        echo "# IMAGE: ${frames_dir}/frame_${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
-        \mv -f ${ctfcor_tilefile} ${frames_dir}/frame_${i}_tiles.mrc
-        echo "# IMAGE: ${frames_dir}/frame_${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
-        \mv -f ${ctfcor_psfile} ${frames_dir}/frame_${i}_ps.mrc
-        echo "# IMAGE: ${frames_dir}/frame_${i}_ps.mrc <Frame ${i}, PowerSpectra>" >> LOGS/${scriptname}.results
+        echo "# IMAGE: ${frames_dir}/f${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
+        \mv -f ${ctfcor_tilefile} ${frames_dir}/f${i}_tiles.mrc
+        echo "# IMAGE: ${frames_dir}/f${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
+        \mv -f ${ctfcor_psfile} ${frames_dir}/f${i}_ps.mrc
+        echo "# IMAGE: ${frames_dir}/f${i}_ps.mrc <Frame ${i}, PowerSpectra>" >> LOGS/${scriptname}.results
         #
-        \mv -f ${ctfcor_ctffile} ${frames_dir}/frame_${i}_ctffile.mrc
+        \mv -f ${ctfcor_ctffile} ${frames_dir}/f${i}_ctffile.mrc
         if ( ${ctfcor_imode} == "2" ) then
-          echo "# IMAGE: ${frames_dir}/frame_${i}_ctffile.mrc <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+          echo "# IMAGE: ${frames_dir}/f${i}_ctffile.mrc <Summed CTF**2 file>" >> LOGS/${scriptname}.results
         else
-          echo "# IMAGE: ${frames_dir}/frame_${i}_ctffile.mrc <Summed CTF file>" >> LOGS/${scriptname}.results
+          echo "# IMAGE: ${frames_dir}/f${i}_ctffile.mrc <Summed CTF file>" >> LOGS/${scriptname}.results
         endif
       endif
     endif
@@ -540,7 +540,7 @@ eot
   ${proc_2dx}/linblock "cross_correlate.py - Cross-correlate reference with frame ${i}"
   ############################################################### 
   #
-  ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/frame_${i}_ctfcor.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
+  ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/f${i}_ctfcor.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
   if ( ${show_frame_CCmap} == "y" ) then
     echo  "# IMAGE: ${frames_dir}/CCmap_${i}.mrc <Frame ${i}, CCmap>" >> LOGS/${scriptname}.results
   endif

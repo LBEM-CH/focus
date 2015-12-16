@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
 	frame_number = sys.argv[1]
 	
-	f = open("frames/frame_" + frame_number + "/2dx_image.cfg", 'r')
+	f = open("frames/f" + frame_number + "/2dx_image.cfg", 'r')
 		
 	for l in f:
 		if l.startswith("set QVAL2"):

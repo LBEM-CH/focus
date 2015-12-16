@@ -27,7 +27,7 @@ if __name__ == "__main__":
 	
 	for i in range(starting, ending+1):
 		data.append([])
-		f = open("frames/frame_" + str(i) + "/APH/" + image_name + postfix)
+		f = open("frames/f" + str(i) + "/APH/" + image_name + postfix)
 		data[i-1] = f.readlines()
 		f.close()
 		

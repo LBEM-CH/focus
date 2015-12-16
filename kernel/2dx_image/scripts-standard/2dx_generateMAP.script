@@ -289,13 +289,13 @@ echo "<<@progress: 30>>"
 set aphfile = APH/${iname}_movie_fou_ctf.aph
 if ( -e ${aphfile} ) then
     echo ":: "
-    ${proc_2dx}/linblock "Generating map from MovieA processing"
+    ${proc_2dx}/linblock "Generating map from MA processing"
     echo ":: "
     if ( ${show_hkl}x == "yx" ) then
-      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieA processing>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MA processing>" >> LOGS/${scriptname}.results
     endif
     set prefix = "movie_"
-    set prename = "MovieA "
+    set prename = "MA "
     #
     set phaori_local = ${phaori}
     #############################################################################
@@ -303,7 +303,7 @@ if ( -e ${aphfile} ) then
     source ${proc_2dx}/2dx_generateMap_sub.com
     #############################################################################
 else
-    ${proc_2dx}/lin "Not generating map from MovieA processing, file not found: ${aphfile}"
+    ${proc_2dx}/lin "Not generating map from MA processing, file not found: ${aphfile}"
 endif
 #
 echo "<<@progress: 40>>"
@@ -311,10 +311,10 @@ echo "<<@progress: 40>>"
 # set aphfile = APH/${iname}_movie_syn_ctf.aph
 # if ( -e ${aphfile} ) then
 #       echo ":: "
-#       ${proc_2dx}/linblock "Generating map from MovieA U2-Syn processing"
+#       ${proc_2dx}/linblock "Generating map from MA U2-Syn processing"
 #       echo ":: "
 #       if ( ${show_hkl}x == "yx" ) then
-#         echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieA U2-Syn processing>" >> LOGS/${scriptname}.results
+#         echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MA U2-Syn processing>" >> LOGS/${scriptname}.results
 #       endif
 #       set prefix = "movie_syn_"
 #       set prename = "MA_Syn "
@@ -325,7 +325,7 @@ echo "<<@progress: 40>>"
 #       source ${proc_2dx}/2dx_generateMap_sub.com
 #       #############################################################################
 # else
-#       ${proc_2dx}/lin "Not generating map from MovieA U2-Syn processing, file not found: ${aphfile}"
+#       ${proc_2dx}/lin "Not generating map from MA U2-Syn processing, file not found: ${aphfile}"
 # endif
 #
 echo "<<@progress: 50>>"
@@ -333,13 +333,13 @@ echo "<<@progress: 50>>"
 set aphfile = APH/${iname}_movieB_fou_ctf.aph
 if ( -e ${aphfile} ) then
     echo ":: "
-    ${proc_2dx}/linblock "Generating map from MovieB processing"
+    ${proc_2dx}/linblock "Generating map from MB processing"
     echo ":: "
     if ( ${show_hkl}x == "yx" ) then
-      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieB processing>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MB processing>" >> LOGS/${scriptname}.results
     endif 
     set prefix = "movieB_"
-    set prename = "MovieB "
+    set prename = "MB "
     #
     set phaori_local = ${phaori}
     #############################################################################
@@ -347,7 +347,7 @@ if ( -e ${aphfile} ) then
     source ${proc_2dx}/2dx_generateMap_sub.com
     #############################################################################
 else
-    ${proc_2dx}/lin "Not generating map from MovieB processing, file not found: ${aphfile}"
+    ${proc_2dx}/lin "Not generating map from MB processing, file not found: ${aphfile}"
 endif
 #
 echo "<<@progress: 60>>"
@@ -355,10 +355,10 @@ echo "<<@progress: 60>>"
 # set aphfile = APH/${iname}_movieB_syn_ctf.aph
 # if ( -e ${aphfile} ) then
 #       echo ":: "
-#       ${proc_2dx}/linblock "Generating map from MovieB U2-Syn processing"
+#       ${proc_2dx}/linblock "Generating map from MB U2-Syn processing"
 #       echo ":: "
 #       if ( ${show_hkl}x == "yx" ) then
-#         echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieB U2-Syn processing>" >> LOGS/${scriptname}.results
+#         echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MB U2-Syn processing>" >> LOGS/${scriptname}.results
 #       endif
 #       set prefix = "movieB_syn_"
 #       set prename = "MB_Syn "
@@ -369,7 +369,7 @@ echo "<<@progress: 60>>"
 #       source ${proc_2dx}/2dx_generateMap_sub.com
 #       #############################################################################
 # else
-#       ${proc_2dx}/lin "Not generating map from MovieB U2-Syn processing, file not found: ${aphfile}"
+#       ${proc_2dx}/lin "Not generating map from MB U2-Syn processing, file not found: ${aphfile}"
 # endif
 #
 echo ":: "

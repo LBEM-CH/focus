@@ -189,12 +189,12 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
   if ( ${movie_enable} == "y" ) then
     set CTF_infile = APH/image_ctfcor_movie_fou.aph
     set CTF_outfile = APH/image_ctfcor_movie_fou_ctf.aph
-    set unbent_image = MovieA/direct_sum_filt_upscale
-    set unbent_FFT = MovieA/direct_sum_fft.mrc
+    set unbent_image = MA/direct_sum_filt_upscale
+    set unbent_FFT = MA/direct_sum_fft.mrc
     set algo = UMA
-    set nametag = "MovieA"
+    set nametag = "MA"
     #######################################
-    # MovieA
+    # MA
     source ${proc_2dx}/2dx_applyCTF_sub.com
     #######################################
 
@@ -202,12 +202,12 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
 
     # set CTF_infile = APH/image_ctfcor_movie_syn.aph
     # set CTF_outfile = APH/image_ctfcor_movie_syn_ctf.aph
-    # set unbent_image = MovieA/direct_sum_syn_filt_upscale
-    # set unbent_FFT = MovieA/direct_sum_syn_fft.mrc
+    # set unbent_image = MA/direct_sum_syn_filt_upscale
+    # set unbent_FFT = MA/direct_sum_syn_fft.mrc
     # set algo = UMAS
     # set nametag = "MA_Syn"
     #######################################
-    # MovieAS
+    # MAS
     # source ${proc_2dx}/2dx_applyCTF_sub.com
     #######################################
 
@@ -215,12 +215,12 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
 
     set CTF_infile = APH/image_ctfcor_movieB_fou.aph
     set CTF_outfile = APH/image_ctfcor_movieB_fou_ctf.aph
-    set unbent_image = MovieB/direct_sum_filt_upscale
-    set unbent_FFT = MovieB/direct_sum_fft.mrc
+    set unbent_image = MB/direct_sum_filt_upscale
+    set unbent_FFT = MB/direct_sum_fft.mrc
     set algo = UMB
-    set nametag = "MovieB"
+    set nametag = "MB"
     #######################################
-    # MovieB
+    # MB
     source ${proc_2dx}/2dx_applyCTF_sub.com
     #######################################
 
@@ -228,12 +228,12 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
 
     # set CTF_infile = APH/image_ctfcor_movieB_syn.aph
     # set CTF_outfile = APH/image_ctfcor_movieB_syn_ctf.aph
-    # set unbent_image = MovieB/direct_sum_syn_filt_upscale
-    # set unbent_FFT = MovieB/direct_sum_syn_fft.mrc
+    # set unbent_image = MB/direct_sum_syn_filt_upscale
+    # set unbent_FFT = MB/direct_sum_syn_fft.mrc
     # set algo = UMBS
     # set nametag = "MB_Syn"
     #######################################
-    # MovieBS
+    # MBS
     # source ${proc_2dx}/2dx_applyCTF_sub.com
     #######################################
   endif
@@ -247,16 +247,16 @@ echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Im
     if ( ${movie_better} == "1" ) then
       set movie_better = `echo ${QVALMA} ${QVALMB} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
       if ( ${movie_better} == "1" ) then
-        ${proc_2dx}/linblock "Using MovieA unbent data, since these have the higher QVAL"
+        ${proc_2dx}/linblock "Using MA unbent data, since these have the higher QVAL"
         set final_outfile = image_ctfcor_movie_fou_ctf.aph
       else
-        ${proc_2dx}/linblock "Using MovieB unbent data, since these have the higher QVAL"
+        ${proc_2dx}/linblock "Using MB unbent data, since these have the higher QVAL"
         set final_outfile = image_ctfcor_movieB_fou_ctf.aph
       endif
     else
       set movie_better = `echo ${QVALMB} ${QVAL2} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
       if ( ${movie_better} == "1" ) then
-        ${proc_2dx}/linblock "Using MovieB unbent data, since these have the higher QVAL"
+        ${proc_2dx}/linblock "Using MB unbent data, since these have the higher QVAL"
         set final_outfile = image_ctfcor_movieB_fou_ctf.aph
       else
         ${proc_2dx}/linblock "Using Unbend2 (not Movie) unbent data, since these have the higher QVAL"

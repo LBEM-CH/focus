@@ -48,7 +48,7 @@ if __name__ == "__main__":
 	means = []
 	sds = []
 	for i in range(first, last+1):
-		result = getProfStat("frames/frame_" + str(i) + "/SCRATCH/profm" + image_name +".dat")
+		result = getProfStat("frames/f" + str(i) + "/SCRATCH/profm" + image_name +".dat")
 		means.append(result[0])
 		sds.append(result[1])
 		

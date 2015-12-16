@@ -243,14 +243,14 @@ echo date = ${date}
 set system = `uname -s`
 echo system = ${system}
 #
-set frame_folder = "SCRATCH/MovieB"
+set frame_folder = "SCRATCH/MB"
 #
 if ( ! -e ${frame_folder} ) then
   \mkdir ${frame_folder}
 endif
 #
-if ( ! -d MovieB ) then
-  \mkdir MovieB
+if ( ! -d MB ) then
+  \mkdir MB
 endif
 #
 ##########################################

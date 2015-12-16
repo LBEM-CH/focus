@@ -268,7 +268,7 @@ if ( -e ${aphfile} ) then
     echo ":: "
     echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieA processing>" >> LOGS/${scriptname}.results
     set prefix = "movie_"
-    set prename = "MovieA "
+    set prename = "MA "
     #
     set phaori_local = ${phaori_local_nospace}
     #############################################################################
@@ -288,7 +288,7 @@ if ( -e ${aphfile} ) then
     echo ":: "
     echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieB processing>" >> LOGS/${scriptname}.results
     set prefix = "movieB_"
-    set prename = "MovieB "
+    set prename = "MB "
     #
     set phaori_local = ${phaori_local_nospace}
     #############################################################################
@@ -374,7 +374,7 @@ if ( -e ${aphfile} ) then
     echo ":: "
     echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieA processing>" >> LOGS/${scriptname}.results
     set prefix = "movie_"
-    set prename = "MovieA "
+    set prename = "MA "
     #
     set phaori_local = ${phaori_local_nospace}
     #############################################################################
@@ -394,7 +394,7 @@ if ( -e ${aphfile} ) then
     echo ":: "
     echo "# IMAGE: ${aphfile} <APH: Amp&Phase from MovieB processing>" >> LOGS/${scriptname}.results
     set prefix = "movieB_"
-    set prename = "MovieB "
+    set prename = "MB "
     #
     set phaori_local = ${phaori_local_nospace}
     #############################################################################

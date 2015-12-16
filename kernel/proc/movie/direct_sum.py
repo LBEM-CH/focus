@@ -13,12 +13,12 @@ if __name__ == "__main__":
 	image_name = sys.argv[2]
 	dir_frame_folder = sys.argv[3]
 	
-	file_name = dir_frame_folder + "/CCUNBEND_frame_1_notap.mrc"
+	file_name = dir_frame_folder + "/CCUNBEND_f1_notap.mrc"
 	image = get_image(file_name)
 	
 	for i in range(2,total_number+1):		
 		
-		file_name = dir_frame_folder + "/CCUNBEND_frame_" + str(i) + "_notap.mrc"
+		file_name = dir_frame_folder + "/CCUNBEND_f" + str(i) + "_notap.mrc"
 		print i, file_name
 		
 		image_tmp = get_image(file_name)

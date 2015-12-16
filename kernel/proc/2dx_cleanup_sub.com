@@ -281,10 +281,10 @@ echo dummy > dummy.TMP
 \rm -f movie_syn_centric.hk
 \rm -f movie_syn_centric.hkl
 \rm -f 2dx_movie_refine_selected.dat
-\rm -f MovieB_peaks_I.dat
-\rm -f MovieB_peaks_II.dat
-\rm -f MovieB_peaks_III.dat
-\rm -f MovieB_peaks_IV.dat
+\rm -f MB_peaks_I.dat
+\rm -f MB_peaks_II.dat
+\rm -f MB_peaks_III.dat
+\rm -f MB_peaks_IV.dat
 \rm -f SPIDERCOORD.spi
 #
 if ( -e ${imagename}.mrc ) then
@@ -300,18 +300,34 @@ if ( -e ${nonmaskimagename}-masking-final.mrc ) then
 endif
 #
 if ( -d MovieA ) then
-  \rm -f MovieA/direct_sum_ctf_fft.mrc
-  \rm -f MovieA/direct_sum_filt_ctf_upscale.mrc
-  \rm -f MovieA/direct_sum_syn_ctf_fft.mrc
+  if ( -d MA ) then
+    \mv -f MovieA MA
+  else
+    \rm -rf MovieA
+  endif
+endif
+#
+if ( -d MA ) then
+  \rm -f MA/direct_sum_ctf_fft.mrc
+  \rm -f MA/direct_sum_filt_ctf_upscale.mrc
+  \rm -f MA/direct_sum_syn_ctf_fft.mrc
 endif
 #
 if ( -d MovieB ) then
-  \rm -f MovieB/direct_sum_ctf_fft.mrc
-  \rm -f MovieB/direct_sum_filt_ctf_upscale.mrc
-  \rm -f MovieB/direct_sum_syn_ctf_fft.mrc
-  \rm -f MovieB/MovieB_peaks_I.dat
-  \rm -f MovieB/MovieB_peaks_II.dat
-  \rm -f MovieB/MovieB_peaks_III.dat
-  \rm -f MovieB/MovieB_peaks_IV.dat
+  if ( -d MB ) then
+    \rm -rf MovieB
+  else
+    \mv MovieB MB
+  endif
+endif
+#
+if ( -d MB ) then
+  \rm -f MB/direct_sum_ctf_fft.mrc
+  \rm -f MB/direct_sum_filt_ctf_upscale.mrc
+  \rm -f MB/direct_sum_syn_ctf_fft.mrc
+  \rm -f MB/MB_peaks_I.dat
+  \rm -f MB/MB_peaks_II.dat
+  \rm -f MB/MB_peaks_III.dat
+  \rm -f MB/MB_peaks_IV.dat
 endif
 #

@@ -278,7 +278,7 @@ eot
 
     echo " " >> History.dat
     echo ":Date: ${date}" >> History.dat
-    echo "::Unbend MovieB: QVal= ${QVAL_local} ... IQ stat = ${IQMB}" >> History.dat
+    echo "::Unbend MB: QVal= ${QVAL_local} ... IQ stat = ${IQMB}" >> History.dat
     #    
   endif
   

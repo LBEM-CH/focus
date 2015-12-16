@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
 	for i in range(0,nz):
 						
-		output_name = folder_name + "/frame_" + str(i+1) + ".mrc"
+		output_name = folder_name + "/f" + str(i+1) + ".mrc"
 				
 		print "Creating frame", i+1, "as", output_name
 		

@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/csh -f
 ####
 #
 #############################################################################
@@ -265,6 +265,7 @@ if ( ${system} == "Darwin" ) then
   set ps2pdf_test = `which ps2pdf`x 
   if ( ${ps2pdf_test} == 'x' ) then
     set ps2pdf = pstopdf
+    set pdf2ps = notfound
     echo "::"
     echo "::ERROR: Install gostscript first."
     echo "::"

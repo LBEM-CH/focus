@@ -240,13 +240,16 @@ C
       WRITE(6,9003)
 C
 9003  FORMAT('$NAME OF CROSS-CORRELATION FILE TO BE SEARCHED? ')
-      READ(5,19006) TITPLOT
-19006 FORMAT(20A4)
-      WRITE(6,9006) TITPLOT
-9006  FORMAT(1X,20A4)
-      do i=1,20
-        TITLE(i)=TITPLOT(i)
-      enddo
+      read(5,'(A)')FILE3
+C      READ(5,19006) TITPLOT
+C19006 FORMAT(20A4)
+C      WRITE(6,9006) TITPLOT
+C9006  FORMAT(1X,20A4)
+      call shorten(FILE3,k)
+      write(6,'(''Read: '',A)')FILE3(1:k)
+C      do i=1,20
+C        TITLE(i)=TITPLOT(i)
+C      enddo
 C
       if(IALIGN.eq.1)then
         write(6,'(''Give name of input image'')')

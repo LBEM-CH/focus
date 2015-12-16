@@ -200,8 +200,9 @@ endif
 #
 if ( -l SCRATCH ) then
   set target = ` ls -l SCRATCH | awk '{ print $11}'`
+  echo "Removing ${target}"
   if ( -e ${target} ) then
-    \rm -rf target
+    \rm -rf ${target}
   endif
 endif
 #

@@ -187,6 +187,7 @@ C
       INTEGER IOFFX,IOFFY
       CHARACTER*200 FILE1
       CHARACTER*200 FILE2
+      CHARACTER*200 FILE3
       CHARACTER*200 cline
       CHARACTER*80 FILENAM
       CHARACTER*80 TEXT
@@ -261,8 +262,9 @@ C
 C
 C-----Read in entire CC map into ARRAY
 C
-      write(6,'(''Reading CC map '',A)')NAME
-      CALL IMOPEN(1,NAME,'RO')
+      write(6,'(''Reading CC map '',A)')FILE3
+      call shorten(FILE3,k)
+      CALL IMOPEN(1,FILE3(1:k),'RO')
       CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
       IF(NCOL*NLINE.GT.IARRMXSIZ) STOP '::  IARRMXSIZ too small'
       CALL IMPOSN(1,0,0)

@@ -247,9 +247,9 @@ C      WRITE(6,9006) TITPLOT
 C9006  FORMAT(1X,20A4)
       call shorten(FILE3,k)
       write(6,'(''Read: '',A)')FILE3(1:k)
-C      do i=1,20
-C        TITLE(i)=TITPLOT(i)
-C      enddo
+      do i=1,20
+        TITLE(i)=TITPLOT(i)
+      enddo
 C
       if(IALIGN.eq.1)then
         write(6,'(''Give name of input image'')')
@@ -841,9 +841,11 @@ C        CALL CCPDPN(18,'ERROUTN','UNKNOWN','F',0,0)
       endif
 C
       IF(IPASS.EQ.1)THEN
+        write(6,'(''Writing TITLE into channel 4'')')
         WRITE(4,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
       ENDIF
       IF(IPASS.EQ.3)THEN
+        write(6,'(''Writing TITLE into channel 8'')')
         WRITE(8,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
 C        WRITE(18,45000)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB
       ENDIF
@@ -860,6 +862,7 @@ C
 C-----Read ERROR field in
 C
       IF(IPASS.EQ.2 .OR. IPASS.EQ.3)THEN
+        write(6,'(''Reading TITLE from channel 4'')')
         READ(4,45000)(TITLE(J),J=1,10),MINA1,MAXA1,MINB1,MAXB1
 45000   FORMAT(10A4,4I5)
         WRITE(6,45002)(TITLE(J),J=1,10),MINA,MAXA,MINB,MAXB

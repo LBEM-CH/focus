@@ -299,7 +299,9 @@ eot
        #
        \cp -f CCPLOT.PS ${frames_dir}/PS/CCUNBEND_${i}.ps
 
-       if ( ${i} == '1' ) then
+       if ( ${movie_ghostscript_installed} == "y" ) then
+
+         if ( ${i} == '1' ) then
           if ( ${ps2pdf} == "pstopdf" ) then
              ${ps2pdf} CCPLOT.PS  
              \mv -f CCPLOT.pdf frame_unbending.pdf
@@ -308,7 +310,7 @@ eot
           endif
           pdftk A=frame_unbending.pdf cat A1 output out.pdf 
           \mv -f out.pdf frame_unbending.pdf
-       else
+         else
           if ( ${ps2pdf} == "pstopdf" ) then
              ${ps2pdf} CCPLOT.PS 
           else
@@ -316,8 +318,9 @@ eot
           endif
           pdftk A=frame_unbending.pdf B=CCPLOT.pdf cat A1-end B1 output out.pdf 
           \mv -f out.pdf frame_unbending.pdf
+         endif
        endif
-     
+
        ###############################################################
        ${proc_2dx}/lin "apply_filter.py - Resolution limiting frame ${i}"
        ###############################################################  
@@ -435,26 +438,27 @@ else
 endif
 
 
-
-###########################################################################
-${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
-###########################################################################
-echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results
-#
-if ( ${show_frame_CCmap_unbent} == "y" ) then
-  ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine.dat MA/2dx_movie_refine.pdf ${frames_dir}/CCmap_driftCorrected_filt.mrc
-else
-  ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine.dat MA/2dx_movie_refine.pdf ${cormap}
-endif
-echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
-#
-if ( ${movie_masking_mode} != '0' ) then
+if ( ${movie_ghostscript_installed} == "y" ) then
+  ###########################################################################
+  ${proc_2dx}/linblock "drift_plotter.py - Producing plots of drift"
+  ###########################################################################
+  echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine.dat <2dx_movie_refine.dat>" >> LOGS/${scriptname}.results  
+  #
   if ( ${show_frame_CCmap_unbent} == "y" ) then
-    ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine_selected.dat MA/2dx_movie_refine_selected.pdf ${frames_dir}/CCmap_driftCorrected_filt_masked.mrc
+    ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine.dat MA/2dx_movie_refine.pdf ${frames_dir}/CCmap_driftCorrected_filt.mrc
   else
-    ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine_selected.dat MA/2dx_movie_refine_selected.pdf ${cormap}
+    ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine.dat MA/2dx_movie_refine.pdf ${cormap}
   endif
-  echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine_selected.pdf <PDF: MA/2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
+  echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine.pdf <PDF: 2dx_movie_refine.pdf>" >> LOGS/${scriptname}.results
+  #
+  if ( ${movie_masking_mode} != '0' ) then
+    if ( ${show_frame_CCmap_unbent} == "y" ) then
+      ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine_selected.dat MA/2dx_movie_refine_selected.pdf ${frames_dir}/CCmap_driftCorrected_filt_masked.mrc
+    else
+      ${app_python} ${proc_2dx}/movie/drift_plotter.py MA/2dx_movie_refine_selected.dat MA/2dx_movie_refine_selected.pdf ${cormap}
+    endif
+    echo  "# IMAGE-IMPORTANT: MA/2dx_movie_refine_selected.pdf <PDF: MA/2dx_movie_refine_selected.pdf>" >> LOGS/${scriptname}.results
+  endif
 endif
 \rm -f tmp.png
 echo "<<@progress: 10>>"
@@ -617,9 +621,11 @@ echo "<<@evaluate>>"
 
 echo "<<@progress: 90>>"
 
-\rm -f frame_unbending.ps
-${pdf2ps} frame_unbending.pdf frame_unbending.ps
-echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
+if ( ${movie_ghostscript_installed} == "y" ) then
+  \rm -f frame_unbending.ps
+  ${pdf2ps} frame_unbending.pdf frame_unbending.ps
+  echo "# IMAGE-IMPORTANT: frame_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
+endif
 
 set IQS = `echo ${UMA_IQ1} ${UMA_IQ2} ${UMA_IQ3} ${UMA_IQ4} ${UMA_IQ5} ${UMA_IQ6} ${UMA_IQ7} ${UMA_IQ8} ${UMA_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"

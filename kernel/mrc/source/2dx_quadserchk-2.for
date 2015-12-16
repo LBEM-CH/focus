@@ -267,7 +267,12 @@ C-----Read in entire CC map into ARRAY
 C
       write(6,'(''Reading CC map '',A)')FILE3
       call shorten(FILE3,k)
-      CALL IMOPEN(1,FILE3(1:k),'RO')
+      call system("\rm -f tmp.mrc")
+      write(cline,'(''\cp -f '',A,'' tmp.mrc'')')FILE3(1:k)
+      call shorten(cline,k)
+      call system(cline(1:k))
+      write(NAME,'(''tmp.mrc'')')
+      CALL IMOPEN(1,NAME,'RO')
       CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
       IF(NCOL*NLINE.GT.IARRMXSIZ) STOP '::  IARRMXSIZ too small'
       CALL IMPOSN(1,0,0)
@@ -609,7 +614,14 @@ C-----------Shift Cross-Correlation Array by ICMAX,IRMAX pixels
 C
 C-----------Open input image
 C
-            CALL IMOPEN(11,FILE1,'RO')
+            call shorten(FILE1,k2)
+            write(cline,'(''\cp -f '',A,'' tmp3.mrc'')')FILE1(1:k2)
+            call shorten(cline,k3)
+            call system(cline(1:k3))
+C
+            write(NAME,'(''tmp3.mrc'')')
+            CALL IMOPEN(11,NAME,'RO')
+C            CALL IMOPEN(11,FILE1,'RO')
             CALL IRDHDR(11,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
 C            CALL IRTLAB(11,LABELS,NL)
 C            CALL IRTEXT(11,EXTRA,1,29)
@@ -668,7 +680,10 @@ C
             call shorten(cline,k3)
             call system(cline(1:k3))
 C
-            CALL IMOPEN(12,FILE2,'NEW')
+C            CALL IMOPEN(12,FILE2,'NEW')
+            call system("\rm tmp2.mrc")
+            write(NAME,'(''tmp2.mrc'')')
+            CALL IMOPEN(12,NAME,'NEW')
             CALL ITRHDR(12,11)
 C
 C-----------Put title labels, new cell and extra information into header
@@ -677,7 +692,7 @@ C
 C            CALL IALEXT(12,EXTRA,1,29)
 C            CALL IALCEL(12,CELL)
 C            CALL IALMOD(12,MODE)
-            CALL IWRHDR(12,TITLE,1,DMIN,DMAX,DMEAN)
+            CALL IWRHDR(12,TITPLOT,1,DMIN,DMAX,DMEAN)
 C
 C-----------Write the file into the output file
 C
@@ -690,9 +705,12 @@ C
               CALL IWRLIN(12,ALINE)
             enddo
 C
-            CALL IWRHDR(12,TITLE,-1,DMIN,DMAX,DMEAN)
+            CALL IWRHDR(12,TITPLOT,-1,DMIN,DMAX,DMEAN)
 C
             CALL IMCLOSE(12)
+            write(cline,'(''\cp -f tmp2.mrc '',A)')FILE2(1:k2)
+            call shorten(cline,k)
+            call system(cline(1:k))
             CALL IMCLOSE(11)
 C
           endif
@@ -729,6 +747,7 @@ CHENN<
 C
 C-----READ PROFILE DATA SET
 C
+      write(6,'(''Reading PROFILE...'')')
       CALL IMOPEN(2,'PROFILE','RO')
       CALL IRDHDR(2,NXYZ2,MXYZ2,MODE,DMIN,DMAX,DMEAN)
       NXP=NXYZ2(1)
@@ -736,6 +755,7 @@ C
       CALL IMPOSN(2,0,0)
       CALL IRDPAS(2,PROFILE,NXP,NYP,0,NXP-1,0,NYP-1,*9501)
       CALL IMCLOSE(2)
+      write(6,'(''PROFILE read.'')')
 C
 C-----Normalise profile to reasonable numbers (max=100.0) - avoids overflow later.
       IF(PROFILE(51,51).GT.0.001) THEN
@@ -806,12 +826,16 @@ C
       WRITE(6,9051)(I,NSTART(I),NFIN(I),NSTEP(I),I=1,10)
 9051  FORMAT(' NPASS=',I3,' NSTART=',I3,' NFIN=',I3,' NSTEP=',I3,/)
 C     
+      write(6,'(''IPASS = '',I6)')IPASS
 C-----OPEN FILE FOR ERRORS; WRITE IF IPASS=1; READ IF IPASS=2; 
       IF(IPASS.NE.0)then
+        write(6,'(''Opening ERRORS...'')')
         CALL CCPDPN(4,'ERRORS','UNKNOWN','F',0,0)
+        write(6,'(''ERRORS opened on channel 4.'')')
       endif
 C-----OPEN FILE FOR ERRORS; WRITE IF IPASS=3;
       IF(IPASS.EQ.3)then
+        write(6,'(''Opening ERROUT...'')')
         CALL CCPDPN(8,'ERROUT','UNKNOWN','F',0,0)
 C        CALL CCPDPN(18,'ERROUTN','UNKNOWN','F',0,0)
       endif

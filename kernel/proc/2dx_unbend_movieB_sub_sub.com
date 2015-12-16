@@ -481,7 +481,8 @@ eot
         # The high-contrast frame-0 is only used as refinement reference  
         if ( ${i} != "0" ) then
 
-            if ( ${irunner} == '1' ) then
+            if ( ${movie_ghostscript_installed} == "y" ) then
+              if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS 
                   \mv -f CCPLOT.pdf PS/MovieB_quadserch.pdf
@@ -490,7 +491,7 @@ eot
                 endif
                 pdftk A=PS/MovieB_quadserch.pdf cat A1 output out.pdf
                 \mv -f out.pdf PS/MovieB_quadserch.pdf
-            else
+              else
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS  
                 else
@@ -502,6 +503,8 @@ eot
                   pdftk A=CCPLOT.pdf B=PS/MovieB_quadserch.pdf cat A1 B1-end output out.pdf 
                 endif
                 \mv -f out.pdf PS/MovieB_quadserch.pdf
+              endif
+
             endif
 
             ###########################################################################
@@ -589,7 +592,8 @@ eot
             #
             \cp -f CCPLOT.PS ${frame_folder}/frame_${i}/PS/${nonmaskimagename}-ccunbend.ps
 
-            if ( ${irunner} == '1' ) then
+            if ( ${movie_ghostscript_installed} == "y" ) then
+              if ( ${irunner} == '1' ) then
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS  
                   \mv -f CCPLOT.pdf PS/MovieB_unbending.pdf
@@ -598,7 +602,7 @@ eot
                 endif
                 pdftk A=PS/MovieB_unbending.pdf cat A1 output out.pdf 
                 \mv -f out.pdf PS/MovieB_unbending.pdf
-            else
+              else
                 if ( ${ps2pdf} == "pstopdf" ) then
                   ${ps2pdf} CCPLOT.PS 
                 else
@@ -610,6 +614,7 @@ eot
                   pdftk A=CCPLOT.pdf B=PS/MovieB_unbending.pdf cat A1 B1-end output out.pdf 
                 endif
                 \mv -f out.pdf PS/MovieB_unbending.pdf
+              endif
             endif
         
             ###########################################################################
@@ -619,7 +624,7 @@ eot
             setenv OUT ${frame_folder}/CCUNBEND_frame_${i}.mrc
             \rm -f     ${frame_folder}/CCUNBEND_frame_${i}.mrc
             ${bin_2dx}/2dx_taperedgek.exe << eot
-            30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
 
             ###########################################################################

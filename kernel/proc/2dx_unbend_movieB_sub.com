@@ -223,6 +223,9 @@ endif
 #
 echo "<<@progress: 15>>"
 #
+if ( ! -e SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc ) then
+  ${proc_2dx}/protest "ERROR: PROFILE missing. First run previous script."
+endif
 setenv PROFILE  SCRATCH/${iname}_fou_unbend2_fft_msk_fft_cro_aut_cro.mrc
 setenv PROFDATA ${nonmaskimagename}_profile.dat
 setenv ERRORS   SCRATCH/errout${iname}.dat
@@ -283,8 +286,8 @@ while ($i <= ${movie_imagenumber_superframes})
   ${proc_2dx}/lin "Working on frame ${i}"
   #########################################################################
 
+  set olddir = $PWD
   if ( ! -e ${frame_folder}/2dx_master.cfg ) then
-    set olddir = $PWD
     cd ${frame_folder}
     \ln -s ../2dx_image.cfg 2dx_master.cfg  
     cd ${olddir}
@@ -295,9 +298,21 @@ while ($i <= ${movie_imagenumber_superframes})
   if ( -d ${image_dir}/${frame_folder} ) then
     ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize"
     ${app_2dx_image} ${image_dir}/${frame_folder}/frame_${i} "2dx_initialize_files"
+    cd ${image_dir}/${frame_folder}/frame_${i}
+    if ( -l SCRATCH ) then 
+      \rm -rf SCRATCH
+      \mkdir SCRATCH
+    endif
+    cd ${olddir}
   else
     ${app_2dx_image} ${frame_folder}/frame_${i} "2dx_initialize"
     ${app_2dx_image} ${frame_folder}/frame_${i} "2dx_initialize_files"
+    cd ${frame_folder}/frame_${i}
+    if ( -l SCRATCH ) then
+      \rm -rf SCRATCH
+      \mkdir SCRATCH
+    endif
+    cd ${olddir}
   endif
   \rm -f ${frame_folder}/2dx_master.cfg
 
@@ -866,8 +881,10 @@ if ( ${movie_filter_type} == '2' ) then
         ${proc_2dx}/linblock "Plotting AMP-Decay"
         ${app_python} ${proc_2dx}/movie/extractAMP.py ${frame_folder}/AMPs.txt `ls ${frame_folder}/aph_*`
         ${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${frame_folder}/AMPs.pdf ${movie_imagenumber_toave}
-        ${pdf2ps} ${frame_folder}/AMPs.pdf ${frame_folder}/AMPs.ps 
-        echo  "# IMAGE: ${frame_folder}/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
+        if ( ${movie_ghostscript_installed} == "y" ) then
+          ${pdf2ps} ${frame_folder}/AMPs.pdf ${frame_folder}/AMPs.ps 
+          echo  "# IMAGE: ${frame_folder}/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
+        endif
 endif
 
 if ( ${tempkeep} != "y" ) then
@@ -886,18 +903,19 @@ endif
 ${proc_2dx}/linblock "Plotting local drift"
 ${app_python} ${proc_2dx}/movie/plotLocalDrift.py ${frame_folder} PS/MovieB_drifts.pdf ${num_dia}
 
-${proc_2dx}/linblock "Finalizing output"
-${pdf2ps} PS/MovieB_drifts.pdf PS/MovieB_drifts.ps
-echo  "# IMAGE: PS/MovieB_drifts.ps <PS: Local drifts>" >> LOGS/${scriptname}.results
+if ( ${movie_ghostscript_installed} == "y" ) then
+  ${proc_2dx}/linblock "Finalizing output"
+  ${pdf2ps} PS/MovieB_drifts.pdf PS/MovieB_drifts.ps
+  echo  "# IMAGE: PS/MovieB_drifts.ps <PS: Local drifts>" >> LOGS/${scriptname}.results
 
-\rm -f PS/MovieB_quadserch.ps
-${pdf2ps} PS/MovieB_quadserch.pdf PS/MovieB_quadserch.ps
-echo "# IMAGE-IMPORTANT: PS/MovieB_quadserch.ps <PS: Profiles QUADSERCH>" >> LOGS/${scriptname}.results
+  \rm -f PS/MovieB_quadserch.ps
+  ${pdf2ps} PS/MovieB_quadserch.pdf PS/MovieB_quadserch.ps
+  echo "# IMAGE-IMPORTANT: PS/MovieB_quadserch.ps <PS: Profiles QUADSERCH>" >> LOGS/${scriptname}.results
 
-\rm -f PS/MovieB_unbending.ps
-${pdf2ps} PS/MovieB_unbending.pdf PS/MovieB_unbending.ps
-echo "# IMAGE-IMPORTANT: PS/MovieB_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
-
+  \rm -f PS/MovieB_unbending.ps
+  ${pdf2ps} PS/MovieB_unbending.pdf PS/MovieB_unbending.ps
+  echo "# IMAGE-IMPORTANT: PS/MovieB_unbending.ps <PS: Profiles CCUNBEND>" >> LOGS/${scriptname}.results
+endif
 
 echo "# IMAGE-IMPORTANT: ${outfile} <APH: APH file after movie-mode B unbending>" >> LOGS/${scriptname}.results
 

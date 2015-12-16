@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/csh -ef
 ####
 #
 #############################################################################
@@ -113,6 +113,7 @@ set show_frame_CCmap_marked = "n"
 # DISPLAY: ctfcor_debug
 # DISPLAY: ctfcor_maxamp_factor
 # DISPLAY: calculate_tiles
+# DISPLAY: movie_ghostscript_installed
 #
 #$end_local_vars
 #
@@ -220,6 +221,7 @@ set stepdigitizer = ""
 set tempkeep = ""
 set treatspotscan = ""
 set use_masked_image = ""
+set movie_ghostscript_installed = ""
 #
 #$end_vars
 #
@@ -261,30 +263,34 @@ if ( ${system} == "Darwin" ) then
   else
     set app_2dx_image = "${bin_2dx}../../../bin/2dx_image"
   endif
-  echo ":Testing, if gostscript is installed and ps2pdf exists"
-  set ps2pdf_test = `which ps2pdf`x 
-  if ( ${ps2pdf_test} == 'x' ) then
-    set ps2pdf = pstopdf
-    set pdf2ps = notfound
-    echo "::"
-    echo "::ERROR: Install gostscript first."
-    echo "::"
-  else
-    set ps2pdf = `which ps2pdf` 
-    set pdf2ps = `which pdf2ps`
+  if ( ${movie_ghostscript_installed} == "y" ) then
+    echo ":Testing, if gostscript is installed and ps2pdf exists"
+    set ps2pdf_test = `which ps2pdf`x 
+    if ( ${ps2pdf_test} == 'x' ) then
+      set ps2pdf = pstopdf
+      set pdf2ps = notfound
+      echo "::"
+      echo "::ERROR: Install gostscript first."
+      echo "::"
+    else
+      set ps2pdf = `which ps2pdf` 
+      set pdf2ps = `which pdf2ps`
+    endif
   endif
 else
   set app_2dx_image = "2dx_image"
   set ps2pdf = ps2pdf
   set pdf2ps = pdf2ps
 endif
-echo ":pdf2ps is ${pdf2ps}"
-echo ":ps2pdf is ${ps2pdf}"
-if ( ${pdf2ps}x == 'x' ) then
-  set pdf2ps = "echo ::ERROR: pdf2ps not found. Install gostscript."
-  echo ::
-  echo ::ERROR: pdf2ps not found. Install gostscript.
-  echo ::
+if ( ${movie_ghostscript_installed} == "y" ) then
+  echo ":pdf2ps is ${pdf2ps}"
+  echo ":ps2pdf is ${ps2pdf}"
+  if ( ${pdf2ps}x == 'x' ) then
+    set pdf2ps = "echo ::ERROR: pdf2ps not found. Install gostscript."
+    echo ::
+    echo ::ERROR: pdf2ps not found. Install gostscript.
+    echo ::
+  endif
 endif
 ##########################################
 ##########################################

@@ -304,9 +304,9 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 #
 #
 #---------------------------------------------------------------------------------------------------
-${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_select_APH.com  ${olddir} ${dirlist} ${merge_data_type}"
+${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_select_APH.com  ${olddir} ${merge_data_type}"
 #----------------------------------------------------------------------------------------------------
-source ${proc_2dx}/2dx_select_APH.com  ${olddir} ${dirlist} ${merge_data_type}
+source ${proc_2dx}/2dx_select_APH.com  ${olddir} ${merge_data_type}
 #
 #############################################################################
 ${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"

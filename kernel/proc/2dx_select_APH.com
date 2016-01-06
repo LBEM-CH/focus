@@ -14,7 +14,7 @@
 # OUTPUT: Copies the correct APH file to "image_ctfcor_ctf.aph" 
 #
 # USAGE:
-#	2dx_select_APH.com  <merge_dir> <dirlist> <user_data_type>
+#	2dx_select_APH.com  <merge_dir> <user_data_type>
 #
 # AUTHOR: Nikhil Biyani
 #         Henning Stahlberg
@@ -22,8 +22,7 @@
 ###############################################################################
 #
 set merge_dir=${1}
-set dirlist=${2}
-set user_data_type=${3}
+set user_data_type=${2}
 #
 #----------------------------------------------------------------------
 # {proc_2dx}/linblock "Setting APH file types to use"

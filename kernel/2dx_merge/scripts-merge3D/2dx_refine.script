@@ -311,9 +311,9 @@ set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 set olddir = $PWD
 #
 #---------------------------------------------------------------------------------------------------
-${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_select_APH.com  ${olddir} ${dirlist} ${refine_data_type}"
+${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_select_APH.com  ${olddir} ${refine_data_type}"
 #----------------------------------------------------------------------------------------------------
-source ${proc_2dx}/2dx_select_APH.com  ${olddir} ${dirlist} ${refine_data_type}
+source ${proc_2dx}/2dx_select_APH.com  ${olddir} ${refine_data_type}
 #
 #------------------------------------------------------------------------------
 ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"

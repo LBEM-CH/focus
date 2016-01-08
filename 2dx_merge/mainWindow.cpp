@@ -291,6 +291,7 @@ void mainWindow::setupMenuBar() {
     viewMenu->addAction(showImageLibraryAction);
     
     QAction* showSelectedAction = new QAction(*(mainData->getIcon("selected")), tr("&Show checked images only"), this);
+    showSelectedAction->setShortcut(tr("Ctrl+X"));
     showSelectedAction->setCheckable(true);
     connect(showSelectedAction, SIGNAL(toggled(bool)), albumCont, SLOT(showSelected(bool)));
     viewMenu->addAction(showSelectedAction);

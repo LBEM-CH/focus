@@ -37,7 +37,6 @@
 #
 # MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_image-algo-2.jpg">
 #
-# DISPLAY: imageorigin
 # DISPLAY: imagename_original
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
@@ -80,7 +79,6 @@ set proc_2dx = ""
 set SCRATCH_DISK = ""
 #
 # Variables to be available from the config file are:
-set imageorigin = ""
 set tempkeep = ""
 set imagename = ""
 set nonmaskimagename = ""
@@ -124,6 +122,9 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
+#
+set imageorigin = 0
+echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
 #
 if ( ${movie_inmovie} == "n" ) then
   echo "<<@evaluate>>"

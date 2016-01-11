@@ -454,15 +454,26 @@ while ( ${dircounter} <= ${dirnum} )
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
           if ( ${backup_also_Movie} == "0" ) then
             if ( -d ${from_dirfile}/MovieA ) then
-              if ( ! -d ${to_dirfile}/MovieA ) then
-                \mkdir ${to_dirfile}/MovieA
+              if ( ! -d ${to_dirfile}/MA ) then
+                \mkdir ${to_dirfile}/MA
               endif
               echo dummy > ${from_dirfile}/MovieA/dummy.tmp
-              echo ":New: ${to_dirfile}/MovieA/*"
-              cd ${from_dirfile}/MovieA ; tar -cf - . | (cd ${to_dirfile}/MovieA ; tar -xpf -)
-              # ${copy_command} ${from_dirfile}/MovieA/* ${to_dirfile}/MovieA
+              echo ":New: ${to_dirfile}/MA/*"
+              cd ${from_dirfile}/MovieA ; tar -cf - . | (cd ${to_dirfile}/MA ; tar -xpf -)
+              # ${copy_command} ${from_dirfile}/MovieA/* ${to_dirfile}/MA
               \rm ${from_dirfile}/MovieA/dummy.tmp
-              \rm ${to_dirfile}/MovieA/dummy.tmp
+              \rm ${to_dirfile}/MA/dummy.tmp
+            endif
+            if ( -d ${from_dirfile}/MA ) then
+              if ( ! -d ${to_dirfile}/MA ) then
+                \mkdir ${to_dirfile}/MA
+              endif
+              echo dummy > ${from_dirfile}/MA/dummy.tmp
+              echo ":New: ${to_dirfile}/MA/*"
+              cd ${from_dirfile}/MA ; tar -cf - . | (cd ${to_dirfile}/MA ; tar -xpf -)
+              # ${copy_command} ${from_dirfile}/MA/* ${to_dirfile}/MA
+              \rm ${from_dirfile}/MA/dummy.tmp
+              \rm ${to_dirfile}/MA/dummy.tmp
             endif
             if ( -d ${from_dirfile}/MovieB ) then
               if ( ! -d ${to_dirfile}/MB ) then

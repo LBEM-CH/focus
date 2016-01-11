@@ -67,6 +67,12 @@ ${proc_2dx}/linblock "2dx_merge_modifyImageParameter.exe"
 #############################################################################
 #
 set dirfile = "2dx_merge_dirfile.dat"
+set olddir = `pwd`
+cd ..
+set base = `pwd`
+cd ${olddir}
+#
+${proc_2dx}/linblock "base is ${base}"
 #
 if ( ! -e ${dirfile} ) then
   ${proc_2dx}/protest "ERROR: 2dx_merge did not provide the directory list."
@@ -80,6 +86,7 @@ endif
 ${bin_2dx}/2dx_merge_modifyImageParameter.exe << eot
 LOGS/${scriptname}.results
 ${dirfile}
+${base}
 ${addPhaOri}
 ${addPhaOriFouFilter}
 ${addBeamTilt}

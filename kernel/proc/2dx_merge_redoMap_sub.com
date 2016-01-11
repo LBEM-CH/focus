@@ -118,7 +118,7 @@ else
   set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
 endif
 #
-${proc_2dx}/lin "Using APH files ${aphfile}"
+${proc_2dx}/linblock "Using APH file ${aphfile}"
 #
 if ( ! -e ${aphfile} ) then
   ${proc_2dx}/linblock "ERROR: ${aphfile} not found."
@@ -270,10 +270,10 @@ echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATC
 #
 ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang}
 #
-  echo "Calling now:"
-  echo "${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}"
-  ${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}
-  #
+echo "Calling now:"
+echo "${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}"
+${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}
+#
 if( ${extends} == "y" ) then
     echo "Running: ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2"
     #

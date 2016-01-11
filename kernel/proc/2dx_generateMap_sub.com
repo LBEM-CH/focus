@@ -50,10 +50,6 @@ echo "scale = ${scale}"
 #
 source ${proc_2dx}/2dx_checklattice_sub.com 
 #
-#############################################################################
-${proc_2dx}/linblock "ORIGTILT - A first time to produce phase residual table"
-#############################################################################
-#
 \rm -f SCRATCH/2dx_origtilt-LOG1.dat
 #
 if ( ${rot180} == 'y' ) then
@@ -279,6 +275,8 @@ ${proc_2dx}/linblock "ORIGTILT - in p1 symmetry to transform the APH file"
 \rm -f SUMMARY
 echo dummy > fort.1
 \rm -f fort.?
+#
+${proc_2dx}/linblock "Using APH file ${aphfile}"
 #
 ${bin_2dx}/2dx_origtiltk.exe << eot
 SCRATCH/2dx_origtilt-LOG1.dat

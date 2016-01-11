@@ -6,7 +6,7 @@ C Created..........: 01/03/2007
 C Last Modification: 01/03/2007       
 C Author...........: 2dx.org           
 C
-      character*200 cname1,cname3,cdir,ctmpdir
+      character*200 cname1,cname2,cname3,cdir,ctmpdir
       character*80 cphaori,cphaoriFouFilter,cbeamtilt
       character*200 CFILE1
       integer*8 imnum(10000)
@@ -23,6 +23,11 @@ C
       read(*,'(A)')cname1
       call shorten(cname1,k)
       write(*,'(A)')cname1(1:k)
+C
+      write(*,'(/,''input project base directory'')')
+      read(*,'(A)')cname2
+      call shorten(cname2,k)
+      write(*,'(A)')cname2(1:k)
 C
       write(*,'(/,''input Additional Phase Shift for phaori'')')
       read(*,*)phaorix,phaoriy
@@ -41,6 +46,7 @@ C
 C
       open(11,FILE=CFILE1,STATUS='UNKNOWN',ERR=905)
 C
+      call shorten(cname2,k7)
       imcount = 0
 C
  100  continue
@@ -66,7 +72,7 @@ C
         imcount=imcount+1
 C
         call shorten(ctmpdir,k)
-        write(11,'(''<IMAGEDIR="'',A,''">'')')ctmpdir(1:k)
+        write(11,'(''<IMAGEDIR="'',A,''/'',A,''">'')')cname2(1:k7),ctmpdir(1:k)
         write(6,'('':Working on '',A)')ctmpdir(1:k)
 C
         call cgetline(cphaori,"phaori")

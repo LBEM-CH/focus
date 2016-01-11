@@ -319,7 +319,6 @@ while ( ${dircounter} <= ${dirnum} )
           source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y 2dx_image.cfg-backup1
           source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y 2dx_image.cfg-backup2
           source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y 2dx_image.cfg-backup3
-          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y 2dx_image.cfg
         endif
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "1" ) then

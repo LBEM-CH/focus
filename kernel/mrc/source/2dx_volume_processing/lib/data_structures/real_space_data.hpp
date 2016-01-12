@@ -196,6 +196,17 @@ namespace volume
             RealSpaceData vertical_slab_mask(double height, bool centered);
             
             /**
+             * Returns a mask with soft boundaries.
+             * All densities above the threshold_higher will be given a value of
+             * 1.0. All densities below this value will be given a value 0f 0.0.
+             * Rest densities will be properly scaled.
+             * @param threshold_higher
+             * @param therehsold_lower
+             * @return RealSpaceData
+             */
+            RealSpaceData threshold_soft_mask(double threshold_higher, double therehsold_lower) const;
+            
+            /**
              * Applies a density slab in the vertical direction (z-axis) with the
              * fractional height. The new densities are changed only with the 
              * fraction provided. fraction = 1.0 will completely change the map
@@ -254,6 +265,13 @@ namespace volume
              * @param fraction
              */
             void apply_mask(const RealSpaceData& mask, double fraction = 1.0);
+            
+            /**
+             * Multiplies the densities of the mask provided with the current data,
+             * the size of the mask and current data should be the same.
+             * @param mask
+             */
+            void multiply_mask(const RealSpaceData& mask);
             
             /**
              * Mask the real space data with a mask. It will fractionally delete all densities 

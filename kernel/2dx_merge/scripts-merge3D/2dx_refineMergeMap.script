@@ -22,13 +22,15 @@
 # DISPLAY: realang
 # DISPLAY: ALAT
 # DISPLAY: number_refinement_iterations
-# DISPLAY: density_threshold_refinement
+# DISPLAY: density_threshold_refinement_higher
+# DISPLAY: density_threshold_refinement_lower
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: calculate_subvolume
 # DISPLAY: refinement_mask_resolution
 # DISPLAY: refinement_amplitude_cutoff
 # DISPLAY: refinement_cone_angle
+# DISPLAY: membrane_height
 #
 #$end_local_vars
 #
@@ -46,7 +48,8 @@ set number_refinement_iterations = ""
 set number_shrinkwrap_iterations = ""
 set membrane_height = ""
 set maximum_amplitude_refinement = ""
-set density_threshold_refinement = ""
+set density_threshold_refinement_higher = ""
+set density_threshold_refinement_lower = ""
 set refinement_mask_resolution = ""
 set refinement_amplitude_cutoff = ""
 set refinement_cone_angle = ""

@@ -323,13 +323,14 @@ ds::RealSpaceData ds::RealSpaceData::vertical_slab_mask(double height, bool cent
 {
     RealSpaceData mask(nx(), ny(), nz());
     
-    if(height > 1.0)
+    if(height > nz())
     {
-        std::cerr << "ERROR: Applying vertical density slab with slab height greater than volume z-length!";
+        std::cerr << "ERROR: Applying vertical density slab with slab height greater than volume z-length(" << nz() << ")\n";
         return mask;
     }
     
-    int membrane_height = floor(height*nz());
+    int membrane_height = floor(height);
+    if(height <= 1.0) membrane_height = floor(height*nz());
     
     int density_start = (int) (nz()-membrane_height)/2;
     int density_end = density_start + membrane_height;
@@ -402,6 +403,45 @@ void ds::RealSpaceData::scale(double min, double max)
 void ds::RealSpaceData::grey_scale()
 {
     scale(0, 255);
+}
+
+ds::RealSpaceData ds::RealSpaceData::threshold_soft_mask(double th, double tl) const
+{
+    if(th < tl)
+    {
+        double tt = th;
+        th = tl;
+        tl = tt;
+    }
+    
+    //Return normal threshold mask the difference is too low
+    if(th-tl < 0.001)
+    {
+        return threshold_mask(th);
+    }
+    
+    std::cout << "Creating threshold soft mask with limits = " << th << ", " << tl<< "\n";
+    
+    RealSpaceData mask(nx(), ny(), nz());
+    for(int id=0; id < size(); id++)
+    {
+        double currentDensity = get_value_at(id);
+        if(currentDensity >= th)
+        {
+            mask.set_value_at(id, 1.0);
+        }
+        else if(currentDensity < tl)
+        {
+            mask.set_value_at(id, 0.0);
+        }
+        else
+        {
+            double scaledDensity = (currentDensity - tl)/(th - tl); 
+            mask.set_value_at(id, scaledDensity);
+        }
+    }
+    
+    return mask;
 }
 
 ds::RealSpaceData ds::RealSpaceData::threshold_mask(double threshold) const
@@ -500,6 +540,23 @@ void ds::RealSpaceData::apply_mask(const RealSpaceData& mask, double fraction)
         {
             set_value_at(id, density*(1-fraction));
         }
+    }
+}
+
+void ds::RealSpaceData::multiply_mask(const RealSpaceData& mask)
+{
+    if(mask.nx() != nx() || mask.ny() != ny() || mask.nz() != nz())
+    {
+        std::cerr << "WARNING: Found different sizes for mask and volume. NOT MASKING!!!\n";
+        return;   
+    }
+    
+    std::cout << "Multiplying mask with the real space data..\n";
+    for(int id=0; id < size(); id++)
+    {
+        double density = get_value_at(id);
+        double mask_density = mask.get_value_at(id);
+        set_value_at(id, density*mask_density);
     }
 }
 

@@ -25,10 +25,11 @@ int main(int argc, char** argv)
     
     TCLAP::ValueArg<double> CONE("", "cone", "(in degrees) The data in Fourier space will be filled only in the cone with specified degrees", false, 90.0, "FLOAT");
     TCLAP::ValueArg<double> AMP_CUTOFF("", "amp_cutoff", "All the reflections below this value would be ignored", false, 0.0, "FLOAT");
+    static TCLAP::ValueArg<double> THRESHOLDH("", "threshold_higher", "Higher density threshold for mask (as percentage)", true, -1.0,"FLOAT");
+    static TCLAP::ValueArg<double> THRESHOLDL("", "threshold_lower", "Lower density threshold for mask (as percentage)", true, -1.0,"FLOAT");
     
     //Select required arguments
     args::templates::MRCIN.forceRequired();
-    args::templates::THRESHOLD.forceRequired();
     args::templates::ITERATIONS.forceRequired();
     
     //Add arguments  
@@ -39,8 +40,10 @@ int main(int argc, char** argv)
     exe.add(args::templates::TEMP_LOC);
     exe.add(AMP_CUTOFF);
     exe.add(CONE);
+    exe.add(args::templates::SLAB);
     exe.add(args::templates::MASK_RES);
-    exe.add(args::templates::THRESHOLD);
+    exe.add(THRESHOLDL);
+    exe.add(THRESHOLDH);
     exe.add(args::templates::ITERATIONS);
     exe.add(args::templates::MRCIN);
     
@@ -52,12 +55,17 @@ int main(int argc, char** argv)
     std::string temp_loc = args::templates::TEMP_LOC.getValue();  
     std::string symmetry = args::templates::SYMMETRY.getValue();
     double max_resolution = args::templates::MAXRES.getValue();
-    double density_threshold = args::templates::THRESHOLD.getValue();
     int number_of_iterations = args::templates::ITERATIONS.getValue();  
     std::string hklout = args::templates::HKLOUT.getValue();
     std::string mrcout = args::templates::MRCOUT.getValue();
     double cone_angle = CONE.getValue();
     double amp_cutoff = AMP_CUTOFF.getValue();
+    
+    double density_threshold_higher = THRESHOLDH.getValue();
+    double density_threshold_lower = THRESHOLDL.getValue();
+    
+    double membrane_slab = 1.0;
+    if(args::templates::SLAB.isSet()) membrane_slab = args::templates::SLAB.getValue();
     
     double mask_resolution = 15.0;
     if(args::templates::MASK_RES.isSet())  mask_resolution = args::templates::MASK_RES.getValue();
@@ -100,7 +108,7 @@ int main(int argc, char** argv)
         std::cout << "::Shrinkwrap Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
-        if(temp_loc != "") output_volume.write_volume(temp_loc + "/shrinkwrap_initial_volume_" + iteration_str +".map", "map");
+        if(temp_loc != "") output_volume.write_volume(temp_loc + "/initial_volume_" + iteration_str +".map", "map");
         
         volume::data::RealSpaceData real_before(output_volume.get_real());
         double sum_initial = real_before.squared_sum();
@@ -108,20 +116,22 @@ int main(int argc, char** argv)
         volume::data::RealSpaceData mask_threshold = real_before.threshold_mask(0);
         real_before.apply_mask(mask_threshold);
         
-        //volume::data::RealSpaceData mask_slab = real_before.vertical_slab_mask(membrane_slab, true);
-        //real_before.apply_mask(mask_slab);
+        volume::data::RealSpaceData mask_slab = real_before.vertical_slab_mask(membrane_slab, true);
+        real_before.apply_mask(mask_slab);
         
         mask.set_real(real_before);
         mask.low_pass_butterworth(mask_resolution);
-        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_shrinkwrap_" + iteration_str +".map");
-        volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_mask(density_threshold*real_before.max()/100);
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_" + iteration_str +".map");
+        double maxDensity = real_before.max();
+        volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_soft_mask(density_threshold_higher*maxDensity/100, density_threshold_lower*maxDensity/100);
     
         //Just to write output of mask to file
         mask.set_real(mask_shrinkwrap);
-        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_shrinkwrap_" + iteration_str +".map");
+        if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_" + iteration_str +".map");
         
         //Mask the volume
-        volume::data::RealSpaceData real_after = real_before.mask_applied_data(mask_shrinkwrap, 1.0);
+        real_before.multiply_mask(mask_shrinkwrap);
+        volume::data::RealSpaceData real_after = real_before;
         
         //Get the sum of densities for error calculation
         double sum_final = real_after.squared_sum();
@@ -149,7 +159,7 @@ int main(int argc, char** argv)
         //Replace the reflections from that of input
         output_volume.replace_reflections(input_volume.get_fourier(), cone_angle, amp_cutoff);
         
-        if(temp_loc != "") output_volume.write_volume(temp_loc + "/shrinkwrap_final_volume_" + iteration_str +".map", "map");
+        if(temp_loc != "") output_volume.write_volume(temp_loc + "/final_volume_" + iteration_str +".map", "map");
         
         error = itr_error;
     }

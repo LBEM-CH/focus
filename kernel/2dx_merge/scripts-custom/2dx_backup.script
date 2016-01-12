@@ -171,30 +171,12 @@ if ( ${backup_merge} == "yes" ) then
     ${copy_command} -r ${from_dir}/REGISTERS ${to_dir}
   endif
   #
-  if ( -e ${from_dir}/merge2D_MRClefthanded.mtz ) then
-    echo ":New: ${to_dir}/merge2D_MRClefthanded.mtz"
-    ${copy_command} ${from_dir}/merge2D_MRClefthanded.mtz ${to_dir}
-  endif
-  #
-  if ( -e ${from_dir}/merge2Dref_MRClefthanded.mtz ) then
-    echo ":New: ${to_dir}/merge2Dref_MRClefthanded.mtz"
-    ${copy_command} ${from_dir}/merge2Dref_MRClefthanded.mtz ${to_dir}
-  endif
-  #
-  if ( -e ${from_dir}/merge3D_MRClefthanded.mtz ) then
-    echo ":New: ${to_dir}/merge3D_MRClefthanded.mtz"
-    ${copy_command} ${from_dir}/merge3D_MRClefthanded.mtz ${to_dir}
-  endif
-  #
-  if ( -e ${from_dir}/merge3Dref_MRClefthanded.mtz ) then
-    echo ":New: ${to_dir}/merge3Dref_MRClefthanded.mtz"
-    ${copy_command} ${from_dir}/merge3Dref_MRClefthanded.mtz ${to_dir}
-  endif
-  #
-  if ( -e ${from_dir}/merge.aph ) then
-    echo ":New: ${to_dir}/merge.aph"
-    ${copy_command} ${from_dir}/merge.aph ${to_dir}
-  endif
+  source ${proc_2dx}/2dx_backup_sub.com ${from_dir} ${to_dir} y merge2D_MRClefthanded.mtz
+  source ${proc_2dx}/2dx_backup_sub.com ${from_dir} ${to_dir} y merge2Dref_MRClefthanded.mtz
+  source ${proc_2dx}/2dx_backup_sub.com ${from_dir} ${to_dir} y merge3D_MRClefthanded.mtz
+  source ${proc_2dx}/2dx_backup_sub.com ${from_dir} ${to_dir} y merge3Dref_MRClefthanded.mtz
+  source ${proc_2dx}/2dx_backup_sub.com ${from_dir} ${to_dir} y merge.aph
+  source ${proc_2dx}/2dx_backup_sub.com ${from_dir} ${to_dir} y History.dat
   #
   if ( -d ${from_dir}/APH ) then
     if ( ! -d ${to_dir}/APH ) then
@@ -207,25 +189,11 @@ if ( ${backup_merge} == "yes" ) then
     \rm ${to_dir}/APH/dummy.tmp
   endif
   #
-  if ( -e ${from_dir}/History.dat ) then
-    echo ":New: ${to_dir}/History.dat"
-    ${copy_command} ${from_dir}/History.dat ${to_dir}
-  endif
-  #
   if ( -e ${from_dir}/2dx_merge_dirfile.dat ) then
     echo ":New: ${to_dir}/2dx_merge_dirfile.dat"
     ${copy_command} ${from_dir}/2dx_merge_dirfil*.dat ${to_dir}
   endif
   #
-  cd ${to_dir}
-  cd ..
-  if ( ! -e 2dx_master.cfg ) then
-    set curdir = ${PWD}
-    echo "::Creating configfile link in ${curdir}."
-    \rm -f 2dx_master.cfg
-   # \ln -s ${to_dir}/2dx_merge.cfg 2dx_master.cfg
-  endif
-  cd ${oldir}
 endif
 #
 ############################################################################# 
@@ -347,94 +315,28 @@ while ( ${dircounter} <= ${dirnum} )
         endif
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
-          echo ":New: ${to_dirfile}/2dx_image.cfg"
-          ${copy_command} ${from_dirfile}/2dx_image.cfg ${to_dirfile}
-          if ( -e ${from_dirfile}/2dx_image.cfg-backup1 ) then
-            ${copy_command} ${from_dirfile}/2dx_image.cfg-backup1 ${to_dirfile}
-          endif
-          if ( -e ${from_dirfile}/2dx_image.cfg-backup2 ) then
-            ${copy_command} ${from_dirfile}/2dx_image.cfg-backup2 ${to_dirfile}
-          endif
-          if ( -e ${from_dirfile}/2dx_image.cfg-backup3 ) then
-            ${copy_command} ${from_dirfile}/2dx_image.cfg-backup3 ${to_dirfile}
-          endif
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y 2dx_image.cfg
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y 2dx_image.cfg-backup1
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y 2dx_image.cfg-backup2
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y 2dx_image.cfg-backup3
         endif
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "1" ) then
-          if ( -e ${from_dirfile}/${loc_nonmaskimagename}.tif ) then
-            if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.tif ) then
-              echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.tif"
-              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.tif ${to_dirfile}
-            else
-              echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.tif"
-            endif
-          else 
-            if ( -e ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
-              if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc ) then
-                echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
-                ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_raw.mrc ${to_dirfile}
-              else
-                echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_raw.mrc"
-              endif
-            else
-              if ( -e ${from_dirfile}/${loc_nonmaskimagename}.mrc ) then
-                if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}.mrc ) then
-                  echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.mrc"
-                  ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.mrc ${to_dirfile}
-                else
-                  echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}.mrc"
-                endif
-              endif
-            endif
-          endif
-          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ) then
-            if ( ! -e ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc ) then
-              echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc"
-              ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_stack.mrc ${to_dirfile}
-            else
-              echo ":Old: ${to_dirfile}/${loc_nonmaskimagename}_stack.mrc"
-            endif
-          endif
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} n ${loc_nonmaskimagename}.tif
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} n ${loc_nonmaskimagename}_raw.mrc
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} n ${loc_nonmaskimagename}.mrc
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} n ${loc_nonmaskimagename}_stack.mrc
         endif
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
-          if ( -e ${from_dirfile}/${loc_nonmaskimagename}.spt ) then
-            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}.spt"
-            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}.spt ${to_dirfile}
-          endif
-          #
-          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_automask.mrc ) then
-            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_automask.mrc"
-            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_automask.mrc ${to_dirfile}
-          endif
-          #
-          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_manualmask.mrc ) then
-            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_manualmask.mrc"
-            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_manualmask.mrc ${to_dirfile}
-          endif
-          #
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y ${loc_nonmaskimagename}.spt
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y ${loc_nonmaskimagename}_automask.spt
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y ${loc_nonmaskimagename}_manualmask.spt
         endif
         #
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
-          if ( -e ${from_dirfile}/History.dat ) then
-            echo ":New: ${to_dirfile}/History.dat"
-            ${copy_command} ${from_dirfile}/History.dat ${to_dirfile}
-          endif
-          #
-          if ( -e ${from_dirfile}/${loc_nonmaskimagename}_profile.dat ) then
-            echo ":New: ${to_dirfile}/${loc_nonmaskimagename}_profile.dat"
-            ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}_profile.dat ${to_dirfile}
-          endif
-          #
-          # if ( -e ${from_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ) then
-          #   echo ":New: ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc"
-          #   ${copy_command} ${from_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ${to_dirfile}
-          # endif
-          #
-          if ( -e ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc ) then
-            echo ":Removing: ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc"
-            \rm ${to_dirfile}/${loc_nonmaskimagename}-unitcells-spider.doc
-          endif
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y History.dat
+          source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile} ${to_dirfile} y ${loc_nonmaskimagename}_profile.dat
           #
           if ( ${backup_also_APH} == "0" ) then
             if ( -d ${from_dirfile}/APH ) then
@@ -453,39 +355,14 @@ while ( ${dircounter} <= ${dirnum} )
 
         if ( ${backup_large_images} == "0" || ${backup_large_images} == "2" ) then
           if ( ${backup_also_Movie} == "0" ) then
-            if ( -d ${from_dirfile}/MovieA ) then
-              if ( ! -d ${to_dirfile}/MovieA ) then
-                \mkdir ${to_dirfile}/MovieA
-              endif
-              echo dummy > ${from_dirfile}/MovieA/dummy.tmp
-              echo ":New: ${to_dirfile}/MovieA/*"
-              cd ${from_dirfile}/MovieA ; tar -cf - . | (cd ${to_dirfile}/MovieA ; tar -xpf -)
-              # ${copy_command} ${from_dirfile}/MovieA/* ${to_dirfile}/MovieA
-              \rm ${from_dirfile}/MovieA/dummy.tmp
-              \rm ${to_dirfile}/MovieA/dummy.tmp
-            endif
-            if ( -d ${from_dirfile}/MovieB ) then
-              if ( ! -d ${to_dirfile}/MB ) then
-                \mkdir ${to_dirfile}/MB
-              endif
-              echo dummy > ${from_dirfile}/MovieB/dummy.tmp
-              echo ":New: ${to_dirfile}/MB/*"
-              cd ${from_dirfile}/MovieB ; tar -cf - . | (cd ${to_dirfile}/MB ; tar -xpf -)
-              # ${copy_command} ${from_dirfile}/MovieB/* ${to_dirfile}/MB
-              \rm ${from_dirfile}/MovieB/dummy.tmp
-              \rm ${to_dirfile}/MB/dummy.tmp
-            endif
-            if ( -d ${from_dirfile}/MB ) then
-              if ( ! -d ${to_dirfile}/MB ) then
-                \mkdir ${to_dirfile}/MB
-              endif
-              echo dummy > ${from_dirfile}/MB/dummy.tmp
-              echo ":New: ${to_dirfile}/MB/*"
-              cd ${from_dirfile}/MB ; tar -cf - . | (cd ${to_dirfile}/MB ; tar -xpf -)
-              # ${copy_command} ${from_dirfile}/MB/* ${to_dirfile}/MB
-              \rm ${from_dirfile}/MB/dummy.tmp
-              \rm ${to_dirfile}/MB/dummy.tmp
-            endif
+            source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile}/MovieA ${to_dirfile}/MA y direct_sum_filt_upscale.mrc
+            source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile}/MovieA ${to_dirfile}/MA y direct_sum_fft.mrc
+            source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile}/MovieB ${to_dirfile}/MB y direct_sum_filt_upscale.mrc
+            source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile}/MovieB ${to_dirfile}/MB y direct_sum_fft.mrc
+            source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile}/MA ${to_dirfile}/MA y direct_sum_filt_upscale.mrc
+            source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile}/MA ${to_dirfile}/MA y direct_sum_fft.mrc
+            source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile}/MB ${to_dirfile}/MB y direct_sum_filt_upscale.mrc
+            source ${proc_2dx}/2dx_backup_sub.com ${from_dirfile}/MB ${to_dirfile}/MB y direct_sum_fft.mrc
           endif
         endif
 	#

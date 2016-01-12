@@ -102,6 +102,10 @@ foreach dirfile ( ${dirlist} )
   # echo "set stepdigitizer = 5.0" >> LOGS/${scriptname}.results
   # echo "set magnification = 43859.0" >> LOGS/${scriptname}.results
 
+  # echo "set crop_histogram = y" >> LOGS/${scriptname}.results
+  # echo "set crop_histogram_percent = 5" >> LOGS/${scriptname}.results
+  # echo "set crop_histogram_stdev = 4.0" >> LOGS/${scriptname}.results
+
   # echo "set maska = 17.0" >> LOGS/${scriptname}.results
   # echo "set maskb01 = 13.0" >> LOGS/${scriptname}.results
   # echo "set maskb02 = 15.0" >> LOGS/${scriptname}.results

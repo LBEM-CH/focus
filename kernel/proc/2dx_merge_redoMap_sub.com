@@ -118,7 +118,7 @@ else
   set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
 endif
 #
-${proc_2dx}/lin "Using APH files ${aphfile}"
+${proc_2dx}/linblock "Using APH file ${aphfile}"
 #
 if ( ! -e ${aphfile} ) then
   ${proc_2dx}/linblock "ERROR: ${aphfile} not found."

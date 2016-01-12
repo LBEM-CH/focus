@@ -37,7 +37,6 @@
 # DISPLAY: imagename
 # DISPLAY: imagename_original
 # DISPLAY: nonmaskimagename
-# DISPLAY: imageorigin
 # DISPLAY: imagesidelength
 # DISPLAY: taperBeforeFFT
 # DISPLAY: comment
@@ -63,7 +62,6 @@ set SCRATCH_DISK = ""
 set SYN_Unbending = ""
 set PHASEORI_done = ""
 #
-set imageorigin = ""
 set tempkeep = ""
 set imagename = ""
 set nonmaskimagename = ""
@@ -108,6 +106,9 @@ set scriptname = 2dx_fftrans
 echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
+#
+set imageorigin = 0
+echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE: "${nonmaskimagename}_automask.mrc "<Masking info, automask>" >> LOGS/${scriptname}.results
 echo "# IMAGE: "${nonmaskimagename}_manualmask.mrc "<Masking info, manualmask>" >> LOGS/${scriptname}.results

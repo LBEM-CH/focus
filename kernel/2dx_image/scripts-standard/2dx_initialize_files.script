@@ -37,7 +37,6 @@
 #
 # MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_image-algo-2.jpg">
 #
-# DISPLAY: imageorigin
 # DISPLAY: imagename_original
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
@@ -84,7 +83,6 @@ set proc_2dx = ""
 set SCRATCH_DISK = ""
 #
 # Variables to be available from the config file are:
-set imageorigin = ""
 set tempkeep = ""
 set imagename = ""
 set nonmaskimagename = ""
@@ -145,6 +143,9 @@ if ( ${movie_inmovie}x != "yx" ) then
   echo "<<@progress: 1>>"
   echo "<<@evaluate>>"
 endif
+#
+set imageorigin = 0
+echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
 #
 if ( ! -e ${imagename}.mrc && ! -e ${imagename}_raw.mrc ) then
   set initialization_executable = 'y'

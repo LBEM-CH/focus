@@ -461,11 +461,11 @@ C
           call cgetline(CIMAGENAME,"imagename")
           call cgetline(CIMAGENUMBER,"imagenumber")
 C
-          read(CIMAGENUMBER,*)imnum(imtotalcountcount)
-C         write(*,'(''::imagenumber read = '',I10)')imnum(imtotalcountcount)
-          if(imtotalcountcount.gt.1)then
-            do i=1,imtotalcountcount-1
-              if(imnum(i).eq.imnum(imtotalcountcount))then
+          read(CIMAGENUMBER,*)imnum(imtotalcount)
+C         write(*,'(''::imagenumber read = '',I10)')imnum(imtotalcount)
+          if(imtotalcount.gt.1)then
+            do i=1,imtotalcount-1
+              if(imnum(i).eq.imnum(imtotalcount))then
                 call shorten(CIMAGENAME,k)
                 write(*,'(''::WARNING: Imagenumber '',I10,
      .            '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
@@ -617,12 +617,12 @@ C
 C
  200    continue
 C
-        write(14,'(''wait'')')
         write(11,'(''        -1'')')
         write(11,'(''eot'')')
         write(11,'(''#'')')
         write(11,'(''#'')')
         close(11)
+        write(14,'(''wait'')')
         close(14)
 C
         call shorten(cname2,k)
@@ -645,12 +645,12 @@ C
       goto 220
 C
  210  continue
-        write(14,'(''wait'')')
         write(11,'(''        -1'')')
         write(11,'(''eot'')')
         write(11,'(''#'')')
         write(11,'(''#'')')
         close(11)
+        write(14,'(''wait'')')
         close(14)
 C
         call shorten(cname2,k)
@@ -672,7 +672,6 @@ C
  220  continue
 C
       close(10)
-C
 C
       goto 999
 C

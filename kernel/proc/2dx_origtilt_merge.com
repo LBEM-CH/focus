@@ -14,7 +14,7 @@
 #############################################################################
 #
 set dirfile = "2dx_merge_dirfile.dat"
-set scriptAfile = "SCRATCH/2dx_merge_scriptA.com"
+set scriptAfile = "2dx_merge_scriptA.com"
 set scriptPLTfile = "SCRATCH/2dx_merge_scriptPLT.com"
 #
 set genref = "0"
@@ -44,8 +44,6 @@ if ( ${num_selected} == '0' ) then
     ${proc_2dx}/protest "ERROR: Did you check the image directories to be merged?"
 endif
 #
-\rm -f ${scriptAfile}
-#
 set number = 1
 if ( ${ILIST} == "n" ) then
     set IVERBOSE = 1
@@ -61,8 +59,20 @@ if ( ${merge_data_type} == '5' ) then
   echo ":: "
 endif
 #
-${bin_2dx}/2dx_merge_compileA.exe << eot
-LOGS/${scriptname}.results
+set dirfile = "2dx_merge_dirfile.dat"
+set dirnum = `cat ${dirfile} | wc -l`
+set maxthread = `echo ${Thread_Number} ${dirnum} | awk '{if ($1<$2/2) { s = $1 } else { s = int($2 / 2) }} END { print s }'`
+if ( ${maxthread} < "1" ) then
+  set maxthread = 1
+endif
+if ( ${maxthread} == "0" ) then
+  set maxthread = 1
+endif
+#
+${bin_2dx}/2dx_merge_compileA_threaded.exe << eot
+${scriptname}.results
+${scriptname}-tmp.reflections
+${scriptname}-tmp.console
 ${proc_2dx}
 ${bin_2dx}
 ${dirfile}
@@ -85,35 +95,86 @@ ${Thread_Number}
 ${ILIST_VAL}
 eot
 #
-echo "# IMAGE: ${scriptAfile} <CSH: merging script>" >> LOGS/${scriptname}.results
 echo "<<@progress: 10>"
 #
 #############################################################################
-${proc_2dx}/linblock "Launch merging script"
+${proc_2dx}/linblock "Launch merging scripts"
 #############################################################################
 #
-chmod +x ${scriptAfile}
+if ( ${genref} == "1" ) then
+  echo dummy > APH/REF1.hkl
+  \rm -f APH/REF*.hkl
+endif
 #
-${scriptAfile} > LOGS/2dx_merge_scriptA.log
+if ( ${shftin} == "1" ) then
+  echo dummy > PRJ/HKLAPH1.prj
+  \rm -f PRJ/HKLAPH*.prj
+endif
 #
-echo "# IMAGE: LOGS/2dx_merge_scriptA.log <LOG: origtilt A output>" >> LOGS/${scriptname}.results
-# cat LOGS/2dx_merge_scriptA.log
+set maxthread_gt_9 = `echo ${maxthread} | awk '{ if ( $1 > 9 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${maxthread_gt_9} == '1' ) then
+  set maxthread_with_zero = ${maxthread}
+else
+  set maxthread_with_zero = "0"${maxthread}
+endif
+#
+if ( ${maxthread} == "1" ) then
+  echo "# IMAGE: SCRATCH/job_01_${scriptAfile} <CSH: Merging script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptA.com.log <LOG: Origtilt A output>" >> LOGS/${scriptname}.results
+else
+  echo "# IMAGE: SCRATCH/job_01_${scriptAfile} <CSH: First (01) merging script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptA.com.log <LOG: First (01) origtilt A output>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_${scriptAfile} <CSH: Last (${maxthread_with_zero}) merging script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_2dx_merge_scriptA.com.log <LOG: Last (${maxthread_with_zero}) origtilt A output>" >> LOGS/${scriptname}.results
+endif
+#
+foreach scriptA ( SCRATCH/job_*_${scriptAfile} )
+  if ( ${scriptA} != SCRATCH/job_${maxthread_with_zero}_${scriptAfile} ) then
+    echo Background nohup ${scriptA} \> ${scriptA}.log \&
+    nohup ${scriptA} > ${scriptA}.log &
+  else
+    echo Forground ${scriptA} \> ${scriptA}.log
+    ${scriptA} > ${scriptA}.log
+  endif
+end
+#
+
 echo "################################################"
 echo "################################################"
-echo "output in file LOGS/2dx_merge_scriptA.log"
+echo "output in file SCRATCH/job_XX_2dx_merge_scriptA.com.log"
 echo "################################################"
 echo "################################################"
 #
-cat 2dx_origtiltk-console.log
-# \rm -f 2dx_origtiltk-console.log
+echo "Refinement jobs produced the following output files:"
+touch SCRATCH/job_01_${scriptname}-tmp.console
+\ls -l SCRATCH/job_*_${scriptname}-tmp.console
+#
+sleep 1
+#
+\rm -f SCRATCH/${scriptname}.console
+echo "# IMAGE: SCRATCH/${scriptname}.console <LOG: Console output from merging>" >> LOGS/${scriptname}.results
+foreach scriptAconsole ( SCRATCH/job_*_${scriptname}-tmp.console ) 
+  cat ${scriptAconsole} >> SCRATCH/${scriptname}.console
+  \rm -f ${scriptAconsole}
+end
+#
 #
 echo "<<@progress: 15>"
 #
-if ( -e fort.3 && -e SUMMARY ) then
+\rm -f APH/merge_tmp.aph
+foreach aphfile ( SCRATCH/job_*_results.aph )
+  cat ${aphfile} >> APH/merge_tmp.aph
+  # \rm -f ${aphfile}
+end
+#
+echo "# IMAGE: APH/merge.aph <APH: merge.aph>" >> LOGS/${scriptname}.results
+echo "0000001001" > APH/merge.aph
+sort APH/merge_tmp.aph >> APH/merge.aph
+#
+if ( -e SUMMARY ) then
     if ( -e TMP987123.tmp ) then
         \mv -f TMP987123.tmp merge.phr
     endif
-    \mv -f fort.3 APH/merge.aph
     \mv -f SUMMARY LOGS/mrcmerge.summary.log
 else
     ${proc_2dx}/protest "ERROR: Problem in ${scriptAfile}"

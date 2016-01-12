@@ -74,7 +74,7 @@ if ( ! -d ${backup_dir} ) then
   ${proc_2dx}/linblock "The directory ${backup_dir} does not exist"
   set backup_root = `dirname ${backup_dir}`
   echo "backup root is ${backup_root}" 
-  if (  -d ${backup_root} && ${backup_direction} == 0 ) then
+  if (  -d ${backup_root} && ( ${backup_direction} == 0 || ${backup_direction} == 1 )) then
     ${proc_2dx}/linblock "Creating backup directory to submit the data to: ${backup_dir}"
     mkdir ${backup_dir}
   else
@@ -104,7 +104,7 @@ if ( ${backup_dir_noslash} == ${local_root_dir_noslash} ) then
   ${proc_2dx}/protest "ERROR: You cannot sync with the local directory."
 endif
 #
-if ( ${backup_direction} == "0" ) then
+if ( ${backup_direction} == "0" || ${backup_direction} == 1 ) then
   ${proc_2dx}/linblock "Pushing local files to remote location."
 else
   ${proc_2dx}/linblock "Pulling remote files to local working copy."
@@ -115,7 +115,7 @@ if ( ${backup_merge} == "yes" ) then
   ${proc_2dx}/linblock "Copying merge directory"
   #############################################################################
   #
-  if ( ${backup_direction} == "0" ) then
+  if ( ${backup_direction} == "0" || ${backup_direction} == 1 ) then
     set from_dir = ${PWD}
     set to_dir = `echo ${from_dir} | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
     if ( ! -d ${to_dir} ) then
@@ -151,13 +151,13 @@ if ( ${backup_merge} == "yes" ) then
   ${copy_command} ${from_dir}/2dx_merge.cfg ${to_dir}
   #
   if ( ${backup_all_files} == "0" ) then
-    if ( ${backup_direction} == "0" ) then
+    if ( ${backup_direction} == "0" || ${backup_direction} == 1 ) then
       cat ${from_dir}/2dx_merge_dirfile.dat | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g" > ${to_dir}/2dx_merge_dirfile.dat
     else
       cat ${from_dir}/2dx_merge_dirfile.dat | sed "s/\//#/g" | sed "s/${backup_dir_noslash}/${local_root_dir_noslash}/" | sed "s/#/\//g" > ${to_dir}/2dx_merge_dirfile.dat
     endif
   else
-    if ( ${backup_direction} == "0" ) then
+    if ( ${backup_direction} == "0" || ${backup_direction} == 1 ) then
       cat ${from_dir}/2dx_merge_dirfile.dat | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g" > ${to_dir}/2dx_merge_dirfile.dat
     else
       if ( ! -e ${to_dir}/2dx_merge_dirfile.dat ) then
@@ -200,7 +200,7 @@ endif
 ${proc_2dx}/linblock "Copying all directories"
 #############################################################################
 #
-if ( ${backup_direction} == "0" ) then
+if ( ${backup_direction} == "0" || ${backup_direction} == 1 ) then
   cd ${oldir}/..
   set from_dir = ${PWD}
   set to_dir = `echo ${from_dir} | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
@@ -226,7 +226,7 @@ echo "::Copying files from ${from_dir}"
 echo "::to ${to_dir}."
 echo ":: "
 #
-if ( ${backup_direction} == "0" ) then
+if ( ${backup_direction} == "0" || ${backup_direction} == 1 ) then
   # Push files
   if ( ${backup_all_files} == "0" ) then
     cd ..
@@ -269,7 +269,7 @@ while ( ${dircounter} <= ${dirnum} )
     echo "::Working on source directory: ${from_dirfile}"
     echo ":##############################################################################"
     #
-    if ( ${backup_direction} == "0" ) then
+    if ( ${backup_direction} == "0" || ${backup_direction} == 1 ) then
       set to_dirfile = `echo ${from_dirfile} | sed "s/\//#/g" | sed "s/${local_root_dir_noslash}/${backup_dir_noslash}/" | sed "s/#/\//g"`
     else
       set to_dirfile = `echo ${from_dirfile} | sed "s/\//#/g" | sed "s/${backup_dir_noslash}/${local_root_dir_noslash}/" | sed "s/#/\//g"`
@@ -284,7 +284,7 @@ while ( ${dircounter} <= ${dirnum} )
     cd ${from_dirfile}
     set docopy = 0
     if ( -e 2dx_image.cfg ) then
-      if ( ${backup_direction} == "2" ) then
+      if ( ${backup_direction} == "1" || ${backup_direction} == 3 ) then
         echo "::Copying this image directory."
         set docopy = 1
       else
@@ -425,6 +425,9 @@ eot
          cd ${to_dir}
          if ( ! -d TRASH ) then
            \mkdir TRASH
+         endif
+         if ( -d TRASH/${dir_name} ) then
+           \rm -rf TRASH/${dir_name}
          endif
          \mv -f ${to_dirfile} TRASH
          cd ${to_dir}

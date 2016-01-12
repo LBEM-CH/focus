@@ -541,7 +541,7 @@ C                           NSHFTIN=.T. SHIFTED INPUT DATA.
       CHARACTER*1 CTMP
 C
       CHARACTER*200 cfile1,cline1,cline2,cline3,cline,CPHAORI
-      CHARACTER*200 cfileconsole,cfilereflections
+      CHARACTER*200 cfileconsole,cfilereflections,cfileaph
 C
 C  DIMENSION STATEMENTS FOR OUTPUT SORTING.
       REAL PZ(MAXPLT),PAMP(MAXPLT),PPHS(MAXPLT)
@@ -647,7 +647,7 @@ C
      . F9.2,',',F9.2,' DEGS')
 175   FORMAT((1X,361I1))
 180   FORMAT(' OUTPUT OF SCALED AND SHIFTED REFLECTIONS. ')
-181   FORMAT(' NPROG.NE.0, NO MERGING, TO MERGE RERUN WITH NPROG=0')
+181   FORMAT(' NPROG.NE.0 or -1, NO MERGING, TO MERGE RERUN WITH NPROG=0')
 182   FORMAT(' SORTING FAILED!!!!!!!!!!!!!!!!!!!! NCHNG= ',I5)
 185   FORMAT(' REFLECTION ZSTAR   AMPLITUDE PHASE  FILM',
      1  ' IQ  FLMWGT  BACKGRND  CTF',/,'   IH  IK'/)
@@ -708,6 +708,12 @@ C
       READ(5,*) ISPGRP,NPROG,NTILT,NBEAM,ILIST,ALNG,BLNG,WIDTH,ANG,
      .          IPLOT,MINRFL,IAQP2,IVERBOSE,LOGOUTPUT
       write(*,'('' ISPGRP = '',I10)')ISPGRP
+C
+      if(NPROG.eq.-1)then
+        write(6,'(''Input name for output APH file'')')
+        read(5,'(A)')cfileaph
+        write(6,'(A)')cfileaph
+      endif
 C
 C-----Read tilt-axis refinement stepsizes and number or steps:
 C
@@ -813,7 +819,7 @@ C
       READ(NIN,138)TITLE
       WRITE(6,136)TITLE
 C
-      IF(NPROG.EQ.0) GO TO 201
+      IF(NPROG.EQ.0 .or. NPROG.EQ.-1) GO TO 201
       IF(NPROG.EQ.1) GO TO 202
 C
 201   WRITE(6,130)              ! THIS IF NPROG.EQ.0
@@ -2700,7 +2706,7 @@ C
       GO TO 220         ! BACK TO DO INPUT FOR ANOTHER FILM.
 500   WRITE(6,125)
       CLOSE(UNIT=9)
-      IF(NPROG.EQ.0) GO TO 501     ! STOP HERE FOR NPROG 1, 2 OR 3.(REFINE ONLY)
+      IF(NPROG.EQ.0 .or. NPROG.eq.-1) GO TO 501     ! STOP HERE FOR NPROG 1, 2 OR 3.(REFINE ONLY)
       WRITE(6,181)
       GO TO 1107
 501   WRITE(6,180)
@@ -2766,7 +2772,17 @@ CHEN>
 C
 CHEN<
 C
-      IF(NPROG.EQ.0) WRITE(3,146)IRUN  ! To ensure disk is there before sorting.
+      IF(NPROG.EQ.0)then
+          WRITE(3,146)IRUN  ! To ensure disk is there before sorting.
+      endif
+      if(NPROG.eq.-1)then
+        call shorten(cfileaph,k3)
+        write(*,'(/,'':Creating output APH file '',A)')cfileaph(1:k3)
+        write(cline2,'(''\rm -f '',A)')cfileaph(1:k3)
+        call shorten(cline2,k)
+        call system(cline2(1:k))
+        open(3,FILE=cfileaph,STATUS='NEW',ERR=900)
+      endif
 CMARC>
 C        WRITE(3,186)
 CMARC<
@@ -2966,15 +2982,23 @@ C
       CLOSE(UNIT=17)
       CLOSE(UNIT=18)
       CLOSE(UNIT=21)
+      CLOSE(UNIT=3)
       STOP
 C
 602   WRITE(6,151)IFILM,ISER
       CLOSE(UNIT=17)
       STOP
+C
+ 900  continue
+      write(6,'(''ERROR during file open'')')
+      STOP
+C
 1150  WRITE(6,1106)NMAXC
 1106  FORMAT(' REFERENCE PHASE DATA TOO BIG FOR PROGRAM DIMENSION',I6)
 1107  CONTINUE
       CLOSE(UNIT=17)
+      STOP
+C
       END
 C
 C------------------------------------------------------------------------

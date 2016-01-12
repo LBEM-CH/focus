@@ -1445,7 +1445,7 @@ CHEN<
         IF(LSPEC(IN)) NINEC=NINEC+1
 C
 C========================================
-        IF(NPROG.EQ.0.OR.NPROG.EQ.1) THEN
+        IF(NPROG.EQ.0 .or. NPROG.EQ.-1 .OR. NPROG.EQ.1) THEN
 C========================================
 C
 C---------here for pure merging or refinement against previous merge
@@ -2982,7 +2982,6 @@ C
       CLOSE(UNIT=17)
       CLOSE(UNIT=18)
       CLOSE(UNIT=21)
-      CLOSE(UNIT=3)
       STOP
 C
 602   WRITE(6,151)IFILM,ISER

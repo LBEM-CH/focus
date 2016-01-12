@@ -167,7 +167,14 @@ C
         write(clin2,'(''\rm -f '',A)')cline(1:k1)
         call shorten(clin2,k)
         call system(clin2(1:k))
-        write(*,'(/,'':Creating merging script '',A)')cline(1:k1)
+        imfrom = imtotalcount + 1
+        if(ithread.lt.ITHRNUM)then
+          imto = imtotalcount + imperthread
+        else
+          imto = imnumber 
+        endif
+        write(*,'(/,''::Creating merging script '',A,'' for image '',I5,'' to '',I5,'' of '',I5)')
+     .    cline(1:k1),imfrom,imto,imnumber
         open(11,FILE=cline,STATUS='NEW',ERR=900)
 C
         write(11,'(''#!/bin/csh -ef'')')

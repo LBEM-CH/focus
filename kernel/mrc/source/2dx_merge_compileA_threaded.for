@@ -173,7 +173,7 @@ C
         else
           imto = imnumber 
         endif
-        write(*,'(/,''::Creating merging script '',A,'' for image '',I5,'' to '',I5,'' of '',I5)')
+        write(*,'(/,'':Creating merging script '',A,'' for image '',I5,'' to '',I5,'' of '',I5)')
      .    cline(1:k1),imfrom,imto,imnumber
         open(11,FILE=cline,STATUS='NEW',ERR=900)
 C

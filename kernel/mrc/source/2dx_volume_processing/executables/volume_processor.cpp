@@ -27,6 +27,9 @@ int main(int argc, char* argv[])
     exe.add(args::templates::SUBSAMPLE);
     exe.add(args::templates::BFACTOR);
     exe.add(args::templates::PSF);
+    exe.add(args::templates::INVERTZ);
+    exe.add(args::templates::INVERTY);
+    exe.add(args::templates::INVERTX);
     exe.add(args::templates::INVERTED);
     exe.add(args::templates::EXTENDED);
     exe.add(args::templates::THRESHOLD);
@@ -102,7 +105,11 @@ int main(int argc, char* argv[])
     if(args::templates::BFACTOR.isSet()) input = input.apply_bfactor(args::templates::BFACTOR.getValue());
   
     if(args::templates::EXTENDED.isSet()) input = input.extended_volume(args::templates::EXTENDED.getValue()-1,args::templates::EXTENDED.getValue()-1,0);
-    if(args::templates::INVERTED.getValue()) input.invert_hand();
+    
+    if(args::templates::INVERTED.getValue()) input.invert_hand(0);
+    if(args::templates::INVERTX.getValue()) input.invert_hand(1);
+    if(args::templates::INVERTY.getValue()) input.invert_hand(2);
+    if(args::templates::INVERTZ.getValue()) input.invert_hand(3);
     
     if(args::templates::PSF.getValue())
     {

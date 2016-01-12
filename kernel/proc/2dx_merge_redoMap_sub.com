@@ -209,8 +209,8 @@ if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   ############################################################################# 
   #
   echo "Calling now:"
-  echo "${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2"
-  ${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2 
+  echo "${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2 --invertx --inverty"
+  ${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2  --invertx --inverty
   #
   echo "Calling now:"
   echo "${bin_2dx}/mrc_header_modifier.exe --mrcin ${refmap} --mrcout ${refmap} --cellx ${cellx} --celly ${celly}"
@@ -264,16 +264,20 @@ Skip 1
 END
 eof
 #
-echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang}"
+#############################################################################
+${proc_2dx}/lin "volume_porcessor.exe - to convert ${infile} to MAP"
+#############################################################################
+#
+echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang} --invertx --inverty"
 #
 \rm -f SCRATCH/${imagename}-${symmetry}.map
 #
-${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang}
+${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang} --invertx --inverty
 #
-  echo "Calling now:"
-  echo "${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}"
-  ${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}
-  #
+echo "Calling now:"
+echo "${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}"
+${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}
+#
 if( ${extends} == "y" ) then
     echo "Running: ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2"
     #

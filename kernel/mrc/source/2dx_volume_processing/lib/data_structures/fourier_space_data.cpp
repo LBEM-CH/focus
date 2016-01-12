@@ -370,7 +370,7 @@ void ds::FourierSpaceData::change_amplitudes(const FourierSpaceData& input, doub
 
 ds::FourierSpaceData ds::FourierSpaceData::inverted_data(int direction) const
 {
-    if(direction == 1  || direction == 2 || direction ==3)
+    if(direction == 0 || direction == 1  || direction == 2 || direction == 3)
     {
         //Iterate over all possible miller indices h, k, l
         FourierSpaceData new_data;
@@ -378,21 +378,27 @@ ds::FourierSpaceData ds::FourierSpaceData::inverted_data(int direction) const
         {
             //Assign the current Miller Index to the array
             ds::MillerIndex currentHKL = (*ref).first;
+            double currentAmp = (*ref).second.value().amplitude();
+            double currentPhase = (*ref).second.value().phase();
             int h = currentHKL.h();
             int k = currentHKL.k();
             int l = currentHKL.l();
-            if(direction == 1) h = -1*h;
-            if(direction == 2) k = -1*k;
-            if(direction == 3) l = -1*l;
-                
-            new_data.set_value_at(h, k, l, (*ref).second.value(), (*ref).second.weight());
+            if(direction == 1 || direction == 0) h = -1*h;
+            if(direction == 2 || direction == 0) k = -1*k;
+            if(direction == 3 || direction == 0) l = -1*l;
+            
+            //Get Friedel spot for negative h
+            if(h < 0) {h = -1*h; k=-1*k; l=-1*l; currentPhase = currentPhase*-1;} 
+            
+            ds::Complex2dx newValue = ds::Complex2dx(currentAmp*cos(currentPhase), currentAmp*sin(currentPhase));
+            new_data.set_value_at(h, k, l, newValue, (*ref).second.weight());
         }
         
         return new_data;
     }
     else
     {
-        std::cerr << "ERROR: Encountered bad value of direction (" << direction << ") while inverting data in Fourier space (Possible values 1(for x), 2(for y), 3(for z))\n";
+        std::cerr << "ERROR: Encountered bad value of direction (" << direction << ") while inverting data in Fourier space (Possible values 0(for all), 1(for x), 2(for y), 3(for z))\n";
         std::cerr << "ERROR: NOT INVERTING\n";
         return *this;
     }

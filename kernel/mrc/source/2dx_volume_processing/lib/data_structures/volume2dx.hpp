@@ -536,9 +536,10 @@ namespace volume
             
             
             /**
-             * Inverts the hand
+             * Inverts the hand (Inverts Fourier data in a specific direction)
+             * @param direction = 0 for all axis, 1 for x axis invert, 2 for y axis invert, 3 for z axis invert, 
              */
-            void invert_hand();
+            void invert_hand(int direction);
             
             /**
              * Replace the reflections from a Fourier volume.

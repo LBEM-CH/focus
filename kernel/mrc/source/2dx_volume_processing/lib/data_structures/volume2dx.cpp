@@ -600,10 +600,10 @@ ds::Volume2dx ds::Volume2dx::generate_bead_model(int no_of_beads, double density
 }
 
 
-void ds::Volume2dx::invert_hand()
+void ds::Volume2dx::invert_hand(int direction)
 {
     FourierSpaceData data = get_fourier();
-    FourierSpaceData new_data = data.inverted_data(3);
+    FourierSpaceData new_data = data.inverted_data(direction);
     set_fourier(new_data);
 }
 

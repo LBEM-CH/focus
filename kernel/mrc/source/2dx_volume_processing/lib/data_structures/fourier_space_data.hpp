@@ -224,10 +224,10 @@ namespace volume
             
             /**
              * Returns the inverted Fourier data in a specific direction
-             * @param direction = 1 for x axis invert, 2 for y axis invert, 3 for z axis invert, 
+             * @param direction = 0 for all axis (default), 1 for x axis invert, 2 for y axis invert, 3 for z axis invert, 
              * @return Data with inverted hand
              */
-            FourierSpaceData inverted_data(int direction) const;
+            FourierSpaceData inverted_data(int direction=0) const;
             
         private:
             

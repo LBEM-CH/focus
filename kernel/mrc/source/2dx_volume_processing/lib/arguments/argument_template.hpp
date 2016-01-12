@@ -47,7 +47,10 @@ namespace volume
             static TCLAP::ValueArg<std::string> TEMP_LOC("", "temp", "Folder to keep temporary files for each iteration (if not specified temp files will not be written)", false, "","FOLDER");
             static TCLAP::ValueArg<double> MASK_RES("", "mask-res", "The volume in each iteration will be lowpassed with this resolution, before generating a thresholded mask.", false, 15.0,"FLOAT");
             
-            static TCLAP::SwitchArg INVERTED("", "inverted", "Produce an output map with inverted hand", false);
+            static TCLAP::SwitchArg INVERTED("", "inverted", "Produce an output map with inverted hand in all x,y,z direction", false);
+            static TCLAP::SwitchArg INVERTX("", "invertx", "Produce an output map with inverted hand in x direction", false);
+            static TCLAP::SwitchArg INVERTY("", "inverty", "Produce an output map with inverted hand in y direction", false);
+            static TCLAP::SwitchArg INVERTZ("", "invertz", "Produce an output map with inverted hand in z direction", false);
             static TCLAP::SwitchArg PSF("", "psf", "Produce an Point Spread Function(PSF) output map (works only with mrcout)", false);
             static TCLAP::SwitchArg FULL_FOURIER("", "full-fourier", "Produce a full P1 Fourier space in output (noticeable only with hklout)", false);
             static TCLAP::SwitchArg SPREAD_FOURIER("", "spread-fourier", "Spread the data in Fourier space to fill some missing spots", false);

@@ -410,7 +410,7 @@ C
               inquire(file=cname4(1:k4),exist=lexist)
             endif
             if(.not.lexist)then
-              write(6,'(''::File not found: '',A)')cname4(1:k4)
+              write(6,'('':File not found: '',A)')cname4(1:k4)
             else
               call shorten(CTITLE,k)
               k1=1

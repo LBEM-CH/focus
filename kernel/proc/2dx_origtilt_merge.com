@@ -133,12 +133,6 @@ if ( ${maxthread} == "1" ) then
 else
   echo "# IMAGE: SCRATCH/job_01_${scriptAfile} <CSH: First (01) merging script>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/job_01_2dx_merge_scriptA.com.log <LOG: First (01) origtilt A output>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/job_02_${scriptAfile} <CSH: First (01) merging script>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/job_02_2dx_merge_scriptA.com.log <LOG: First (01) origtilt A output>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/job_03_${scriptAfile} <CSH: First (01) merging script>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/job_03_2dx_merge_scriptA.com.log <LOG: First (01) origtilt A output>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/job_04_${scriptAfile} <CSH: First (01) merging script>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/job_04_2dx_merge_scriptA.com.log <LOG: First (01) origtilt A output>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_${scriptAfile} <CSH: Last (${maxthread_with_zero}) merging script>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_2dx_merge_scriptA.com.log <LOG: Last (${maxthread_with_zero}) origtilt A output>" >> LOGS/${scriptname}.results
 endif

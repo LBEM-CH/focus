@@ -1,0 +1,279 @@
+#!/bin/csh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Tile Images (Experimental)                                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/14/2016                                             #
+# Last Modification: 01/14/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 97
+#
+# MANUAL: <B>Tile Images <B>
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_image = ""
+set SCRATCH_DISK = ""
+#
+# Variables to be available from the config file are:
+#
+#$end_vars
+#
+set scriptname = 2dx_tile
+#
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>>"
+# echo "<<@evaluate>>"
+#
+source ${proc_2dx}/2dx_makedirs
+#
+echo "# IMAGE: 2dx_merge_dirfile.dat <TXT: Directory List>" >> LOGS/${scriptname}.results
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "::The current working directory is" ${olddir}
+echo ": "
+#
+set newimagesidelength = 1024
+set tilenumber = 5
+set tileseries = "1 2 3 4 5"
+#
+set tilenumberm1 = `echo ${tilenumber} | awk '{ s = $1 - 1 } END { print s }'`
+#
+cd ..
+if ( ! -d TILES ) then
+  \mkdir TILES
+endif
+cd TILES
+set target_base = $PWD
+echo "::Target base is ${target_base}"
+if ( ! -d merge ) then
+  \mkdir merge
+  \cp -r ${olddir}/* merge
+  \ln -s merge/2dx_merge.cfg 2dx_master.cfg
+endif
+#
+cd ${olddir}
+#
+cp 2dx_merge_dirfile.dat SCRATCH/2dx_merge_alldirs.dat
+#
+set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
+echo ": Will work on ${dirnum} image directories."
+set increment = `echo ${dirnum} | awk '{ s = 80.0 / ( $1 + 1 ) } END { print s }'`
+set curval = 10.0
+#
+set dircounter = ${dirnum}
+set irun = 1
+while ( ${dircounter} > 0 )
+  #
+  ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
+${olddir}/SCRATCH/2dx_merge_alldirs.dat
+${dircounter}
+eot
+  #
+  set from_dir = `cat TMP.tmp`
+  \rm TMP.tmp
+  #
+  cd ..
+  cd ${from_dir}
+  #
+  set imagename = `cat 2dx_image.cfg | grep "set imagename =" | cut -d\" -f2`
+  set nonmaskimagename = `cat 2dx_image.cfg | grep "set nonmaskimagename =" | cut -d\" -f2`
+  set imagenumber      = `cat 2dx_image.cfg | grep "set imagenumber =" | cut -d\" -f2`
+  set TLTAXIS          = `cat 2dx_image.cfg | grep "set TLTAXIS =" | cut -d\" -f2`
+  set TLTANG           = `cat 2dx_image.cfg | grep "set TLTANG =" | cut -d\" -f2`
+  set CS               = `cat 2dx_image.cfg | grep "set CS =" | cut -d\" -f2`
+  set KV               = `cat 2dx_image.cfg | grep "set KV =" | cut -d\" -f2`
+  set phacon           = `cat 2dx_image.cfg | grep "set phacon =" | cut -d\" -f2`
+  set magnification    = `cat 2dx_image.cfg | grep "set magnification =" | cut -d\" -f2`
+  set stepdigitizer    = `cat 2dx_image.cfg | grep "set stepdigitizer =" | cut -d\" -f2`
+  set defocus          = `cat 2dx_image.cfg | grep "set defocus =" | cut -d\" -f2`
+  set RESMAX           = `cat 2dx_image.cfg | grep "set RESMAX =" | cut -d\" -f2`
+  set ctfcor_noise     = `cat 2dx_image.cfg | grep "set ctfcor_noise =" | cut -d\" -f2`
+  set imode            = 7
+  set ctfcor_debug     = `cat 2dx_image.cfg | grep "set ctfcor_debug =" | cut -d\" -f2`
+  set ctfcor_maxamp_factor = `cat 2dx_image.cfg | grep "set ctfcor_maxamp_factor =" | cut -d\" -f2`
+  set realcell         = `cat 2dx_image.cfg | grep "set realcell =" | cut -d\" -f2`
+  set ALAT             = `cat 2dx_image.cfg | grep "set ALAT =" | cut -d\" -f2`
+  set realang          = `cat 2dx_image.cfg | grep "set realang =" | cut -d\" -f2`
+  set lattice          = `cat 2dx_image.cfg | grep "set lattice =" | cut -d\" -f2`
+  set imagesidelength  = `cat 2dx_image.cfg | grep "set imagesidelength =" | cut -d\" -f2`
+  #
+  echo ": "
+  ${proc_2dx}/linblock "Working on TILE_${imagenumber}: ${from_dir}"
+  #
+  set unbent_image = unbent
+  echo ":PWD = $PWD"
+  ls -l ${unbent_image}.mrc
+  #
+  set lattice_u1 = `echo ${lattice} ${imagesidelength} ${newimagesidelength} | sed 's/,/ /g' | awk '{ s = $1 / $5 * $6 } END { print s }'`
+  set lattice_u2 = `echo ${lattice} ${imagesidelength} ${newimagesidelength} | sed 's/,/ /g' | awk '{ s = $2 / $5 * $6 } END { print s }'`
+  set lattice_v1 = `echo ${lattice} ${imagesidelength} ${newimagesidelength} | sed 's/,/ /g' | awk '{ s = $3 / $5 * $6 } END { print s }'`
+  set lattice_v2 = `echo ${lattice} ${imagesidelength} ${newimagesidelength} | sed 's/,/ /g' | awk '{ s = $4 / $5 * $6 } END { print s }'`
+  set newlattice = `echo ${lattice_u1},${lattice_u2},${lattice_v1},${lattice_v2}`
+  echo ": "
+  echo ":Old lattice = ${lattice}"
+  echo ":New lattice = ${newlattice}"
+  echo ": "
+  #
+  echo "# IMAGE: ${olddir}/../${from_dir}/${unbent_image}.mrc <Unbent Image>" >>  ${olddir}/LOGS/${scriptname}.results
+  set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
+  \rm -f ${ctfcor_ctffile}
+  set ctfcor_outfile = "SCRATCH/image_ctf.mrc"
+  \rm -f ${ctfcor_outfile}
+  #
+  # ${bin_2dx}/2dx_ctfcor.exe << eot
+  ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
+${unbent_image}.mrc
+${ctfcor_outfile}
+${ctfcor_ctffile}
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${RESMAX}
+${ctfcor_noise}
+${imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+  #
+  echo "# IMAGE: ${olddir}/../${from_dir}/${ctfcor_outfile} <Output Image CTF corrected>" >>  ${olddir}/LOGS/${scriptname}.results
+  if ( ${imode} == "2" ) then
+    echo "# IMAGE: ${olddir}/../${from_dir}/${ctfcor_ctffile} <Summed CTF**2 file>" >>  ${olddir}/LOGS/${scriptname}.results
+  else
+    echo "# IMAGE: ${olddir}/../${from_dir}/${ctfcor_ctffile} <Summed CTF file>" >>  ${olddir}/LOGS/${scriptname}.results
+  endif
+  #
+  ###########################################################################
+  ${proc_2dx}/lin "LABELH - Normalizing image to AVG=0, STDEV=100"
+  ###########################################################################
+  #
+  \rm -f SCRATCH/image_ctf_upscale.mrc
+  ${bin_2dx}/labelh.exe << eot
+${ctfcor_outfile}
+39
+SCRATCH/image_ctf_upscale.mrc
+eot
+  #
+  #
+  foreach num_x ( ${tileseries} )
+    foreach num_y ( ${tileseries} )
+      #
+      set locimagenumber = `echo ${imagenumber} ${num_x} ${num_y} | awk '{ s = $1 + 10 * $2 + $3 } END { print s }'`
+      set newimagenumber = `echo ${locimagenumber} | ${bin_2dx}/2dx_getnumber.exe`
+      set testval = `echo ${newimagenumber} | wc -c`
+      if ( `echo ${testval} | awk '{ if ( $1 < 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+        set oldval = ${newimagenumber}
+        set newimagenumber = `echo 0000000000 | cut -c${testval}-`${newimagenumber}
+      endif  
+      #
+      cd ${target_base}
+      #
+      set newdir = TILE_${newimagenumber}
+      if ( ! -d ${newdir} ) then
+        \mkdir ${newdir}
+        cp ${olddir}/../${from_dir}/2dx_image.cfg ${newdir}
+      endif
+      #
+      cd ${newdir}
+      echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
+      echo "set lattice = ${newlattice}" >> 2dx_image.cfg
+      echo "set imagesidelength = ${newimagesidelength}" >> 2dx_image.cfg
+      set fullpath = `pwd`
+      ${app_2dx_image} ${fullpath} "2dx_initialize"
+      #
+      # cp ${olddir}/../${from_dir}/APH/image_ctfcor_fou_unbent_ctf.aph APH
+      #
+      set offset = `echo ${imagesidelength} ${newimagesidelength} ${tilenumberm1} | awk ' { s = int ( ( $1 - $2 ) / $3 ) } END { print s } '`
+      set xmin = `echo ${offset} ${newimagesidelength} ${num_x} | awk '{ s = 1 + ( $3 - 1 ) * $1 } END { print s }'`
+      set xmax = `echo ${xmin} ${newimagesidelength} | awk '{ s = $1 + $2 - 1 } END { print s }'`
+      set ymin = `echo ${offset} ${newimagesidelength} ${num_y} | awk '{ s = 1 + ( $3 - 1 ) * $1 } END { print s }'`
+      set ymax = `echo ${ymin} ${newimagesidelength} | awk '{ s = $1 + $2 - 1 } END { print s }'`
+      echo ":xmin,xmax,ymin,ymax = ${xmin},${xmax},${ymin},${ymax}"
+      # 
+      \rm -f SCRATCH/tile_ctf.mrc
+      #
+      ${bin_2dx}/labelh.exe << eot
+${olddir}/../${from_dir}/SCRATCH/image_ctf_upscale.mrc
+1
+SCRATCH/tile_ctf.mrc
+${xmin},${xmax},${ymin},${ymax},1,1
+eot
+      #
+      ###########################################################################
+      ${proc_2dx}/lin "TAPEREDGE - Tapering edge of summed frames"
+      ###########################################################################
+
+      setenv IN  SCRATCH/tile_ctf.mrc
+      setenv OUT tile_ctf_taper.mrc
+      \rm -f     tile_ctf_taper.mrc
+      ${bin_2dx}/2dx_taperedgek.exe << eot
+30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+eot
+      ###########################################################################
+      ${proc_2dx}/lin "FFTRANS - Producing final FFT"
+      ###########################################################################
+
+      setenv IN tile_ctf_taper.mrc
+      setenv OUT SCRATCH/tile_ctf_taper_fft.mrc
+      \rm -f     SCRATCH/tile_ctf_taper_fft.mrc
+      ${bin_2dx}/2dx_fftrans.exe
+      echo "# IMAGE: tile_ctf_taper.mrc <TILE ${imagenumber}>" >>  ${olddir}/LOGS/${scriptname}.results
+      echo "# IMAGE: SCRATCH/tile_ctf_taper_fft.mrc <TILE ${imagenumber} FFT>" >>  ${olddir}/LOGS/${scriptname}.results
+
+      ###########################################################################
+      ${proc_2dx}/lin "MMBOX - Evaluating APH values"
+      ###########################################################################
+
+      \rm -f SCRATCH/TMP9873.dat
+      set CTF_outfile = APH/image_ctfcor_fou_unbent_ctf.aph
+      \rm -f ${CTF_outfile}
+      set algo = U2
+      set imagecenterx = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+      set imagecentery = ${imagecenterx}
+ 
+      ${bin_2dx}/2dx_mmboxa.exe << eot
+SCRATCH/tile_ctf_taper_fft.mrc
+${imagenumber} ${imagename}, CTFcor_Mode=${imode}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+${CTF_outfile}
+SCRATCH/TMP9873.dat
+${algo}
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
+200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${newlattice}                         ! Lattice vectors
+eot
+
+
+      cd ${olddir}
+      cd ..
+      cd ${from_dir} 
+    end
+  end
+  #
+  set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'` 
+  echo "<<@progress:${progress}>>"
+  #
+  @ irun += 1
+  @ dircounter -= 1
+  cd ${olddir}
+end
+#
+${proc_2dx}/lin "Done."
+echo "<<@progress: 100>>"
+#
+#

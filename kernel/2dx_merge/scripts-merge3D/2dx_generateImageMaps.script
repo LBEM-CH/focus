@@ -220,7 +220,7 @@ if ( ${make_reference} == "y" ) then
   endif
   #
   #############################################################################
-  ${proc_2dx}/linblock "Compile refinement script"
+  ${proc_2dx}/linblock "Compile origtilt script for reference projections"
   #############################################################################
   #
   set scriptBfile = "2dx_merge_scriptB.com"
@@ -283,7 +283,7 @@ eot
   echo "<<@progress: 20>>"
   #
   #############################################################################
-  ${proc_2dx}/linblock "Launch refinement script to create reference projections."
+  ${proc_2dx}/linblock "Launch origtilt script to create reference projections."
   ${proc_2dx}/linblock "CHECK OUTPUT in LOG: origtilt B output"
   #############################################################################
   #

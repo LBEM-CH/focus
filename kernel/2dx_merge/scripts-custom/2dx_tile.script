@@ -128,8 +128,8 @@ eot
       # set olddir = $8
       # set from_dir = $9
       #
-      echo ":: Launching: "
-      echo "::" ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir}
+      echo ": Launching: "
+      echo ":" ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir}
       #
       nohup ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir} &
       #

@@ -43,8 +43,8 @@ eot
   foreach num_x ( ${tileseries} )
     foreach num_y ( ${tileseries} )
       #
-      set locimagenumber = `echo ${locimagenumber} ${num_x} ${num_y} ${image_type} | awk '{ s = $1 * 10 + 100 * $2 + 10 * $3 + $4 } END { print s }'`
-      set newimagenumber = `echo ${locimagenumber} | ${bin_2dx}/2dx_getnumber.exe`
+      set tmpimagenumber = `echo ${locimagenumber} ${num_x} ${num_y} ${image_type} | awk '{ s = $1 * 10 + 100 * $2 + 10 * $3 + $4 } END { print s }'`
+      set newimagenumber = `echo ${tmpimagenumber} | ${bin_2dx}/2dx_getnumber.exe`
       set testval = `echo ${newimagenumber} | wc -c`
       if ( `echo ${testval} | awk '{ if ( $1 < 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
         set oldval = ${newimagenumber}

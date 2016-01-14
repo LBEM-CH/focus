@@ -1,4 +1,4 @@
-#!/bin/csh -fex
+#!/bin/csh -fe 
 ####
 #
 #
@@ -14,6 +14,12 @@ set newimagesidelength = $6
 set tilenumber = $7
 set olddir = $8
 set from_dir = $9
+#
+cd ${olddir}
+cd ..
+cd TILES
+set target_base = $PWD
+cd ${olddir}
 #
 set tilenumberm1 = `echo ${tilenumber} | awk '{ s = $1 - 1 } END { print s }'`
 if ( ${tilenumber} == "1" ) then
@@ -34,7 +40,7 @@ endif
 #
 cd ${olddir}
 #
-echo "::The current working directory is" ${olddir}
+echo ":The current working directory is" ${olddir}
 echo ": "
 #
   #
@@ -69,7 +75,7 @@ echo ": "
   set locimagenumber = ${imagenumber}
   #
   echo ": "
-  ${proc_2dx}/linblock "Working on TILE_${imagenumber}: ${from_dir}"
+  echo ":      Working on TILE_${imagenumber}: ${from_dir}"
   #
   set unbent_image = unbent
   echo ":PWD = $PWD"
@@ -123,6 +129,6 @@ echo ": "
     source ${proc_2dx}/2dx_tile_sub_sub.com
   endif
   #
-${proc_2dx}/linblock "Done with ${from_dir}"
+${proc_2dx}/lin "Done with ${from_dir}"
 #
 #

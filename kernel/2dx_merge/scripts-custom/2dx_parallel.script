@@ -74,7 +74,7 @@ set script_2dx_cleanup = ""
 #$end_vars 
 #
 #
-set scriptname = 2dx_reunbend3
+set scriptname = 2dx_parallel
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'

@@ -1,21 +1,34 @@
-#!/bin/csh -fe
+#!/bin/csh -ef
 ####
 #
 #############################################################################
 #                                                                           #
-# Title: Tile Images (Experimental)                                         #
+# Title: Prepare TILES                                                      #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 01/14/2016                                             #
-# Last Modification: 01/14/2016                                             #
+# Created..........: 01/12/2016                                             #
+# Last Modification: 01/12/2016                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
 # SORTORDER: 97
 #
-# MANUAL: <B>Tile Images <B>
+# MANUAL: This script allows to launch several jobs in parallel.  Choose below, which 2dx_image scripts to include.
+#
+# DISPLAY: ReUnbend_MP
+#
+#=============================================================================
+# SECTION: Create Tiles
+#=============================================================================
+#
+# LABEL: Clone merge directory first?
+# LEGEND: Choose if the merge directory should be copied also
+# EXAMPLE: tile_copy_merge = "0"
+# HELP: http://2dx.org/documentation/2dx-software/parameters
+# TYPE: Drop_Down_Menu "0=no;1=yes"
+set tile_copy_merge = "0"
 #
 #$end_local_vars
 #
@@ -24,34 +37,31 @@ set proc_2dx = ""
 set app_2dx_image = ""
 set SCRATCH_DISK = ""
 #
-# Variables to be available from the config file are:
+set ReUnbend_MP = ""
 #
-#$end_vars
+#$end_vars 
 #
 set scriptname = 2dx_tile
-#
 \rm -f LOGS/${scriptname}.results
 #
-echo "<<@progress: 1>>"
-# echo "<<@evaluate>>"
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+source ${proc_2dx}/2dx_merge_makedirs 
 #
-source ${proc_2dx}/2dx_makedirs
+echo "<<@progress: 1>>"
 #
 echo "# IMAGE: 2dx_merge_dirfile.dat <TXT: Directory List>" >> LOGS/${scriptname}.results
 #
-# This memorizes the current merge directory under the variable "olddir":
-set olddir = $PWD
-#
-echo "::The current working directory is" ${olddir}
-echo ": "
-#
 set newimagesidelength = 1024
 set tilenumber = 5
-set tileseries = "1 2 3 4 5"
 #
-set tilenumberm1 = `echo ${tilenumber} | awk '{ s = $1 - 1 } END { print s }'`
-#
+set olddir = ${PWD}
 cd ..
+set rootdir = ${PWD}
+#
+############################################################################# 
+# Copy Merge Directory to new TILE location
+############################################################################# 
 if ( ! -d TILES ) then
   \mkdir TILES
 endif
@@ -61,120 +71,110 @@ echo "::Target base is ${target_base}"
 if ( ! -d merge ) then
   \mkdir merge
   \cp -r ${olddir}/* merge
+else
+  if ( ${tile_copy_merge} == "1" ) then
+    \cp -rf ${olddir}/* merge
+  endif
+endif
+if ( ! -l 2dx_master.cfg ) then
   \ln -s merge/2dx_merge.cfg 2dx_master.cfg
 endif
+############################################################################# 
 #
-cd ${olddir}
+cd ${olddir} 
 #
-cp 2dx_merge_dirfile.dat SCRATCH/2dx_merge_alldirs.dat
+# set loadaverage = `uptime | cut -d\: -f4 | cut -d\  -f2`
+set loadaverage = `ps -axf | sed -n '/${scriptname}/p' | wc -l`
+set ReUnbend_MP = `cat 2dx_merge.cfg | grep "set ReUnbend_MP" | cut -d\" -f2`
+\cp -f 2dx_merge.cfg SCRATCH/${scriptname}_2dx_merge_cfg.tmp
 #
-set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
+set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
 echo ": Will work on ${dirnum} image directories."
-set increment = `echo ${dirnum} | awk '{ s = 80.0 / ( $1 + 1 ) } END { print s }'`
-set curval = 10.0
 #
-set dircounter = ${dirnum}
-set irun = 1
-while ( ${dircounter} > 0 )
-  #
-  ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
-${olddir}/SCRATCH/2dx_merge_alldirs.dat
+\cp -f 2dx_merge_dirfile.dat SCRATCH/${scriptname}_2dx_merge_dirfile_runfile.dat
+#
+set dircounter = 1
+while ( ${dircounter} <= ${dirnum} )
+    #
+    set prog_num = `echo ${dircounter} ${dirnum} | awk '{ s = 5 + int( 90 * $1 / $2 ) } END { print s }'` 
+    echo "<<@progress: ${prog_num}>>"
+    #
+    cd ${olddir}
+    ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
+SCRATCH/${scriptname}_2dx_merge_dirfile_runfile.dat
 ${dircounter}
 eot
-  #
-  set from_dir = `cat TMP.tmp`
-  \rm TMP.tmp
-  #
-  cd ..
-  cd ${from_dir}
-  #
-  set imagename = `cat 2dx_image.cfg | grep "set imagename =" | cut -d\" -f2`
-  set nonmaskimagename = `cat 2dx_image.cfg | grep "set nonmaskimagename =" | cut -d\" -f2`
-  set imagenumber      = `cat 2dx_image.cfg | grep "set imagenumber =" | cut -d\" -f2`
-  set TLTAXIS          = `cat 2dx_image.cfg | grep "set TLTAXIS =" | cut -d\" -f2`
-  set TLTANG           = `cat 2dx_image.cfg | grep "set TLTANG =" | cut -d\" -f2`
-  set CS               = `cat 2dx_image.cfg | grep "set CS =" | cut -d\" -f2`
-  set KV               = `cat 2dx_image.cfg | grep "set KV =" | cut -d\" -f2`
-  set phacon           = `cat 2dx_image.cfg | grep "set phacon =" | cut -d\" -f2`
-  set magnification    = `cat 2dx_image.cfg | grep "set magnification =" | cut -d\" -f2`
-  set stepdigitizer    = `cat 2dx_image.cfg | grep "set stepdigitizer =" | cut -d\" -f2`
-  set defocus          = `cat 2dx_image.cfg | grep "set defocus =" | cut -d\" -f2`
-  set RESMAX           = `cat 2dx_image.cfg | grep "set RESMAX =" | cut -d\" -f2`
-  set ctfcor_noise     = `cat 2dx_image.cfg | grep "set ctfcor_noise =" | cut -d\" -f2`
-  set imode            = 7
-  set ctfcor_debug     = `cat 2dx_image.cfg | grep "set ctfcor_debug =" | cut -d\" -f2`
-  set ctfcor_maxamp_factor = `cat 2dx_image.cfg | grep "set ctfcor_maxamp_factor =" | cut -d\" -f2`
-  set realcell         = `cat 2dx_image.cfg | grep "set realcell =" | cut -d\" -f2`
-  set ALAT             = `cat 2dx_image.cfg | grep "set ALAT =" | cut -d\" -f2`
-  set realang          = `cat 2dx_image.cfg | grep "set realang =" | cut -d\" -f2`
-  set lattice          = `cat 2dx_image.cfg | grep "set lattice =" | cut -d\" -f2`
-  set phaori           = `cat 2dx_image.cfg | grep "set phaori =" | cut -d\" -f2`
-  set imagesidelength  = `cat 2dx_image.cfg | grep "set imagesidelength =" | cut -d\" -f2`
-  set sample_pixel      = `cat 2dx_image.cfg | grep "set sample_pixel =" | cut -d\" -f2`
-  #
-  set locimagenumber = ${imagenumber}
-  #
-  echo ": "
-  ${proc_2dx}/linblock "Working on TILE_${imagenumber}: ${from_dir}"
-  #
-  set unbent_image = unbent
-  echo ":PWD = $PWD"
-  ls -l ${unbent_image}.mrc
-  #
-  set realu      = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-  set realv      = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
-  set lattice_u1 = `echo ${lattice} ${imagesidelength} ${newimagesidelength} | sed 's/,/ /g' | awk '{ s = $1 / $5 * $6 } END { print s }'`
-  set lattice_u2 = `echo ${lattice} ${imagesidelength} ${newimagesidelength} | sed 's/,/ /g' | awk '{ s = $2 / $5 * $6 } END { print s }'`
-  set lattice_v1 = `echo ${lattice} ${imagesidelength} ${newimagesidelength} | sed 's/,/ /g' | awk '{ s = $3 / $5 * $6 } END { print s }'`
-  set lattice_v2 = `echo ${lattice} ${imagesidelength} ${newimagesidelength} | sed 's/,/ /g' | awk '{ s = $4 / $5 * $6 } END { print s }'`
-  set newlattice = `echo ${lattice_u1},${lattice_u2},${lattice_v1},${lattice_v2}`
-  echo ": "
-  echo ":Old lattice = ${lattice}"
-  echo ":New lattice = ${newlattice}"
-  echo ": "
-  #
-  set inimage          = "unbent.mrc"
-  if ( -e ${inimage} ) then
-    set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
-    set ctfcor_outfile = "SCRATCH/image_ctf.mrc"
-    set outimage       = "tile_ctf_taper.mrc"
-    set outfft         = "SCRATCH/tile_ctf_taper_fft.mrc"
-    set CTF_outfile_nA = image_ctfcor_fou_unbent_ctf.aph
-    echo "# IMAGE: ${olddir}/../${from_dir}/${inimage} <Unbent U2 Image>" >>  ${olddir}/LOGS/${scriptname}.results
-    source ${proc_2dx}/2dx_tile_sub.com
-  endif
-  #
-  set inimage          = "MA/direct_sum_filt_upscale.mrc"
-  if ( -e ${inimage} ) then
-    set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
-    set ctfcor_outfile = "SCRATCH/image_ctf.mrc"
-    set outimage       = "tile_ctf_taper.mrc"
-    set outfft         = "SCRATCH/tile_ctf_taper_fft.mrc"
-    set CTF_outfile_nA = image_ctfcor_movie_fou_ctf.aph
-    echo "# IMAGE: ${olddir}/../${from_dir}/${inimage} <Unbent MA Image>" >>  ${olddir}/LOGS/${scriptname}.results
-    source ${proc_2dx}/2dx_tile_sub.com
-  endif
-  #
-  set inimage          = "MB/direct_sum_filt_upscale.mrc"
-  if ( -e ${inimage} ) then
-    set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
-    set ctfcor_outfile = "SCRATCH/image_ctf.mrc"
-    set outimage       = "tile_ctf_taper.mrc"
-    set outfft         = "SCRATCH/tile_ctf_taper_fft.mrc"
-    set CTF_outfile_nA = image_ctfcor_movieB_fou_ctf.aph
-    echo "# IMAGE: ${olddir}/../${from_dir}/${inimage} <Unbent MB Image>" >>  ${olddir}/LOGS/${scriptname}.results
-    source ${proc_2dx}/2dx_tile_sub.com
-  endif
-  #
-  set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'` 
-  echo "<<@progress:${progress}>>"
-  #
-  @ irun += 1
-  @ dircounter -= 1
-  cd ${olddir}
-end
+    #
+    set from_dir = `cat TMP.tmp`
+    \rm TMP.tmp
+    #
+    cd ..
+    cd ${from_dir}
+    #
+    if ( -e 2dx_image.cfg ) then
+      echo ": "
+      echo "Working on ${from_dir} ("`date`")"
+
+      ${proc_2dx}/linblock "At load ${loadaverage}/${ReUnbend_MP}, launching job ${dircounter} of ${dirnum} on ${from_dir}"
+
+      ###########################################################################################################################
+      # set bin_2dx = $1
+      # set proc_2dx = $2
+      # set app_2dx_image = $3
+      # set SCRATCH_DISK = $4
+      # set scriptname = $5
+      # set newimagesidelength = $6
+      # set tilenumber = $7
+      # set olddir = $8
+      # set from_dir = $9
+      #
+      echo ":: Launching: "
+      echo "::" ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir}
+      #
+      nohup ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir} &
+      #
+      ###########################################################################################################################
+
+      cd ${olddir}
+      set load_too_high = 1
+      while ( ${load_too_high} == 1 ) 
+        set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
+        set loadaverage = `ps -axf | sed -n '/2dx_tile_sub.com/p' | wc -l`
+        set load_too_high = `echo ${loadaverage} ${ReUnbend_MP} | awk '{ if ( ( $1 - 0 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+        if ( ${load_too_high} == 1 ) then
+          sleep 2
+        endif
+      end
+
+    else
+      echo "::ERROR for ${from_dir}: No 2dx_image.cfg found."
+    endif
+    # 
+    # 
+    @ dircounter++
+    cd ${olddir}
+  end
+  echo "::Waiting for last jobs to finish"
+  set load_too_high = 1
+  while ( ${load_too_high} == 1 ) 
+    set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
+    set loadaverage = `ps -axf | sed -n '/2dx_tile_sub.com/p' | wc -l`
+    set load_too_high = `echo ${loadaverage} 1 | awk '{ if ( ( $1 - 2 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+    if ( ${load_too_high} == 1 ) then
+      sleep 5
+      # ps -af | grep ${scriptname}
+    endif
+  end
+  echo "::Last jobs have finished."
 #
-${proc_2dx}/lin "Done."
+#
+echo ":: Done."
 echo "<<@progress: 100>>"
+#
+############################################################################# 
+${proc_2dx}/linblock "${scriptname} - normal end."
+#############################################################################
+#
+exit
 #
 #

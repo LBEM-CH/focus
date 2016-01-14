@@ -186,6 +186,12 @@ ${imagecenterx},${imagecentery}           ! XORIG,YORIG
 ${newlattice}                         ! Lattice vectors
 eot
       #
+      cat SCRATCH/TMP9873.dat | grep PSMAX >> 2dx_image.cfg
+      # Update the 2dx_image.cfg file:
+      set fullpath = `pwd`
+      ${app_2dx_image} ${fullpath} "2dx_initialize"
+      #
+      #
       cd APH
       \rm -f image_ctfcor_ctf.aph
       \ln -s ${CTF_outfile_nA} image_ctfcor_ctf.aph

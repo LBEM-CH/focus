@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Prepare TILES                                                      #
+# Title: Prepare TILES (EXPERIMENTAL)                                       #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -51,6 +51,7 @@ source ${proc_2dx}/2dx_merge_makedirs
 echo "<<@progress: 1>>"
 #
 echo "# IMAGE: 2dx_merge_dirfile.dat <TXT: Directory List>" >> LOGS/${scriptname}.results
+echo "# IMAGE: LOGS/${scriptname}_sub.logfile <TXT: Output of subscripts>" >> LOGS/${scriptname}.results
 #
 set newimagesidelength = 1024
 set tilenumber = 5
@@ -131,18 +132,24 @@ eot
       echo ": Launching: "
       echo ":" ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir}
       #
-      nohup ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir} &
+      nohup ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir} >> ${olddir}/LOGS/${scriptname}_sub.logfile &
       #
       ###########################################################################################################################
 
       cd ${olddir}
       set load_too_high = 1
       while ( ${load_too_high} == 1 ) 
-        set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
-        set loadaverage = `ps -axf | sed -n '/2dx_tile_sub.com/p' | wc -l`
+        nohup ${proc_2dx}/getload.com &
+        sleep 1
+        if ( -e SCRATCH/getload.dat ) then
+          set loadaverage = `cat SCRATCH/getload.dat`
+        else
+          sleep 1
+          set loadaverage = 50
+        endif
         set load_too_high = `echo ${loadaverage} ${ReUnbend_MP} | awk '{ if ( ( $1 - 0 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
         if ( ${load_too_high} == 1 ) then
-          sleep 2
+          sleep 4
         endif
       end
 
@@ -154,15 +161,21 @@ eot
     @ dircounter++
     cd ${olddir}
   end
+  cd ${olddir}
   echo "::Waiting for last jobs to finish"
   set load_too_high = 1
   while ( ${load_too_high} == 1 ) 
-    set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
-    set loadaverage = `ps -axf | sed -n '/2dx_tile_sub.com/p' | wc -l`
+    nohup getload.com &
+    sleep 1
+    if ( -e SCRATCH/getload.dat ) then
+      set loadaverage = `cat SCRATCH/getload.dat`
+    else
+      sleep 1
+      set loadaverage = 50
+    endif
     set load_too_high = `echo ${loadaverage} 1 | awk '{ if ( ( $1 - 2 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
     if ( ${load_too_high} == 1 ) then
       sleep 5
-      # ps -af | grep ${scriptname}
     endif
   end
   echo "::Last jobs have finished."
@@ -177,4 +190,7 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 #
 exit
 #
+source ${proc_2dx}/getload.com
+source ${proc_2dx}/2dx_tile_sub.com
+source ${proc_2dx}/2dx_tile_sub_sub.com
 #

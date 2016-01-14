@@ -69,7 +69,7 @@ eot
       set xmax = `echo ${xmin} ${newimagesidelength} | awk '{ s = $1 + $2 - 1 } END { print s }'`
       set ymin = `echo ${offset} ${newimagesidelength} ${num_y} | awk '{ s = 1 + ( $3 - 1 ) * $1 } END { print s }'`
       set ymax = `echo ${ymin} ${newimagesidelength} | awk '{ s = $1 + $2 - 1 } END { print s }'`
-      echo ":xmin,xmax,ymin,ymax = ${xmin},${xmax},${ymin},${ymax}"
+      echo "xmin,xmax,ymin,ymax = ${xmin},${xmax},${ymin},${ymax}"
       #
       # Calculate the difference vector of this tile from the image center:
       set xcen = `echo ${xmax} ${xmin} | awk '{ s = int ( ( $1 + $2 ) / 2 ) } END { print s }'`
@@ -77,41 +77,41 @@ eot
       set ocen = `echo ${imagesidelength} | awk '{ s = int ( $1 / 2 ) } END { print s }'`
       set xdif = `echo ${ocen} ${xcen} | awk '{ s = int ( $2 - $1 ) } END { print s }'`
       set ydif = `echo ${ocen} ${ycen} | awk '{ s = int ( $2 - $1 ) } END { print s }'`
-      echo ":tile difference vector is ${xdif} ${ydif}"
+      echo "tile difference vector is ${xdif} ${ydif}"
       # 
       # Calculate the real lattice and its matrix and its determinant:
       set ux   = `echo ${lattice} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
       set uy   = `echo ${lattice} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
       set vx   = `echo ${lattice} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
       set vy   = `echo ${lattice} | sed 's/,/ /g' | awk '{ s = $4 } END { print s }'`
-      echo ":reciprocal lattice is ${ux} ${uy} ${vx} ${vy}"
+      echo "reciprocal lattice is ${ux} ${uy} ${vx} ${vy}"
       set detB = `echo ${ux} ${uy} ${vx} ${vy} | awk '{ s = $1 * $4 - $2 * $3 } END { print s }'`
-      echo ":reciprocal lattice determinant is ${detB}"
+      echo "reciprocal lattice determinant is ${detB}"
       set rfac = `echo ${imagesidelength} ${detB} | awk '{ s = abs ( $1 / $2 ) } END { print s }'`
       set ax   = `echo ${ux} ${uy} ${vx} ${vy} ${rfac} | awk '{ s =  $4 * $5 } END { print s }'`
       set ay   = `echo ${ux} ${uy} ${vx} ${vy} ${rfac} | awk '{ s = -$3 * $5 } END { print s }'`
       set bx   = `echo ${ux} ${uy} ${vx} ${vy} ${rfac} | awk '{ s = -$2 * $5 } END { print s }'`
       set by   = `echo ${ux} ${uy} ${vx} ${vy} ${rfac} | awk '{ s =  $1 * $5 } END { print s }'`
       set detR = `echo ${ax} ${ay} ${bx} ${by} | awk '{ s = $1 * $4 - $2 * $3 } END { print s }'`
-      echo ":real lattice determinant is ${detR}"
+      echo "real lattice determinant is ${detR}"
       #
       # Calculate the inverse matrix to the lattice:
       set nax  = `echo ${ax} ${ay} ${bx} ${by} ${detR} | awk '{ s =  $4 / $5 } END { print s }'`
       set nay  = `echo ${ax} ${ay} ${bx} ${by} ${detR} | awk '{ s = -$2 / $5 } END { print s }'`
       set nbx  = `echo ${ax} ${ay} ${bx} ${by} ${detR} | awk '{ s = -$3 / $5 } END { print s }'`
       set nby  = `echo ${ax} ${ay} ${bx} ${by} ${detR} | awk '{ s =  $1 / $5 } END { print s }'`
-      echo ":real    lattice matrix is ${ax} ${ay} ${bx} ${by}"
-      echo ":inverse lattice matrix is ${nax} ${nay} ${nbx} ${nby}"
+      echo "real    lattice matrix is ${ax} ${ay} ${bx} ${by}"
+      echo "inverse lattice matrix is ${nax} ${nay} ${nbx} ${nby}"
       #
       # Transform the difference vector for this tile into the lattice vector space (in fractions of 1):
       set xdiB = `echo ${xdif} ${ydif} ${nax} ${nay} ${nbx} ${nby} | awk '{ s = $1 * $3 + $2 * $5 } END { print s }'`
       set ydiB = `echo ${xdif} ${ydif} ${nax} ${nay} ${nbx} ${nby} | awk '{ s = $1 * $4 + $2 * $6 } END { print s }'`
-      echo ":tile center in lattice vector space is ${xdiB} ${ydiB}"
+      echo "tile center in lattice vector space is ${xdiB} ${ydiB}"
       #
       # Transform this difference vector into phase origin space:
       set xdip = `echo ${xdiB} | awk '{ s = ( $1 * 360.0 ) % 360.0 } END { print s }'`
       set ydip = `echo ${ydiB} | awk '{ s = ( $1 * 360.0 ) % 360.0 } END { print s }'`
-      echo ":tile center in unit cell space is ${xdip} ${ydip} degrees"
+      echo "tile center in unit cell space is ${xdip} ${ydip} degrees"
       #
       # Calculate new phase origin for this tile:
       set xphaori  = `echo ${phaori} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`

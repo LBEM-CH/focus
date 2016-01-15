@@ -66,9 +66,9 @@ endif
 mkdir SHRINKWRAP
 #
 #------------------------------------------------------------------------------
-echo ":Launching ${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SHRINKWRAP/ -s ${SYM} --res ${RESMAX} --threshold_higher ${density_threshold_refinement_higher} --threshold_lower ${density_threshold_refinement_lower} --mask-res ${refinement_mask_resolution} --iterations ${number_refinement_iterations} --slab ${membrane_height} --cone ${refinement_cone_angle} --amp_cutoff ${refinement_amplitude_cutoff} --hklout ${refined_hkl} --mrcout ${refined_map}"
+echo ":Launching ${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SHRINKWRAP/ -s ${SYM} --res ${RESMAX} --threshold_higher ${density_threshold_refinement_higher} --threshold_lower ${density_threshold_refinement_lower} --mask-res ${refinement_mask_resolution} --scale_cone_energy ${refinement_cone_energy_scale} --iterations ${number_refinement_iterations} --slab ${membrane_height} --cone ${refinement_cone_angle} --amp_cutoff ${refinement_amplitude_cutoff} --hklout ${refined_hkl} --mrcout ${refined_map}"
 #------------------------------------------------------------------------------
-${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SHRINKWRAP/ -s ${SYM} --res ${RESMAX} --threshold_higher ${density_threshold_refinement_higher} --threshold_lower ${density_threshold_refinement_lower} --mask-res ${refinement_mask_resolution} --iterations ${number_refinement_iterations} --slab ${membrane_height} --cone ${refinement_cone_angle} --amp_cutoff ${refinement_amplitude_cutoff} --hklout ${refined_hkl} --mrcout ${refined_map}
+${bin_2dx}/apply_shrinkwrap.exe --mrcin ${back_projected_map} --temp SHRINKWRAP/ -s ${SYM} --res ${RESMAX} --threshold_higher ${density_threshold_refinement_higher} --threshold_lower ${density_threshold_refinement_lower} --mask-res ${refinement_mask_resolution} --scale_cone_energy ${refinement_cone_energy_scale} --iterations ${number_refinement_iterations} --slab ${membrane_height} --cone ${refinement_cone_angle} --amp_cutoff ${refinement_amplitude_cutoff} --hklout ${refined_hkl} --mrcout ${refined_map}
 #
 echo "# IMAGE: SHRINKWRAP" >> LOGS/${scriptname}.results
 #

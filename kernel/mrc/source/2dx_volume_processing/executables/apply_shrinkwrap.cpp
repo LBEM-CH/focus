@@ -20,13 +20,16 @@
  */
 int main(int argc, char** argv)
 {
-    
+    /********************************************
+     * Command Line Setup
+     *********************************************/
     args::Executable exe("A program to refine input map/mrc volume using shrinkwrap algorithm.", ' ', "1.0" );
     
     TCLAP::ValueArg<double> CONE("", "cone", "(in degrees) The data in Fourier space will be filled only in the cone with specified degrees", false, 90.0, "FLOAT");
     TCLAP::ValueArg<double> AMP_CUTOFF("", "amp_cutoff", "All the reflections below this value would be ignored", false, 0.0, "FLOAT");
     static TCLAP::ValueArg<double> THRESHOLDH("", "threshold_higher", "Higher density threshold for mask (as percentage)", true, -1.0,"FLOAT");
     static TCLAP::ValueArg<double> THRESHOLDL("", "threshold_lower", "Lower density threshold for mask (as percentage)", true, -1.0,"FLOAT");
+    static TCLAP::ValueArg<double> SCALE_CONE_ENERGY("", "scale_cone_energy", "Scales the calculated optimum cone energy in each iteration", true, 1.0,"FLOAT");
     
     //Select required arguments
     args::templates::MRCIN.forceRequired();
@@ -39,6 +42,7 @@ int main(int argc, char** argv)
     exe.add(args::templates::SYMMETRY);
     exe.add(args::templates::TEMP_LOC);
     exe.add(AMP_CUTOFF);
+    exe.add(SCALE_CONE_ENERGY);
     exe.add(CONE);
     exe.add(args::templates::SLAB);
     exe.add(args::templates::MASK_RES);
@@ -60,6 +64,7 @@ int main(int argc, char** argv)
     std::string mrcout = args::templates::MRCOUT.getValue();
     double cone_angle = CONE.getValue();
     double amp_cutoff = AMP_CUTOFF.getValue();
+    double scale_cone_energy = SCALE_CONE_ENERGY.getValue();
     
     double density_threshold_higher = THRESHOLDH.getValue();
     double density_threshold_lower = THRESHOLDL.getValue();
@@ -88,14 +93,22 @@ int main(int argc, char** argv)
     input_volume.prepare_fourier();
     input_volume.prepare_real();
     std::cout << input_volume.to_string();
- 
-    //Prepare the lowpassed binary mask for the shrinkwrap algorithm
+    
+    /********************************************
+     * Shrinkwrap Iterations
+     *********************************************/
+    
+    //Initialize iteration volume and mask   
+    Volume2dx iteration_volume(input_volume);
+    Volume2dx iteration_cone;
+    Volume2dx iteration_without_cone;
     Volume2dx mask(input_volume);
     
-    //Prepare the output volume
-    Volume2dx output_volume(input_volume);
+    iteration_volume.cut_cone(iteration_cone, iteration_without_cone, cone_angle);
+    double cone_energy_initial = iteration_cone.get_fourier().intensity_sum();
+    double optimum_cone_energy = iteration_without_cone.get_fourier().intensity_sum()*(cone_angle/(90-cone_angle));
+    std::cout << ":Optimum cone energy = " << optimum_cone_energy <<"\n";
     
-    double error = 1.0;
     for(int iteration=0; iteration<number_of_iterations; ++iteration)
     {
         
@@ -108,82 +121,86 @@ int main(int argc, char** argv)
         std::cout << "::Shrinkwrap Iteration: " << iteration+1 << std::endl;
         std::cout << "-----------------------------------\n";
         
-        if(temp_loc != "") output_volume.write_volume(temp_loc + "/initial_volume_" + iteration_str +".map", "map");
+        /********************************************
+        * Real Space constraints
+        *********************************************/
+        volume::data::RealSpaceData real_space_data(iteration_volume.get_real());
         
-        volume::data::RealSpaceData real_before(output_volume.get_real());
-        double sum_initial = real_before.squared_sum();
+        //Threshold mask
+        volume::data::RealSpaceData mask_threshold = real_space_data.threshold_mask(0);
+        real_space_data.apply_mask(mask_threshold);
         
-        volume::data::RealSpaceData mask_threshold = real_before.threshold_mask(0);
-        real_before.apply_mask(mask_threshold);
+        //Slab mask
+        volume::data::RealSpaceData mask_slab = real_space_data.vertical_slab_mask(membrane_slab, true);
+        real_space_data.apply_mask(mask_slab);
         
-        volume::data::RealSpaceData mask_slab = real_before.vertical_slab_mask(membrane_slab, true);
-        real_before.apply_mask(mask_slab);
-        
-        mask.set_real(real_before);
+        //Shrinkwrap mask
+        mask.set_real(real_space_data);
         mask.low_pass_butterworth(mask_resolution);
         if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_" + iteration_str +".map");
-        double maxDensity = real_before.max();
+        double maxDensity = real_space_data.max();
         volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_soft_mask(density_threshold_higher*maxDensity/100, density_threshold_lower*maxDensity/100);
     
         //Just to write output of mask to file
         mask.set_real(mask_shrinkwrap);
         if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_binary_" + iteration_str +".map");
         
-        //Mask the volume
-        real_before.multiply_mask(mask_shrinkwrap);
-        volume::data::RealSpaceData real_after = real_before;
+        real_space_data.multiply_mask(mask_shrinkwrap);
         
-        //Get the sum of densities for error calculation
-        double sum_final = real_after.squared_sum();
-        double itr_error = ((sum_initial-sum_final)/sum_initial);
+        //Finally set the modified real space volume
+        iteration_volume.set_real(real_space_data);
         
-        //Begin with setting a real space volume
-        output_volume.set_real(real_after);
+        
+        /********************************************
+        * Fourier Space constraints
+        *********************************************/
         
         //Low pass filter to use whatever is required
-        output_volume.low_pass(max_resolution);
+        iteration_volume.low_pass(max_resolution);
+
+        //Cut the cone
+        iteration_volume.cut_cone(iteration_cone, iteration_without_cone, cone_angle);
+        double cone_energy_final = iteration_cone.get_fourier().intensity_sum();
+        double error = (cone_energy_initial - cone_energy_final)/cone_energy_initial;
+        std::cout <<":Squared error: " << error <<"\n";
+        cone_energy_initial = cone_energy_final;
         
-        std::cout << "\nIteration result:\n";
-        std::cout << "\n:Squared Error = " << itr_error;
-        if(iteration != 0) std::cout << " (Change = " << error-itr_error << ")\n\n";
-        else std::cout << "\n\n";
-        
-        //Check for convergence
-        if( (error - itr_error < 1E-4) || itr_error < 1E-3)
-        {
-            std::cout << ":\n\nConvergence criterion found after iteration: " << iteration+1 <<"\n";
-            std::cout << "Stopping iterations\n\n\n";
-            break;
-        }
+        //Scale the intensities
+        std::cout << ":Rescaling energy from: " << cone_energy_final << " to: " << scale_cone_energy*optimum_cone_energy <<"\n";
+        iteration_cone.rescale_energy(scale_cone_energy*optimum_cone_energy);
         
         //Replace the reflections from that of input
-        output_volume.replace_reflections(input_volume.get_fourier(), cone_angle, amp_cutoff);
+        iteration_cone.replace_reflections(input_volume.get_fourier(), cone_angle, amp_cutoff);
         
-        if(temp_loc != "") output_volume.write_volume(temp_loc + "/final_volume_" + iteration_str +".map", "map");
+        iteration_volume = iteration_cone;
         
-        error = itr_error;
+        //Calculate the new intensity sum
+        iteration_volume.cut_cone(iteration_cone, iteration_without_cone, cone_angle);
+        cone_energy_initial = iteration_cone.get_fourier().intensity_sum();
+               
+        if(temp_loc != "") iteration_volume.write_volume(temp_loc + "/final_volume_" + iteration_str +".map", "map");
     }
     
     std::cout << "\n::Done with the iterations.\n";
     
     //Resolution limit
-    output_volume.low_pass(max_resolution);
+    iteration_volume.low_pass(max_resolution);
 
     //Symmetrize
-    output_volume.symmetrize();
+    iteration_volume.symmetrize();
 
     //Prepare real/Fourier volumes
-    output_volume.prepare_fourier();
-    output_volume.prepare_real();
+    iteration_volume.prepare_fourier();
+    iteration_volume.prepare_real();
     
     std::cout << "\n-----------------------------------\n";
     std::cout << ":Final results:\n";
     std::cout << "-----------------------------------\n";
-    std::cout << output_volume.to_string();
+    std::cout << iteration_volume.to_string();
 
     //Write output in HKL format
-    if(hklout != "") output_volume.write_volume(hklout, "hkl");
-    if(mrcout != "") output_volume.write_volume(mrcout);
+    if(hklout != "") iteration_volume.write_volume(hklout, "hkl");
+    if(mrcout != "") iteration_volume.write_volume(mrcout);
     
     return 0;
     

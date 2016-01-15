@@ -31,6 +31,7 @@
 # DISPLAY: refinement_amplitude_cutoff
 # DISPLAY: refinement_cone_angle
 # DISPLAY: membrane_height
+# DISPLAY: refinement_cone_energy_scale
 #
 #$end_local_vars
 #
@@ -53,6 +54,7 @@ set density_threshold_refinement_lower = ""
 set refinement_mask_resolution = ""
 set refinement_amplitude_cutoff = ""
 set refinement_cone_angle = ""
+set refinement_cone_energy_scale = ""
 #
 #$end_vars
 #

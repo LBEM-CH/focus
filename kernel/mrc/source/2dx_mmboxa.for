@@ -745,7 +745,7 @@ C1103    FORMAT(2I4,2F12.1,I4,1F12.1,1F12.1,'  ',A24)
            ITEMP=19-IQ-IQ-2
            IF(ITEMP.GE.1)CZEIL(1:ITEMP) = '------------------'
            RRES=SQRT(IH(I)*IH(I)+IK(I)*IK(I)+0.0)
-           WRITE(6,1103)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK,RRES,CZEIL
+C           WRITE(6,1103)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK,RRES,CZEIL
           ENDIF
       IF(NUMOUT.GT.NUMSPOT) GO TO 500
 CHENN<
@@ -1028,9 +1028,9 @@ CHEN<
       AY = AY * SCALE
       BX = BX * SCALE
       BY = BY * SCALE
-      WRITE(6,10)
-   10 FORMAT(/' Lattice generated coordinates'/8X,'H',9X,'K',
-     1       7X,'X',9X,'Y'/'0')
+C      WRITE(6,10)
+C   10 FORMAT(/' Lattice generated coordinates'/8X,'H',9X,'K',
+C     1       7X,'X',9X,'Y'/'0')
       NOHD = 2 * NOH + 1
       NOKD = 2 * NOK + 1
       NSPOT = 0
@@ -1111,8 +1111,8 @@ C           WRITE(6,117)JH,JK,X,Y
             GO TO 100
 116       CONTINUE
 C
-          WRITE(6,20) JH,JK,X,Y
-   20     FORMAT(2I10,2F10.1)
+C          WRITE(6,20) JH,JK,X,Y
+C   20     FORMAT(2I10,2F10.1)
   100 CONTINUE
       WRITE(6,4552)NSPOT
 4552  FORMAT('  THERE WERE A TOTAL OF',I5,'  SPOTS GENEREATED')

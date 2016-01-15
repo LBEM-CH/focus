@@ -69,7 +69,7 @@ if ( ${do} == "0" || ${do} == "6" ) then
 
   echo "<<@progress: +5>>"
 
-  if ( -d SCRATCH ) then
+  if ( -d SCRATCH || -l SCRATCH ) then
     ${proc_2dx}/linblock "inventory of SCRATCH/\*.mrc"
     echo dummy > SCRATCH/111Adummy.mrc
     echo `\ls -1 SCRATCH/*.mrc | wc -l` > tmp.tmp

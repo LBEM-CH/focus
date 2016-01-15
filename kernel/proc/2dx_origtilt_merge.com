@@ -62,12 +62,21 @@ endif
 set dirfile = "2dx_merge_dirfile.dat"
 set dirnum = `cat ${dirfile} | wc -l`
 set maxthread = `echo ${Thread_Number} ${dirnum} | awk '{if ($1<$2/2) { s = $1 } else { s = int($2 / 2) }} END { print s }'`
-if ( ${maxthread} < "1" ) then
+if ( ${maxthread} < "4" ) then
   set maxthread = 1
 endif
 if ( ${maxthread} == "0" ) then
   set maxthread = 1
 endif
+#
+echo dummy > SCRATCH/job_01_${scriptname}.results
+echo dummy > SCRATCH/job_01_${scriptname}-tmp.reflections
+echo dummy > SCRATCH/job_01_${scriptname}-tmp.console
+echo dummy > SCRATCH/job_01_results.aph
+\rm -f SCRATCH/job_*_${scriptname}.results
+\rm -f SCRATCH/job_*_${scriptname}-tmp.reflections
+\rm -f SCRATCH/job_*_${scriptname}-tmp.console
+\rm -f SCRATCH/job_*_results.aph
 #
 ${bin_2dx}/2dx_merge_compileA_threaded.exe << eot
 ${scriptname}.results
@@ -91,7 +100,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_data_type_local}
-${Thread_Number}
+${maxthread}
 ${ILIST_VAL}
 eot
 #

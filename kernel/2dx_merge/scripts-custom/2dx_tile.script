@@ -165,7 +165,7 @@ eot
   echo "::Waiting for last jobs to finish"
   set load_too_high = 1
   while ( ${load_too_high} == 1 ) 
-    nohup getload.com &
+    nohup ${proc_2dx}/getload.com &
     sleep 1
     if ( -e SCRATCH/getload.dat ) then
       set loadaverage = `cat SCRATCH/getload.dat`

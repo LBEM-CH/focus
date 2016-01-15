@@ -111,7 +111,7 @@ echo ": "
     set ctfcor_outfile = "SCRATCH/image_ctf.mrc"
     set outimage       = "tile_ctf_taper.mrc"
     set outfft         = "SCRATCH/tile_ctf_taper_fft.mrc"
-    set CTF_outfile_nA = image_ctfcor_movie_fou_ctf.aph
+    set CTF_outfile_nA = image_ctfcor_fou_unbent_ctf.aph
     set image_type     = 2
     echo "# IMAGE: ${olddir}/../${from_dir}/${inimage} <Unbent MA Image>" >>  ${olddir}/LOGS/${scriptname}.results
     source ${proc_2dx}/2dx_tile_sub_sub.com
@@ -123,7 +123,7 @@ echo ": "
     set ctfcor_outfile = "SCRATCH/image_ctf.mrc"
     set outimage       = "tile_ctf_taper.mrc"
     set outfft         = "SCRATCH/tile_ctf_taper_fft.mrc"
-    set CTF_outfile_nA = image_ctfcor_movieB_fou_ctf.aph
+    set CTF_outfile_nA = image_ctfcor_fou_unbent_ctf.aph
     set image_type     = 3
     echo "# IMAGE: ${olddir}/../${from_dir}/${inimage} <Unbent MB Image>" >>  ${olddir}/LOGS/${scriptname}.results
     source ${proc_2dx}/2dx_tile_sub_sub.com

@@ -177,7 +177,7 @@ ${imagenumber} ${imagename}, CTFcor_Mode=${imode}
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
-2,2,0,50,50,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+2,2,0,50,50,13,13               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 ${CTF_outfile}
 SCRATCH/TMP9873.dat
 ${algo}

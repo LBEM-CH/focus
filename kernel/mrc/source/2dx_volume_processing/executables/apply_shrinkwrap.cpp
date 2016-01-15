@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     iteration_volume.cut_cone(iteration_cone, iteration_without_cone, cone_angle);
     double cone_energy_initial = iteration_cone.get_fourier().intensity_sum();
     // double optimum_cone_energy = iteration_without_cone.get_fourier().intensity_sum()*(cone_angle/(90-cone_angle));
-    double optimum_cone_energy = iteration_without_cone.get_fourier().intensity_sum()*(1-cos(cone_angle*M_PI/180.0)/cos(cone_angle*M_PI/180.0));
+    double optimum_cone_energy = iteration_without_cone.get_fourier().intensity_sum()*( (1-cos(cone_angle*M_PI/180.0))/cos(cone_angle*M_PI/180.0));
     std::cout << ":Optimum cone energy = " << optimum_cone_energy <<"\n";
     
     for(int iteration=0; iteration<number_of_iterations; ++iteration)

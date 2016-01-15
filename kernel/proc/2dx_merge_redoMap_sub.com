@@ -116,6 +116,9 @@ if ( ${LUSEML} == "T" ) then
   set aphfile = APH/ML_result.aph
 else
   set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
+  if ( ! -e ${aphfile} ) then
+    set aphfile = APH/image_ctfcor_ctf.aph
+  endif
 endif
 #
 ${proc_2dx}/linblock "Using APH file ${aphfile}"
@@ -136,7 +139,7 @@ ${spcgrp},0,F,F,0,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOG
 ${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}          !IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
 100,DUMMY
 ${aphdummy}
-${imagenumber},${imagename},${date}
+${imagenumber},${imagename}
 ${aphfile}
 F
 ${TAXA},${TANGL},0                                                  ! TAXA,TANGL,IORIGT
@@ -245,7 +248,7 @@ ${proc_2dx}/lin "f2mtz - to translate avrg.hkl into ${imagename}_MRClefthanded.m
 set infile = avrg.hkl
 echo "Calling now:"
 echo "${bin_ccp4}/f2mtz hklin ${infile} hklout ${imagename}_MRClefthanded.mtz"
-echo "TITLE  P1 map ${imagename}, ${date}"
+echo "TITLE  P1 map ${imagename}"
 echo "CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}"
 echo "SYMMETRY ${CCP4_SYM}"
 echo "LABOUT H K L F PHI FOM"
@@ -254,7 +257,7 @@ echo "FILE ${infile}"
 echo "END"
 #
 ${bin_ccp4}/f2mtz hklin ${infile} hklout ${imagename}_MRClefthanded.mtz << eof
-TITLE  P1 map ${imagename}, ${date}
+TITLE  P1 map ${imagename}
 CELL ${realcell} ${ALAT} 90.0 90.0 ${realang}
 SYMMETRY ${CCP4_SYM}
 LABOUT H K L F PHI FOM
@@ -340,10 +343,10 @@ eot
 \rm -f final_map.mrc
 \cp -f ${imagename}-${symmetry}.mrc final_map.mrc
 #
-if ( ${RESULTSMRC} != "y" ) then
-  echo "# IMAGE: RESULTS-MRC" >> ${mergedir}/LOGS/${scriptname}.results
-  set RESULTSMRC = "y"
-endif
+# if ( ${RESULTSMRC} != "y" ) then
+#   echo "# IMAGE: RESULTS-MRC" >> ${mergedir}/LOGS/${scriptname}.results
+#   set RESULTSMRC = "y"
+# endif
 #
 #
 if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then

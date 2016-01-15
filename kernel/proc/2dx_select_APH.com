@@ -113,13 +113,13 @@ foreach imagefile ( ${dirlist} )
     endif
 
     if ( ! -e ${APH_file} ) then
-        echo "::${APH_file} should be best, but was not found."
+        echo "::${APH_file} should be best, but was not found in $PWD."
         set APH_file = image_ctfcor_fou_unbent_ctf.aph
+    else
+       echo ":In directory ${imagename_local}: Using APH file ${APH_file}. "
+       \rm -f image_ctfcor_ctf.aph
+       \cp -f ${APH_file} image_ctfcor_ctf.aph
     endif
-
-    echo ":In directory ${imagename_local}: Using APH file ${APH_file}. "
-    \rm -f image_ctfcor_ctf.aph
-    \cp -f ${APH_file} image_ctfcor_ctf.aph
     cd ${merge_dir}
 end
 #

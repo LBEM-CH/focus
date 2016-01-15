@@ -166,15 +166,10 @@ end
 #
 \rm -f SCRATCH/${scriptname}.py
 echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
-echo "import os" > SCRATCH/${scriptname}.py
 foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py )
-  cat ${scriptBresults} | grep -v "import os" >> SCRATCH/${scriptname}.py
-  \rm -f ${scriptBresults}
+  echo "# IMAGE: ${scriptBresults} <PY: Refinement results update script ${scriptBresults}>" >> LOGS/${scriptname}.results
+  ${app_python} ${scriptBresults}  
 end
-#
-${app_python} SCRATCH/${scriptname}.py
-#
-#echo "# IMAGE: SCRATCH/2dx_merge_scriptB_postprocessing.log <LOG: origtilt B postprocessing output>" >> LOGS/${scriptname}.results
 #
 #
 #############################################################################

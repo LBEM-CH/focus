@@ -374,10 +374,10 @@ void ds::Volume2dx::cut_cone(Volume2dx& cone, Volume2dx& missing_cone, double co
         }
     }
     
-    cone = Volume2dx(nx(), ny(), nz());
+    cone = Volume2dx(header());
     cone.set_fourier(cut_data);
     
-    missing_cone = Volume2dx(nx(), ny(), nz());
+    missing_cone = Volume2dx(header());
     missing_cone.set_fourier(new_data);
 }
 

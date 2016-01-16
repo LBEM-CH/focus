@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 90
+# SORTORDER: 76
 #
 # MANUAL: This script allows to copy the significant files from the currently selected images in this project into a different location, or vice versa. You can use this to synchronize your current working copy of this project with that on a remote file server. This could, for example, allow you to work on one common project with several people. For this, you would in the morning synchronize your copy with the remote server, by issuing an "UPDATE" command. This would pull the newer versions of images and image processing data from the server to your local copy. In the evening, when you are done, you could issue a "COMMIT" command, to push your changes to the backup location. 
 #

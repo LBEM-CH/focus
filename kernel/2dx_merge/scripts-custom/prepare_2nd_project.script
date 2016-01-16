@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 31
+# SORTORDER: 45
 #
 # MANUAL: Switches to TTF-correction for all images with a tilt angle higher then a given value and reruns Unbend2, CTF-correction and GenerateMap
 #

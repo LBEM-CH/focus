@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 55
+# SORTORDER: 65
 #
 # MANUAL: This script will delete most files in the current directory, leaving only the essential image processing results (APH files) and a few other files behind. This will save hard-drive space. There are two levels of cleanliness...
 #

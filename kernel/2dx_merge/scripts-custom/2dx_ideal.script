@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 48
+# SORTORDER: 53
 #
 # MANUAL: command file to create ideal p1 reference data set for calculation of theoretical point spread function. Note max L-index = 100 for 00L lattice line (if present)
 #

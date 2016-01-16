@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 50
+# SORTORDER: 55
 #
 # MANUAL: This script will produce a list of *.mrc or other types of files, and show them in the <i>Images</I> pane. Select the kind of files you want to see.
 #

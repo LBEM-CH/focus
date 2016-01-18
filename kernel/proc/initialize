@@ -21,6 +21,7 @@ if ( -e /usr/bin/python2.7 ) then
   set app_python = /usr/bin/python2.7
 endif
 ${proc_2dx}/linblock "app_python = ${app_python}"
+${proc_2dx}/linblock "Working Directory = $PWD"
 #
 ##################################################
 # CCP4 SETUP CHECK:

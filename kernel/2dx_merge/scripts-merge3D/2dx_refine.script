@@ -301,19 +301,26 @@ if ( ${merge_ref_num} != "0" ) then
   #
 endif
 #
-#------------------------------------------------------------------------------
-${proc_2dx}/linblock "Setting APH file types to use"
-#------------------------------------------------------------------------------
-#
-# This translates the list of directories to work on into one single long line:
-cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
 set olddir = $PWD
 #
-#---------------------------------------------------------------------------------------------------
-${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_select_APH.com  ${olddir} ${refine_data_type}"
-#----------------------------------------------------------------------------------------------------
-source ${proc_2dx}/2dx_select_APH.com  ${olddir} ${refine_data_type}
+#------------------------------------------------------------------------------
+# Test if we are dealing with TILES:
+set intiles = `echo ${olddir} | grep TILES | wc -l`
+if ( ${intiles} != "1" ) then
+  #------------------------------------------------------------------------------
+  ${proc_2dx}/linblock "Setting APH file types to use"
+  #------------------------------------------------------------------------------ 
+  #
+  # This translates the list of directories to work on into one single long line:
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
+  #---------------------------------------------------------------------------------------------------
+  ${proc_2dx}/linblock "Sourcing ${proc_2dx}/2dx_select_APH.com  ${olddir} ${refine_data_type}"
+  #----------------------------------------------------------------------------------------------------
+  source ${proc_2dx}/2dx_select_APH.com  ${olddir} ${refine_data_type}
+  #
+endif
 #
 #------------------------------------------------------------------------------
 ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"

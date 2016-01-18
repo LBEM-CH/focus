@@ -20,6 +20,11 @@ ${proc_2dx}/linblock "Compile refinement script"
 set scriptBfile = "2dx_merge_scriptB.com"
 set postprocessingfile = "2dx_merge_postprocessing.com"
 #
+set num_images = `cat 2dx_merge_dirfile.dat | wc -l`
+if ( ${num_images} < 1 ) then
+  ${proc_2dx}/protest "ERROR: No images selected."
+endif
+#
 set genref = "0"
 #
 if ( ${refbeamtilt} == 'y' ) then

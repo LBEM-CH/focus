@@ -35,7 +35,6 @@ foreach imagefile ( ${dirlist} )
     if ( ! -e 2dx_image.cfg ) then
         ${proc_2dx}/protest "ERROR: 2dx_image.cfg not found in ${imagefile}"
     endif
-    set imagename_local = `cat 2dx_image.cfg | grep 'set nonmaskimagename =' | cut -d\" -f2`
     
     cd APH
     set APH_file = image_ctfcor_fou_unbent_ctf.aph
@@ -116,7 +115,7 @@ foreach imagefile ( ${dirlist} )
         echo "::${APH_file} should be best, but was not found in $PWD."
         set APH_file = image_ctfcor_fou_unbent_ctf.aph
     else
-       echo ":In directory ${imagename_local}: Using APH file ${APH_file}. "
+       echo ":In directory ${imagefile}: Using APH file ${APH_file}. "
        \rm -f image_ctfcor_ctf.aph
        \cp -f ${APH_file} image_ctfcor_ctf.aph
     endif

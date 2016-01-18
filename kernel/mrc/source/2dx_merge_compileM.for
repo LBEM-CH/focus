@@ -139,6 +139,7 @@ C
         write(11,'(''set zwin = $8'')')
         write(11,'(''set make_reference = $9'')')
         write(11,'(''set create_PS = $10'')')
+        write(11,'(''set scriptname = $11'')')
         write(11,'(''#'')')
         write(11,'(''set mergedir = $PWD'')')
         write(11,'(''#'')')

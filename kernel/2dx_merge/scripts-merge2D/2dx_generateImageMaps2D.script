@@ -168,6 +168,7 @@ ${scriptMfile}
 ${realcell}
 ${realang}
 ${ALAT}
+${Thread_Number}
 ${merge_data_type}
 eot
 #

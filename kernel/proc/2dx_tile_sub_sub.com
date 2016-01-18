@@ -65,9 +65,10 @@ eot
       echo "set imagesidelength = ${newimagesidelength}" >> 2dx_image.cfg
       #
       set offset = `echo ${imagesidelength} ${newimagesidelength} ${tilenumberm1} | awk ' { s = int ( ( $1 - $2 ) / $3 ) } END { print s } '`
-      set xmin = `echo ${offset} ${newimagesidelength} ${num_x} | awk '{ s = 1 + ( $3 - 1 ) * $1 } END { print s }'`
+      # (0,0) is lower left corner:
+      set xmin = `echo ${offset} ${newimagesidelength} ${num_x} | awk '{ s = 0 + ( $3 - 1 ) * $1 } END { print s }'`
       set xmax = `echo ${xmin} ${newimagesidelength} | awk '{ s = $1 + $2 - 1 } END { print s }'`
-      set ymin = `echo ${offset} ${newimagesidelength} ${num_y} | awk '{ s = 1 + ( $3 - 1 ) * $1 } END { print s }'`
+      set ymin = `echo ${offset} ${newimagesidelength} ${num_y} | awk '{ s = 0 + ( $3 - 1 ) * $1 } END { print s }'`
       set ymax = `echo ${ymin} ${newimagesidelength} | awk '{ s = $1 + $2 - 1 } END { print s }'`
       echo "xmin,xmax,ymin,ymax = ${xmin},${xmax},${ymin},${ymax}"
       #
@@ -197,18 +198,6 @@ eot
       \ln -s ${CTF_outfile_nA} image_ctfcor_ctf.aph
       cd ..
       #
-      set gotrash = `echo ${PSMAX} | awk '{ if ( $1 < 8 ) { s = 1 } else { s = 0 } } END { print s }'`
-      if ( ${gotrash} == "1" ) then
-        cd ..
-        if ( ! -d TRASH ) then
-          \mkdir TRASH
-        endif
-        if ( -d TRASH/${newdir} ) then
-          \rm -rf TRASH/${newdir}
-          echo "::WARNING: old TRASH/${newdir} removed"
-        endif
-        \mv ${newdir} TRASH
-      endif
       cd ${olddir}
       cd ..
       cd ${from_dir} 

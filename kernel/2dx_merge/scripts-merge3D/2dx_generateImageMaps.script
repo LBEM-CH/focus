@@ -360,7 +360,7 @@ if ( ${Thread_Number} == "1" ) then
 else
   echo "# IMAGE: SCRATCH/job_01_${scriptMfile}.com <CSH: First (01) script>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/job_01_${scriptMfile}.com.log <LOG: First (01) script output>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_${scriptMfile}.com <CSH: Last (${maxthread_with_zero}) refinement script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_${scriptMfile}.com <CSH: Last (${maxthread_with_zero}) script>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_2dx_${scriptMfile}.com.log <LOG: Last (${maxthread_with_zero}) script output>" >> LOGS/${scriptname}.results
 endif
 #

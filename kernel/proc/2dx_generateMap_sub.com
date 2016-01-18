@@ -736,7 +736,7 @@ eot
 #
 if ( ${SYM_sub} == 'p1' ) then
   \rm -f final_map.mrc
-  \ln -s ${prefix}${imagename}-p1.mrc final_map.mrc
+  \cp -f ${prefix}${imagename}-p1.mrc final_map.mrc
 endif
 #
 #

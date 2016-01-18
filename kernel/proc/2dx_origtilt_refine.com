@@ -164,6 +164,13 @@ foreach scriptBconsole ( SCRATCH/job_*_${scriptname}-tmp.console )
   \rm -f ${scriptBconsole}
 end
 #
+\rm -f SCRATCH/${scriptname}.console.csv
+echo "# IMAGE: SCRATCH/${scriptname}.console.csv <CSV: refinement table>" >> LOGS/${scriptname}.results
+foreach scriptBconsole ( SCRATCH/job_*_${scriptname}-tmp.console.csv ) 
+  cat ${scriptBconsole} | sed 's/ -999.000//g' >> SCRATCH/${scriptname}.console.csv
+  \rm -f ${scriptBconsole}
+end
+#
 \rm -f SCRATCH/${scriptname}.py
 echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
 foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py )

@@ -260,7 +260,7 @@ ${oldir}/2dx_merge_alldirs.dat
 ${dircounter}
 eot
     #
-    set from_dir = `cat TMP.tmp`
+    set from_dir = `cat TMP.tmp | cut -c3-`
     \rm TMP.tmp
     #
     cd ${oldir}

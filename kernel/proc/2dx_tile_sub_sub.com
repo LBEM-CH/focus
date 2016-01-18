@@ -197,6 +197,18 @@ eot
       \ln -s ${CTF_outfile_nA} image_ctfcor_ctf.aph
       cd ..
       #
+      set gotrash = `echo ${PSMAX} | awk '{ if ( $1 < 8 ) { s = 1 } else { s = 0 } } END { print s }'`
+      if ( ${gotrash} == "1" ) then
+        cd ..
+        if ( ! -d TRASH ) then
+          \mkdir TRASH
+        endif
+        if ( -d TRASH/${newdir} ) then
+          \rm -rf TRASH/${newdir}
+          echo "::WARNING: old TRASH/${newdir} removed"
+        endif
+        \mv ${newdir} TRASH
+      endif
       cd ${olddir}
       cd ..
       cd ${from_dir} 

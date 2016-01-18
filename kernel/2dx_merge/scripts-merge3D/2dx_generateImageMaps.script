@@ -240,7 +240,7 @@ if ( ${make_reference} == "y" ) then
   set RTANGLSIZE = 0.5
   set MergeStepSize = "0.001"
   set IBOXPHS = 3
-  set Thread_Number = 1
+  set Loc_Thread_Number = 1
   #
   ${bin_2dx}/2dx_merge_compileB.exe << eot
 ${reference_file}
@@ -276,7 +276,7 @@ ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
 ${merge_data_type}
-${Thread_Number}
+${Loc_Thread_Number}
 ${ILIST_VAL}
 0
 eot

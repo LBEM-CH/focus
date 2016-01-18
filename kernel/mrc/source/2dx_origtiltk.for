@@ -563,6 +563,7 @@ C
         REAL a,temp
                 LOGICAL icompare 
 C
+      REAL rfield(4,100)
 C
       USEPYTHON = .TRUE.
       PYTHONFIRST = .TRUE.
@@ -765,18 +766,28 @@ C     THE FIRST DATASET IS A FULLY-FLEDGED MTZ FILE.
 C
 CHEN>
       OPEN(UNIT=17,FILE=cfile1,STATUS='UNKNOWN')
+C
       call shorten(cfilereflections,k)
       write(cline,'(''\rm -f '',A)')cfilereflections(1:k)
       call shorten(cline,k)
       call system(cline(1:k))
 C      OPEN(UNIT=18,FILE='2dx_origtiltk-reflections.log',STATUS='NEW')
       OPEN(UNIT=18,FILE=cfilereflections,STATUS='NEW')
+C
       call shorten(cfileconsole,k)
       write(cline,'(''\rm -f '',A)')cfileconsole(1:k)
       call shorten(cline,k)
       call system(cline(1:k))
 C      OPEN(UNIT=21,FILE='2dx_origtiltk-console.log',STATUS='NEW')
       OPEN(UNIT=21,FILE=cfileconsole,STATUS='NEW')
+C
+      call shorten(cfileconsole,k)
+      write(cline,'(''\rm -f '',A,''.csv'')')cfileconsole(1:k)
+      call shorten(cline,k1)
+      call system(cline(1:k1))
+      write(cline,'(A,''.csv'')')cfileconsole(1:k)
+      call shorten(cline,k1)
+      OPEN(UNIT=27,FILE=cline(1:k1),STATUS='NEW')
 CHEN<
 C
       IF(NPROG.GE.2) GO TO 207
@@ -2255,9 +2266,9 @@ C
           endif
         endif
         write(6,'(''new TANGL = "'',A,''"'')')cline1(1:k)
+      endif
 C
 C        write(2,'(''mrctestangle 1'')')
-      endif
 C
       if(LOGOUTPUT)then
         write(cline1,'(F8.3)')SCALE
@@ -2598,6 +2609,42 @@ C
           write(6,'('' '')')
         endif
       endif
+C
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C
+        if(1.eq.1)then
+          k1 = ihen1 - 2
+          k2 = k1 
+          k3 = ihen1 - 1
+          k4 = k3 
+          k5 = ihen1
+          k6 = k5 
+          write(cline1,'(A)') FILIN(k1:k6)
+          do i=1,25
+            do j=1,4
+              rfield(j,i)=-999.0
+            enddo
+          enddo
+          read(FILIN(k1:k2),*,ERR=128)i1
+          read(FILIN(k3:k4),*,ERR=128)i2
+            i3 = i1 + 5 * (i2 - 1)
+            rfield(1,i3)=TAXA
+            rfield(2,i3)=TANGL
+            rfield(3,i3)=HTHLT
+            rfield(4,i3)=HTKLT
+          goto 129
+ 128      continue
+            rfield(1,1)=-1000.0
+            rfield(2,1)=-1000.0
+            rfield(3,1)=-1000.0
+            rfield(4,1)=-1000.0
+ 129      continue
+          write(27,'(3(A,'',''),100(F9.3,'',''),A)')
+     .       cline1(1:1),cline1(2:2),cline1(3:3),
+     .       ((rfield(j,i),i=1,25),j=1,4),FILIN(1:ihen1)
+        endif
 C
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
@@ -2982,6 +3029,7 @@ C
       CLOSE(UNIT=17)
       CLOSE(UNIT=18)
       CLOSE(UNIT=21)
+      CLOSE(UNIT=27)
       STOP
 C
 602   WRITE(6,151)IFILM,ISER

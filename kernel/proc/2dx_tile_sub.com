@@ -1,4 +1,4 @@
-#!/bin/csh -fe 
+#!/bin/csh -fe
 ####
 #
 #
@@ -58,6 +58,7 @@ echo ": "
   set magnification        = `cat 2dx_image.cfg | grep "set magnification ="        | cut -d\" -f2`
   set stepdigitizer        = `cat 2dx_image.cfg | grep "set stepdigitizer ="        | cut -d\" -f2`
   set defocus              = `cat 2dx_image.cfg | grep "set defocus ="              | cut -d\" -f2`
+  set RESMIN               = `cat 2dx_image.cfg | grep "set RESMIN ="               | cut -d\" -f2`
   set RESMAX               = `cat 2dx_image.cfg | grep "set RESMAX ="               | cut -d\" -f2`
   set ctfcor_noise         = `cat 2dx_image.cfg | grep "set ctfcor_noise ="         | cut -d\" -f2`
   set ctfcor_debug         = `cat 2dx_image.cfg | grep "set ctfcor_debug ="         | cut -d\" -f2`
@@ -69,8 +70,15 @@ echo ": "
   set phaori               = `cat 2dx_image.cfg | grep "set phaori ="               | cut -d\" -f2`
   set imagesidelength      = `cat 2dx_image.cfg | grep "set imagesidelength ="      | cut -d\" -f2`
   set sample_pixel         = `cat 2dx_image.cfg | grep "set sample_pixel ="         | cut -d\" -f2`
+  set phacon               = `cat 2dx_image.cfg | grep "set phacon ="               | cut -d\" -f2`
+  set defocus_res_min      = `cat 2dx_image.cfg | grep "set defocus_res_min ="      | cut -d\" -f2`
+  set defocus_res_max      = `cat 2dx_image.cfg | grep "set defocus_res_max ="      | cut -d\" -f2`
+  set use_paralellized     = `cat 2dx_image.cfg | grep "set use_paralellized ="     | cut -d\" -f2`
+
+  set ampcon = `echo ${phacon} | awk '{s=sqrt(1.0 - ( $1 * $1 ))} END {print s}'`
   #
-  set imode                = 7
+  # set imode                = 7
+  set imode                = 1
   #
   set locimagenumber = ${imagenumber}
   #

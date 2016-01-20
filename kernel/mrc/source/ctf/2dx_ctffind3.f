@@ -425,6 +425,7 @@ C
       CALL ICLOSE(10)
 C
 CHEN>
+      call system("\rm -f SCRATCH/2dx_ctffind3_result.tmp")
       open(11,FILE='SCRATCH/2dx_ctffind3_result.tmp',STATUS='NEW',ERR=998)
         write(11,'(3F12.2)')DFMID1,DFMID2,ANGAST/PI*180.0
         write(11,'(G18.6)')DRMS1

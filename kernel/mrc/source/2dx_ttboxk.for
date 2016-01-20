@@ -260,8 +260,8 @@ C
       IF(NUMSPOT.EQ.0) ILIST=.FALSE.
 C
       IF(IOUT.NE.0) THEN
-      READ(5,1005) FILOUT
-      OPEN(UNIT=2,FILE=FILOUT,STATUS='NEW')
+        READ(5,1005) FILOUT
+        OPEN(UNIT=2,FILE=FILOUT,STATUS='NEW')
       END IF
 C
 CHEN
@@ -447,7 +447,7 @@ C
       IF(IYL.LT.-NY2M1) GO TO 160
       IF(IYU.GT.NY2M1) GO TO 160
       GO TO 180
-160     WRITE(6,161) IH(I),IK(I)
+160     if(ILIST)WRITE(6,161) IH(I),IK(I)
 161     FORMAT(' SPOT TOO NEAR EDGE FOR CTF TILT CORRECTION',2I8)
         GO TO 500
 180   CONTINUE
@@ -734,8 +734,8 @@ C
       NUMOUT = NUMOUT + 1
           IF(NUMOUT.GE.NUMSPOT) ILIST=.FALSE.
           IF(NUMOUT.EQ.NUMSPOT+1) THEN
-                WRITE(6,1103)
-                WRITE(6,1102)
+                if(ILIST)WRITE(6,1103)
+                if(ILIST)WRITE(6,1102)
           ENDIF
 1102      FORMAT(/,' OTHER SPOTS NOT PRINTED OUT WITH FULL ',
      .       'DIAGNOSTICS')
@@ -744,7 +744,9 @@ C
      .       'NCTFSAMPLES    CTFINMIDDLE   RESCALING BY')
           IF(NUMOUT.GT.NUMSPOT) THEN
            NUMAFTER=NUMOUT-NUMSPOT-1    ! Test for table heading output.
-           IF(60*((NUMAFTER)/60).EQ.NUMAFTER) WRITE(6,1108)
+           IF(60*((NUMAFTER)/60).EQ.NUMAFTER) then
+             if(ILIST)WRITE(6,1108)
+           endif
 C
 CHEN
            CZEILE(1:24)='8877665544332211'
@@ -753,7 +755,7 @@ CHEN
            ITEMP=19-IQ-IQ-2
            IF(ITEMP.GE.1)CZEILE(1:ITEMP) = '------------------'
 C
-           WRITE(6,1101)IH(I),IK(I),ISENS,AMPOUT,PHSOUT,IQ,RMSBK,
+           if(ILIST)WRITE(6,1101)IH(I),IK(I),ISENS,AMPOUT,PHSOUT,IQ,RMSBK,
      .     DFMID,DELCHI,ICTFHOR,CTFMID,FACTOR,CZEILE(1:17)
 CHEN
           ENDIF
@@ -763,7 +765,7 @@ CHEN
 C
 C     write up to NUMSPOT spots
 C
-      WRITE(6,1105) IH(I),IK(I),XA(I),YA(I)
+      if(ILIST)WRITE(6,1105) IH(I),IK(I),XA(I),YA(I)
 1103  FORMAT(/,/,132('*'),/)
 1105  FORMAT(/,' Reflection  H',I3,'  K',I3,10X,
      1       'Lattice coordinates in grid units ',2F8.2)
@@ -953,6 +955,8 @@ C     1  +NIQ(6)*2+NIQ(7))*RSCAMAX/200
         RLMAX=ILSUM+(RSCAMAX/4.0)
 CHEN>
           write(IOU2,'(''set QVAL_local = '',F16.1)')NEWMAX
+C
+          write(IOU2,'(''set PSMAX = '',I12)')ICENTRE
 C
           call shorten(CNAMPAT,k)
           if(k.gt.3)k=3

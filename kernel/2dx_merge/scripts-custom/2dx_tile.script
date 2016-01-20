@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Prepare TILES (EXPERIMENTAL)                                       #
+# Title: Prepare Tiles (EXPERIMENTAL)                                       #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -92,6 +92,7 @@ set ReUnbend_MP = `cat 2dx_merge.cfg | grep "set ReUnbend_MP" | cut -d\" -f2`
 set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
 echo ": Will work on ${dirnum} image directories."
 #
+\rm -f LOGS/${scriptname}_sub.logfile
 \cp -f 2dx_merge_dirfile.dat SCRATCH/${scriptname}_2dx_merge_dirfile_runfile.dat
 #
 set dircounter = 1
@@ -169,6 +170,7 @@ eot
     sleep 1
     if ( -e SCRATCH/getload.dat ) then
       set loadaverage = `cat SCRATCH/getload.dat`
+      # echo "::loadaverage = ${loadaverage}"
     else
       sleep 1
       set loadaverage = 50

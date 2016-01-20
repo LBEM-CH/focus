@@ -91,9 +91,12 @@ eot
     set nonmaskimagename = `cat 2dx_image.cfg | grep "set nonmaskimagename =" | cut -d\" -f2`
     #
     set PSMAX = `cat 2dx_image.cfg | grep "set PSMAX =" | cut -d\" -f2`
+    if ( ${PSMAX} == "************" ) then
+      set PSMAX = 0
+    endif
     set MergePhaseResidual = `cat 2dx_image.cfg | grep "set MergePhaseResidual =" | cut -d\" -f2` 
     set MergePhaseRes_slot1 = `cat 2dx_image.cfg | grep "set MergePhaseRes_slot1 =" | cut -d\" -f2`
-    echo ${from_dir}: ${PSMAX}, ${MergePhaseResidual}, ${MergePhaseRes_slot1}
+    echo "${from_dir}: ${PSMAX}, ${MergePhaseResidual}, ${MergePhaseRes_slot1}"
     set gotrash1 = `echo ${PSMAX} | awk '{ if ( $1 < 8 ) { s = 1 } else { s = 0 } } END { print s }'`
     set gotrash2 = `echo ${MergePhaseResidual} | awk '{ if ( $1 > 78.5 ) { s = 1 } else { s = 0 } } END { print s }'`
     set gotrash3 = `echo ${MergePhaseRes_slot1} | awk '{ if ( $1 > 45 ) { s = 1 } else { s = 0 } } END { print s }'`

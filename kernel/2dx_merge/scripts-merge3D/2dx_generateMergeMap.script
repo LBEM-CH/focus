@@ -215,6 +215,8 @@ echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
 ${proc_2dx}/linblock "volume_processor.exe - to transform HKL file into volume"
 #############################################################################  
 #
+echo "<<@progress: +10>>"
+#
 ${bin_2dx}/volume_processor.exe --hklin APH/latfitted.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
 #
 echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results
@@ -223,11 +225,15 @@ echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results
 ${proc_2dx}/linblock "extend the map to 2x2x1 unit cells"
 #############################################################################  
 #
+echo "<<@progress: +10>>"
+#
 source ${proc_2dx}/2dx_extend_map.com volume.map extended.map
 #
 echo "# IMAGE: extended.map <MAP: final map 3D, 2x2 unit cells>"  >> LOGS/${scriptname}.results
 #
 if ( ${calculate_subvolume}x != "0x" ) then 
+    echo "<<@progress: +10>>"
+    #
     source ${proc_2dx}/2dx_create_subvolume.com ${calculate_subvolume} extended.map ${realcell} ${ALAT} 3D_sub.map
     #
     echo "# IMAGE-IMPORTANT: 3D_sub.map <MAP: 3D sub map>" >> LOGS/${scriptname}.results
@@ -237,6 +243,8 @@ endif
 #############################################################################
 ${proc_2dx}/linblock "hkl_to_PSFmrc.exe - to transform HKL file into volume for PSF"
 #############################################################################  
+#
+echo "<<@progress: +10>>"
 #
 ${bin_2dx}/volume_processor.exe --hklin APH/latfitted.hkl --mrcout PSF.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME} --psf
 #
@@ -253,6 +261,8 @@ ${proc_2dx}/linblock "Now for 2D processing:"
 #############################################################################
 #
 #
+echo "<<@progress: +10>>"
+#
 ${bin_2dx}/project2D.exe --mrcin extended.map --mrcout ${imagename}-${SYM}.mrc --axis z
 #
 echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}.mrc <${SYM}-symmetrized final 2D map>" >> LOGS/${scriptname}.results
@@ -260,6 +270,8 @@ echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}.mrc <${SYM}-symmetrized final 2D ma
 #############################################################################
 ${proc_2dx}/linblock "labelh - to transform the map into BYTE format with automatic scaling"
 #############################################################################
+#
+echo "<<@progress: +10>>"
 #
 ${bin_2dx}/labelh.exe << eot
 ${imagename}-${SYM}.mrc

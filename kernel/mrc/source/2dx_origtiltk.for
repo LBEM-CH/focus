@@ -1811,7 +1811,6 @@ C---------------------------------------------------------------------------
 C
 
       IF (NBEAM) THEN
-        PRINT *, "::HELLO FROM BEAMTILT IF!"
         CALL BEAMTILTA
         WRITE(6,355)ORIGH+SHMIN,ORIGK+SKMIN,TLTH+TILTH,TLTK+TILTK
 355     FORMAT(' AGGREGATE TOTAL OF PARAMETERS --- INPUT PLUS REFINED'/

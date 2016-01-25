@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Merge & Refine (Iterative)                                         #
+# Title: Refine & Merge (Iterative)                                         #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -130,12 +130,9 @@ set zstarrange_real = ""
 set zstarwin = ""
 set calculate_subvolume = ""
 set number_of_beads = ""
-set density_threshold_bead = ""
-set maximum_resolution_bead = ""
 set number_refinement_iterations = ""
 set membrane_height = ""
 set maximum_amplitude_refinement = ""
-set density_threshold_refinement = ""
 #
 #$end_vars
 #
@@ -307,6 +304,20 @@ while ( ${itnum} < ${merge_refine_iterations} )
   echo "<<@progress: ${prog_num}>>"
   #
   #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
+  #############################################################################  
+  #
+  source ${proc_2dx}/2dx_origtilt_refine.com
+  #
+  if ( ${reftiltgeo} == "y" ) then
+    #############################################################################
+    ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
+    #############################################################################  
+    #
+    ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
+  endif
+  #
+  #############################################################################
   ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
   #############################################################################
   #
@@ -324,28 +335,13 @@ while ( ${itnum} < ${merge_refine_iterations} )
   #
   source ${proc_2dx}/2dx_merge_generate3D.com
   #
-  #############################################################################
-  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
-  #############################################################################  
-  #
-  source ${proc_2dx}/2dx_origtilt_refine.com
-  #
-  #
-  #
-  if ( ${reftiltgeo} == "y" ) then
-    #############################################################################
-    ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
-    #############################################################################  
-    #
-    ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
-  endif
-  #
   #
   # Issue evaluate here to reload the Ph-Ori-Change column
   # echo "<<@evaluate>>"
   #
   @ itnum += 1
 end
+#
 #
 ${proc_2dx}/linblock "Now, press the REFRESH DISPLAY VIEW button in top menu to update the project library."
 #############################################################################

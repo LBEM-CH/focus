@@ -47,6 +47,12 @@ echo ": "
   cd ..
   cd ${from_dir}
   #
+  if ( ! -w SCRATCH ) then
+    \rm -rf SCRATCH
+  endif
+
+  source ${proc_2dx}/2dx_merge_makedirs 
+
   set imagename            = `cat 2dx_image.cfg | grep "set imagename ="            | cut -d\" -f2`
   set nonmaskimagename     = `cat 2dx_image.cfg | grep "set nonmaskimagename ="     | cut -d\" -f2`
   set imagenumber          = `cat 2dx_image.cfg | grep "set imagenumber ="          | cut -d\" -f2`
@@ -78,6 +84,8 @@ echo ": "
   set ampcon = `echo ${phacon} | awk '{s=sqrt(1.0 - ( $1 * $1 ))} END {print s}'`
   #
   # set imode                = 7
+  # set imode                = 1
+  # set imode                = 6
   set imode                = 1
   #
   set locimagenumber = ${imagenumber}

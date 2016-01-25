@@ -138,6 +138,7 @@ else
 endif
 #
 foreach scriptA ( SCRATCH/job_*_${scriptAfile} )
+  \chmod +x ${scriptA}
   if ( ${scriptA} != SCRATCH/job_${maxthread_with_zero}_${scriptAfile} ) then
     echo Background nohup ${scriptA} \> ${scriptA}.log \&
     nohup ${scriptA} > ${scriptA}.log &
@@ -147,7 +148,8 @@ foreach scriptA ( SCRATCH/job_*_${scriptAfile} )
   endif
 end
 #
-
+wait
+#
 echo "################################################"
 echo "################################################"
 echo "output in file SCRATCH/job_XX_2dx_merge_scriptA.com.log"

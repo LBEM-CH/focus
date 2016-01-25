@@ -77,9 +77,6 @@ else
     \cp -rf ${olddir}/* merge
   endif
 endif
-if ( ! -l 2dx_master.cfg ) then
-  \ln -s merge/2dx_merge.cfg 2dx_master.cfg
-endif
 ############################################################################# 
 #
 cd ${olddir} 

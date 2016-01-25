@@ -173,7 +173,8 @@ C
         else
           imto = imnumber 
         endif
-        write(*,'(/,'':Creating merging script '',A,'' for image '',I5,'' to '',I5,'' of '',I5)')
+        write(*,'(/,'':Creating merging script '',A,
+     .       '' for image '',I5,'' to '',I5,'' of '',I5)')
      .    cline(1:k1),imfrom,imto,imnumber
         open(11,FILE=cline,STATUS='NEW',ERR=900)
 C
@@ -336,7 +337,8 @@ C
           if(iok.eq.0)then
             write(CMLMERGE(1:1),'(''n'')')
             write(*,'(''::WARNING: ML_use_for_merging not yet defined for this image.'')')
-            write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
+            write(*,'(''::To resolve, open 2dx_image on this image,'',
+     .        '' click on save, and close 2dx_image.'')')
           endif
 C
           call rgetline(RZWIN,"zstarwin")
@@ -497,7 +499,8 @@ C
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')
-        write(*,'(''::ERROR on file open in 2dx_merge_compileA_thread'')')
+        write(*,'(''::ERROR on file open in '',
+     .     ''2dx_merge_compileA_thread'')')
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')
         write(*,'(''::'',79(''#''))')

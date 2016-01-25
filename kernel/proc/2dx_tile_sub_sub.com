@@ -2,6 +2,7 @@
 #  This is not an independent script.  It should be called by another script.
 #
 #
+set imode_local = ${imode}
 #
 if ( ${imode} == "7" ) then
   #
@@ -23,15 +24,11 @@ ${ctfcor_debug}
 ${ctfcor_maxamp_factor}
 eot
   #
-  echo "# IMAGE: ${olddir}/../${from_dir}/${ctfcor_outfile} <Output Image CTF corrected>" >>  ${olddir}/LOGS/${scriptname}.results
-  if ( ${imode} == "2" ) then
-    echo "# IMAGE: ${olddir}/../${from_dir}/${ctfcor_ctffile} <Summed CTF**2 file>" >>  ${olddir}/LOGS/${scriptname}.results
-  else
-    echo "# IMAGE: ${olddir}/../${from_dir}/${ctfcor_ctffile} <Summed CTF file>" >>  ${olddir}/LOGS/${scriptname}.results
-  endif
+  echo "# IMAGE: ${olddir}/../${from_dir}/${ctfcor_outfile} <Output Image CTF corrected>" >>  ${olddir}/../${from_dir}/LOGS/${scriptname}.results
+  echo "# IMAGE: ${olddir}/../${from_dir}/${ctfcor_ctffile} <Summed CTF file>" >>  ${olddir}/../${from_dir}/LOGS/${scriptname}.results
   #
   ###########################################################################
-  ${proc_2dx}/lin "LABELH - Normalizing image to AVG=0, STDEV=100"
+  ${proc_2dx}/linblock "LABELH - Normalizing image to AVG=0, STDEV=100"
   ###########################################################################
   #
   \rm -f SCRATCH/image_ctf_upscale.mrc
@@ -174,7 +171,7 @@ foreach num_row ( ${tileseries} )
       ${app_2dx_image} ${fullpath} "2dx_initialize"
       #
       ###########################################################################
-      ${proc_2dx}/lin "LABELH - to crop tile from unbent and masked image"
+      ${proc_2dx}/linblock "LABELH - to crop tile from unbent and masked image"
       ###########################################################################
       #
       \rm -f SCRATCH/tile_ctf.mrc
@@ -182,89 +179,38 @@ foreach num_row ( ${tileseries} )
       ${bin_2dx}/labelh.exe << eot
 ${olddir}/../${from_dir}/SCRATCH/image_ctf_upscale.mrc
 1
-SCRATCH/tile_ctf.mrc
+SCRATCH/tile.mrc
 ${xmin},${xmax},${ymin},${ymax},1,1
 eot
       #
-      ###########################################################################
-      ${proc_2dx}/lin "LABELH - to crop tile from original image"
-      ###########################################################################
-      #
-      \rm -f SCRATCH/nonmasktile.mrc
-      #
-      ${bin_2dx}/labelh.exe << eot
+      if ( ${imode} == "7" ) then
+        \mv -f SCRATCH/tile.mrc SCRATCH/tile_ctf.mrc
+      else
+        #
+        ###########################################################################
+        ${proc_2dx}/linblock "LABELH - to crop tile from original image"
+        ###########################################################################
+        #
+        \rm -f SCRATCH/nonmasktile.mrc
+        #
+        ${bin_2dx}/labelh.exe << eot
 ${olddir}/../${from_dir}/${nonmaskimagename}.mrc
 1
 SCRATCH/nonmasktile.mrc
 ${xmin},${xmax},${ymin},${ymax},1,1
 eot
-      #
-      ###########################################################################
-      ${proc_2dx}/lin "TAPEREDGE - Tapering edge of summed frames"
-      ###########################################################################
-      #
-      setenv IN  SCRATCH/tile_ctf.mrc
-      setenv OUT tile_ctf_taper.mrc
-      \rm -f     tile_ctf_taper.mrc
-      ${bin_2dx}/2dx_taperedgek.exe << eot
-30,30,100,30       ! IAVER,ISMOOTH,ITAPER
-eot
-      #
-      ###########################################################################
-      ${proc_2dx}/lin "FFTRANS - Producing FFT of unbent crystal image tile"
-      ###########################################################################
-      #
-      setenv IN tile_ctf_taper.mrc
-      setenv OUT SCRATCH/tile_ctf_taper_fft.mrc
-      \rm -f     SCRATCH/tile_ctf_taper_fft.mrc
-      ${bin_2dx}/2dx_fftrans.exe
-      echo "# IMAGE: tile_ctf_taper.mrc <TILE ${imagenumber}>" >>  ${olddir}/LOGS/${scriptname}.results
-      echo "# IMAGE: SCRATCH/tile_ctf_taper_fft.mrc <TILE ${imagenumber} FFT>" >>  ${olddir}/LOGS/${scriptname}.results
-      \rm -f SCRATCH/tile_ctf.mrc
-      #
-      ###########################################################################
-      ${proc_2dx}/lin "FFTRANS - Producing FFT of oroginal image tile"
-      ###########################################################################
-      #
-      setenv IN SCRATCH/nonmasktile.mrc
-      setenv OUT SCRATCH/nonmasktile_fft.mrc
-      \rm -f     SCRATCH/nonmasktile_fft.mrc
-      ${bin_2dx}/2dx_fftrans.exe
-      #
-      #
-      #
-      \rm -f SCRATCH/TMP9873.dat
-      set CTF_outfile = APH/${CTF_outfile_nA}
-      \rm -f ${CTF_outfile}
-      set algo = U2
-      set imagecenterx = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-      set imagecentery = ${imagecenterx}
-   
-      if ( ${imode} == "7" ) then
         #
         ###########################################################################
-        ${proc_2dx}/lin "MMBOX - Evaluating APH values"
+        ${proc_2dx}/linblock "FFTRANS - Producing FFT of oroginal image tile"
         ###########################################################################
-
-        ${bin_2dx}/2dx_mmboxa.exe << eot
-SCRATCH/tile_ctf_taper_fft.mrc
-${imagenumber} ${imagename}, CTFcor_Mode=${imode}
-Y                               ! Use grid units?
-Y                               ! Generate grid from lattice?
-N                               ! Generate points from lattice?
-2,2,0,50,50,13,13               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-${CTF_outfile}
-SCRATCH/TMP9873.dat
-${algo}
-${imagecenterx},${imagecentery}           ! XORIG,YORIG
-200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
-${newlattice}                         ! Lattice vectors
-eot
         #
-      else
+        setenv IN SCRATCH/nonmasktile.mrc
+        setenv OUT SCRATCH/nonmasktile_fft.mrc
+        \rm -f     SCRATCH/nonmasktile_fft.mrc
+        ${bin_2dx}/2dx_fftrans.exe
         #
         ###########################################################################
-        ${proc_2dx}/lin "CTFFIND3 - To verify defocus"
+        ${proc_2dx}/linblock "CTFFIND3 - To verify defocus"
         ###########################################################################
         #
         if ( ${use_paralellized} == "y" ) then
@@ -293,8 +239,7 @@ eot
         set resoma   = ${defocus_res_min}
         set resoma   = 4.0
         echo resoma  = ${resoma}
-  
-
+        #
         echo " "
         echo "Calling:"  
         echo "${bin_2dx}/${progname}"
@@ -324,11 +269,111 @@ eof
         set fullpath = `pwd`
         ${app_2dx_image} ${fullpath} "2dx_initialize"
         #
+      endif
+      #
+      if ( ${imode} == "6" ) then
         ###########################################################################
-        ${proc_2dx}/lin "TTBOX - To evaluate APH values"
+        ${proc_2dx}/linblock "CTFCOR in stripes"
+        ########################################################################### 
+        #
+        set      tile_ctfcor_outfile = SCRATCH/tile_ctfcor.mrc
+        \rm -f ${tile_ctfcor_outfile}
+        set      tile_ctfcor_ctffile = SCRATCH/tile_ctffile.mrc
+        \rm -f ${tile_ctfcor_ctffile}
+        #
+        # ${bin_2dx}/2dx_ctfcor.exe << eot
+        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
+SCRATCH/tile.mrc
+${tile_ctfcor_outfile}
+${tile_ctfcor_ctffile}
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${newdefocus}
+${RESMAX}
+${ctfcor_noise}
+${imode}
+${ctfcor_debug}
+${ctfcor_maxamp_factor}
+eot
+        #
+        echo "# IMAGE: ${olddir}/../${from_dir}/${tile_ctfcor_outfile} <Output Image CTF corrected>" >>  ${olddir}/../${from_dir}/LOGS/${scriptname}.results
+        echo "# IMAGE: ${olddir}/../${from_dir}/${tile_ctfcor_ctffile} <Summed CTF file>" >>  ${olddir}/../${from_dir}/LOGS/${scriptname}.results
+        #
+        ###########################################################################
+        ${proc_2dx}/linblock "LABELH - Normalizing image to AVG=0, STDEV=100"
         ###########################################################################
         #
-        ${proc_2dx}/linblock "TTBOXA - to read out AMPs and PHASES with TTF-correction"
+        \rm -f SCRATCH/image_ctf_upscale.mrc
+        ${bin_2dx}/labelh.exe << eot
+${tile_ctfcor_outfile}
+39
+SCRATCH/tile_ctf.mrc
+eot
+        #
+      endif
+      #
+      ###########################################################################
+      ${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
+      ###########################################################################
+      #
+      if ( ${imode} == "1" ) then
+        setenv IN  SCRATCH/tile.mrc
+      else
+        setenv IN  SCRATCH/tile_ctf.mrc
+      endif
+      setenv OUT tile_ctf_taper.mrc
+      \rm -f     tile_ctf_taper.mrc
+      ${bin_2dx}/2dx_taperedgek.exe << eot
+30,30,100,30       ! IAVER,ISMOOTH,ITAPER
+eot
+      #
+      ###########################################################################
+      ${proc_2dx}/linblock "FFTRANS - Producing FFT of unbent crystal image tile"
+      ###########################################################################
+      #
+      setenv IN tile_ctf_taper.mrc
+      setenv OUT SCRATCH/tile_ctf_taper_fft.mrc
+      \rm -f     SCRATCH/tile_ctf_taper_fft.mrc
+      ${bin_2dx}/2dx_fftrans.exe
+      echo "# IMAGE: tile_ctf_taper.mrc <TILE ${imagenumber}>" >>  ${olddir}/../${from_dir}/LOGS/${scriptname}.results
+      echo "# IMAGE: SCRATCH/tile_ctf_taper_fft.mrc <TILE ${imagenumber} FFT>" >>  ${olddir}/../${from_dir}/LOGS/${scriptname}.results
+      \rm -f SCRATCH/tile_ctf.mrc
+      #
+      #
+      \rm -f SCRATCH/TMP9873.dat
+      set CTF_outfile = APH/${CTF_outfile_nA}
+      \rm -f ${CTF_outfile}
+      set algo = U2
+      set imagecenterx = `echo ${newimagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+      set imagecentery = ${imagecenterx}
+   
+      if ( ${imode} == "6" || ${imode} == "7" ) then
+        #
+        ###########################################################################
+        ${proc_2dx}/linblock "MMBOX - Evaluating APH values"
+        ###########################################################################
+
+        ${bin_2dx}/2dx_mmboxa.exe << eot
+SCRATCH/tile_ctf_taper_fft.mrc
+${imagenumber} ${imagename}, CTFcor_Mode=${imode}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2,2,0,50,50,13,13               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+${CTF_outfile}
+SCRATCH/TMP9873.dat
+${algo}
+${imagecenterx},${imagecentery}           ! XORIG,YORIG
+200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${newlattice}                         ! Lattice vectors
+eot
+        #
+      else
+        #
+        ###########################################################################
+        ${proc_2dx}/linblock "TTBOX - To evaluate APH values"
+        ###########################################################################
+        #
         ${bin_2dx}/2dx_ttboxk.exe << eot
 SCRATCH/tile_ctf_taper_fft.mrc
 ${imagenumber} 
@@ -346,7 +391,7 @@ ${RESMIN},1.0,${imagecenterx},${imagecentery},90.0 !RSMN,RSMX,XORIG,YORIG,SEGMNT
 ${newlattice}                  ! reciprocal lattice vectors in pixels
 eot
         #
-        echo "# IMAGE: ${CTF_outfile} <APH File after TTF correction [H,K,A,P,IQ,Back,0])>" >> LOGS/${scriptname}.results   
+        echo "# IMAGE: ${CTF_outfile} <APH File after TTF correction [H,K,A,P,IQ,Back,0])>" >> ${olddir}/../${from_dir}/LOGS/${scriptname}.results   
         \rm -f TTPLOT.PS
       endif
       #

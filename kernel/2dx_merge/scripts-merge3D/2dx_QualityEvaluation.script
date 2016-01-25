@@ -229,7 +229,14 @@ eot
     echo "Overall weighted R-factor:# ${tmp_overall_weighted_R_factor}%" >> Summary_Statistics_3D.txt
     echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   endif
-  cat SCRATCH/2dx_statistics_file.dat >> Summary_Statistics_3D.txt
+  set lines = `cat SCRATCH/2dx_statistics_file.dat | wc -l`
+  set toomany = `echo ${lines} | awk '{ if ( $1 > 20 ) { s = 1 } else { s = 0 } } END { print s }'`
+  if ( ${toomany} == "1" ) then
+    head -n 20 SCRATCH/2dx_statistics_file.dat >> Summary_Statistics_3D.txt
+    echo "::[list truncated] (total directories: ${lines})"  
+  else
+    cat SCRATCH/2dx_statistics_file.dat >> Summary_Statistics_3D.txt
+  endif
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
   #
   #

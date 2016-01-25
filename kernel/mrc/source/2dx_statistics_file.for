@@ -49,7 +49,7 @@ C---------If new, then output last one and restart counters:
           if(inewrun.eq.0)then
             inewrun=1
           else
-            write(*,'(''Tiltangle '',A,'': '',i5,'' images'')')clastname(1:ilastlen),ilast
+            write(*,'(I5,'' images in '',A)')ilast,clastname(1:ilastlen)
           endif
           ilast=1
         endif
@@ -62,7 +62,7 @@ C
 C
 C-----Output last tiltanglerange:
 C
-      write(*,'(''Tiltangle '',A,'': '',i5,'' images'')')clastname(1:ilastlen),ilast
+      write(*,'(I5,'' images in '',A)')ilast,clastname(1:ilastlen)
 C
       goto 900
 C

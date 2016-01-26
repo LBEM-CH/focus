@@ -70,6 +70,11 @@ echo "dummy" > SCRATCH/job_00_${scriptname}-tmp.reflections
 echo "dummy" > SCRATCH/job_00_${scriptname}-tmp.console
 \rm -f SCRATCH/job_*_${scriptname}-tmp.console
 #
+echo "dummy" > SCRATCH/job_00_${scriptname}-tmp.console.csv
+\rm -f SCRATCH/job_*_${scriptname}-tmp.console.csv
+#
+\rm -f ${scriptname}.console.csv
+#
 echo "dummy" > SCRATCH/job_00_${scriptBfile}.log
 \rm -f SCRATCH/job_*_${scriptBfile}.log
 #
@@ -170,17 +175,17 @@ foreach scriptBconsole ( SCRATCH/job_*_${scriptname}-tmp.console )
   \rm -f ${scriptBconsole}
 end
 #
-\rm -f SCRATCH/${scriptname}.console.csv
-echo "# IMAGE: SCRATCH/${scriptname}.console.csv <CSV: refinement table>" >> LOGS/${scriptname}.results
-foreach scriptBconsole ( SCRATCH/job_*_${scriptname}-tmp.console.csv ) 
-  cat ${scriptBconsole} | sed 's/ -999.000//g' >> SCRATCH/${scriptname}.console.csv
-  \rm -f ${scriptBconsole}
+\rm -f ${scriptname}.console.csv
+echo "# IMAGE: ${scriptname}.console.csv <CSV: refinement table>" >> LOGS/${scriptname}.results
+foreach csvfile ( SCRATCH/job_*_${scriptname}-tmp.console.csv ) 
+  cat ${csvfile} | sed 's/ -999.000//g' >> ${scriptname}.console.csv
+  # \rm -f ${csvfile}
 end
 #
 \rm -f SCRATCH/${scriptname}.py
 echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
 foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py )
-  echo "# IMAGE: ${scriptBresults} <PY: Refinement results update script ${scriptBresults}>" >> LOGS/${scriptname}.results
+  # echo "# IMAGE: ${scriptBresults} <PY: Refinement results update script ${scriptBresults}>" >> LOGS/${scriptname}.results
   ${app_python} ${scriptBresults}  
 end
 #

@@ -12,7 +12,7 @@ C 2dx_origtiltk.for
 C
       character*200 cname1,cname2,cname3,cname4,cname5
       character*200 cdir,cprocdir,cbindir,ctmpdir
-      character CROT90,CROT180
+      character CROT90,CROT180,CTMP1
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE,CPHOPROT,CMLMERGE
       character*1 cNBM,cNTL,CNREFOUT
@@ -475,8 +475,22 @@ C         write(*,'(''::imagenumber read = '',I10)')imnum(imtotalcount)
             enddo
           endif
 C
-          call shorten(CIMAGENAME,k)
-          write(CTITLE(1:80),'('' Imagename = '',A)')CIMAGENAME(1:k)
+C          call shorten(CIMAGENAME,k)
+C          write(CTITLE(1:80),'('' Imagename = '',A)')CIMAGENAME(1:k)
+C
+          call cgetline(cline,"imagename_original")
+          call shorten(cline,k2)
+C---------k2 now points to last character in cline. Find last "/":
+          do i=k2,1,-1
+            READ(cline(i:i),'(A1)')CTMP1
+            IF(CTMP1.eq.'/')GOTO 300
+          enddo
+          i=0
+  300     continue
+          k1=i+1
+C---------Now, k1 point to first character of usable file name
+          write(CTITLE(1:80),'(A)')cline(k1:k2)
+C         
           call rgetline(RESMAX,"RESMAX")
           if(RESMAX.lt.RGRESMAX)RESMAX=RGRESMAX
           call rgetline(RESMIN,"RESMIN")

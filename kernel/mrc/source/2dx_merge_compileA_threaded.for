@@ -16,7 +16,7 @@ C
       character*80 CIMAGENUMBER,CLATTICE,CMLMERGE
       character*200 CFILE1,cline,clin2
       character*200 CFILEreflections,CFILEconsole
-      character*1 CNREFOUT,CNSHFTIN
+      character*1 CNREFOUT,CNSHFTIN,CTMP1
       integer*8 imnum(10000)
       logical lexist
       logical LPROTFOUFIL,LUSEML
@@ -314,15 +314,27 @@ C         write(*,'(''::imagenumber read = '',I10)')imnum(imtotalcount)
                   call shorten(CIMAGENAME,k)
                   write(*,'(''::WARNING: Imagenumber '',I10,
      .            '' appears twice, here for image '',A)')imnum(i),CIMAGENAME(1:k)
-                  write(*,'(''::You should run the Custom Script named '',
-     .            ''RENUMBER IMAGENUMBERS to fix this.'')')
+                  write(*,'(''::You should run the Custom Script '',
+     .            ''named RENUMBER IMAGENUMBERS to fix this.'')')
                   ifound=1
                 endif
               endif
             enddo
           endif
 C
-          write(CTITLE(1:40),'('' Merging '')')
+          call cgetline(cline,"imagename_original")
+          call shorten(cline,k2)
+C---------k2 now points to last character in cline. Find last "/":
+          do i=k2,1,-1
+            READ(cline(i:i),'(A1)')CTMP1
+            IF(CTMP1.eq.'/')GOTO 300
+          enddo
+          i=0
+  300     continue
+          k1=i+1
+C---------Now, k1 point to first character of usable file name
+          write(CTITLE(1:40),'(A)')cline(k1:k2)
+C         
           call rgetline(RESMAX,"RESMAX")
           call rgetline(RESMIN,"RESMIN")
           call rgetline(RCS,"CS")
@@ -336,7 +348,8 @@ C
           call dgetline(CMLMERGE,"ML_use_for_merging",iok)
           if(iok.eq.0)then
             write(CMLMERGE(1:1),'(''n'')')
-            write(*,'(''::WARNING: ML_use_for_merging not yet defined for this image.'')')
+            write(*,'(''::WARNING: ML_use_for_merging not yet '',
+     .        ''defined for this image.'')')
             write(*,'(''::To resolve, open 2dx_image on this image,'',
      .        '' click on save, and close 2dx_image.'')')
           endif

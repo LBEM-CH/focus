@@ -39,6 +39,7 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set app_python = ""
 #
 set create_merged_dataset = ""
 set MergeResolution = ""
@@ -253,6 +254,17 @@ eot
 endif
 #
 echo "# IMAGE-IMPORTANT: PS/2dx_plotresolution.ps <PS: Resolution Plot>" >> LOGS/${scriptname}.results
+#
+set CSVfile = 2dx_mergeRefine.console.csv
+if ( ! -e ${CSVfile} ) then
+  set CSVfile = SCRATCH/2dx_mergeRefine.console.csv
+endif
+set CSVoutfile = 2dx_mergeRefine.console.out.png
+if ( -e ${CSVfile} ) then
+  ${app_python} ${proc_2dx}/plotTileBeamTilt.py ${CSVfile} 5 ${CSVoutfile}
+endif
+echo "# IMAGE: ${CSVfile} <TXT: Tile refinement results>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${CSVoutfile} <PNG: Tile refinement plot>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "Normal End."

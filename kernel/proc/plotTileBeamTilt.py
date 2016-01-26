@@ -75,21 +75,33 @@ print countsy
 #--------------------------------
 
 range_plot = max(abs(min(beamtiltsx)), abs(max(beamtiltsx)), abs(min(beamtiltsy)), abs(max(beamtiltsy)))
+range_plot = range_plot+0.4*range_plot
 
 fig = plt.figure(figsize = (number_of_tiles, number_of_tiles))
-fig.suptitle("Averaged beamtilts from " + str(count) + " measurements\nTile axes ranges: (-" + str(round(range_plot,4)) + ", " +str(round(range_plot,4)) + ") mrad.", fontsize=10)
+fig.suptitle("Averaged beamtilts from " + str(count) + " measurements\nTile axes range: (-" + str(round(range_plot,4)) + ", " +str(round(range_plot,4)) + ") mrad.", fontsize=10)
 
 gs = gridspec.GridSpec( number_of_tiles, number_of_tiles)
 gs.update(wspace=0.00, hspace=0.00) # set the spacing between axes. 
 
 for i in range(0, number_of_tiles):
-	for j in range(0, number_of_tiles):
-		print "Plotting for tile: " + str(i+1) + " " + str(j+1)
-		ax = plt.subplot(gs[j*number_of_tiles +i])
-		ax.plot([0, beamtiltsx[j*number_of_tiles +i] ], [0, beamtiltsy[j*number_of_tiles +i] ])
-		ax.set_xlim(-1*range_plot, range_plot)
-		ax.set_ylim(-1*range_plot, range_plot)
-		ax.set_xticklabels([])
-    		ax.set_yticklabels([])
+        for j in range(0, number_of_tiles):
+                print "Plotting for tile: " + str(i+1) + " " + str(j+1)
+                ax = plt.subplot(gs[j*number_of_tiles +i])
+                ax.arrow(0, 0, beamtiltsx[j*number_of_tiles +i], beamtiltsy[j*number_of_tiles +i], head_width=0.2*range_plot, head_length=0.2*range_plot, linewidth=2.0*range_plot, fc='r', ec='r', alpha=0.7)
+                ax.set_xlim(-1*range_plot, range_plot)
+                ax.set_ylim(-1*range_plot, range_plot)
+                ax.set_axis_off()
+                if j == 0:
+                    ax.axhline(y=range_plot, color='k')
+                if i == 0:
+                    ax.axvline(x=-1*range_plot, color='k')
+                if not j == number_of_tiles-1:
+                    ax.axhline(y=-1*range_plot, linestyle='dashed', alpha=0.5, color='k')
+                else:
+                    ax.axhline(y=-1*range_plot, color='k')
+                if not i == number_of_tiles-1:
+                    ax.axvline(x=range_plot, linestyle='dashed', alpha = 0.5, color='k')
+                else:
+                    ax.axvline(x=range_plot, color='k')
 
 plt.savefig(output_file)

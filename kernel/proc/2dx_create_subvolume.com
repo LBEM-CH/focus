@@ -126,6 +126,23 @@ endif
 #
 #
 #
+if ( ${calculate_subvolume}x == "6x" ) then
+  #------------------------------------------------------------------------
+  ${proc_2dx}/linblock "Creating subvolume with type Bacteriorhodopsin for map ${input_map}."
+  #------------------------------------------------------------------------
+  set maprot_rota = "0.0 0.0 0.0"
+  set maprot_trans = "0.0 0.0 0.0"
+  set limxmin = "-0.60"
+  set limxmax = "0.60"
+  set limymin = "-0.60"
+  set limymax = "0.65"
+  set limzmin = "0.40"
+  set limzmax = "0.75"
+  #
+endif
+#
+#
+#
 #
 echo ":Rotating with: ${maprot_rota}"
 echo ":Translating with: ${maprot_trans}"

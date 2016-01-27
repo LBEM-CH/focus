@@ -259,12 +259,12 @@ set CSVfile = 2dx_mergeRefine.console.csv
 if ( ! -e ${CSVfile} ) then
   set CSVfile = SCRATCH/2dx_mergeRefine.console.csv
 endif
-set CSVoutfile = 2dx_mergeRefine.console.out.png
+set CSVoutfile = 2dx_mergeRefine.console.ps
 if ( -e ${CSVfile} ) then
   ${app_python} ${proc_2dx}/plotTileBeamTilt.py ${CSVfile} 5 ${CSVoutfile}
 endif
 echo "# IMAGE: ${CSVfile} <TXT: Tile refinement results>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${CSVoutfile} <PNG: Tile refinement plot>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${CSVoutfile} <PS: Tile refinement plot>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "Normal End."

@@ -212,12 +212,12 @@ echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
 #############################################################################
 #
 #############################################################################
-${proc_2dx}/linblock "volume_processor.exe - to transform HKL file into volume"
+${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume"
 #############################################################################  
 #
 echo "<<@progress: +10>>"
 #
-${bin_2dx}/volume_processor.exe --hklin APH/latfitted.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
+${bin_2dx}/2dx_processor.exe --hklin APH/latfitted.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
 #
 echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results
 #
@@ -241,12 +241,12 @@ if ( ${calculate_subvolume}x != "0x" ) then
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "hkl_to_PSFmrc.exe - to transform HKL file into volume for PSF"
+${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for PSF"
 #############################################################################  
 #
 echo "<<@progress: +10>>"
 #
-${bin_2dx}/volume_processor.exe --hklin APH/latfitted.hkl --mrcout PSF.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME} --psf
+${bin_2dx}/2dx_processor.exe --hklin APH/latfitted.hkl --mrcout PSF.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME} --psf
 #
 echo "# IMAGE: PSF.map <MAP: PSF>"  >> LOGS/${scriptname}.results
 #

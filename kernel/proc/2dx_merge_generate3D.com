@@ -136,7 +136,7 @@ echo "::Unique Reflections = ${Reflections_Unique}"
 echo "<<@progress: +5>>"  
 #
 #############################################################################
-${proc_2dx}/linblock "2dx Volume Processor : creating FOM-weighted averaged HKL file"
+${proc_2dx}/linblock "2dx Processor : creating FOM-weighted averaged HKL file"
 #############################################################################  
 #
 \rm -f APH/latfitted.hkl
@@ -149,8 +149,8 @@ echo "cellx = ${cellx}"
 echo "celly = ${celly}"
 echo "cellz = ${ALAT}" 
 #
-echo ":Launching ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey"
-${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey
+echo ":Launching ${bin_2dx}/2dx_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey"
+${bin_2dx}/2dx_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey
 #
 echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
 #

@@ -150,7 +150,7 @@ if(${sharpening_algo} == "2") then
     set model_map = "model.map"
     \rm -f ${model_map}
     #
-    ${bin_2dx}/volume_processor.exe --mrcin ${model_mrc} --mrcout ${model_map}
+    ${bin_2dx}/2dx_processor.exe --mrcin ${model_mrc} --mrcout ${model_map}
     #
     echo "# IMAGE-IMPORTANT: ${model_map} <MAP: PDB model density map>" >> LOGS/${scriptname}.results
     #
@@ -186,9 +186,9 @@ if(${sharpening_algo} != "0") then
       @ num += 1
     end
     #------------------------------------------------------------------------------
-    #echo ":Launching ${bin_2dx}/volume_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}"
+    #echo ":Launching ${bin_2dx}/2dx_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}"
     #------------------------------------------------------------------------------
-    #${bin_2dx}/volume_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}
+    #${bin_2dx}/2dx_processor.exe --mrcin ${sharpened_map} --mrcout ${sharpened_map} --res ${RESMAX}
     #
 else if(${if_bfactor_sharpen} == "y") then
     cp ${refined_map} ${sharpened_map}
@@ -197,9 +197,9 @@ endif
 #
 if(${if_bfactor_sharpen} == "y") then
     #------------------------------------------------------------------------------
-    echo ":Launching ${bin_2dx}/volume_processor.exe --mrcin ${sharpened_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}"
+    echo ":Launching ${bin_2dx}/2dx_processor.exe --mrcin ${sharpened_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}"
     #------------------------------------------------------------------------------
-    ${bin_2dx}/volume_processor.exe --mrcin ${sharpened_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}
+    ${bin_2dx}/2dx_processor.exe --mrcin ${sharpened_map} --hklout ${sharpened_hkl} --mrcout ${sharpened_map} --res ${RESMAX} --bfactor ${bfactor_sharpening}
     #
 endif
 #

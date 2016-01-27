@@ -19,9 +19,9 @@ set back_projected_hkl = "back_projected_LeftHanded.hkl"
 set back_projected_map = "back_projected.map"
 \rm -f ${back_projected_map}
 #
-echo ":Launching ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout ${back_projected_hkl} --mrcout ${back_projected_map}"
+echo ":Launching ${bin_2dx}/2dx_processor.exe --hkzin APH/latlines.dat -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout ${back_projected_hkl} --mrcout ${back_projected_map}"
 #-----------------------------------------------------------------------------------
-${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout ${back_projected_hkl} --mrcout ${back_projected_map}
+${bin_2dx}/2dx_processor.exe --hkzin APH/latlines.dat -s ${SYM} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout ${back_projected_hkl} --mrcout ${back_projected_map}
 #
 echo "# IMAGE: ${back_projected_hkl} <Back-Projected HKL (MRC lefthanded) [H K L AMP PHASE FOM]>" >> LOGS/${scriptname}.results
 echo "# IMAGE: ${back_projected_map} <Back-Projected map>" >> LOGS/${scriptname}.results

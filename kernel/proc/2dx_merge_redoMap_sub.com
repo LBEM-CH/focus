@@ -208,12 +208,12 @@ if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then
   ${proc_2dx}/lin "Creating reference projection map ${refhklfile}"
   #
   #############################################################################
-  ${proc_2dx}/lin "volume_processor.exe to create map file"
+  ${proc_2dx}/lin "2dx_processor.exe to create map file"
   ############################################################################# 
   #
   echo "Calling now:"
-  echo "${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2 --invertx --inverty"
-  ${bin_2dx}/volume_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2  --invertx --inverty
+  echo "${bin_2dx}/2dx_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2 --invertx --inverty"
+  ${bin_2dx}/2dx_processor.exe --hklin ${refhklfile} --mrcout ${refmap} --nx 200 --ny 200 --nz 1 --gamma ${realang} --extended 2  --invertx --inverty
   #
   echo "Calling now:"
   echo "${bin_2dx}/mrc_header_modifier.exe --mrcin ${refmap} --mrcout ${refmap} --cellx ${cellx} --celly ${celly}"
@@ -268,23 +268,23 @@ END
 eof
 #
 #############################################################################
-${proc_2dx}/lin "volume_porcessor.exe - to convert ${infile} to MAP"
+${proc_2dx}/lin "2dx_porcessor.exe - to convert ${infile} to MAP"
 #############################################################################
 #
-echo "Running: ${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang} --invertx --inverty"
+echo "Running: ${bin_2dx}/2dx_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang} --invertx --inverty"
 #
 \rm -f SCRATCH/${imagename}-${symmetry}.map
 #
-${bin_2dx}/volume_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang} --invertx --inverty
+${bin_2dx}/2dx_processor.exe --hklin ${infile} --mrcout SCRATCH/${imagename}-${symmetry}.map --nx 200 --ny 200 --nz 1 --gamma ${realang} --invertx --inverty
 #
 echo "Calling now:"
 echo "${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}"
 ${bin_2dx}/mrc_header_modifier.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --cellx ${cellx} --celly ${celly}
 #
 if( ${extends} == "y" ) then
-    echo "Running: ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2"
+    echo "Running: ${bin_2dx}/2dx_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2"
     #
-    ${bin_2dx}/volume_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2 
+    ${bin_2dx}/2dx_processor.exe --mrcin SCRATCH/${imagename}-${symmetry}.map --mrcout SCRATCH/${imagename}-${symmetry}.map --extended 2 
 endif
 
 if ( ${create_PS} == "y" ) then

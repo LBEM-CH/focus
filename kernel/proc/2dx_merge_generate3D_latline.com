@@ -354,7 +354,7 @@ eot
   endif  
   #
   #############################################################################
-  ${proc_2dx}/linblock "2dx_extend_fourier.exe - to expand symmetry to full P1 space"
+  ${proc_2dx}/linblock "2dx_processor.exe - to expand symmetry to full P1 space"
   #############################################################################  
   #
   set infile = APH/latfitted_nosym.hkl
@@ -366,7 +366,7 @@ eot
   set nk_max = ${MergeHKMAX}
   set nl_max = ${ALAT}
   #
-  ${bin_2dx}/volume_processor.exe --hklin ${infile} -s ${SYM_NAME} -X ${nh_max} -Y ${nk_max} -Z ${nl_max} --hklout ${outfile} --full-fourier
+  ${bin_2dx}/2dx_processor.exe --hklin ${infile} -s ${SYM_NAME} -X ${nh_max} -Y ${nk_max} -Z ${nl_max} --hklout ${outfile} --full-fourier
   echo "# IMAGE: ${infile} <HKL: HKL file before symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   echo "# IMAGE: ${outfile} <HKL: HKL file after symmetrization [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
@@ -377,7 +377,7 @@ eot
 else
   #
   #############################################################################
-  ${proc_2dx}/linblock "2dx Volume Processor : creating FOM-weighted averaged HKL file"
+  ${proc_2dx}/linblock "2dx Processor : creating FOM-weighted averaged HKL file"
   #############################################################################  
   #
   \rm -f PLOT.PS
@@ -395,8 +395,8 @@ else
   echo "celly = ${celly}"
   echo "cellz = ${ALAT}" 
   #
-  echo ":Launching ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey"
-  ${bin_2dx}/volume_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey
+  echo ":Launching ${bin_2dx}/2dx_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey"
+  ${bin_2dx}/2dx_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey
   #
   echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #

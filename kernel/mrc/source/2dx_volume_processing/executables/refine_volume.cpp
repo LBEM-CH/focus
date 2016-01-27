@@ -108,19 +108,19 @@ int main(int argc, char** argv)
         }
         
         //Prepare for constraints
-        volume::data::RealSpaceData real_before(output_volume.get_real());
+        tdx::data::RealSpaceData real_before(output_volume.get_real());
         
         //Get the sum of densities for error calculation
         double sum_initial = real_before.squared_sum();
         
         //Generate mask/support
-        volume::data::RealSpaceData mask_threshold = real_before.threshold_mask(0);
-        volume::data::RealSpaceData mask_slab = real_before.vertical_slab_mask(membrane_slab, true);
+        tdx::data::RealSpaceData mask_threshold = real_before.threshold_mask(0);
+        tdx::data::RealSpaceData mask_slab = real_before.vertical_slab_mask(membrane_slab, true);
         
         //Keep voxels only if all the masks are 1 or their addition is 2
-        volume::data::RealSpaceData mask_real = (mask_slab +  mask_threshold).threshold_mask(1.9);
+        tdx::data::RealSpaceData mask_real = (mask_slab +  mask_threshold).threshold_mask(1.9);
 
-        volume::data::RealSpaceData real_after = real_before.mask_applied_data(mask_real);
+        tdx::data::RealSpaceData real_after = real_before.mask_applied_data(mask_real);
         
         //Get the sum of densities for error calculation
         double sum_final = real_after.squared_sum();

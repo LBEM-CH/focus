@@ -3,19 +3,19 @@
 
 #include "../utilities/angle_utilities.hpp"
 
-namespace ds = volume::data;
+namespace ds = tdx::data;
 
-ds::VolumeHeader2dx::VolumeHeader2dx()
+ds::VolumeHeader::VolumeHeader()
 {
     initialize(0, 0, 0);
 }
 
-ds::VolumeHeader2dx::VolumeHeader2dx(int nx, int ny, int nz)
+ds::VolumeHeader::VolumeHeader(int nx, int ny, int nz)
 {
     initialize(nx, ny, nz);
 }
 
-void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
+void ds::VolumeHeader::initialize(int nx, int ny, int nz)
 {
     _rows = nx;
     _columns = ny;
@@ -29,12 +29,12 @@ void ds::VolumeHeader2dx::initialize(int nx, int ny, int nz)
     _nxstart = 0;
     _nystart = 0;
     _nzstart = 0;
-    set_gamma(volume::utilities::angle_utilities::DegreeToRadian(90));
+    set_gamma(tdx::utilities::angle_utilities::DegreeToRadian(90));
     set_symmetry("P1");
 
 }
 
-void ds::VolumeHeader2dx::reset_size(int nx, int ny, int nz)
+void ds::VolumeHeader::reset_size(int nx, int ny, int nz)
 {
     _rows = nx;
     _columns = ny;
@@ -47,7 +47,7 @@ void ds::VolumeHeader2dx::reset_size(int nx, int ny, int nz)
     if(_zlen == 0.0) _zlen = (double) nz;
 } 
 
-std::string ds::VolumeHeader2dx::to_string() const
+std::string ds::VolumeHeader::to_string() const
 {
     std::string output = "";
     double ninty = 90.0;
@@ -60,7 +60,7 @@ std::string ds::VolumeHeader2dx::to_string() const
                std::to_string(ylen()) + ", " + std::to_string(zlen()) + "\n";
     output += "\t|Cell angles: " + std::to_string(ninty) + ", " + 
                std::to_string(ninty) + ", " + 
-               std::to_string(volume::utilities::angle_utilities::RadianToDegree(gamma())) + "\n";
+               std::to_string(tdx::utilities::angle_utilities::RadianToDegree(gamma())) + "\n";
     output += "\t|Symmetry: " + symmetry() + "\n";
     output += "\t|Start indices: " + std::to_string(nxstart()) + " , " + 
                std::to_string(nystart()) + " , " + std::to_string(nzstart()) + "\n";
@@ -68,152 +68,152 @@ std::string ds::VolumeHeader2dx::to_string() const
     return output;
 }
 
-void ds::VolumeHeader2dx::set_rows(int rows)
+void ds::VolumeHeader::set_rows(int rows)
 {
     this->_rows = rows;
 }
 
-void ds::VolumeHeader2dx::set_columns(int columns)
+void ds::VolumeHeader::set_columns(int columns)
 {
     this->_columns = columns;
 }
 
-void ds::VolumeHeader2dx::set_sections(int sections)
+void ds::VolumeHeader::set_sections(int sections)
 {
     this->_sections = sections;
 }
 
-void ds::VolumeHeader2dx::set_mx(int mx)
+void ds::VolumeHeader::set_mx(int mx)
 {
     this->_mx = mx;
 }
 
-void ds::VolumeHeader2dx::set_my(int my)
+void ds::VolumeHeader::set_my(int my)
 {
     this->_my = my;
 }
 
-void ds::VolumeHeader2dx::set_mz(int mz)
+void ds::VolumeHeader::set_mz(int mz)
 {
     this->_mz = mz;
 }
 
-void ds::VolumeHeader2dx::set_nxstart(int nxstart)
+void ds::VolumeHeader::set_nxstart(int nxstart)
 {
     this->_nxstart = nxstart;
 }
 
-void ds::VolumeHeader2dx::set_nystart(int nystart)
+void ds::VolumeHeader::set_nystart(int nystart)
 {
     this->_nystart = nystart;
 }
 
-void ds::VolumeHeader2dx::set_nzstart(int nzstart)
+void ds::VolumeHeader::set_nzstart(int nzstart)
 {
     this->_nzstart = nzstart;
 }
 
-void ds::VolumeHeader2dx::set_xlen(double xlen)
+void ds::VolumeHeader::set_xlen(double xlen)
 {
     this->_xlen = xlen;
 }
 
-void ds::VolumeHeader2dx::set_ylen(double ylen)
+void ds::VolumeHeader::set_ylen(double ylen)
 {
     this->_ylen = ylen;
 }
 
-void ds::VolumeHeader2dx::set_zlen(double zlen)
+void ds::VolumeHeader::set_zlen(double zlen)
 {
     this->_zlen = zlen;
 }
 
-void ds::VolumeHeader2dx::set_symmetry(std::string symmetry)
+void ds::VolumeHeader::set_symmetry(std::string symmetry)
 {
-    _symmetry = volume::symmetrization::Symmetry2dx(symmetry);
+    _symmetry = tdx::symmetrization::Symmetry2dx(symmetry);
 }
 
-void ds::VolumeHeader2dx::set_gamma(double gamma)
+void ds::VolumeHeader::set_gamma(double gamma)
 {
     _gamma = gamma;
 }
 
-int ds::VolumeHeader2dx::rows() const
+int ds::VolumeHeader::rows() const
 {
     return _rows;
 }
 
-int ds::VolumeHeader2dx::columns() const
+int ds::VolumeHeader::columns() const
 {
     return _columns;
 }
 
-int ds::VolumeHeader2dx::sections() const
+int ds::VolumeHeader::sections() const
 {
     return _sections;
 }
 
-int ds::VolumeHeader2dx::mx() const
+int ds::VolumeHeader::mx() const
 {
     return _mx;
 }
 
-int ds::VolumeHeader2dx::my() const
+int ds::VolumeHeader::my() const
 {
     return _my;
 }
 
-int ds::VolumeHeader2dx::mz() const
+int ds::VolumeHeader::mz() const
 {
     return _mz;
 }
 
-int ds::VolumeHeader2dx::nxstart() const
+int ds::VolumeHeader::nxstart() const
 {
     return _nxstart;
 }
 
-int ds::VolumeHeader2dx::nystart() const
+int ds::VolumeHeader::nystart() const
 {
     return _nystart;
 }
 
-int ds::VolumeHeader2dx::nzstart() const
+int ds::VolumeHeader::nzstart() const
 {
     return _nzstart;
 }
 
-double ds::VolumeHeader2dx::xlen() const
+double ds::VolumeHeader::xlen() const
 {
     return _xlen;
 }
 
-double ds::VolumeHeader2dx::ylen() const
+double ds::VolumeHeader::ylen() const
 {
     return _ylen;
 }
 
-double ds::VolumeHeader2dx::zlen() const
+double ds::VolumeHeader::zlen() const
 {
     return _zlen;
 }
 
-double ds::VolumeHeader2dx::gamma() const
+double ds::VolumeHeader::gamma() const
 {
     return _gamma;
 }
 
-std::string ds::VolumeHeader2dx::symmetry() const
+std::string ds::VolumeHeader::symmetry() const
 {
     return _symmetry.symmetry_string();
 }
 
-int ds::VolumeHeader2dx::symmetry_2dx_code() const
+int ds::VolumeHeader::symmetry_2dx_code() const
 {
     return _symmetry.symmetry_code();
 }
 
-int ds::VolumeHeader2dx::symmetry_ccp4_code() const
+int ds::VolumeHeader::symmetry_ccp4_code() const
 {
     return _symmetry.ccp4_index();
 }

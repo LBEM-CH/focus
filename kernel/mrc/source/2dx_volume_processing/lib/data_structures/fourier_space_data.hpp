@@ -14,7 +14,7 @@
 #include "miller_index.hpp"
 #include "diffraction_spot.hpp"
 
-namespace volume
+namespace tdx
 {
     namespace data
     {
@@ -116,7 +116,7 @@ namespace volume
              * @param value - complex value
              * @param weight - fom weight in fraction 
              */
-            void set_value_at(int h, int k, int l, Complex2dx value, double weight);
+            void set_value_at(int h, int k, int l, Complex value, double weight);
             
             /**
              * Fetches the complex number stored at miller index h, k, l.
@@ -126,7 +126,7 @@ namespace volume
              * @param l
              * @return complex value at h, k, l
              */
-            Complex2dx complex_at(int h, int k, int l) const ;
+            Complex complex_at(int h, int k, int l) const ;
             
             /**
              * Fetches the weight at the miller index h, k, l.

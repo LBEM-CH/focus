@@ -10,7 +10,7 @@
 #include <iostream>
 #include <complex>
 
-namespace volume
+namespace tdx
 {
     namespace data
     {
@@ -20,21 +20,21 @@ namespace volume
          * Also provides handy methods to directly set/get amplitudes and
          * phases.
          */
-        class Complex2dx
+        class Complex
         {
         public:
             
             /**
              * Default constructor which initializes to 0 + 0i 
              */
-            Complex2dx();
+            Complex();
             
             /**
              * Constructor with real and imag part
              * @param real
              * @param imag
              */
-            Complex2dx(double real, double imag);
+            Complex(double real, double imag);
             
             /**
              * Operator overloading of = operator.
@@ -42,7 +42,7 @@ namespace volume
              * @param rhs
              * @return equated instance
              */
-            Complex2dx& operator=(const Complex2dx& rhs);
+            Complex& operator=(const Complex& rhs);
             
             /**
              * Operator overloading of + operator.
@@ -50,14 +50,14 @@ namespace volume
              * @param rhs
              * @return modified this object
              */
-            Complex2dx operator+(const Complex2dx& rhs);
+            Complex operator+(const Complex& rhs);
             
             /**
              * Declaration of multiplication of a double with complex2dx
              * @param factor
              * @return 
              */
-            Complex2dx operator*( double factor);
+            Complex operator*( double factor);
             
             /**
              * Operator overloading of < operator
@@ -65,7 +65,7 @@ namespace volume
              * @param rhs
              * @return result of this < rhs? 
              */
-            bool operator<(const Complex2dx& rhs) const;
+            bool operator<(const Complex& rhs) const;
             
             /**
              * Operator overloading of ==
@@ -73,7 +73,7 @@ namespace volume
              * @param rhs
              * @return result of this == rhs
              */
-            bool operator==(const Complex2dx& rhs) const;
+            bool operator==(const Complex& rhs) const;
             
             /**
              * Returns the real part of the complex

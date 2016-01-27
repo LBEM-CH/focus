@@ -7,8 +7,8 @@
 #include "fourier_utilities.hpp"
 
 
-double volume::utilities::fourier_utilities::GetResolution
-    (const volume::data::MillerIndex& index, double gamma, double a, double b, double c)
+double tdx::utilities::fourier_utilities::GetResolution
+    (const tdx::data::MillerIndex& index, double gamma, double a, double b, double c)
 {
     
     if(a==0 || b==0 || c==0 || gamma==0)

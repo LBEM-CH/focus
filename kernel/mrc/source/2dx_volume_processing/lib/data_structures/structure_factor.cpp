@@ -5,9 +5,9 @@
  */
 
 #include "structure_factor.hpp"
-#include "volume2dx.hpp"
+#include "volume.hpp"
 
-namespace ds = volume::data;
+namespace ds = tdx::data;
 
 ds::StructureFactors::StructureFactors(double min_resolution, double max_resolution, int resolution_bins)
 {
@@ -16,10 +16,10 @@ ds::StructureFactors::StructureFactors(double min_resolution, double max_resolut
     _resolution_bins = resolution_bins;
 }
 
-void ds::StructureFactors::initialize_intensities(const volume::data::Volume2dx& volume)
+void ds::StructureFactors::initialize_intensities(const tdx::data::Volume& volume)
 {
     
-    Volume2dx copied_volume(volume);
+    Volume copied_volume(volume);
     
     //Get the Fourier data
     FourierSpaceData fourier_data = copied_volume.get_fourier();

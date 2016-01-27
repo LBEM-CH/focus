@@ -16,7 +16,7 @@
 #include "structure_factor.hpp"
 #include "../transforms/fourier_transform_fftw.hpp"
 
-namespace volume
+namespace tdx
 {
     namespace data
     {
@@ -26,7 +26,7 @@ namespace volume
          * a header containing all necessary information about the volume.
          * Does a lazy initialization of the data whenever required.
          */
-        class Volume2dx
+        class Volume
         {
         public:
             
@@ -36,44 +36,44 @@ namespace volume
              * @param ny
              * @param nz
              */
-            Volume2dx(int nx=0, int ny=0, int nz=0);
+            Volume(int nx=0, int ny=0, int nz=0);
             
             /**
              * Generates a volume with the given header
              * @param header
              */
-            Volume2dx(const VolumeHeader2dx& header);
+            Volume(const VolumeHeader& header);
             
             /**
              * Copy constructor
              * @param copy
              */
-            Volume2dx(const Volume2dx& copy);
+            Volume(const Volume& copy);
             
             /**
              * Default destructor
              */
-            ~Volume2dx();
+            ~Volume();
             
             /**
              * Definition of operator =
              */
-            Volume2dx& operator=(const Volume2dx& rhs);
+            Volume& operator=(const Volume& rhs);
             
             /**
              * Operator + definition
              */
-            Volume2dx operator+(const Volume2dx& rhs);
+            Volume operator+(const Volume& rhs);
             
             /**
              * Multiplication by a factor
              */
-            Volume2dx operator*(double factor);
+            Volume operator*(double factor);
             
             /**
              * Resets the volume with other volume
              */
-            void reset(const Volume2dx& other);
+            void reset(const Volume& other);
             
             /**
              * Clears all the data present
@@ -97,7 +97,7 @@ namespace volume
              * Returns the header of the volume
              * @return header
              */
-            VolumeHeader2dx header() const;
+            VolumeHeader header() const;
             
             /**
              * Gets the real space x dimension of the volume
@@ -279,7 +279,7 @@ namespace volume
              * @param missing_plane: Write the volume with missing plane
              * @param plane_number: which plane to cut (int)
              */
-            void cut_xy_plane(Volume2dx& xy_plane, Volume2dx& missing_plane, int plane_number=0);
+            void cut_xy_plane(Volume& xy_plane, Volume& missing_plane, int plane_number=0);
             
             /**
              * Cuts a cone in Fourier space with specified degree
@@ -287,7 +287,7 @@ namespace volume
              * @param missing_cone: Write the result in this volume
              * @param cone_angle: Angle in degrees of cone to cut
              */
-            void cut_cone(Volume2dx& cone, Volume2dx& missing_cone, double cone_angle=30);
+            void cut_cone(Volume& cone, Volume& missing_cone, double cone_angle=30);
             
             /**
              * Generates random Gaussian densities in the volume
@@ -340,7 +340,7 @@ namespace volume
              * Returns a projection in the direction of axis
              * @param axis: x/y/z
              */
-            Volume2dx project2D(char axis);
+            Volume project2D(char axis);
             
             /**
              * Fetches the real valued density at (x,y,z) from the volume
@@ -393,7 +393,7 @@ namespace volume
              * Sets the data from a volume
              * @param volume
              */
-            void set_data(const Volume2dx& volume);
+            void set_data(const Volume& volume);
             
             /**
              * Calculates the structure factors. 
@@ -435,7 +435,7 @@ namespace volume
              * @param bead_model_resolution
              * @return volume
              */
-            Volume2dx generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution = 2.0);
+            Volume generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution = 2.0);
             
             /**
              * Centers the density along the z axis. Internally adds PI*miller_index_l 
@@ -462,7 +462,7 @@ namespace volume
              * @param fraction - The fraction (between 0 and 1) with which the density values
              *                   from reference map is to be applied.
              */
-            void apply_density_histogram(Volume2dx reference, double fraction);
+            void apply_density_histogram(Volume reference, double fraction);
             
             /**
              * Generates the density histogram from the reference and applies 
@@ -473,7 +473,7 @@ namespace volume
              * 
              * @param reference - Reference volume to be used to get density histogram
              */
-            void apply_density_histogram(Volume2dx reference);
+            void apply_density_histogram(Volume reference);
             
             /**
              * Applies a density slab in the vertical direction (z-axis) with the
@@ -532,7 +532,7 @@ namespace volume
             /**
              * Sets all phases to zero, for PSF calculation
              */
-            Volume2dx zero_phases();
+            Volume zero_phases();
             
             
             /**
@@ -564,20 +564,20 @@ namespace volume
              * @param y_cells
              * @param z_cells
              */
-            Volume2dx extended_volume(int x_cells, int y_cells=0, int z_cells=0);
+            Volume extended_volume(int x_cells, int y_cells=0, int z_cells=0);
             
             /**
              * Subsamples to factor.
              * @param factor
              * @return 
              */
-            Volume2dx subsample(int factor);
+            Volume subsample(int factor);
             
             /**
              * Spreads the data in the Fourier space and tries to fill in the missing spots.
              * @return new volume with spreaded data
              */
-            Volume2dx spread_fourier_data();
+            Volume spread_fourier_data();
             
             /**
              * Expands the data to include negative h as well, so that full
@@ -592,7 +592,7 @@ namespace volume
              * exp(B/4/resolution**2) 
              * @param negative_temp_factor
              */
-            Volume2dx apply_bfactor(double negative_temp_factor);
+            Volume apply_bfactor(double negative_temp_factor);
 
         private:
             
@@ -640,7 +640,7 @@ namespace volume
             /**
              * Information of the volume
              */
-            VolumeHeader2dx _header;
+            VolumeHeader _header;
             
             /**
              * Real space data
@@ -655,7 +655,7 @@ namespace volume
             /**
              * Transforming between real and Fourier data. To be used for wisdom
              */
-            volume::transforms::FourierTransformFFTW _transform;
+            tdx::transforms::FourierTransformFFTW _transform;
             
             /**
              * Type of data being hold in the volume

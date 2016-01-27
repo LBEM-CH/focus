@@ -9,12 +9,12 @@
 
 #include "density_generator.hpp"
 
-volume::data::RealSpaceData volume::utilities::density_generator::create_density(int box_size, double max_resolution, double charge)
+tdx::data::RealSpaceData tdx::utilities::density_generator::create_density(int box_size, double max_resolution, double charge)
 {
     std::cout << "Generating density with charge: " << charge << " electrons in a square box of size: "
               << box_size << " X " << box_size << " X " << box_size << "\n";
 
-    volume::data::RealSpaceData data(box_size, box_size, box_size);
+    tdx::data::RealSpaceData data(box_size, box_size, box_size);
 
     double gauss_real_width = max_resolution / (M_PI); // in Angstrom, res is in Angstrom
 

@@ -8,11 +8,11 @@
 #include "symmetry_operations.hpp"
 
 
-void volume::symmetrization::fourier_symmetrization::symmetrize
-        (volume::data::FourierSpaceData& fourier_data, 
-        const volume::symmetrization::Symmetry2dx& symmetry)
+void tdx::symmetrization::fourier_symmetrization::symmetrize
+        (tdx::data::FourierSpaceData& fourier_data, 
+        const tdx::symmetrization::Symmetry2dx& symmetry)
 {
-    namespace ds = volume::data;
+    namespace ds = tdx::data;
     ds::DiffractionSpotMultiMap spot_multimap;
     
     for(ds::FourierSpaceData::const_iterator data_iterator= fourier_data.begin(); data_iterator != fourier_data.end(); ++data_iterator)
@@ -31,8 +31,8 @@ void volume::symmetrization::fourier_symmetrization::symmetrize
             //Loop over all possible symmetry operations
             for(int op_index=0; op_index<30; op_index++)
             {
-                volume::symmetrization::SymmetryOperations operation = 
-                        volume::symmetrization::SymmetryOperations(op_index, symmetry.symmetry_code());
+                tdx::symmetrization::SymmetryOperations operation = 
+                        tdx::symmetrization::SymmetryOperations(op_index, symmetry.symmetry_code());
                 
                 if(!operation.SkipOperation())
                 {
@@ -58,7 +58,7 @@ void volume::symmetrization::fourier_symmetrization::symmetrize
                     
                     double sym_real = current_amp * cos(sym_phase);
                     double sym_imag = current_amp * sin(sym_phase);
-                    ds::DiffractionSpot sym_spot(ds::Complex2dx(sym_real, sym_imag), current_spot.weight());
+                    ds::DiffractionSpot sym_spot(ds::Complex(sym_real, sym_imag), current_spot.weight());
                     
                     spot_multimap.insert(ds::MillerIndexDiffSpotPair(sym_index, sym_spot));
                     

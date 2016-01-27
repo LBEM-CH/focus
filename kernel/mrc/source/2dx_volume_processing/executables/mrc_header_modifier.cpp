@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     //Prepare the input
     Volume2dx input;
     input.read_volume(args::templates::MRCIN.getValue());
-    volume::data::VolumeHeader2dx header = input.header();
+    tdx::data::VolumeHeader header = input.header();
     if(CELLX.isSet()) header.set_xlen(CELLX.getValue());
     if(CELLY.isSet()) header.set_ylen(CELLY.getValue());
     if(CELLZ.isSet()) header.set_zlen(CELLZ.getValue());

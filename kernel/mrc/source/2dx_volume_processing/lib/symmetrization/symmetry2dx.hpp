@@ -12,7 +12,7 @@
 
 #include <string.h>
 
-namespace volume
+namespace tdx
 {
     namespace symmetrization
     {

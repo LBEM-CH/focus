@@ -8,7 +8,7 @@
 #ifndef REAL_SPACE_DATA_HPP
 #define	REAL_SPACE_DATA_HPP
 
-namespace volume
+namespace tdx
 {
     namespace data
     {

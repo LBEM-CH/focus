@@ -10,14 +10,14 @@
 
 #include "filesystem.hpp"
 
-bool volume::utilities::filesystem::FileExists(const std::string file_path)
+bool tdx::utilities::filesystem::FileExists(const std::string file_path)
 {
     struct stat buffer;   
     bool result = (stat (file_path.c_str(), &buffer) == 0);
     return result;
 }
 
-std::string volume::utilities::filesystem::FileExtension(const std::string file_path)
+std::string tdx::utilities::filesystem::FileExtension(const std::string file_path)
 {
     std::string extension = "";
     
@@ -28,7 +28,7 @@ std::string volume::utilities::filesystem::FileExtension(const std::string file_
     return extension; 
 }
 
-int volume::utilities::filesystem::NumberOfColumns(const std::string file_name, int& number_columns)
+int tdx::utilities::filesystem::NumberOfColumns(const std::string file_name, int& number_columns)
 {
     std::ifstream infile(file_name);
 

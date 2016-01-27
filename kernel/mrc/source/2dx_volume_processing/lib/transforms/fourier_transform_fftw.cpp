@@ -6,7 +6,7 @@
 
 #include "fourier_transform_fftw.hpp"
 
-namespace ft = volume::transforms;
+namespace ft = tdx::transforms;
 
 ft::FourierTransformFFTW::FourierTransformFFTW()
 {

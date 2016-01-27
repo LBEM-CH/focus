@@ -4,89 +4,89 @@
  * 
  */
 
-#include "complex2dx.hpp"
+#include "complex.hpp"
 
 
-namespace ds = volume::data;
+namespace ds = tdx::data;
 
-ds::Complex2dx::Complex2dx()
+ds::Complex::Complex()
 {
     initialize(0, 0);
 }
 
-ds::Complex2dx::Complex2dx(double real, double imag)
+ds::Complex::Complex(double real, double imag)
 {
     initialize(real, imag);
 }
 
-void ds::Complex2dx::initialize(double real, double imag)
+void ds::Complex::initialize(double real, double imag)
 {
     set_real(real);
     set_imag(imag);
 }
 
-ds::Complex2dx& ds::Complex2dx::operator =(const ds::Complex2dx& rhs)
+ds::Complex& ds::Complex::operator =(const ds::Complex& rhs)
 {
     initialize(rhs.real(), rhs.imag());
     return *this;
 }
 
-ds::Complex2dx ds::Complex2dx::operator +(const ds::Complex2dx& rhs)
+ds::Complex ds::Complex::operator +(const ds::Complex& rhs)
 {
-    return ds::Complex2dx(this->real()+rhs.real(), this->imag()+rhs.imag());
+    return ds::Complex(this->real()+rhs.real(), this->imag()+rhs.imag());
 }
 
-ds::Complex2dx ds::Complex2dx::operator *(double factor)
+ds::Complex ds::Complex::operator *(double factor)
 {
-    return ds::Complex2dx(this->real()*factor, this->imag()*factor);
+    return ds::Complex(this->real()*factor, this->imag()*factor);
 }
 
-bool ds::Complex2dx::operator <(const ds::Complex2dx& rhs) const
+bool ds::Complex::operator <(const ds::Complex& rhs) const
 {
     return (this->amplitude() < rhs.amplitude());
 }
 
-bool ds::Complex2dx::operator ==(const Complex2dx& rhs) const
+bool ds::Complex::operator ==(const Complex& rhs) const
 {
     return (real()==rhs.real() && imag()==rhs.imag());
 }
 
-double ds::Complex2dx::real() const
+double ds::Complex::real() const
 {
     return _real;
 }
 
-double ds::Complex2dx::imag() const
+double ds::Complex::imag() const
 {
     return _imag;
 }
 
-double ds::Complex2dx::amplitude() const
+double ds::Complex::amplitude() const
 {
     return std::abs(std::complex<double>(real(), imag()));
 }
 
-double ds::Complex2dx::phase() const
+double ds::Complex::phase() const
 {
     return std::arg(std::complex<double>(real(), imag()));
 }
 
-double ds::Complex2dx::intensity() const
+double ds::Complex::intensity() const
 {
     return amplitude()*amplitude();
 }
 
-void ds::Complex2dx::set_real(double real)
+void ds::Complex::set_real(double real)
 {
     this->_real = real;
 }
 
-void ds::Complex2dx::set_imag(double imag)
+void ds::Complex::set_imag(double imag)
 {
     this->_imag = imag;
 }
 
-void ds::Complex2dx::set_amplitude(double amplitude)
+void ds::Complex::set_amplitude(double amplitude)
 {
     double current_amplitude = this->amplitude();
     double current_real = this->real();
@@ -97,7 +97,7 @@ void ds::Complex2dx::set_amplitude(double amplitude)
     this->set_imag(current_imag*(scale));
 }
 
-void ds::Complex2dx::set_phase(double phase)
+void ds::Complex::set_phase(double phase)
 {
     double current_amplitude = this->amplitude();
     this->set_real(current_amplitude*cos(phase));

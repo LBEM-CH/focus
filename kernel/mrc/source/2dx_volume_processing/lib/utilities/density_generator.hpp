@@ -12,7 +12,7 @@
 
 #include "../data_structures/real_space_data.hpp"
 
-namespace volume
+namespace tdx
 {
     namespace utilities
     {
@@ -27,7 +27,7 @@ namespace volume
              * @param charge
              * @return real space data of size : box_size * box_size * box_size with real space densities in it.
              */
-            volume::data::RealSpaceData create_density(int box_size, double max_resolution, double charge); 
+            tdx::data::RealSpaceData create_density(int box_size, double max_resolution, double charge); 
             
         }
         

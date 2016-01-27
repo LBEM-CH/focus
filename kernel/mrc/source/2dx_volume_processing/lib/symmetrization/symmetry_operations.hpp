@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <math.h>
 
-namespace volume
+namespace tdx
 {
     namespace symmetrization
     {

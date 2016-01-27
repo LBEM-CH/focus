@@ -9,13 +9,13 @@
 #include "density_value_sorter.hpp"
 
 
-volume::utilities::DensityValueSorter::DensityValueSorter(int max_size, double* data)
+tdx::utilities::DensityValueSorter::DensityValueSorter(int max_size, double* data)
 {
     this->data = data;
     this->max_size = max_size;
 }
 
-void volume::utilities::DensityValueSorter::sort_data_with_id()
+void tdx::utilities::DensityValueSorter::sort_data_with_id()
 {
     //Prepare the pairs
     std::list<DensityValueSorter::DensityIdPair> pairs;
@@ -40,13 +40,13 @@ void volume::utilities::DensityValueSorter::sort_data_with_id()
     
 }
 
-int* volume::utilities::DensityValueSorter::get_sorted_ids()
+int* tdx::utilities::DensityValueSorter::get_sorted_ids()
 {
     sort_data_with_id();
     return sorted_ids;
 }
 
-double* volume::utilities::DensityValueSorter::get_sorted_values()
+double* tdx::utilities::DensityValueSorter::get_sorted_values()
 {
     sort_data_with_id();
     return sorted_data;

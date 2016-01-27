@@ -11,10 +11,10 @@
 #include <string.h>
 #include <fstream>
 
-#include "../data_structures/volume2dx.hpp"
+#include "../data_structures/volume.hpp"
 #include "../data_structures/real_space_data.hpp"
 
-namespace volume 
+namespace tdx 
 {
     
     namespace utilities 
@@ -39,14 +39,14 @@ namespace volume
              * @param input volume
              * @return output real space data
              */
-            volume::data::RealSpaceData generate_bead_model_volume(volume::data::Volume2dx volume);
+            tdx::data::RealSpaceData generate_bead_model_volume(tdx::data::Volume volume);
             
             /**
              * Generate the bead model from volume and write the output pdb.
              * @param volume
              * @param output_pdb_file
              */
-            void generate_bead_model_coordinates(volume::data::Volume2dx volume, std::string output_pdb_file);
+            void generate_bead_model_coordinates(tdx::data::Volume volume, std::string output_pdb_file);
 
         private:
             

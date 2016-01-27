@@ -13,7 +13,7 @@
 #include "miller_index.hpp"
 #include "diffraction_spot.hpp"
 
-namespace volume
+namespace tdx
 {
     namespace data
     {
@@ -42,7 +42,7 @@ namespace volume
         /**
          * Defines a list of complex
          */
-        typedef std::list<Complex2dx> ComplexList;
+        typedef std::list<Complex> ComplexList;
         
         /**
          * Defines a list of doubles

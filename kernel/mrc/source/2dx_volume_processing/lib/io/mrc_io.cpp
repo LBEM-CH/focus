@@ -10,13 +10,13 @@
 #include "../utilities/filesystem.hpp"
 #include "../utilities/angle_utilities.hpp"
 
-namespace io = volume::io;
+namespace io = tdx::io;
 
-volume::data::VolumeHeader2dx io::mrc::get_header(const std::string file_name, const std::string format)
+tdx::data::VolumeHeader io::mrc::get_header(const std::string file_name, const std::string format)
 {
     std::cout << "Reading header..\n";
     //Check for the presence of file
-    if (!volume::utilities::filesystem::FileExists(file_name)){
+    if (!tdx::utilities::filesystem::FileExists(file_name)){
         std::cerr << "File not found: " << file_name << std::endl;
         exit(1);
     }
@@ -30,14 +30,14 @@ volume::data::VolumeHeader2dx io::mrc::get_header(const std::string file_name, c
         exit(1);
     }
     
-    volume::data::VolumeHeader2dx header;
+    tdx::data::VolumeHeader header;
     
     std::ifstream file(file_name, std::ios::in|std::ios::binary);;
     
     file.seekg (0, std::ios::beg);
     try
     {
-        namespace bf = volume::utilities::binary_file_utilities;
+        namespace bf = tdx::utilities::binary_file_utilities;
         
         //Read the header
         header.set_rows(bf::read_int(file));
@@ -79,7 +79,7 @@ volume::data::VolumeHeader2dx io::mrc::get_header(const std::string file_name, c
             exit(1);
         }
         
-        header.set_gamma(volume::utilities::angle_utilities::DegreeToRadian(bf::read_float(file)));
+        header.set_gamma(tdx::utilities::angle_utilities::DegreeToRadian(bf::read_float(file)));
         
         int mapc = bf::read_int(file);
         int mapr = bf::read_int(file);
@@ -105,11 +105,11 @@ volume::data::VolumeHeader2dx io::mrc::get_header(const std::string file_name, c
     return header;
 }
 
-volume::data::RealSpaceData io::mrc::get_data(const std::string file_name, const int nx, const int ny, const int nz)
+tdx::data::RealSpaceData io::mrc::get_data(const std::string file_name, const int nx, const int ny, const int nz)
 {
     std::cout << "Reading data..\n";
     //Check for the presence of file
-    if (!volume::utilities::filesystem::FileExists(file_name)){
+    if (!tdx::utilities::filesystem::FileExists(file_name)){
         std::cerr << "File not found: " << file_name << std::endl;
         exit(1);
     }
@@ -117,7 +117,7 @@ volume::data::RealSpaceData io::mrc::get_data(const std::string file_name, const
     std::ifstream file(file_name, std::ios::in|std::ios::binary);
     
     long input_size = nx*ny*nz;
-    long file_size = volume::utilities::binary_file_utilities::file_size(file_name);
+    long file_size = tdx::utilities::binary_file_utilities::file_size(file_name);
     long memory_size = (int)(file_size - 1024)/4;
     
     if(memory_size < input_size)
@@ -135,10 +135,10 @@ volume::data::RealSpaceData io::mrc::get_data(const std::string file_name, const
     float* _data = (float*) malloc(input_size*sizeof(float));
     for(int itr_memory=0; itr_memory < input_size; ++itr_memory)
     {
-        _data[itr_memory] = volume::utilities::binary_file_utilities::read_float(file);
+        _data[itr_memory] = tdx::utilities::binary_file_utilities::read_float(file);
     }
     
-    volume::data::RealSpaceData data(nx, ny, nz);
+    tdx::data::RealSpaceData data(nx, ny, nz);
     for(int id=0; id< data.size(); ++id)
     {
         //flip the data for 2dx format
@@ -150,13 +150,13 @@ volume::data::RealSpaceData io::mrc::get_data(const std::string file_name, const
     
 }
 
-void volume::io::mrc::write_mrc_mode_2(const std::string file_name, 
-                                            const volume::data::VolumeHeader2dx& header, 
-                                            const volume::data::RealSpaceData& data,
+void tdx::io::mrc::write_mrc_mode_2(const std::string file_name, 
+                                            const tdx::data::VolumeHeader& header, 
+                                            const tdx::data::RealSpaceData& data,
                                             const std::string format)
 {
     //Check for the existence of the file
-    if(volume::utilities::filesystem::FileExists(file_name))
+    if(tdx::utilities::filesystem::FileExists(file_name))
     {
         std::cout << "WARNING: File.. " << file_name << " already exists. Overwriting!\n";
     }
@@ -177,7 +177,7 @@ void volume::io::mrc::write_mrc_mode_2(const std::string file_name,
     float xlen = (float) header.xlen();
     float ylen = (float) header.ylen();
     float zlen = (float) header.zlen();
-    float gamma = (float) volume::utilities::angle_utilities::RadianToDegree(header.gamma());
+    float gamma = (float) tdx::utilities::angle_utilities::RadianToDegree(header.gamma());
     float amin = (float) data.min();
     float amax = (float) data.max();
     float amean = (float) data.mean();

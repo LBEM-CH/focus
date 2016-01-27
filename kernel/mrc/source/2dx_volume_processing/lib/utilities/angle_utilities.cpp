@@ -7,7 +7,7 @@
 #include "angle_utilities.hpp"
 
 
-double volume::utilities::angle_utilities::CorrectRadianPhase(double phase_in_radians)
+double tdx::utilities::angle_utilities::CorrectRadianPhase(double phase_in_radians)
 {   
     double new_phase = phase_in_radians;
     
@@ -21,12 +21,12 @@ double volume::utilities::angle_utilities::CorrectRadianPhase(double phase_in_ra
     return new_phase;
 }
 
-double volume::utilities::angle_utilities::DegreeToRadian(double angle_in_degrees)
+double tdx::utilities::angle_utilities::DegreeToRadian(double angle_in_degrees)
 {
     return angle_in_degrees * M_PI/180;
 }
 
-double volume::utilities::angle_utilities::RadianToDegree(double angle_in_radians)
+double tdx::utilities::angle_utilities::RadianToDegree(double angle_in_radians)
 {
     return angle_in_radians * 180/M_PI;
 }

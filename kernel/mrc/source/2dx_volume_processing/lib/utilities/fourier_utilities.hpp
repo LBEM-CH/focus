@@ -12,7 +12,7 @@
 
 #include "../data_structures/common_definitions.hpp"
 
-namespace volume
+namespace tdx
 {
     namespace utilities
     {
@@ -29,7 +29,7 @@ namespace volume
              * @param c cell length c, in Angstroems
              * @return resolution, in Angstroems
              */
-            double GetResolution(const volume::data::MillerIndex& index, 
+            double GetResolution(const tdx::data::MillerIndex& index, 
                     double gamma, double a, double b, double c);
             
         } // namespace fourier_space

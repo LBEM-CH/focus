@@ -11,12 +11,12 @@
 #include "../utilities/angle_utilities.hpp"
 #include "../utilities/fourier_utilities.hpp"
 
-volume::data::FourierSpaceData volume::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4)
+tdx::data::FourierSpaceData tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4)
 {
-    namespace ds = volume::data;
+    namespace ds = tdx::data;
     
     //Check for the presence of file
-    if (!volume::utilities::filesystem::FileExists(file_path)){
+    if (!tdx::utilities::filesystem::FileExists(file_path)){
         std::cerr << "File not found: " << file_path << std::endl;
         exit(1);
     }
@@ -30,7 +30,7 @@ volume::data::FourierSpaceData volume::io::reflection::read(std::string file_pat
     
     //Count number of columns in file
     int number_columns;
-    int header_lines = volume::utilities::filesystem::NumberOfColumns(file_path, number_columns);
+    int header_lines = tdx::utilities::filesystem::NumberOfColumns(file_path, number_columns);
     
     if(number_columns < 5 )
     {
@@ -100,7 +100,7 @@ volume::data::FourierSpaceData volume::io::reflection::read(std::string file_pat
         {
             if(wt_in>90) wt_in = 90;
             if ( wt_in < 89.9 )
-            {   wt_in = volume::utilities::angle_utilities::DegreeToRadian(wt_in);
+            {   wt_in = tdx::utilities::angle_utilities::DegreeToRadian(wt_in);
                 add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, cos(wt_in), z_scale, raw_ccp4);
             }
         }
@@ -122,21 +122,21 @@ volume::data::FourierSpaceData volume::io::reflection::read(std::string file_pat
     return fourier_data;
 }
 
-void volume::io::reflection::write(const std::string& file_path, const volume::data::FourierSpaceData& data, bool for_ccp4)
+void tdx::io::reflection::write(const std::string& file_path, const tdx::data::FourierSpaceData& data, bool for_ccp4)
 {
     const int INT_WIDTH = 5;
     const int FLOAT_WIDTH = 13;
     const int FLOAT_PRECISION = 7;
 
     //Check for the existence of the file
-    if(volume::utilities::filesystem::FileExists(file_path))
+    if(tdx::utilities::filesystem::FileExists(file_path))
     {
         std::cout << "WARNING: File.. " << file_path << " already exists. Overwriting!\n";
     }
     
     std::ofstream hklFile(file_path);
     
-    volume::data::FourierSpaceData data_to_write = data;
+    tdx::data::FourierSpaceData data_to_write = data;
     
     //If is being generated for CCP4 invert the handedness
     //if(for_ccp4) data_to_write = data.invert_hand();
@@ -146,7 +146,7 @@ void volume::io::reflection::write(const std::string& file_path, const volume::d
     std::cout << "H K L AMP PHASE FOM\n";
     std::cout << "----------------------------------------------\n\n";
     
-    for(volume::data::FourierSpaceData::const_iterator ii=data_to_write.begin(); ii!=data_to_write.end(); ++ii){
+    for(tdx::data::FourierSpaceData::const_iterator ii=data_to_write.begin(); ii!=data_to_write.end(); ++ii){
         int h = (*ii).first.h();
         int k = (*ii).first.k();
         int l = (*ii).first.l();
@@ -157,9 +157,9 @@ void volume::io::reflection::write(const std::string& file_path, const volume::d
         //If is being generate for CCP4 shift the phase to de-centerize the density
         if(for_ccp4) phase = phase + M_PI*l;
         
-        phase = volume::utilities::angle_utilities::CorrectRadianPhase(phase);
+        phase = tdx::utilities::angle_utilities::CorrectRadianPhase(phase);
         
-        phase = volume::utilities::angle_utilities::RadianToDegree(phase);
+        phase = tdx::utilities::angle_utilities::RadianToDegree(phase);
         
         double fom = (*ii).second.weight()*100;
 
@@ -174,9 +174,9 @@ void volume::io::reflection::write(const std::string& file_path, const volume::d
     hklFile.close();
 }
 
-void volume::io::reflection::add_spot(volume::data::DiffractionSpotMultiMap& map, int h_in, int k_in, double z_in, double amp_in, double phase_in, double weight_in, int z_scale, bool raw_ccp4)
+void tdx::io::reflection::add_spot(tdx::data::DiffractionSpotMultiMap& map, int h_in, int k_in, double z_in, double amp_in, double phase_in, double weight_in, int z_scale, bool raw_ccp4)
 {
-    namespace ds= volume::data;
+    namespace ds= tdx::data;
     
     int l_in = round(z_in * z_scale);
     ds::MillerIndex index_in(h_in, k_in, l_in);
@@ -192,12 +192,12 @@ void volume::io::reflection::add_spot(volume::data::DiffractionSpotMultiMap& map
     }
     
     //Convert phase to radians
-    phase_in = volume::utilities::angle_utilities::DegreeToRadian(phase_in);
+    phase_in = tdx::utilities::angle_utilities::DegreeToRadian(phase_in);
     
     double real_in = amp_in*cos(phase_in);
     double imag_in = amp_in*sin(phase_in);
 
-    ds::Complex2dx complex_in(real_in, imag_in);
+    ds::Complex complex_in(real_in, imag_in);
     ds::DiffractionSpot value_in(complex_in, weight_in);
     
     map.insert(ds::MillerIndexDiffSpotPair(index_in, value_in));

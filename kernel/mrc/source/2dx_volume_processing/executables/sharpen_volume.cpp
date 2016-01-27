@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     std ::cout << ref_volume.to_string();
     
     //Calculate the SF from ref volume
-    volume::data::StructureFactors ref_structure_factors = ref_volume.calculate_structure_factors(100, max_resolution);
+    tdx::data::StructureFactors ref_structure_factors = ref_volume.calculate_structure_factors(100, max_resolution);
     if(temp_loc != "")
     {
         std::ofstream ref_sf_file(temp_loc+"/ref_sf.dat");

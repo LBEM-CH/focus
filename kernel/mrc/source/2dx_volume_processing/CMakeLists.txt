@@ -18,4 +18,3 @@ find_package(FFTW REQUIRED)
 #==============================#
 add_subdirectory(lib)
 add_subdirectory(executables)
-add_subdirectory(examples)

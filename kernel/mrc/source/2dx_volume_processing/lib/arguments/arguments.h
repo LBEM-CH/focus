@@ -10,7 +10,7 @@
 
 #include "argument_template.hpp"
 
-namespace args = volume::arguments;
+namespace args = tdx::arguments;
 
 #endif	/* ARGUMENTS_H */
 

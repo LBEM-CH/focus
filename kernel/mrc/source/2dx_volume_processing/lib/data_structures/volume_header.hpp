@@ -14,7 +14,7 @@
 
 #include "../symmetrization/symmetry2dx.hpp"
 
-namespace volume
+namespace tdx
 {
     namespace data
     {
@@ -23,14 +23,14 @@ namespace volume
          * A class to store all header information of a 2dx volume.
          * To be used in conjunction with some kind of data (Real/Fourier)
          */
-        class VolumeHeader2dx
+        class VolumeHeader
         {
             
         public:
             /**
              * Default constructor initializing size to 0
              */
-            VolumeHeader2dx();
+            VolumeHeader();
             
             /**
              * Constructor setting the size
@@ -38,7 +38,7 @@ namespace volume
              * @param ny : size of y-dimension
              * @param nz : size of z-dimension
              */
-            VolumeHeader2dx(int nx, int ny, int nz);
+            VolumeHeader(int nx, int ny, int nz);
             
             /**
              * Resets the size of the header. Also, changes the cell lengths if they are zero. 
@@ -288,7 +288,7 @@ namespace volume
             * P1, P2, P12, P121, C12, P222, P2221, P22121, C222, P4, P422, P4212, P3, P312, P321, P6, P622
             * Default: P1
             */
-           volume::symmetrization::Symmetry2dx _symmetry;
+           tdx::symmetrization::Symmetry2dx _symmetry;
 
         };
         

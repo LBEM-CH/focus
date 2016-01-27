@@ -11,7 +11,7 @@
 #include "fourier_space_data.hpp"
 
 
-namespace ds = volume::data;
+namespace ds = tdx::data;
 
 ds::FourierSpaceData::FourierSpaceData()
 {
@@ -57,12 +57,12 @@ ds::FourierSpaceData ds::FourierSpaceData::operator+(const FourierSpaceData& rhs
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
     {
         ds::MillerIndex index = (*ref).first;
-        ds::Complex2dx current_complex = (*ref).second.value();
-        ds::Complex2dx new_complex(current_complex.real(), current_complex.imag());
+        ds::Complex current_complex = (*ref).second.value();
+        ds::Complex new_complex(current_complex.real(), current_complex.imag());
         
         if(rhs.exists(index.h(), index.k(), index.l()))
         {
-            Complex2dx rhs_complex = rhs.complex_at(index.h(), index.k(), index.l());
+            Complex rhs_complex = rhs.complex_at(index.h(), index.k(), index.l());
             new_complex = rhs_complex + current_complex;
         }     
         new_data->set_value_at(index.h(), index.k(), index.l(), new_complex, weight_at(index.h(), index.k(), index.l()) );
@@ -73,7 +73,7 @@ ds::FourierSpaceData ds::FourierSpaceData::operator+(const FourierSpaceData& rhs
     {
         //Assign the current Miller Index to the array
         ds::MillerIndex index = (*ref).first;
-        ds::Complex2dx current_complex = (*ref).second.value();
+        ds::Complex current_complex = (*ref).second.value();
 
         if( !(new_data->exists(index.h(), index.k(), index.l())) )
         {
@@ -90,7 +90,7 @@ ds::FourierSpaceData ds::FourierSpaceData::operator*(double factor)
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
     {
         ds::MillerIndex index = (*ref).first;
-        Complex2dx currentComplex = (*ref).second.value();
+        Complex currentComplex = (*ref).second.value();
         double current_amp = currentComplex.amplitude();
         currentComplex.set_amplitude(current_amp*factor);
         data->set_value_at(index.h(), index.k(), index.l(), currentComplex, (*ref).second.weight());
@@ -120,16 +120,16 @@ bool ds::FourierSpaceData::exists(int h, int k, int l) const
 
 }
 
-void ds::FourierSpaceData::set_value_at(int h, int k, int l, Complex2dx value, double weight)
+void ds::FourierSpaceData::set_value_at(int h, int k, int l, Complex value, double weight)
 {
     MillerIndex index = MillerIndex(h, k, l);
     //if(h < 0) std::cerr << "\nWARNING: Encountered negative h value, there is a problem somewhere!\n\n";
     _data[index] = DiffractionSpot(value, weight);
 }
 
-ds::Complex2dx ds::FourierSpaceData::complex_at(int h, int k, int l) const
+ds::Complex ds::FourierSpaceData::complex_at(int h, int k, int l) const
 {
-    ds::Complex2dx value(0.0, 0.0);
+    ds::Complex value(0.0, 0.0);
     if(exists(h,k,l))
     {
         value = _data.at(MillerIndex(h, k, l)).value();
@@ -239,7 +239,7 @@ fftw_complex* ds::FourierSpaceData::fftw_data(int fx, int fy, int fz) const
 
         //Assign the current Miller Index to the array
         ds::MillerIndex currentHKL = (*ref).first;
-        Complex2dx currentComplex = (*ref).second.value();
+        Complex currentComplex = (*ref).second.value();
         
         // Fill in this spot
         if(currentHKL.h() >= 0){
@@ -285,7 +285,7 @@ void ds::FourierSpaceData::reset_data_from_fftw(int fx, int fy, int fz, fftw_com
                 double imag = ((fftw_complex*)complex_data)[memory_id][1];
 
                 //Assign the current miller index
-                Complex2dx currentComplex(real, imag);
+                Complex currentComplex(real, imag);
                 
                 int h = ix;
                 int k = iy;
@@ -323,7 +323,7 @@ void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, do
     {
         //Assign the current Miller Index to the array
         ds::MillerIndex index = (*ref).first;
-        ds::Complex2dx current_complex = (*ref).second.value();
+        ds::Complex current_complex = (*ref).second.value();
 
         if(current_complex.amplitude() > replacement_amplitude_cutoff)
         {
@@ -336,7 +336,7 @@ void ds::FourierSpaceData::replace_reflections(const FourierSpaceData& input, do
     {
         //Assign the current Miller Index to the array
         ds::MillerIndex index = (*ref).first;
-        ds::Complex2dx current_complex = (*ref).second.value();
+        ds::Complex current_complex = (*ref).second.value();
         double radius = std::abs(index.l()*tan(cone_angle_rad));
         double distance = sqrt(index.h()*index.h() + index.k()*index.k());
         if(current_complex.amplitude() > replacement_amplitude_cutoff && !new_data.exists(index.h(), index.k(), index.l()) && distance < radius)
@@ -360,7 +360,7 @@ void ds::FourierSpaceData::change_amplitudes(const FourierSpaceData& input, doub
 
         if( exists(index.h(), index.k(), index.l()) && current_amp > replacement_amplitude_cutoff)
         {
-            ds::Complex2dx current_complex = complex_at(index.h(), index.k(), index.l());
+            ds::Complex current_complex = complex_at(index.h(), index.k(), index.l());
             current_complex.set_amplitude(current_amp);
             double current_weight = weight_at(index.h(), index.k(), index.l());
             set_value_at(index.h(), index.k(), index.l(), current_complex, current_weight );
@@ -390,7 +390,7 @@ ds::FourierSpaceData ds::FourierSpaceData::inverted_data(int direction) const
             //Get Friedel spot for negative h
             if(h < 0) {h = -1*h; k=-1*k; l=-1*l; currentPhase = currentPhase*-1;} 
             
-            ds::Complex2dx newValue = ds::Complex2dx(currentAmp*cos(currentPhase), currentAmp*sin(currentPhase));
+            ds::Complex newValue = ds::Complex(currentAmp*cos(currentPhase), currentAmp*sin(currentPhase));
             new_data.set_value_at(h, k, l, newValue, (*ref).second.weight());
         }
         
@@ -456,10 +456,10 @@ ds::FourierSpaceData ds::FourierSpaceData::get_full_fourier() const
     {
         //Assign the current Miller Index to the array
         ds::MillerIndex currentHKL = (*ref).first;
-        ds::Complex2dx currentComplex = (*ref).second.value();
+        ds::Complex currentComplex = (*ref).second.value();
         
         ds::MillerIndex friedelHKL = currentHKL.FriedelSpot();
-        ds::Complex2dx friedelComplex = currentComplex;
+        ds::Complex friedelComplex = currentComplex;
         friedelComplex.set_phase(-1*currentComplex.phase());
         
         full_data.set_value_at(currentHKL.h(), currentHKL.k(), currentHKL.l(), currentComplex, (*ref).second.weight());

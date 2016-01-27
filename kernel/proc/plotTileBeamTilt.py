@@ -54,9 +54,9 @@ try:
 					beamtiltsy[i] += float(row[bt_starty+i])
 					countsy[i] += 1
 except Exception,e:
-	print "Exception occured while reading the file:"
+	print "ERROR: Exception occurred while reading the file:"
 	print str(e)
-	exit(1)
+	sys.exit(1)
 
 beamtiltsx = np.divide(beamtiltsx, countsx)
 beamtiltsy = np.divide(beamtiltsy, countsy)

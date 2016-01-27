@@ -10,11 +10,11 @@
 #include <iostream>
 #include <string>
 
-namespace volume
+namespace tdx
 {
     namespace data
     {
-        class Volume2dx;
+        class Volume;
         
         /**
          * A class used to store structure factors. Structure factors are radial
@@ -37,7 +37,7 @@ namespace volume
              * Calculates the intensities in the bins and stores them.
              * @param volume: input volume for which the intensities will be calculated
              */
-            void initialize_intensities(const Volume2dx& volume);
+            void initialize_intensities(const Volume& volume);
             
             /**
              * A string converter of the class instance. 

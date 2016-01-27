@@ -125,14 +125,14 @@ int main(int argc, char** argv)
         /********************************************
         * Real Space constraints
         *********************************************/
-        volume::data::RealSpaceData real_space_data(iteration_volume.get_real());
+        tdx::data::RealSpaceData real_space_data(iteration_volume.get_real());
         
         //Threshold mask
-        volume::data::RealSpaceData mask_threshold = real_space_data.threshold_mask(0);
+        tdx::data::RealSpaceData mask_threshold = real_space_data.threshold_mask(0);
         real_space_data.apply_mask(mask_threshold);
         
         //Slab mask
-        volume::data::RealSpaceData mask_slab = real_space_data.vertical_slab_mask(membrane_slab, true);
+        tdx::data::RealSpaceData mask_slab = real_space_data.vertical_slab_mask(membrane_slab, true);
         real_space_data.apply_mask(mask_slab);
         
         //Shrinkwrap mask
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
         mask.low_pass_butterworth(mask_resolution);
         if(temp_loc != "") mask.write_volume(temp_loc+ "/mask_volume_" + iteration_str +".map");
         double maxDensity = real_space_data.max();
-        volume::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_soft_mask(density_threshold_higher*maxDensity/100, density_threshold_lower*maxDensity/100);
+        tdx::data::RealSpaceData mask_shrinkwrap = mask.get_real().threshold_soft_mask(density_threshold_higher*maxDensity/100, density_threshold_lower*maxDensity/100);
     
         //Just to write output of mask to file
         mask.set_real(mask_shrinkwrap);

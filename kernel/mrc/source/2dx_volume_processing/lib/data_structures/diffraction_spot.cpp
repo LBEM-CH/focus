@@ -9,21 +9,21 @@
 #include "../utilities/fom_utilities.hpp"
 
 
-namespace ds = volume::data;
+namespace ds = tdx::data;
 
 ds::DiffractionSpot::DiffractionSpot()
 {
-    initialize(Complex2dx(0.0, 0.0), 0.0);
+    initialize(Complex(0.0, 0.0), 0.0);
 }
 
-ds::DiffractionSpot::DiffractionSpot(Complex2dx value, double weight)
+ds::DiffractionSpot::DiffractionSpot(Complex value, double weight)
 {
     initialize(value, weight);
 }
 
 ds::DiffractionSpot::DiffractionSpot(const std::list<DiffractionSpot> spots)
 {
-    ds::Complex2dx sum_values;
+    ds::Complex sum_values;
     std::list<double> foms;
     double sum_foms = 0.0;
     
@@ -36,15 +36,15 @@ ds::DiffractionSpot::DiffractionSpot(const std::list<DiffractionSpot> spots)
     }
     
     //Get the averaged weight
-    double avg_weight = volume::utilities::fom_utilities::AverageFOMs(foms);
+    double avg_weight = tdx::utilities::fom_utilities::AverageFOMs(foms);
     
     //The averaged value
-    ds::Complex2dx avg_value = sum_values*(avg_weight/sum_foms);
+    ds::Complex avg_value = sum_values*(avg_weight/sum_foms);
     
     this->initialize(avg_value, avg_weight);
 }
 
-void ds::DiffractionSpot::initialize(Complex2dx value, double weight)
+void ds::DiffractionSpot::initialize(Complex value, double weight)
 {
     set_value(value);
     set_weight(weight);
@@ -62,7 +62,7 @@ ds::DiffractionSpot ds::DiffractionSpot::operator +(const DiffractionSpot& rhs)
     weights.push_back(this->weight());
     weights.push_back(rhs.weight());
     return DiffractionSpot(this->value()+rhs.value(), 
-                           volume::utilities::fom_utilities::AverageFOMs(weights) 
+                           tdx::utilities::fom_utilities::AverageFOMs(weights) 
                           );
 }
 
@@ -83,7 +83,7 @@ bool ds::DiffractionSpot::operator <(const DiffractionSpot& rhs) const
            );
 }
 
-ds::Complex2dx ds::DiffractionSpot::value() const
+ds::Complex ds::DiffractionSpot::value() const
 {
     return _value;
 }
@@ -108,7 +108,7 @@ double ds::DiffractionSpot::intensity() const
     return value().intensity();
 }
 
-void ds::DiffractionSpot::set_value(Complex2dx value)
+void ds::DiffractionSpot::set_value(Complex value)
 {
     this->_value = value;
 }

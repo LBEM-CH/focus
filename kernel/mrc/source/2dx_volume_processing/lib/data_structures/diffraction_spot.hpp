@@ -12,9 +12,9 @@
 #include <list>
 #include <string.h>
 
-#include "complex2dx.hpp"
+#include "complex.hpp"
 
-namespace volume
+namespace tdx
 {
     namespace data
     {
@@ -38,7 +38,7 @@ namespace volume
              * @param value
              * @param weight in fractions
              */
-            DiffractionSpot(Complex2dx value, double weight);
+            DiffractionSpot(Complex value, double weight);
             
             /**
              * Constructor from a list of Diffraction spots.
@@ -91,7 +91,7 @@ namespace volume
              * Gets the complex value of the spot
              * @return value
              */
-            Complex2dx value() const ;
+            Complex value() const ;
             
             /**
              * Gets the weight of the spot
@@ -121,7 +121,7 @@ namespace volume
              * Assigner function of the value
              * @param value
              */
-            void set_value(Complex2dx value);
+            void set_value(Complex value);
             
             /**
              * Assigner function of the weight
@@ -137,12 +137,12 @@ namespace volume
              * @param value
              * @param weight
              */
-            void initialize(Complex2dx value, double weight);
+            void initialize(Complex value, double weight);
             
             /**
              * Value of the diffraction spot
              */
-            Complex2dx _value;
+            Complex _value;
             
             /**
              * weight of the diffraction spot

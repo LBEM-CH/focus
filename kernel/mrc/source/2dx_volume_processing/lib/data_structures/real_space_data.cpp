@@ -14,7 +14,7 @@
 #include "../utilities/density_value_sorter.hpp"
 
 
-namespace ds = volume::data;
+namespace ds = tdx::data;
 
 ds::RealSpaceData::RealSpaceData() : _data(NULL) {}
 
@@ -295,13 +295,13 @@ void ds::RealSpaceData::merge_data(const RealSpaceData& to_be_merged, int x, int
 
 int* ds::RealSpaceData::density_sorted_ids()
 {
-    volume::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()));
+    tdx::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()));
     return sorter.get_sorted_ids();
 }
 
 double* ds::RealSpaceData::density_sorted_values()
 {
-    volume::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()));
+    tdx::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()));
     return sorter.get_sorted_values();
 }
 

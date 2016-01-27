@@ -12,7 +12,7 @@
 #include "angle_utilities.hpp"
 #include "density_generator.hpp"
 
-volume::utilities::BeadModelGenerator::BeadModelGenerator(int number_of_beads, double density_threshold, double noise_level, double max_resolution)
+tdx::utilities::BeadModelGenerator::BeadModelGenerator(int number_of_beads, double density_threshold, double noise_level, double max_resolution)
 {
     this->number_of_beads = number_of_beads;
     this->density_threshold = density_threshold;
@@ -20,17 +20,17 @@ volume::utilities::BeadModelGenerator::BeadModelGenerator(int number_of_beads, d
     this->max_resolution = max_resolution;
 }
 
-void volume::utilities::BeadModelGenerator::generate_bead_model_coordinates(volume::data::Volume2dx volume, std::string output_pdb_file)
+void tdx::utilities::BeadModelGenerator::generate_bead_model_coordinates(tdx::data::Volume volume, std::string output_pdb_file)
 {
     
     //Prepare the output stream
     std::ofstream out_file_stream;
     
-    volume::data::RealSpaceData real = volume.get_real();
+    tdx::data::RealSpaceData real = volume.get_real();
     
     out_file_stream.open(output_pdb_file);
     write_pdb_header(out_file_stream, volume.xlen(), volume.ylen(), volume.zlen(),
-                      90, 90, volume::utilities::angle_utilities::RadianToDegree(volume.gamma()), volume.symmetry());
+                      90, 90, tdx::utilities::angle_utilities::RadianToDegree(volume.gamma()), volume.symmetry());
     
     int x, y, z = 0;
     for ( int bead = 0; bead < number_of_beads; bead++ ) 
@@ -66,15 +66,15 @@ void volume::utilities::BeadModelGenerator::generate_bead_model_coordinates(volu
 
 }
 
-volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead_model_volume(volume::data::Volume2dx input_volume)
+tdx::data::RealSpaceData tdx::utilities::BeadModelGenerator::generate_bead_model_volume(tdx::data::Volume input_volume)
 {   
-    volume::data::RealSpaceData output_real(input_volume.nx(), input_volume.ny(), input_volume.nz());
-    volume::data::RealSpaceData oxygen = volume::utilities::density_generator::create_density(11, max_resolution, 8.0);
-    volume::data::RealSpaceData carbon = volume::utilities::density_generator::create_density(11, max_resolution, 6.0);
-    volume::data::RealSpaceData nitrogen = volume::utilities::density_generator::create_density(11, max_resolution, 7.0);
-    volume::data::RealSpaceData sulphur = volume::utilities::density_generator::create_density(11, max_resolution, 16.0);
+    tdx::data::RealSpaceData output_real(input_volume.nx(), input_volume.ny(), input_volume.nz());
+    tdx::data::RealSpaceData oxygen = tdx::utilities::density_generator::create_density(11, max_resolution, 8.0);
+    tdx::data::RealSpaceData carbon = tdx::utilities::density_generator::create_density(11, max_resolution, 6.0);
+    tdx::data::RealSpaceData nitrogen = tdx::utilities::density_generator::create_density(11, max_resolution, 7.0);
+    tdx::data::RealSpaceData sulphur = tdx::utilities::density_generator::create_density(11, max_resolution, 16.0);
     
-    volume::data::RealSpaceData input_real = input_volume.get_real();
+    tdx::data::RealSpaceData input_real = input_volume.get_real();
     
     int x, y, z = 0;
     int max_trials = number_of_beads;
@@ -134,7 +134,7 @@ volume::data::RealSpaceData volume::utilities::BeadModelGenerator::generate_bead
 
 }
 
-void volume::utilities::BeadModelGenerator::write_pdb_coordinate
+void tdx::utilities::BeadModelGenerator::write_pdb_coordinate
         (std::ofstream& out_file_stream, int atom_id, std::string atom_type, int x, int y, int z)
 {
     
@@ -187,7 +187,7 @@ void volume::utilities::BeadModelGenerator::write_pdb_coordinate
                         << std::endl;
 }
 
-void volume::utilities::BeadModelGenerator::write_pdb_header
+void tdx::utilities::BeadModelGenerator::write_pdb_header
         (std::ofstream& out_file_stream, double a, double b, double c, double alpha, double beta, double gamma, std::string symmetry)
 {
     

@@ -8,7 +8,7 @@
 
 #include "binary_file_utilities.hpp"
 
-long volume::utilities::binary_file_utilities::file_size(const std::string& filename)
+long tdx::utilities::binary_file_utilities::file_size(const std::string& filename)
 {
     struct stat stat_buf;
     int rc = stat(filename.c_str(), &stat_buf);
@@ -16,7 +16,7 @@ long volume::utilities::binary_file_utilities::file_size(const std::string& file
 }
 
 
-int volume::utilities::binary_file_utilities::read_int(std::istream& in_file)
+int tdx::utilities::binary_file_utilities::read_int(std::istream& in_file)
 {
     int value;
     in_file.read((char*)&value, sizeof(int));
@@ -24,7 +24,7 @@ int volume::utilities::binary_file_utilities::read_int(std::istream& in_file)
     return value;
 }
 
-float volume::utilities::binary_file_utilities::read_float(std::istream& in_file)
+float tdx::utilities::binary_file_utilities::read_float(std::istream& in_file)
 {
     float value;
     in_file.read((char*)&value, sizeof(float));

@@ -76,16 +76,11 @@ int main(int argc, char** argv)
     std ::cout << ref_volume.to_string();
     
     //Calculate the SF from ref volume
-    tdx::data::StructureFactors ref_structure_factors = ref_volume.calculate_structure_factors(100, max_resolution);
-    if(temp_loc != "")
-    {
-        std::ofstream ref_sf_file(temp_loc+"/ref_sf.dat");
-        ref_sf_file << ref_structure_factors.to_string();
-        ref_sf_file.close();
-    }
+    tdx::data::ResolutionBinnedData ref_structure_factors = ref_volume.calculate_structure_factors(0, 1/max_resolution, 100);
+    if(temp_loc != "") ref_structure_factors.write_average(temp_loc+"/ref_sf.dat");
  
     std::cout << "\nReference Structure factors:\n";
-    std::cout << ref_structure_factors.plot_profile();
+    std::cout << ref_structure_factors.plot_average();
     
     Volume2dx output_volume = input_volume;
     
@@ -136,7 +131,7 @@ int main(int argc, char** argv)
     std::cout << "-----------------------------------\n";
     std::cout << output_volume.to_string();
     std::cout << "\nNew structure factor profile:\n";
-    std::cout << output_volume.calculate_structure_factors(100, max_resolution).plot_profile();
+    std::cout << output_volume.calculate_structure_factors(0, 1/max_resolution, 100).plot_average();
     
 
     //Write output in HKL format

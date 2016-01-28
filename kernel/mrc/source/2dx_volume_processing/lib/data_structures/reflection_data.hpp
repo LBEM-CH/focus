@@ -19,13 +19,13 @@ namespace tdx
     namespace data
     {
         /**
-         * A class to store Fourier space data.
+         * A class to store Fourier space reflections HKL and values.
          * The data is stored as a map of miller indices and it's values.
          * Miller index is sorted with x changing slowest and z changing
          * fastest. For each miller index a complex value and it's weight
          * is also stored.
          */
-        class FourierSpaceData
+        class ReflectionData
         {
             
         public:
@@ -38,13 +38,13 @@ namespace tdx
             /**
              * Default constructor initializing the data
              */
-            FourierSpaceData();
+            ReflectionData();
             
             /**
              * Copy constructor
              * @param copy - Instance to be copied from.
              */
-            FourierSpaceData(const FourierSpaceData& copy);
+            ReflectionData(const ReflectionData& copy);
             
             /**
              * Constructor using a multi-map of miller index and diffraction spot
@@ -55,12 +55,12 @@ namespace tdx
              * one diffraction spot is assigned to a miller index.
              * @param spot_multimap: A multi-map with miller indices mapped to multiple complexes
              */
-            FourierSpaceData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap);
+            ReflectionData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap);
             
             /**
              * Destructor
              */
-            ~FourierSpaceData();
+            ~ReflectionData();
             
             /**
              * Operator definition of =
@@ -68,21 +68,21 @@ namespace tdx
              * Behavior similar to copy constructor
              * @param rhs
              */
-            FourierSpaceData& operator=(const FourierSpaceData& rhs);
+            ReflectionData& operator=(const ReflectionData& rhs);
             
             /**
              * Operator definition of +
              * Joins the reflections from both rhs and current instance. For the
              * intersection set (reflections present in both) adds the reflections.
              */
-            FourierSpaceData operator+(const FourierSpaceData& rhs);
+            ReflectionData operator+(const ReflectionData& rhs);
             
             /**
              * Operator definition of * with double factor.
              * Multiplies the amplitudes of all reflections by the factor.
              * @param factor
              */
-            FourierSpaceData operator*(double factor);
+            ReflectionData operator*(double factor);
             
             /**
              * Clears the current data
@@ -93,7 +93,7 @@ namespace tdx
              * Resets (Copies) the data with another one
              * @param data
              */
-            void reset(const FourierSpaceData& data);
+            void reset(const ReflectionData& data);
             
             /**
              * Returns the beginning of the data for iterating
@@ -116,7 +116,7 @@ namespace tdx
              * @param value - complex value
              * @param weight - fom weight in fraction 
              */
-            void set_value_at(int h, int k, int l, Complex value, double weight);
+            void set_spot_at(int h, int k, int l, Complex value, double weight);
             
             /**
              * Fetches the complex number stored at miller index h, k, l.
@@ -126,7 +126,7 @@ namespace tdx
              * @param l
              * @return complex value at h, k, l
              */
-            Complex complex_at(int h, int k, int l) const ;
+            Complex value_at(int h, int k, int l) const ;
             
             /**
              * Fetches the weight at the miller index h, k, l.
@@ -199,7 +199,7 @@ namespace tdx
              * @param replacement_amplitude_cutoff - Reflections in input with this amplitude value or more will only be changed
              * @return new replaced Fourier Space Data
              */
-            void replace_reflections(const FourierSpaceData& input, double cone_angle = 90, double replacement_amplitude_cutoff = 0.0);
+            void replace_reflections(const ReflectionData& input, double cone_angle = 90, double replacement_amplitude_cutoff = 0.0);
             
             /**
              * Replaces the amplitudes present in input data. The amplitudes which are not
@@ -209,7 +209,7 @@ namespace tdx
              * @param replacement_amplitude_cutoff - Reflections in input with this amplitude value or more will only be changed
              * @return new replaced Fourier Space Data
              */
-            void change_amplitudes(const FourierSpaceData& input, double replacement_amplitude_cutoff = 0.0);
+            void change_amplitudes(const ReflectionData& input, double replacement_amplitude_cutoff = 0.0);
             
             /**
              * Spreads the current data and tries to fill in the missing spots.
@@ -220,14 +220,14 @@ namespace tdx
              * Returns the full Fourier space with negative h as well
              * @return Fourier Space Data
              */
-            FourierSpaceData get_full_fourier() const;
+            ReflectionData get_full_fourier() const;
             
             /**
              * Returns the inverted Fourier data in a specific direction
              * @param direction = 0 for all axis (default), 1 for x axis invert, 2 for y axis invert, 3 for z axis invert, 
              * @return Data with inverted hand
              */
-            FourierSpaceData inverted_data(int direction=0) const;
+            ReflectionData inverted_data(int direction=0) const;
             
         private:
             

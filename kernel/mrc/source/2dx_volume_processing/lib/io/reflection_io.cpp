@@ -11,7 +11,7 @@
 #include "../utilities/angle_utilities.hpp"
 #include "../utilities/fourier_utilities.hpp"
 
-tdx::data::FourierSpaceData tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4)
+tdx::data::ReflectionData tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4)
 {
     namespace ds = tdx::data;
     
@@ -117,12 +117,12 @@ tdx::data::FourierSpaceData tdx::io::reflection::read(std::string file_path, int
     hkzFile.close();
 
     //Assign the data to Fourier_space
-    ds::FourierSpaceData fourier_data(spot_multimap);
+    ds::ReflectionData fourier_data(spot_multimap);
     
     return fourier_data;
 }
 
-void tdx::io::reflection::write(const std::string& file_path, const tdx::data::FourierSpaceData& data, bool for_ccp4)
+void tdx::io::reflection::write(const std::string& file_path, const tdx::data::ReflectionData& data, bool for_ccp4)
 {
     const int INT_WIDTH = 5;
     const int FLOAT_WIDTH = 13;
@@ -136,7 +136,7 @@ void tdx::io::reflection::write(const std::string& file_path, const tdx::data::F
     
     std::ofstream hklFile(file_path);
     
-    tdx::data::FourierSpaceData data_to_write = data;
+    tdx::data::ReflectionData data_to_write = data;
     
     //If is being generated for CCP4 invert the handedness
     //if(for_ccp4) data_to_write = data.invert_hand();
@@ -146,7 +146,7 @@ void tdx::io::reflection::write(const std::string& file_path, const tdx::data::F
     std::cout << "H K L AMP PHASE FOM\n";
     std::cout << "----------------------------------------------\n\n";
     
-    for(tdx::data::FourierSpaceData::const_iterator ii=data_to_write.begin(); ii!=data_to_write.end(); ++ii){
+    for(tdx::data::ReflectionData::const_iterator ii=data_to_write.begin(); ii!=data_to_write.end(); ++ii){
         int h = (*ii).first.h();
         int k = (*ii).first.k();
         int l = (*ii).first.l();

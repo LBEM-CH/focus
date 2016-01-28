@@ -20,7 +20,7 @@ tdx::utilities::BeadModelGenerator::BeadModelGenerator(int number_of_beads, doub
     this->max_resolution = max_resolution;
 }
 
-void tdx::utilities::BeadModelGenerator::generate_bead_model_coordinates(tdx::data::Volume volume, std::string output_pdb_file)
+void tdx::utilities::BeadModelGenerator::generate_bead_model_coordinates(tdx::data::Volume2DX volume, std::string output_pdb_file)
 {
     
     //Prepare the output stream
@@ -66,7 +66,7 @@ void tdx::utilities::BeadModelGenerator::generate_bead_model_coordinates(tdx::da
 
 }
 
-tdx::data::RealSpaceData tdx::utilities::BeadModelGenerator::generate_bead_model_volume(tdx::data::Volume input_volume)
+tdx::data::RealSpaceData tdx::utilities::BeadModelGenerator::generate_bead_model_volume(tdx::data::Volume2DX input_volume)
 {   
     tdx::data::RealSpaceData output_real(input_volume.nx(), input_volume.ny(), input_volume.nz());
     tdx::data::RealSpaceData oxygen = tdx::utilities::density_generator::create_density(11, max_resolution, 8.0);

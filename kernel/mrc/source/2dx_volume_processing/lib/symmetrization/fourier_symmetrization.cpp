@@ -9,13 +9,13 @@
 
 
 void tdx::symmetrization::fourier_symmetrization::symmetrize
-        (tdx::data::FourierSpaceData& fourier_data, 
+        (tdx::data::ReflectionData& fourier_data, 
         const tdx::symmetrization::Symmetry2dx& symmetry)
 {
     namespace ds = tdx::data;
     ds::DiffractionSpotMultiMap spot_multimap;
     
-    for(ds::FourierSpaceData::const_iterator data_iterator= fourier_data.begin(); data_iterator != fourier_data.end(); ++data_iterator)
+    for(ds::ReflectionData::const_iterator data_iterator= fourier_data.begin(); data_iterator != fourier_data.end(); ++data_iterator)
     {
         ds::MillerIndex current_index = (*data_iterator).first;
         ds::DiffractionSpot current_spot = (*data_iterator).second;
@@ -71,6 +71,6 @@ void tdx::symmetrization::fourier_symmetrization::symmetrize
         
     }
     
-    fourier_data = ds::FourierSpaceData(spot_multimap);
+    fourier_data = ds::ReflectionData(spot_multimap);
     
 }

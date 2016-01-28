@@ -12,8 +12,8 @@
 
 #include "volume_header.hpp"
 #include "real_space_data.hpp"
-#include "fourier_space_data.hpp"
-#include "structure_factor.hpp"
+#include "reflection_data.hpp"
+#include "resolution_binned_data.hpp"
 #include "../transforms/fourier_transform_fftw.hpp"
 
 namespace tdx
@@ -26,7 +26,7 @@ namespace tdx
          * a header containing all necessary information about the volume.
          * Does a lazy initialization of the data whenever required.
          */
-        class Volume
+        class Volume2DX
         {
         public:
             
@@ -36,44 +36,44 @@ namespace tdx
              * @param ny
              * @param nz
              */
-            Volume(int nx=0, int ny=0, int nz=0);
+            Volume2DX(int nx=0, int ny=0, int nz=0);
             
             /**
              * Generates a volume with the given header
              * @param header
              */
-            Volume(const VolumeHeader& header);
+            Volume2DX(const VolumeHeader& header);
             
             /**
              * Copy constructor
              * @param copy
              */
-            Volume(const Volume& copy);
+            Volume2DX(const Volume2DX& copy);
             
             /**
              * Default destructor
              */
-            ~Volume();
+            ~Volume2DX();
             
             /**
              * Definition of operator =
              */
-            Volume& operator=(const Volume& rhs);
+            Volume2DX& operator=(const Volume2DX& rhs);
             
             /**
              * Operator + definition
              */
-            Volume operator+(const Volume& rhs);
+            Volume2DX operator+(const Volume2DX& rhs);
             
             /**
              * Multiplication by a factor
              */
-            Volume operator*(double factor);
+            Volume2DX operator*(double factor);
             
             /**
              * Resets the volume with other volume
              */
-            void reset(const Volume& other);
+            void reset(const Volume2DX& other);
             
             /**
              * Clears all the data present
@@ -279,7 +279,7 @@ namespace tdx
              * @param missing_plane: Write the volume with missing plane
              * @param plane_number: which plane to cut (int)
              */
-            void cut_xy_plane(Volume& xy_plane, Volume& missing_plane, int plane_number=0);
+            void cut_xy_plane(Volume2DX& xy_plane, Volume2DX& missing_plane, int plane_number=0);
             
             /**
              * Cuts a cone in Fourier space with specified degree
@@ -287,7 +287,7 @@ namespace tdx
              * @param missing_cone: Write the result in this volume
              * @param cone_angle: Angle in degrees of cone to cut
              */
-            void cut_cone(Volume& cone, Volume& missing_cone, double cone_angle=30);
+            void cut_cone(Volume2DX& cone, Volume2DX& missing_cone, double cone_angle=30);
             
             /**
              * Generates random Gaussian densities in the volume
@@ -340,7 +340,7 @@ namespace tdx
              * Returns a projection in the direction of axis
              * @param axis: x/y/z
              */
-            Volume project2D(char axis);
+            Volume2DX project2D(char axis);
             
             /**
              * Fetches the real valued density at (x,y,z) from the volume
@@ -356,7 +356,7 @@ namespace tdx
              * Checks if the data is initialized, if not then does initialization
              * @return Fourier Space data
              */
-            FourierSpaceData get_fourier();
+            ReflectionData get_fourier();
             
             /**
              * Returns the Real space data.
@@ -369,7 +369,7 @@ namespace tdx
              * Sets the Fourier data
              * @param fourier
              */
-            void set_fourier(const FourierSpaceData& fourier);
+            void set_fourier(const ReflectionData& fourier);
             
             /**
              * Sets the real data
@@ -393,7 +393,7 @@ namespace tdx
              * Sets the data from a volume
              * @param volume
              */
-            void set_data(const Volume& volume);
+            void set_data(const Volume2DX& volume);
             
             /**
              * Calculates the structure factors. 
@@ -402,11 +402,12 @@ namespace tdx
              * space is divided in the number of bins and the intensity of a
              * particular spot is added to the correct bin.
              * 
+             * @param minimum frequency (in 1/A)
+             * @param maximum frequency (in 1/A)
              * @param resolution_bins - number of bins.
-             * @param max_resolution 
-             * @return instance of class Structure Factors.
+             * @return instance of class Resolution binned data.
              */
-            StructureFactors calculate_structure_factors(int resolution_bins, double max_resolution) const;
+            ResolutionBinnedData calculate_structure_factors(double min_freq, double max_freq, int resolution_bins);
             
             /**
              * Apply the structure factors. The factors are applied partially with the
@@ -417,7 +418,7 @@ namespace tdx
              * @param fraction
              * @see calculate_structure_factors
              */
-            void apply_structure_factors(StructureFactors structure_factors, double fraction);
+            void apply_structure_factors(ResolutionBinnedData structure_factors, double fraction);
             
             /**
              * Generates a bead model of the current volume and writes it in a PDB file
@@ -435,7 +436,7 @@ namespace tdx
              * @param bead_model_resolution
              * @return volume
              */
-            Volume generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution = 2.0);
+            Volume2DX generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution = 2.0);
             
             /**
              * Centers the density along the z axis. Internally adds PI*miller_index_l 
@@ -462,7 +463,7 @@ namespace tdx
              * @param fraction - The fraction (between 0 and 1) with which the density values
              *                   from reference map is to be applied.
              */
-            void apply_density_histogram(Volume reference, double fraction);
+            void apply_density_histogram(Volume2DX reference, double fraction);
             
             /**
              * Generates the density histogram from the reference and applies 
@@ -473,7 +474,7 @@ namespace tdx
              * 
              * @param reference - Reference volume to be used to get density histogram
              */
-            void apply_density_histogram(Volume reference);
+            void apply_density_histogram(Volume2DX reference);
             
             /**
              * Applies a density slab in the vertical direction (z-axis) with the
@@ -532,7 +533,7 @@ namespace tdx
             /**
              * Sets all phases to zero, for PSF calculation
              */
-            Volume zero_phases();
+            Volume2DX zero_phases();
             
             
             /**
@@ -548,13 +549,13 @@ namespace tdx
              *                                   change other reflections in the conical region provided
              * @param replacement_amplitude_cutoff - Reflections in input with this amplitude value or more will only be changed
              */
-            void replace_reflections(const FourierSpaceData& fourier_data, double cone_angle = 90, double replacement_amplitude_cutoff = 0.0);
+            void replace_reflections(const ReflectionData& fourier_data, double cone_angle = 90, double replacement_amplitude_cutoff = 0.0);
             
             /**
              * Replace the reflections from a Fourier volume.
              * @param fourier_data
              */
-            void change_amplitudes(const FourierSpaceData& fourier_data);
+            void change_amplitudes(const ReflectionData& fourier_data);
             
             /**
              * NOT WORKING!!
@@ -564,20 +565,20 @@ namespace tdx
              * @param y_cells
              * @param z_cells
              */
-            Volume extended_volume(int x_cells, int y_cells=0, int z_cells=0);
+            Volume2DX extended_volume(int x_cells, int y_cells=0, int z_cells=0);
             
             /**
              * Subsamples to factor.
              * @param factor
              * @return 
              */
-            Volume subsample(int factor);
+            Volume2DX subsample(int factor);
             
             /**
              * Spreads the data in the Fourier space and tries to fill in the missing spots.
              * @return new volume with spreaded data
              */
-            Volume spread_fourier_data();
+            Volume2DX spread_fourier_data();
             
             /**
              * Expands the data to include negative h as well, so that full
@@ -592,7 +593,7 @@ namespace tdx
              * exp(B/4/resolution**2) 
              * @param negative_temp_factor
              */
-            Volume apply_bfactor(double negative_temp_factor);
+            Volume2DX apply_bfactor(double negative_temp_factor);
 
         private:
             
@@ -650,7 +651,7 @@ namespace tdx
             /**
              * Fourier space data
              */
-            FourierSpaceData _fourier;
+            ReflectionData _fourier;
             
             /**
              * Transforming between real and Fourier data. To be used for wisdom

@@ -14,7 +14,7 @@
 
 #include "../data_structures/common_definitions.hpp"
 #include "../data_structures/volume_header.hpp"
-#include "../data_structures/fourier_space_data.hpp"
+#include "../data_structures/reflection_data.hpp"
 
 namespace tdx
 {
@@ -31,7 +31,7 @@ namespace tdx
              * @param raw_ccp4 :  Correct for density on top and bottom (as from raw ccp4)?
              * @return fourier_data
              */
-            tdx::data::FourierSpaceData read(std::string file_path, int z_scale, bool raw_ccp4 = true);
+            tdx::data::ReflectionData read(std::string file_path, int z_scale, bool raw_ccp4 = true);
             
             /**
              * A HKL file writer. Writes the HKL File in the following format:
@@ -40,7 +40,7 @@ namespace tdx
              * @param data - input data
              * @param for_ccp4 - if the output would be used by CCP4? (will invert the hand and sift the phase)
              */
-            void write(const std::string& file_path, const tdx::data::FourierSpaceData& data, bool for_ccp4 = true);
+            void write(const std::string& file_path, const tdx::data::ReflectionData& data, bool for_ccp4 = true);
             
             /**
              * Method to add a spot with raw parameters read from file.

@@ -11,7 +11,7 @@
 
 #include "symmetry2dx.hpp"
 #include "../data_structures/common_definitions.hpp"
-#include "../data_structures/fourier_space_data.hpp"
+#include "../data_structures/reflection_data.hpp"
 
 
 namespace tdx
@@ -27,7 +27,7 @@ namespace tdx
              * @param[in/out] fourier_data
              * @param symmetry
              */
-            void symmetrize(tdx::data::FourierSpaceData& fourier_data, 
+            void symmetrize(tdx::data::ReflectionData& fourier_data, 
                             const tdx::symmetrization::Symmetry2dx& symmetry);
             
         }

@@ -8,7 +8,7 @@
 #include <fftw3.h>
 #include <random>
 
-#include "volume.hpp"
+#include "volume2dx.hpp"
 
 #include "miller_index.hpp"
 #include "diffraction_spot.hpp"
@@ -27,36 +27,36 @@
 
 namespace ds = tdx::data;
 
-ds::Volume::Volume(int nx, int ny, int nz)
+ds::Volume2DX::Volume2DX(int nx, int ny, int nz)
 {
     _header = ds::VolumeHeader(nx, ny, nz);
     _real = ds::RealSpaceData(nx, ny, nz);
-    _fourier = ds::FourierSpaceData();
+    _fourier = ds::ReflectionData();
     _transform = tdx::transforms::FourierTransformFFTW();
     _type = NONE;
 }
 
-ds::Volume::Volume(const VolumeHeader& header)
+ds::Volume2DX::Volume2DX(const VolumeHeader& header)
 {
     _header = ds::VolumeHeader(header);
     _real = ds::RealSpaceData(nx(), ny(), nz());
-    _fourier = ds::FourierSpaceData();
+    _fourier = ds::ReflectionData();
     _transform = tdx::transforms::FourierTransformFFTW();
     _type = NONE;
 }
 
-ds::Volume::Volume(const Volume& copy)
+ds::Volume2DX::Volume2DX(const Volume2DX& copy)
 {
     _header = ds::VolumeHeader(copy.header());
     _real = ds::RealSpaceData(copy._real);
-    _fourier = ds::FourierSpaceData(copy._fourier);
+    _fourier = ds::ReflectionData(copy._fourier);
     _transform = tdx::transforms::FourierTransformFFTW(copy._transform);
     _type = copy._type;
 }
 
-ds::Volume::~Volume(){}
+ds::Volume2DX::~Volume2DX(){}
 
-void ds::Volume::reset(const Volume& other)
+void ds::Volume2DX::reset(const Volume2DX& other)
 {
     _header = ds::VolumeHeader(other._header);
     _real.reset(other._real);
@@ -65,22 +65,22 @@ void ds::Volume::reset(const Volume& other)
     _type = other._type;
 }
 
-void ds::Volume::clear()
+void ds::Volume2DX::clear()
 {
     _real.clear();
     _fourier.clear();
     _type = NONE;
 }
 
-ds::Volume& ds::Volume::operator=(const Volume& rhs)
+ds::Volume2DX& ds::Volume2DX::operator=(const Volume2DX& rhs)
 {
     reset(rhs);
     return *this;
 }
 
-ds::Volume ds::Volume::operator+(const Volume& rhs)
+ds::Volume2DX ds::Volume2DX::operator+(const Volume2DX& rhs)
 {
-    Volume added(header());
+    Volume2DX added(header());
     if(rhs.has_real())
     {
         RealSpaceData rhs_real = rhs._real;
@@ -95,9 +95,9 @@ ds::Volume ds::Volume::operator+(const Volume& rhs)
     return added;
 }
 
-ds::Volume ds::Volume::operator*(double factor)
+ds::Volume2DX ds::Volume2DX::operator*(double factor)
 {
-    Volume modified;
+    Volume2DX modified;
     if(has_real())
     {
         modified.set_real(get_real()*factor);
@@ -114,47 +114,47 @@ ds::Volume ds::Volume::operator*(double factor)
     return modified;
 }
 
-bool ds::Volume::has_fourier() const
+bool ds::Volume2DX::has_fourier() const
 {
     if(_type == FOURIER || _type == BOTH) return true;
     else return false;
 }
 
-bool ds::Volume::has_real() const
+bool ds::Volume2DX::has_real() const
 {
     if(_type == REAL || _type == BOTH) return true;
     else return false;
 }
 
-ds::RealSpaceData ds::Volume::get_real()
+ds::RealSpaceData ds::Volume2DX::get_real()
 {
     prepare_real();
     return _real;
 }
 
-ds::FourierSpaceData ds::Volume::get_fourier()
+ds::ReflectionData ds::Volume2DX::get_fourier()
 {
     prepare_fourier();
     return _fourier;
 }
 
-void ds::Volume::prepare_fourier()
+void ds::Volume2DX::prepare_fourier()
 {
     if(!has_fourier()) fourier_from_real();
 }
 
-void ds::Volume::prepare_real()
+void ds::Volume2DX::prepare_real()
 {
     if(!has_real()) real_from_fourier();
 }
 
-void ds::Volume::set_fourier(const FourierSpaceData& fourier)
+void ds::Volume2DX::set_fourier(const ReflectionData& fourier)
 {
     _fourier.reset(fourier);
     _type = FOURIER;
 }
 
-void ds::Volume::set_real(const RealSpaceData& real)
+void ds::Volume2DX::set_real(const RealSpaceData& real)
 {
     if(real.nx() == nx() && real.ny() == ny() && real.nz() == nz())
     {
@@ -170,7 +170,7 @@ void ds::Volume::set_real(const RealSpaceData& real)
     }
 }
 
-void ds::Volume::fourier_from_real()
+void ds::Volume2DX::fourier_from_real()
 {
     std::cout << "Converting the real data to Fourier. \n";
     if(_type == REAL)
@@ -190,7 +190,7 @@ void ds::Volume::fourier_from_real()
     }
 }
 
-void ds::Volume::real_from_fourier()
+void ds::Volume2DX::real_from_fourier()
 {
     std::cout << "Converting the Fourier data to real. \n";
     if(_type == FOURIER){
@@ -207,7 +207,7 @@ void ds::Volume::real_from_fourier()
     }
 }
 
-std::string ds::Volume::to_string() const
+std::string ds::Volume2DX::to_string() const
 {
     std::string output = "";
     
@@ -217,7 +217,7 @@ std::string ds::Volume::to_string() const
     return output;
 }
 
-std::string ds::Volume::data_string() const
+std::string ds::Volume2DX::data_string() const
 {
     std::string output = "";
     
@@ -251,11 +251,11 @@ std::string ds::Volume::data_string() const
     
 }
 
-ds::VolumeHeader ds::Volume::header() const {
+ds::VolumeHeader ds::Volume2DX::header() const {
     return _header;
 }
 
-void ds::Volume::read_volume(std::string file_name, std::string format)
+void ds::Volume2DX::read_volume(std::string file_name, std::string format)
 {
     std::cout << "Reading volume with format <"<< format << "> from file:\n\t" << file_name << "\n\n";
     if(format == "hkl")
@@ -281,14 +281,14 @@ void ds::Volume::read_volume(std::string file_name, std::string format)
     
 }
 
-void ds::Volume::read_volume(std::string file_name)
+void ds::Volume2DX::read_volume(std::string file_name)
 {
     std::string format = tdx::utilities::filesystem::FileExtension(file_name);
     
     read_volume(file_name, format);
 }
 
-void ds::Volume::write_volume(std::string file_name, std::string format)
+void ds::Volume2DX::write_volume(std::string file_name, std::string format)
 {
     std::cout << "\nWriting volume with format <"<< format << "> to file:\n\t" << file_name << "\n\n";
     if(format == "hkl")
@@ -305,21 +305,21 @@ void ds::Volume::write_volume(std::string file_name, std::string format)
     }
 }
 
-void ds::Volume::write_volume(std::string file_name)
+void ds::Volume2DX::write_volume(std::string file_name)
 {
     std::string format = tdx::utilities::filesystem::FileExtension(file_name);
     write_volume(file_name, format);
 }
 
-void ds::Volume::cut_xy_plane(Volume& xy_plane, Volume& missing_plane, int plane_number)
+void ds::Volume2DX::cut_xy_plane(Volume2DX& xy_plane, Volume2DX& missing_plane, int plane_number)
 {
     std::cout << "Cutting the XY plane from volume.. \n";
     
-    FourierSpaceData new_data;
-    FourierSpaceData cut_data;
-    FourierSpaceData current_data = get_fourier();
+    ReflectionData new_data;
+    ReflectionData cut_data;
+    ReflectionData current_data = get_fourier();
     
-    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
@@ -328,33 +328,33 @@ void ds::Volume::cut_xy_plane(Volume& xy_plane, Volume& missing_plane, int plane
         if ( index.l() == plane_number ) 
         {
             //Insert into cut_data
-            cut_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            cut_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
         else
         {
             //Insert into new_data
-            new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }
     
-    xy_plane = Volume(nx(), ny(), 1);
+    xy_plane = Volume2DX(nx(), ny(), 1);
     xy_plane.set_fourier(cut_data);
     
-    missing_plane = Volume(nx(), ny(), nz());
+    missing_plane = Volume2DX(nx(), ny(), nz());
     missing_plane.set_fourier(new_data);
 }
 
-void ds::Volume::cut_cone(Volume& cone, Volume& missing_cone, double cone_angle)
+void ds::Volume2DX::cut_cone(Volume2DX& cone, Volume2DX& missing_cone, double cone_angle)
 {
     std::cout << "Cutting the cone of " << cone_angle << " degrees from volume.. \n";
     
     double cone_angle_rad = double(cone_angle)*M_PI/180;
     
-    FourierSpaceData new_data;
-    FourierSpaceData cut_data;
-    FourierSpaceData current_data = get_fourier();
+    ReflectionData new_data;
+    ReflectionData cut_data;
+    ReflectionData current_data = get_fourier();
     
-    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
@@ -365,30 +365,30 @@ void ds::Volume::cut_cone(Volume& cone, Volume& missing_cone, double cone_angle)
         if ( distance < radius ) 
         {
             //Insert into cut_data
-            cut_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            cut_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
         else
         {
             //Insert into new_data
-            new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }
     
-    cone = Volume(header());
+    cone = Volume2DX(header());
     cone.set_fourier(cut_data);
     
-    missing_cone = Volume(header());
+    missing_cone = Volume2DX(header());
     missing_cone.set_fourier(new_data);
 }
 
-void ds::Volume::generate_fourier_noise(double fraction_to_change)
+void ds::Volume2DX::generate_fourier_noise(double fraction_to_change)
 {   
     std::cout << "Randomly changing  " << fraction_to_change << " fraction of phases in Fourier space.. \n";
     
-    ds::FourierSpaceData data = get_fourier();
-    ds::FourierSpaceData new_data;
+    ds::ReflectionData data = get_fourier();
+    ds::ReflectionData new_data;
     int changes = 0;
-    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    for(ReflectionData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
     {
         MillerIndex index = (*itr).first;
         DiffractionSpot spot = (*itr).second;
@@ -399,12 +399,12 @@ void ds::Volume::generate_fourier_noise(double fraction_to_change)
             double new_phase = ((double) rand() / (RAND_MAX)) * M_PI;
             Complex new_value = spot.value();
             new_value.set_phase(new_phase);
-            new_data.set_value_at(index.h(), index.k(), index.l(), new_value, spot.weight());
+            new_data.set_spot_at(index.h(), index.k(), index.l(), new_value, spot.weight());
             changes++;
         }
         else
         {
-            new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }
     
@@ -412,7 +412,7 @@ void ds::Volume::generate_fourier_noise(double fraction_to_change)
     set_fourier(new_data);
 }
 
-void ds::Volume::generate_random_densities(double fraction_to_fill)
+void ds::Volume2DX::generate_random_densities(double fraction_to_fill)
 {
     ds::RealSpaceData data(nx(), ny(), nz());
     int attempts = fraction_to_fill * data.size();
@@ -427,7 +427,7 @@ void ds::Volume::generate_random_densities(double fraction_to_fill)
     set_real(data);
 }
 
-void ds::Volume::generate_poisson_densities(double mean_density)
+void ds::Volume2DX::generate_poisson_densities(double mean_density)
 {
     std::cout << "Generating Poisson noise with expected mean: " << mean_density << "\n";
     std::default_random_engine generator;
@@ -444,19 +444,19 @@ void ds::Volume::generate_poisson_densities(double mean_density)
     set_real(data);
 }
 
-double ds::Volume::resolution_at(int h, int k, int l) const
+double ds::Volume2DX::resolution_at(int h, int k, int l) const
 {
     ds::MillerIndex index(h, k, l);
     return tdx::utilities::fourier_utilities::GetResolution(index, _header.gamma(), _header.xlen(), _header.ylen(), _header.zlen());
 }
 
-ds::MillerIndex ds::Volume::max_resolution_spot() const
+ds::MillerIndex ds::Volume2DX::max_resolution_spot() const
 {
     if(has_fourier())
     {
         MillerIndex spot;
         double maxres = 10000;
-        for(FourierSpaceData::const_iterator itr=_fourier.begin(); itr!=_fourier.end(); ++itr)
+        for(ReflectionData::const_iterator itr=_fourier.begin(); itr!=_fourier.end(); ++itr)
         {
             MillerIndex index = (*itr).first;
             double res = resolution_at(index.h(), index.k(), index.l());
@@ -474,45 +474,45 @@ ds::MillerIndex ds::Volume::max_resolution_spot() const
     }
 }
 
-double ds::Volume::max_resolution() const
+double ds::Volume2DX::max_resolution() const
 {
     MillerIndex index = max_resolution_spot();
     return resolution_at(index.h(), index.k(), index.l());
 }
 
-void ds::Volume::rescale_energy(double energy)
+void ds::Volume2DX::rescale_energy(double energy)
 {
-    FourierSpaceData data = get_fourier();
+    ReflectionData data = get_fourier();
     double curr_energy = data.intensity_sum();
     double factor = sqrt(energy/curr_energy);
     data.scale_amplitudes(factor);
     set_fourier(data);
 }
 
-void ds::Volume::rescale_to_max_amplitude(double max_amplitude)
+void ds::Volume2DX::rescale_to_max_amplitude(double max_amplitude)
 {
-    FourierSpaceData data = get_fourier();
+    ReflectionData data = get_fourier();
     double current_max = data.max_amplitude();
     double factor = max_amplitude/current_max;
     data.scale_amplitudes(factor);
     set_fourier(data);
 }
 
-void ds::Volume::rescale_densities(double min, double max)
+void ds::Volume2DX::rescale_densities(double min, double max)
 {
     RealSpaceData data = get_real();
     data.scale(min, max);
     this->set_real(data);
 }
 
-void ds::Volume::grey_scale_densities()
+void ds::Volume2DX::grey_scale_densities()
 {
     RealSpaceData data = get_real();
     data.grey_scale();
     this->set_real(data);
 }
 
-void ds::Volume::symmetrize()
+void ds::Volume2DX::symmetrize()
 {
     std::cout << "Symmetrizing with symmetry: " << symmetry() << std::endl;
     tdx::symmetrization::Symmetry2dx sym(_header.symmetry());
@@ -521,32 +521,43 @@ void ds::Volume::symmetrize()
     _type = FOURIER;
 }
 
-ds::StructureFactors ds::Volume::calculate_structure_factors(int resolution_bins, double max_resolution) const
+ds::ResolutionBinnedData ds::Volume2DX::calculate_structure_factors(double min_freq, double max_freq, int resolution_bins)
 {
-    double min_resolution = 0;
     
-    ds::StructureFactors sf(min_resolution, 1/max_resolution, resolution_bins);
-    sf.initialize_intensities(*this);
+    ds::ResolutionBinnedData binned_data(min_freq, max_freq, resolution_bins);
     
-    return sf;
+    ReflectionData fourier_data = get_fourier();
+    
+    //Iterate over all possible h,k,l and populate intensity sums
+    for(ReflectionData::const_iterator itr=fourier_data.begin(); itr!=fourier_data.end(); ++itr)
+    {
+        MillerIndex index = (*itr).first;
+        DiffractionSpot spot = (*itr).second;
+        if ( index.h() != 0 || index.k() != 0 || index.l() != 0 ) 
+        {
+            double resolution = 1 / resolution_at(index.h(), index.k(), index.l());
+            binned_data.add_data_at(resolution, pow(spot.value().amplitude(), 2));
+        }
+    }
+    
+    return binned_data;
 }
 
-void ds::Volume::apply_structure_factors(ds::StructureFactors sf_ref, double fraction)
+void ds::Volume2DX::apply_structure_factors(ds::ResolutionBinnedData sf_ref, double fraction)
 {
     std::cout << "Applying structure factors to the volume.. \n";
     
-    FourierSpaceData new_data;
-    FourierSpaceData current_data = get_fourier();
+    ReflectionData new_data;
+    ReflectionData current_data = get_fourier();
     
     //Get the current structure factors with same resolution spacing as of reference
-    ds::StructureFactors sf_current(sf_ref.min_resolution(), sf_ref.max_resolution(), sf_ref.resolution_bins());
-    sf_current.initialize_intensities(*this);
+    ds::ResolutionBinnedData sf_current = calculate_structure_factors(sf_ref.min_resolution(), sf_ref.max_resolution(), sf_ref.resolution_bins());
     
-    double sf_ref_max = sf_ref.max_intensity();
-    double sf_current_max = sf_current.max_intensity();
+    double sf_ref_max = sf_ref.max_averaged_value();
+    double sf_current_max = sf_current.max_averaged_value();
     double max_scale = sf_current_max/sf_ref_max;
     
-    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
@@ -558,8 +569,8 @@ void ds::Volume::apply_structure_factors(ds::StructureFactors sf_ref, double fra
 
             //Find the appropriate intensity
 
-            double sf_ref_intensity = sf_ref.intensity_at(resolution);
-            double sf_curr_intensity = sf_current.intensity_at(resolution);
+            double sf_ref_intensity = sf_ref.average_at(resolution);
+            double sf_curr_intensity = sf_current.average_at(resolution);
 
             if ( sf_ref_intensity != -1 && sf_curr_intensity != -1 ) {
                 double amplitude_scale = 0.0;
@@ -573,7 +584,7 @@ void ds::Volume::apply_structure_factors(ds::StructureFactors sf_ref, double fra
                 //Insert the new value
                 Complex new_value(spot.value());
                 new_value.set_amplitude(scaled_amplitude);
-                new_data.set_value_at(index.h(), index.k(), index.l(), new_value, spot.weight());
+                new_data.set_spot_at(index.h(), index.k(), index.l(), new_value, spot.weight());
             }
         }
     }
@@ -582,15 +593,15 @@ void ds::Volume::apply_structure_factors(ds::StructureFactors sf_ref, double fra
 }
 
 
-void ds::Volume::write_bead_model_pdb(int no_of_beads, double density_threshold, double noise_level, std::string pdb_file)
+void ds::Volume2DX::write_bead_model_pdb(int no_of_beads, double density_threshold, double noise_level, std::string pdb_file)
 {
     tdx::utilities::BeadModelGenerator generator(no_of_beads, density_threshold, noise_level);
     generator.generate_bead_model_coordinates(*this, pdb_file);
 }
 
-ds::Volume ds::Volume::generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution)
+ds::Volume2DX ds::Volume2DX::generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution)
 {
-    ds::Volume bead_model(header());
+    ds::Volume2DX bead_model(header());
     tdx::utilities::BeadModelGenerator generator(no_of_beads, density_threshold, 1.0, bead_model_resolution);
     
     ds::RealSpaceData bead_model_real_data = generator.generate_bead_model_volume(*this);
@@ -600,19 +611,19 @@ ds::Volume ds::Volume::generate_bead_model(int no_of_beads, double density_thres
 }
 
 
-void ds::Volume::invert_hand(int direction)
+void ds::Volume2DX::invert_hand(int direction)
 {
-    FourierSpaceData data = get_fourier();
-    FourierSpaceData new_data = data.inverted_data(direction);
+    ReflectionData data = get_fourier();
+    ReflectionData new_data = data.inverted_data(direction);
     set_fourier(new_data);
 }
 
-void ds::Volume::centerize_density_along_z()
+void ds::Volume2DX::centerize_density_along_z()
 {
     std::cout <<"Centering the density..\n";
-    FourierSpaceData data = get_fourier();
-    FourierSpaceData new_data;
-    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    ReflectionData data = get_fourier();
+    ReflectionData new_data;
+    for(ReflectionData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
     {
         MillerIndex index = (*itr).first;
         DiffractionSpot spot = (*itr).second;
@@ -620,7 +631,7 @@ void ds::Volume::centerize_density_along_z()
         Complex new_value = spot.value();
         new_value.set_phase(spot.phase()+M_PI*index.l());
         
-        new_data.set_value_at(index.h(), index.k(), index.l(), new_value, spot.weight());
+        new_data.set_spot_at(index.h(), index.k(), index.l(), new_value, spot.weight());
     }
     
     set_fourier(new_data);
@@ -629,12 +640,12 @@ void ds::Volume::centerize_density_along_z()
 
 
 
-void ds::Volume::centerize_density_along_xyz()
+void ds::Volume2DX::centerize_density_along_xyz()
 {
     std::cout <<"Centering the density in x,y,z..\n";
-    FourierSpaceData data = get_fourier();
-    FourierSpaceData new_data;
-    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    ReflectionData data = get_fourier();
+    ReflectionData new_data;
+    for(ReflectionData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
     {
         MillerIndex index = (*itr).first;
         DiffractionSpot spot = (*itr).second;
@@ -642,7 +653,7 @@ void ds::Volume::centerize_density_along_xyz()
         Complex new_value = spot.value();
         new_value.set_phase(spot.phase()+M_PI*index.h()+M_PI*index.k()+M_PI*index.l());
         
-        new_data.set_value_at(index.h(), index.k(), index.l(), new_value, spot.weight());
+        new_data.set_spot_at(index.h(), index.k(), index.l(), new_value, spot.weight());
     }
     
     set_fourier(new_data);
@@ -650,12 +661,12 @@ void ds::Volume::centerize_density_along_xyz()
 }
 
 
-void ds::Volume::apply_density_histogram(Volume reference)
+void ds::Volume2DX::apply_density_histogram(Volume2DX reference)
 {
     apply_density_histogram(reference, 1.0);
 }
 
-void ds::Volume::apply_density_histogram(Volume reference, double fraction)
+void ds::Volume2DX::apply_density_histogram(Volume2DX reference, double fraction)
 {
     std::cout << "Applying density histogram\n";
     //Check the fraction
@@ -695,21 +706,21 @@ void ds::Volume::apply_density_histogram(Volume reference, double fraction)
     
 }
 
-void ds::Volume::apply_density_threshold(double limit, double fraction)
+void ds::Volume2DX::apply_density_threshold(double limit, double fraction)
 {
    RealSpaceData data = get_real();
    data.threshold(limit, fraction);
    set_real(data);
 }
 
-void ds::Volume::apply_real_mask(const RealSpaceData& mask, double fraction)
+void ds::Volume2DX::apply_real_mask(const RealSpaceData& mask, double fraction)
 {
     RealSpaceData new_data = get_real();
     new_data.apply_mask(mask, fraction);   
     set_real(new_data);   
 }
 
-void ds::Volume::apply_density_slab(double height, double fraction, bool centered)
+void ds::Volume2DX::apply_density_slab(double height, double fraction, bool centered)
 {
     std::cout << "Applying density slab along vertical direction to the volume.. \n";
     RealSpaceData new_data = get_real();
@@ -717,7 +728,7 @@ void ds::Volume::apply_density_slab(double height, double fraction, bool centere
     this->set_real(new_data);
 }
 
-void ds::Volume::band_pass(double low_resolution, double high_resolution)
+void ds::Volume2DX::band_pass(double low_resolution, double high_resolution)
 {
     if(low_resolution <= 0) low_resolution = resolution_at(0, 0, 0);
     if(high_resolution <= 0 ) high_resolution = 0.0;
@@ -729,9 +740,9 @@ void ds::Volume::band_pass(double low_resolution, double high_resolution)
         return;
     }
     
-    ds::FourierSpaceData current_data = get_fourier();
-    FourierSpaceData new_data;
-    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    ds::ReflectionData current_data = get_fourier();
+    ReflectionData new_data;
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
@@ -739,7 +750,7 @@ void ds::Volume::band_pass(double low_resolution, double high_resolution)
         double resolution = resolution_at(index.h(), index.k(), index.l());
         if(resolution >= high_resolution && resolution <= low_resolution)
         {
-            new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
         
     }
@@ -748,21 +759,21 @@ void ds::Volume::band_pass(double low_resolution, double high_resolution)
     
 }
 
-void ds::Volume::replace_reflections(const FourierSpaceData& fourier_data, double cone_angle, double replacement_amplitude_cutoff)
+void ds::Volume2DX::replace_reflections(const ReflectionData& fourier_data, double cone_angle, double replacement_amplitude_cutoff)
 {
-    FourierSpaceData current = get_fourier();
+    ReflectionData current = get_fourier();
     current.replace_reflections(fourier_data, cone_angle, replacement_amplitude_cutoff);
     set_fourier(current);
 }
 
-void ds::Volume::change_amplitudes(const FourierSpaceData& fourier_data)
+void ds::Volume2DX::change_amplitudes(const ReflectionData& fourier_data)
 {
-    FourierSpaceData current = get_fourier();
+    ReflectionData current = get_fourier();
     current.change_amplitudes(fourier_data, 0.00001);
     set_fourier(current);
 }
 
-void ds::Volume::low_pass(double high_resolution)
+void ds::Volume2DX::low_pass(double high_resolution)
 {
     prepare_fourier();
     std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
@@ -770,7 +781,7 @@ void ds::Volume::low_pass(double high_resolution)
     std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
 }
 
-void ds::Volume::low_pass_butterworth(double high_resolution)
+void ds::Volume2DX::low_pass_butterworth(double high_resolution)
 {
     prepare_fourier();
     std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
@@ -787,16 +798,16 @@ void ds::Volume::low_pass_butterworth(double high_resolution)
     
     std::cout << "Low passing using Butterworth filter (order = " << order << ") with expected maximum resolution: " << high_resolution << " A\n";
     
-    ds::FourierSpaceData current_data = get_fourier();
-    FourierSpaceData new_data;
-    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    ds::ReflectionData current_data = get_fourier();
+    ReflectionData new_data;
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
         DiffractionSpot spot = (*itr).second;
         double resolution = 1/resolution_at(index.h(), index.k(), index.l());
         double weight = sqrt(1.0/(1.0+pow(resolution/omegaH, order)));
-        new_data.set_value_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
+        new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
         //std::cout << index.to_string() << "(" << 1/resolution << " A)" << " had weight of: " << weight << "\n";
         
     }
@@ -807,7 +818,7 @@ void ds::Volume::low_pass_butterworth(double high_resolution)
     
 }
 
-void ds::Volume::low_pass_gaussian(double high_resolution)
+void ds::Volume2DX::low_pass_gaussian(double high_resolution)
 {
     prepare_fourier();
     std::cout << "Current maximum resolution = " << max_resolution() << " A\n";
@@ -816,16 +827,16 @@ void ds::Volume::low_pass_gaussian(double high_resolution)
     
     double omega_square = 4*high_resolution*high_resolution;
     
-    ds::FourierSpaceData current_data = get_fourier();
-    FourierSpaceData new_data;
-    for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    ds::ReflectionData current_data = get_fourier();
+    ReflectionData new_data;
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
         DiffractionSpot spot = (*itr).second;
         double resolution = 1/resolution_at(index.h(), index.k(), index.l());
         double weight = exp(-1*resolution*resolution*omega_square);
-        new_data.set_value_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
+        new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
         //std::cout << index.to_string() << "(" << 1/resolution << " A)" << " had weight of: " << weight << "\n";
         
     }
@@ -836,45 +847,45 @@ void ds::Volume::low_pass_gaussian(double high_resolution)
     
 }
 
-ds::Volume ds::Volume::project2D(char axis)
+ds::Volume2DX ds::Volume2DX::project2D(char axis)
 {
     VolumeHeader head = header();
-    FourierSpaceData current_data = get_fourier();
-    FourierSpaceData new_data;
+    ReflectionData current_data = get_fourier();
+    ReflectionData new_data;
     if(axis == 'x' || axis == 'X')
     {
         head.set_mx(1);
         head.set_rows(1);
-        for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+        for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
         {
             //Get the data for current reflection
             MillerIndex index = (*itr).first;
             DiffractionSpot spot = (*itr).second;
-            if(index.h() == 0) new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            if(index.h() == 0) new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }
     else if(axis == 'y' || axis == 'Y')
     {
         head.set_my(1);
         head.set_columns(1);
-        for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+        for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
         {
             //Get the data for current reflection
             MillerIndex index = (*itr).first;
             DiffractionSpot spot = (*itr).second;
-            if(index.k() == 0) new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            if(index.k() == 0) new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }
     else if(axis == 'z' || axis == 'Z')
     {
         head.set_mz(1);
         head.set_sections(1);
-        for(FourierSpaceData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+        for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
         {
             //Get the data for current reflection
             MillerIndex index = (*itr).first;
             DiffractionSpot spot = (*itr).second;
-            if(index.l() == 0) new_data.set_value_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
+            if(index.l() == 0) new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }
     else
@@ -883,13 +894,13 @@ ds::Volume ds::Volume::project2D(char axis)
         exit(1);
     }
     
-    Volume projection(head);
+    Volume2DX projection(head);
     projection.set_fourier(new_data);
     
     return projection;
 }
 
-ds::Volume ds::Volume::subsample(int factor)
+ds::Volume2DX ds::Volume2DX::subsample(int factor)
 {
     std::cout << "Sub-sampling volume by " << factor << " times.\n";
     
@@ -901,7 +912,7 @@ ds::Volume ds::Volume::subsample(int factor)
     head.set_mx(new_nx);
     head.set_my(new_ny);
     head.set_mz(new_nz);
-    Volume new_volume(head);
+    Volume2DX new_volume(head);
     
     RealSpaceData data = get_real();
     RealSpaceData new_data(new_nx, new_ny, new_nz);
@@ -924,7 +935,7 @@ ds::Volume ds::Volume::subsample(int factor)
     return new_volume;
 }
 
-ds::Volume ds::Volume::extended_volume(int x_cells, int y_cells, int z_cells)
+ds::Volume2DX ds::Volume2DX::extended_volume(int x_cells, int y_cells, int z_cells)
 {
     std::cout << "Extending volume to " << x_cells+1 << " X " << y_cells+1 << " X " << z_cells+1 << " unit cells \n";
     
@@ -934,7 +945,7 @@ ds::Volume ds::Volume::extended_volume(int x_cells, int y_cells, int z_cells)
     
     VolumeHeader new_header = header();
     new_header.reset_size(new_nx, new_ny, new_nz);
-    Volume new_volume(new_header);
+    Volume2DX new_volume(new_header);
 
     RealSpaceData data = get_real();
     RealSpaceData new_data(new_nx, new_ny, new_nz);
@@ -957,21 +968,21 @@ ds::Volume ds::Volume::extended_volume(int x_cells, int y_cells, int z_cells)
     return new_volume;
 }
 
-ds::Volume ds::Volume::zero_phases()
+ds::Volume2DX ds::Volume2DX::zero_phases()
 {
     std::cout << "Zeroing phases in volume \n";
     
-    Volume new_volume(header());
+    Volume2DX new_volume(header());
     
-    FourierSpaceData data = get_fourier();
-    FourierSpaceData new_data;
-    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    ReflectionData data = get_fourier();
+    ReflectionData new_data;
+    for(ReflectionData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
         Complex value = (*itr).second.value();
         value.set_phase(0);
-        new_data.set_value_at(index.h(), index.k(), index.l(), value, (*itr).second.weight());
+        new_data.set_spot_at(index.h(), index.k(), index.l(), value, (*itr).second.weight());
     }
     
     new_volume.set_fourier(new_data);
@@ -979,39 +990,39 @@ ds::Volume ds::Volume::zero_phases()
     return new_volume;
 }
 
-ds::Volume ds::Volume::spread_fourier_data()
+ds::Volume2DX ds::Volume2DX::spread_fourier_data()
 {
-    FourierSpaceData data = get_fourier();
+    ReflectionData data = get_fourier();
     data.spread_data();
     
-    Volume new_volume(header());
+    Volume2DX new_volume(header());
     new_volume.set_fourier(data);
     return new_volume;
 }
 
-void ds::Volume::extend_to_full_fourier() 
+void ds::Volume2DX::extend_to_full_fourier() 
 {
-    FourierSpaceData data = get_fourier();
-    FourierSpaceData new_data = data.get_full_fourier();
+    ReflectionData data = get_fourier();
+    ReflectionData new_data = data.get_full_fourier();
     set_fourier(new_data);
 }
 
-ds::Volume ds::Volume::apply_bfactor(double negative_temp_factor)
+ds::Volume2DX ds::Volume2DX::apply_bfactor(double negative_temp_factor)
 {
     std::cout << "Applying a negative B-factor of: " << negative_temp_factor << "\n";
     
-    Volume new_volume(header());
+    Volume2DX new_volume(header());
     
-    FourierSpaceData data = get_fourier();
-    FourierSpaceData new_data;
-    for(FourierSpaceData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
+    ReflectionData data = get_fourier();
+    ReflectionData new_data;
+    for(ReflectionData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
         Complex value = (*itr).second.value();
         double resolution = resolution_at(index.h(), index.k(), index.l());
         double weight = exp(-1*negative_temp_factor/(4*resolution*resolution));
-        new_data.set_value_at(index.h(), index.k(), index.l(), value*weight, (*itr).second.weight());
+        new_data.set_spot_at(index.h(), index.k(), index.l(), value*weight, (*itr).second.weight());
     }
     
     new_volume.set_fourier(new_data);
@@ -1019,99 +1030,99 @@ ds::Volume ds::Volume::apply_bfactor(double negative_temp_factor)
     return new_volume;
 }
 
-double ds::Volume::density_at(int x, int y, int z)
+double ds::Volume2DX::density_at(int x, int y, int z)
 {
     return get_real().get_value_at(x,y,z);
 }
 
-int ds::Volume::nx() const
+int ds::Volume2DX::nx() const
 {
     return _header.rows();   
 }
 
-int ds::Volume::ny() const
+int ds::Volume2DX::ny() const
 {
     return _header.columns();
 }
 
-int ds::Volume::nz() const
+int ds::Volume2DX::nz() const
 {
     return _header.sections();
 }
 
-int ds::Volume::fx() const{
+int ds::Volume2DX::fx() const{
     return (int) (nx()/2+1);
 }
 
-int ds::Volume::fy() const{
+int ds::Volume2DX::fy() const{
     return ny();
 }
 
-int ds::Volume::fz() const{
+int ds::Volume2DX::fz() const{
     return nz();
 }
 
 
-int ds::Volume::h_max() const{
+int ds::Volume2DX::h_max() const{
     return fx()-1;
 }
 
-int ds::Volume::k_max() const{
+int ds::Volume2DX::k_max() const{
     return (int) fy()/2;
 }
 
-int ds::Volume::l_max() const{
+int ds::Volume2DX::l_max() const{
     return (int) fz()/2;
 }
 
-double ds::Volume::xlen() const {
+double ds::Volume2DX::xlen() const {
     return _header.xlen();
 }
 
-void ds::Volume::set_xlen(double xlen)
+void ds::Volume2DX::set_xlen(double xlen)
 {
     _header.set_xlen(xlen);
 }
 
-double ds::Volume::ylen() const {
+double ds::Volume2DX::ylen() const {
     return _header.ylen();
 }
 
-void ds::Volume::set_ylen(double ylen)
+void ds::Volume2DX::set_ylen(double ylen)
 {
     _header.set_ylen(ylen);
 }
 
-double ds::Volume::zlen() const {
+double ds::Volume2DX::zlen() const {
     return _header.zlen();
 }
 
-void ds::Volume::set_zlen(double zlen)
+void ds::Volume2DX::set_zlen(double zlen)
 {
     _header.set_zlen(zlen);
 }
 
-double ds::Volume::gamma() const
+double ds::Volume2DX::gamma() const
 {
     return _header.gamma();
 }
 
-void ds::Volume::set_gamma_radians(double gamma)
+void ds::Volume2DX::set_gamma_radians(double gamma)
 {
     _header.set_gamma(gamma);
 }
 
-void ds::Volume::set_gamma_degrees(double gamma)
+void ds::Volume2DX::set_gamma_degrees(double gamma)
 {
     _header.set_gamma(tdx::utilities::angle_utilities::DegreeToRadian(gamma));
 }
 
-std::string ds::Volume::symmetry() const
+std::string ds::Volume2DX::symmetry() const
 {
     return _header.symmetry();
 }
 
-void ds::Volume::set_symmetry(std::string symmetry)
+void ds::Volume2DX::set_symmetry(std::string symmetry)
 {
     _header.set_symmetry(symmetry);
 }

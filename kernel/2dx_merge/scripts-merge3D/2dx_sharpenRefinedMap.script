@@ -175,10 +175,10 @@ touch SCRATCH/sharpened_dummy
 #
 if(${sharpening_algo} != "0") then
     #------------------------------------------------------------------------------
-    echo ":Launching ${bin_2dx}/sharpen_volume.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}"
+    echo ":Launching ${bin_2dx}/2dx_sf_hist_refiner.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}"
     #------------------------------------------------------------------------------
     #
-    ${bin_2dx}/sharpen_volume.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}
+    ${bin_2dx}/2dx_sf_hist_refiner.exe --mrcin ${refined_map} --refin ${reference_map} --temp SCRATCH/ --res ${RESMAX} -s ${SYM} --iterations ${number_sharpening_iterations} --hklout ${sharpened_hkl} --mrcout ${sharpened_map}
     #
     set num = 1
     while ( ${num} <= ${number_sharpening_iterations} ) 

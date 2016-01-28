@@ -295,13 +295,13 @@ void ds::RealSpaceData::merge_data(const RealSpaceData& to_be_merged, int x, int
 
 int* ds::RealSpaceData::density_sorted_ids()
 {
-    tdx::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()));
+    tdx::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()-1));
     return sorter.get_sorted_ids();
 }
 
 double* ds::RealSpaceData::density_sorted_values()
 {
-    tdx::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size()));
+    tdx::utilities::DensityValueSorter sorter(size(), get_data_copy(0, size() -1));
     return sorter.get_sorted_values();
 }
 

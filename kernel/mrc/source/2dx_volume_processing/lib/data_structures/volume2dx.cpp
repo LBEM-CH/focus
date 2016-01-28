@@ -11,7 +11,7 @@
 #include "volume2dx.hpp"
 
 #include "miller_index.hpp"
-#include "diffraction_spot.hpp"
+#include "peak_data.hpp"
 
 #include "../io/mrc_io.hpp"
 #include "../io/reflection_io.hpp"
@@ -260,11 +260,23 @@ void ds::Volume2DX::read_volume(std::string file_name, std::string format)
     std::cout << "Reading volume with format <"<< format << "> from file:\n\t" << file_name << "\n\n";
     if(format == "hkl")
     {
-       set_fourier(tdx::io::reflection::read(file_name, 1));
+        MillerToPeakMultiMap data_read;
+        tdx::io::reflection::read(file_name, 1, true, data_read);
+        MillerToPeakMap averaged_data;
+        tdx::utilities::fourier_utilities::average_peaks(data_read, averaged_data);
+        ReflectionData fourier_data;
+        fourier_data.reset(averaged_data);
+        set_fourier(fourier_data);
     }
     else if(format == "hkz")
     {
-       set_fourier(tdx::io::reflection::read(file_name, nz()));
+        MillerToPeakMultiMap data_read;
+        tdx::io::reflection::read(file_name, nz(), true, data_read);
+        MillerToPeakMap averaged_data;
+        tdx::utilities::fourier_utilities::average_peaks(data_read, averaged_data);
+        ReflectionData fourier_data;
+        fourier_data.reset(averaged_data);
+        set_fourier(fourier_data);
     }
     else if (format == "mrc" || format == "map")
     {
@@ -323,7 +335,7 @@ void ds::Volume2DX::cut_xy_plane(Volume2DX& xy_plane, Volume2DX& missing_plane, 
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         
         if ( index.l() == plane_number ) 
         {
@@ -358,7 +370,7 @@ void ds::Volume2DX::cut_cone(Volume2DX& cone, Volume2DX& missing_cone, double co
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         double radius = std::abs(index.l()*tan(cone_angle_rad));
         double distance = sqrt(index.h()*index.h() + index.k()*index.k());
         
@@ -391,7 +403,7 @@ void ds::Volume2DX::generate_fourier_noise(double fraction_to_change)
     for(ReflectionData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
     {
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         
         double rand_number = ((double) rand() / (RAND_MAX));
         if(rand_number < fraction_to_change)
@@ -447,7 +459,7 @@ void ds::Volume2DX::generate_poisson_densities(double mean_density)
 double ds::Volume2DX::resolution_at(int h, int k, int l) const
 {
     ds::MillerIndex index(h, k, l);
-    return tdx::utilities::fourier_utilities::GetResolution(index, _header.gamma(), _header.xlen(), _header.ylen(), _header.zlen());
+    return tdx::utilities::fourier_utilities::get_resolution(index, _header.gamma(), _header.xlen(), _header.ylen(), _header.zlen());
 }
 
 ds::MillerIndex ds::Volume2DX::max_resolution_spot() const
@@ -532,7 +544,7 @@ ds::ResolutionBinnedData ds::Volume2DX::calculate_structure_factors(double min_f
     for(ReflectionData::const_iterator itr=fourier_data.begin(); itr!=fourier_data.end(); ++itr)
     {
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         if ( index.h() != 0 || index.k() != 0 || index.l() != 0 ) 
         {
             double resolution = 1 / resolution_at(index.h(), index.k(), index.l());
@@ -561,7 +573,7 @@ void ds::Volume2DX::apply_structure_factors(ds::ResolutionBinnedData sf_ref, dou
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         
         if ( index.h() != 0 || index.k() != 0 || index.l() != 0 ) 
         {
@@ -626,7 +638,7 @@ void ds::Volume2DX::centerize_density_along_z()
     for(ReflectionData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
     {
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         
         Complex new_value = spot.value();
         new_value.set_phase(spot.phase()+M_PI*index.l());
@@ -648,7 +660,7 @@ void ds::Volume2DX::centerize_density_along_xyz()
     for(ReflectionData::const_iterator itr=data.begin(); itr!=data.end(); ++itr)
     {
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         
         Complex new_value = spot.value();
         new_value.set_phase(spot.phase()+M_PI*index.h()+M_PI*index.k()+M_PI*index.l());
@@ -746,7 +758,7 @@ void ds::Volume2DX::band_pass(double low_resolution, double high_resolution)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         double resolution = resolution_at(index.h(), index.k(), index.l());
         if(resolution >= high_resolution && resolution <= low_resolution)
         {
@@ -804,7 +816,7 @@ void ds::Volume2DX::low_pass_butterworth(double high_resolution)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         double resolution = 1/resolution_at(index.h(), index.k(), index.l());
         double weight = sqrt(1.0/(1.0+pow(resolution/omegaH, order)));
         new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
@@ -833,7 +845,7 @@ void ds::Volume2DX::low_pass_gaussian(double high_resolution)
     {
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
-        DiffractionSpot spot = (*itr).second;
+        PeakData spot = (*itr).second;
         double resolution = 1/resolution_at(index.h(), index.k(), index.l());
         double weight = exp(-1*resolution*resolution*omega_square);
         new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value()*weight, spot.weight());
@@ -860,7 +872,7 @@ ds::Volume2DX ds::Volume2DX::project2D(char axis)
         {
             //Get the data for current reflection
             MillerIndex index = (*itr).first;
-            DiffractionSpot spot = (*itr).second;
+            PeakData spot = (*itr).second;
             if(index.h() == 0) new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }
@@ -872,7 +884,7 @@ ds::Volume2DX ds::Volume2DX::project2D(char axis)
         {
             //Get the data for current reflection
             MillerIndex index = (*itr).first;
-            DiffractionSpot spot = (*itr).second;
+            PeakData spot = (*itr).second;
             if(index.k() == 0) new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }
@@ -884,7 +896,7 @@ ds::Volume2DX ds::Volume2DX::project2D(char axis)
         {
             //Get the data for current reflection
             MillerIndex index = (*itr).first;
-            DiffractionSpot spot = (*itr).second;
+            PeakData spot = (*itr).second;
             if(index.l() == 0) new_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());
         }
     }

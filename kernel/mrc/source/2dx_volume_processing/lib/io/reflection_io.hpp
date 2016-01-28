@@ -12,7 +12,6 @@
 #include <string>
 #include <math.h>
 
-#include "../data_structures/common_definitions.hpp"
 #include "../data_structures/volume_header.hpp"
 #include "../data_structures/reflection_data.hpp"
 
@@ -29,9 +28,9 @@ namespace tdx
              * @param file_path
              * @param z_scale: the scale which will be used to convert z* data to l (for HKL files z_scale = 1)  
              * @param raw_ccp4 :  Correct for density on top and bottom (as from raw ccp4)?
-             * @return fourier_data
+             * @param[out] Reflections with each h,k,l associated with multiple possible peak values
              */
-            tdx::data::ReflectionData read(std::string file_path, int z_scale, bool raw_ccp4 = true);
+            void read(std::string file_path, int z_scale, bool raw_ccp4, tdx::data::MillerToPeakMultiMap& peak_multimap);
             
             /**
              * A HKL file writer. Writes the HKL File in the following format:
@@ -54,7 +53,7 @@ namespace tdx
              * @param z_scale
              * @param raw_ccp4
              */
-            void add_spot(tdx::data::DiffractionSpotMultiMap& map, int h_in, int k_in, double z_in, double amp_in, double phase_in, double weight_in, int z_scale, bool raw_ccp4);
+            void add_spot(tdx::data::MillerToPeakMultiMap& map, int h_in, int k_in, double z_in, double amp_in, double phase_in, double weight_in, int z_scale, bool raw_ccp4);
         }
         
     }

@@ -10,7 +10,6 @@
 #include <math.h>
 
 #include "symmetry2dx.hpp"
-#include "../data_structures/common_definitions.hpp"
 #include "../data_structures/reflection_data.hpp"
 
 

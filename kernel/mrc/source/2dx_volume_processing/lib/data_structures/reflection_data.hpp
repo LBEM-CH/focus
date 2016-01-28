@@ -12,12 +12,40 @@
 #include <fftw3.h>
 
 #include "miller_index.hpp"
-#include "diffraction_spot.hpp"
+#include "peak_data.hpp"
 
 namespace tdx
 {
     namespace data
     {
+        
+        /**
+         * A map of Miller Index and diffraction spot. Stores sorted values 
+         * of a miller index mapped to diffraction spots.
+         */
+        typedef std::map<MillerIndex, PeakData> MillerToPeakMap;
+        
+        /**
+         * A multi-map of Miller Index and Diffraction spot. 
+         * Stores multiple diffraction spots at one miller index. 
+         */
+        typedef std::multimap<MillerIndex, PeakData> MillerToPeakMultiMap;
+        
+        /**
+         * Defines a map of MillerIndex and double
+         */
+        typedef std::map<MillerIndex, double> MillerToDoubleMap;
+        
+        /**
+         * Defines a pair of Miller Index and Diffraction Spot.
+         */
+        typedef std::pair<MillerIndex, PeakData> MillerToPeakPair;
+        
+        /**
+         * Defines a pair of Miller Index and double.
+         */
+        typedef std::pair<MillerIndex, double> MillerToDoublePair;
+        
         /**
          * A class to store Fourier space reflections HKL and values.
          * The data is stored as a map of miller indices and it's values.
@@ -33,7 +61,7 @@ namespace tdx
             /**
              * Defines a const_iterator for the class
              */
-            typedef std::map<MillerIndex, DiffractionSpot>::const_iterator const_iterator;
+            typedef MillerToPeakMap::const_iterator const_iterator;
             
             /**
              * Default constructor initializing the data
@@ -45,17 +73,6 @@ namespace tdx
              * @param copy - Instance to be copied from.
              */
             ReflectionData(const ReflectionData& copy);
-            
-            /**
-             * Constructor using a multi-map of miller index and diffraction spot
-             * Internally converts a multi-map of miller index to diffraction spots
-             * to a map of miller index to diffraction spot. In the input
-             * multi-map, there can exist multiple diffraction spots assigned to
-             * one miller index, which will be converted to a map where only
-             * one diffraction spot is assigned to a miller index.
-             * @param spot_multimap: A multi-map with miller indices mapped to multiple complexes
-             */
-            ReflectionData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap);
             
             /**
              * Destructor
@@ -94,6 +111,12 @@ namespace tdx
              * @param data
              */
             void reset(const ReflectionData& data);
+            
+            /**
+             * Resets (Copies) the data with another one
+             * @param data
+             */
+            void reset(const MillerToPeakMap& data);
             
             /**
              * Returns the beginning of the data for iterating
@@ -231,22 +254,12 @@ namespace tdx
             
         private:
             
-            /**
-             * Back projects the multi-map of miller index and diffraction spot.
-             * Internally converts a multi-map of miller index to diffraction spots
-             * to a map of miller index to diffraction spot. In the input
-             * multi-map, there can exist multiple diffraction spots assigned to
-             * one miller index, which will be converted to a map where only
-             * one diffraction spot is assigned to a miller index.
-             * @param spot_multimap
-             * @return map of MillerIndex and DiffractionSport
-             */
-            std::map<MillerIndex, DiffractionSpot> backproject(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap) const;
+           
             
             /**
              * Data stored as a map of Miller Index and it's value
              */
-            std::map<MillerIndex, DiffractionSpot> _data;
+            MillerToPeakMap _data;
             
             
         }; // class FourierSpaceData

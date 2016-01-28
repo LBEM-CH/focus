@@ -6,6 +6,7 @@
 
 #include "fourier_symmetrization.hpp"
 #include "symmetry_operations.hpp"
+#include "2dx_volume_processing/lib/utilities/fourier_utilities.hpp"
 
 
 void tdx::symmetrization::fourier_symmetrization::symmetrize
@@ -13,12 +14,12 @@ void tdx::symmetrization::fourier_symmetrization::symmetrize
         const tdx::symmetrization::Symmetry2dx& symmetry)
 {
     namespace ds = tdx::data;
-    ds::DiffractionSpotMultiMap spot_multimap;
+    ds::MillerToPeakMultiMap spot_multimap;
     
     for(ds::ReflectionData::const_iterator data_iterator= fourier_data.begin(); data_iterator != fourier_data.end(); ++data_iterator)
     {
         ds::MillerIndex current_index = (*data_iterator).first;
-        ds::DiffractionSpot current_spot = (*data_iterator).second;
+        ds::PeakData current_spot = (*data_iterator).second;
         double current_amp = current_spot.value().amplitude();
         double current_phase = current_spot.value().phase();
         
@@ -26,7 +27,7 @@ void tdx::symmetrization::fourier_symmetrization::symmetrize
         if(current_amp > 0.0001)
         {
             //Place the original reflection
-            spot_multimap.insert(ds::MillerIndexDiffSpotPair(current_index, current_spot));
+            spot_multimap.insert(ds::MillerToPeakPair(current_index, current_spot));
             
             //Loop over all possible symmetry operations
             for(int op_index=0; op_index<30; op_index++)
@@ -58,9 +59,9 @@ void tdx::symmetrization::fourier_symmetrization::symmetrize
                     
                     double sym_real = current_amp * cos(sym_phase);
                     double sym_imag = current_amp * sin(sym_phase);
-                    ds::DiffractionSpot sym_spot(ds::Complex(sym_real, sym_imag), current_spot.weight());
+                    ds::PeakData sym_spot(ds::Complex(sym_real, sym_imag), current_spot.weight());
                     
-                    spot_multimap.insert(ds::MillerIndexDiffSpotPair(sym_index, sym_spot));
+                    spot_multimap.insert(ds::MillerToPeakPair(sym_index, sym_spot));
                     
                     
                 }
@@ -71,6 +72,8 @@ void tdx::symmetrization::fourier_symmetrization::symmetrize
         
     }
     
-    fourier_data = ds::ReflectionData(spot_multimap);
+    ds::MillerToPeakMap averaged_data;
+    tdx::utilities::fourier_utilities::average_peaks(spot_multimap, averaged_data);
+    fourier_data.reset(averaged_data);
     
 }

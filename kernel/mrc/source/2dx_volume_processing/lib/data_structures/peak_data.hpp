@@ -18,11 +18,15 @@ namespace tdx
 {
     namespace data
     {
+        class PeakData;
+        typedef std::list<PeakData> PeakList;
+        
         /**
-         * A class used to store the data of a diffraction spot. 
-         * A diffraction spot has a complex and it's weight associated to it.
+         * A class used to store the data of a Bragg Peak including it's value 
+         * and weight. This would translate to amplitude, phase and a weight in
+         * reflection file
          */
-        class DiffractionSpot
+        class PeakData
         {
             
         public:
@@ -31,28 +35,27 @@ namespace tdx
              * Default constructor with value assigned to (0 + 0i) 
              * and weight assigned to 0.0
              */
-            DiffractionSpot();
+            PeakData();
             
             /**
              * Constructor with a value and weight
              * @param value
              * @param weight in fractions
              */
-            DiffractionSpot(Complex value, double weight);
+            PeakData(Complex value, double weight);
             
             /**
-             * Constructor from a list of Diffraction spots.
-             * Averages the spots from a list of diffraction spots.
-             * @param spots: list of diffraction spots
+             * Resets to a averaged peak from a list of peaks.
+             * @param peak list
              */
-            DiffractionSpot(const std::list<DiffractionSpot> spots);
+            void from_peak_list(const PeakList peaks);
             
             /**
-             * Define = oeprator. Equates the weights and the values
+             * Define = operator. Equates the weights and the values
              * @param rhs
              * @return this instance equated to rhs
              */
-            DiffractionSpot& operator=(const DiffractionSpot& rhs);
+            PeakData& operator=(const PeakData& rhs);
             
             /**
              * Definition of + operator. 
@@ -61,14 +64,14 @@ namespace tdx
              * @param rhs
              * @return added diffraction spot
              */
-            DiffractionSpot operator+(const DiffractionSpot& rhs);
+            PeakData operator+(const PeakData& rhs);
             
             /**
              * Declaration of multiplication of a double with Diffraction spot
              * @param factor
              * @return 
              */
-            DiffractionSpot operator*( double factor);
+            PeakData operator*( double factor);
             
             /**
              * Definition of == operator.
@@ -76,7 +79,7 @@ namespace tdx
              * @param rhs
              * @return True/false
              */
-            bool operator==(const DiffractionSpot& rhs) const;
+            bool operator==(const PeakData& rhs) const;
             
             /**
              * Definition of < operator.
@@ -85,7 +88,7 @@ namespace tdx
              * @param rhs
              * @return 
              */
-            bool operator<(const DiffractionSpot& rhs) const;
+            bool operator<(const PeakData& rhs) const;
             
             /**
              * Gets the complex value of the spot
@@ -140,12 +143,12 @@ namespace tdx
             void initialize(Complex value, double weight);
             
             /**
-             * Value of the diffraction spot
+             * Value of the peak
              */
             Complex _value;
             
             /**
-             * weight of the diffraction spot
+             * weight of the peak
              */
             double _weight;
             

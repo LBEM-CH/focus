@@ -4,35 +4,34 @@
  * 
  */
 
-#include "diffraction_spot.hpp"
-#include "common_definitions.hpp"
+#include "peak_data.hpp"
 #include "../utilities/fom_utilities.hpp"
 
 
 namespace ds = tdx::data;
 
-ds::DiffractionSpot::DiffractionSpot()
+ds::PeakData::PeakData()
 {
     initialize(Complex(0.0, 0.0), 0.0);
 }
 
-ds::DiffractionSpot::DiffractionSpot(Complex value, double weight)
+ds::PeakData::PeakData(Complex value, double weight)
 {
     initialize(value, weight);
 }
 
-ds::DiffractionSpot::DiffractionSpot(const std::list<DiffractionSpot> spots)
+void ds::PeakData::from_peak_list(const ds::PeakList peaks)
 {
     ds::Complex sum_values;
     std::list<double> foms;
     double sum_foms = 0.0;
     
-    for(ds::DiffractionSpotList::const_iterator spots_itr = spots.begin(); 
-                spots_itr != spots.end(); ++spots_itr)
+    for(ds::PeakList::const_iterator peaks_itr = peaks.begin(); 
+                peaks_itr != peaks.end(); ++peaks_itr)
     {
-        foms.push_back((*spots_itr).weight());
-        sum_values = sum_values + (*spots_itr).value();
-        sum_foms = sum_foms + (*spots_itr).weight();
+        foms.push_back((*peaks_itr).weight());
+        sum_values = sum_values + (*peaks_itr).value();
+        sum_foms = sum_foms + (*peaks_itr).weight();
     }
     
     //Get the averaged weight
@@ -44,76 +43,76 @@ ds::DiffractionSpot::DiffractionSpot(const std::list<DiffractionSpot> spots)
     this->initialize(avg_value, avg_weight);
 }
 
-void ds::DiffractionSpot::initialize(Complex value, double weight)
+void ds::PeakData::initialize(Complex value, double weight)
 {
     set_value(value);
     set_weight(weight);
 }
 
-ds::DiffractionSpot& ds::DiffractionSpot::operator =(const DiffractionSpot& rhs)
+ds::PeakData& ds::PeakData::operator =(const PeakData& rhs)
 {
     this->initialize(rhs.value(), rhs.weight());
     return *this;
 }
 
-ds::DiffractionSpot ds::DiffractionSpot::operator +(const DiffractionSpot& rhs)
+ds::PeakData ds::PeakData::operator +(const PeakData& rhs)
 {
     std::list<double> weights;
     weights.push_back(this->weight());
     weights.push_back(rhs.weight());
-    return DiffractionSpot(this->value()+rhs.value(), 
+    return PeakData(this->value()+rhs.value(), 
                            tdx::utilities::fom_utilities::AverageFOMs(weights) 
                           );
 }
 
-ds::DiffractionSpot ds::DiffractionSpot::operator *(double factor)
+ds::PeakData ds::PeakData::operator *(double factor)
 {
-    return ds::DiffractionSpot(value()*factor, weight());
+    return ds::PeakData(value()*factor, weight());
 }
 
-bool ds::DiffractionSpot::operator ==(const DiffractionSpot& rhs) const
+bool ds::PeakData::operator ==(const PeakData& rhs) const
 {
     return (this->value() == rhs.value() && this->weight() == rhs.weight());
 }
 
-bool ds::DiffractionSpot::operator <(const DiffractionSpot& rhs) const
+bool ds::PeakData::operator <(const PeakData& rhs) const
 {
     return ( (this->value() == rhs.value() && this->weight() > rhs.weight()) ||
              (this->value() < rhs.value())
            );
 }
 
-ds::Complex ds::DiffractionSpot::value() const
+ds::Complex ds::PeakData::value() const
 {
     return _value;
 }
 
-double ds::DiffractionSpot::weight() const
+double ds::PeakData::weight() const
 {
     return _weight;
 }
 
-double ds::DiffractionSpot::amplitude() const
+double ds::PeakData::amplitude() const
 {
     return value().amplitude();
 }
 
-double ds::DiffractionSpot::phase() const
+double ds::PeakData::phase() const
 {
     return value().phase();
 }
 
-double ds::DiffractionSpot::intensity() const
+double ds::PeakData::intensity() const
 {
     return value().intensity();
 }
 
-void ds::DiffractionSpot::set_value(Complex value)
+void ds::PeakData::set_value(Complex value)
 {
     this->_value = value;
 }
 
-void ds::DiffractionSpot::set_weight(double weight)
+void ds::PeakData::set_weight(double weight)
 {
     if(weight < 0.0 || weight > 1.0)
     {

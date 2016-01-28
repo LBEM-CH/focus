@@ -1,5 +1,5 @@
 #include "complex.hpp"
-#include "diffraction_spot.hpp"
+#include "peak_data.hpp"
 #include "reflection_data.hpp"
 #include "miller_index.hpp"
 #include "real_space_data.hpp"

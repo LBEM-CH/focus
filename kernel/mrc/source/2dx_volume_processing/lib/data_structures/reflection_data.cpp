@@ -7,15 +7,15 @@
 #include <iostream>
 #include <math.h>
 
-#include "common_definitions.hpp"
 #include "reflection_data.hpp"
+#include "2dx_volume_processing/lib/utilities/fourier_utilities.hpp"
 
 
 namespace ds = tdx::data;
 
 ds::ReflectionData::ReflectionData()
 {
-    _data = std::map<MillerIndex, DiffractionSpot>();
+    _data = std::map<MillerIndex, PeakData>();
 }
 
 ds::ReflectionData::ReflectionData(const ReflectionData& copy)
@@ -25,19 +25,18 @@ ds::ReflectionData::ReflectionData(const ReflectionData& copy)
 
 ds::ReflectionData::~ReflectionData(){}
 
-ds::ReflectionData::ReflectionData(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap)
-{
-    _data = std::map<MillerIndex, DiffractionSpot>();
-    std::map<MillerIndex, DiffractionSpot> back_projected_map = backproject(spot_multimap);
-    _data.insert(back_projected_map.begin(), back_projected_map.end());    
-}
-
 void ds::ReflectionData::clear()
 {
     _data.clear();
 }
 
 void ds::ReflectionData::reset(const ReflectionData& data)
+{
+    _data.clear();
+    _data.insert(data.begin(), data.end());
+}
+
+void ds::ReflectionData::reset(const ds::MillerToPeakMap& data)
 {
     _data.clear();
     _data.insert(data.begin(), data.end());
@@ -124,7 +123,7 @@ void ds::ReflectionData::set_spot_at(int h, int k, int l, Complex value, double 
 {
     MillerIndex index = MillerIndex(h, k, l);
     //if(h < 0) std::cerr << "\nWARNING: Encountered negative h value, there is a problem somewhere!\n\n";
-    _data[index] = DiffractionSpot(value, weight);
+    _data[index] = PeakData(value, weight);
 }
 
 ds::Complex ds::ReflectionData::value_at(int h, int k, int l) const
@@ -174,45 +173,6 @@ double ds::ReflectionData::max_amplitude() const
     }
     
     return max;
-}
-
-std::map<ds::MillerIndex, ds::DiffractionSpot> ds::ReflectionData::backproject(const std::multimap<MillerIndex, DiffractionSpot>& spot_multimap) const
-{
-    std::map<MillerIndex, DiffractionSpot> map;
-    bool initialized = false;
-    
-    ds::MillerIndex current_index;
-    std::list<ds::DiffractionSpot> current_spots;
-    
-    for(std::map<ds::MillerIndex, ds::DiffractionSpot>::const_iterator spot_itr=spot_multimap.begin(); 
-            spot_itr!=spot_multimap.end(); ++spot_itr)
-    {
-        // Initialize for the start
-        if(!(initialized))
-        {
-            current_index = (*spot_itr).first;
-            initialized = true;
-        }
-        
-        // Average and insert accumulated spots
-        if(!(current_index == (*spot_itr).first))
-        {
-            ds::DiffractionSpot avg_spot(current_spots);
-            map.insert(std::pair<MillerIndex, DiffractionSpot>(current_index, avg_spot));
-            current_spots.clear();
-        }
-        
-        //Accumulate the spots in a list
-        current_spots.push_back((*spot_itr).second);
-        current_index = (*spot_itr).first;
-        
-    }
-    
-    //insert the final reflection
-    ds::DiffractionSpot avg_spot(current_spots);
-    map.insert(std::pair<MillerIndex, DiffractionSpot>(current_index, avg_spot));
-    
-    return map;
 }
 
 void ds::ReflectionData::scale_amplitudes(double factor)
@@ -408,14 +368,14 @@ void ds::ReflectionData::spread_data()
 {
     std::cout << "Spreading the data in Fourier space.. \n";
     std::cout << "Current spots: " << spots() << "\n";
-    std::multimap<MillerIndex, DiffractionSpot> spreaded_raw;
+    MillerToPeakMultiMap spreaded_raw;
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
     {
         MillerIndex index_in = (*ref).first;
-        DiffractionSpot spot_in = (*ref).second;
+        PeakData spot_in = (*ref).second;
         
         //Insert this spot
-        spreaded_raw.insert(MillerIndexDiffSpotPair(index_in, spot_in));
+        spreaded_raw.insert(MillerToPeakPair(index_in, spot_in));
         
         //Spread this spot to neighbors if not present
         for(int ih=-2; ih<=2; ih++)
@@ -431,7 +391,7 @@ void ds::ReflectionData::spread_data()
                         
                         //1.6 is to make the integral of exponential 1
                         double weight = exp(-1.6*distance_square);
-                        spreaded_raw.insert(MillerIndexDiffSpotPair(new_index, spot_in*weight));
+                        spreaded_raw.insert(MillerToPeakPair(new_index, spot_in*weight));
                     }
                 }
             }
@@ -439,7 +399,8 @@ void ds::ReflectionData::spread_data()
         
     }
     
-    std::map<MillerIndex, DiffractionSpot> spreaded_map = backproject(spreaded_raw);
+    MillerToPeakMap spreaded_map;
+    tdx::utilities::fourier_utilities::average_peaks(spreaded_raw, spreaded_map);
     
     _data.clear();
     _data.insert(spreaded_map.begin(), spreaded_map.end());

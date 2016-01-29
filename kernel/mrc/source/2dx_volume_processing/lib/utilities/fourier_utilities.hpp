@@ -44,16 +44,6 @@ namespace tdx
              */
             void average_peaks(const tdx::data::MillerToPeakMultiMap& peak_multimap, tdx::data::MillerToPeakMap& peak_map);
             
-            /**
-             * Calculates phase residual from a given list of peaks. 
-             * Calculate phase residual w.r.t the averaged complex.
-             * The definition comes from:
-             * Marin Van Hell, Ultra Microscopy 21(1978) 95-100, Section 4 
-             * @param peaks
-             * @return phase residual
-             */
-            double calculate_phase_residual(const tdx::data::PeakList peaks);
-            
         } // namespace fourier_space
         
     } // namespace utilities

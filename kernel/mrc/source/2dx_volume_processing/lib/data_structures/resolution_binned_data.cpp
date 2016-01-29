@@ -18,6 +18,32 @@ ds::ResolutionBinnedData::ResolutionBinnedData(double min_resolution, double max
     _counts = (int*) calloc(_resolution_bins, sizeof(int));
 }
 
+void ds::ResolutionBinnedData::add_data_at(double resolution, double value)
+{
+    //Find the appropriate bin
+    if ( resolution <= max_resolution() && resolution >= min_resolution() ) 
+    {
+        int bin = get_resolution_bin(resolution);
+        if(bin != -1)
+        {   
+            _data[bin] += value;
+            _counts[bin]++;
+        }
+    }
+} 
+
+void ds::ResolutionBinnedData::set_bin_sum(int bin, double sum)
+{
+    if(bin >=0 && bin < resolution_bins()) _data[bin] = sum;
+    else std::cerr << "Warning: The bin provided exceeds limits.";
+}
+
+void ds::ResolutionBinnedData::set_bin_count(int bin, int count)
+{
+    if(bin >=0 && bin < resolution_bins()) _counts[bin] = count;
+    else std::cerr << "Warning: The bin provided exceeds limits.";
+}
+
 void ds::ResolutionBinnedData::write_sum(std::string file) const
 {
     write(file, false);
@@ -189,17 +215,3 @@ int ds::ResolutionBinnedData::get_resolution_bin(double resolution) const
     else
         return -1;
 }
-
-void ds::ResolutionBinnedData::add_data_at(double resolution, double value)
-{
-    //Find the appropriate bin
-    if ( resolution <= max_resolution() && resolution >= min_resolution() ) 
-    {
-        int bin = get_resolution_bin(resolution);
-        if(bin != -1)
-        {   
-            _data[bin] += value;
-            _counts[bin]++;
-        }
-    }
-} 

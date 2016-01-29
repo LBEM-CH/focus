@@ -53,41 +53,10 @@ int main(int argc, char* argv[])
     //Read the data 
     tdx::data::MillerToPeakMultiMap peak_multimap;
     tdx::io::reflection::read(infile, (int)c, true, peak_multimap );
-    
-    bool initialized = false;
-    tdx::data::MillerIndex current_index;
-    tdx::data::PeakList current_spots;
     tdx::data::ResolutionBinnedData binnedPR(0, 1/resolution_max, 50);
     
-    for(tdx::data::MillerToPeakMultiMap::const_iterator spot_itr=peak_multimap.begin(); spot_itr!=peak_multimap.end(); ++spot_itr)
-    {
-        // Initialize for the start
-        if(!(initialized))
-        {
-            current_index = (*spot_itr).first;
-            initialized = true;
-        }
-        
-        // Average and insert accumulated spots
-        if(!(current_index == (*spot_itr).first))
-        {
-            double resolution = tdx::utilities::fourier_utilities::get_resolution(current_index, gamma, a, b, c);
-            double residual = tdx::utilities::fourier_utilities::calculate_phase_residual(current_spots);
-            // std::cout << current_index.to_string() << " " << resolution << " " << residual << "\n";
-            binnedPR.add_data_at(1/resolution, residual);
-            current_spots.clear();
-        }
-        
-        //Accumulate the spots in a list
-        current_spots.push_back((*spot_itr).second);
-        current_index = (*spot_itr).first;
-        
-    }
-    
-    //Write last data point
-    double resolution = tdx::utilities::fourier_utilities::get_resolution(current_index, gamma, a, b, c);
-    double residual = tdx::utilities::fourier_utilities::calculate_phase_residual(current_spots);
-    binnedPR.add_data_at(resolution, residual);
+    //Calculate binned phase residuals
+    tdx::utilities::quality_evaluation::corrected_phase_residual(peak_multimap, a, b, c, gamma, binnedPR);
     
     //Write out binned data
     binnedPR.write_average(RESIDUALS.getValue());

@@ -19,7 +19,7 @@ namespace tdx
         /**
          * A class used to store resolution binned data.
          * This class can be used to store the data and later plot the sums
-         * or the averages of the stored data.
+         * or the simple averages of the stored data.
          */
         class ResolutionBinnedData
         {
@@ -33,6 +33,27 @@ namespace tdx
              * @param resolution_bins - number of bins used
              */
             ResolutionBinnedData(double min_resolution, double max_resolution, int resolution_bins);
+                       
+            /**
+             * Sets the value at the resolution provided in correct bin
+             * @param resolution - in frequency units (1/A)
+             * @param value - value to be added
+             */
+            void add_data_at(double resolution, double value);
+            
+            /**
+             * Replaces the current sum in the bin with the one provided
+             * @param bin number starting from 0,...,number_of_bins-1
+             * @param sum
+             */
+            void set_bin_sum(int bin, double sum);
+            
+            /**
+             * Replaces the current count in the bin with the one provided
+             * @param bin number starting from 0,...,number_of_bins-1
+             * @param count
+             */
+            void set_bin_count(int bin, int count);
             
             /**
              * Writes into a file the resolution bins (1st column) 
@@ -142,13 +163,6 @@ namespace tdx
              *         for inappropriate resolution values returns -1
              */
             int get_resolution_bin(double resolution) const;
-            
-            /**
-             * Sets the value at the resolution provided in correct bin
-             * @param resolution - in frequency units (1/A)
-             * @param value - value to be added
-             */
-            void add_data_at(double resolution, double value);
             
             /**
              * Fetches the maximum summed value

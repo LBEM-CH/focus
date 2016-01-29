@@ -259,8 +259,12 @@ set CSVfile = 2dx_mergeRefine.console.csv
 if ( ! -e ${CSVfile} ) then
   set CSVfile = SCRATCH/2dx_mergeRefine.console.csv
 endif
-set CSVoutfile = 2dx_mergeRefine.console.ps
-if ( -e ${CSVfile} ) then
+if ( -d ../../TILES ) then
+  set in_tile = 1
+else
+  set in_tile = 0
+endif
+if ( -e ${CSVfile} && ${in_tile} == "1" ) then
   ${app_python} ${proc_2dx}/plotTileBeamTilt.py ${CSVfile} 5 ${CSVoutfile}
   #    
   echo "# IMAGE: ${CSVfile} <TXT: Tile refinement results>" >> LOGS/${scriptname}.results

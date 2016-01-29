@@ -262,9 +262,27 @@ endif
 set CSVoutfile = 2dx_mergeRefine.console.ps
 if ( -e ${CSVfile} ) then
   ${app_python} ${proc_2dx}/plotTileBeamTilt.py ${CSVfile} 5 ${CSVoutfile}
+  #    
+  echo "# IMAGE: ${CSVfile} <TXT: Tile refinement results>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${CSVoutfile} <PS: Tile refinement plot>" >> LOGS/${scriptname}.results
 endif
-echo "# IMAGE: ${CSVfile} <TXT: Tile refinement results>" >> LOGS/${scriptname}.results
-echo "# IMAGE: ${CSVoutfile} <PS: Tile refinement plot>" >> LOGS/${scriptname}.results
+#
+#----------------------------------------------------------------------------------------------------
+${proc_2dx}/linblock "2dx_quality_evaluator.exe - to calculate phase residual and fsc of merged data"
+#---------------------------------------------------------------------------------------------------
+#
+set cellx = `echo ${realcell} | cut -d\, -f1`
+set celly = `echo ${realcell} | cut -d\, -f2`
+#
+${bin_2dx}/2dx_quality_evaluator.exe --hkzin APH/latlines.dat --nx ${cellx} --ny ${celly} --nz ${ALAT} --gamma ${realang} --res ${RESMAX} --residuals residuals_merged.txt --fsc fsc_merged.txt  
+#
+${app_python} ${proc_2dx}/plotPhaseResiduals.py residuals_merged.txt PS/residuals_merged.ps
+${app_python} ${proc_2dx}/plotFSC.py fsc_merged.txt PS/fsc_merged.ps
+#
+echo "# IMAGE-IMPORTANT: residuals_merged.txt <TXT: Phase residuals of merged data>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/residuals_merged.ps <PS: Merged phase reidual plot>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: fsc_merged.txt <TXT: FSC of merged data>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/fsc_merged.ps <PS: Merged FSC plot>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "Normal End."

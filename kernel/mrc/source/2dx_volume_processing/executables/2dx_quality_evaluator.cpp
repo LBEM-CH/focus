@@ -13,14 +13,15 @@
 
 /*
  * Calculates qualtiy of merged data in 2dx.
- * Quality measures include phase residuals
+ * Quality measures include phase residuals, fsc 
  */
 int main(int argc, char* argv[]) 
 {
-    args::Executable exe("A script to measure quality of the merged data using phase residuals.", ' ', "1.0" );
+    args::Executable exe("A script to measure quality of the merged data using phase residuals, FSC", ' ', "1.0" );
     
     //Custom arguments
     TCLAP::ValueArg<std::string> RESIDUALS("", "residuals", "Output file to be used for writing phase residuals", false, "","FILE");
+    TCLAP::ValueArg<std::string> FSC("", "fsc", "Output file to be used for writing FSC", false, "","FILE");
     
     //Forced arguments
     args::templates::NX.forceRequired();
@@ -31,6 +32,7 @@ int main(int argc, char* argv[])
 
     
     //Add arguments from templates
+    exe.add(FSC);
     exe.add(RESIDUALS);
     exe.add(args::templates::MAXRES);
     exe.add(args::templates::GAMMA);
@@ -53,15 +55,37 @@ int main(int argc, char* argv[])
     //Read the data 
     tdx::data::MillerToPeakMultiMap peak_multimap;
     tdx::io::reflection::read(infile, (int)c, true, peak_multimap );
-    tdx::data::ResolutionBinnedData binnedPR(0, 1/resolution_max, 50);
+    
     
     //Calculate binned phase residuals
-    tdx::utilities::quality_evaluation::corrected_phase_residual(peak_multimap, a, b, c, gamma, binnedPR);
+    if(RESIDUALS.isSet())
+    {
+        tdx::data::ResolutionBinnedData binnedPR(0, 1/resolution_max, 50);
+        tdx::utilities::quality_evaluation::corrected_phase_residual(peak_multimap, a, b, c, gamma, binnedPR);
+        
+        //Write out binned data
+        binnedPR.write_sum(RESIDUALS.getValue());
+        std::cout << "\n\n----------------------------------\n";
+        std::cout << "Averaged binned phase residuals:\n";
+        std::cout << "----------------------------------\n";
+        std::cout << binnedPR.plot_sum();
+    }
     
-    //Write out binned data
-    binnedPR.write_average(RESIDUALS.getValue());
-    std::cout << "Averaged binned phase residuals:\n";
-    std::cout << binnedPR.plot_average();
+    //Calculate binned FSC
+    if(FSC.isSet())
+    {
+        tdx::data::ResolutionBinnedData binnedFSC(0, 1/resolution_max, 50);
+        tdx::utilities::quality_evaluation::fourier_shell_correlation(peak_multimap, a, b, c, gamma, binnedFSC);
+        
+        //Write out binned data
+        binnedFSC.write_sum(FSC.getValue());
+        std::cout << "\n\n--------------------------\n";
+        std::cout << "Averaged binned FSC:\n";
+        std::cout << "--------------------------\n";
+        std::cout << binnedFSC.plot_sum();
+    }
+    
+    
     
     return 0;
 }

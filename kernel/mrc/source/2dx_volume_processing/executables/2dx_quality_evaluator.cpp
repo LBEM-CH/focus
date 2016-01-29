@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
         {
             double resolution = tdx::utilities::fourier_utilities::get_resolution(current_index, gamma, a, b, c);
             double residual = tdx::utilities::fourier_utilities::calculate_phase_residual(current_spots);
-            //std::cout << current_index.to_string() << " " << resolution << " " << residual << "\n";
+            // std::cout << current_index.to_string() << " " << resolution << " " << residual << "\n";
             binnedPR.add_data_at(1/resolution, residual);
             current_spots.clear();
         }

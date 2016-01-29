@@ -7,6 +7,7 @@
 #include "fourier_utilities.hpp"
 #include "fom_utilities.hpp"
 #include "2dx_volume_processing/lib/data_structures/reflection_data.hpp"
+#include "angle_utilities.hpp"
 
 
 double tdx::utilities::fourier_utilities::get_resolution
@@ -113,6 +114,7 @@ double tdx::utilities::fourier_utilities::calculate_phase_residual(const tdx::da
     //Calculate phase residual w.r.t the averaged complex. 
     //The definition comes from Van Hell Ultra Microscopy 21(1978) 95-100 Section 4
     double averaged_phase = avg_value.phase();
+    averaged_phase = tdx::utilities::angle_utilities::CorrectRadianPhase(averaged_phase);
     double averaged_amplitude = avg_value.amplitude();
     double numerator_sum = 0.0;
     double denominator_sum = 0.0;
@@ -121,12 +123,14 @@ double tdx::utilities::fourier_utilities::calculate_phase_residual(const tdx::da
                 peaks_itr != peaks.end(); ++peaks_itr)
         {
             double phase = (*peaks_itr).value().phase();
+            phase = tdx::utilities::angle_utilities::CorrectRadianPhase(phase);
             double amplitude = (*peaks_itr).value().amplitude();
             denominator_sum += std::abs(averaged_amplitude) * std::abs(amplitude);
-            numerator_sum += std::abs(averaged_amplitude) * std::abs(amplitude) * pow(averaged_phase-phase, 2);
+            double phase_diff = tdx::utilities::angle_utilities::CorrectRadianPhase(averaged_phase-phase);
+            numerator_sum += std::abs(averaged_amplitude) * std::abs(amplitude) *abs(phase_diff);
         }
     
-        if(denominator_sum > 0.00001) phase_residual = sqrt(numerator_sum/denominator_sum);
+        if(denominator_sum > 0.00001) phase_residual = numerator_sum/denominator_sum;
     }
     return phase_residual*180/M_PI;
     

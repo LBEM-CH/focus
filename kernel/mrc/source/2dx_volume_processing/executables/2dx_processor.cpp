@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     }
     
     //Prepare the input
-    Volume2dx input((int)args::templates::NX.getValue(), (int)args::templates::NY.getValue(), (int)args::templates::NZ.getValue());
+    Volume2DX input((int)args::templates::NX.getValue(), (int)args::templates::NY.getValue(), (int)args::templates::NZ.getValue());
     if(args::templates::GAMMA.isSet()) input.set_gamma_degrees(args::templates::GAMMA.getValue());
     
     input.read_volume(infile, informat);

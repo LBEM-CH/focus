@@ -13,7 +13,7 @@
 
 #include "../data_structures/peak_data.hpp"
 #include "../data_structures/reflection_data.hpp"
-#include "../data_structures/resolution_binned_data.hpp"
+#include "../data_structures/binned_data.hpp"
 
 #include "fourier_utilities.hpp"
 #include "angle_utilities.hpp"
@@ -41,7 +41,7 @@ namespace tdx
              * @param gamma: cell angle gamma
              * @param[out] binnedPR: instance where all binned phase residuals are present
              */
-            void corrected_phase_residual(const tdx::data::MillerToPeakMultiMap peak_multimap, double a, double b, double c, double gamma, tdx::data::ResolutionBinnedData& binnedPR);
+            void corrected_phase_residual(const tdx::data::MillerToPeakMultiMap peak_multimap, double a, double b, double c, double gamma, tdx::data::BinnedData& binnedPR);
             
             /**
              * Calculates Fourier shell correlation from a given list of peaks. 
@@ -59,7 +59,7 @@ namespace tdx
              * @param gamma: cell angle gamma
              * @param[out] binnedFSC: instance where all binned phase residuals are present
              */
-            void fourier_shell_correlation(const tdx::data::MillerToPeakMultiMap peak_multimap, double a, double b, double c, double gamma, tdx::data::ResolutionBinnedData& binnedFSC);
+            void fourier_shell_correlation(const tdx::data::MillerToPeakMultiMap peak_multimap, double a, double b, double c, double gamma, tdx::data::BinnedData& binnedFSC);
             
             
         }

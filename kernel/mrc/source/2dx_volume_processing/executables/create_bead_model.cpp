@@ -39,12 +39,12 @@ int main(int argc, char* argv[])
     }
     
     //Prepare the input
-    Volume2dx input;
+    Volume2DX input;
     input.read_volume(args::templates::MRCIN.getValue());
     
     if(args::templates::HKLOUT.isSet() || args::templates::MRCOUT.isSet())
     {    
-        Volume2dx bead_model = input.generate_bead_model(args::templates::BEADS.getValue(), args::templates::THRESHOLD.getValue(), 2.0);
+        Volume2DX bead_model = input.generate_bead_model(args::templates::BEADS.getValue(), args::templates::THRESHOLD.getValue(), 2.0);
         bead_model.low_pass(args::templates::MAXRES.getValue());
         if(args::templates::HKLOUT.getValue() != "") bead_model.write_volume(args::templates::HKLOUT.getValue(), "hkl");
         if(args::templates::MRCOUT.getValue() != "") bead_model.write_volume(args::templates::MRCOUT.getValue());

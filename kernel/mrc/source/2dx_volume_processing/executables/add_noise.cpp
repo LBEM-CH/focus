@@ -42,11 +42,11 @@ int main(int argc, char* argv[])
     if(NOISE_AMOUNT.isSet()) amount = NOISE_AMOUNT.getValue(); 
     
     //Prepare the input
-    Volume2dx input;
+    Volume2DX input;
     input.read_volume(args::templates::MRCIN.getValue());
     input.grey_scale_densities();
     
-    Volume2dx random_noise(input);
+    Volume2DX random_noise(input);
     random_noise.generate_fourier_noise(amount);
     //random_noise.generate_poisson_densities(input.get_real().squared_sum()*10);
     

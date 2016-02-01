@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     std::string mrcout = args::templates::MRCOUT.getValue();
     
     //Prepare the input
-    Volume2dx input;
+    Volume2DX input;
     input.read_volume(args::templates::MRCIN.getValue());
     tdx::data::VolumeHeader header = input.header();
     if(CELLX.isSet()) header.set_xlen(CELLX.getValue());
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     if(YSTART.isSet()) header.set_nystart(YSTART.getValue());
     if(ZSTART.isSet()) header.set_nzstart(ZSTART.getValue());
     
-    Volume2dx output(header);
+    Volume2DX output(header);
     output.set_real(input.get_real());
     
     if(mrcout != "") output.write_volume(mrcout);

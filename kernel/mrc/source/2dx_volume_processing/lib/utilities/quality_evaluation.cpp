@@ -2,10 +2,10 @@
 
 
 void tdx::utilities::quality_evaluation::corrected_phase_residual
-                            (const tdx::data::MillerToPeakMultiMap peak_multimap, double a, double b, double c, double gamma, tdx::data::ResolutionBinnedData& binnedPR)
+                            (const tdx::data::MillerToPeakMultiMap peak_multimap, double a, double b, double c, double gamma, tdx::data::BinnedData& binnedPR)
 {
-    tdx::data::ResolutionBinnedData binned_numerator_sums(binnedPR.min_resolution(), binnedPR.max_resolution(), binnedPR.resolution_bins());
-    tdx::data::ResolutionBinnedData binned_denominator_sums(binnedPR.min_resolution(), binnedPR.max_resolution(), binnedPR.resolution_bins());
+    tdx::data::BinnedData binned_numerator_sums(binnedPR.min_range(), binnedPR.max_range(), binnedPR.bins());
+    tdx::data::BinnedData binned_denominator_sums(binnedPR.min_range(), binnedPR.max_range(), binnedPR.bins());
     
     tdx::data::MillerToPeakMap peak_map;
     tdx::utilities::fourier_utilities::average_peaks(peak_multimap, peak_map);
@@ -29,7 +29,7 @@ void tdx::utilities::quality_evaluation::corrected_phase_residual
     }
     
     //Divide numerator and denominator in each bin to get final binned phase residuals
-    for(int bin=0; bin<binnedPR.resolution_bins(); bin++)
+    for(int bin=0; bin<binnedPR.bins(); bin++)
     {
         if(binned_denominator_sums.sum_in(bin) > 0.0000001)
         {
@@ -42,11 +42,11 @@ void tdx::utilities::quality_evaluation::corrected_phase_residual
 }
 
 void tdx::utilities::quality_evaluation::fourier_shell_correlation
-                            (const tdx::data::MillerToPeakMultiMap peak_multimap, double a, double b, double c, double gamma, tdx::data::ResolutionBinnedData& binnedFSC)
+                            (const tdx::data::MillerToPeakMultiMap peak_multimap, double a, double b, double c, double gamma, tdx::data::BinnedData& binnedFSC)
 {
-    tdx::data::ResolutionBinnedData binned_numerator_sums(binnedFSC.min_resolution(), binnedFSC.max_resolution(), binnedFSC.resolution_bins());
-    tdx::data::ResolutionBinnedData binned_amp1_sums(binnedFSC.min_resolution(), binnedFSC.max_resolution(), binnedFSC.resolution_bins());
-    tdx::data::ResolutionBinnedData binned_amp2_sums(binnedFSC.min_resolution(), binnedFSC.max_resolution(), binnedFSC.resolution_bins());
+    tdx::data::BinnedData binned_numerator_sums(binnedFSC.min_range(), binnedFSC.max_range(), binnedFSC.bins());
+    tdx::data::BinnedData binned_amp1_sums(binnedFSC.min_range(), binnedFSC.max_range(), binnedFSC.bins());
+    tdx::data::BinnedData binned_amp2_sums(binnedFSC.min_range(), binnedFSC.max_range(), binnedFSC.bins());
     
     tdx::data::MillerToPeakMap peak_map;
     tdx::utilities::fourier_utilities::average_peaks(peak_multimap, peak_map);
@@ -72,7 +72,7 @@ void tdx::utilities::quality_evaluation::fourier_shell_correlation
     
     //Calculate the FSC using the formula:
     // fsc = sum(amp1*amp2*cos(phase_diff)/sqrt(sum(amp1^2)*sum(amp2^2))
-    for(int bin=0; bin<binnedFSC.resolution_bins(); bin++)
+    for(int bin=0; bin<binnedFSC.bins(); bin++)
     {
         double denominator = sqrt(binned_amp1_sums.sum_in(bin)*binned_amp2_sums.sum_in(bin));
         if( denominator > 0.0000001)

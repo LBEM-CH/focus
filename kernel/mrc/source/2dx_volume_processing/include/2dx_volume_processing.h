@@ -8,4 +8,4 @@
 /**
  * typedef to use Volume2dx without namespace
  */
-typedef tdx::data::Volume2DX Volume2dx;
+using tdx::data::Volume2DX;

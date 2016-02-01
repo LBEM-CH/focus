@@ -60,6 +60,13 @@ namespace tdx
             Complex operator*( double factor);
             
             /**
+             * Declaration of multiplication of a Complex with another Complex
+             * @param another complex
+             * @return multiplied complex
+             */
+            Complex operator*(const Complex& other);
+            
+            /**
              * Operator overloading of < operator
              * Amplitudes (aka abs) is used to check the condition.
              * @param rhs
@@ -128,6 +135,12 @@ namespace tdx
              * @param phase in radians
              */
             void set_phase(double phase);
+            
+            /**
+             * Returns the conjugate of the current complex
+             * @return Complex conjugate
+             */
+            Complex conjugate();
             
             
         private:

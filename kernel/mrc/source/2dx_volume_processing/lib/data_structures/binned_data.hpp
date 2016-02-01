@@ -4,8 +4,8 @@
  * 
  */
 
-#ifndef RESOLUTION_BINNED_DATA_HPP
-#define	RESOLUTION_BINNED_DATA_HPP
+#ifndef BINNED_DATA_HPP
+#define	BINNED_DATA_HPP
 
 #include <iostream>
 #include <fstream>
@@ -17,29 +17,30 @@ namespace tdx
     namespace data
     {   
         /**
-         * A class used to store resolution binned data.
+         * A class used to store binned data.
+         * The data are provided at the x-points and the class will keep track
+         * of sums and counts in each bin
          * This class can be used to store the data and later plot the sums
          * or the simple averages of the stored data.
          */
-        class ResolutionBinnedData
+        class BinnedData
         {
         public:
             
             /**
-             * Instance of the structure factors with min_resolution, 
-             * max_resolution in frequency (1/A) units and resolution_bins assigned 
-             * @param min_resolution - min resolution in 1/A units
-             * @param max_resolution - max resolution in 1/A units
-             * @param resolution_bins - number of bins used
+             * Constructor with min, max range and number of bins assigned 
+             * @param min_range - min range
+             * @param max_range - max range
+             * @param bins - number of bins used
              */
-            ResolutionBinnedData(double min_resolution, double max_resolution, int resolution_bins);
+            BinnedData(double min_range, double max_range, int bins);
                        
             /**
-             * Sets the value at the resolution provided in correct bin
-             * @param resolution - in frequency units (1/A)
-             * @param value - value to be added
+             * Sets the value at the point provided
+             * @param data_point - the point at which the value is to be set
+             * @param data_value - value to be added
              */
-            void add_data_at(double resolution, double value);
+            void add_data_at(double data_point, double data_value);
             
             /**
              * Replaces the current sum in the bin with the one provided
@@ -56,21 +57,21 @@ namespace tdx
             void set_bin_count(int bin, int count);
             
             /**
-             * Writes into a file the resolution bins (1st column) 
+             * Writes into a file the bins (1st column) 
              * and summed data (2nd column)
              * @param file - output file
              */
             void write_sum(std::string file) const;
             
             /**
-             * Writes into a file the resolution bins (1st column) 
+             * Writes into a file the bins (1st column) 
              * and averaged data (2nd column)
              * @param file - output file
              */
             void write_average(std::string file) const;
             
             /**
-             * Writes into a file the resolution bins (1st column) 
+             * Writes into a file the bins (1st column) 
              * and data (2nd column)
              * @param file - file name
              * @param average - should the data be averaged
@@ -79,40 +80,40 @@ namespace tdx
             
             /**
              * Returns a string containing a printable histogram of the
-             * sum of data vs resolution bins
+             * sum of data verses bin values
              * @return string with histogram 
              */
             std::string plot_sum() const;
             
             /**
              * Returns a string containing a printable histogram of the
-             * average of data vs resolution bins
+             * average of data verses bin values
              * @return string with histogram 
              */
             std::string plot_average() const;
             
             /**
-             * Returns a plot of the current data. (i.e. resolution vs data)
+             * Returns a plot of the current data. (i.e. bins vs data)
              * @param average - should the data be averaged
              * @return the string containing the histogram
              */
             std::string plot_profile(bool average) const;
             
             /**
-             * Fetches the summed value at the resolution provided
-             * @param resolution - in frequency units (1/A)
-             * @return double value at provided resolution
-             *         Returns -1.0, if found inappropriate resolution value
+             * Fetches the summed value at the data point provided
+             * @param data_point - where the sum is to be fetched
+             * @return double value at provided point
+             *         Returns -1.0, if found inappropriate value
              */
-            double sum_at(double resolution) const;
+            double sum_at(double data_point) const;
             
             /**
-             * Fetches the averaged value at the resolution provided
-             * @param resolution - in frequency units (1/A)
-             * @return double value at provided resolution
-             *         Returns -1.0, if found inappropriate resolution value
+             * Fetches the averaged value at the data point provided
+             * @param data_point - where the sum is to be fetched
+             * @return double value at provided data point
+             *         Returns -1.0, if found inappropriate value
              */
-            double average_at(double resolution) const;
+            double average_at(double data_point) const;
             
             /**
              * Fetches the sum of the data in the provided bin
@@ -131,38 +132,38 @@ namespace tdx
             double average_in(int bin) const;
             
             /**
-             * Returns the value of minimum resolution set.
-             * @return min resolution in 1/A units
+             * Returns the value of minimum range set.
+             * @return min range set
              */
-            double min_resolution() const;
+            double min_range() const;
             
              /**
-             * Returns the value of maximum resolution set.
-             * @return max resolution in 1/A units
+             * Returns the value of maximum range set.
+             * @return max range set
              */
-            double max_resolution() const;
+            double max_range() const;
             
             /**
              * Returns the number of bins used to generate intensities
              * @return number of bins
              */
-            int resolution_bins() const;
+            int bins() const;
             
             /**
-             * Fetches the resolution spacing in 1/A which was used 
+             * Fetches the bin spacing which was used 
              * to generate the data
-             * @return spacing in resolution (units 1/A)
+             * @return spacing
              */
-            double resolution_spacing() const;
+            double spacing() const;
             
             /**
-             * Fetched the correct bin number (starting 0) for the given
-             * resolution
-             * @param resolution
-             * @return bin number starting with 0,1,..,resolution_bins-1
-             *         for inappropriate resolution values returns -1
+             * Fetches the correct bin number (starting 0) for the given
+             * data point
+             * @param data point
+             * @return bin number starting with 0,1,..,bins-1
+             *         for inappropriate point values returns -1
              */
-            int get_resolution_bin(double resolution) const;
+            int get_bin_number(double data_point) const;
             
             /**
              * Fetches the maximum summed value
@@ -171,7 +172,7 @@ namespace tdx
             double max_summed_value() const;
             
             /**
-             * Fetches the maximum summed value
+             * Fetches the maximum averaged value
              * @return maximum value
              */
             double max_averaged_value() const;
@@ -179,22 +180,22 @@ namespace tdx
         private:
                
             /**
-             * Value of minimum resolution in frequency (1/A) units
+             * Value of minimum range
              */
-            double _min_resolution;
+            double _min_range;
             
             /**
-             * Value of maximum resolution in frequency (1/A) units
+             * Value of maximum range
              */
-            double _max_resolution;
+            double _max_range;
             
             /**
-             * Number of resolution bins used to generate the data
+             * Number of bins used to generate the data
              */
-            int _resolution_bins;
+            int _bins;
             
             /**
-             * Array of size <resolution_bins> used to store
+             * Array of size <bins> used to store
              * data in each bin
              */
             double* _data;
@@ -211,5 +212,5 @@ namespace tdx
 }
 
 
-#endif	/* RESOLUTION_BINNED_DATA_HPP */
+#endif	/* BINNED_DATA_HPP */
 

@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     //Calculate binned phase residuals
     if(RESIDUALS.isSet())
     {
-        tdx::data::ResolutionBinnedData binnedPR(0, 1/resolution_max, 50);
+        tdx::data::BinnedData binnedPR(0, 1/resolution_max, 50);
         tdx::utilities::quality_evaluation::corrected_phase_residual(peak_multimap, a, b, c, gamma, binnedPR);
         
         //Write out binned data
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     //Calculate binned FSC
     if(FSC.isSet())
     {
-        tdx::data::ResolutionBinnedData binnedFSC(0, 1/resolution_max, 50);
+        tdx::data::BinnedData binnedFSC(0, 1/resolution_max, 50);
         tdx::utilities::quality_evaluation::fourier_shell_correlation(peak_multimap, a, b, c, gamma, binnedFSC);
         
         //Write out binned data

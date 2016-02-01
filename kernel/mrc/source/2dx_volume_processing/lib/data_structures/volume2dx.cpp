@@ -533,10 +533,10 @@ void ds::Volume2DX::symmetrize()
     _type = FOURIER;
 }
 
-ds::ResolutionBinnedData ds::Volume2DX::calculate_structure_factors(double min_freq, double max_freq, int resolution_bins)
+ds::BinnedData ds::Volume2DX::calculate_structure_factors(double min_freq, double max_freq, int resolution_bins)
 {
     
-    ds::ResolutionBinnedData binned_data(min_freq, max_freq, resolution_bins);
+    ds::BinnedData binned_data(min_freq, max_freq, resolution_bins);
     
     ReflectionData fourier_data = get_fourier();
     
@@ -555,7 +555,101 @@ ds::ResolutionBinnedData ds::Volume2DX::calculate_structure_factors(double min_f
     return binned_data;
 }
 
-void ds::Volume2DX::apply_structure_factors(ds::ResolutionBinnedData sf_ref, double fraction)
+ds::BinnedData ds::Volume2DX::fourier_shell_correlation(ds::Volume2DX reference, double min_freq, double max_freq, int resolution_bins)
+{
+    BinnedData binnedFSC(min_freq, max_freq, resolution_bins);
+    BinnedData binned_numerator_sums(binnedFSC.min_range(), binnedFSC.max_range(), binnedFSC.bins());
+    BinnedData binned_amp1_sums(binnedFSC.min_range(), binnedFSC.max_range(), binnedFSC.bins());
+    BinnedData binned_amp2_sums(binnedFSC.min_range(), binnedFSC.max_range(), binnedFSC.bins());
+    
+    ReflectionData current_data = get_fourier();
+    ReflectionData reference_data = reference.get_fourier();
+    
+    //Iterate over all reflections present in current Fourier space and consider
+    //only the ones also present in reference volume
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    {
+        MillerIndex index = (*itr).first;
+        Complex value = (*itr).second.value();
+        
+        if(reference_data.exists(index.h(), index.k(), index.l()))
+        {
+            Complex ref_value = reference_data.value_at(index.h(), index.k(), index.l());
+            Complex complex_numerator = value*ref_value.conjugate();
+            
+            double resolution = 1 / resolution_at(index.h(), index.k(), index.l());
+
+            //Update the sums in the bins
+            binned_amp1_sums.add_data_at(resolution, value.amplitude() * value.amplitude());
+            binned_amp2_sums.add_data_at(resolution, ref_value.amplitude() * ref_value.amplitude());
+            binned_numerator_sums.add_data_at(resolution, complex_numerator.real());
+        }
+    }
+    
+    //Calculate the FSC using the formula:
+    // fsc = sum(real(f1*f2')/sqrt(sum(amp1^2)*sum(amp2^2)))
+    for(int bin=0; bin<binnedFSC.bins(); bin++)
+    {
+        double denominator = sqrt(binned_amp1_sums.sum_in(bin)*binned_amp2_sums.sum_in(bin));
+        if( denominator > 0.0000001)
+        {
+            double bin_fsc = binned_numerator_sums.sum_in(bin)/denominator;
+            binnedFSC.set_bin_sum(bin, bin_fsc);
+            binnedFSC.set_bin_count(bin, 1); //Just to get correct averages
+        }
+    }
+    
+    return binnedFSC;
+}
+
+ds::BinnedData ds::Volume2DX::fourier_conic_correlation(ds::Volume2DX reference, double min_cone_angle, double max_cone_angle, int bins)
+{
+    BinnedData binnedFCC(min_cone_angle, max_cone_angle, bins);
+    BinnedData binned_numerator_sums(binnedFCC.min_range(), binnedFCC.max_range(), binnedFCC.bins());
+    BinnedData binned_amp1_sums(binnedFCC.min_range(), binnedFCC.max_range(), binnedFCC.bins());
+    BinnedData binned_amp2_sums(binnedFCC.min_range(), binnedFCC.max_range(), binnedFCC.bins());
+    
+    ReflectionData current_data = get_fourier();
+    ReflectionData reference_data = reference.get_fourier();
+    
+    //Iterate over all reflections present in current Fourier space and consider
+    //only the ones also present in reference volume
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    {
+        MillerIndex index = (*itr).first;
+        Complex value = (*itr).second.value();
+        
+        if(reference_data.exists(index.h(), index.k(), index.l()))
+        {
+            Complex ref_value = reference_data.value_at(index.h(), index.k(), index.l());
+            Complex complex_numerator = value*ref_value.conjugate();
+            
+            double angle = 90 - acos(std::abs(index.l())/sqrt(index.h()*index.h() + index.k()*index.k() + index.l()*index.l()))*180/M_PI;
+
+            //Update the sums in the bins
+            binned_amp1_sums.add_data_at(angle, value.amplitude() * value.amplitude());
+            binned_amp2_sums.add_data_at(angle, ref_value.amplitude() * ref_value.amplitude());
+            binned_numerator_sums.add_data_at(angle, complex_numerator.real());
+        }
+    }
+    
+    //Calculate the correlation using the formula:
+    // sum(real(f1*f2')/sqrt(sum(amp1^2)*sum(amp2^2)))
+    for(int bin=0; bin<binnedFCC.bins(); bin++)
+    {
+        double denominator = sqrt(binned_amp1_sums.sum_in(bin)*binned_amp2_sums.sum_in(bin));
+        if( denominator > 0.0000001)
+        {
+            double bin_fsc = binned_numerator_sums.sum_in(bin)/denominator;
+            binnedFCC.set_bin_sum(bin, bin_fsc);
+            binnedFCC.set_bin_count(bin, 1); //Just to get correct averages
+        }
+    }
+    
+    return binnedFCC;
+}
+
+void ds::Volume2DX::apply_structure_factors(ds::BinnedData sf_ref, double fraction)
 {
     std::cout << "Applying structure factors to the volume.. \n";
     
@@ -563,7 +657,7 @@ void ds::Volume2DX::apply_structure_factors(ds::ResolutionBinnedData sf_ref, dou
     ReflectionData current_data = get_fourier();
     
     //Get the current structure factors with same resolution spacing as of reference
-    ds::ResolutionBinnedData sf_current = calculate_structure_factors(sf_ref.min_resolution(), sf_ref.max_resolution(), sf_ref.resolution_bins());
+    ds::BinnedData sf_current = calculate_structure_factors(sf_ref.min_range(), sf_ref.max_range(), sf_ref.bins());
     
     double sf_ref_max = sf_ref.max_averaged_value();
     double sf_current_max = sf_current.max_averaged_value();

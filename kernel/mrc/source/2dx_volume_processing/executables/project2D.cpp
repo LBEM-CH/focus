@@ -30,10 +30,10 @@ int main(int argc, char* argv[])
     exe.parse(argc, argv);
     
     //Prepare the input
-    Volume2dx input;
+    Volume2DX input;
     input.read_volume(args::templates::MRCIN.getValue());
     
-    Volume2dx projection = input.project2D(PROJECT_AXIS.getValue());
+    Volume2DX projection = input.project2D(PROJECT_AXIS.getValue());
     
     projection.write_volume(args::templates::MRCOUT.getValue());
     

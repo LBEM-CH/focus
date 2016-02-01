@@ -44,11 +44,11 @@ int main(int argc, char* argv[])
     }
     
     //Prepare the input
-    Volume2dx input;
+    Volume2DX input;
     input.read_volume(args::templates::MRCIN.getValue());
     
-    Volume2dx cutout;
-    Volume2dx after_cut;
+    Volume2DX cutout;
+    Volume2DX after_cut;
     
     if(XY_PLANE.isSet()) input.cut_xy_plane(cutout, after_cut, XY_PLANE.getValue());
     if(CONE.isSet()) input.cut_cone(cutout, after_cut, CONE.getValue());

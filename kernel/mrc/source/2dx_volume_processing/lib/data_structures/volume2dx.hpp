@@ -13,7 +13,7 @@
 #include "volume_header.hpp"
 #include "real_space_data.hpp"
 #include "reflection_data.hpp"
-#include "resolution_binned_data.hpp"
+#include "binned_data.hpp"
 #include "../transforms/fourier_transform_fftw.hpp"
 
 namespace tdx
@@ -407,7 +407,35 @@ namespace tdx
              * @param resolution_bins - number of bins.
              * @return instance of class Resolution binned data.
              */
-            ResolutionBinnedData calculate_structure_factors(double min_freq, double max_freq, int resolution_bins);
+            BinnedData calculate_structure_factors(double min_freq, double max_freq, int resolution_bins);
+            
+            /**
+             * Calculates the Fourier shell correlation with the reference. The
+             * min and max frequency range and the number of resolution bins to
+             * be used can also be controlled. Outputs the Binned data class
+             * instance which contains the sum of the FSC in each bins and 
+             * can be used to output the final FSC. 
+             * @param reference
+             * @param min_freq
+             * @param max_freq
+             * @param resolution_bins
+             * @return instance of class BinnedData
+             */
+            BinnedData fourier_shell_correlation(Volume2DX reference, double min_freq=0, double max_freq=0.5, int resolution_bins=50);
+            
+            /**
+             * Calculates the Fourier conic correlation with the reference. The
+             * min and max cone angle and the number of bins to
+             * be used can also be controlled. Outputs the Binned data class
+             * instance which contains the sum of the FCC in each bins and 
+             * can be used to output the final FCC. 
+             * @param reference
+             * @param min_cone_angle (in degrees)
+             * @param max_cone_angle (in degrees)
+             * @param bins
+             * @return instance of class BinnedData
+             */
+            BinnedData fourier_conic_correlation(Volume2DX reference, double min_cone_angle=0, double max_cone_angle=90, int bins=90);
             
             /**
              * Apply the structure factors. The factors are applied partially with the
@@ -418,7 +446,7 @@ namespace tdx
              * @param fraction
              * @see calculate_structure_factors
              */
-            void apply_structure_factors(ResolutionBinnedData structure_factors, double fraction);
+            void apply_structure_factors(BinnedData structure_factors, double fraction);
             
             /**
              * Generates a bead model of the current volume and writes it in a PDB file

@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     std::cout << "\n-----------------------------------\n";
     std::cout << ":Preparing the input volume:\n";
     std::cout << "-----------------------------------\n\n";
-    Volume2dx input_volume;
+    Volume2DX input_volume;
     input_volume.read_volume(mrcin);
     input_volume.set_symmetry(symmetry);
     if(args::templates::MAXRES.isSet()) input_volume.low_pass(args::templates::MAXRES.getValue()); 
@@ -99,10 +99,10 @@ int main(int argc, char** argv)
      *********************************************/
     
     //Initialize iteration volume and mask   
-    Volume2dx iteration_volume(input_volume);
-    Volume2dx iteration_cone;
-    Volume2dx iteration_without_cone;
-    Volume2dx mask(input_volume);
+    Volume2DX iteration_volume(input_volume);
+    Volume2DX iteration_cone;
+    Volume2DX iteration_without_cone;
+    Volume2DX mask(input_volume);
     
     iteration_volume.cut_cone(iteration_cone, iteration_without_cone, cone_angle);
     double cone_energy_initial = iteration_cone.get_fourier().intensity_sum();

@@ -41,6 +41,15 @@ ds::Complex ds::Complex::operator *(double factor)
     return ds::Complex(this->real()*factor, this->imag()*factor);
 }
 
+ds::Complex ds::Complex::operator *(const Complex& other)
+{
+    double a1 = this->real();
+    double b1 = this->imag();
+    double a2 = other.real();
+    double b2 = other.imag();
+    return ds::Complex(a1*a2 - b1*b2, a1*b2 + b1*a2);
+}
+
 bool ds::Complex::operator <(const ds::Complex& rhs) const
 {
     return (this->amplitude() < rhs.amplitude());
@@ -102,4 +111,9 @@ void ds::Complex::set_phase(double phase)
     double current_amplitude = this->amplitude();
     this->set_real(current_amplitude*cos(phase));
     this->set_imag(current_amplitude*sin(phase));
+}
+
+ds::Complex ds::Complex::conjugate()
+{
+    return Complex(real(), -1*imag());
 }

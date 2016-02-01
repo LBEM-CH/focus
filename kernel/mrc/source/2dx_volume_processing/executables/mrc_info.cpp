@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
     exe.parse(argc, argv);
     
     //Prepare the input
-    Volume2dx input;
+    Volume2DX input;
     input.read_volume(INPUT_VOLUME.getValue());
     
     input.prepare_real();

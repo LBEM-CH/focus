@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     std::cout << "\n-----------------------------------\n";
     std::cout << ":Preparing the input volume:\n";
     std::cout << "-----------------------------------\n\n";
-    Volume2dx input_volume;
+    Volume2DX input_volume;
     input_volume.read_volume(mrcin);
     input_volume.set_symmetry(symmetry);
     input_volume.prepare_fourier();
@@ -70,19 +70,19 @@ int main(int argc, char** argv)
     std::cout << "\n-----------------------------------\n";
     std::cout << ":Preparing the reference volume: \n";
     std::cout << "-----------------------------------\n\n";
-    Volume2dx ref_volume;
+    Volume2DX ref_volume;
     ref_volume.read_volume(refin);
     ref_volume.grey_scale_densities();
     std ::cout << ref_volume.to_string();
     
     //Calculate the SF from ref volume
-    tdx::data::ResolutionBinnedData ref_structure_factors = ref_volume.calculate_structure_factors(0, 1/max_resolution, 100);
+    tdx::data::BinnedData ref_structure_factors = ref_volume.calculate_structure_factors(0, 1/max_resolution, 100);
     if(temp_loc != "") ref_structure_factors.write_average(temp_loc+"/ref_sf.dat");
  
     std::cout << "\nReference Structure factors:\n";
     std::cout << ref_structure_factors.plot_average();
     
-    Volume2dx output_volume = input_volume;
+    Volume2DX output_volume = input_volume;
     
     for(int iteration=0; iteration<number_of_iterations; ++iteration)
     {

@@ -2640,7 +2640,6 @@ C
             rfield(3,1)=-1000.0
             rfield(4,1)=-1000.0
  129      continue
-          call shorten(CORINAME,k5)
           write(27,'(3(A,'',''),100(F9.3,'',''),A,'','',10A4)')
      .       cline1(1:1),cline1(2:2),cline1(3:3),
      .       ((rfield(j,i),i=1,25),j=1,4),FILIN(1:ihen1),TITLE

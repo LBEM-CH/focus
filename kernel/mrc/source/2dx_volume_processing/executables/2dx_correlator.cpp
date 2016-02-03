@@ -24,9 +24,11 @@ int main(int argc, char* argv[])
     TCLAP::ValueArg<std::string> VOL2("", "vol2", "Input MRC/MAP volume 2", true, "","FILE");
     TCLAP::ValueArg<std::string> FSC("", "fsc", "Output file containing the FSC plot", false, "","FILE");
     TCLAP::ValueArg<std::string> FCC("", "fcc", "Output file containing the FCC plot", false, "","FILE");
+    TCLAP::ValueArg<std::string> FCMC("", "fcmc", "Output file containing the FCMC plot", false, "","FILE");
     TCLAP::ValueArg<int> BINS("", "bins", "Number of bins to be used", false, 50, "INT");
     
     //Add arguments from templates
+    exe.add(FCMC);
     exe.add(FCC);
     exe.add(FSC);
     exe.add(BINS);
@@ -74,6 +76,15 @@ int main(int argc, char* argv[])
         std::cout << "Averaged binned FCC:\n";
         std::cout << "--------------------------\n";
         std::cout << binnedFCC.plot_sum();
+    }
+    
+    //Calculate binned FCMC
+    if(FCC.isSet())
+    {
+        tdx::data::MeshBinnedData binnedFCMC = volume1.fourier_conic_mesh_correlation(volume2);
+        
+        //Write out binned data
+        binnedFCMC.write_sum(FCMC.getValue());
     }
     
     return 0;

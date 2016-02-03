@@ -44,12 +44,12 @@ plt.ylim(0, 1.0)
 
 # Setup title
 plt.title("FCC of the data")
-plt.xlabel('Resolution (' + r'$\AA$' + ')')
+plt.xlabel('Cone angle (in degrees)')
 plt.ylabel('Fourier conic correlation')
 
 
 # Custom  x-axis labels
-ticks = numpy.linspace(min(data[0]), max(data[0]), 18)
+ticks = numpy.linspace(min(data[0]), max(data[0]), 10)
 labels = numpy.round((ticks), 1)
 plt.xticks(ticks.tolist(), labels.tolist())
 

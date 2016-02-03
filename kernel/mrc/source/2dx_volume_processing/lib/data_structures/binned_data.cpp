@@ -140,7 +140,7 @@ std::string ds::BinnedData::plot_profile(bool average) const
 
 double ds::BinnedData::sum_at(double data_point) const
 {   
-    return average_in(get_bin_number(data_point));      
+    return sum_in(get_bin_number(data_point));      
 }
 
 double ds::BinnedData::average_at(double data_point) const

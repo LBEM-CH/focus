@@ -624,7 +624,9 @@ ds::BinnedData ds::Volume2DX::fourier_conic_correlation(ds::Volume2DX reference,
             Complex ref_value = reference_data.value_at(index.h(), index.k(), index.l());
             Complex complex_numerator = value*ref_value.conjugate();
             
-            double angle = 90 - acos(std::abs(index.l())/sqrt(index.h()*index.h() + index.k()*index.k() + index.l()*index.l()))*180/M_PI;
+            double resolution = resolution_at(index.h(), index.k(), index.l());
+            double val = std::abs(index.l()*1.0/nz())*resolution;
+            double angle = 90 - acos(val)*180/M_PI;
 
             //Update the sums in the bins
             binned_amp1_sums.add_data_at(angle, value.amplitude() * value.amplitude());
@@ -647,6 +649,57 @@ ds::BinnedData ds::Volume2DX::fourier_conic_correlation(ds::Volume2DX reference,
     }
     
     return binnedFCC;
+}
+
+ds::MeshBinnedData ds::Volume2DX::fourier_conic_mesh_correlation(Volume2DX reference, double min_freq, double max_freq, double min_cone, double max_cone, int resolution_bins, int cone_bins)
+{
+    MeshBinnedData binnedFCMC(min_freq, max_freq, min_cone, max_cone, resolution_bins, cone_bins);
+    MeshBinnedData binned_numerator_sums(min_freq, max_freq, min_cone, max_cone, resolution_bins, cone_bins);
+    MeshBinnedData binned_amp1_sums(min_freq, max_freq, min_cone, max_cone, resolution_bins, cone_bins);
+    MeshBinnedData binned_amp2_sums(min_freq, max_freq, min_cone, max_cone, resolution_bins, cone_bins);
+    
+    ReflectionData current_data = get_fourier();
+    ReflectionData reference_data = reference.get_fourier();
+    
+    //Iterate over all reflections present in current Fourier space and consider
+    //only the ones also present in reference volume
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    {
+        MillerIndex index = (*itr).first;
+        Complex value = (*itr).second.value();
+        
+        if(reference_data.exists(index.h(), index.k(), index.l()))
+        {
+            Complex ref_value = reference_data.value_at(index.h(), index.k(), index.l());
+            double dot_prod = value.real()*ref_value.real() + value.imag()*ref_value.imag();
+            
+            double resolution = 1 / resolution_at(index.h(), index.k(), index.l());
+            double angle = 90 - acos(std::abs(index.l())/sqrt(index.h()*index.h() + index.k()*index.k() + index.l()*index.l()))*180/M_PI;
+
+            //Update the sums in the bins
+            binned_amp1_sums.add_data_at(resolution, angle, value.amplitude() * value.amplitude());
+            binned_amp2_sums.add_data_at(resolution, angle, ref_value.amplitude() * ref_value.amplitude());
+            binned_numerator_sums.add_data_at(resolution, angle, dot_prod);
+        }
+    }
+    
+    //Calculate the correlation using the formula:
+    // sum(real(f1*f2')/sqrt(sum(amp1^2)*sum(amp2^2)))
+    for(int bin_x=0; bin_x<binnedFCMC.bins_x(); bin_x++)
+    {
+        for(int bin_y=0; bin_y<binnedFCMC.bins_y(); bin_y++)
+        {
+            double denominator = sqrt(binned_amp1_sums.sum_in(bin_x, bin_y)*binned_amp2_sums.sum_in(bin_x, bin_y));
+            if( denominator > 0.0000001)
+            {
+                double bin_fsc = binned_numerator_sums.sum_in(bin_x, bin_y)/denominator;
+                binnedFCMC.set_bin_sum(bin_x, bin_y, bin_fsc);
+                binnedFCMC.set_bin_count(bin_x, bin_y, 1); //Just to get correct averages
+            }
+        }
+    }
+    
+    return binnedFCMC;
 }
 
 void ds::Volume2DX::apply_structure_factors(ds::BinnedData sf_ref, double fraction)

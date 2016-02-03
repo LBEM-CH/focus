@@ -14,6 +14,7 @@
 #include "real_space_data.hpp"
 #include "reflection_data.hpp"
 #include "binned_data.hpp"
+#include "mesh_binned_data.hpp"
 #include "../transforms/fourier_transform_fftw.hpp"
 
 namespace tdx
@@ -436,6 +437,25 @@ namespace tdx
              * @return instance of class BinnedData
              */
             BinnedData fourier_conic_correlation(Volume2DX reference, double min_cone_angle=0, double max_cone_angle=90, int bins=90);
+            
+            /**
+             * Calculates the Fourier conic mesh correlation with the reference.
+             * This correlation measures correlation on a mesh grid over frequency
+             * and cone angle resulting in a two dimensional plot.
+             * The min and max cone angle, frequency and the number of bins to
+             * be used can also be controlled. Outputs the Binned data class
+             * instance which contains the sum of the FCMC in each bin and 
+             * can be used to output the final FCMC. 
+             * @param reference
+             * @param min frequency (in 1/A)
+             * @param max frequency (in 1/A)
+             * @param min_cone_angle (in degrees)
+             * @param max_cone_angle (in degrees)
+             * @param resolution bins
+             * @param conical bins
+             * @return instance of class MeshedBinnedData
+             */
+            MeshBinnedData fourier_conic_mesh_correlation(Volume2DX reference, double min_freq=0, double max_freq=0.5, double min_cone=0, double max_cone=90, int resolution_bins=50, int cone_bins=36);
             
             /**
              * Apply the structure factors. The factors are applied partially with the

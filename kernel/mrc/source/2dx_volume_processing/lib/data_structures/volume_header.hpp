@@ -56,6 +56,18 @@ namespace tdx
             std::string to_string() const;
             
             /**
+             * Output the file name from which this header was generated
+             * @return file name
+             */
+            std::string file_name() const;
+            
+            /**
+             * Outputs the title/description of the header
+             * @return 
+             */
+            std::string title() const;
+            
+            /**
              * Returns the size of rows
              * @return rows
              */
@@ -152,6 +164,18 @@ namespace tdx
             int symmetry_ccp4_code() const ;
             
             /**
+             * Set the file name
+             * @param file_name
+             */
+            void set_file_name(std::string file_name);
+            
+            /**
+             * Sets the title
+             * @param title
+             */
+            void set_title(std::string title);
+            
+            /**
              * Assigner function of rows
              * @param rows
              */
@@ -245,50 +269,60 @@ namespace tdx
              */
             void initialize(int nx, int ny, int nz);
             
-           /**
-            * Number of rows, columns and sections of the volume
-            * Example: 108, 108, 401
-            * Default: nx, ny, nz
-            */
-           int _rows, _columns, _sections;
-           
-           /**
-            * The grid size
-            * Example: 131, 131, 400
-            * Default: nx, ny, nz
-            */
-           int _mx, _my, _mz;
+            /**
+             * File name from which the header originated
+             */
+            std::string _file_name;
+            
+            /**
+             * Optional title/description of the file from which this header originated
+             */
+            std::string _title;
+            
+            /**
+             * Number of rows, columns and sections of the volume
+             * Example: 108, 108, 401
+             * Default: nx, ny, nz
+             */
+            int _rows, _columns, _sections;
 
-           /**
-            * Cell size
-            * Example: 131.0, 131.0, 400.0
-            * Default: nx, ny, nz
-            */
-           double _xlen, _ylen, _zlen;
-           
-           /**
-            * Start of volume in MRC files
-            * (Important when reading from MRC files)
-            * Example: -10, -10, 0
-            * Default: 0, 0, 0
-            */
-           int _nxstart, _nystart, _nzstart;
+            /**
+             * The grid size
+             * Example: 131, 131, 400
+             * Default: nx, ny, nz
+             */
+            int _mx, _my, _mz;
 
-           /**
-            * Cell angle beta in degrees;
-            * NOTE: alpha, beta are = 90 for 2d crystals
-            * Example: 30
-            * Default: 90
-            */
-           double _gamma;
+            /**
+             * Cell size
+             * Example: 131.0, 131.0, 400.0
+             * Default: nx, ny, nz
+             */
+            double _xlen, _ylen, _zlen;
 
-           /**
-            * Symmetry present in the protein.
-            * Possible values for the symmetry in 2d crystals are:
-            * P1, P2, P12, P121, C12, P222, P2221, P22121, C222, P4, P422, P4212, P3, P312, P321, P6, P622
-            * Default: P1
-            */
-           tdx::symmetrization::Symmetry2dx _symmetry;
+            /**
+             * Start of volume in MRC files
+             * (Important when reading from MRC files)
+             * Example: -10, -10, 0
+             * Default: 0, 0, 0
+             */
+            int _nxstart, _nystart, _nzstart;
+
+            /**
+             * Cell angle beta in degrees;
+             * NOTE: alpha, beta are = 90 for 2d crystals
+             * Example: 30
+             * Default: 90
+             */
+            double _gamma;
+
+            /**
+             * Symmetry present in the protein.
+             * Possible values for the symmetry in 2d crystals are:
+             * P1, P2, P12, P121, C12, P222, P2221, P22121, C222, P4, P422, P4212, P3, P312, P321, P6, P622
+             * Default: P1
+             */
+            tdx::symmetrization::Symmetry2dx _symmetry;
 
         };
         

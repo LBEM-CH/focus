@@ -25,6 +25,14 @@ namespace tdx
             long file_size(const std::string& filename);
             
             /**
+             * Reads an string of character size read_size from current position of ifstream
+             * @param in_file
+             * @param read_size (number of characters to be read)
+             * @return 
+             */
+            std::string read_string(std::istream& in_file, int read_size);
+            
+            /**
              * Reads in an integer from the current position of the file.
              * @param in_file
              * @return int

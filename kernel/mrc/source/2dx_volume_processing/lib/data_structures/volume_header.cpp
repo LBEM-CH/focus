@@ -31,7 +31,8 @@ void ds::VolumeHeader::initialize(int nx, int ny, int nz)
     _nzstart = 0;
     set_gamma(tdx::utilities::angle_utilities::DegreeToRadian(90));
     set_symmetry("P1");
-
+    _file_name = "";
+    _title = "Initialized with size: " + std::to_string(nx) + ", " + std::to_string(ny) + ", " + std::to_string(nz); 
 }
 
 void ds::VolumeHeader::reset_size(int nx, int ny, int nz)
@@ -50,8 +51,10 @@ void ds::VolumeHeader::reset_size(int nx, int ny, int nz)
 std::string ds::VolumeHeader::to_string() const
 {
     std::string output = "";
+    if(file_name() != "") output += "Origin file name: " + file_name() + "\n";
+    if(title() != "" ) output += "Title: " + title() + "\n\n";
     double ninty = 90.0;
-    output += "Volume Information:\n";
+    output += "Header Information:\n";
     output += "\t|Size (rows, columns, sections): " + std::to_string(rows()) + " X " + 
                std::to_string(columns()) + " X " + std::to_string(sections()) + "\n";
     output += "\t|Grid size (x, y, z): " + std::to_string(mx()) + " X " + 
@@ -66,6 +69,16 @@ std::string ds::VolumeHeader::to_string() const
                std::to_string(nystart()) + " , " + std::to_string(nzstart()) + "\n";
     
     return output;
+}
+
+void ds::VolumeHeader::set_file_name(std::string file_name) 
+{
+    _file_name = file_name;
+}
+
+void ds::VolumeHeader::set_title(std::string title)
+{
+    _title = title;
 }
 
 void ds::VolumeHeader::set_rows(int rows)
@@ -136,6 +149,16 @@ void ds::VolumeHeader::set_symmetry(std::string symmetry)
 void ds::VolumeHeader::set_gamma(double gamma)
 {
     _gamma = gamma;
+}
+
+std::string ds::VolumeHeader::file_name() const
+{
+    return _file_name;
+}
+
+std::string ds::VolumeHeader::title() const
+{
+    return _title;
 }
 
 int ds::VolumeHeader::rows() const

@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     if(CELLX.isSet()) header.set_xlen(CELLX.getValue());
     if(CELLY.isSet()) header.set_ylen(CELLY.getValue());
     if(CELLZ.isSet()) header.set_zlen(CELLZ.getValue());
-    if(GAMMA.isSet()) header.set_gamma(GAMMA.getValue());
+    if(GAMMA.isSet()) header.set_gamma(GAMMA.getValue()*M_PI/180);
     if(XSTART.isSet()) header.set_nxstart(XSTART.getValue());
     if(YSTART.isSet()) header.set_nystart(YSTART.getValue());
     if(ZSTART.isSet()) header.set_nzstart(ZSTART.getValue());

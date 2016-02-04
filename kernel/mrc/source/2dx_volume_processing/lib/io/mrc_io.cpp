@@ -31,6 +31,8 @@ tdx::data::VolumeHeader io::mrc::get_header(const std::string file_name, const s
     }
     
     tdx::data::VolumeHeader header;
+    header.set_file_name(file_name);
+    header.set_title("Read from file with format: " + format);
     
     std::ifstream file(file_name, std::ios::in|std::ios::binary);;
     

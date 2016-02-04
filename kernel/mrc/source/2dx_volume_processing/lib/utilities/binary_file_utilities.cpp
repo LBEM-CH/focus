@@ -15,6 +15,14 @@ long tdx::utilities::binary_file_utilities::file_size(const std::string& filenam
     return rc == 0 ? stat_buf.st_size : -1;
 }
 
+std::string tdx::utilities::binary_file_utilities::read_string(std::istream& in_file, int read_size)
+{
+    char* temp = new char[read_size];
+    in_file.read(temp, read_size*sizeof(char));
+    
+    std::string value = std::string(temp);
+    return value;
+}
 
 int tdx::utilities::binary_file_utilities::read_int(std::istream& in_file)
 {

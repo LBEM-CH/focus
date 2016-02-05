@@ -26,6 +26,8 @@ int main(int argc, char* argv[])
     //Prepare the input
     tdx::io::MTZUtils mtz(INPUT_VOLUME.getValue());
     std::cout << mtz.header_string();
+    std::cout << "\n\n Number of reflections read: " << mtz.data().spots() << "\n";
+    std::cout << " Intensity sum: "  << mtz.data().intensity_sum() << "\n\n";
     
     return 0;
 }

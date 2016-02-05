@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     exe.add(args::templates::NX);
     
     
-    std::vector<args::Arg*> infileArgs = {&args::templates::HKZIN, &args::templates::HKLIN, &args::templates::MRCIN};
+    std::vector<args::Arg*> infileArgs = {&args::templates::HKZIN, &args::templates::HKLIN, &args::templates::MRCIN, &args::templates::MTZIN};
     exe.xorAdd(infileArgs);
     
     //Parse the arguments
@@ -65,6 +65,11 @@ int main(int argc, char* argv[])
     {
         infile = args::templates::HKZIN.getValue();
         informat = "hkz";
+    }
+    else if(args::templates::MTZIN.isSet())
+    {
+        infile = args::templates::MTZIN.getValue();
+        informat = "mtz";
     }
     
     if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()))

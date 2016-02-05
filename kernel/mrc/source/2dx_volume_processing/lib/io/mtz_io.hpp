@@ -11,6 +11,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cmath>
 
 #include "../data_structures/volume_header.hpp"
 #include "../data_structures/reflection_data.hpp"
@@ -37,35 +38,38 @@ namespace tdx
             
             std::string header_string();
             
+            tdx::data::ReflectionData data();
+            
+            tdx::data::VolumeHeader header();
+            
             
         private:
             
             void read_header();
             
-            std::vector<std::string> _supported_column_labels = { "H", "I", "K", "L", "FC", "SIGFP", "PHIC", "FOM", "WT"};
-            std::vector<char> _supported_column_types = {'H', 'J', 'F', 'P', 'W'};
+            void read_data();
             
             std::string _file_name;
             
-            int _number_of_columns = 0;
-            int _number_of_reflections = 0;
+            size_t _number_of_columns = 0;
+            size_t _number_of_reflections = 0;
             std::vector<std::string> _column_labels;
             std::vector<std::string> _column_type;
             std::vector<int> _column_min;
             std::vector<int> _column_max;
             std::vector<int> _column_id;
             
-            int _header_position;
+            size_t _header_position;
             
             std::string _title = "";
             
             float _cell[6] = {0, 0, 0, 90, 90, 90};
             
-            int _sort[5] = {1, 2, 3, 4, 5};
-            
             double _resolution[2] = {1000, 2};
             
             std::vector<std::string> _history;
+            
+            tdx::data::ReflectionData _data;
             
         };  
         

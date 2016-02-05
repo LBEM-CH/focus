@@ -15,6 +15,7 @@
 
 #include "../io/mrc_io.hpp"
 #include "../io/reflection_io.hpp"
+#include "../io/mtz_io.hpp"
 
 #include "../symmetrization/symmetry2dx.hpp"
 #include "../symmetrization/fourier_symmetrization.hpp"
@@ -277,6 +278,13 @@ void ds::Volume2DX::read_volume(std::string file_name, std::string format)
         ReflectionData fourier_data;
         fourier_data.reset(averaged_data);
         set_fourier(fourier_data);
+    }
+    else if (format == "mtz")
+    {
+        tdx::io::MTZUtils mtz(file_name);
+        _header = VolumeHeader(mtz.header());
+        _real.reset(RealSpaceData(nx(), ny(), nz()));
+        set_fourier(mtz.data());
     }
     else if (format == "mrc" || format == "map")
     {

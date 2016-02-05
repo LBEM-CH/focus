@@ -149,12 +149,16 @@ void tdx::io::MTZUtils::read_data()
             int k = (int) read_reflection[col_order[1]];
             int l = (int) read_reflection[col_order[2]];
             double amp = (double) read_reflection[col_order[3]];
-            double phase = (double) read_reflection[col_order[4]];
+            double phase = (double) read_reflection[col_order[4]]*M_PI/180;
             double fom = 1.0;
             if(col_order[5] >= 0) fom = (double) read_reflection[col_order[5]];
             if(fom > 1.0) fom = fom * 0.01;
         
-        
+            //For negative h use Friedel spot
+            if(h < 0)
+            {
+                h=-1*h; k=-1*k; l=-1*l; phase=-1*phase;
+            }
             tdx::data::Complex value(amp * cos(phase), amp*sin(phase));
         
             _data.set_spot_at(h,k,l, value, fom);

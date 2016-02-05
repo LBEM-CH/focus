@@ -281,7 +281,7 @@ void ds::Volume2DX::read_volume(std::string file_name, std::string format)
     }
     else if (format == "mtz")
     {
-        tdx::io::MTZUtils mtz(file_name);
+        tdx::io::MTZParser mtz(file_name);
         _header = VolumeHeader(mtz.header());
         _real.reset(RealSpaceData(nx(), ny(), nz()));
         set_fourier(mtz.data());
@@ -318,6 +318,11 @@ void ds::Volume2DX::write_volume(std::string file_name, std::string format)
     else if (format == "mrc" || format == "map")
     {
         tdx::io::mrc::write_mrc_mode_2(file_name, header(), get_real(), format);
+    }
+    else if( format == "mtz")
+    {
+        tdx::io::MTZParser mtz(file_name, get_fourier(), header());
+        mtz.write();
     }
     else
     {

@@ -39,3 +39,34 @@ std::vector<std::string> tdx::utilities::string_utilities::split(const std::stri
     }
     return elems;
 }
+
+std::string tdx::utilities::string_utilities::string_of(double value, int width, int precision)
+{
+    std::stringstream stream;
+    stream << std::fixed << std::setw(width) << std::setprecision(precision) << value;
+    std::string s = stream.str();
+    
+    return s;
+}
+
+std::string tdx::utilities::string_utilities::string_of(int value, int width)
+{
+    std::stringstream stream;
+    stream << std::fixed << std::setw(width) << value;
+    std::string s = stream.str();
+    
+    return s;
+}
+
+std::string tdx::utilities::string_utilities::string_of(std::string value, int width)
+{
+    std::string s = value;
+    int length_input = value.length();
+    if(length_input > width) s = s.substr(0, width);
+    else
+    {
+        while(s.length() != width) s += ' ';
+    }
+    
+    return s;
+}

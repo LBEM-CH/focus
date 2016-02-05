@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 namespace tdx
 {
@@ -31,6 +32,31 @@ namespace tdx
              * @return 
              */
             std::vector<std::string> split(const std::string &s, char delim);
+            
+            /**
+             * Returns a string of precision and width from double
+             * @param (double) value
+             * @param (int) width
+             * @param (int) precision
+             * @return (string)
+             */
+            std::string string_of(double value, int width, int precision);
+            
+            /**
+             * Returns a string of width from int
+             * @param (int) value
+             * @param (int) width
+             * @return (string)
+             */
+            std::string string_of(int value, int width);
+            
+            /**
+             * Returns a string of width from string
+             * @param (string) value
+             * @param (int) width
+             * @return (string)
+             */
+            std::string string_of(std::string value, int width);
               
         } 
     

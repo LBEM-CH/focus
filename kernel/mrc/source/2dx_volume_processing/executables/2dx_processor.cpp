@@ -18,7 +18,8 @@ int main(int argc, char* argv[])
 {
     args::Executable exe("A universal 2D crystallography volume processor.", ' ', "1.0" );
     
-    //Add arguments  
+    //Add arguments
+    exe.add(args::templates::MTZOUT);
     exe.add(args::templates::MRCOUT);
     exe.add(args::templates::HKLOUT);
     exe.add(args::templates::NORMALIZE_GREY);
@@ -72,9 +73,9 @@ int main(int argc, char* argv[])
         informat = "mtz";
     }
     
-    if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()))
+    if(!(args::templates::HKLOUT.isSet()) && !(args::templates::MRCOUT.isSet()) && !(args::templates::MTZOUT.isSet()))
     {
-        std::cerr << "\n\nERROR: Please specify at least one output with hklout or mrcout!\n";
+        std::cerr << "\n\nERROR: Please specify at least one output with hklout or mrcout or mtzout!\n";
         std::cerr << "\nFor full details type:\n\t" << exe.getProgramName() << " --help \n\n\n";
         exit(1);
     }
@@ -132,6 +133,7 @@ int main(int argc, char* argv[])
     
     if(args::templates::HKLOUT.isSet()) input.write_volume(args::templates::HKLOUT.getValue(), "hkl");
     if(args::templates::MRCOUT.isSet()) input.write_volume(args::templates::MRCOUT.getValue());
+    if(args::templates::MTZOUT.isSet())  input.write_volume(args::templates::MTZOUT.getValue(), "mtz");
     
     return 0;
 }

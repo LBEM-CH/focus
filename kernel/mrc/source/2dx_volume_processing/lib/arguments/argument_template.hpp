@@ -26,6 +26,7 @@ namespace tdx
             static TCLAP::ValueArg<std::string> MTZIN("", "mtzin", "input MTZ file", false, "", "FILE");
             static TCLAP::ValueArg<std::string> HKLOUT("", "hklout", "output reflections file in hkl format(H K L AMP PHASE FOM)", false, "", "FILE");
             static TCLAP::ValueArg<std::string> MRCOUT("", "mrcout", "output mrc/map file", false, "","FILE");
+            static TCLAP::ValueArg<std::string> MTZOUT("", "mtzout", "output MTZ file", false, "","FILE");
             static TCLAP::ValueArg<std::string> PDBOUT("", "pdbout", "output file in pdb format", false, "", "FILE");
 
             static TCLAP::ValueArg<double> NX("X", "nx", "number of points in X (required with hklin/hkzin)", false, 0,"FLOAT");

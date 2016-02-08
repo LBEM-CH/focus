@@ -75,7 +75,7 @@ void ds::BinnedData::write(std::string file, bool average) const
     
     for(int bin=0; bin<bins(); bin++)
     {
-        double data_point = min_range() + (bin+1)*spacing();
+        double data_point = min_range() + (bin)*spacing();
         double data;
         if(average) data = average_in(bin);
         else data = sum_in(bin);
@@ -122,7 +122,7 @@ std::string ds::BinnedData::plot_profile(bool average) const
     
     for(int bin=0; bin<bins(); bin++)
     {
-        double data_point = min_range() + (bin+1)*spacing();
+        double data_point = min_range() + (bin)*spacing();
         
         double data;
         if(average) data = average_in(bin);

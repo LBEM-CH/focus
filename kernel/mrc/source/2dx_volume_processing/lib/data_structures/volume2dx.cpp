@@ -715,6 +715,61 @@ ds::MeshBinnedData ds::Volume2DX::fourier_conic_mesh_correlation(Volume2DX refer
     return binnedFCMC;
 }
 
+ds::MeshBinnedData ds::Volume2DX::cylindrical_ring_correlation(Volume2DX reference, int bins)
+{
+    double min_freq = 0.0;
+    double max_freq = 0.5;
+    
+    MeshBinnedData binnedCRC(min_freq, max_freq, 0, 0.5, bins, bins);
+    MeshBinnedData binned_numerator_sums(min_freq, max_freq, 0, 0.5, bins, bins);
+    MeshBinnedData binned_amp1_sums(min_freq, max_freq, 0, 0.5, bins, bins);
+    MeshBinnedData binned_amp2_sums(min_freq, max_freq, 0, 0.5, bins, bins);
+    
+    ReflectionData current_data = get_fourier();
+    ReflectionData reference_data = reference.get_fourier();
+    
+    //Iterate over all reflections present in current Fourier space and consider
+    //only the ones also present in reference volume
+    for(ReflectionData::const_iterator itr=current_data.begin(); itr!=current_data.end(); ++itr)
+    {
+        MillerIndex index = (*itr).first;
+        Complex value = (*itr).second.value();
+        
+        if(reference_data.exists(index.h(), index.k(), index.l()))
+        {
+            Complex ref_value = reference_data.value_at(index.h(), index.k(), index.l());
+            double dot_prod = value.real()*ref_value.real() + value.imag()*ref_value.imag();
+            
+            double resolution2D = 1 / resolution_at(index.h(), index.k(), 0);
+            double height = std::abs(index.l())*1.0/nz();
+
+            //std::cout << "Processing: " << index.to_string() << " at " << height << " and " << resolution2D << "\n";
+            //Update the sums in the bins
+            binned_amp1_sums.add_data_at(resolution2D, height, value.amplitude() * value.amplitude());
+            binned_amp2_sums.add_data_at(resolution2D, height, ref_value.amplitude() * ref_value.amplitude());
+            binned_numerator_sums.add_data_at(resolution2D, height, dot_prod);
+        }
+    }
+    
+    //Calculate the correlation using the formula:
+    // sum(real(f1*f2')/sqrt(sum(amp1^2)*sum(amp2^2)))
+    for(int bin_x=0; bin_x<binnedCRC.bins_x(); bin_x++)
+    {
+        for(int bin_y=0; bin_y<binnedCRC.bins_y(); bin_y++)
+        {
+            double denominator = sqrt(binned_amp1_sums.sum_in(bin_x, bin_y)*binned_amp2_sums.sum_in(bin_x, bin_y));
+            if( denominator > 0.0000001)
+            {
+                double bin_fsc = binned_numerator_sums.sum_in(bin_x, bin_y)/denominator;
+                binnedCRC.set_bin_sum(bin_x, bin_y, bin_fsc);
+                binnedCRC.set_bin_count(bin_x, bin_y, 1); //Just to get correct averages
+            }
+        }
+    }
+    
+    return binnedCRC;
+}
+
 void ds::Volume2DX::apply_structure_factors(ds::BinnedData sf_ref, double fraction)
 {
     std::cout << "Applying structure factors to the volume.. \n";

@@ -31,6 +31,7 @@ void ds::MeshBinnedData::add_data_at(double x, double y, double value)
         if(bin_x != -1 && bin_y !=-1)
         {   
             int bin = get_linear_bin(bin_x, bin_y);
+            //std::cout << "x: " << x << " y: " << y << " falls in: " << bin_x << ", " << bin_y << " -> " << bin << " with value: " << value << "\n"; 
             _data[bin] += value;
             _counts[bin]++;
         }
@@ -76,7 +77,7 @@ void ds::MeshBinnedData::write(std::string file, bool average) const
     output += "data in range: X direction (" + 
                 std::to_string(min_x()) +
                 ", " + std::to_string(max_x()) +
-                " and in Y direction (" + 
+                ") and in Y direction (" + 
                 std::to_string(min_y()) +
                 ", " + std::to_string(max_y()) +
                 ") spaced in X by " + std::to_string(spacing_x())+
@@ -86,8 +87,8 @@ void ds::MeshBinnedData::write(std::string file, bool average) const
     {
         for(int bin_y=0; bin_y<bins_y(); bin_y++)
         {
-            double x = min_x() + (bin_x+1)*spacing_x();
-            double y = min_y() + (bin_y+1)*spacing_y();
+            double x = min_x() + (bin_x)*spacing_x();
+            double y = min_y() + (bin_y)*spacing_y();
             double data;
             if(average) data = average_in(bin_x, bin_y);
             else data = sum_in(bin_x, bin_y);

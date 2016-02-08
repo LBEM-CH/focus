@@ -24,11 +24,13 @@ int main(int argc, char* argv[])
     TCLAP::ValueArg<std::string> VOL2("", "vol2", "Input MRC/MAP volume 2", true, "","FILE");
     TCLAP::ValueArg<std::string> FSC("", "fsc", "Output file containing the FSC plot", false, "","FILE");
     TCLAP::ValueArg<std::string> FCC("", "fcc", "Output file containing the FCC plot", false, "","FILE");
+    TCLAP::ValueArg<std::string> CRC("", "crc", "Output file containing the CRC plot", false, "","FILE");
     TCLAP::ValueArg<std::string> FCMC("", "fcmc", "Output file containing the FCMC plot", false, "","FILE");
     TCLAP::ValueArg<int> BINS("", "bins", "Number of bins to be used", false, 50, "INT");
     
     //Add arguments from templates
     exe.add(FCMC);
+    exe.add(CRC);
     exe.add(FCC);
     exe.add(FSC);
     exe.add(BINS);
@@ -51,6 +53,13 @@ int main(int argc, char* argv[])
     
     Volume2DX volume2;
     volume2.read_volume(infile_volume2);
+    
+    volume1.low_pass(resolution_max);
+    volume2.low_pass(resolution_max);
+    
+    //Bring the volumes to same scale.
+    volume1.rescale_to_max_amplitude(1000);
+    volume2.rescale_energy(volume1.get_fourier().intensity_sum());
     
     //Calculate binned FSC
     if(FSC.isSet())
@@ -76,6 +85,13 @@ int main(int argc, char* argv[])
         std::cout << "Averaged binned FCC:\n";
         std::cout << "--------------------------\n";
         std::cout << binnedFCC.plot_sum();
+    }
+    
+    //Calculate CRC
+    if(CRC.isSet())
+    {
+        tdx::data::MeshBinnedData binnedCRC = volume1.cylindrical_ring_correlation(volume2, BINS.getValue());
+        binnedCRC.write_sum(CRC.getValue());
     }
     
     //Calculate binned FCMC

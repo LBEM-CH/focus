@@ -458,6 +458,17 @@ namespace tdx
             MeshBinnedData fourier_conic_mesh_correlation(Volume2DX reference, double min_freq=0, double max_freq=0.5, double min_cone=0, double max_cone=90, int resolution_bins=50, int cone_bins=36);
             
             /**
+             * Calculates the CRC between current volume and it's reference and 
+             * returns a MeshBinnedData which can be used to output the final
+             * mesh plot.
+             * @param (Volume2DX) reference
+             * @param (int) bins in x and in y direction
+             * @return (MeshBinnedData)
+             * @see MeshBinnedData
+             */
+            MeshBinnedData cylindrical_ring_correlation(Volume2DX reference, int bins=50);
+            
+            /**
              * Apply the structure factors. The factors are applied partially with the
              * fraction provided. the highest intensity in the radial distribution 
              * is kept intact.

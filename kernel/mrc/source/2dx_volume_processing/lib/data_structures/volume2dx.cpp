@@ -373,8 +373,6 @@ void ds::Volume2DX::cut_cone(Volume2DX& cone, Volume2DX& missing_cone, double co
 {
     std::cout << "Cutting the cone of " << cone_angle << " degrees from volume.. \n";
     
-    double cone_angle_rad = double(cone_angle)*M_PI/180;
-    
     ReflectionData new_data;
     ReflectionData cut_data;
     ReflectionData current_data = get_fourier();
@@ -384,10 +382,11 @@ void ds::Volume2DX::cut_cone(Volume2DX& cone, Volume2DX& missing_cone, double co
         //Get the data for current reflection
         MillerIndex index = (*itr).first;
         PeakData spot = (*itr).second;
-        double radius = std::abs(index.l()*tan(cone_angle_rad));
-        double distance = sqrt(index.h()*index.h() + index.k()*index.k());
+        double resolution = resolution_at(index.h(), index.k(), index.l());
+        double val = std::abs(index.l()*1.0/nz())*resolution;
+        double angle = acos(val)*180/M_PI;
         
-        if ( distance < radius ) 
+        if ( angle < cone_angle ) 
         {
             //Insert into cut_data
             cut_data.set_spot_at(index.h(), index.k(), index.l(), spot.value(), spot.weight());

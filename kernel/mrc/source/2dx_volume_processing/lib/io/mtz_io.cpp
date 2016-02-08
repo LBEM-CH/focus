@@ -253,7 +253,7 @@ void tdx::io::MTZParser::read_header()
     {
         std::string line = tdx::utilities::binary_file_utilities::read_string(file, 80);
         std::string trimmed = tdx::utilities::string_utilities::trim(line);
-        std::cout << "\n" <<line << "\n";
+        //std::cout << "\n" <<line << "\n";
         std::vector<std::string> elems = tdx::utilities::string_utilities::split(trimmed, ' ');
         
         if(elems.size() > 0)
@@ -263,7 +263,6 @@ void tdx::io::MTZParser::read_header()
                 if(elems.at(0).substr(0,4) == "VERS")
                 {
                     std::cout << "VERSION.. ";
-                    std::cout << trimmed << "\n";
                     std::string version = elems.at(1);
                     if(version!= "MTZ:V1.1" ) 
                     {
@@ -344,6 +343,27 @@ void tdx::io::MTZParser::write()
     file.write("MTZ ", sizeof(float));
     file.write((char*) &_header_position, sizeof(float));
     
+    //Write file architecture
+    /* Machine stamp is quite a complex routine
+     * It also considers the byte order into consideration. 
+     * But for the sake of simplicity and as we assume that the files
+     * written on same machine would be read by same machine (NATIVE
+     * ENVIRONMENT) we set all chars in the machine stamp to 0. This is 
+     * caught in the CCP4 code and converted to native values.
+     * mtstring[0] is float byte order
+     * mtstring[1] is integer byte order
+     * mtstring[3] and mtstring[4] are anyways 0
+     */
+    unsigned char mtstring[4];
+    unsigned int iconvert = 0;
+    unsigned int fconvert = 0;
+    
+    mtstring[0] = fconvert | (fconvert << 4);
+    mtstring[1] = 1 | (iconvert << 4);
+    mtstring[2] = mtstring[3] = 0;
+    
+    file.write((const char*)&mtstring, 4*sizeof(char));
+    
     //Write reflections
     file.seekp(20*sizeof(float), std::ios::beg);
     
@@ -368,13 +388,13 @@ void tdx::io::MTZParser::write()
         
         try
         {
-            file.write((char *) &h, sizeof(int));
-            file.write((char *) &k, sizeof(int));
-            file.write((char *) &l, sizeof(int));
-            file.write((char *) &amp, sizeof(float));
-            file.write((char *) &phase, sizeof(float));
-            if(_number_of_columns >=6 ) file.write((char *) &fom, sizeof(float));
-            if(_number_of_columns >=7 ) file.write((char *) &sigf, sizeof(float));
+            file.write((const char *) &h, sizeof(int));
+            file.write((const char *) &k, sizeof(int));
+            file.write((const char *) &l, sizeof(int));
+            file.write((const char *) &amp, sizeof(float));
+            file.write((const char *) &phase, sizeof(float));
+            if(_number_of_columns >=6 ) file.write((const char *) &fom, sizeof(float));
+            if(_number_of_columns >=7 ) file.write((const char *) &sigf, sizeof(float));
         }
         catch(const std::exception& e)
         {

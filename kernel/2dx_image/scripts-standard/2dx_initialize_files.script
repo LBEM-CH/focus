@@ -397,6 +397,12 @@ endif
 #
 if ( ${movie_enable} == "y" ) then
   ${proc_2dx}/linblock "Movie Mode."
+  if ( ${movie_stackname} == "ScriptWillPutNameHere") then
+    if( -e ${nonmaskimagename}_stack.mrc ) then
+      set movie_stackname = ${nonmaskimagename}_stack.mrc
+      echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
+    endif
+  endif
   if ( -e ${movie_stackname}.mrc ) then
     set movie_stackname = ${movie_stackname}.mrc
     echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results

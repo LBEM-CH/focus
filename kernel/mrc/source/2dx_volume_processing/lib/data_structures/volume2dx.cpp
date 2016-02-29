@@ -1073,7 +1073,7 @@ void ds::Volume2DX::low_pass_gaussian(double high_resolution)
     
 }
 
-ds::Volume2DX ds::Volume2DX::project2D(char axis)
+ds::Volume2DX ds::Volume2DX::projection2D(char axis)
 {
     VolumeHeader head = header();
     ReflectionData current_data = get_fourier();
@@ -1124,6 +1124,83 @@ ds::Volume2DX ds::Volume2DX::project2D(char axis)
     projection.set_fourier(new_data);
     
     return projection;
+}
+
+ds::Volume2DX ds::Volume2DX::average2D(char axis)
+{
+    VolumeHeader head = header();
+    RealSpaceData current_data = get_real();
+    RealSpaceData new_data;
+    if(axis == 'x' || axis == 'X')
+    {
+        head.set_mx(1);
+        head.set_rows(1);
+        new_data = RealSpaceData(1, ny(), nz());
+        for(int iz=0; iz<current_data.nz(); iz++)
+        {
+            for(int iy=0; iy<current_data.ny(); iy++)
+            {
+                double sum = 0.0;
+                int count = 0;
+                for(int ix=0; ix<current_data.nx(); ix++)
+                {
+                    sum += current_data.get_value_at(ix, iy, iz);
+                }
+                if(count != 0) sum = sum/count;
+                new_data.set_value_at(0, iy, iz, sum);
+            }
+        }
+    }
+    else if(axis == 'y' || axis == 'Y')
+    {
+        head.set_my(1);
+        head.set_columns(1);
+        new_data = RealSpaceData(nx(), 1, nz());
+        for(int iz=0; iz<current_data.nz(); iz++)
+        {
+            for(int ix=0; ix<current_data.nx(); ix++)
+            {
+                double sum = 0.0;
+                int count = 0;
+                for(int iy=0; iy<current_data.ny(); iy++)
+                {
+                    sum += current_data.get_value_at(ix, iy, iz);
+                }
+                if(count != 0) sum = sum/count;
+                new_data.set_value_at(ix, 0, iz, sum);
+            }
+        }
+    }
+    else if(axis == 'z' || axis == 'Z')
+    {
+        head.set_mz(1);
+        head.set_sections(1);
+        new_data = RealSpaceData(nx(), ny(), 1);
+        for(int ix=0; ix<current_data.nx(); ix++)
+        {
+            for(int iy=0; iy<current_data.ny(); iy++)
+            {
+                double sum = 0.0;
+                int count = 0;
+                for(int iz=0; iz<current_data.nz(); iz++)
+                {
+                    sum += current_data.get_value_at(ix, iy, iz);
+                }
+                if(count != 0) sum = sum/count;
+                new_data.set_value_at(ix, iy, 0, sum);
+            }
+        }
+    }
+    else
+    {
+        std::cerr << "ERROR: Bad value provided for axis: " << axis << " should be (x ,or, y ,or, z)\n";
+        exit(1);
+    }
+    
+    Volume2DX averaged(head);
+    averaged.set_real(new_data);
+    
+    return averaged;
 }
 
 ds::Volume2DX ds::Volume2DX::subsample(int factor)

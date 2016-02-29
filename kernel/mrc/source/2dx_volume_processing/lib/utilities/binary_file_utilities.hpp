@@ -22,7 +22,7 @@ namespace tdx
              * @param in_file
              * @return size
              */
-            long file_size(const std::string& filename);
+            size_t file_size(const std::string& filename);
             
             /**
              * Reads an string of character size read_size from current position of ifstream

@@ -6,4 +6,5 @@
 #include "binned_data.hpp"
 #include "volume_header.hpp"
 #include "volume2dx.hpp"
+#include "volume_stack.hpp"
 #include "mesh_binned_data.hpp"

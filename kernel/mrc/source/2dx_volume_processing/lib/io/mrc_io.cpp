@@ -4,6 +4,7 @@
  * 
  */
 
+#include <ctime>
 #include "mrc_io.hpp"
 
 #include "../utilities/binary_file_utilities.hpp"
@@ -118,9 +119,9 @@ tdx::data::RealSpaceData io::mrc::get_data(const std::string file_name, const in
     
     std::ifstream file(file_name, std::ios::in|std::ios::binary);
     
-    long input_size = nx*ny*nz;
-    long file_size = tdx::utilities::binary_file_utilities::file_size(file_name);
-    long memory_size = (int)(file_size - 1024)/4;
+    size_t input_size = nx*ny*nz;
+    size_t file_size = tdx::utilities::binary_file_utilities::file_size(file_name);
+    size_t memory_size = (int)(file_size - 1024)/4;
     
     if(memory_size < input_size)
     {
@@ -134,18 +135,24 @@ tdx::data::RealSpaceData io::mrc::get_data(const std::string file_name, const in
     
     file.seekg (1024, std::ios::beg);
     
+    clock_t start = clock();
     float* _data = (float*) malloc(input_size*sizeof(float));
     for(int itr_memory=0; itr_memory < input_size; ++itr_memory)
     {
         _data[itr_memory] = tdx::utilities::binary_file_utilities::read_float(file);
     }
     
+    std::cout << "Data read in " << (clock() - start)/(double)CLOCKS_PER_SEC << " seconds\n";
+
+    start = clock();
     tdx::data::RealSpaceData data(nx, ny, nz);
     for(int id=0; id< data.size(); ++id)
     {
         //flip the data for 2dx format
         data.set_value_at(data.size()-id-1, (double)_data[id]);     
     }
+    
+    std::cout << "Data flipped in " << (clock() - start)/(double)CLOCKS_PER_SEC << " seconds\n";
     
     free(_data);
     return data;
@@ -196,6 +203,8 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
     
     float ccp4_skwmat = 0.0101;
     int machine_stamp = 16708;
+    
+    clock_t start = clock();
     
     file.write((char*)&rows, sizeof(int));
     file.write((char*)&columns, sizeof(int));
@@ -260,6 +269,8 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
         float value = (float)data.get_value_at(write_id);
         file.write((char*)&value, sizeof(float));
     }
+    
+    std::cout << "File written in " << (clock()-start)/(double)CLOCKS_PER_SEC << " seconds\n";
     
     file.close();
 }

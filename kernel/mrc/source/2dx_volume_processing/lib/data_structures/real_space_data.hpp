@@ -110,19 +110,19 @@ namespace tdx
              * x-size of the data
              * @return x-size of the data
              */
-            int nx() const;
+            size_t nx() const;
             
             /**
              * y-size of the data
              * @return y-size of the data
              */
-            int ny() const;
+            size_t ny() const;
             
             /**
              * z-size of the data
              * @return z-size of the data
              */
-            int nz() const;
+            size_t nz() const;
             
             /**
              * Evaluates minimum density value
@@ -146,7 +146,7 @@ namespace tdx
              * The the current size of the array
              * @return size
              */
-            long size() const ;
+            size_t size() const ;
             
              /**
              * Fetches the memory location of the x, y, z
@@ -155,7 +155,7 @@ namespace tdx
              * @param z
              * @return 
              */
-            int memory_id(int x, int y, int z) const ;
+            size_t memory_id(int x, int y, int z) const ;
             
             /**
              * Returns the sum of the squared densities of all voxels
@@ -306,13 +306,15 @@ namespace tdx
             
             /**
              * Data variable as a pointer to the double array
+             * Data is stored with origin at the lower left corner looking 
+             * down on the volume.
              */
             double* _data;
             
             /**
              * The size of the current data variable
              */
-            int _nx, _ny, _nz;
+            size_t _nx, _ny, _nz;
             
             
         }; //class RealSpaceData

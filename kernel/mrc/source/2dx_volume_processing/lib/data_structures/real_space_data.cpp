@@ -181,22 +181,22 @@ bool ds::RealSpaceData::indices_in_limit(int x, int y, int z) const
     return result;
 }
 
-int ds::RealSpaceData::memory_id(int x, int y, int z) const
+size_t ds::RealSpaceData::memory_id(int x, int y, int z) const
 {
     return ( x + (y*_nx) + (z*_ny*_nx) );
 }
 
-int ds::RealSpaceData::nx() const
+size_t ds::RealSpaceData::nx() const
 {
     return _nx;
 }
 
-int ds::RealSpaceData::ny() const
+size_t ds::RealSpaceData::ny() const
 {
     return _ny;
 }
 
-int ds::RealSpaceData::nz() const
+size_t ds::RealSpaceData::nz() const
 {
     return _nz;
 }
@@ -236,7 +236,7 @@ double ds::RealSpaceData::mean() const
     return sum/size();
 }
 
-long ds::RealSpaceData::size() const
+size_t ds::RealSpaceData::size() const
 {
     return _nx*_ny*_nz;
 }

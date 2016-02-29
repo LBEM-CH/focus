@@ -28,6 +28,7 @@ int main(int argc, char* argv[])
     exe.add(args::templates::SUBSAMPLE);
     exe.add(args::templates::BFACTOR);
     exe.add(args::templates::PSF);
+    exe.add(args::templates::ZERO_PHASES);
     exe.add(args::templates::INVERTZ);
     exe.add(args::templates::INVERTY);
     exe.add(args::templates::INVERTX);
@@ -116,6 +117,12 @@ int main(int argc, char* argv[])
     if(args::templates::INVERTX.getValue()) input.invert_hand(1);
     if(args::templates::INVERTY.getValue()) input.invert_hand(2);
     if(args::templates::INVERTZ.getValue()) input.invert_hand(3);
+    
+    if(args::templates::ZERO_PHASES.getValue())
+    {
+        std::cout << "Setting all phases to zero..\n";
+        input = input.zero_phases();
+    }
     
     if(args::templates::PSF.getValue())
     {

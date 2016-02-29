@@ -53,6 +53,7 @@ namespace tdx
             static TCLAP::SwitchArg INVERTX("", "invertx", "Produce an output map with inverted hand in x direction", false);
             static TCLAP::SwitchArg INVERTY("", "inverty", "Produce an output map with inverted hand in y direction", false);
             static TCLAP::SwitchArg INVERTZ("", "invertz", "Produce an output map with inverted hand in z direction", false);
+            static TCLAP::SwitchArg ZERO_PHASES("", "zero-phases", "Produce the output map with zero phases", false);
             static TCLAP::SwitchArg PSF("", "psf", "Produce an Point Spread Function(PSF) output map (works only with mrcout)", false);
             static TCLAP::SwitchArg FULL_FOURIER("", "full-fourier", "Produce a full P1 Fourier space in output (noticeable only with hklout)", false);
             static TCLAP::SwitchArg SPREAD_FOURIER("", "spread-fourier", "Spread the data in Fourier space to fill some missing spots", false);

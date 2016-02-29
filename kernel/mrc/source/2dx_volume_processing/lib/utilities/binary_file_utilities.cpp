@@ -8,7 +8,7 @@
 
 #include "binary_file_utilities.hpp"
 
-long tdx::utilities::binary_file_utilities::file_size(const std::string& filename)
+size_t tdx::utilities::binary_file_utilities::file_size(const std::string& filename)
 {
     struct stat stat_buf;
     int rc = stat(filename.c_str(), &stat_buf);

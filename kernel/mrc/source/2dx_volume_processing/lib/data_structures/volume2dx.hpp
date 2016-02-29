@@ -341,7 +341,14 @@ namespace tdx
              * Returns a projection in the direction of axis
              * @param axis: x/y/z
              */
-            Volume2DX project2D(char axis);
+            Volume2DX projection2D(char axis);
+            
+             /**
+             * Calculates the average of all voxels along axis
+             * in real space.
+             * @param axis: x/y/z
+             */
+            Volume2DX average2D(char axis);
             
             /**
              * Fetches the real valued density at (x,y,z) from the volume

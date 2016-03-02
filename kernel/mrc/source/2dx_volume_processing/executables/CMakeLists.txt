@@ -19,6 +19,11 @@ set(RUNNER_SOURCES ${EXEC_SOURCES})
 # Include Directories          #
 #==============================#
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
+if(NOT TCLAP_INCLUDE_DIR)
+    MESSAGE("TCLAP NOT FOUND")
+    SET(TCLAP_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/tclap)
+endif()
+include_directories(${TCLAP_INCLUDE_DIR})
 
 #=============================#
 # Create Executables          # 

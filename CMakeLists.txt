@@ -100,6 +100,7 @@ install(FILES ${HTM} DESTINATION .)
 #-- ADD SUBDIRECTORIES --------------------------------------------------------
 #
 # the libraries have to be built before by the build_all script 
+add_subdirectory(external)
 add_subdirectory(kernel)
 add_subdirectory(lib)
 add_subdirectory(2dx_image)

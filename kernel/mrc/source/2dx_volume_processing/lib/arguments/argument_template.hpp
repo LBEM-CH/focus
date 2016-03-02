@@ -7,7 +7,7 @@
 #ifndef ARGUMENT_TEMPLATE_HPP
 #define	ARGUMENT_TEMPLATE_HPP
 
-#include "tclap/CmdLine.h"
+#include "CmdLine.h"
 #include <string>
 
 namespace tdx

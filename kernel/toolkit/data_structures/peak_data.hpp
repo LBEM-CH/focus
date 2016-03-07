@@ -12,7 +12,7 @@
 #include <list>
 #include <string.h>
 
-#include "complex.hpp"
+#include "../basics/complex.hpp"
 
 namespace tdx
 {
@@ -94,7 +94,7 @@ namespace tdx
              * Gets the complex value of the spot
              * @return value
              */
-            Complex value() const ;
+            tdx::Complex value() const ;
             
             /**
              * Gets the weight of the spot
@@ -124,7 +124,7 @@ namespace tdx
              * Assigner function of the value
              * @param value
              */
-            void set_value(Complex value);
+            void set_value(tdx::Complex value);
             
             /**
              * Assigner function of the weight
@@ -140,12 +140,12 @@ namespace tdx
              * @param value
              * @param weight
              */
-            void initialize(Complex value, double weight);
+            void initialize(tdx::Complex value, double weight);
             
             /**
              * Value of the peak
              */
-            Complex _value;
+            tdx::Complex _value;
             
             /**
              * weight of the peak

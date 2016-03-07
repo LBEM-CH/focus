@@ -191,7 +191,7 @@ void tdx::io::reflection::add_spot(tdx::data::MillerToPeakMultiMap& map, int h_i
     double real_in = amp_in*cos(phase_in);
     double imag_in = amp_in*sin(phase_in);
 
-    ds::Complex complex_in(real_in, imag_in);
+    tdx::Complex complex_in(real_in, imag_in);
     ds::PeakData value_in(complex_in, weight_in);
     
     map.insert(ds::MillerToPeakPair(index_in, value_in));

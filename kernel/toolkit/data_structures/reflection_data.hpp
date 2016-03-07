@@ -139,7 +139,7 @@ namespace tdx
              * @param value - complex value
              * @param weight - fom weight in fraction 
              */
-            void set_spot_at(int h, int k, int l, Complex value, double weight);
+            void set_spot_at(int h, int k, int l, tdx::Complex value, double weight);
             
             /**
              * Fetches the complex number stored at miller index h, k, l.
@@ -149,7 +149,7 @@ namespace tdx
              * @param l
              * @return complex value at h, k, l
              */
-            Complex value_at(int h, int k, int l) const ;
+            tdx::Complex value_at(int h, int k, int l) const ;
             
             /**
              * Fetches the weight at the miller index h, k, l.

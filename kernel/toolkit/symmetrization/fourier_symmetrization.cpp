@@ -59,7 +59,7 @@ void tdx::symmetrization::fourier_symmetrization::symmetrize
                     
                     double sym_real = current_amp * cos(sym_phase);
                     double sym_imag = current_amp * sin(sym_phase);
-                    ds::PeakData sym_spot(ds::Complex(sym_real, sym_imag), current_spot.weight());
+                    ds::PeakData sym_spot(tdx::Complex(sym_real, sym_imag), current_spot.weight());
                     
                     spot_multimap.insert(ds::MillerToPeakPair(sym_index, sym_spot));
                     

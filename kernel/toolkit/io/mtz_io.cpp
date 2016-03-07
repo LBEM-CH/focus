@@ -6,10 +6,10 @@
 
 #include "mtz_io.hpp"
 
+#include "../basics/string.hpp"
 #include "../utilities/binary_file_utilities.hpp"
 #include "../utilities/filesystem.hpp"
 #include "../utilities/angle_utilities.hpp"
-#include "../utilities/string_utilities.hpp"
 
 std::string tdx::io::MTZParser::file_name()
 {
@@ -220,7 +220,7 @@ void tdx::io::MTZParser::read_data()
             {
                 h=-1*h; k=-1*k; l=-1*l; phase=-1*phase;
             }
-            tdx::data::Complex value(amp * cos(phase), amp*sin(phase));
+            tdx::Complex value(amp * cos(phase), amp*sin(phase));
         
             _data.set_spot_at(h,k,l, value, fom);
             
@@ -252,9 +252,9 @@ void tdx::io::MTZParser::read_header()
     for(int l=0; l<number_header_lines; l++)
     {
         std::string line = tdx::utilities::binary_file_utilities::read_string(file, 80);
-        std::string trimmed = tdx::utilities::string_utilities::trim(line);
+        std::string trimmed = tdx::String::trim(line);
         //std::cout << "\n" <<line << "\n";
-        std::vector<std::string> elems = tdx::utilities::string_utilities::split(trimmed, ' ');
+        std::vector<std::string> elems = tdx::String::split(trimmed, ' ');
         
         if(elems.size() > 0)
         {
@@ -429,32 +429,31 @@ void tdx::io::MTZParser::write()
     file.write(std::string("TITLE "+_title).c_str(), 80*sizeof(char));
     
     //NCOL %8d %12d %8d
-    namespace su = tdx::utilities::string_utilities;
     int zero = 0;
-    file.write(std::string("NCOL " + su::string_of(_number_of_columns, 8) + " " 
-                + su::string_of(_number_of_reflections, 12) + " " + su::string_of(zero, 8)).c_str(), 80*sizeof(char));
+    file.write(std::string("NCOL " + tdx::String::string_of(_number_of_columns, 8) + " " 
+                + tdx::String::string_of(_number_of_reflections, 12) + " " + tdx::String::string_of(zero, 8)).c_str(), 80*sizeof(char));
     
     //CELL  %9.4f %9.4f %9.4f %9.4f %9.4f %9.4f
     std::string cell_str = "CELL ";
-    for(int i=0; i<6; i++) cell_str += " " + su::string_of(_cell[i], 9, 4); 
+    for(int i=0; i<6; i++) cell_str += " " + tdx::String::string_of(_cell[i], 9, 4); 
     file.write(cell_str.c_str(), 80*sizeof(char));
     
     //COLUMN %30s %c %17.9g %17.9g %4d
     for(int col=0; col < _number_of_columns; col++)
     {
-        file.write(std::string("COLUMN " + su::string_of(_column_labels[col], 30) + " " 
+        file.write(std::string("COLUMN " + tdx::String::string_of(_column_labels[col], 30) + " " 
                 + _column_type[col] + " " 
-                + su::string_of(_column_min[col], 17, 9) + " "
-                + su::string_of(_column_max[col], 17, 9) + " "
-                + su::string_of(zero, 4)).c_str(),
+                + tdx::String::string_of(_column_min[col], 17, 9) + " "
+                + tdx::String::string_of(_column_max[col], 17, 9) + " "
+                + tdx::String::string_of(zero, 4)).c_str(),
                 80*sizeof(char));
         
         std::time_t rawtime = std::time(0);
         struct tm * now = std::localtime(&rawtime);
         char buffer[30];
         strftime(buffer, 30, "%d/%m/%y_%I:%M:%S", now);
-        file.write(std::string("COLSRC " + su::string_of(_column_labels[col], 30) +
-                        " Created_" + buffer + su::string_of(zero, 4)).c_str(), 80*sizeof(char) );
+        file.write(std::string("COLSRC " + tdx::String::string_of(_column_labels[col], 30) +
+                        " Created_" + buffer + tdx::String::string_of(zero, 4)).c_str(), 80*sizeof(char) );
     }
     
     file.write("END", 80*sizeof(char));

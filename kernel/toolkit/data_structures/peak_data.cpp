@@ -22,7 +22,7 @@ ds::PeakData::PeakData(Complex value, double weight)
 
 void ds::PeakData::from_peak_list(const ds::PeakList peaks)
 {
-    ds::Complex sum_values;
+    tdx::Complex sum_values;
     std::list<double> foms;
     double sum_foms = 0.0;
     
@@ -38,7 +38,7 @@ void ds::PeakData::from_peak_list(const ds::PeakList peaks)
     double avg_weight = tdx::utilities::fom_utilities::AverageFOMs(foms);
     
     //The averaged value
-    ds::Complex avg_value = sum_values*(avg_weight/sum_foms);
+    tdx::Complex avg_value = sum_values*(avg_weight/sum_foms);
     
     this->initialize(avg_value, avg_weight);
 }
@@ -82,7 +82,7 @@ bool ds::PeakData::operator <(const PeakData& rhs) const
            );
 }
 
-ds::Complex ds::PeakData::value() const
+tdx::Complex ds::PeakData::value() const
 {
     return _value;
 }

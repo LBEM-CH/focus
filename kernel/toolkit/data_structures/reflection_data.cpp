@@ -56,8 +56,8 @@ ds::ReflectionData ds::ReflectionData::operator+(const ReflectionData& rhs)
     for(const_iterator ref=this->begin(); ref!=this->end(); ++ref)
     {
         ds::MillerIndex index = (*ref).first;
-        ds::Complex current_complex = (*ref).second.value();
-        ds::Complex new_complex(current_complex.real(), current_complex.imag());
+        tdx::Complex current_complex = (*ref).second.value();
+        tdx::Complex new_complex(current_complex.real(), current_complex.imag());
         
         if(rhs.exists(index.h(), index.k(), index.l()))
         {
@@ -72,7 +72,7 @@ ds::ReflectionData ds::ReflectionData::operator+(const ReflectionData& rhs)
     {
         //Assign the current Miller Index to the array
         ds::MillerIndex index = (*ref).first;
-        ds::Complex current_complex = (*ref).second.value();
+        tdx::Complex current_complex = (*ref).second.value();
 
         if( !(new_data->exists(index.h(), index.k(), index.l())) )
         {
@@ -126,9 +126,9 @@ void ds::ReflectionData::set_spot_at(int h, int k, int l, Complex value, double 
     _data[index] = PeakData(value, weight);
 }
 
-ds::Complex ds::ReflectionData::value_at(int h, int k, int l) const
+tdx::Complex ds::ReflectionData::value_at(int h, int k, int l) const
 {
-    ds::Complex value(0.0, 0.0);
+    tdx::Complex value(0.0, 0.0);
     if(exists(h,k,l))
     {
         value = _data.at(MillerIndex(h, k, l)).value();
@@ -283,7 +283,7 @@ void ds::ReflectionData::replace_reflections(const ReflectionData& input, double
     {
         //Assign the current Miller Index to the array
         ds::MillerIndex index = (*ref).first;
-        ds::Complex current_complex = (*ref).second.value();
+        tdx::Complex current_complex = (*ref).second.value();
 
         if(current_complex.amplitude() > replacement_amplitude_cutoff)
         {
@@ -296,7 +296,7 @@ void ds::ReflectionData::replace_reflections(const ReflectionData& input, double
     {
         //Assign the current Miller Index to the array
         ds::MillerIndex index = (*ref).first;
-        ds::Complex current_complex = (*ref).second.value();
+        tdx::Complex current_complex = (*ref).second.value();
         double radius = std::abs(index.l()*tan(cone_angle_rad));
         double distance = sqrt(index.h()*index.h() + index.k()*index.k());
         if(current_complex.amplitude() > replacement_amplitude_cutoff && !new_data.exists(index.h(), index.k(), index.l()) && distance < radius)
@@ -320,7 +320,7 @@ void ds::ReflectionData::change_amplitudes(const ReflectionData& input, double r
 
         if( exists(index.h(), index.k(), index.l()) && current_amp > replacement_amplitude_cutoff)
         {
-            ds::Complex current_complex = value_at(index.h(), index.k(), index.l());
+            tdx::Complex current_complex = value_at(index.h(), index.k(), index.l());
             current_complex.set_amplitude(current_amp);
             double current_weight = weight_at(index.h(), index.k(), index.l());
             set_spot_at(index.h(), index.k(), index.l(), current_complex, current_weight );
@@ -350,7 +350,7 @@ ds::ReflectionData ds::ReflectionData::inverted_data(int direction) const
             //Get Friedel spot for negative h
             if(h < 0) {h = -1*h; k=-1*k; l=-1*l; currentPhase = currentPhase*-1;} 
             
-            ds::Complex newValue = ds::Complex(currentAmp*cos(currentPhase), currentAmp*sin(currentPhase));
+            tdx::Complex newValue = tdx::Complex(currentAmp*cos(currentPhase), currentAmp*sin(currentPhase));
             new_data.set_spot_at(h, k, l, newValue, (*ref).second.weight());
         }
         
@@ -417,10 +417,10 @@ ds::ReflectionData ds::ReflectionData::get_full_fourier() const
     {
         //Assign the current Miller Index to the array
         ds::MillerIndex currentHKL = (*ref).first;
-        ds::Complex currentComplex = (*ref).second.value();
+        tdx::Complex currentComplex = (*ref).second.value();
         
         ds::MillerIndex friedelHKL = currentHKL.FriedelSpot();
-        ds::Complex friedelComplex = currentComplex;
+        tdx::Complex friedelComplex = currentComplex;
         friedelComplex.set_phase(-1*currentComplex.phase());
         
         full_data.set_spot_at(currentHKL.h(), currentHKL.k(), currentHKL.l(), currentComplex, (*ref).second.weight());

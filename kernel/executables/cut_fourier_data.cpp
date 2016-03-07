@@ -8,7 +8,7 @@
 #include <string.h>
 #include <vector>
 
-#include "../include/2dx_volume_processing.h"
+#include "2dx_toolkit.h"
 
 int main(int argc, char* argv[])
 {

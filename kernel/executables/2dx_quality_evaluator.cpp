@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "../include/2dx_volume_processing.h"
+#include "2dx_toolkit.h"
 
 /*
  * Calculates qualtiy of merged data in 2dx.

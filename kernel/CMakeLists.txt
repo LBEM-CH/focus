@@ -22,6 +22,8 @@ if(LOCAL_LIB_DIR)
 	list(APPEND PER_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a )
 endif(LOCAL_LIB_DIR)
 
+add_subdirectory(toolkit)
+add_subdirectory(executables)
 add_subdirectory(config)
 add_subdirectory(2dx_image)
 add_subdirectory(2dx_merge)

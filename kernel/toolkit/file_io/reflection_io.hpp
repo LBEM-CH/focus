@@ -54,6 +54,15 @@ namespace tdx
              * @param raw_ccp4
              */
             void add_spot(tdx::data::MillerToPeakMultiMap& map, int h_in, int k_in, double z_in, double amp_in, double phase_in, double weight_in, int z_scale, bool raw_ccp4);
+            
+            /**
+             * Returns the number of columns in a file.
+             * Also considers if there are irregular heading lines present 
+             * @param file_name : String path of file
+             * @param number_columns : Returns the number of columns in this variable
+             * @return number of header lines if found
+             */
+            int number_of_columns(const std::string file_name, int& number_columns);
         }
         
     }

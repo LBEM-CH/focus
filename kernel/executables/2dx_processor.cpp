@@ -56,7 +56,8 @@ int main(int argc, char* argv[])
     if(args::templates::MRCIN.isSet())
     {
         infile = args::templates::MRCIN.getValue();
-        informat = tdx::utilities::filesystem::FileExtension(infile);
+        tdx::File file(infile);
+        informat = file.extension();
     }
     else if(args::templates::HKLIN.isSet())
     {

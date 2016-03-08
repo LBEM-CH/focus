@@ -7,8 +7,8 @@
 #include "mtz_io.hpp"
 
 #include "../basics/string.hpp"
-#include "../utilities/binary_file_utilities.hpp"
-#include "../utilities/filesystem.hpp"
+#include "../basics/binary_file.hpp"
+
 #include "../utilities/angle_utilities.hpp"
 
 std::string tdx::io::MTZParser::file_name()
@@ -37,19 +37,19 @@ tdx::io::MTZParser::MTZParser(std::string file_name)
     std::cout << "Opening in READ mode: " << file_name << "\n";
     _file_name = file_name;
     _data = tdx::data::ReflectionData();
+    
+    tdx::BinaryFile infile(file_name, tdx::File::in);
     //Check for the presence of file
-    if (!tdx::utilities::filesystem::FileExists(file_name)){
+    if (!infile.exists())
+    {
         std::cerr << "File not found: " << file_name << std::endl;
         exit(1);
     }
     
-    namespace bf = tdx::utilities::binary_file_utilities;
-    
-    std::ifstream file(file_name, std::ios::in|std::ios::binary);
-    file.seekg (0, std::ios::beg);
+    infile.seekg (0, std::ios::beg);
     
     //Check if the first record is called MTZ
-    std::string first_record = bf::read_string(file, 4);
+    std::string first_record = infile.read_string(4);
     if(first_record.substr(0,3) != "MTZ")
     {
         std::cerr << "The file is not supposed to be in MTZ format\n";
@@ -57,11 +57,11 @@ tdx::io::MTZParser::MTZParser(std::string file_name)
     }
     
     //Get the header location
-    _header_position = (size_t) bf::read_int(file);
+    _header_position = (size_t) infile.read_int();
     
     std::cout << "Header location: " << _header_position <<"\n";
     
-    file.close();
+    infile.close();
     
     read_header();
     
@@ -76,10 +76,13 @@ tdx::io::MTZParser::MTZParser(std::string file_name, tdx::data::ReflectionData d
     _file_name = file_name;
     _data = data;
     
-    //Check for the existence of the file
-    if(tdx::utilities::filesystem::FileExists(file_name))
+    tdx::BinaryFile infile(file_name, tdx::File::in);
+    
+    //Check for the presence of file
+    if (!infile.exists())
     {
-        std::cout << "WARNING: File.. " << file_name << " already exists. Overwriting!\n";
+        std::cerr << "File not found: " << file_name << std::endl;
+        exit(1);
     }
     
     //Check number of columns
@@ -189,8 +192,8 @@ void tdx::io::MTZParser::read_data()
     }
     
     
-    std::ifstream file(file_name(), std::ios::in|std::ios::binary);
-    file.seekg (20*sizeof(float), std::ios::beg);
+    tdx::BinaryFile infile(file_name(), tdx::File::in);
+    infile.seekg (20*sizeof(float), std::ios::beg);
     
     
     _data.clear();
@@ -204,7 +207,7 @@ void tdx::io::MTZParser::read_data()
             
             for(int col=0; col<_number_of_columns; col++)
             {
-                read_reflection[col] = tdx::utilities::binary_file_utilities::read_float(file);   
+                read_reflection[col] = infile.read_float();   
             }
             int h = (int) read_reflection[col_order[0]];
             int k = (int) read_reflection[col_order[1]];
@@ -233,16 +236,16 @@ void tdx::io::MTZParser::read_data()
         
     }
     delete read_reflection;
-    file.close();
+    infile.close();
             
 }
 
 void tdx::io::MTZParser::read_header() 
 {
-    std::ifstream file(file_name(), std::ios::in|std::ios::binary);
-    file.seekg ((_header_position-1)*sizeof(float), std::ios::beg);
+    tdx::BinaryFile infile(file_name(), tdx::File::in);
+    infile.seekg ((_header_position-1)*sizeof(float), std::ios::beg);
     
-    long file_size = tdx::utilities::binary_file_utilities::file_size(file_name());
+    size_t file_size = infile.file_size();
     int number_header_lines = (int)(file_size - (_header_position-1)*sizeof(float))/80;
     
     std::cout << "Number of header lines found: " << number_header_lines <<"\n";
@@ -251,7 +254,7 @@ void tdx::io::MTZParser::read_header()
     std::cout << "Reading record ";
     for(int l=0; l<number_header_lines; l++)
     {
-        std::string line = tdx::utilities::binary_file_utilities::read_string(file, 80);
+        std::string line = infile.read_string(80);
         std::string trimmed = tdx::String::trim(line);
         //std::cout << "\n" <<line << "\n";
         std::vector<std::string> elems = tdx::String::split(trimmed, ' ');
@@ -331,7 +334,7 @@ void tdx::io::MTZParser::read_header()
     
     std::cout <<" FINISHED !! \n";
     
-    file.close();
+    infile.close();
 
 }
 

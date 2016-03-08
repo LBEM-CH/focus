@@ -13,15 +13,16 @@
 #include "miller_index.hpp"
 #include "peak_data.hpp"
 
-#include "../io/mrc_io.hpp"
-#include "../io/reflection_io.hpp"
-#include "../io/mtz_io.hpp"
+#include "../basics/file.hpp"
+
+#include "../file_io/mrc_io.hpp"
+#include "../file_io/reflection_io.hpp"
+#include "../file_io/mtz_io.hpp"
 
 #include "../symmetrization/symmetry2dx.hpp"
 #include "../symmetrization/fourier_symmetrization.hpp"
 
 #include "../utilities/angle_utilities.hpp"
-#include "../utilities/filesystem.hpp"
 #include "../utilities/fourier_utilities.hpp"
 #include "../utilities/bead_model_generator.hpp"
 #include "../utilities/number_utilities.hpp"
@@ -303,8 +304,8 @@ void ds::Volume2DX::read_volume(std::string file_name, std::string format)
 
 void ds::Volume2DX::read_volume(std::string file_name)
 {
-    std::string format = tdx::utilities::filesystem::FileExtension(file_name);
-    
+    tdx::File file(file_name);
+    std::string format = file.extension();   
     read_volume(file_name, format);
 }
 
@@ -332,7 +333,8 @@ void ds::Volume2DX::write_volume(std::string file_name, std::string format)
 
 void ds::Volume2DX::write_volume(std::string file_name)
 {
-    std::string format = tdx::utilities::filesystem::FileExtension(file_name);
+    tdx::File file(file_name);
+    std::string format = file.extension();
     write_volume(file_name, format);
 }
 

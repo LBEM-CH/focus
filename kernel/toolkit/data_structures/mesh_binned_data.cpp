@@ -5,7 +5,8 @@
  */
 
 #include "mesh_binned_data.hpp"
-#include "../utilities/filesystem.hpp"
+
+#include "../basics/file.hpp"
 
 namespace ds = tdx::data;
 
@@ -62,13 +63,13 @@ void ds::MeshBinnedData::write_average(std::string file) const
 
 void ds::MeshBinnedData::write(std::string file, bool average) const
 {
+    tdx::File writeFile(file, tdx::File::out);
+    
     //Check for the existence of the file
-    if(tdx::utilities::filesystem::FileExists(file))
+    if(writeFile.exists())
     {
         std::cout << "WARNING: File.. " << file << " already exists. Overwriting!\n";
     }
-    
-    std::ofstream writeFile(file);
     
     std::string output = "";
     output += "\n";

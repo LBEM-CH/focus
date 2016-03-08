@@ -7,7 +7,8 @@
 #include <iomanip>
 
 #include "reflection_io.hpp"
-#include "../utilities/filesystem.hpp"
+
+#include "../basics/file.hpp"
 #include "../utilities/angle_utilities.hpp"
 #include "../utilities/fourier_utilities.hpp"
 
@@ -17,8 +18,10 @@ void tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4
     
     spot_multimap.clear();
     
+    tdx::File inFile (file_path, tdx::File::in);
+    
     //Check for the presence of file
-    if (!tdx::utilities::filesystem::FileExists(file_path)){
+    if (!inFile.exists()){
         std::cerr << "File not found: " << file_path << std::endl;
         exit(1);
     }
@@ -29,7 +32,7 @@ void tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4
     
     //Count number of columns in file
     int number_columns;
-    int header_lines = tdx::utilities::filesystem::NumberOfColumns(file_path, number_columns);
+    int header_lines = number_of_columns(file_path, number_columns);
     
     if(number_columns < 5 )
     {
@@ -39,16 +42,13 @@ void tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4
         exit(1);
     }
     
-    std::ifstream hkzFile(file_path);
-    
     if(header_lines != 0)
     {
         std::cout << "WARNING: Found " << header_lines << " header lines while reading reflections file " << file_path << "\n\n";
     }
     for(int header_line=0; header_line<header_lines; header_line++)
     {
-        std::string sLine;
-        std::getline(hkzFile, sLine);
+        std::string sLine = inFile.read_line();
     }
     
     if(number_columns == 5)
@@ -57,7 +57,7 @@ void tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4
         std::cout << "----------------------------------------------\n";
         std::cout << "H K L/Z* AMP PHASE\n";
         std::cout << "----------------------------------------------\n\n";
-        while (hkzFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in)
+        while (inFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in)
         {
             add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, 1.0, z_scale, raw_ccp4);
         }
@@ -69,7 +69,7 @@ void tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4
         std::cout << "----------------------------------------------\n";
         std::cout << "H K L/Z* AMP PHASE FOM\n";
         std::cout << "----------------------------------------------\n\n";
-        while (hkzFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> wt_in)
+        while (inFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> wt_in)
         {
             if(wt_in > 1.0) wt_in = wt_in*0.01;
             add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, wt_in, z_scale, raw_ccp4);
@@ -82,7 +82,7 @@ void tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4
         std::cout << "----------------------------------------------\n";
         std::cout << "H K L/Z* AMP PHASE FOM DUMMY\n";
         std::cout << "----------------------------------------------\n\n";
-        while (hkzFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> wt_in >> dummy)
+        while (inFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> wt_in >> dummy)
         {
             if(wt_in > 1.0) wt_in = wt_in*0.01;
             add_spot(spot_multimap, h_in, k_in, z_in, amplitude_in, phase_in, wt_in, z_scale, raw_ccp4);
@@ -95,7 +95,7 @@ void tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4
         std::cout << "----------------------------------------------\n";
         std::cout << "H K L/Z* AMP PHASE DUMMY SIG_PHASE DUMMY\n";
         std::cout << "----------------------------------------------\n\n";
-        while (hkzFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> dummy >> wt_in >> dummy)
+        while (inFile >> h_in >> k_in >> z_in >> amplitude_in >> phase_in >> dummy >> wt_in >> dummy)
         {
             if(wt_in>90) wt_in = 90;
             if ( wt_in < 89.9 )
@@ -113,7 +113,7 @@ void tdx::io::reflection::read(std::string file_path, int z_scale, bool raw_ccp4
         exit(1);
     }
     
-    hkzFile.close();
+    inFile.close();
 }
 
 void tdx::io::reflection::write(const std::string& file_path, const tdx::data::ReflectionData& data, bool for_ccp4)
@@ -121,9 +121,11 @@ void tdx::io::reflection::write(const std::string& file_path, const tdx::data::R
     const int INT_WIDTH = 5;
     const int FLOAT_WIDTH = 13;
     const int FLOAT_PRECISION = 7;
+    
+    tdx::File outfile(file_path, tdx::File::out);
 
     //Check for the existence of the file
-    if(tdx::utilities::filesystem::FileExists(file_path))
+    if(outfile.exists())
     {
         std::cout << "WARNING: File.. " << file_path << " already exists. Overwriting!\n";
     }
@@ -195,4 +197,43 @@ void tdx::io::reflection::add_spot(tdx::data::MillerToPeakMultiMap& map, int h_i
     ds::PeakData value_in(complex_in, weight_in);
     
     map.insert(ds::MillerToPeakPair(index_in, value_in));
+}
+
+int tdx::io::reflection::number_of_columns(const std::string file_name, int& number_columns)
+{
+    std::ifstream infile(file_name);
+
+    std::string sLine;
+    number_columns = 0;
+    int cols_current = 0;
+    int cols_previous=0;
+    int header_lines=-1;
+    
+    if (infile.good())
+    {
+        //Check for the same number of columns in two consecutive rows
+        while(! infile.eof())
+        {
+            std::getline(infile, sLine);
+            std::stringstream is(sLine);
+        
+            float temp;
+            cols_previous = cols_current;
+            cols_current = 0;
+            while (is >> temp)
+            {
+                cols_current++;
+            }
+            if(cols_current == cols_previous)
+            {
+                number_columns = cols_current;
+                break;
+            }
+            header_lines++;
+        }
+    }
+    
+    infile.close();
+    
+    return header_lines;
 }

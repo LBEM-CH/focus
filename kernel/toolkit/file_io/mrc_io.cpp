@@ -7,8 +7,7 @@
 #include <ctime>
 #include "mrc_io.hpp"
 
-#include "../utilities/binary_file_utilities.hpp"
-#include "../utilities/filesystem.hpp"
+#include "../basics/binary_file.hpp"
 #include "../utilities/angle_utilities.hpp"
 
 namespace io = tdx::io;
@@ -16,8 +15,10 @@ namespace io = tdx::io;
 tdx::data::VolumeHeader io::mrc::get_header(const std::string file_name, const std::string format)
 {
     std::cout << "Reading header..\n";
+    
+    tdx::BinaryFile infile(file_name, tdx::File::in);
     //Check for the presence of file
-    if (!tdx::utilities::filesystem::FileExists(file_name)){
+    if (!infile.exists()){
         std::cerr << "File not found: " << file_name << std::endl;
         exit(1);
     }
@@ -35,19 +36,15 @@ tdx::data::VolumeHeader io::mrc::get_header(const std::string file_name, const s
     header.set_file_name(file_name);
     header.set_title("Read from file with format: " + format);
     
-    std::ifstream file(file_name, std::ios::in|std::ios::binary);;
-    
-    file.seekg (0, std::ios::beg);
+    infile.seekg (0, std::ios::beg);
     try
-    {
-        namespace bf = tdx::utilities::binary_file_utilities;
-        
+    {   
         //Read the header
-        header.set_rows(bf::read_int(file));
-        header.set_columns(bf::read_int(file));
-        header.set_sections(bf::read_int(file));
+        header.set_rows(infile.read_int());
+        header.set_columns(infile.read_int());
+        header.set_sections(infile.read_int());
         
-        int mode = bf::read_int(file);
+        int mode = infile.read_int();
         
         if(mode != 2)
         {
@@ -59,20 +56,20 @@ tdx::data::VolumeHeader io::mrc::get_header(const std::string file_name, const s
             exit(1);
         }
         
-        header.set_nxstart(bf::read_int(file));
-        header.set_nystart(bf::read_int(file));
-        header.set_nzstart(bf::read_int(file));
+        header.set_nxstart(infile.read_int());
+        header.set_nystart(infile.read_int());
+        header.set_nzstart(infile.read_int());
         
-        header.set_mx(bf::read_int(file));
-        header.set_my(bf::read_int(file));
-        header.set_mz(bf::read_int(file));
+        header.set_mx(infile.read_int());
+        header.set_my(infile.read_int());
+        header.set_mz(infile.read_int());
         
-        header.set_xlen(bf::read_float(file));
-        header.set_ylen(bf::read_float(file));
-        header.set_zlen(bf::read_float(file));
+        header.set_xlen(infile.read_float());
+        header.set_ylen(infile.read_float());
+        header.set_zlen(infile.read_float());
         
-        float alpha = bf::read_float(file);
-        float beta = bf::read_float(file);
+        float alpha = infile.read_float();
+        float beta = infile.read_float();
         
         if(alpha != 90.0 || beta != 90.0)
         {
@@ -82,11 +79,11 @@ tdx::data::VolumeHeader io::mrc::get_header(const std::string file_name, const s
             exit(1);
         }
         
-        header.set_gamma(tdx::utilities::angle_utilities::DegreeToRadian(bf::read_float(file)));
+        header.set_gamma(tdx::utilities::angle_utilities::DegreeToRadian(infile.read_float()));
         
-        int mapc = bf::read_int(file);
-        int mapr = bf::read_int(file);
-        int maps = bf::read_int(file);
+        int mapc = infile.read_int();
+        int mapr = infile.read_int();
+        int maps = infile.read_int();
         
         if(mapc != 1 || mapr != 2 || maps !=3)
         {
@@ -104,23 +101,24 @@ tdx::data::VolumeHeader io::mrc::get_header(const std::string file_name, const s
         exit(1);
     }
     
-    file.close();
+    infile.close();
     return header;
 }
 
 tdx::data::RealSpaceData io::mrc::get_data(const std::string file_name, const int nx, const int ny, const int nz)
 {
     std::cout << "Reading data..\n";
+    
+    tdx::BinaryFile infile(file_name, tdx::File::in);
+    
     //Check for the presence of file
-    if (!tdx::utilities::filesystem::FileExists(file_name)){
+    if (!infile.exists()){
         std::cerr << "File not found: " << file_name << std::endl;
         exit(1);
     }
     
-    std::ifstream file(file_name, std::ios::in|std::ios::binary);
-    
     size_t input_size = nx*ny*nz;
-    size_t file_size = tdx::utilities::binary_file_utilities::file_size(file_name);
+    size_t file_size = infile.file_size();
     size_t memory_size = (int)(file_size - 1024)/4;
     
     if(memory_size < input_size)
@@ -133,13 +131,13 @@ tdx::data::RealSpaceData io::mrc::get_data(const std::string file_name, const in
         exit(1);
     }
     
-    file.seekg (1024, std::ios::beg);
+    infile.seekg (1024, std::ios::beg);
     
     clock_t start = clock();
     float* _data = (float*) malloc(input_size*sizeof(float));
     for(int itr_memory=0; itr_memory < input_size; ++itr_memory)
     {
-        _data[itr_memory] = tdx::utilities::binary_file_utilities::read_float(file);
+        _data[itr_memory] = infile.read_float();
     }
     
     std::cout << "Data read in " << (clock() - start)/(double)CLOCKS_PER_SEC << " seconds\n";
@@ -164,8 +162,11 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
                                             const tdx::data::RealSpaceData& data,
                                             const std::string format)
 {
+    
+    tdx::File outfile(file_name, tdx::File::out);
+    
     //Check for the existence of the file
-    if(tdx::utilities::filesystem::FileExists(file_name))
+    if(outfile.exists())
     {
         std::cout << "WARNING: File.. " << file_name << " already exists. Overwriting!\n";
     }
@@ -206,29 +207,29 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
     
     clock_t start = clock();
     
-    file.write((char*)&rows, sizeof(int));
-    file.write((char*)&columns, sizeof(int));
-    file.write((char*)&sections, sizeof(int));
-    file.write((char*)&mode, sizeof(int));
-    file.write((char*)&nxstart, sizeof(int));   //nxstart
-    file.write((char*)&nystart, sizeof(int));   //nystart
-    file.write((char*)&nzstart, sizeof(int));   //nzstart
-    file.write((char*)&mx, sizeof(int));        //mx
-    file.write((char*)&my, sizeof(int));        //my
-    file.write((char*)&mz, sizeof(int));        //mz
-    file.write((char*)&xlen, sizeof(float));
-    file.write((char*)&ylen, sizeof(float));
-    file.write((char*)&zlen, sizeof(float));
-    file.write((char*)&ninty, sizeof(float));
-    file.write((char*)&ninty, sizeof(float));
-    file.write((char*)&gamma, sizeof(float));
-    file.write((char*)&mapc, sizeof(int));
-    file.write((char*)&mapr, sizeof(int));
-    file.write((char*)&maps, sizeof(int));
-    file.write((char*)&amin, sizeof(float));
-    file.write((char*)&amax, sizeof(float));
-    file.write((char*)&amean, sizeof(float));
-    file.write((char*)&spcgrp, sizeof(int));
+    outfile.write((char*)&rows, sizeof(int));
+    outfile.write((char*)&columns, sizeof(int));
+    outfile.write((char*)&sections, sizeof(int));
+    outfile.write((char*)&mode, sizeof(int));
+    outfile.write((char*)&nxstart, sizeof(int));   //nxstart
+    outfile.write((char*)&nystart, sizeof(int));   //nystart
+    outfile.write((char*)&nzstart, sizeof(int));   //nzstart
+    outfile.write((char*)&mx, sizeof(int));        //mx
+    outfile.write((char*)&my, sizeof(int));        //my
+    outfile.write((char*)&mz, sizeof(int));        //mz
+    outfile.write((char*)&xlen, sizeof(float));
+    outfile.write((char*)&ylen, sizeof(float));
+    outfile.write((char*)&zlen, sizeof(float));
+    outfile.write((char*)&ninty, sizeof(float));
+    outfile.write((char*)&ninty, sizeof(float));
+    outfile.write((char*)&gamma, sizeof(float));
+    outfile.write((char*)&mapc, sizeof(int));
+    outfile.write((char*)&mapr, sizeof(int));
+    outfile.write((char*)&maps, sizeof(int));
+    outfile.write((char*)&amin, sizeof(float));
+    outfile.write((char*)&amax, sizeof(float));
+    outfile.write((char*)&amean, sizeof(float));
+    outfile.write((char*)&spcgrp, sizeof(int));
       
     if(format == "mrc")
     {
@@ -238,39 +239,39 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
     else if(format == "map")
     {
         //Fill few default fields expected by CCP4
-        file.write((char*)&zero, sizeof(int));
-        file.write((char*)&zero, sizeof(int));
-        file.write((char*)&ccp4_skwmat, sizeof(float));
-        file.write((char*)&zero, sizeof(float));
-        file.write((char*)&zero, sizeof(float));
-        file.write((char*)&zero, sizeof(float));
-        file.write((char*)&ccp4_skwmat, sizeof(float));
-        file.write((char*)&zero, sizeof(float));
-        file.write((char*)&zero, sizeof(float));
-        file.write((char*)&zero, sizeof(float));
-        file.write((char*)&ccp4_skwmat, sizeof(float));
+        outfile.write((char*)&zero, sizeof(int));
+        outfile.write((char*)&zero, sizeof(int));
+        outfile.write((char*)&ccp4_skwmat, sizeof(float));
+        outfile.write((char*)&zero, sizeof(float));
+        outfile.write((char*)&zero, sizeof(float));
+        outfile.write((char*)&zero, sizeof(float));
+        outfile.write((char*)&ccp4_skwmat, sizeof(float));
+        outfile.write((char*)&zero, sizeof(float));
+        outfile.write((char*)&zero, sizeof(float));
+        outfile.write((char*)&zero, sizeof(float));
+        outfile.write((char*)&ccp4_skwmat, sizeof(float));
 
-        for(int i=0; i<18; i++) file.write((char*)&zero, sizeof(float));
+        for(int i=0; i<18; i++) outfile.write((char*)&zero, sizeof(float));
 
-        file.write("MAP ", sizeof(int));
-        file.write((char*)&machine_stamp, sizeof(int));
-        file.write((char*)&zero, sizeof(int));
-        file.write((char*)&zero, sizeof(int));
+        outfile.write("MAP ", sizeof(int));
+        outfile.write((char*)&machine_stamp, sizeof(int));
+        outfile.write((char*)&zero, sizeof(int));
+        outfile.write((char*)&zero, sizeof(int));
     
         //Fill the rest of data with zeros
-        for(int i=0; i<200; i++) file.write("    ", sizeof(float));
+        for(int i=0; i<200; i++) outfile.write("    ", sizeof(float));
     }
     
     //Write the data
-    file.seekp(1024);
+    outfile.seekp(1024);
     for(int id=0; id < data.size(); id++ )
     {
         long write_id = data.size() - id - 1;
         float value = (float)data.get_value_at(write_id);
-        file.write((char*)&value, sizeof(float));
+        outfile.write((char*)&value, sizeof(float));
     }
     
     std::cout << "File written in " << (clock()-start)/(double)CLOCKS_PER_SEC << " seconds\n";
     
-    file.close();
+    outfile.close();
 }

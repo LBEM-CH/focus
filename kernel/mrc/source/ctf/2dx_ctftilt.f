@@ -784,13 +784,14 @@ C
 1100  FORMAT(/,5F12.2,F12.5,'  Final Values')
 C
 CHEN>
-      open(11,FILE='SCRATCH/2dx_ctftilt.result.tmp',STATUS='NEW',
+      call system("\rm -f SCRATCH/2dx_ctftilt_result.tmp")
+      open(11,FILE='SCRATCH/2dx_ctftilt_result.tmp',STATUS='NEW',
      .  ERR=998)
         WRITE(11,'(3F12.2)')DFMID1,DFMID2,180.0*(ANGAST/PI-NINT(ANGAST/PI))
         write(11,'(3F12.2)')TLTAXIS/PI*180.0,TANGLE/PI*180.0,-RF
       close(11)
       GOTO 9997
-998   stop 'ERROR on file open of SCRATCH/2dx_ctftilt.result.tmp'
+998   stop 'ERROR on file open of SCRATCH/2dx_ctftilt_result.tmp'
 9997  continue
 C
 CHEN<

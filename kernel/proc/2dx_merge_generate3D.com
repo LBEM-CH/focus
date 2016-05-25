@@ -47,7 +47,7 @@ echo bin_ccp4 = ${bin_ccp4}
     setenv OUT ${scalimamp_out}
     \rm -f ${scalimamp_out}
     #
-    set RESMAX_local = 2.0
+    set RESMAX_local = ${RESMAX}
     echo ": "
     echo ": calling 2dx_scalimamp3d.exe with the following parameters:"
     echo ": ${scalimamp3d_refdata}"

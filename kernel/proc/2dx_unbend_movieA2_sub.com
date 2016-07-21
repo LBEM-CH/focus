@@ -30,7 +30,12 @@ endif
 #
 # echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
 #
-set iname = image_ctfcor
+if ( ${ctfcor_imode}x == 9x ) then
+  set iname = image_ctfcor_multiplied
+else
+  set iname = image_ctfcor
+endif
+#
 #
 echo "<<@progress: 5>>"
 #
@@ -519,19 +524,14 @@ echo "# IMAGE: ${frames_dir}/direct_sum_ctf_fixed.mrc <Sum unbent images, CTFcor
 ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 ###########################################################################
 
-
-if ( ${SYN_Unbending}x == "0x" ) then
-  set outfile = APH/${iname}_movie_fou.aph
-  echo ${ctfcor_imode} > APH/${iname}_movie_fou.aph_ctfcor_imode
-  set outfft = MA/direct_sum_ctf_fft.mrc
-  set outfft_noctf = MA/direct_sum_fft.mrc
+set outfile = APH/${iname}_movie_fou.aph
+if ( ${ctfcor_imode}x == 9x ) then
+  echo ${ctfcor_imode} > APH/image_ctfcor_movie_fou.aph_ctfcor_imode
 else
-  set outfile = APH/${iname}_movie_syn.aph
-  echo ${ctfcor_imode} > APH/${iname}_movie_syn.aph_ctfcor_imode
-  set outfft = MA/direct_sum_syn_ctf_fft.mrc
-  set outfft_noctf = MA/direct_sum_syn_fft.mrc
+  echo ${ctfcor_imode} > APH/${iname}_movie_fou.aph_ctfcor_imode
 endif
-
+set outfft = MA/direct_sum_ctf_fft.mrc
+set outfft_noctf = MA/direct_sum_fft.mrc
 
 
 setenv IN ${frames_dir}/direct_sum_fixed.mrc
@@ -584,30 +584,16 @@ ${proc_2dx}/linblock "Generate IQ-stat output"
 
 echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
 
-if ( ${SYN_Unbending}x == "0x" ) then
-  echo "set UMA_IQ1 = ${UMA_IQ1}" >> LOGS/${scriptname}.results
-  echo "set UMA_IQ2 = ${UMA_IQ2}" >> LOGS/${scriptname}.results
-  echo "set UMA_IQ3 = ${UMA_IQ3}" >> LOGS/${scriptname}.results
-  echo "set UMA_IQ4 = ${UMA_IQ4}" >> LOGS/${scriptname}.results
-  echo "set UMA_IQ5 = ${UMA_IQ5}" >> LOGS/${scriptname}.results
-  echo "set UMA_IQ6 = ${UMA_IQ6}" >> LOGS/${scriptname}.results
-  echo "set UMA_IQ7 = ${UMA_IQ7}" >> LOGS/${scriptname}.results
-  echo "set UMA_IQ8 = ${UMA_IQ8}" >> LOGS/${scriptname}.results
-  echo "set UMA_IQ9 = ${UMA_IQ9}" >> LOGS/${scriptname}.results
-  echo "set QVALMA = ${QVAL_local}" >> LOGS/${scriptname}.results
-else
-  echo "set UAS_IQ1 = ${UMA_IQ1}" >> LOGS/${scriptname}.results
-  echo "set UAS_IQ2 = ${UMA_IQ2}" >> LOGS/${scriptname}.results
-  echo "set UAS_IQ3 = ${UMA_IQ3}" >> LOGS/${scriptname}.results
-  echo "set UAS_IQ4 = ${UMA_IQ4}" >> LOGS/${scriptname}.results
-  echo "set UAS_IQ5 = ${UMA_IQ5}" >> LOGS/${scriptname}.results
-  echo "set UAS_IQ6 = ${UMA_IQ6}" >> LOGS/${scriptname}.results
-  echo "set UAS_IQ7 = ${UMA_IQ7}" >> LOGS/${scriptname}.results
-  echo "set UAS_IQ8 = ${UMA_IQ8}" >> LOGS/${scriptname}.results
-  echo "set UAS_IQ9 = ${UMA_IQ9}" >> LOGS/${scriptname}.results
-  echo "set QVALAS = ${QVAL_local}" >> LOGS/${scriptname}.results
-endif
-
+echo "set UMA_IQ1 = ${UMA_IQ1}" >> LOGS/${scriptname}.results
+echo "set UMA_IQ2 = ${UMA_IQ2}" >> LOGS/${scriptname}.results
+echo "set UMA_IQ3 = ${UMA_IQ3}" >> LOGS/${scriptname}.results
+echo "set UMA_IQ4 = ${UMA_IQ4}" >> LOGS/${scriptname}.results
+echo "set UMA_IQ5 = ${UMA_IQ5}" >> LOGS/${scriptname}.results
+echo "set UMA_IQ6 = ${UMA_IQ6}" >> LOGS/${scriptname}.results
+echo "set UMA_IQ7 = ${UMA_IQ7}" >> LOGS/${scriptname}.results
+echo "set UMA_IQ8 = ${UMA_IQ8}" >> LOGS/${scriptname}.results
+echo "set UMA_IQ9 = ${UMA_IQ9}" >> LOGS/${scriptname}.results
+echo "set QVALMA = ${QVAL_local}" >> LOGS/${scriptname}.results
 
 set RP_6 = ${PSMAX}
 echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
@@ -629,20 +615,12 @@ endif
 
 set IQS = `echo ${UMA_IQ1} ${UMA_IQ2} ${UMA_IQ3} ${UMA_IQ4} ${UMA_IQ5} ${UMA_IQ6} ${UMA_IQ7} ${UMA_IQ8} ${UMA_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-if ( ${SYN_Unbending}x == "0x" ) then
-  echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMA= ${QVAL_local} ... IQ stat = ${IQS}"
-else
-  echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValAS= ${QVAL_local} ... IQ stat = ${IQS}"
-endif
+echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMA= ${QVAL_local} ... IQ stat = ${IQS}"
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
-if ( ${SYN_Unbending}x == "0x" ) then
-  echo "::Unbend MA: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
-else
-  echo "::Unbend MA-Syn: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
-endif
+echo "::Unbend MA: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 #
 
 

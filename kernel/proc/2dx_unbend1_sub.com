@@ -602,7 +602,7 @@ echo ":+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo " " >> History.dat
 echo "::_________________________________________________________________________________" >> History.dat
 echo ":Date: ${date}" >> History.dat
-echo "::Unbend 1: maska=${maska}, boxa1=${boxa1}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+echo "::Unbend U1: maska=${maska}, boxa1=${boxa1}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 #
 echo "set QVal1 = ${QVAL_local}" >> LOGS/${scriptname}.results
 echo "set U1_QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results

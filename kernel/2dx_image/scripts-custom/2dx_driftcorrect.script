@@ -1,0 +1,204 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Correct Drift on Movie                                             #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 07/21/2016                                             #
+# Last Modification: 07/21/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 108
+#
+# MANUAL: This script runs ZORRO on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
+#
+# DISPLAY: imagenumber
+# DISPLAY: imagename
+# DISPLAY: imagename_original
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagesidelength
+# DISPLAY: comment
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
+# DISPLAY: Thread_Number
+# DISPLAY: movie_stackname
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set realang = ""
+set phacon = ""
+set RESMIN = ""
+set RESMAX = ""
+set movie_inmovie = ""
+set movie_stackname = ""
+set Thread_Number = ""
+#
+#$end_vars
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+set scriptname = 2dx_driftcorrect
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+#
+#################################################################################
+${proc_2dx}/linblock "Verifying some parameters"
+#################################################################################
+#
+if ( ! -e ${imagename}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${imagename}.mrc missing. Aborting."
+endif
+if ( ! -e ${nonmaskimagename}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${nonmaskimagename}.mrc missing. Aborting."
+endif
+#
+set testname = `echo ${imagename} | cut -c2-`
+if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
+  set oldval = ${nonmaskimagename}
+  set nonmaskimagename = ${imagename}
+  #############################################################################
+  ${proc_2dx}/linblock "Warning: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
+  #############################################################################
+  echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+endif
+# 
+if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) then
+  set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
+  #############################################################################
+  ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
+  #############################################################################
+  echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 5>>"
+#
+echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
+if ( ${imagename} != ${nonmaskimagename} ) then
+  echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-masked Image>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${Calc_from_sample_pixel} == "y" ) then
+  set magnification = `echo ${stepdigitizer} ${sample_pixel} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
+  echo "set magnification = ${magnification}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating magnification as ${magnification}."
+else
+  set sample_pixel = `echo ${stepdigitizer} ${magnification} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
+  echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating pixel size on sample level as ${sample_pixel} Angstroems."
+endif
+#
+set testname = `echo ${imagename} | cut -c2-`
+if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
+  set oldval = ${nonmaskimagename}
+  set nonmaskimagename = ${imagename}
+  ${proc_2dx}/linblock "ERROR: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
+  echo "set nonmaskimagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
+endif
+# 
+echo "<<@progress: 10>>"
+#
+if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${RESMIN}
+  set RESMIN = ${RESMAX}
+  set RESMAX = ${oldval}
+  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
+  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
+endif
+#
+set newimagenumber = `echo ${imagenumber} | ${bin_2dx}/2dx_getnumber.exe`
+if ( ${newimagenumber} != ${imagenumber} ) then
+  ${proc_2dx}/linblock "WARNING: correcting imagenumber from ${imagenumber} to ${newimagenumber}"
+  set imagenumber = ${newimagenumber}
+  echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+endif
+#
+set testval = `echo ${imagenumber} | wc -c`
+if ( `echo ${testval} | awk '{ if ( $1 < 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${imagenumber}
+  set imagenumber = `echo 0000000000 | cut -c${testval}-`${imagenumber}
+  ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
+  echo "set imagenumber = ${imagenumber}" >> LOGS/${scriptname}.results
+endif  
+#
+if ( `echo ${testval} | awk '{ if ( $1 > 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+  set oldval = ${imagenumber}
+  set startnum = `echo ${testval} | awk '{ s = $1 - 10 } END { print s }'`
+  set endnum   = `echo ${testval} | awk '{ s = $1 - 1 } END { print s }'`
+  set imagenumber = `echo ${imagenumber} | cut -c${startnum}-${endnum}`
+  ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
+  echo "set imagenumber = ${imagenumber}" >> LOGS/${scriptname}.results
+endif  
+#
+echo "<<@progress: 5>>"
+#
+#############################################################################
+#############################################################################
+#######  Now Run Zorro ######################################################
+#############################################################################
+#############################################################################
+#
+#################################################################################
+${proc_2dx}/linblock "Sourcing 2dx_zorro_sub.com"
+#################################################################################
+#
+set n_threads = ${Thread_Number} # number of threads for numexpr and FFTW
+set savePNGs = True # Do you want Zorro diagnostic images?
+set pixelsize = ${sample_pixel} # pixel size in Angstroms
+set a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'` # lattice parameter a, Angstroms
+set b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'` # lattice parameter b, Angstroms
+set gamma = ${realang} # crystal rotation parammeter
+set outputFolder = "./zorro/"
+if ( ! -d zorro ) then
+  if ( -e zorro ) then
+    \rm -rf zorro
+  endif
+  \mkdir zorro
+endif
+set fileDescriptor = ${movie_stackname} 
+#
+${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${fileDescriptor}
+#
+#################################################################################
+${proc_2dx}/linblock "Back in 2dx_driftcorrect.com"
+#################################################################################
+#
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+##
+#
+echo "<<@progress: 100>>"
+exit
+#
+# These are listed here to make sure they appear in the 2dx_image GUI:
+#

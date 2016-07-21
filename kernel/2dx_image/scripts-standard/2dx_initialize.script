@@ -108,6 +108,7 @@ set crop = ""
 set SYN_Unbending = ""
 set movie_inmovie = ""
 set use_masked_image = ""
+set backup_large_images = ""
 #
 #$end_vars
 #

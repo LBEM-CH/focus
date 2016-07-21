@@ -46,7 +46,7 @@ C         RESMAX  - Maximum resolution for output ps-file.
 C         PHACON  - PHASECONTRAST, should be approx. 0.93(Cryo),0.65(neg.stain)
 C         RESHIG  - HIGHER VALUE FOR RESOLUTION CUTOFF (JUST ON OUTPUT)
 C         RESLOW  - LOWER  VALUE FOR RESOLUTION CUTOFF (JUST ON OUTPUT)
-C         CTFCOR  - Switch to indicate how CTF correction is to be done:
+C         ICTFCOR - Switch to indicate how CTF correction is to be done:
 C                   0 = conventional way: CTF correction done here.
 C                   1 = Original image has been Phase flipped. Here only AMP correction.
 C                   2 = Original image has been multiplied by CTF. Here only AMP correction (taking care of multiplied CTF).
@@ -94,7 +94,7 @@ CHEN>
       READ(5,*)PHACON
       AMPCON=SQRT(1.0-(PHACON*PHACON))
       READ(5,*)RESHIG,RESLOW
-      READ(5,*)CTFCOR  
+      READ(5,*)ICTFCOR  
 CHEN<
       WRITE(6,98)TITLE, ISER
 96    FORMAT(I10,15A4,A40)
@@ -382,16 +382,6 @@ cc        Y=Y+0.5                               ! ADJUST CHARACTER TO BE CENTRAL
         ANGDIF=ANGSPT-ANGAST
         CCOS=COS(2.0*ANGDIF)
 CHEN>
-C       DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-C       CHI=C1*DF+C2
-C       CNTRST=-SIN(CHI)
-        if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0)then
-          DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-          CHI=C1*DF+C2
-          CNTRST=-SIN(CHI)*PHACON-COS(CHI)*AMPCON
-        else
-          CNTRST=-AMPCON
-        endif
 C
 C################################################################################
 C################################################################################
@@ -414,39 +404,38 @@ C###############################################################################
 C################################################################################
 C################################################################################
 C
-        if(CTFCOR.eq.0)then
+        if(ICTFCOR.eq.0)then
 C
 C--------- 0 = conventional way: CTF correction done here.
 C
+          if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0)then
+            DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
+            CHI=C1*DF+C2
+            CNTRST=-SIN(CHI)*PHACON-COS(CHI)*AMPCON
+          else
+            CNTRST=-AMPCON
+          endif
           IQ=IQIN
-C-------- This sets IQ to 5 for high resolution spots with ctf < 0.15.
-C          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
 C
-        else if(CTFCOR.eq.1)then
+        else if(ICTFCOR.eq.1)then
 C
 C--------- 1 = Original image has been Phase flipped, and also already corrected by CTF+Noise**2
 C
           IQ=IQIN
-C          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
-C          CNTRST = -1.0 * ABS(CNTRST)
           CNTRST = -1.0
 C
-        else if(CTFCOR.eq.2)then
+        else if(ICTFCOR.eq.2)then
 C
 C--------- 2 = Original image has been multiplied by CTF and also already correctedy by CTF**2+Noise**2. 
-C--------- Here nothing is to be done.
 C
           IQ=IQIN
-C          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
-C          CNTRST = -1.0 * CNTRST*CNTRST
           CNTRST = -1.0
 C
-        else if(CTFCOR.eq.3)then
+        else if(ICTFCOR.eq.3 .or. ICTFCOR.eq.9)then
 C
 C--------- 3 = Original image has been Wiener filtered. Here nothing is to be done.
 C
           IQ=IQIN
-C          IF(ABS(CNTRST).LT.0.15.AND.ANGLE.GT.WL/5.5) IQ=MAX(IQ,5)
           CNTRST = -1.0
 C
         endif
@@ -456,17 +445,15 @@ C
         IF(CNTRST.LT.0.0) P=PIN+180.0
         IF(P.GE.360.0) P=P-360.0
         WRITE(2,1000) IHIN,IKIN,AIN,P,IQ,BIN,CNTRST ! O/P of SPOTS.
-C               NOTE A FEW SPOTS NEAR CTF ZEROES HAVE THEIR IQ CHANGED TO 5.
-C1000    FORMAT(2I5,2F12.1,I4,F12.1,F12.3)
 1000    FORMAT(2I5,2G15.5,I4,G15.5,F12.3)
         NTOTSPOTS = NTOTSPOTS +1
-        IF(IQ.LE.7) THEN
-          WRITE(6,1001)IHIN,IKIN,AIN,PIN,IQIN,P,IQ,CNTRST,WIENFILTER
-1001      FORMAT(1X,2I5,2G15.5,I4,G18.5,I3,F12.3,F12.3)
-1003      FORMAT(1X,2I5,2G15.5,I4,G18.5,I3,F12.3,F12.3,
+        IF(IQ.ne.8) THEN
+          WRITE(6,1001)IHIN,IKIN,AIN,PIN,IQIN,P,IQ,CNTRST
+1001      FORMAT(1X,2I5,2G15.5,I4,G18.5,I3,F12.3)
+1003      FORMAT(1X,2I5,2G15.5,I4,G18.5,I3,F12.3,
      1        ' WRITTEN OUT, BUT IQ=8,9')
         ELSE
-          WRITE(6,1003)IHIN,IKIN,AIN,PIN,IQIN,P,IQ,CNTRST,WIENFILTER
+          WRITE(6,1003)IHIN,IKIN,AIN,PIN,IQIN,P,IQ,CNTRST
         ENDIF
       GO TO 109
 110   CLOSE(1)
@@ -502,9 +489,6 @@ C
           ANGDIF=ANGSPT-ANGAST
           CCOS=COS(2.0*ANGDIF)
 CHEN>
-C         DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-C         CHI=C1*DF+C2
-C         CNTRST=-SIN(CHI)
           if(DFMID1.ne.0.0 .or. DFMID2.ne.0.0)then
             DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
             CHI=C1*DF+C2

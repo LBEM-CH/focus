@@ -4,7 +4,11 @@
 #
 #
 #
-set iname = image_ctfcor
+if ( ${ctfcor_imode}x == 9x ) then
+  set iname = image_ctfcor_multiplied
+else
+  set iname = image_ctfcor
+endif
 #
 set date = `date`
 echo date = ${date}

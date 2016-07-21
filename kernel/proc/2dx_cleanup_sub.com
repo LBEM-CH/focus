@@ -269,6 +269,9 @@ echo dummy > dummy.TMP
 \rm -f *_phase_zero-p1.mtz
 \rm -f *_phase_zero-p1.mrc
 \rm -f TMP_*
+\rm -f tmp.mrc
+\rm -f tmp2.mrc
+\rm -f tmp3.mrc
 \rm -f fort.3
 \rm -f dummy.results
 #

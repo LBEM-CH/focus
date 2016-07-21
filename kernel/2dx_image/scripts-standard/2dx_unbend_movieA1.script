@@ -60,9 +60,6 @@ set show_frame_FFT = "n"
 set show_frame_CCmap = "n"
 #
 # DISPLAY: imagename
-# DISPLAY: SYN_Unbending
-# DISPLAY: SYN_Bfact1
-# DISPLAY: SYN_maska
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
 # DISPLAY: tempkeep
@@ -79,12 +76,8 @@ set show_frame_CCmap = "n"
 # DISPLAY: movie_drift_threshold
 # DISPLAY: Thread_Number
 # DISPLAY: ctfcor_noise
-# DISPLAY: ctfcor_inner_tile
-# DISPLAY: ctfcor_outer_tile
-# DISPLAY: ctfcor_taper
 # DISPLAY: ctfcor_imode
 # DISPLAY: ctfcor_debug
-# DISPLAY: ctfcor_maxamp_factor
 # DISPLAY: calculate_tiles
 # DISPLAY: movie_ghostscript_installed
 #
@@ -121,9 +114,6 @@ set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
 set SYM = ""
-set SYN_Bfact1 = ""
-set SYN_Unbending = ""
-set SYN_maska = ""
 set TANGL = ""
 set TAXA = ""
 set TLTANG = ""
@@ -142,11 +132,7 @@ set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
 set ctfcor_debug = ""
 set ctfcor_imode = ""
-set ctfcor_inner_tile = ""
-set ctfcor_maxamp_factor = ""
 set ctfcor_noise = ""
-set ctfcor_outer_tile = ""
-set ctfcor_taper = ""
 set ctfplotresmax = ""
 set ctfrev = ""
 set defocus = ""
@@ -193,6 +179,8 @@ set tempkeep = ""
 set treatspotscan = ""
 set use_masked_image = ""
 set movie_ghostscript_installed = ""
+set DEFOCUS_TLTAXIS = ""
+set DEFOCUS_TLTANG = ""
 #
 #$end_vars
 #
@@ -261,8 +249,6 @@ endif
 #
 #
 #
-set SYN_Unbending = 0
-#
 source ${proc_2dx}/2dx_unbend_movieA1_sub.com
 #
 #
@@ -279,7 +265,6 @@ exit
 #
 #
 # These are listed here, so that they show up in the GUI:
-source ${proc_2dx}/2dx_make_SynRef_sub.com
 source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
 source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
 python ${proc_2dx}/movie/box_reference.py 

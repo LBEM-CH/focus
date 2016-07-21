@@ -60,7 +60,6 @@ set show_frame_CCmap_marked = "n"
 set show_frame_CCmap_unbent = "n"
 #
 # DISPLAY: imagename
-# DISPLAY: SYN_Unbending
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
 # DISPLAY: tempkeep
@@ -87,7 +86,6 @@ set app_2dx_image = ""
 set bin_2dx = ""
 set proc_2dx = ""
 #
-set SYN_Unbending = ""
 set PHASEORI_done = ""
 set boxb1 = ""
 set boxb2 = ""
@@ -235,7 +233,6 @@ endif
 #
 #
 #
-set SYN_Unbending = 0
 #
 source ${proc_2dx}/2dx_unbend_movieA2_sub.com
 #

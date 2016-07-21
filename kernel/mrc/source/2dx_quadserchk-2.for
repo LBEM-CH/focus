@@ -684,7 +684,7 @@ C
             call system(cline(1:k3))
 C
 C            CALL IMOPEN(12,FILE2,'NEW')
-            call system("\rm tmp2.mrc")
+            call system("\rm -f tmp2.mrc")
             write(NAME,'(''tmp2.mrc'')')
             CALL IMOPEN(12,NAME,'NEW')
             CALL ITRHDR(12,11)
@@ -715,6 +715,7 @@ C
             call shorten(cline,k)
             call system(cline(1:k))
             CALL IMCLOSE(11)
+            call system("\rm -f tmp2.mrc")
 C
           endif
 C
@@ -817,7 +818,7 @@ CHEN--Read switch for output of manual Masking information
 C
 CHEN--Read switch for automatic masking based on XCF
       READ(5,*)IXCFPIC
-      if(IXCFPIC.eq.1)then
+      if(IXCFPIC.ne.0)then
         write(6,'(/,/,
      1    '' masking picture with XCF pattern'')')
       else
@@ -1674,6 +1675,7 @@ C
 C
       CHARACTER DAT*24
       CHARACTER*80 INFILE,OUTFILE
+      CHARACTER*80 INFILE2,OUTFILE2
       CHARACTER*80 FILENAM,TEXT
       CHARACTER*80 NAME
       REAL*8 DOUBLMEAN
@@ -1701,9 +1703,23 @@ C
       read(*,'(I10)')icontrol
       print *,' icontrol= ',icontrol
 C
-      write(6,'(/,'' use external masking template (0=no, 1=yes)'')')
+      write(6,'(/,'' use external masking template (0=no, 1=yes, '',
+     .  ''2=no with second image, 3=yes with second image)'')')
       read(*,'(I10)')iexternmask
       print *,' iexternmask= ',iexternmask
+      if(iexternmask.gt.1)then
+        iexternmask = iexternmask-2
+        idosecond = 1
+        write(6,'(/,'' give name for second original image to mask '')')
+        read(*,'(A)')INFILE2
+        write(6,'('' INFILE= '',A40)')INFILE2
+C
+        write(6,'(/,'' give name for second output of masked image '')')
+        read(*,'(A)')OUTFILE2
+        write(6,'('' OUTFILE= '',A40)')OUTFILE2
+      else
+        idosecond = 0
+      endif
 C
       if(icontrol.le.0)then
         IPICSIZ=256
@@ -1879,6 +1895,7 @@ C     CALL IRDPAS(1,IPICT2,NCOLIPIC,NLINEIPIC,0,NCOLIPIC-1,0,NLINEIPIC-1,*9400)
 C      write(6,'(''::DEBUG2   = '',I8)')IPICT2(10,10)
 
       CALL IMCLOSE(1)
+C
 556   continue
 C
 C======================================
@@ -1896,7 +1913,6 @@ C
       CALL ITRHDR(2,1)
 C
       write(NAME,1954)
-C      write(TITLE,1954)
 1954  FORMAT('QUADSERCHH: masking for XCF ')
       write(6,'('' masking picture'')')
       DMIN =  1.E10
@@ -1957,6 +1973,87 @@ C
 C
       if(iover.ne.0)then
         print *,'WARNING: iover = ',iover
+      endif
+C
+C-------------------------------------
+C
+      if(idosecond.eq.1)then
+C
+        call shorten(INFILE2,k)
+        write(6,'(''::Masking also second (Wiener-filtered) image '',A)')INFILE2(1:k)
+C
+        CALL IMOPEN(1,INFILE2,'RO')
+C
+        CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        DOMIN=DMIN
+        DOMAX=DMAX
+        DOMEAN=DMEAN
+C
+        CALL IMOPEN(2,OUTFILE2,'NEW')
+        CALL ITRHDR(2,1)
+C
+        write(NAME,1954)
+        write(6,'('' masking picture'')')
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+        CALL IWRHDR(2,NAME,1,DMIN,DMAX,DMEAN)
+C
+        NX=NXYZ(1)
+        NY=NXYZ(2)
+        NZ=NXYZ(3)
+        iunder=0
+        iover=0
+        rmin=0.0
+        rmax=32000.0
+        print *,'starting masking with image NX,NY,NZ=',NX,NY,NZ
+        DO IZ= 1,NZ
+          ilj=1
+          DO IY = 1,NY
+            CALL IRDLIN(1,ALINE,*900)
+            ilk=(IY*IPICDI2)/NY
+            if(ilk.lt.1)ilk=1
+            if(ilk.gt.IPICDI2)ilk=IPICDI2
+            DO IX = 1,NX
+              ilj=(IX*IPICDI2)/NX
+              if(ilj.lt.1)ilj=1
+              if(ilj.gt.IPICDI2)ilj=IPICDI2
+C
+              VAL=(ALINE(IX)-DOMEAN)*(real(IPICT2(ilj,ilk))/255.0)+DOMEAN
+C
+              if(VAL.lt.rmin)then
+                iunder=iunder+1
+                VAL=rmin
+              endif
+              if(VAL.gt.rmax)then
+                iover=iover+1
+                VAL=rmax
+              endif
+              IF (VAL .LT. DMIN) DMIN = VAL
+              IF (VAL .GT. DMAX) DMAX = VAL
+              DOUBLMEAN = DOUBLMEAN + VAL
+              ALINE(IX) = VAL
+            enddo
+            CALL IWRLIN(2,ALINE)
+          enddo
+        enddo
+        DMEAN = DOUBLMEAN/(NX*NY*NZ)
+        write(6,'('' file written, DMIN,DMAX,DMEAN='',3G12.3)')
+     1  DMIN,DMAX,DMEAN
+        CALL IWRHDR(2,NAME,-1,DMIN,DMAX,DMEAN)
+C
+        CALL IMCLOSE(2)
+        CALL IMCLOSE(1)
+C
+        if(iunder.ne.0)then
+          print *,'WARNING: iunder = ',iunder
+        endif
+C
+        if(iover.ne.0)then
+          print *,'WARNING: iover = ',iover
+        endif
+C
       endif
 C
       goto 999

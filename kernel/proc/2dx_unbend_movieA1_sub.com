@@ -18,6 +18,12 @@ if ( ${show_frames} == "y" || ${show_frame_FFT} == "y" || ${show_frame_CCmap} ==
   set tempkeep = "y"
 endif
 #
+if ( ${ctfcor_imode}x == 9x ) then
+  set iname = image_ctfcor_multiplied
+else
+  set iname = image_ctfcor
+endif
+#
 # echo  "# IMAGE-IMPORTANT: ${movie_stackname} <Raw image stack>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_enable} == "n" ) then
@@ -30,12 +36,6 @@ if ( ${ctfcor_noise_toosmall} == "1" ) then
   echo ":: Correcting CTF-correction Noise value to 0.8."
   set ctfcor_noise = "0.8"
   echo "set ctfcor_noise = ${ctfcor_noise}" >> LOGS/${scriptname}.results
-endif
-#
-if ( ${calculate_tiles}x == "nx" || ${calculate_tiles}x == "x" ) then
-  set calculate_tiles = "0"
-  echo "set calculate_tiles = ${calculate_tiles}" >> LOGS/${scriptname}.results
-  echo ":: Correcting calculate_tiles to ${calculate_tiles}"
 endif
 #
 if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
@@ -115,8 +115,6 @@ endif
 #
 set num_dia = 100
 #
-set iname = image_ctfcor
-#
 if ( 1 == 1 ) then
   set movie_smoothing = 8
   echo "set movie_smoothing = ${movie_smoothing}"  >> LOGS/${scriptname}.results
@@ -158,7 +156,7 @@ if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then
 endif
 #
 if ( ! -e ${iname}.mrc ) then
-  ${proc_2dx}/protest "ERROR:  ${iname}.mrc missing. First run script Correct CTF on tiles"
+  ${proc_2dx}/protest "ERROR:  ${iname}.mrc missing. First run script Correct CTF on stripes"
 endif
 #
 #
@@ -205,179 +203,139 @@ if ( ! -e ${cormap} ) then
   ${proc_2dx}/protest "ERROR: First run Unbend-I and Unbend-II scripts. File missing: ${cormap}"
 endif
 # 
-if ( ${SYN_Unbending} == "0" ) then
-  #
-  ###############################################################
-  ###############################################################
-  ###############################################################
-  ${proc_2dx}/linblock "Preparing reference from Fourier-filtered UNBEND-II result"
-  ###############################################################
-  ###############################################################
-  ###############################################################
-  #
-  ###############################################################
-  ${proc_2dx}/linblock "FFTRANS - Calculate FFT of unbent image"
-  ###############################################################
-  #
-  set unbent_fil = unbent.mrc  
-  #
-  if ( ! -e ${unbent_fil} ) then
-    ${proc_2dx}/protest "ERROR: File missing: ${unbent_fil}"
-  endif
-  # 
-  \rm -f SCRATCH/reference_flt_upscale.mrc
-  ${bin_2dx}/labelh.exe << eot
+###############################################################
+###############################################################
+###############################################################
+${proc_2dx}/linblock "Preparing reference from Fourier-filtered UNBEND-II result"
+###############################################################
+###############################################################
+###############################################################
+#
+###############################################################
+${proc_2dx}/linblock "FFTRANS - Calculate FFT of unbent image"
+###############################################################
+#
+set unbent_fil = unbent.mrc  
+#
+if ( ! -e ${unbent_fil} ) then
+  ${proc_2dx}/protest "ERROR: File missing: ${unbent_fil}"
+endif
+# 
+\rm -f SCRATCH/reference_flt_upscale.mrc
+${bin_2dx}/labelh.exe << eot
 ${unbent_fil}
 39
 ${frames_dir}/reference_flt_upscale.mrc
 eot
-  #
-  setenv IN  ${frames_dir}/reference_flt_upscale.mrc
-  setenv OUT ${frames_dir}/reference_flt_upscale_fft.mrc
-  \rm -f     ${frames_dir}/reference_flt_upscale_fft.mrc
-  ${bin_2dx}/2dx_fftrans.exe  
-  #
-  echo  "# IMAGE: ${frames_dir}/reference_flt_upscale_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
-  #
-  echo "<<@progress: 15>>"
-  #
-  #
-  #########################################################################
-  ${proc_2dx}/linblock "MASKTRAN - Lattice-mask FFT of unbent image, small holes"
-  #########################################################################
-  set maskb = ${maskb01}
-  set rmax = 11000  
-  #
-  setenv IN  ${frames_dir}/reference_flt_upscale_fft.mrc
-  setenv OUT ${frames_dir}/reference_flt_upscale_fft_mask.mrc
-  \rm -f     ${frames_dir}/reference_flt_upscale_fft_mask.mrc
-  setenv SPOTS ${nonmaskimagename}.spt
-  ${bin_2dx}/2dx_masktrana.exe << eot
+#
+setenv IN  ${frames_dir}/reference_flt_upscale.mrc
+setenv OUT ${frames_dir}/reference_flt_upscale_fft.mrc
+\rm -f     ${frames_dir}/reference_flt_upscale_fft.mrc
+${bin_2dx}/2dx_fftrans.exe  
+#
+echo  "# IMAGE: ${frames_dir}/reference_flt_upscale_fft.mrc <Unbent image (FFT)>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 15>>"
+#
+#
+#########################################################################
+${proc_2dx}/linblock "MASKTRAN - Lattice-mask FFT of unbent image, small holes"
+#########################################################################
+set maskb = ${maskb01}
+set rmax = 11000  
+#
+setenv IN  ${frames_dir}/reference_flt_upscale_fft.mrc
+setenv OUT ${frames_dir}/reference_flt_upscale_fft_mask.mrc
+\rm -f     ${frames_dir}/reference_flt_upscale_fft_mask.mrc
+setenv SPOTS ${nonmaskimagename}.spt
+${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 1 ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
-  echo  "# IMAGE: ${frames_dir}/reference_flt_upscale_fft_mask.mrc <Unbent image, Fourier-filtered (1px) (FFT)>" >> LOGS/${scriptname}.results 
-  #
-  if ( ${tempkeep} != "y" ) then
-    \rm -f SCRATCH/reference_flt_upscale_fft.mrc
-  endif
-  #
-  #
-  ###############################################################
-  ${proc_2dx}/linblock "FFTRANS - Back to real space"
-  ###############################################################
-  #
-  setenv IN  ${frames_dir}/reference_flt_upscale_fft_mask.mrc
-  setenv OUT ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc
-  \rm -f     ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc
-  ${bin_2dx}/2dx_fftrans.exe  
-  #
-  echo  "# IMAGE: ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc <Unbent image, Fourier-filtered>" >> LOGS/${scriptname}.results  
-  #
-  if ( ${tempkeep} != "y" ) then
-    \rm -f ${frames_dir}/reference_flt_upscale_fft_mask.mrc
-  endif
-  #
-  echo "<<@progress: 17>>"
-  #
-  #
-  ###############################################################
-  ${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxa}"
-  ###############################################################
-  #
-  ${app_python} ${proc_2dx}/movie/box_reference.py ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc ${frames_dir}/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa}
-  #
-  if ( ${tempkeep} != "y" ) then
-    \rm -f ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc
-  endif
-  #
-  \rm -f ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
-  ${bin_2dx}/labelh.exe << eot
+echo  "# IMAGE: ${frames_dir}/reference_flt_upscale_fft_mask.mrc <Unbent image, Fourier-filtered (1px) (FFT)>" >> LOGS/${scriptname}.results 
+#
+if ( ${tempkeep} != "y" ) then
+  \rm -f SCRATCH/reference_flt_upscale_fft.mrc
+endif
+#
+#
+###############################################################
+${proc_2dx}/linblock "FFTRANS - Back to real space"
+###############################################################
+#
+setenv IN  ${frames_dir}/reference_flt_upscale_fft_mask.mrc
+setenv OUT ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc
+\rm -f     ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc
+${bin_2dx}/2dx_fftrans.exe  
+#
+echo  "# IMAGE: ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc <Unbent image, Fourier-filtered>" >> LOGS/${scriptname}.results  
+#
+if ( ${tempkeep} != "y" ) then
+  \rm -f ${frames_dir}/reference_flt_upscale_fft_mask.mrc
+endif
+#
+echo "<<@progress: 17>>"
+#
+#
+###############################################################
+${proc_2dx}/linblock "BOXIMAGE - Boxing reference: ${movie_refboxa}"
+###############################################################
+#
+${app_python} ${proc_2dx}/movie/box_reference.py ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc ${frames_dir}/reference_flt_upscale_fft_mask_fft_box.mrc ${movie_refboxa}
+#
+if ( ${tempkeep} != "y" ) then
+  \rm -f ${frames_dir}/reference_flt_upscale_fft_mask_fft.mrc
+endif
+#
+\rm -f ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
+${bin_2dx}/labelh.exe << eot
 ${frames_dir}/reference_flt_upscale_fft_mask_fft_box.mrc
 39
 ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
 eot
-  echo  "# IMAGE-IMPORTANT: ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_upscale.mrc <Reference (${movie_refboxa}px)>" >> LOGS/${scriptname}.results
-  #
-  #
-  ###############################################################
-  ${proc_2dx}/linblock "FFTRANS - Producing reference in Fourier space"
-  ###############################################################
-  #
-  setenv IN  ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
-  setenv OUT ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-  \rm -f     ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-  ${bin_2dx}/2dx_fftrans.exe 
-  #
-  echo  "# IMAGE: ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_fft.mrc <Reference (FFT)>" >> LOGS/${scriptname}.results
-  #
-  #
-  #########################################################################
-  ${proc_2dx}/linblock "MASKTRAN - Masked FFT of boxed reference"
-  #########################################################################
-  set maskb = ${maskb01}
-  set rmax = 11000
-  #
-  setenv IN  ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-  setenv OUT ${frames_dir}/reference_fft.mrc
-  \rm -f     ${frames_dir}/reference_fft.mrc
-  setenv SPOTS ${nonmaskimagename}.spt
-  ${bin_2dx}/2dx_masktrana.exe << eot
+echo  "# IMAGE-IMPORTANT: ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_upscale.mrc <Reference (${movie_refboxa}px)>" >> LOGS/${scriptname}.results
+#
+#
+###############################################################
+${proc_2dx}/linblock "FFTRANS - Producing reference in Fourier space"
+###############################################################
+#
+setenv IN  ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_upscale.mrc
+setenv OUT ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_fft.mrc
+\rm -f     ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_fft.mrc
+${bin_2dx}/2dx_fftrans.exe 
+#
+echo  "# IMAGE: ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_fft.mrc <Reference (FFT)>" >> LOGS/${scriptname}.results
+#
+#
+#########################################################################
+${proc_2dx}/linblock "MASKTRAN - Masked FFT of boxed reference"
+#########################################################################
+set maskb = ${maskb01}
+set rmax = 11000
+#
+setenv IN  ${frames_dir}/reference_flt_upscale_fft_mask_fft_box_fft.mrc
+setenv OUT ${frames_dir}/reference_fft.mrc
+\rm -f     ${frames_dir}/reference_fft.mrc
+setenv SPOTS ${nonmaskimagename}.spt
+${bin_2dx}/2dx_masktrana.exe << eot
 1 F T F ! ISHAPE=1(CIRC),2(GAUSCIR),3(RECT)HOLE,IAMPLIMIT(T or F),ISPOT,IFIL
 ${maskb} ! RADIUS OF HOLE IF CIRCULAR, X,Y HALF-EDGE-LENGTHS IF RECT.
 ${lattice},-50,50,-50,50,${rmax},1 ! A/BX/Y,IH/IKMN/MX,RMAX,ITYPE
 eot
-  #
-  echo  "# IMAGE: ${frames_dir}/reference_fft.mrc <Reference, Fourier-filtered (${maskb}px) (FFT)>" >> LOGS/${scriptname}.results
-  #
-  cat ${nonmaskimagename}.spt
-  #
-  if ( ${tempkeep} != "y" ) then
-    \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
-  endif
-  #
-  #
-  #
-  #
-  #
-else
-  #
-  ###############################################################
-  ###############################################################
-  ###############################################################
-  ${proc_2dx}/linblock "Preparing reference from merged MTZ file"
-  ###############################################################
-  ###############################################################
-  ###############################################################
-  #
-  set tmp1 = `echo ${SYN_maska} | awk '{s = int( $1 ) } END { print s }'`
-  if ( ${tmp1} == ${SYN_maska} ) then
-    echo SYN_maska = ${SYN_maska}
-  else
-    set SYN_maska = ${tmp1}
-    echo SYN_maska = ${SYN_maska}
-    echo "set SYN_maska = ${SYN_maska}" >> LOGS/${scriptname}.results
-    ${proc_2dx}/linblock "Warning: SYN_maska needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
-    echo "#WARNING: Warning: SYN_maska needs to be an integer number. Now corrected." >> LOGS/${scriptname}.results
-  endif
-  #
-  set loc_SYN_mask = ${SYN_maska}
-  set loc_SYN_Bfact = ${SYN_Bfact1}
-  set locfactor = '1.0'
-  #
-  source ${proc_2dx}/2dx_make_SynRef_sub.com
-  #
-  \mv -f SCRATCH/reference_fft.mrc ${frames_dir}/reference_fft.mrc
-  echo "# IMAGE: ${frames_dir}/reference_fft.mrc <Synthetic Reference (FFT)>" >> LOGS/${scriptname}.results
-  #
-  \mv -f SCRATCH/reference.mrc ${frames_dir}/reference.mrc
-  echo  "# IMAGE: ${frames_dir}/reference.mrc <Synthetic Reference>" >> LOGS/${scriptname}.results
-
-  #
-  #
-  #
+#
+echo  "# IMAGE: ${frames_dir}/reference_fft.mrc <Reference, Fourier-filtered (${maskb}px) (FFT)>" >> LOGS/${scriptname}.results
+#
+cat ${nonmaskimagename}.spt
+#
+if ( ${tempkeep} != "y" ) then
+  \rm -f SCRATCH/reference_flt_upscale_fft_mask_fft_box_fft.mrc
 endif
+#
+#
+#
+#
 #
 echo "<<@progress: 20>>"
 #
@@ -385,20 +343,9 @@ echo "<<@progress: 20>>"
 #
 #
 #
-#
-##########################################################################
 ##########################################################################
 # Now preparing frames:
 ##########################################################################
-##########################################################################
-#
-#
-#
-#
-#
-#
-#
-#
 #
 #
 ###############################################################
@@ -441,15 +388,62 @@ while ($i <= ${movie_imagenumber_touse})
     \ln -s f${i}.mrc f${i}_ctfcor.mrc
     cd olddir
   else
-    #  
-    #################################################################################
-    ${proc_2dx}/linblock "2dx_ctfcor - CTF correcting frame ${i}"
-    #################################################################################  
-    #
-    \rm -f ${frames_dir}/f${i}_ctfcor.mrc
-    #
-    if ( ${calculate_tiles} == "0" ) then
-      ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
+      #  
+        set TLTAXIS_local = ${DEFOCUS_TLTAXIS}
+        set TLTANG_local = ${DEFOCUS_TLTANG}
+        echo ":Using DEFOCUS TLTAXIS of ${TLTAXIS_local}"
+        echo ":Using DEFOCUS TLTANG  of ${TLTANG_local}"    
+        #
+
+      if ( ${ctfcor_imode}x == 9x ) then
+        #
+        #############################################################################################
+        ${proc_2dx}/linblock "2dx_ctfcor - Frame ${i}: A first time with CTF phase flipping for lattice finding"
+        #############################################################################################
+        set ctfcor_imode_local = 1
+        #
+        \rm -f ${frames_dir}/f${i}_ctfcor_multiplied.mrc
+        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
+${frames_dir}/f${i}.mrc
+${frames_dir}/f${i}_ctfcor_multiplied.mrc
+#
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${RESMAX}
+${ctfcor_noise}
+${ctfcor_imode_local}
+${ctfcor_debug}
+eot
+        #
+        #
+        #############################################################################################
+        ${proc_2dx}/linblock "2dx_ctfcor - Frame ${i}: A second time with Wiener filter for data"
+        #############################################################################################
+        set ctfcor_imode_local = 3
+        #
+        \rm -f ${frames_dir}/f${i}_ctfcor.mrc
+        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
+${frames_dir}/f${i}.mrc
+${frames_dir}/f${i}_ctfcor.mrc
+#
+${TLTAXIS},${TLTANG}
+${CS},${KV},${phacon},${magnification},${stepdigitizer}
+${defocus}
+${RESMAX}
+${ctfcor_noise}
+${ctfcor_imode_local}
+${ctfcor_debug}
+eot
+        #
+    else
+        #################################################################################
+        ${proc_2dx}/linblock "2dx_ctfcor - CTF correcting frame ${i}"
+        #################################################################################  
+        #
+        \rm -f ${frames_dir}/f${i}_ctfcor.mrc
+        #
+        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
 ${frames_dir}/f${i}.mrc
 ${frames_dir}/f${i}_ctfcor.mrc
 #
@@ -461,77 +455,7 @@ ${ctfcor_noise}
 ${ctfcor_imode}
 ${ctfcor_debug}
 eot
-      #
-    else
-      if ( ${calculate_tiles} == "1" ) then
         #
-        set ctfcor_tilefile = "${frames_dir}/2dx_ctfcor_tile.mrc"
-        set ctfcor_psfile = "${frames_dir}/2dx_ctfcor_psfile.mrc"
-        set ctfcor_ctffile = "${frames_dir}/2dx_ctfcor_ctffile.mrc"
-        \rm -f ${ctfcor_tilefile}
-        \rm -f ${ctfcor_psfile} 
-        \rm -f ${ctfcor_ctffile} 
-        #
-        ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
-${frames_dir}/f${i}.mrc
-${frames_dir}/f${i}_ctfcor.mrc
-#
-#
-#
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${ctfcor_noise}
-${ctfcor_inner_tile}
-${ctfcor_outer_tile}
-${ctfcor_taper}
-${ctfcor_imode}
-${ctfcor_debug}
-${ctfcor_maxamp_factor}
-eot
-        #
-        echo "# IMAGE: ${frames_dir}/f${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
-        #
-      else
-        #
-        set ctfcor_tilefile = "${frames_dir}/2dx_ctfcor_tile.mrc"
-        set ctfcor_psfile = "${frames_dir}/2dx_ctfcor_psfile.mrc"
-        set ctfcor_ctffile = "${frames_dir}/2dx_ctfcor_ctffile.mrc"
-        \rm -f ${ctfcor_tilefile}
-        \rm -f ${ctfcor_psfile} 
-        \rm -f ${ctfcor_ctffile} 
-        #
-        ${bin_2dx}/2dx_ctfcor_tiles.exe << eot
-${frames_dir}/f${i}.mrc
-${frames_dir}/f${i}_ctfcor.mrc
-${ctfcor_tilefile}
-${ctfcor_psfile}
-${ctfcor_ctffile}
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${ctfcor_noise}
-${ctfcor_inner_tile}
-${ctfcor_outer_tile}
-${ctfcor_taper}
-${ctfcor_imode}
-${ctfcor_debug}
-${ctfcor_maxamp_factor}
-eot
-        #
-        echo "# IMAGE: ${frames_dir}/f${i}_ctfcor.mrc <Frame ${i}, CTF corrected>" >> LOGS/${scriptname}.results
-        \mv -f ${ctfcor_tilefile} ${frames_dir}/f${i}_tiles.mrc
-        echo "# IMAGE: ${frames_dir}/f${i}_tiles.mrc <Frame ${i}, tiles marked>" >> LOGS/${scriptname}.results
-        \mv -f ${ctfcor_psfile} ${frames_dir}/f${i}_ps.mrc
-        echo "# IMAGE: ${frames_dir}/f${i}_ps.mrc <Frame ${i}, PowerSpectra>" >> LOGS/${scriptname}.results
-        #
-        \mv -f ${ctfcor_ctffile} ${frames_dir}/f${i}_ctffile.mrc
-        if ( ${ctfcor_imode} == "2" ) then
-          echo "# IMAGE: ${frames_dir}/f${i}_ctffile.mrc <Summed CTF**2 file>" >> LOGS/${scriptname}.results
-        else
-          echo "# IMAGE: ${frames_dir}/f${i}_ctffile.mrc <Summed CTF file>" >> LOGS/${scriptname}.results
-        endif
-      endif
     endif
     #
   endif
@@ -540,7 +464,11 @@ eot
   ${proc_2dx}/linblock "cross_correlate.py - Cross-correlate reference with frame ${i}"
   ############################################################### 
   #
-  ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/f${i}_ctfcor.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
+  if ( ${ctfcor_imode}x == 9x ) then
+    ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/f${i}_ctfcor_multiplied.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
+  else
+    ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/f${i}_ctfcor.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
+  endif
   if ( ${show_frame_CCmap} == "y" ) then
     echo  "# IMAGE: ${frames_dir}/CCmap_${i}.mrc <Frame ${i}, CCmap>" >> LOGS/${scriptname}.results
   endif

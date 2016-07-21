@@ -70,7 +70,10 @@ eot
                 endif 
                 \cp -f ${maskfile}.mrc TMP_quadserch_7.mrc
                 #
-                ${bin_2dx}/2dx_quadserchk-2.exe << eot
+                if ( ${ctfcor_imode}x == 9x ) then
+                  \rm -f ${frame_folder}/f${i}/image_ctfcor_mask.mrc
+                  #
+                  ${bin_2dx}/2dx_quadserchk-2.exe << eot
 2,${quadpredb}                     ! IPASS,NRANGE
 ${frame_folder}/f${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
@@ -86,9 +89,32 @@ ${createmask}                   ! dont create manual Masking information
 ${frame_folder}/f${i}/${iname}.mrc
 ${frame_folder}/f${i}/${iname}_mask.mrc
 -1                              ! create output images (0=no, <0 = one, >0 =size)
-1                               ! use external masking template (0=no, 1=yes)
+3                               ! use external masking template (0=no, 1=yes, 2=no with 2nd image, 3=yes with 2nd image)
+${frame_folder}/f${i}/image_ctfcor.mrc
+${frame_folder}/f${i}/image_ctfcor_mask.mrc
 TMP_quadserch_7.mrc
 eot
+                else
+                  ${bin_2dx}/2dx_quadserchk-2.exe << eot
+2,${quadpredb}                     ! IPASS,NRANGE
+${frame_folder}/f${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${movie_quadradax},${movie_quadraday}         ! RADIUS OF CORR SEARCH, search offset in pixels
+${imagecenterx},${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! dont create manual Masking information
+1                               ! Do mask the image directly
+${frame_folder}/f${i}/${iname}.mrc
+${frame_folder}/f${i}/${iname}_mask.mrc
+-1                              ! create output images (0=no, <0 = one, >0 =size)
+1                               ! use external masking template (0=no, 1=yes, 2=no with 2nd image, 3=yes with 2nd image)
+TMP_quadserch_7.mrc
+eot
+                endif
                 #
            else
                 #
@@ -96,7 +122,10 @@ eot
                 ${proc_2dx}/lin "QUADSERCH - masking frame individually (IPASS=2)"
                 #########################################################################
                 #
-                ${bin_2dx}/2dx_quadserchk-2.exe << eot
+                if ( ${ctfcor_imode}x == 9x ) then
+                  \rm -f ${frame_folder}/f${i}/image_ctfcor_mask.mrc
+                  #
+                  ${bin_2dx}/2dx_quadserchk-2.exe << eot
 2,${quadpredb}                     ! IPASS,NRANGE
 ${frame_folder}/f${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
 ${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
@@ -112,8 +141,30 @@ ${createmask}                   ! dont create manual Masking information
 ${frame_folder}/f${i}/${iname}.mrc
 ${frame_folder}/f${i}/${iname}_mask.mrc
 -1                              ! create output images (0=no, <0 = one, >0 =size)
-0                               ! use external masking template (0=no, 1=yes)
+2                               ! use external masking template (0=no, 1=yes, 2=no with 2nd image, 3=yes with 2nd image)
+${frame_folder}/f${i}/image_ctfcor.mrc
+${frame_folder}/f${i}/image_ctfcor_mask.mrc
 eot
+                 else
+                  ${bin_2dx}/2dx_quadserchk-2.exe << eot
+2,${quadpredb}                     ! IPASS,NRANGE
+${frame_folder}/f${i}/SCRATCH/${nonmaskimagename}_CCmapMB.mrc
+${imagesidelength},${imagesidelength}     ! SIZE OF TRANSFORM (ISIZEX, ISIZEY)
+${lattice},F                       ! Lattice vectors
+-200,200,-200,200               ! NUMBER UNIT CELLS TO SEARCH
+${movie_quadradax},${movie_quadraday}           ! RADIUS OF CORR SEARCH, search offset in pixels
+${imagecenterx} ${imagecentery}           ! POSN OF START SEARCH ORIGIN  0,0 IS ORIGIN
+N                               ! YES/NO FOR DETAILED PRINTOUT
+${radlim}                       ! RADLIM IN PROFILE GRID UNITS
+${valspotscan},${RMAG},${LCOLOR}          ! prohibit fractures in crystal (1=y,0=n),RMAG,LCOLOR
+${createmask}                   ! dont create manual Masking information
+1                               ! Do mask the image directly
+${frame_folder}/f${i}/${iname}.mrc
+${frame_folder}/f${i}/${iname}_mask.mrc
+-1                              ! create output images (0=no, <0 = one, >0 =size)
+0                               ! use external masking template (0=no, 1=yes, 2=no with 2nd image, 3=yes with 2nd image)
+eot
+                endif
                 #
            endif
 
@@ -135,6 +186,12 @@ eot
            \ln -s ${iname}.mrc ${iname}_mask.mrc
            \rm -f                  ${iname}_mask_fft.mrc
            \ln -s ${iname}_fft.mrc ${iname}_mask_fft.mrc
+           if ( ${ctfcor_imode}x == 9x ) then
+             \rm -f                      image_ctfcor_mask.mrc
+             \ln -s image_ctfcor.mrc     image_ctfcor_mask.mrc
+             \rm -f                      image_ctfcor_mask_fft.mrc
+             \ln -s image_ctfcor_fft.mrc image_ctfcor_mask_fft.mrc
+           endif
            cd ${olddir}
         endif
 
@@ -551,7 +608,7 @@ eot
             \rm -f CCPLOT.PS
 
             ${bin_2dx}/2dx_ccunbendk.exe << eot
-${frame_folder}/f${i}/${iname}_mask.mrc
+${frame_folder}/f${i}/image_ctfcor_mask.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 30,52,0.001,${movie_facthreshb},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
 ${imagename}, Movie-Mode UNBEND, ${date}
@@ -559,6 +616,7 @@ ${frame_folder}/CCUNBEND_f${i}_notap.mrc
 CCUNBEND, f${i}/m${nonmaskimagename}_${i}.mrc, ${date}
 eot
 
+            echo "# IMAGE-IMPORTANT: ${frame_folder}/CCUNBEND_f${i}_notap.mrc <Unbent Frame ${i}>" >> LOGS/${scriptname}.results
 
 
             if ( ${show_frame_CCmap_marked}x == "yx" ) then
@@ -640,6 +698,9 @@ eot
             setenv OUT ${frame_folder}/CCUNBEND_f${i}_fft.mrc
             \rm -f     ${frame_folder}/CCUNBEND_f${i}_fft.mrc
             ${bin_2dx}/2dx_fftrans.exe
+
+            echo "# IMAGE-IMPORTANT: ${frame_folder}/CCUNBEND_f${i}.mrc <Unbent Frame ${i}>" >> LOGS/${scriptname}.results
+            echo "# IMAGE-IMPORTANT: ${frame_folder}/CCUNBEND_f${i}_fft.mrc <Unbent Frame ${i} (FFT)>" >> LOGS/${scriptname}.results
 
             ###########################################################################
             ${proc_2dx}/lin "MMBOX - evaluate AMPlitudes and PHAses from unbent movie"

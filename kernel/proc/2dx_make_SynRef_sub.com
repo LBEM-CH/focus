@@ -6,6 +6,9 @@
 # This file has to be sourced from another csh.
 #
 #
+echo ":: Don't use this script. Using a Synthetic reference only introduces reference bias."
+echo ":: As a result, you will produce artifacts and loose resolution."
+exit -1
 #
 #
   echo ":: "

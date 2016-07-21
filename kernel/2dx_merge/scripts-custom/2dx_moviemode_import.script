@@ -87,8 +87,8 @@ cd ${olddir}
 set imagenum = `cat tmp.tmp | wc -l`
 echo ":: Importing ${imagenum} images"
 #
-set movie_import_dirname = `echo ${movie_import_dir} | rev | cut -d\/ -f1 | rev`
-set movie_import_target_dirname = `echo ${movie_import_target_dir}-${movie_import_dirname} | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' -e 's/+/_/g'`
+# set movie_import_dirname = `echo ${movie_import_dir} | rev | cut -d\/ -f1 | rev`
+set movie_import_target_dirname = `echo ${movie_import_target_dir} | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' -e 's/+/_/g'`
 cd ..
 if ( ! -d ${movie_import_target_dirname} ) then
   \mkdir ${movie_import_target_dirname}
@@ -111,52 +111,52 @@ while ( ${irun} <= ${imagenum} )
   endif
   #
   if ( -e ${movie_average}/${importimage} ) then
-    if ( -e ${movie_stack}/${importimage} ) then
-      set newval = `echo ${movie_import_imagenumber} | awk '{ s = $1 * 100 } END { print s }'`
-      set testval = `echo ${newval} | wc -c`
-      set newimagenumber = `echo 0000000000 | cut -c${testval}-`${newval}
-      echo ":"
-      echo ": Importing drift-corrected average image "
-      echo ":      ${movie_average}/${importimage}"
-      if ( ${movie_import_aligned_stack} == "y" ) then
+    set newval = `echo ${movie_import_imagenumber} | awk '{ s = $1 * 100 } END { print s }'`
+    set testval = `echo ${newval} | wc -c`
+    set newimagenumber = `echo 0000000000 | cut -c${testval}-`${newval}
+    echo ":"
+    echo ": Importing drift-corrected average image "
+    echo ":      ${movie_average}/${importimage}"
+    if ( ${movie_import_aligned_stack} == "y" ) then
+      if ( -e ${movie_stack}/${importimage} ) then
         echo ": and drift-corrected stack"
         echo ":      ${movie_stack}/${importimage}"
+      else
+        ${proc_2dx}/protest "ERROR: ${movie_stack}/${importimage} not found."
       endif
-      echo ":: ${irun}: Creating ${movie_import_target_dirname}/${importimage_pattern} for image number ${newimagenumber}"
-      echo ":"
-      cd ${olddir}
-      cd ..
-      cd ${movie_import_target_dirname}
-      if ( -d ${importimage_pattern} ) then
-        ${proc_2dx}/linblock "WARNING: ${importimage_pattern} already existing. Removing."
-        \rm -rf ${importimage_pattern}
-      endif
-      mkdir ${importimage_pattern}
-      cd ${importimage_pattern}
-      cp ${movie_average}/${importimage} ${importimage_pattern}_${newimagenumber}_raw.${file_ending}
-      if ( ${movie_import_aligned_stack} == "y" ) then
-        cp ${movie_stack}/${importimage} ${importimage_pattern}_${newimagenumber}_stack.${file_ending}
-      endif
-      cp ${olddir}/2dx_merge.cfg 2dx_image.cfg
-      echo "set imagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
-      echo "set nonmaskimagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
-      if ( ${movie_import_aligned_stack} == "y" ) then
-        echo "set movie_stackname = ${importimage_pattern}_${newimagenumber}_stack.${file_ending}" >> 2dx_image.cfg
-      endif
-      echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
-      echo "set imagename_original = ${movie_average}/${importimage}" >> 2dx_image.cfg
-      echo "set initialization_reset = y" >> 2dx_image.cfg
-      echo "set initialization_executable = y" >> 2dx_image.cfg
-      set fullpath = `pwd`
-      cd ${olddir}
-      ${app_2dx_image} ${fullpath} "2dx_initialize"
-      cd ${olddir}
-      #
-      @ movie_import_imagenumber++
-      echo "set movie_import_imagenumber = ${movie_import_imagenumber}"  >> LOGS/${scriptname}.results
-    else
-      ${proc_2dx}/protest "ERROR: ${movie_stack}/${importimage} not found."
     endif
+    echo ":: ${irun}: Creating ${movie_import_target_dirname}/${importimage_pattern} for image number ${newimagenumber}"
+    echo ":"
+    cd ${olddir}
+    cd ..
+    cd ${movie_import_target_dirname}
+    if ( -d ${importimage_pattern} ) then
+      ${proc_2dx}/linblock "WARNING: ${importimage_pattern} already existing. Removing."
+      \rm -rf ${importimage_pattern}
+    endif
+    mkdir ${importimage_pattern}
+    cd ${importimage_pattern}
+    cp ${movie_average}/${importimage} ${importimage_pattern}_${newimagenumber}_raw.${file_ending}
+    if ( ${movie_import_aligned_stack} == "y" ) then
+      cp ${movie_stack}/${importimage} ${importimage_pattern}_${newimagenumber}_stack.${file_ending}
+    endif
+    cp ${olddir}/2dx_merge.cfg 2dx_image.cfg
+    echo "set imagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
+    echo "set nonmaskimagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
+    if ( ${movie_import_aligned_stack} == "y" ) then
+      echo "set movie_stackname = ${importimage_pattern}_${newimagenumber}_stack.${file_ending}" >> 2dx_image.cfg
+    endif
+    echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
+    echo "set imagename_original = ${movie_average}/${importimage}" >> 2dx_image.cfg
+    echo "set initialization_reset = y" >> 2dx_image.cfg
+    echo "set initialization_executable = y" >> 2dx_image.cfg
+    set fullpath = `pwd`
+    cd ${olddir}
+    ${app_2dx_image} ${fullpath} "2dx_initialize"
+    cd ${olddir}
+    #
+    @ movie_import_imagenumber++
+    echo "set movie_import_imagenumber = ${movie_import_imagenumber}"  >> LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: ${movie_average}/${importimage} not found."
   endif

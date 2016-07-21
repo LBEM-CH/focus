@@ -638,7 +638,7 @@ eot
     else
       #
       if ( ${ctfcor_imode}x == 8x ) then
-        set ctfcor_imode_local = 2
+        set ctfcor_imode_local = 1
       else
         set ctfcor_imode_local = ${ctfcor_imode}
       endif
@@ -662,7 +662,6 @@ ${RESMAX}
 ${ctfcor_noise}
 ${ctfcor_imode_local}
 ${ctfcor_debug}
-${ctfcor_maxamp_factor}
 eot
       #
       echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
@@ -734,13 +733,13 @@ ${nonmaskimagename}_profile.dat
 2
 eot
   echo "# IMAGE: SCRATCH/${iname}_CCmap21_marked.mrc <CCmap, marked>" >> LOGS/${scriptname}.results 
-#
+  #
   echo "# IMAGE: SCRATCH/${iname}_CCmap21_unbend2.mrc <CCmap with Reference 1, unbent>" >> LOGS/${scriptname}.results 
   #
   \rm -f fort.17
   
-      ${proc_2dx}/${lincommand} "2dx_ccunbendk - to unbend the original image"
-      ${bin_2dx}/2dx_ccunbendk.exe << eot
+  ${proc_2dx}/${lincommand} "2dx_ccunbendk - to unbend the original image"
+  ${bin_2dx}/2dx_ccunbendk.exe << eot
 ${iname}.mrc
 ${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
 50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
@@ -793,6 +792,46 @@ eot
     #
   endif
   #
+  if ( ${ctfcor_imode} == "9" &&  ${final_round} == "y" ) then
+    #############################################################################
+    ${proc_2dx}/${lincommand} "unbend also the Wiener-filtered image"
+    #############################################################################
+    #
+    set iname = image_ctfcor
+    #
+    \rm -f SCRATCH/${iname}_fou_unbend2_notap.mrc
+    #
+    if ( ${ccunbend_program} == "1" ) then
+      ${proc_2dx}/${lincommand} "2dx_ccunbendh - to unbend the original image"
+      ${bin_2dx}/2dx_ccunbendh.exe << eot
+${iname}.mrc
+${IMAXCOR},${ISTEP_h},${NNUM},${ROFFSET}	 !IMAXCOR,ISTEP,NNUM,ROFFSET
+0.001,${facthresha},${RMAG} !EPS,FACTOR,RMAG
+SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc
+UNBENT,PASS,2,${date}
+eot
+      #
+    else
+      #
+      ${proc_2dx}/${lincommand} "2dx_ccunbendk - to unbend the original image"
+      ${bin_2dx}/2dx_ccunbendk.exe << eot
+${iname}.mrc
+${ITYPE},1,${IMAXCOR},${ISTEP},F,40,T       !ITYPE,IOUT,IMAXCOR,ISTEP,LTAPER,RTAPER,LTABOUT
+50,72,0.001,${facthresha},${TLTAXIS},${RMAG},${LCOLOR}     !IKX,IKY,EPS,FACTOR,TLTAXIS,RMAG,LCOLOR
+${iname}, UNBEND2, ${date}
+SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc
+UNBENT,PASS,2,${date}
+eot
+      #
+      echo "# IMAGE-IMPORTANT: SCRATCH/${iname}_fou_unbend2_notap.mrc <Wiener-filtered image, unbent>" >> LOGS/${scriptname}.results 
+      #
+    endif
+    #
+    \rm -f fort.17
+    \rm -f CCPLOT.PS
+    #
+  endif
+  #
   echo "<<@progress: 90>>"
   #
   #
@@ -817,7 +856,7 @@ eot
   #
   \rm -f unbent.mrc
   #
-  if ( ${ctfcor_imode} == "2"  &&  ${final_round} == "y" ) then
+  if ( ( ${ctfcor_imode} == "2" || ${ctfcor_imode} == "9" ) &&  ${final_round} == "y" ) then
     setenv IN  SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc
   else
     setenv IN  SCRATCH/${iname}_fou_unbend2_notap.mrc
@@ -894,7 +933,7 @@ eot
   #
   echo " " >> History.dat
   echo ":Date: ${date}" >> History.dat
-  echo "::Unbend 2: maskb=${maskb}, boxb1=${boxb1}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+  echo "::Unbend U2: maskb=${maskb}, boxb1=${boxb1}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
   #
   echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
   echo "set QVal2 = ${QVAL_local}" >> LOGS/${scriptname}.results

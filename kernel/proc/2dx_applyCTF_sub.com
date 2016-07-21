@@ -11,7 +11,7 @@ endif
 echo ":: "
 echo ":: 2dx_applyCTF_sub.com : Working on ${algo} "
 echo ":: -------------------------------------"
-if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
+if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" || ${local_ctfcor_imode} == "9" ) then
   if ( -e ${CTF_infile} ) then
     echo ":: Input file          = ${CTF_infile}"
   else
@@ -30,7 +30,7 @@ set imagecentery = ${imagecenterx}
 #
 
 
-if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" ) then
+if ( ${local_ctfcor_imode} == "0" || ${local_ctfcor_imode} == "1" || ${local_ctfcor_imode} == "2" || ${local_ctfcor_imode} == "3" || ${local_ctfcor_imode} == "9" ) then
 
   ${proc_2dx}/linblock "2dx_ctfapplyk - Applying CTF correction to data"
   setenv IN  ${CTF_infile}
@@ -217,7 +217,7 @@ eot
     #
     echo " " >> History.dat
     echo ":Date: ${date}" >> History.dat
-    echo "::Unbend 2: QVal= ${QVAL_local} ... IQ stat = ${IQ2}" >> History.dat
+    echo "::Unbend U2: QVal= ${QVAL_local} ... IQ stat = ${IQ2}" >> History.dat
   endif
   
   if ( ${algo} == "UMA" ) then
@@ -247,7 +247,7 @@ eot
 
     echo " " >> History.dat
     echo ":Date: ${date}" >> History.dat
-    echo "::Unbend MovieA: QVal= ${QVAL_local} ... IQ stat = ${IQMA}" >> History.dat
+    echo "::Unbend MA: QVal= ${QVAL_local} ... IQ stat = ${IQMA}" >> History.dat
     #
   endif
   

@@ -304,8 +304,11 @@ endif
 set olddir = $PWD
 #
 #------------------------------------------------------------------------------
-# Test if we are dealing with TILES:
-set intiles = `echo ${olddir} | grep TILES | wc -l`
+echo Test if we are dealing with TILES
+# set intiles = `echo ${olddir} | grep -c TILES`
+set intiles = 0
+echo intiles = ${intiles}
+
 if ( ${intiles} != "1" ) then
   #------------------------------------------------------------------------------
   ${proc_2dx}/linblock "Setting APH file types to use"

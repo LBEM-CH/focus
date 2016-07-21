@@ -13,6 +13,7 @@ set system = `uname -s`
 echo system = ${system}
 #
 set app_python = "python"
+set app_anaconda = "/opt/anaconda/bin/python"
 #
 if ( -e /usr/bin/python ) then
   set app_python = /usr/bin/python

@@ -64,9 +64,6 @@ set show_frame_CCmap_marked = "n"
 #
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
-# DISPLAY: SYN_Unbending
-# DISPLAY: SYN_Bfact1
-# DISPLAY: SYN_maska
 # DISPLAY: holeb
 # DISPLAY: maskb01
 # DISPLAY: maskb02
@@ -112,7 +109,6 @@ set show_frame_CCmap_marked = "n"
 # DISPLAY: ctfcor_imode
 # DISPLAY: ctfcor_debug
 # DISPLAY: ctfcor_maxamp_factor
-# DISPLAY: calculate_tiles
 # DISPLAY: movie_ghostscript_installed
 #
 #$end_local_vars
@@ -148,9 +144,6 @@ set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
 set SYM = ""
-set SYN_Bfact1 = ""
-set SYN_Unbending = ""
-set SYN_maska = ""
 set TANGL = ""
 set TAXA = ""
 set TLTANG = ""
@@ -160,7 +153,6 @@ set app_2dx_image = ""
 set beamtilt = ""
 set boxb1 = ""
 set boxb2 = ""
-set calculate_tiles = ""
 set ccunbend_program = ""
 set createmaskinfo = ""
 set ctfcor_debug = ""
@@ -222,6 +214,8 @@ set tempkeep = ""
 set treatspotscan = ""
 set use_masked_image = ""
 set movie_ghostscript_installed = ""
+set DEFOCUS_TLTAXIS = ""
+set DEFOCUS_TLTANG = ""
 #
 #$end_vars
 #
@@ -294,8 +288,6 @@ if ( ${movie_ghostscript_installed} == "y" ) then
 endif
 ##########################################
 ##########################################
-
-set SYN_Unbending = "0"
 
 source ${proc_2dx}/2dx_unbend_movieB_sub.com
 

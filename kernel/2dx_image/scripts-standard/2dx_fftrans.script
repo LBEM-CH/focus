@@ -91,6 +91,7 @@ set movie_inmovie = ""
 #
 #$end_vars
 #
+set scriptname = 2dx_fftrans
 source ${proc_2dx}/initialize
 #
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") && ( -e  FFTIR/${imagename}.fft.mrc ) ) then
@@ -99,9 +100,8 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") && ( -e  FFTIR/${ima
 endif
 #
 source ${proc_2dx}/2dx_makedirs
-#
-set scriptname = 2dx_fftrans
 \rm -f LOGS/${scriptname}.results
+#
 #
 echo "<<@evaluate>>"
 #

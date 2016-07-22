@@ -28,7 +28,11 @@
 # DISPLAY: Calc_from_sample_pixel
 # DISPLAY: sample_pixel
 # DISPLAY: Thread_Number
+# DISPLAY: movie_stackname_raw
 # DISPLAY: movie_stackname
+# DISPLAY: KV
+# DISPLAY: CS
+# DISPLAY: gainfactor
 #
 #$end_local_vars
 #
@@ -51,17 +55,22 @@ set phacon = ""
 set RESMIN = ""
 set RESMAX = ""
 set movie_inmovie = ""
+set movie_stackname_raw = ""
 set movie_stackname = ""
 set Thread_Number = ""
+set SCRATCH_DISK = ""
+set KV = ""
+set CS = ""
+set gainfactor = ""
 #
 #$end_vars
+#
+set scriptname = 2dx_driftcorrect
+\rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
-#
-set scriptname = 2dx_driftcorrect
-\rm -f LOGS/${scriptname}.results
 #
 echo "<<@evaluate>>"
 #
@@ -171,7 +180,7 @@ ${proc_2dx}/linblock "Sourcing 2dx_zorro_sub.com"
 #
 set n_threads = ${Thread_Number} # number of threads for numexpr and FFTW
 set savePNGs = True # Do you want Zorro diagnostic images?
-set pixelsize = ${sample_pixel} # pixel size in Angstroms
+set pixelsize = ${sample_pixel} # pixel size in Angstroems
 set a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'` # lattice parameter a, Angstroms
 set b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'` # lattice parameter b, Angstroms
 set gamma = ${realang} # crystal rotation parammeter
@@ -182,13 +191,25 @@ if ( ! -d zorro ) then
   endif
   \mkdir zorro
 endif
-set fileDescriptor = ${movie_stackname} 
+set movie_stackname_raw_base = `echo ${movie_stackname_raw} | sed 's/.mrc//g' | sed 's/.dm4//g'`
 #
-${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${fileDescriptor}
+echo "# IMAGE-IMPORTANT: "${movie_stackname_raw} "<Input Movie Stack>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro.mrc "<MRC: Drift-corrected average>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro_filt.mrc "<MRC: Dose-filtered, drift-corrected average>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro_movie.mrc "<MRC: Drift-corrected movie>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}.mrc.zor.txt "<TXT: ZORRO logfile>" >> LOGS/${scriptname}.results
+#
+echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer}"
+${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer}
 #
 #################################################################################
 ${proc_2dx}/linblock "Back in 2dx_driftcorrect.com"
 #################################################################################
+#
+if ( -e ${movie_stackname_raw_base}_zorro_movie.mrc ) then
+  \rm -f ${movie_stackname}
+  \mv -f ${movie_stackname_raw_base}_zorro_movie.mrc ${movie_stackname} 
+endif
 #
 echo "<<@evaluate>>"
 #
@@ -202,3 +223,4 @@ exit
 #
 # These are listed here to make sure they appear in the 2dx_image GUI:
 #
+python ${proc_2dx}/movie/2dx_zorro_sub.py

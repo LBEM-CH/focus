@@ -61,17 +61,22 @@ print("::Zorro starting...")
 
 print "2dx_zorro_sub.py"
 
-if len(sys.argv) != 9:
-                sys.exit("Usage: 2dx_zorro_sub.py <correct parameters> ")
+if len(sys.argv) != 14:
+                sys.exit("Wrong number of parameters given for 2dx_zorro_sub.py ")
 
 n_threads = int(sys.argv[1])
 savePNGs = sys.argv[2]
-pixelsize = float(sys.argv[3])
-a = float(sys.argv[4])
-b = float(sys.argv[5])
-gamma = float(sys.argv[6])
+pixelsize = float(sys.argv[3])/10
+a = float(sys.argv[4])/10
+b = float(sys.argv[5])/10
+gamma = np.deg2rad(float(sys.argv[6]))
 outputFolder = sys.argv[7]
 fileDescriptor = sys.argv[8]
+scratch = sys.argv[9]
+KV = float(sys.argv[10])
+CS = float(sys.argv[11])
+gainfactor = float(sys.argv[12])
+stepdigitizer = float(sys.argv[13])
 
 
 zorroReg = zorro.ImageRegistrator()
@@ -83,6 +88,17 @@ zorroReg.plotDict['transparent'] = False
 zorroReg.CTFProgram = None
 zorroReg.filterMode = 'dose,background'
 zorroReg.n_threads = n_threads
+zorroReg.cachePath = scratch
+zorroReg.voltage = KV
+zorroReg.C3 = CS
+zorroReg.gain = gainfactor
+zorroReg.detectorPixelSize = stepdigitizer
+
+
+# Option 1: bin it
+# zorroReg.shapeBinned = [3838,3710]
+# Option 2: pad to 8k
+# zorroReg.shapePadded = [8192,8192]
 
 if isinstance( fileDescriptor, list ) or isinstance( fileDescriptor, tuple ):
     # Do nothing
@@ -90,20 +106,27 @@ if isinstance( fileDescriptor, list ) or isinstance( fileDescriptor, tuple ):
 elif isinstance( fileDescriptor, str ):
     fileList = glob.glob( fileDescriptor )
 
+print("a = " + str(a))
+print("b = " + str(b))
+print("gamma in rad = " + str(gamma))
+print("FileDescriptor = " + str(fileDescriptor) )
+
 # Normalize the path so we keep everything simple.
 for fileName in fileList:
     baseName = os.path.basename( fileName )
-    baseFront = os.path.splitext( baseName )
+    baseFront = os.path.splitext( baseName )[0]
     
     # Set individual file names and save a configuration file for each.
     zorroReg.files = {}
     zorroReg.files['figurePath'] = './fig'
-    zorroReg.files['config'] = baseName + ".log"
+    zorroReg.files['config'] = baseName + ".zor"
     zorroReg.files['stack'] = os.path.realpath( fileName )
+    print("zorroReg.files['stack'] = " + str(zorroReg.files['stack']))
     zorroReg.files['align'] = baseFront + "_zorro_movie.mrcs"
     zorroReg.files['sum'] = baseFront + "_zorro.mrc"
     
-    realConfig = os.path.join( os.path.realpath( outputFolder ), baseName + ".log" )
-    zorro.call( realConfig )
+    zorroReg.saveConfig()
+    #realConfig = os.path.join( os.path.realpath( outputFolder ), baseName + ".zor" )
+    zorro.call( zorroReg.files['config'] )
     
     

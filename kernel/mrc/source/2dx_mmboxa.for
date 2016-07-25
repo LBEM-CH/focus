@@ -232,7 +232,7 @@ CHENN>
         WRITE(*,'('' '')')
         READ(5,1005) CNAMPAT
         WRITE(6,'(A)') CNAMPAT
-        OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='UNKNOWN')
+        OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='NEW')
       END IF
 C
       IF(IOUT.EQ.3) THEN
@@ -242,7 +242,7 @@ C
         WRITE(*,'('' '')')
         READ(5,1005) FILOUT2
         WRITE(6,'(A)') FILOUT2
-        OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='UNKNOWN')
+        OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='NEW')
         WRITE(*,'('' '')')
         WRITE(*,'('' # type IQ max value'')')
         WRITE(*,'('' '')')

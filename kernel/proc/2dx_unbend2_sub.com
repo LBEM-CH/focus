@@ -835,9 +835,9 @@ eot
   echo "<<@progress: 90>>"
   #
   #
-  if ( ( ${ctfcor_imode} == "1" || ${ctfcor_imode} == "2" ) &&  ${final_round} == "y" ) then
+  if ( ${ctfcor_imode} == "7" &&  ${final_round} == "y" ) then
     #############################################################################
-    ${proc_2dx}/${lincommand} "apply_filter_Fourier.py - to perform Weiner filtration on unbent image"
+    ${proc_2dx}/${lincommand} "apply_filter_Fourier.py - to perform Wiener filtration on unbent image"
     #############################################################################
     #
     ${app_python} ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_fou_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc ${ctfcor_noise}

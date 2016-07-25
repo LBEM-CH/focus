@@ -120,7 +120,10 @@ if ( ${cleanup_merge} == "0" ) then
       \rm -rf PRJ
       \rm -rf HKL
       \rm -rf TRASH
-      \rm -rf LOGS/*.log
+      if ( -d LOGS ) then
+        echo dummy > LOGS/dummy.log
+        \rm -rf LOGS/*.log
+      endif
       #
       if ( -d proc ) then
         cd proc
@@ -260,7 +263,11 @@ ${oldir}/2dx_merge_alldirs.dat
 ${dircounter}
 eot
     #
-    set from_dir = `cat TMP.tmp | cut -c3-`
+    if ( ${cleanup_location} == "1" ) then
+      set from_dir = `cat TMP.tmp`
+    else
+      set from_dir = `cat TMP.tmp | cut -c3-`
+    endif
     \rm TMP.tmp
     #
     cd ${oldir}

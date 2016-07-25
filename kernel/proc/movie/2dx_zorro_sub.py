@@ -86,7 +86,8 @@ zorroReg.preShift = True
 print( "Estimated distance to first spot in FFT (pix): %f" % zorroReg.maxShift )
 zorroReg.plotDict['transparent'] = False
 zorroReg.CTFProgram = None
-zorroReg.filterMode = 'dose,background'
+# zorroReg.filterMode = 'dose,background'
+zorroReg.filterMode = 'dosenorm,background'
 zorroReg.n_threads = n_threads
 zorroReg.cachePath = scratch
 zorroReg.voltage = KV
@@ -96,7 +97,7 @@ zorroReg.detectorPixelSize = stepdigitizer
 
 
 # Option 1: bin it
-# zorroReg.shapeBinned = [3838,3710]
+zorroReg.shapeBinned = [3838,3710]
 # Option 2: pad to 8k
 # zorroReg.shapePadded = [8192,8192]
 

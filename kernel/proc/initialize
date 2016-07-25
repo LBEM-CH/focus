@@ -164,7 +164,8 @@ else
   set EMAN2_setup = ${eman2}/eman2.cshrc
   if ( -e ${EMAN2_setup} ) then
     if ( $?scriptname ) then
-      if ( ${scriptname} != "2dx_driftcorrectx" ) then
+      # echo "::Scriptname = "${scriptname}
+      if ( ${scriptname} != "2dx_driftcorrect" ) then
         # This is sourcing a script within a sourced script. Hopefully, this will work...
         echo ":   Sourcing ${EMAN2_setup}"
         source ${EMAN2_setup}

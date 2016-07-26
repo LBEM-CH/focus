@@ -136,6 +136,7 @@ C
 CHENN>
 C      CHARACTER*80 FILIN,FILOUT
       CHARACTER*80 FILIN,FILOUT,FILOUT2,CZEIL,CNAMPAT
+      CHARACTER*200 cline
 CHENN<
       COMMON NOH,NOK,NSPOT,IX1,IX2,IY1,IY2,IHOR,IVERT,IXOUT1,IXOUT2,
      1       IXL,IYL,IX,IY,
@@ -232,6 +233,9 @@ CHENN>
         WRITE(*,'('' '')')
         READ(5,1005) CNAMPAT
         WRITE(6,'(A)') CNAMPAT
+        write(cline,'(''\rm -f '', A)')FILOUT2
+        call shorten(cline,k)
+        call system(cline(1:k))
         OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='NEW')
       END IF
 C
@@ -242,6 +246,9 @@ C
         WRITE(*,'('' '')')
         READ(5,1005) FILOUT2
         WRITE(6,'(A)') FILOUT2
+        write(cline,'(''\rm -f '', A)')FILOUT2
+        call shorten(cline,k)
+        call system(cline(1:k))
         OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='NEW')
         WRITE(*,'('' '')')
         WRITE(*,'('' # type IQ max value'')')

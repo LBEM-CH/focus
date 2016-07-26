@@ -78,6 +78,9 @@ CS = float(sys.argv[11])
 gainfactor = float(sys.argv[12])
 stepdigitizer = float(sys.argv[13])
 
+# x_dim = 
+
+
 
 zorroReg = zorro.ImageRegistrator()
 zorroReg.pixelsize = pixelsize
@@ -96,10 +99,17 @@ zorroReg.gain = gainfactor
 zorroReg.detectorPixelSize = stepdigitizer
 
 
+
+
 # Option 1: bin it
 zorroReg.shapeBinned = [3838,3710]
 # Option 2: pad to 8k
 # zorroReg.shapePadded = [8192,8192]
+
+zorroReg.savePNG = True
+zorroReg.files['figurePath'] = "./zorro/"
+
+
 
 if isinstance( fileDescriptor, list ) or isinstance( fileDescriptor, tuple ):
     # Do nothing

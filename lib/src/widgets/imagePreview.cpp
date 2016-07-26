@@ -118,6 +118,10 @@ void imagePreview::launchNavigator()
 		{
 			QProcess::startDetached(conf->getApp("pdfViewer") + " " + result);
 		}
+		else if(result.toLower().endsWith(".png"))
+		{
+			QProcess::startDetached(conf->getApp("pngViewer") + " " + result);
+		}
 		else if(result.toLower().endsWith(".txt") || result.toLower().endsWith(".hk") || result.toLower().endsWith(".hkl") || 
 				result.toLower().endsWith(".dat") || result.toLower().endsWith(".aph") || result.toLower().endsWith(".spt") )
 		{

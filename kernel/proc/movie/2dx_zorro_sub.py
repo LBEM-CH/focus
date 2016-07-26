@@ -61,7 +61,7 @@ print("::Zorro starting...")
 
 print "2dx_zorro_sub.py"
 
-if len(sys.argv) != 14:
+if len(sys.argv) != 17:
                 sys.exit("Wrong number of parameters given for 2dx_zorro_sub.py ")
 
 n_threads = int(sys.argv[1])
@@ -77,10 +77,9 @@ KV = float(sys.argv[10])
 CS = float(sys.argv[11])
 gainfactor = float(sys.argv[12])
 stepdigitizer = float(sys.argv[13])
-
-# x_dim = 
-
-
+x_dim = int(sys.argv[14])
+y_dim = int(sys.argv[15])
+z_dim = int(sys.argv[16])
 
 zorroReg = zorro.ImageRegistrator()
 zorroReg.pixelsize = pixelsize
@@ -99,17 +98,15 @@ zorroReg.gain = gainfactor
 zorroReg.detectorPixelSize = stepdigitizer
 
 
-
+if x_dim > 4096 or y_dim > 4096:
+  zorroReg.shapeBinned = [y_dim,x_dim]
 
 # Option 1: bin it
-zorroReg.shapeBinned = [3838,3710]
+# zorroReg.shapeBinned = [3838,3710]
 # Option 2: pad to 8k
 # zorroReg.shapePadded = [8192,8192]
 
 zorroReg.savePNG = True
-zorroReg.files['figurePath'] = "./zorro/"
-
-
 
 if isinstance( fileDescriptor, list ) or isinstance( fileDescriptor, tuple ):
     # Do nothing

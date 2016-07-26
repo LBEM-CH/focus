@@ -76,7 +76,6 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
-#
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
@@ -97,6 +96,15 @@ endif
 #######  Now Run Zorro ######################################################
 #############################################################################
 #############################################################################
+#
+setenv IN ${movie_stackname_raw}
+${bin_2dx}/2dx_header.exe
+# cat 2dx_header.out
+set NX = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $1} END { print s }'`
+set NY = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $2} END { print s }'`
+set NZ = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $3} END { print s }'`
+echo ":Dimensions of input movie in X,Y,Z are ${NX},${NY},${NZ}"
+\rm 2dx_header.out
 #
 #################################################################################
 ${proc_2dx}/linblock "Sourcing 2dx_zorro_sub.com"
@@ -123,8 +131,8 @@ echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro_filt.mrc "<MRC: Dose
 echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro_movie.mrc "<MRC: Drift-corrected movie>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}.mrc.zor.txt "<TXT: ZORRO logfile>" >> LOGS/${scriptname}.results
 #
-echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer}"
-${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer}
+echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NX} ${NY} ${NZ}"
+${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NX} ${NY} ${NZ}
 #
 #################################################################################
 ${proc_2dx}/linblock "Back in 2dx_driftcorrect.com"
@@ -147,6 +155,18 @@ if ( -e ${movie_stackname_raw_base}_zorro_movie.mrcs ) then
     endif 
   endif
   \rm -f m${movie_stackname_raw_base}_zorro_filt.mrc
+  #
+  \mv -f fig/* zorro
+  \rm -rf fig
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_FRC.png "<PNG Zorro: FRC among adjacent frames>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}-logisticWeights.png "<PNG Zorro: Logistic weights plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_peaksigTriMat.png "<PNG Zorro: Peak significance matrix>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_translations.png "<PNG Zorro: Drift profile plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_pixRegError.png "<PNG Zorro: Pixel registration error X,Y>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_imageSum "<PNG Zorro: Drift-corrected average>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_filtSum.png "<PNG Zorro: Drift-corrected, filtered average >" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_FFTSum.png "<PNG Zorro: Drift-corrected average (FFT)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_polarFFTSum.png "<PNG Zorro: Drift-corrected average (Polar FFT)>" >> LOGS/${scriptname}.results
 endif
 #
 echo "<<@evaluate>>"

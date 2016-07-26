@@ -24,8 +24,8 @@ include(SetPropagateDeps)
 # 
 PROJECT(2dx)
 set (2dx_VERSION_MAJOR 3)
-set (2dx_VERSION_MINOR 5)
-set (2dx_VERSION_PATCH 1)
+set (2dx_VERSION_MINOR 6)
+set (2dx_VERSION_PATCH 0)
 #------------------------------------------------------------------------------
 
 
@@ -81,7 +81,7 @@ message(STATUS "The variable 2DX_INCLUDE_DIR is set to: ${2DX_INCLUDE_DIR}")
 # Binary Directory
 set(2DX_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "The path of the 2dx binary directory.")
 
-add_subdirectory(include)
+#add_subdirectory(include)
 #-------------------------------------------------------------------------------
 
 #-- EXTRA CONFIGURATION -------------------------------------------------------
@@ -102,9 +102,10 @@ install(FILES ${HTM} DESTINATION .)
 # the libraries have to be built before by the build_all script 
 add_subdirectory(external)
 add_subdirectory(kernel)
-add_subdirectory(lib)
-add_subdirectory(2dx_image)
-add_subdirectory(2dx_merge)
+#add_subdirectory(lib)
+add_subdirectory(gui)
+#add_subdirectory(2dx_image)
+#add_subdirectory(2dx_merge)
 add_subdirectory(2dx_logbrowser)
 add_subdirectory(2dx_automator)
 add_subdirectory(plugins)

@@ -116,7 +116,6 @@ set(MOC_HDRS
         src/ctfTool.h
         src/displayParametersTool.h
         src/eulerWindow.h
-        src/executionContainer.h
         src/fileWatcher.h
         src/fullScreenImage.h
         src/graphicalButton.h
@@ -132,7 +131,7 @@ set(MOC_HDRS
         src/latticeTool.h
         src/levelGroup.h
         src/LogViewer.h
-        src/mergeWindow.h
+        src/mergeContainer.h
         src/mouseAssignTool.h
         src/mrcGraphicsItem.h
         src/mrcImage.h

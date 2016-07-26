@@ -70,7 +70,8 @@
 #include <confEditor.h>
 #include <scriptTab.h>
 
-#include "mergeWindow.h"
+#include "libraryContainer.h"
+#include "mergeContainer.h"
 #include "imageWindow.h"
 
 class mainWindow : public QMainWindow
@@ -94,7 +95,6 @@ public slots:
     void importFile(const QString & fileName, const QHash<QString, QString> &imageCodes);
     void importFinished();
     void open();
-    void reload();
     void openURL(const QString &url);
     void toggleAutoSave();
 
@@ -143,7 +143,7 @@ private:
     
     QTabWidget* centralWin_;
     libraryContainer* libraryWin_;
-    executionContainer* mergeWin_;
+    mergeContainer* mergeWin_;
     imageWindow* imageWin_;
     
     //Image Windows
@@ -157,7 +157,6 @@ private:
     QAction* saveAction;
     QAction* importAction;
     QAction* viewAlbum;
-    QAction* refreshAction;
 
     int importCount;
 

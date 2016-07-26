@@ -1,8 +1,8 @@
-#include "executionContainer.h"
+#include "mergeContainer.h"
 
 using namespace std;
 
-executionContainer::executionContainer(confData* data, resultsData *res, QWidget *parent)
+mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent)
                         : QWidget(parent) 
 {
     mainData = data;
@@ -111,14 +111,20 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     runButton = new QPushButton;
     runButton->setIcon(*(mainData->getIcon("play")));
-    runButton->setIconSize(QSize(20,20));
+    runButton->setIconSize(QSize(18,18));
     runButton->setCheckable(true);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
     connect(this, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
     
+    refreshButton = new QPushButton;
+    refreshButton->setIcon(*(mainData->getIcon("refresh")));
+    refreshButton->setIconSize(QSize(18,18));
+    refreshButton->setCheckable(false);
+    connect(refreshButton, SIGNAL(clicked()), this, SLOT(reload()));
+    
     manualButton = new QPushButton;
     manualButton->setIcon(*(mainData->getIcon("help")));
-    manualButton->setIconSize(QSize(20,20));
+    manualButton->setIconSize(QSize(18,18));
     manualButton->setCheckable(true);
     connect(manualButton, SIGNAL(toggled(bool)), this, SLOT(showManual(bool)));
     
@@ -129,6 +135,7 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     headerLayout->addWidget(scriptLabel);
     headerLayout->addWidget(spacer);
     headerLayout->addWidget(runButton);
+    headerLayout->addWidget(refreshButton);
     headerLayout->addWidget(manualButton);
     headerContainer->setLayout(headerLayout);
     
@@ -170,7 +177,7 @@ executionContainer::executionContainer(confData* data, resultsData *res, QWidget
     maximizeParameterWindow(false);
 }
 
-QToolBar* executionContainer::setupToolbar() 
+QToolBar* mergeContainer::setupToolbar() 
 {
     QToolBar* scriptsToolBar = new QToolBar("Choose Mode", this);
     scriptsToolBar->setOrientation(Qt::Vertical);
@@ -209,7 +216,7 @@ QToolBar* executionContainer::setupToolbar()
 
 }
 
-blockContainer* executionContainer::setupLogWindow() 
+blockContainer* mergeContainer::setupLogWindow() 
 {   
     //Setup Log Viewer
     logViewer = new LogViewer("Standard Output", NULL);
@@ -275,7 +282,7 @@ blockContainer* executionContainer::setupLogWindow()
 
 }
 
-blockContainer* executionContainer::setupParameterWindow() 
+blockContainer* mergeContainer::setupParameterWindow() 
 {
     localParameters = new resizeableStackedWidget(this);
     
@@ -336,7 +343,7 @@ blockContainer* executionContainer::setupParameterWindow()
 
 
 
-void executionContainer::addToScriptsWidget(QWidget *widget) 
+void mergeContainer::addToScriptsWidget(QWidget *widget) 
 {
     scriptsWidget->addWidget(widget);
     widget->resize(200, 20);
@@ -344,7 +351,7 @@ void executionContainer::addToScriptsWidget(QWidget *widget)
 
 }
 
-void executionContainer::execute(bool halt) {
+void mergeContainer::execute(bool halt) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
     if (module->type() == scriptModule::merge2D) {
         merge2DScripts->execute(halt);
@@ -361,29 +368,29 @@ void executionContainer::execute(bool halt) {
 
 }
 
-void executionContainer::stopPlay() 
+void mergeContainer::stopPlay() 
 {
     runButton->setChecked(false);
 }
 
 
-void executionContainer::updateScriptLabel(const QString& label) {
+void mergeContainer::updateScriptLabel(const QString& label) {
     progressBar->update();
     scriptLabel->setText(label);
 }
 
-void executionContainer::increaseScriptProgress(int increament) {
+void mergeContainer::increaseScriptProgress(int increament) {
     if (progressBar->value() + increament <= progressBar->maximum())
         progressBar->setValue(progressBar->value() + increament);
     else
         progressBar->setValue(progressBar->maximum());
 }
 
-void executionContainer::setScriptProgress(int progress) {
+void mergeContainer::setScriptProgress(int progress) {
     progressBar->setValue(progress);
 }
 
-void executionContainer::setMerge2DMode() {
+void mergeContainer::setMerge2DMode() {
     showMerge2DScripts->setChecked(true);
     showMerge3DScripts->setChecked(false);
     showCustomScripts->setChecked(false);
@@ -392,7 +399,7 @@ void executionContainer::setMerge2DMode() {
     merge2DScripts->focusWidget();
 }
 
-void executionContainer::setMerge3DMode() {
+void mergeContainer::setMerge3DMode() {
     showMerge2DScripts->setChecked(false);
     showMerge3DScripts->setChecked(true);
     showCustomScripts->setChecked(false);
@@ -401,7 +408,7 @@ void executionContainer::setMerge3DMode() {
     merge3DScripts->focusWidget();
 }
 
-void executionContainer::setCustomMode() {
+void mergeContainer::setCustomMode() {
     showMerge2DScripts->setChecked(false);
     showMerge3DScripts->setChecked(false);
     showCustomScripts->setChecked(true);
@@ -410,7 +417,7 @@ void executionContainer::setCustomMode() {
     customScripts->focusWidget();
 }
 
-void executionContainer::setSPMode() {
+void mergeContainer::setSPMode() {
     showMerge2DScripts->setChecked(false);
     showMerge3DScripts->setChecked(false);
     showCustomScripts->setChecked(false);
@@ -420,7 +427,7 @@ void executionContainer::setSPMode() {
 }
 
 
-void executionContainer::scriptChanged(scriptModule *module, QModelIndex index) {
+void mergeContainer::scriptChanged(scriptModule *module, QModelIndex index) {
     updateScriptLabel(module->title(index));
     
     //  container->saveSplitterState(1);
@@ -456,23 +463,23 @@ void executionContainer::scriptChanged(scriptModule *module, QModelIndex index) 
     //  container->restoreSplitterState(1);
 }
 
-void executionContainer::merge2DScriptChanged(QModelIndex index) {
+void mergeContainer::merge2DScriptChanged(QModelIndex index) {
     scriptChanged(merge2DScripts, index);
 }
 
-void executionContainer::merge3DScriptChanged(QModelIndex index) {
+void mergeContainer::merge3DScriptChanged(QModelIndex index) {
     scriptChanged(merge3DScripts, index);
 }
 
-void executionContainer::customScriptChanged(QModelIndex index) {
+void mergeContainer::customScriptChanged(QModelIndex index) {
     scriptChanged(customScripts, index);
 }
 
-void executionContainer::singleParticleScriptChanged(QModelIndex index) {
+void mergeContainer::singleParticleScriptChanged(QModelIndex index) {
     scriptChanged(singleParticleScripts, index);
 }
 
-void executionContainer::scriptCompleted(scriptModule *module, QModelIndex index) {
+void mergeContainer::scriptCompleted(scriptModule *module, QModelIndex index) {
     //  cerr<<"Script completed"<<endl;
     results->load(module->resultsFile(index));
     results->save();
@@ -481,31 +488,31 @@ void executionContainer::scriptCompleted(scriptModule *module, QModelIndex index
     emit scriptCompletedSignal();
 }
 
-void executionContainer::reload() {
+void mergeContainer::reload() {
     results->load();
 }
 
-void executionContainer::merge2DScriptCompleted(QModelIndex index) {
+void mergeContainer::merge2DScriptCompleted(QModelIndex index) {
     //  cerr<<"Standard ";
     scriptCompleted(merge2DScripts, index);
 }
 
-void executionContainer::merge3DScriptCompleted(QModelIndex index) {
+void mergeContainer::merge3DScriptCompleted(QModelIndex index) {
     //  cerr<<"Standard ";
     scriptCompleted(merge3DScripts, index);
 }
 
-void executionContainer::customScriptCompleted(QModelIndex index) {
+void mergeContainer::customScriptCompleted(QModelIndex index) {
     //  cerr<<"Custom ";
     scriptCompleted(customScripts, index);
 }
 
-void executionContainer::singleParticleScriptCompleted(QModelIndex index) {
+void mergeContainer::singleParticleScriptCompleted(QModelIndex index) {
     //  cerr<<"Single Particle ";
     scriptCompleted(singleParticleScripts, index);
 }
 
-void executionContainer::maximizeLogWindow(bool maximize) 
+void mergeContainer::maximizeLogWindow(bool maximize) 
 {
     if(maximize) 
     {
@@ -519,7 +526,7 @@ void executionContainer::maximizeLogWindow(bool maximize)
     }
 }
 
-void executionContainer::maximizeParameterWindow(bool maximize) 
+void mergeContainer::maximizeParameterWindow(bool maximize) 
 {
     if(maximize) 
     {
@@ -533,17 +540,17 @@ void executionContainer::maximizeParameterWindow(bool maximize)
     }
 }
 
-void executionContainer::launchFileBrowser() {
+void mergeContainer::launchFileBrowser() {
     QString path = QDir::toNativeSeparators(mainData->getDir("working"));
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
-void executionContainer::launchLogBrowser()
+void mergeContainer::launchLogBrowser()
 {
     QProcess::startDetached(mainData->getApp("logBrowser") + " " +logViewer->getLogFile());
 }
 
-void executionContainer::showManual(bool show) {
+void mergeContainer::showManual(bool show) {
     if (show) {
         manuals->show();
     } else {
@@ -551,7 +558,7 @@ void executionContainer::showManual(bool show) {
     }
 }
 
-void executionContainer::updateFontInfo() 
+void mergeContainer::updateFontInfo() 
 {
     parameters->updateFontInfo();
     logViewer->updateFontInfo();

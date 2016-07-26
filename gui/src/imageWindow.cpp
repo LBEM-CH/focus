@@ -30,7 +30,7 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
 
     //Setup Leftmost container
     scriptsWidget = new QStackedWidget(this);
-    scriptsWidget->setMinimumWidth(180);
+    scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
 
     standardScripts = new scriptModule(data, data->getDir("standardScripts"), scriptModule::standard);
@@ -147,14 +147,53 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     //Setup status Bar
     progressBar = new QProgressBar(this);
     progressBar->setMaximum(100);
-    progressBar->setFixedWidth(300);
-    progressBar->setFixedHeight(10);
+    progressBar->setFixedHeight(4);
     progressBar->setValue(0);
     progressBar->setTextVisible(false);
+    
+    QPalette p = palette();
+    p.setColor(QPalette::Highlight, Qt::darkCyan);
+    //p.setColor(QPalette::Base, Qt::black);
+    progressBar->setPalette(p);
 
-    statusBar = new QStatusBar(this);
-    statusBar->setFixedHeight(20);
-    statusBar->addPermanentWidget(progressBar);
+    //Setup Header Bar
+    scriptLabel = new QLabel;
+    QFont labelFont = scriptLabel->font();
+    labelFont.setBold(true);
+    labelFont.setPointSize(20);
+    scriptLabel->setFont(labelFont);
+    QWidget* spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    runButton = new QPushButton;
+    runButton->setIcon(*(data->getIcon("play")));
+    runButton->setIconSize(QSize(18,18));
+    runButton->setCheckable(true);
+    connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
+    connect(this, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
+    
+    refreshButton = new QPushButton;
+    refreshButton->setIcon(*(data->getIcon("refresh")));
+    refreshButton->setIconSize(QSize(18,18));
+    refreshButton->setCheckable(false);
+    connect(refreshButton, SIGNAL(clicked()), this, SLOT(reload()));
+    
+    manualButton = new QPushButton;
+    manualButton->setIcon(*(data->getIcon("help")));
+    manualButton->setIconSize(QSize(18,18));
+    manualButton->setCheckable(true);
+    connect(manualButton, SIGNAL(toggled(bool)), this, SLOT(showManual(bool)));
+    
+    QWidget* headerContainer = new QWidget;
+    QHBoxLayout* headerLayout = new QHBoxLayout;
+    headerLayout->setMargin(5);
+    headerLayout->setSpacing(0);
+    headerLayout->addWidget(scriptLabel);
+    headerLayout->addWidget(spacer);
+    headerLayout->addWidget(runButton);
+    headerLayout->addWidget(refreshButton);
+    headerLayout->addWidget(manualButton);
+    headerContainer->setLayout(headerLayout);
+    
     
     //Setup the layout and add widgets
     QGridLayout* layout = new QGridLayout(this);
@@ -180,38 +219,41 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     
     /*LAYOUT
     * -----------------------------------------------------------
-     * | TOOL   | SCRIPTS       | CENTRAL RIGHT SPLITTER
-     * | BAR    | WIDGET        | (0, 2, 1 , 1)
-     * |(0,0,   | (0,1,2,1)     |
-     * |   3,1) |               |
-     * |        |               |
-     * |        |               |
+     * | TOOL   | SCRIPTS       | HEADER (0, 2, 1, 1)
+     * | BAR    | WIDGET        |--------------------------------
+     * |(0,0,   | (0,1,4,1)     | PROGRESSBAR (1, 2, 1, 1)
+     * |   4,1) |               | -------------------------------
+     * |        |               | CENTRAL RIGHT SPLITTER
+     * |        |               | (2, 2, 1 , 1)
      * |        |               |
      * |        |               |
      * |        |               |
      * |        |               |__________________________________
-     * |        |               | STATUS PARSER (1, 2, 1, 1)
-     * |        |_______________|__________________________________
-     * |        | STATUSBAR (2, 1, 1,2)
+     * |        |               | STATUS PARSER (3, 2, 1, 1)
      * -----------------------------------------------------------
      */
 
-    layout->addWidget(setupToolbar(), 0, 0, 3, 1);
-    layout->addWidget(scriptsContainer, 0, 1, 2, 1);
-    layout->addWidget(centerRightSplitter, 0, 2, 1, 1);
-    layout->addWidget(statusContainer, 1, 2, 1, 1);
-    layout->addWidget(statusBar, 2, 1, 1, 2);
+    layout->addWidget(setupToolbar(), 0, 0, 4, 1);
+    layout->addWidget(scriptsContainer, 0, 1, 4, 1);
+    layout->addWidget(headerContainer, 0, 2, 1, 1);
+    layout->addWidget(progressBar, 1, 2, 1, 1);
+    layout->addWidget(centerRightSplitter, 2, 2, 1, 1);
+    layout->addWidget(statusContainer, 3, 2, 1, 1);
+    
+    layout->setRowStretch(0, 0);
+    layout->setRowStretch(1, 0);
+    layout->setRowStretch(2, 1);
+    layout->setRowStretch(3, 0);
     
     manuals->hide();
     verbosityControl->setCurrentIndex(1);
-    
-    
     
     //Just to set correct siezs
     maximizeLogWindow(false);
     maximizeParameterWindow(false);
     
     setStandardMode();
+    standardScripts->initialize();
 }
 
 void imageWindow::bridgeScriptLogConnection(bool bridge) {
@@ -352,20 +394,17 @@ blockContainer* imageWindow::setupParameterWindow() {
 QToolBar* imageWindow::setupToolbar() {
     QToolBar* scriptsToolBar = new QToolBar("Choose Mode", this);
     scriptsToolBar->setOrientation(Qt::Vertical);
-
+    scriptsToolBar->setIconSize(QSize(36,36));
+    
     showStandardScripts = new QToolButton(scriptsToolBar);
     showStandardScripts->setIcon(*(data->getIcon("standard")));
-    showStandardScripts->setFixedSize(QSize(64, 64));
-    showStandardScripts->setText("Standard");
-    showStandardScripts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    showStandardScripts->setToolTip("Standard");
     showStandardScripts->setCheckable(true);
     connect(showStandardScripts, SIGNAL(clicked()), this, SLOT(setStandardMode()));
 
     showCustomScripts = new QToolButton(scriptsToolBar);
     showCustomScripts->setIcon(*(data->getIcon("custom")));
-    showCustomScripts->setFixedSize(QSize(64, 64));
-    showCustomScripts->setText("Custom");
-    showCustomScripts->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    showCustomScripts->setToolTip("Custom");
     showCustomScripts->setCheckable(true);
     connect(showCustomScripts, SIGNAL(clicked()), this, SLOT(setCustomMode()));
 
@@ -380,7 +419,7 @@ void imageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     int uid = index.data(Qt::UserRole).toUInt();
     currentResults = module->resultsFile(index);
 
-    if ((module == customScripts && !standardScripts->isRunning()) || (module == standardScripts && !customScripts->isRunning())) updateStatusMessage(module->title(index));
+    if ((module == customScripts && !standardScripts->isRunning()) || (module == standardScripts && !customScripts->isRunning())) updateScriptLabel(module->title(index));
 
     if (localIndex[uid] == 0 && module->conf(index)->size() != 0) {
         confInterface *local = new confInterface(module->conf(index), "");
@@ -398,6 +437,8 @@ void imageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
         localParameters->setCurrentIndex(localIndex[uid] - 1);
     }
 
+    setScriptProgress(module->getScriptProgress(uid));
+    
     manuals->setCurrentIndex(manualIndex[uid] - 1);
 
     parameters->select(module->displayedVariables(index));
@@ -446,7 +487,7 @@ void imageWindow::customScriptCompleted(QModelIndex index) {
 }
 
 void imageWindow::runningScriptChanged(scriptModule *module, QModelIndex index) {
-    updateStatusMessage(module->title(index));
+    updateScriptLabel(module->title(index));
 }
 
 void imageWindow::customRunningScriptChanged(QModelIndex index) {
@@ -508,6 +549,10 @@ void imageWindow::reload() {
     refresh();
 }
 
+void imageWindow::stopPlay() {
+    runButton->setChecked(false);
+}
+
 void imageWindow::refresh() {
     parameters->load();
     //statusParser->load();
@@ -516,9 +561,9 @@ void imageWindow::refresh() {
     //statusParser->load();
 }
 
-void imageWindow::updateStatusMessage(const QString& message) {
+void imageWindow::updateScriptLabel(const QString& label) {
     progressBar->update();
-    statusBar->showMessage(message);
+    scriptLabel->setText(label);
 }
 
 void imageWindow::increaseScriptProgress(int increament) {

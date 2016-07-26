@@ -77,6 +77,7 @@ public slots:
     void reload();
     void refresh();
     void revert();
+    void stopPlay();
 
     void launchLogBrowser();
     void launchFileBrowser();
@@ -85,7 +86,7 @@ public slots:
 
     void toggleHistoryView(bool show);
 
-    void updateStatusMessage(const QString& message);
+    void updateScriptLabel(const QString& label);
     void increaseScriptProgress(int increament);
     void setScriptProgress(int progress);
 
@@ -142,8 +143,12 @@ private:
 
     QHash<QString, bool> visible;
 
-    QStatusBar* statusBar;
     QProgressBar* progressBar;
+    
+    QLabel* scriptLabel;
+    QPushButton* runButton;
+    QPushButton* refreshButton;
+    QPushButton* manualButton;
 
 public:
     imageWindow(confData *data, QWidget *parent = NULL);

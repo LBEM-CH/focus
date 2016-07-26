@@ -166,10 +166,6 @@ void mainWindow::setupActions() {
     connect(timer, SIGNAL(timeout()), mainData, SLOT(save()));
     timer->start(timer_refresh);
 
-    refreshAction = new QAction(*(mainData->getIcon("refresh")), tr("&Refresh Results"), this);
-    refreshAction->setShortcut(tr("Ctrl+Shift+r"));
-    connect(refreshAction, SIGNAL(triggered()), this, SLOT(reload()));
-
 }
 
 void mainWindow::setupMenuBar() {
@@ -201,24 +197,6 @@ void mainWindow::setupMenuBar() {
     connect(decreaseFontAction, SIGNAL(triggered()), this, SLOT(decreaseFontSize()));
     editMenu->addAction(decreaseFontAction);
 
-    /**
-     * setup View Menu
-     */
-    QMenu* viewMenu = new QMenu("View");
-
-    QAction* showSelectedAction = new QAction(*(mainData->getIcon("selected")), tr("&Show checked images only"), this);
-    showSelectedAction->setShortcut(tr("Ctrl+X"));
-    showSelectedAction->setCheckable(true);
-    connect(showSelectedAction, SIGNAL(toggled(bool)), libraryWin_, SLOT(showSelected(bool)));
-    viewMenu->addAction(showSelectedAction);
-
-    viewMenu->addAction(viewAlbum);
-
-    QAction *viewReproject = new QAction("Show Reproject GUI", this);
-    viewReproject->setShortcut(tr("Ctrl+Shift+P"));
-    connect(viewReproject, SIGNAL(triggered()), this, SLOT(showReproject()));
-    viewMenu->addAction(viewReproject);
-
 
     /**
      * Setup Options menu
@@ -232,12 +210,6 @@ void mainWindow::setupMenuBar() {
     QAction *showAutoSaveAction = new QAction("Autosave On/Off", this);
     connect(showAutoSaveAction, SIGNAL(triggered()), this, SLOT(toggleAutoSave()));
     optionMenu->addAction(showAutoSaveAction);
-
-    /**
-     * Setup Actions menu 
-     */
-    QMenu *actionMenu = new QMenu("Action");
-    actionMenu->addAction(refreshAction);
 
     /**
      * Setup select menu
@@ -293,8 +265,6 @@ void mainWindow::setupMenuBar() {
 
     menuBar()->addMenu(fileMenu);
     menuBar()->addMenu(editMenu);
-    menuBar()->addMenu(viewMenu);
-    menuBar()->addMenu(actionMenu);
     menuBar()->addMenu(optionMenu);
     menuBar()->addMenu(selectMenu);
     menuBar()->addMenu(helpMenu);
@@ -337,7 +307,7 @@ void mainWindow::setupWindows() {
 
     results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
     libraryWin_ = new libraryContainer(mainData, results, this);   
-    mergeWin_ = new executionContainer(mainData, results, this);
+    mergeWin_ = new mergeContainer(mainData, results, this);
     centralWin_->addTab(libraryWin_, *(mainData->getIcon("library")), "Project Library");
     centralWin_->addTab(mergeWin_, *(mainData->getIcon("merge_tool")), "Merge Tool");
 
@@ -446,14 +416,6 @@ void mainWindow::setSaveState(bool state) {
     } else {
         saveAction->setCheckable(true);
         saveAction->setChecked(true);
-    }
-}
-
-void mainWindow::reload() {
-    results->load();
-    libraryWin_->reload();
-    if (album != NULL) {
-        album->reload();
     }
 }
 

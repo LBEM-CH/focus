@@ -24,7 +24,7 @@
 #include <QModelIndexList>
 #include <QGroupBox>
 #include <QToolButton>
-#include <QListWidget>
+#include <QTreeWidget>
 
 #include "blockContainer.h"
 #include "projectModel.h"
@@ -92,7 +92,9 @@ class libraryContainer : public QWidget
         imagePreview* refPreview;
         imagePreview* dualPreview;
         
-        QListWidget* selectionWidget;
+        QTreeWidget* selectionWidget;
+        QStringList dataLabels;
+        QStringList dataParameters;
         
         QStackedWidget* previews;
         

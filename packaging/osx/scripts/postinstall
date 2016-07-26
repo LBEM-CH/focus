@@ -5,9 +5,9 @@ export INSTALL_DIR=$2
 echo "PROCESSING POSTINSTALL"
 cd ${INSTALL_DIR}/bin
 \rm -f 2dx_image.app
-ln -sf ../2dx_image/2dx_image.app ./
 \rm -f 2dx_merge.app
-ln -sf ../2dx_merge/2dx_merge.app ./
+\rm -f 2dx_gui.app
+ln -sf ../2dx_gui/2dx_gui.app ./
 \rm -f 2dx_logbrowser.app
 ln -sf ../2dx_logbrowser/2dx_logbrowser.app ./
 #

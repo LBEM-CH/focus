@@ -5,8 +5,8 @@
  * Created on August 21, 2015, 11:30 AM
  */
 
-#ifndef EXECUTIONCONTAINER_H
-#define	EXECUTIONCONTAINER_H
+#ifndef MERGECONTAINER_H
+#define	MERGECONTAINER_H
 
 #include <QWidget>
 #include <QProcess>
@@ -46,12 +46,12 @@
 
 #include "blockContainer.h"
 
-class executionContainer : public QWidget
+class mergeContainer : public QWidget
 {
     Q_OBJECT
 
 public:
-    executionContainer(confData* data, resultsData *results, QWidget *parent = NULL);
+    mergeContainer(confData* data, resultsData *results, QWidget *parent = NULL);
 
 public slots:
 
@@ -141,6 +141,7 @@ private:
     
     QLabel* scriptLabel;
     QPushButton* runButton;
+    QPushButton* refreshButton;
     QPushButton* manualButton;
 
 };

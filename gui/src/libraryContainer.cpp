@@ -4,10 +4,22 @@ libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget*
 : QWidget(parent) {
     this->data = dat;
 
-    selectionWidget = new QListWidget;
+    selectionWidget = new QTreeWidget;
+    selectionWidget->setColumnCount(2);
+    selectionWidget->header()->hide();
     selectionWidget->setFixedWidth(235);
     selectionWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
     selectionWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    
+    dataLabels  << "Name" << "Number" << "Original Name" << "Magnification" << "Defocus"
+                << "QVal" << "QVal2" << "QValMA" << "QValMB"
+                << "TLTAXIS" << "TLTANG" << "TLTAXA" << "TAXA" << "TANGL"
+                << "Phase Residual" << "Comment";
+    
+    dataParameters << "imagename" << "imagenumber" << "imagename_original" << "magnification" << "defocus"
+                << "QVAL" << "QVAL2" << "QVALMA" << "QVALMB"
+                << "TLTAXIS" << "TLTANG" << "TLTAXA" << "TAXA" << "TANGL"
+                << "MergePhaResidual" << "comment";
 
     previews = new QStackedWidget(this);
     previews->setFixedWidth(235);
@@ -189,6 +201,15 @@ void libraryContainer::setupDirectoryContainer(confData* data) {
 
 QToolBar* libraryContainer::setupContextAndMenu() {
     //Setup Actions
+    QAction *refreshAction = new QAction(*(data->getIcon("refresh")), tr("&Refresh Results"), this);
+    refreshAction->setShortcut(tr("Ctrl+Shift+r"));
+    connect(refreshAction, SIGNAL(triggered()), this, SLOT(reload()));
+    
+    QAction* showSelectedAction = new QAction(*(data->getIcon("selected")), tr("&Show checked images only"), this);
+    showSelectedAction->setShortcut(tr("Ctrl+X"));
+    showSelectedAction->setCheckable(true);
+    connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
+    
     QAction *addSelectionAction;
     addSelectionAction = new QAction(*(data->getIcon("add_selection")), "Check highlighted", dirView);
     connect(addSelectionAction, SIGNAL(triggered()), this, SLOT(extendSelection()));
@@ -215,6 +236,8 @@ QToolBar* libraryContainer::setupContextAndMenu() {
 
     //Right-Click Menu
     dirView->setContextMenuPolicy(Qt::ActionsContextMenu);
+    dirView->addAction(refreshAction);
+    dirView->addAction(showSelectedAction);
     dirView->addAction(addSelectionAction);
     dirView->addAction(removeSelectionAction);
     dirView->addAction(addFolderAction);
@@ -227,6 +250,8 @@ QToolBar* libraryContainer::setupContextAndMenu() {
     QToolBar* toolBar = new QToolBar("Library Actions");
     toolBar->setIconSize(QSize(36, 36));
     toolBar->setOrientation(Qt::Vertical);
+    toolBar->addAction(refreshAction);
+    toolBar->addAction(showSelectedAction);
     toolBar->addAction(addSelectionAction);
     toolBar->addAction(removeSelectionAction);
     toolBar->addAction(addFolderAction);
@@ -579,16 +604,18 @@ void libraryContainer::loadDataContainer(const QString& imagePath) {
     
     QString confName = imagePath + "/" + "2dx_image.cfg";
     confData* data = new confData(confName);
-    selectionWidget->addItem("Name: " + data->get("imagename", "value"));
-    selectionWidget->addItem("Number: " + data->get("imagenumber", "value"));
-    selectionWidget->addItem("QVal2: " + data->get("QVAL2", "value"));
-    selectionWidget->addItem("QValS: " + data->get("QVALS", "value"));
-    selectionWidget->addItem("Phase Residual: " + data->get("MergePhaseResidual", "value"));
-    selectionWidget->addItem("TAXA: " + data->get("TAXA", "value"));
-    selectionWidget->addItem("TANGL: " + data->get("TANGL", "value"));
-    selectionWidget->addItem("Magnification: " + data->get("magnification", "value"));
-    selectionWidget->addItem("Defocus: " + data->get("defocus", "value"));
-    selectionWidget->addItem("Comment: " + data->get("comment", "value"));
+    
+    QList<QTreeWidgetItem *> items;
+    
+    for(int i=0; i<dataLabels.size(); ++i) {
+        QTreeWidgetItem* item = new QTreeWidgetItem((QTreeWidget*) 0);
+        item->setData(0, Qt::DisplayRole, dataLabels.at(i));
+        item->setData(1, Qt::DisplayRole, data->get(dataParameters.at(i), "value"));
+        items.append(item);
+    }
+    
+    selectionWidget->insertTopLevelItems(0, items);
+    selectionWidget->resizeColumnToContents(0);
 }
 
 void libraryContainer::autoSwitch(bool play) {

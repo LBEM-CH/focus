@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Correct Drift on Movie                                             #
+# Title: ZORRO Drift-Correction of Movie                                    #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -68,6 +68,8 @@ set gainfactor = ""
 set scriptname = 2dx_driftcorrect
 \rm -f LOGS/${scriptname}.results
 #
+set noEMAN = 'y'
+#
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
@@ -76,97 +78,52 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
-#
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
 #
-if ( ! -e ${imagename}.mrc ) then
-  ${proc_2dx}/protest "ERROR: ${imagename}.mrc missing. Aborting."
-endif
-if ( ! -e ${nonmaskimagename}.mrc ) then
-  ${proc_2dx}/protest "ERROR: ${nonmaskimagename}.mrc missing. Aborting."
-endif
-#
-set testname = `echo ${imagename} | cut -c2-`
-if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
-  set oldval = ${nonmaskimagename}
-  set nonmaskimagename = ${imagename}
-  #############################################################################
-  ${proc_2dx}/linblock "Warning: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
-  #############################################################################
-  echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
-endif
-# 
-if ( ${imagenumber} == "ScriptWillPutNumberHere" || ${imagenumber} == "1000" ) then
-  set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
-  #############################################################################
-  ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
-  #############################################################################
-  echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
-endif
-#
 echo "<<@progress: 5>>"
 #
-echo "# IMAGE-IMPORTANT: "${imagename}.mrc "<Image>" >> LOGS/${scriptname}.results
-if ( ${imagename} != ${nonmaskimagename} ) then
-  echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-masked Image>" >> LOGS/${scriptname}.results
+if ( ! -e ${movie_stackname_raw} ) then
+  echo "dummy" > zzzzz27765.dm4
+  set filename = `ls -1 *.dm4 | sort | head -n 1`
+  if ( ${filename} != "zzzzz27765.dm4" ) then
+    set movie_stackname_raw = ${filename}
+    ${proc_2dx}/linblock "Image ${movie_stackname_raw}.dm4 found."
+    echo "set movie_stackname_raw = ${movie_stackname_raw}" >> LOGS/${scriptname}.results
+  else
+    if ( -e ${movie_stackname} ) then
+      if ( ${movie_stackname} !~ "zorro" ) then
+        set movie_stackname_raw = ${movie_stackname}
+        echo "set movie_stackname_raw = ${movie_stackname_raw}" >> LOGS/${scriptname}.results
+      endif
+    endif
+  endif
 endif
 #
-if ( ${Calc_from_sample_pixel} == "y" ) then
-  set magnification = `echo ${stepdigitizer} ${sample_pixel} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
-  echo "set magnification = ${magnification}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Calculating magnification as ${magnification}."
+set movie_stackname_raw_end = `echo ${movie_stackname_raw} | cut -d\. -f2`
+if ( ${movie_stackname_raw_end} != 'dm4' && ${movie_stackname_raw_end} != 'mrc' ) then
+  ${proc_2dx}/protest "Movie type ${movie_stackname_raw_end} is not 
+endif
+#
+#################################################################################
+${proc_2dx}/linblock "Getting movie dimensions"
+#################################################################################
+#
+if ( ${movie_stackname_raw_end} == 'mrc' ) then
+  setenv IN ${movie_stackname_raw}
+  ${bin_2dx}/2dx_header.exe
+  # cat 2dx_header.out
+  set NX = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $1} END { print s }'`
+  set NY = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $2} END { print s }'`
+  set NZ = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $3} END { print s }'`
+  echo ":Dimensions of input movie in X,Y,Z are ${NX},${NY},${NZ}"
+  \rm 2dx_header.out
 else
-  set sample_pixel = `echo ${stepdigitizer} ${magnification} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
-  echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
-  ${proc_2dx}/linblock "Calculating pixel size on sample level as ${sample_pixel} Angstroems."
+  set NX = 9999
+  set NY = 9999
+  set NZ = 9999
 endif
-#
-set testname = `echo ${imagename} | cut -c2-`
-if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
-  set oldval = ${nonmaskimagename}
-  set nonmaskimagename = ${imagename}
-  ${proc_2dx}/linblock "ERROR: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
-  echo "set nonmaskimagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
-endif
-# 
-echo "<<@progress: 10>>"
-#
-if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
-  set oldval = ${RESMIN}
-  set RESMIN = ${RESMAX}
-  set RESMAX = ${oldval}
-  ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
-  echo "set RESMIN = ${RESMIN}" >> LOGS/${scriptname}.results
-  echo "set RESMAX = ${RESMAX}" >> LOGS/${scriptname}.results
-endif
-#
-set newimagenumber = `echo ${imagenumber} | ${bin_2dx}/2dx_getnumber.exe`
-if ( ${newimagenumber} != ${imagenumber} ) then
-  ${proc_2dx}/linblock "WARNING: correcting imagenumber from ${imagenumber} to ${newimagenumber}"
-  set imagenumber = ${newimagenumber}
-  echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
-endif
-#
-set testval = `echo ${imagenumber} | wc -c`
-if ( `echo ${testval} | awk '{ if ( $1 < 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
-  set oldval = ${imagenumber}
-  set imagenumber = `echo 0000000000 | cut -c${testval}-`${imagenumber}
-  ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
-  echo "set imagenumber = ${imagenumber}" >> LOGS/${scriptname}.results
-endif  
-#
-if ( `echo ${testval} | awk '{ if ( $1 > 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
-  set oldval = ${imagenumber}
-  set startnum = `echo ${testval} | awk '{ s = $1 - 10 } END { print s }'`
-  set endnum   = `echo ${testval} | awk '{ s = $1 - 1 } END { print s }'`
-  set imagenumber = `echo ${imagenumber} | cut -c${startnum}-${endnum}`
-  ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
-  echo "set imagenumber = ${imagenumber}" >> LOGS/${scriptname}.results
-endif  
-#
-echo "<<@progress: 5>>"
 #
 #############################################################################
 #############################################################################
@@ -199,17 +156,57 @@ echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro_filt.mrc "<MRC: Dose
 echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro_movie.mrc "<MRC: Drift-corrected movie>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}.mrc.zor.txt "<TXT: ZORRO logfile>" >> LOGS/${scriptname}.results
 #
-echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer}"
-${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer}
+echo "# IMAGE: "LOGS/2dx_driftcorrect_zorro.txt "<TXT: ZORRO run output>" >> LOGS/${scriptname}.results
+#
+echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ}"
+echo ":: Working on ${movie_stackname_raw}"
+echo ":: Output  will be in LOGS/2dx_driftcorrect_zorro.txt"
+\rm -f LOGS/2dx_driftcorrect_zorro.txt
+${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/2dx_driftcorrect_zorro.txt
+cat LOGS/2dx_driftcorrect_zorro.txt
 #
 #################################################################################
 ${proc_2dx}/linblock "Back in 2dx_driftcorrect.com"
 #################################################################################
 #
-if ( -e ${movie_stackname_raw_base}_zorro_movie.mrc ) then
-  \rm -f ${movie_stackname}
-  \mv -f ${movie_stackname_raw_base}_zorro_movie.mrc ${movie_stackname} 
+if ( -e ${movie_stackname_raw_base}_zorro_movie.mrcs ) then
+  #################################################################################
+  ${proc_2dx}/linblock "Switching project to zorro-corrected movie and average"
+  #################################################################################
+  \mv -f ${movie_stackname_raw_base}_zorro_movie.mrcs ${movie_stackname_raw_base}_zorro_movie.mrc
+  echo "set movie_stackname = ${movie_stackname_raw_base}_zorro_movie" >> LOGS/${scriptname}.results
+  echo "set nonmaskimagename = ${movie_stackname_raw_base}_zorro_filt" >> LOGS/${scriptname}.results
+  echo "set imagename = ${movie_stackname_raw_base}_zorro_filt" >> LOGS/${scriptname}.results
+  if ( ${nonmaskimagename} != ${movie_stackname_raw_base}_zorro_filt ) then
+    if ( -e ${nonmaskimagename}_automask.mrc ) then
+      \cp -f ${nonmaskimagename}_automask.mrc ${movie_stackname_raw_base}_zorro_filt_automask.mrc
+    endif 
+    if ( -e ${nonmaskimagename}_automask_mask.mrc ) then
+      \cp -f ${nonmaskimagename}_automask_mask.mrc ${movie_stackname_raw_base}_zorro_filt_automask_mask.mrc
+    endif 
+  endif
+  \rm -f m${movie_stackname_raw_base}_zorro_filt.mrc
+  #
+  \mv -f fig/* zorro
+  \rm -rf fig
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_FRC.png "<PNG Zorro: FRC among adjacent frames>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}-logisticWeights.png "<PNG: Logistic weights plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_peaksigTriMat.png "<PNG: Peak significance matrix>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_translations.png "<PNG: Drift profile plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_pixRegError.png "<PNG: Pixel registration error X,Y>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_imageSum "<PNG: Drift-cor. average>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_filtSum.png "<PNG: Drift-cor., filtered average >" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_FFTSum.png "<PNG: Drift-cor. average (FFT)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_polarFFTSum.png "<PNG: Drift-cor. average (Polar FFT)>" >> LOGS/${scriptname}.results
 endif
+#
+echo " "
+echo ": "
+echo ":: "
+echo "::Now run the script CLEANUP, then start with INIT FILES AND PARAMETERS etc."
+echo ":: "
+echo ": "
+echo " "
 #
 echo "<<@evaluate>>"
 #

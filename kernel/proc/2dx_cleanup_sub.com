@@ -39,8 +39,17 @@ endif
 echo dummy > LOGS/dummy.log
 echo dummy > LOGS/dummy.results
 echo dummy > ${imagename}-tmp.tabl
-\rm LOGS/*.results
-\rm LOGS/*.log
+if ( -e LOGS/2dx_driftcorrect.log ) then
+  \mv -f LOGS/2dx_driftcorrect.log .
+  \mv -f LOGS/2dx_driftcorrect.results .
+  \rm LOGS/*.results
+  \rm LOGS/*.log
+  \mv -f 2dx_driftcorrect.log LOGS
+  \mv -f 2dx_driftcorrect.results LOGS
+else
+  \rm LOGS/*.results
+  \rm LOGS/*.log
+endif
 #
 if ( "${level}" == "radical" ) then
   #

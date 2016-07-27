@@ -19,6 +19,7 @@
 #
 #
 # DISPLAY: script_2dx_initialize_files
+# DISPLAY: script_2dx_initialize_files2
 # DISPLAY: script_2dx_fftrans
 # DISPLAY: script_2dx_getDefTilt
 # DISPLAY: script_2dx_getLattice
@@ -38,7 +39,10 @@
 # DISPLAY: script_2dx_generateMAP
 # DISPLAY: script_2dx_initialize
 # DISPLAY: script_2dx_evaluateLattice
+# DISPLAY: script_2dx_driftcorrect
+# DISPLAY: script_2dx_driftcorrect2
 # DISPLAY: script_2dx_cleanup
+# DISPLAY: script_2dx_cleanup2
 # DISPLAY: ReUnbend_MP
 #
 #$end_local_vars
@@ -50,6 +54,7 @@ set app_2dx_image = ""
 set ReUnbend_MP = ""
 #
 set script_2dx_initialize_files = ""
+set script_2dx_initialize_files2 = ""
 set script_2dx_fftrans = ""
 set script_2dx_getDefTilt = ""
 set script_2dx_getLattice = ""
@@ -70,6 +75,9 @@ set script_2dx_generateMAP = ""
 set script_2dx_initialize = ""
 set script_2dx_evaluateLattice = ""
 set script_2dx_cleanup = ""
+set script_2dx_cleanup2 = ""
+set script_2dx_driftcorrect = ""
+set script_2dx_driftcorrect2 = ""
 #
 #$end_vars 
 #
@@ -78,7 +86,8 @@ set scriptname = 2dx_parallel
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'
-source ${proc_2dx}/initialize
+set noEMAN = 'y'
+source ${proc_2dx}/initialize 
 source ${proc_2dx}/2dx_merge_makedirs 
 #
 echo "<<@progress: 1>>"
@@ -90,9 +99,21 @@ echo 'set app_2dx_image = $1' >> SCRATCH/${scriptname}_tmp_runjob.com
 echo 'set curdir = $2' >> SCRATCH/${scriptname}_tmp_runjob.com
 echo 'set dirfile = $3' >> SCRATCH/${scriptname}_tmp_runjob.com
 echo '${app_2dx_image} ${curdir} "2dx_initialize"' >> SCRATCH/${scriptname}_tmp_runjob.com
-if ( ${script_2dx_initialize} == "y" ) then
+#
+if ( ${script_2dx_initialize_files} == "y" ) then
   echo '${app_2dx_image} ${curdir} "2dx_initialize_files"' >> SCRATCH/${scriptname}_tmp_runjob.com
 endif
+#
+if ( ${script_2dx_driftcorrect} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "+2dx_driftcorrect"'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_cleanup} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "+2dx_cleanup"'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_initialize_files2} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "2dx_initialize_files"' >> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+#
 if ( ${script_2dx_fftrans} == "y" ) then
   echo '${app_2dx_image} ${curdir} "2dx_fftrans"'>> SCRATCH/${scriptname}_tmp_runjob.com
 endif
@@ -147,7 +168,10 @@ endif
 if ( ${script_2dx_evaluateLattice} == "y" ) then
   echo '${app_2dx_image} ${curdir} "+2dx_evaluateLattice"'>> SCRATCH/${scriptname}_tmp_runjob.com
 endif
-if ( ${script_2dx_cleanup} == "y" ) then
+if ( ${script_2dx_driftcorrect2} == "y" ) then
+  echo '${app_2dx_image} ${curdir} "+2dx_driftcorrect"'>> SCRATCH/${scriptname}_tmp_runjob.com
+endif
+if ( ${script_2dx_cleanup2} == "y" ) then
   echo '${app_2dx_image} ${curdir} "+2dx_cleanup"'>> SCRATCH/${scriptname}_tmp_runjob.com
 endif
 echo 'echo ":: Background process finished with ${dirfile} ("`date`")"' >> SCRATCH/${scriptname}_tmp_runjob.com
@@ -236,10 +260,10 @@ eot
     # 
     @ dircounter++
     cd ${olddir}
-  end
-  echo "::Waiting for last jobs to finish"
-  set load_too_high = 1
-  while ( ${load_too_high} == 1 ) 
+end
+echo "::Waiting for last jobs to finish"
+set load_too_high = 1
+while ( ${load_too_high} == 1 ) 
     set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
     set loadaverage = `ps -axf | sed -n '/runjob/p' | wc -l`
     set load_too_high = `echo ${loadaverage} 1 | awk '{ if ( ( $1 - 2 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
@@ -247,8 +271,8 @@ eot
       sleep 5
       # ps -af | grep ${scriptname}
     endif
-  end
-  echo "::Last jobs have finished."
+end
+echo "::Last jobs have finished."
 #
 #
 echo ":: Done."

@@ -9,12 +9,22 @@ Created on Mon Jun 13 11:38:56 2016
 # from EMAN2 import *
 # from sparx import *
 
-
 import numpy as np
-import zorro
 import os, os.path, glob
 import subprocess
 import sys
+try:
+    import zorro
+except Exception as e:
+    print( "Failed to import zorro.  You should used anaconda python, and not have EMAN2 environment variables defined." )
+    print( " " ) 
+    print( "Likely cause: " )
+    print( "   if you called " )
+    print( "      source ${proc_2dx}/initialize ")
+    print( "   then you need to have before that ")
+    print( "      set noEMAN = y" )
+    print( " " ) 
+    print( e )
 
 ####### PARAMETERS FOR ZORRO ######
 
@@ -61,7 +71,7 @@ print("::Zorro starting...")
 
 print "2dx_zorro_sub.py"
 
-if len(sys.argv) != 14:
+if len(sys.argv) != 17:
                 sys.exit("Wrong number of parameters given for 2dx_zorro_sub.py ")
 
 n_threads = int(sys.argv[1])
@@ -77,7 +87,9 @@ KV = float(sys.argv[10])
 CS = float(sys.argv[11])
 gainfactor = float(sys.argv[12])
 stepdigitizer = float(sys.argv[13])
-
+x_dim = int(sys.argv[14])
+y_dim = int(sys.argv[15])
+z_dim = int(sys.argv[16])
 
 zorroReg = zorro.ImageRegistrator()
 zorroReg.pixelsize = pixelsize
@@ -96,10 +108,18 @@ zorroReg.gain = gainfactor
 zorroReg.detectorPixelSize = stepdigitizer
 
 
+if x_dim <= 4096 and y_dim <= 4096:
+  zorroReg.shapeBinned = [y_dim,x_dim]
+
+if x_dim == 9999:
+  zorroReg.shapeBinned = [3710,3838]
+
 # Option 1: bin it
-zorroReg.shapeBinned = [3838,3710]
+# zorroReg.shapeBinned = [3838,3710]
 # Option 2: pad to 8k
 # zorroReg.shapePadded = [8192,8192]
+
+zorroReg.savePNG = True
 
 if isinstance( fileDescriptor, list ) or isinstance( fileDescriptor, tuple ):
     # Do nothing
@@ -112,8 +132,10 @@ print("b = " + str(b))
 print("gamma in rad = " + str(gamma))
 print("FileDescriptor = " + str(fileDescriptor) )
 
+
 # Normalize the path so we keep everything simple.
 for fileName in fileList:
+    print "fileName = ",fileName
     baseName = os.path.basename( fileName )
     baseFront = os.path.splitext( baseName )[0]
     

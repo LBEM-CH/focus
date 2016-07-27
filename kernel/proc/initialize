@@ -22,6 +22,7 @@ if ( -e /usr/bin/python2.7 ) then
   set app_python = /usr/bin/python2.7
 endif
 ${proc_2dx}/linblock "app_python = ${app_python}"
+${proc_2dx}/linblock "app_anaconda = ${app_anaconda}"
 ${proc_2dx}/linblock "Working Directory = $PWD"
 #
 ##################################################
@@ -163,9 +164,9 @@ else
   echo "Finding CSH setup script from EMAN2 installation.. "
   set EMAN2_setup = ${eman2}/eman2.cshrc
   if ( -e ${EMAN2_setup} ) then
-    if ( $?scriptname ) then
-      # echo "::Scriptname = "${scriptname}
-      if ( ${scriptname} != "2dx_driftcorrect" ) then
+    if ( $?noEMAN ) then
+      # echo "::noEMAN = "${noEMAN}
+      if ( ${noEMAN} != "y" ) then
         # This is sourcing a script within a sourced script. Hopefully, this will work...
         echo ":   Sourcing ${EMAN2_setup}"
         source ${EMAN2_setup}

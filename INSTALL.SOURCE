@@ -33,11 +33,11 @@ Download from http://www.fftw.org/download.html
 To compile for OSX/Linux systems download the latest libraries and use the 
 following commands:
 
-./configure --enable-shared --enable-single; 
+./configure --enable-shared --enable-single --enable-threads --enable-sse --enable-sse2 --with-pic; 
 make; 
 sudo make install; 
 make clean; 
-./configure --enable-shared; 
+./configure --enable-shared --enable-threads --enable-sse2 --with-pic; 
 make; 
 sudo make install;
 

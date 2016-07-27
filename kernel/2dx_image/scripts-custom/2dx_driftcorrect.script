@@ -68,6 +68,8 @@ set gainfactor = ""
 set scriptname = 2dx_driftcorrect
 \rm -f LOGS/${scriptname}.results
 #
+set noEMAN = 'y'
+#
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
@@ -83,12 +85,44 @@ ${proc_2dx}/linblock "Verifying some parameters"
 echo "<<@progress: 5>>"
 #
 if ( ! -e ${movie_stackname_raw} ) then
-  if ( -e ${movie_stackname} ) then
-    if ( ${movie_stackname} !~ "zorro" ) then
-      set movie_stackname_raw = ${movie_stackname}
-      echo "set movie_stackname_raw = ${movie_stackname_raw}" >> LOGS/${scriptname}.results
+  echo "dummy" > zzzzz27765.dm4
+  set filename = `ls -1 *.dm4 | sort | head -n 1`
+  if ( ${filename} != "zzzzz27765.dm4" ) then
+    set movie_stackname_raw = ${filename}
+    ${proc_2dx}/linblock "Image ${movie_stackname_raw}.dm4 found."
+    echo "set movie_stackname_raw = ${movie_stackname_raw}" >> LOGS/${scriptname}.results
+  else
+    if ( -e ${movie_stackname} ) then
+      if ( ${movie_stackname} !~ "zorro" ) then
+        set movie_stackname_raw = ${movie_stackname}
+        echo "set movie_stackname_raw = ${movie_stackname_raw}" >> LOGS/${scriptname}.results
+      endif
     endif
   endif
+endif
+#
+set movie_stackname_raw_end = `echo ${movie_stackname_raw} | cut -d\. -f2`
+if ( ${movie_stackname_raw_end} != 'dm4' && ${movie_stackname_raw_end} != 'mrc' ) then
+  ${proc_2dx}/protest "Movie type ${movie_stackname_raw_end} is not 
+endif
+#
+#################################################################################
+${proc_2dx}/linblock "Getting movie dimensions"
+#################################################################################
+#
+if ( ${movie_stackname_raw_end} == 'mrc' ) then
+  setenv IN ${movie_stackname_raw}
+  ${bin_2dx}/2dx_header.exe
+  # cat 2dx_header.out
+  set NX = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $1} END { print s }'`
+  set NY = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $2} END { print s }'`
+  set NZ = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $3} END { print s }'`
+  echo ":Dimensions of input movie in X,Y,Z are ${NX},${NY},${NZ}"
+  \rm 2dx_header.out
+else
+  set NX = 9999
+  set NY = 9999
+  set NZ = 9999
 endif
 #
 #############################################################################
@@ -96,15 +130,6 @@ endif
 #######  Now Run Zorro ######################################################
 #############################################################################
 #############################################################################
-#
-setenv IN ${movie_stackname_raw}
-${bin_2dx}/2dx_header.exe
-# cat 2dx_header.out
-set NX = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $1} END { print s }'`
-set NY = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $2} END { print s }'`
-set NZ = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $3} END { print s }'`
-echo ":Dimensions of input movie in X,Y,Z are ${NX},${NY},${NZ}"
-\rm 2dx_header.out
 #
 #################################################################################
 ${proc_2dx}/linblock "Sourcing 2dx_zorro_sub.com"
@@ -131,8 +156,14 @@ echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro_filt.mrc "<MRC: Dose
 echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}_zorro_movie.mrc "<MRC: Drift-corrected movie>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${movie_stackname_raw_base}.mrc.zor.txt "<TXT: ZORRO logfile>" >> LOGS/${scriptname}.results
 #
-echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NX} ${NY} ${NZ}"
-${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NX} ${NY} ${NZ}
+echo "# IMAGE: "LOGS/2dx_driftcorrect_zorro.txt "<TXT: ZORRO run output>" >> LOGS/${scriptname}.results
+#
+echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ}"
+echo ":: Working on ${movie_stackname_raw}"
+echo ":: Output  will be in LOGS/2dx_driftcorrect_zorro.txt"
+\rm -f LOGS/2dx_driftcorrect_zorro.txt
+${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${movie_stackname_raw} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/2dx_driftcorrect_zorro.txt
+cat LOGS/2dx_driftcorrect_zorro.txt
 #
 #################################################################################
 ${proc_2dx}/linblock "Back in 2dx_driftcorrect.com"
@@ -159,15 +190,23 @@ if ( -e ${movie_stackname_raw_base}_zorro_movie.mrcs ) then
   \mv -f fig/* zorro
   \rm -rf fig
   echo "# IMAGE: "./zorro/${movie_stackname_raw}_FRC.png "<PNG Zorro: FRC among adjacent frames>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}-logisticWeights.png "<PNG Zorro: Logistic weights plot>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}_peaksigTriMat.png "<PNG Zorro: Peak significance matrix>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}_translations.png "<PNG Zorro: Drift profile plot>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}_pixRegError.png "<PNG Zorro: Pixel registration error X,Y>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}_imageSum "<PNG Zorro: Drift-corrected average>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}_filtSum.png "<PNG Zorro: Drift-corrected, filtered average >" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}_FFTSum.png "<PNG Zorro: Drift-corrected average (FFT)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}_polarFFTSum.png "<PNG Zorro: Drift-corrected average (Polar FFT)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}-logisticWeights.png "<PNG: Logistic weights plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_peaksigTriMat.png "<PNG: Peak significance matrix>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_translations.png "<PNG: Drift profile plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_pixRegError.png "<PNG: Pixel registration error X,Y>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_imageSum "<PNG: Drift-cor. average>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_filtSum.png "<PNG: Drift-cor., filtered average >" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_FFTSum.png "<PNG: Drift-cor. average (FFT)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_polarFFTSum.png "<PNG: Drift-cor. average (Polar FFT)>" >> LOGS/${scriptname}.results
 endif
+#
+echo " "
+echo ": "
+echo ":: "
+echo "::Now run the script CLEANUP, then start with INIT FILES AND PARAMETERS etc."
+echo ":: "
+echo ": "
+echo " "
 #
 echo "<<@evaluate>>"
 #

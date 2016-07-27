@@ -9,12 +9,22 @@ Created on Mon Jun 13 11:38:56 2016
 # from EMAN2 import *
 # from sparx import *
 
-
 import numpy as np
-import zorro
 import os, os.path, glob
 import subprocess
 import sys
+try:
+    import zorro
+except Exception as e:
+    print( "Failed to import zorro.  You should used anaconda python, and not have EMAN2 environment variables defined." )
+    print( " " ) 
+    print( "Likely cause: " )
+    print( "   if you called " )
+    print( "      source ${proc_2dx}/initialize ")
+    print( "   then you need to have before that ")
+    print( "      set noEMAN = y" )
+    print( " " ) 
+    print( e )
 
 ####### PARAMETERS FOR ZORRO ######
 
@@ -98,8 +108,11 @@ zorroReg.gain = gainfactor
 zorroReg.detectorPixelSize = stepdigitizer
 
 
-if x_dim > 4096 or y_dim > 4096:
+if x_dim <= 4096 and y_dim <= 4096:
   zorroReg.shapeBinned = [y_dim,x_dim]
+
+if x_dim == 9999:
+  zorroReg.shapeBinned = [3710,3838]
 
 # Option 1: bin it
 # zorroReg.shapeBinned = [3838,3710]
@@ -119,8 +132,10 @@ print("b = " + str(b))
 print("gamma in rad = " + str(gamma))
 print("FileDescriptor = " + str(fileDescriptor) )
 
+
 # Normalize the path so we keep everything simple.
 for fileName in fileList:
+    print "fileName = ",fileName
     baseName = os.path.basename( fileName )
     baseFront = os.path.splitext( baseName )[0]
     

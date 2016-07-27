@@ -287,7 +287,7 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
   {
       lockedBox = new graphicalButton(data->getIcon("lock"),this);
       lockedBox->setCheckable(true);
-      lockedBox->setFixedHeight(20);
+      lockedBox->setFixedSize(18, 18);
       if(locked.startsWith("yes")) {lockedBox->setChecked(true); setReadOnlyState(Qt::Checked);}
       else {lockedBox->setChecked(false); setReadOnlyState(Qt::Unchecked);}
       if(type == "fourtynine_float")

@@ -28,6 +28,8 @@
 #include <QProgressBar>
 #include <QToolBar>
 #include <QPushButton>
+#include <QListWidget>
+#include <QListWidgetItem>
 
 #include <confData.h>
 #include <confManual.h>
@@ -72,6 +74,8 @@ public slots:
     void customScriptCompleted(QModelIndex index);
     void singleParticleScriptCompleted(QModelIndex index);
 
+    void subscriptActivated(QModelIndex item);
+    
     //void maximizeWindow(int option);
     void maximizeLogWindow(bool maximize);
     void maximizeParameterWindow(bool maximize);
@@ -81,7 +85,7 @@ public slots:
     void launchFileBrowser();
     void launchLogBrowser();
 
-    void showManual(bool show);
+    void showSubTitle(bool show);
     
     void updateFontInfo();
     
@@ -111,6 +115,7 @@ private:
     scriptModule *singleParticleScripts;
 
     QStackedWidget* scriptsWidget;
+    QListView* subscriptWidget;
 
     QToolButton* showMerge2DScripts;
     QToolButton* showMerge3DScripts;
@@ -125,7 +130,6 @@ private:
     QSplitter *centerRightSplitter;
 
     resizeableStackedWidget *localParameters;
-    QStackedWidget *manuals;
 
     resultsModule *resultsView;
 
@@ -135,11 +139,11 @@ private:
     QComboBox* verbosityControl;
 
     QHash<uint, int> localIndex;
-    QHash<uint, int> manualIndex;
     
     QProgressBar* progressBar;
     
     QLabel* scriptLabel;
+    QLabel* subTitleLabel;
     QPushButton* runButton;
     QPushButton* refreshButton;
     QPushButton* manualButton;

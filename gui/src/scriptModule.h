@@ -11,7 +11,8 @@
 #define SCRIPTMODULE_H
 
 #include <QWidget>
-#include <QTreeView>
+#include <QListView>
+#include <QStringList>
 #include <QHeaderView>
 #include <QStandardItem>
 #include <QGridLayout>
@@ -21,102 +22,106 @@
 #include <confData.h>
 #include <scriptParser.h>
 
-class scriptModule : public QWidget
-{
-  Q_OBJECT
+class scriptModule : public QWidget {
 
-  public:
-  enum moduleType {standard, custom, singleparticle, merge2D, merge3D};
+    Q_OBJECT
 
-  public slots:
-  void execute(bool run);
-  void clearSelection();
-  void clearExtendedSelections();
+public:
+    enum moduleType {
+        standard, custom, singleparticle, merge2D, merge3D
+    };
 
-  void readStdOut();
-  void readStdErr();
+public slots:
+    void execute(bool run);
+    void clearSelection();
+    void clearExtendedSelections();
 
-  void scriptActivated(QModelIndex item);
-  void scriptFinished(int exitCode);
+    void readStdOut();
+    void readStdErr();
 
-  void selectAll();
-  void select(QModelIndex index);
-  void select(const QItemSelection &selected);
-  void select(const QItemSelection &selected, const QItemSelection &deselected);
-  void initialize();
+    void scriptActivated(QModelIndex item);
+    void scriptFinished(int exitCode);
 
-  void setVerbosity(int value);
+    void selectAll();
+    void select(QModelIndex index);
+    void select(const QItemSelection &selected);
+    void select(const QItemSelection &selected, const QItemSelection &deselected);
+    void initialize();
 
-  signals:
-  void halt();
-  void standardOut(const QStringList &text);
-  void standardError(const QByteArray &text);
+    void setVerbosity(int value);
 
-  void progress(int value);
-  void incrementProgress(int inc);
-  void reload();
+signals:
+    void halt();
+    void standardOut(const QStringList &text);
+    void standardError(const QByteArray &text);
 
-  void currentScriptChanged(QModelIndex index);
-  void runningScriptChanged(QModelIndex index);
+    void progress(int value);
+    void incrementProgress(int inc);
+    void reload();
 
-  void scriptLaunched();
-  void scriptCompleted(QModelIndex index);
+    void currentScriptChanged(QModelIndex index);
+    void runningScriptChanged(QModelIndex index);
 
-  void initialized();
+    void scriptLaunched();
+    void scriptCompleted(QModelIndex index);
 
-  private:
-  QDir scriptDir;
-  moduleType scriptType;
-  confData *data;
-  QList<scriptModule *> selectionObjects;
-  QHash<quint32,QHash<QString,QVariant> > scriptData;
-  QHash<quint32, quint32> scriptProgress;
-  QHash<quint32,confData *> localConf;
-  QProcess process;
+    void initialized();
 
-  quint32 currentUid;
-  QStandardItem *runningScript;
-  int runningIndex;
-  QList<int> executionList;
+private:
+    QDir scriptDir;
+    moduleType scriptType;
+    confData *data;
+    QList<scriptModule *> selectionObjects;
+    QHash<quint32, QHash<QString, QVariant> > scriptData;
+    QHash<quint32, quint32> scriptProgress;
+    QHash<quint32, confData *> localConf;
+    QProcess process;
 
-  QTreeView *view;
-  QStandardItemModel *model;
-  QItemSelectionModel *selection;
+    quint32 currentUid;
+    QStandardItem *runningScript;
+    int runningIndex;
+    QList<int> executionList;
 
-  bool currentlyRunning;
+    QListView *view;
+    QStandardItemModel *model;
+    QItemSelectionModel *selection;
 
-  int verbosity;
+    bool currentlyRunning;
 
-  QTreeView *setupModule();
-  void addScriptProperty(quint32 uid, const QString &property, const QVariant &value);
-  const QVariant &getScriptProperty(quint32 uid, const QString &property);
+    int verbosity;
 
-  bool clean(int uid);
+    void setupModule();
+    void addScriptProperty(quint32 uid, const QString &property, const QVariant &value);
+    const QVariant &getScriptProperty(quint32 uid, const QString &property);
 
-  bool runningScriptSelected();
+    bool clean(int uid);
 
-  bool writeToLog(const QString &logText);
+    bool runningScriptSelected();
 
-  bool initializeExecution();
-  void cleanupExecution();
+    bool writeToLog(const QString &logText);
 
-  public:
-  scriptModule(confData *conf, const QDir &directory, scriptModule::moduleType type = scriptModule::standard, QWidget *parent = NULL);
-  void extendSelectionTo(scriptModule *module);
+    bool initializeExecution();
+    void cleanupExecution();
 
-  QStringList displayedVariables(QModelIndex index);
-  QString logFile(QModelIndex index);
-  QString logFile();
-  QString resultsFile(QModelIndex index);
-  QString resultsFile();
-  QString title(QModelIndex index);
-  moduleType type();
-  uint uid();
-  confData *conf(QModelIndex index);
-  bool isRunning();
-  QItemSelectionModel* getSelection();
-  quint32 getScriptProgress(quint32 uid);
-  
+public:
+    scriptModule(confData *conf, const QDir &directory, scriptModule::moduleType type = scriptModule::standard, QWidget *parent = NULL);
+    void extendSelectionTo(scriptModule *module);
+
+    QStringList displayedVariables(QModelIndex index);
+    QString logFile(QModelIndex index);
+    QString logFile();
+    QString resultsFile(QModelIndex index);
+    QString resultsFile();
+    QString title(QModelIndex index);
+    moduleType type();
+    uint uid();
+    confData *conf(QModelIndex index);
+    bool isRunning();
+    QItemSelectionModel* getSelection();
+    quint32 getScriptProgress(quint32 uid);
+    QStringList getScriptManual(quint32 uid);
+    QStringList getScriptDependents(quint32 uid);
+
 };
 
 #endif

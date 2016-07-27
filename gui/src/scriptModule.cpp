@@ -20,6 +20,8 @@
 
 #include <iostream>
 #include <scriptModule.h>
+#include <QPalette>
+#include <QLabel>
 
 #include "scriptProgress.h"
 using namespace std;
@@ -39,11 +41,24 @@ scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::
     layout->setSpacing(0);
     setLayout(layout);
 
-    view = setupModule();
+    /*QLabel* titleLabel = new QLabel;
+    titleLabel->setFixedHeight(30);
+    QPalette pal = titleLabel->palette();
+    pal.setColor(QPalette::Window, Qt::white);
+    pal.setColor(QPalette::WindowText, Qt::darkGray);
+    titleLabel->setPalette(pal);
+    if (scriptType == standard) titleLabel->setText("STANDARD SCRIPTS");
+    else if (scriptType == custom) titleLabel->setText("CUSTOM SCRIPTS");
+    else if (scriptType == singleparticle) titleLabel->setText("SINGLE PARTICLE SCRIPTS");
+    else if (scriptType == merge2D) titleLabel->setText("2D MERGE SCRIPTS");
+    else if (scriptType == merge3D) titleLabel->setText("3D MERGE SCRIPTS");
+    */
+    setupModule();
     if (view != NULL) {
         if (type == scriptModule::standard) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
         if (type == scriptModule::custom) view->setSelectionMode(QAbstractItemView::SingleSelection);
         if (type == scriptModule::singleparticle) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        //layout->addWidget(titleLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignVCenter);
         layout->addWidget(view, 0, 0, 1, 1);
         //connect(selection,SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),this,SLOT(clearExtendedSelections()));
         //connect(view,SIGNAL(pressed(QModelIndex)),this,SLOT(clearExtendedSelections()));
@@ -58,27 +73,21 @@ scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::
     view->selectionModel()->clearSelection();
 }
 
-QTreeView *scriptModule::setupModule() {
-    if (!scriptDir.exists() || data->isEmpty()) return NULL;
+void scriptModule::setupModule() {
+    if (!scriptDir.exists() || data->isEmpty()) return;
 
-    QTreeView *view = new QTreeView;
-    view->setAnimated(true);
-    view->setRootIsDecorated(true);
-    view->setUniformRowHeights(true);
+    view = new QListView;
+    view->setUniformItemSizes(true);
+    view->setItemDelegate(new SpinBoxDelegate);
 
     model = new QStandardItemModel;
 
-    view->header()->hide();
-    view->setIndentation(8);
-    view->setItemDelegate(new SpinBoxDelegate);
-
     QString entry;
     QStandardItem *item;
-    QMap<int, QList<QStandardItem *> > map;
+    QMap<int, QStandardItem*> map;
     quint32 sortOrder, uid;
-
+    
     foreach(entry, scriptDir.entryList(QStringList() << "*.script", QDir::Files | QDir::NoDotAndDotDot, QDir::Unsorted)) {
-        QList<QStandardItem *> itemList;
         QStringList titleList;
         confData *scriptData = new confData(scriptDir.path() + "/" + entry, data);
         sortOrder = scriptData->property("sortOrder").toUInt();
@@ -90,7 +99,6 @@ QTreeView *scriptModule::setupModule() {
         titleList << scriptData->property("title").simplified();
 
         item = new QStandardItem(titleList.first());
-        itemList << item;
 
         item->setToolTip(entry);
 
@@ -101,19 +109,18 @@ QTreeView *scriptModule::setupModule() {
         addScriptProperty(uid, "displayedVars", QVariant(scriptData->propertyList("display")));
         addScriptProperty(uid, "logFile", data->getDir("working") + "/LOGS/" + entry.section('.', 0, -2) + ".log");
         addScriptProperty(uid, "resultsFile", data->getDir("working") + "/LOGS/" + entry.section('.', 0, -2) + ".results");
-        
+
         scriptProgress[uid] = 0;
 
         item->setData(scriptDir.canonicalPath() + "/" + entry, Qt::UserRole + 5);
 
         item->setData(uid, Qt::UserRole);
         item->setEditable(false);
-        if (scriptType == standard)
-            item->setIcon(*data->getIcon("scriptIcon"));
-        else if (scriptType == custom)
-            item->setIcon(*data->getIcon("customScriptIcon"));
-        else if (scriptType == singleparticle)
-            item->setIcon(*data->getIcon("spScriptIcon"));
+        if (scriptType == standard) item->setIcon(*data->getIcon("scriptIcon"));
+        else if (scriptType == custom) item->setIcon(*data->getIcon("customScriptIcon"));
+        else if (scriptType == singleparticle) item->setIcon(*data->getIcon("spScriptIcon"));
+        else if (scriptType == merge2D) item->setIcon(*data->getIcon("2DScriptIcon"));
+        else if (scriptType == merge3D) item->setIcon(*data->getIcon("3DScriptIcon"));
 
         item->setTextAlignment(Qt::AlignVCenter);
 
@@ -122,29 +129,12 @@ QTreeView *scriptModule::setupModule() {
         itemFont.setStretch(QFont::SemiExpanded);
         item->setFont(itemFont);
 
-        item->setSizeHint(QSize(200,24));
-        
-        QSetIterator<QString> it(scriptData->subScripts());
-        QString subScriptTitle;
-        QStandardItem *subItem;
-        while (it.hasNext()) {
-            subScriptTitle = it.next();
-            subItem = new QStandardItem(subScriptTitle);
-            subItem->setIcon(*data->getIcon("subScript"));
+        item->setSizeHint(QSize(200, 24));
 
-            subItem->setData(data->getDir("procDir") + "/" + subScriptTitle, Qt::UserRole + 5);
-            if (!QFileInfo(data->getDir("procDir") + "/" + subScriptTitle).exists())
-                subItem->setForeground(QColor(255, 0, 0));
-
-            subItem->setEditable(false);
-            subItem->setData(item->data(Qt::UserRole), Qt::UserRole);
-            item->appendRow(subItem);
-        }
-
-        map.insert(sortOrder, itemList);
+        map.insert(sortOrder, item);
     }
 
-    QMapIterator<int, QList<QStandardItem*> > it(map);
+    QMapIterator<int, QStandardItem*> it(map);
     while (it.hasNext()) {
         it.next();
         model->appendRow(it.value());
@@ -156,10 +146,9 @@ QTreeView *scriptModule::setupModule() {
 
     view->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
     //view->setAlternatingRowColors(true);
-    view->resizeColumnToContents(0);
+    //view->resizeColumnToContents(0);
 
     clearSelection();
-    return view;
 }
 
 void scriptModule::addScriptProperty(quint32 uid, const QString &property, const QVariant &value) {
@@ -170,8 +159,16 @@ const QVariant & scriptModule::getScriptProperty(quint32 uid, const QString &pro
     return scriptData[uid][property.toLower()];
 }
 
-quint32 scriptModule::getScriptProgress(quint32 uid){
+quint32 scriptModule::getScriptProgress(quint32 uid) {
     return scriptProgress[uid];
+}
+
+QStringList scriptModule::getScriptManual(quint32 uid) {
+    return localConf[uid]->manual();
+}
+
+QStringList scriptModule::getScriptDependents(quint32 uid) {
+    return localConf[uid]->subScripts().toList();
 }
 
 QItemSelectionModel* scriptModule::getSelection() {

@@ -31,6 +31,7 @@ confSectionHeader::confSectionHeader(confData *conf, confSection *s, QWidget *pa
   collapseButton = new graphicalButton(icon);
   collapseButton->setCheckable(true);
   collapseButton->setChecked(false);
+  collapseButton->setFixedSize(16, 16);
   connect(collapseButton,SIGNAL(toggled(bool)),this,SIGNAL(hideChildren(bool)));
   connect(collapseButton,SIGNAL(toggled(bool)),this,SLOT(collapse(bool)));
 

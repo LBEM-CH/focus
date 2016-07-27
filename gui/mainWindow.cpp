@@ -177,7 +177,7 @@ void mainWindow::setupMenuBar() {
     fileMenu->addAction(saveAction);
     fileMenu->addAction(importAction);
 
-    QAction *closeAction = new QAction("Quit", this);
+    QAction *closeAction = new QAction(*(mainData->getIcon("quit")), "Quit", this);
     closeAction->setShortcut(tr("Ctrl+Q"));
     connect(closeAction, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
     fileMenu->addAction(closeAction);
@@ -187,12 +187,12 @@ void mainWindow::setupMenuBar() {
      */
     QMenu *editMenu = new QMenu("Edit");
 
-    QAction *increaseFontAction = new QAction("Increase Font Size", this);
+    QAction *increaseFontAction = new QAction(*(mainData->getIcon("increase_font")), "Increase Font Size", this);
     increaseFontAction->setShortcut(tr("]"));
     connect(increaseFontAction, SIGNAL(triggered()), this, SLOT(increaseFontSize()));
     editMenu->addAction(increaseFontAction);
 
-    QAction *decreaseFontAction = new QAction("Decrease Font Size", this);
+    QAction *decreaseFontAction = new QAction(*(mainData->getIcon("decrease_font")), "Decrease Font Size", this);
     decreaseFontAction->setShortcut(tr("["));
     connect(decreaseFontAction, SIGNAL(triggered()), this, SLOT(decreaseFontSize()));
     editMenu->addAction(decreaseFontAction);
@@ -203,11 +203,11 @@ void mainWindow::setupMenuBar() {
      */
     QMenu *optionMenu = new QMenu("Options");
 
-    QAction *openPreferencesAction = new QAction("Preferences", this);
+    QAction *openPreferencesAction = new QAction(*(mainData->getIcon("preferences")), "Preferences", this);
     connect(openPreferencesAction, SIGNAL(triggered()), this, SLOT(editHelperConf()));
     optionMenu->addAction(openPreferencesAction);
 
-    QAction *showAutoSaveAction = new QAction("Autosave On/Off", this);
+    QAction *showAutoSaveAction = new QAction(*(mainData->getIcon("autosave")), "Autosave On/Off", this);
     connect(showAutoSaveAction, SIGNAL(triggered()), this, SLOT(toggleAutoSave()));
     optionMenu->addAction(showAutoSaveAction);
 
@@ -216,21 +216,21 @@ void mainWindow::setupMenuBar() {
      */
     QMenu *selectMenu = new QMenu("Select");
 
-    QAction *selectAllAction = new QAction("Check all images", this);
+    QAction *selectAllAction = new QAction(*(mainData->getIcon("check_all")), "Check all images", this);
     selectAllAction->setShortcut(tr("Ctrl+A"));
     selectMenu->addAction(selectAllAction);
     connect(selectAllAction, SIGNAL(triggered()), libraryWin_->getDirModel(), SLOT(selectAll()));
 
-    QAction *invertSelectedAction = new QAction("Invert check", this);
+    QAction *invertSelectedAction = new QAction(*(mainData->getIcon("check_invert")), "Invert check", this);
     invertSelectedAction->setShortcut(tr("Ctrl+I"));
     selectMenu->addAction(invertSelectedAction);
     connect(invertSelectedAction, SIGNAL(triggered()), libraryWin_->getDirModel(), SLOT(invertSelection()));
 
-    QAction *saveDirectorySelectionAction = new QAction("Save checked list", this);
+    QAction *saveDirectorySelectionAction = new QAction(*(mainData->getIcon("check_save")), "Save checked list", this);
     connect(saveDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(saveDirectorySelection()));
     selectMenu->addAction(saveDirectorySelectionAction);
 
-    QAction *loadDirectorySelectionAction = new QAction("Load checked list", this);
+    QAction *loadDirectorySelectionAction = new QAction(*(mainData->getIcon("check_load")), "Load checked list", this);
     connect(loadDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(loadDirectorySelection()));
     selectMenu->addAction(loadDirectorySelectionAction);
 
@@ -255,11 +255,11 @@ void mainWindow::setupMenuBar() {
 
     connect(mapper, SIGNAL(mapped(const QString &)), this, SLOT(openURL(const QString &)));
 
-    QAction *showUpdatesAction = new QAction("Update...", this);
+    QAction *showUpdatesAction = new QAction(*(mainData->getIcon("update")), "Update...", this);
     connect(showUpdatesAction, SIGNAL(triggered()), updates, SLOT(show()));
     helpMenu->addAction(showUpdatesAction);
 
-    QAction *showAboutAction = new QAction("About", this);
+    QAction *showAboutAction = new QAction(*(mainData->getIcon("about")), "About", this);
     connect(showAboutAction, SIGNAL(triggered()), about, SLOT(show()));
     helpMenu->addAction(showAboutAction);
 

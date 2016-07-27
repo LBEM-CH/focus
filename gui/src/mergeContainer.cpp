@@ -11,6 +11,7 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent
 
     //Setup Leftmost container
     scriptsWidget = new QStackedWidget(this);
+    scriptsWidget->setAttribute(Qt::WA_MacShowFocusRect, 0);
     scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
 

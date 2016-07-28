@@ -72,7 +72,7 @@
 
 #include "libraryContainer.h"
 #include "mergeContainer.h"
-#include "imageWindow.h"
+#include "imageContainer.h"
 
 class mainWindow : public QMainWindow
 {
@@ -103,10 +103,9 @@ public slots:
     void launchReproject();
     void saveDirectorySelection();
     void loadDirectorySelection();
-    
-    void showImageWindow(const QModelIndex&);
-    void closeImageWindow(int index);
 
+    void showImageWindow(const QModelIndex&);
+    
 signals:
     void saveConfig();
 
@@ -119,6 +118,7 @@ private:
     void setupActions();
     void setupMenuBar();
     void setupWindows();
+    void setupToolBar();
     confData* setupMainConfiguration(const QString &directory);
     
     bool createDir(const QString &dir);
@@ -144,11 +144,9 @@ private:
     QStackedWidget* centralWin_;
     libraryContainer* libraryWin_;
     mergeContainer* mergeWin_;
-    imageWindow* imageWin_;
+    imageContainer* imageWin_;
     
-    //Image Windows
-    QMap<QString, imageWindow*> imagesInitializedToTabs_;
-    QStringList imagesShown_;
+    
 
     /**
      * Standard actions
@@ -157,6 +155,10 @@ private:
     QAction* saveAction;
     QAction* importAction;
     QAction* viewAlbum;
+    
+    QAction* openLibraryWindowAct;
+    QAction* openImageWindowAct;
+    QAction* openMergeWindowAct;
 
     int importCount;
 

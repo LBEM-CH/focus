@@ -24,6 +24,7 @@
 #include <QItemSelectionModel>
 #include <QTabWidget>
 #include <QToolBar>
+#include <QActionGroup>
 #include <iostream>
 
 #include "mainWindow.h"
@@ -55,6 +56,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     setupWindows();
     setupActions();
     setupMenuBar();
+    setupToolBar();
 
     album = NULL;
     euler = NULL;
@@ -299,41 +301,69 @@ bool mainWindow::setupIcons(confData *data, const QDir &directory) {
     return true;
 }
 
-void mainWindow::setupWindows() {
-    centralWin_ = new QTabWidget(this);
-    centralWin_->setTabsClosable(true);
+void mainWindow::setupToolBar() {
+    QToolBar* mainToolBar = addToolBar("");
+    mainToolBar->setIconSize(QSize(32, 32));
+    
+    openLibraryWindowAct = new QAction(*(mainData->getIcon("library")), "Project Library", mainToolBar);
+    openLibraryWindowAct->setCheckable(true);
+    connect(openLibraryWindowAct, &QAction::triggered,
+            [=] () {
+                centralWin_->setCurrentWidget(libraryWin_);
+            });
+            
+    openImageWindowAct = new QAction(*(mainData->getIcon("image")), "Edit Images", mainToolBar);
+    openImageWindowAct->setCheckable(true);
+    connect(openImageWindowAct, &QAction::triggered,
+            [=] () {
+                centralWin_->setCurrentWidget(imageWin_);
+            });
+    
+    openMergeWindowAct = new QAction(*(mainData->getIcon("merge_tool")), "Merge Tool", mainToolBar);
+    openMergeWindowAct->setCheckable(true);
+    connect(openMergeWindowAct, &QAction::triggered,
+            [=] () {
+                centralWin_->setCurrentWidget(mergeWin_);
+            });
+    
+    QActionGroup* group = new QActionGroup(mainToolBar);
+    group->addAction(openLibraryWindowAct);
+    group->addAction(openImageWindowAct);
+    group->addAction(openMergeWindowAct);
+    group->setExclusive(true);
+    openLibraryWindowAct->setChecked(true);
+    
+    QWidget* spacer1 = new QWidget();
+    spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QWidget* spacer2 = new QWidget();
+    spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mainToolBar->addWidget(spacer1);
+    mainToolBar->addAction(openLibraryWindowAct);
+    mainToolBar->addAction(openImageWindowAct);
+    mainToolBar->addAction(openMergeWindowAct);
+    mainToolBar->addWidget(spacer2);
+    
+}
 
-    connect(centralWin_, SIGNAL(tabCloseRequested(int)), this, SLOT(closeImageWindow(int)));
+void mainWindow::setupWindows() {
+    centralWin_ = new QStackedWidget(this);
 
     results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
     libraryWin_ = new libraryContainer(mainData, results, this);   
     mergeWin_ = new mergeContainer(mainData, results, this);
-    centralWin_->addTab(libraryWin_, *(mainData->getIcon("library")), "Project Library");
-    centralWin_->addTab(mergeWin_, *(mainData->getIcon("merge_tool")), "Merge Tool");
+    imageWin_ = new imageContainer(mainData, this);
+    centralWin_->addWidget(libraryWin_);
+    centralWin_->addWidget(mergeWin_);
+    centralWin_->addWidget(imageWin_);
 
     connect(mergeWin_, SIGNAL(scriptCompletedSignal()), libraryWin_, SLOT(maskResults()));
     connect(libraryWin_->getDirView(), SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(showImageWindow(const QModelIndex&)));
     
-    //No closable buttons on the library and merge tabs
-    centralWin_->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
-    centralWin_->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
-    centralWin_->tabBar()->setTabButton(1, QTabBar::RightSide, 0);
-    centralWin_->tabBar()->setTabButton(1, QTabBar::LeftSide, 0);
-
-    //Tab Colors
-    centralWin_->tabBar()->setTabTextColor(0, Qt::darkCyan);
-    centralWin_->tabBar()->setTabTextColor(1, Qt::darkGreen);
-
     setCentralWidget(centralWin_);
 }
 
-void mainWindow::closeImageWindow(int index) {
-    centralWin_->removeTab(index);
-    imagesShown_.removeAt(index - 2);
-}
-
 void mainWindow::showImageWindow(const QModelIndex& index) {
-
+    
     QString workingDir = libraryWin_->getDirModel()->pathFromIndex(index);
     
     if (workingDir.isEmpty()) return;
@@ -347,66 +377,10 @@ void mainWindow::showImageWindow(const QModelIndex& index) {
         QMessageBox::critical(this, tr("Configuration file error"), "No configuration data found in:\n" + workingDir + "\n\nThe image should be properly imported using the import action.");
         return;
     }
-
-    if (!imagesInitializedToTabs_.contains(workingDir)) {
-        confData* imageData = new confData(workingDir + "/" + "2dx_image.cfg", mainData);
-        QString userConfigPath = QDir::homePath() + "/.2dx/2dx_master.cfg";
-        if (QFileInfo(userConfigPath).exists()) imageData->updateConf(userConfigPath);
-
-        userData->set("imageDir", workingDir);
-        userData->save();
-        imageData->setUserConf(userData);
-        imageData->setDir("application", mainData->getDir("application"));
-        imageData->setDir("plugins", mainData->getDir("pluginsDir"));
-        imageData->setDir("tools", mainData->getDir("pluginsDir") + "/tools/");
-        imageData->setDir("standardScripts", QDir(mainData->getDir("application") + "../kernel/2dx_image" + "/" + "scripts-standard/"));
-        imageData->setDir("customScripts", QDir(mainData->getDir("application") + "../kernel/2dx_image" + "/" + "scripts-custom/"));
-        imageData->setDir("config", mainData->getDir("config"));
-        imageData->setDir("project", QDir(workingDir + "/../"));
-        imageData->setDir("icons", imageData->getDir("config") + "/resource");
-        imageData->setDir("working", workingDir);
-
-        createDir(workingDir + "/proc");
-        imageData->setDir("remoteProc", workingDir + "/proc/");
-        createDir(workingDir + "/LOGS");
-        imageData->setDir("logs", workingDir + "/LOGS");
-
-        imageData->setDir("binDir", imageData->getDir("application") + "/../kernel/mrc/bin");
-        imageData->setDir("procDir", imageData->getDir("application") + "/../kernel/proc/");
-
-        confData *cfg = new confData(QDir::homePath() + "/.2dx/" + "2dx.cfg", imageData->getDir("config") + "/" + "2dx.cfg");
-        if (cfg->isEmpty()) {
-            cerr << "2dx.cfg not found." << endl;
-            exit(0);
-        }
-        cfg->save();
-
-        imageData->setAppConf(cfg);
-        imageData->addApp("this", imageData->getDir("application") + "/../" + "bin/" + "2dx_image");
-        imageData->addApp("2dx_image", imageData->getDir("application") + "/../" + "bin/" + "2dx_image");
-        imageData->addApp("2dx_merge", imageData->getDir("application") + "/../" + "bin/" + "2dx_merge");
-        imageData->addApp("logBrowser", imageData->getDir("application") + "/../" + "bin/" + "2dx_logbrowser");
-
-        imageData->setURL("help", "http://2dx.org/documentation/2dx-software");
-        imageData->setURL("bugReport", "https://github.com/C-CINA/2dx/issues");
-
-        imageData->addImage("appImage", new QImage(imageData->getDir("application") + "/resource/" + "icon.png"));
-
-        imageData->syncWithUpper();
-        imageWindow* imageWin = new imageWindow(imageData);
-        imagesInitializedToTabs_.insert(workingDir, imageWin);
-    }
-
-    //Check if the tab is already visible
-    if (!imagesShown_.contains(workingDir)) {
-        int currTabIndex = centralWin_->count();
-        QString tabName = workingDir;
-        tabName = tabName.remove(mainData->getDir("project"));
-        centralWin_->addTab(imagesInitializedToTabs_[workingDir], *(mainData->getIcon("image")), tabName);
-        imagesShown_.insert(currTabIndex, workingDir);
-    }
-
-    centralWin_->setCurrentWidget(imagesInitializedToTabs_[workingDir]);
+    
+    openImageWindowAct->setChecked(true);
+    centralWin_->setCurrentWidget(imageWin_);
+    imageWin_->showImageWindow(workingDir);
 }
 
 void mainWindow::setSaveState(bool state) {

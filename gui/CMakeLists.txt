@@ -120,6 +120,7 @@ set(MOC_HDRS
         src/fullScreenImage.h
         src/graphicalButton.h
         src/imageAlbum.h
+        src/imageContainer.h
         src/imageNavigator.h
         src/imagePreview.h
         src/imageViewer.h

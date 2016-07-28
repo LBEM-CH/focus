@@ -83,13 +83,10 @@ void scriptModule::setupModule() {
     view->setItemDelegate(new SpinBoxDelegate);
     view->setAttribute(Qt::WA_MacShowFocusRect, 0);
     QPalette p = view->palette();
-    p.setColor(QPalette::Window, QColor(240,240,240));
-    p.setColor(QPalette::Base, QColor(240,240,240));
-    p.setColor(QPalette::Highlight, QColor(240,240,240));
+    //p.setColor(QPalette::Window, QColor(240,240,240));
+    //p.setColor(QPalette::Base, QColor(240,240,240));
+    p.setColor(QPalette::Highlight, Qt::white);
     p.setColor(QPalette::HighlightedText, Qt::darkBlue);
-// or even different colors for different color groups (states)
-// p.setColor(QPalette::Normal, QPalette::Highlight, Qt::green);
-// p.setColor(QPalette::Disabled, QPalette::Highlight, Qt::blue);
     view->setPalette(p);
     
     model = new QStandardItemModel;

@@ -109,7 +109,6 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent
     //Setup Title Bar
     scriptLabel = new QLabel;
     QFont labelFont = scriptLabel->font();
-    labelFont.setBold(true);
     labelFont.setPointSize(20);
     scriptLabel->setFont(labelFont);
     QWidget* spacer = new QWidget();
@@ -135,7 +134,7 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent
 
     QWidget* titleContainer = new QWidget;
     QHBoxLayout* titleLayout = new QHBoxLayout;
-    titleLayout->setMargin(5);
+    titleLayout->setMargin(0);
     titleLayout->setSpacing(0);
     titleLayout->addWidget(scriptLabel);
     titleLayout->addWidget(spacer);
@@ -155,7 +154,7 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent
     //Setup progress Bar
     progressBar = new QProgressBar(this);
     progressBar->setMaximum(100);
-    progressBar->setFixedHeight(4);
+    progressBar->setFixedHeight(5);
     progressBar->setValue(0);
     progressBar->setTextVisible(false);
 
@@ -227,11 +226,16 @@ QToolBar* mergeContainer::setupToolbar() {
     showSPScripts->setCheckable(true);
     connect(showSPScripts, SIGNAL(clicked()), this, SLOT(setSPMode()));
 
+    QWidget* spacer1 = new QWidget();
+    spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QWidget* spacer2 = new QWidget();
+    spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    scriptsToolBar->addWidget(spacer1);
     scriptsToolBar->addWidget(showMerge2DScripts);
     scriptsToolBar->addWidget(showMerge3DScripts);
     scriptsToolBar->addWidget(showCustomScripts);
     scriptsToolBar->addWidget(showSPScripts);
-
+scriptsToolBar->addWidget(spacer2);
     return scriptsToolBar;
 
 }

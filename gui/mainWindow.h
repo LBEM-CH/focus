@@ -141,7 +141,7 @@ private:
     eulerWindow *euler;
     reprojectWindow *reproject;
     
-    QTabWidget* centralWin_;
+    QStackedWidget* centralWin_;
     libraryContainer* libraryWin_;
     mergeContainer* mergeWin_;
     imageWindow* imageWin_;

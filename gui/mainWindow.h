@@ -101,8 +101,6 @@ public slots:
     void launchAlbum(const QString &path);
     void launchEuler();
     void launchReproject();
-    void saveDirectorySelection();
-    void loadDirectorySelection();
 
     void showImageWindow(const QModelIndex&);
     

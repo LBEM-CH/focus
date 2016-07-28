@@ -20,12 +20,13 @@ blockContainer::blockContainer(const QString& title, QWidget* parent)
     
     //Setup contents
     mainLayout = new QVBoxLayout(this);
-    this->setLayout(mainLayout);
     mainLayout->setMargin(0);
     mainLayout->setSpacing(0);
     
     mainLayout->addWidget(header);
     mainLayout->addWidget(mainWidget);
+    
+    this->setLayout(mainLayout);
     
 }
 

@@ -1,3 +1,5 @@
+#include <QFormLayout>
+
 #include "libraryContainer.h"
 
 libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget* parent)
@@ -7,9 +9,8 @@ libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget*
     selectionWidget = new QTreeWidget;
     selectionWidget->setColumnCount(2);
     selectionWidget->header()->hide();
-    selectionWidget->setFixedWidth(235);
+    selectionWidget->setFixedHeight(235);
     selectionWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    selectionWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     
     dataLabels  << "Name" << "Number" << "Original Name" << "Magnification" << "Defocus"
                 << "QVal" << "QVal2" << "QValMA" << "QValMB"
@@ -22,7 +23,7 @@ libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget*
                 << "MergePhaResidual" << "comment";
 
     previews = new QStackedWidget(this);
-    previews->setFixedWidth(235);
+    previews->setFixedSize(235, 235);
 
     mapPreview = new imagePreview(data, "NP", false, previews);
     refPreview = new imagePreview(data, "NR", false, previews);
@@ -33,32 +34,10 @@ libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget*
     previews->addWidget(dualPreview);
 
     setupDirectoryContainer(data);
-    QToolBar* headerToolBar = setupContextAndMenu();
     dirModel->setResultsFile(results);
-
-    QWidget* widget = new QWidget(this);
-    QGridLayout* layout = new QGridLayout(widget);
-    layout->setMargin(0);
-    layout->setSpacing(0);
-    widget->setLayout(layout);
-
-    layout->addWidget(headerToolBar, 0, 0, 1, 1);
-    layout->addWidget(dirView, 0, 1, 1, 1);
 
     previewTimer = new QTimer(this);
     connect(previewTimer, SIGNAL(timeout()), this, SLOT(updatePreview()));
-
-    blockContainer* libraryContainer = new blockContainer(QString("Project Library (" + data->getDir("project") + ")"));
-    libraryContainer->setMainWidget(widget);
-
-    selectionState = new QLabel(" ");
-    QFont* font = new QFont();
-    font->setItalic(true);
-    font->setPixelSize(10);
-    selectionState->setFont(*font);
-    resetSelectionState();
-
-    libraryContainer->setHeaderWidget(selectionState);
 
     QToolButton* showHeaderButton = new QToolButton();
     showHeaderButton->setIcon(*(data->getIcon("info")));
@@ -93,21 +72,31 @@ libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget*
     headerWidgetLayout->addItem(new QSpacerItem(3, 3), 0, 3);
     headerWidgetLayout->addWidget(autoPreviewsButton, 0, 4);
 
-    blockContainer* previewContainer = new blockContainer("", this);
-    previewContainer->setFixedWidth(235);
-    previewContainer->setMainWidget(previews);
+    QWidget* dataAndPreview = new QWidget;
+    QHBoxLayout* dataAndPreviewLayout = new QHBoxLayout;
+    dataAndPreviewLayout->setMargin(0);
+    dataAndPreviewLayout->setSpacing(0);
+    dataAndPreviewLayout->addWidget(selectionWidget, 1);
+    dataAndPreviewLayout->addWidget(previews, 0);
+    dataAndPreview->setLayout(dataAndPreviewLayout);
+    
+    blockContainer* previewContainer = new blockContainer("Image Data and Preview", this);
+    previewContainer->setMainWidget(dataAndPreview);
     previewContainer->setHeaderWidget(headerWidget);
 
     QGridLayout* mainLayout = new QGridLayout(this);
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
-    mainLayout->addWidget(libraryContainer, 0, 0, 2, 1);
-    mainLayout->addWidget(previewContainer, 0, 1, 1, 1, Qt::AlignTop);
-    mainLayout->addWidget(selectionWidget, 1, 1, 1, 1);
-
-    mainLayout->setRowStretch(0, 0);
-    mainLayout->setRowStretch(1, 1);
-
+    mainLayout->addWidget(dirView, 0, 0);
+    mainLayout->addWidget(previewContainer, 1, 0);
+    mainLayout->addWidget(setupToolBar(), 0, 1, 2, 1, Qt::AlignTop);
+    
+    mainLayout->setColumnStretch(0, 1);
+    mainLayout->setColumnStretch(1, 0);
+    
+    mainLayout->setRowStretch(0, 1);
+    mainLayout->setRowStretch(1, 0);
+    
     this->setLayout(mainLayout);
 
 }
@@ -199,67 +188,180 @@ void libraryContainer::setupDirectoryContainer(confData* data) {
     }
 }
 
-QToolBar* libraryContainer::setupContextAndMenu() {
-    //Setup Actions
-    QAction *refreshAction = new QAction(*(data->getIcon("refresh")), tr("&Refresh Results"), this);
-    refreshAction->setShortcut(tr("Ctrl+Shift+r"));
-    connect(refreshAction, SIGNAL(triggered()), this, SLOT(reload()));
+QWidget* libraryContainer::setupToolBar() {
+    QTabWidget* tabWidget = new QTabWidget;
+    tabWidget->addTab(setupSelectionTab(), "Select");
+    tabWidget->addTab(setupProjectTab(), "Project");
     
-    QAction* showSelectedAction = new QAction(*(data->getIcon("selected")), tr("&Show checked images only"), this);
+    selectionState = new QLabel(" ");
+    selectionState->setAlignment(Qt::AlignCenter);
+    QFont* font = new QFont();
+    font->setItalic(true);
+    font->setPixelSize(10);
+    selectionState->setFont(*font);
+    resetSelectionState();
+    
+    //Setup tool bar
+    QWidget* toolBar =  new QWidget;
+    toolBar->setFixedWidth(200);
+    QVBoxLayout* toolBarLayout =  new QVBoxLayout;
+    toolBarLayout->addStretch(0);
+    toolBarLayout->setMargin(0);
+    
+    toolBarLayout->addWidget(selectionState);
+    toolBarLayout->addWidget(tabWidget);
+    toolBar->setLayout(toolBarLayout);
+    
+    return toolBar;
+}
+
+QWidget* libraryContainer::setupSelectionTab() {
+    
+    QSizePolicy sizePolicy((QSizePolicy::Policy)QSizePolicy::Minimum,(QSizePolicy::Policy)QSizePolicy::Fixed);
+    sizePolicy.setHorizontalStretch(0);
+    sizePolicy.setVerticalStretch(0);
+    
+    QPushButton *refreshAction = new QPushButton(*(data->getIcon("refresh")), tr("&Refresh Library"), this);
+    refreshAction->setSizePolicy(sizePolicy);
+    refreshAction->setShortcut(tr("Ctrl+Shift+r"));
+    connect(refreshAction, SIGNAL(clicked()), this, SLOT(reload()));
+    
+    
+    //Check Group
+    QGroupBox* checkGroup = new QGroupBox("Manage Check");
+    checkGroup->setSizePolicy(sizePolicy);
+    QVBoxLayout* checkGroupLayout = new QVBoxLayout;
+    
+    QPushButton* showSelectedAction = new QPushButton(*(data->getIcon("selected")), tr("&Show checked images only"), this);
     showSelectedAction->setShortcut(tr("Ctrl+X"));
     showSelectedAction->setCheckable(true);
     connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
+    checkGroupLayout->addWidget(showSelectedAction);
     
-    QAction *addSelectionAction;
-    addSelectionAction = new QAction(*(data->getIcon("add_selection")), "Check highlighted", dirView);
-    connect(addSelectionAction, SIGNAL(triggered()), this, SLOT(extendSelection()));
+    QPushButton *selectAllAction = new QPushButton(*(data->getIcon("check_all")), "Check all images", this);
+    selectAllAction->setShortcut(tr("Ctrl+A"));
+    connect(selectAllAction, SIGNAL(clicked()), dirModel, SLOT(selectAll()));
+    checkGroupLayout->addWidget(selectAllAction);
+    
+    QPushButton *invertSelectedAction = new QPushButton(*(data->getIcon("check_invert")), "Invert check", this);
+    invertSelectedAction->setShortcut(tr("Ctrl+I"));
+    connect(invertSelectedAction, SIGNAL(clicked()), dirModel, SLOT(invertSelection()));
+    checkGroupLayout->addWidget(invertSelectedAction);
+    
+    QPushButton* addSelectionAction = new QPushButton(*(data->getIcon("add_selection")), "Check highlighted", dirView);
+    connect(addSelectionAction, SIGNAL(clicked()), this, SLOT(extendSelection()));
+    checkGroupLayout->addWidget(addSelectionAction);
 
-    QAction *removeSelectionAction;
-    removeSelectionAction = new QAction(*(data->getIcon("remove_selection")), "Uncheck highlighted", dirView);
-    connect(removeSelectionAction, SIGNAL(triggered()), this, SLOT(reduceSelection()));
+    QPushButton* removeSelectionAction = new QPushButton(*(data->getIcon("remove_selection")), "Uncheck highlighted", dirView);
+    connect(removeSelectionAction, SIGNAL(clicked()), this, SLOT(reduceSelection()));
+    checkGroupLayout->addWidget(removeSelectionAction);
 
-    QAction *copyImageAction;
-    copyImageAction = new QAction(*(data->getIcon("copy_selection")), "Copy highlighted to second project", dirView);
-    connect(copyImageAction, SIGNAL(triggered()), this, SLOT(copyImage()));
+    checkGroup->setLayout(checkGroupLayout);
+    
+    //Auto Selection Group
+    QGroupBox* autoSelectionGroup = new QGroupBox("Automatic Selection");
+    
+    minDegree = new QLineEdit;
+    minDegree->setFrame(false);
+    minDegree->setText("0");
+    minDegree->setValidator(new QIntValidator(-90, 90));
+    
+    maxDegree = new QLineEdit;
+    maxDegree->setFrame(false);
+    maxDegree->setText("90");
+    maxDegree->setValidator(new QIntValidator(-90, 90));
+    
+    negPosOption = new QComboBox;
+    negPosOption->addItems(QStringList() << "Yes" << "No");
+    negPosOption->setCurrentIndex(0);
+        
+    QPushButton* changeSelection = new QPushButton("Change Selection");
+    connect(changeSelection, SIGNAL(clicked()), this, SLOT(autoSelect()));
+    
+    QFormLayout* autoSelectLayout = new QFormLayout;
+    autoSelectLayout->setRowWrapPolicy(QFormLayout::WrapLongRows);
+    autoSelectLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+    autoSelectLayout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    autoSelectLayout->setLabelAlignment(Qt::AlignLeft);
+    autoSelectLayout->addRow("Minimum Tilt Angle", minDegree);
+    autoSelectLayout->addRow("Maximum Tilt Angle", maxDegree);
+    autoSelectLayout->addRow("Positive/negative values", negPosOption);
+    autoSelectLayout->addRow(changeSelection);
+    
+    autoSelectionGroup->setLayout(autoSelectLayout);
+    
+    //Image Folder Group
+    QGroupBox* imageFolderGroup = new QGroupBox("Image Folder");
+    imageFolderGroup->setSizePolicy(sizePolicy);
+    QVBoxLayout* imageFolderGroupLayout = new QVBoxLayout;
+    
+    QPushButton* addFolderAction = new QPushButton(*(data->getIcon("add_folder")), "Add image folder", dirView);
+    connect(addFolderAction, SIGNAL(clicked()), this, SLOT(addImageFolder()));
+    imageFolderGroupLayout->addWidget(addFolderAction);
+    
+    QPushButton* moveImageAction = new QPushButton(*(data->getIcon("move_selection")), "Move highlighted", dirView);
+    connect(moveImageAction, SIGNAL(clicked()), this, SLOT(moveSelectiontoFolder()));
+    imageFolderGroupLayout->addWidget(moveImageAction);
+    
+    QPushButton* trashImageAction = new QPushButton(*(data->getIcon("trash_selection")), "Trash highlighted", dirView);
+    connect(trashImageAction, SIGNAL(clicked()), this, SLOT(trashSelection()));
+    imageFolderGroupLayout->addWidget(trashImageAction);
+    
+    QPushButton* copyImageAction = new QPushButton(*(data->getIcon("copy_selection")), "Copy to second project", dirView);
+    connect(copyImageAction, SIGNAL(clicked()), this, SLOT(copyImage()));
+    imageFolderGroupLayout->addWidget(copyImageAction);
+    
+    imageFolderGroup->setLayout(imageFolderGroupLayout);
+    
+    
+    //Backup/Save Group
+    
+    QGroupBox* backupSaveGroup = new QGroupBox("Save and Backup");
+    backupSaveGroup->setSizePolicy(sizePolicy);
+    QVBoxLayout* backupSaveLayout = new QVBoxLayout;
+    
+    QPushButton *saveDirectorySelectionAction = new QPushButton(*(data->getIcon("check_save")), "Save checked list", this);
+    connect(saveDirectorySelectionAction, SIGNAL(clicked()), this, SLOT(saveDirectorySelection()));
+    backupSaveLayout->addWidget(saveDirectorySelectionAction);
 
-    QAction *moveImageAction;
-    moveImageAction = new QAction(*(data->getIcon("move_selection")), "Move highlighted to another folder", dirView);
-    connect(moveImageAction, SIGNAL(triggered()), this, SLOT(moveSelectiontoFolder()));
+    QPushButton *loadDirectorySelectionAction = new QPushButton(*(data->getIcon("check_load")), "Load checked list", this);
+    connect(loadDirectorySelectionAction, SIGNAL(clicked()), this, SLOT(loadDirectorySelection()));
+    backupSaveLayout->addWidget(loadDirectorySelectionAction);
+    
+    backupSaveGroup->setLayout(backupSaveLayout);
+    
+    QWidget* tab = new QWidget;
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->addStretch(0);
+    layout->addWidget(refreshAction, 0, Qt::AlignTop);
+    layout->addWidget(checkGroup, 0, Qt::AlignTop);
+    layout->addWidget(autoSelectionGroup, 0);
+    layout->addWidget(imageFolderGroup, 0, Qt::AlignTop);
+    layout->addWidget(backupSaveGroup, 0, Qt::AlignTop);
+    tab->setLayout(layout);
+    return tab;
+}
 
-    QAction *trashImageAction;
-    trashImageAction = new QAction(*(data->getIcon("trash_selection")), "Trash highlighted images", dirView);
-    connect(trashImageAction, SIGNAL(triggered()), this, SLOT(trashSelection()));
+QWidget* libraryContainer::setupProjectTab() {
+    
+    
+    QWidget* tab = new QWidget;
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->addStretch(0);
+    
+    tab->setLayout(layout);
+    return tab;
+}
 
-    QAction *addFolderAction;
-    addFolderAction = new QAction(*(data->getIcon("add_folder")), "Add image folder", dirView);
-    connect(addFolderAction, SIGNAL(triggered()), this, SLOT(addImageFolder()));
+void libraryContainer::loadDirectorySelection() {
+    QString loadName = QFileDialog::getOpenFileName(this, "Save Selection As...", data->getDir("working") + "/2dx_merge_dirfile.dat");
+    loadSelection(loadName);
+}
 
-    //Right-Click Menu
-    dirView->setContextMenuPolicy(Qt::ActionsContextMenu);
-    dirView->addAction(refreshAction);
-    dirView->addAction(showSelectedAction);
-    dirView->addAction(addSelectionAction);
-    dirView->addAction(removeSelectionAction);
-    dirView->addAction(addFolderAction);
-    dirView->addAction(moveImageAction);
-    dirView->addAction(trashImageAction);
-    dirView->addAction(copyImageAction);
-
-
-    //Setup tool bar
-    QToolBar* toolBar = new QToolBar("Library Actions");
-    toolBar->setIconSize(QSize(36, 36));
-    toolBar->setOrientation(Qt::Vertical);
-    toolBar->addAction(refreshAction);
-    toolBar->addAction(showSelectedAction);
-    toolBar->addAction(addSelectionAction);
-    toolBar->addAction(removeSelectionAction);
-    toolBar->addAction(addFolderAction);
-    toolBar->addAction(moveImageAction);
-    toolBar->addAction(trashImageAction);
-    toolBar->addAction(copyImageAction);
-
-    return toolBar;
+void libraryContainer::saveDirectorySelection() {
+    QString saveName = QFileDialog::getSaveFileName(this, "Save Selection As...", data->getDir("working") + "/2dx_merge_dirfile.dat");
+    if (QFileInfo(saveName).exists()) QFile::remove(saveName);
+    QFile::copy(data->getDir("working") + "/2dx_merge_dirfile.dat", saveName);
 }
 
 projectModel* libraryContainer::getDirModel() {
@@ -562,6 +664,13 @@ void libraryContainer::columnActivated(int i) {
     dirModel->saveColumns();
     dirView->setColumnHidden(i, !dirModel->getColumnProperty(i, "visible").toBool());
     dirView->resizeColumnToContents(i);
+}
+
+void libraryContainer::autoSelect() {
+    bool useAbsolute = false;
+    if(negPosOption->currentText() == "Yes") useAbsolute=true;
+    
+    dirModel->autoSelect(minDegree->text().toInt(), maxDegree->text().toInt(), useAbsolute);
 }
 
 void libraryContainer::extendSelection() {

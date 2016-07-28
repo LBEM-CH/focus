@@ -63,6 +63,8 @@ class projectModel : public QStandardItemModel
   void selectAll(bool commit = true);
   void clearSelection(bool commit = true);
   void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
+  void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, bool useAbsolute);
+  void autoSelect(int minTilt, int maxTilt, bool useAbsolute);
   bool loadSelection(const QString &fileName = "");  
   bool loadHidden(const QString &columnsFile);
   bool saveColumns();
@@ -91,6 +93,7 @@ class projectModel : public QStandardItemModel
   QStringList columnsFileHeader;
   QString saveFileName;
   QStringList labels;
+  int tltAngColID;
 
   bool loadColumns(const QString &columnsFile);
   void initDir(const QString &path, QStandardItem *parent = NULL);

@@ -55,6 +55,7 @@ class libraryContainer : public QWidget
         void columnActivated(int i);
         void copyImage();
         
+        void autoSelect();
         void extendSelection();
         void reduceSelection();
         void addImageFolder();
@@ -67,6 +68,9 @@ class libraryContainer : public QWidget
         void saveProjectState();
         void loadProjectState();
         
+        void saveDirectorySelection();
+        void loadDirectorySelection();
+        
         void setPreviewImages(const QString&);
         void loadDataContainer(const QString&);
         void autoSwitch(bool);
@@ -76,7 +80,10 @@ class libraryContainer : public QWidget
                    
     private:
         void setupDirectoryContainer(confData*);
-        QToolBar* setupContextAndMenu();
+        QWidget* setupToolBar();
+        QWidget* setupSelectionTab();
+        QWidget* setupProjectTab();
+        
         void modifySelection(bool select = true);
         
 
@@ -101,6 +108,10 @@ class libraryContainer : public QWidget
         QTimer* previewTimer;
         
         QComboBox* viewControl;
+        
+        QLineEdit* minDegree;
+        QLineEdit* maxDegree;
+        QComboBox* negPosOption;
     
 };
 

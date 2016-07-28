@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <iostream>
+#include <cmath>
 #include <fstream>
 
 #include <QMessageBox>
@@ -81,7 +82,7 @@ bool projectModel::loadColumns(const QString &columnsFile)
   columns[i]["visible"] = true; columns[i]["uid"] = "directory";  columns[i]["shortname"] = "Directory"; columns[i]["tooltip"] = "Directory";i++;
 
   columnsFileHeader.clear();
-  
+  tltAngColID = 0;
   while(!modelInfo.atEnd())
   {
     line = modelInfo.readLine().trimmed();
@@ -102,7 +103,7 @@ bool projectModel::loadColumns(const QString &columnsFile)
       else columns[i]["visible"] = false;
 
       columns[i]["uid"] = line.trimmed();
-
+      if(line.trimmed().toLower() == "tltang") tltAngColID = i;
       if(parameters.contains(QRegExp("\\(.*\\)")))
       {
         QRegExp pattern("\\(([^,]*),mouseover\\s*=\\s*\"?([^,\\\"]*)\"?,([^,]*),([^,]*)?(,.*)?\\)",Qt::CaseInsensitive);
@@ -669,6 +670,46 @@ bool projectModel::removeSelected()
 	connect(this,SIGNAL(itemChanged(QStandardItem *)),this,SLOT(submit()));    
   emit reloading();
    return true;
+}
+
+void projectModel::autoSelect(int minTilt, int maxTilt, bool useAbsolute) {
+    disconnect(this,SIGNAL(itemChanged(QStandardItem *)),this,SLOT(submit()));
+    autoSelection(item(0),rowCount(), minTilt, maxTilt, useAbsolute);
+    submit();
+    connect(this,SIGNAL(itemChanged(QStandardItem *)),this,SLOT(submit()));    
+}
+
+
+void projectModel::autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, bool useAbsolute) {
+    if(currentItem == NULL) return;
+    QList<QModelIndex> list = match(currentItem->index(), Qt::CheckStateRole, ".*", itemCount, Qt::MatchRegExp);
+    foreach(QModelIndex i, list) {
+        if(i.isValid()) {
+            if(i.child(0,0).isValid()) autoSelection(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), minTilt, maxTilt, useAbsolute);
+            else if(i.column() == 0) {
+                QString confFile = pathFromIndex(i) + QString("/2dx_image.cfg");
+                if(QFileInfo().exists(confFile)) {
+                    
+                    int tiltAng = i.sibling(i.row(), tltAngColID).data(SortRole).toInt();
+                    if(!useAbsolute) {
+                        if(tiltAng >= minTilt && tiltAng <= maxTilt) {
+                            if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);
+                        }
+                        else {
+                            if(i.data(Qt::CheckStateRole) == Qt::Checked) setData(i,Qt::Unchecked,Qt::CheckStateRole);
+                        }
+                    } else {
+                        if(std::abs(tiltAng) >= minTilt && std::abs(tiltAng) <= maxTilt) {
+                            if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);
+                        }
+                        else {
+                            if(i.data(Qt::CheckStateRole) == Qt::Checked) setData(i,Qt::Unchecked,Qt::CheckStateRole);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void projectModel::changeSelection(QStandardItem *currentItem, int itemCount, const QString &action)

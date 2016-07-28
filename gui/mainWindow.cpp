@@ -42,7 +42,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     mainData->setUserConf(userData);
 
     installedVersion = mainData->version();
-    setWindowTitle("2dx (" + installedVersion + ")");
+    setWindowTitle(mainData->getDir("project") + " | 2dx (" + installedVersion + ")");
     setUnifiedTitleAndToolBarOnMac(true);
 
     connect(&importProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(importFinished()));
@@ -214,29 +214,6 @@ void mainWindow::setupMenuBar() {
     optionMenu->addAction(showAutoSaveAction);
 
     /**
-     * Setup select menu
-     */
-    QMenu *selectMenu = new QMenu("Select");
-
-    QAction *selectAllAction = new QAction(*(mainData->getIcon("check_all")), "Check all images", this);
-    selectAllAction->setShortcut(tr("Ctrl+A"));
-    selectMenu->addAction(selectAllAction);
-    connect(selectAllAction, SIGNAL(triggered()), libraryWin_->getDirModel(), SLOT(selectAll()));
-
-    QAction *invertSelectedAction = new QAction(*(mainData->getIcon("check_invert")), "Invert check", this);
-    invertSelectedAction->setShortcut(tr("Ctrl+I"));
-    selectMenu->addAction(invertSelectedAction);
-    connect(invertSelectedAction, SIGNAL(triggered()), libraryWin_->getDirModel(), SLOT(invertSelection()));
-
-    QAction *saveDirectorySelectionAction = new QAction(*(mainData->getIcon("check_save")), "Save checked list", this);
-    connect(saveDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(saveDirectorySelection()));
-    selectMenu->addAction(saveDirectorySelectionAction);
-
-    QAction *loadDirectorySelectionAction = new QAction(*(mainData->getIcon("check_load")), "Load checked list", this);
-    connect(loadDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(loadDirectorySelection()));
-    selectMenu->addAction(loadDirectorySelectionAction);
-
-    /**
      * Setup Help menu
      */
     QMenu *helpMenu = new QMenu("Help");
@@ -268,7 +245,6 @@ void mainWindow::setupMenuBar() {
     menuBar()->addMenu(fileMenu);
     menuBar()->addMenu(editMenu);
     menuBar()->addMenu(optionMenu);
-    menuBar()->addMenu(selectMenu);
     menuBar()->addMenu(helpMenu);
 }
 
@@ -391,11 +367,6 @@ void mainWindow::setSaveState(bool state) {
         saveAction->setCheckable(true);
         saveAction->setChecked(true);
     }
-}
-
-void mainWindow::loadDirectorySelection() {
-    QString loadName = QFileDialog::getOpenFileName(this, "Save Selection As...", mainData->getDir("working") + "/2dx_merge_dirfile.dat");
-    libraryWin_->loadSelection(loadName);
 }
 
 bool mainWindow::createDir(const QString &dir) {
@@ -573,12 +544,6 @@ void mainWindow::toggleAutoSave() {
         QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched off"));
         timer->stop();
     }
-}
-
-void mainWindow::saveDirectorySelection() {
-    QString saveName = QFileDialog::getSaveFileName(this, "Save Selection As...", mainData->getDir("working") + "/2dx_merge_dirfile.dat");
-    if (QFileInfo(saveName).exists()) QFile::remove(saveName);
-    QFile::copy(mainData->getDir("working") + "/2dx_merge_dirfile.dat", saveName);
 }
 
 void mainWindow::showAlbum(bool show) {

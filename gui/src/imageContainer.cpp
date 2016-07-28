@@ -19,11 +19,15 @@ imageContainer::imageContainer(confData* data, QWidget* parent)
     noImageLabel->setPalette(pal);
     
     windowTabWidget = new QTabWidget(this);
+    windowTabWidget->setDocumentMode(true);
     windowTabWidget->setTabsClosable(true);
+    windowTabWidget->setTabShape(QTabWidget::Triangular);
     windowTabWidget->hide();
     connect(windowTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeImageWindow(int)));
     
     QGridLayout* mainLayout = new QGridLayout;
+    mainLayout->setMargin(0);
+    mainLayout->setSpacing(0);
     mainLayout->addWidget(noImageLabel, 0, 0, Qt::AlignHCenter | Qt::AlignVCenter);
     mainLayout->addWidget(windowTabWidget, 1, 0);
     
@@ -96,7 +100,7 @@ void imageContainer::showImageWindow(const QString& workingDir) {
         int currTabIndex = windowTabWidget->count();
         QString tabName = workingDir;
         tabName = tabName.remove(mainData->getDir("project"));
-        windowTabWidget->addTab(imagesInitializedToTabs_[workingDir], *(mainData->getIcon("image")), tabName);
+        windowTabWidget->addTab(imagesInitializedToTabs_[workingDir], tabName);
         imagesShown_.insert(currTabIndex, workingDir);
     }
 

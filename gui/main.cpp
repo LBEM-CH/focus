@@ -69,6 +69,7 @@ void initializeProject(const QString &appDir, const QString &workingDir) {
 int main(int argc, char *argv[]) {
 
     QApplication app(argc, argv);
+    qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
     QCoreApplication::setApplicationName("2DX");
     QCoreApplication::setOrganizationName("C-CINA");
     QCoreApplication::setOrganizationDomain("c-cina.org");

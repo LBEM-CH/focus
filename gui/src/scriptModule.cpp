@@ -40,25 +40,27 @@ scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::
     layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);
-
-    /*QLabel* titleLabel = new QLabel;
-    titleLabel->setFixedHeight(30);
+    /*
+    QLabel* titleLabel = new QLabel;
+    QFont labelFont = titleLabel->font();
+    labelFont.setPointSize(16);
+    titleLabel->setFont(labelFont);
     QPalette pal = titleLabel->palette();
-    pal.setColor(QPalette::Window, Qt::white);
     pal.setColor(QPalette::WindowText, Qt::darkGray);
     titleLabel->setPalette(pal);
     if (scriptType == standard) titleLabel->setText("STANDARD SCRIPTS");
     else if (scriptType == custom) titleLabel->setText("CUSTOM SCRIPTS");
-    else if (scriptType == singleparticle) titleLabel->setText("SINGLE PARTICLE SCRIPTS");
-    else if (scriptType == merge2D) titleLabel->setText("2D MERGE SCRIPTS");
-    else if (scriptType == merge3D) titleLabel->setText("3D MERGE SCRIPTS");
+    else if (scriptType == singleparticle) titleLabel->setText("SINGLE PARTICLE");
+    else if (scriptType == merge2D) titleLabel->setText("2D MERGE");
+    else if (scriptType == merge3D) titleLabel->setText("3D MERGE");
     */
     setupModule();
     if (view != NULL) {
         if (type == scriptModule::standard) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
         if (type == scriptModule::custom) view->setSelectionMode(QAbstractItemView::SingleSelection);
         if (type == scriptModule::singleparticle) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        //layout->addWidget(titleLabel, 0, 0, 1, 1, Qt::AlignHCenter | Qt::AlignVCenter);
+        //layout->addWidget(titleLabel, 0, 0, 1, 1, Qt::AlignHCenter);
+        //layout->setRowMinimumHeight(0, 40);
         layout->addWidget(view, 0, 0, 1, 1);
         //connect(selection,SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),this,SLOT(clearExtendedSelections()));
         //connect(view,SIGNAL(pressed(QModelIndex)),this,SLOT(clearExtendedSelections()));
@@ -79,7 +81,17 @@ void scriptModule::setupModule() {
     view = new QListView;
     view->setUniformItemSizes(true);
     view->setItemDelegate(new SpinBoxDelegate);
-
+    view->setAttribute(Qt::WA_MacShowFocusRect, 0);
+    QPalette p = view->palette();
+    p.setColor(QPalette::Window, QColor(240,240,240));
+    p.setColor(QPalette::Base, QColor(240,240,240));
+    p.setColor(QPalette::Highlight, QColor(240,240,240));
+    p.setColor(QPalette::HighlightedText, Qt::darkBlue);
+// or even different colors for different color groups (states)
+// p.setColor(QPalette::Normal, QPalette::Highlight, Qt::green);
+// p.setColor(QPalette::Disabled, QPalette::Highlight, Qt::blue);
+    view->setPalette(p);
+    
     model = new QStandardItemModel;
 
     QString entry;
@@ -126,10 +138,10 @@ void scriptModule::setupModule() {
 
         QFont itemFont;
         itemFont.setBold(true);
-        itemFont.setStretch(QFont::SemiExpanded);
+        //itemFont.setStretch(QFont::SemiExpanded);
         item->setFont(itemFont);
 
-        item->setSizeHint(QSize(200, 24));
+        item->setSizeHint(QSize(200, 30));
 
         map.insert(sortOrder, item);
     }

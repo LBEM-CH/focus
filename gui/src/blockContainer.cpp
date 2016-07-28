@@ -10,7 +10,7 @@
 blockContainer::blockContainer(const QString& title, QWidget* parent)
             :QFrame(parent)
 {
-    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
     
     //setup title bar
     QWidget* header = setupHeader(title);
@@ -59,21 +59,24 @@ QWidget* blockContainer::setupHeader(const QString& title)
     //Set color of bar
     QPalette pal(bar->palette());
     QLinearGradient linearGradient(QPoint(0,0),QPoint(0,bar->height()));
-    linearGradient.setColorAt(0.0, Qt::white);
-    linearGradient.setColorAt(0.2, Qt::lightGray);
-    linearGradient.setColorAt(1.0, Qt::gray);
-    pal.setBrush(QPalette::Window, linearGradient);
-    //pal.setColor(QPalette::WindowText, QColor(255, 255, 255));
+    linearGradient.setColorAt(1.0, Qt::white);
+    linearGradient.setColorAt(0.05, Qt::lightGray);
+    linearGradient.setColorAt(0.0, Qt::gray);
+    //pal.setBrush(QPalette::Window, linearGradient);
+    //pal.setColor(QPalette::WindowText, Qt::darkGray);
     bar->setPalette(pal);
     
     //Setup Label
     headerTitle = new QLabel(title, this);
     headerTitle->setAutoFillBackground(false);
     headerTitle->setAlignment(Qt::AlignLeft);
+    QPalette titlePal(headerTitle->palette());
+    titlePal.setColor(QPalette::WindowText, Qt::darkGray);
+    headerTitle->setPalette(titlePal);
     
     QFont font;
     font.setBold(true);
-    font.setStretch(QFont::SemiExpanded);
+    //font.setStretch(QFont::SemiExpanded);
     headerTitle->setFont(font);
     
     //Setup header Widget

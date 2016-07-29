@@ -20,6 +20,8 @@ class imageContainer : public QWidget
     public slots:
         void showImageWindow(const QString&);
         void closeImageWindow(int index);
+        void setTabProcessing(const QString&);
+        void setTabNormal(const QString&);
         
     private:
         

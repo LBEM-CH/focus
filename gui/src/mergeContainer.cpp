@@ -20,6 +20,7 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, const QStringLi
     scriptsWidget->setMaximumWidth(300);
 
     QActionGroup* showScriptsGroup = new QActionGroup(this);
+    showScriptsGroup->setExclusive(true);
     QToolBar* scriptsToolBar = new QToolBar("Mode", this);
     scriptsToolBar->setOrientation(Qt::Vertical);
     scriptsToolBar->setIconSize(QSize(36, 36));
@@ -48,6 +49,7 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, const QStringLi
         connect(verbosityControl, SIGNAL(currentIndexChanged(int)), module, SLOT(setVerbosity(int)));
         
         QAction* action = new QAction(module->getModuleToolIcon(), module->getModuleDescription(), this);
+        action->setCheckable(true);
         connect(action, &QAction::triggered,
             [=] () {
                 scriptsWidget->setCurrentWidget(module);

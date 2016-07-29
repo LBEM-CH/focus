@@ -46,7 +46,7 @@ void imageContainer::closeImageWindow(int index) {
 
 void imageContainer::showImageWindow(const QString& workingDir) {
 
-    if (!imagesInitializedToTabs_.contains(workingDir)) {
+    if (!imagesInitializedToTabs_.keys().contains(workingDir)) {
         confData* imageData = new confData(workingDir + "/" + "2dx_image.cfg", mainData);
         QString userConfigPath = QDir::homePath() + "/.2dx/2dx_master.cfg";
         if (QFileInfo(userConfigPath).exists()) imageData->updateConf(userConfigPath);
@@ -92,6 +92,17 @@ void imageContainer::showImageWindow(const QString& workingDir) {
 
         imageData->syncWithUpper();
         imageWindow* imageWin = new imageWindow(imageData);
+        connect(imageWin, &imageWindow::executing,
+                [=] (bool run){
+                    if(run) setTabProcessing(workingDir);
+                    else setTabNormal(workingDir);
+                });
+                
+        connect(imageWin, &imageWindow::scriptCompletedSignal,
+                [=] () {
+                    setTabNormal(workingDir);
+                });
+                
         imagesInitializedToTabs_.insert(workingDir, imageWin);
     }
 
@@ -107,4 +118,14 @@ void imageContainer::showImageWindow(const QString& workingDir) {
     noImageLabel->hide();
     windowTabWidget->show();
     windowTabWidget->setCurrentWidget(imagesInitializedToTabs_[workingDir]);
+}
+
+void imageContainer::setTabNormal(const QString& workingDir) {
+    if(imagesShown_.contains(workingDir)) {
+        windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("file")));
+    }
+}
+
+void imageContainer::setTabProcessing(const QString& workingDir) {
+    if(imagesShown_.contains(workingDir)) windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("processing")));
 }

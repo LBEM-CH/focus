@@ -156,6 +156,7 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     runButton->setIcon(*(data->getIcon("play")));
     runButton->setIconSize(QSize(18, 18));
     runButton->setCheckable(true);
+    connect(runButton, &QPushButton::toggled, this, &imageWindow::executing);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
     connect(this, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
 
@@ -520,7 +521,6 @@ void imageWindow::scriptCompleted(scriptModule *module, QModelIndex index) {
     imageParser->setResult(module->resultsFile(index));
     parameters->load();
     //statusParser->load();
-
     emit scriptCompletedSignal();
 }
 
@@ -580,13 +580,13 @@ void imageWindow::maximizeParameterWindow(bool maximize) {
     }
 }
 
-void imageWindow::execute(bool halt) {
+void imageWindow::execute(bool run) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
     if (module->type() == scriptModule::standard) {
-        standardScripts->execute(halt);
+        standardScripts->execute(run);
     }
     if (module->type() == scriptModule::custom) {
-        customScripts->execute(halt);
+        customScripts->execute(run);
     }
 }
 
@@ -668,3 +668,7 @@ void imageWindow::useNewViewer(bool enable) {
     preview->enableNewViewer(enable);
 }
 
+void imageWindow::subscriptActivated(QModelIndex item) {
+    if (item.data(Qt::UserRole + 5).toString().isEmpty()) return;
+    QProcess::startDetached(data->getApp("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
+}

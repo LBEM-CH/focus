@@ -40,20 +40,7 @@ scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::
     layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);
-    /*
-    QLabel* titleLabel = new QLabel;
-    QFont labelFont = titleLabel->font();
-    labelFont.setPointSize(16);
-    titleLabel->setFont(labelFont);
-    QPalette pal = titleLabel->palette();
-    pal.setColor(QPalette::WindowText, Qt::darkGray);
-    titleLabel->setPalette(pal);
-    if (scriptType == standard) titleLabel->setText("STANDARD SCRIPTS");
-    else if (scriptType == custom) titleLabel->setText("CUSTOM SCRIPTS");
-    else if (scriptType == singleparticle) titleLabel->setText("SINGLE PARTICLE");
-    else if (scriptType == merge2D) titleLabel->setText("2D MERGE");
-    else if (scriptType == merge3D) titleLabel->setText("3D MERGE");
-    */
+
     setupModule();
     if (view != NULL) {
         if (type == scriptModule::standard) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -83,10 +70,8 @@ void scriptModule::setupModule() {
     view->setItemDelegate(new SpinBoxDelegate);
     view->setAttribute(Qt::WA_MacShowFocusRect, 0);
     QPalette p = view->palette();
-    //p.setColor(QPalette::Window, QColor(240,240,240));
-    //p.setColor(QPalette::Base, QColor(240,240,240));
-    p.setColor(QPalette::Highlight, Qt::white);
-    p.setColor(QPalette::HighlightedText, Qt::darkBlue);
+    p.setColor(QPalette::Highlight, Qt::gray);
+    //p.setColor(QPalette::HighlightedText, Qt::darkBlue);
     view->setPalette(p);
     
     model = new QStandardItemModel;

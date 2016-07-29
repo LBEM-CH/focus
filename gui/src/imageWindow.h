@@ -52,6 +52,7 @@ public slots:
     void scriptChanged(scriptModule *module, QModelIndex index);
     void standardScriptChanged(QModelIndex index);
     void customScriptChanged(QModelIndex index);
+    void subscriptActivated(QModelIndex item);
 
     void scriptCompleted(scriptModule *module, QModelIndex index);
     void standardScriptCompleted(QModelIndex index);
@@ -94,6 +95,7 @@ public slots:
     void maximizeParameterWindow(bool maximize);
 
 signals:
+    void executing(bool);
     void scriptCompletedSignal();
     void fontInfoUpdated();
 

@@ -131,6 +131,7 @@ set(MOC_HDRS
         src/latticeRefineTool.h
         src/latticeTool.h
         src/levelGroup.h
+        src/libraryImageStatus.h
         src/LogViewer.h
         src/mergeContainer.h
         src/mouseAssignTool.h

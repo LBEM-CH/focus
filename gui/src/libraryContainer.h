@@ -25,6 +25,7 @@
 #include <QGroupBox>
 #include <QToolButton>
 #include <QTreeWidget>
+#include <QFormLayout>
 
 #include "blockContainer.h"
 #include "projectModel.h"
@@ -32,6 +33,7 @@
 #include "confData.h"
 #include "resultsData.h"
 #include "projectDelegate.h"
+#include "libraryImageStatus.h"
 
 class libraryContainer : public QWidget
 {
@@ -99,9 +101,7 @@ class libraryContainer : public QWidget
         imagePreview* refPreview;
         imagePreview* dualPreview;
         
-        QTreeWidget* selectionWidget;
-        QStringList dataLabels;
-        QStringList dataParameters;
+        libraryImageStatus* imageDataWidget;
         
         QStackedWidget* previews;
         

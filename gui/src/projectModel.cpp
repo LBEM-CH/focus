@@ -82,7 +82,6 @@ bool projectModel::loadColumns(const QString &columnsFile)
   columns[i]["visible"] = true; columns[i]["uid"] = "directory";  columns[i]["shortname"] = "Directory"; columns[i]["tooltip"] = "Directory";i++;
 
   columnsFileHeader.clear();
-  tltAngColID = 0;
   while(!modelInfo.atEnd())
   {
     line = modelInfo.readLine().trimmed();
@@ -103,7 +102,7 @@ bool projectModel::loadColumns(const QString &columnsFile)
       else columns[i]["visible"] = false;
 
       columns[i]["uid"] = line.trimmed();
-      if(line.trimmed().toLower() == "tltang") tltAngColID = i;
+      parameterToColId[line.trimmed()] = i;
       if(parameters.contains(QRegExp("\\(.*\\)")))
       {
         QRegExp pattern("\\(([^,]*),mouseover\\s*=\\s*\"?([^,\\\"]*)\"?,([^,]*),([^,]*)?(,.*)?\\)",Qt::CaseInsensitive);
@@ -570,6 +569,17 @@ QList<bool> projectModel::visibleColumns()
   return v;
 }
 
+QVariant projectModel::getCurrentRowParameterValue(const QString& parameter) {
+    if(!currentIndex.sibling(currentIndex.row(),1).isValid()) return QVariant();
+    if(!parameterToColId.keys().contains(parameter)) return QVariant();
+    return currentIndex.sibling(currentIndex.row(), parameterToColId[parameter]).data(SortRole);
+}
+
+bool projectModel::isCurrentRowValidImage() {
+    if(!QFileInfo(pathFromIndex(currentIndex)+"/2dx_image.cfg").exists() || pathFromIndex(currentIndex).isEmpty()) return false;
+    else return true;
+}
+
 const QVariant &projectModel::getColumnProperty(int i, const QString &property)
 {
   return columns[i][property.toLower()];
@@ -690,7 +700,7 @@ void projectModel::autoSelection(QStandardItem *currentItem, int itemCount, int 
                 QString confFile = pathFromIndex(i) + QString("/2dx_image.cfg");
                 if(QFileInfo().exists(confFile)) {
                     
-                    int tiltAng = i.sibling(i.row(), tltAngColID).data(SortRole).toInt();
+                    int tiltAng = i.sibling(i.row(), parameterToColId["tltang"]).data(SortRole).toInt();
                     if(!useAbsolute) {
                         if(tiltAng >= minTilt && tiltAng <= maxTilt) {
                             if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);
@@ -816,6 +826,7 @@ QString projectModel::getProjectPath() const
 
 void projectModel::currentRowChanged(const QModelIndex&i,const QModelIndex&)
 {
+        currentIndex = i;
 	if(!i.sibling(i.row(),1).isValid()) return;
 	//QString image = pathFromIndex(i) + "/" + i.sibling(i.row(),1).data().toString() + "-p1.mrc";
 	QString image = pathFromIndex(i);

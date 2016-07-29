@@ -86,6 +86,7 @@ class projectModel : public QStandardItemModel
   
   QHash<quint32,QString> paths;
   QMap<quint32, QHash<QString,QVariant> > columns;
+  QMap<QString, quint32> parameterToColId; 
   QHash<quint32, QHash<QString,QStandardItem*> >items;
 
   QString projectPath;
@@ -93,7 +94,8 @@ class projectModel : public QStandardItemModel
   QStringList columnsFileHeader;
   QString saveFileName;
   QStringList labels;
-  int tltAngColID;
+  
+  QModelIndex currentIndex;
 
   bool loadColumns(const QString &columnsFile);
   void initDir(const QString &path, QStandardItem *parent = NULL);
@@ -125,6 +127,9 @@ class projectModel : public QStandardItemModel
 
   const QVariant &getColumnProperty(int i, const QString &property);
   void setColumnProperty(int i, const QString &property, const QVariant &value);
+  
+  QVariant getCurrentRowParameterValue(const QString& parameter);
+  bool isCurrentRowValidImage();
 };
 
 #endif

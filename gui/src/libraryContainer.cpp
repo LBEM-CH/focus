@@ -6,22 +6,6 @@ libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget*
 : QWidget(parent) {
     this->data = dat;
 
-    selectionWidget = new QTreeWidget;
-    selectionWidget->setColumnCount(2);
-    selectionWidget->header()->hide();
-    selectionWidget->setFixedHeight(235);
-    selectionWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    
-    dataLabels  << "Name" << "Number" << "Original Name" << "Magnification" << "Defocus"
-                << "QVal" << "QVal2" << "QValMA" << "QValMB"
-                << "TLTAXIS" << "TLTANG" << "TLTAXA" << "TAXA" << "TANGL"
-                << "Phase Residual" << "Comment";
-    
-    dataParameters << "imagename" << "imagenumber" << "imagename_original" << "magnification" << "defocus"
-                << "QVAL" << "QVAL2" << "QVALMA" << "QVALMB"
-                << "TLTAXIS" << "TLTANG" << "TLTAXA" << "TAXA" << "TANGL"
-                << "MergePhaResidual" << "comment";
-
     previews = new QStackedWidget(this);
     previews->setFixedSize(235, 235);
 
@@ -72,11 +56,14 @@ libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget*
     headerWidgetLayout->addItem(new QSpacerItem(3, 3), 0, 3);
     headerWidgetLayout->addWidget(autoPreviewsButton, 0, 4);
 
+    imageDataWidget = new libraryImageStatus(dirModel);
+    imageDataWidget->setFixedHeight(235);
+    
     QWidget* dataAndPreview = new QWidget;
     QHBoxLayout* dataAndPreviewLayout = new QHBoxLayout;
     dataAndPreviewLayout->setMargin(0);
     dataAndPreviewLayout->setSpacing(0);
-    dataAndPreviewLayout->addWidget(selectionWidget, 1);
+    dataAndPreviewLayout->addWidget(imageDataWidget, 1);
     dataAndPreviewLayout->addWidget(previews, 0);
     dataAndPreview->setLayout(dataAndPreviewLayout);
     
@@ -710,24 +697,7 @@ void libraryContainer::setPreviewImages(const QString& imagePath) {
 }
 
 void libraryContainer::loadDataContainer(const QString& imagePath) {
-    selectionWidget->clear();
-
-    if(!QFileInfo(imagePath+"/2dx_image.cfg").exists() || imagePath.isEmpty()) return;
-    
-    QString confName = imagePath + "/" + "2dx_image.cfg";
-    confData* data = new confData(confName);
-    
-    QList<QTreeWidgetItem *> items;
-    
-    for(int i=0; i<dataLabels.size(); ++i) {
-        QTreeWidgetItem* item = new QTreeWidgetItem((QTreeWidget*) 0);
-        item->setData(0, Qt::DisplayRole, dataLabels.at(i));
-        item->setData(1, Qt::DisplayRole, data->get(dataParameters.at(i), "value"));
-        items.append(item);
-    }
-    
-    selectionWidget->insertTopLevelItems(0, items);
-    selectionWidget->resizeColumnToContents(0);
+    imageDataWidget->updateData();
 }
 
 void libraryContainer::autoSwitch(bool play) {

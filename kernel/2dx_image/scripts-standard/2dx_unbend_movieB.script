@@ -103,12 +103,8 @@ set show_frame_CCmap_marked = "n"
 # DISPLAY: movie_imagenumber_toave
 # DISPLAY: Thread_Number
 # DISPLAY: ctfcor_noise
-# DISPLAY: ctfcor_inner_tile
-# DISPLAY: ctfcor_outer_tile
-# DISPLAY: ctfcor_taper
 # DISPLAY: ctfcor_imode
 # DISPLAY: ctfcor_debug
-# DISPLAY: ctfcor_maxamp_factor
 # DISPLAY: movie_ghostscript_installed
 #
 #$end_local_vars
@@ -157,11 +153,7 @@ set ccunbend_program = ""
 set createmaskinfo = ""
 set ctfcor_debug = ""
 set ctfcor_imode = ""
-set ctfcor_inner_tile = ""
-set ctfcor_maxamp_factor = ""
 set ctfcor_noise = ""
-set ctfcor_outer_tile = ""
-set ctfcor_taper = ""
 set ctfplotresmax = ""
 set ctfrev = ""
 set defocus = ""

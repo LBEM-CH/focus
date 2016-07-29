@@ -174,6 +174,8 @@ if ( -e ${movie_stackname_raw_base}_zorro_movie.mrcs ) then
   ${proc_2dx}/linblock "Switching project to zorro-corrected movie and average"
   #################################################################################
   \mv -f ${movie_stackname_raw_base}_zorro_movie.mrcs ${movie_stackname_raw_base}_zorro_movie.mrc
+  \mv -f ${movie_stackname_raw_base}_zorro_filt.mrc ${movie_stackname_raw_base}_zorro_filt_raw.mrc
+  \rm -f m${movie_stackname_raw_base}_zorro_filt.mrc
   echo "set movie_stackname = ${movie_stackname_raw_base}_zorro_movie" >> LOGS/${scriptname}.results
   echo "set nonmaskimagename = ${movie_stackname_raw_base}_zorro_filt" >> LOGS/${scriptname}.results
   echo "set imagename = ${movie_stackname_raw_base}_zorro_filt" >> LOGS/${scriptname}.results
@@ -189,7 +191,7 @@ if ( -e ${movie_stackname_raw_base}_zorro_movie.mrcs ) then
   #
   \mv -f fig/* zorro
   \rm -rf fig
-  echo "# IMAGE: "./zorro/${movie_stackname_raw}_FRC.png "<PNG Zorro: FRC among adjacent frames>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${movie_stackname_raw}_FRC.png "<PNG: FRC among adjacent frames>" >> LOGS/${scriptname}.results
   echo "# IMAGE: "./zorro/${movie_stackname_raw}-logisticWeights.png "<PNG: Logistic weights plot>" >> LOGS/${scriptname}.results
   echo "# IMAGE: "./zorro/${movie_stackname_raw}_peaksigTriMat.png "<PNG: Peak significance matrix>" >> LOGS/${scriptname}.results
   echo "# IMAGE: "./zorro/${movie_stackname_raw}_translations.png "<PNG: Drift profile plot>" >> LOGS/${scriptname}.results

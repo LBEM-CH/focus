@@ -203,7 +203,7 @@ QWidget* libraryContainer::setupToolBar() {
     
     //Setup tool bar
     QWidget* toolBar =  new QWidget;
-    toolBar->setFixedWidth(200);
+    //toolBar->setFixedWidth(200);
     QVBoxLayout* toolBarLayout =  new QVBoxLayout;
     toolBarLayout->addStretch(0);
     toolBarLayout->setMargin(0);
@@ -263,11 +263,13 @@ QWidget* libraryContainer::setupSelectionTab() {
     
     minDegree = new QLineEdit;
     minDegree->setFrame(false);
+    minDegree->setMaximumWidth(50);
     minDegree->setText("0");
     minDegree->setValidator(new QIntValidator(-90, 90));
     
     maxDegree = new QLineEdit;
     maxDegree->setFrame(false);
+    maxDegree->setMaximumWidth(50);
     maxDegree->setText("90");
     maxDegree->setValidator(new QIntValidator(-90, 90));
     
@@ -332,6 +334,7 @@ QWidget* libraryContainer::setupSelectionTab() {
     
     QWidget* tab = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
+    layout->setSpacing(10);
     layout->addStretch(0);
     layout->addWidget(refreshAction, 0, Qt::AlignTop);
     layout->addWidget(checkGroup, 0, Qt::AlignTop);

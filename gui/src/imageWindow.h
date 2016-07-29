@@ -69,7 +69,7 @@ public slots:
 
     void bridgeScriptLogConnection(bool bridge);
 
-    void showManual(bool show);
+    void showSubTitle(bool show);
 
     void useNewViewer(bool enable);
 
@@ -106,9 +106,10 @@ private:
     confData *data;
 
     QHash<uint, int> localIndex;
-    QHash<uint, int> manualIndex;
 
     QStackedWidget* scriptsWidget;
+    QListView* subscriptWidget;
+    
     scriptModule *standardScripts;
     scriptModule *customScripts;
 
@@ -132,7 +133,6 @@ private:
 
     confInterface *parameters;
     resizeableStackedWidget *localParameters;
-    QStackedWidget *manuals;
     QComboBox* userLevelButtons;
 
     QWidget *parametersWidget;
@@ -146,6 +146,7 @@ private:
     QProgressBar* progressBar;
     
     QLabel* scriptLabel;
+    QLabel* subTitleLabel;
     QPushButton* runButton;
     QPushButton* refreshButton;
     QPushButton* manualButton;

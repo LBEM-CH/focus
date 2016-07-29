@@ -325,8 +325,13 @@ void mainWindow::setupWindows() {
     centralWin_ = new QStackedWidget(this);
 
     results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
-    libraryWin_ = new libraryContainer(mainData, results, this);   
-    mergeWin_ = new mergeContainer(mainData, results, this);
+    libraryWin_ = new libraryContainer(mainData, results, this);
+    
+    QStringList scriptsDir;
+    scriptsDir << mainData->getDir("merge2DScripts") << mainData->getDir("merge3DScripts") << mainData->getDir("customScripts") <<  mainData->getDir("singleParticleScripts");
+    QList<scriptModule::moduleType> scriptsModules;
+    scriptsModules << scriptModule::merge2D << scriptModule::merge3D << scriptModule::custom << scriptModule::singleparticle;
+    mergeWin_ = new mergeContainer(mainData, results, scriptsDir, scriptsModules, this);
     imageWin_ = new imageContainer(mainData, this);
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);

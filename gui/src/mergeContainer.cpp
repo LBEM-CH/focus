@@ -4,10 +4,14 @@
 
 using namespace std;
 
-mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent)
+mergeContainer::mergeContainer(confData* data, resultsData *res, const QStringList& scriptDirs, const QList<scriptModule::moduleType>& moduleTypes, QWidget *parent)
 : QWidget(parent) {
     mainData = data;
     results = res;
+    
+    //Setup dependables
+    blockContainer* logWindow = setupLogWindow();
+    blockContainer* parameterContainer = setupParameterWindow();
 
     //Setup Leftmost container
     scriptsWidget = new QStackedWidget(this);
@@ -15,53 +19,54 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent
     scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
 
-    merge2DScripts = new scriptModule(mainData, mainData->getDir("merge2DScripts"), scriptModule::merge2D);
-    connect(merge2DScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(merge2DScriptCompleted(QModelIndex)));
-    connect(merge2DScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(merge2DScriptChanged(QModelIndex)));
-    connect(merge2DScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(merge2DScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(merge2DScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-    addToScriptsWidget(merge2DScripts);
+    QActionGroup* showScriptsGroup = new QActionGroup(this);
+    QToolBar* scriptsToolBar = new QToolBar("Mode", this);
+    scriptsToolBar->setOrientation(Qt::Vertical);
+    scriptsToolBar->setIconSize(QSize(36, 36));
 
-    merge3DScripts = new scriptModule(mainData, mainData->getDir("merge3DScripts"), scriptModule::merge3D);
-    connect(merge3DScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(merge3DScriptCompleted(QModelIndex)));
-    connect(merge3DScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(merge3DScriptChanged(QModelIndex)));
-    connect(merge3DScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(merge3DScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(merge3DScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-    addToScriptsWidget(merge3DScripts);
-
-    customScripts = new scriptModule(mainData, mainData->getDir("customScripts"), scriptModule::custom);
-    connect(customScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(customScriptCompleted(QModelIndex)));
-    connect(customScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(customScriptChanged(QModelIndex)));
-    connect(customScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(customScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(customScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-    addToScriptsWidget(customScripts);
-
-    singleParticleScripts = new scriptModule(mainData, mainData->getDir("singleParticleScripts"), scriptModule::singleparticle);
-    connect(singleParticleScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(singleParticleScriptCompleted(QModelIndex)));
-    connect(singleParticleScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(singleParticleScriptChanged(QModelIndex)));
-    connect(singleParticleScripts, SIGNAL(reload()), this, SLOT(reload()));
-    connect(singleParticleScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(singleParticleScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
-    addToScriptsWidget(singleParticleScripts);
-
+    for (int i = 0; i < scriptDirs.size(); ++i) {
+        scriptModule* module = new scriptModule(mainData, scriptDirs[i], moduleTypes[i]);               
+        scriptsWidget->addWidget(module);
+        module->resize(200, 20);
+        module->setMinimumWidth(200);
+        if(i==0) defaultModule = module;
+        
+        connect(module, &scriptModule::scriptCompleted,
+                [ = ](QModelIndex index){
+            scriptCompleted(module, index);
+        });
+        connect(module, &scriptModule::currentScriptChanged,
+                [ = ](QModelIndex index){
+            scriptChanged(module, index);
+        });
+        connect(module, SIGNAL(reload()), this, SLOT(reload()));
+        connect(module, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
+        connect(module, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
+        connect(module, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
+        connect(module, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
+        connect(module, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
+        connect(verbosityControl, SIGNAL(currentIndexChanged(int)), module, SLOT(setVerbosity(int)));
+        
+        QAction* action = new QAction(module->getModuleToolIcon(), module->getModuleDescription(), this);
+        connect(action, &QAction::triggered,
+            [=] () {
+                scriptsWidget->setCurrentWidget(module);
+            });
+        showScriptsGroup->addAction(action);
+        scriptsToolBar->addAction(action);
+        if(i==0) defaultAction = action;
+    }
 
     subscriptWidget = new QListView;
     subscriptWidget->setUniformItemSizes(true);
     subscriptWidget->setItemDelegate(new SpinBoxDelegate);
     connect(subscriptWidget, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(subscriptActivated(QModelIndex)));
-    
+
     QSplitter* scriptsContainer = new QSplitter(Qt::Vertical);
     scriptsContainer->addWidget(scriptsWidget);
     scriptsContainer->addWidget(subscriptWidget);
     scriptsContainer->setStretchFactor(0, 2);
     scriptsContainer->setStretchFactor(1, 1);
-
-    //Setup center container
-    blockContainer* logWindow = setupLogWindow();
-    blockContainer* parameterContainer = setupParameterWindow();
 
     centralSplitter = new QSplitter(Qt::Vertical);
     centralSplitter->addWidget(parameterContainer);
@@ -154,7 +159,7 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent
     //Setup progress Bar
     progressBar = new QProgressBar(this);
     progressBar->setMaximum(100);
-    progressBar->setFixedHeight(5);
+    progressBar->setFixedHeight(10);
     progressBar->setValue(0);
     progressBar->setTextVisible(false);
 
@@ -177,7 +182,7 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent
     layout->setSpacing(0);
     setLayout(layout);
 
-    layout->addWidget(setupToolbar(), 0, 0, 3, 1);
+    layout->addWidget(scriptsToolBar, 0, 0, 3, 1);
     layout->addWidget(scriptsContainer, 0, 1, 3, 1);
     layout->addWidget(headerContainer, 0, 2, 1, 1);
     layout->addWidget(progressBar, 1, 2, 1, 1);
@@ -188,84 +193,26 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, QWidget *parent
     layout->setRowStretch(2, 1);
 
     verbosityControl->setCurrentIndex(1);
-    merge2DScripts->initialize();
+    defaultModule->initialize();
 
-    setMerge2DMode();
+    scriptsWidget->setCurrentIndex(0);
+    defaultAction->setChecked(true);
 
     //Just to get the correct stretches of log and parameter windows
     maximizeLogWindow(false);
     maximizeParameterWindow(false);
 }
 
-QToolBar* mergeContainer::setupToolbar() {
-    QToolBar* scriptsToolBar = new QToolBar("Choose Mode", this);
-    scriptsToolBar->setOrientation(Qt::Vertical);
-    scriptsToolBar->setIconSize(QSize(36, 36));
-
-    showMerge2DScripts = new QToolButton(scriptsToolBar);
-    showMerge2DScripts->setIcon(*(mainData->getIcon("merge2D")));
-    showMerge2DScripts->setToolTip("2D Merge");
-    showMerge2DScripts->setCheckable(true);
-    connect(showMerge2DScripts, SIGNAL(clicked()), this, SLOT(setMerge2DMode()));
-
-    showMerge3DScripts = new QToolButton(scriptsToolBar);
-    showMerge3DScripts->setIcon(*(mainData->getIcon("merge3D")));
-    showMerge3DScripts->setToolTip("3D Merge");
-    showMerge3DScripts->setCheckable(true);
-    connect(showMerge3DScripts, SIGNAL(clicked()), this, SLOT(setMerge3DMode()));
-
-    showCustomScripts = new QToolButton(scriptsToolBar);
-    showCustomScripts->setIcon(*(mainData->getIcon("custom")));
-    showCustomScripts->setToolTip("Custom");
-    showCustomScripts->setCheckable(true);
-    connect(showCustomScripts, SIGNAL(clicked()), this, SLOT(setCustomMode()));
-
-    showSPScripts = new QToolButton(scriptsToolBar);
-    showSPScripts->setIcon(*(mainData->getIcon("single_particle")));
-    showSPScripts->setToolTip(tr("Single\nParticle"));
-    showSPScripts->setCheckable(true);
-    connect(showSPScripts, SIGNAL(clicked()), this, SLOT(setSPMode()));
-
-    scriptsToolBar->addWidget(showMerge2DScripts);
-    scriptsToolBar->addWidget(showMerge3DScripts);
-    scriptsToolBar->addWidget(showCustomScripts);
-    scriptsToolBar->addWidget(showSPScripts);
-
-    return scriptsToolBar;
-
-}
-
 blockContainer* mergeContainer::setupLogWindow() {
     //Setup Log Viewer
     logViewer = new LogViewer("Standard Output", NULL);
-
-    connect(merge2DScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
-    connect(merge2DScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
-
-    connect(merge3DScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
-    connect(merge3DScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
-
-    connect(customScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
-    connect(customScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
-
-    connect(singleParticleScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
-    connect(singleParticleScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
-
-    connect(merge2DScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-    connect(merge3DScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-    connect(customScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-    connect(singleParticleScripts, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
 
     //Setup Verbosity control combo box
     verbosityControl = new QComboBox(this);
     verbosityControl->addItems(QStringList() << "Silent" << "Low" << "Moderate" << "Highest");
 
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), logViewer, SLOT(load(int)));
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), merge2DScripts, SLOT(setVerbosity(int)));
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), merge3DScripts, SLOT(setVerbosity(int)));
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), customScripts, SLOT(setVerbosity(int)));
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), singleParticleScripts, SLOT(setVerbosity(int)));
-
+    
     //Setup Maximize tool button
     QToolButton* maximizeLogWindow = new QToolButton();
     maximizeLogWindow->setFixedSize(QSize(20, 20));
@@ -358,28 +305,9 @@ blockContainer* mergeContainer::setupParameterWindow() {
     return parameterContainer;
 }
 
-void mergeContainer::addToScriptsWidget(QWidget *widget) {
-    scriptsWidget->addWidget(widget);
-    widget->resize(200, 20);
-    widget->setMinimumWidth(200);
-
-}
-
 void mergeContainer::execute(bool halt) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
-    if (module->type() == scriptModule::merge2D) {
-        merge2DScripts->execute(halt);
-    }
-    if (module->type() == scriptModule::merge3D) {
-        merge3DScripts->execute(halt);
-    }
-    if (module->type() == scriptModule::custom) {
-        customScripts->execute(halt);
-    }
-    if (module->type() == scriptModule::singleparticle) {
-        singleParticleScripts->execute(halt);
-    }
-
+    module->execute(halt);
 }
 
 void mergeContainer::stopPlay() {
@@ -400,42 +328,6 @@ void mergeContainer::increaseScriptProgress(int increament) {
 
 void mergeContainer::setScriptProgress(int progress) {
     progressBar->setValue(progress);
-}
-
-void mergeContainer::setMerge2DMode() {
-    showMerge2DScripts->setChecked(true);
-    showMerge3DScripts->setChecked(false);
-    showCustomScripts->setChecked(false);
-    showSPScripts->setChecked(false);
-    scriptsWidget->setCurrentWidget(merge2DScripts);
-    merge2DScripts->focusWidget();
-}
-
-void mergeContainer::setMerge3DMode() {
-    showMerge2DScripts->setChecked(false);
-    showMerge3DScripts->setChecked(true);
-    showCustomScripts->setChecked(false);
-    showSPScripts->setChecked(false);
-    scriptsWidget->setCurrentWidget(merge3DScripts);
-    merge3DScripts->focusWidget();
-}
-
-void mergeContainer::setCustomMode() {
-    showMerge2DScripts->setChecked(false);
-    showMerge3DScripts->setChecked(false);
-    showCustomScripts->setChecked(true);
-    showSPScripts->setChecked(false);
-    scriptsWidget->setCurrentWidget(customScripts);
-    customScripts->focusWidget();
-}
-
-void mergeContainer::setSPMode() {
-    showMerge2DScripts->setChecked(false);
-    showMerge3DScripts->setChecked(false);
-    showCustomScripts->setChecked(false);
-    showSPScripts->setChecked(true);
-    scriptsWidget->setCurrentWidget(singleParticleScripts);
-    singleParticleScripts->focusWidget();
 }
 
 void mergeContainer::scriptChanged(scriptModule *module, QModelIndex index) {
@@ -468,7 +360,7 @@ void mergeContainer::scriptChanged(scriptModule *module, QModelIndex index) {
             QString subScriptTitle = subScripts[i];
             QStandardItem *subItem = new QStandardItem(subScriptTitle);
             subItem->setEditable(false);
-            if(subScriptTitle.endsWith(".py") || subScriptTitle.endsWith(".python")) subItem->setIcon(*mainData->getIcon("script_py"));
+            if (subScriptTitle.endsWith(".py") || subScriptTitle.endsWith(".python")) subItem->setIcon(*mainData->getIcon("script_py"));
             else subItem->setIcon(*mainData->getIcon("script_csh"));
 
             subItem->setData(mainData->getDir("procDir") + "/" + subScriptTitle, Qt::UserRole + 5);
@@ -479,7 +371,7 @@ void mergeContainer::scriptChanged(scriptModule *module, QModelIndex index) {
         }
     }
     subscriptWidget->setModel(model);
-    
+
     if (localIndex[uid] == 0 && module->conf(index)->size() != 0) {
         confInterface *local = new confInterface(module->conf(index), "");
         localIndex[uid] = localParameters->addWidget(local) + 1;
@@ -505,22 +397,6 @@ void mergeContainer::scriptChanged(scriptModule *module, QModelIndex index) {
     //  container->restoreSplitterState(1);
 }
 
-void mergeContainer::merge2DScriptChanged(QModelIndex index) {
-    scriptChanged(merge2DScripts, index);
-}
-
-void mergeContainer::merge3DScriptChanged(QModelIndex index) {
-    scriptChanged(merge3DScripts, index);
-}
-
-void mergeContainer::customScriptChanged(QModelIndex index) {
-    scriptChanged(customScripts, index);
-}
-
-void mergeContainer::singleParticleScriptChanged(QModelIndex index) {
-    scriptChanged(singleParticleScripts, index);
-}
-
 void mergeContainer::scriptCompleted(scriptModule *module, QModelIndex index) {
     //  cerr<<"Script completed"<<endl;
     results->load(module->resultsFile(index));
@@ -531,32 +407,12 @@ void mergeContainer::scriptCompleted(scriptModule *module, QModelIndex index) {
 }
 
 void mergeContainer::subscriptActivated(QModelIndex item) {
-    if(item.data(Qt::UserRole + 5).toString().isEmpty()) return;
+    if (item.data(Qt::UserRole + 5).toString().isEmpty()) return;
     QProcess::startDetached(mainData->getApp("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
 }
 
 void mergeContainer::reload() {
     results->load();
-}
-
-void mergeContainer::merge2DScriptCompleted(QModelIndex index) {
-    //  cerr<<"Standard ";
-    scriptCompleted(merge2DScripts, index);
-}
-
-void mergeContainer::merge3DScriptCompleted(QModelIndex index) {
-    //  cerr<<"Standard ";
-    scriptCompleted(merge3DScripts, index);
-}
-
-void mergeContainer::customScriptCompleted(QModelIndex index) {
-    //  cerr<<"Custom ";
-    scriptCompleted(customScripts, index);
-}
-
-void mergeContainer::singleParticleScriptCompleted(QModelIndex index) {
-    //  cerr<<"Single Particle ";
-    scriptCompleted(singleParticleScripts, index);
 }
 
 void mergeContainer::maximizeLogWindow(bool maximize) {

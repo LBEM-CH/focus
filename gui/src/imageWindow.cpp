@@ -30,6 +30,7 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
 
     //Setup Leftmost container
     scriptsWidget = new QStackedWidget(this);
+    scriptsWidget->setAttribute(Qt::WA_MacShowFocusRect, 0);
     scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
 
@@ -52,20 +53,20 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     connect(customScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
     connect(customScripts, SIGNAL(reload()), this, SLOT(reload()));
 
-    manuals = new QStackedWidget();
-    manuals->hide();
-
+    subscriptWidget = new QListView;
+    subscriptWidget->setUniformItemSizes(true);
+    subscriptWidget->setItemDelegate(new SpinBoxDelegate);
+    connect(subscriptWidget, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(subscriptActivated(QModelIndex)));
+    
     QSplitter* scriptsContainer = new QSplitter(Qt::Vertical);
     scriptsContainer->addWidget(scriptsWidget);
-    scriptsContainer->addWidget(manuals);
+    scriptsContainer->addWidget(subscriptWidget);
     scriptsContainer->setStretchFactor(0, 2);
     scriptsContainer->setStretchFactor(1, 1);
     
     
     parameterContainer = setupParameterWindow();
     logWindow = setupLogWindow();
-    //warningWindow = new warningBox;
-    //logWindow->addWidget(warningWindow);
     
     centralSplitter = new QSplitter(this);
     centralSplitter->setOrientation(Qt::Vertical);
@@ -144,62 +145,70 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     centerRightSplitter->setStretchFactor(0, 5);
     centerRightSplitter->setStretchFactor(1, 2);
 
-    //Setup status Bar
-    progressBar = new QProgressBar(this);
-    progressBar->setMaximum(100);
-    progressBar->setFixedHeight(4);
-    progressBar->setValue(0);
-    progressBar->setTextVisible(false);
-    
-    QPalette p = palette();
-    p.setColor(QPalette::Highlight, Qt::darkCyan);
-    //p.setColor(QPalette::Base, Qt::black);
-    progressBar->setPalette(p);
-
-    //Setup Header Bar
+    //Setup Title Bar
     scriptLabel = new QLabel;
     QFont labelFont = scriptLabel->font();
-    labelFont.setBold(true);
     labelFont.setPointSize(20);
     scriptLabel->setFont(labelFont);
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     runButton = new QPushButton;
     runButton->setIcon(*(data->getIcon("play")));
-    runButton->setIconSize(QSize(18,18));
+    runButton->setIconSize(QSize(18, 18));
     runButton->setCheckable(true);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
     connect(this, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
-    
+
     refreshButton = new QPushButton;
-    refreshButton->setIcon(*(data->getIcon("refresh")));
-    refreshButton->setIconSize(QSize(18,18));
+    refreshButton->setIcon(*(data->getIcon("refresh_colored")));
+    refreshButton->setIconSize(QSize(18, 18));
     refreshButton->setCheckable(false);
     connect(refreshButton, SIGNAL(clicked()), this, SLOT(reload()));
-    
+
     manualButton = new QPushButton;
     manualButton->setIcon(*(data->getIcon("help")));
-    manualButton->setIconSize(QSize(18,18));
+    manualButton->setIconSize(QSize(18, 18));
     manualButton->setCheckable(true);
-    connect(manualButton, SIGNAL(toggled(bool)), this, SLOT(showManual(bool)));
-    
+    connect(manualButton, SIGNAL(toggled(bool)), this, SLOT(showSubTitle(bool)));
+
+    QWidget* titleContainer = new QWidget;
+    QHBoxLayout* titleLayout = new QHBoxLayout;
+    titleLayout->setMargin(0);
+    titleLayout->setSpacing(0);
+    titleLayout->addWidget(scriptLabel);
+    titleLayout->addWidget(spacer);
+    titleLayout->addWidget(runButton);
+    titleLayout->addWidget(refreshButton);
+    titleLayout->addWidget(manualButton);
+    titleContainer->setLayout(titleLayout);
+
+    //Setup Subtitle Container
+    subTitleLabel = new QLabel;
+    subTitleLabel->setWordWrap(true);
+    QPalette subTitlePal(subTitleLabel->palette());
+    subTitlePal.setColor(QPalette::WindowText, Qt::darkGray);
+    subTitleLabel->setPalette(subTitlePal);
+    subTitleLabel->hide();
+
+    //Setup progress Bar
+    progressBar = new QProgressBar(this);
+    progressBar->setMaximum(100);
+    progressBar->setFixedHeight(10);
+    progressBar->setValue(0);
+    progressBar->setTextVisible(false);
+
+    QPalette p = palette();
+    p.setColor(QPalette::Highlight, Qt::darkCyan);
+    progressBar->setPalette(p);
+
+    //Setup Header Container
     QWidget* headerContainer = new QWidget;
-    QHBoxLayout* headerLayout = new QHBoxLayout;
+    QVBoxLayout* headerLayout = new QVBoxLayout;
     headerLayout->setMargin(5);
-    headerLayout->setSpacing(0);
-    headerLayout->addWidget(scriptLabel);
-    headerLayout->addWidget(spacer);
-    headerLayout->addWidget(runButton);
-    headerLayout->addWidget(refreshButton);
-    headerLayout->addWidget(manualButton);
+    headerLayout->setSpacing(5);
+    headerLayout->addWidget(titleContainer);
+    headerLayout->addWidget(subTitleLabel);
     headerContainer->setLayout(headerLayout);
-    
-    
-    //Setup the layout and add widgets
-    QGridLayout* layout = new QGridLayout(this);
-    layout->setMargin(0);
-    layout->setSpacing(0);
-    setLayout(layout);
     
     blockContainer* statusParserCont = new blockContainer("Status");
     statusParser = new statusViewer(data->getDir("config") + "/2dx_image/2dx_status.html");
@@ -213,9 +222,15 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     QHBoxLayout *statusLayout = new QHBoxLayout();
     statusLayout->setMargin(0);
     statusLayout->setSpacing(0);
-    statusContainer->setLayout(statusLayout);
     statusLayout->addWidget(statusParserCont, 1);
     statusLayout->addWidget(previewContainer, 0 , Qt::AlignHCenter | Qt::AlignVCenter);
+    statusContainer->setLayout(statusLayout);
+    
+    //Setup the layout and add widgets
+    QGridLayout* layout = new QGridLayout(this);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    setLayout(layout);
     
     /*LAYOUT
     * -----------------------------------------------------------
@@ -245,7 +260,6 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     layout->setRowStretch(2, 1);
     layout->setRowStretch(3, 0);
     
-    manuals->hide();
     verbosityControl->setCurrentIndex(1);
     
     //Just to set correct siezs
@@ -416,19 +430,53 @@ QToolBar* imageWindow::setupToolbar() {
 }
 
 void imageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
+    updateScriptLabel(module->title(index));
+    
     int uid = index.data(Qt::UserRole).toUInt();
-    currentResults = module->resultsFile(index);
+    
+    QString text;
+    QStringList helpTextList = module->getScriptManual(uid);
+    for (int i = 0; i < helpTextList.size(); i++) text += helpTextList[i] + "\n";
+    subTitleLabel->setText(text);
+    
+    QStandardItemModel* model = new QStandardItemModel;
+    QStringList subScripts = module->getScriptDependents(uid);
+    if (subScripts.size() == 0) {
+        subscriptWidget->hide();
+    } else {
+        subscriptWidget->show();
+        QStandardItem *titleItem = new QStandardItem("DEPENDENT SCRIPTS");
+        QBrush b;
+        b.setColor(Qt::darkGray);
+        titleItem->setForeground(b);
+        titleItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        titleItem->setSizeHint(QSize(200, 40));
+        titleItem->setSelectable(false);
+        titleItem->setEditable(false);
+        model->appendRow(titleItem);
+        for (int i = 0; i < subScripts.size(); ++i) {
+            QString subScriptTitle = subScripts[i];
+            QStandardItem *subItem = new QStandardItem(subScriptTitle);
+            subItem->setEditable(false);
+            if (subScriptTitle.endsWith(".py") || subScriptTitle.endsWith(".python")) subItem->setIcon(*data->getIcon("script_py"));
+            else subItem->setIcon(*data->getIcon("script_csh"));
 
-    if ((module == customScripts && !standardScripts->isRunning()) || (module == standardScripts && !customScripts->isRunning())) updateScriptLabel(module->title(index));
+            subItem->setData(data->getDir("procDir") + "/" + subScriptTitle, Qt::UserRole + 5);
+            if (!QFileInfo(data->getDir("procDir") + "/" + subScriptTitle).exists())
+                subItem->setForeground(QColor(255, 0, 0));
+
+            model->appendRow(subItem);
+        }
+    }
+    subscriptWidget->setModel(model);
+    
+    currentResults = module->resultsFile(index);
 
     if (localIndex[uid] == 0 && module->conf(index)->size() != 0) {
         confInterface *local = new confInterface(module->conf(index), "");
         connect(this, SIGNAL(fontInfoUpdated()), local, SLOT(updateFontInfo()));
         localIndex[uid] = localParameters->addWidget(local) + 1;
     }
-
-    if (manualIndex[uid] == 0 && !module->conf(index)->manual().isEmpty())
-        manualIndex[uid] = manuals->addWidget(new confManual(data, module->conf(index))) + 1;
 
     if (localIndex[uid] - 1 < 0)
         localParameters->hide();
@@ -438,8 +486,6 @@ void imageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     }
 
     setScriptProgress(module->getScriptProgress(uid));
-    
-    manuals->setCurrentIndex(manualIndex[uid] - 1);
 
     parameters->select(module->displayedVariables(index));
     currentLog = module->logFile(index);
@@ -577,18 +623,14 @@ void imageWindow::setScriptProgress(int progress) {
     progressBar->setValue(progress);
 }
 
-void imageWindow::showManual(bool show) {
-    if (show) {
-        manuals->show();
-    } else {
-        manuals->hide();
-    }
-}
-
 void imageWindow::revert() {
     data->reload();
     parameters->load();
     //statusParser->load();
+}
+
+void imageWindow::showSubTitle(bool s) {
+    subTitleLabel->setVisible(s);
 }
 
 void imageWindow::updateFontInfo() {

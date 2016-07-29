@@ -53,30 +53,14 @@ class mergeContainer : public QWidget
     Q_OBJECT
 
 public:
-    mergeContainer(confData* data, resultsData *results, QWidget *parent = NULL);
+    mergeContainer(confData* data, resultsData *results, const QStringList& scriptDirs, const QList<scriptModule::moduleType>& moduleTypes, QWidget *parent = NULL);
 
 public slots:
-
-    void setMerge2DMode();
-    void setMerge3DMode();
-    void setCustomMode();
-    void setSPMode();
     
     void scriptChanged(scriptModule *module, QModelIndex index);
-    void merge2DScriptChanged(QModelIndex index);
-    void merge3DScriptChanged(QModelIndex index);
-    void customScriptChanged(QModelIndex index);
-    void singleParticleScriptChanged(QModelIndex index);
-
     void scriptCompleted(scriptModule *module, QModelIndex index);
-    void merge2DScriptCompleted(QModelIndex index);
-    void merge3DScriptCompleted(QModelIndex index);
-    void customScriptCompleted(QModelIndex index);
-    void singleParticleScriptCompleted(QModelIndex index);
-
     void subscriptActivated(QModelIndex item);
     
-    //void maximizeWindow(int option);
     void maximizeLogWindow(bool maximize);
     void maximizeParameterWindow(bool maximize);
 
@@ -103,24 +87,14 @@ private:
     
     blockContainer* setupLogWindow();
     blockContainer* setupParameterWindow();
-    QToolBar* setupToolbar();
-    
-    void addToScriptsWidget(QWidget *widget);
     
     confData *mainData;
 
-    scriptModule *merge2DScripts;
-    scriptModule *merge3DScripts;
-    scriptModule *customScripts;
-    scriptModule *singleParticleScripts;
+    scriptModule* defaultModule;
+    QAction* defaultAction;
 
     QStackedWidget* scriptsWidget;
     QListView* subscriptWidget;
-
-    QToolButton* showMerge2DScripts;
-    QToolButton* showMerge3DScripts;
-    QToolButton* showCustomScripts;
-    QToolButton* showSPScripts;
     
     resultsData *results;
 

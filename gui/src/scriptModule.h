@@ -121,6 +121,10 @@ public:
     quint32 getScriptProgress(quint32 uid);
     QStringList getScriptManual(quint32 uid);
     QStringList getScriptDependents(quint32 uid);
+    
+    QIcon getModuleToolIcon();
+    QIcon getModuleScriptIcon();
+    QString getModuleDescription();
 
 };
 

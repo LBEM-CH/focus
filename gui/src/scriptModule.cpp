@@ -125,17 +125,11 @@ void scriptModule::setupModule() {
 
         item->setData(uid, Qt::UserRole);
         item->setEditable(false);
-        if (scriptType == standard) item->setIcon(*data->getIcon("scriptIcon"));
-        else if (scriptType == custom) item->setIcon(*data->getIcon("customScriptIcon"));
-        else if (scriptType == singleparticle) item->setIcon(*data->getIcon("spScriptIcon"));
-        else if (scriptType == merge2D) item->setIcon(*data->getIcon("2DScriptIcon"));
-        else if (scriptType == merge3D) item->setIcon(*data->getIcon("3DScriptIcon"));
-
+        item->setIcon(getModuleScriptIcon());
         item->setTextAlignment(Qt::AlignVCenter);
 
         QFont itemFont;
         itemFont.setBold(true);
-        //itemFont.setStretch(QFont::SemiExpanded);
         item->setFont(itemFont);
 
         item->setSizeHint(QSize(200, 30));
@@ -496,3 +490,36 @@ scriptModule::moduleType scriptModule::type() {
     return scriptType;
 }
 
+QIcon scriptModule::getModuleScriptIcon() {
+    QIcon icon;
+    if (scriptType == standard) icon = *(data->getIcon("scriptIcon"));
+    else if (scriptType == custom) icon = *(data->getIcon("customScriptIcon"));
+    else if (scriptType == singleparticle) icon = *(data->getIcon("spScriptIcon"));
+    else if (scriptType == merge2D) icon = *(data->getIcon("2DScriptIcon"));
+    else if (scriptType == merge3D) icon = *(data->getIcon("3DScriptIcon"));
+    
+    return icon;
+}
+
+QIcon scriptModule::getModuleToolIcon() {
+    QIcon icon;
+    if (scriptType == standard) icon = *(data->getIcon("standard"));
+    else if (scriptType == custom) icon = *(data->getIcon("custom"));
+    else if (scriptType == singleparticle) icon = *(data->getIcon("single_particle"));
+    else if (scriptType == merge2D) icon = *(data->getIcon("merge2D"));
+    else if (scriptType == merge3D) icon = *(data->getIcon("merge3D"));
+    
+    return icon;
+}
+
+QString scriptModule::getModuleDescription() {
+    QString desc;
+    if (scriptType == standard) desc = "STANDARD SCRIPTS";
+    else if (scriptType == custom) desc = "CUSTOM SCRIPTS";
+    else if (scriptType == singleparticle) desc = "SINGLE PARTICLE";
+    else if (scriptType == merge2D) desc = "2D MERGE";
+    else if (scriptType == merge3D) desc = "3D MERGE";
+    
+    return desc;
+    
+}

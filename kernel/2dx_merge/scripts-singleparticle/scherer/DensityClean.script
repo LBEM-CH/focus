@@ -1,0 +1,73 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Density Clean Container (NOT READY TO USE)                         #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 05/19/2007                                             #
+# Last Modification: 05/19/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 42
+#
+#$end_local_vars
+#
+# MANUAL: Single Particle Refinement (still under construction)
+#
+# DISPLAY: particle_size_sp2dx
+# DISPLAY: cont_folder_sp2dx
+# DISPLAY: nn_number_refp_sp2dx
+# DISPLAY: min_density_percent_sp2dx
+#
+# DISPLAY: particle_masking_sp2dx
+# DISPLAY: particle_masking_params_sp2dx
+#
+#
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set particle_size_sp2dx = ""
+set cont_folder_sp2dx = ""
+set particle_masking_sp2dx = ""
+set particle_masking_params_sp2dx = ""
+set nn_number_refp_sp2dx = ""
+set min_density_percent_sp2dx = ""
+#
+#$end_vars
+
+echo "<<@progress: 1>>"
+
+set scriptname = DensityClean
+
+set cache_projections_sp2dx = "0"
+set 
+set refinement_method_sp2dx = "0"
+set missing_cone_sp2dx = "0"
+set projection_method_sp2dx = "3"
+set nn_number_incharge = $nn_number_refp_sp2dx
+
+\rm -f LOGS/${scriptname}.results
+echo "<<@evaluate>>"
+
+source ${proc_2dx}/2dx_makedirs 
+
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#set dirstack = `pwd`
+#echo $dirstack
+
+echo "set called now"
+#rm mergevars_written_to_file.txt
+set > mergevars_written_to_file.txt
+
+${bin_2dx}/2dx_singleparticle/DensityClean.exe
+
+python ${bin_2dx}/2dx_singleparticle/image_plotter_density.py "$cont_folder_sp2dx/ContainerStatsTXT/container_stat_density.txt" "$cont_folder_sp2dx/ContainerStatsPDF/cont_stat_density.pdf"
+python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/ContainerStatsPDF/cont_stat_density.pdf" "Container Stat Density" "$scriptname" 1
+
+echo "<<@progress: 100>>"
+

@@ -1,0 +1,88 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Measure Resolution (NOT READY TO USE)                              #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 05/19/2007                                             #
+# Last Modification: 05/19/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 90
+#
+#$end_local_vars
+#
+# MANUAL: Single Particle Refinement (still under construction)
+#
+# DISPLAY: particle_size_sp2dx
+# DISPLAY: symmetry_sp2dx
+# DISPLAY: cont_folder_sp2dx
+#
+# DISPLAY: back_projection_method_sp2dx
+#
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set particle_size_sp2dx = ""
+set symmetry_sp2dx = ""
+set cont_folder_sp2dx = ""
+#
+set back_projection_method_sp2dx = ""
+#
+#
+#$end_vars
+
+echo "<<@progress: 1>>"
+
+set scriptname = MeasureResolution
+set cache_projections_sp2dx = "0"
+set particle_masking_sp2dx = "0"
+set projection_masking_sp2dx = "0"
+set reconstruction_masking_sp2dx = "0"
+set missing_cone_sp2dx = "0"
+set projection_method_sp2dx = "0"
+set parallel_projection_sp2dx = "0"
+set refinement_method_sp2dx = "0"
+
+set half_size_particle = `echo ${particle_size_sp2dx} | awk '{ s = $1/2 } END { print s }'`
+
+set lp_volume_filter_incharge = "$half_size_particle,0"
+set lp_particle_filter_sp2dx = "$half_size_particle,0"
+set lp_projection_filter_sp2dx = "$half_size_particle,0"
+	
+\rm -f LOGS/${scriptname}.results
+echo "<<@evaluate>>"
+
+source ${proc_2dx}/2dx_makedirs 
+\rm -f SCRATCH/2dx_merge_dirfile_oneline.dat
+\rm -f SCRATCH/2dx_SP_convergence.txt
+\rm -f SCRATCH/2dx_SP_convergence_tree.txt
+\rm -f container_stat.txt
+
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#set dirstack = `pwd`
+#echo $dirstack
+
+echo "set called now"
+#rm mergevars_written_to_file.txt
+set > mergevars_written_to_file.txt
+
+set olddir = `pwd`
+
+${bin_2dx}/2dx_singleparticle/DetermineResolution.exe
+
+python ${bin_2dx}/2dx_singleparticle/fsc_plotter.py "$cont_folder_sp2dx/Div_output/fsc.dat" "$cont_folder_sp2dx/Div_output/fsc_all.pdf"
+python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/Div_output/fsc_all.pdf" "FSC (0.5 Nq)" "$scriptname" 0
+
+python ${bin_2dx}/2dx_singleparticle/fsc_plotter_pub.py "$cont_folder_sp2dx/Div_output/fsc.dat" "$cont_folder_sp2dx/Div_output/fsc_pub.pdf"
+python ${bin_2dx}/2dx_singleparticle/image_output_2dx_absolut_path.py "$cont_folder_sp2dx/Div_output/fsc_pub.pdf" "FSC (0.2 Nq)" "$scriptname" 0
+
+python ${bin_2dx}/2dx_singleparticle/fsc_measure_res.py "$cont_folder_sp2dx/Div_output/fsc.dat" "$scriptname"
+
+echo "<<@progress: 100>>"
+

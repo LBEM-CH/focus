@@ -18,12 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "imageWindow.h"
+#include "image_window.h"
 #include  <QDesktopServices>
 #include <iostream>
 using namespace std;
 
-imageWindow::imageWindow(confData *conf, QWidget *parent)
+ImageWindow::ImageWindow(confData *conf, QWidget *parent)
 : QWidget(parent) {
     data = conf;
 
@@ -155,7 +155,7 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     runButton->setIcon(*(data->getIcon("play")));
     runButton->setIconSize(QSize(18, 18));
     runButton->setCheckable(true);
-    connect(runButton, &QPushButton::toggled, this, &imageWindow::executing);
+    connect(runButton, &QPushButton::toggled, this, &ImageWindow::executing);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
     connect(this, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
 
@@ -270,7 +270,7 @@ imageWindow::imageWindow(confData *conf, QWidget *parent)
     standardScripts->initialize();
 }
 
-void imageWindow::bridgeScriptLogConnection(bool bridge) {
+void ImageWindow::bridgeScriptLogConnection(bool bridge) {
     if (bridge) {
         connect(standardScripts, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
         connect(standardScripts, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
@@ -288,7 +288,7 @@ void imageWindow::bridgeScriptLogConnection(bool bridge) {
     }
 }
 
-blockContainer* imageWindow::setupLogWindow() {
+blockContainer* ImageWindow::setupLogWindow() {
     blockContainer *logWindow = new blockContainer("Output (Double click for logbrowser)", this);
     logWindow->setMinimumWidth(400);
     logWindow->setMinimumHeight(200);
@@ -348,7 +348,7 @@ blockContainer* imageWindow::setupLogWindow() {
 
 }
 
-blockContainer* imageWindow::setupParameterWindow() {
+blockContainer* ImageWindow::setupParameterWindow() {
     localParameters = new resizeableStackedWidget(this);
 
     parameters = new confInterface(data, "");
@@ -405,7 +405,7 @@ blockContainer* imageWindow::setupParameterWindow() {
     return parameterContainer;
 }
 
-QToolBar* imageWindow::setupToolbar() {
+QToolBar* ImageWindow::setupToolbar() {
     QToolBar* scriptsToolBar = new QToolBar("Choose Mode", this);
     scriptsToolBar->setOrientation(Qt::Vertical);
     scriptsToolBar->setIconSize(QSize(36,36));
@@ -429,7 +429,7 @@ QToolBar* imageWindow::setupToolbar() {
 
 }
 
-void imageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
+void ImageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     updateScriptLabel(module->title(index));
     
     int uid = index.data(Qt::UserRole).toUInt();
@@ -496,24 +496,24 @@ void imageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     parametersWidget->update();
 }
 
-void imageWindow::standardScriptChanged(QModelIndex index) {
+void ImageWindow::standardScriptChanged(QModelIndex index) {
     scriptChanged(standardScripts, index);
 }
 
-void imageWindow::customScriptChanged(QModelIndex index) {
+void ImageWindow::customScriptChanged(QModelIndex index) {
     scriptChanged(customScripts, index);
 }
 
-bool imageWindow::parseResults(confData *conf, const QString &results) {
+bool ImageWindow::parseResults(confData *conf, const QString &results) {
     currentResults = results;
     return scriptParser::parseResults(conf, results);
 }
 
-bool imageWindow::parseResults() {
+bool ImageWindow::parseResults() {
     return parseResults(data, currentResults);
 }
 
-void imageWindow::scriptCompleted(scriptModule *module, QModelIndex index) {
+void ImageWindow::scriptCompleted(scriptModule *module, QModelIndex index) {
     if (!module->isRunning())
         parseResults(data, module->resultsFile(index));
     //  results->setResult(module->resultsFile(index));
@@ -523,41 +523,41 @@ void imageWindow::scriptCompleted(scriptModule *module, QModelIndex index) {
     emit scriptCompletedSignal();
 }
 
-void imageWindow::standardScriptCompleted(QModelIndex index) {
+void ImageWindow::standardScriptCompleted(QModelIndex index) {
     scriptCompleted(standardScripts, index);
 }
 
-void imageWindow::customScriptCompleted(QModelIndex index) {
+void ImageWindow::customScriptCompleted(QModelIndex index) {
     scriptCompleted(customScripts, index);
 }
 
-void imageWindow::runningScriptChanged(scriptModule *module, QModelIndex index) {
+void ImageWindow::runningScriptChanged(scriptModule *module, QModelIndex index) {
     updateScriptLabel(module->title(index));
 }
 
-void imageWindow::customRunningScriptChanged(QModelIndex index) {
+void ImageWindow::customRunningScriptChanged(QModelIndex index) {
     runningScriptChanged(customScripts, index);
 }
 
-void imageWindow::standardRunningScriptChanged(QModelIndex index) {
+void ImageWindow::standardRunningScriptChanged(QModelIndex index) {
     runningScriptChanged(standardScripts, index);
 }
 
-void imageWindow::setStandardMode() {
+void ImageWindow::setStandardMode() {
     showStandardScripts->setChecked(true);
     showCustomScripts->setChecked(false);
     scriptsWidget->setCurrentWidget(standardScripts);
     standardScripts->focusWidget();
 }
 
-void imageWindow::setCustomMode() {
+void ImageWindow::setCustomMode() {
     showStandardScripts->setChecked(false);
     showCustomScripts->setChecked(true);
     scriptsWidget->setCurrentWidget(customScripts);
     customScripts->focusWidget();
 }
 
-void imageWindow::maximizeLogWindow(bool maximize) {
+void ImageWindow::maximizeLogWindow(bool maximize) {
     if (maximize) {
         centralSplitter->setSizes(QList<int>() << 0 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
@@ -567,7 +567,7 @@ void imageWindow::maximizeLogWindow(bool maximize) {
     }
 }
 
-void imageWindow::maximizeParameterWindow(bool maximize) {
+void ImageWindow::maximizeParameterWindow(bool maximize) {
     
     if (maximize) {
         centralSplitter->setSizes(QList<int>() << 1 << 0);
@@ -579,7 +579,7 @@ void imageWindow::maximizeParameterWindow(bool maximize) {
     }
 }
 
-void imageWindow::execute(bool run) {
+void ImageWindow::execute(bool run) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
     if (module->type() == scriptModule::standard) {
         standardScripts->execute(run);
@@ -589,16 +589,16 @@ void imageWindow::execute(bool run) {
     }
 }
 
-void imageWindow::reload() {
+void ImageWindow::reload() {
     parseResults();
     refresh();
 }
 
-void imageWindow::stopPlay() {
+void ImageWindow::stopPlay() {
     runButton->setChecked(false);
 }
 
-void imageWindow::refresh() {
+void ImageWindow::refresh() {
     parameters->load();
     //statusParser->load();
     results->load();
@@ -606,33 +606,33 @@ void imageWindow::refresh() {
     //statusParser->load();
 }
 
-void imageWindow::updateScriptLabel(const QString& label) {
+void ImageWindow::updateScriptLabel(const QString& label) {
     progressBar->update();
     scriptLabel->setText(label);
 }
 
-void imageWindow::increaseScriptProgress(int increament) {
+void ImageWindow::increaseScriptProgress(int increament) {
     if (progressBar->value() + increament <= progressBar->maximum())
         progressBar->setValue(progressBar->value() + increament);
     else
         progressBar->setValue(progressBar->maximum());
 }
 
-void imageWindow::setScriptProgress(int progress) {
+void ImageWindow::setScriptProgress(int progress) {
     progressBar->setValue(progress);
 }
 
-void imageWindow::revert() {
+void ImageWindow::revert() {
     data->reload();
     parameters->load();
     //statusParser->load();
 }
 
-void imageWindow::showSubTitle(bool s) {
+void ImageWindow::showSubTitle(bool s) {
     subTitleLabel->setVisible(s);
 }
 
-void imageWindow::updateFontInfo() {
+void ImageWindow::updateFontInfo() {
     parameters->updateFontInfo();
     logViewer->updateFontInfo();
     results->updateFontInfo();
@@ -640,16 +640,16 @@ void imageWindow::updateFontInfo() {
     emit fontInfoUpdated();
 }
 
-void imageWindow::launchLogBrowser() {
+void ImageWindow::launchLogBrowser() {
     QProcess::startDetached(data->getApp("logBrowser") + " " + logViewer->getLogFile());
 }
 
-void imageWindow::launchFileBrowser() {
+void ImageWindow::launchFileBrowser() {
     QString path = QDir::toNativeSeparators(data->getDir("working"));
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
-void imageWindow::toggleHistoryView(bool show) {
+void ImageWindow::toggleHistoryView(bool show) {
     visible["historyview"] = show;
     if (show) {
         bridgeScriptLogConnection(false);
@@ -663,11 +663,11 @@ void imageWindow::toggleHistoryView(bool show) {
     verbosityControl->setCurrentIndex(verbosityControl->currentIndex());
 }
 
-void imageWindow::useNewViewer(bool enable) {
+void ImageWindow::useNewViewer(bool enable) {
     preview->enableNewViewer(enable);
 }
 
-void imageWindow::subscriptActivated(QModelIndex item) {
+void ImageWindow::subscriptActivated(QModelIndex item) {
     if (item.data(Qt::UserRole + 5).toString().isEmpty()) return;
     QProcess::startDetached(data->getApp("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
 }

@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "imageContainer.h"
+#include "image_tab.h"
 
-imageContainer::imageContainer(confData* data, QWidget* parent) 
+ImageTab::ImageTab(confData* data, QWidget* parent) 
 : QWidget(parent){
     mainData = data;
     
@@ -35,7 +35,7 @@ imageContainer::imageContainer(confData* data, QWidget* parent)
 }
 
 
-void imageContainer::closeImageWindow(int index) {
+void ImageTab::closeImageWindow(int index) {
     windowTabWidget->removeTab(index);
     imagesShown_.removeAt(index);
     if(imagesShown_.isEmpty()) {
@@ -44,7 +44,7 @@ void imageContainer::closeImageWindow(int index) {
     }
 }
 
-void imageContainer::showImageWindow(const QString& workingDir) {
+void ImageTab::showImageWindow(const QString& workingDir) {
 
     if (!imagesInitializedToTabs_.keys().contains(workingDir)) {
         confData* imageData = new confData(workingDir + "/" + "2dx_image.cfg", mainData);
@@ -91,14 +91,14 @@ void imageContainer::showImageWindow(const QString& workingDir) {
         imageData->addImage("appImage", new QImage(imageData->getDir("application") + "/resource/" + "icon.png"));
 
         imageData->syncWithUpper();
-        imageWindow* imageWin = new imageWindow(imageData);
-        connect(imageWin, &imageWindow::executing,
+        ImageWindow* imageWin = new ImageWindow(imageData);
+        connect(imageWin, &ImageWindow::executing,
                 [=] (bool run){
                     if(run) setTabProcessing(workingDir);
                     else setTabNormal(workingDir);
                 });
                 
-        connect(imageWin, &imageWindow::scriptCompletedSignal,
+        connect(imageWin, &ImageWindow::scriptCompletedSignal,
                 [=] () {
                     setTabNormal(workingDir);
                 });
@@ -120,12 +120,12 @@ void imageContainer::showImageWindow(const QString& workingDir) {
     windowTabWidget->setCurrentWidget(imagesInitializedToTabs_[workingDir]);
 }
 
-void imageContainer::setTabNormal(const QString& workingDir) {
+void ImageTab::setTabNormal(const QString& workingDir) {
     if(imagesShown_.contains(workingDir)) {
         windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("file")));
     }
 }
 
-void imageContainer::setTabProcessing(const QString& workingDir) {
+void ImageTab::setTabProcessing(const QString& workingDir) {
     if(imagesShown_.contains(workingDir)) windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("processing")));
 }

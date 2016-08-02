@@ -35,13 +35,13 @@
 #include <scriptModule.h>
 #include <resultsParser.h>
 #include <imagePreview.h>
-#include <LogViewer.h>
+#include <log_viewer.h>
 #include <statusViewer.h>
 #include <resizeableStackedWidget.h>
 #include <warningBox.h>
 #include <scriptParser.h>
 
-class imageWindow : public QWidget {
+class ImageWindow : public QWidget {
     Q_OBJECT
 
 public slots:
@@ -151,7 +151,7 @@ private:
     QPushButton* manualButton;
 
 public:
-    imageWindow(confData *data, QWidget *parent = NULL);
+    ImageWindow(confData *data, QWidget *parent = NULL);
 
 };
 

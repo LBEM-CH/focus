@@ -35,8 +35,6 @@
 #include <QList>
 #include <QScrollBar>
 
-class LogViewer;  // forward declaration
-
 class LogViewer : public QWidget
 {
     Q_OBJECT

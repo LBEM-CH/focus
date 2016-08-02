@@ -134,7 +134,7 @@ set(MOC_HDRS
         src/widgets/latticeRefineTool.h
         src/widgets/warningBox.h
         src/widgets/mouseAssignTool.h
-        src/widgets/LogViewer.h
+        src/widgets/log_viewer.h
         src/widgets/blockContainer.h
         src/widgets/imageNavigator.h
         src/widgets/resultsFile.h
@@ -144,14 +144,15 @@ set(MOC_HDRS
         src/extentions/fileWatcher.h
         src/mrcImage/largeMRC.h
         src/mrcImage/mrcImage.h
-        src/windows/libraryContainer.h
-        src/windows/imageWindow.h
-        src/windows/imageContainer.h
-        src/windows/mergeContainer.h
+        src/windows/library_tab.h
+        src/windows/image_window.h
+        src/windows/image_tab.h
+        src/windows/merge_tab.h
         src/dialogs/updateWindow.h
         src/dialogs/aboutWindow.h
         src/dialogs/eulerWindow.h
         src/dialogs/reprojectWindow.h
+        src/dialogs/project_tools.h
         src/models/confModel.h
         src/models/albumModel.h
         src/models/projectModel.h

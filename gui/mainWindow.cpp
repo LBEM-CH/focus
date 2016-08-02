@@ -132,6 +132,7 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
     mainData->setDir("merge3DScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-merge3D/"));
     mainData->setDir("customScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-custom/"));
     mainData->setDir("singleParticleScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-singleparticle/"));
+    mainData->setDir("projectToolScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-project/"));
     mainData->addImage("appImage", new QImage("resource/icon.png"));
 
     mainData->addApp("logBrowser", mainData->getDir("application") + "/../" + "bin/" + "2dx_logbrowser");
@@ -304,6 +305,10 @@ void mainWindow::setupToolBar() {
     group->setExclusive(true);
     openLibraryWindowAct->setChecked(true);
     
+    QAction* showProjectToolsAct = new QAction(*(mainData->getIcon("project_tools")), "Project Tools", mainToolBar);
+    showProjectToolsAct->setCheckable(true);
+    connect(showProjectToolsAct, SIGNAL(triggered(bool)), this, SLOT(showProjectTools(bool)));
+    
     QWidget* spacer1 = new QWidget();
     spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QWidget* spacer2 = new QWidget();
@@ -313,6 +318,7 @@ void mainWindow::setupToolBar() {
     mainToolBar->addAction(openImageWindowAct);
     mainToolBar->addAction(openMergeWindowAct);
     mainToolBar->addWidget(spacer2);
+    mainToolBar->addAction(showProjectToolsAct);
     
 }
 
@@ -320,14 +326,14 @@ void mainWindow::setupWindows() {
     centralWin_ = new QStackedWidget(this);
 
     results = new resultsData(mainData, mainData->getDir("working") + "/LOGS/" + "2dx_initialization.results", mainData->getDir("working"), this);
-    libraryWin_ = new libraryContainer(mainData, results, this);
+    libraryWin_ = new LibraryTab(mainData, results, this);
     
     QStringList scriptsDir;
     scriptsDir << mainData->getDir("merge2DScripts") << mainData->getDir("merge3DScripts") << mainData->getDir("customScripts") <<  mainData->getDir("singleParticleScripts");
     QList<scriptModule::moduleType> scriptsModules;
     scriptsModules << scriptModule::merge2D << scriptModule::merge3D << scriptModule::custom << scriptModule::singleparticle;
-    mergeWin_ = new mergeContainer(mainData, results, scriptsDir, scriptsModules, this);
-    imageWin_ = new imageContainer(mainData, this);
+    mergeWin_ = new MergeTab(mainData, results, scriptsDir, scriptsModules, this);
+    imageWin_ = new ImageTab(mainData, this);
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);
     centralWin_->addWidget(imageWin_);
@@ -388,6 +394,13 @@ void mainWindow::launchEuler() {
 void mainWindow::launchReproject() {
     if (reproject == NULL) {
         reproject = new reprojectWindow(mainData);
+    }
+}
+
+void mainWindow::launchProjectTools() {
+    if (!projectToolsInit) {
+        projectToolsInit = true;
+        projectTools = new ProjectTools(mainData, this);
     }
 }
 
@@ -549,6 +562,11 @@ void mainWindow::showReproject(bool show) {
         launchReproject();
 
     reproject->setHidden(!show);
+}
+
+void mainWindow::showProjectTools(bool show) {
+    if (!projectToolsInit) launchProjectTools();
+    projectTools->setHidden(!show);
 }
 
 void mainWindow::editHelperConf() {

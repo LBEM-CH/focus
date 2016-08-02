@@ -20,7 +20,7 @@
 #include <QThread>
 #include <QApplication>
 #include <QAction>
-#include "LogViewer.h"
+#include "log_viewer.h"
 #include <iostream>
 using namespace std;
 

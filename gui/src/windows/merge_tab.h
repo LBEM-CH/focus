@@ -5,8 +5,8 @@
  * Created on August 21, 2015, 11:30 AM
  */
 
-#ifndef MERGECONTAINER_H
-#define	MERGECONTAINER_H
+#ifndef MERGETAB_H
+#define	MERGETAB_H
 
 #include <QWidget>
 #include <QProcess>
@@ -37,19 +37,19 @@
 #include <scriptModule.h>
 #include <confInterface.h>
 #include <confModel.h>
-#include <LogViewer.h>
+#include <log_viewer.h>
 #include <resultsModule.h>
 #include <reprojectWindow.h>
 #include <confEditor.h>
 
 #include "blockContainer.h"
 
-class mergeContainer : public QWidget
+class MergeTab : public QWidget
 {
     Q_OBJECT
 
 public:
-    mergeContainer(confData* data, resultsData *results, const QStringList& scriptDirs, const QList<scriptModule::moduleType>& moduleTypes, QWidget *parent = NULL);
+    MergeTab(confData* data, resultsData *results, const QStringList& scriptDirs, const QList<scriptModule::moduleType>& moduleTypes, QWidget *parent = NULL);
 
 public slots:
     

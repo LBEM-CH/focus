@@ -440,6 +440,10 @@ void scriptModule::initialize() {
     execute(true);
 }
 
+void scriptModule::selectFirst() {
+    select(model->item(0)->index());
+}
+
 void scriptModule::select(QModelIndex index) {
     clearExtendedSelections();
     if (!selection->isSelected(index)) selection->select(index, QItemSelectionModel::Select);
@@ -481,6 +485,7 @@ QIcon scriptModule::getModuleScriptIcon() {
     else if (scriptType == singleparticle) icon = *(data->getIcon("spScriptIcon"));
     else if (scriptType == merge2D) icon = *(data->getIcon("2DScriptIcon"));
     else if (scriptType == merge3D) icon = *(data->getIcon("3DScriptIcon"));
+    else if (scriptType == project) icon = *(data->getIcon("projectScriptIcon"));
     
     return icon;
 }
@@ -492,6 +497,7 @@ QIcon scriptModule::getModuleToolIcon() {
     else if (scriptType == singleparticle) icon = *(data->getIcon("single_particle"));
     else if (scriptType == merge2D) icon = *(data->getIcon("merge2D"));
     else if (scriptType == merge3D) icon = *(data->getIcon("merge3D"));
+    else if (scriptType == project) icon = *(data->getIcon("custom"));
     
     return icon;
 }
@@ -503,6 +509,7 @@ QString scriptModule::getModuleDescription() {
     else if (scriptType == singleparticle) desc = "SINGLE PARTICLE";
     else if (scriptType == merge2D) desc = "2D MERGE";
     else if (scriptType == merge3D) desc = "3D MERGE";
+    else if (scriptType == project) desc = "PROJECT TOOLS";
     
     return desc;
     

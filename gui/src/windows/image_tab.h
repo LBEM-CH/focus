@@ -8,14 +8,14 @@
 #include <QStringList>
 
 #include "confData.h"
-#include "imageWindow.h"
+#include "image_window.h"
 
-class imageContainer : public QWidget
+class ImageTab : public QWidget
 {
     Q_OBJECT
            
     public:
-        imageContainer(confData* mainData, QWidget* parent=NULL);
+        ImageTab(confData* mainData, QWidget* parent=NULL);
         
     public slots:
         void showImageWindow(const QString&);
@@ -30,7 +30,7 @@ class imageContainer : public QWidget
         confData* mainData;
         
         //Image Windows
-        QMap<QString, imageWindow*> imagesInitializedToTabs_;
+        QMap<QString, ImageWindow*> imagesInitializedToTabs_;
         QStringList imagesShown_;
 };
 

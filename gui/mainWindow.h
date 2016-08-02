@@ -52,7 +52,7 @@
 #include <confModel.h>
 #include <confDelegate.h>
 #include <projectDelegate.h>
-#include <LogViewer.h>
+#include <log_viewer.h>
 #include <resultsModule.h>
 #include <projectModel.h>
 #include <imagePreview.h>
@@ -62,9 +62,10 @@
 #include <updateWindow.h>
 #include <confEditor.h>
 
-#include "libraryContainer.h"
-#include "mergeContainer.h"
-#include "imageContainer.h"
+#include "library_tab.h"
+#include "merge_tab.h"
+#include "image_tab.h"
+#include "project_tools.h"
 
 class mainWindow : public QMainWindow
 {
@@ -80,6 +81,7 @@ public slots:
 
     void showEuler(bool show = true);
     void showReproject(bool show = true);
+    void showProjectTools(bool show = true);
 
     void import();
     void importFiles(const QHash<QString, QHash<QString, QString> > &imageList);
@@ -91,6 +93,7 @@ public slots:
 
     void launchEuler();
     void launchReproject();
+    void launchProjectTools();
 
     void showImageWindow(const QModelIndex&);
     
@@ -127,11 +130,12 @@ private:
 
     eulerWindow *euler;
     reprojectWindow *reproject;
+    ProjectTools* projectTools;
     
     QStackedWidget* centralWin_;
-    libraryContainer* libraryWin_;
-    mergeContainer* mergeWin_;
-    imageContainer* imageWin_;
+    LibraryTab* libraryWin_;
+    MergeTab* mergeWin_;
+    ImageTab* imageWin_;
     
     
 
@@ -149,6 +153,7 @@ private:
 
     int importCount;
 
+    bool projectToolsInit = false;
     bool m_do_autosave;
     QTimer *timer;
     int timer_refresh;

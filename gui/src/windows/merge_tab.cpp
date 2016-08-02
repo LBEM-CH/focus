@@ -1,10 +1,10 @@
 #include <QtCore/qnamespace.h>
 
-#include "mergeContainer.h"
+#include "merge_tab.h"
 
 using namespace std;
 
-mergeContainer::mergeContainer(confData* data, resultsData *res, const QStringList& scriptDirs, const QList<scriptModule::moduleType>& moduleTypes, QWidget *parent)
+MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDirs, const QList<scriptModule::moduleType>& moduleTypes, QWidget *parent)
 : QWidget(parent) {
     mainData = data;
     results = res;
@@ -205,7 +205,7 @@ mergeContainer::mergeContainer(confData* data, resultsData *res, const QStringLi
     maximizeParameterWindow(false);
 }
 
-blockContainer* mergeContainer::setupLogWindow() {
+blockContainer* MergeTab::setupLogWindow() {
     //Setup Log Viewer
     logViewer = new LogViewer("Standard Output", NULL);
 
@@ -249,7 +249,7 @@ blockContainer* mergeContainer::setupLogWindow() {
 
 }
 
-blockContainer* mergeContainer::setupParameterWindow() {
+blockContainer* MergeTab::setupParameterWindow() {
     localParameters = new resizeableStackedWidget(this);
 
     parameters = new confInterface(mainData, "");
@@ -307,32 +307,32 @@ blockContainer* mergeContainer::setupParameterWindow() {
     return parameterContainer;
 }
 
-void mergeContainer::execute(bool halt) {
+void MergeTab::execute(bool halt) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
     module->execute(halt);
 }
 
-void mergeContainer::stopPlay() {
+void MergeTab::stopPlay() {
     runButton->setChecked(false);
 }
 
-void mergeContainer::updateScriptLabel(const QString& label) {
+void MergeTab::updateScriptLabel(const QString& label) {
     progressBar->update();
     scriptLabel->setText(label);
 }
 
-void mergeContainer::increaseScriptProgress(int increament) {
+void MergeTab::increaseScriptProgress(int increament) {
     if (progressBar->value() + increament <= progressBar->maximum())
         progressBar->setValue(progressBar->value() + increament);
     else
         progressBar->setValue(progressBar->maximum());
 }
 
-void mergeContainer::setScriptProgress(int progress) {
+void MergeTab::setScriptProgress(int progress) {
     progressBar->setValue(progress);
 }
 
-void mergeContainer::scriptChanged(scriptModule *module, QModelIndex index) {
+void MergeTab::scriptChanged(scriptModule *module, QModelIndex index) {
     updateScriptLabel(module->title(index));
 
     //  container->saveSplitterState(1);
@@ -399,7 +399,7 @@ void mergeContainer::scriptChanged(scriptModule *module, QModelIndex index) {
     //  container->restoreSplitterState(1);
 }
 
-void mergeContainer::scriptCompleted(scriptModule *module, QModelIndex index) {
+void MergeTab::scriptCompleted(scriptModule *module, QModelIndex index) {
     //  cerr<<"Script completed"<<endl;
     results->load(module->resultsFile(index));
     results->save();
@@ -408,16 +408,16 @@ void mergeContainer::scriptCompleted(scriptModule *module, QModelIndex index) {
     emit scriptCompletedSignal();
 }
 
-void mergeContainer::subscriptActivated(QModelIndex item) {
+void MergeTab::subscriptActivated(QModelIndex item) {
     if (item.data(Qt::UserRole + 5).toString().isEmpty()) return;
     QProcess::startDetached(mainData->getApp("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
 }
 
-void mergeContainer::reload() {
+void MergeTab::reload() {
     results->load();
 }
 
-void mergeContainer::maximizeLogWindow(bool maximize) {
+void MergeTab::maximizeLogWindow(bool maximize) {
     if (maximize) {
         centralSplitter->setSizes(QList<int>() << 0 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
@@ -427,7 +427,7 @@ void mergeContainer::maximizeLogWindow(bool maximize) {
     }
 }
 
-void mergeContainer::maximizeParameterWindow(bool maximize) {
+void MergeTab::maximizeParameterWindow(bool maximize) {
     if (maximize) {
         centralSplitter->setSizes(QList<int>() << 1 << 0);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
@@ -437,20 +437,20 @@ void mergeContainer::maximizeParameterWindow(bool maximize) {
     }
 }
 
-void mergeContainer::launchFileBrowser() {
+void MergeTab::launchFileBrowser() {
     QString path = QDir::toNativeSeparators(mainData->getDir("working"));
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
-void mergeContainer::launchLogBrowser() {
+void MergeTab::launchLogBrowser() {
     QProcess::startDetached(mainData->getApp("logBrowser") + " " + logViewer->getLogFile());
 }
 
-void mergeContainer::showSubTitle(bool s) {
+void MergeTab::showSubTitle(bool s) {
     subTitleLabel->setVisible(s);
 }
 
-void mergeContainer::updateFontInfo() {
+void MergeTab::updateFontInfo() {
     parameters->updateFontInfo();
     logViewer->updateFontInfo();
 }

@@ -28,7 +28,7 @@ class scriptModule : public QWidget {
 
 public:
     enum moduleType {
-        standard, custom, singleparticle, merge2D, merge3D
+        standard, custom, singleparticle, merge2D, merge3D, project
     };
 
 public slots:
@@ -44,6 +44,7 @@ public slots:
 
     void selectAll();
     void select(QModelIndex index);
+    void selectFirst();
     void select(const QItemSelection &selected);
     void select(const QItemSelection &selected, const QItemSelection &deselected);
     void initialize();

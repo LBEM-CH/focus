@@ -35,12 +35,12 @@
 #include "projectDelegate.h"
 #include "libraryImageStatus.h"
 
-class libraryContainer : public QWidget
+class LibraryTab : public QWidget
 {
     Q_OBJECT
            
     public:
-        libraryContainer(confData *data, resultsData* results, QWidget* parent=NULL);
+        LibraryTab(confData *data, resultsData* results, QWidget* parent=NULL);
         
         projectModel* getDirModel();
         QTreeView* getDirView();

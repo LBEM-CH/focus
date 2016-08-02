@@ -1,8 +1,8 @@
 #include <QFormLayout>
 
-#include "libraryContainer.h"
+#include "library_tab.h"
 
-libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget* parent)
+LibraryTab::LibraryTab(confData *dat, resultsData* results, QWidget* parent)
 : QWidget(parent) {
     this->data = dat;
 
@@ -88,13 +88,13 @@ libraryContainer::libraryContainer(confData *dat, resultsData* results, QWidget*
 
 }
 
-void libraryContainer::showContents(bool show) {
+void LibraryTab::showContents(bool show) {
     setVisible(show);
     QSize size = sizeHint();
     resize(size);
 }
 
-void libraryContainer::setupDirectoryContainer(confData* data) {
+void LibraryTab::setupDirectoryContainer(confData* data) {
     if (!QDir(data->getDir("project")).exists()) {
         dirView = NULL;
         std::cerr << "The project directory does not exit\n";
@@ -175,7 +175,7 @@ void libraryContainer::setupDirectoryContainer(confData* data) {
     }
 }
 
-QWidget* libraryContainer::setupToolBar() {
+QWidget* LibraryTab::setupToolBar() {
     QTabWidget* tabWidget = new QTabWidget;
     tabWidget->addTab(setupSelectionTab(), "Select");
     tabWidget->addTab(setupProjectTab(), "Project");
@@ -202,7 +202,7 @@ QWidget* libraryContainer::setupToolBar() {
     return toolBar;
 }
 
-QWidget* libraryContainer::setupSelectionTab() {
+QWidget* LibraryTab::setupSelectionTab() {
     
     QSizePolicy sizePolicy((QSizePolicy::Policy)QSizePolicy::Minimum,(QSizePolicy::Policy)QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
@@ -332,7 +332,7 @@ QWidget* libraryContainer::setupSelectionTab() {
     return tab;
 }
 
-QWidget* libraryContainer::setupProjectTab() {
+QWidget* LibraryTab::setupProjectTab() {
     
     
     QWidget* tab = new QWidget;
@@ -343,31 +343,31 @@ QWidget* libraryContainer::setupProjectTab() {
     return tab;
 }
 
-void libraryContainer::loadDirectorySelection() {
+void LibraryTab::loadDirectorySelection() {
     QString loadName = QFileDialog::getOpenFileName(this, "Save Selection As...", data->getDir("working") + "/2dx_merge_dirfile.dat");
     loadSelection(loadName);
 }
 
-void libraryContainer::saveDirectorySelection() {
+void LibraryTab::saveDirectorySelection() {
     QString saveName = QFileDialog::getSaveFileName(this, "Save Selection As...", data->getDir("working") + "/2dx_merge_dirfile.dat");
     if (QFileInfo(saveName).exists()) QFile::remove(saveName);
     QFile::copy(data->getDir("working") + "/2dx_merge_dirfile.dat", saveName);
 }
 
-projectModel* libraryContainer::getDirModel() {
+projectModel* LibraryTab::getDirModel() {
     return dirModel;
 }
 
-QTreeView* libraryContainer::getDirView() {
+QTreeView* LibraryTab::getDirView() {
     return dirView;
 }
 
-void libraryContainer::reload() {
+void LibraryTab::reload() {
     maskResults();
     updateModel();
 }
 
-void libraryContainer::loadProjectState() {
+void LibraryTab::loadProjectState() {
     QString projectHeaderState = data->getDir("working") + "/config/projectHeaderState.dat";
     if (QFileInfo(projectHeaderState).exists()) {
         QFile f(projectHeaderState);
@@ -377,7 +377,7 @@ void libraryContainer::loadProjectState() {
     }
 }
 
-void libraryContainer::saveProjectState() {
+void LibraryTab::saveProjectState() {
     QString projectHeaderState = data->getDir("working") + "/config/projectHeaderState.dat";
     if (!projectHeaderState.isEmpty()) {
         QFile f(projectHeaderState);
@@ -387,7 +387,7 @@ void libraryContainer::saveProjectState() {
     }
 }
 
-void libraryContainer::showSelected(bool enable) {
+void LibraryTab::showSelected(bool enable) {
     sortModel->setFilterRole(Qt::CheckStateRole);
     sortModel->setDynamicSortFilter(true);
     if (enable) {
@@ -397,11 +397,11 @@ void libraryContainer::showSelected(bool enable) {
     }
 }
 
-bool libraryContainer::loadSelection(const QString &fileName) {
+bool LibraryTab::loadSelection(const QString &fileName) {
     return dirModel->loadSelection(fileName);
 }
 
-void libraryContainer::updateModel() {
+void LibraryTab::updateModel() {
     dirModel->reload();
 
     for (int i = 0; i < dirModel->columnCount(); i++) {
@@ -419,11 +419,11 @@ void libraryContainer::updateModel() {
     dirView->expandAll();
 }
 
-void libraryContainer::maskResults() {
+void LibraryTab::maskResults() {
     dirModel->maskResults();
 }
 
-void libraryContainer::copyImage() {
+void LibraryTab::copyImage() {
     QString secondDir = data->get("second_dir", "value");
 
     if (secondDir == "-" || secondDir == "") {
@@ -485,7 +485,7 @@ void libraryContainer::copyImage() {
     }
 }
 
-void libraryContainer::addImageFolder(const QString& folder) {
+void LibraryTab::addImageFolder(const QString& folder) {
     QString projectFolder = data->getDir("project");
     QDir projectDir(projectFolder);
     QFile newDirCfg(projectFolder + "/" + folder + "/2dx_master.cfg");
@@ -506,7 +506,7 @@ void libraryContainer::addImageFolder(const QString& folder) {
 
 }
 
-void libraryContainer::addImageFolder() {
+void LibraryTab::addImageFolder() {
     bool ok;
     QString folder = QInputDialog::getText(this, tr("Add image folder"),
             tr("Enter the folder name to be created"), QLineEdit::Normal,
@@ -517,7 +517,7 @@ void libraryContainer::addImageFolder() {
     }
 }
 
-void libraryContainer::moveSelectionToFolder(const QString& targetPath) {
+void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     QModelIndexList selection = dirView->selectionModel()->selectedRows();
     int numFiles = selection.count();
     int count = 0;
@@ -582,7 +582,7 @@ void libraryContainer::moveSelectionToFolder(const QString& targetPath) {
 
 }
 
-void libraryContainer::trashSelection() {
+void LibraryTab::trashSelection() {
     QString projectFolder = data->getDir("project");
     QDir projectDir(projectFolder);
     QString folder = "TRASH";
@@ -595,7 +595,7 @@ void libraryContainer::trashSelection() {
     moveSelectionToFolder(data->getDir("project") + "/" + folder);
 }
 
-void libraryContainer::moveSelectiontoFolder() {
+void LibraryTab::moveSelectiontoFolder() {
     QString projectFolder = data->getDir("project");
 
     //Get the list of current folders
@@ -620,7 +620,7 @@ void libraryContainer::moveSelectiontoFolder() {
 
 }
 
-bool libraryContainer::copyRecursively(const QString& srcFilePath, const QString& tgtFilePath) {
+bool LibraryTab::copyRecursively(const QString& srcFilePath, const QString& tgtFilePath) {
     QFileInfo srcFileInfo(srcFilePath);
     if (srcFileInfo.isDir()) {
         QDir targetDir(tgtFilePath);
@@ -649,29 +649,29 @@ bool libraryContainer::copyRecursively(const QString& srcFilePath, const QString
     return true;
 }
 
-void libraryContainer::columnActivated(int i) {
+void LibraryTab::columnActivated(int i) {
     dirModel->setColumnProperty(i, "visible", dirModel->getColumnProperty(i, "visible").toBool()^true);
     dirModel->saveColumns();
     dirView->setColumnHidden(i, !dirModel->getColumnProperty(i, "visible").toBool());
     dirView->resizeColumnToContents(i);
 }
 
-void libraryContainer::autoSelect() {
+void LibraryTab::autoSelect() {
     bool useAbsolute = false;
     if(negPosOption->currentText() == "Yes") useAbsolute=true;
     
     dirModel->autoSelect(minDegree->text().toInt(), maxDegree->text().toInt(), useAbsolute);
 }
 
-void libraryContainer::extendSelection() {
+void LibraryTab::extendSelection() {
     modifySelection(true);
 }
 
-void libraryContainer::reduceSelection() {
+void LibraryTab::reduceSelection() {
     modifySelection(false);
 }
 
-void libraryContainer::modifySelection(bool select) {
+void LibraryTab::modifySelection(bool select) {
     QModelIndex i;
     QModelIndexList selection = dirView->selectionModel()->selectedRows();
 
@@ -689,28 +689,28 @@ void libraryContainer::modifySelection(bool select) {
     }
 }
 
-void libraryContainer::setPreviewImages(const QString& imagePath) {
+void LibraryTab::setPreviewImages(const QString& imagePath) {
     loadDataContainer(imagePath);
     mapPreview->setImage(imagePath + "/final_map.mrc");
     refPreview->setImage(imagePath + "/reference_map.mrc");
     dualPreview->setImage(imagePath + "/half_half.mrc");
 }
 
-void libraryContainer::loadDataContainer(const QString& imagePath) {
+void LibraryTab::loadDataContainer(const QString& imagePath) {
     imageDataWidget->updateData();
 }
 
-void libraryContainer::autoSwitch(bool play) {
+void LibraryTab::autoSwitch(bool play) {
     if (play) previewTimer->start(1000);
     else previewTimer->stop();
 }
 
-void libraryContainer::updatePreview() {
+void LibraryTab::updatePreview() {
     int id = (previews->currentIndex() + 1) % 2;
     viewControl->setCurrentIndex(id);
 }
 
-void libraryContainer::resetSelectionState() {
+void LibraryTab::resetSelectionState() {
     QString checked = QString::number(dirModel->getSelectionNames().count());
     QString selected = QString::number(dirView->selectionModel()->selectedRows().count());
     selectionState->setText(checked + " checked and " + selected + " highlighted ");

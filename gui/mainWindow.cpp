@@ -29,6 +29,7 @@
 
 #include "mainWindow.h"
 #include "blockContainer.h"
+#include "user_preferences.h"
 
 using namespace std;
 
@@ -45,8 +46,6 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     setWindowTitle(mainData->getDir("project") + " | 2dx (" + installedVersion + ")");
     setUnifiedTitleAndToolBarOnMac(true);
 
-    connect(&importProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(importFinished()));
-
     updates = new updateWindow(mainData, this);
     updates->hide();
 
@@ -57,11 +56,12 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     setupActions();
     setupMenuBar();
     setupToolBar();
+    
+    UserPreferences(mainData).loadAllFontSettings();
+    UserPreferences(mainData).loadWindowPreferences(this);
 
     euler = NULL;
     reproject = NULL;
-
-    importCount = 0;
 
     resize(1120, 630);
 }
@@ -156,9 +156,6 @@ void mainWindow::setupActions() {
     saveAction->setShortcut(tr("Ctrl+S"));
     connect(saveAction, SIGNAL(triggered()), mainData, SLOT(save()));
 
-    importAction = new QAction(*(mainData->getIcon("import")), tr("&Import Images"), this);
-    connect(importAction, SIGNAL(triggered()), this, SLOT(import()));
-
     timer_refresh = 10000;
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), mainData, SLOT(save()));
@@ -173,27 +170,11 @@ void mainWindow::setupMenuBar() {
     QMenu *fileMenu = new QMenu("File");
     fileMenu->addAction(openAction);
     fileMenu->addAction(saveAction);
-    fileMenu->addAction(importAction);
 
     QAction *closeAction = new QAction(*(mainData->getIcon("quit")), "Quit", this);
     closeAction->setShortcut(tr("Ctrl+Q"));
     connect(closeAction, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
     fileMenu->addAction(closeAction);
-
-    /**
-     * Setup Edit menu
-     */
-    QMenu *editMenu = new QMenu("Edit");
-
-    QAction *increaseFontAction = new QAction(*(mainData->getIcon("increase_font")), "Increase Font Size", this);
-    increaseFontAction->setShortcut(tr("]"));
-    connect(increaseFontAction, SIGNAL(triggered()), this, SLOT(increaseFontSize()));
-    editMenu->addAction(increaseFontAction);
-
-    QAction *decreaseFontAction = new QAction(*(mainData->getIcon("decrease_font")), "Decrease Font Size", this);
-    decreaseFontAction->setShortcut(tr("["));
-    connect(decreaseFontAction, SIGNAL(triggered()), this, SLOT(decreaseFontSize()));
-    editMenu->addAction(decreaseFontAction);
 
 
     /**
@@ -239,7 +220,6 @@ void mainWindow::setupMenuBar() {
     helpMenu->addAction(showAboutAction);
 
     menuBar()->addMenu(fileMenu);
-    menuBar()->addMenu(editMenu);
     menuBar()->addMenu(optionMenu);
     menuBar()->addMenu(helpMenu);
 }
@@ -307,7 +287,7 @@ void mainWindow::setupToolBar() {
     
     QAction* showProjectToolsAct = new QAction(*(mainData->getIcon("project_tools")), "Project Tools", mainToolBar);
     showProjectToolsAct->setCheckable(false);
-    connect(showProjectToolsAct, SIGNAL(triggered(bool)), this, SLOT(showProjectTools(bool)));
+    connect(showProjectToolsAct, SIGNAL(triggered()), this, SLOT(showProjectTools()));
     
     QWidget* spacer1 = new QWidget();
     spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -419,117 +399,6 @@ void mainWindow::closeEvent(QCloseEvent *event) {
     }
 }
 
-void mainWindow::importFiles(const QHash<QString, QHash<QString, QString> > &imageList) {
-    QHashIterator<QString, QHash<QString, QString> > it(imageList);
-    importCount = imageList.size();
-    while (it.hasNext()) {
-        it.next();
-        qDebug() << "Importing File: " << it.key();
-        importFile(it.key(), it.value());
-    }
-}
-
-void mainWindow::importFile(const QString &file, const QHash<QString, QString> &imageCodes) {
-    QHashIterator<QString, QString> it(imageCodes);
-    QString fileName = file;
-    QString pC = imageCodes["protein_code"];
-    QString tiltAngle = imageCodes["tilt_angle"];
-    QString frame = imageCodes["frame_number"];
-    QString subID = imageCodes["sub_image_number"];
-    QString ext = QFileInfo(file).suffix();
-
-    qDebug() << "pC=" << pC << "  tiltAngle=" << tiltAngle << "  frame=" << frame << "  subID=" << subID << "  ext=" << ext;
-
-    QDir tiltDir(mainData->getDir("project") + "/" + pC + tiltAngle);
-    QString newFile = pC + tiltAngle + frame + subID;
-    QString tiltDirectory = pC + tiltAngle;
-    QString tiltConfigLocation = mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg";
-    if (!tiltDir.exists()) {
-        qDebug() << pC + tiltAngle << " does not exist...creating.";
-        tiltDir.setPath(mainData->getDir("project"));
-        tiltDir.mkdir(tiltDirectory);
-        //confData tiltData(tiltConfigLocation);
-        confData tiltData(mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg", mainData->getDir("project") + "/2dx_master.cfg");
-        tiltData.save();
-        tiltData.setSymLink("../2dx_master.cfg", mainData->getDir("project") + "/" + tiltDirectory + "/2dx_master.cfg");
-    }
-
-    tiltDir.setPath(mainData->getDir("project") + "/" + tiltDirectory);
-    tiltDir.mkdir(newFile);
-
-    QFile::copy(fileName, tiltDir.path() + "/" + newFile + "/" + newFile + '.' + ext);
-    QString newFilePath = tiltDir.path() + "/" + newFile;
-    QString newFileConfigPath = newFilePath + "/2dx_image.cfg";
-    if (!QFileInfo(newFileConfigPath).exists()) {
-        //HENN>
-        qDebug() << "Copying " << tiltConfigLocation << " to " << newFileConfigPath;
-        if (!QFile::copy(tiltConfigLocation, newFileConfigPath))
-            qDebug() << "Failed to copy " << tiltConfigLocation << " to " << newFileConfigPath;
-        else {
-            QFileInfo oldFile(fileName);
-            QString name = oldFile.fileName();
-            QString oldFileDir = oldFile.absolutePath();
-            QString oldStackName = oldFileDir + "/../aligned_stacks/" + name;
-            QFileInfo oldStack(oldStackName);
-            if (!oldStack.exists()) {
-                // qDebug() << "Stack " << oldStackName << " not found. Trying ";
-                oldStackName = oldFileDir + "/../DC_stacks/" + name;
-                // qDebug() << oldStackName;
-            }
-
-            QString newStackName = newFilePath + "/" + newFile + "_stack." + ext;
-            // qDebug() << "oldStackName = " << oldStackName << ", newStackName = " << newStackName;
-
-            QFile f(newFileConfigPath);
-            if (f.open(QIODevice::Append | QIODevice::Text)) {
-                // qDebug() << "Apending imagename_original = " << name << " to 2dx_image.cfg file.";
-                QTextStream stream(&f);
-                // qDebug() << "set imagename = " << newFile;
-                stream << "set imagename = " << newFile << endl;
-                // qDebug() << "set imagenumber = " << frame+ subID;
-                stream << "set imagenumber = " << frame + subID << endl;
-                // qDebug() << "set nonmaskimagename = " << newFile;
-                stream << "set nonmaskimagename = " << newFile << endl;
-                // qDebug() << "set imagename_original = " << name;
-                stream << "set imagename_original = " << name << endl;
-
-                if (oldStack.exists()) {
-                    qDebug() << "Copying " << oldStackName << " to " << newStackName;
-                    stream << "set movie_stackname = " << newFile + "_stack." + ext << endl;
-                    if (!QFile::copy(oldStackName, newStackName)) {
-                        qDebug() << "ERROR when trying to copy stack." << endl;
-                    }
-                }
-                f.close();
-            }
-        }
-        //HENN<
-    }
-    importProcess.start(mainData->getApp("2dx_image") + " " + newFilePath + " " + "\"2dx_initialize\"");
-    importProcess.waitForFinished(8 * 60 * 60 * 1000);
-}
-
-void mainWindow::importFinished() {
-    importCount--;
-    //if (importCount <= 0) albumCont->updateModel();
-}
-
-void mainWindow::import() {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this,
-            "Import Images",
-            QString("A new and improved tool to import images is available in Custom Tab called as <Import Images and Movies>\n")
-            + "Are you sure you want to continue using the old import tool?",
-            QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
-        QStringList fileList = QFileDialog::getOpenFileNames(NULL, "Choose image files to add", mainData->getDir("project"), "Images (*.tif *.mrc)");
-        if (fileList.isEmpty()) {
-            return;
-        }
-        
-    }
-}
-
 void mainWindow::open() {
     QProcess::startDetached(mainData->getApp("this"));
 }
@@ -570,5 +439,10 @@ void mainWindow::showProjectTools(bool show) {
 }
 
 void mainWindow::editHelperConf() {
-    new confEditor(mainData->getSubConf("appConf"));
+    if (!preferencesDialogInit_) {
+        preferencesDialogInit_ = true;
+        preferencesDialog_ = new PreferencesDialog(mainData, this);
+    }
+    preferencesDialog_->showNormal();
+    //new confEditor(mainData->getSubConf("appConf"));
 }

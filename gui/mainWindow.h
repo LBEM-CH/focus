@@ -66,6 +66,7 @@
 #include "merge_tab.h"
 #include "image_tab.h"
 #include "project_tools.h"
+#include "preferences.h"
 
 class mainWindow : public QMainWindow
 {
@@ -83,10 +84,6 @@ public slots:
     void showReproject(bool show = true);
     void showProjectTools(bool show = true);
 
-    void import();
-    void importFiles(const QHash<QString, QHash<QString, QString> > &imageList);
-    void importFile(const QString & fileName, const QHash<QString, QString> &imageCodes);
-    void importFinished();
     void open();
     void openURL(const QString &url);
     void toggleAutoSave();
@@ -119,12 +116,11 @@ private:
      */
     confData *mainData;
     confData *userData;
-    resultsData *results; 
-
-    QProcess importProcess;
+    resultsData *results;
 
     updateWindow *updates;
     aboutWindow *about;
+    PreferencesDialog* preferencesDialog_;
 
     QString installedVersion;
 
@@ -144,16 +140,14 @@ private:
      */
     QAction* openAction;
     QAction* saveAction;
-    QAction* importAction;
     QAction* viewAlbum;
     
     QAction* openLibraryWindowAct;
     QAction* openImageWindowAct;
     QAction* openMergeWindowAct;
 
-    int importCount;
-
     bool projectToolsInit = false;
+    bool preferencesDialogInit_ = false;
     bool m_do_autosave;
     QTimer *timer;
     int timer_refresh;

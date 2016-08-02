@@ -78,6 +78,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/dialogs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/extentions)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/models)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/mrcImage)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/settings)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/widgets)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/windows)
 if(APPLE)
@@ -153,6 +154,7 @@ set(MOC_HDRS
         src/dialogs/eulerWindow.h
         src/dialogs/reprojectWindow.h
         src/dialogs/project_tools.h
+        src/dialogs/preferences.h
         src/models/confModel.h
         src/models/albumModel.h
         src/models/projectModel.h

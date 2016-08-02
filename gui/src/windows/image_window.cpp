@@ -153,6 +153,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     runButton = new QPushButton;
     runButton->setIcon(*(data->getIcon("play")));
+    runButton->setToolTip("Run/Stop script");
     runButton->setIconSize(QSize(18, 18));
     runButton->setCheckable(true);
     connect(runButton, &QPushButton::toggled, this, &ImageWindow::executing);
@@ -161,12 +162,21 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
 
     refreshButton = new QPushButton;
     refreshButton->setIcon(*(data->getIcon("refresh_colored")));
+    refreshButton->setToolTip("Refresh Results");
     refreshButton->setIconSize(QSize(18, 18));
     refreshButton->setCheckable(false);
     connect(refreshButton, SIGNAL(clicked()), this, SLOT(reload()));
+    
+    saveCfgButton = new QPushButton;
+    saveCfgButton->setIcon(*(data->getIcon("save_project_default")));
+    saveCfgButton->setToolTip("Save this configuration as project default");
+    saveCfgButton->setIconSize(QSize(18, 18));
+    saveCfgButton->setCheckable(false);
+    connect(saveCfgButton, SIGNAL(clicked()), this, SLOT(saveAsProjectDefault()));
 
     manualButton = new QPushButton;
     manualButton->setIcon(*(data->getIcon("help")));
+    manualButton->setToolTip("Show Help");
     manualButton->setIconSize(QSize(18, 18));
     manualButton->setCheckable(true);
     connect(manualButton, SIGNAL(toggled(bool)), this, SLOT(showSubTitle(bool)));
@@ -179,6 +189,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     titleLayout->addWidget(spacer);
     titleLayout->addWidget(runButton);
     titleLayout->addWidget(refreshButton);
+    titleLayout->addWidget(saveCfgButton);
     titleLayout->addWidget(manualButton);
     titleContainer->setLayout(titleLayout);
 
@@ -670,4 +681,16 @@ void ImageWindow::useNewViewer(bool enable) {
 void ImageWindow::subscriptActivated(QModelIndex item) {
     if (item.data(Qt::UserRole + 5).toString().isEmpty()) return;
     QProcess::startDetached(data->getApp("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
+}
+
+void ImageWindow::saveAsProjectDefault()
+{
+  QString confFile = QFileInfo(data->getDir("working") + "/../../").absolutePath() + "/" + "2dx_master.cfg";
+  confFile.replace(QRegExp("/+"),"/");
+  if(QMessageBox::question(this,
+			   tr("Save as default?"),"Saving as \n" + confFile + "\n will set default values for all other images in this project. \n\n Make sure you have QUIT the program 2dx_merge.exe before continuing here. Otherwise, 2dx_merge.exe would overwrite the default values again with its own set of values. \n\n Proceed?",
+			   tr("Yes"),
+			   tr("No"),
+			   QString(),0,1) == 0)
+    data->saveAs(confFile);
 }

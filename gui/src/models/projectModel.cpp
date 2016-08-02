@@ -682,25 +682,25 @@ bool projectModel::removeSelected()
    return true;
 }
 
-void projectModel::autoSelect(int minTilt, int maxTilt, bool useAbsolute) {
+void projectModel::autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute) {
     disconnect(this,SIGNAL(itemChanged(QStandardItem *)),this,SLOT(submit()));
-    autoSelection(item(0),rowCount(), minTilt, maxTilt, useAbsolute);
+    autoSelection(item(0),rowCount(), minTilt, maxTilt, param, useAbsolute);
     submit();
     connect(this,SIGNAL(itemChanged(QStandardItem *)),this,SLOT(submit()));    
 }
 
 
-void projectModel::autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, bool useAbsolute) {
+void projectModel::autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute) {
     if(currentItem == NULL) return;
     QList<QModelIndex> list = match(currentItem->index(), Qt::CheckStateRole, ".*", itemCount, Qt::MatchRegExp);
     foreach(QModelIndex i, list) {
         if(i.isValid()) {
-            if(i.child(0,0).isValid()) autoSelection(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), minTilt, maxTilt, useAbsolute);
+            if(i.child(0,0).isValid()) autoSelection(itemFromIndex(i.child(0,0)), itemFromIndex(i)->rowCount(), minTilt, maxTilt, param, useAbsolute);
             else if(i.column() == 0) {
                 QString confFile = pathFromIndex(i) + QString("/2dx_image.cfg");
                 if(QFileInfo().exists(confFile)) {
                     
-                    int tiltAng = i.sibling(i.row(), parameterToColId["tltang"]).data(SortRole).toInt();
+                    int tiltAng = i.sibling(i.row(), parameterToColId[param]).data(SortRole).toInt();
                     if(!useAbsolute) {
                         if(tiltAng >= minTilt && tiltAng <= maxTilt) {
                             if(i.data(Qt::CheckStateRole) != Qt::Checked) setData(i,Qt::Checked,Qt::CheckStateRole);

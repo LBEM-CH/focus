@@ -122,6 +122,7 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     runButton = new QPushButton;
     runButton->setIcon(*(mainData->getIcon("play")));
+    runButton->setToolTip("Run/Stop script");
     runButton->setIconSize(QSize(18, 18));
     runButton->setCheckable(true);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
@@ -129,12 +130,14 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
 
     refreshButton = new QPushButton;
     refreshButton->setIcon(*(mainData->getIcon("refresh_colored")));
+    refreshButton->setToolTip("Refresh Results");
     refreshButton->setIconSize(QSize(18, 18));
     refreshButton->setCheckable(false);
     connect(refreshButton, SIGNAL(clicked()), this, SLOT(reload()));
 
     manualButton = new QPushButton;
     manualButton->setIcon(*(mainData->getIcon("help")));
+    manualButton->setToolTip("Show Help");
     manualButton->setIconSize(QSize(18, 18));
     manualButton->setCheckable(true);
     connect(manualButton, SIGNAL(toggled(bool)), this, SLOT(showSubTitle(bool)));

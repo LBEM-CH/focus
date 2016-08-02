@@ -84,7 +84,6 @@ class LibraryTab : public QWidget
         void setupDirectoryContainer(confData*);
         QWidget* setupToolBar();
         QWidget* setupSelectionTab();
-        QWidget* setupProjectTab();
         
         void modifySelection(bool select = true);
         
@@ -111,6 +110,7 @@ class LibraryTab : public QWidget
         
         QLineEdit* minDegree;
         QLineEdit* maxDegree;
+        QComboBox* parameterToUse;
         QComboBox* negPosOption;
     
 };

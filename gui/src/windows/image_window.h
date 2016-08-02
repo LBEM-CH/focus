@@ -22,7 +22,6 @@
 #define IMAGEWINDOW_H
 
 #include <QWidget>
-#include <QWebView>
 #include <QGridLayout>
 #include <QStackedWidget>
 #include <QComboBox>
@@ -90,6 +89,8 @@ public slots:
 
     void maximizeLogWindow(bool maximize);
     void maximizeParameterWindow(bool maximize);
+    
+    void saveAsProjectDefault();
 
 signals:
     void executing(bool);
@@ -148,6 +149,7 @@ private:
     QLabel* subTitleLabel;
     QPushButton* runButton;
     QPushButton* refreshButton;
+    QPushButton* saveCfgButton;
     QPushButton* manualButton;
 
 public:

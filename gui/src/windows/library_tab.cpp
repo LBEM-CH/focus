@@ -1,4 +1,5 @@
 #include <QFormLayout>
+#include <QMessageBox>
 
 #include "library_tab.h"
 
@@ -177,15 +178,18 @@ void LibraryTab::setupDirectoryContainer(confData* data) {
 
 QWidget* LibraryTab::setupToolBar() {
     QTabWidget* tabWidget = new QTabWidget;
-    tabWidget->addTab(setupSelectionTab(), "Select");
-    tabWidget->addTab(setupProjectTab(), "Project");
+    tabWidget->addTab(setupSelectionTab(), "Library Tools");
     
     selectionState = new QLabel(" ");
     selectionState->setAlignment(Qt::AlignCenter);
-    QFont* font = new QFont();
-    font->setItalic(true);
-    font->setPixelSize(10);
-    selectionState->setFont(*font);
+    QFont font = selectionState->font();
+    font.setBold(true);
+    selectionState->setFont(font);
+    
+    QPalette pal = selectionState->palette();
+    pal.setColor(QPalette::WindowText, Qt::darkGray);
+    selectionState->setPalette(pal);
+    
     resetSelectionState();
     
     //Setup tool bar
@@ -211,6 +215,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     QPushButton *refreshAction = new QPushButton(*(data->getIcon("refresh")), tr("&Refresh Library"), this);
     refreshAction->setSizePolicy(sizePolicy);
     refreshAction->setShortcut(tr("Ctrl+Shift+r"));
+    refreshAction->setToolTip("Shortcut: " + refreshAction->shortcut().toString());
     connect(refreshAction, SIGNAL(clicked()), this, SLOT(reload()));
     
     
@@ -221,17 +226,20 @@ QWidget* LibraryTab::setupSelectionTab() {
     
     QPushButton* showSelectedAction = new QPushButton(*(data->getIcon("selected")), tr("&Show checked images only"), this);
     showSelectedAction->setShortcut(tr("Ctrl+X"));
+    showSelectedAction->setToolTip("Shortcut: " + showSelectedAction->shortcut().toString());
     showSelectedAction->setCheckable(true);
     connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
     checkGroupLayout->addWidget(showSelectedAction);
     
     QPushButton *selectAllAction = new QPushButton(*(data->getIcon("check_all")), "Check all images", this);
     selectAllAction->setShortcut(tr("Ctrl+A"));
+    selectAllAction->setToolTip("Shortcut: " + selectAllAction->shortcut().toString());
     connect(selectAllAction, SIGNAL(clicked()), dirModel, SLOT(selectAll()));
     checkGroupLayout->addWidget(selectAllAction);
     
     QPushButton *invertSelectedAction = new QPushButton(*(data->getIcon("check_invert")), "Invert check", this);
     invertSelectedAction->setShortcut(tr("Ctrl+I"));
+    invertSelectedAction->setToolTip("Shortcut: " + invertSelectedAction->shortcut().toString());
     connect(invertSelectedAction, SIGNAL(clicked()), dirModel, SLOT(invertSelection()));
     checkGroupLayout->addWidget(invertSelectedAction);
     
@@ -252,13 +260,15 @@ QWidget* LibraryTab::setupSelectionTab() {
     minDegree->setFrame(false);
     minDegree->setMaximumWidth(50);
     minDegree->setText("0");
-    minDegree->setValidator(new QIntValidator(-90, 90));
     
     maxDegree = new QLineEdit;
     maxDegree->setFrame(false);
     maxDegree->setMaximumWidth(50);
     maxDegree->setText("90");
-    maxDegree->setValidator(new QIntValidator(-90, 90));
+    
+    parameterToUse = new QComboBox;
+    parameterToUse->addItems(QStringList() << "taxa" << "tangl" << "tltaxis" << "tltang" << "tltaxa" << "QVAL");
+    parameterToUse->setCurrentIndex(0);
     
     negPosOption = new QComboBox;
     negPosOption->addItems(QStringList() << "Yes" << "No");
@@ -272,9 +282,10 @@ QWidget* LibraryTab::setupSelectionTab() {
     autoSelectLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
     autoSelectLayout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
     autoSelectLayout->setLabelAlignment(Qt::AlignLeft);
-    autoSelectLayout->addRow("Minimum Tilt Angle", minDegree);
-    autoSelectLayout->addRow("Maximum Tilt Angle", maxDegree);
-    autoSelectLayout->addRow("Positive/negative values", negPosOption);
+    autoSelectLayout->addRow("Parameter to use", parameterToUse);
+    autoSelectLayout->addRow("Minimum value", minDegree);
+    autoSelectLayout->addRow("Maximum value", maxDegree);
+    autoSelectLayout->addRow("Positive+negative values", negPosOption);
     autoSelectLayout->addRow(changeSelection);
     
     autoSelectionGroup->setLayout(autoSelectLayout);
@@ -328,17 +339,6 @@ QWidget* LibraryTab::setupSelectionTab() {
     layout->addWidget(autoSelectionGroup, 0);
     layout->addWidget(imageFolderGroup, 0, Qt::AlignTop);
     layout->addWidget(backupSaveGroup, 0, Qt::AlignTop);
-    tab->setLayout(layout);
-    return tab;
-}
-
-QWidget* LibraryTab::setupProjectTab() {
-    
-    
-    QWidget* tab = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->addStretch(0);
-    
     tab->setLayout(layout);
     return tab;
 }
@@ -583,16 +583,23 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
 }
 
 void LibraryTab::trashSelection() {
-    QString projectFolder = data->getDir("project");
-    QDir projectDir(projectFolder);
-    QString folder = "TRASH";
-    if (!QFile(data->getDir("project") + "/" + folder + "/2dx_master.cfg").exists()) {
-        if (!QDir(projectFolder + "/" + folder).exists()) {
-            projectDir.mkdir(folder);
+    if(QMessageBox::question(this,
+			   tr("Move to trash?"),"Are you sure you want to move all the selected images to TRASH? \n\n Proceed?",
+			   tr("Yes"),
+			   tr("No"),
+			   QString(),0,1) == 0){
+    
+        QString projectFolder = data->getDir("project");
+        QDir projectDir(projectFolder);
+        QString folder = "TRASH";
+        if (!QFile(data->getDir("project") + "/" + folder + "/2dx_master.cfg").exists()) {
+            if (!QDir(projectFolder + "/" + folder).exists()) {
+                projectDir.mkdir(folder);
+            }
+            QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
         }
-        QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
+        moveSelectionToFolder(data->getDir("project") + "/" + folder);
     }
-    moveSelectionToFolder(data->getDir("project") + "/" + folder);
 }
 
 void LibraryTab::moveSelectiontoFolder() {
@@ -660,7 +667,7 @@ void LibraryTab::autoSelect() {
     bool useAbsolute = false;
     if(negPosOption->currentText() == "Yes") useAbsolute=true;
     
-    dirModel->autoSelect(minDegree->text().toInt(), maxDegree->text().toInt(), useAbsolute);
+    dirModel->autoSelect(minDegree->text().toInt(), maxDegree->text().toInt(), parameterToUse->currentText(), useAbsolute);
 }
 
 void LibraryTab::extendSelection() {

@@ -63,7 +63,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
 
     importCount = 0;
 
-    resize(1024, 576);
+    resize(1120, 630);
 }
 
 confData* mainWindow::setupMainConfiguration(const QString &directory) {
@@ -306,7 +306,7 @@ void mainWindow::setupToolBar() {
     openLibraryWindowAct->setChecked(true);
     
     QAction* showProjectToolsAct = new QAction(*(mainData->getIcon("project_tools")), "Project Tools", mainToolBar);
-    showProjectToolsAct->setCheckable(true);
+    showProjectToolsAct->setCheckable(false);
     connect(showProjectToolsAct, SIGNAL(triggered(bool)), this, SLOT(showProjectTools(bool)));
     
     QWidget* spacer1 = new QWidget();

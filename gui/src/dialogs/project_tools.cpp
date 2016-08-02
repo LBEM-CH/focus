@@ -21,10 +21,9 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     centralSplitter->setSizes(QList<int>() << 1 << 1);
 
     toolsScriptModule = new scriptModule(data, mainData->getDir("projectToolScripts"), scriptModule::project);
-    toolsScriptModule->resize(200, 20);
     toolsScriptModule->setAttribute(Qt::WA_MacShowFocusRect, 0);
-    toolsScriptModule->setMinimumWidth(200);
-    toolsScriptModule->setMaximumWidth(250);
+    toolsScriptModule->setMinimumWidth(250);
+    toolsScriptModule->setMaximumWidth(300);
     
     connect(toolsScriptModule, &scriptModule::currentScriptChanged,
             [ = ](QModelIndex index){
@@ -47,6 +46,7 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     runButton = new QPushButton;
     runButton->setIcon(*(mainData->getIcon("play")));
+    runButton->setToolTip("Run/Stop script");
     runButton->setIconSize(QSize(18, 18));
     runButton->setCheckable(true);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
@@ -54,6 +54,7 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
 
     manualButton = new QPushButton;
     manualButton->setIcon(*(mainData->getIcon("help")));
+    manualButton->setToolTip("Show Help");
     manualButton->setIconSize(QSize(18, 18));
     manualButton->setCheckable(true);
     connect(manualButton, SIGNAL(toggled(bool)), this, SLOT(showSubTitle(bool)));
@@ -107,10 +108,11 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     layout->addWidget(centralSplitter, 2, 1, 1, 1);
 
     layout->setRowStretch(0, 0);
-    layout->setRowStretch(1, 1);
+    layout->setRowStretch(1, 0);
+    layout->setRowStretch(2, 1);
     
     setLayout(layout);
-    resize(420, 270);
+    resize(700, 440);
 
     verbosityControl->setCurrentIndex(1);
     toolsScriptModule->setVerbosity(1);

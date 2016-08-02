@@ -58,7 +58,6 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     setupMenuBar();
     setupToolBar();
 
-    album = NULL;
     euler = NULL;
     reproject = NULL;
 
@@ -158,10 +157,6 @@ void mainWindow::setupActions() {
 
     importAction = new QAction(*(mainData->getIcon("import")), tr("&Import Images"), this);
     connect(importAction, SIGNAL(triggered()), this, SLOT(import()));
-
-    viewAlbum = new QAction(*(mainData->getIcon("album")), tr("&Reconstruction album"), this);
-    viewAlbum->setShortcut(tr("Ctrl+Shift+A"));
-    connect(viewAlbum, SIGNAL(triggered()), this, SLOT(showAlbum()));
 
     timer_refresh = 10000;
     timer = new QTimer(this);
@@ -381,14 +376,6 @@ bool mainWindow::createDir(const QString &dir) {
     return false;
 }
 
-void mainWindow::launchAlbum(const QString &path) {
-        if (album == NULL && libraryWin_ != NULL) {
-            album = new imageAlbum(libraryWin_->getDirModel());
-            connect(libraryWin_->getDirView()->selectionModel(), SIGNAL(currentRowChanged(const QModelIndex&, const QModelIndex&)), album, SLOT(currentSelectionChanged(const QModelIndex&, const QModelIndex&)));
-       }
-    
-}
-
 void mainWindow::launchEuler() {
 
     if (euler == NULL) {
@@ -526,8 +513,7 @@ void mainWindow::import() {
         if (fileList.isEmpty()) {
             return;
         }
-        importTool *import = new importTool(mainData, fileList);
-        connect(import, SIGNAL(acceptedImages(const QHash< QString, QHash < QString, QString > >&)), this, SLOT(importFiles(const QHash<QString, QHash<QString, QString> > &)));
+        
     }
 }
 
@@ -549,13 +535,6 @@ void mainWindow::toggleAutoSave() {
         QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched off"));
         timer->stop();
     }
-}
-
-void mainWindow::showAlbum(bool show) {
-    if (album == NULL)
-        launchAlbum(mainData->getDir("project"));
-
-    album->setHidden(!show);
 }
 
 void mainWindow::showEuler(bool show) {

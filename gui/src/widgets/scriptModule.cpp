@@ -23,7 +23,6 @@
 #include <QPalette>
 #include <QLabel>
 
-#include "scriptProgress.h"
 using namespace std;
 
 scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::moduleType type, QWidget *parent)

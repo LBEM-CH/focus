@@ -32,16 +32,12 @@
 #include <QListWidgetItem>
 
 #include <confData.h>
-#include <confManual.h>
-#include <scriptProgress.h>
 #include <viewContainer.h>
 #include <resizeableStackedWidget.h>
 #include <scriptModule.h>
 #include <confInterface.h>
 #include <confModel.h>
 #include <LogViewer.h>
-#include <controlBar.h>
-#include <levelGroup.h>
 #include <resultsModule.h>
 #include <reprojectWindow.h>
 #include <confEditor.h>

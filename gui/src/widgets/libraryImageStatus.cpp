@@ -51,10 +51,18 @@ libraryImageStatus::libraryImageStatus(projectModel* model, QWidget* parent)
 
 QFormLayout* libraryImageStatus::fillFormLayout(const QStringList& labels) {
     QFormLayout* dataLayout = new QFormLayout;
+    dataLayout->setRowWrapPolicy(QFormLayout::DontWrapRows);
+    dataLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+    dataLayout->setFormAlignment(Qt::AlignTop);
+    dataLayout->setLabelAlignment(Qt::AlignLeft);
     dataLayout->setHorizontalSpacing(20);
     for(int i=0; i< labels.size(); ++i) {
         QLabel* valueLabel = new QLabel;
         dataLayout->addRow(labels[i], valueLabel);
+        QLabel* label = static_cast<QLabel*>(dataLayout->itemAt(i, QFormLayout::LabelRole)->widget());
+        QFont font = label->font();
+        font.setBold(true);
+        label->setFont(font);
     }
     
     return dataLayout;

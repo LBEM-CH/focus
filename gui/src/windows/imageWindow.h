@@ -33,13 +33,10 @@
 #include <blockContainer.h>
 #include <confInterface.h>
 #include <scriptModule.h>
-#include <controlActionsGroup.h>
 #include <resultsParser.h>
 #include <imagePreview.h>
-#include <levelGroup.h>
 #include <LogViewer.h>
 #include <statusViewer.h>
-#include <confManual.h>
 #include <resizeableStackedWidget.h>
 #include <warningBox.h>
 #include <scriptParser.h>

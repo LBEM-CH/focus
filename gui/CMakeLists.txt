@@ -73,6 +73,13 @@ endif(OPENGL_FOUND)
 # Header files ----------------------------------------------------------------
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/data)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/dialogs)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/extentions)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/models)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/mrcImage)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/widgets)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/windows)
 if(APPLE)
 	include_directories(/opt/local/include)
 endif(APPLE)
@@ -84,85 +91,72 @@ file(GLOB_RECURSE 2DX_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 # QT forms ---------------------------------------------------------------------
 file(GLOB 2DX_UI_FORMS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.ui)
 
-configure_file(src/confVersion.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/confVersion.h)
+configure_file(src/widgets/confVersion.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/widgets/confVersion.h)
 
 # moc files --------------------------------------------------------------------
 # these are all the headers containing Q_OBJECT
 # TODO: glob these files with a cmake module
 set(MOC_HDRS
         mainWindow.h
-        src/aboutWindow.h
-        src/abstractTool.h
-        src/libraryContainer.h
-        src/albumDelegate.h
-        src/albumModel.h
-        src/albumView.h
-        src/albumViewer.h
-        src/blockContainer.h
-        src/colorTool.h
-        src/confData.h
-        src/confDelegate.h
-        src/confEditor.h
-        src/confElement.h
-        src/confInput.h
-        src/confInterface.h
-        src/confManual.h
-        src/confModel.h
-        src/confSection.h
-        src/confSectionHeader.h
-        src/confValidator.h
-        src/controlActionsGroup.h
-        src/controlBar.h
-        src/ctfTool.h
-        src/displayParametersTool.h
-        src/eulerWindow.h
-        src/fileWatcher.h
-        src/fullScreenImage.h
-        src/graphicalButton.h
-        src/imageAlbum.h
-        src/imageContainer.h
-        src/imageNavigator.h
-        src/imagePreview.h
-        src/imageViewer.h
-        src/imageWindow.h
-        src/importBox.h
-        src/importTool.h
-        src/largeMRC.h
-        src/latticeRefineTool.h
-        src/latticeTool.h
-        src/levelGroup.h
-        src/libraryImageStatus.h
-        src/LogViewer.h
-        src/mergeContainer.h
-        src/mouseAssignTool.h
-        src/mrcGraphicsItem.h
-        src/mrcImage.h
-        src/navigator.h
-        src/noScrollComboBox.h
-        src/phaseView.h
-        src/progressStamps.h
-        src/projectDelegate.h
-        src/projectModel.h
-        src/reprojectWindow.h
-        src/resizeableStackedWidget.h
-        src/resultsData.h
-        src/resultsFile.h
-        src/resultsModule.h
-        src/resultsParser.h
-        src/scriptModule.h
-        src/scriptParser.h
-        src/scriptProgress.h
-        src/scriptTab.h
-        src/selectionFFT.h
-        src/SpinBoxDelegate.h
-        src/spotSelectTool.h
-        src/statusViewer.h
-        src/textBrowser.h
-        src/translator.h
-        src/updateWindow.h
-        src/viewContainer.h
-        src/warningBox.h
-        src/zoomWindow.h
+        src/data/resultsData.h
+        src/data/confData.h
+        src/data/confElement.h
+        src/data/confDelegate.h
+        src/data/confSection.h
+        src/widgets/libraryImageStatus.h
+        src/widgets/confInterface.h
+        src/widgets/resizeableStackedWidget.h
+        src/widgets/confInput.h
+        src/widgets/translator.h
+        src/widgets/noScrollComboBox.h
+        src/widgets/imageViewer.h
+        src/widgets/statusViewer.h
+        src/widgets/confValidator.h
+        src/widgets/mrcGraphicsItem.h
+        src/widgets/zoomWindow.h
+        src/widgets/textBrowser.h
+        src/widgets/resultsParser.h
+        src/widgets/viewContainer.h
+        src/widgets/confEditor.h
+        src/widgets/selectionFFT.h
+        src/widgets/colorTool.h
+        src/widgets/SpinBoxDelegate.h
+        src/widgets/graphicalButton.h
+        src/widgets/imagePreview.h
+        src/widgets/displayParametersTool.h
+        src/widgets/latticeTool.h
+        src/widgets/scriptModule.h
+        src/widgets/confSectionHeader.h
+        src/widgets/abstractTool.h
+        src/widgets/fullScreenImage.h
+        src/widgets/ctfTool.h
+        src/widgets/resultsModule.h
+        src/widgets/latticeRefineTool.h
+        src/widgets/warningBox.h
+        src/widgets/mouseAssignTool.h
+        src/widgets/LogViewer.h
+        src/widgets/blockContainer.h
+        src/widgets/imageNavigator.h
+        src/widgets/resultsFile.h
+        src/widgets/phaseView.h
+        src/widgets/spotSelectTool.h
+        src/extentions/scriptParser.h
+        src/extentions/fileWatcher.h
+        src/mrcImage/largeMRC.h
+        src/mrcImage/mrcImage.h
+        src/windows/libraryContainer.h
+        src/windows/imageWindow.h
+        src/windows/imageContainer.h
+        src/windows/mergeContainer.h
+        src/dialogs/updateWindow.h
+        src/dialogs/aboutWindow.h
+        src/dialogs/eulerWindow.h
+        src/dialogs/reprojectWindow.h
+        src/models/confModel.h
+        src/models/albumModel.h
+        src/models/projectModel.h
+        src/models/projectDelegate.h
+
 )
 
 QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})

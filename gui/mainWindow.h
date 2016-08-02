@@ -45,8 +45,6 @@
 #include <QStringList>
 
 #include <confData.h>
-#include <confManual.h>
-#include <scriptProgress.h>
 #include <viewContainer.h>
 #include <resizeableStackedWidget.h>
 #include <scriptModule.h>
@@ -55,20 +53,14 @@
 #include <confDelegate.h>
 #include <projectDelegate.h>
 #include <LogViewer.h>
-#include <controlBar.h>
-#include <levelGroup.h>
 #include <resultsModule.h>
 #include <projectModel.h>
 #include <imagePreview.h>
-#include <imageAlbum.h>
 #include <eulerWindow.h>
 #include <reprojectWindow.h>
-#include <importBox.h>
-#include <importTool.h>
 #include <aboutWindow.h>
 #include <updateWindow.h>
 #include <confEditor.h>
-#include <scriptTab.h>
 
 #include "libraryContainer.h"
 #include "mergeContainer.h"
@@ -86,7 +78,6 @@ public slots:
 
     void setSaveState(bool state);
 
-    void showAlbum(bool show = true);
     void showEuler(bool show = true);
     void showReproject(bool show = true);
 
@@ -98,7 +89,6 @@ public slots:
     void openURL(const QString &url);
     void toggleAutoSave();
 
-    void launchAlbum(const QString &path);
     void launchEuler();
     void launchReproject();
 
@@ -135,7 +125,6 @@ private:
 
     QString installedVersion;
 
-    imageAlbum *album;
     eulerWindow *euler;
     reprojectWindow *reproject;
     

@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include "imageWindow.h"
-#include "progressStamps.h"
 #include  <QDesktopServices>
 #include <iostream>
 using namespace std;

@@ -12,7 +12,6 @@
 #############################################################################
 import sparx as spx
 import numpy as np
-import RDRutil as rdr
 import glob
 import os
 import sys
@@ -23,6 +22,7 @@ import EMAN2 as e2
 
 def main():
 
+	# Get arguments:
 	folders = sys.argv[1]
 	merge_dirfile = sys.argv[2]
 	png_path = sys.argv[3]
@@ -65,6 +65,12 @@ def main():
 		tiltgeom = 'LATTICE_'
 	elif sys.argv[20] == 'Merge':
 		tiltgeom = 'MERGE_'
+	if sys.argv[21] == 'Micrograph':
+		ctfcor = True
+		stack_rootname = stack_rootname + '_ctfcor'
+	else:
+		ctfcor = False
+	# End arguments
 
 	f = open(merge_dirfile,'r')
 	img_dirs = f.readlines()
@@ -75,7 +81,7 @@ def main():
 	shy = 0.0
 	occ = 100.0
 	logp = 0
-	sigma = 0.5
+	sig = 0.5 # This has nothing to do with the normalizaiton SIGMA!
 	score = 0.0
 	chg = 0.0
 
@@ -93,29 +99,42 @@ def main():
 		d = d.strip()
 		imname = d.split('/')[-1]
 
+		if ctfcor:
 
-		# First we look for the masked, zero-padded, normalized micrograph:
-		try:
-
-			mrc = glob.glob(folders+d+'/m'+imname+'.mrc')[0]
-			bf = open(folders+d+'/m'+imname+'.box', 'w+')
-
-		except:
-
-			# If it doesn't exist, we try the unmasked, zero-padded, normalized micrograph:
 			try:
 
-				mrc = glob.glob(folders+d+'/'+imname+'.mrc')[0]
-				bf = open(folders+d+'/'+imname+'.box', 'w+')
+				mrc = glob.glob(folders+d+'/image_ctfcor.mrc')[0]
+				bf = open(folders+d+'/image_ctfcor.box', 'w+')
 
 			except:
 
-					# If neither exist we skip this image
+				print ':: CTF-corrected micrograph not found for image %s!' % d
+				continue
 
-					print 'Problem with image %s!' % d
-					continue
+		else:
 
-		print '\nNow boxing unit cells of micrograph'
+			# First we look for the masked, zero-padded, normalized micrograph:
+			try:
+
+				mrc = glob.glob(folders+d+'/m'+imname+'.mrc')[0]
+				bf = open(folders+d+'/m'+imname+'.box', 'w+')
+
+			except:
+
+				# If it doesn't exist, we try the unmasked, zero-padded, normalized micrograph:
+				try:
+
+					mrc = glob.glob(folders+d+'/'+imname+'.mrc')[0]
+					bf = open(folders+d+'/'+imname+'.box', 'w+')
+
+				except:
+
+						# If neither exist we skip this image
+
+						print ':: Problem with image %s!' % d
+						continue
+
+		print ':: Now boxing unit cells of micrograph %d/%d.' % (n, N)
 		print mrc
 
 		try:
@@ -134,11 +153,11 @@ def main():
 			ccstd = np.std(dat[:,4])
 			cc_thr = ccmean + sigcc * ccstd
 
-			print 'Image average value: %.1f' % img['mean']
-			print 'Image standard deviation: %.1f' % img['sigma']
-			print 'CC scores average value: %.1f' % ccmean
-			print 'CC scores standard deviation: %.1f' % ccstd
-			print 'Only particles with CC score above %.1f will be picked.' % cc_thr
+			print ': Image average value: %.1f' % img['mean']
+			print ': Image standard deviation: %.1f' % img['sigma']
+			print ': CC scores average value: %.1f' % ccmean
+			print ': CC scores standard deviation: %.1f' % ccstd
+			print ': Only particles with CC score above %.1f will be picked.' % cc_thr
 
 
 			# Get several values related to defocus, astigmatism and tilting:
@@ -167,7 +186,7 @@ def main():
 
 			meanimg = np.mean(imgarr)
 			stdimg = np.std(imgarr)
-			climimg = [meanimg - 3 * stdimg, meanimg + 3 * stdimg]
+			climimg = [meanimg - 2 * stdimg, meanimg + 2 * stdimg]
 
 			fig1 = plt.figure()
 			plt.imshow(imgarr, cmap=cm.gray, vmin=climimg[0], vmax=climimg[1])
@@ -199,7 +218,7 @@ def main():
 
 							box = NormalizeStack([box], sigma)[0]
 
-						if calculate_defocus_tilted:
+						if calculate_defocus_tilted and not ctfcor:
 
 							RLDEF1,RLDEF2 = CalculateDefocusTilted(x[i], y[i], apix, params[tiltgeom+'TLTAXIS'], params[tiltgeom+'TLTANG'], params['DEFOCUS1'], params['DEFOCUS2'])
 
@@ -209,7 +228,7 @@ def main():
 							RLDEF2 = params['DEFOCUS2']
 
 						# Write .par file with the parameters for each particle in the dataset:
-						print >>f, '      %d' % (idx+1),'  %.2f' % psi,'  %.2f' % theta,'    %.2f' % phi,'     %.2f' % shx,'      %.2f' % shy,'   %d' % magnification,'     %d' % n,'  %.2f' % RLDEF1,'  %.2f' % RLDEF2,'  %.2f' % ang,'  %.2f' % occ,'        %d' % logp,'     %.4f' % sigma,'   %.2f' % score,'   %.2f' % chg
+						print >>f, '      %d' % (idx+1),'  %.2f' % psi,'  %.2f' % theta,'    %.2f' % phi,'     %.2f' % shx,'      %.2f' % shy,'   %d' % magnification,'     %d' % n,'  %.2f' % RLDEF1,'  %.2f' % RLDEF2,'  %.2f' % ang,'  %.2f' % occ,'        %d' % logp,'     %.4f' % sig,'   %.2f' % score,'   %.2f' % chg
 
 						# Write the picking information to the .box file:
 						xbox = x[i] + w/2 - box_size/2
@@ -219,7 +238,7 @@ def main():
 						# Write image to the particle stack:
 						box.write_image(stack_path+stack_rootname+'.mrcs', idx)
 
-						if save_phase_flipped or save_wiener_filtered:
+						if (save_phase_flipped or save_wiener_filtered) and not ctfcor:
 
 							# Convert CTF parameters to SPARX convention:
 							defocus = (RLDEF1+RLDEF2)/2
@@ -240,24 +259,24 @@ def main():
 							ctf = spx.generate_ctf(p)
 
 						# Phase-flip the image:
-						if save_phase_flipped:
+						if save_phase_flipped and not ctfcor:
 
-							ctfcor = spx.filt_ctf(box, ctf,binary=1)
+							boxctfcor = spx.filt_ctf(box, ctf,binary=1)
 							if normalize_box:
 
-								ctfcor = rdr.NormalizeStack([ctfcor], sigma)[0]
+								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
 
-							ctfcor.write_image(stack_path+stack_rootname+'_ctf-phase_flip.mrcs', idx)
+							boxctfcor.write_image(stack_path+stack_rootname+'_phase-flipped.mrcs', idx)
 
-										# Phase-flip the image:
-						if save_wiener_filtered:
+						# Wiener-filter the image:
+						if save_wiener_filtered and not ctfcor:
 
-							ctfcor = spx.filt_ctf(box, ctf,binary=0)
+							boxctfcor = spx.filt_ctf(box, ctf,binary=0)
 							if normalize_box:
 
-								ctfcor = rdr.NormalizeStack([ctfcor], sigma)[0]
+								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
 								
-							ctfcor.write_image(stack_path+stack_rootname+'_ctf-wiener.mrcs', idx)
+							boxctfcor.write_image(stack_path+stack_rootname+'_wiener-filtered.mrcs', idx)
 
 						# Write green patch on image to be saved as .png describing the picking positions:
 						Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='lime', facecolor='none', linewidth=0.5, radius=20))
@@ -273,14 +292,14 @@ def main():
 					print 'Failed to box unit cell (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 					box_fail += 1
 
-			print 'Boxed units from micrograph %d/%d.' % (n, N)
+			print ':: Boxed unit cells from micrograph %d/%d.' % (n, N)
 
 			fig1.savefig(png_path+'mic_%.3d_' % n+imname+'_picking.png', dpi=300)
 			plt.close(fig1)
 
 		except RuntimeError:
 
-			print '\nPROBLEM WITH MICROGRAPH %d/%d!!! Maybe it was not found?' % (n, N)
+			print ':: PROBLEM WITH MICROGRAPH %d/%d!!! Maybe it was not found?' % (n, N)
 
 			print mrc
 
@@ -289,8 +308,8 @@ def main():
 		n += 1
 
 
-	print '\nTotal boxed unit cells: %d' % idx
-	print 'Failed to box %d unit cells.' % box_fail
+	print ':: Total boxed unit cells: %d' % idx
+	print ':: Failed to box %d unit cells.' % box_fail
 
 	f.close()
 

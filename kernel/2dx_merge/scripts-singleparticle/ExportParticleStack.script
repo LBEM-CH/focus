@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Export to FREALIGN                                					#
+# Title: Export particle stack                                					#
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -14,35 +14,33 @@
 # SORTORDER: 1
 #
 #
-# MANUAL: Single Particle Refinement with FREALIGN and RELION (under construction)
+# MANUAL: This script extracts particles from the 2D crystal images to be refined in single-particle fashion. Currently supports only FREALIGN.
 #
 # DISPLAY: SPR_RESMIN
 # DISPLAY: SPR_RESMAX
-# DISPLAY: SPR_SYM
-# DISPLAY: SCRATCH_DISK
 # DISPLAY: SPR_boxsize
 # DISPLAY: SPR_PhaseShift
 # DISPLAY: SPR_SIGCC
 # DISPLAY: SPR_InvertContrast
 # DISPLAY: SPR_NormalizeBox
+# DISPLAY: SPR_SigmaNorm
+# DISPLAY: SPR_WhichCTF
 # DISPLAY: SPR_CalculateDefocusTilted
 # DISPLAY: SPR_SavePhaseFlipped
 # DISPLAY: SPR_SaveWienerFiltered
-# DISPLAY: SPR_SigmaNorm
 # DISPLAY: SPR_WhichTiltGeometry
-# DISPLAY: Thread_Number
 # DISPLAY: CS
 # DISPLAY: KV
 # DISPLAY: sample_pixel
 # DISPLAY: phacon
 # DISPLAY: magnification
+# DISPLAY: SPR_SYM
 #
 #$end_local_vars
 #
 set bin_2dx = ""
 set proc_2dx = ""
 set app_python = ""
-set SCRATCH_DISK = ""
 #
 set SPR_RESMIN = ""
 set SPR_RESMAX = ""
@@ -57,9 +55,9 @@ set SPR_SavePhaseFlipped = ""
 set SPR_SaveWienerFiltered = ""
 set SPR_SigmaNorm = ""
 set SPR_WhichTiltGeometry = ""
+set SPR_WhichCTF = ""
 set CS = ""
 set KV = ""
-set Thread_Number = ""
 set sample_pixel = ""
 set phacon = ""
 set magnification = ""
@@ -67,16 +65,22 @@ set magnification = ""
 set SPR_IMGS_DIR = ${PWD}/../
 set SPR_MERGEFILE = ${PWD}/2dx_merge_dirfile.dat
 set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
-set SPR_FREALIGN_DIR = ${PWD}/SPR/frealign/
 set SPR_PICKING_DIR = ${PWD}/SPR/picking/
 set SPR_STACK_ROOTNAME = 'particles'
 #$end_vars
 
 # Start script commands:
 mkdir -p ${SPR_STACKS_DIR}
-mkdir -p ${SPR_FREALIGN_DIR}
 mkdir -p ${SPR_PICKING_DIR}
 
-${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry}
+${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF}
+
+if ( ${SPR_SavePhaseFlipped} == "y" ) then
+	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
+endif
+
+if ( ${SPR_SaveWienerFiltered} == "y" ) then
+	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
+endif
 
 #${app_python} ${proc_2dx}/SPR_mparameters.py ${FREALIGN_DIR}

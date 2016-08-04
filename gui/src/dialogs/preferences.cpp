@@ -42,21 +42,23 @@ PreferencesDialog::PreferencesDialog(confData* data, QWidget* parent)
     QFrame* vLine = new QFrame(this);
     vLine->setFrameStyle(QFrame::VLine | QFrame::Sunken);
     
-    QHBoxLayout *horizontalLayout = new QHBoxLayout;
-    horizontalLayout->addWidget(setupToolBar(), 0);
-    horizontalLayout->addWidget(vLine, 0);
-    horizontalLayout->addWidget(pagesWidget_, 1);
-
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
     buttonsLayout->addStretch(1);
     buttonsLayout->addWidget(closeButton);
-
-    QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addLayout(horizontalLayout, 1);
-    //mainLayout->addStretch(1);
-    mainLayout->addSpacing(12);
-    mainLayout->addLayout(buttonsLayout, 0);
-    setLayout(mainLayout);
+    
+    QVBoxLayout *verticalLayout = new QVBoxLayout;
+    verticalLayout->addWidget(pagesWidget_, 1);
+    verticalLayout->addSpacing(12);
+    verticalLayout->addLayout(buttonsLayout, 0);
+    
+    QHBoxLayout *horizontalLayout = new QHBoxLayout;
+    horizontalLayout->setMargin(0);
+    horizontalLayout->setSpacing(0);
+    horizontalLayout->addWidget(setupToolBar(), 0);
+    horizontalLayout->addWidget(vLine, 0);
+    horizontalLayout->addLayout(verticalLayout, 1);
+    
+    setLayout(horizontalLayout);
 
     setWindowTitle(tr("Preferences"));
     setModal(true);

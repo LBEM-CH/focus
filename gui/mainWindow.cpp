@@ -178,7 +178,7 @@ void mainWindow::setupMenuBar() {
     QStringList recents = UserProjects(mainData).projectPaths();
     if (recents.count() > 0) {
         QMenu* openRecentsMenu = new QMenu("Recent Projects");
-
+        openRecentsMenu->setIcon(*(mainData->getIcon("recent")));
         for(int i=0; i< recents.size(); ++i) {
             if (recents[i] != "" && recents[i] != QDir(mainData->getDir("project")).absolutePath()) {
                 QAction* act = new QAction(recents[i], this);
@@ -207,7 +207,7 @@ void mainWindow::setupMenuBar() {
     connect(openPreferencesAction, SIGNAL(triggered()), this, SLOT(editHelperConf()));
     optionMenu->addAction(openPreferencesAction);
     
-    QAction* setProjectNameAction = new QAction("Change Project Name", this);
+    QAction* setProjectNameAction = new QAction(*(mainData->getIcon("rename")), "Change Project Name", this);
     connect(setProjectNameAction, SIGNAL(triggered()), this, SLOT(changeProjectName()));
     optionMenu->addAction(setProjectNameAction);
 

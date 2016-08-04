@@ -79,6 +79,8 @@ class LibraryTab : public QWidget
         void updatePreview();
         
         void resetSelectionState();
+        
+        void updateProjectName();
                    
     private:
         void setupDirectoryContainer(confData*);
@@ -95,6 +97,7 @@ class LibraryTab : public QWidget
         QSortFilterProxyModel *sortModel;
         
         QLabel* selectionState;
+        QLabel* projectNameLabel;
                
         imagePreview* mapPreview;
         imagePreview* refPreview;

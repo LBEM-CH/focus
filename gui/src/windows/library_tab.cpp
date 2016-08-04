@@ -2,6 +2,7 @@
 #include <QMessageBox>
 
 #include "library_tab.h"
+#include "project_preferences.h"
 
 LibraryTab::LibraryTab(confData *dat, resultsData* results, QWidget* parent)
 : QWidget(parent) {
@@ -180,16 +181,20 @@ QWidget* LibraryTab::setupToolBar() {
     QTabWidget* tabWidget = new QTabWidget;
     tabWidget->addTab(setupSelectionTab(), "Library Tools");
     
+    projectNameLabel = new QLabel("");
+    projectNameLabel->setAlignment(Qt::AlignCenter);
+    projectNameLabel->setWordWrap(true);
+    QFont font = projectNameLabel->font();
+    font.setBold(true);
+    font.setPointSize(18);
+    projectNameLabel->setFont(font);
+    updateProjectName();
+    
     selectionState = new QLabel(" ");
     selectionState->setAlignment(Qt::AlignCenter);
-    QFont font = selectionState->font();
-    font.setBold(true);
-    selectionState->setFont(font);
-    
     QPalette pal = selectionState->palette();
     pal.setColor(QPalette::WindowText, Qt::darkGray);
     selectionState->setPalette(pal);
-    
     resetSelectionState();
     
     //Setup tool bar
@@ -197,8 +202,10 @@ QWidget* LibraryTab::setupToolBar() {
     //toolBar->setFixedWidth(200);
     QVBoxLayout* toolBarLayout =  new QVBoxLayout;
     toolBarLayout->addStretch(0);
-    toolBarLayout->setMargin(0);
+    toolBarLayout->setMargin(10);
+    toolBarLayout->setSpacing(15);
     
+    toolBarLayout->addWidget(projectNameLabel);
     toolBarLayout->addWidget(selectionState);
     toolBarLayout->addWidget(tabWidget);
     toolBar->setLayout(toolBarLayout);
@@ -721,4 +728,9 @@ void LibraryTab::resetSelectionState() {
     QString checked = QString::number(dirModel->getSelectionNames().count());
     QString selected = QString::number(dirView->selectionModel()->selectedRows().count());
     selectionState->setText(checked + " checked and " + selected + " highlighted ");
+}
+
+void LibraryTab::updateProjectName() {
+    projectNameLabel->setText(ProjectPreferences(data).projectName());
+    projectNameLabel->setToolTip(data->getDir("project"));
 }

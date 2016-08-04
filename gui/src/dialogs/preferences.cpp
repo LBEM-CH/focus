@@ -15,38 +15,36 @@
  */
 
 #include <QtWidgets>
-#include <QSettings>
 #include <QFontDatabase>
 #include <QPalette>
 #include <QColor>
+#include <QTableView>
+#include <QToolBar>
+#include <QAction>
+#include <QActionGroup>
 
 #include "user_preferences.h"
+#include "confModel.h"
 
 #include "preferences.h"
 
-PreferencesDialog::PreferencesDialog(confData* data, QWidget* parent) 
+PreferencesDialog::PreferencesDialog(confData* data, QWidget* parent)
 : QDialog(parent), mainData(data) {
-    contentsWidget_ = new QListWidget;
-    contentsWidget_->setViewMode(QListView::IconMode);
-    contentsWidget_->setIconSize(QSize(96, 84));
-    contentsWidget_->setMovement(QListView::Static);
-    contentsWidget_->setMaximumWidth(128);
-    contentsWidget_->setSpacing(12);
 
     pagesWidget_ = new QStackedWidget;
-    pagesWidget_->addWidget(getApperancePage());
-    pagesWidget_->addWidget(getViewersPage());
     pagesWidget_->addWidget(getAppsPage());
+    pagesWidget_->addWidget(getApperancePage());
+    pagesWidget_->setCurrentIndex(0);
 
     QPushButton *closeButton = new QPushButton(tr("Close"));
-
-    createIcons();
-    contentsWidget_->setCurrentRow(0);
-
     connect(closeButton, &QAbstractButton::clicked, this, &QWidget::close);
 
+    QFrame* vLine = new QFrame(this);
+    vLine->setFrameStyle(QFrame::VLine | QFrame::Sunken);
+    
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
-    horizontalLayout->addWidget(contentsWidget_);
+    horizontalLayout->addWidget(setupToolBar(), 0);
+    horizontalLayout->addWidget(vLine, 0);
     horizontalLayout->addWidget(pagesWidget_, 1);
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
@@ -54,43 +52,46 @@ PreferencesDialog::PreferencesDialog(confData* data, QWidget* parent)
     buttonsLayout->addWidget(closeButton);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addLayout(horizontalLayout);
-    mainLayout->addStretch(1);
+    mainLayout->addLayout(horizontalLayout, 1);
+    //mainLayout->addStretch(1);
     mainLayout->addSpacing(12);
-    mainLayout->addLayout(buttonsLayout);
+    mainLayout->addLayout(buttonsLayout, 0);
     setLayout(mainLayout);
 
     setWindowTitle(tr("Preferences"));
     setModal(true);
+    resize(300, 400);
 }
 
-void PreferencesDialog::createIcons() {
-    QListWidgetItem *appearanceButton = new QListWidgetItem(contentsWidget_);
-    appearanceButton->setIcon(*(mainData->getIcon("appearance")));
-    appearanceButton->setText(tr("Appearance"));
-    appearanceButton->setTextAlignment(Qt::AlignHCenter);
-    appearanceButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+QToolBar* PreferencesDialog::setupToolBar() {  
+    QToolBar* contentsWidget_ = new QToolBar("Select");
+    contentsWidget_->setOrientation(Qt::Vertical);
+    contentsWidget_->setIconSize(QSize(36, 36));
 
-    QListWidgetItem *viewersButton = new QListWidgetItem(contentsWidget_);
-    viewersButton->setIcon(*(mainData->getIcon("viewers")));
-    viewersButton->setText(tr("Viewers"));
-    viewersButton->setTextAlignment(Qt::AlignHCenter);
-    viewersButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-    QListWidgetItem *externalButton = new QListWidgetItem(contentsWidget_);
-    externalButton->setIcon(*(mainData->getIcon("external")));
-    externalButton->setText(tr("Linked Apps"));
-    externalButton->setTextAlignment(Qt::AlignHCenter);
-    externalButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-    connect(contentsWidget_, &QListWidget::currentItemChanged, this, &PreferencesDialog::changePage);
-}
-
-void PreferencesDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous) {
-    if (!current)
-        current = previous;
-
-    pagesWidget_->setCurrentIndex(contentsWidget_->row(current));
+    QAction *externalButton = new QAction(*(mainData->getIcon("external")), tr("Linked Apps"), contentsWidget_);
+    externalButton->setCheckable(true);
+    connect(externalButton, &QAction::triggered,
+            [=] () {
+                pagesWidget_->setCurrentIndex(0);
+            });
+            
+    QAction *appearanceButton = new QAction(*(mainData->getIcon("appearance")), tr("Appearance"), contentsWidget_);
+    appearanceButton->setCheckable(true);
+    connect(appearanceButton, &QAction::triggered,
+            [=] () {
+                pagesWidget_->setCurrentIndex(1);
+            });
+            
+    QActionGroup* group = new QActionGroup(this);
+    group->setExclusive(true);
+    group->addAction(externalButton);
+    group->addAction(appearanceButton);
+    
+    contentsWidget_->addAction(externalButton);
+    contentsWidget_->addAction(appearanceButton);
+    
+    externalButton->setChecked(true);
+    return contentsWidget_;
 }
 
 QWidget* PreferencesDialog::getApperancePage() {
@@ -126,8 +127,8 @@ QWidget* PreferencesDialog::getApperancePage() {
             [ = ] (const QString & value){UserPreferences(mainData).setFontFamily(value);});
 
     QFormLayout *fontLayout = new QFormLayout;
-                    fontLayout->setRowWrapPolicy(QFormLayout::WrapLongRows);
-                    fontLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    fontLayout->setRowWrapPolicy(QFormLayout::WrapLongRows);
+    fontLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
     fontLayout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
     fontLayout->setLabelAlignment(Qt::AlignRight);
     fontLayout->addRow("Font Size", fontSizeCombo);
@@ -143,78 +144,50 @@ QWidget* PreferencesDialog::getApperancePage() {
     return widget;
 }
 
-QWidget* PreferencesDialog::getViewersPage() {
+QWidget* PreferencesDialog::getAppsPage() {
     QWidget* widget = new QWidget();
-    QGroupBox *updateGroup = new QGroupBox(tr("Package selection"));
-    QCheckBox *systemCheckBox = new QCheckBox(tr("Update system"));
-    QCheckBox *appsCheckBox = new QCheckBox(tr("Update applications"));
-    QCheckBox *docsCheckBox = new QCheckBox(tr("Update documentation"));
+    QVBoxLayout *layout = new QVBoxLayout;
 
-    QGroupBox *packageGroup = new QGroupBox(tr("Existing packages"));
+    QHBoxLayout *top = new QHBoxLayout;
+    QHBoxLayout *middle = new QHBoxLayout;
+    QHBoxLayout *bottom = new QHBoxLayout;
 
-    QListWidget *packageList = new QListWidget;
-    QListWidgetItem *qtItem = new QListWidgetItem(packageList);
-    qtItem->setText(tr("Qt"));
-    QListWidgetItem *qsaItem = new QListWidgetItem(packageList);
-    qsaItem->setText(tr("QSA"));
-    QListWidgetItem *teamBuilderItem = new QListWidgetItem(packageList);
-    teamBuilderItem->setText(tr("Teambuilder"));
+    layout->addLayout(top, 0);
+    layout->addLayout(middle, 1);
+    layout->addLayout(bottom, 0);
 
-    QPushButton *startUpdateButton = new QPushButton(tr("Start update"));
+    QFont font;
+    font.setStyleHint(QFont::Times);
+    font.setBold(true);
+    font.setPixelSize(14);
 
-    QVBoxLayout *updateLayout = new QVBoxLayout;
-    updateLayout->addWidget(systemCheckBox);
-    updateLayout->addWidget(appsCheckBox);
-    updateLayout->addWidget(docsCheckBox);
-    updateGroup->setLayout(updateLayout);
+    QLabel *title = new QLabel("External Applications (Double Click to Edit)", this);
+    title->setFont(font);
+    title->setTextFormat(Qt::RichText);
+    top->addWidget(title);
 
-    QVBoxLayout *packageLayout = new QVBoxLayout;
-    packageLayout->addWidget(packageList);
-    packageGroup->setLayout(packageLayout);
+    confModel *dataModel = new confModel(mainData->getSubConf("appConf"), this);
+    QTableView* preferencesTable = new QTableView(this);
+    preferencesTable->setModel(dataModel);
+    preferencesTable->horizontalHeader()->hide();
+    preferencesTable->verticalHeader()->hide();
+    preferencesTable->setColumnHidden(0, true);
+    preferencesTable->setColumnHidden(2, true);
+    preferencesTable->setRowHidden(0, true);
+    preferencesTable->resizeColumnsToContents();
+    preferencesTable->setShowGrid(false);
+    preferencesTable->setAlternatingRowColors(true);
+    middle->addWidget(preferencesTable);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(updateGroup);
-    mainLayout->addWidget(packageGroup);
-    mainLayout->addSpacing(12);
-    mainLayout->addWidget(startUpdateButton);
-    mainLayout->addStretch(1);
-    widget->setLayout(mainLayout);
+    QPushButton *saveButton = new QPushButton("Save", this);
+    connect(saveButton, SIGNAL(released()), this, SLOT(saveApps()));
+    bottom->addWidget(saveButton);
+
+    widget->setLayout(layout);
     return widget;
 }
 
-QWidget* PreferencesDialog::getAppsPage() {
-    QWidget* widget = new QWidget();
-    QGroupBox *packagesGroup = new QGroupBox(tr("Look for packages"));
-
-    QLabel *nameLabel = new QLabel(tr("Name:"));
-    QLineEdit *nameEdit = new QLineEdit;
-
-    QCheckBox *releasesCheckBox = new QCheckBox(tr("Releases"));
-    QCheckBox *upgradesCheckBox = new QCheckBox(tr("Upgrades"));
-
-    QSpinBox *hitsSpinBox = new QSpinBox;
-    hitsSpinBox->setPrefix(tr("Return up to "));
-    hitsSpinBox->setSuffix(tr(" results"));
-    hitsSpinBox->setSpecialValueText(tr("Return only the first result"));
-    hitsSpinBox->setMinimum(1);
-    hitsSpinBox->setMaximum(100);
-    hitsSpinBox->setSingleStep(10);
-
-    QPushButton *startQueryButton = new QPushButton(tr("Start query"));
-
-    QGridLayout *packagesLayout = new QGridLayout;
-    packagesLayout->addWidget(nameLabel, 0, 0);
-    packagesLayout->addWidget(nameEdit, 0, 1);
-    packagesLayout->addWidget(releasesCheckBox, 2, 0);
-    packagesLayout->addWidget(upgradesCheckBox, 3, 0);
-    packagesLayout->addWidget(hitsSpinBox, 4, 0, 1, 2);
-    packagesGroup->setLayout(packagesLayout);
-
-    QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(packagesGroup);
-    mainLayout->addSpacing(12);
-    mainLayout->addWidget(startQueryButton);
-    mainLayout->addStretch(1);
-    widget->setLayout(mainLayout);
-    return widget;
+void PreferencesDialog::saveApps() {
+    mainData->getSubConf("appConf")->save();
+    close();
 }

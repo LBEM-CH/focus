@@ -55,7 +55,6 @@ confData::confData(const confData &data)
                   :QObject(data.parent())
 {
   parentConf = data.parentConf;
-  userData = data.userData;
   dataFilename = data.dataFilename;
   header = data.header;
   sections = data.sections;
@@ -103,11 +102,6 @@ confData::~confData()
 void confData::setParentConf(confData *parent)
 {
   parentConf = parent;
-}
-
-void confData::setUserConf(confData *userConf)
-{
-  userData = userConf;
 }
 
 void confData::setSymLink(const QString fileName, const QString linkName)
@@ -909,11 +903,6 @@ const QString &confData::version()
 	version_2dx = QString::fromUtf8(version_string.c_str());
 	
 	return version_2dx;
-}
-
-confData *confData::userConf()
-{
-  return userData;
 }
 
 void confData::setURL(const QString &name, const QString &url)

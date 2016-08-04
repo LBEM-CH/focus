@@ -22,11 +22,8 @@
 
 #include "confData.h"
 
-class QListWidget;
-class QListWidgetItem;
 class QStackedWidget;
-class QSettings;
-class QFont;
+class QToolBar;
 
 class PreferencesDialog : public QDialog {
     Q_OBJECT
@@ -35,16 +32,14 @@ public:
     PreferencesDialog(confData* data, QWidget* parent = NULL);
 
 public slots:
-    void changePage(QListWidgetItem* current, QListWidgetItem* previous);
+    void saveApps();
 
 private:
-    void createIcons();
+    QToolBar* setupToolBar();
 
     QWidget* getApperancePage();
-    QWidget* getViewersPage();
     QWidget* getAppsPage();
 
-    QListWidget* contentsWidget_;
     QStackedWidget* pagesWidget_;
     confData* mainData;
 };

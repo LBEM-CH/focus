@@ -22,8 +22,6 @@ endif(APPLE)
 
 set(CONF 
         VARIABLE.txt 
-        2dx_image-user.cfg 
-        2dx_merge-user.cfg 
         status-window
         2dx.cfg	
         2dx.cshrc 

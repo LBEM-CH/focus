@@ -20,11 +20,16 @@
 #include <QString>
 #include <QStringList>
 #include <QDir>
+#include <QFileInfo>
 
 #include "confData.h"
 
 class UserProjects : public QSettings {
 public:
+    
+    UserProjects(const QString& homeDir)
+    : QSettings(homeDir + "/projects.ini", QSettings::Format::IniFormat) {
+    }
 
     UserProjects(confData* data)
     : QSettings(data->getDir("home_2dx") + "/projects.ini", QSettings::Format::IniFormat) {
@@ -36,9 +41,13 @@ public:
         paths.removeDuplicates();
         clear();
         beginWriteArray("recents");
+        int index = 0;
         for (int i = 0; i < paths.size(); ++i) {
-            setArrayIndex(i);
-            setValue("path", paths.at(i));
+            if (QFileInfo(paths.at(i) + "/merge/" + "2dx_merge.cfg").exists()) {
+                setArrayIndex(index);
+                setValue("path", paths.at(i));
+                index++;
+            }
         }
         endArray();
     }

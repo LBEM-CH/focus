@@ -20,6 +20,7 @@
 
 
 #include "updateWindow.h"
+#include "user_preferences.h"
 #include <iostream>
 using namespace std;
 
@@ -93,7 +94,7 @@ void updateWindow::updateTextBox()
   QByteArray updateHTML = updateInf->readAll();
   QString updateString = QString(updateHTML);
   QString currentVersion = updateString.section("##",1,1).trimmed();
-  QString remindUpdate = data->userConf()->get("remindUpdate","value").toLower();
+  QString remindUpdate = UserPreferences(data).getRemindUpdate().toLower();
   QString intVersion = currentVersion, intInstalled = installedVersion;
   intVersion.remove('.'); intInstalled.remove('.');
   if(intVersion.toInt()>intInstalled.toInt())
@@ -104,7 +105,7 @@ void updateWindow::updateTextBox()
     {
       int choice = QMessageBox::question(this,tr("New version available"),tr("A new version of 2dx is available. <br> Would you like to upgrade?"),tr("Tell Me More"),tr("Skip this version"),tr("Not now"));
       if(choice == 0) show();
-      if(choice == 1) {data->userConf()->set("remindUpdate",currentVersion); data->userConf()->save();}
+      if(choice == 1) UserPreferences(data).setRemindUpdate(currentVersion); 
     }
   }
   else

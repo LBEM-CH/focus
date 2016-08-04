@@ -15,7 +15,9 @@ class ImageTab : public QWidget
     Q_OBJECT
            
     public:
-        ImageTab(confData* mainData, QWidget* parent=NULL);
+        ImageTab(confData* mainData, const QStringList& imagesOpen, QWidget* parent=NULL);
+        
+        QStringList getImagesOpen();
         
     public slots:
         void showImageWindow(const QString&);

@@ -27,6 +27,7 @@
 #include <QStringList>
 
 #include "mainWindow.h"
+#include "open_project_wizard.h"
 
 using namespace std;
 
@@ -36,34 +37,21 @@ Q_IMPORT_PLUGIN(qjpeg)
 Q_IMPORT_PLUGIN(qgif)
 #endif
 
-QString getAppDir() {
-    QString appDir = QApplication::applicationDirPath();
-    QString sep = "/../";
-#ifdef Q_OS_MAC
-    appDir += "/../../../";
-#endif
-    int tries = 0;
-    while (!QFileInfo(appDir + sep + "config/2dx_master.cfg").exists() && tries < 3) {
-        qDebug() << (appDir + sep + "config/2dx_master.cfg") << " does not exist!";
-        sep += "../";
-        tries++;
-    }
-    if (QFileInfo(appDir + sep + "config/2dx_master.cfg").exists()) {
-        return QString(appDir + sep);
-    } else
-        return QString();
-
+void loadMainWindow(const QString& projectPath) {
+    mainWindow *win = new mainWindow(projectPath);
+    win->show();
+    win->raise(); // raises the window on top of the parent widget stack
+    win->activateWindow(); // activates the window an thereby putting it on top-level
 }
 
-void initializeProject(const QString &appDir, const QString &workingDir) {
-
-    QDir dir(workingDir);
-    dir.mkdir("merge");
-    dir.mkpath("merge/proc");
-    dir.mkpath("merge/LOGS");
-    confData data(workingDir + "/merge/" + "2dx_merge.cfg", appDir + "config/2dx_master.cfg");
-    data.setSymLink("merge/2dx_merge.cfg", workingDir + "/2dx_master.cfg");
-    data.save();
+void openProject() {
+    OpenProjectWizard* wiz = new OpenProjectWizard();
+    wiz->setAttribute(Qt::WA_DeleteOnClose);
+    wiz->connect(wiz, &OpenProjectWizard::projectSelected,
+            [ = ](const QString & projectPath){
+        loadMainWindow(projectPath);
+    });
+    wiz->showNormal();
 }
 
 int main(int argc, char *argv[]) {
@@ -74,38 +62,18 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationName("C-CINA");
     QCoreApplication::setOrganizationDomain("c-cina.org");
 
-    QString appDir = getAppDir();
-    if (appDir.isEmpty()) exit(0);
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QApplication::applicationName());
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("project_dir", "Path of the 2dx Project to be opened.");
+    parser.process(app);
 
-    QString configDir = appDir + "/config";
-
-    // read user config to get the latest image dir
-    confData* userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg", configDir + "/" + "2dx_merge-user.cfg");
-    userData->save();
-    QString userDirPath = userData->get("workingDir", "value");
-    //qDebug() << "The last used working dir is: " << userDirPath;
-    if (userDirPath.isEmpty())
-        userDirPath = QDir::homePath();
-
-
-    QString workingDir = QFileDialog::getExistingDirectory(0, "Select a Project Directory", userDirPath);
-    if (workingDir.isEmpty() || !QDir(workingDir).exists()) exit(0);
-    //save the selected dir as working dir in 2dx_merge-user.cfg
-    userData->set("workingDir", workingDir);
-    userData->save();
-
-    if (!QFileInfo(workingDir + "/merge/" + "2dx_merge.cfg").exists()) {
-        quint32 choice = QMessageBox::question(NULL, "Confirm Create new Project?", "No configuration data found in:\n" + workingDir + "\n\nCreate new config files in this directory?", "Create", "Cancel", QString(), 0, 1);
-        if (choice) return 0;
-        else {
-            initializeProject(appDir, workingDir);
-        }
+    if (!parser.positionalArguments().isEmpty()) {
+        loadMainWindow(parser.positionalArguments().first());
+    } else {
+        openProject();
     }
-
-    mainWindow *win = new mainWindow(workingDir);
-    win->show();
-    win->raise(); // raises the window on top of the parent widget stack
-    win->activateWindow(); // activates the window an thereby putting it on top-level
 
     return app.exec();
 }

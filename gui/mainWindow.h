@@ -84,7 +84,7 @@ public slots:
     void showReproject(bool show = true);
     void showProjectTools(bool show = true);
 
-    void open();
+    void open(const QString& projectPath="");
     void openURL(const QString &url);
     void toggleAutoSave();
 
@@ -93,6 +93,9 @@ public slots:
     void launchProjectTools();
 
     void showImageWindow(const QModelIndex&);
+    
+    void changeProjectName();
+    void updateWindowTitle();
     
 signals:
     void saveConfig();
@@ -108,6 +111,7 @@ private:
     void setupWindows();
     void setupToolBar();
     confData* setupMainConfiguration(const QString &directory);
+    void reallyClose(QCloseEvent *event);
     
     bool createDir(const QString &dir);
     

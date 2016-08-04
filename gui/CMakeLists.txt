@@ -155,6 +155,7 @@ set(MOC_HDRS
         src/dialogs/reprojectWindow.h
         src/dialogs/project_tools.h
         src/dialogs/preferences.h
+        src/dialogs/open_project_wizard.h
         src/models/confModel.h
         src/models/albumModel.h
         src/models/projectModel.h

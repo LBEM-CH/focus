@@ -30,20 +30,25 @@
 #include "mainWindow.h"
 #include "blockContainer.h"
 #include "user_preferences.h"
+#include "project_preferences.h"
+#include "user_projects.h"
 
 using namespace std;
 
 mainWindow::mainWindow(const QString &directory, QWidget *parent)
 : QMainWindow(parent) {
+    
+    if (!QFileInfo(directory + "/merge/" + "2dx_merge.cfg").exists()) {
+        QMessageBox::critical(this, "Configuration Files not found!", "This folder does not have 2DX configuration files. Will quit now.");
+        exit(0);
+    }
 
     m_do_autosave = true;
     mainData = setupMainConfiguration(directory);
-    userData = new confData(QDir::homePath() + "/.2dx/" + "2dx_merge-user.cfg", mainData->getDir("config") + "/" + "2dx_merge-user.cfg");
-    userData->save();
-    mainData->setUserConf(userData);
-
+    UserProjects(mainData).addProjectPath(mainData->getDir("project"));
+    
     installedVersion = mainData->version();
-    setWindowTitle(mainData->getDir("project") + " | 2dx (" + installedVersion + ")");
+    updateWindowTitle();
     setUnifiedTitleAndToolBarOnMac(true);
 
     updates = new updateWindow(mainData, this);
@@ -63,7 +68,7 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     euler = NULL;
     reproject = NULL;
 
-    resize(1120, 630);
+    resize(1300, 900);
 }
 
 confData* mainWindow::setupMainConfiguration(const QString &directory) {
@@ -120,7 +125,7 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
     mainData->setDir("translatorsDir", mainData->getDir("pluginsDir") + "/translators");
     mainData->setDir("resource", QDir(mainData->getDir("config") + "/resource/"));
     mainData->setDir("2dx_bin", mainData->getDir("application") + "/.." + "/bin");
-    mainData->addApp("this", mainData->getDir("application") + "/../" + "bin/" + "2dx_merge");
+    mainData->addApp("this", mainData->getDir("application") + "/../" + "bin/" + "2dx_gui");
     mainData->addApp("2dx_image", mainData->getDir("2dx_bin") + "/" + "2dx_image");
     mainData->addApp("2dx_merge", mainData->getDir("2dx_bin") + "/" + "2dx_merge");
 
@@ -148,7 +153,7 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
 }
 
 void mainWindow::setupActions() {
-    openAction = new QAction(*(mainData->getIcon("open")), tr("&New"), this);
+    openAction = new QAction(*(mainData->getIcon("open")), tr("&Open Project"), this);
     openAction->setShortcut(tr("Ctrl+O"));
     connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
 
@@ -169,6 +174,22 @@ void mainWindow::setupMenuBar() {
      */
     QMenu *fileMenu = new QMenu("File");
     fileMenu->addAction(openAction);
+    
+    QStringList recents = UserProjects(mainData).projectPaths();
+    if (recents.count() > 0) {
+        QMenu* openRecentsMenu = new QMenu("Recent Projects");
+
+        for(int i=0; i< recents.size(); ++i) {
+            if (recents[i] != "" && recents[i] != QDir(mainData->getDir("project")).absolutePath()) {
+                QAction* act = new QAction(recents[i], this);
+                connect(act, &QAction::triggered,
+                        [ = ] (bool){open(recents[i]);});
+                openRecentsMenu->addAction(act);
+            }
+        }
+        fileMenu->addMenu(openRecentsMenu);
+    }
+    
     fileMenu->addAction(saveAction);
 
     QAction *closeAction = new QAction(*(mainData->getIcon("quit")), "Quit", this);
@@ -185,6 +206,10 @@ void mainWindow::setupMenuBar() {
     QAction *openPreferencesAction = new QAction(*(mainData->getIcon("preferences")), "Preferences", this);
     connect(openPreferencesAction, SIGNAL(triggered()), this, SLOT(editHelperConf()));
     optionMenu->addAction(openPreferencesAction);
+    
+    QAction* setProjectNameAction = new QAction("Change Project Name", this);
+    connect(setProjectNameAction, SIGNAL(triggered()), this, SLOT(changeProjectName()));
+    optionMenu->addAction(setProjectNameAction);
 
     QAction *showAutoSaveAction = new QAction(*(mainData->getIcon("autosave")), "Autosave On/Off", this);
     connect(showAutoSaveAction, SIGNAL(triggered()), this, SLOT(toggleAutoSave()));
@@ -313,7 +338,7 @@ void mainWindow::setupWindows() {
     QList<scriptModule::moduleType> scriptsModules;
     scriptsModules << scriptModule::merge2D << scriptModule::merge3D << scriptModule::custom << scriptModule::singleparticle;
     mergeWin_ = new MergeTab(mainData, results, scriptsDir, scriptsModules, this);
-    imageWin_ = new ImageTab(mainData, this);
+    imageWin_ = new ImageTab(mainData, ProjectPreferences(mainData).imagesOpen(), this);
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);
     centralWin_->addWidget(imageWin_);
@@ -385,22 +410,30 @@ void mainWindow::launchProjectTools() {
 }
 
 void mainWindow::closeEvent(QCloseEvent *event) {
-    if (!mainData->isModified())
-        event->accept();
+    if (!mainData->isModified()) {
+        reallyClose(event);
+    }
     else {
         int choice = QMessageBox::question(this, tr("Confirm Exit"), tr("Data not saved, exit?"), tr("Save && Quit"), tr("Quit Anyway"), QString("Cancel"), 0, 1);
         if (choice == 0) {
             mainData->save();
-            event->accept();
+            reallyClose(event);
         } else if (choice == 1)
-            event->accept();
+            reallyClose(event);
         else if (choice == 2)
             event->ignore();
     }
 }
 
-void mainWindow::open() {
-    QProcess::startDetached(mainData->getApp("this"));
+void mainWindow::reallyClose(QCloseEvent *event) {
+    event->accept();
+    UserPreferences(mainData).saveCurrentFontSettings();
+    UserPreferences(mainData).saveWindowPreferences(this);
+    ProjectPreferences(mainData).setImagesOpen(imageWin_->getImagesOpen());
+}
+
+void mainWindow::open(const QString& projectPath) {
+    QProcess::startDetached(mainData->getApp("this") + " " + projectPath);
 }
 
 void mainWindow::openURL(const QString &url) {
@@ -445,4 +478,20 @@ void mainWindow::editHelperConf() {
     }
     preferencesDialog_->showNormal();
     //new confEditor(mainData->getSubConf("appConf"));
+}
+
+void mainWindow::changeProjectName() {
+    bool ok;
+    QString projectName = QInputDialog::getText(this, "Project Name", "Enter a name for the project", QLineEdit::Normal,
+            ProjectPreferences(mainData).projectName(), &ok);
+
+    if (ok && !projectName.isEmpty()) {
+        ProjectPreferences(mainData).setProjectName(projectName);
+    }
+    
+    libraryWin_->updateProjectName();
+}
+
+void mainWindow::updateWindowTitle() {
+    setWindowTitle(ProjectPreferences(mainData).projectName() + " | 2dx (" + installedVersion + ")");
 }

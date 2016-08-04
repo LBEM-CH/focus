@@ -1,15 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   user_preferences.h
- * Author: biyanin
- *
- * Created on August 2, 2016, 8:43 PM
- */
 
 #ifndef USER_PREFERENCES_H
 #define USER_PREFERENCES_H
@@ -82,19 +70,6 @@ public:
         QApplication::setFont(font);
     }
 
-    void addApplication(const QString& appTag, const QString& appPath) {
-        beginGroup("application");
-        setValue(appTag, appPath);
-        endGroup();
-    }
-
-    QString getApplication(const QString& appTag) {
-        beginGroup("application");
-        QString val = value(appTag).toString();
-        endGroup();
-        return val;
-    }
-
     void saveWindowPreferences(QMainWindow* window) {
         beginGroup("window");
         setValue("size", window->size());
@@ -107,6 +82,20 @@ public:
         window->resize(value("size", QSize(896, 504)).toSize());
         window->move(value("position", QPoint(200, 200)).toPoint());
         endGroup();
+    }
+    
+    void setRemindUpdate(const QString& update) {
+        beginGroup("software");
+        setValue("remindUpdate", update);
+        endGroup();
+    }
+    
+    QString getRemindUpdate() {
+        QString update;
+        beginGroup("software");
+        update = value("remindUpdate", "y").toString();
+        endGroup();
+        return update;
     }
 
 };

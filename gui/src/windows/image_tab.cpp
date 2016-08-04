@@ -2,7 +2,7 @@
 
 #include "image_tab.h"
 
-ImageTab::ImageTab(confData* data, QWidget* parent) 
+ImageTab::ImageTab(confData* data, const QStringList& imagesOpen, QWidget* parent) 
 : QWidget(parent){
     mainData = data;
     
@@ -32,6 +32,8 @@ ImageTab::ImageTab(confData* data, QWidget* parent)
     mainLayout->addWidget(windowTabWidget, 1, 0);
     
     setLayout(mainLayout);
+    
+    for(int i=0; i<imagesOpen.size(); ++i) showImageWindow(imagesOpen[i]);
 }
 
 
@@ -51,7 +53,6 @@ void ImageTab::showImageWindow(const QString& workingDir) {
         QString userConfigPath = QDir::homePath() + "/.2dx/2dx_master.cfg";
         if (QFileInfo(userConfigPath).exists()) imageData->updateConf(userConfigPath);
 
-        imageData->setUserConf(mainData->userConf());
         imageData->setDir("application", mainData->getDir("application"));
         imageData->setDir("plugins", mainData->getDir("pluginsDir"));
         imageData->setDir("tools", mainData->getDir("pluginsDir") + "/tools/");
@@ -128,4 +129,8 @@ void ImageTab::setTabNormal(const QString& workingDir) {
 
 void ImageTab::setTabProcessing(const QString& workingDir) {
     if(imagesShown_.contains(workingDir)) windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("processing")));
+}
+
+QStringList ImageTab::getImagesOpen() {
+    return imagesShown_;
 }

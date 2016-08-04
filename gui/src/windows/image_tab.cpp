@@ -2,7 +2,7 @@
 
 #include "image_tab.h"
 
-ImageTab::ImageTab(confData* data, const QStringList& imagesOpen, QWidget* parent) 
+ImageTab::ImageTab(confData* data, QWidget* parent) 
 : QWidget(parent){
     mainData = data;
     
@@ -32,14 +32,13 @@ ImageTab::ImageTab(confData* data, const QStringList& imagesOpen, QWidget* paren
     mainLayout->addWidget(windowTabWidget, 1, 0);
     
     setLayout(mainLayout);
-    
-    for(int i=0; i<imagesOpen.size(); ++i) showImageWindow(imagesOpen[i]);
 }
 
 
 void ImageTab::closeImageWindow(int index) {
     windowTabWidget->removeTab(index);
     imagesShown_.removeAt(index);
+    emit imagesOpenChanged(imagesShown_);
     if(imagesShown_.isEmpty()) {
         windowTabWidget->hide();
         noImageLabel->show();
@@ -114,6 +113,7 @@ void ImageTab::showImageWindow(const QString& workingDir) {
         tabName = tabName.remove(mainData->getDir("project"));
         windowTabWidget->addTab(imagesInitializedToTabs_[workingDir], tabName);
         imagesShown_.insert(currTabIndex, workingDir);
+        emit imagesOpenChanged(imagesShown_);
     }
 
     noImageLabel->hide();

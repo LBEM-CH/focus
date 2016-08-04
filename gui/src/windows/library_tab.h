@@ -62,6 +62,7 @@ class LibraryTab : public QWidget
         void reduceSelection();
         void addImageFolder();
         void addImageFolder(const QString& folder);
+        void renameImageFolder();
         void moveSelectiontoFolder();
         void moveSelectionToFolder(const QString& targetPath);
         void trashSelection();
@@ -81,6 +82,9 @@ class LibraryTab : public QWidget
         void resetSelectionState();
         
         void updateProjectName();
+        
+        void setImagesOpen(QStringList);
+        bool imageOpen(const QString& imageDir);
                    
     private:
         void setupDirectoryContainer(confData*);
@@ -115,6 +119,8 @@ class LibraryTab : public QWidget
         QLineEdit* maxDegree;
         QComboBox* parameterToUse;
         QComboBox* negPosOption;
+        
+        QStringList imagesOpen;
     
 };
 

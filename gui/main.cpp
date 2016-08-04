@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationDomain("c-cina.org");
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QApplication::applicationName());
+    parser.setApplicationDescription("2DX Software Suite: Graphical User Interface");
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument("project_dir", "Path of the 2dx Project to be opened.");

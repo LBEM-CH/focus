@@ -1,5 +1,6 @@
 #include <QFormLayout>
 #include <QMessageBox>
+#include <QtCore/qnamespace.h>
 
 #include "library_tab.h"
 #include "project_preferences.h"
@@ -229,36 +230,105 @@ QWidget* LibraryTab::setupSelectionTab() {
     //Check Group
     QGroupBox* checkGroup = new QGroupBox("Manage Check");
     checkGroup->setSizePolicy(sizePolicy);
-    QVBoxLayout* checkGroupLayout = new QVBoxLayout;
+    QHBoxLayout* checkGroupLayout = new QHBoxLayout;
+    checkGroupLayout->setSpacing(0);
     
-    QPushButton* showSelectedAction = new QPushButton(*(data->getIcon("selected")), tr("&Show checked images only"), this);
+    QToolButton* showSelectedAction = new QToolButton(dirView);
+    showSelectedAction->setIcon(*(data->getIcon("selected")));
+    showSelectedAction->setIconSize(QSize(32, 32));
+    showSelectedAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
     showSelectedAction->setShortcut(tr("Ctrl+X"));
-    showSelectedAction->setToolTip("Shortcut: " + showSelectedAction->shortcut().toString());
+    showSelectedAction->setToolTip("Show checked images only\nShortcut: " + showSelectedAction->shortcut().toString());
     showSelectedAction->setCheckable(true);
     connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
     checkGroupLayout->addWidget(showSelectedAction);
     
-    QPushButton *selectAllAction = new QPushButton(*(data->getIcon("check_all")), "Check all images", this);
+    QToolButton *selectAllAction = new QToolButton(dirView);
+    selectAllAction->setIcon(*(data->getIcon("check_all")));
+    selectAllAction->setIconSize(QSize(32, 32));
+    selectAllAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
     selectAllAction->setShortcut(tr("Ctrl+A"));
-    selectAllAction->setToolTip("Shortcut: " + selectAllAction->shortcut().toString());
+    selectAllAction->setToolTip("Check All Images\nShortcut: " + selectAllAction->shortcut().toString());
     connect(selectAllAction, SIGNAL(clicked()), dirModel, SLOT(selectAll()));
     checkGroupLayout->addWidget(selectAllAction);
     
-    QPushButton *invertSelectedAction = new QPushButton(*(data->getIcon("check_invert")), "Invert check", this);
+    QToolButton *invertSelectedAction = new QToolButton(dirView);
+    invertSelectedAction->setIcon(*(data->getIcon("check_invert")));
+    invertSelectedAction->setIconSize(QSize(32, 32));
+    invertSelectedAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
     invertSelectedAction->setShortcut(tr("Ctrl+I"));
-    invertSelectedAction->setToolTip("Shortcut: " + invertSelectedAction->shortcut().toString());
+    invertSelectedAction->setToolTip("Invert Check\nShortcut: " + invertSelectedAction->shortcut().toString());
     connect(invertSelectedAction, SIGNAL(clicked()), dirModel, SLOT(invertSelection()));
     checkGroupLayout->addWidget(invertSelectedAction);
     
-    QPushButton* addSelectionAction = new QPushButton(*(data->getIcon("add_selection")), "Check highlighted", dirView);
+    QToolButton* addSelectionAction = new QToolButton(dirView);
+    addSelectionAction->setIcon(*(data->getIcon("add_selection")));
+    addSelectionAction->setIconSize(QSize(32, 32));
+    addSelectionAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    addSelectionAction->setShortcut(tr("Ctrl+C"));
+    addSelectionAction->setToolTip("Check highlighted images\nShortcut: " + addSelectionAction->shortcut().toString());
     connect(addSelectionAction, SIGNAL(clicked()), this, SLOT(extendSelection()));
     checkGroupLayout->addWidget(addSelectionAction);
 
-    QPushButton* removeSelectionAction = new QPushButton(*(data->getIcon("remove_selection")), "Uncheck highlighted", dirView);
+    QToolButton* removeSelectionAction = new QToolButton(dirView);
+    removeSelectionAction->setIcon(*(data->getIcon("remove_selection")));
+    removeSelectionAction->setIconSize(QSize(32, 32));
+    removeSelectionAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    removeSelectionAction->setShortcut(tr("Ctrl+U"));
+    removeSelectionAction->setToolTip("Uncheck highlighted images\nShortcut: " + removeSelectionAction->shortcut().toString());
     connect(removeSelectionAction, SIGNAL(clicked()), this, SLOT(reduceSelection()));
     checkGroupLayout->addWidget(removeSelectionAction);
 
     checkGroup->setLayout(checkGroupLayout);
+    
+    
+    //Image Folder Group
+    QGroupBox* imageFolderGroup = new QGroupBox("Organize Image Folder");
+    imageFolderGroup->setSizePolicy(sizePolicy);
+    QHBoxLayout* imageFolderGroupLayout = new QHBoxLayout;
+    imageFolderGroupLayout->setSpacing(0);
+    
+    QToolButton* addFolderAction = new QToolButton(dirView);
+    addFolderAction->setToolTip("Add Image Folder");
+    addFolderAction->setIcon(*(data->getIcon("add_folder")));
+    addFolderAction->setIconSize(QSize(32, 32));
+    addFolderAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(addFolderAction, SIGNAL(clicked()), this, SLOT(addImageFolder()));
+    imageFolderGroupLayout->addWidget(addFolderAction);
+    
+    QToolButton* renameFolderAction = new QToolButton(dirView);
+    renameFolderAction->setToolTip("Rename Image Folder");
+    renameFolderAction->setIcon(*(data->getIcon("rename")));
+    renameFolderAction->setIconSize(QSize(32, 32));
+    renameFolderAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(renameFolderAction, SIGNAL(clicked()), this, SLOT(renameImageFolder()));
+    imageFolderGroupLayout->addWidget(renameFolderAction);
+    
+    QToolButton* moveImageAction = new QToolButton(dirView);
+    moveImageAction->setToolTip("Move highlighted");
+    moveImageAction->setIcon(*(data->getIcon("move_selection")));
+    moveImageAction->setIconSize(QSize(32, 32));
+    moveImageAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(moveImageAction, SIGNAL(clicked()), this, SLOT(moveSelectiontoFolder()));
+    imageFolderGroupLayout->addWidget(moveImageAction);
+    
+    QToolButton* trashImageAction = new QToolButton(dirView);
+    trashImageAction->setToolTip("Trash highlighted");
+    trashImageAction->setIcon(*(data->getIcon("trash_selection")));
+    trashImageAction->setIconSize(QSize(32, 32));
+    trashImageAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(trashImageAction, SIGNAL(clicked()), this, SLOT(trashSelection()));
+    imageFolderGroupLayout->addWidget(trashImageAction);
+    
+    QToolButton* copyImageAction = new QToolButton(dirView);
+    copyImageAction->setToolTip("Copy to second project");
+    copyImageAction->setIcon(*(data->getIcon("copy_selection")));
+    copyImageAction->setIconSize(QSize(32, 32));
+    copyImageAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(copyImageAction, SIGNAL(clicked()), this, SLOT(copyImage()));
+    imageFolderGroupLayout->addWidget(copyImageAction);
+    
+    imageFolderGroup->setLayout(imageFolderGroupLayout);
     
     //Auto Selection Group
     QGroupBox* autoSelectionGroup = new QGroupBox("Automatic Selection");
@@ -297,29 +367,6 @@ QWidget* LibraryTab::setupSelectionTab() {
     
     autoSelectionGroup->setLayout(autoSelectLayout);
     
-    //Image Folder Group
-    QGroupBox* imageFolderGroup = new QGroupBox("Image Folder");
-    imageFolderGroup->setSizePolicy(sizePolicy);
-    QVBoxLayout* imageFolderGroupLayout = new QVBoxLayout;
-    
-    QPushButton* addFolderAction = new QPushButton(*(data->getIcon("add_folder")), "Add image folder", dirView);
-    connect(addFolderAction, SIGNAL(clicked()), this, SLOT(addImageFolder()));
-    imageFolderGroupLayout->addWidget(addFolderAction);
-    
-    QPushButton* moveImageAction = new QPushButton(*(data->getIcon("move_selection")), "Move highlighted", dirView);
-    connect(moveImageAction, SIGNAL(clicked()), this, SLOT(moveSelectiontoFolder()));
-    imageFolderGroupLayout->addWidget(moveImageAction);
-    
-    QPushButton* trashImageAction = new QPushButton(*(data->getIcon("trash_selection")), "Trash highlighted", dirView);
-    connect(trashImageAction, SIGNAL(clicked()), this, SLOT(trashSelection()));
-    imageFolderGroupLayout->addWidget(trashImageAction);
-    
-    QPushButton* copyImageAction = new QPushButton(*(data->getIcon("copy_selection")), "Copy to second project", dirView);
-    connect(copyImageAction, SIGNAL(clicked()), this, SLOT(copyImage()));
-    imageFolderGroupLayout->addWidget(copyImageAction);
-    
-    imageFolderGroup->setLayout(imageFolderGroupLayout);
-    
     
     //Backup/Save Group
     
@@ -342,10 +389,10 @@ QWidget* LibraryTab::setupSelectionTab() {
     layout->setSpacing(10);
     layout->addStretch(0);
     layout->addWidget(refreshAction, 0, Qt::AlignTop);
-    layout->addWidget(checkGroup, 0, Qt::AlignTop);
-    layout->addWidget(autoSelectionGroup, 0);
-    layout->addWidget(imageFolderGroup, 0, Qt::AlignTop);
     layout->addWidget(backupSaveGroup, 0, Qt::AlignTop);
+    layout->addWidget(checkGroup, 0, Qt::AlignTop);
+    layout->addWidget(imageFolderGroup, 0, Qt::AlignTop);
+    layout->addWidget(autoSelectionGroup, 0);
     tab->setLayout(layout);
     return tab;
 }
@@ -524,6 +571,59 @@ void LibraryTab::addImageFolder() {
     }
 }
 
+void LibraryTab::renameImageFolder() {
+    QString projectFolder = data->getDir("project");
+
+    //Get the list of current folders
+    QStringList imageFolders = QDir(projectFolder).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
+
+    //Remove non-linked folders
+    QString imageFolder;
+    foreach(imageFolder, imageFolders) {
+        if (!QFile(projectFolder + "/" + imageFolder + "/2dx_master.cfg").exists()) imageFolders.removeAll(imageFolder);
+    }
+
+    //Ask for the folder to move to!
+    bool ok2;
+    QString folder = QInputDialog::getItem(this, tr("Folder selection"),
+            tr("Select one of the following available folder to be renamed:"), imageFolders, 0, false, &ok2);
+
+    if (ok2 && !folder.isEmpty()) {
+        
+        //Check if any image is already open
+        foreach(QString im, imagesOpen) {
+            if(im.split('/').contains(folder)) {
+                QMessageBox::warning(
+                    this,
+                    tr("Warning: Unable to rename"),
+                    "Unable to rename folder: " + projectFolder + "/" + folder + "\n" 
+                    + "Images from this folder are  already open. Please close them and try again."
+                    );
+                return;
+            }
+        }
+        
+        bool ok;
+        QString name = QInputDialog::getText(this, tr("New name"),
+            tr("Enter the new name of the folder"), QLineEdit::Normal,
+            folder, &ok);
+
+        if (ok && !name.isEmpty()) {
+            if(!QDir().rename(projectFolder + "/" + folder, projectFolder + "/" + name)) {
+                QMessageBox::warning(
+                    this,
+                    tr("Warning: Unable to rename"),
+                    "Unable to rename folder: " + projectFolder + "/" + folder + " to:\n"
+                    + projectFolder + "/" + name
+                    );
+            }
+            else {
+                reload();
+            }
+        }
+    }
+}
+
 void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     QModelIndexList selection = dirView->selectionModel()->selectedRows();
     int numFiles = selection.count();
@@ -531,24 +631,35 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     QProgressDialog progress("Moving files...", "Abort Move", 0, numFiles, this);
     progress.setWindowModality(Qt::WindowModal);
 
-    QModelIndex i;
-
-    foreach(i, selection) {
+    QString warnings;
+    QString projectDir = data->getDir("project");
+    
+    for(int ii=0; ii<selection.size();  ++ii) {
+        QModelIndex i = selection[ii];
         progress.setValue(count++);
         if (progress.wasCanceled()) break;
-
+        
         QString sourcePath = dirModel->pathFromIndex(i);
         QString sourceImage = QFileInfo(sourcePath).fileName();
+        
+        //Check if the image is open.
+        if(imageOpen(sourcePath)) {
+            warnings += sourcePath.remove(projectDir) + ": Image already open\n";
+            qDebug() << sourcePath << " Image already open";
+            continue;
+        }
 
         if (!QFile(sourcePath + "/2dx_image.cfg").exists()) {
-            qDebug() << "2dx_image.cfg does not exist";
+            warnings += sourcePath.remove(projectDir) + ": 2dx_image.cfg does not exist\n";
+            qDebug() << sourcePath << " 2dx_image.cfg does not exist";
             continue;
         }
 
         QDir targetImageDir = QDir(targetPath + "/" + sourceImage);
 
         if (targetImageDir.absolutePath() == QDir(sourcePath).absolutePath()) {
-            qDebug() << "Target same as source";
+            warnings += sourcePath.remove(projectDir) + ": Target same as source\n";
+            qDebug() << sourcePath << " Target same as source";
             continue;
         }
 
@@ -559,32 +670,26 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
         }
 
         if (target_exist) {
-            QMessageBox::warning(
-                    this,
-                    tr("Move warning"),
-                    "The target folder: " + targetPath + "/" + sourceImage + " already exists!\n"
-                    + "Renaming it to: " + targetImageDir.absolutePath()
-                    );
+            warnings += sourcePath.remove(projectDir) + ": already exists. Renaming it to: " + targetImageDir.absolutePath();
+            qDebug() << sourcePath << " Already exists. Renaming it to: " + targetImageDir.absolutePath();
         }
 
-        bool moved = copyRecursively(sourcePath, targetImageDir.absolutePath());
+        bool moved = QDir().rename(sourcePath, targetImageDir.absolutePath());
         if (!moved) {
-            QMessageBox::warning(
-                    this,
-                    tr("Warning: Unable to copy"),
-                    "Unable to move folder: " + sourcePath + " to:\n"
-                    + targetImageDir.absolutePath()
-                    );
-            targetImageDir.removeRecursively();
+            warnings += sourcePath.remove(projectDir) + ": Unable to move image to " + targetImageDir.absolutePath();
+            qDebug() << sourcePath << ": Unable to move image to " + targetImageDir.absolutePath();
+            //targetImageDir.removeRecursively();
         } else {
-            qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.absolutePath();
+            qDebug() << "Moved image: " + sourcePath + " to: " + targetImageDir.absolutePath();
             dirModel->itemDeselected(sortModel->mapToSource(i));
-            QDir(sourcePath).removeRecursively();
+            //QDir(sourcePath).removeRecursively();
         }
-
     }
 
     progress.setValue(numFiles);
+    
+    if(!warnings.isEmpty()) QMessageBox::warning(this, tr("Move Errors"), warnings);
+    
     reload();
 
 }
@@ -733,4 +838,13 @@ void LibraryTab::resetSelectionState() {
 void LibraryTab::updateProjectName() {
     projectNameLabel->setText(ProjectPreferences(data).projectName());
     projectNameLabel->setToolTip(data->getDir("project"));
+}
+
+void LibraryTab::setImagesOpen(QStringList open) {
+    imagesOpen = open;
+}
+
+bool LibraryTab::imageOpen(const QString& imageDir) {
+    if(imagesOpen.contains(imageDir)) return true;
+    else return false;
 }

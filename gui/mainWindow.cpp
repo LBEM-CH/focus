@@ -207,7 +207,7 @@ void mainWindow::setupMenuBar() {
     connect(openPreferencesAction, SIGNAL(triggered()), this, SLOT(editHelperConf()));
     optionMenu->addAction(openPreferencesAction);
     
-    QAction* setProjectNameAction = new QAction(*(mainData->getIcon("rename")), "Change Project Name", this);
+    QAction* setProjectNameAction = new QAction(*(mainData->getIcon("change_name")), "Change Project Name", this);
     connect(setProjectNameAction, SIGNAL(triggered()), this, SLOT(changeProjectName()));
     optionMenu->addAction(setProjectNameAction);
 
@@ -338,30 +338,36 @@ void mainWindow::setupWindows() {
     QList<scriptModule::moduleType> scriptsModules;
     scriptsModules << scriptModule::merge2D << scriptModule::merge3D << scriptModule::custom << scriptModule::singleparticle;
     mergeWin_ = new MergeTab(mainData, results, scriptsDir, scriptsModules, this);
-    imageWin_ = new ImageTab(mainData, ProjectPreferences(mainData).imagesOpen(), this);
+    
+    imageWin_ = new ImageTab(mainData, this);
+    QStringList imagesOpen = ProjectPreferences(mainData).imagesOpen();
+    for(int i=0; i<imagesOpen.size(); ++i) showImageWindow(imagesOpen[i], true);
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);
     centralWin_->addWidget(imageWin_);
 
     connect(mergeWin_, SIGNAL(scriptCompletedSignal()), libraryWin_, SLOT(maskResults()));
     connect(libraryWin_->getDirView(), SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(showImageWindow(const QModelIndex&)));
+    connect(imageWin_, SIGNAL(imagesOpenChanged(QStringList)), libraryWin_, SLOT(setImagesOpen(QStringList)));
     
     setCentralWidget(centralWin_);
 }
 
-void mainWindow::showImageWindow(const QModelIndex& index) {
-    
+void mainWindow::showImageWindow(const QModelIndex& index, bool supressWarnings) {
     QString workingDir = libraryWin_->getDirModel()->pathFromIndex(index);
-    
+    showImageWindow(workingDir, supressWarnings);
+}
+
+void mainWindow::showImageWindow(const QString& workingDir, bool supressWarnings) {
     if (workingDir.isEmpty()) return;
 
     if (!QFileInfo(workingDir).exists()) {
-        QMessageBox::critical(this, tr("Image folder error"), "The folder does not exist:\n" + workingDir + "\n\nThe image should be properly imported using the import action.");
+        if(!supressWarnings) QMessageBox::critical(this, tr("Image folder error"), "The folder does not exist:\n" + workingDir + "\n\nThe image should be properly imported using the import action.");
         return;
     }
 
     if (!QFileInfo(workingDir + "/" + "2dx_image.cfg").exists()) {
-        QMessageBox::critical(this, tr("Configuration file error"), "No configuration data found in:\n" + workingDir + "\n\nThe image should be properly imported using the import action.");
+        if(!supressWarnings) QMessageBox::critical(this, tr("Configuration file error"), "No configuration data found in:\n" + workingDir + "\n\nThe image should be properly imported using the import action.");
         return;
     }
     

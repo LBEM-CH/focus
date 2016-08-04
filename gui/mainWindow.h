@@ -92,7 +92,8 @@ public slots:
     void launchReproject();
     void launchProjectTools();
 
-    void showImageWindow(const QModelIndex&);
+    void showImageWindow(const QModelIndex&, bool supressWarnings=false);
+    void showImageWindow(const QString&, bool supressWarnings=false);
     
     void changeProjectName();
     void updateWindowTitle();

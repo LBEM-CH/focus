@@ -15,7 +15,7 @@ class ImageTab : public QWidget
     Q_OBJECT
            
     public:
-        ImageTab(confData* mainData, const QStringList& imagesOpen, QWidget* parent=NULL);
+        ImageTab(confData* mainData, QWidget* parent=NULL);
         
         QStringList getImagesOpen();
         
@@ -24,6 +24,9 @@ class ImageTab : public QWidget
         void closeImageWindow(int index);
         void setTabProcessing(const QString&);
         void setTabNormal(const QString&);
+        
+    signals:
+        void imagesOpenChanged(QStringList);
         
     private:
         

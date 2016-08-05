@@ -43,7 +43,7 @@ def main():
 
 	for x in X:
 
-		print 'Averaging particles from crystal %d/%d...' % (x, XN)
+		print ':: Averaging particles from crystal %d/%d...' % (x, XN)
 
 		img_list = np.where(labels == x)[0]
 
@@ -97,6 +97,8 @@ def main():
 			plt.grid()
 			plt.savefig(frc_folder+'crystal_'+'%.3d' % x+'_'+sys.argv[3]+'_FRC.png', dpi=300)
 			plt.close()
+
+	print ':: '
 
 
 def NormalizeStack(stack, sigma):

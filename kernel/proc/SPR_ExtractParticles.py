@@ -70,6 +70,10 @@ def main():
 		stack_rootname = stack_rootname + '_ctfcor'
 	else:
 		ctfcor = False
+	if sys.argv[22] == 'y':
+		save_pick_fig = True
+	else:
+		save_pick_fig = False
 	# End arguments
 
 	f = open(merge_dirfile,'r')
@@ -109,6 +113,7 @@ def main():
 			except:
 
 				print ':: CTF-corrected micrograph not found for image %s!' % d
+				print ':: '
 				continue
 
 		else:
@@ -132,9 +137,11 @@ def main():
 						# If neither exist we skip this image
 
 						print ':: Problem with image %s!' % d
+						print ':: '
 						continue
 
 		print ':: Now boxing unit cells of micrograph %d/%d.' % (n, N)
+		print ':: '
 		print mrc
 
 		try:
@@ -155,10 +162,11 @@ def main():
 
 			print ': Image average value: %.1f' % img['mean']
 			print ': Image standard deviation: %.1f' % img['sigma']
+			print ': '
 			print ': CC scores average value: %.1f' % ccmean
 			print ': CC scores standard deviation: %.1f' % ccstd
 			print ': Only particles with CC score above %.1f will be picked.' % cc_thr
-
+			print ': '
 
 			# Get several values related to defocus, astigmatism and tilting:
 			params = Read2dxCfgFile(folders+d+'/2dx_image.cfg')
@@ -170,9 +178,9 @@ def main():
 				PhaOriY = 0
 				a = [0,0]
 				b = [0,0]
-		        
+			    
 			else:
-		        
+			    
 				w = img.get_xsize()
 				a,b = LatticeReciprocal2Real(params['u'], params['v'], w)
 
@@ -184,14 +192,16 @@ def main():
 
 			# Plot the picking profile:
 
-			meanimg = np.mean(imgarr)
-			stdimg = np.std(imgarr)
-			climimg = [meanimg - 2 * stdimg, meanimg + 2 * stdimg]
+			if save_pick_fig:
 
-			fig1 = plt.figure()
-			plt.imshow(imgarr, cmap=cm.gray, vmin=climimg[0], vmax=climimg[1])
+				meanimg = np.mean(imgarr)
+				stdimg = np.std(imgarr)
+				climimg = [meanimg - 2 * stdimg, meanimg + 2 * stdimg]
 
-			Axes1 = fig1.gca()
+				fig1 = plt.figure()
+				plt.imshow(imgarr, cmap=cm.gray, vmin=climimg[0], vmax=climimg[1])
+
+				Axes1 = fig1.gca()
 
 			# The following values are constant within each crystal:
 			phi = 90.0 - params[tiltgeom+'TAXA']
@@ -206,8 +216,9 @@ def main():
 
 					if dat[i,4] < cc_thr:
 
-						# Write red patch on image to be saved as .png describing the picking positions:
-						Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.5, radius=20))
+						if save_pick_fig:
+							# Write red patch on image to be saved as .png describing the picking positions:
+							Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.5, radius=20))
 
 					else:
 
@@ -236,7 +247,7 @@ def main():
 						print >>bf, '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size
 
 						# Write image to the particle stack:
-						box.write_image(stack_path+stack_rootname+'.mrcs', idx)
+						box.write_image(stack_path+stack_rootname+'.hdf', idx)
 
 						if (save_phase_flipped or save_wiener_filtered) and not ctfcor:
 
@@ -266,7 +277,7 @@ def main():
 
 								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
 
-							boxctfcor.write_image(stack_path+stack_rootname+'_phase-flipped.mrcs', idx)
+							boxctfcor.write_image(stack_path+stack_rootname+'_phase-flipped.hdf', idx)
 
 						# Wiener-filter the image:
 						if save_wiener_filtered and not ctfcor:
@@ -276,30 +287,37 @@ def main():
 
 								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
 								
-							boxctfcor.write_image(stack_path+stack_rootname+'_wiener-filtered.mrcs', idx)
+							boxctfcor.write_image(stack_path+stack_rootname+'_wiener-filtered.hdf', idx)
 
-						# Write green patch on image to be saved as .png describing the picking positions:
-						Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='lime', facecolor='none', linewidth=0.5, radius=20))
+						if save_pick_fig:
+							# Write green patch on image to be saved as .png describing the picking positions:
+							Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='lime', facecolor='none', linewidth=0.5, radius=20))
 
 						m += 1
 						idx += 1
 
 				except RuntimeError:
 
-					# Write red patch on image to be saved as .png describing the picking positions:
-					Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.5, radius=20))
+					if save_pick_fig:
+						# Write red patch on image to be saved as .png describing the picking positions:
+						Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.5, radius=20))
 
 					print 'Failed to box unit cell (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 					box_fail += 1
 
 			print ':: Boxed unit cells from micrograph %d/%d.' % (n, N)
+			print ':: '
+			print '<<@progress: %d >>' % round(n*100.0/N)
 
-			fig1.savefig(png_path+'mic_%.3d_' % n+imname+'_picking.png', dpi=300)
-			plt.close(fig1)
+			if save_pick_fig:
+
+				fig1.savefig(png_path+'mic_%.3d_' % n+imname+'_picking.png', dpi=300)
+				plt.close(fig1)
 
 		except RuntimeError:
 
 			print ':: PROBLEM WITH MICROGRAPH %d/%d!!! Maybe it was not found?' % (n, N)
+			print ':: '
 
 			print mrc
 
@@ -332,83 +350,129 @@ def Read2dxCfgFile(filepath):
 
 		if l.startswith('set TLTAXIS ='):
 
-		    params['TLTAXIS'] = float(l.split('= ')[1].strip()[1:-1])
+			params['TLTAXIS'] = float(l.split('= ')[1].strip()[1:-1])
 
 		if l.startswith('set TLTANG ='):
 
-		    params['TLTANG'] = float(l.split('= ')[1].strip()[1:-1])
+			params['TLTANG'] = float(l.split('= ')[1].strip()[1:-1])
 
 		if l.startswith('set TAXA ='):
 
-		    params['TAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			params['TAXA'] = float(l.split('= ')[1].strip()[1:-1])
 
 		if l.startswith('set TANGL ='):
 
-		    params['TANGL'] = float(l.split('= ')[1].strip()[1:-1])
+			params['TANGL'] = float(l.split('= ')[1].strip()[1:-1])
 
 		if l.startswith('set TLTAXA ='):
 
-		    params['TLTAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			params['TLTAXA'] = float(l.split('= ')[1].strip()[1:-1])
 
+			# Below we fetch the method-specific tilt geometries. If for some reason we don't find a value we assign them the corresponding default value found above.
 		if l.startswith('set DEFOCUS_TLTAXIS ='):
 
-		    params['DEFOCUS_TLTAXIS'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['DEFOCUS_TLTAXIS'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['DEFOCUS_TLTAXIS'] = params['TLTAXIS']
 
 		if l.startswith('set DEFOCUS_TLTANG ='):
 
-		    params['DEFOCUS_TLTANG'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['DEFOCUS_TLTANG'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['DEFOCUS_TLTANG'] = params['TLTANG']
 
 		if l.startswith('set DEFOCUS_TAXA ='):
 
-		    params['DEFOCUS_TAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['DEFOCUS_TAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['DEFOCUS_TAXA'] = params['TAXA']
 
 		if l.startswith('set DEFOCUS_TANGL ='):
 
-		    params['DEFOCUS_TANGL'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['DEFOCUS_TANGL'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['DEFOCUS_TANGL'] = params['TANGL']
 
 		if l.startswith('set DEFOCUS_TLTAXA ='):
 
-		    params['DEFOCUS_TLTAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['DEFOCUS_TLTAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['DEFOCUS_TLTAXA'] = params['TLTAXA']
 
 		if l.startswith('set MERGE_TLTAXIS ='):
 
-		    params['MERGE_TLTAXIS'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['MERGE_TLTAXIS'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['MERGE_TLTAXIS'] = params['TLTAXIS']
 
 		if l.startswith('set MERGE_TLTANG ='):
 
-		    params['MERGE_TLTANG'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['MERGE_TLTANG'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['MERGE_TLTANG'] = params['TLTANG']
 
 		if l.startswith('set MERGE_TAXA ='):
 
-		    params['MERGE_TAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['MERGE_TAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['MERGE_TAXA'] = params['TAXA']
 
 		if l.startswith('set MERGE_TANGL ='):
 
-		    params['MERGE_TANGL'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['MERGE_TANGL'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['MERGE_TANGL'] = params['TANGL']
 
 		if l.startswith('set MERGE_TLTAXA ='):
 
-		    params['MERGE_TLTAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['MERGE_TLTAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['MERGE_TLTAXA'] = params['TLTAXA']
 
 		if l.startswith('set LATTICE_TLTAXIS ='):
 
-		    params['LATTICE_TLTAXIS'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['LATTICE_TLTAXIS'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['LATTICE_TLTAXIS'] = params['TLTAXIS']
 
 		if l.startswith('set LATTICE_TLTANG ='):
 
-		    params['LATTICE_TLTANG'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['LATTICE_TLTANG'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['LATTICE_TLTANG'] = params['TLTANG']
 
 		if l.startswith('set LATTICE_TAXA ='):
 
-		    params['LATTICE_TAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['LATTICE_TAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['LATTICE_TAXA'] = params['TAXA']
 
 		if l.startswith('set LATTICE_TANGL ='):
 
-		    params['LATTICE_TANGL'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['LATTICE_TANGL'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['LATTICE_TANGL'] = params['TANGL']
 
 		if l.startswith('set LATTICE_TLTAXA ='):
 
-		    params['LATTICE_TLTAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			try:
+				params['LATTICE_TLTAXA'] = float(l.split('= ')[1].strip()[1:-1])
+			except:
+				params['LATTICE_TLTAXA'] = params['TLTAXA']
 
 		if l.startswith('set lattice ='):
 
@@ -420,7 +484,7 @@ def Read2dxCfgFile(filepath):
 
 			phaori = l.split('= ')[1].strip()[1:-1].split(',')
 			params['PHAORI'] = [float(phaori[0]), float(phaori[1])]
-		    
+			
 		if l.startswith('set realcell_local ='):
 
 			realcell = l.split('= ')[1].strip()[1:-1].split(',')
@@ -587,8 +651,10 @@ def CalculateDefocusTilted(x, y, apix, TLTAXIS, TLTANG, DEFOCUS1, DEFOCUS2):
 def CalculatePickingPositions(dat, a, b, w, PHAORI, phaori_shift, TLTANG):
 # Here we compute the picking positions accounting for the phase origin shifts:
 
-	PhaOriX = a[0] * (PHAORI[1] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[0] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
-	PhaOriY = a[1] * (PHAORI[1] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[1] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
+	# PhaOriX = a[0] * (PHAORI[1] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[0] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
+	# PhaOriY = a[1] * (PHAORI[1] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[1] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
+	PhaOriX = a[0] * (PHAORI[1] + phaori_shift[0])/360.0 + b[0] * (PHAORI[1] + phaori_shift[1])/360.0
+	PhaOriY = a[1] * (PHAORI[1] + phaori_shift[0])/360.0 + b[1] * (PHAORI[1] + phaori_shift[1])/360.0
 
 	PhaOriPx = [PhaOriX, PhaOriY]
 

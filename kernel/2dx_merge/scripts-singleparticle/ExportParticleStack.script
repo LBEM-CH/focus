@@ -16,8 +16,6 @@
 #
 # MANUAL: This script extracts particles from the 2D crystal images to be refined in single-particle fashion. Currently supports only FREALIGN.
 #
-# DISPLAY: SPR_RESMIN
-# DISPLAY: SPR_RESMAX
 # DISPLAY: SPR_boxsize
 # DISPLAY: SPR_PhaseShift
 # DISPLAY: SPR_SIGCC
@@ -35,6 +33,7 @@
 # DISPLAY: phacon
 # DISPLAY: magnification
 # DISPLAY: SPR_SYM
+# DISPLAY: SPR_SavePickFig
 #
 #$end_local_vars
 #
@@ -44,7 +43,6 @@ set app_python = ""
 #
 set SPR_RESMIN = ""
 set SPR_RESMAX = ""
-set SPR_SYM = ""
 set SPR_PhaseShift = ""
 set SPR_boxsize = ""
 set SPR_SIGCC = ""
@@ -56,6 +54,7 @@ set SPR_SaveWienerFiltered = ""
 set SPR_SigmaNorm = ""
 set SPR_WhichTiltGeometry = ""
 set SPR_WhichCTF = ""
+set SPR_SavePickFig = ""
 set CS = ""
 set KV = ""
 set sample_pixel = ""
@@ -71,9 +70,12 @@ set SPR_STACK_ROOTNAME = 'particles'
 
 # Start script commands:
 mkdir -p ${SPR_STACKS_DIR}
-mkdir -p ${SPR_PICKING_DIR}
 
-${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF}
+if ( ${SPR_SavePickFig} == "y" ) then
+	mkdir -p ${SPR_PICKING_DIR}
+endif
+
+${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig}
 
 if ( ${SPR_SavePhaseFlipped} == "y" ) then
 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
@@ -83,4 +85,11 @@ if ( ${SPR_SaveWienerFiltered} == "y" ) then
 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
 endif
 
-#${app_python} ${proc_2dx}/SPR_mparameters.py ${FREALIGN_DIR}
+### BELOW IS A SERIOUS KLUDGE BECAUSE EMAN2/SPARX DO NOT SUPPORT WRITING TO MRC STACKS BIGGER THAN 65535 IMAGES DIRECTLY ###
+echo "Now converting stack(s) to .mrcs format..."
+foreach i (${SPR_STACKS_DIR}/*.hdf)
+	e2proc2d.py $i $i.mrc --twod2threed
+	rm $i
+end
+rename .hdf.mrc .mrcs ${SPR_STACKS_DIR}/*
+echo "Done!"

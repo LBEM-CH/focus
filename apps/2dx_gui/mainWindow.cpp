@@ -57,10 +57,10 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     about = new aboutWindow(mainData, this, true);
     about->hide();
 
+    setupToolBar();
     setupWindows();
     setupActions();
     setupMenuBar();
-    setupToolBar();
     
     UserPreferences(mainData).loadAllFontSettings();
     UserPreferences(mainData).loadWindowPreferences(this);
@@ -68,6 +68,10 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     euler = NULL;
     reproject = NULL;
 
+    openLibraryWindowAct->setChecked(true);
+    centralWin_->setCurrentWidget(libraryWin_);
+    setCentralWidget(centralWin_);
+    
     resize(1300, 900);
 }
 
@@ -308,7 +312,6 @@ void mainWindow::setupToolBar() {
     group->addAction(openImageWindowAct);
     group->addAction(openMergeWindowAct);
     group->setExclusive(true);
-    openLibraryWindowAct->setChecked(true);
     
     QAction* showProjectToolsAct = new QAction(*(mainData->getIcon("project_tools")), "Project Tools", mainToolBar);
     showProjectToolsAct->setCheckable(false);
@@ -340,17 +343,17 @@ void mainWindow::setupWindows() {
     mergeWin_ = new MergeTab(mainData, results, scriptsDir, scriptsModules, this);
     
     imageWin_ = new ImageTab(mainData, this);
-    QStringList imagesOpen = ProjectPreferences(mainData).imagesOpen();
-    for(int i=0; i<imagesOpen.size(); ++i) showImageWindow(imagesOpen[i], true);
+    
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);
     centralWin_->addWidget(imageWin_);
+    
+    QStringList imagesOpen = ProjectPreferences(mainData).imagesOpen();
+    for(int i=0; i<imagesOpen.size(); ++i) showImageWindow(imagesOpen[i], true);
 
     connect(mergeWin_, SIGNAL(scriptCompletedSignal()), libraryWin_, SLOT(maskResults()));
     connect(libraryWin_->getDirView(), SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(showImageWindow(const QModelIndex&)));
     connect(imageWin_, SIGNAL(imagesOpenChanged(QStringList)), libraryWin_, SLOT(setImagesOpen(QStringList)));
-    
-    setCentralWidget(centralWin_);
 }
 
 void mainWindow::showImageWindow(const QModelIndex& index, bool supressWarnings) {

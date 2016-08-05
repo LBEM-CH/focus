@@ -1,9 +1,9 @@
-############################################################################
+#------------------------------------------------------------------------------
 # @file CMakeLists.txt
 # @author Nikhil Biyani
 # @author Marcel Arheit
 # @location 2dx
-############################################################################
+#------------------------------------------------------------------------------
 
 #-- CMAKE Configurations ------------------------------------------------------
 #
@@ -12,6 +12,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # Set CMAKE Policies
 #~~ TODO
 #cmake_policy(SET CMP0012 NEW)
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0011 NEW)
+endif(COMMAND cmake_policy)
 
 #CMAKE extra config files
 add_subdirectory(cmake)
@@ -102,13 +105,7 @@ install(FILES ${HTM} DESTINATION .)
 # the libraries have to be built before by the build_all script 
 add_subdirectory(external)
 add_subdirectory(kernel)
-#add_subdirectory(lib)
-add_subdirectory(gui)
-#add_subdirectory(2dx_image)
-#add_subdirectory(2dx_merge)
-add_subdirectory(2dx_logbrowser)
-add_subdirectory(2dx_automator)
+add_subdirectory(apps)
 add_subdirectory(plugins)
-add_subdirectory(bin)
 add_subdirectory(packaging)
 #------------------------------------------------------------------------------

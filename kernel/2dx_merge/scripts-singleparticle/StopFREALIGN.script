@@ -1,0 +1,31 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: AUX-Stop FREALIGN run				                          		#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 29/07/2016                                             #
+# Last Modification: 29/07/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 19
+#
+#
+# MANUAL: This script stops a current run of FREALIGN.
+#
+# DISPLAY: SPR_FRLRefOrPreref
+#
+#$end_local_vars
+
+set SPR_FRLRefOrPreref = ""
+set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
+#$end_vars
+
+cd ${SPR_FREALIGN_DIR}/${SPR_FRLRefOrPreref}
+
+frealign_kill
+
+cd ${OLDPWD}

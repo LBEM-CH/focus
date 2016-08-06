@@ -1,0 +1,58 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Run pre-refinement (FREALIGN)		                          		#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 29/07/2016                                             #
+# Last Modification: 29/07/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 4
+#
+#
+# MANUAL: This script launches the first refinement in single-particle mode using the crystal averages obtained in the previous steps.
+#
+# MANUAL: This script is based on the frealign_run_refinement script distributed with FREALIGN v9.11, which was modified to support FREALIGN launching from an arbitrary directory.
+#
+set bin_2dx = ""
+set proc_2dx = ""
+
+set SPR_PREREFINE_DIR = ${PWD}/SPR/FREALIGN/pre-refine/
+#$end_vars
+
+# There's some issue with ${PWD} and {$OLDPWD} in csh, so just to be safe:
+set SAVEPATH = ${PWD}
+
+cd ${SPR_PREREFINE_DIR}
+
+frealign_run_refine
+
+cd ${SAVEPATH}
+
+echo ":: "
+echo ":: Pre-refinement with FREALIGN has been launched."
+echo ":: This may take some time to complete."
+echo ":: For detailed information please check ${PWD}/SPR/FREALIGN/pre-refine/frealign.log"
+echo ":: "
+# set OLDLINE = "`tail -n 1 ${SPR_PREREFINE_DIR}/frealign.log`"
+# echo ":: ${OLDLINE}"
+
+# # tail -f ${SPR_PREREFINE_DIR}/frealign.log
+# while ( 1 )
+
+# 	set NEWLINE = "`tail -n 1 ${SPR_PREREFINE_DIR}/frealign.log`"
+# 	if ( ${NEWLINE} != ${OLDLINE} ) then
+# 		echo ":: ${NEWLINE}"
+# 		set OLDLINE = ${NEWLINE}
+# 	endif
+
+# 	if ( ${NEWLINE} =~ *"Normal termination of frealign"* ) then
+# 		break
+# 	endif
+
+# end
+

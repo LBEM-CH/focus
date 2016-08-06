@@ -1,0 +1,72 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: AUX-Remove FREALIGN files	                    					#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 29/07/2016                                             #
+# Last Modification: 29/07/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 20
+#
+#
+# MANUAL: This script allows the user to remove specific .par or .mrc files from a FREALIGN refinement.
+#
+# DISPLAY: SPR_FRLRefOrPreref
+# DISPLAY: SPR_WhichStackAll
+# DISPLAY: SPR_FRLCycle
+# DISPLAY: SPR_FRLRef
+# DISPLAY: SPR_FRLRemovePar
+# DISPLAY: SPR_FRLRemoveMrc
+# DISPLAY: SPR_CleanSPR
+#
+#$end_local_vars
+
+set SPR_FRLRefOrPreref = ""
+set SPR_WhichStackAll = ""
+set SPR_FRLCycle = ""
+set SPR_FRLRef = ""
+set SPR_FRLRemovePar = ""
+set SPR_FRLRemoveMrc = ""
+set SPR_CleanSPR = ""
+
+set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
+
+#
+set SPR_DIR = ${PWD}/SPR
+set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
+#$end_vars
+
+if ( ${SPR_CleanSPR} == "y" ) then
+
+	if ( ${SPR_WhichStackAll} == "non-corrected" ) then
+		set stack_name = "particles"
+	else
+		set stack_name = "particles_${SPR_WhichStackAll}"
+	endif
+
+	# Form the string:
+	if ( ${SPR_FRLRef} == 0 ) then
+		set remove_file = "${SPR_FREALIGN_DIR}/${SPR_FRLRefOrPreref}/${stack_name}_${FRLCycle}_r*."
+	else
+		set remove_file = "${SPR_FREALIGN_DIR}/${SPR_FRLRefOrPreref}/${stack_name}_${FRLCycle}_r${FRLRef}."
+	endif
+
+	if ( ${SPR_FRLRemovePar} == "y" ) then
+		rm ${remove_file}.par
+	endif
+
+	if ( ${SPR_FRLRemoveMrc} == "y" ) then
+		rm ${remove_file}.mrc
+	endif
+
+else if ( ${SPR_CleanSPR} == "n" ) then
+
+	echo ":: Nothing done."
+	endif
+
+endif

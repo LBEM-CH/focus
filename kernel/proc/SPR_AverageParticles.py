@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+#############################################################################
+#                                                                           #
+# Title: Average Particles from 2D Crystals									#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 29/07/2016                                             #
+# Last Modification: 29/07/2016                                             #
+# Author...........: Ricardo Righetto                                       #
+#                                                                           #
+#############################################################################
+import sparx as spx
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+
+def main():
+
+	# Get arguments:
+	stack_path = sys.argv[1]
+	stack_rootname = sys.argv[2]+'_'+sys.argv[3]
+	if sys.argv[4] == 'y':
+		do_frc = True
+	else:
+		do_frc = False
+	frc_folder = sys.argv[5]
+	sigma = float(sys.argv[6]) # Sigma for normalization of the windowed images (if normalize_box == True)
+	apix = float(sys.argv[7]) # pixel size in Angstroems
+	thr = float(sys.argv[8]) # pixel size in Angstroems
+	# End arguments
+	stack_file = stack_path+stack_rootname+'.mrcs'
+
+	f = open(stack_path+stack_rootname+'_crystal-avg_1_r1.par', 'w+')
+
+	first = spx.EMData()
+	first.read_image(stack_file, 0)
+
+	par = np.loadtxt(stack_path+stack_rootname+'_1_r1.par', comments='C')
+	labels = par[:,7]
+	X = np.unique(labels)
+	XN = len(X)
+
+	for x in X:
+
+		print ':: Averaging particles from crystal %d/%d...' % (x, XN)
+
+		img_list = np.where(labels == x)[0]
+
+		avg = spx.EMData(first.get_xsize(),first.get_ysize())
+
+		if do_frc:
+
+			plt.figure()
+
+			odd = spx.EMData(first.get_xsize(),first.get_ysize())
+			even = spx.EMData(first.get_xsize(),first.get_ysize())
+
+		for i in img_list:
+
+			img = spx.EMData()
+			img.read_image(stack_file, int(i))
+
+			avg += img
+
+			if do_frc:
+
+				if np.mod(i,2) == 1:
+
+					odd += img
+
+				else:
+
+					even += img
+
+		avg = NormalizeStack([avg], sigma)[0]
+
+		avg.write_image(stack_path+stack_rootname+'_crystal-avg.mrcs', int(x-1))
+
+		# Write .par file with the parameters for each particle in the dataset:
+		print >>f, '      %d' % (x),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
+
+		if do_frc:
+
+			frc = spx.fsc(odd, even)
+
+			plt.plot(np.array(frc[0])/apix,frc[1])
+
+			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc[1]))*10.0,11)]
+			yvalues.append(thr)
+
+			plt.title('Fourier Ring Correlation - TLTANG = %.1f' % par[img_list[0],2])
+			plt.ylabel('FRC')
+			plt.xlabel('Spatial frequency (1/A)')
+			# plt.ylim(0.0,1.0)
+			plt.yticks(yvalues)
+			plt.grid()
+			plt.savefig(frc_folder+'crystal_'+'%.3d' % x+'_'+sys.argv[3]+'_FRC.png', dpi=300)
+			plt.close()
+
+	print ':: '
+
+
+def NormalizeStack(stack, sigma):
+# Normalizes a stack of images to zero-mean and standard deviation given by sigma:
+
+	stack_norm = []
+	for i in range(len(stack)):
+
+		zero_float = stack[i] - stack[i]['mean']
+		zero_float.mult(sigma/zero_float['sigma'])
+		stack_norm.append(zero_float)
+
+	return stack_norm
+
+if __name__ == '__main__':
+	main()

@@ -1,0 +1,46 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Generate crystal averages                               					#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 29/07/2016                                             #
+# Last Modification: 29/07/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 2
+#
+#
+# MANUAL: This script will calculate the average of the particles for every crystal. This can be useful to assess whether the particle extraction parameters used in the previous step are good. Also, these averages, which are analogous to 2D class averages in conventional Single Particle Analysis, are used in the next step for the first refinement in single-particle mode. This averaging procedure is similar to Correlation Averaging. Optionl Fourier Ring Correlations can be calculated for every crystal average to assess its quality.
+#
+# DISPLAY: SPR_WhichStack
+# DISPLAY: SPR_DoFRC
+# DISPLAY: SPR_SigmaNorm
+# DISPLAY: SPR_FRCThreshold
+# DISPLAY: sample_pixel
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_python = ""
+#
+set SPR_WhichStack = ""
+set SPR_DoFRC = ""
+set SPR_SigmaNorm = ""
+set sample_pixel = ""
+set SPR_FRCThreshold = ""
+#
+set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
+set SPR_STACK_ROOTNAME = 'particles'
+set SPR_FRC_DIR = ${PWD}/SPR/FRC/
+#$end_vars
+
+if ( ${SPR_DoFRC} == "y" ) then
+	mkdir -p ${SPR_FRC_DIR}
+endif
+
+${app_python} ${proc_2dx}/SPR_AverageParticles.py ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_WhichStack} ${SPR_DoFRC} ${SPR_FRC_DIR} ${SPR_SigmaNorm} ${sample_pixel} ${SPR_FRCThreshold}

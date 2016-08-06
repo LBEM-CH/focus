@@ -1,0 +1,52 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Analyze pre-refinement results                        				#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 29/07/2016                                             #
+# Last Modification: 29/07/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 5
+#
+#
+# MANUAL: This script will generate plots showing how much the alignment parameters (Euler angles and shifts) have changed during the pre-refinement.
+
+# MANUAL: For a good dataset that has been properly processed with 2dx, the parameters for all or most of the images should change very little.
+#
+# DISPLAY: SPR_WhichStack
+# DISPLAY: SPR_FRLPreRefAnalyzeCycleIni
+# DISPLAY: SPR_FRLPreRefAnalyzeCycleFin
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_python = ""
+#
+set SPR_WhichStack = ""
+set SPR_FRLPreRefAnalyzeCycleIni = ""
+set SPR_FRLPreRefAnalyzeCycleFin = ""
+#
+set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
+set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/pre-refine/
+set scriptname = AnalyzePreRefineResults
+#$end_vars
+
+${app_python} ${proc_2dx}/SPR_FrealignComparePar.py ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleIni}_r1.par ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleFin}_r1.par  ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleIni}-${SPR_FRLPreRefAnalyzeCycleFin}_diff.txt ${SPR_PREREFINE_DIR}
+
+echo "# IMAGE: ${SPR_PREREFINE_DIR}/TLTAXIS_change_hist.png <TXT: TLTAXIS_change_hist.png>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${SPR_PREREFINE_DIR}/TLTANG_change_hist.png <TXT: TLTANG_change_hist.png>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${SPR_PREREFINE_DIR}/TAXA_change_hist.png <TXT: TAXA_change_hist.png>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${SPR_PREREFINE_DIR}/SHX_change_hist.png <TXT: SHX_change_hist.png>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${SPR_PREREFINE_DIR}/SHY_change_hist.png <TXT: SHY_change_hist.png>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${SPR_PREREFINE_DIR}/angular_change_hist.png <TXT: angular_change_hist.png>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${SPR_PREREFINE_DIR}/translational_change_hist.png <TXT: translational_change_hist.png>" >> LOGS/${scriptname}.results
+
+echo ":: "
+echo ":: Done!"
+echo ":: "

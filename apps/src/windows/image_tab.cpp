@@ -21,6 +21,7 @@ ImageTab::ImageTab(confData* data, QWidget* parent)
     windowTabWidget = new QTabWidget(this);
     windowTabWidget->setDocumentMode(true);
     windowTabWidget->setTabsClosable(true);
+    windowTabWidget->setIconSize(QSize(20,20));
     windowTabWidget->setTabShape(QTabWidget::Triangular);
     windowTabWidget->hide();
     connect(windowTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeImageWindow(int)));
@@ -124,11 +125,15 @@ void ImageTab::showImageWindow(const QString& workingDir) {
 void ImageTab::setTabNormal(const QString& workingDir) {
     if(imagesShown_.contains(workingDir)) {
         windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("file")));
+        windowTabWidget->tabBar()->setTabTextColor(imagesShown_.indexOf(workingDir), Qt::black);
     }
 }
 
 void ImageTab::setTabProcessing(const QString& workingDir) {
-    if(imagesShown_.contains(workingDir)) windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("processing")));
+    if(imagesShown_.contains(workingDir)) {
+        windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("processing")));
+        windowTabWidget->tabBar()->setTabTextColor(imagesShown_.indexOf(workingDir), Qt::red);
+    }
 }
 
 QStringList ImageTab::getImagesOpen() {

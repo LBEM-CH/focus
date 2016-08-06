@@ -670,9 +670,17 @@ void confData::addIcon(const QString &iconName, QIcon *icon) {
 }
 
 QIcon *confData::getIcon(QString icon) {
-    if (icons[icon.toLower()] == NULL && parentConf != NULL) return parentConf->getIcon(icon);
-
-    return icons[icon.toLower()];
+    if (!(icons.keys().contains(icon.toLower())) && parentConf != NULL) return parentConf->getIcon(icon);
+    
+    QIcon* ic;
+    if(!(icons.keys().contains(icon.toLower()))) {
+        std::cout << "WARNING: Icon not found: " << icon.toStdString() << "\n";
+        ic = new QIcon();
+    }
+    else {
+        ic = icons[icon.toLower()];
+    }
+    return ic;
 }
 
 void confData::addImage(const QString &imageName, QImage *image) {

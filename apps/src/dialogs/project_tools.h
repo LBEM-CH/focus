@@ -49,12 +49,9 @@ private:
 
     confData* mainData;
     
-    QHash<uint, int> localIndex;
-    
     scriptModule* toolsScriptModule;
-    resizeableStackedWidget *localParameters;
 
-    confInterface *parameters;
+    ParametersWidget *parameters;
     LogViewer *logViewer;
 
     QComboBox* userLevelButtons;

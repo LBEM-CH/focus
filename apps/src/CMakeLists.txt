@@ -45,13 +45,11 @@ set(MOC_HDRS
         widgets/noScrollComboBox.h
         widgets/imageViewer.h
         widgets/statusViewer.h
-        widgets/confValidator.h
         widgets/mrcGraphicsItem.h
         widgets/zoomWindow.h
         widgets/textBrowser.h
         widgets/resultsParser.h
         widgets/viewContainer.h
-        widgets/confEditor.h
         widgets/selectionFFT.h
         widgets/colorTool.h
         widgets/SpinBoxDelegate.h
@@ -74,6 +72,10 @@ set(MOC_HDRS
         widgets/resultsFile.h
         widgets/phaseView.h
         widgets/spotSelectTool.h
+        widgets/browser_widget.h
+        widgets/combo_input_widget.h
+        widgets/edit_set_widget.h
+        widgets/yesno_widget.h
         extentions/scriptParser.h
         extentions/fileWatcher.h
         mrcImage/largeMRC.h

@@ -1,73 +1,51 @@
-/*
- *  confInterface.h
- *  2DX-Mod
- *
- *  Created by Bryant Gipson on 2/22/06.
- *  Copyright 2006 __MyCompanyName__. All rights reserved.
- *
- */
+#ifndef CONFINTERFACE_H
+#define CONFINTERFACE_H
 
- #ifndef CONFINTERFACE_H
- #define CONFINTERFACE_H
+#include <QWidget>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QScrollArea>
+#include <QToolBar>
+#include <QToolButton>
+#include <QString>
+#include <QStringList>
+#include <QMap>
 
- #include <QWidget>
- #include <QLabel>
- #include <QGridLayout>
- #include <QVBoxLayout>
- #include <QHBoxLayout>
- #include <QLineEdit>
- #include <QString>
- #include <QAction>
- #include <QSet>
- #include <confData.h>
- #include <confSectionHeader.h>
- #include <confInput.h>
- #include <graphicalButton.h>
+#include "graphicalButton.h"
+#include "confData.h"
+#include "confSectionHeader.h"
 
-class confInterface : public QWidget
-{
-  Q_OBJECT
+class ParametersWidget : public QWidget {
+    Q_OBJECT
 
-  public slots:
-  void save();
-  void load();
-  void execute();
-  void setUserLevel(int level);
-  void setSelectionUserLevel(int level);
-  void reselect(bool value = true);
-  void updateFontInfo();
-  void hideAll();
+public:
+    ParametersWidget(confData* data, QWidget *parent = NULL);
+    ParametersWidget(confData* data, int userLevel, QWidget *parent = NULL);
+    ParametersWidget(confData* data, QStringList parametersDisplayed, int userLevel = 0, QWidget *parent = NULL);
+    
+public slots:
+    void setSelectionUserLevel(int);
+    void changeParametersDisplayed(const QStringList& toBeDisplayed);
+    void load();
 
-  void openAllSections();
+private:
 
-  signals:
-  void saveAll();
-  void loadAll();
-  void fontInfoUpdated();
+    void initialize(int userLevel, const QStringList& toBeDisplayed);
+    void changeFormWidget();
 
-  private:
-  //Actions
-  QAction *saveAction;
-  QAction *loadAction;
-  QAction *executeAction;
-  confData *data;
-  bool advancedView;
-  QMultiMap<QWidget*,confInput*> lookup;
-  QSet<QWidget*> emptyingSections;
-  QList<confSectionHeader*> titles;
-  QList<QWidget*> sectionHeaders;
-  QHash<QString, confInput*> inputs;
-  QStringList selectedInputs;
+    QWidget* formWidget();
+    QToolBar* toolWidget();
 
-  int userLevel;
-  int isWrong;
+    QHBoxLayout* mainLayout_;
+    QScrollArea* scrollArea_;
 
-  QColor alt;
-
-  public:
-  confInterface(confData *conf, QString concerns = "", QWidget *parent = NULL);
-  void select(const QStringList &selectionList, int level = 0);
-  
+    int userLevel_;
+    QStringList parametersDisplayed_;
+    
+    confData* data;
+    
+    QList<confSectionHeader*> sections_;
+    QMap<QString, confElement*> parameterToElement_;
 };
 
 #endif

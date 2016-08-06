@@ -94,6 +94,7 @@ private:
     bool empty;
     bool modified;
     bool autoSave;
+    bool parentConfInit = false;
 
     QString OS_X_APP_PATH;
 

@@ -62,6 +62,8 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     setupActions();
     setupMenuBar();
     
+    connect(mainData, SIGNAL(dataModified(bool)), this, SLOT(setSaveState(bool)));
+    
     UserPreferences(mainData).loadAllFontSettings();
     UserPreferences(mainData).loadWindowPreferences(this);
 
@@ -150,8 +152,6 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
     mainData->setURL("bugReport", "https://github.com/C-CINA/2dx/issues");
 
     if (!setupIcons(mainData, mainData->getDir("resource"))) cerr << "Error loading images." << mainData->getDir("resource").toStdString() << endl;
-
-    connect(mainData, SIGNAL(dataModified(bool)), this, SLOT(setSaveState(bool)));
 
     return mainData;
 }
@@ -285,6 +285,8 @@ bool mainWindow::setupIcons(confData *data, const QDir &directory) {
 void mainWindow::setupToolBar() {
     QToolBar* mainToolBar = addToolBar("");
     mainToolBar->setIconSize(QSize(32, 32));
+    mainToolBar->setFloatable(false);
+    mainToolBar->setMovable(false);
     
     openLibraryWindowAct = new QAction(*(mainData->getIcon("library")), "Project Library", mainToolBar);
     openLibraryWindowAct->setCheckable(true);
@@ -317,16 +319,22 @@ void mainWindow::setupToolBar() {
     showProjectToolsAct->setCheckable(false);
     connect(showProjectToolsAct, SIGNAL(triggered()), this, SLOT(showProjectTools()));
     
+    QAction *openPreferencesAction = new QAction(*(mainData->getIcon("preferences")), "Preferences", this);
+    openPreferencesAction->setCheckable(false);
+    connect(openPreferencesAction, SIGNAL(triggered()), this, SLOT(editHelperConf()));
+    
     QWidget* spacer1 = new QWidget();
     spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QWidget* spacer2 = new QWidget();
     spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    
+    mainToolBar->addAction(showProjectToolsAct);
     mainToolBar->addWidget(spacer1);
     mainToolBar->addAction(openLibraryWindowAct);
     mainToolBar->addAction(openImageWindowAct);
     mainToolBar->addAction(openMergeWindowAct);
     mainToolBar->addWidget(spacer2);
-    mainToolBar->addAction(showProjectToolsAct);
+    mainToolBar->addAction(openPreferencesAction);
     
 }
 

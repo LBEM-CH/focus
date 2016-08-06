@@ -1,108 +1,133 @@
-#include <confSectionHeader.h>
+#include <iostream>
 
-confSectionHeader::confSectionHeader(confData *conf, confSection *s, QWidget *parent)
-                  :QFrame(parent)
-{
-  data = conf;
-  section = s;  
+#include <QFont>
+#include <QPalette>
+#include <QColor>
 
-  QHBoxLayout *layout = new QHBoxLayout;
-  setLayout(layout);
-  layout->setMargin(0); 
-  layout->setSpacing(0);
+#include "confSectionHeader.h"
 
-  //setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-  //setLineWidth(1);
+confSectionHeader::confSectionHeader(confData* conf, QString sectionTitle, QWidget *parent)
+: QWidget(parent) {
 
-  setAutoFillBackground(true);
-  QPalette titlePal(palette());
-  QLinearGradient grad(QPoint(0,0),QPoint(0,height()));
-  grad.setColorAt(1,QColor(31,92,207));
-  grad.setColorAt(0.5,QColor(33,126,220));
-  grad.setColorAt(0,QColor(88,153,229));
-  titlePal.setBrush(QPalette::Background,grad);
-  titlePal.setColor(QPalette::WindowText,QColor(247,245,250));
-  setPalette(titlePal);
+    data = conf;
 
-  setMinimumHeight(20);
+    mainLayout_ = new QVBoxLayout;
+    mainLayout_->setSpacing(10);
+    mainLayout_->setMargin(10);
 
-  QIcon *icon = data->getIcon("expand");
+    QLabel* title = new QLabel(sectionTitle);
+    title->setAlignment(Qt::AlignLeft);
 
-  collapseButton = new graphicalButton(icon);
-  collapseButton->setCheckable(true);
-  collapseButton->setChecked(false);
-  collapseButton->setFixedSize(16, 16);
-  connect(collapseButton,SIGNAL(toggled(bool)),this,SIGNAL(hideChildren(bool)));
-  connect(collapseButton,SIGNAL(toggled(bool)),this,SLOT(collapse(bool)));
+    QFont f = title->font();
+    f.setCapitalization(QFont::Capitalize);
+    f.setBold(true);
+    title->setFont(f);
+    QPalette pal = title->palette();
+    pal.setColor(QPalette::WindowText, QColor(31, 92, 207));
+    title->setPalette(pal);
+    mainLayout_->addWidget(title);
 
-  layout->addWidget(collapseButton);
+    parameterFrame_ = new QFrame(this);
+    parameterFrame_->setFrameShadow(QFrame::Plain);
+    parameterFrame_->setFrameShape(QFrame::StyledPanel);
 
-  QLabel *title = new QLabel(s->title());
-  QPalette headerPalette(palette());
-  headerPalette.setBrush(QPalette::Background,grad);
-  headerPalette.setColor(QPalette::WindowText,QColor(247,245,250));
-  title->setPalette(headerPalette);
-  title->setFixedHeight(20);
-  title->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-  QFont titleFont(QApplication::font());
-  titleFont.setPointSize(titleFont.pointSize()-1);
-  titleFont.setWeight(QFont::Bold);
-  title->setFont(titleFont);
+    formLayout_ = new QFormLayout();
+    formLayout_->setRowWrapPolicy(QFormLayout::WrapLongRows);
+    formLayout_->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    formLayout_->setFormAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    formLayout_->setLabelAlignment(Qt::AlignLeft);
+    formLayout_->setVerticalSpacing(0);
 
-  layout->addWidget(title);
-  
-  setChildrenHidden(false);
-
+    setAutoFillBackground(true);
 }
 
-void confSectionHeader::setChildrenHidden(bool hidden)
-{
-  childrenHiddenValue = hidden;
-}
+void confSectionHeader::addParameter(confElement* element) {
+    confInput* inputWidget = new confInput(data, element, this);
+    int paramUserLevel = element->userLevel();
 
-bool confSectionHeader::childrenHidden()
-{
-  return childrenHiddenValue;
-}
-
-void confSectionHeader::addChild(confInput *input)
-{
-  childInputs<<input;
-  visible[input] = true;
-  connect(input,SIGNAL(shown()),this,SLOT(childShown()));
-}
-
-void confSectionHeader::collapse(bool value)
-{
-  if(value)
-  {
-    foreach(confInput *child, childInputs)
-    {
-      visible[child] = child->isVisible();
-      child->hide();
+    int index = formLayout_->rowCount();
+    parameterRowLevelLookup_.insert(element->get("valuelabel"), index);
+    parameterUserLevelLookup_.insert(element->get("valuelabel"), paramUserLevel);
+    parameterInputLookup_.insert(element->get("valuelabel"), inputWidget);
+    
+    QLabel* label = new QLabel(element->get("label"));
+    label->setToolTip(getWhatsThis(element));
+    if (paramUserLevel == 1) {
+        QFont f = label->font();
+        f.setItalic(true);
+        label->setFont(f);
     }
-  }
-  else
-    foreach(confInput *child, childInputs)
-      if(visible[child]) child->show();
-  
+    
+    formLayout_->addRow(label, inputWidget);
 }
 
-void confSectionHeader::clearChildren()
-{
-  childInputs.clear();
+void confSectionHeader::loadFromConfig() {
+    for (int i = 0; i < parameterInputLookup_.keys().size(); ++i) {
+        QString parameterName = parameterInputLookup_.keys()[i];
+        parameterInputLookup_[parameterName]->load();
+    }
 }
 
-void confSectionHeader::showAllChildren(bool value)
-{
- foreach(confInput *child, childInputs)
-    child->show();
+void confSectionHeader::finishAddingParameters() {
+    parameterFrame_->setLayout(formLayout_);
+    mainLayout_->addWidget(parameterFrame_);
+    mainLayout_->addSpacing(10);
+    setLayout(mainLayout_);
 }
 
-void confSectionHeader::childShown()
-{
-  collapseButton->setChecked(false);
-  show();
+void confSectionHeader::changeDisplayedParameters(int userLevel, QStringList parametersDisplayed) {
+    int shown = parameterInputLookup_.keys().size();
+    for (int i = 0; i < parameterInputLookup_.keys().size(); ++i) {
+        QString parameterName = parameterInputLookup_.keys()[i];
+        int index = parameterRowLevelLookup_[parameterName];
+        if (parameterUserLevelLookup_[parameterName] <= userLevel && (parametersDisplayed.contains(parameterName) || parametersDisplayed.contains("*"))) {
+            if(formLayout_->itemAt(index, QFormLayout::LabelRole) != nullptr) formLayout_->itemAt(index, QFormLayout::LabelRole)->widget()->show();
+            if(formLayout_->itemAt(index, QFormLayout::FieldRole) != nullptr) formLayout_->itemAt(index, QFormLayout::FieldRole)->widget()->show();
+            if(formLayout_->itemAt(index, QFormLayout::SpanningRole) != nullptr) formLayout_->itemAt(index, QFormLayout::SpanningRole)->widget()->show();
+        } else {
+            if(formLayout_->itemAt(index, QFormLayout::LabelRole) != nullptr) formLayout_->itemAt(index, QFormLayout::LabelRole)->widget()->hide();
+            if(formLayout_->itemAt(index, QFormLayout::FieldRole) != nullptr) formLayout_->itemAt(index, QFormLayout::FieldRole)->widget()->hide();
+            if(formLayout_->itemAt(index, QFormLayout::SpanningRole) != nullptr) formLayout_->itemAt(index, QFormLayout::SpanningRole)->widget()->hide();
+            shown --;
+        }
+    }
+
+    if(shown <= 0) hide();
+    else show();
+    
+    formLayout_->invalidate();
+    formLayout_->update();
+    update();
+    updateGeometry();
 }
 
+QString confSectionHeader::getWhatsThis(confElement* element) {
+    QString whatsthis = element->get("valuelabel") + "<br><br>" + element->get("legend") + "<br><br>";
 
+    confElement::TypeInfo info = element->typeInfo();
+    QMap<int, QStringList> widgetRange = info.deduceMinMaxPairs(info.properties);
+
+    if (!widgetRange.isEmpty()) whatsthis += "Range: <br>";
+
+    foreach(int i, widgetRange.keys()) {
+        if (widgetRange.size() > 1) {
+            whatsthis += QString::number(i + 1) + " : ";
+        }
+        if (!widgetRange.value(i)[0].isEmpty()) {
+            whatsthis += " Min=";
+            whatsthis += widgetRange.value(i)[0];
+        }
+        if (widgetRange.value(i).size() > 1 && !widgetRange.value(i)[1].isEmpty()) {
+            whatsthis += " and ";
+            whatsthis += " Max=";
+            whatsthis += widgetRange.value(i)[1];
+            whatsthis += " ";
+        }
+        whatsthis += "<br>";
+    }
+    whatsthis += "Example: " + element->get("example") + "<br><br>";
+    whatsthis += "<a href=\"" + element->get("help") + "\"> " + element->get("help") + "</a>";
+
+    return whatsthis;
+
+}

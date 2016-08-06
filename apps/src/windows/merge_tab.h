@@ -40,7 +40,6 @@
 #include <log_viewer.h>
 #include <resultsModule.h>
 #include <reprojectWindow.h>
-#include <confEditor.h>
 
 #include "blockContainer.h"
 
@@ -67,8 +66,6 @@ public slots:
 
     void showSubTitle(bool show);
     
-    void updateFontInfo();
-    
     void execute(bool halt);
     void stopPlay();
     
@@ -94,12 +91,10 @@ private:
     
     resultsData *results;
 
-    confInterface *parameters;
+    ParametersWidget *parameters;
 
     QSplitter* centralSplitter;
     QSplitter *centerRightSplitter;
-
-    resizeableStackedWidget *localParameters;
 
     resultsModule *resultsView;
 
@@ -107,8 +102,6 @@ private:
 
     QComboBox* userLevelButtons;
     QComboBox* verbosityControl;
-
-    QHash<uint, int> localIndex;
     
     QProgressBar* progressBar;
     

@@ -96,7 +96,7 @@ private:
             layout->addWidget(listWidget_, 1, 0, 1, 2);
 
             updateListWiget();
-
+            
             setLayout(layout);
 
         }
@@ -122,6 +122,7 @@ private:
             for(int i=0; i< projectPaths.size(); ++i) {
                 listWidget_->addItem(ProjectPreferences(projectPaths[i]).projectName() + " (" + projectPaths[i] + ")");
             }
+            if(!projectPaths.isEmpty()) listWidget_->setCurrentRow(0);
         }
         
         QString getUserPath() {

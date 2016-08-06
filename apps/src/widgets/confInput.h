@@ -29,67 +29,44 @@
 #include <QIcon>
 #include <QColor>
 #include <float.h>
+
 #include "confData.h"
 #include "graphicalButton.h"
-//#include "confValidator.h"
+#include "browser_widget.h"
+#include "combo_input_widget.h"
+#include "edit_set_widget.h"
+#include "yesno_widget.h"
 
-class confInput : public QWidget
-{
-  Q_OBJECT
+class confInput : public QWidget {
+    Q_OBJECT
 
-  public slots:
-  void save();
-  void load();
-  void setReadOnlyState(int state);
-  void dataModified();
-  void updateFontInfo();
-  void updateStatus();
-  void updateWhatsThis();
-  void show();
-  void openFileDialog();
-  void openDirDialog();
+public:
+    confInput(confData *conf, confElement *e, QWidget *parent = NULL);
+    int userLevel();
 
-  signals:
-  void shown();
+public slots:
+    void saveValue(const QString& value);
+    void load();  
+    void setReadOnlyState(int state);
+    void show();
 
-  private:
-  confData *data;
-  confElement *element;
+signals:
+    void shown();
+    void shouldLoadValue(const QString& value);
 
-  QGridLayout *layout;
+private:
 
-  QString varUID;
+    QWidget* setupDirWidget(bool isDir = false);
+    QWidget* setupEditWidget();
+    QWidget* setupBoolWidget();
+    QWidget* setupDropDownWidget();
 
-  QFont labelFont;
+    confData *data;
+    confElement *element;
 
-  QString type;
-  int user_level;
-  bool is_wrong;
-
-  QLabel *label;
-  QList<QLineEdit *> lEdits;
-  QComboBox *menu;
-
-  QRadioButton *yes,*no;
-  QPushButton *browse;
-  QLabel *yesLabel, *noLabel;
-
-  graphicalButton *lockedBox;
-  QPalette pal;
-  const QColor isWrongColor;
-  QBrush texture;
-
-  void setIsWrongValueColor();
-  
-  public:
-  confInput(confData *conf, confElement *e, QWidget *parent = NULL);
-  int userLevel();
-  bool isWrong();
-
-  protected:
-  void mousePressEvent(QMouseEvent *event);
-  bool event(QEvent *event);
-  bool eventFilter(QObject *obj, QEvent *event);
+    QGridLayout* layout_;
+    graphicalButton* lockButton_;
+    QWidget* inputWidget_;
 };
 
 #endif

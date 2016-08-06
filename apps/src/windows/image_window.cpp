@@ -360,25 +360,7 @@ blockContainer* ImageWindow::setupLogWindow() {
 }
 
 blockContainer* ImageWindow::setupParameterWindow() {
-    localParameters = new resizeableStackedWidget(this);
-
-    parameters = new confInterface(data, "");
-
-    parametersWidget = new QWidget();
-    QVBoxLayout *parameterLayout = new QVBoxLayout();
-    parameterLayout->setMargin(0);
-    parameterLayout->setSpacing(0);
-    parametersWidget->setLayout(parameterLayout);
-    parameterLayout->addWidget(localParameters);
-    parameterLayout->addWidget(parameters);
-    parameterLayout->setStretchFactor(localParameters, 1);
-    parameterLayout->setStretchFactor(parameters, 100);
-
-    QScrollArea *window = new QScrollArea(this);
-    window->setWidgetResizable(true);
-    window->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    window->setWidget(parametersWidget);
-
+    parameters = new ParametersWidget(data, this);
 
     //Setup Verbosity control combo box
     userLevelButtons = new QComboBox(this);
@@ -410,7 +392,7 @@ blockContainer* ImageWindow::setupParameterWindow() {
     blockContainer* parameterContainer = new blockContainer("Setup");
     parameterContainer->setMinimumWidth(400);
     parameterContainer->setMinimumHeight(200);
-    parameterContainer->setMainWidget(window);
+    parameterContainer->setMainWidget(parameters);
     parameterContainer->setHeaderWidget(parameterLevelWidget);
 
     return parameterContainer;
@@ -483,28 +465,15 @@ void ImageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     
     currentResults = module->resultsFile(index);
 
-    if (localIndex[uid] == 0 && module->conf(index)->size() != 0) {
-        confInterface *local = new confInterface(module->conf(index), "");
-        connect(this, SIGNAL(fontInfoUpdated()), local, SLOT(updateFontInfo()));
-        localIndex[uid] = localParameters->addWidget(local) + 1;
-    }
-
-    if (localIndex[uid] - 1 < 0)
-        localParameters->hide();
-    else {
-        localParameters->show();
-        localParameters->setCurrentIndex(localIndex[uid] - 1);
-    }
-
     setScriptProgress(module->getScriptProgress(uid));
 
-    parameters->select(module->displayedVariables(index));
+    parameters->changeParametersDisplayed(module->displayedVariables(index));
     currentLog = module->logFile(index);
     if (!visible["historyview"]) logViewer->loadLogFile(currentLog);
     results->setResult(module->resultsFile(index));
     imageParser->setResult(module->resultsFile(index));
     //warningWindow->load(module->resultsFile(index));
-    parametersWidget->update();
+    parameters->update();
 }
 
 void ImageWindow::standardScriptChanged(QModelIndex index) {
@@ -641,14 +610,6 @@ void ImageWindow::revert() {
 
 void ImageWindow::showSubTitle(bool s) {
     subTitleLabel->setVisible(s);
-}
-
-void ImageWindow::updateFontInfo() {
-    parameters->updateFontInfo();
-    logViewer->updateFontInfo();
-    results->updateFontInfo();
-    imageParser->updateFontInfo();
-    emit fontInfoUpdated();
 }
 
 void ImageWindow::launchLogBrowser() {

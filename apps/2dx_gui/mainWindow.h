@@ -60,7 +60,6 @@
 #include <reprojectWindow.h>
 #include <aboutWindow.h>
 #include <updateWindow.h>
-#include <confEditor.h>
 
 #include "library_tab.h"
 #include "merge_tab.h"

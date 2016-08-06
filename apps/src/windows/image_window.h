@@ -79,8 +79,6 @@ public slots:
     void launchLogBrowser();
     void launchFileBrowser();
 
-    void updateFontInfo();
-
     void toggleHistoryView(bool show);
 
     void updateScriptLabel(const QString& label);
@@ -95,7 +93,6 @@ public slots:
 signals:
     void executing(bool);
     void scriptCompletedSignal();
-    void fontInfoUpdated();
 
 private:
     blockContainer* setupLogWindow();
@@ -104,8 +101,6 @@ private:
 
     QString workingDir;
     confData *data;
-
-    QHash<uint, int> localIndex;
 
     QStackedWidget* scriptsWidget;
     QListView* subscriptWidget;
@@ -131,11 +126,9 @@ private:
 
     statusViewer *statusParser;
 
-    confInterface *parameters;
-    resizeableStackedWidget *localParameters;
+    ParametersWidget *parameters;
     QComboBox* userLevelButtons;
 
-    QWidget *parametersWidget;
     blockContainer *parameterContainer;
 
     QSplitter* centralSplitter;

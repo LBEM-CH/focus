@@ -253,26 +253,7 @@ blockContainer* MergeTab::setupLogWindow() {
 }
 
 blockContainer* MergeTab::setupParameterWindow() {
-    localParameters = new resizeableStackedWidget(this);
-
-    parameters = new confInterface(mainData, "");
-    connect(results, SIGNAL(saved(bool)), parameters, SLOT(load()));
-
-    QWidget *parametersWidget = new QWidget();
-    QVBoxLayout *parameterLayout = new QVBoxLayout();
-    parametersWidget->setLayout(parameterLayout);
-    parameterLayout->setMargin(0);
-    parameterLayout->setSpacing(0);
-    parameterLayout->addWidget(localParameters);
-    parameterLayout->addWidget(parameters);
-    parameterLayout->setStretchFactor(localParameters, 1);
-    parameterLayout->setStretchFactor(parameters, 100);
-
-    QScrollArea *window = new QScrollArea(this);
-    window->setWidgetResizable(true);
-    window->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    window->setWidget(parametersWidget);
-
+    parameters = new ParametersWidget(mainData, this);
 
     //Setup Verbosity control combo box
     userLevelButtons = new QComboBox(this);
@@ -304,7 +285,7 @@ blockContainer* MergeTab::setupParameterWindow() {
     blockContainer* parameterContainer = new blockContainer("Setup");
     parameterContainer->setMinimumWidth(400);
     parameterContainer->setMinimumHeight(200);
-    parameterContainer->setMainWidget(window);
+    parameterContainer->setMainWidget(parameters);
     parameterContainer->setHeaderWidget(parameterLevelWidget);
 
     return parameterContainer;
@@ -377,21 +358,7 @@ void MergeTab::scriptChanged(scriptModule *module, QModelIndex index) {
     }
     subscriptWidget->setModel(model);
 
-    if (localIndex[uid] == 0 && module->conf(index)->size() != 0) {
-        confInterface *local = new confInterface(module->conf(index), "");
-        localIndex[uid] = localParameters->addWidget(local) + 1;
-        if (localParameters->widget(localIndex[uid] - 1) == NULL) cerr << "Something's very wrong here." << endl;
-        //    connect(userLevelButtons,SIGNAL(levelChanged(int)),local,SLOT(setSelectionUserLevel(int)));
-    }
-
-    if (localIndex[uid] - 1 < 0)
-        localParameters->hide();
-    else {
-        localParameters->show();
-        localParameters->setCurrentIndex(localIndex[uid] - 1);
-    }
-
-    parameters->select(module->displayedVariables(index));
+    parameters->changeParametersDisplayed(module->displayedVariables(index));
     if (verbosityControl->currentIndex() != 0)
         logViewer->loadLogFile(module->logFile(index));
     else
@@ -451,9 +418,4 @@ void MergeTab::launchLogBrowser() {
 
 void MergeTab::showSubTitle(bool s) {
     subTitleLabel->setVisible(s);
-}
-
-void MergeTab::updateFontInfo() {
-    parameters->updateFontInfo();
-    logViewer->updateFontInfo();
 }

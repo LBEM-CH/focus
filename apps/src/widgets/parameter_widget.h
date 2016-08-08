@@ -13,7 +13,7 @@
 
 #include "graphicalButton.h"
 #include "confData.h"
-#include "confSectionHeader.h"
+#include "parameter_section.h"
 
 class ParametersWidget : public QWidget {
     Q_OBJECT
@@ -44,7 +44,7 @@ private:
     
     confData* data;
     
-    QList<confSectionHeader*> sections_;
+    QList<ParameterSection*> sections_;
     QMap<QString, confElement*> parameterToElement_;
 };
 

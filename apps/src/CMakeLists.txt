@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 2.8.11)
 SET(LIBTITLE 2dx_app)
 SET(LIBVERSION 1)
 PROJECT(${LIBTITLE})
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/widgets/confVersion.h.in ${CMAKE_CURRENT_SOURCE_DIR}/widgets/confVersion.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/confVersion.h.in ${CMAKE_CURRENT_SOURCE_DIR}/data/confVersion.h)
 #-------------------------------------------------------------------------------
 
 #--- BASE DIRECTORIES ----------------------------------------------------------
@@ -38,9 +38,9 @@ set(MOC_HDRS
         data/confDelegate.h
         data/confSection.h
         widgets/libraryImageStatus.h
-        widgets/confInterface.h
+        widgets/parameter_widget.h
         widgets/resizeableStackedWidget.h
-        widgets/confInput.h
+        widgets/parameter_input.h
         widgets/translator.h
         widgets/noScrollComboBox.h
         widgets/imageViewer.h
@@ -58,7 +58,7 @@ set(MOC_HDRS
         widgets/displayParametersTool.h
         widgets/latticeTool.h
         widgets/scriptModule.h
-        widgets/confSectionHeader.h
+        widgets/parameter_section.h
         widgets/abstractTool.h
         widgets/fullScreenImage.h
         widgets/ctfTool.h

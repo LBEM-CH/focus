@@ -1,7 +1,7 @@
 #include <QVBoxLayout>
 #include <QFrame>
 
-#include "confInterface.h"
+#include "parameter_widget.h"
 
 ParametersWidget::ParametersWidget(confData* conf, QWidget* parent)
 : QWidget(parent), data(conf) {
@@ -66,9 +66,9 @@ QWidget* ParametersWidget::formWidget() {
     generalLayout->setAlignment(Qt::AlignTop);
     
     sections_.clear();
-    confSectionHeader* sectionHeader;
+    ParameterSection* sectionHeader;
     for (unsigned int i = 0; i < data->size(); i++) {
-        sectionHeader = new confSectionHeader(data, (*data)[i]->title());
+        sectionHeader = new ParameterSection(data, (*data)[i]->title());
         sections_.append(sectionHeader);
         confElement *element;
         for (unsigned int j = 0; j < (*data)[i]->size(); j++) {

@@ -37,11 +37,11 @@
 #include "edit_set_widget.h"
 #include "yesno_widget.h"
 
-class confInput : public QWidget {
+class ParameterInput : public QWidget {
     Q_OBJECT
 
 public:
-    confInput(confData *conf, confElement *e, QWidget *parent = NULL);
+    ParameterInput(confData *conf, confElement *e, QWidget *parent = NULL);
     int userLevel();
 
 public slots:

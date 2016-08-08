@@ -27,13 +27,13 @@
 #include <QLabel>
 #include <QString>
 
-#include "confInput.h"
+#include "parameter_input.h"
 
-class confSectionHeader : public QWidget {
+class ParameterSection : public QWidget {
     Q_OBJECT
 
 public:
-    confSectionHeader(confData* data, QString sectionTitle, QWidget *parent=NULL);
+    ParameterSection(confData* data, QString sectionTitle, QWidget *parent=NULL);
     void finishAddingParameters();
     void changeDisplayedParameters(int userLevel, QStringList parametersDisplayed);
 
@@ -44,7 +44,7 @@ public slots:
 
 private:
 
-    QMap<QString, confInput*> parameterInputLookup_;
+    QMap<QString, ParameterInput*> parameterInputLookup_;
     QMap<QString, int> parameterRowLevelLookup_;
     QMap<QString, int> parameterUserLevelLookup_;
 

@@ -35,7 +35,7 @@
 #include <viewContainer.h>
 #include <resizeableStackedWidget.h>
 #include <scriptModule.h>
-#include <confInterface.h>
+#include <parameter_widget.h>
 #include <confModel.h>
 #include <log_viewer.h>
 #include <resultsModule.h>

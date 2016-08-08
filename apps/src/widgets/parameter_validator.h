@@ -29,11 +29,12 @@
 
 #include "confElement.h"
 
-class confValidator {
+class ParameterValidator {
 public:
 
-    static QStringList valueErrors(confElement::TypeInfo info, const QString& value) {
+    static QStringList valueErrors(confElement::TypeInfo info, const QString& val) {
         QStringList errorMsg_;
+        QString value = val.trimmed().toLower();
         if (info.type == confElement::Type::DIRECTORY && !QDir(value).exists()) {
             errorMsg_ << QString("The directory used does not exit: ") + value + QString("\n");
         } else if (info.type == confElement::Type::FILE && !QFileInfo(value).exists()) {
@@ -50,7 +51,7 @@ public:
         } else if (info.type == confElement::Type::INT && !(QVariant(value).canConvert<int>())) {
             errorMsg_ << QString("The provided value cannot be converted to int: ") + value + QString("\n");
         } else if (info.type == confElement::Type::BOOL) {
-            if (value != "y" || value != "n" || value != "yes" || value != "no" || value != "0" || value != "1") {
+            if (value != "y" && value != "n" && value != "yes" && value != "no" && value != "0" && value != "1") {
                 errorMsg_ << QString("The provided value cannot be converted to bool: ") + value + QString("\n");
             }
         }

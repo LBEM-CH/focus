@@ -6,13 +6,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "confInput.h"
+#include "parameter_input.h"
 #include "noScrollComboBox.h"
-#include "confValidator.h"
+#include "parameter_validator.h"
 
 using namespace std;
 
-confInput::confInput(confData *conf, confElement *e, QWidget *parent)
+ParameterInput::ParameterInput(confData *conf, confElement *e, QWidget *parent)
 : QWidget(parent), data(conf), element(e) {
 
     setAutoFillBackground(true);
@@ -46,13 +46,14 @@ confInput::confInput(confData *conf, confElement *e, QWidget *parent)
     setLayout(layout_);
 }
 
-void confInput::saveValue(const QString& value) {
-    QStringList errors = confValidator::valueErrors(element->typeInfo(), value);
+void ParameterInput::saveValue(const QString& value) {
+    QStringList errors = ParameterValidator::valueErrors(element->typeInfo(), value);
 
     if (errors.size() != 0) {
         QString err, fullErr;
         foreach(err, errors) fullErr += err + "\n";
         QMessageBox::warning(this, tr("Error in setting value for parameter"), fullErr);
+        load();
         return;
     }
     
@@ -66,7 +67,7 @@ void confInput::saveValue(const QString& value) {
     data->setModified(true);
 }
 
-void confInput::load() {
+void ParameterInput::load() {
     bool lock = element->locked();
     lockButton_->setChecked(lock);
     inputWidget_->setDisabled(lock);
@@ -90,7 +91,7 @@ void confInput::load() {
     update();
 }
 
-void confInput::setReadOnlyState(int state) {
+void ParameterInput::setReadOnlyState(int state) {
     if (state == Qt::Checked) {
         inputWidget_->setDisabled(true);
     } else if (state == Qt::Unchecked) {
@@ -103,11 +104,11 @@ void confInput::setReadOnlyState(int state) {
     }
 }
 
-int confInput::userLevel() {
+int ParameterInput::userLevel() {
     return element->userLevel();
 }
 
-void confInput::show() {
+void ParameterInput::show() {
     inputWidget_->show();
     updateGeometry();
     
@@ -118,8 +119,8 @@ void confInput::show() {
     emit shown();
 }
 
-QWidget* confInput::setupDirWidget(bool isDir) {
-    BrowserWidget* widget = new BrowserWidget(this);
+QWidget* ParameterInput::setupDirWidget(bool isDir) {
+    BrowserWidget* widget = new BrowserWidget(data->getIcon("folder"), this);
     if (isDir) widget->setType(BrowserWidget::BrowseType::DIRECTORY);
     widget->setDefaultPath(data->getDir("project"));
 
@@ -131,12 +132,12 @@ QWidget* confInput::setupDirWidget(bool isDir) {
     return widget;
 }
 
-QWidget* confInput::setupDropDownWidget() {
+QWidget* ParameterInput::setupDropDownWidget() {
     QComboBox* combo = new ComboInputWidget(this);
     combo->setFocusPolicy(Qt::StrongFocus);
     combo->addItems(element->typeInfo().properties);
 
-    connect(this, &confInput::shouldLoadValue, 
+    connect(this, &ParameterInput::shouldLoadValue, 
                 [ = ](const QString & value){combo->setCurrentIndex(value.toInt());});
     connect(combo, static_cast<void(QComboBox::*)(int)> (&QComboBox::currentIndexChanged),
             [ = ](int index){saveValue(QString::number(index));});
@@ -144,7 +145,7 @@ QWidget* confInput::setupDropDownWidget() {
     return combo;
 }
 
-QWidget* confInput::setupEditWidget() {
+QWidget* ParameterInput::setupEditWidget() {
     confElement::TypeInfo info = element->typeInfo();
     EditSetWidget* widget;
 
@@ -166,10 +167,10 @@ QWidget* confInput::setupEditWidget() {
     return widget;
 }
 
-QWidget* confInput::setupBoolWidget() {
+QWidget* ParameterInput::setupBoolWidget() {
     YesNoWidget* widget = new YesNoWidget(this);
 
-    connect(this, &confInput::shouldLoadValue,
+    connect(this, &ParameterInput::shouldLoadValue,
             [ = ](const QString & value){bool val = false;
         QString valStr = value.trimmed().toLower();
         if (valStr == "yes" || valStr == "y" || valStr == "1") val = true;

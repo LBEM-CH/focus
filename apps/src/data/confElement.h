@@ -146,24 +146,24 @@ public:
 
     bool locked() {
         bool yup = false;
-        if (get("locked").trimmed().toLower() == "yes") yup = true;
+        if (get("LOCKED").trimmed().toLower() == "yes") yup = true;
         return yup;
     };
 
     void setLock(bool lock) {
-        if (lock) set("locked", "YES");
-        else set("locked", "NO");
+        if (lock) set("LOCKED", "YES");
+        else set("LOCKED", "NO");
     };
 
     bool isWrong() {
         bool yup = false;
-        if (get("iswrong").trimmed().toLower() == "yes") yup = true;
+        if (get("ISWRONG").trimmed().toLower() == "yes") yup = true;
         return yup;
     }
 
     void setIsWrong(bool iswrong) {
-        if (iswrong) setProperty("iswrong", "YES");
-        else setProperty("iswrong", "NO");
+        if (iswrong) set("ISWRONG", "YES");
+        else set("ISWRONG", "NO");
     }
     
     int userLevel() {

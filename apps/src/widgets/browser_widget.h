@@ -22,14 +22,14 @@ public:
         DIRECTORY
     };
 
-    BrowserWidget(QWidget* parent)
+    BrowserWidget(QIcon* icon, QWidget* parent)
     : QWidget(parent) {
-        initialize();
+        initialize(icon);
     }
 
-    BrowserWidget(BrowseType type = BrowseType::FILE, QString defaultPath = "", QWidget* parent = NULL)
+    BrowserWidget(QIcon* icon, BrowseType type = BrowseType::FILE, QString defaultPath = "", QWidget* parent = NULL)
     : QWidget(parent), type_(type), defaultPath_(defaultPath) {
-        initialize();
+        initialize(icon);
     }
 
     QLineEdit* pathLineEditWidget() {
@@ -56,8 +56,10 @@ public slots:
         if (type_ == BrowseType::DIRECTORY) path = QFileDialog::getExistingDirectory(this, tr("Select Directory"), defaultPath_);
         else path = QFileDialog::getOpenFileName(this, tr("Select File"), defaultPath_);
 
-        pathEdit_->setText(path);
-        emit pathChanged(path);
+        if(!path.isEmpty()) {
+            pathEdit_->setText(path);
+            emit pathChanged(path);
+        }
     }
 
     void setPath(const QString& path) {
@@ -70,16 +72,18 @@ signals:
 
 private:
 
-    void initialize() {
+    void initialize(QIcon* icon) {
         layout_ = new QHBoxLayout(this);
         layout_->setMargin(0);
         layout_->setSpacing(2);
 
         pathEdit_ = new QLineEdit(this);
         pathEdit_->setFrame(false);
+        connect(pathEdit_, &QLineEdit::textEdited,
+                [=](const QString& text) {emit pathChanged(text);});
 
-        browseButton_ = new QPushButton("Browse", this);
-        //browseButton_->setFixedSize(QSize(pathEdit_->sizeHint().height(), pathEdit_->sizeHint().height()));
+        browseButton_ = new graphicalButton(icon, this);
+        browseButton_->setFixedSize(QSize(pathEdit_->sizeHint().height(), pathEdit_->sizeHint().height()));
         connect(browseButton_, SIGNAL(clicked()), this, SLOT(browse()));
 
         layout_->addWidget(pathEdit_);
@@ -88,7 +92,7 @@ private:
         setLayout(layout_);
     }
 
-    QPushButton* browseButton_;
+    graphicalButton* browseButton_;
     QHBoxLayout* layout_;
     QLineEdit* pathEdit_;
     BrowseType type_;

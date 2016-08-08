@@ -30,7 +30,7 @@
 #include <QStatusBar>
 #include <confData.h>
 #include <blockContainer.h>
-#include <confInterface.h>
+#include <parameter_widget.h>
 #include <scriptModule.h>
 #include <resultsParser.h>
 #include <imagePreview.h>

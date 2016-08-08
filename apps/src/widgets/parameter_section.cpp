@@ -4,9 +4,9 @@
 #include <QPalette>
 #include <QColor>
 
-#include "confSectionHeader.h"
+#include "parameter_section.h"
 
-confSectionHeader::confSectionHeader(confData* conf, QString sectionTitle, QWidget *parent)
+ParameterSection::ParameterSection(confData* conf, QString sectionTitle, QWidget *parent)
 : QWidget(parent) {
 
     data = conf;
@@ -41,8 +41,9 @@ confSectionHeader::confSectionHeader(confData* conf, QString sectionTitle, QWidg
     setAutoFillBackground(true);
 }
 
-void confSectionHeader::addParameter(confElement* element) {
-    confInput* inputWidget = new confInput(data, element, this);
+void ParameterSection::addParameter(confElement* element) {
+    ParameterInput* inputWidget = new ParameterInput(data, element, this);
+    inputWidget->setMinimumHeight(18);
     int paramUserLevel = element->userLevel();
 
     int index = formLayout_->rowCount();
@@ -61,21 +62,21 @@ void confSectionHeader::addParameter(confElement* element) {
     formLayout_->addRow(label, inputWidget);
 }
 
-void confSectionHeader::loadFromConfig() {
+void ParameterSection::loadFromConfig() {
     for (int i = 0; i < parameterInputLookup_.keys().size(); ++i) {
         QString parameterName = parameterInputLookup_.keys()[i];
         parameterInputLookup_[parameterName]->load();
     }
 }
 
-void confSectionHeader::finishAddingParameters() {
+void ParameterSection::finishAddingParameters() {
     parameterFrame_->setLayout(formLayout_);
     mainLayout_->addWidget(parameterFrame_);
     mainLayout_->addSpacing(10);
     setLayout(mainLayout_);
 }
 
-void confSectionHeader::changeDisplayedParameters(int userLevel, QStringList parametersDisplayed) {
+void ParameterSection::changeDisplayedParameters(int userLevel, QStringList parametersDisplayed) {
     int shown = parameterInputLookup_.keys().size();
     for (int i = 0; i < parameterInputLookup_.keys().size(); ++i) {
         QString parameterName = parameterInputLookup_.keys()[i];
@@ -101,7 +102,7 @@ void confSectionHeader::changeDisplayedParameters(int userLevel, QStringList par
     updateGeometry();
 }
 
-QString confSectionHeader::getWhatsThis(confElement* element) {
+QString ParameterSection::getWhatsThis(confElement* element) {
     QString whatsthis = element->get("valuelabel") + "<br><br>" + element->get("legend") + "<br><br>";
 
     confElement::TypeInfo info = element->typeInfo();

@@ -43,8 +43,8 @@ scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::
     setupModule();
     if (view != NULL) {
         if (type == scriptModule::standard) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        if (type == scriptModule::custom) view->setSelectionMode(QAbstractItemView::SingleSelection);
-        if (type == scriptModule::singleparticle) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        else view->setSelectionMode(QAbstractItemView::SingleSelection);
+     
         //layout->addWidget(titleLabel, 0, 0, 1, 1, Qt::AlignHCenter);
         //layout->setRowMinimumHeight(0, 40);
         layout->addWidget(view, 0, 0, 1, 1);
@@ -216,10 +216,7 @@ bool scriptModule::initializeExecution() {
     }
 
     runningScript = model->item(executionList[runningIndex]);
-    if (runningScriptSelected())
-        select(runningScript->index());
-    else
-        emit runningScriptChanged(runningScript->index());
+    if (runningScriptSelected()) select(runningScript->index());
 
     return true;
 }
@@ -230,6 +227,7 @@ void scriptModule::cleanupExecution() {
         model->item(i)->setForeground(Qt::black);
     }
     executionList.clear();
+    emit allScriptsCompleted();
     runningScript = NULL;
 }
 
@@ -307,12 +305,11 @@ void scriptModule::readStdOut() {
             value.last().remove('>');
             if (value.last().contains('+')) {
                 value.last().remove('+');
-                emit incrementProgress(value.last().toInt());
                 scriptProgress[currentUid] += value.last().toInt();
-            } else {
-                emit progress(value.last().toInt());
+            } else {             
                 scriptProgress[currentUid] = value.last().toInt();
             }
+            if(runningScriptSelected()) emit progress(scriptProgress[currentUid]);
         } else if (lineLower.startsWith("<<@evaluate>>")) {
             emit reload();
         } else
@@ -359,12 +356,7 @@ void scriptModule::scriptActivated(QModelIndex item) {
 
 bool scriptModule::runningScriptSelected() {
     if (selection->selectedIndexes().isEmpty()) return false;
-    //if(currentUid==selection->selectedIndexes().first().data(Qt::UserRole).toUInt()) return true;
-    bool selected = selection->isSelected(runningScript->index());
-    for (int i = 0; i < runningScript->rowCount(); i++)
-        selected = selected || selection->isSelected(runningScript->child(i)->index());
-    return selected;
-    return false;
+    return selection->isSelected(runningScript->index());
 }
 
 bool scriptModule::writeToLog(const QString &logText) {
@@ -398,6 +390,7 @@ void scriptModule::scriptFinished(int exitCode) {
     if (executionList.isEmpty()) {
         currentlyRunning = false;
         emit scriptCompleted(runningScript->index());
+        emit allScriptsCompleted();
         if (exitCode == -1) cleanupExecution();
         if (!selection->selectedRows().isEmpty())
             emit currentScriptChanged(selection->selectedRows().last());
@@ -428,10 +421,7 @@ confData *scriptModule::conf(QModelIndex index) {
 }
 
 QString scriptModule::title(QModelIndex index) {
-    if (runningScript == NULL)
-        return getScriptProperty(index.data(Qt::UserRole).toUInt(), "title").toString();
-    else
-        return getScriptProperty(runningScript->data(Qt::UserRole).toUInt(), "title").toString();
+    return getScriptProperty(index.data(Qt::UserRole).toUInt(), "title").toString();
 }
 
 void scriptModule::initialize() {

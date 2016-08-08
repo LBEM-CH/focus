@@ -70,7 +70,6 @@ public slots:
     void stopPlay();
     
     void updateScriptLabel(const QString& label);
-    void increaseScriptProgress(int increament);
     void setScriptProgress(int progress);
 
 signals:
@@ -102,6 +101,8 @@ private:
 
     QComboBox* userLevelButtons;
     QComboBox* verbosityControl;
+    
+    int runningTabIndex = -1;
     
     QProgressBar* progressBar;
     

@@ -50,7 +50,7 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     runButton->setIconSize(QSize(18, 18));
     runButton->setCheckable(true);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
-    connect(toolsScriptModule, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(stopPlay()));
+    connect(toolsScriptModule, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
 
     manualButton = new QPushButton;
     manualButton->setIcon(*(mainData->getIcon("help")));

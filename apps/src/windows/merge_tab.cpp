@@ -18,6 +18,12 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     scriptsWidget->setAttribute(Qt::WA_MacShowFocusRect, 0);
     scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
+    
+    connect(scriptsWidget, &QStackedWidget::currentChanged, 
+            [=](){
+               scriptModule* module = static_cast<scriptModule*>(scriptsWidget->currentWidget());
+               module->select(module->getSelection()->selection());
+            });
 
     QActionGroup* showScriptsGroup = new QActionGroup(this);
     showScriptsGroup->setExclusive(true);
@@ -40,9 +46,9 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
                 [ = ](QModelIndex index){
             scriptChanged(module, index);
         });
+        connect(module, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
         connect(module, SIGNAL(reload()), this, SLOT(reload()));
         connect(module, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-        connect(module, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
         connect(module, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
         connect(module, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
         connect(module, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
@@ -126,7 +132,6 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     runButton->setIconSize(QSize(18, 18));
     runButton->setCheckable(true);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
-    connect(this, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
 
     refreshButton = new QPushButton;
     refreshButton->setIcon(*(mainData->getIcon("refresh_colored")));
@@ -293,23 +298,19 @@ blockContainer* MergeTab::setupParameterWindow() {
 
 void MergeTab::execute(bool halt) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
+    runningTabIndex = scriptsWidget->currentIndex();
     module->execute(halt);
 }
 
 void MergeTab::stopPlay() {
+    runningTabIndex = -1;
     runButton->setChecked(false);
+    emit scriptCompletedSignal();
 }
 
 void MergeTab::updateScriptLabel(const QString& label) {
     progressBar->update();
     scriptLabel->setText(label);
-}
-
-void MergeTab::increaseScriptProgress(int increament) {
-    if (progressBar->value() + increament <= progressBar->maximum())
-        progressBar->setValue(progressBar->value() + increament);
-    else
-        progressBar->setValue(progressBar->maximum());
 }
 
 void MergeTab::setScriptProgress(int progress) {
@@ -374,8 +375,6 @@ void MergeTab::scriptCompleted(scriptModule *module, QModelIndex index) {
     results->load(module->resultsFile(index));
     results->save();
     resultsView->load();
-
-    emit scriptCompletedSignal();
 }
 
 void MergeTab::subscriptActivated(QModelIndex item) {

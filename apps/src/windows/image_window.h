@@ -54,10 +54,6 @@ public slots:
     void standardScriptCompleted(QModelIndex index);
     void customScriptCompleted(QModelIndex index);
 
-    void runningScriptChanged(scriptModule *module, QModelIndex index);
-    void customRunningScriptChanged(QModelIndex index);
-    void standardRunningScriptChanged(QModelIndex index);
-
     void setStandardMode();
     void setCustomMode();
 
@@ -82,7 +78,6 @@ public slots:
     void toggleHistoryView(bool show);
 
     void updateScriptLabel(const QString& label);
-    void increaseScriptProgress(int increament);
     void setScriptProgress(int progress);
 
     void maximizeLogWindow(bool maximize);
@@ -136,6 +131,8 @@ private:
 
     QHash<QString, bool> visible;
 
+    int runningTabIndex = -1;
+    
     QProgressBar* progressBar;
     
     QLabel* scriptLabel;

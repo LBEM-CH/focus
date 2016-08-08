@@ -57,14 +57,13 @@ signals:
     void standardError(const QByteArray &text);
 
     void progress(int value);
-    void incrementProgress(int inc);
     void reload();
 
     void currentScriptChanged(QModelIndex index);
-    void runningScriptChanged(QModelIndex index);
 
     void scriptLaunched();
     void scriptCompleted(QModelIndex index);
+    void allScriptsCompleted();
 
     void initialized();
 
@@ -88,7 +87,7 @@ private:
     QItemSelectionModel *selection;
 
     bool currentlyRunning;
-
+    
     int verbosity;
 
     void setupModule();

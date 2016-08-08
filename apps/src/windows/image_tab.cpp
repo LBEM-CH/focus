@@ -99,11 +99,6 @@ void ImageTab::showImageWindow(const QString& workingDir) {
                     else setTabNormal(workingDir);
                 });
                 
-        connect(imageWin, &ImageWindow::scriptCompletedSignal,
-                [=] () {
-                    setTabNormal(workingDir);
-                });
-                
         imagesInitializedToTabs_.insert(workingDir, imageWin);
     }
 

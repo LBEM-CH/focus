@@ -32,24 +32,27 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     scriptsWidget->setAttribute(Qt::WA_MacShowFocusRect, 0);
     scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
+    connect(scriptsWidget, &QStackedWidget::currentChanged, 
+            [=](){
+               scriptModule* module = static_cast<scriptModule*>(scriptsWidget->currentWidget());
+               module->select(module->getSelection()->selection());
+            });
 
     standardScripts = new scriptModule(data, data->getDir("standardScripts"), scriptModule::standard);
     scriptsWidget->addWidget(standardScripts);
     connect(standardScripts, SIGNAL(initialized()), data, SLOT(save()));
     connect(standardScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(standardScriptChanged(QModelIndex)));
     connect(standardScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(standardScriptCompleted(QModelIndex)));
-    connect(standardScripts, SIGNAL(runningScriptChanged(QModelIndex)), this, SLOT(standardRunningScriptChanged(QModelIndex)));
+    connect(standardScripts, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
     connect(standardScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(standardScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
     connect(standardScripts, SIGNAL(reload()), this, SLOT(reload()));
 
     customScripts = new scriptModule(data, data->getDir("customScripts"), scriptModule::custom);
     scriptsWidget->addWidget(customScripts);
     connect(customScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(customScriptChanged(QModelIndex)));
     connect(customScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(customScriptCompleted(QModelIndex)));
-    connect(customScripts, SIGNAL(runningScriptChanged(QModelIndex)), this, SLOT(customRunningScriptChanged(QModelIndex)));
+    connect(customScripts, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
     connect(customScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(customScripts, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
     connect(customScripts, SIGNAL(reload()), this, SLOT(reload()));
 
     subscriptWidget = new QListView;
@@ -158,7 +161,6 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     runButton->setCheckable(true);
     connect(runButton, &QPushButton::toggled, this, &ImageWindow::executing);
     connect(runButton, SIGNAL(toggled(bool)), this, SLOT(execute(bool)));
-    connect(this, SIGNAL(scriptCompletedSignal()), this, SLOT(stopPlay()));
 
     refreshButton = new QPushButton;
     refreshButton->setIcon(*(data->getIcon("refresh_colored")));
@@ -500,7 +502,6 @@ void ImageWindow::scriptCompleted(scriptModule *module, QModelIndex index) {
     imageParser->setResult(module->resultsFile(index));
     parameters->load();
     //statusParser->load();
-    emit scriptCompletedSignal();
 }
 
 void ImageWindow::standardScriptCompleted(QModelIndex index) {
@@ -509,18 +510,6 @@ void ImageWindow::standardScriptCompleted(QModelIndex index) {
 
 void ImageWindow::customScriptCompleted(QModelIndex index) {
     scriptCompleted(customScripts, index);
-}
-
-void ImageWindow::runningScriptChanged(scriptModule *module, QModelIndex index) {
-    updateScriptLabel(module->title(index));
-}
-
-void ImageWindow::customRunningScriptChanged(QModelIndex index) {
-    runningScriptChanged(customScripts, index);
-}
-
-void ImageWindow::standardRunningScriptChanged(QModelIndex index) {
-    runningScriptChanged(standardScripts, index);
 }
 
 void ImageWindow::setStandardMode() {
@@ -561,12 +550,8 @@ void ImageWindow::maximizeParameterWindow(bool maximize) {
 
 void ImageWindow::execute(bool run) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
-    if (module->type() == scriptModule::standard) {
-        standardScripts->execute(run);
-    }
-    if (module->type() == scriptModule::custom) {
-        customScripts->execute(run);
-    }
+    runningTabIndex = scriptsWidget->currentIndex();
+    module->execute(run);
 }
 
 void ImageWindow::reload() {
@@ -575,7 +560,9 @@ void ImageWindow::reload() {
 }
 
 void ImageWindow::stopPlay() {
+    runningTabIndex = -1;
     runButton->setChecked(false);
+    emit scriptCompletedSignal();
 }
 
 void ImageWindow::refresh() {
@@ -591,15 +578,8 @@ void ImageWindow::updateScriptLabel(const QString& label) {
     scriptLabel->setText(label);
 }
 
-void ImageWindow::increaseScriptProgress(int increament) {
-    if (progressBar->value() + increament <= progressBar->maximum())
-        progressBar->setValue(progressBar->value() + increament);
-    else
-        progressBar->setValue(progressBar->maximum());
-}
-
 void ImageWindow::setScriptProgress(int progress) {
-    progressBar->setValue(progress);
+    if(scriptsWidget->currentIndex() == runningTabIndex) progressBar->setValue(progress);
 }
 
 void ImageWindow::revert() {

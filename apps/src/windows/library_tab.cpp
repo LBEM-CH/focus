@@ -227,7 +227,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     QPushButton *refreshAction = new QPushButton(*(data->getIcon("refresh")), tr("&Refresh Library"), this);
     refreshAction->setSizePolicy(sizePolicy);
     refreshAction->setShortcut(tr("Ctrl+Shift+r"));
-    refreshAction->setToolTip("Shortcut: " + refreshAction->shortcut().toString());
+    refreshAction->setToolTip("Shortcut: " + refreshAction->shortcut().toString(QKeySequence::NativeText));
     connect(refreshAction, SIGNAL(clicked()), this, SLOT(reload()));
     
     
@@ -242,7 +242,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     showSelectedAction->setIconSize(QSize(32, 32));
     showSelectedAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
     showSelectedAction->setShortcut(tr("Ctrl+X"));
-    showSelectedAction->setToolTip("Show checked images only\nShortcut: " + showSelectedAction->shortcut().toString());
+    showSelectedAction->setToolTip("Show checked images only\nShortcut: " + showSelectedAction->shortcut().toString(QKeySequence::NativeText));
     showSelectedAction->setCheckable(true);
     connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
     checkGroupLayout->addWidget(showSelectedAction);
@@ -252,7 +252,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     selectAllAction->setIconSize(QSize(32, 32));
     selectAllAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
     selectAllAction->setShortcut(tr("Ctrl+A"));
-    selectAllAction->setToolTip("Check All Images\nShortcut: " + selectAllAction->shortcut().toString());
+    selectAllAction->setToolTip("Check All Images\nShortcut: " + selectAllAction->shortcut().toString(QKeySequence::NativeText));
     connect(selectAllAction, SIGNAL(clicked()), dirModel, SLOT(selectAll()));
     checkGroupLayout->addWidget(selectAllAction);
     
@@ -261,7 +261,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     invertSelectedAction->setIconSize(QSize(32, 32));
     invertSelectedAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
     invertSelectedAction->setShortcut(tr("Ctrl+I"));
-    invertSelectedAction->setToolTip("Invert Check\nShortcut: " + invertSelectedAction->shortcut().toString());
+    invertSelectedAction->setToolTip("Invert Check\nShortcut: " + invertSelectedAction->shortcut().toString(QKeySequence::NativeText));
     connect(invertSelectedAction, SIGNAL(clicked()), dirModel, SLOT(invertSelection()));
     checkGroupLayout->addWidget(invertSelectedAction);
     
@@ -270,7 +270,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     addSelectionAction->setIconSize(QSize(32, 32));
     addSelectionAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
     addSelectionAction->setShortcut(tr("Ctrl+C"));
-    addSelectionAction->setToolTip("Check highlighted images\nShortcut: " + addSelectionAction->shortcut().toString());
+    addSelectionAction->setToolTip("Check highlighted images\nShortcut: " + addSelectionAction->shortcut().toString(QKeySequence::NativeText));
     connect(addSelectionAction, SIGNAL(clicked()), this, SLOT(extendSelection()));
     checkGroupLayout->addWidget(addSelectionAction);
 
@@ -279,7 +279,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     removeSelectionAction->setIconSize(QSize(32, 32));
     removeSelectionAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
     removeSelectionAction->setShortcut(tr("Ctrl+U"));
-    removeSelectionAction->setToolTip("Uncheck highlighted images\nShortcut: " + removeSelectionAction->shortcut().toString());
+    removeSelectionAction->setToolTip("Uncheck highlighted images\nShortcut: " + removeSelectionAction->shortcut().toString(QKeySequence::NativeText));
     connect(removeSelectionAction, SIGNAL(clicked()), this, SLOT(reduceSelection()));
     checkGroupLayout->addWidget(removeSelectionAction);
 

@@ -50,8 +50,10 @@ void ImageTab::showImageWindow(const QString& workingDir) {
 
     if (!imagesInitializedToTabs_.keys().contains(workingDir)) {
         confData* imageData = new confData(workingDir + "/" + "2dx_image.cfg", mainData);
-        QString userConfigPath = QDir::homePath() + "/.2dx/2dx_master.cfg";
-        if (QFileInfo(userConfigPath).exists()) imageData->updateConf(userConfigPath);
+        QString appConfigLocation = mainData->getDir("config") + "/" + "2dx_master.cfg";
+        if (QFileInfo(appConfigLocation).exists()) {
+                imageData->updateConf(appConfigLocation);
+        }
 
         imageData->setDir("application", mainData->getDir("application"));
         imageData->setDir("plugins", mainData->getDir("pluginsDir"));

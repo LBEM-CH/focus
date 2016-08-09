@@ -1,0 +1,98 @@
+#!/bin/csh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Assign Even/Odd                                                    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 11/25/2015                                             #
+# Last Modification: 11/25/2015                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 86
+#
+# MANUAL: <B>Assign even/odd<B>
+#
+# MANUAL: This script will randomly assign images even and odd
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_image = ""
+set SCRATCH_DISK = ""
+#
+#
+#$end_vars
+#
+set scriptname = 2dx_assign_evenodd
+#
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 1>>"
+# echo "<<@evaluate>>"
+#
+source ${proc_2dx}/2dx_makedirs
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "::The current working directory is" ${olddir}
+echo ": "
+#
+cd ..
+set rootdir = $PWD
+#
+find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${olddir}/SCRATCH/2dx_merge_alldirs.dat
+cd ${olddir}
+#
+set dirnum = `cat SCRATCH/2dx_merge_alldirs.dat | wc -l`
+echo ": Will work on ${dirnum} image directories."
+#
+set dircounter = ${dirnum}
+set irun = 1
+while ( ${dircounter} > 0 )
+  #
+  ${bin_2dx}/2dx_getline.exe << eot > TMP.tmp
+${olddir}/SCRATCH/2dx_merge_alldirs.dat
+${dircounter}
+eot
+  #
+  set from_dir = `cat TMP.tmp`
+  \rm TMP.tmp
+  #
+  set evenodd = "0"
+  #
+  if ( $irun % 2 == 0 ) then
+    set evenodd = "1"
+  else
+    set evenodd = "2"
+  endif
+  echo "::Setting image_evenodd ${evenodd} for ${from_dir}"
+  cd ${rootdir}
+  cd ${from_dir}
+  #
+  if ( -e 2dx_image.cfg ) then
+    echo "set image_evenodd = ${evenodd}" >> 2dx_image.cfg
+    set fullpath = `pwd`
+    ${app_2dx_image} ${fullpath} "2dx_initialize"
+  else
+    ${proc_2dx}/linblock "WARNING: ${source} does not exist here."
+  endif
+  #
+  set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'` 
+  echo "<<@progress:${progress}>>"
+  #
+  @ irun += 1
+  @ dircounter -= 1
+  cd ${olddir}
+end
+#
+${proc_2dx}/linblock "Done."
+echo "<<@progress: 100>>"
+#
+#

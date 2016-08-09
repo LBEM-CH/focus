@@ -32,7 +32,6 @@ public slots:
     
     void scriptChanged(QModelIndex index);
     void updateScriptLabel(const QString& label);
-    void increaseScriptProgress(int increament);
     void setScriptProgress(int progress);
     
     void launchLogBrowser();

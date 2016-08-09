@@ -1,6 +1,7 @@
 # UniqueID (ShortName,mouseover="Long Name",nonlockable|nonlockable,sortable|nonsortable,["C++-format"|other-format])
 imagename (Name,mouseover="Image Name",nonlockable,sortable)
 *imagenumber (Number,mouseover="Image Number",nonlockable,sortable,"%s")
+image_evenodd(Even/Odd,mouseover="Even or odd image",nonlockable,sortable,evenodd)
 imagename_original (OriName,mouseover="Original Image Name",nonlockable,sortable)
 imageorigin (ImageSource,mouseover="Source of the Image",nonlockable,sortable)
 movie_enable (movie_enable,mouseover="Enable movie-mode",nonlockable,sortable)

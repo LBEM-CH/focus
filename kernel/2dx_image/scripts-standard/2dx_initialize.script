@@ -41,6 +41,7 @@
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
 # DISPLAY: imagenumber
+# DISPLAY: image_evenodd
 # DISPLAY: magnification
 # DISPLAY: stepdigitizer
 # DISPLAY: Calc_from_sample_pixel
@@ -85,6 +86,7 @@ set nonmaskimagename = ""
 set imagenumber = ""
 set imagesidelength = ""
 set realcell = ""
+set image_evenodd = ""
 set magnification = ""
 set stepdigitizer = ""
 set Calc_from_sample_pixel = ""

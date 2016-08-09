@@ -37,99 +37,111 @@
 #include <resultsData.h>
 #include <mrcImage.h>
 
-class projectModel : public QStandardItemModel
-{
-  Q_OBJECT
+class projectModel : public QStandardItemModel {
 
-  public slots:
-  void itemActivated(const QModelIndex& index);
-  void itemSelected(const QModelIndex &index);
-  void itemDeselected(const QModelIndex &index);
-  void changeItemCheckedRole(const QModelIndex &index, bool check = true);
-  void currentRowChanged(const QModelIndex&,const QModelIndex&) ;
-  void confChanged(const QString &path);
-  bool removeSelected();
+    Q_OBJECT
 
-  bool save(QStandardItem *currentItem, int itemCount, QFile &saveFile);
-  void maskResults();
-  bool submit();
+public:
 
-  void updateItems(QStandardItem *element);
-  void update();
+    enum projectModelSortRole {
+        SortRole = Qt::UserRole + 2
+    };
 
-  void reload();
-  
-  void invertSelection(bool commit = true);
-  void selectAll(bool commit = true);
-  void clearSelection(bool commit = true);
-  void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
-  void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute);
-  void autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute);
-  bool loadSelection(const QString &fileName = "");  
-  bool loadHidden(const QString &columnsFile);
-  bool saveColumns();
-  bool saveColumns(const QString &columnsFile);
-  
-  signals:
-  void currentImage(const QString&);
-  void reloading();
-  void submitting();
-  
-  private:
-
-  confData *data;
-  resultsData *resultData;
-  QFileSystemWatcher watcher;
-  
-  QProgressDialog* loadDialog;
-  int loadProgress;
-  
-  QHash<quint32,QString> paths;
-  QMap<quint32, QHash<QString,QVariant> > columns;
-  QMap<QString, quint32> parameterToColId; 
-  QHash<quint32, QHash<QString,QStandardItem*> >items;
-
-  QString projectPath;
-  QString columnsDataFile;
-  QStringList columnsFileHeader;
-  QString saveFileName;
-  QStringList labels;
-  
-  QModelIndex currentIndex;
-
-  bool loadColumns(const QString &columnsFile);
-  void initDir(const QString &path, QStandardItem *parent = NULL);
-  
-
-  void load();
-  
-  void maskResults(QStandardItem *currentItem, int itemCount);
-  uint uid(const QString & path);
+    enum SaveOptions {
+        ALL, EVEN_ONLY, ODD_ONLY
+    };
 
 
-  void getSelection(QStandardItem *currentItem, int itemCount, QStringList & selected);
+    projectModel(confData *conf, const QString &path, const QString &columnsFile, QObject *parent = NULL);
 
-  public:
+    void setSaveName(const QString &saveName);
+    void setEvenImageFileName(const QString& name);
+    void setOddImageFileName(const QString& name);
+    void setResultsFile(resultsData *resultsFile);
 
-  enum projectModelSortRole {SortRole = Qt::UserRole + 2};
+    QString pathFromIndex(const QModelIndex &index);
+    QString relativePathFromIndex(const QModelIndex& index);
+    QStringList getSelectionNames();
+    QString getProjectPath() const;
+    QStringList parentDirs();
+    QList<bool> visibleColumns();
 
-  projectModel(confData *conf, const QString &path, const QString &columnsFile, QObject *parent = NULL);
+    const QVariant &getColumnProperty(int i, const QString &property);
+    void setColumnProperty(int i, const QString &property, const QVariant &value);
 
-  void setSaveName(const QString &saveName);
-  void setResultsFile(resultsData *resultsFile);
+    QVariant getRowParameterValue(const QModelIndex &index, const QString& parameter);
+    QVariant getCurrentRowParameterValue(const QString& parameter);
+    bool isCurrentRowValidImage();
 
-  QString pathFromIndex(const QModelIndex &index);
-  QString relativePathFromIndex(const QModelIndex& index);
-  QStringList getSelectionNames();
-  QString getProjectPath() const; 
-  QStringList parentDirs();
-  QList<bool> visibleColumns();
+public slots:
+    void itemActivated(const QModelIndex& index);
+    void itemSelected(const QModelIndex &index);
+    void itemDeselected(const QModelIndex &index);
+    void changeItemCheckedRole(const QModelIndex &index, bool check = true);
+    void currentRowChanged(const QModelIndex&, const QModelIndex&);
+    void confChanged(const QString &path);
+    bool removeSelected();
 
-  const QVariant &getColumnProperty(int i, const QString &property);
-  void setColumnProperty(int i, const QString &property, const QVariant &value);
-  
-  QVariant getCurrentRowParameterValue(const QString& parameter);
-  bool isCurrentRowValidImage();
+    bool save(QStandardItem *currentItem, int itemCount, QFile &saveFile, SaveOptions option = ALL);
+    void maskResults();
+    bool submit();
+
+    void updateItems(QStandardItem *element);
+    void update();
+
+    void reload();
+
+    void invertSelection(bool commit = true);
+    void selectAll(bool commit = true);
+    void clearSelection(bool commit = true);
+    void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
+    void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute);
+    void autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute);
+    bool loadSelection(const QString &fileName = "");
+    bool loadHidden(const QString &columnsFile);
+    bool saveColumns();
+    bool saveColumns(const QString &columnsFile);
+
+signals:
+    void currentImage(const QString&);
+    void reloading();
+    void submitting();
+
+private:
+
+    confData *data;
+    resultsData *resultData;
+    QFileSystemWatcher watcher;
+
+    QProgressDialog* loadDialog;
+    int loadProgress;
+
+    QHash<quint32, QString> paths;
+    QMap<quint32, QHash<QString, QVariant> > columns;
+    QMap<QString, quint32> parameterToColId;
+    QHash<quint32, QHash<QString, QStandardItem*> >items;
+
+    QString projectPath;
+    QString columnsDataFile;
+    QStringList columnsFileHeader;
+    QString saveFileName;
+    QString evenImageFileName;
+    QString oddImageFileName;
+    QStringList labels;
+
+    QModelIndex currentIndex;
+
+    bool loadColumns(const QString &columnsFile);
+    void initDir(const QString &path, QStandardItem *parent = NULL);
+
+
+    void load();
+
+    void maskResults(QStandardItem *currentItem, int itemCount);
+    uint uid(const QString & path);
+
+
+    void getSelection(QStandardItem *currentItem, int itemCount, QStringList & selected);
 };
 
 #endif

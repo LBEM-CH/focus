@@ -108,8 +108,12 @@ void LibraryTab::setupDirectoryContainer(confData* data) {
     dirModel = new projectModel(data, projectDir, data->getDir("working") + "/config/" + "projectMenu.inf", this);
 
     const QString& savePath = data->getDir("working") + "/2dx_merge_dirfile.dat";
+    const QString& evenPath = data->getDir("working") + "/2dx_merge_dirfile_even.dat";
+    const QString& oddPath = data->getDir("working") + "/2dx_merge_dirfile_odd.dat";
     if (!savePath.isEmpty()) {
         dirModel->setSaveName(savePath);
+        dirModel->setEvenImageFileName(evenPath);
+        dirModel->setOddImageFileName(oddPath);
         dirModel->loadSelection();
     }
 

@@ -31,7 +31,6 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     });
     
     connect(toolsScriptModule, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
-    connect(toolsScriptModule, SIGNAL(incrementProgress(int)), this, SLOT(increaseScriptProgress(int)));
     connect(toolsScriptModule, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
     connect(toolsScriptModule, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
     connect(toolsScriptModule, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
@@ -202,13 +201,6 @@ void ProjectTools::scriptChanged(QModelIndex index) {
 void ProjectTools::updateScriptLabel(const QString& label) {
     progressBar->update();
     scriptLabel->setText(label);
-}
-
-void ProjectTools::increaseScriptProgress(int increament) {
-    if (progressBar->value() + increament <= progressBar->maximum())
-        progressBar->setValue(progressBar->value() + increament);
-    else
-        progressBar->setValue(progressBar->maximum());
 }
 
 void ProjectTools::setScriptProgress(int progress) {

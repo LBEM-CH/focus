@@ -322,7 +322,7 @@ bool confData::parseDataFile() {
 
 void confData::updateConf(const QString &confFileName) {
     //qDebug()<<"updating configuration";
-    // qDebug()<< "confData.cpp:  confData::updateConf:  creating QFile data(" << confFileName << ")";
+    //qDebug()<< "confData.cpp:  confData::updateConf:  creating QFile data(" << confFileName << ")";
     QFile data(confFileName);
     if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) return;
 
@@ -699,10 +699,10 @@ void confData::setAppDir(QString dir) {
     if (dir[dir.size() - 1] != '/') dir += '/';
     directories["appdir"] = dir;
     directories["2dx_bin"] = dir + "2dx_bin/";
-    directories["bindir"] = dir + "bin/";
+    directories["bindir"] = dir + "../kernel/mrc/bin/";
     directories["templatedir"] = dir + "scripts-standard/";
     directories["customdir"] = dir + "scripts-custom/";
-    directories["procdir"] = dir + "proc/";
+    directories["procdir"] = dir + "../kernel/proc/";
 
     initializationScriptBaseName = "2dx_initialize";
     initializationScriptName = initializationScriptBaseName + ".script";
@@ -830,7 +830,6 @@ void confData::setDefaults(const QString &workingDirName) {
     QDir standardScriptsDir(appDir + "/../kernel/2dx_image/scripts-standard/");
     QDir customScriptsDir(appDir + "/../kernel/2dx_image/scripts-custom/");
     QDir working(QDir(workingDirName).absolutePath());
-    QDir remoteProc(working.path() + "/proc/");
 
     init(referenceConf);
     confData local(localConf);
@@ -847,12 +846,12 @@ void confData::setDefaults(const QString &workingDirName) {
     }
 
     setDir("working", workingDir);
-    setDir("binDir", appDir + "/bin");
-    setDir("procDir", appDir + "/../proc");
+    setDir("binDir", appDir + "/../kernel/mrc/bin");
+    setDir("procDir", appDir + "/../kernel/proc");
     setDir("standardScriptsDir", standardScriptsDir);
     setDir("customScriptsDir", customScriptsDir);
-    setApp("2dx_image", appDir + "../bin/2dx_image");
-    setApp("2dx_merge", appDir + "../bin/2dx_merge");
+    setApp("2dx_image", appDir + "/../bin/2dx_image");
+    setApp("2dx_merge", appDir + "/../bin/2dx_merge");
     syncWithUpper();
     if (!QFileInfo(localConf).exists()) {
         loadDefaults();

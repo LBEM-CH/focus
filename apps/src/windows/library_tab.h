@@ -81,7 +81,7 @@ class LibraryTab : public QWidget
         
         void resetSelectionState();
         
-        void updateProjectName();
+        void updateProjectName(const QString& name="");
         
         void setImagesOpen(QStringList);
         bool imageOpen(const QString& imageDir);

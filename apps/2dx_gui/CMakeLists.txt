@@ -42,7 +42,7 @@ IF( APPLE )
     ADD_CUSTOM_COMMAND(TARGET ${EXETITLE} POST_BUILD
             COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/${EXETITLE}.app/Contents/Resources
             COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/${EXETITLE}.app/Contents/MacOS
-            COMMAND cp ARGS ${CMAKE_CURRENT_SOURCE_DIR}/resource/${MACOSX_BUNDLE_ICON_FILE}
+            COMMAND cp ARGS ${CMAKE_CURRENT_SOURCE_DIR}/icons/${MACOSX_BUNDLE_ICON_FILE}
             ${CMAKE_CURRENT_BINARY_DIR}/${EXETITLE}.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE})
 ELSE( APPLE )
     ADD_EXECUTABLE( ${EXETITLE} ${2DX_SRC} ${MOC_SRCS})
@@ -65,9 +65,8 @@ ENDIF(APPLE)
 install(TARGETS ${EXETITLE} DESTINATION ${EXETITLE})
 
 
-file(GLOB PNG resource/*.png)
-install(FILES ${PNG} DESTINATION Resource/2dx_gui)
-install(FILES ${PNG} DESTINATION Resource)
+file(GLOB PNG icons/*.png)
+install(FILES ${PNG} DESTINATION ${EXETITLE}/icons/)
 
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'

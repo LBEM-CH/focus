@@ -349,7 +349,7 @@ projectModel::projectModel(confData *conf, const QString &path, const QString &c
 }
 
 void projectModel::load() {
-    loadColumns(data->getDir("config") + "/2dx_merge/" + "projectMenu.inf");
+    loadColumns(data->getDir("config") + "projectMenu.inf");
     if (!QFileInfo(columnsDataFile).exists())
         saveColumns(columnsDataFile);
     loadHidden(columnsDataFile);

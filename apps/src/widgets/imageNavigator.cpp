@@ -453,7 +453,7 @@ void imageNavigator::Initialize_Tools()
   mouseAssign->hide();
   setMouseDefaults();
 
-  helpTool = new navigatorHelpTool(data->getDir("application") + "../config/2dx_image/" + "navigator_help.htm",this);
+  helpTool = new navigatorHelpTool(data->getDir("application") + "../config/" + "navigator_help.htm",this);
   helpTool->hide();
 }
 

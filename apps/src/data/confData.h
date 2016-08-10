@@ -126,7 +126,6 @@ public:
     bool isModified();
     bool hasParent();
 
-    void setAppDir(QString dir);
     void setWorkingDir(QString dir);
     void setParentConf(confData *parent);
     void setSymLink(const QString fileName, const QString linkName);

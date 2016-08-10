@@ -224,7 +224,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     headerContainer->setLayout(headerLayout);
     
     blockContainer* statusParserCont = new blockContainer("Status");
-    statusParser = new statusViewer(data->getDir("config") + "/2dx_image/2dx_status.html");
+    statusParser = new statusViewer(data->getDir("config") + "/2dx_status.html");
     statusParser->setConf(data);
     statusParser->load();
     statusParserCont->setMainWidget(statusParser);

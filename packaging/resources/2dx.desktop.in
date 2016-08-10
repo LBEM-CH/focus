@@ -4,6 +4,6 @@ GenericName=2dx @2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@
 Version=@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@
 Comment=Image processing tool for Electron Crystallography
 Exec=@CMAKE_INSTALL_PREFIX@/2dx_gui/2dx_gui
-Icon=@CMAKE_INSTALL_PREFIX@/Resource/2dx_merge/icon.png
+Icon=@CMAKE_INSTALL_PREFIX@/2dx_gui/icons/icon.png
 Type=Application
 Categories=Application;Education;Science;

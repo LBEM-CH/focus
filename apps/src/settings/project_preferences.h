@@ -14,11 +14,11 @@ class ProjectPreferences : public QSettings {
 public:
     
     ProjectPreferences(const QString& projectPath) 
-    :QSettings(projectPath + "/.project.preferences.ini", QSettings::Format::IniFormat) { 
+    :QSettings(projectPath + "/merge/config/project.preferences.ini", QSettings::Format::IniFormat) { 
     }
 
     ProjectPreferences(confData* data)
-    : QSettings(data->getDir("project") + "/.project.preferences.ini", QSettings::Format::IniFormat) {
+    : QSettings(data->getDir("project") + "/merge/config/project.preferences.ini", QSettings::Format::IniFormat) {
     }
 
     void setImagesOpen(const QStringList& paths) {

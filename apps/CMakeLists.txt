@@ -79,5 +79,7 @@ add_subdirectory(2dx_logbrowser)
 add_subdirectory(2dx_gui)
 add_subdirectory(2dx_image)
 add_subdirectory(2dx_merge)
+add_subdirectory(resources)
+add_subdirectory(plugins)
 add_subdirectory(bin)
 #-------------------------------------------------------------------------------

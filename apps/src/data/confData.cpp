@@ -695,35 +695,6 @@ confData *confData::getParent() {
     return parentConf;
 }
 
-void confData::setAppDir(QString dir) {
-    if (dir[dir.size() - 1] != '/') dir += '/';
-    directories["appdir"] = dir;
-    directories["2dx_bin"] = dir + "2dx_bin/";
-    directories["bindir"] = dir + "../kernel/mrc/bin/";
-    directories["templatedir"] = dir + "scripts-standard/";
-    directories["customdir"] = dir + "scripts-custom/";
-    directories["procdir"] = dir + "../kernel/proc/";
-
-    initializationScriptBaseName = "2dx_initialize";
-    initializationScriptName = initializationScriptBaseName + ".script";
-
-    QString logBrowser = "2dx_logbrowser";
-    if (QFileInfo(getDir("2dx_bin") + logBrowser).exists())
-        applications["logbrowser"] = getDir("2dx_bin") + logBrowser;
-    else if (QFileInfo(directories["2dx_bin"] + logBrowser + ".app/" + OS_X_APP_PATH + logBrowser).exists())
-        applications["logbrowser"] = getDir("2dx_bin") + logBrowser + ".app/" + OS_X_APP_PATH + logBrowser;
-
-    QString thisApp = QApplication::applicationFilePath();
-    if (QFileInfo(thisApp).exists())
-        applications["this"] = thisApp;
-    else if (QFileInfo(thisApp + ".app/").exists())
-        applications["this"] = thisApp + ".app/" + OS_X_APP_PATH + thisApp;
-
-    QImage *appImage = new QImage(getDir("appDir") + "resource/" + "icon.png");
-    if (appImage->isNull()) cout << (getDir("appDir") + "resource/" + "icon.png").toStdString() << " does not exist" << endl;
-    addImage("appImage", appImage);
-}
-
 void confData::setWorkingDir(QString dir) {
     if (dir[dir.size() - 1] != '/') dir += '/';
     directories["workingdir"] = dir;
@@ -806,8 +777,8 @@ void confData::setDefaults(const QString &workingDirName) {
     appDir += "/../../../";
 #endif
     int tries = 0;
-    while (!QFileInfo(appDir + sep + "config/2dx_master.cfg").exists() && tries < 3) {
-        cout << (appDir + sep + "config/2dx_master.cfg").toStdString() << " does not exist!" << endl;
+    while (!QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists() && tries < 3) {
+        cout << (appDir + sep + "resources/config/2dx_master.cfg").toStdString() << " does not exist!" << endl;
         sep += "../";
         tries++;
     }
@@ -818,7 +789,7 @@ void confData::setDefaults(const QString &workingDirName) {
     }
     workingDir.mkdir("proc");
     workingDir.mkdir("LOGS");
-    QString referenceConf = appDir + sep + "config/2dx_master.cfg";
+    QString referenceConf = appDir + sep + "resources/config/2dx_master.cfg";
     QString localConf = workingDir.absolutePath() + "/" + "2dx_image.cfg";
     if (!QFileInfo(localConf).exists()) {
         localConf = workingDir.absolutePath() + "/" + "2dx_master.cfg";
@@ -827,8 +798,8 @@ void confData::setDefaults(const QString &workingDirName) {
         qDebug() << (localConf + " does not exist!");
         exit(0);
     }
-    QDir standardScriptsDir(appDir + "/../kernel/2dx_image/scripts-standard/");
-    QDir customScriptsDir(appDir + "/../kernel/2dx_image/scripts-custom/");
+    QDir standardScriptsDir(appDir + "/../scripts/image/standard/");
+    QDir customScriptsDir(appDir + "/../scripts/image/custom/");
     QDir working(QDir(workingDirName).absolutePath());
 
     init(referenceConf);
@@ -847,7 +818,7 @@ void confData::setDefaults(const QString &workingDirName) {
 
     setDir("working", workingDir);
     setDir("binDir", appDir + "/../kernel/mrc/bin");
-    setDir("procDir", appDir + "/../kernel/proc");
+    setDir("procDir", appDir + "/../scripts/proc");
     setDir("standardScriptsDir", standardScriptsDir);
     setDir("customScriptsDir", customScriptsDir);
     setApp("2dx_image", appDir + "/../bin/2dx_image");

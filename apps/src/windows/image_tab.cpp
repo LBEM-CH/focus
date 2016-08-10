@@ -58,11 +58,11 @@ void ImageTab::showImageWindow(const QString& workingDir) {
         imageData->setDir("application", mainData->getDir("application"));
         imageData->setDir("plugins", mainData->getDir("pluginsDir"));
         imageData->setDir("tools", mainData->getDir("pluginsDir") + "/tools/");
-        imageData->setDir("standardScripts", QDir(mainData->getDir("application") + "../kernel/2dx_image" + "/" + "scripts-standard/"));
-        imageData->setDir("customScripts", QDir(mainData->getDir("application") + "../kernel/2dx_image" + "/" + "scripts-custom/"));
+        imageData->setDir("standardScripts", QDir(mainData->getDir("application") + "../scripts/image/standard/"));
+        imageData->setDir("customScripts", QDir(mainData->getDir("application") + "../scripts/image/custom/"));
         imageData->setDir("config", mainData->getDir("config"));
         imageData->setDir("project", QDir(workingDir + "/../"));
-        imageData->setDir("icons", imageData->getDir("config") + "/resource");
+        imageData->setDir("icons", QDir(mainData->getDir("application") + "../resources/images/"));
         imageData->setDir("working", workingDir);
 
         QDir procdirectory(workingDir + "/proc");
@@ -73,7 +73,7 @@ void ImageTab::showImageWindow(const QString& workingDir) {
         imageData->setDir("logs", workingDir + "/LOGS");
 
         imageData->setDir("binDir", imageData->getDir("application") + "/../kernel/mrc/bin");
-        imageData->setDir("procDir", imageData->getDir("application") + "/../kernel/proc/");
+        imageData->setDir("procDir", imageData->getDir("application") + "/../scripts/proc/");
 
         confData *cfg = new confData(QDir::homePath() + "/.2dx/" + "2dx.cfg", imageData->getDir("config") + "/" + "2dx.cfg");
         if (cfg->isEmpty()) {
@@ -90,9 +90,7 @@ void ImageTab::showImageWindow(const QString& workingDir) {
 
         imageData->setURL("help", "http://2dx.org/documentation/2dx-software");
         imageData->setURL("bugReport", "https://github.com/C-CINA/2dx/issues");
-
-        imageData->addImage("appImage", new QImage(imageData->getDir("application") + "/resource/" + "icon.png"));
-
+        
         imageData->syncWithUpper();
         ImageWindow* imageWin = new ImageWindow(imageData);
         connect(imageWin, &ImageWindow::executing,

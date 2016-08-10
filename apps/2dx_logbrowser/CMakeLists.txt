@@ -71,7 +71,7 @@ if(APPLE)
   add_custom_command(TARGET ${EXETITLE} POST_BUILD
     COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/${EXETITLE}.app/Contents/Resources
     COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/${EXETITLE}.app/Contents/MacOS
-    COMMAND cp ARGS ${CMAKE_CURRENT_SOURCE_DIR}/resource/${MACOSX_BUNDLE_ICON_FILE}
+    COMMAND cp ARGS ${CMAKE_CURRENT_SOURCE_DIR}/icons/${MACOSX_BUNDLE_ICON_FILE}
 	${CMAKE_CURRENT_BINARY_DIR}/${EXETITLE}.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE})
  ## This tells cmake where to place files inside the bundle
   #set_source_files_properties( ${ProjectName_RESOURCES} ${ProjectName_TRANSLATIONS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
@@ -97,11 +97,9 @@ IF(APPLE)
 ENDIF(APPLE)
 # Installation
 install(TARGETS ${EXETITLE} DESTINATION ${EXETITLE})
-file(GLOB PNG resource/*.png)
 
-install(FILES ${PNG} DESTINATION resource)
-
-install(FILES ${PNG} DESTINATION Resource/2dx_logbrowser)
+file(GLOB PNG icons/*.png)
+install(FILES ${PNG} DESTINATION ${EXETITLE}/icons/)
 
 set(CMAKE_CXX_FLAGS "-O3 -funroll-loops -W -Waddress -Wchar-subscripts -Wcomment -Wformat -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized  -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wvolatile-register-var -Wno-long-long -Wextra")
 

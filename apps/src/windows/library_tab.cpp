@@ -839,8 +839,9 @@ void LibraryTab::resetSelectionState() {
     selectionState->setText(checked + " checked and " + selected + " highlighted ");
 }
 
-void LibraryTab::updateProjectName() {
-    projectNameLabel->setText(ProjectPreferences(data).projectName());
+void LibraryTab::updateProjectName(const QString& name) {
+    if(name.isEmpty()) projectNameLabel->setText(ProjectPreferences(data).projectName());
+    else projectNameLabel->setText(name);
     projectNameLabel->setToolTip(data->getDir("project"));
 }
 

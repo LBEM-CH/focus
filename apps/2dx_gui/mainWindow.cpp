@@ -88,7 +88,7 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
     applicationDir = QDir(QApplication::applicationDirPath());
 #endif
 
-    configDir = QDir(applicationDir.canonicalPath() + "/../" + "config/");
+    configDir = QDir(applicationDir.canonicalPath() + "/../" + "resources/config/");
 
     QString mergeConfigLocation = directory + "/merge/" + "2dx_merge.cfg";
     QString appConfigLocation = configDir.canonicalPath() + "/" + "2dx_master.cfg";
@@ -107,8 +107,8 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
 
     mainData->setDir("application", applicationDir);
 
-    mainData->setDir("binDir", mainData->getDir("application") + "../kernel/mrc/bin/");
-    mainData->setDir("procDir", mainData->getDir("application") + "../kernel/proc/");
+    mainData->setDir("binDir", mainData->getDir("application") + "/../kernel/mrc/bin/");
+    mainData->setDir("procDir", mainData->getDir("application") + "/../scripts/proc/");
     createDir(mainData->getDir("working") + "/config");
 
     mainData->setDir("config", configDir);
@@ -129,7 +129,7 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
     mainData->setDir("home_2dx", userPath);
     mainData->setDir("pluginsDir", mainData->getDir("application") + "/.." + "/plugins");
     mainData->setDir("translatorsDir", mainData->getDir("pluginsDir") + "/translators");
-    mainData->setDir("resource", QDir(mainData->getDir("config") + "/resource/"));
+    mainData->setDir("resource", mainData->getDir("application") + "/../resources/images");
     mainData->setDir("2dx_bin", mainData->getDir("application") + "/.." + "/bin");
     mainData->addApp("this", mainData->getDir("application") + "/../" + "bin/" + "2dx_gui");
     mainData->addApp("2dx_image", mainData->getDir("2dx_bin") + "/" + "2dx_image");
@@ -139,12 +139,12 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
     mainData->setDir("remoteProc", mainData->getDir("working") + "/proc/");
     createDir(mainData->getDir("working") + "/LOGS");
     mainData->setDir("logs", mainData->getDir("working") + "/LOGS");
-    mainData->setDir("merge2DScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-merge2D/"));
-    mainData->setDir("merge3DScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-merge3D/"));
-    mainData->setDir("customScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-custom/"));
-    mainData->setDir("singleParticleScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-singleparticle/"));
-    mainData->setDir("projectToolScripts", QDir(mainData->getDir("application") + "../kernel/2dx_merge" + "/" + "scripts-project/"));
-    mainData->addImage("appImage", new QImage("resource/icon.png"));
+    mainData->setDir("merge2DScripts", QDir(mainData->getDir("application") + "../scripts/merge/merge2D/"));
+    mainData->setDir("merge3DScripts", QDir(mainData->getDir("application") + "../scripts/merge/merge3D/"));
+    mainData->setDir("customScripts", QDir(mainData->getDir("application") + "../scripts/merge/custom/"));
+    mainData->setDir("singleParticleScripts", QDir(mainData->getDir("application") + "../scripts/merge/singleparticle/"));
+    mainData->setDir("projectToolScripts", QDir(mainData->getDir("application") + "../scripts/project/"));
+    mainData->addImage("appImage", new QImage(mainData->getDir("application") + "icons/icon.png"));
 
     mainData->addApp("logBrowser", mainData->getDir("application") + "/../" + "bin/" + "2dx_logbrowser");
 
@@ -506,7 +506,8 @@ void mainWindow::changeProjectName() {
         ProjectPreferences(mainData).setProjectName(projectName);
     }
     
-    libraryWin_->updateProjectName();
+    libraryWin_->updateProjectName(projectName);
+    updateWindowTitle();
 }
 
 void mainWindow::updateWindowTitle() {

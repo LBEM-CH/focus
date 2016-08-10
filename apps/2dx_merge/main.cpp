@@ -15,12 +15,12 @@ QString getAppDir() {
     appDir += "/../../../";
 #endif
     int tries = 0;
-    while (!QFileInfo(appDir + sep + "config/2dx_master.cfg").exists() && tries < 3) {
-        qDebug() << (appDir + sep + "config/2dx_master.cfg") << " does not exist!";
+    while (!QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists() && tries < 3) {
+        qDebug() << (appDir + sep + "resources/config/2dx_master.cfg") << " does not exist!";
         sep += "../";
         tries++;
     }
-    if (QFileInfo(appDir + sep + "config/2dx_master.cfg").exists()) {
+    if (QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists()) {
         return QString(appDir + sep);
     } else
         return QString();
@@ -126,7 +126,7 @@ bool restoreSelections(QList<QString> selection, QDir mergeDir) {
 confData* readConfig(const QString workingPath, const QString applicationPath) {
     confData* data;
     QString mergeConfigLocation = workingPath + "/merge/" + "2dx_merge.cfg";
-    QString appConfigLocation = applicationPath + "config" + "/" + "2dx_master.cfg";
+    QString appConfigLocation = applicationPath + "resources/config" + "/" + "2dx_master.cfg";
     if (!QFileInfo(mergeConfigLocation).exists()) {
         std::cerr << "Config file " + mergeConfigLocation.toStdString() << " does not exist!";
         std::cerr << "Please initialize the project via the graphical user interface of 2dx_merge.";
@@ -174,10 +174,10 @@ void commandLineMerge(const QString appDir, const QString workingDir, const QStr
         return;
     }
 
-    QString merge2DScripts = appDir + "/../kernel/2dx_merge/scripts-merge2D/";
-    QString merge3DScripts = appDir + "/../kernel/2dx_merge/scripts-merge3D/";
-    QString customScripts = appDir + "/../kernel/2dx_merge/scripts-custom/";
-    QString spScripts = appDir + "/../kernel/2dx_merge/scripts-singleparticle/";
+    QString merge2DScripts = appDir + "/../scripts/merge/merge2D/";
+    QString merge3DScripts = appDir + "/../scripts/merge/merge3D/";
+    QString customScripts = appDir + "/../scripts/merge/custom/";
+    QString spScripts = appDir + "/../scripts/merge/singleparticle/";
     
     QString strippedScript = QString(script).remove('"').trimmed();
     QString scriptFile = strippedScript + ".script";

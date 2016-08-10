@@ -105,7 +105,7 @@ install(FILES ${HTM} DESTINATION .)
 # the libraries have to be built before by the build_all script 
 add_subdirectory(external)
 add_subdirectory(kernel)
+add_subdirectory(scripts)
 add_subdirectory(apps)
-add_subdirectory(plugins)
 add_subdirectory(packaging)
 #------------------------------------------------------------------------------

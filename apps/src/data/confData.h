@@ -46,9 +46,9 @@ public slots:
     void saveAs(QString fileName);
     void saveSynchronized(QString fileName);
     void setSaveName(QString fileName);
-    void load();
     void reload();
     void loadConf(confData *conf);
+    void loadValuesFromConf(confData *conf);
     void loadDefaultConf(confData *conf, const QStringList &defaults);
     void setModified(bool isModified);
     void setAutoSave(bool value);
@@ -115,7 +115,7 @@ public:
     confData(QString filename, confData *parentData = NULL, QObject *parent = NULL);
     confData(QString filename, confData *parentData, const QString link, QObject *parent = NULL);
     confData(const confData &data);
-    confData(const QString &source, const QString &reference);
+    confData(const QString &source, const QString &reference, bool sourceHasValuesOnly=false);
     confData(const QString &source, const QString &reference, const QString &link);
     confData(QObject *parent = NULL);
     ~confData();

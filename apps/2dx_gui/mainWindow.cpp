@@ -117,7 +117,7 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
     QString userPath = QDir::homePath() + "/.2dx";
     createDir(userPath + "/2dx_merge");
 
-    confData *cfg = new confData(userPath + "/2dx.cfg", mainData->getDir("config") + "/" + "2dx.cfg");
+    confData *cfg = new confData(userPath + "/2dx.cfg", mainData->getDir("config") + "/" + "2dx.cfg", true);
     if (cfg->isEmpty()) {
         cerr << "2dx.cfg not found." << endl;
         exit(0);

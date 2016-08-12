@@ -74,15 +74,9 @@ void ImageTab::showImageWindow(const QString& workingDir) {
 
         imageData->setDir("binDir", imageData->getDir("application") + "/../kernel/mrc/bin");
         imageData->setDir("procDir", imageData->getDir("application") + "/../scripts/proc/");
-
-        confData *cfg = new confData(QDir::homePath() + "/.2dx/" + "2dx.cfg", imageData->getDir("config") + "/" + "2dx.cfg");
-        if (cfg->isEmpty()) {
-            std::cerr << "2dx.cfg not found." << std::endl;
-            exit(0);
-        }
-        cfg->save();
-
-        imageData->setAppConf(cfg);
+        
+        imageData->setAppConf(mainData->getSubConf("appConf"));
+        
         imageData->addApp("this", imageData->getDir("application") + "/../" + "bin/" + "2dx_image");
         imageData->addApp("2dx_image", imageData->getDir("application") + "/../" + "bin/" + "2dx_image");
         imageData->addApp("2dx_merge", imageData->getDir("application") + "/../" + "bin/" + "2dx_merge");

@@ -39,7 +39,7 @@ public:
     }
 
     QString valueAt(int widgetNumber) {
-        if (widgetNumber < widgets_.size()) widgets_.at(widgetNumber)->text();
+        if (widgetNumber < widgets_.size()) return widgets_.at(widgetNumber)->text();
         else return QString();
     }
 

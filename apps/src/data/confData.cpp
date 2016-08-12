@@ -64,10 +64,11 @@ confData::confData(const confData &data)
     // sync(QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg");
 }
 
-confData::confData(const QString &source, const QString &reference) {
+confData::confData(const QString &source, const QString &reference, bool sourceHasValuesOnly) {
     init(reference);
     confData local(source);
-    loadConf(&local);
+    if(sourceHasValuesOnly) loadValuesFromConf(&local);
+    else loadConf(&local);
     setSaveName(source);
     //sync(QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg");
 }
@@ -246,7 +247,7 @@ bool confData::parseDataFile() {
         if (lineData.toLower().startsWith("section:")) {
             if (!headerRead) headerRead = true;
             lineData.remove(0, 8);
-            section = new confSection(lineData.simplified(), this);
+            section = new confSection(lineData.simplified(), this);          
             sections << section;
         }
 
@@ -427,13 +428,6 @@ confSection* confData::operator[](unsigned int i) {
     return sections[i];
 }
 
-void confData::load() {
-    clear();
-    parseDataFile();
-    setModified(false);
-    emit loading();
-}
-
 void confData::reload() {
     confData local(dataFilename);
     loadConf(&local);
@@ -451,6 +445,21 @@ void confData::loadConf(confData *conf) {
                 for (int k = 0; k < valueSearch.size(); k++)
                     data->set(valueSearch[k], element->get(valueSearch[k]));
                 if (!element->get("locked").isEmpty()) data->set("locked", element->get("locked").simplified());
+                data->set("value", element->get("value"));
+            }
+        }
+    }
+    emit loading();
+}
+
+void confData::loadValuesFromConf(confData *conf) {
+    for (unsigned int i = 0; i < conf->size(); i++) {
+        for (unsigned int j = 0; j < (*conf)[i]->size(); j++) {
+            confElement *element = (*(*conf)[i])[j];
+            QString valueLabel = element->get("valueLabel");
+            confElement *data = get(valueLabel);
+            //copying all the values in valueSearch
+            if (data != NULL) {
                 data->set("value", element->get("value"));
             }
         }

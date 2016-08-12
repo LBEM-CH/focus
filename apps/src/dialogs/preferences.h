@@ -19,8 +19,11 @@
 
 #include <QObject>
 #include <QDialog>
+#include <QMap>
 
 #include "confData.h"
+#include "confElement.h"
+#include "edit_set_widget.h"
 
 class QStackedWidget;
 class QToolBar;
@@ -33,6 +36,7 @@ public:
 
 public slots:
     void saveApps();
+    void loadApps();
 
 private:
     QToolBar* setupToolBar();
@@ -40,6 +44,8 @@ private:
     QWidget* getApperancePage();
     QWidget* getAppsPage();
 
+    QMap<confElement*, EditSetWidget*> elementToWidget;
+    
     QStackedWidget* pagesWidget_;
     confData* mainData;
 };

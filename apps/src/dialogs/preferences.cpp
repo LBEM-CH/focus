@@ -22,9 +22,9 @@
 #include <QToolBar>
 #include <QAction>
 #include <QActionGroup>
+#include <QFormLayout>
 
 #include "user_preferences.h"
-#include "confModel.h"
 
 #include "preferences.h"
 
@@ -62,7 +62,7 @@ PreferencesDialog::PreferencesDialog(confData* data, QWidget* parent)
 
     setWindowTitle(tr("Preferences"));
     setModal(true);
-    resize(300, 400);
+    resize(500, 400);
 }
 
 QToolBar* PreferencesDialog::setupToolBar() {  
@@ -149,47 +149,58 @@ QWidget* PreferencesDialog::getApperancePage() {
 QWidget* PreferencesDialog::getAppsPage() {
     QWidget* widget = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout;
+    layout->addStretch(0);
 
-    QHBoxLayout *top = new QHBoxLayout;
-    QHBoxLayout *middle = new QHBoxLayout;
-    QHBoxLayout *bottom = new QHBoxLayout;
-
-    layout->addLayout(top, 0);
-    layout->addLayout(middle, 1);
-    layout->addLayout(bottom, 0);
-
-    QFont font;
-    font.setStyleHint(QFont::Times);
-    font.setBold(true);
-    font.setPixelSize(14);
-
-    QLabel *title = new QLabel("External Applications (Double Click to Edit)", this);
-    title->setFont(font);
-    title->setTextFormat(Qt::RichText);
-    top->addWidget(title);
-
-    confModel *dataModel = new confModel(mainData->getSubConf("appConf"), this);
-    QTableView* preferencesTable = new QTableView(this);
-    preferencesTable->setModel(dataModel);
-    preferencesTable->horizontalHeader()->hide();
-    preferencesTable->verticalHeader()->hide();
-    preferencesTable->setColumnHidden(0, true);
-    preferencesTable->setColumnHidden(2, true);
-    preferencesTable->setRowHidden(0, true);
-    preferencesTable->resizeColumnsToContents();
-    preferencesTable->setShowGrid(false);
-    preferencesTable->setAlternatingRowColors(true);
-    middle->addWidget(preferencesTable);
+    confData *data = mainData->getSubConf("appConf");
+    for (unsigned int i = 0; i < data->size(); i++) {
+        QGroupBox* sectionBox = new QGroupBox((*data)[i]->title());
+        QFormLayout* formLayout_ = new QFormLayout();
+        formLayout_->setRowWrapPolicy(QFormLayout::WrapLongRows);
+        formLayout_->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+        formLayout_->setFormAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        formLayout_->setLabelAlignment(Qt::AlignLeft);
+        //formLayout_->setVerticalSpacing(0);
+        confElement *element;
+        for (unsigned int j = 0; j < (*data)[i]->size(); j++) {
+            element = (*(*data)[i])[j];
+            EditSetWidget* editWid = new EditSetWidget(1, sectionBox);
+            editWid->setValue(element->get("value"));
+            elementToWidget.insert(element, editWid);
+            formLayout_->addRow(element->get("LABEL"), editWid);   
+        }
+        
+        sectionBox->setLayout(formLayout_);
+        layout->addWidget(sectionBox);
+    }
 
     QPushButton *saveButton = new QPushButton("Save", this);
-    connect(saveButton, SIGNAL(released()), this, SLOT(saveApps()));
-    bottom->addWidget(saveButton);
-
+    connect(saveButton, SIGNAL(released()), this, SLOT(saveApps()));   
+    QPushButton *resetButton = new QPushButton("Reset", this);
+    connect(resetButton, SIGNAL(released()), this, SLOT(loadApps()));
+    
+    QHBoxLayout* buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(resetButton);
+    buttonLayout->addWidget(saveButton);
+    
+    layout->addLayout(buttonLayout);
+    layout->addStretch(1);
     widget->setLayout(layout);
+    loadApps();
     return widget;
 }
 
 void PreferencesDialog::saveApps() {
+    for(int i=0; i< elementToWidget.keys().size(); ++i) {
+        confElement* element = elementToWidget.keys()[i];
+        element->set("value", elementToWidget[element]->valueAt(0));
+    }
     mainData->getSubConf("appConf")->save();
     close();
+}
+
+void PreferencesDialog::loadApps() {
+    for(int i=0; i< elementToWidget.keys().size(); ++i) {
+        confElement* element = elementToWidget.keys()[i];
+        elementToWidget[element]->setValue(element->get("value"));
+    }
 }

@@ -136,12 +136,12 @@ private:
             appDir += "/../../../";
 #endif
             int tries = 0;
-            while (!QFileInfo(appDir + sep + "config/2dx_master.cfg").exists() && tries < 3) {
-                qDebug() << (appDir + sep + "config/2dx_master.cfg") << " does not exist!";
+            while (!QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists() && tries < 3) {
+                qDebug() << (appDir + sep + "resources/config/2dx_master.cfg") << " does not exist!";
                 sep += "../";
                 tries++;
             }
-            if (QFileInfo(appDir + sep + "config/2dx_master.cfg").exists()) {
+            if (QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists()) {
                 return QString(appDir + sep);
             } else
                 return QString();
@@ -153,7 +153,7 @@ private:
             dir.mkdir("merge");
             dir.mkpath("merge/proc");
             dir.mkpath("merge/LOGS");
-            confData data(workingDir + "/merge/" + "2dx_merge.cfg", getAppDir() + "config/2dx_master.cfg");
+            confData data(workingDir + "/merge/" + "2dx_merge.cfg", getAppDir() + "resources/config/2dx_master.cfg");
             data.setSymLink("merge/2dx_merge.cfg", workingDir + "/2dx_master.cfg");
             data.save();
         }

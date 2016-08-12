@@ -57,7 +57,10 @@ public:
         int size = beginReadArray("recents");
         for (int i = 0; i < size; ++i) {
             setArrayIndex(i);
-            if (value("path").toString() != "") paths << value("path").toString();
+            QString path = value("path").toString();
+            if (QFileInfo(path + "/merge/" + "2dx_merge.cfg").exists() && !(path.isEmpty())) {
+                paths << path;
+            }
         }
         endArray();
         return paths;

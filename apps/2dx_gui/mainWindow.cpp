@@ -46,6 +46,8 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     m_do_autosave = true;
     mainData = setupMainConfiguration(directory);
     UserProjects(mainData).addProjectPath(mainData->getDir("project"));
+    UserPreferences(mainData).loadAllFontSettings();
+    UserPreferences(mainData).loadWindowPreferences(this);
     
     installedVersion = mainData->version();
     updateWindowTitle();
@@ -63,9 +65,6 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     setupMenuBar();
     
     connect(mainData, SIGNAL(dataModified(bool)), this, SLOT(setSaveState(bool)));
-    
-    UserPreferences(mainData).loadAllFontSettings();
-    UserPreferences(mainData).loadWindowPreferences(this);
 
     euler = NULL;
     reproject = NULL;

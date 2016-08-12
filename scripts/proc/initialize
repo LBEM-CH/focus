@@ -12,91 +12,64 @@ echo date = ${date}
 set system = `uname -s`
 echo system = ${system}
 #
-set app_python = "python"
-set app_anaconda = "/opt/anaconda/bin/python"
+# The paths like app_python, app_anaconda comes from the 2DX Preferences set
+# by the user. 
 #
-if ( -e /usr/bin/python ) then
-  set app_python = /usr/bin/python
+if ( ! -e ${app_python} ) then
+    echo ":: "
+    ${proc_2dx}/linblock "Python executable not found. Is it installed ???"
+    ${proc_2dx}/linblock "${app_python}"
+    ${proc_2dx}/linblock "The location of python is defined in Preferences."
+    echo ":: "
 endif
-if ( -e /usr/bin/python2.7 ) then
-  set app_python = /usr/bin/python2.7
+if ( ! -e ${app_anaconda} ) then
+    echo ":: "
+    ${proc_2dx}/linblock "Anaconda Python executable not found. Is it installed ???"
+    ${proc_2dx}/linblock "${app_anaconda}"
+    ${proc_2dx}/linblock "The location of Anaconda Python is defined in Preferences."
+    echo ":: "
 endif
+if ( ! -d ${dir_ccp4} ) then
+    echo ":: "
+    ${proc_2dx}/linblock "CCP4 installation directory not found. Is it installed ???"
+    ${proc_2dx}/linblock "${dir_ccp4}"
+    ${proc_2dx}/linblock "The location of CCP4 installation is defined in Preferences."
+    echo ":: "
+    set ccp4 = "NOTFOUND"
+    set bin_ccp4 = "NOTFOUND"
+else
+    set ccp4 = ${dir_ccp4}
+    set bin_ccp4 = ${ccp4}/bin
+endif
+if ( ! -d ${dir_eman2} ) then
+    echo ":: "
+    ${proc_2dx}/linblock "EMAN2 installation directory not found. Is it installed ???"
+    ${proc_2dx}/linblock "${dir_eman2}"
+    ${proc_2dx}/linblock "The location of EMAN2 installation is defined in Preferences."
+    echo ":: "
+else
+    set EMAN2_dir = ${dir_eman2}
+    set path=(${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin $path)
+    if ( $?PYTHONPATH ) then
+    else
+        setenv PYTHONPATH
+    endif
+    setenv PYTHONPATH ${EMAN2_dir}/lib:${EMAN2_dir}/bin:${EMAN2_dir}/extlib/site-packages:${EMAN2_dir}
+endif
+if ( ! -e ${app_spider} ) then
+    echo ":: "
+    ${proc_2dx}/linblock "Spider executable not found. Is it installed ???"
+    ${proc_2dx}/linblock "${app_spider}"
+    ${proc_2dx}/linblock "The location of spider is defined in Preferences."
+    echo ":: "
+endif
+#
 ${proc_2dx}/linblock "app_python = ${app_python}"
 ${proc_2dx}/linblock "app_anaconda = ${app_anaconda}"
-${proc_2dx}/linblock "Working Directory = $PWD"
+${proc_2dx}/linblock "dir_ccp4 = ${dir_ccp4}"
+${proc_2dx}/linblock "dir_eman2 = ${dir_eman2}"
+${proc_2dx}/linblock "app_spider = ${app_spider}"
 #
-##################################################
-# CCP4 SETUP CHECK:
-# ------------------------------
-# Set the CCP4 Directory:
-# Find if the variable ${CCP4} is already set!
-# If not try to guess the paths: e.g. /usr/local/ccp4
-##################################################
-
-echo "Finding CCP4 setup directory.. "
-if ($?CCP4) then
-  set ccp4_dir = $CCP4
-else
-  set ccp4_dir = /usr/local/ccp4
-endif 
-if ( -d ${ccp4_dir} ) then
-  set ccp4 = ${ccp4_dir}
-  set bin_ccp4 = ${ccp4}/bin
-else
-  if ( ${system} == "Darwin") then
-	set nonomatch
-	if( -d /Applications/ccp4* ) then 
-        	set ccp=`ls -1 /Applications | grep ccp4`
-	 	set ccp4 = /Applications/$ccp[1]
-        	set bin_ccp4 = ${ccp4}/bin
-	else
-		set ccp4 = "NOT_FOUND"
-		set bin_ccp4 = "NOT_FOUND"
-	endif
-  else
-	set ccp4 = "NOT_FOUND"
-	set bin_ccp4 = "NOT_FOUND"
-  endif 
-endif
-
-#
-#################################################
-# EMAN2 SETUP CHECK:
-# ------------------------------
-# Set the EMAN2 Directory:
-# Find if the variable ${EMAN2DIR} is already set!
-# If not try to guess the paths:
-# FOr OSX it can be: /Applications/EMAN2
-# Other search path: ~/EMAN2
-##################################################
-
-echo "Finding EMAN2 setup directory.. "
-if ($?EMAN2DIR) then
-  set EMAN2_dir = ${EMAN2DIR}
-else
-  set EMAN2_dir = /Applications/EMAN2
-  if ( ! -d ${EMAN2_dir} ) then
-    set EMAN2_dir = ~/EMAN2
-  endif
-endif
-
-if ( -d ${EMAN2_dir} ) then
-  set eman2 = ${EMAN2_dir}
-else
-  set eman2 = "NOT_FOUND"
-endif
-#
-#
-echo bin_2dx = ${bin_2dx}
-echo proc_2dx = ${proc_2dx}
-echo ccp4 = ${ccp4}
-echo bin_ccp4 = ${bin_ccp4}
-echo EMAN2 = ${eman2}
-if ($?app_2dx_image) then
-  echo app_2dx_image = ${app_2dx_image}
-endif
-#
-
 ####################################################
 # Find CCP4 CSH setup file and source it!
 ###################################################
@@ -144,51 +117,6 @@ if ( $?ccp4_setup ) then
     endif
   endif
 endif
-
-####################################################
-# Find EMAN2 CSH setup file and source it!
-###################################################
-if ( ! -d ${eman2} ) then
-  echo ":: "
-  ${proc_2dx}/linblock "EMAN2 not found. Is it installed ???"
-  ${proc_2dx}/linblock "The location of EMAN2 is defined in ${proc_2dx}/initialize."
-  ${proc_2dx}/linblock "You can edit it here."
-  ${proc_2dx}/linblock "EMAN2 could for example be installed in /Applications/EMAN2"
-  echo ":: "
-  ${proc_2dx}/linblock "You will not be able to use scripts such as Movie Mode Processing without EMAN2."
-  echo ":: "
-  ${proc_2dx}/linblock "Install EMAN2 from http://blake.bcm.edu/emanwiki/EMAN2"
-  echo ":: "
-else
-  # Set the EMAN2 CSH setup script
-  echo "Finding CSH setup script from EMAN2 installation.. "
-  set EMAN2_setup = ${eman2}/eman2.cshrc
-  if ( -e ${EMAN2_setup} ) then
-    if ( $?noEMAN ) then
-      # echo "::noEMAN = "${noEMAN}
-      if ( ${noEMAN} != "y" ) then
-        # This is sourcing a script within a sourced script. Hopefully, this will work...
-        echo ":   Sourcing ${EMAN2_setup}"
-        source ${EMAN2_setup}
-      endif
-    else
-      # This is sourcing a script within a sourced script. Hopefully, this will work...
-      echo ":   Sourcing ${EMAN2_setup}"
-      source ${EMAN2_setup}
-    endif
-    echo ":   Finished with ${EMAN2_setup}"
-  else
-    ${proc_2dx}/linblock "WARNING: ${EMAN2_setup} does not exists."
-    ${proc_2dx}/linblock "EMAN2 setup file not found. Is EMAN2 correctly installed ???"
-    ${proc_2dx}/linblock "Does the EMAN2 installation have a eman2.cshrc file??" 
-    ${proc_2dx}/linblock "If not download and set it up in ${eman2}"
-    echo ":: "
-    ${proc_2dx}/linblock "You will not be able to use scripts such as Movie Mode Processing without EMAN2."
-    echo ":: "
-    echo ":: "
-  endif
-endif
-
 #
 source ${proc_2dx}/2dx_makedirs
 #

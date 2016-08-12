@@ -163,10 +163,13 @@ QWidget* PreferencesDialog::getAppsPage() {
         confElement *element;
         for (unsigned int j = 0; j < (*data)[i]->size(); j++) {
             element = (*(*data)[i])[j];
+            QLabel* label = new QLabel(element->get("LABEL"));
+            QString toolTip = element->get("valuelabel") + "<br><br>" + element->get("legend");
+            label->setToolTip(toolTip);
             EditSetWidget* editWid = new EditSetWidget(1, sectionBox);
             editWid->setValue(element->get("value"));
             elementToWidget.insert(element, editWid);
-            formLayout_->addRow(element->get("LABEL"), editWid);   
+            formLayout_->addRow(label, editWid);   
         }
         
         sectionBox->setLayout(formLayout_);

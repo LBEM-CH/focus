@@ -74,7 +74,7 @@ private:
 
             setTitle("Open project");
             setSubTitle("Select the project from list or add new project");
-            setPixmap(QWizard::BackgroundPixmap, QPixmap(getAppDir()+"resources/images/background.jpg"));
+            setPixmap(QWizard::BackgroundPixmap, QPixmap(getAppDir()+"resources/images/background.png"));
             setPixmap(QWizard::LogoPixmap, QPixmap(getAppDir()+"resources/images/logo.png"));
 
             QLabel* label = new QLabel("Available Projects");

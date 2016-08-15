@@ -44,7 +44,7 @@ updateWindow::updateWindow(confData *conf, QWidget *parent)
 
     QVBoxLayout *layout = new QVBoxLayout(this);
 
-    updateTitle = new QLabel("2DX Version Information.");
+    updateTitle = new QLabel("2DX Version Information");
     QFont font = updateTitle->font();
     font.setBold(true);
     font.setPointSize(18);
@@ -96,7 +96,7 @@ updateWindow::updateWindow(confData *conf, QWidget *parent)
     layout->addWidget(upgradeButton, 0);
 
     QNetworkAccessManager* manager = new QNetworkAccessManager();
-    QUrl url = QUrl("http://www.2dx.unibas.ch/download/2dx-software/2dx-installer/changes.htm");
+    QUrl url = QUrl("http://www.2dx.unibas.ch/documentation/2dx-software/version-change-log/changes.htm");
     updateInf = manager->get(QNetworkRequest(url));
     connect(updateInf, SIGNAL(finished()), this, SLOT(updateTextBox()));
 
@@ -110,8 +110,12 @@ void updateWindow::updateTextBox() {
         return;
     }
     QByteArray updateHTML = updateInf->readAll();
-    QString updateString = QString(updateHTML);
-    QString currentFullVersion = updateString.section("##", 1, 1).trimmed();
+    QStringList updateString = QString(updateHTML).split("######");
+    QString currentFullVersion, currentReleaseText;
+    
+    if(updateString.size() > 1) currentFullVersion = updateString[1];
+    if(updateString.size() > 2) currentReleaseText = updateString[2];
+    
     QString currentVersion = currentFullVersion.split('-')[0];
     QString currentRevision;
     if (currentFullVersion.split('-').size() > 1) currentRevision = currentFullVersion.split('-')[1];
@@ -139,6 +143,9 @@ void updateWindow::updateTextBox() {
                 revisionInfo->setText("Revision " + currentRevision + " is now available, your current revision is " + data->version_revision() + ".<br>Would you like to upgrade?<br>");
                 setWarningPalette(revisionInfo);
                 upgradeButton->show();
+            } else {
+                revisionInfo->setText("The currently installed revision, " + data->version_revision() + " is the latest available.");
+                setNormalPalette(revisionInfo);
             }
         } else {
             revisionInfo->setText("No revision information available");
@@ -146,7 +153,9 @@ void updateWindow::updateTextBox() {
         }
     }
 
-    updateText->insertHtml(updateString);
+    currentReleaseText.insert(0, "<html><body>");
+    currentReleaseText.append("</body></html>");
+    updateText->insertHtml(currentReleaseText);
     updateText->moveCursor(QTextCursor::Start);
 }
 

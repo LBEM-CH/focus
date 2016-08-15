@@ -1,6 +1,8 @@
-<html>
-<##@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@-@GIT_COMMIT_HASH@##>
-<body>
+<BR>
+
+######@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@-@GIT_COMMIT_HASH@######
+
+<BR>
 
 <font color="blue">3.6.0</font> (Developmental version) <br>
 <ul>
@@ -606,5 +608,4 @@
 <li> Added parameter to control the number of displayed lattice orders.
 <li> Changed parameters related to ellipse sizes to reflect radius not diameter.
 </ul>
-</body>
-</html>
+######

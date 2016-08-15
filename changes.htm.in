@@ -1,7 +1,47 @@
 <html>
-<##@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@##>
+<##@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@-@GIT_COMMIT_HASH@##>
 <body>
-	
+
+<font color="blue">3.6.0</font> (Developmental version) <br>
+<ul>
+<li>2DX has a new integrated Graphical User Interface called 2dx_gui</li>
+<li>Both merging and image processing can be done with 2dx_gui</li>
+<li>2dx_merge and 2dx_image are now just command line</li>
+<li>2DX Projects can now be ported to single particle packages like FREALIGN/RELION</li>
+<li>ZORRO integrated</li>
+<li>MTZ write capabilities added</li>
+<li>FSC/Phase residuals added to the Quality Evaluation script</li>
+<li>Features added to the core kernel </li>
+<li><font color="red">[bug]</font> Major bug removed in parallel refinement script </li>
+<li>Fixes in movie mode processing</li>
+</ul>
+
+<BR>
+<hr>
+<BR>
+
+<font color="blue">3.5.0</font> Dec. 14, 2015 <br>
+<ul>
+<li>A new tool to automatically switch between maps and references now available</li>
+<li>Parallel processing of images in 2dx_merge is now possible</li>
+<li>Weighted Backprojection introduced instead of Latline fitting</li>
+<li>2D merge and 3D merge separated</li><li>Movie mode processing for direct electron detectors</li>
+<li>GUI Improvements in 2dx_merge and 2dx_image</li>
+<li>Moved to Qt5.x</li>
+<li>Improved build and packaging, no dependency on Boost</li>
+<li>It is now possible to sharpen maps using bead models</li>
+<li>B-factor sharpening scripts included</li>
+<li>New Volume refinement methods included which helps to encounter problems of Missing cone</li>
+<li>New kernel tools introduced, capable of doing all the major operations on EM-Volume</li>
+<li>Radiation damage measurement for movie-mode processing</li>
+<li><font color="red">[bug]</font> 2D-ML now works with the newly integrated general processing parameters</li>
+<li><font color="red">[bug]</font> Classical diffmap-script working for maps with where RES &lt; 6A</li>
+<li>Many other bugfixes</li>
+</ul>
+
+<BR>
+<hr>
+<BR>	
 	
 <font color="blue">3.4.2</font> Feb. 26, 2014 <br>
 <ul>

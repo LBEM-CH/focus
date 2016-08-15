@@ -126,8 +126,6 @@ private:
     aboutWindow *about;
     PreferencesDialog* preferencesDialog_;
 
-    QString installedVersion;
-
     eulerWindow *euler;
     reprojectWindow *reproject;
     ProjectTools* projectTools;

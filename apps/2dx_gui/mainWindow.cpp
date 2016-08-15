@@ -49,14 +49,13 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     UserPreferences(mainData).loadAllFontSettings();
     UserPreferences(mainData).loadWindowPreferences(this);
     
-    installedVersion = mainData->version();
     updateWindowTitle();
     setUnifiedTitleAndToolBarOnMac(true);
 
-    //updates = new updateWindow(mainData, this);
-    //updates->hide();
+    updates = new updateWindow(mainData, this);
+    updates->hide();
 
-    about = new aboutWindow(mainData, this, true);
+    about = new aboutWindow(mainData, this);
     about->hide();
 
     setupToolBar();
@@ -239,9 +238,9 @@ void mainWindow::setupMenuBar() {
 
     connect(mapper, SIGNAL(mapped(const QString &)), this, SLOT(openURL(const QString &)));
 
-    //QAction *showUpdatesAction = new QAction(*(mainData->getIcon("update")), "Update...", this);
-    //connect(showUpdatesAction, SIGNAL(triggered()), updates, SLOT(show()));
-    //helpMenu->addAction(showUpdatesAction);
+    QAction *showUpdatesAction = new QAction(*(mainData->getIcon("update")), "Update...", this);
+    connect(showUpdatesAction, SIGNAL(triggered()), updates, SLOT(show()));
+    helpMenu->addAction(showUpdatesAction);
 
     QAction *showAboutAction = new QAction(*(mainData->getIcon("about")), "About", this);
     connect(showAboutAction, SIGNAL(triggered()), about, SLOT(show()));
@@ -510,5 +509,5 @@ void mainWindow::changeProjectName() {
 }
 
 void mainWindow::updateWindowTitle() {
-    setWindowTitle(ProjectPreferences(mainData).projectName() + " | 2dx (" + installedVersion + ")");
+    setWindowTitle(ProjectPreferences(mainData).projectName() + " | 2dx (" + mainData->version_number() + ")");
 }

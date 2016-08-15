@@ -90,6 +90,7 @@ private:
     QString initializationScriptName;
 
     QString version_2dx;
+    QString revision_2dx;
 
     bool empty;
     bool modified;
@@ -169,7 +170,8 @@ public:
     confSection* operator[](unsigned int i);
     const confSection* operator[](unsigned int i) const;
 
-    const QString &version();
+    const QString &version_number();
+    const QString &version_revision();
     void setURL(const QString &name, const QString &url);
     const QString &getURL(const QString &name);
 

@@ -29,6 +29,22 @@ PROJECT(2dx)
 set (2dx_VERSION_MAJOR 3)
 set (2dx_VERSION_MINOR 6)
 set (2dx_VERSION_PATCH 0)
+#
+# Get the current working branch
+execute_process(
+  COMMAND git rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+#
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 #------------------------------------------------------------------------------
 
 
@@ -93,7 +109,6 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Configure files to replace version numbers
 configure_file("changes.htm.in" "changes.htm")
-configure_file("about.htm.in" "about.htm")
 configure_file("current.version.in" "current.version")
 
 file(GLOB HTM ${CMAKE_BINARY_DIR}/*.htm)

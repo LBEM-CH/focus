@@ -26,25 +26,28 @@
 #include <QAction>
 #include "confData.h"
 
-class updateWindow : public QWidget
-{
-  Q_OBJECT
+class updateWindow : public QWidget {
+    Q_OBJECT
 
-  public slots:
-  void updateTextBox();
-  void updateVersion();
+public slots:
+    void updateTextBox();
+    void updateVersion();
 
-  private:
+private:
+    
+    void setWarningPalette(QWidget* widget);
+    void setNormalPalette(QWidget* widget);
 
-  confData *data;
-  QNetworkReply *updateInf;
-  QTextBrowser *updateText;
-  QLabel *updateTitle, *versionInfo;
-  QString installedVersion;
+    confData *data;
+    QNetworkReply *updateInf;
+    QTextBrowser *updateText;
+    QLabel *updateTitle, *versionInfo, *revisionInfo;
+    QPushButton *upgradeButton;
+    QString installedVersion;
 
 
-  public:
-  updateWindow(confData *conf, QWidget *parent = NULL);
+public:
+    updateWindow(confData *conf, QWidget *parent = NULL);
 
 };
 

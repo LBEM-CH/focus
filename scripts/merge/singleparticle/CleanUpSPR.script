@@ -16,6 +16,8 @@
 #
 # MANUAL: This script allows the user to clean up the Single Particle Refinement (SPR) folders.
 #
+# DISPLAY: SPR_PREREFINE_DIR
+# DISPLAY: SPR_REFINE_DIR
 # DISPLAY: SPR_CleanStacksDir
 # DISPLAY: SPR_CleanPickDir
 # DISPLAY: SPR_CleanFRLPreRefDir
@@ -36,6 +38,8 @@ set SPR_CleanFRLScratchPreRefDir = ""
 set SPR_CleanFRLRefDir = ""
 set SPR_CleanFRLScratchRefDir = ""
 set SPR_CleanSPR = ""
+set SPR_PREREFINE_DIR = ""
+set SPR_REFINE_DIR = ""
 #
 set SPR_DIR = ${PWD}/SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
@@ -67,28 +71,28 @@ if ( ${SPR_CleanSPR} == "y" ) then
 	if ( ${SPR_CleanFRLPreRefDir} == "y" ) then
 
 		echo ":: Removing contents of FREALIGN pre-refinement directory..."
-		rm -Rf ${SPR_DIR}/FREALIGN/pre-refine/*
+		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_PREREFINE_DIR}/*
 
 	endif
 
 	if ( ${SPR_CleanFRLScratchPreRefDir} == "y" ) then
 
 		echo ":: Removing contents of FREALIGN pre-refinement scratch directory..."
-		rm -Rf ${SPR_DIR}/FREALIGN/pre-refine/*
+		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_PREREFINE_DIR}/scratch/*
 
 	endif
 
 	if ( ${SPR_CleanFRLRefDir} == "y" ) then
 
 		echo ":: Removing contents of FREALIGN refinement directory..."
-		rm -Rf ${SPR_DIR}/FREALIGN/pre-refine/*
+		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_REFINE_DIR}/*
 
 	endif
 
 	if ( ${SPR_CleanFRLScratchRefDir} == "y" ) then
 
 		echo ":: Removing contents of FREALIGN refinement scratch directory..."
-		rm -Rf ${SPR_DIR}/FREALIGN/pre-refine/*
+		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_REFINE_DIR}/scratch/*
 
 	endif
 

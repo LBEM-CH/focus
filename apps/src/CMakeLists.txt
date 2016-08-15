@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 2.8.11)
 SET(LIBTITLE 2dx_app)
 SET(LIBVERSION 1)
 PROJECT(${LIBTITLE})
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/confVersion.h.in ${CMAKE_CURRENT_SOURCE_DIR}/data/confVersion.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/confVersion.h.in ${CMAKE_CURRENT_BINARY_DIR}/confVersion.h)
 #-------------------------------------------------------------------------------
 
 #--- BASE DIRECTORIES ----------------------------------------------------------
@@ -26,6 +26,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/mrcImage)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/settings)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/widgets)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/windows)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Source Files
 FILE(GLOB_RECURSE SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)

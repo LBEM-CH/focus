@@ -741,7 +741,7 @@ bool confData::isModified() {
     return modified;
 }
 
-const QString &confData::version() {
+const QString &confData::version_number() {
     // TODO introduce BOOST
 
     std::stringstream ss_major; //create a stringstream
@@ -769,6 +769,18 @@ const QString &confData::version() {
     version_2dx = QString::fromUtf8(version_string.c_str());
 
     return version_2dx;
+}
+
+const QString &confData::version_revision() {
+    // TODO introduce BOOST
+
+    std::stringstream ss_major; //create a stringstream
+    ss_major << VERSION_REVISION; //add number to the stream
+    std::string revision = ss_major.str();
+
+    revision_2dx = QString::fromUtf8(revision.c_str());
+
+    return revision_2dx;
 }
 
 void confData::setURL(const QString &name, const QString &url) {

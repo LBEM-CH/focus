@@ -603,7 +603,7 @@ eot
   ### THIS NEEDS TO BE A VALID PATH TO SPIDER: For example:
   #/usr/local/spider/bin/spider.exe
   #
-  /usr/local/spider/bin/spider.exe << eot
+  ${app_spider} << eot
 spi
 ;
 ; X70 is the size of the unit cell in the MRC output file from above.

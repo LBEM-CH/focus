@@ -17,6 +17,8 @@
 # MANUAL: This script stops a current run of FREALIGN.
 #
 # DISPLAY: SPR_FRLRefOrPreref
+# DISPLAY: SPR_PREREFINE_DIR
+# DISPLAY: SPR_REFINE_DIR
 #
 #$end_local_vars
 
@@ -24,6 +26,14 @@ set SPR_FRLRefOrPreref = ""
 set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
 #$end_vars
 
+# Form the strings:
+
+if ( ${SPR_FRLRefOrPreref} == "refine" ) then
+	set SPR_FRLRefOrPreref = ${SPR_REFINE_DIR}
+else
+	set SPR_FRLRefOrPreref = ${SPR_PREREFINE_DIR}
+endif
+	
 cd ${SPR_FREALIGN_DIR}/${SPR_FRLRefOrPreref}
 
 frealign_kill

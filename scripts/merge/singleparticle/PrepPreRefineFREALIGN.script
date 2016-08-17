@@ -17,6 +17,7 @@
 # MANUAL: This script prepares the first refinement in single-particle mode with FREALIGN, based on the crystal averages calculated in the previous step.
 #
 # DISPLAY: SPR_WhichStack
+# DISPLAY: SPR_PREREFINE_DIR
 # DISPLAY: SPR_FRL_cluster_type
 # DISPLAY: SPR_FRL_nprocessor_ref
 # DISPLAY: SPR_FRL_nprocessor_rec
@@ -57,6 +58,7 @@ set bin_2dx = ""
 set proc_2dx = ""
 #
 set SPR_WhichStack = ""
+set SPR_PREREFINE_DIR = ""
 set SPR_FRL_cluster_type = ""
 set SPR_FRL_nprocessor_ref = ""
 set SPR_FRL_nprocessor_rec = ""
@@ -101,7 +103,7 @@ set SPR_FRL_nclasses = "1"
 set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
 set SPR_STACK_ROOTNAME = 'particles'
 set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
-set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/pre-refine/
+set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
 set SPR_PREREFINE_MPARAMETERS = ${SPR_PREREFINE_DIR}/mparameters
 #$end_vars
 

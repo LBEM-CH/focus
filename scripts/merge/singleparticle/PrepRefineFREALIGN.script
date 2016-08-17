@@ -16,6 +16,7 @@
 #
 # MANUAL: This script prepares the first refinement in single-particle mode with FREALIGN, based on the crystal averages calculated in the previous step.
 #
+# DISPLAY: SPR_REFINE_DIR
 # DISPLAY: SPR_WhichStackInherit
 # DISPLAY: SPR_WhichCycleInherit
 # DISPLAY: SPR_WhichStackAll
@@ -63,6 +64,8 @@ set app_python = ""
 set SPR_WhichStackAll = ""
 set SPR_WhichStackInherit = ""
 set SPR_WhichCycleInherit = ""
+set SPR_PREREFINE_DIR = ""
+set SPR_REFINE_DIR = ""
 set SPR_FRL_cluster_type = ""
 set SPR_FRL_nprocessor_ref = ""
 set SPR_FRL_nprocessor_rec = ""
@@ -106,9 +109,9 @@ set SPR_FRL_nclasses = ""
 set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
 set SPR_STACK_ROOTNAME = 'particles'
 set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
-set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/pre-refine/
-set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/refine/
-set SPR_PREREFINE_MPARAMETERS = ${SPR_PREREFINE_DIR}/mparameters
+set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
+set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_REFINE_DIR}/
+set SPR_REFINE_MPARAMETERS = ${SPR_REFINE_DIR}/mparameters
 #$end_vars
 
 # Start script commands:
@@ -187,85 +190,85 @@ endif
 # GENERATE THE MPARAMETERS FILE FOR FREALIGN
 #################################################################################
 
-echo "Control parameter file to run Frealign" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "======================================" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "This file must me kept in the project working directory from which the refinement scripts are launched." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "Note: Please make sure that project and scratch directories (if specified) are accessible by all sub-processes that are run on cluster nodes." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "# Computer-specific setting" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "cluster_type         ${SPR_FRL_cluster_type}		! Set to "sge", "lsf", "slurm", "pbs" or "condor" when running on a cluster, otherwise set to "none"." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "nprocessor_ref       ${SPR_FRL_nprocessor_ref}		! Number of CPUs to use during refinement." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "nprocessor_rec       ${SPR_FRL_nprocessor_rec}		! Number of CPUs to use during reconstruction." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "mem_per_cpu	     ${SPR_FRL_mem_per_cpu}	! Memory available per CPU (in MB)." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "# Refinement-specific parameters" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "MODE                  1		! 1, 2, 3, 4 or 5. Refinement mode, normally 1. Set to 2 for additional search." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "start_process         ${SPR_FRL_start_process}         ! First cycle to execute. Output files from previous cycle (n-1) required." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "end_process           ${SPR_FRL_end_process}  	! Last cycle to execute." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "res_high_refinement   ${SPR_FRL_res_high_refinement}	! High-resolution limit for particle alignment." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "res_high_class        ${SPR_FRL_res_high_class}        ! High-resolution limit to calculate class membership (OCC)." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "thresh_reconst        ${SPR_FRL_thresh_reconst}       ! Particles with scores below this value will not be included in the reconstruction." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "nclasses              ${SPR_FRL_nclasses}		! Number of classes to use." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "# Search-specific parameters" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "res_search           10.0	! High-resolution limit for orientational search." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "thresh_refine        50.0	! Mode 4: Score threshold above which search will not be performed." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "DANG                5.0	! Mode 3, 4 and 5: Angular step for orientational search." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "ITMAX               50		! Mode 2 and 4: Number of repetitions of grid search with random starting angles." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "Bsearch            2000.0	! B-factor filtering (when > 0) applied during search." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "# Dataset-specific parameters" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "data_input           ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg	! Root name for parameter and map files." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "raw_images           ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrc" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "image_contrast        ${SPR_FRL_image_contrast}		! N or P. Set to N if particles are dark on bright background, otherwise set to P." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "outer_radius        ${SPR_FRL_outer_radius} 	! Outer radius of spherical particle mask in Angstrom." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "inner_radius          ${SPR_FRL_inner_radius}	! Inner radius of spherical particle mask in Angstrom." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "mol_mass            ${SPR_FRL_mol_mass}	! Molecular mass in kDa of particle or helical segment." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "Symmetry              ${SPR_SYM}         ! Symmetry of particle." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "pix_size              ${sample_pixel}	! Pixel size of particle in Angstrom." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "dstep                 ${stepdigitizer}	! Pixel size of detector in micrometer." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "Aberration            ${CS}	! Sherical aberration coefficient in millimeter." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "Voltage             ${KV}	! Beam accelleration voltage in kilovolt." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "Amp_contrast        ${SPR_ampcon}	! Amplitude contrast." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "# Expert parameters (for expert users)" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "XSTD                  ${SPR_FRL_XSTD}	! Tighter masking of 3D map (XSTD > 0) or particles (XSTD < 0)." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "PBC                   ${SPR_FRL_PBC}	! Discriminate particles with different scores during reconstruction. Small values (5 - 10) discriminate more than large values (50 - 100)." >> ${SPR_PREREFINE_MPARAMETERS}
-echo parameter_mask   \"${SPR_FRL_parameter_mask}\" ! Five flags of 0 or 1 \(e.g. 1 1 1 1 1\). Determines which parameters are refined \(PSI, THETA, PHI, SHX, SHY\). >> ${SPR_PREREFINE_MPARAMETERS}
-echo "refineangleinc        ${SPR_FRL_refineangleinc} 	! When larger than 1: Alternate between refinement of OCC and OCC + angles." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "refineshiftinc        ${SPR_FRL_refineshiftinc} 	! When larger than 1: Alternate between refinement of OCC and OCC + angles + shifts." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "res_reconstruction    ${SPR_FRL_res_reconstruction}	! High-resolution limit of reconstruction. Normally set to Nyquist limit." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "res_low_refinement    ${SPR_FRL_res_low_refinement}	! Low-resolution limit for particle alignment. Set to particle dimention or larger." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "nbootstrap         1000		! Number of bootstrap volumes to calculate real-space variance map." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "FMAG                  F		! T or F. Set to T to refine particle magnification. Not recommended in most cases." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "FDEF                  F		! T or F. Set to T to refine defocus per micrograph. Not recommended in most cases." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "FASTIG                F		! T or F. Set to T to refine astigmatism. Not recommended in most cases." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "FPART                 F		! T or F. Set to T to refine defocus for each particle. Not recommended in most cases." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "FFILT                 ${SPR_FRL_FFILT}		! T or F. Set to T to apply optimal filter to reconstruction. Recommended in most cases." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "FMATCH                ${SPR_FRL_FMATCH}		! T or F. Set to T to output matching projections. Only needed for diagnostics." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "FBEAUT                ${SPR_FRL_FBEAUT}		! T or F. Set to T to apply symmetry also in real space. Not needed in most cases." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "FBOOST                ${SPR_FRL_FBOOST}		! T or F. Set to T to allow potential overfitting during refinement. Not recommended in most cases." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "RBfactor              0.0	! B-factor sharpening (when < 0) applied during refinement. Not recommended in most cases." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "beam_tilt_x           0.0	! Beam tilt in mrad along X-axis." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "beam_tilt_y           0.0	! Beam tilt in mrad along y-axis." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "mp_cpus               ${SPR_FRL_mp_cpus}		! Number of CPUs to use for each reconstruction job." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "restart_after_crash   ${SPR_FRL_restart_after_crash}		! T or F. Set to T to restart job if it crashes." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "delete_scratch        ${SPR_FRL_delete_scratch}		! Delete intermediate files in scratch directory." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "qsub_string_ref  ""		! String to add to cluster jobs submitted for refinement (only for SGE and PBS clusters)." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "qsub_string_rec  ""		! String to add to cluster jobs submitted for reconstruction (only for SGE and PBS clusters)." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "first_particle        " >> ${SPR_PREREFINE_MPARAMETERS}
-echo "last_particle         " >> ${SPR_PREREFINE_MPARAMETERS}
-echo "frealign_bin_dir      " >> ${SPR_PREREFINE_MPARAMETERS}
-echo "scratch_dir           ${SCRATCH_DISK}" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "# Masking parameters (for expert users)" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "mask_file             ${SPR_FRL_mask_file}" >> ${SPR_PREREFINE_MPARAMETERS}
-echo "mask_edge             0		! Width of cosine edge in pixels to add around mask. Set to 0 to leave mask unchanged." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "mask_outside_weight   0.0	! Factor to downweight density outside of mask (normally 0.0 - 1.0)." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "mask_filt_res         0.0	! Filter radius (in A) to low-pass filter density outside density. Set to 0.0 to skip filtering." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "mask_filt_edge        0		! Width of cosine edge in reciprocal pixels to add to filter function." >> ${SPR_PREREFINE_MPARAMETERS}
+echo "Control parameter file to run Frealign" >> ${SPR_REFINE_MPARAMETERS}
+echo "======================================" >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "This file must me kept in the project working directory from which the refinement scripts are launched." >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "Note: Please make sure that project and scratch directories (if specified) are accessible by all sub-processes that are run on cluster nodes." >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "# Computer-specific setting" >> ${SPR_REFINE_MPARAMETERS}
+echo "cluster_type         ${SPR_FRL_cluster_type}		! Set to "sge", "lsf", "slurm", "pbs" or "condor" when running on a cluster, otherwise set to "none"." >> ${SPR_REFINE_MPARAMETERS}
+echo "nprocessor_ref       ${SPR_FRL_nprocessor_ref}		! Number of CPUs to use during refinement." >> ${SPR_REFINE_MPARAMETERS}
+echo "nprocessor_rec       ${SPR_FRL_nprocessor_rec}		! Number of CPUs to use during reconstruction." >> ${SPR_REFINE_MPARAMETERS}
+echo "mem_per_cpu	     ${SPR_FRL_mem_per_cpu}	! Memory available per CPU (in MB)." >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "# Refinement-specific parameters" >> ${SPR_REFINE_MPARAMETERS}
+echo "MODE                  1		! 1, 2, 3, 4 or 5. Refinement mode, normally 1. Set to 2 for additional search." >> ${SPR_REFINE_MPARAMETERS}
+echo "start_process         ${SPR_FRL_start_process}         ! First cycle to execute. Output files from previous cycle (n-1) required." >> ${SPR_REFINE_MPARAMETERS}
+echo "end_process           ${SPR_FRL_end_process}  	! Last cycle to execute." >> ${SPR_REFINE_MPARAMETERS}
+echo "res_high_refinement   ${SPR_FRL_res_high_refinement}	! High-resolution limit for particle alignment." >> ${SPR_REFINE_MPARAMETERS}
+echo "res_high_class        ${SPR_FRL_res_high_class}        ! High-resolution limit to calculate class membership (OCC)." >> ${SPR_REFINE_MPARAMETERS}
+echo "thresh_reconst        ${SPR_FRL_thresh_reconst}       ! Particles with scores below this value will not be included in the reconstruction." >> ${SPR_REFINE_MPARAMETERS}
+echo "nclasses              ${SPR_FRL_nclasses}		! Number of classes to use." >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "# Search-specific parameters" >> ${SPR_REFINE_MPARAMETERS}
+echo "res_search           10.0	! High-resolution limit for orientational search." >> ${SPR_REFINE_MPARAMETERS}
+echo "thresh_refine        50.0	! Mode 4: Score threshold above which search will not be performed." >> ${SPR_REFINE_MPARAMETERS}
+echo "DANG                5.0	! Mode 3, 4 and 5: Angular step for orientational search." >> ${SPR_REFINE_MPARAMETERS}
+echo "ITMAX               50		! Mode 2 and 4: Number of repetitions of grid search with random starting angles." >> ${SPR_REFINE_MPARAMETERS}
+echo "Bsearch            2000.0	! B-factor filtering (when > 0) applied during search." >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "# Dataset-specific parameters" >> ${SPR_REFINE_MPARAMETERS}
+echo "data_input           ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg	! Root name for parameter and map files." >> ${SPR_REFINE_MPARAMETERS}
+echo "raw_images           ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrc" >> ${SPR_REFINE_MPARAMETERS}
+echo "image_contrast        ${SPR_FRL_image_contrast}		! N or P. Set to N if particles are dark on bright background, otherwise set to P." >> ${SPR_REFINE_MPARAMETERS}
+echo "outer_radius        ${SPR_FRL_outer_radius} 	! Outer radius of spherical particle mask in Angstrom." >> ${SPR_REFINE_MPARAMETERS}
+echo "inner_radius          ${SPR_FRL_inner_radius}	! Inner radius of spherical particle mask in Angstrom." >> ${SPR_REFINE_MPARAMETERS}
+echo "mol_mass            ${SPR_FRL_mol_mass}	! Molecular mass in kDa of particle or helical segment." >> ${SPR_REFINE_MPARAMETERS}
+echo "Symmetry              ${SPR_SYM}         ! Symmetry of particle." >> ${SPR_REFINE_MPARAMETERS}
+echo "pix_size              ${sample_pixel}	! Pixel size of particle in Angstrom." >> ${SPR_REFINE_MPARAMETERS}
+echo "dstep                 ${stepdigitizer}	! Pixel size of detector in micrometer." >> ${SPR_REFINE_MPARAMETERS}
+echo "Aberration            ${CS}	! Sherical aberration coefficient in millimeter." >> ${SPR_REFINE_MPARAMETERS}
+echo "Voltage             ${KV}	! Beam accelleration voltage in kilovolt." >> ${SPR_REFINE_MPARAMETERS}
+echo "Amp_contrast        ${SPR_ampcon}	! Amplitude contrast." >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "# Expert parameters (for expert users)" >> ${SPR_REFINE_MPARAMETERS}
+echo "XSTD                  ${SPR_FRL_XSTD}	! Tighter masking of 3D map (XSTD > 0) or particles (XSTD < 0)." >> ${SPR_REFINE_MPARAMETERS}
+echo "PBC                   ${SPR_FRL_PBC}	! Discriminate particles with different scores during reconstruction. Small values (5 - 10) discriminate more than large values (50 - 100)." >> ${SPR_REFINE_MPARAMETERS}
+echo parameter_mask   \"${SPR_FRL_parameter_mask}\" ! Five flags of 0 or 1 \(e.g. 1 1 1 1 1\). Determines which parameters are refined \(PSI, THETA, PHI, SHX, SHY\). >> ${SPR_REFINE_MPARAMETERS}
+echo "refineangleinc        ${SPR_FRL_refineangleinc} 	! When larger than 1: Alternate between refinement of OCC and OCC + angles." >> ${SPR_REFINE_MPARAMETERS}
+echo "refineshiftinc        ${SPR_FRL_refineshiftinc} 	! When larger than 1: Alternate between refinement of OCC and OCC + angles + shifts." >> ${SPR_REFINE_MPARAMETERS}
+echo "res_reconstruction    ${SPR_FRL_res_reconstruction}	! High-resolution limit of reconstruction. Normally set to Nyquist limit." >> ${SPR_REFINE_MPARAMETERS}
+echo "res_low_refinement    ${SPR_FRL_res_low_refinement}	! Low-resolution limit for particle alignment. Set to particle dimention or larger." >> ${SPR_REFINE_MPARAMETERS}
+echo "nbootstrap         1000		! Number of bootstrap volumes to calculate real-space variance map." >> ${SPR_REFINE_MPARAMETERS}
+echo "FMAG                  F		! T or F. Set to T to refine particle magnification. Not recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
+echo "FDEF                  F		! T or F. Set to T to refine defocus per micrograph. Not recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
+echo "FASTIG                F		! T or F. Set to T to refine astigmatism. Not recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
+echo "FPART                 F		! T or F. Set to T to refine defocus for each particle. Not recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
+echo "FFILT                 ${SPR_FRL_FFILT}		! T or F. Set to T to apply optimal filter to reconstruction. Recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
+echo "FMATCH                ${SPR_FRL_FMATCH}		! T or F. Set to T to output matching projections. Only needed for diagnostics." >> ${SPR_REFINE_MPARAMETERS}
+echo "FBEAUT                ${SPR_FRL_FBEAUT}		! T or F. Set to T to apply symmetry also in real space. Not needed in most cases." >> ${SPR_REFINE_MPARAMETERS}
+echo "FBOOST                ${SPR_FRL_FBOOST}		! T or F. Set to T to allow potential overfitting during refinement. Not recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
+echo "RBfactor              0.0	! B-factor sharpening (when < 0) applied during refinement. Not recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
+echo "beam_tilt_x           0.0	! Beam tilt in mrad along X-axis." >> ${SPR_REFINE_MPARAMETERS}
+echo "beam_tilt_y           0.0	! Beam tilt in mrad along y-axis." >> ${SPR_REFINE_MPARAMETERS}
+echo "mp_cpus               ${SPR_FRL_mp_cpus}		! Number of CPUs to use for each reconstruction job." >> ${SPR_REFINE_MPARAMETERS}
+echo "restart_after_crash   ${SPR_FRL_restart_after_crash}		! T or F. Set to T to restart job if it crashes." >> ${SPR_REFINE_MPARAMETERS}
+echo "delete_scratch        ${SPR_FRL_delete_scratch}		! Delete intermediate files in scratch directory." >> ${SPR_REFINE_MPARAMETERS}
+echo "qsub_string_ref  ""		! String to add to cluster jobs submitted for refinement (only for SGE and PBS clusters)." >> ${SPR_REFINE_MPARAMETERS}
+echo "qsub_string_rec  ""		! String to add to cluster jobs submitted for reconstruction (only for SGE and PBS clusters)." >> ${SPR_REFINE_MPARAMETERS}
+echo "first_particle        " >> ${SPR_REFINE_MPARAMETERS}
+echo "last_particle         " >> ${SPR_REFINE_MPARAMETERS}
+echo "frealign_bin_dir      " >> ${SPR_REFINE_MPARAMETERS}
+echo "scratch_dir           ${SCRATCH_DISK}" >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "# Masking parameters (for expert users)" >> ${SPR_REFINE_MPARAMETERS}
+echo "mask_file             ${SPR_FRL_mask_file}" >> ${SPR_REFINE_MPARAMETERS}
+echo "mask_edge             0		! Width of cosine edge in pixels to add around mask. Set to 0 to leave mask unchanged." >> ${SPR_REFINE_MPARAMETERS}
+echo "mask_outside_weight   0.0	! Factor to downweight density outside of mask (normally 0.0 - 1.0)." >> ${SPR_REFINE_MPARAMETERS}
+echo "mask_filt_res         0.0	! Filter radius (in A) to low-pass filter density outside density. Set to 0.0 to skip filtering." >> ${SPR_REFINE_MPARAMETERS}
+echo "mask_filt_edge        0		! Width of cosine edge in reciprocal pixels to add to filter function." >> ${SPR_REFINE_MPARAMETERS}
 
 echo ":: "
 echo ":: New mparameters file has been generated. Old one has been backed-up."

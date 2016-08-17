@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Apply Crystal Weighting	                        				#
+# Title: Apply crystal weighting	                        				#
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -45,10 +45,18 @@ set sample_pixel = ""
 #
 set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
 set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_REFINE_DIR}/
+set SPR_CRYSTALREC_DIR = ${SPR_FREALIGN_DIR}/${SPR_CRYSTALREC_DIR}/
 set scriptname = ApplyCrystalWeighting
 #$end_vars
 
-${app_python} ${proc_2dx}/SPR_FrealignCrystalWeighting.py ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_${SPR_FRLCycle}_r${SPR_FRLRef}.par ${SPR_CRYSTALREC_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_${SPR_FRLCycle}_r1.par ${SPR_SIG_EULER} ${SPR_SIG_SHIFT} ${SPR_FRL_parameter_mask} ${sample_pixel}
+# Start script commands:
+
+# Check if initial files exist:
+if ( ! -e ${SPR_CRYSTALREC_DIR} ) then
+	mkdir -p ${SPR_CRYSTALREC_DIR}
+endif
+
+${app_python} ${proc_2dx}/SPR_FrealignCrystalWeighting.py ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_${SPR_FRLCycle}_r${SPR_FRLRef}.par ${SPR_CRYSTALREC_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}-xweighted_${SPR_FRLCycle}_r1.par ${SPR_SIG_EULER} ${SPR_SIG_SHIFT} ${SPR_FRL_parameter_mask} ${sample_pixel}
 
 
 echo ":: "

@@ -49,6 +49,10 @@ echo "# IMAGE: ${SPR_PREREFINE_DIR}/SHY_change_hist.png <TXT: SHY_change_hist.pn
 echo "# IMAGE-IMPORTANT: ${SPR_PREREFINE_DIR}/angular_change_hist.png <TXT: angular_change_hist.png>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${SPR_PREREFINE_DIR}/translational_change_hist.png <TXT: translational_change_hist.png>" >> LOGS/${scriptname}.results
 
+foreach i (${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}*)
+	echo "# IMAGE: $i <TXT: `basename $i`>" >> LOGS/${scriptname}.results
+end
+
 echo ":: "
 echo ":: Done!"
 echo ":: "

@@ -66,6 +66,7 @@ set SPR_MERGEFILE = ${PWD}/2dx_merge_dirfile.dat
 set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
 set SPR_PICKING_DIR = ${PWD}/SPR/picking/
 set SPR_STACK_ROOTNAME = 'particles'
+set scriptname = ExportParticleStack
 #$end_vars
 
 # Start script commands:
@@ -87,9 +88,21 @@ endif
 
 ### BELOW IS A SERIOUS KLUDGE BECAUSE EMAN2/SPARX DO NOT SUPPORT WRITING TO MRC STACKS BIGGER THAN 65535 IMAGES DIRECTLY ###
 echo "Now converting stack(s) to .mrcs format..."
-foreach i (${SPR_STACKS_DIR}/*.hdf)
+foreach i ( ${SPR_STACKS_DIR}/*.hdf )
 	e2proc2d.py $i $i.mrc --twod2threed
 	rm $i
 end
 rename .hdf.mrc .mrcs ${SPR_STACKS_DIR}/*
 echo "Done!"
+
+foreach i (${SPR_STACKS_DIR}/*.mrc*)
+	echo "# IMAGE-IMPORTANT: $i <TXT: `basename $i`>" >> LOGS/${scriptname}.results
+end
+
+foreach i (${SPR_PICKING_DIR}/*.png)
+	echo "# IMAGE: $i <TXT: `basename $i`>" >> LOGS/${scriptname}.results
+end
+
+echo ":: "
+echo ":: Done!"
+echo ":: "

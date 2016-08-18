@@ -29,9 +29,11 @@ set SPR_FRLCycle = ""
 set bin_2dx = ""
 set proc_2dx = ""
 
+set scriptname = RunWeightedReconstructionFREALIGN
+
 set SPR_CRYSTALREC_DIR = ""
 
-set SPR_CRYSTALREC_DIR = ${PWD}/SPR/FREALIGN/${SPR_CRYSTALREC_DIR}/
+set SPR_CRYSTALREC_DIR = SPR/FREALIGN/${SPR_CRYSTALREC_DIR}/
 
 #$end_vars
 

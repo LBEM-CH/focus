@@ -25,9 +25,11 @@
 set bin_2dx = ""
 set proc_2dx = ""
 
+set scriptname = RunFinalReconstructionFREALIGN
+
 set SPR_REFINE_DIR = ""
 
-set SPR_REFINE_DIR = ${PWD}/SPR/FREALIGN/${SPR_REFINE_DIR}/
+set SPR_REFINE_DIR = SPR/FREALIGN/${SPR_REFINE_DIR}/
 
 #$end_vars
 
@@ -43,5 +45,5 @@ cd ${SAVEPATH}
 echo ":: "
 echo ":: Refinement with FREALIGN has been launched."
 echo ":: This may take some time to complete."
-echo ":: For detailed information please check ${PWD}/SPR/FREALIGN/refine/frealign.log"
+echo ":: For detailed information please check SPR/FREALIGN/refine/frealign.log"
 echo ":: "

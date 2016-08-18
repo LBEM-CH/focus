@@ -60,6 +60,9 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set app_python = ""
+
+set scriptname = PrepRefineFREALIGN
+
 #
 set SPR_WhichStackAll = ""
 set SPR_WhichStackInherit = ""
@@ -106,9 +109,9 @@ set SPR_FRL_mask_file = ""
 set SPR_ampcon = ""
 set SPR_FRL_nclasses = ""
 #
-set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
+set SPR_STACKS_DIR = SPR/stacks/
 set SPR_STACK_ROOTNAME = 'particles'
-set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
+set SPR_FREALIGN_DIR = SPR/FREALIGN/
 set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
 set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_REFINE_DIR}/
 set SPR_REFINE_MPARAMETERS = ${SPR_REFINE_DIR}/mparameters

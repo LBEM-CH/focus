@@ -23,26 +23,9 @@
 #
 # MANUAL: A big <I><U>thank you</U></I> goes to Vinzenz Unger for debugging this script and providing most of the algorithm and usage here, and to Per Bullough, who gave us essential information and help in handling symmetries and systematic absences between MRC and CCP4 worlds.
 #
-# LABEL: Show APH files?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_hkl = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_hkl = "n"
-#
-# LABEL: Show Phase Residual TXT files?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_phares = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_phares = "n"
-#
-# LABEL: Show Point Spread Function (PSF) files?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_PSF = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_PSF = "n"
+# RESET: show_hkl = "n"
+# RESET: show_phares = "n"
+# RESET: show_PSF = "n"
 #
 # DISPLAY: SYN_Unbending
 # DISPLAY: ML_doit
@@ -136,6 +119,9 @@ set PHARES_NUM_SPOTS = ""
 set MergeIQMAX = ""
 set movie_enable = ""
 set RFACAMP = ""
+set show_hkl = ""
+set show_phares = ""
+set show_PSF = ""
 #
 #$end_vars
 #

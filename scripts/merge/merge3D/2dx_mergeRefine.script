@@ -72,6 +72,7 @@
 # DISPLAY: Thread_Number
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
+# DISPLAY: merge_alsoevenodd
 #
 #$end_local_vars
 #
@@ -133,6 +134,7 @@ set number_of_beads = ""
 set number_refinement_iterations = ""
 set membrane_height = ""
 set maximum_amplitude_refinement = ""
+set merge_alsoevenodd = ""
 #
 #$end_vars
 #
@@ -206,6 +208,13 @@ echo "<<@progress: 1>>"
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
+#
+if ( ${merge_alsoevenodd} == "y" && ( ! -e 2dx_merge_dirfile_even.dat || ! -e 2dx_merge_dirfile_odd.dat )) then
+  echo ":: "
+  echo ":: "
+  ${proc_2dx}/linblock "ERROR: First define EVEN and ODD image tags, using the Project Tool"
+  ${proc_2dx}/protest "This is the button top left in the GUI"
+endif
 #
 if ( ${MergeHKMAX}x == 'x' ) then
   set MergeHKMAX = '20'
@@ -303,10 +312,67 @@ while ( ${itnum} < ${merge_refine_iterations} )
   set prog_num = `echo ${itnum} ${merge_refine_iterations} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'` 
   echo "<<@progress: ${prog_num}>>"
   #
+  if ( ${merge_alsoevenodd} == "y" ) then
+    echo ":: "
+    #############################################################################
+    ${proc_2dx}/linblock "Switching to EVEN IMAGES series"
+    #############################################################################
+    set dirfile = "2dx_merge_dirfile_even.dat"
+    if ( ${merge_reference} == '0' ) then
+      set reference_file="APH/merge_even.aph"
+    endif 
+    if ( ${merge_reference} == '1' ) then
+      set reference_file="merge3Dref_MRClefthanded_even.mtz"
+    endif  
+    #
+    ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
+    source ${proc_2dx}/2dx_origtilt_refine.com
+    #############################################################################
+    ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+    source ${proc_2dx}/2dx_merge_generate3D.com
+    #
+    cp APH/merge.aph APH/merge_even.aph
+    cp APH/latfitted.hkl APH/latfitted_even.hkl
+    cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_even.mtz
+    #
+    echo ":: "
+    #############################################################################
+    ${proc_2dx}/linblock "Switching to ODD IMAGES series"
+    #############################################################################
+    set dirfile = "2dx_merge_dirfile_odd.dat"
+    if ( ${merge_reference} == '0' ) then
+      set reference_file="APH/merge_odd.aph"
+    endif 
+    if ( ${merge_reference} == '1' ) then
+      set reference_file="merge3Dref_MRClefthanded_odd.mtz"
+    endif  
+    #
+    ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
+    source ${proc_2dx}/2dx_origtilt_refine.com
+    #############################################################################
+    ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+    source ${proc_2dx}/2dx_merge_generate3D.com
+    #
+    cp APH/merge.aph APH/merge_odd.aph
+    cp APH/latfitted.hkl APH/latfitted_odd.hkl
+    cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_odd.mtz
+    #
+    echo ":: "
+    #############################################################################
+    ${proc_2dx}/linblock "Switching to ALL IMAGES series"
+    #############################################################################
+  endif
+  set dirfile = "2dx_merge_dirfile.dat"
+  if ( ${merge_reference} == '0' ) then
+    set reference_file="APH/merge.aph"
+  endif 
+  if ( ${merge_reference} == '1' ) then
+    set reference_file="merge3Dref_MRClefthanded.mtz"
+  endif
+  #
   #############################################################################
   ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
   #############################################################################  
-  #
   source ${proc_2dx}/2dx_origtilt_refine.com
   #
   if ( ${reftiltgeo} == "y" ) then
@@ -317,6 +383,44 @@ while ( ${itnum} < ${merge_refine_iterations} )
     ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
   endif
   #
+  if ( ${merge_alsoevenodd} == "y" ) then
+    echo ":: "
+    #############################################################################
+    ${proc_2dx}/linblock "Switching to EVEN IMAGES series"
+    #############################################################################
+    set dirfile = "2dx_merge_dirfile_even.dat"
+    #
+    ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
+    source ${proc_2dx}/2dx_origtilt_merge.com
+    #############################################################################
+    ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+    source ${proc_2dx}/2dx_merge_generate3D.com
+    #
+    cp APH/merge.aph APH/merge_even.aph
+    cp APH/latfitted.hkl APH/latfitted_even.hkl
+    cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_even.mtz
+    #
+    echo ":: "
+    #############################################################################
+    ${proc_2dx}/linblock "Switching to ODD IMAGES series"
+    #############################################################################
+    set dirfile = "2dx_merge_dirfile_odd.dat"
+    #
+    ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
+    source ${proc_2dx}/2dx_origtilt_merge.com
+    #############################################################################
+    ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+    source ${proc_2dx}/2dx_merge_generate3D.com
+    #
+    cp APH/merge.aph APH/merge_odd.aph
+    cp APH/latfitted.hkl APH/latfitted_odd.hkl
+    cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_odd.mtz
+    #
+    echo ":: "
+    #############################################################################
+    ${proc_2dx}/linblock "Switching to ALL IMAGES series"
+    #############################################################################
+  endif
   #############################################################################
   ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
   #############################################################################

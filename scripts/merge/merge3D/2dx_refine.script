@@ -56,6 +56,7 @@
 # DISPLAY: merge_comment_7
 # DISPLAY: merge_comment_8
 # DISPLAY: merge_comment_9
+# DIspLAY: merge_alsoevenodd
 # DISPLAY: max_amp_correction
 # DISPLAY: merge_data_type
 # DISPLAY: refine_data_type
@@ -94,6 +95,7 @@ set merge_reference = ""
 set merge_ref_num = ""
 set max_amp_correction = ""
 set merge_data_type = ""
+set merge_alsoevenodd = ""
 set refine_data_type = ""
 set ITAXASTEP = ""
 set RTAXASIZE = ""
@@ -175,6 +177,13 @@ echo "<<@progress: 1>>"
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
+#
+if ( ${merge_alsoevenodd} == "y" && ( ! -e 2dx_merge_dirfile_even.dat || ! -e 2dx_merge_dirfile_odd.dat )) then
+  echo ":: "
+  echo ":: "
+  ${proc_2dx}/linblock "ERROR: First define EVEN and ODD image tags, using the Project Tool"
+  ${proc_2dx}/protest "This is the button top left in the GUI"
+endif
 #
 if ( ${refine_data_type}x == 'x' ) then
   set refine_data_type = "0"
@@ -325,10 +334,51 @@ if ( ${intiles} != "1" ) then
   #
 endif
 #
-#------------------------------------------------------------------------------
-${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
-#------------------------------------------------------------------------------
+if ( ${merge_alsoevenodd} == "y" ) then
+  echo ":: "
+  #############################################################################
+  ${proc_2dx}/linblock "Switching to EVEN IMAGES series"
+  #############################################################################
+  set dirfile = "2dx_merge_dirfile_even.dat"
+  if ( ${merge_reference} == '0' ) then
+    set reference_file="APH/merge_even.aph"
+  endif 
+  if ( ${merge_reference} == '1' ) then
+    set reference_file="merge3Dref_MRClefthanded_even.mtz"
+  endif  
+  #
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
+  source ${proc_2dx}/2dx_origtilt_refine.com
+  #
+  echo ":: "
+  #############################################################################
+  ${proc_2dx}/linblock "Switching to ODD IMAGES series"
+  #############################################################################
+  set dirfile = "2dx_merge_dirfile_odd.dat"
+  if ( ${merge_reference} == '0' ) then
+    set reference_file="APH/merge_odd.aph"
+  endif 
+  if ( ${merge_reference} == '1' ) then
+    set reference_file="merge3Dref_MRClefthanded_odd.mtz"
+  endif
+  #
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
+  source ${proc_2dx}/2dx_origtilt_refine.com
+  #
+  echo ":: "
+  #############################################################################
+  ${proc_2dx}/linblock "Switching to ALL IMAGES series"
+  #############################################################################
+endif
+set dirfile = "2dx_merge_dirfile.dat"
+if ( ${merge_reference} == '0' ) then
+  set reference_file="APH/merge.aph"
+endif 
+if ( ${merge_reference} == '1' ) then
+  set reference_file="merge3Dref_MRClefthanded.mtz"
+endif
 #
+${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
 source ${proc_2dx}/2dx_origtilt_refine.com
 #
 #

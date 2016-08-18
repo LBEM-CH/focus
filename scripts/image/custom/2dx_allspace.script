@@ -21,23 +21,8 @@
 #
 # MANUAL: Note that only projection images of non-tilted crystals show symmetry. A tilted view of for example a p3 crystal is usually no longer symmetric.
 #
-#=============================================================================
-# SECTION: Program
-#=============================================================================
-#
-# LABEL: Test other spacegroups?
-# LEGEND: Flag, defining if a search for spacegroups should done.
-# EXAMPLE: test_spacegroups_doit = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Allspace
-# TYPE: Bool "y;n"
-set test_spacegroups_doit = "y"
-#
-# LABEL: Spacegroups to test
-# LEGEND: Choose the spacegroup groups that should be considered.
-# EXAMPLE: test_spacegroups_val= "ALL"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Allspace
-# TYPE: Drop_Down_Menu "ALL;HEXA;SQUA;RECT;OPLI;TWO;THRE;SIX;FOUR"
-set test_spacegroups_val = "ALL"
+# RESET: test_spacegroups_doit = "y"
+# RESET: test_spacegroups_val = "ALL"
 #
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
@@ -89,6 +74,8 @@ set allspace_stepnum = ""
 set allspace_IQMAX = ""
 set allspace_RESMAX = ""
 set movie_enable = ""
+set test_spacegroups_doit = ""
+set test_spacegroups_val = ""
 #
 #$end_vars
 #

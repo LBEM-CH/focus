@@ -15,16 +15,7 @@
 #
 # MANUAL: This script will produce a list of *.mrc or other types of files, and show them in the <i>Images</I> pane. Select the kind of files you want to see.
 #
-#=============================================================================
-# SECTION: Program
-#=============================================================================
-#
-# LABEL: Select the kind of files to list
-# LEGEND: This allows to chose the kind of files that this script should produce an inventory of.
-# EXAMPLE: do = "mrc"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Inventory
-# TYPE: Drop_Down_Menu "0=MRC format files;1=CCP4 format files;2=PostScript files;3=Amplitude-and-Phase lists;4=Spot Lists;5=ML;6=PNG;7=all"
-set do = "0"
+# RESET: inventory_image_do = "0"
 #
 # DISPLAY: comment
 #
@@ -32,6 +23,8 @@ set do = "0"
 #
 set bin_2dx = ""
 set proc_2dx = ""
+#
+set inventory_image_do = ""
 #
 #$end_vars
 #
@@ -42,10 +35,10 @@ set scriptname = 2dx_inventory
 #
 source ${proc_2dx}/initialize
 #
-echo "do = ${do}"
+echo "inventory_image_do = ${inventory_image_do}"
 echo "<<@progress: 1>>"
 #
-if ( ${do} == "0" || ${do} == "7" ) then
+if ( ${inventory_image_do} == "0" || ${inventory_image_do} == "7" ) then
 
   ${proc_2dx}/linblock "inventory of \*.mrc"
   echo dummy > 111Adummy.mrc
@@ -99,7 +92,7 @@ if ( ${do} == "0" || ${do} == "7" ) then
 
 endif
 
-if ( ${do} == "1" || ${do} == "7" ) then
+if ( ${inventory_image_do} == "1" || ${inventory_image_do} == "7" ) then
 
   ${proc_2dx}/linblock "inventory of \*.map"
   echo dummy > 111Adummy.map
@@ -159,7 +152,7 @@ endif
 
   echo "<<@progress: +5>>"
 
-if ( ${do} == "2" || ${do} == "7" ) then
+if ( ${inventory_image_do} == "2" || ${inventory_image_do} == "7" ) then
   if ( -d PS ) then
     ${proc_2dx}/linblock "inventory of PS/\*.ps"
     echo dummy > PS/111Adummy.ps
@@ -189,7 +182,7 @@ if ( ${do} == "2" || ${do} == "7" ) then
 endif
 
 
-if ( ${do} == "3" || ${do} == "7" ) then
+if ( ${inventory_image_do} == "3" || ${inventory_image_do} == "7" ) then
   if ( -d APH ) then
     ${proc_2dx}/linblock "inventory of APH/\*.aph"
     echo dummy > APH/111Adummy.aph
@@ -211,7 +204,7 @@ if ( ${do} == "3" || ${do} == "7" ) then
   endif
 endif
 
-if ( ${do} == "4" || ${do} == "7" ) then
+if ( ${inventory_image_do} == "4" || ${inventory_image_do} == "7" ) then
   ${proc_2dx}/linblock "inventory of \*.spt"
   echo dummy > 111Adummy.spt
   echo `\ls -1 *.spt | wc -l` > tmp.tmp
@@ -222,7 +215,7 @@ if ( ${do} == "4" || ${do} == "7" ) then
   \rm -f 111Adummy.spt
 endif
 
-if ( ${do} == "5" || ${do} == "7" ) then
+if ( ${inventory_image_do} == "5" || ${inventory_image_do} == "7" ) then
   if ( -d ML ) then
     ${proc_2dx}/linblock "inventory of ML*\*.mrc"
     echo dummy > ML/111Adummy.spt
@@ -237,7 +230,7 @@ if ( ${do} == "5" || ${do} == "7" ) then
   endif
 endif
 
-if ( ${do} == "6" || ${do} == "7" ) then
+if ( ${inventory_image_do} == "6" || ${inventory_image_do} == "7" ) then
   ${proc_2dx}/linblock "inventory of \*.png"
   echo dummy > 111Adummy.png
   echo `\ls -1 *.png | wc -l` > tmp.tmp

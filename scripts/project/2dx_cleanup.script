@@ -17,37 +17,10 @@
 #
 # MANUAL: This script will delete most files in the current directory, leaving only the essential image processing results (APH files) and a few other files behind. This will save hard-drive space. There are two levels of cleanliness...
 #
-#=============================================================================
-# SECTION: Cleanup Level
-#=============================================================================
-#
-# LABEL: Cleanup which image directories?
-# LEGEND: Choose the location of the Cleanup that should be done.
-# EXAMPLE: cleanup_location = "1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "0=all image directories;1=only selected directories;2=no image directories"
-set cleanup_location = "0"
-#
-# LABEL: Cleanup also merge directory?
-# LEGEND: Choose the location of the Cleanup that should be done.
-# EXAMPLE: cleanup_location = "1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "0=also merge directory;1=not merge directory"
-set cleanup_merge = "0"
-#
-# LABEL: Level of Cleanup
-# LEGEND: Choose the Level of the Cleanup that should be done.
-# EXAMPLE: cleanup_level = "4"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "0=radical;1=a little bit;2=only get disk usage;3=remove radical and final maps;4=remove radical and final maps and database backups"
-set cleanup_level = "4"
-#
-# LABEL: Also delete Masking info?
-# LEGEND: Choose if the masking info files should also be deleted.
-# EXAMPLE: cleanup_mask = "n"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Bool "y;n"
-set cleanup_mask = "n"
+# RESET: merge_cleanup_location = "0"
+# RESET: merge_cleanup_merge = "0"
+# RESET: merge_cleanup_level = "4"
+# RESET: merge_cleanup_mask = "n"
 #
 #$end_local_vars
 #
@@ -56,6 +29,10 @@ set proc_2dx = ""
 set app_2dx_image = ""
 #
 set imagename = ""
+set merge_cleanup_location = ""
+set merge_cleanup_merge = ""
+set merge_cleanup_level = ""
+set merge_cleanup_mask = ""
 #
 #$end_vars
 #
@@ -69,9 +46,9 @@ echo "<<@progress: 1>>"
 #
 set oldir = $PWD
 #
-if ( ${cleanup_merge} == "0" ) then
+if ( ${merge_cleanup_merge} == "0" ) then
   #
-  if ( ${cleanup_level} == "2" ) then
+  if ( ${merge_cleanup_level} == "2" ) then
     ############################################################################# 
     ${proc_2dx}/linblock "getting disk usage for local merge directory"
     #############################################################################
@@ -80,7 +57,7 @@ if ( ${cleanup_merge} == "0" ) then
     echo ":: ${duval} kB  ${oldir}" 
     #
   else
-    if ( ${cleanup_level} == "4" || ${cleanup_level} == "5" ) then
+    if ( ${merge_cleanup_level} == "4" || ${merge_cleanup_level} == "5" ) then
       \rm -f final_map.mrc
     endif
     #
@@ -109,7 +86,7 @@ if ( ${cleanup_merge} == "0" ) then
     endif
     echo dummy > LOGS/dummy.log
     #
-    if ( "${cleanup_level}" != "1" ) then
+    if ( "${merge_cleanup_level}" != "1" ) then
       #
       ${proc_2dx}/linblock "Radical Cleanup"
       #
@@ -238,9 +215,9 @@ if ( ${cleanup_merge} == "0" ) then
   #
 endif
 #
-if ( ${cleanup_location} == "0" || ${cleanup_location} == "1" ) then
+if ( ${merge_cleanup_location} == "0" || ${merge_cleanup_location} == "1" ) then
   #
-  if ( ${cleanup_location} == "0" ) then
+  if ( ${merge_cleanup_location} == "0" ) then
     cd ${oldir}
     cd ..
     find . -name 2dx_image.cfg -print | sed 's/\/2dx_image.cfg//' > ${oldir}/2dx_merge_alldirs.dat
@@ -263,7 +240,7 @@ ${oldir}/2dx_merge_alldirs.dat
 ${dircounter}
 eot
     #
-    if ( ${cleanup_location} == "1" ) then
+    if ( ${merge_cleanup_location} == "1" ) then
       set from_dir = `cat TMP.tmp`
     else
       set from_dir = `cat TMP.tmp | cut -c3-`
@@ -276,12 +253,12 @@ eot
     #
     set fullpath = `pwd`
     #
-    if ( "${cleanup_level}" == "2" ) then
+    if ( "${merge_cleanup_level}" == "2" ) then
       set duval = `\du -x -s . | cut -f 1`
       echo ":: ${duval} kB  ${from_dir}" 
     endif
     #
-    if ( ${cleanup_level} != "2" ) then
+    if ( ${merge_cleanup_level} != "2" ) then
       ############################################################################# 
       ${proc_2dx}/linblock "cleanup ${from_dir}"
       #############################################################################
@@ -292,16 +269,16 @@ eot
       #
       source ${proc_2dx}/2dx_cleanup_sub.com
       #
-      if ( ${cleanup_mask} == "y" ) then
+      if ( ${merge_cleanup_mask} == "y" ) then
         \rm -f ${nonmaskimagename}_mask.mrc
         \rm -f ${nonmaskimagename}_automask.mrc
         \rm -f ${nonmaskimagename}_automask_mask.mrc
       endif
       #
-      if ( "${cleanup_level}" == "3" || "${cleanup_level}" == "4" ) then
+      if ( "${merge_cleanup_level}" == "3" || "${merge_cleanup_level}" == "4" ) then
         \rm -f final_map.mrc
       endif
-      if ( "${cleanup_level}" == "4" ) then
+      if ( "${merge_cleanup_level}" == "4" ) then
         \rm -f 2dx_image.cfg-backup1
         \rm -f 2dx_image.cfg-backup2
         \rm -f 2dx_image.cfg-backup3

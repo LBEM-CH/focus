@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Refine Defocus (Not Refommended)                                   #
+# Title: Refine Defocus (Not Recommended)                                   #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -19,18 +19,7 @@
 #
 # MANUAL: Be aware that this program may make things worse, if the data are noisy. Use with care, and first try to run it with the "Overwrite data" button set to "no". If the output appears to make sense, you can re-run it with "Overwrite data" set to "yes". 
 #
-#=============================================================================
-# SECTION: Algorithm Selection
-#=============================================================================
-#
-# LABEL: Overwrite data
-# LEGEND: Define if the results should overwrite the database or not.
-# EXAMPLE: overwrite = "n"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/searchdefocus
-# TYPE: Bool "y;n"
-set overwrite = "y"
-#
-#=============================================================================
+# RESET: overwrite = "y"
 #
 # DISPLAY: lattice
 # DISPLAY: realang
@@ -110,6 +99,7 @@ set SYN_Unbending = ""
 set refine_def_reference = ""
 set refine_def_RESMAX = ""
 set defocus_direction = ""
+set overwrite = ""
 #
 #$end_vars
 #

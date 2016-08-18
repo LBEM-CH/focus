@@ -78,6 +78,9 @@ set show_frame_CCmap_unbent = "n"
 # DISPLAY: ctfcor_noise
 # DISPLAY: ctfcor_imode
 # DiSpLAY: movie_ghostscript_installed
+# RESET: show_frame_PROFDATA = "n"
+# RESET: show_frame_CCmap_marked = "n"
+# RESET: show_frame_CCmap_unbent = "n"
 #
 #$end_local_vars
 #
@@ -163,6 +166,9 @@ set ctfcor_noise = ""
 set ctfcor_imode = ""
 set use_masked_image = ""
 set movie_ghostscript_installed = ""
+set show_frame_PROFDATA = ""
+set show_frame_CCmap_marked = ""
+set show_frame_CCmap_unbent = ""
 #
 #$end_vars
 #

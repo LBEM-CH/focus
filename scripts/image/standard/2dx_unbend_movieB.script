@@ -34,34 +34,10 @@
 #
 # SORTORDER: 58
 #
-# LABEL: Show raw frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frames = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frames = "n"
-#
-# LABEL: Show FFT of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_FFT = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_FFT = "n"
-#
-# LABEL: Show CCmaps of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_CCmap = "n"
-#
-# LABEL: Mark CCmaps with found coordinates?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap_marked = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_CCmap_marked = "n"
-#
+# RESET: show_frames = "n"
+# RESET: show_frame_FFT = "n"
+# RESET: show_frame_CCmap = "n"
+# RESET: show_frame_CCmap_marked = "n"
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
 # DISPLAY: holeb
@@ -208,6 +184,10 @@ set use_masked_image = ""
 set movie_ghostscript_installed = ""
 set DEFOCUS_TLTAXIS = ""
 set DEFOCUS_TLTANG = ""
+set show_frames = ""
+set show_frame_FFT = ""
+set show_frame_CCmap = ""
+set show_frame_CCmap_marked = ""
 #
 #$end_vars
 #

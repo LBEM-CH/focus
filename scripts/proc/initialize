@@ -12,6 +12,9 @@ echo date = ${date}
 set system = `uname -s`
 echo system = ${system}
 #
+echo bin_2dx = ${bin_2dx}
+echo proc_2dx = ${proc_2dx}
+#
 # The paths like app_python, app_anaconda comes from the 2DX Preferences set
 # by the user. 
 #

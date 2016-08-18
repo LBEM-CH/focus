@@ -15,22 +15,15 @@
 #
 # MANUAL: This script will produce a list of *.mrc or other types of files, and show them in the <i>Images</I> pane. Select the kind of files you want to see.
 #
-#=============================================================================
-# SECTION: Program
-#=============================================================================
-#
-# LABEL: Select the kind of files to list
-# LEGEND: This allows to chose the kind of files that this script should produce an inventory of.
-# EXAMPLE: do = "mrc"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Inventory
-# TYPE: Drop_Down_Menu "0=MRC format files;1=PostScript files;2=Amplitude-and-Phase lists;3=Spot Lists;4=MTZ;5=all"
-set do = "0"
+# DISPLAY: inventory_do
 #
 #$end_local_vars
 #
 set proc_2dx = ""
 set bin_2dx = ""
 set app_2dx_image = ""
+#
+set inventory_do = ""
 #
 #$end_vars
 #
@@ -42,7 +35,7 @@ source ${proc_2dx}/initialize
 #
 echo "<<@progress: 1>>"
 #
-if ( ${do} == "0" || ${do} == "5" ) then
+if ( ${inventory_do} == "0" || ${inventory_do} == "5" ) then
 
   ${proc_2dx}/linblock "inventory of \*.mrc"
   echo dummy > 111Adummy.mrc
@@ -86,7 +79,7 @@ endif
 
 echo "<<@progress: 85>>"
 
-if ( ${do} == "1" || ${do} == "5" ) then
+if ( ${inventory_do} == "1" || ${inventory_do} == "5" ) then
   if ( -d PS ) then
     ${proc_2dx}/linblock "inventory of PS/\*.ps"
     echo dummy > PS/111Adummy.ps
@@ -98,7 +91,7 @@ if ( ${do} == "1" || ${do} == "5" ) then
 endif
 
 
-if ( ${do} == "2" || ${do} == "5" ) then
+if ( ${inventory_do} == "2" || ${inventory_do} == "5" ) then
   if ( -d APH ) then
     ${proc_2dx}/linblock "inventory of APH/\*.aph"
     echo dummy > APH/111Adummy.aph
@@ -109,14 +102,14 @@ if ( ${do} == "2" || ${do} == "5" ) then
   endif
 endif
 
-if ( ${do} == "3" || ${do} == "5" ) then
+if ( ${inventory_do} == "3" || ${inventory_do} == "5" ) then
   ${proc_2dx}/linblock "inventory of \*.spt"
   echo dummy > 111Adummy.spt
   ls -1 *.spt | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results
   \rm -f 111Adummy.spt
 endif
 
-if ( ${do} == "4" || ${do} == "5" ) then
+if ( ${inventory_do} == "4" || ${inventory_do} == "5" ) then
   ${proc_2dx}/linblock "inventory of \*.mtz"
   echo dummy > 111Adummy.mtz
   ls -1 *.mtz | grep -v "111Adummy" | sed -e "s/^/# IMAGE: /" >> LOGS/${scriptname}.results

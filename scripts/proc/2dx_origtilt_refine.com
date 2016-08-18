@@ -20,9 +20,15 @@ ${proc_2dx}/linblock "Compile refinement script"
 set scriptBfile = "2dx_merge_scriptB.com"
 set postprocessingfile = "2dx_merge_postprocessing.com"
 #
-set num_images = `cat 2dx_merge_dirfile.dat | wc -l`
+set num_images = `cat ${dirfile} | wc -l`
 if ( ${num_images} < 1 ) then
   ${proc_2dx}/protest "ERROR: No images selected."
+endif
+#
+set dirnum = `cat ${dirfile} | wc -l`
+set maxthread = `echo ${Thread_Number} ${dirnum} | awk '{if ($1<$2/2) { s = $1 } else { s = int($2 / 2) }} END { print s }'`
+if ( ${maxthread} == "0" ) then
+  set maxthread = 1
 endif
 #
 set genref = "0"

@@ -17,17 +17,6 @@
 #
 # MANUAL: This script will delete bad tiles or move them into the trash.
 #
-#=============================================================================
-# SECTION: Cleanup Level
-#=============================================================================
-#
-# LABEL: Cleanup which image directories?
-# LEGEND: Choose the location of the Cleanup that should be done.
-# EXAMPLE: cleanup_location = "1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "0=all image directories;1=only selected directories;2=no image directories"
-set cleanup_location = "0"
-#
 #$end_local_vars
 #
 set bin_2dx = ""

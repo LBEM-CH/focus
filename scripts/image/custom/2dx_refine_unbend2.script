@@ -20,69 +20,14 @@
 #
 # MANUAL: You can run this script on one representative image over night, and the use the determined parameters as default values for other images from the same class of images (e.g. same sample, same microscope, same tilt-angle). To set default values, either edit the system-wide default 2dx_image.cfg, or edit the 2dx_image.cfg file one level up from the current image directories.
 #
-#=============================================================================
-# SECTION: Refinement Program
-#=============================================================================
-#
-# LABEL: Refine maskb01?
-# LEGEND: Flag, defining if maska should be refined, using the following values.
-# EXAMPLE: refine_maskb01_doit_1 = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_maskb01_doit_1 = "y"
-#
-# LABEL: Refine boxb1?
-# LEGEND: Flag, defining if boxa1 should be refined, using the following values.
-# EXAMPLE: refine_boxb1_doit_1 = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_boxb1_doit_1 = "y"
-#
-# LABEL: Refine maskb01 and boxb1 simulaneously?
-# LEGEND: Flag, defining if maskb01 and boxb1 should be refined, using the following values.
-# EXAMPLE: refine_maskb01_boxb1_doit = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_maskb01_boxb1_doit = "n"
-#
-# LABEL: Refine maskb02?
-# LEGEND: Flag, defining if maska should be refined, using the following values.
-# EXAMPLE: refine_maskb02_doit_1 = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_maskb02_doit_1 = "n"
-#
-# LABEL: Refine maskb01?
-# LEGEND: Flag, defining if maska should be refined, using the following values.
-# EXAMPLE: refine_maskb01_doit_2 = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_maskb01_doit_2 = "n"
-#
-# LABEL: Refine boxb1?
-# LEGEND: Flag, defining if boxa1 should be refined, using the following values.
-# EXAMPLE: refine_boxb1_doit_2 = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_boxb1_doit_2 = "n"
-#
-# LABEL: Refine maskb01?
-# LEGEND: Flag, defining if maska should be refined, using the following values.
-# EXAMPLE: refine_maskb01_doit_3 = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_maskb01_doit_3 = "n"
-#
-# LABEL: Refine boxb1?
-# LEGEND: Flag, defining if boxa1 should be refined, using the following values.
-# EXAMPLE: refine_boxb1_doit_3 = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_boxb1_doit_3 = "n"
-#
-#=============================================================================
-# Other parameter follow
-#=============================================================================
+# RESET: refine_maskb01_doit_1 = "y"
+# RESET: refine_boxb1_doit_1 = "y"
+# RESET: refine_maskb01_boxb1_doit = "n"
+# RESET: refine_maskb02_doit_1 = "n"
+# RESET: refine_maskb01_doit_2 = "n"
+# RESET: refine_boxb1_doit_2 = "n"
+# RESET: refine_maskb01_doit_3 = "n"
+# RESET: refine_boxb1_doit_3 = "n"
 #
 # DISPLAY: maskb01
 # DISPLAY: maskb02
@@ -155,6 +100,14 @@ set ccunbend_program = ""
 set refine_maskb01_val = ""
 set refine_boxb1_val = ""
 set refine_maskb02_val = ""
+set refine_maskb01_doit_1 = ""
+set refine_boxb1_doit_1 = ""
+set refine_maskb01_boxb1_doit = ""
+set refine_maskb02_doit_1 = ""
+set refine_maskb01_doit_2 = ""
+set refine_boxb1_doit_2 = ""
+set refine_maskb01_doit_3 = ""
+set refine_boxb1_doit_3 = ""
 #
 #$end_vars
 #

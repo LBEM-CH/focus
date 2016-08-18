@@ -6,7 +6,7 @@ ImageTab::ImageTab(confData* data, QWidget* parent)
 : QWidget(parent){
     mainData = data;
     
-    noImageLabel = new QLabel("No Images Activated\nPlease activate image from Library to process!");
+    noImageLabel = new QLabel("No Images Activated\nPlease double click image from Library to activate and process!");
     noImageLabel->setWordWrap(true);
     noImageLabel->setAlignment(Qt::AlignCenter);
     QFont font = noImageLabel->font();

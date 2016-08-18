@@ -279,7 +279,6 @@ bool confData::parseDataFile() {
             }
             if (cell.first().trimmed().toLower() == "reset") {
                 QStringList val = cell.last().split('=');
-                val[0].remove(0, 4);
                 val[1].remove('"');
                 val[0] = val[0].simplified();
                 val[1] = val[1].simplified();
@@ -379,7 +378,6 @@ void confData::updateConf(const QString &confFileName) {
             }
             if (cell.first().trimmed().toLower() == "reset") {
                 QStringList val = cell.last().split('=');
-                val[0].remove(0, 4);
                 val[1].remove('"');
                 val[0] = val[0].simplified();
                 val[1] = val[1].simplified();

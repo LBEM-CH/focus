@@ -93,5 +93,8 @@ void ParametersWidget::load() {
 }
 
 void ParametersWidget::resetParameters(const QMap<QString, QString>& toBeReset) {
-    
+    if(toBeReset.isEmpty()) return;
+    for(int i=0; i< sections_.size(); ++i) {
+        sections_[i]->resetParameters(toBeReset);
+    }
 }

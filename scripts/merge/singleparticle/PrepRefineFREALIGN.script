@@ -176,8 +176,6 @@ else
 
 endif
 
- ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleIni}_r1.par ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleFin}_r1.par  ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleIni}-${SPR_FRLPreRefAnalyzeCycleFin}_diff.txt ${SPR_PREREFINE_DIR}
-
 if ( -e ${SPR_REFINE_MPARAMETERS} ) then
 	mv ${SPR_REFINE_MPARAMETERS} ${SPR_REFINE_MPARAMETERS}.old
 endif
@@ -220,8 +218,8 @@ echo "ITMAX               50		! Mode 2 and 4: Number of repetitions of grid sear
 echo "Bsearch            2000.0	! B-factor filtering (when > 0) applied during search." >> ${SPR_REFINE_MPARAMETERS}
 echo "" >> ${SPR_REFINE_MPARAMETERS}
 echo "# Dataset-specific parameters" >> ${SPR_REFINE_MPARAMETERS}
-echo "data_input           ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg	! Root name for parameter and map files." >> ${SPR_REFINE_MPARAMETERS}
-echo "raw_images           ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrc" >> ${SPR_REFINE_MPARAMETERS}
+echo "data_input           ${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}	! Root name for parameter and map files." >> ${SPR_REFINE_MPARAMETERS}
+echo "raw_images           ${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc" >> ${SPR_REFINE_MPARAMETERS}
 echo "image_contrast        ${SPR_FRL_image_contrast}		! N or P. Set to N if particles are dark on bright background, otherwise set to P." >> ${SPR_REFINE_MPARAMETERS}
 echo "outer_radius        ${SPR_FRL_outer_radius} 	! Outer radius of spherical particle mask in Angstrom." >> ${SPR_REFINE_MPARAMETERS}
 echo "inner_radius          ${SPR_FRL_inner_radius}	! Inner radius of spherical particle mask in Angstrom." >> ${SPR_REFINE_MPARAMETERS}

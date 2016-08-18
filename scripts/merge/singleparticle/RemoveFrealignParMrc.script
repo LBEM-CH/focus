@@ -51,14 +51,13 @@ if ( ${SPR_CleanSPR} == "y" ) then
 		set stack_name = "particles_${SPR_WhichStackAll}"
 	endif
 
-	# Form the string:
+	# Form the strings:
 
 	if ( ${SPR_FRLRefOrPreref} == "refine" ) then
 		set SPR_FRLRefOrPreref = ${SPR_REFINE_DIR}
 	else
 		set SPR_FRLRefOrPreref = ${SPR_PREREFINE_DIR}
 	endif
-
 
 	if ( ${SPR_FRLRef} == 0 ) then
 		set remove_file = "${SPR_FREALIGN_DIR}/${SPR_FRLRefOrPreref}/${stack_name}_${FRLCycle}_r*."

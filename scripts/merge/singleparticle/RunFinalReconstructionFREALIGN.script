@@ -43,5 +43,5 @@ cd ${SAVEPATH}
 echo ":: "
 echo ":: Refinement with FREALIGN has been launched."
 echo ":: This may take some time to complete."
-echo ":: For detailed information please check ${SPR_REFINE_DIR}/frealign.log"
+echo ":: For detailed information please check ${PWD}/SPR/FREALIGN/refine/frealign.log"
 echo ":: "

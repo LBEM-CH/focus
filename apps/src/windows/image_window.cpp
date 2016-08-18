@@ -629,9 +629,11 @@ void ImageWindow::saveAsProjectDefault()
   QString confFile = QFileInfo(data->getDir("working") + "/../../").absolutePath() + "/" + "2dx_master.cfg";
   confFile.replace(QRegExp("/+"),"/");
   if(QMessageBox::question(this,
-			   tr("Save as default?"),"Saving as \n" + confFile + "\n will set default values for all other images in this project. \n\n Make sure you have QUIT the program 2dx_merge.exe before continuing here. Otherwise, 2dx_merge.exe would overwrite the default values again with its own set of values. \n\n Proceed?",
+			   tr("Save as default?"),"Saving as \n" + confFile + "\n will set default values for all other images in this project. \n\n 2DX will QUIT after saving the file. \n\n Proceed?",
 			   tr("Yes"),
 			   tr("No"),
-			   QString(),0,1) == 0)
+			   QString(),0,1) == 0) {
     data->saveAs(confFile);
+    qApp->closeAllWindows();
+  }
 }

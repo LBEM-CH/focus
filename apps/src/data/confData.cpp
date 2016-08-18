@@ -277,6 +277,15 @@ bool confData::parseDataFile() {
             if (cell.first().trimmed().toLower() == "global") {
                 cell.first() = "display";
             }
+            if (cell.first().trimmed().toLower() == "reset") {
+                QStringList val = cell.last().split('=');
+                val[1].remove('"');
+                val[0] = val[0].simplified();
+                val[1] = val[1].simplified();
+                resetVars.insert(val[0], val[1]);
+                cell.first() = "display";
+                cell.last() = val[0];
+            }
             properties.insert(cell.first().trimmed().toLower(), cell.last().trimmed());
         }
 
@@ -366,6 +375,15 @@ void confData::updateConf(const QString &confFileName) {
             QStringList cell = headerLine.split(':');
             if (cell.first().trimmed().toLower() == "global") {
                 cell.first() = "display";
+            }
+            if (cell.first().trimmed().toLower() == "reset") {
+                QStringList val = cell.last().split('=');
+                val[1].remove('"');
+                val[0] = val[0].simplified();
+                val[1] = val[1].simplified();
+                resetVars.insert(val[0], val[1]);
+                cell.first() = "display";
+                cell.last() = val[0];
             }
             properties.insert(cell.first().trimmed().toLower(), cell.last().trimmed());
         }
@@ -857,6 +875,10 @@ QString confData::property(const QString &propertyName) {
 
 QList<QString> confData::propertyList(const QString &propertyName) {
     return properties.values(propertyName.toLower());
+}
+
+QMap<QString, QString> confData::resetVariables() {
+    return resetVars;
 }
 
 QList<confElement*> confData::find(const QString &field, const QRegExp &exp) {

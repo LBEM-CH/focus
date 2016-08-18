@@ -30,6 +30,7 @@
 #include <QDir>
 #include <QString>
 #include <QIcon>
+#include <QMap>
 
 #include <iostream>
 #include <sstream>
@@ -79,6 +80,7 @@ private:
     QHash<QString, confData*> subConfs;
     QSet<QString> subScript;
     QMultiHash<QString, QString> properties;
+    QMap<QString, QString> resetVars;
     confData *parentConf;
     QString dataFilename;
     QString linkName;
@@ -154,6 +156,8 @@ public:
 
     QString property(const QString &propertyName);
     QList<QString> propertyList(const QString &propertyName);
+    
+    QMap<QString, QString> resetVariables();
 
     QStringList &manual();
     const QSet<QString> &subScripts();

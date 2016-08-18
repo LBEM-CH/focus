@@ -190,6 +190,7 @@ void ProjectTools::scriptChanged(QModelIndex index) {
     subTitleLabel->setText(text);
 
     parameters->changeParametersDisplayed(toolsScriptModule->displayedVariables(index));
+    parameters->resetParameters(toolsScriptModule->variablesToReset(index));
     if (verbosityControl->currentIndex() != 0)
         logViewer->loadLogFile(toolsScriptModule->logFile(index));
     else

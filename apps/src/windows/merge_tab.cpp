@@ -360,6 +360,7 @@ void MergeTab::scriptChanged(scriptModule *module, QModelIndex index) {
     subscriptWidget->setModel(model);
 
     parameters->changeParametersDisplayed(module->displayedVariables(index));
+    parameters->resetParameters(module->variablesToReset(index));
     if (verbosityControl->currentIndex() != 0)
         logViewer->loadLogFile(module->logFile(index));
     else

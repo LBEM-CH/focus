@@ -69,6 +69,16 @@ void ParameterSection::loadFromConfig() {
     }
 }
 
+void ParameterSection::resetParameters(const QMap<QString, QString>& toBeReset) {
+    for (int i = 0; i < parameterInputLookup_.keys().size(); ++i) {
+        QString parameterName = parameterInputLookup_.keys()[i];
+        if(toBeReset.keys().contains(parameterName)) {
+            parameterInputLookup_[parameterName]->saveValue(toBeReset[parameterName]);
+            parameterInputLookup_[parameterName]->load();
+        }
+    }
+}
+
 void ParameterSection::finishAddingParameters() {
     parameterFrame_->setLayout(formLayout_);
     mainLayout_->addWidget(parameterFrame_);

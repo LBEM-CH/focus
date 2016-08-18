@@ -36,8 +36,6 @@ set SPR_FRLRemovePar = ""
 set SPR_FRLRemoveMrc = ""
 set SPR_CleanSPR = ""
 
-set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
-
 #
 set SPR_DIR = ${PWD}/SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN

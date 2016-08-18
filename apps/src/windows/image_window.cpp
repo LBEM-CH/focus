@@ -470,6 +470,7 @@ void ImageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     setScriptProgress(module->getScriptProgress(uid));
 
     parameters->changeParametersDisplayed(module->displayedVariables(index));
+    parameters->resetParameters(module->variablesToReset(index));
     currentLog = module->logFile(index);
     if (!visible["historyview"]) logViewer->loadLogFile(currentLog);
     results->setResult(module->resultsFile(index));

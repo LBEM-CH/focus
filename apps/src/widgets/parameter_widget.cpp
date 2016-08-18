@@ -91,3 +91,7 @@ void ParametersWidget::load() {
         sections_[i]->loadFromConfig();
     }
 }
+
+void ParametersWidget::resetParameters(const QMap<QString, QString>& toBeReset) {
+    
+}

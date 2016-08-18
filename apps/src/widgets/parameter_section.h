@@ -39,6 +39,7 @@ public:
 
 public slots:
     void loadFromConfig();
+    void resetParameters(const QMap<QString, QString>& toBeReset);
     void addParameter(confElement* element);
     QString getWhatsThis(confElement* element);
 

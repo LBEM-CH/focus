@@ -27,6 +27,7 @@ public slots:
     void setSelectionUserLevel(int);
     void changeParametersDisplayed(const QStringList& toBeDisplayed);
     void load();
+    void resetParameters(const QMap<QString, QString>& toBeReset);
 
 private:
 

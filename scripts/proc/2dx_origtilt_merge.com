@@ -13,7 +13,6 @@
 #                                                                           #
 #############################################################################
 #
-set dirfile = "2dx_merge_dirfile.dat"
 set scriptAfile = "2dx_merge_scriptA.com"
 set scriptPLTfile = "SCRATCH/2dx_merge_scriptPLT.com"
 #
@@ -59,7 +58,6 @@ if ( ${merge_data_type} == '5' ) then
   echo ":: "
 endif
 #
-set dirfile = "2dx_merge_dirfile.dat"
 set dirnum = `cat ${dirfile} | wc -l`
 set maxthread = `echo ${Thread_Number} ${dirnum} | awk '{if ($1<$2/2) { s = $1 } else { s = int($2 / 2) }} END { print s }'`
 if ( ${maxthread} < "4" ) then

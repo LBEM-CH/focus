@@ -103,6 +103,8 @@ void scriptModule::setupModule() {
         addScriptProperty(uid, "logFile", data->getDir("working") + "/LOGS/" + entry.section('.', 0, -2) + ".log");
         addScriptProperty(uid, "resultsFile", data->getDir("working") + "/LOGS/" + entry.section('.', 0, -2) + ".results");
 
+        resetVars.insert(uid, scriptData->resetVariables());
+        
         scriptProgress[uid] = 0;
 
         item->setData(scriptDir.canonicalPath() + "/" + entry, Qt::UserRole + 5);
@@ -331,6 +333,10 @@ void scriptModule::readStdErr() {
 
 QStringList scriptModule::displayedVariables(QModelIndex index) {
     return getScriptProperty(index.data(Qt::UserRole).toUInt(), "displayedVars").toStringList();
+}
+
+QMap<QString, QString> scriptModule::variablesToReset(QModelIndex index) {
+    return resetVars[index.data(Qt::UserRole).toUInt()];
 }
 
 QString scriptModule::logFile(QModelIndex index) {

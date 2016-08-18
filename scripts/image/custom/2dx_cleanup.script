@@ -17,23 +17,8 @@
 #
 # MANUAL: This script will delete most files in the current directory, leaving only the essential image processing results (APH files) and a few other files behind. This will save hard-drive space. There are two levels of cleanliness...
 #
-#=============================================================================
-# SECTION: Cleanup Level
-#=============================================================================
-#
-# LABEL: Level of Cleanup
-# LEGEND: Choose the Level of the Cleanup that should be done.
-# EXAMPLE: cleanup_level = "radical"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Drop_Down_Menu "radical;a little bit"
-set cleanup_level = "radical"
-#
-# LABEL: Also delete Masking info?
-# LEGEND: Choose if the masking info files should also be deleted.
-# EXAMPLE: cleanup_mask = "n"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Cleanup
-# TYPE: Bool "y;n"
-set cleanup_mask = "n"
+# RESET: cleanup_level = "radical"
+# RESET: cleanup_mask = "n"
 #
 # DISPLAY: comment
 # DISPLAY: reset_variables
@@ -47,6 +32,8 @@ set proc_2dx = ""
 #
 set imagename = ""
 set nonmaskimagename = ""
+set cleanup_level = ""
+set cleanup_mask = ""
 #
 #$end_vars
 #

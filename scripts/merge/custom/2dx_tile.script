@@ -18,17 +18,7 @@
 # MANUAL: This script allows to launch several jobs in parallel.  Choose below, which 2dx_image scripts to include.
 #
 # DISPLAY: ReUnbend_MP
-#
-#=============================================================================
-# SECTION: Create Tiles
-#=============================================================================
-#
-# LABEL: Clone merge directory first?
-# LEGEND: Choose if the merge directory should be copied also
-# EXAMPLE: tile_copy_merge = "0"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Drop_Down_Menu "0=no;1=yes"
-set tile_copy_merge = "0"
+# DISPLAY: tile_copy_merge
 #
 #$end_local_vars
 #
@@ -38,6 +28,7 @@ set app_2dx_image = ""
 set SCRATCH_DISK = ""
 #
 set ReUnbend_MP = ""
+set tile_copy_merge = ""
 #
 #$end_vars 
 #

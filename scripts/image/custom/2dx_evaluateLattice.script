@@ -28,93 +28,16 @@
 #
 # SORTORDER: 20
 #
-#=============================================================================
-# SECTION: Permutate Current Lattice ------ these leave lattice nodes where they are and only change indexing
-#=============================================================================
-#
-# LABEL: Swap first and second lattice
-# LEGEND: This allows to exchange the lattices that are stored as primary and secondary lattice.
-# EXAMPLE: doswap = "nothing"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=nothing;1=Swap First with Second Lattice;2=Copy First onto Second;3=Copy Second onto First;4=Copy First onto Backup;5=Copy Backup onto First"
-set doswap = "0"
-#
-# LABEL: Scaling - Do the following
-# LEGEND: This allows to modify the lattice vector values
-# EXAMPLE: do1 = "nothing"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=nothing;1=double u;2=double v;3=double u&v;4=grow by 45deg (h->h+k,k->h-k);5=half u;6=half v;7=half u&v;8=shrink by 45deg (h->h/2+k/2,k->h/2-k/2)"
-set do1 = "0"
-#
-# LABEL: Skewing - Then do the following
-# LEGEND: This allows to replace one vector with the sum of the two
-# EXAMPLE: do2 = "nothing"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=nothing;1=close (h->h,k->h+k);2=open (h->h,k->h-k)"
-set do2 = "0"
-#
-# LABEL: Rotating - Then do the following
-# LEGEND: This allows to rotate a hexagonal lattice
-# EXAMPLE: do3 = "nothing"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=nothing;1=rot sq. ccw (h->k,k->-h);2=rot sq. cw (h->-k,k->h);3=rot hex ccw (h->k,k->-h+k);4=rot hex cw (h->-k+h,k->h)"
-set do3 = "0"
-#
-# LABEL: Handedness - Then do the following
-# LEGEND: This allows to change the hand of the lattice, by exchanging u and v
-# EXAMPLE: do4 = "nothing"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=nothing;1=change hand (h->k,k->h)"
-set do4 = "0"
-#
-#=============================================================================
-# SECTION: Modify Lattices ------ these alter lattice node coordinates
-#=============================================================================
-#
-# LABEL: Replace current and second lattice with one that...
-# LEGEND: This rotates and/or mirrors the current lattice. This will create a different lattice with different coordinates in the image.
-# EXAMPLE: dorotate = "nothing"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Drop_Down_Menu "0=nothing;1=... is rotated cw by 90deg;2=... is rotated cw by 90deg (also change defocus&tilt);3=... is rotated ccw by 90deg;4=... is rotated ccw by 90deg (also change defocus&tilt);5=... is mirrored upside down (y->-y);6=... is mirrored upside down (y->-y) (also change defocus&tilt);7=... is rotated cw by 90deg (also mirror defocus)"
-set dorotate = "0"
-#
-#=============================================================================
-# SECTION: Overwrite existing values ? (careful !!!)
-#=============================================================================
-#
-# LABEL: Overwrite project-wide real-space lattice?
-# LEGEND: When this is 'y', then the determined real-space lattice will be inserted into the database. Be careful, this should only be done ONCE for the entire protein crystal project, and <B>only for a non-tilted sample</B>. A determined value should be updated in the higher-level master database 2dx_image.cfg. Future starts of 2dx_image will then update the local databases of all lower-level image processing directories with this new value.
-# EXAMPLE: overwriteRealLattice = "n"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Bool "y;n"
-# LOCKED: YES
-set overwriteRealLattice = "n"
-#
-# LABEL: Overwrite local tilt geometry?
-# LEGEND: When this is 'y', then the determined tilt geometry from lattice distortions will be inserted into the database. This, however, will only happen if the determined tilt angle is higher than 15 degrees, and if the flag to determine the tilt geometry is set to yes (det_tilt).  
-# EXAMPLE: overwriteTiltgeometry = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Bool "y;n"
-set overwriteTiltgeometry = "n"
-#
-#=============================================================================
-# SECTION: Peak Coordinates
-#=============================================================================
-#
-# LABEL: (Re-)create peak coordinate file ?
-# LEGEND: When this is 'y', then the peaks_xy_final.dat file is (re-)created. This is then used for the calculation of the lattice error.
-# EXAMPLE: regenPL = "n"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: Bool "y;n"
-set regenPL = "n"
-#
-# LABEL: Number of Peaks
-# LEGEND: Number of Peaks in peaksearch, more peaks yields a more accurate lattice. These peaks are used to calculate the lattice error.
-# EXAMPLE: peakNum = "140"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Latevaluate
-# TYPE: INTEGER
-set peakNum = "140"
-#
+# RESET: eval_lattice_doswap = "0"
+# RESET: eval_lattice_do1 = "0"
+# RESET: eval_lattice_do2 = "0"
+# RESET: eval_lattice_do3 = "0"
+# RESET: eval_lattice_do4 = "0"
+# RESET: eval_lattice_dorotate = "0"
+# RESET: eval_lattice_overwriteRealLattice = "n"
+# RESET: eval_lattice_overwriteTiltgeometry = "n"
+# RESET: eval_lattice_regenPL = "n"
+# RESET: eval_lattice_peakNum = "140"
 #
 # DISPLAY: SYM
 # DISPLAY: lattice
@@ -165,6 +88,16 @@ set det_tilt = ""
 set tempkeep = ""
 set defocus = ""
 set flag_lefthanded_lattice = ""
+set eval_lattice_doswap = ""
+set eval_lattice_do1 = ""
+set eval_lattice_do2 = ""
+set eval_lattice_do3 = ""
+set eval_lattice_do4 = ""
+set eval_lattice_dorotate = ""
+set eval_lattice_overwriteRealLattice = ""
+set eval_lattice_overwriteTiltgeometry = ""
+set eval_lattice_regenPL = ""
+set eval_lattice_peakNum = ""
 #
 #$end_vars
 #
@@ -181,30 +114,30 @@ set scriptname = 2dx_evaluateLattice
 #
 source ${proc_2dx}/2dx_makedirs 
 #
-if ( ${do1} != 0 || ${do2} != 0 || ${do3} != 0 ) then
+if ( ${eval_lattice_do1} != 0 || ${eval_lattice_do2} != 0 || ${eval_lattice_do3} != 0 ) then
   ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
 else
   echo ":Lattice is: ${lattice}"
 endif
 #
-if ( ${dorotate} != 0 ) then
+if ( ${eval_lattice_dorotate} != 0 ) then
   ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
   ${proc_2dx}/linblock "Second Lattice is currently: ${secondlattice}"
   ${proc_2dx}/linblock "Backup Lattice is currently: ${backuplattice}"
 endif
 #
-if ( ${doswap} != 0 ) then
+if ( ${eval_lattice_doswap} != 0 ) then
   ${proc_2dx}/linblock "Second Lattice is currently: ${secondlattice}"
 endif
 #
-# set dorotate = 4
+# set eval_lattice_dorotate = 4
 #############################################################################
-if ( ${doswap} != 0 ) then
-  ${proc_2dx}/linblock "doswap - swapping lattices"
+if ( ${eval_lattice_doswap} != 0 ) then
+  ${proc_2dx}/linblock "eval_lattice_doswap - swapping lattices"
 endif
 #############################################################################
 #
-if ( ${doswap} == "1" ) then
+if ( ${eval_lattice_doswap} == "1" ) then
   set tmplattice = `echo ${lattice} | sed 's/, /,/g'`
   set lattice = `echo ${secondlattice} | sed 's/, /,/g'`
   set secondlattice = "${tmplattice}"
@@ -215,7 +148,7 @@ if ( ${doswap} == "1" ) then
   ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
 endif
 #
-if ( ${doswap} == "2" ) then
+if ( ${eval_lattice_doswap} == "2" ) then
   set secondlattice = `echo ${lattice} | sed 's/, /,/g'`
   echo "set secondlattice = "${secondlattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
@@ -223,7 +156,7 @@ if ( ${doswap} == "2" ) then
   ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
 endif
 #
-if ( ${doswap} == "3" ) then
+if ( ${eval_lattice_doswap} == "3" ) then
   set lattice = `echo ${secondlattice} | sed 's/, /,/g'`
   echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
@@ -231,7 +164,7 @@ if ( ${doswap} == "3" ) then
   ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
 endif
 #
-if ( ${doswap} == "4" ) then
+if ( ${eval_lattice_doswap} == "4" ) then
   set backuplattice = `echo ${lattice} | sed 's/, /,/g'`
   echo "set backuplattice = "${backuplattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
@@ -239,7 +172,7 @@ if ( ${doswap} == "4" ) then
   ${proc_2dx}/linblock "Backup Lattice is now: ${backuplattice}"
 endif
 #
-if ( ${doswap} == "5" ) then
+if ( ${eval_lattice_doswap} == "5" ) then
   set lattice = `echo ${backuplattice} | sed 's/, /,/g'`
   echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
@@ -258,31 +191,31 @@ set slatv1 = `echo ${secondlattice} | cut -d, -f3`
 set slatv2 = `echo ${secondlattice} | cut -d, -f4`
 #
 #############################################################################
-if ( ${do1} != 0 ) then
-  ${proc_2dx}/linblock "do1 - to scale the lattice"
+if ( ${eval_lattice_do1} != 0 ) then
+  ${proc_2dx}/linblock "eval_lattice_do1 - to scale the lattice"
 endif
 #############################################################################
 #
 # TYPE: Drop_Down_Menu "0=nothing;1=double u;2=double v;3=double u&v;4=grow by 45deg (h->h+k,k->h-k);5=half u;6=half v;7=half u&v;8=shrink by 45deg (h->h/2+k/2,k->h/2-k/2)"
 #
-if ( ${do1} == "1" ) then
+if ( ${eval_lattice_do1} == "1" ) then
   set latu1 = `echo ${latu1} | awk '{ s = 2 * $1 } END { print s}'`
   set latu2 = `echo ${latu2} | awk '{ s = 2 * $1 } END { print s}'`
 endif
 #
-if ( ${do1} == "2" ) then
+if ( ${eval_lattice_do1} == "2" ) then
   set latv1 = `echo ${latv1} | awk '{ s = 2 * $1 } END { print s}'`
   set latv2 = `echo ${latv2} | awk '{ s = 2 * $1 } END { print s}'`
 endif
 #
-if ( ${do1} == "3" ) then
+if ( ${eval_lattice_do1} == "3" ) then
   set latu1 = `echo ${latu1} | awk '{ s = 2 * $1 } END { print s}'`
   set latu2 = `echo ${latu2} | awk '{ s = 2 * $1 } END { print s}'`
   set latv1 = `echo ${latv1} | awk '{ s = 2 * $1 } END { print s}'`
   set latv2 = `echo ${latv2} | awk '{ s = 2 * $1 } END { print s}'`
 endif
 #
-if ( ${do1} == "4" ) then
+if ( ${eval_lattice_do1} == "4" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 + $3 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 + $4 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 - $3 } END { print s}'`
@@ -293,24 +226,24 @@ if ( ${do1} == "4" ) then
   set latv2 = ${nlatv2}
 endif
 #
-if ( ${do1} == "5" ) then
+if ( ${eval_lattice_do1} == "5" ) then
   set latu1 = `echo ${latu1} | awk '{ s = $1 / 2 } END { print s}'`
   set latu2 = `echo ${latu2} | awk '{ s = $1 / 2 } END { print s}'`
 endif
 #
-if ( ${do1} == "6" ) then
+if ( ${eval_lattice_do1} == "6" ) then
   set latv1 = `echo ${latv1} | awk '{ s = $1 / 2 } END { print s}'`
   set latv2 = `echo ${latv2} | awk '{ s = $1 / 2 } END { print s}'`
 endif
 #
-if ( ${do1} == "7" ) then
+if ( ${eval_lattice_do1} == "7" ) then
   set latu1 = `echo ${latu1} | awk '{ s = $1 / 2 } END { print s}'`
   set latu2 = `echo ${latu2} | awk '{ s = $1 / 2 } END { print s}'`
   set latv1 = `echo ${latv1} | awk '{ s = $1 / 2 } END { print s}'`
   set latv2 = `echo ${latv2} | awk '{ s = $1 / 2 } END { print s}'`
 endif
 #
-if ( ${do1} == "8" ) then
+if ( ${eval_lattice_do1} == "8" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 / 2 + $3 / 2 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 / 2 + $4 / 2 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 / 2 - $3 / 2 } END { print s}'`
@@ -321,35 +254,35 @@ if ( ${do1} == "8" ) then
   set latv2 = ${nlatv2}
 endif
 #
-if ( ${do1} != 0 ) then
+if ( ${eval_lattice_do1} != 0 ) then
   set lattice = `echo ${latu1},${latu2},${latv1},${latv2}`
   echo "set lattice = "${lattice} >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "Lattice is now: ${lattice}"
 endif
 #
 #############################################################################
-if ( ${do2} != 0 ) then
-  ${proc_2dx}/linblock "do2 - to skew the lattice"
+if ( ${eval_lattice_do2} != 0 ) then
+  ${proc_2dx}/linblock "eval_lattice_do2 - to skew the lattice"
 endif
 #############################################################################
 #
 # TYPE: Drop_Down_Menu "0=nothing;1=(h->h,k=h+k);2=(h->h,k=h-k)"
 #
-if ( ${do2} == "1" ) then
+if ( ${eval_lattice_do2} == "1" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1      } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2      } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 + $3 } END { print s}'`
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 + $4 } END { print s}'`
 endif
 #
-if ( ${do2} == "2" ) then
+if ( ${eval_lattice_do2} == "2" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1      } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2      } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 - $3 } END { print s}'`
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 - $4 } END { print s}'`
 endif
 #
-if ( ${do2} != 0 ) then
+if ( ${eval_lattice_do2} != 0 ) then
   set latu1 = ${nlatu1}
   set latu2 = ${nlatu2}
   set latv1 = ${nlatv1}
@@ -360,42 +293,42 @@ if ( ${do2} != 0 ) then
 endif
 #
 #############################################################################
-if ( ${do3} != 0 ) then
-  ${proc_2dx}/linblock "do3 - to rotate the lattice"
+if ( ${eval_lattice_do3} != 0 ) then
+  ${proc_2dx}/linblock "eval_lattice_do3 - to rotate the lattice"
 endif
 #############################################################################
 #
 # TYPE: Drop_Down_Menu "0=nothing;1=rot sq. ccw (h->k,k->-h);2=rot sq. cw (h->-k,k->h);3=rot hex ccw (hk->k,-h+k);4=rot hex cw (hk->-k+h,h)"
 #
-if ( ${do3} == "1" ) then
+if ( ${eval_lattice_do3} == "1" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $3 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $4 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = - $1 } END { print s}'`
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = - $2 } END { print s}'`
 endif
 #
-if ( ${do3} == "2" ) then
+if ( ${eval_lattice_do3} == "2" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = - $3 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = - $4 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $1 } END { print s}'`
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =   $2 } END { print s}'`
 endif
 #
-if ( ${do3} == "3" ) then
+if ( ${eval_lattice_do3} == "3" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $3      } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $4      } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $3 - $1 } END { print s}'`
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $4 - $2 } END { print s}'`
 endif
 #
-if ( ${do3} == "4" ) then
+if ( ${eval_lattice_do3} == "4" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 - $3 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 - $4 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1      } END { print s}'`
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2      } END { print s}'`
 endif
 #
-if ( ${do3} != 0 ) then
+if ( ${eval_lattice_do3} != 0 ) then
   set latu1 = ${nlatu1}
   set latu2 = ${nlatu2}
   set latv1 = ${nlatv1}
@@ -406,19 +339,19 @@ if ( ${do3} != 0 ) then
 endif
 #
 #############################################################################
-if ( ${do4} != 0 ) then
-  ${proc_2dx}/linblock "do3 - to change the hand of the lattice"
+if ( ${eval_lattice_do4} != 0 ) then
+  ${proc_2dx}/linblock "eval_lattice_do3 - to change the hand of the lattice"
 endif
 #############################################################################
 #
-if ( ${do4} == "1" ) then
+if ( ${eval_lattice_do4} == "1" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $3 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $4 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 } END { print s}'`
   set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 } END { print s}'`
 endif
 #
-if ( ${do4} != 0 ) then
+if ( ${eval_lattice_do4} != 0 ) then
   set latu1 = ${nlatu1}
   set latu2 = ${nlatu2}
   set latv1 = ${nlatv1}
@@ -429,12 +362,12 @@ if ( ${do4} != 0 ) then
 endif
 #
 #############################################################################
-if ( ${dorotate} != 0 ) then
-  ${proc_2dx}/linblock "dorotate - to rotate or mirror the lattices"
+if ( ${eval_lattice_dorotate} != 0 ) then
+  ${proc_2dx}/linblock "eval_lattice_dorotate - to rotate or mirror the lattices"
 endif
 #############################################################################
 #
-if ( ${dorotate} == "1" || ${dorotate} == "2" || ${dorotate} == "7" ) then
+if ( ${eval_lattice_dorotate} == "1" || ${eval_lattice_dorotate} == "2" || ${eval_lattice_dorotate} == "7" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $2 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$1 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $4 } END { print s}'`
@@ -443,7 +376,7 @@ if ( ${dorotate} == "1" || ${dorotate} == "2" || ${dorotate} == "7" ) then
   set nslatu2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$1 } END { print s}'`
   set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $4 } END { print s}'`
   set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$3 } END { print s}'`
-  if ( ${dorotate} == "2" ) then
+  if ( ${eval_lattice_dorotate} == "2" ) then
     echo "::old defocus = ${defocus}" 
     set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$1} END {print s}'`
     set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$2} END {print s}'`
@@ -461,7 +394,7 @@ if ( ${dorotate} == "1" || ${dorotate} == "2" || ${dorotate} == "7" ) then
     echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
     echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
   endif
-  if ( ${dorotate} == "7" ) then
+  if ( ${eval_lattice_dorotate} == "7" ) then
     echo "::old defocus = ${defocus}" 
     set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$2} END {print s}'`
     set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$1} END {print s}'`
@@ -472,7 +405,7 @@ if ( ${dorotate} == "1" || ${dorotate} == "2" || ${dorotate} == "7" ) then
   endif
 endif
 #
-if ( ${dorotate} == "3" || ${dorotate} == "4" ) then
+if ( ${eval_lattice_dorotate} == "3" || ${eval_lattice_dorotate} == "4" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$2 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $1 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$4 } END { print s}'`
@@ -481,7 +414,7 @@ if ( ${dorotate} == "3" || ${dorotate} == "4" ) then
   set nslatu2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $1 } END { print s}'`
   set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$4 } END { print s}'`
   set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $3 } END { print s}'`
-  if ( ${dorotate} == "4" ) then
+  if ( ${eval_lattice_dorotate} == "4" ) then
     echo "::old defocus = ${defocus}" 
     set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$1} END {print s}'`
     set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{s=$2} END {print s}'`
@@ -501,7 +434,7 @@ if ( ${dorotate} == "3" || ${dorotate} == "4" ) then
   endif
 endif
 #
-if ( ${dorotate} == "5" || ${dorotate} == "6" ) then
+if ( ${eval_lattice_dorotate} == "5" || ${eval_lattice_dorotate} == "6" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $1 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = -$2 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $3 } END { print s}'`
@@ -510,7 +443,7 @@ if ( ${dorotate} == "5" || ${dorotate} == "6" ) then
   set nslatu2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$2 } END { print s}'`
   set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $3 } END { print s}'`
   set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$4 } END { print s}'`
-  if ( ${dorotate} == "6" ) then
+  if ( ${eval_lattice_dorotate} == "6" ) then
     echo "::old defocus = ${defocus}" 
     set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END {print s}'`
     set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END {print s}'`
@@ -528,7 +461,7 @@ if ( ${dorotate} == "5" || ${dorotate} == "6" ) then
   endif
 endif
 #
-if ( ${dorotate} != 0 ) then
+if ( ${eval_lattice_dorotate} != 0 ) then
   set latu1 = ${nlatu1}
   set latu2 = ${nlatu2}
   set latv1 = ${nlatv1}
@@ -547,7 +480,7 @@ endif
 #
 #############################################################################
 #
-if ( ${do1} != 0 || ${do2} != 0 || ${do3} != 0 || ${do4} != 0 ) then
+if ( ${eval_lattice_do1} != 0 || ${eval_lattice_do2} != 0 || ${eval_lattice_do3} != 0 || ${eval_lattice_do4} != 0 ) then
   echo "::Don't forget to redo the spotlist."
 endif
 #
@@ -715,8 +648,8 @@ echo "<<@progress: 55>>"
 #
 set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>15 || $1<-15) {s=1} else {s=0}} END {print s}'`
 #
-# if ( ${highangle} == '1' && ${det_tilt} == 'y' && ${overwriteTiltgeometry} == 'y' ) then
-if ( ${overwriteTiltgeometry} == 'y' ) then
+# if ( ${highangle} == '1' && ${det_tilt} == 'y' && ${eval_lattice_overwriteTiltgeometry} == 'y' ) then
+if ( ${eval_lattice_overwriteTiltgeometry} == 'y' ) then
   #############################################################################
   ${proc_2dx}/linblock "Saving tilt geometry from lattice, because of high tilt."
   #############################################################################
@@ -823,10 +756,10 @@ set realang_local = `cat ${outputfile} | head -n 6 | tail -n 1`
 echo "set realcell_local = "${realcell_local} >> LOGS/${scriptname}.results
 echo "set realang_local = "${realang_local} >> LOGS/${scriptname}.results
 #
-if ( ${overwriteRealLattice} == "y" ) then
+if ( ${eval_lattice_overwriteRealLattice} == "y" ) then
   echo "set realcell = "${realcell_local} >> LOGS/${scriptname}.results
   echo "set realang = "${realang_local} >> LOGS/${scriptname}.results
-  echo "set overwriteRealLattice = n" >> LOGS/${scriptname}.results
+  echo "set eval_lattice_overwriteRealLattice = n" >> LOGS/${scriptname}.results
   echo "::"
   echo ":: ##############################################################################"
   echo ":: ${realcell},${realang}    is the corresponding non-tilted real-space lattice [A,A,deg]."
@@ -853,7 +786,7 @@ echo "::"
 echo "set CALCULATEDMAG = ${theormag}" >> LOGS/${scriptname}.results
 #
 set docfile = "./peaks_xy_final.dat"
-if ( ${regenPL} == "y" ) then
+if ( ${eval_lattice_regenPL} == "y" ) then
   #
   #############################################################################
   ${proc_2dx}/linblock "2dx_taperedge: To taper the edges to prevent stripes in the FFT"
@@ -874,7 +807,7 @@ eot
   #
   \rm -f ${docfile}
   #
-  ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}_taper.mrc 40 ${peakNum}
+  ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}_taper.mrc 40 ${eval_lattice_peakNum}
   #
   if ( ${tempkeep} == 'y' ) then
     #
@@ -901,9 +834,9 @@ eot
   #
 endif
 #
-if ( ${doswap} != "0" ) then
+if ( ${eval_lattice_doswap} != "0" ) then
   #
-  echo "set doswap = 0" >> LOGS/${scriptname}.results
+  echo "set eval_lattice_doswap = 0" >> LOGS/${scriptname}.results
   #
 endif
 #

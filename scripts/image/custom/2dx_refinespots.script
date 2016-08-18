@@ -17,25 +17,8 @@
 #
 # MANUAL: This script allows the creation of a new spotlist, using either the final Amplitude-and-Phase file or the final unbent image as input. In both cases, an IQ threshold is defined, and the identified spots stronger than this threshold are identified.
 #
-#=============================================================================
-# SECTION: Algorithm Selection
-#=============================================================================
-#
-# LABEL: Source of additional spots
-# LEGEND: Choose the file where the additional spots are extracted from.
-# EXAMPLE: addspots = "1"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Spots
-# TYPE: Drop_Down_Menu "0=FFT of Unbent Image;1=APH File"
-set addspots = "1"
-#
-# LABEL: Keep old spots in addition to new ones (for APH file option)?
-# LEGEND: Lets you decide, if a completely new spotlist should be established, or if the found spots should merely added to the existing one. This applies only to the APH file option. When using the Unbent Image as source, then always a new spotfile is generated.
-# EXAMPLE: keepOld = "n"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Spots
-# TYPE: Bool "y;n"
-set keepOld = "n"
-#
-#=============================================================================
+# RESET: addspots = "1"
+# RESET: keepOld = "n"
 #
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
@@ -83,6 +66,8 @@ set IQMAX = ""
 set spotrefine_IHKmax = ""
 set RMAG = ""
 set LCOLOR = ""
+set addspots = ""
+est keepOld = ""
 #
 #$end_vars
 #

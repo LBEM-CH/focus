@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <QListView>
 #include <QStringList>
+#include <QMap>
 #include <QHeaderView>
 #include <QStandardItem>
 #include <QGridLayout>
@@ -75,6 +76,7 @@ private:
     QHash<quint32, QHash<QString, QVariant> > scriptData;
     QHash<quint32, quint32> scriptProgress;
     QHash<quint32, confData *> localConf;
+    QHash<quint32, QMap<QString, QString>> resetVars;
     QProcess process;
 
     quint32 currentUid;
@@ -108,6 +110,7 @@ public:
     void extendSelectionTo(scriptModule *module);
 
     QStringList displayedVariables(QModelIndex index);
+    QMap<QString, QString> variablesToReset(QModelIndex index);
     QString logFile(QModelIndex index);
     QString logFile();
     QString resultsFile(QModelIndex index);

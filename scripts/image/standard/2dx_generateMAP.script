@@ -22,26 +22,9 @@
 #
 # REMARK: The following section defines variables that will be displayed in the GUI:
 #
-# LABEL: Show APH files?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_hkl = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_hkl = "n"
-#
-# LABEL: Show Phase Residual TXT files?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_phares = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_phares = "n"
-#
-# LABEL: Show Point Spread Function (PSF) files?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_PSF = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_PSF = "n"
+# RESET: show_hkl = "n"
+# RESET: show_phares = "n"
+# RESET: show_PSF = "n"
 #
 # DISPLAY: SYN_Unbending
 # DISPLAY: ML_doit
@@ -134,6 +117,10 @@ set MergeIQMAX = ""
 set movie_enable = ""
 set ctfcor_imode = ""
 set RFACAMP = ""
+set show_hkl = ""
+set show_phares = ""
+set show_PSF = ""
+#
 #
 #$end_vars
 #

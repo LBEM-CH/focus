@@ -19,40 +19,10 @@
 #
 # MANUAL: Be aware that this program may make things worse, if the data are noisy. For the refinement of all five parameters usually a well-refined and stable 3D dataset in form of a MTZ file is needed as well. Use with care, and first try to run it with the "Overwrite data" button set to "no". If the output appears to make sense, you can re-run it with "Overwrite data" set to "yes". Good luck.
 #
-#=============================================================================
-# SECTION: Algorithm Selection
-#=============================================================================
-#
-# LABEL: Mode of operation
-# LEGEND: Choose the things that should be refined"
-# EXAMPLE: mode = "tiltangle"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
-# TYPE: Drop_Down_Menu "0=nothing;1=refine defocus;2=refine defocus and astigma;3=refine tiltaxis;4=refine tiltangle;5=refine all 5 parameters"
-set mode = "0=nothing"
-#
-# LABEL: Number of cycles 
-# LEGEND: The number of refinement cycles in ttrefine
-# EXAMPLE: ncyc = "10"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
-# TYPE: Integer "MIN=1;MAX=1000;DEFAULT=10"
-set ncyc = "10"
-#
-# LABEL: MTZ reference for refinement
-# LEGEND: Define, if a MTZ file is available as refinement reference.
-# EXAMPLE: reference = "(none)"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
-# The reference should be something like: '../merge/merge3D_MRClefthanded.mtz'
-# TYPE: Drop_Down_Menu "(none);../merge/merge3D_MRClefthanded.mtz"
-set reference = "(none)"
-#
-# LABEL: Overwrite data
-# LEGEND: Define if the results should overwrite the database or not.
-# EXAMPLE: overwrite = "n"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Ttrefine
-# TYPE: Bool "y;n"
-set overwrite = "n"
-#
-#=============================================================================
+# RESET: mode = "0=nothing"
+# RESET: ncyc = "10"
+# RESET: reference = "(none)"
+# RESET: overwrite = "n"
 #
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
@@ -107,6 +77,10 @@ set CS = ""
 set KV = ""
 set RMAG = ""
 set LCOLOR = ""
+set mode = ""
+set ncyc = ""
+set reference = ""
+set overwrite = ""
 #
 #$end_vars
 #

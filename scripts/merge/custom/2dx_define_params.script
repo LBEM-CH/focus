@@ -37,6 +37,12 @@
 # DISPLAY: movie_masking_mode
 # DISPLAY: ctfcor_imode
 # DISPLAY: movie_enable
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: magnification
+# DISPLAY: imageorigin
+# DISPLAY: stepdigitizer
+# DISPLAY: movie_imagenumber_toave
 #
 #$end_local_vars
 #
@@ -75,13 +81,6 @@ set movie_masking_mode = ""
 set ctfcor_imode = ""
 #
 #$end_vars
-#
-# DISPLAY: CS
-# DISPLAY: KV
-# DISPLAY: magnification
-# DISPLAY: imageorigin
-# DISPLAY: stepdigitizer
-# DISPLAY: movie_imagenumber_toave
 #
 # This sets the scriptname variable:
 set scriptname = 2dx_define_params

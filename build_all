@@ -141,7 +141,7 @@ then
   ls -ld kernel
   if [ -h kernel ];
   then
-    echo "Link already existing."
+    echo "kernel link already existing."
   else
     echo "Moving executables into kernel/mrc/bin"
     \cp -rf kernel/mrc/bin/* ${SRC}/kernel/mrc/bin
@@ -152,8 +152,70 @@ then
   then
     echo "Replacing with link to svn-repository"
     \ln -s ${SRC}/kernel .
+    ls -ld kernel
   fi
-  ls -ld kernel
+  #
+  cd scripts
+  ls -ld image
+  if [ -h image ];
+  then
+    echo "scripts/image link already existing."
+  else
+    echo "Removing image directory in local ~/2dx/scripts"
+    \rm -rf image
+  fi
+  if [ ! -h image ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/image .
+    ls -ld image
+  fi
+  #
+  ls -ld merge
+  if [ -h merge ];
+  then
+    echo "scripts/merge link already existing."
+  else
+    echo "Removing merge directory in local ~/2dx/scripts"
+    \rm -rf merge
+  fi
+  if [ ! -h merge ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/merge .
+    ls -ld merge
+  fi
+  #
+  ls -ld proc 
+  if [ -h proc  ];
+  then
+    echo "scripts/proc  link already existing."
+  else
+    echo "Removing proc  directory in local ~/2dx/scripts"
+    \rm -rf proc 
+  fi
+  if [ ! -h proc  ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/proc  .
+    ls -ld proc 
+  fi
+  #
+  ls -ld project
+  if [ -h project ];
+  then
+    echo "scripts/project link already existing."
+  else
+    echo "Removing project directory in local ~/2dx/scripts"
+    \rm -rf project
+  fi
+  if [ ! -h project ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/project .
+    ls -ld project
+  fi
+  #
   echo "done."
 fi
 

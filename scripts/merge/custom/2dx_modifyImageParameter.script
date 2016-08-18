@@ -17,36 +17,20 @@
 #
 # MANUAL: In order to do so, it will read the config files in all selected image directories, change values, and save them again.
 #
-#=============================================================================
-# SECTION: Specify additional Phase Shift or Beam Tilt
-#=============================================================================
-#
-# LABEL: Additional Phase Origin
-# LEGEND: This allows to modify the phase origin (phaori) values for all selected images.
-# EXAMPLE: addPhaOri = "0.0,0.0"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Modifyimageparameter
-# TYPE: Two_Float "MIN=-360.0;MAX=360.0;DEFAULT=0.0;MIN=-360.0;MAX=360.0;DEFAULT=0.0"
-set addPhaOri = "0.0,0.0"
-#
-# LABEL: Additional Phase Origin FouFilter
-# LEGEND: This allows to modify the phase origin (phaoriFouFilter) values for all selected images.
-# EXAMPLE: addPhaOriFouFilter = "0.0,0.0"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Modifyimageparameter
-# TYPE: Two_Float "MIN=-360.0;MAX=360.0;DEFAULT=0.0;MIN=-360.0;MAX=360.0;DEFAULT=0.0"
-set addPhaOriFouFilter = "0.0,0.0"
-#
-# LABEL: Additional Beam Tilt
-# LEGEND: This allows to modify the beam tilt values for all selected images.
-# EXAMPLE: addBeamTilt = "0.0,0.0"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Modifyimageparameter
-# TYPE: Two_Float "MIN=-360.0;MAX=360.0;DEFAULT=0.0;MIN=-360.0;MAX=360.0;DEFAULT=0.0"
-set addBeamTilt = "0.0,0.0"
+# 
+# RESET: addPhaOri = "0.0,0.0"
+# RESET: addPhaOriFouFilter = "0.0,0.0"
+# RESET: addBeamTilt = "0.0,0.0"
 #
 #$end_local_vars
 #
 set proc_2dx = ""
 set bin_2dx = ""
 set app_2dx_image = ""
+#
+set addPhaOri = ""
+set addPhaOriFouFilter = ""
+set addBeamTilt = ""
 #
 #$end_vars
 #

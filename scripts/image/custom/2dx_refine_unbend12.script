@@ -20,22 +20,7 @@
 #
 # MANUAL: You can run this script on one representative image over night, and the use the determined parameters as default values for other images from the same class of images (e.g. same sample, same microscope, same tilt-angle). To set default values, either edit the system-wide default 2dx_image.cfg, or edit the 2dx_image.cfg file one level up from the current image directories.
 #
-#=============================================================================
-# SECTION: Refinement Program
-#=============================================================================
-#
-# LABEL: Refine maska and boxa1 simulaneously?
-# LEGEND: Flag, defining if maska and boxa1 should be refined, using the following values.
-# EXAMPLE: refine_maska_boxa1_doit = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters/Refine
-# TYPE: Bool "y;n"
-set refine_maska_boxa1_doit = "y"
-#
-
-#
-#=============================================================================
-# Other parameter follow
-#=============================================================================
+# RESET: refine_maska_boxa1_doit = "y"
 #
 # DISPLAY: maska
 # DISPLAY: boxa1
@@ -93,6 +78,7 @@ set LCOLOR = ""
 set ccunbend_program = ""
 set refine_maska_val = ""
 set refine_boxa1_val = ""
+set refine_maska_boxa1_doit = ""
 #
 #$end_vars
 #

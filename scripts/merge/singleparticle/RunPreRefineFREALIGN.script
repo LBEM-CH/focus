@@ -25,10 +25,12 @@
 set bin_2dx = ""
 set proc_2dx = ""
 
+set scriptname = RunPreRefineFREALIGN
+
 set SPR_PREREFINE_DIR = ""
 
 
-set SPR_PREREFINE_DIR = ${PWD}/SPR/FREALIGN/${SPR_PREREFINE_DIR}/
+set SPR_PREREFINE_DIR = SPR/FREALIGN/${SPR_PREREFINE_DIR}/
 #$end_vars
 
 # There's some issue with ${PWD} and {$OLDPWD} in csh, so just to be safe:

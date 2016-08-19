@@ -31,6 +31,8 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set app_python = ""
+
+set scriptname = ApplyCrystalWeighting
 #
 set SPR_WhichStackAll = ""
 set SPR_REFINE_DIR = ""
@@ -43,7 +45,7 @@ set SPR_FRL_parameter_mask = ""
 set sample_pixel = ""
 
 #
-set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
+set SPR_FREALIGN_DIR = SPR/FREALIGN/
 set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_REFINE_DIR}/
 set SPR_CRYSTALREC_DIR = ${SPR_FREALIGN_DIR}/${SPR_CRYSTALREC_DIR}/
 set scriptname = ApplyCrystalWeighting

@@ -15,7 +15,8 @@
 #
 # SORTORDER: 82
 #
-# MANUAL: This script will replace all 2dx_image_cfg files of the selected images with the 2dx_master.cfg file. 
+# MANUAL: This script will replace all 2dx_image_cfg files of the selected images with the 2dx_master.cfg file.
+# MANUAL: Please note that all the parameters except imagename, nonmaskimagename, movie_stackname, imagenumber, imagename_original will be replaced.
 #
 #$end_local_vars
 #
@@ -54,9 +55,32 @@ eot
     cd ${oldir}
     cd ..
     cd ${to_dir}
+    #
+    # Variables not to reset
+    set imagename = `grep "set imagename =" 2dx_image.cfg`
+    set nonmaskimagename = `grep "set nonmaskimagename =" 2dx_image.cfg`
+    set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg`
+    set imagenumber = `grep "set imagenumber =" 2dx_image.cfg`
+    set imagename_original = `grep "set imagename_original =" 2dx_image.cfg`
+    #
+    # Copy the file
     set fullpath = `pwd`
     echo "::Copying ${oldir}/2dx_merge.cfg to ${fullpath}/2dx_image.cfg"
     \cp -f ${oldir}/2dx_merge.cfg ${fullpath}/2dx_image.cfg
+    #
+    # Reset the variables
+    echo ": Updating - ${imagename}"
+    echo "${imagename}" >> 2dx_image.cfg
+    echo ": Updating - ${nonmaskimagename}"
+    echo "${nonmaskimagename}" >> 2dx_image.cfg
+    echo ": Updating - ${movie_stackname}"
+    echo "${movie_stackname}" >> 2dx_image.cfg
+    echo ": Updating - ${imagenumber}"
+    echo "${imagenumber}" >> 2dx_image.cfg
+    echo ": Updating - ${imagename_original}"
+    echo "${imagename_original}" >> 2dx_image.cfg
+    echo "set initialization_reset = y" >> 2dx_image.cfg
+    echo "set initialization_executable = y" >> 2dx_image.cfg
     #
     set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
     set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`

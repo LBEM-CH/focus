@@ -27,6 +27,9 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set app_python = ""
+
+set scriptname = GenerateCrystalAverages
+
 #
 set SPR_WhichStack = ""
 set SPR_DoFRC = ""
@@ -34,9 +37,9 @@ set SPR_SigmaNorm = ""
 set sample_pixel = ""
 set SPR_FRCThreshold = ""
 #
-set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
+set SPR_STACKS_DIR = SPR/stacks/
 set SPR_STACK_ROOTNAME = 'particles'
-set SPR_FRC_DIR = ${PWD}/SPR/FRC/
+set SPR_FRC_DIR = SPR/FRC/
 set scriptname = GenerateCrystalAverages
 #$end_vars
 
@@ -46,10 +49,10 @@ endif
 
 ${app_python} ${proc_2dx}/SPR_AverageParticles.py ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_WhichStack} ${SPR_DoFRC} ${SPR_FRC_DIR} ${SPR_SigmaNorm} ${sample_pixel} ${SPR_FRCThreshold}
 
-echo "# IMAGE-IMPORTANT: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_crystal-avg.mrcs <TXT: ${SPR_STACK_ROOTNAME}_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_crystal-avg.mrcs <STACK: ${SPR_STACK_ROOTNAME}_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
 
-echo "# IMAGE-IMPORTANT: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_crystal-avg.mrcs <TXT: ${SPR_STACK_ROOTNAME}_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_crystal-avg.mrcs <STACK: ${SPR_STACK_ROOTNAME}_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
  
 foreach i (${SPR_FRC_DIR}/*.png)
-	echo "# IMAGE: $i <TXT: `basename $i`>" >> LOGS/${scriptname}.results
+	echo "# IMAGE: $i <PNG: `basename $i`>" >> LOGS/${scriptname}.results
 end

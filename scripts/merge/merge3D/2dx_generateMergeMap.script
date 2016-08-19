@@ -258,7 +258,7 @@ ${proc_2dx}/linblock "Now for 2D processing:"
 #
 echo "<<@progress: +10>>"
 #
-${bin_2dx}/project2D.exe --mrcin extended.map --mrcout ${imagename}-${SYM}.mrc --axis z
+${bin_2dx}/2dx_projector.exe --mrcin extended.map --mrcout ${imagename}-${SYM}.mrc --axis z
 #
 echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}.mrc <${SYM}-symmetrized final 2D map>" >> LOGS/${scriptname}.results
 #

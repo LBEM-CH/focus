@@ -28,6 +28,8 @@
 #
 #$end_local_vars
 
+set scriptname = RemoveFrealignParMrc
+
 set SPR_FRLRefOrPreref = ""
 set SPR_WhichStackAll = ""
 set SPR_FRLCycle = ""
@@ -37,7 +39,7 @@ set SPR_FRLRemoveMrc = ""
 set SPR_CleanSPR = ""
 
 #
-set SPR_DIR = ${PWD}/SPR
+set SPR_DIR = SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
 #$end_vars
 

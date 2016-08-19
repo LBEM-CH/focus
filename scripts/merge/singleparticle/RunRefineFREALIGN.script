@@ -25,9 +25,11 @@
 set bin_2dx = ""
 set proc_2dx = ""
 
+set scriptname = RunRefineFREALIGN
+
 set SPR_REFINE_DIR = ""
 
-set SPR_REFINE_DIR = ${PWD}/SPR/FREALIGN/${SPR_REFINE_DIR}/
+set SPR_REFINE_DIR = SPR/FREALIGN/${SPR_REFINE_DIR}/
 
 #$end_vars
 

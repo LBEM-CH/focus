@@ -973,31 +973,11 @@ TMP006
 cp to mrc
 TMP006
 ${prefix}${imagename}-${SYM_sub}-scaled.mrc
--9999
+32,0
+
+1,1,1
+
 ;
-goto LB77
-; the usual origin top-left / bottom-left issue:
-MR
-TMP006
-TMP007
-X
-;
-fs
-TMP007
-;
-fi
-TMP007
-;
-cp to tiff
-TMP007
-${prefix}${imagename}-${SYM_sub}-scaled.tif
-;
-cp to mrc
-TMP007
-${prefix}${imagename}-${SYM_sub}-scaled.mrc
--9999
-;
-LB77
 ;
 de a
 TMP001
@@ -1020,10 +1000,10 @@ eot
 #  #
 #   \rm -f ${prefix}${imagename}-${SYM_sub}-scaled.mrc
 #   ${bin_2dx}/tif2mrc.exe << eot
-# ${prefix}${imagename}-${SYM_sub}-scaled.tif
-# ${prefix}${imagename}-${SYM_sub}-scaled.mrc
-# eot
-  #
+#${prefix}${imagename}-${SYM_sub}-scaled.tif
+#${prefix}${imagename}-${SYM_sub}-scaled.mrc
+#eot
+#  #
   #
 endif
 #

@@ -62,6 +62,7 @@ eot
     set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg`
     set imagenumber = `grep "set imagenumber =" 2dx_image.cfg`
     set imagename_original = `grep "set imagename_original =" 2dx_image.cfg`
+    set movie_stackname_raw = `grep "set movie_stackname_raw = " 2dx_image.cfg`
     #
     # Copy the file
     set fullpath = `pwd`
@@ -79,6 +80,8 @@ eot
     echo "${imagenumber}" >> 2dx_image.cfg
     echo ": Updating - ${imagename_original}"
     echo "${imagename_original}" >> 2dx_image.cfg
+    echo ": Updating - ${movie_stackname_raw}"
+    echo "${movie_stackname_raw}" >> 2dx_image.cfg
     echo "set initialization_reset = y" >> 2dx_image.cfg
     echo "set initialization_executable = y" >> 2dx_image.cfg
     #

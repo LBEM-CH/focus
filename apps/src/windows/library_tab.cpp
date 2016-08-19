@@ -4,6 +4,7 @@
 
 #include "library_tab.h"
 #include "project_preferences.h"
+#include "import_images_wizard.h"
 
 LibraryTab::LibraryTab(confData *dat, resultsData* results, QWidget* parent)
 : QWidget(parent) {
@@ -230,6 +231,9 @@ QWidget* LibraryTab::setupSelectionTab() {
     refreshAction->setToolTip("Shortcut: " + refreshAction->shortcut().toString(QKeySequence::NativeText));
     connect(refreshAction, SIGNAL(clicked()), this, SLOT(reload()));
     
+    //QPushButton *importAction = new QPushButton(*(data->getIcon("import")), tr("&Import Images"), this);
+    //importAction->setSizePolicy(sizePolicy);
+    //connect(importAction, SIGNAL(clicked()), this, SLOT(import()));
     
     //Check Group
     QGroupBox* checkGroup = new QGroupBox("Manage Check");
@@ -393,6 +397,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     layout->setSpacing(10);
     layout->addStretch(0);
     layout->addWidget(refreshAction, 0, Qt::AlignTop);
+    //layout->addWidget(importAction, 0, Qt::AlignTop);
     layout->addWidget(backupSaveGroup, 0, Qt::AlignTop);
     layout->addWidget(checkGroup, 0, Qt::AlignTop);
     layout->addWidget(imageFolderGroup, 0, Qt::AlignTop);
@@ -423,6 +428,12 @@ QTreeView* LibraryTab::getDirView() {
 void LibraryTab::reload() {
     maskResults();
     updateModel();
+}
+
+void LibraryTab::import() {
+    ImportImagesWizard* importWizard_ = new ImportImagesWizard(data, this);
+    importWizard_->setAttribute(Qt::WA_DeleteOnClose);
+    importWizard_->showNormal();
 }
 
 void LibraryTab::loadProjectState() {

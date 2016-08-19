@@ -92,6 +92,10 @@ set(MOC_HDRS
         dialogs/project_tools.h
         dialogs/preferences.h
         dialogs/open_project_wizard.h
+        dialogs/import_execute_page.h
+        dialogs/label_wizard_page.h
+        dialogs/import_options_page.h
+        dialogs/import_images_wizard.h
         models/confModel.h
         models/albumModel.h
         models/projectModel.h

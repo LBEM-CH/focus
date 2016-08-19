@@ -353,6 +353,7 @@ if ( ${merge_alsoevenodd} == "y" ) then
   cp APH/merge.aph APH/merge_even.aph
   cp APH/latfitted.hkl APH/latfitted_even.hkl
   cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_even.mtz
+  echo "# IMAGE: APH/latfitted_even.hkl <HKL: Generated HKL EVEN [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
   echo ":: "
   #############################################################################
@@ -371,6 +372,7 @@ if ( ${merge_alsoevenodd} == "y" ) then
   cp APH/merge.aph APH/merge_odd.aph
   cp APH/latfitted.hkl APH/latfitted_odd.hkl
   cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_odd.mtz
+  echo "# IMAGE: APH/latfitted_odd.hkl <HKL: Generated HKL ODD [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
   echo ":: "
   #############################################################################
@@ -390,6 +392,7 @@ echo "<<@progress: +5>>"
 #############################################################################
 ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
 source ${proc_2dx}/2dx_merge_generate3D.com
+echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #

@@ -208,9 +208,12 @@ if ( ${merge_alsoevenodd} == "y" ) then
   ${proc_2dx}/linblock "Switching to EVEN IMAGES series"
   #############################################################################
   set dirfile = "2dx_merge_dirfile_even.dat"
+  set select_mode = "even"
   #
   ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
   source ${proc_2dx}/2dx_origtilt_merge.com
+  \cp -f APH/merge.aph APH/merge_even.aph
+  echo "# IMAGE: APH/merge_even.aph <HKL: Generated merge_even.aph>" >> LOGS/${scriptname}.results
   echo "<<@progress: +5>>"
   #############################################################################
   ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
@@ -220,15 +223,19 @@ if ( ${merge_alsoevenodd} == "y" ) then
   cp APH/merge.aph APH/merge_even.aph
   cp APH/latfitted.hkl APH/latfitted_even.hkl
   cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_even.mtz
+  echo "# IMAGE: APH/latfitted_even.hkl <HKL: Generated HKL EVEN [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
   echo ":: "
   #############################################################################
   ${proc_2dx}/linblock "Switching to ODD IMAGES series"
   #############################################################################
   set dirfile = "2dx_merge_dirfile_odd.dat"
+  set select_mode = "odd"
   #
   ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
   source ${proc_2dx}/2dx_origtilt_merge.com
+  \cp -f APH/merge.aph APH/merge_odd.aph
+  echo "# IMAGE: APH/merge_odd.aph <HKL: Generated merge_odd.aph>" >> LOGS/${scriptname}.results
   echo "<<@progress: +5>>"
   #############################################################################
   ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
@@ -238,6 +245,7 @@ if ( ${merge_alsoevenodd} == "y" ) then
   cp APH/merge.aph APH/merge_odd.aph
   cp APH/latfitted.hkl APH/latfitted_odd.hkl
   cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_odd.mtz
+  echo "# IMAGE: APH/latfitted_odd.hkl <HKL: Generated HKL ODD [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
   echo ":: "
   #############################################################################
@@ -246,9 +254,12 @@ if ( ${merge_alsoevenodd} == "y" ) then
 endif
 #
 set dirfile = "2dx_merge_dirfile.dat"
+set select_mode = "all"
 #
 ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
 source ${proc_2dx}/2dx_origtilt_merge.com
+\cp -f APH/merge.aph APH/merge_all.aph
+echo "# IMAGE: APH/merge_all.aph <HKL: Generated merge_all.aph>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #############################################################################
 ${proc_2dx}/linblock "Sourcing 2dx_plttilt.com"
@@ -257,6 +268,7 @@ echo "<<@progress: +5>>"
 #############################################################################
 ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
 source ${proc_2dx}/2dx_merge_generate3D.com
+echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
 echo "<<@progress: +5>>"
 #
 #############################################################################
@@ -265,4 +277,7 @@ ${proc_2dx}/linblock "${scriptname} normal end."
 #
 echo "<<@progress: 100>>"
 #
+exit
+# for GUI:
+source ${proc_2dx}/2dx_hkl_to_mtz.com
 #

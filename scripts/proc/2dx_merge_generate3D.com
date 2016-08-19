@@ -152,7 +152,6 @@ echo "cellz = ${ALAT}"
 echo ":Launching ${bin_2dx}/2dx_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey"
 ${bin_2dx}/2dx_processor.exe --hkzin APH/latlines.dat -s ${SYM_NAME} -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} --hklout APH/latfitted.hkl --threshold 0 --normalize-grey
 #
-echo "# IMAGE: APH/latfitted.hkl <HKL: Generated HKL [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
 #
 #
 #

@@ -149,6 +149,9 @@ if ( ! -e ${nonmaskimagename}_raw.mrc ) then
   endif
 endif
 #
+set curdir = `pwd`
+echo "::working directory = " ${curdir}
+#
 if ( ${initialization_executable} == "n" ) then
   set initialization_reset = "n"
 endif

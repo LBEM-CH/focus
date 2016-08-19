@@ -67,11 +67,11 @@ if ( ! -e ${app_spider} ) then
     echo ":: "
 endif
 #
-${proc_2dx}/linblock "app_python = ${app_python}"
-${proc_2dx}/linblock "app_anaconda = ${app_anaconda}"
-${proc_2dx}/linblock "dir_ccp4 = ${dir_ccp4}"
-${proc_2dx}/linblock "dir_eman2 = ${dir_eman2}"
-${proc_2dx}/linblock "app_spider = ${app_spider}"
+${proc_2dx}/lin "app_python = ${app_python}"
+${proc_2dx}/lin "app_anaconda = ${app_anaconda}"
+${proc_2dx}/lin "dir_ccp4 = ${dir_ccp4}"
+${proc_2dx}/lin "dir_eman2 = ${dir_eman2}"
+${proc_2dx}/lin "app_spider = ${app_spider}"
 #
 ####################################################
 # Find CCP4 CSH setup file and source it!

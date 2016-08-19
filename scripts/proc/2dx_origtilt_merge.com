@@ -53,9 +53,7 @@ endif
 set merge_data_type_local = ${merge_data_type}
 #
 if ( ${merge_data_type} == '5' ) then
-  echo ":: "
-  ${proc_2dx}/linblock "Using all APH files simultaneously (this will take some time)."
-  echo ":: "
+  ${proc_2dx}/linblock "Using all APH files simultaneously."
 endif
 #
 set dirnum = `cat ${dirfile} | wc -l`
@@ -173,7 +171,7 @@ echo "<<@progress: 15>"
 \rm -f APH/merge_tmp.aph
 foreach aphfile ( SCRATCH/job_*_results.aph )
   cat ${aphfile} >> APH/merge_tmp.aph
-  # \rm -f ${aphfile}
+  \rm -f ${aphfile}
 end
 #
 echo "# IMAGE: APH/merge.aph <APH: merge.aph>" >> LOGS/${scriptname}.results

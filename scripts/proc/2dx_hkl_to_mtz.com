@@ -18,7 +18,7 @@ set realcell = ${2}
 set ALAT = ${3}
 set realang = ${4}
 set RESMIN = ${5}
-set RESMAX = ${6}
+set hkl_to_mtz_RESMAX = ${6}
 set output_mtz = ${7}
 #
 ########################################################################
@@ -55,7 +55,7 @@ set cad_mtz = "SCRATCH/cad_MRClefthanded.mtz"
 #
 ${bin_ccp4}/cad hklin1 ${f2mtz_mtz} hklout ${cad_mtz} << eof
 sort h k l
-resolution overall ${RESMAX} ${RESMIN}  
+resolution overall ${hkl_to_mtz_RESMAX} ${RESMIN}  
 outlim spacegroup 1
 labin file 1 all
 valm NaN NOOUTPUT

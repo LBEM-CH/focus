@@ -199,19 +199,24 @@ if ( ${merge_alsoevenodd} == "y" ) then
   #############################################################################
   ${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for EVEN images"
   #############################################################################    
+  echo "# IMAGE: APH/latfitted_even.hkl <HKL: Input HKL EVEN [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted_even.hkl --mrcout volume_even.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
   echo "# IMAGE: volume_even.map <MAP: final map 3D EVEN images>"  >> LOGS/${scriptname}.results
   #
+  echo "<<@progress: +10>>"
   #############################################################################
-  ${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for EVEN images"
+  ${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for ODD  images"
   #############################################################################    
+  echo "# IMAGE: APH/latfitted_odd.hkl <HKL: Input HKL ODD  [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted_odd.hkl  --mrcout volume_odd.map  -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
   echo "# IMAGE: volume_odd.map <MAP: final map 3D ODD images>"  >> LOGS/${scriptname}.results
+  echo "<<@progress: +10>>"
 endif
 #
 #############################################################################
-${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for all images"
+${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for all  images"
 #############################################################################    
+echo "# IMAGE: APH/latfitted.hkl <HKL: Input HKL all  [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
 ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
 #
 echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results

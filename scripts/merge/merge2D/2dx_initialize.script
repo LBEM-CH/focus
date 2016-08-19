@@ -90,7 +90,7 @@ echo ":: "
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
 #
-echo "The current working directory is" ${olddir}
+echo "::The current working directory is" ${olddir}
 #
 set linkok = "y"
 cd ..

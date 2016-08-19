@@ -212,18 +212,18 @@ eot
   echo "Number of observed reflections:# ${JREFL}" >> Summary_Statistics_3D.txt
   echo "Number of observed unique reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
   echo "Number of possible unique reflections in asym. unit:# ${num_reflections_theoretic}" >> Summary_Statistics_3D.txt
+  if ( ${latline_algo}x == "0x" ) then
   # The following number is without resolution limit:
   # echo "Number of observed unique reflections in asym. unit without resolution limit:# ${num_reflections_fitted}" >> Summary_Statistics_3D.txt
-  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Number obs. uniq. refl. in asym. unit with FOM>1%:# ${num_reflections_FOM1}" >> Summary_Statistics_3D.txt
-  echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
-  echo "counting reflections with FOM > 1%:# ${completeness1}%" >> Summary_Statistics_3D.txt
-  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Number obs. uniq. refl. in asym. unit with FOM>50%:# ${num_reflections_FOM50}" >> Summary_Statistics_3D.txt
-  echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
-  echo "counting reflections with FOM > 50%:# ${completeness50}%" >> Summary_Statistics_3D.txt
-  echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  if ( ${latline_algo}x == "0x" ) then
+    echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+    echo "Number obs. uniq. refl. in asym. unit with FOM>1%:# ${num_reflections_FOM1}" >> Summary_Statistics_3D.txt
+    echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
+    echo "counting reflections with FOM > 1%:# ${completeness1}%" >> Summary_Statistics_3D.txt
+    echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
+    echo "Number obs. uniq. refl. in asym. unit with FOM>50%:# ${num_reflections_FOM50}" >> Summary_Statistics_3D.txt
+    echo "Completeness to ${tmp_nominal_tilt_angle}deg tilt and ${RESMAX}A (${zstarrange_real}A vertical)," >> Summary_Statistics_3D.txt
+    echo "counting reflections with FOM > 50%:# ${completeness50}%" >> Summary_Statistics_3D.txt
+    echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
     # echo "Overall phase residual [deg]:# ${overall_phase_residual}" >> Summary_Statistics_3D.txt
     echo "Overall weighted phase residual [deg]:# ${overall_weighted_phase_residual}" >> Summary_Statistics_3D.txt
     # echo "Overall R-factor:# ${tmp_overall_R_factor}%" >> Summary_Statistics_3D.txt

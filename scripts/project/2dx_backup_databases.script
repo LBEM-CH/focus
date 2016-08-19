@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Backup Databases                                                   #
+# Title: Backup or Restore Databases                                        #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -15,7 +15,7 @@
 #
 # MANUAL: This script can be used to backup or restore all 2dx_image.cfg databases.
 #
-# DISPLAY: backup_sure
+# RESET: backup_sure = "n"
 # DISPLAY: backup_all_files
 # DISPLAY: backup_database_direction
 # DISPLAY: backup_database_comment_1
@@ -83,6 +83,11 @@ if ( ${backup_database_direction} == "4" ) then
 endif
 if ( ${backup_database_direction} == "5" ) then
   set source = 2dx_image.cfg-backup3
+  set target = 2dx_image.cfg
+  set do_eval = 1
+endif
+if ( ${backup_database_direction} == "6" ) then
+  set source = 2dx_image.cfg-backup4
   set target = 2dx_image.cfg
   set do_eval = 1
 endif

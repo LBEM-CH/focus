@@ -365,24 +365,22 @@ if ( ${merge_alsoevenodd} == "y" ) then
   ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
   source ${proc_2dx}/2dx_origtilt_refine.com
   #
-  echo ":: "
-  #############################################################################
-  ${proc_2dx}/linblock "Switching to ALL IMAGES series"
-  #############################################################################
+else
+  set dirfile = "2dx_merge_dirfile.dat"
+  if ( ${merge_reference} == '0' ) then
+    set reference_file="APH/merge.aph"
+  endif 
+  if ( ${merge_reference} == '1' ) then
+    set reference_file="merge3Dref_MRClefthanded.mtz"
+  endif 
+  #
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
+  source ${proc_2dx}/2dx_origtilt_refine.com
+  #
 endif
-set dirfile = "2dx_merge_dirfile.dat"
-if ( ${merge_reference} == '0' ) then
-  set reference_file="APH/merge.aph"
-endif 
-if ( ${merge_reference} == '1' ) then
-  set reference_file="merge3Dref_MRClefthanded.mtz"
-endif
-#
-${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
-source ${proc_2dx}/2dx_origtilt_refine.com
-#
 #
 if ( ${reftiltgeo} == "y" ) then
+  set dirfile = "2dx_merge_dirfile.dat"
   #############################################################################
   ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
   #############################################################################
@@ -395,7 +393,6 @@ echo "<<@progress: 90>"
 #
 # Issue evaluate here to reload the Ph-Ori-Change column
 # echo "<<@evaluate>>"
-${proc_2dx}/linblock "Now, press the REFRESH DISPLAY VIEW button in top menu to update the project library."
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_refine normal end."

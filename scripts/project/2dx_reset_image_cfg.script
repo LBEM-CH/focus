@@ -106,6 +106,14 @@ eot
     cd ${oldir}
 end
 #
+echo ":: "
+echo ":: "
+echo ":: Done."
+echo ":: "
+echo ":: All image parameter databases in the files 2dx_image.cfg were reset to the default parameters for this project."
+echo ":: If this was a mistake, you can still use the Backup or Restore Databases script to recover the last versions."
+echo ":: "
+
 echo "<<@progress: 100>>"
 #
 exit

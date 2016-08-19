@@ -377,6 +377,7 @@ if ( ${merge_alsoevenodd} == "y" ) then
   ${proc_2dx}/linblock "Switching to ALL IMAGES series"
   #############################################################################
 endif
+#
 set dirfile = "2dx_merge_dirfile.dat"
 #
 ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"

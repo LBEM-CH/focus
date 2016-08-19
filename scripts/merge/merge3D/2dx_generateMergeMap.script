@@ -38,6 +38,7 @@
 # DISPLAY: mask_subvolume_PDB
 # DISPLAY: mask_subvolume_PDB_file
 # DISPLAY: mask_subvolume_PDB_radius
+# DISPLAY: merge_alsoevenodd
 #
 #$end_local_vars
 #
@@ -93,6 +94,7 @@ set calculate_subvolume = ""
 set mask_subvolume_PDB = ""
 set mask_subvolume_PDB_file = ""
 set mask_subvolume_PDB_radius = ""
+set merge_alsoevenodd = ""
 #
 #$end_vars
 #
@@ -106,26 +108,6 @@ set imagename = "merge"
 #
 echo imagename = ${imagename}
 echo imagenumber = ${imagenumber}
-echo tempkeep = ${tempkeep}
-echo RESMIN = ${RESMIN}
-echo RESMAX = ${RESMAX}
-echo CS = ${CS}
-echo KV = ${KV}
-echo ALAT = ${ALAT}
-echo realang = ${realang}
-echo realcell = ${realcell}
-echo rot180 = ${rot180}
-echo rot90 = ${rot90}
-echo beamtilt = ${beamtilt}
-echo tempfac = ${tempfac}
-echo SYM = ${SYM}
-echo avrgamphsNUMBER = ${avrgamphsNUMBER}
-echo avrgamphsRESOL = ${avrgamphsRESOL}
-echo diffmap_doit = ${diffmap_doit}
-echo diffmap_source = ${diffmap_source}
-echo diffmap_weight = ${diffmap_weight}
-echo npo_line1 = ${npo_line1}
-echo npo_line2 = ${npo_line2}
 #
 set scriptname = 2dx_generateMergeMap
 set merge_modus=3D
@@ -211,12 +193,25 @@ echo ":ALAT = ${ALAT},      ALATm1 = ${ALATm1}"
 #############################################################################
 #############################################################################
 #
-#############################################################################
-${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume"
-#############################################################################  
-#
 echo "<<@progress: +10>>"
 #
+if ( ${merge_alsoevenodd} == "y" ) then
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for EVEN images"
+  #############################################################################    
+  ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted_even.hkl --mrcout volume_even.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
+  echo "# IMAGE: volume_even.map <MAP: final map 3D EVEN images>"  >> LOGS/${scriptname}.results
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for EVEN images"
+  #############################################################################    
+  ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted_odd.hkl  --mrcout volume_odd.map  -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
+  echo "# IMAGE: volume_odd.map <MAP: final map 3D ODD images>"  >> LOGS/${scriptname}.results
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for all images"
+#############################################################################    
 ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted.hkl --mrcout volume.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
 #
 echo "# IMAGE: volume.map <MAP: final map 3D>"  >> LOGS/${scriptname}.results

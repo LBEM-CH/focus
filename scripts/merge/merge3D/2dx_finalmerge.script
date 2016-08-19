@@ -55,6 +55,7 @@
 # DISPLAY: RFACAMP
 # DISPLAY: Thread_Number
 # DISPLAY: sample_pixel
+# DISPLAY: merge_alsoevenodd
 #
 #$end_local_vars
 #
@@ -106,6 +107,7 @@ set Thread_Number = ""
 set zstarrange  = ""
 set zstarrange_real = ""
 set zstarwin  = ""
+set merge_alsoevenodd = ""
 #
 #$end_vars
 #
@@ -136,6 +138,13 @@ echo "<<@progress: 1>>"
 #################################################################################
 ${proc_2dx}/linblock "Verifying some parameters"
 #################################################################################
+#
+if ( ${merge_alsoevenodd} == "y" && ( ! -e 2dx_merge_dirfile_even.dat || ! -e 2dx_merge_dirfile_odd.dat )) then
+  echo ":: "
+  echo ":: "
+  ${proc_2dx}/linblock "ERROR: First define EVEN and ODD image tags, using the Project Tool"
+  ${proc_2dx}/protest "This is the button top left in the GUI"
+endif
 #
 if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
   set oldval = ${RESMIN}
@@ -192,25 +201,63 @@ ${proc_2dx}/lin "2dx_merge_makedirs - to create all required subdirectories"
 source ${proc_2dx}/2dx_merge_makedirs
 #
 echo "<<@progress: 10>"
-#############################################################################
+#
+if ( ${merge_alsoevenodd} == "y" ) then
+  echo ":: "
+  #############################################################################
+  ${proc_2dx}/linblock "Switching to EVEN IMAGES series"
+  #############################################################################
+  set dirfile = "2dx_merge_dirfile_even.dat"
+  #
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
+  source ${proc_2dx}/2dx_origtilt_merge.com
+  echo "<<@progress: +5>>"
+  #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+  source ${proc_2dx}/2dx_merge_generate3D.com
+  echo "<<@progress: +5>>"
+  #
+  cp APH/merge.aph APH/merge_even.aph
+  cp APH/latfitted.hkl APH/latfitted_even.hkl
+  cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_even.mtz
+  #
+  echo ":: "
+  #############################################################################
+  ${proc_2dx}/linblock "Switching to ODD IMAGES series"
+  #############################################################################
+  set dirfile = "2dx_merge_dirfile_odd.dat"
+  #
+  ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
+  source ${proc_2dx}/2dx_origtilt_merge.com
+  echo "<<@progress: +5>>"
+  #############################################################################
+  ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
+  source ${proc_2dx}/2dx_merge_generate3D.com
+  echo "<<@progress: +5>>"
+  #
+  cp APH/merge.aph APH/merge_odd.aph
+  cp APH/latfitted.hkl APH/latfitted_odd.hkl
+  cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_odd.mtz
+  #
+  echo ":: "
+  #############################################################################
+  ${proc_2dx}/linblock "Switching to ALL IMAGES series"
+  #############################################################################
+endif
+#
+set dirfile = "2dx_merge_dirfile.dat"
+#
 ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
-#############################################################################
-#
 source ${proc_2dx}/2dx_origtilt_merge.com
-#
-echo "<<@progress: 45>>"
-#
+echo "<<@progress: +5>>"
 #############################################################################
 ${proc_2dx}/linblock "Sourcing 2dx_plttilt.com"
-#############################################################################
-#
 source ${proc_2dx}/2dx_plttilt.com
-#
+echo "<<@progress: +5>>"
 #############################################################################
 ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
-############################################################################# 
-#
 source ${proc_2dx}/2dx_merge_generate3D.com
+echo "<<@progress: +5>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "${scriptname} normal end."

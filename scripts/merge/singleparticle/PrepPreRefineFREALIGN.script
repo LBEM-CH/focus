@@ -56,6 +56,9 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+
+set scriptname = PrepPreRefineFREALIGN
+
 #
 set SPR_WhichStack = ""
 set SPR_PREREFINE_DIR = ""
@@ -100,9 +103,9 @@ set SPR_ampcon = -1.0
 # For the pre-refinement the number of classes will always be 1:
 set SPR_FRL_nclasses = "1"
 #
-set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
+set SPR_STACKS_DIR = SPR/stacks/
 set SPR_STACK_ROOTNAME = 'particles'
-set SPR_FREALIGN_DIR = ${PWD}/SPR/FREALIGN/
+set SPR_FREALIGN_DIR = SPR/FREALIGN/
 set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
 set SPR_PREREFINE_MPARAMETERS = ${SPR_PREREFINE_DIR}/mparameters
 #$end_vars

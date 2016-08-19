@@ -40,6 +40,9 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set app_python = ""
+
+set scriptname = ExportParticleStack
+
 #
 set SPR_RESMIN = ""
 set SPR_RESMAX = ""
@@ -61,12 +64,12 @@ set sample_pixel = ""
 set phacon = ""
 set magnification = ""
 #
-set SPR_IMGS_DIR = ${PWD}/../
-set SPR_MERGEFILE = ${PWD}/2dx_merge_dirfile.dat
-set SPR_STACKS_DIR = ${PWD}/SPR/stacks/
-set SPR_PICKING_DIR = ${PWD}/SPR/picking/
+set SPR_IMGS_DIR = ../
+set SPR_MERGEFILE = 2dx_merge_dirfile.dat
+set SPR_STACKS_DIR = SPR/stacks/
+set SPR_PICKING_DIR = SPR/picking/
 set SPR_STACK_ROOTNAME = 'particles'
-set scriptname = ExportParticleStack
+
 #$end_vars
 
 # Start script commands:
@@ -96,11 +99,11 @@ rename .hdf.mrc .mrcs ${SPR_STACKS_DIR}/*
 echo "Done!"
 
 foreach i (${SPR_STACKS_DIR}/*.mrc*)
-	echo "# IMAGE-IMPORTANT: $i <TXT: `basename $i`>" >> LOGS/${scriptname}.results
+	echo "# IMAGE-IMPORTANT: $i <MAP: `basename $i`>" >> LOGS/${scriptname}.results
 end
 
 foreach i (${SPR_PICKING_DIR}/*.png)
-	echo "# IMAGE: $i <TXT: `basename $i`>" >> LOGS/${scriptname}.results
+	echo "# IMAGE: $i <PNG: `basename $i`>" >> LOGS/${scriptname}.results
 end
 
 echo ":: "

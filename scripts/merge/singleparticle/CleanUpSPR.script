@@ -30,6 +30,9 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+
+set scriptname = CleanUpSPR
+
 #
 set SPR_CleanStacksDir = ""
 set SPR_CleanPickDir = ""
@@ -41,7 +44,7 @@ set SPR_CleanSPR = ""
 set SPR_PREREFINE_DIR = ""
 set SPR_REFINE_DIR = ""
 #
-set SPR_DIR = ${PWD}/SPR
+set SPR_DIR = SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
 #$end_vars
 

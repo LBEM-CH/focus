@@ -203,13 +203,25 @@ if ( ${merge_alsoevenodd} == "y" ) then
   ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted_even.hkl --mrcout volume_even.map -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
   echo "# IMAGE: volume_even.map <MAP: final map 3D EVEN images>"  >> LOGS/${scriptname}.results
   #
-  echo "<<@progress: +10>>"
+  echo "<<@progress: +5>>"
   #############################################################################
   ${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for ODD  images"
   #############################################################################    
   echo "# IMAGE: APH/latfitted_odd.hkl <HKL: Input HKL ODD  [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted_odd.hkl  --mrcout volume_odd.map  -X ${cellx} -Y ${celly} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
   echo "# IMAGE: volume_odd.map <MAP: final map 3D ODD images>"  >> LOGS/${scriptname}.results
+  echo "<<@progress: +5>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_correlator.exe - for FSC"
+  #############################################################################  
+  ${bin_2dx}/2dx_correlator.exe --vol1 volume_even.map --vol2 volume_odd.map -R ${RESMAX} --bins 100 --fsc even_odd_fsc.dat
+  #
+  ${app_python} ${proc_2dx}/plotFSC.py even_odd_fsc.dat PS/even_odd_fsc.ps
+  #
+  echo "# IMAGE: even_odd_fsc.dat <TXT: FSC data between even odd datasets>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: PS/even_odd_fsc.ps <PS: FSC plot between even odd datasets>" >> LOGS/${scriptname}.results
+  #
   echo "<<@progress: +10>>"
 endif
 #

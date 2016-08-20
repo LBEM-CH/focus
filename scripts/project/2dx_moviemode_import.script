@@ -117,12 +117,15 @@ while ( ${irun} <= ${imagenum} )
     echo ":"
     echo ": Importing drift-corrected average image "
     echo ":      ${movie_average}/${importimage}"
+    set stack_found = "n"
     if ( ${movie_import_aligned_stack} == "y" ) then
       if ( -e ${movie_stack}/${importimage} ) then
         echo ": and drift-corrected stack"
         echo ":      ${movie_stack}/${importimage}"
+        set stack_found = "y"
       else
-        ${proc_2dx}/protest "ERROR: ${movie_stack}/${importimage} not found."
+        echo "::WARNING: ${movie_stack}/${importimage} not found."
+        set stack_found = "n"
       endif
     endif
     echo ":: ${irun}: Creating ${movie_import_target_dirname}/${importimage_pattern} for image number ${newimagenumber}"
@@ -137,13 +140,13 @@ while ( ${irun} <= ${imagenum} )
     mkdir ${importimage_pattern}
     cd ${importimage_pattern}
     cp ${movie_average}/${importimage} ${importimage_pattern}_${newimagenumber}_raw.${file_ending}
-    if ( ${movie_import_aligned_stack} == "y" ) then
+    if ( ${movie_import_aligned_stack} == "y" && ${stack_found} == "y") then
       cp ${movie_stack}/${importimage} ${importimage_pattern}_${newimagenumber}_stack.${file_ending}
     endif
     cp ${olddir}/2dx_merge.cfg 2dx_image.cfg
     echo "set imagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
     echo "set nonmaskimagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
-    if ( ${movie_import_aligned_stack} == "y" ) then
+    if ( ${movie_import_aligned_stack} == "y" && ${stack_found} == "y") then
       echo "set movie_stackname = ${importimage_pattern}_${newimagenumber}_stack.${file_ending}" >> 2dx_image.cfg
     endif
     echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg

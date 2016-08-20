@@ -92,7 +92,10 @@ void ImageTab::showImageWindow(const QString& workingDir) {
                     if(run) setTabProcessing(workingDir);
                     else setTabNormal(workingDir);
                 });
-                
+        connect(imageWin, &ImageWindow::saveAsProjectDefaultRequested, 
+                [ = ] (confData* data) {
+                    emit saveAsProjectDefaultRequested(data); 
+                });     
         imagesInitializedToTabs_.insert(workingDir, imageWin);
     }
 

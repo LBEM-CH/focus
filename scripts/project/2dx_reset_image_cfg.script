@@ -67,12 +67,12 @@ eot
     cd ${to_dir}
     #
     # Variables not to reset
-    set imagename = `grep "set imagename =" 2dx_image.cfg`
-    set nonmaskimagename = `grep "set nonmaskimagename =" 2dx_image.cfg`
-    set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg`
-    set imagenumber = `grep "set imagenumber =" 2dx_image.cfg`
-    set imagename_original = `grep "set imagename_original =" 2dx_image.cfg`
-    set movie_stackname_raw = `grep "set movie_stackname_raw = " 2dx_image.cfg`
+    set imagename = `grep "set imagename =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set nonmaskimagename = `grep "set nonmaskimagename =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set imagenumber = `grep "set imagenumber =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set imagename_original = `grep "set imagename_original =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set movie_stackname_raw = `grep "set movie_stackname_raw = " 2dx_image.cfg | head -1 | cut -d'"' -f2`
     #
     # Backup the file
     \cp -f 2dx_image.cfg 2dx_image.cfg-backup4
@@ -83,18 +83,19 @@ eot
     \cp -f ${oldir}/2dx_merge.cfg ${fullpath}/2dx_image.cfg
     #
     # Reset the variables
-    echo ": Updating - ${imagename}"
-    echo "${imagename}" >> 2dx_image.cfg
-    echo ": Updating - ${nonmaskimagename}"
-    echo "${nonmaskimagename}" >> 2dx_image.cfg
-    echo ": Updating - ${movie_stackname}"
-    echo "${movie_stackname}" >> 2dx_image.cfg
-    echo ": Updating - ${imagenumber}"
-    echo "${imagenumber}" >> 2dx_image.cfg
-    echo ": Updating - ${imagename_original}"
-    echo "${imagename_original}" >> 2dx_image.cfg
-    echo ": Updating - ${movie_stackname_raw}"
-    echo "${movie_stackname_raw}" >> 2dx_image.cfg
+    echo ": Updating - imagename to ${imagename}"
+    echo 'set imagename = "'${imagename}'"' >> 2dx_image.cfg
+    echo ": Updating - nonmaskimagename to ${nonmaskimagename}"
+    echo 'set nonmaskimagename = "'${nonmaskimagename}'"' >> 2dx_image.cfg
+    echo ": Updating - movie_stackname to ${movie_stackname}"
+    echo 'set movie_stackname = "'${movie_stackname}'"' >> 2dx_image.cfg
+    echo ": Updating - imagenumber to ${imagenumber}"
+    echo 'set imagenumber = "'${imagenumber}'"' >> 2dx_image.cfg
+    echo ": Updating - imagename_original to ${imagename_original}"
+    echo 'set imagename_original = "'${imagename_original}'"' >> 2dx_image.cfg
+    echo ": Updating - movie_stackname_raw to ${movie_stackname_raw}"
+    echo 'set movie_stackname_raw = "'${movie_stackname_raw}'"' >> 2dx_image.cfg
+    #
     echo "set initialization_reset = y" >> 2dx_image.cfg
     echo "set initialization_executable = y" >> 2dx_image.cfg
     #

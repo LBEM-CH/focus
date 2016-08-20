@@ -32,11 +32,11 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     scriptsWidget->setAttribute(Qt::WA_MacShowFocusRect, 0);
     scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
-    connect(scriptsWidget, &QStackedWidget::currentChanged, 
-            [=](){
-               scriptModule* module = static_cast<scriptModule*>(scriptsWidget->currentWidget());
-               module->select(module->getSelection()->selection());
-            });
+    connect(scriptsWidget, &QStackedWidget::currentChanged,
+            [ = ](){
+        scriptModule* module = static_cast<scriptModule*> (scriptsWidget->currentWidget());
+        module->select(module->getSelection()->selection());
+    });
 
     standardScripts = new scriptModule(data, data->getDir("standardScripts"), scriptModule::standard);
     scriptsWidget->addWidget(standardScripts);
@@ -47,8 +47,8 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     connect(standardScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
     connect(standardScripts, SIGNAL(reload()), this, SLOT(reload()));
     connect(standardScripts, &scriptModule::shouldResetParams,
-                [ = ] (QModelIndex index){
-            parameters->resetParameters(standardScripts->variablesToReset(index));
+            [ = ] (QModelIndex index){
+        parameters->resetParameters(standardScripts->variablesToReset(index));
     });
 
     customScripts = new scriptModule(data, data->getDir("customScripts"), scriptModule::custom);
@@ -59,25 +59,25 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     connect(customScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
     connect(customScripts, SIGNAL(reload()), this, SLOT(reload()));
     connect(customScripts, &scriptModule::shouldResetParams,
-                [ = ] (QModelIndex index){
-            parameters->resetParameters(customScripts->variablesToReset(index));
+            [ = ] (QModelIndex index){
+        parameters->resetParameters(customScripts->variablesToReset(index));
     });
 
     subscriptWidget = new QListView;
     subscriptWidget->setUniformItemSizes(true);
     subscriptWidget->setItemDelegate(new SpinBoxDelegate);
     connect(subscriptWidget, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(subscriptActivated(QModelIndex)));
-    
+
     QSplitter* scriptsContainer = new QSplitter(Qt::Vertical);
     scriptsContainer->addWidget(scriptsWidget);
     scriptsContainer->addWidget(subscriptWidget);
     scriptsContainer->setStretchFactor(0, 2);
     scriptsContainer->setStretchFactor(1, 1);
-    
-    
+
+
     parameterContainer = setupParameterWindow();
     logWindow = setupLogWindow();
-    
+
     centralSplitter = new QSplitter(this);
     centralSplitter->setOrientation(Qt::Vertical);
 
@@ -111,8 +111,8 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     preview = new imagePreview(data, "", false, previewContainer);
     connect(preview, SIGNAL(load()), this, SLOT(refresh()));
     previewContainer->setMainWidget(preview);
-    
-    
+
+
     imageParser = new resultsParser(data, QStringList() << "", resultsParser::images);
     connect(imageParser, SIGNAL(imageSelected(const QString &)), preview, SLOT(setImage(const QString&)));
     connect(imageParser, SIGNAL(cellActivated(int, int)), preview, SLOT(launchNavigator()));
@@ -138,9 +138,9 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     showHeaderButton->setChecked(false);
     connect(showHeaderButton, SIGNAL(toggled(bool)), preview, SLOT(showImageHeader(bool)));
     previewContainer->setHeaderWidget(showHeaderButton);
-    
+
     QWidget *rightContainer = new QWidget;
-    
+
     QVBoxLayout *rightLayout = new QVBoxLayout;
     rightLayout->setMargin(0);
     rightLayout->setSpacing(0);
@@ -176,7 +176,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     refreshButton->setIconSize(QSize(18, 18));
     refreshButton->setCheckable(false);
     connect(refreshButton, SIGNAL(clicked()), this, SLOT(reload()));
-    
+
     saveCfgButton = new QPushButton;
     saveCfgButton->setIcon(*(data->getIcon("save_project_default")));
     saveCfgButton->setToolTip("Save this configuration as project default");
@@ -230,31 +230,31 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     headerLayout->addWidget(titleContainer);
     headerLayout->addWidget(subTitleLabel);
     headerContainer->setLayout(headerLayout);
-    
+
     blockContainer* statusParserCont = new blockContainer("Status");
     statusParser = new statusViewer(data->getDir("config") + "/2dx_status.html");
     statusParser->setConf(data);
     statusParser->load();
     statusParserCont->setMainWidget(statusParser);
-    
+
     QWidget *statusContainer = new QWidget();
     statusContainer->setFixedHeight(235);
-    
+
     QHBoxLayout *statusLayout = new QHBoxLayout();
     statusLayout->setMargin(0);
     statusLayout->setSpacing(0);
     statusLayout->addWidget(statusParserCont, 1);
-    statusLayout->addWidget(previewContainer, 0 , Qt::AlignHCenter | Qt::AlignVCenter);
+    statusLayout->addWidget(previewContainer, 0, Qt::AlignHCenter | Qt::AlignVCenter);
     statusContainer->setLayout(statusLayout);
-    
+
     //Setup the layout and add widgets
     QGridLayout* layout = new QGridLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);
-    
+
     /*LAYOUT
-    * -----------------------------------------------------------
+     * -----------------------------------------------------------
      * | TOOL   | SCRIPTS       | HEADER (0, 2, 1, 1)
      * | BAR    | WIDGET        |--------------------------------
      * |(0,0,   | (0,1,4,1)     | PROGRESSBAR (1, 2, 1, 1)
@@ -275,18 +275,18 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     layout->addWidget(progressBar, 1, 2, 1, 1);
     layout->addWidget(centerRightSplitter, 2, 2, 1, 1);
     layout->addWidget(statusContainer, 3, 2, 1, 1);
-    
+
     layout->setRowStretch(0, 0);
     layout->setRowStretch(1, 0);
     layout->setRowStretch(2, 1);
     layout->setRowStretch(3, 0);
-    
+
     verbosityControl->setCurrentIndex(1);
-    
+
     //Just to set correct siezs
     maximizeLogWindow(false);
     maximizeParameterWindow(false);
-    
+
     setStandardMode();
     standardScripts->initialize();
 }
@@ -411,8 +411,8 @@ blockContainer* ImageWindow::setupParameterWindow() {
 QToolBar* ImageWindow::setupToolbar() {
     QToolBar* scriptsToolBar = new QToolBar("Choose Mode", this);
     scriptsToolBar->setOrientation(Qt::Vertical);
-    scriptsToolBar->setIconSize(QSize(36,36));
-    
+    scriptsToolBar->setIconSize(QSize(36, 36));
+
     showStandardScripts = new QToolButton(scriptsToolBar);
     showStandardScripts->setIcon(*(data->getIcon("standard")));
     showStandardScripts->setToolTip("Standard");
@@ -434,14 +434,14 @@ QToolBar* ImageWindow::setupToolbar() {
 
 void ImageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     updateScriptLabel(module->title(index));
-    
+
     int uid = index.data(Qt::UserRole).toUInt();
-    
+
     QString text;
     QStringList helpTextList = module->getScriptManual(uid);
     for (int i = 0; i < helpTextList.size(); i++) text += helpTextList[i] + "\n";
     subTitleLabel->setText(text);
-    
+
     QStandardItemModel* model = new QStandardItemModel;
     QStringList subScripts = module->getScriptDependents(uid);
     if (subScripts.size() == 0) {
@@ -472,7 +472,7 @@ void ImageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
         }
     }
     subscriptWidget->setModel(model);
-    
+
     currentResults = module->resultsFile(index);
 
     setScriptProgress(module->getScriptProgress(uid));
@@ -545,13 +545,13 @@ void ImageWindow::maximizeLogWindow(bool maximize) {
 }
 
 void ImageWindow::maximizeParameterWindow(bool maximize) {
-    
+
     if (maximize) {
         centralSplitter->setSizes(QList<int>() << 1 << 0);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
     } else {
         centralSplitter->setSizes(QList<int>() << 1 << 1);
-        
+
         centerRightSplitter->setSizes(QList<int>() << 5 << 2);
     }
 }
@@ -595,7 +595,7 @@ void ImageWindow::updateScriptLabel(const QString& label) {
 }
 
 void ImageWindow::setScriptProgress(int progress) {
-    if(scriptsWidget->currentIndex() == runningTabIndex) progressBar->setValue(progress);
+    if (scriptsWidget->currentIndex() == runningTabIndex) progressBar->setValue(progress);
 }
 
 void ImageWindow::revert() {
@@ -640,16 +640,12 @@ void ImageWindow::subscriptActivated(QModelIndex item) {
     QProcess::startDetached(data->getApp("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
 }
 
-void ImageWindow::saveAsProjectDefault()
-{
-  QString confFile = QFileInfo(data->getDir("working") + "/../../").absolutePath() + "/" + "2dx_master.cfg";
-  confFile.replace(QRegExp("/+"),"/");
-  if(QMessageBox::question(this,
-			   tr("Save as default?"),"Saving as \n" + confFile + "\n will set default values for all other images in this project. \n\n 2DX will QUIT after saving the file. \n\n Proceed?",
-			   tr("Yes"),
-			   tr("No"),
-			   QString(),0,1) == 0) {
-    data->saveAs(confFile);
-    qApp->closeAllWindows();
-  }
+void ImageWindow::saveAsProjectDefault() {
+    if (QMessageBox::question(this,
+            tr("Save as default?"), "Saving as project default will change master config file and set default values for all other new imported images in this project. \n\n 2DX will QUIT after saving the file. \n\n Proceed?",
+            tr("Yes"),
+            tr("No"),
+            QString(), 0, 1) == 0) {
+        emit saveAsProjectDefaultRequested(data);
+    }
 }

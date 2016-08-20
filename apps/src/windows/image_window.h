@@ -91,6 +91,7 @@ public slots:
 signals:
     void executing(bool);
     void scriptCompletedSignal();
+    void saveAsProjectDefaultRequested(confData* data);
 
 private:
     blockContainer* setupLogWindow();

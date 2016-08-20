@@ -49,6 +49,11 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     UserPreferences(mainData).loadAllFontSettings();
     UserPreferences(mainData).loadWindowPreferences(this);
     
+    timer_refresh = 10000;
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(save()));
+    timer->start(timer_refresh);
+    
     updateWindowTitle();
     setUnifiedTitleAndToolBarOnMac(true);
 
@@ -162,12 +167,6 @@ void mainWindow::setupActions() {
     saveAction = new QAction(*(mainData->getIcon("save")), tr("&Save"), this);
     saveAction->setShortcut(tr("Ctrl+S"));
     connect(saveAction, SIGNAL(triggered()), mainData, SLOT(save()));
-
-    timer_refresh = 10000;
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(save()));
-    timer->start(timer_refresh);
-
 }
 
 void mainWindow::setupMenuBar() {
@@ -349,6 +348,12 @@ void mainWindow::setupWindows() {
     mergeWin_ = new MergeTab(mainData, results, scriptsDir, scriptsModules, this);
     
     imageWin_ = new ImageTab(mainData, this);
+    connect(imageWin_, &ImageTab::saveAsProjectDefaultRequested, 
+            [ = ] (confData* data) {
+                timer->stop();
+                data->saveAs(mainData->getDir("working") + "/2dx_merge.cfg");
+                qApp->closeAllWindows();
+            });
     
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);

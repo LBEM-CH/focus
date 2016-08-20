@@ -29,6 +29,7 @@ class ImageTab : public QWidget
         
     signals:
         void imagesOpenChanged(QStringList);
+        void saveAsProjectDefaultRequested(confData* data);
         
     private:
         

@@ -11,9 +11,7 @@
 QString getAppDir() {
     QString appDir = QApplication::applicationDirPath();
     QString sep = "/../";
-#ifdef Q_OS_MAC
-    appDir += "/../../../";
-#endif
+    
     int tries = 0;
     while (!QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists() && tries < 3) {
         qDebug() << (appDir + sep + "resources/config/2dx_master.cfg") << " does not exist!";
@@ -220,7 +218,7 @@ int main(int argc, char **argv) {
         QString applicationDir = getAppDir();
         std::cout << "Application Directory: " << applicationDir.toStdString() << std::endl;
         
-        QString workingDir = arguments[0];
+        QString workingDir = QDir(arguments[0]).absolutePath();
         std::cout << "Project Directory: " << workingDir.toStdString() << std::endl;
         
         QString script = arguments[1];

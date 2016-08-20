@@ -48,6 +48,8 @@ int main(int argc, char *argv[]) {
         data.setDefaults(args[0]);
         QDir standardScriptsDir(data.getDir("standardScriptsDir"));
         QDir customScriptsDir(data.getDir("customScriptsDir"));
+        
+        std::cout << "Application Directory: " << data.getDir("application").toStdString() << "\n";
 
         QMap<int, QString> scripts;
         QMap<int, QString> cScripts;
@@ -60,9 +62,17 @@ int main(int argc, char *argv[]) {
             if (searchScripts[i].trimmed().toLower().startsWith('+')) {
                 QString script = searchScripts[i].trimmed() + ".script";
                 script.remove(0, 1);
+                if(!QFileInfo(data.getDir("customScriptsDir") + "/" + script).exists()) {
+                    std::cerr << "WARNING: Custom script: " << script.toStdString() << " does not exist in: \n\t" << data.getDir("customScriptsDir").toStdString() << "\n";
+                }
                 cSearchScripts << script;
-            } else
-                sSearchScripts << searchScripts[i].trimmed() + ".script";
+            } else {
+                QString script = searchScripts[i].trimmed() + ".script";
+                if(!QFileInfo(data.getDir("standardScriptsDir") + "/" + script).exists()) {
+                    std::cerr << "WARNING: Standard script: " << script.toStdString() << " does not exist in: \n\t" << data.getDir("standardScriptsDir").toStdString() << "\n";
+                }
+                sSearchScripts << script;
+            }
         }
 
         QMap<int, confData*> localConfList;

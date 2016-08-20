@@ -812,9 +812,6 @@ const QString &confData::getURL(const QString &name) {
 void confData::setDefaults(const QString &workingDirName) {
     QString appDir = QApplication::applicationDirPath();
     QString sep = "/../";
-#ifdef Q_OS_MAC
-    appDir += "/../../../";
-#endif
     int tries = 0;
     while (!QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists() && tries < 3) {
         cout << (appDir + sep + "resources/config/2dx_master.cfg").toStdString() << " does not exist!" << endl;
@@ -837,8 +834,8 @@ void confData::setDefaults(const QString &workingDirName) {
         qDebug() << (localConf + " does not exist!");
         exit(0);
     }
-    QDir standardScriptsDir(appDir + "/../scripts/image/standard/");
-    QDir customScriptsDir(appDir + "/../scripts/image/custom/");
+    QDir standardScriptsDir(appDir +  sep + "/scripts/image/standard/");
+    QDir customScriptsDir(appDir + sep + "/scripts/image/custom/");
     QDir working(QDir(workingDirName).absolutePath());
 
     init(referenceConf);
@@ -855,13 +852,14 @@ void confData::setDefaults(const QString &workingDirName) {
         exit(0);
     }
 
+    setDir("application", appDir + sep);
     setDir("working", workingDir);
-    setDir("binDir", appDir + "/../kernel/mrc/bin");
-    setDir("procDir", appDir + "/../scripts/proc");
+    setDir("binDir", appDir + sep + "/kernel/mrc/bin");
+    setDir("procDir", appDir + sep + "/scripts/proc");
     setDir("standardScriptsDir", standardScriptsDir);
     setDir("customScriptsDir", customScriptsDir);
-    setApp("2dx_image", appDir + "/../bin/2dx_image");
-    setApp("2dx_merge", appDir + "/../bin/2dx_merge");
+    setApp("2dx_image", appDir + sep + "/bin/2dx_image");
+    setApp("2dx_merge", appDir + sep + "/bin/2dx_merge");
     syncWithUpper();
     if (!QFileInfo(localConf).exists()) {
         loadDefaults();

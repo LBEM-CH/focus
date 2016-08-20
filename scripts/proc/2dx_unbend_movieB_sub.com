@@ -299,7 +299,9 @@ while ($i <= ${movie_imagenumber_superframes})
   echo "set nonmaskimagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/f${i}/2dx_image.cfg
 
   if ( -d ${image_dir}/${frame_folder} ) then
+    echo ": Launching" ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize"
     ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize"
+    echo ": Launching" ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize_files"
     ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize_files"
     cd ${image_dir}/${frame_folder}/f${i}
     if ( -l SCRATCH ) then 
@@ -308,7 +310,9 @@ while ($i <= ${movie_imagenumber_superframes})
     endif
     cd ${olddir}
   else
+    echo ": Launching" ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize"
     ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize"
+    echo ": Launching" ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize_files"
     ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize_files"
     cd ${frame_folder}/f${i}
     if ( -l SCRATCH ) then

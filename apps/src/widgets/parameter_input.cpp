@@ -52,7 +52,7 @@ void ParameterInput::saveValue(const QString& value) {
     if (errors.size() != 0) {
         QString err, fullErr;
         foreach(err, errors) fullErr += err + "\n";
-        QMessageBox::warning(this, tr("Error in setting value for parameter"), fullErr);
+        QMessageBox::warning(this, tr("Error in setting value for parameter: ") + element->get("valuelabel"), fullErr);
         load();
         return;
     }
@@ -138,9 +138,22 @@ QWidget* ParameterInput::setupDropDownWidget() {
     combo->addItems(element->typeInfo().properties);
 
     connect(this, &ParameterInput::shouldLoadValue, 
-                [ = ](const QString & value){combo->setCurrentIndex(value.toInt());});
-    connect(combo, static_cast<void(QComboBox::*)(int)> (&QComboBox::currentIndexChanged),
-            [ = ](int index){saveValue(QString::number(index));});
+                [ = ](const QString & value){
+                    if(value.contains('=')) combo->setCurrentIndex(value.split('=').first().trimmed().toInt());
+                    else if(combo->findText(value) >=0 ) combo->setCurrentText(value);
+                    else if(QVariant(value).canConvert<int>() && QVariant(value).convert(QMetaType::Int)) {
+                        combo->setCurrentIndex(value.toInt()); 
+                        //qDebug() << "Loaded by index" << element->get("valueLabel") << value;
+                    }
+                    else {
+                        qDebug() << "Error in loading the parameter" << element->get("valueLabel") << value;
+                    }
+                });
+    connect(combo, static_cast<void(QComboBox::*)(const QString&)> (&QComboBox::currentTextChanged),
+            [ = ](const QString& value) {
+                if(value.contains('=')) saveValue(value.split('=').first().trimmed());
+                else saveValue(value);
+            });
 
     return combo;
 }

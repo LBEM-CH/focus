@@ -25,7 +25,7 @@ bool parse_csh(const QList<confData *> &data, QStringList &scriptData) {
     int i = 0;
     QString line;
     QStringList vSearch = data.first()->getValueSearch();
-    vSearch << "sortorder" << "remark" << "display" << "global" << "section" << "===" << "manual";
+    vSearch << "sortorder" << "remark" << "display" << "global" << "section" << "===" << "manual" << "reset";
 
     while (!line.contains("$end_local_vars", Qt::CaseInsensitive) && i < scriptData.size()) {
         line = scriptData[i].trimmed().toLower();

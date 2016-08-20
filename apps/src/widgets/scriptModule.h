@@ -44,7 +44,7 @@ public slots:
     void scriptFinished(int exitCode);
 
     void selectAll();
-    void select(QModelIndex index);
+    void select(QModelIndex index, bool shouldResetParam = false);
     void selectFirst();
     void select(const QItemSelection &selected);
     void select(const QItemSelection &selected, const QItemSelection &deselected);
@@ -61,6 +61,7 @@ signals:
     void reload();
 
     void currentScriptChanged(QModelIndex index);
+    void shouldResetParams(QModelIndex index);
 
     void scriptLaunched();
     void scriptCompleted(QModelIndex index);

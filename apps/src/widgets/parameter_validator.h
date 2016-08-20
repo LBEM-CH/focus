@@ -40,10 +40,11 @@ public:
         } else if (info.type == confElement::Type::FILE && !QFileInfo(value).exists()) {
             errorMsg_ << QString("The file used does not exit: ") + value + QString("\n");
         } else if (info.type == confElement::Type::DROP_DOWN) {
-            if (!(QVariant(value).canConvert<int>())) {
-                errorMsg_ << QString("The drop down index can't be converted to int\n");
-            } else if (value.toInt() >= info.properties.size()) {
+            if(QVariant(value).canConvert<int>() && value.toInt() >= info.properties.size() && !info.properties.contains(value)) {
                 errorMsg_ << QString("The drop down index exceeds it's size \n");
+            }
+            else if(!QVariant(value).canConvert<int>() && !info.properties.contains(value)) {
+                errorMsg_ << QString("The value ") + value + (" specified is not contained in drop down\n");
             }
         } else if (info.type == confElement::Type::FLOAT && !(QVariant(value).canConvert<float>())) {
             errorMsg_ << QString("The provided value cannot be converted to float: ") + value + QString("\n");

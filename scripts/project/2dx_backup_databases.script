@@ -15,7 +15,7 @@
 #
 # MANUAL: This script can be used to backup or restore all 2dx_image.cfg databases.
 #
-# RESET: backup_sure = "n"
+# RESET: backup_sure = "no"
 # DISPLAY: backup_all_files
 # DISPLAY: backup_database_direction
 # DISPLAY: backup_database_comment_1

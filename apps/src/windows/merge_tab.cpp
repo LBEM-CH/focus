@@ -8,7 +8,7 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
 : QWidget(parent) {
     mainData = data;
     results = res;
-    
+
     //Setup dependables
     blockContainer* logWindow = setupLogWindow();
     blockContainer* parameterContainer = setupParameterWindow();
@@ -18,12 +18,12 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     scriptsWidget->setAttribute(Qt::WA_MacShowFocusRect, 0);
     scriptsWidget->setMinimumWidth(250);
     scriptsWidget->setMaximumWidth(300);
-    
-    connect(scriptsWidget, &QStackedWidget::currentChanged, 
-            [=](){
-               scriptModule* module = static_cast<scriptModule*>(scriptsWidget->currentWidget());
-               module->select(module->getSelection()->selection());
-            });
+
+    connect(scriptsWidget, &QStackedWidget::currentChanged,
+            [ = ](){
+        scriptModule* module = static_cast<scriptModule*> (scriptsWidget->currentWidget());
+        module->select(module->getSelection()->selection());
+    });
 
     QActionGroup* showScriptsGroup = new QActionGroup(this);
     showScriptsGroup->setExclusive(true);
@@ -32,12 +32,12 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     scriptsToolBar->setIconSize(QSize(36, 36));
 
     for (int i = 0; i < scriptDirs.size(); ++i) {
-        scriptModule* module = new scriptModule(mainData, scriptDirs[i], moduleTypes[i]);               
+        scriptModule* module = new scriptModule(mainData, scriptDirs[i], moduleTypes[i]);
         scriptsWidget->addWidget(module);
         module->resize(200, 20);
         module->setMinimumWidth(200);
-        if(i==0) defaultModule = module;
-        
+        if (i == 0) defaultModule = module;
+
         connect(module, &scriptModule::scriptCompleted,
                 [ = ](QModelIndex index){
             scriptCompleted(module, index);
@@ -46,6 +46,10 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
                 [ = ](QModelIndex index){
             scriptChanged(module, index);
         });
+        connect(module, &scriptModule::shouldResetParams,
+                [ = ] (QModelIndex index){
+            parameters->resetParameters(module->variablesToReset(index));
+        });
         connect(module, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
         connect(module, SIGNAL(reload()), this, SLOT(reload()));
         connect(module, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
@@ -53,16 +57,16 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
         connect(module, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
         connect(module, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
         connect(verbosityControl, SIGNAL(currentIndexChanged(int)), module, SLOT(setVerbosity(int)));
-        
+
         QAction* action = new QAction(module->getModuleToolIcon(), module->getModuleDescription(), this);
         action->setCheckable(true);
         connect(action, &QAction::triggered,
-            [=] () {
-                scriptsWidget->setCurrentWidget(module);
-            });
+                [ = ] (){
+            scriptsWidget->setCurrentWidget(module);
+        });
         showScriptsGroup->addAction(action);
         scriptsToolBar->addAction(action);
-        if(i==0) defaultAction = action;
+        if (i == 0) defaultAction = action;
     }
 
     subscriptWidget = new QListView;
@@ -222,7 +226,7 @@ blockContainer* MergeTab::setupLogWindow() {
     verbosityControl->addItems(QStringList() << "Silent" << "Low" << "Moderate" << "Highest");
 
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), logViewer, SLOT(load(int)));
-    
+
     //Setup Maximize tool button
     QToolButton* maximizeLogWindow = new QToolButton();
     maximizeLogWindow->setFixedSize(QSize(20, 20));
@@ -360,7 +364,6 @@ void MergeTab::scriptChanged(scriptModule *module, QModelIndex index) {
     subscriptWidget->setModel(model);
 
     parameters->changeParametersDisplayed(module->displayedVariables(index));
-    parameters->resetParameters(module->variablesToReset(index));
     if (verbosityControl->currentIndex() != 0)
         logViewer->loadLogFile(module->logFile(index));
     else

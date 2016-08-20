@@ -111,6 +111,20 @@ void ImageTab::showImageWindow(const QString& workingDir) {
     windowTabWidget->setCurrentWidget(imagesInitializedToTabs_[workingDir]);
 }
 
+void ImageTab::saveConfigs() {
+    for(int i=0; i<imagesInitializedToTabs_.keys().size(); ++i) {
+        imagesInitializedToTabs_[imagesInitializedToTabs_.keys()[i]]->save();
+    }
+}
+
+bool ImageTab::configModified() {
+    for(int i=0; i<imagesInitializedToTabs_.keys().size(); ++i) {
+        if(imagesInitializedToTabs_[imagesInitializedToTabs_.keys()[i]]->modified()) return true;
+    }
+    return false;
+}
+
+
 void ImageTab::setTabNormal(const QString& workingDir) {
     if(imagesShown_.contains(workingDir)) {
         windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), *(mainData->getIcon("file")));

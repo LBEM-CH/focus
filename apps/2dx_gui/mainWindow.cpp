@@ -165,7 +165,7 @@ void mainWindow::setupActions() {
 
     timer_refresh = 10000;
     timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), mainData, SLOT(save()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(save()));
     timer->start(timer_refresh);
 
 }
@@ -425,13 +425,13 @@ void mainWindow::launchProjectTools() {
 }
 
 void mainWindow::closeEvent(QCloseEvent *event) {
-    if (!mainData->isModified()) {
+    if (!mainData->isModified() && !imageWin_->configModified()) {
         reallyClose(event);
     }
     else {
         int choice = QMessageBox::question(this, tr("Confirm Exit"), tr("Data not saved, exit?"), tr("Save && Quit"), tr("Quit Anyway"), QString("Cancel"), 0, 1);
         if (choice == 0) {
-            mainData->save();
+            this->save();
             reallyClose(event);
         } else if (choice == 1)
             reallyClose(event);
@@ -510,4 +510,9 @@ void mainWindow::changeProjectName() {
 
 void mainWindow::updateWindowTitle() {
     setWindowTitle(ProjectPreferences(mainData).projectName() + " | 2dx (" + mainData->version_number() + ")");
+}
+
+void mainWindow::save() {
+    mainData->save();
+    imageWin_->saveConfigs();
 }

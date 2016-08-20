@@ -24,6 +24,8 @@ class ImageTab : public QWidget
         void closeImageWindow(int index);
         void setTabProcessing(const QString&);
         void setTabNormal(const QString&);
+        void saveConfigs();
+        bool configModified();
         
     signals:
         void imagesOpenChanged(QStringList);

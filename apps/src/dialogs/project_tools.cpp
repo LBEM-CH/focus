@@ -30,6 +30,11 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
         scriptChanged(index);
     });
     
+    connect(toolsScriptModule, &scriptModule::shouldResetParams,
+                [ = ] (QModelIndex index){
+            parameters->resetParameters(toolsScriptModule->variablesToReset(index));
+    });
+    
     connect(toolsScriptModule, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
     connect(toolsScriptModule, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
     connect(toolsScriptModule, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
@@ -190,7 +195,6 @@ void ProjectTools::scriptChanged(QModelIndex index) {
     subTitleLabel->setText(text);
 
     parameters->changeParametersDisplayed(toolsScriptModule->displayedVariables(index));
-    parameters->resetParameters(toolsScriptModule->variablesToReset(index));
     if (verbosityControl->currentIndex() != 0)
         logViewer->loadLogFile(toolsScriptModule->logFile(index));
     else

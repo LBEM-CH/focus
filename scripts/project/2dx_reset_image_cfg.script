@@ -18,8 +18,8 @@
 # MANUAL: This script will replace all 2dx_image_cfg files of the selected images with the 2dx_master.cfg file.
 # MANUAL: Please note that all the parameters except imagename, nonmaskimagename, movie_stackname, imagenumber, imagename_original will be replaced.
 #
-# RESET: reset_sure1 = "n"
-# RESET: reset_sure2 = "n"
+# RESET: reset_sure1 = "no"
+# RESET: reset_sure2 = "no"
 # RESET: reset_warning = "Make no mistake here!"
 #
 #$end_local_vars

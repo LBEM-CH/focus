@@ -71,6 +71,9 @@ public slots:
     void refresh();
     void revert();
     void stopPlay();
+    
+    void save();
+    bool modified();
 
     void launchLogBrowser();
     void launchFileBrowser();

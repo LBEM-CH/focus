@@ -432,25 +432,26 @@ QString scriptModule::title(QModelIndex index) {
 
 void scriptModule::initialize() {
     setVerbosity(1);
-    select(model->item(0)->index());
+    select(model->item(0)->index(), true);
     execute(true);
 }
 
 void scriptModule::selectFirst() {
-    select(model->item(0)->index());
+    select(model->item(0)->index(), true);
 }
 
-void scriptModule::select(QModelIndex index) {
+void scriptModule::select(QModelIndex index, bool shouldResetParam) {
     clearExtendedSelections();
     if (!selection->isSelected(index)) selection->select(index, QItemSelectionModel::Select);
     if (index.parent().isValid()) selection->select(index.parent(), QItemSelectionModel::Current);
     if (selection->selectedIndexes().isEmpty()) cerr << "No selection for some reason..." << endl;
     emit currentScriptChanged(index);
+    if(shouldResetParam) emit shouldResetParams(index);
 }
 
 void scriptModule::select(const QItemSelection& selected) {
     if (selected.indexes().isEmpty()) return;
-    select(selected.indexes().first());
+    select(selected.indexes().first(), true);
 }
 
 void scriptModule::select(const QItemSelection &selected, const QItemSelection &deselected) {

@@ -46,6 +46,10 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     connect(standardScripts, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
     connect(standardScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
     connect(standardScripts, SIGNAL(reload()), this, SLOT(reload()));
+    connect(standardScripts, &scriptModule::shouldResetParams,
+                [ = ] (QModelIndex index){
+            parameters->resetParameters(standardScripts->variablesToReset(index));
+    });
 
     customScripts = new scriptModule(data, data->getDir("customScripts"), scriptModule::custom);
     scriptsWidget->addWidget(customScripts);
@@ -54,6 +58,10 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     connect(customScripts, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
     connect(customScripts, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
     connect(customScripts, SIGNAL(reload()), this, SLOT(reload()));
+    connect(customScripts, &scriptModule::shouldResetParams,
+                [ = ] (QModelIndex index){
+            parameters->resetParameters(customScripts->variablesToReset(index));
+    });
 
     subscriptWidget = new QListView;
     subscriptWidget->setUniformItemSizes(true);
@@ -470,7 +478,6 @@ void ImageWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     setScriptProgress(module->getScriptProgress(uid));
 
     parameters->changeParametersDisplayed(module->displayedVariables(index));
-    parameters->resetParameters(module->variablesToReset(index));
     currentLog = module->logFile(index);
     if (!visible["historyview"]) logViewer->loadLogFile(currentLog);
     results->setResult(module->resultsFile(index));
@@ -553,6 +560,14 @@ void ImageWindow::execute(bool run) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
     runningTabIndex = scriptsWidget->currentIndex();
     module->execute(run);
+}
+
+void ImageWindow::save() {
+    data->save();
+}
+
+bool ImageWindow::modified() {
+    return data->isModified();
 }
 
 void ImageWindow::reload() {

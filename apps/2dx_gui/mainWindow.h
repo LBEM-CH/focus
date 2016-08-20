@@ -86,6 +86,8 @@ public slots:
     void open(const QString& projectPath="");
     void openURL(const QString &url);
     void toggleAutoSave();
+    
+    void save();
 
     void launchEuler();
     void launchReproject();

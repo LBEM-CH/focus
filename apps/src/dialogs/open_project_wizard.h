@@ -79,6 +79,8 @@ private:
 
             QLabel* label = new QLabel("Available Projects");
             QPushButton* createProject = new QPushButton("Add Project");
+            createProject->setAutoDefault(false);
+            createProject->setDefault(false);
             connect(createProject, &QPushButton::clicked,
                     [ = ](){
                 createNewProject();

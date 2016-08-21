@@ -60,6 +60,8 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     runButton = new QPushButton;
+    runButton->setAutoDefault(false);
+    runButton->setDefault(false);
     runButton->setIcon(*(mainData->getIcon("play")));
     runButton->setToolTip("Run/Stop script");
     runButton->setIconSize(QSize(18, 18));
@@ -68,6 +70,8 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     connect(toolsScriptModule, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
 
     manualButton = new QPushButton;
+    manualButton->setAutoDefault(false);
+    manualButton->setDefault(false);
     manualButton->setIcon(*(mainData->getIcon("help")));
     manualButton->setToolTip("Show Help");
     manualButton->setIconSize(QSize(18, 18));

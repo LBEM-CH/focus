@@ -220,6 +220,9 @@ echo "<<@progress: 10>"
 ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com "
 #----------------------------------------------------------------------
 #
+set dirfile = "2dx_merge_dirfile.dat"
+set select_mode = "all"
+#
 source ${proc_2dx}/2dx_origtilt_merge.com
 #
 source ${proc_2dx}/2dx_origtilt_aph_to_mtz.com

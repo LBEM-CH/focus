@@ -132,8 +132,10 @@ echo date = ${date}
 #
 set scriptname = 2dx_refine2D
 #
-set merge_modus="2D"
-set 
+set merge_modus = "2D"
+set refbeamtilt = n
+set reftiltgeo = n
+set merge_reference = 0
 #
 \rm -f LOGS/${scriptname}.results
 #

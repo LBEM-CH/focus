@@ -2,13 +2,14 @@
 
 #include "project_tools.h"
 
-ProjectTools::ProjectTools(confData* data, QWidget* parent)
+ProjectTools::ProjectTools(confData* data, resultsData* res, QWidget* parent)
 : QDialog(parent) {
     
     setWindowTitle("Project Tools");
     setModal(true);
     
     mainData = data;
+    results = res;
     
     blockContainer* logWindow = setupLogWindow();
     blockContainer* parameterContainer = setupParameterWindow();
@@ -24,6 +25,11 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     toolsScriptModule->setAttribute(Qt::WA_MacShowFocusRect, 0);
     toolsScriptModule->setMinimumWidth(250);
     toolsScriptModule->setMaximumWidth(300);
+    
+    connect(toolsScriptModule, &scriptModule::scriptCompleted,
+                [ = ](QModelIndex index){
+            scriptCompleted(index);
+        });
     
     connect(toolsScriptModule, &scriptModule::currentScriptChanged,
             [ = ](QModelIndex index){
@@ -136,6 +142,8 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     verbosityControl->setCurrentIndex(1);
     toolsScriptModule->setVerbosity(1);
     toolsScriptModule->selectFirst();
+    
+    connect(results, SIGNAL(saved(bool)), parameters, SLOT(load()));
 }
 
 blockContainer* ProjectTools::setupLogWindow() {
@@ -246,7 +254,13 @@ void ProjectTools::scriptChanged(QModelIndex index) {
     else
         logViewer->clear();
     
+    results->load(toolsScriptModule->resultsFile(index));
     setScriptProgress(toolsScriptModule->getScriptProgress(uid));
+}
+
+void ProjectTools::scriptCompleted(QModelIndex index) {
+    results->load(toolsScriptModule->resultsFile(index));
+    results->save();
 }
 
 void ProjectTools::updateScriptLabel(const QString& label) {

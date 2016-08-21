@@ -211,6 +211,8 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
 
     scriptsWidget->setCurrentIndex(0);
     defaultAction->setChecked(true);
+    
+    connect(results, SIGNAL(saved(bool)), parameters, SLOT(load()));
 
     //Just to get the correct stretches of log and parameter windows
     maximizeLogWindow(false);

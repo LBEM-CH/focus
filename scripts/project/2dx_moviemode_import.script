@@ -189,7 +189,7 @@ while ( ${irun} <= ${imagenum} )
     cd ${olddir}
     #
     @ import_imagenumber++
-    echo "set import_imagenumber = ${import_imagenumber}"  >> LOGS/${scriptname}.results
+    echo "set -force import_imagenumber = ${import_imagenumber}"  >> LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: ${movie_average}/${importimage} not found."
   endif

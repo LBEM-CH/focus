@@ -15,6 +15,7 @@
 #include <QProcess>
 
 #include "confData.h"
+#include "resultsData.h"
 #include "scriptModule.h"
 #include "parameter_widget.h"
 #include "log_viewer.h"
@@ -26,11 +27,12 @@ class ProjectTools : public QDialog {
 
 public:
 
-    ProjectTools(confData* data, QWidget *parent = NULL);
+    ProjectTools(confData* data, resultsData* res, QWidget *parent = NULL);
     
 public slots:
     
     void scriptChanged(QModelIndex index);
+    void scriptCompleted(QModelIndex index);
     void subscriptActivated(QModelIndex item);
     void updateScriptLabel(const QString& label);
     void setScriptProgress(int progress);
@@ -54,6 +56,8 @@ private:
 
     ParametersWidget *parameters;
     LogViewer *logViewer;
+    
+    resultsData *results;
 
     QComboBox* userLevelButtons;
     QComboBox* verbosityControl;

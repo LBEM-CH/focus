@@ -426,7 +426,7 @@ void mainWindow::launchReproject() {
 void mainWindow::launchProjectTools() {
     if (!projectToolsInit) {
         projectToolsInit = true;
-        projectTools = new ProjectTools(mainData, this);
+        projectTools = new ProjectTools(mainData, results, this);
     }
 }
 

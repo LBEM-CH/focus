@@ -34,31 +34,9 @@
 #
 # SORTORDER: 53
 #
-#=============================================================================
-# SECTION: Verbosity
-#=============================================================================
-#
-# LABEL: Show PROFDATA (CCunbending files) of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_PROFDATA = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_PROFDATA = "n"
-#
-# LABEL: Mark CCmaps with found coordinates?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap_marked = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_CCmap_marked = "n"
-#
-# LABEL: Show unbent CCmaps of frames?
-# LEGEND: This switch decides, if this should be listed in the Images pane.
-# EXAMPLE: show_frame_CCmap_unbent = "y"
-# HELP: http://2dx.org/documentation/2dx-software/parameters
-# TYPE: Bool "y;n"
-set show_frame_CCmap_unbent = "n"
-#
+# DISPLAY: show_frame_PROFDATA
+# DISPLAY: show_frame_CCmap_marked
+# DISPLAY: show_frame_CCmap_unbent
 # DISPLAY: imagename
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
@@ -78,9 +56,6 @@ set show_frame_CCmap_unbent = "n"
 # DISPLAY: ctfcor_noise
 # DISPLAY: ctfcor_imode
 # DiSpLAY: movie_ghostscript_installed
-# RESET: show_frame_PROFDATA = "n"
-# RESET: show_frame_CCmap_marked = "n"
-# RESET: show_frame_CCmap_unbent = "n"
 #
 #$end_local_vars
 #

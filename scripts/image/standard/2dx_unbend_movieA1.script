@@ -54,9 +54,9 @@
 # DISPLAY: ctfcor_imode
 # DISPLAY: ctfcor_debug
 # DISPLAY: movie_ghostscript_installed
-# RESET: show_frames = "n"
-# RESET: show_frame_FFT = "n"
-# RESET: show_frame_CCmap = "n"
+# DISPLAY: show_frames
+# DISPLAY: show_frame_FFT
+# DISPLAY: show_frame_CCmap
 #
 #$end_local_vars
 #

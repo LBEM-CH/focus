@@ -23,7 +23,6 @@ if ( ! $?app_python ) then
 endif
 #
 if ( $?app_python ) then
-  echo 1
   if ( ! -e ${app_python} ) then
     echo ":: "
     ${proc_2dx}/linblock "Python executable not found. Is it installed ???"

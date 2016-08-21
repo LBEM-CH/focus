@@ -23,7 +23,6 @@
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: merge_res_limit
-# DISPLAY: merge_reference
 # DISPLAY: tempkeep
 # DISPLAY: realcell
 # DISPLAY: realang

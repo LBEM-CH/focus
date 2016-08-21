@@ -31,6 +31,7 @@ public:
 public slots:
     
     void scriptChanged(QModelIndex index);
+    void subscriptActivated(QModelIndex item);
     void updateScriptLabel(const QString& label);
     void setScriptProgress(int progress);
     
@@ -49,6 +50,7 @@ private:
     confData* mainData;
     
     scriptModule* toolsScriptModule;
+    QListView* subscriptWidget;
 
     ParametersWidget *parameters;
     LogViewer *logViewer;

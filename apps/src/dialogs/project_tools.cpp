@@ -41,6 +41,17 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     connect(toolsScriptModule, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
     connect(verbosityControl, SIGNAL(currentIndexChanged(int)), toolsScriptModule, SLOT(setVerbosity(int)));
     
+    subscriptWidget = new QListView;
+    subscriptWidget->setUniformItemSizes(true);
+    subscriptWidget->setItemDelegate(new SpinBoxDelegate);
+    connect(subscriptWidget, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(subscriptActivated(QModelIndex)));
+
+    QSplitter* scriptsContainer = new QSplitter(Qt::Vertical);
+    scriptsContainer->addWidget(toolsScriptModule);
+    scriptsContainer->addWidget(subscriptWidget);
+    scriptsContainer->setStretchFactor(0, 2);
+    scriptsContainer->setStretchFactor(1, 1);
+    
     //Setup Title Bar
     scriptLabel = new QLabel;
     QFont labelFont = scriptLabel->font();
@@ -106,7 +117,7 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     layout->setMargin(0);
     layout->setSpacing(0);
 
-    layout->addWidget(toolsScriptModule, 0, 0, 3, 1);
+    layout->addWidget(scriptsContainer, 0, 0, 3, 1);
     layout->addWidget(headerContainer, 0, 1, 1, 1);
     layout->addWidget(progressBar, 1, 1, 1, 1);
     layout->addWidget(centralSplitter, 2, 1, 1, 1);
@@ -116,7 +127,7 @@ ProjectTools::ProjectTools(confData* data, QWidget* parent)
     layout->setRowStretch(2, 1);
     
     setLayout(layout);
-    resize(900, 500);
+    resize(1100, 600);
 
     verbosityControl->setCurrentIndex(1);
     toolsScriptModule->setVerbosity(1);
@@ -193,6 +204,37 @@ void ProjectTools::scriptChanged(QModelIndex index) {
     QStringList helpTextList = toolsScriptModule->getScriptManual(uid);
     for (int i = 0; i < helpTextList.size(); i++) text += helpTextList[i] + "\n";
     subTitleLabel->setText(text);
+    
+    QStandardItemModel* model = new QStandardItemModel;
+    QStringList subScripts = toolsScriptModule->getScriptDependents(uid);
+    if (subScripts.size() == 0) {
+        subscriptWidget->hide();
+    } else {
+        subscriptWidget->show();
+        QStandardItem *titleItem = new QStandardItem("DEPENDENT SCRIPTS");
+        QBrush b;
+        b.setColor(Qt::darkGray);
+        titleItem->setForeground(b);
+        titleItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        titleItem->setSizeHint(QSize(200, 40));
+        titleItem->setSelectable(false);
+        titleItem->setEditable(false);
+        model->appendRow(titleItem);
+        for (int i = 0; i < subScripts.size(); ++i) {
+            QString subScriptTitle = subScripts[i];
+            QStandardItem *subItem = new QStandardItem(subScriptTitle);
+            subItem->setEditable(false);
+            if (subScriptTitle.endsWith(".py") || subScriptTitle.endsWith(".python")) subItem->setIcon(*mainData->getIcon("script_py"));
+            else subItem->setIcon(*mainData->getIcon("script_csh"));
+
+            subItem->setData(mainData->getDir("procDir") + "/" + subScriptTitle, Qt::UserRole + 5);
+            if (!QFileInfo(mainData->getDir("procDir") + "/" + subScriptTitle).exists())
+                subItem->setForeground(QColor(255, 0, 0));
+
+            model->appendRow(subItem);
+        }
+    }
+    subscriptWidget->setModel(model);
 
     parameters->changeParametersDisplayed(toolsScriptModule->displayedVariables(index));
     if (verbosityControl->currentIndex() != 0)
@@ -226,4 +268,9 @@ void ProjectTools::launchLogBrowser() {
 
 void ProjectTools::showSubTitle(bool s) {
     subTitleLabel->setVisible(s);
+}
+
+void ProjectTools::subscriptActivated(QModelIndex item) {
+    if (item.data(Qt::UserRole + 5).toString().isEmpty()) return;
+    QProcess::startDetached(mainData->getApp("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
 }

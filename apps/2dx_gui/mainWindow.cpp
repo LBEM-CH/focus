@@ -51,8 +51,6 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     
     timer_refresh = 10000;
     timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(save()));
-    timer->start(timer_refresh);
     
     updateWindowTitle();
     setUnifiedTitleAndToolBarOnMac(true);
@@ -76,6 +74,9 @@ mainWindow::mainWindow(const QString &directory, QWidget *parent)
     openLibraryWindowAct->setChecked(true);
     centralWin_->setCurrentWidget(libraryWin_);
     setCentralWidget(centralWin_);
+    
+    connect(timer, SIGNAL(timeout()), this, SLOT(save()));
+    timer->start(timer_refresh);
     
     resize(1300, 900);
 }

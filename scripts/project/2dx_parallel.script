@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Parallel processing                                                #
+# Title: Parallel Processing                                                #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 10
+# SORTORDER: 20
 #
 # MANUAL: This script allows to launch several jobs in parallel.  Choose below, which 2dx_image scripts to include.
 #

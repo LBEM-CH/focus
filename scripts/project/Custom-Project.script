@@ -1,0 +1,183 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Custom Script                                                      #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2007                                             #
+# Last Modification: 10/01/2007                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 70
+#
+# MANUAL: Adapt this script to do some task on all selected image directories.
+#
+# MANUAL: To do so, double-click on the script name in the "Customs Script" panel. Edit the script, save it, and use it for your purposes.
+#
+#$end_local_vars
+#
+# This defines some variables that we might need:
+set proc_2dx = ""
+set bin_2dx = ""
+set app_2dx_image = ""
+set SCRATCH_DISK = ""
+#
+#$end_vars
+#
+# This sets the scriptname variable:
+set scriptname = Custom-Project
+#
+# This removes the old logfile, so that a new fresh one can be created:
+\rm -f LOGS/${scriptname}.results
+#
+# This initializes the ccp4 environment, and other variables.
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+# This advances the progress bar to the 1% position:
+echo "<<@progress: 1>>"
+#
+# This creates all needed subdirectories in the current merge directory, in case they are missing:
+source ${proc_2dx}/2dx_makedirs 
+#
+# This translates the list of directories to work on into one single long line:
+cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+#
+set tmp = `wc -l 2dx_merge_dirfile.dat`
+set images_num = `echo ${tmp} | cut -d\  -f1`
+set images_increment = `echo ${images_num} | awk '{ s = 80.0 / $1 } END { print s }'`
+set images_current = 10.0
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+echo "<<@progress: 10>>"
+#
+# This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
+foreach dirfile ( ${dirlist} ) 
+  cd ..
+  cd ${dirfile}
+  set newdir = $PWD
+  cd ${olddir}
+  echo "::Working on ${newdir}"
+  # This tells the 2dx_merge GUI that the following variable output concerns the image "newdir":
+  echo "<IMAGEDIR="\"${newdir}\"">" >> LOGS/${scriptname}.results
+  # echo "set dummy = 1" >> LOGS/${scriptname}.results
+  set images_progress = `echo ${images_current} | awk '{ s = $1 } END { printf "%.0f", s }'` 
+  echo "<<@progress: ${images_progress}>>"
+  set images_current = `echo ${images_current} ${images_increment} | awk '{ s = $1 + $2 } END { print s }'`
+  #
+  ################################################################################
+  ######### Modify only the section below ########################################
+  ################################################################################
+  #
+  # Use the following to invert the CTF in all directories, so that cryo setting is valid:
+  # echo "set ctfrev = n" >> LOGS/${scriptname}.results
+
+  # Use the following to activate the synthetic unbending in all directories:
+  # echo "set -force SYN_Unbending = 1" >> LOGS/${scriptname}.results
+  # echo "set tempkeep = y" >> LOGS/${scriptname}.results
+  
+  # Use the following to set have the resolution of the Nyquist frequency automatically determined:
+  # echo "set ctfplotresmax = 0.0" >> LOGS/${scriptname}.results
+
+  # Use the following to set all tilt angle and phase origin values to zero:
+  # echo "set TAXA = 0.0" >> LOGS/${scriptname}.results
+  # echo "set TANGL = 0.0" >> LOGS/${scriptname}.results
+  # echo "set phaori = 0.0,0.0" >> LOGS/${scriptname}.results
+  # echo "set phaoriFouFilter = 0.0,0.0" >> LOGS/${scriptname}.results
+  # echo "set beamtilt = 0.0,0.0" >> LOGS/${scriptname}.results
+  # echo "set beamtilt_change = 0.0,0.0" >> LOGS/${scriptname}.results
+
+  # echo "set do_lattice_algorithm = 0" >> LOGS/${scriptname}.results
+  # echo "set FirstPeakNum = 60" >> LOGS/${scriptname}.results
+  # echo "set peakNum = 50" >> LOGS/${scriptname}.results
+
+  # echo "set CS = 4.2" >> LOGS/${scriptname}.results
+  # echo "set KV = 300.0" >> LOGS/${scriptname}.results
+  # echo "set stepdigitizer = 5.0" >> LOGS/${scriptname}.results
+  # echo "set magnification = 43859.0" >> LOGS/${scriptname}.results
+
+  # echo "set crop_histogram = y" >> LOGS/${scriptname}.results
+  # echo "set crop_histogram_percent = 5" >> LOGS/${scriptname}.results
+  # echo "set crop_histogram_stdev = 4.0" >> LOGS/${scriptname}.results
+
+  # echo "set use_masekd_image = y" >> LOGS/${scriptname}.results
+
+  # echo "set maska = 17.0" >> LOGS/${scriptname}.results
+  # echo "set maskb01 = 13.0" >> LOGS/${scriptname}.results
+  # echo "set maskb02 = 15.0" >> LOGS/${scriptname}.results
+  # echo "set boxa1 = 400.0" >> LOGS/${scriptname}.results
+  # echo "set boxa2 = 1200.0" >> LOGS/${scriptname}.results
+  # echo "set boxb1 = 350.0" >> LOGS/${scriptname}.results
+  # echo "set boxb2 = 1200.0" >> LOGS/${scriptname}.results
+  # echo "set quadrada = 9,9" >> LOGS/${scriptname}.results
+  # echo "set quadradb = 9,9" >> LOGS/${scriptname}.results
+  # echo "set treatspotscan = y" >> LOGS/${scriptname}.results
+  # echo "set rot90 = n" >> LOGS/${scriptname}.results
+  # echo "set rot180 = n" >> LOGS/${scriptname}.results
+  # echo "set revhnd = y" >> LOGS/${scriptname}.results
+  # echo "set revhk = n" >> LOGS/${scriptname}.results
+  # echo "set revxsgn = n" >> LOGS/${scriptname}.results
+  # echo "set refine_def_reference = 4" >> LOGS/${scriptname}.results
+  # echo "set ctfsearch_iphase = 1" >> LOGS/${scriptname}.results
+  # echo "set overwrite = y" >> LOGS/${scriptname}.results
+  # echo "set ccunbend_program = 0" >> LOGS/${scriptname}.results
+
+  # echo "set SYN_Unbending = 1" >> LOGS/${scriptname}.results
+  # echo "set SYN_maska = 20" >> LOGS/${scriptname}.results
+  # echo "set do3quadserch = n" >> LOGS/${scriptname}.results
+
+  # echo "set defocus_res_max = 5.0" >> LOGS/${scriptname}.results
+  # echo "set imageorigin = 0" >> LOGS/${scriptname}.results
+  # echo "set df_end = 25000.0" >> LOGS/${scriptname}.results
+  # echo "set det_defocus = y" >> LOGS/${scriptname}.results
+  # echo "set det_tilt = y" >> LOGS/${scriptname}.results
+  # echo "set det_tlt_alg = 0" >> LOGS/${scriptname}.results
+  # echo "set QVALS = ." >> LOGS/${scriptname}.results
+  # echo "set QVALMA = ." >> LOGS/${scriptname}.results
+  # echo "set QVALMB = ." >> LOGS/${scriptname}.results
+  # echo "set domask = y" >> LOGS/${scriptname}.results
+
+  # echo "set RESMAX = 5.0" >> LOGS/${scriptname}.results
+  # echo "set spotlist_RESMAX = 7.0" >> LOGS/${scriptname}.results
+  # echo "set -force IQMAX1 = 7" >> LOGS/${scriptname}.results
+  # echo "set -force IQMAX = 4" >> LOGS/${scriptname}.results
+
+  # echo "set movie_enable = y" >> LOGS/${scriptname}.results
+  # echo "set movie_refboxa = 300" >> LOGS/${scriptname}.results
+  # echo "set movie_smoothing = 8" >> LOGS/${scriptname}.results
+  # echo "set movie_drift_threshold = 5" >> LOGS/${scriptname}.results
+  # echo "set movie_imagenumber_toave = 5" >> LOGS/${scriptname}.results
+  # echo "set movie_quadradb = 8,8 = 8" >> LOGS/${scriptname}.results
+  # echo "set ctfcor_imode = 9" >> LOGS/${scriptname}.results
+  # echo "set ctfcor_calculate_tiles = 0" >> LOGS/${scriptname}.results
+  # echo "set calculate_tiles = 0" >> LOGS/${scriptname}.results
+  # echo "set ML_doit = n" >> LOGS/${scriptname}.results
+
+  # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
+  # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
+
+  # Use the following to run a few selected scripts on all selected images:
+  # ${app_2dx_image} ${newdir} "2dx_applyCTF"
+  # ${app_2dx_image} ${newdir} "2dx_fftrans,2dx_refineLattice,+2dx_evaluateLattice,+2dx_fourierSpots"
+  
+  #
+  ################################################################################
+  ######### Modify only the section above ########################################
+  ################################################################################
+  #
+  # This tells 2dx_merge that the output for the image is done:
+  echo "</IMAGEDIR>" >> LOGS/${scriptname}.results
+end
+#
+# Move the progress bar to 100%:
+echo "<<@progress: 100>>"
+#
+# Leave a message on the logfile that the script finished:
+${proc_2dx}/linblock "${scriptname} finished correctly."
+#

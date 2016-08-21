@@ -158,7 +158,14 @@ ${proc_2dx}/linblock "Compile script to re-generate maps"
 #############################################################################
 #
 set dirfile = "2dx_merge_dirfile.dat"
-set scriptMfile = "SCRATCH/2dx_merge_scriptM.com"
+set scriptMfile = "2dx_merge_scriptM"
+#
+echo "dummy" > SCRATCH/job_00_${scriptMfile}.com
+\rm -f SCRATCH/job_*_${scriptMfile}.com
+#
+echo "dummy" > SCRATCH/job_00_${scriptMfile}.log
+\rm -f SCRATCH/job_*_${scriptMfile}.log
+
 \rm -f ${scriptMfile}
 #
 ${bin_2dx}/2dx_merge_compileM.exe << eot
@@ -175,15 +182,60 @@ eot
 echo "<<@progress: 50>>"
 #
 #############################################################################
-${proc_2dx}/linblock "Launch script"
+${proc_2dx}/linblock "Launching scripts"
 #############################################################################
 #
-echo "# IMAGE-IMPORTANT: ${imagename}-${SYM}.mrc <Merged Map: ${imagename}-${SYM}.mrc>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${scriptMfile} <csh: scriptM to generate maps>" >> LOGS/${scriptname}.results
-echo "# IMAGE: SCRATCH/${scriptname}.log <LOG: scriptM logfile>" >> LOGS/${scriptname}.results
+echo "<<@progress: 20>>"
 #
-source ${scriptMfile} > SCRATCH/${scriptname}.log
+set maxthread_gt_9 = `echo ${Thread_Number} | awk '{ if ( $1 > 9 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${maxthread_gt_9} == '1' ) then
+  set maxthread_with_zero = ${Thread_Number}
+else
+  set maxthread_with_zero = "0"${Thread_Number}
+endif
+if ( ${Thread_Number} == "1" ) then
+  echo "# IMAGE: SCRATCH/job_01_${scriptMfile}.com <CSH: Script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_01_${scriptMfile}.com.log <LOG: Script output>" >> LOGS/${scriptname}.results
+else
+  echo "# IMAGE: SCRATCH/job_01_${scriptMfile}.com <CSH: First (01) script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_01_${scriptMfile}.com.log <LOG: First (01) script output>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_${scriptMfile}.com <CSH: Last (${maxthread_with_zero}) script>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/job_${maxthread_with_zero}_2dx_${scriptMfile}.com.log <LOG: Last (${maxthread_with_zero}) script output>" >> LOGS/${scriptname}.results
+endif
 #
+foreach scriptM ( SCRATCH/job_*_${scriptMfile}.com )
+  chmod +x ${scriptM}
+  if ( ${scriptM} != SCRATCH/job_${maxthread_with_zero}_${scriptMfile}.com ) then
+    echo Background nohup ${scriptM} \> ${scriptM}.log \&
+    nohup ${scriptM} ${proc_2dx} ${bin_2dx} ${MergeIQMAX} ${RFACAMP} ${RESMIN} ${RESMAX} ${CCP4_SYM} ${zwin} ${make_reference} ${create_PS} ${scriptname} > ${scriptM}.log &
+  else
+    echo Forground ${scriptM} \> ${scriptM}.log
+    ${scriptM} ${proc_2dx} ${bin_2dx} ${MergeIQMAX} ${RFACAMP} ${RESMIN} ${RESMAX} ${CCP4_SYM} ${zwin} ${make_reference} ${create_PS} ${scriptname} > ${scriptM}.log
+  endif
+end
+#
+#
+echo "################################################"
+echo "################################################"
+echo "output in file SCRATCH/job_XX_${scriptMfile}.com.log"
+echo "################################################"
+echo "################################################"
+#
+echo "Refinement jobs produced the following output files:"
+touch SCRATCH/job_01_${scriptMfile}.com
+\ls -l SCRATCH/job_*_${scriptMfile}.com
+touch SCRATCH/job_01_${scriptMfile}.com.log
+\ls -l SCRATCH/job_*_${scriptMfile}.com.log
+#
+sleep 1
+#
+\rm -f SCRATCH/${scriptMfile}.console
+echo "# IMAGE: SCRATCH/${scriptMfile}.console <LOG: Console output from merging>" >> LOGS/${scriptname}.results
+foreach scriptMconsole ( SCRATCH/job_*_${scriptMfile}.com.log ) 
+  cat ${scriptMconsole} >> SCRATCH/${scriptMfile}.console
+  \rm -f ${scriptMconsole}
+end
+##
 echo "<<@progress: 100>>"
 #
 #

@@ -103,7 +103,7 @@ endif
 #
 set movie_stackname_raw_end = `echo ${movie_stackname_raw} | cut -d\. -f2`
 if ( ${movie_stackname_raw_end} != 'dm4' && ${movie_stackname_raw_end} != 'mrc' ) then
-  ${proc_2dx}/protest "Movie type ${movie_stackname_raw_end} is not 
+  ${proc_2dx}/protest "Movie ${movie_stackname_raw_end} is not found."
 endif
 #
 #################################################################################

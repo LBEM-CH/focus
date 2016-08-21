@@ -15,13 +15,15 @@
 #
 # MANUAL: This script allows to import dose-fractionated movies and their drift-corrected average images.
 #
-# DISPLAY: movie_import_dir
-# DISPLAY: movie_import_imagenumber
-# DISPLAY: movie_import_target_dir
-# DISPLAY: movie_import_type
-# DISPLAY: movie_import_aligned_stack
-# DISPLAY: movie_import_DC_averages
-# DISPLAY: movie_import_DC_stacks
+# DISPLAY: import_dir
+# DISPLAY: import_imagenumber
+# DISPLAY: import_target_dir
+# DISPLAY: import_type
+# DISPLAY: import_DC_stacks_do
+# DISPLAY: import_RAW_stacks_do
+# DISPLAY: import_DC_averages_folder
+# DISPLAY: import_DC_stacks_folder
+# DISPLAY: import_RAW_stacks_folder
 #
 #$end_local_vars
 #
@@ -31,13 +33,15 @@ set bin_2dx = ""
 set app_2dx_image = ""
 set SCRATCH_DISK = ""
 #
-set movie_import_dir = ""
-set movie_import_imagenumber = ""
-set movie_import_target_dir = ""
-set movie_import_type = ""
-set movie_import_aligned_stack = ""
-set movie_import_DC_averages = ""
-set movie_import_DC_stacks = ""
+set import_dir = ""
+set import_imagenumber = ""
+set import_target_dir = ""
+set import_type = ""
+set import_DC_stacks_do = ""
+set import_RAW_stacks_do = ""
+set import_DC_averages_folder = ""
+set import_DC_stacks_folder = ""
+set import_RAW_stacks_folder = ""
 #
 #$end_vars
 #
@@ -60,7 +64,7 @@ source ${proc_2dx}/2dx_makedirs
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
 #
-if ( ${movie_import_type} == 0 ) then
+if ( ${import_type} == 0 ) then
   set file_ending = "mrc"
 else
   set file_ending = "tiff"
@@ -68,16 +72,23 @@ endif
 #
 echo "<<@progress: 10>>"
 #
-set movie_average = ${movie_import_dir}/${movie_import_DC_averages}
-set movie_stack   = ${movie_import_dir}/${movie_import_DC_stacks}
+set movie_average = ${import_dir}/${import_DC_averages_folder}
+set movie_stack   = ${import_dir}/${import_DC_stacks_folder}
+set movie_RAW     = ${import_dir}/${import_RAW_stacks_folder}
 #
 if ( ! -d ${movie_average} ) then
   ${proc_2dx}/protest "ERRROR: directory ${movie_average} not found."
 endif
 #
-if ( ${movie_import_aligned_stack} == "y" ) then
+if ( ${import_DC_stacks_do} == "y" ) then
   if ( ! -d ${movie_stack} ) then
     ${proc_2dx}/protest "ERRROR: directory ${movie_stack} not found."
+  endif
+endif
+#
+if ( ${import_RAW_stacks_do} == "y" ) then
+  if ( ! -d ${movie_RAW} ) then
+    ${proc_2dx}/protest "ERRROR: directory ${movie_RAW} not found."
   endif
 endif
 #
@@ -87,13 +98,12 @@ cd ${olddir}
 set imagenum = `cat tmp.tmp | wc -l`
 echo ":: Importing ${imagenum} images"
 #
-# set movie_import_dirname = `echo ${movie_import_dir} | rev | cut -d\/ -f1 | rev`
-set movie_import_target_dirname = `echo ${movie_import_target_dir} | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' -e 's/+/_/g'`
+set import_target_dirname = `echo ${import_target_dir} | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' -e 's/+/_/g'`
 cd ..
-if ( ! -d ${movie_import_target_dirname} ) then
-  \mkdir ${movie_import_target_dirname}
-  ${proc_2dx}/linblock "Creating ${movie_import_target_dirname}"
-  cd ${movie_import_target_dirname}
+if ( ! -d ${import_target_dirname} ) then
+  \mkdir ${import_target_dirname}
+  ${proc_2dx}/linblock "Creating ${import_target_dirname}"
+  cd ${import_target_dirname}
   \ln -s ../2dx_master.cfg .
 endif
 cd ${olddir}
@@ -104,35 +114,49 @@ while ( ${irun} <= ${imagenum} )
   echo "<<@progress: ${prog_num}>>"
   #
   set importimage = `sed -n "${irun}p" tmp.tmp`
-  if ( ${movie_import_type} == 0 ) then
-    set importimage_pattern = `echo ${importimage} | sed -e's/_aligned.mrc//g' -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g' | tr 'A-Z' 'a-z'`
+  if ( ${import_type} == 0 ) then
+    set importimage_pattern = `echo ${importimage} | sed -e's/_aligned\.mrc//g'  -e's/\.mrc//g'  -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g' | tr 'A-Z' 'a-z'`
   else
-    set importimage_pattern = `echo ${importimage} | sed -e's/_aligned.tiff//g' -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g' | tr 'A-Z' 'a-z'`
+    set importimage_pattern = `echo ${importimage} | sed -e's/_aligned\.tiff//g' -e's/\.tiff//g' -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g' | tr 'A-Z' 'a-z'`
   endif
   #
   if ( -e ${movie_average}/${importimage} ) then
-    set newval = `echo ${movie_import_imagenumber} | awk '{ s = $1 * 100 } END { print s }'`
+    set newval = `echo ${import_imagenumber} | awk '{ s = $1 * 100 } END { print s }'`
     set testval = `echo ${newval} | wc -c`
     set newimagenumber = `echo 0000000000 | cut -c${testval}-`${newval}
     echo ":"
     echo ": Importing drift-corrected average image "
     echo ":      ${movie_average}/${importimage}"
     set stack_found = "n"
-    if ( ${movie_import_aligned_stack} == "y" ) then
+    if ( ${import_DC_stacks_do} == "y" ) then
       if ( -e ${movie_stack}/${importimage} ) then
         echo ": and drift-corrected stack"
         echo ":      ${movie_stack}/${importimage}"
-        set stack_found = "y"
+        set DC_stack_found = "y"
       else
         echo "::WARNING: ${movie_stack}/${importimage} not found."
-        set stack_found = "n"
+        set DC_stack_found = "n"
       endif
+    else
+      set DC_stack_found = "n"
     endif
-    echo ":: ${irun}: Creating ${movie_import_target_dirname}/${importimage_pattern} for image number ${newimagenumber}"
+    if ( ${import_RAW_stacks_do} == "y" ) then
+      if ( -e ${movie_RAW}/${importimage} ) then
+        echo ": and raw stack"
+        echo ":      ${movie_RAW}/${importimage}"
+        set RAW_stack_found = "y"
+      else
+        echo "::WARNING: ${movie_RAW}/${importimage} not found."
+        set RAW_stack_found = "n"
+      endif
+    else
+      set RAW_stack_found = "n"
+    endif
+    echo ":: ${irun}: Creating ${import_target_dirname}/${importimage_pattern} for image number ${newimagenumber}"
     echo ":"
     cd ${olddir}
     cd ..
-    cd ${movie_import_target_dirname}
+    cd ${import_target_dirname}
     if ( -d ${importimage_pattern} ) then
       ${proc_2dx}/linblock "WARNING: ${importimage_pattern} already existing. Removing."
       \rm -rf ${importimage_pattern}
@@ -140,14 +164,20 @@ while ( ${irun} <= ${imagenum} )
     mkdir ${importimage_pattern}
     cd ${importimage_pattern}
     cp ${movie_average}/${importimage} ${importimage_pattern}_${newimagenumber}_raw.${file_ending}
-    if ( ${movie_import_aligned_stack} == "y" && ${stack_found} == "y") then
+    if ( ${import_DC_stacks_do} == "y" && ${DC_stack_found} == "y") then
       cp ${movie_stack}/${importimage} ${importimage_pattern}_${newimagenumber}_stack.${file_ending}
+    endif
+    if ( ${import_RAW_stacks_do} == "y" && ${RAW_stack_found} == "y") then
+      cp ${movie_RAW}/${importimage} ${importimage_pattern}_${newimagenumber}_stack_raw.${file_ending}
     endif
     cp ${olddir}/2dx_merge.cfg 2dx_image.cfg
     echo "set imagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
     echo "set nonmaskimagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
-    if ( ${movie_import_aligned_stack} == "y" && ${stack_found} == "y") then
+    if ( ${import_DC_stacks_do} == "y" && ${DC_stack_found} == "y") then
       echo "set movie_stackname = ${importimage_pattern}_${newimagenumber}_stack.${file_ending}" >> 2dx_image.cfg
+    endif
+    if ( ${import_RAW_stacks_do} == "y" && ${RAW_stack_found} == "y") then
+      echo "set movie_stackname_raw = ${importimage_pattern}_${newimagenumber}_stack_raw.${file_ending}" >> 2dx_image.cfg
     endif
     echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
     echo "set imagename_original = ${movie_average}/${importimage}" >> 2dx_image.cfg
@@ -158,8 +188,8 @@ while ( ${irun} <= ${imagenum} )
     ${app_2dx_image} ${fullpath} "2dx_initialize"
     cd ${olddir}
     #
-    @ movie_import_imagenumber++
-    echo "set movie_import_imagenumber = ${movie_import_imagenumber}"  >> LOGS/${scriptname}.results
+    @ import_imagenumber++
+    echo "set import_imagenumber = ${import_imagenumber}"  >> LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: ${movie_average}/${importimage} not found."
   endif
@@ -168,6 +198,11 @@ end
 #
 \rm -f tmp.tmp
 #
+echo ":: "
+echo "::  Image data was imported into ${import_target_dirname}"
+echo ":: "
+echo "::  Now Refresh the Library in the Project Library view."
+echo ":: "
 echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "Normal End."
 #

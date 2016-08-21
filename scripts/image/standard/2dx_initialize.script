@@ -40,6 +40,8 @@
 # DISPLAY: imagename_original
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
+# DISPLAY: movie_stackname
+# DISPLAY: movie_stackname_raw
 # DISPLAY: imagenumber
 # DISPLAY: image_evenodd
 # DISPLAY: magnification

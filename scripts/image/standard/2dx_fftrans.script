@@ -29,7 +29,6 @@
 #
 # MANUAL: The smaller the window, the faster the program execution; more steps tends toward a more well defined CTF.
 #
-# DISPLAY: SYN_Unbending
 # DISPLAY: generatePeriodogram
 # DISPLAY: periodogramWindowsize
 # DISPLAY: periodogramNumsubsteps
@@ -59,7 +58,6 @@ set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
 #
-set SYN_Unbending = ""
 set PHASEORI_done = ""
 #
 set tempkeep = ""
@@ -93,11 +91,6 @@ set movie_inmovie = ""
 #
 set scriptname = 2dx_fftrans
 source ${proc_2dx}/initialize
-#
-if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") && ( -e  FFTIR/${imagename}.fft.mrc ) ) then
-  ${proc_2dx}/linblock "Skipping. Synthetical Reference is used and FFT exists."
-  exit
-endif
 #
 source ${proc_2dx}/2dx_makedirs
 \rm -f LOGS/${scriptname}.results

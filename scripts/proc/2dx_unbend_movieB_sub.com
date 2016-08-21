@@ -789,12 +789,12 @@ echo "<<@evaluate>>"
 
 set IQS = `echo ${UMB_IQ1} ${UMB_IQ2} ${UMB_IQ3} ${UMB_IQ4} ${UMB_IQ5} ${UMB_IQ6} ${UMB_IQ7} ${UMB_IQ8} ${UMB_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMB= ${QVAL_local} ... IQ stat = ${IQS}"
+echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVALMB= ${QVAL_local} ... IQ stat = ${IQS}"
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
-echo "::Unbend MB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+echo "::Unbend MB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVAL= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 #
 
 

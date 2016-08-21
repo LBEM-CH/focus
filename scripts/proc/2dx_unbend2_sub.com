@@ -928,15 +928,15 @@ eot
   #
   set IQS = `echo ${U2_IQ1} ${U2_IQ2} ${U2_IQ3} ${U2_IQ4} ${U2_IQ5} ${U2_IQ6} ${U2_IQ7} ${U2_IQ8} ${U2_IQ9}`
   echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-  echo "::maskb=${maskb}, boxb1=${boxb1}: QVal2= ${QVAL_local} ... IQ stat = ${IQS}"
+  echo "::maskb=${maskb}, boxb1=${boxb1}: QVAL2= ${QVAL_local} ... IQ stat = ${IQS}"
   echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   #
   echo " " >> History.dat
   echo ":Date: ${date}" >> History.dat
-  echo "::Unbend U2: maskb=${maskb}, boxb1=${boxb1}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+  echo "::Unbend U2: maskb=${maskb}, boxb1=${boxb1}: QVAL= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
   #
   echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
-  echo "set QVal2 = ${QVAL_local}" >> LOGS/${scriptname}.results
+  echo "set QVAL2 = ${QVAL_local}" >> LOGS/${scriptname}.results
   echo "set U2_QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
   echo "set U2_IQs = ${IQS}" >> LOGS/${scriptname}.results
   #

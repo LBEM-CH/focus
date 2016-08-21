@@ -767,13 +767,13 @@ source SCRATCH/TMP9871.dat
 #
 set IQS = `echo ${US_IQ1} ${US_IQ2} ${US_IQ3} ${US_IQ4} ${US_IQ5} ${US_IQ6} ${US_IQ7} ${US_IQ8} ${US_IQ9}`
 #":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-${proc_2dx}/linblock "Synthetic Unbend with maska=${SYN_maska} maskb=${SYN_maskb} gives QVal= ${QVAL_local}"
+${proc_2dx}/linblock "Synthetic Unbend with maska=${SYN_maska} maskb=${SYN_maskb} gives QVAL= ${QVAL_local}"
 ${proc_2dx}/linblock "IQ stat = ${IQS}"
 #":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 #
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
-echo "::Unbend S: maska=${SYN_maska} maskb=${SYN_maskb}: QVal= ${QVAL_local}      IQ stat = ${IQS}" >> History.dat
+echo "::Unbend S: maska=${SYN_maska} maskb=${SYN_maskb}: QVAL= ${QVAL_local}      IQ stat = ${IQS}" >> History.dat
 #
 echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
 echo "set QVALS = ${QVAL_local}" >> LOGS/${scriptname}.results

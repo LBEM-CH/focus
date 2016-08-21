@@ -65,7 +65,6 @@
 # DISPLAY: comment
 # DISPLAY: imagesidelength
 # DISPLAY: SCRATCH_DISK
-# DISPLAY: SYN_Unbending
 # DISPLAY: initialization_reset
 # DISPLAY: use_masked_image
 # DISPLAY: domask
@@ -110,7 +109,6 @@ set initialization_reset = ""
 set initialization_executable = ""
 set initialization_corr_endian = ""
 set crop = ""
-set SYN_Unbending = ""
 set movie_inmovie = ""
 set use_masked_image = ""
 set backup_large_images = ""

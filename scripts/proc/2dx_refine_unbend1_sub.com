@@ -35,10 +35,10 @@ if ( ${refine_now} == "maska" ) then
   #
   \rm -f TMP442211.tmp
   set best_maska = `cat ${imagename}-maska.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_maska}, with QVal ${best_QVal}. Previously was ${old_maska}"
+  ${proc_2dx}/linblock "Best value was found at ${best_maska}, with QVAL ${best_QVAL}. Previously was ${old_maska}"
   #
   set maska = ${best_maska}
   echo set maska = ${maska} >> LOGS/${scriptname}.results
@@ -77,10 +77,10 @@ if ( ${refine_now} == "boxa1" ) then
   #
   \rm -f TMP442211.tmp
   set best_boxa1 = `cat ${imagename}-boxa1.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_boxa1}, with QVal ${best_QVal}. Previously was ${old_boxa1}"
+  ${proc_2dx}/linblock "Best value was found at ${best_boxa1}, with QVAL ${best_QVAL}. Previously was ${old_boxa1}"
   #
   set boxa1 = ${best_boxa1}
   #
@@ -141,17 +141,17 @@ if ( ${refine_now} == "maska_boxa1" ) then
     set loc_maska = `echo ${loc_maska} ${loc_maska_step} ${loc_maska_factor} | awk '{s = int( ($1 + $2 ) * $3) } END { print s }'`
   end
   #
-  echo "# IMAGE: SCRATCH/${imagename}-maska_boxa1.txt  <TXT: QVal Table>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${imagename}-maska_boxa1.txt  <TXT: QVAL Table>" >> LOGS/${scriptname}.results
   #
   \rm -f TMP442211.tmp
   set best_maska = `cat ${imagename}-maska.tabl | ${bin_2dx}/getmax.exe`
   \rm -f TMP442211.tmp
   set best_boxa1 = `cat ${imagename}-boxa1.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
   ${proc_2dx}/linblock "Old maska and boxa1 values were ${old_maska}, ${old_boxa1}."
-  ${proc_2dx}/linblock "New best values are ${best_maska} and ${best_boxa1}, with QVal ${best_QVal}."
+  ${proc_2dx}/linblock "New best values are ${best_maska} and ${best_boxa1}, with QVAL ${best_QVAL}."
   #
   set maska = ${best_maska}
   set boxa1 = ${best_boxa1}

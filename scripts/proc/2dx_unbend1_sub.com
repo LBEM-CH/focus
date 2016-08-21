@@ -596,15 +596,15 @@ source SCRATCH/TMP9871.dat
 #
 set IQS = `echo ${U1_IQ1} ${U1_IQ2} ${U1_IQ3} ${U1_IQ4} ${U1_IQ5} ${U1_IQ6} ${U1_IQ7} ${U1_IQ8} ${U1_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "::maska=${maska}, boxa1=${boxa1}: QVal1= ${QVAL_local} ... IQ stat = ${IQS}"
+echo "::maska=${maska}, boxa1=${boxa1}: QVAL1= ${QVAL_local} ... IQ stat = ${IQS}"
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 #
 echo " " >> History.dat
 echo "::_________________________________________________________________________________" >> History.dat
 echo ":Date: ${date}" >> History.dat
-echo "::Unbend U1: maska=${maska}, boxa1=${boxa1}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+echo "::Unbend U1: maska=${maska}, boxa1=${boxa1}: QVAL= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 #
-echo "set QVal1 = ${QVAL_local}" >> LOGS/${scriptname}.results
+echo "set QVAL1 = ${QVAL_local}" >> LOGS/${scriptname}.results
 echo "set U1_QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
 echo "set U1_IQs = ${IQS}" >> LOGS/${scriptname}.results
 #

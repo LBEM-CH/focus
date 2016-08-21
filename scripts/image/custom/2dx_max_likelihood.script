@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Single Particle Processing (ML-2D)                                 #
+# Title: ML-2D (DO NOT USE, OUTDATED)                                       #
 #                                                                           #
 # 2dx.org, GNU Plublic License.                                             #
 #                                                                           #
@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 80
+# SORTORDER: 81
 #
 # MANUAL: <B>This script applies a Maximum Likelihood algorithm to a stack of unit cells.</B>
 #

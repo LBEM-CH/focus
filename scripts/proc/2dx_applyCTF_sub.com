@@ -199,7 +199,7 @@ eot
   #
   if ( ${algo} == "U2" ) then
     echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
-    echo "set QVal2 = ${QVAL_local}" >> LOGS/${scriptname}.results
+    echo "set QVAL2 = ${QVAL_local}" >> LOGS/${scriptname}.results
     echo "set U2_IQ1 = ${U2_IQ1}" >> LOGS/${scriptname}.results
     echo "set U2_IQ2 = ${U2_IQ2}" >> LOGS/${scriptname}.results
     echo "set U2_IQ3 = ${U2_IQ3}" >> LOGS/${scriptname}.results
@@ -212,12 +212,12 @@ eot
 
     set IQ2 = `echo ${U2_IQ1} ${U2_IQ2} ${U2_IQ3} ${U2_IQ4} ${U2_IQ5} ${U2_IQ6} ${U2_IQ7} ${U2_IQ8} ${U2_IQ9}`
     echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    echo "::QVal2= ${QVAL_local} ... IQ stat = ${IQ2}"
+    echo "::QVAL2= ${QVAL_local} ... IQ stat = ${IQ2}"
     echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
     #
     echo " " >> History.dat
     echo ":Date: ${date}" >> History.dat
-    echo "::Unbend U2: QVal= ${QVAL_local} ... IQ stat = ${IQ2}" >> History.dat
+    echo "::Unbend U2: QVAL= ${QVAL_local} ... IQ stat = ${IQ2}" >> History.dat
   endif
   
   if ( ${algo} == "UMA" ) then
@@ -242,12 +242,12 @@ eot
 
     set IQMA = `echo ${UMA_IQ1} ${UMA_IQ2} ${UMA_IQ3} ${UMA_IQ4} ${UMA_IQ5} ${UMA_IQ6} ${UMA_IQ7} ${UMA_IQ8} ${UMA_IQ9}`
     echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    echo "::QValMA= ${QVAL_local} ... IQ stat = ${IQMA}"
+    echo "::QVALMA= ${QVAL_local} ... IQ stat = ${IQMA}"
     echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
     echo " " >> History.dat
     echo ":Date: ${date}" >> History.dat
-    echo "::Unbend MA: QVal= ${QVAL_local} ... IQ stat = ${IQMA}" >> History.dat
+    echo "::Unbend MA: QVAL= ${QVAL_local} ... IQ stat = ${IQMA}" >> History.dat
     #
   endif
   
@@ -273,12 +273,12 @@ eot
 
     set IQMB = `echo ${UMB_IQ1} ${UMB_IQ2} ${UMB_IQ3} ${UMB_IQ4} ${UMB_IQ5} ${UMB_IQ6} ${UMB_IQ7} ${UMB_IQ8} ${UMB_IQ9}`
     echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    echo "::QValMB= ${QVAL_local} ... IQ stat = ${IQMB}"
+    echo "::QVALMB= ${QVAL_local} ... IQ stat = ${IQMB}"
     echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
     echo " " >> History.dat
     echo ":Date: ${date}" >> History.dat
-    echo "::Unbend MB: QVal= ${QVAL_local} ... IQ stat = ${IQMB}" >> History.dat
+    echo "::Unbend MB: QVAL= ${QVAL_local} ... IQ stat = ${IQMB}" >> History.dat
     #    
   endif
   

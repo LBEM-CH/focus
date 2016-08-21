@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 10/28/2014                                             #
-# Last Modification: 10/28/2014                                             #
+# Last Modification: 08/21/2016                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -125,8 +125,10 @@ while ( ${irun} <= ${imagenum} )
     set testval = `echo ${newval} | wc -c`
     set newimagenumber = `echo 0000000000 | cut -c${testval}-`${newval}
     echo ":"
-    echo ": Importing drift-corrected average image "
-    echo ":      ${movie_average}/${importimage}"
+    echo ":: ${irun}: Creating ${import_target_dirname}/${importimage_pattern} for image number ${newimagenumber}"
+    echo ":"
+    echo ":         Importing drift-corrected average image "
+    echo ":              ${movie_average}/${importimage}"
     set stack_found = "n"
     if ( ${import_DC_stacks_do} == "y" ) then
       if ( -e ${movie_stack}/${importimage} ) then
@@ -134,7 +136,7 @@ while ( ${irun} <= ${imagenum} )
         echo ":      ${movie_stack}/${importimage}"
         set DC_stack_found = "y"
       else
-        echo "::WARNING: ${movie_stack}/${importimage} not found."
+        echo "::        WARNING: ${movie_stack}/${importimage} not found."
         set DC_stack_found = "n"
       endif
     else
@@ -146,19 +148,17 @@ while ( ${irun} <= ${imagenum} )
         echo ":      ${movie_RAW}/${importimage}"
         set RAW_stack_found = "y"
       else
-        echo "::WARNING: ${movie_RAW}/${importimage} not found."
+        echo "::        WARNING: ${movie_RAW}/${importimage} not found."
         set RAW_stack_found = "n"
       endif
     else
       set RAW_stack_found = "n"
     endif
-    echo ":: ${irun}: Creating ${import_target_dirname}/${importimage_pattern} for image number ${newimagenumber}"
-    echo ":"
     cd ${olddir}
     cd ..
     cd ${import_target_dirname}
     if ( -d ${importimage_pattern} ) then
-      ${proc_2dx}/linblock "WARNING: ${importimage_pattern} already existing. Removing."
+      echo "::        WARNING: ${importimage_pattern} already existing. Removing."
       \rm -rf ${importimage_pattern}
     endif
     mkdir ${importimage_pattern}

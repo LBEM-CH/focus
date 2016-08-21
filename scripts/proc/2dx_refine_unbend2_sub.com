@@ -36,10 +36,10 @@ if ( ${refine_now} == "maskb01" ) then
   #
   \rm -f TMP442211.tmp
   set best_maskb01 = `cat ${imagename}-maskb01.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_maskb01}, with QVal ${best_QVal}. Previously was ${old_maskb01}"
+  ${proc_2dx}/linblock "Best value was found at ${best_maskb01}, with QVAL ${best_QVAL}. Previously was ${old_maskb01}"
   #
   set maskb01 = ${best_maskb01}
   echo set maskb01 = ${maskb01} >> LOGS/${scriptname}.results
@@ -77,10 +77,10 @@ if ( ${refine_now} == "maskb02" ) then
   #
   \rm -f TMP442211.tmp
   set best_maskb02 = `cat ${imagename}-maskb02.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_maskb02}, with QVal ${best_QVal}. Previously was ${old_maskb02}"
+  ${proc_2dx}/linblock "Best value was found at ${best_maskb02}, with QVAL ${best_QVAL}. Previously was ${old_maskb02}"
   #
   set maskb02 = ${best_maskb02}
   echo set maskb02 = ${maskb02} >> LOGS/${scriptname}.results
@@ -118,10 +118,10 @@ if ( ${refine_now} == "maskb03" ) then
   #
   \rm -f TMP442211.tmp
   set best_maskb03 = `cat ${imagename}-maskb03.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_maskb03}, with QVal ${best_QVal}. Previously was ${old_maskb03}"
+  ${proc_2dx}/linblock "Best value was found at ${best_maskb03}, with QVAL ${best_QVAL}. Previously was ${old_maskb03}"
   #
   set maskb03 = ${best_maskb03}
   echo set maskb03 = ${maskb03} >> LOGS/${scriptname}.results
@@ -159,10 +159,10 @@ if ( ${refine_now} == "maskb04" ) then
   #
   \rm -f TMP442211.tmp
   set best_maskb04 = `cat ${imagename}-maskb04.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_maskb04}, with QVal ${best_QVal}. Previously was ${old_maskb04}"
+  ${proc_2dx}/linblock "Best value was found at ${best_maskb04}, with QVAL ${best_QVAL}. Previously was ${old_maskb04}"
   #
   set maskb04 = ${best_maskb04}
   echo set maskb04 = ${maskb04} >> LOGS/${scriptname}.results
@@ -200,10 +200,10 @@ if ( ${refine_now} == "maskb05" ) then
   #
   \rm -f TMP442211.tmp
   set best_maskb05 = `cat ${imagename}-maskb05.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_maskb05}, with QVal ${best_QVal}. Previously was ${old_maskb05}"
+  ${proc_2dx}/linblock "Best value was found at ${best_maskb05}, with QVAL ${best_QVAL}. Previously was ${old_maskb05}"
   #
   set maskb05 = ${best_maskb05}
   echo set maskb05 = ${maskb05} >> LOGS/${scriptname}.results
@@ -242,10 +242,10 @@ if ( ${refine_now} == "boxb1" ) then
   #
   \rm -f TMP442211.tmp
   set best_boxb1 = `cat ${imagename}-boxb1.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_boxb1}, with QVal ${best_QVal}. Previously was ${old_boxb1}"
+  ${proc_2dx}/linblock "Best value was found at ${best_boxb1}, with QVAL ${best_QVAL}. Previously was ${old_boxb1}"
   #
   set boxb1 = ${best_boxb1}
   #
@@ -284,10 +284,10 @@ if ( ${refine_now} == "boxb2" ) then
   #
   \rm -f TMP442211.tmp
   set best_boxb2 = `cat ${imagename}-boxb2.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_boxb2}, with QVal ${best_QVal}. Previously was ${old_boxb2}"
+  ${proc_2dx}/linblock "Best value was found at ${best_boxb2}, with QVAL ${best_QVAL}. Previously was ${old_boxb2}"
   #
   set boxb2 = ${best_boxb2}
   #
@@ -350,16 +350,16 @@ if ( ${refine_now} == "maskb01_boxb1" ) then
   end
   #
   \mv -f SCRATCH/${imagename}-maskb01_boxb1.tabl SCRATCH/${imagename}-maskb01_boxb1.txt
-  echo "# IMAGE: SCRATCH/${imagename}-maskb01_boxb1.txt  <TXT: QVal Table>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: SCRATCH/${imagename}-maskb01_boxb1.txt  <TXT: QVAL Table>" >> LOGS/${scriptname}.results
   #  
   \rm -f TMP442211.tmp
   set best_maskb01 = `cat ${imagename}-maskb01.tabl | ${bin_2dx}/getmax.exe`
   \rm -f TMP442211.tmp
   set best_boxb1 = `cat ${imagename}-boxb1.tabl | ${bin_2dx}/getmax.exe`
-  set best_QVal = `cat TMP442211.tmp`
+  set best_QVAL = `cat TMP442211.tmp`
   \rm -f TMP442211.tmp
   #
-  ${proc_2dx}/linblock "Best value was found at ${best_boxb1}, with QVal ${best_QVal}. Previously was ${old_boxb1}"
+  ${proc_2dx}/linblock "Best value was found at ${best_boxb1}, with QVAL ${best_QVAL}. Previously was ${old_boxb1}"
   #
   set maskb01 = ${best_maskb01}
   set boxb1 = ${best_boxb1}

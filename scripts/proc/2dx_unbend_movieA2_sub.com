@@ -74,6 +74,16 @@ else
   echo "set movie_imagenumber_total = ${movie_imagenumber}"  >> LOGS/${scriptname}.results
   set movie_imagenumber_touse = `echo ${movie_imagenumber_total} ${movie_imagenumber_toskip} | awk '{ s = $1 - $2 } END { print s }'`
   echo "set movie_imagenumber_touse = ${movie_imagenumber_touse}"  >> LOGS/${scriptname}.results
+  if ( ${movie_imagenumber_touse} == "0" ) then
+    echo ":: "
+    echo ":: ERROR: No frames are left to use ???"
+    echo ":: "
+    echo ":: movie_imagenumber_total = ${movie_imagenumber_total}"
+    echo ":: movie_imagenumber_toskip = ${movie_imagenumber_toskip}"
+    echo ":: movie_imagenumber_touse = ${movie_imagenumber_touse}"
+    echo ":: "
+    ${proc_2dx}/linblock "ERROR in frame number of movie"
+  endif
   \rm tmp_stack_header.txt
 endif
 #
@@ -615,12 +625,12 @@ endif
 
 set IQS = `echo ${UMA_IQ1} ${UMA_IQ2} ${UMA_IQ3} ${UMA_IQ4} ${UMA_IQ5} ${UMA_IQ6} ${UMA_IQ7} ${UMA_IQ8} ${UMA_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QValMA= ${QVAL_local} ... IQ stat = ${IQS}"
+echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVALMA= ${QVAL_local} ... IQ stat = ${IQS}"
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
-echo "::Unbend MA: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVal= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
+echo "::Unbend MA: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVAL= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 #
 
 

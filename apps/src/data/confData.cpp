@@ -851,15 +851,29 @@ void confData::setDefaults(const QString &workingDirName) {
         cout << standardScriptsDir.absolutePath().toStdString() << " does not exist!" << endl;
         exit(0);
     }
+    
+    QString userPath = QDir::homePath() + "/.2dx";
 
+    setDir("home_2dx", userPath);
     setDir("application", appDir + sep);
     setDir("working", workingDir);
     setDir("binDir", appDir + sep + "/kernel/mrc/bin");
     setDir("procDir", appDir + sep + "/scripts/proc");
+    setDir("config", appDir + sep + "/resources/config");
     setDir("standardScriptsDir", standardScriptsDir);
     setDir("customScriptsDir", customScriptsDir);
     setApp("2dx_image", appDir + sep + "/bin/2dx_image");
     setApp("2dx_merge", appDir + sep + "/bin/2dx_merge");
+    
+    confData *cfg = new confData(userPath + "/2dx.cfg", getDir("config") + "/" + "2dx.cfg", true);
+    if (cfg->isEmpty()) {
+        cerr << "2dx.cfg not found." << endl;
+        exit(0);
+    }
+    cfg->save();
+
+    setAppConf(cfg);
+    
     syncWithUpper();
     if (!QFileInfo(localConf).exists()) {
         loadDefaults();

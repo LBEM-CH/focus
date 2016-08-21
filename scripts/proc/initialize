@@ -18,21 +18,27 @@ echo proc_2dx = ${proc_2dx}
 # The paths like app_python, app_anaconda comes from the 2DX Preferences set
 # by the user. 
 #
-if ( ! -e ${app_python} ) then
+if ( ! $?app_python ) then
+  source ~/.2dx/2dx.cfg
+endif
+#
+if ( $?app_python ) then
+  echo 1
+  if ( ! -e ${app_python} ) then
     echo ":: "
     ${proc_2dx}/linblock "Python executable not found. Is it installed ???"
     ${proc_2dx}/linblock "${app_python}"
     ${proc_2dx}/linblock "The location of python is defined in Preferences."
     echo ":: "
-endif
-if ( ! -e ${app_anaconda} ) then
+  endif
+  if ( ! -e ${app_anaconda} ) then
     echo ":: "
     ${proc_2dx}/linblock "Anaconda Python executable not found. Is it installed ???"
     ${proc_2dx}/linblock "${app_anaconda}"
     ${proc_2dx}/linblock "The location of Anaconda Python is defined in Preferences."
     echo ":: "
-endif
-if ( ! -d ${dir_ccp4} ) then
+  endif
+  if ( ! -d ${dir_ccp4} ) then
     echo ":: "
     ${proc_2dx}/linblock "CCP4 installation directory not found. Is it installed ???"
     ${proc_2dx}/linblock "${dir_ccp4}"
@@ -40,17 +46,17 @@ if ( ! -d ${dir_ccp4} ) then
     echo ":: "
     set ccp4 = "NOTFOUND"
     set bin_ccp4 = "NOTFOUND"
-else
+  else
     set ccp4 = ${dir_ccp4}
     set bin_ccp4 = ${ccp4}/bin
-endif
-if ( ! -d ${dir_eman2} ) then
+  endif
+  if ( ! -d ${dir_eman2} ) then
     echo ":: "
     ${proc_2dx}/linblock "EMAN2 installation directory not found. Is it installed ???"
     ${proc_2dx}/linblock "${dir_eman2}"
     ${proc_2dx}/linblock "The location of EMAN2 installation is defined in Preferences."
     echo ":: "
-else
+  else
     set EMAN2_dir = ${dir_eman2}
     set path=(${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin $path)
     if ( $?PYTHONPATH ) then
@@ -58,13 +64,17 @@ else
         setenv PYTHONPATH
     endif
     setenv PYTHONPATH ${EMAN2_dir}/lib:${EMAN2_dir}/bin:${EMAN2_dir}/extlib/site-packages:${EMAN2_dir}
-endif
-if ( ! -e ${app_spider} ) then
+  endif
+  if ( ! -e ${app_spider} ) then
     echo ":: "
     ${proc_2dx}/linblock "Spider executable not found. Is it installed ???"
     ${proc_2dx}/linblock "${app_spider}"
     ${proc_2dx}/linblock "The location of spider is defined in Preferences."
     echo ":: "
+  endif
+  #
+else
+  echo "::WARNING: CSH Variable app_python is not defined. You may be running this script from the wrong environment."
 endif
 #
 ${proc_2dx}/lin "app_python = ${app_python}"

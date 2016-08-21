@@ -292,7 +292,9 @@ while ($i <= ${movie_imagenumber_superframes})
   set olddir = $PWD
   if ( ! -e ${frame_folder}/2dx_master.cfg ) then
     cd ${frame_folder}
-    \ln -s ../2dx_image.cfg 2dx_master.cfg  
+    echo ": In " $PWD
+    echo ": Linking " \ln -s ${olddir}/2dx_image.cfg 2dx_master.cfg  
+    \ln -s ${olddir}/2dx_image.cfg 2dx_master.cfg  
     cd ${olddir}
   endif
   echo "set imagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/f${i}/2dx_image.cfg
@@ -328,7 +330,7 @@ while ($i <= ${movie_imagenumber_superframes})
   # echo "LP on: ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc with filter radius ${filtervalue}"
   # echo "${app_python} ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}"
   #
-  # echo "${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
+  echo "${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
   ${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc
   #
 

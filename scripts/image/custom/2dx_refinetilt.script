@@ -39,6 +39,8 @@
 # DISPLAY: phaori
 # DISPLAY: revhk
 # DISPLAY: rot180
+# DISPLAY: rot90
+# DISPLAY: ctfrev
 # DISPLAY: comment
 #
 #$end_local_vars
@@ -59,6 +61,8 @@ set stepdigitizer = ""
 set tempkeep = ""
 set revhk = ""
 set rot180 = ""
+set rot90 = ""
+set ctfrev = ""
 set realang = ""
 set RESMIN = ""
 set RESMAX = ""
@@ -109,16 +113,22 @@ else
   set rot180val = '1'
 endif
 #
-# if ( ${rot90} == 'y' ) then
-#   set rot90val = '1'
-# else
-#   set rot90val = '0'
-# endif
+if ( ${rot90} == 'y' ) then
+  set rot90val = '1'
+else
+  set rot90val = '0'
+endif
 #
 if ( ${revhk} == 'y' ) then
   set revhkval = '1'
 else
   set revhkval = '0'
+endif
+#
+if ( ${ctfrev} == 'y' ) then
+  set ctfrevval = '1'
+else
+  set ctfrevval = '0'
 endif
 #
 set SGNXCH = 1
@@ -180,7 +190,7 @@ if ( $reference == "(none)" ) then
   echo "0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT"
   echo "${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX"
   echo "${lattice},${ABANG}                             ! AX, AY, BX, BY  , ABANG"
-  echo "${spcgrp} ${phaori} ${revhkval} ${rot180val} ${SGNXCH} ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH"
+  echo "${spcgrp} ${phaori} ${revhkval} ${rot180val} ${SGNXCH} ${rot90val} ${ctfrevval} ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH"
   echo "${defocus} ${TLTAXIS} ${TLTANG}              ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL"
   ${proc_2dx}/lin "Starting now:"
   echo " "
@@ -192,7 +202,7 @@ ${imagesidelength} ${imagesidelength} ${stepdigitizer} ${magnification} ${CS} ${
 0 30 30 19 19                                ! NUMSPOT, NOH, NOK, NHOR, NVERT
 ${RESMIN} ${RESMAX}                          ! RESMIN, RESMAX
 ${lattice},${ABANG}                             ! AX, AY, BX, BY  , ABANG
-${spcgrp} ${phaori} ${revhkval} ${rot180val} ${SGNXCH} ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
+${spcgrp} ${phaori} ${revhkval} ${rot180val} ${SGNXCH} ${rot90val} ${ctfrevval} ! ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
 ${defocus} ${TLTAXIS} ${TLTANG}              ! DFMID1,DFMID2,ANGAST,TLTAXIS,TLTANGL
 eot
   #

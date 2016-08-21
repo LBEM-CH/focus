@@ -238,7 +238,7 @@ C
       AYR = AY/RATIOYX  ! coords referred to x-scale.
       BYR = BY/RATIOYX
       READ(5,*) ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH,ROT90,CTFREV
-      WRITE(6,1051) ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH
+      WRITE(6,1051) ISPGRP,ORIGH,ORIGK,REVHK,ROT180,SGNXCH,ROT90,CTFREV
 1051  FORMAT(/,'          ISPGRP -------------------',I5,/,
      .  '          ORIGH --------------------',F7.1,/,
      .  '          ORIGK --------------------',F7.1,/,

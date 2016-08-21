@@ -71,6 +71,7 @@ else
   # Get the number of frames
   e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
   set movie_imagenumber = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
+  set movie_imagenumber_total = ${movie_imagenumber}
   echo "set movie_imagenumber_total = ${movie_imagenumber}"  >> LOGS/${scriptname}.results
   set movie_imagenumber_touse = `echo ${movie_imagenumber_total} ${movie_imagenumber_toskip} | awk '{ s = $1 - $2 } END { print s }'`
   echo "set movie_imagenumber_touse = ${movie_imagenumber_touse}"  >> LOGS/${scriptname}.results

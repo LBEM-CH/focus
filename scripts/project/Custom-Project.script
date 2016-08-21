@@ -155,8 +155,6 @@ foreach dirfile ( ${dirlist} )
   # echo "set movie_imagenumber_toave = 5" >> LOGS/${scriptname}.results
   # echo "set movie_quadradb = 8,8 = 8" >> LOGS/${scriptname}.results
   # echo "set ctfcor_imode = 9" >> LOGS/${scriptname}.results
-  # echo "set ctfcor_calculate_tiles = 0" >> LOGS/${scriptname}.results
-  # echo "set calculate_tiles = 0" >> LOGS/${scriptname}.results
   # echo "set ML_doit = n" >> LOGS/${scriptname}.results
 
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results

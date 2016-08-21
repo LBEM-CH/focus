@@ -53,7 +53,6 @@
 # DISPLAY: ctfcor_noise
 # DISPLAY: ctfcor_imode
 # DISPLAY: ctfcor_debug
-# DISPLAY: calculate_tiles
 # DISPLAY: movie_ghostscript_installed
 # RESET: show_frames = "n"
 # RESET: show_frame_FFT = "n"
@@ -101,7 +100,6 @@ set app_2dx_image = ""
 set beamtilt = ""
 set boxb1 = ""
 set boxb2 = ""
-set calculate_tiles = ""
 set ccunbend_program = ""
 set createmaskinfo = ""
 set crop = ""

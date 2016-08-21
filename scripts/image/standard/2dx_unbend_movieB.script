@@ -34,10 +34,10 @@
 #
 # SORTORDER: 58
 #
-# RESET: show_frames = "n"
-# RESET: show_frame_FFT = "n"
-# RESET: show_frame_CCmap = "n"
-# RESET: show_frame_CCmap_marked = "n"
+# DISPLAY: show_frames
+# DISPLAY: show_frame_FFT
+# DISPLAY: show_frame_CCmap
+# DISPLAY: show_frame_CCmap_marked
 # DISPLAY: imagename
 # DISPLAY: imagesidelength 
 # DISPLAY: holeb

@@ -85,7 +85,7 @@ void ImageTab::showImageWindow(const QString& workingDir) {
         imageData->setURL("help", "http://2dx.org/documentation/2dx-software");
         imageData->setURL("bugReport", "https://github.com/C-CINA/2dx/issues");
         
-        imageData->syncWithUpper();
+        //imageData->syncWithUpper();
         ImageWindow* imageWin = new ImageWindow(imageData);
         connect(imageWin, &ImageWindow::executing,
                 [=] (bool run){

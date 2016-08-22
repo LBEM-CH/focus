@@ -28,6 +28,88 @@
 
 using namespace std;
 
+confData* getConf(const QString &workingDirName) {
+
+    QString appDir = QApplication::applicationDirPath();
+    QString sep = "/../";
+    int tries = 0;
+    while (!QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists() && tries < 3) {
+        cout << (appDir + sep + "resources/config/2dx_master.cfg").toStdString() << " does not exist!" << endl;
+        sep += "../";
+        tries++;
+    }
+    
+    QDir workingDir(workingDirName);
+    if (!workingDir.exists()) {
+        qDebug() << (workingDirName + " does not exist!");
+        exit(0);
+    }
+    workingDir.mkdir("proc");
+    workingDir.mkdir("LOGS");
+    
+    QString referenceConf = appDir + sep + "resources/config/2dx_master.cfg";
+    if (!QFileInfo(referenceConf).exists()) {
+        qDebug() << (referenceConf + " does not exist!");
+        exit(0);
+    }
+    
+    QString mergeConfigLocation = workingDirName + "/../" + "2dx_master.cfg";
+    if (!QFileInfo(mergeConfigLocation).exists()) {
+        qDebug() << (mergeConfigLocation + " does not exist!");
+        exit(0);
+    }
+    
+    confData* mergeData = new confData(mergeConfigLocation, referenceConf);
+    mergeData->updateConf(referenceConf);
+        
+    QString localConf = workingDir.absolutePath() + "/" + "2dx_image.cfg";   
+    if (!QFileInfo(localConf).exists()) {
+        qDebug() << (localConf + " does not exist!");
+        exit(0);
+    }
+
+    confData* imageData = new confData(localConf, mergeData);
+    if (QFileInfo(referenceConf).exists()) {
+        imageData->updateConf(referenceConf);
+    }
+        
+    QDir standardScriptsDir(appDir +  sep + "/scripts/image/standard/");
+    QDir customScriptsDir(appDir + sep + "/scripts/image/custom/");
+
+    if (!standardScriptsDir.exists()) {
+        cout << standardScriptsDir.absolutePath().toStdString() << " does not exist!" << endl;
+        exit(0);
+    }
+    if (!customScriptsDir.exists()) {
+        cout << standardScriptsDir.absolutePath().toStdString() << " does not exist!" << endl;
+        exit(0);
+    }
+    
+    QString userPath = QDir::homePath() + "/.2dx";
+
+    imageData->setDir("home_2dx", userPath);
+    imageData->setDir("application", appDir + sep);
+    imageData->setDir("working", workingDir);
+    imageData->setDir("binDir", appDir + sep + "/kernel/mrc/bin");
+    imageData->setDir("procDir", appDir + sep + "/scripts/proc");
+    imageData->setDir("config", appDir + sep + "/resources/config");
+    imageData->setDir("standardScriptsDir", standardScriptsDir);
+    imageData->setDir("customScriptsDir", customScriptsDir);
+    imageData->setApp("2dx_image", appDir + sep + "/bin/2dx_image");
+    imageData->setApp("2dx_merge", appDir + sep + "/bin/2dx_merge");
+    
+    confData *cfg = new confData(userPath + "/2dx.cfg", imageData->getDir("config") + "/" + "2dx.cfg", true);
+    if (cfg->isEmpty()) {
+        cerr << "2dx.cfg not found." << endl;
+        exit(0);
+    }
+    cfg->save();
+
+    imageData->setAppConf(cfg);
+    
+    return imageData;
+}
+
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("2dx_image");
@@ -44,8 +126,7 @@ int main(int argc, char *argv[]) {
 
     const QStringList args = cliParser.positionalArguments();
     if (args.size() == 2) {       
-        confData data;
-        data.setDefaults(args[0]);
+        confData data = *(getConf(args[0]));
         QDir standardScriptsDir(data.getDir("standardScriptsDir"));
         QDir customScriptsDir(data.getDir("customScriptsDir"));
         

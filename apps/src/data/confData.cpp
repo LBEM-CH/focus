@@ -8,6 +8,7 @@
  */
 
 #include "confData.h"
+#include "confVersion.h"
 #include <QDebug>
 #include <iostream>
 using namespace std;
@@ -16,7 +17,7 @@ void confData::init(const QString &fileName, confData *parentData) {
     parentConf = parentData;
     dataFilename = fileName;
     valueSearch << "LABEL" << "LEGEND" << "EXAMPLE" << "FORMER" << "HELP" << "TYPE" << "RELATION" << "LOCKED" << "CONCERNS" << "USERLEVEL" << "INHERITABLE_UPON_INIT" << "SYNC_WITH_UPPER_LEVEL" << "ISWRONG";
-    userSetProperties << "LOCKED" << "SYNC_WITH_UPPER_LEVEL" << "ISWRONG";
+    userSetProperties << "LOCKED" << "ISWRONG";
     //globalSetPropeties = valueSearch - userSetProperties
     for (int i = 0; i < valueSearch.size(); ++i) {
         if (!(userSetProperties.contains(valueSearch[i])))
@@ -302,7 +303,7 @@ bool confData::parseDataFile() {
                 val[1] = val[1].simplified();
 
                 element->set("valueLabel", val[0]);
-                element->set("value", val[1]);
+                        element->set("value", val[1]);
 
                 *section << element;
                 lookup.insert(element->get("valuelabel").toLower(), element);
@@ -344,6 +345,7 @@ void confData::updateConf(const QString &confFileName) {
     bool headerRead = false;
     QString headerLine;
     qint64 pos = -1;
+    bool syncWithUpperLevel = false;
     while (!data.atEnd() && pos != data.pos() && lineData.toLower() != "$end_local_vars" && lineData.toLower() != "$end_vars") {
         bool inValueSearch = false;
         pos = data.pos();
@@ -365,6 +367,7 @@ void confData::updateConf(const QString &confFileName) {
             if (lineData.startsWith(globalSetProperties[i] + ':')) {
                 element = getElement(element);
                 lineData.remove(0, globalSetProperties[i].size() + 1);
+                if(globalSetProperties[i] == "SYNC_WITH_UPPER_LEVEL" && lineData.trimmed().toLower() == "yes") syncWithUpperLevel = true; 
                 element->set(globalSetProperties[i].simplified(), lineData);
                 inValueSearch = true;
             }
@@ -403,6 +406,7 @@ void confData::updateConf(const QString &confFileName) {
                 element->set("valueLabel", val[0]);
                 QHash<QString, confElement *>::iterator it = lookup.find(val[0].toLower());
                 QString value;
+                
                 //if the element does not exist yet 
                 if (it == lookup.end())
                     value = val[1];
@@ -410,13 +414,19 @@ void confData::updateConf(const QString &confFileName) {
                     value = it.value()->get("value");
                     element = protectUserSetProperies(it.value(), element);
                 }
-
+                
                 element->set("value", value);
-                if (section != NULL)
+                if (section != NULL) {
+                    if(syncWithUpperLevel && parentConf && parentConf->lookup.contains(val[0].toLower())) {
+                        //qDebug() << "Syncing with upper: " << val[0];
+                        element = parentConf->get(val[0]);
+                    }
                     *section << element;
+                }
                 lookup.insert(element->get("valuelabel").toLower(), element);
                 section->addConcern(element->get("concerns"));
                 element = NULL;
+                syncWithUpperLevel = false;
             }
         }
     }
@@ -569,8 +579,10 @@ void confData::saveSynchronized(QString fileName) {
                     data.write(("# " + valueSearch[k] + ": " + v + "\n").toLatin1());
                     if (valueSearch[k] == "SYNC_WITH_UPPER_LEVEL" && v.toLower() == "yes") {
                         // CHEN: This is probably wrong: It should not be "saveInUpperLevel" but rather "GetFromUpperLevel".
-                        if (saveInUpperLevel(e->get("valuelabel"), e->get("value")))
-                            synchronized = true;
+                        //if (saveInUpperLevel(e->get("valuelabel"), e->get("value")))
+                        //    synchronized = true;
+                        if(parentConf && parentConf->lookup.contains(e->get("valuelabel").toLower())) 
+                            e->set("value", lookup[e->get("valuelabel").toLower()]->get("value"));
                     }
                 }
             }
@@ -809,78 +821,6 @@ const QString &confData::getURL(const QString &name) {
     return urls[name.toLower()];
 }
 
-void confData::setDefaults(const QString &workingDirName) {
-    QString appDir = QApplication::applicationDirPath();
-    QString sep = "/../";
-    int tries = 0;
-    while (!QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists() && tries < 3) {
-        cout << (appDir + sep + "resources/config/2dx_master.cfg").toStdString() << " does not exist!" << endl;
-        sep += "../";
-        tries++;
-    }
-    QDir workingDir(workingDirName);
-    if (!workingDir.exists()) {
-        qDebug() << (workingDirName + " does not exist!");
-        exit(0);
-    }
-    workingDir.mkdir("proc");
-    workingDir.mkdir("LOGS");
-    QString referenceConf = appDir + sep + "resources/config/2dx_master.cfg";
-    QString localConf = workingDir.absolutePath() + "/" + "2dx_image.cfg";
-    if (!QFileInfo(localConf).exists()) {
-        localConf = workingDir.absolutePath() + "/" + "2dx_master.cfg";
-    }
-    if (!QFileInfo(localConf).exists()) {
-        qDebug() << (localConf + " does not exist!");
-        exit(0);
-    }
-    QDir standardScriptsDir(appDir +  sep + "/scripts/image/standard/");
-    QDir customScriptsDir(appDir + sep + "/scripts/image/custom/");
-    QDir working(QDir(workingDirName).absolutePath());
-
-    init(referenceConf);
-    confData local(localConf);
-    loadConf(&local);
-    setSaveName(localConf);
-
-    if (!standardScriptsDir.exists()) {
-        cout << standardScriptsDir.absolutePath().toStdString() << " does not exist!" << endl;
-        exit(0);
-    }
-    if (!customScriptsDir.exists()) {
-        cout << standardScriptsDir.absolutePath().toStdString() << " does not exist!" << endl;
-        exit(0);
-    }
-    
-    QString userPath = QDir::homePath() + "/.2dx";
-
-    setDir("home_2dx", userPath);
-    setDir("application", appDir + sep);
-    setDir("working", workingDir);
-    setDir("binDir", appDir + sep + "/kernel/mrc/bin");
-    setDir("procDir", appDir + sep + "/scripts/proc");
-    setDir("config", appDir + sep + "/resources/config");
-    setDir("standardScriptsDir", standardScriptsDir);
-    setDir("customScriptsDir", customScriptsDir);
-    setApp("2dx_image", appDir + sep + "/bin/2dx_image");
-    setApp("2dx_merge", appDir + sep + "/bin/2dx_merge");
-    
-    confData *cfg = new confData(userPath + "/2dx.cfg", getDir("config") + "/" + "2dx.cfg", true);
-    if (cfg->isEmpty()) {
-        cerr << "2dx.cfg not found." << endl;
-        exit(0);
-    }
-    cfg->save();
-
-    setAppConf(cfg);
-    
-    syncWithUpper();
-    if (!QFileInfo(localConf).exists()) {
-        loadDefaults();
-        save();
-    }
-}
-
 QString confData::property(const QString &propertyName) {
     return properties.value(propertyName.toLower());
 }
@@ -905,17 +845,7 @@ QList<confElement*> confData::find(const QString &field, const QRegExp &exp) {
     return selection;
 }
 
-bool confData::sync(const QString &reference, const QString &variable, const QRegExp &exp) {
-    if (!QFileInfo(reference).exists()) {
-        cout << (reference + " does not exist.").toStdString() << endl;
-        return false;
-    }
-
-    confData local(reference);
-    if (local.isEmpty()) {
-        cerr << (reference + " is empty.").toStdString() << endl;
-        return false;
-    }
+bool confData::sync(confData* local, const QString &variable, const QRegExp &exp) {
 
     QRegExp search;
 
@@ -925,15 +855,20 @@ bool confData::sync(const QString &reference, const QString &variable, const QRe
     } else search = exp;
 
     confElement *l;
-
-    foreach(confElement *e, local.find(variable, search)) {
-        l = get(e->get("valuelabel"));
-        if (l != NULL)
-            *l = *e;
-        else
-            cout << "Variable not found: " << e->get("valuelabel").toStdString() << "    (Run the custom script 'Refresh Databases' on all images to update 2dx_image.cfg files)" << endl;
+ 
+    foreach(confElement *e, local->find(variable, search)) {
+        QString valueLabel = e->get("valuelabel");
+        l = get(valueLabel);
+        if (l != NULL) {         
+            qDebug() << "Syncing with upper: " << valueLabel << l->get("value");
+            l = e;
+            qDebug() << "After sync: " << get(valueLabel)->get("value"); 
+        }
+        else {
+            cout << "Variable not found: " << e->get("valuelabel").toStdString() << "    (Run the script 'Refresh Databases' on all images to update 2dx_image.cfg files)" << endl;
+        }
     }
-
+  
     return true;
 }
 
@@ -942,7 +877,24 @@ bool confData::syncPropertyWithUpper(const QString element, const QString proper
 }
 
 bool confData::syncWithUpper(const QString &variable, const QRegExp &exp) {
-    return sync(QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg", variable, exp);
+    if (parentConf) {
+        qDebug() << "Using parent conf";
+        return sync(parentConf, variable, exp);
+    }
+    else {
+        QString reference = QFileInfo(dataFilename).absolutePath() + "/../2dx_master.cfg";
+        if (!QFileInfo(reference).exists()) {
+            cout << (reference + " does not exist.").toStdString() << endl;
+            return false;
+        }
+
+        confData local(reference);
+        if (local.isEmpty()) {
+            cerr << (reference + " is empty.").toStdString() << endl;
+            return false;
+        }
+        return sync(&local, variable, exp);
+    }
 }
 
 bool confData::syncProperty(const QString reference, const QString element, const QString property) {

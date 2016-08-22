@@ -37,7 +37,6 @@
 
 #include "confElement.h"
 #include "confSection.h"
-#include "confVersion.h"
 
 class confData : public QObject {
     Q_OBJECT
@@ -123,7 +122,7 @@ public:
     confData(QObject *parent = NULL);
     ~confData();
 
-    bool sync(const QString &reference, const QString &variable = "SYNC_WITH_UPPER_LEVEL", const QRegExp &exp = QRegExp());
+    bool sync(confData* local, const QString &variable = "SYNC_WITH_UPPER_LEVEL", const QRegExp &exp = QRegExp());
     bool syncPropertyWithUpper(const QString element, const QString property = "SYNC_WITH_UPPER_LEVEL");
     bool isEmpty();
     bool isModified();
@@ -178,8 +177,6 @@ public:
     const QString &version_revision();
     void setURL(const QString &name, const QString &url);
     const QString &getURL(const QString &name);
-
-    void setDefaults(const QString &workingDirName);
 
     QList<confElement*> find(const QString &field, const QRegExp &exp);
     confData *getSubConf(QString sub);

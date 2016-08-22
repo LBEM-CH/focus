@@ -43,6 +43,7 @@ ParameterSection::ParameterSection(confData* conf, QString sectionTitle, QWidget
 
 void ParameterSection::addParameter(confElement* element) {
     ParameterInput* inputWidget = new ParameterInput(data, element, this);
+    connect(element, SIGNAL(dataChanged()), inputWidget, SLOT(load()));
     inputWidget->setMinimumHeight(18);
     int paramUserLevel = element->userLevel();
 

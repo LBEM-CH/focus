@@ -132,7 +132,7 @@ confData* readConfig(const QString workingPath, const QString applicationPath) {
     }
     data = new confData(mergeConfigLocation, appConfigLocation);
     std::cout << "set config defaults." << std::endl;
-    data->setDefaults(workingPath);
+    //data->setDefaults(workingPath);
     if (QFileInfo(appConfigLocation).exists()) {
         data->updateConf(appConfigLocation);
     }

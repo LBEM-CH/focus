@@ -36,7 +36,6 @@
 #include <resizeableStackedWidget.h>
 #include <scriptModule.h>
 #include <parameter_widget.h>
-#include <confModel.h>
 #include <log_viewer.h>
 #include <resultsModule.h>
 #include <reprojectWindow.h>

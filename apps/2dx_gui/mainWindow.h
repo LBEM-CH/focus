@@ -49,7 +49,6 @@
 #include <resizeableStackedWidget.h>
 #include <scriptModule.h>
 #include <parameter_widget.h>
-#include <confModel.h>
 #include <confDelegate.h>
 #include <projectDelegate.h>
 #include <log_viewer.h>

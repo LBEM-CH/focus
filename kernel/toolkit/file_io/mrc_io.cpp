@@ -231,6 +231,7 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
     outfile.write((char*)&amean, sizeof(float));
     outfile.write((char*)&spcgrp, sizeof(int));
       
+    /* CHEN>
     if(format == "mrc")
     {
         //Fill the rest of data with zeros
@@ -238,6 +239,8 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
     }
     else if(format == "map")
     {
+    */
+    
         //Fill few default fields expected by CCP4
         outfile.write((char*)&zero, sizeof(int));
         outfile.write((char*)&zero, sizeof(int));
@@ -260,7 +263,9 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
     
         //Fill the rest of data with zeros
         for(int i=0; i<200; i++) outfile.write("    ", sizeof(float));
+    /* CHEN>
     }
+    */
     
     //Write the data
     outfile.seekp(1024);

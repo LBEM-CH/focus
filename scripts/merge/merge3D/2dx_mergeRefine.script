@@ -361,6 +361,7 @@ while ( ${itnum} < ${merge_refine_iterations} )
     #############################################################################
     ${proc_2dx}/linblock "Switching to ALL IMAGES series"
     #############################################################################
+    set dirfile = "2dx_merge_dirfile.dat"
   else
     set dirfile = "2dx_merge_dirfile.dat"
     if ( ${merge_reference} == '0' ) then

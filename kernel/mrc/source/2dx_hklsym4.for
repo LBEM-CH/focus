@@ -415,32 +415,34 @@ C
                       if(i1sig.eq.3)SIGA=1.0
 C        
 C        -------------Output the values into the output channels
-                      if(isig.eq.1)then
-                        write(11,310) H,K,L,AMP,PHASE,FOM,SIGA
-                        write(12,310) H,K,L,AMP,PHASE,FOM,SIGA
-                        if(ineg.gt.1)then
-                          write(11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
-                          write(12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                      if(FOM.gt.0.0)then
+                        if(isig.eq.1)then
+                          write(11,310) H,K,L,AMP,PHASE,FOM,SIGA
+                          write(12,310) H,K,L,AMP,PHASE,FOM,SIGA
+                          if(ineg.gt.1)then
+                            write(11,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                            write(12,310) -H,-K,-L,AMP,-PHASE,FOM,SIGA
+                          endif
+                        elseif(isig.eq.2)then
+                          write(11,310) H,K,L,AMP,PHASE,BACK,FOM
+                          write(12,310) H,K,L,AMP,PHASE,BACK,FOM
+                          if(ineg.gt.1)then
+                            write(11,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                            write(12,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
+                          endif
+                        else
+                          write(11,300) H,K,L,AMP,PHASE,FOM
+                          write(12,300) H,K,L,AMP,PHASE,FOM
+                          if(ineg.gt.1)then
+                            write(11,300) -H,-K,-L,AMP,-PHASE,FOM
+                            write(12,300) -H,-K,-L,AMP,-PHASE,FOM
+                          endif
                         endif
-                      elseif(isig.eq.2)then
-                        write(11,310) H,K,L,AMP,PHASE,BACK,FOM
-                        write(12,310) H,K,L,AMP,PHASE,BACK,FOM
-                        if(ineg.gt.1)then
-                          write(11,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
-                          write(12,310) -H,-K,-L,AMP,-PHASE,BACK,FOM
-                        endif
-                      else
-                        write(11,300) H,K,L,AMP,PHASE,FOM
-                        write(12,300) H,K,L,AMP,PHASE,FOM
-                        if(ineg.gt.1)then
-                          write(11,300) -H,-K,-L,AMP,-PHASE,FOM
-                          write(12,300) -H,-K,-L,AMP,-PHASE,FOM
-                        endif
+                        write(*,'(''H,K,L,AMP,PHASE,BACK,'',
+     .                  ''SIGA,FOM,FILL='',
+     .                  3I4,X,5G11.5,I8)') 
+     .                  H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL
                       endif
-                      write(*,'(''H,K,L,AMP,PHASE,BACK,'',
-     .                ''SIGA,FOM,FILL='',
-     .                3I4,X,5G11.5,I8)') 
-     .                H,K,L,AMP,PHASE,BACK,SIGA,FOM,IFILL
                 endif
             endif
           enddo

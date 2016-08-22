@@ -34,6 +34,7 @@
 # DISPLAY: ILIST
 # DISPLAY: MergeHKMAX
 # DISPLAY: MergeIQMAX
+# DISPLAY: merge_alsoevenodd
 #
 #$end_local_vars
 #
@@ -82,6 +83,7 @@ set overall_phase_residual_2D = ""
 set overall_weighted_phase_residual_2D = ""
 set zstarrange_real = ""
 set latline_algo = ""
+set merge_alsoevenodd = ""
 #
 #$end_vars
 #
@@ -165,6 +167,36 @@ set tmp_overall_weighted_phase_residual_2D = `echo ${overall_weighted_phase_resi
 #
 #
 if ( ${merge_modus} == '3D' ) then
+  #
+  if ( ${merge_alsoevenodd} == "y" ) then
+    # #############################################################################
+    # ${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for EVEN images"
+    # #############################################################################    
+    # echo "# IMAGE: APH/latfitted_even.hkl <HKL: Input HKL EVEN [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
+    # ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted_even.hkl --mrcout volume_even.map -X ${realcell_a} -Y ${realcell_b} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
+    echo "# IMAGE: volume_even.map <MAP: final map 3D EVEN images>"  >> LOGS/${scriptname}.results
+    #
+    echo "<<@progress: +5>>"
+    # #############################################################################
+    # ${proc_2dx}/linblock "2dx_processor.exe - to transform HKL file into volume for ODD  images"
+    # #############################################################################    
+    # echo "# IMAGE: APH/latfitted_odd.hkl <HKL: Input HKL ODD  [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
+    # ${bin_2dx}/2dx_processor.exe --hklin APH/latfitted_odd.hkl  --mrcout volume_odd.map  -X ${realcell_a} -Y ${realcell_b} -Z ${ALAT} --gamma ${realang} --res ${RESMAX} -s ${SYM_NAME}
+    echo "# IMAGE: volume_odd.map <MAP: final map 3D ODD images>"  >> LOGS/${scriptname}.results
+    echo "<<@progress: +5>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_correlator.exe - for FSC"
+    #############################################################################  
+    ${bin_2dx}/2dx_correlator.exe --vol1 volume_even.map --vol2 volume_odd.map -R ${RESMAX} --bins 100 --fsc even_odd_fsc.dat
+    #
+    ${app_python} ${proc_2dx}/plotFSC.py even_odd_fsc.dat PS/even_odd_fsc.ps
+    #
+    echo "# IMAGE: even_odd_fsc.dat <TXT: FSC data between even odd datasets>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: PS/even_odd_fsc.ps <PS: FSC plot between even odd datasets>" >> LOGS/${scriptname}.results
+    #
+    echo "<<@progress: +10>>"
+  endif  
   #
   #############################################################################
   ${proc_2dx}/linblock "2dx_calc_num_phases - to estimate theoretically possible numbers of reflections"
@@ -278,6 +310,7 @@ ${proc_2dx}/linblock "2dx_quality_evaluator.exe - to calculate phase residual an
 set cellx = `echo ${realcell} | cut -d\, -f1`
 set celly = `echo ${realcell} | cut -d\, -f2`
 #
+echo "# IMAGE: APH/latlines.dat <Latline after prescal [H,K,Z,A,P,SigA,SigP,IQ]>" >> LOGS/${scriptname}.results
 ${bin_2dx}/2dx_quality_evaluator.exe --hkzin APH/latlines.dat --nx ${cellx} --ny ${celly} --nz ${ALAT} --gamma ${realang} --res ${RESMAX} --residuals residuals_merged.txt --fsc fsc_merged.txt  
 #
 ${app_python} ${proc_2dx}/plotPhaseResiduals.py residuals_merged.txt PS/residuals_merged.ps

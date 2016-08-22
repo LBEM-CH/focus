@@ -99,6 +99,9 @@ eot
     echo "set initialization_reset = y" >> 2dx_image.cfg
     echo "set initialization_executable = y" >> 2dx_image.cfg
     #
+    cd ${oldir}
+    ${app_2dx_image} ${fullpath} "2dx_initialize"
+    cd ${oldir}
     set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
     set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
     echo "<<@progress:${curprogress}>>"

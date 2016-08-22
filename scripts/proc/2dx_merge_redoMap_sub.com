@@ -343,10 +343,10 @@ eot
 \rm -f final_map.mrc
 \cp -f ${imagename}-${symmetry}.mrc final_map.mrc
 #
-# if ( ${RESULTSMRC} != "y" ) then
-#   echo "# IMAGE: RESULTS-MRC" >> ${mergedir}/LOGS/${scriptname}.results
-#   set RESULTSMRC = "y"
-# endif
+if ( ${RESULTSMRC} != "y" ) then
+  echo "# IMAGE: RESULTS-MRC" >> ${mergedir}/LOGS/${scriptname}.results
+  set RESULTSMRC = "y"
+endif
 #
 #
 if (( ${filehere} == '1' ) && ( ${make_reference} == "y" )) then

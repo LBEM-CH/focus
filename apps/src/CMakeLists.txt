@@ -96,7 +96,6 @@ set(MOC_HDRS
         dialogs/label_wizard_page.h
         dialogs/import_options_page.h
         dialogs/import_images_wizard.h
-        models/confModel.h
         models/albumModel.h
         models/projectModel.h
         models/projectDelegate.h

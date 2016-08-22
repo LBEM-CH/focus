@@ -519,6 +519,6 @@ void mainWindow::updateWindowTitle() {
 }
 
 void mainWindow::save() {
-    mainData->save();
     imageWin_->saveConfigs();
+    mainData->save();
 }

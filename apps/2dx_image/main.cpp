@@ -32,6 +32,9 @@ confData* getConf(const QString &workingDirName) {
 
     QString appDir = QApplication::applicationDirPath();
     QString sep = "/../";
+#ifdef Q_OS_MAC
+  appDir+="/../../../";
+#endif
     int tries = 0;
     while (!QFileInfo(appDir + sep + "resources/config/2dx_master.cfg").exists() && tries < 3) {
         cout << (appDir + sep + "resources/config/2dx_master.cfg").toStdString() << " does not exist!" << endl;

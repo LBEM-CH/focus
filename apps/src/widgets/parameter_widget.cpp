@@ -70,8 +70,8 @@ void ParametersWidget::initialize(int userLevel, const QStringList& toBeDisplaye
     mainLayout_ = new QVBoxLayout();
     mainLayout_->setSpacing(0);
     mainLayout_->setMargin(0);
-    mainLayout_->addWidget(searchWidget);
-    mainLayout_->addWidget(scrollArea_);
+    mainLayout_->addWidget(searchWidget, 0);
+    mainLayout_->addWidget(scrollArea_, 1);
 
     setLayout(mainLayout_); 
     

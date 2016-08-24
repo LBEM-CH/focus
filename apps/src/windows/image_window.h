@@ -87,6 +87,8 @@ public slots:
     void maximizeParameterWindow(bool maximize);
     
     void saveAsProjectDefault();
+    
+    bool isRunningScript();
 
 signals:
     void executing(bool);
@@ -148,6 +150,8 @@ private:
 
 public:
     ImageWindow(confData *data, QWidget *parent = NULL);
+    
+    confData* getConf();
 
 };
 

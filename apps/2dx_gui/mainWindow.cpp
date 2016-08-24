@@ -519,6 +519,7 @@ void mainWindow::updateWindowTitle() {
 }
 
 void mainWindow::save() {
+    if(projectToolsInit && projectTools->isVisible()) return;
     imageWin_->saveConfigs();
     mainData->save();
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <QMessageBox>
 
 #include "image_tab.h"
 
@@ -36,19 +37,37 @@ ImageTab::ImageTab(confData* data, QWidget* parent)
 }
 
 
-void ImageTab::closeImageWindow(int index) {
+void ImageTab::closeImageWindow(int index) { 
+    QWidget* currWidget = windowTabWidget->widget(index);;
+    
+    
+    ImageWindow* win = imagesInitializedToTabs_[imagesShown_[index]];
+    
+    if(win->isRunningScript()) {
+        QMessageBox::information(this, "Error in closing image", "Image cannot be closed as it is being processed.");
+        return;
+    }
+    
+    if(win->getConf()->isModified()) {
+        win->getConf()->save();
+    }
+    
     windowTabWidget->removeTab(index);
+    delete currWidget;
+    imagesInitializedToTabs_.remove(imagesShown_[index]);
+    
     imagesShown_.removeAt(index);
     emit imagesOpenChanged(imagesShown_);
     if(imagesShown_.isEmpty()) {
         windowTabWidget->hide();
         noImageLabel->show();
-    }
+    } 
 }
 
 void ImageTab::showImageWindow(const QString& workingDir) {
 
     if (!imagesInitializedToTabs_.keys().contains(workingDir)) {
+        std::cout << "Initializing: " << workingDir.toStdString() << "\n";
         confData* imageData = new confData(workingDir + "/" + "2dx_image.cfg", mainData);
         QString appConfigLocation = mainData->getDir("config") + "/" + "2dx_master.cfg";
         if (QFileInfo(appConfigLocation).exists()) {

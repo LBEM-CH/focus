@@ -649,3 +649,11 @@ void ImageWindow::saveAsProjectDefault() {
         emit saveAsProjectDefaultRequested(data);
     }
 }
+
+confData* ImageWindow::getConf() {
+    return data;
+}
+
+bool ImageWindow::isRunningScript() {
+    return runButton->isChecked();
+}

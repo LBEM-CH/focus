@@ -323,7 +323,7 @@ eof
   echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
   #
   set newdef = `echo ${def1},${def2},${ang}`
-  echo "set defocus = ${newdef}" >> LOGS/${scriptname}.results
+  echo "set defocus = "\"${newdef}\" >> LOGS/${scriptname}.results
   ${proc_2dx}/linblock "new defocus is ${newdef}"
   set defocus = ${newdef}
   #

@@ -122,6 +122,7 @@ set laterror_peaksused = ""
 set laterror_nodepeakdensity = ""
 set MASKING_done = ""
 set LATTICE_done = ""
+set defocus = ""
 #
 #$end_vars
 #
@@ -186,6 +187,7 @@ source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #
+echo "::Defocus = "${defocus}
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #

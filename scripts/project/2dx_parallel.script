@@ -35,12 +35,10 @@
 # DISPLAY: script_2dx_unbend_movieA2
 # DISPLAY: script_2dx_unbend_movieB
 # DISPLAY: script_2dx_applyCTF
-# DISPLAY: script_2dx_max_likelihood
 # DISPLAY: script_2dx_generateMAP
 # DISPLAY: script_2dx_initialize
 # DISPLAY: script_2dx_evaluateLattice
 # DISPLAY: script_2dx_driftcorrect
-# DISPLAY: script_2dx_driftcorrect2
 # DISPLAY: script_2dx_cleanup
 # DISPLAY: script_2dx_cleanup2
 # DISPLAY: ReUnbend_MP

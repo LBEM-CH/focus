@@ -28,6 +28,7 @@ public slots:
     void changeParametersDisplayed(const QStringList& toBeDisplayed);
     void load();
     void resetParameters(const QMap<QString, QString>& toBeReset);
+    void searchParams();
 
 private:
 
@@ -37,16 +38,19 @@ private:
     QWidget* formWidget();
     QToolBar* toolWidget();
 
-    QHBoxLayout* mainLayout_;
+    QVBoxLayout* mainLayout_;
     QScrollArea* scrollArea_;
+    QWidget* searchWidget;
+    
+    QLineEdit* searchBox;
 
     int userLevel_;
     QStringList parametersDisplayed_;
+    QStringList parametersActuallyShown_;
     
     confData* data;
     
     QList<ParameterSection*> sections_;
-    QMap<QString, confElement*> parameterToElement_;
 };
 
 #endif

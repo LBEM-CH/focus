@@ -54,7 +54,6 @@
 # DISPLAY: resolutionplot_bins
 # DISPLAY: RFACAMP
 # DISPLAY: Thread_Number
-# DISPLAY: sample_pixel
 # DISPLAY: merge_alsoevenodd
 #
 #$end_local_vars
@@ -96,7 +95,6 @@ set RESMIN = ""
 set resolutionplot_bins = ""
 set resolutionplot_RESMAX = ""
 set RFACAMP = ""
-set sample_pixel = ""
 set scalimamp3d_BEXTRA = ""
 set scalimamp3d_BXYMINMAX = ""
 set scalimamp3d_BZMINMAX = ""

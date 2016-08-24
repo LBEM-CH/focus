@@ -26,18 +26,13 @@
 # RESET: show_phares = "n"
 # RESET: show_PSF = "n"
 #
-# DISPLAY: SYN_Unbending
-# DISPLAY: ML_doit
-# DiSPLAY: ML_use_for_merging
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
 # DISPLAY: ALAT
 # DISPLAY: tempfac
-# DISPLAY: imagename_original
 # DISPLAY: SYM
 # DISPLAY: phaori
 # DISPLAY: phaoriFouFilter
-# DISPLAY: phaori_ML
 # DISPLAY: zstarrange
 # DISPLAY: zstarrange_real
 # DISPLAY: Calc_from_zstarrange

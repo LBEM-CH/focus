@@ -22,9 +22,6 @@
 # MANUAL: In order to use the movie-mode unbent APH-files, switch the "Enable movie-mode" option ON!
 #
 # DISPLAY: movie_enable
-# DISPLAY: imagesidelength
-# DISPLAY: magnification
-# DISPLAY: stepdigitizer
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG 
 # DISPLAY: TLTAXA 
@@ -34,7 +31,6 @@
 # DISPLAY: beamtilt
 # DISPLAY: RESMAX
 # DISPLAY: ctfplotresmax
-# DISPLAY: imagename_original
 # DISPLAY: CS
 # DISPLAY: KV
 # DISPLAY: phacon

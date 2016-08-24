@@ -349,10 +349,10 @@ QWidget* LibraryTab::setupSelectionTab() {
     maxDegree = new QLineEdit;
     maxDegree->setFrame(false);
     maxDegree->setMaximumWidth(50);
-    maxDegree->setText("90");
+    maxDegree->setText("10");
     
     parameterToUse = new QComboBox;
-    parameterToUse->addItems(QStringList() << "taxa" << "tangl" << "tltaxis" << "tltang" << "tltaxa" << "QVAL");
+    parameterToUse->addItems(QStringList() << "tltang" << "tangl" << "QVAL2" << "QVALMA" << "QVALMB" );
     parameterToUse->setCurrentIndex(0);
     
     negPosOption = new QComboBox;

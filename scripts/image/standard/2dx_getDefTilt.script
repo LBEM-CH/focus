@@ -30,8 +30,6 @@
 #
 # MANUAL: If you know that your defocus is around 4000.0 Angstroems, you could set the search range to 2000.0 to 6000.0 Angstroems, to save time.
 #
-# DISPLAY: imagename
-# DISPLAY: nonmaskimagename
 # DISPLAY: imagesidelength
 # DISPLAY: magnification
 # DISPLAY: stepdigitizer

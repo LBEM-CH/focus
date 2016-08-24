@@ -37,9 +37,6 @@
 # DISPLAY: show_frame_PROFDATA
 # DISPLAY: show_frame_CCmap_marked
 # DISPLAY: show_frame_CCmap_unbent
-# DISPLAY: imagename
-# DISPLAY: RESMAX
-# DISPLAY: RESMIN
 # DISPLAY: tempkeep
 # DISPLAY: comment
 # DISPLAY: movie_stackname
@@ -53,8 +50,6 @@
 # DISPLAY: movie_smoothing
 # DISPLAY: movie_drift_threshold
 # DISPLAY: Thread_Number
-# DISPLAY: ctfcor_noise
-# DISPLAY: ctfcor_imode
 # DiSpLAY: movie_ghostscript_installed
 #
 #$end_local_vars

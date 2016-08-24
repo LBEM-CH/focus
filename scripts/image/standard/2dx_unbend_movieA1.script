@@ -34,7 +34,6 @@
 #
 # SORTORDER: 52
 #
-# DISPLAY: imagename
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
 # DISPLAY: tempkeep
@@ -50,9 +49,6 @@
 # DISPLAY: movie_smoothing
 # DISPLAY: movie_drift_threshold
 # DISPLAY: Thread_Number
-# DISPLAY: ctfcor_noise
-# DISPLAY: ctfcor_imode
-# DISPLAY: ctfcor_debug
 # DISPLAY: movie_ghostscript_installed
 # DISPLAY: show_frames
 # DISPLAY: show_frame_FFT

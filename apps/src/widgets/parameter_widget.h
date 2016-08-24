@@ -10,6 +10,7 @@
 #include <QString>
 #include <QStringList>
 #include <QMap>
+#include <QLineEdit>
 
 #include "graphicalButton.h"
 #include "confData.h"

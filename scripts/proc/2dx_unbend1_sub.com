@@ -32,6 +32,10 @@ ${proc_2dx}/${lincommand} "MASKTRAN - to mask the image according to the spotlis
 #
 \rm -f SCRATCH/${imagename}_fft_msk1.mrc
 #
+if ( ! -e FFTIR/${imagename}_fft.mrc || ! -e ${nonmaskimagename}.spt ) then
+  ${proc_2dx}/protest "ERROR: Input files not found."
+endif
+#
 setenv IN  FFTIR/${imagename}_fft.mrc
 setenv OUT SCRATCH/${imagename}_fft_msk1.mrc
 setenv SPOTS ${nonmaskimagename}.spt

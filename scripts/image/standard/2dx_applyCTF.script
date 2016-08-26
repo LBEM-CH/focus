@@ -54,6 +54,7 @@ set SCRATCH_DISK = ""
 #
 set SYN_Unbending = ""
 set movie_enable = ""
+set movie_stackname = ""
 set imagename = ""
 set nonmaskimagename = ""
 set defocus = ""
@@ -99,6 +100,31 @@ echo "<<@evaluate>>"
 #
 set date = `date`
 echo date = ${date}
+#
+if ( ! -e ${movie_stackname}) then
+  set QVALMA = '.'
+  set QVALMB = '.'
+  echo "set QVALMA = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ1 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ2 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ3 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ4 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ5 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ6 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ7 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ8 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMA_IQ9 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set QVALMB = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ1 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ2 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ3 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ4 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ5 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ6 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ7 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ8 = ${QVALMA}" >> LOGS/${scriptname}.results
+  echo "set UMB_IQ9 = ${QVALMA}" >> LOGS/${scriptname}.results
+endif
 #
 if ( ${QVALMA}x == 'x' ) then
   set QVALMA = '.'

@@ -25,6 +25,7 @@
 # DISPLAY: SPR_CleanFRLRefDir
 # DISPLAY: SPR_CleanFRLScratchRefDir
 # DISPLAY: SPR_CleanSPR
+# DISPLAY: SPR_CleanAll
 #
 #$end_local_vars
 #
@@ -43,6 +44,7 @@ set SPR_CleanFRLScratchRefDir = ""
 set SPR_CleanSPR = ""
 set SPR_PREREFINE_DIR = ""
 set SPR_REFINE_DIR = ""
+set SPR_CleanAll = ""
 #
 set SPR_DIR = SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN

@@ -38,32 +38,10 @@
 # DISPLAY: show_frame_FFT
 # DISPLAY: show_frame_CCmap
 # DISPLAY: show_frame_CCmap_marked
-# DISPLAY: imagename
-# DISPLAY: imagesidelength 
-# DISPLAY: holeb
-# DISPLAY: maskb01
-# DISPLAY: maskb02
-# DISPLAY: maskb03
-# DISPLAY: maskb04
-# DISPLAY: maskb05
-# DISPLAY: boxb1
-# DISPLAY: boxb2
-# DISPLAY: quadpredb
 # DISPLAY: RESMAX
 # DISPLAY: RESMIN
-# DISPLAY: ALAT
-# DISPLAY: radlim
-# DISPLAY: treatspotscan
-# DISPLAY: ctfplotresmax
 # DISPLAY: tempkeep
-# DISPLAY: ISTEP
-# DISPLAY: ISTEP_h
-# DISPLAY: IMAXCOR
 # DISPLAY: comment
-# DISPLAY: RMAG
-# DISPLAY: LCOLOR
-# DISPLAY: ccunbend_program
-# DISPLAY: plotres_rings
 # DISPLAY: movie_stackname
 # DISPLAY: movie_enable
 # DISPLAY: movie_imagenumber_toskip
@@ -78,9 +56,6 @@
 # DISPLAY: movie_filter_param
 # DISPLAY: movie_imagenumber_toave
 # DISPLAY: Thread_Number
-# DISPLAY: ctfcor_noise
-# DISPLAY: ctfcor_imode
-# DISPLAY: ctfcor_debug
 # DISPLAY: movie_ghostscript_installed
 #
 #$end_local_vars

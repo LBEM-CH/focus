@@ -18,7 +18,6 @@
 # MANUAL: This script establishes a spotlist, using a simple <B>mmbox</B> evaluation of the FT of the image. This spotlist from the raw image will not be perfect, but may get you to a first approximation of the structure. Later, once unbent versions of the image are available, re-running this script will give better spotlists.
 #
 #
-# DISPLAY: SYN_Unbending
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 # DISPLAY: spotlist_RESMAX

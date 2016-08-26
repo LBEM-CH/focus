@@ -68,7 +68,6 @@
 # DISPLAY: resolutionplot_bins
 # DISPLAY: RFACAMP
 # DISPLAY: Thread_Number
-# DISPLAY: sample_pixel
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
 #
@@ -119,7 +118,6 @@ set resolutionplot_RESMAX = ""
 set RFACAMP = ""
 set RTANGLSIZE = ""
 set RTAXASIZE = ""
-set sample_pixel = ""
 set SYM = ""
 set tempkeep = ""
 set Thread_Number = ""

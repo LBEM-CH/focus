@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Calculate Crystal Tilt from Carbon Tilt                                                    #
+# Title: Calculate Crystal Tilt from Carbon Tilt                            #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -19,11 +19,6 @@
 #
 # MANUA: You can run this script after having determined the tilt geometry of the carbon film support, to determine the orientation of the 2D crystal on that support.
 #
-# DISPLAY: imagename
-# DISPLAY: nonmaskimagename
-# DISPLAY: imagesidelength
-# DISPLAY: magnification
-# DISPLAY: stepdigitizer
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG
 # DISPLAY: TLTAXA

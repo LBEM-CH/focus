@@ -19,8 +19,6 @@
 #
 # SORTORDER: 50
 #
-# DISPLAY: imagename
-# DISPLAY: imagesidelength 
 # DISPLAY: holeb
 # DISPLAY: maskb01
 # DISPLAY: maskb02
@@ -47,8 +45,6 @@
 # DISPLAY: comment
 # DISPLAY: RMAG
 # DISPLAY: LCOLOR
-# DISPLAY: ctfcor_imode
-# DISPLAY: ctfcor_noise
 # DISPLAY: ccunbend_program
 #
 #$end_local_vars

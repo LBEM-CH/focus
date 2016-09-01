@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: AUX-Fetch FREALIGN results	                    					#
+# Title: AUX-Fetch FREALIGN results	                    		    #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 60
+# SORTORDER: 160
 #
 #
 # MANUAL: This script fetches all the MRC and PAR files within a FREALIGN refinement directory and makes them available from the 2dx GUI.

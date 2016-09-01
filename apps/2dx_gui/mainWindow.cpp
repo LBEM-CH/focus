@@ -146,7 +146,8 @@ confData* mainWindow::setupMainConfiguration(const QString &directory) {
     mainData->setDir("merge2DScripts", QDir(mainData->getDir("application") + "../scripts/merge/merge2D/"));
     mainData->setDir("merge3DScripts", QDir(mainData->getDir("application") + "../scripts/merge/merge3D/"));
     mainData->setDir("customScripts", QDir(mainData->getDir("application") + "../scripts/merge/custom/"));
-    mainData->setDir("singleParticleScripts", QDir(mainData->getDir("application") + "../scripts/merge/singleparticle/"));
+    mainData->setDir("frealignScripts", QDir(mainData->getDir("application") + "../scripts/singleparticle/frealign/"));
+    mainData->setDir("relionScripts", QDir(mainData->getDir("application") + "../scripts/singleparticle/relion/"));
     mainData->setDir("projectToolScripts", QDir(mainData->getDir("application") + "../scripts/project/"));
     mainData->addImage("appImage", new QImage(mainData->getDir("application") + "icons/icon.png"));
 
@@ -306,11 +307,19 @@ void mainWindow::setupToolBar() {
             [=] () {
                 centralWin_->setCurrentWidget(mergeWin_);
             });
+            
+    openSPWindowAct = new QAction(*(mainData->getIcon("singleparticle")), "Export project to Single Particle packages", mainToolBar);
+    openSPWindowAct->setCheckable(true);
+    connect(openSPWindowAct, &QAction::triggered,
+            [=] () {
+                centralWin_->setCurrentWidget(spWin_);
+            });
     
     QActionGroup* group = new QActionGroup(mainToolBar);
     group->addAction(openLibraryWindowAct);
     group->addAction(openImageWindowAct);
     group->addAction(openMergeWindowAct);
+    group->addAction(openSPWindowAct);
     group->setExclusive(true);
     
     QAction* showProjectToolsAct = new QAction(*(mainData->getIcon("project_tools")), "Project Tools", mainToolBar);
@@ -331,6 +340,7 @@ void mainWindow::setupToolBar() {
     mainToolBar->addAction(openLibraryWindowAct);
     mainToolBar->addAction(openImageWindowAct);
     mainToolBar->addAction(openMergeWindowAct);
+    mainToolBar->addAction(openSPWindowAct);
     mainToolBar->addWidget(spacer2);
     mainToolBar->addAction(openPreferencesAction);
     
@@ -343,10 +353,13 @@ void mainWindow::setupWindows() {
     libraryWin_ = new LibraryTab(mainData, results, this);
     
     QStringList scriptsDir;
-    scriptsDir << mainData->getDir("merge2DScripts") << mainData->getDir("merge3DScripts") << mainData->getDir("customScripts") <<  mainData->getDir("singleParticleScripts");
+    scriptsDir << mainData->getDir("merge2DScripts") << mainData->getDir("merge3DScripts") << mainData->getDir("customScripts");
     QList<scriptModule::moduleType> scriptsModules;
-    scriptsModules << scriptModule::merge2D << scriptModule::merge3D << scriptModule::custom << scriptModule::singleparticle;
+    scriptsModules << scriptModule::merge2D << scriptModule::merge3D << scriptModule::custom;
     mergeWin_ = new MergeTab(mainData, results, scriptsDir, scriptsModules, this);
+    
+    spWin_ = new MergeTab(mainData, results, QStringList() << mainData->getDir("frealignScripts") << mainData->getDir("relionScripts"), 
+                            QList<scriptModule::moduleType>() << scriptModule::frealign << scriptModule::relion, this);
     
     imageWin_ = new ImageTab(mainData, this);
     connect(imageWin_, &ImageTab::saveAsProjectDefaultRequested, 
@@ -359,11 +372,13 @@ void mainWindow::setupWindows() {
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);
     centralWin_->addWidget(imageWin_);
+    centralWin_->addWidget(spWin_);
     
     QStringList imagesOpen = ProjectPreferences(mainData).imagesOpen();
     for(int i=0; i<imagesOpen.size(); ++i) showImageWindow(imagesOpen[i], true);
 
     connect(mergeWin_, SIGNAL(scriptCompletedSignal()), libraryWin_, SLOT(maskResults()));
+    connect(spWin_, SIGNAL(scriptCompletedSignal()), libraryWin_, SLOT(maskResults()));
     connect(libraryWin_->getDirView(), SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(showImageWindow(const QModelIndex&)));
     connect(imageWin_, SIGNAL(imagesOpenChanged(QStringList)), libraryWin_, SLOT(setImagesOpen(QStringList)));
 }

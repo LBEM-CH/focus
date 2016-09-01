@@ -135,7 +135,7 @@ private:
     LibraryTab* libraryWin_;
     MergeTab* mergeWin_;
     ImageTab* imageWin_;
-    
+    MergeTab* spWin_;
     
 
     /**
@@ -148,6 +148,7 @@ private:
     QAction* openLibraryWindowAct;
     QAction* openImageWindowAct;
     QAction* openMergeWindowAct;
+    QAction* openSPWindowAct;
 
     bool projectToolsInit = false;
     bool preferencesDialogInit_ = false;

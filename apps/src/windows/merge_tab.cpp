@@ -1,5 +1,3 @@
-#include <QtCore/qnamespace.h>
-
 #include "merge_tab.h"
 
 using namespace std;

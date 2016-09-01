@@ -29,7 +29,7 @@ class scriptModule : public QWidget {
 
 public:
     enum moduleType {
-        standard, custom, singleparticle, merge2D, merge3D, project
+        standard, custom, singleparticle, merge2D, merge3D, project, frealign, relion
     };
 
 public slots:

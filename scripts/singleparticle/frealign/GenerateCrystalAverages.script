@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 2
+# SORTORDER: 20
 #
 #
 # MANUAL: This script will calculate the average of the particles for every crystal. This can be useful to assess whether the particle extraction parameters used in the previous step are good. Also, these averages, which are analogous to 2D class averages in conventional Single Particle Analysis, are used in the next step for the first refinement in single-particle mode. This averaging procedure is similar to Correlation Averaging. Optionl Fourier Ring Correlations can be calculated for every crystal average to assess its quality.

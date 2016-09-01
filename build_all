@@ -186,6 +186,21 @@ then
     ls -ld merge
   fi
   #
+  ls -ld singleparticle
+  if [ -h singleparticle ];
+  then
+    echo "scripts/singleparticle link already existing."
+  else
+    echo "Removing singleparticle directory in local ~/2dx/scripts"
+    \rm -rf singleparticle
+  fi
+  if [ ! -h singleparticle ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/singleparticle .
+    ls -ld singleparticle
+  fi
+  #
   ls -ld proc 
   if [ -h proc  ];
   then

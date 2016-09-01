@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Run FREALIGN to calculate crystal-weighted reconstruction     		#
+# Title: Calculate crystal-weighted reconstruction     		            #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 10
+# SORTORDER: 100
 #
 #
 # MANUAL: This script launches FREALIGN in reconstruction mode to calculate a 3D map of the crystal-weighted particles with the alignment parameters determined during refinement.

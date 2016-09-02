@@ -28,6 +28,8 @@
 #
 #$end_local_vars
 
+set app_frealign = ""
+
 set scriptname = RemoveFrealignParMrc
 
 set SPR_FRLRefOrPreref = ""

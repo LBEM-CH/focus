@@ -53,6 +53,10 @@ set scriptname = ApplyCrystalWeighting
 
 # Start script commands:
 
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+
 # Check if initial files exist:
 if ( ! -e ${SPR_CRYSTALREC_DIR} ) then
 	mkdir -p ${SPR_CRYSTALREC_DIR}

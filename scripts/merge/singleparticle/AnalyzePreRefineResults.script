@@ -42,6 +42,10 @@ set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
 
 #$end_vars
 
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+
 ${app_python} ${proc_2dx}/SPR_FrealignComparePar.py ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleIni}_r1.par ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleFin}_r1.par  ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleIni}-${SPR_FRLPreRefAnalyzeCycleFin}_diff.txt ${SPR_PREREFINE_DIR}
 
 echo "# IMAGE: ${SPR_PREREFINE_DIR}/TLTAXIS_change_hist.png <PNG: TLTAXIS_change_hist.png>" >> LOGS/${scriptname}.results

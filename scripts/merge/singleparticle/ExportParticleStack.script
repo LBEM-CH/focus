@@ -72,6 +72,10 @@ set SPR_STACK_ROOTNAME = 'particles'
 
 #$end_vars
 
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+
 # Start script commands:
 mkdir -p ${SPR_STACKS_DIR}
 

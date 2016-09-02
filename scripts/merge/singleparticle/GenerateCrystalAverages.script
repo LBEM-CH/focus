@@ -43,6 +43,10 @@ set SPR_FRC_DIR = SPR/FRC/
 set scriptname = GenerateCrystalAverages
 #$end_vars
 
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+
 if ( ${SPR_DoFRC} == "y" ) then
 	mkdir -p ${SPR_FRC_DIR}
 endif

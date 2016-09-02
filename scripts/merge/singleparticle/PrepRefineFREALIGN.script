@@ -117,6 +117,10 @@ set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_REFINE_DIR}/
 set SPR_REFINE_MPARAMETERS = ${SPR_REFINE_DIR}/mparameters
 #$end_vars
 
+set ccp4_setup = 'y'
+source ${proc_2dx}/initialize
+#
+
 # Start script commands:
 
 # Check if initial files exist:

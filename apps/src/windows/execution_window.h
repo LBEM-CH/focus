@@ -1,12 +1,5 @@
-/* 
- * File:   executionContainer.h
- * Author: biyanin
- *
- * Created on August 21, 2015, 11:30 AM
- */
-
-#ifndef MERGETAB_H
-#define	MERGETAB_H
+#ifndef EXECUTION_WINDOW_H
+#define	EXECUTION_WINDOW_H
 
 #include <QWidget>
 #include <QProcess>
@@ -30,6 +23,7 @@
 #include <QPushButton>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QToolBox>
 
 #include <confData.h>
 #include <viewContainer.h>
@@ -42,12 +36,12 @@
 
 #include "blockContainer.h"
 
-class MergeTab : public QWidget
+class ExecutionWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    MergeTab(confData* data, resultsData *results, const QStringList& scriptDirs, const QList<scriptModule::moduleType>& moduleTypes, QWidget *parent = NULL);
+    ExecutionWindow(confData* data, resultsData *results, const QStringList& scriptDirs, QWidget *parent = NULL);
 
 public slots:
     
@@ -63,13 +57,14 @@ public slots:
     void launchFileBrowser();
     void launchLogBrowser();
 
-    void showSubTitle(bool show);
+    void showScriptHelp();
     
     void execute(bool halt);
     void stopPlay();
     
-    void updateScriptLabel(const QString& label);
     void setScriptProgress(int progress);
+    
+    void runInitialization();
 
 signals:
     void scriptCompletedSignal();
@@ -106,7 +101,9 @@ private:
     QProgressBar* progressBar;
     
     QLabel* scriptLabel;
-    QLabel* subTitleLabel;
+    
+    QString scriptHelp;
+    
     QPushButton* runButton;
     QPushButton* refreshButton;
     QPushButton* manualButton;

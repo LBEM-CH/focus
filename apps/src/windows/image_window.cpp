@@ -38,7 +38,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
         module->select(module->getSelection()->selection());
     });
 
-    standardScripts = new scriptModule(data, data->getDir("standardScripts"), scriptModule::standard);
+    standardScripts = new scriptModule(data, data->getDir("standardScripts"));
     scriptsWidget->addWidget(standardScripts);
     connect(standardScripts, SIGNAL(initialized()), data, SLOT(save()));
     connect(standardScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(standardScriptChanged(QModelIndex)));
@@ -51,7 +51,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
         parameters->resetParameters(standardScripts->variablesToReset(index));
     });
 
-    customScripts = new scriptModule(data, data->getDir("customScripts"), scriptModule::custom);
+    customScripts = new scriptModule(data, data->getDir("customScripts"));
     scriptsWidget->addWidget(customScripts);
     connect(customScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(customScriptChanged(QModelIndex)));
     connect(customScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(customScriptCompleted(QModelIndex)));

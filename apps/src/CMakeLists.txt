@@ -84,12 +84,11 @@ set(MOC_HDRS
         windows/library_tab.h
         windows/image_window.h
         windows/image_tab.h
-        windows/merge_tab.h
+        windows/execution_window.h
         dialogs/updateWindow.h
         dialogs/aboutWindow.h
         dialogs/eulerWindow.h
         dialogs/reprojectWindow.h
-        dialogs/project_tools.h
         dialogs/preferences.h
         dialogs/open_project_wizard.h
         dialogs/import_execute_page.h

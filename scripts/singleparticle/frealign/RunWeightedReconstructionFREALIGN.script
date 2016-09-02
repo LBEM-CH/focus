@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Run refinement (FREALIGN)			                          		#
+# Title: Calculate crystal-weighted reconstruction     		            #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -11,44 +11,48 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 7
+# SORTORDER: 100
 #
 #
-# MANUAL: This script launches a refinement in single-particle mode using the particles extracted from the 2D crystal images, initialized with the alignment parameters obtained in the pre-refinement.
+# MANUAL: This script launches FREALIGN in reconstruction mode to calculate a 3D map of the crystal-weighted particles with the alignment parameters determined during refinement.
 #
-# MANUAL: This script is based on the frealign_run_refinement script distributed with FREALIGN v9.11, which was modified to support FREALIGN launching from an arbitrary directory.
+# MANUAL: This script is based on the frealign_calc_reconstruction script distributed with FREALIGN v9.11, which was modified to support FREALIGN launching from an arbitrary directory.
 #
-# DISPLAY: SPR_REFINE_DIR
+# DISPLAY: SPR_CRYSTALREC_DIR
+# DISPLAY: SPR_FRLCycle
 #
 #$end_local_vars
 #
+
+set SPR_FRLCycle = ""
+
 set bin_2dx = ""
 set proc_2dx = ""
 set app_frealign = ""
 
-set scriptname = RunRefineFREALIGN
+set scriptname = RunWeightedReconstructionFREALIGN
+
+set SPR_CRYSTALREC_DIR = ""
+
+set SPR_CRYSTALREC_DIR = SPR/FREALIGN/${SPR_CRYSTALREC_DIR}/
+
+#$end_vars
 
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 
-set SPR_REFINE_DIR = ""
-
-set SPR_REFINE_DIR = SPR/FREALIGN/${SPR_REFINE_DIR}/
-
-#$end_vars
-
 # There's some issue with ${PWD} and {$OLDPWD} in csh, so just to be safe:
 set SAVEPATH = ${PWD}
 
-cd ${SPR_REFINE_DIR}
+cd ${SPR_CRYSTALREC_DIR}
 
-${app_frealign}/bin/frealign_run_refine
+${app_frealign}/bin/frealign_calc_reconstruction ${SPR_FRLCycle}
 
 cd ${SAVEPATH}
 
 echo ":: "
-echo ":: Refinement with FREALIGN has been launched."
+echo ":: Reconstruction with FREALIGN has been launched."
 echo ":: This may take some time to complete."
-echo ":: For detailed information please check ${SPR_REFINE_DIR}/frealign.log"
+echo ":: For detailed information please check ${SPR_CRYSTALREC_DIR}/frealign.log"
 echo ":: "

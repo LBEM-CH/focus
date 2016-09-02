@@ -19,35 +19,35 @@
  ***************************************************************************/
 
 #include <iostream>
-#include <scriptModule.h>
 #include <QPalette>
 #include <QLabel>
 
+#include "scriptModule.h"
+#include "script_module_props.h"
+
 using namespace std;
 
-scriptModule::scriptModule(confData *conf, const QDir &directory, scriptModule::moduleType type, QWidget *parent)
+scriptModule::scriptModule(confData *conf, const QDir &directory, QWidget *parent)
 : QWidget(parent) {
     scriptDir = directory;
-    scriptType = type;
     data = conf;
 
     runningScript = NULL;
     currentlyRunning = false;
     verbosity = 1;
 
-    QGridLayout *layout = new QGridLayout(this);
+    QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);
 
     setupModule();
     if (view != NULL) {
-        if (type == scriptModule::standard) view->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        else view->setSelectionMode(QAbstractItemView::SingleSelection);
+        if (getModuleSelection() == "single") view->setSelectionMode(QAbstractItemView::SingleSelection);
+        else view->setSelectionMode(QAbstractItemView::ExtendedSelection);
      
-        //layout->addWidget(titleLabel, 0, 0, 1, 1, Qt::AlignHCenter);
-        //layout->setRowMinimumHeight(0, 40);
-        layout->addWidget(view, 0, 0, 1, 1);
+        layout->addStretch(0);
+        layout->addWidget(view, 1);
         //connect(selection,SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),this,SLOT(clearExtendedSelections()));
         //connect(view,SIGNAL(pressed(QModelIndex)),this,SLOT(clearExtendedSelections()));
         //connect(view,SIGNAL(pressed(QModelIndex)),this,SLOT(select(QModelIndex)));//currentScriptChanged(QModelIndex)));
@@ -471,43 +471,18 @@ void scriptModule::setVerbosity(int value) {
     verbosity = value;
 }
 
-scriptModule::moduleType scriptModule::type() {
-    return scriptType;
-}
-
 QIcon scriptModule::getModuleScriptIcon() {
-    QIcon icon;
-    if (scriptType == standard) icon = *(data->getIcon("scriptIcon"));
-    else if (scriptType == custom) icon = *(data->getIcon("customScriptIcon"));
-    else if (scriptType == singleparticle) icon = *(data->getIcon("spScriptIcon"));
-    else if (scriptType == merge2D) icon = *(data->getIcon("2DScriptIcon"));
-    else if (scriptType == merge3D) icon = *(data->getIcon("3DScriptIcon"));
-    else if (scriptType == project) icon = *(data->getIcon("projectScriptIcon"));
-    
-    return icon;
+    return *(data->getIcon(ScriptModuleProperties(scriptDir.absolutePath()).scriptIcon()));
 }
 
 QIcon scriptModule::getModuleToolIcon() {
-    QIcon icon;
-    if (scriptType == standard) icon = *(data->getIcon("standard"));
-    else if (scriptType == custom) icon = *(data->getIcon("custom"));
-    else if (scriptType == singleparticle) icon = *(data->getIcon("single_particle"));
-    else if (scriptType == merge2D) icon = *(data->getIcon("merge2D"));
-    else if (scriptType == merge3D) icon = *(data->getIcon("merge3D"));
-    else if (scriptType == project) icon = *(data->getIcon("custom"));
-    
-    return icon;
+    return *(data->getIcon(ScriptModuleProperties(scriptDir.absolutePath()).icon()));
 }
 
 QString scriptModule::getModuleDescription() {
-    QString desc;
-    if (scriptType == standard) desc = "STANDARD SCRIPTS";
-    else if (scriptType == custom) desc = "CUSTOM SCRIPTS";
-    else if (scriptType == singleparticle) desc = "SINGLE PARTICLE";
-    else if (scriptType == merge2D) desc = "2D MERGE";
-    else if (scriptType == merge3D) desc = "3D MERGE";
-    else if (scriptType == project) desc = "PROJECT TOOLS";
-    
-    return desc;
-    
+    return ScriptModuleProperties(scriptDir.absolutePath()).title(); 
+}
+
+QString scriptModule::getModuleSelection() {
+    return ScriptModuleProperties(scriptDir.absolutePath()).selection(); 
 }

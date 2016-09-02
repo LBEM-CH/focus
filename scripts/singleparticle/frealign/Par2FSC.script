@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: AUX-FREALIGN Stats			                    					#
+# Title: AUX-Plot FSC from PAR file	                    					#
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -11,39 +11,41 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 40
+# SORTORDER: 150
 #
 #
 # MANUAL: This script calculates some refinement stats given .par files.
 #
 # DISPLAY: SPR_PARPATH
+# DISPLAY: SPR_FSC_THRESH
 #
 #$end_local_vars
 
 set SPR_PARPATH = ""
+set SPR_FSC_THRESH = ""
 
 set SPR_DIR = SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
 set SPR_PARPATH = ${SPR_FREALIGN_DIR}/${SPR_PARPATH}
-set SPR_STATS_DIR = ${SPR_DIR}/STATS
+set SPR_FSC_DIR = ${SPR_DIR}/FSC
 
 set bin_2dx = ""
 set proc_2dx = ""
 set app_python = ""
 
-set scriptname = Par2Stats
+set scriptname = Par2FSC
 
 #$end_vars
 
 # Check if initial files exist:
-if ( ! -e ${SPR_STATS_DIR} ) then
-	mkdir -p ${SPR_STATS_DIR}
+if ( ! -e ${SPR_FSC_DIR} ) then
+	mkdir -p ${SPR_FSC_DIR}
 endif
 
 # Run the script:
-${app_python} ${proc_2dx}/SPR_Par2Stats.py ${SPR_STATS_DIR} ${SPR_PARPATH}
+${app_python} ${proc_2dx}/SPR_Par2FSC.py ${SPR_FSC_DIR} ${SPR_FSC_THRESH} ${SPR_PARPATH} 
 
-foreach i (${SPR_STATS_DIR}/*.png)
+foreach i (${SPR_FSC_DIR}/*.png)
 	echo "# IMAGE-IMPORTANT: $i <PNG: `basename $i`>" >> LOGS/${scriptname}.results
 end
 

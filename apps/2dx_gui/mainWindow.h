@@ -61,9 +61,8 @@
 #include <updateWindow.h>
 
 #include "library_tab.h"
-#include "merge_tab.h"
+#include "execution_window.h"
 #include "image_tab.h"
-#include "project_tools.h"
 #include "preferences.h"
 
 class mainWindow : public QMainWindow
@@ -80,7 +79,6 @@ public slots:
 
     void showEuler(bool show = true);
     void showReproject(bool show = true);
-    void showProjectTools(bool show = true);
 
     void open(const QString& projectPath="");
     void openURL(const QString &url);
@@ -90,7 +88,6 @@ public slots:
 
     void launchEuler();
     void launchReproject();
-    void launchProjectTools();
 
     void showImageWindow(const QModelIndex&, bool supressWarnings=false);
     void showImageWindow(const QString&, bool supressWarnings=false);
@@ -129,13 +126,13 @@ private:
 
     eulerWindow *euler;
     reprojectWindow *reproject;
-    ProjectTools* projectTools;
     
     QStackedWidget* centralWin_;
-    LibraryTab* libraryWin_;
-    MergeTab* mergeWin_;
+    LibraryTab* libraryWin_; 
     ImageTab* imageWin_;
-    
+    ExecutionWindow* mergeWin_;
+    ExecutionWindow* spWin_;
+    ExecutionWindow* projectToolsWin_;
     
 
     /**
@@ -148,8 +145,9 @@ private:
     QAction* openLibraryWindowAct;
     QAction* openImageWindowAct;
     QAction* openMergeWindowAct;
+    QAction* openSPWindowAct;
+    QAction* openProjectToolsAct;
 
-    bool projectToolsInit = false;
     bool preferencesDialogInit_ = false;
     bool m_do_autosave;
     QTimer *timer;

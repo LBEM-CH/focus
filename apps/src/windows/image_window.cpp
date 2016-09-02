@@ -38,7 +38,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
         module->select(module->getSelection()->selection());
     });
 
-    standardScripts = new scriptModule(data, data->getDir("standardScripts"), scriptModule::standard);
+    standardScripts = new scriptModule(data, data->getDir("standardScripts"));
     scriptsWidget->addWidget(standardScripts);
     connect(standardScripts, SIGNAL(initialized()), data, SLOT(save()));
     connect(standardScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(standardScriptChanged(QModelIndex)));
@@ -51,7 +51,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
         parameters->resetParameters(standardScripts->variablesToReset(index));
     });
 
-    customScripts = new scriptModule(data, data->getDir("customScripts"), scriptModule::custom);
+    customScripts = new scriptModule(data, data->getDir("customScripts"));
     scriptsWidget->addWidget(customScripts);
     connect(customScripts, SIGNAL(currentScriptChanged(QModelIndex)), this, SLOT(customScriptChanged(QModelIndex)));
     connect(customScripts, SIGNAL(scriptCompleted(QModelIndex)), this, SLOT(customScriptCompleted(QModelIndex)));
@@ -281,7 +281,7 @@ ImageWindow::ImageWindow(confData *conf, QWidget *parent)
     layout->setRowStretch(2, 1);
     layout->setRowStretch(3, 0);
 
-    verbosityControl->setCurrentIndex(1);
+    verbosityControl->setValue(1);
 
     //Just to set correct siezs
     maximizeLogWindow(false);
@@ -319,12 +319,18 @@ blockContainer* ImageWindow::setupLogWindow() {
     bridgeScriptLogConnection(true);
 
     //Setup Verbosity control combo box
-    verbosityControl = new QComboBox(this);
-    verbosityControl->addItems(QStringList() << "Silent" << "Low" << "Moderate" << "Highest");
+    verbosityControl = new QSlider;
+    verbosityControl->setOrientation(Qt::Horizontal);
+    verbosityControl->setFixedHeight(20);
+    verbosityControl->setMinimum(0);
+    verbosityControl->setMaximum(3);
+    verbosityControl->setTickPosition(QSlider::TicksBothSides);
+    verbosityControl->setTickInterval(1);
+    verbosityControl->setSingleStep(1);
+    connect(verbosityControl, SIGNAL(valueChanged(int)), logViewer, SLOT(load(int)));
 
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), logViewer, SLOT(load(int)));
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), standardScripts, SLOT(setVerbosity(int)));
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), customScripts, SLOT(setVerbosity(int)));
+    connect(verbosityControl, SIGNAL(valueChanged(int)), standardScripts, SLOT(setVerbosity(int)));
+    connect(verbosityControl, SIGNAL(valueChanged(int)), customScripts, SLOT(setVerbosity(int)));
 
     //Setup History View
     QToolButton* historyButton = new QToolButton();
@@ -372,10 +378,24 @@ blockContainer* ImageWindow::setupLogWindow() {
 blockContainer* ImageWindow::setupParameterWindow() {
     parameters = new ParametersWidget(data, this);
 
-    //Setup Verbosity control combo box
-    userLevelButtons = new QComboBox(this);
-    userLevelButtons->addItems(QStringList() << "Simplified" << "Advanced");
-    connect(userLevelButtons, SIGNAL(currentIndexChanged(int)), parameters, SLOT(setSelectionUserLevel(int)));
+    //Setup search box
+    parameterSearchBox = new QLineEdit;
+    connect(parameterSearchBox, &QLineEdit::editingFinished,
+            [=]() {
+                parameters->searchParams(parameterSearchBox->text());
+            });
+    
+    //Setup advanced level button
+    QToolButton* advancedLevelButton = new QToolButton();
+    advancedLevelButton->setCheckable(true);
+    advancedLevelButton->setIcon(*(data->getIcon("advanced")));
+    advancedLevelButton->setToolTip("Show/Hide advanced parameters");
+    advancedLevelButton->setFixedSize(20, 20);
+    connect(advancedLevelButton, &graphicalButton::toggled, 
+            [=](bool val) {
+                if(val) parameters->setSelectionUserLevel(1);
+                else parameters->setSelectionUserLevel(0);
+            });
 
     //Setup Maximize tool button
     QToolButton* maximizeParameterWin = new QToolButton();
@@ -388,15 +408,16 @@ blockContainer* ImageWindow::setupParameterWindow() {
     connect(maximizeParameterWin, SIGNAL(toggled(bool)), this, SLOT(maximizeParameterWindow(bool)));
 
     QWidget* parameterLevelWidget = new QWidget();
-    QGridLayout* parameterLevelLayout = new QGridLayout(parameterLevelWidget);
+    QHBoxLayout* parameterLevelLayout = new QHBoxLayout(parameterLevelWidget);
     parameterLevelLayout->setMargin(0);
-    parameterLevelLayout->setSpacing(0);
+    parameterLevelLayout->setSpacing(3);
     parameterLevelWidget->setLayout(parameterLevelLayout);
 
-    parameterLevelLayout->addWidget(new QLabel("Level: "), 0, 0);
-    parameterLevelLayout->addWidget(userLevelButtons, 0, 1, 1, 1, Qt::AlignVCenter);
-    parameterLevelLayout->addItem(new QSpacerItem(3, 3), 0, 2);
-    parameterLevelLayout->addWidget(maximizeParameterWin, 0, 3);
+    parameterLevelLayout->addWidget(new QLabel("Search"), 0, Qt::AlignVCenter);
+    parameterLevelLayout->addWidget(parameterSearchBox, 0, Qt::AlignVCenter);
+    parameterLevelLayout->addSpacing(3);
+    parameterLevelLayout->addWidget(advancedLevelButton, 0, Qt::AlignVCenter);
+    parameterLevelLayout->addWidget(maximizeParameterWin, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
     blockContainer* parameterContainer = new blockContainer("Setup");
@@ -628,7 +649,6 @@ void ImageWindow::toggleHistoryView(bool show) {
         bridgeScriptLogConnection(true);
         logWindow->setHeaderTitle("Output (Double click for logbrowser)");
     }
-    verbosityControl->setCurrentIndex(verbosityControl->currentIndex());
 }
 
 void ImageWindow::useNewViewer(bool enable) {

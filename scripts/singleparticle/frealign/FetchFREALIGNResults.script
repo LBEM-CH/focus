@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: AUX-Plot FSC from PAR file	                    					#
+# Title: AUX-Fetch FREALIGN results	                    		    #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -11,42 +11,35 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 50
+# SORTORDER: 160
 #
 #
-# MANUAL: This script calculates some refinement stats given .par files.
+# MANUAL: This script fetches all the MRC and PAR files within a FREALIGN refinement directory and makes them available from the 2dx GUI.
 #
-# DISPLAY: SPR_PARPATH
-# DISPLAY: SPR_FSC_THRESH
+# DISPLAY: SPR_FRL_DIR
 #
 #$end_local_vars
 
-set SPR_PARPATH = ""
-set SPR_FSC_THRESH = ""
+set SPR_FRL_DIR = ""
 
 set SPR_DIR = SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
-set SPR_PARPATH = ${SPR_FREALIGN_DIR}/${SPR_PARPATH}
-set SPR_FSC_DIR = ${SPR_DIR}/FSC
+set SPR_FRL_DIR = ${SPR_FREALIGN_DIR}/${SPR_FRL_DIR}
 
-set bin_2dx = ""
-set proc_2dx = ""
-set app_python = ""
-
-set scriptname = Par2FSC
+set scriptname = FetchFREALIGNResults
 
 #$end_vars
 
-# Check if initial files exist:
-if ( ! -e ${SPR_FSC_DIR} ) then
-	mkdir -p ${SPR_FSC_DIR}
-endif
+foreach i (${SPR_FRL_DIR}/*.mrc)
+	echo "# IMAGE-IMPORTANT: $i <MAP: `basename $i`>" >> LOGS/${scriptname}.results
+end
 
-# Run the script:
-${app_python} ${proc_2dx}/SPR_Par2FSC.py ${SPR_FSC_DIR} ${SPR_FSC_THRESH} ${SPR_PARPATH} 
+foreach i (${SPR_FRL_DIR}/*.par)
+	echo "# IMAGE: $i <PAR: `basename $i`>" >> LOGS/${scriptname}.results
+end
 
-foreach i (${SPR_FSC_DIR}/*.png)
-	echo "# IMAGE-IMPORTANT: $i <PNG: `basename $i`>" >> LOGS/${scriptname}.results
+foreach i (${SPR_FRL_DIR}/scratch/*map*.mrc)
+	echo "# IMAGE: $i <MAP: `basename $i`>" >> LOGS/${scriptname}.results
 end
 
 echo ":: "

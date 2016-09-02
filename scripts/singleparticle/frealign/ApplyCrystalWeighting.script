@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 8
+# SORTORDER: 80
 #
 #
 # MANUAL: This script will introduce neighborhood correlations in the reconstruction by weighting the particles according to how well they agree with the crystal statistics. Ideally, the alignment parameters for particles extracted from the same 2D crystal should be very similar.

@@ -1,10 +1,10 @@
-#include <QtCore/qnamespace.h>
+#include <QWhatsThis>
 
-#include "merge_tab.h"
+#include "execution_window.h"
 
 using namespace std;
 
-MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDirs, const QList<scriptModule::moduleType>& moduleTypes, QWidget *parent)
+ExecutionWindow::ExecutionWindow(confData* data, resultsData *res, const QStringList& scriptDirs, QWidget *parent)
 : QWidget(parent) {
     mainData = data;
     results = res;
@@ -32,7 +32,7 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     scriptsToolBar->setIconSize(QSize(36, 36));
 
     for (int i = 0; i < scriptDirs.size(); ++i) {
-        scriptModule* module = new scriptModule(mainData, scriptDirs[i], moduleTypes[i]);
+        scriptModule* module = new scriptModule(mainData, scriptDirs[i]);
         scriptsWidget->addWidget(module);
         module->resize(200, 20);
         module->setMinimumWidth(200);
@@ -56,7 +56,7 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
         connect(module, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
         connect(module, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
         connect(module, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-        connect(verbosityControl, SIGNAL(currentIndexChanged(int)), module, SLOT(setVerbosity(int)));
+        connect(verbosityControl, SIGNAL(valueChanged(int)), module, SLOT(setVerbosity(int)));
 
         QAction* action = new QAction(module->getModuleToolIcon(), module->getModuleDescription(), this);
         action->setCheckable(true);
@@ -111,7 +111,7 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     imagesContainer->setHeaderWidget(importantSwitch);
 
 
-    QSplitter *resultsSplitter = new QSplitter(Qt::Vertical, this);
+    resultsSplitter = new QSplitter(Qt::Vertical, this);
     resultsSplitter->addWidget(resultsContainer);
     resultsSplitter->addWidget(imagesContainer);
 
@@ -145,11 +145,11 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     connect(refreshButton, SIGNAL(clicked()), this, SLOT(reload()));
 
     manualButton = new QPushButton;
-    manualButton->setIcon(*(mainData->getIcon("help")));
+    manualButton->setIcon(*(mainData->getIcon("information")));
     manualButton->setToolTip("Show Help");
     manualButton->setIconSize(QSize(18, 18));
-    manualButton->setCheckable(true);
-    connect(manualButton, SIGNAL(toggled(bool)), this, SLOT(showSubTitle(bool)));
+    manualButton->setCheckable(false);
+    connect(manualButton, SIGNAL(clicked()), this, SLOT(showScriptHelp()));
 
     QWidget* titleContainer = new QWidget;
     QHBoxLayout* titleLayout = new QHBoxLayout;
@@ -161,14 +161,6 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     titleLayout->addWidget(refreshButton);
     titleLayout->addWidget(manualButton);
     titleContainer->setLayout(titleLayout);
-
-    //Setup Subtitle Container
-    subTitleLabel = new QLabel;
-    subTitleLabel->setWordWrap(true);
-    QPalette subTitlePal(subTitleLabel->palette());
-    subTitlePal.setColor(QPalette::WindowText, Qt::darkGray);
-    subTitleLabel->setPalette(subTitlePal);
-    subTitleLabel->hide();
 
     //Setup progress Bar
     progressBar = new QProgressBar(this);
@@ -187,7 +179,6 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     headerLayout->setMargin(5);
     headerLayout->setSpacing(5);
     headerLayout->addWidget(titleContainer);
-    headerLayout->addWidget(subTitleLabel);
     headerContainer->setLayout(headerLayout);
 
     //Setup the layout and add widgets
@@ -206,8 +197,8 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     layout->setRowStretch(1, 0);
     layout->setRowStretch(2, 1);
 
-    verbosityControl->setCurrentIndex(1);
-    defaultModule->initialize();
+    verbosityControl->setValue(1);
+    defaultModule->selectFirst();
 
     scriptsWidget->setCurrentIndex(0);
     defaultAction->setChecked(true);
@@ -219,15 +210,19 @@ MergeTab::MergeTab(confData* data, resultsData *res, const QStringList& scriptDi
     maximizeParameterWindow(false);
 }
 
-blockContainer* MergeTab::setupLogWindow() {
+blockContainer* ExecutionWindow::setupLogWindow() {
     //Setup Log Viewer
     logViewer = new LogViewer("Standard Output", NULL);
 
-    //Setup Verbosity control combo box
-    verbosityControl = new QComboBox(this);
-    verbosityControl->addItems(QStringList() << "Silent" << "Low" << "Moderate" << "Highest");
-
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), logViewer, SLOT(load(int)));
+    verbosityControl = new QSlider;
+    verbosityControl->setOrientation(Qt::Horizontal);
+    verbosityControl->setFixedHeight(20);
+    verbosityControl->setMinimum(0);
+    verbosityControl->setMaximum(3);
+    verbosityControl->setTickPosition(QSlider::TicksBothSides);
+    verbosityControl->setTickInterval(1);
+    verbosityControl->setSingleStep(1);
+    connect(verbosityControl, SIGNAL(valueChanged(int)), logViewer, SLOT(load(int)));
 
     //Setup Maximize tool button
     QToolButton* maximizeLogWindow = new QToolButton();
@@ -240,15 +235,15 @@ blockContainer* MergeTab::setupLogWindow() {
     connect(maximizeLogWindow, SIGNAL(toggled(bool)), this, SLOT(maximizeLogWindow(bool)));
 
     QWidget* verbosityControlWidget = new QWidget();
-    QGridLayout* verbosityControlLayout = new QGridLayout(verbosityControlWidget);
+    QHBoxLayout* verbosityControlLayout = new QHBoxLayout(verbosityControlWidget);
     verbosityControlLayout->setMargin(0);
-    verbosityControlLayout->setSpacing(0);
+    verbosityControlLayout->setSpacing(3);
     verbosityControlWidget->setLayout(verbosityControlLayout);
 
-    verbosityControlLayout->addWidget(new QLabel("Verbosity Level: "), 0, 0);
-    verbosityControlLayout->addWidget(verbosityControl, 0, 1, 1, 1, Qt::AlignVCenter);
-    verbosityControlLayout->addItem(new QSpacerItem(3, 3), 0, 2);
-    verbosityControlLayout->addWidget(maximizeLogWindow, 0, 3);
+    verbosityControlLayout->addWidget(new QLabel("Verbosity Level "), 0, Qt::AlignVCenter);
+    verbosityControlLayout->addWidget(verbosityControl, 0, Qt::AlignVCenter);
+    verbosityControlLayout->addSpacing(3);
+    verbosityControlLayout->addWidget(maximizeLogWindow, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
     blockContainer *logWindow = new blockContainer("Output (Double click for logbrowser)", this);
@@ -263,13 +258,27 @@ blockContainer* MergeTab::setupLogWindow() {
 
 }
 
-blockContainer* MergeTab::setupParameterWindow() {
+blockContainer* ExecutionWindow::setupParameterWindow() {
     parameters = new ParametersWidget(mainData, this);
 
-    //Setup Verbosity control combo box
-    userLevelButtons = new QComboBox(this);
-    userLevelButtons->addItems(QStringList() << "Simplified" << "Advanced");
-    connect(userLevelButtons, SIGNAL(currentIndexChanged(int)), parameters, SLOT(setSelectionUserLevel(int)));
+    //Setup search box
+    parameterSearchBox = new QLineEdit;
+    connect(parameterSearchBox, &QLineEdit::editingFinished,
+            [=]() {
+                parameters->searchParams(parameterSearchBox->text());
+            });
+    
+    //Setup advanced level button
+    QToolButton* advancedLevelButton = new QToolButton();
+    advancedLevelButton->setCheckable(true);
+    advancedLevelButton->setIcon(*(mainData->getIcon("advanced")));
+    advancedLevelButton->setToolTip("Show/Hide advanced parameters");
+    advancedLevelButton->setFixedSize(20, 20);
+    connect(advancedLevelButton, &graphicalButton::toggled, 
+            [=](bool val) {
+                if(val) parameters->setSelectionUserLevel(1);
+                else parameters->setSelectionUserLevel(0);
+            });
 
     //Setup Maximize tool button
     QToolButton* maximizeParameterWin = new QToolButton();
@@ -282,15 +291,16 @@ blockContainer* MergeTab::setupParameterWindow() {
     connect(maximizeParameterWin, SIGNAL(toggled(bool)), this, SLOT(maximizeParameterWindow(bool)));
 
     QWidget* parameterLevelWidget = new QWidget();
-    QGridLayout* parameterLevelLayout = new QGridLayout(parameterLevelWidget);
+    QHBoxLayout* parameterLevelLayout = new QHBoxLayout(parameterLevelWidget);
     parameterLevelLayout->setMargin(0);
-    parameterLevelLayout->setSpacing(0);
+    parameterLevelLayout->setSpacing(3);
     parameterLevelWidget->setLayout(parameterLevelLayout);
 
-    parameterLevelLayout->addWidget(new QLabel("Level: "), 0, 0);
-    parameterLevelLayout->addWidget(userLevelButtons, 0, 1, 1, 1, Qt::AlignVCenter);
-    parameterLevelLayout->addItem(new QSpacerItem(3, 3), 0, 2);
-    parameterLevelLayout->addWidget(maximizeParameterWin, 0, 3);
+    parameterLevelLayout->addWidget(new QLabel("Search"), 0, Qt::AlignVCenter);
+    parameterLevelLayout->addWidget(parameterSearchBox, 0, Qt::AlignVCenter);
+    parameterLevelLayout->addSpacing(3);
+    parameterLevelLayout->addWidget(advancedLevelButton, 0, Qt::AlignVCenter);
+    parameterLevelLayout->addWidget(maximizeParameterWin, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
     blockContainer* parameterContainer = new blockContainer("Setup");
@@ -302,38 +312,37 @@ blockContainer* MergeTab::setupParameterWindow() {
     return parameterContainer;
 }
 
-void MergeTab::execute(bool halt) {
+void ExecutionWindow::execute(bool halt) {
     scriptModule* module = (scriptModule*) scriptsWidget->currentWidget();
     runningTabIndex = scriptsWidget->currentIndex();
     module->execute(halt);
 }
 
-void MergeTab::stopPlay() {
+void ExecutionWindow::stopPlay() {
     runningTabIndex = -1;
     runButton->setChecked(false);
     emit scriptCompletedSignal();
 }
 
-void MergeTab::updateScriptLabel(const QString& label) {
-    progressBar->update();
-    scriptLabel->setText(label);
-}
-
-void MergeTab::setScriptProgress(int progress) {
+void ExecutionWindow::setScriptProgress(int progress) {
     progressBar->setValue(progress);
 }
 
-void MergeTab::scriptChanged(scriptModule *module, QModelIndex index) {
-    updateScriptLabel(module->title(index));
-
+void ExecutionWindow::scriptChanged(scriptModule *module, QModelIndex index) {
+    progressBar->update();
+    scriptLabel->setText(module->title(index));
+    parameterSearchBox->setText("");
+    
     //  container->saveSplitterState(1);
     int uid = index.data(Qt::UserRole).toUInt();
 
     QString text;
     QStringList helpTextList = module->getScriptManual(uid);
-    for (int i = 0; i < helpTextList.size(); i++) text += helpTextList[i] + "\n";
-    subTitleLabel->setText(text);
+    for (int i = 0; i < helpTextList.size(); i++) text += "<p>" + helpTextList[i] + "</p>";
+    scriptHelp = text;
 
+    centralSplitter->setWhatsThis(text);
+    
     QStandardItemModel* model = new QStandardItemModel;
     QStringList subScripts = module->getScriptDependents(uid);
     if (subScripts.size() == 0) {
@@ -366,7 +375,7 @@ void MergeTab::scriptChanged(scriptModule *module, QModelIndex index) {
     subscriptWidget->setModel(model);
 
     parameters->changeParametersDisplayed(module->displayedVariables(index));
-    if (verbosityControl->currentIndex() != 0)
+    if (verbosityControl->value() != 0)
         logViewer->loadLogFile(module->logFile(index));
     else
         logViewer->clear();
@@ -376,23 +385,23 @@ void MergeTab::scriptChanged(scriptModule *module, QModelIndex index) {
     //  container->restoreSplitterState(1);
 }
 
-void MergeTab::scriptCompleted(scriptModule *module, QModelIndex index) {
+void ExecutionWindow::scriptCompleted(scriptModule *module, QModelIndex index) {
     //  cerr<<"Script completed"<<endl;
     results->load(module->resultsFile(index));
     results->save();
     resultsView->load();
 }
 
-void MergeTab::subscriptActivated(QModelIndex item) {
+void ExecutionWindow::subscriptActivated(QModelIndex item) {
     if (item.data(Qt::UserRole + 5).toString().isEmpty()) return;
     QProcess::startDetached(mainData->getApp("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
 }
 
-void MergeTab::reload() {
+void ExecutionWindow::reload() {
     results->load();
 }
 
-void MergeTab::maximizeLogWindow(bool maximize) {
+void ExecutionWindow::maximizeLogWindow(bool maximize) {
     if (maximize) {
         centralSplitter->setSizes(QList<int>() << 0 << 1);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
@@ -402,7 +411,7 @@ void MergeTab::maximizeLogWindow(bool maximize) {
     }
 }
 
-void MergeTab::maximizeParameterWindow(bool maximize) {
+void ExecutionWindow::maximizeParameterWindow(bool maximize) {
     if (maximize) {
         centralSplitter->setSizes(QList<int>() << 1 << 0);
         centerRightSplitter->setSizes(QList<int>() << 1 << 0);
@@ -412,15 +421,27 @@ void MergeTab::maximizeParameterWindow(bool maximize) {
     }
 }
 
-void MergeTab::launchFileBrowser() {
+void ExecutionWindow::launchFileBrowser() {
     QString path = QDir::toNativeSeparators(mainData->getDir("working"));
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
-void MergeTab::launchLogBrowser() {
+void ExecutionWindow::launchLogBrowser() {
     QProcess::startDetached(mainData->getApp("logBrowser") + " " + logViewer->getLogFile());
 }
 
-void MergeTab::showSubTitle(bool s) {
-    subTitleLabel->setVisible(s);
+void ExecutionWindow::showScriptHelp() {
+    QWhatsThis::showText(mapToGlobal(QPoint(width()/2, 0)), scriptHelp);
+}
+
+void ExecutionWindow::runInitialization() {
+    defaultModule->initialize();
+}
+
+void ExecutionWindow::hideResultsPanel() {
+    resultsSplitter->hide();
+}
+
+bool ExecutionWindow::isRunningScript() {
+    return runButton->isChecked();
 }

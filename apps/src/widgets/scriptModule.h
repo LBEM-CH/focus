@@ -27,11 +27,6 @@ class scriptModule : public QWidget {
 
     Q_OBJECT
 
-public:
-    enum moduleType {
-        standard, custom, singleparticle, merge2D, merge3D, project
-    };
-
 public slots:
     void execute(bool run);
     void clearSelection();
@@ -71,7 +66,6 @@ signals:
 
 private:
     QDir scriptDir;
-    moduleType scriptType;
     confData *data;
     QList<scriptModule *> selectionObjects;
     QHash<quint32, QHash<QString, QVariant> > scriptData;
@@ -107,7 +101,7 @@ private:
     void cleanupExecution();
 
 public:
-    scriptModule(confData *conf, const QDir &directory, scriptModule::moduleType type = scriptModule::standard, QWidget *parent = NULL);
+    scriptModule(confData *conf, const QDir &directory, QWidget *parent = NULL);
     void extendSelectionTo(scriptModule *module);
 
     QStringList displayedVariables(QModelIndex index);
@@ -117,7 +111,6 @@ public:
     QString resultsFile(QModelIndex index);
     QString resultsFile();
     QString title(QModelIndex index);
-    moduleType type();
     uint uid();
     confData *conf(QModelIndex index);
     bool isRunning();
@@ -129,6 +122,7 @@ public:
     QIcon getModuleToolIcon();
     QIcon getModuleScriptIcon();
     QString getModuleDescription();
+    QString getModuleSelection();
 
 };
 

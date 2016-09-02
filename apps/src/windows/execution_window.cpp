@@ -56,7 +56,7 @@ ExecutionWindow::ExecutionWindow(confData* data, resultsData *res, const QString
         connect(module, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
         connect(module, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
         connect(module, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-        connect(verbosityControl, SIGNAL(currentIndexChanged(int)), module, SLOT(setVerbosity(int)));
+        connect(verbosityControl, SIGNAL(valueChanged(int)), module, SLOT(setVerbosity(int)));
 
         QAction* action = new QAction(module->getModuleToolIcon(), module->getModuleDescription(), this);
         action->setCheckable(true);
@@ -111,7 +111,7 @@ ExecutionWindow::ExecutionWindow(confData* data, resultsData *res, const QString
     imagesContainer->setHeaderWidget(importantSwitch);
 
 
-    QSplitter *resultsSplitter = new QSplitter(Qt::Vertical, this);
+    resultsSplitter = new QSplitter(Qt::Vertical, this);
     resultsSplitter->addWidget(resultsContainer);
     resultsSplitter->addWidget(imagesContainer);
 
@@ -197,7 +197,7 @@ ExecutionWindow::ExecutionWindow(confData* data, resultsData *res, const QString
     layout->setRowStretch(1, 0);
     layout->setRowStretch(2, 1);
 
-    verbosityControl->setCurrentIndex(1);
+    verbosityControl->setValue(1);
     defaultModule->selectFirst();
 
     scriptsWidget->setCurrentIndex(0);
@@ -214,11 +214,15 @@ blockContainer* ExecutionWindow::setupLogWindow() {
     //Setup Log Viewer
     logViewer = new LogViewer("Standard Output", NULL);
 
-    //Setup Verbosity control combo box
-    verbosityControl = new QComboBox(this);
-    verbosityControl->addItems(QStringList() << "Silent" << "Low" << "Moderate" << "Highest");
-
-    connect(verbosityControl, SIGNAL(currentIndexChanged(int)), logViewer, SLOT(load(int)));
+    verbosityControl = new QSlider;
+    verbosityControl->setOrientation(Qt::Horizontal);
+    verbosityControl->setFixedHeight(20);
+    verbosityControl->setMinimum(0);
+    verbosityControl->setMaximum(3);
+    verbosityControl->setTickPosition(QSlider::TicksBothSides);
+    verbosityControl->setTickInterval(1);
+    verbosityControl->setSingleStep(1);
+    connect(verbosityControl, SIGNAL(valueChanged(int)), logViewer, SLOT(load(int)));
 
     //Setup Maximize tool button
     QToolButton* maximizeLogWindow = new QToolButton();
@@ -231,15 +235,15 @@ blockContainer* ExecutionWindow::setupLogWindow() {
     connect(maximizeLogWindow, SIGNAL(toggled(bool)), this, SLOT(maximizeLogWindow(bool)));
 
     QWidget* verbosityControlWidget = new QWidget();
-    QGridLayout* verbosityControlLayout = new QGridLayout(verbosityControlWidget);
+    QHBoxLayout* verbosityControlLayout = new QHBoxLayout(verbosityControlWidget);
     verbosityControlLayout->setMargin(0);
-    verbosityControlLayout->setSpacing(0);
+    verbosityControlLayout->setSpacing(3);
     verbosityControlWidget->setLayout(verbosityControlLayout);
 
-    verbosityControlLayout->addWidget(new QLabel("Verbosity Level: "), 0, 0);
-    verbosityControlLayout->addWidget(verbosityControl, 0, 1, 1, 1, Qt::AlignVCenter);
-    verbosityControlLayout->addItem(new QSpacerItem(3, 3), 0, 2);
-    verbosityControlLayout->addWidget(maximizeLogWindow, 0, 3);
+    verbosityControlLayout->addWidget(new QLabel("Verbosity Level "), 0, Qt::AlignVCenter);
+    verbosityControlLayout->addWidget(verbosityControl, 0, Qt::AlignVCenter);
+    verbosityControlLayout->addSpacing(3);
+    verbosityControlLayout->addWidget(maximizeLogWindow, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
     blockContainer *logWindow = new blockContainer("Output (Double click for logbrowser)", this);
@@ -257,10 +261,24 @@ blockContainer* ExecutionWindow::setupLogWindow() {
 blockContainer* ExecutionWindow::setupParameterWindow() {
     parameters = new ParametersWidget(mainData, this);
 
-    //Setup Verbosity control combo box
-    userLevelButtons = new QComboBox(this);
-    userLevelButtons->addItems(QStringList() << "Simplified" << "Advanced");
-    connect(userLevelButtons, SIGNAL(currentIndexChanged(int)), parameters, SLOT(setSelectionUserLevel(int)));
+    //Setup search box
+    parameterSearchBox = new QLineEdit;
+    connect(parameterSearchBox, &QLineEdit::editingFinished,
+            [=]() {
+                parameters->searchParams(parameterSearchBox->text());
+            });
+    
+    //Setup advanced level button
+    QToolButton* advancedLevelButton = new QToolButton();
+    advancedLevelButton->setCheckable(true);
+    advancedLevelButton->setIcon(*(mainData->getIcon("advanced")));
+    advancedLevelButton->setToolTip("Show/Hide advanced parameters");
+    advancedLevelButton->setFixedSize(20, 20);
+    connect(advancedLevelButton, &graphicalButton::toggled, 
+            [=](bool val) {
+                if(val) parameters->setSelectionUserLevel(1);
+                else parameters->setSelectionUserLevel(0);
+            });
 
     //Setup Maximize tool button
     QToolButton* maximizeParameterWin = new QToolButton();
@@ -273,15 +291,16 @@ blockContainer* ExecutionWindow::setupParameterWindow() {
     connect(maximizeParameterWin, SIGNAL(toggled(bool)), this, SLOT(maximizeParameterWindow(bool)));
 
     QWidget* parameterLevelWidget = new QWidget();
-    QGridLayout* parameterLevelLayout = new QGridLayout(parameterLevelWidget);
+    QHBoxLayout* parameterLevelLayout = new QHBoxLayout(parameterLevelWidget);
     parameterLevelLayout->setMargin(0);
-    parameterLevelLayout->setSpacing(0);
+    parameterLevelLayout->setSpacing(3);
     parameterLevelWidget->setLayout(parameterLevelLayout);
 
-    parameterLevelLayout->addWidget(new QLabel("Level: "), 0, 0);
-    parameterLevelLayout->addWidget(userLevelButtons, 0, 1, 1, 1, Qt::AlignVCenter);
-    parameterLevelLayout->addItem(new QSpacerItem(3, 3), 0, 2);
-    parameterLevelLayout->addWidget(maximizeParameterWin, 0, 3);
+    parameterLevelLayout->addWidget(new QLabel("Search"), 0, Qt::AlignVCenter);
+    parameterLevelLayout->addWidget(parameterSearchBox, 0, Qt::AlignVCenter);
+    parameterLevelLayout->addSpacing(3);
+    parameterLevelLayout->addWidget(advancedLevelButton, 0, Qt::AlignVCenter);
+    parameterLevelLayout->addWidget(maximizeParameterWin, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
     blockContainer* parameterContainer = new blockContainer("Setup");
@@ -312,7 +331,8 @@ void ExecutionWindow::setScriptProgress(int progress) {
 void ExecutionWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     progressBar->update();
     scriptLabel->setText(module->title(index));
-
+    parameterSearchBox->setText("");
+    
     //  container->saveSplitterState(1);
     int uid = index.data(Qt::UserRole).toUInt();
 
@@ -355,7 +375,7 @@ void ExecutionWindow::scriptChanged(scriptModule *module, QModelIndex index) {
     subscriptWidget->setModel(model);
 
     parameters->changeParametersDisplayed(module->displayedVariables(index));
-    if (verbosityControl->currentIndex() != 0)
+    if (verbosityControl->value() != 0)
         logViewer->loadLogFile(module->logFile(index));
     else
         logViewer->clear();
@@ -416,4 +436,12 @@ void ExecutionWindow::showScriptHelp() {
 
 void ExecutionWindow::runInitialization() {
     defaultModule->initialize();
+}
+
+void ExecutionWindow::hideResultsPanel() {
+    resultsSplitter->hide();
+}
+
+bool ExecutionWindow::isRunningScript() {
+    return runButton->isChecked();
 }

@@ -23,7 +23,8 @@
 #include <QPushButton>
 #include <QListWidget>
 #include <QListWidgetItem>
-#include <QToolBox>
+#include <QLineEdit>
+#include <QSlider>
 
 #include <confData.h>
 #include <viewContainer.h>
@@ -42,6 +43,7 @@ class ExecutionWindow : public QWidget
 
 public:
     ExecutionWindow(confData* data, resultsData *results, const QStringList& scriptDirs, QWidget *parent = NULL);
+    bool isRunningScript();
 
 public slots:
     
@@ -65,6 +67,8 @@ public slots:
     void setScriptProgress(int progress);
     
     void runInitialization();
+    
+    void hideResultsPanel();
 
 signals:
     void scriptCompletedSignal();
@@ -85,17 +89,17 @@ private:
     resultsData *results;
 
     ParametersWidget *parameters;
+    QLineEdit* parameterSearchBox;
 
     QSplitter* centralSplitter;
-    QSplitter *centerRightSplitter;
+    QSplitter* centerRightSplitter;
+    QSplitter* resultsSplitter;
 
     resultsModule *resultsView;
 
     LogViewer *logViewer;
 
-    QComboBox* userLevelButtons;
-    QComboBox* verbosityControl;
-    
+    QSlider* verbosityControl;
     int runningTabIndex = -1;
     
     QProgressBar* progressBar;

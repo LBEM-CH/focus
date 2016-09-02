@@ -27,7 +27,6 @@ void ParametersWidget::setSelectionUserLevel(int level){
 
 void ParametersWidget::changeParametersDisplayed(const QStringList& toBeDisplayed) {
     parametersDisplayed_ = toBeDisplayed;
-    searchBox->setText("");
     parametersActuallyShown_ = parametersDisplayed_;
     changeFormWidget();
 }
@@ -42,36 +41,10 @@ void ParametersWidget::initialize(int userLevel, const QStringList& toBeDisplaye
     scrollArea_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     scrollArea_->setWidget(formWidget());
     
-    searchBox = new QLineEdit;
-    searchBox->setFrame(false);
-    connect(searchBox, SIGNAL(editingFinished()), this, SLOT(searchParams()));
-    
-    graphicalButton* searchButton = new graphicalButton(data->getIcon("search"));
-    searchButton->setFixedSize(QSize(searchBox->sizeHint().height(), searchBox->sizeHint().height()));
-    connect(searchButton, SIGNAL(clicked()), this, SLOT(searchParams()));
-    
-    QLabel* searchLabel = new QLabel("Search Parameters");
-    QFont font = searchLabel->font();
-    font.setBold(true);
-    searchLabel->setFont(font);
-    
-    QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    
-    QHBoxLayout* searchLayout = new QHBoxLayout;
-    searchLayout->addWidget(searchLabel);
-    searchLayout->addWidget(spacer);
-    searchLayout->addWidget(searchBox);
-    searchLayout->addWidget(searchButton);
-
-    searchWidget = new QWidget;
-    searchWidget->setLayout(searchLayout);
-    
     mainLayout_ = new QVBoxLayout();
     mainLayout_->setSpacing(0);
     mainLayout_->setMargin(0);
-    mainLayout_->addWidget(searchWidget, 0);
-    mainLayout_->addWidget(scrollArea_, 1);
+    mainLayout_->addWidget(scrollArea_);
 
     setLayout(mainLayout_); 
     
@@ -129,10 +102,10 @@ void ParametersWidget::resetParameters(const QMap<QString, QString>& toBeReset) 
     }
 }
 
-void ParametersWidget::searchParams() {
+void ParametersWidget::searchParams(const QString& text) {
     parametersActuallyShown_.clear();
     
-    QString searchText = searchBox->text().trimmed().toLower();
+    QString searchText = text.trimmed().toLower();
     
     if(searchText == "") {
         parametersActuallyShown_ = parametersDisplayed_;

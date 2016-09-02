@@ -28,6 +28,8 @@
 #include <QToolButton>
 #include <QToolBar>
 #include <QStatusBar>
+#include <QSlider>
+
 #include <confData.h>
 #include <blockContainer.h>
 #include <parameter_widget.h>
@@ -123,12 +125,12 @@ private:
     QString currentResults;
     QString currentLog;
 
-    QComboBox* verbosityControl;
+    QSlider* verbosityControl;
 
     statusViewer *statusParser;
 
     ParametersWidget *parameters;
-    QComboBox* userLevelButtons;
+    QLineEdit* parameterSearchBox;
 
     blockContainer *parameterContainer;
 

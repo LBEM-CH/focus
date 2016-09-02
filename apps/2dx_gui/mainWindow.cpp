@@ -529,7 +529,7 @@ void mainWindow::updateWindowTitle() {
 }
 
 void mainWindow::save() {
-    if(centralWin_->currentWidget() == projectToolsWin_) return;
+    if(projectToolsWin_->isRunningScript()) return;
     imageWin_->saveConfigs();
     mainData->save();
 }

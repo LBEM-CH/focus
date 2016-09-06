@@ -243,7 +243,11 @@ eot
           set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`
           set loadaverage = `ps -axf | sed -n '/runjob/p' | wc -l`
           set pythonJobs = `ps -axf | sed -n '/python/p' | wc -l`
-          set memfree = `vm_stat -c 1 1 | awk 'NR>2 {gsub("K","000");print ($1+$4)/256000}'`
+          if ( `uname` == "Linux" ) then
+            set memfree = `vmstat 1 1 | awk 'NR>2 {gsub("K","000");print ($1+$4)/256000}'`
+          else
+            set memfree = `vm_stat -c 1 1 | awk 'NR>2 {gsub("K","000");print ($1+$4)/256000}'`
+          endif
           set load_too_high = `echo ${loadaverage} ${ReUnbend_MP} | awk '{ if ( ( $1 - 0 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
           set python_too_high = `echo ${pythonJobs} ${ReUnbend_MP} | awk '{ if ( ( $1 - 0 ) > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
           set mem_too_low = `echo ${memfree} | awk '{ if ( $1 < 20.0 ) { s = 1 } else { s = 0 } } END { print s }'`

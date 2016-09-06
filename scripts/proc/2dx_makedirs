@@ -39,7 +39,7 @@ alias replaceWithLink 'eval " \\
 		  endif \\
 		  if ( -e \!:2 ) then \\
 		  	if ( -d \!:2 ) then \\
-		    		if (`ls -l \!:2/ | wc -l` != 0 ) then \\
+		    		if (`ls -1 \!:2/ | wc -l` != 0 ) then \\
 	              			mv \!:2/* \!:1 \\
 		   	 	endif \\
     		    	rm -rf \!:2 \\

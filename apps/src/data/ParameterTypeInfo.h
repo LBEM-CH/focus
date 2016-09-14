@@ -13,7 +13,7 @@ public:
     };
     
     Type type;
-    int count;
+    int count=0;
     QStringList properties;
 
     ParameterTypeInfo();

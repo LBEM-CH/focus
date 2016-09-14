@@ -162,10 +162,10 @@ void ProjectModel::loadImages(const QDir& currentDir, QStringList& imageList, QS
     QDir dir = currentDir;
     dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
     QString image = dir.relativeFilePath(imageList.first());
-    if(image.isEmpty()) return;
+    if(image.isEmpty() || image == ".") return;
     
     QString entry = image.split('/').first();
-    if(entry.isEmpty()) return;
+    if(entry.isEmpty() || entry == ".") return;
     
     if(image.contains("../")) {
         dir.cdUp();

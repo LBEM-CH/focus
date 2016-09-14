@@ -128,7 +128,7 @@ bool mrcImage::loadData(mrcHeader *header) {
     imageFile.seek(header->dataOffset());
     quint32 mode = headers[0]->mode();
     qint64 dataSize;
-    if (mode >= 0 && mode <= 4) {
+    if (mode <= 4) {
         dataSize = header->nx() * header->ny() * cellSize;
     } else {
         std::cerr << "The MRC mode of image " << imageFile.fileName().toStdString() << " (mode = " << mode << ") is not a supported MRC mode.\n";
@@ -137,22 +137,25 @@ bool mrcImage::loadData(mrcHeader *header) {
     rawData = new char[dataSize];
     imageFile.read(rawData, dataSize);
     //emit setProgress(10);
-    if (mode != 0 && header->swapEndian())
-        if (mode == 3 || mode == 4)
+    if (mode != 0 && header->swapEndian()) {
+        if (mode == 3 || mode == 4) {
             // CHEN: 4.1.2015
             // image 512x512 gives FFT of 513x513 in display, but 2x256x512 in data ("2x" is for complex values). 
             // This is 2 * nx/2 * ny
             // Shouldn't this then be: ???
             // for(quint32 i=0;i<header->nx()*header->ny()*cellSize/2;i++)
 //#pragma omp parallel for shared(rawData)
-            for (quint32 i = 0; i < header->nx() * header->ny() * cellSize / 2 - cellSize / 2; i++)
+            for (quint32 i = 0; i < header->nx() * header->ny() * cellSize / 2 - cellSize / 2; i++) {
                 byteSwap(&rawData[i * cellSize / 2], cellSize / 2);
+            }
+        }
         else {
 //#pragma omp parallel for shared(rawData)
-            for (quint32 i = 0; i < header->nx() * header->ny() - 1; i++)
+            for (quint32 i = 0; i < header->nx() * header->ny() - 1; i++) {
                 byteSwap(&rawData[i * cellSize], cellSize);
+            }
         }
-
+    }
 
     imageFile.close();
     return true;

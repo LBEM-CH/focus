@@ -23,8 +23,8 @@
 #include <QCommandLineParser>
 #include <iostream>
 
-#include "confData.h"
-#include "scriptParser.h"
+#include "ParameterConfiguration.h"
+#include "ScriptParser.h"
 
 using namespace std;
 
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
             //cout << "<<@progress: " << int(scriptCount / float(scripts.size() + cScripts.size())*100.0) << ">>" << endl;
             scriptCount++;
             it.next();
-            scriptParser parser(QList<confData *>() << localConfList[it.key()] << &data);
+            ScriptParser parser(QList<confData *>() << localConfList[it.key()] << &data);
             QString script = it.value();
             script.remove(QRegExp("\\.script$"));
 
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
             //cout << "<<@progress: " << int(scriptCount / float(scripts.size() + cScripts.size())*100.0) << ">>" << endl;
             scriptCount++;
             it2.next();
-            scriptParser parser(QList<confData *>() << localCConfList[it2.key()] << &data);
+            ScriptParser parser(QList<confData *>() << localCConfList[it2.key()] << &data);
             QString script = it2.value();
             script.remove(QRegExp("\\.script$"));
             if (QFileInfo(customScriptsDir.path() + "/" + script + ".script").exists()) {

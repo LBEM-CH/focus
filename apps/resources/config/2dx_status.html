@@ -1,33 +1,28 @@
 <HTML>
 
 <script type="text/javascript">
-function set(key)
-{
-	var value  = confData.get(key,"value");
-	if(value!="")
-		document.getElementById(key).innerText = value;
+function set(key){
+    var value  = config.getValue(key);
+    if(value!="")
+        document.getElementById(key).innerText = value;
 }
-function setFloat(key)
-{
-	var value  = confData.get(key,"value");
-  var floatValue = parseFloat(value).toFixed(1);
-	if(value!="" && !isNaN(floatValue))
-		document.getElementById(key).innerText = floatValue;
+function setFloat(key) {
+    var value  = config.getValue(key);
+    var floatValue = parseFloat(value).toFixed(1);
+    if(value!="" && !isNaN(floatValue))
+	document.getElementById(key).innerText = floatValue;
 }
-function load()
-{
+function load() {
   var tag;
   var values = document.getElementsByTagName("*");
   re = /.*(U._IQ|U.._IQ|R._.|PHARES_NUM_SPOTS).*/
-  for(i = 0; i < values.length; i++)
-  {
+  for(i = 0; i < values.length; i++) {
     var key = values[i].id;
-    if(key != "")
-    {
-      if( re.exec(key) == null)
-	  		setFloat(key);
+    if(key != "") {
+      if(re.exec(key) == null)
+          setFloat(key);
       else
-        set(key);
+          set(key);
     }
   }
 }
@@ -41,139 +36,150 @@ TD{font-family: Courier; font-size: 10pt; line-height: 1.4em}
 </style>
 
 <BODY onLoad="load()" BGCOLOR="WHITE" MARGINHEIGHT="0" MARGINWIDTH="0">
-<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+<TABLE BORDER=0 frame="void" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="5">
 <TBODY>
-<TR>
-<TD colspan=2 align="left" height=17><B>Calc. Mag=</B></TD>
-<TD colspan=3 align="left"  height=17 ID="CALCULATEDMAG">---</TD>
-<TD colspan=3 align="right" height=17><B>Last QVAL=</B></TD>
-<TD colspan=1 align="right" height=17 ID="QVAL"><B>---</B></TD></TR>
-</TABLE>
-<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
-<TBODY>
-<TR>
-<TD align="left"><B><U>Unbend</U></B></TD>
-<TD align="right" width="10%"><I>IQ1</I></TD>
-<TD align="right" width="10%"><I>IQ2</I></TD>
-<TD align="right" width="10%"><I>IQ3</I></TD>
-<TD align="right" width="10%"><I>IQ4</I></TD>
-<TD align="right" width="10%"><I>IQ5</I></TD>
-<TD align="right" width="10%"><I>IQ6</I></TD>
-<TD align="right" colspan=2>QVAL</TD>
-</TR>
-<TR>
-<TD align="left">Unb.I</TD>
-<TD align="right" ID="U1_IQ1"><I>-</I></TD>
-<TD align="right" ID="U1_IQ2"><I>-</I></TD>
-<TD align="right" ID="U1_IQ3"><I>-</I></TD>
-<TD align="right" ID="U1_IQ4"><I>-</I></TD>
-<TD align="right" ID="U1_IQ5"><I>-</I></TD>
-<TD align="right" ID="U1_IQ6"><I>-</I></TD>
-<TD align="right"> </TD>
-<TD align="right" ID="QVAL1">---</TD>
-</TR>
-<TR>
-<TR>
-<TD align="left">Unb.II</TD>
-<TD align="right" ID="U2_IQ1"><I>-</I></TD>
-<TD align="right" ID="U2_IQ2"><I>-</I></TD>
-<TD align="right" ID="U2_IQ3"><I>-</I></TD>
-<TD align="right" ID="U2_IQ4"><I>-</I></TD>
-<TD align="right" ID="U2_IQ5"><I>-</I></TD>
-<TD align="right" ID="U2_IQ6"><I>-</I></TD>
-<TD align="right"> </TD>
-<TD align="right" ID="QVAL2">---</TD>
-</TR>
-<TR>
-<TD align="left">MovieA</TD>
-<TD align="right" ID="UMA_IQ1"><I>-</I></TD>
-<TD align="right" ID="UMA_IQ2"><I>-</I></TD>
-<TD align="right" ID="UMA_IQ3"><I>-</I></TD>
-<TD align="right" ID="UMA_IQ4"><I>-</I></TD>
-<TD align="right" ID="UMA_IQ5"><I>-</I></TD>
-<TD align="right" ID="UMA_IQ6"><I>-</I></TD>
-<TD align="right"> </TD>
-<TD align="right" ID="QVALMA">---</TD>
-</TR>
-<TR>
-<TD align="left">MovieB</TD>
-<TD align="right" ID="UMB_IQ1"><I>-</I></TD>
-<TD align="right" ID="UMB_IQ2"><I>-</I></TD>
-<TD align="right" ID="UMB_IQ3"><I>-</I></TD>
-<TD align="right" ID="UMB_IQ4"><I>-</I></TD>
-<TD align="right" ID="UMB_IQ5"><I>-</I></TD>
-<TD align="right" ID="UMB_IQ6"><I>-</I></TD>
-<TD align="right"> </TD>
-<TD align="right" ID="QVALMB">---</TD>
-</TR>
-</TABLE>
-<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
-<TBODY>
-<TR>
-<TD ROWSPAN=2 COLSPAN=1 height=24><B><U>PowerBins</U></B><BR>&nbsp;(noise=7)</TD>
-<TD align="center">[A]</TD>
-<TD align="center" ID="RB_1"><I>-</I></TD>
-<TD align="center" ID="RB_2"><I>-</I></TD>
-<TD align="center" ID="RB_3"><I>-</I></TD>
-<TD align="center" ID="RB_4"><I>-</I></TD>
-<TD align="center" ID="RB_5"><I>-</I></TD>
-<TD align="center" ID="RB_6"><I>-</I></TD>
-</TR>
-<TR>
-<TD align="center"><I>#</I></TD>
-<TD align="center" ID="RP_1"><I>-</I></TD>
-<TD align="center" ID="RP_2"><I>-</I></TD>
-<TD align="center" ID="RP_3"><I>-</I></TD>
-<TD align="center" ID="RP_4"><I>-</I></TD>
-<TD align="center" ID="RP_5"><I>-</I></TD>
-<TD align="center" ID="RP_6"><I>-</I></TD>
-</TR>
-<TBODY>
-</TABLE>
-<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
-<TR>
-<TD align="left"  ><B><U>Tilt Info</U></B> </TD>
-<TD align="right">Defoc. </TD>
-<TD align="right">Latt.  </TD>
-<TD align="right">SpSplit</TD>
-<TD align="right">Merge  </TD>
-</TR>
-<TR>
-<TD align="left">Grid TAxis</TD>
-<TD align="right" ID="DEFOCUS_TLTAXIS">---&nbsp;</TD>
-<TD align="right" ID="LATTICE_TLTAXIS">---&nbsp;</TD>
-<TD align="right" ID="TTREFINE_TLTAXIS">---&nbsp;</TD>
-<TD align="right" ID="MERGE_TLTAXIS">---&nbsp;</TD>
-</TR>
-<TR>
-<TD align="left">Grid TAngle</TD>
-<TD align="right" ID="DEFOCUS_TLTANG">---&nbsp;</TD>
-<TD align="right" ID="LATTICE_TLTANG">---&nbsp;</TD>
-<TD align="right" ID="TTREFINE_TLTANG">---&nbsp;</TD>
-<TD align="right" ID="MERGE_TLTANG">---&nbsp;</TD>
-</TR>
-<TR>
-<TD align="left">Xst. TAxis</TD>
-<TD align="right" ID="DEFOCUS_TAXA">---&nbsp;</TD>
-<TD align="right" ID="LATTICE_TAXA">---&nbsp;</TD>
-<TD align="right" ID="TTREFINE_TAXA">---&nbsp;</TD>
-<TD align="right" ID="MERGE_TAXA">---&nbsp;</TD>
-</TR>
-<TR>
-<TD align="left">Xst. TAngle</TD>
-<TD align="right" ID="DEFOCUS_TANGL">---&nbsp;</TD>
-<TD align="right" ID="LATTICE_TANGL">---&nbsp;</TD>
-<TD align="right" ID="TTREFINE_TANGL">---&nbsp;</TD>
-<TD align="right" ID="MERGE_TANGL">---&nbsp;</TD>
-</TR>
-</TABLE>
-<TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
-<TR>
-<TD align="left"><B>Sym.PhaRes=</B></TD>
-<TD align="left" ID="PHARES_SYM">--- </TD>
-<TD align="right"> Num.Spots= </TD>
-<TD align="right" ID="PHARES_NUM_SPOTS">--- </TD>
-</TR>
+    <TR>
+    <TD style="border: 1px solid">
+        <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+        <TBODY>
+            <TR>
+                <TD colspan=2 align="left" height=17><B>Calc Mag = </B></TD>
+                <TD colspan=3 align="left"  height=17 ID="CALCULATEDMAG">---</TD>
+                <TD colspan=3 align="right" height=17><B>Last QVAL=</B></TD>
+                <TD colspan=1 align="right" height=17 ID="QVAL"><B>---</B></TD>
+            </TR>
+        </TABLE>
+        <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+        <TBODY>
+            <TR>
+                <TD ROWSPAN=2 COLSPAN=1 height=24><B><U>PowerBins</U></B><BR>&nbsp;(noise=7)</TD>
+                <TD align="center">[A]</TD>
+                <TD align="center" ID="RB_1"><I>-</I></TD>
+                <TD align="center" ID="RB_2"><I>-</I></TD>
+                <TD align="center" ID="RB_3"><I>-</I></TD>
+                <TD align="center" ID="RB_4"><I>-</I></TD>
+                <TD align="center" ID="RB_5"><I>-</I></TD>
+                <TD align="center" ID="RB_6"><I>-</I></TD>
+            </TR>
+            <TR>
+                <TD align="center"><I>#</I></TD>
+                <TD align="center" ID="RP_1"><I>-</I></TD>
+                <TD align="center" ID="RP_2"><I>-</I></TD>
+                <TD align="center" ID="RP_3"><I>-</I></TD>
+                <TD align="center" ID="RP_4"><I>-</I></TD>
+                <TD align="center" ID="RP_5"><I>-</I></TD>
+                <TD align="center" ID="RP_6"><I>-</I></TD>
+            </TR>
+            <TBODY>
+        </TABLE>
+        <TABLE BORDER=0 frame="below" rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+            <TR>
+                <TD align="left"><B>Sym.PhaRes=</B></TD>
+                <TD align="left" ID="PHARES_SYM">--- </TD>
+                <TD align="right"> Num.Spots= </TD>
+                <TD align="right" ID="PHARES_NUM_SPOTS">--- </TD>
+            </TR>
+        </TABLE>
+    </TD>
+    <TD style="border: 1px solid">    
+        <TABLE BORDER=0 rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+        <TBODY>
+            <TR>
+                <TD align="left"><B><U>Unbend</U></B></TD>
+                <TD align="right" width="10%"><I>IQ1</I></TD>
+                <TD align="right" width="10%"><I>IQ2</I></TD>
+                <TD align="right" width="10%"><I>IQ3</I></TD>
+                <TD align="right" width="10%"><I>IQ4</I></TD>
+                <TD align="right" width="10%"><I>IQ5</I></TD>
+                <TD align="right" width="10%"><I>IQ6</I></TD>
+                <TD align="right" colspan=2>QVAL</TD>
+            </TR>
+            <TR>
+                <TD align="left">Unb.I</TD>
+                <TD align="right" ID="U1_IQ1"><I>-</I></TD>
+                <TD align="right" ID="U1_IQ2"><I>-</I></TD>
+                <TD align="right" ID="U1_IQ3"><I>-</I></TD>
+                <TD align="right" ID="U1_IQ4"><I>-</I></TD>
+                <TD align="right" ID="U1_IQ5"><I>-</I></TD>
+                <TD align="right" ID="U1_IQ6"><I>-</I></TD>
+                <TD align="right"> </TD>
+                <TD align="right" ID="QVAL1">---</TD>
+            </TR>
+            <TR>
+                <TD align="left">Unb.II</TD>
+                <TD align="right" ID="U2_IQ1"><I>-</I></TD>
+                <TD align="right" ID="U2_IQ2"><I>-</I></TD>
+                <TD align="right" ID="U2_IQ3"><I>-</I></TD>
+                <TD align="right" ID="U2_IQ4"><I>-</I></TD>
+                <TD align="right" ID="U2_IQ5"><I>-</I></TD>
+                <TD align="right" ID="U2_IQ6"><I>-</I></TD>
+                <TD align="right"> </TD>
+                <TD align="right" ID="QVAL2">---</TD>
+            </TR>
+            <TR>
+                <TD align="left">MovieA</TD>
+                <TD align="right" ID="UMA_IQ1"><I>-</I></TD>
+                <TD align="right" ID="UMA_IQ2"><I>-</I></TD>
+                <TD align="right" ID="UMA_IQ3"><I>-</I></TD>
+                <TD align="right" ID="UMA_IQ4"><I>-</I></TD>
+                <TD align="right" ID="UMA_IQ5"><I>-</I></TD>
+                <TD align="right" ID="UMA_IQ6"><I>-</I></TD>
+                <TD align="right"> </TD>
+                <TD align="right" ID="QVALMA">---</TD>
+            </TR>
+            <TR>
+                <TD align="left">MovieB</TD>
+                <TD align="right" ID="UMB_IQ1"><I>-</I></TD>
+                <TD align="right" ID="UMB_IQ2"><I>-</I></TD>
+                <TD align="right" ID="UMB_IQ3"><I>-</I></TD>
+                <TD align="right" ID="UMB_IQ4"><I>-</I></TD>
+                <TD align="right" ID="UMB_IQ5"><I>-</I></TD>
+                <TD align="right" ID="UMB_IQ6"><I>-</I></TD>
+                <TD align="right"> </TD>
+                <TD align="right" ID="QVALMB">---</TD>
+            </TR>
+        </TABLE>
+    </TD>  
+    <TD style="border: 1px solid">
+        <TABLE BORDER=0 rules="groups" WIDTH="100%" cellspacing="0" cellpadding="0">
+            <TR>
+                <TD align="left"  ><B><U>Tilt Info</U></B> </TD>
+                <TD align="right">Defoc. </TD>
+                <TD align="right">Latt.  </TD>
+                <TD align="right">SpSplit</TD>
+                <TD align="right">Merge  </TD>
+            </TR>
+            <TR>
+                <TD align="left">Grid TAxis</TD>
+                <TD align="right" ID="DEFOCUS_TLTAXIS">---&nbsp;</TD>
+                <TD align="right" ID="LATTICE_TLTAXIS">---&nbsp;</TD>
+                <TD align="right" ID="TTREFINE_TLTAXIS">---&nbsp;</TD>
+                <TD align="right" ID="MERGE_TLTAXIS">---&nbsp;</TD>
+            </TR>
+            <TR>
+                <TD align="left">Grid TAngle</TD>
+                <TD align="right" ID="DEFOCUS_TLTANG">---&nbsp;</TD>
+                <TD align="right" ID="LATTICE_TLTANG">---&nbsp;</TD>
+                <TD align="right" ID="TTREFINE_TLTANG">---&nbsp;</TD>
+                <TD align="right" ID="MERGE_TLTANG">---&nbsp;</TD>
+            </TR>
+            <TR>
+                <TD align="left">Xst. TAxis</TD>
+                <TD align="right" ID="DEFOCUS_TAXA">---&nbsp;</TD>
+                <TD align="right" ID="LATTICE_TAXA">---&nbsp;</TD>
+                <TD align="right" ID="TTREFINE_TAXA">---&nbsp;</TD>
+                <TD align="right" ID="MERGE_TAXA">---&nbsp;</TD>
+            </TR>
+            <TR>
+                <TD align="left">Xst. TAngle</TD>
+                <TD align="right" ID="DEFOCUS_TANGL">---&nbsp;</TD>
+                <TD align="right" ID="LATTICE_TANGL">---&nbsp;</TD>
+                <TD align="right" ID="TTREFINE_TANGL">---&nbsp;</TD>
+                <TD align="right" ID="MERGE_TANGL">---&nbsp;</TD>
+            </TR>
+        </TABLE>
+    </TD>
+    </TR>
 </TABLE>
 </BODY>
 </HTML>

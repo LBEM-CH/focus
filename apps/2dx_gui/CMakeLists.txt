@@ -16,8 +16,8 @@ set(EXETITLE 2dx_gui)           # Application name
 #--- BASE DIRECTORIES ----------------------------------------------------------
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}) # Header Files
 get_propagate_deps(2dx_app) # Get the header files from the lib
-SET(2DX_SRC mainWindow.cpp main.cpp) # Source Files
-SET(MOC_HDRS mainWindow.h) # MOC Headers
+SET(2DX_SRC MainWindow.cpp main.cpp) # Source Files
+SET(MOC_HDRS MainWindow.h) # MOC Headers
 QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS}) # Create MOC Sources
 #-------------------------------------------------------------------------------
 

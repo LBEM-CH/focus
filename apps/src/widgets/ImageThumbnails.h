@@ -22,9 +22,11 @@ public:
         setHeaderHidden(true);
         setSortingEnabled(false);
         setIconSize(QSize(64, 64));
+        setAttribute(Qt::WA_MacShowFocusRect, 0);
+        
         
         QPalette pal = palette();
-        pal.setColor(QPalette::Highlight, Qt::darkGray);
+        pal.setColor(QPalette::Highlight, Qt::darkCyan);
         setPalette(pal);
         //setBackgroundRole(QPalette::Dark);
 
@@ -49,11 +51,16 @@ public:
             items.append(item);
         }
         
-        if(!imageList.isEmpty()) resizeColumnToContents(0);
+        QStandardItem* lastitem = new QStandardItem();
+        lastitem->setEditable(false);
+        lastitem->setSelectable(false);
+        items << lastitem;
         
         model =  new QStandardItemModel();
         model->appendRow(items);
         setModel(model);
+        
+        for (int i = 0; i < model->columnCount()-1; i++) resizeColumnToContents(i);  
     }
     
     QString getPath(int colId) {

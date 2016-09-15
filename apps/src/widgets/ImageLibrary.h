@@ -2,7 +2,7 @@
 #define IMAGELIBRARY_H
 
 #include <QWidget>
-#include <QGroupBox>
+#include <QFrame>
 #include <QGridLayout>
 #include <QLabel>
 #include <QList>
@@ -41,16 +41,19 @@ private:
     
     ImageThumbnails* thumbnails_;
     QGridLayout* dataLayout;
-    QGroupBox* dataBox;
+    QFrame* dataBox;
     QList<QLabel*> valueLabels;
     
     FileWatcher watcher;
     QTimer timer;
     
+    QLabel* imageLabel;
     QLabel* headerTitle;
     QLabel* selectionLabel;
     QToolButton* infoButton;
     
+    static const int HEADER_HEIGHT = 25;
+    static const int CONTENT_HEIGHT = 90;
 };
 
 #endif /* IMAGELIBRARY_H */

@@ -127,6 +127,7 @@ void LibraryTab::setupDirectoryContainer() {
     sortModel->setSortRole(ProjectModel::SortRole);
 
     dirView = new QTreeView(this);
+    dirView->setAttribute(Qt::WA_MacShowFocusRect, 0);
     dirView->setModel(sortModel);
     dirView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     dirView->setSortingEnabled(true);

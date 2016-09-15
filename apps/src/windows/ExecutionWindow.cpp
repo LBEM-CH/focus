@@ -365,6 +365,8 @@ BlockContainer* ExecutionWindow::setupParameterWindow() {
 
 QPushButton* ExecutionWindow::addVisibilityButton(QString title, QWidget* widgetToLink, bool initialState) {
     QPushButton* button = new QPushButton(title, panelVisibilityToolBar);
+    button->setAutoDefault(false);
+    button->setDefault(false);
     button->setCheckable(true);
     button->setChecked(initialState);
     //widgetToLink->setVisible(initialState);

@@ -81,14 +81,13 @@ MainWindow::MainWindow(QWidget *parent)
     openLibraryWindowAct->setChecked(true);
     centralWin_->setCurrentWidget(libraryWin_);
     
+    QWidget* mainWidget = new QWidget;
     QGridLayout* mainLayout = new QGridLayout;
+    mainWidget->setLayout(mainLayout);
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
     mainLayout->addWidget(imageLibrary, 0, 0);
     mainLayout->addWidget(centralWin_, 1, 0);
-    
-    QWidget* mainWidget = new QWidget;
-    mainWidget->setLayout(mainLayout);
     
     setCentralWidget(mainWidget);
     

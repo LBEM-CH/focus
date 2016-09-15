@@ -12,7 +12,7 @@ ImageLibrary::ImageLibrary(QWidget* parent)
     QWidget* header = setupHeader();
     
     thumbnails_ = new ImageThumbnails;
-    thumbnails_->setFixedHeight(80);
+    thumbnails_->setFixedHeight(CONTENT_HEIGHT);
     
     connect(thumbnails_, &ImageThumbnails::clicked, [=](const QModelIndex& i){
         updateData(thumbnails_->getPath(i.column()));
@@ -26,41 +26,48 @@ ImageLibrary::ImageLibrary(QWidget* parent)
         setSelectionCount(count);
     });
     
-    dataBox = new QGroupBox();
+    dataBox = new QFrame();
+    dataBox->setFrameShadow(QFrame::Plain);
+    dataBox->setFrameShape(QFrame::StyledPanel);
     dataLayout = fillFormLayout(QStringList() << "Defocus" << "QVal" << "TAXA" << "TANGL");
     dataBox->setLayout(dataLayout);   
     
     expandedWidget = new QWidget;
+    expandedWidget->setFixedHeight(CONTENT_HEIGHT);
     QGridLayout* expandedWidgetLayout = new QGridLayout;
     expandedWidgetLayout->setMargin(0);
-    expandedWidgetLayout->setSpacing(5);
+    expandedWidgetLayout->setSpacing(0);
     expandedWidgetLayout->addWidget(thumbnails_, 0, 0);
     expandedWidgetLayout->addWidget(dataBox, 0, 1);
     expandedWidget->setLayout(expandedWidgetLayout);
     
     QGridLayout* mainLayout = new QGridLayout;
+    setLayout(mainLayout);
     mainLayout->setMargin(0);
     mainLayout->setSpacing(0);
     mainLayout->addWidget(header, 0, 0);
     mainLayout->addWidget(expandedWidget, 1, 0);
-    setLayout(mainLayout);
-    
+      
     connect(&watcher, SIGNAL(fileChanged(const QString &)), this, SLOT(timedLoad()));
     connect(&timer, SIGNAL(timeout()), this, SLOT(updateChecks()));
     
     setSelectionCount(thumbnails_->getSlectionCount());
     infoButton->setChecked(false);
     expandedWidget->setVisible(false);
+    setFixedHeight(HEADER_HEIGHT);
     updateData();
     updateChecks();
+    update();
 }
 
 QWidget* ImageLibrary::setupHeader() {
-    QWidget* bar = new QWidget(this);
+    QFrame* bar = new QFrame(this);
     bar->setAutoFillBackground(true);
+    bar->setFrameShadow(QFrame::Plain);
+    bar->setFrameShape(QFrame::StyledPanel);
     
     //Set Height
-    bar->setFixedHeight(24);
+    bar->setFixedHeight(HEADER_HEIGHT);
     
     //Setup Label
     headerTitle = new QLabel("", bar);
@@ -88,6 +95,9 @@ QWidget* ImageLibrary::setupHeader() {
     infoButton->setCheckable(true);
     connect(infoButton, &QToolButton::toggled, [=] (bool show){
         expandedWidget->setVisible(show);
+        if(show) setFixedHeight(HEADER_HEIGHT+CONTENT_HEIGHT);
+        else setFixedHeight(HEADER_HEIGHT);
+        update();
     });
     
     //Setup spacer
@@ -114,14 +124,24 @@ QWidget* ImageLibrary::setupHeader() {
 QGridLayout* ImageLibrary::fillFormLayout(const QStringList& labels) {
     valueLabels.clear();
     QGridLayout* dataLayout = new QGridLayout;
+    dataLayout->setMargin(5);
+    dataLayout->setSpacing(3);
+    
+    imageLabel = new QLabel("No image selected. Please select one from list.");
+    imageLabel->setAlignment(Qt::AlignCenter);
+    QFont titleFont = imageLabel->font();
+    titleFont.setBold(true);
+    titleFont.setItalic(true);
+    imageLabel->setFont(titleFont);
+    dataLayout->addWidget(imageLabel, 0, 0, 1, labels.size(), Qt::AlignCenter);
     for(int i=0; i< labels.size(); ++i) {
         QLabel* valueLabel = new QLabel;
         QLabel* nameLabel = new QLabel(labels[i]);
         QFont font = nameLabel->font();
         font.setBold(true);
         nameLabel->setFont(font);
-        dataLayout->addWidget(nameLabel, 0, i, Qt::AlignCenter);
-        dataLayout->addWidget(valueLabel, 1, i, Qt::AlignCenter);
+        dataLayout->addWidget(nameLabel, 1, i, Qt::AlignHCenter | Qt::AlignTop);
+        dataLayout->addWidget(valueLabel, 2, i, Qt::AlignHCenter | Qt::AlignTop);
         valueLabels.append(valueLabel);
     }
     
@@ -157,7 +177,9 @@ void ImageLibrary::updateData(const QString& imagePath) {
 
 void ImageLibrary::updateFormData(const QString& imagePath, const QStringList& params) {
     ParametersConfiguration* data = projectData.parameterData(imagePath);
-    dataBox->setTitle(projectData.projectDir().relativeFilePath(imagePath));
+    QString imageName = projectData.projectDir().relativeFilePath(imagePath);
+    if(imageName.length() > 60) imageName = "..." + imageName.remove(0, imageName.length()-60);
+    imageLabel->setText(imageName);
     for(int i=0; i< params.size(); ++i) {
         QVariant valueVar = data->get(params[i])->value();
         QString valueStr = valueVar.toString();

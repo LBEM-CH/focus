@@ -93,7 +93,7 @@ void ResultsModule::load() {
                             variable->setForeground(0, Qt::blue);
                             variable->setForeground(1, Qt::blue);
                         }                      
-                        if (data->masked(i.key(), j.key()) || dryRun) {
+                        if (dryRun) {
                             variable->setForeground(0, Qt::red);
                             variable->setForeground(1, Qt::red);
                             item->setForeground(0, QColor(150, 0, 0));

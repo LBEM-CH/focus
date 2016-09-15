@@ -35,6 +35,7 @@ set(MOC_HDRS
         data/ParameterConfiguration.h
         data/ParameterElementData.h
         data/ParameterSectionData.h
+        data/ProjectData.h
         data/ResultsData.h
         data/ScriptData.h
         extentions/FileWatcher.h

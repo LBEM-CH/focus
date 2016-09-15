@@ -68,17 +68,15 @@ void ImageTab::showImageWindow(const QString& workingDir) {
 
     if (!imagesInitializedToTabs_.keys().contains(workingDir)) {
         std::cout << "Initializing: " << workingDir.toStdString() << "\n";
-        ParametersConfiguration* imageData = projectData.parameterData(QDir(workingDir));
 
         QDir procdirectory(workingDir + "/proc");
         if (!procdirectory.exists()) procdirectory.mkdir(workingDir + "/proc");
         QDir logdirectory(workingDir + "/LOGS");
         if (!logdirectory.exists()) logdirectory.mkdir(workingDir + "/LOGS");
         
-        ResultsData* results = new ResultsData(ProjectData::logsDir(QDir(workingDir)).canonicalPath() + "/2dx_initialization.results", workingDir, this);
         QStringList scriptsDirs;
         scriptsDirs << ApplicationData::scriptsDir().canonicalPath() + "/image/standard" << ApplicationData::scriptsDir().canonicalPath() + "/image/custom";
-        ExecutionWindow* imageWin = new ExecutionWindow(QDir(workingDir), results, scriptsDirs, ExecutionWindow::Type::IMAGE, this);
+        ExecutionWindow* imageWin = new ExecutionWindow(QDir(workingDir), scriptsDirs, ExecutionWindow::Type::IMAGE, this);
         connect(imageWin, &ExecutionWindow::executing,
                 [=] (bool run){
                     if(run) setTabProcessing(workingDir);

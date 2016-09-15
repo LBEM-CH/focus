@@ -5,7 +5,7 @@
 #include "LibraryTab.h"
 #include "ProjectPreferences.h"
 
-LibraryTab::LibraryTab(ResultsData* results, QWidget* parent)
+LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
 
     previews = new QStackedWidget(this);
@@ -20,7 +20,6 @@ LibraryTab::LibraryTab(ResultsData* results, QWidget* parent)
     previews->addWidget(dualPreview);
 
     setupDirectoryContainer();
-    dirModel->setResultsFile(results);
 
     previewTimer = new QTimer(this);
     connect(previewTimer, SIGNAL(timeout()), this, SLOT(updatePreview()));
@@ -89,6 +88,9 @@ LibraryTab::LibraryTab(ResultsData* results, QWidget* parent)
     
     this->setLayout(mainLayout);
 
+    connect(&projectData, &ProjectData::imageDirsChanged, [=] () {
+        reload();
+    });
 }
 
 void LibraryTab::showContents(bool show) {
@@ -225,11 +227,11 @@ QWidget* LibraryTab::setupSelectionTab() {
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
     
-    QPushButton *refreshAction = new QPushButton(ApplicationData::icon("refresh"), tr("&Refresh Library"), this);
-    refreshAction->setSizePolicy(sizePolicy);
-    refreshAction->setShortcut(tr("Ctrl+Shift+r"));
-    refreshAction->setToolTip("Shortcut: " + refreshAction->shortcut().toString(QKeySequence::NativeText));
-    connect(refreshAction, SIGNAL(clicked()), this, SLOT(reload()));
+    //QPushButton *refreshAction = new QPushButton(ApplicationData::icon("refresh"), tr("&Refresh Library"), this);
+    //refreshAction->setSizePolicy(sizePolicy);
+    //refreshAction->setShortcut(tr("Ctrl+Shift+r"));
+    //refreshAction->setToolTip("Shortcut: " + refreshAction->shortcut().toString(QKeySequence::NativeText));
+    //connect(refreshAction, SIGNAL(clicked()), this, SLOT(reload()));
     
     //QPushButton *importAction = new QPushButton(*(data->getIcon("import")), tr("&Import Images"), this);
     //importAction->setSizePolicy(sizePolicy);
@@ -370,7 +372,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     autoSelectLayout->addRow("Parameter to use", parameterToUse);
     autoSelectLayout->addRow("Minimum value", minDegree);
     autoSelectLayout->addRow("Maximum value", maxDegree);
-    autoSelectLayout->addRow("Positive+negative values", negPosOption);
+    autoSelectLayout->addRow("Pos+neg values", negPosOption);
     autoSelectLayout->addRow(changeSelection);
     
     autoSelectionGroup->setLayout(autoSelectLayout);
@@ -396,7 +398,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setSpacing(10);
     layout->addStretch(0);
-    layout->addWidget(refreshAction, 0, Qt::AlignTop);
+    //layout->addWidget(refreshAction, 0, Qt::AlignTop);
     //layout->addWidget(importAction, 0, Qt::AlignTop);
     layout->addWidget(backupSaveGroup, 0, Qt::AlignTop);
     layout->addWidget(checkGroup, 0, Qt::AlignTop);
@@ -426,7 +428,6 @@ QTreeView* LibraryTab::getDirView() {
 }
 
 void LibraryTab::reload() {
-    maskResults();
     updateModel();
 }
 
@@ -483,10 +484,6 @@ void LibraryTab::updateModel() {
     }
     dirModel->loadSelection();
     dirView->expandAll();
-}
-
-void LibraryTab::maskResults() {
-    dirModel->maskResults();
 }
 
 void LibraryTab::copyImage() {
@@ -567,9 +564,6 @@ void LibraryTab::addImageFolder(const QString& folder) {
         }
         QFile(projectFolder + "/2dx_master.cfg").link(QString("../2dx_master.cfg"), projectFolder + "/" + folder + "/2dx_master.cfg");
     }
-
-    reload();
-
 }
 
 void LibraryTab::addImageFolder() {
@@ -630,7 +624,7 @@ void LibraryTab::renameImageFolder() {
                     );
             }
             else {
-                reload();
+                projectData.indexImages();
             }
         }
     }
@@ -638,6 +632,12 @@ void LibraryTab::renameImageFolder() {
 
 void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     QModelIndexList selection = dirView->selectionModel()->selectedRows();
+    QStringList sourcePaths;
+    for(int ii=0; ii<selection.size();  ++ii) {
+        QModelIndex i = selection[ii];
+        sourcePaths.append(dirModel->pathFromIndex(i));
+    }
+    
     int numFiles = selection.count();
     int count = 0;
     QProgressDialog progress("Moving files...", "Abort Move", 0, numFiles, this);
@@ -646,12 +646,11 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     QString warnings;
     QString projectDir = projectData.projectDir().canonicalPath();
     
-    for(int ii=0; ii<selection.size();  ++ii) {
-        QModelIndex i = selection[ii];
+    for(int ii=0; ii< sourcePaths.size(); ++ii) {   
         progress.setValue(count++);
         if (progress.wasCanceled()) break;
         
-        QString sourcePath = dirModel->pathFromIndex(i);
+        QString sourcePath = sourcePaths[ii];
         QString sourceImage = QFileInfo(sourcePath).fileName();
         
         //Check if the image is open.
@@ -693,7 +692,7 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
             //targetImageDir.removeRecursively();
         } else {
             qDebug() << "Moved image: " + sourcePath + " to: " + targetImageDir.absolutePath();
-            dirModel->itemDeselected(sortModel->mapToSource(i));
+            //dirModel->itemDeselected(sortModel->mapToSource(i));
             //QDir(sourcePath).removeRecursively();
         }
     }
@@ -702,7 +701,7 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     
     if(!warnings.isEmpty()) QMessageBox::warning(this, tr("Move Errors"), warnings);
     
-    reload();
+    projectData.indexImages();
 
 }
 

@@ -30,7 +30,6 @@
 #include <QDebug>
 
 #include "ParameterConfiguration.h"
-#include "FileWatcher.h"
 
 class ResultsData : public QObject {
     
@@ -40,11 +39,9 @@ public:
     QMap<QString, QMap<QString, QString> > results;
     QMap<QString, QMap<QString, QString> > images;
 
-    ResultsData(const QString &fileName, const QString &defaultDir = "@default", QObject *parent = 0);
-    void setMasked(const QString &directory, const QString &variable);
-    bool masked(const QString &directory, const QString &variable);
-    void clearMasked();
+    ResultsData(const QDir& workDir, QObject* parent=0);
     bool dryRunMode();
+    bool newImagesImported();
 
 public slots:
     bool load(const QString &fileName);
@@ -57,17 +54,14 @@ signals:
     void saved(bool successful);
 
 private:
-    FileWatcher watcher;
+    QFileSystemWatcher watcher;
 
     QString mainDir;
     QString fileName;
     bool dryRun;
+    bool imagesImported =  false;
 
     void printValues();
-
-    QSet<quint32> maskedResults;
-
-    quint32 maskHash(const QString &directory, const QString &variable);
 };
 
 #endif

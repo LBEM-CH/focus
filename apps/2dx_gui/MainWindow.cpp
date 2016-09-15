@@ -149,6 +149,12 @@ void MainWindow::setupMenuBar() {
     QAction* setProjectNameAction = new QAction(ApplicationData::icon("change_name"), "Change Project Name", this);
     connect(setProjectNameAction, SIGNAL(triggered()), this, SLOT(changeProjectName()));
     optionMenu->addAction(setProjectNameAction);
+    
+    QAction* reindeximageAct = new QAction(ApplicationData::icon("refresh"), "Reindex images", this);
+    connect(reindeximageAct, &QAction::triggered, [=](){
+        projectData.indexImages();
+    });
+    optionMenu->addAction(reindeximageAct);
 
     QAction *showAutoSaveAction = new QAction(ApplicationData::icon("autosave"), "Autosave On/Off", this);
     connect(showAutoSaveAction, SIGNAL(triggered()), this, SLOT(toggleAutoSave()));
@@ -224,24 +230,21 @@ void MainWindow::setupToolBar() {
 void MainWindow::setupWindows() {
     centralWin_ = new QStackedWidget(this);
 
-    results = new ResultsData(ProjectData::logsDir(projectData.projectWorkingDir()).canonicalPath() + "/2dx_initialization.results", 
-                        projectData.projectWorkingDir().canonicalPath(), this);
-    
-    libraryWin_ = new LibraryTab(results, this);
+    libraryWin_ = new LibraryTab(this);
     
     QStringList scriptsDir;
     scriptsDir << ApplicationData::scriptsDir().canonicalPath() + "/merge/merge2D" 
                << ApplicationData::scriptsDir().canonicalPath() + "/merge/merge3D" 
                << ApplicationData::scriptsDir().canonicalPath() + "/merge/custom";
-    mergeWin_ = new ExecutionWindow(projectData.projectWorkingDir(), results, scriptsDir, ExecutionWindow::Type::PROJECT, this);
+    mergeWin_ = new ExecutionWindow(projectData.projectWorkingDir(), scriptsDir, ExecutionWindow::Type::PROJECT, this);
     mergeWin_->runInitialization();
     
-    spWin_ = new ExecutionWindow(projectData.projectWorkingDir(), results, 
+    spWin_ = new ExecutionWindow(projectData.projectWorkingDir(),
             QStringList() << ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/frealign" 
                           << ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/relion", ExecutionWindow::Type::PROJECT, this);
     spWin_->runInitialization();
     
-    projectToolsWin_ = new ExecutionWindow(projectData.projectWorkingDir(), results, 
+    projectToolsWin_ = new ExecutionWindow(projectData.projectWorkingDir(),
             QStringList() << ApplicationData::scriptsDir().canonicalPath() + "/project", ExecutionWindow::Type::PROJECT, this);
     
     imageWin_ = new ImageTab(this);
@@ -252,9 +255,6 @@ void MainWindow::setupWindows() {
     centralWin_->addWidget(spWin_);
     centralWin_->addWidget(projectToolsWin_);
 
-    connect(mergeWin_, SIGNAL(scriptCompletedSignal()), libraryWin_, SLOT(maskResults()));
-    connect(spWin_, SIGNAL(scriptCompletedSignal()), libraryWin_, SLOT(maskResults()));
-    connect(projectToolsWin_, SIGNAL(scriptCompletedSignal()), libraryWin_, SLOT(maskResults()));
     connect(imageWin_, SIGNAL(imagesOpenChanged(QStringList)), libraryWin_, SLOT(setImagesOpen(QStringList)));
 }
 

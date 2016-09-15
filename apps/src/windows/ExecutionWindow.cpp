@@ -1,5 +1,6 @@
 #include <QWhatsThis>
 #include <QMessageBox>
+#include <QDateTime>
 
 #include "ApplicationData.h"
 #include "ProjectData.h"
@@ -8,11 +9,12 @@
 #include "ExecutionWindow.h"
 #include "StatusViewer.h"
 
-ExecutionWindow::ExecutionWindow(const QDir& workDir, ResultsData *res, const QStringList& scriptDirs, ExecutionWindow::Type type, QWidget *parent)
+ExecutionWindow::ExecutionWindow(const QDir& workDir, const QStringList& scriptDirs, ExecutionWindow::Type type, QWidget *parent)
 : QWidget(parent) {
     workingDir = workDir;
-    results = res;
     type_ = type;
+    
+    results = new ResultsData(workingDir, this);
     
     panelVisibilityToolBar = new QToolBar;
     panelVisibilityToolBar->addWidget(spacer());
@@ -400,6 +402,7 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
     scriptLabel->setText(module->title(index));
     parameterSearchBox->setText("");
     
+    //qDebug() << "Script selected: " << module->title(index);
     //  container->saveSplitterState(1);
     int uid = index.data(Qt::UserRole).toUInt();
 
@@ -442,6 +445,7 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
     subscriptWidget->setModel(model);
 
     parameters->changeParametersDisplayed(module->displayedVariables(index));
+    //qDebug() << module->displayedVariables(index);
     if (verbosityControl->value() != 0)
         logViewer->loadLogFile(module->logFile(index));
     else
@@ -458,7 +462,9 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
 void ExecutionWindow::scriptCompleted(ScriptModule *module, QModelIndex index) {
     reload(module->resultsFile(index));
     results->save();
+    if(results->newImagesImported()) projectData.indexImages();
     resultsView->load();
+    setLastChangedInConfig();
 }
 
 void ExecutionWindow::subscriptActivated(QModelIndex item) {
@@ -521,4 +527,9 @@ QWidget* ExecutionWindow::spacer() {
     QWidget* s = new QWidget();
     s->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     return s;
+}
+
+void ExecutionWindow::setLastChangedInConfig() {
+    ParametersConfiguration* conf = getConf();
+    conf->set("last_processed", QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm"));
 }

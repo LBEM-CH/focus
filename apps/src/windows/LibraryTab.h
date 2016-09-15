@@ -20,7 +20,6 @@
 #include "ProjectModel.h"
 #include "ImageViewer.h"
 #include "ParameterConfiguration.h"
-#include "ResultsData.h"
 #include "ProjectDelegate.h"
 #include "LibraryImageStatus.h"
 
@@ -29,7 +28,7 @@ class LibraryTab : public QWidget
     Q_OBJECT
            
     public:
-        LibraryTab(ResultsData* results, QWidget* parent=NULL);
+        LibraryTab(QWidget* parent=NULL);
         
         ProjectModel* getDirModel();
         QTreeView* getDirView();
@@ -42,7 +41,6 @@ class LibraryTab : public QWidget
         
         void reload();
         void updateModel();
-        void maskResults();
         void columnActivated(int i);
         void copyImage();
         

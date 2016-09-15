@@ -30,7 +30,6 @@
 # This defines some variables that we might need:
 set proc_2dx = ""
 set bin_2dx = ""
-set app_2dx_image = ""
 set SCRATCH_DISK = ""
 #
 set import_dir = ""
@@ -170,26 +169,32 @@ while ( ${irun} <= ${imagenum} )
     if ( ${import_RAW_stacks_do} == "y" && ${RAW_stack_found} == "y") then
       cp ${movie_RAW}/${importimage} ${importimage_pattern}_${newimagenumber}_stack_raw.${file_ending}
     endif
+    #
     cp ${olddir}/2dx_merge.cfg 2dx_image.cfg
-    echo "set imagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
-    echo "set nonmaskimagename = ${importimage_pattern}_${newimagenumber}" >> 2dx_image.cfg
+    #
+    # This tells the GUI that the parameters are now to be added in the current image directory
+    echo "<IMAGEDIR="\"${PWD}\"">" >> ${olddir}/LOGS/${scriptname}.results
+    #
+    echo "set imagename = ${importimage_pattern}_${newimagenumber}" >> ${olddir}/LOGS/${scriptname}.results
+    echo "set nonmaskimagename = ${importimage_pattern}_${newimagenumber}" >> ${olddir}/LOGS/${scriptname}.results
     if ( ${import_DC_stacks_do} == "y" && ${DC_stack_found} == "y") then
-      echo "set movie_stackname = ${importimage_pattern}_${newimagenumber}_stack.${file_ending}" >> 2dx_image.cfg
+      echo "set movie_stackname = ${importimage_pattern}_${newimagenumber}_stack.${file_ending}" >> ${olddir}/LOGS/${scriptname}.results
     endif
     if ( ${import_RAW_stacks_do} == "y" && ${RAW_stack_found} == "y") then
-      echo "set movie_stackname_raw = ${importimage_pattern}_${newimagenumber}_stack_raw.${file_ending}" >> 2dx_image.cfg
+      echo "set movie_stackname_raw = ${importimage_pattern}_${newimagenumber}_stack_raw.${file_ending}" >> ${olddir}/LOGS/${scriptname}.results
     endif
-    echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
-    echo "set imagename_original = ${movie_average}/${importimage}" >> 2dx_image.cfg
-    echo "set initialization_reset = y" >> 2dx_image.cfg
-    echo "set initialization_executable = y" >> 2dx_image.cfg
+    echo "set imagenumber = ${newimagenumber}" >> ${olddir}/LOGS/${scriptname}.results
+    echo "set imagename_original = ${movie_average}/${importimage}" >> ${olddir}/LOGS/${scriptname}.results
+    echo "set initialization_reset = y" >> ${olddir}/LOGS/${scriptname}.results
+    echo "set initialization_executable = y" >> ${olddir}/LOGS/${scriptname}.results
     set fullpath = `pwd`
-    cd ${olddir}
-    ${app_2dx_image} ${fullpath} "2dx_initialize"
     cd ${olddir}
     #
     @ import_imagenumber++
-    echo "set -force import_imagenumber = ${import_imagenumber}"  >> LOGS/${scriptname}.results
+    #
+    # This tells the GUI to get back to the original dir for setting parameters
+    echo "<IMAGEDIR>" >> ${olddir}/LOGS/${scriptname}.results
+    echo "set -force import_imagenumber = ${import_imagenumber}"  >> ${olddir}/LOGS/${scriptname}.results
   else
     ${proc_2dx}/protest "ERROR: ${movie_average}/${importimage} not found."
   endif
@@ -197,6 +202,9 @@ while ( ${irun} <= ${imagenum} )
 end
 #
 \rm -f tmp.tmp
+#
+# This tells the GUI that new images were added and the project library should be updated
+echo "<IMPORTDIR>" >> LOGS/${scriptname}.results
 #
 echo ":: "
 echo "::  Image data was imported into ${import_target_dirname}"

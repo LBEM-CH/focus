@@ -26,7 +26,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set app_2dx_image = ""
 #
 set imagename = ""
 set reset_sure1 = ""
@@ -34,7 +33,7 @@ set reset_sure2 = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_reset_image_cfg.script
+set scriptname = 2dx_reset_image_cfg
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'
@@ -83,25 +82,31 @@ eot
     \cp -f ${oldir}/2dx_merge.cfg ${fullpath}/2dx_image.cfg
     #
     # Reset the variables
+    #
+    # This tells the GUI that the parameters are now to be added in the current image directory
+    echo "<IMAGEDIR="\"${fullpath}\"">" >> ${oldir}/LOGS/${scriptname}.results
+    #
     echo ": Updating - imagename to ${imagename}"
-    echo 'set imagename = "'${imagename}'"' >> 2dx_image.cfg
+    echo 'set imagename = "'${imagename}'"' >> ${oldir}/LOGS/${scriptname}.results
     echo ": Updating - nonmaskimagename to ${nonmaskimagename}"
-    echo 'set nonmaskimagename = "'${nonmaskimagename}'"' >> 2dx_image.cfg
+    echo 'set nonmaskimagename = "'${nonmaskimagename}'"' >> ${oldir}/LOGS/${scriptname}.results
     echo ": Updating - movie_stackname to ${movie_stackname}"
-    echo 'set movie_stackname = "'${movie_stackname}'"' >> 2dx_image.cfg
+    echo 'set movie_stackname = "'${movie_stackname}'"' >> ${oldir}/LOGS/${scriptname}.results
     echo ": Updating - imagenumber to ${imagenumber}"
-    echo 'set imagenumber = "'${imagenumber}'"' >> 2dx_image.cfg
+    echo 'set imagenumber = "'${imagenumber}'"' >> ${oldir}/LOGS/${scriptname}.results
     echo ": Updating - imagename_original to ${imagename_original}"
-    echo 'set imagename_original = "'${imagename_original}'"' >> 2dx_image.cfg
+    echo 'set imagename_original = "'${imagename_original}'"' >> ${oldir}/LOGS/${scriptname}.results
     echo ": Updating - movie_stackname_raw to ${movie_stackname_raw}"
-    echo 'set movie_stackname_raw = "'${movie_stackname_raw}'"' >> 2dx_image.cfg
+    echo 'set movie_stackname_raw = "'${movie_stackname_raw}'"' >> ${oldir}/LOGS/${scriptname}.results
     #
-    echo "set initialization_reset = y" >> 2dx_image.cfg
-    echo "set initialization_executable = y" >> 2dx_image.cfg
+    echo "set initialization_reset = y" >> ${oldir}/LOGS/${scriptname}.results
+    echo "set initialization_executable = y" >> ${oldir}/LOGS/${scriptname}.results
     #
     cd ${oldir}
-    ${app_2dx_image} ${fullpath} "2dx_initialize"
-    cd ${oldir}
+    #
+    # This tells the GUI to get back to the original dir for setting parameters
+    echo "<IMAGEDIR>" >> ${oldir}/LOGS/${scriptname}.results
+    #
     set curval = `echo ${curval} ${increment} | awk '{ s = $1 + $2 } END { print s }'`
     set curprogress = `echo ${curval} | awk '{ s = int( $1 ) } END { print s }'`
     echo "<<@progress:${curprogress}>>"

@@ -56,7 +56,6 @@ public:
     void setSaveName(const QString &saveName);
     void setEvenImageFileName(const QString& name);
     void setOddImageFileName(const QString& name);
-    void setResultsFile(ResultsData *resultsFile);
 
     QString pathFromIndex(const QModelIndex &index);
     QString relativePathFromIndex(const QModelIndex& index);
@@ -82,11 +81,9 @@ public slots:
     bool removeSelected();
 
     bool save(QStandardItem *currentItem, int itemCount, QFile &saveFile, SaveOptions option = ALL);
-    void maskResults();
     bool submit();
 
     void updateItems(QStandardItem *element);
-    void update();
 
     void reload();
 
@@ -108,7 +105,6 @@ signals:
 
 private:
 
-    ResultsData* resultData;
     QFileSystemWatcher watcher;
     
     QHash<quint32, QString> paths;
@@ -132,8 +128,7 @@ private:
     void loadImages(const QDir &path, QStringList& imageList, QStandardItem *parent = 0);
     void fillData(quint32 c, QStandardItem* entryItem, QVariant value);
     void load();
-
-    void maskResults(QStandardItem *currentItem, int itemCount);
+    
     uint uid(const QString & path);
     
     void prepareLoadDialog(int max);

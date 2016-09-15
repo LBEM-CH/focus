@@ -58,6 +58,11 @@ ImageLibrary::ImageLibrary(QWidget* parent)
     updateData();
     updateChecks();
     update();
+    
+    connect(&projectData, &ProjectData::imageDirsChanged, [=] () {
+        thumbnails_->updateThumbanils();
+        updateChecks();
+    });
 }
 
 QWidget* ImageLibrary::setupHeader() {
@@ -88,6 +93,18 @@ QWidget* ImageLibrary::setupHeader() {
     
     setSelectionCount(0);
     
+    QToolButton* reloadButton = new QToolButton();
+    reloadButton->setIcon(ApplicationData::icon("refresh"));
+    reloadButton->setToolTip("Update Thumbnails");
+    reloadButton->setAutoRaise(false);
+    reloadButton->setCheckable(false);
+    reloadButton->setVisible(false);
+    connect(reloadButton, &QToolButton::clicked, [=] (){
+        thumbnails_->updateThumbanils();
+        updateChecks();
+        update();
+    });
+    
     infoButton = new QToolButton();
     infoButton->setIcon(ApplicationData::icon("expand"));
     infoButton->setToolTip("Show More Information");
@@ -95,6 +112,7 @@ QWidget* ImageLibrary::setupHeader() {
     infoButton->setCheckable(true);
     connect(infoButton, &QToolButton::toggled, [=] (bool show){
         expandedWidget->setVisible(show);
+        reloadButton->setVisible(show);
         if(show) setFixedHeight(HEADER_HEIGHT+CONTENT_HEIGHT);
         else setFixedHeight(HEADER_HEIGHT);
         update();
@@ -114,7 +132,8 @@ QWidget* ImageLibrary::setupHeader() {
     headerLayout->addWidget(headerTitle, 0, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     headerLayout->addWidget(s, 0, 2, 1, 1);
     headerLayout->addWidget(selectionLabel, 0, 3, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
-    headerLayout->addWidget(infoButton, 0, 4, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
+    headerLayout->addWidget(reloadButton, 0, 4, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
+    headerLayout->addWidget(infoButton, 0, 5, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
     
     bar->setLayout(headerLayout);
     

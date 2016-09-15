@@ -74,6 +74,17 @@ QStringList ProjectData::imageList() {
     return ProjectPreferences(projectDir()).imageList();
 }
 
+void ProjectData::addImage(const QDir& imageDir) {
+    if(!QFileInfo(imageDir.canonicalPath() + "/2dx_image.cfg").exists()) {
+        qDebug() << "Error while adding image: " << imageDir.canonicalPath() << "No config files found.";
+        return;
+    }
+    ProjectPreferences(projectDir()).addImage(imageDir.canonicalPath());
+    qDebug() << "Added image: " << imageDir.canonicalPath();
+    emit imageDirsChanged();
+}
+
+
 void ProjectData::indexImages() {
     QStringList imageList;
     QProgressDialog progressDialog;
@@ -84,6 +95,7 @@ void ProjectData::indexImages() {
     initializeImageParameters(projectDir(), imageList, progressDialog);
     progressDialog.reset();
     ProjectPreferences(projectDir()).resetImageList(imageList);
+    emit imageDirsChanged();
 }
 
 void ProjectData::initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog& dialog) {

@@ -2,6 +2,7 @@
 #ifndef PROJECT_DATA_H
 #define PROJECT_DATA_H
 
+#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QDebug>
@@ -16,7 +17,10 @@
 
 #define projectData (ProjectData::Instance())
 
-class ProjectData {
+class ProjectData : public QObject {
+    
+    Q_OBJECT
+    
 public:
 
     static ProjectData& Instance();
@@ -27,6 +31,7 @@ public:
     ParametersConfiguration* parameterData(const QDir& workDir);
     
     void indexImages();
+    void addImage(const QDir& imageDir);
     QStringList imageList();
     
     QStringList imagesOpen();
@@ -46,6 +51,9 @@ public:
     QString selectionDirfile();
     QString evenSelectionDirfile();
     QString oddSelectionDirfile();
+    
+signals:
+    void imageDirsChanged();
 
 
 private:

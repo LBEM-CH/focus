@@ -26,7 +26,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set app_2dx_image = ""
 set SCRATCH_DISK = ""
 #
 # Variables to be available from the config file are:
@@ -100,9 +99,11 @@ eot
   cd ${from_dir}
   #
   if ( -e 2dx_image.cfg ) then
-    echo "set imagenumber = ${newimagenumber}" >> 2dx_image.cfg
+    # This tells the GUI that the parameters are now to be added in the current image directory
+    echo "<IMAGEDIR="\"${PWD}\"">" >> ${olddir}/LOGS/${scriptname}.results
+    #
+    echo "set imagenumber = ${newimagenumber}" >> ${olddir}/LOGS/${scriptname}.results
     set fullpath = `pwd`
-    ${app_2dx_image} ${fullpath} "2dx_initialize"
   else
     ${proc_2dx}/linblock "WARNING: ${source} does not exist here."
   endif
@@ -114,6 +115,8 @@ eot
   @ irun += 1
   @ dircounter -= 1
   cd ${olddir}
+  # This tells the GUI to get back to the original dir for setting parameters
+  echo "<IMAGEDIR>" >> ${olddir}/LOGS/${scriptname}.results
 end
 #
 ${proc_2dx}/linblock "Done."

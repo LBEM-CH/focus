@@ -23,6 +23,7 @@
 
 #include <QMessageBox>
 #include <QDebug>
+#include <QDateTime>
 
 #include "ApplicationData.h"
 #include "ProjectData.h"
@@ -290,6 +291,13 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
                 entryItem->setIcon(ApplicationData::icon("tick"));
             else
                 entryItem->setIcon(ApplicationData::icon("cross"));
+        } else if (columns[c]["format"].toString().trimmed().toLower() == "time") {
+            entryString = value.toString();
+            if (value.toString().trimmed() == "-") entryItem->setData(0, SortRole);
+            else {
+                QDateTime date = QDateTime::fromString(value.toString(), "dd.MM.yyyy hh:mm");
+                entryItem->setData(date.toMSecsSinceEpoch(), SortRole);
+            }
         } else if (columns[c]["format"].toString().trimmed().toLower() == "evenodd") {
             entryString.clear();
             entryItem->setData(value.toString().trimmed(), SortRole);
@@ -344,7 +352,6 @@ bool ProjectModel::loadSelection(const QString &fileName) {
 
 ProjectModel::ProjectModel(const QString &path, const QString &columnsFile, QObject *parent)
 : QStandardItemModel(parent) {
-    resultData = NULL;
 
     loadDialog = new QProgressDialog();
     loadDialog->setWindowModality(Qt::WindowModal);
@@ -561,56 +568,6 @@ const QVariant &ProjectModel::getColumnProperty(int i, const QString &property) 
 
 void ProjectModel::setColumnProperty(int i, const QString &property, const QVariant &value) {
     columns[i][property.toLower()] = value;
-}
-
-void ProjectModel::setResultsFile(ResultsData *resultsFile) {
-    if (resultData != NULL) disconnect(resultData, SIGNAL(saved(bool)), this, SLOT(update()));
-    resultData = resultsFile;
-    connect(resultData, SIGNAL(saved(bool)), this, SLOT(update()));
-}
-
-void ProjectModel::update() {
-    if (resultData == NULL) return;
-
-    QStandardItem *item;
-    quint32 uid;
-
-    QMapIterator<QString, QMap<QString, QString> > it(resultData->results);
-    while (it.hasNext()) {
-        it.next();
-
-        uid = qHash(QDir(it.key()).canonicalPath());
-
-        QMapIterator<QString, QString> j(it.value());
-        while (j.hasNext()) {
-            j.next();
-            item = items[uid][j.key()];
-            if (item != NULL && !j.key().contains(QRegExp("^##\\w*##$"))) {
-                if (item->checkState() != Qt::Checked && item->checkState() != Qt::PartiallyChecked)
-                    item->setText(j.value());
-            }
-        }
-    }
-}
-
-void ProjectModel::maskResults() {
-    resultData->clearMasked();
-    maskResults(item(0), rowCount());
-}
-
-void ProjectModel::maskResults(QStandardItem *currentItem, int itemCount) {
-    QModelIndex i, j;
-    if (currentItem == NULL) return;
-
-    foreach(i, match(currentItem->index(), Qt::CheckStateRole, ".*" /*QString::number(Qt::Checked) + "|" + QString::number(Qt::PartiallyChecked)*/, itemCount, Qt::MatchRegExp)) {
-        if (i.isValid()) {
-            if (i.child(0, 0).isValid()) maskResults(itemFromIndex(i.child(0, 0)), itemFromIndex(i)->rowCount());
-            else
-                for (int j = 2; j < columnCount(); j++)
-                    if (i.parent().child(i.row(), j).data(Qt::CheckStateRole) == Qt::Checked || i.parent().child(i.row(), j).data(Qt::CheckStateRole) == Qt::PartiallyChecked)
-                        resultData->setMasked(pathFromIndex(i), columns[j]["uid"].toString());
-        }
-    }
 }
 
 void ProjectModel::invertSelection(bool commit) {

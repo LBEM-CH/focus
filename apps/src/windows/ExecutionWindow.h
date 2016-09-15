@@ -33,7 +33,7 @@
 #include "LogViewer.h"
 #include "ResultsModule.h"
 #include "ImageViewer.h"
-
+#include "ResultsData.h"
 #include "BlockContainer.h"
 
 class ExecutionWindow : public QWidget
@@ -46,7 +46,7 @@ public:
         PROJECT, IMAGE
     };
     
-    ExecutionWindow(const QDir& workingDir, ResultsData *results, const QStringList& scriptDirs, ExecutionWindow::Type type= ExecutionWindow::Type::PROJECT, QWidget *parent = NULL);
+    ExecutionWindow(const QDir& workingDir, const QStringList& scriptDirs, ExecutionWindow::Type type= ExecutionWindow::Type::PROJECT, QWidget *parent = NULL);
     bool isRunningScript();
     ParametersConfiguration* getConf();
 
@@ -87,6 +87,8 @@ private:
     QSplitter* setupResultsContainer();
     QWidget* spacer();
     QPushButton* addVisibilityButton(QString title, QWidget* widgetToLink, bool initialState);
+    
+    void setLastChangedInConfig();
 
     QDir workingDir;
     ExecutionWindow::Type type_;

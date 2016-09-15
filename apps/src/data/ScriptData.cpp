@@ -21,6 +21,8 @@ QString& ScriptData::parseVariables(QString& line) {
 bool ScriptData::parseDataFile(const QString& filename) {
     QFile data(filename);
     if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+    
+    //qDebug() << "Analyzing: " << filename;
 
     QString lineData;
     qint64 pos = -1;
@@ -48,6 +50,7 @@ bool ScriptData::parseDataFile(const QString& filename) {
                 resetVars.insert(val[0], val[1]);
                 cell.first() = "display";
                 cell.last() = val[0];
+                //qDebug() << "Reseting: " << cell.last().trimmed();
             }
             properties.insert(cell.first().trimmed().toLower(), cell.last().trimmed());
         }

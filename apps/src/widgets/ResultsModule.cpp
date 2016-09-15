@@ -35,6 +35,7 @@ ResultsModule::ResultsModule(const QString& workDir, ResultsData *resultsInfo, R
     setLayout(layout);
 
     view = new QTreeWidget;
+    view->setAttribute(Qt::WA_MacShowFocusRect, 0);
     view->setIndentation(8);
     view->setTextElideMode(Qt::ElideLeft);
     connect(view, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(itemSelected(QTreeWidgetItem*)));

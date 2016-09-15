@@ -178,7 +178,7 @@ void ImageLibrary::updateData(const QString& imagePath) {
 void ImageLibrary::updateFormData(const QString& imagePath, const QStringList& params) {
     ParametersConfiguration* data = projectData.parameterData(imagePath);
     QString imageName = projectData.projectDir().relativeFilePath(imagePath);
-    if(imageName.length() > 60) imageName = "..." + imageName.remove(0, imageName.length()-60);
+    if(imageName.length() > 30) imageName = "..." + imageName.remove(0, imageName.length()-30);
     imageLabel->setText(imageName);
     for(int i=0; i< params.size(); ++i) {
         QVariant valueVar = data->get(params[i])->value();

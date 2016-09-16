@@ -29,6 +29,7 @@ set(CONF
         navigator_help.htm
         2dx_status.html
         projectMenu.inf
-        publications.list)
+        publications.list
+        viewer.params.list)
 
 install(FILES ${CONF} DESTINATION ${INSTALL_DIR})

@@ -21,13 +21,13 @@ void ProjectData::initiailze(const QDir& projectDir) {
 
 void ProjectData::registerParameterMaster(const QString& fileName) {
     if(!QFileInfo(fileName).exists()) {
-        qDebug() << "Configuration File Missing!" << ApplicationData::masterCfgFile() << " does not exist. Will quit now.";
+        qDebug() << "Configuration File Missing!" << fileName << " does not exist. Will quit now.";
         exit(0);
     }
     
     QFile data(fileName);
     if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Configuration file read error!" << ApplicationData::masterCfgFile() << " was not read. Will quit now.";
+        qDebug() << "Configuration file read error!" << fileName << " was not read. Will quit now.";
         exit(0);
     }
 

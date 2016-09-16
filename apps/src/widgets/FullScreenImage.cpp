@@ -1049,7 +1049,7 @@ float FullScreenImage::imageMin() {
 }
 
 void FullScreenImage::rescaleWidget() {
-    pixmap = sourceImage->getPixmap().scaled((int) (scale * image->width()), (int) (scale * image->height()));
+    pixmap = sourceImage->getPixmap().scaled((int) (scale * image->width()), (int) (scale * image->height()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     float nx = (float) ((int*) (imageHeader->rawData()))[0];
     float ny = (float) ((int*) (imageHeader->rawData()))[1];

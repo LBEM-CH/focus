@@ -100,6 +100,7 @@ void ScriptModule::setupModule() {
         addScriptProperty(uid, "filePath", scriptDir.canonicalPath() + "/" + entry);
         addScriptProperty(uid, "title", scriptFileData.property("title"));
         addScriptProperty(uid, "displayedVars", QVariant(scriptFileData.propertyList("display")));
+        addScriptProperty(uid, "publication", QVariant(scriptFileData.propertyList("publication")));
         addScriptProperty(uid, "logFile", workingDir.canonicalPath() + "/LOGS/" + entry.section('.', 0, -2) + ".log");
         addScriptProperty(uid, "resultsFile", workingDir.canonicalPath() + "/LOGS/" + entry.section('.', 0, -2) + ".results");
 
@@ -335,6 +336,10 @@ void ScriptModule::readStdErr() {
 
 QStringList ScriptModule::displayedVariables(QModelIndex index) {
     return getScriptProperty(index.data(Qt::UserRole).toUInt(), "displayedVars").toStringList();
+}
+
+QStringList ScriptModule::publicationList(QModelIndex index) {
+    return getScriptProperty(index.data(Qt::UserRole).toUInt(), "publication").toStringList();
 }
 
 QMap<QString, QString> ScriptModule::variablesToReset(QModelIndex index) {

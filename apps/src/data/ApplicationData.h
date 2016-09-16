@@ -47,6 +47,9 @@ public:
     //Important Files
     static QString masterCfgFile();
     static QString userCfgFile();
+    
+    //Default publications
+    static QStringList defaultPublicationsList();
         
 };
 

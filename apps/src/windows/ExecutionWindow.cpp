@@ -14,6 +14,7 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QStringList& scriptD
     workingDir = workDir;
     type_ = type;
     
+    scriptHelpDialog = new ScriptHelp(this);
     results = new ResultsData(workingDir, this);
     
     panelVisibilityToolBar = new QToolBar;
@@ -447,15 +448,10 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
     parameterSearchBox->setText("");
     
     //qDebug() << "Script selected: " << module->title(index);
-    //  container->saveSplitterState(1);
     int uid = index.data(Qt::UserRole).toUInt();
-
-    QString text;
-    QStringList helpTextList = module->getScriptManual(uid);
-    for (int i = 0; i < helpTextList.size(); i++) text += "<p>" + helpTextList[i] + "</p>";
-    scriptHelp = text;
-
-    centralSplitter->setWhatsThis(text);
+    
+    scriptHelpDialog->setTitle(module->title(index));
+    scriptHelpDialog->setData(module->getScriptManual(uid), module->publicationList(index));
     
     QStandardItemModel* model = new QStandardItemModel;
     QStringList subScripts = module->getScriptDependents(uid);
@@ -537,7 +533,7 @@ void ExecutionWindow::launchLogBrowser() {
 }
 
 void ExecutionWindow::showScriptHelp() {
-    QWhatsThis::showText(mapToGlobal(QPoint(width()/2, 0)), scriptHelp);
+    scriptHelpDialog->show();
 }
 
 void ExecutionWindow::runInitialization() {

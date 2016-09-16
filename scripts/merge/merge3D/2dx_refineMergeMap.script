@@ -17,6 +17,8 @@
 #
 # MANUAL: This script takes the unevenly spaced hkz file and generates a 3D reference map using backprojection.
 #
+# PUBLICATION: Automatic Recovery of Missing Amplitudes and Phases in Tilt-Limited Electron Crystallography of 2D Crystals: <A HREF="http://link.aps.org/doi/10.1103/PhysRevE.84.011916">Phys. Rev. E Stat. Nonlin. Soft Matter Phys., Vol 84(1-1):011916 (2011)</A>
+#
 # DISPLAY: SYM
 # DISPLAY: realcell
 # DISPLAY: realang

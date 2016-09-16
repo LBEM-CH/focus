@@ -24,6 +24,7 @@ public:
     
     void extendSelectionTo(ScriptModule *module);
     QStringList displayedVariables(QModelIndex index);
+    QStringList publicationList(QModelIndex index);
     QMap<QString, QString> variablesToReset(QModelIndex index);
     
     QString logFile(QModelIndex index);

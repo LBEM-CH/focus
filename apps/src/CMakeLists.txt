@@ -68,6 +68,7 @@ set(MOC_HDRS
         widgets/PhaseView.h
         widgets/ResultsModule.h
         widgets/ScriptModule.h
+        widgets/ScriptHelp.h
         widgets/SelectionFFT.h
         widgets/SpinBoxDelegate.h
         widgets/SpotSelectTool.h

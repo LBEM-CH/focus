@@ -52,6 +52,9 @@ bool ScriptData::parseDataFile(const QString& filename) {
                 cell.last() = val[0];
                 //qDebug() << "Reseting: " << cell.last().trimmed();
             }
+            if (cell.first().trimmed().toLower() == "publication") {
+                for(int ci=cell.length()-2; ci>0; --ci) cell[cell.length()-1] = cell[ci] + ": " +cell[cell.length()-1]; 
+            }
             properties.insert(cell.first().trimmed().toLower(), cell.last().trimmed());
         }
     }

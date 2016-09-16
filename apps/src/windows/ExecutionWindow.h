@@ -35,6 +35,7 @@
 #include "ImageViewer.h"
 #include "ResultsData.h"
 #include "BlockContainer.h"
+#include "ScriptHelp.h"
 
 class ExecutionWindow : public QWidget
 {
@@ -121,7 +122,7 @@ private:
     
     QProgressBar* progressBar;
     QLabel* scriptLabel;
-    QString scriptHelp;
+    ScriptHelp* scriptHelpDialog;
     QPushButton* runButton;
     
     QToolBar* panelVisibilityToolBar;

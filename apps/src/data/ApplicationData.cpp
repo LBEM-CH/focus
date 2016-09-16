@@ -153,13 +153,17 @@ QString ApplicationData::userCfgFile() {
     return configDir().absolutePath() + "/2dx.cfg";
 }
 
+QStringList ApplicationData::defaultPublicationsList() {
+    QFile s(configDir().absolutePath() + "/publications.list");
+    
+    if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Publications list file read failed.";
+        return QStringList();
+    }
 
-
-
-
-
-
-
-
-
-
+    QStringList publicationList;
+    while (!s.atEnd()) publicationList << s.readLine().simplified();
+    s.close();
+    
+    return publicationList;
+}

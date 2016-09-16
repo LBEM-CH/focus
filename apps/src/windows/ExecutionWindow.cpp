@@ -29,6 +29,12 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QStringList& scriptD
     centralSplitter->addWidget(logWindow);
     centralSplitter->setStretchFactor(0, 2);
     centralSplitter->setStretchFactor(1, 1);
+    
+    if(type_ == Type::IMAGE) {
+        centralSplitter->addWidget(setupHistoryWindow());
+        centralSplitter->setStretchFactor(2, 1);
+    }
+    
 
     //Setup rightmost container
     resultsSplitter = setupResultsContainer();
@@ -80,7 +86,7 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QStringList& scriptD
     
     setLayout(scriptsAndContainerLayout);
 
-    verbosityControl->setValue(1);
+    outputVerbosityControl->setValue(1);
     defaultModule->selectFirst();
 
     scriptsWidget->setCurrentIndex(0);
@@ -135,7 +141,7 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
         connect(module, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
         connect(module, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
         connect(module, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
-        connect(verbosityControl, SIGNAL(valueChanged(int)), module, SLOT(setVerbosity(int)));
+        connect(outputVerbosityControl, SIGNAL(valueChanged(int)), module, SLOT(setVerbosity(int)));
 
         QToolButton* toolButton = new QToolButton(this);
         toolButton->setIcon(module->getModuleToolIcon());
@@ -288,15 +294,15 @@ BlockContainer* ExecutionWindow::setupLogWindow() {
     //Setup Log Viewer
     logViewer = new LogViewer("Standard Output", NULL);
 
-    verbosityControl = new QSlider;
-    verbosityControl->setOrientation(Qt::Horizontal);
-    verbosityControl->setFixedHeight(20);
-    verbosityControl->setMinimum(0);
-    verbosityControl->setMaximum(3);
-    verbosityControl->setTickPosition(QSlider::TicksBothSides);
-    verbosityControl->setTickInterval(1);
-    verbosityControl->setSingleStep(1);
-    connect(verbosityControl, SIGNAL(valueChanged(int)), logViewer, SLOT(load(int)));
+    outputVerbosityControl = new QSlider;
+    outputVerbosityControl->setOrientation(Qt::Horizontal);
+    outputVerbosityControl->setFixedHeight(20);
+    outputVerbosityControl->setMinimum(0);
+    outputVerbosityControl->setMaximum(3);
+    outputVerbosityControl->setTickPosition(QSlider::TicksBothSides);
+    outputVerbosityControl->setTickInterval(1);
+    outputVerbosityControl->setSingleStep(1);
+    connect(outputVerbosityControl, SIGNAL(valueChanged(int)), logViewer, SLOT(load(int)));
 
     QWidget* verbosityControlWidget = new QWidget();
     QHBoxLayout* verbosityControlLayout = new QHBoxLayout(verbosityControlWidget);
@@ -305,7 +311,7 @@ BlockContainer* ExecutionWindow::setupLogWindow() {
     verbosityControlWidget->setLayout(verbosityControlLayout);
 
     verbosityControlLayout->addWidget(new QLabel("Verbosity Level "), 0, Qt::AlignVCenter);
-    verbosityControlLayout->addWidget(verbosityControl, 0, Qt::AlignVCenter);
+    verbosityControlLayout->addWidget(outputVerbosityControl, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
     BlockContainer *logWindow = new BlockContainer("Output (Double click for logbrowser)", this);
@@ -319,6 +325,44 @@ BlockContainer* ExecutionWindow::setupLogWindow() {
     showOutputButton = addVisibilityButton("Output", logWindow, false);
     
     return logWindow;
+
+}
+
+BlockContainer* ExecutionWindow::setupHistoryWindow() {
+    //Setup Log Viewer
+    historyViewer = new LogViewer("Processing History", NULL);
+
+    historyVerbosityControl = new QSlider;
+    historyVerbosityControl->setOrientation(Qt::Horizontal);
+    historyVerbosityControl->setFixedHeight(20);
+    historyVerbosityControl->setMinimum(0);
+    historyVerbosityControl->setMaximum(3);
+    historyVerbosityControl->setTickPosition(QSlider::TicksBothSides);
+    historyVerbosityControl->setTickInterval(1);
+    historyVerbosityControl->setSingleStep(1);
+    historyVerbosityControl->setValue(1);
+    connect(historyVerbosityControl, SIGNAL(valueChanged(int)), historyViewer, SLOT(load(int)));
+
+    QWidget* verbosityControlWidget = new QWidget();
+    QHBoxLayout* verbosityControlLayout = new QHBoxLayout(verbosityControlWidget);
+    verbosityControlLayout->setMargin(0);
+    verbosityControlLayout->setSpacing(3);
+    verbosityControlWidget->setLayout(verbosityControlLayout);
+
+    verbosityControlLayout->addWidget(new QLabel("Verbosity Level "), 0, Qt::AlignVCenter);
+    verbosityControlLayout->addWidget(historyVerbosityControl, 0, Qt::AlignVCenter);
+
+    //Setup the window and add widgets
+    BlockContainer *historyWindow = new BlockContainer("Processing History", this);
+    historyWindow->setMinimumWidth(400);
+    historyWindow->setMinimumHeight(200);
+    historyWindow->setMainWidget(historyViewer);
+    historyWindow->setHeaderWidget(verbosityControlWidget);
+
+    historyWindow->setVisible(false);
+    addVisibilityButton("History", historyWindow, false);
+    
+    return historyWindow;
 
 }
 
@@ -446,10 +490,13 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
 
     parameters->changeParametersDisplayed(module->displayedVariables(index));
     //qDebug() << module->displayedVariables(index);
-    if (verbosityControl->value() != 0)
-        logViewer->loadLogFile(module->logFile(index));
-    else
-        logViewer->clear();
+    if (outputVerbosityControl->value() != 0) logViewer->loadLogFile(module->logFile(index));
+    else logViewer->clear();
+    
+    if(type_ == Type::IMAGE) {
+        if (historyVerbosityControl->value() != 0) historyViewer->loadLogFile(workingDir.canonicalPath() + "/" + "History.dat");
+        else historyViewer->clear();
+    }
     
     if(QFileInfo(module->logFile(index)).exists()) showOutputButton->setChecked(true);
     else showOutputButton->setChecked(false);

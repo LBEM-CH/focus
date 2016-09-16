@@ -81,6 +81,7 @@ signals:
 private:
     
     BlockContainer* setupLogWindow();
+    BlockContainer* setupHistoryWindow();
     BlockContainer* setupParameterWindow();
     QWidget* setupScriptsWidget(const QStringList& scriptDirs);
     QWidget* setupTitleContainer();
@@ -111,8 +112,11 @@ private:
     ResultsModule *resultsView;
 
     LogViewer *logViewer;
+    LogViewer *historyViewer;
 
-    QSlider* verbosityControl;
+    QSlider* outputVerbosityControl;
+    QSlider* historyVerbosityControl;
+    
     int runningTabIndex = -1;
     
     QProgressBar* progressBar;

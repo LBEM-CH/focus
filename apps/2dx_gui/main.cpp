@@ -40,11 +40,9 @@ Q_IMPORT_PLUGIN(qgif)
 #endif
 
 void loadMainWindow(const QString& projectPath) {
-    projectData.initiailze(QDir(projectPath));
-    MainWindow *win = new MainWindow();
+    MainWindow *win = new MainWindow(projectPath);
     
     UserProjects().addProjectPath(projectData.projectDir().canonicalPath());
-    UserPreferences().loadWindowPreferences(win);
     
     win->show();
     win->raise(); // raises the window on top of the parent widget stack

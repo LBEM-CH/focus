@@ -65,7 +65,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    MainWindow(QWidget *parent = NULL);
+    MainWindow(const QString& projectPath, QWidget *parent = NULL);
 
 public slots:
 

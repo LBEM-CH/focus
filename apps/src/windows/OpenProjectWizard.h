@@ -46,7 +46,7 @@ public:
         optionsPage_ = new OptionsPage(this);
         addPage(optionsPage_);
         setWindowTitle(tr("Open Project"));
-        setModal(true);
+        //setModal(true);
     }
 
     void accept() override {

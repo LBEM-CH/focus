@@ -36,8 +36,13 @@
 
 #include "MainWindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
 : QMainWindow(parent) {
+    
+    projectData.setParent(this);
+    projectData.initiailze(QDir(projectPath));
+    
+    UserPreferences().loadWindowPreferences(this);
     
     if (!QFileInfo(projectData.projectWorkingDir().canonicalPath() + "/2dx_merge.cfg").exists()) {
         QMessageBox::critical(this, "Configuration Files not found!", "This folder does not have 2DX configuration files. Will quit now.");

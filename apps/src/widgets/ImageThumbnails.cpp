@@ -33,8 +33,23 @@ void ImageThumbnails::updateThumbanils() {
     model->clear();
     columnPaths.clear();
     QStringList imageList = projectData.imageList();
+    
+    QProgressDialog progressDialog;
+    progressDialog.setCancelButtonText(tr("&Cancel"));
+    progressDialog.setRange(0, imageList.size());
+    progressDialog.setWindowTitle(tr("Updating thumbnails..."));
+    progressDialog.show();
+    int saveProgress = 0;
+    
     QList<QStandardItem*> items;
     for (int i = 0; i < imageList.size(); ++i) {
+        saveProgress++;
+        progressDialog.setValue(saveProgress);
+        progressDialog.setLabelText(tr("Processing image %1 of %2...").arg(saveProgress).arg(imageList.size()));
+        qApp->processEvents();
+
+        if (progressDialog.wasCanceled()) break;
+        
         QIcon icon;
         QString imageDir = imageList[i];
         if (QFileInfo(imageDir + "/final_map.mrc").exists()) {

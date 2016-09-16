@@ -113,7 +113,11 @@ QWidget* ImageLibrary::setupHeader() {
     connect(infoButton, &QToolButton::toggled, [=] (bool show){
         expandedWidget->setVisible(show);
         reloadButton->setVisible(show);
-        if(show) setFixedHeight(HEADER_HEIGHT+CONTENT_HEIGHT);
+        if(show) {
+            setFixedHeight(HEADER_HEIGHT+CONTENT_HEIGHT);
+            thumbnails_->updateThumbanils();
+            updateChecks();
+        }
         else setFixedHeight(HEADER_HEIGHT);
         update();
     });

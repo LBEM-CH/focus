@@ -39,7 +39,7 @@ void prepareWorkingDir(const QDir& workingDir) {
 }
 
 void prepareConfigFile(const QString& paramsFileName, const QString& workingDir) {
-    QFile cfgFile(workingDir + "/merge/2dx_master.cfg");
+    QFile cfgFile(workingDir + "/merge/2dx_merge.cfg");
     if (!cfgFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(NULL, "Could not write", "Was not able to write the file: " + cfgFile.fileName() + "\n\nWill quit now.");
         qApp->closeAllWindows();
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     QString workDir = cliParser.value(workingDirOption);
 
     if (workDir.isEmpty()) {
-        workDir = QDir::tempPath();
+        workDir = QDir::tempPath() + "/2dx_viewer_tmp/";
         qDebug() << "The working dir is set to: " << workDir;
     }
 

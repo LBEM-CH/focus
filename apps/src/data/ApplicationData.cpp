@@ -89,6 +89,10 @@ QString ApplicationData::mergeApp() {
     return binDir().absoluteFilePath("2dx_merge");
 }
 
+QString ApplicationData::viewerApp() {
+    return binDir().absoluteFilePath("2dx_viewer");
+}
+
 QDir ApplicationData::pluginsDir() {
     return QDir(applicationDir().absolutePath() + "/../plugins/");
 }

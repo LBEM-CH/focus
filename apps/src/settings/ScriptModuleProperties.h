@@ -42,6 +42,28 @@ public:
         endGroup();
         return val;
     }
+    
+    QString level() {
+        QString val;
+        beginGroup("module");
+        val = value("level", "project").toString();
+        endGroup();
+        return val;
+    }
+    
+    QStringList subfolders() {
+        QStringList paths;
+        int size = beginReadArray("subfolders");
+        for (int i = 0; i < size; ++i) {
+            setArrayIndex(i);
+            QString path = QFileInfo(fileName()).path() + '/' + value("path").toString();
+            if (QFileInfo(path + "/module.ini").exists() && !(path.isEmpty())) {
+                paths << path;
+            }
+        }
+        endArray();
+        return paths;
+    }
 
 };
 

@@ -236,23 +236,15 @@ void MainWindow::setupWindows() {
     centralWin_ = new QStackedWidget(this);
 
     libraryWin_ = new LibraryTab(this);
+    imageWin_ = new ImageTab(this);
     
-    QStringList scriptsDir;
-    scriptsDir << ApplicationData::scriptsDir().canonicalPath() + "/merge/merge2D" 
-               << ApplicationData::scriptsDir().canonicalPath() + "/merge/merge3D" 
-               << ApplicationData::scriptsDir().canonicalPath() + "/merge/custom";
-    mergeWin_ = new ExecutionWindow(projectData.projectWorkingDir(), scriptsDir, ExecutionWindow::Type::PROJECT, this);
+    mergeWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/merge/"), this);
     mergeWin_->runInitialization();
     
-    spWin_ = new ExecutionWindow(projectData.projectWorkingDir(),
-            QStringList() << ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/frealign" 
-                          << ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/relion", ExecutionWindow::Type::PROJECT, this);
+    spWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/"), this); 
     spWin_->runInitialization();
     
-    projectToolsWin_ = new ExecutionWindow(projectData.projectWorkingDir(),
-            QStringList() << ApplicationData::scriptsDir().canonicalPath() + "/project", ExecutionWindow::Type::PROJECT, this);
-    
-    imageWin_ = new ImageTab(this);
+    projectToolsWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"), this);
     
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);

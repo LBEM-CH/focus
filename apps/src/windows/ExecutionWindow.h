@@ -47,9 +47,10 @@ public:
         PROJECT, IMAGE
     };
     
-    ExecutionWindow(const QDir& workingDir, const QStringList& scriptDirs, ExecutionWindow::Type type= ExecutionWindow::Type::PROJECT, QWidget *parent = NULL);
+    ExecutionWindow(const QDir& workingDir, const QDir& moduleDir, QWidget *parent = NULL);
     bool isRunningScript();
     ParametersConfiguration* getConf();
+    QToolBar* getToolBar();
 
 public slots:
     
@@ -98,6 +99,7 @@ private:
     ScriptModule* defaultModule;
     QToolButton* defaultButton;
 
+    QToolBar* scriptsToolBar;
     QStackedWidget* scriptsWidget;
     QListView* subscriptWidget;
     

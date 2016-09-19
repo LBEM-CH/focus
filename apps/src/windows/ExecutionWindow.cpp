@@ -8,11 +8,15 @@
 
 #include "ExecutionWindow.h"
 #include "StatusViewer.h"
+#include "ScriptModuleProperties.h"
 
-ExecutionWindow::ExecutionWindow(const QDir& workDir, const QStringList& scriptDirs, ExecutionWindow::Type type, QWidget *parent)
+ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWidget *parent)
 : QWidget(parent) {
     workingDir = workDir;
-    type_ = type;
+    
+    QString typeStr = ScriptModuleProperties(moduleDir.canonicalPath()).level();
+    if(typeStr == "image") type_ = ExecutionWindow::Type::IMAGE;
+    else type_ = ExecutionWindow::Type::PROJECT;
     
     scriptHelpDialog = new ScriptHelp(this);
     results = new ResultsData(workingDir, this);
@@ -23,7 +27,7 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QStringList& scriptD
     //Setup containers
     BlockContainer* parameterContainer = setupParameterWindow();
     BlockContainer* logWindow = setupLogWindow();
-    QWidget* scriptsContainer = setupScriptsWidget(scriptDirs);
+    QWidget* scriptsContainer = setupScriptsWidget(ScriptModuleProperties(moduleDir.canonicalPath()).subfolders());
 
     centralSplitter = new QSplitter(Qt::Vertical);
     centralSplitter->addWidget(parameterContainer);
@@ -98,7 +102,7 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QStringList& scriptD
 QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
    
     //Create Toolbar
-    QToolBar* scriptsToolBar = new QToolBar("Mode", this);
+    scriptsToolBar = new QToolBar("Mode", this);
     scriptsToolBar->setOrientation(Qt::Vertical);
     scriptsToolBar->setIconSize(QSize(32, 32));
     
@@ -543,6 +547,11 @@ bool ExecutionWindow::modified() {
 ParametersConfiguration* ExecutionWindow::getConf() {
     return projectData.parameterData(workingDir);
 }
+
+QToolBar* ExecutionWindow::getToolBar() {
+    return scriptsToolBar;
+}
+
 
 void ExecutionWindow::saveAsProjectDefault() {
     if (QMessageBox::question(this,

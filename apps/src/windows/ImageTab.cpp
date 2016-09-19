@@ -74,9 +74,7 @@ void ImageTab::showImageWindow(const QString& workingDir) {
         QDir logdirectory(workingDir + "/LOGS");
         if (!logdirectory.exists()) logdirectory.mkdir(workingDir + "/LOGS");
         
-        QStringList scriptsDirs;
-        scriptsDirs << ApplicationData::scriptsDir().canonicalPath() + "/image/standard" << ApplicationData::scriptsDir().canonicalPath() + "/image/custom";
-        ExecutionWindow* imageWin = new ExecutionWindow(QDir(workingDir), scriptsDirs, ExecutionWindow::Type::IMAGE, this);
+        ExecutionWindow* imageWin = new ExecutionWindow(QDir(workingDir), QDir(ApplicationData::scriptsDir().canonicalPath() + "/image/"), this);
         connect(imageWin, &ExecutionWindow::executing,
                 [=] (bool run){
                     if(run) setTabProcessing(workingDir);

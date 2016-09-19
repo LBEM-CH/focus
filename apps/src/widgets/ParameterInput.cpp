@@ -74,13 +74,7 @@ void ParameterInput::saveValue(const QString& value) {
         return;
     }
     
-    element->setValue(value);
-    if (element->isWrong()) {
-        element->setIsWrong(false);
-        QPalette pal = inputWidget_->palette();
-        pal.setColor(QPalette::Base, Qt::white);
-        inputWidget_->setPalette(pal);
-    }
+    element->getSection()->getConf()->set(element->name(), value);
 }
 
 void ParameterInput::load() {
@@ -168,7 +162,7 @@ QWidget* ParameterInput::setupDropDownWidget() {
                         qDebug() << items;
                     }
                 });
-    connect(combo, static_cast<void(QComboBox::*)(const QString&)> (&QComboBox::currentTextChanged),
+    connect(combo, static_cast<void(QComboBox::*)(const QString&)> (&QComboBox::activated),
             [ = ](const QString& value) {
                 if(value.contains('=')) saveValue(value.split('=').first().trimmed());
                 else saveValue(value);

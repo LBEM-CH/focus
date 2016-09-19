@@ -46,8 +46,6 @@ public:
     bool isEmpty();
     bool isModified();
     bool hasParent();
-    
-    void setAutoSave(bool save);
 
     int set(QString element, QString value);
     int setForce(QString element, QString value);
@@ -79,7 +77,6 @@ private:
 
     bool empty;
     bool modified;
-    bool autoSave;
     
     bool parseDataFile(const QString& fileName);
     bool resetUserValues(const QString& fileName);

@@ -1,5 +1,6 @@
 
 #include <QDebug>
+#include <QMessageBox>
 
 #include "ApplicationData.h"
 #include "ParameterMaster.h"
@@ -86,6 +87,7 @@ void ProjectData::addImage(const QDir& imageDir) {
 
 
 void ProjectData::indexImages() {
+    imageToParameterData_.clear();
     QStringList imageList;
     QProgressDialog progressDialog;
     progressDialog.setCancelButton(0);
@@ -132,14 +134,23 @@ ParametersConfiguration* ProjectData::parameterData(const QDir& workDir) {
         }
         else {
             qDebug() << "CRITICAL: " << configFile << "requested, but not present, program may crash!";
+            return 0;
         }
     }
     
     return imageToParameterData_[workDir.canonicalPath()];
 }
 
+void ProjectData::reloadParameterData(const QDir& workDir) {
+    if(parameterData(workDir)) parameterData(workDir)->reload();
+}
+
 ParametersConfiguration* ProjectData::projectParameterData() {
     return projectParameters_;
+}
+
+void ProjectData::reloadProjectParameters() {
+    projectParameters_->reload();
 }
 
 QDir ProjectData::projectDir() const {
@@ -152,7 +163,7 @@ QDir ProjectData::projectWorkingDir() const {
 
 void ProjectData::saveAsProjectDefault(const QDir& workingDir) {
     parameterData(workingDir)->saveAs(projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", false);
-    qApp->closeAllWindows();
+    reloadProjectParameters();
 }
 
 QString ProjectData::projectName() {
@@ -161,6 +172,20 @@ QString ProjectData::projectName() {
 
 void ProjectData::setProjectName(const QString& projectName) {
     ProjectPreferences(projectDir()).setProjectName(projectName);
+}
+
+void ProjectData::toggleAutoSave() {
+    autoSave_ = !autoSave_;
+
+    if (autoSave_) {
+        QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched on"));
+    } else {
+        QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched off"));
+    }
+}
+
+bool ProjectData::isAutoSave() {
+    return autoSave_;
 }
 
 QStringList ProjectData::imagesOpen() {

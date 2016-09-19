@@ -3,11 +3,12 @@
 #include "ProjectData.h"
 #include "ApplicationData.h"
 
+#include "ParameterElementData.h"
+#include "ParameterSectionData.h"
 #include "ParameterConfiguration.h"
 
 ParametersConfiguration::ParametersConfiguration(const QString& referenceFileName, const QString& valuesFileName, ParametersConfiguration* parentData, QObject* parent)
 : QObject(parent), parentData_(parentData), saveFileName(valuesFileName) {
-    autoSave = true;
     empty = false;
     if (!parseDataFile(referenceFileName)) {
         empty = true;
@@ -154,10 +155,6 @@ bool ParametersConfiguration::hasParent() {
     else return true;
 }
 
-void ParametersConfiguration::setAutoSave(bool save) {
-    autoSave = save;
-}
-
 unsigned int ParametersConfiguration::size() {
     return sections.size();
 }
@@ -182,7 +179,7 @@ void ParametersConfiguration::save() {
 }
 
 void ParametersConfiguration::saveAs(QString fileName, bool saveSyncronized) {
-    //qDebug() << "Saving: " << fileName;
+    qDebug() << "Saving: " << fileName;
     QFile data(fileName);
     if (!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
@@ -251,7 +248,7 @@ int ParametersConfiguration::setForce(QString element, QString value) {
 
 void ParametersConfiguration::setModified(bool isModified) {
     modified = isModified;
-    if (modified && autoSave) save();
+    if (modified && projectData.isAutoSave()) save();
 
     emit dataModified(modified);
 }

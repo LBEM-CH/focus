@@ -5,8 +5,11 @@
 #include <QStringList>
 #include <QPoint>
 #include <QVariant>
+#include <QObject>
 
 #include "ParameterTypeInfo.h"
+
+class ParameterSectionData;
 
 class ParameterElementData : public QObject {
 
@@ -14,8 +17,10 @@ class ParameterElementData : public QObject {
 
 public:
     
-    ParameterElementData(const QString& name, QObject* parent = 0);
+    ParameterElementData(const QString& name, ParameterSectionData* parent);
     ParameterElementData &operator=(const ParameterElementData &e);
+    
+    ParameterSectionData* getSection();
     
     //Getters
     QString name() const;

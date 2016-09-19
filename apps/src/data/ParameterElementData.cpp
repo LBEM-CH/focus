@@ -1,10 +1,11 @@
 #include <QDebug>
 
 #include "ParameterMaster.h"
+#include "ParameterSectionData.h"
 #include "ParameterElementData.h"
 
 
-ParameterElementData::ParameterElementData(const QString& name, QObject* parent)
+ParameterElementData::ParameterElementData(const QString& name, ParameterSectionData* parent)
 : QObject(parent), name_(name) {
 };
 
@@ -15,6 +16,11 @@ ParameterElementData& ParameterElementData::operator=(const ParameterElementData
     isWrong_ = e.isWrong_;
     return *this;
 }
+
+ParameterSectionData* ParameterElementData::getSection() {
+    return static_cast<ParameterSectionData*>(parent());
+}
+
 
 QPoint ParameterElementData::toQPoint(int group, bool *ok) const {
 

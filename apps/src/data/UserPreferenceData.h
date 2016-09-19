@@ -5,6 +5,7 @@
 #include <QDebug>
 
 #include "ApplicationData.h"
+#include "ParameterElementData.h"
 #include "ParameterConfiguration.h"
 
 #define userPreferenceData (UserData::Instance())

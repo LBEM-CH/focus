@@ -1,6 +1,8 @@
 #include "ParameterSectionData.h"
+#include "ParameterElementData.h"
+#include "ParameterConfiguration.h"
 
-ParameterSectionData::ParameterSectionData(QString title, QObject *parent)
+ParameterSectionData::ParameterSectionData(QString title, ParametersConfiguration* parent)
 : QObject(parent) {
     sectionTitle_ = title;
 }
@@ -30,3 +32,8 @@ ParameterElementData* ParameterSectionData::operator[](unsigned int i) {
 bool ParameterSectionData::operator==(const ParameterSectionData& section) {
     return sectionTitle_ == section.sectionTitle_;
 }
+
+ParametersConfiguration* ParameterSectionData::getConf() {
+    return static_cast<ParametersConfiguration*>(parent());
+}
+

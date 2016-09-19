@@ -48,11 +48,6 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
         QMessageBox::critical(this, "Configuration Files not found!", "This folder does not have 2DX configuration files. Will quit now.");
         exit(0);
     }
-
-    m_do_autosave = true;
-    
-    timer_refresh = 10000;
-    timer = new QTimer(this);
     
     updateWindowTitle();
     setUnifiedTitleAndToolBarOnMac(true);
@@ -95,9 +90,6 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     mainLayout->addWidget(centralWin_, 1, 0);
     
     setCentralWidget(mainWidget);
-    
-    connect(timer, SIGNAL(timeout()), this, SLOT(save()));
-    timer->start(timer_refresh);
     
     resize(1300, 900);
 }
@@ -162,7 +154,7 @@ void MainWindow::setupMenuBar() {
     optionMenu->addAction(reindeximageAct);
 
     QAction *showAutoSaveAction = new QAction(ApplicationData::icon("autosave"), "Autosave On/Off", this);
-    connect(showAutoSaveAction, SIGNAL(triggered()), this, SLOT(toggleAutoSave()));
+    connect(showAutoSaveAction, &QAction::triggered, [=] () {projectData.toggleAutoSave();});
     optionMenu->addAction(showAutoSaveAction);
 
     /**
@@ -245,6 +237,17 @@ void MainWindow::setupWindows() {
     spWin_->runInitialization();
     
     projectToolsWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"), this);
+    QToolBar* projectToolbar = projectToolsWin_->getToolBar();
+    
+    QToolButton* changeProjectNameButton = ExecutionWindow::getToolButton(ApplicationData::icon("change_name"), "Rename", false);
+    connect(changeProjectNameButton, SIGNAL(clicked()), this, SLOT(changeProjectName()));
+    projectToolbar->addWidget(changeProjectNameButton);
+    
+    QToolButton* relaodImagesButton = ExecutionWindow::getToolButton(ApplicationData::icon("refresh"), "ReIndex", false);
+    connect(relaodImagesButton, &QPushButton::clicked, [=](){
+        projectData.indexImages();
+    });
+    projectToolbar->addWidget(relaodImagesButton);
     
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);
@@ -315,18 +318,6 @@ void MainWindow::open(const QString& projectPath) {
     QProcess::startDetached(ApplicationData::guiApp() + " " + projectPath);
 }
 
-void MainWindow::toggleAutoSave() {
-    m_do_autosave = !m_do_autosave;
-
-    if (m_do_autosave) {
-        QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched on"));
-        timer->start(timer_refresh);
-    } else {
-        QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched off"));
-        timer->stop();
-    }
-}
-
 void MainWindow::editHelperConf() {
     if (!preferencesDialogInit_) {
         preferencesDialogInit_ = true;
@@ -354,7 +345,6 @@ void MainWindow::updateWindowTitle() {
 }
 
 void MainWindow::save() {
-    if(projectToolsWin_->isRunningScript()) return;
     imageWin_->saveConfigs();
     projectData.projectParameterData()->save();
 }

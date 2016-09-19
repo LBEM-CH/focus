@@ -51,6 +51,7 @@ public:
     bool isRunningScript();
     ParametersConfiguration* getConf();
     QToolBar* getToolBar();
+    static QToolButton* getToolButton(const QIcon& icon, const QString& text, bool checkable);
 
 public slots:
     

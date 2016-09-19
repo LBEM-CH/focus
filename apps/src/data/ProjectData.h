@@ -28,7 +28,9 @@ public:
     void initiailze(const QDir& projectDir);
     
     ParametersConfiguration* projectParameterData();
+    void reloadProjectParameters();
     ParametersConfiguration* parameterData(const QDir& workDir);
+    void reloadParameterData(const QDir& workDir);
     
     void indexImages();
     void addImage(const QDir& imageDir);
@@ -43,6 +45,9 @@ public:
     QString projectName();
     void setProjectName(const QString& projectName);
     
+    void toggleAutoSave();
+    bool isAutoSave();
+    
     void saveAsProjectDefault(const QDir& workingDir);
 
     static QDir logsDir(const QDir& workingDir);
@@ -54,7 +59,6 @@ public:
     
 signals:
     void imageDirsChanged();
-
 
 private:
 
@@ -68,7 +72,8 @@ private:
     QDir projectDir_;
     ParametersConfiguration* projectParameters_;
     QMap<QString, ParametersConfiguration*> imageToParameterData_;
-
+    bool autoSave_=true;
+    
 };
 
 

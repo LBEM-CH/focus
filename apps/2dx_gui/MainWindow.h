@@ -74,7 +74,6 @@ public slots:
     void setSaveState(bool state);
 
     void open(const QString& projectPath="");
-    void toggleAutoSave();
     
     void save();
 
@@ -129,10 +128,6 @@ private:
     QToolButton* openProjectToolsAct;
 
     bool preferencesDialogInit_ = false;
-    bool m_do_autosave;
-    QTimer *timer;
-    int timer_refresh;
-
 };
 
 #endif

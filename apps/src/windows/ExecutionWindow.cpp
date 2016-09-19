@@ -147,12 +147,7 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
         connect(module, SIGNAL(scriptLaunched()), logViewer, SLOT(clear()));
         connect(outputVerbosityControl, SIGNAL(valueChanged(int)), module, SLOT(setVerbosity(int)));
 
-        QToolButton* toolButton = new QToolButton(this);
-        toolButton->setIcon(module->getModuleToolIcon());
-        toolButton->setText(module->getModuleDescription());
-        toolButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-        toolButton->setCheckable(true);
-        toolButton->setFixedSize(64, 64);
+        QToolButton* toolButton = getToolButton(module->getModuleToolIcon(), module->getModuleDescription(), true);
         connect(toolButton, &QToolButton::toggled,
                 [ = ] (){
             scriptsWidget->setCurrentWidget(module);
@@ -552,10 +547,19 @@ QToolBar* ExecutionWindow::getToolBar() {
     return scriptsToolBar;
 }
 
+QToolButton* ExecutionWindow::getToolButton(const QIcon& icon, const QString& text, bool checkable) {
+    QToolButton* toolButton = new QToolButton();
+    toolButton->setIcon(icon);
+    toolButton->setText(text);
+    toolButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    toolButton->setCheckable(checkable);
+    toolButton->setFixedSize(64, 64);
+    return toolButton;
+}
 
 void ExecutionWindow::saveAsProjectDefault() {
     if (QMessageBox::question(this,
-            tr("Save as default?"), "Saving as project default will change master config file and set default values for all other new imported images in this project. \n\n 2DX will QUIT after saving the file. \n\n Proceed?",
+            tr("Save as default?"), "Saving as project default will change master config file and set default values for all other new imported images in this project.\n\n Proceed?",
             tr("Yes"),
             tr("No"),
             QString(), 0, 1) == 0) {

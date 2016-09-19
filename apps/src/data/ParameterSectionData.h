@@ -17,18 +17,23 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef PARAMETER_SECTION_DATA
+#define PARAMETER_SECTION_DATA
 
 #include <QString>
 #include <QStringList>
 #include <QList>
+#include <QObject>
 
-#include "ParameterElementData.h"
+class ParameterElementData;
+class ParametersConfiguration;
 
 class ParameterSectionData : public QObject {
+    
     Q_OBJECT
-
+    
 public:
-    ParameterSectionData(QString title, QObject *parent = NULL);
+    ParameterSectionData(QString title, ParametersConfiguration* parent);
 
     ParameterSectionData & operator<<(ParameterElementData *e);
     ParameterElementData* operator[](unsigned int);
@@ -37,8 +42,12 @@ public:
     void append(ParameterElementData *e);
     QString title();
     unsigned int size();
+    
+    ParametersConfiguration* getConf();
 
 private:
     QString sectionTitle_;
     QList<ParameterElementData *> elements_;
 };
+
+#endif

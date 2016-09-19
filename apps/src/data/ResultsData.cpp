@@ -30,10 +30,10 @@ ResultsData::ResultsData(const QDir& workDir, QObject *parent)
 : QObject(parent) {
     mainDir = workDir.canonicalPath();
     dryRun = false;
-    watcher.addPath(ProjectData::logsDir(workDir).canonicalPath());
-    connect(&watcher, &QFileSystemWatcher::directoryChanged, [=] () {
-        load();
-    });
+    //watcher.addPath(ProjectData::logsDir(workDir).canonicalPath());
+    //connect(&watcher, &QFileSystemWatcher::directoryChanged, [=] () {
+    //    load();
+    //});
 }
 
 bool ResultsData::load(const QString &name) {

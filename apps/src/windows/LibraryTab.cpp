@@ -69,9 +69,7 @@ LibraryTab::LibraryTab(QWidget* parent)
     dataAndPreviewLayout->addWidget(previews, 0);
     dataAndPreview->setLayout(dataAndPreviewLayout);
     
-    BlockContainer* previewContainer = new BlockContainer("Image Data and Preview", this);
-    previewContainer->setMainWidget(dataAndPreview);
-    previewContainer->setHeaderWidget(headerWidget);
+    BlockContainer* previewContainer = new BlockContainer("Image Data and Preview", dataAndPreview, headerWidget, this);
 
     QGridLayout* mainLayout = new QGridLayout(this);
     mainLayout->setSpacing(0);

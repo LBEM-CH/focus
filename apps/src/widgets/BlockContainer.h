@@ -17,10 +17,7 @@ class BlockContainer : public QFrame {
     Q_OBJECT
 
 public:
-    BlockContainer(const QString& title = "", QWidget* parent = NULL);
-
-    void setMainWidget(QWidget* widget);
-    void setHeaderWidget(QWidget* widget);
+    BlockContainer(const QString& title, QWidget* mainWidget, QWidget* headerWidget = 0, QWidget* parent = 0);
 
 public slots:
     void setHeaderTitle(const QString& titleLabel);
@@ -32,14 +29,9 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
-    QWidget* setupHeader(const QString& title);
+    QWidget* setupHeader(const QString& title, QWidget* headerWidget);
 
-    QVBoxLayout* mainLayout;
-    QWidget* mainWidget;
-
-    QGridLayout* headerLayout;
     QLabel* headerTitle;
-    QWidget* headerWidget;
 
 };
 

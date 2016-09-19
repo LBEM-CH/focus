@@ -66,11 +66,10 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QStringList& scriptD
 
     //For Image add the status container
     if (type_ == ExecutionWindow::Type::IMAGE) {
-        BlockContainer* statusParserCont = new BlockContainer("Status");
         StatusViewer* statusParser = new StatusViewer(ApplicationData::configDir().absolutePath() + "/2dx_status.html");
         statusParser->setConf(getConf());
         statusParser->load();
-        statusParserCont->setMainWidget(statusParser);
+        BlockContainer* statusParserCont = new BlockContainer("Status", statusParser);
         addVisibilityButton("Status", statusParserCont, true);
         containersLayout->addWidget(statusParserCont, 0);
     }
@@ -237,15 +236,11 @@ QWidget* ExecutionWindow::setupTitleContainer() {
 }
 
 QSplitter* ExecutionWindow::setupResultsContainer() {
-    BlockContainer *resultsContainer = new BlockContainer("Results");
+    
     resultsView = new ResultsModule(workingDir.canonicalPath(), results, ResultsModule::results);
-    resultsContainer->setMainWidget(resultsView);
+    BlockContainer *resultsContainer = new BlockContainer("Results", resultsView);
     resultsContainer->setMinimumSize(QSize(235, 100));
 
-    BlockContainer *imagesContainer = new BlockContainer("Images");
-    imagesContainer->setMinimumSize(QSize(235, 100));
-
-    connect(imagesContainer, SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
     ResultsModule *imagesView = new ResultsModule(workingDir.canonicalPath(), results, ResultsModule::images);
 
     QToolButton* importantSwitch = new QToolButton();
@@ -254,12 +249,10 @@ QSplitter* ExecutionWindow::setupResultsContainer() {
     importantSwitch->setAutoRaise(false);
     importantSwitch->setCheckable(true);
     connect(importantSwitch, SIGNAL(toggled(bool)), imagesView, SLOT(setImportant(bool)));
-
-    imagesContainer->setMainWidget(imagesView);
-    imagesContainer->setHeaderWidget(importantSwitch);
     
-    BlockContainer *previewContainer = new BlockContainer("File Preview");
-    previewContainer->setMinimumSize(QSize(235, 100));
+    BlockContainer *imagesContainer = new BlockContainer("Images", imagesView, importantSwitch);
+    connect(imagesContainer, SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
+    imagesContainer->setMinimumSize(QSize(235, 100));
     
     QToolButton* infoSwitch = new QToolButton();
     infoSwitch->setIcon(ApplicationData::icon("info"));
@@ -270,14 +263,15 @@ QSplitter* ExecutionWindow::setupResultsContainer() {
     
     viewer = new ImageViewer(workingDir.canonicalPath());
     connect(imagesView, &ResultsModule::resultChanged, [=] (const QString& file) {viewer->loadFile(file, infoSwitch->isChecked());});
+    
+    BlockContainer* previewContainer = new BlockContainer("File Preview", viewer, infoSwitch);
+    previewContainer->setMinimumSize(QSize(235, 100));
+    
     connect(infoSwitch, &QToolButton::toggled, [=] (bool check) {
         if(check) previewContainer->setHeaderTitle("File Information");
         else previewContainer->setHeaderTitle("File Preview");
         viewer->loadFile(imagesView->selectedImage(), check);
     });
-    
-    previewContainer->setMainWidget(viewer);
-    previewContainer->setHeaderWidget(infoSwitch);
     
     QSplitter* splitter = new QSplitter(Qt::Vertical, this);
     splitter->setMaximumWidth(350);
@@ -315,11 +309,9 @@ BlockContainer* ExecutionWindow::setupLogWindow() {
     verbosityControlLayout->addWidget(outputVerbosityControl, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
-    BlockContainer *logWindow = new BlockContainer("Output (Double click for logbrowser)", this);
+    BlockContainer *logWindow = new BlockContainer("Output (Double click for logbrowser)", logViewer, verbosityControlWidget, this);
     logWindow->setMinimumWidth(400);
     logWindow->setMinimumHeight(200);
-    logWindow->setMainWidget(logViewer);
-    logWindow->setHeaderWidget(verbosityControlWidget);
 
     connect(logWindow, SIGNAL(doubleClicked()), this, SLOT(launchLogBrowser()));
 
@@ -354,11 +346,9 @@ BlockContainer* ExecutionWindow::setupHistoryWindow() {
     verbosityControlLayout->addWidget(historyVerbosityControl, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
-    BlockContainer *historyWindow = new BlockContainer("Processing History", this);
+    BlockContainer *historyWindow = new BlockContainer("Processing History", historyViewer, verbosityControlWidget);
     historyWindow->setMinimumWidth(400);
     historyWindow->setMinimumHeight(200);
-    historyWindow->setMainWidget(historyViewer);
-    historyWindow->setHeaderWidget(verbosityControlWidget);
 
     historyWindow->setVisible(false);
     addVisibilityButton("History", historyWindow, false);
@@ -399,11 +389,9 @@ BlockContainer* ExecutionWindow::setupParameterWindow() {
     parameterLevelLayout->addWidget(parameterSearchBox, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
-    BlockContainer* parameterContainer = new BlockContainer("Setup");
+    BlockContainer* parameterContainer = new BlockContainer("Setup", parameters, parameterLevelWidget);
     parameterContainer->setMinimumWidth(400);
     parameterContainer->setMinimumHeight(200);
-    parameterContainer->setMainWidget(parameters);
-    parameterContainer->setHeaderWidget(parameterLevelWidget);
     
     addVisibilityButton("Parameters", parameterContainer, true);
 

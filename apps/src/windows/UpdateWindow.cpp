@@ -88,8 +88,7 @@ UpdateWindow::UpdateWindow(QWidget *parent)
     layout->addWidget(hLine);
 
     updateText = new QTextBrowser(this);
-    BlockContainer* changesContainer = new BlockContainer("Major release information", this);
-    changesContainer->setMainWidget(updateText);
+    BlockContainer* changesContainer = new BlockContainer("Major release information", updateText);
     layout->addWidget(changesContainer, 1);
 
     upgradeButton = new QPushButton("Update Version");

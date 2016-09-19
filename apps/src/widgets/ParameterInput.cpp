@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDesktopServices>
 
 #include "ParameterValidator.h"
 #include "GraphicalButton.h"
@@ -40,12 +41,24 @@ ParameterInput::ParameterInput(ParameterElementData *e, QWidget *parent)
     else inputWidget_ = new QWidget(this);
 
     lockButton_ = new GraphicalButton(ApplicationData::icon("lock"));
+    lockButton_->setToolTip("Lock this parameter, no script or user would be able to change this value (until it is forced or unlocked again)");
     lockButton_->setCheckable(true);
     lockButton_->setFixedSize(QSize(18, 18));
     connect(lockButton_, SIGNAL(stateChanged(int)), this, SLOT(setReadOnlyState(int)));
-
-    layout_->addWidget(lockButton_, 0, 0);
-    layout_->addWidget(inputWidget_, 0, 1);
+    
+    layout_->addWidget(lockButton_, 0, 0, Qt::AlignVCenter);
+    layout_->addWidget(inputWidget_, 0, 1, Qt::AlignVCenter);
+    
+    if(!element->helpUrl().isEmpty()) {
+        GraphicalButton* linkButton_ = new GraphicalButton(ApplicationData::icon("external_link"));
+        linkButton_->setToolTip("Get help from external source (opens in web-browser)");
+        linkButton_->setCheckable(false);
+        linkButton_->setFixedSize(18, 18);
+        connect(linkButton_, &GraphicalButton::clicked, [=]{
+            QDesktopServices::openUrl(QUrl(element->helpUrl().toLower()));
+        });
+        layout_->addWidget(linkButton_, 0, 2, Qt::AlignVCenter);
+    }
 
     setLayout(layout_);
 }

@@ -134,8 +134,7 @@ QString ParameterSection::getWhatsThis(ParameterElementData* element) {
         }
         whatsthis += "<br>";
     }
-    whatsthis += "Example: " + element->example() + "<br><br>";
-    whatsthis += "<a href=\"" + element->helpUrl() + "\"> " + element->helpUrl() + "</a>";
+    whatsthis += "Example: " + element->example();
 
     return whatsthis;
 

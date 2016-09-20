@@ -1,0 +1,6 @@
+#!/bin/csh -ef
+#
+set infile = $1
+#
+${viewerStack_2dx_app} ${infile}
+#

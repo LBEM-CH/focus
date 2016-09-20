@@ -29,7 +29,7 @@ void ScriptHelp::setData(const QStringList& manual, const QStringList& scriptPub
     browser->insertHtml("<B>MANUAL</B><p>");
     for (int i = 0; i < manual.size(); i++) browser->insertHtml(manual[i] + "<p>");
     browser->insertHtml("<br><B>FURTHER READING</B><p>");
-    browser->insertHtml("<I>(Please site the following if you use this script)</I><p>");
+    browser->insertHtml("<I>(Please cite the following if you use this script)</I><p>");
     for (int i = 0; i < scriptPubs.size(); i++) browser->insertHtml(scriptPubs[i] + "<p>");
     for (int i = 0; i < defaultPublications.size(); i++) browser->insertHtml(defaultPublications[i] + "<p>");
     browser->moveCursor(QTextCursor::Start);

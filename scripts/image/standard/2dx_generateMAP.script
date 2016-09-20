@@ -47,9 +47,6 @@
 # DISPLAY: revxsgn
 # DISPLAY: tempkeep
 # DISPLAY: comment
-# DISPLAY: produceSpiderMap
-# DISPLAY: mapscale
-# DISPLAY: unitcellnumber
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
@@ -65,9 +62,6 @@ set SCRATCH_DISK = ""
 set SYN_Unbending = ""
 set PHASEORI_done = ""
 #
-set produceSpiderMap = ""
-set mapscale = ""
-set unitcellnumber = ""
 set SYN_Unbending = ""
 set imagename = ""
 set nonmaskimagename = ""
@@ -167,7 +161,6 @@ set ML_sym_val = "1"
 #
 set symmetry = 'p1'
 set spcgrp_local = 1
-set produceSpiderMapLocal = ${produceSpiderMap}
 set CCP4_SYM = 1
 set rotate_to_Z = "no"
 #

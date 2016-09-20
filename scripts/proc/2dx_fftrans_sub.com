@@ -110,38 +110,6 @@ eot
 #
 echo "# IMAGE: "FFTIR/${inimage}_red.mrc "<Downsampled Image ${inimage}>" >> LOGS/${scriptname}.results
 #
-if ( ${scriptname} == '2dx_fftrans' ) then
-  \rm -f SCRATCH/${nonmaskimagename}_red2.mrc
-  # 
-  ${bin_2dx}/labelh.exe << eot
-${nonmaskimagename}.mrc
-4               ! average adjacent pixels
-SCRATCH/${nonmaskimagename}_red2.mrc
-2,2
-eot
-  #
-  \rm -f SCRATCH/${nonmaskimagename}_red4.mrc   
-  #
-  ${bin_2dx}/labelh.exe << eot
-SCRATCH/${nonmaskimagename}_red2.mrc
-4               ! average adjacent pixels
-SCRATCH/${nonmaskimagename}_red4.mrc
-2,2
-eot
-  #
-  \rm -f SCRATCH/${nonmaskimagename}_red8.mrc 
-  #
-  ${bin_2dx}/labelh.exe << eot
-SCRATCH/${nonmaskimagename}_red4.mrc
-4               ! average adjacent pixels
-SCRATCH/${nonmaskimagename}_red8.mrc
-2,2
-eot
-  #
-  echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red2.mrc "<2x2 binned nonmasked Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red4.mrc "<4x4 binned nonmasked Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "SCRATCH/${nonmaskimagename}_red8.mrc "<8x8 binned nonmasked Image>" >> LOGS/${scriptname}.results
-endif
 #
 echo "<<@progress: 30>>"
 echo "<<@evaluate>>"

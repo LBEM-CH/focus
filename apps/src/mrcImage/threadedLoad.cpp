@@ -29,7 +29,9 @@ void loadThread::run()
 		quint32 i,j,index;
 		QColor color, oppositeColor;
 		int colors[6];
-		float theta, theta2, rotatePhase = 1.0;
+		float theta = 1.0;
+                float theta2 = 1.0;
+                float rotatePhase = 1.0;
 		int value = 0;
 		qint64 dataSize = nx*ny;
 

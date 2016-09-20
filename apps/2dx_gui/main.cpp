@@ -26,8 +26,10 @@
 #include <QCommandLineParser>
 #include <QStringList>
 
-#include "mainWindow.h"
-#include "open_project_wizard.h"
+#include "MainWindow.h"
+#include "OpenProjectWizard.h"
+#include "ProjectData.h"
+#include "UserPreferences.h"
 
 using namespace std;
 
@@ -38,7 +40,10 @@ Q_IMPORT_PLUGIN(qgif)
 #endif
 
 void loadMainWindow(const QString& projectPath) {
-    mainWindow *win = new mainWindow(projectPath);
+    MainWindow *win = new MainWindow(projectPath);
+    
+    UserProjects().addProjectPath(projectData.projectDir().canonicalPath());
+    
     win->show();
     win->raise(); // raises the window on top of the parent widget stack
     win->activateWindow(); // activates the window an thereby putting it on top-level
@@ -68,6 +73,8 @@ int main(int argc, char *argv[]) {
     parser.addVersionOption();
     parser.addPositionalArgument("project_dir", "Path of the 2dx Project to be opened.");
     parser.process(app);
+    
+    UserPreferences().loadAllFontSettings();
 
     if (!parser.positionalArguments().isEmpty()) {
         loadMainWindow(parser.positionalArguments().first());

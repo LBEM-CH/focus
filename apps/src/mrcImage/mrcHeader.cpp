@@ -186,12 +186,12 @@ float mrcHeader::rms()
 
 void mrcHeader::setMax(float var)
 {
-  header[variables.indexOf("amax")] = *((int*)&var);
+  header[variables.indexOf("amax")] = *(reinterpret_cast<int*>(&var));
 }
 
 void mrcHeader::setMin(float var)
 {
-  header[variables.indexOf("amin")] = *((int*)&var);
+  header[variables.indexOf("amin")] = *(reinterpret_cast<int*>(&var));
 }
 
 bool mrcHeader::isFFT()

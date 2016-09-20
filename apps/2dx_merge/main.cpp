@@ -5,8 +5,8 @@
 #include <QFileInfo>
 #include <QCommandLineParser>
 
-#include "confData.h"
-#include "scriptParser.h"
+#include "ParameterConfiguration.h"
+#include "ScriptParser.h"
 
 QString getAppDir() {
     QString appDir = QApplication::applicationDirPath();
@@ -155,7 +155,7 @@ void execute(QString scriptName, QString scriptsDir, confData* config) {
     if (QFileInfo(scriptPath).exists()) {
         scriptConf = new confData(scriptPath);
     }
-    scriptParser parser(QList<confData *>() << scriptConf << config);
+    ScriptParser parser(QList<confData *>() << scriptConf << config);
     std::cout << "::  Executing in " << config->getDir("working").toStdString() << " : " << scriptName.toStdString() << std::endl;
     parser.parse(scriptPath, config->getDir("working") + "/proc/" + scriptName + ".com");
     parser.execute(scriptName, config);

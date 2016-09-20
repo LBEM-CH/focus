@@ -1,5 +1,6 @@
 #include <QVBoxLayout>
 #include <QFrame>
+#include <QDebug>
 
 #include "ParameterWidget.h"
 #include "ParameterValidator.h"

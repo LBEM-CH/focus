@@ -46,6 +46,8 @@ public:
     bool isEmpty();
     bool isModified();
     bool hasParent();
+    
+    QString dataFileName();
 
     int set(QString element, QString value);
     int setForce(QString element, QString value);

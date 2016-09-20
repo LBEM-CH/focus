@@ -93,7 +93,7 @@ private:
         QString label;
         QString legend;
         ParameterTypeInfo typeInfo;
-        int userLevel;
+        int userLevel = 0;
         QString example;
         QString helpUrl;
         QString relation;
@@ -136,7 +136,10 @@ private:
     
     PropertySet propertySet(const QString& parameter) {
         if(properties_.keys().contains(parameter)) return properties_[parameter];
-        else return PropertySet();
+        else {
+            qDebug() << "No properties found for: " << parameter;
+            return PropertySet();
+        }
     }
     
     QMap<QString, PropertySet> properties_;    

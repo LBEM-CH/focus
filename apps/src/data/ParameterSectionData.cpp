@@ -9,7 +9,6 @@ ParameterSectionData::ParameterSectionData(QString title, ParametersConfiguratio
 
 void ParameterSectionData::append(ParameterElementData *e) {
     elements_ << e;
-    e->setParent(this);
 }
 
 QString ParameterSectionData::title() {

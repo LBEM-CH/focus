@@ -14,9 +14,9 @@ ProjectData& ProjectData::Instance() {
 
 void ProjectData::initiailze(const QDir& projectDir) {
     projectDir_ = projectDir;
-    projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg");
     registerParameterMaster(ApplicationData::masterCfgFile());
     registerParameterMaster(ApplicationData::userCfgFile());
+    projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg");
     indexImages();
 }
 

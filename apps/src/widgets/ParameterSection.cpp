@@ -3,6 +3,7 @@
 #include <QFont>
 #include <QPalette>
 #include <QColor>
+#include <QDebug>
 
 #include "ParameterSection.h"
 

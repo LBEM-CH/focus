@@ -74,7 +74,7 @@ bool ParametersConfiguration::parseDataFile(const QString& fileName) {
                     element->setIsWrong(isWrong);
                 }
 
-                *section << element;
+                section->append(element);
                 lookup.insert(element->name().toLower(), element);
                 lock = false;
                 isWrong = false;
@@ -154,6 +154,11 @@ bool ParametersConfiguration::hasParent() {
     if (parentData_ == 0) return false;
     else return true;
 }
+
+QString ParametersConfiguration::dataFileName() {
+    return saveFileName;
+}
+
 
 unsigned int ParametersConfiguration::size() {
     return sections.size();

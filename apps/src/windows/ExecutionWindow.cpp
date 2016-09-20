@@ -558,13 +558,7 @@ QToolButton* ExecutionWindow::getToolButton(const QIcon& icon, const QString& te
 }
 
 void ExecutionWindow::saveAsProjectDefault() {
-    if (QMessageBox::question(this,
-            tr("Save as default?"), "Saving as project default will change master config file and set default values for all other new imported images in this project.\n\n Proceed?",
-            tr("Yes"),
-            tr("No"),
-            QString(), 0, 1) == 0) {
-        projectData.saveAsProjectDefault(workingDir);
-    }
+    projectData.saveAsProjectDefault(workingDir);
 }
 
 QWidget* ExecutionWindow::spacer() {

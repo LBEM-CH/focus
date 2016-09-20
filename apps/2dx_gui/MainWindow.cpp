@@ -254,8 +254,6 @@ void MainWindow::setupWindows() {
     centralWin_->addWidget(imageWin_);
     centralWin_->addWidget(spWin_);
     centralWin_->addWidget(projectToolsWin_);
-
-    connect(imageWin_, SIGNAL(imagesOpenChanged(QStringList)), libraryWin_, SLOT(setImagesOpen(QStringList)));
 }
 
 void MainWindow::showImageWindow(const QModelIndex& index, bool supressWarnings) {
@@ -311,7 +309,6 @@ void MainWindow::reallyClose(QCloseEvent *event) {
     event->accept();
     UserPreferences().saveCurrentFontSettings();
     UserPreferences().saveWindowPreferences(this);
-    projectData.setImagesOpen(imageWin_->getImagesOpen());
 }
 
 void MainWindow::open(const QString& projectPath) {

@@ -595,6 +595,7 @@ void LibraryTab::renameImageFolder() {
     if (ok2 && !folder.isEmpty()) {
         
         //Check if any image is already open
+        QStringList imagesOpen = projectData.imagesOpen();
         foreach(QString im, imagesOpen) {
             if(im.split('/').contains(folder)) {
                 QMessageBox::warning(
@@ -652,7 +653,7 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
         QString sourceImage = QFileInfo(sourcePath).fileName();
         
         //Check if the image is open.
-        if(imageOpen(sourcePath)) {
+        if(projectData.imageOpen(sourcePath)) {
             warnings += sourcePath.remove(projectDir) + ": Image already open\n";
             qDebug() << sourcePath << " Image already open";
             continue;
@@ -848,13 +849,4 @@ void LibraryTab::updateProjectName(const QString& name) {
     if(name.isEmpty()) projectNameLabel->setText(projectData.projectName());
     else projectNameLabel->setText(name);
     projectNameLabel->setToolTip(projectData.projectDir().canonicalPath());
-}
-
-void LibraryTab::setImagesOpen(QStringList open) {
-    imagesOpen = open;
-}
-
-bool LibraryTab::imageOpen(const QString& imageDir) {
-    if(imagesOpen.contains(imageDir)) return true;
-    else return false;
 }

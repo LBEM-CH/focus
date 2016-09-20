@@ -37,6 +37,7 @@ public:
     QStringList imageList();
     
     QStringList imagesOpen();
+    bool imageOpen(const QString path);
     void setImagesOpen(const QStringList& paths);
     
     QDir projectDir() const;

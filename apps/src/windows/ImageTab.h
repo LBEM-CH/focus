@@ -26,9 +26,6 @@ public slots:
     void saveConfigs();
     bool configModified();
 
-signals:
-    void imagesOpenChanged(QStringList);
-
 private:
 
     QLabel* noImageLabel;

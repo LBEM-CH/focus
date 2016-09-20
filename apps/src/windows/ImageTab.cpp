@@ -57,7 +57,7 @@ void ImageTab::closeImageWindow(int index) {
     imagesInitializedToTabs_.remove(imagesShown_[index]);
     
     imagesShown_.removeAt(index);
-    emit imagesOpenChanged(imagesShown_);
+    projectData.setImagesOpen(imagesShown_);
     if(imagesShown_.isEmpty()) {
         windowTabWidget->hide();
         noImageLabel->show();
@@ -89,7 +89,7 @@ void ImageTab::showImageWindow(const QString& workingDir) {
         int currTabIndex = windowTabWidget->count();
         windowTabWidget->addTab(imagesInitializedToTabs_[workingDir], projectData.projectDir().relativeFilePath(workingDir));
         imagesShown_.insert(currTabIndex, workingDir);
-        emit imagesOpenChanged(imagesShown_);
+        projectData.setImagesOpen(imagesShown_);
     }
 
     noImageLabel->hide();

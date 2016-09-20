@@ -162,8 +162,17 @@ QDir ProjectData::projectWorkingDir() const {
 }
 
 void ProjectData::saveAsProjectDefault(const QDir& workingDir) {
-    parameterData(workingDir)->saveAs(projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", false);
-    reloadProjectParameters();
+    if (QMessageBox::question(NULL,
+            tr("Save as default?"), QString("Saving as project default will change master config file and set default values for all other new imported images in this project.\n\n.") + 
+            QString("NOTE that to change the parameters of already imported images, you will have to run RESET IMAGE CONFIGS script from PROJECT TOOLS tab.\n\n Proceed?"),
+            tr("Yes"),
+            tr("No"),
+            QString(), 0, 1) == 0) {
+        parameterData(workingDir)->saveAs(projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", false);
+        reloadProjectParameters();
+    }
+    
+    
 }
 
 QString ProjectData::projectName() {
@@ -191,6 +200,13 @@ bool ProjectData::isAutoSave() {
 QStringList ProjectData::imagesOpen() {
     return ProjectPreferences(projectDir()).imagesOpen();
 }
+
+bool ProjectData::imageOpen(const QString path) {
+    QStringList imagesOp = imagesOpen();
+    if(imagesOp.contains(path)) return true;
+    else return false;
+}
+
 
 void ProjectData::setImagesOpen(const QStringList& paths) {
     ProjectPreferences(projectDir()).setImagesOpen(paths);

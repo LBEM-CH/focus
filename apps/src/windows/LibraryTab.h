@@ -71,9 +71,6 @@ class LibraryTab : public QWidget
         void resetSelectionState();
         
         void updateProjectName(const QString& name="");
-        
-        void setImagesOpen(QStringList);
-        bool imageOpen(const QString& imageDir);
                    
     private:
         void setupDirectoryContainer();
@@ -105,10 +102,7 @@ class LibraryTab : public QWidget
         QLineEdit* minDegree;
         QLineEdit* maxDegree;
         QComboBox* parameterToUse;
-        QComboBox* negPosOption;
-        
-        QStringList imagesOpen;
-    
+        QComboBox* negPosOption;  
 };
 
 

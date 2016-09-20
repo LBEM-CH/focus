@@ -54,6 +54,7 @@ void ResultsModule::load() {
     QTreeWidgetItem *item, *variable;
     QString title;
     view->clear();
+    fullPath.clear();
     bool dryRun = data->dryRunMode();
     QMap<QString, QMap<QString, QString> > *map = NULL;
     if (viewType == ResultsModule::results) {
@@ -101,14 +102,20 @@ void ResultsModule::load() {
                     } else if (viewType == ResultsModule::images) {
                         QString fileBaseName = j.key();
                         fileBaseName.remove(QRegExp("<<@\\d+>>"));
+                        QStringList cells = fileBaseName.split("##");
+                        fileBaseName = cells.first();
+                        QString ext;
+                        if(cells.size() == 1) ext = QFileInfo(cells.first()).suffix();
+                        else ext = cells[1];
+                        
                         bool important = false;
-                        QString itemName, fileName, toolTipText;
+                        QString itemName;
                         itemName = j.value();
                         if (itemName.startsWith("<<@important>>")) {
                             important = true;
                             itemName.remove("<<@important>>");
                         }
-                        toolTipText = fileBaseName;
+                        
                         if (itemName.trimmed().isEmpty() || showFileNames) itemName = fileBaseName;
                         QString path;
 
@@ -121,8 +128,11 @@ void ResultsModule::load() {
                                 else
                                     variable = new QTreeWidgetItem(view, QStringList() << itemName);
                                 if (important) variable->setForeground(0, QColor(198, 25, 10));
-                                variable->setToolTip(0, toolTipText);
-                                fullPath.insert(variable, path);
+                                
+                                
+                                fullPath.insert(variable, QStringList() << i.key() + "/" + fileBaseName << ext);
+                                variable->setToolTip(0, "<B>" + ext.toUpper() + "</B> Type Image:<br>" + fileBaseName);
+                                
                             }
                         } else {
                             qDebug() << "IMAGE:" << itemName << "missing! Check the file:";
@@ -138,21 +148,43 @@ void ResultsModule::load() {
     resetColumnSize();
 }
 
-QString ResultsModule::selectedImage() {
-    if(viewType == ResultsModule::Type::results) return "";
-    if(view->selectedItems().isEmpty()) return "";
+QString ResultsModule::selectedImagePath() {
+    if(viewType == ResultsModule::Type::results) return QString();
+    if(view->selectedItems().isEmpty()) return QString();
 
-    return fullPath[view->selectedItems().first()];
+    return fullPath[view->selectedItems().first()].first();
+}
+
+QString ResultsModule::selectedImageExtenstion() {
+    if(viewType == ResultsModule::Type::results) return QString();
+    if(view->selectedItems().isEmpty()) return QString();
+    
+    QString ext;
+    
+    if(fullPath[view->selectedItems().first()].size() < 2) ext = QFileInfo(fullPath[view->selectedItems().first()].first()).suffix();
+    else ext = fullPath[view->selectedItems().first()].at(1);
+    
+    return ext;
 }
 
 void ResultsModule::itemSelected(QTreeWidgetItem *item) {
-    emit resultChanged(fullPath[item]);
+    QString ext, file;
+    if(fullPath.keys().contains(item)) {
+        if(fullPath[item].size() >= 1) file = fullPath[item].first();
+        if(fullPath[item].size() >= 2) ext = fullPath[item].at(1);
+        emit resultChanged(file, ext);
+    }
+    else {
+        emit resultChanged(QString(), QString());
+    }
 }
 
 void ResultsModule::itemActivated(QTreeWidgetItem *item) {
     if (viewType == ResultsModule::images) {
-        QString result = fullPath[item];
-        editor->open(result);
+        QString result = fullPath[item].first();
+        QString ext;
+        if(fullPath[item].size() >= 2) ext = fullPath[item].at(1);
+        editor->open(result, ext);
     }
 }
 

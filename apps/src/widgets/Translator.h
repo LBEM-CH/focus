@@ -36,7 +36,7 @@ public:
     bool getAvailableTranslators(const QString &translatorDir);
 
 public slots:
-    void open(const QString &fileName);
+    void open(const QString &fileName, const QString& extension);
 
 private:
     QString workingDir;

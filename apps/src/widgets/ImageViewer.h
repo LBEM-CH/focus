@@ -16,7 +16,7 @@ class ImageViewer : public QFrame {
 
 public:
     ImageViewer(const QString& workDir, const QString& notFoundMessage="File not selected", QWidget* parent=0);
-    void loadFile(const QString& file, bool loadInfo=false, const QString& notFoundMessage="");
+    void loadFile(const QString& file, const QString& extenstion, bool loadInfo=false, const QString& notFoundMessage="");
 
 private slots:
     void progressDialog();
@@ -40,6 +40,7 @@ private:
     QString notFoundMessage_;
     QString workingDir_;
     QString fileName_;
+    QString extension_;
 };
 
 #endif

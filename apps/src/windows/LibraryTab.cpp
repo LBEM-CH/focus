@@ -820,9 +820,9 @@ void LibraryTab::modifySelection(bool select) {
 
 void LibraryTab::setPreviewImages(const QString& imagePath) {
     loadDataContainer(imagePath);
-    mapPreview->loadFile(imagePath + "/final_map.mrc", showHeaderButton->isChecked());
-    refPreview->loadFile(imagePath + "/reference_map.mrc", showHeaderButton->isChecked());
-    dualPreview->loadFile(imagePath + "/half_half.mrc", showHeaderButton->isChecked());
+    mapPreview->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
+    refPreview->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
+    dualPreview->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());
 }
 
 void LibraryTab::loadDataContainer(const QString& imagePath) {

@@ -35,19 +35,22 @@ ImageViewer::ImageViewer(const QString& workDir, const QString& notFoundMessage,
     setLayout(layout);
 }
 
-void ImageViewer::loadFile(const QString &fileName, bool loadInfo, const QString& notFoundMessage) {
+void ImageViewer::loadFile(const QString &fileName, const QString& extension, bool loadInfo, const QString& notFoundMessage) {
     fileName_ = fileName;
+    extension_ = extension.trimmed().toLower();
     if (!notFoundMessage.isEmpty()) notFoundMessage_ = notFoundMessage;
 
     clearWidgets();
     
+    if(fileName.isEmpty() || extension.isEmpty()) return;
+    
     if (!QFileInfo(fileName).exists()) {
-        setText(notFoundMessage_);
+        setText(notFoundMessage_); 
         return;
     }
 
     if (loadInfo) {
-        if (fileName.endsWith(".mrc")) {
+        if (extension_ == "mrc") {
             mrcHeader header(fileName);
             mrcInfo->setHeader(fileName, header);
             widgets->setCurrentWidget(mrcInfo);
@@ -56,7 +59,7 @@ void ImageViewer::loadFile(const QString &fileName, bool loadInfo, const QString
         }
     } else {
         QImage image;
-        if (fileName.endsWith(".mrc")) {
+        if (extension_ == "mrc") {
             mrcImage tempImage(fileName, true, this);
             image = *(tempImage.getImage());
         } else {
@@ -83,7 +86,7 @@ void ImageViewer::setText(const QString& text) {
 }
 
 void ImageViewer::mouseDoubleClickEvent(QMouseEvent *event) {
-    if(QFileInfo(fileName_).exists()) Translator(workingDir_, ApplicationData::translatorsDir().canonicalPath()).open(fileName_);
+    if(QFileInfo(fileName_).exists()) Translator(workingDir_, ApplicationData::translatorsDir().canonicalPath()).open(fileName_, extension_);
     QFrame::mouseDoubleClickEvent(event);
 }
 
@@ -109,6 +112,5 @@ void ImageViewer::clearWidgets() {
 }
 
 void ImageViewer::setNotSupportedText() {
-    QString suffix = QFileInfo(fileName_).suffix().toUpper();
-    setText(suffix + " file<br>(can't preview)");
+    setText(extension_.toUpper() + " file<br>(can't preview)");
 }

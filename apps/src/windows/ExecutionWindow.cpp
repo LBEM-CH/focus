@@ -261,7 +261,7 @@ QSplitter* ExecutionWindow::setupResultsContainer() {
     infoSwitch->setChecked(false);
     
     viewer = new ImageViewer(workingDir.canonicalPath());
-    connect(imagesView, &ResultsModule::resultChanged, [=] (const QString& file) {viewer->loadFile(file, infoSwitch->isChecked());});
+    connect(imagesView, &ResultsModule::resultChanged, [=] (const QString& file, const QString& ext) {viewer->loadFile(file, ext, infoSwitch->isChecked());});
     
     BlockContainer* previewContainer = new BlockContainer("File Preview", viewer, infoSwitch);
     previewContainer->setMinimumSize(QSize(235, 100));
@@ -269,7 +269,7 @@ QSplitter* ExecutionWindow::setupResultsContainer() {
     connect(infoSwitch, &QToolButton::toggled, [=] (bool check) {
         if(check) previewContainer->setHeaderTitle("File Information");
         else previewContainer->setHeaderTitle("File Preview");
-        viewer->loadFile(imagesView->selectedImage(), check);
+        viewer->loadFile(imagesView->selectedImagePath(), imagesView->selectedImageExtenstion(), check);
     });
     
     QSplitter* splitter = new QSplitter(Qt::Vertical, this);

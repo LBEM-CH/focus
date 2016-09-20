@@ -46,7 +46,7 @@ bool ResultsData::load(const QString &name) {
         emit loaded(false);
         return false;
     }
-    QString line, image, nickName;
+    QString line, image, nickName, ext;
     QString currentDirectory = mainDir;
     if(QFileInfo(mainDir + "/2dx_merge.cfg").exists()) results[currentDirectory]["##CONFFILE##"] = "2dx_merge.cfg";
     else if(QFileInfo(mainDir + "/2dx_image.cfg").exists()) results[currentDirectory]["##CONFFILE##"] = "2dx_image.cfg";
@@ -58,12 +58,14 @@ bool ResultsData::load(const QString &name) {
     while (!file.atEnd()) {
         line = file.readLine().trimmed();
         if (line.contains(QRegExp("^\\s*#")) && !line.contains(QRegExp("^\\s*#\\s*lock", Qt::CaseInsensitive))) {
-            QRegExp pattern(".*#\\s*image(-important)?\\s*:\\s*\"?([^\"\\s]*)\"?\\s*(<.*>)?", Qt::CaseInsensitive);
+            QRegExp pattern(".*#\\s*image(-important)?\\s*([^\"\\s]*)?\\s*:\\s*\"?([^\"\\s]*)\"?\\s*(<.*>)?", Qt::CaseInsensitive);
             if (pattern.indexIn(line) != -1) {
                 QString important;
                 if (pattern.cap(1).toLower() == "-important") important = "<<@important>>";
-                image = pattern.cap(2);
-                nickName = pattern.cap(3);
+                ext = pattern.cap(2).toLower();
+                image = pattern.cap(3);
+                if(ext.isEmpty()) ext = QFileInfo(image).suffix().toLower();
+                nickName = pattern.cap(4);
                 nickName.remove(QRegExp("^.*<|>.*$"));
 
                 QFileInfo inf(currentDirectory + "/" + image);
@@ -75,7 +77,7 @@ bool ResultsData::load(const QString &name) {
                     QDir dir(inf.canonicalFilePath());
                     foreach(QString file, dir.entryList(QDir::Files)) images[inf.canonicalFilePath()][order + file] = important + file;
                 } else{
-                    images[currentDirectory][order + image] = important + nickName;
+                    images[currentDirectory][order + image + "##" + ext] = important + nickName;
                 }
                 k++;
             }

@@ -42,7 +42,8 @@ public:
     };
 
     ResultsModule(const QString& workDir, ResultsData *resultsInfo, ResultsModule::Type moduleType = ResultsModule::results, QWidget *parent = NULL);
-    QString selectedImage();
+    QString selectedImagePath();
+    QString selectedImageExtenstion();
 
 public slots:
     void load();
@@ -54,7 +55,7 @@ public slots:
     void resetColumnSize();
 
 signals:
-    void resultChanged(const QString &result);
+    void resultChanged(const QString& path, const QString& extention);
 
 private:
     QString workingDir;
@@ -66,7 +67,7 @@ private:
 
     Translator *editor;
 
-    QHash<QTreeWidgetItem*, QString> fullPath;
+    QHash<QTreeWidgetItem*, QStringList> fullPath; //Contains a list of fullpaths and extensions for each entry
 
 };
 

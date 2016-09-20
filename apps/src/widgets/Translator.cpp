@@ -49,8 +49,11 @@ bool Translator::getAvailableTranslators(const QString &translatorDir) {
     return true;
 }
 
-void Translator::open(const QString &fileName) {
-    QString ext = QFileInfo(fileName).suffix().toLower();
+void Translator::open(const QString &fileName, const QString& extention) {
+    if(fileName.isEmpty() || !QFileInfo(fileName).exists()) return;
+    QString ext = extention.trimmed();
+    
+    if(ext.isEmpty()) ext = QFileInfo(fileName).suffix().toLower();
 
     if (translators.contains(ext))
         proc->start(translators[ext], QStringList() << fileName);

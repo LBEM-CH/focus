@@ -12,7 +12,7 @@ public:
         NONE, TEXT_EDIT, DIRECTORY, FILE, DROP_DOWN, FLOAT, BOOL, INT
     };
     
-    Type type;
+    Type type = Type::NONE;
     int count=0;
     QStringList properties;
 

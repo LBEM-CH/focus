@@ -63,17 +63,9 @@ Boost C++ libraries can be downloaded from http://www.boost.org/users/download/
 
 
 *******************************************************************************
- ADDITIONAL REQUIREMENTS 
+ COMPILATION
 *******************************************************************************
 
-SPIDER:
-Download from:
-http://spider.wadsworth.org/spider_doc/spider/docs/spi-download.html
-Install via
-sudo tar -C /usr/local -xvf spiderweb.22.03.tar
-
-Compilation
------------
 Launch
 ./build_all
 

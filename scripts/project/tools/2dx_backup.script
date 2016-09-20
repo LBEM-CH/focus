@@ -370,10 +370,6 @@ while ( ${dircounter} <= ${dirnum} )
           echo ":Removing: ${to_dirfile}/m${loc_nonmaskimagename}-profile.dat.gz"
           \rm ${to_dirfile}/m${loc_nonmaskimagename}-profile.dat.gz
         endif
-        if ( -e ${to_dirfile}/m${loc_nonmaskimagename}-unitcells-spider.doc ) then
-          echo ":Removing: ${to_dirfile}/m${loc_nonmaskimagename}-unitcells-spider.doc"
-          \rm ${to_dirfile}/m${loc_nonmaskimagename}-unitcells-spider.doc
-        endif
         if ( -e ${to_dirfile}/m${loc_nonmaskimagename}.mtz ) then
           echo ":Removing: ${to_dirfile}/m${loc_nonmaskimagename}.mtz"
           \rm ${to_dirfile}/m${loc_nonmaskimagename}.mtz

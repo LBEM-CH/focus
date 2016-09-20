@@ -64,13 +64,6 @@ if ( $?app_python ) then
     endif
     setenv PYTHONPATH ${EMAN2_dir}/lib:${EMAN2_dir}/bin:${EMAN2_dir}/extlib/site-packages:${EMAN2_dir}
   endif
-  if ( ! -e ${app_spider} ) then
-    echo ":: "
-    ${proc_2dx}/linblock "Spider executable not found. Is it installed ???"
-    ${proc_2dx}/linblock "${app_spider}"
-    ${proc_2dx}/linblock "The location of spider is defined in Preferences."
-    echo ":: "
-  endif
   #
 else
   echo "::WARNING: CSH Variable app_python is not defined. You may be running this script from the wrong environment."
@@ -80,7 +73,6 @@ ${proc_2dx}/lin "app_python = ${app_python}"
 ${proc_2dx}/lin "app_anaconda = ${app_anaconda}"
 ${proc_2dx}/lin "dir_ccp4 = ${dir_ccp4}"
 ${proc_2dx}/lin "dir_eman2 = ${dir_eman2}"
-${proc_2dx}/lin "app_spider = ${app_spider}"
 ${proc_2dx}/lin "app_frealign = ${app_frealign}"
 alias sparx sx.py
 #

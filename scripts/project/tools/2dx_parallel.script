@@ -17,6 +17,7 @@
 #
 # MANUAL: This script allows to launch several jobs in parallel.  Choose below, which 2dx_image scripts to include.
 #
+# CHECK_IMAGES_OPEN: SELECTED
 #
 # DISPLAY: script_2dx_initialize_files
 # DISPLAY: script_2dx_initialize_files2
@@ -238,6 +239,10 @@ eot
         ###########################################################################################################################
 
         cd ${olddir}
+        #
+        # Following tells GUI that the parameters for image have been changed and the GUI should reload them.
+        echo "<RESETDIR="\"${curdir}\"">" >> LOGS/${scriptname}.results
+        #
         set load_too_high = 1
         while ( ${load_too_high} == 1 ) 
           set ReUnbend_MP = `cat SCRATCH/${scriptname}_2dx_merge_cfg.tmp | grep "set ReUnbend_MP" | cut -d\" -f2`

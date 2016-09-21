@@ -81,6 +81,9 @@ eot
     echo "::Copying ${oldir}/2dx_merge.cfg to ${fullpath}/2dx_image.cfg"
     \cp -f ${oldir}/2dx_merge.cfg ${fullpath}/2dx_image.cfg
     #
+    # Following tells GUI that the parameters for image have been changed and the GUI should reload them.
+    echo "<RESETDIR="\"${fullpath}\"">" >> ${oldir}/LOGS/${scriptname}.results
+    #
     # Reset the variables
     #
     # This tells the GUI that the parameters are now to be added in the current image directory

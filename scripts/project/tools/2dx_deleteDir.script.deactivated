@@ -14,6 +14,7 @@
 # SORTORDER: 45
 #
 # MANUAL: This script moves all choosen directories into a TRASH subdirectory. Use with extreme caution !!!
+# MANUAL: This can now directly be done via the Library Tab in GUI
 #
 # DISPLAY: delete_in_out_trash
 # DISPLAY: delete_sure

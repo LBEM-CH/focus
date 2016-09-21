@@ -163,7 +163,7 @@ QDir ProjectData::projectWorkingDir() const {
 
 void ProjectData::saveAsProjectDefault(const QDir& workingDir) {
     if (QMessageBox::question(NULL,
-            tr("Save as default?"), QString("Saving as project default will change master config file and set default values for all other new imported images in this project.\n\n.") + 
+            tr("Save as default?"), QString("Saving as project default will change master config file and set default values for all other new imported images in this project.\n\n") + 
             QString("NOTE that to change the parameters of already imported images, you will have to run RESET IMAGE CONFIGS script from PROJECT TOOLS tab.\n\n Proceed?"),
             tr("Yes"),
             tr("No"),

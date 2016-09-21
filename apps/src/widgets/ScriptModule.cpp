@@ -20,6 +20,7 @@
 
 #include <QPalette>
 #include <QLabel>
+#include <QMessageBox>
 
 #include "ApplicationData.h"
 #include "ProjectData.h"
@@ -85,11 +86,11 @@ void ScriptModule::setupModule() {
     foreach(entry, scriptDir.entryList(QStringList() << "*.script", QDir::Files | QDir::NoDotAndDotDot, QDir::Unsorted)) {
         QStringList titleList;
         ScriptData scriptFileData(scriptDir.canonicalPath() + "/" + entry);
-        sortOrder = scriptFileData.property("sortOrder").toUInt();
+        sortOrder = scriptFileData.getProperty("sortOrder").toUInt();
 
         uid = qHash(scriptDir.canonicalPath() + "/" + entry)^qHash(sortOrder);
 
-        titleList << QString(scriptFileData.property("title")).simplified();
+        titleList << QString(scriptFileData.getProperty("title")).simplified();
 
         item = new QStandardItem(titleList.first());
 
@@ -98,7 +99,7 @@ void ScriptModule::setupModule() {
         addScriptProperty(uid, "path", scriptDir.absolutePath() + "/");
         addScriptProperty(uid, "fileName", entry);
         addScriptProperty(uid, "filePath", scriptDir.canonicalPath() + "/" + entry);
-        addScriptProperty(uid, "title", scriptFileData.property("title"));
+        addScriptProperty(uid, "title", scriptFileData.getProperty("title"));
         addScriptProperty(uid, "displayedVars", QVariant(scriptFileData.propertyList("display")));
         addScriptProperty(uid, "publication", QVariant(scriptFileData.propertyList("publication")));
         addScriptProperty(uid, "logFile", workingDir.canonicalPath() + "/LOGS/" + entry.section('.', 0, -2) + ".log");
@@ -107,6 +108,7 @@ void ScriptModule::setupModule() {
         manual.insert(uid, scriptFileData.manual());
         subScripts.insert(uid, scriptFileData.subScripts().toList());
         resetVars.insert(uid, scriptFileData.resetVariables());
+        warnString.insert(uid, scriptFileData.getProperty("check_images_open").toLower());
         
         scriptProgress[uid] = 0;
 
@@ -162,6 +164,11 @@ QStringList ScriptModule::getScriptManual(quint32 uid) {
 QStringList ScriptModule::getScriptDependents(quint32 uid) {
     return subScripts[uid];
 }
+
+QString ScriptModule::getImagesOpenCheckList(quint32 uid) {
+    return warnString[uid];
+}
+
 
 QItemSelectionModel* ScriptModule::getSelection() {
     return selection;
@@ -247,12 +254,39 @@ void ScriptModule::execute(bool run) {
             return;
         }
         it = runningScript;
-
+        
         it->setForeground(QColor(0, 0, 186));
         currentUid = it->data(Qt::UserRole).toUInt();
         scriptName = getScriptProperty(currentUid, "fileName").toString();
         scriptPath = getScriptProperty(currentUid, "path").toString();
         QString scriptTitle = scriptName.section('.', 0, -2);
+        
+        //Check if should be warned for images open
+        if(getImagesOpenCheckList(currentUid) == "all" && !projectData.imagesOpen().isEmpty()) {
+            QMessageBox::warning(this, "Image(s) Open", "Script <" + getScriptProperty(currentUid, "title").toString() + "> requires all images to be closed.\n\nPlease close all images in PROCESS tab and try again.");
+            cleanupExecution();
+            return;
+        } 
+        
+        if (getImagesOpenCheckList(currentUid) == "selected") {
+            QFile s(projectData.selectionDirfile());
+
+            if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qDebug() << "Dirfile read failed.";
+            } else {
+                QStringList imagesOpen = projectData.imagesOpen();
+                QString projectDir = projectData.projectDir().canonicalPath();
+                while (!s.atEnd()) {
+                    if (imagesOpen.contains(projectDir + '/' + s.readLine().simplified())) {
+                        QMessageBox::warning(this, "Image(s) Open", "Script <" + getScriptProperty(currentUid, "title").toString() + "> requires selected images to be closed.\n\nPlease close all selected images in PROCESS tab and try again.");
+                        s.close();
+                        cleanupExecution();
+                        return;
+                    }
+                }
+                s.close();
+            }
+        }
 
         ScriptParser parser(workingDir);
 

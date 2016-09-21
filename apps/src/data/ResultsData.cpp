@@ -86,6 +86,8 @@ bool ResultsData::load(const QString &name) {
             if (line.contains(QRegExp("<\\s*IMAGEDIR\\s*=", Qt::CaseInsensitive))) {
                 currentDirectory = line.replace(QRegExp(".*<\\s*IMAGEDIR\\s*=\\s*\\\"?\\s*([^\"\\s]*)\\s*\\\"?\\s*>.*", Qt::CaseInsensitive), "\\1");
                 results[currentDirectory]["##CONFFILE##"] = "2dx_image.cfg";
+            } else if (line.contains(QRegExp("<\\s*RESETDIR\\s*=", Qt::CaseInsensitive))) {
+                projectData.reloadParameterData(QDir(line.replace(QRegExp(".*<\\s*RESETDIR\\s*=\\s*\\\"?\\s*([^\"\\s]*)\\s*\\\"?\\s*>.*", Qt::CaseInsensitive), "\\1")));
             } else if (line.contains(QRegExp("<IMPORTDIR>", Qt::CaseInsensitive))) {
                 imagesImported = true;
                 //qDebug() << "Ok. Got that new images were added";

@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
         if (!sSearchScripts.isEmpty()) {
             foreach(QString entry, standardScriptsDir.entryList(sSearchScripts, QDir::Files | QDir::NoDotAndDotDot, QDir::Unsorted)) {
                 ScriptData local(standardScriptsDir.canonicalPath() + "/" + entry);
-                sortOrder = local.property("sortOrder").toInt();
+                sortOrder = local.getProperty("sortOrder").toInt();
                 scripts.insert(sortOrder, entry);
             }
         }

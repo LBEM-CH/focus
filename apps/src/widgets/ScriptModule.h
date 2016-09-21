@@ -42,6 +42,7 @@ public:
     quint32 getScriptProgress(quint32 uid);
     QStringList getScriptManual(quint32 uid);
     QStringList getScriptDependents(quint32 uid);
+    QString getImagesOpenCheckList(quint32 uid);
     
     QIcon getModuleToolIcon();
     QIcon getModuleScriptIcon();
@@ -94,6 +95,7 @@ private:
     QMap<quint32, QMap<QString, QString>> resetVars;
     QMap<quint32, QStringList> manual;
     QMap<quint32, QStringList> subScripts;
+    QMap<quint32, QString> warnString;
     QProcess process;
 
     quint32 currentUid;

@@ -88,7 +88,7 @@ const QString& ScriptData::initializationScript(bool fullName) {
         return initializationScriptBaseName;
 }
 
-QString ScriptData::property(const QString &propertyName) {
+QString ScriptData::getProperty(const QString &propertyName) {
     return properties.value(propertyName.toLower());
 }
 

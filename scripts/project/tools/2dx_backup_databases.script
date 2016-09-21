@@ -130,6 +130,10 @@ eot
   if ( -e ${source} ) then
     echo "::                                              Copy ${source} to ${target}"
     \cp -f ${source} ${target}
+    #
+    # Following tells GUI that the parameters for image have been changed and the GUI should reload them.
+    echo "<RESETDIR="\"${from_dir}\"">" >> ${oldir}/LOGS/${scriptname}.results
+    #
   else
     ${proc_2dx}/linblock "WARNING: ${source} does not exist here."
   endif

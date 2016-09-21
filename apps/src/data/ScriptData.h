@@ -39,7 +39,7 @@ class ScriptData : public QObject {
 public:
     ScriptData(const QString& filename, QObject* parent = 0);
 
-    QString property(const QString &propertyName);
+    QString getProperty(const QString &propertyName);
     QList<QString> propertyList(const QString &propertyName);
     QMap<QString, QString> resetVariables();
     QStringList &manual();

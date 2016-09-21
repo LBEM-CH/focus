@@ -1,4 +1,5 @@
 # UniqueID (ShortName,mouseover="Long Name",nonlockable|nonlockable,sortable|nonsortable,["C++-format"|other-format])
+image_flag (Flag,mouseover="Image Flag",nonlockable,sortable,flag)
 imagename (Name,mouseover="Image Name",nonlockable,sortable)
 *imagenumber (Number,mouseover="Image Number",nonlockable,sortable,"%s")
 image_evenodd(Tag,mouseover="Even or odd image tag",nonlockable,sortable,evenodd)

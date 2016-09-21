@@ -307,8 +307,13 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
                 entryItem->setIcon(ApplicationData::icon("odd"));
             else
                 entryItem->setIcon(ApplicationData::icon("none"));
-        } else
+        } else if (columns[c]["format"].toString().trimmed().toLower() == "flag") {
+            entryString.clear();
+            entryItem->setData(value.toString().trimmed(), SortRole);
+            entryItem->setIcon(ApplicationData::icon("flag_" + value.toString().trimmed().toLower()));
+        } else {
             entryString = value.toString();
+        }
     } else {
         entryString = value.toString();
     }

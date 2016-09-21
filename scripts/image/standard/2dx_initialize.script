@@ -39,6 +39,7 @@
 #
 # DISPLAY: imagename_original
 # DISPLAY: imagename
+# DISPLAY: image_flag
 # DISPLAY: nonmaskimagename
 # DISPLAY: movie_stackname
 # DISPLAY: movie_stackname_raw

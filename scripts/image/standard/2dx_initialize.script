@@ -31,11 +31,11 @@
 #
 # MANUAL: <HR>
 #
-# MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_image-algo-1.jpg">
+# MANUAL: <IMG SRC="${appDir_2dx}/../resources/config/2dx_image-algo-1.jpg">
 #
 # MANUAL: <HR>
 #
-# MANUAL: <IMG SRC="${appDir_2dx}/../config/2dx_image-algo-2.jpg">
+# MANUAL: <IMG SRC="${appDir_2dx}/../resources/config/2dx_image-algo-2.jpg">
 #
 # DISPLAY: imagename_original
 # DISPLAY: imagename

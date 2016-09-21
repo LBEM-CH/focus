@@ -183,7 +183,7 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
 QWidget* ExecutionWindow::setupTitleContainer() {
     QWidget* titleContainer = new QWidget;
     QHBoxLayout* titleLayout = new QHBoxLayout;
-    titleLayout->setMargin(0);
+    titleLayout->setMargin(5);
     titleLayout->setSpacing(0);
     
     scriptLabel = new QLabel;

@@ -202,7 +202,18 @@ void ImageLibrary::updateFormData(const QString& imagePath, const QStringList& p
     ParametersConfiguration* data = projectData.parameterData(imagePath);
     QString imageName = projectData.projectDir().relativeFilePath(imagePath);
     if(imageName.length() > 30) imageName = "..." + imageName.remove(0, imageName.length()-30);
+    
     imageLabel->setText(imageName);
+    
+    QString color = data->getValue("image_flag");
+    QPalette pal = imageLabel->palette();
+    if(color == "red") pal.setColor(QPalette::WindowText, Qt::red);
+    else if(color == "green") pal.setColor(QPalette::WindowText, Qt::green);
+    else if(color == "blue") pal.setColor(QPalette::WindowText, Qt::blue);
+    else pal.setColor(QPalette::WindowText, Qt::black);
+    
+    imageLabel->setPalette(pal);
+    
     for(int i=0; i< params.size(); ++i) {
         QVariant valueVar = data->get(params[i])->value();
         QString valueStr = valueVar.toString();

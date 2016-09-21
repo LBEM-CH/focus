@@ -129,7 +129,7 @@ bool ParametersConfiguration::resetUserValues(const QString& fileName) {
 
                 if (lookup.contains(val[0].toLower())) {
                     ParameterElementData* element = get(val[0]);
-                    if (!element->syncWithUpperLevel()) {
+                    if (!element->syncWithUpperLevel() || !parentData_) {
                         element->setValue(val[1]);
                         element->setLock(lock);
                         element->setIsWrong(isWrong);

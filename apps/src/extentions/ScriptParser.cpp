@@ -3,6 +3,7 @@
 #include "ProjectData.h"
 #include "UserPreferenceData.h"
 #include "ScriptParser.h"
+#include "ResultsData.h"
 
 ScriptParser::ScriptParser(const QDir& workDir, QObject* parent)
 : QObject(parent), workingDir(workDir) {
@@ -45,46 +46,15 @@ const QString &ScriptParser::executionString() {
     return executionCall;
 }
 
-bool ScriptParser::parseResults(ParametersConfiguration* conf, const QString &results) {
-    //  currentResults = results;
-    QFile data(results);
-    if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) return 0;
-
-    QString line;
-    while (!data.atEnd()) {
-        line = data.readLine();
-        QRegExp lock("^\\s*#\\s(un)?lock\\s(.*)$", Qt::CaseInsensitive);
-        QRegExp var("^\\s*set\\s*(\\S+)\\s*=\\s*\\\"{0,1}(.*)\\\"{0,1}");
-        if (var.indexIn(line) != -1) {
-            QString variable = var.cap(1).trimmed();
-            QString value = var.cap(2).trimmed().remove('"');
-            if (!variable.isEmpty() && !value.isEmpty())
-                conf->set(variable, value);
-        }
-        if (lock.indexIn(line) != -1) {
-            QString variable = lock.cap(2).remove('"').trimmed();
-            bool value = false;
-            bool setLock = !(lock.cap(1).toLower() == "un");
-            if (setLock)
-                value = true;
-            if (conf->get(variable) != NULL)
-                conf->get(variable)->setLock(value);
-            else
-                qDebug() << "No lockable variable " << variable << "!";
-        }
-    }
-    data.close();
-    return 1;
-}
-
-void ScriptParser::execute(const QString &script, const QString &working, ParametersConfiguration *localData) {
+void ScriptParser::execute(const QString &script) {
     QProcess process;
-    process.setWorkingDirectory(working);
-    process.setStandardOutputFile(working + "/LOGS/" + script + ".log");
+    process.setWorkingDirectory(workingDir.canonicalPath());
+    process.setStandardOutputFile(workingDir.canonicalPath() + "/LOGS/" + script + ".log");
     process.start(executionCall, QIODevice::ReadOnly);
     process.waitForFinished(6 * (60 * 60 * 1000));
-    parseResults(localData, working + "/LOGS/" + script + ".results");
-    localData->save();
+    ResultsData resultsData(workingDir);
+    resultsData.load(workingDir.canonicalPath() + "/LOGS/" + script + ".results");
+    resultsData.save();
 }
 
 bool ScriptParser::parseCsh(QStringList& scriptData) {

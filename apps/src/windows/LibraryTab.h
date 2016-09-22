@@ -54,6 +54,7 @@ class LibraryTab : public QWidget
         void renameImageFolder();
         void moveSelectiontoFolder();
         void moveSelectionToFolder(const QString& targetPath);
+        void flagSelection(const QString& color);
         void trashSelection();
         bool copyRecursively(const QString &srcFilePath, const QString &tgtFilePath);
         
@@ -103,6 +104,12 @@ class LibraryTab : public QWidget
         QLineEdit* maxDegree;
         QComboBox* parameterToUse;
         QComboBox* negPosOption;  
+        
+        QCheckBox* noFlagged;
+        QCheckBox* redFlagged;
+        QCheckBox* greenFlagged;
+        QCheckBox* blueFlagged;
+        QCheckBox* goldFlagged;
 };
 
 

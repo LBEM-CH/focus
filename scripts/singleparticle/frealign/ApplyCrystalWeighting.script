@@ -14,7 +14,7 @@
 # SORTORDER: 80
 #
 #
-# MANUAL: This script will introduce neighborhood correlations in the reconstruction by weighting the particles according to how well they agree with the crystal statistics. Ideally, the alignment parameters for particles extracted from the same 2D crystal should be very similar.
+# MANUAL: This script will introduce neighborhood correlations in the reconstruction by weighting the particles according to how well they agree with the crystal statistics. Ideally, the alignment parameters for particles extracted from the same 2D crystal should be very similar. Even if you don't want to apply this weighting scheme, this script can be used to generate histogram plots of the parameter distributions.
 #
 # DISPLAY: SPR_WhichStackAll
 # DISPLAY: SPR_REFINE_DIR
@@ -24,6 +24,7 @@
 # DISPLAY: SPR_SIG_EULER
 # DISPLAY: SPR_SIG_SHIFT
 # DISPLAY: SPR_FRL_parameter_mask
+# DISPLAY: SPR_CRYSTALWEIGHTING_PLOT_BINS
 # DISPLAY: sample_pixel
 #
 #$end_local_vars
@@ -43,6 +44,7 @@ set SPR_SIG_EULER = ""
 set SPR_SIG_SHIFT = ""
 set SPR_FRL_parameter_mask = ""
 set sample_pixel = ""
+set SPR_CRYSTALWEIGHTING_PLOT_BINS = ""
 
 #
 set SPR_FREALIGN_DIR = SPR/FREALIGN/
@@ -62,8 +64,10 @@ if ( ! -e ${SPR_CRYSTALREC_DIR} ) then
 	mkdir -p ${SPR_CRYSTALREC_DIR}
 endif
 
-${app_python} ${proc_2dx}/SPR_FrealignCrystalWeighting.py ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_${SPR_FRLCycle}_r${SPR_FRLRef}.par ${SPR_CRYSTALREC_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}-xweighted_${SPR_FRLCycle}_r1.par ${SPR_SIG_EULER} ${SPR_SIG_SHIFT} ${SPR_FRL_parameter_mask} ${sample_pixel}
+# ${app_python} ${proc_2dx}/SPR_FrealignCrystalWeighting.py ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_${SPR_FRLCycle}_r${SPR_FRLRef}.par ${SPR_CRYSTALREC_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}-xweighted_${SPR_FRLCycle}_r1.par ${SPR_SIG_EULER} ${SPR_SIG_SHIFT} ${SPR_FRL_parameter_mask} ${sample_pixel}
+${app_python} ${proc_2dx}/SPR_FrealignCrystalWeighting.py --sigma_euler ${SPR_SIG_EULER} --sigma_shift ${SPR_SIG_SHIFT} --pmask ${SPR_FRL_parameter_mask} --angpix ${sample_pixel} ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_${SPR_FRLCycle}_r${SPR_FRLRef}.par
 
+mv ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_${SPR_FRLCycle}_r${SPR_FRLRef}-xweighted.par ${SPR_CRYSTALREC_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}-xweighted_${SPR_FRLCycle}_r1.par
 
 echo ":: "
 echo ":: Done!"

@@ -71,6 +71,7 @@ public:
     QVariant getCurrentRowParameterValue(const QString& parameter);
     QString getCurrentRowPath();
     bool isCurrentRowValidImage();
+    bool isRowValidImage(const QModelIndex &index);
 
 public slots:
     void itemSelected(const QModelIndex &index);
@@ -91,8 +92,8 @@ public slots:
     void selectAll(bool commit = true);
     void clearSelection(bool commit = true);
     void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
-    void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute);
-    void autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute);
+    void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
+    void autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
     bool loadSelection(const QString &fileName = "");
     bool loadHidden(const QString &columnsFile);
     bool saveColumns();

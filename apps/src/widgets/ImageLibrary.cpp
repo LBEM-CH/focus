@@ -210,6 +210,7 @@ void ImageLibrary::updateFormData(const QString& imagePath, const QStringList& p
     if(color == "red") pal.setColor(QPalette::WindowText, Qt::red);
     else if(color == "green") pal.setColor(QPalette::WindowText, Qt::green);
     else if(color == "blue") pal.setColor(QPalette::WindowText, Qt::blue);
+    else if(color == "gold") pal.setColor(QPalette::WindowText, Qt::darkYellow);
     else pal.setColor(QPalette::WindowText, Qt::black);
     
     imageLabel->setPalette(pal);

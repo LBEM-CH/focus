@@ -567,6 +567,12 @@ bool ProjectModel::isCurrentRowValidImage() {
     else return true;
 }
 
+bool ProjectModel::isRowValidImage(const QModelIndex& index) {
+    if (!QFileInfo(pathFromIndex(index) + "/2dx_image.cfg").exists() || pathFromIndex(index).isEmpty()) return false;
+    else return true;
+}
+
+
 const QVariant &ProjectModel::getColumnProperty(int i, const QString &property) {
     return columns[i][property.toLower()];
 }
@@ -605,33 +611,34 @@ bool ProjectModel::removeSelected() {
     return true;
 }
 
-void ProjectModel::autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute) {
+void ProjectModel::autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList) {
     disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-    autoSelection(item(0), rowCount(), minTilt, maxTilt, param, useAbsolute);
+    autoSelection(item(0), rowCount(), minTilt, maxTilt, param, useAbsolute, flagList);
     submit();
     connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
 }
 
-void ProjectModel::autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute) {
+void ProjectModel::autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList) {
     if (currentItem == NULL) return;
     QList<QModelIndex> list = match(currentItem->index(), Qt::CheckStateRole, ".*", itemCount, Qt::MatchRegExp);
 
     foreach(QModelIndex i, list) {
         if (i.isValid()) {
-            if (i.child(0, 0).isValid()) autoSelection(itemFromIndex(i.child(0, 0)), itemFromIndex(i)->rowCount(), minTilt, maxTilt, param, useAbsolute);
+            if (i.child(0, 0).isValid()) autoSelection(itemFromIndex(i.child(0, 0)), itemFromIndex(i)->rowCount(), minTilt, maxTilt, param, useAbsolute, flagList);
             else if (i.column() == 0) {
                 QString confFile = pathFromIndex(i) + QString("/2dx_image.cfg");
                 if (QFileInfo().exists(confFile)) {
 
                     int tiltAng = i.sibling(i.row(), parameterToColId[param]).data(SortRole).toInt();
+                    QString color = i.sibling(i.row(), parameterToColId["image_flag"]).data(SortRole).toString();
                     if (!useAbsolute) {
-                        if (tiltAng >= minTilt && tiltAng <= maxTilt) {
+                        if (tiltAng >= minTilt && tiltAng <= maxTilt && flagList.contains(color)) {
                             if (i.data(Qt::CheckStateRole) != Qt::Checked) setData(i, Qt::Checked, Qt::CheckStateRole);
                         } else {
                             if (i.data(Qt::CheckStateRole) == Qt::Checked) setData(i, Qt::Unchecked, Qt::CheckStateRole);
                         }
                     } else {
-                        if (std::abs(tiltAng) >= minTilt && std::abs(tiltAng) <= maxTilt) {
+                        if (std::abs(tiltAng) >= minTilt && std::abs(tiltAng) <= maxTilt && flagList.contains(color)) {
                             if (i.data(Qt::CheckStateRole) != Qt::Checked) setData(i, Qt::Checked, Qt::CheckStateRole);
                         } else {
                             if (i.data(Qt::CheckStateRole) == Qt::Checked) setData(i, Qt::Unchecked, Qt::CheckStateRole);

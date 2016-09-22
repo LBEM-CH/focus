@@ -225,16 +225,6 @@ QWidget* LibraryTab::setupSelectionTab() {
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
     
-    //QPushButton *refreshAction = new QPushButton(ApplicationData::icon("refresh"), tr("&Refresh Library"), this);
-    //refreshAction->setSizePolicy(sizePolicy);
-    //refreshAction->setShortcut(tr("Ctrl+Shift+r"));
-    //refreshAction->setToolTip("Shortcut: " + refreshAction->shortcut().toString(QKeySequence::NativeText));
-    //connect(refreshAction, SIGNAL(clicked()), this, SLOT(reload()));
-    
-    //QPushButton *importAction = new QPushButton(*(data->getIcon("import")), tr("&Import Images"), this);
-    //importAction->setSizePolicy(sizePolicy);
-    //connect(importAction, SIGNAL(clicked()), this, SLOT(import()));
-    
     //Check Group
     QGroupBox* checkGroup = new QGroupBox("Manage Check");
     checkGroup->setSizePolicy(sizePolicy);
@@ -288,6 +278,54 @@ QWidget* LibraryTab::setupSelectionTab() {
     checkGroupLayout->addWidget(removeSelectionAction);
 
     checkGroup->setLayout(checkGroupLayout);
+    
+    //Flag Group
+    QGroupBox* flagGroup = new QGroupBox("Flag Images");
+    flagGroup->setSizePolicy(sizePolicy);
+    QHBoxLayout* flagGroupLayout = new QHBoxLayout;
+    flagGroupLayout->setSpacing(0);
+    
+    QToolButton* noFlag = new QToolButton(dirView);
+    noFlag->setToolTip("Remove flag from highlighted");
+    noFlag->setIcon(ApplicationData::icon("flag_none"));
+    noFlag->setIconSize(QSize(32, 32));
+    noFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(noFlag, &QToolButton::clicked, [=] () {flagSelection("none");});
+    flagGroupLayout->addWidget(noFlag);
+    
+    QToolButton* redFlag = new QToolButton(dirView);
+    redFlag->setToolTip("Flag highlighted to red");
+    redFlag->setIcon(ApplicationData::icon("flag_red"));
+    redFlag->setIconSize(QSize(32, 32));
+    redFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(redFlag, &QToolButton::clicked, [=] () {flagSelection("red");});
+    flagGroupLayout->addWidget(redFlag);
+    
+    QToolButton* greenFlag = new QToolButton(dirView);
+    greenFlag->setToolTip("Flag highlighted to green");
+    greenFlag->setIcon(ApplicationData::icon("flag_green"));
+    greenFlag->setIconSize(QSize(32, 32));
+    greenFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(greenFlag, &QToolButton::clicked, [=] () {flagSelection("green");});
+    flagGroupLayout->addWidget(greenFlag);
+    
+    QToolButton* blueFlag = new QToolButton(dirView);
+    blueFlag->setToolTip("Flag highlighted to blue");
+    blueFlag->setIcon(ApplicationData::icon("flag_blue"));
+    blueFlag->setIconSize(QSize(32, 32));
+    blueFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(blueFlag, &QToolButton::clicked, [=] () {flagSelection("blue");});
+    flagGroupLayout->addWidget(blueFlag);
+    
+    QToolButton* goldFlag = new QToolButton(dirView);
+    goldFlag->setToolTip("Flag highlighted to gold");
+    goldFlag->setIcon(ApplicationData::icon("flag_gold"));
+    goldFlag->setIconSize(QSize(32, 32));
+    goldFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(goldFlag, &QToolButton::clicked, [=] () {flagSelection("gold");});
+    flagGroupLayout->addWidget(goldFlag);
+    
+    flagGroup->setLayout(flagGroupLayout);
     
     
     //Image Folder Group
@@ -358,6 +396,26 @@ QWidget* LibraryTab::setupSelectionTab() {
     negPosOption = new QComboBox;
     negPosOption->addItems(QStringList() << "Yes" << "No");
     negPosOption->setCurrentIndex(0);
+    
+    noFlagged = new QCheckBox("Un-flagged");
+    noFlagged->setChecked(true);
+    redFlagged = new QCheckBox("Red");
+    redFlagged->setChecked(true);
+    greenFlagged = new QCheckBox("Green");
+    greenFlagged->setChecked(true);
+    blueFlagged = new QCheckBox("Blue");
+    blueFlagged->setChecked(true);
+    goldFlagged = new QCheckBox("Gold");
+    goldFlagged->setChecked(true);
+    
+    QGridLayout* selectionFlagLayout = new QGridLayout;
+    selectionFlagLayout->setMargin(0);
+    selectionFlagLayout->setSpacing(2);
+    selectionFlagLayout->addWidget(noFlagged, 0, 0, 1, 2);
+    selectionFlagLayout->addWidget(redFlagged, 1, 0, 1, 1);
+    selectionFlagLayout->addWidget(greenFlagged, 1, 1, 1, 1);
+    selectionFlagLayout->addWidget(blueFlagged, 2, 0, 1, 1);
+    selectionFlagLayout->addWidget(goldFlagged, 2, 1, 1, 1);
         
     QPushButton* changeSelection = new QPushButton("Change Selection");
     connect(changeSelection, SIGNAL(clicked()), this, SLOT(autoSelect()));
@@ -371,6 +429,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     autoSelectLayout->addRow("Minimum value", minDegree);
     autoSelectLayout->addRow("Maximum value", maxDegree);
     autoSelectLayout->addRow("Pos+neg values", negPosOption);
+    autoSelectLayout->addRow("Include images", selectionFlagLayout);
     autoSelectLayout->addRow(changeSelection);
     
     autoSelectionGroup->setLayout(autoSelectLayout);
@@ -400,6 +459,7 @@ QWidget* LibraryTab::setupSelectionTab() {
     //layout->addWidget(importAction, 0, Qt::AlignTop);
     layout->addWidget(backupSaveGroup, 0, Qt::AlignTop);
     layout->addWidget(checkGroup, 0, Qt::AlignTop);
+    layout->addWidget(flagGroup, 0, Qt::AlignTop);
     layout->addWidget(imageFolderGroup, 0, Qt::AlignTop);
     layout->addWidget(autoSelectionGroup, 0);
     tab->setLayout(layout);
@@ -629,12 +689,27 @@ void LibraryTab::renameImageFolder() {
     }
 }
 
+void LibraryTab::flagSelection(const QString& color) {
+    QModelIndexList selection = dirView->selectionModel()->selectedRows();
+    QStringList sourcePaths;
+    for(int ii=0; ii<selection.size();  ++ii) {
+        QModelIndex i = selection[ii];
+        if(dirModel->isRowValidImage(i)) sourcePaths.append(dirModel->pathFromIndex(i));
+    }
+    
+    for(int ii=0; ii< sourcePaths.size(); ++ii) {   
+        QString sourcePath = sourcePaths[ii];
+        projectData.parameterData(QDir(sourcePath))->set("image_flag", color);
+    }
+}
+
+
 void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     QModelIndexList selection = dirView->selectionModel()->selectedRows();
     QStringList sourcePaths;
     for(int ii=0; ii<selection.size();  ++ii) {
         QModelIndex i = selection[ii];
-        sourcePaths.append(dirModel->pathFromIndex(i));
+        if(dirModel->isRowValidImage(i)) sourcePaths.append(dirModel->pathFromIndex(i));
     }
     
     int numFiles = selection.count();
@@ -654,13 +729,13 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
         
         //Check if the image is open.
         if(projectData.imageOpen(sourcePath)) {
-            warnings += sourcePath.remove(projectDir) + ": Image already open\n";
+            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Image already open<br>";
             qDebug() << sourcePath << " Image already open";
             continue;
         }
 
         if (!QFile(sourcePath + "/2dx_image.cfg").exists()) {
-            warnings += sourcePath.remove(projectDir) + ": 2dx_image.cfg does not exist\n";
+            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: 2dx_image.cfg does not exist<br>";
             qDebug() << sourcePath << " 2dx_image.cfg does not exist";
             continue;
         }
@@ -668,7 +743,7 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
         QDir targetImageDir = QDir(targetPath + "/" + sourceImage);
 
         if (targetImageDir.absolutePath() == QDir(sourcePath).absolutePath()) {
-            warnings += sourcePath.remove(projectDir) + ": Target same as source\n";
+            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Target same as source<br>";
             qDebug() << sourcePath << " Target same as source";
             continue;
         }
@@ -680,13 +755,13 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
         }
 
         if (target_exist) {
-            warnings += sourcePath.remove(projectDir) + ": already exists. Renaming it to: " + targetImageDir.absolutePath();
+            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Already exists at destination. Renaming it to: " + targetImageDir.absolutePath() + "<br>";
             qDebug() << sourcePath << " Already exists. Renaming it to: " + targetImageDir.absolutePath();
         }
 
         bool moved = QDir().rename(sourcePath, targetImageDir.absolutePath());
         if (!moved) {
-            warnings += sourcePath.remove(projectDir) + ": Unable to move image to " + targetImageDir.absolutePath();
+            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Unable to move image to " + targetImageDir.absolutePath() + "<br>";
             qDebug() << sourcePath << ": Unable to move image to " + targetImageDir.absolutePath();
             //targetImageDir.removeRecursively();
         } else {
@@ -789,7 +864,14 @@ void LibraryTab::autoSelect() {
     bool useAbsolute = false;
     if(negPosOption->currentText() == "Yes") useAbsolute=true;
     
-    dirModel->autoSelect(minDegree->text().toInt(), maxDegree->text().toInt(), parameterToUse->currentText(), useAbsolute);
+    QStringList colorList;
+    if(noFlagged->isChecked()) colorList << "none";
+    if(redFlagged->isChecked()) colorList << "red";
+    if(blueFlagged->isChecked()) colorList << "blue";
+    if(greenFlagged->isChecked()) colorList << "green";
+    if(goldFlagged->isChecked()) colorList << "gold";
+    
+    dirModel->autoSelect(minDegree->text().toInt(), maxDegree->text().toInt(), parameterToUse->currentText(), useAbsolute, colorList);
 }
 
 void LibraryTab::extendSelection() {

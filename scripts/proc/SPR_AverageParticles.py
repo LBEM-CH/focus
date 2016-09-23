@@ -41,6 +41,7 @@ def main():
 	X = np.unique(labels)
 	XN = len(X)
 
+	j = 1
 	for x in X:
 
 		print ':: Averaging particles from crystal %d/%d...' % (x, XN)
@@ -75,10 +76,11 @@ def main():
 
 		avg = NormalizeStack([avg], sigma)[0]
 
-		avg.write_image(stack_path+stack_rootname+'_crystal-avg.mrcs', int(x-1))
+		avg.write_image(stack_path+stack_rootname+'_crystal-avg.mrcs', j-1)
 
 		# Write .par file with the parameters for each particle in the dataset:
-		print >>f, '      %d' % (x),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
+		# print >>f, '      %d' % (x),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
+		print >>f, '      %d' % (j),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
 
 		if do_frc:
 
@@ -97,6 +99,8 @@ def main():
 			plt.grid()
 			plt.savefig(frc_folder+'crystal_'+'%.3d' % x+'_'+sys.argv[3]+'_FRC.png', dpi=300)
 			plt.close()
+
+		j += 1
 
 	print ':: '
 

@@ -102,12 +102,16 @@ end
 rename .hdf.mrc .mrcs ${SPR_STACKS_DIR}/*
 echo "Done!"
 
-foreach i (${SPR_STACKS_DIR}/*.mrc*)
-	echo "# IMAGE-IMPORTANT: $i <MAP: `basename $i`>" >> LOGS/${scriptname}.results
+foreach i (${SPR_STACKS_DIR}/*.mrc)
+	echo "# IMAGE-IMPORTANT MAP: $i <MAP: `basename $i`>" >> LOGS/${scriptname}.results
+end
+
+foreach i (${SPR_STACKS_DIR}/*.mrcs)
+	echo "# IMAGE-IMPORTANT MRCS: $i <STACK: `basename $i`>" >> LOGS/${scriptname}.results
 end
 
 foreach i (${SPR_PICKING_DIR}/*.png)
-	echo "# IMAGE: $i <PNG: `basename $i`>" >> LOGS/${scriptname}.results
+	echo "# IMAGE PNG: $i <PNG: `basename $i`>" >> LOGS/${scriptname}.results
 end
 
 echo ":: "

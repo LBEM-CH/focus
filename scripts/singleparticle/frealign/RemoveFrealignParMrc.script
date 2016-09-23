@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/csh -efX
 #############################################################################
 #                                                                           #
 # Title: AUX-Remove FREALIGN files	                    					#
@@ -39,10 +39,14 @@ set SPR_FRLRef = ""
 set SPR_FRLRemovePar = ""
 set SPR_FRLRemoveMrc = ""
 set SPR_CleanSPR = ""
+set SPR_PREREFINE_DIR = ""
+set SPR_REFINE_DIR = ""
 
 #
 set SPR_DIR = SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
+set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
+set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_REFINE_DIR}/
 #$end_vars
 
 if ( ${SPR_CleanSPR} == "y" ) then
@@ -61,14 +65,24 @@ if ( ${SPR_CleanSPR} == "y" ) then
 		set SPR_FRLRefOrPreref = ${SPR_PREREFINE_DIR}
 	endif
 
+	# if ( ${SPR_FRLRef} == 0 ) then
+	# 	set remove_file = "${SPR_FRLRefOrPreref}/_${SPR_FRLCycle}_r*"
+	# else
+	# 	set remove_file = "${SPR_FRLRefOrPreref}/_${SPR_FRLCycle}_r${SPR_FRLRef}"
+	# endif
+
 	if ( ${SPR_FRLRef} == 0 ) then
-		set remove_file = "${SPR_FREALIGN_DIR}/${SPR_FRLRefOrPreref}/${stack_name}_${FRLCycle}_r*."
-	else
-		set remove_file = "${SPR_FREALIGN_DIR}/${SPR_FRLRefOrPreref}/${stack_name}_${FRLCycle}_r${FRLRef}."
+		set SPR_FRLRef = "*"
 	endif
 
+	if ( ${SPR_FRLCycle} == 0 ) then
+		set SPR_FRLCycle = "*"
+	endif
+
+	set remove_file = "${SPR_FRLRefOrPreref}/${stack_name}_*"
+
 	if ( ${SPR_FRLRemovePar} == "y" ) then
-		rm ${remove_file}.par
+		rm ${remove_file}_${SPR_FRLCycle}_r${SPR_FRLRef}.par
 	endif
 
 	if ( ${SPR_FRLRemoveMrc} == "y" ) then

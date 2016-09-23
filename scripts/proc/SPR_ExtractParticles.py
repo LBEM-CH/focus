@@ -214,6 +214,7 @@ def main():
 
 				try:
 
+					# if dat[i,4] < cc_thr or np.isnan(x[i]) or np.isnan(y[i]):
 					if dat[i,4] < cc_thr:
 
 						if save_pick_fig:
@@ -314,16 +315,31 @@ def main():
 				fig1.savefig(png_path+'mic_%.3d_' % n+imname+'_picking.png', dpi=300)
 				plt.close(fig1)
 
+			n += 1
+
 		except RuntimeError:
 
-			print ':: PROBLEM WITH MICROGRAPH %d/%d!!! Maybe it was not found?' % (n, N)
-			print ':: '
+			# print ':: PROBLEM WITH MICROGRAPH %d/%d!!! Maybe it was not found?' % (n, N)
+			# print ':: '
 
-			print mrc
+			# print mrc
+			print ':: PROBLEM WITH MICROGRAPH: '
+			print ':: %s' % mrc
+			print ':: Maybe it was not found?'
+
+		except ValueError:
+
+			# print ':: PROBLEM WITH CC PROFILE FOR IMAGE %d/%d!!!' % (n, N)
+			# print ':: '
+
+			# print mrc
+
+			print ':: PROBLEM WITH CC PROFILE FOR IMAGE: '
+			print ':: %s' % mrc
 
 		bf.close()
 
-		n += 1
+		# n += 1
 
 
 	print ':: Total boxed unit cells: %d' % idx
@@ -538,6 +554,7 @@ def LatticeReciprocal2Real(u,v,w):
 
 		ASTR = np.sqrt(u1*u1+u2*u2);
 		BSTR = np.sqrt(v1*v1+v2*v2);
+
 		SINASTR=u2/ASTR;
 		COSASTR=u1/ASTR;
 		SINBSTR=v2/BSTR;

@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 60
+# SORTORDER: 7
 #
 #
 # MANUAL: This script prepares the first refinement in single-particle mode with FREALIGN, based on the crystal averages calculated in the previous step.

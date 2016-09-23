@@ -14,7 +14,7 @@
 # SORTORDER: 150
 #
 #
-# MANUAL: This script calculates some refinement stats given .par files.
+# MANUAL: This script displays information about the Fourier Shell Correlation (FSC) extracted from the .par files.
 #
 # DISPLAY: SPR_PARPATH
 # DISPLAY: SPR_FSC_THRESH

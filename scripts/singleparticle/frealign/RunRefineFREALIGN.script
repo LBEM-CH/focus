@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 70
+# SORTORDER: 8
 #
 #
 # MANUAL: This script launches a refinement in single-particle mode using the particles extracted from the 2D crystal images, initialized with the alignment parameters obtained in the pre-refinement.

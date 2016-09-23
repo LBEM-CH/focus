@@ -95,8 +95,6 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWi
 
     scriptsWidget->setCurrentIndex(0);
     defaultButton->setChecked(true);
-    
-    connect(results, SIGNAL(saved(bool)), parameters, SLOT(load()));
 }
 
 QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
@@ -308,7 +306,7 @@ BlockContainer* ExecutionWindow::setupLogWindow() {
     verbosityControlLayout->addWidget(outputVerbosityControl, 0, Qt::AlignVCenter);
 
     //Setup the window and add widgets
-    BlockContainer *logWindow = new BlockContainer("Output (Double click for logbrowser)", logViewer, verbosityControlWidget, this);
+    logWindow = new BlockContainer("Output (Double click for logbrowser)", logViewer, verbosityControlWidget, this);
     logWindow->setMinimumWidth(400);
     logWindow->setMinimumHeight(200);
 
@@ -416,6 +414,7 @@ void ExecutionWindow::execute(bool halt) {
     ScriptModule* module = (ScriptModule*) scriptsWidget->currentWidget();
     runningTabIndex = scriptsWidget->currentIndex();
     showOutputButton->setChecked(true);
+    logWindow->setVisible(true);
     module->execute(halt);
 }
 
@@ -481,8 +480,14 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
         else historyViewer->clear();
     }
     
-    if(QFileInfo(module->logFile(index)).exists()) showOutputButton->setChecked(true);
-    else showOutputButton->setChecked(false);
+    if(QFileInfo(module->logFile(index)).exists()) {
+        showOutputButton->setChecked(true);
+        logWindow->setVisible(true);
+    }
+    else {
+        showOutputButton->setChecked(false);
+        logWindow->setVisible(false);
+    }
     
     reload(module->resultsFile(index));
 
@@ -490,6 +495,7 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
 }
 
 void ExecutionWindow::scriptCompleted(ScriptModule *module, QModelIndex index) {
+    qDebug() << "Script: " << module->title(index) << " finished";
     reload(module->resultsFile(index));
     results->save();
     if(results->newImagesImported()) projectData.indexImages();
@@ -506,8 +512,14 @@ void ExecutionWindow::reload(const QString& resultsFile) {
     if(resultsFile.isEmpty()) results->load();
     else results->load(resultsFile);
     
-    if(results->results.isEmpty() && results->images.isEmpty()) showResultsButton->setChecked(false);
-    else showResultsButton->setChecked(true);
+    if(results->results.isEmpty() && results->images.isEmpty())  {
+        showResultsButton->setChecked(false);
+        resultsSplitter->setVisible(false);
+    }
+    else  {
+        showResultsButton->setChecked(true);
+        resultsSplitter->setVisible(true);
+    }
 }
 
 void ExecutionWindow::launchFileBrowser() {

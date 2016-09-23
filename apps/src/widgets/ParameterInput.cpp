@@ -176,11 +176,11 @@ QWidget* ParameterInput::setupEditWidget() {
     LineEditSet* widget;
 
     if (info.type == ParameterTypeInfo::Type::INT) {
-        widget = new EditIntSetWidget(info.count, this);
-        static_cast<EditIntSetWidget*> (widget)->setRange(info.deduceMinMaxPairs(info.properties));
+        widget = new IntLineEditSet(info.count, this);
+        static_cast<IntLineEditSet*> (widget)->setRange(info.deduceMinMaxPairs(info.properties));
     } else if (info.type == ParameterTypeInfo::Type::FLOAT) {
-        widget = new EditDoubleSetWidget(info.count, this);
-        static_cast<EditDoubleSetWidget*> (widget)->setRange(info.deduceMinMaxPairs(info.properties));
+        widget = new DoubleLineEditSet(info.count, this);
+        static_cast<DoubleLineEditSet*> (widget)->setRange(info.deduceMinMaxPairs(info.properties));
     } else {
         widget = new LineEditSet(info.count, this);
     }

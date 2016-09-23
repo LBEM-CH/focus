@@ -28,7 +28,7 @@ public:
             QLineEdit* widget = new QLineEdit(this);
             widget->setFrame(false);
             widgets_.append(widget);
-            connect(widget, SIGNAL(editingFinished()), this, SLOT(updateValues()));
+            connect(widget, &QLineEdit::textEdited, this, &LineEditSet::updateValues);
             layout->addWidget(widget, 1);
         }
 
@@ -48,9 +48,14 @@ public slots:
 
     void updateValues() {
         QString v;
-        for (int i = 0; i < widgets_.size() - 1; i++)
-            v += widgets_[i]->text() + ',';
-        v += widgets_.last()->text();
+        for (int i = 0; i < widgets_.size(); i++) {
+            if(i != 0) v += ',';
+            v += widgets_[i]->text().trimmed();
+            QPalette pal = widgets_[i]->palette();
+            if(widgets_[i]->hasAcceptableInput()) pal.setColor(QPalette::Text, Qt::black);
+            else pal.setColor(QPalette::Text, Qt::red);
+            widgets_[i]->setPalette(pal);
+        }
 
         emit valueChanged(v);
     }
@@ -78,10 +83,10 @@ private:
 
 };
 
-class EditIntSetWidget : public LineEditSet {
+class IntLineEditSet : public LineEditSet {
 public:
 
-    EditIntSetWidget(int count = 1, QWidget* parent = NULL)
+    IntLineEditSet(int count = 1, QWidget* parent = NULL)
     : LineEditSet(count, parent) {
         QLineEdit* member;
 
@@ -113,10 +118,10 @@ public:
 
 };
 
-class EditDoubleSetWidget : public LineEditSet {
+class DoubleLineEditSet : public LineEditSet {
 public:
 
-    EditDoubleSetWidget(int count = 1, QWidget* parent = NULL)
+    DoubleLineEditSet(int count = 1, QWidget* parent = NULL)
     : LineEditSet(count, parent) {
         QLineEdit* member;
 

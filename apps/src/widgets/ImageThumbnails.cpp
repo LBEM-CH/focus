@@ -14,6 +14,13 @@ ImageThumbnails::ImageThumbnails(QWidget* parent)
     model = new QStandardItemModel();
     setModel(model);
     updateThumbanils();
+    
+    connect(&projectData, &ProjectData::imageDirsChanged, [=] () {
+        updateThumbanils();
+    });
+    
+    connect(model, &QStandardItemModel::itemChanged, this, &ImageThumbnails::saveChecks);
+    connect(&projectData, &ProjectData::selectionChanged, this, &ImageThumbnails::updateChecks);
 }
 
 QString ImageThumbnails::getPath(int colId) {
@@ -30,9 +37,11 @@ int ImageThumbnails::getSlectionCount() {
 }
 
 void ImageThumbnails::updateThumbanils() {
+    disconnect(model, &QStandardItemModel::itemChanged, this, &ImageThumbnails::saveChecks);
     model->clear();
     columnPaths.clear();
     QStringList imageList = projectData.imageList();
+    QStringList selectedList = projectData.imagesSelected();
     
     QProgressDialog progressDialog;
     progressDialog.setCancelButtonText(tr("&Cancel"));
@@ -62,8 +71,10 @@ void ImageThumbnails::updateThumbanils() {
         QStandardItem* item = new QStandardItem();
         item->setIcon(icon);
         item->setToolTip(projectData.projectDir().relativeFilePath(imageDir));
-        item->setCheckable(true);
         item->setEditable(false);
+        item->setCheckable(true);
+        if(selectedList.contains(imageDir)) item->setCheckState(Qt::Checked);
+
         columnPaths.append(imageDir);
         items.append(item);
     }
@@ -76,38 +87,32 @@ void ImageThumbnails::updateThumbanils() {
     model->appendRow(items);    
 
     for (int i = 0; i < model->columnCount() - 1; i++) resizeColumnToContents(i);
+    connect(model, &QStandardItemModel::itemChanged, this, &ImageThumbnails::saveChecks);
 }
 
 
 void ImageThumbnails::updateChecks(const QStringList& checkedImages) {
-    int count = 0;
+    disconnect(model, &QStandardItemModel::itemChanged, this, &ImageThumbnails::saveChecks);
     for (int i = 0; i < columnPaths.size(); ++i) {
         if (checkedImages.contains(columnPaths[i])) {
             model->item(0, i)->setCheckState(Qt::Checked);
-            count++;
         } else model->item(0, i)->setCheckState(Qt::Unchecked);
     }
-    if (count != selectionCount) {
-        selectionCount = count;
-        emit selectionCountChanged(selectionCount);
-    }
+    connect(model, &QStandardItemModel::itemChanged, this, &ImageThumbnails::saveChecks);
 }
 
 void ImageThumbnails::saveChecks() {
-    QFile saveFile(projectData.selectionDirfile());
-    if (!saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
-
-    int count = 0;
+    disconnect(&projectData, &ProjectData::selectionChanged, this, &ImageThumbnails::updateChecks);
+    
+    QStringList checkedImages;
     for (int i = 0; i < columnPaths.size(); ++i) {
         if (model->item(0, i)->checkState() == Qt::Checked) {
-            saveFile.write(QString(projectData.projectDir().relativeFilePath(columnPaths[i]) + '\n').toLatin1());
-            count++;
+            checkedImages << columnPaths[i];
         }
     }
-    if (count != selectionCount) {
-        selectionCount = count;
-        emit selectionCountChanged(selectionCount);
-    }
+    projectData.setImagesSelected(checkedImages);
+
+    connect(&projectData, &ProjectData::selectionChanged, this, &ImageThumbnails::updateChecks);
 }
 
 void ImageThumbnails::mousePressEvent(QMouseEvent* e) {

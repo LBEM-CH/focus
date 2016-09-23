@@ -51,15 +51,13 @@ public slots:
 
 signals:
     void loaded(bool successful);
-    void saved(bool successful);
 
 private:
-    QFileSystemWatcher watcher;
-
     QString mainDir;
     QString fileName;
     bool dryRun;
     bool imagesImported =  false;
+    QStringList imagesToBeReset;
 
     void printValues();
 };

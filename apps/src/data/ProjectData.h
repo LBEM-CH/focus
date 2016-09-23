@@ -40,6 +40,11 @@ public:
     bool imageOpen(const QString path);
     void setImagesOpen(const QStringList& paths);
     
+    QStringList imagesSelected();
+    QStringList loadSelection(const QString& dirFileName);
+    void saveSelection(const QString& newDirFileName);
+    void setImagesSelected(const QStringList& paths);
+    
     QDir projectDir() const;
     QDir projectWorkingDir() const;
 
@@ -54,12 +59,13 @@ public:
     static QDir logsDir(const QDir& workingDir);
     static QDir procDir(const QDir& workingDir);
     
-    QString selectionDirfile();
-    QString evenSelectionDirfile();
-    QString oddSelectionDirfile();
+    //Tasks
+    void renumberImages();
+    void AssignEvenOdd();
     
 signals:
     void imageDirsChanged();
+    void selectionChanged(const QStringList& paths);
 
 private:
 
@@ -67,8 +73,15 @@ private:
     }
     
     void registerParameterMaster(const QString& cfgFileName);
-
     void initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog& dialog);
+    
+    bool sureDialog(const QString& title, const QString& text);
+    
+    QString commitIntToStringLength(int num, int length);
+    
+    QString selectionDirfile();
+    QString evenSelectionDirfile();
+    QString oddSelectionDirfile();
 
     QDir projectDir_;
     ParametersConfiguration* projectParameters_;

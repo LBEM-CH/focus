@@ -13,6 +13,7 @@
 #include <QStackedWidget>
 #include <QSortFilterProxyModel>
 #include <QLabel>
+#include <QToolBar>
 #include <QToolButton>
 #include <QLineEdit>
 
@@ -37,7 +38,6 @@ class LibraryTab : public QWidget
         void showContents(bool show);
         
         void showSelected(bool enable);
-        bool loadSelection(const QString &fileName = "");
         
         void reload();
         void updateModel();
@@ -75,8 +75,12 @@ class LibraryTab : public QWidget
                    
     private:
         void setupDirectoryContainer();
+        QToolBar* setupLibraryControls();
+        QGroupBox* setupAutoSelectionTool();
         QWidget* setupToolBar();
         QWidget* setupSelectionTab();
+        
+        QAction* getLibraryToolBarAction(const QString& ic, const QString& tooltip, const QString& shortcut, bool checkable);
         
         void modifySelection(bool select = true);
         

@@ -29,6 +29,23 @@
 #include "ProjectData.h"
 #include "ProjectModel.h"
 
+ProjectModel::ProjectModel(const QString &path, const QString &columnsFile, QObject *parent)
+: QStandardItemModel(parent) {
+
+    loadDialog = new QProgressDialog();
+    loadDialog->setWindowModality(Qt::WindowModal);
+    loadDialog->setCancelButton(0);
+    
+    projectPath = QDir(path).canonicalPath();
+    columnsDataFile = columnsFile;
+
+    load();
+
+    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    connect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
+    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(updateItems(QStandardItem *)));
+}
+
 bool ProjectModel::saveColumns(const QString &columnsFile) {
     QFile modelInfo(columnsFile);
     if (!modelInfo.open(QIODevice::WriteOnly | QIODevice::Text)) return false;
@@ -321,23 +338,12 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
     entryItem->setText(entryString);
 }
 
-bool ProjectModel::loadSelection(const QString &fileName) {
-    if (items.isEmpty()) return false;
-    QString selectedFile = fileName, line;
-    quint32 uid;
-    QDir tempDir;
+void ProjectModel::loadSelectionList(const QStringList& list) {
     QStandardItem *item = NULL;
-    if (fileName.isEmpty()) selectedFile = saveFileName;
-
-    QFile file(selectedFile);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
-
-    clearSelection(false);
-
+    quint32 uid;
     disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-    while (!file.atEnd()) {
-        line = file.readLine().trimmed();
-        tempDir = QDir(line);
+    for (const QString& line: list) {
+        QDir tempDir = QDir(line);
         //if absolute path is saved in the selection file
         if (tempDir.exists()) {
             uid = qHash(QDir(line).canonicalPath());
@@ -350,26 +356,6 @@ bool ProjectModel::loadSelection(const QString &fileName) {
         else qDebug() << line << " not found.";
     }
     connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-    submit();
-    file.close();
-    return true;
-}
-
-ProjectModel::ProjectModel(const QString &path, const QString &columnsFile, QObject *parent)
-: QStandardItemModel(parent) {
-
-    loadDialog = new QProgressDialog();
-    loadDialog->setWindowModality(Qt::WindowModal);
-    loadDialog->setCancelButton(0);
-    
-    projectPath = QDir(path).canonicalPath();
-    columnsDataFile = columnsFile;
-
-    load();
-
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(updateItems(QStandardItem *)));
-    //connect(&watcher,SIGNAL(fileChanged(const QString &)),this,SLOT(confChanged(const QString &)));
 }
 
 void ProjectModel::load() {
@@ -462,54 +448,10 @@ QStringList ProjectModel::parentDirs() {
     return dirs;
 }
 
-void ProjectModel::setSaveName(const QString &saveName) {
-    saveFileName = saveName;
-}
-
-void ProjectModel::setEvenImageFileName(const QString& name) {
-    evenImageFileName = name;
-}
-
-void ProjectModel::setOddImageFileName(const QString& name) {
-    oddImageFileName = name;
-}
-
-bool ProjectModel::save(QStandardItem *currentItem, int itemCount, QFile &saveFile, SaveOptions option) {
-    QModelIndex i;
-    if (currentItem == NULL) return false;
-
-    foreach(i, match(currentItem->index(), Qt::CheckStateRole, QString::number(Qt::Checked) + "|" + QString::number(Qt::PartiallyChecked), itemCount, Qt::MatchRegExp)) {
-        if (i.isValid()) {
-            if (i.child(0, 0).isValid()) {
-                save(itemFromIndex(i.child(0, 0)), itemFromIndex(i)->rowCount(), saveFile, option);
-            } else {
-                int evenodd = getRowParameterValue(i, "image_evenodd").toInt();
-                //qDebug() << evenodd << saveFile.fileName();
-                if (option == ALL || (option == EVEN_ONLY && evenodd == 1) || (option == ODD_ONLY && evenodd == 2)) {
-                    //qDebug() << "Writing: " << relativePathFromIndex(i);
-                    saveFile.write(QString(relativePathFromIndex(i) + '\n').toLatin1());
-                }
-            }
-        }
-    }
-    return true;
-}
-
 bool ProjectModel::submit() {
-    emit submitting();
-    if (saveFileName.isEmpty()) return false;
-    QFile saveFile(saveFileName);
-    QFile evenFile(evenImageFileName);
-    QFile oddFile(oddImageFileName);
-    if (!saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) return false;
-    if (!evenFile.open(QIODevice::WriteOnly | QIODevice::Text)) return false;
-    if (!oddFile.open(QIODevice::WriteOnly | QIODevice::Text)) return false;
-    save(item(0), rowCount(), saveFile, ALL);
-    save(item(0), rowCount(), evenFile, EVEN_ONLY);
-    save(item(0), rowCount(), oddFile, ODD_ONLY);
-    saveFile.close();
-    evenFile.close();
-    oddFile.close();
+    disconnect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
+    projectData.setImagesSelected(getSelectedImagePaths());
+    connect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
     return true;
 }
 
@@ -685,7 +627,7 @@ void ProjectModel::changeSelection(QStandardItem *currentItem, int itemCount, co
     }
 }
 
-QStringList ProjectModel::getSelectionNames() {
+QStringList ProjectModel::getSelectedImagePaths() {
     QStringList selectedFiles;
     if (rowCount() != 0) {
         getSelection(item(0), rowCount(), selectedFiles);
@@ -695,25 +637,17 @@ QStringList ProjectModel::getSelectionNames() {
 
 void ProjectModel::getSelection(QStandardItem *currentItem, int itemCount, QStringList & selected) {
     QModelIndex i;
-    QList<QModelIndex> allItems = match(currentItem->index(), Qt::CheckStateRole, ".*" /*QString::number(Qt::Checked) + "|" + QString::number(Qt::PartiallyChecked) + "|" + QString::number(Qt::Unchecked)*/, itemCount, Qt::MatchRegExp);
+    QList<QModelIndex> allItems = match(currentItem->index(), Qt::CheckStateRole, QString::number(Qt::Checked) + "|" + QString::number(Qt::PartiallyChecked), itemCount, Qt::MatchRegExp);
 
     foreach(i, allItems) {
         if (i.isValid()) {
             if (i.child(0, 0).isValid()) {
                 getSelection(itemFromIndex(i.child(0, 0)), itemFromIndex(i)->rowCount(), selected);
-            } else if (i.column() == 0) {
-                if (i.data(Qt::CheckStateRole) == Qt::Checked) {
-                    QString name = i.data(Qt::DisplayRole).toString();
-                    //QString name = item(i)->text();
-                    selected << name;
-                }
+            } else {
+                if(isRowValidImage(i)) selected << pathFromIndex(i);
             }
         }
     }
-}
-
-QString ProjectModel::getProjectPath() const {
-    return projectPath;
 }
 
 void ProjectModel::currentRowChanged(const QModelIndex&i, const QModelIndex&) {
@@ -726,10 +660,6 @@ void ProjectModel::currentRowChanged(const QModelIndex&i, const QModelIndex&) {
     if (QFileInfo(pathFromIndex(i) + "/2dx_master.cfg").exists()) image = "";
 
     emit currentImage(image);
-}
-
-void ProjectModel::confChanged(const QString &path) {
-    qDebug() << path;
 }
 
 void ProjectModel::prepareLoadDialog(int max) {

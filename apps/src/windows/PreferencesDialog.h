@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QDialog>
 #include <QMap>
+#include <QButtonGroup>
 
 #include "LineEditSet.h"
 
@@ -32,19 +33,19 @@ class PreferencesDialog : public QDialog {
 public:
     PreferencesDialog(QWidget* parent = NULL);
 
-public slots:
-    void saveApps();
-    void loadApps();
-
 private:
     QToolBar* setupToolBar();
 
-    QWidget* getApperancePage();
-    QWidget* getAppsPage();
-
-    QMap<QString, LineEditSet*> elementToWidget;
+    QWidget* getFontsPage();
+    QWidget* getPathsPage();
+    QWidget* getViewersPage();
+    QWidget* getProjectPage();
+    
+    void getToolButton(const QString& icon, const QString& text, int indexOfStackedWidget);
     
     QStackedWidget* pagesWidget_;
+    QButtonGroup* toolBarButtonGroup_;
+    QToolBar* contentsWidget_;
 };
 
 #endif 

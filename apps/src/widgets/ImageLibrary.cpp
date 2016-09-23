@@ -6,9 +6,6 @@
 
 ImageLibrary::ImageLibrary(QWidget* parent)
 : QWidget(parent){
-    watcher.setFile(projectData.selectionDirfile());
-    timer.setSingleShot(true);
-    
     QWidget* header = setupHeader();
     
     thumbnails_ = new ImageThumbnails;
@@ -22,8 +19,8 @@ ImageLibrary::ImageLibrary(QWidget* parent)
         emit shouldLoadImage(thumbnails_->getPath(i.column()));
     });
     
-    connect(thumbnails_, &ImageThumbnails::selectionCountChanged, [=] (int count) {
-        setSelectionCount(count);
+    connect(&projectData, &ProjectData::selectionChanged, [=] (const QStringList& sel) {
+        setSelectionCount(sel.count());
     });
     
     dataBox = new QFrame();
@@ -47,22 +44,13 @@ ImageLibrary::ImageLibrary(QWidget* parent)
     mainLayout->setSpacing(0);
     mainLayout->addWidget(header, 0, 0);
     mainLayout->addWidget(expandedWidget, 1, 0);
-      
-    connect(&watcher, SIGNAL(fileChanged(const QString &)), this, SLOT(timedLoad()));
-    connect(&timer, SIGNAL(timeout()), this, SLOT(updateChecks()));
     
     setSelectionCount(thumbnails_->getSlectionCount());
     infoButton->setChecked(false);
     expandedWidget->setVisible(false);
     setFixedHeight(HEADER_HEIGHT);
     updateData();
-    updateChecks();
     update();
-    
-    connect(&projectData, &ProjectData::imageDirsChanged, [=] () {
-        thumbnails_->updateThumbanils();
-        updateChecks();
-    });
 }
 
 QWidget* ImageLibrary::setupHeader() {
@@ -101,7 +89,6 @@ QWidget* ImageLibrary::setupHeader() {
     reloadButton->setVisible(false);
     connect(reloadButton, &QToolButton::clicked, [=] (){
         thumbnails_->updateThumbanils();
-        updateChecks();
         update();
     });
     
@@ -116,7 +103,6 @@ QWidget* ImageLibrary::setupHeader() {
         if(show) {
             setFixedHeight(HEADER_HEIGHT+CONTENT_HEIGHT);
             thumbnails_->updateThumbanils();
-            updateChecks();
         }
         else setFixedHeight(HEADER_HEIGHT);
         update();
@@ -171,22 +157,6 @@ QGridLayout* ImageLibrary::fillFormLayout(const QStringList& labels) {
     return dataLayout;
 }
 
-void ImageLibrary::updateChecks() {
-    QFile s(projectData.selectionDirfile());
-    
-    if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Dirfile read failed.";
-        return;
-    }
-
-    QStringList checkdImages;
-    QString projectDir = projectData.projectDir().canonicalPath();
-    while (!s.atEnd()) checkdImages << projectDir + '/' + s.readLine().simplified();
-    s.close();
-    
-    thumbnails_->updateChecks(checkdImages);
-}
-
 void ImageLibrary::updateData(const QString& imagePath) {
     if(imagePath.isEmpty()) {
         dataBox->hide();
@@ -221,10 +191,6 @@ void ImageLibrary::updateFormData(const QString& imagePath, const QStringList& p
         if(valueVar.canConvert<double>()) valueStr = QString::number(valueVar.toDouble(), 'f', 2);
         if(valueLabels[i]) valueLabels[i]->setText(valueStr);
     }
-}
-
-void ImageLibrary::timedLoad() {
-    timer.start(100);
 }
 
 void ImageLibrary::setHeaderTitle(const QString& title) {

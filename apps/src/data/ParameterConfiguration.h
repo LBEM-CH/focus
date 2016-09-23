@@ -49,8 +49,8 @@ public:
     
     QString dataFileName();
 
-    int set(QString element, QString value);
-    int setForce(QString element, QString value);
+    int set(QString element, QString value, bool saveOnDisk=true);
+    int setForce(QString element, QString value, bool saveOnDisk=true);
     
     unsigned int size();
     QMap<QString, ParameterElementData *> getLookupTable();

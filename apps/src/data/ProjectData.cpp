@@ -212,6 +212,58 @@ void ProjectData::setImagesOpen(const QStringList& paths) {
     ProjectPreferences(projectDir()).setImagesOpen(paths);
 }
 
+QStringList ProjectData::imagesSelected() {
+    return loadSelection(selectionDirfile());
+}
+
+QStringList ProjectData::loadSelection(const QString& dirFileName) {
+    QFile s(dirFileName);
+    
+    if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Dirfile read failed: " << dirFileName;
+        return QStringList();
+    }
+
+    QStringList selectedImages;
+    QString projectDir = projectData.projectDir().canonicalPath();
+    while (!s.atEnd()) selectedImages << projectDir + '/' + s.readLine().simplified();
+    s.close();
+    
+    return selectedImages;
+}
+
+void ProjectData::saveSelection(const QString& saveName) {
+    if (QFileInfo(saveName).exists()) QFile::remove(saveName);
+    QFile::copy(selectionDirfile(), saveName);
+}
+
+
+void ProjectData::setImagesSelected(const QStringList& paths) {
+    QFile saveFile(selectionDirfile());
+    QFile evenFile(evenSelectionDirfile());
+    QFile oddFile(oddSelectionDirfile());
+    if (!saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+    if (!evenFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+    if (!oddFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+
+    for (int i = 0; i < paths.size(); ++i) {
+        if(parameterData(QDir(paths[i]))) {
+            QString toBeWritten = QString(projectData.projectDir().relativeFilePath(paths[i]) + '\n');
+            saveFile.write(toBeWritten.toLatin1());
+            if(parameterData(QDir(paths[i]))->get("image_evenodd")->value().toInt() == 1) evenFile.write(toBeWritten.toLatin1());
+            if(parameterData(QDir(paths[i]))->get("image_evenodd")->value().toInt() == 2) oddFile.write(toBeWritten.toLatin1());
+        }
+    }
+    
+    saveFile.close();
+    evenFile.close();
+    oddFile.close();
+    
+    emit selectionChanged(paths);
+}
+
+
+
 QDir ProjectData::logsDir(const QDir& workingDir) {
     QDir dir = QDir(workingDir.canonicalPath() + "/LOGS");
     if (!dir.exists()) dir.mkpath(workingDir.canonicalPath() + "/LOGS");
@@ -235,4 +287,49 @@ QString ProjectData::evenSelectionDirfile() {
 QString ProjectData::oddSelectionDirfile() {
     return projectWorkingDir().canonicalPath() + "/2dx_merge_dirfile_odd.dat";
 }
+
+void ProjectData::renumberImages() {
+    if(sureDialog("Renumber Images?", "This will renumber all the images.\n\nProceed?")){
+        QStringList list = imageList();
+        int number = 1;
+        for(QString image : list) {
+            if(parameterData(QDir(image))) {
+                parameterData(QDir(image))->set("imagenumber", commitIntToStringLength(number++, 8)+"00");
+            }
+        }
+        
+        projectParameterData()->set("import_imagenumber", commitIntToStringLength(number, 4));
+    }
+}
+
+void ProjectData::AssignEvenOdd() {
+    if(sureDialog("Assign even odd?", "This will assign all the images to either even or odd group.\n\nProceed?")){
+        QStringList list = imageList();
+        int number = 1;
+        for(QString image : list) {
+            if(parameterData(QDir(image))) {
+                parameterData(QDir(image))->set("image_evenodd", QString::number(number++%2));
+            }
+        }
+    }
+}
+
+bool ProjectData::sureDialog(const QString& title, const QString& text) {
+    if(QMessageBox::question(NULL, title, text, "Yes", "No", QString(), 0, 1) == 0){
+        return true;
+    }
+    else return false;
+}
+
+QString ProjectData::commitIntToStringLength(int num, int length) {
+    QString value = QString::number(num);
+    int diff = length - value.size();
+    for (int i = 0; i < diff; ++i) {
+        value.push_front('0');
+    }
+    return value;
+}
+
+
+
 

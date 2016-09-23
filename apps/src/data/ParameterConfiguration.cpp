@@ -142,7 +142,7 @@ bool ParametersConfiguration::resetUserValues(const QString& fileName) {
     }
 
     data.close();
-    
+
     return true;
 }
 
@@ -219,7 +219,7 @@ QString ParametersConfiguration::getValue(QString element) {
 }
 
 
-int ParametersConfiguration::set(QString element, QString value) {
+int ParametersConfiguration::set(QString element, QString value, bool saveOnDisk) {
     if (lookup[element.toLower()] == NULL) return 0;
 
     if (!lookup[element.toLower()]->locked()) {
@@ -229,14 +229,14 @@ int ParametersConfiguration::set(QString element, QString value) {
         
         if (lookup[element.toLower()]->value().toString() != value) {
             lookup[element.toLower()]->setValue(value);
-            setModified(true);
+            if(saveOnDisk) setModified(true);
         }
     }
     
     return 1;
 }
 
-int ParametersConfiguration::setForce(QString element, QString value) {
+int ParametersConfiguration::setForce(QString element, QString value, bool saveOnDisk) {
     if (lookup[element.toLower()] == NULL) return 0;
 
     if (lookup[element.toLower()]->isWrong()) {
@@ -245,7 +245,7 @@ int ParametersConfiguration::setForce(QString element, QString value) {
     
     if (lookup[element.toLower()]->value().toString() != value) {
         lookup[element.toLower()]->setValue(value);
-        setModified(true);
+        if(saveOnDisk) setModified(true);
     }
 
     return 1;

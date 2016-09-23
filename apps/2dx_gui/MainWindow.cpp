@@ -62,22 +62,16 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
    
     setupWindows();
     setupToolBar();
-    setupActions();
     setupMenuBar();
     
     connect(libraryWin_->getDirView(), SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(showImageWindow(const QModelIndex&)));
-    connect(projectData.projectParameterData(), SIGNAL(dataModified(bool)), this, SLOT(setSaveState(bool)));
     
     QStringList imagesOpen = projectData.imagesOpen();
     for(int i=0; i<imagesOpen.size(); ++i) showImageWindow(imagesOpen[i], true);
     
     connect(imageLibrary, &ImageLibrary::shouldLoadImage, [=] (const QString& path) {showImageWindow(path, true);});
     connect(openLibraryWindowAct, &QToolButton::toggled, [=] (bool check) {imageLibrary->setHidden(check);});
-    connect(imageLibrary->thumbnailContainer()->getModel(), &QStandardItemModel::itemChanged, [=] () {
-        imageLibrary->thumbnailContainer()->saveChecks();
-        libraryWin_->getDirModel()->loadSelection(); 
-    });
-     
+         
     openLibraryWindowAct->setChecked(true);
     centralWin_->setCurrentWidget(libraryWin_);
     
@@ -94,20 +88,14 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     resize(1300, 900);
 }
 
-void MainWindow::setupActions() {
-    openAction = new QAction(ApplicationData::icon("open"), tr("&Open Project"), this);
-    openAction->setShortcut(tr("Ctrl+O"));
-    connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
-
-    saveAction = new QAction(ApplicationData::icon("save"), tr("&Save"), this);
-    saveAction->setShortcut(tr("Ctrl+S"));
-    connect(saveAction, SIGNAL(triggered()), projectData.projectParameterData(), SLOT(save()));
-}
-
 void MainWindow::setupMenuBar() {
     /**
      * Setup File menu
      */
+    QAction* openAction = new QAction(ApplicationData::icon("open"), tr("&Open Project"), this);
+    openAction->setShortcut(tr("Ctrl+O"));
+    connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
+    
     QMenu *fileMenu = new QMenu("File");
     fileMenu->addAction(openAction);
     
@@ -125,6 +113,10 @@ void MainWindow::setupMenuBar() {
         }
         fileMenu->addMenu(openRecentsMenu);
     }
+    
+    QAction* saveAction = new QAction(ApplicationData::icon("save"), tr("&Save"), this);
+    saveAction->setShortcut(tr("Ctrl+S"));
+    connect(saveAction, SIGNAL(triggered()), projectData.projectParameterData(), SLOT(save()));
     
     fileMenu->addAction(saveAction);
 
@@ -195,7 +187,7 @@ void MainWindow::setupToolBar() {
     openImageWindowAct = setupMainNavigationButton("image", "Process", "Process Images", true, imageWin_);
     openMergeWindowAct = setupMainNavigationButton("merge_tool", "Merge", "Merge Tool", true, mergeWin_);
     openSPWindowAct = setupMainNavigationButton("singleparticle", "Particles", "Single Particle Processing", true, spWin_);          
-    openProjectToolsAct = setupMainNavigationButton("project_tools", "Project", "Project Tools", true, projectToolsWin_);
+    openProjectToolsAct = setupMainNavigationButton("project_tools", "Project", "Manage Project", true, projectToolsWin_);
     
     QButtonGroup* group = new QButtonGroup(mainToolBar);
     group->addButton(openLibraryWindowAct);
@@ -234,7 +226,6 @@ void MainWindow::setupWindows() {
     mergeWin_->runInitialization();
     
     spWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/"), this); 
-    spWin_->runInitialization();
     
     projectToolsWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"), this);
     QToolBar* projectToolbar = projectToolsWin_->getToolBar();
@@ -277,16 +268,6 @@ void MainWindow::showImageWindow(const QString& workingDir, bool supressWarnings
     openImageWindowAct->setChecked(true);
     centralWin_->setCurrentWidget(imageWin_);
     imageWin_->showImageWindow(workingDir);
-}
-
-void MainWindow::setSaveState(bool state) {
-    if (state == false) {
-        saveAction->setChecked(false);
-        saveAction->setCheckable(false);
-    } else {
-        saveAction->setCheckable(true);
-        saveAction->setChecked(true);
-    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

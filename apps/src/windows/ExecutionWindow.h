@@ -117,6 +117,7 @@ private:
 
     LogViewer *logViewer;
     LogViewer *historyViewer;
+    BlockContainer* logWindow;
 
     QSlider* outputVerbosityControl;
     QSlider* historyVerbosityControl;

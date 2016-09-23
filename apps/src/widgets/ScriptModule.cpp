@@ -219,7 +219,7 @@ bool ScriptModule::initializeExecution() {
         runningIndex++;
         if (runningIndex >= executionList.size()) {
             currentlyRunning = false;
-            emit scriptCompleted(model->item(executionList.last())->index());
+            //emit scriptCompleted(model->item(executionList.last())->index());
             cleanupExecution();
             if (!selection->selectedRows().isEmpty())
                 emit currentScriptChanged(selection->selectedRows().last());
@@ -266,25 +266,17 @@ void ScriptModule::execute(bool run) {
             QMessageBox::warning(this, "Image(s) Open", "Script <" + getScriptProperty(currentUid, "title").toString() + "> requires all images to be closed.\n\nPlease close all images in PROCESS tab and try again.");
             cleanupExecution();
             return;
-        } 
-        
-        if (getImagesOpenCheckList(currentUid) == "selected") {
-            QFile s(projectData.selectionDirfile());
+        }
 
-            if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                qDebug() << "Dirfile read failed.";
-            } else {
-                QStringList imagesOpen = projectData.imagesOpen();
-                QString projectDir = projectData.projectDir().canonicalPath();
-                while (!s.atEnd()) {
-                    if (imagesOpen.contains(projectDir + '/' + s.readLine().simplified())) {
-                        QMessageBox::warning(this, "Image(s) Open", "Script <" + getScriptProperty(currentUid, "title").toString() + "> requires selected images to be closed.\n\nPlease close all selected images in PROCESS tab and try again.");
-                        s.close();
-                        cleanupExecution();
-                        return;
-                    }
+        if (getImagesOpenCheckList(currentUid) == "selected") {
+            QStringList imagesOpen = projectData.imagesOpen();
+            QStringList imagesSelected = projectData.imagesSelected();
+            for (QString selected : imagesSelected) {
+                if (imagesOpen.contains(selected)) {
+                    QMessageBox::warning(this, "Image(s) Open", "Script <" + getScriptProperty(currentUid, "title").toString() + "> requires selected images to be closed.\n\nPlease close all selected images in PROCESS tab and try again.");
+                    cleanupExecution();
+                    return;
                 }
-                s.close();
             }
         }
 
@@ -425,12 +417,6 @@ void ScriptModule::scriptFinished(int exitCode) {
     if (runningScriptSelected()) emit standardOut(QStringList() << scriptHeader);
     writeToLog(scriptHeader);
 
-    if (runningScript == NULL)
-        qDebug() << "Running script is NULL and should not be!";
-    else {
-        if (runningScript->row() == 0) emit initialized();
-    }
-
     runningScript->setForeground(Qt::black);
 
     if (executionList.isEmpty()) {
@@ -443,8 +429,6 @@ void ScriptModule::scriptFinished(int exitCode) {
     } else {
         if (exitCode == -1) {
             cleanupExecution();
-            //if(!selection->selectedRows().isEmpty())
-            //  emit currentScriptChanged(selection->selectedRows().last());
         } else {
             emit scriptCompleted(runningScript->index());
             runningScript = NULL;

@@ -30,10 +30,6 @@ ResultsData::ResultsData(const QDir& workDir, QObject *parent)
 : QObject(parent) {
     mainDir = workDir.canonicalPath();
     dryRun = false;
-    //watcher.addPath(ProjectData::logsDir(workDir).canonicalPath());
-    //connect(&watcher, &QFileSystemWatcher::directoryChanged, [=] () {
-    //    load();
-    //});
 }
 
 bool ResultsData::load(const QString &name) {
@@ -41,6 +37,7 @@ bool ResultsData::load(const QString &name) {
     QFile file(fileName);
     results.clear();
     images.clear();
+    imagesToBeReset.clear();
     imagesImported = false;
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         emit loaded(false);
@@ -87,7 +84,7 @@ bool ResultsData::load(const QString &name) {
                 currentDirectory = line.replace(QRegExp(".*<\\s*IMAGEDIR\\s*=\\s*\\\"?\\s*([^\"\\s]*)\\s*\\\"?\\s*>.*", Qt::CaseInsensitive), "\\1");
                 results[currentDirectory]["##CONFFILE##"] = "2dx_image.cfg";
             } else if (line.contains(QRegExp("<\\s*RESETDIR\\s*=", Qt::CaseInsensitive))) {
-                projectData.reloadParameterData(QDir(line.replace(QRegExp(".*<\\s*RESETDIR\\s*=\\s*\\\"?\\s*([^\"\\s]*)\\s*\\\"?\\s*>.*", Qt::CaseInsensitive), "\\1")));
+                imagesToBeReset.append(line.replace(QRegExp(".*<\\s*RESETDIR\\s*=\\s*\\\"?\\s*([^\"\\s]*)\\s*\\\"?\\s*>.*", Qt::CaseInsensitive), "\\1"));
             } else if (line.contains(QRegExp("<IMPORTDIR>", Qt::CaseInsensitive))) {
                 imagesImported = true;
                 //qDebug() << "Ok. Got that new images were added";
@@ -126,6 +123,11 @@ bool ResultsData::save() {
     progressDialog.setWindowTitle(tr("Saving results..."));
     progressDialog.show();
     int saveProgress = 0;
+    
+    for(QString image : imagesToBeReset) {
+        qDebug() << "Reseting: " << image;
+        projectData.reloadParameterData(QDir(image));
+    }
 
     while (it.hasNext()) {
         it.next();
@@ -146,23 +148,22 @@ bool ResultsData::save() {
                     if (!j.key().contains(QRegExp("^##\\w*##$"))) {
                         if (!dryRun) {
                             if (j.key().contains("##FORCE##")) {
-                                qDebug() << "setForce " << j.key().trimmed().replace("##FORCE##","") << " to " << j.value().trimmed(); 
-                                local->setForce(j.key().trimmed().replace("##FORCE##", ""), j.value().trimmed());
+                                //qDebug() << "setForce " << j.key().trimmed().replace("##FORCE##","") << " to " << j.value().trimmed(); 
+                                local->setForce(j.key().trimmed().replace("##FORCE##", ""), j.value().trimmed(), false);
                             } else {
-                                qDebug() << "set " << j.key().trimmed() << " to " << j.value().trimmed(); 
-                                local->set(j.key().trimmed(), j.value().trimmed());
+                                //qDebug() << "set " << j.key().trimmed() << " to " << j.value().trimmed(); 
+                                local->set(j.key().trimmed(), j.value().trimmed(), false);
                             }
                         }
                     }
                 }
-                local->save();
+                local->setModified(true);
             }
         } else {
             qDebug() << "CRITICAL: Config file for saving results: " << (it.key() + "/" + it.value()["##CONFFILE##"]) << " does not exist.";
         }
     }
 
-    emit saved(true);
     return true;
 }
 

@@ -36,11 +36,12 @@ QDir getProjectDir(const QString& workingDir) {
         dir.cdUp();
     }
     
-    if(QFileInfo(dir.canonicalPath() + "/merge/2dx_merge.cfg").exists()) return dir;
-    else {
+    if(!QFileInfo(dir.canonicalPath() + "/merge/2dx_merge.cfg").exists()) {
         qDebug() << "ERROR: Could not find the project directory!!";
         QCoreApplication::exit(1);
-    }  
+    }
+    
+    return dir;
 }
 
 int main(int argc, char *argv[]) {

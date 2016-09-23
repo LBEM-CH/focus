@@ -47,20 +47,11 @@ public:
         SortRole = Qt::UserRole + 2
     };
 
-    enum SaveOptions {
-        ALL, EVEN_ONLY, ODD_ONLY
-    };
-
     ProjectModel(const QString &path, const QString &columnsFile, QObject *parent = 0);
-
-    void setSaveName(const QString &saveName);
-    void setEvenImageFileName(const QString& name);
-    void setOddImageFileName(const QString& name);
 
     QString pathFromIndex(const QModelIndex &index);
     QString relativePathFromIndex(const QModelIndex& index);
-    QStringList getSelectionNames();
-    QString getProjectPath() const;
+    QStringList getSelectedImagePaths();
     QStringList parentDirs();
     QList<bool> visibleColumns();
 
@@ -78,10 +69,8 @@ public slots:
     void itemDeselected(const QModelIndex &index);
     void changeItemCheckedRole(const QModelIndex &index, bool check = true);
     void currentRowChanged(const QModelIndex&, const QModelIndex&);
-    void confChanged(const QString &path);
     bool removeSelected();
 
-    bool save(QStandardItem *currentItem, int itemCount, QFile &saveFile, SaveOptions option = ALL);
     bool submit();
 
     void updateItems(QStandardItem *element);
@@ -94,7 +83,7 @@ public slots:
     void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
     void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
     void autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
-    bool loadSelection(const QString &fileName = "");
+    void loadSelectionList(const QStringList& list);
     bool loadHidden(const QString &columnsFile);
     bool saveColumns();
     bool saveColumns(const QString &columnsFile);
@@ -102,8 +91,7 @@ public slots:
 signals:
     void currentImage(const QString&);
     void reloading();
-    void submitting();
-
+    
 private:
 
     QFileSystemWatcher watcher;
@@ -116,9 +104,6 @@ private:
     QString projectPath;
     QString columnsDataFile;
     QStringList columnsFileHeader;
-    QString saveFileName;
-    QString evenImageFileName;
-    QString oddImageFileName;
     QStringList labels;
 
     QModelIndex currentIndex;

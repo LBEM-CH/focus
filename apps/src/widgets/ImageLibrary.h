@@ -24,8 +24,6 @@ public:
     
 public slots:
     void updateData(const QString& imagePath="");
-    void updateChecks();
-    void timedLoad();
     void setHeaderTitle(const QString& title);
     
 signals:
@@ -43,9 +41,6 @@ private:
     QGridLayout* dataLayout;
     QFrame* dataBox;
     QList<QLabel*> valueLabels;
-    
-    FileWatcher watcher;
-    QTimer timer;
     
     QLabel* imageLabel;
     QLabel* headerTitle;

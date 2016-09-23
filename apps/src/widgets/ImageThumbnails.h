@@ -29,9 +29,6 @@ public slots:
     void updateChecks(const QStringList& checkedImages);
     void saveChecks();
     
-signals:
-    void selectionCountChanged(int count);
-    
 protected:
     void mousePressEvent(QMouseEvent* e) override;
     

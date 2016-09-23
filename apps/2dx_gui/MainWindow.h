@@ -71,10 +71,7 @@ public slots:
 
     void editHelperConf();
 
-    void setSaveState(bool state);
-
     void open(const QString& projectPath="");
-    
     void save();
 
     void showImageWindow(const QModelIndex&, bool supressWarnings=false);
@@ -90,7 +87,6 @@ protected:
     void closeEvent(QCloseEvent *event);
     
 private:
-    void setupActions();
     void setupMenuBar();
     void setupWindows();
     void setupToolBar();
@@ -113,13 +109,6 @@ private:
     ExecutionWindow* mergeWin_;
     ExecutionWindow* spWin_;
     ExecutionWindow* projectToolsWin_;
-    
-    /**
-     * Standard actions
-     */
-    QAction* openAction;
-    QAction* saveAction;
-    QAction* viewAlbum;
     
     QToolButton* openLibraryWindowAct;
     QToolButton* openImageWindowAct;

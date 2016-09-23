@@ -20,8 +20,8 @@
 #include <QColor>
 #include <QTableView>
 #include <QToolBar>
-#include <QAction>
-#include <QActionGroup>
+#include <QToolButton>
+#include <QButtonGroup>
 #include <QFormLayout>
 #include <QSpinBox>
 
@@ -30,77 +30,93 @@
 #include "UserPreferenceData.h"
 
 #include "PreferencesDialog.h"
+#include "ParameterWidget.h"
 
 
 PreferencesDialog::PreferencesDialog(QWidget* parent)
 : QDialog(parent) {
 
     pagesWidget_ = new QStackedWidget;
-    pagesWidget_->addWidget(getAppsPage());
-    pagesWidget_->addWidget(getApperancePage());
+    pagesWidget_->addWidget(getProjectPage());
+    pagesWidget_->addWidget(getPathsPage());
+    pagesWidget_->addWidget(getViewersPage());
+    pagesWidget_->addWidget(getFontsPage());
     pagesWidget_->setCurrentIndex(0);
 
     QPushButton *closeButton = new QPushButton(tr("Close"));
     connect(closeButton, &QAbstractButton::clicked, this, &QWidget::close);
-
-    QFrame* vLine = new QFrame(this);
-    vLine->setFrameStyle(QFrame::VLine | QFrame::Sunken);
     
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
+    buttonsLayout->setMargin(10);
     buttonsLayout->addStretch(1);
     buttonsLayout->addWidget(closeButton);
     
+    QFrame* hLine = new QFrame(this);
+    hLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+    
     QVBoxLayout *verticalLayout = new QVBoxLayout;
+    verticalLayout->setMargin(0);
+    verticalLayout->setSpacing(0);
+    verticalLayout->addStretch(0);
+    verticalLayout->addWidget(setupToolBar(), 0);
+    verticalLayout->addWidget(hLine, 0);
     verticalLayout->addWidget(pagesWidget_, 1);
     verticalLayout->addSpacing(12);
     verticalLayout->addLayout(buttonsLayout, 0);
     
-    QHBoxLayout *horizontalLayout = new QHBoxLayout;
-    horizontalLayout->setMargin(0);
-    horizontalLayout->setSpacing(0);
-    horizontalLayout->addWidget(setupToolBar(), 0);
-    horizontalLayout->addWidget(vLine, 0);
-    horizontalLayout->addLayout(verticalLayout, 1);
-    
-    setLayout(horizontalLayout);
+    setLayout(verticalLayout);
 
     setWindowTitle(tr("Preferences"));
     setModal(true);
-    resize(500, 400);
+    resize(550, 450);
 }
 
-QToolBar* PreferencesDialog::setupToolBar() {  
-    QToolBar* contentsWidget_ = new QToolBar("Select");
-    contentsWidget_->setOrientation(Qt::Vertical);
-    contentsWidget_->setIconSize(QSize(36, 36));
+QToolBar* PreferencesDialog::setupToolBar() {
+    toolBarButtonGroup_ = new QButtonGroup(this);
+    toolBarButtonGroup_->setExclusive(true);
+    
+    contentsWidget_ = new QToolBar("Select");
+    contentsWidget_->setOrientation(Qt::Horizontal);
+    contentsWidget_->setIconSize(QSize(32, 32));
+    
+    QWidget* spacer1 = new QWidget();
+    spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QWidget* spacer2 = new QWidget();
+    spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    contentsWidget_->addWidget(spacer1);
+    getToolButton("project_settings", "Project", 0);
+    getToolButton("paths", "Paths", 1);
+    getToolButton("viewer", "Viewers", 2);
+    getToolButton("fonts", "Font", 3);
+    contentsWidget_->addWidget(spacer2);
 
-    QAction *externalButton = new QAction(ApplicationData::icon("external"), tr("Linked Apps"), contentsWidget_);
-    externalButton->setCheckable(true);
-    connect(externalButton, &QAction::triggered,
-            [=] () {
-                pagesWidget_->setCurrentIndex(0);
-            });
-            
-    QAction *appearanceButton = new QAction(ApplicationData::icon("appearance"), tr("Appearance"), contentsWidget_);
-    appearanceButton->setCheckable(true);
-    connect(appearanceButton, &QAction::triggered,
-            [=] () {
-                pagesWidget_->setCurrentIndex(1);
-            });
-            
-    QActionGroup* group = new QActionGroup(this);
-    group->setExclusive(true);
-    group->addAction(externalButton);
-    group->addAction(appearanceButton);
-    
-    contentsWidget_->addAction(externalButton);
-    contentsWidget_->addAction(appearanceButton);
-    
-    externalButton->setChecked(true);
     return contentsWidget_;
 }
 
-QWidget* PreferencesDialog::getApperancePage() {
+void PreferencesDialog::getToolButton(const QString& ic, const QString& text, int indexOfStackedWidget) {
+    QToolButton *button = new QToolButton;
+    button->setIcon(ApplicationData::icon(ic));
+    button->setText(text);
+    button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    button->setFixedSize(QSize(64, 64));
+    button->setCheckable(true);
+    if(indexOfStackedWidget == 0) button->setChecked(true);
+    connect(button, &QToolButton::toggled, [ = ] (){
+        pagesWidget_->setCurrentIndex(indexOfStackedWidget);
+    });
+    
+    toolBarButtonGroup_->addButton(button);
+    contentsWidget_->addWidget(button);
+}
+
+QWidget* PreferencesDialog::getProjectPage() {
+    QWidget* widget = new QWidget;
+    return widget;
+}
+
+
+
+QWidget* PreferencesDialog::getFontsPage() {
     QWidget* widget = new QWidget();
 
     //---------------------
@@ -142,62 +158,18 @@ QWidget* PreferencesDialog::getApperancePage() {
     return widget;
 }
 
-QWidget* PreferencesDialog::getAppsPage() {
-    QWidget* widget = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addStretch(0);
-
-    ParametersConfiguration *data = userPreferenceData.data();
-    for (unsigned int i = 0; i < data->size(); i++) {
-        QGroupBox* sectionBox = new QGroupBox((*data)[i]->title());
-        QFormLayout* formLayout_ = new QFormLayout();
-        formLayout_->setRowWrapPolicy(QFormLayout::WrapLongRows);
-        formLayout_->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
-        formLayout_->setFormAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-        formLayout_->setLabelAlignment(Qt::AlignLeft);
-
-        for (unsigned int j = 0; j < (*data)[i]->size(); j++) {
-            ParameterElementData* element = (*(*data)[i])[j];
-            QLabel* label = new QLabel(element->label());
-            QString toolTip = element->name() + "<br><br>" + element->legend();
-            label->setToolTip(toolTip);
-            LineEditSet* editWid = new LineEditSet(1, sectionBox);
-            editWid->setValue(element->value().toString());
-            elementToWidget.insert(element->name(), editWid);
-            formLayout_->addRow(label, editWid);   
-        }
-        
-        sectionBox->setLayout(formLayout_);
-        layout->addWidget(sectionBox);
-    }
-
-    QPushButton *saveButton = new QPushButton("Save", this);
-    connect(saveButton, SIGNAL(released()), this, SLOT(saveApps()));   
-    QPushButton *resetButton = new QPushButton("Reset", this);
-    connect(resetButton, SIGNAL(released()), this, SLOT(loadApps()));
-    
-    QHBoxLayout* buttonLayout = new QHBoxLayout;
-    buttonLayout->addWidget(resetButton);
-    buttonLayout->addWidget(saveButton);
-    
-    layout->addLayout(buttonLayout);
-    layout->addStretch(1);
-    widget->setLayout(layout);
-    loadApps();
+QWidget* PreferencesDialog::getViewersPage() {
+    ParameterSectionData* section = (*userPreferenceData.data())[1];
+    QStringList parameters;
+    for (unsigned int j = 0; j < section->size(); j++) parameters.append((*section)[j]->name());
+    ParametersWidget* widget = new ParametersWidget(userPreferenceData.data(), parameters, 1);
     return widget;
 }
 
-void PreferencesDialog::saveApps() {
-    for(int i=0; i< elementToWidget.keys().size(); ++i) {
-        QString element = elementToWidget.keys()[i];
-        UserData::Instance().set(element, elementToWidget[element]->valueAt(0));
-    }
-    close();
-}
-
-void PreferencesDialog::loadApps() {
-    for(int i=0; i< elementToWidget.keys().size(); ++i) {
-        QString element = elementToWidget.keys()[i];
-        elementToWidget[element]->setValue(UserData::Instance().get(element));
-    }
+QWidget* PreferencesDialog::getPathsPage() {
+    ParameterSectionData* section = (*userPreferenceData.data())[0];
+    QStringList parameters;
+    for (unsigned int j = 0; j < section->size(); j++) parameters.append((*section)[j]->name());
+    ParametersWidget* widget = new ParametersWidget(userPreferenceData.data(), parameters, 1);
+    return widget;
 }

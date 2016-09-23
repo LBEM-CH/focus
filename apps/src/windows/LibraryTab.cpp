@@ -74,15 +74,17 @@ LibraryTab::LibraryTab(QWidget* parent)
     QGridLayout* mainLayout = new QGridLayout(this);
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
-    mainLayout->addWidget(dirView, 0, 0);
-    mainLayout->addWidget(previewContainer, 1, 0);
-    mainLayout->addWidget(setupToolBar(), 0, 1, 2, 1, Qt::AlignTop);
+    mainLayout->addWidget(setupLibraryControls(), 0, 0);
+    mainLayout->addWidget(dirView, 1, 0);
+    mainLayout->addWidget(previewContainer, 2, 0);
+    mainLayout->addWidget(setupToolBar(), 0, 1, 3, 1, Qt::AlignTop);
     
     mainLayout->setColumnStretch(0, 1);
     mainLayout->setColumnStretch(1, 0);
     
-    mainLayout->setRowStretch(0, 1);
-    mainLayout->setRowStretch(1, 0);
+    mainLayout->setRowStretch(0, 0);
+    mainLayout->setRowStretch(1, 1);
+    mainLayout->setRowStretch(2, 0);
     
     this->setLayout(mainLayout);
 
@@ -106,20 +108,11 @@ void LibraryTab::setupDirectoryContainer() {
     QString projectDir = projectData.projectDir().canonicalPath();
 
     dirModel = new ProjectModel(projectDir, projectData.projectWorkingDir().canonicalPath() + "/config/projectMenu.inf", this);
-
-    QString savePath = projectData.selectionDirfile();
-    QString evenPath = projectData.evenSelectionDirfile();
-    QString oddPath = projectData.oddSelectionDirfile();
-    if (!savePath.isEmpty()) {
-        dirModel->setSaveName(savePath);
-        dirModel->setEvenImageFileName(evenPath);
-        dirModel->setOddImageFileName(oddPath);
-        dirModel->loadSelection();
-    }
+    dirModel->loadSelectionList(projectData.imagesSelected());
 
     connect(dirModel, SIGNAL(currentImage(const QString&)), this, SLOT(setPreviewImages(const QString&)));
     connect(dirModel, SIGNAL(reloading()), this, SLOT(reload()));
-    connect(dirModel, SIGNAL(submitting()), this, SLOT(resetSelectionState()));
+    connect(&projectData, &ProjectData::selectionChanged, this, &LibraryTab::resetSelectionState);
 
     sortModel = new QSortFilterProxyModel(this);
     sortModel->setSourceModel(dirModel);
@@ -183,6 +176,107 @@ void LibraryTab::setupDirectoryContainer() {
     }
 }
 
+QToolBar* LibraryTab::setupLibraryControls() {
+    QToolBar* toolbar = new QToolBar(this);
+    toolbar->setIconSize(QSize(24,24));
+    
+    //Check Group
+    QAction* showSelectedAction = getLibraryToolBarAction("selected", "Show checked images only", "Ctrl+X", true);
+    connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
+    toolbar->addAction(showSelectedAction);
+    
+    QAction* selectAllAction = getLibraryToolBarAction("check_all", "Check All Images", "Ctrl+A", false);
+    connect(selectAllAction, SIGNAL(triggered()), dirModel, SLOT(selectAll()));
+    toolbar->addAction(selectAllAction);
+    
+    QAction *invertSelectedAction = getLibraryToolBarAction("check_invert", "Invert Check", "Ctrl+I", false);
+    connect(invertSelectedAction, SIGNAL(triggered()), dirModel, SLOT(invertSelection()));
+    toolbar->addAction(invertSelectedAction);
+    
+    QAction* addSelectionAction = getLibraryToolBarAction("add_selection", "Check highlighted images", "Ctrl+C", false);
+    connect(addSelectionAction, SIGNAL(triggered()), this, SLOT(extendSelection()));
+    toolbar->addAction(addSelectionAction);
+
+    QAction* removeSelectionAction = getLibraryToolBarAction("remove_selection", "Un-check highlighted images", "Ctrl+U", false);
+    connect(removeSelectionAction, SIGNAL(triggered()), this, SLOT(reduceSelection()));
+    toolbar->addAction(removeSelectionAction);
+    
+    toolbar->addSeparator();
+    
+    
+    //Flag Group
+    QAction* noFlag = getLibraryToolBarAction("flag_none", "Remove flag from highlighted", "Ctrl+Shift+N", false);
+    connect(noFlag, &QAction::triggered, [=] () {flagSelection("none");});
+    toolbar->addAction(noFlag);
+    
+    QAction* redFlag = getLibraryToolBarAction("flag_red", "Flag highlighted to red", "Ctrl+Shift+R", false);
+    connect(redFlag, &QAction::triggered, [=] () {flagSelection("red");});
+    toolbar->addAction(redFlag);
+    
+    QAction* greenFlag = getLibraryToolBarAction("flag_green", "Flag highlighted to green", "Ctrl+Shift+G", false);
+    connect(greenFlag, &QAction::triggered, [=] () {flagSelection("green");});
+    toolbar->addAction(greenFlag);
+    
+    QAction* blueFlag = getLibraryToolBarAction("flag_blue", "Flag highlighted to blue", "Ctrl+Shift+B", false);
+    connect(blueFlag, &QAction::triggered, [=] () {flagSelection("blue");});
+    toolbar->addAction(blueFlag);
+    
+    QAction* goldFlag = getLibraryToolBarAction("flag_gold", "Flag highlighted to gold", "Ctrl+Shift+O", false);
+    connect(goldFlag, &QAction::triggered, [=] () {flagSelection("gold");});
+    toolbar->addAction(goldFlag);
+
+    toolbar->addSeparator();
+    
+    //Image Folder Group
+    QAction* addFolderAction = getLibraryToolBarAction("add_folder", "Add Image Folder", "Ctrl+Alt+F", false);
+    connect(addFolderAction, SIGNAL(triggered()), this, SLOT(addImageFolder()));
+    toolbar->addAction(addFolderAction);
+    
+    QAction* renameFolderAction = getLibraryToolBarAction("rename", "Rename Image Folder", "Ctrl+Alt+R", false);
+    connect(renameFolderAction, SIGNAL(triggered()), this, SLOT(renameImageFolder()));
+    toolbar->addAction(renameFolderAction);
+    
+    QAction* moveImageAction = getLibraryToolBarAction("move_selection", "Move highlighted", "Ctrl+Alt+M", false);
+    connect(moveImageAction, SIGNAL(triggered()), this, SLOT(moveSelectiontoFolder()));
+    toolbar->addAction(moveImageAction);
+    
+    QAction* trashImageAction = getLibraryToolBarAction("trash_selection", "Trash highlighted", "Ctrl+Alt+T", false);
+    connect(trashImageAction, SIGNAL(triggered()), this, SLOT(trashSelection()));
+    toolbar->addAction(trashImageAction);
+    
+    QAction* copyImageAction = getLibraryToolBarAction("copy_selection", "Copy to second project", "Ctrl+Alt+S", false);
+    connect(copyImageAction, SIGNAL(triggered()), this, SLOT(copyImage()));
+    toolbar->addAction(copyImageAction);
+    
+    toolbar->addSeparator();
+    
+    //Backup/Save Group
+    QAction *saveDirectorySelectionAction = getLibraryToolBarAction("check_save", "Save checked list", "", false);
+    connect(saveDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(saveDirectorySelection()));
+    toolbar->addAction(saveDirectorySelectionAction);
+
+    QAction *loadDirectorySelectionAction = getLibraryToolBarAction("check_load", "Load checked list", "", false);
+    connect(loadDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(loadDirectorySelection()));
+    toolbar->addAction(loadDirectorySelectionAction);
+    
+    return toolbar;
+}
+
+QAction* LibraryTab::getLibraryToolBarAction(const QString& ic, const QString& tooltip, const QString& shortcut, bool checkable) {
+    QAction* action = new QAction(dirView);
+    action->setIcon(ApplicationData::icon(ic));
+    action->setCheckable(checkable);
+    if(shortcut.isEmpty()) {
+        action->setToolTip(tooltip);
+    }
+    else {
+        action->setShortcut(shortcut);
+        action->setToolTip(tooltip + "\nShortcut: " + action->shortcut().toString(QKeySequence::NativeText));
+    }
+    
+    return action;
+}
+
 QWidget* LibraryTab::setupToolBar() {
     QTabWidget* tabWidget = new QTabWidget;
     tabWidget->addTab(setupSelectionTab(), "Library Tools");
@@ -219,163 +313,18 @@ QWidget* LibraryTab::setupToolBar() {
     return toolBar;
 }
 
+
 QWidget* LibraryTab::setupSelectionTab() {
-    
-    QSizePolicy sizePolicy((QSizePolicy::Policy)QSizePolicy::Minimum,(QSizePolicy::Policy)QSizePolicy::Fixed);
-    sizePolicy.setHorizontalStretch(0);
-    sizePolicy.setVerticalStretch(0);
-    
-    //Check Group
-    QGroupBox* checkGroup = new QGroupBox("Manage Check");
-    checkGroup->setSizePolicy(sizePolicy);
-    QHBoxLayout* checkGroupLayout = new QHBoxLayout;
-    checkGroupLayout->setSpacing(0);
-    
-    QToolButton* showSelectedAction = new QToolButton(dirView);
-    showSelectedAction->setIcon(ApplicationData::icon("selected"));
-    showSelectedAction->setIconSize(QSize(32, 32));
-    showSelectedAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    showSelectedAction->setShortcut(tr("Ctrl+X"));
-    showSelectedAction->setToolTip("Show checked images only\nShortcut: " + showSelectedAction->shortcut().toString(QKeySequence::NativeText));
-    showSelectedAction->setCheckable(true);
-    connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
-    checkGroupLayout->addWidget(showSelectedAction);
-    
-    QToolButton *selectAllAction = new QToolButton(dirView);
-    selectAllAction->setIcon(ApplicationData::icon("check_all"));
-    selectAllAction->setIconSize(QSize(32, 32));
-    selectAllAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    selectAllAction->setShortcut(tr("Ctrl+A"));
-    selectAllAction->setToolTip("Check All Images\nShortcut: " + selectAllAction->shortcut().toString(QKeySequence::NativeText));
-    connect(selectAllAction, SIGNAL(clicked()), dirModel, SLOT(selectAll()));
-    checkGroupLayout->addWidget(selectAllAction);
-    
-    QToolButton *invertSelectedAction = new QToolButton(dirView);
-    invertSelectedAction->setIcon(ApplicationData::icon("check_invert"));
-    invertSelectedAction->setIconSize(QSize(32, 32));
-    invertSelectedAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    invertSelectedAction->setShortcut(tr("Ctrl+I"));
-    invertSelectedAction->setToolTip("Invert Check\nShortcut: " + invertSelectedAction->shortcut().toString(QKeySequence::NativeText));
-    connect(invertSelectedAction, SIGNAL(clicked()), dirModel, SLOT(invertSelection()));
-    checkGroupLayout->addWidget(invertSelectedAction);
-    
-    QToolButton* addSelectionAction = new QToolButton(dirView);
-    addSelectionAction->setIcon(ApplicationData::icon("add_selection"));
-    addSelectionAction->setIconSize(QSize(32, 32));
-    addSelectionAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    addSelectionAction->setShortcut(tr("Ctrl+C"));
-    addSelectionAction->setToolTip("Check highlighted images\nShortcut: " + addSelectionAction->shortcut().toString(QKeySequence::NativeText));
-    connect(addSelectionAction, SIGNAL(clicked()), this, SLOT(extendSelection()));
-    checkGroupLayout->addWidget(addSelectionAction);
+    QWidget* tab = new QWidget;
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->setSpacing(10);
+    layout->addStretch(0);
+    layout->addWidget(setupAutoSelectionTool(), 0);
+    tab->setLayout(layout);
+    return tab;
+}
 
-    QToolButton* removeSelectionAction = new QToolButton(dirView);
-    removeSelectionAction->setIcon(ApplicationData::icon("remove_selection"));
-    removeSelectionAction->setIconSize(QSize(32, 32));
-    removeSelectionAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    removeSelectionAction->setShortcut(tr("Ctrl+U"));
-    removeSelectionAction->setToolTip("Uncheck highlighted images\nShortcut: " + removeSelectionAction->shortcut().toString(QKeySequence::NativeText));
-    connect(removeSelectionAction, SIGNAL(clicked()), this, SLOT(reduceSelection()));
-    checkGroupLayout->addWidget(removeSelectionAction);
-
-    checkGroup->setLayout(checkGroupLayout);
-    
-    //Flag Group
-    QGroupBox* flagGroup = new QGroupBox("Flag Images");
-    flagGroup->setSizePolicy(sizePolicy);
-    QHBoxLayout* flagGroupLayout = new QHBoxLayout;
-    flagGroupLayout->setSpacing(0);
-    
-    QToolButton* noFlag = new QToolButton(dirView);
-    noFlag->setToolTip("Remove flag from highlighted");
-    noFlag->setIcon(ApplicationData::icon("flag_none"));
-    noFlag->setIconSize(QSize(32, 32));
-    noFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(noFlag, &QToolButton::clicked, [=] () {flagSelection("none");});
-    flagGroupLayout->addWidget(noFlag);
-    
-    QToolButton* redFlag = new QToolButton(dirView);
-    redFlag->setToolTip("Flag highlighted to red");
-    redFlag->setIcon(ApplicationData::icon("flag_red"));
-    redFlag->setIconSize(QSize(32, 32));
-    redFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(redFlag, &QToolButton::clicked, [=] () {flagSelection("red");});
-    flagGroupLayout->addWidget(redFlag);
-    
-    QToolButton* greenFlag = new QToolButton(dirView);
-    greenFlag->setToolTip("Flag highlighted to green");
-    greenFlag->setIcon(ApplicationData::icon("flag_green"));
-    greenFlag->setIconSize(QSize(32, 32));
-    greenFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(greenFlag, &QToolButton::clicked, [=] () {flagSelection("green");});
-    flagGroupLayout->addWidget(greenFlag);
-    
-    QToolButton* blueFlag = new QToolButton(dirView);
-    blueFlag->setToolTip("Flag highlighted to blue");
-    blueFlag->setIcon(ApplicationData::icon("flag_blue"));
-    blueFlag->setIconSize(QSize(32, 32));
-    blueFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(blueFlag, &QToolButton::clicked, [=] () {flagSelection("blue");});
-    flagGroupLayout->addWidget(blueFlag);
-    
-    QToolButton* goldFlag = new QToolButton(dirView);
-    goldFlag->setToolTip("Flag highlighted to gold");
-    goldFlag->setIcon(ApplicationData::icon("flag_gold"));
-    goldFlag->setIconSize(QSize(32, 32));
-    goldFlag->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(goldFlag, &QToolButton::clicked, [=] () {flagSelection("gold");});
-    flagGroupLayout->addWidget(goldFlag);
-    
-    flagGroup->setLayout(flagGroupLayout);
-    
-    
-    //Image Folder Group
-    QGroupBox* imageFolderGroup = new QGroupBox("Organize Image Folder");
-    imageFolderGroup->setSizePolicy(sizePolicy);
-    QHBoxLayout* imageFolderGroupLayout = new QHBoxLayout;
-    imageFolderGroupLayout->setSpacing(0);
-    
-    QToolButton* addFolderAction = new QToolButton(dirView);
-    addFolderAction->setToolTip("Add Image Folder");
-    addFolderAction->setIcon(ApplicationData::icon("add_folder"));
-    addFolderAction->setIconSize(QSize(32, 32));
-    addFolderAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(addFolderAction, SIGNAL(clicked()), this, SLOT(addImageFolder()));
-    imageFolderGroupLayout->addWidget(addFolderAction);
-    
-    QToolButton* renameFolderAction = new QToolButton(dirView);
-    renameFolderAction->setToolTip("Rename Image Folder");
-    renameFolderAction->setIcon(ApplicationData::icon("rename"));
-    renameFolderAction->setIconSize(QSize(32, 32));
-    renameFolderAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(renameFolderAction, SIGNAL(clicked()), this, SLOT(renameImageFolder()));
-    imageFolderGroupLayout->addWidget(renameFolderAction);
-    
-    QToolButton* moveImageAction = new QToolButton(dirView);
-    moveImageAction->setToolTip("Move highlighted");
-    moveImageAction->setIcon(ApplicationData::icon("move_selection"));
-    moveImageAction->setIconSize(QSize(32, 32));
-    moveImageAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(moveImageAction, SIGNAL(clicked()), this, SLOT(moveSelectiontoFolder()));
-    imageFolderGroupLayout->addWidget(moveImageAction);
-    
-    QToolButton* trashImageAction = new QToolButton(dirView);
-    trashImageAction->setToolTip("Trash highlighted");
-    trashImageAction->setIcon(ApplicationData::icon("trash_selection"));
-    trashImageAction->setIconSize(QSize(32, 32));
-    trashImageAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(trashImageAction, SIGNAL(clicked()), this, SLOT(trashSelection()));
-    imageFolderGroupLayout->addWidget(trashImageAction);
-    
-    QToolButton* copyImageAction = new QToolButton(dirView);
-    copyImageAction->setToolTip("Copy to second project");
-    copyImageAction->setIcon(ApplicationData::icon("copy_selection"));
-    copyImageAction->setIconSize(QSize(32, 32));
-    copyImageAction->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    connect(copyImageAction, SIGNAL(clicked()), this, SLOT(copyImage()));
-    imageFolderGroupLayout->addWidget(copyImageAction);
-    
-    imageFolderGroup->setLayout(imageFolderGroupLayout);
-    
+QGroupBox* LibraryTab::setupAutoSelectionTool() {
     //Auto Selection Group
     QGroupBox* autoSelectionGroup = new QGroupBox("Automatic Selection");
     
@@ -428,53 +377,24 @@ QWidget* LibraryTab::setupSelectionTab() {
     autoSelectLayout->addRow("Parameter to use", parameterToUse);
     autoSelectLayout->addRow("Minimum value", minDegree);
     autoSelectLayout->addRow("Maximum value", maxDegree);
-    autoSelectLayout->addRow("Pos+neg values", negPosOption);
+    autoSelectLayout->addRow("Ignore sign", negPosOption);
     autoSelectLayout->addRow("Include images", selectionFlagLayout);
     autoSelectLayout->addRow(changeSelection);
     
     autoSelectionGroup->setLayout(autoSelectLayout);
     
-    
-    //Backup/Save Group
-    
-    QGroupBox* backupSaveGroup = new QGroupBox("Save and Backup");
-    backupSaveGroup->setSizePolicy(sizePolicy);
-    QVBoxLayout* backupSaveLayout = new QVBoxLayout;
-    
-    QPushButton *saveDirectorySelectionAction = new QPushButton(ApplicationData::icon("check_save"), "Save checked list", this);
-    connect(saveDirectorySelectionAction, SIGNAL(clicked()), this, SLOT(saveDirectorySelection()));
-    backupSaveLayout->addWidget(saveDirectorySelectionAction);
-
-    QPushButton *loadDirectorySelectionAction = new QPushButton(ApplicationData::icon("check_load"), "Load checked list", this);
-    connect(loadDirectorySelectionAction, SIGNAL(clicked()), this, SLOT(loadDirectorySelection()));
-    backupSaveLayout->addWidget(loadDirectorySelectionAction);
-    
-    backupSaveGroup->setLayout(backupSaveLayout);
-    
-    QWidget* tab = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->setSpacing(10);
-    layout->addStretch(0);
-    //layout->addWidget(refreshAction, 0, Qt::AlignTop);
-    //layout->addWidget(importAction, 0, Qt::AlignTop);
-    layout->addWidget(backupSaveGroup, 0, Qt::AlignTop);
-    layout->addWidget(checkGroup, 0, Qt::AlignTop);
-    layout->addWidget(flagGroup, 0, Qt::AlignTop);
-    layout->addWidget(imageFolderGroup, 0, Qt::AlignTop);
-    layout->addWidget(autoSelectionGroup, 0);
-    tab->setLayout(layout);
-    return tab;
+    return autoSelectionGroup;
 }
+
 
 void LibraryTab::loadDirectorySelection() {
     QString loadName = QFileDialog::getOpenFileName(this, "Save Selection As...", projectData.projectWorkingDir().canonicalPath() + "/2dx_merge_dirfile.dat");
-    loadSelection(loadName);
+    projectData.setImagesSelected(projectData.loadSelection(loadName));
 }
 
 void LibraryTab::saveDirectorySelection() {
     QString saveName = QFileDialog::getSaveFileName(this, "Save Selection As...", projectData.projectWorkingDir().canonicalPath() + "/2dx_merge_dirfile.dat");
-    if (QFileInfo(saveName).exists()) QFile::remove(saveName);
-    QFile::copy(projectData.projectWorkingDir().canonicalPath() + "/2dx_merge_dirfile.dat", saveName);
+    projectData.saveSelection(saveName);
 }
 
 ProjectModel* LibraryTab::getDirModel() {
@@ -522,10 +442,6 @@ void LibraryTab::showSelected(bool enable) {
     }
 }
 
-bool LibraryTab::loadSelection(const QString &fileName) {
-    return dirModel->loadSelection(fileName);
-}
-
 void LibraryTab::updateModel() {
     dirModel->reload();
 
@@ -540,7 +456,7 @@ void LibraryTab::updateModel() {
         dirView->resizeColumnToContents(i);
         width += dirView->columnWidth(i);
     }
-    dirModel->loadSelection();
+    dirModel->loadSelectionList(projectData.imagesSelected());
     dirView->expandAll();
 }
 
@@ -922,7 +838,7 @@ void LibraryTab::updatePreview() {
 }
 
 void LibraryTab::resetSelectionState() {
-    QString checked = QString::number(dirModel->getSelectionNames().count());
+    QString checked = QString::number(projectData.imagesSelected().count());
     QString selected = QString::number(dirView->selectionModel()->selectedRows().count());
     selectionState->setText(checked + " checked and " + selected + " highlighted ");
 }

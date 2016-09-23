@@ -84,8 +84,6 @@ signals:
     void scriptCompleted(QModelIndex index);
     void allScriptsCompleted();
 
-    void initialized();
-
 private:
     QDir scriptDir;
     QDir workingDir;

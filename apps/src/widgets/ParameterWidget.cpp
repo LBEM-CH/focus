@@ -47,7 +47,9 @@ void ParametersWidget::initialize(int userLevel, const QStringList& toBeDisplaye
     mainLayout_->setMargin(0);
     mainLayout_->addWidget(scrollArea_);
 
-    setLayout(mainLayout_); 
+    setLayout(mainLayout_);
+    
+    changeFormWidget();
     
 }
 

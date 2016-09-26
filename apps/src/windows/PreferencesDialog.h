@@ -39,7 +39,7 @@ private:
     QWidget* getFontsPage();
     QWidget* getPathsPage();
     QWidget* getViewersPage();
-    QWidget* getProjectPage();
+    QWidget* getGeneralPage();
     
     void getToolButton(const QString& icon, const QString& text, int indexOfStackedWidget);
     

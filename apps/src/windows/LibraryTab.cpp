@@ -91,6 +91,10 @@ LibraryTab::LibraryTab(QWidget* parent)
     connect(&projectData, &ProjectData::imageDirsChanged, [=] () {
         reload();
     });
+    
+    connect(&projectData, &ProjectData::projectNameChanged, [=](const QString& name) {
+       updateProjectName(name); 
+    });
 }
 
 void LibraryTab::showContents(bool show) {

@@ -60,6 +60,7 @@
 #include "ImageTab.h"
 #include "PreferencesDialog.h"
 #include "ImageLibrary.h"
+#include "ProjectWindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -77,7 +78,6 @@ public slots:
     void showImageWindow(const QModelIndex&, bool supressWarnings=false);
     void showImageWindow(const QString&, bool supressWarnings=false);
     
-    void changeProjectName();
     void updateWindowTitle();
     
 signals:
@@ -108,7 +108,7 @@ private:
     ImageTab* imageWin_;
     ExecutionWindow* mergeWin_;
     ExecutionWindow* spWin_;
-    ExecutionWindow* projectToolsWin_;
+    ProjectWindow* projectToolsWin_;
     
     QToolButton* openLibraryWindowAct;
     QToolButton* openImageWindowAct;

@@ -86,6 +86,49 @@ public:
         endGroup();
         return update;
     }
+    
+    void setAutoSaveConfigs(bool save) {
+        beginGroup("gui-general");
+        setValue("autosave", save);
+        endGroup();
+    }
+    
+    bool autoSaveConfigs() {
+        bool save;
+        beginGroup("gui-general");
+        save = value("autosave", true).toBool();
+        endGroup();
+        return save;
+    }
+    
+    void setShowAdvanced(bool show) {
+        beginGroup("gui-general");
+        setValue("advanced", show);
+        endGroup();
+    }
+    
+    bool showAdvanced() {
+        bool save;
+        beginGroup("gui-general");
+        save = value("advanced", false).toBool();
+        endGroup();
+        return save;
+    }
+    
+    void setUserLevel(int level) {
+        beginGroup("gui-general");
+        setValue("userLevel", level);
+        endGroup();
+    }
+    
+    int userLevel() {
+        int level;
+        beginGroup("gui-general");
+        level = value("userLevel", 1).toInt();
+        endGroup();
+        return level;
+    }
+    
 
 };
 

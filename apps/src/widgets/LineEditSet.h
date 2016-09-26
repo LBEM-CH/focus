@@ -63,6 +63,10 @@ public slots:
     void setValue(const QString& value) {
         if(widgets_.size() == 1) {
             widgets_[0]->setText(value);
+            QPalette pal = widgets_[0]->palette();
+            if(widgets_[0]->hasAcceptableInput()) pal.setColor(QPalette::Text, Qt::black);
+            else pal.setColor(QPalette::Text, Qt::red);
+            widgets_[0]->setPalette(pal);
             return;
         }
         QStringList vals = value.trimmed().split(',');
@@ -70,7 +74,13 @@ public slots:
             qDebug() << "WARNING: Trying to set value of element. Got " << vals.size() << " values. But expected: " << widgets_.size();
         }
         for (int i = 0; i < vals.size(); i++) {
-            if (i < widgets_.size()) widgets_[i]->setText(vals[i]);
+            if (i < widgets_.size()) {
+                widgets_[i]->setText(vals[i]);
+                QPalette pal = widgets_[i]->palette();
+                if(widgets_[i]->hasAcceptableInput()) pal.setColor(QPalette::Text, Qt::black);
+                else pal.setColor(QPalette::Text, Qt::red);
+                widgets_[i]->setPalette(pal);
+            }
         }
     }
 

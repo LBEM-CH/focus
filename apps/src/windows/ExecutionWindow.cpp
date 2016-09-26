@@ -9,6 +9,7 @@
 #include "ExecutionWindow.h"
 #include "StatusViewer.h"
 #include "ScriptModuleProperties.h"
+#include "UserPreferences.h"
 
 ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWidget *parent)
 : QWidget(parent) {
@@ -90,7 +91,7 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWi
     
     setLayout(scriptsAndContainerLayout);
 
-    outputVerbosityControl->setValue(1);
+    outputVerbosityControl->setValue(UserPreferences().userLevel());
     defaultModule->selectFirst();
 
     scriptsWidget->setCurrentIndex(0);
@@ -330,8 +331,8 @@ BlockContainer* ExecutionWindow::setupHistoryWindow() {
     historyVerbosityControl->setTickPosition(QSlider::TicksBothSides);
     historyVerbosityControl->setTickInterval(1);
     historyVerbosityControl->setSingleStep(1);
-    historyVerbosityControl->setValue(1);
     connect(historyVerbosityControl, SIGNAL(valueChanged(int)), historyViewer, SLOT(load(int)));
+    historyVerbosityControl->setValue(UserPreferences().userLevel());
 
     QWidget* verbosityControlWidget = new QWidget();
     QHBoxLayout* verbosityControlLayout = new QHBoxLayout(verbosityControlWidget);
@@ -356,6 +357,8 @@ BlockContainer* ExecutionWindow::setupHistoryWindow() {
 
 BlockContainer* ExecutionWindow::setupParameterWindow() {
     parameters = new ParametersWidget(projectData.parameterData(workingDir), this);
+    
+    if(UserPreferences().showAdvanced()) parameters->setSelectionUserLevel(1);
 
     //Setup search box
     parameterSearchBox = new QLineEdit;
@@ -368,6 +371,7 @@ BlockContainer* ExecutionWindow::setupParameterWindow() {
     //Setup advanced level button
     QRadioButton* advancedLevelButton = new QRadioButton();
     advancedLevelButton->setFixedSize(20, 20);
+    advancedLevelButton->setChecked(UserPreferences().showAdvanced());
     connect(advancedLevelButton, &GraphicalButton::toggled, 
             [=](bool val) {
                 if(val) parameters->setSelectionUserLevel(1);

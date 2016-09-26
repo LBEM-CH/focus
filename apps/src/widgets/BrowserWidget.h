@@ -11,6 +11,7 @@
 
 #include "ApplicationData.h"
 #include "GraphicalButton.h"
+#include "PathValidator.h"
 
 class BrowserWidget : public QWidget {
 
@@ -65,6 +66,10 @@ public slots:
 
     void setPath(const QString& path) {
         pathEdit_->setText(path);
+        QPalette pal = pathEdit_->palette();
+        if(pathEdit_->hasAcceptableInput()) pal.setColor(QPalette::Text, Qt::black);
+        else pal.setColor(QPalette::Text, Qt::red);
+        pathEdit_->setPalette(pal);
         defaultPath_ = path;
     }
 
@@ -80,8 +85,14 @@ private:
 
         pathEdit_ = new QLineEdit(this);
         pathEdit_->setFrame(false);
-        connect(pathEdit_, &QLineEdit::textEdited,
-                [=](const QString& text) {emit pathChanged(text);});
+        pathEdit_->setValidator(new PathValidator());
+        connect(pathEdit_, &QLineEdit::textEdited, [=](const QString& text) {
+            QPalette pal = pathEdit_->palette();
+            if(pathEdit_->hasAcceptableInput()) pal.setColor(QPalette::Text, Qt::black);
+            else pal.setColor(QPalette::Text, Qt::red);
+            pathEdit_->setPalette(pal);
+            emit pathChanged(text);
+        });
 
         browseButton_ = new GraphicalButton(ApplicationData::icon("folder"), this);
         browseButton_->setFixedSize(QSize(pathEdit_->sizeHint().height(), pathEdit_->sizeHint().height()));

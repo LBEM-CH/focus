@@ -1,11 +1,12 @@
 
 #include <QDebug>
-#include <QMessageBox>
+#include <QtWidgets>
 
 #include "ApplicationData.h"
 #include "ParameterMaster.h"
 
 #include "ProjectData.h"
+#include "UserPreferences.h"
 
 ProjectData& ProjectData::Instance() {
     static ProjectData instance_;
@@ -13,6 +14,7 @@ ProjectData& ProjectData::Instance() {
 }
 
 void ProjectData::initiailze(const QDir& projectDir) {
+    autoSave_ = UserPreferences().autoSaveConfigs();
     projectDir_ = projectDir;
     registerParameterMaster(ApplicationData::masterCfgFile());
     registerParameterMaster(ApplicationData::userCfgFile());
@@ -181,6 +183,17 @@ QString ProjectData::projectName() {
 
 void ProjectData::setProjectName(const QString& projectName) {
     ProjectPreferences(projectDir()).setProjectName(projectName);
+    emit projectNameChanged(projectName);
+}
+
+void ProjectData::changeProjectName() {
+    bool ok;
+    QString projectName = QInputDialog::getText(NULL, "Project Name", "Enter a name for the project", QLineEdit::Normal,
+            projectData.projectName(), &ok);
+
+    if (ok && !projectName.isEmpty()) {
+        projectData.setProjectName(projectName);
+    }
 }
 
 void ProjectData::toggleAutoSave() {
@@ -192,6 +205,11 @@ void ProjectData::toggleAutoSave() {
         QMessageBox::information(NULL, tr("Automatic Saving"), tr("Automatic Saving is now switched off"));
     }
 }
+
+void ProjectData::setAutoSave(bool save) {
+    autoSave_ = save;
+}
+
 
 bool ProjectData::isAutoSave() {
     return autoSave_;
@@ -294,25 +312,92 @@ void ProjectData::renumberImages() {
         int number = 1;
         for(QString image : list) {
             if(parameterData(QDir(image))) {
-                parameterData(QDir(image))->set("imagenumber", commitIntToStringLength(number++, 8)+"00");
+                parameterData(QDir(image))->setForce("imagenumber", commitIntToStringLength(number++, 8)+"00");
             }
         }
         
-        projectParameterData()->set("import_imagenumber", commitIntToStringLength(number, 4));
+        projectParameterData()->setForce("import_imagenumber", commitIntToStringLength(number, 4));
     }
 }
 
-void ProjectData::AssignEvenOdd() {
+void ProjectData::assignEvenOdd() {
     if(sureDialog("Assign even odd?", "This will assign all the images to either even or odd group.\n\nProceed?")){
         QStringList list = imageList();
         int number = 1;
         for(QString image : list) {
             if(parameterData(QDir(image))) {
-                parameterData(QDir(image))->set("image_evenodd", QString::number(number++%2));
+                parameterData(QDir(image))->setForce("image_evenodd", QString::number(number%2 + 1));
+                number++;
             }
         }
     }
 }
+
+void ProjectData::repairLinks() {
+    if(sureDialog("Repair Project Links", "This will look for all possible image folders and will correctly link them so that 2DX can read these images.\n\nProceed?")) {
+        linkProjectConfig("merge/2dx_merge.cfg", projectDir().absolutePath() + "/2dx_master.cfg");
+        foreach(QString entry, projectDir().entryList(QDir::NoDotAndDotDot | QDir::Dirs)) {
+            if(entry != "merge") linkProjectConfig("../2dx_master.cfg", projectDir().absolutePath() + '/' + entry + "/2dx_master.cfg");
+        }
+        
+        indexImages();
+    }
+} 
+
+void ProjectData::resetImageConfigs() {
+    if(sureDialog("Reset image parameters with project?", "This will replace all the parameters in selected images with that of project.\n\nCAREFUL: You will loose all the processed results.\n\nARE YOU SURE TO Proceed?")) {
+        
+        QStringList selectedList = imagesSelected();
+        
+        QProgressDialog progressDialog;
+        progressDialog.setRange(0, selectedList.size()); // -1 because a merge dir is present in project folder!!);
+        progressDialog.setWindowTitle("Reseting Images");
+        progressDialog.show();
+        
+        
+        for(int i=0; i< selectedList.size(); ++i) {
+            
+            progressDialog.setValue(i+1);
+            progressDialog.setLabelText(tr("Reseting image %1 of %2...").arg(i+1).arg(selectedList.size()));
+            qApp->processEvents();
+
+            if (progressDialog.wasCanceled()) break;
+            
+            QString selected = selectedList[i];
+            
+            QFile(selected + "/2dx_image.cfg").copy(selected + "/2dx_image.cfg-backup4"); 
+            
+            ParametersConfiguration* conf  = parameterData(selected);
+            
+            if(conf) {
+                //Copy some original values
+                QString imageName = conf->getValue("imagename");
+                QString nonMaskName = conf->getValue("nonmaskimagename");
+                QString stackName = conf->getValue("movie_stackname");
+                QString imageNumber = conf->getValue("imagenumber");
+                QString origName = conf->getValue("imagename_original");
+                QString rawName = conf->getValue("movie_stackname_raw");
+
+                projectParameterData()->saveAs(selected + "/2dx_image.cfg", true);
+                conf->reload();
+                
+                //Reset orig values
+                conf->set("imagename", imageName, false);
+                conf->set("nonmaskimagename", nonMaskName, false);
+                conf->set("movie_stackname", stackName, false);
+                conf->set("imagenumber", imageNumber, false);
+                conf->set("imagename_original", origName, false);
+                conf->set("movie_stackname_raw", rawName, false);
+                
+                conf->setModified(true);
+            }
+        }
+        
+        progressDialog.reset();
+        QMessageBox::information(NULL, "Parameters were reset", "All image parameter databases in the files 2dx_image.cfg were reset to the default parameters for this project. If this was a mistake, you can still use the Backup or Restore Databases script to recover the last versions.");
+    }
+}
+
 
 bool ProjectData::sureDialog(const QString& title, const QString& text) {
     if(QMessageBox::question(NULL, title, text, "Yes", "No", QString(), 0, 1) == 0){
@@ -329,6 +414,15 @@ QString ProjectData::commitIntToStringLength(int num, int length) {
     }
     return value;
 }
+
+void ProjectData::linkProjectConfig(const QString& sourceName, const QString& targetLinkName) {
+    if(QFileInfo(targetLinkName).exists()) {
+        QFile(targetLinkName).remove();
+    }
+    
+    QFile::link(sourceName, targetLinkName);
+}
+
 
 
 

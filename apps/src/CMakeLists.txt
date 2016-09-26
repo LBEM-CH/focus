@@ -83,6 +83,7 @@ set(MOC_HDRS
         windows/LibraryTab.h
         windows/OpenProjectWizard.h
         windows/PreferencesDialog.h
+        windows/ProjectWindow.h
         windows/UpdateWindow.h
 )
 

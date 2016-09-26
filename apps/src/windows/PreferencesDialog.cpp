@@ -31,13 +31,14 @@
 
 #include "PreferencesDialog.h"
 #include "ParameterWidget.h"
+#include "ProjectData.h"
 
 
 PreferencesDialog::PreferencesDialog(QWidget* parent)
 : QDialog(parent) {
 
     pagesWidget_ = new QStackedWidget;
-    pagesWidget_->addWidget(getProjectPage());
+    pagesWidget_->addWidget(getGeneralPage());
     pagesWidget_->addWidget(getPathsPage());
     pagesWidget_->addWidget(getViewersPage());
     pagesWidget_->addWidget(getFontsPage());
@@ -84,7 +85,7 @@ QToolBar* PreferencesDialog::setupToolBar() {
     QWidget* spacer2 = new QWidget();
     spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     contentsWidget_->addWidget(spacer1);
-    getToolButton("project_settings", "Project", 0);
+    getToolButton("general", "General", 0);
     getToolButton("paths", "Paths", 1);
     getToolButton("viewer", "Viewers", 2);
     getToolButton("fonts", "Font", 3);
@@ -109,9 +110,53 @@ void PreferencesDialog::getToolButton(const QString& ic, const QString& text, in
     contentsWidget_->addWidget(button);
 }
 
-QWidget* PreferencesDialog::getProjectPage() {
-    QWidget* widget = new QWidget;
-    return widget;
+QWidget* PreferencesDialog::getGeneralPage() {
+    QGroupBox* widget = new QGroupBox("General");
+    
+    QFormLayout* mainLayout = new QFormLayout;
+    mainLayout->setRowWrapPolicy(QFormLayout::WrapLongRows);
+    mainLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    mainLayout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    mainLayout->setLabelAlignment(Qt::AlignRight);
+    
+    QCheckBox* autoSaveBox = new QCheckBox("Automatically save configurations when they are changed");
+    autoSaveBox->setChecked(UserPreferences().autoSaveConfigs());
+    connect(autoSaveBox, &QCheckBox::toggled, [=](bool check){
+        UserPreferences().setAutoSaveConfigs(check);
+        projectData.setAutoSave(check);
+    });
+    mainLayout->addRow(autoSaveBox);
+    
+    QCheckBox* advancedBox = new QCheckBox("Show advanced by default (valid on restart)");
+    advancedBox->setChecked(UserPreferences().showAdvanced());
+    connect(advancedBox, &QCheckBox::toggled, [=](bool check){
+        UserPreferences().setShowAdvanced(check);
+    });
+    mainLayout->addRow(advancedBox);
+     
+    QSlider* outputVerbosityControl = new QSlider;
+    outputVerbosityControl->setOrientation(Qt::Horizontal);
+    outputVerbosityControl->setFixedSize(100, 20);
+    outputVerbosityControl->setMinimum(0);
+    outputVerbosityControl->setMaximum(3);
+    outputVerbosityControl->setTickPosition(QSlider::TicksBothSides);
+    outputVerbosityControl->setTickInterval(1);
+    outputVerbosityControl->setSingleStep(1);
+    outputVerbosityControl->setValue(UserPreferences().userLevel());
+    connect(outputVerbosityControl, &QSlider::valueChanged, [=] (int level) {
+        UserPreferences().setUserLevel(level);
+    });
+    mainLayout->addRow("Default verbosity level (valid on restart)", outputVerbosityControl);
+    
+    widget->setLayout(mainLayout);
+    
+    QWidget* pageWid = new QWidget;
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(widget);
+    layout->addStretch(1);
+    pageWid->setLayout(layout);
+    
+    return pageWid;
 }
 
 

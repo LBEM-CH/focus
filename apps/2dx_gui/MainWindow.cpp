@@ -85,6 +85,10 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     
     setCentralWidget(mainWidget);
     
+    connect(&projectData, &ProjectData::projectNameChanged, [=](const QString& name) {
+       updateWindowTitle(); 
+    });
+    
     resize(1300, 900);
 }
 
@@ -134,20 +138,6 @@ void MainWindow::setupMenuBar() {
     QAction *openPreferencesAction = new QAction(ApplicationData::icon("preferences"), "Preferences", this);
     connect(openPreferencesAction, SIGNAL(triggered()), this, SLOT(editHelperConf()));
     optionMenu->addAction(openPreferencesAction);
-    
-    QAction* setProjectNameAction = new QAction(ApplicationData::icon("change_name"), "Change Project Name", this);
-    connect(setProjectNameAction, SIGNAL(triggered()), this, SLOT(changeProjectName()));
-    optionMenu->addAction(setProjectNameAction);
-    
-    QAction* reindeximageAct = new QAction(ApplicationData::icon("refresh"), "Reindex images", this);
-    connect(reindeximageAct, &QAction::triggered, [=](){
-        projectData.indexImages();
-    });
-    optionMenu->addAction(reindeximageAct);
-
-    QAction *showAutoSaveAction = new QAction(ApplicationData::icon("autosave"), "Autosave On/Off", this);
-    connect(showAutoSaveAction, &QAction::triggered, [=] () {projectData.toggleAutoSave();});
-    optionMenu->addAction(showAutoSaveAction);
 
     /**
      * Setup Help menu
@@ -227,18 +217,7 @@ void MainWindow::setupWindows() {
     
     spWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/"), this); 
     
-    projectToolsWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"), this);
-    QToolBar* projectToolbar = projectToolsWin_->getToolBar();
-    
-    QToolButton* changeProjectNameButton = ExecutionWindow::getToolButton(ApplicationData::icon("change_name"), "Rename", false);
-    connect(changeProjectNameButton, SIGNAL(clicked()), this, SLOT(changeProjectName()));
-    projectToolbar->addWidget(changeProjectNameButton);
-    
-    QToolButton* relaodImagesButton = ExecutionWindow::getToolButton(ApplicationData::icon("refresh"), "ReIndex", false);
-    connect(relaodImagesButton, &QPushButton::clicked, [=](){
-        projectData.indexImages();
-    });
-    projectToolbar->addWidget(relaodImagesButton);
+    projectToolsWin_ = new ProjectWindow(this);
     
     centralWin_->addWidget(libraryWin_);
     centralWin_->addWidget(mergeWin_);
@@ -303,19 +282,6 @@ void MainWindow::editHelperConf() {
     }
     preferencesDialog_->showNormal();
     //new confEditor(mainData->getSubConf("appConf"));
-}
-
-void MainWindow::changeProjectName() {
-    bool ok;
-    QString projectName = QInputDialog::getText(this, "Project Name", "Enter a name for the project", QLineEdit::Normal,
-            projectData.projectName(), &ok);
-
-    if (ok && !projectName.isEmpty()) {
-        projectData.setProjectName(projectName);
-    }
-    
-    libraryWin_->updateProjectName(projectName);
-    updateWindowTitle();
 }
 
 void MainWindow::updateWindowTitle() {

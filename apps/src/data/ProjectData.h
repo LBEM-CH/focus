@@ -50,22 +50,30 @@ public:
 
     QString projectName();
     void setProjectName(const QString& projectName);
-    
+     
     void toggleAutoSave();
+    void setAutoSave(bool save);
     bool isAutoSave();
     
-    void saveAsProjectDefault(const QDir& workingDir);
-
     static QDir logsDir(const QDir& workingDir);
     static QDir procDir(const QDir& workingDir);
     
+public slots:
+    
+    void saveAsProjectDefault(const QDir& workingDir);
+    void changeProjectName();
+    
     //Tasks
     void renumberImages();
-    void AssignEvenOdd();
+    void assignEvenOdd();
+    void repairLinks();
+    void resetImageConfigs();
+    
     
 signals:
     void imageDirsChanged();
     void selectionChanged(const QStringList& paths);
+    void projectNameChanged(const QString& name);
 
 private:
 
@@ -78,6 +86,7 @@ private:
     bool sureDialog(const QString& title, const QString& text);
     
     QString commitIntToStringLength(int num, int length);
+    void linkProjectConfig(const QString& sourceName, const QString& targetLinkName);
     
     QString selectionDirfile();
     QString evenSelectionDirfile();

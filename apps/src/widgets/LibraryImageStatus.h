@@ -23,19 +23,19 @@ public slots:
 
 private:
 
-    QFormLayout* fillFormLayout(const QStringList& labels);
-    void updateFormData(QFormLayout* layout, const QStringList& params);
+    QFormLayout* fillFormLayout();
+    void updateFormData();
+    void readParamsList();
 
     ProjectModel* projModel;
-
-    QFormLayout* qvalLayout;
-    QFormLayout* tiltLayout;
+    
     QFormLayout* dataLayout;
-    QFormLayout* mergeLayout;
 
-    QWidget* dataWidget;
+    QGroupBox* dataWidget;
     QLabel* selectImageLabel;
 
+    QStringList labelsList;
+    QStringList paramsList;
 
 };
 

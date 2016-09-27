@@ -1,33 +1,16 @@
 #include "LibraryImageStatus.h"
+#include "ApplicationData.h"
+#include "ProjectData.h"
 
 LibraryImageStatus::LibraryImageStatus(ProjectModel* model, QWidget* parent) 
 : QWidget(parent) {
     projModel = model;
     
-    QGroupBox* dataBox = new QGroupBox("Image Data");
-    dataLayout = fillFormLayout(QStringList() << "Defocus" << "Magnification" << "Sample Pixel" << "Comment");
-    dataBox->setLayout(dataLayout);
+    this->readParamsList();
     
-    QGroupBox* qvalBox = new QGroupBox("Q-Values");
-    qvalLayout = fillFormLayout(QStringList() << "Latest" << "Unbend II" << "Movie A" << "Movie B");
-    qvalBox->setLayout(qvalLayout);
-    
-    QGroupBox* tiltBox = new QGroupBox("Tilt Info");
-    tiltLayout = fillFormLayout(QStringList() << "Grid Axis" << "Grid Angle" << "Crystal Axis" << "Crystal Angle");
-    tiltBox->setLayout(tiltLayout);
-    
-    QGroupBox* mergeBox = new QGroupBox("Merge Info");
-    mergeLayout = fillFormLayout(QStringList() << "Phase Residual" << "TAXA Change" << "TANGL Change" << "Phase Origin Change");
-    mergeBox->setLayout(mergeLayout);
-    
-    QGridLayout* dataWidgetLayout = new QGridLayout;
-    dataWidgetLayout->addWidget(dataBox, 0, 0);
-    dataWidgetLayout->addWidget(qvalBox, 0, 1);
-    dataWidgetLayout->addWidget(tiltBox, 1, 0);
-    dataWidgetLayout->addWidget(mergeBox, 1, 1);
-    
-    dataWidget = new QWidget;
-    dataWidget->setLayout(dataWidgetLayout);
+    dataWidget = new QGroupBox("Image Data");
+    dataLayout = fillFormLayout();
+    dataWidget->setLayout(dataLayout);
     dataWidget->hide();
     
     selectImageLabel = new QLabel("Select image from the list");
@@ -49,16 +32,19 @@ LibraryImageStatus::LibraryImageStatus(ProjectModel* model, QWidget* parent)
     setLayout(mainLayout);
 }
 
-QFormLayout* LibraryImageStatus::fillFormLayout(const QStringList& labels) {
+QFormLayout* LibraryImageStatus::fillFormLayout() {
     QFormLayout* dataLayout = new QFormLayout;
     dataLayout->setRowWrapPolicy(QFormLayout::DontWrapRows);
     dataLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
     dataLayout->setFormAlignment(Qt::AlignTop);
     dataLayout->setLabelAlignment(Qt::AlignLeft);
     dataLayout->setHorizontalSpacing(20);
-    for(int i=0; i< labels.size(); ++i) {
+    dataLayout->setVerticalSpacing(5);
+    
+    for(int i=0; i< labelsList.size(); ++i) {
         QLabel* valueLabel = new QLabel;
-        dataLayout->addRow(labels[i], valueLabel);
+        valueLabel->setWordWrap(true);
+        dataLayout->addRow(labelsList[i], valueLabel);
         QLabel* label = static_cast<QLabel*>(dataLayout->itemAt(i, QFormLayout::LabelRole)->widget());
         QFont font = label->font();
         font.setBold(true);
@@ -75,23 +61,39 @@ void LibraryImageStatus::updateData() {
         return;
     }
     
-    updateFormData(dataLayout, QStringList() << "defocus" << "magnification" << "sample_pixel" << "comment");
-    updateFormData(qvalLayout, QStringList() << "QVAL" << "QVAL2" << "QVALMA" << "QVALMB");
-    updateFormData(tiltLayout, QStringList() << "tltaxa" << "tltang" << "taxa" << "tangl");
-    updateFormData(mergeLayout, QStringList() << "MergePhaseResidual" << "taxa_change" << "tangl_change" << "phaori_last_change");
+    updateFormData();
     dataWidget->show();
-    selectImageLabel->hide();
-    
+    selectImageLabel->hide();  
 }
 
-void LibraryImageStatus::updateFormData(QFormLayout* layout, const QStringList& params) {
-    for(int i=0; i< params.size(); ++i) {
-        QLabel* label = static_cast<QLabel*>(layout->itemAt(i, QFormLayout::FieldRole)->widget());
-        QVariant valueVar = projModel->getCurrentRowParameterValue(params[i]);
-        QString valueStr = valueVar.toString();
-        if(valueVar.canConvert<double>()) valueStr = QString::number(valueVar.toDouble(), 'f', 2);
-        if(label != NULL) label->setText(valueStr);
+void LibraryImageStatus::updateFormData() {
+    
+    for(int i=0; i< labelsList.size(); ++i) {
+        if(i < paramsList.size()) {
+            QLabel* label = static_cast<QLabel*>(dataLayout->itemAt(i, QFormLayout::FieldRole)->widget());
+            if(label != NULL) label->setText(projModel->getCurrentRowParameterValue(paramsList[i]).toString());
+        }
+    } 
+}
+
+void LibraryImageStatus::readParamsList() {
+    QFile s(ApplicationData::configDir().canonicalPath() + "/lib.params.list");
+    
+    if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "ERROR: Lib Params file read failed: " << ApplicationData::configDir().canonicalPath()+ "/lib.params.list";
+        return;
     }
+
+    while (!s.atEnd()) {
+        QString line = s.readLine().simplified();
+        QStringList cell = line.split(':');
+        if(cell.size() == 1) {
+            cell.append(cell[0]);
+        }
+        paramsList.append(cell[0].trimmed());
+        labelsList.append(cell[1].trimmed());
+    }
+    s.close();
 }
 
 

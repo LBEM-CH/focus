@@ -105,7 +105,7 @@ void mrcImage::clear() {
         rawData = NULL;
     }
     if (imageData != NULL) {
-        delete imageData;
+        delete[] imageData;
         imageData = NULL;
     }
     if (image != NULL) {
@@ -196,7 +196,7 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format) {
     quint32 ny = header->ny();
     int value = 0;
 
-    if (imageData != NULL) delete imageData;
+    if (imageData != NULL) delete[] imageData;
 
     if (mode == 3 || mode == 4) {
         imageData = new uchar[dataSize * 2 * 4];

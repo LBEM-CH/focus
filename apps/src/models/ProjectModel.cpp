@@ -501,7 +501,7 @@ QString ProjectModel::getCurrentRowPath() {
 QVariant ProjectModel::getRowParameterValue(const QModelIndex &index, const QString& parameter) {
     if (!index.sibling(index.row(), 1).isValid()) return QVariant();
     if (!parameterToColId.keys().contains(parameter)) return QVariant();
-    return index.sibling(index.row(), parameterToColId[parameter]).data(SortRole);
+    return index.sibling(index.row(), parameterToColId[parameter]).data();
 }
 
 bool ProjectModel::isCurrentRowValidImage() {

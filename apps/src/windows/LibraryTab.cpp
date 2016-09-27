@@ -1,99 +1,41 @@
 #include <QtWidgets>
+#include <QtGui/qpushbutton.h>
 
 #include "ProjectData.h"
 #include "ApplicationData.h"
 #include "LibraryTab.h"
 #include "ProjectPreferences.h"
+#include "GraphicalButton.h"
 
 LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
-
-    previews = new QStackedWidget(this);
-    previews->setMinimumSize(235, 235);
-
-    mapPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Image not<br>processed"), previews);
-    refPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("No reference<br>available"), previews);
-    dualPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Half-Half map<br>not available"), previews);
-
-    previews->addWidget(mapPreview);
-    previews->addWidget(refPreview);
-    previews->addWidget(dualPreview);
-
-    setupDirectoryContainer();
-
-    previewTimer = new QTimer(this);
-    connect(previewTimer, SIGNAL(timeout()), this, SLOT(updatePreview()));
-
-    showHeaderButton = new QToolButton();
-    showHeaderButton->setIcon(ApplicationData::icon("info"));
-    showHeaderButton->setToolTip("Show Image Header");
-    showHeaderButton->setAutoRaise(false);
-    showHeaderButton->setCheckable(true);
-    showHeaderButton->setChecked(false);
-    connect(showHeaderButton, &QToolButton::toggled, [=] (bool) {
-        setPreviewImages(dirModel->getCurrentRowPath());
-    });
-
-    QToolButton* autoPreviewsButton = new QToolButton();
-    autoPreviewsButton->setIcon(ApplicationData::icon("timer"));
-    autoPreviewsButton->setToolTip("Auto switch previews");
-    autoPreviewsButton->setAutoRaise(false);
-    autoPreviewsButton->setCheckable(true);
-    connect(autoPreviewsButton, SIGNAL(toggled(bool)), this, SLOT(autoSwitch(bool)));
-
-    //Setup preview control combo box
-    viewControl = new QComboBox(this);
-    viewControl->addItems(QStringList() << "Map Preview" << "Reference Preview" << "Half-Half Preview");
-    connect(viewControl, SIGNAL(currentIndexChanged(int)), previews, SLOT(setCurrentIndex(int)));
-
-    QWidget* headerWidget = new QWidget();
-    QGridLayout* headerWidgetLayout = new QGridLayout(headerWidget);
-    headerWidgetLayout->setMargin(0);
-    headerWidgetLayout->setSpacing(0);
-    headerWidget->setLayout(headerWidgetLayout);
-
-    headerWidgetLayout->addWidget(viewControl, 0, 0, 1, 1, Qt::AlignVCenter);
-    headerWidgetLayout->addItem(new QSpacerItem(3, 3), 0, 1);
-    headerWidgetLayout->addWidget(showHeaderButton, 0, 2);
-    headerWidgetLayout->addItem(new QSpacerItem(3, 3), 0, 3);
-    headerWidgetLayout->addWidget(autoPreviewsButton, 0, 4);
-
-    imageDataWidget = new LibraryImageStatus(dirModel);
-    imageDataWidget->setFixedHeight(235);
     
-    QWidget* dataAndPreview = new QWidget;
-    QHBoxLayout* dataAndPreviewLayout = new QHBoxLayout;
-    dataAndPreviewLayout->setMargin(0);
-    dataAndPreviewLayout->setSpacing(0);
-    dataAndPreviewLayout->addWidget(imageDataWidget, 1);
-    dataAndPreviewLayout->addWidget(previews, 0);
-    dataAndPreview->setLayout(dataAndPreviewLayout);
+    previewContainer = setupPreviewContainer();
+    previewContainer->setMaximumWidth(310);
+    previewContainer->hide();
     
-    BlockContainer* previewContainer = new BlockContainer("Image Data and Preview", dataAndPreview, headerWidget, this);
-
+    autoSelectContainer = setupAutoSelectionTool();
+    autoSelectContainer->hide();
+    
     QGridLayout* mainLayout = new QGridLayout(this);
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
-    mainLayout->addWidget(setupLibraryControls(), 0, 0);
-    mainLayout->addWidget(dirView, 1, 0);
-    mainLayout->addWidget(previewContainer, 2, 0);
-    mainLayout->addWidget(setupToolBar(), 0, 1, 3, 1, Qt::AlignTop);
+    mainLayout->addWidget(setupLibraryControls(), 0, 0, 1, 2);
+    mainLayout->addWidget(autoSelectContainer, 1, 0, 1, 2);
+    mainLayout->addWidget(dirView, 2, 0, 1, 1);
+    mainLayout->addWidget(previewContainer, 2, 1, 1, 1, Qt::AlignTop);
     
     mainLayout->setColumnStretch(0, 1);
     mainLayout->setColumnStretch(1, 0);
     
     mainLayout->setRowStretch(0, 0);
-    mainLayout->setRowStretch(1, 1);
-    mainLayout->setRowStretch(2, 0);
+    mainLayout->setRowStretch(1, 0);
+    mainLayout->setRowStretch(2, 1);
     
     this->setLayout(mainLayout);
 
     connect(&projectData, &ProjectData::imageDirsChanged, [=] () {
         reload();
-    });
-    
-    connect(&projectData, &ProjectData::projectNameChanged, [=](const QString& name) {
-       updateProjectName(name); 
     });
 }
 
@@ -263,6 +205,33 @@ QToolBar* LibraryTab::setupLibraryControls() {
     connect(loadDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(loadDirectorySelection()));
     toolbar->addAction(loadDirectorySelectionAction);
     
+    toolbar->addSeparator();
+    
+    //Autoselect
+    QToolButton* showAutoSelect = new QToolButton();
+    showAutoSelect->setText("Auto Selection Tool");
+    showAutoSelect->setCheckable(true);
+    showAutoSelect->setChecked(false);
+    connect(showAutoSelect, &QPushButton::toggled, [=](bool check){
+       autoSelectContainer->setVisible(check); 
+    });
+    
+    toolbar->addWidget(showAutoSelect);
+    
+    //Setup Project title and header
+    selectionState = new QLabel(" ");
+    selectionState->setAlignment(Qt::AlignCenter);
+    QPalette pal = selectionState->palette();
+    pal.setColor(QPalette::WindowText, Qt::darkGray);
+    selectionState->setPalette(pal);
+    resetSelectionState();
+    
+    QWidget* s = new QWidget();
+    s->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    
+    toolbar->addWidget(s);
+    toolbar->addWidget(selectionState);
+    
     return toolbar;
 }
 
@@ -281,56 +250,112 @@ QAction* LibraryTab::getLibraryToolBarAction(const QString& ic, const QString& t
     return action;
 }
 
-QWidget* LibraryTab::setupToolBar() {
-    QTabWidget* tabWidget = new QTabWidget;
-    tabWidget->addTab(setupSelectionTab(), "Library Tools");
+QWidget* LibraryTab::setupPreviewContainer() {
+    QWidget* container = new QWidget();
     
-    projectNameLabel = new QLabel("");
-    projectNameLabel->setAlignment(Qt::AlignCenter);
-    projectNameLabel->setWordWrap(true);
-    QFont font = projectNameLabel->font();
+    previews = new QStackedWidget(this);
+    previews->setFixedSize(200, 200);
+
+    mapPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Image not<br>processed"), previews);
+    refPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("No reference<br>available"), previews);
+    dualPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Half-Half map<br>not available"), previews);
+
+    previews->addWidget(mapPreview);
+    previews->addWidget(refPreview);
+    previews->addWidget(dualPreview);
+
+    setupDirectoryContainer();
+
+    previewTimer = new QTimer(this);
+    connect(previewTimer, SIGNAL(timeout()), this, SLOT(updatePreview()));
+
+    
+    QVBoxLayout* mainLayout = new QVBoxLayout();
+    mainLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    mainLayout->setMargin(5);
+    mainLayout->setSpacing(5);
+    mainLayout->addStretch(0);
+    
+    previewLabel = new QLabel;
+    QFont font = previewLabel->font();
     font.setBold(true);
-    font.setPointSize(18);
-    projectNameLabel->setFont(font);
-    updateProjectName();
+    previewLabel->setFont(font);
     
-    selectionState = new QLabel(" ");
-    selectionState->setAlignment(Qt::AlignCenter);
-    QPalette pal = selectionState->palette();
-    pal.setColor(QPalette::WindowText, Qt::darkGray);
-    selectionState->setPalette(pal);
-    resetSelectionState();
+    GraphicalButton* rightButton = new GraphicalButton(ApplicationData::icon("move_right"));
+    rightButton->setFixedSize(42, 42);
+    connect(rightButton, &GraphicalButton::clicked, [=]() {
+        previews->setCurrentIndex((previews->currentIndex()+1)%(previews->count()));
+        setPreviewLabelText();
+    });
     
-    //Setup tool bar
-    QWidget* toolBar =  new QWidget;
-    //toolBar->setFixedWidth(200);
-    QVBoxLayout* toolBarLayout =  new QVBoxLayout;
-    toolBarLayout->addStretch(0);
-    toolBarLayout->setMargin(10);
-    toolBarLayout->setSpacing(15);
+    GraphicalButton* leftButton = new GraphicalButton(ApplicationData::icon("move_left"));
+    leftButton->setFixedSize(42, 42);
+    connect(leftButton, &GraphicalButton::clicked, [=]() {
+        previews->setCurrentIndex((previews->currentIndex()-1)%(previews->count()));
+        setPreviewLabelText();
+    });
     
-    toolBarLayout->addWidget(projectNameLabel);
-    toolBarLayout->addWidget(selectionState);
-    toolBarLayout->addWidget(tabWidget);
-    toolBar->setLayout(toolBarLayout);
+    QHBoxLayout* changerLayout = new QHBoxLayout;
+    changerLayout->setMargin(0);
+    changerLayout->setSpacing(0);
+    changerLayout->addWidget(leftButton, 0);
+    changerLayout->addWidget(previews, 1);
+    changerLayout->addWidget(rightButton, 0);
     
-    return toolBar;
+    previews->setCurrentIndex(0);
+    setPreviewLabelText();
+    
+    showHeaderButton = new QPushButton();
+    showHeaderButton->setIcon(ApplicationData::icon("header_info"));
+    showHeaderButton->setText("Show Image Header");
+    showHeaderButton->setToolTip("Show Image Header");
+    showHeaderButton->setCheckable(true);
+    showHeaderButton->setChecked(false);
+    connect(showHeaderButton, &QToolButton::toggled, [=] (bool) {
+        setPreviewImages(dirModel->getCurrentRowPath());
+    });
+    
+    QPushButton* autoPreviewsButton = new QPushButton();
+    autoPreviewsButton->setIcon(ApplicationData::icon("overlay"));
+    autoPreviewsButton->setText("Activate Overlay");
+    autoPreviewsButton->setToolTip("Auto switch previews");
+    autoPreviewsButton->setCheckable(true);
+    autoPreviewsButton->setChecked(false);
+    connect(autoPreviewsButton, SIGNAL(toggled(bool)), this, SLOT(autoSwitch(bool)));
+    
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    buttonLayout->setSpacing(0);
+    buttonLayout->setMargin(0);
+    buttonLayout->addWidget(autoPreviewsButton);
+    buttonLayout->addWidget(showHeaderButton);
+    
+    mainLayout->addWidget(previewLabel, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    mainLayout->addLayout(changerLayout, 0);
+    mainLayout->addLayout(buttonLayout, 0);
+    
+    QFrame* vLine = new QFrame(this);
+    vLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+    mainLayout->addWidget(vLine, 0);
+    
+    imageStatus = new LibraryImageStatus(dirModel);
+    mainLayout->addWidget(imageStatus, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    
+    container->setLayout(mainLayout);
+    return container;
 }
 
-
-QWidget* LibraryTab::setupSelectionTab() {
-    QWidget* tab = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->setSpacing(10);
-    layout->addStretch(0);
-    layout->addWidget(setupAutoSelectionTool(), 0);
-    tab->setLayout(layout);
-    return tab;
+void LibraryTab::setPreviewLabelText() {
+    if(previews->currentWidget() == mapPreview) previewLabel->setText("Final Map");
+    else if(previews->currentWidget() == refPreview) previewLabel->setText("Reference Map");
+    else if(previews->currentWidget() == dualPreview) previewLabel->setText("Half-Half Map");
+    else previewLabel->setText("Preview");
 }
 
-QGroupBox* LibraryTab::setupAutoSelectionTool() {
+QWidget* LibraryTab::setupAutoSelectionTool() {
     //Auto Selection Group
-    QGroupBox* autoSelectionGroup = new QGroupBox("Automatic Selection");
+    QFrame* autoSelectionGroup = new QFrame();
+    autoSelectionGroup->setFrameShadow(QFrame::Plain);
+    autoSelectionGroup->setFrameShape(QFrame::StyledPanel);
     
     minDegree = new QLineEdit;
     minDegree->setFrame(false);
@@ -346,9 +371,8 @@ QGroupBox* LibraryTab::setupAutoSelectionTool() {
     parameterToUse->addItems(QStringList() << "tltang" << "tangl" << "QVAL2" << "QVALMA" << "QVALMB" );
     parameterToUse->setCurrentIndex(0);
     
-    negPosOption = new QComboBox;
-    negPosOption->addItems(QStringList() << "Yes" << "No");
-    negPosOption->setCurrentIndex(0);
+    negPosOption = new QCheckBox("Ignore Sign (+/-)");
+    negPosOption->setChecked(true);
     
     noFlagged = new QCheckBox("Un-flagged");
     noFlagged->setChecked(true);
@@ -361,31 +385,33 @@ QGroupBox* LibraryTab::setupAutoSelectionTool() {
     goldFlagged = new QCheckBox("Gold");
     goldFlagged->setChecked(true);
     
-    QGridLayout* selectionFlagLayout = new QGridLayout;
-    selectionFlagLayout->setMargin(0);
-    selectionFlagLayout->setSpacing(2);
-    selectionFlagLayout->addWidget(noFlagged, 0, 0, 1, 2);
-    selectionFlagLayout->addWidget(redFlagged, 1, 0, 1, 1);
-    selectionFlagLayout->addWidget(greenFlagged, 1, 1, 1, 1);
-    selectionFlagLayout->addWidget(blueFlagged, 2, 0, 1, 1);
-    selectionFlagLayout->addWidget(goldFlagged, 2, 1, 1, 1);
-        
     QPushButton* changeSelection = new QPushButton("Change Selection");
     connect(changeSelection, SIGNAL(clicked()), this, SLOT(autoSelect()));
     
-    QFormLayout* autoSelectLayout = new QFormLayout;
-    autoSelectLayout->setRowWrapPolicy(QFormLayout::WrapLongRows);
-    autoSelectLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
-    autoSelectLayout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
-    autoSelectLayout->setLabelAlignment(Qt::AlignLeft);
-    autoSelectLayout->addRow("Parameter to use", parameterToUse);
-    autoSelectLayout->addRow("Minimum value", minDegree);
-    autoSelectLayout->addRow("Maximum value", maxDegree);
-    autoSelectLayout->addRow("Ignore sign", negPosOption);
-    autoSelectLayout->addRow("Include images", selectionFlagLayout);
-    autoSelectLayout->addRow(changeSelection);
+    QHBoxLayout* selectionLayout = new QHBoxLayout;
+    selectionLayout->setMargin(5);
+    selectionLayout->setSpacing(5);
+    selectionLayout->addStretch(0);
+    selectionLayout->addWidget(new QLabel("Selection Parameter"));
+    selectionLayout->addWidget(parameterToUse);
+    selectionLayout->addSpacing(5);
+    selectionLayout->addWidget(new QLabel("Range:"));
+    selectionLayout->addWidget(minDegree);
+    selectionLayout->addWidget(new QLabel("to"));
+    selectionLayout->addWidget(maxDegree);
+    selectionLayout->addSpacing(5);
+    selectionLayout->addWidget(negPosOption);
+    selectionLayout->addSpacing(5);
+    selectionLayout->addWidget(noFlagged);
+    selectionLayout->addWidget(redFlagged);
+    selectionLayout->addWidget(greenFlagged);
+    selectionLayout->addWidget(blueFlagged);
+    selectionLayout->addWidget(goldFlagged);
+    selectionLayout->addSpacing(10);
+    selectionLayout->addWidget(changeSelection);
+    selectionLayout->addStretch(1);
     
-    autoSelectionGroup->setLayout(autoSelectLayout);
+    autoSelectionGroup->setLayout(selectionLayout);
     
     return autoSelectionGroup;
 }
@@ -781,8 +807,6 @@ void LibraryTab::columnActivated(int i) {
 }
 
 void LibraryTab::autoSelect() {
-    bool useAbsolute = false;
-    if(negPosOption->currentText() == "Yes") useAbsolute=true;
     
     QStringList colorList;
     if(noFlagged->isChecked()) colorList << "none";
@@ -791,7 +815,7 @@ void LibraryTab::autoSelect() {
     if(greenFlagged->isChecked()) colorList << "green";
     if(goldFlagged->isChecked()) colorList << "gold";
     
-    dirModel->autoSelect(minDegree->text().toInt(), maxDegree->text().toInt(), parameterToUse->currentText(), useAbsolute, colorList);
+    dirModel->autoSelect(minDegree->text().toInt(), maxDegree->text().toInt(), parameterToUse->currentText(), negPosOption->isChecked(), colorList);
 }
 
 void LibraryTab::extendSelection() {
@@ -821,14 +845,15 @@ void LibraryTab::modifySelection(bool select) {
 }
 
 void LibraryTab::setPreviewImages(const QString& imagePath) {
-    loadDataContainer(imagePath);
-    mapPreview->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
-    refPreview->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
-    dualPreview->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());
-}
-
-void LibraryTab::loadDataContainer(const QString& imagePath) {
-    imageDataWidget->updateData();
+    if(dirModel->isCurrentRowValidImage()) {
+        previewContainer->show();
+        imageStatus->updateData();
+        mapPreview->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
+        refPreview->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
+        dualPreview->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());
+    } else {
+        previewContainer->hide();
+    }
 }
 
 void LibraryTab::autoSwitch(bool play) {
@@ -838,17 +863,12 @@ void LibraryTab::autoSwitch(bool play) {
 
 void LibraryTab::updatePreview() {
     int id = (previews->currentIndex() + 1) % 2;
-    viewControl->setCurrentIndex(id);
+    previews->setCurrentIndex(id);
+    setPreviewLabelText();
 }
 
 void LibraryTab::resetSelectionState() {
     QString checked = QString::number(projectData.imagesSelected().count());
     QString selected = QString::number(dirView->selectionModel()->selectedRows().count());
     selectionState->setText(checked + " checked and " + selected + " highlighted ");
-}
-
-void LibraryTab::updateProjectName(const QString& name) {
-    if(name.isEmpty()) projectNameLabel->setText(projectData.projectName());
-    else projectNameLabel->setText(name);
-    projectNameLabel->setToolTip(projectData.projectDir().canonicalPath());
 }

@@ -9,10 +9,7 @@
 ImageViewer::ImageViewer(const QString& workDir, const QString& notFoundMessage, QWidget* parent)
 :QFrame(parent), notFoundMessage_(notFoundMessage), workingDir_(workDir){
     
-    //setAutoFillBackground(true);
-    //setBackgroundRole(QPalette::Base);
-    setMinimumSize(QSize(235, 235));
-    //setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    setMinimumSize(QSize(200, 200));
     
     imageLabel = new QLabel;
     imageLabel->setBackgroundRole(QPalette::Base);
@@ -23,7 +20,7 @@ ImageViewer::ImageViewer(const QString& workDir, const QString& notFoundMessage,
     mrcInfo = new MrcHeaderDisplay;
 
     widgets = new QStackedWidget;
-    widgets->setMinimumSize(QSize(235, 235));
+    widgets->setMinimumSize(QSize(200, 200));
     widgets->addWidget(imageLabel);
     widgets->addWidget(mrcInfo);
     

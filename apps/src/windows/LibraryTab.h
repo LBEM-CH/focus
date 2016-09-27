@@ -16,6 +16,7 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QLineEdit>
+#include <QCheckBox>
 
 #include "BlockContainer.h"
 #include "ProjectModel.h"
@@ -65,49 +66,47 @@ class LibraryTab : public QWidget
         void loadDirectorySelection();
         
         void setPreviewImages(const QString&);
-        void loadDataContainer(const QString&);
         void autoSwitch(bool);
         void updatePreview();
         
         void resetSelectionState();
-        
-        void updateProjectName(const QString& name="");
                    
     private:
         void setupDirectoryContainer();
         QToolBar* setupLibraryControls();
-        QGroupBox* setupAutoSelectionTool();
-        QWidget* setupToolBar();
-        QWidget* setupSelectionTab();
+        QWidget* setupAutoSelectionTool();
+        QWidget* setupPreviewContainer();
         
         QAction* getLibraryToolBarAction(const QString& ic, const QString& tooltip, const QString& shortcut, bool checkable);
         
         void modifySelection(bool select = true);
+        void setPreviewLabelText();
         
         QTreeView* dirView;
         ProjectModel* dirModel;
         QSortFilterProxyModel *sortModel;
         
         QLabel* selectionState;
-        QLabel* projectNameLabel;
+        QLabel* previewLabel;
+        
+        QPushButton* showHeaderButton;
                
         ImageViewer* mapPreview;
         ImageViewer* refPreview;
         ImageViewer* dualPreview;
-        QToolButton* showHeaderButton;
-        
-        LibraryImageStatus* imageDataWidget;
         
         QStackedWidget* previews;
         
-        QTimer* previewTimer;
+        QWidget* previewContainer;
+        QWidget* autoSelectContainer;
+        LibraryImageStatus* imageStatus;
         
-        QComboBox* viewControl;
+        QTimer* previewTimer;
         
         QLineEdit* minDegree;
         QLineEdit* maxDegree;
         QComboBox* parameterToUse;
-        QComboBox* negPosOption;  
+        QCheckBox* negPosOption;  
         
         QCheckBox* noFlagged;
         QCheckBox* redFlagged;

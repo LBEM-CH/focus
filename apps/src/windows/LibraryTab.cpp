@@ -304,9 +304,10 @@ QWidget* LibraryTab::setupPreviewContainer() {
     previews->setCurrentIndex(0);
     setPreviewLabelText();
     
-    showHeaderButton = new QPushButton();
+    showHeaderButton = new QToolButton();
     showHeaderButton->setIcon(ApplicationData::icon("header_info"));
-    showHeaderButton->setText("Show Image Header");
+    showHeaderButton->setText("Show Header");
+    showHeaderButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     showHeaderButton->setToolTip("Show Image Header");
     showHeaderButton->setCheckable(true);
     showHeaderButton->setChecked(false);
@@ -314,9 +315,10 @@ QWidget* LibraryTab::setupPreviewContainer() {
         setPreviewImages(dirModel->getCurrentRowPath());
     });
     
-    QPushButton* autoPreviewsButton = new QPushButton();
+    QToolButton* autoPreviewsButton = new QToolButton();
     autoPreviewsButton->setIcon(ApplicationData::icon("overlay"));
     autoPreviewsButton->setText("Activate Overlay");
+    autoPreviewsButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     autoPreviewsButton->setToolTip("Auto switch previews");
     autoPreviewsButton->setCheckable(true);
     autoPreviewsButton->setChecked(false);
@@ -338,6 +340,8 @@ QWidget* LibraryTab::setupPreviewContainer() {
     
     imageStatus = new LibraryImageStatus(dirModel);
     mainLayout->addWidget(imageStatus, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    
+    mainLayout->addStretch(1);
     
     container->setLayout(mainLayout);
     return container;

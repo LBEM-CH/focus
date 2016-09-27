@@ -8,7 +8,7 @@ LibraryImageStatus::LibraryImageStatus(ProjectModel* model, QWidget* parent)
     
     this->readParamsList();
     
-    dataWidget = new QGroupBox("Image Data");
+    dataWidget = new QGroupBox();
     dataLayout = fillFormLayout();
     dataWidget->setLayout(dataLayout);
     dataWidget->hide();

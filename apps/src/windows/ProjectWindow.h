@@ -72,7 +72,7 @@ private:
         layout->addWidget(projectNameLabel_, 0, 0);
 
         QFrame* vLine = new QFrame(this);
-        vLine->setFrameStyle(QFrame::VLine | QFrame::Sunken);
+        vLine->setFrameStyle(QFrame::VLine | QFrame::Plain);
         layout->addWidget(vLine, 0, 1);
 
         projectPathLabel_ = new QLabel;

@@ -89,7 +89,7 @@ class LibraryTab : public QWidget
         QLabel* selectionState;
         QLabel* previewLabel;
         
-        QPushButton* showHeaderButton;
+        QToolButton* showHeaderButton;
                
         ImageViewer* mapPreview;
         ImageViewer* refPreview;

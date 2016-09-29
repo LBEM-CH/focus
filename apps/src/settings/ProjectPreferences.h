@@ -92,7 +92,7 @@ public:
 
     QString importImageDir() {
         beginGroup("import");
-        QString val = value("mainDir", QFileInfo(fileName()).filePath()).toString();
+        QString val = value("mainDir", QDir::homePath()).toString();
         endGroup();
         return val;
     }

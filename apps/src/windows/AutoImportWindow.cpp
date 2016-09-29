@@ -48,6 +48,7 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
 QTableWidget* AutoImportWindow::setupFilesTable() {
     QTableWidget* filesTable = new QTableWidget(0, 5);
     filesTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    filesTable->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
     QStringList labels;
     labels << "" << tr("Directory") << tr("Averaged Stack Name") << tr("Aligned") << tr("Raw");
@@ -218,6 +219,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     QStringList scriptsAvailable;
     QListWidget* availableScriptCont = new QListWidget();
     availableScriptCont->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    availableScriptCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
     QStringList scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/image/").subfolders();
     for (QString scriptFolder : scriptFolders) {
@@ -258,6 +260,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
 
     selectedScriptsCont = new QListWidget;
     selectedScriptsCont->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    selectedScriptsCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
     resetSelectedScriptsContainer(availableScriptCont, scriptsAvailable);
 
     GraphicalButton* moveButton = new GraphicalButton(ApplicationData::icon("move_selected"));

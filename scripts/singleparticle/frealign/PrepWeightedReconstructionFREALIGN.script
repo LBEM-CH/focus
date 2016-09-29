@@ -26,6 +26,7 @@
 # DISPLAY: SPR_FRL_start_process
 # DISPLAY: SPR_FRL_end_process
 # DISPLAY: SPR_FRL_res_high_refinement
+# DISPLAY: SPR_FRL_res_low_refinement
 # DISPLAY: SPR_FRL_res_high_class
 # DISPLAY: SPR_FRL_thresh_reconst
 # DISPLAY: SPR_FRL_image_contrast
@@ -73,6 +74,7 @@ set SPR_FRL_mem_per_cpu = ""
 set SPR_FRL_start_process = ""
 set SPR_FRL_end_process = ""
 set SPR_FRL_res_high_refinement = ""
+set SPR_FRL_res_low_refinement = ""
 set SPR_FRL_res_high_class = ""
 set SPR_FRL_thresh_reconst = ""
 set SPR_FRL_image_contrast = ""

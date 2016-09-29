@@ -8,26 +8,8 @@
 #include "ParameterSection.h"
 
 ParameterSection::ParameterSection(QString sectionTitle, QWidget *parent)
-: QWidget(parent) {
-    mainLayout_ = new QVBoxLayout;
-    mainLayout_->setSpacing(10);
-    mainLayout_->setMargin(10);
-
-    QLabel* title = new QLabel(sectionTitle);
-    title->setAlignment(Qt::AlignLeft);
-
-    QFont f = title->font();
-    f.setCapitalization(QFont::Capitalize);
-    f.setBold(true);
-    title->setFont(f);
-    QPalette pal = title->palette();
-    pal.setColor(QPalette::WindowText, QColor(31, 92, 207));
-    title->setPalette(pal);
-    mainLayout_->addWidget(title);
-
-    parameterFrame_ = new QFrame(this);
-    parameterFrame_->setFrameShadow(QFrame::Plain);
-    parameterFrame_->setFrameShape(QFrame::StyledPanel);
+: GroupContainer(parent) {
+    setTitle(sectionTitle);
 
     formLayout_ = new QFormLayout();
     formLayout_->setRowWrapPolicy(QFormLayout::WrapLongRows);
@@ -79,10 +61,7 @@ void ParameterSection::resetParameters(const QMap<QString, QString>& toBeReset) 
 }
 
 void ParameterSection::finishAddingParameters() {
-    parameterFrame_->setLayout(formLayout_);
-    mainLayout_->addWidget(parameterFrame_);
-    mainLayout_->addSpacing(10);
-    setLayout(mainLayout_);
+    setContainerLayout(formLayout_);
 }
 
 void ParameterSection::changeDisplayedParameters(int userLevel, QStringList parametersDisplayed) {

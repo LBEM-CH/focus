@@ -28,8 +28,9 @@
 #include <QString>
 
 #include "ParameterInput.h"
+#include "GroupContainer.h"
 
-class ParameterSection : public QWidget {
+class ParameterSection : public GroupContainer {
     Q_OBJECT
 
 public:
@@ -49,9 +50,7 @@ private:
     QMap<QString, int> parameterRowLevelLookup_;
     QMap<QString, int> parameterUserLevelLookup_;
 
-    QVBoxLayout* mainLayout_;
     QFormLayout* formLayout_;
-    QFrame* parameterFrame_;
 };
 
 #endif

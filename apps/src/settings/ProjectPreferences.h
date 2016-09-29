@@ -86,26 +86,52 @@ public:
 
     void setImportImageDir(const QString& path) {
         beginGroup("import");
-        setValue("image", path);
+        setValue("mainDir", path);
         endGroup();
     }
 
     QString importImageDir() {
         beginGroup("import");
-        QString val = value("image").toString();
+        QString val = value("mainDir", QFileInfo(fileName()).filePath()).toString();
         endGroup();
         return val;
     }
 
-    void setImportMoiveDir(const QString& path) {
+    void setImportRawFolder(const QString& path) {
         beginGroup("import");
-        setValue("movie", path);
+        setValue("raw", path);
         endGroup();
     }
 
-    QString importMovieDir() {
+    QString importRawFolder() {
         beginGroup("import");
-        QString val = value("movie").toString();
+        QString val = value("raw", "raw").toString();
+        endGroup();
+        return val;
+    }
+    
+    void setImportAlignedFolder(const QString& path) {
+        beginGroup("import");
+        setValue("aligned", path);
+        endGroup();
+    }
+
+    QString importAlignedFolder() {
+        beginGroup("import");
+        QString val = value("aligned", "aligned").toString();
+        endGroup();
+        return val;
+    }
+    
+    void setImportAveragedFolder(const QString& path) {
+        beginGroup("import");
+        setValue("averaged", path);
+        endGroup();
+    }
+
+    QString importAveragedFolder() {
+        beginGroup("import");
+        QString val = value("averaged", "averaged").toString();
         endGroup();
         return val;
     }
@@ -118,7 +144,7 @@ public:
 
     QString importGroup() {
         beginGroup("import");
-        QString val = value("group").toString();
+        QString val = value("group", "auto").toString();
         endGroup();
         return val;
     }
@@ -144,22 +170,62 @@ public:
 
     int importImageLength() {
         beginGroup("import");
-        int val = value("length").toInt();
+        int val = value("length", 5).toInt();
         endGroup();
         return val;
     }
     
-    void setLastImageNumber(int number) {
+    void setImportContinuousCheck(bool check) {
         beginGroup("import");
-        setValue("lastnumber", number);
+        setValue("continuous", check);
         endGroup();
     }
-
-    int lastImageNumber() {
+    
+    bool importContinuousCheck() {
+        bool val;
         beginGroup("import");
-        int val = value("lastnumber", 0).toInt();
+        val = value("continuous", false).toBool();
         endGroup();
         return val;
+    }
+    
+    void setImportRestartCheck(bool check) {
+        beginGroup("import");
+        setValue("onRestart", check);
+        endGroup();
+    }
+    
+    bool importRestartCheck() {
+        bool val;
+        beginGroup("import");
+        val = value("onRestart", false).toBool();
+        endGroup();
+        return val;
+    }
+    
+    void setImportScripts(const QStringList& scripts) {
+        beginGroup("import");
+        remove("scripts");
+        beginWriteArray("scripts");
+        for (int i = 0; i < scripts.size(); ++i) {
+            setArrayIndex(i);
+            setValue("name", scripts.at(i));
+        }
+        endArray();
+        endGroup();
+    }
+    
+    QStringList importScripts() {
+        beginGroup("import");
+        QStringList paths;
+        int size = beginReadArray("scripts");
+        for (int i = 0; i < size; ++i) {
+            setArrayIndex(i);
+            if (value("name").toString() != "") paths << value("name").toString();
+        }
+        endArray();
+        endGroup();
+        return paths;
     }
 
 };

@@ -58,6 +58,8 @@ public:
     static QDir logsDir(const QDir& workingDir);
     static QDir procDir(const QDir& workingDir);
     
+    static QString commitIntToStringLength(int num, int length);
+    
 public slots:
     
     void saveAsProjectDefault(const QDir& workingDir);
@@ -85,7 +87,6 @@ private:
     
     bool sureDialog(const QString& title, const QString& text);
     
-    QString commitIntToStringLength(int num, int length);
     void linkProjectConfig(const QString& sourceName, const QString& targetLinkName);
     
     QString selectionDirfile();

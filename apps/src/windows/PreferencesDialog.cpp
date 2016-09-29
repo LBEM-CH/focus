@@ -111,7 +111,8 @@ void PreferencesDialog::getToolButton(const QString& ic, const QString& text, in
 }
 
 QWidget* PreferencesDialog::getGeneralPage() {
-    QGroupBox* widget = new QGroupBox("General");
+    GroupContainer* widget = new GroupContainer();
+    widget->setTitle("General");
     
     QFormLayout* mainLayout = new QFormLayout;
     mainLayout->setRowWrapPolicy(QFormLayout::WrapLongRows);
@@ -148,10 +149,12 @@ QWidget* PreferencesDialog::getGeneralPage() {
     });
     mainLayout->addRow("Default verbosity level (valid on restart)", outputVerbosityControl);
     
-    widget->setLayout(mainLayout);
+    widget->setContainerLayout(mainLayout);
     
     QWidget* pageWid = new QWidget;
     QVBoxLayout *layout = new QVBoxLayout;
+    layout->setMargin(0);
+    layout->setSpacing(0);
     layout->addWidget(widget);
     layout->addStretch(1);
     pageWid->setLayout(layout);
@@ -167,7 +170,8 @@ QWidget* PreferencesDialog::getFontsPage() {
     //---------------------
     // Font
     //---------------------
-    QGroupBox *fontGroup = new QGroupBox(tr("Font"));
+    GroupContainer *fontGroup = new GroupContainer;
+    fontGroup->setTitle("Font");
 
     //Font Size
     QSpinBox* fontSizeCombo = new QSpinBox;
@@ -194,9 +198,11 @@ QWidget* PreferencesDialog::getFontsPage() {
     fontLayout->addRow("Font Size", fontSizeCombo);
     fontLayout->addRow("Font Weight", fontWeightCombo);
 
-    fontGroup->setLayout(fontLayout);
+    fontGroup->setContainerLayout(fontLayout);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
+    mainLayout->setMargin(0);
+    mainLayout->setSpacing(0);
     mainLayout->addWidget(fontGroup);
     mainLayout->addStretch(1);
     widget->setLayout(mainLayout);

@@ -121,16 +121,33 @@ def main():
 			# First we look for the masked, zero-padded, normalized micrograph:
 			try:
 
-				mrc = glob.glob(folders+d+'/m'+imname+'.mrc')[0]
-				bf = open(folders+d+'/m'+imname+'.box', 'w+')
-
+				# There might be some funny numbers appended to the file name so we have to look for the shortest one to get the right file:
+				mrclist = glob.glob(folders+d+'/m'+imname+'*.mrc')
+				lenlist = []
+				for m in mrclist:
+					lenlist.append(len(m))
+				shortest_idx = np.argsort(lenlist)[0]
+				# print mrclist[shortest_idx]
+				mrc = mrclist[shortest_idx]
+				bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+				# mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+				# bf = open(folders+d+'/m'+imname+'.box', 'w+')
+				
 			except:
 
 				# If it doesn't exist, we try the unmasked, zero-padded, normalized micrograph:
 				try:
 
-					mrc = glob.glob(folders+d+'/'+imname+'.mrc')[0]
-					bf = open(folders+d+'/'+imname+'.box', 'w+')
+					mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
+					lenlist = []
+					for m in mrclist:
+						lenlist.append(len(m))
+					shortest_idx = np.argsort(lenlist)[0]
+					# print mrclist[shortest_idx]
+					mrc = mrclist[shortest_idx]
+					bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+					# mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+					# bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 				except:
 

@@ -110,9 +110,13 @@ foreach i (${SPR_STACKS_DIR}/*.mrcs)
 	echo "# IMAGE-IMPORTANT MRCS: $i <STACK: `basename $i`>" >> LOGS/${scriptname}.results
 end
 
-foreach i (${SPR_PICKING_DIR}/*.png)
-	echo "# IMAGE PNG: $i <PNG: `basename $i`>" >> LOGS/${scriptname}.results
-end
+if ( ${SPR_SavePickFig} == "y" ) then
+
+	foreach i (${SPR_PICKING_DIR}/*.png)
+		echo "# IMAGE PNG: $i <PNG: `basename $i`>" >> LOGS/${scriptname}.results
+	end
+	
+endif
 
 echo ":: "
 echo ":: Done!"

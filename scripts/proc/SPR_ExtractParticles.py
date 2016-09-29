@@ -121,16 +121,33 @@ def main():
 			# First we look for the masked, zero-padded, normalized micrograph:
 			try:
 
-				mrc = glob.glob(folders+d+'/m'+imname+'.mrc')[0]
-				bf = open(folders+d+'/m'+imname+'.box', 'w+')
-
+				# There might be some funny numbers appended to the file name so we have to look for the shortest one to get the right file:
+				mrclist = glob.glob(folders+d+'/m'+imname+'*.mrc')
+				lenlist = []
+				for m in mrclist:
+					lenlist.append(len(m))
+				shortest_idx = np.argsort(lenlist)[0]
+				# print mrclist[shortest_idx]
+				mrc = mrclist[shortest_idx]
+				bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+				# mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+				# bf = open(folders+d+'/m'+imname+'.box', 'w+')
+				
 			except:
 
 				# If it doesn't exist, we try the unmasked, zero-padded, normalized micrograph:
 				try:
 
-					mrc = glob.glob(folders+d+'/'+imname+'.mrc')[0]
-					bf = open(folders+d+'/'+imname+'.box', 'w+')
+					mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
+					lenlist = []
+					for m in mrclist:
+						lenlist.append(len(m))
+					shortest_idx = np.argsort(lenlist)[0]
+					# print mrclist[shortest_idx]
+					mrc = mrclist[shortest_idx]
+					bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+					# mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+					# bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 				except:
 
@@ -668,10 +685,10 @@ def CalculateDefocusTilted(x, y, apix, TLTAXIS, TLTANG, DEFOCUS1, DEFOCUS2):
 def CalculatePickingPositions(dat, a, b, w, PHAORI, phaori_shift, TLTANG):
 # Here we compute the picking positions accounting for the phase origin shifts:
 
-	# PhaOriX = a[0] * (PHAORI[1] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[0] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
-	# PhaOriY = a[1] * (PHAORI[1] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[1] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
-	PhaOriX = a[0] * (PHAORI[1] + phaori_shift[0])/360.0 + b[0] * (PHAORI[1] + phaori_shift[1])/360.0
-	PhaOriY = a[1] * (PHAORI[1] + phaori_shift[0])/360.0 + b[1] * (PHAORI[1] + phaori_shift[1])/360.0
+	PhaOriX = a[0] * (PHAORI[0] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[0] * (PHAORI[0] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0
+	PhaOriY = a[1] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0 + b[1] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
+	# PhaOriX = a[0] * (PHAORI[1] + phaori_shift[0])/360.0 + b[0] * (PHAORI[1] + phaori_shift[1])/360.0
+	# PhaOriY = a[1] * (PHAORI[1] + phaori_shift[0])/360.0 + b[1] * (PHAORI[1] + phaori_shift[1])/360.0
 
 	PhaOriPx = [PhaOriX, PhaOriY]
 

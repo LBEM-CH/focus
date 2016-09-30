@@ -111,6 +111,7 @@ void ParameterInput::setReadOnlyState(int state) {
     if (lockButton_ != NULL) {
         if (lockButton_->isChecked()) element->setLock(true);
         else element->setLock(false);
+        element->getSection()->getConf()->save();
     }
 }
 

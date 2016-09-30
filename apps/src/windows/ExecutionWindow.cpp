@@ -363,6 +363,7 @@ BlockContainer* ExecutionWindow::setupParameterWindow() {
     //Setup search box
     parameterSearchBox = new QLineEdit;
     parameterSearchBox->setPlaceholderText("Search Parameters");
+    parameterSearchBox->setFixedWidth(200);
     connect(parameterSearchBox, &QLineEdit::editingFinished,
             [=]() {
                 parameters->searchParams(parameterSearchBox->text());

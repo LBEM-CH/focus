@@ -17,25 +17,9 @@
 #
 # MANUAL: <B>Welcome to 2dx_image</B>
 #
-# MANUAL: This program assists you in the processing of one 2D crystal image. Help is available <A HREF="http://2dx.org/documentation/2dx-software">here</A>. Try the right mouse click on the various fields or variable names, to get more information. See also the introductory <A HREF="http://2dx.org/documentation/2dx-software/tutorial"><B>online video tutorials</B></A>.
-#
-# MANUAL: 2dx_image uses external programs to display certain files. These can be defined in the 2dx configuration file, which you can find (and edit) in your home directory under .2dx/2dx.cfg . Use this file to define your prefered editor, web browser, etc..
-#
 # MANUAL: Edit the parameters in this central <I>Processing Data</I> pane. By default, only the most important parameters are accessible here. If you want to change one of the <I>advanced</I> parameters too, you can switch the display mode of this <I>Processing Data</I> pane at the left end of the top bar from "Simplified" to "Full Parameter List".
 #
 # MANUAL: 2dx tries to calculate or predict values for all parameters, based on available information. In several cases, you need to manually verify these values. These are then unerlaid with a blue stripe-pattern, until you have edited or confirmed manually the values.   
-#
-# MANUAL: After having edited the parameters, choose a script from the <I>Standard Scripts</I> and execute it via the <I>Start</I> button above.
-#
-# MANUAL: Upon first launch of this program, a default database in form of the file 2dx_image.cfg is created in the chosen  directory. The default entries for this database file are taken from the ${appDir_2dx}2dx/config/2dx_image.cfg file. These default values are then updated with values from the file ../2dx_image.cfg (the database file one level up from the current directory). Finally, this script 2dx_initialize.script is executed, and the resulting databse saved into the local directory's 2dx_image.cfg file.
-#
-# MANUAL: <HR>
-#
-# MANUAL: <IMG SRC="${appDir_2dx}/../resources/config/2dx_image-algo-1.jpg">
-#
-# MANUAL: <HR>
-#
-# MANUAL: <IMG SRC="${appDir_2dx}/../resources/config/2dx_image-algo-2.jpg">
 #
 # DISPLAY: imagename_original
 # DISPLAY: imagename
@@ -127,9 +111,6 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
-#
-set imageorigin = 0
-echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
 #
 if ( ${movie_inmovie} == "n" ) then
   echo "<<@evaluate>>"

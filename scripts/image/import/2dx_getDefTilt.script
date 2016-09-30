@@ -1,0 +1,851 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Get Defocus & Tilt                                                 #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 08/28/2010                                             #
+# Last Modification: 09/04/2010                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 25
+#
+# MANUAL: This script calculates the defocus and astigmatism of the image, using Niko Grigorieff's programs CTFFIND3 or CTFTILT. 
+#
+# MANUAL: If you set <I>Determine Defocus</I> to <I>Yes</I>, then it will crop the central 4096x4096 part of the image (if the image was larger than that), downsample it by 2x2 times, and then use Niko's CTFFIND3 on it to fit simulated Thon rings to the experimental Thon rings, which are produced in a Periodogram.
+#
+# MANUAL: If you set <I>Determine Tilt Geometry</i> to <I>Yes</I>, it will use either of two algorithms implemented here. You can chose to use <I>CTFFIND on 7x7 locations</I>, which will then have the script to cut out 7x7 locations on the image of 2048 px size each, which are then all downsampled by 2x2 to 1024px size images. On all of these, it will then use CTFFIND3 to determine the defocus. For this, it will first run CTFFIND3 on the central tile (position 4,4 from the 7x7=49 windows), and measure the defocus and astigmatism in detail. It will then run on all other 48 tiles an abreviated version of CTFFIND3, which will only perform a one-dimensional search without refinement of the defocus changes with respect to the defocus and astigmatism setting of the central tile. This abbreviated version of CTFFIND3 will then run much faster, and it will always use the defocus values of the closest known neighbor as starting point for the search. 
+# MANUAL: This all will result in a matrix of 7x7=49 defocus values, which you can inspect as "TXT: Defocus Table", and you can inspect the fitted Thon rings on the 7x7=49 positions in the "Gallery of Thonring Fits". On these defocus values it will then try to fit a plane, and then iteratively reject outliers from that plane, and re-fit the plane, until a plane is found that agrees best with roughly half of the defocus measurements. This allows to be less sensitive to outliers in the defocus values, which might occur from artifacts in the image (e.g. the negative text field, or broken carbon film). The script will then produce another copy of the "Gallery of Marked Thonring fits", which shows the Thon rings in the 7x7 locations, but the defocus measurements that were rejected and not used are now crossed out. 
+#
+# MANUAL: If you instead set <I>CTFTILT</I>, this script will run that program from Niko Grigorieff, which searches in one go for the tilted plane that agrees best with the defocus gradient across the image (by doing a similar approach as described above). 
+#
+# MANUAL: The above programs will determine the tilt geometry of the carbon film support, which is described by the variables TLTAXIS and TLTANG. These two variables are valid for the sample support, and have nothing to do with the crystal. In fact, they could also be determined in absence of any crystal.
+#
+# MANUAL: If a lattice for a potential crystal in this image is already known, then this script will run an additional program 2dx_tiltgeom2.exe will calculate TLTAXA, which describes the orientation of the crystal with respect to the tilt axis, and it will also calculate TAXA and TANGL, which describe the tilt axis and tilt angle from the perspective of the crystal unit cell. The latter two are the values that are needed for the 3D merging.
+#
+# MANUAL: The parameter <I>Defocus Search Start</I> and <I>Defocus Start End</I> define the search range for the defocus, and <I>Defocus Search Step</I> defines the step size of the search. This script may take some time, if the <I>Defocus Search Step</I> is set to small values.
+#
+# MANUAL: If you know that your defocus is around 4000.0 Angstroems, you could set the search range to 2000.0 to 6000.0 Angstroems, to save time.
+#
+# DISPLAY: imagesidelength
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: TLTAXA
+# DISPLAY: TAXA
+# DISPLAY: TANGL
+# DISPLAY: defocus
+# DISPLAY: defocusbackup
+# DISPLAY: df_start
+# DISPLAY: df_end
+# DISPLAY: df_step 
+# DISPLAY: det_defocus
+# DISPLAY: det_tilt
+# DISPLAY: det_tlt_alg
+# DISPLAY: phacon
+# DISPLAY: RESMAX
+# DISPLAY: RESMIN
+# DISPLAY: lattice
+# DISPLAY: comment
+# DISPLAY: tempkeep
+# DISPLAY: expected_astig
+# DISPLAY: expected_tltang
+# DISPLAY: expected_tltang_uncertainty
+# DISPLAY: df_PAve 
+# DISPLAY: defocus_res_min
+# DISPLAY: defocus_res_max
+# DISPLAY: use_paralellized
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set SYN_Unbending = ""
+set PHASEORI_done = ""
+#
+set imagename = ""
+set nonmaskimagename = ""
+set imagesidelength = ""
+set lattice = ""
+set magnification = ""
+set stepdigitizer = ""
+set CS = ""
+set KV = ""
+set defocus = ""
+set defocusbackup = ""
+set df_start = ""
+set df_end = ""
+set df_step = ""
+set df_PAve = ""
+set RESMIN = ""
+set RESMAX = ""
+set phacon = ""
+set det_defocus = ""
+set det_tilt = ""
+set det_tlt_alg = ""
+set TLTAXIS = ""
+set TLTAXA = ""
+set TLTANG = ""
+set tempkeep = ""
+set expected_astig = ""
+set expected_tltang = ""
+set expected_tltang_uncertainty = ""
+set defocus_res_min = ""
+set defocus_res_max = ""
+set use_paralellized = ""
+set MASKING_done = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_getDefTilt
+#
+set debugmode = "n"
+#
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@evaluate>>"
+#
+set df_dast = ${expected_astig}
+#
+set old_defocus = ${defocus}
+#
+if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
+  ${proc_2dx}/linblock "Skipping. Synthetical Reference is used"
+  ${proc_2dx}/linblock "Defocus should be determined already."
+  #
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  #
+  ##########################################################################
+  ${proc_2dx}/linblock "${scriptname} - normal end."
+  ##########################################################################
+  exit
+endif
+#
+if ( ${det_tilt}x == 'x' ) then
+  set det_tilt = 'y'
+  echo "set det_tilt = ${det_tilt}" >> LOGS/${scriptname}.results
+  echo ":: det_tilt corrected to ${det_tilt}"
+endif
+#
+if (( ${det_defocus} == 'n' ) && ( ${det_tilt} == 'n' )) then
+  ${proc_2dx}/linblock "Skipping. Not determining any defocus or defocus gradient."
+  #
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+  #
+  ##########################################################################
+  ${proc_2dx}/linblock "${scriptname} - normal end."
+  ##########################################################################
+  exit
+endif
+#
+echo nonmaskimagename = ${nonmaskimagename}
+echo imagesidelength = ${imagesidelength}
+echo magnification = ${magnification}
+echo stepdigitizer = ${stepdigitizer}
+echo CS = ${CS}
+echo KV = ${KV}
+echo defocus = ${defocus}
+echo RESMIN = ${RESMIN}
+echo RESMAX = ${RESMAX}
+echo phacon = ${phacon}
+echo det_tilt = ${det_tilt}
+#
+# set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
+# set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
+# set resolim = `echo ${resolim} | awk '{if ( $1 > 16.0 ) { s = 16.0 } else { s = $1 }} END { print s }'`
+set resolim =  $defocus_res_max
+echo resolim = $resolim
+# set resoma = `echo ${RESMIN} | awk '{ if ( $1 > 100.0) { s = 100.0 } else { s = $1 }} END { print s }'`
+# set resoma = `echo ${resoma} | awk '{ s = $1 / 2.0 } END { print s }'`
+set resoma =  $defocus_res_min
+echo resoma = ${resoma}
+#
+set ampcon = `echo ${phacon} | awk '{s=sqrt(1.0 - ( $1 * $1 ))} END {print s}'`
+echo ampcon = ${ampcon}
+#
+echo "<<@progress: 1>>"
+#
+set date = `date`
+echo date = ${date}
+#
+#set smallimagesidelength=2048
+set smallimagesidelength=`echo ${imagesidelength} | awk '{if($1<2049) {s=512} else if ($1<4099) {s=1024} else {s=2048}} END {print s}'`
+echo smallimagesidelength=${smallimagesidelength}
+#
+if ( ! -e ${nonmaskimagename}.mrc ) then
+  ${proc_2dx}/protest "ERROR: The non-masked image name ${nonmaskimagename}.mrc does not exist."
+endif
+#
+echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${nonmaskimagename}.mrc "<Non-Masked Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red.mrc <Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE: FFTIR/${imagename}_pg.mrc <Periodogram>" >> LOGS/${scriptname}.results
+#
+if ( ${magnification} == '' ) then
+  ${proc_2dx}/protest "ERROR: Magnification is not defined."
+endif
+#
+if ( ${stepdigitizer} == '' ) then
+  ${proc_2dx}/protest "ERROR: Digitizer stepsize is not defined."
+endif
+#
+echo ":df_start,df_end,df_step,df_dast = ${df_start}, ${df_end}, ${df_step}, ${df_dast}"
+#
+set oldlat = `echo ${lattice}`
+set lattice = `echo ${lattice} | sed 's/ /,/g' | sed 's/,,,/,/g' | sed 's/,,/,/g'`
+if ( "${oldlat}" != ${lattice} ) then
+  echo "set lattice = ${lattice}" >> LOGS/${scriptname}.results
+  echo "lattice corrected from ${oldlat} to ${lattice}"
+endif
+#
+set inimage = ${nonmaskimagename}.mrc
+#
+if ( ! -d SCRATCH ) then
+  \mkdir SCRATCH
+endif
+#
+echo "<<@progress: 20>>"
+#
+if ( ${det_tilt} == 'n' ) then
+  #
+  ###############################################################################
+  ################## Here for "Determine Defocus only" ##########################
+  ###############################################################################
+  #
+  set docrop = `echo ${imagesidelength} | awk '{ if ( $1 > 4800 ) { s = 1 } else { s = 0 }} END { print s }'`
+  if ( ${docrop} == "1" ) then
+    #
+    set minx = `echo ${imagesidelength} | awk '{ s = ( $1 / 2 ) - 2048 } END { print s }'`
+    set maxx = `echo ${imagesidelength} | awk '{ s = ( $1 / 2 ) + 2047 } END { print s }'`
+    set miny = ${minx}
+    set maxy = ${maxx}
+    # 
+    ##############################################################################
+    ${proc_2dx}/lin "Cropping out the central 4096x4096 image"
+    ##############################################################################
+    #
+    \rm -f SCRATCH/2dx_ctffind_cut.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+${inimage}
+1
+SCRATCH/2dx_ctffind_cut.mrc
+  ${minx} ${maxx} ${miny} ${maxy}
+eot
+    #
+    echo "# IMAGE: SCRATCH/2dx_ctffind_cut.mrc <Cropped central tile>" >> LOGS/${scriptname}.results
+    #
+  else
+    \cp -f ${inimage} SCRATCH/2dx_ctffind_cut.mrc
+  endif
+  #
+  echo "<<@progress: 30>>"
+  #
+  ##############################################################################
+  ${proc_2dx}/lin "Downsampling by a factor of 2x2"
+  ##############################################################################
+  #
+  \rm -f SCRATCH/2dx_ctffind_cut_down.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+SCRATCH/2dx_ctffind_cut.mrc
+4               ! average adjacent pixels
+SCRATCH/2dx_ctffind_cut_down.mrc
+2,2
+eot
+  #
+  echo "# IMAGE: SCRATCH/2dx_ctffind_cut_down.mrc <Downsampled central tile>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 40>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_ctffind3.exe - to get defocus and astigmatism"
+  #############################################################################
+  #
+  echo imagesidelength = ${imagesidelength}
+  set tilesize = 128
+  echo tilesize = ${tilesize}
+  echo ":Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
+  #
+  #
+  \rm -f SCRATCH/2dx_ctffind3_result.tmp
+  set outimage = 'SCRATCH/2dx_ctffind3_out.mrc'
+  \rm -f ${outimage} 
+  #
+  # Dummy setting of parameters that are not used here, as long as inoast = 0
+  set inoast = 0
+  set dfref = "1.0,1.0,0.0"
+  set drms1 = 0.0
+  set downstepdigitizer = `echo ${stepdigitizer} | awk '{ s = 2 * $1 } END { print s }'`
+  #
+  echo "# IMAGE-IMPORTANT: LOGS/2dx_ctffind3.txt <TXT: Logfile of 2dx_ctffind3.exe>" >>  LOGS/${scriptname}.results
+  #
+  if ( ${use_paralellized} == "y" ) then
+    set progname = 2dx_ctffind3.exe
+  else
+    set progname = 2dx_ctffind3_noOMP.exe
+  endif
+  ${bin_2dx}/${progname} > LOGS/2dx_ctffind3.txt << eof
+SCRATCH/2dx_ctffind_cut_down.mrc
+${outimage}
+${CS},${KV},${ampcon},${magnification},${downstepdigitizer}
+${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${df_dast}
+${inoast},${dfref},${drms1}
+eof
+  #
+  if ( ! -e ${outimage} ) then
+    ${proc_2dx}/protest "2dx_ctffind3: ERROR: ${outimage} does not exist."
+  endif
+  #
+  echo "<<@progress: 70>>"
+  #
+  set newdef = `cat SCRATCH/2dx_ctffind3_result.tmp | head -1`
+  set drms1 = `cat SCRATCH/2dx_ctffind3_result.tmp | tail -1`
+  set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
+  set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
+  set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
+  #
+  \rm -f SCRATCH/2dx_ctffind3_result.tmp
+  #
+  echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+  #
+  set newdef = `echo ${def1},${def2},${ang}`
+  echo "set defocus = "\"${newdef}\" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "new defocus is ${newdef}"
+  set defocus = ${newdef}
+  #
+  if ( ${tempkeep} == "n" ) then
+    \rm -f SCRATCH/2dx_ctffind_cut.mrc
+    \rm -f SCRATCH/2dx_ctffind_cut_down.mrc
+  endif
+  #
+  echo " " >> History.dat
+  echo "::Defocus = ${defocus}" >> History.dat
+  #
+  echo "<<@progress: 80>>"
+  #
+  echo "set DEFOCUS_done = y" >> LOGS/${scriptname}.results
+  #
+  echo "set CTF_done = n" >> LOGS/${scriptname}.results
+  echo "set MERGING_done = n" >> LOGS/${scriptname}.results
+  #
+else
+  #
+  ###############################################################################
+  ################## Here for "Determine Tilt from Defocus Gradient" ############
+  ###############################################################################
+  #
+  if ( ${det_tlt_alg} == "0" ) then
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "Using CTFFIND on 7x7 locations."
+    #                                                                           #
+    ############################################################################# 
+    #
+    set outimage = 'SCRATCH/2dx_ctftilt_out.mrc'
+    \rm -f ${outimage}  
+    #
+    set searchrange1 = 10000.0
+    # TODO: check search range (int and float)
+    #if ( ${searchrange1} < ${imagesidelength} ) then
+    #  set searchrange1 = ${imagesidelength}
+    #end
+    set searchrange2 = 1000.0
+    #
+    set mode = 0
+    if ( ${debugmode} == "y" ) then
+      set mode = 1
+    endif
+    # 
+    set petit = `echo ${imagesidelength} | awk ' { if ( $1 < 2050 ) { s = 1 } else { s = 0 } } END { print s }'`
+    set trespetit = `echo ${imagesidelength} | awk ' { if ( $1 < 1025 ) { s = 1 } else { s = 0 } } END { print s }'`
+    if ( ${petit} == '1' ) then
+      set downsample = 0
+      if ( ${trespetit} == '1' ) then
+        set smallsize = 512
+      else
+        set smallsize = 1024
+      endif
+    else
+      set downsample = 1
+      set smallsize = 2048
+    endif
+    #
+    echo ":: imagesidelength = ${imagesidelength}, smallsize = ${smallsize}"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "Preparing defocus table."
+    #                                                                           #
+    ############################################################################# 
+    #
+    set defocus_pos_file = 2dx_defocus_positions.txt
+    set defocus_pos_select_file = 2dx_defocus_select_positions.txt
+    echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_file}
+    echo ":: Central Defocus = 0.0,0.0,0.0" > ${defocus_pos_select_file}
+    #
+    # TODO: Make defocus_tiles_count a input paramter. And so that it works with all sizes. 
+    set defocus_tiles_count = "7" 
+    #set tiles =  `echo $defocus_tiles_count | awk 'BEGIN for (i=1; i<=$1; i++) { printf(%d\t, i); }'`
+    set tiles = `echo ${defocus_tiles_count} | awk '{s=$1} END {printf "%d\t", s}'`
+    set i = 1
+    
+    while ( $i <= ${defocus_tiles_count} )
+	set j = 1
+        echo "::        " >> ${defocus_pos_file}
+	set det_row = "::"
+    	while ( $j <= ${defocus_tiles_count} )
+		set det_row = `echo  "${det_row}        0.0"`
+      		#echo "::        " >> ${defocus_pos_file}
+      		#echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_file}
+      		#echo "::        " >> ${defocus_pos_file}
+     		# echo "::        " >> ${defocus_pos_select_file}
+      		#echo "::        0.0        0.0        0.0        0.0        0.0        0.0        0.0" >> ${defocus_pos_select_file}
+      		#echo "::        " >> ${defocus_pos_select_file}
+		@ j++
+	end
+	echo "${det_row}" >> ${defocus_pos_file}
+	@ i++
+    end
+    cp  ${defocus_pos_file} ${defocus_pos_select_file}
+    #
+    echo "# IMAGE-IMPORTANT: ${defocus_pos_file} <TXT: Defocus Table>" >> LOGS/${scriptname}.results  
+    #
+    echo "<<@progress: 25>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "Prepare windowed images"
+    #                                                                           #
+      #############################################################################
+    #
+    \rm -f TMP_positions.txt TMP_runfile_windows.txt
+    #
+  ${bin_2dx}/2dx_calcpositions.exe << eot
+${imagesidelength}
+${smallsize}
+${defocus_tiles_count},${defocus_tiles_count}
+${mode}
+${nonmaskimagename}
+TMP_positions.txt
+TMP_runfile_windows.txt
+eot
+    #
+    echo "<<@progress: 30>>"
+    #
+    chmod +x TMP_runfile_windows.txt 
+    #
+    echo "# IMAGE: TMP_positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: TMP_runfile_windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
+    #
+    if ( ! -l CUT ) then
+      \rm -rf CUT
+    endif
+    set olddir = $PWD
+    cd SCRATCH
+    if ( ! -d CUT ) then
+      \rm -fr CUT
+      \mkdir CUT
+    endif
+    cd ${olddir}
+    \rm -f CUT
+    \ln -s SCRATCH/CUT CUT 
+    #
+    source TMP_runfile_windows.txt
+    #
+    echo "<<@progress: 50>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "2dx_deftilt_sub.com: On center of image"
+    #                                                                           #
+    #############################################################################
+    #
+    set centerX = `echo ${defocus_tiles_count} | awk '{ s = int( $1 / 2 ) + 1} END { print s }'`
+    set centerY = `echo ${defocus_tiles_count} | awk '{ s = int( $1 / 2 ) + 1} END { print s }'`
+    echo ":: centerX=${centerX}" 
+    echo ":: centerY=${centerY}" 
+    set dfdist = ${searchrange1} ; set inoast = 0 ; set drms1 = 0.0
+    set newX = ${centerX} ; set newY = ${centerY} ; set refX = 0 ; set refY = 0 ; 
+    source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    echo "<<@progress: 60>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "2dx_deftilt_sub.com: On other places in image"
+    ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 3x3 of 7x7 system"
+    #                                                                           #
+    #############################################################################
+    #
+    set refX = ${centerX}; set refY = ${centerY};
+    set dfdist = ${searchrange2} ; set inoast = 1
+    set sub_tilesize = 128 
+    @ newX = ${centerX} - 1 ; @ newY = ${centerY} ; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} + 1; @ newY = ${centerY} ; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} ; @ newY = ${centerY} - 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} ; @ newY = ${centerY} + 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} - 1 ; @ newY = ${centerY} - 1 ; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} + 1 ; @ newY = ${centerY} - 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} - 1 ; @ newY = ${centerY} + 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    @ newX = ${centerX} + 1 ; @ newY = ${centerY} + 1; source ${proc_2dx}/2dx_deftilt_sub.com     
+    #
+    echo "<<@progress: 65>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 5x5 of 7x7 system"
+    #                                                                           #
+    #############################################################################
+    #
+    set newX = 2 ; set newY = 2 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 3 ; set newY = 2 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 2 ; set newY = 3 ; set refX = 3 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 4 ; set newY = 2 ; set refX = 4 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 5 ; set newY = 2 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 6 ; set newY = 2 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 6 ; set newY = 3 ; set refX = 5 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 6 ; set newY = 4 ; set refX = 5 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 6 ; set newY = 5 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 6 ; set newY = 6 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 5 ; set newY = 6 ; set refX = 5 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 4 ; set newY = 6 ; set refX = 4 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 3 ; set newY = 6 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 2 ; set newY = 6 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 2 ; set newY = 5 ; set refX = 3 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 2 ; set newY = 4 ; set refX = 3 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    echo "<<@progress: 70>>"
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/lin "2dx_deftilt_sub.com: Other places in 7x7 of 7x7 system"
+    #                                                                           #
+    #############################################################################
+    #
+    set newX = 1 ; set newY = 1 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 2 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 2 ; set newY = 1 ; set refX = 2 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 3 ; set newY = 1 ; set refX = 3 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 4 ; set newY = 1 ; set refX = 4 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 5 ; set newY = 1 ; set refX = 5 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 6 ; set newY = 1 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 1 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 2 ; set refX = 6 ; set refY = 2 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 7 ; set newY = 3 ; set refX = 6 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 4 ; set refX = 6 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 5 ; set refX = 6 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 7 ; set newY = 6 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 7 ; set newY = 7 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 6 ; set newY = 7 ; set refX = 6 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 5 ; set newY = 7 ; set refX = 5 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 4 ; set newY = 7 ; set refX = 4 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 3 ; set newY = 7 ; set refX = 3 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 2 ; set newY = 7 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 7 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 6 ; set refX = 2 ; set refY = 6 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    set newX = 1 ; set newY = 5 ; set refX = 2 ; set refY = 5 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 4 ; set refX = 2 ; set refY = 4 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    set newX = 1 ; set newY = 3 ; set refX = 2 ; set refY = 3 ; source ${proc_2dx}/2dx_deftilt_sub.com  
+    #
+    echo "<<@progress: 80>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
+    #############################################################################
+    #
+    \rm -f CUT/${nonmaskimagename}_merge_ps.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+CUT/${nonmaskimagename}_1_1_ps.mrc
+14
+CUT/${nonmaskimagename}_merge_ps.mrc
+CUT/${nonmaskimagename}
+eot
+    #
+    echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_merge_ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
+    #
+    if ( ! -e CUT/${nonmaskimagename}_merge_ps.mrc ) then
+      ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}_merge_ps.mrc not produced."
+    endif
+    #
+    cat ${defocus_pos_file}
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Now calculating tilt geometry from defocus values"
+    #############################################################################
+    #
+    echo "#" > TMP_2dx_deftilt_run.txt
+    echo "\rm -f TMP_2dx_deftilt_good.txt"   >> TMP_2dx_deftilt_run.txt
+    echo "${bin_2dx}/2dx_tiltgeom.exe << eot" >> TMP_2dx_deftilt_run.txt
+    echo "TMP_2dx_deftilt_good.txt"  >> TMP_2dx_deftilt_run.txt
+    echo ${stepdigitizer} >> TMP_2dx_deftilt_run.txt
+    echo ${magnification} >> TMP_2dx_deftilt_run.txt
+    echo ${defocus_tiles_count}  >> TMP_2dx_deftilt_run.txt
+    echo TMP_positions.txt >> TMP_2dx_deftilt_run.txt 
+    # The input order of columns and rows needs to be inverted here.
+    \rm -f TMP.txt
+    set refX = 1
+    while ( ${refX} <= ${defocus_tiles_count} )
+      set refY = 1
+      set line = " "
+      while ( ${refY} <= ${defocus_tiles_count} )
+        #
+        ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
+${defocus_pos_file}
+${refX},${refY}
+TMP.txt
+1
+eot
+        #
+        set dfmid = `cat TMP.txt`
+        \rm -f TMP.txt
+        set newline = "`echo ${line} ${dfmid}`"
+        set line = "${newline}"
+        @ refY++
+      end
+      echo ${line} | sed 's/ /,/g' >> TMP_2dx_deftilt_run.txt
+      @ refX++
+    end
+    #
+    echo 0,0,0 >> TMP_2dx_deftilt_run.txt
+    echo eot >> TMP_2dx_deftilt_run.txt 
+    echo # >> TMP_2dx_deftilt_run.txt 
+    echo # The input order of columns and rows is inverted here. >> TMP_2dx_deftilt_run.txt 
+    #
+    chmod +x TMP_2dx_deftilt_run.txt
+    #
+    echo "# IMAGE: TMP_2dx_deftilt_run.txt <TXT: runfile for tiltgeom>" >> LOGS/${scriptname}.results
+    #
+    source TMP_2dx_deftilt_run.txt > TMP_2dx_deftilt_run_out.txt
+    #
+    cat TMP_2dx_deftilt_run_out.txt
+    echo "# IMAGE: TMP_2dx_deftilt_run_out.txt <TXT: result of runfile for tiltgeom>" >> LOGS/${scriptname}.results
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Mark Thon-ring fit panels"
+    #############################################################################
+    #
+    chmod +x TMP_2dx_deftilt_good.txt
+    echo "# IMAGE: TMP_2dx_deftilt_good.txt <TXT: runfile for Thonring marking>" >> LOGS/${scriptname}.results
+    #
+    source TMP_2dx_deftilt_good.txt > TMP_2dx_deftilt_good_out.txt
+    echo "# IMAGE: TMP_2dx_deftilt_good_out.txt <TXT: result of runfile for Thonring marking>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${defocus_pos_select_file} <TXT: Defocus Table (Selected values)>" >> LOGS/${scriptname}.results  
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Merge Marked Thon-ring fit panels into one overview image"
+    #############################################################################
+    #
+    cat ${defocus_pos_select_file}
+    #
+    \rm -f CUT/${nonmaskimagename}_marked_merge_ps.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+CUT/${nonmaskimagename}_marked_1_1_ps.mrc
+14
+CUT/${nonmaskimagename}_marked_merge_ps.mrc
+CUT/${nonmaskimagename}_marked
+eot
+    #
+    echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_marked_merge_ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
+    #
+    if ( ! -e CUT/${nonmaskimagename}_merge_ps.mrc ) then
+      ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}_merge_ps.mrc not produced."
+    endif
+    #
+    tail -2 TMP_2dx_deftilt_run_out.txt
+    set line = `tail -1 TMP_2dx_deftilt_run_out.txt`
+    set TLTAXIS = `echo ${line} | cut -d\  -f6`
+    set TLTANG  = `echo ${line} | cut -d\  -f3`
+    #
+    #############################################################################
+    #############################################################################
+    #############################################################################
+  else
+    #############################################################################
+    #############################################################################
+    #############################################################################
+    #
+    #############################################################################
+    #                                                                           #
+    ${proc_2dx}/linblock "Using CTFTILT."
+    #                                                                           #
+    ############################################################################# 
+    #
+    \rm -f SCRATCH/2dx_ctftilt_result.tmp
+    echo imagesidelength = ${imagesidelength}
+    set tilesize = 128
+    echo tilesize = ${tilesize}
+    echo "::Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
+    echo ":Expected tilt angle is ${expected_tltang}, its uncertainty is ${expected_tltang_uncertainty}"
+    #
+    echo "<<@progress: 40>>"
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "2dx_ctftilt - to get defocus and tilt."
+    #############################################################################
+    #
+    set outimage = 'SCRATCH/2dx_ctftilt_out.mrc'
+    \rm -f ${outimage}  
+    #
+    ${bin_2dx}/2dx_ctftilt.exe << eof
+${inimage}
+${outimage}
+${CS},${KV},${ampcon},${magnification},${stepdigitizer},${df_PAve}
+${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${expected_astig},${expected_tltang},${expected_tltang_uncertainty}
+eof
+    #
+    if ( ! -e ${outimage} ) then
+      ${proc_2dx}/protest "2dx_ctftilt: ERROR: ${outimage} does not exist."
+    endif
+    #
+    echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+    #
+    set newdef = `cat SCRATCH/2dx_ctftilt_result.tmp | head -1`
+    set def1 = `echo $newdef | awk '{s=$1} END {print s}'`
+    set def2 = `echo $newdef | awk '{s=$2} END {print s}'`
+    set ang  = `echo $newdef | awk '{s=$3} END {print s}'`
+    set defocus = `echo ${def1},${def2},${ang}`
+    #
+    set newtilt = `cat SCRATCH/2dx_ctftilt_result.tmp | tail -1`
+    set TLTAXIS = `echo $newtilt | awk '{s=$1} END {printf "%.3f", s}'`
+    set TLTAXIS = `echo ${TLTAXIS} | awk '{ if ( $1 > 90.0 ) { s = $1 - 180.0 } else { s = $1 } } END { print s }'`
+    set TLTANG = `echo $newtilt | awk '{s=$2} END {printf "%.3f", s}'`
+    set RF  = `echo $newtilt | awk '{s=$3} END {print s}'`
+    #
+    # \rm -f SCRATCH/2dx_ctftilt_result.tmp
+    #
+  endif
+  echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+  echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+  #
+  echo " " >> History.dat
+  echo "::Defocus = ${defocus}" >> History.dat
+  echo "::TLTAXIS = ${TLTAXIS}" >> History.dat
+  echo "::TLTANG  = ${TLTANG}" >> History.dat
+  #
+  echo "::Defocus = ${defocus}"
+  echo "::TLTAXIS = ${TLTAXIS}"
+  echo "::TLTANG  = ${TLTANG}" 
+  #
+  #
+  echo "<<@progress: 90>>"
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "2dx_tiltgeom2: Determine other tilt angles with respect to lattice."
+  #############################################################################
+  #
+  if ( ${lattice} != '0.0,0.0,0.0,0.0' ) then
+    ${bin_2dx}/2dx_tiltgeom2.exe << eot
+${lattice}
+${TLTAXIS}
+${TLTANG}
+eot
+    # 
+    ${proc_2dx}/lin "="
+    cat 2dx_tiltgeom2.out
+    source 2dx_tiltgeom2.out
+    \rm -f 2dx_tiltgeom2.out
+    ${proc_2dx}/lin "="
+    #
+  else
+    set TLTAXA = '0.0'
+    set TAXA   = '0.0'
+    set TANGL  = '0.0'
+  endif
+  #
+  set TLTAXIS = `echo ${TLTAXIS} | awk '{s=$1} END {printf "%.3f", s}'`
+  set TLTANG  = `echo ${TLTANG}  | awk '{s=$1} END {printf "%.3f", s}'`
+  set TLTAXA  = `echo ${TLTAXA}  | awk '{s=$1} END {printf "%.3f", s}'`
+  set TAXA    = `echo ${TAXA}    | awk '{s=$1} END {printf "%.3f", s}'`
+  set TANGL   = `echo ${TANGL}   | awk '{s=$1} END {printf "%.3f", s}'`
+  #
+  echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+  echo "set TLTAXA = ${TLTAXA}" >> LOGS/${scriptname}.results
+  echo "set TAXA = ${TAXA}" >> LOGS/${scriptname}.results
+  echo "set TANGL = ${TANGL}" >> LOGS/${scriptname}.results 
+  echo "set DEFOCUS_ACTIVE = 1" >> LOGS/${scriptname}.results
+  #
+  echo "set DEFOCUS_TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_TLTAXA = ${TLTAXA}" >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_TAXA = ${TAXA}" >> LOGS/${scriptname}.results
+  echo "set DEFOCUS_TANGL = ${TANGL}" >> LOGS/${scriptname}.results
+  #
+  echo " " >> History.dat
+  echo "::From Defocus:" >> History.dat
+  echo "::TLTAXIS = ${TLTAXIS}" >> History.dat
+  echo "::TLTANG  = ${TLTANG}" >> History.dat
+  echo "::TLTAXA  = ${TLTAXA}" >> History.dat
+  echo "::TAXA    = ${TAXA}" >> History.dat
+  echo "::TANGL   = ${TANGL}" >> History.dat
+  #
+  #
+  if ( ${debugmode} == "n" ) then
+    echo dummy > CUT/${nonmaskimagename}_1_1_ps.mrc 
+    \rm -f CUT/${nonmaskimagename}_?_?_ps.mrc
+    echo dummy > CUT/${nonmaskimagename}_marked_1_1_ps.mrc 
+    \rm -f CUT/${nonmaskimagename}_marked_?_?_ps.mrc
+  endif
+  #
+  if ( ${tempkeep} == "n" ) then
+    \rm -f TMP_positions.txt
+    \rm -f TMP_runfile_windows.txt
+    \rm -f CUT/${nonmaskimagename}_4_4.mrc
+    \rm -f TMP_2dx_deftilt_run.txt
+    \rm -f TMP_2dx_deftilt_run_out.txt
+    \rm -f TMP_2dx_deftilt_good.txt
+  endif
+  #
+  echo "set DEFOCUS_done = y" >> LOGS/${scriptname}.results
+  #
+  echo "set DEFOCUSGRADIENT_done = y" >> LOGS/${scriptname}.results
+  #
+  echo "set CTF_done = n" >> LOGS/${scriptname}.results
+  echo "set MERGING_done = n" >> LOGS/${scriptname}.results
+  #
+endif
+#
+if ( ${defocusbackup} == "5000.0,5000.0,0.0" ) then
+  set defocusbackup = ${old_defocus}
+  echo "set defocusbackup = ${defocusbackup}" >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 100>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+##
+#
+#
+#

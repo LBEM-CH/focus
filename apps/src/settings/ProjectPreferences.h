@@ -170,7 +170,7 @@ public:
 
     int importImageLength() {
         beginGroup("import");
-        int val = value("length", 5).toInt();
+        int val = value("length", 7).toInt();
         endGroup();
         return val;
     }

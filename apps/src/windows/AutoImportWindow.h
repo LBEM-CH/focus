@@ -44,8 +44,11 @@ private:
     QStringList selectedScriptPaths();
     void resetSelectedScriptsContainer(QListWidget* availCont, QStringList availScripts);
     
+    bool isSafeToCopy(const QString& imageName);
+    
+    QTimer timer_; //Timer to check reanalyze if a file is being changed
     QProcess process_;
-    QFileSystemWatcher watcher_;
+    QFileSystemWatcher watcher_; //Watcher to check the current averages folder
 
     //Widgets
     QTableWidget *resultsTable_;
@@ -55,6 +58,7 @@ private:
     QWidget* inputContiner_;
     QProgressBar* progressBar_; 
     QPushButton* importButton_;
+    QPushButton* refreshButton_;
     
     //Data
     QMap<QString, QStringList> toBeImported_;
@@ -64,6 +68,7 @@ private:
     QString fileExecuting_;
     QString numberExecuting_;
     QMap<QString, int> dirToRowNumber_;
+    bool currentlyExecuting_ = false;
 
 };
 

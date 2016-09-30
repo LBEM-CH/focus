@@ -24,6 +24,9 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     importButton_->setChecked(false);
     connect(importButton_, &QAbstractButton::clicked, this, &AutoImportWindow::executeImport);
     
+    refreshButton_ = new QPushButton(ApplicationData::icon("refresh"), tr("Rescan Import Folder"));
+    connect(refreshButton_, &QAbstractButton::clicked, this, &AutoImportWindow::analyzeImport);
+    
     inputContiner_ = setupInputContainer();
     inputContiner_->setMaximumWidth(550);
 
@@ -39,10 +42,24 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     mainLayout->addWidget(mainSplitter);
     setLayout(mainLayout);
 
-    connect(&process_, static_cast<void(QProcess::*)(int)>(&QProcess::finished), this, &AutoImportWindow::continueExecution);
-    connect(&watcher_, &QFileSystemWatcher::directoryChanged, this, &AutoImportWindow::analyzeImport);
-    
+    analyzeImport();
     if(ProjectPreferences(projectData.projectDir()).importRestartCheck()) executeImport(true);
+    
+    connect(&process_, static_cast<void(QProcess::*)(int)>(&QProcess::finished), this, &AutoImportWindow::continueExecution);
+    connect(&watcher_, &QFileSystemWatcher::directoryChanged, [=] {
+        analyzeImport();
+        if(ProjectPreferences(projectData.projectDir()).importContinuousCheck()) {
+            executeImport(true);
+        }
+    });
+    
+    connect(&timer_, &QTimer::timeout, [=] {
+        analyzeImport();
+        if(ProjectPreferences(projectData.projectDir()).importContinuousCheck()) {
+            executeImport(true);
+        }
+    });
+    
 }
 
 QTableWidget* AutoImportWindow::setupFilesTable() {
@@ -94,11 +111,13 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
 
     BrowserWidget* filesDirBrowser_ = new BrowserWidget(BrowserWidget::BrowseType::DIRECTORY);
     filesDirBrowser_->setPath(ProjectPreferences(projectPath).importImageDir());
-    if(QFileInfo(ProjectPreferences(projectPath).importImageDir()).isDir()) watcher_.addPath(ProjectPreferences(projectPath).importImageDir());
+    QString currDir = ProjectPreferences(projectPath).importImageDir() + '/' + ProjectPreferences(projectPath).importAveragedFolder();
+    if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
     connect(filesDirBrowser_, &BrowserWidget::pathChanged, [ = ] (const QString & value){
         ProjectPreferences(projectPath).setImportImageDir(value);
         watcher_.removePaths(watcher_.directories());
-        if(QFileInfo(ProjectPreferences(projectPath).importImageDir()).isDir()) watcher_.addPath(ProjectPreferences(projectPath).importImageDir());
+        QString newDir = ProjectPreferences(projectPath).importImageDir() + '/' + ProjectPreferences(projectPath).importAveragedFolder();
+        if(QFileInfo(newDir).isDir()) watcher_.addPath(newDir);
         analyzeImport();
     });
     layout->addRow(filesDirBrowser_);
@@ -110,19 +129,19 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     introLabel->setPalette(pal);
     layout->addRow(introLabel);
 
-    QCheckBox* restartCheck = new QCheckBox("Check for new images in the import folder on restart");
+    QCheckBox* restartCheck = new QCheckBox("Import new images in the import folder on start");
+    restartCheck->setChecked(ProjectPreferences(projectPath).importRestartCheck());
     connect(restartCheck, &QCheckBox::toggled, [ = ] (bool check){
         ProjectPreferences(projectPath).setImportRestartCheck(check);
     });
     layout->addRow(restartCheck);
 
-    /*
-    QCheckBox* continuous = new QCheckBox("Continuously check for new images in the import folder");
+    QCheckBox* continuous = new QCheckBox("Continuously import new images in the import folder");
+    continuous->setChecked(ProjectPreferences(projectPath).importContinuousCheck());
     connect(continuous, &QCheckBox::toggled, [ = ] (bool check){
         ProjectPreferences(projectPath).setImportContinuousCheck(check);
     });
     layout->addRow(continuous);
-     * */
     
     container->setContainerLayout(layout);
 
@@ -136,6 +155,9 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
     averagedDir->setValue(ProjectPreferences(projectPath).importAveragedFolder());
     connect(averagedDir, &LineEditSet::valueChanged, [ = ] (const QString & value){
         ProjectPreferences(projectPath).setImportAveragedFolder(value);
+        watcher_.removePaths(watcher_.directories());
+        QString newDir = ProjectPreferences(projectPath).importImageDir() + '/' + ProjectPreferences(projectPath).importAveragedFolder();
+        if(QFileInfo(newDir).isDir()) watcher_.addPath(newDir);
         analyzeImport();
     });
 
@@ -182,8 +204,6 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
         ProjectPreferences(projectPath).setImportImageLength(value.toInt());
         analyzeImport();
     });
-
-    analyzeImport();
 
     QFormLayout* layout = new QFormLayout;
     layout->setHorizontalSpacing(10);
@@ -307,10 +327,10 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
 
 QWidget* AutoImportWindow::setupStatusContinaer() {
     
-    
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch(0);
     buttonLayout->addWidget(importButton_, 0);
+    buttonLayout->addWidget(refreshButton_, 0);
     buttonLayout->addStretch(1);
 
     progressBar_ = new QProgressBar;
@@ -342,8 +362,8 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
 
 void AutoImportWindow::analyzeImport() {
     
-    if(process_.state() == QProcess::Running) {
-        qDebug()<< "The import is already running, not analyzing the dir for now!";
+    if(currentlyExecuting_) {
+        qDebug()<< "The import is already running, not analyzing the import folder for now!";
         return;
     }
     
@@ -368,14 +388,22 @@ void AutoImportWindow::analyzeImport() {
 
     int uid = projectData.projectParameterData()->get("import_imagenumber")->value().toInt();
 
+    bool addingAFile = false;
     
     ImportFolderSettings folderPreferences(QDir(projectConfig.importImageDir()));
     for (QString image : QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks)) {
+                
+        bool copying = false;
         bool processed = false;
         bool hasAligned = false;
         bool hasRaw = false;
         QString dirName;
-        if(ImportFolderSettings(QDir(importImagesPath)).importedNames().contains(image)) {
+        if(!isSafeToCopy(importImagesPath + "/" + importAveragedFolder + "/" + image)) {
+            copying = true;
+            dirName = "File being edited";
+            addingAFile = true;
+        }
+        else if(ImportFolderSettings(QDir(importImagesPath)).importedNames().contains(image)) {
             processed = true;
             dirName = folderPreferences.linkedDirectory(image);
             hasAligned = folderPreferences.hadAligned(image);
@@ -388,7 +416,7 @@ void AutoImportWindow::analyzeImport() {
                 imageNumber = ProjectData::commitIntToStringLength(++uid, imageNumberLength);
             }
             
-            dirToRowNumber_.insert(imageNumber, resultsTable_->rowCount()-1);
+            dirToRowNumber_.insert(imageNumber, resultsTable_->rowCount());
             dirName = importGroup + "/" + imageNumber;
             toBeImported_.insert(imageNumber, QStringList() << importImagesPath + "/" + importAveragedFolder + "/" + image);
 
@@ -429,7 +457,8 @@ void AutoImportWindow::analyzeImport() {
 
         QTableWidgetItem *statusItem = new QTableWidgetItem();
         statusItem->setFlags(statusItem->flags() ^ Qt::ItemIsEditable);
-        if (!processed) statusItem->setIcon(ApplicationData::icon("import_next"));
+        if(copying) statusItem->setIcon(ApplicationData::icon("import_copying"));
+        else if (!processed) statusItem->setIcon(ApplicationData::icon("import_next"));
         else statusItem->setIcon(ApplicationData::icon("import_done"));
         
         QTableWidgetItem* imageItem = new QTableWidgetItem(image);
@@ -458,12 +487,17 @@ void AutoImportWindow::analyzeImport() {
 
     }
 
-    if(toBeImported_.isEmpty()) importButton_->setDisabled(true);
+    if(addingAFile) timer_.start(30000);
+    else timer_.stop();
     
     for (int i = 0; i < resultsTable_->columnCount(); ++i) resultsTable_->resizeColumnToContents(i);
 
     if(resultsTable_->rowCount()!=0) statusLabel_->setText(tr("%1 image(s) found in folder of which %2 image(s) are to be imported").arg(resultsTable_->rowCount()).arg(toBeImported_.keys().size()));
     else statusLabel_->setText("No such files could be found. (if not intended, please check the options again.)");
+    
+    if(toBeImported_.isEmpty()) importButton_->setDisabled(true);
+    
+    resultsTable_->scrollToBottom();
 }
 
 void AutoImportWindow::resetSelectedScriptsContainer(QListWidget* availCont, QStringList availScripts) {
@@ -495,6 +529,7 @@ void AutoImportWindow::executeImport(bool execute) {
         importButton_->setText("Start Import");
         progressBar_->hide();
         inputContiner_->setEnabled(true);
+        refreshButton_->setEnabled(true);
         scriptsToBeExecuted_.clear();
         
         if(!numberExecuting_.isEmpty()) projectData.indexImages();
@@ -508,11 +543,17 @@ void AutoImportWindow::executeImport(bool execute) {
             while (!process_.waitForFinished()) process_.kill();
             connect(&process_, static_cast<void(QProcess::*)(int)>(&QProcess::finished), this, &AutoImportWindow::continueExecution);
         }
-        
+        currentlyExecuting_ =false;
         analyzeImport();
         
+    } else if(currentlyExecuting_) {
+        qDebug() << "Currently importing, skipping this import";
+        return;
     } else {
         
+        timer_.stop();
+        
+        currentlyExecuting_ = true;
         importButton_->setChecked(true);
         importButton_->setText("Stop Import");
         
@@ -526,6 +567,7 @@ void AutoImportWindow::executeImport(bool execute) {
         statusEntryList_->show();
         
         inputContiner_->setDisabled(true);
+        refreshButton_->setDisabled(true);
 
         QString importGroup_ = ProjectPreferences(projectData.projectDir()).importGroup();
 
@@ -573,6 +615,7 @@ void AutoImportWindow::importImage() {
     
     projectData.projectParameterData()->set("import_imagenumber", number);
     
+    scriptExecuting_ = "";
     scriptsToBeExecuted_ = selectedScriptPaths();
 
     //Create dir
@@ -584,13 +627,13 @@ void AutoImportWindow::importImage() {
 
     //Copy Config File
     projectData.projectParameterData()->saveAs(workingDir.canonicalPath() + "/2dx_image.cfg", true);
-    addStatusToList("Created Configuration File: " + workingDir.canonicalPath() + "/2dx_image.cfg");
+    addStatusToList("Created Configuration File.");
 
     ParametersConfiguration* conf = projectData.parameterData(workingDir);
-    conf->set("imagename", number);
-    conf->set("nonmaskimagename", number);
-    conf->set("imagenumber", number);
-    conf->set("imagename_original", files.first());
+    conf->set("imagename", number, false);
+    conf->set("nonmaskimagename", number, false);
+    conf->set("imagenumber", number, false);
+    conf->set("imagename_original", files.first(), false);
 
     scriptsToBeExecuted_.insert(0, "cp -f " + files.first() + " " + workingDir.canonicalPath() + "/" + number + "_raw.mrc");
 
@@ -598,18 +641,20 @@ void AutoImportWindow::importImage() {
     bool hasRaw = false;
     //Check for movie file
     if (files.size() > 1 && !files[1].isEmpty()) {
-        conf->set("movie_stackname", files[1]);
+        conf->set("movie_stackname", files[1], false);
         scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + number + "_stack.mrc");
         hasAligned = true;
     }
 
     //Check for raw file
     if (files.size() > 2 && !files[2].isEmpty()) {
-        conf->set("movie_stackname_raw", files[2]);
+        conf->set("movie_stackname_raw", files[2], false);
         scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + number + "_stack_raw.mrc");
         hasRaw = true;
     }
 
+    conf->setModified(true);
+    
     //Prepare for script execution
     currentWorkingDir_ = workingDir;
     
@@ -625,12 +670,12 @@ void AutoImportWindow::importImage() {
 
 void AutoImportWindow::continueExecution(int exitCode) {
     if(exitCode != 0) {
-        if(scriptExecuting_.isEmpty()) addStatusToList("Error in copying files, check: " + currentWorkingDir_.canonicalPath() + "/LOGS/autoimport.log", true);
-        else addStatusToList("Error in running script: " + scriptExecuting_ + " check: " + currentWorkingDir_.canonicalPath() + "/LOGS/" + scriptExecuting_ + ".log", true);
+        if(scriptExecuting_.isEmpty()) addStatusToList("Error in copying files!", true);
+        else addStatusToList("Error in running script: " + scriptExecuting_, true);
     }
     
     if(!scriptExecuting_.isEmpty()) {
-        addStatusToList("Saving results from script: " + scriptExecuting_ + " to " + currentWorkingDir_.canonicalPath());
+        addStatusToList("Saving results from script: " + scriptExecuting_ + " to " + numberExecuting_);
         ResultsData resultsData(currentWorkingDir_);
         resultsData.load(currentWorkingDir_.canonicalPath() + "/LOGS/" + scriptExecuting_ + ".results");
         resultsData.save();
@@ -646,16 +691,13 @@ void AutoImportWindow::continueExecution(int exitCode) {
     scriptsToBeExecuted_.removeFirst();
 
     if (scriptPath.startsWith("cp -f")) {
-        addStatusToList(scriptPath);
         process_.setWorkingDirectory(currentWorkingDir_.canonicalPath());
-        process_.setStandardOutputFile(currentWorkingDir_.canonicalPath() + "/LOGS/autoimport.log");
         process_.start(scriptPath, QIODevice::ReadOnly);
     } else {
         QString scriptName = QFileInfo(scriptPath).fileName().remove(QRegExp("\\.script$"));
         scriptExecuting_ = scriptName;
         if (QFileInfo(scriptPath).exists()) {
             addStatusToList("Executing: " + scriptName);
-            qDebug() << ":==== Executing in " << currentWorkingDir_.canonicalPath() << " : " << scriptName;
 
             parser.parse(scriptPath, currentWorkingDir_.canonicalPath() + "/proc/" + scriptName + ".com");
             process_.setWorkingDirectory(currentWorkingDir_.canonicalPath());
@@ -686,6 +728,17 @@ void AutoImportWindow::addStatusToList(const QString& text, bool error) {
     statusLabel_->setText("Processing: " + numberExecuting_ + " (" + cell.last() + ")");
     statusEntryList_->scrollToBottom();
 }
+
+bool AutoImportWindow::isSafeToCopy(const QString& imageName) {
+    if(!QFileInfo(imageName).exists()) return false;
+    
+    int safe_interval = 30000; //in milli secs
+    if(QDateTime::currentMSecsSinceEpoch() - QFileInfo(imageName).lastModified().toMSecsSinceEpoch() < safe_interval) {
+        return false;
+    }
+    else return true;
+}
+
 
 QStringList AutoImportWindow::imageGroups() {
     QString projectFolder = projectData.projectDir().canonicalPath();

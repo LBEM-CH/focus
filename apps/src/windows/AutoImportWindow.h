@@ -42,7 +42,7 @@ private:
     void addStatusToList(const QString& text, bool error=false);
 
     QStringList selectedScriptPaths();
-    void resetSelectedScriptsContainer(QListWidget* availCont, QStringList availScripts);
+    void resetSelectedScriptsContainer(QList<QListWidget*> availCont, QStringList availScripts);
     
     bool isSafeToCopy(const QString& imageName);
     

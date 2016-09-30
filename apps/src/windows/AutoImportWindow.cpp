@@ -237,13 +237,18 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     QHBoxLayout* scriptContLayout = new QHBoxLayout();
 
     QStringList scriptsAvailable;
-    QListWidget* availableScriptCont = new QListWidget();
-    availableScriptCont->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    availableScriptCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
+    
+    
 
     QStringList scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/image/").subfolders();
+    QList<QListWidget*> availableScriptConts;
+    QToolBox* availaleScriptsBox = new QToolBox;
     for (QString scriptFolder : scriptFolders) {
 
+        QListWidget* availableScriptCont = new QListWidget();
+        availableScriptCont->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        availableScriptCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
+        
         QDir scriptDir = QDir(scriptFolder);
         ScriptModuleProperties scriptProps(scriptDir.absolutePath());
 
@@ -276,12 +281,15 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
             availableScriptCont->addItem(it.value());
             scriptsAvailable.append(it.value()->text());
         }
+        
+        availableScriptConts.append(availableScriptCont);
+        availaleScriptsBox->addItem(availableScriptCont, ApplicationData::icon(scriptProps.icon()), scriptProps.title());
     }
 
     selectedScriptsCont = new QListWidget;
     selectedScriptsCont->setSelectionMode(QAbstractItemView::ExtendedSelection);
     selectedScriptsCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
-    resetSelectedScriptsContainer(availableScriptCont, scriptsAvailable);
+    resetSelectedScriptsContainer(availableScriptConts, scriptsAvailable);
 
     GraphicalButton* moveButton = new GraphicalButton(ApplicationData::icon("move_selected"));
     moveButton->setFixedSize(32, 32);
@@ -291,12 +299,14 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
             selectedScripts.append(selectedScriptsCont->item(row)->text());
         }
 
-        for (QModelIndex index : availableScriptCont->selectionModel()->selectedIndexes()) {
-            if (!selectedScripts.contains(index.data(Qt::DisplayRole).toString())) selectedScripts.append(index.data(Qt::DisplayRole).toString());
+        for(QListWidget* availableScriptCont : availableScriptConts) {
+            for (QModelIndex index : availableScriptCont->selectionModel()->selectedIndexes()) {
+                if (!selectedScripts.contains(index.data(Qt::DisplayRole).toString())) selectedScripts.append(index.data(Qt::DisplayRole).toString());
             }
+        }
 
         ProjectPreferences(projectData.projectDir()).setImportScripts(selectedScripts);
-        resetSelectedScriptsContainer(availableScriptCont, scriptsAvailable);
+        resetSelectedScriptsContainer(availableScriptConts, scriptsAvailable);
     });
 
     GraphicalButton* deleteButton = new GraphicalButton(ApplicationData::icon("delete_selected"));
@@ -307,7 +317,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
             selectedScripts.removeAll(index.data(Qt::DisplayRole).toString());
         }
         ProjectPreferences(projectData.projectDir()).setImportScripts(selectedScripts);
-        resetSelectedScriptsContainer(availableScriptCont, scriptsAvailable);
+        resetSelectedScriptsContainer(availableScriptConts, scriptsAvailable);
     });
 
     QVBoxLayout *buttonsLayout = new QVBoxLayout;
@@ -318,7 +328,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     buttonsLayout->addWidget(deleteButton, 0);
     buttonsLayout->addStretch(0);
 
-    scriptContLayout->addWidget(new BlockContainer("Available Scripts", availableScriptCont));
+    scriptContLayout->addWidget(new BlockContainer("Available Scripts", availaleScriptsBox));
     scriptContLayout->addLayout(buttonsLayout, 0);
     scriptContLayout->addWidget(new BlockContainer("Selected Scripts", selectedScriptsCont));
     scriptsContainer->setContainerLayout(scriptContLayout);
@@ -500,13 +510,13 @@ void AutoImportWindow::analyzeImport() {
     resultsTable_->scrollToBottom();
 }
 
-void AutoImportWindow::resetSelectedScriptsContainer(QListWidget* availCont, QStringList availScripts) {
+void AutoImportWindow::resetSelectedScriptsContainer(QList<QListWidget*> availConts, QStringList availScripts) {
     selectedScriptsCont->clear();
     QStringList selectedScripts = ProjectPreferences(projectData.projectDir()).importScripts();
     for (QString script : availScripts) {
         if (selectedScripts.contains(script)) {
-
-            QList<QListWidgetItem*> foundItems = availCont->findItems(script, Qt::MatchExactly);
+            QList<QListWidgetItem*> foundItems;
+            for(QListWidget* availCont : availConts) foundItems.append(availCont->findItems(script, Qt::MatchExactly));
             if (foundItems.size() > 0) {
                 QListWidgetItem* foundItem = foundItems.first();
                 QListWidgetItem* item = new QListWidgetItem(foundItem->text());

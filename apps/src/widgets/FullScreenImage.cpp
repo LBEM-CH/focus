@@ -994,10 +994,10 @@ void FullScreenImage::rescale(float max, float min, bool invert) {
     sourceImage->rescale(max, min);
     image = sourceImage->getImage();
     if (!invert)
-        pixmap = sourceImage->getPixmap().scaled((int) (scale * image->width()), (int) (scale * image->height()));
+        pixmap = sourceImage->getPixmap().scaled((int) (scale * image->width()), (int) (scale * image->height()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     else {
         image->invertPixels();
-        pixmap = QPixmap::fromImage(*image).scaled((int) (scale * image->width()), (int) (scale * image->height()));
+        pixmap = QPixmap::fromImage(*image).scaled((int) (scale * image->width()), (int) (scale * image->height()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
     repaint();
 }

@@ -89,7 +89,7 @@ set movie_inmovie = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_fftrans
+set scriptname = import_fftrans
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs

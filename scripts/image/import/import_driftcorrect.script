@@ -65,7 +65,7 @@ set gainfactor = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_driftcorrect
+set scriptname = import_driftcorrect
 \rm -f LOGS/${scriptname}.results
 #
 set noEMAN = 'y'

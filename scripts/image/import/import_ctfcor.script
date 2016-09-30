@@ -83,7 +83,7 @@ set DEFOCUS_TLTANG = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_ctfcor
+set scriptname = import_ctfcor
 #
 \rm -f LOGS/${scriptname}.results
 #

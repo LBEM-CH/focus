@@ -112,7 +112,7 @@ set backup_large_images = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_initialize_files
+set scriptname = import_initialize_files
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'

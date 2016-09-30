@@ -102,7 +102,7 @@ set MASKING_done = ""
 #
 #$end_vars
 #
-set scriptname = 2dx_getDefTilt
+set scriptname = import_getDefTilt
 #
 set debugmode = "n"
 #

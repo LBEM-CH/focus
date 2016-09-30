@@ -104,7 +104,7 @@ if ( ! -d LOGS ) then
   \mkdir LOGS
 endif
 #
-set scriptname = 2dx_initialize
+set scriptname = import_initialize
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'

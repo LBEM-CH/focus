@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Drift-Correction of Image Stack                                    #
+# Title: Drift-Correct with Zorro                                           #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 108
+# SORTORDER: 20 
 #
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
@@ -65,11 +65,10 @@ set gainfactor = ""
 #
 #$end_vars
 #
-set scriptname = import_driftcorrect
+set scriptname = import_driftcor_zorro
 \rm -f LOGS/${scriptname}.results
 #
 set noEMAN = 'y'
-#
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs

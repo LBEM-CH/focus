@@ -1,0 +1,109 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Drift-Correct with Unblur                                          #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 07/21/2016                                             #
+# Last Modification: 07/21/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 23 
+#
+# MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
+#
+# DISPLAY: imagenumber
+# DISPLAY: imagename
+# DISPLAY: imagename_original
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagesidelength
+# DISPLAY: comment
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
+# DISPLAY: movie_stackname_raw
+# DISPLAY: movie_stackname
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set movie_stackname_raw = ""
+set movie_stackname = ""
+#
+#$end_vars
+#
+set scriptname = import_driftcorrect_unblur
+\rm -f LOGS/${scriptname}.results
+#
+set noEMAN = 'y'
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+#
+set FRAMES = "50"
+set APIX = "1.35"
+set APIX_AREA = ` echo "scale=3; $APIX * $APIX" | bc `
+set COUNTS_PER_PIX = ` header ${movie_stackname_raw}.mrc | grep 'Mean    Intensity' | awk '{print $3}' `
+set SERIALEM_FACTOR = ` header ${movie_stackname_raw}.mrc | grep 'SerialEMCCD' | awk '{print $7}' `
+set DOSE_CALC = ` echo "scale=3; ${COUNTS_PER_PIX} / ${APIX_AREA} / ${SERIALEM_FACTOR}" | bc `
+echo "::Mean density of binned pixel: ${COUNTS_PER_PIX}"
+echo "::Calculated dose is: ${DOSE_CALC}" 
+#
+#
+##########################################################################
+${proc_2dx}/linblock "Calling unblur..."
+##########################################################################
+#
+unblur << eof 
+${movie_stackname_raw}.mrc
+${FRAMES}
+${nonmaskimagename}.mrc
+${imagename}_unblur_shifts.txt
+${APIX}
+YES
+${DOSE_CALC}
+300
+0
+YES
+${movie_stackname}.mrc
+NO
+eof
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname_raw}.mrc <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+exit
+#
+# These are listed here to make sure they appear in the 2dx_image GUI:
+#

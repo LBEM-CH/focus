@@ -373,10 +373,13 @@ void ProjectData::resetImageConfigs() {
                 //Copy some original values
                 QString imageName = conf->getValue("imagename");
                 QString nonMaskName = conf->getValue("nonmaskimagename");
-                QString stackName = conf->getValue("movie_stackname");
                 QString imageNumber = conf->getValue("imagenumber");
                 QString origName = conf->getValue("imagename_original");
+                QString stackName = conf->getValue("movie_stackname");
                 QString rawName = conf->getValue("movie_stackname_raw");
+                QString importstackName = conf->getValue("import_rawstack");
+                QString importgainref   = conf->getValue("import_gainref");
+                QString importgaincorrectedstack = conf->getValue("import_gaincorrectedstack");
 
                 projectParameterData()->saveAs(selected + "/2dx_image.cfg", true);
                 conf->reload();
@@ -384,10 +387,13 @@ void ProjectData::resetImageConfigs() {
                 //Reset orig values
                 conf->set("imagename", imageName, false);
                 conf->set("nonmaskimagename", nonMaskName, false);
-                conf->set("movie_stackname", stackName, false);
                 conf->set("imagenumber", imageNumber, false);
                 conf->set("imagename_original", origName, false);
                 conf->set("movie_stackname_raw", rawName, false);
+                conf->set("movie_stackname", stackName, false);
+                conf->set("import_rawstack", importstackName, false);
+                conf->set("import_gainref", importgainref, false);
+                conf->set("import_gaincorrectedstack", importgaincorrectedstack, false);
                 
                 conf->setModified(true);
             }

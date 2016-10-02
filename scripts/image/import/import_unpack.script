@@ -22,17 +22,12 @@
 # DISPLAY: nonmaskimagename
 # DISPLAY: imagenumber
 # DISPLAY: tempkeep
-# DISPLAY: crop
 # DISPLAY: comment
 # DISPLAY: crop_histogram
-# DISPLAY: crop_histogram_percent
 # DISPLAY: crop_histogram_stdev
 # DISPLAY: movie_stackname
-# DISPLAY: movie_enable
-# DISPLAY: movie_imagenumber_total
-# DISPLAY: movie_imagenumber_touse
-# DISPLAY: movie_imagenumber_toave
 # DISPLAY: import_rawstack
+# DISPLAY: import_rawstack_original
 # DISPLAY: import_rawstack_type
 # DISPLAY: import_gainref
 # DISPLAY: import_gaincorrectedstack
@@ -54,9 +49,7 @@ set SCRATCH_DISK = ""
 set tempkeep = ""
 set imagename = ""
 set nonmaskimagename = ""
-set crop = ""
 set crop_histogram = ""
-set crop_histogram_percent = ""
 set crop_histogram_stdev = ""
 set movie_stackname = ""
 set import_rawstack = ""
@@ -71,7 +64,7 @@ set import_gaincorrectedstack_2d_fft = ""
 #$end_vars
 #
 # Input example: (these have extensions)
-# set import_rawstack = "Prot_Sep29_16.59.59.mrc"
+# set import_rawstack = "Prot_Sep29_16.59.59_oristack.mrc"
 # set import_gainref = "CountRef_Prot_Sep28_15.27.14.dm4"
 #
 # Output example: (no extensions)
@@ -98,35 +91,58 @@ source ${proc_2dx}/2dx_makedirs
 # - drift-corrected movie
 # - drift-corrected and averaged image
 #
+# CHEN: Temporary fix:
+set import_gainref = "CountRef_TssA_Sep28_15.27.14.dm4"
+echo "set import_gainref = ${import_gainref}" >> LOGS/${scriptname}.results
+#
 set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z'`
 set import_gaincorrectedstack = ${namestub}_stack_raw
 set import_gaincorrectedstack_2d = ${namestub}_raw
 set import_gaincorrectedstack_2d_fft = ${namestub}_raw_fft
 #
+cp -f ../${import_gainref} .
+#
+echo "<<@progress: 10>>"
+#
 if ( ${import_rawstack_type} == "1" ) then
   if ( ! -e ${import_rawstack} ) then
-    ${bin_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
+    ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
   endif    
   if ( ! -e ${import_gainref} ) then
-    ${bin_2dx}/protest "ERROR: Gain reference ${import_gainref} not found."
+    ${proc_2dx}/protest "ERROR: Gain reference ${import_gainref} not found."
   endif
+  echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${import_gainref} <Gain reference (2D)>" >> LOGS/${scriptname}.results
+  echo "<<@evaluate>>"
   echo "::Raw movie as dark-subtracted stack present. Gain reference found."
   #
-  echo "::Running: clip unpack ${import_rawstack} ${import_gainref} ${import_gaincorrectedstack}.mrc"
-  clip unpack ${import_rawstack} ${import_gainref} ${import_gaincorrectedstack}.mrc
+  #################################################################################
+  ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${import_gainref} ${import_gaincorrectedstack}.mrc"
+  #################################################################################
+  #
+  clip unpack -m 2 ${import_rawstack} ${import_gainref} ${import_gaincorrectedstack}.mrc
   #
   set movie_stackname = ${import_gaincorrectedstack}
   echo "set movie_stackname = ${movie_stackname}.mrc"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif
 #
+echo "<<@progress: 20>>"
+#
 if ( ${import_rawstack_type} == "2" ) then
   if ( ! -e ${import_gaincorrectedstack} ) then
-    ${bin_2dx}/protest "ERROR: Gain-corrected stack ${import_gaincorrectedstack} not found."
+    ${proc_2dx}/protest "ERROR: Gain-corrected stack ${import_gaincorrectedstack} not found."
   endif
   echo "::Raw movie as gain-corrected stack present."
-  echo "::Running: clip unpack ${import_rawstack} ${movie_stackname}.mrc"
-  clip unpack ${import_rawstack} ${movie_stackname}.mrc
+  #
+  #################################################################################
+  ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${movie_stackname}.mrc"
+  #################################################################################
+  #
+  echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results
+  echo "<<@evaluate>>"
+  #
+  clip unpack -m 2 ${import_rawstack} ${movie_stackname}.mrc
   #
   set movie_stackname = ${import_gaincorrectedstack}
   echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
@@ -135,15 +151,18 @@ endif
 #
 if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
   echo "::Gain-corrected stack is ${movie_stackname}.mrc"
-  set nonmaskedimagename = ${namestub}
-  echo "set imagename = ${nonmaskedimagename}"  >> LOGS/${scriptname}.results
-  echo "set nonmaskedimagename = ${nonmaskedimagename}"  >> LOGS/${scriptname}.results
+  set nonmaskimagename = ${namestub}
+  echo "set imagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+  echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
 endif
 #
 echo "<<@progress: 30>>"
 #
 if ( ${import_produce_gainref2D} == "y" ) then
-  echo "::Running: avgstack on ${import_gaincorrectedstack}.mrc"
+  #################################################################################
+  ${proc_2dx}/linblock "Running: avgstack on ${import_gaincorrectedstack}.mrc"
+  #################################################################################
+  #
   avgstack << eot
 ${import_gaincorrectedstack}.mrc
 ${import_gaincorrectedstack_2d}.mrc
@@ -153,6 +172,23 @@ eot
   echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
 endif
 #
+echo "<<@progress: 50>>"
+echo "<<@evaluate>>"
+#
+if ( ${crop_histogram} == "y" ) then
+  set val_avg = `clip stats ${import_gaincorrectedstack_2d}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $1}'`
+  set val_stddev = `clip stats ${import_gaincorrectedstack_2d}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $2}'`
+  set newmin = 0.0
+  set newmin =  `echo "scale=3; ${val_avg} - ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  set newmax =  `echo "scale=3; ${val_avg} + ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  echo ":Statistics on 2D images are:  Average = ${val_avg}, StdDev = ${val_stddev}"
+  #################################################################################
+  ${proc_2dx}/linblock "Truncating histogram of 2D average to ${newmin} ... ${newmax}"
+  #################################################################################
+  #
+  clip truncate -l ${newmin} -h ${newmax} ${import_gaincorrectedstack_2d}.mrc ${import_gaincorrectedstack_2d}_trunc.mrc
+  \mv -f ${import_gaincorrectedstack_2d}_trunc.mrc ${import_gaincorrectedstack_2d}.mrc
+endif
 #
 if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y" ) then
   echo "::Running: clip fft ${import_gaincorrectedstack_2d}.mrc ${import_gaincorrectedstack_2d_fft}.mrc"

@@ -644,6 +644,7 @@ void AutoImportWindow::importImage() {
     conf->set("nonmaskimagename", number, false);
     conf->set("imagenumber", number, false);
     conf->set("imagename_original", files.first(), false);
+    conf->set("import_gaincorrectedstack_2d", number + "_raw", false);
 
     scriptsToBeExecuted_.insert(0, "cp -f " + files.first() + " " + workingDir.canonicalPath() + "/" + number + "_raw.mrc");
 
@@ -651,17 +652,27 @@ void AutoImportWindow::importImage() {
     bool hasRaw = false;
     //Check for movie file
     if (files.size() > 1 && !files[1].isEmpty()) {
-        conf->set("movie_stackname", files[1], false);
+        conf->set("movie_stackname_raw", number + "_stack", false);
         scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + number + "_stack.mrc");
         hasAligned = true;
     }
 
     //Check for raw file
     if (files.size() > 2 && !files[2].isEmpty()) {
-        conf->set("movie_stackname_raw", files[2], false);
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + number + "_stack_raw.mrc");
+        conf->set("import_rawstack_original", files[2], false);
+        conf->set("import_rawstack", QFileInfo(files[2]).fileName(), false);
+        scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + QFileInfo(files[2]).fileName());
         hasRaw = true;
     }
+
+    //ToDo: CHEN:
+    //Ckech for gain reference file
+    // 
+    // 
+    // 
+    // 
+    // 
+    //
 
     conf->setModified(true);
     

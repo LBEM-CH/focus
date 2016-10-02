@@ -33,6 +33,11 @@
 # DISPLAY: import_gaincorrectedstack
 # DISPLAY: import_produce_gainref2D
 # DISPLAY: import_produce_gainref2Dfft
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
+# DISPLAY: movie_imagenumber_total
 #
 #$end_local_vars
 #
@@ -60,6 +65,11 @@ set import_produce_gainref2D = ""
 set import_produce_gainref2Dfft = ""
 set import_gaincorrectedstack_2d = ""
 set import_gaincorrectedstack_2d_fft = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set movie_imagenumber_total = ""
 #
 #$end_vars
 #
@@ -154,6 +164,23 @@ if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
   set nonmaskimagename = ${namestub}
   echo "set imagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
   echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+  #
+  set sample_pixel = `clip info ${movie_stackname}.mrc | grep Scale | cut -d\( -f2 | cut -dx -f1`
+  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
+  #
+  set movie_imagenumber_total = `clip info ${movie_stackname}.mrc | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
+  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
+  #
+else
+  #
+  set sample_pixel = `clip info ${import_gaincorrectedstack_2d}.mrc | grep Scale | cut -d\( -f2 | cut -dx -f1`
+  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
+  #
+endif
+#
+if ( ${Calc_from_sample_pixel} == "y" ) then
+  set magnification = `echo "scale=3; ${stepdigitizer} * 10000 / ${sample_pixel}" | bc ` 
+  echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
 endif
 #
 echo "<<@progress: 30>>"
@@ -178,9 +205,8 @@ echo "<<@evaluate>>"
 if ( ${crop_histogram} == "y" ) then
   set val_avg = `clip stats ${import_gaincorrectedstack_2d}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $1}'`
   set val_stddev = `clip stats ${import_gaincorrectedstack_2d}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $2}'`
-  set newmin = 0.0
-  set newmin =  `echo "scale=3; ${val_avg} - ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
-  set newmax =  `echo "scale=3; ${val_avg} + ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  set newmin = `echo "scale=3; ${val_avg} - ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  set newmax = `echo "scale=3; ${val_avg} + ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
   echo ":Statistics on 2D images are:  Average = ${val_avg}, StdDev = ${val_stddev}"
   #################################################################################
   ${proc_2dx}/linblock "Truncating histogram of 2D average to ${newmin} ... ${newmax}"

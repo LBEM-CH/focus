@@ -33,6 +33,7 @@
 # DISPLAY: KV
 # DISPLAY: CS
 # DISPLAY: gainfactor
+# DISPLAY: import_rawstack
 #
 #$end_local_vars
 #
@@ -62,6 +63,7 @@ set SCRATCH_DISK = ""
 set KV = ""
 set CS = ""
 set gainfactor = ""
+set import_rawstack = ""
 #
 #$end_vars
 #
@@ -78,51 +80,12 @@ echo "<<@evaluate>>"
 echo "<<@progress: 1>>"
 #
 #################################################################################
-${proc_2dx}/linblock "Verifying some parameters"
-#################################################################################
-#
-echo "<<@progress: 5>>"
-#
-if ( ! -e ${movie_stackname_raw} ) then
-  echo "dummy" > zzzzz27765.dm4
-  set filename = `ls -1 *.dm4 | sort | head -n 1`
-  if ( ${filename} != "zzzzz27765.dm4" ) then
-    set movie_stackname_raw = ${filename}
-    ${proc_2dx}/linblock "Image ${movie_stackname_raw}.dm4 found."
-    echo "set movie_stackname_raw = ${movie_stackname_raw}" >> LOGS/${scriptname}.results
-  else
-    if ( -e ${movie_stackname} ) then
-      if ( ${movie_stackname} !~ "zorro" ) then
-        set movie_stackname_raw = ${movie_stackname}
-        echo "set movie_stackname_raw = ${movie_stackname_raw}" >> LOGS/${scriptname}.results
-      endif
-    endif
-  endif
-endif
-#
-set movie_stackname_raw_end = `echo ${movie_stackname_raw} | cut -d\. -f2`
-if ( ${movie_stackname_raw_end} != 'dm4' && ${movie_stackname_raw_end} != 'mrc' ) then
-  ${proc_2dx}/protest "Movie ${movie_stackname_raw_end} is not found."
-endif
-#
-#################################################################################
 ${proc_2dx}/linblock "Getting movie dimensions"
 #################################################################################
 #
-if ( ${movie_stackname_raw_end} == 'mrc' ) then
-  setenv IN ${movie_stackname_raw}
-  ${bin_2dx}/2dx_header.exe
-  # cat 2dx_header.out
-  set NX = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $1} END { print s }'`
-  set NY = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $2} END { print s }'`
-  set NZ = `head -n 1 2dx_header.out | tail -n 1 | cut -c43- | awk '{s = $3} END { print s }'`
-  echo ":Dimensions of input movie in X,Y,Z are ${NX},${NY},${NZ}"
-  \rm 2dx_header.out
-else
-  set NX = 9999
-  set NY = 9999
-  set NZ = 9999
-endif
+set NX = ` clip info ${import_rawstack} | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f1 `
+set NY = ` clip info ${import_rawstack} | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f2 `
+set NZ = ` clip info ${import_rawstack} | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f3 `
 #
 #############################################################################
 #############################################################################
@@ -137,9 +100,9 @@ ${proc_2dx}/linblock "Sourcing 2dx_zorro_sub.com"
 set n_threads = ${Thread_Number} # number of threads for numexpr and FFTW
 set savePNGs = True # Do you want Zorro diagnostic images?
 set pixelsize = ${sample_pixel} # pixel size in Angstroems
-set a = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'` # lattice parameter a, Angstroms
-set b = `echo ${realcell} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'` # lattice parameter b, Angstroms
-set gamma = ${realang} # crystal rotation parammeter
+set a = 100.0
+set b = 100.0
+set gamma = 90.0
 set outputFolder = "./zorro/"
 if ( ! -d zorro ) then
   if ( -e zorro ) then
@@ -200,14 +163,6 @@ if ( -e ${movie_stackname_raw_base}_zorro_movie.mrcs ) then
   echo "# IMAGE: "./zorro/${movie_stackname_raw}_FFTSum.png "<PNG: Drift-cor. average (FFT)>" >> LOGS/${scriptname}.results
   echo "# IMAGE: "./zorro/${movie_stackname_raw}_polarFFTSum.png "<PNG: Drift-cor. average (Polar FFT)>" >> LOGS/${scriptname}.results
 endif
-#
-echo " "
-echo ": "
-echo ":: "
-echo "::Now run the script CLEANUP, then start with INIT FILES AND PARAMETERS etc."
-echo ":: "
-echo ": "
-echo " "
 #
 echo "<<@evaluate>>"
 #

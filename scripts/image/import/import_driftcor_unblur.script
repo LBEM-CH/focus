@@ -21,14 +21,12 @@
 # DISPLAY: imagename
 # DISPLAY: imagename_original
 # DISPLAY: nonmaskimagename
-# DISPLAY: imagesidelength
 # DISPLAY: comment
-# DISPLAY: magnification
-# DISPLAY: stepdigitizer
-# DISPLAY: Calc_from_sample_pixel
 # DISPLAY: sample_pixel
 # DISPLAY: movie_stackname_raw
 # DISPLAY: movie_stackname
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: import_rawstack
 #
 #$end_local_vars
 #
@@ -41,16 +39,15 @@ set imagename = ""
 set nonmaskimagename = ""
 set imagenumber = ""
 set imagesidelength = ""
-set magnification = ""
-set stepdigitizer = ""
-set Calc_from_sample_pixel = ""
 set sample_pixel = ""
 set movie_stackname_raw = ""
 set movie_stackname = ""
+set movie_imagenumber_total = ""
+set import_rawstack = ""
 #
 #$end_vars
 #
-set scriptname = import_driftcorrect_unblur
+set scriptname = import_driftcor_unblur
 \rm -f LOGS/${scriptname}.results
 #
 set noEMAN = 'y'
@@ -62,35 +59,35 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
-#
-set FRAMES = "50"
-set APIX = "1.35"
-set APIX_AREA = ` echo "scale=3; $APIX * $APIX" | bc `
-set COUNTS_PER_PIX = ` header ${movie_stackname_raw}.mrc | grep 'Mean    Intensity' | awk '{print $3}' `
-set SERIALEM_FACTOR = ` header ${movie_stackname_raw}.mrc | grep 'SerialEMCCD' | awk '{print $7}' `
-set DOSE_CALC = ` echo "scale=3; ${COUNTS_PER_PIX} / ${APIX_AREA} / ${SERIALEM_FACTOR}" | bc `
-echo "::Mean density of binned pixel: ${COUNTS_PER_PIX}"
-echo "::Calculated dose is: ${DOSE_CALC}" 
-#
+set COUNTS_PER_PIX = ` clip info ${import_rawstack} | grep mean | cut -d\= -f2 `
+echo "::Mean count is: ${COUNTS_PER_PIX}" 
+# set SERIALEM_FACTOR = ` header ${import_rawstack} | grep 'SerialEMCCD' | awk '{print $7}' `
+set SERIALEM_FACTOR = 1
+set frame_dose = ` echo "scale=3; ${COUNTS_PER_PIX} / ${sample_pixel} / ${sample_pixel} / ${SERIALEM_FACTOR}" | bc `
+echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame" 
+set total_dose = ` echo "scale=3; ${frame_dose} * ${movie_imagenumber_total} " | bc `
+echo "::Calculated total dose is: ${total_dose} electrons/A2" 
 #
 ##########################################################################
 ${proc_2dx}/linblock "Calling unblur..."
 ##########################################################################
 #
+if ( 1 == 2 ) then
 unblur << eof 
 ${movie_stackname_raw}.mrc
-${FRAMES}
+${movie_imagenumber_total}
 ${nonmaskimagename}.mrc
 ${imagename}_unblur_shifts.txt
-${APIX}
+${sample_pixel}
 YES
-${DOSE_CALC}
+${total_dose}
 300
 0
 YES
 ${movie_stackname}.mrc
 NO
 eof
+endif
 #
 echo "# IMAGE-IMPORTANT: ${movie_stackname_raw}.mrc <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results

@@ -354,6 +354,7 @@ eot
   echo "set ML_done = n" >> LOGS/${scriptname}.results
   echo "set CTF_done = n" >> LOGS/${scriptname}.results
   echo "set SPOTS_done = n" >> LOGS/${scriptname}.results
+  echo "set use_masked_image = y" >> LOGS/${scriptname}.results
   #
   ${proc_2dx}/linblock "#"
   echo ":: "

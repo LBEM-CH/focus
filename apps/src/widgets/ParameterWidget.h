@@ -16,7 +16,7 @@
 #include "ParameterConfiguration.h"
 #include "ParameterSection.h"
 
-class ParametersWidget : public QWidget {
+class ParametersWidget : public QScrollArea {
     Q_OBJECT
 
 public:
@@ -37,10 +37,6 @@ private:
     void changeFormWidget();
 
     QWidget* formWidget();
-    QToolBar* toolWidget();
-
-    QVBoxLayout* mainLayout_;
-    QScrollArea* scrollArea_;
 
     int userLevel_;
     QStringList parametersDisplayed_;

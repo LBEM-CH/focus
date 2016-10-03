@@ -6,17 +6,17 @@
 #include "ParameterValidator.h"
 
 ParametersWidget::ParametersWidget(ParametersConfiguration* conf, QWidget* parent)
-: QWidget(parent), data(conf) {
+: QScrollArea(parent), data(conf) {
     initialize(0, QStringList());
 }
 
 ParametersWidget::ParametersWidget(ParametersConfiguration* conf, int userLevel, QWidget *parent)
-: QWidget(parent), data(conf) {
+: QScrollArea(parent), data(conf) {
     initialize(userLevel, QStringList());
 }
 
 ParametersWidget::ParametersWidget(ParametersConfiguration* conf, QStringList parametersDisplayed, int userLevel, QWidget *parent)
-: QWidget(parent), data(conf) {
+: QScrollArea(parent), data(conf) {
     initialize(userLevel, parametersDisplayed);
 }
 
@@ -37,17 +37,9 @@ void ParametersWidget::initialize(int userLevel, const QStringList& toBeDisplaye
     parametersDisplayed_ = toBeDisplayed;
     parametersActuallyShown_ = toBeDisplayed;
 
-    scrollArea_ = new QScrollArea();
-    scrollArea_->setWidgetResizable(true);
-    scrollArea_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    scrollArea_->setWidget(formWidget());
-    
-    mainLayout_ = new QVBoxLayout();
-    mainLayout_->setSpacing(0);
-    mainLayout_->setMargin(0);
-    mainLayout_->addWidget(scrollArea_);
-
-    setLayout(mainLayout_);
+    setWidgetResizable(true);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    setWidget(formWidget());
     
     changeFormWidget();
     
@@ -57,8 +49,6 @@ void ParametersWidget::changeFormWidget() {
     for(int i=0; i< sections_.size(); ++i) {
         sections_[i]->changeDisplayedParameters(userLevel_, parametersActuallyShown_);
     }
-    mainLayout_->invalidate();
-    mainLayout_->update();
     update();
     updateGeometry();
 }

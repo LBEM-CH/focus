@@ -31,6 +31,7 @@ set(CONF
         projectMenu.inf
         publications.list
         viewer.params.list
-        lib.params.list)
+        lib.params.list
+        import.params.list)
 
 install(FILES ${CONF} DESTINATION ${INSTALL_DIR})

@@ -12,7 +12,7 @@ ParameterSection::ParameterSection(QString sectionTitle, QWidget *parent)
     setTitle(sectionTitle);
 
     formLayout_ = new QFormLayout();
-    formLayout_->setRowWrapPolicy(QFormLayout::WrapLongRows);
+    formLayout_->setRowWrapPolicy(QFormLayout::DontWrapRows);
     formLayout_->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
     formLayout_->setFormAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     formLayout_->setLabelAlignment(Qt::AlignLeft);

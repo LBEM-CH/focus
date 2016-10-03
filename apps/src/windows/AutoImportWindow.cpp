@@ -8,6 +8,7 @@
 #include "GroupContainer.h"
 #include "ScriptParser.h"
 #include "ResultsData.h"
+#include "ParameterWidget.h"
 
 AutoImportWindow::AutoImportWindow(QWidget* parent)
 : QWidget(parent) {
@@ -86,8 +87,8 @@ QWidget* AutoImportWindow::setupInputContainer() {
     mainLayout->setMargin(0);
 
     mainLayout->addWidget(setupInputFolderContainer(), 0, 0);
-    mainLayout->addWidget(setupOptionsContainter(), 1, 0);
-    mainLayout->addWidget(setupScriptsContainer(), 2, 0);
+    mainLayout->addWidget(setupScriptsContainer(), 1, 0);
+    mainLayout->addWidget(setupOptionsContainter(), 2, 0);
 
     mainContainer->setMaximumWidth(550);
     mainContainer->setLayout(mainLayout);
@@ -110,13 +111,18 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     QDir projectPath = projectData.projectDir();
 
     BrowserWidget* filesDirBrowser_ = new BrowserWidget(BrowserWidget::BrowseType::DIRECTORY);
-    filesDirBrowser_->setPath(ProjectPreferences(projectPath).importImageDir());
-    QString currDir = ProjectPreferences(projectPath).importImageDir() + '/' + ProjectPreferences(projectPath).importAveragedFolder();
+    ParametersConfiguration* conf  = projectData.projectParameterData();
+    QString importImagesPath = conf->getValue("import_dir");
+    QString importAveragedFolder = conf->getValue("import_averages_folder");
+    filesDirBrowser_->setPath(importImagesPath);
+    QString currDir = importImagesPath + '/' + importAveragedFolder;
     if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
     connect(filesDirBrowser_, &BrowserWidget::pathChanged, [ = ] (const QString & value){
-        ProjectPreferences(projectPath).setImportImageDir(value);
+        conf->set("import_dir", value);
         watcher_.removePaths(watcher_.directories());
-        QString newDir = ProjectPreferences(projectPath).importImageDir() + '/' + ProjectPreferences(projectPath).importAveragedFolder();
+        QString importImagesPath = conf->getValue("import_dir");
+        QString importAveragedFolder = conf->getValue("import_averages_folder");
+        QString newDir = importImagesPath + '/' + importAveragedFolder;
         if(QFileInfo(newDir).isDir()) watcher_.addPath(newDir);
         analyzeImport();
     });
@@ -149,83 +155,22 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
 }
 
 QWidget* AutoImportWindow::setupOptionsContainter() {
-    QDir projectPath = projectData.projectDir();
 
-    LineEditSet* averagedDir = new LineEditSet;
-    averagedDir->setValue(ProjectPreferences(projectPath).importAveragedFolder());
-    connect(averagedDir, &LineEditSet::valueChanged, [ = ] (const QString & value){
-        ProjectPreferences(projectPath).setImportAveragedFolder(value);
-        watcher_.removePaths(watcher_.directories());
-        QString newDir = ProjectPreferences(projectPath).importImageDir() + '/' + ProjectPreferences(projectPath).importAveragedFolder();
-        if(QFileInfo(newDir).isDir()) watcher_.addPath(newDir);
-        analyzeImport();
-    });
-
-    LineEditSet* moviesDir = new LineEditSet;
-    moviesDir->setValue(ProjectPreferences(projectPath).importAlignedFolder());
-    connect(moviesDir, &LineEditSet::valueChanged, [ = ] (const QString & value){
-        ProjectPreferences(projectPath).setImportAlignedFolder(value);
-        analyzeImport();
-    });
-
-    LineEditSet* rawDir = new LineEditSet;
-    rawDir->setValue(ProjectPreferences(projectPath).importRawFolder());
-    connect(rawDir, &LineEditSet::valueChanged, [ = ] (const QString & value){
-        ProjectPreferences(projectPath).setImportRawFolder(value);
-        analyzeImport();
-    });
-
-    LineEditSet* ignoreImagePattern = new LineEditSet;
-    ignoreImagePattern->setValue(ProjectPreferences(projectPath).importIgnorePattern());
-    connect(ignoreImagePattern, &LineEditSet::valueChanged, [ = ] (const QString & value){
-        ProjectPreferences(projectPath).setImportIgnorePattern(value);
-        analyzeImport();
-    });
-
-    NoScrollComboBox* addToGroup_ = new NoScrollComboBox();
-    addToGroup_->setEditable(true);
-    addToGroup_->addItems(imageGroups());
-    addToGroup_->setCurrentText(ProjectPreferences(projectPath).importGroup());
-    addToGroup_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    connect(addToGroup_, static_cast<void(QComboBox::*)(const QString &)> (&QComboBox::currentTextChanged), [ = ] (const QString & value){
-        ProjectPreferences(projectPath).setImportGroup(value);
-        analyzeImport();
-    });
-
-    IntLineEditSet* numberLength_ = new IntLineEditSet();
-    numberLength_->setAllRanges(5, 10);
-    int pastNumberLength = ProjectPreferences(projectPath).importImageLength();
-    if (pastNumberLength >= 5 && pastNumberLength <= 10) numberLength_->setValue(QString::number(pastNumberLength));
-    else {
-        numberLength_->setValue("5");
-        ProjectPreferences(projectPath).setImportImageLength(5);
+    //Get the list of parameters to be displayed
+    QFile s(ApplicationData::configDir().canonicalPath() + "/import.params.list");
+    if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Import parameters read failed: " << ApplicationData::configDir().canonicalPath() + "/import.params.list";
+        return new QWidget();
     }
-    connect(numberLength_, &LineEditSet::valueChanged, [ = ] (const QString & value){
-        ProjectPreferences(projectPath).setImportImageLength(value.toInt());
-        analyzeImport();
-    });
 
-    QFormLayout* layout = new QFormLayout;
-    layout->setHorizontalSpacing(10);
-    layout->setVerticalSpacing(2);
-    layout->setRowWrapPolicy(QFormLayout::DontWrapRows);
-    layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
-    layout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
-    layout->setLabelAlignment(Qt::AlignLeft);
-    layout->addRow("Subdirectory containing averaged stack", averagedDir);
-    layout->addRow("Subdirectory containing aligned stack", moviesDir);
-    layout->addRow("Subdirectory containing raw stack", rawDir);
-    layout->addRow("String to be ignored at the end of image file names", ignoreImagePattern);
-    layout->addRow("Add the imported images to group", addToGroup_);
-    layout->addRow("Length of the target image number string (>=5 and <=10)", numberLength_);
-
-
+    QStringList paramsList;
+    while (!s.atEnd()) paramsList << s.readLine().simplified();
+    s.close();
+    
     //Setup the window and add widgets
-    GroupContainer* parameterContainer = new GroupContainer;
-    parameterContainer->setTitle("Import Options");
+    ParametersWidget* parameterContainer = new ParametersWidget(projectData.projectParameterData(), paramsList, 2);
     parameterContainer->setMinimumWidth(200);
     parameterContainer->setMinimumHeight(100);
-    parameterContainer->setContainerLayout(layout);
 
     return parameterContainer;
 }
@@ -238,8 +183,6 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
 
     QStringList scriptsAvailable;
     
-    
-
     QStringList scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/image/").subfolders();
     QList<QListWidget*> availableScriptConts;
     QToolBox* availaleScriptsBox = new QToolBox;
@@ -382,16 +325,16 @@ void AutoImportWindow::analyzeImport() {
     resultsTable_->setRowCount(0);
     importButton_->setEnabled(true);
 
-    ProjectPreferences projectConfig(projectData.projectDir());
-    QString importImagesPath = projectConfig.importImageDir();
-    QString importAveragedFolder = projectConfig.importAveragedFolder();
-    QString importAlignedFolder = projectConfig.importAlignedFolder();
-    QString importRawFolder = projectConfig.importRawFolder();
-    QString importGroup = projectConfig.importGroup();
-    QString ignoreImagePattern = projectConfig.importIgnorePattern();
-    int imageNumberLength = projectConfig.importImageLength();
+    ParametersConfiguration* conf  = projectData.projectParameterData();
+    QString importImagesPath = conf->getValue("import_dir");
+    QString importAveragedFolder = conf->getValue("import_averages_folder");
+    QString importAlignedFolder = conf->getValue("import_aligned_folder");
+    QString importRawFolder =conf->getValue("import_raw_folder");
+    QString importGroup =conf->getValue("import_target_group");
+    QStringList ignoreImagePattern = conf->getValue("import_ignore_strings").split(' ');
+    int imageNumberLength = conf->get("import_averages_folder")->value().toInt();
 
-    if (projectConfig.importImageDir().isEmpty() || !QFileInfo(importImagesPath).exists()) {
+    if (importImagesPath.isEmpty() || !QFileInfo(importImagesPath).exists()) {
         std::cerr << "The import image path does not exist\n";
         return;
     }
@@ -400,7 +343,8 @@ void AutoImportWindow::analyzeImport() {
 
     bool addingAFile = false;
     
-    ImportFolderSettings folderPreferences(QDir(projectConfig.importImageDir()));
+    QDir importDir(importImagesPath);
+    ImportFolderSettings folderPreferences(importDir);
     for (QString image : QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks)) {
                 
         bool copying = false;
@@ -435,8 +379,9 @@ void AutoImportWindow::analyzeImport() {
             if (QDir(importImagesPath + "/" + importAlignedFolder).exists()) {
                 QString baseName = QFileInfo(importImagesPath + "/" + image).completeBaseName();
                 if (!ignoreImagePattern.isEmpty()) {
-                    baseName.contains(ignoreImagePattern, Qt::CaseInsensitive);
-                    baseName.remove(ignoreImagePattern, Qt::CaseInsensitive);
+                    for(QString pattern : ignoreImagePattern) {
+                        if(!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
+                    }
                 }
 
                 QStringList possibleMovieFiles = QDir(importImagesPath + "/" + importAlignedFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
@@ -452,8 +397,9 @@ void AutoImportWindow::analyzeImport() {
             if (QDir(importImagesPath + "/" + importRawFolder).exists()) {
                 QString baseName = QFileInfo(importImagesPath + "/" + image).completeBaseName();
                 if (!ignoreImagePattern.isEmpty()) {
-                    baseName.contains(ignoreImagePattern, Qt::CaseInsensitive);
-                    baseName.remove(ignoreImagePattern, Qt::CaseInsensitive);
+                    for(QString pattern : ignoreImagePattern) {
+                        if(!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
+                    }
                 }
 
                 QStringList possibleMovieFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
@@ -579,7 +525,7 @@ void AutoImportWindow::executeImport(bool execute) {
         inputContiner_->setDisabled(true);
         refreshButton_->setDisabled(true);
 
-        QString importGroup_ = ProjectPreferences(projectData.projectDir()).importGroup();
+        QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
 
         projectData.projectDir().mkpath(importGroup_);
         QFile(projectData.projectDir().absolutePath() + "/merge").link("../2dx_master.cfg", projectData.projectDir().absolutePath() + "/" + importGroup_ + "/2dx_master.cfg");
@@ -604,7 +550,7 @@ void AutoImportWindow::importImage() {
         }
     }
     
-    QString importGroup_ = ProjectPreferences(projectData.projectDir()).importGroup();
+    QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
     QString number = toBeImported_.keys().first();
     numberExecuting_ = number;
     QStringList files = toBeImported_[number];
@@ -681,7 +627,7 @@ void AutoImportWindow::importImage() {
     
 
     //register that this image was imported
-    ImportFolderSettings(QDir(ProjectPreferences(projectData.projectDir()).importImageDir()))
+    ImportFolderSettings(QDir(conf->getValue("import_dir")))
             .addImportedImage(QFileInfo(files.first()).fileName(), importGroup_ + "/" + number, hasAligned, hasRaw);
     
     //Copy Files

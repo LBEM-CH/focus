@@ -25,6 +25,19 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWi
     panelVisibilityToolBar = new QToolBar;
     panelVisibilityToolBar->addWidget(spacer());
     
+    //Create Toolbar
+    mainToolBar = new QToolBar("Navigation", this);
+    mainToolBar->setOrientation(Qt::Vertical);
+    mainToolBar->setIconSize(QSize(32, 32));
+    
+    executionWidget = new QWidget;
+    
+    mainWidget = new QStackedWidget;
+    mainWidget->addWidget(executionWidget);
+    
+    mainToolBarButtonGroup = new QButtonGroup(this);
+    mainToolBarButtonGroup->setExclusive(true);
+    
     //Setup containers
     BlockContainer* parameterContainer = setupParameterWindow();
     BlockContainer* logWindow = setupLogWindow();
@@ -81,16 +94,30 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWi
     
     containersLayout->addWidget(panelVisibilityToolBar, 0);
     
-    // Setup Main Layout
+    // Setup Execution Layout
     QHBoxLayout* scriptsAndContainerLayout = new QHBoxLayout;
     scriptsAndContainerLayout->setMargin(0);
     scriptsAndContainerLayout->setSpacing(0);
     scriptsAndContainerLayout->addStretch(0);
     scriptsAndContainerLayout->addWidget(scriptsContainer, 0);
     scriptsAndContainerLayout->addLayout(containersLayout, 1);
+    executionWidget->setLayout(scriptsAndContainerLayout);
     
-    setLayout(scriptsAndContainerLayout);
-
+    //Setup Main Layout
+    QFrame* vLine = new QFrame(this);
+    vLine->setFrameStyle(QFrame::VLine | QFrame::Sunken);
+    
+    QHBoxLayout* mainLayout = new QHBoxLayout;
+    mainLayout->setSpacing(0);
+    mainLayout->setMargin(0);
+    mainLayout->addStretch(0);
+    mainLayout->addWidget(mainToolBar, 0);
+    mainLayout->addWidget(vLine, 0);
+    mainLayout->addWidget(mainWidget, 1);
+    
+    setLayout(mainLayout);
+    
+    //Set up values from settings
     outputVerbosityControl->setValue(UserPreferences().userLevel());
     defaultModule->selectFirst();
 
@@ -99,11 +126,6 @@ ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWi
 }
 
 QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
-   
-    //Create Toolbar
-    scriptsToolBar = new QToolBar("Mode", this);
-    scriptsToolBar->setOrientation(Qt::Vertical);
-    scriptsToolBar->setIconSize(QSize(32, 32));
     
     scriptsWidget = new QStackedWidget(this);
     scriptsWidget->setAttribute(Qt::WA_MacShowFocusRect, 0);
@@ -115,9 +137,6 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
         ScriptModule* module = static_cast<ScriptModule*> (scriptsWidget->currentWidget());
         module->select(module->getSelection()->selection());
     });
-
-    QButtonGroup* showScriptsGroup = new QButtonGroup(this);
-    showScriptsGroup->setExclusive(true);
     
     for (int i = 0; i < scriptDirs.size(); ++i) {
         ScriptModule* module = new ScriptModule(scriptDirs[i], workingDir);
@@ -147,12 +166,12 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
         connect(outputVerbosityControl, SIGNAL(valueChanged(int)), module, SLOT(setVerbosity(int)));
 
         QToolButton* toolButton = getToolButton(module->getModuleToolIcon(), module->getModuleDescription(), true);
-        connect(toolButton, &QToolButton::toggled,
-                [ = ] (){
+        connect(toolButton, &QToolButton::toggled, [ = ] (){
+            mainWidget->setCurrentWidget(executionWidget);
             scriptsWidget->setCurrentWidget(module);
         });
-        showScriptsGroup->addButton(toolButton);
-        scriptsToolBar->addWidget(toolButton);
+        mainToolBarButtonGroup->addButton(toolButton);
+        mainToolBar->addWidget(toolButton);
         if (i == 0) defaultButton = toolButton;
     }
 
@@ -172,7 +191,6 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
     layout->setMargin(0);
     layout->setSpacing(0);
     layout->addStretch(0);
-    layout->addWidget(scriptsToolBar, 0);
     layout->addWidget(scriptsContainer, 1);
     widget->setLayout(layout);
     
@@ -561,7 +579,7 @@ ParametersConfiguration* ExecutionWindow::getConf() {
 }
 
 QToolBar* ExecutionWindow::getToolBar() {
-    return scriptsToolBar;
+    return mainToolBar;
 }
 
 QToolButton* ExecutionWindow::getToolButton(const QIcon& icon, const QString& text, bool checkable) {
@@ -587,4 +605,16 @@ QWidget* ExecutionWindow::spacer() {
 void ExecutionWindow::setLastChangedInConfig() {
     ParametersConfiguration* conf = getConf();
     conf->set("last_processed", QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm"));
+}
+
+void ExecutionWindow::addToMainToolBar(QWidget* associatedWidget, const QIcon& icon, const QString& text, bool startWithSeperator) {
+    mainWidget->addWidget(associatedWidget);
+    QToolButton* button = getToolButton(icon, text, true);
+    button->setChecked(false);
+    mainToolBarButtonGroup->addButton(button);
+    connect(button, &QToolButton::toggled, [=] () {
+        mainWidget->setCurrentWidget(associatedWidget);
+    });
+    if(startWithSeperator) mainToolBar->addSeparator();
+    mainToolBar->addWidget(button);
 }

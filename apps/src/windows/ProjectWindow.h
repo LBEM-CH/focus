@@ -12,6 +12,7 @@
 #include "ExecutionWindow.h"
 #include "ApplicationData.h"
 #include "ProjectData.h"
+#include "AutoImportWindow.h"
 
 class ProjectWindow : public QWidget {
 
@@ -35,6 +36,9 @@ public:
         mainLayout->addWidget(hLine);
         
         exeWindow_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"), this);
+        AutoImportWindow* importWin = new AutoImportWindow(this);
+        exeWindow_->addToMainToolBar(importWin, ApplicationData::icon("import"), "Import", true);
+        
         mainLayout->addWidget(exeWindow_, 1);
         
         setLayout(mainLayout);

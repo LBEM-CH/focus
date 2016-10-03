@@ -52,6 +52,7 @@ public:
     ParametersConfiguration* getConf();
     QToolBar* getToolBar();
     static QToolButton* getToolButton(const QIcon& icon, const QString& text, bool checkable);
+    void addToMainToolBar(QWidget* associatedWidget, const QIcon& icon, const QString& text, bool startWithSeperator=false);
 
 public slots:
     
@@ -100,7 +101,10 @@ private:
     ScriptModule* defaultModule;
     QToolButton* defaultButton;
 
-    QToolBar* scriptsToolBar;
+    QStackedWidget* mainWidget;
+    QWidget* executionWidget;
+    QButtonGroup* mainToolBarButtonGroup;
+    QToolBar* mainToolBar;
     QStackedWidget* scriptsWidget;
     QListView* subscriptWidget;
     

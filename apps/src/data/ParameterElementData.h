@@ -40,6 +40,7 @@ public:
     int userLevel() const;
     QString example() const;
     QString helpUrl() const;
+    bool lockable() const;
     bool syncWithUpperLevel() const;
     QString relation() const;
     

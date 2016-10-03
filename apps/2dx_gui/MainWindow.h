@@ -61,7 +61,6 @@
 #include "PreferencesDialog.h"
 #include "ImageLibrary.h"
 #include "ProjectWindow.h"
-#include "AutoImportWindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -110,11 +109,9 @@ private:
     ExecutionWindow* mergeWin_;
     ExecutionWindow* spWin_;
     ProjectWindow* projectToolsWin_;
-    AutoImportWindow* importWin_;
-    
+
     QToolButton* openLibraryWindowAct;
     QToolButton* openImageWindowAct;
-    QToolButton* openImportWindowAct;
     QToolButton* openMergeWindowAct;
     QToolButton* openSPWindowAct;
     QToolButton* openProjectToolsAct;

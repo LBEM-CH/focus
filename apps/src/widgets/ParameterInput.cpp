@@ -46,6 +46,8 @@ ParameterInput::ParameterInput(ParameterElementData *e, QWidget *parent)
     lockButton_->setFixedSize(QSize(18, 18));
     connect(lockButton_, SIGNAL(stateChanged(int)), this, SLOT(setReadOnlyState(int)));
     
+    if(!element->lockable()) lockButton_->hide();
+    
     layout_->addWidget(lockButton_, 0, 0, Qt::AlignVCenter);
     layout_->addWidget(inputWidget_, 0, 1, Qt::AlignVCenter);
     
@@ -109,9 +111,12 @@ void ParameterInput::setReadOnlyState(int state) {
     }
 
     if (lockButton_ != NULL) {
-        if (lockButton_->isChecked()) element->setLock(true);
-        else element->setLock(false);
-        element->getSection()->getConf()->save();
+        bool lock = false;
+        if (lockButton_->isChecked()) lock = true;
+        if(element->locked() != lock) {
+            element->setLock(lock);
+            element->getSection()->getConf()->save();
+        }
     }
 }
 

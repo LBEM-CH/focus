@@ -1,0 +1,93 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Drift-Correct with MotionCor2                                      #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 07/21/2016                                             #
+# Last Modification: 07/21/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 25 
+#
+# MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
+#
+# DISPLAY: imagenumber
+# DISPLAY: imagename
+# DISPLAY: imagename_original
+# DISPLAY: nonmaskimagename
+# DISPLAY: comment
+# DISPLAY: sample_pixel
+# DISPLAY: movie_stackname_raw
+# DISPLAY: movie_stackname
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: import_rawstack
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set SCRATCH_DISK = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set sample_pixel = ""
+set movie_stackname_raw = ""
+set movie_stackname = ""
+set movie_imagenumber_total = ""
+set import_rawstack = ""
+#
+#$end_vars
+#
+set scriptname = import_driftcor_motioncor2
+\rm -f LOGS/${scriptname}.results
+#
+set noEMAN = 'y'
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+#
+set COUNTS_PER_PIX = ` clip info ${import_rawstack} | grep mean | cut -d\= -f2 `
+echo "::Mean count is: ${COUNTS_PER_PIX}" 
+# set SERIALEM_FACTOR = ` header ${import_rawstack} | grep 'SerialEMCCD' | awk '{print $7}' `
+set SERIALEM_FACTOR = 1
+set frame_dose = ` echo "scale=3; ${COUNTS_PER_PIX} / ${sample_pixel} / ${sample_pixel} / ${SERIALEM_FACTOR}" | bc `
+echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame" 
+#
+##########################################################################
+${proc_2dx}/linblock "Calling MotionCor2..."
+##########################################################################
+#
+if ( 1 == 2 ) then
+MotionCor2 -InMrc ${movie_stackname_raw}.mrc \-OutMrc ${movie_stackname}.mrc \-Patch 5 5 \
+-Iter 10 \-Tol 0.5 \
+-bft 100 \
+-Kv ${KV} \-PixSize ${sample_pixel} \-FmDose ${frame_dose}
+endif
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname_raw}.mrc <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+exit
+#
+# These are listed here to make sure they appear in the 2dx_image GUI:
+#

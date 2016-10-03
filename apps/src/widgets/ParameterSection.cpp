@@ -24,7 +24,7 @@ ParameterSection::ParameterSection(QString sectionTitle, QWidget *parent)
 void ParameterSection::addParameter(ParameterElementData* element) {
     ParameterInput* inputWidget = new ParameterInput(element, this);
     connect(element, SIGNAL(dataChanged()), inputWidget, SLOT(load()));
-    inputWidget->setMinimumHeight(18);
+    inputWidget->setFixedHeight(24);
     int paramUserLevel = element->userLevel();
 
     int index = formLayout_->rowCount();

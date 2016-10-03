@@ -43,7 +43,7 @@ ParameterInput::ParameterInput(ParameterElementData *e, QWidget *parent)
     lockButton_ = new GraphicalButton(ApplicationData::icon("lock"));
     lockButton_->setToolTip("Lock this parameter, no script or user would be able to change this value (until it is forced or unlocked again)");
     lockButton_->setCheckable(true);
-    lockButton_->setFixedSize(QSize(18, 18));
+    lockButton_->setFixedSize(16, 16);
     connect(lockButton_, SIGNAL(stateChanged(int)), this, SLOT(setReadOnlyState(int)));
     
     if(!element->lockable()) lockButton_->hide();

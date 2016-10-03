@@ -40,6 +40,8 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     mainSplitter->setStretchFactor(1, 1);
 
     QGridLayout* mainLayout = new QGridLayout;
+    mainLayout->setMargin(0);
+    mainLayout->setSpacing(0);
     mainLayout->addWidget(mainSplitter);
     setLayout(mainLayout);
 

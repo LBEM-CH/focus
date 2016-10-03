@@ -64,14 +64,13 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
 }
 
 QTableWidget* AutoImportWindow::setupFilesTable() {
-    QTableWidget* filesTable = new QTableWidget(0, 5);
+    QTableWidget* filesTable = new QTableWidget(0, 6);
     filesTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     filesTable->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
     QStringList labels;
-    labels << "" << tr("Directory") << tr("Averaged Stack Name") << tr("Aligned") << tr("Raw");
+    labels << "" << tr("Directory") << tr("Search Name") << tr("Averaged") << tr("Aligned") << tr("Raw");
     filesTable->setHorizontalHeaderLabels(labels);
-    filesTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     filesTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     filesTable->verticalHeader()->hide();
     filesTable->setShowGrid(false);
@@ -82,15 +81,16 @@ QTableWidget* AutoImportWindow::setupFilesTable() {
 
 QWidget* AutoImportWindow::setupInputContainer() {
     QWidget* mainContainer = new QWidget;
-    QGridLayout* mainLayout = new QGridLayout();
+    QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
+    mainLayout->addStretch(0);
 
-    mainLayout->addWidget(setupInputFolderContainer(), 0, 0);
-    mainLayout->addWidget(setupScriptsContainer(), 1, 0);
-    mainLayout->addWidget(setupOptionsContainter(), 2, 0);
+    mainLayout->addWidget(setupInputFolderContainer(), 0);
+    mainLayout->addWidget(setupOptionsContainter(), 0);
+    mainLayout->addWidget(setupScriptsContainer(), 1);
 
-    mainContainer->setMaximumWidth(550);
+    mainContainer->setMaximumWidth(580);
     mainContainer->setLayout(mainLayout);
 
     return mainContainer;
@@ -113,17 +113,11 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     BrowserWidget* filesDirBrowser_ = new BrowserWidget(BrowserWidget::BrowseType::DIRECTORY);
     ParametersConfiguration* conf  = projectData.projectParameterData();
     QString importImagesPath = conf->getValue("import_dir");
-    QString importAveragedFolder = conf->getValue("import_averages_folder");
     filesDirBrowser_->setPath(importImagesPath);
-    QString currDir = importImagesPath + '/' + importAveragedFolder;
-    if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
+    setupWatcherPaths();
     connect(filesDirBrowser_, &BrowserWidget::pathChanged, [ = ] (const QString & value){
         conf->set("import_dir", value);
-        watcher_.removePaths(watcher_.directories());
-        QString importImagesPath = conf->getValue("import_dir");
-        QString importAveragedFolder = conf->getValue("import_averages_folder");
-        QString newDir = importImagesPath + '/' + importAveragedFolder;
-        if(QFileInfo(newDir).isDir()) watcher_.addPath(newDir);
+        setupWatcherPaths();
         analyzeImport();
     });
     layout->addRow(filesDirBrowser_);
@@ -169,7 +163,8 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
     
     //Setup the window and add widgets
     ParametersWidget* parameterContainer = new ParametersWidget(projectData.projectParameterData(), paramsList, 2);
-    parameterContainer->setMinimumWidth(200);
+    parameterContainer->setFrameStyle(QFrame::NoFrame);
+    parameterContainer->setFixedHeight(250);
     parameterContainer->setMinimumHeight(100);
 
     return parameterContainer;
@@ -184,8 +179,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     QStringList scriptsAvailable;
     
     QStringList scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/image/").subfolders();
-    QList<QListWidget*> availableScriptConts;
-    QToolBox* availaleScriptsBox = new QToolBox;
+    availaleScriptsBox = new QTabWidget;
     for (QString scriptFolder : scriptFolders) {
 
         QListWidget* availableScriptCont = new QListWidget();
@@ -225,14 +219,13 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
             scriptsAvailable.append(it.value()->text());
         }
         
-        availableScriptConts.append(availableScriptCont);
-        availaleScriptsBox->addItem(availableScriptCont, ApplicationData::icon(scriptProps.icon()), scriptProps.title());
+        availaleScriptsBox->addTab(availableScriptCont, ApplicationData::icon(scriptProps.icon()), "");
     }
 
     selectedScriptsCont = new QListWidget;
     selectedScriptsCont->setSelectionMode(QAbstractItemView::ExtendedSelection);
     selectedScriptsCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
-    resetSelectedScriptsContainer(availableScriptConts, scriptsAvailable);
+    resetSelectedScriptsContainer(scriptsAvailable);
 
     GraphicalButton* moveButton = new GraphicalButton(ApplicationData::icon("move_selected"));
     moveButton->setFixedSize(32, 32);
@@ -242,14 +235,14 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
             selectedScripts.append(selectedScriptsCont->item(row)->text());
         }
 
-        for(QListWidget* availableScriptCont : availableScriptConts) {
-            for (QModelIndex index : availableScriptCont->selectionModel()->selectedIndexes()) {
-                if (!selectedScripts.contains(index.data(Qt::DisplayRole).toString())) selectedScripts.append(index.data(Qt::DisplayRole).toString());
-            }
+        QListWidget* availableScriptCont = static_cast<QListWidget*> (availaleScriptsBox->currentWidget());
+        for (QModelIndex index : availableScriptCont->selectionModel()->selectedIndexes()) {
+            if (!selectedScripts.contains(index.data(Qt::DisplayRole).toString())) selectedScripts.append(index.data(Qt::DisplayRole).toString());
         }
+        
 
         ProjectPreferences(projectData.projectDir()).setImportScripts(selectedScripts);
-        resetSelectedScriptsContainer(availableScriptConts, scriptsAvailable);
+        resetSelectedScriptsContainer(scriptsAvailable);
     });
 
     GraphicalButton* deleteButton = new GraphicalButton(ApplicationData::icon("delete_selected"));
@@ -260,7 +253,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
             selectedScripts.removeAll(index.data(Qt::DisplayRole).toString());
         }
         ProjectPreferences(projectData.projectDir()).setImportScripts(selectedScripts);
-        resetSelectedScriptsContainer(availableScriptConts, scriptsAvailable);
+        resetSelectedScriptsContainer(scriptsAvailable);
     });
 
     QVBoxLayout *buttonsLayout = new QVBoxLayout;
@@ -271,7 +264,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     buttonsLayout->addWidget(deleteButton, 0);
     buttonsLayout->addStretch(0);
 
-    scriptContLayout->addWidget(new BlockContainer("Available Scripts", availaleScriptsBox));
+    scriptContLayout->addWidget(availaleScriptsBox);
     scriptContLayout->addLayout(buttonsLayout, 0);
     scriptContLayout->addWidget(new BlockContainer("Selected Scripts", selectedScriptsCont));
     scriptsContainer->setContainerLayout(scriptContLayout);
@@ -332,7 +325,7 @@ void AutoImportWindow::analyzeImport() {
     QString importRawFolder =conf->getValue("import_raw_folder");
     QString importGroup =conf->getValue("import_target_group");
     QStringList ignoreImagePattern = conf->getValue("import_ignore_strings").split(' ');
-    int imageNumberLength = conf->get("import_averages_folder")->value().toInt();
+    int imageNumberLength = conf->get("import_numberlength")->value().toInt();
 
     if (importImagesPath.isEmpty() || !QFileInfo(importImagesPath).exists()) {
         std::cerr << "The import image path does not exist\n";
@@ -345,23 +338,36 @@ void AutoImportWindow::analyzeImport() {
     
     QDir importDir(importImagesPath);
     ImportFolderSettings folderPreferences(importDir);
-    for (QString image : QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks)) {
-                
+    QStringList alreadyImportedBaseNames = folderPreferences.importedNames();
+    
+    //Get a list of all available files
+    QStringList fileNames = QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks);
+    fileNames.append(QDir(importImagesPath + "/" + importAlignedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks));
+    fileNames.append(QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks));
+    fileNames.removeDuplicates();
+    
+    for (QString image : fileNames) {
         bool copying = false;
         bool processed = false;
+        bool hasAveraged = false;
         bool hasAligned = false;
         bool hasRaw = false;
         QString dirName;
-        if(!isSafeToCopy(importImagesPath + "/" + importAveragedFolder + "/" + image)) {
-            copying = true;
-            dirName = "File being edited";
-            addingAFile = true;
+        
+        //get the basename and remove the to_be_ignored strings
+        QString baseName = QFileInfo(image).completeBaseName();
+        if (!ignoreImagePattern.isEmpty()) {
+            for (QString pattern : ignoreImagePattern) {
+                if (!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
+            }
         }
-        else if(ImportFolderSettings(QDir(importImagesPath)).importedNames().contains(image)) {
+        
+        if(alreadyImportedBaseNames.contains(baseName)) {
             processed = true;
-            dirName = folderPreferences.linkedDirectory(image);
-            hasAligned = folderPreferences.hadAligned(image);
-            hasRaw = folderPreferences.hadRaw(image);
+            dirName = folderPreferences.linkedDirectory(baseName);
+            hasAveraged = folderPreferences.hadAveraged(baseName);
+            hasAligned = folderPreferences.hadAligned(baseName);
+            hasRaw = folderPreferences.hadRaw(baseName);
         }
         else {
             QString imageNumber = ProjectData::commitIntToStringLength(++uid, imageNumberLength);
@@ -372,22 +378,27 @@ void AutoImportWindow::analyzeImport() {
             
             dirToRowNumber_.insert(imageNumber, resultsTable_->rowCount());
             dirName = importGroup + "/" + imageNumber;
-            toBeImported_.insert(imageNumber, QStringList() << importImagesPath + "/" + importAveragedFolder + "/" + image);
+           
+            toBeImported_.insert(imageNumber, QStringList() << baseName);
+            
+            //Check for averaged file
+            QString averagedFile;
+            if (QDir(importImagesPath + "/" + importAveragedFolder).exists()) {
+                QStringList possibleFiles = QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
+                if (!possibleFiles.isEmpty()) {
+                    hasAveraged = true;
+                    averagedFile = importImagesPath + "/" + importAveragedFolder + "/" + possibleFiles.first();
+                }
+            }
+            toBeImported_[imageNumber].append(averagedFile);
 
             //Check for movie file
             QString movieFile;
             if (QDir(importImagesPath + "/" + importAlignedFolder).exists()) {
-                QString baseName = QFileInfo(importImagesPath + "/" + image).completeBaseName();
-                if (!ignoreImagePattern.isEmpty()) {
-                    for(QString pattern : ignoreImagePattern) {
-                        if(!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
-                    }
-                }
-
-                QStringList possibleMovieFiles = QDir(importImagesPath + "/" + importAlignedFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
-                if (!possibleMovieFiles.isEmpty()) {
+                QStringList possibleFiles = QDir(importImagesPath + "/" + importAlignedFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
+                if (!possibleFiles.isEmpty()) {
                     hasAligned = true;
-                    movieFile = importImagesPath + "/" + importAlignedFolder + "/" + possibleMovieFiles.first();
+                    movieFile = importImagesPath + "/" + importAlignedFolder + "/" + possibleFiles.first();
                 }
             }
             toBeImported_[imageNumber].append(movieFile);
@@ -395,21 +406,26 @@ void AutoImportWindow::analyzeImport() {
             //Check for raw file
             QString rawFile;
             if (QDir(importImagesPath + "/" + importRawFolder).exists()) {
-                QString baseName = QFileInfo(importImagesPath + "/" + image).completeBaseName();
-                if (!ignoreImagePattern.isEmpty()) {
-                    for(QString pattern : ignoreImagePattern) {
-                        if(!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
-                    }
-                }
-
-                QStringList possibleMovieFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
-                if (!possibleMovieFiles.isEmpty()) {
+                QStringList possibleFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
+                if (!possibleFiles.isEmpty()) {
                     hasRaw = true;
-                    rawFile = importImagesPath + "/" + importRawFolder + "/" + possibleMovieFiles.first();
+                    rawFile = importImagesPath + "/" + importRawFolder + "/" + possibleFiles.first();
                 }
             }
             toBeImported_[imageNumber].append(rawFile);
+            
+            //Check if the file is still being copied
+            for(int i=1; i<toBeImported_[imageNumber].size(); ++i) {
+                if(!isSafeToCopy(toBeImported_[imageNumber][i])) {
+                    copying = true;
+                    addingAFile = true;
+                    dirName = "Not yet ready";
+                    toBeImported_.remove(imageNumber);
+                    break;
+                }
+            }
         }
+        
 
         QTableWidgetItem *statusItem = new QTableWidgetItem();
         statusItem->setFlags(statusItem->flags() ^ Qt::ItemIsEditable);
@@ -417,12 +433,17 @@ void AutoImportWindow::analyzeImport() {
         else if (!processed) statusItem->setIcon(ApplicationData::icon("import_next"));
         else statusItem->setIcon(ApplicationData::icon("import_done"));
         
-        QTableWidgetItem* imageItem = new QTableWidgetItem(image);
+        QTableWidgetItem* imageItem = new QTableWidgetItem(baseName);
         imageItem->setFlags(imageItem->flags() ^ Qt::ItemIsEditable);
         
         QTableWidgetItem* numberItem = new QTableWidgetItem(dirName);
         numberItem->setFlags(numberItem->flags() ^ Qt::ItemIsEditable);
 
+        QTableWidgetItem *averagedItem = new QTableWidgetItem();
+        averagedItem->setFlags(averagedItem->flags() ^ Qt::ItemIsEditable);
+        if (hasAveraged) averagedItem->setIcon(ApplicationData::icon("tick"));
+        else averagedItem->setIcon(ApplicationData::icon("cross"));
+        
         QTableWidgetItem *movieItem = new QTableWidgetItem();
         movieItem->setFlags(movieItem->flags() ^ Qt::ItemIsEditable);
         if (hasAligned) movieItem->setIcon(ApplicationData::icon("tick"));
@@ -438,8 +459,9 @@ void AutoImportWindow::analyzeImport() {
         resultsTable_->setItem(row, 0, statusItem);
         resultsTable_->setItem(row, 1, numberItem);
         resultsTable_->setItem(row, 2, imageItem);
-        resultsTable_->setItem(row, 3, movieItem);
-        resultsTable_->setItem(row, 4, rawItem);
+        resultsTable_->setItem(row, 3, averagedItem);
+        resultsTable_->setItem(row, 4, movieItem);
+        resultsTable_->setItem(row, 5, rawItem);
 
     }
 
@@ -456,13 +478,16 @@ void AutoImportWindow::analyzeImport() {
     resultsTable_->scrollToBottom();
 }
 
-void AutoImportWindow::resetSelectedScriptsContainer(QList<QListWidget*> availConts, QStringList availScripts) {
+void AutoImportWindow::resetSelectedScriptsContainer(QStringList availScripts) {
     selectedScriptsCont->clear();
     QStringList selectedScripts = ProjectPreferences(projectData.projectDir()).importScripts();
     for (QString script : availScripts) {
         if (selectedScripts.contains(script)) {
             QList<QListWidgetItem*> foundItems;
-            for(QListWidget* availCont : availConts) foundItems.append(availCont->findItems(script, Qt::MatchExactly));
+            for(int i=0; i< availaleScriptsBox->count(); ++i)  {
+                QListWidget* availCont = static_cast<QListWidget*>(availaleScriptsBox->widget(i));
+                foundItems.append(availCont->findItems(script, Qt::MatchExactly));
+            }
             if (foundItems.size() > 0) {
                 QListWidgetItem* foundItem = foundItems.first();
                 QListWidgetItem* item = new QListWidgetItem(foundItem->text());
@@ -586,49 +611,50 @@ void AutoImportWindow::importImage() {
     addStatusToList("Created Configuration File.");
 
     ParametersConfiguration* conf = projectData.parameterData(workingDir);
-    conf->set("imagename", number, false);
-    conf->set("nonmaskimagename", number, false);
     conf->set("imagenumber", number, false);
-    conf->set("imagename_original", files.first(), false);
-    conf->set("import_gaincorrectedstack_2d", number + "_raw", false);
-
-    scriptsToBeExecuted_.insert(0, "cp -f " + files.first() + " " + workingDir.canonicalPath() + "/" + number + "_raw.mrc");
-
+    
+    bool hasAveraged = false;
     bool hasAligned = false;
     bool hasRaw = false;
-    //Check for movie file
-    if (files.size() > 1 && !files[1].isEmpty()) {
-        conf->set("movie_stackname_raw", number + "_stack", false);
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + number + "_stack.mrc");
+    
+    //Get the original file name used for search
+    QString baseName = files.first();
+    
+    //Check for the averaged file
+    if(files.size() > 1 && !files[1].isEmpty()) {
+        conf->set("imagename", baseName + "_2dx", false);
+        conf->set("nonmaskimagename", baseName + "_2dx", false);
+        conf->set("imagename_original", files[1], false);
+        scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + baseName + "_2dx.mrc");
+        hasAveraged = true;
+    }
+    
+    //Check for aligned file
+    if (files.size() > 2 && !files[2].isEmpty()) {
+        conf->set("movie_stackname", baseName + "_aligned", false);
+        conf->set("movie_stackname_original", files[2], false);
+        scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + baseName + "_aligned.mrcs");
         hasAligned = true;
     }
 
     //Check for raw file
-    if (files.size() > 2 && !files[2].isEmpty()) {
-        conf->set("import_rawstack_original", files[2], false);
-        conf->set("import_rawstack", QFileInfo(files[2]).fileName(), false);
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + QFileInfo(files[2]).fileName());
+    if (files.size() > 3 && !files[3].isEmpty()) {
+        conf->set("raw_gaincorrected_stack", baseName + "_raw", false);
+        conf->set("raw_gaincorrected_original", files[3], false);
+        scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + "_raw.mrcs");
         hasRaw = true;
     }
 
-    //ToDo: CHEN:
-    //Ckech for gain reference file
-    // 
-    // 
-    // 
-    // 
-    // 
-    //
-
+    //Check for gain reference file
+    //TODO
+    
     conf->setModified(true);
     
     //Prepare for script execution
     currentWorkingDir_ = workingDir;
     
-
     //register that this image was imported
-    ImportFolderSettings(QDir(conf->getValue("import_dir")))
-            .addImportedImage(QFileInfo(files.first()).fileName(), importGroup_ + "/" + number, hasAligned, hasRaw);
+    ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasAveraged, hasAligned, hasRaw);
     
     //Copy Files
     addStatusToList("Copying Files...");
@@ -697,7 +723,7 @@ void AutoImportWindow::addStatusToList(const QString& text, bool error) {
 }
 
 bool AutoImportWindow::isSafeToCopy(const QString& imageName) {
-    if(!QFileInfo(imageName).exists()) return false;
+    if(!QFileInfo(imageName).exists()) return true;
     
     int safe_interval = 30000; //in milli secs
     if(QDateTime::currentMSecsSinceEpoch() - QFileInfo(imageName).lastModified().toMSecsSinceEpoch() < safe_interval) {
@@ -719,8 +745,27 @@ QStringList AutoImportWindow::imageGroups() {
     return imageFolders;
 }
 
+void AutoImportWindow::setupWatcherPaths() {
+    ParametersConfiguration* conf  = projectData.projectParameterData();
+    QString importImagesPath = conf->getValue("import_dir");
+    QString importAveragedFolder = conf->getValue("import_averages_folder");
+    QString importAlignedFolder = conf->getValue("import_aligned_folder");
+    QString importRawFolder = conf->getValue("import_raw_folder");
+    
+    if(watcher_.directories().size() > 0) watcher_.removePaths(watcher_.directories());
+    
+    QString currDir;
+    currDir = importImagesPath + '/' + importAveragedFolder;
+    if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
+    
+    currDir = importImagesPath + '/' + importAlignedFolder;
+    if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
+    
+    currDir = importImagesPath + '/' + importRawFolder;
+    if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
+}
+
+
 QString AutoImportWindow::introText() {
-    return (QString("Place the raw, aligned and averaged stacks in this directory with sub-folders separating them. " +
-            QString("The corresponding raw, aligned and averaged stacks in the folders should ") +
-            QString("have same starting file names.")));
+    return QString("Place the raw, aligned and averaged stacks in this directory with sub-folders separating them.");
 }

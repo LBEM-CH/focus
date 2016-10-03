@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QTableWidget>
 #include <QProgressBar>
+#include <QTabWidget>
 
 #include "BlockContainer.h"
 #include "BrowserWidget.h"
@@ -42,9 +43,11 @@ private:
     void addStatusToList(const QString& text, bool error=false);
 
     QStringList selectedScriptPaths();
-    void resetSelectedScriptsContainer(QList<QListWidget*> availCont, QStringList availScripts);
+    void resetSelectedScriptsContainer(QStringList availScripts);
     
     bool isSafeToCopy(const QString& imageName);
+    
+    void setupWatcherPaths();
     
     QTimer timer_; //Timer to check reanalyze if a file is being changed
     QProcess process_;
@@ -55,12 +58,21 @@ private:
     QLabel* statusLabel_;
     QListWidget* statusEntryList_;
     QListWidget* selectedScriptsCont;
+    QTabWidget* availaleScriptsBox;
     QWidget* inputContiner_;
     QProgressBar* progressBar_; 
     QPushButton* importButton_;
     QPushButton* refreshButton_;
     
     //Data
+    
+    /**
+     * Each Target number is mapped to a list of strings containing:
+     * 0. OriName (the target images are named using this)
+     * 1. If averaged file is present then it's full file path else empty
+     * 2. If aligned file is present then it's full file path else empty
+     * 3. If raw file is present then it's full file path else empty
+     */
     QMap<QString, QStringList> toBeImported_;
     QStringList scriptsToBeExecuted_;
     QDir currentWorkingDir_;

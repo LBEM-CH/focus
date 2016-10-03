@@ -18,10 +18,11 @@ public:
     : QSettings(importFolder.absolutePath() + "/.2dx.imported.ini", QSettings::Format::IniFormat) {
     }
 
-    void addImportedImage(const QString& image, const QString& importedDir, bool hadAligned, bool hadRaw) {
+    void addImportedImage(const QString& image, const QString& importedDir, bool hadAveraged, bool hadAligned, bool hadRaw) {
         beginGroup("imported");
         beginGroup(image);
         setValue("directory", importedDir);
+        setValue("hadAveraged", hadAveraged);
         setValue("hadAligned", hadAligned);
         setValue("hadRaw", hadRaw);
         endGroup();
@@ -39,6 +40,15 @@ public:
         beginGroup("imported");
         beginGroup(imageName);
         QString val = value("directory").toString();
+        endGroup();
+        endGroup();
+        return val;
+    }
+    
+    bool hadAveraged(const QString& imageName) {
+        beginGroup("imported");
+        beginGroup(imageName);
+        bool val = value("hadAveraged", false).toBool();
         endGroup();
         endGroup();
         return val;

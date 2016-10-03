@@ -29,6 +29,7 @@ public:
             else if(prop == "help") set.helpUrl = valueStr;
             else if(prop == "relation") set.relation = valueStr;
             else if(prop == "type") set.typeInfo = ParameterTypeInfo(valueStr);
+            else if(prop == "locked") set.lockable = true;
             else if(prop == "userlevel") {
                 QString userLevelString = valueStr.toLower().trimmed();
                 if (userLevelString == "hidden") set.userLevel = 2;
@@ -75,6 +76,10 @@ public:
         return propertySet(parameterName).relation;
     }
     
+    bool lockable(const QString& parameterName) {
+        return propertySet(parameterName).lockable;
+    }
+    
     bool syncWithUpperLevel(const QString& parameterName) {
         return propertySet(parameterName).syncWithUpperLevel;
     }
@@ -97,6 +102,7 @@ private:
         QString example;
         QString helpUrl;
         QString relation;
+        bool lockable = false;
         bool syncWithUpperLevel = false;
         
         PropertySet() = default;
@@ -108,7 +114,8 @@ private:
         userLevel(other.userLevel), 
         example(other.example), 
         helpUrl(other.helpUrl), 
-        relation(other.relation), 
+        relation(other.relation),
+        lockable(other.lockable),
         syncWithUpperLevel(other.syncWithUpperLevel) {
         }
 
@@ -125,6 +132,7 @@ private:
             example = right.example;
             helpUrl = right.helpUrl;
             relation = right.relation;
+            lockable = right.lockable;
             syncWithUpperLevel = right.syncWithUpperLevel;
             
             return *this;

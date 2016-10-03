@@ -3,6 +3,7 @@
 #include "ParameterMaster.h"
 #include "ParameterSectionData.h"
 #include "ParameterElementData.h"
+#include "ParameterConfiguration.h"
 
 
 ParameterElementData::ParameterElementData(const QString& name, ParameterSectionData* parent)
@@ -103,6 +104,11 @@ QString ParameterElementData::helpUrl() const {
     return parameterMaster.helpUrl(name());
 }
 
+bool ParameterElementData::lockable() const {
+    return parameterMaster.lockable(name());
+}
+
+
 bool ParameterElementData::syncWithUpperLevel() const {
     return parameterMaster.syncWithUpperLevel(name());
 }
@@ -130,12 +136,12 @@ void ParameterElementData::setValue(QString value) {
 }
 
 void ParameterElementData::setLock(bool lock) {
-    bool changed = false;
-    if(lock_ != lock) changed = true;
-    lock_ = lock;
-    if (changed) {
-        emit dataChanged();
-        emit lockChanged(lock);
+    if(lockable()) {
+        if(lock_ != lock) {
+            lock_ = lock;
+            emit dataChanged();
+            emit lockChanged(lock);
+        }
     }
 }
 

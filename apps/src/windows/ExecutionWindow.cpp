@@ -546,7 +546,7 @@ void ExecutionWindow::reload(const QString& resultsFile) {
 }
 
 void ExecutionWindow::launchFileBrowser() {
-    QString path = QDir::toNativeSeparators(projectData.projectWorkingDir().canonicalPath());
+    QString path = QDir::toNativeSeparators(workingDir.canonicalPath());
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 

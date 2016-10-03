@@ -35,7 +35,7 @@ void ProjectData::registerParameterMaster(const QString& fileName) {
     }
 
     QStringList valueSearch;
-    valueSearch << "LABEL" << "LEGEND" << "EXAMPLE" << "HELP" << "TYPE" << "RELATION" << "USERLEVEL" << "SYNC_WITH_UPPER_LEVEL";
+    valueSearch << "LABEL" << "LEGEND" << "EXAMPLE" << "HELP" << "TYPE" << "RELATION" << "USERLEVEL" << "LOCKED" << "SYNC_WITH_UPPER_LEVEL";
     
     QMap<QString, QString> propertiesRead;
     QString lineData;

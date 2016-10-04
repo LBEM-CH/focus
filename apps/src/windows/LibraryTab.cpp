@@ -255,12 +255,20 @@ QWidget* LibraryTab::setupPreviewContainer() {
     previews = new QStackedWidget(this);
     previews->setFixedSize(200, 200);
 
+    GainCorrectedPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("GainCorrected<br>image<br>not found"), previews);
+    GainCorrectedfftPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("FFT of<br>GainCorrected <br>image<br>not found"), previews);
+    DriftCorrectedPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("DriftCorrected<br>image<br>not found"), previews);
+    DriftCorrectedfftPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("FFT of<br>DriftCorrected <br>image<br>not found"), previews);
     rawPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Raw image<br>not found"), previews);
     fftPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Fourier image<br>not found"), previews);
     mapPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Image not<br>processed"), previews);
     refPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("No reference<br>available"), previews);
     dualPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Half-Half map<br>not available"), previews);
 
+    previews->addWidget(GainCorrectedPreview);
+    previews->addWidget(GainCorrectedfftPreview);
+    previews->addWidget(DriftCorrectedPreview);
+    previews->addWidget(DriftCorrectedfftPreview);
     previews->addWidget(rawPreview);
     previews->addWidget(fftPreview);
     previews->addWidget(mapPreview);
@@ -352,7 +360,11 @@ QWidget* LibraryTab::setupPreviewContainer() {
 }
 
 void LibraryTab::setPreviewLabelText() {
-    if(previews->currentWidget() == rawPreview) previewLabel->setText("Raw Image");
+    if(previews->currentWidget() == GainCorrectedPreview) previewLabel->setText("GainCorrected Image");
+    else if(previews->currentWidget() == GainCorrectedfftPreview) previewLabel->setText("FFT of GainCorrected Image");
+    else if(previews->currentWidget() == DriftCorrectedPreview) previewLabel->setText("DriftCorrected Image");
+    else if(previews->currentWidget() == DriftCorrectedfftPreview) previewLabel->setText("FFT of DriftCorrected Image");
+    else if(previews->currentWidget() == rawPreview) previewLabel->setText("Raw Image");
     else if(previews->currentWidget() == fftPreview) previewLabel->setText("FFT of Raw Image");
     else if(previews->currentWidget() == mapPreview) previewLabel->setText("Final Map");
     else if(previews->currentWidget() == refPreview) previewLabel->setText("Reference Map");
@@ -858,11 +870,19 @@ void LibraryTab::setPreviewImages(const QString& imagePath) {
         previewContainer->show();
         imageStatus->updateData();
         ParametersConfiguration* imageConf = projectData.parameterData(QDir(imagePath));
-        QString rawImage, fftImage;
+        QString GainCorrectedImage, GainCorrectedfftImage, DriftCorrectedImage, DriftCorrectedfftImage, rawImage, fftImage;
         if(imageConf) {
+            GainCorrectedImage = imageConf->getValue("raw_gaincorrectedstack") + ".mrc";
+            GainCorrectedfftImage = imageConf->getValue("raw_gaincorrectedstack") + "_fft.mrc";
+            DriftCorrectedImage = imageConf->getValue("movie_stackname") + ".mrc";
+            DriftCorrectedfftImage = imageConf->getValue("movie_stackname") + "_fft.mrc";
             rawImage = imageConf->getValue("imagename") + ".mrc";
             fftImage = "FFTIR/" + imageConf->getValue("nonmaskimagename") + "_fft.mrc";
         }
+        GainCorrectedPreview->loadFile(imagePath + "/" + GainCorrectedImage, "mrc", showHeaderButton->isChecked());
+        GainCorrectedfftPreview->loadFile(imagePath + "/" + GainCorrectedfftImage, "mrc", showHeaderButton->isChecked());
+        DriftCorrectedPreview->loadFile(imagePath + "/" + DriftCorrectedImage, "mrc", showHeaderButton->isChecked());
+        DriftCorrectedfftPreview->loadFile(imagePath + "/" + DriftCorrectedfftImage, "mrc", showHeaderButton->isChecked());
         rawPreview->loadFile(imagePath + "/" + rawImage, "mrc", showHeaderButton->isChecked());
         fftPreview->loadFile(imagePath + "/" + fftImage, "mrc", showHeaderButton->isChecked());
         mapPreview->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());

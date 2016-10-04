@@ -327,6 +327,8 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format) {
          */
     }
 
+    // CHEN:  Should for non-suqare images this be:
+    // if (format == QImage::Format_Indexed8 && header->ny() < 256 && header->nx() < 256) {
     if (format == QImage::Format_Indexed8 && header->ny() < 256) {
         uchar *temp = imageData;
         imageData = new uchar[1024 * 1024];
@@ -342,7 +344,9 @@ void mrcImage::formatImage(mrcHeader *header, QImage::Format format) {
 
     if (image != NULL) delete image;
 
-    if (format == QImage::Format_Indexed8 && header->ny() < 256) {
+    // CHEN:  Should for non-suqare images this be:
+    //if (format == QImage::Format_Indexed8 && header->ny() < 256) {
+    if (format == QImage::Format_Indexed8 && header->ny() < 256 && header->nx() < 256) {
         image = new QImage(imageData, 1024, 1024, format);
         if (mode == 3 || mode == 4)
             // *image = image->copy(0,0,(header->nx()-1)*2, header->ny());
@@ -356,11 +360,11 @@ void mrcImage::formatImage(mrcHeader *header, QImage::Format format) {
             image = new QImage(imageData, header->nx(), header->ny(), format);
         }
     }
-    // CHEN
     // cout<<"In mrcImage.cpp, line 374:  Image mode = "<<mode<<",  Image dimensions = "<<image->width()<<" "<<image->height()<<endl;
     // *image = image->mirrored(false,true);
     QImage mirrorimage = image->mirrored(false, true);
     // cout<<"In mrcImage.cpp, line 376:  Image now mirrored."<<endl;
+    // CHEN   Why is this crashing, for a non-square image ????? :
     *image = mirrorimage;
     // cout<<"In mrcImage.cpp, line 378:  Image now copied back."<<endl;
     if (format == QImage::Format_Indexed8) {

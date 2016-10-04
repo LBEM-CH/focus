@@ -27,7 +27,9 @@ void ParametersWidget::setSelectionUserLevel(int level){
 }
 
 void ParametersWidget::changeParametersDisplayed(const QStringList& toBeDisplayed) {
-    parametersDisplayed_ = toBeDisplayed;
+    if(toBeDisplayed.contains("*")) parametersDisplayed_ = data->getLookupTable().keys();
+    else parametersDisplayed_ = toBeDisplayed;
+    
     parametersActuallyShown_ = parametersDisplayed_;
     changeFormWidget();
 }

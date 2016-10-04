@@ -1,18 +1,19 @@
-#ifndef PATHVALIDATOR_H
-#define PATHVALIDATOR_H
+#ifndef DIRVALIDATOR_H
+#define DIRVALIDATOR_H
 
 #include <QValidator>
-#include <QFileInfo>
+#include <QDir>
 
-class PathValidator : public QValidator {
+class DirValidator : public QValidator {
     
 public:
-    PathValidator(QObject* parent = 0) 
+    DirValidator(QObject* parent = 0) 
     : QValidator(parent){
     }
     
     QValidator::State validate(QString& input, int&) const override {
-        if(QFileInfo(input).exists()) return QValidator::Acceptable;
+        QDir dir(input);
+        if(dir.exists()) return QValidator::Acceptable;
         else return QValidator::Invalid;
     }
 

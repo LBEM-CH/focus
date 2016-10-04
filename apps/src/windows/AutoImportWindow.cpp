@@ -166,7 +166,7 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
     //Setup the window and add widgets
     ParametersWidget* parameterContainer = new ParametersWidget(projectData.projectParameterData(), paramsList, 2);
     parameterContainer->setFrameStyle(QFrame::NoFrame);
-    parameterContainer->setFixedHeight(250);
+    parameterContainer->setFixedHeight(260);
     parameterContainer->setMinimumHeight(100);
 
     return parameterContainer;
@@ -328,6 +328,7 @@ void AutoImportWindow::analyzeImport() {
     QString importGroup =conf->getValue("import_target_group");
     QStringList ignoreImagePattern = conf->getValue("import_ignore_strings").split(' ');
     int imageNumberLength = conf->get("import_numberlength")->value().toInt();
+    int rawOption = conf->get("import_rawstack_type")->value().toInt();
 
     if (importImagesPath.isEmpty() || !QFileInfo(importImagesPath).exists()) {
         std::cerr << "The import image path does not exist\n";
@@ -342,10 +343,14 @@ void AutoImportWindow::analyzeImport() {
     ImportFolderSettings folderPreferences(importDir);
     QStringList alreadyImportedBaseNames = folderPreferences.importedNames();
     
+    //If rawOption is 1, add tif extention to be searched
+    QStringList rawExtentions;
+    rawExtentions << "*.mrc" << "*.mrcs" << "*.tif" << "*.tiff";
+    
     //Get a list of all available files
     QStringList fileNames = QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks);
-    fileNames.append(QDir(importImagesPath + "/" + importAlignedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks));
-    fileNames.append(QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks));
+    fileNames.append(QDir(importImagesPath + "/" + importAlignedFolder).entryList(QStringList() << "*.mrc" << "*.mrcs", QDir::Files | QDir::NoSymLinks));
+    fileNames.append(QDir(importImagesPath + "/" + importRawFolder).entryList(rawExtentions , QDir::Files | QDir::NoSymLinks));
     fileNames.removeDuplicates();
     
     for (QString image : fileNames) {
@@ -407,11 +412,14 @@ void AutoImportWindow::analyzeImport() {
             
             //Check for raw file
             QString rawFile;
-            if (QDir(importImagesPath + "/" + importRawFolder).exists()) {
-                QStringList possibleFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
-                if (!possibleFiles.isEmpty()) {
-                    hasRaw = true;
-                    rawFile = importImagesPath + "/" + importRawFolder + "/" + possibleFiles.first();
+            
+            if (rawOption != 0) {
+                if (QDir(importImagesPath + "/" + importRawFolder).exists()) {
+                    QStringList possibleFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList() << baseName + "*.mrc" << baseName + "*.mrcs" << baseName + "*.tif" << baseName + "*.tiff", QDir::Files | QDir::NoSymLinks);
+                    if (!possibleFiles.isEmpty()) {
+                        hasRaw = true;
+                        rawFile = importImagesPath + "/" + importRawFolder + "/" + possibleFiles.first();
+                    }
                 }
             }
             toBeImported_[imageNumber].append(rawFile);
@@ -641,14 +649,28 @@ void AutoImportWindow::importImage() {
 
     //Check for raw file
     if (files.size() > 3 && !files[3].isEmpty()) {
-        conf->set("raw_gaincorrected_stack", baseName + "_raw", false);
-        conf->set("raw_gaincorrected_original", files[3], false);
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + "_raw.mrcs");
-        hasRaw = true;
+        int rawOption = conf->get("import_rawstack_type")->value().toInt();
+        if(rawOption == 1) {
+            conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
+            conf->set("import_rawstack_original", files[3], false);
+            scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
+            hasRaw = true;
+        } else if (rawOption == 2) {
+            conf->set("raw_gaincorrectedstack", baseName + "_raw", false);
+            conf->set("raw_gaincorrectedstack_original", files[3], false);
+            scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + "_raw.mrcs");
+            hasRaw = true;
+        }
+       
+        
     }
 
     //Check for gain reference file
-    //TODO
+    QString gainRefFile = conf->getValue("import_gainref");
+    if(QFileInfo(gainRefFile).exists()) {
+        conf->set("import_gainref", QFileInfo(gainRefFile).fileName());
+        scriptsToBeExecuted_.insert(0, "cp -f " + gainRefFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(gainRefFile).fileName());
+    }
     
     conf->setModified(true);
     

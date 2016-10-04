@@ -255,10 +255,14 @@ QWidget* LibraryTab::setupPreviewContainer() {
     previews = new QStackedWidget(this);
     previews->setFixedSize(200, 200);
 
+    rawPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Raw image<br>not found"), previews);
+    fftPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Fourier image<br>not found"), previews);
     mapPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Image not<br>processed"), previews);
     refPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("No reference<br>available"), previews);
     dualPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Half-Half map<br>not available"), previews);
 
+    previews->addWidget(rawPreview);
+    previews->addWidget(fftPreview);
     previews->addWidget(mapPreview);
     previews->addWidget(refPreview);
     previews->addWidget(dualPreview);
@@ -348,7 +352,9 @@ QWidget* LibraryTab::setupPreviewContainer() {
 }
 
 void LibraryTab::setPreviewLabelText() {
-    if(previews->currentWidget() == mapPreview) previewLabel->setText("Final Map");
+    if(previews->currentWidget() == rawPreview) previewLabel->setText("Raw Image");
+    else if(previews->currentWidget() == fftPreview) previewLabel->setText("FFT of Raw Image");
+    else if(previews->currentWidget() == mapPreview) previewLabel->setText("Final Map");
     else if(previews->currentWidget() == refPreview) previewLabel->setText("Reference Map");
     else if(previews->currentWidget() == dualPreview) previewLabel->setText("Half-Half Map");
     else previewLabel->setText("Preview");
@@ -851,6 +857,14 @@ void LibraryTab::setPreviewImages(const QString& imagePath) {
     if(dirModel->isCurrentRowValidImage()) {
         previewContainer->show();
         imageStatus->updateData();
+        ParametersConfiguration* imageConf = projectData.parameterData(QDir(imagePath));
+        QString rawImage, fftImage;
+        if(imageConf) {
+            rawImage = imageConf->getValue("imagename") + ".mrc";
+            fftImage = "FFTIR/" + imageConf->getValue("nonmaskimagename") + "_fft.mrc";
+        }
+        rawPreview->loadFile(imagePath + "/" + rawImage, "mrc", showHeaderButton->isChecked());
+        fftPreview->loadFile(imagePath + "/" + fftImage, "mrc", showHeaderButton->isChecked());
         mapPreview->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
         refPreview->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
         dualPreview->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());
@@ -866,7 +880,7 @@ void LibraryTab::autoSwitch(bool play) {
 
 void LibraryTab::updatePreview() {
     int id = (previews->currentIndex() + 1) % 2;
-    previews->setCurrentIndex(id);
+    previews->setCurrentIndex(id + 2);
     setPreviewLabelText();
 }
 

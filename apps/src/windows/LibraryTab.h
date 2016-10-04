@@ -91,6 +91,8 @@ class LibraryTab : public QWidget
         
         QToolButton* showHeaderButton;
                
+        ImageViewer* rawPreview;
+        ImageViewer* fftPreview;
         ImageViewer* mapPreview;
         ImageViewer* refPreview;
         ImageViewer* dualPreview;

@@ -11,7 +11,8 @@
 
 #include "ApplicationData.h"
 #include "GraphicalButton.h"
-#include "PathValidator.h"
+#include "FileValidator.h"
+#include "DirValidator.h"
 
 class BrowserWidget : public QWidget {
 
@@ -85,7 +86,10 @@ private:
 
         pathEdit_ = new QLineEdit(this);
         pathEdit_->setFrame(false);
-        pathEdit_->setValidator(new PathValidator());
+        
+        if (type_ == BrowseType::DIRECTORY) pathEdit_->setValidator(new DirValidator());
+        else pathEdit_->setValidator(new FileValidator());
+        
         connect(pathEdit_, &QLineEdit::textEdited, [=](const QString& text) {
             QPalette pal = pathEdit_->palette();
             if(pathEdit_->hasAcceptableInput()) pal.setColor(QPalette::Text, Qt::black);

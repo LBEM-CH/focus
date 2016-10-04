@@ -858,12 +858,13 @@ void LibraryTab::setPreviewImages(const QString& imagePath) {
         previewContainer->show();
         imageStatus->updateData();
         ParametersConfiguration* imageConf = projectData.parameterData(QDir(imagePath));
-        QString rawImage;
+        QString rawImage, fftImage;
         if(imageConf) {
             rawImage = imageConf->getValue("imagename") + ".mrc";
+            fftImage = "FFTIR/" + imageConf->getValue("nonmaskimagename") + "_fft.mrc";
         }
         rawPreview->loadFile(imagePath + "/" + rawImage, "mrc", showHeaderButton->isChecked());
-        fftPreview->loadFile(imagePath + "/" + rawImage + "_fft.mrc", "mrc", showHeaderButton->isChecked());
+        fftPreview->loadFile(imagePath + "/" + fftImage, "mrc", showHeaderButton->isChecked());
         mapPreview->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
         refPreview->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
         dualPreview->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());

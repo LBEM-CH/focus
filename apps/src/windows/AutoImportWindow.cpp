@@ -666,7 +666,11 @@ void AutoImportWindow::importImage() {
     }
 
     //Check for gain reference file
-    //TODO
+    QString gainRefFile = conf->getValue("import_gainref");
+    if(QFileInfo(gainRefFile).exists()) {
+        conf->set("import_gainref", QFileInfo(gainRefFile).fileName());
+        scriptsToBeExecuted_.insert(0, "cp -f " + gainRefFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(gainRefFile).fileName());
+    }
     
     conf->setModified(true);
     

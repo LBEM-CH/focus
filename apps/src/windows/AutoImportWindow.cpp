@@ -345,8 +345,7 @@ void AutoImportWindow::analyzeImport() {
     
     //If rawOption is 1, add tif extention to be searched
     QStringList rawExtentions;
-    rawExtentions << "*.mrc" << "*.mrcs";
-    if(rawOption == 1) rawExtentions.append("*.tif");
+    rawExtentions << "*.mrc" << "*.mrcs" << "*.tif" << "*.tiff";
     
     //Get a list of all available files
     QStringList fileNames = QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks);
@@ -416,7 +415,7 @@ void AutoImportWindow::analyzeImport() {
             
             if (rawOption != 0) {
                 if (QDir(importImagesPath + "/" + importRawFolder).exists()) {
-                    QStringList possibleFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
+                    QStringList possibleFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList() << baseName + "*.mrc" << baseName + "*.mrcs" << baseName + "*.tif" << baseName + "*.tiff", QDir::Files | QDir::NoSymLinks);
                     if (!possibleFiles.isEmpty()) {
                         hasRaw = true;
                         rawFile = importImagesPath + "/" + importRawFolder + "/" + possibleFiles.first();

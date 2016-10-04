@@ -188,6 +188,7 @@ def main():
 			# Get several values related to defocus, astigmatism and tilting:
 			params = Read2dxCfgFile(folders+d+'/2dx_image.cfg')
 
+			w = img.get_xsize()
 			# Get the unit-cell vectors:
 			if sum(params['PHAORI']) == 0:
 
@@ -198,7 +199,7 @@ def main():
 			    
 			else:
 			    
-				w = img.get_xsize()
+				
 				a,b = LatticeReciprocal2Real(params['u'], params['v'], w)
 
 				# Convert from Numpy-array to list:
@@ -679,6 +680,26 @@ def CalculateDefocusTilted(x, y, apix, TLTAXIS, TLTANG, DEFOCUS1, DEFOCUS2):
 	rdist3 = rdist2 * apix # distance in Angstroems
 	RLDEF1 = DEFOCUS1 + rdist3 * np.tan(TLTANG * np.pi / 180.0)
 	RLDEF2 = DEFOCUS2 + rdist3 * np.tan(TLTANG * np.pi / 180.0)
+
+	# CTFTILT equation:
+
+	# DFL1  = DFMID1 +DF
+	# DFL2  = DFMID2 +DF
+	# DF    = (N1*DX+N2*DY)*PSIZE*TAN(TANGLE)
+	# DX    = CX-NX
+	# DY    = CY-NY
+	# CX    = CENTER_X =         1904
+	# CY    = CENTER_Y =         1904
+	# PSIZE = PIXEL SIZE [A] =       1.3400
+	# N1,N2 = TILT AXIS NORMAL:
+	# N1 =  SIN(TLTAXIS) =    -0.995884
+	# N2 = -COS(TLTAXIS) =    -0.090635
+
+	# N1 = np.sin(TLTAXIS * np.pi / 180.0)
+	# N2 = -np.cos(TLTAXIS * np.pi / 180.0)
+	# DF = (N1 * x + N2 * y) * apix * np.tan(TLTANG * np.pi / 180.0)
+	# RLDEF1 = DEFOCUS1 + DF
+	# RLDEF2 = DEFOCUS2 + DF
 
 	return RLDEF1,RLDEF2
 

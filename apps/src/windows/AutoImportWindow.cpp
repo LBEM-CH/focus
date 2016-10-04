@@ -651,13 +651,13 @@ void AutoImportWindow::importImage() {
     if (files.size() > 3 && !files[3].isEmpty()) {
         int rawOption = conf->get("import_rawstack_type")->value().toInt();
         if(rawOption == 1) {
-            conf->set("import_rawstack", baseName, false);
+            conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
             conf->set("import_rawstack_original", files[3], false);
             scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
             hasRaw = true;
         } else if (rawOption == 2) {
-            conf->set("raw_gaincorrected_stack", baseName + "_raw", false);
-            conf->set("raw_gaincorrected_original", files[3], false);
+            conf->set("raw_gaincorrectedstack", baseName + "_raw", false);
+            conf->set("raw_gaincorrectedstack_original", files[3], false);
             scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + "_raw.mrcs");
             hasRaw = true;
         }
@@ -743,7 +743,7 @@ void AutoImportWindow::addStatusToList(const QString& text, bool error) {
 }
 
 bool AutoImportWindow::isSafeToCopy(const QString& imageName) {
-    if(!QFileInfo(imageName).exists()) return false;
+    if(!QFileInfo(imageName).exists()) return true;
     
     int safe_interval = 30000; //in milli secs
     if(QDateTime::currentMSecsSinceEpoch() - QFileInfo(imageName).lastModified().toMSecsSinceEpoch() < safe_interval) {

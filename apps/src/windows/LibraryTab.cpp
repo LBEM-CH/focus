@@ -863,7 +863,7 @@ void LibraryTab::setPreviewImages(const QString& imagePath) {
             rawImage = imageConf->getValue("imagename") + ".mrc";
         }
         rawPreview->loadFile(imagePath + "/" + rawImage, "mrc", showHeaderButton->isChecked());
-        fftPreview->loadFile(imagePath + "/image_fft.mrc", "mrc", showHeaderButton->isChecked());
+        fftPreview->loadFile(imagePath + "/" + rawImage + "_fft.mrc", "mrc", showHeaderButton->isChecked());
         mapPreview->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
         refPreview->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
         dualPreview->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());

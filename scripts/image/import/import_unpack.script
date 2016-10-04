@@ -127,7 +127,7 @@ if ( ${import_rawstack_type} == "1" ) then
   echo "::Raw movie as dark-subtracted stack present. Gain reference found."
   #
   #################################################################################
-  ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${import_gainref} ${import_gaincorrectedstack}.mrc"
+  echo "::Running: clip unpack ${import_rawstack} ${import_gainref} ${import_gaincorrectedstack}.mrc"
   #################################################################################
   #
   clip unpack -m 2 ${import_rawstack} ${import_gainref} ${import_gaincorrectedstack}.mrc

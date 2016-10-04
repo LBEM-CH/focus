@@ -152,7 +152,7 @@ if ( ${import_rawstack_type} == "2" ) then
   echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results
   echo "<<@evaluate>>"
   #
-  clip unpack -m 2 ${import_rawstack} ${movie_stackname}.mrc
+  clip unpack ${import_rawstack} ${movie_stackname}.mrc
   #
   set movie_stackname = ${import_gaincorrectedstack}
   echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results

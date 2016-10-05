@@ -30,6 +30,10 @@ set scriptname = FetchFREALIGNResults
 
 #$end_vars
 
+if ( -e LOGS/${scriptname}.results ) then
+	mv LOGS/${scriptname}.results LOGS/${scriptname}.results.old
+endif
+
 foreach i (${SPR_FRL_DIR}/*.mrc)
 	echo "# IMAGE-IMPORTANT: $i <MAP: `basename $i`>" >> LOGS/${scriptname}.results
 end

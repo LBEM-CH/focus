@@ -42,6 +42,10 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 
+if ( -e LOGS/${scriptname}.results ) then
+	mv LOGS/${scriptname}.results LOGS/${scriptname}.results.old
+endif
+
 # There's some issue with ${PWD} and {$OLDPWD} in csh, so just to be safe:
 set SAVEPATH = ${PWD}
 

@@ -30,6 +30,10 @@ set scriptname = StopFREALIGNRun
 
 #$end_vars
 
+if ( -e LOGS/${scriptname}.results ) then
+	mv LOGS/${scriptname}.results LOGS/${scriptname}.results.old
+endif
+
 # Form the strings:
 
 if ( ${SPR_FRLRefOrPreref} == "refine" ) then

@@ -60,7 +60,9 @@ C
       PARAMETER (ID=150)
 CHEN>
 C      PARAMETER (RESMAX=0.3)
+      PARAMETER (IPICSIZ=1024)
 CHEN<
+
       PARAMETER (PLTSIZ=300.0)
       PARAMETER (CHRSIZ=0.6)
       PARAMETER (IPTMAX=1000)
@@ -76,7 +78,9 @@ CTSH++
       EQUIVALENCE (TMPTEXT,TEXT)
 CTSH--
 CHEN>
+      INTEGER IPICTU(IPICSIZ,IPICSIZ)
       CHARACTER * 60 CZEILE(60)
+      CHARACTER*80 FILENAM
       DIMENSION TZEILE(15)
       INTEGER * 8 ISER,NSER
 CHEN<
@@ -127,6 +131,16 @@ C      .       ' ACCELERATING VOLTAGE (KV) ..........',F8.0)
      . ' PHASECONTRAST PORTION ..............',F9.5)
 203   FORMAT(' HIGHER RES. CUTOFF .................',F8.0/
      . ' LOWER  RES. CUTOFF .................',F8.0)
+C
+C-----Prepare output pictura, all white
+C
+      do K=1,IPICSIZ
+        do J=1,IPICSIZ
+          IPICTU(J,K)=255
+        enddo
+      enddo
+C
+C
 CHEN<
       CALL CCPDPN(1,'IN','READONLY','F',0,0)
       CALL CCPDPN(2,'OUT','UNKNOWN','F',0,0)
@@ -323,8 +337,11 @@ C            write(*,'(''A,B = '',4F12.3,'', X,Y = '',2F12.3)')
 C     .        AX,AY,BX,BY,X,Y
             GOTO 100
           ENDIF
+C             SCALE=PLTSIZ/(2.0*RESMAX)         !MAXIMUM RESOLUTION, 0.3=3.33 ANGSTROMS
           X=X*SCALE
           Y=Y*SCALE
+          PICX=X*IPICSIZ/PLTSIZ + IPICSIZ/2
+          PICY=Y*IPICSIZ/PLTSIZ + IPICSIZ/2
 C         WRITE(6,104)X,Y
 104       FORMAT(2F10.1)
           XN=X-CHRSIZ*(8.1-IQIN)/2      ! work this one out if you can.
@@ -355,6 +372,27 @@ CHEN>
             CALL P2K_DRAW(XN,YP,0.)
             CALL P2K_DRAW(XN,YN,0.)               ! SQUARE ROUND EACH SPOT.
           endif
+          if(IQIN.eq.1)IPMAX=4
+          if(IQIN.eq.2)IPMAX=3
+          if(IQIN.eq.3)IPMAX=2
+          if(IQIN.eq.4)IPMAX=1
+          if(IQIN.eq.5)IPMAX=0
+          IPMIN=-IPMAX
+          do IPICK=IPMIN,IPMAX
+            do IPICJ=IPMIN,IPMAX
+              IPCXPLOT=PICX+IPICK
+              IPCYPLOT=PICY+IPICJ
+              if(IPCXPLOT.gt.0 .and. IPCXPLOT.lt.IPICSIZ 
+     .          .and. IPCYPLOT.gt.0 .and. IPCYPLOT.lt.IPICSIZ)then
+                if ( IPICK.eq.IPMIN .or. IPICK.eq.IPMAX
+     .          .or.  IPICJ.eq.IPMIN .or. IPICJ.eq.IPMAX) then
+                   IPICTU(IPCXPLOT,IPCYPLOT)=0
+                else
+                   IPICTU(IPCXPLOT,IPCYPLOT)=128
+                endif
+              endif
+            enddo
+          enddo
 CHEN<
 cc        X=X-0.3                               ! ADJUST CHARACTER TO BE CENTRAL IN X.
 cc        Y=Y+0.5                               ! ADJUST CHARACTER TO BE CENTRAL IN Y.
@@ -521,6 +559,13 @@ C HPCNTR IS SAME AS PLUTO SUBROUTINE BUT WITHH OTHER CALLS REMOVED AND SCALE
 C ADDED TO ARGUMENT LIST.
       CALL P2K_PAGE
 C
+C-----Write out IQ PLot image
+C
+      write(TMPTEXT,1952)
+1952  FORMAT('CTFAPPLY: IQ Plot')
+      write(FILENAM(1:80),'(''ctfapply-IQplot.mrc'')')
+      CALL PICWRI(IPICTU,FILENAM,TMPTEXT,IPICSIZ,IPICSIZ)
+C
       STOP
       END
 C
@@ -538,6 +583,95 @@ C      WRITE(6,10)NPT,SCALE
 1     CALL P2K_DRAW(X,Y,0.)
       RETURN
       END
+C
+c==========================================================
+c
+      SUBROUTINE shorten(czeile,k)
+C
+C counts the number of actual characters not ' ' in czeile
+C and gives the result out in k.
+C
+      CHARACTER * (*) CZEILE
+      CHARACTER * 1 CTMP1
+      CHARACTER * 1 CTMP2
+      CTMP2=' '
+C
+      ilen=len(czeile)
+      DO 100 I=1,ilen
+         k=ilen+1-I
+         READ(CZEILE(k:k),'(A1)')CTMP1
+         IF(CTMP1.NE.CTMP2)GOTO 300
+  100 CONTINUE
+  300 CONTINUE
+      IF(k.LT.1)k=1
+C
+      RETURN
+      END
+C
+C**APLOT***********************************************************************
+C
+      SUBROUTINE PICWRI(IPICTU,FILENAM,TEXT,IPICDIM,IPICSIZ)
+C
+      PARAMETER (LMAX=20100)
+C
+      INTEGER IPICTU(IPICDIM,IPICDIM)
+C
+      COMMON//NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+C
+      DIMENSION ALINE(LMAX),TITLE(20),NXYZ(3),MXYZ(3)
+      DIMENSION NXYZST(3)
+      DIMENSION LABELS(20,10)
+C
+      DIMENSION TEXT(20),PROGTIT(4)
+C
+      CHARACTER*80 FILENAM
+      CHARACTER*200 cline
+C
+      DMIN =  0.0
+      DMAX =  255.0
+      DMEAN = 0.5
+      MODE = 0
+C
+      NX=IPICSIZ
+      NY=IPICSIZ
+      NXYZ(1)=NX
+      NXYZ(2)=NY
+      NXYZ(3)=1
+      NXYZST(1) = NXYZ(1)
+      NXYZST(2) = NXYZ(2)
+      NXYZST(3) = NXYZ(3)
+C
+      write(6,'('' Writing picture into '',A40)')FILENAM
+      write(6,'('' Size '',2I15)')IPICDIM,IPICSIZ
+C
+      MODE=0
+      call shorten(FILENAM,k)
+      write(cline,'(''\rm -f '',A)')FILENAM(1:k)
+      call system(cline)
+      CALL IMOPEN(2,FILENAM,'NEW')
+      CALL ICRHDR(2,NXYZST,NXYZST,MODE,LABELS,0)
+      CALL ITRLAB(2,1)
+      CALL IWRHDR(2,TEXT,1,DMIN,DMAX,DMEAN)
+C
+      DMIN= 1.0e10
+      DMAX=-1.0e10
+      DOUBLMEAN=0.0
+      DO K=1,IPICSIZ
+        DO J=1,IPICSIZ
+          ALINE(J) = IPICTU(J,K)
+          if(IPICTU(J,K).lt.DMIN)DMIN=IPICTU(J,K)
+          if(IPICTU(J,K).gt.DMAX)DMAX=IPICTU(J,K)
+          DOUBLMEAN=DOUBLMEAN+IPICTU(J,K)
+        enddo
+        CALL IWRLIN(2,ALINE)
+      enddo
+      DMEAN=DOUBLMEAN/(IPICSIZ*IPICSIZ)
+      CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+      CALL IMCLOSE(2)
+C
+      RETURN
+      END
+C
 C**HPCNTR**********************************************************************
       SUBROUTINE HPCNTR (A,M,N,SCALE,BITS,CONT,NCONT,X,Y,IPTMAX)
 C

@@ -675,6 +675,7 @@ CUT/${nonmaskimagename}_marked
 eot
     #
     echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_marked_merge_ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
+    \cp -f CUT/${nonmaskimagename}_marked_merge_ps.mrc ThonRingFit.mrc
     #
     if ( ! -e CUT/${nonmaskimagename}_merge_ps.mrc ) then
       ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}_merge_ps.mrc not produced."
@@ -727,6 +728,7 @@ eof
     endif
     #
     echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+    \cp -f ${outimage} ThonRingFit.mrc
     #
     set newdef = `cat SCRATCH/2dx_ctftilt_result.tmp | head -1`
     set def1 = `echo $newdef | awk '{s=$1} END {print s}'`

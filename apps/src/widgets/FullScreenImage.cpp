@@ -1074,7 +1074,7 @@ void FullScreenImage::rescaleWidget() {
 
 void FullScreenImage::zoomIn() {
     if (image->width() * scale * 2.0 > 8192 || image->height() * scale * 2.0 > 8192) return;
-    scale *= 2.0;
+    scale *= 1.25;
     //  if(scale>1.0) scale = 1.0;
     rescaleWidget();
     update();
@@ -1082,7 +1082,7 @@ void FullScreenImage::zoomIn() {
 
 void FullScreenImage::zoomOut() {
     if (image->width() * scale * 2.0 < 16 || image->height() * scale * 2.0 < 16) return;
-    scale /= 2.0;
+    scale *= 0.8;
     rescaleWidget();
     update();
 }

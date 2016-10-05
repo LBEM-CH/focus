@@ -302,7 +302,7 @@ bool mrcImage::loadImage(mrcHeader *header, QImage::Format format) {
         //rescale(header,header->min(),2.0*header->mean() /*+1.0*stdDev(header) */,format);	
         //rescale(header,header->min(), header->mean() + 1.1*stdDev(header), format);	
         // CHEN: 4.1.2015
-        rescale(header, header->min(), 3.0 * header->mean() + 1.1 * stdDev(header), format);
+        rescale(header, header->min(), 2.0 * header->mean() + 1.1 * stdDev(header), format);
     } else
         rescale(header, header->min(), header->max(), format);
     return true;

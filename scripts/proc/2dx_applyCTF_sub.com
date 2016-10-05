@@ -60,7 +60,11 @@ ${RESMIN},${RESMAX}
 ${local_ctfcor_imode}  ! Define modus of CTF correction
 eot
   \rm -f dummy.tmp
+  if ( -e ctfapply-IQplot.mrc ) then
+    \mv -f ctfapply-IQplot.mrc IQplot.mrc 
+    echo "# IMAGE-IMPORTANT: IQplot.mrc <MRC: IQ Plot>" >> LOGS/${scriptname}.results 
 
+  endif
 
 endif
 

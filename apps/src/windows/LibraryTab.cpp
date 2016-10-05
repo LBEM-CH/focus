@@ -303,7 +303,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
     font.setPixelSize(18);
     overviewLabel->setFont(font);
     
-    GraphicalButton* rightButton = new GraphicalButton(ApplicationData::icon("move_right"));
+    rightButton = new GraphicalButton(ApplicationData::icon("move_right"));
     rightButton->setFixedSize(20, 20);
     connect(rightButton, &GraphicalButton::clicked, [=]() {
         overviewIndex = (overviewIndex + 1)%4;
@@ -311,7 +311,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
         resetOverview();
     });
     
-    GraphicalButton* leftButton = new GraphicalButton(ApplicationData::icon("move_left"));
+    leftButton = new GraphicalButton(ApplicationData::icon("move_left"));
     leftButton->setFixedSize(20, 20);
     connect(leftButton, &GraphicalButton::clicked, [=]() {
         overviewIndex = (overviewIndex + 4 - 1)%4;
@@ -950,14 +950,18 @@ void LibraryTab::setPreviewImages(const QString& imagePath) {
 void LibraryTab::activateOverlay(bool play) {
     if (play) {
         overlayTimer->start(1000);
-        overlayWidgets->show();
         previewGridWidget_->hide();
+        rightButton->hide();
+        leftButton->hide();
+        overlayWidgets->show();
         overviewLabel->setText("Final map and Reference");
         setPreviewImages(currentImagePath_);
     }
     else {
         overlayTimer->stop();
         overlayWidgets->hide();
+        rightButton->show();
+        leftButton->show();
         previewGridWidget_->show();
         resetOverview();
     }

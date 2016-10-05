@@ -24,6 +24,7 @@
 #include "ParameterConfiguration.h"
 #include "ProjectDelegate.h"
 #include "LibraryImageStatus.h"
+#include "GraphicalButton.h"
 
 class LibraryTab : public QWidget
 {
@@ -97,6 +98,9 @@ class LibraryTab : public QWidget
         int overviewIndex = 0;
         QString currentImagePath_;
         QWidget* previewGridWidget_;
+        
+        GraphicalButton* rightButton;
+        GraphicalButton* leftButton;
         
         QStackedWidget* overlayWidgets;
         

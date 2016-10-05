@@ -136,6 +136,45 @@ public:
         endGroup();
         return paths;
     }
+        
+    void setProcessScripts(const QStringList& scripts) {
+        beginGroup("process");
+        remove("scripts");
+        beginWriteArray("scripts");
+        for (int i = 0; i < scripts.size(); ++i) {
+            setArrayIndex(i);
+            setValue("name", scripts.at(i));
+        }
+        endArray();
+        endGroup();
+    }
+    
+    QStringList processScripts() {
+        beginGroup("process");
+        QStringList paths;
+        int size = beginReadArray("scripts");
+        for (int i = 0; i < size; ++i) {
+            setArrayIndex(i);
+            if (value("name").toString() != "") paths << value("name").toString();
+        }
+        endArray();
+        endGroup();
+        return paths;
+    }
+    
+    void setProcessJobs(int jobs) {
+        beginGroup("process");
+        setValue("jobs", jobs);
+        endGroup();
+    }
+    
+    int processJobs() {
+        int val;
+        beginGroup("process");
+        val = value("jobs", 2).toInt();
+        endGroup();
+        return val;
+    }
 
 };
 

@@ -523,7 +523,8 @@ void AutoImportWindow::executeImport(bool execute) {
         refreshButton_->setEnabled(true);
         scriptsToBeExecuted_.clear();
         
-        if(!numberExecuting_.isEmpty()) projectData.indexImages();
+        //To avoid continuous reload
+        //if(!numberExecuting_.isEmpty()) projectData.indexImages();
         
         scriptExecuting_ = "";
         numberExecuting_ = "";

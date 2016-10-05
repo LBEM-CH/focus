@@ -57,7 +57,7 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
     } else {
         QImage image;
         if (extension_ == "mrc") {
-            mrcImage tempImage(fileName, true, this);
+            mrcImage tempImage(fileName);
             image = *(tempImage.getImage());
         } else {
             image = QImage(fileName);

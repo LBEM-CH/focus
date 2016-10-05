@@ -1,18 +1,10 @@
-imagename : Name
-imagenumber : Number
 last_processed : Last Processed
-magnification : Magnification
-CALCULATEDMAG : Theoretical Mag
 defocus : Defocus
 realcell_local : Image Real cell
 realang_local : Image Real angle
-tltaxis : TLTAXIS
-tltang : TLTANG
-tltaxa : TLTAXA
 taxa : TAXA
 tangl : TANGL
 QVAL : QVal (Used)
 QVAL2 : QVal (Unbend II)
 QVALMA : QVal (Movie A)
 QVALMB : QVal (Movie B)
-comment : Comment

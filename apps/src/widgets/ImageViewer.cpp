@@ -15,7 +15,7 @@ ImageViewer::ImageViewer(const QString& workDir, const QString& notFoundMessage,
     imageLabel->setBackgroundRole(QPalette::Base);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     imageLabel->setAlignment(Qt::AlignCenter);
-    //imageLabel->setScaledContents(true);
+    imageLabel->setScaledContents(true);
     
     mrcInfo = new MrcHeaderDisplay;
 
@@ -24,12 +24,22 @@ ImageViewer::ImageViewer(const QString& workDir, const QString& notFoundMessage,
     widgets->addWidget(imageLabel);
     widgets->addWidget(mrcInfo);
     
+    setFrameStyle(QFrame::StyledPanel | QFrame::Raised);
     
     QGridLayout* layout = new QGridLayout;
     layout->setSpacing(0);
     layout->setMargin(0);
     layout->addWidget(widgets, 0, 0, Qt::AlignVCenter | Qt::AlignHCenter);
     setLayout(layout);
+}
+
+void ImageViewer::setFileProperties(const QString& file, const QString& extension) {
+    fileName_ = file;
+    extension_ = extension.trimmed().toLower();
+}
+
+void ImageViewer::loadFile(bool loadInfo, const QString& notFoundMessage) {
+    loadFile(fileName_, extension_, loadInfo, notFoundMessage);
 }
 
 void ImageViewer::loadFile(const QString &fileName, const QString& extension, bool loadInfo, const QString& notFoundMessage) {

@@ -66,8 +66,8 @@ class LibraryTab : public QWidget
         void loadDirectorySelection();
         
         void setPreviewImages(const QString&);
-        void autoSwitch(bool);
-        void updatePreview();
+        void activateOverlay(bool);
+        void changeOverlaidWidget();
         
         void resetSelectionState();
                    
@@ -80,34 +80,31 @@ class LibraryTab : public QWidget
         QAction* getLibraryToolBarAction(const QString& ic, const QString& tooltip, const QString& shortcut, bool checkable);
         
         void modifySelection(bool select = true);
-        void setPreviewLabelText();
+        void resetOverview();
         
         QTreeView* dirView;
         ProjectModel* dirModel;
         QSortFilterProxyModel *sortModel;
         
         QLabel* selectionState;
-        QLabel* previewLabel;
+        
         
         QToolButton* showHeaderButton;
                
-        ImageViewer* GainCorrectedPreview;
-        ImageViewer* GainCorrectedfftPreview;
-        ImageViewer* DriftCorrectedPreview;
-        ImageViewer* DriftCorrectedfftPreview;
-        ImageViewer* rawPreview;
-        ImageViewer* fftPreview;
-        ImageViewer* mapPreview;
-        ImageViewer* refPreview;
-        ImageViewer* dualPreview;
+        QList<ImageViewer*> previewList;
+        QList<QLabel*> previewLabels;
+        QLabel* overviewLabel;
+        int overviewIndex = 0;
+        QString currentImagePath_;
+        QWidget* previewGridWidget_;
         
-        QStackedWidget* previews;
+        QStackedWidget* overlayWidgets;
         
         QWidget* previewContainer;
         QWidget* autoSelectContainer;
         LibraryImageStatus* imageStatus;
         
-        QTimer* previewTimer;
+        QTimer* overlayTimer;
         
         QLineEdit* minDegree;
         QLineEdit* maxDegree;

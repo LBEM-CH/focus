@@ -633,18 +633,18 @@ void AutoImportWindow::importImage() {
     
     //Check for the averaged file
     if(files.size() > 1 && !files[1].isEmpty()) {
-        conf->set("imagename", baseName + "_2dx", false);
-        conf->set("nonmaskimagename", baseName + "_2dx", false);
+        conf->set("imagename", "image_2dx", false);
+        conf->set("nonmaskimagename", "image_2dx", false);
         conf->set("imagename_original", files[1], false);
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + baseName + "_2dx.mrc");
+        scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx.mrc");
         hasAveraged = true;
     }
     
     //Check for aligned file
     if (files.size() > 2 && !files[2].isEmpty()) {
-        conf->set("movie_stackname", baseName + "_aligned", false);
+        conf->set("movie_stackname", "movie_aligned", false);
         conf->set("movie_stackname_original", files[2], false);
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + baseName + "_aligned.mrcs");
+        scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned.mrcs");
         hasAligned = true;
     }
 
@@ -657,9 +657,9 @@ void AutoImportWindow::importImage() {
             scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
             hasRaw = true;
         } else if (rawOption == 2) {
-            conf->set("raw_gaincorrectedstack", baseName + "_raw", false);
+            conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
             conf->set("raw_gaincorrectedstack_original", files[3], false);
-            scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + "_raw.mrcs");
+            scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");
             hasRaw = true;
         }
        

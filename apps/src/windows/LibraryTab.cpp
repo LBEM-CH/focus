@@ -1,4 +1,5 @@
 #include <QtWidgets>
+#include <QtGui/qgridlayout.h>
 
 #include "ProjectData.h"
 #include "ApplicationData.h"
@@ -8,9 +9,8 @@
 
 LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
-    
     previewContainer = setupPreviewContainer();
-    previewContainer->setMaximumWidth(310);
+    previewContainer->setMaximumWidth(410);
     previewContainer->hide();
     
     autoSelectContainer = setupAutoSelectionTool();
@@ -36,6 +36,12 @@ LibraryTab::LibraryTab(QWidget* parent)
     connect(&projectData, &ProjectData::imageDirsChanged, [=] () {
         reload();
     });
+    
+    overlayTimer = new QTimer(this);
+    connect(overlayTimer, &QTimer::timeout, this, &LibraryTab::changeOverlaidWidget);
+    
+    overviewIndex = ProjectPreferences(projectData.projectDir()).overviewIndex();
+    resetOverview();
 }
 
 void LibraryTab::showContents(bool show) {
@@ -56,6 +62,9 @@ void LibraryTab::setupDirectoryContainer() {
     dirModel->loadSelectionList(projectData.imagesSelected());
 
     connect(dirModel, SIGNAL(currentImage(const QString&)), this, SLOT(setPreviewImages(const QString&)));
+    connect(dirModel, &ProjectModel::currentImage, [=](const QString& imagePath){
+        currentImagePath_ = imagePath;
+    });
     connect(dirModel, SIGNAL(reloading()), this, SLOT(reload()));
     connect(&projectData, &ProjectData::selectionChanged, this, &LibraryTab::resetSelectionState);
 
@@ -251,35 +260,36 @@ QAction* LibraryTab::getLibraryToolBarAction(const QString& ic, const QString& t
 
 QWidget* LibraryTab::setupPreviewContainer() {
     QWidget* container = new QWidget();
+
+    QGridLayout* previewsGridLayout = new QGridLayout;
+    previewsGridLayout->setMargin(0);
+    previewsGridLayout->setSpacing(5);
+    previewsGridLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    previewList.clear();
     
-    previews = new QStackedWidget(this);
-    previews->setFixedSize(200, 200);
-
-    GainCorrectedPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("GainCorrected<br>image<br>not found"), previews);
-    GainCorrectedfftPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("FFT of<br>GainCorrected <br>image<br>not found"), previews);
-    DriftCorrectedPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("DriftCorrected<br>image<br>not found"), previews);
-    DriftCorrectedfftPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("FFT of<br>DriftCorrected <br>image<br>not found"), previews);
-    rawPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Raw image<br>not found"), previews);
-    fftPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Fourier image<br>not found"), previews);
-    mapPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Image not<br>processed"), previews);
-    refPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("No reference<br>available"), previews);
-    dualPreview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), QString("Half-Half map<br>not available"), previews);
-
-    previews->addWidget(GainCorrectedPreview);
-    previews->addWidget(GainCorrectedfftPreview);
-    previews->addWidget(DriftCorrectedPreview);
-    previews->addWidget(DriftCorrectedfftPreview);
-    previews->addWidget(rawPreview);
-    previews->addWidget(fftPreview);
-    previews->addWidget(mapPreview);
-    previews->addWidget(refPreview);
-    previews->addWidget(dualPreview);
-
+    for(int i=1; i<3; ++i){
+        for(int j=0; j<2; ++j) {
+            ImageViewer* preview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Not found");
+            previewList.append(preview);
+            QLabel* label =  new QLabel;
+            label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+            QFont font = label->font();
+            font.setBold(true);
+            label->setFont(font);
+            previewLabels.append(label);
+            previewsGridLayout->addWidget(preview, i, j);
+        }
+    }
+    
+    previewsGridLayout->addWidget(previewLabels[0], 0, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewLabels[1], 0, 1, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewLabels[2], 3, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewLabels[3], 3, 1, Qt::AlignHCenter | Qt::AlignVCenter);
+    
+    previewGridWidget_ = new QWidget;
+    previewGridWidget_->setLayout(previewsGridLayout);
+    
     setupDirectoryContainer();
-
-    previewTimer = new QTimer(this);
-    connect(previewTimer, SIGNAL(timeout()), this, SLOT(updatePreview()));
-
     
     QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -287,34 +297,43 @@ QWidget* LibraryTab::setupPreviewContainer() {
     mainLayout->setSpacing(5);
     mainLayout->addStretch(0);
     
-    previewLabel = new QLabel;
-    QFont font = previewLabel->font();
+    overviewLabel = new QLabel;
+    overviewLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    QFont font = overviewLabel->font();
     font.setBold(true);
-    previewLabel->setFont(font);
+    font.setPixelSize(18);
+    overviewLabel->setFont(font);
     
     GraphicalButton* rightButton = new GraphicalButton(ApplicationData::icon("move_right"));
-    rightButton->setFixedSize(42, 42);
+    rightButton->setFixedSize(20, 20);
     connect(rightButton, &GraphicalButton::clicked, [=]() {
-        previews->setCurrentIndex((previews->currentIndex()+1)%(previews->count()));
-        setPreviewLabelText();
+        overviewIndex = (overviewIndex + 1)%4;
+        ProjectPreferences(projectData.projectDir()).setOverviewIndex(overviewIndex);
+        resetOverview();
     });
     
     GraphicalButton* leftButton = new GraphicalButton(ApplicationData::icon("move_left"));
-    leftButton->setFixedSize(42, 42);
+    leftButton->setFixedSize(20, 20);
     connect(leftButton, &GraphicalButton::clicked, [=]() {
-        previews->setCurrentIndex((previews->currentIndex()-1)%(previews->count()));
-        setPreviewLabelText();
+        overviewIndex = (overviewIndex + 4 - 1)%4;
+        ProjectPreferences(projectData.projectDir()).setOverviewIndex(overviewIndex);
+        resetOverview();
     });
     
     QHBoxLayout* changerLayout = new QHBoxLayout;
+    changerLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     changerLayout->setMargin(0);
     changerLayout->setSpacing(0);
     changerLayout->addWidget(leftButton, 0);
-    changerLayout->addWidget(previews, 1);
+    changerLayout->addWidget(overviewLabel, 1);
     changerLayout->addWidget(rightButton, 0);
     
-    previews->setCurrentIndex(0);
-    setPreviewLabelText();
+    overlayWidgets = new QStackedWidget;
+    overlayWidgets->setFixedSize(400, 400);
+    overlayWidgets->addWidget(new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Final Map<br>not found"));
+    overlayWidgets->addWidget(new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Reference Map<br>not found"));
+    overlayWidgets->setCurrentIndex(0);
+    overlayWidgets->hide();
     
     showHeaderButton = new QToolButton();
     showHeaderButton->setIcon(ApplicationData::icon("header_info"));
@@ -334,7 +353,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
     autoPreviewsButton->setToolTip("Auto switch previews");
     autoPreviewsButton->setCheckable(true);
     autoPreviewsButton->setChecked(false);
-    connect(autoPreviewsButton, SIGNAL(toggled(bool)), this, SLOT(autoSwitch(bool)));
+    connect(autoPreviewsButton, SIGNAL(toggled(bool)), this, SLOT(activateOverlay(bool)));
     
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->setSpacing(0);
@@ -342,8 +361,9 @@ QWidget* LibraryTab::setupPreviewContainer() {
     buttonLayout->addWidget(autoPreviewsButton);
     buttonLayout->addWidget(showHeaderButton);
     
-    mainLayout->addWidget(previewLabel, 0, Qt::AlignHCenter | Qt::AlignVCenter);
     mainLayout->addLayout(changerLayout, 0);
+    mainLayout->addWidget(previewGridWidget_, 0);
+    mainLayout->addWidget(overlayWidgets, 0);
     mainLayout->addLayout(buttonLayout, 0);
     
     QFrame* vLine = new QFrame(this);
@@ -351,6 +371,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
     mainLayout->addWidget(vLine, 0);
     
     imageStatus = new LibraryImageStatus(dirModel);
+    imageStatus->setFixedWidth(400);
     mainLayout->addWidget(imageStatus, 0, Qt::AlignHCenter | Qt::AlignVCenter);
     
     mainLayout->addStretch(1);
@@ -359,17 +380,35 @@ QWidget* LibraryTab::setupPreviewContainer() {
     return container;
 }
 
-void LibraryTab::setPreviewLabelText() {
-    if(previews->currentWidget() == GainCorrectedPreview) previewLabel->setText("GainCorrected Image");
-    else if(previews->currentWidget() == GainCorrectedfftPreview) previewLabel->setText("FFT of GainCorrected Image");
-    else if(previews->currentWidget() == DriftCorrectedPreview) previewLabel->setText("DriftCorrected Image");
-    else if(previews->currentWidget() == DriftCorrectedfftPreview) previewLabel->setText("FFT of DriftCorrected Image");
-    else if(previews->currentWidget() == rawPreview) previewLabel->setText("Raw Image");
-    else if(previews->currentWidget() == fftPreview) previewLabel->setText("FFT of Raw Image");
-    else if(previews->currentWidget() == mapPreview) previewLabel->setText("Final Map");
-    else if(previews->currentWidget() == refPreview) previewLabel->setText("Reference Map");
-    else if(previews->currentWidget() == dualPreview) previewLabel->setText("Half-Half Map");
-    else previewLabel->setText("Preview");
+void LibraryTab::resetOverview() {
+    int id = overviewIndex;
+    if(id == 0) {
+        overviewLabel->setText("Image Overview");
+        previewLabels[0]->setText("Image Before DriftCorr");
+        previewLabels[1]->setText("FFT Before DriftCorr");
+        previewLabels[2]->setText("Image After DriftCorr");
+        previewLabels[3]->setText("FFT After DriftCorr");
+    } else if(id == 1) {
+        overviewLabel->setText("Drift Overview");
+        previewLabels[0]->setText("Image After DriftCorr");
+        previewLabels[1]->setText("FFT After DriftCorr");
+        previewLabels[2]->setText("Drift Trajectory");
+        previewLabels[3]->setText("Thon Rings Fit");
+    } else if(id == 2) {
+        overviewLabel->setText("Processing Overview");
+        previewLabels[0]->setText("Thon Rings Fit");
+        previewLabels[1]->setText("Unbending Profile");
+        previewLabels[2]->setText("IQ Plot");
+        previewLabels[3]->setText("Final Map");
+    } else {
+        overviewLabel->setText("Maps Overview");
+        previewLabels[0]->setText("Final Map");
+        previewLabels[1]->setText("Reference Map");
+        previewLabels[2]->setText("Half Half Map");
+        previewLabels[3]->setText("Thon Rings Fit");
+    }
+    
+    setPreviewImages(currentImagePath_);
 }
 
 QWidget* LibraryTab::setupAutoSelectionTool() {
@@ -866,42 +905,71 @@ void LibraryTab::modifySelection(bool select) {
 }
 
 void LibraryTab::setPreviewImages(const QString& imagePath) {
-    if(dirModel->isCurrentRowValidImage()) {
+    if (dirModel->isCurrentRowValidImage()) {
         previewContainer->show();
         imageStatus->updateData();
-        ParametersConfiguration* imageConf = projectData.parameterData(QDir(imagePath));
-        QString GainCorrectedImage, GainCorrectedfftImage, DriftCorrectedImage, DriftCorrectedfftImage, rawImage, fftImage;
-        if(imageConf) {
-            GainCorrectedImage = imageConf->getValue("raw_gaincorrectedstack") + ".mrc";
-            GainCorrectedfftImage = imageConf->getValue("raw_gaincorrectedstack") + "_fft.mrc";
-            DriftCorrectedImage = imageConf->getValue("movie_stackname") + ".mrc";
-            DriftCorrectedfftImage = imageConf->getValue("movie_stackname") + "_fft.mrc";
-            rawImage = imageConf->getValue("imagename") + ".mrc";
-            fftImage = "FFTIR/" + imageConf->getValue("nonmaskimagename") + "_fft.mrc";
+        if (previewGridWidget_->isVisible()) {
+            ParametersConfiguration* imageConf = projectData.parameterData(QDir(imagePath));
+            QString driftCorrectedImage, driftCorrectedfftImage, gaincorrected, gaincorrectedfft;
+            if (imageConf) {
+                gaincorrected = imageConf->getValue("raw_gaincorrectedstack") + ".mrc";
+                gaincorrectedfft = imageConf->getValue("raw_gaincorrectedstack") + "_fft.mrc";
+                driftCorrectedImage = imageConf->getValue("movie_stackname") + ".mrc";
+                driftCorrectedfftImage = imageConf->getValue("movie_stackname") + "_fft.mrc";
+            }
+            if (overviewIndex == 0) {
+                previewList[0]->loadFile(imagePath + "/" + gaincorrected, "mrc", showHeaderButton->isChecked());
+                previewList[1]->loadFile(imagePath + "/" + gaincorrectedfft, "mrc", showHeaderButton->isChecked());
+                previewList[2]->loadFile(imagePath + "/" + driftCorrectedImage, "mrc", showHeaderButton->isChecked());
+                previewList[3]->loadFile(imagePath + "/" + driftCorrectedfftImage, "mrc", showHeaderButton->isChecked());
+            } else if (overviewIndex == 1) {
+                previewList[0]->loadFile(imagePath + "/" + driftCorrectedImage, "mrc", showHeaderButton->isChecked());
+                previewList[1]->loadFile(imagePath + "/" + driftCorrectedfftImage, "mrc", showHeaderButton->isChecked());
+                previewList[2]->loadFile(imagePath + "/translations.png", "png", showHeaderButton->isChecked());
+                previewList[3]->loadFile(imagePath + "/CTFDiag.png", "png", showHeaderButton->isChecked());
+            } else if (overviewIndex == 2) {
+                previewList[0]->loadFile(imagePath + "/ThonRingFit.mrc", "mrc", showHeaderButton->isChecked());
+                previewList[1]->loadFile(imagePath + "/ManualMasking_UnbendPlot.mrc", "mrc", showHeaderButton->isChecked());
+                previewList[2]->loadFile(imagePath + "/IQplot.mrc", "mrc", showHeaderButton->isChecked());
+                previewList[3]->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
+            } else {
+                previewList[0]->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
+                previewList[1]->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
+                previewList[2]->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());
+                previewList[3]->loadFile(imagePath + "/ThonRingFit.mrc", "mrc", showHeaderButton->isChecked());
+            }
         }
-        GainCorrectedPreview->loadFile(imagePath + "/" + GainCorrectedImage, "mrc", showHeaderButton->isChecked());
-        GainCorrectedfftPreview->loadFile(imagePath + "/" + GainCorrectedfftImage, "mrc", showHeaderButton->isChecked());
-        DriftCorrectedPreview->loadFile(imagePath + "/" + DriftCorrectedImage, "mrc", showHeaderButton->isChecked());
-        DriftCorrectedfftPreview->loadFile(imagePath + "/" + DriftCorrectedfftImage, "mrc", showHeaderButton->isChecked());
-        rawPreview->loadFile(imagePath + "/" + rawImage, "mrc", showHeaderButton->isChecked());
-        fftPreview->loadFile(imagePath + "/" + fftImage, "mrc", showHeaderButton->isChecked());
-        mapPreview->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
-        refPreview->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
-        dualPreview->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());
+        if (overlayWidgets->isVisible()) {
+            static_cast<ImageViewer*> (overlayWidgets->widget(0))->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
+            static_cast<ImageViewer*> (overlayWidgets->widget(1))->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
+        }
     } else {
         previewContainer->hide();
     }
 }
 
-void LibraryTab::autoSwitch(bool play) {
-    if (play) previewTimer->start(1000);
-    else previewTimer->stop();
+void LibraryTab::activateOverlay(bool play) {
+    if (play) {
+        overlayTimer->start(1000);
+        overlayWidgets->show();
+        previewGridWidget_->hide();
+        overviewLabel->setText("Final map and Reference");
+        setPreviewImages(currentImagePath_);
+    }
+    else {
+        overlayTimer->stop();
+        overlayWidgets->hide();
+        previewGridWidget_->show();
+        resetOverview();
+    }
 }
 
-void LibraryTab::updatePreview() {
-    int id = (previews->currentIndex() + 1) % 2;
-    previews->setCurrentIndex(id + 2);
-    setPreviewLabelText();
+void LibraryTab::changeOverlaidWidget() {
+    int id = (overlayWidgets->currentIndex() + 1) % 2;
+    overlayWidgets->setCurrentIndex(id);
+    if(id == 0) overviewLabel->setText("Final Map");
+    else if(id == 1) overviewLabel->setText("Reference Map");
+    else overviewLabel->setText("Final map and Reference");
 }
 
 void LibraryTab::resetSelectionState() {

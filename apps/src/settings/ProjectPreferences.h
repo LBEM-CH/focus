@@ -84,6 +84,20 @@ public:
         return name;
     }
     
+    void setOverviewIndex(int jobs) {
+        beginGroup("project");
+        setValue("overviewIndex", jobs);
+        endGroup();
+    }
+    
+    int overviewIndex() {
+        int val;
+        beginGroup("project");
+        val = value("overviewIndex", 0).toInt();
+        endGroup();
+        return val;
+    }
+    
     void setImportContinuousCheck(bool check) {
         beginGroup("import");
         setValue("continuous", check);
@@ -175,7 +189,7 @@ public:
         endGroup();
         return val;
     }
-
+    
 };
 
 

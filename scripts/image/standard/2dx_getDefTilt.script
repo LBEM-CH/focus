@@ -319,6 +319,7 @@ eof
   \rm -f SCRATCH/2dx_ctffind3_result.tmp
   #
   echo "# IMAGE-IMPORTANT: ${outimage} <Defocus Thonring Fit>" >>  LOGS/${scriptname}.results
+  \cp -f ${outimage} ThonRingFit.mrc
   #
   set newdef = `echo ${def1},${def2},${ang}`
   echo "set defocus = "\"${newdef}\" >> LOGS/${scriptname}.results
@@ -590,6 +591,7 @@ CUT/${nonmaskimagename}
 eot
     #
     echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_merge_ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
+    \cp -f CUT/${nonmaskimagename}_4_4_ps.mrc ThonRingFit.mrc
     #
     if ( ! -e CUT/${nonmaskimagename}_merge_ps.mrc ) then
       ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}_merge_ps.mrc not produced."
@@ -675,7 +677,6 @@ CUT/${nonmaskimagename}_marked
 eot
     #
     echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_marked_merge_ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
-    \cp -f CUT/${nonmaskimagename}_marked_merge_ps.mrc ThonRingFit.mrc
     #
     if ( ! -e CUT/${nonmaskimagename}_merge_ps.mrc ) then
       ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}_merge_ps.mrc not produced."

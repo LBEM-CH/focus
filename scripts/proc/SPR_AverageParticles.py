@@ -86,7 +86,7 @@ def main():
 
 			frc = spx.fsc(odd, even)
 
-			plt.plot(np.array(frc[0])/apix,frc[1])
+			plt.plot(np.array(frc[0][1:])/apix,frc[1][1:])
 
 			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc[1]))*10.0,11)]
 			yvalues.append(thr)

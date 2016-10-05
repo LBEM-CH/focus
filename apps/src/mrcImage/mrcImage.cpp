@@ -173,18 +173,32 @@ float mrcImage::stdDev(mrcHeader *header) {
 
     if (header->mode() == 3 || header->mode() == 4) {
         if (header->mode() == 3)
+         {
 //#pragma omp parallel for shared(rawData)
             for (quint32 k = 0; k < (nx - 1) * ny; k++)
                 x2 += ((unsigned short*) rawData)[2 * k]*((unsigned short*) rawData)[2 * k]+((unsigned short*) rawData)[2 * k + 1]*((unsigned short*) rawData)[2 * k + 1];
+            return sqrt(x2 / ((nx - 1) * ny) - header->mean() * header->mean());
+         }
         else
+         {
 //#pragma omp parallel for shared(rawData)
-            for (quint32 k = 0; k < (nx - 1) * ny; k++) {
+            //CHEN: In an attempt to skip the center of the FFT with its super-strong peak:
+            // for (quint32 k = 0; k < (nx - 1) * ny; k++) {
+            for (quint32 k = nx + ny; k < (nx - 1) * (ny - 1) / 2; k++) {
                 r = ((float*) rawData)[2 * k];
                 x2 += r*r;
                 r = ((float*) rawData)[2 * k + 1];
                 x2 += r*r;
             }
-        return sqrt(x2 / ((nx - 1) * ny) - header->mean() * header->mean());
+            for (quint32 k = (nx - 1) * (ny + 1) / 2 + nx + ny; k < (nx - 1) * ny; k++) {
+                r = ((float*) rawData)[2 * k];
+                x2 += r*r;
+                r = ((float*) rawData)[2 * k + 1];
+                x2 += r*r;
+            }
+            return sqrt(x2 / (((nx - 1) * ny) - 2 * (nx + ny)) - header->mean() * header->mean());
+         }
+        // return sqrt(x2 / ((nx - 1) * ny) - header->mean() * header->mean());
     } else return 0.0;
 }
 
@@ -301,8 +315,7 @@ bool mrcImage::loadImage(mrcHeader *header, QImage::Format format) {
     if (header->mode() == 3 || header->mode() == 4) {
         //rescale(header,header->min(),2.0*header->mean() /*+1.0*stdDev(header) */,format);	
         //rescale(header,header->min(), header->mean() + 1.1*stdDev(header), format);	
-        // CHEN: 4.1.2015
-        rescale(header, header->min(), 2.0 * header->mean() + 1.1 * stdDev(header), format);
+        rescale(header, header->min(), 3.0 * header->mean() + 1.1 * stdDev(header), format);
     } else
         rescale(header, header->min(), header->max(), format);
     return true;

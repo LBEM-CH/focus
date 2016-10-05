@@ -53,6 +53,10 @@ set SPR_CRYSTALREC_DIR = ${SPR_FREALIGN_DIR}/${SPR_CRYSTALREC_DIR}/
 set scriptname = ApplyCrystalWeighting
 #$end_vars
 
+if ( -e LOGS/${scriptname}.results ) then
+	mv LOGS/${scriptname}.results LOGS/${scriptname}.results.old
+endif
+
 # Start script commands:
 
 set ccp4_setup = 'y'

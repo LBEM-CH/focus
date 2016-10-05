@@ -37,6 +37,10 @@ set scriptname = Par2FSC
 
 #$end_vars
 
+if ( -e LOGS/${scriptname}.results ) then
+	mv LOGS/${scriptname}.results LOGS/${scriptname}.results.old
+endif
+
 # Check if initial files exist:
 if ( ! -e ${SPR_FSC_DIR} ) then
 	mkdir -p ${SPR_FSC_DIR}

@@ -75,6 +75,9 @@ set SPR_STACK_ROOTNAME = 'particles'
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
+if ( -e LOGS/${scriptname}.results ) then
+	mv LOGS/${scriptname}.results LOGS/${scriptname}.results.old
+endif
 
 # Start script commands:
 mkdir -p ${SPR_STACKS_DIR}
@@ -85,11 +88,11 @@ endif
 
 ${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig}
 
-if ( ${SPR_SavePhaseFlipped} == "y" ) then
+if ( ${SPR_SavePhaseFlipped} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
 endif
 
-if ( ${SPR_SaveWienerFiltered} == "y" ) then
+if ( ${SPR_SaveWienerFiltered} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
 endif
 
@@ -101,10 +104,6 @@ foreach i ( ${SPR_STACKS_DIR}/*.hdf )
 end
 rename .hdf.mrc .mrcs ${SPR_STACKS_DIR}/*
 echo "Done!"
-
-foreach i (${SPR_STACKS_DIR}/*.mrc)
-	echo "# IMAGE-IMPORTANT MAP: $i <MAP: `basename $i`>" >> LOGS/${scriptname}.results
-end
 
 foreach i (${SPR_STACKS_DIR}/*.mrcs)
 	echo "# IMAGE-IMPORTANT MRCS: $i <STACK: `basename $i`>" >> LOGS/${scriptname}.results

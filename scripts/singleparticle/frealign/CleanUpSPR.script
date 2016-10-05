@@ -50,6 +50,10 @@ set SPR_DIR = SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
 #$end_vars
 
+if ( -e LOGS/${scriptname}.results ) then
+	mv LOGS/${scriptname}.results LOGS/${scriptname}.results.old
+endif
+
 if ( ${SPR_CleanSPR} == "y" ) then
 
 	if ( ${SPR_CleanAll} == "y" ) then

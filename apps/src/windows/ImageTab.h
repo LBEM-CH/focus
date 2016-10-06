@@ -9,14 +9,13 @@
 
 #include "ParameterConfiguration.h"
 #include "ExecutionWindow.h"
+#include "ParallelProcessingWindow.h"
 
 class ImageTab : public QWidget {
     Q_OBJECT
 
 public:
     ImageTab(QWidget* parent = NULL);
-
-    QStringList getImagesOpen();
 
 public slots:
     void showImageWindow(const QString&);
@@ -27,13 +26,14 @@ public slots:
     bool configModified();
 
 private:
+    
+    ParallelProcessingWindow* automatorWindow_;
 
-    QLabel* noImageLabel;
     QTabWidget* windowTabWidget;
 
     //Image Windows
     QMap<QString, ExecutionWindow*> imagesInitializedToTabs_;
-    QStringList imagesShown_;
+    QStringList tabIdToWorkingDir_;
 };
 
 #endif

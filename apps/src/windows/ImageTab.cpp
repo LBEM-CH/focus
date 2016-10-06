@@ -7,41 +7,40 @@
 
 ImageTab::ImageTab(QWidget* parent) 
 : QWidget(parent){
-    noImageLabel = new QLabel("No Images Activated\nPlease double click image from Library to activate and process!");
-    noImageLabel->setWordWrap(true);
-    noImageLabel->setAlignment(Qt::AlignCenter);
-    QFont font = noImageLabel->font();
-    font.setBold(true);
-    font.setPointSize(24);
-    noImageLabel->setFont(font);
-    
-    QPalette pal = noImageLabel->palette();
-    pal.setColor(QPalette::WindowText, Qt::darkGray);
-    noImageLabel->setPalette(pal);
     
     windowTabWidget = new QTabWidget(this);
     windowTabWidget->setDocumentMode(true);
     windowTabWidget->setTabsClosable(true);
     windowTabWidget->setIconSize(QSize(20,20));
     windowTabWidget->setTabShape(QTabWidget::Triangular);
-    windowTabWidget->hide();
     connect(windowTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeImageWindow(int)));
+    
+    automatorWindow_ = new ParallelProcessingWindow(this);
+    
+    windowTabWidget->addTab(automatorWindow_, ApplicationData::icon("parallel_processing"), "Parallel Processing");
+    tabIdToWorkingDir_.insert(0, QString());
+
+    //No closable buttons on the library and merge tabs
+    windowTabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
+    windowTabWidget->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
+    
+    //Tab Colors
+    windowTabWidget->tabBar()->setTabTextColor(0, Qt::darkCyan);
     
     QGridLayout* mainLayout = new QGridLayout;
     mainLayout->setMargin(0);
     mainLayout->setSpacing(0);
-    mainLayout->addWidget(noImageLabel, 0, 0, Qt::AlignHCenter | Qt::AlignVCenter);
-    mainLayout->addWidget(windowTabWidget, 1, 0);
+    mainLayout->addWidget(windowTabWidget, 0, 0);
     
     setLayout(mainLayout);
 }
 
-
-void ImageTab::closeImageWindow(int index) { 
+void ImageTab::closeImageWindow(int index) {
+    if(index == 0) return;
+    
     QWidget* currWidget = windowTabWidget->widget(index);;
     
-    
-    ExecutionWindow* win = imagesInitializedToTabs_[imagesShown_[index]];
+    ExecutionWindow* win = imagesInitializedToTabs_[tabIdToWorkingDir_[index]];
     
     if(win->isRunningScript()) {
         QMessageBox::information(this, "Error in closing image", "Image cannot be closed as it is being processed.");
@@ -54,14 +53,12 @@ void ImageTab::closeImageWindow(int index) {
     
     windowTabWidget->removeTab(index);
     delete currWidget;
-    imagesInitializedToTabs_.remove(imagesShown_[index]);
+    imagesInitializedToTabs_.remove(tabIdToWorkingDir_[index]);
     
-    imagesShown_.removeAt(index);
-    projectData.setImagesOpen(imagesShown_);
-    if(imagesShown_.isEmpty()) {
-        windowTabWidget->hide();
-        noImageLabel->show();
-    } 
+    tabIdToWorkingDir_.removeAt(index);
+    QStringList imagesShown = tabIdToWorkingDir_;
+    imagesShown.removeFirst();
+    projectData.setImagesOpen(imagesShown);
 }
 
 void ImageTab::showImageWindow(const QString& workingDir) {
@@ -85,15 +82,15 @@ void ImageTab::showImageWindow(const QString& workingDir) {
     }
 
     //Check if the tab is already visible
-    if (!imagesShown_.contains(workingDir)) {
+    if (!tabIdToWorkingDir_.contains(workingDir)) {
         int currTabIndex = windowTabWidget->count();
         windowTabWidget->addTab(imagesInitializedToTabs_[workingDir], projectData.projectDir().relativeFilePath(workingDir));
-        imagesShown_.insert(currTabIndex, workingDir);
-        projectData.setImagesOpen(imagesShown_);
+        tabIdToWorkingDir_.insert(currTabIndex, workingDir);
+        QStringList imagesShown = tabIdToWorkingDir_;
+        imagesShown.removeFirst();
+        projectData.setImagesOpen(imagesShown);
     }
 
-    noImageLabel->hide();
-    windowTabWidget->show();
     windowTabWidget->setCurrentWidget(imagesInitializedToTabs_[workingDir]);
 }
 
@@ -112,19 +109,15 @@ bool ImageTab::configModified() {
 
 
 void ImageTab::setTabNormal(const QString& workingDir) {
-    if(imagesShown_.contains(workingDir)) {
-        windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), ApplicationData::icon("file"));
-        windowTabWidget->tabBar()->setTabTextColor(imagesShown_.indexOf(workingDir), Qt::black);
+    if(tabIdToWorkingDir_.contains(workingDir)) {
+        windowTabWidget->setTabIcon(tabIdToWorkingDir_.indexOf(workingDir), ApplicationData::icon("file"));
+        windowTabWidget->tabBar()->setTabTextColor(tabIdToWorkingDir_.indexOf(workingDir), Qt::black);
     }
 }
 
 void ImageTab::setTabProcessing(const QString& workingDir) {
-    if(imagesShown_.contains(workingDir)) {
-        windowTabWidget->setTabIcon(imagesShown_.indexOf(workingDir), ApplicationData::icon("processing"));
-        windowTabWidget->tabBar()->setTabTextColor(imagesShown_.indexOf(workingDir), Qt::red);
+    if(tabIdToWorkingDir_.contains(workingDir)) {
+        windowTabWidget->setTabIcon(tabIdToWorkingDir_.indexOf(workingDir), ApplicationData::icon("processing"));
+        windowTabWidget->tabBar()->setTabTextColor(tabIdToWorkingDir_.indexOf(workingDir), Qt::red);
     }
-}
-
-QStringList ImageTab::getImagesOpen() {
-    return imagesShown_;
 }

@@ -133,6 +133,11 @@ ParametersConfiguration* ProjectData::parameterData(const QDir& workDir) {
         if (QFileInfo(configFile).exists()) {
             ParametersConfiguration* localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
             imageToParameterData_.insert(QFileInfo(configFile).canonicalPath(), localData);
+            
+            QDir procdirectory(workDir.canonicalPath() + "/proc");
+            if (!procdirectory.exists()) procdirectory.mkdir(workDir.canonicalPath() + "/proc");
+            QDir logdirectory(workDir.canonicalPath() + "/LOGS");
+            if (!logdirectory.exists()) logdirectory.mkdir(workDir.canonicalPath() + "/LOGS");
         }
         else {
             qDebug() << "CRITICAL: " << configFile << "requested, but not present, program may crash!";

@@ -39,6 +39,7 @@ set(MOC_HDRS
         data/ResultsData.h
         data/ScriptData.h
         extentions/FileWatcher.h
+        extentions/ImageScriptProcessor.h
         extentions/ScriptParser.h
         models/ProjectDelegate.h
         models/ProjectModel.h

@@ -23,10 +23,10 @@
 # DISPLAY: nonmaskimagename
 # DISPLAY: comment
 # DISPLAY: sample_pixel
-# DISPLAY: movie_stackname_raw
 # DISPLAY: movie_stackname
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_rawstack
+# DISPLAY: raw_gaincorrectedstack
 #
 #$end_local_vars
 #
@@ -40,10 +40,10 @@ set nonmaskimagename = ""
 set imagenumber = ""
 set imagesidelength = ""
 set sample_pixel = ""
-set movie_stackname_raw = ""
 set movie_stackname = ""
 set movie_imagenumber_total = ""
 set import_rawstack = ""
+set raw_gaincorrectedstack = ""
 #
 #$end_vars
 #
@@ -68,31 +68,63 @@ echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame"
 set total_dose = ` echo "scale=3; ${frame_dose} * ${movie_imagenumber_total} " | bc `
 echo "::Calculated total dose is: ${total_dose} electrons/A2" 
 #
+if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
+  set movie_stackname = movie_aligned
+  echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
+endif
+#
 ##########################################################################
 ${proc_2dx}/linblock "Calling unblur..."
 ##########################################################################
 #
-if ( 1 == 2 ) then
+\rm -f outdummy.mrc
+\rm -f dummy.mrc
+\ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
+# 
+if ( 1 == 1 ) then
 unblur << eof 
-${movie_stackname_raw}.mrc
+dummy.mrc
 ${movie_imagenumber_total}
-${nonmaskimagename}.mrc
+${movie_stackname}.mrc
 ${imagename}_unblur_shifts.txt
 ${sample_pixel}
 YES
-${total_dose}
+${frame_dose}
 300
 0
 YES
-${movie_stackname}.mrc
+outdummy.mrc
 NO
 eof
 endif
 #
-echo "# IMAGE-IMPORTANT: ${movie_stackname_raw}.mrc <Raw movie (stack)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
+\rm -f dummy.mrc
+\mv -f outdummy.mrc ${movie_stackname}.mrcs
+#
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}.mrcs"
+#################################################################################
+#
+avgstack << eot
+${movie_stackname}.mrcs
+${movie_stackname}.mrc
+/
+eot
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 50>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
+##########################################################################
+#
+clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

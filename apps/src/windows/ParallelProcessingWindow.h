@@ -32,8 +32,7 @@ private:
     QWidget* setupScriptsContainer();
     QWidget* setupStatusContinaer();
     
-    QString introText();
-    QStringList imageGroups();
+    void changeSelectionCount(int count);
     
     void executeProcesses(bool execute=true);
     void executeImage(ImageScriptProcessor* processor);

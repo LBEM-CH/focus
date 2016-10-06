@@ -40,7 +40,7 @@ public:
         
         
         scriptsToBeExecuted_ = scriptsToBeExecuted;
-        emit statusChanged("******** Starting processing *******");
+        emit statusChanged("STARTING ============================");
         continueExecution(0);
 
         return true;
@@ -58,7 +58,7 @@ public:
             connect(&process_, static_cast<void(QProcess::*)(int)> (&QProcess::finished), this, &ImageScriptProcessor::continueExecution);
         }
         
-        emit statusChanged("$$$$$$$ Stopped $$$$$$$");
+        emit statusChanged("$$$$$$$ STOPPED $$$$$$$");
     }
 
 signals:
@@ -82,7 +82,7 @@ private:
         }
 
         if (scriptsToBeExecuted_.isEmpty()) {
-            emit statusChanged("=== Finished processing ===");
+            emit statusChanged("FINISHED   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
             scriptExecuting_ = "";
             emit processFinished();
             return;

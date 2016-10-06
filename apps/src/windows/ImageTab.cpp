@@ -25,7 +25,7 @@ ImageTab::ImageTab(QWidget* parent)
     windowTabWidget->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
     
     //Tab Colors
-    windowTabWidget->tabBar()->setTabTextColor(0, Qt::darkCyan);
+    windowTabWidget->tabBar()->setTabTextColor(0, Qt::darkMagenta);
     
     QGridLayout* mainLayout = new QGridLayout;
     mainLayout->setMargin(0);

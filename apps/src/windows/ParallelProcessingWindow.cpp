@@ -6,6 +6,7 @@
 #include "ScriptData.h"
 #include "UserPreferences.h"
 #include "GroupContainer.h"
+#include "ProjectData.h"
 
 ParallelProcessingWindow::ParallelProcessingWindow(QWidget* parent)
 : QWidget(parent) {
@@ -14,6 +15,10 @@ ParallelProcessingWindow::ParallelProcessingWindow(QWidget* parent)
     QFont font = statusLabel_->font();
     font.setBold(true);
     statusLabel_->setFont(font);
+    changeSelectionCount(projectData.imagesSelected().count());
+    connect(&projectData, &ProjectData::selectionChanged, [=](const QStringList& paths){
+        if(!currentlyExecuting_) changeSelectionCount(paths.count());
+    });
 
     importButton_ = new QPushButton(ApplicationData::icon("play"), tr("Start Processing"));
     importButton_->setCheckable(true);
@@ -276,9 +281,10 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
         importButton_->setChecked(false);
         importButton_->setText("Start Processing");
 
-        statusLabel_->setText("Idle");
+        changeSelectionCount(projectData.imagesSelected().count());
         
-        statusEntryTable_->resizeColumnsToContents();
+        statusEntryTable_->resizeColumnToContents(0);
+        statusEntryTable_->resizeColumnToContents(1);
         
     } else if (currentlyExecuting_) {
         qDebug() << "Currently working, skipping this processing";
@@ -360,7 +366,7 @@ void ParallelProcessingWindow::addStatusToTable(int processId, const QString& im
             
             QTableWidgetItem* processItem = new QTableWidgetItem();
             processItem->setFlags(processItem->flags() ^ Qt::ItemIsEnabled);
-            processItem->setText(text);
+            processItem->setText(QTime::currentTime().toString("hh:mm:ss.zzz") + " "  + text);
             
             if(error) {
                 idItem->setForeground(Qt::red);
@@ -377,5 +383,9 @@ void ParallelProcessingWindow::addStatusToTable(int processId, const QString& im
         }
     }
     statusEntryTable_->scrollToBottom();
+}
+
+void ParallelProcessingWindow::changeSelectionCount(int count) {
+    statusLabel_->setText(QString::number(count) + " images are selected, and are ready to be processed.");
 }
 

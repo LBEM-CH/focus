@@ -9,7 +9,7 @@
 LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
     previewContainer = setupPreviewContainer();
-    previewContainer->setMaximumWidth(410);
+    previewContainer->setMaximumWidth(415);
     previewContainer->hide();
     
     autoSelectContainer = setupAutoSelectionTool();
@@ -293,7 +293,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
     QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     mainLayout->setMargin(5);
-    mainLayout->setSpacing(5);
+    mainLayout->setSpacing(10);
     mainLayout->addStretch(0);
     
     overviewLabel = new QLabel;
@@ -400,7 +400,7 @@ void LibraryTab::resetOverview() {
         previewLabels[2]->setText("IQ Plot");
         previewLabels[3]->setText("Final Map");
     } else {
-        overviewLabel->setText("Maps Overview");
+        overviewLabel->setText("Merge Overview");
         previewLabels[0]->setText("Final Map");
         previewLabels[1]->setText("Reference Map");
         previewLabels[2]->setText("Half Half Map");
@@ -496,9 +496,6 @@ QTreeView* LibraryTab::getDirView() {
 
 void LibraryTab::reload() {
     updateModel();
-}
-
-void LibraryTab::import() {
 }
 
 void LibraryTab::loadProjectState() {

@@ -48,6 +48,7 @@ public:
     QIcon getModuleScriptIcon();
     QString getModuleDescription();
     QString getModuleSelection();
+    bool isModuleDefaultActivated();
 
 public slots:
     void execute(bool run);

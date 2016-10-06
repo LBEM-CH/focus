@@ -505,3 +505,8 @@ QString ScriptModule::getModuleDescription() {
 QString ScriptModule::getModuleSelection() {
     return ScriptModuleProperties(scriptDir.absolutePath()).selection(); 
 }
+
+bool ScriptModule::isModuleDefaultActivated() {
+    return ScriptModuleProperties(scriptDir.absolutePath()).defaultActivated();
+}
+

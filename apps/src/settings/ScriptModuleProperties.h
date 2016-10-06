@@ -51,6 +51,14 @@ public:
         return val;
     }
     
+    bool defaultActivated() {
+        bool val;
+        beginGroup("module");
+        val = value("defaultActivated", false).toBool();
+        endGroup();
+        return val;
+    }
+    
     QStringList subfolders() {
         QStringList paths;
         int size = beginReadArray("subfolders");

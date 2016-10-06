@@ -46,8 +46,6 @@ class LibraryTab : public QWidget
         void columnActivated(int i);
         void copyImage();
         
-        void import();
-        
         void autoSelect();
         void extendSelection();
         void reduceSelection();

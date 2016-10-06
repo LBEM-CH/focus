@@ -173,6 +173,7 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
         mainToolBarButtonGroup->addButton(toolButton);
         mainToolBar->addWidget(toolButton);
         if (i == 0) defaultButton = toolButton;
+        if(module->isModuleDefaultActivated()) defaultButton = toolButton;
     }
 
     subscriptWidget = new QListView;

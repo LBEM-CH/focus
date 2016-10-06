@@ -33,6 +33,9 @@
 # DISPLAY: Thread_Number
 # DISPLAY: DEFOCUS_TLTAXIS
 # DISPLAY: DEFOCUS_TLTANG
+# DISPLAY: sample_pixel
+# DISPLAY: phacon
+# DISPLAY: movie_stackname
 #
 #$end_local_vars
 #
@@ -67,6 +70,8 @@ set defocus = ""
 set ctfcor_noise = ""
 set ctfcor_imode = ""
 set ctfcor_debug = ""
+set phacon = ""
+set movie_stackname = ""
 #
 #$end_vars
 #
@@ -77,9 +82,28 @@ source ${proc_2dx}/initialize
 #
 echo "<<@progress: 5>>"
 #
+set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
-echo "::ToDo: Run gctf or CTFFIND4 here."
+echo ":: "
+echo "::Running: gctf --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL 5000 --defH 100000 --defS 100 --astm 500 --bfac 50 --resL ${RESMIN} --resH${RESMAX} --boxsize 512 ${movie_stackname}.mrc"
+echo ":: "
 #
+gctf --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL 5000 --defH 100000 --defS 100 --astm 500 --bfac 50 --resL ${RESMIN} --resH ${RESMAX} --boxsize 512 ${movie_stackname}.mrc
+#
+\mv -f ${movie_stackname}.ctf CTFDiag.mrc
+#2dx_mrc_converter CTFDIAG.mrc CTFDIAG.png --size 1024
+echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${scriptname}.results
+#
+cat ${movie_stackname}_gctf.log
+#
+echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+set defocus = `cat tmp.1`
+\rm tmp.1
+#
+echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

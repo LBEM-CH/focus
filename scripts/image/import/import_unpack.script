@@ -101,16 +101,10 @@ source ${proc_2dx}/2dx_makedirs
 # - drift-corrected movie
 # - drift-corrected and averaged image
 #
-# CHEN: Temporary fix:
-set import_gainref = "CountRef_TssA_Sep28_15.27.14.dm4"
-echo "set import_gainref = ${import_gainref}" >> LOGS/${scriptname}.results
-#
 set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z'`
 set raw_gaincorrectedstack        = ${namestub}_raw
 set raw_gaincorrectedstack_2d     = ${namestub}_raw
 set raw_gaincorrectedstack_2d_fft = ${namestub}_raw_fft
-#
-cp -f ../${import_gainref} .
 #
 echo "<<@progress: 10>>"
 #

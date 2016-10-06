@@ -90,8 +90,10 @@ echo ":: "
 #
 gctf --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL 5000 --defH 100000 --defS 100 --astm 500 --bfac 50 --resL ${RESMIN} --resH ${RESMAX} --boxsize 512 ${movie_stackname}.mrc
 #
-\mv -f ${movie_stackname}.ctf ThonRingFit.mrc
-echo "#IMAGE-IMPORTANT: ThonRingFit.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
+\mv -f ${movie_stackname}.ctf CTFDiag.mrc
+#2dx_mrc_converter CTFDIAG.mrc CTFDIAG.png --size 1024
+echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
 echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
 echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${scriptname}.results
 #

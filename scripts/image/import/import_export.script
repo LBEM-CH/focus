@@ -1,0 +1,121 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Export Image Data                                                  #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/03/2016                                             #
+# Last Modification: 10/03/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 80
+#
+# DISPLAY: comment
+# DISPLAY: export_anything_doit
+# DISPLAY: export_basedir
+# DISPLAY: export_rawstack_doit
+# DISPLAY: export_rawstack_subdir
+# DISPLAY: export_gainref_doit
+# DISPLAY: export_gainref_subdir
+# DISPLAY: export_pixeldef_doit
+# DISPLAY: export_pixeldef_subdir
+# DISPLAY: export_gaincorstack_doit
+# DISPLAY: export_gaincorstack_subdir
+# DISPLAY: export_driftcorstack_doit
+# DISPLAY: export_driftcorstack_subdir
+# DISPLAY: export_driftcoraver_doit
+# DISPLAY: export_driftcoraver_subdir
+# DISPLAY: export_driftcorfig_doit
+# DISPLAY: export_driftcorfig_subdir
+# DISPLAY: export_CTFDiag_doit
+# DISPLAY: export_CTFDiag_subdir
+# DISPLAY: export_CTFstar_doit
+# DISPLAY: export_CTFstar_subdir
+# DISPLAY: export_delete_rest
+#
+# DISPLAY: import_rawstack
+# DISPLAY: import_gainref
+# DISPLAY: raw_gaincorrectedstack
+# DISPLAY: movie_stackname
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set comment = ""
+set export_anything_doit = ""
+set export_basedir = ""
+set export_rawstack_doit = ""
+set export_rawstack_subdir = ""
+set export_gainref_doit = ""
+set export_gainref_subdir = ""
+set export_pixeldef_doit = ""
+set export_pixeldef_subdir = ""
+set export_gaincorstack_doit = ""
+set export_gaincorstack_subdir = ""
+set export_driftcorstack_doit = ""
+set export_driftcorstack_subdir = ""
+set export_driftcoraver_doit = ""
+set export_driftcoraver_subdir = ""
+set export_driftcorfig_doit = ""
+set export_driftcorfig_subdir = ""
+set export_CTFDiag_doit = ""
+set export_CTFDiag_subdir = ""
+set export_CTFstar_doit = ""
+set export_CTFstar_subdir = ""
+set export_delete_rest = ""I
+#
+set import_rawstack = ""
+set import_gainref = ""
+set raw_gaincorrectedstack = ""
+set movie_stackname = ""
+#
+#$end_vars
+#
+set scriptname = import_export
+#
+\rm -f LOGS/${scriptname}.results
+source ${proc_2dx}/initialize
+#
+if ( ${export_anything_doit} == "y" ) then
+  #
+  echo "<<@progress: 10>>"
+  #
+  if ( ! -d ${export_basedir} ) then
+    ${proc_2dx}/protest "ERROR: ${export_basedir} not existing. First create it."
+  endif
+  #
+  echo "IMAGE-IMPORTANT: ${export_basedir} <Export Base Directory>" >> LOGS/${scriptname}.results
+  #
+  set oriname = `echo ${import_rawstack} | cut -d\.  -f1`
+  #
+  source ${proc_2dx}/import_export_sub.com ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
+  source ${proc_2dx}/import_export_sub.com ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir}  ${import_gainref} ${oriname}_${import_gainref}
+  #source ${proc_2dx}/import_export_sub.com ${export_pixeldef_doit} ${export_basedir} ${export_pixeldef_subdir} ${import_pixeldef}
+  source ${proc_2dx}/import_export_sub.com ${export_gaincorstack_doit} ${export_basedir} ${export_gaincorstack_subdir} ${raw_gaincorrectedstack}.mrcs ${oriname}_${raw_gaincorrectedstack}.mrcs
+  source ${proc_2dx}/import_export_sub.com ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_${movie_stackname}.mrcs
+  source ${proc_2dx}/import_export_sub.com ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}_${movie_stackname}.mrc
+  source ${proc_2dx}/import_export_sub.com ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} translations.png ${oriname}_translations.png
+  source ${proc_2dx}/import_export_sub.com ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.png ${oriname}_CTFDiag.png
+  source ${proc_2dx}/import_export_sub.com ${export_CTFstar_doit} ${export_basedir} ${export_CTFstar_subdir} micrographs_all_gctf.star ${oriname}_micrograph_all_gctf.star
+  #
+else
+  #
+  echo ":Skipping."
+  #
+endif
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+##
+#
+#
+#

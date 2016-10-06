@@ -188,15 +188,15 @@ eot
   #                                                                           #
   #############################################################################
   #
-  \rm -f CUT/${imagename}_center_red.mrc
+  \rm -f SCRATCH/${imagename}_center_red.mrc
   ${bin_2dx}/labelh.exe << eot
 SCRATCH/${imagename}_center.mrc
 4               ! average adjacent pixels
-CUT/${imagename}_center_red.mrc
+SCRATCH/${imagename}_center_red.mrc
 2,2
 eot
   #
-  echo "# IMAGE: "CUT/${imagename}_center_red.mrc "<Center of Downsampled Image>"  >> LOGS/${scriptname}.results
+  echo "# IMAGE: "SCRATCH/${imagename}_center_red.mrc "<Center of Downsampled Image>"  >> LOGS/${scriptname}.results
   #
   echo "<<@progress: 70>>"
   echo "<<@evaluate>>"
@@ -207,13 +207,13 @@ eot
   #                                                                           #
   #############################################################################
   #
-  \rm -f     CUT/${imagename}_center_red_fft.mrc
+  \rm -f     SCRATCH/${imagename}_center_red_fft.mrc
   #
-  setenv IN  CUT/${imagename}_center_red.mrc
-  setenv OUT CUT/${imagename}_center_red_fft.mrc
+  setenv IN  SCRATCH/${imagename}_center_red.mrc
+  setenv OUT SCRATCH/${imagename}_center_red_fft.mrc
   ${bin_2dx}/2dx_fftrans.exe
   #
-  echo "# IMAGE: "CUT/${imagename}_center_red_fft.mrc "<FFT of Center of Downsampled Image>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "SCRATCH/${imagename}_center_red_fft.mrc "<FFT of Center of Downsampled Image>" >> LOGS/${scriptname}.results
   #
   echo "<<@progress: 80>>"
   #

@@ -38,14 +38,9 @@ void ImageViewer::setFileProperties(const QString& file, const QString& extensio
     extension_ = extension.trimmed().toLower();
 }
 
-void ImageViewer::loadFile(bool loadInfo, const QString& notFoundMessage) {
-    loadFile(fileName_, extension_, loadInfo, notFoundMessage);
-}
-
-void ImageViewer::loadFile(const QString &fileName, const QString& extension, bool loadInfo, const QString& notFoundMessage) {
+void ImageViewer::loadFile(const QString &fileName, const QString& extension, bool loadInfo) {
     fileName_ = fileName;
     extension_ = extension.trimmed().toLower();
-    if (!notFoundMessage.isEmpty()) notFoundMessage_ = notFoundMessage;
 
     clearWidgets();
     

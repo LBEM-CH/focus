@@ -198,6 +198,7 @@ void MainWindow::setupToolBar() {
     mainToolBar->addWidget(openProjectToolsAct);
     mainToolBar->addWidget(spacer1);
     mainToolBar->addWidget(openLibraryWindowAct);
+    mainToolBar->addSeparator();
     mainToolBar->addWidget(openImageWindowAct);
     mainToolBar->addWidget(openMergeWindowAct);
     mainToolBar->addWidget(openSPWindowAct);

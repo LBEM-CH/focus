@@ -91,17 +91,17 @@ if ( ${export_anything_doit} == "y" ) then
   #
   echo "IMAGE-IMPORTANT: ${export_basedir} <Export Base Directory>" >> LOGS/${scriptname}.results
   #
-  set oriname = `echo ${import_rawstack} | cut -d\.  -f1`
+  set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
   #
   source ${proc_2dx}/import_export_sub.com ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
   source ${proc_2dx}/import_export_sub.com ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir}  ${import_gainref} ${oriname}_${import_gainref}
   #source ${proc_2dx}/import_export_sub.com ${export_pixeldef_doit} ${export_basedir} ${export_pixeldef_subdir} ${import_pixeldef}
   source ${proc_2dx}/import_export_sub.com ${export_gaincorstack_doit} ${export_basedir} ${export_gaincorstack_subdir} ${raw_gaincorrectedstack}.mrcs ${oriname}_${raw_gaincorrectedstack}.mrcs
-  source ${proc_2dx}/import_export_sub.com ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_${movie_stackname}.mrcs
-  source ${proc_2dx}/import_export_sub.com ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}_${movie_stackname}.mrc
+  source ${proc_2dx}/import_export_sub.com ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_aligned.mrcs
+  source ${proc_2dx}/import_export_sub.com ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}_aligned.mrc
   source ${proc_2dx}/import_export_sub.com ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} translations.png ${oriname}_translations.png
-  source ${proc_2dx}/import_export_sub.com ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.png ${oriname}_CTFDiag.png
-  source ${proc_2dx}/import_export_sub.com ${export_CTFstar_doit} ${export_basedir} ${export_CTFstar_subdir} micrographs_all_gctf.star ${oriname}_micrograph_all_gctf.star
+  source ${proc_2dx}/import_export_sub.com ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}_CTFDiag.mrc
+  source ${proc_2dx}/import_export_sub.com ${export_CTFstar_doit} ${export_basedir} ${export_CTFstar_subdir} micrographs_all_gctf.star ${oriname}_micrographs_all_gctf.star
   #
 else
   #

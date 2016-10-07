@@ -81,8 +81,11 @@ ${proc_2dx}/linblock "Calling unblur..."
 \rm -f dummy.mrc
 \ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
 # 
-if ( 1 == 1 ) then
-unblur << eof 
+if ( ! -e ${app_unblur} ) then
+  ${proc_2dx}/protest "ERROR: First define location of UNBLUR in Settings"
+endif
+#
+${app_unblur} << eof 
 dummy.mrc
 ${movie_imagenumber_total}
 ${movie_stackname}.mrc
@@ -96,7 +99,6 @@ YES
 outdummy.mrc
 NO
 eof
-endif
 #
 \rm -f dummy.mrc
 \mv -f outdummy.mrc ${movie_stackname}.mrcs

@@ -922,7 +922,7 @@ void LibraryTab::setPreviewImages(const QString& imagePath) {
                 previewList[0]->loadFile(imagePath + "/" + driftCorrectedImage, "mrc", showHeaderButton->isChecked());
                 previewList[1]->loadFile(imagePath + "/" + driftCorrectedfftImage, "mrc", showHeaderButton->isChecked());
                 previewList[2]->loadFile(imagePath + "/translations.png", "png", showHeaderButton->isChecked());
-                previewList[3]->loadFile(imagePath + "/CTFDiag.png", "png", showHeaderButton->isChecked());
+                previewList[3]->loadFile(imagePath + "/CTFDiag.mrc", "mrc", showHeaderButton->isChecked());
             } else if (overviewIndex == 2) {
                 previewList[0]->loadFile(imagePath + "/ThonRingFit.mrc", "mrc", showHeaderButton->isChecked());
                 previewList[1]->loadFile(imagePath + "/ManualMasking_UnbendPlot.mrc", "mrc", showHeaderButton->isChecked());

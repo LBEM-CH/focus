@@ -36,6 +36,12 @@
 # DISPLAY: sample_pixel
 # DISPLAY: phacon
 # DISPLAY: movie_stackname
+# DISPLAY: gctf_RESMAX
+# DISPLAY: df_start
+# DISPLAY: df_end
+# DISPLAY: df_step
+# DISPLAY: defocus_res_min
+# DISPLAY: defocus_res_max
 #
 #$end_local_vars
 #
@@ -72,6 +78,12 @@ set ctfcor_imode = ""
 set ctfcor_debug = ""
 set phacon = ""
 set movie_stackname = ""
+set gctf_RESMAX = ""
+set df_start = ""
+set df_end = ""
+set df_step = ""
+set defocus_res_min = ""
+set defocus_res_max = ""
 #
 #$end_vars
 #
@@ -84,14 +96,22 @@ echo "<<@progress: 5>>"
 #
 set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
+if ( ! -e ${movie_stackname}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${movie_stackname}.mrc does not exist."
+endif
+#
+##########################################################################
+${proc_2dx}/linblock "Calling gctf"
+##########################################################################
+#
 echo ":: "
-echo "::Running: gctf --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL 5000 --defH 100000 --defS 100 --astm 500 --bfac 50 --resL ${RESMIN} --resH${RESMAX} --boxsize 512 ${movie_stackname}.mrc"
+echo "::Running: gctf --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL ${df_start} --defH ${df_end} --defS ${df_step} --astm 500 --bfac 50 --resL ${defocus_res_min} --resH ${defocus_res_max} --boxsize 512 ${movie_stackname}.mrc"
 echo ":: "
 #
-gctf --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL 5000 --defH 100000 --defS 100 --astm 500 --bfac 50 --resL ${RESMIN} --resH ${RESMAX} --boxsize 512 ${movie_stackname}.mrc
+${app_gctf} --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL ${df_start} --defH ${df_end} --defS ${df_step} --astm 500 --bfac 50 --resL ${defocus_res_min} --resH ${defocus_res_max} --boxsize 512 ${movie_stackname}.mrc
 #
 \mv -f ${movie_stackname}.ctf CTFDiag.mrc
-#2dx_mrc_converter CTFDIAG.mrc CTFDIAG.png --size 1024
+#2dx_mrc_converter CTFDiag.mrc CTFDiag.png --size 1024
 echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
 echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
 echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
@@ -102,8 +122,12 @@ cat ${movie_stackname}_gctf.log
 echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
 set defocus = `cat tmp.1`
 \rm tmp.1
-#
 echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+#
+echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f12 | sed 's/ /,/g' > tmp.1
+set gctf_RESMAX = `cat tmp.1`
+\rm tmp.1
+echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

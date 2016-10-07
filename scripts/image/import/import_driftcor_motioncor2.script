@@ -71,12 +71,19 @@ echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame"
 ${proc_2dx}/linblock "Calling MotionCor2..."
 ##########################################################################
 #
-if ( 1 == 2 ) then
-MotionCor2 -InMrc ${movie_stackname_raw}.mrc \-OutMrc ${movie_stackname}.mrc \-Patch 5 5 \
--Iter 10 \-Tol 0.5 \
--bft 100 \
--Kv ${KV} \-PixSize ${sample_pixel} \-FmDose ${frame_dose}
+if ( ! -e ${app_motioncor2} ) then
+  ${proc_2dx}/protest "ERROR: First define location of MOTIONCOR2 in Settings."
 endif
+#
+${app_motioncor2} -InMrc ${movie_stackname_raw}.mrc \
+-OutMrc ${movie_stackname}.mrc \
+-Patch 5 5 \
+-Iter 10 \
+-Tol 0.5 \
+-bft 100 \
+-Kv ${KV} \
+-PixSize ${sample_pixel} \
+-FmDose ${frame_dose}
 #
 echo "# IMAGE-IMPORTANT: ${movie_stackname_raw}.mrc <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results

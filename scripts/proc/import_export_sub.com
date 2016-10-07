@@ -12,7 +12,7 @@ set sub_targetname = "${5}"
 if ( ${sub_doit} == "y" ) then
   if ( -e ${sub_filename} ) then
     if ( ! -d ${sub_basedir}/${sub_targetdir} ) then
-      echo "::   mkdir ${sub_basedir}/${sub_targetdir}
+      echo "::   mkdir ${sub_basedir}/${sub_targetdir}"
       \mkdir ${sub_basedir}/${sub_targetdir}
     endif
     echo "::   rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}"

@@ -369,6 +369,10 @@ void AutoImportWindow::analyzeImport() {
             }
         }
         
+        if(toBeImported_.keys().contains(baseName)) {
+            continue;
+        }
+        
         if(alreadyImportedBaseNames.contains(baseName)) {
             processed = true;
             dirName = folderPreferences.linkedDirectory(baseName);

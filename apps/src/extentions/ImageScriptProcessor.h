@@ -19,6 +19,7 @@ public:
     ImageScriptProcessor(QObject* parent = 0)
     : QObject(parent) {
         connect(&process_, static_cast<void(QProcess::*)(int)> (&QProcess::finished), this, &ImageScriptProcessor::continueExecution);
+        workingDir_ = projectData.projectDir();
     }
 
     QDir workingDir() {
@@ -37,8 +38,6 @@ public:
         }
         workingDir_ = workingDir;
         
-        
-        
         scriptsToBeExecuted_ = scriptsToBeExecuted;
         emit statusChanged("STARTING ============================");
         continueExecution(0);
@@ -47,10 +46,6 @@ public:
     }
 
     void stopExecution() {
-        scriptsToBeExecuted_.clear();
-        scriptExecuting_ = "";
-        workingDir_ = projectData.projectDir();
-        
         if (process_.state() == QProcess::Running) {
             disconnect(&process_, static_cast<void(QProcess::*)(int)> (&QProcess::finished), this, &ImageScriptProcessor::continueExecution);
             process_.kill();
@@ -59,6 +54,10 @@ public:
         }
         
         emit statusChanged("$$$$$$$ STOPPED $$$$$$$");
+        
+        scriptsToBeExecuted_.clear();
+        scriptExecuting_ = "";
+        workingDir_ = projectData.projectDir();
     }
 
 signals:

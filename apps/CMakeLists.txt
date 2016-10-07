@@ -39,7 +39,7 @@ endif(FFTWF_FOUND)
 SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${FFTW_LIB})
 
 # QT5 ---------------------------------
-FIND_PACKAGE(Qt5 COMPONENTS Widgets WebKitWidgets Network Script OpenGL REQUIRED)
+FIND_PACKAGE(Qt5 COMPONENTS Widgets WebKitWidgets Network Script OpenGL Concurrent REQUIRED)
 
 IF(Qt5_FOUND)
     MESSAGE(STATUS "@EXETITLE@: Found QT5 Widgets (Version: ${Qt5Widgets_VERSION_STRING})")
@@ -52,16 +52,18 @@ IF(Qt5_FOUND)
     INCLUDE_DIRECTORIES(${Qt5Network_INCLUDE_DIRS})
     INCLUDE_DIRECTORIES(${Qt5Script_INCLUDE_DIRS})
     INCLUDE_DIRECTORIES(${Qt5OpenGL_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Qt5Concurrent_INCLUDE_DIRS})
     ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
     ADD_DEFINITIONS(${Qt5WebKitWidgets_DEFINITIONS})
     ADD_DEFINITIONS(${Qt5Network_DEFINITIONS})
     ADD_DEFINITIONS(${Qt5Script_DEFINITIONS})
     ADD_DEFINITIONS(${Qt5OepnGL_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5Concurrent_DEFINITIONS})
 ELSE()
     MESSAGE(STATUS "@EXETITLE@: QT5 not Found!")
 ENDIF()
 
-SET(2DX_LIBRARIES ${2DX_LIBRARIES} Qt5::Widgets Qt5::WebKitWidgets Qt5::Network Qt5::Script Qt5::OpenGL)
+SET(2DX_LIBRARIES ${2DX_LIBRARIES} Qt5::Widgets Qt5::WebKitWidgets Qt5::Network Qt5::Script Qt5::OpenGL Qt5::Concurrent)
 
 # OPENGL ---------------------------------
 find_package(OpenGL)

@@ -74,15 +74,17 @@ QWidget* ParallelProcessingWindow::setupInputFolderContainer() {
 
     QDir projectDir = projectData.projectDir();
     
+    int numberOfThreads = QThread::idealThreadCount();
+    if(numberOfThreads < 1) numberOfThreads = 2;
+    
     IntLineEditSet* processesBox = new IntLineEditSet(1);
-    processesBox->setAllRanges(1, 24);
+    processesBox->setAllRanges(1, numberOfThreads);
     processesBox->setValue(QString::number(ProjectPreferences(projectDir).processJobs()));
     connect(processesBox, &IntLineEditSet::valueChanged, [=](){
         ProjectPreferences(projectDir).setProcessJobs(processesBox->valueAt(0).toInt());
     });
     layout->addRow("Number of jobs to run in parallel", processesBox);
     
-    int numberOfThreads = QThread::idealThreadCount();
     QLabel* introLabel = new QLabel("The maximum number of threads available on your system is: " + QString::number(numberOfThreads));
     introLabel->setWordWrap(true);
     QPalette pal = introLabel->palette();
@@ -221,6 +223,7 @@ QWidget* ParallelProcessingWindow::setupStatusContinaer() {
     statusEntryTable_->setShowGrid(false);
     statusEntryTable_->setAlternatingRowColors(true);
     statusEntryTable_->setSortingEnabled(true);
+    statusEntryTable_->sortByColumn(2, Qt::SortOrder::AscendingOrder);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setMargin(10);

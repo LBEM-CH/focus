@@ -23,6 +23,9 @@ ENDIF()
 
 #Check if qmake is present
 FIND_PROGRAM(QMAKE_EXECUTABLE NAMES qmake)
+if(${QMAKE_EXECUTABLE} MATCHES "/usr/local/cina/qt4/qt-4.8.6/bin/qmake")
+    set(QMAKE_EXECUTABLE "/usr/local/cina/qt5/Qt5.5.0/5.5/gcc_64/bin/qmake")
+endif()
 
 IF(${QMAKE_EXECUTABLE} MATCHES "NOTFOUND$" )
     SET(_Qt5_NOTFOUND_MESSAGE "qmake installation NOT FOUND!\nMake sure QT5 is installed it's binaries are in search path\n")
@@ -35,7 +38,7 @@ ELSE()
     EXECUTE_PROCESS(COMMAND ${QMAKE_EXECUTABLE} -query QT_INSTALL_PLUGINS COMMAND tr -d "\n" OUTPUT_VARIABLE Qt5_PLUGINS_DIR)
     EXECUTE_PROCESS(COMMAND ${QMAKE_EXECUTABLE} -query QT_INSTALL_IMPORTS COMMAND tr -d "\n" OUTPUT_VARIABLE Qt5_IMPORTS_DIR)
     SET(Qt5_CMAKE_DIR "${Qt5_LIB_DIR}/cmake")
-    MESSAGE(STATUS "Qt5 (Version ${Qt5_VERSION}) found at: ${Qt5_DIR}")
+    MESSAGE(STATUS "=======> Qt5 (Version ${Qt5_VERSION}) found at: ${Qt5_DIR} ")
 ENDIF()
 
 IF(NOT DEFINED _Qt5_NOTFOUND_MESSAGE)

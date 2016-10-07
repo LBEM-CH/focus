@@ -134,7 +134,8 @@ echo ''
 
 S2='henning'
 S3='sthennin'
-if [ "$USER" == "$S2" ] || [ "$USER" == "$S3" ];
+S4='cina'
+if [ "$USER" == "$S2" ] || [ "$USER" == "$S3" ] || [ "$USER" == "$S4" ];
 then
   echo User = $USER
   cd $BUILD 

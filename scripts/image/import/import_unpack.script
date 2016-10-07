@@ -36,6 +36,7 @@
 # DISPLAY: Calc_from_sample_pixel
 # DISPLAY: sample_pixel
 # DISPLAY: movie_imagenumber_total
+# DISPLAY: import_bin_doit
 #
 #$end_local_vars
 #
@@ -66,6 +67,7 @@ set stepdigitizer = ""
 set Calc_from_sample_pixel = ""
 set sample_pixel = ""
 set movie_imagenumber_total = ""
+set import_bin_doit = ""
 #
 #$end_vars
 #
@@ -95,7 +97,7 @@ if ( ${import_rawstack_type} == "1" ) then
   echo "::Raw movie as dark-subtracted stack present. Gain reference found."
   #
   #################################################################################
-  echo "::Running: clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
+  ${proc_2dx}/linblock "Running clip unpack -m 2 ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
   #
   clip unpack -m 2 ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs
@@ -139,7 +141,7 @@ if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
   #
 else
   #
-  set sample_pixel = `clip info ${import_rawstack}.mrc | grep Scale | cut -d\( -f2 | cut -dx -f1`
+  set sample_pixel = `clip info ${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
   echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
   #
 endif
@@ -147,6 +149,28 @@ endif
 if ( ${Calc_from_sample_pixel} == "y" ) then
   set magnification = `echo "scale=3; ${stepdigitizer} * 10000 / ${sample_pixel}" | bc ` 
   echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
+endif
+#
+if ( ${import_bin_doit} == "y" ) then
+  set width = `clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
+  set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
+  if ( ${widthbig} == "1" ) then
+    echo ":: Image has size ${width}, which is too large."
+    #################################################################################
+    ${proc_2dx}/linblock "Running: newstack -ftreduce 2 -input ${raw_gaincorrectedstack}_large.mrcs -output ${raw_gaincorrectedstack}.mrcs"
+    #################################################################################
+    #
+    \mv -f ${raw_gaincorrectedstack}.mrcs ${raw_gaincorrectedstack}_large.mrcs
+    echo "# IMAGE: ${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
+    newstack -ftreduce 2 -input ${raw_gaincorrectedstack}_large.mrcs -output ${raw_gaincorrectedstack}.mrcs 
+    #
+    if ( ${tempkeep} == "n" ) then
+      \rm -f ${raw_gaincorrectedstack}_large.mrcs
+    endif
+  else
+    echo ":: Image has size ${width}, which is small enough, no binning done."
+  endif
+  #
 endif
 #
 echo "<<@progress: 30>>"

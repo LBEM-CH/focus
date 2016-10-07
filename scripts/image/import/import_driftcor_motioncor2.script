@@ -40,12 +40,14 @@ set nonmaskimagename = ""
 set imagenumber = ""
 set imagesidelength = ""
 set sample_pixel = ""
-set movie_stackname_raw = ""
+set raw_gaincorrectedstack = ""
 set movie_stackname = ""
 set movie_imagenumber_total = ""
-set import_rawstack = ""
 #
 #$end_vars
+#
+# get motioncor2 from
+# wget http://msg.ucsf.edu/MotionCor2/MotionCor2.zip
 #
 set scriptname = import_driftcor_motioncor2
 \rm -f LOGS/${scriptname}.results
@@ -61,11 +63,19 @@ echo "<<@progress: 1>>"
 #
 #
 set COUNTS_PER_PIX = ` clip info ${import_rawstack} | grep mean | cut -d\= -f2 `
-echo "::Mean count is: ${COUNTS_PER_PIX}" 
+echo "::Mean count is: ${COUNTS_PER_PIX}"
 # set SERIALEM_FACTOR = ` header ${import_rawstack} | grep 'SerialEMCCD' | awk '{print $7}' `
 set SERIALEM_FACTOR = 1
 set frame_dose = ` echo "scale=3; ${COUNTS_PER_PIX} / ${sample_pixel} / ${sample_pixel} / ${SERIALEM_FACTOR}" | bc `
-echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame" 
+echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame"
+set total_dose = ` echo "scale=3; ${frame_dose} * ${movie_imagenumber_total} " | bc `
+echo "::Calculated total dose is: ${total_dose} electrons/A2"
+#
+if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
+  set movie_stackname = movie_aligned
+  echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
+endif
+#
 #
 ##########################################################################
 ${proc_2dx}/linblock "Calling MotionCor2..."
@@ -75,8 +85,8 @@ if ( ! -e ${app_motioncor2} ) then
   ${proc_2dx}/protest "ERROR: First define location of MOTIONCOR2 in Settings."
 endif
 #
-${app_motioncor2} -InMrc ${movie_stackname_raw}.mrc \
--OutMrc ${movie_stackname}.mrc \
+${app_motioncor2} -InMrc ${raw_gaincorrectedstack}.mrcs \
+-OutMrc ${movie_stackname}.mrcs \
 -Patch 5 5 \
 -Iter 10 \
 -Tol 0.5 \
@@ -85,8 +95,8 @@ ${app_motioncor2} -InMrc ${movie_stackname_raw}.mrc \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose}
 #
-echo "# IMAGE-IMPORTANT: ${movie_stackname_raw}.mrc <Raw movie (stack)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

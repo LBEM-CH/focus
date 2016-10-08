@@ -47,7 +47,6 @@ void ImageThumbnails::updateThumbanils() {
     progressDialog.setCancelButtonText(tr("&Cancel"));
     progressDialog.setRange(0, imageList.size());
     progressDialog.setWindowTitle(tr("Updating thumbnails..."));
-    progressDialog.show();
     int saveProgress = 0;
     
     QList<QStandardItem*> items;
@@ -86,6 +85,9 @@ void ImageThumbnails::updateThumbanils() {
 
     model->appendRow(items);    
 
+    progressDialog.reset();
+    progressDialog.close();
+    
     for (int i = 0; i < model->columnCount() - 1; i++) resizeColumnToContents(i);
     connect(model, &QStandardItemModel::itemChanged, this, &ImageThumbnails::saveChecks);
 }

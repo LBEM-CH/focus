@@ -370,9 +370,9 @@ void ProjectModel::load() {
     
     QStringList imageList = projectData.imageList();
     prepareLoadDialog(imageList.size());
-    loadImages(QDir(projectPath), imageList);
+    if(!imageList.isEmpty()) loadImages(QDir(projectPath), imageList);
     loadDialog->reset();
-    
+
     quint32 var;
     QStandardItem *item;
 

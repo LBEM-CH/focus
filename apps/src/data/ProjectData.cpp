@@ -95,9 +95,9 @@ void ProjectData::indexImages() {
     progressDialog.setCancelButton(0);
     progressDialog.setRange(0, projectDir().entryList().count() - 1); // -1 because a merge dir is present in project folder!!);
     progressDialog.setWindowTitle("Scanning images");
-    progressDialog.show();
     initializeImageParameters(projectDir(), imageList, progressDialog);
     progressDialog.reset();
+    progressDialog.close();
     ProjectPreferences(projectDir()).resetImageList(imageList);
     emit imageDirsChanged();
 }

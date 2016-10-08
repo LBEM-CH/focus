@@ -174,6 +174,7 @@ void MainWindow::setupToolBar() {
     mainToolBar->setMovable(false);
     
     openLibraryWindowAct = setupMainNavigationButton("library", "Library", "Project Library", true, libraryWin_);
+    openImportWindowAct = setupMainNavigationButton("import", "Import", "Import Movies and Images", true, importWin_);
     openImageWindowAct = setupMainNavigationButton("image", "Process", "Process Images", true, imageWin_);
     openMergeWindowAct = setupMainNavigationButton("merge_tool", "Merge", "Merge Tool", true, mergeWin_);
     openSPWindowAct = setupMainNavigationButton("singleparticle", "Particles", "Single Particle Processing", true, spWin_);          
@@ -181,6 +182,7 @@ void MainWindow::setupToolBar() {
     
     QButtonGroup* group = new QButtonGroup(mainToolBar);
     group->addButton(openLibraryWindowAct);
+    group->addButton(openImportWindowAct);
     group->addButton(openImageWindowAct);
     group->addButton(openMergeWindowAct);
     group->addButton(openSPWindowAct);
@@ -199,6 +201,7 @@ void MainWindow::setupToolBar() {
     mainToolBar->addWidget(spacer1);
     mainToolBar->addWidget(openLibraryWindowAct);
     mainToolBar->addSeparator();
+    mainToolBar->addWidget(openImportWindowAct);
     mainToolBar->addWidget(openImageWindowAct);
     mainToolBar->addWidget(openMergeWindowAct);
     mainToolBar->addWidget(openSPWindowAct);
@@ -209,18 +212,17 @@ void MainWindow::setupToolBar() {
 
 void MainWindow::setupWindows() {
     centralWin_ = new QStackedWidget(this);
-
+    
+    importWin_ = new AutoImportWindow(this);
     libraryWin_ = new LibraryTab(this);
     imageWin_ = new ImageTab(this);
-    
     mergeWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/merge/"), this);
     mergeWin_->runInitialization();
-    
     spWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/"), this); 
-    
     projectToolsWin_ = new ProjectWindow(this);
     
     centralWin_->addWidget(libraryWin_);
+    centralWin_->addWidget(importWin_);
     centralWin_->addWidget(mergeWin_);
     centralWin_->addWidget(imageWin_);
     centralWin_->addWidget(spWin_);

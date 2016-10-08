@@ -9,22 +9,25 @@
 LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
     previewContainer = setupPreviewContainer();
-    previewContainer->setMaximumWidth(415);
+    previewContainer->setMinimumWidth(415);
+    previewContainer->setMaximumWidth(700);
     previewContainer->hide();
     
     autoSelectContainer = setupAutoSelectionTool();
     autoSelectContainer->hide();
     
+    QSplitter* mainSplitter = new QSplitter;
+    mainSplitter->addWidget(dirView);
+    mainSplitter->addWidget(previewContainer);
+    mainSplitter->setStretchFactor(0, 3);
+    mainSplitter->setStretchFactor(1, 1);
+    
     QGridLayout* mainLayout = new QGridLayout(this);
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
-    mainLayout->addWidget(setupLibraryControls(), 0, 0, 1, 2);
-    mainLayout->addWidget(autoSelectContainer, 1, 0, 1, 2);
-    mainLayout->addWidget(dirView, 2, 0, 1, 1);
-    mainLayout->addWidget(previewContainer, 2, 1, 1, 1, Qt::AlignTop);
-    
-    mainLayout->setColumnStretch(0, 1);
-    mainLayout->setColumnStretch(1, 0);
+    mainLayout->addWidget(setupLibraryControls(), 0, 0);
+    mainLayout->addWidget(autoSelectContainer, 1, 0);
+    mainLayout->addWidget(mainSplitter, 2, 0);
     
     mainLayout->setRowStretch(0, 0);
     mainLayout->setRowStretch(1, 0);
@@ -328,7 +331,6 @@ QWidget* LibraryTab::setupPreviewContainer() {
     changerLayout->addWidget(rightButton, 0);
     
     overlayWidgets = new QStackedWidget;
-    overlayWidgets->setFixedSize(400, 400);
     overlayWidgets->addWidget(new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Final Map<br>not found"));
     overlayWidgets->addWidget(new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Reference Map<br>not found"));
     overlayWidgets->setCurrentIndex(0);
@@ -370,8 +372,8 @@ QWidget* LibraryTab::setupPreviewContainer() {
     mainLayout->addWidget(vLine, 0);
     
     imageStatus = new LibraryImageStatus(dirModel);
-    imageStatus->setFixedWidth(400);
-    mainLayout->addWidget(imageStatus, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    imageStatus->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    mainLayout->addWidget(imageStatus, 0, Qt::AlignLeft | Qt::AlignTop);
     
     mainLayout->addStretch(1);
     

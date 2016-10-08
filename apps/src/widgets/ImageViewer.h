@@ -23,6 +23,9 @@ private slots:
     void progressDialog();
     void clearWidgets();
     
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+    
 signals:
     void setProgress(int value);
 
@@ -32,6 +35,7 @@ protected:
 private:
     void setText(const QString& text);
     void setNotSupportedText();
+    void resizeWidgets();
 
     QStackedWidget* widgets;
     

@@ -13,7 +13,7 @@ ImageViewer::ImageViewer(const QString& workDir, const QString& notFoundMessage,
     
     imageLabel = new QLabel;
     imageLabel->setBackgroundRole(QPalette::Base);
-    imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    imageLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     imageLabel->setAlignment(Qt::AlignCenter);
     imageLabel->setScaledContents(true);
     
@@ -73,7 +73,7 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
             return;
         }
         imageLabel->setPixmap(QPixmap::fromImage(image));
-        imageLabel->adjustSize();
+        resizeWidgets();
     }
 }
 
@@ -84,7 +84,7 @@ void ImageViewer::setText(const QString& text) {
     imageLabel->setText(text);
     imageLabel->setAlignment(Qt::AlignCenter);
     imageLabel->setFont(labelFont);
-    imageLabel->adjustSize();
+    resizeWidgets();
 }
 
 void ImageViewer::mouseDoubleClickEvent(QMouseEvent *event) {
@@ -116,3 +116,25 @@ void ImageViewer::clearWidgets() {
 void ImageViewer::setNotSupportedText() {
     setText(extension_.toUpper() + " file<br>(can't preview)");
 }
+
+void ImageViewer::resizeEvent(QResizeEvent* event) {
+    QFrame::resizeEvent(event);
+    resizeWidgets();
+}
+
+void ImageViewer::resizeWidgets() {
+    if(imageLabel->pixmap()) {
+        QSize newSize = imageLabel->pixmap()->size();
+        newSize.scale(size().width(), size().height(), Qt::KeepAspectRatio);
+        widgets->setFixedSize(newSize);
+        imageLabel->setFixedSize(newSize);
+    } else {
+        widgets->setFixedSize(size());
+        imageLabel->setFixedSize(size());
+    }
+    widgets->updateGeometry();
+    imageLabel->updateGeometry();
+    widgets->update();
+    imageLabel->update();
+}
+

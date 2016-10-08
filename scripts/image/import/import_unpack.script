@@ -18,14 +18,11 @@
 # MANUAL: <B>Welcome to the File Importer</B>
 #
 # DISPLAY: imagename_original
-# DISPLAY: imagename
-# DISPLAY: nonmaskimagename
 # DISPLAY: imagenumber
 # DISPLAY: tempkeep
 # DISPLAY: comment
 # DISPLAY: crop_histogram
 # DISPLAY: crop_histogram_stdev
-# DISPLAY: movie_stackname
 # DISPLAY: import_rawstack
 # DISPLAY: import_rawstack_original
 # DISPLAY: import_rawstack_type

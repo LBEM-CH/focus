@@ -125,7 +125,10 @@ echo '*=========================================================================
 echo ''
 echo ''
 cd ${PREFIX}/bin
-\ln -s 2dx_gui 2dx
+if [ ! -h 2dx ];
+then
+  \ln -s 2dx_gui 2dx
+fi
 cd ${src}
 echo ''
 echo ''

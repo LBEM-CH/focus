@@ -18,14 +18,10 @@
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
 # DISPLAY: imagenumber
-# DISPLAY: imagename
 # DISPLAY: imagename_original
-# DISPLAY: nonmaskimagename
 # DISPLAY: comment
 # DISPLAY: sample_pixel
-# DISPLAY: movie_stackname
 # DISPLAY: movie_imagenumber_total
-# DISPLAY: import_rawstack
 # DISPLAY: raw_gaincorrectedstack
 #
 #$end_local_vars
@@ -77,6 +73,9 @@ if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
 endif
 #
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+#
 ##########################################################################
 ${proc_2dx}/linblock "Calling unblur..."
 ##########################################################################
@@ -84,7 +83,8 @@ ${proc_2dx}/linblock "Calling unblur..."
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
 \ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
-# 
+\rm -f ${movie_stackname}.mrc
+#
 ${app_unblur} << eof 
 dummy.mrc
 ${movie_imagenumber_total}
@@ -106,16 +106,6 @@ eof
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
-#
-#################################################################################
-${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}.mrcs"
-#################################################################################
-#
-avgstack << eot
-${movie_stackname}.mrcs
-${movie_stackname}.mrc
-/
-eot
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 50>>"
@@ -125,6 +115,7 @@ echo "<<@evaluate>>"
 echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
 ##########################################################################
 #
+\rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #

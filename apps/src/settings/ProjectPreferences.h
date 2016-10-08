@@ -150,6 +150,20 @@ public:
         endGroup();
         return paths;
     }
+    
+    void setImportJobs(int jobs) {
+        beginGroup("import");
+        setValue("jobs", jobs);
+        endGroup();
+    }
+    
+    int importJobs() {
+        int val;
+        beginGroup("import");
+        val = value("jobs", 2).toInt();
+        endGroup();
+        return val;
+    }
         
     void setProcessScripts(const QStringList& scripts) {
         beginGroup("process");

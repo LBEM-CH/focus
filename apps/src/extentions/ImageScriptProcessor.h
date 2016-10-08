@@ -90,19 +90,27 @@ private:
         ScriptParser parser(workingDir_.canonicalPath());
         QString scriptPath = scriptsToBeExecuted_.first();
         scriptsToBeExecuted_.removeFirst();
+        
+        if (scriptPath.startsWith("cp -f")) {
+            process_.setWorkingDirectory(workingDir_.canonicalPath());
+            process_.start(scriptPath, QIODevice::ReadOnly);
+            QString copyFile;
+            if(scriptPath.trimmed().split(' ').size() > 2) copyFile = scriptPath.trimmed().split(' ')[2];
+            emit statusChanged("Copying file: " + copyFile);
+        } else {
+            QString scriptName = QFileInfo(scriptPath).fileName().remove(QRegExp("\\.script$"));
+            scriptExecuting_ = scriptName;
+            if (QFileInfo(scriptPath).exists()) {
+                emit statusChanged("Executing: " + scriptName);
 
-        QString scriptName = QFileInfo(scriptPath).fileName().remove(QRegExp("\\.script$"));
-        scriptExecuting_ = scriptName;
-        if (QFileInfo(scriptPath).exists()) {
-            emit statusChanged("Executing: " + scriptName);
-
-            if(parser.parse(scriptPath, workingDir_.canonicalPath() + "/proc/" + scriptName + ".com") == 0) {
-                process_.setWorkingDirectory(workingDir_.canonicalPath());
-                process_.setStandardOutputFile(workingDir_.canonicalPath() + "/LOGS/" + scriptName + ".log");
-                process_.start('"' + parser.executionString() + '"', QIODevice::ReadOnly);
-            } else {
-                emit statusChanged("Error in creating runnable csh file", true);
-                continueExecution(-1);
+                if (parser.parse(scriptPath, workingDir_.canonicalPath() + "/proc/" + scriptName + ".com") == 0) {
+                    process_.setWorkingDirectory(workingDir_.canonicalPath());
+                    process_.setStandardOutputFile(workingDir_.canonicalPath() + "/LOGS/" + scriptName + ".log");
+                    process_.start('"' + parser.executionString() + '"', QIODevice::ReadOnly);
+                } else {
+                    emit statusChanged("Error in creating runnable csh file", true);
+                    continueExecution(-1);
+                }
             }
         }
     }

@@ -16,7 +16,7 @@
 #include "LineEditSet.h"
 #include "NoScrollComboBox.h"
 #include "ProjectData.h"
-#include "LogViewer.h"
+#include "ImageScriptProcessor.h"
 
 class AutoImportWindow : public QWidget {
 public:
@@ -27,6 +27,7 @@ private:
 
     QWidget* setupInputContainer();
     QWidget* setupInputFolderContainer();
+    QWidget* setupJobsContainer();
     QWidget* setupOptionsContainter();
     QWidget* setupScriptsContainer();
     QTableWidget* setupFilesTable();
@@ -37,10 +38,9 @@ private:
     QStringList imageGroups();
     
     void executeImport(bool execute=true);
-    void importImage();
-    void continueExecution(int exitCode);
+    void importImage(ImageScriptProcessor* processor);
     
-    void addStatusToList(const QString& text, bool error=false);
+    void addStatusToTable(int processId, const QString& image, const QString& text, bool error=false);
 
     QStringList selectedScriptPaths();
     void resetSelectedScriptsContainer(QStringList availScripts);
@@ -50,13 +50,15 @@ private:
     void setupWatcherPaths();
     
     QTimer timer_; //Timer to check reanalyze if a file is being changed
-    QProcess process_;
+    QList<ImageScriptProcessor*> processors_;
+    QMap<ImageScriptProcessor*, int> processorId_;
+    QMutex mutex_;
     QFileSystemWatcher watcher_; //Watcher to check the current averages folder
 
     //Widgets
     QTableWidget *resultsTable_;
     QLabel* statusLabel_;
-    QListWidget* statusEntryList_;
+    QTableWidget* statusEntryTable_;
     QListWidget* selectedScriptsCont;
     QTabWidget* availaleScriptsBox;
     QWidget* inputContiner_;
@@ -74,11 +76,6 @@ private:
      * 3. If raw file is present then it's full file path else empty
      */
     QMap<QString, QStringList> toBeImported_;
-    QStringList scriptsToBeExecuted_;
-    QDir currentWorkingDir_;
-    QString scriptExecuting_;
-    QString fileExecuting_;
-    QString numberExecuting_;
     QMap<QString, int> dirToRowNumber_;
     bool currentlyExecuting_ = false;
 

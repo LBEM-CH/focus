@@ -18,14 +18,12 @@
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
 # DISPLAY: imagenumber
-# DISPLAY: imagename
 # DISPLAY: imagename_original
-# DISPLAY: nonmaskimagename
 # DISPLAY: comment
 # DISPLAY: sample_pixel
-# DISPLAY: movie_stackname
 # DISPLAY: movie_imagenumber_total
-# DISPLAY: import_rawstack
+# DISPLAY: KV
+# DISPLAY: GPU_to_use
 #
 #$end_local_vars
 #
@@ -42,6 +40,9 @@ set sample_pixel = ""
 set raw_gaincorrectedstack = ""
 set movie_stackname = ""
 set movie_imagenumber_total = ""
+set import_rawstack = ""
+set KV = ""
+set GPU_to_use = ""
 #
 #$end_vars
 #
@@ -75,6 +76,8 @@ if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
 endif
 #
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
 ${proc_2dx}/linblock "Calling MotionCor2..."
@@ -84,18 +87,45 @@ if ( ! -e ${app_motioncor2} ) then
   ${proc_2dx}/protest "ERROR: First define location of MOTIONCOR2 in Settings."
 endif
 #
+\rm -f ${movie_stackname}.mrcs
+#
 ${app_motioncor2} -InMrc ${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}.mrcs \
 -Patch 5 5 \
 -Iter 10 \
 -Tol 0.5 \
 -bft 100 \
--Kv ${KV} \
+-kVmport ${KV} \
 -PixSize ${sample_pixel} \
--FmDose ${frame_dose}
+-FmDose ${frame_dose} \
+-Gpu ${GPU_to_use}
 #
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}.mrcs"
+#################################################################################
+#
+\rm -f ${movie_stackname}.mrc
+#
+avgstack << eot
+${movie_stackname}.mrcs
+${movie_stackname}.mrc
+/
+eot
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 50>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
+##########################################################################
+#
+\rm -f ${movie_stackname}_fft.mrc
+clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

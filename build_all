@@ -49,7 +49,7 @@ echo $SRC
 echo "The build dir is:"
 echo $BUILD 
 echo "The install dir is:"
-echo $PREFIX
+echo ${PREFIX}
 
 # check if the build dir exists
 if [ ! -e $BUILD ]; then
@@ -124,6 +124,12 @@ make -j1 install || { echo "Install failed for $APP"; exit 7; }
 echo '*============================================================================*'
 echo ''
 echo ''
+cd ${PREFIX}/bin
+if [ ! -h 2dx ];
+then
+  \ln -s 2dx_gui 2dx
+fi
+cd ${src}
 echo ''
 echo ''
 
@@ -138,7 +144,7 @@ S4='cina'
 if [ "$USER" == "$S2" ] || [ "$USER" == "$S3" ] || [ "$USER" == "$S4" ];
 then
   echo User = $USER
-  cd $BUILD 
+  cd ${PREFIX}
   ls -ld kernel
   if [ -h kernel ];
   then
@@ -146,7 +152,7 @@ then
   else
     echo "Moving executables into kernel/mrc/bin"
     \cp -rf kernel/mrc/bin/* ${SRC}/kernel/mrc/bin
-    echo "Removing kernel directory in local ~/2dx"
+    echo "Removing kernel directory in local ${PREFIX}"
     \rm -rf kernel
   fi
   if [ ! -h kernel ];
@@ -162,7 +168,7 @@ then
   then
     echo "scripts/image link already existing."
   else
-    echo "Removing image directory in local ~/2dx/scripts"
+    echo "Removing image directory in local ${PREFIX}/scripts"
     \rm -rf image
   fi
   if [ ! -h image ];
@@ -177,7 +183,7 @@ then
   then
     echo "scripts/merge link already existing."
   else
-    echo "Removing merge directory in local ~/2dx/scripts"
+    echo "Removing merge directory in local ${PREFIX}/scripts"
     \rm -rf merge
   fi
   if [ ! -h merge ];
@@ -192,7 +198,7 @@ then
   then
     echo "scripts/singleparticle link already existing."
   else
-    echo "Removing singleparticle directory in local ~/2dx/scripts"
+    echo "Removing singleparticle directory in local ${PREFIX}/scripts"
     \rm -rf singleparticle
   fi
   if [ ! -h singleparticle ];
@@ -207,7 +213,7 @@ then
   then
     echo "scripts/proc  link already existing."
   else
-    echo "Removing proc  directory in local ~/2dx/scripts"
+    echo "Removing proc  directory in local ${PREFIX}/scripts"
     \rm -rf proc 
   fi
   if [ ! -h proc  ];
@@ -222,7 +228,7 @@ then
   then
     echo "scripts/project link already existing."
   else
-    echo "Removing project directory in local ~/2dx/scripts"
+    echo "Removing project directory in local ${PREFIX}/scripts"
     \rm -rf project
   fi
   if [ ! -h project ];

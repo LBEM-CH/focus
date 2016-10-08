@@ -1,7 +1,6 @@
 mkdir imagenumber
 mkdir imagename
 mkdir maskimagename
-mkdir imageorigin
 mkdir imagesidelength
 mkdir magnification
 mkdir min

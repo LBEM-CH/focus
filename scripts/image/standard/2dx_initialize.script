@@ -128,9 +128,6 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
-set imageorigin = 0
-echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
-#
 if ( ${movie_inmovie} == "n" ) then
   echo "<<@evaluate>>"
   echo "<<@progress: 1>>"

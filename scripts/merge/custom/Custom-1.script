@@ -133,7 +133,6 @@ foreach dirfile ( ${dirlist} )
   # echo "set do3quadserch = n" >> LOGS/${scriptname}.results
 
   # echo "set defocus_res_max = 5.0" >> LOGS/${scriptname}.results
-  # echo "set imageorigin = 0" >> LOGS/${scriptname}.results
   # echo "set df_end = 25000.0" >> LOGS/${scriptname}.results
   # echo "set det_defocus = y" >> LOGS/${scriptname}.results
   # echo "set det_tilt = y" >> LOGS/${scriptname}.results

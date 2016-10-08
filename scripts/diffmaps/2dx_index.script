@@ -21,7 +21,6 @@
 # GLOBAL: imagenumber
 # GLOBAL: imagename
 # GLOBAL: nonmaskimagename
-# GLOBAL: imageorigin
 # GLOBAL: imagesidelength
 # GLOBAL: min
 # GLOBAL: max
@@ -31,7 +30,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
-set imageorigin = ""
 set tempkeep = ""
 set imagename = ""
 set nonmaskimagename = ""
@@ -49,7 +47,6 @@ set RESMAX = ""
 echo bin_2dx = ${bin_2dx}
 echo proc_2dx = ${proc_2dx}
 #
-echo imageorigin = ${imageorigin}
 echo imagenumber = ${imagenumber}
 echo imagesidelength = ${imagesidelength}
 echo tempkeep = ${tempkeep}
@@ -76,7 +73,7 @@ ${proc_2dx}/linblock "Preparing"
 set halimsid = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
 echo halimsid = ${halimsid}
 #
-set origin = ${imageorigin}
+set origin = 0
 echo origin = ${origin}
 #
 set orioffx = `echo ${origin} ${halimsid} | sed 's/,/ /g' | awk '{s=$1-$3} END {print s}'`

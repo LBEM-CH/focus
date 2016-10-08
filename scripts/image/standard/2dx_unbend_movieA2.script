@@ -55,7 +55,6 @@
 #$end_local_vars
 #
 #
-set app_2dx_image = ""
 set bin_2dx = ""
 set proc_2dx = ""
 #
@@ -63,7 +62,6 @@ set PHASEORI_done = ""
 set boxb1 = ""
 set boxb2 = ""
 set imagename = ""
-set imageorigin = ""
 set defocus = ""
 set nonmaskimagename = ""
 set imagenumber = ""
@@ -124,7 +122,6 @@ set movie_imagenumber_total = ""
 set movie_imagenumber_touse = ""
 set movie_filter_type = ""
 set movie_filter_param = ""
-set app_2dx_image = ""
 set movie_masking_mode = ""
 set movie_refboxa = ""
 set movie_facthreshb = ""
@@ -164,13 +161,6 @@ echo system = ${system}
 ##########################################################################
 #
 if ( ${system} == "Darwin" ) then
-  set S2 = "henning"
-  set S3 = "sthennin"
-  if (( "$USER" == "$S2" ) || ( "$USER" == "$S3" )) then
-    set app_2dx_image = "~/2dx/bin/2dx_image"
-  else
-    set app_2dx_image = "${bin_2dx}/../../../bin/2dx_image"
-  endif
   if ( ${movie_ghostscript_installed} == "y" ) then
     echo ":Testing, if gostscript is installed and ps2pdf exists"
     set ps2pdf_test = `which ps2pdf`x 
@@ -186,7 +176,6 @@ if ( ${system} == "Darwin" ) then
   endif
 else
   if ( ${movie_ghostscript_installed} == "y" ) then
-    set app_2dx_image = "2dx_image"
     set ps2pdf = ps2pdf
     set pdf2ps = pdf2ps
   endif

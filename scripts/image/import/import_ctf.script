@@ -46,7 +46,6 @@ set SCRATCH_DISK = ""
 set SYN_Unbending = ""
 set PHASEORI_done = ""
 #
-set imageorigin = ""
 set tempkeep = ""
 set imagename = ""
 set nonmaskimagename = ""

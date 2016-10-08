@@ -47,7 +47,6 @@ set SCRATCH_DISK = ""
 set SYN_Unbending = ""
 set PHASEORI_done = ""
 #
-set imageorigin = ""
 set tempkeep = ""
 set imagename = ""
 set nonmaskimagename = ""
@@ -122,54 +121,10 @@ else
   #
   setenv NCPUS ${Thread_Number}
   #
-    set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
-    \rm -f ${ctfcor_ctffile}  
-    #
-    if ( ${ctfcor_imode}x == 9x ) then
-      #
-      #
-      # A first time with CTF Multiplication, to determine unbending profile
-      #
-      set ctfcor_imode_local = 1
-      ${proc_2dx}/linblock "2dx_ctfcor - A first time with CTF phase flipping for lattice finding"
-      #
-      ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${imagename}.mrc
-image_ctfcor_multiplied.mrc
-${ctfcor_ctffile}
-${TLTAXIS_local},${TLTANG_local}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${RESMAX}
-${ctfcor_noise}
-${ctfcor_imode_local}
-${ctfcor_debug}
-eot
-      echo "# IMAGE: image_ctfcor_multiplied.mrc <CTF-multiplied file>" >> LOGS/${scriptname}.results
-      #
-      # Now a second time with Wiener Filtration
-      #
-      set ctfcor_imode_local = 3
-      ${proc_2dx}/linblock "2dx_ctfcor - A second time with Wiener filter for data"
-      #
-      \rm -f ${ctfcor_ctffile}  
-      ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${imagename}.mrc
-image_ctfcor.mrc
-${ctfcor_ctffile}
-${TLTAXIS_local},${TLTANG_local}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${RESMAX}
-${ctfcor_noise}
-${ctfcor_imode_local}
-${ctfcor_debug}
-eot
-      echo "# IMAGE: image_ctfcor.mrc <Wiener filtered file>" >> LOGS/${scriptname}.results
-      #
-    else
-      #
-      ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
+  set ctfcor_ctffile = "SCRATCH/2dx_ctfcor_ctffile.mrc"
+  \rm -f ${ctfcor_ctffile}  
+  #
+  ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
 ${imagename}.mrc
 image_ctfcor.mrc
 ${ctfcor_ctffile}
@@ -181,15 +136,14 @@ ${ctfcor_noise}
 ${ctfcor_imode_local}
 ${ctfcor_debug}
 eot
-    endif
-    #
-    echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
-    if ( ${ctfcor_imode_local} == "2" ) then
-      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
-    else
-      echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
-    endif
-    #
+  #
+  echo "# IMAGE-IMPORTANT: image_ctfcor.mrc <Output Image CTF corrected>" >> LOGS/${scriptname}.results
+  if ( ${ctfcor_imode_local} == "2" ) then
+    echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF**2 file>" >> LOGS/${scriptname}.results
+  else
+    echo "# IMAGE: ${ctfcor_ctffile} <Summed CTF file>" >> LOGS/${scriptname}.results
+  endif
+  #
 endif
 #
 echo "<<@progress: 10>>"
@@ -197,11 +151,6 @@ echo "<<@progress: 10>>"
 #################################################################################
 ${proc_2dx}/linblock "Sourcing 2dx_fftrans_sub.com"
 #################################################################################
-#
-if ( ${ctfcor_imode}x == 9x ) then
-  set inimage = image_ctfcor_multiplied
-  source ${proc_2dx}/2dx_fftrans_sub.com
-endif
 #
 set inimage = image_ctfcor
 source ${proc_2dx}/2dx_fftrans_sub.com

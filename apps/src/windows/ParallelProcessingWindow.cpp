@@ -62,7 +62,7 @@ QWidget* ParallelProcessingWindow::setupInputContainer() {
 
 QWidget* ParallelProcessingWindow::setupInputFolderContainer() {
     GroupContainer* container = new GroupContainer();
-    container->setTitle("Import Folder");
+    container->setTitle("Concurrency selection");
 
     QFormLayout* layout = new QFormLayout;
     layout->setHorizontalSpacing(10);
@@ -85,7 +85,7 @@ QWidget* ParallelProcessingWindow::setupInputFolderContainer() {
     });
     layout->addRow("Number of jobs to run in parallel", processesBox);
     
-    QLabel* introLabel = new QLabel("The maximum number of threads available on your system is: " + QString::number(numberOfThreads));
+    QLabel* introLabel = new QLabel("The maximum number of threads on your system is: " + QString::number(numberOfThreads));
     introLabel->setWordWrap(true);
     QPalette pal = introLabel->palette();
     pal.setColor(QPalette::WindowText, Qt::darkGray);

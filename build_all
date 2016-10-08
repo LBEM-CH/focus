@@ -124,6 +124,9 @@ make -j1 install || { echo "Install failed for $APP"; exit 7; }
 echo '*============================================================================*'
 echo ''
 echo ''
+cd ${PREFIX}/bin
+\ln -s 2dx_gui 2dx
+cd ${src}
 echo ''
 echo ''
 

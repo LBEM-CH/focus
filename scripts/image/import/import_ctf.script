@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 09/39/2014                                             #
-# Last Modification: 03/08/2015	                                      #
+# Last Modification: 03/08/2015	                                            #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -16,7 +16,6 @@
 # MANUAL: This script measures the CTF of the recorded image.
 #
 # DISPLAY: imagenumber
-# DISPLAY: imagesidelength
 # DISPLAY: comment
 # DISPLAY: RESMAX
 # DISPLAY: defocus
@@ -123,6 +122,30 @@ echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f12 | sed 's
 set gctf_RESMAX = `cat tmp.1`
 \rm tmp.1
 echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "Plotting CTF"
+##########################################################################
+#
+\rm -f ${movie_stackname}_EPA.png
+${app_python} ${proc_2dx}/CTF_plotter.py ${movie_stackname}_EPA.log ${movie_stackname}_EPA.png
+#
+# cat > gnuplot.script << eot 
+# set xlabel "Resolution [A, ResMax = ${defocus_res_max}A]"
+# set ylabel "|CTFsim|"
+# set ylabel "EPA(Ln|F|)"
+# set title "gctf plot"
+# set xrange [100:${defocus_res_max}] reverse
+# set logscale x
+# set size square
+# set term png; set output "${movie_stackname}_EPA.png"
+# plot 'movie_aligned_EPA.log' using 1:2 with lines title "CTFsim", '' using 1:4 with lines title "EPA(Ln|F|)"
+# eot
+# gnuplot gnuplot.script
+# ${app_gnuplot} gnuplot.script
+# \rm gnuplot.script
+#
+echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

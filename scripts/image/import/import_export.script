@@ -36,11 +36,6 @@
 # DISPLAY: export_CTFstar_subdir
 # DISPLAY: export_delete_rest
 #
-# DISPLAY: import_rawstack
-# DISPLAY: import_gainref
-# DISPLAY: raw_gaincorrectedstack
-# DISPLAY: movie_stackname
-#
 #$end_local_vars
 #
 set bin_2dx = ""
@@ -89,8 +84,6 @@ if ( ${export_anything_doit} == "y" ) then
     ${proc_2dx}/protest "ERROR: ${export_basedir} not existing. First create it."
   endif
   #
-  echo "IMAGE-IMPORTANT: ${export_basedir} <Export Base Directory>" >> LOGS/${scriptname}.results
-  #
   set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
   #
   source ${proc_2dx}/import_export_sub.com ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
@@ -103,6 +96,11 @@ if ( ${export_anything_doit} == "y" ) then
   source ${proc_2dx}/import_export_sub.com ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}_CTFDiag.mrc
   source ${proc_2dx}/import_export_sub.com ${export_CTFstar_doit} ${export_basedir} ${export_CTFstar_subdir} micrographs_all_gctf.star ${oriname}_micrographs_all_gctf.star
   #
+  echo ":: "
+  echo "::Exported to:"
+  echo "::${export_basedir}"
+  echo ":: "
+  #  
 else
   #
   echo ":Skipping."

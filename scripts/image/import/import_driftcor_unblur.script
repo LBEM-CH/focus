@@ -108,6 +108,11 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
 #
+\rm -f unblur-plot.png
+${app_python}  ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png
+#
+echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
+#
 echo "<<@progress: 50>>"
 echo "<<@evaluate>>"
 #

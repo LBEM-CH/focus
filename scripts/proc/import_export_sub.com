@@ -18,6 +18,8 @@ if ( ${sub_doit} == "y" ) then
     echo "::   rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}"
     \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
     #
+    echo "#IMAGE-IMPORTANT: ${sub_basedir}/${sub_targetdir} <${sub_targetdir}>" >> LOGS/${scriptname}.results
+    #
     set ending = ` echo ${sub_targetname} | rev | cut -c1-4 | rev `
     if ( ${ending} == "star" ) then
       set firstpart = ` echo ${sub_targetname} | sed 's/_micrographs_all_gctf.star//g' `
@@ -29,5 +31,5 @@ if ( ${sub_doit} == "y" ) then
   endif
 endif
 #
-echo "<<@progress: +7>>" >> LOGS/${scriptname}.results
+echo "<<@progress: +7>>" 
 #

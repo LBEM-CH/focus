@@ -69,7 +69,7 @@ def get_resolution( gamma, a, b):
 
 print("::Zorro starting...")
 
-print "2dx_zorro_sub.py"
+print("2dx_zorro_sub.py")
 
 if len(sys.argv) != 17:
                 sys.exit("Wrong number of parameters given for 2dx_zorro_sub.py ")
@@ -94,12 +94,12 @@ z_dim = int(sys.argv[16])
 zorroReg = zorro.ImageRegistrator()
 zorroReg.pixelsize = pixelsize
 zorroReg.maxShift = zorroReg.pixelsize * get_resolution( gamma, a, b )
-zorroReg.preShift = True
+zorroReg.preShift = False
 print( "Estimated distance to first spot in FFT (pix): %f" % zorroReg.maxShift )
 zorroReg.plotDict['transparent'] = False
 zorroReg.CTFProgram = None
-# zorroReg.filterMode = 'dose,background'
-zorroReg.filterMode = 'dosenorm,background'
+# zorroReg.filterMode = 'hot,dose,background'
+zorroReg.filterMode = 'hot,dosenorm,background'
 zorroReg.n_threads = n_threads
 zorroReg.cachePath = scratch
 zorroReg.voltage = KV
@@ -135,7 +135,7 @@ print("FileDescriptor = " + str(fileDescriptor) )
 
 # Normalize the path so we keep everything simple.
 for fileName in fileList:
-    print "fileName = ",fileName
+    print("fileName = "+fileName)
     baseName = os.path.basename( fileName )
     baseFront = os.path.splitext( baseName )[0]
     

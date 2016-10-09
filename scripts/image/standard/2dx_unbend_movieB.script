@@ -248,7 +248,6 @@ python ${proc_2dx}/movie/apply_filter_fourier.py
 python ${proc_2dx}/movie/box_reference.py
 python ${proc_2dx}/movie/deleteZeros.py
 python ${proc_2dx}/movie/direct_sum.py
-python ${proc_2dx}/movie/disable_movie.py
 python ${proc_2dx}/movie/extractAMP.py
 python ${proc_2dx}/movie/getClosestPeaks.py
 python ${proc_2dx}/movie/getFilter.py

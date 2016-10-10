@@ -88,7 +88,7 @@ def main():
 
 			plt.plot(np.array(frc[0][1:])/apix,frc[1][1:])
 
-			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc[1]))*10.0,11)]
+			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc[1][1:]))*10.0,11)]
 			yvalues.append(thr)
 
 			plt.title('Fourier Ring Correlation - TLTANG = %.1f' % par[img_list[0],2])

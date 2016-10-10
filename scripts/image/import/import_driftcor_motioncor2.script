@@ -53,7 +53,6 @@ set GPU_to_use = ""
 set scriptname = import_driftcor_motioncor2
 \rm -f LOGS/${scriptname}.results
 #
-set noEMAN = 'y'
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
@@ -107,7 +106,7 @@ ${app_motioncor2} \
 #
 cat LOGS/motioncor2.out
 #
-cat LOGS/motioncor2.out | grep shift: | grep Frame > motioncor2_shifts.txt
+cat LOGS/motioncor2.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_shifts.txt
 #
 ##########################################################################
 echo "::Running ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png"

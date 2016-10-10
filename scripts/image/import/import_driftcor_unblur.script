@@ -47,7 +47,6 @@ set raw_gaincorrectedstack = ""
 set scriptname = import_driftcor_unblur
 \rm -f LOGS/${scriptname}.results
 #
-set noEMAN = 'y'
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs

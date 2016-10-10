@@ -10,6 +10,7 @@
 #include <QTableWidget>
 #include <QProgressBar>
 #include <QTabWidget>
+#include <QListWidget>
 
 #include "BlockContainer.h"
 #include "BrowserWidget.h"
@@ -19,9 +20,15 @@
 #include "ImageScriptProcessor.h"
 
 class AutoImportWindow : public QWidget {
+    
+    Q_OBJECT
+    
 public:
 
     AutoImportWindow(QWidget* parent);
+    
+signals:
+    void imageToBeOpened(const QString& imPath);
 
 private:
 
@@ -77,6 +84,7 @@ private:
      */
     QMap<QString, QStringList> toBeImported_;
     QMap<QString, int> dirToRowNumber_;
+    QStringList rowToImagePaths_;
     bool currentlyExecuting_ = false;
 
 };

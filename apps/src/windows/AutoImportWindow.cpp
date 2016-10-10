@@ -77,6 +77,14 @@ QTableWidget* AutoImportWindow::setupFilesTable() {
     filesTable->verticalHeader()->hide();
     filesTable->setShowGrid(false);
     filesTable->setAlternatingRowColors(true);
+    
+    connect(filesTable, &QTableWidget::itemActivated, [=](QTableWidgetItem *item){
+        if(item->row() != -1 && item->row() < rowToImagePaths_.size()) {
+            QString path = projectData.projectDir().canonicalPath() + "/" + rowToImagePaths_[item->row()];
+            if(QFileInfo(path + "/2dx_image.cfg").exists()) emit imageToBeOpened(path);
+            else QMessageBox::warning(this, "Image Open Error!", "Image: " + path + " was either not imported or not found.");
+        }
+    });
 
     return filesTable;
 }
@@ -366,6 +374,7 @@ void AutoImportWindow::analyzeImport() {
     }
     
     dirToRowNumber_.clear();
+    rowToImagePaths_.clear();
     toBeImported_.clear();
     resultsTable_->setRowCount(0);
     importButton_->setEnabled(true);
@@ -496,6 +505,7 @@ void AutoImportWindow::analyzeImport() {
             }
         }
         
+        rowToImagePaths_.append(dirName);
 
         QTableWidgetItem *statusItem = new QTableWidgetItem();
         statusItem->setFlags(statusItem->flags() ^ Qt::ItemIsEditable);

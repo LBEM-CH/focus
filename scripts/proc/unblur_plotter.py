@@ -1,6 +1,4 @@
-from pylab import *
-import os
-import matplotlib.image as mpimg
+import os,sys
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":

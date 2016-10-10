@@ -1,6 +1,4 @@
-from pylab import *
-import os
-import matplotlib.image as mpimg
+import os,sys
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
@@ -19,9 +17,10 @@ if __name__ == "__main__":
 		
 	x=[]; y=[];
 	
-        for l in data_file
-	        x.append(float(l.split(1)))
-	        y.append(float(l.split(2)))
+        for l in data_file:
+                data_split = l.split()
+                x.append(float(data_split[0]))
+                y.append(float(data_split[1]))
 
 	for i in range(0,len(x)):
 		print i," = ",x[i],",",y[i]

@@ -104,7 +104,7 @@ if ( ${import_rawstack_type} == "1" ) then
   ${proc_2dx}/linblock "Running clip unpack -m 2 ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
   #
-  clip unpack -m 2 ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs
+  clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs
   #
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
@@ -171,6 +171,8 @@ if ( ${import_bin_doit} == "y" ) then
     if ( ${tempkeep} == "n" ) then
       \rm -f ${raw_gaincorrectedstack}_large.mrcs
     endif
+    set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
+    echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
   else
     echo ":: Image has size ${width}, which is small enough, no binning done."
   endif

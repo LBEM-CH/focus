@@ -419,15 +419,15 @@ BlockContainer* ExecutionWindow::setupParameterWindow() {
     return parameterContainer;
 }
 
-QPushButton* ExecutionWindow::addVisibilityButton(QString title, QWidget* widgetToLink, bool initialState) {
-    QPushButton* button = new QPushButton(title, panelVisibilityToolBar);
-    button->setAutoDefault(false);
-    button->setDefault(false);
+QToolButton* ExecutionWindow::addVisibilityButton(QString title, QWidget* widgetToLink, bool initialState) {
+    QToolButton* button = new QToolButton(panelVisibilityToolBar);
+    button->setText(title);
+    button->setToolButtonStyle(Qt::ToolButtonTextOnly);
     button->setCheckable(true);
     button->setChecked(initialState);
     //widgetToLink->setVisible(initialState);
     
-    connect(button, &QPushButton::toggled, 
+    connect(button, &QToolButton::toggled, 
             [=](bool visible) { widgetToLink->setVisible(visible);});
             
     panelVisibilityToolBar->addWidget(button);

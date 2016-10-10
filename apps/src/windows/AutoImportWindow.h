@@ -11,6 +11,7 @@
 #include <QProgressBar>
 #include <QTabWidget>
 #include <QListWidget>
+#include <QMutex>
 
 #include "BlockContainer.h"
 #include "BrowserWidget.h"

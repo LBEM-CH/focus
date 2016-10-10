@@ -29,6 +29,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set app_2dx_mrc_converter = ""
 #
 set tempkeep = ""
 set imagename = ""
@@ -108,7 +109,13 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
 #
-\rm -f unblur-plot.png
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${movie_stackname}.mrc.png 
+#
+##########################################################################
+echo "::Running ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png"
+##########################################################################
+#
+\rm -f translations.png
 ${app_python}  ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
@@ -123,6 +130,7 @@ echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
 \rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${movie_stackname}_fft.mrc.png 
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

@@ -45,6 +45,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set app_2dx_mrc_converter = ""
 #
 # Variables to be available from the config file are:
 set tempkeep = ""
@@ -192,6 +193,7 @@ ${raw_gaincorrectedstack}.mrc
 /
 eot
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrc.png 
 endif
 #
 echo "<<@progress: 50>>"
@@ -215,6 +217,7 @@ if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y"
   echo "::Running: clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc"
   clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc ${raw_gaincorrectedstack}_fft.mrc.png 
 endif
 #
 ##########################################################################

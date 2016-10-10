@@ -42,6 +42,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set app_2dx_mrc_converter = ""
 #
 set SYN_Unbending = ""
 set PHASEORI_done = ""
@@ -104,7 +105,7 @@ echo ":: "
 ${app_gctf} --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL ${df_start} --defH ${df_end} --defS ${df_step} --astm 500 --bfac 50 --resL ${defocus_res_min} --resH ${defocus_res_max} --boxsize 512 ${movie_stackname}.mrc
 #
 \mv -f ${movie_stackname}.ctf CTFDiag.mrc
-#2dx_mrc_converter CTFDiag.mrc CTFDiag.png --size 1024
+${app_2dx_mrc_converter} --size 400 CTFDiag.mrc CTFDiag.mrc.png
 echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
 echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
 echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results

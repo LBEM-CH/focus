@@ -393,14 +393,15 @@ void AutoImportWindow::analyzeImport() {
     ImportFolderSettings folderPreferences(importDir);
     QStringList alreadyImportedBaseNames = folderPreferences.importedNames();
     
-    //If rawOption is 1, add tif extention to be searched
-    QStringList rawExtentions;
-    rawExtentions << "*.mrc" << "*.mrcs" << "*.tif" << "*.tiff";
+    QStringList stackExtentions;
+    stackExtentions << "*.mrc" << "*.mrcs" << "*.tif" << "*.tiff";
+    QStringList avgExtentions;
+    avgExtentions << "*.mrc" << "*.tif" << "*.tiff";
     
     //Get a list of all available files
-    QStringList fileNames = QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList("*.mrc"), QDir::Files | QDir::NoSymLinks);
-    fileNames.append(QDir(importImagesPath + "/" + importAlignedFolder).entryList(QStringList() << "*.mrc" << "*.mrcs", QDir::Files | QDir::NoSymLinks));
-    fileNames.append(QDir(importImagesPath + "/" + importRawFolder).entryList(rawExtentions , QDir::Files | QDir::NoSymLinks));
+    QStringList fileNames = QDir(importImagesPath + "/" + importAveragedFolder).entryList(avgExtentions, QDir::Files | QDir::NoSymLinks);
+    fileNames.append(QDir(importImagesPath + "/" + importAlignedFolder).entryList(stackExtentions, QDir::Files | QDir::NoSymLinks));
+    fileNames.append(QDir(importImagesPath + "/" + importRawFolder).entryList(stackExtentions , QDir::Files | QDir::NoSymLinks));
     fileNames.removeDuplicates();
     
     for (QString image : fileNames) {
@@ -442,10 +443,15 @@ void AutoImportWindow::analyzeImport() {
            
             toBeImported_.insert(imageNumber, QStringList() << baseName);
             
+            //Search string for avg File
+            QStringList avgSearchStrings, stackSearchStrings;
+            for(QString ext : avgExtentions) avgSearchStrings.append(baseName + "*" + ext);
+            for(QString ext : stackExtentions) stackSearchStrings.append(baseName + "*" + ext);
+            
             //Check for averaged file
             QString averagedFile;
             if (QDir(importImagesPath + "/" + importAveragedFolder).exists()) {
-                QStringList possibleFiles = QDir(importImagesPath + "/" + importAveragedFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
+                QStringList possibleFiles = QDir(importImagesPath + "/" + importAveragedFolder).entryList(avgSearchStrings, QDir::Files | QDir::NoSymLinks);
                 if (!possibleFiles.isEmpty()) {
                     hasAveraged = true;
                     averagedFile = importImagesPath + "/" + importAveragedFolder + "/" + possibleFiles.first();
@@ -456,7 +462,7 @@ void AutoImportWindow::analyzeImport() {
             //Check for movie file
             QString movieFile;
             if (QDir(importImagesPath + "/" + importAlignedFolder).exists()) {
-                QStringList possibleFiles = QDir(importImagesPath + "/" + importAlignedFolder).entryList(QStringList(baseName + "*.mrc*"), QDir::Files | QDir::NoSymLinks);
+                QStringList possibleFiles = QDir(importImagesPath + "/" + importAlignedFolder).entryList(stackSearchStrings, QDir::Files | QDir::NoSymLinks);
                 if (!possibleFiles.isEmpty()) {
                     hasAligned = true;
                     movieFile = importImagesPath + "/" + importAlignedFolder + "/" + possibleFiles.first();
@@ -469,7 +475,7 @@ void AutoImportWindow::analyzeImport() {
             
             if (rawOption != 0) {
                 if (QDir(importImagesPath + "/" + importRawFolder).exists()) {
-                    QStringList possibleFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(QStringList() << baseName + "*.mrc" << baseName + "*.mrcs" << baseName + "*.tif" << baseName + "*.tiff", QDir::Files | QDir::NoSymLinks);
+                    QStringList possibleFiles = QDir(importImagesPath + "/" + importRawFolder).entryList(stackSearchStrings, QDir::Files | QDir::NoSymLinks);
                     if (!possibleFiles.isEmpty()) {
                         hasRaw = true;
                         rawFile = importImagesPath + "/" + importRawFolder + "/" + possibleFiles.first();

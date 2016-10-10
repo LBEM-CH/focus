@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
     //Check the input
     QString input = cliParser.positionalArguments().first();
-    QString inputPath = QFileInfo(input).absolutePath() + "/" + input;
+    QString inputPath = QFileInfo(input).absolutePath() + "/" + QFileInfo(input).fileName();
     if(!QFileInfo(inputPath).exists()) {
         std::cout << "\nERROR: The input file: " << QString(inputPath).toStdString() + " does not exit!!\n\n";
         exit(1);
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     
     //Check the output
     QString output = cliParser.positionalArguments()[1];
-    QString outputPath = QFileInfo(output).absolutePath() + "/" + output;
+    QString outputPath = QFileInfo(output).absolutePath() + "/" + QFileInfo(output).fileName();
     qDebug() << "The output will be written on: " << outputPath;
     if(QFileInfo(outputPath).exists()) {
         std::cout << "\nWARNING: The output file: " << QString(outputPath).toStdString() + " already exits!!\n\n";

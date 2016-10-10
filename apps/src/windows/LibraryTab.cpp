@@ -10,7 +10,7 @@ LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
     previewContainer = setupPreviewContainer();
     previewContainer->setMinimumWidth(415);
-    previewContainer->setMaximumWidth(700);
+    previewContainer->setMaximumWidth(815);
     previewContainer->hide();
     
     autoSelectContainer = setupAutoSelectionTool();
@@ -228,6 +228,16 @@ QToolBar* LibraryTab::setupLibraryControls() {
     
     toolbar->addWidget(showAutoSelect);
     
+    //Reload Library Action
+    QToolButton* rescanImagesBut = new QToolButton();
+    rescanImagesBut->setText("Rescan Images");
+    rescanImagesBut->setIcon(ApplicationData::icon("refresh"));
+    connect(showAutoSelect, &QPushButton::clicked, [=](){
+       projectData.indexImages(); 
+    });
+    
+    toolbar->addWidget(showAutoSelect);
+    
     //Setup Project title and header
     selectionState = new QLabel(" ");
     selectionState->setAlignment(Qt::AlignCenter);
@@ -290,6 +300,8 @@ QWidget* LibraryTab::setupPreviewContainer() {
     
     previewGridWidget_ = new QWidget;
     previewGridWidget_->setLayout(previewsGridLayout);
+    previewGridWidget_->setMinimumSize(405, 450);
+    previewGridWidget_->setMaximumSize(805, 850);
     
     setupDirectoryContainer();
     

@@ -317,6 +317,7 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
         processorId_.clear();
         
         int numJobs = ProjectPreferences(projectData.projectDir()).processJobs();
+        if(imagesToBeProcessed_.size() < numJobs) numJobs = imagesToBeProcessed_.size();
         for(int i=0; i< numJobs; ++i) {
             ImageScriptProcessor* processor = new ImageScriptProcessor();
             processorId_.insert(processor, i);

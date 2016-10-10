@@ -18,11 +18,13 @@ ImageViewer::ImageViewer(const QString& workDir, const QString& notFoundMessage,
     imageLabel->setScaledContents(true);
     
     mrcInfo = new MrcHeaderDisplay;
+    fileInfo = new FileInfoDisplay;
 
     widgets = new QStackedWidget;
     widgets->setMinimumSize(QSize(200, 200));
     widgets->addWidget(imageLabel);
     widgets->addWidget(mrcInfo);
+    widgets->addWidget(fileInfo);
     
     setFrameStyle(QFrame::StyledPanel | QFrame::Raised);
     
@@ -50,20 +52,28 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
         setText(notFoundMessage_); 
         return;
     }
-
+    
     if (loadInfo) {
         if (extension_ == "mrc") {
             mrcHeader header(fileName);
             mrcInfo->setHeader(fileName, header);
             widgets->setCurrentWidget(mrcInfo);
         } else {
-            setNotSupportedText();
+            fileInfo->setFile(fileName);
+            widgets->setCurrentWidget(fileInfo);
         }
     } else {
         QImage image;
         if (extension_ == "mrc") {
-            mrcImage tempImage(fileName);
-            image = *(tempImage.getImage());
+            
+            //Check if a png preview is available
+            if(QFileInfo(fileName+".png").exists() && QFileInfo(fileName).created() < QFileInfo(fileName+".png").created()) {
+                qDebug() << "Loaded the preview using PNG file";
+                image = QImage(fileName+".png");
+            } else {
+                mrcImage tempImage(fileName);
+                image = *(tempImage.getImage());
+            }
         } else {
             image = QImage(fileName);
         }

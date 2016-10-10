@@ -618,6 +618,7 @@ void AutoImportWindow::executeImport(bool execute) {
         processorId_.clear();
         
         int numJobs = ProjectPreferences(projectData.projectDir()).importJobs();
+        if(toBeImported_.size() < numJobs) numJobs = toBeImported_.size();
         for(int i=0; i< numJobs; ++i) {
             ImageScriptProcessor* processor = new ImageScriptProcessor();
             processorId_.insert(processor, i);

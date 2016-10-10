@@ -65,6 +65,7 @@ set Calc_from_sample_pixel = ""
 set sample_pixel = ""
 set movie_imagenumber_total = ""
 set import_bin_doit = ""
+set import_rawstack_original = ""
 #
 #$end_vars
 #
@@ -80,6 +81,12 @@ set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | 
 set raw_gaincorrectedstack = ${namestub}_raw
 #
 echo "<<@progress: 10>>"
+#
+if ( ! -e ${import_rawstack} ) then
+  if ( -e ${import_rawstack_original} ) then
+    rsync -auvP ${import_rawstack_original} .
+  endif
+endif
 #
 if ( ${import_rawstack_type} == "1" ) then
   if ( ! -e ${import_rawstack} ) then

@@ -49,7 +49,8 @@ if ( $?app_python ) then
     set ccp4 = ${dir_ccp4}
     set bin_ccp4 = ${ccp4}/bin
   endif
-  if ( ${noEMAN} != "y" ) then
+  if ( $?noEMAN ) then
+   if ( ${noEMAN} != "y" ) then
     if ( ! -d ${dir_eman2} ) then
       echo ":: "
       ${proc_2dx}/linblock "EMAN2 installation directory not found. Is it installed ???"
@@ -66,6 +67,7 @@ if ( $?app_python ) then
       setenv PYTHONPATH ${EMAN2_dir}/lib:${EMAN2_dir}/bin:${EMAN2_dir}/extlib/site-packages:${EMAN2_dir}
     endif
     ${proc_2dx}/lin "dir_eman2 = ${dir_eman2}"
+   endif
   endif
   #
 else

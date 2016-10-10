@@ -89,8 +89,9 @@ endif
 #
 \rm -f ${movie_stackname}.mrcs
 #
-${app_motioncor2} -InMrc ${raw_gaincorrectedstack}.mrcs \
--OutMrc ${movie_stackname}.mrcs \
+${app_motioncor2} \
+-InMrc ${raw_gaincorrectedstack}.mrcs \
+-OutMrc ${movie_stackname}_motioncor2Sum.mrc \
 -Patch 5 5 \
 -Iter 10 \
 -Tol 0.5 \
@@ -98,22 +99,38 @@ ${app_motioncor2} -InMrc ${raw_gaincorrectedstack}.mrcs \
 -kVmport ${KV} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
--Gpu ${GPU_to_use}
+-Gpu ${GPU_to_use} \
+ > LOGS/motioncor2.out 
+#
+cat LOGS/motioncor2.out
+#
+cat LOGS/motioncor2.out | grep shift: | grep Frame > motioncor2_shifts.txt
 #
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
+# echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 #
 #################################################################################
-${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}.mrcs"
+${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}_motioncor2Sum.mrc"
 #################################################################################
 #
 \rm -f ${movie_stackname}.mrc
 #
 avgstack << eot
-${movie_stackname}.mrcs
-${movie_stackname}.mrc
+${movie_stackname}_motioncor2Sum.mrc
+${movie_stackname}_2D_with_header.mrc
 /
 eot
+#
+set image_mean = `clip info ${movie_stackname}.mrc | grep mean | cut -d\=  -f2`
+${bin_2dx}/labelh.exe << eot
+${movie_stackname}_2D_with_header.mrc
+39
+${movie_stackname}.mrc
+eot
+#
+\rm -f ${movie_stackname}_motioncor2Sum.mrc
+\rm -f ${movie_stackname}_2D_with_header.mrc
+#
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 50>>"

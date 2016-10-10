@@ -68,6 +68,15 @@ if ( $?app_python ) then
     endif
     ${proc_2dx}/lin "dir_eman2 = ${dir_eman2}"
    endif
+  else
+    set EMAN2_dir = ${dir_eman2}
+    set path=(${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin $path)
+    if ( $?PYTHONPATH ) then
+    else
+        setenv PYTHONPATH
+    endif
+    setenv PYTHONPATH ${EMAN2_dir}/lib:${EMAN2_dir}/bin:${EMAN2_dir}/extlib/site-packages:${EMAN2_dir}
+    ${proc_2dx}/lin "dir_eman2 = ${dir_eman2}"
   endif
   #
 else

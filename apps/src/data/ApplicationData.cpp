@@ -31,6 +31,10 @@ QString ApplicationData::guiApp() {
     return binDir().absoluteFilePath("2dx_gui");
 }
 
+QString ApplicationData::mrcConverterApp() {
+    return binDir().absoluteFilePath("2dx_mrc_converter");
+}
+
 QUrl ApplicationData::helpUrl() {
     return QUrl("http://2dx.org/documentation/2dx-software");
 }

@@ -15,6 +15,8 @@ QString& ScriptData::parseVariables(QString& line) {
     line.replace("${proc_2dx}", ApplicationData::procScriptsDir().absolutePath());
     line.replace("${app_2dx_image}", ApplicationData::imageApp());
     line.replace("${app_2dx_merge}", ApplicationData::mergeApp());
+    line.replace("${app_2dx_mrc_converter}", ApplicationData::mrcConverterApp());
+    line.replace("${app_2dx_viewer}", ApplicationData::viewerApp());
     return line;
 }
 

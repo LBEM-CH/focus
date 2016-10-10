@@ -84,6 +84,10 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
                     scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::imageApp() + '"');
                 else if (cell[0].trimmed() == "app_2dx_merge")
                     scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::mergeApp() + '"');
+                else if (cell[0].trimmed() == "app_2dx_mrc_converter")
+                    scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::mrcConverterApp() + '"');
+                else if (cell[0].trimmed() == "app_2dx_viewer")
+                    scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::viewerApp() + '"');
                 else {
                     ParametersConfiguration* data = projectData.parameterData(workingDir);
                     if(data->get(cell[0].trimmed())) {
@@ -128,6 +132,10 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
                     scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::imageApp() + '"');
                 else if (cell[0].trimmed() == "app_2dx_merge")
                     scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::mergeApp() + '"');
+                else if (cell[0].trimmed() == "app_2dx_mrc_converter")
+                    scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::mrcConverterApp() + '"');
+                else if (cell[0].trimmed() == "app_2dx_viewer")
+                    scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::viewerApp() + '"');
                 else {
                     ParametersConfiguration* data = projectData.parameterData(workingDir);
                     if(data->get(cell[0].trimmed())) {

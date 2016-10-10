@@ -37,6 +37,7 @@ public:
     static QString viewerApp();
     static QString imageApp(); 
     static QString guiApp();
+    static QString mrcConverterApp();
     
     //App icon Path
     static QString appIcon();

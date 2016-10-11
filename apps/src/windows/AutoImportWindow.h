@@ -91,7 +91,7 @@ private:
     QMap<QString, int> dirToRowNumber_;
     QStringList rowToImagePaths_;
     bool currentlyExecuting_ = false;
-    int processorsFinished_;
+    int processorsFinished_=0;
 
 };
 

@@ -58,6 +58,7 @@ private:
     QStringList imagesToBeProcessed_;
     QStringList scriptsToBeExecuted_;
     bool currentlyExecuting_ = false;
+    int processorsFinished_=0;
 
 };
 

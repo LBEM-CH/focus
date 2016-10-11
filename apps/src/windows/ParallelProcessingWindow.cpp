@@ -10,6 +10,11 @@
 
 ParallelProcessingWindow::ParallelProcessingWindow(QWidget* parent)
 : QWidget(parent) {
+    importButton_ = new QPushButton(ApplicationData::icon("play"), tr("Start Processing"));
+    importButton_->setCheckable(true);
+    importButton_->setChecked(false);
+    connect(importButton_, &QAbstractButton::clicked, this, &ParallelProcessingWindow::executeProcesses);
+    
     statusLabel_ = new QLabel("Idle");
     statusLabel_->setWordWrap(true);
     QFont font = statusLabel_->font();
@@ -20,11 +25,6 @@ ParallelProcessingWindow::ParallelProcessingWindow(QWidget* parent)
         if(!currentlyExecuting_) changeSelectionCount(paths.count());
     });
 
-    importButton_ = new QPushButton(ApplicationData::icon("play"), tr("Start Processing"));
-    importButton_->setCheckable(true);
-    importButton_->setChecked(false);
-    connect(importButton_, &QAbstractButton::clicked, this, &ParallelProcessingWindow::executeProcesses);
-    
     inputContiner_ = setupInputContainer();
     inputContiner_->setMaximumWidth(550);
 
@@ -270,7 +270,7 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
     if (!execute) {
         qDebug() << "Stopping parallel processing";
         imagesToBeProcessed_.clear();
-
+        processorsFinished_ = 0;
         progressBar_->hide();
         inputContiner_->setEnabled(true);
         scriptsToBeExecuted_.clear();
@@ -293,13 +293,18 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
         qDebug() << "Currently working, skipping this processing";
         return;
     } else {
-
-        currentlyExecuting_ = true;
-        importButton_->setChecked(true);
-        importButton_->setText("Stop Processing");
         
         imagesToBeProcessed_ = projectData.imagesSelected();
         
+        if(imagesToBeProcessed_.isEmpty()) {
+            QMessageBox::information(this, "Empty selection", "No images are selected, so nothing to process.\n\nSelect images from LIBRARY tab to start processing them.");
+            executeProcesses(false);
+            return;
+        }
+        
+        currentlyExecuting_ = true;
+        importButton_->setChecked(true);
+        importButton_->setText("Stop Processing");
         progressBar_->setMaximum(imagesToBeProcessed_.size());
         progressBar_->setValue(0);
         progressBar_->show();
@@ -315,6 +320,7 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
 
         processors_.clear();
         processorId_.clear();
+        processorsFinished_ = 0;
         
         int numJobs = ProjectPreferences(projectData.projectDir()).processJobs();
         if(imagesToBeProcessed_.size() < numJobs) numJobs = imagesToBeProcessed_.size();
@@ -336,7 +342,9 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
 void ParallelProcessingWindow::executeImage(ImageScriptProcessor* processor) {
             
     if(imagesToBeProcessed_.isEmpty()) {
-        if(processor == processors_.last()) executeProcesses(false);
+        processorsFinished_ ++;
+        //if all the processors are done, finish executing
+        if(processorsFinished_ == processors_.size()) executeProcesses(false);
         return;
     }
     
@@ -390,6 +398,12 @@ void ParallelProcessingWindow::addStatusToTable(int processId, const QString& im
 }
 
 void ParallelProcessingWindow::changeSelectionCount(int count) {
-    statusLabel_->setText(QString::number(count) + " images are selected, and are ready to be processed.");
+    if(count == 0) {
+        importButton_->setEnabled(false);
+        statusLabel_->setText("No images are selected!! Select images from LIBRARY tab to process them.");
+    } else {
+        importButton_->setEnabled(true);
+        statusLabel_->setText(QString::number(count) + " images are selected, and are ready to be processed.");
+    }
 }
 

@@ -1,4 +1,4 @@
-UniqueID (ShortName,mouseover="Long Name",nonlockable|nonlockable,sortable|nonsortable,["C++-format"|other-format])
+#UniqueID (ShortName,mouseover="Long Name",nonlockable|nonlockable,sortable|nonsortable,["C++-format"|other-format])
 image_flag (Flag,mouseover="Image Flag",nonlockable,sortable,flag)
 imagename (Name,mouseover="Image Name",nonlockable,sortable)
 *imagenumber (Number,mouseover="Image Number",nonlockable,sortable,"%s")

@@ -76,6 +76,7 @@ private:
     QProgressBar* progressBar_; 
     QPushButton* importButton_;
     QPushButton* refreshButton_;
+    QCheckBox* importLastFirstOption_;
     
     //Data
     

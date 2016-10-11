@@ -29,6 +29,9 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     refreshButton_ = new QPushButton(ApplicationData::icon("refresh"), tr("Rescan Import Folder"));
     connect(refreshButton_, &QAbstractButton::clicked, this, &AutoImportWindow::analyzeImport);
     
+    importLastFirstOption_ = new QCheckBox("Start importing images from the end of the list");
+    importLastFirstOption_->setChecked(false);
+    
     inputContiner_ = setupInputContainer();
     inputContiner_->setMaximumWidth(550);
 
@@ -327,6 +330,7 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     buttonLayout->addWidget(importButton_, 0);
     buttonLayout->addWidget(refreshButton_, 0);
     buttonLayout->addStretch(1);
+    buttonLayout->addWidget(importLastFirstOption_, 0);
 
     progressBar_ = new QProgressBar;
     progressBar_->setMaximum(100);
@@ -697,7 +701,11 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
 
     mutex_.lock();
-    QString number = toBeImported_.keys().first();
+
+    QString number;
+    if(importLastFirstOption_->isChecked()) number = toBeImported_.keys().last();
+    else number = toBeImported_.keys().first();
+
     QStringList files = toBeImported_[number];
     toBeImported_.remove(number);
     

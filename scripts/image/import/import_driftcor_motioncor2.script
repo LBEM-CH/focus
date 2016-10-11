@@ -65,7 +65,7 @@ echo "<<@progress: 1>>"
 set COUNTS_PER_PIX = ` clip info ${import_rawstack} | grep mean | cut -d\= -f2 `
 echo "::Mean count is: ${COUNTS_PER_PIX} electrons/pixel"
 # set SERIALEM_FACTOR = ` header ${import_rawstack} | grep 'SerialEMCCD' | awk '{print $7}' `
-set SERIALEM_FACTOR = 1
+set SERIALEM_FACTOR = 0.7
 set frame_dose = ` echo "scale=3; ${COUNTS_PER_PIX} / ${sample_pixel} / ${sample_pixel} / ${SERIALEM_FACTOR}" | bc `
 echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame"
 set total_dose = ` echo "scale=3; ${frame_dose} * ${movie_imagenumber_total} " | bc `
@@ -89,6 +89,10 @@ endif
 #
 \rm -f ${movie_stackname}.mrcs
 \rm -f ${movie_stackname}_motioncor2Sum.mrc
+\rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
+\rm -f ${movie_stackname}_motioncor2Sum_Stk.mrc
+#
+echo "<<@progress: 20>>"
 #
 ${app_motioncor2} \
 -InMrc ${raw_gaincorrectedstack}.mrcs \
@@ -97,12 +101,15 @@ ${app_motioncor2} \
 -Iter 10 \
 -Tol 0.5 \
 -bft 100 \
--kVmport ${KV} \
+-kV ${KV} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
 -Gpu ${GPU_to_use} \
 -OutStack 1 \
  > LOGS/motioncor2.out 
+#
+\mv -f ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 #
 cat LOGS/motioncor2.out
 #
@@ -112,45 +119,47 @@ cat LOGS/motioncor2.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_s
 echo "::Running ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png"
 ##########################################################################
 #
+echo "<<@progress: 50>>"
+#
 \rm -f translations.png
 ${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 #
+#
 #################################################################################
-${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}_motioncor2Sum.mrc"
+${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
 #################################################################################
 #
-\rm -f ${movie_stackname}_2D_with_header.mrc
-#
-avgstack << eot
-${movie_stackname}_motioncor2Sum.mrc
-${movie_stackname}_2D_with_header.mrc
-/
-eot
+echo "<<@progress: 70>>"
 #
 \rm -f ${movie_stackname}.mrc
 #
 ${bin_2dx}/labelh.exe << eot
-${movie_stackname}_2D_with_header.mrc
+${movie_stackname}_motioncor2Sum_DW.mrc
 39
 ${movie_stackname}.mrc
 eot
 #
-\rm -f ${movie_stackname}_motioncor2Sum.mrc
-\rm -f ${movie_stackname}_2D_with_header.mrc
+\rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
 #
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
 #
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${movie_stackname}.mrc.png 
+#################################################################################
+${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
+#################################################################################
 #
-echo "<<@progress: 50>>"
-echo "<<@evaluate>>"
+echo "<<@progress: 80>>"
+#
+\rm -f ${movie_stackname}.mrc.png
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${movie_stackname}.mrc.png 
 #
 ##########################################################################
 echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
 ##########################################################################
+#
+echo "<<@progress: 90>>"
 #
 \rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc

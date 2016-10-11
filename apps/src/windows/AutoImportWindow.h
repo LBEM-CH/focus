@@ -47,6 +47,7 @@ private:
     
     void executeImport(bool execute=true);
     void importImage(ImageScriptProcessor* processor);
+    void finishExecution();
     
     void addStatusToTable(int processId, const QString& image, const QString& text, bool error=false);
 
@@ -56,6 +57,8 @@ private:
     bool isSafeToCopy(const QString& imageName);
     
     void setupWatcherPaths();
+    
+    void resetState();
     
     QTimer timer_; //Timer to check reanalyze if a file is being changed
     QList<ImageScriptProcessor*> processors_;
@@ -87,6 +90,7 @@ private:
     QMap<QString, int> dirToRowNumber_;
     QStringList rowToImagePaths_;
     bool currentlyExecuting_ = false;
+    int processorsFinished_;
 
 };
 

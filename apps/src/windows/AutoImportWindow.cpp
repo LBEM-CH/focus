@@ -413,7 +413,20 @@ void AutoImportWindow::analyzeImport() {
     fileNames.append(QDir(importImagesPath + "/" + importRawFolder).entryList(stackExtentions , QDir::Files | QDir::NoSymLinks));
     fileNames.removeDuplicates();
     
-    for (QString image : fileNames) {
+    QStringList baseNames;
+    for(QString image: fileNames) {
+         //get the basename and remove the to_be_ignored strings
+        QString baseName = QFileInfo(image).completeBaseName();
+        if (!ignoreImagePattern.isEmpty()) {
+            for (QString pattern : ignoreImagePattern) {
+                if (!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
+            }
+        }
+        baseNames.append(baseName);
+    }
+    baseNames.removeDuplicates();
+    
+    for (QString baseName : baseNames) {
         bool copying = false;
         bool processed = false;
         bool hasAveraged = false;
@@ -421,19 +434,12 @@ void AutoImportWindow::analyzeImport() {
         bool hasRaw = false;
         QString dirName;
         
-        //get the basename and remove the to_be_ignored strings
-        QString baseName = QFileInfo(image).completeBaseName();
-        if (!ignoreImagePattern.isEmpty()) {
-            for (QString pattern : ignoreImagePattern) {
-                if (!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
-            }
-        }
-        
         if(toBeImported_.keys().contains(baseName)) {
             continue;
         }
         
-        if(alreadyImportedBaseNames.contains(baseName)) {
+        if(alreadyImportedBaseNames.contains(baseName) 
+                && QFileInfo(projectData.projectDir().canonicalPath() + '/' + folderPreferences.linkedDirectory(baseName) + "/2dx_image.cfg").exists()) {
             processed = true;
             dirName = folderPreferences.linkedDirectory(baseName);
             hasAveraged = folderPreferences.hadAveraged(baseName);
@@ -584,54 +590,72 @@ void AutoImportWindow::resetSelectedScriptsContainer(QStringList availScripts) {
     }
 }
 
-void AutoImportWindow::executeImport(bool execute) {
-    if (!execute || toBeImported_.isEmpty()) {
+void AutoImportWindow::resetState() {
+    processorId_.clear();
+    processors_.clear();
+    processorsFinished_ = 0;
+
+    if(!currentlyExecuting_) {
+        toBeImported_.clear();
         importButton_->setChecked(false);
         importButton_->setText("Start Import");
         progressBar_->hide();
         inputContiner_->setEnabled(true);
         refreshButton_->setEnabled(true);
-        
-        for (int i=0; i<processors_.size(); ++i) {
-            processors_[i]->stopExecution();
-        }
-        processorId_.clear();
-        processors_.clear();
-        currentlyExecuting_ =false;
         statusEntryTable_->resizeColumnToContents(0);
         statusEntryTable_->resizeColumnToContents(1);
+    } else {
+        importButton_->setChecked(true);
+        importButton_->setText("Stop Import");
+        progressBar_->show();
+        inputContiner_->setDisabled(true);
+        refreshButton_->setDisabled(true);
         
-        analyzeImport();
+        statusEntryTable_->show();
+    }
+}
+
+void AutoImportWindow::finishExecution() {
+    for (int i = 0; i < processors_.size(); ++i) {
+        processors_[i]->stopExecution();
+    }
+    currentlyExecuting_ = false;
+    resetState();
+    analyzeImport();
+}
+
+void AutoImportWindow::executeImport(bool execute) {
+    if (!execute) {
+        int choice = QMessageBox::question(this, "Confirm stop", QString("Please select how you want to stop\n\nIf you stop now, the images which are ") +
+                "being processed will be marked as imported and the scripts execution will be " +
+                "killed.\n", "Finish current and stop", "Stop now", "Continue importing", 0, 2);
+        if(choice == 0) {
+            toBeImported_.clear();
+            resetState();
+            progressBar_->setValue(progressBar_->maximum());
+        } else if(choice == 1) {
+            finishExecution();
+        } else {
+            resetState();
+        }
     } else if(currentlyExecuting_) {
         qDebug() << "Currently importing, skipping this import";
         return;
+    } else if(toBeImported_.isEmpty()) {
+        QMessageBox::information(this, "Empty List", "Nothing to be imported");
+        return;
     } else {
-        
-        timer_.stop();
-        
         currentlyExecuting_ = true;
-        importButton_->setChecked(true);
-        importButton_->setText("Stop Import");
-        
-        QStringList numbers = toBeImported_.keys();
+        resetState();
 
-        progressBar_->setMaximum(numbers.size());
+        timer_.stop();
+        progressBar_->setMaximum(toBeImported_.keys().size());
         progressBar_->setValue(0);
-        progressBar_->show();
-
         statusEntryTable_->setRowCount(0);
-        statusEntryTable_->show();
         
-        inputContiner_->setDisabled(true);
-        refreshButton_->setDisabled(true);
-
         QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
-
         projectData.projectDir().mkpath(importGroup_);
         QFile(projectData.projectDir().absolutePath() + "/merge").link("../2dx_master.cfg", projectData.projectDir().absolutePath() + "/" + importGroup_ + "/2dx_master.cfg");
-        
-        processors_.clear();
-        processorId_.clear();
         
         int numJobs = ProjectPreferences(projectData.projectDir()).importJobs();
         if(toBeImported_.size() < numJobs) numJobs = toBeImported_.size();
@@ -653,7 +677,9 @@ void AutoImportWindow::executeImport(bool execute) {
 void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     
     if(toBeImported_.isEmpty()) {
-        if(processor == processors_.last()) executeImport(false);
+        processorsFinished_ ++;
+        //if all the processors are done, finish executing
+        if(processorsFinished_ == processors_.size()) finishExecution();
         return;
     }
     

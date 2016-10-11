@@ -77,8 +77,10 @@ echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average i
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
-${proc_2dx}/linblock "Calling unblur..."
+${proc_2dx}/linblock "unblur..."
 ##########################################################################
+#
+echo "<<@progress: 10>>"
 #
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
@@ -108,11 +110,19 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
 #
+##########################################################################
+${proc_2dx}/linblock "2dx_mrc_converter - to create a PNG file"
+##########################################################################
+#
+echo "<<@progress: 50>>"
+#
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${movie_stackname}.mrc.png 
 #
 ##########################################################################
-echo "::Running ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png"
+${proc_2dx}/linblock "${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png"
 ##########################################################################
+#
+echo "<<@progress: 70>>"
 #
 \rm -f translations.png
 ${app_python}  ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png
@@ -123,8 +133,10 @@ echo "<<@progress: 50>>"
 echo "<<@evaluate>>"
 #
 ##########################################################################
-echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
+${proc_2dx}/linblock "clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
 ##########################################################################
+#
+echo "<<@progress: 80>>"
 #
 \rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc

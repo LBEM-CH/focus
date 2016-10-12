@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationDomain("c-cina.org");
 
     QCommandLineParser cliParser;
-    cliParser.setApplicationDescription("2DX Software Suite:\n\n2dx_mrc_converter:  Converts mrc file to other image file formats.\n\n");
+    cliParser.setApplicationDescription("2DX Software Suite:\n\n2dx_mrc_converter:  Converts mrc file to other image file formats.\nNOTE that it works only on 2D MRC images, if provided with volumes it converts z=0 plane.\n\n");
     cliParser.addHelpOption();
     cliParser.addVersionOption();
     cliParser.addPositionalArgument("input", "Input MRC format file to be converted");
@@ -78,14 +78,14 @@ int main(int argc, char *argv[]) {
         std::cout << "\nERROR: Couldn't read input file: " << QString(inputPath).toStdString() + "!!\n\n";
         exit(1);
     }
-    qDebug() << "Read the input file: " << inputPath;
+    std::cout << "Read the input file: " << inputPath.toStdString() << std::endl;
     
     QImage inputImage = *(inputMrc.getImage());
     
     //Check the output
     QString output = cliParser.positionalArguments()[1];
     QString outputPath = QFileInfo(output).absolutePath() + "/" + QFileInfo(output).fileName();
-    qDebug() << "The output will be written on: " << outputPath;
+    std::cout << "The output will be written on: " << outputPath.toStdString() << std::endl;
     if(QFileInfo(outputPath).exists()) {
         std::cout << "\nWARNING: The output file: " << QString(outputPath).toStdString() + " already exits!!\n\n";
     }
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
         qDebug() << supportedFormat;
         exit(1);
     }
-    qDebug() << "Output image will be formatted to:" << format;
+    std::cout << "Output image will be formatted to: " << format.toStdString() << std::endl;
     
     //Get the size;
     QSize userSize = inputImage.size();
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
             qDebug() << "WARNING: The size can not be interpreted. Check: " << sizex << sizey;
         } else {
             userSize = QSize(QVariant(sizex).toInt(), QVariant(sizey).toInt());
-            qDebug() << "The defined size for the output image: " << userSize;
+            std::cout << "The defined size for the output image: " << userSize.width() << ", " << userSize.height() << std::endl;
         }
     }
     
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
     QSize outputSize = inputImage.size();
     if(cliParser.isSet(ignoreAspectRatioOption)) outputSize.scale(userSize, Qt::IgnoreAspectRatio);
     else outputSize.scale(userSize, Qt::KeepAspectRatio);
-    qDebug() << "The output image will have the size: " << outputSize;
+    std::cout << "The output image will have the size: " << outputSize.width() << ", " << outputSize.height() << std::endl;
     
     if(cliParser.isSet(ignoreAspectRatioOption)) inputImage = inputImage.scaled(outputSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     else inputImage = inputImage.scaled(outputSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
     }
 
     inputImage.save(outputPath, format.toLatin1().constData(), quality);
-    qDebug() << "The output file was written.";
+    std::cout << "The output file was written." << std::endl;
         
     return 0;
 }

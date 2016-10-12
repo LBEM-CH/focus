@@ -144,6 +144,7 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
         module->resize(200, 20);
         module->setMinimumWidth(200);
         if (i == 0) defaultModule = module;
+        if(module->isModuleDefaultActivated()) defaultModule = module;
 
         connect(module, &ScriptModule::scriptCompleted,
                 [ = ](QModelIndex index){

@@ -31,6 +31,8 @@
 # DISPLAY: phacon
 # DISPLAY: movie_stackname
 # DISPLAY: gctf_RESMAX
+# DISPLAY: gctf_defocus
+# DISPLAY: defocus
 # DISPLAY: df_start
 # DISPLAY: df_end
 # DISPLAY: df_step
@@ -67,6 +69,7 @@ set KV = ""
 set TLTAXIS = ""
 set TLTANG = ""
 set defocus = ""
+set gctf_defocus = ""
 set ctfcor_noise = ""
 set ctfcor_imode = ""
 set ctfcor_debug = ""
@@ -94,6 +97,9 @@ if ( ! -e ${movie_stackname}.mrc ) then
   ${proc_2dx}/protest "ERROR: ${movie_stackname}.mrc does not exist."
 endif
 #
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+#
 ##########################################################################
 ${proc_2dx}/linblock "Calling gctf"
 ##########################################################################
@@ -105,9 +111,10 @@ echo ":: "
 ${app_gctf} --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL ${df_start} --defH ${df_end} --defS ${df_step} --astm 500 --bfac 50 --resL ${defocus_res_min} --resH ${defocus_res_max} --boxsize 512 ${movie_stackname}.mrc
 #
 \mv -f ${movie_stackname}.ctf CTFDiag.mrc
-# ${app_2dx_mrc_converter} --size 400 CTFDiag.mrc CTFDiag.mrc.png
 echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
-echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
+# \rm -f CTFDiag.png
+# ${app_2dx_mrc_converter} CTFDiag.mrc CTFDiag.png
+# echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
 echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
 echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${scriptname}.results
 #
@@ -118,9 +125,16 @@ set defocus = `cat tmp.1`
 \rm tmp.1
 echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
 #
+set tmpdef1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+set tmpdef2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+set gctf_defocus = `echo "scale=3; ( ${tmpdef1} + ${tmpdef2} ) / 20000.0 " | bc `
+echo "::Average defocus = ${gctf_defocus} microns"
+echo "set gctf_defocus = ${gctf_defocus}" >> LOGS/${scriptname}.results
+#
 echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f12 | sed 's/ /,/g' > tmp.1
 set gctf_RESMAX = `cat tmp.1`
 \rm tmp.1
+echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
 echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
 #
 ##########################################################################
@@ -153,4 +167,6 @@ echo "<<@evaluate>>"
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
+#
+exit
 #

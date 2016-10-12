@@ -34,6 +34,7 @@
 # DISPLAY: sample_pixel
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_bin_doit
+# DISPLAY: import_remove_original
 #
 #$end_local_vars
 #
@@ -67,6 +68,7 @@ set sample_pixel = ""
 set movie_imagenumber_total = ""
 set import_bin_doit = ""
 set import_rawstack_original = ""
+set import_remove_original = ""
 #
 #$end_vars
 #
@@ -88,6 +90,14 @@ if ( ! -e ${import_rawstack} ) then
     rsync -auvP ${import_rawstack_original} .
   endif
 endif
+if ( -e ${import_rawstack} ) then
+  if ( -e ${import_rawstack_original} ) then
+    if ( ${import_rawstack} != ${import_rawstack_original} ) then
+      ${proc_2dx}/linblock "(Not yet) REMOVING ${import_rawstack_original}"
+#       \rm ${import_rawstack_original}
+    endif
+  endif
+endif
 #
 if ( ${import_rawstack_type} == "1" ) then
   if ( ! -e ${import_rawstack} ) then
@@ -102,7 +112,7 @@ if ( ${import_rawstack_type} == "1" ) then
   echo "::Raw movie as dark-subtracted stack present. Gain reference found."
   #
   #################################################################################
-  ${proc_2dx}/linblock "Running clip unpack -m 2 ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
+  ${proc_2dx}/linblock "Running clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
   #
   clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs

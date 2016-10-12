@@ -144,21 +144,6 @@ ${proc_2dx}/linblock "Plotting CTF"
 \rm -f ${movie_stackname}_EPA.png
 ${app_python} ${proc_2dx}/CTF_plotter.py ${movie_stackname}_EPA.log ${movie_stackname}_EPA.png
 #
-# cat > gnuplot.script << eot 
-# set xlabel "Resolution [A, ResMax = ${defocus_res_max}A]"
-# set ylabel "|CTFsim|"
-# set ylabel "EPA(Ln|F|)"
-# set title "gctf plot"
-# set xrange [100:${defocus_res_max}] reverse
-# set logscale x
-# set size square
-# set term png; set output "${movie_stackname}_EPA.png"
-# plot 'movie_aligned_EPA.log' using 1:2 with lines title "CTFsim", '' using 1:4 with lines title "EPA(Ln|F|)"
-# eot
-# gnuplot gnuplot.script
-# ${app_gnuplot} gnuplot.script
-# \rm gnuplot.script
-#
 echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"

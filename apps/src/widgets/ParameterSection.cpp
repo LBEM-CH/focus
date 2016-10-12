@@ -69,7 +69,7 @@ void ParameterSection::changeDisplayedParameters(int userLevel, QStringList para
     for (int i = 0; i < parameterInputLookup_.keys().size(); ++i) {
         QString parameterName = parameterInputLookup_.keys()[i];
         int index = parameterRowLevelLookup_[parameterName];
-        if (parameterUserLevelLookup_[parameterName] <= userLevel && parametersDisplayed.contains(parameterName)) {
+        if (parameterUserLevelLookup_[parameterName] <= userLevel && parametersDisplayed.contains(parameterName.toLower())) {
             if(formLayout_->itemAt(index, QFormLayout::LabelRole) != nullptr) formLayout_->itemAt(index, QFormLayout::LabelRole)->widget()->show();
             if(formLayout_->itemAt(index, QFormLayout::FieldRole) != nullptr) formLayout_->itemAt(index, QFormLayout::FieldRole)->widget()->show();
             if(formLayout_->itemAt(index, QFormLayout::SpanningRole) != nullptr) formLayout_->itemAt(index, QFormLayout::SpanningRole)->widget()->show();

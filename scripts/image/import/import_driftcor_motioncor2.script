@@ -23,6 +23,7 @@
 # DISPLAY: sample_pixel
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: KV
+# DISPLAY: GPU_how_many
 # DISPLAY: GPU_to_use
 #
 #$end_local_vars
@@ -43,6 +44,7 @@ set movie_stackname = ""
 set movie_imagenumber_total = ""
 set import_rawstack = ""
 set KV = ""
+set GPU_how_many = ""
 set GPU_to_use = ""
 #
 #$end_vars
@@ -92,7 +94,38 @@ endif
 \rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
 \rm -f ${movie_stackname}_motioncor2Sum_Stk.mrc
 #
+if ( ${GPU_to_use} >= ${GPU_how_many} ) then
+  set GPU_to_use = 0
+endif
+set GPU_to_use_old = ${GPU_to_use}
+#
+if ( ${GPU_how_many} > "1" ) then
+  if ( ${GPU_to_use} == "0" ) then
+    set GPU_to_use = `echo ${GPU_how_many} | awk '{ s = $1 - 1 } END { print s }'`
+  else
+    set GPU_to_use = `echo ${GPU_to_use} | awk '{ s = $1 - 1 } END { print s }'`
+  endif
+endif
+echo "set GPU_to_use = ${GPU_to_use}" >> LOGS/${scriptname}.results
+#
 echo "<<@progress: 20>>"
+echo "<<@evaluate>>"
+#
+echo ": "
+echo ": "\
+${app_motioncor2} \
+-InMrc ${raw_gaincorrectedstack}.mrcs \
+-OutMrc ${movie_stackname}_motioncor2Sum.mrc \
+-Patch 5 5 \
+-Iter 10 \
+-Tol 0.5 \
+-bft 100 \
+-kV ${KV} \
+-PixSize ${sample_pixel} \
+-FmDose ${frame_dose} \
+-Gpu ${GPU_to_use_old} \
+-OutStack 1
+echo ": "
 #
 ${app_motioncor2} \
 -InMrc ${raw_gaincorrectedstack}.mrcs \
@@ -104,7 +137,7 @@ ${app_motioncor2} \
 -kV ${KV} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
--Gpu ${GPU_to_use} \
+-Gpu ${GPU_to_use_old} \
 -OutStack 1 \
  > LOGS/motioncor2.out 
 #
@@ -164,6 +197,7 @@ echo "<<@progress: 90>>"
 \rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+\rm -f ${movie_stackname}_fft.mrc.png
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${movie_stackname}_fft.mrc.png 
 #
 ##########################################################################

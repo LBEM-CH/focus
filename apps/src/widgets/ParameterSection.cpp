@@ -34,9 +34,10 @@ void ParameterSection::addParameter(ParameterElementData* element) {
     
     QLabel* label = new QLabel(element->label());
     label->setToolTip(getWhatsThis(element));
-    if (paramUserLevel == 1) {
+    if (paramUserLevel == 1 || element->syncWithUpperLevel()) {
         QFont f = label->font();
-        f.setItalic(true);
+        if(paramUserLevel == 1) f.setItalic(true);
+        if(element->syncWithUpperLevel()) f.setBold(true);
         label->setFont(f);
     }
     

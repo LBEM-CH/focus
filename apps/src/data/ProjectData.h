@@ -83,7 +83,7 @@ private:
     }
     
     void registerParameterMaster(const QString& cfgFileName);
-    void initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog& dialog);
+    void initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog* dialog);
     
     bool sureDialog(const QString& title, const QString& text);
     

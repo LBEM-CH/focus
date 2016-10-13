@@ -1,6 +1,8 @@
 
 #include <QDebug>
+#include <QtConcurrent>
 #include <QtWidgets>
+#include <QtGui/qprogressdialog.h>
 
 #include "ApplicationData.h"
 #include "ParameterMaster.h"
@@ -91,25 +93,48 @@ void ProjectData::addImage(const QDir& imageDir) {
 void ProjectData::indexImages() {
     imageToParameterData_.clear();
     QStringList imageList;
-    QProgressDialog progressDialog;
-    progressDialog.setCancelButton(0);
-    progressDialog.setRange(0, projectDir().entryList().count() - 1); // -1 because a merge dir is present in project folder!!);
-    progressDialog.setWindowTitle("Scanning images");
+    QProgressDialog* progressDialog = new QProgressDialog();
+    progressDialog->setCancelButton(0);
+    progressDialog->setRange(0, projectDir().entryList().count() - 1); // -1 because a merge dir is present in project folder!!);
+    progressDialog->setWindowTitle("Scanning images");
     initializeImageParameters(projectDir(), imageList, progressDialog);
-    progressDialog.reset();
-    progressDialog.close();
     ProjectPreferences(projectDir()).resetImageList(imageList);
+
+    progressDialog->reset();
+    progressDialog->setCancelButton(0);
+    progressDialog->setRange(0, imageList.size()+1);
+    progressDialog->setWindowTitle("Loading image parameters");
+    progressDialog->setMinimumDuration(0);
+    progressDialog->setValue(0);
+    QMutex* mutex = new QMutex();
+    QFuture<void> future = QtConcurrent::map(imageList, [=](const QString& imPath) {
+        QString configFile = imPath + "/2dx_image.cfg";
+        if (QFileInfo(configFile).exists()) {
+            ParametersConfiguration* localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
+            mutex->lock();
+            imageToParameterData_.insert(QFileInfo(configFile).canonicalPath(), localData);
+            progressDialog->setLabelText("Working on image " + QString::number(progressDialog->value()) + " of " + QString::number(imageList.size()) + "...");
+            progressDialog->setValue(progressDialog->value()+1);
+            mutex->unlock();
+        }
+    });
+    future.waitForFinished();
+    
+    progressDialog->close();
+    
+    delete mutex;
+    delete progressDialog;
     emit imageDirsChanged();
 }
 
-void ProjectData::initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog& dialog) {
+void ProjectData::initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog* dialog) {
     QDir dir = currDir;
     dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
 
     if (dir.relativeFilePath(projectDir().canonicalPath()) == "../") {
-        dialog.setValue(dialog.value()+1);
+        dialog->setValue(dialog->value()+1);
     }
-    dialog.setLabelText("Scanning folder for images:\n" + currDir.canonicalPath());
+    dialog->setLabelText("Scanning folder for images:\n" + currDir.canonicalPath());
     qApp->processEvents();
     
     foreach(QString entry, dir.entryList()) {
@@ -133,17 +158,17 @@ ParametersConfiguration* ProjectData::parameterData(const QDir& workDir) {
         if (QFileInfo(configFile).exists()) {
             ParametersConfiguration* localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
             imageToParameterData_.insert(QFileInfo(configFile).canonicalPath(), localData);
-            
-            QDir procdirectory(workDir.canonicalPath() + "/proc");
-            if (!procdirectory.exists()) procdirectory.mkdir(workDir.canonicalPath() + "/proc");
-            QDir logdirectory(workDir.canonicalPath() + "/LOGS");
-            if (!logdirectory.exists()) logdirectory.mkdir(workDir.canonicalPath() + "/LOGS");
         }
         else {
             qDebug() << "CRITICAL: " << configFile << "requested, but not present, program may crash!";
             return 0;
         }
     }
+
+    QDir procdirectory(workDir.canonicalPath() + "/proc");
+    if (!procdirectory.exists()) procdirectory.mkdir(workDir.canonicalPath() + "/proc");
+    QDir logdirectory(workDir.canonicalPath() + "/LOGS");
+    if (!logdirectory.exists()) logdirectory.mkdir(workDir.canonicalPath() + "/LOGS");
     
     return imageToParameterData_[workDir.canonicalPath()];
 }

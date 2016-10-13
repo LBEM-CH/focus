@@ -81,7 +81,8 @@ if ( ${export_anything_doit} == "y" ) then
   echo "<<@progress: 10>>"
   #
   if ( ! -d ${export_basedir} ) then
-    ${proc_2dx}/protest "ERROR: ${export_basedir} not existing. First create it."
+    ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
+    \mkdir ${export_basedir} 
   endif
   #
   set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `

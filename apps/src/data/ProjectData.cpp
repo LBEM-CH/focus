@@ -5,7 +5,7 @@
 
 #include "ApplicationData.h"
 #include "ParameterMaster.h"
-
+#include "ProcessDialog.h"
 #include "ProjectData.h"
 #include "UserPreferences.h"
 
@@ -90,7 +90,6 @@ void ProjectData::addImage(const QDir& imageDir) {
 
 
 void ProjectData::indexImages() {
-    imageToParameterData_.clear();
     QStringList imageList;
     QProgressDialog* progressDialog = new QProgressDialog();
     progressDialog->setCancelButton(0);
@@ -98,31 +97,46 @@ void ProjectData::indexImages() {
     progressDialog->setWindowTitle("Scanning images");
     initializeImageParameters(projectDir(), imageList, progressDialog);
     ProjectPreferences(projectDir()).resetImageList(imageList);
-
     progressDialog->reset();
-    progressDialog->setCancelButton(0);
-    progressDialog->setRange(0, imageList.size()+1);
-    progressDialog->setWindowTitle("Loading image parameters");
-    progressDialog->setMinimumDuration(0);
-    progressDialog->setValue(0);
+    progressDialog->close();
+    delete progressDialog;
+
+    auto imageToParameterDataOld = imageToParameterData_;
+    imageToParameterData_.clear();
+
+    ProcessDialog processDialog;
+    processDialog.setRange(0, imageList.size()+1);
+    processDialog.setWindowTitle("Loading image parameters");
+    processDialog.setProgress(0);
+    processDialog.show();
+    qApp->processEvents();
+    int progressValue = 0;
     QMutex* mutex = new QMutex();
-    QFuture<void> future = QtConcurrent::map(imageList, [=](const QString& imPath) {
+    QFuture<void> future = QtConcurrent::map(imageList, [&](const QString& imPath) {
         QString configFile = imPath + "/2dx_image.cfg";
         if (QFileInfo(configFile).exists()) {
-            ParametersConfiguration* localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
+            ParametersConfiguration* localData;
+            QString status;
+            if(imageToParameterDataOld.keys().contains(imPath)) {
+                localData = imageToParameterDataOld[imPath];
+                status = "Reloaded ";
+            } else {
+                localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
+                status = "Loaded ";
+            }
+            status += imPath;
             mutex->lock();
             imageToParameterData_.insert(QFileInfo(configFile).canonicalPath(), localData);
-            progressDialog->setLabelText("Working on image " + QString::number(progressDialog->value()) + " of " + QString::number(imageList.size()) + "...");
-            progressDialog->setValue(progressDialog->value()+1);
             mutex->unlock();
+            processDialog.setProgress(progressValue++);
+            processDialog.setLabelText("Working on image " + QString::number(progressValue) + " of " + QString::number(imageList.size()) + "...");
+            processDialog.addStatusText(status);
+            qApp->processEvents();
         }
     });
     future.waitForFinished();
-    
-    progressDialog->close();
-    
+    processDialog.close();
     delete mutex;
-    delete progressDialog;
     emit imageDirsChanged();
 }
 

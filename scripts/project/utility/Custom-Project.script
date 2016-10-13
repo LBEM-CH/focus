@@ -101,6 +101,7 @@ foreach dirfile ( ${dirlist} )
   # echo "set KV = 300.0" >> LOGS/${scriptname}.results
   # echo "set stepdigitizer = 5.0" >> LOGS/${scriptname}.results
   # echo "set magnification = 43859.0" >> LOGS/${scriptname}.results
+    echo "set -force sample_pixel = 1.326" >> LOGS/${scriptname}.results
 
   # echo "set crop_histogram = y" >> LOGS/${scriptname}.results
   # echo "set crop_histogram_percent = 5" >> LOGS/${scriptname}.results

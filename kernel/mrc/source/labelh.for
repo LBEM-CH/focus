@@ -165,8 +165,11 @@ C
         write(6,'(''Read: '',A)')INFILE(1:k)
 
         CALL IMOPEN(1,INFILE,'RO')
+        write(6,'(''File opened.'')')
 C
         CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        write(6,'(''Header read.'')')
+C
         NXT = NX
         MXT = MX
         IF (MODE .GE. 3) then

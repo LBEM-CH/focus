@@ -33,6 +33,7 @@
 # DISPLAY: imagesidelength
 # DISPLAY: magnification
 # DISPLAY: stepdigitizer
+# DISPLAY: sample_pixel
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG
 # DISPLAY: TLTAXA
@@ -274,7 +275,7 @@ eot
   #############################################################################
   #
   echo imagesidelength = ${imagesidelength}
-  set tilesize = 128
+  set tilesize = 256
   echo tilesize = ${tilesize}
   echo ":Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
   #
@@ -493,7 +494,7 @@ eot
     #
     set refX = ${centerX}; set refY = ${centerY};
     set dfdist = ${searchrange2} ; set inoast = 1
-    set sub_tilesize = 128 
+    set sub_tilesize = 256 
     @ newX = ${centerX} - 1 ; @ newY = ${centerY} ; source ${proc_2dx}/2dx_deftilt_sub.com     
     @ newX = ${centerX} + 1; @ newY = ${centerY} ; source ${proc_2dx}/2dx_deftilt_sub.com     
     @ newX = ${centerX} ; @ newY = ${centerY} - 1; source ${proc_2dx}/2dx_deftilt_sub.com     
@@ -703,7 +704,7 @@ eot
     #
     \rm -f SCRATCH/2dx_ctftilt_result.tmp
     echo imagesidelength = ${imagesidelength}
-    set tilesize = 128
+    set tilesize = 256
     echo tilesize = ${tilesize}
     echo "::Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
     echo ":Expected tilt angle is ${expected_tltang}, its uncertainty is ${expected_tltang_uncertainty}"

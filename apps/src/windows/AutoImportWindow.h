@@ -63,7 +63,7 @@ private:
     QTimer timer_; //Timer to check reanalyze if a file is being changed
     QList<ImageScriptProcessor*> processors_;
     QMap<ImageScriptProcessor*, int> processorId_;
-    QMutex mutex_;
+    static QMutex mutex_;
     QFileSystemWatcher watcher_; //Watcher to check the current averages folder
 
     //Widgets

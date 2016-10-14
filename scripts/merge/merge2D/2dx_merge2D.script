@@ -97,6 +97,7 @@ set sample_pixel = ""
 set SYM = ""
 set tempkeep = ""
 set Thread_Number = ""
+set zstarwin = ""
 #
 #$end_vars
 #

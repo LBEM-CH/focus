@@ -86,7 +86,7 @@ echo "dummy" > SCRATCH/job_00_${scriptBfile}.log
 #
 ${bin_2dx}/2dx_merge_compileB.exe << eot
 ${reference_file}
-${scriptname}-tmp.py
+${scriptname}-tmp.com
 ${scriptname}-tmp.reflections
 ${scriptname}-tmp.console
 ${proc_2dx}
@@ -169,8 +169,8 @@ echo "################################################"
 echo "Refinement jobs produced the following output files:"
 touch SCRATCH/job_01_${scriptname}-tmp.console
 \ls -l SCRATCH/job_*_${scriptname}-tmp.console
-touch SCRATCH/job_01_${scriptname}-tmp.py
-\ls -l SCRATCH/job_*_${scriptname}-tmp.py
+touch SCRATCH/job_01_${scriptname}-tmp.com
+\ls -l SCRATCH/job_*_${scriptname}-tmp.com
 #
 sleep 1
 #
@@ -188,11 +188,8 @@ foreach csvfile ( SCRATCH/job_*_${scriptname}-tmp.console.csv )
   # \rm -f ${csvfile}
 end
 #
-\rm -f SCRATCH/${scriptname}.py
-echo "# IMAGE: SCRATCH/${scriptname}.py <PY: Refinement results update script>" >> LOGS/${scriptname}.results
-foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.py )
-  # echo "# IMAGE: ${scriptBresults} <PY: Refinement results update script ${scriptBresults}>" >> LOGS/${scriptname}.results
-  ${app_python} ${scriptBresults}  
+foreach scriptBresults ( SCRATCH/job_*_${scriptname}-tmp.com )
+  cat ${scriptBresults} >> LOGS/${scriptname}.results  
 end
 #
 #

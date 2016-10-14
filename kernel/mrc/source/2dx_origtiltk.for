@@ -565,7 +565,7 @@ C
 C
       REAL rfield(4,100)
 C
-      USEPYTHON = .TRUE.
+      USEPYTHON = .FALSE.
       PYTHONFIRST = .TRUE.
 C
       MAX1=MAXRFL+1
@@ -2073,26 +2073,6 @@ C      write(6,'(''new MergePhaseResidual = "'',A,''"'')')cline1(1:k)
           write(17,'(''set MergePhaseResidual = "'',A,''"'')')cline1(1:k)
         endif
       endif
-C
-C10171 FORMAT(":",5X,' RANGE','     DMIN ','     DMAX ','   RESIDUAL  NUMBER',/)
-C      NRESALL=0
-C      SERRESALL=0.0
-C      DO 10175 I=1,NSLOTS
-C        IF(NRESO(I).EQ.0)GO TO 10175
-C        NRESALL=NRESALL+NRESO(I)
-C        SERRESALL=SERRES(I)+SERRESALL
-C        ERRES(I)=SERRES(I)/NRESO(I)
-C        DMIN=SQRT(10000.0/((I-1)*IRESTEP + 1))
-C        DMAX=SQRT(10000.0/(I*IRESTEP))
-C        WRITE(6,10172)I,DMIN,DMAX,ERRES(I),NRESO(I)
-C10175 CONTINUE
-C10172 FORMAT(":",5X,I6,3F10.3,I7)
-C      ERRESALL = 0.0
-C      IF(NRESALL.NE.0)THEN
-C        ERRESALL=SERRESALL/NRESALL
-C      ENDIF
-C      WRITE(6,10174)IFILM,ERRESALL,NRESALL
-C10174 FORMAT(/,/,":",5X,'OVERALL (',I10,')',10X,F10.3,I7,/,/)
 C
       do I=1,9
         if(NRESO(I).GT.0)then

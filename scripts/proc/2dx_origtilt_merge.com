@@ -98,6 +98,7 @@ ${RESMAX}
 ${merge_data_type_local}
 ${maxthread}
 ${ILIST_VAL}
+${zstarwin}
 eot
 #
 echo "<<@progress: 10>"

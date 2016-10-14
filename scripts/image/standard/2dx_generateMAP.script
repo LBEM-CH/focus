@@ -241,7 +241,7 @@ echo "<<@progress: 20>>"
 #
 #
 set aphfile = APH/ML_result.aph
-if ( -e ${aphfile} ) then
+if ( -e ${aphfile} && ( 1 == 2 ) ) then
   echo ":: "
   ${proc_2dx}/linblock "Sourcing generateMap script for ML reconstruction in p1 symmetry"
   echo ":: "

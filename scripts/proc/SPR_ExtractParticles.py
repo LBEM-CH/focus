@@ -74,6 +74,10 @@ def main():
 		save_pick_fig = True
 	else:
 		save_pick_fig = False
+	if sys.argv[23] == 'y':
+		use_masked_image = True
+	else:
+		use_masked_image = False
 	# End arguments
 
 	f = open(merge_dirfile,'r')
@@ -103,11 +107,24 @@ def main():
 		d = d.strip()
 		imname = d.split('/')[-1]
 
+		try:
+
+			# Read in all relevant image parameters:
+			params = Read2dxCfgFile(folders+d+'/2dx_image.cfg')
+
+		except:
+
+			print ':: Problem with image %s!' % d
+			print ':: '
+			continue
+
 		if ctfcor:
 
 			try:
 
 				mrc = glob.glob(folders+d+'/image_ctfcor.mrc')[0]
+				img = spx.get_image(mrc) # Read image
+
 				bf = open(folders+d+'/image_ctfcor.box', 'w+')
 
 			except:
@@ -118,44 +135,85 @@ def main():
 
 		else:
 
-			# First we look for the masked, zero-padded, normalized micrograph:
-			try:
+			if use_masked_image:
 
-				# There might be some funny numbers appended to the file name so we have to look for the shortest one to get the right file:
-				mrclist = glob.glob(folders+d+'/m'+imname+'*.mrc')
-				lenlist = []
-				for m in mrclist:
-					lenlist.append(len(m))
-				shortest_idx = np.argsort(lenlist)[0]
-				# print mrclist[shortest_idx]
-				mrc = mrclist[shortest_idx]
-				bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
-				# mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
-				# bf = open(folders+d+'/m'+imname+'.box', 'w+')
-				
-			except:
-
-				# If it doesn't exist, we try the unmasked, zero-padded, normalized micrograph:
+				# First we look for the masked, zero-padded, normalized micrograph:
 				try:
 
-					mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
-					lenlist = []
-					for m in mrclist:
-						lenlist.append(len(m))
-					shortest_idx = np.argsort(lenlist)[0]
-					# print mrclist[shortest_idx]
-					mrc = mrclist[shortest_idx]
-					bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
-					# mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
-					# bf = open(folders+d+'/m'+imname+'.box', 'w+')
+					# # There might be some funny numbers appended to the file name so we have to look for the shortest one to get the right file:
+					# mrclist = glob.glob(folders+d+'/m'+imname+'*.mrc')
+					# lenlist = []
+					# for m in mrclist:
+					# 	lenlist.append(len(m))
+					# shortest_idx = np.argsort(lenlist)[0]
+					# # print mrclist[shortest_idx]
+					# mrc = mrclist[shortest_idx]
+					# bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+					# # mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+					# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
+					mrc = folders + d + '/' + params['imagename'] + '.mrc'
+					img = spx.get_image(mrc) # Read image
+
+					bf = open(folders + d + '/' + params['imagename'] + '.box', 'w+')
+					
 				except:
 
-						# If neither exist we skip this image
+					# If it doesn't exist, we try the unmasked, zero-padded, normalized micrograph:
+					try:
 
-						print ':: Problem with image %s!' % d
-						print ':: '
-						continue
+						# mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
+						# lenlist = []
+						# for m in mrclist:
+						# 	lenlist.append(len(m))
+						# shortest_idx = np.argsort(lenlist)[0]
+						# # print mrclist[shortest_idx]
+						# mrc = mrclist[shortest_idx]
+						# bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+						# # mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+						# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
+
+						mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
+						img = spx.get_image(mrc) # Read image
+
+						bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
+
+					except:
+
+							# If neither exist we skip this image
+
+							print ':: Problem with image %s!' % d
+							print ':: '
+							continue
+
+			else:
+
+					# If the user requires, we go directly to the unmasked, zero-padded, normalized micrograph:
+					try:
+
+						# mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
+						# lenlist = []
+						# for m in mrclist:
+						# 	lenlist.append(len(m))
+						# shortest_idx = np.argsort(lenlist)[0]
+						# # print mrclist[shortest_idx]
+						# mrc = mrclist[shortest_idx]
+						# bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+						# # mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+						# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
+
+						mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
+						img = spx.get_image(mrc) # Read image
+
+						bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
+
+					except:
+
+							# If neither exist we skip this image
+
+							print ':: Problem with image %s!' % d
+							print ':: '
+							continue
 
 		print ':: Now boxing unit cells of micrograph %d/%d.' % (n, N)
 		print ':: '
@@ -163,7 +221,6 @@ def main():
 
 		try:
 
-			img = spx.get_image(mrc) # Read image
 
 			if invert_micrograph:
 
@@ -185,8 +242,8 @@ def main():
 			print ': Only particles with CC score above %.1f will be picked.' % cc_thr
 			print ': '
 
-			# Get several values related to defocus, astigmatism and tilting:
-			params = Read2dxCfgFile(folders+d+'/2dx_image.cfg')
+			# # Get several values related to defocus, astigmatism and tilting:
+			# params = Read2dxCfgFile(folders+d+'/2dx_image.cfg')
 
 			w = img.get_xsize()
 			# Get the unit-cell vectors:
@@ -553,6 +610,18 @@ def Read2dxCfgFile(filepath):
 
 			revxsgn_line = l.split('= ')[1].strip().split(',')
 			params['revxsgn'] = revxsgn_line[0][1]
+
+		if l.startswith('set imagenumber ='):
+
+			params['imagenumber'] = l.split('= ')[1].strip()[1:-1]
+
+		if l.startswith('set imagename ='):
+
+			params['imagename'] = l.split('= ')[1].strip()[1:-1]
+
+		if l.startswith('set nonmaskimagename ='):
+
+			params['nonmaskimagename'] = l.split('= ')[1].strip()[1:-1]
 
 	return params
 

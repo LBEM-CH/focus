@@ -16,6 +16,7 @@
 #
 # MANUAL: This script extracts particles from the 2D crystal images to be refined in single-particle fashion. Currently supports only FREALIGN.
 #
+# DISPLAY: use_masked_image
 # DISPLAY: SPR_boxsize
 # DISPLAY: SPR_PhaseShift
 # DISPLAY: SPR_SIGCC
@@ -63,6 +64,7 @@ set KV = ""
 set sample_pixel = ""
 set phacon = ""
 set magnification = ""
+set use_masked_image = ""
 #
 set SPR_IMGS_DIR = ../
 set SPR_MERGEFILE = 2dx_merge_dirfile.dat
@@ -86,7 +88,7 @@ if ( ${SPR_SavePickFig} == "y" ) then
 	mkdir -p ${SPR_PICKING_DIR}
 endif
 
-${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig}
+${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image}
 
 if ( ${SPR_SavePhaseFlipped} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par

@@ -774,6 +774,8 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
             scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
             hasRaw = true;
         } else if (rawOption == 2) {
+            conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
+            conf->set("import_rawstack_original", files[3], false);
             conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
             conf->set("raw_gaincorrectedstack_original", files[3], false);
             scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");

@@ -105,10 +105,39 @@ ${proc_2dx}/linblock "Calling gctf"
 ##########################################################################
 #
 echo ":: "
-echo "::Running: gctf --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL ${df_start} --defH ${df_end} --defS ${df_step} --astm 500 --bfac 50 --resL ${defocus_res_min} --resH ${defocus_res_max} --boxsize 512 ${movie_stackname}.mrc"
+echo "::Running:"
+echo ":: "
+echo ":: "${app_gctf} 
+echo ":: "--apix ${sample_pixel} 
+echo ":: "--kv ${KV} 
+echo ":: "--cs ${CS} 
+echo ":: "--AC ${ampcon} 
+echo ":: "--defL ${df_start} 
+echo ":: "--defH ${df_end} 
+echo ":: "--defS ${df_step}
+echo ":: "--astm 500 
+echo ":: "--bfac 50
+echo ":: "--resL ${defocus_res_min}
+echo ":: "--resH ${defocus_res_max}
+echo ":: "--boxsize 512
+echo ":: "${movie_stackname}.mrc
 echo ":: "
 #
-${app_gctf} --apix ${sample_pixel} --kv ${KV} --cs ${CS} --AC ${ampcon} --defL ${df_start} --defH ${df_end} --defS ${df_step} --astm 500 --bfac 50 --resL ${defocus_res_min} --resH ${defocus_res_max} --boxsize 512 ${movie_stackname}.mrc
+#
+${app_gctf} \
+--apix ${sample_pixel} \
+--kv ${KV} \
+--cs ${CS} \
+--AC ${ampcon} \
+--defL ${df_start} \
+--defH ${df_end} \
+--defS ${df_step} \
+--astm 500 \
+--bfac 50 \
+--resL ${defocus_res_min} \
+--resH ${defocus_res_max} \
+--boxsize 512 \
+${movie_stackname}.mrc
 #
 \mv -f ${movie_stackname}.ctf CTFDiag.mrc
 echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results

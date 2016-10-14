@@ -112,19 +112,18 @@ echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
 echo ": "
-echo ": "\
-${app_motioncor2} \
--InMrc ${raw_gaincorrectedstack}.mrcs \
--OutMrc ${movie_stackname}_motioncor2Sum.mrc \
--Patch 5 5 \
--Iter 10 \
--Tol 0.5 \
--bft 100 \
--kV ${KV} \
--PixSize ${sample_pixel} \
--FmDose ${frame_dose} \
--Gpu ${GPU_to_use_old} \
--OutStack 1
+echo ": "${app_motioncor2} 
+echo ": " -InMrc ${raw_gaincorrectedstack}.mrcs
+echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
+echo ": " -Patch 5 5
+echo ": " -Iter 10
+echo ": " -Tol 0.5
+echo ": " -bft 100
+echo ": " -kV ${KV}
+echo ": " -PixSize ${sample_pixel}
+echo ": " -FmDose ${frame_dose}
+echo ": " -Gpu ${GPU_to_use_old}
+echo ": " -OutStack 1
 echo ": "
 #
 ${app_motioncor2} \
@@ -149,7 +148,7 @@ cat LOGS/motioncor2.out
 cat LOGS/motioncor2.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_shifts.txt
 #
 ##########################################################################
-echo "::Running ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png"
+echo "::Running ${proc_2dx}/motioncor2_plotter.py ${imagename}_unblur_shifts.txt translations.png"
 ##########################################################################
 #
 echo "<<@progress: 50>>"

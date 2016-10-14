@@ -80,8 +80,25 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
+if ( ${import_rawstack_type} == "2" ) then
+  if ( -e ${raw_gaincorrectedstack}.mrcs ) then
+    set import_rawstack = ${raw_gaincorrectedstack}.mrcs
+    set import_rawstack_original = ${raw_gaincorrectedstack}.mrcs
+  else if ( -e ${raw_gaincorrectedstack}.mrc ) then
+    set import_rawstack = ${raw_gaincorrectedstack}.mrcs
+    set import_rawstack_original = ${raw_gaincorrectedstack}.mrc
+  else if ( -e ${raw_gaincorrectedstack}.tif ) then
+    set import_rawstack = ${raw_gaincorrectedstack}.mrcs
+    set import_rawstack_original = ${raw_gaincorrectedstack}.tif
+  endif
+  #
+  echo "set import_rawstack = ${import_rawstack}"  >> LOGS/${scriptname}.results
+  echo "set import_rawstack_original = ${import_rawstack_original}"  >> LOGS/${scriptname}.results
+endif
 set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z'`
-set raw_gaincorrectedstack = ${namestub}_raw
+if ( ${import_rawstack_type} == "1" ) then
+  set raw_gaincorrectedstack = ${namestub}_raw
+endif
 #
 echo "<<@progress: 10>>"
 #
@@ -126,20 +143,25 @@ endif
 echo "<<@progress: 20>>"
 #
 if ( ${import_rawstack_type} == "2" ) then
-  if ( ! -e ${import_rawstack} ) then
-    ${proc_2dx}/protest "ERROR: Gain-corrected stack ${import_rawstack} not found."
+  if ( -e ${raw_gaincorrectedstack}.mrcs ) then
+    echo "::Raw movie as gain-corrected stack is present as MRCS file."
+  else if ( -e ${raw_gaincorrectedstack}.mrc ) then
+    \mv -f ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrcs
+    echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
+  else if ( -e ${raw_gaincorrectedstack}.tif ) then
+    #
+    #################################################################################
+    ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
+    #################################################################################
+    #
+    clip unpack ${raw_gaincorrectedstack}.tif ${raw_gaincorrectedstack}.mrcs
+    #
+  else
+    #################################################################################
+    ${proc_2dx}/protest "${raw_gaincorrectedstack}.mrcs not found, also not at mrc or tif."
+    #################################################################################
+    #
   endif
-  echo "::Raw movie as gain-corrected stack present."
-  #
-  #################################################################################
-  ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
-  #################################################################################
-  #
-  echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
-  echo "<<@evaluate>>"
-  #
-  clip unpack ${import_rawstack} ${movie_stackname}.mrc
-  #
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif

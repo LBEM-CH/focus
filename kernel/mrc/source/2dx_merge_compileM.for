@@ -10,7 +10,7 @@ C
       character*200 cccp4dir,cccp4,ctmpdir,cbasedir
       character*80 cspcgrp,crealcell,CBMTLT,CPHORI,CIMAGENAME,CTITLE
       character*80 CIMAGENUMBER,CLATTICE,CMLMERGE,cgrid
-      character*200 CFILE1,cline,clin2
+      character*200 CFILE1,cline,clin2,cnpoline1,cnpoline2
       character*1 CNREFOUT,CNSHFTIN
       integer*8 imnum(10000)
       integer stat 
@@ -41,6 +41,24 @@ C
       write(*,'(/,''input real ang'')')
       read(*,*)realang
       write(*,'(F12.3)')realang
+C
+      write(*,'(/,''input temperature factor'')')
+      read(*,*)tempfac
+      write(*,'(F12.3)')tempfac
+C
+      write(*,'(/,''input zstarrange'')')
+      read(*,*)zstarrange
+      write(*,'(F12.3)')zstarrange
+C
+      write(*,'(/,''input NPO line 1'')')
+      read(*,'(A)')cnpoline1
+      call shorten(cnpoline1,k)
+      write(*,'(A)')cnpoline1(1:k)
+C
+      write(*,'(/,''input NPO line 2'')')
+      read(*,'(A)')cnpoline2
+      call shorten(cnpoline2,k)
+      write(*,'(A)')cnpoline2(1:k)
 C
       write(*,'(/,''input ALAT'')')
       read(*,*)RALAT
@@ -294,13 +312,13 @@ C
             call shorten(cline,k)
             write(11,'(''set lattice = "'',A,''"'')')cline(1:k)
 C
-            call cgetline(cline,"realang")
-            call shorten(cline,k)
-            write(11,'(''set realang = "'',A,''"'')')cline(1:k)
+            call shorten(crealcell,k)
+            write(11,'(''set realcell = "'',A,''"'')')crealcell(1:k)
+            write(cline,'(F12.3)')realang
 C
-            call cgetline(cline,"realcell")
-            call shorten(cline,k)
-            write(11,'(''set realcell = "'',A,''"'')')cline(1:k)
+            call shortshrink(cline,k)
+            write(11,'(''set realang = "'',A,''"'')')cline(1:k)
+            write(cline,'(F12.3)')RALAT
 C
             if(CMLMERGE(1:1).ne."y" .or. IMERGEML.lt.3)then
               call cgetline(CPHORI,"phaori")
@@ -354,12 +372,12 @@ C
             call shorten(cline,k)
             write(11,'(''set beamtilt = "'',A,''"'')')cline(1:k)
 C
-            call cgetline(cline,"zstarrange")
+            write(cline,'(F12.3)')zstarrange
             call shorten(cline,k)
             write(11,'(''set zstarrange = "'',A,''"'')')cline(1:k)
 C
-            call cgetline(cline,"tempfac")
-            call shorten(cline,k)
+            write(cline,'(F12.3)')tempfac 
+            call shortshrink(cline,k)
             write(11,'(''set tempfac = "'',A,''"'')')cline(1:k)
 C
             call cgetline(cline,"TAXA")
@@ -370,13 +388,11 @@ C
             call shorten(cline,k)
             write(11,'(''set TANGL = "'',A,''"'')')cline(1:k)
 C
-            call cgetline(cline,"npo_line1")
-            call shorten(cline,k)
-            write(11,'(''set npo_line1 = "'',A,''"'')')cline(1:k)
+            call shorten(cnpoline1,k)
+            write(11,'(''set npo_line1 = "'',A,''"'')')cnpoline1(1:k)
 C
-            call cgetline(cline,"npo_line2")
-            call shorten(cline,k)
-            write(11,'(''set npo_line2 = "'',A,''"'')')cline(1:k)
+            call shorten(cnpoline2,k)
+            write(11,'(''set npo_line2 = "'',A,''"'')')cnpoline2(1:k)
 C
             close(12)
 C

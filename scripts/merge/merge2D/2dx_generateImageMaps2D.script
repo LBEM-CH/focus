@@ -29,6 +29,7 @@
 # DISPLAY: create_PS
 # DISPLAY: merge_data_type
 # DISPLAY: merge_res_limit
+# DISPLAY: tempfac
 #
 #$end_local_vars
 #
@@ -55,6 +56,10 @@ set merge_data_type = ""
 set merge_reference = ""
 set RFACAMP = ""
 set Thread_Number = ""
+set tempfac = ""
+set zstarrange = ""
+set npo_line1 = ""
+set npo_line2 = ""
 #
 #$end_vars
 #
@@ -174,6 +179,10 @@ ${dirfile}
 ${scriptMfile}
 ${realcell}
 ${realang}
+${tempfac}
+${zstarrange}
+${npo_line1}
+${npo_line2}
 ${ALAT}
 ${Thread_Number}
 ${merge_data_type}

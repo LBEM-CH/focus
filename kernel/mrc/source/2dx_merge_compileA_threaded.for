@@ -130,6 +130,10 @@ C
       read(*,*)ILIST
       write(*,'(I3)')ILIST
 C
+      write(*,'(/,''input zstarwin'')')
+      read(*,*)RZWIN
+      write(*,'(F12.3)')RZWIN
+C
       call shorten(cname1,k)
       write(6,'(''Opening file '',A)')cname1(1:k)
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
@@ -354,7 +358,6 @@ C
      .        '' click on save, and close 2dx_image.'')')
           endif
 C
-          call rgetline(RZWIN,"zstarwin")
           if(imcount.eq.1)then
 C-----------First film is used as is, without rescaling
             RSCL=1.0

@@ -130,6 +130,10 @@ C
       read(*,*)ILIST
       write(*,'(I3)')ILIST
 C
+      write(*,'(/,''input zstarwin'')')
+      read(*,*)RZWIN
+      write(*,'(F12.3)')RZWIN
+C
       open(10,FILE=cname1,STATUS='OLD',ERR=900)
 C
       open(11,FILE=cname2,STATUS='NEW',ERR=900)
@@ -282,7 +286,6 @@ C
           write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
         endif
 C
-        call rgetline(RZWIN,"zstarwin")
         if(imcount.eq.1)then
 C---------First film is used as is, without rescaling
           RSCL=1.0

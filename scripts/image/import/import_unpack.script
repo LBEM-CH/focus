@@ -80,21 +80,6 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
-if ( ${import_rawstack_type} == "2" ) then
-  if ( -e ${raw_gaincorrectedstack}.mrcs ) then
-    set import_rawstack = ${raw_gaincorrectedstack}.mrcs
-    set import_rawstack_original = ${raw_gaincorrectedstack}.mrcs
-  else if ( -e ${raw_gaincorrectedstack}.mrc ) then
-    set import_rawstack = ${raw_gaincorrectedstack}.mrcs
-    set import_rawstack_original = ${raw_gaincorrectedstack}.mrc
-  else if ( -e ${raw_gaincorrectedstack}.tif ) then
-    set import_rawstack = ${raw_gaincorrectedstack}.mrcs
-    set import_rawstack_original = ${raw_gaincorrectedstack}.tif
-  endif
-  #
-  echo "set import_rawstack = ${import_rawstack}"  >> LOGS/${scriptname}.results
-  echo "set import_rawstack_original = ${import_rawstack_original}"  >> LOGS/${scriptname}.results
-endif
 set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z'`
 if ( ${import_rawstack_type} == "1" ) then
   set raw_gaincorrectedstack = ${namestub}_raw

@@ -41,6 +41,7 @@ set movie_stackname = ""
 set movie_imagenumber_total = ""
 set import_rawstack = ""
 set raw_gaincorrectedstack = ""
+set import_rawstack_type = ""
 #
 #$end_vars
 #
@@ -73,19 +74,40 @@ if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
 endif
 #
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: dummy.mrc <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
-${proc_2dx}/linblock "unblur..."
+${proc_2dx}/linblock "Calling unblur..."
 ##########################################################################
 #
 echo "<<@progress: 10>>"
 #
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
-\ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
+if ( ${import_rawstack_type} == "2" ) then
+  clip unpack ${raw_gaincorrectedstack}.mrcs dummy.mrc 
+else
+  \ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
+endif
 \rm -f ${movie_stackname}.mrc
+#
+echo ":: " ${app_unblur} 
+echo ":: " dummy.mrc
+echo ":: " ${movie_imagenumber_total}
+echo ":: " ${movie_stackname}.mrc
+echo ":: " ${imagename}_unblur_shifts.txt
+echo ":: " ${sample_pixel}
+echo ":: " YES
+echo ":: " ${frame_dose}
+echo ":: " 300
+echo ":: " 0
+echo ":: " YES
+echo ":: " outdummy.mrc
+echo ":: " NO
+echo ":: " 
 #
 ${app_unblur} << eof 
 dummy.mrc
@@ -102,7 +124,7 @@ outdummy.mrc
 NO
 eof
 #
-\rm -f dummy.mrc
+# \rm -f dummy.mrc
 \mv -f outdummy.mrc ${movie_stackname}.mrcs
 #
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results

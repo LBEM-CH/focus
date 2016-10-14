@@ -11,6 +11,8 @@
 #include "ParameterWidget.h"
 #include "ImageScriptProcessor.h"
 
+QMutex AutoImportWindow::mutex_;
+
 AutoImportWindow::AutoImportWindow(QWidget* parent)
 : QWidget(parent) {
     resultsTable_ = setupFilesTable();
@@ -700,7 +702,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     
     QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
 
-    mutex_.lock();
+    QMutexLocker locker(&AutoImportWindow::mutex_);
 
     QString number;
     if(importLastFirstOption_->isChecked()) number = toBeImported_.keys().last();
@@ -718,7 +720,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     }
     
     progressBar_->setValue(progressBar_->value() + 1);
-    statusLabel_->setText("Importing...");
+    statusLabel_->setText("Importing remaining " + QString::number(toBeImported_.keys().size()) + " images...");
     projectData.projectParameterData()->set("import_imagenumber", number);
     
     QStringList scriptsToBeExecuted_ = selectedScriptPaths();
@@ -795,8 +797,6 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     
     //register that this image was imported
     ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasAveraged, hasAligned, hasRaw);
-    
-    mutex_.unlock();
 }
 
 QStringList AutoImportWindow::selectedScriptPaths() {

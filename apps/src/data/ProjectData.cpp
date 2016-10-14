@@ -121,7 +121,7 @@ void ProjectData::indexImages(bool reload) {
     connect(&futureWatcher, SIGNAL(progressValueChanged(int)), progressDialog, SLOT(setValue(int)));
 
     // Start the loading.
-    QMutex* mutex = new QMutex();;
+    QMutex* mutex = new QMutex();
     futureWatcher.setFuture(QtConcurrent::map(newImageList, [=](const QString& imPath) {
         QString configFile = imPath + "/2dx_image.cfg";
         if (QFileInfo(configFile).exists()) {

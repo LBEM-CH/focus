@@ -22,7 +22,7 @@
 class ParallelProcessingWindow : public QWidget {
     
 public:
-
+    
     ParallelProcessingWindow(QWidget* parent);
     
 private:
@@ -44,8 +44,8 @@ private:
     
     QList<ImageScriptProcessor*> processors_;
     QMap<ImageScriptProcessor*, int> processorId_;
-    QMutex mutex_;
-    
+    static QMutex mutex_;
+
     //Widgets
     QLabel* statusLabel_;
     QTableWidget* statusEntryTable_;

@@ -69,9 +69,9 @@ public slots:
     void itemDeselected(const QModelIndex &index);
     void changeItemCheckedRole(const QModelIndex &index, bool check = true);
     void currentRowChanged(const QModelIndex&, const QModelIndex&);
-    bool removeSelected();
 
-    bool submit();
+    void onItemChangedSignal(QStandardItem *item);
+    void saveCheckStates();
 
     void updateItems(QStandardItem *element);
 
@@ -79,7 +79,6 @@ public slots:
 
     void invertSelection(bool commit = true);
     void selectAll(bool commit = true);
-    void clearSelection(bool commit = true);
     void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
     void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
     void autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);

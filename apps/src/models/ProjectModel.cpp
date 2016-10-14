@@ -41,9 +41,8 @@ ProjectModel::ProjectModel(const QString &path, const QString &columnsFile, QObj
 
     load();
 
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     connect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(updateItems(QStandardItem *)));
 }
 
 bool ProjectModel::saveColumns(const QString &columnsFile) {
@@ -341,7 +340,7 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
 void ProjectModel::loadSelectionList(const QStringList& list) {
     QStandardItem *item = NULL;
     quint32 uid;
-    disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     for (const QString& line: list) {
         QDir tempDir = QDir(line);
         //if absolute path is saved in the selection file
@@ -355,7 +354,7 @@ void ProjectModel::loadSelectionList(const QStringList& list) {
         if (item != NULL) item->setCheckState(Qt::Checked);
         else qDebug() << line << " not found.";
     }
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
 void ProjectModel::load() {
@@ -385,7 +384,7 @@ void ProjectModel::load() {
 
 void ProjectModel::reload() {
     clear();
-
+    
     QStringList imageList = projectData.imageList();
     prepareLoadDialog(imageList.size());
     loadImages(QDir(projectPath), imageList);
@@ -448,20 +447,25 @@ QStringList ProjectModel::parentDirs() {
     return dirs;
 }
 
-bool ProjectModel::submit() {
+void ProjectModel::onItemChangedSignal(QStandardItem* item) {
+    if(item->column() == 0) {
+        updateItems(item);
+        saveCheckStates();
+    }
+}
+
+void ProjectModel::saveCheckStates() {
     disconnect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
     projectData.setImagesSelected(getSelectedImagePaths());
     connect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
-    return true;
 }
 
 void ProjectModel::updateItems(QStandardItem *element) {
-    disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(updateItems(QStandardItem *)));
-
-    if (element->checkState() != Qt::PartiallyChecked)
-        for (int i = 0; i < element->rowCount(); i++)
-            element->child(i)->setCheckState(element->checkState());
-
+    disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
+    if (element->checkState() != Qt::PartiallyChecked) {
+        for (int i = 0; i < element->rowCount(); i++) element->child(i)->setCheckState(element->checkState());
+    }
+    
     QStandardItem *parent = element->parent();
 
     if (parent != NULL) {
@@ -477,8 +481,7 @@ void ProjectModel::updateItems(QStandardItem *element) {
         else if (!checked && unchecked) parent->setCheckState(Qt::Unchecked);
         else parent->setCheckState(Qt::PartiallyChecked);
     }
-
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(updateItems(QStandardItem *)));
+    connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
 QList<bool> ProjectModel::visibleColumns() {
@@ -524,40 +527,24 @@ void ProjectModel::setColumnProperty(int i, const QString &property, const QVari
 }
 
 void ProjectModel::invertSelection(bool commit) {
-    disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     changeSelection(item(0), rowCount(), "invert");
-    if (commit) submit();
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    if (commit) saveCheckStates();
+    connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
 void ProjectModel::selectAll(bool commit) {
-    disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     changeSelection(item(0), rowCount(), "selectAll");
-    if (commit) submit();
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-}
-
-void ProjectModel::clearSelection(bool commit) {
-    disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-    changeSelection(item(0), rowCount(), "clear");
-    if (commit) submit();
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-}
-
-bool ProjectModel::removeSelected() {
-    disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-    changeSelection(item(0), rowCount(), "removeItems");
-    //  submit();
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
-    emit reloading();
-    return true;
+    if (commit) saveCheckStates();
+    connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
 void ProjectModel::autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList) {
-    disconnect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     autoSelection(item(0), rowCount(), minTilt, maxTilt, param, useAbsolute, flagList);
-    submit();
-    connect(this, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(submit()));
+    saveCheckStates();
+    connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
 void ProjectModel::autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList) {

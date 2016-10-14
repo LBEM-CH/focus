@@ -5,6 +5,7 @@
 
 #include "ApplicationData.h"
 #include "ParameterMaster.h"
+
 #include "ProjectData.h"
 #include "UserPreferences.h"
 
@@ -19,7 +20,7 @@ void ProjectData::initiailze(const QDir& projectDir) {
     registerParameterMaster(ApplicationData::masterCfgFile());
     registerParameterMaster(ApplicationData::userCfgFile());
     projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg");
-    indexImages();
+    indexImages(false);
 }
 
 void ProjectData::registerParameterMaster(const QString& fileName) {
@@ -88,45 +89,57 @@ void ProjectData::addImage(const QDir& imageDir) {
 }
 
 
-void ProjectData::indexImages() {
-    QStringList imageList;
+void ProjectData::indexImages(bool reload) {
+    QStringList newImageList;
     QProgressDialog* progressDialog = new QProgressDialog();
     progressDialog->setCancelButton(0);
     progressDialog->setRange(0, projectDir().entryList().count() - 1); // -1 because a merge dir is present in project folder!!);
     progressDialog->setWindowTitle("Scanning images");
-    initializeImageParameters(projectDir(), imageList, progressDialog);
-    ProjectPreferences(projectDir()).resetImageList(imageList);
-    progressDialog->reset();
-    progressDialog->close();
-    delete progressDialog;
+    initializeImageParameters(projectDir(), newImageList, progressDialog);
+    newImageList.sort();
+    QStringList currentImageList = imageList();
+    currentImageList.sort();
+    if(newImageList == currentImageList && reload) {
+        qDebug() << "No change in image list was found. Doing nothing.";
+        progressDialog->close();
+        delete progressDialog;
+        return;
+    }
+    
+    ProjectPreferences(projectDir()).resetImageList(newImageList);
 
-    auto imageToParameterDataOld = imageToParameterData_;
+    QMap<QString, ParametersConfiguration*> imageToParameterDataOld = imageToParameterData_;
     imageToParameterData_.clear();
+    progressDialog->reset();
+    progressDialog->setCancelButton(0);
+    progressDialog->setWindowTitle("Loading image parameters");
+    progressDialog->setLabelText(QString("Loading the parameters from %1 images in the project...").arg(newImageList.size()));
+    
+    QFutureWatcher<void> futureWatcher;
+    connect(&futureWatcher, SIGNAL(finished()), progressDialog, SLOT(reset()));
+    connect(&futureWatcher, SIGNAL(progressRangeChanged(int,int)), progressDialog, SLOT(setRange(int,int)));
+    connect(&futureWatcher, SIGNAL(progressValueChanged(int)), progressDialog, SLOT(setValue(int)));
 
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Loading image parameters");
-    msgBox.setText("Loading data from images.");
-    msgBox.setInformativeText("Loading the parameters from " + QString::number(imageList.size()) + " parameters.\n\nPLEAE WAIT!");
-    msgBox.show();
-    qApp->processEvents();
-    QMutex* mutex = new QMutex();
-    QFuture<void> future = QtConcurrent::map(imageList, [=](const QString& imPath) {
+    // Start the loading.
+    QMutex* mutex = new QMutex();;
+    futureWatcher.setFuture(QtConcurrent::map(newImageList, [=](const QString& imPath) {
         QString configFile = imPath + "/2dx_image.cfg";
         if (QFileInfo(configFile).exists()) {
             ParametersConfiguration* localData;
-            if(imageToParameterDataOld.keys().contains(imPath)) {
-                localData = imageToParameterDataOld[imPath];
-            } else {
-                localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
-            }
+            if(imageToParameterDataOld.keys().contains(imPath)) localData = imageToParameterDataOld[imPath];
+            else localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
             mutex->lock();
             imageToParameterData_.insert(QFileInfo(configFile).canonicalPath(), localData);
             mutex->unlock();
         }
-    });
-    future.waitForFinished();
-    msgBox.hide();
+    }));
+    
+    progressDialog->exec();
+    futureWatcher.waitForFinished();
+    
+    progressDialog->close();
     delete mutex;
+    delete progressDialog;
     emit imageDirsChanged();
 }
 
@@ -309,7 +322,6 @@ void ProjectData::setImagesSelected(const QStringList& paths) {
     saveFile.close();
     evenFile.close();
     oddFile.close();
-    
     emit selectionChanged(paths);
 }
 

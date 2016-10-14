@@ -31,8 +31,9 @@ public:
     void reloadProjectParameters();
     ParametersConfiguration* parameterData(const QDir& workDir);
     void reloadParameterData(const QDir& workDir);
+    void addImageParametersToList(const QString& imPath, QMap<QString, ParametersConfiguration*>& map);
     
-    void indexImages();
+    void indexImages(bool reload = true);
     void addImage(const QDir& imageDir);
     QStringList imageList();
     
